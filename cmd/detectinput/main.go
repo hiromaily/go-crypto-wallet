@@ -6,6 +6,10 @@ import (
 	"github.com/hiromaily/go-bitcoin/api"
 	"github.com/jessevdk/go-flags"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
+	"github.com/bookerzzz/grok"
+	"github.com/btcsuite/btcutil"
+	"github.com/btcsuite/btcd/chaincfg"
+	"github.com/btcsuite/btcd/btcjson"
 )
 
 type Options struct {
@@ -44,14 +48,14 @@ func callAPI(bit *api.Bitcoin) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("Block count: %d", blockCount)
+	log.Printf("Block count: %d\n", blockCount)
 
 	// Getnewaddress
-	addr, err := bit.Client.GetNewAddress("ben")
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("created address: %v", addr)
+	//addr, err := bit.Client.GetNewAddress("ben")
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//log.Printf("created address: %v\n", addr)
 
 
 	// Unspent
@@ -60,7 +64,8 @@ func callAPI(bit *api.Bitcoin) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("List Unspent: %v", list)
+	log.Printf("List Unspent: %v\n", list)
+	grok.Value(list)
 
 	// Listaccounts
 	// map[string]btcutil.Amount, error
@@ -68,7 +73,8 @@ func callAPI(bit *api.Bitcoin) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("List Accounts: %v", listAcnt)
+	log.Printf("List Accounts: %v\n", listAcnt)
+	grok.Value(listAcnt)
 
 	// Getbalance
 	// btcutil.Amount, error
@@ -76,7 +82,8 @@ func callAPI(bit *api.Bitcoin) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("Hiroki's Accounts: %v", amount)
+	log.Printf("Hiroki's Accounts: %v\n", amount)
+	grok.Value(amount)
 
 	// Gettransaction
 	hash, err := chainhash.NewHashFromStr("5fe20dace7be113a73e5324194e20d24ae39307dd749b623fd7fe3f65115cadb")
@@ -84,20 +91,30 @@ func callAPI(bit *api.Bitcoin) {
 		log.Fatal(err)
 	}
 	tran, err := bit.Client.GetTransaction(hash)
-	log.Printf("Transactions: %v", tran)
+	log.Printf("Transactions: %v\n", tran)
+	grok.Value(tran)
+	//TODO:Txid, Vout should be retrieved from result.
 
 	// Gettxout
 	// txHash *chainhash.Hash, index uint32, mempool bool
-	txOut, err := bit.Client.GetTxOut(hash, 0, false)
-	log.Printf("TxOut: %v", txOut)
+	//txOut, err := bit.Client.GetTxOut(hash, 0, false)
+	//log.Printf("TxOut: %v\n", txOut)
+	//grok.Value(txOut)
 
 	// CreateRawTransaction
-	//func (c *Client) CreateRawTransaction(inputs []btcjson.TransactionInput,
-	//	amounts map[btcutil.Address]btcutil.Amount, lockTime *int64) (*wire.MsgTx, error) {
-	//createrawtransaction "[{\"txid\":\"myid\",\"vout\":0}]" "{\"address\":0.01}"
-	//btcjson.TransactionInput{Txid:"5fe20dace7be113a73e5324194e20d24ae39307dd749b623fd7fe3f65115cadb", }
-	//bit.Client.CreateRawTransaction(
-	//	[]btcjson.TransactionInput{{Txid: "123", Vout: 1}},
-	//	map[btcutil.Address]btcutil.Amount{"456": .0123}, nil)
-
+	//Getaddressesbyaccount "account"
+	addrs, err := bit.Client.GetAddressesByAccount("hokan")
+	if err != nil && len(addrs) == 0 {
+		log.Fatal(err)
+	}
+	//DecodeAddress(addr string, defaultNet *chaincfg.Params) (Address, error) {
+	sendAddr, err := btcutil.DecodeAddress(addrs[0].String(), &chaincfg.TestNet3Params) //for test
+	//1Satoshi＝0.00000001BTC
+	msgTx, err := bit.Client.CreateRawTransaction(
+		[]btcjson.TransactionInput{{Txid: "5fe20dace7be113a73e5324194e20d24ae39307dd749b623fd7fe3f65115cadb", Vout: 1}},
+		map[btcutil.Address]btcutil.Amount{sendAddr: 80000000}, nil)
+	if err != nil && len(addrs) == 0 {
+		log.Fatal(err)
+	}
+	grok.Value(msgTx)
 }
