@@ -5,6 +5,7 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/api"
 	"github.com/jessevdk/go-flags"
+	"github.com/btcsuite/btcd/chaincfg/chainhash"
 )
 
 type Options struct {
@@ -38,10 +39,47 @@ func main() {
 
 // For example
 func callAPI(bit *api.Bitcoin) {
+	//Block
 	blockCount, err := bit.Client.GetBlockCount()
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Printf("Block count: %d", blockCount)
 
+	// Unspent
+	//[]btcjson.ListUnspentResult, error
+	list, err := bit.Client.ListUnspent()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("List Unspent: %v", list)
+
+	// Listaccounts
+	// map[string]btcutil.Amount, error
+	listAcnt, err := bit.Client.ListAccounts()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("List Accounts: %v", listAcnt)
+
+	// Getbalance
+	// btcutil.Amount, error
+	amount, err := bit.Client.GetBalance("hiroki")
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("Hiroki's Accounts: %v", amount)
+
+	// Gettransaction
+	hash, err := chainhash.NewHashFromStr("5fe20dace7be113a73e5324194e20d24ae39307dd749b623fd7fe3f65115cadb")
+	if err != nil {
+		log.Fatal(err)
+	}
+	tran, err := bit.Client.GetTransaction(hash)
+	log.Printf("Transactions: %v", tran)
+
+	// Gettxout
+	// txHash *chainhash.Hash, index uint32, mempool bool
+	txOut, err := bit.Client.GetTxOut(hash, 0, false)
+	log.Printf("TxOut: %v", txOut)
 }
