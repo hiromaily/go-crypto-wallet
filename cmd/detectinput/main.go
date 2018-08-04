@@ -46,6 +46,14 @@ func callAPI(bit *api.Bitcoin) {
 	}
 	log.Printf("Block count: %d", blockCount)
 
+	// Getnewaddress
+	addr, err := bit.Client.GetNewAddress("ben")
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("created address: %v", addr)
+
+
 	// Unspent
 	//[]btcjson.ListUnspentResult, error
 	list, err := bit.Client.ListUnspent()
@@ -82,4 +90,14 @@ func callAPI(bit *api.Bitcoin) {
 	// txHash *chainhash.Hash, index uint32, mempool bool
 	txOut, err := bit.Client.GetTxOut(hash, 0, false)
 	log.Printf("TxOut: %v", txOut)
+
+	// CreateRawTransaction
+	//func (c *Client) CreateRawTransaction(inputs []btcjson.TransactionInput,
+	//	amounts map[btcutil.Address]btcutil.Amount, lockTime *int64) (*wire.MsgTx, error) {
+	//createrawtransaction "[{\"txid\":\"myid\",\"vout\":0}]" "{\"address\":0.01}"
+	//btcjson.TransactionInput{Txid:"5fe20dace7be113a73e5324194e20d24ae39307dd749b623fd7fe3f65115cadb", }
+	//bit.Client.CreateRawTransaction(
+	//	[]btcjson.TransactionInput{{Txid: "123", Vout: 1}},
+	//	map[btcutil.Address]btcutil.Amount{"456": .0123}, nil)
+
 }
