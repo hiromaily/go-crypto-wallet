@@ -1,4 +1,4 @@
-package bitcoin
+package api
 
 import (
 	"github.com/btcsuite/btcd/rpcclient"
