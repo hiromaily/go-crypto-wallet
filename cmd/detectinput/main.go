@@ -3,23 +3,28 @@ package main
 import (
 	"log"
 
+	"github.com/bookerzzz/grok"
+	"github.com/btcsuite/btcd/btcjson"
+	"github.com/btcsuite/btcd/chaincfg"
+	"github.com/btcsuite/btcd/chaincfg/chainhash"
+	"github.com/btcsuite/btcutil"
 	"github.com/hiromaily/go-bitcoin/api"
 	"github.com/jessevdk/go-flags"
-	"github.com/btcsuite/btcd/chaincfg/chainhash"
-	"github.com/bookerzzz/grok"
-	"github.com/btcsuite/btcutil"
-	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/btcsuite/btcd/btcjson"
 )
 
+//TODO:ウォレットの定期バックアップ機能 + import機能
+//TODO:coldウォレットへのデータ移行機能が必要なはず
+
 type Options struct {
-	Host string `short:"s" long:"host" default:"127.0.0.1:18332" description:"Host and Port of RPC Server"`
-	User string `short:"u" long:"user" default:"xyz" description:"User of RPC Server"`
-	Pass string `short:"p" long:"pass" default:"xyz" description:"Password of RPC Server"`
+	Host   string `short:"s" long:"server" default:"127.0.0.1:18332" description:"Host and Port of RPC Server"`
+	User   string `short:"u" long:"user" default:"xyz" description:"User of RPC Server"`
+	Pass   string `short:"p" long:"pass" default:"xyz" description:"Password of RPC Server"`
+	IsMain bool   `short:"m" long:"ismain" description:"Using MainNetParams as network permeters or Not"`
 }
 
 var (
-	opts Options
+	opts      Options
+	chainConf *chaincfg.Params
 )
 
 func init() {
@@ -31,8 +36,8 @@ func init() {
 func main() {
 	// Connection
 	//bit, err := bitcoin.Connection("127.0.0.1:18332", "xyz", "xyz", true, true)
-	bit, err := api.Connection(opts.Host, opts.User, opts.Pass, true, true)
-	if err != nil{
+	bit, err := api.Connection(opts.Host, opts.User, opts.Pass, true, true, opts.IsMain)
+	if err != nil {
 		log.Fatal(err)
 	}
 	defer bit.Close()
@@ -56,7 +61,6 @@ func callAPI(bit *api.Bitcoin) {
 	//	log.Fatal(err)
 	//}
 	//log.Printf("created address: %v\n", addr)
-
 
 	// Unspent
 	//[]btcjson.ListUnspentResult, error
@@ -103,18 +107,58 @@ func callAPI(bit *api.Bitcoin) {
 
 	// CreateRawTransaction
 	//Getaddressesbyaccount "account"
+	//TODO:集約用アドレス情報を、どこか内部的に保持しておく必要がある。
+	//TODO:ドキュメント見る限り、ここはオンラインでいいはず
+	//required:送金先のアドレス
+	//required:送金金額
 	addrs, err := bit.Client.GetAddressesByAccount("hokan")
-	if err != nil && len(addrs) == 0 {
+	if err != nil || len(addrs) == 0 {
 		log.Fatal(err)
 	}
 	//DecodeAddress(addr string, defaultNet *chaincfg.Params) (Address, error) {
-	sendAddr, err := btcutil.DecodeAddress(addrs[0].String(), &chaincfg.TestNet3Params) //for test
+	//sendAddr, err := btcutil.DecodeAddress(addrs[0].String(), &chaincfg.TestNet3Params) //for test(TODO:切り替えが必要)
+	sendAddr, err := btcutil.DecodeAddress(addrs[0].String(), bit.GetChainConf())
 	//1Satoshi＝0.00000001BTC
+	//TODO:変換ロジック bitcoin to satoshiがあると楽
 	msgTx, err := bit.Client.CreateRawTransaction(
 		[]btcjson.TransactionInput{{Txid: "5fe20dace7be113a73e5324194e20d24ae39307dd749b623fd7fe3f65115cadb", Vout: 1}},
 		map[btcutil.Address]btcutil.Amount{sendAddr: 80000000}, nil)
-	if err != nil && len(addrs) == 0 {
+	if err != nil {
 		log.Fatal(err)
 	}
+	log.Printf("CreateRawTransaction: %v\n", msgTx)
 	grok.Value(msgTx)
+
+	//Signrawtransaction
+	//TODO: It should be implemented on Cold Strage
+	//この処理がHotwallet内で動くということは、重要な情報がwallet内に含まれてしまっているということでは？
+	signed, isSigned, err := bit.Client.SignRawTransaction(msgTx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("Signrawtransaction: %v\n", signed)
+	log.Printf("Signrawtransaction isSigned: %v\n", isSigned)
+
+	//Sendrawtransaction
+	//TODO:ここはオンライン
+	//TODO:手数料はどのタイミングで？これもオフラインだと実行できないのでは？
+	//TODO:送信前に手数料を取得する
+	//Estimatesmartfee
+	//estimatefee is deprecated and will be fully removed in v0.17. To use estimatefee in v0.16, restart bitcoind with -deprecatedrpc=estimatefee.
+	fee, err := bit.Client.EstimateFee(1)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("Estimatesmartfee: %v\n", fee)
+
+	//cmd := btcjson.NewEstimateFeeCmd(numBlocks)
+	//return c.sendCmd(cmd)
+	//func (c *Client) RawRequest(method string, params []json.RawMessage) (json.RawMessage, error) {
+	//return c.RawRequestAsync(method, params).Receive()
+	//}
+	//rawChainHelp, err := client.RawRequest("help", []json.RawMessage{param})
+	//if err == nil {
+	//	_ = json.Unmarshal([]byte(rawChainHelp), &chainHelp)
+	//}
+
 }
