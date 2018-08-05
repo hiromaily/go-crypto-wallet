@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 
 	"github.com/bookerzzz/grok"
@@ -14,12 +15,24 @@ import (
 
 //TODO:ウォレットの定期バックアップ機能 + import機能
 //TODO:coldウォレットへのデータ移行機能が必要なはず
+//TODO:multisigの実装
 
 type Options struct {
 	Host   string `short:"s" long:"server" default:"127.0.0.1:18332" description:"Host and Port of RPC Server"`
 	User   string `short:"u" long:"user" default:"xyz" description:"User of RPC Server"`
 	Pass   string `short:"p" long:"pass" default:"xyz" description:"Password of RPC Server"`
 	IsMain bool   `short:"m" long:"ismain" description:"Using MainNetParams as network permeters or Not"`
+}
+
+//EstimateSmartFee input
+type EstimateSmartFee struct {
+	ConfTarget   int    `json:"conf_target"`
+	EstimateMode string `json:"estimate_mode"`
+}
+type EstimateSmartFeeResult struct {
+	FeeRate float32  `json:"feerate"`
+	Errors  []string `json:"errors"`
+	Blocks  int64    `json:"blocks"`
 }
 
 var (
@@ -144,12 +157,12 @@ func callAPI(bit *api.Bitcoin) {
 	//TODO:手数料はどのタイミングで？これもオフラインだと実行できないのでは？
 	//TODO:送信前に手数料を取得する
 	//Estimatesmartfee
-	//estimatefee is deprecated and will be fully removed in v0.17. To use estimatefee in v0.16, restart bitcoind with -deprecatedrpc=estimatefee.
-	fee, err := bit.Client.EstimateFee(1)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("Estimatesmartfee: %v\n", fee)
+	//fee, err := bit.Client.EstimateFee(1)
+	//if err != nil {
+	//	//estimatefee is deprecated and will be fully removed in v0.17. To use estimatefee in v0.16, restart bitcoind with -deprecatedrpc=estimatefee.
+	//	log.Fatal(err)
+	//}
+	//log.Printf("Estimatesmartfee: %v\n", fee)
 
 	//cmd := btcjson.NewEstimateFeeCmd(numBlocks)
 	//return c.sendCmd(cmd)
@@ -161,4 +174,17 @@ func callAPI(bit *api.Bitcoin) {
 	//	_ = json.Unmarshal([]byte(rawChainHelp), &chainHelp)
 	//}
 
+	param := EstimateSmartFee{ConfTarget: 1}
+	b, err := json.Marshal(param)
+	rawResult, err := bit.Client.RawRequest("estimatesmartfee", []json.RawMessage{b})
+	if err != nil {
+		//-3: Expected type number, got object
+		log.Fatal("1:", err)
+	}
+	estimateResult := EstimateSmartFeeResult{}
+	err = json.Unmarshal([]byte(rawResult), &estimateResult)
+	if err != nil {
+		log.Fatal("2:", err)
+	}
+	log.Printf("Estimatesmartfee: %v\n", estimateResult)
 }
