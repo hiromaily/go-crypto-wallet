@@ -164,27 +164,28 @@ func callAPI(bit *api.Bitcoin) {
 	//}
 	//log.Printf("Estimatesmartfee: %v\n", fee)
 
-	//cmd := btcjson.NewEstimateFeeCmd(numBlocks)
-	//return c.sendCmd(cmd)
-	//func (c *Client) RawRequest(method string, params []json.RawMessage) (json.RawMessage, error) {
-	//return c.RawRequestAsync(method, params).Receive()
-	//}
-	//rawChainHelp, err := client.RawRequest("help", []json.RawMessage{param})
-	//if err == nil {
-	//	_ = json.Unmarshal([]byte(rawChainHelp), &chainHelp)
-	//}
-
-	param := EstimateSmartFee{ConfTarget: 1}
-	b, err := json.Marshal(param)
-	rawResult, err := bit.Client.RawRequest("estimatesmartfee", []json.RawMessage{b})
+	//param := EstimateSmartFee{ConfTarget: 6}
+	//b, err := json.Marshal(param)
+	input, err := json.Marshal(uint64(6))
+	if err != nil {
+		log.Fatal(err)
+	}
+	rawResult, err := bit.Client.RawRequest("estimatesmartfee", []json.RawMessage{input})
 	if err != nil {
 		//-3: Expected type number, got object
-		log.Fatal("1:", err)
+		log.Fatal(err)
 	}
 	estimateResult := EstimateSmartFeeResult{}
 	err = json.Unmarshal([]byte(rawResult), &estimateResult)
 	if err != nil {
-		log.Fatal("2:", err)
+		log.Fatal(err)
 	}
 	log.Printf("Estimatesmartfee: %v\n", estimateResult)
+	grok.Value(estimateResult)
+	//1.116e-05
+	log.Printf("%f", estimateResult.FeeRate)
+	//0.000011 per 1kb
+
+	//TODO:トランザクションに応じて、手数料を算出
+
 }
