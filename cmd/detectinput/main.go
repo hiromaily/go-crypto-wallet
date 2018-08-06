@@ -55,8 +55,10 @@ func main() {
 	}
 	defer bit.Close()
 
-	//
-	callAPI(bit)
+	// for test
+	//callAPI(bit)
+
+	detectReceivedCoin(bit)
 }
 
 // For example
@@ -75,7 +77,7 @@ func callAPI(bit *api.Bitcoin) {
 	//}
 	//log.Printf("created address: %v\n", addr)
 
-	// Unspent
+	// Unspent => このレスポンスを元に処理を進める
 	//[]btcjson.ListUnspentResult, error
 	list, err := bit.Client.ListUnspent()
 	if err != nil {
@@ -84,25 +86,24 @@ func callAPI(bit *api.Bitcoin) {
 	log.Printf("List Unspent: %v\n", list)
 	grok.Value(list)
 
-	// Listaccounts
-	// map[string]btcutil.Amount, error
-	listAcnt, err := bit.Client.ListAccounts()
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("List Accounts: %v\n", listAcnt)
-	grok.Value(listAcnt)
+	// Listaccounts => これは単純にアカウントの資産一覧が表示されるだけ
+	//listAcnt, err := bit.Client.ListAccounts()
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//log.Printf("List Accounts: %v\n", listAcnt)
+	//grok.Value(listAcnt)
 
-	// Getbalance
+	// Getbalance -> 個人レベルでしか取得できない
 	// btcutil.Amount, error
-	amount, err := bit.Client.GetBalance("hiroki")
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("Hiroki's Accounts: %v\n", amount)
-	grok.Value(amount)
+	//amount, err := bit.Client.GetBalance("hiroki")
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//log.Printf("Hiroki's Accounts: %v\n", amount)
+	//grok.Value(amount)
 
-	// Gettransaction
+	// Gettransaction => トランザクション詳細情報を取得するのだが、ここから必要となる情報がどこで必要となるか？？
 	hash, err := chainhash.NewHashFromStr("5fe20dace7be113a73e5324194e20d24ae39307dd749b623fd7fe3f65115cadb")
 	if err != nil {
 		log.Fatal(err)
@@ -124,11 +125,11 @@ func callAPI(bit *api.Bitcoin) {
 	//TODO:ドキュメント見る限り、ここはオンラインでいいはず
 	//required:送金先のアドレス
 	//required:送金金額
+	//TODO:これはサンプルロジックであって、実際はこういうやり方はしない
 	addrs, err := bit.Client.GetAddressesByAccount("hokan")
 	if err != nil || len(addrs) == 0 {
 		log.Fatal(err)
 	}
-	//DecodeAddress(addr string, defaultNet *chaincfg.Params) (Address, error) {
 	//sendAddr, err := btcutil.DecodeAddress(addrs[0].String(), &chaincfg.TestNet3Params) //for test(TODO:切り替えが必要)
 	sendAddr, err := btcutil.DecodeAddress(addrs[0].String(), bit.GetChainConf())
 	//1Satoshi＝0.00000001BTC
@@ -186,6 +187,79 @@ func callAPI(bit *api.Bitcoin) {
 	log.Printf("%f", estimateResult.FeeRate)
 	//0.000011 per 1kb
 
-	//TODO:トランザクションに応じて、手数料を算出
+	//TODO:トランザクションのkbに応じて、手数料を算出
+
+}
+
+func detectReceivedCoin(bit *api.Bitcoin){
+	//1. アカウント一覧からまとめて残高を取得
+	//[]btcjson.ListUnspentResult
+	// ListUnspentResult models a successful response from the listunspent request.
+	//type ListUnspentResult struct {
+	//	TxID          string  `json:"txid"`
+	//	Vout          uint32  `json:"vout"`
+	//	Address       string  `json:"address"`
+	//	Account       string  `json:"account"`
+	//	ScriptPubKey  string  `json:"scriptPubKey"`
+	//	RedeemScript  string  `json:"redeemScript,omitempty"`
+	//	Amount        float64 `json:"amount"`
+	//	Confirmations int64   `json:"confirmations"`
+	//	Spendable     bool    `json:"spendable"`
+	//}
+	list, err := bit.Client.ListUnspent()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("List Unspent: %v\n", list)
+	grok.Value(list)
+
+	if len(list) == 0{
+		return
+	}
+
+
+	//
+	var total btcutil.Amount
+	var inputs []btcjson.TransactionInput
+	//CreateRawTransaction()は外で実行する
+	//Loop内ではパラメータを作成するのみ
+	for _, tx := range list {
+		if tx.Spendable == false{
+			continue
+		}
+
+		// Transaction詳細を取得
+		hash, err := chainhash.NewHashFromStr(tx.TxID)
+		if err != nil {
+			log.Fatal(err)
+		}
+		tran, err := bit.Client.GetTransaction(hash)
+		log.Printf("Transactions: %v\n", tran)
+		grok.Value(tran)
+
+		// Amount
+		// 1Satoshi＝0.00000001BTC
+		amt, err := btcutil.NewAmount(tx.Amount)
+		if err != nil{
+			continue
+		}
+		total += amt //合計
+
+		// inputs
+		inputs = append(inputs, btcjson.TransactionInput{
+			Txid: tx.TxID,
+			Vout: tx.Vout,
+		})
+	}
+	sendAddr, err := btcutil.DecodeAddress("2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW", bit.GetChainConf()) //hokanのアドレス
+	outputs := make(map[btcutil.Address]btcutil.Amount)
+	outputs[sendAddr] = total //satoshi
+	lockTime := int64(0)
+	msgTx, err := bit.Client.CreateRawTransaction(inputs, outputs, &lockTime)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("CreateRawTransaction: %v\n", msgTx)
+	grok.Value(msgTx)
 
 }
