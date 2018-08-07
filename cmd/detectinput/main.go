@@ -10,6 +10,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcutil"
 	"github.com/hiromaily/go-bitcoin/api"
+	"github.com/hiromaily/go-bitcoin/service"
 	"github.com/jessevdk/go-flags"
 )
 
@@ -58,7 +59,11 @@ func main() {
 	// for test
 	//callAPI(bit)
 
-	detectReceivedCoin(bit)
+	err = service.DetectReceivedCoin(bit)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 // For example
@@ -188,78 +193,5 @@ func callAPI(bit *api.Bitcoin) {
 	//0.000011 per 1kb
 
 	//TODO:トランザクションのkbに応じて、手数料を算出
-
-}
-
-func detectReceivedCoin(bit *api.Bitcoin){
-	//1. アカウント一覧からまとめて残高を取得
-	//[]btcjson.ListUnspentResult
-	// ListUnspentResult models a successful response from the listunspent request.
-	//type ListUnspentResult struct {
-	//	TxID          string  `json:"txid"`
-	//	Vout          uint32  `json:"vout"`
-	//	Address       string  `json:"address"`
-	//	Account       string  `json:"account"`
-	//	ScriptPubKey  string  `json:"scriptPubKey"`
-	//	RedeemScript  string  `json:"redeemScript,omitempty"`
-	//	Amount        float64 `json:"amount"`
-	//	Confirmations int64   `json:"confirmations"`
-	//	Spendable     bool    `json:"spendable"`
-	//}
-	list, err := bit.Client.ListUnspent()
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("List Unspent: %v\n", list)
-	grok.Value(list)
-
-	if len(list) == 0{
-		return
-	}
-
-
-	//
-	var total btcutil.Amount
-	var inputs []btcjson.TransactionInput
-	//CreateRawTransaction()は外で実行する
-	//Loop内ではパラメータを作成するのみ
-	for _, tx := range list {
-		if tx.Spendable == false{
-			continue
-		}
-
-		// Transaction詳細を取得
-		hash, err := chainhash.NewHashFromStr(tx.TxID)
-		if err != nil {
-			log.Fatal(err)
-		}
-		tran, err := bit.Client.GetTransaction(hash)
-		log.Printf("Transactions: %v\n", tran)
-		grok.Value(tran)
-
-		// Amount
-		// 1Satoshi＝0.00000001BTC
-		amt, err := btcutil.NewAmount(tx.Amount)
-		if err != nil{
-			continue
-		}
-		total += amt //合計
-
-		// inputs
-		inputs = append(inputs, btcjson.TransactionInput{
-			Txid: tx.TxID,
-			Vout: tx.Vout,
-		})
-	}
-	sendAddr, err := btcutil.DecodeAddress("2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW", bit.GetChainConf()) //hokanのアドレス
-	outputs := make(map[btcutil.Address]btcutil.Amount)
-	outputs[sendAddr] = total //satoshi
-	lockTime := int64(0)
-	msgTx, err := bit.Client.CreateRawTransaction(inputs, outputs, &lockTime)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("CreateRawTransaction: %v\n", msgTx)
-	grok.Value(msgTx)
 
 }
