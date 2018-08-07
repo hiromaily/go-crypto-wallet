@@ -13,6 +13,7 @@ import (
 //TODO:coldウォレットへのデータ移行機能が必要なはず
 //TODO:multisigの実装
 //TODO:オフラインで可能機能と、不可能な機能の切り分けが必要
+//TODO:生成したkeyの暗号化周りのpkgが必要になるはず
 
 type Options struct {
 	//接続情報
@@ -50,7 +51,7 @@ func main() {
 	case 1:
 		log.Print("Run: Keyの生成")
 		//単一Keyの生成
-		wif, pubAddress, err := bit.GenerateKey()
+		wif, pubAddress, err := bit.GenerateKey("btc")
 		if err != nil {
 			log.Fatal(err)
 		}
