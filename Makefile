@@ -2,7 +2,11 @@ goget:
 	go get -u -d -v ./...
 
 bld:
-	go build -o detect ./cmd/detectinput/main.go
+	go build -o wallet ./cmd/wallet/main.go
 
 run: bld
-	./detect
+	./wallet
+
+.PHONY: clean
+clean:
+	rm -rf detect

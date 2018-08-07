@@ -9,3 +9,8 @@ import (
 func (b *Bitcoin) CreateNewAddress(accountName string) (btcutil.Address, error) {
 	return b.Client.GetNewAddress(accountName)
 }
+
+// GetAddressesByAccount アカウント名から紐づくすべてのアドレスを取得する
+func (b *Bitcoin) GetAddressesByAccount(name string) ([]btcutil.Address, error) {
+	return b.Client.GetAddressesByAccount(name)
+}

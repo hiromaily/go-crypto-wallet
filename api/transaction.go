@@ -7,6 +7,9 @@ import (
 	"github.com/btcsuite/btcutil"
 )
 
+//TODO:参考に
+//https://www.haowuliaoa.com/article/info/11350.html
+
 // GetTransactionByTxID txIDからトランザクション詳細を取得する
 func (b *Bitcoin) GetTransactionByTxID(txID string) (*btcjson.GetTransactionResult, error) {
 	// Transaction詳細を取得(必要な情報があるかどうか不明)
@@ -29,4 +32,18 @@ func (b *Bitcoin) CreateRawTransaction(sendAddr string, amount btcutil.Amount, i
 	outputs[sendAddrDecoded] = amount //satoshi
 	lockTime := int64(0)              //TODO:ここは何をいれるべき？
 	return b.Client.CreateRawTransaction(inputs, outputs, &lockTime)
+}
+
+func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutResult, error) {
+	hash, err := chainhash.NewHashFromStr(txID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Gettxout
+	// txHash *chainhash.Hash, index uint32, mempool bool
+	//return b.Client.GetTxOut(hash, 0, false)
+	return b.Client.GetTxOut(hash, index, false)
+	//log.Printf("TxOut: %v\n", txOut)
+	//grok.Value(txOut)
 }
