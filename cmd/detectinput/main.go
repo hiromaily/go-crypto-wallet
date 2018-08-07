@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
 
 	"github.com/bookerzzz/grok"
@@ -17,23 +16,13 @@ import (
 //TODO:ウォレットの定期バックアップ機能 + import機能
 //TODO:coldウォレットへのデータ移行機能が必要なはず
 //TODO:multisigの実装
+//TODO:オフラインで可能機能と、不可能な機能の切り分けが必要
 
 type Options struct {
 	Host   string `short:"s" long:"server" default:"127.0.0.1:18332" description:"Host and Port of RPC Server"`
 	User   string `short:"u" long:"user" default:"xyz" description:"User of RPC Server"`
 	Pass   string `short:"p" long:"pass" default:"xyz" description:"Password of RPC Server"`
 	IsMain bool   `short:"m" long:"ismain" description:"Using MainNetParams as network permeters or Not"`
-}
-
-//EstimateSmartFee input
-type EstimateSmartFee struct {
-	ConfTarget   int    `json:"conf_target"`
-	EstimateMode string `json:"estimate_mode"`
-}
-type EstimateSmartFeeResult struct {
-	FeeRate float32  `json:"feerate"`
-	Errors  []string `json:"errors"`
-	Blocks  int64    `json:"blocks"`
 }
 
 var (
@@ -159,38 +148,6 @@ func callAPI(bit *api.Bitcoin) {
 	log.Printf("Signrawtransaction isSigned: %v\n", isSigned)
 
 	//Sendrawtransaction
-	//TODO:ここはオンライン
-	//TODO:手数料はどのタイミングで？これもオフラインだと実行できないのでは？
-	//TODO:送信前に手数料を取得する
-	//Estimatesmartfee
-	//fee, err := bit.Client.EstimateFee(1)
-	//if err != nil {
-	//	//estimatefee is deprecated and will be fully removed in v0.17. To use estimatefee in v0.16, restart bitcoind with -deprecatedrpc=estimatefee.
-	//	log.Fatal(err)
-	//}
-	//log.Printf("Estimatesmartfee: %v\n", fee)
-
-	//param := EstimateSmartFee{ConfTarget: 6}
-	//b, err := json.Marshal(param)
-	input, err := json.Marshal(uint64(6))
-	if err != nil {
-		log.Fatal(err)
-	}
-	rawResult, err := bit.Client.RawRequest("estimatesmartfee", []json.RawMessage{input})
-	if err != nil {
-		//-3: Expected type number, got object
-		log.Fatal(err)
-	}
-	estimateResult := EstimateSmartFeeResult{}
-	err = json.Unmarshal([]byte(rawResult), &estimateResult)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("Estimatesmartfee: %v\n", estimateResult)
-	grok.Value(estimateResult)
-	//1.116e-05
-	log.Printf("%f", estimateResult.FeeRate)
-	//0.000011 per 1kb
 
 	//TODO:トランザクションのkbに応じて、手数料を算出
 

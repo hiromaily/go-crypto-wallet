@@ -38,10 +38,12 @@ func Connection(host, user, pass string, postMode, tls, isMain bool) (*Bitcoin, 
 	return &bit, err
 }
 
+// Close コネクションを切断する
 func (b *Bitcoin) Close() {
 	b.Client.Shutdown()
 }
 
+// GetChainConf 接続先であるMainNet/TestNetに応じて必要なconfを返す
 func (b *Bitcoin) GetChainConf() *chaincfg.Params {
 	return b.chainConf
 }

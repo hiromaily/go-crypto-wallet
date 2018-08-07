@@ -7,6 +7,7 @@ import (
 	"github.com/btcsuite/btcutil"
 )
 
+// GetTransactionByTxID txIDからトランザクション詳細を取得する
 func (b *Bitcoin) GetTransactionByTxID(txID string) (*btcjson.GetTransactionResult, error) {
 	// Transaction詳細を取得(必要な情報があるかどうか不明)
 	hash, err := chainhash.NewHashFromStr(txID)
@@ -16,6 +17,7 @@ func (b *Bitcoin) GetTransactionByTxID(txID string) (*btcjson.GetTransactionResu
 	return b.Client.GetTransaction(hash)
 }
 
+// CreateRawTransaction Rawトランザクションを作成する
 func (b *Bitcoin) CreateRawTransaction(sendAddr string, amount btcutil.Amount, inputs []btcjson.TransactionInput) (*wire.MsgTx, error) {
 	sendAddrDecoded, err := btcutil.DecodeAddress(sendAddr, b.GetChainConf())
 	//TODO:sendAddrの厳密なチェックがセキュリティ的に必要な場面もありそう

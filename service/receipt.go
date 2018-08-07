@@ -11,8 +11,10 @@ import (
 
 const HokanAddress = "2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW"
 
-// DetectReceivedCoin Wallet内アカウントに入金があれば、
+// DetectReceivedCoin Wallet内アカウントに入金があれば、そこから、未署名のトランザクションを返す？？
 func DetectReceivedCoin(bit *api.Bitcoin) error {
+	//TODO:このロジックを連続で走らせた場合、現在処理中のものが、タイミングによってはまた取得できてしまうので、そこを考慮しないといけない
+
 	//1. アカウント一覧からまとめて残高を取得
 	//[]btcjson.ListUnspentResult
 	// ListUnspentResult models a successful response from the listunspent request.

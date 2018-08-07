@@ -4,7 +4,7 @@ import (
 	"github.com/btcsuite/btcutil"
 )
 
-//ToSatoshi bitcoinをSatoshiに変換する
+// ToSatoshi bitcoinをSatoshiに変換する
 func ToSatoshi(f float64) (btcutil.Amount, error) {
 	// Amount
 	// Satoshiに変換しないといけない
