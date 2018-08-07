@@ -15,6 +15,7 @@ import (
 //TODO:オフラインで可能機能と、不可能な機能の切り分けが必要
 //TODO:生成したkeyの暗号化周りのpkgが必要になるはず
 
+// Options コマンドラインオプション
 type Options struct {
 	//接続情報
 	Host string `short:"s" long:"server" default:"127.0.0.1:18332" description:"Host and Port of RPC Server"`
@@ -24,6 +25,8 @@ type Options struct {
 	IsMain bool `short:"m" long:"ismain" description:"Using MainNetParams as network permeters or Not"`
 	//実行される機能
 	Functionality uint8 `short:"f" long:"function" description:"Functionality: 1: generate key, 2: detect received coin, other: debug"`
+	//HDウォレット用Key生成のためのseed情報
+	ParamSeed string `short:"sd" long:"seed" default:"" description:"backup seed"`
 }
 
 var (
@@ -57,6 +60,10 @@ func main() {
 		}
 		log.Printf("[WIF] %s - [Pub Address] %s\n", wif.String(), pubAddress)
 	case 2:
+		//TODO:まだ検証中
+		log.Print("Run: HDウォレット Keyの生成")
+		bit.GenerateHDKey(opts.ParamSeed)
+	case 3:
 		log.Print("Run: 入金処理検知")
 		//入金検知
 		//TODO:処理中にして、再度対象としないようにしないといけない

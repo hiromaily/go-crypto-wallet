@@ -20,7 +20,7 @@ func (b *Bitcoin) GetTransactionByTxID(txID string) (*btcjson.GetTransactionResu
 	return b.Client.GetTransaction(hash)
 }
 
-// GetTxOutByTxID
+// GetTxOutByTxID TxOutを指定したトランザクションIDから取得する
 func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutResult, error) {
 	hash, err := chainhash.NewHashFromStr(txID)
 	if err != nil {

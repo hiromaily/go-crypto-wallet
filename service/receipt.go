@@ -9,6 +9,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/api"
 )
 
+//HokanAddress 保管用アドレスだが、これをどこに保持すべきか TODO
 const HokanAddress = "2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW"
 
 // DetectReceivedCoin Wallet内アカウントに入金があれば、そこから、未署名のトランザクションを返す？？

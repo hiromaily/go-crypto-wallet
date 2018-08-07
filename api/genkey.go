@@ -7,6 +7,9 @@ import (
 	"github.com/btcsuite/btcutil"
 )
 
+//TODO:WIP
+
+// Network bitcoin系のnetwork parameters 情報
 type Network struct {
 	name        string
 	symbol      string
@@ -14,9 +17,6 @@ type Network struct {
 	xprivatekey byte
 }
 
-//Bitcoin      / BTC
-//Bitcoin Cash / BCH => same to bitcoin, bit it may be out of date.
-//Ethereum     / ETH
 var network = map[string]Network{
 	"btc": {name: "bitcoin", symbol: "btc", xpubkey: 0x00, xprivatekey: 0x80},
 	"ltc": {name: "litecoin", symbol: "ltc", xpubkey: 0x30, xprivatekey: 0xb0},
@@ -50,7 +50,6 @@ func (n Network) getAddressPubKey(wif *btcutil.WIF, conf *chaincfg.Params) (*btc
 }
 
 //func (network Network) ImportPrivateKey(secretHex string) (*btcutil.WIF, error) {
-//	//TODO
 //}
 
 // ImportWIF stringをインポートし、WIFを生成する
@@ -66,7 +65,7 @@ func (n Network) ImportWIF(wifStr string, conf *chaincfg.Params) (*btcutil.WIF, 
 	return wif, nil
 }
 
-// 単一のWIF, 公開鍵のアドレス(string)を生成する
+// GenerateKey 単一のWIF, 公開鍵のアドレス(string)を生成する
 //  WIF(Wallet Import Format): 秘密鍵をより簡潔に表現したもの
 func (b *Bitcoin) GenerateKey(symbol string) (*btcutil.WIF, string, error) {
 	if symbol == "" {
