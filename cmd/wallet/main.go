@@ -44,28 +44,21 @@ func main() {
 	// for test
 	//callAPI(bit)
 
+	//入金検知
+	//TODO:処理中にして、再度対象としないようにしないといけない
 	err = service.DetectReceivedCoin(bit)
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }
 
 // 検証用
 func callAPI(bit *api.Bitcoin) {
-
-	//Signrawtransaction
-	//TODO: It should be implemented on Cold Strage
-	//この処理がHotwallet内で動くということは、重要な情報がwallet内に含まれてしまっているということでは？
-	//signed, isSigned, err := bit.Client.SignRawTransaction(msgTx)
+	//txOut
+	//txOut, err := bit.GetTxOutByTxID("d0f3b258dda46a5980a0a9e1e6f818eb421be572d12e4e641b7b77e699ecddca", 0)
 	//if err != nil {
 	//	log.Fatal(err)
 	//}
-	//log.Printf("Signrawtransaction: %v\n", signed)
-	//log.Printf("Signrawtransaction isSigned: %v\n", isSigned)
-
-	//Sendrawtransaction
-
-	//TODO:トランザクションのkbに応じて、手数料を算出
-
+	//log.Printf("TxOut: %v\n", txOut)
+	//grok.Value(txOut)
 }
