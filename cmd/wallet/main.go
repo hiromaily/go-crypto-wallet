@@ -15,10 +15,14 @@ import (
 //TODO:オフラインで可能機能と、不可能な機能の切り分けが必要
 
 type Options struct {
-	Host   string `short:"s" long:"server" default:"127.0.0.1:18332" description:"Host and Port of RPC Server"`
-	User   string `short:"u" long:"user" default:"xyz" description:"User of RPC Server"`
-	Pass   string `short:"p" long:"pass" default:"xyz" description:"Password of RPC Server"`
-	IsMain bool   `short:"m" long:"ismain" description:"Using MainNetParams as network permeters or Not"`
+	//接続情報
+	Host string `short:"s" long:"server" default:"127.0.0.1:18332" description:"Host and Port of RPC Server"`
+	User string `short:"u" long:"user" default:"xyz" description:"User of RPC Server"`
+	Pass string `short:"p" long:"pass" default:"xyz" description:"Password of RPC Server"`
+	//接続先: MainNet or TestNet
+	IsMain bool `short:"m" long:"ismain" description:"Using MainNetParams as network permeters or Not"`
+	//実行される機能
+	Functionality uint8 `short:"f" long:"function" description:"Functionality: 1: generate key, 2: detect received coin, other: debug"`
 }
 
 var (
@@ -41,15 +45,30 @@ func main() {
 	}
 	defer bit.Close()
 
-	// for test
-	//callAPI(bit)
-
-	//入金検知
-	//TODO:処理中にして、再度対象としないようにしないといけない
-	err = service.DetectReceivedCoin(bit)
-	if err != nil {
-		log.Fatal(err)
+	// 処理をFunctionalityで切り替える
+	switch opts.Functionality {
+	case 1:
+		log.Print("Run: Keyの生成")
+		//単一Keyの生成
+		wif, pubAddress, err := bit.GenerateKey()
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Printf("[WIF] %s - [Pub Address] %s\n", wif.String(), pubAddress)
+	case 2:
+		log.Print("Run: 入金処理検知")
+		//入金検知
+		//TODO:処理中にして、再度対象としないようにしないといけない
+		err = service.DetectReceivedCoin(bit)
+		if err != nil {
+			log.Fatal(err)
+		}
+	default:
+		log.Print("Run: 検証コード")
+		// for test
+		callAPI(bit)
 	}
+
 }
 
 // 検証用
