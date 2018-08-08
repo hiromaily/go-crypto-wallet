@@ -5,15 +5,17 @@ import (
 
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
+	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
-	"github.com/hiromaily/go-bitcoin/api"
+	"github.com/hiromaily/go-bitcoin/btc/api"
+	"github.com/pkg/errors"
 )
 
 //HokanAddress 保管用アドレスだが、これをどこに保持すべきか TODO
 const HokanAddress = "2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW"
 
 // DetectReceivedCoin Wallet内アカウントに入金があれば、そこから、未署名のトランザクションを返す？？
-func DetectReceivedCoin(bit *api.Bitcoin) error {
+func DetectReceivedCoin(bit *api.Bitcoin) (*wire.MsgTx, error) {
 	//TODO:このロジックを連続で走らせた場合、現在処理中のものが、タイミングによってはまた取得できてしまうので、そこを考慮しないといけない
 
 	//1. アカウント一覧からまとめて残高を取得
@@ -32,13 +34,13 @@ func DetectReceivedCoin(bit *api.Bitcoin) error {
 	//}
 	list, err := bit.Client.ListUnspent()
 	if err != nil {
-		return err
+		return nil, errors.Errorf("ListUnspent(): error: %v", err)
 	}
 	log.Printf("List Unspent: %v\n", list)
 	grok.Value(list)
 
 	if len(list) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	//
@@ -54,7 +56,8 @@ func DetectReceivedCoin(bit *api.Bitcoin) error {
 		// Transaction詳細を取得(必要な情報があるかどうか不明)
 		tran, err := bit.GetTransactionByTxID(tx.TxID)
 		if err != nil {
-			return err
+			//txIDがおかしいはず
+			continue
 		}
 		log.Printf("Transactions: %v\n", tran)
 		grok.Value(tran)
@@ -83,13 +86,13 @@ func DetectReceivedCoin(bit *api.Bitcoin) error {
 	}
 	log.Printf("Total Fee:%d, Length: %d", total, len(inputs))
 	if len(inputs) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	// CreateRawTransaction
 	msgTx, err := bit.CreateRawTransaction(HokanAddress, total, inputs) //hokanのアドレス
 	if err != nil {
-		return err
+		return nil, errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
 	log.Printf("CreateRawTransaction: %v\n", msgTx)
 	grok.Value(msgTx)
@@ -97,5 +100,5 @@ func DetectReceivedCoin(bit *api.Bitcoin) error {
 	//TODO:本来、これをDumpして、どっかに保存する必要があるはず、それをUSBに入れてコールドウォレットに移動しなくてはいけない
 	//Feeもこのタイミングで取得する？？
 
-	return nil
+	return msgTx, nil
 }

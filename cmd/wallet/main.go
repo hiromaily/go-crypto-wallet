@@ -4,8 +4,8 @@ import (
 	"log"
 
 	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/hiromaily/go-bitcoin/api"
-	"github.com/hiromaily/go-bitcoin/service"
+	"github.com/hiromaily/go-bitcoin/btc/api"
+	"github.com/hiromaily/go-bitcoin/btc/service"
 	"github.com/jessevdk/go-flags"
 )
 
@@ -27,7 +27,7 @@ type Options struct {
 	//実行される機能
 	Functionality uint8 `short:"f" long:"function" description:"Functionality: 1: generate key, 2: detect received coin, other: debug"`
 	//HDウォレット用Key生成のためのseed情報
-	ParamSeed string `short:"sd" long:"seed" default:"" description:"backup seed"`
+	ParamSeed string `short:"d" long:"seed" default:"" description:"backup seed"`
 }
 
 var (
@@ -70,10 +70,31 @@ func main() {
 		log.Print("Run: 入金処理検知")
 		//入金検知
 		//TODO:処理中にして、再度対象としないようにしないといけない
-		err = service.DetectReceivedCoin(bit)
+		_, err := service.DetectReceivedCoin(bit)
 		if err != nil {
 			log.Fatal(err)
 		}
+	case 9:
+		log.Print("Run: [Debug用]送金までの一連の流れを確認")
+		//入金検知
+		//TODO:処理中にして、再度対象としないようにしないといけない
+		tx, err := service.DetectReceivedCoin(bit)
+		if err != nil {
+			log.Fatal(err)
+		}
+		//署名
+		signedTx, err := bit.SignRawTransaction(tx)
+		if err != nil {
+			log.Fatal(err)
+		}
+		//送金
+		hash, err := bit.SendRawTransaction(signedTx)
+		if err != nil {
+			log.Fatal(err)
+		}
+		//min relay fee not met
+		log.Printf("[Hash] %v", hash)
+
 	default:
 		log.Print("Run: 検証コード")
 		// for test

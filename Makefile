@@ -13,6 +13,12 @@ run1: bld
 run2: bld
 	./wallet -f 2
 
+run3: bld
+	./wallet -f 3
+
+run9: bld
+	./wallet -f 9
+
 .PHONY: clean
 clean:
 	rm -rf detect
