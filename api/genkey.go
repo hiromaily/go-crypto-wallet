@@ -65,6 +65,7 @@ func (n Network) ImportWIF(wifStr string, conf *chaincfg.Params) (*btcutil.WIF, 
 	return wif, nil
 }
 
+// TODO:こっちをServiceに移すべき
 // GenerateKey 単一のWIF, 公開鍵のアドレス(string)を生成する
 //  WIF(Wallet Import Format): 秘密鍵をより簡潔に表現したもの
 func (b *Bitcoin) GenerateKey(symbol string) (*btcutil.WIF, string, error) {

@@ -139,7 +139,7 @@ func generateHierarchicalChild(masterKey *hdkeychain.ExtendedKey, layerIndex, in
 
 	// Generate Child
 	//m/0H/0-10
-	//未着手
+	//TODO:未着手
 	//var act0 *hdkeychain.ExtendedKey //for only debug
 	//for i := indexFrom; i <= indexTo; i++ {
 	//	act, err := account0.Child(i)
@@ -161,6 +161,7 @@ func generateHierarchicalChild(masterKey *hdkeychain.ExtendedKey, layerIndex, in
 
 // GenerateHDKey HDウォレットキー及びSeedを生成する
 //TODO: WIP
+// TODO:こっちをServiceに移すべき
 //func (b *Bitcoin) GenerateHDKey(paramSeed string) (*btcutil.WIF, string, error) {
 func (b *Bitcoin) GenerateHDKey(paramSeed string) error {
 	var (

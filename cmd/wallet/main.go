@@ -9,10 +9,11 @@ import (
 	"github.com/jessevdk/go-flags"
 )
 
+//TODO:coldwallet側(非ネットワーク環境)側の機能と明確に分ける
+//TODO:オフラインで可能機能と、不可能な機能の切り分けが必要
 //TODO:ウォレットの定期バックアップ機能 + import機能
 //TODO:coldウォレットへのデータ移行機能が必要なはず
 //TODO:multisigの実装
-//TODO:オフラインで可能機能と、不可能な機能の切り分けが必要
 //TODO:生成したkeyの暗号化周りのpkgが必要になるはず
 
 // Options コマンドラインオプション
@@ -50,8 +51,10 @@ func main() {
 	defer bit.Close()
 
 	// 処理をFunctionalityで切り替える
+	//TODO:ここから呼び出すべきはService系のみに統一したい
 	switch opts.Functionality {
 	case 1:
+		//TODO:cold wallet側の機能
 		log.Print("Run: Keyの生成")
 		//単一Keyの生成
 		wif, pubAddress, err := bit.GenerateKey("btc")
