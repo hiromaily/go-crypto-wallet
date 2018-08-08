@@ -96,6 +96,7 @@ func DetectReceivedCoin(bit *api.Bitcoin) (*wire.MsgTx, error) {
 		if err != nil {
 			continue
 		}
+		//TODO:これが解除されん。。。
 
 		// inputs
 		inputs = append(inputs, btcjson.TransactionInput{
