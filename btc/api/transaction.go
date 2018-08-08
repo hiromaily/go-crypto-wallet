@@ -103,7 +103,7 @@ func (b *Bitcoin) CreateRawTransaction(sendAddr string, amount btcutil.Amount, i
 
 	//TODO: 手数料を考慮せず、全額送金しようとすると、SendRawTransaction()で、`min relay fee not met`
 	//つまり、そのチェックロジックも入れたほうがいいかもしれない
-	log.Println("[Debug] amout:", amount) // 1.95 BTC
+	log.Printf("[Debug] amout:%d, %v", amount, amount) // 1.95 BTC => %v表示だと、単位まで表示される！
 
 	outputs := make(map[btcutil.Address]btcutil.Amount)
 	outputs[sendAddrDecoded] = amount //satoshi

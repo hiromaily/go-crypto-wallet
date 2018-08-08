@@ -103,13 +103,14 @@ func DetectReceivedCoin(bit *api.Bitcoin) (*wire.MsgTx, error) {
 			Vout: tx.Vout,
 		})
 	}
-	log.Printf("Total Coin to send:%d, Length: %d", total, len(inputs))
+	log.Printf("Total Coin to send:%d(Satoshi), Length: %d", total, len(inputs))
 	if len(inputs) == 0 {
 		return nil, nil
 	}
 
 	//TODO: このタイミングで手数料を算出して、totalから差し引く？？
-	//total = 18500000
+	//total = 18500000 //桁を間違えた。。。
+	//total = 195000000
 
 	// CreateRawTransaction
 	msgTx, err := bit.CreateRawTransaction(HokanAddress, total, inputs) //hokanのアドレス
