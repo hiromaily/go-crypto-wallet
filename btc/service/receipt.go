@@ -83,6 +83,7 @@ func DetectReceivedCoin(bit *api.Bitcoin) (*wire.MsgTx, error) {
 			//TODO:このタイミングでエラーはおきないはず
 			continue
 		}
+		//TODO:全額は送金できないので、このタイミングで手数料を差し引かねばならないが、ここでいいんだっけ？total算出後でもいい？
 		total += amt //合計
 
 		//TODO:lockunspent
@@ -107,8 +108,8 @@ func DetectReceivedCoin(bit *api.Bitcoin) (*wire.MsgTx, error) {
 		return nil, nil
 	}
 
-	//TODO: Debug:total:ちょっと減らしてみるか
-	total = 18500000
+	//TODO: このタイミングで手数料を算出して、totalから差し引く？？
+	//total = 18500000
 
 	// CreateRawTransaction
 	msgTx, err := bit.CreateRawTransaction(HokanAddress, total, inputs) //hokanのアドレス
