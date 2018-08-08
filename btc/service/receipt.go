@@ -46,6 +46,7 @@ func DetectReceivedCoin(bit *api.Bitcoin) (*wire.MsgTx, error) {
 	}
 
 	//TODO:LockUnspent
+	//TODO:第二パラメータがnilだとダメ
 	if err := bit.Client.LockUnspent(true, nil); err != nil {
 		return nil, errors.Errorf("LockUnspent() error: unable to unlock unspent outputs")
 	}
@@ -97,6 +98,7 @@ func DetectReceivedCoin(bit *api.Bitcoin) (*wire.MsgTx, error) {
 			continue
 		}
 		//TODO:これが解除されん。。。
+		//listlockunspentでチェック
 
 		// inputs
 		inputs = append(inputs, btcjson.TransactionInput{
