@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 
+	"fmt"
+	"github.com/btcsuite/btcd/wire"
 	"github.com/pkg/errors"
 )
 
@@ -53,10 +55,19 @@ func (b *Bitcoin) EstimateSmartFee() (float32, error) {
 		return 0, errors.Errorf("json.RawRequest(estimatesmartfee): error: %v", estimateResult.Errors[0])
 	}
 
-	log.Printf("Estimatesmartfee: %v\n", estimateResult)
+	log.Printf("Estimatesmartfee: %v: %f\n", estimateResult, estimateResult.FeeRate)
 	//1.116e-05
-	log.Printf("%f", estimateResult.FeeRate)
 	//0.000011 per 1kb
 
 	return estimateResult.FeeRate, nil
+}
+
+func (b *Bitcoin) GetTransactionFee(tx *wire.MsgTx) (string, error) {
+	feePerKB, err := b.EstimateSmartFee()
+	if err != nil {
+		return "", errors.Errorf("EstimateSmartFee(): error: %v", err)
+	}
+	fee := fmt.Sprintf("%f", feePerKB*float32(tx.SerializeSize())/1000)
+
+	return fee, nil
 }

@@ -70,18 +70,33 @@ func main() {
 		log.Print("Run: 入金処理検知")
 		//入金検知
 		//TODO:処理中にして、再度対象としないようにしないといけない
-		_, err := service.DetectReceivedCoin(bit)
+		tx, err := service.DetectReceivedCoin(bit)
 		if err != nil {
 			log.Fatal(err)
 		}
+		if tx == nil {
+			log.Printf("no utxo")
+			return
+		}
 	case 9:
 		log.Print("Run: [Debug用]送金までの一連の流れを確認")
-		//入金検知
+		//送金までの一連の流れを確認
 		//TODO:処理中にして、再度対象としないようにしないといけない
 		tx, err := service.DetectReceivedCoin(bit)
 		if err != nil {
 			log.Fatal(err)
 		}
+		if tx == nil {
+			log.Printf("no utxo")
+			return
+		}
+		//fee算出
+		fee, err := bit.GetTransactionFee(tx)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Printf("fee: %s", fee)
+
 		//署名
 		signedTx, err := bit.SignRawTransaction(tx)
 		if err != nil {

@@ -1,6 +1,9 @@
 package api
 
 import (
+	"bytes"
+	"encoding/hex"
+
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
@@ -59,6 +62,14 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 	//	}
 	//	Coinbase bool = false
 	//}
+}
+
+func (b *Bitcoin) ToHex(tx *wire.MsgTx) (string, error) {
+	buf := bytes.NewBuffer(make([]byte, 0, tx.SerializeSize()))
+	if err := tx.Serialize(buf); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(buf.Bytes()), nil
 }
 
 // CreateRawTransaction Rawトランザクションを作成する
