@@ -9,9 +9,10 @@ import (
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
+	"log"
 )
 
-//TODO:参考に
+//TODO:参考に(中国語のサイト)
 //https://www.haowuliaoa.com/article/info/11350.html
 
 // GetTransactionByTxID txIDからトランザクション詳細を取得する
@@ -100,9 +101,13 @@ func (b *Bitcoin) CreateRawTransaction(sendAddr string, amount btcutil.Amount, i
 		return nil, errors.Errorf("btcutil.DecodeAddress(%s): error: %v", sendAddr, err)
 	}
 
+	//TODO: 手数料を考慮せず、全額送金しようとすると、SendRawTransaction()で、`min relay fee not met`
+	//つまり、そのチェックロジックも入れたほうがいいかもしれない
+	log.Println("[Debug] amout:", amount) // 1.95 BTC
+
 	outputs := make(map[btcutil.Address]btcutil.Amount)
 	outputs[sendAddrDecoded] = amount //satoshi
-	lockTime := int64(0)              //TODO:ここは何をいれるべき？
+	lockTime := int64(0)              //TODO:Raw locktime ここは何をいれるべき？
 	msgTx, err := b.Client.CreateRawTransaction(inputs, outputs, &lockTime)
 	if err != nil {
 		return nil, errors.Errorf("btcutil.CreateRawTransaction(): error: %v", err)
@@ -135,24 +140,22 @@ func (b *Bitcoin) SendRawTransaction(tx *wire.MsgTx) (*chainhash.Hash, error) {
 	return hash, nil
 }
 
-//func (c *Connector) SendTransaction(rawTx []byte) error {
-//	m := crypto.NewMetric(c.cfg.DaemonCfg.Name, string(c.cfg.Asset),
-//		MethodSendTransaction, c.cfg.Metrics)
-//	defer m.Finish()
-//
-//	wireTx := new(wire.MsgTx)
-//	r := bytes.NewBuffer(rawTx)
-//
-//	if err := wireTx.Deserialize(r); err != nil {
-//		m.AddError(errToSeverity(ErrDeserialiseTx))
-//		return errors.Errorf("unable to deserialize raw tx: %v", err)
-//	}
-//
-//	_, err := c.client.SendRawTransaction(wireTx, true)
-//	if err != nil {
-//		m.AddError(errToSeverity(ErrSendTx))
-//		return errors.Errorf("unable to send transaction: %v", err)
-//	}
-//
-//	return nil
-//}
+// SendTransactionByByte 外部から渡されたバイト列からRawトランザクションを送信する
+func (b *Bitcoin) SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error) {
+	//TODO:渡された文字列は暗号化されていることを想定
+	//TODO:ここで復号化の処理が必要
+
+	wireTx := new(wire.MsgTx)
+	r := bytes.NewBuffer(rawTx)
+
+	if err := wireTx.Deserialize(r); err != nil {
+		return nil, errors.Errorf("wireTx.Deserialize(): error: %v", err)
+	}
+
+	hash, err := b.Client.SendRawTransaction(wireTx, true)
+	if err != nil {
+		return nil, errors.Errorf("SendRawTransaction(): error: %v", err)
+	}
+
+	return hash, nil
+}

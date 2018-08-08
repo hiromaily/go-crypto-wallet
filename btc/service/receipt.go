@@ -5,6 +5,7 @@ import (
 
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
+	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
 	"github.com/hiromaily/go-bitcoin/btc/api"
@@ -32,6 +33,7 @@ func DetectReceivedCoin(bit *api.Bitcoin) (*wire.MsgTx, error) {
 	//	Confirmations int64   `json:"confirmations"`
 	//	Spendable     bool    `json:"spendable"`
 	//}
+	//TODO:とりあえず、ListUnspentを使っているが、全ユーザーにGetUnspentByAddress()を使わないといけないかも
 	list, err := bit.Client.ListUnspent()
 	if err != nil {
 		return nil, errors.Errorf("ListUnspent(): error: %v", err)
@@ -41,6 +43,11 @@ func DetectReceivedCoin(bit *api.Bitcoin) (*wire.MsgTx, error) {
 
 	if len(list) == 0 {
 		return nil, nil
+	}
+
+	//TODO:LockUnspent
+	if err := bit.Client.LockUnspent(true, nil); err != nil {
+		return nil, errors.Errorf("LockUnspent() error: unable to unlock unspent outputs")
 	}
 
 	//
@@ -59,8 +66,8 @@ func DetectReceivedCoin(bit *api.Bitcoin) (*wire.MsgTx, error) {
 			//txIDがおかしいはず
 			continue
 		}
-		log.Printf("Transactions: %v\n", tran)
-		grok.Value(tran)
+		//log.Printf("Transactions: %v\n", tran)
+		//grok.Value(tran)
 
 		//除外するアカウント
 		if tran.Details[0].Account == "hokan" || tran.Details[0].Account == "" {
@@ -78,16 +85,30 @@ func DetectReceivedCoin(bit *api.Bitcoin) (*wire.MsgTx, error) {
 		}
 		total += amt //合計
 
+		//TODO:lockunspent
+		txIDHash, err := chainhash.NewHashFromStr(tx.TxID)
+		if err != nil {
+			continue
+		}
+		outpoint := wire.NewOutPoint(txIDHash, tx.Vout)
+		err = bit.Client.LockUnspent(false, []*wire.OutPoint{outpoint})
+		if err != nil {
+			continue
+		}
+
 		// inputs
 		inputs = append(inputs, btcjson.TransactionInput{
 			Txid: tx.TxID,
 			Vout: tx.Vout,
 		})
 	}
-	log.Printf("Total Fee:%d, Length: %d", total, len(inputs))
+	log.Printf("Total Coin to send:%d, Length: %d", total, len(inputs))
 	if len(inputs) == 0 {
 		return nil, nil
 	}
+
+	//TODO: Debug:total:ちょっと減らしてみるか
+	total = 18500000
 
 	// CreateRawTransaction
 	msgTx, err := bit.CreateRawTransaction(HokanAddress, total, inputs) //hokanのアドレス
@@ -95,7 +116,7 @@ func DetectReceivedCoin(bit *api.Bitcoin) (*wire.MsgTx, error) {
 		return nil, errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
 	log.Printf("CreateRawTransaction: %v\n", msgTx)
-	grok.Value(msgTx)
+	//grok.Value(msgTx)
 
 	//TODO:本来、これをDumpして、どっかに保存する必要があるはず、それをUSBに入れてコールドウォレットに移動しなくてはいけない
 	//Feeもこのタイミングで取得する？？

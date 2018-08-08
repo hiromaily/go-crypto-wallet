@@ -110,12 +110,12 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		//FIXME:min relay fee not met
+		//FIXME:min relay fee not met => 手数料を考慮せず、全額送金しようとするとこのエラーが出るっぽい。
 		//https://bitcoin.stackexchange.com/questions/69282/what-is-the-min-relay-min-fee-code-26
 		//https://bitcoin.stackexchange.com/questions/59125/what-does-allowhighfees-in-sendrawtransaction-actually-does
 		//https://bitcoin.stackexchange.com/questions/77273/bitcoin-rawtransaction-fee
 		//https://bitcoin.org/en/glossary/minimum-relay-fee
-		log.Printf("[Hash] %v", hash)
+		log.Printf("[Hash] %v, Done!", hash)
 
 	default:
 		log.Print("Run: 検証コード")
