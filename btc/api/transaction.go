@@ -64,12 +64,29 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 	//}
 }
 
+// ToHex 16進数のstringに変換する
 func (b *Bitcoin) ToHex(tx *wire.MsgTx) (string, error) {
 	buf := bytes.NewBuffer(make([]byte, 0, tx.SerializeSize()))
 	if err := tx.Serialize(buf); err != nil {
-		return "", err
+		return "", errors.Errorf("tx.Serialize(): error: %v", err)
 	}
 	return hex.EncodeToString(buf.Bytes()), nil
+}
+
+// GetRawTransactionByHex Hexからトランザクションを取得する
+func (b *Bitcoin) GetRawTransactionByHex(txHex string) (*btcutil.Tx, error) {
+
+	txHash, err := chainhash.NewHashFromStr(txHex)
+	if err != nil {
+		return nil, errors.Errorf("chainhash.NewHashFromStr(%s): error: %v", txHex, err)
+	}
+
+	tx, err := b.Client.GetRawTransaction(txHash)
+	if err != nil {
+		return nil, errors.Errorf("GetRawTransaction(hash): error: %v", err)
+	}
+
+	return tx, nil
 }
 
 // CreateRawTransaction Rawトランザクションを作成する
@@ -93,7 +110,7 @@ func (b *Bitcoin) CreateRawTransaction(sendAddr string, amount btcutil.Amount, i
 	return msgTx, nil
 }
 
-// SignRawTransaction
+// SignRawTransaction Rawのトランザクションに署名する
 func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, error) {
 	//TODO: It should be implemented on Cold Strage
 	//この処理がHotwallet内で動くということは、重要な情報がwallet内に含まれてしまっているということでは？
@@ -108,6 +125,7 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, error) {
 	return msgTx, nil
 }
 
+// SendRawTransaction Rawトランザクションを送信する
 func (b *Bitcoin) SendRawTransaction(tx *wire.MsgTx) (*chainhash.Hash, error) {
 	hash, err := b.Client.SendRawTransaction(tx, true)
 	if err != nil {

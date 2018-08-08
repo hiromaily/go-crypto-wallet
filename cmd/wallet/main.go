@@ -79,6 +79,9 @@ func main() {
 			return
 		}
 	case 9:
+		//TODO:lockunspentがどこかで必要っぽい
+		//https://bitcoincore.org/en/doc/0.16.2/rpc/wallet/lockunspent/
+
 		log.Print("Run: [Debug用]送金までの一連の流れを確認")
 		//送金までの一連の流れを確認
 		//TODO:処理中にして、再度対象としないようにしないといけない
@@ -107,7 +110,11 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		//min relay fee not met
+		//FIXME:min relay fee not met
+		//https://bitcoin.stackexchange.com/questions/69282/what-is-the-min-relay-min-fee-code-26
+		//https://bitcoin.stackexchange.com/questions/59125/what-does-allowhighfees-in-sendrawtransaction-actually-does
+		//https://bitcoin.stackexchange.com/questions/77273/bitcoin-rawtransaction-fee
+		//https://bitcoin.org/en/glossary/minimum-relay-fee
 		log.Printf("[Hash] %v", hash)
 
 	default:

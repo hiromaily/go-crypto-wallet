@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
+	"strconv"
 )
 
 // ConvertToSatoshi bitcoinをSatoshiに変換する
@@ -16,6 +17,23 @@ func ConvertToSatoshi(f float64) (btcutil.Amount, error) {
 	}
 
 	return amt, nil
+}
+
+// ConvertToBTC satoshiをBitcoinに変換する
+// TODO:引数はstringでいいんだっけ？
+func ConvertToBTC(amt string) (float64, error) {
+
+	f, err := strconv.ParseFloat(amt, 64)
+	if err != nil {
+		return 0, errors.Errorf("strconv.ParseFloat(%s): error: %v", amt, err)
+	}
+
+	val, err := btcutil.NewAmount(f)
+	if err != nil {
+		return 0, errors.Errorf("btcutil.NewAmount(%f): error: %v", f, err)
+	}
+
+	return val.ToBTC(), nil
 }
 
 // ListAccounts これは単純にアカウントの資産一覧が表示されるだけ

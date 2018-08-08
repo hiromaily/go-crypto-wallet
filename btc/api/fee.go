@@ -22,6 +22,9 @@ type EstimateSmartFeeResult struct {
 	Blocks  int64    `json:"blocks"`
 }
 
+//Making Sense of Bitcoin Transaction Fees
+//https://bitzuma.com/posts/making-sense-of-bitcoin-transaction-fees/
+
 // EstimateSmartFee bitcoin coreの`estimatesmartfee`APIをcallする
 func (b *Bitcoin) EstimateSmartFee() (float32, error) {
 	//TODO:ここはオンラインでしか実行できない？？
@@ -62,6 +65,8 @@ func (b *Bitcoin) EstimateSmartFee() (float32, error) {
 	return estimateResult.FeeRate, nil
 }
 
+// GetTransactionFee トランザクションサイズからfeeを算出する
+//FIXME: WIP
 func (b *Bitcoin) GetTransactionFee(tx *wire.MsgTx) (string, error) {
 	feePerKB, err := b.EstimateSmartFee()
 	if err != nil {
