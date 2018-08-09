@@ -1,42 +1,22 @@
-package api
+package service
 
 import (
-	"log"
-
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
-	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
+	"log"
 )
 
-//HokanAddress 保管用アドレスだが、これをどこに保持すべきか TODO
-const HokanAddress = "2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW"
-
-// UnlockAllUnspentTransaction Lockされたトランザクションの解除
-//TODO:手動解除の場合、listlockunspentコマンドでtxidの一覧を出力し
-//TODO:              lockunspent true txid一覧のjson
-func (b *Bitcoin) UnlockAllUnspentTransaction() error {
-	list, err := b.client.ListLockUnspent() //[]*wire.OutPoint
-	if len(list) != 0 {
-		err = b.client.LockUnspent(true, list)
-		if err != nil {
-			return errors.Errorf("LockUnspent(): error: %v", err)
-		}
-	}
-
-	return nil
-}
-
 // DetectReceivedCoin Wallet内アカウントに入金があれば、そこから、未署名のトランザクションを返す？？
-func (b *Bitcoin) DetectReceivedCoin() (*wire.MsgTx, error) {
+func (w *Wallet) DetectReceivedCoin() (*wire.MsgTx, error) {
 	log.Println("[DetectReceivedCoin]")
 	//TODO:このロジックを連続で走らせた場合、現在処理中のものが、タイミングによってはまた取得できてしまうので、そこを考慮しないといけない
 
 	//TODO:LockUnspent
 	//TODO:ここはgoroutineで並列化されたタスク内で、ロックされたtxidを監視し、confirmationが6になったら、解除するようにしたほうがいいかも。
-	if err := b.UnlockAllUnspentTransaction(); err != nil {
+	if err := w.Btc.UnlockAllUnspentTransaction(); err != nil {
 		return nil, err
 	}
 
@@ -55,7 +35,7 @@ func (b *Bitcoin) DetectReceivedCoin() (*wire.MsgTx, error) {
 	//	Spendable     bool    `json:"spendable"`
 	//}
 	//TODO:とりあえず、ListUnspentを使っているが、全ユーザーにGetUnspentByAddress()を使わないといけないかも()
-	list, err := b.client.ListUnspent()
+	list, err := w.Btc.Client().ListUnspent()
 	if err != nil {
 		return nil, errors.Errorf("ListUnspent(): error: %v", err)
 	}
@@ -80,7 +60,7 @@ func (b *Bitcoin) DetectReceivedCoin() (*wire.MsgTx, error) {
 		}
 
 		// Transaction詳細を取得(必要な情報があるかどうか不明)
-		tran, err := b.GetTransactionByTxID(tx.TxID)
+		tran, err := w.Btc.GetTransactionByTxID(tx.TxID)
 		if err != nil {
 			//txIDがおかしいはず
 			continue
@@ -106,15 +86,20 @@ func (b *Bitcoin) DetectReceivedCoin() (*wire.MsgTx, error) {
 		total += amt //合計
 
 		//TODO:lockunspent
-		txIDHash, err := chainhash.NewHashFromStr(tx.TxID)
-		if err != nil {
+		if w.Btc.LockUnspent(tx) != nil {
 			continue
 		}
-		outpoint := wire.NewOutPoint(txIDHash, tx.Vout)
-		err = b.client.LockUnspent(false, []*wire.OutPoint{outpoint})
-		if err != nil {
-			continue
-		}
+		//TODO:このトランザクションIDはDBに保存が必要
+
+		//txIDHash, err := chainhash.NewHashFromStr(tx.TxID)
+		//if err != nil {
+		//	continue
+		//}
+		//outpoint := wire.NewOutPoint(txIDHash, tx.Vout)
+		//err = b.client.LockUnspent(false, []*wire.OutPoint{outpoint})
+		//if err != nil {
+		//	continue
+		//}
 
 		// inputs
 		inputs = append(inputs, btcjson.TransactionInput{
@@ -133,7 +118,7 @@ func (b *Bitcoin) DetectReceivedCoin() (*wire.MsgTx, error) {
 
 	// CreateRawTransaction
 	//FIXME:おつりがあるのであれば、おつりのトランザクションも作らないといけないし、このfuncのインターフェースを見直す必要がある
-	msgTx, err := b.CreateRawTransaction(HokanAddress, total, inputs) //hokanのアドレス
+	msgTx, err := w.Btc.CreateRawTransaction(HokanAddress, total, inputs) //hokanのアドレス
 	if err != nil {
 		return nil, errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}

@@ -47,3 +47,7 @@ func (b *Bitcoin) Close() {
 func (b *Bitcoin) GetChainConf() *chaincfg.Params {
 	return b.chainConf
 }
+
+func (b *Bitcoin) Client() *rpcclient.Client {
+	return b.client
+}

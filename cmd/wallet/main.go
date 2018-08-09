@@ -6,6 +6,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/hiromaily/go-bitcoin/pkg/api"
 	"github.com/hiromaily/go-bitcoin/pkg/kvs"
+	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/jessevdk/go-flags"
 )
 
@@ -30,11 +31,6 @@ type Options struct {
 	Functionality uint8 `short:"f" long:"function" description:"Functionality: 1: generate key, 2: detect received coin, other: debug"`
 	//HDウォレット用Key生成のためのseed情報
 	ParamSeed string `short:"d" long:"seed" default:"" description:"backup seed"`
-}
-
-type Wallet struct {
-	btc *api.Bitcoin
-	db  *kvs.LevelDB
 }
 
 var (
@@ -66,13 +62,13 @@ func main() {
 	defer bit.Close()
 
 	//Wallet Object
-	wallet := Wallet{btc: bit, db: db}
+	wallet := service.Wallet{Btc: bit, Db: db}
 
 	//switch
 	switchFunction(&wallet)
 }
 
-func switchFunction(wallet *Wallet) {
+func switchFunction(wallet *service.Wallet) {
 	// 処理をFunctionalityで切り替える
 	//TODO:ここから呼び出すべきはService系のみに統一したい
 	switch opts.Functionality {
@@ -80,7 +76,7 @@ func switchFunction(wallet *Wallet) {
 		//TODO:cold wallet側の機能
 		log.Print("Run: Keyの生成")
 		//単一Keyの生成
-		wif, pubAddress, err := wallet.btc.GenerateKey("btc")
+		wif, pubAddress, err := wallet.Btc.GenerateKey("btc")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -88,12 +84,12 @@ func switchFunction(wallet *Wallet) {
 	case 2:
 		//TODO:まだ検証中
 		log.Print("Run: HDウォレット Keyの生成")
-		wallet.btc.GenerateHDKey(opts.ParamSeed)
+		wallet.Btc.GenerateHDKey(opts.ParamSeed)
 	case 3:
 		log.Print("Run: 入金処理検知")
 		//入金検知
 		//TODO:処理中にして、再度対象としないようにしないといけない
-		tx, err := wallet.btc.DetectReceivedCoin()
+		tx, err := wallet.DetectReceivedCoin()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -104,11 +100,11 @@ func switchFunction(wallet *Wallet) {
 	case 4:
 		//TODO:未実装
 		log.Print("Run: 手数料算出 estimatesmartfee")
-		wallet.btc.EstimateSmartFee()
+		wallet.Btc.EstimateSmartFee()
 	case 5:
 		//TODO:未実装
 		log.Print("Run: lockされたトランザクションの解除")
-		wallet.btc.UnlockAllUnspentTransaction()
+		wallet.Btc.UnlockAllUnspentTransaction()
 	case 9:
 		log.Print("Run: [Debug用]送金までの一連の流れを確認")
 		//送金までの一連の流れを確認
@@ -116,7 +112,7 @@ func switchFunction(wallet *Wallet) {
 		//TODO:lockunspentがどこかで必要っぽい
 		//https://bitcoincore.org/en/doc/0.16.2/rpc/wallet/lockunspent/
 
-		tx, err := wallet.btc.DetectReceivedCoin()
+		tx, err := wallet.DetectReceivedCoin()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -125,19 +121,19 @@ func switchFunction(wallet *Wallet) {
 			return
 		}
 		//fee算出
-		fee, err := wallet.btc.GetTransactionFee(tx)
+		fee, err := wallet.Btc.GetTransactionFee(tx)
 		if err != nil {
 			log.Fatal(err)
 		}
 		log.Printf("fee: %s", fee)
 
 		//署名
-		signedTx, err := wallet.btc.SignRawTransaction(tx)
+		signedTx, err := wallet.Btc.SignRawTransaction(tx)
 		if err != nil {
 			log.Fatal(err)
 		}
 		//送金
-		hash, err := wallet.btc.SendRawTransaction(signedTx)
+		hash, err := wallet.Btc.SendRawTransaction(signedTx)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -151,7 +147,7 @@ func switchFunction(wallet *Wallet) {
 	default:
 		log.Print("Run: 検証コード")
 		// for test
-		callAPI(wallet.btc)
+		callAPI(wallet.Btc)
 	}
 
 }
