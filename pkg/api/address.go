@@ -8,7 +8,7 @@ import (
 // CreateNewAddress アカウント名から新しいアドレスを生成する
 // これによって作成されたアカウントはbitcoin core側のwalletで管理される
 func (b *Bitcoin) CreateNewAddress(accountName string) (btcutil.Address, error) {
-	addr, err := b.Client.GetNewAddress(accountName)
+	addr, err := b.client.GetNewAddress(accountName)
 	if err != nil {
 		return nil, errors.Errorf("GetNewAddress(%s): error: %v", accountName, err)
 	}
@@ -18,7 +18,7 @@ func (b *Bitcoin) CreateNewAddress(accountName string) (btcutil.Address, error) 
 
 // GetAddressesByAccount アカウント名から紐づくすべてのアドレスを取得する
 func (b *Bitcoin) GetAddressesByAccount(accountName string) ([]btcutil.Address, error) {
-	addrs, err := b.Client.GetAddressesByAccount(accountName)
+	addrs, err := b.client.GetAddressesByAccount(accountName)
 	if err != nil {
 		return nil, errors.Errorf("GetAddressesByAccount(%s): error: %v", accountName, err)
 	}

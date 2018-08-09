@@ -43,7 +43,7 @@ func (b *Bitcoin) EstimateSmartFee() (float32, error) {
 	if err != nil {
 		return 0, errors.Errorf("json.Marchal(): error: %v", err)
 	}
-	rawResult, err := b.Client.RawRequest("estimatesmartfee", []json.RawMessage{input})
+	rawResult, err := b.client.RawRequest("estimatesmartfee", []json.RawMessage{input})
 	if err != nil {
 		//-3: Expected type number, got object
 		return 0, errors.Errorf("json.RawRequest(estimatesmartfee): error: %v", err)

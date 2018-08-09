@@ -22,7 +22,7 @@ func (b *Bitcoin) GetTransactionByTxID(txID string) (*btcjson.GetTransactionResu
 	if err != nil {
 		return nil, errors.Errorf("chainhash.NewHashFromStr(%s): error: %v", txID, err)
 	}
-	txResult, err := b.Client.GetTransaction(hash)
+	txResult, err := b.client.GetTransaction(hash)
 	if err != nil {
 		return nil, errors.Errorf("GetTransaction(%s): error: %v", hash, err)
 	}
@@ -40,7 +40,7 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 	// Gettxout
 	// txHash *chainhash.Hash, index uint32, mempool bool
 	//return b.Client.GetTxOut(hash, 0, false)
-	txOutResult, err := b.Client.GetTxOut(hash, index, false)
+	txOutResult, err := b.client.GetTxOut(hash, index, false)
 	if err != nil {
 		return nil, errors.Errorf("GetTxOut(%s, %d, false): error: %v", hash, index, err)
 	}
@@ -82,7 +82,7 @@ func (b *Bitcoin) GetRawTransactionByHex(txHex string) (*btcutil.Tx, error) {
 		return nil, errors.Errorf("chainhash.NewHashFromStr(%s): error: %v", txHex, err)
 	}
 
-	tx, err := b.Client.GetRawTransaction(txHash)
+	tx, err := b.client.GetRawTransaction(txHash)
 	if err != nil {
 		return nil, errors.Errorf("GetRawTransaction(hash): error: %v", err)
 	}
@@ -108,7 +108,7 @@ func (b *Bitcoin) CreateRawTransaction(sendAddr string, amount btcutil.Amount, i
 	outputs := make(map[btcutil.Address]btcutil.Amount)
 	outputs[sendAddrDecoded] = amount //satoshi
 	lockTime := int64(0)              //TODO:Raw locktime ここは何をいれるべき？
-	msgTx, err := b.Client.CreateRawTransaction(inputs, outputs, &lockTime)
+	msgTx, err := b.client.CreateRawTransaction(inputs, outputs, &lockTime)
 	if err != nil {
 		return nil, errors.Errorf("btcutil.CreateRawTransaction(): error: %v", err)
 	}
@@ -119,7 +119,7 @@ func (b *Bitcoin) CreateRawTransaction(sendAddr string, amount btcutil.Amount, i
 func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, error) {
 	//TODO: It should be implemented on Cold Strage
 	//この処理がHotwallet内で動くということは、重要な情報がwallet内に含まれてしまっているということでは？
-	msgTx, isSigned, err := b.Client.SignRawTransaction(tx)
+	msgTx, isSigned, err := b.client.SignRawTransaction(tx)
 	if err != nil {
 		return nil, errors.Errorf("SignRawTransaction(): error: %v", err)
 	}
@@ -132,7 +132,7 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, error) {
 
 // SendRawTransaction Rawトランザクションを送信する
 func (b *Bitcoin) SendRawTransaction(tx *wire.MsgTx) (*chainhash.Hash, error) {
-	hash, err := b.Client.SendRawTransaction(tx, true)
+	hash, err := b.client.SendRawTransaction(tx, true)
 	if err != nil {
 		return nil, errors.Errorf("SendRawTransaction(): error: %v", err)
 	}
@@ -152,7 +152,7 @@ func (b *Bitcoin) SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error) {
 		return nil, errors.Errorf("wireTx.Deserialize(): error: %v", err)
 	}
 
-	hash, err := b.Client.SendRawTransaction(wireTx, true)
+	hash, err := b.client.SendRawTransaction(wireTx, true)
 	if err != nil {
 		return nil, errors.Errorf("SendRawTransaction(): error: %v", err)
 	}

@@ -7,7 +7,7 @@ import (
 
 // Bitcoin includes Client to call Json-RPC
 type Bitcoin struct {
-	Client    *rpcclient.Client
+	client    *rpcclient.Client
 	chainConf *chaincfg.Params
 }
 
@@ -28,7 +28,7 @@ func Connection(host, user, pass string, postMode, tls, isMain bool) (*Bitcoin, 
 		return nil, err
 	}
 
-	bit := Bitcoin{Client: client}
+	bit := Bitcoin{client: client}
 	if isMain {
 		bit.chainConf = &chaincfg.MainNetParams
 	} else {
@@ -40,7 +40,7 @@ func Connection(host, user, pass string, postMode, tls, isMain bool) (*Bitcoin, 
 
 // Close コネクションを切断する
 func (b *Bitcoin) Close() {
-	b.Client.Shutdown()
+	b.client.Shutdown()
 }
 
 // GetChainConf 接続先であるMainNet/TestNetに応じて必要なconfを返す

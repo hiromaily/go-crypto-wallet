@@ -1,4 +1,4 @@
-package service
+package api
 
 import (
 	"log"
@@ -8,16 +8,37 @@ import (
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
-	"github.com/hiromaily/go-bitcoin/btc/api"
 	"github.com/pkg/errors"
 )
 
 //HokanAddress 保管用アドレスだが、これをどこに保持すべきか TODO
 const HokanAddress = "2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW"
 
+// UnlockAllUnspentTransaction Lockされたトランザクションの解除
+//TODO:手動解除の場合、listlockunspentコマンドでtxidの一覧を出力し
+//TODO:              lockunspent true txid一覧のjson
+func (b *Bitcoin) UnlockAllUnspentTransaction() error {
+	list, err := b.client.ListLockUnspent() //[]*wire.OutPoint
+	if len(list) != 0 {
+		err = b.client.LockUnspent(true, list)
+		if err != nil {
+			return errors.Errorf("LockUnspent(): error: %v", err)
+		}
+	}
+
+	return nil
+}
+
 // DetectReceivedCoin Wallet内アカウントに入金があれば、そこから、未署名のトランザクションを返す？？
-func DetectReceivedCoin(bit *api.Bitcoin) (*wire.MsgTx, error) {
+func (b *Bitcoin) DetectReceivedCoin() (*wire.MsgTx, error) {
+	log.Println("[DetectReceivedCoin]")
 	//TODO:このロジックを連続で走らせた場合、現在処理中のものが、タイミングによってはまた取得できてしまうので、そこを考慮しないといけない
+
+	//TODO:LockUnspent
+	//TODO:ここはgoroutineで並列化されたタスク内で、ロックされたtxidを監視し、confirmationが6になったら、解除するようにしたほうがいいかも。
+	if err := b.UnlockAllUnspentTransaction(); err != nil {
+		return nil, err
+	}
 
 	//1. アカウント一覧からまとめて残高を取得
 	//[]btcjson.ListUnspentResult
@@ -33,8 +54,8 @@ func DetectReceivedCoin(bit *api.Bitcoin) (*wire.MsgTx, error) {
 	//	Confirmations int64   `json:"confirmations"`
 	//	Spendable     bool    `json:"spendable"`
 	//}
-	//TODO:とりあえず、ListUnspentを使っているが、全ユーザーにGetUnspentByAddress()を使わないといけないかも
-	list, err := bit.Client.ListUnspent()
+	//TODO:とりあえず、ListUnspentを使っているが、全ユーザーにGetUnspentByAddress()を使わないといけないかも()
+	list, err := b.client.ListUnspent()
 	if err != nil {
 		return nil, errors.Errorf("ListUnspent(): error: %v", err)
 	}
@@ -45,24 +66,21 @@ func DetectReceivedCoin(bit *api.Bitcoin) (*wire.MsgTx, error) {
 		return nil, nil
 	}
 
-	//TODO:LockUnspent
-	//TODO:第二パラメータがnilだとダメ
-	if err := bit.Client.LockUnspent(true, nil); err != nil {
-		return nil, errors.Errorf("LockUnspent() error: unable to unlock unspent outputs")
-	}
-
 	//
 	var total btcutil.Amount
 	var inputs []btcjson.TransactionInput
 	//CreateRawTransaction()は外で実行する
 	//Loop内ではパラメータを作成するのみ
 	for _, tx := range list {
-		if tx.Spendable == false {
+		//FIXME: pendableは実環境では使えない。とりあえず、confirmation数でチェックにしておく
+		//https://bitcoin.stackexchange.com/questions/63198/why-outputs-spendable-and-solvable-are-false
+		if tx.Confirmations < 6 {
+			//if tx.Spendable == false {
 			continue
 		}
 
 		// Transaction詳細を取得(必要な情報があるかどうか不明)
-		tran, err := bit.GetTransactionByTxID(tx.TxID)
+		tran, err := b.GetTransactionByTxID(tx.TxID)
 		if err != nil {
 			//txIDがおかしいはず
 			continue
@@ -93,12 +111,10 @@ func DetectReceivedCoin(bit *api.Bitcoin) (*wire.MsgTx, error) {
 			continue
 		}
 		outpoint := wire.NewOutPoint(txIDHash, tx.Vout)
-		err = bit.Client.LockUnspent(false, []*wire.OutPoint{outpoint})
+		err = b.client.LockUnspent(false, []*wire.OutPoint{outpoint})
 		if err != nil {
 			continue
 		}
-		//TODO:これが解除されん。。。
-		//listlockunspentでチェック
 
 		// inputs
 		inputs = append(inputs, btcjson.TransactionInput{
@@ -112,11 +128,12 @@ func DetectReceivedCoin(bit *api.Bitcoin) (*wire.MsgTx, error) {
 	}
 
 	//TODO: このタイミングで手数料を算出して、totalから差し引く？？
-	//total = 18500000 //桁を間違えた。。。
+	//total = 18500000 //桁を間違えた。。。0.185 BTC
 	//total = 195000000
 
 	// CreateRawTransaction
-	msgTx, err := bit.CreateRawTransaction(HokanAddress, total, inputs) //hokanのアドレス
+	//FIXME:おつりがあるのであれば、おつりのトランザクションも作らないといけないし、このfuncのインターフェースを見直す必要がある
+	msgTx, err := b.CreateRawTransaction(HokanAddress, total, inputs) //hokanのアドレス
 	if err != nil {
 		return nil, errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}

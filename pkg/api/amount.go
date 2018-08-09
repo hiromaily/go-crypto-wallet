@@ -38,7 +38,7 @@ func ConvertToBTC(amt string) (float64, error) {
 
 // ListAccounts これは単純にアカウントの資産一覧が表示されるだけ
 func (b *Bitcoin) ListAccounts() (map[string]btcutil.Amount, error) {
-	listAmts, err := b.Client.ListAccounts()
+	listAmts, err := b.client.ListAccounts()
 	if err != nil {
 		return nil, errors.Errorf("ListAccounts(): error: %v", err)
 	}
@@ -48,7 +48,7 @@ func (b *Bitcoin) ListAccounts() (map[string]btcutil.Amount, error) {
 
 // GetBalanceByAccount アカウントに対してのBalanceを取得する
 func (b *Bitcoin) GetBalanceByAccount(accountName string) (btcutil.Amount, error) {
-	amt, err := b.Client.GetBalance(accountName)
+	amt, err := b.client.GetBalance(accountName)
 	if err != nil {
 		return 0, errors.Errorf("GetBalance(%s): error: %v", accountName, err)
 	}

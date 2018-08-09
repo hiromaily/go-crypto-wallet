@@ -2,3 +2,5 @@
 detect
 wallet
 !cmd/wallet
+data/kvs/*
+!.gitkeep

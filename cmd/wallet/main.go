@@ -4,8 +4,8 @@ import (
 	"log"
 
 	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/hiromaily/go-bitcoin/btc/api"
-	"github.com/hiromaily/go-bitcoin/btc/service"
+	"github.com/hiromaily/go-bitcoin/pkg/api"
+	"github.com/hiromaily/go-bitcoin/pkg/kvs"
 	"github.com/jessevdk/go-flags"
 )
 
@@ -24,10 +24,17 @@ type Options struct {
 	Pass string `short:"p" long:"pass" default:"xyz" description:"Password of RPC Server"`
 	//接続先: MainNet or TestNet
 	IsMain bool `short:"m" long:"ismain" description:"Using MainNetParams as network permeters or Not"`
+	//KVSのstoreされるファイルパス
+	DBPath string `short:"k" long:"kvspath" default:"./data/kvs/db" description:"Path for stored data by KVS"`
 	//実行される機能
 	Functionality uint8 `short:"f" long:"function" description:"Functionality: 1: generate key, 2: detect received coin, other: debug"`
 	//HDウォレット用Key生成のためのseed情報
 	ParamSeed string `short:"d" long:"seed" default:"" description:"backup seed"`
+}
+
+type Wallet struct {
+	btc *api.Bitcoin
+	db  *kvs.LevelDB
 }
 
 var (
@@ -42,7 +49,15 @@ func init() {
 }
 
 func main() {
-	// Connection
+
+	// KVS
+	db, err := kvs.InitDB(opts.DBPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	// Connection to Bitcoin core
 	//bit, err := bitcoin.Connection("127.0.0.1:18332", "xyz", "xyz", true, true)
 	bit, err := api.Connection(opts.Host, opts.User, opts.Pass, true, true, opts.IsMain)
 	if err != nil {
@@ -50,6 +65,14 @@ func main() {
 	}
 	defer bit.Close()
 
+	//Wallet Object
+	wallet := Wallet{btc: bit, db: db}
+
+	//switch
+	switchFunction(&wallet)
+}
+
+func switchFunction(wallet *Wallet) {
 	// 処理をFunctionalityで切り替える
 	//TODO:ここから呼び出すべきはService系のみに統一したい
 	switch opts.Functionality {
@@ -57,7 +80,7 @@ func main() {
 		//TODO:cold wallet側の機能
 		log.Print("Run: Keyの生成")
 		//単一Keyの生成
-		wif, pubAddress, err := bit.GenerateKey("btc")
+		wif, pubAddress, err := wallet.btc.GenerateKey("btc")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -65,12 +88,12 @@ func main() {
 	case 2:
 		//TODO:まだ検証中
 		log.Print("Run: HDウォレット Keyの生成")
-		bit.GenerateHDKey(opts.ParamSeed)
+		wallet.btc.GenerateHDKey(opts.ParamSeed)
 	case 3:
 		log.Print("Run: 入金処理検知")
 		//入金検知
 		//TODO:処理中にして、再度対象としないようにしないといけない
-		tx, err := service.DetectReceivedCoin(bit)
+		tx, err := wallet.btc.DetectReceivedCoin()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -78,14 +101,22 @@ func main() {
 			log.Printf("no utxo")
 			return
 		}
+	case 4:
+		//TODO:未実装
+		log.Print("Run: 手数料算出 estimatesmartfee")
+		wallet.btc.EstimateSmartFee()
+	case 5:
+		//TODO:未実装
+		log.Print("Run: lockされたトランザクションの解除")
+		wallet.btc.UnlockAllUnspentTransaction()
 	case 9:
-		//TODO:lockunspentがどこかで必要っぽい
-		//https://bitcoincore.org/en/doc/0.16.2/rpc/wallet/lockunspent/
-
 		log.Print("Run: [Debug用]送金までの一連の流れを確認")
 		//送金までの一連の流れを確認
 		//TODO:処理中にして、再度対象としないようにしないといけない
-		tx, err := service.DetectReceivedCoin(bit)
+		//TODO:lockunspentがどこかで必要っぽい
+		//https://bitcoincore.org/en/doc/0.16.2/rpc/wallet/lockunspent/
+
+		tx, err := wallet.btc.DetectReceivedCoin()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -94,19 +125,19 @@ func main() {
 			return
 		}
 		//fee算出
-		fee, err := bit.GetTransactionFee(tx)
+		fee, err := wallet.btc.GetTransactionFee(tx)
 		if err != nil {
 			log.Fatal(err)
 		}
 		log.Printf("fee: %s", fee)
 
 		//署名
-		signedTx, err := bit.SignRawTransaction(tx)
+		signedTx, err := wallet.btc.SignRawTransaction(tx)
 		if err != nil {
 			log.Fatal(err)
 		}
 		//送金
-		hash, err := bit.SendRawTransaction(signedTx)
+		hash, err := wallet.btc.SendRawTransaction(signedTx)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -120,7 +151,7 @@ func main() {
 	default:
 		log.Print("Run: 検証コード")
 		// for test
-		callAPI(bit)
+		callAPI(wallet.btc)
 	}
 
 }

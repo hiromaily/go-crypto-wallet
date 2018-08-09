@@ -16,6 +16,12 @@ run2: bld
 run3: bld
 	./wallet -f 3
 
+run4: bld
+	./wallet -f 4
+
+run5: bld
+	./wallet -f 5
+
 run9: bld
 	./wallet -f 9
 
