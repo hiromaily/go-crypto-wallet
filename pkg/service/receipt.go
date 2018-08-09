@@ -81,7 +81,7 @@ func (w *Wallet) DetectReceivedCoin() (*wire.MsgTx, error) {
 		amt, err := btcutil.NewAmount(tx.Amount)
 		if err != nil {
 			//このエラーは起こりえない
-			log.Printf("btcutil.NewAmount(): Amount:%d, err:%v", tx.Amount, err)
+			log.Printf("btcutil.NewAmount(): Amount:%f, err:%v", tx.Amount, err)
 			continue
 		}
 		//TODO:全額は送金できないので、このタイミングで手数料を差し引かねばならないが、
@@ -94,6 +94,7 @@ func (w *Wallet) DetectReceivedCoin() (*wire.MsgTx, error) {
 			continue
 		}
 		//TODO:ここはまとめてLevelDBにPutしたほうが効率的かもしれない
+		//TODO:ここで保存した情報が本当に必要か？監視すべき対象は何で、何を実現させるかはっきりさせる
 		//このトランザクションIDはDBに保存が必要 => ここで保存されたIDはconfirmationのチェックに使われる
 		err = w.Db.Put("unspent", tx.TxID+string(tx.Vout), nil)
 		if err != nil {

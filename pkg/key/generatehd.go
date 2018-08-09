@@ -1,4 +1,4 @@
-package api
+package key
 
 import (
 	"errors"
@@ -159,11 +159,8 @@ func generateHierarchicalChild(masterKey *hdkeychain.ExtendedKey, layerIndex, in
 	return nil
 }
 
-// GenerateHDKey HDウォレットキー及びSeedを生成する
-//TODO: WIP
-// TODO:こっちをServiceに移すべき
-//func (b *Bitcoin) GenerateHDKey(paramSeed string) (*btcutil.WIF, string, error) {
-func (b *Bitcoin) GenerateHDKey(paramSeed string) error {
+// GenerateHDKey HDウォレットキー及びSeedを生成する TODO: WIP
+func GenerateHDKey(paramSeed string, conf *chaincfg.Params) error {
 	var (
 		seed []byte
 		err  error
@@ -188,14 +185,14 @@ func (b *Bitcoin) GenerateHDKey(paramSeed string) error {
 	}
 
 	// 2.Generate a new private master key using the seed.
-	masterPrivateKey, err := generateMasterPrivateKey(seed, b.GetChainConf())
+	masterPrivateKey, err := generateMasterPrivateKey(seed, conf)
 	if err != nil {
 		return err
 	}
 
 	// 3.Generate a new public master key using the master private key.
 	//masterPublicKey, err := generateMasterPublicKey(masterPrivateKey, *isTest)
-	_, err = generateMasterPublicKey(masterPrivateKey, b.GetChainConf())
+	_, err = generateMasterPublicKey(masterPrivateKey, conf)
 	if err != nil {
 		return err
 	}

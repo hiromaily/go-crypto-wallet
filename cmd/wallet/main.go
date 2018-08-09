@@ -5,6 +5,7 @@ import (
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/hiromaily/go-bitcoin/pkg/api"
+	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/kvs"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/jessevdk/go-flags"
@@ -76,7 +77,7 @@ func switchFunction(wallet *service.Wallet) {
 		//TODO:cold wallet側の機能
 		log.Print("Run: Keyの生成")
 		//単一Keyの生成
-		wif, pubAddress, err := wallet.Btc.GenerateKey("btc")
+		wif, pubAddress, err := key.GenerateKey(wallet.Btc.GetChainConf())
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -84,7 +85,7 @@ func switchFunction(wallet *service.Wallet) {
 	case 2:
 		//TODO:まだ検証中
 		log.Print("Run: HDウォレット Keyの生成")
-		wallet.Btc.GenerateHDKey(opts.ParamSeed)
+		key.GenerateHDKey(opts.ParamSeed, wallet.Btc.GetChainConf())
 	case 3:
 		log.Print("Run: 入金処理検知")
 		//入金検知

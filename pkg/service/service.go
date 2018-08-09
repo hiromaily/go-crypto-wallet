@@ -14,6 +14,6 @@ type Wallet struct {
 // これらの定義はどこにすべきか
 const (
 	//HokanAddress 保管用アドレス
-	HokanAddress = "2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW"
+	HokanAddress         = "2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW"
 	ConfirmationBlockNum = 6
 )
