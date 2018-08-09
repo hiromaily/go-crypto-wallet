@@ -88,7 +88,7 @@ func switchFunction(wallet *service.Wallet) {
 	case 3:
 		log.Print("Run: 入金処理検知")
 		//入金検知
-		//TODO:処理中にして、再度対象としないようにしないといけない
+		//TODO:この中でLoopする必要はない。実行するtaskrunner側で実行間隔を調整する。
 		tx, err := wallet.DetectReceivedCoin()
 		if err != nil {
 			log.Fatal(err)
