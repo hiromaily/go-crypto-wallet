@@ -5,7 +5,7 @@ bld:
 	go build -o wallet ./cmd/wallet/main.go
 
 run: bld
-	./wallet
+	./wallet -f 99
 
 run1: bld
 	./wallet -f 1

@@ -80,6 +80,7 @@ func (w *Wallet) DetectReceivedCoin() (*wire.MsgTx, error) {
 		amt, err := btcutil.NewAmount(tx.Amount)
 		if err != nil {
 			//TODO:このタイミングでエラーはおきないはず
+			log.Println(err)
 			continue
 		}
 		//TODO:全額は送金できないので、このタイミングで手数料を差し引かねばならないが、ここでいいんだっけ？total算出後でもいい？
@@ -90,16 +91,13 @@ func (w *Wallet) DetectReceivedCoin() (*wire.MsgTx, error) {
 			continue
 		}
 		//TODO:このトランザクションIDはDBに保存が必要
-
-		//txIDHash, err := chainhash.NewHashFromStr(tx.TxID)
-		//if err != nil {
-		//	continue
-		//}
-		//outpoint := wire.NewOutPoint(txIDHash, tx.Vout)
-		//err = b.client.LockUnspent(false, []*wire.OutPoint{outpoint})
-		//if err != nil {
-		//	continue
-		//}
+		//func (d *LevelDB) Put(prefix, key string, val []byte) error{
+		err = w.Db.Put("unspent", tx.TxID+string(tx.Vout), nil)
+		if err != nil {
+			//TODO:このタイミングでエラーはおきないはず
+			log.Println(err)
+			continue
+		}
 
 		// inputs
 		inputs = append(inputs, btcjson.TransactionInput{
@@ -124,6 +122,9 @@ func (w *Wallet) DetectReceivedCoin() (*wire.MsgTx, error) {
 	}
 	log.Printf("CreateRawTransaction: %v\n", msgTx)
 	//grok.Value(msgTx)
+
+	//TODO:fundrawtransactionによって手数料を算出したほうがいい。
+	//https://bitcoincore.org/en/doc/0.16.2/rpc/rawtransactions/fundrawtransaction/
 
 	//TODO:本来、これをDumpして、どっかに保存する必要があるはず、それをUSBに入れてコールドウォレットに移動しなくてはいけない
 	//Feeもこのタイミングで取得する？？

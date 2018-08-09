@@ -147,13 +147,13 @@ func switchFunction(wallet *service.Wallet) {
 	default:
 		log.Print("Run: 検証コード")
 		// for test
-		callAPI(wallet.Btc)
+		callAPI(wallet)
 	}
 
 }
 
 // 検証用
-func callAPI(bit *api.Bitcoin) {
+func callAPI(wallet *service.Wallet) {
 	//txOut
 	//txOut, err := bit.GetTxOutByTxID("d0f3b258dda46a5980a0a9e1e6f818eb421be572d12e4e641b7b77e699ecddca", 0)
 	//if err != nil {
@@ -161,4 +161,18 @@ func callAPI(bit *api.Bitcoin) {
 	//}
 	//log.Printf("TxOut: %v\n", txOut)
 	//grok.Value(txOut)
+}
+
+func checkLevelDB(wallet *service.Wallet) {
+	//Put
+	err := wallet.Db.Put("unspent", "testkey1", []byte("data1234567890"))
+	if err != nil {
+		log.Println(err)
+	}
+	//Get
+	val, err := wallet.Db.Get("unspent", "testkey1")
+	if err != nil {
+		log.Println(err)
+	}
+	log.Printf("[Done] %s", string(val))
 }
