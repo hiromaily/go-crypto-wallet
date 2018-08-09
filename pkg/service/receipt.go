@@ -54,7 +54,7 @@ func (w *Wallet) DetectReceivedCoin() (*wire.MsgTx, error) {
 		//FIXME: pendableは実環境では使えない。とりあえず、confirmation数でチェックにしておく
 		// 6に満たない場合、まだ未確定であることを意味するはず
 		//https://bitcoin.stackexchange.com/questions/63198/why-outputs-spendable-and-solvable-are-false
-		if tx.Confirmations < 6 {
+		if tx.Confirmations < ConfirmationBlockNum {
 			//if tx.Spendable == false {
 			continue
 		}

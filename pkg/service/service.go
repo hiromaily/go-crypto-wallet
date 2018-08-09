@@ -11,5 +11,9 @@ type Wallet struct {
 	Db  *kvs.LevelDB
 }
 
-//HokanAddress 保管用アドレスだが、これをどこに保持すべきか TODO
-const HokanAddress = "2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW"
+// これらの定義はどこにすべきか
+const (
+	//HokanAddress 保管用アドレス
+	HokanAddress = "2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW"
+	ConfirmationBlockNum = 6
+)
