@@ -48,6 +48,7 @@ func (b *Bitcoin) GetChainConf() *chaincfg.Params {
 	return b.chainConf
 }
 
+// Client clientオブジェクトを返す
 func (b *Bitcoin) Client() *rpcclient.Client {
 	return b.client
 }

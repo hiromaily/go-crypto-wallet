@@ -8,8 +8,6 @@ import (
 )
 
 // UnlockAllUnspentTransaction Lockされたトランザクションの解除
-//TODO:手動解除の場合、listlockunspentコマンドでtxidの一覧を出力し
-//TODO:              lockunspent true txid一覧のjson
 func (b *Bitcoin) UnlockAllUnspentTransaction() error {
 	list, err := b.client.ListLockUnspent() //[]*wire.OutPoint
 	if len(list) != 0 {
@@ -22,7 +20,7 @@ func (b *Bitcoin) UnlockAllUnspentTransaction() error {
 	return nil
 }
 
-// LockUnspent 渡されたtxidをロックする
+// LockUnspent 渡されたtxIDをロックする
 func (b *Bitcoin) LockUnspent(tx btcjson.ListUnspentResult) error {
 	txIDHash, err := chainhash.NewHashFromStr(tx.TxID)
 	if err != nil {

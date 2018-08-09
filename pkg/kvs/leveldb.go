@@ -14,10 +14,12 @@ type LevelDB struct {
 	conn *leveldb.DB
 }
 
+// ここに定義したものを常にprefix(仮想テーブル名)として、keyにaddして利用する。
 var tableList = map[string]string{
 	"unspent": "unspent",
 }
 
+// InitDB 接続処理
 func InitDB(path string) (*LevelDB, error) {
 	db, err := leveldb.OpenFile(path, nil)
 	if err != nil {
@@ -26,14 +28,17 @@ func InitDB(path string) (*LevelDB, error) {
 	return &LevelDB{conn: db}, nil
 }
 
+// Conn connectionオブジェクトを返す
 func (d *LevelDB) Conn() *leveldb.DB {
 	return d.conn
 }
 
+// Close 接続
 func (d *LevelDB) Close() {
 	d.conn.Close()
 }
 
+// SetKey keyを作成する
 func (d *LevelDB) SetKey(prefix, key string) ([]byte, error) {
 	if _, ok := tableList[prefix]; ok {
 		return []byte(prefix + key), nil
@@ -41,6 +46,7 @@ func (d *LevelDB) SetKey(prefix, key string) ([]byte, error) {
 	return nil, errors.Errorf("table in leveldb is not found: %s", prefix)
 }
 
+// Put Putのwrapper
 func (d *LevelDB) Put(prefix, key string, val []byte) error {
 	bKey, err := d.SetKey(prefix, key)
 	if err != nil {
@@ -54,6 +60,7 @@ func (d *LevelDB) Put(prefix, key string, val []byte) error {
 	return nil
 }
 
+// Get Getのwrapper
 func (d *LevelDB) Get(prefix, key string) ([]byte, error) {
 	bKey, err := d.SetKey(prefix, key)
 	if err != nil {
