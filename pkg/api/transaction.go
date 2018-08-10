@@ -86,6 +86,8 @@ func (b *Bitcoin) GetRawTransactionByHex(txHex string) (*btcutil.Tx, error) {
 	if err != nil {
 		return nil, errors.Errorf("GetRawTransaction(hash): error: %v", err)
 	}
+	//TODO:これでMsgTx()
+	//tx.MsgTx()
 
 	return tx, nil
 }
