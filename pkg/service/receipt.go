@@ -41,7 +41,7 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 	if err != nil {
 		return "", errors.Errorf("ListUnspent(): error: %v", err)
 	}
-	log.Printf("List Unspent: %v\n", list)
+	log.Printf("[Debug]List Unspent: %v\n", list)
 	grok.Value(list) //Debug
 
 	if len(list) == 0 {
@@ -65,10 +65,10 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 		tran, err := w.Btc.GetTransactionByTxID(tx.TxID)
 		if err != nil {
 			//このエラーは起こりえない
-			log.Printf("w.Btc.GetTransactionByTxID(): txID:%s, err:%v", tx.TxID, err)
+			log.Printf("[Error] w.Btc.GetTransactionByTxID(): txID:%s, err:%v", tx.TxID, err)
 			continue
 		}
-		//log.Printf("Transactions: %v\n", tran)
+		//log.Printf("[Debug]Transactions: %v\n", tran)
 		//grok.Value(tran)
 
 		//除外するアカウント(TODO:これは必要であれば外部定義すべき)
@@ -83,7 +83,7 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 		amt, err := btcutil.NewAmount(tx.Amount)
 		if err != nil {
 			//このエラーは起こりえない
-			log.Printf("btcutil.NewAmount(): Amount:%f, err:%v", tx.Amount, err)
+			log.Printf("[Error] btcutil.NewAmount(): Amount:%f, err:%v", tx.Amount, err)
 			continue
 		}
 		//TODO:全額は送金できないので、このタイミングで手数料を差し引かねばならないが、
@@ -101,7 +101,7 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 		err = w.Db.Put("unspent", tx.TxID+string(tx.Vout), nil)
 		if err != nil {
 			//このタイミングでエラーがおきるのであれば、設計ミス
-			log.Printf("Error by w.Db.Put(unspent). This error should not occurred.:, error:%v", err)
+			log.Printf("[Error] Error by w.Db.Put(unspent). This error should not occurred.:, error:%v", err)
 			continue
 		}
 
@@ -111,21 +111,17 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 			Vout: tx.Vout,
 		})
 	}
-	log.Printf("[Debug]Total Coin to send:%d(Satoshi), input length: %d", total, len(inputs))
+	log.Printf("[Debug]Total Coin to send:%d(Satoshi) before fee calculated, input length: %d", total, len(inputs))
 	if len(inputs) == 0 {
 		return "", nil
 	}
-
-	//TODO: このタイミングで手数料を算出して、totalから差し引く？？ => これは不要
-	//total = 18500000 //桁を間違えた。。。0.185 BTC
-	//total = 195000000
 
 	// CreateRawTransaction(仮で作成し、この後サイズから手数料を算出する)
 	msgTx, err := w.Btc.CreateRawTransaction(w.Btc.StoreAddr(), total, inputs)
 	if err != nil {
 		return "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
-	log.Printf("[Done]CreateRawTransaction: %v\n", msgTx)
+	log.Printf("[Debug] CreateRawTransaction: %v\n", msgTx)
 	//grok.Value(msgTx)
 
 	//fee算出
@@ -133,9 +129,19 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 	if err != nil {
 		return "", errors.Errorf("GetTransactionFee(): error: %v", err)
 	}
-	log.Printf("fee: %v", fee) //0.000208 BTC
+	log.Printf("[Debug]fee: %v", fee) //0.000208 BTC
 
 	//TODO: totalを調整し、再度RawTransactionを作成する
+	total = total - fee
+	if total <= 0{
+		return "", errors.Errorf("calculated fee must be wrong: fee:%v, error: %v", fee, err)
+	}
+	log.Printf("[Debug]Total Coin to send:%d(Satoshi) after fee calculated, input length: %d", total, len(inputs))
+
+	msgTx, err = w.Btc.CreateRawTransaction(w.Btc.StoreAddr(), total, inputs)
+	if err != nil {
+		return "", errors.Errorf("CreateRawTransaction(): error: %v", err)
+	}
 
 	hex, err := w.Btc.ToHex(msgTx)
 	if err != nil {

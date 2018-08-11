@@ -168,7 +168,7 @@ func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, err
 		return nil, errors.Errorf("json.Unmarshal(): error: %v", err)
 	}
 
-	log.Printf("fundRawTransactionResult: %v: %s\n", fundRawTransactionResult, fundRawTransactionResult.Hex)
+	log.Printf("[Debug]fundRawTransactionResult: %v: %s\n", fundRawTransactionResult, fundRawTransactionResult.Hex)
 
 	return &fundRawTransactionResult, nil
 }
@@ -227,13 +227,6 @@ func (b *Bitcoin) SequentialTransaction(hex string) error {
 		return err
 	}
 	msgTx := tx.MsgTx()
-
-	//fee算出
-	//fee, err := b.GetTransactionFee(msgTx)
-	//if err != nil {
-	//	return err
-	//}
-	//log.Printf("fee: %s", fee)
 
 	//署名
 	signedTx, err := b.SignRawTransaction(msgTx)
