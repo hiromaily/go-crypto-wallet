@@ -2,22 +2,14 @@ package api
 
 import (
 	"encoding/json"
-	"log"
-
 	"fmt"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/pkg/errors"
 )
 
-// EstimateSmartFee input (これは不要のはず)
-type EstimateSmartFee struct {
-	ConfTarget   int    `json:"conf_target"`
-	EstimateMode string `json:"estimate_mode"`
-}
-
 // EstimateSmartFeeResult estimatesmartfeeをcallしたresponseの型
 type EstimateSmartFeeResult struct {
-	FeeRate float32  `json:"feerate"`
+	FeeRate float64  `json:"feerate"`
 	Errors  []string `json:"errors"`
 	Blocks  int64    `json:"blocks"`
 }
@@ -26,20 +18,8 @@ type EstimateSmartFeeResult struct {
 //https://bitzuma.com/posts/making-sense-of-bitcoin-transaction-fees/
 
 // EstimateSmartFee bitcoin coreの`estimatesmartfee`APIをcallする
-func (b *Bitcoin) EstimateSmartFee() (float32, error) {
-	//TODO:ここはオンラインでしか実行できない？？
-	//TODO:送信前に手数料を取得する
-	//Estimatesmartfee
-	//fee, err := bit.Client.EstimateFee(1)
-	//if err != nil {
-	//	//estimatefee is deprecated and will be fully removed in v0.17. To use estimatefee in v0.16, restart bitcoind with -deprecatedrpc=estimatefee.
-	//	log.Fatal(err)
-	//}
-	//log.Printf("Estimatesmartfee: %v\n", fee)
-
-	//param := EstimateSmartFee{ConfTarget: 6}
-	//b, err := json.Marshal(param)
-	input, err := json.Marshal(uint64(6)) //ここは固定でいいはず
+func (b *Bitcoin) EstimateSmartFee() (float64, error) {
+	input, err := json.Marshal(uint64(b.confirmationBlock)) //ここは固定(6)でいいはず
 	if err != nil {
 		return 0, errors.Errorf("json.Marchal(): error: %v", err)
 	}
@@ -58,10 +38,11 @@ func (b *Bitcoin) EstimateSmartFee() (float32, error) {
 		return 0, errors.Errorf("json.RawRequest(estimatesmartfee): error: %v", estimateResult.Errors[0])
 	}
 
-	log.Printf("Estimatesmartfee: %v: %f\n", estimateResult, estimateResult.FeeRate)
+	//log.Printf("[Debug]Estimatesmartfee: %v: %f\n", estimateResult, estimateResult.FeeRate)
 	//1.116e-05
 	//0.000011 per 1kb
 
+	//TODO:Amoutとして返したほうがいいかも
 	return estimateResult.FeeRate, nil
 }
 
@@ -72,7 +53,7 @@ func (b *Bitcoin) GetTransactionFee(tx *wire.MsgTx) (string, error) {
 	if err != nil {
 		return "", errors.Errorf("EstimateSmartFee(): error: %v", err)
 	}
-	fee := fmt.Sprintf("%f", feePerKB*float32(tx.SerializeSize())/1000)
+	fee := fmt.Sprintf("%f", feePerKB*float64(tx.SerializeSize())/1000)
 
 	return fee, nil
 }

@@ -3,14 +3,15 @@ package service
 import (
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
-	"github.com/btcsuite/btcd/wire"
+	//"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 	"log"
 )
 
 // DetectReceivedCoin Wallet内アカウントに入金があれば、そこから、未署名のトランザクションを返す
-func (w *Wallet) DetectReceivedCoin() (*wire.MsgTx, error) {
+//func (w *Wallet) DetectReceivedCoin() (*wire.MsgTx, error) {
+func (w *Wallet) DetectReceivedCoin() (string, error) {
 	log.Println("[DetectReceivedCoin]")
 	//TODO:このロジックを連続で走らせた場合、現在処理中のものが、タイミングによってはまた取得できてしまうかもしれない
 	// ので、そこを考慮しないといけない
@@ -18,7 +19,7 @@ func (w *Wallet) DetectReceivedCoin() (*wire.MsgTx, error) {
 	//TODO:ここはgoroutineで並列化されたタスク内で、ロックされたtxidを監視し、confirmationが6になったら、
 	// 解除するようにしたほうがいいかも。暫定でここに設定
 	if err := w.Btc.UnlockAllUnspentTransaction(); err != nil {
-		return nil, err
+		return "", err
 	}
 
 	//1. アカウント一覧からまとめて残高を取得
@@ -37,13 +38,13 @@ func (w *Wallet) DetectReceivedCoin() (*wire.MsgTx, error) {
 	// Watch only walletであれば、実現できるはず
 	list, err := w.Btc.Client().ListUnspent()
 	if err != nil {
-		return nil, errors.Errorf("ListUnspent(): error: %v", err)
+		return "", errors.Errorf("ListUnspent(): error: %v", err)
 	}
 	log.Printf("List Unspent: %v\n", list)
 	grok.Value(list) //Debug
 
 	if len(list) == 0 {
-		return nil, nil
+		return "", nil
 	}
 
 	var total btcutil.Amount
@@ -54,7 +55,7 @@ func (w *Wallet) DetectReceivedCoin() (*wire.MsgTx, error) {
 		//FIXME: pendableは実環境では使えない。とりあえず、confirmation数でチェックにしておく
 		// 6に満たない場合、まだ未確定であることを意味するはず
 		//https://bitcoin.stackexchange.com/questions/63198/why-outputs-spendable-and-solvable-are-false
-		if tx.Confirmations < ConfirmationBlockNum {
+		if tx.Confirmations < w.Btc.ConfirmationBlock() {
 			//if tx.Spendable == false {
 			continue
 		}
@@ -111,7 +112,7 @@ func (w *Wallet) DetectReceivedCoin() (*wire.MsgTx, error) {
 	}
 	log.Printf("[Debug]Total Coin to send:%d(Satoshi), input length: %d", total, len(inputs))
 	if len(inputs) == 0 {
-		return nil, nil
+		return "", nil
 	}
 
 	//TODO: このタイミングで手数料を算出して、totalから差し引く？？ => これは不要
@@ -120,17 +121,29 @@ func (w *Wallet) DetectReceivedCoin() (*wire.MsgTx, error) {
 
 	// CreateRawTransaction
 	//FIXME:おつりがあるのであれば、おつりのトランザクションも作らないといけないし、このfuncのインターフェースを見直す必要がある
-	msgTx, err := w.Btc.CreateRawTransaction(HokanAddress, total, inputs) //hokanのアドレス
+	msgTx, err := w.Btc.CreateRawTransaction(w.Btc.StoreAddr(), total, inputs) //hokanのアドレス
 	if err != nil {
-		return nil, errors.Errorf("CreateRawTransaction(): error: %v", err)
+		return "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
 	log.Printf("[Done]CreateRawTransaction: %v\n", msgTx)
 	//grok.Value(msgTx)
 
-	//TODO:fundrawtransactionによって手数料を算出したほうがいい。
+	hex, err := w.Btc.ToHex(msgTx)
+	if err != nil {
+		return "", errors.Errorf("w.Btc.ToHex(msgTx): error: %v", err)
+	}
+
+	//TODO:fundrawtransactionによる手数料の算出は全額送金においては機能しない
 	//https://bitcoincore.org/en/doc/0.16.2/rpc/rawtransactions/fundrawtransaction/
+	//res, err := w.Btc.FundRawTransaction(hex)
+	//if err != nil {
+	//	//FIXME:error: -4: Insufficient funds
+	//	return "", errors.Errorf("w.Btc.FundRawTransaction(hex): error: %v", err)
+	//}
+	//[Debug]res.Hex
+	//w.Btc.GetRawTransactionByHex(res.Hex)
 
 	//TODO:本来、この戻り値をDumpして、どっかに保存する必要があるはず、それをUSBに入れてコールドウォレットに移動しなくてはいけない
 
-	return msgTx, nil
+	return hex, nil
 }

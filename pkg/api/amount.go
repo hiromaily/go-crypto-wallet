@@ -19,7 +19,7 @@ func ConvertToSatoshi(f float64) (btcutil.Amount, error) {
 	return amt, nil
 }
 
-// ConvertToBTC satoshiをBitcoinに変換する
+// ConvertToBTC string型のsatoshiをBitcoinに変換する
 // TODO:引数はstringでいいんだっけ？
 func ConvertToBTC(amt string) (float64, error) {
 

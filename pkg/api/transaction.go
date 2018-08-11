@@ -3,17 +3,32 @@ package api
 import (
 	"bytes"
 	"encoding/hex"
+	"encoding/json"
+	"log"
 
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
-	"log"
 )
 
 //TODO:参考に(中国語のサイト)
 //https://www.haowuliaoa.com/article/info/11350.html
+
+// FundRawTransactionResult fundrawtransactionをcallしたresponseの型
+type FundRawTransactionResult struct {
+	Hex       string `json:"hex"`
+	Fee       int64  `json:"fee"`
+	Changepos int64  `json:"changepos"`
+}
+
+//Result:
+//	{
+//		"hex":       "value", (string)  The resulting raw transaction (hex-encoded string)
+//		"fee":       n,         (numeric) Fee in BTC the resulting transaction pays
+//		"changepos": n          (numeric) The position of the added change output, or -1
+//	}
 
 // GetTransactionByTxID txIDからトランザクション詳細を取得する
 func (b *Bitcoin) GetTransactionByTxID(txID string) (*btcjson.GetTransactionResult, error) {
@@ -117,6 +132,47 @@ func (b *Bitcoin) CreateRawTransaction(sendAddr string, amount btcutil.Amount, i
 	return msgTx, nil
 }
 
+// FundRawTransaction
+func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, error) {
+	//fundrawtransaction
+	//https://bitcoincore.org/en/doc/0.16.2/rpc/rawtransactions/fundrawtransaction/
+	//"{\"changePosition\":2}"
+
+	//hex
+	bHex, err := json.Marshal(hex)
+	if err != nil {
+		return nil, errors.Errorf("json.Marchal(): error: %v", err)
+	}
+
+	//fee rate
+	feePerKb, err := b.EstimateSmartFee()
+	if err != nil {
+		return nil, errors.Errorf("EstimateSmartFee(): error: %v", err)
+	}
+	bFeeRate, err := json.Marshal(struct {
+		FeeRate float64 `json:"feeRate"`
+	}{
+		FeeRate: feePerKb,
+	})
+
+	rawResult, err := b.client.RawRequest("fundrawtransaction", []json.RawMessage{bHex, bFeeRate})
+	//rawResult, err := b.client.RawRequest("fundrawtransaction", []json.RawMessage{bHex})
+	if err != nil {
+		//FIXME: error: -4: Insufficient funds
+		return nil, errors.Errorf("json.RawRequest(fundrawtransaction): error: %v", err)
+	}
+
+	fundRawTransactionResult := FundRawTransactionResult{}
+	err = json.Unmarshal([]byte(rawResult), &fundRawTransactionResult)
+	if err != nil {
+		return nil, errors.Errorf("json.Unmarshal(): error: %v", err)
+	}
+
+	log.Printf("fundRawTransactionResult: %v: %s\n", fundRawTransactionResult, fundRawTransactionResult.Hex)
+
+	return &fundRawTransactionResult, nil
+}
+
 // SignRawTransaction Rawのトランザクションに署名する
 func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, error) {
 	//TODO: It should be implemented on Cold Strage
@@ -160,4 +216,42 @@ func (b *Bitcoin) SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error) {
 	}
 
 	return hash, nil
+}
+
+// SequentialTransaction 検証用: 一連の未署名トランザクション作成から送信までの流れ
+//func (b *Bitcoin) SequentialTransaction(tx *wire.MsgTx) error {
+func (b *Bitcoin) SequentialTransaction(hex string) error {
+	// Hexからトランザクションを取得
+	tx, err := b.GetRawTransactionByHex(hex)
+	if err != nil {
+		return err
+	}
+	txMsg := tx.MsgTx()
+
+	//fee算出
+	fee, err := b.GetTransactionFee(txMsg)
+	if err != nil {
+		return err
+	}
+	log.Printf("fee: %s", fee)
+
+	//署名
+	signedTx, err := b.SignRawTransaction(txMsg)
+	if err != nil {
+		return err
+	}
+
+	//送金
+	hash, err := b.SendRawTransaction(signedTx)
+	if err != nil {
+		return err
+	}
+	//FIXME:min relay fee not met => 手数料を考慮せず、全額送金しようとするとこのエラーが出るっぽい。
+	//https://bitcoin.stackexchange.com/questions/69282/what-is-the-min-relay-min-fee-code-26
+	//https://bitcoin.stackexchange.com/questions/59125/what-does-allowhighfees-in-sendrawtransaction-actually-does
+	//https://bitcoin.stackexchange.com/questions/77273/bitcoin-rawtransaction-fee
+	//https://bitcoin.org/en/glossary/minimum-relay-fee
+	log.Printf("[Hash] %v, Done!", hash)
+
+	return nil
 }

@@ -3,12 +3,15 @@ package api
 import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/rpcclient"
+	"github.com/hiromaily/go-bitcoin/pkg/toml"
 )
 
 // Bitcoin includes Client to call Json-RPC
 type Bitcoin struct {
-	client    *rpcclient.Client
-	chainConf *chaincfg.Params
+	client            *rpcclient.Client
+	chainConf         *chaincfg.Params
+	storedAddr        string
+	confirmationBlock int64
 }
 
 // Connection is to local bitcoin core RPC server using HTTP POST mode
@@ -51,4 +54,20 @@ func (b *Bitcoin) GetChainConf() *chaincfg.Params {
 // Client clientオブジェクトを返す
 func (b *Bitcoin) Client() *rpcclient.Client {
 	return b.client
+}
+
+// TODO: 構造がこれから変化していくので対応する
+func (b *Bitcoin) SetConfiguration(conf *toml.Config) {
+	b.storedAddr = conf.HokanAddress
+	b.confirmationBlock = conf.ConfirmationBlockNum
+}
+
+// StoreAddr 保管用アドレスを返す
+func (b *Bitcoin) StoreAddr() string {
+	return b.storedAddr
+}
+
+// Confirmationに必要なブロック数を返す
+func (b *Bitcoin) ConfirmationBlock() int64 {
+	return b.confirmationBlock
 }
