@@ -15,6 +15,7 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 	log.Println("[DetectReceivedCoin]")
 	//TODO:このロジックを連続で走らせた場合、現在処理中のものが、タイミングによってはまた取得できてしまうかもしれない
 	// ので、そこを考慮しないといけない
+	// => LockUnspent()
 
 	//TODO:ここはgoroutineで並列化されたタスク内で、ロックされたtxidを監視し、confirmationが6になったら、
 	// 解除するようにしたほうがいいかも。暫定でここに設定
@@ -119,14 +120,22 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 	//total = 18500000 //桁を間違えた。。。0.185 BTC
 	//total = 195000000
 
-	// CreateRawTransaction
-	//FIXME:おつりがあるのであれば、おつりのトランザクションも作らないといけないし、このfuncのインターフェースを見直す必要がある
-	msgTx, err := w.Btc.CreateRawTransaction(w.Btc.StoreAddr(), total, inputs) //hokanのアドレス
+	// CreateRawTransaction(仮で作成し、この後サイズから手数料を算出する)
+	msgTx, err := w.Btc.CreateRawTransaction(w.Btc.StoreAddr(), total, inputs)
 	if err != nil {
 		return "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
 	log.Printf("[Done]CreateRawTransaction: %v\n", msgTx)
 	//grok.Value(msgTx)
+
+	//fee算出
+	fee, err := w.Btc.GetTransactionFee(msgTx)
+	if err != nil {
+		return "", errors.Errorf("GetTransactionFee(): error: %v", err)
+	}
+	log.Printf("fee: %v", fee) //0.000208 BTC
+
+	//TODO: totalを調整し、再度RawTransactionを作成する
 
 	hex, err := w.Btc.ToHex(msgTx)
 	if err != nil {

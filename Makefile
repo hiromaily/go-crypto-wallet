@@ -25,6 +25,9 @@ run5: bld
 run9: bld
 	./wallet -f 9
 
+run11: bld
+	./wallet -f 9
+
 .PHONY: clean
 clean:
 	rm -rf detect

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/btcsuite/btcd/wire"
+	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 )
 
@@ -18,6 +19,7 @@ type EstimateSmartFeeResult struct {
 //https://bitzuma.com/posts/making-sense-of-bitcoin-transaction-fees/
 
 // EstimateSmartFee bitcoin coreの`estimatesmartfee`APIをcallする
+// 戻り値はBTC/kB
 func (b *Bitcoin) EstimateSmartFee() (float64, error) {
 	input, err := json.Marshal(uint64(b.confirmationBlock)) //ここは固定(6)でいいはず
 	if err != nil {
@@ -48,12 +50,19 @@ func (b *Bitcoin) EstimateSmartFee() (float64, error) {
 
 // GetTransactionFee トランザクションサイズからfeeを算出する
 //FIXME: WIP
-func (b *Bitcoin) GetTransactionFee(tx *wire.MsgTx) (string, error) {
+func (b *Bitcoin) GetTransactionFee(tx *wire.MsgTx) (btcutil.Amount, error) {
 	feePerKB, err := b.EstimateSmartFee()
 	if err != nil {
-		return "", errors.Errorf("EstimateSmartFee(): error: %v", err)
+		return 0, errors.Errorf("EstimateSmartFee(): error: %v", err)
 	}
 	fee := fmt.Sprintf("%f", feePerKB*float64(tx.SerializeSize())/1000)
+	//log.Printf("[Debug] fee: %s", fee)
 
-	return fee, nil
+	//To Amount
+	feeAsBit, err := b.CastStrBitToAmount(fee)
+	if err != nil {
+		return 0, errors.Errorf("CastStrToSatoshi(%s): error: %v", fee, err)
+	}
+
+	return feeAsBit, nil
 }

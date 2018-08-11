@@ -83,20 +83,24 @@ func switchFunction(wallet *service.Wallet) {
 	//TODO:ここから呼び出すべきはService系のみに統一したい
 	switch opts.Functionality {
 	case 1:
-		//TODO:cold wallet側の機能
-		log.Print("Run: Keyの生成")
-		//単一Keyの生成
-		wif, pubAddress, err := key.GenerateKey(wallet.Btc.GetChainConf())
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Printf("[WIF] %s - [Pub Address] %s\n", wif.String(), pubAddress)
+		//入金検知処理後、lock解除を行う
+		log.Print("Run: lockされたトランザクションの解除")
+		wallet.Btc.UnlockAllUnspentTransaction()
 	case 2:
-		//TODO:まだ検証中
-		log.Print("Run: HDウォレット Keyの生成")
-		key.GenerateHDKey(opts.ParamSeed, wallet.Btc.GetChainConf())
-	case 3:
+		//TODO:未実装
+		log.Print("Run: 手数料算出 estimatesmartfee")
+		feePerKb, err := wallet.Btc.EstimateSmartFee()
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		log.Printf("Estimatesmartfee: %f\n", feePerKb)
+
+	case 11:
 		log.Print("Run: 入金処理検知")
+
+		//Debug中のみ
+		wallet.Btc.UnlockAllUnspentTransaction()
+
 		//入金検知 + 未署名トランザクション作成
 		//TODO:この中でLoopする必要はない。実行するtaskrunner側で実行間隔を調整する。
 		hex, err := wallet.DetectReceivedCoin()
@@ -108,20 +112,7 @@ func switchFunction(wallet *service.Wallet) {
 			return
 		}
 		log.Printf("hex: %s", hex)
-	case 4:
-		//TODO:未実装
-		log.Print("Run: 手数料算出 estimatesmartfee")
-		feePerKb, err := wallet.Btc.EstimateSmartFee()
-		if err != nil {
-			log.Fatalf("%+v", err)
-		}
-		log.Printf("Estimatesmartfee: %f\n", feePerKb)
-
-	case 5:
-		//TODO:未実装
-		log.Print("Run: lockされたトランザクションの解除")
-		wallet.Btc.UnlockAllUnspentTransaction()
-	case 9:
+	case 12:
 		log.Print("Run: [Debug用]送金までの一連の流れを確認")
 		//入金検知
 		hex, err := wallet.DetectReceivedCoin()
@@ -159,6 +150,19 @@ func switchFunction(wallet *service.Wallet) {
 		////https://bitcoin.stackexchange.com/questions/77273/bitcoin-rawtransaction-fee
 		////https://bitcoin.org/en/glossary/minimum-relay-fee
 		//log.Printf("[Hash] %v, Done!", hash)
+	case 21:
+		//TODO:cold wallet側の機能
+		log.Print("Run: Keyの生成")
+		//単一Keyの生成
+		wif, pubAddress, err := key.GenerateKey(wallet.Btc.GetChainConf())
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Printf("[WIF] %s - [Pub Address] %s\n", wif.String(), pubAddress)
+	case 22:
+		//TODO:まだ検証中
+		log.Print("Run: HDウォレット Keyの生成")
+		key.GenerateHDKey(opts.ParamSeed, wallet.Btc.GetChainConf())
 
 	default:
 		log.Print("Run: 検証コード")

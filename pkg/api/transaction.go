@@ -226,17 +226,17 @@ func (b *Bitcoin) SequentialTransaction(hex string) error {
 	if err != nil {
 		return err
 	}
-	txMsg := tx.MsgTx()
+	msgTx := tx.MsgTx()
 
 	//fee算出
-	fee, err := b.GetTransactionFee(txMsg)
-	if err != nil {
-		return err
-	}
-	log.Printf("fee: %s", fee)
+	//fee, err := b.GetTransactionFee(msgTx)
+	//if err != nil {
+	//	return err
+	//}
+	//log.Printf("fee: %s", fee)
 
 	//署名
-	signedTx, err := b.SignRawTransaction(txMsg)
+	signedTx, err := b.SignRawTransaction(msgTx)
 	if err != nil {
 		return err
 	}
