@@ -23,12 +23,6 @@ import (
 type Options struct {
 	//Configパス
 	ConfPath string `short:"c" long:"conf" default:"./data/toml/config.toml" description:"Path for configuration toml file"`
-	//接続情報
-	Host string `short:"s" long:"server" default:"127.0.0.1:18332" description:"Host and Port of RPC Server"`
-	User string `short:"u" long:"user" default:"xyz" description:"User of RPC Server"`
-	Pass string `short:"p" long:"pass" default:"xyz" description:"Password of RPC Server"`
-	//接続先: MainNet or TestNet
-	IsMain bool `short:"m" long:"ismain" description:"Using MainNetParams as network permeters or Not"`
 	//KVSのstoreされるファイルパス
 	DBPath string `short:"k" long:"kvspath" default:"./data/kvs/db" description:"Path for stored data by KVS"`
 	//実行される機能
@@ -63,7 +57,7 @@ func main() {
 	defer db.Close()
 
 	// Connection to Bitcoin core
-	bit, err := api.Connection(opts.Host, opts.User, opts.Pass, true, true, opts.IsMain)
+	bit, err := api.Connection(conf.Bitcoin.Host, conf.Bitcoin.User, conf.Bitcoin.Pass, true, true, conf.Bitcoin.IsMain)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -99,7 +93,7 @@ func switchFunction(wallet *service.Wallet) {
 		log.Print("Run: 入金処理検知")
 
 		//Debug中のみ
-		wallet.Btc.UnlockAllUnspentTransaction()
+		//wallet.Btc.UnlockAllUnspentTransaction()
 
 		//入金検知 + 未署名トランザクション作成
 		//TODO:この中でLoopする必要はない。実行するtaskrunner側で実行間隔を調整する。
@@ -116,7 +110,7 @@ func switchFunction(wallet *service.Wallet) {
 		log.Print("Run: [Debug用]送金までの一連の流れを確認")
 
 		//Debug中のみ
-		wallet.Btc.UnlockAllUnspentTransaction()
+		//wallet.Btc.UnlockAllUnspentTransaction()
 
 		//入金検知 + 未署名トランザクション作成
 		hex, err := wallet.DetectReceivedCoin()

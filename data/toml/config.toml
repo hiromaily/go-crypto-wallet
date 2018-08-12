@@ -1,2 +1,14 @@
-hokan_address = "2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW" #保管用アドレス
-confirmation_blockNum = 6 #Confirmationに必要なブロック数
+[bitcoin]
+host = "127.0.0.1:18332"
+user = "xyz"
+pass = "xyz"
+is_main = false
+
+[bitcoin.block]
+confirmation_num = 6 #Confirmationに必要なブロック数
+
+[bitcoin.address]
+stored = "2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW" #保管用アドレス
+
+[leveldb]
+path = "./data/kvs/db"

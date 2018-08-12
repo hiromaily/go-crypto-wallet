@@ -11,8 +11,24 @@ var conf *Config
 
 // Config is of root
 type Config struct {
-	HokanAddress         string `toml:"hokan_address"`
-	ConfirmationBlockNum int64  `toml:"confirmation_blockNum"`
+	Bitcoin BitcoinConf `toml:"bitcoin"`
+}
+
+type BitcoinConf struct {
+	Host   string `toml:"host"`
+	User   string `toml:"user"`
+	Pass   string `toml:"pass"`
+	IsMain bool   `toml:"is_main"`
+	Block  BitcoinBlockConf
+	Addr   BitcoinAddrConf
+}
+
+type BitcoinBlockConf struct {
+	ConfirmationNum int64 `toml:"confirmation_num"`
+}
+
+type BitcoinAddrConf struct {
+	Stored string `toml:"stored"`
 }
 
 // load configfile

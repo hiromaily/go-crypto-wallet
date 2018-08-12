@@ -58,8 +58,8 @@ func (b *Bitcoin) Client() *rpcclient.Client {
 
 // TODO: 構造がこれから変化していくので対応する
 func (b *Bitcoin) SetConfiguration(conf *toml.Config) {
-	b.storedAddr = conf.HokanAddress
-	b.confirmationBlock = conf.ConfirmationBlockNum
+	b.storedAddr = conf.Bitcoin.Addr.Stored
+	b.confirmationBlock = conf.Bitcoin.Block.ConfirmationNum
 }
 
 // StoreAddr 保管用アドレスを返す

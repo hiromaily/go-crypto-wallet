@@ -19,6 +19,9 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 
 	//TODO:ここはgoroutineで並列化されたタスク内で、ロックされたtxidを監視し、confirmationが6になったら、
 	// 解除するようにしたほうがいいかも。暫定でここに設定
+	// 実際にはRawTransactionを作成後、すぐに署名されるわけではないので、UnlockはTransactionが送信されたあとに行う
+	// ただし、送信前の、時間がたったRawTransactionは手数料の変動などで、受け付けられなくなる可能性もあり、
+	// Unlockして1から作成する場合も必要
 	if err := w.Btc.UnlockAllUnspentTransaction(); err != nil {
 		return "", err
 	}

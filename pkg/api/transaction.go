@@ -257,13 +257,13 @@ func (b *Bitcoin) SequentialTransaction(hex string) (*chainhash.Hash, *btcutil.T
 		return nil, nil, err
 	}
 
-	//署名
+	//署名(オフライン)
 	signedTx, err := b.SignRawTransaction(msgTx)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	//送金
+	//送金(オンライン)
 	hash, err := b.SendRawTransaction(signedTx)
 	if err != nil {
 		return nil, nil, err
