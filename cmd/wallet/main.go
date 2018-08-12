@@ -131,12 +131,12 @@ func switchFunction(wallet *service.Wallet) {
 
 		//一連の署名から送信までの流れをチェック
 		//[WIF] cUW7ZSF9WX7FUTeHkuw5L9Rj26V5Kz8yCkYjZamyvATTwsu7KUCi - [Pub Address] muVSWToBoNWusjLCbxcQNBWTmPjioRLpaA
-		tx, err := wallet.Btc.SequentialTransaction(hex)
+		hash, tx, err := wallet.Btc.SequentialTransaction(hex)
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
-
-		log.Printf("[Debug] 送信までDONE!! %v", tx)
+		//tx.MsgTx()
+		log.Printf("[Debug] 送信までDONE!! %s, %v", hash.String(), tx)
 
 	case 21:
 		//TODO:cold wallet側の機能

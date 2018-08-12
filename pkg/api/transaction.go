@@ -89,19 +89,48 @@ func (b *Bitcoin) ToHex(tx *wire.MsgTx) (string, error) {
 	return hex.EncodeToString(buf.Bytes()), nil
 }
 
-// GetRawTransactionByHex Hexからトランザクションを取得する
-func (b *Bitcoin) GetRawTransactionByHex(txHex string) (*btcutil.Tx, error) {
-
-	txHash, err := chainhash.NewHashFromStr(txHex)
+//ToMsgTx 16進数のstringから、wire.MsgTxに変換する
+func (b *Bitcoin) ToMsgTx(txHex string) (*wire.MsgTx, error) {
+	byteHex, err := hex.DecodeString(txHex)
 	if err != nil {
-		return nil, errors.Errorf("chainhash.NewHashFromStr(%s): error: %v", txHex, err)
+		return nil, errors.Errorf("hex.DecodeString(): error: %v", err)
+	}
+
+	var msgTx wire.MsgTx
+	if err := msgTx.Deserialize(bytes.NewReader(byteHex)); err != nil {
+		return nil, err
+	}
+	//return btcutil.NewTx(&msgTx), nil
+	return &msgTx, nil
+}
+
+// DecodeRawTransaction
+func (b *Bitcoin) DecodeRawTransaction(txHex string) (*btcjson.TxRawResult, error) {
+	byteHex, err := hex.DecodeString(txHex)
+	if err != nil {
+		return nil, errors.Errorf("hex.DecodeString(): error: %v", err)
+	}
+	resTx, err := b.client.DecodeRawTransaction(byteHex)
+	if err != nil {
+		return nil, errors.Errorf("client.DecodeRawTransaction(): error: %v", err)
+	}
+
+	return resTx, nil
+}
+
+// GetRawTransactionByHex Hexからトランザクションを取得する
+func (b *Bitcoin) GetRawTransactionByHex(strTxHash string) (*btcutil.Tx, error) {
+
+	txHash, err := chainhash.NewHashFromStr(strTxHash)
+	if err != nil {
+		return nil, errors.Errorf("chainhash.NewHashFromStr(%s): error: %v", strTxHash, err)
 	}
 
 	tx, err := b.client.GetRawTransaction(txHash)
 	if err != nil {
 		return nil, errors.Errorf("GetRawTransaction(hash): error: %v", err)
 	}
-	//TODO:これでMsgTx()
+	//MsgTx()
 	//tx.MsgTx()
 
 	return tx, nil
@@ -129,6 +158,7 @@ func (b *Bitcoin) CreateRawTransaction(sendAddr string, amount btcutil.Amount, i
 	if err != nil {
 		return nil, errors.Errorf("btcutil.CreateRawTransaction(): error: %v", err)
 	}
+
 	return msgTx, nil
 }
 
@@ -220,37 +250,31 @@ func (b *Bitcoin) SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error) {
 
 // SequentialTransaction 検証用: 一連の未署名トランザクション作成から送信までの流れ
 //func (b *Bitcoin) SequentialTransaction(tx *wire.MsgTx) error {
-func (b *Bitcoin) SequentialTransaction(hex string) (*btcutil.Tx, error) {
+func (b *Bitcoin) SequentialTransaction(hex string) (*chainhash.Hash, *btcutil.Tx, error) {
 	// Hexからトランザクションを取得
-	tx, err := b.GetRawTransactionByHex(hex)
+	msgTx, err := b.ToMsgTx(hex)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	msgTx := tx.MsgTx()
 
 	//署名
 	signedTx, err := b.SignRawTransaction(msgTx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	//送金
 	hash, err := b.SendRawTransaction(signedTx)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
+	}
+	log.Printf("[Debug] txID hash: %s", hash.String())
+
+	//txを取得
+	resTx, err := b.GetRawTransactionByHex(hash.String())
+	if err != nil {
+		return nil, nil, err
 	}
 
-	//FIXME:min relay fee not met => 手数料を考慮せず、全額送金しようとするとこのエラーが出るっぽい。
-	//https://bitcoin.stackexchange.com/questions/69282/what-is-the-min-relay-min-fee-code-26
-	//https://bitcoin.stackexchange.com/questions/59125/what-does-allowhighfees-in-sendrawtransaction-actually-does
-	//https://bitcoin.stackexchange.com/questions/77273/bitcoin-rawtransaction-fee
-	//https://bitcoin.org/en/glossary/minimum-relay-fee
-
-	//
-	//log.Printf("[Hash] %v, Done!", hash)
-	//resTx, err := b.GetRawTransactionByHex(hash.String())
-	//if err != nil {
-	//	return nil, err
-	//}
-	return b.GetRawTransactionByHex(hash.String())
+	return hash, resTx, nil
 }

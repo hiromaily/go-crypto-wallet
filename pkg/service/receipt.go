@@ -139,6 +139,7 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 		return "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
 
+	//FIXME:ロジックがおかしいかも
 	hex, err := w.Btc.ToHex(msgTx)
 	if err != nil {
 		return "", errors.Errorf("w.Btc.ToHex(msgTx): error: %v", err)
