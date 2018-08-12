@@ -15,12 +15,15 @@ type Config struct {
 }
 
 type BitcoinConf struct {
-	Host   string `toml:"host"`
-	User   string `toml:"user"`
-	Pass   string `toml:"pass"`
-	IsMain bool   `toml:"is_main"`
-	Block  BitcoinBlockConf
-	Addr   BitcoinAddrConf
+	Host       string `toml:"host"`
+	User       string `toml:"user"`
+	Pass       string `toml:"pass"`
+	PostMode   bool   `toml:"http_post_mode"`
+	DisableTls bool   `toml:"disable_tls"`
+	IsMain     bool   `toml:"is_main"`
+
+	Block BitcoinBlockConf
+	Addr  BitcoinAddrConf
 }
 
 type BitcoinBlockConf struct {

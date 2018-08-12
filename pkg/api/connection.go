@@ -15,13 +15,14 @@ type Bitcoin struct {
 }
 
 // Connection is to local bitcoin core RPC server using HTTP POST mode
-func Connection(host, user, pass string, postMode, tls, isMain bool) (*Bitcoin, error) {
+//func Connection(host, user, pass string, postMode, tls, isMain bool) (*Bitcoin, error) {
+func Connection(conf *toml.BitcoinConf) (*Bitcoin, error) {
 	connCfg := &rpcclient.ConnConfig{
-		Host:         host,
-		User:         user,
-		Pass:         pass,
-		HTTPPostMode: postMode, // Bitcoin core only supports HTTP POST mode
-		DisableTLS:   tls,      // Bitcoin core does not provide TLS by default
+		Host:         conf.Host,
+		User:         conf.User,
+		Pass:         conf.Pass,
+		HTTPPostMode: conf.PostMode,   // Bitcoin core only supports HTTP POST mode
+		DisableTLS:   conf.DisableTls, // Bitcoin core does not provide TLS by default
 	}
 
 	// Notice the notification parameter is nil since notifications are
@@ -32,11 +33,14 @@ func Connection(host, user, pass string, postMode, tls, isMain bool) (*Bitcoin, 
 	}
 
 	bit := Bitcoin{client: client}
-	if isMain {
+	if conf.IsMain {
 		bit.chainConf = &chaincfg.MainNetParams
 	} else {
 		bit.chainConf = &chaincfg.TestNet3Params
 	}
+
+	bit.storedAddr = conf.Addr.Stored
+	bit.confirmationBlock = conf.Block.ConfirmationNum
 
 	return &bit, err
 }
@@ -54,12 +58,6 @@ func (b *Bitcoin) GetChainConf() *chaincfg.Params {
 // Client clientオブジェクトを返す
 func (b *Bitcoin) Client() *rpcclient.Client {
 	return b.client
-}
-
-// TODO: 構造がこれから変化していくので対応する
-func (b *Bitcoin) SetConfiguration(conf *toml.Config) {
-	b.storedAddr = conf.Bitcoin.Addr.Stored
-	b.confirmationBlock = conf.Bitcoin.Block.ConfirmationNum
 }
 
 // StoreAddr 保管用アドレスを返す

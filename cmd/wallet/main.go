@@ -57,13 +57,14 @@ func main() {
 	defer db.Close()
 
 	// Connection to Bitcoin core
-	bit, err := api.Connection(conf.Bitcoin.Host, conf.Bitcoin.User, conf.Bitcoin.Pass, true, true, conf.Bitcoin.IsMain)
+	//bit, err := api.Connection(conf.Bitcoin.Host, conf.Bitcoin.User, conf.Bitcoin.Pass, true, true, conf.Bitcoin.IsMain)
+	bit, err := api.Connection(&conf.Bitcoin)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer bit.Close()
 
-	bit.SetConfiguration(conf)
+	//bit.SetConfiguration(conf)
 
 	//Wallet Object
 	wallet := service.Wallet{Btc: bit, Db: db}
