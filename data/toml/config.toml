@@ -14,3 +14,9 @@ stored = "2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW" #保管用アドレス
 
 [leveldb]
 path = "./data/kvs/db"
+
+[mysql]
+host = "127.0.0.1:3307"
+dbname = "wallet"
+user = "cayenne"
+pass = "cayenne"

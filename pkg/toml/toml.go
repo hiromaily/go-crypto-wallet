@@ -7,11 +7,11 @@ import (
 	"github.com/pkg/errors"
 )
 
-var conf *Config
-
 // Config is of root
 type Config struct {
 	Bitcoin BitcoinConf `toml:"bitcoin"`
+	LevelDB LevelDBConf `toml:"leveldb"` //TODO:おそらく不要
+	MySQL   MySQLConf   `toml:"mysql"`
 }
 
 type BitcoinConf struct {
@@ -32,6 +32,17 @@ type BitcoinBlockConf struct {
 
 type BitcoinAddrConf struct {
 	Stored string `toml:"stored"`
+}
+
+type LevelDBConf struct {
+	Path string `toml:"path"`
+}
+
+type MySQLConf struct {
+	Host string `toml:"host"`
+	DB   string `toml:"dbname"`
+	User string `toml:"user"`
+	Pass string `toml:"pass"`
 }
 
 // load configfile
@@ -60,7 +71,7 @@ func New(file string) (*Config, error) {
 	}
 
 	var err error
-	conf, err = loadConfig(file)
+	conf, err := loadConfig(file)
 	if err != nil {
 		return nil, err
 	}

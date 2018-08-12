@@ -5,7 +5,6 @@ import (
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/hiromaily/go-bitcoin/pkg/api"
-	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/kvs"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/hiromaily/go-bitcoin/pkg/toml"
@@ -23,12 +22,8 @@ import (
 type Options struct {
 	//Configパス
 	ConfPath string `short:"c" long:"conf" default:"./data/toml/config.toml" description:"Path for configuration toml file"`
-	//KVSのstoreされるファイルパス
-	DBPath string `short:"k" long:"kvspath" default:"./data/kvs/db" description:"Path for stored data by KVS"`
 	//実行される機能
 	Functionality uint8 `short:"f" long:"function" description:"Functionality: 1: generate key, 2: detect received coin, other: debug"`
-	//HDウォレット用Key生成のためのseed情報
-	ParamSeed string `short:"d" long:"seed" default:"" description:"backup seed"`
 }
 
 var (
@@ -50,7 +45,7 @@ func main() {
 	}
 
 	// KVS
-	db, err := kvs.InitDB(opts.DBPath)
+	db, err := kvs.InitDB(conf.LevelDB.Path)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -63,8 +58,6 @@ func main() {
 		log.Fatal(err)
 	}
 	defer bit.Close()
-
-	//bit.SetConfiguration(conf)
 
 	//Wallet Object
 	wallet := service.Wallet{Btc: bit, Db: db}
@@ -132,20 +125,6 @@ func switchFunction(wallet *service.Wallet) {
 		}
 		//tx.MsgTx()
 		log.Printf("[Debug] 送信までDONE!! %s, %v", hash.String(), tx)
-
-	case 21:
-		//TODO:cold wallet側の機能
-		log.Print("Run: Keyの生成")
-		//単一Keyの生成
-		wif, pubAddress, err := key.GenerateKey(wallet.Btc.GetChainConf())
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Printf("[WIF] %s - [Pub Address] %s\n", wif.String(), pubAddress)
-	case 22:
-		//TODO:まだ検証中
-		log.Print("Run: HDウォレット Keyの生成")
-		key.GenerateHDKey(opts.ParamSeed, wallet.Btc.GetChainConf())
 
 	default:
 		log.Print("Run: 検証コード")

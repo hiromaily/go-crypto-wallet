@@ -5,6 +5,8 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
+// 検証用に追加しただけで使わないかと
+
 //GoDoc
 //https://godoc.org/github.com/syndtr/goleveldb/leveldb
 //https://www.sambaiz.net/article/45/
