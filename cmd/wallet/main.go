@@ -12,12 +12,18 @@ import (
 	"github.com/jessevdk/go-flags"
 )
 
+//こちらはHotwallet、ただし、Watch Only Walletとしての機能を実装していく。
+//ネットワークへの接続はGCP上のBitcoin Core
+//Watch Only Walletとしてのセットアップが必要
+// - Cold Wallet側から生成したPublic Key を`importaddress xxxxx`でimportする
+//   これがかなり時間がかかる。。。実運用ではどうすべきか。rescanしなくても最初はOKかと
+
 //TODO:coldwallet側(非ネットワーク環境)側の機能と明確に分ける
 //TODO:オフラインで可能機能と、不可能な機能の切り分けが必要
 //TODO:ウォレットの定期バックアップ機能 + import機能
 //TODO:coldウォレットへのデータ移行機能が必要なはず
 //TODO:multisigの実装
-//TODO:生成したkeyの暗号化周りのpkgが必要になるはず
+//TODO:生成したkeyの暗号化処理のpkgが必要になるはず
 
 // Options コマンドラインオプション
 type Options struct {
