@@ -50,11 +50,9 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 
 	var total btcutil.Amount
 	var inputs []btcjson.TransactionInput
-	//CreateRawTransaction()は外で実行する
-	//Loop内ではパラメータを作成するのみ
 	for _, tx := range list {
 		//FIXME: pendableは実環境では使えない。とりあえず、confirmation数でチェックにしておく
-		// 6に満たない場合、まだ未確定であることを意味するはず
+		// 6に満たない場合、まだ未確定であることを意味するはず => これはListUnspent()のパラメータで可能
 		//https://bitcoin.stackexchange.com/questions/63198/why-outputs-spendable-and-solvable-are-false
 		if tx.Confirmations < w.Btc.ConfirmationBlock() {
 			//if tx.Spendable == false {
@@ -72,38 +70,34 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 		//grok.Value(tran)
 
 		//除外するアカウント(TODO:これは必要であれば外部定義すべき)
+		//=> これは本番環境では不要なはず
 		if tran.Details[0].Account == "hokan" || tran.Details[0].Account == "" {
 			continue
 		}
 
 		// Amount
-		// Satoshiに変換しないといけない
-		// 1Satoshi＝0.00000001BTC
-		// Float型の計算は微妙なのでint64型に変換して計算する
 		amt, err := btcutil.NewAmount(tx.Amount)
 		if err != nil {
 			//このエラーは起こりえない
 			log.Printf("[Error] btcutil.NewAmount(): Amount:%f, err:%v", tx.Amount, err)
 			continue
 		}
-		//TODO:全額は送金できないので、このタイミングで手数料を差し引かねばならないが、
-		// どこで手数料を算出すべき？total算出後でもいい？
-		// => fundrawtransaction()にて算出できるっぽい
 		total += amt //合計
 
 		//lockunspentによって、該当トランザクションをロックして再度ListUnspent()で出力されることを防ぐ
 		if w.Btc.LockUnspent(tx) != nil {
 			continue
 		}
+
 		//TODO:ここはまとめてLevelDBにPutしたほうが効率的かもしれない
 		//TODO:ここで保存した情報が本当に必要か？監視すべき対象は何で、何を実現させるかはっきりさせる
 		//このトランザクションIDはDBに保存が必要 => ここで保存されたIDはconfirmationのチェックに使われる
-		err = w.Db.Put("unspent", tx.TxID+string(tx.Vout), nil)
-		if err != nil {
-			//このタイミングでエラーがおきるのであれば、設計ミス
-			log.Printf("[Error] Error by w.Db.Put(unspent). This error should not occurred.:, error:%v", err)
-			continue
-		}
+		//err = w.Db.Put("unspent", tx.TxID+string(tx.Vout), nil)
+		//if err != nil {
+		//	//このタイミングでエラーがおきるのであれば、設計ミス
+		//	log.Printf("[Error] Error by w.Db.Put(unspent). This error should not occurred.:, error:%v", err)
+		//	continue
+		//}
 
 		// inputs
 		inputs = append(inputs, btcjson.TransactionInput{
@@ -117,7 +111,9 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 	}
 
 	// CreateRawTransaction(仮で作成し、この後サイズから手数料を算出する)
-	msgTx, err := w.Btc.CreateRawTransaction(w.Btc.StoreAddr(), total, inputs)
+	//msgTx, err := w.Btc.CreateRawTransaction(w.Btc.StoreAddr(), total, inputs)
+	//[For Only Debug]
+	msgTx, err := w.Btc.CreateRawTransaction("muVSWToBoNWusjLCbxcQNBWTmPjioRLpaA", total, inputs)
 	if err != nil {
 		return "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
@@ -133,7 +129,7 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 
 	//TODO: totalを調整し、再度RawTransactionを作成する
 	total = total - fee
-	if total <= 0{
+	if total <= 0 {
 		return "", errors.Errorf("calculated fee must be wrong: fee:%v, error: %v", fee, err)
 	}
 	log.Printf("[Debug]Total Coin to send:%d(Satoshi) after fee calculated, input length: %d", total, len(inputs))
@@ -158,7 +154,6 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 	//[Debug]res.Hex
 	//w.Btc.GetRawTransactionByHex(res.Hex)
 
-	//TODO:本来、この戻り値をDumpして、どっかに保存する必要があるはず、それをUSBに入れてコールドウォレットに移動しなくてはいけない
-
+	//TODO:本来、この戻り値をDumpして、GCSに保存、それをDLして、USBに入れてコールドウォレットに移動しなくてはいけない
 	return hex, nil
 }

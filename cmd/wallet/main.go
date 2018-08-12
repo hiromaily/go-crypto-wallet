@@ -114,7 +114,11 @@ func switchFunction(wallet *service.Wallet) {
 		log.Printf("hex: %s", hex)
 	case 12:
 		log.Print("Run: [Debug用]送金までの一連の流れを確認")
-		//入金検知
+
+		//Debug中のみ
+		wallet.Btc.UnlockAllUnspentTransaction()
+
+		//入金検知 + 未署名トランザクション作成
 		hex, err := wallet.DetectReceivedCoin()
 		if err != nil {
 			log.Fatal(err)
@@ -123,33 +127,17 @@ func switchFunction(wallet *service.Wallet) {
 			log.Printf("No utxo")
 			return
 		}
+		log.Printf("hex: %s", hex)
 
 		//一連の署名から送信までの流れをチェック
-		wallet.Btc.SequentialTransaction(hex)
+		//[WIF] cUW7ZSF9WX7FUTeHkuw5L9Rj26V5Kz8yCkYjZamyvATTwsu7KUCi - [Pub Address] muVSWToBoNWusjLCbxcQNBWTmPjioRLpaA
+		tx, err := wallet.Btc.SequentialTransaction(hex)
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
 
-		////fee算出
-		//fee, err := wallet.Btc.GetTransactionFee(tx)
-		//if err != nil {
-		//	log.Fatal(err)
-		//}
-		//log.Printf("fee: %s", fee)
-		//
-		////署名
-		//signedTx, err := wallet.Btc.SignRawTransaction(tx)
-		//if err != nil {
-		//	log.Fatal(err)
-		//}
-		////送金
-		//hash, err := wallet.Btc.SendRawTransaction(signedTx)
-		//if err != nil {
-		//	log.Fatal(err)
-		//}
-		////FIXME:min relay fee not met => 手数料を考慮せず、全額送金しようとするとこのエラーが出るっぽい。
-		////https://bitcoin.stackexchange.com/questions/69282/what-is-the-min-relay-min-fee-code-26
-		////https://bitcoin.stackexchange.com/questions/59125/what-does-allowhighfees-in-sendrawtransaction-actually-does
-		////https://bitcoin.stackexchange.com/questions/77273/bitcoin-rawtransaction-fee
-		////https://bitcoin.org/en/glossary/minimum-relay-fee
-		//log.Printf("[Hash] %v, Done!", hash)
+		log.Printf("[Debug] 送信までDONE!! %v", tx)
+
 	case 21:
 		//TODO:cold wallet側の機能
 		log.Print("Run: Keyの生成")

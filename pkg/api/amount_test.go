@@ -84,9 +84,9 @@ func TestCastStrSatoshiToAmount(t *testing.T) {
 
 func TestCaluculation(t *testing.T) {
 	var tests = []struct {
-		val1    float64
-		val2    float64
-		want    float64
+		val1 float64
+		val2 float64
+		want float64
 	}{
 		{0.156, 0.3, 0.456},
 		{2.567, 0.111, 2.678},
@@ -94,11 +94,11 @@ func TestCaluculation(t *testing.T) {
 	for _, v := range tests {
 		amt1, _ := btcutil.NewAmount(v.val1)
 		amt2, _ := btcutil.NewAmount(v.val2)
-		res := (amt1+amt2).ToBTC()
-		if res != v.want{
+		res := (amt1 + amt2).ToBTC()
+		if res != v.want {
 			t.Errorf("result is %f however %f is expected.", res, v.want)
 		}
 		t.Logf("%f + %f = %f", v.val1, v.val2, res)
 	}
 
-	}
+}
