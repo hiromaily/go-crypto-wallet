@@ -93,6 +93,7 @@ func switchFunction(wallet *service.Wallet) {
 
 	case 11:
 		log.Print("Run: 入金処理検知")
+		//実際には署名処理は手動なので、ユーザーの任意のタイミングで走らせたほうがいい。
 
 		//Debug中のみ
 		//wallet.Btc.UnlockAllUnspentTransaction()

@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.7.12, for osx10.13 (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.21, for osx10.13 (x86_64)
 --
 -- Host: 127.0.0.1    Database: hiromaily
 -- ------------------------------------------------------
--- Server version	5.7.12
+-- Server version	5.7.21
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -34,8 +34,8 @@ DROP TABLE IF EXISTS `block_checked`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `block_checked` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `count` int(11) NOT NULL AUTO_INCREMENT COMMENT'Current Block Count',
+  `id`         int(11) NOT NULL AUTO_INCREMENT COMMENT'ID',
+  `count`      int(11) COLLATE utf8_unicode_ci NOT NULL COMMENT'現在のチェックしたブロック数',
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Checked Block Table';
@@ -43,10 +43,10 @@ CREATE TABLE `block_checked` (
 
 
 LOCK TABLES `block_checked` WRITE;
-/*!40000 ALTER TABLE `t_users` DISABLE KEYS */;
+/*!40000 ALTER TABLE `block_checked` DISABLE KEYS */;
 INSERT INTO `block_checked` VALUES
   (1,10000,now());
-/*!40000 ALTER TABLE `t_users` ENABLE KEYS */;
+/*!40000 ALTER TABLE `block_checked` ENABLE KEYS */;
 UNLOCK TABLES;
 
 
@@ -58,19 +58,14 @@ DROP TABLE IF EXISTS `transaction_unsigned`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `transaction_unsigned` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `tx_hex` int(11) NOT NULL AUTO_INCREMENT COMMENT'Current Block Count',
+  `id`     int(11) NOT NULL AUTO_INCREMENT COMMENT'ID',
+  `tx_hex` varchar(80) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT'CreatedRawTransactionによって算出されたHex',
+  `total`  int(11) COLLATE utf8_unicode_ci NOT NULL COMMENT'手数料込みの送信される金額',
+  `fee`    int(11) COLLATE utf8_unicode_ci NOT NULL COMMENT'手数料',
+  `to_address` varchar(80) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT'受取先アドレス',
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',
   PRIMARY KEY (`id`),
-  INDEX login (`email`, `password`)
+  INDEX hex (`tx_hex`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Unsigned Transaction Table';
 /*!40101 SET character_set_client = @saved_cs_client */;
-
-
-LOCK TABLES `transaction_unsigned` WRITE;
-/*!40000 ALTER TABLE `t_users` DISABLE KEYS */;
-INSERT INTO `transaction_unsigned` VALUES
-  (1,10000,now());
-/*!40000 ALTER TABLE `t_users` ENABLE KEYS */;
-UNLOCK TABLES;
 

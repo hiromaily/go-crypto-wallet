@@ -39,8 +39,9 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 	//	Spendable     bool    `json:"spendable"`
 	//}
 	//TODO:とりあえず、ListUnspentを使っているが、全ユーザーにGetUnspentByAddress()を使わないといけないかも
-	// Watch only walletであれば、実現できるはず
-	list, err := w.Btc.Client().ListUnspent()
+	// Watch only walletであれば、ListUnspentで実現可能
+	//list, err := w.Btc.Client().ListUnspent()
+	list, err := w.Btc.Client().ListUnspentMin(6)
 	if err != nil {
 		return "", errors.Errorf("ListUnspent(): error: %v", err)
 	}
@@ -130,7 +131,7 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 	}
 	log.Printf("[Debug]fee: %v", fee) //0.000208 BTC
 
-	//TODO: totalを調整し、再度RawTransactionを作成する
+	//totalを調整し、再度RawTransactionを作成する
 	total = total - fee
 	if total <= 0 {
 		return "", errors.Errorf("calculated fee must be wrong: fee:%v, error: %v", fee, err)
@@ -142,7 +143,6 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 		return "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
 
-	//FIXME:ロジックがおかしいかも
 	hex, err := w.Btc.ToHex(msgTx)
 	if err != nil {
 		return "", errors.Errorf("w.Btc.ToHex(msgTx): error: %v", err)
@@ -159,5 +159,15 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 	//w.Btc.GetRawTransactionByHex(res.Hex)
 
 	//TODO:本来、この戻り値をDumpして、GCSに保存、それをDLして、USBに入れてコールドウォレットに移動しなくてはいけない
+	//TODO:その後、Databaseに情報を保存
+	// Hex, target utxos, total, fee
 	return hex, nil
+}
+
+func storeHexOnGPS(hexTx string) {
+
+}
+
+func storeHexOnDB() {
+
 }
