@@ -48,7 +48,7 @@ func main() {
 	defer bit.Close()
 
 	//Wallet Object
-	wallet := service.Wallet{Btc: bit, Db: nil}
+	wallet := service.Wallet{Btc: bit, DB: nil}
 
 	//switch
 	switchFunction(&wallet)

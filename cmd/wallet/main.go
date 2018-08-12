@@ -5,7 +5,8 @@ import (
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/hiromaily/go-bitcoin/pkg/api"
-	"github.com/hiromaily/go-bitcoin/pkg/kvs"
+	//"github.com/hiromaily/go-bitcoin/pkg/kvs"
+	"github.com/hiromaily/go-bitcoin/pkg/rds"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/hiromaily/go-bitcoin/pkg/toml"
 	"github.com/jessevdk/go-flags"
@@ -45,11 +46,18 @@ func main() {
 	}
 
 	// KVS
-	db, err := kvs.InitDB(conf.LevelDB.Path)
+	//db, err := kvs.InitDB(conf.LevelDB.Path)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//defer db.Close()
+
+	// MySQL
+	rds, err := rds.Connection(&conf.MySQL)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	defer rds.Close()
 
 	// Connection to Bitcoin core
 	//bit, err := api.Connection(conf.Bitcoin.Host, conf.Bitcoin.User, conf.Bitcoin.Pass, true, true, conf.Bitcoin.IsMain)
@@ -60,7 +68,7 @@ func main() {
 	defer bit.Close()
 
 	//Wallet Object
-	wallet := service.Wallet{Btc: bit, Db: db}
+	wallet := service.Wallet{Btc: bit, DB: rds}
 
 	//switch
 	switchFunction(&wallet)
@@ -145,16 +153,16 @@ func callAPI(wallet *service.Wallet) {
 	//grok.Value(txOut)
 }
 
-func checkLevelDB(wallet *service.Wallet) {
-	//Put
-	err := wallet.Db.Put("unspent", "testkey1", []byte("data1234567890"))
-	if err != nil {
-		log.Println(err)
-	}
-	//Get
-	val, err := wallet.Db.Get("unspent", "testkey1")
-	if err != nil {
-		log.Println(err)
-	}
-	log.Printf("[Done] %s", string(val))
-}
+//func checkLevelDB(wallet *service.Wallet) {
+//	//Put
+//	err := wallet.DB.Put("unspent", "testkey1", []byte("data1234567890"))
+//	if err != nil {
+//		log.Println(err)
+//	}
+//	//Get
+//	val, err := wallet.DB.Get("unspent", "testkey1")
+//	if err != nil {
+//		log.Println(err)
+//	}
+//	log.Printf("[Done] %s", string(val))
+//}
