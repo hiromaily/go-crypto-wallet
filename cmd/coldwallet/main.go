@@ -11,6 +11,9 @@ import (
 	"github.com/jessevdk/go-flags"
 )
 
+// HDウォレットとしてseed作成、keyを指定した数だけ生成し、出力する
+// これは、ネットワーク環境下のwallet側から、
+
 // Options コマンドラインオプション
 type Options struct {
 	//Configパス
