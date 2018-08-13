@@ -39,6 +39,24 @@ func (b *Bitcoin) ValidateAddress(addr string) error {
 	if err != nil {
 		return err
 	}
+	//debug
+	//type ValidateAddressWalletResult struct {
+	//	IsValid      bool     `json:"isvalid"`
+	//	Address      string   `json:"address,omitempty"`
+	//	IsMine       bool     `json:"ismine,omitempty"`
+	//	IsWatchOnly  bool     `json:"iswatchonly,omitempty"`
+	//	IsScript     bool     `json:"isscript,omitempty"`
+	//	PubKey       string   `json:"pubkey,omitempty"`
+	//	IsCompressed bool     `json:"iscompressed,omitempty"`
+	//	Account      string   `json:"account,omitempty"`
+	//	Addresses    []string `json:"addresses,omitempty"`
+	//	Hex          string   `json:"hex,omitempty"`
+	//	Script       string   `json:"script,omitempty"`
+	//	SigsRequired int32    `json:"sigsrequired,omitempty"`
+	//}
+
+	//b, _ := json.MarshalIndent(acc, "", " ")
+	//log.Println(string(b))
 
 	return nil
 }
