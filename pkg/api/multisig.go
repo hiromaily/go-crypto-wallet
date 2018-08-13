@@ -58,16 +58,12 @@ func (b *Bitcoin) CreateMultiSig(requiredSigs int, addresses []string, accountNa
 	}
 
 	//addresses
-	bAddresses, err := json.Marshal(struct {
-		Addresses []string `json:"keys"`
-	}{
-		Addresses: addresses,
-	})
+	bAddresses, err := json.Marshal(addresses)
 	if err != nil {
 		return nil, errors.Errorf("json.Marchal(addresses): error: %v", err)
 	}
 
-	jsonRawMsg := []json.RawMessage{}
+	var jsonRawMsg []json.RawMessage
 
 	//accountName
 	if accountName != "" {
@@ -83,6 +79,7 @@ func (b *Bitcoin) CreateMultiSig(requiredSigs int, addresses []string, accountNa
 	//call addmultisigaddress
 	rawResult, err := b.client.RawRequest("addmultisigaddress", jsonRawMsg)
 	if err != nil {
+		//client.RawRequest(addmultisigaddress): error: -1: JSON value is not an array as expected
 		return nil, errors.Errorf("client.RawRequest(addmultisigaddress): error: %v", err)
 	}
 
