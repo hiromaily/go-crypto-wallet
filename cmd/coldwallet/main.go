@@ -78,6 +78,8 @@ func switchFunction(wallet *service.Wallet) {
 		log.Print("Run: HDウォレット Keyの生成")
 		key.GenerateHDKey(opts.ParamSeed, wallet.Btc.GetChainConf())
 	case 3:
+		//TODO:Multisigの作成
+
 		//事前準備
 		//getnewaddress taro 2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP
 		//getnewaddress boss1 2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu
@@ -100,7 +102,7 @@ func switchFunction(wallet *service.Wallet) {
 		// これで、DetectReceivedCoin()を実行し、hexを取得
 		// 02000000019dcbbda4e5233051f2bed587c1d48e8e17aa21c2c3012097899bda5097ce78e20100000000ffffffff01042bbf070000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e8700000000
 
-		// service.MultiSigByHex(hex)を実行してみる。TODO:WIP
+		// service.MultiSigByHex(hex)を実行してみる。
 	case 4:
 		//TODO:ImportしたHEXから署名を行う()
 		log.Print("Run: ImportしたHEXから署名を行う")

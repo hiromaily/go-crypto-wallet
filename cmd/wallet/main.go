@@ -87,11 +87,11 @@ func switchFunction(wallet *service.Wallet) {
 	//TODO:ここから呼び出すべきはService系のみに統一したい
 	switch opts.Functionality {
 	case 1:
-		//入金検知処理後、lock解除を行う
+		//[Debug用]入金検知処理後、lock解除を行う
 		log.Print("Run: lockされたトランザクションの解除")
 		wallet.Btc.UnlockAllUnspentTransaction()
 	case 2:
-		//TODO:未実装
+		//[Debug用]手数料算出
 		log.Print("Run: 手数料算出 estimatesmartfee")
 		feePerKb, err := wallet.Btc.EstimateSmartFee()
 		if err != nil {
@@ -102,9 +102,6 @@ func switchFunction(wallet *service.Wallet) {
 	case 11:
 		log.Print("Run: 入金処理検知")
 		//実際には署名処理は手動なので、ユーザーの任意のタイミングで走らせたほうがいい。
-
-		//Debug中のみ
-		//wallet.Btc.UnlockAllUnspentTransaction()
 
 		//入金検知 + 未署名トランザクション作成
 		//TODO:この中でLoopする必要はない。実行するtaskrunner側で実行間隔を調整する。
@@ -125,7 +122,6 @@ func switchFunction(wallet *service.Wallet) {
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
-		//tx.MsgTx()
 		log.Printf("[Debug] 送信までDONE!! %s", hash.String())
 
 	case 13:
