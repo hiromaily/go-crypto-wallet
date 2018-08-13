@@ -98,11 +98,18 @@ func switchFunction(wallet *service.Wallet) {
 		// https://live.blockcypher.com/btc-testnet/tx/e278ce9750da9b89972001c3c221aa178e8ed4c187d5bef2513023e5a4bdcb9d/
 		// 現時点で、hokan以外ではlistunspentで取得できないはず
 		// これで、DetectReceivedCoin()を実行し、hexを取得
+		// 02000000019dcbbda4e5233051f2bed587c1d48e8e17aa21c2c3012097899bda5097ce78e20100000000ffffffff01042bbf070000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e8700000000
 
 		// service.MultiSigByHex(hex)を実行してみる。TODO:WIP
 	case 4:
 		//TODO:ImportしたHEXから署名を行う()
 		log.Print("Run: ImportしたHEXから署名を行う")
+		hex := "02000000019dcbbda4e5233051f2bed587c1d48e8e17aa21c2c3012097899bda5097ce78e20100000000ffffffff01042bbf070000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e8700000000"
+		hexTx, err := wallet.MultiSigByHex(hex)
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		log.Println("hex:", hexTx)
 
 	default:
 		log.Print("Run: 検証コード")

@@ -255,6 +255,22 @@ func (b *Bitcoin) SendRawTransaction(tx *wire.MsgTx) (*chainhash.Hash, error) {
 }
 
 // SendTransactionByByte 外部から渡されたバイト列からRawトランザクションを送信する
+func (b *Bitcoin) SendTransactionByHex(hex string) (*chainhash.Hash, error) {
+	// Hexからトランザクションを取得
+	msgTx, err := b.ToMsgTx(hex)
+	if err != nil {
+		return nil, err
+	}
+
+	hash, err := b.client.SendRawTransaction(msgTx, true)
+	if err != nil {
+		return nil, errors.Errorf("SendRawTransaction(): error: %v", err)
+	}
+
+	return hash, nil
+}
+
+// SendTransactionByByte 外部から渡されたバイト列からRawトランザクションを送信する
 func (b *Bitcoin) SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error) {
 	//TODO:渡された文字列は暗号化されていることを想定
 	//TODO:ここで復号化の処理が必要
