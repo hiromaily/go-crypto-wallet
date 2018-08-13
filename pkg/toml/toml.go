@@ -23,8 +23,8 @@ type BitcoinConf struct {
 	DisableTLS bool   `toml:"disable_tls"`
 	IsMain     bool   `toml:"is_main"`
 
-	Block BitcoinBlockConf
-	Addr  BitcoinAddrConf
+	Block BitcoinBlockConf `toml:"block"`
+	Addr  BitcoinAddrConf  `toml:"address"`
 }
 
 // BitcoinBlockConf Bitcoinブロック情報

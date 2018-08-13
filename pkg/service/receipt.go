@@ -116,9 +116,10 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 	}
 
 	// CreateRawTransaction(仮で作成し、この後サイズから手数料を算出する)
-	//msgTx, err := w.Btc.CreateRawTransaction(w.Btc.StoreAddr(), total, inputs)
+	log.Println("w.Btc.StoreAddr() :", w.Btc.StoreAddr())
+	msgTx, err := w.Btc.CreateRawTransaction(w.Btc.StoreAddr(), total, inputs)
 	//[For Only Debug]
-	msgTx, err := w.Btc.CreateRawTransaction("muVSWToBoNWusjLCbxcQNBWTmPjioRLpaA", total, inputs)
+	//msgTx, err := w.Btc.CreateRawTransaction("muVSWToBoNWusjLCbxcQNBWTmPjioRLpaA", total, inputs)
 	if err != nil {
 		return "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
@@ -140,6 +141,8 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 	log.Printf("[Debug]Total Coin to send:%d(Satoshi) after fee calculated, input length: %d", total, len(inputs))
 
 	msgTx, err = w.Btc.CreateRawTransaction(w.Btc.StoreAddr(), total, inputs)
+	//[For Only Debug]
+	//msgTx, err := w.Btc.CreateRawTransaction("muVSWToBoNWusjLCbxcQNBWTmPjioRLpaA", total, inputs)
 	if err != nil {
 		return "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}

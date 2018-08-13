@@ -11,6 +11,7 @@ confirmation_num = 6 #Confirmationに必要なブロック数
 
 [bitcoin.address]
 stored = "2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW" #保管用アドレス
+#stored = "muVSWToBoNWusjLCbxcQNBWTmPjioRLpaA" #Debug保管用アドレス
 
 [leveldb]
 path = "./data/kvs/db"

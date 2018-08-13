@@ -14,6 +14,9 @@ import (
 // HDウォレットとしてseed作成、keyを指定した数だけ生成し、出力する
 // これは、ネットワーク環境下のwallet側から、
 
+//TODO:encryptwalletコマンドによって、walletを暗号化した場合、秘密鍵を使用するタイミング(未署名トランザクションに署名する)
+// でパスフレーズの入力が必要になり
+
 // Options コマンドラインオプション
 type Options struct {
 	//Configパス
@@ -92,7 +95,8 @@ func switchFunction(wallet *service.Wallet) {
 		//TODO:ここで生成されたアドレスに送金してみる。
 		// https://testnet.manu.backend.hamburg/faucet
 		//  Sent! TX ID: e278ce9750da9b89972001c3c221aa178e8ed4c187d5bef2513023e5a4bdcb9d
-		// 現時点で、hokan以外ではlistunspentで取得できない。
+		// https://live.blockcypher.com/btc-testnet/tx/e278ce9750da9b89972001c3c221aa178e8ed4c187d5bef2513023e5a4bdcb9d/
+		// 現時点で、hokan以外ではlistunspentで取得できないはず
 		// これで、DetectReceivedCoin()を実行し、hexを取得
 
 		// service.MultiSigByHex(hex)を実行してみる。TODO:WIP

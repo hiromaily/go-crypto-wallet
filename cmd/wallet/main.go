@@ -6,6 +6,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/hiromaily/go-bitcoin/pkg/api"
 	//"github.com/hiromaily/go-bitcoin/pkg/kvs"
+	"github.com/bookerzzz/grok"
 	"github.com/hiromaily/go-bitcoin/pkg/rds"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/hiromaily/go-bitcoin/pkg/toml"
@@ -50,6 +51,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	grok.Value(conf)
 
 	// KVS
 	//db, err := kvs.InitDB(conf.LevelDB.Path)
