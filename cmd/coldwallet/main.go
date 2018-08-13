@@ -88,6 +88,14 @@ func switchFunction(wallet *service.Wallet) {
 		}
 		log.Printf("multisig address: %s, redeemScript: %s", resAddr.Address, resAddr.RedeemScript)
 		//multisig address: 2N4Rm1aLPxCcg1H1V96bBzH69vMAipADLCQ, redeemScript: 522103d69e07dbf6da065e6fae1ef5761d029b9ff9143e75d579ffc439d47484044bed2103748797877523b8b36add26c9e0fb6a023f05083dd4056aedc658d2932df1eb6052ae
+
+		//TODO:ここで生成されたアドレスに送金してみる。
+		// https://testnet.manu.backend.hamburg/faucet
+		//  Sent! TX ID: e278ce9750da9b89972001c3c221aa178e8ed4c187d5bef2513023e5a4bdcb9d
+		// 現時点で、hokan以外ではlistunspentで取得できない。
+		// これで、DetectReceivedCoin()を実行し、hexを取得
+
+		// service.MultiSigByHex(hex)を実行してみる。TODO:WIP
 	case 4:
 		//TODO:ImportしたHEXから署名を行う()
 		log.Print("Run: ImportしたHEXから署名を行う")
