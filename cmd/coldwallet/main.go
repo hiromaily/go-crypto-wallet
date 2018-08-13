@@ -62,7 +62,7 @@ func switchFunction(wallet *service.Wallet) {
 	//TODO:ここから呼び出すべきはService系のみに統一したい
 	switch opts.Functionality {
 	case 1:
-		//TODO:cold wallet側の機能
+		//TODO: 通常のKeyの生成
 		log.Print("Run: Keyの生成")
 		//単一Keyの生成
 		wif, pubAddress, err := key.GenerateKey(wallet.Btc.GetChainConf())
@@ -71,11 +71,24 @@ func switchFunction(wallet *service.Wallet) {
 		}
 		log.Printf("[WIF] %s - [Pub Address] %s\n", wif.String(), pubAddress)
 	case 2:
-		//TODO:まだ検証中
+		//TODO: HDウォレットによるKeyの作成 (まだ検証中)
 		log.Print("Run: HDウォレット Keyの生成")
 		key.GenerateHDKey(opts.ParamSeed, wallet.Btc.GetChainConf())
 	case 3:
-		//TODO:ImportしたHEXから署名を行う
+		//事前準備
+		//getnewaddress taro 2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP
+		//getnewaddress boss1 2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu
+		//TODO:ここで、AddMultisigAddressを使うのにパラメータとしてaccout名も渡さないといけない。。これをどうすべきか。。。
+		//TODO: => おそらくBlankでもいい
+
+		//TODO: Multisigアドレス作成 (まだ検証中)
+		resAddr, err := wallet.Btc.CreateMultiSig(2, []string{"2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP", "2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu"}, "multi01")
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		log.Printf("multisig address: %s, redeemScript: %s", resAddr.Address, resAddr.RedeemScript)
+	case 4:
+		//TODO:ImportしたHEXから署名を行う()
 		log.Print("Run: ImportしたHEXから署名を行う")
 
 	default:

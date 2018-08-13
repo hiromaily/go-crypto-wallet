@@ -13,8 +13,11 @@ bld:
 	go build -o wallet ./cmd/wallet/main.go
 	go build -o coldwallet ./cmd/coldwallet/main.go
 
-run: bld
+wallet: bld
 	./wallet -f 1
+
+cold-wallet: bld
+	./coldwallet -f 3
 
 ###############################################################################
 # Test

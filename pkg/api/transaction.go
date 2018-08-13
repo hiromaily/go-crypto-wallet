@@ -204,19 +204,44 @@ func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, err
 	return &fundRawTransactionResult, nil
 }
 
+// SignRawTransactionByHex HexからRawトランザクションを生成し、署名する
+// オフライン(coldwallet)での利用を想定
+func (b *Bitcoin) SignRawTransactionByHex(hex string) (string, bool, error) {
+	// Hexからトランザクションを取得
+	msgTx, err := b.ToMsgTx(hex)
+	if err != nil {
+		return "", false, err
+	}
+
+	//署名
+	signedTx, isSigned, err := b.SignRawTransaction(msgTx)
+	if err != nil {
+		return "", false, err
+	}
+
+	//Hexに変換
+	hexTx, err := b.ToHex(signedTx)
+	if err != nil {
+		return "", false, errors.Errorf("w.Btc.ToHex(msgTx): error: %v", err)
+	}
+
+	//return signedTx, nil
+	return hexTx, isSigned, nil
+}
+
 // SignRawTransaction Rawのトランザクションに署名する
-func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, error) {
+func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) {
 	//TODO: It should be implemented on Cold Strage
 	//この処理がHotwallet内で動くということは、重要な情報がwallet内に含まれてしまっているということでは？
 	msgTx, isSigned, err := b.client.SignRawTransaction(tx)
 	if err != nil {
-		return nil, errors.Errorf("SignRawTransaction(): error: %v", err)
+		return nil, false, errors.Errorf("SignRawTransaction(): error: %v", err)
 	}
-	if !isSigned {
-		return nil, errors.New("SignRawTransaction() can not sign on given transaction")
-	}
+	//if !isSigned {
+	//	return nil, errors.New("SignRawTransaction() can not sign on given transaction")
+	//}
 
-	return msgTx, nil
+	return msgTx, isSigned, nil
 }
 
 // SendRawTransaction Rawトランザクションを送信する
@@ -259,9 +284,12 @@ func (b *Bitcoin) SequentialTransaction(hex string) (*chainhash.Hash, *btcutil.T
 	}
 
 	//署名(オフライン)
-	signedTx, err := b.SignRawTransaction(msgTx)
+	signedTx, isSigned, err := b.SignRawTransaction(msgTx)
 	if err != nil {
 		return nil, nil, err
+	}
+	if !isSigned {
+		return nil, nil, errors.New("SignRawTransaction() can not sign on given transaction or multisig may be required")
 	}
 
 	//送金(オンライン)

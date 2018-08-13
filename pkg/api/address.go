@@ -31,7 +31,7 @@ func (b *Bitcoin) GetAddressesByAccount(accountName string) ([]btcutil.Address, 
 // TODO: 動作未検証、address_test.goを書いて検証すること
 func (b *Bitcoin) ValidateAddress(addr string) error {
 	//func (c *Client) ValidateAddress(address btcutil.Address) (*btcjson.ValidateAddressWalletResult, error) {
-	address, err := b.decodeAddress(addr)
+	address, err := b.DecodeAddress(addr)
 	if err != nil {
 		return err
 	}
@@ -61,7 +61,8 @@ func (b *Bitcoin) ValidateAddress(addr string) error {
 	return nil
 }
 
-func (b *Bitcoin) decodeAddress(addr string) (btcutil.Address, error) {
+// DecodeAddress string型のアドレスをDecodeしてAddress型に変換する
+func (b *Bitcoin) DecodeAddress(addr string) (btcutil.Address, error) {
 	address, err := btcutil.DecodeAddress(addr, b.chainConf)
 	if err != nil {
 		return nil, errors.Errorf("btcutil.DecodeAddress() error: %v", err)
