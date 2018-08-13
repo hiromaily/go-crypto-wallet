@@ -104,7 +104,7 @@ func (b *Bitcoin) ToMsgTx(txHex string) (*wire.MsgTx, error) {
 	return &msgTx, nil
 }
 
-// DecodeRawTransaction
+// DecodeRawTransaction Hex stringをデコードして、Rawのトランザクションデータに変換する
 func (b *Bitcoin) DecodeRawTransaction(txHex string) (*btcjson.TxRawResult, error) {
 	byteHex, err := hex.DecodeString(txHex)
 	if err != nil {
@@ -162,7 +162,8 @@ func (b *Bitcoin) CreateRawTransaction(sendAddr string, amount btcutil.Amount, i
 	return msgTx, nil
 }
 
-// FundRawTransaction
+// FundRawTransaction 送信したい金額に応じて、自動的にutxoを算出してくれる
+// TODO:現時点で使う予定無し
 func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, error) {
 	//fundrawtransaction
 	//https://bitcoincore.org/en/doc/0.16.2/rpc/rawtransactions/fundrawtransaction/

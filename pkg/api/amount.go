@@ -10,7 +10,7 @@ import (
 //btcutil.Amount => Satoshi
 //float64 => BTC
 
-// BitToSatoshi BTC(float64)をSatoshi(Amount)に変換する
+// FloatBitToAmount BTC(float64)をSatoshi(Amount)に変換する
 // e.g. 0.54 to 54000000
 func (b *Bitcoin) FloatBitToAmount(f float64) (btcutil.Amount, error) {
 	amt, err := btcutil.NewAmount(f)
@@ -38,7 +38,7 @@ func (b *Bitcoin) CastStrBitToAmount(s string) (btcutil.Amount, error) {
 	return amt, nil
 }
 
-// CastStrToSatoshi string型のSatoshiをAmountに変換する
+// CastStrSatoshiToAmount string型のSatoshiをAmountに変換する
 func (b *Bitcoin) CastStrSatoshiToAmount(s string) (btcutil.Amount, error) {
 	f, err := strconv.ParseFloat(s, 64)
 	if err != nil {

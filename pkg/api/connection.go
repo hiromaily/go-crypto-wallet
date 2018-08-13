@@ -22,7 +22,7 @@ func Connection(conf *toml.BitcoinConf) (*Bitcoin, error) {
 		User:         conf.User,
 		Pass:         conf.Pass,
 		HTTPPostMode: conf.PostMode,   // Bitcoin core only supports HTTP POST mode
-		DisableTLS:   conf.DisableTls, // Bitcoin core does not provide TLS by default
+		DisableTLS:   conf.DisableTLS, // Bitcoin core does not provide TLS by default
 	}
 
 	// Notice the notification parameter is nil since notifications are
@@ -65,7 +65,7 @@ func (b *Bitcoin) StoreAddr() string {
 	return b.storedAddr
 }
 
-// Confirmationに必要なブロック数を返す
+// ConfirmationBlock Confirmationに必要なブロック数を返す
 func (b *Bitcoin) ConfirmationBlock() int64 {
 	return b.confirmationBlock
 }

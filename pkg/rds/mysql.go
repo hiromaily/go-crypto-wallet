@@ -8,6 +8,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Connection MySQLサーバーに接続する
+// TODO:リトライ機能も必要
 func Connection(conf *toml.MySQLConf) (*sqlx.DB, error) {
 	db, err := sqlx.Connect("mysql",
 		fmt.Sprintf(
