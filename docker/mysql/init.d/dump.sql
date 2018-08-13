@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.7.21, for osx10.13 (x86_64)
 --
--- Host: 127.0.0.1    Database: hiromaily
+-- Host: 127.0.0.1    Database: wallet
 -- ------------------------------------------------------
 -- Server version	5.7.21
 
