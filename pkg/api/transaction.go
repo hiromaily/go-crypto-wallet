@@ -172,7 +172,7 @@ func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, err
 	//hex
 	bHex, err := json.Marshal(hex)
 	if err != nil {
-		return nil, errors.Errorf("json.Marchal(): error: %v", err)
+		return nil, errors.Errorf("json.Marchal(hex): error: %v", err)
 	}
 
 	//fee rate
@@ -180,11 +180,15 @@ func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, err
 	if err != nil {
 		return nil, errors.Errorf("EstimateSmartFee(): error: %v", err)
 	}
+
 	bFeeRate, err := json.Marshal(struct {
 		FeeRate float64 `json:"feeRate"`
 	}{
 		FeeRate: feePerKb,
 	})
+	if err != nil {
+		return nil, errors.Errorf("json.Marchal(feeRate): error: %v", err)
+	}
 
 	rawResult, err := b.client.RawRequest("fundrawtransaction", []json.RawMessage{bHex, bFeeRate})
 	//rawResult, err := b.client.RawRequest("fundrawtransaction", []json.RawMessage{bHex})
@@ -254,7 +258,7 @@ func (b *Bitcoin) SendRawTransaction(tx *wire.MsgTx) (*chainhash.Hash, error) {
 	return hash, nil
 }
 
-// SendTransactionByByte 外部から渡されたバイト列からRawトランザクションを送信する
+// SendTransactionByHex 外部から渡されたバイト列からRawトランザクションを送信する
 func (b *Bitcoin) SendTransactionByHex(hex string) (*chainhash.Hash, error) {
 	// Hexからトランザクションを取得
 	msgTx, err := b.ToMsgTx(hex)

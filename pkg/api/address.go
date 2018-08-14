@@ -7,6 +7,7 @@ import (
 
 // CreateNewAddress アカウント名から新しいアドレスを生成する
 // これによって作成されたアカウントはbitcoin core側のwalletで管理される
+// TODO:おそらく本番では使わない
 func (b *Bitcoin) CreateNewAddress(accountName string) (btcutil.Address, error) {
 	addr, err := b.client.GetNewAddress(accountName)
 	if err != nil {
@@ -17,6 +18,7 @@ func (b *Bitcoin) CreateNewAddress(accountName string) (btcutil.Address, error) 
 }
 
 // GetAddressesByAccount アカウント名から紐づくすべてのアドレスを取得する
+// TODO:本番でaddressに対してアカウント名を紐付けることをするかどうか未定
 func (b *Bitcoin) GetAddressesByAccount(accountName string) ([]btcutil.Address, error) {
 	addrs, err := b.client.GetAddressesByAccount(accountName)
 	if err != nil {
@@ -27,17 +29,15 @@ func (b *Bitcoin) GetAddressesByAccount(accountName string) ([]btcutil.Address, 
 }
 
 // ValidateAddress 渡されたアドレスの整合性をチェックする
-// TODO: こちらの機能はCayenne側でも必要だが、Cayenneの場合、Bitcoin Coreの機能を単独で使うことは難くはないが、煩雑になってしまう
-// TODO: 動作未検証、address_test.goを書いて検証すること
+// TODO: こちらの機能はCayenne側でも必要だが、Cayenneから直接利用する場合、Bitcoin Coreの機能に依存しているので、煩雑になってしまう
 func (b *Bitcoin) ValidateAddress(addr string) error {
-	//func (c *Client) ValidateAddress(address btcutil.Address) (*btcjson.ValidateAddressWalletResult, error) {
 	address, err := b.DecodeAddress(addr)
 	if err != nil {
-		return err
+		return errors.Errorf("DecodeAddress(%s): error: %v", addr, err)
 	}
 	_, err = b.client.ValidateAddress(address)
 	if err != nil {
-		return err
+		return errors.Errorf("client.ValidateAddress(%s): error: %v", addr, err)
 	}
 	//debug
 	//type ValidateAddressWalletResult struct {

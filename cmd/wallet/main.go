@@ -4,19 +4,16 @@ import (
 	"log"
 
 	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/hiromaily/go-bitcoin/pkg/api"
-	//"github.com/hiromaily/go-bitcoin/pkg/kvs"
-	"github.com/bookerzzz/grok"
-	"github.com/hiromaily/go-bitcoin/pkg/rds"
+	_ "github.com/go-sql-driver/mysql"
+
 	"github.com/hiromaily/go-bitcoin/pkg/service"
-	"github.com/hiromaily/go-bitcoin/pkg/toml"
 	"github.com/jessevdk/go-flags"
 )
 
 //こちらはHotwallet、ただし、Watch Only Walletとしての機能を実装していく。
 //ネットワークへの接続はGCP上のBitcoin Core
 //Watch Only Walletとしてのセットアップが必要
-// - Cold Wallet側から生成したPublic Key を`importaddress xxxxx`でimportする
+// - Cold Wallet側から生成したPublic Key をMultisigアドレス変換後、`importaddress xxxxx`でimportする
 //   これがかなり時間がかかる。。。実運用ではどうすべきか。rescanしなくても最初はOKかと
 
 //TODO:coldwallet側(非ネットワーク環境)側の機能と明確に分ける
@@ -46,40 +43,15 @@ func init() {
 }
 
 func main() {
-	// Config
-	conf, err := toml.New(opts.ConfPath)
+	//initialSettings()
+	wallet, err := service.InitialSettings(opts.ConfPath)
 	if err != nil {
 		log.Fatal(err)
 	}
-	grok.Value(conf)
-
-	// KVS
-	//db, err := kvs.InitDB(conf.LevelDB.Path)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//defer db.Close()
-
-	// MySQL
-	rds, err := rds.Connection(&conf.MySQL)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rds.Close()
-
-	// Connection to Bitcoin core
-	//bit, err := api.Connection(conf.Bitcoin.Host, conf.Bitcoin.User, conf.Bitcoin.Pass, true, true, conf.Bitcoin.IsMain)
-	bit, err := api.Connection(&conf.Bitcoin)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer bit.Close()
-
-	//Wallet Object
-	wallet := service.Wallet{Btc: bit, DB: rds}
+	defer wallet.Done()
 
 	//switch
-	switchFunction(&wallet)
+	switchFunction(wallet)
 }
 
 func switchFunction(wallet *service.Wallet) {
@@ -98,7 +70,20 @@ func switchFunction(wallet *service.Wallet) {
 			log.Fatalf("%+v", err)
 		}
 		log.Printf("Estimatesmartfee: %f\n", feePerKb)
+	case 3:
+		//[Debug用]ValidateAddress
+		log.Print("Run: AddressのValidationチェック")
+		err := wallet.Btc.ValidateAddress("2NFXSXxw8Fa6P6CSovkdjXE6UF4hupcTHtr")
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		err = wallet.Btc.ValidateAddress("4VHGkbQTGg2vN5P6yHZw3UJhmsBh9igsSos")
+		if err == nil {
+			log.Fatal("something is wrong")
+		}
 
+		log.Printf("error is %v", err)
+		log.Print("Done!")
 	case 11:
 		log.Print("Run: 入金処理検知")
 		//実際には署名処理は手動なので、ユーザーの任意のタイミングで走らせたほうがいい。

@@ -3,7 +3,6 @@ package api
 import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/rpcclient"
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/hiromaily/go-bitcoin/pkg/toml"
 )
 

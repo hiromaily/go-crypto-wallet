@@ -10,6 +10,10 @@ import (
 // UnlockAllUnspentTransaction Lockされたトランザクションの解除
 func (b *Bitcoin) UnlockAllUnspentTransaction() error {
 	list, err := b.client.ListLockUnspent() //[]*wire.OutPoint
+	if err != nil {
+		return errors.Errorf("ListLockUnspent(): error: %v", err)
+	}
+
 	if len(list) != 0 {
 		err = b.client.LockUnspent(true, list)
 		if err != nil {
@@ -24,7 +28,7 @@ func (b *Bitcoin) UnlockAllUnspentTransaction() error {
 func (b *Bitcoin) LockUnspent(tx btcjson.ListUnspentResult) error {
 	txIDHash, err := chainhash.NewHashFromStr(tx.TxID)
 	if err != nil {
-		return err
+		return errors.Errorf("chainhash.NewHashFromStr(): error: %v", err)
 	}
 	outpoint := wire.NewOutPoint(txIDHash, tx.Vout)
 	err = b.client.LockUnspent(false, []*wire.OutPoint{outpoint})

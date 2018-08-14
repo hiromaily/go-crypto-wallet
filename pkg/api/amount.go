@@ -21,7 +21,7 @@ func (b *Bitcoin) FloatBitToAmount(f float64) (btcutil.Amount, error) {
 	return amt, nil
 }
 
-// CastStrBitToAmount string型のBitcoinをAmmountに変換する
+// CastStrBitToAmount string型のBitcoinをAmountに変換する
 func (b *Bitcoin) CastStrBitToAmount(s string) (btcutil.Amount, error) {
 
 	f, err := strconv.ParseFloat(s, 64)
