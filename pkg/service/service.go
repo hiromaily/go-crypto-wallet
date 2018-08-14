@@ -16,7 +16,7 @@ type Wallet struct {
 	//Db  *kvs.LevelDB
 }
 
-//TODO:serviceへ
+//InitialSettings 実行前に必要なすべての設定をこちらで行う
 func InitialSettings(confPath string) (*Wallet, error) {
 	// Config
 	conf, err := toml.New(confPath)
@@ -52,6 +52,7 @@ func InitialSettings(confPath string) (*Wallet, error) {
 	return &wallet, nil
 }
 
+// Done 終了時に必要な処理
 func (w *Wallet) Done() {
 	w.DB.Close()
 	w.Btc.Close()

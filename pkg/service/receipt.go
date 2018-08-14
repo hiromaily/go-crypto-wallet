@@ -5,24 +5,22 @@ import (
 
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
-	//"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 )
 
 // DetectReceivedCoin Wallet内アカウントに入金があれば、そこから、未署名のトランザクションを返す
-//func (w *Wallet) DetectReceivedCoin() (*wire.MsgTx, error) {
+// 古い未署名のトランザクションは変動するfeeの関係で、stackしていく(再度実行時は差分を抽出する)仕様にはしていない。
+// 送信処理後には、unspent()でutxoとして取得できなくなるので、シーケンスで送信まで行うことを想定している
+// - 未署名トランザクション作成(本機能)
+// - 署名(オフライン)
+// - 送信(オンライン)
 func (w *Wallet) DetectReceivedCoin() (string, error) {
 	log.Println("[DetectReceivedCoin]")
-	//TODO:このロジックを連続で走らせた場合、現在処理中のものが、タイミングによってはまた取得できてしまうかもしれない
-	// ので、そこを考慮しないといけない
+	//TODO:このロジックを連続で走らせた場合、現在処理中のものが、タイミングによってはまた取得できてしまうかもしれない??
 	// => LockUnspent()
 
-	//TODO:ここはgoroutineで並列化されたタスク内で、ロックされたtxidを監視し、confirmationが6になったら、
-	// 解除するようにしたほうがいいかも。暫定でここに設定
-	// 実際にはRawTransactionを作成後、すぐに署名されるわけではないので、UnlockはTransactionが送信されたあとに行う
-	// ただし、送信前の、時間がたったRawTransactionは手数料の変動などで、受け付けられなくなる可能性もあり、
-	// Unlockして1から作成する場合も必要
+	// LockされたUnspentTransactionを解除する
 	if err := w.Btc.UnlockAllUnspentTransaction(); err != nil {
 		return "", err
 	}
@@ -39,14 +37,15 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 	//	Confirmations int64   `json:"confirmations"`
 	//	Spendable     bool    `json:"spendable"`
 	//}
+
 	//TODO:とりあえず、ListUnspentを使っているが、全ユーザーにGetUnspentByAddress()を使わないといけないかも
+	//TODO:ListUnspent内で、検索すべきBlock番号まで内部的に保持できてるっぽい
 	// Watch only walletであれば、ListUnspentで実現可能
-	//list, err := w.Btc.Client().ListUnspent()
 	list, err := w.Btc.Client().ListUnspentMin(6)
 	//FIXME: multisigのアドレスはこれで取得できないかも。。。それか、Bitcoin Coreの表示がおかしい。。。
 	//FIXME: multisigからhokanに転送したので、multisigには残高がないことが正しい
 	if err != nil {
-		return "", errors.Errorf("ListUnspent(): error: %v", err)
+		return "", errors.Errorf("ListUnspentMin(): error: %v", err)
 	}
 	log.Printf("[Debug]List Unspent: %v\n", list)
 	grok.Value(list) //Debug
@@ -58,15 +57,15 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 	var total btcutil.Amount
 	var inputs []btcjson.TransactionInput
 	for _, tx := range list {
-		//FIXME: pendableは実環境では使えない。とりあえず、confirmation数でチェックにしておく
-		// 6に満たない場合、まだ未確定であることを意味するはず => これはListUnspent()のパラメータで可能
+		//TODO: spendableは実環境では使えない。とりあえず、confirmation数でチェックにしておく
+		// 6に満たない場合、まだ未確定であることを意味するはず => これはListUnspent()のパラメータで可能のためコメントアウト
 		//https://bitcoin.stackexchange.com/questions/63198/why-outputs-spendable-and-solvable-are-false
-		if tx.Confirmations < w.Btc.ConfirmationBlock() {
-			//if tx.Spendable == false {
-			continue
-		}
+		//if tx.Confirmations < w.Btc.ConfirmationBlock() {
+		//	continue
+		//}
 
-		// Transaction詳細を取得(必要な情報があるかどうか不明)
+		// Transaction詳細を取得
+		// (アカウント名によって、はじく、もしくはユーザーのアドレスの取得に必要)
 		tran, err := w.Btc.GetTransactionByTxID(tx.TxID)
 		if err != nil {
 			//このエラーは起こりえない
@@ -91,11 +90,15 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 		}
 		total += amt //合計
 
+		//TODO: 送信対象として、utxoの詳細を保存
+		grok.Value(tran)
+
 		//lockunspentによって、該当トランザクションをロックして再度ListUnspent()で出力されることを防ぐ
 		if w.Btc.LockUnspent(tx) != nil {
 			continue
 		}
 
+		//TODO:以下処理は不要だが、仕様がFIXするまでコメントアウトとしてのこしておく
 		//TODO:ここはまとめてLevelDBにPutしたほうが効率的かもしれない
 		//TODO:ここで保存した情報が本当に必要か？監視すべき対象は何で、何を実現させるかはっきりさせる
 		//このトランザクションIDはDBに保存が必要 => ここで保存されたIDはconfirmationのチェックに使われる
@@ -117,43 +120,50 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 		return "", nil
 	}
 
-	// CreateRawTransaction(仮で作成し、この後サイズから手数料を算出する)
+	// 一連の処理を実行
+	return w.createRawTransactionAndFee(total, inputs)
+}
+
+// createRawTransactionAndFee feeの抽出からtransaction作成、DBへの必要情報保存など、もろもろこちらで行う
+func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjson.TransactionInput) (string, error) {
+
+	// TODO:ここはWrapperとして別funcで定義したほうがいいかも
+	// 1.CreateRawTransaction(仮で作成し、この後サイズから手数料を算出する)
 	log.Println("w.Btc.StoreAddr() :", w.Btc.StoreAddr())
 	msgTx, err := w.Btc.CreateRawTransaction(w.Btc.StoreAddr(), total, inputs)
-	//[For Only Debug]
-	//msgTx, err := w.Btc.CreateRawTransaction("muVSWToBoNWusjLCbxcQNBWTmPjioRLpaA", total, inputs)
 	if err != nil {
 		return "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
 	log.Printf("[Debug] CreateRawTransaction: %v\n", msgTx)
 	//grok.Value(msgTx)
 
-	//fee算出
+	// 2.fee算出
 	fee, err := w.Btc.GetTransactionFee(msgTx)
 	if err != nil {
 		return "", errors.Errorf("GetTransactionFee(): error: %v", err)
 	}
 	log.Printf("[Debug]fee: %v", fee) //0.000208 BTC
 
-	//totalを調整し、再度RawTransactionを作成する
+	// 3.totalを調整し、再度RawTransactionを作成する
 	total = total - fee
 	if total <= 0 {
 		return "", errors.Errorf("calculated fee must be wrong: fee:%v, error: %v", fee, err)
 	}
 	log.Printf("[Debug]Total Coin to send:%d(Satoshi) after fee calculated, input length: %d", total, len(inputs))
 
+	// 4.再度 CreateRawTransaction
 	msgTx, err = w.Btc.CreateRawTransaction(w.Btc.StoreAddr(), total, inputs)
-	//[For Only Debug]
-	//msgTx, err := w.Btc.CreateRawTransaction("muVSWToBoNWusjLCbxcQNBWTmPjioRLpaA", total, inputs)
 	if err != nil {
 		return "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
 
+	// 5.出力用にHexに変換する
 	hex, err := w.Btc.ToHex(msgTx)
 	if err != nil {
 		return "", errors.Errorf("w.Btc.ToHex(msgTx): error: %v", err)
 	}
 
+	//TODO:以下処理は不要だが、仕様がFIXするまでコメントアウトとしてのこしておく
 	//TODO:fundrawtransactionによる手数料の算出は全額送金においては機能しない
 	//https://bitcoincore.org/en/doc/0.16.2/rpc/rawtransactions/fundrawtransaction/
 	//res, err := w.Btc.FundRawTransaction(hex)
@@ -164,9 +174,13 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 	//[Debug]res.Hex
 	//w.Btc.GetRawTransactionByHex(res.Hex)
 
+	// 6. GCSにトランザクションファイルを作成
 	//TODO:本来、この戻り値をDumpして、GCSに保存、それをDLして、USBに入れてコールドウォレットに移動しなくてはいけない
-	//TODO:その後、Databaseに情報を保存
+
+	// 7. Databaseに必要な情報を保存
+	//TODO:その後、Databaseに情報を保存 txの詳細情報が必要
 	// Hex, target utxos, total, fee
+
 	return hex, nil
 }
 
