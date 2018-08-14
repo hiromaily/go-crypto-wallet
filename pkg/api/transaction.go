@@ -16,6 +16,13 @@ import (
 //TODO:参考に(中国語のサイト)
 //https://www.haowuliaoa.com/article/info/11350.html
 
+//transactionの命名ルールについて
+//*wire.MsgTxなどは、txがsuffixとして扱われているため、それに習う。e.g. hexTx, hashTxなど
+
+//入金時における、トランザクション作成順序
+//[Online]  CreateRawTransaction
+//[Offline] SignRawTransactionByHex
+
 // FundRawTransactionResult fundrawtransactionをcallしたresponseの型
 type FundRawTransactionResult struct {
 	Hex       string `json:"hex"`
@@ -23,26 +30,89 @@ type FundRawTransactionResult struct {
 	Changepos int64  `json:"changepos"`
 }
 
-//Result:
-//	{
-//		"hex":       "value", (string)  The resulting raw transaction (hex-encoded string)
-//		"fee":       n,         (numeric) Fee in BTC the resulting transaction pays
-//		"changepos": n          (numeric) The position of the added change output, or -1
-//	}
+// ToHex 16進数のstringに変換する
+func (b *Bitcoin) ToHex(tx *wire.MsgTx) (string, error) {
+	buf := bytes.NewBuffer(make([]byte, 0, tx.SerializeSize()))
+	if err := tx.Serialize(buf); err != nil {
+		return "", errors.Errorf("tx.Serialize(): error: %v", err)
+	}
+	return hex.EncodeToString(buf.Bytes()), nil
+}
+
+//ToMsgTx 16進数のstringから、wire.MsgTxに変換する
+func (b *Bitcoin) ToMsgTx(txHex string) (*wire.MsgTx, error) {
+	byteHex, err := hex.DecodeString(txHex)
+	if err != nil {
+		return nil, errors.Errorf("hex.DecodeString(): error: %v", err)
+	}
+
+	var msgTx wire.MsgTx
+	if err := msgTx.Deserialize(bytes.NewReader(byteHex)); err != nil {
+		return nil, err
+	}
+
+	return &msgTx, nil
+}
+
+// DecodeRawTransaction Hex stringをデコードして、Rawのトランザクションデータに変換する
+func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*btcjson.TxRawResult, error) {
+	byteHex, err := hex.DecodeString(hexTx)
+	if err != nil {
+		return nil, errors.Errorf("hex.DecodeString(): error: %v", err)
+	}
+	resTx, err := b.client.DecodeRawTransaction(byteHex)
+	if err != nil {
+		return nil, errors.Errorf("client.DecodeRawTransaction(): error: %v", err)
+	}
+
+	return resTx, nil
+}
+
+// GetRawTransactionByHex Hexからトランザクションを取得する
+func (b *Bitcoin) GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error) {
+
+	hashTx, err := chainhash.NewHashFromStr(strHashTx)
+	if err != nil {
+		return nil, errors.Errorf("chainhash.NewHashFromStr(%s): error: %v", strHashTx, err)
+	}
+
+	tx, err := b.client.GetRawTransaction(hashTx)
+	if err != nil {
+		return nil, errors.Errorf("GetRawTransaction(hash): error: %v", err)
+	}
+	//MsgTx()
+	//tx.MsgTx()
+
+	return tx, nil
+}
 
 // GetTransactionByTxID txIDからトランザクション詳細を取得する
 func (b *Bitcoin) GetTransactionByTxID(txID string) (*btcjson.GetTransactionResult, error) {
 	// Transaction詳細を取得(必要な情報があるかどうか不明)
-	hash, err := chainhash.NewHashFromStr(txID)
+	hashTx, err := chainhash.NewHashFromStr(txID)
 	if err != nil {
 		return nil, errors.Errorf("chainhash.NewHashFromStr(%s): error: %v", txID, err)
 	}
-	txResult, err := b.client.GetTransaction(hash)
+	resTx, err := b.client.GetTransaction(hashTx)
 	if err != nil {
-		return nil, errors.Errorf("GetTransaction(%s): error: %v", hash, err)
+		return nil, errors.Errorf("GetTransaction(%s): error: %v", hashTx, err)
 	}
+	//type GetTransactionResult struct {
+	//	Amount          float64                       `json:"amount"`
+	//	Fee             float64                       `json:"fee,omitempty"`
+	//	Confirmations   int64                         `json:"confirmations"`
+	//	BlockHash       string                        `json:"blockhash"`
+	//	BlockIndex      int64                         `json:"blockindex"`
+	//	BlockTime       int64                         `json:"blocktime"`
+	//	TxID            string                        `json:"txid"`
+	//	WalletConflicts []string                      `json:"walletconflicts"`
+	//	Time            int64                         `json:"time"`
+	//	TimeReceived    int64                         `json:"timereceived"`
+	//	Details         []GetTransactionDetailsResult `json:"details"`
+	//	Hex             string                        `json:"hex"`
+	//}
 
-	return txResult, nil
+	return resTx, nil
 }
 
 // GetTxOutByTxID TxOutを指定したトランザクションIDから取得する
@@ -52,9 +122,7 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 		return nil, errors.Errorf("chainhash.NewHashFromStr(%s): error: %v", txID, err)
 	}
 
-	// Gettxout
-	// txHash *chainhash.Hash, index uint32, mempool bool
-	//return b.Client.GetTxOut(hash, 0, false)
+	// Gettxout / txHash *chainhash.Hash, index uint32, mempool bool
 	txOutResult, err := b.client.GetTxOut(hash, index, false)
 	if err != nil {
 		return nil, errors.Errorf("GetTxOut(%s, %d, false): error: %v", hash, index, err)
@@ -80,80 +148,25 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 	//}
 }
 
-// ToHex 16進数のstringに変換する
-func (b *Bitcoin) ToHex(tx *wire.MsgTx) (string, error) {
-	buf := bytes.NewBuffer(make([]byte, 0, tx.SerializeSize()))
-	if err := tx.Serialize(buf); err != nil {
-		return "", errors.Errorf("tx.Serialize(): error: %v", err)
-	}
-	return hex.EncodeToString(buf.Bytes()), nil
-}
-
-//ToMsgTx 16進数のstringから、wire.MsgTxに変換する
-func (b *Bitcoin) ToMsgTx(txHex string) (*wire.MsgTx, error) {
-	byteHex, err := hex.DecodeString(txHex)
-	if err != nil {
-		return nil, errors.Errorf("hex.DecodeString(): error: %v", err)
-	}
-
-	var msgTx wire.MsgTx
-	if err := msgTx.Deserialize(bytes.NewReader(byteHex)); err != nil {
-		return nil, err
-	}
-	//return btcutil.NewTx(&msgTx), nil
-	return &msgTx, nil
-}
-
-// DecodeRawTransaction Hex stringをデコードして、Rawのトランザクションデータに変換する
-func (b *Bitcoin) DecodeRawTransaction(txHex string) (*btcjson.TxRawResult, error) {
-	byteHex, err := hex.DecodeString(txHex)
-	if err != nil {
-		return nil, errors.Errorf("hex.DecodeString(): error: %v", err)
-	}
-	resTx, err := b.client.DecodeRawTransaction(byteHex)
-	if err != nil {
-		return nil, errors.Errorf("client.DecodeRawTransaction(): error: %v", err)
-	}
-
-	return resTx, nil
-}
-
-// GetRawTransactionByHex Hexからトランザクションを取得する
-func (b *Bitcoin) GetRawTransactionByHex(strTxHash string) (*btcutil.Tx, error) {
-
-	txHash, err := chainhash.NewHashFromStr(strTxHash)
-	if err != nil {
-		return nil, errors.Errorf("chainhash.NewHashFromStr(%s): error: %v", strTxHash, err)
-	}
-
-	tx, err := b.client.GetRawTransaction(txHash)
-	if err != nil {
-		return nil, errors.Errorf("GetRawTransaction(hash): error: %v", err)
-	}
-	//MsgTx()
-	//tx.MsgTx()
-
-	return tx, nil
-}
-
 // CreateRawTransaction Rawトランザクションを作成する
+//  => watch only wallet(online)で利用されることを想定
+// こちらは多対1用の送金、つまり入金時、集約用アドレスに一括して送信するケースで利用することを想定
+// [Noted] 手数料を考慮せず、全額送金しようとすると、SendRawTransaction()で、`min relay fee not met`
 func (b *Bitcoin) CreateRawTransaction(sendAddr string, amount btcutil.Amount, inputs []btcjson.TransactionInput) (*wire.MsgTx, error) {
-	sendAddrDecoded, err := btcutil.DecodeAddress(sendAddr, b.GetChainConf())
 	//TODO:sendAddrの厳密なチェックがセキュリティ的に必要な場面もありそう
-	//TODO:このタイミングでfeeの計算も必要っぽい
-	//TODO:トランザクションのkbに応じて、手数料を算出
-	//TODO:でもfeeのパラメータを入れるのは、sendrawtransaction
+	sendAddrDecoded, err := btcutil.DecodeAddress(sendAddr, b.GetChainConf())
 	if err != nil {
 		return nil, errors.Errorf("btcutil.DecodeAddress(%s): error: %v", sendAddr, err)
 	}
 
-	//TODO: 手数料を考慮せず、全額送金しようとすると、SendRawTransaction()で、`min relay fee not met`
-	//つまり、そのチェックロジックも入れたほうがいいかもしれない
-	log.Printf("[Debug] amout:%d, %v", amount, amount) // 1.95 BTC => %v表示だと、単位まで表示される！
+	log.Printf("[Debug] amount:%d, %v", amount, amount) // 1.95 BTC => %v表示だと、単位まで表示される！
 
+	// パラメータを作成する
 	outputs := make(map[btcutil.Address]btcutil.Amount)
 	outputs[sendAddrDecoded] = amount //satoshi
 	lockTime := int64(0)              //TODO:Raw locktime ここは何をいれるべき？
+
+	// CreateRawTransaction
 	msgTx, err := b.client.CreateRawTransaction(inputs, outputs, &lockTime)
 	if err != nil {
 		return nil, errors.Errorf("btcutil.CreateRawTransaction(): error: %v", err)
@@ -163,7 +176,7 @@ func (b *Bitcoin) CreateRawTransaction(sendAddr string, amount btcutil.Amount, i
 }
 
 // FundRawTransaction 送信したい金額に応じて、自動的にutxoを算出してくれる
-// TODO:現時点で使う予定無し
+//  現時点で使う予定無し
 func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, error) {
 	//fundrawtransaction
 	//https://bitcoincore.org/en/doc/0.16.2/rpc/rawtransactions/fundrawtransaction/
@@ -193,7 +206,7 @@ func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, err
 	rawResult, err := b.client.RawRequest("fundrawtransaction", []json.RawMessage{bHex, bFeeRate})
 	//rawResult, err := b.client.RawRequest("fundrawtransaction", []json.RawMessage{bHex})
 	if err != nil {
-		//FIXME: error: -4: Insufficient funds
+		//error: -4: Insufficient funds
 		return nil, errors.Errorf("json.RawRequest(fundrawtransaction): error: %v", err)
 	}
 
@@ -208,8 +221,25 @@ func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, err
 	return &fundRawTransactionResult, nil
 }
 
+// SignRawTransaction *wire.MsgTxからRawのトランザクションに署名する
+// こちらは一連の流れを調査するために、CreateRawTransaction()の戻りに合わせたI/F (実際の運用で利用されることはないはず)
+// 秘密鍵を保持している側のwallet(つまりcold wallet)で実行することを想定
+func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) {
+	//署名
+	msgTx, isSigned, err := b.client.SignRawTransaction(tx)
+	if err != nil {
+		return nil, false, errors.Errorf("SignRawTransaction(): error: %v", err)
+	}
+	//Multisigの場合、これによって署名が終了したか判断するはず
+	//if !isSigned {
+	//	return nil, errors.New("SignRawTransaction() can not sign on given transaction")
+	//}
+
+	return msgTx, isSigned, nil
+}
+
 // SignRawTransactionByHex HexからRawトランザクションを生成し、署名する
-// オフライン(coldwallet)での利用を想定
+// 秘密鍵を保持している側のwallet(つまりcold wallet)で実行することを想定
 func (b *Bitcoin) SignRawTransactionByHex(hex string) (string, bool, error) {
 	// Hexからトランザクションを取得
 	msgTx, err := b.ToMsgTx(hex)
@@ -233,32 +263,21 @@ func (b *Bitcoin) SignRawTransactionByHex(hex string) (string, bool, error) {
 	return hexTx, isSigned, nil
 }
 
-// SignRawTransaction Rawのトランザクションに署名する
-func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) {
-	//TODO: It should be implemented on Cold Strage
-	//この処理がHotwallet内で動くということは、重要な情報がwallet内に含まれてしまっているということでは？
-	msgTx, isSigned, err := b.client.SignRawTransaction(tx)
-	if err != nil {
-		return nil, false, errors.Errorf("SignRawTransaction(): error: %v", err)
-	}
-	//if !isSigned {
-	//	return nil, errors.New("SignRawTransaction() can not sign on given transaction")
-	//}
-
-	return msgTx, isSigned, nil
-}
-
 // SendRawTransaction Rawトランザクションを送信する
+// こちらは一連の流れを調査するために、CreateRawTransaction()の戻りに合わせたI/F (実際の運用で利用されることはないはず)
+// オンラインで実行される必要がある
 func (b *Bitcoin) SendRawTransaction(tx *wire.MsgTx) (*chainhash.Hash, error) {
+	//送信
 	hash, err := b.client.SendRawTransaction(tx, true)
 	if err != nil {
-		return nil, errors.Errorf("SendRawTransaction(): error: %v", err)
+		return nil, errors.Errorf("client.SendRawTransaction(): error: %v", err)
 	}
 
 	return hash, nil
 }
 
 // SendTransactionByHex 外部から渡されたバイト列からRawトランザクションを送信する
+// オンラインで実行される必要がある
 func (b *Bitcoin) SendTransactionByHex(hex string) (*chainhash.Hash, error) {
 	// Hexからトランザクションを取得
 	msgTx, err := b.ToMsgTx(hex)
@@ -266,19 +285,27 @@ func (b *Bitcoin) SendTransactionByHex(hex string) (*chainhash.Hash, error) {
 		return nil, err
 	}
 
-	hash, err := b.client.SendRawTransaction(msgTx, true)
+	//送信
+	hash, err := b.SendRawTransaction(msgTx)
+	//hash, err := b.client.SendRawTransaction(msgTx, true)
 	if err != nil {
 		return nil, errors.Errorf("SendRawTransaction(): error: %v", err)
 	}
+
+	//txID
+	//hash.String()
 
 	return hash, nil
 }
 
 // SendTransactionByByte 外部から渡されたバイト列からRawトランザクションを送信する
+// オンラインで実行される必要がある
+// TODO:これはいつ使うんだっけ?? 作ったものの、呼ばれている箇所は見当たらない
 func (b *Bitcoin) SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error) {
 	//TODO:渡された文字列は暗号化されていることを想定
 	//TODO:ここで復号化の処理が必要
 
+	//[]byte to wireTx
 	wireTx := new(wire.MsgTx)
 	r := bytes.NewBuffer(rawTx)
 
@@ -286,7 +313,9 @@ func (b *Bitcoin) SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error) {
 		return nil, errors.Errorf("wireTx.Deserialize(): error: %v", err)
 	}
 
-	hash, err := b.client.SendRawTransaction(wireTx, true)
+	//送信
+	hash, err := b.SendRawTransaction(wireTx)
+	//hash, err := b.client.SendRawTransaction(wireTx, true)
 	if err != nil {
 		return nil, errors.Errorf("SendRawTransaction(): error: %v", err)
 	}
@@ -294,8 +323,8 @@ func (b *Bitcoin) SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error) {
 	return hash, nil
 }
 
-// SequentialTransaction 検証用: 一連の未署名トランザクション作成から送信までの流れ
-//func (b *Bitcoin) SequentialTransaction(tx *wire.MsgTx) error {
+// SequentialTransaction [Debug用]: 一連の未署名トランザクション作成から送信までの流れ
+// TODO:Testに移動するか
 func (b *Bitcoin) SequentialTransaction(hex string) (*chainhash.Hash, *btcutil.Tx, error) {
 	// Hexからトランザクションを取得
 	msgTx, err := b.ToMsgTx(hex)
