@@ -5,6 +5,7 @@ import (
 )
 
 // GetBlockCount Blockのカウントを返す
+//  e.g. 1383526
 func (b *Bitcoin) GetBlockCount() (int64, error) {
 	blockCnt, err := b.client.GetBlockCount()
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/pkg/errors"
+	"log"
 )
 
 // UnlockAllUnspentTransaction Lockされたトランザクションの解除
@@ -15,8 +16,12 @@ func (b *Bitcoin) UnlockAllUnspentTransaction() error {
 	}
 
 	if len(list) != 0 {
+		log.Printf("b.client.ListLockUnspent() %v", list)
 		err = b.client.LockUnspent(true, list)
 		if err != nil {
+			//FIXME: -8: Invalid parameter, expected unspent output たまにこのエラーが出る。。。
+			//
+			// 以前はBitcoin Coreを再起動したら直ったが。。。
 			return errors.Errorf("LockUnspent(): error: %v", err)
 		}
 	}

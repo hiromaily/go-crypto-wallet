@@ -43,6 +43,8 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 	// Watch only walletであれば、ListUnspentで実現可能
 	//list, err := w.Btc.Client().ListUnspent()
 	list, err := w.Btc.Client().ListUnspentMin(6)
+	//FIXME: multisigのアドレスはこれで取得できないかも。。。それか、Bitcoin Coreの表示がおかしい。。。
+	//FIXME: multisigからhokanに転送したので、multisigには残高がないことが正しい
 	if err != nil {
 		return "", errors.Errorf("ListUnspent(): error: %v", err)
 	}

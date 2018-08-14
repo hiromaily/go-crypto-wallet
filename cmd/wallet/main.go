@@ -22,6 +22,7 @@ import (
 //TODO:coldウォレットへのデータ移行機能が必要なはず
 //TODO:multisigの実装
 //TODO:生成したkeyの暗号化処理のpkgが必要になるはず
+//TODO:入金時にMultisigでの送金は不要な気がする
 
 // Options コマンドラインオプション
 type Options struct {
