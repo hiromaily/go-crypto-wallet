@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 
-	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 )
 
@@ -14,28 +13,28 @@ type AddMultisigAddressResult struct {
 }
 
 // CreateMultiSig マルチシグを Rawトランザクション用に作成する
-// requiredSigs: 取引成立に必要なサイン数
-// addresses: 自分のアドレス+承認者のアドレスxN をいれていく
-// TODO:各ユーザーに割り振るアドレスは、Multisigのアドレスになる？？
-// TODO:ここで作ったアドレスに送金してみてtest
-//func (b *Bitcoin) CreateMultiSig(requiredSigs int, addresses []string, accountName string) (btcutil.Address, error) {
+//  - requiredSigs: 取引成立に必要なサイン数
+//  - addresses:    自分のアドレス+承認者のアドレスxN をいれていく
+// TODO:各ユーザーに割り振るアドレスは、Multisigのアドレスになる？？->これは集約用にいくだけなので、問題ないような
+// TODO:保管用のアドレスだったり、トレード用のアドレスはMultisig対応すべき
 func (b *Bitcoin) CreateMultiSig(requiredSigs int, addresses []string, accountName string) (*AddMultisigAddressResult, error) {
 
 	if requiredSigs > len(addresses) {
 		return nil, errors.New("number of given address should be at least same to requiredSigs or more")
 	}
 
-	//TODO:NativeのJson RPCを使うのであれば不要かと
-	addrs := make([]btcutil.Address, len(addresses))
-	for idx, ad := range addresses {
-		add, err := b.DecodeAddress(ad)
-		if err != nil {
-			return nil, err
-		}
-		//
-		//addrs = append(addrs, add)
-		addrs[idx] = add
-	}
+	//20180814時点で、pkg側にバグがあるため、NativeのJson RPCを使わざるを得ない
+	//addrs := make([]btcutil.Address, len(addresses))
+	//for idx, ad := range addresses {
+	//	add, err := b.DecodeAddress(ad)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	//
+	//	//addrs = append(addrs, add)
+	//	addrs[idx] = add
+	//}
+
 	// deprecateされているので、こちらは使用しない。
 	//res, err := b.client.CreateMultisig(requiredSigs, addrs)
 	//error: -5: Invalid public key
@@ -79,7 +78,6 @@ func (b *Bitcoin) CreateMultiSig(requiredSigs int, addresses []string, accountNa
 	//call addmultisigaddress
 	rawResult, err := b.client.RawRequest("addmultisigaddress", jsonRawMsg)
 	if err != nil {
-		//client.RawRequest(addmultisigaddress): error: -1: JSON value is not an array as expected
 		return nil, errors.Errorf("client.RawRequest(addmultisigaddress): error: %v", err)
 	}
 
