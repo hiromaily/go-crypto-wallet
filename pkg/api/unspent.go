@@ -20,8 +20,8 @@ func (b *Bitcoin) UnlockAllUnspentTransaction() error {
 		err = b.client.LockUnspent(true, list)
 		if err != nil {
 			//FIXME: -8: Invalid parameter, expected unspent output たまにこのエラーが出る。。。
-			//
 			// 以前はBitcoin Coreを再起動したら直ったが。。。
+			// loggingコマンド, もしくは ./testnet3/wallets/db.logのチェック??
 			return errors.Errorf("LockUnspent(): error: %v", err)
 		}
 	}
