@@ -81,6 +81,107 @@ func (w *Wallet) isFoundTxIDAndVout(txID string, vout uint32, inputs []btcjson.T
 func (w *Wallet) CreateUnsignedTransactionForPayment() error {
 	//DBから情報を取得、もしくはNatsからのリクエストをトリガーにするか、今はまだ未定
 	//とりあえず、テストデータで実装
+	//実際には、こちらもamountでソートしておく=> ソートは不要
+	userPayments := w.createDebugUserPayment()
+
+	//2.送信合計金額を算出
+	var userTotal btcutil.Amount
+	for _, val := range userPayments {
+		userTotal += val.validAmount
+	}
+
+	//3. Listunspent()にてpaymentアカウント用のutxoをすべて取得する
+	//listunspent 6  9999999 [\"2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW\"]
+	addr, err := w.Btc.DecodeAddress(w.Btc.PaymentAddress())
+	if err != nil {
+		return errors.Errorf("DecodeAddress(): error: %v", err)
+	}
+	unspentList, err := w.Btc.Client().ListUnspentMinMaxAddresses(6, 9999999, []btcutil.Address{addr})
+	if err != nil {
+		//致命的なエラー
+		return err
+	}
+
+	//3. 送金の金額と近しいutxoでtxを作成するため、ソートしておく => これも不要
+	//unspentList[0].Amount
+	//sort.Slice(unspentList, func(i, j int) bool {
+	//	//small to big
+	//	return unspentList[i].Amount < unspentList[j].Amount
+	//})
+
+	//grok.Value(userPayments)
+	//grok.Value(unspentList)
+
+	var (
+		inputs     []btcjson.TransactionInput
+		tmpOutputs = map[string]btcutil.Amount{}
+		outputs    = map[btcutil.Address]btcutil.Amount{}
+	)
+	//合計金額を超えるまで、listunspentからinputsを作成する
+	var inputTotal btcutil.Amount
+	var isDone bool
+	for _, utxo := range unspentList {
+		//utxo.Amount
+		//utxo.Vout
+		//utxo.TxID
+		amt, err := btcutil.NewAmount(utxo.Amount)
+		if err != nil {
+			log.Println("[Error] unexpected error:", err)
+			continue
+		}
+		inputTotal += amt
+		//新規利用のため、inputを作成
+		inputs = append(inputs, btcjson.TransactionInput{
+			Txid: utxo.TxID,
+			Vout: utxo.Vout,
+		})
+		if inputTotal > userTotal {
+			isDone = true
+			break
+		}
+	}
+	if !isDone {
+		//これは金額が足りなかったことを意味するので致命的
+		return errors.New("[fatal error] bitcoin is insufficient in trading account of ours")
+	}
+	//outputは別途こちらで作成
+	for _, userPayment := range userPayments {
+		if _, ok := tmpOutputs[userPayment.receiverAddr]; ok {
+			//加算する
+			tmpOutputs[userPayment.receiverAddr] += userPayment.validAmount
+		} else {
+			//新規送信先を作成
+			tmpOutputs[userPayment.receiverAddr] = userPayment.validAmount
+		}
+	}
+
+	//差分でお釣り用のoutputを作成する
+	change := inputTotal - userTotal
+	tmpOutputs[w.Btc.PaymentAddress()] = change
+
+	//tmpOutputsをoutputsとして変換する
+	for key, val := range tmpOutputs {
+		addr, err = w.Btc.DecodeAddress(key)
+		if err != nil {
+			//これは本来事前にチェックされるため、ありえないはず
+			log.Printf("[Error] unexpected error converting string to address")
+		}
+		outputs[addr] = val
+	}
+
+	//TODO:inputsをすべてlockする
+	grok.Value(inputs)
+	grok.Value(tmpOutputs)
+	grok.Value(outputs)
+
+	return nil
+}
+
+// CreateUnsignedTransactionForPaymentOld 支払いのための未署名トランザクションを作成する
+// TODO:別ロジックとして考えるため、一旦退避
+func (w *Wallet) CreateUnsignedTransactionForPaymentOld() error {
+	//DBから情報を取得、もしくはNatsからのリクエストをトリガーにするか、今はまだ未定
+	//とりあえず、テストデータで実装
 	//実際には、こちらもamountでソートしておく
 	userPayments := w.createDebugUserPayment()
 
@@ -91,6 +192,10 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() error {
 		return errors.Errorf("DecodeAddress(): error: %v", err)
 	}
 	unspentList, err := w.Btc.Client().ListUnspentMinMaxAddresses(6, 9999999, []btcutil.Address{addr})
+	if err != nil {
+		//致命的なエラー
+		return err
+	}
 
 	//3. 送金の金額と近しいutxoでtxを作成するため、ソートしておく
 	//unspentList[0].Amount
@@ -105,10 +210,9 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() error {
 	var (
 		inputs     []btcjson.TransactionInput
 		tmpOutputs = map[string]btcutil.Amount{}
-		outputs = map[btcutil.Address]btcutil.Amount{}
+		outputs    = map[btcutil.Address]btcutil.Amount{}
 	)
 	//送信ユーザー毎に処理
-	//TODO:lockの処理は後ほど
 	for _, userPayment := range userPayments {
 		//送金金額をチェック
 		//userPayment
@@ -164,7 +268,6 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() error {
 	//TODO:おつりを自分に送信せねばならない
 	//inputsにあるものはすべて
 	grok.Value(unspentList)
-
 
 	//TODO:inputsをすべてlockする
 	grok.Value(inputs)

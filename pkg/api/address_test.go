@@ -63,7 +63,7 @@ func TestValidateAddress(t *testing.T) {
 			t.Errorf("Unexpectedly error occorred. %v", err)
 		}
 		if err == nil && val.isErr {
-			t.Error("Error is expected. However nothing happend.")
+			t.Error("Error is expected. However nothing happened.")
 		}
 	}
 }
