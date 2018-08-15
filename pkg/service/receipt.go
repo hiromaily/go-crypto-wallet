@@ -6,6 +6,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
+	"github.com/hiromaily/go-bitcoin/pkg/file"
 	"github.com/pkg/errors"
 )
 
@@ -176,6 +177,8 @@ func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjs
 
 	// 6. GCSにトランザクションファイルを作成
 	//TODO:本来、この戻り値をDumpして、GCSに保存、それをDLして、USBに入れてコールドウォレットに移動しなくてはいけない
+	//TODO:Debug時はlocalに出力することとする
+	file.WriteFileForUnsigned(hex)
 
 	// 7. Databaseに必要な情報を保存
 	//TODO:その後、Databaseに情報を保存 txの詳細情報が必要

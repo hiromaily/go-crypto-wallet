@@ -17,6 +17,7 @@ type Wallet struct {
 }
 
 //InitialSettings 実行前に必要なすべての設定をこちらで行う
+//TODO:hotwalletとColdwalletで設定が異なるので要調整
 func InitialSettings(confPath string) (*Wallet, error) {
 	// Config
 	conf, err := toml.New(confPath)

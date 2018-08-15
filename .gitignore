@@ -7,4 +7,5 @@ coldwallet
 !cmd/coldwallet
 data/kvs/*
 !.gitkeep
+data/tx/*
 cayenne-dev-strage.json

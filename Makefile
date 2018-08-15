@@ -17,7 +17,11 @@ wallet: bld
 	./wallet -f 1
 
 cold-wallet: bld
-	./coldwallet -f 3
+	./coldwallet -f 4
+
+cold-wallet-sign: bld
+	./coldwallet -f 5 -i ./data/tx/unsigned_1534298524369506187
+
 
 ###############################################################################
 # Test

@@ -5,6 +5,8 @@ import (
 	"log"
 )
 
+//TODO: こちらは不要になるはず。service/signature.go側にて開発
+
 // MultiSigByHex 一連のマルチシグアドレスに対しての署名処理
 // オフラインで使うことを想定
 func (w *Wallet) MultiSigByHex(hex string) (string, error) {
@@ -22,6 +24,7 @@ func (w *Wallet) MultiSigByHex(hex string) (string, error) {
 		return "", err
 	}
 	//TODO:multisigでも1回でisSignedがtrueになった。。。
+	//つまり,実行環境化にて両方の秘密鍵が保持されている場合に、1回でOKになるのでは？
 	log.Printf("[Debug] isSigned01 is %t, false is expected.", isSigned)
 
 	// 署名2

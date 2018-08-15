@@ -109,8 +109,15 @@ func switchFunction(wallet *service.Wallet) {
 			log.Fatalf("%+v", err)
 		}
 		log.Printf("[Debug] 送信までDONE!! %s", hash.String())
-
 	case 13:
+		//TODO:実際にはUSBで署名済の16進数で書かれたtransactionの文字列を処理するのだが、
+		// 1.GPSにupload(web管理画面から行う??)
+		// 2.Uploadされたtransactionファイルから、送信する？
+		// 3. unsignedトランザクションファイル名と、signedトランザクションファイル名のリレーションをDBに保存したほうがいいか？
+
+		//[Debug]とりあえず、localのファイルから読みこんで送信してみる
+
+	case 20:
 		log.Print("Run: [Debug用]送金までの一連の流れを確認")
 
 		//Debug中のみ
