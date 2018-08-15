@@ -8,6 +8,7 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/jessevdk/go-flags"
+	"github.com/bookerzzz/grok"
 )
 
 //こちらはHotwallet、ただし、Watch Only Walletとしての機能を実装していく。
@@ -72,6 +73,15 @@ func switchFunction(wallet *service.Wallet) {
 		}
 		log.Printf("Estimatesmartfee: %f\n", feePerKb)
 	case 3:
+		//[Debug用]手数料算出
+		log.Print("Run: ロギング logging")
+		logData, err := wallet.Btc.Logging()
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		//Debug
+		grok.Value(logData)
+	case 4:
 		//[Debug用]ValidateAddress
 		log.Print("Run: AddressのValidationチェック")
 		err := wallet.Btc.ValidateAddress("2NFXSXxw8Fa6P6CSovkdjXE6UF4hupcTHtr")
@@ -116,7 +126,11 @@ func switchFunction(wallet *service.Wallet) {
 		// 3. unsignedトランザクションファイル名と、signedトランザクションファイル名のリレーションをDBに保存したほうがいいか？
 
 		//[Debug]とりあえず、localのファイルから読みこんで送信してみる
-		wallet.SendFromFile("./data/tx/signed_1534303789374409841")
+		txID, err := wallet.SendFromFile("./data/tx/signed_1534303789374409841")
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		log.Printf("[Debug] 送信までDONE!! %s", txID)
 
 	case 20:
 		log.Print("Run: [Debug用]送金までの一連の流れを確認")

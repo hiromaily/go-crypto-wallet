@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
