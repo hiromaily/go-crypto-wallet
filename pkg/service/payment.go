@@ -46,7 +46,7 @@ func (w *Wallet) createDebugUserPayment() []UserPayment {
 	//btcutil.Address型, btcutil.Amount型に変換,
 	var err error
 	for idx, val := range userPayments {
-		//Address
+		//Address TODO:このタイミングでaddressは不要かもしれない
 		userPayments[idx].validRecAddr, err = w.Btc.DecodeAddress(val.receiverAddr)
 		if err != nil {
 			//これは本来事前にチェックされるため、ありえないはず
@@ -103,7 +103,8 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() error {
 	grok.Value(unspentList)
 
 	var (
-		inputs  []btcjson.TransactionInput
+		inputs     []btcjson.TransactionInput
+		tmpOutputs = map[string]btcutil.Amount{}
 		outputs = map[btcutil.Address]btcutil.Amount{}
 	)
 	//送信ユーザー毎に処理
@@ -128,14 +129,17 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() error {
 				//Outputを更新
 				//log.Println("[Debug]", userPayment.validRecAddr)
 				//FIXME:userPayment.validRecAddrはポインタとして保持しているので、値が同じでも異なるものとして認識されてしまう。。。
-				if _, ok := outputs[userPayment.validRecAddr]; ok {
+				//if _, ok := outputs[userPayment.validRecAddr]; ok {
+				if _, ok := tmpOutputs[userPayment.receiverAddr]; ok {
 					log.Println(" 加算")
 					//加算する
-					outputs[userPayment.validRecAddr] += userPayment.validAmount
+					//outputs[userPayment.validRecAddr] += userPayment.validAmount
+					tmpOutputs[userPayment.receiverAddr] += userPayment.validAmount
 				} else {
 					log.Println(" 新規")
 					//新規送信先を作成
-					outputs[userPayment.validRecAddr] = userPayment.validAmount
+					//outputs[userPayment.validRecAddr] = userPayment.validAmount
+					tmpOutputs[userPayment.receiverAddr] = userPayment.validAmount
 				}
 				//unspentListも更新する
 				unspentList[idx].Amount -= userPayment.amount
@@ -150,10 +154,21 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() error {
 			log.Printf("[Error] unexpected error: proper utxo could not be found in our accout to send")
 		}
 	}
+	//tmpOutputsをoutputsとして変換する
+	for key, val := range tmpOutputs {
+		addr, err = w.Btc.DecodeAddress(key)
+		if err != nil {
+			//これは本来事前にチェックされるため、ありえないはず
+			log.Printf("[Error] unexpected error converting string to address")
+		}
+		outputs[addr] = val
+	}
+
 	//TODO:おつりを自分に送信せねばならない
 
 	//TODO:inputsをすべてlockする
 	grok.Value(inputs)
+	grok.Value(tmpOutputs)
 	grok.Value(outputs)
 
 	return nil
