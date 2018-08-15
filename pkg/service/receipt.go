@@ -10,6 +10,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+// 入金チェックから、utxoを取得し、未署名トランザクションを作成する
+
 // DetectReceivedCoin Wallet内アカウントに入金があれば、そこから、未署名のトランザクションを返す
 // 古い未署名のトランザクションは変動するfeeの関係で、stackしていく(再度実行時は差分を抽出する)仕様にはしていない。
 // 送信処理後には、unspent()でutxoとして取得できなくなるので、シーケンスで送信まで行うことを想定している
@@ -42,22 +44,22 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 	//TODO:とりあえず、ListUnspentを使っているが、全ユーザーにGetUnspentByAddress()を使わないといけないかも
 	//TODO:ListUnspent内で、検索すべきBlock番号まで内部的に保持できてるっぽい
 	// Watch only walletであれば、ListUnspentで実現可能
-	list, err := w.Btc.Client().ListUnspentMin(6)
+	unspentList, err := w.Btc.Client().ListUnspentMin(6)
 	//FIXME: multisigのアドレスはこれで取得できないかも。。。それか、Bitcoin Coreの表示がおかしい。。。
 	//FIXME: multisigからhokanに転送したので、multisigには残高がないことが正しい
 	if err != nil {
 		return "", errors.Errorf("ListUnspentMin(): error: %v", err)
 	}
-	log.Printf("[Debug]List Unspent: %v\n", list)
-	grok.Value(list) //Debug
+	log.Printf("[Debug]List Unspent: %v\n", unspentList)
+	grok.Value(unspentList) //Debug
 
-	if len(list) == 0 {
+	if len(unspentList) == 0 {
 		return "", nil
 	}
 
 	var total btcutil.Amount
 	var inputs []btcjson.TransactionInput
-	for _, tx := range list {
+	for _, tx := range unspentList {
 		//TODO: spendableは実環境では使えない。とりあえず、confirmation数でチェックにしておく
 		// 6に満たない場合、まだ未確定であることを意味するはず => これはListUnspent()のパラメータで可能のためコメントアウト
 		//https://bitcoin.stackexchange.com/questions/63198/why-outputs-spendable-and-solvable-are-false
@@ -130,8 +132,8 @@ func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjs
 
 	// TODO:ここはWrapperとして別funcで定義したほうがいいかも
 	// 1.CreateRawTransaction(仮で作成し、この後サイズから手数料を算出する)
-	log.Println("w.Btc.StoreAddr() :", w.Btc.StoreAddr())
-	msgTx, err := w.Btc.CreateRawTransaction(w.Btc.StoreAddr(), total, inputs)
+	log.Println("w.Btc.StoredAddress() :", w.Btc.StoredAddress())
+	msgTx, err := w.Btc.CreateRawTransaction(w.Btc.StoredAddress(), total, inputs)
 	if err != nil {
 		return "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
@@ -153,7 +155,7 @@ func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjs
 	log.Printf("[Debug]Total Coin to send:%d(Satoshi) after fee calculated, input length: %d", total, len(inputs))
 
 	// 4.再度 CreateRawTransaction
-	msgTx, err = w.Btc.CreateRawTransaction(w.Btc.StoreAddr(), total, inputs)
+	msgTx, err = w.Btc.CreateRawTransaction(w.Btc.StoredAddress(), total, inputs)
 	if err != nil {
 		return "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}

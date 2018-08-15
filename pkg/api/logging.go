@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// LoggingResult logging RPC のレスポンス
 type LoggingResult struct {
 	Net         int64 `json:"net"`
 	Tor         int64 `json:"tor"`
@@ -30,6 +31,7 @@ type LoggingResult struct {
 	LevelDB     int64 `json:"leveldb"`
 }
 
+// Logging logging RPC をcallする
 func (b *Bitcoin) Logging() (*LoggingResult, error) {
 	rawResult, err := b.client.RawRequest("logging", []json.RawMessage{})
 	if err != nil {

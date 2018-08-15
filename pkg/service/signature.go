@@ -6,6 +6,8 @@ import (
 	"log"
 )
 
+// coldwallet側から未署名トランザクションを読み込み、署名を行う
+
 // signatureByHex 署名する
 // オフラインで使うことを想定
 func (w *Wallet) signatureByHex(hex string) (string, bool, error) {

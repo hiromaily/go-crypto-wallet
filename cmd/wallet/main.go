@@ -3,10 +3,9 @@ package main
 import (
 	"log"
 
+	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/chaincfg"
 	_ "github.com/go-sql-driver/mysql"
-
-	"github.com/bookerzzz/grok"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/jessevdk/go-flags"
 )
@@ -131,6 +130,9 @@ func switchFunction(wallet *service.Wallet) {
 			log.Fatalf("%+v", err)
 		}
 		log.Printf("[Debug] 送信までDONE!! %s", txID)
+	case 14:
+		log.Print("Run:出金トランザクション作成")
+		wallet.CreateUnsignedTransactionForPayment()
 
 	case 20:
 		log.Print("Run: [Debug用]送金までの一連の流れを確認")

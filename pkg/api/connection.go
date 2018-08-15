@@ -10,8 +10,15 @@ import (
 type Bitcoin struct {
 	client            *rpcclient.Client
 	chainConf         *chaincfg.Params
-	storedAddr        string
+	stored            *KeyInfo
+	payment           *KeyInfo
 	confirmationBlock int64
+}
+
+// KeyInfo 公開鍵アドレスと紐づくアカウント名
+type KeyInfo struct {
+	address    string
+	acountName string
 }
 
 // Connection is to local bitcoin core RPC server using HTTP POST mode
@@ -39,7 +46,10 @@ func Connection(conf *toml.BitcoinConf) (*Bitcoin, error) {
 		bit.chainConf = &chaincfg.TestNet3Params
 	}
 
-	bit.storedAddr = conf.Addr.Stored
+	bit.stored.address = conf.Stored.Address
+	bit.stored.acountName = conf.Stored.AccountName
+	bit.payment.address = conf.Payment.Address
+	bit.payment.acountName = conf.Payment.AccountName
 	bit.confirmationBlock = conf.Block.ConfirmationNum
 
 	return &bit, err
@@ -60,9 +70,24 @@ func (b *Bitcoin) Client() *rpcclient.Client {
 	return b.client
 }
 
-// StoreAddr 保管用アドレスを返す
-func (b *Bitcoin) StoreAddr() string {
-	return b.storedAddr
+// StoredAddress 保管用アドレスを返す
+func (b *Bitcoin) StoredAddress() string {
+	return b.stored.address
+}
+
+// StoredAccountName 保管用アカウント名を返す
+func (b *Bitcoin) StoredAccountName() string {
+	return b.stored.acountName
+}
+
+// PaymentAddress 支払い用アドレスを返す
+func (b *Bitcoin) PaymentAddress() string {
+	return b.payment.address
+}
+
+// PaymentAccountName 支払い用アカウント名を返す
+func (b *Bitcoin) PaymentAccountName() string {
+	return b.payment.acountName
 }
 
 // ConfirmationBlock Confirmationに必要なブロック数を返す

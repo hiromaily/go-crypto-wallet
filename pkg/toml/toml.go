@@ -23,8 +23,9 @@ type BitcoinConf struct {
 	DisableTLS bool   `toml:"disable_tls"`
 	IsMain     bool   `toml:"is_main"`
 
-	Block BitcoinBlockConf `toml:"block"`
-	Addr  BitcoinAddrConf  `toml:"address"`
+	Block   BitcoinBlockConf `toml:"block"`
+	Stored  BitcoinAddrConf  `toml:"stored"`
+	Payment BitcoinAddrConf  `toml:"payment"`
 }
 
 // BitcoinBlockConf Bitcoinブロック情報
@@ -32,9 +33,10 @@ type BitcoinBlockConf struct {
 	ConfirmationNum int64 `toml:"confirmation_num"`
 }
 
-// BitcoinAddrConf Bitcoin公開アドレス情報
+// BitcoinAddrConf 内部利用のためのBitcoin公開アドレス, アカウント情報
 type BitcoinAddrConf struct {
-	Stored string `toml:"stored"`
+	Address     string `toml:"address"`
+	AccountName string `toml:"account"`
 }
 
 // LevelDBConf LevelDB情報
