@@ -7,6 +7,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
+	"github.com/hiromaily/go-bitcoin/pkg/file"
 	"github.com/pkg/errors"
 )
 
@@ -78,7 +79,7 @@ func (w *Wallet) isFoundTxIDAndVout(txID string, vout uint32, inputs []btcjson.T
 }
 
 // CreateUnsignedTransactionForPayment 支払いのための未署名トランザクションを作成する
-func (w *Wallet) CreateUnsignedTransactionForPayment() error {
+func (w *Wallet) CreateUnsignedTransactionForPayment() (string, error) {
 	//DBから情報を取得、もしくはNatsからのリクエストをトリガーにするか、今はまだ未定
 	//とりあえず、テストデータで実装
 	//実際には、こちらもamountでソートしておく=> ソートは不要
@@ -94,12 +95,12 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() error {
 	//listunspent 6  9999999 [\"2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW\"]
 	addr, err := w.Btc.DecodeAddress(w.Btc.PaymentAddress())
 	if err != nil {
-		return errors.Errorf("DecodeAddress(): error: %v", err)
+		return "", errors.Errorf("DecodeAddress(): error: %v", err)
 	}
 	unspentList, err := w.Btc.Client().ListUnspentMinMaxAddresses(6, 9999999, []btcutil.Address{addr})
 	if err != nil {
 		//致命的なエラー
-		return err
+		return "", err
 	}
 
 	//3. 送金の金額と近しいutxoでtxを作成するため、ソートしておく => これも不要
@@ -142,7 +143,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() error {
 	}
 	if !isDone {
 		//これは金額が足りなかったことを意味するので致命的
-		return errors.New("[fatal error] bitcoin is insufficient in trading account of ours")
+		return "", errors.New("[fatal error] bitcoin is insufficient in trading account of ours")
 	}
 	//outputは別途こちらで作成
 	for _, userPayment := range userPayments {
@@ -174,7 +175,61 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() error {
 	grok.Value(tmpOutputs)
 	grok.Value(outputs)
 
-	return nil
+	//rawtransactionを
+	// 一連の処理を実行
+	return w.createRawTransactionForPayment(inputs, outputs)
+}
+
+func (w *Wallet) createRawTransactionForPayment(inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount) (string, error) {
+	// 1.CreateRawTransactionWithOutput(仮で作成し、この後サイズから手数料を算出する)
+	msgTx, err := w.Btc.CreateRawTransactionWithOutput(inputs, outputs)
+	if err != nil {
+		return "", errors.Errorf("CreateRawTransactionWithOutput(): error: %v", err)
+	}
+	log.Printf("[Debug] CreateRawTransactionWithOutput: %v\n", msgTx)
+	//grok.Value(msgTx)
+
+	// 2.fee算出
+	fee, err := w.Btc.GetTransactionFee(msgTx)
+	if err != nil {
+		return "", errors.Errorf("GetTransactionFee(): error: %v", err)
+	}
+	log.Printf("[Debug]fee: %v", fee) //0.001183 BTC
+
+	// 3.TODO:お釣り用のoutputのトランザクションから、手数料を差し引かねばならい
+	// FIXME: これが足りない場合がめんどくさい。。。これをどう回避すべきか
+	for addr, _ := range outputs {
+		if addr.String() == w.Btc.PaymentAddress() {
+			outputs[addr] -= fee
+		}
+	}
+	grok.Value(outputs)
+
+	//debug
+	//return "", nil
+
+	// 4.再度 CreateRawTransaction
+	msgTx, err = w.Btc.CreateRawTransactionWithOutput(inputs, outputs)
+	if err != nil {
+		return "", errors.Errorf("CreateRawTransaction(): error: %v", err)
+	}
+
+	// 5.出力用にHexに変換する
+	hex, err := w.Btc.ToHex(msgTx)
+	if err != nil {
+		return "", errors.Errorf("w.Btc.ToHex(msgTx): error: %v", err)
+	}
+
+	// 6. GCSにトランザクションファイルを作成
+	//TODO:本来、この戻り値をDumpして、GCSに保存、それをDLして、USBに入れてコールドウォレットに移動しなくてはいけない
+	//TODO:Debug時はlocalに出力することとする
+	file.WriteFileForUnsigned(hex)
+
+	// 7. Databaseに必要な情報を保存
+	//TODO:その後、Databaseに情報を保存 txの詳細情報が必要
+	// Hex, target utxos, total, fee
+
+	return hex, nil
 }
 
 // CreateUnsignedTransactionForPaymentOld 支払いのための未署名トランザクションを作成する

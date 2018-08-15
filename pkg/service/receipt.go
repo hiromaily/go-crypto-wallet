@@ -130,7 +130,6 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 // createRawTransactionAndFee feeの抽出からtransaction作成、DBへの必要情報保存など、もろもろこちらで行う
 func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjson.TransactionInput) (string, error) {
 
-	// TODO:ここはWrapperとして別funcで定義したほうがいいかも
 	// 1.CreateRawTransaction(仮で作成し、この後サイズから手数料を算出する)
 	log.Println("w.Btc.StoredAddress() :", w.Btc.StoredAddress())
 	msgTx, err := w.Btc.CreateRawTransaction(w.Btc.StoredAddress(), total, inputs)

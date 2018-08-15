@@ -132,7 +132,31 @@ func switchFunction(wallet *service.Wallet) {
 		log.Printf("[Debug] 送信までDONE!! %s", txID)
 	case 14:
 		log.Print("Run:出金トランザクション作成")
-		wallet.CreateUnsignedTransactionForPayment()
+		hex, err := wallet.CreateUnsignedTransactionForPayment()
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		if hex == "" {
+			log.Printf("No utxo")
+			return
+		}
+		log.Printf("hex: %s", hex)
+
+		//一連の動作も確認
+		//署名
+		signedTx, isSigned, err := wallet.SignatureByHex(hex)
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		if !isSigned {
+			log.Fatalf("signature is not enough")
+		}
+		//送信
+		hash, err := wallet.Btc.SendTransactionByHex(signedTx)
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		log.Printf("[Done] txID hash: %s", hash.String())
 
 	case 20:
 		log.Print("Run: [Debug用]送金までの一連の流れを確認")
