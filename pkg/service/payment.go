@@ -52,6 +52,8 @@ func (w *Wallet) createDebugUserPayment() []UserPayment {
 			//これは本来事前にチェックされるため、ありえないはず
 			log.Printf("[Error] unexpected error converting string to address")
 		}
+		//grok.Value(userPayments[idx].validRecAddr)
+
 		//Amount
 		userPayments[idx].validAmount, err = w.Btc.FloatBitToAmount(val.amount)
 		if err != nil {
@@ -124,10 +126,14 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() error {
 					})
 				}
 				//Outputを更新
+				//log.Println("[Debug]", userPayment.validRecAddr)
+				//FIXME:userPayment.validRecAddrはポインタとして保持しているので、値が同じでも異なるものとして認識されてしまう。。。
 				if _, ok := outputs[userPayment.validRecAddr]; ok {
+					log.Println(" 加算")
 					//加算する
 					outputs[userPayment.validRecAddr] += userPayment.validAmount
 				} else {
+					log.Println(" 新規")
 					//新規送信先を作成
 					outputs[userPayment.validRecAddr] = userPayment.validAmount
 				}
