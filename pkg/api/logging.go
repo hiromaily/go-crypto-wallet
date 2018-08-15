@@ -3,7 +3,7 @@ package api
 import (
 	"encoding/json"
 
-		"github.com/pkg/errors"
+	"github.com/pkg/errors"
 )
 
 type LoggingResult struct {

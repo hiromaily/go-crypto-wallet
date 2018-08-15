@@ -6,9 +6,9 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	_ "github.com/go-sql-driver/mysql"
 
+	"github.com/bookerzzz/grok"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/jessevdk/go-flags"
-	"github.com/bookerzzz/grok"
 )
 
 //こちらはHotwallet、ただし、Watch Only Walletとしての機能を実装していく。
