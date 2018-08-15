@@ -32,10 +32,16 @@ func (w *Wallet) createDebugUserPayment() []UserPayment {
 	//getnewaddress pay3
 	//2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV
 
+	//getnewaddress pay4
+	//2N7WsiDc4yK7PoUL9saGE5ZGsbRQ8R9NafS
+
+	//5レコードあるが、4種類の送信先
 	userPayments := []UserPayment{
 		{"", "2N33pRYgyuHn6K2xCrrq9dPzuW6ZAvFJfVz", nil, 0.1, 0},
 		{"", "2NFd6TEUgSpy8LvttBgVrLB6ZBA5X9BSUSz", nil, 0.2, 0},
+		{"", "2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV", nil, 0.25, 0},
 		{"", "2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV", nil, 0.3, 0},
+		{"", "2N7WsiDc4yK7PoUL9saGE5ZGsbRQ8R9NafS", nil, 0.4, 0},
 	}
 	//btcutil.Address型, btcutil.Amount型に変換,
 	var err error
@@ -128,6 +134,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() error {
 				//unspentListも更新する
 				unspentList[idx].Amount -= userPayment.amount
 
+				//
 				break
 			}
 		}
@@ -137,6 +144,8 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() error {
 			log.Printf("[Error] unexpected error: proper utxo could not be found in our accout to send")
 		}
 	}
+	//TODO:おつりを自分に送信せねばならない
+
 	//TODO:inputsをすべてlockする
 	grok.Value(inputs)
 	grok.Value(outputs)
