@@ -10,8 +10,8 @@ import (
 type Bitcoin struct {
 	client            *rpcclient.Client
 	chainConf         *chaincfg.Params
-	stored            *KeyInfo
-	payment           *KeyInfo
+	stored            KeyInfo
+	payment           KeyInfo
 	confirmationBlock int64
 }
 

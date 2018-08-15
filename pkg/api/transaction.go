@@ -163,8 +163,22 @@ func (b *Bitcoin) CreateRawTransaction(sendAddr string, amount btcutil.Amount, i
 
 	// パラメータを作成する
 	outputs := make(map[btcutil.Address]btcutil.Amount)
+	//TODO:ここから下はCreateRawTransactionWithOutput()を呼び出すことでコードの重複を防いだほうがいい。
 	outputs[sendAddrDecoded] = amount //satoshi
 	lockTime := int64(0)              //TODO:Raw locktime ここは何をいれるべき？
+
+	// CreateRawTransaction
+	msgTx, err := b.client.CreateRawTransaction(inputs, outputs, &lockTime)
+	if err != nil {
+		return nil, errors.Errorf("btcutil.CreateRawTransaction(): error: %v", err)
+	}
+
+	return msgTx, nil
+}
+
+// CreateRawTransactionWithOutput 出金時に1対多で送信する場合に利用するトランザクションを作成する
+func (b *Bitcoin) CreateRawTransactionWithOutput(inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount) (*wire.MsgTx, error) {
+	lockTime := int64(0) //TODO:Raw locktime ここは何をいれるべき？
 
 	// CreateRawTransaction
 	msgTx, err := b.client.CreateRawTransaction(inputs, outputs, &lockTime)
