@@ -32,7 +32,7 @@ func (w *Wallet) signatureByHex(hex string) (string, bool, error) {
 
 }
 
-// SignatureFromHex Hex文字列から署名を行う
+// SignatureByHex Hex文字列から署名を行う
 func (w *Wallet) SignatureByHex(hex string) (string, bool, error) {
 	//署名
 	hexTx, isSigned, err := w.signatureByHex(hex)
@@ -52,7 +52,7 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, error) {
 	//ファイルからhexを読み取る
 	hex, err := file.ReadFile(filePath)
 	if err != nil {
-		log.Fatal(err)
+		return "", false, err
 	}
 
 	//署名

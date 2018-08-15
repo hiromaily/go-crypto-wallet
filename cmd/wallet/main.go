@@ -116,6 +116,7 @@ func switchFunction(wallet *service.Wallet) {
 		// 3. unsignedトランザクションファイル名と、signedトランザクションファイル名のリレーションをDBに保存したほうがいいか？
 
 		//[Debug]とりあえず、localのファイルから読みこんで送信してみる
+		wallet.SendFromFile("./data/tx/signed_1534303789374409841")
 
 	case 20:
 		log.Print("Run: [Debug用]送金までの一連の流れを確認")
