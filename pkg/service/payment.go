@@ -99,7 +99,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() error {
 		return unspentList[i].Amount < unspentList[j].Amount
 	})
 
-	grok.Value(userPayments)
+	//grok.Value(userPayments)
 	grok.Value(unspentList)
 
 	var (
@@ -131,12 +131,10 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() error {
 				//FIXME:userPayment.validRecAddrはポインタとして保持しているので、値が同じでも異なるものとして認識されてしまう。。。
 				//if _, ok := outputs[userPayment.validRecAddr]; ok {
 				if _, ok := tmpOutputs[userPayment.receiverAddr]; ok {
-					log.Println(" 加算")
 					//加算する
 					//outputs[userPayment.validRecAddr] += userPayment.validAmount
 					tmpOutputs[userPayment.receiverAddr] += userPayment.validAmount
 				} else {
-					log.Println(" 新規")
 					//新規送信先を作成
 					//outputs[userPayment.validRecAddr] = userPayment.validAmount
 					tmpOutputs[userPayment.receiverAddr] = userPayment.validAmount
@@ -163,12 +161,14 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() error {
 		}
 		outputs[addr] = val
 	}
-
 	//TODO:おつりを自分に送信せねばならない
+	//inputsにあるものはすべて
+	grok.Value(unspentList)
+
 
 	//TODO:inputsをすべてlockする
 	grok.Value(inputs)
-	grok.Value(tmpOutputs)
+	//grok.Value(tmpOutputs)
 	grok.Value(outputs)
 
 	return nil
