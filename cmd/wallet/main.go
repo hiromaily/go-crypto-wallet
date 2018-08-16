@@ -113,7 +113,7 @@ func switchFunction(wallet *service.Wallet) {
 		txReceipt.ReceiverAddress = "address"
 		txReceipt.TxType = 1
 
-		id, err := wallet.DB.InsertTxReceiptForUnsigned(&txReceipt, nil)
+		id, err := wallet.DB.InsertTxReceiptForUnsigned(&txReceipt, nil, true)
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
@@ -143,7 +143,7 @@ func switchFunction(wallet *service.Wallet) {
 			},
 		}
 
-		err := wallet.DB.InsertTxReceiptDetailForUnsigned(txReceiptDetails, nil)
+		err := wallet.DB.InsertTxReceiptDetailForUnsigned(txReceiptDetails, nil, true)
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}

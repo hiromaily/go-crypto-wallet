@@ -31,7 +31,7 @@ func (m *DB) GetTxReceiptByID(id int64) (*TxReceipt, error) {
 }
 
 // InsertTxReceiptForUnsigned TxReceiptテーブルに未署名トランザクションレコードを作成する
-func (m *DB) InsertTxReceiptForUnsigned(txReceipt *TxReceipt, tx *sqlx.Tx) (int64, error) {
+func (m *DB) InsertTxReceiptForUnsigned(txReceipt *TxReceipt, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	if tx == nil {
 		tx = m.DB.MustBegin()
 	}
@@ -45,7 +45,9 @@ VALUES (:unsigned_hex_tx, :signed_hex_tx, :sent_hex_tx, :total_amount, :fee, :re
 		tx.Rollback()
 		return 0, err
 	}
-	tx.Commit()
+	if isCommit {
+		tx.Commit()
+	}
 
 	id, _ := res.LastInsertId()
 	return id, nil

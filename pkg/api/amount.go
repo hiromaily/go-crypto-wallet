@@ -4,11 +4,17 @@ import (
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 	"strconv"
+	"strings"
 )
 
 //0.00000001 BTC=1 Satoshi
 //btcutil.Amount => Satoshi
 //float64 => BTC
+
+// AmountString 1.0 BTCといったstringを1.0という単位を除いたstringとして返す
+func (b *Bitcoin) AmountString(amt btcutil.Amount) string {
+	return strings.TrimRight(amt.String(), " BTC")
+}
 
 // FloatBitToAmount BTC(float64)をSatoshi(Amount)に変換する
 // e.g. 0.54 to 54000000

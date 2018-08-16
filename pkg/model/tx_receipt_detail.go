@@ -28,7 +28,7 @@ func (m *DB) GetTxReceiptDetailByReceiptID(receiptID int64) (*TxReceiptDetail, e
 
 // InsertTxReceiptDetailForUnsigned TxReceiptDetailテーブルに未署名トランザクションのinputに使われたtxレコードを作成する
 //TODO:BulkInsertがやりたい
-func (m *DB) InsertTxReceiptDetailForUnsigned(txReceiptDetails []TxReceiptDetail, tx *sqlx.Tx) error {
+func (m *DB) InsertTxReceiptDetailForUnsigned(txReceiptDetails []TxReceiptDetail, tx *sqlx.Tx, isCommit bool) error {
 	if tx == nil {
 		tx = m.DB.MustBegin()
 	}
@@ -45,7 +45,9 @@ VALUES (:receipt_id, :input_txid, :input_vout, :input_address, :input_account, :
 		}
 	}
 
-	tx.Commit()
+	if isCommit {
+		tx.Commit()
+	}
 
 	return nil
 }
