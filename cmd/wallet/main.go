@@ -119,6 +119,36 @@ func switchFunction(wallet *service.Wallet) {
 		}
 		log.Printf("ID is %d", id)
 
+	case 7:
+		//[Debug用]DB周り
+		log.Print("Run: wallet.DB.InsertTxReceiptDetailForUnsigned()")
+		txReceiptDetails := []model.TxReceiptDetail{
+			{
+				ReceiptID:          1,
+				InputTxid:          "txidxxxxxx",
+				InputVout:          0,
+				InputAddress:       "address",
+				InputAccount:       "acount",
+				InputAmount:        "0.05",
+				InputConfirmations: 6,
+			},
+			{
+				ReceiptID:          1,
+				InputTxid:          "txidxxxxxx2",
+				InputVout:          1,
+				InputAddress:       "address2",
+				InputAccount:       "acount2",
+				InputAmount:        "0.051111",
+				InputConfirmations: 8,
+			},
+		}
+
+		err := wallet.DB.InsertTxReceiptDetailForUnsigned(txReceiptDetails, nil)
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		log.Println("Done!")
+
 	case 11:
 		log.Print("Run: 入金処理検知")
 		//実際には署名処理は手動なので、ユーザーの任意のタイミングで走らせたほうがいい。
