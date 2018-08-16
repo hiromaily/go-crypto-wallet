@@ -1,9 +1,9 @@
 package service
 
 import (
+	"fmt"
 	"log"
 
-	"fmt"
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
@@ -52,8 +52,8 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 	if err != nil {
 		return "", errors.Errorf("ListUnspentMin(): error: %v", err)
 	}
-	//log.Printf("[Debug]List Unspent: %v\n", unspentList)
-	//grok.Value(unspentList) //Debug
+	log.Println("[Debug]List Unspent")
+	grok.Value(unspentList) //Debug
 
 	if len(unspentList) == 0 {
 		return "", nil
@@ -73,22 +73,20 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 		//	continue
 		//}
 
-		// Transaction詳細を取得
+		// Transaction詳細を取得 => これはこのタイミングでは不要
 		// (アカウント名によって、はじく、もしくはユーザーのアドレスの取得に必要)
-		tran, err := w.Btc.GetTransactionByTxID(tx.TxID)
-		if err != nil {
-			//このエラーは起こりえない
-			log.Printf("[Error] w.Btc.GetTransactionByTxID(): txID:%s, err:%v", tx.TxID, err)
-			continue
-		}
-		log.Printf("[Debug]Transactions: %v\n", tran)
-		grok.Value(tran)
+		//tran, err := w.Btc.GetTransactionByTxID(tx.TxID)
+		//if err != nil {
+		//	//このエラーは起こりえない
+		//	log.Printf("[Error] w.Btc.GetTransactionByTxID(): txID:%s, err:%v", tx.TxID, err)
+		//	continue
+		//}
+		//log.Println("[Debug]Transactions")
+		//grok.Value(tran)
 
 		//除外するアカウント
-		//=> これは本番環境では不要か？
-		//if tran.Details[0].Account == "hokan" || tran.Details[0].Account == "" {
-		if tran.Details[0].Account == w.Btc.StoredAccountName() ||
-			tran.Details[0].Account == w.Btc.PaymentAccountName() || tran.Details[0].Account == "" {
+		if tx.Account == w.Btc.StoredAccountName() ||
+			tx.Account == w.Btc.PaymentAccountName() || tx.Account == "" {
 			continue
 		}
 
@@ -196,17 +194,20 @@ func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjs
 	//[Debug]res.Hex
 	//w.Btc.GetRawTransactionByHex(res.Hex)
 
-	// 6. GCSにトランザクションファイルを作成
-	//TODO:本来、この戻り値をDumpして、GCSに保存、それをDLして、USBに入れてコールドウォレットに移動しなくてはいけない
-	//TODO:Debug時はlocalに出力することとする
-	file.WriteFileForUnsigned(hex)
-
-	// 7. Databaseに必要な情報を保存
+	// 6. Databaseに必要な情報を保存
 	//TODO:その後、Databaseに情報を保存 txの詳細情報が必要
 	// Hex, target utxos, total, fee
-	err = w.insertHexOnDB(hex, total+fee, fee, w.Btc.StoredAddress(), 1, txReceiptDetails)
+	isInserted, err := w.insertHexForUnsignedTx(hex, total+fee, fee, w.Btc.StoredAddress(), 1, txReceiptDetails)
 	if err != nil {
 		return "", errors.Errorf("insertHexOnDB(): error: %v", err)
+	}
+
+	// 7. GCSにトランザクションファイルを作成
+	//TODO:本来、この戻り値をDumpして、GCSに保存、それをDLして、USBに入れてコールドウォレットに移動しなくてはいけない
+	//TODO:Debug時はlocalに出力することとする
+	if isInserted {
+		//TODO:出力されたファイル名を返したほうがいい
+		file.WriteFileForUnsigned(hex)
 	}
 
 	return hex, nil
@@ -217,18 +218,18 @@ func (w *Wallet) storeHexOnGPS(hexTx string) {
 }
 
 //TODO:引数の数が多いのはGoにおいてはBad practice...
-func (w *Wallet) insertHexOnDB(hex string, total, fee btcutil.Amount, addr string, txType int, txReceiptDetails []model.TxReceiptDetail) error {
-	//TODO:内容が同じだと、生成されるhexもまったく同じ為、同一のhexが合った場合は処理をskipする
+func (w *Wallet) insertHexForUnsignedTx(hex string, total, fee btcutil.Amount, addr string, txType int, txReceiptDetails []model.TxReceiptDetail) (bool, error) {
+	//1.内容が同じだと、生成されるhexもまったく同じ為、同一のhexが合った場合は処理をskipする
 	count, err := w.DB.GetTxReceiptByUnsignedHex(hex)
 	if err != nil {
-		return errors.Errorf("DB.GetTxReceiptByUnsignedHex(): error: %v", err)
+		return false, errors.Errorf("DB.GetTxReceiptByUnsignedHex(): error: %v", err)
 	}
 	if count != 0 {
 		//skip
-		return nil
+		return false, nil
 	}
 
-	//1.TxReceiptテーブル
+	//2.TxReceiptテーブル
 	txReceipt := model.TxReceipt{}
 	txReceipt.UnsignedHexTx = hex
 	txReceipt.TotalAmount = w.Btc.AmountString(total)
@@ -239,18 +240,18 @@ func (w *Wallet) insertHexOnDB(hex string, total, fee btcutil.Amount, addr strin
 	tx := w.DB.DB.MustBegin()
 	txReceiptID, err := w.DB.InsertTxReceiptForUnsigned(&txReceipt, tx, false)
 	if err != nil {
-		return errors.Errorf("DB.InsertTxReceiptForUnsigned(): error: %v", err)
+		return false, errors.Errorf("DB.InsertTxReceiptForUnsigned(): error: %v", err)
 	}
 
-	//2.TxReceiptDetailテーブル
+	//3.TxReceiptDetailテーブル
 	for idx, _ := range txReceiptDetails {
 		txReceiptDetails[idx].ReceiptID = txReceiptID
 	}
 
 	err = w.DB.InsertTxReceiptDetailForUnsigned(txReceiptDetails, tx, true)
 	if err != nil {
-		return errors.Errorf("DB.InsertTxReceiptDetailForUnsigned(): error: %v", err)
+		return false, errors.Errorf("DB.InsertTxReceiptDetailForUnsigned(): error: %v", err)
 	}
 
-	return nil
+	return true, nil
 }
