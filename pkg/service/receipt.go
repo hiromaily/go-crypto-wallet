@@ -184,6 +184,7 @@ func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjs
 	// 7. Databaseに必要な情報を保存
 	//TODO:その後、Databaseに情報を保存 txの詳細情報が必要
 	// Hex, target utxos, total, fee
+	storeHexOnDB()
 
 	return hex, nil
 }

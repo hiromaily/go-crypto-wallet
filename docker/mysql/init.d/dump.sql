@@ -93,8 +93,8 @@ CREATE TABLE `tx_receipt` (
   `receiver_address`    VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL COMMENT'受取先アドレス(固定だがlogも兼ねるので念の為保持する)',
   `current_tx_type`     tinyint(1) NOT NULL COMMENT'現在のtx_type(ステータス)',
   `unsigned_updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'未署名トランザクション 更新日時',
-  `signed_updated_at`   datetime DEFAULT CURRENT_TIMESTAMP COMMENT'署名済トランザクション 更新日時',
-  `sent_updated_at`     datetime DEFAULT CURRENT_TIMESTAMP COMMENT'送信済トランザクション 更新日時',
+  `signed_updated_at`   datetime DEFAULT NULL COMMENT'署名済トランザクション 更新日時',
+  `sent_updated_at`     datetime DEFAULT NULL COMMENT'送信済トランザクション 更新日時',
   PRIMARY KEY (`id`)
   /*INDEX idx_unsigned_hex (`unsigned_hex_tx(255)`),*/
   /*INDEX idx_signed_hex (`signed_hex_tx(255)`),*/

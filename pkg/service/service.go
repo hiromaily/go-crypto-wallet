@@ -3,16 +3,17 @@ package service
 import (
 	"github.com/bookerzzz/grok"
 	"github.com/hiromaily/go-bitcoin/pkg/api"
+	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/hiromaily/go-bitcoin/pkg/rds"
 	"github.com/hiromaily/go-bitcoin/pkg/toml"
-	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
 
 // Wallet 基底オブジェクト
 type Wallet struct {
 	Btc *api.Bitcoin
-	DB  *sqlx.DB
+	DB  *model.DB
+	//DB  *sqlx.DB
 	//Db  *kvs.LevelDB
 }
 
@@ -49,12 +50,12 @@ func InitialSettings(confPath string) (*Wallet, error) {
 	//defer bit.Close()
 
 	//Wallet Object
-	wallet := Wallet{Btc: bit, DB: rds}
+	wallet := Wallet{Btc: bit, DB: model.New(rds)}
 	return &wallet, nil
 }
 
 // Done 終了時に必要な処理
 func (w *Wallet) Done() {
-	w.DB.Close()
+	w.DB.DB.Close()
 	w.Btc.Close()
 }

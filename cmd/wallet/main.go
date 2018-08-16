@@ -6,6 +6,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/chaincfg"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/jessevdk/go-flags"
 )
@@ -94,6 +95,30 @@ func switchFunction(wallet *service.Wallet) {
 
 		log.Printf("error is %v", err)
 		log.Print("Done!")
+	case 5:
+		//[Debug用]DB周り
+		log.Print("Run: wallet.DB.GetTxType()")
+		txTypes, err := wallet.DB.GetTxType()
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		grok.Value(txTypes)
+	case 6:
+		//[Debug用]DB周り
+		log.Print("Run: wallet.DB.InsertTxReceiptForUnsigned()")
+		txReceipt := model.TxReceipt{}
+		txReceipt.UnsignedHexTx = "12345"
+		txReceipt.TotalAmount = "1.5"
+		txReceipt.Fee = "0.2"
+		txReceipt.ReceiverAddress = "address"
+		txReceipt.TxType = 1
+
+		id, err := wallet.DB.InsertTxReceiptForUnsigned(&txReceipt, nil)
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		log.Printf("ID is %d", id)
+
 	case 11:
 		log.Print("Run: 入金処理検知")
 		//実際には署名処理は手動なので、ユーザーの任意のタイミングで走らせたほうがいい。
