@@ -50,8 +50,8 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 	if err != nil {
 		return "", errors.Errorf("ListUnspentMin(): error: %v", err)
 	}
-	log.Printf("[Debug]List Unspent: %v\n", unspentList)
-	grok.Value(unspentList) //Debug
+	//log.Printf("[Debug]List Unspent: %v\n", unspentList)
+	//grok.Value(unspentList) //Debug
 
 	if len(unspentList) == 0 {
 		return "", nil
@@ -75,8 +75,8 @@ func (w *Wallet) DetectReceivedCoin() (string, error) {
 			log.Printf("[Error] w.Btc.GetTransactionByTxID(): txID:%s, err:%v", tx.TxID, err)
 			continue
 		}
-		//log.Printf("[Debug]Transactions: %v\n", tran)
-		//grok.Value(tran)
+		log.Printf("[Debug]Transactions: %v\n", tran)
+		grok.Value(tran)
 
 		//除外するアカウント(TODO:これは必要であれば外部定義すべき)
 		//=> これは本番環境では不要なはず
