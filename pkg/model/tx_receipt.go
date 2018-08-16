@@ -1,12 +1,13 @@
 package model
 
 import (
-	"github.com/jmoiron/sqlx"
 	"time"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type TxReceipt struct {
-	ID            int    `db:"id"`
+	ID            int64  `db:"id"`
 	UnsignedHexTx string `db:"unsigned_hex_tx"`
 	SignedHexTx   string `db:"signed_hex_tx"`
 	SentHexTx     string `db:"sent_hex_tx"`
@@ -22,7 +23,7 @@ type TxReceipt struct {
 }
 
 // GetTxReceiptByID TxReceiptテーブルから該当するIDのレコードを返す
-func (m *DB) GetTxReceiptByID(id int) (*TxReceipt, error) {
+func (m *DB) GetTxReceiptByID(id int64) (*TxReceipt, error) {
 	txReceipt := TxReceipt{}
 	err := m.DB.Get(&txReceipt, "SELECT * FROM tx_receipt WHERE id=$1", id)
 
@@ -34,13 +35,11 @@ func (m *DB) InsertTxReceiptForUnsigned(txReceipt *TxReceipt, tx *sqlx.Tx) (int6
 	if tx == nil {
 		tx = m.DB.MustBegin()
 	}
-	//sql := "INSERT INTO tx_receipt (unsigned_hex_tx, signed_hex_tx, sent_hex_tx, total_amount, fee, receiver_address, current_tx_type) VALUES ('$1', '$2', '$3', '$4', '$5', '$6', '$7')"
-	//res := tx.MustExec(sql, txReceipt.UnsignedHexTx, "", "", txReceipt.TotalAmount, txReceipt.Fee, txReceipt.ReceiverAddress, txReceipt.TxType)
-	//if _, err := res.LastInsertId(); err != nil {
-	//	tx.Rollback()
-	//	return err
-	//}
-	sql := "INSERT INTO tx_receipt (unsigned_hex_tx, signed_hex_tx, sent_hex_tx, total_amount, fee, receiver_address, current_tx_type) VALUES (:unsigned_hex_tx, :signed_hex_tx, :sent_hex_tx, :total_amount, :fee, :receiver_address, :current_tx_type)"
+
+	sql := `
+INSERT INTO tx_receipt (unsigned_hex_tx, signed_hex_tx, sent_hex_tx, total_amount, fee, receiver_address, current_tx_type) 
+VALUES (:unsigned_hex_tx, :signed_hex_tx, :sent_hex_tx, :total_amount, :fee, :receiver_address, :current_tx_type)
+`
 	res, err := tx.NamedExec(sql, txReceipt)
 	if err != nil {
 		tx.Rollback()

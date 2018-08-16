@@ -7,6 +7,7 @@ import (
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
 	"github.com/hiromaily/go-bitcoin/pkg/file"
+	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
 )
 
@@ -184,15 +185,29 @@ func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjs
 	// 7. Databaseに必要な情報を保存
 	//TODO:その後、Databaseに情報を保存 txの詳細情報が必要
 	// Hex, target utxos, total, fee
-	storeHexOnDB()
+	w.insertHexOnDB(hex, total+fee, fee, w.Btc.StoredAddress(), 1)
 
 	return hex, nil
 }
 
-func storeHexOnGPS(hexTx string) {
+func (w *Wallet) storeHexOnGPS(hexTx string) {
 
 }
 
-func storeHexOnDB() {
+func (w *Wallet) insertHexOnDB(hex string, total, fee btcutil.Amount, addr string, txType int) error {
+	//1.
+	txReceipt := model.TxReceipt{}
+	txReceipt.UnsignedHexTx = hex
+	txReceipt.TotalAmount = total.String()
+	txReceipt.Fee = fee.String()
+	txReceipt.ReceiverAddress = addr
+	txReceipt.TxType = 1
 
+	//txReceiptID, err := w.DB.InsertTxReceiptForUnsigned(&txReceipt, nil)
+	//if err != nil {
+	//	return errors.Errorf("DB.InsertTxReceiptForUnsigned(): error: %v", err)
+	//}
+	//2.
+
+	return nil
 }
