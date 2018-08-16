@@ -8,6 +8,9 @@ import (
 	"github.com/pkg/errors"
 )
 
+//sqlx
+// http://jmoiron.github.io/sqlx/#bindvars
+
 // Connection MySQLサーバーに接続する
 // TODO:リトライ機能も必要
 func Connection(conf *toml.MySQLConf) (*sqlx.DB, error) {

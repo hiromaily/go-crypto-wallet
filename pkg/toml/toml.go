@@ -12,6 +12,7 @@ type Config struct {
 	Bitcoin BitcoinConf `toml:"bitcoin"`
 	LevelDB LevelDBConf `toml:"leveldb"` //TODO:おそらく不要
 	MySQL   MySQLConf   `toml:"mysql"`
+	File    FileConf    `toml:"file"`
 }
 
 // BitcoinConf Bitcoin情報
@@ -50,6 +51,12 @@ type MySQLConf struct {
 	DB   string `toml:"dbname"`
 	User string `toml:"user"`
 	Pass string `toml:"pass"`
+}
+
+// FileConf 保存されるtransactionファイル情報
+// import/export共にこのパスが使われる
+type FileConf struct {
+	Path string `toml:"path"`
 }
 
 // load configfile

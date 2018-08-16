@@ -223,7 +223,8 @@ func (w *Wallet) createRawTransactionForPayment(inputs []btcjson.TransactionInpu
 	// 6. GCSにトランザクションファイルを作成
 	//TODO:本来、この戻り値をDumpして、GCSに保存、それをDLして、USBに入れてコールドウォレットに移動しなくてはいけない
 	//TODO:Debug時はlocalに出力することとする
-	file.WriteFileForUnsigned(hex)
+	//FIXME:該当するtransactionのIDを設定せねばならない
+	file.WriteFileForUnsigned(1, hex)
 
 	// 7. Databaseに必要な情報を保存
 	//TODO:その後、Databaseに情報を保存 txの詳細情報が必要

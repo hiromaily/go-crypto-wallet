@@ -168,7 +168,7 @@ func switchFunction(wallet *service.Wallet) {
 
 		//入金検知 + 未署名トランザクション作成
 		//TODO:この中でLoopする必要はない。実行するtaskrunner側で実行間隔を調整する。
-		hex, err := wallet.DetectReceivedCoin()
+		hex, fileName, err := wallet.DetectReceivedCoin()
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
@@ -176,7 +176,7 @@ func switchFunction(wallet *service.Wallet) {
 			log.Printf("No utxo")
 			return
 		}
-		log.Printf("hex: %s", hex)
+		log.Printf("hex: %s\n fileName: %s", hex, fileName)
 	case 12:
 		log.Print("Run: 署名済みtxを送信する")
 
@@ -233,7 +233,7 @@ func switchFunction(wallet *service.Wallet) {
 		//wallet.Btc.UnlockAllUnspentTransaction()
 
 		//入金検知 + 未署名トランザクション作成
-		hex, err := wallet.DetectReceivedCoin()
+		hex, fileName, err := wallet.DetectReceivedCoin()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -241,7 +241,7 @@ func switchFunction(wallet *service.Wallet) {
 			log.Printf("No utxo")
 			return
 		}
-		log.Printf("hex: %s", hex)
+		log.Printf("hex: %s\n, fileName: %s", hex, fileName)
 
 		//一連の署名から送信までの流れをチェック
 		//[WIF] cUW7ZSF9WX7FUTeHkuw5L9Rj26V5Kz8yCkYjZamyvATTwsu7KUCi - [Pub Address] muVSWToBoNWusjLCbxcQNBWTmPjioRLpaA

@@ -44,7 +44,8 @@ func (w *Wallet) SignatureByHex(hex string) (string, bool, error) {
 	//log.Println("hex:", hexTx)
 
 	//ファイルに書き込む
-	file.WriteFileForSigned(hexTx)
+	//FIXME: txReceiptIDが必要
+	file.WriteFileForSigned(9, hexTx)
 
 	return hexTx, isSigned, nil
 }
@@ -65,7 +66,8 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, error) {
 	//log.Println("hex:", hexTx)
 
 	//ファイルに書き込む
-	file.WriteFileForSigned(hexTx)
+	//FIXME: txReceiptIDが必要
+	file.WriteFileForSigned(9, hexTx)
 
 	return hexTx, isSigned, nil
 }

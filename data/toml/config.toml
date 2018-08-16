@@ -27,3 +27,6 @@ host = "127.0.0.1:3307"
 dbname = "wallet"
 user = "cayenne"
 pass = "cayenne"
+
+[file]
+path = "./data/tx/"

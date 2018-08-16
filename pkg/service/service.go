@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/bookerzzz/grok"
 	"github.com/hiromaily/go-bitcoin/pkg/api"
+	"github.com/hiromaily/go-bitcoin/pkg/file"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/hiromaily/go-bitcoin/pkg/rds"
 	"github.com/hiromaily/go-bitcoin/pkg/toml"
@@ -40,6 +41,11 @@ func InitialSettings(confPath string) (*Wallet, error) {
 		return nil, errors.Errorf("rds.Connection() error: %v", err)
 	}
 	//defer rds.Close()
+
+	// File
+	if conf.File.Path != "" {
+		file.SetFilePath(conf.File.Path)
+	}
 
 	// Connection to Bitcoin core
 	//bit, err := api.Connection(conf.Bitcoin.Host, conf.Bitcoin.User, conf.Bitcoin.Pass, true, true, conf.Bitcoin.IsMain)
