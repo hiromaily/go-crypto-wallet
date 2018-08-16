@@ -12,7 +12,7 @@ func TestCreateMultiSig(t *testing.T) {
 	//TODO: => おそらくBlankでもいい
 
 	//TODO: Multisigアドレス作成
-	resAddr, err := wlt.Btc.CreateMultiSig(2, []string{"2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP", "2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu"}, "multi01")
+	resAddr, err := wlt.BTC.CreateMultiSig(2, []string{"2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP", "2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu"}, "multi01")
 	if err != nil {
 		t.Fatal(err)
 	}

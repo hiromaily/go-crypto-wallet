@@ -265,7 +265,7 @@ func (b *Bitcoin) SignRawTransactionByHex(hex string) (string, bool, error) {
 	//Hexに変換
 	hexTx, err := b.ToHex(signedTx)
 	if err != nil {
-		return "", false, errors.Errorf("w.Btc.ToHex(msgTx): error: %v", err)
+		return "", false, errors.Errorf("w.BTC.ToHex(msgTx): error: %v", err)
 	}
 
 	//return signedTx, nil

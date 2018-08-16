@@ -9,7 +9,7 @@ func TestGetTransactionByTxID(t *testing.T) {
 	//実行環境によって、このtxIDが機能しないかも
 	txID := "e1fb7fb4c345c81d6852c4cfc51f7a83aaa63587db85317db92bec5839ad3bfb"
 
-	resTx, err := wlt.Btc.GetTransactionByTxID(txID)
+	resTx, err := wlt.BTC.GetTransactionByTxID(txID)
 	if err != nil {
 		t.Errorf("GetTransactionByTxID() error: %v", err)
 	}

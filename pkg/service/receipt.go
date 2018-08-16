@@ -26,7 +26,7 @@ func (w *Wallet) DetectReceivedCoin() (string, string, error) {
 	// => LockUnspent()
 
 	// LockされたUnspentTransactionを解除する
-	if err := w.Btc.UnlockAllUnspentTransaction(); err != nil {
+	if err := w.BTC.UnlockAllUnspentTransaction(); err != nil {
 		return "", "", err
 	}
 
@@ -46,7 +46,7 @@ func (w *Wallet) DetectReceivedCoin() (string, string, error) {
 	//TODO:とりあえず、ListUnspentを使っているが、全ユーザーにGetUnspentByAddress()を使わないといけないかも
 	//TODO:ListUnspent内で、検索すべきBlock番号まで内部的に保持できてるっぽい
 	// Watch only walletであれば、ListUnspentで実現可能
-	unspentList, err := w.Btc.Client().ListUnspentMin(6)
+	unspentList, err := w.BTC.Client().ListUnspentMin(6)
 	//FIXME: multisigのアドレスはこれで取得できないかも。。。それか、Bitcoin Coreの表示がおかしい。。。
 	//FIXME: multisigからhokanに転送したので、multisigには残高がないことが正しい
 	if err != nil {
@@ -69,24 +69,24 @@ func (w *Wallet) DetectReceivedCoin() (string, string, error) {
 		//TODO: spendableは実環境では使えない。
 		// 6に満たない場合、まだ未確定であることを意味するはず => これはListUnspent()のパラメータで可能のためコメントアウト
 		//https://bitcoin.stackexchange.com/questions/63198/why-outputs-spendable-and-solvable-are-false
-		//if tx.Confirmations < w.Btc.ConfirmationBlock() {
+		//if tx.Confirmations < w.BTC.ConfirmationBlock() {
 		//	continue
 		//}
 
 		// Transaction詳細を取得 => これはこのタイミングでは不要
 		// (アカウント名によって、はじく、もしくはユーザーのアドレスの取得に必要)
-		//tran, err := w.Btc.GetTransactionByTxID(tx.TxID)
+		//tran, err := w.BTC.GetTransactionByTxID(tx.TxID)
 		//if err != nil {
 		//	//このエラーは起こりえない
-		//	log.Printf("[Error] w.Btc.GetTransactionByTxID(): txID:%s, err:%v", tx.TxID, err)
+		//	log.Printf("[Error] w.BTC.GetTransactionByTxID(): txID:%s, err:%v", tx.TxID, err)
 		//	continue
 		//}
 		//log.Println("[Debug]Transactions")
 		//grok.Value(tran)
 
 		//除外するアカウント
-		if tx.Account == w.Btc.StoredAccountName() ||
-			tx.Account == w.Btc.PaymentAccountName() || tx.Account == "" {
+		if tx.Account == w.BTC.StoredAccountName() ||
+			tx.Account == w.BTC.PaymentAccountName() || tx.Account == "" {
 			continue
 		}
 
@@ -100,7 +100,7 @@ func (w *Wallet) DetectReceivedCoin() (string, string, error) {
 		total += amt //合計
 
 		//lockunspentによって、該当トランザクションをロックして再度ListUnspent()で出力されることを防ぐ
-		if w.Btc.LockUnspent(tx) != nil {
+		if w.BTC.LockUnspent(tx) != nil {
 			continue
 		}
 
@@ -146,8 +146,8 @@ func (w *Wallet) DetectReceivedCoin() (string, string, error) {
 func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjson.TransactionInput, txReceiptDetails []model.TxReceiptDetail) (string, string, error) {
 
 	// 1.CreateRawTransaction(仮で作成し、この後サイズから手数料を算出する)
-	log.Println("[Debug] w.Btc.StoredAddress() :", w.Btc.StoredAddress())
-	msgTx, err := w.Btc.CreateRawTransaction(w.Btc.StoredAddress(), total, inputs)
+	log.Println("[Debug] w.BTC.StoredAddress() :", w.BTC.StoredAddress())
+	msgTx, err := w.BTC.CreateRawTransaction(w.BTC.StoredAddress(), total, inputs)
 	if err != nil {
 		return "", "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
@@ -155,7 +155,7 @@ func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjs
 	//grok.Value(msgTx)
 
 	// 2.fee算出
-	fee, err := w.Btc.GetTransactionFee(msgTx)
+	fee, err := w.BTC.GetTransactionFee(msgTx)
 	if err != nil {
 		return "", "", errors.Errorf("GetTransactionFee(): error: %v", err)
 	}
@@ -169,32 +169,32 @@ func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjs
 	log.Printf("[Debug]Total Coin to send:%d(Satoshi) after fee calculated, input length: %d", total, len(inputs))
 
 	// 4.再度 CreateRawTransaction
-	msgTx, err = w.Btc.CreateRawTransaction(w.Btc.StoredAddress(), total, inputs)
+	msgTx, err = w.BTC.CreateRawTransaction(w.BTC.StoredAddress(), total, inputs)
 	if err != nil {
 		return "", "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
 
 	// 5.出力用にHexに変換する
-	hex, err := w.Btc.ToHex(msgTx)
+	hex, err := w.BTC.ToHex(msgTx)
 	if err != nil {
-		return "", "", errors.Errorf("w.Btc.ToHex(msgTx): error: %v", err)
+		return "", "", errors.Errorf("w.BTC.ToHex(msgTx): error: %v", err)
 	}
 
 	//TODO:以下処理は不要だが、仕様がFIXするまでコメントアウトとしてのこしておく
 	//TODO:fundrawtransactionによる手数料の算出は全額送金においては機能しない
 	//https://bitcoincore.org/en/doc/0.16.2/rpc/rawtransactions/fundrawtransaction/
-	//res, err := w.Btc.FundRawTransaction(hex)
+	//res, err := w.BTC.FundRawTransaction(hex)
 	//if err != nil {
 	//	//FIXME:error: -4: Insufficient funds
-	//	return "", errors.Errorf("w.Btc.FundRawTransaction(hex): error: %v", err)
+	//	return "", errors.Errorf("w.BTC.FundRawTransaction(hex): error: %v", err)
 	//}
 	//[Debug]res.Hex
-	//w.Btc.GetRawTransactionByHex(res.Hex)
+	//w.BTC.GetRawTransactionByHex(res.Hex)
 
 	// 6. Databaseに必要な情報を保存
 	//TODO:その後、Databaseに情報を保存 txの詳細情報が必要
 	// Hex, target utxos, total, fee
-	txReceiptID, err := w.insertHexForUnsignedTx(hex, total+fee, fee, w.Btc.StoredAddress(), 1, txReceiptDetails)
+	txReceiptID, err := w.insertHexForUnsignedTx(hex, total+fee, fee, w.BTC.StoredAddress(), 1, txReceiptDetails)
 	if err != nil {
 		return "", "", errors.Errorf("insertHexOnDB(): error: %v", err)
 	}
@@ -229,12 +229,12 @@ func (w *Wallet) insertHexForUnsignedTx(hex string, total, fee btcutil.Amount, a
 	//2.TxReceiptテーブル
 	txReceipt := model.TxReceipt{}
 	txReceipt.UnsignedHexTx = hex
-	txReceipt.TotalAmount = w.Btc.AmountString(total)
-	txReceipt.Fee = w.Btc.AmountString(fee)
+	txReceipt.TotalAmount = w.BTC.AmountString(total)
+	txReceipt.Fee = w.BTC.AmountString(fee)
 	txReceipt.ReceiverAddress = addr
 	txReceipt.TxType = 1 //未署名
 
-	tx := w.DB.DB.MustBegin()
+	tx := w.DB.RDB.MustBegin()
 	txReceiptID, err := w.DB.InsertTxReceiptForUnsigned(&txReceipt, tx, false)
 	if err != nil {
 		return 0, errors.Errorf("DB.InsertTxReceiptForUnsigned(): error: %v", err)

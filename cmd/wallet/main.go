@@ -63,11 +63,11 @@ func switchFunction(wallet *service.Wallet) {
 	case 1:
 		//[Debug用]入金検知処理後、lock解除を行う
 		log.Print("Run: lockされたトランザクションの解除")
-		wallet.Btc.UnlockAllUnspentTransaction()
+		wallet.BTC.UnlockAllUnspentTransaction()
 	case 2:
 		//[Debug用]手数料算出
 		log.Print("Run: 手数料算出 estimatesmartfee")
-		feePerKb, err := wallet.Btc.EstimateSmartFee()
+		feePerKb, err := wallet.BTC.EstimateSmartFee()
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
@@ -75,7 +75,7 @@ func switchFunction(wallet *service.Wallet) {
 	case 3:
 		//[Debug用]手数料算出
 		log.Print("Run: ロギング logging")
-		logData, err := wallet.Btc.Logging()
+		logData, err := wallet.BTC.Logging()
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
@@ -84,11 +84,11 @@ func switchFunction(wallet *service.Wallet) {
 	case 4:
 		//[Debug用]ValidateAddress
 		log.Print("Run: AddressのValidationチェック")
-		err := wallet.Btc.ValidateAddress("2NFXSXxw8Fa6P6CSovkdjXE6UF4hupcTHtr")
+		err := wallet.BTC.ValidateAddress("2NFXSXxw8Fa6P6CSovkdjXE6UF4hupcTHtr")
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
-		err = wallet.Btc.ValidateAddress("4VHGkbQTGg2vN5P6yHZw3UJhmsBh9igsSos")
+		err = wallet.BTC.ValidateAddress("4VHGkbQTGg2vN5P6yHZw3UJhmsBh9igsSos")
 		if err == nil {
 			log.Fatal("something is wrong")
 		}
@@ -181,7 +181,7 @@ func switchFunction(wallet *service.Wallet) {
 		log.Print("Run: 署名済みtxを送信する")
 
 		hex := "020000000001019dcbbda4e5233051f2bed587c1d48e8e17aa21c2c3012097899bda5097ce78e201000000232200208e1343e11e4def66d7102d9b0f36f019188118df5a5f30dacdd1008928b12f5fffffffff01042bbf070000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e870400483045022100f4975a5ea23e5799b1df65d699f85236b9d00bcda8da333731ffa508285d3c59022037285857821ee68cbe5f74239299170686b108ce44e724a9a280a3ef9291746901483045022100f94ce83946b4698b8dfbb7cb75eece12932c5097017e70e60d924aeae1ec829a02206e7b2437e9747a9c28a3a3d7291ea16db1d2f0a60482cdb8eca91c28c01aba790147522103d69e07dbf6da065e6fae1ef5761d029b9ff9143e75d579ffc439d47484044bed2103748797877523b8b36add26c9e0fb6a023f05083dd4056aedc658d2932df1eb6052ae00000000"
-		hash, err := wallet.Btc.SendTransactionByHex(hex)
+		hash, err := wallet.BTC.SendTransactionByHex(hex)
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
@@ -220,7 +220,7 @@ func switchFunction(wallet *service.Wallet) {
 			log.Fatalf("signature is not enough")
 		}
 		//送信
-		hash, err := wallet.Btc.SendTransactionByHex(signedTx)
+		hash, err := wallet.BTC.SendTransactionByHex(signedTx)
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
@@ -230,7 +230,7 @@ func switchFunction(wallet *service.Wallet) {
 		log.Print("Run: [Debug用]送金までの一連の流れを確認")
 
 		//Debug中のみ
-		//wallet.Btc.UnlockAllUnspentTransaction()
+		//wallet.BTC.UnlockAllUnspentTransaction()
 
 		//入金検知 + 未署名トランザクション作成
 		hex, fileName, err := wallet.DetectReceivedCoin()
@@ -245,7 +245,7 @@ func switchFunction(wallet *service.Wallet) {
 
 		//一連の署名から送信までの流れをチェック
 		//[WIF] cUW7ZSF9WX7FUTeHkuw5L9Rj26V5Kz8yCkYjZamyvATTwsu7KUCi - [Pub Address] muVSWToBoNWusjLCbxcQNBWTmPjioRLpaA
-		hash, tx, err := wallet.Btc.SequentialTransaction(hex)
+		hash, tx, err := wallet.BTC.SequentialTransaction(hex)
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}

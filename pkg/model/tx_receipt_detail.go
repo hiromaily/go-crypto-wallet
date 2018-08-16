@@ -21,7 +21,7 @@ type TxReceiptDetail struct {
 // GetTxReceiptByID TxReceiptテーブルから該当するIDのレコードを返す
 func (m *DB) GetTxReceiptDetailByReceiptID(receiptID int64) (*TxReceiptDetail, error) {
 	txReceiptDetail := TxReceiptDetail{}
-	err := m.DB.Select(&txReceiptDetail, "SELECT * FROM tx_receipt_detail WHERE receipt_id=$1", receiptID)
+	err := m.RDB.Select(&txReceiptDetail, "SELECT * FROM tx_receipt_detail WHERE receipt_id=$1", receiptID)
 
 	return &txReceiptDetail, err
 }
@@ -30,7 +30,7 @@ func (m *DB) GetTxReceiptDetailByReceiptID(receiptID int64) (*TxReceiptDetail, e
 //TODO:BulkInsertがやりたい
 func (m *DB) InsertTxReceiptDetailForUnsigned(txReceiptDetails []TxReceiptDetail, tx *sqlx.Tx, isCommit bool) error {
 	if tx == nil {
-		tx = m.DB.MustBegin()
+		tx = m.RDB.MustBegin()
 	}
 
 	sql := `

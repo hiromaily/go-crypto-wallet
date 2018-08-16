@@ -56,7 +56,7 @@ func main() {
 	defer bit.Close()
 
 	//Wallet Object
-	wallet := service.Wallet{Btc: bit, DB: nil}
+	wallet := service.Wallet{BTC: bit, DB: nil}
 
 	//switch
 	switchFunction(&wallet)
@@ -70,7 +70,7 @@ func switchFunction(wallet *service.Wallet) {
 		//TODO: 通常のKeyの生成
 		log.Print("Run: Keyの生成")
 		//単一Keyの生成
-		wif, pubAddress, err := key.GenerateKey(wallet.Btc.GetChainConf())
+		wif, pubAddress, err := key.GenerateKey(wallet.BTC.GetChainConf())
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -78,7 +78,7 @@ func switchFunction(wallet *service.Wallet) {
 	case 2:
 		//TODO: HDウォレットによるKeyの作成 (まだ検証中)
 		log.Print("Run: HDウォレット Keyの生成")
-		key.GenerateHDKey(opts.ParamSeed, wallet.Btc.GetChainConf())
+		key.GenerateHDKey(opts.ParamSeed, wallet.BTC.GetChainConf())
 	case 3:
 		//TODO:Multisigの作成
 
@@ -89,7 +89,7 @@ func switchFunction(wallet *service.Wallet) {
 		//TODO: => おそらくBlankでもいい
 
 		//TODO: Multisigアドレス作成 (まだ検証中)
-		resAddr, err := wallet.Btc.CreateMultiSig(2, []string{"2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP", "2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu"}, "multi01")
+		resAddr, err := wallet.BTC.CreateMultiSig(2, []string{"2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP", "2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu"}, "multi01")
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}

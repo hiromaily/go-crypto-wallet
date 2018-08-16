@@ -48,7 +48,7 @@ func (w *Wallet) createDebugUserPayment() []UserPayment {
 	var err error
 	for idx, val := range userPayments {
 		//Address TODO:このタイミングでaddressは不要かもしれない
-		userPayments[idx].validRecAddr, err = w.Btc.DecodeAddress(val.receiverAddr)
+		userPayments[idx].validRecAddr, err = w.BTC.DecodeAddress(val.receiverAddr)
 		if err != nil {
 			//これは本来事前にチェックされるため、ありえないはず
 			log.Printf("[Error] unexpected error converting string to address")
@@ -56,7 +56,7 @@ func (w *Wallet) createDebugUserPayment() []UserPayment {
 		//grok.Value(userPayments[idx].validRecAddr)
 
 		//Amount
-		userPayments[idx].validAmount, err = w.Btc.FloatBitToAmount(val.amount)
+		userPayments[idx].validAmount, err = w.BTC.FloatBitToAmount(val.amount)
 		if err != nil {
 			//これは本来事前にチェックされるため、ありえないはず
 			log.Printf("[Error] unexpected error converting float64 to Amount")
@@ -93,11 +93,11 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() (string, error) {
 
 	//3. Listunspent()にてpaymentアカウント用のutxoをすべて取得する
 	//listunspent 6  9999999 [\"2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW\"]
-	addr, err := w.Btc.DecodeAddress(w.Btc.PaymentAddress())
+	addr, err := w.BTC.DecodeAddress(w.BTC.PaymentAddress())
 	if err != nil {
 		return "", errors.Errorf("DecodeAddress(): error: %v", err)
 	}
-	unspentList, err := w.Btc.Client().ListUnspentMinMaxAddresses(6, 9999999, []btcutil.Address{addr})
+	unspentList, err := w.BTC.Client().ListUnspentMinMaxAddresses(6, 9999999, []btcutil.Address{addr})
 	if err != nil {
 		//致命的なエラー
 		return "", err
@@ -158,11 +158,11 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() (string, error) {
 
 	//差分でお釣り用のoutputを作成する
 	change := inputTotal - userTotal
-	tmpOutputs[w.Btc.PaymentAddress()] = change
+	tmpOutputs[w.BTC.PaymentAddress()] = change
 
 	//tmpOutputsをoutputsとして変換する
 	for key, val := range tmpOutputs {
-		addr, err = w.Btc.DecodeAddress(key)
+		addr, err = w.BTC.DecodeAddress(key)
 		if err != nil {
 			//これは本来事前にチェックされるため、ありえないはず
 			log.Printf("[Error] unexpected error converting string to address")
@@ -182,7 +182,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() (string, error) {
 
 func (w *Wallet) createRawTransactionForPayment(inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount) (string, error) {
 	// 1.CreateRawTransactionWithOutput(仮で作成し、この後サイズから手数料を算出する)
-	msgTx, err := w.Btc.CreateRawTransactionWithOutput(inputs, outputs)
+	msgTx, err := w.BTC.CreateRawTransactionWithOutput(inputs, outputs)
 	if err != nil {
 		return "", errors.Errorf("CreateRawTransactionWithOutput(): error: %v", err)
 	}
@@ -190,7 +190,7 @@ func (w *Wallet) createRawTransactionForPayment(inputs []btcjson.TransactionInpu
 	//grok.Value(msgTx)
 
 	// 2.fee算出
-	fee, err := w.Btc.GetTransactionFee(msgTx)
+	fee, err := w.BTC.GetTransactionFee(msgTx)
 	if err != nil {
 		return "", errors.Errorf("GetTransactionFee(): error: %v", err)
 	}
@@ -199,7 +199,7 @@ func (w *Wallet) createRawTransactionForPayment(inputs []btcjson.TransactionInpu
 	// 3.TODO:お釣り用のoutputのトランザクションから、手数料を差し引かねばならい
 	// FIXME: これが足りない場合がめんどくさい。。。これをどう回避すべきか
 	for addr, _ := range outputs {
-		if addr.String() == w.Btc.PaymentAddress() {
+		if addr.String() == w.BTC.PaymentAddress() {
 			outputs[addr] -= fee
 		}
 	}
@@ -209,15 +209,15 @@ func (w *Wallet) createRawTransactionForPayment(inputs []btcjson.TransactionInpu
 	//return "", nil
 
 	// 4.再度 CreateRawTransaction
-	msgTx, err = w.Btc.CreateRawTransactionWithOutput(inputs, outputs)
+	msgTx, err = w.BTC.CreateRawTransactionWithOutput(inputs, outputs)
 	if err != nil {
 		return "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
 
 	// 5.出力用にHexに変換する
-	hex, err := w.Btc.ToHex(msgTx)
+	hex, err := w.BTC.ToHex(msgTx)
 	if err != nil {
-		return "", errors.Errorf("w.Btc.ToHex(msgTx): error: %v", err)
+		return "", errors.Errorf("w.BTC.ToHex(msgTx): error: %v", err)
 	}
 
 	// 6. GCSにトランザクションファイルを作成
@@ -243,11 +243,11 @@ func (w *Wallet) CreateUnsignedTransactionForPaymentOld() error {
 
 	//2. Listunspent()にてpaymentアカウント用のutxoをすべて取得する
 	//listunspent 6  9999999 [\"2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW\"]
-	addr, err := w.Btc.DecodeAddress(w.Btc.PaymentAddress())
+	addr, err := w.BTC.DecodeAddress(w.BTC.PaymentAddress())
 	if err != nil {
 		return errors.Errorf("DecodeAddress(): error: %v", err)
 	}
-	unspentList, err := w.Btc.Client().ListUnspentMinMaxAddresses(6, 9999999, []btcutil.Address{addr})
+	unspentList, err := w.BTC.Client().ListUnspentMinMaxAddresses(6, 9999999, []btcutil.Address{addr})
 	if err != nil {
 		//致命的なエラー
 		return err
@@ -314,7 +314,7 @@ func (w *Wallet) CreateUnsignedTransactionForPaymentOld() error {
 	}
 	//tmpOutputsをoutputsとして変換する
 	for key, val := range tmpOutputs {
-		addr, err = w.Btc.DecodeAddress(key)
+		addr, err = w.BTC.DecodeAddress(key)
 		if err != nil {
 			//これは本来事前にチェックされるため、ありえないはず
 			log.Printf("[Error] unexpected error converting string to address")

@@ -13,7 +13,7 @@ func (w *Wallet) SendFromFile(filePath string) (string, error) {
 	}
 
 	//送信
-	hash, err := w.Btc.SendTransactionByHex(hex)
+	hash, err := w.BTC.SendTransactionByHex(hex)
 	if err != nil {
 		return "", err
 	}

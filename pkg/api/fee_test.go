@@ -6,7 +6,7 @@ import (
 
 // TestEstimateSmartFee
 func TestEstimateSmartFee(t *testing.T) {
-	fee, err := wlt.Btc.EstimateSmartFee()
+	fee, err := wlt.BTC.EstimateSmartFee()
 	if err != nil {
 		t.Errorf("Unexpectedly error occorred. %v", err)
 	}
@@ -33,7 +33,7 @@ func TestGetTransactionFee(t *testing.T) {
 	}
 	for _, val := range tests {
 		// Hexからトランザクションを取得
-		msgTx, err := wlt.Btc.ToMsgTx(val.hex)
+		msgTx, err := wlt.BTC.ToMsgTx(val.hex)
 		if err != nil {
 			t.Fatal("Hex can not be converted as *wire.MsgTx")
 		}
@@ -41,7 +41,7 @@ func TestGetTransactionFee(t *testing.T) {
 		//size
 		t.Logf("msgTx.SerializeSize() %d", msgTx.SerializeSize())
 
-		fee, err := wlt.Btc.GetTransactionFee(msgTx)
+		fee, err := wlt.BTC.GetTransactionFee(msgTx)
 		if err != nil {
 			t.Fatalf("GetTransactionFee() must be fixed. error: %v", err)
 		}

@@ -25,14 +25,14 @@ type TxReceipt struct {
 // GetTxReceiptByID TxReceiptテーブルから該当するIDのレコードを返す
 func (m *DB) GetTxReceiptByID(id int64) (*TxReceipt, error) {
 	txReceipt := TxReceipt{}
-	err := m.DB.Get(&txReceipt, "SELECT * FROM tx_receipt WHERE id=?", id)
+	err := m.RDB.Get(&txReceipt, "SELECT * FROM tx_receipt WHERE id=?", id)
 
 	return &txReceipt, err
 }
 
 func (m *DB) GetTxReceiptByUnsignedHex(hex string) (int64, error) {
 	var count int64
-	err := m.DB.Get(&count, "SELECT count(id) FROM tx_receipt WHERE unsigned_hex_tx=?", hex)
+	err := m.RDB.Get(&count, "SELECT count(id) FROM tx_receipt WHERE unsigned_hex_tx=?", hex)
 
 	return count, err
 }
@@ -40,7 +40,7 @@ func (m *DB) GetTxReceiptByUnsignedHex(hex string) (int64, error) {
 // InsertTxReceiptForUnsigned TxReceiptテーブルに未署名トランザクションレコードを作成する
 func (m *DB) InsertTxReceiptForUnsigned(txReceipt *TxReceipt, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	if tx == nil {
-		tx = m.DB.MustBegin()
+		tx = m.RDB.MustBegin()
 	}
 
 	sql := `

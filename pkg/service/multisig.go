@@ -12,14 +12,14 @@ import (
 func (w *Wallet) MultiSigByHex(hex string) (string, error) {
 	//first hex: 未署名トランザクションのhex
 	// Hexからトランザクションを取得
-	msgTx, err := w.Btc.ToMsgTx(hex)
+	msgTx, err := w.BTC.ToMsgTx(hex)
 	if err != nil {
 		return "", err
 	}
 
 	// TODO:署名処理はLoopのほうがいいか？
 	// 署名1
-	signedTx, isSigned, err := w.Btc.SignRawTransaction(msgTx)
+	signedTx, isSigned, err := w.BTC.SignRawTransaction(msgTx)
 	if err != nil {
 		return "", err
 	}
@@ -28,16 +28,16 @@ func (w *Wallet) MultiSigByHex(hex string) (string, error) {
 	log.Printf("[Debug] isSigned01 is %t, false is expected.", isSigned)
 
 	// 署名2
-	//signedTx2, isSigned, err := w.Btc.SignRawTransaction(signedTx1)
+	//signedTx2, isSigned, err := w.BTC.SignRawTransaction(signedTx1)
 	//if err != nil {
 	//	return "", err
 	//}
 	//log.Printf("[Debug] isSigned02 is %t, true is expected.", isSigned)
 
-	hexTx, err := w.Btc.ToHex(signedTx)
-	//hexTx, err := w.Btc.ToHex(signedTx2)
+	hexTx, err := w.BTC.ToHex(signedTx)
+	//hexTx, err := w.BTC.ToHex(signedTx2)
 	if err != nil {
-		return "", errors.Errorf("w.Btc.ToHex(msgTx): error: %v", err)
+		return "", errors.Errorf("w.BTC.ToHex(msgTx): error: %v", err)
 	}
 
 	return hexTx, nil

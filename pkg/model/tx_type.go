@@ -13,7 +13,7 @@ type TxType struct {
 // GetTxType GetTxTypeテーブル全体を返す
 func (m *DB) GetTxType() ([]TxType, error) {
 	txTypes := []TxType{}
-	err := m.DB.Select(&txTypes, "SELECT * FROM tx_type")
+	err := m.RDB.Select(&txTypes, "SELECT * FROM tx_type")
 
 	return txTypes, err
 }

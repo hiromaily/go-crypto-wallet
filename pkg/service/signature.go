@@ -13,21 +13,21 @@ import (
 func (w *Wallet) signatureByHex(hex string) (string, bool, error) {
 	//first hex: 未署名トランザクションのhex
 	// Hexからトランザクションを取得
-	msgTx, err := w.Btc.ToMsgTx(hex)
+	msgTx, err := w.BTC.ToMsgTx(hex)
 	if err != nil {
 		return "", false, err
 	}
 
 	// 署名
-	signedTx, isSigned, err := w.Btc.SignRawTransaction(msgTx)
+	signedTx, isSigned, err := w.BTC.SignRawTransaction(msgTx)
 	if err != nil {
 		return "", false, err
 	}
 	log.Printf("[Debug] isSigned01 is %t", isSigned)
 
-	hexTx, err := w.Btc.ToHex(signedTx)
+	hexTx, err := w.BTC.ToHex(signedTx)
 	if err != nil {
-		return "", false, errors.Errorf("w.Btc.ToHex(msgTx): error: %v", err)
+		return "", false, errors.Errorf("w.BTC.ToHex(msgTx): error: %v", err)
 	}
 
 	return hexTx, isSigned, nil

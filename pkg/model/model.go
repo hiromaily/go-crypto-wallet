@@ -5,12 +5,13 @@ import (
 )
 
 // Model データベースオブジェクト
+// 複数のDBがある場合、こちらを拡張していく
 type DB struct {
-	DB *sqlx.DB
+	RDB *sqlx.DB
 }
 
 // New DBオブジェクトを返す
 func New(d *sqlx.DB) *DB {
-	db := DB{DB: d}
+	db := DB{RDB: d}
 	return &db
 }
