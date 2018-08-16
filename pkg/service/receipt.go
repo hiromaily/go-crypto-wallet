@@ -218,23 +218,31 @@ func (w *Wallet) storeHexOnGPS(hexTx string) {
 
 //TODO:引数の数が多いのはGoにおいてはBad practice...
 func (w *Wallet) insertHexOnDB(hex string, total, fee btcutil.Amount, addr string, txType int, txReceiptDetails []model.TxReceiptDetail) error {
+	//TODO:内容が同じだと、生成されるhexもまったく同じ為、同一のhexが合った場合は処理をskipする
+	count, err := w.DB.GetTxReceiptByUnsignedHex(hex)
+	if err != nil {
+		return errors.Errorf("DB.GetTxReceiptByUnsignedHex(): error: %v", err)
+	}
+	if count != 0 {
+		//skip
+		return nil
+	}
+
 	//1.TxReceiptテーブル
 	txReceipt := model.TxReceipt{}
 	txReceipt.UnsignedHexTx = hex
 	txReceipt.TotalAmount = w.Btc.AmountString(total)
 	txReceipt.Fee = w.Btc.AmountString(fee)
 	txReceipt.ReceiverAddress = addr
-	txReceipt.TxType = 1
+	txReceipt.TxType = 1 //未署名
 
 	tx := w.DB.DB.MustBegin()
-	//TODO:内容が同じだと、生成されるhexも同じ為、Upsertのほうがいい、もしくは、同一のhexが合った場合は処理をskipする
 	txReceiptID, err := w.DB.InsertTxReceiptForUnsigned(&txReceipt, tx, false)
 	if err != nil {
 		return errors.Errorf("DB.InsertTxReceiptForUnsigned(): error: %v", err)
 	}
 
 	//2.TxReceiptDetailテーブル
-	//txReceiptDetails := make([]model.TxReceiptDetail, len(inputs))
 	for idx, _ := range txReceiptDetails {
 		txReceiptDetails[idx].ReceiptID = txReceiptID
 	}

@@ -18,16 +18,23 @@ type TxReceipt struct {
 	ReceiverAddress   string     `db:"receiver_address"`
 	TxType            int        `db:"current_tx_type"`
 	UnsignedUpdatedAt *time.Time `db:"unsigned_updated_at"`
-	SignedUpdatedAt   *time.Time `db:"unsigned_updated_at"`
+	SignedUpdatedAt   *time.Time `db:"signed_updated_at"`
 	SentUpdatedAt     *time.Time `db:"sent_updated_at"`
 }
 
 // GetTxReceiptByID TxReceiptテーブルから該当するIDのレコードを返す
 func (m *DB) GetTxReceiptByID(id int64) (*TxReceipt, error) {
 	txReceipt := TxReceipt{}
-	err := m.DB.Get(&txReceipt, "SELECT * FROM tx_receipt WHERE id=$1", id)
+	err := m.DB.Get(&txReceipt, "SELECT * FROM tx_receipt WHERE id=?", id)
 
 	return &txReceipt, err
+}
+
+func (m *DB) GetTxReceiptByUnsignedHex(hex string) (int64, error) {
+	var count int64
+	err := m.DB.Get(&count, "SELECT count(id) FROM tx_receipt WHERE unsigned_hex_tx=?", hex)
+
+	return count, err
 }
 
 // InsertTxReceiptForUnsigned TxReceiptテーブルに未署名トランザクションレコードを作成する

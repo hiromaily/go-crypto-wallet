@@ -97,13 +97,26 @@ func switchFunction(wallet *service.Wallet) {
 		log.Print("Done!")
 	case 5:
 		//[Debug用]DB周り
+		log.Print("Run: wallet.DB.GetTxReceiptByID()")
+
+		//txReceipt, err := wallet.DB.GetTxReceiptByID(10)
+
+		hex := "02000000ss2b5085ddcbe61200c54b29c2d664df31341cd72834ec03a6c0b71bba7054429cb0100000000ffffffffb9401d39321d17fe1ec07668256820b0ccd2184b9ad4a8083c9a7295641d52220100000000ffffffff0114ba9e0b0000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e8700000000"
+		count, err := wallet.DB.GetTxReceiptByUnsignedHex(hex)
+
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		grok.Value(count)
+	case 6:
+		//[Debug用]DB周り
 		log.Print("Run: wallet.DB.GetTxType()")
 		txTypes, err := wallet.DB.GetTxType()
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
 		grok.Value(txTypes)
-	case 6:
+	case 7:
 		//[Debug用]DB周り
 		log.Print("Run: wallet.DB.InsertTxReceiptForUnsigned()")
 		txReceipt := model.TxReceipt{}
@@ -119,7 +132,7 @@ func switchFunction(wallet *service.Wallet) {
 		}
 		log.Printf("ID is %d", id)
 
-	case 7:
+	case 8:
 		//[Debug用]DB周り
 		log.Print("Run: wallet.DB.InsertTxReceiptDetailForUnsigned()")
 		txReceiptDetails := []model.TxReceiptDetail{
