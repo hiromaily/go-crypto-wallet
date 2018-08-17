@@ -1,11 +1,10 @@
 .DS_Store
 .idea/
-detect
 wallet
-!cmd/wallet
 coldwallet
+!cmd/wallet
 !cmd/coldwallet
 data/kvs/*
-!.gitkeep
 data/tx/*
+!.gitkeep
 cayenne-dev-strage.json
