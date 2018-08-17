@@ -126,3 +126,23 @@ CREATE TABLE `tx_receipt_detail` (
   INDEX idx_receipt_id (`receipt_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='受け取り用トランザクション情報詳細Table';
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+
+--
+-- Table structure for table `tx_payment`
+--
+
+DROP TABLE IF EXISTS `tx_payment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tx_payment` LIKE `tx_receipt`;
+
+
+--
+-- Table structure for table `tx_payment`
+--
+
+DROP TABLE IF EXISTS `tx_payment_detail`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tx_payment_detail` LIKE `tx_receipt_detail`;
