@@ -4,9 +4,9 @@ package enum
 type TxType string
 
 const (
-	TxTypeUnsigned = "unsigned"
-	TxTypeSigned   = "signed"
-	TxTypeSent     = "sent"
-	TxTypeDone     = "done"
-	TxTypeCancel   = "cancel"
+	TxTypeUnsigned TxType = "unsigned"
+	TxTypeSigned   TxType = "signed"
+	TxTypeSent     TxType = "sent"
+	TxTypeDone     TxType = "done"
+	TxTypeCancel   TxType = "cancel"
 )
