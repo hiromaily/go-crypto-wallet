@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"cloud.google.com/go/storage"
-	"github.com/moneyforward/cayenne/app/pkg/logger"
 	"github.com/pkg/errors"
 	"google.golang.org/api/option"
 )
@@ -87,7 +86,6 @@ func (s *Strage) ReadAndSave(readFileName, saveFileName string, perm os.FileMode
 	defer func() {
 		if errr := r.Close(); errr == nil {
 			err = errr
-			logger.Error("r.Close() %v", err)
 		}
 	}()
 
