@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/file"
 	"github.com/pkg/errors"
 	"log"
@@ -46,7 +47,7 @@ func (w *Wallet) SignatureByHex(hex string, txReceiptID int64) (string, bool, st
 
 	//ファイルに書き込む
 	//TODO:暫定で1を使っている
-	path := file.CreateFilePath(file.ActionReceipt, "signed", txReceiptID)
+	path := file.CreateFilePath(file.ActionReceipt, enum.TxTypeSigned, txReceiptID)
 	generatedFileName, err := file.WriteFile(path, hex)
 	//generatedFileName := file.WriteFileForSigned(txReceiptID, "inside/", hexTx)
 	if err != nil {
@@ -81,7 +82,7 @@ func (w *Wallet) SignatureFromFile(filePath string, actionFlg file.Action) (stri
 	//log.Println("hex:", hexTx)
 
 	//ファイルに書き込む
-	path := file.CreateFilePath(actionFlg, "signed", txReceiptID)
+	path := file.CreateFilePath(actionFlg, enum.TxTypeSigned, txReceiptID)
 	generatedFileName, err := file.WriteFile(path, hexTx)
 	if err != nil {
 		return "", isSigned, "", err

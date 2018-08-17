@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"fmt"
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/pkg/errors"
 )
 
@@ -37,7 +38,7 @@ func SetFilePath(receiptPath, paymentPath string) {
 	paymentFilePath = paymentPath
 }
 
-func CreateFilePath(actionFlg Action, txType string, txID int64) string {
+func CreateFilePath(actionFlg Action, txType enum.TxType, txID int64) string {
 	basePath := receiptFilePath
 	if actionFlg == 2 {
 		basePath = paymentFilePath
@@ -95,7 +96,7 @@ func ReadFile(path string) (string, error) {
 }
 
 // ParseFile ファイル名を解析する
-func ParseFile(filePath, txType string) (int64, string, error) {
+func ParseFile(filePath string, txType enum.TxType) (int64, string, error) {
 	//フルパスが渡されることも想定
 	tmp := strings.Split(filePath, "/")
 	fileName := tmp[len(tmp)-1]
@@ -109,7 +110,7 @@ func ParseFile(filePath, txType string) (int64, string, error) {
 	if err != nil {
 		return 0, "", errors.Errorf("error: invalid file: %s", fileName)
 	}
-	if s[1] != txType {
+	if s[1] != string(txType) {
 		return 0, "", errors.Errorf("error: invalid file: %s", fileName)
 	}
 

@@ -7,6 +7,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/file"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
@@ -185,7 +186,7 @@ func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjs
 	var generatedFileName string
 	if txReceiptID != 0 {
 		//generatedFileName = file.WriteFileForUnsigned(txReceiptID, "inside/", hex)
-		path := file.CreateFilePath(file.ActionReceipt, "unsigned", txReceiptID)
+		path := file.CreateFilePath(file.ActionReceipt, enum.TxTypeUnsigned, txReceiptID)
 		generatedFileName, err = file.WriteFile(path, hex)
 		if err != nil {
 			return "", "", errors.Errorf("file.WriteFile(): error: %v", err)
