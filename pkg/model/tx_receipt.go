@@ -59,3 +59,27 @@ VALUES (:unsigned_hex_tx, :signed_hex_tx, :sent_hex_tx, :total_amount, :fee, :re
 	id, _ := res.LastInsertId()
 	return id, nil
 }
+
+// UpdateTxReceiptForSent TxReceiptテーブルのsigned_hex_tx, sent_hex_txを更新する
+func (m *DB) UpdateTxReceiptForSent(txReceipt *TxReceipt, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	if tx == nil {
+		tx = m.RDB.MustBegin()
+	}
+
+	sql := `
+UPDATE tx_receipt SET signed_hex_tx=:signed_hex_tx, sent_hex_tx=:sent_hex_tx, current_tx_type=:current_tx_type,
+ sent_updated_at=:sent_updated_at
+ WHERE id=:id
+`
+	res, err := tx.NamedExec(sql, txReceipt)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+	if isCommit {
+		tx.Commit()
+	}
+	affectedNum, _ := res.RowsAffected()
+
+	return affectedNum, nil
+}

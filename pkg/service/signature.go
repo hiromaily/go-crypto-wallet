@@ -35,19 +35,18 @@ func (w *Wallet) signatureByHex(hex string) (string, bool, error) {
 }
 
 // SignatureByHex Hex文字列から署名を行う
-func (w *Wallet) SignatureByHex(hex string) (string, bool, error) {
+func (w *Wallet) SignatureByHex(hex string, txReceiptID int64) (string, bool, string, error) {
 	//署名
 	hexTx, isSigned, err := w.signatureByHex(hex)
 	if err != nil {
-		return "", isSigned, err
+		return "", isSigned, "", err
 	}
 	//log.Println("hex:", hexTx)
 
 	//ファイルに書き込む
-	//FIXME: txReceiptIDが必要
-	file.WriteFileForSigned(9, hexTx)
+	generatedFileName := file.WriteFileForSigned(txReceiptID, hexTx)
 
-	return hexTx, isSigned, nil
+	return hexTx, isSigned, generatedFileName, nil
 }
 
 // SignatureFromFile 渡されたファイルからtransactionを読み取り、署名を行う

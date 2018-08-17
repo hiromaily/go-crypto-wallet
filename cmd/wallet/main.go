@@ -9,6 +9,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/jessevdk/go-flags"
+	"time"
 )
 
 //こちらはHotwallet、ただし、Watch Only Walletとしての機能を実装していく。
@@ -161,6 +162,26 @@ func switchFunction(wallet *service.Wallet) {
 			log.Fatalf("%+v", err)
 		}
 		log.Println("Done!")
+	case 9:
+		//[Debug用]DB周り
+		log.Print("Run: wallet.DB.UpdateTxReceiptForSent()")
+		//1.TxReceiptテーブル
+		t := time.Now()
+		txReceipt := model.TxReceipt{}
+		txReceipt.ID = 5
+		txReceipt.SignedHexTx = "signedHex"
+		txReceipt.SentHexTx = "sentTxID"
+		txReceipt.SentUpdatedAt = &t
+		txReceipt.TxType = 3 //未署名:TODO:Constとして定義しておく
+
+		affected, err := wallet.DB.UpdateTxReceiptForSent(&txReceipt, nil, true)
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		if affected == 0 {
+			log.Fatal("table was not updated")
+		}
+		log.Println("Done!")
 
 	case 11:
 		log.Print("Run: 入金処理検知")
@@ -178,7 +199,7 @@ func switchFunction(wallet *service.Wallet) {
 		}
 		log.Printf("hex: %s\n fileName: %s", hex, fileName)
 	case 12:
-		log.Print("Run: 署名済みtxを送信する")
+		log.Print("Run: hexから署名済みtxを送信する")
 
 		hex := "020000000001019dcbbda4e5233051f2bed587c1d48e8e17aa21c2c3012097899bda5097ce78e201000000232200208e1343e11e4def66d7102d9b0f36f019188118df5a5f30dacdd1008928b12f5fffffffff01042bbf070000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e870400483045022100f4975a5ea23e5799b1df65d699f85236b9d00bcda8da333731ffa508285d3c59022037285857821ee68cbe5f74239299170686b108ce44e724a9a280a3ef9291746901483045022100f94ce83946b4698b8dfbb7cb75eece12932c5097017e70e60d924aeae1ec829a02206e7b2437e9747a9c28a3a3d7291ea16db1d2f0a60482cdb8eca91c28c01aba790147522103d69e07dbf6da065e6fae1ef5761d029b9ff9143e75d579ffc439d47484044bed2103748797877523b8b36add26c9e0fb6a023f05083dd4056aedc658d2932df1eb6052ae00000000"
 		hash, err := wallet.BTC.SendTransactionByHex(hex)
@@ -187,13 +208,13 @@ func switchFunction(wallet *service.Wallet) {
 		}
 		log.Printf("[Debug] 送信までDONE!! %s", hash.String())
 	case 13:
-		//TODO:実際にはUSBで署名済の16進数で書かれたtransactionの文字列を処理するのだが、
+		log.Print("Run: ファイルから署名済みtxを送信する")
 		// 1.GPSにupload(web管理画面から行う??)
 		// 2.Uploadされたtransactionファイルから、送信する？
 		// 3. unsignedトランザクションファイル名と、signedトランザクションファイル名のリレーションをDBに保存したほうがいいか？
 
-		//[Debug]とりあえず、localのファイルから読みこんで送信してみる
-		txID, err := wallet.SendFromFile("./data/tx/signed_1534303789374409841")
+		//txID, err := wallet.SendFromFile("./data/tx/signed_1534303789374409841")
+		txID, err := wallet.SendFromFile("5_signed_1534467893242368938")
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
@@ -212,7 +233,7 @@ func switchFunction(wallet *service.Wallet) {
 
 		//一連の動作も確認
 		//署名
-		signedTx, isSigned, err := wallet.SignatureByHex(hex)
+		signedTx, isSigned, _, err := wallet.SignatureByHex(hex, 10)
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
