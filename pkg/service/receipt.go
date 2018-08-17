@@ -47,8 +47,6 @@ func (w *Wallet) DetectReceivedCoin() (string, string, error) {
 	//TODO:ListUnspent内で、検索すべきBlock番号まで内部的に保持できてるっぽい
 	// Watch only walletであれば、ListUnspentで実現可能
 	unspentList, err := w.BTC.Client().ListUnspentMin(6)
-	//FIXME: multisigのアドレスはこれで取得できないかも。。。それか、Bitcoin Coreの表示がおかしい。。。
-	//FIXME: multisigからhokanに転送したので、multisigには残高がないことが正しい
 	if err != nil {
 		return "", "", errors.Errorf("ListUnspentMin(): error: %v", err)
 	}
@@ -66,13 +64,6 @@ func (w *Wallet) DetectReceivedCoin() (string, string, error) {
 	)
 
 	for _, tx := range unspentList {
-		//TODO: spendableは実環境では使えない。
-		// 6に満たない場合、まだ未確定であることを意味するはず => これはListUnspent()のパラメータで可能のためコメントアウト
-		//https://bitcoin.stackexchange.com/questions/63198/why-outputs-spendable-and-solvable-are-false
-		//if tx.Confirmations < w.BTC.ConfirmationBlock() {
-		//	continue
-		//}
-
 		// Transaction詳細を取得 => これはこのタイミングでは不要
 		// (アカウント名によって、はじく、もしくはユーザーのアドレスの取得に必要)
 		//tran, err := w.BTC.GetTransactionByTxID(tx.TxID)
@@ -104,17 +95,6 @@ func (w *Wallet) DetectReceivedCoin() (string, string, error) {
 		if w.BTC.LockUnspent(tx) != nil {
 			continue
 		}
-
-		//TODO:以下処理は不要だが、仕様がFIXするまでコメントアウトとして残しておく
-		//TODO:ここはまとめてLevelDBにPutしたほうが効率的かもしれない
-		//TODO:ここで保存した情報が本当に必要か？監視すべき対象は何で、何を実現させるかはっきりさせる
-		//このトランザクションIDはDBに保存が必要 => ここで保存されたIDはconfirmationのチェックに使われる
-		//err = w.Db.Put("unspent", tx.TxID+string(tx.Vout), nil)
-		//if err != nil {
-		//	//このタイミングでエラーがおきるのであれば、設計ミス
-		//	log.Printf("[Error] Error by w.Db.Put(unspent). This error should not occurred.:, error:%v", err)
-		//	continue
-		//}
 
 		// inputs
 		inputs = append(inputs, btcjson.TransactionInput{

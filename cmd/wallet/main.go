@@ -298,17 +298,3 @@ func callAPI(wallet *service.Wallet) {
 	//log.Printf("TxOut: %v\n", txOut)
 	//grok.Value(txOut)
 }
-
-//func checkLevelDB(wallet *service.Wallet) {
-//	//Put
-//	err := wallet.DB.Put("unspent", "testkey1", []byte("data1234567890"))
-//	if err != nil {
-//		log.Println(err)
-//	}
-//	//Get
-//	val, err := wallet.DB.Get("unspent", "testkey1")
-//	if err != nil {
-//		log.Println(err)
-//	}
-//	log.Printf("[Done] %s", string(val))
-//}
