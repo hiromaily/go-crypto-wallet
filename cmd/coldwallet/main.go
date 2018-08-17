@@ -5,6 +5,7 @@ import (
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/hiromaily/go-bitcoin/pkg/api"
+	"github.com/hiromaily/go-bitcoin/pkg/file"
 	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/hiromaily/go-bitcoin/pkg/toml"
@@ -127,7 +128,7 @@ func switchFunction(wallet *service.Wallet) {
 		}
 
 		//出金と入金で、フラグが変わるので注意
-		hexTx, isSigned, generatedFileName, err := wallet.SignatureFromFile(opts.ImportFile, 1)
+		hexTx, isSigned, generatedFileName, err := wallet.SignatureFromFile(opts.ImportFile, file.ActionReceipt)
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}

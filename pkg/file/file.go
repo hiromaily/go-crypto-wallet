@@ -17,6 +17,14 @@ var (
 	paymentFilePath = "./data/tx/payment/" //2
 )
 
+//Action 入金/出金
+type Action uint8
+
+const (
+	ActionReceipt Action = iota + 1
+	ActionPayment
+)
+
 // 出力されるファイルフォーマットについて
 // [1_unsigned_timestamp]
 // - 最初の数字: 該当するtxReceiptID、つまりこの数値から、ファイル名のリレーションを追うことが可能
@@ -29,7 +37,7 @@ func SetFilePath(receiptPath, paymentPath string) {
 	paymentFilePath = paymentPath
 }
 
-func CreateFilePath(actionFlg uint8, txType string, txID int64) string {
+func CreateFilePath(actionFlg Action, txType string, txID int64) string {
 	basePath := receiptFilePath
 	if actionFlg == 2 {
 		basePath = paymentFilePath
