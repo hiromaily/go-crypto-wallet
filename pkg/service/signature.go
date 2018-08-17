@@ -51,23 +51,29 @@ func (w *Wallet) SignatureByHex(hex string) (string, bool, error) {
 }
 
 // SignatureFromFile 渡されたファイルからtransactionを読み取り、署名を行う
-func (w *Wallet) SignatureFromFile(filePath string) (string, bool, error) {
+func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error) {
+	//ファイル名から、tx_receipt_idを取得する
+	//5_unsigned_1534466246366489473
+	txReceiptID, _, err := file.ParseFile(filePath, "unsigned")
+	if err != nil {
+		return "", false, "", err
+	}
+
 	//ファイルからhexを読み取る
 	hex, err := file.ReadFile(filePath)
 	if err != nil {
-		return "", false, err
+		return "", false, "", err
 	}
 
 	//署名
 	hexTx, isSigned, err := w.signatureByHex(hex)
 	if err != nil {
-		return "", isSigned, err
+		return "", isSigned, "", err
 	}
 	//log.Println("hex:", hexTx)
 
 	//ファイルに書き込む
-	//FIXME: txReceiptIDが必要
-	file.WriteFileForSigned(9, hexTx)
+	generatedFileName := file.WriteFileForSigned(txReceiptID, hexTx)
 
-	return hexTx, isSigned, nil
+	return hexTx, isSigned, generatedFileName, nil
 }

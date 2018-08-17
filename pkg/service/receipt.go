@@ -85,6 +85,7 @@ func (w *Wallet) DetectReceivedCoin() (string, string, error) {
 		//grok.Value(tran)
 
 		//除外するアカウント
+		//TODO:本番環境ではこの条件がかわる気がする
 		if tx.Account == w.BTC.StoredAccountName() ||
 			tx.Account == w.BTC.PaymentAccountName() || tx.Account == "" {
 			continue
@@ -199,13 +200,13 @@ func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjs
 
 	// 7. GCSにトランザクションファイルを作成
 	//TODO:本来、この戻り値をDumpして、GCSに保存、それをDLして、USBに入れてコールドウォレットに移動しなくてはいけない
-	//TODO:Debug時はlocalに出力することとする
-	var fileName string
+	//TODO:Debug時はlocalに出力することとする。=> これはフラグで判別したほうがいいかもしれない
+	var generatedFileName string
 	if txReceiptID != 0 {
-		fileName = file.WriteFileForUnsigned(txReceiptID, hex)
+		generatedFileName = file.WriteFileForUnsigned(txReceiptID, hex)
 	}
 
-	return hex, fileName, nil
+	return hex, generatedFileName, nil
 }
 
 func (w *Wallet) storeHexOnGPS(hexTx string) {
@@ -230,7 +231,7 @@ func (w *Wallet) insertHexForUnsignedTx(hex string, total, fee btcutil.Amount, a
 	txReceipt.TotalAmount = w.BTC.AmountString(total)
 	txReceipt.Fee = w.BTC.AmountString(fee)
 	txReceipt.ReceiverAddress = addr
-	txReceipt.TxType = 1 //未署名
+	txReceipt.TxType = 1 //未署名:TODO:Constとして定義しておく
 
 	tx := w.DB.RDB.MustBegin()
 	txReceiptID, err := w.DB.InsertTxReceiptForUnsigned(&txReceipt, tx, false)

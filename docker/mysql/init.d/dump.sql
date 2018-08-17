@@ -71,7 +71,9 @@ LOCK TABLES `tx_type` WRITE;
 INSERT INTO `tx_type` VALUES
   (1,'unsigned',now()),
   (2,'signed',now()),
-  (3,'sent',now());
+  (3,'sent',now()),
+  (4,'done',now()),
+  (5,'cancel',now());
 /*!40000 ALTER TABLE `tx_type` ENABLE KEYS */;
 UNLOCK TABLES;
 

@@ -106,9 +106,8 @@ func switchFunction(wallet *service.Wallet) {
 
 		// service.MultiSigByHex(hex)を実行してみる。
 	case 4:
-		//TODO:ImportしたHEXから署名を行う()
-		//FIXME: WIP multisigのフローはまだ未確定
-		log.Print("Run: ImportしたHEXから署名を行う")
+		//TODO:HEXから署名を行う()
+		log.Print("Run: HEXから署名を行う")
 		//hex := "02000000019dcbbda4e5233051f2bed587c1d48e8e17aa21c2c3012097899bda5097ce78e20100000000ffffffff01042bbf070000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e8700000000"
 		//hex := "02000000032e0183cd8e082c185030b8eed4bf19bace65936960fe79736dc21f3b0586b7640100000000ffffffff8afd01d2ecdfeb1657ae7a0ecee9e89b86feb58ed10803cdf6c95d25354161ff0100000000ffffffffc6f7645941324cfe9e36194a6443e0f50fe9117c4964ad942f39833da60363ba0000000000ffffffff01f0be8e0d0000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e8700000000"
 		hex := "02000000021ed288be4c4d7923a0d044bb500a15b2eb0f2b3c5503293f251f7c94939a3f9f0000000000ffffffff557624120cdf3f4d092f35e5cd6b75418b76c3e3fd4c398357374e93cfe5c4200000000000ffffffff05c03b47030000000017a91419e70491572c55fb08ce90b0c6bf5cfe45a5420e87809698000000000017a9146b8902fc7a6a0bccea9dbd80a4c092c314227f618734e133070000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e87005a62020000000017a9149c877d6f21d5800ca60a7660ee56745f239b222b87002d31010000000017a914f575a0d1ddcfb98a11628826f1632453d718ff618700000000"
@@ -121,26 +120,17 @@ func switchFunction(wallet *service.Wallet) {
 		//TODO:isSigned: 送信までした署名はfalseになる??
 	case 5:
 		//TODO: importしたファイルからhex値を取得し、署名を行う
+		// ./coldwallet -f 5 -i 5_unsigned_1534466246366489473
 		log.Print("Run: Importしたファイルからhex値を取得し、署名を行う")
 		if opts.ImportFile == "" {
 			log.Fatal("file path is required as argument file when running")
 		}
 
-		//hex, err := file.ReadFile(opts.ImportFile)
-		//if err != nil{
-		//	log.Fatal(err)
-		//}
-		//
-		//hexTx, err := wallet.MultiSigByHex(hex)
-		//if err != nil {
-		//	log.Fatalf("%+v", err)
-		//}
-		//log.Println("hex:", hexTx)
-		hexTx, isSigned, err := wallet.SignatureFromFile(opts.ImportFile)
+		hexTx, isSigned, generatedFileName, err := wallet.SignatureFromFile(opts.ImportFile)
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
-		log.Printf("hex: %s\n, 署名完了: %t", hexTx, isSigned)
+		log.Printf("hex: %s\n, 署名完了: %t\n, fileName: %s", hexTx, isSigned, generatedFileName)
 
 	default:
 		log.Print("Run: 検証コード")

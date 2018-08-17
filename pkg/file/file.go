@@ -3,6 +3,7 @@ package file
 import (
 	"io/ioutil"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/pkg/errors"
@@ -37,7 +38,6 @@ func WriteFileForSigned(txReceiptID int64, hexTx string) string {
 }
 
 func writeFileOnLocal(hexTx, filePrefix string) string {
-	//localPath := "./data/tx/" //TODO:ここは外部ファイル(toml)に定義したほうがいい
 	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
 
 	byteTx := []byte(hexTx)
@@ -49,12 +49,28 @@ func writeFileOnLocal(hexTx, filePrefix string) string {
 
 // ReadFile ファイルを読み込み
 func ReadFile(fileName string) (string, error) {
-	//localPath := "./data/tx/"
-	//ret, err := ioutil.ReadFile(localPath + fileName)
 	ret, err := ioutil.ReadFile(filePath + fileName)
 	if err != nil {
 		return "", errors.Errorf("ioutil.ReadFile(%s): error: %v", fileName, err)
 	}
 
 	return string(ret), nil
+}
+
+// ParseFile ファイル名を解析する
+func ParseFile(fileName, txType string) (int64, string, error) {
+	//5_unsigned_1534466246366489473
+	s := strings.Split(fileName, "_")
+	if len(s) != 3 {
+		return 0, "", errors.Errorf("error: invalid file: %s", fileName)
+	}
+	txReceiptID, err := strconv.ParseInt(s[0], 10, 64)
+	if err != nil {
+		return 0, "", errors.Errorf("error: invalid file: %s", fileName)
+	}
+	if s[1] != txType {
+		return 0, "", errors.Errorf("error: invalid file: %s", fileName)
+	}
+
+	return txReceiptID, s[1], nil
 }
