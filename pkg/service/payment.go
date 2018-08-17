@@ -2,8 +2,6 @@ package service
 
 import (
 	"log"
-	"sort"
-
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
@@ -235,100 +233,100 @@ func (w *Wallet) createRawTransactionForPayment(inputs []btcjson.TransactionInpu
 
 // CreateUnsignedTransactionForPaymentOld 支払いのための未署名トランザクションを作成する
 // TODO:別ロジックとして考えるため、一旦退避
-func (w *Wallet) CreateUnsignedTransactionForPaymentOld() error {
-	//DBから情報を取得、もしくはNatsからのリクエストをトリガーにするか、今はまだ未定
-	//とりあえず、テストデータで実装
-	//実際には、こちらもamountでソートしておく
-	userPayments := w.createDebugUserPayment()
-
-	//2. Listunspent()にてpaymentアカウント用のutxoをすべて取得する
-	//listunspent 6  9999999 [\"2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW\"]
-	addr, err := w.BTC.DecodeAddress(w.BTC.PaymentAddress())
-	if err != nil {
-		return errors.Errorf("DecodeAddress(): error: %v", err)
-	}
-	unspentList, err := w.BTC.Client().ListUnspentMinMaxAddresses(6, 9999999, []btcutil.Address{addr})
-	if err != nil {
-		//致命的なエラー
-		return err
-	}
-
-	//3. 送金の金額と近しいutxoでtxを作成するため、ソートしておく
-	//unspentList[0].Amount
-	sort.Slice(unspentList, func(i, j int) bool {
-		//small to big
-		return unspentList[i].Amount < unspentList[j].Amount
-	})
-
-	//grok.Value(userPayments)
-	grok.Value(unspentList)
-
-	var (
-		inputs     []btcjson.TransactionInput
-		tmpOutputs = map[string]btcutil.Amount{}
-		outputs    = map[btcutil.Address]btcutil.Amount{}
-	)
-	//送信ユーザー毎に処理
-	for _, userPayment := range userPayments {
-		//送金金額をチェック
-		//userPayment
-		var isAllocated bool
-		for idx, utxo := range unspentList {
-			if utxo.Amount >= userPayment.amount {
-				//利用可能 utxoを発見
-				isAllocated = true
-
-				//if !(usedTxID == utxo.TxID && usedTxVout == utxo.Vout){
-				if !w.isFoundTxIDAndVout(utxo.TxID, utxo.Vout, inputs) {
-					//新規利用のため、inputを作成
-					inputs = append(inputs, btcjson.TransactionInput{
-						Txid: utxo.TxID,
-						Vout: utxo.Vout,
-					})
-				}
-				//Outputを更新
-				//log.Println("[Debug]", userPayment.validRecAddr)
-				//FIXME:userPayment.validRecAddrはポインタとして保持しているので、値が同じでも異なるものとして認識されてしまう。。。
-				//if _, ok := outputs[userPayment.validRecAddr]; ok {
-				if _, ok := tmpOutputs[userPayment.receiverAddr]; ok {
-					//加算する
-					//outputs[userPayment.validRecAddr] += userPayment.validAmount
-					tmpOutputs[userPayment.receiverAddr] += userPayment.validAmount
-				} else {
-					//新規送信先を作成
-					//outputs[userPayment.validRecAddr] = userPayment.validAmount
-					tmpOutputs[userPayment.receiverAddr] = userPayment.validAmount
-				}
-				//unspentListも更新する
-				unspentList[idx].Amount -= userPayment.amount
-
-				//
-				break
-			}
-		}
-		if !isAllocated {
-			//送信に必要なutxoが見つからなかった。
-			//こんな致命的なエラーは発生しないよう、運用せねばならない。
-			log.Printf("[Error] unexpected error: proper utxo could not be found in our accout to send")
-		}
-	}
-	//tmpOutputsをoutputsとして変換する
-	for key, val := range tmpOutputs {
-		addr, err = w.BTC.DecodeAddress(key)
-		if err != nil {
-			//これは本来事前にチェックされるため、ありえないはず
-			log.Printf("[Error] unexpected error converting string to address")
-		}
-		outputs[addr] = val
-	}
-	//TODO:おつりを自分に送信せねばならない
-	//inputsにあるものはすべて
-	grok.Value(unspentList)
-
-	//TODO:inputsをすべてlockする
-	grok.Value(inputs)
-	//grok.Value(tmpOutputs)
-	grok.Value(outputs)
-
-	return nil
-}
+//func (w *Wallet) CreateUnsignedTransactionForPaymentOld() error {
+//	//DBから情報を取得、もしくはNatsからのリクエストをトリガーにするか、今はまだ未定
+//	//とりあえず、テストデータで実装
+//	//実際には、こちらもamountでソートしておく
+//	userPayments := w.createDebugUserPayment()
+//
+//	//2. Listunspent()にてpaymentアカウント用のutxoをすべて取得する
+//	//listunspent 6  9999999 [\"2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW\"]
+//	addr, err := w.BTC.DecodeAddress(w.BTC.PaymentAddress())
+//	if err != nil {
+//		return errors.Errorf("DecodeAddress(): error: %v", err)
+//	}
+//	unspentList, err := w.BTC.Client().ListUnspentMinMaxAddresses(6, 9999999, []btcutil.Address{addr})
+//	if err != nil {
+//		//致命的なエラー
+//		return err
+//	}
+//
+//	//3. 送金の金額と近しいutxoでtxを作成するため、ソートしておく
+//	//unspentList[0].Amount
+//	sort.Slice(unspentList, func(i, j int) bool {
+//		//small to big
+//		return unspentList[i].Amount < unspentList[j].Amount
+//	})
+//
+//	//grok.Value(userPayments)
+//	grok.Value(unspentList)
+//
+//	var (
+//		inputs     []btcjson.TransactionInput
+//		tmpOutputs = map[string]btcutil.Amount{}
+//		outputs    = map[btcutil.Address]btcutil.Amount{}
+//	)
+//	//送信ユーザー毎に処理
+//	for _, userPayment := range userPayments {
+//		//送金金額をチェック
+//		//userPayment
+//		var isAllocated bool
+//		for idx, utxo := range unspentList {
+//			if utxo.Amount >= userPayment.amount {
+//				//利用可能 utxoを発見
+//				isAllocated = true
+//
+//				//if !(usedTxID == utxo.TxID && usedTxVout == utxo.Vout){
+//				if !w.isFoundTxIDAndVout(utxo.TxID, utxo.Vout, inputs) {
+//					//新規利用のため、inputを作成
+//					inputs = append(inputs, btcjson.TransactionInput{
+//						Txid: utxo.TxID,
+//						Vout: utxo.Vout,
+//					})
+//				}
+//				//Outputを更新
+//				//log.Println("[Debug]", userPayment.validRecAddr)
+//				//FIXME:userPayment.validRecAddrはポインタとして保持しているので、値が同じでも異なるものとして認識されてしまう。。。
+//				//if _, ok := outputs[userPayment.validRecAddr]; ok {
+//				if _, ok := tmpOutputs[userPayment.receiverAddr]; ok {
+//					//加算する
+//					//outputs[userPayment.validRecAddr] += userPayment.validAmount
+//					tmpOutputs[userPayment.receiverAddr] += userPayment.validAmount
+//				} else {
+//					//新規送信先を作成
+//					//outputs[userPayment.validRecAddr] = userPayment.validAmount
+//					tmpOutputs[userPayment.receiverAddr] = userPayment.validAmount
+//				}
+//				//unspentListも更新する
+//				unspentList[idx].Amount -= userPayment.amount
+//
+//				//
+//				break
+//			}
+//		}
+//		if !isAllocated {
+//			//送信に必要なutxoが見つからなかった。
+//			//こんな致命的なエラーは発生しないよう、運用せねばならない。
+//			log.Printf("[Error] unexpected error: proper utxo could not be found in our accout to send")
+//		}
+//	}
+//	//tmpOutputsをoutputsとして変換する
+//	for key, val := range tmpOutputs {
+//		addr, err = w.BTC.DecodeAddress(key)
+//		if err != nil {
+//			//これは本来事前にチェックされるため、ありえないはず
+//			log.Printf("[Error] unexpected error converting string to address")
+//		}
+//		outputs[addr] = val
+//	}
+//	//TODO:おつりを自分に送信せねばならない
+//	//inputsにあるものはすべて
+//	grok.Value(unspentList)
+//
+//	//TODO:inputsをすべてlockする
+//	grok.Value(inputs)
+//	//grok.Value(tmpOutputs)
+//	grok.Value(outputs)
+//
+//	return nil
+//}
