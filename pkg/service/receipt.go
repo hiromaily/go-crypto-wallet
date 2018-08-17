@@ -143,6 +143,7 @@ func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjs
 	log.Printf("[Debug]fee: %v", fee) //0.000208 BTC
 
 	// 3.totalを調整し、再度RawTransactionを作成する
+	//このパートのみが、出金とロジックが異なる
 	total = total - fee
 	if total <= 0 {
 		return "", "", errors.Errorf("calculated fee must be wrong: fee:%v, error: %v", fee, err)

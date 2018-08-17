@@ -96,10 +96,9 @@ func switchFunction(wallet *service.Wallet) {
 			log.Fatal("something is wrong")
 		}
 
-		log.Printf("error is %v", err)
 		log.Print("Done!")
 	case 5:
-		//[Debug用]DB周り
+		//[Debug用]DB.GetTxReceiptByID()
 		log.Print("Run: wallet.DB.GetTxReceiptByID()")
 
 		//txReceipt, err := wallet.DB.GetTxReceiptByID(10)
@@ -112,7 +111,7 @@ func switchFunction(wallet *service.Wallet) {
 		}
 		grok.Value(count)
 	case 6:
-		//[Debug用]DB周り
+		//[Debug用]DB.GetTxType()
 		log.Print("Run: wallet.DB.GetTxType()")
 		txTypes, err := wallet.DB.GetTxType()
 		if err != nil {
@@ -120,7 +119,7 @@ func switchFunction(wallet *service.Wallet) {
 		}
 		grok.Value(txTypes)
 	case 7:
-		//[Debug用]DB周り
+		//[Debug用]DB.InsertTxReceiptForUnsigned()
 		log.Print("Run: wallet.DB.InsertTxReceiptForUnsigned()")
 		txReceipt := model.TxReceipt{}
 		txReceipt.UnsignedHexTx = "12345"
@@ -136,7 +135,7 @@ func switchFunction(wallet *service.Wallet) {
 		log.Printf("ID is %d", id)
 
 	case 8:
-		//[Debug用]DB周り
+		//[Debug用]DB.InsertTxReceiptDetailForUnsigned()
 		log.Print("Run: wallet.DB.InsertTxReceiptDetailForUnsigned()")
 		txReceiptDetails := []model.TxReceiptDetail{
 			{
@@ -165,7 +164,7 @@ func switchFunction(wallet *service.Wallet) {
 		}
 		log.Println("Done!")
 	case 9:
-		//[Debug用]DB周り
+		//[Debug用]DB.UpdateTxReceiptForSent()
 		log.Print("Run: wallet.DB.UpdateTxReceiptForSent()")
 		//1.TxReceiptテーブル
 		t := time.Now()
@@ -201,6 +200,7 @@ func switchFunction(wallet *service.Wallet) {
 		}
 		log.Printf("[hex]: %s\n[fileName]: %s", hex, fileName)
 	case 12:
+		//Debug用
 		log.Print("Run: hexから署名済みtxを送信する")
 
 		hex := "020000000001019dcbbda4e5233051f2bed587c1d48e8e17aa21c2c3012097899bda5097ce78e201000000232200208e1343e11e4def66d7102d9b0f36f019188118df5a5f30dacdd1008928b12f5fffffffff01042bbf070000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e870400483045022100f4975a5ea23e5799b1df65d699f85236b9d00bcda8da333731ffa508285d3c59022037285857821ee68cbe5f74239299170686b108ce44e724a9a280a3ef9291746901483045022100f94ce83946b4698b8dfbb7cb75eece12932c5097017e70e60d924aeae1ec829a02206e7b2437e9747a9c28a3a3d7291ea16db1d2f0a60482cdb8eca91c28c01aba790147522103d69e07dbf6da065e6fae1ef5761d029b9ff9143e75d579ffc439d47484044bed2103748797877523b8b36add26c9e0fb6a023f05083dd4056aedc658d2932df1eb6052ae00000000"
@@ -220,7 +220,6 @@ func switchFunction(wallet *service.Wallet) {
 		}
 		//TODO:フルパスじゃないとダメ
 		// ./wallet -f 13 -i ./data/tx/receipt/10_unsigned_1534477741449699817
-		//txID, err := wallet.SendFromFile("./data/tx/receipt/10_signed_1534478357922179484")
 		txID, err := wallet.SendFromFile(opts.ImportFile)
 		if err != nil {
 			log.Fatalf("%+v", err)
