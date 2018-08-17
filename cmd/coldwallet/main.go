@@ -25,7 +25,7 @@ type Options struct {
 	Functionality uint8 `short:"f" long:"function" description:"Functionality: 1: generate key, 2: detect received coin, other: debug"`
 	//HDウォレット用Key生成のためのseed情報
 	ParamSeed string `short:"d" long:"seed" default:"" description:"backup seed"`
-	//HDウォレット用Key生成のためのseed情報
+	//txファイルパス
 	ImportFile string `short:"i" long:"import" default:"" description:"import file path for hex"`
 }
 
@@ -106,7 +106,7 @@ func switchFunction(wallet *service.Wallet) {
 
 		// service.MultiSigByHex(hex)を実行してみる。
 	case 4:
-		//TODO:HEXから署名を行う()
+		//TODO:HEXから署名を行う() debug用
 		log.Print("Run: HEXから署名を行う")
 		//hex := "02000000019dcbbda4e5233051f2bed587c1d48e8e17aa21c2c3012097899bda5097ce78e20100000000ffffffff01042bbf070000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e8700000000"
 		//hex := "02000000032e0183cd8e082c185030b8eed4bf19bace65936960fe79736dc21f3b0586b7640100000000ffffffff8afd01d2ecdfeb1657ae7a0ecee9e89b86feb58ed10803cdf6c95d25354161ff0100000000ffffffffc6f7645941324cfe9e36194a6443e0f50fe9117c4964ad942f39833da60363ba0000000000ffffffff01f0be8e0d0000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e8700000000"
@@ -120,17 +120,18 @@ func switchFunction(wallet *service.Wallet) {
 		//TODO:isSigned: 送信までした署名はfalseになる??
 	case 5:
 		//TODO: importしたファイルからhex値を取得し、署名を行う
-		// ./coldwallet -f 5 -i 5_unsigned_1534466246366489473
+		// ./coldwallet -f 5 -i ./data/tx/receipt/10_unsigned_1534477741449699817
 		log.Print("Run: Importしたファイルからhex値を取得し、署名を行う")
 		if opts.ImportFile == "" {
 			log.Fatal("file path is required as argument file when running")
 		}
 
-		hexTx, isSigned, generatedFileName, err := wallet.SignatureFromFile(opts.ImportFile)
+		//出金と入金で、フラグが変わるので注意
+		hexTx, isSigned, generatedFileName, err := wallet.SignatureFromFile(opts.ImportFile, 1)
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
-		log.Printf("hex: %s\n, 署名完了: %t\n, fileName: %s", hexTx, isSigned, generatedFileName)
+		log.Printf("[hex]: %s\n[署名完了]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName)
 
 	default:
 		log.Print("Run: 検証コード")

@@ -43,8 +43,8 @@ func InitialSettings(confPath string) (*Wallet, error) {
 	//defer rds.Close()
 
 	// File
-	if conf.File.Path != "" {
-		file.SetFilePath(conf.File.Path)
+	if conf.File.ReceiptPath != "" && conf.File.PaymentPath != "" {
+		file.SetFilePath(conf.File.ReceiptPath, conf.File.PaymentPath)
 	}
 
 	// Connection to Bitcoin core

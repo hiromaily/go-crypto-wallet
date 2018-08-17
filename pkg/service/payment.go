@@ -1,12 +1,11 @@
 package service
 
 import (
-	"log"
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
-	"github.com/hiromaily/go-bitcoin/pkg/file"
 	"github.com/pkg/errors"
+	"log"
 )
 
 // ユーザーからの出金依頼事に出金する処理
@@ -178,6 +177,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() (string, error) {
 	return w.createRawTransactionForPayment(inputs, outputs)
 }
 
+//TODO:receipt側のロジックとほぼ同じ為、まとめたほうがいい
 func (w *Wallet) createRawTransactionForPayment(inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount) (string, error) {
 	// 1.CreateRawTransactionWithOutput(仮で作成し、この後サイズから手数料を算出する)
 	msgTx, err := w.BTC.CreateRawTransactionWithOutput(inputs, outputs)
@@ -218,16 +218,22 @@ func (w *Wallet) createRawTransactionForPayment(inputs []btcjson.TransactionInpu
 		return "", errors.Errorf("w.BTC.ToHex(msgTx): error: %v", err)
 	}
 
+	// 6. Databaseに必要な情報を保存
+	//txReceiptID, err := w.insertHexForUnsignedTx(hex, total+fee, fee, w.BTC.StoredAddress(), 1, txReceiptDetails)
+	//if err != nil {
+	//	return "", "", errors.Errorf("insertHexOnDB(): error: %v", err)
+	//}
+
 	// 6. GCSにトランザクションファイルを作成
 	//TODO:本来、この戻り値をDumpして、GCSに保存、それをDLして、USBに入れてコールドウォレットに移動しなくてはいけない
 	//TODO:Debug時はlocalに出力することとする
 	//FIXME:該当するtransactionのIDを設定せねばならない
-	file.WriteFileForUnsigned(1, hex)
+	//var generatedFileName string
+	//if txReceiptID != 0 {
+	//	generatedFileName = file.WriteFileForUnsigned(txReceiptID, hex)
+	//}
 
-	// 7. Databaseに必要な情報を保存
-	//TODO:その後、Databaseに情報を保存 txの詳細情報が必要
-	// Hex, target utxos, total, fee
-
+	//return hex, generatedFileName, nil
 	return hex, nil
 }
 

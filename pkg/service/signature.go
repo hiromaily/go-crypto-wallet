@@ -35,6 +35,7 @@ func (w *Wallet) signatureByHex(hex string) (string, bool, error) {
 }
 
 // SignatureByHex Hex文字列から署名を行う
+// TODO:出金/入金でフラグがほしいが、これはDebug時にしか使わない
 func (w *Wallet) SignatureByHex(hex string, txReceiptID int64) (string, bool, string, error) {
 	//署名
 	hexTx, isSigned, err := w.signatureByHex(hex)
@@ -44,13 +45,21 @@ func (w *Wallet) SignatureByHex(hex string, txReceiptID int64) (string, bool, st
 	//log.Println("hex:", hexTx)
 
 	//ファイルに書き込む
-	generatedFileName := file.WriteFileForSigned(txReceiptID, hexTx)
+	//TODO:暫定で1を使っている
+	path := file.CreateFilePath(1, "signed", txReceiptID)
+	generatedFileName, err := file.WriteFile(path, hex)
+	//generatedFileName := file.WriteFileForSigned(txReceiptID, "inside/", hexTx)
+	if err != nil {
+		return "", isSigned, "", err
+	}
 
 	return hexTx, isSigned, generatedFileName, nil
 }
 
 // SignatureFromFile 渡されたファイルからtransactionを読み取り、署名を行う
-func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error) {
+// ColdWalletの機能なので、渡されたfilePathをそのまま使う?
+// TODO:いずれにせよ、入金と出金で署名もMultisigかどうかで変わってくる
+func (w *Wallet) SignatureFromFile(filePath string, actionFlg uint8) (string, bool, string, error) {
 	//ファイル名から、tx_receipt_idを取得する
 	//5_unsigned_1534466246366489473
 	txReceiptID, _, err := file.ParseFile(filePath, "unsigned")
@@ -72,7 +81,11 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 	//log.Println("hex:", hexTx)
 
 	//ファイルに書き込む
-	generatedFileName := file.WriteFileForSigned(txReceiptID, hexTx)
+	path := file.CreateFilePath(actionFlg, "signed", txReceiptID)
+	generatedFileName, err := file.WriteFile(path, hexTx)
+	if err != nil {
+		return "", isSigned, "", err
+	}
 
 	return hexTx, isSigned, generatedFileName, nil
 }

@@ -29,4 +29,6 @@ user = "cayenne"
 pass = "cayenne"
 
 [file]
-path = "./data/tx/"
+# ここは開発時にしか必要ないはず
+receipt_path = "./data/tx/receipt/"
+payment_path  = "./data/tx/payment/"

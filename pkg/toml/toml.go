@@ -56,7 +56,8 @@ type MySQLConf struct {
 // FileConf 保存されるtransactionファイル情報
 // import/export共にこのパスが使われる
 type FileConf struct {
-	Path string `toml:"path"`
+	ReceiptPath string `toml:"receipt_path"`
+	PaymentPath string `toml:"payment_path"`
 }
 
 // load configfile

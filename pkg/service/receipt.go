@@ -203,7 +203,12 @@ func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjs
 	//TODO:Debug時はlocalに出力することとする。=> これはフラグで判別したほうがいいかもしれない
 	var generatedFileName string
 	if txReceiptID != 0 {
-		generatedFileName = file.WriteFileForUnsigned(txReceiptID, hex)
+		//generatedFileName = file.WriteFileForUnsigned(txReceiptID, "inside/", hex)
+		path := file.CreateFilePath(1, "unsigned", txReceiptID)
+		generatedFileName, err = file.WriteFile(path, hex)
+		if err != nil {
+			return "", "", errors.Errorf("file.WriteFile(): error: %v", err)
+		}
 	}
 
 	return hex, generatedFileName, nil

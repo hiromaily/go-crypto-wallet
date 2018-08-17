@@ -32,6 +32,8 @@ type Options struct {
 	ConfPath string `short:"c" long:"conf" default:"./data/toml/config.toml" description:"Path for configuration toml file"`
 	//実行される機能
 	Functionality uint8 `short:"f" long:"function" description:"Functionality: 1: generate key, 2: detect received coin, other: debug"`
+	//txファイルパス
+	ImportFile string `short:"i" long:"import" default:"" description:"import file path for hex"`
 }
 
 var (
@@ -197,7 +199,7 @@ func switchFunction(wallet *service.Wallet) {
 			log.Printf("No utxo")
 			return
 		}
-		log.Printf("hex: %s\n fileName: %s", hex, fileName)
+		log.Printf("[hex]: %s\n[fileName]: %s", hex, fileName)
 	case 12:
 		log.Print("Run: hexから署名済みtxを送信する")
 
@@ -213,8 +215,13 @@ func switchFunction(wallet *service.Wallet) {
 		// 2.Uploadされたtransactionファイルから、送信する？
 		// 3. unsignedトランザクションファイル名と、signedトランザクションファイル名のリレーションをDBに保存したほうがいいか？
 
-		//txID, err := wallet.SendFromFile("./data/tx/signed_1534303789374409841")
-		txID, err := wallet.SendFromFile("5_signed_1534467893242368938")
+		if opts.ImportFile == "" {
+			log.Fatal("file path is required as argument file when running")
+		}
+		//TODO:フルパスじゃないとダメ
+		// ./wallet -f 13 -i ./data/tx/receipt/10_unsigned_1534477741449699817
+		//txID, err := wallet.SendFromFile("./data/tx/receipt/10_signed_1534478357922179484")
+		txID, err := wallet.SendFromFile(opts.ImportFile)
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}

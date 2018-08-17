@@ -4,13 +4,13 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/file"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
+	"log"
 	"time"
 )
 
 // coldwallet側で署名済みトランザクションを作成したものから、送金処理を行う
 
 // SendFromFile 渡されたファイルから署名済transactionを読み取り、送信を行う
-// TODO: 未FIX
 func (w *Wallet) SendFromFile(filePath string) (string, error) {
 	//ファイル名から、tx_receipt_idを取得する
 	//5_unsigned_1534466246366489473
@@ -24,11 +24,14 @@ func (w *Wallet) SendFromFile(filePath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	log.Println(signedHex)
 
 	//送信
 	hash, err := w.BTC.SendTransactionByHex(signedHex)
 	if err != nil {
 		//TODO: これが失敗するのはどういうときか？
+		//-26: 16: mandatory-script-verify-flag-failed (Operation not valid with the current stack size)
+		//=> 署名が不十分だとこれが出るらしい
 		return "", err
 	}
 
