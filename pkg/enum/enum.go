@@ -10,3 +10,11 @@ const (
 	TxTypeDone     TxType = "done"
 	TxTypeCancel   TxType = "cancel"
 )
+
+//Action 入金/出金
+type Action uint8
+
+const (
+	ActionReceipt Action = iota + 1
+	ActionPayment
+)

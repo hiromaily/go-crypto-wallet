@@ -6,6 +6,8 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+const tableNameReceipt = "tx_receipt"
+
 type TxReceipt struct {
 	ID            int64  `db:"id"`
 	UnsignedHexTx string `db:"unsigned_hex_tx"`
