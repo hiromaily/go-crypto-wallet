@@ -11,7 +11,7 @@ type DB struct {
 }
 
 // New DBオブジェクトを返す
-func New(d *sqlx.DB) *DB {
+func NewModel(d *sqlx.DB) *DB {
 	db := DB{RDB: d}
 	return &db
 }

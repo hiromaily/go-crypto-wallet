@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	. "github.com/mf-financial/cayenne_wallet/pkg/kvs"
+	. "github.com/hiromaily/go-bitcoin/pkg/kvs"
 )
 
 var db *LevelDB

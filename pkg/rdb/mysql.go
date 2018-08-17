@@ -6,6 +6,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/toml"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 //sqlx

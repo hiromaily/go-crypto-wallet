@@ -6,10 +6,8 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/chaincfg"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/jessevdk/go-flags"
-	"time"
 )
 
 //こちらはHotwallet、ただし、Watch Only Walletとしての機能を実装していく。
@@ -97,92 +95,6 @@ func switchFunction(wallet *service.Wallet) {
 		}
 
 		log.Print("Done!")
-	case 5:
-		//[Debug用]DB.GetTxReceiptByID()
-		log.Print("Run: wallet.DB.GetTxReceiptByID()")
-
-		//txReceipt, err := wallet.DB.GetTxReceiptByID(10)
-
-		hex := "02000000ss2b5085ddcbe61200c54b29c2d664df31341cd72834ec03a6c0b71bba7054429cb0100000000ffffffffb9401d39321d17fe1ec07668256820b0ccd2184b9ad4a8083c9a7295641d52220100000000ffffffff0114ba9e0b0000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e8700000000"
-		count, err := wallet.DB.GetTxReceiptByUnsignedHex(hex)
-
-		if err != nil {
-			log.Fatalf("%+v", err)
-		}
-		grok.Value(count)
-	case 6:
-		//[Debug用]DB.GetTxType()
-		log.Print("Run: wallet.DB.GetTxType()")
-		txTypes, err := wallet.DB.GetTxType()
-		if err != nil {
-			log.Fatalf("%+v", err)
-		}
-		grok.Value(txTypes)
-	case 7:
-		//[Debug用]DB.InsertTxReceiptForUnsigned()
-		log.Print("Run: wallet.DB.InsertTxReceiptForUnsigned()")
-		txReceipt := model.TxReceipt{}
-		txReceipt.UnsignedHexTx = "12345"
-		txReceipt.TotalAmount = "1.5"
-		txReceipt.Fee = "0.2"
-		txReceipt.ReceiverAddress = "address"
-		txReceipt.TxType = 1
-
-		id, err := wallet.DB.InsertTxReceiptForUnsigned(&txReceipt, nil, true)
-		if err != nil {
-			log.Fatalf("%+v", err)
-		}
-		log.Printf("ID is %d", id)
-
-	case 8:
-		//[Debug用]DB.InsertTxReceiptDetailForUnsigned()
-		log.Print("Run: wallet.DB.InsertTxReceiptDetailForUnsigned()")
-		txReceiptDetails := []model.TxReceiptDetail{
-			{
-				ReceiptID:          1,
-				InputTxid:          "txidxxxxxx",
-				InputVout:          0,
-				InputAddress:       "address",
-				InputAccount:       "acount",
-				InputAmount:        "0.05",
-				InputConfirmations: 6,
-			},
-			{
-				ReceiptID:          1,
-				InputTxid:          "txidxxxxxx2",
-				InputVout:          1,
-				InputAddress:       "address2",
-				InputAccount:       "acount2",
-				InputAmount:        "0.051111",
-				InputConfirmations: 8,
-			},
-		}
-
-		err := wallet.DB.InsertTxReceiptDetailForUnsigned(txReceiptDetails, nil, true)
-		if err != nil {
-			log.Fatalf("%+v", err)
-		}
-		log.Println("Done!")
-	case 9:
-		//[Debug用]DB.UpdateTxReceiptForSent()
-		log.Print("Run: wallet.DB.UpdateTxReceiptForSent()")
-		//1.TxReceiptテーブル
-		t := time.Now()
-		txReceipt := model.TxReceipt{}
-		txReceipt.ID = 5
-		txReceipt.SignedHexTx = "signedHex"
-		txReceipt.SentHexTx = "sentTxID"
-		txReceipt.SentUpdatedAt = &t
-		txReceipt.TxType = 3 //未署名:TODO:Constとして定義しておく
-
-		affected, err := wallet.DB.UpdateTxReceiptForSent(&txReceipt, nil, true)
-		if err != nil {
-			log.Fatalf("%+v", err)
-		}
-		if affected == 0 {
-			log.Fatal("table was not updated")
-		}
-		log.Println("Done!")
 
 	case 11:
 		log.Print("Run: 入金処理検知")

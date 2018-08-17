@@ -3,7 +3,15 @@ package model
 import (
 	"time"
 
+	"fmt"
 	"github.com/jmoiron/sqlx"
+)
+
+//enum.Actionに応じて、テーブルを切り替える
+
+const (
+	tableNameReceiptDetail = "tx_receipt_detail"
+	tableNamePaymentDetail = "tx_payment_detail"
 )
 
 type TxReceiptDetail struct {
@@ -18,25 +26,41 @@ type TxReceiptDetail struct {
 	UpdatedAt          *time.Time `db:"updated_at"`
 }
 
+// TableNameReceipt tx_receipt_detailテーブル名を返す
+func (m *DB) TableNameReceiptDetail() string {
+	return tableNameReceiptDetail
+}
+
+// TableNamePayment tx_payment_detailテーブル名を返す
+func (m *DB) TableNamePaymentDetail() string {
+	return tableNamePaymentDetail
+}
+
 // GetTxReceiptByID TxReceiptテーブルから該当するIDのレコードを返す
-func (m *DB) GetTxReceiptDetailByReceiptID(receiptID int64) (*TxReceiptDetail, error) {
+func (m *DB) GetTxReceiptDetailByReceiptID(tbl string, receiptID int64) (*TxReceiptDetail, error) {
+	sql := "SELECT * FROM %s WHERE receipt_id=$1"
+	sql = fmt.Sprintf(sql, tbl)
+
 	txReceiptDetail := TxReceiptDetail{}
-	err := m.RDB.Select(&txReceiptDetail, "SELECT * FROM tx_receipt_detail WHERE receipt_id=$1", receiptID)
+	err := m.RDB.Select(&txReceiptDetail, sql, receiptID)
 
 	return &txReceiptDetail, err
 }
 
 // InsertTxReceiptDetailForUnsigned TxReceiptDetailテーブルに未署名トランザクションのinputに使われたtxレコードを作成する
 //TODO:BulkInsertがやりたい
-func (m *DB) InsertTxReceiptDetailForUnsigned(txReceiptDetails []TxReceiptDetail, tx *sqlx.Tx, isCommit bool) error {
+func (m *DB) InsertTxReceiptDetailForUnsigned(tbl string, txReceiptDetails []TxReceiptDetail, tx *sqlx.Tx, isCommit bool) error {
+
+	sql := `
+INSERT INTO %s (receipt_id, input_txid, input_vout, input_address, input_account, input_amount, input_confirmations) 
+VALUES (:receipt_id, :input_txid, :input_vout, :input_address, :input_account, :input_amount, :input_confirmations)
+`
+	sql = fmt.Sprintf(sql, tbl)
+
 	if tx == nil {
 		tx = m.RDB.MustBegin()
 	}
 
-	sql := `
-INSERT INTO tx_receipt_detail (receipt_id, input_txid, input_vout, input_address, input_account, input_amount, input_confirmations) 
-VALUES (:receipt_id, :input_txid, :input_vout, :input_address, :input_account, :input_amount, :input_confirmations)
-`
 	for _, txReceiptDetail := range txReceiptDetails {
 		_, err := tx.NamedExec(sql, txReceiptDetail)
 		if err != nil {
