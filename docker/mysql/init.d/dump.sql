@@ -89,7 +89,7 @@ CREATE TABLE `tx_receipt` (
   `id`     BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
   `unsigned_hex_tx`     TEXT COLLATE utf8_unicode_ci NOT NULL COMMENT'未署名トランザクションのHex',
   `signed_hex_tx`       TEXT COLLATE utf8_unicode_ci DEFAULT NULL COMMENT'署名済トランザクションのHex',
-  `sent_hex_tx`         TEXT COLLATE utf8_unicode_ci DEFAULT NULL COMMENT'送信済トランザクションのHex',
+  `sent_hash_tx`         TEXT COLLATE utf8_unicode_ci DEFAULT NULL COMMENT'送信済トランザクションのHash',
   `total_amount`        DECIMAL(26,10) NOT NULL COMMENT'手数料込みの送信される金額(実際は手数料が引かれるので、これより少ないAmoutが送金される)',
   `fee`                 DECIMAL(26,10) NOT NULL COMMENT'手数料',
   `receiver_address`    VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL COMMENT'受取先アドレス(固定だがlogも兼ねるので念の為保持する)',
