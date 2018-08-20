@@ -19,10 +19,10 @@ type TxReceipt struct {
 	UnsignedHexTx     string     `db:"unsigned_hex_tx"`
 	SignedHexTx       string     `db:"signed_hex_tx"`
 	SentHashTx        string     `db:"sent_hash_tx"`
-	TotalInputAmount  string     `db:"total_input_amount"`
-	TotalOutputAmount string     `db:"total_output_amount"`
+	TotalInputAmount  string     `db:"total_input_amount"`  //inputの合計
+	TotalOutputAmount string     `db:"total_output_amount"` //outputの合計(input-feeがこの金額になるはず)
 	Fee               string     `db:"fee"`
-	TxType            uint8      `db:"current_tx_type"` //TODO: intからuint8にできないか？
+	TxType            uint8      `db:"current_tx_type"`
 	UnsignedUpdatedAt *time.Time `db:"unsigned_updated_at"`
 	SignedUpdatedAt   *time.Time `db:"signed_updated_at"`
 	SentUpdatedAt     *time.Time `db:"sent_updated_at"`

@@ -14,7 +14,7 @@ import (
 // これは開発時にしか使われないはず
 
 var (
-	baseFilePath = "./data/tx/%s/"
+	baseFilePath = "./data/tx/"
 )
 
 // 出力されるファイルフォーマットについて
@@ -32,9 +32,10 @@ func SetFilePath(basePath string) {
 // CreateFilePath 書き込み用として、ファイルパスを生成する(読み込みは渡されたパスをそのまま利用するのみ)
 // TODO:Actionも名前として考慮すること
 func CreateFilePath(actionType enum.ActionType, txType enum.TxType, txID int64) string {
-	basePath := fmt.Sprintf(baseFilePath, actionType)
+	baseDir := fmt.Sprintf("%s%s/", baseFilePath, string(actionType))
 
-	return fmt.Sprintf("%s%d_%s_", basePath, txID, txType)
+	// ./data/tx/receipt/receipt_8_unsigned_1534744535097796209
+	return fmt.Sprintf("%s%s_%d_%s_", baseDir, string(actionType), txID, txType)
 }
 
 // ParseFile ファイル名を解析する

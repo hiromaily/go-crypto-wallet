@@ -8,15 +8,10 @@ import (
 	. "github.com/hiromaily/go-bitcoin/pkg/model"
 )
 
-func TestGetTxReceiptByID(t *testing.T) {
-	hexTx := "02000000ss2b5085ddcbe61200c54b29c2d664df31341cd72834ec03a6c0b71bba7054429cb0100000000ffffffffb9401d39321d17fe1ec07668256820b0ccd2184b9ad4a8083c9a7295641d52220100000000ffffffff0114ba9e0b0000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e8700000000"
-	count, err := db.GetTxReceiptByUnsignedHex(hexTx)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(count)
-}
+var (
+	testReceiptID  int64
+	testReceiptHEX string
+)
 
 func TestInsertTxReceiptForUnsigned(t *testing.T) {
 	txReceipt := TxReceipt{}
@@ -27,11 +22,38 @@ func TestInsertTxReceiptForUnsigned(t *testing.T) {
 	//txReceipt.ReceiverAddress = "address"
 	txReceipt.TxType = enum.TxTypeValue[enum.TxTypeUnsigned]
 
-	id, err := db.InsertTxReceiptForUnsigned(&txReceipt, nil, true)
+	testReceiptID, err := db.InsertTxReceiptForUnsigned(&txReceipt, nil, true)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("ID is %d", id)
+
+	t.Logf("ID is %d", testReceiptID)
+}
+
+func TestGetTxReceiptByID(t *testing.T) {
+	if testReceiptID == 0 {
+		t.Fatal("testReceiptID should be set")
+	}
+	txReceipt, err := db.GetTxReceiptByID(testReceiptID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("txReceipt is %+v", txReceipt)
+	testReceiptHEX = txReceipt.UnsignedHexTx
+}
+
+func TestGetTxReceiptByUnsignedHex(t *testing.T) {
+	if testReceiptHEX == "" {
+		t.Fatal("testReceiptID should be set")
+	}
+
+	//hexTx := "02000000ss2b5085ddcbe61200c54b29c2d664df31341cd72834ec03a6c0b71bba7054429cb0100000000ffffffffb9401d39321d17fe1ec07668256820b0ccd2184b9ad4a8083c9a7295641d52220100000000ffffffff0114ba9e0b0000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e8700000000"
+	count, err := db.GetTxReceiptByUnsignedHex(testReceiptHEX)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(count)
 }
 
 func TestUpdateTxReceiptForSent(t *testing.T) {

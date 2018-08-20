@@ -59,7 +59,7 @@ func (w *Wallet) DetectReceivedCoin() (string, string, error) {
 	}
 
 	var (
-		total           btcutil.Amount
+		inputTotal      btcutil.Amount
 		inputs          []btcjson.TransactionInput
 		txReceiptInputs []model.TxReceiptInput
 	)
@@ -90,7 +90,7 @@ func (w *Wallet) DetectReceivedCoin() (string, string, error) {
 			log.Printf("[Error] btcutil.NewAmount(): Amount:%f, err:%v", tx.Amount, err)
 			continue
 		}
-		total += amt //合計
+		inputTotal += amt //合計
 
 		//lockunspentによって、該当トランザクションをロックして再度ListUnspent()で出力されることを防ぐ
 		if w.BTC.LockUnspent(tx) != nil {
@@ -115,21 +115,22 @@ func (w *Wallet) DetectReceivedCoin() (string, string, error) {
 		})
 
 	}
-	log.Printf("[Debug]Total Coin to send:%d(Satoshi) before fee calculated, input length: %d", total, len(inputs))
+	log.Printf("[Debug]Total Coin to send:%d(Satoshi) before fee calculated, input length: %d", inputTotal, len(inputs))
 	if len(inputs) == 0 {
 		return "", "", nil
 	}
 
 	// 一連の処理を実行
-	return w.createRawTransactionAndFee(total, inputs, txReceiptInputs)
+	return w.createRawTransactionAndFee(inputTotal, inputs, txReceiptInputs)
 }
 
 // createRawTransactionAndFee feeの抽出からtransaction作成、DBへの必要情報保存など、もろもろこちらで行う
-func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjson.TransactionInput, txReceiptDetails []model.TxReceiptInput) (string, string, error) {
+func (w *Wallet) createRawTransactionAndFee(inputTotal btcutil.Amount, inputs []btcjson.TransactionInput, txReceiptInputs []model.TxReceiptInput) (string, string, error) {
+	var outputTotal btcutil.Amount
 
 	// 1.CreateRawTransaction(仮で作成し、この後サイズから手数料を算出する)
 	log.Println("[Debug] w.BTC.StoredAddress() :", w.BTC.StoredAddress())
-	msgTx, err := w.BTC.CreateRawTransaction(w.BTC.StoredAddress(), total, inputs)
+	msgTx, err := w.BTC.CreateRawTransaction(w.BTC.StoredAddress(), inputTotal, inputs)
 	if err != nil {
 		return "", "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
@@ -145,14 +146,14 @@ func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjs
 
 	// 3.totalを調整し、再度RawTransactionを作成する
 	//このパートのみが、出金とロジックが異なる
-	total = total - fee
-	if total <= 0 {
+	outputTotal = inputTotal - fee
+	if outputTotal <= 0 {
 		return "", "", errors.Errorf("calculated fee must be wrong: fee:%v, error: %v", fee, err)
 	}
-	log.Printf("[Debug]Total Coin to send:%d(Satoshi) after fee calculated, input length: %d", total, len(inputs))
+	log.Printf("[Debug]Total Coin to send:%d(Satoshi) after fee calculated, input length: %d", outputTotal, len(inputs))
 
 	// 4.再度 CreateRawTransaction
-	msgTx, err = w.BTC.CreateRawTransaction(w.BTC.StoredAddress(), total, inputs)
+	msgTx, err = w.BTC.CreateRawTransaction(w.BTC.StoredAddress(), outputTotal, inputs)
 	if err != nil {
 		return "", "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
@@ -175,7 +176,7 @@ func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjs
 	//w.BTC.GetRawTransactionByHex(res.Hex)
 
 	// 6. Databaseに必要な情報を保存
-	txReceiptID, err := w.insertHexForUnsignedTx(hex, total+fee, fee, w.BTC.StoredAddress(), 1, txReceiptDetails)
+	txReceiptID, err := w.insertHexForUnsignedTx(hex, inputTotal, outputTotal, fee, w.BTC.StoredAddress(), 1, txReceiptInputs)
 	if err != nil {
 		return "", "", errors.Errorf("insertHexOnDB(): error: %v", err)
 	}
@@ -202,7 +203,7 @@ func (w *Wallet) storeHexOnGPS(hexTx string) {
 }
 
 //TODO:引数の数が多いのはGoにおいてはBad practice...
-func (w *Wallet) insertHexForUnsignedTx(hex string, total, fee btcutil.Amount, addr string, txType int, txReceiptDetails []model.TxReceiptInput) (int64, error) {
+func (w *Wallet) insertHexForUnsignedTx(hex string, inputTotal, outputTotal, fee btcutil.Amount, addr string, txType int, txReceiptInputs []model.TxReceiptInput) (int64, error) {
 	//1.内容が同じだと、生成されるhexもまったく同じ為、同一のhexが合った場合は処理をskipする
 	count, err := w.DB.GetTxReceiptByUnsignedHex(hex)
 	if err != nil {
@@ -216,10 +217,11 @@ func (w *Wallet) insertHexForUnsignedTx(hex string, total, fee btcutil.Amount, a
 	//2.TxReceiptテーブル
 	txReceipt := model.TxReceipt{}
 	txReceipt.UnsignedHexTx = hex
-	txReceipt.TotalInputAmount = w.BTC.AmountString(total)
+	txReceipt.TotalInputAmount = w.BTC.AmountString(inputTotal)
+	txReceipt.TotalOutputAmount = w.BTC.AmountString(outputTotal)
 	txReceipt.Fee = w.BTC.AmountString(fee)
 	//txReceipt.ReceiverAddress = addr
-	txReceipt.TxType = enum.TxTypeValue[enum.TxTypeUnsigned] //1.未署名:TODO:Constとして定義しておく
+	txReceipt.TxType = enum.TxTypeValue[enum.TxTypeUnsigned] //1.未署名
 
 	tx := w.DB.RDB.MustBegin()
 	txReceiptID, err := w.DB.InsertTxReceiptForUnsigned(&txReceipt, tx, false)
@@ -227,15 +229,18 @@ func (w *Wallet) insertHexForUnsignedTx(hex string, total, fee btcutil.Amount, a
 		return 0, errors.Errorf("DB.InsertTxReceiptForUnsigned(): error: %v", err)
 	}
 
-	//3.TxReceiptDetailテーブル
-	for idx := range txReceiptDetails {
-		txReceiptDetails[idx].ReceiptID = txReceiptID
+	//3.TxReceiptInputテーブル
+	for idx := range txReceiptInputs {
+		txReceiptInputs[idx].ReceiptID = txReceiptID
 	}
 
-	err = w.DB.InsertTxReceiptInputForUnsigned(txReceiptDetails, tx, true)
+	err = w.DB.InsertTxReceiptInputForUnsigned(txReceiptInputs, tx, true)
 	if err != nil {
 		return 0, errors.Errorf("DB.InsertTxReceiptDetailForUnsigned(): error: %v", err)
 	}
+
+	//4.TxReceiptOutputテーブル
+
 
 	return txReceiptID, nil
 }
