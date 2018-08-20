@@ -11,7 +11,6 @@ import (
 
 const (
 	tableNameReceiptDetail = "tx_receipt_detail"
-	tableNamePaymentDetail = "tx_payment_detail"
 )
 
 // TxReceiptDetail tx_receipt_detailテーブル(tx_payment_detailとしても利用)
@@ -30,11 +29,6 @@ type TxReceiptDetail struct {
 // TableNameReceiptDetail tx_receipt_detailテーブル名を返す
 func (m *DB) TableNameReceiptDetail() string {
 	return tableNameReceiptDetail
-}
-
-// TableNamePaymentDetail tx_payment_detailテーブル名を返す
-func (m *DB) TableNamePaymentDetail() string {
-	return tableNamePaymentDetail
 }
 
 // getTxReceiptDetailByReceiptID TxReceiptDetailテーブルから該当するIDのレコードを返す

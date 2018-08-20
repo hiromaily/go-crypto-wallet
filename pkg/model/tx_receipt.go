@@ -11,10 +11,9 @@ import (
 
 const (
 	tableNameReceipt = "tx_receipt"
-	tableNamePayment = "tx_payment"
 )
 
-// TxReceipt tx_receiptテーブル(tx_paymentとしても利用)
+// TxReceipt tx_receiptテーブル
 type TxReceipt struct {
 	ID            int64  `db:"id"`
 	UnsignedHexTx string `db:"unsigned_hex_tx"`
@@ -34,11 +33,6 @@ type TxReceipt struct {
 // TableNameReceipt tx_receiptテーブル名を返す
 func (m *DB) TableNameReceipt() string {
 	return tableNameReceipt
-}
-
-// TableNamePayment tx_paymentテーブル名を返す
-func (m *DB) TableNamePayment() string {
-	return tableNamePayment
 }
 
 // getTxReceiptByID TxReceiptテーブルから該当するIDのレコードを返す
