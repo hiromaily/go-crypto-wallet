@@ -63,7 +63,7 @@ func (b *Bitcoin) CastStrSatoshiToAmount(s string) (btcutil.Amount, error) {
 func (b *Bitcoin) ListAccounts() (map[string]btcutil.Amount, error) {
 	listAmts, err := b.client.ListAccounts()
 	if err != nil {
-		return nil, errors.Errorf("ListAccounts(): error: %v", err)
+		return nil, errors.Errorf("client.ListAccounts(): error: %v", err)
 	}
 
 	return listAmts, nil
@@ -73,7 +73,17 @@ func (b *Bitcoin) ListAccounts() (map[string]btcutil.Amount, error) {
 func (b *Bitcoin) GetBalanceByAccount(accountName string) (btcutil.Amount, error) {
 	amt, err := b.client.GetBalance(accountName)
 	if err != nil {
-		return 0, errors.Errorf("GetBalance(%s): error: %v", accountName, err)
+		return 0, errors.Errorf("client.GetBalance(%s): error: %v", accountName, err)
+	}
+
+	return amt, nil
+}
+
+// GetBalanceByAccountAndMinConf アカウントに対してのBalanceを取得する
+func (b *Bitcoin) GetBalanceByAccountAndMinConf(accountName string, minConf int) (btcutil.Amount, error) {
+	amt, err := b.client.GetBalanceMinConf(accountName, minConf)
+	if err != nil {
+		return 0, errors.Errorf("client.GetBalanceMinConf(%s): error: %v", accountName, err)
 	}
 
 	return amt, nil

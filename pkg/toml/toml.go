@@ -31,7 +31,8 @@ type BitcoinConf struct {
 
 // BitcoinBlockConf Bitcoinブロック情報
 type BitcoinBlockConf struct {
-	ConfirmationNum int64 `toml:"confirmation_num"`
+	//ConfirmationNum int64 `toml:"confirmation_num"`
+	ConfirmationNum int `toml:"confirmation_num"`
 }
 
 // BitcoinAddrConf 内部利用のためのBitcoin公開アドレス, アカウント情報

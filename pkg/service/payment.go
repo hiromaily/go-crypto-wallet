@@ -1,11 +1,13 @@
 package service
 
 import (
+	"log"
+	"sort"
+
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
-	"log"
 )
 
 // ユーザーからの出金依頼事に出金する処理
@@ -88,7 +90,17 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() (string, error) {
 		userTotal += val.validAmount
 	}
 
-	//3. Listunspent()にてpaymentアカウント用のutxoをすべて取得する
+	//3.保管用アドレスの残高を確認し、金額が不足しているのであればエラー
+	//getbalance hokan 6
+	balance, err := w.BTC.GetBalanceByAccountAndMinConf(w.BTC.PaymentAccountName(), w.BTC.ConfirmationBlock())
+	if err != nil {
+		return "", err
+	}
+	if balance <= userTotal {
+		return "", errors.New("Stored account balance is insufficient")
+	}
+
+	//4. Listunspent()にてpaymentアカウント用のutxoをすべて取得する
 	//listunspent 6  9999999 [\"2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW\"]
 	addr, err := w.BTC.DecodeAddress(w.BTC.PaymentAddress())
 	if err != nil {
@@ -100,12 +112,11 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() (string, error) {
 		return "", err
 	}
 
-	//3. 送金の金額と近しいutxoでtxを作成するため、ソートしておく => これも不要
-	//unspentList[0].Amount
-	//sort.Slice(unspentList, func(i, j int) bool {
-	//	//small to big
-	//	return unspentList[i].Amount < unspentList[j].Amount
-	//})
+	//5. 送金の金額と近しいutxoでtxを作成するため、ソートしておく => 小さなutxoから利用していくのに便利だが、MUSTではない
+	sort.Slice(unspentList, func(i, j int) bool {
+		//small to big
+		return unspentList[i].Amount < unspentList[j].Amount
+	})
 
 	//grok.Value(userPayments)
 	//grok.Value(unspentList)
@@ -115,7 +126,8 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() (string, error) {
 		tmpOutputs = map[string]btcutil.Amount{}
 		outputs    = map[btcutil.Address]btcutil.Amount{}
 	)
-	//合計金額を超えるまで、listunspentからinputsを作成する
+
+	//6.合計金額を超えるまで、listunspentからinputsを作成する
 	var inputTotal btcutil.Amount
 	var isDone bool
 	for _, utxo := range unspentList {
@@ -163,6 +175,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() (string, error) {
 		if err != nil {
 			//これは本来事前にチェックされるため、ありえないはず
 			log.Printf("[Error] unexpected error converting string to address")
+			continue
 		}
 		outputs[addr] = val
 	}
@@ -177,7 +190,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() (string, error) {
 	return w.createRawTransactionForPayment(inputs, outputs)
 }
 
-//TODO:receipt側のロジックとほぼ同じ為、まとめたほうがいい
+//TODO:receipt側のロジックとほぼ同じ為、まとめたほうがいい(手数料のロジックのみ異なる)
 func (w *Wallet) createRawTransactionForPayment(inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount) (string, error) {
 	// 1.CreateRawTransactionWithOutput(仮で作成し、この後サイズから手数料を算出する)
 	msgTx, err := w.BTC.CreateRawTransactionWithOutput(inputs, outputs)

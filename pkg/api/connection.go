@@ -8,11 +8,12 @@ import (
 
 // Bitcoin includes Client to call Json-RPC
 type Bitcoin struct {
-	client            *rpcclient.Client
-	chainConf         *chaincfg.Params
-	stored            KeyInfo
-	payment           KeyInfo
-	confirmationBlock int64
+	client    *rpcclient.Client
+	chainConf *chaincfg.Params
+	stored    KeyInfo
+	payment   KeyInfo
+	//confirmationBlock int64
+	confirmationBlock int
 }
 
 // KeyInfo 公開鍵アドレスと紐づくアカウント名
@@ -91,6 +92,6 @@ func (b *Bitcoin) PaymentAccountName() string {
 }
 
 // ConfirmationBlock Confirmationに必要なブロック数を返す
-func (b *Bitcoin) ConfirmationBlock() int64 {
+func (b *Bitcoin) ConfirmationBlock() int {
 	return b.confirmationBlock
 }
