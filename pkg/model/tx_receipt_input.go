@@ -13,7 +13,7 @@ const (
 	tableNameReceiptInput = "tx_receipt_input"
 )
 
-// TxReceiptInput tx_receipt_inputテーブル
+// TxInput tx_receipt_input/tx_payment_inputテーブル
 type TxInput struct {
 	ID                 int64      `db:"id"`
 	ReceiptID          int64      `db:"receipt_id"`

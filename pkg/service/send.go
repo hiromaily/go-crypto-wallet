@@ -55,10 +55,20 @@ func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID strin
 	txReceipt.SignedHexTx = signedHex
 	txReceipt.SentHashTx = sentTxID
 	txReceipt.SentUpdatedAt = &t
-	txReceipt.TxType = 3 //未署名:TODO:Constとして定義しておく
+	txReceipt.TxType = enum.TxTypeValue[enum.TxTypeSent] //3:未署名
 
-	affectedNum, err := w.DB.UpdateTxReceiptForSent(
-		&txReceipt, nil, true)
+	var (
+		affectedNum int64
+		err         error
+	)
+	//TODO:ActionTypeによって、処理を分ける
+	if actionType == enum.ActionTypeReceipt {
+		affectedNum, err = w.DB.UpdateTxReceiptForSent(
+			&txReceipt, nil, true)
+	} else if actionType == enum.ActionTypePayment {
+		affectedNum, err = w.DB.UpdateTxPaymentForSent(
+			&txReceipt, nil, true)
+	}
 
 	if err != nil {
 		return errors.Errorf("DB.UpdateTxReceiptForSent(): error: %v", err)

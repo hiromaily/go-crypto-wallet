@@ -13,7 +13,7 @@ const (
 	tableNameReceipt = "tx_receipt"
 )
 
-// TxReceipt tx_receiptテーブル
+// TxTable tx_receipt/tx_paymentテーブル
 type TxTable struct {
 	ID                int64      `db:"id"`
 	UnsignedHexTx     string     `db:"unsigned_hex_tx"`

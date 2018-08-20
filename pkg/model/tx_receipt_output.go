@@ -19,7 +19,7 @@ const (
 	tableNameReceiptOutput = "tx_receipt_output"
 )
 
-// TxReceiptOutput tx_receipt_outputテーブル
+// TxOutput tx_receipt_output/tx_payment_outputテーブル
 type TxOutput struct {
 	ID            int64      `db:"id"`
 	ReceiptID     int64      `db:"receipt_id"`
