@@ -104,12 +104,11 @@ func (w *Wallet) DetectReceivedCoin() (string, string, error) {
 		})
 		// txReceiptInputs
 		txReceiptInputs = append(txReceiptInputs, model.TxInput{
-			ReceiptID:    0,
-			InputTxid:    tx.TxID,
-			InputVout:    tx.Vout,
-			InputAddress: tx.Address,
-			InputAccount: tx.Account,
-			//InputAmount:        strconv.FormatFloat(tx.Amount, 'f',4, 64),
+			ReceiptID:          0,
+			InputTxid:          tx.TxID,
+			InputVout:          tx.Vout,
+			InputAddress:       tx.Address,
+			InputAccount:       tx.Account,
 			InputAmount:        fmt.Sprintf("%f", tx.Amount),
 			InputConfirmations: tx.Confirmations,
 		})

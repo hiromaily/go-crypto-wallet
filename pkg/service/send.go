@@ -61,7 +61,8 @@ func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID strin
 		affectedNum int64
 		err         error
 	)
-	//TODO:ActionTypeによって、処理を分ける
+
+	//ActionTypeによって、処理を分ける
 	if actionType == enum.ActionTypeReceipt {
 		affectedNum, err = w.DB.UpdateTxReceiptForSent(
 			&txReceipt, nil, true)

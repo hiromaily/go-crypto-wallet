@@ -8,6 +8,7 @@ import (
 
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
+	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
@@ -309,10 +310,7 @@ func (b *Bitcoin) SendTransactionByHex(hex string) (*chainhash.Hash, error) {
 
 // SendTransactionByByte 外部から渡されたバイト列からRawトランザクションを送信する
 // オンラインで実行される必要がある
-// TODO:これはいつ使うんだっけ?? 作ったものの、呼ばれている箇所は見当たらない
 func (b *Bitcoin) SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error) {
-	//TODO:渡された文字列は暗号化されていることを想定
-	//TODO:ここで復号化の処理が必要
 
 	//[]byte to wireTx
 	wireTx := new(wire.MsgTx)
@@ -364,4 +362,34 @@ func (b *Bitcoin) SequentialTransaction(hex string) (*chainhash.Hash, *btcutil.T
 	}
 
 	return hash, resTx, nil
+}
+
+//FIXME: これはColdWallet内で必要となるが、BitcoinCoreの機能が必要ないので、あれば実装しておきたい
+func (b *Bitcoin) Sign(tx *wire.MsgTx, strPrivateKey string) (string, error) {
+	// Key
+	wif, err := btcutil.DecodeWIF(strPrivateKey)
+	if err != nil {
+		return "", err
+	}
+	privKey := wif.PrivKey
+
+	// SignatureScript
+	for idx, val := range tx.TxIn {
+		//
+		script, err := txscript.SignatureScript(tx, idx, val.SignatureScript, txscript.SigHashAll, privKey, false)
+		if err != nil {
+			return "", err
+		}
+		tx.TxIn[idx].SignatureScript = script
+	}
+	//TODO: isSignedかどうかをどうチェックするか
+	//TODO: TxInごとに異なるKeyの場合は難しい
+
+	//Hexに変換
+	hexTx, err := b.ToHex(tx)
+	if err != nil {
+		return "", err
+	}
+
+	return hexTx, nil
 }
