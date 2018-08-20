@@ -218,7 +218,7 @@ func (w *Wallet) insertHexForUnsignedTx(hex string, total, fee btcutil.Amount, a
 	txReceipt.TotalAmount = w.BTC.AmountString(total)
 	txReceipt.Fee = w.BTC.AmountString(fee)
 	txReceipt.ReceiverAddress = addr
-	txReceipt.TxType = 1 //未署名:TODO:Constとして定義しておく
+	txReceipt.TxType = enum.TxTypeValue[enum.TxTypeUnsigned] //1.未署名:TODO:Constとして定義しておく
 
 	tx := w.DB.RDB.MustBegin()
 	txReceiptID, err := w.DB.InsertTxReceiptForUnsigned(&txReceipt, tx, false)

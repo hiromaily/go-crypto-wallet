@@ -50,7 +50,7 @@ func (m *DB) getTxReceiptDetailByReceiptID(tbl string, receiptID int64) (*TxRece
 
 // GetTxReceiptDetailByReceiptID TxReceiptDetailテーブルから該当するIDのレコードを返す
 func (m *DB) GetTxReceiptDetailByReceiptID(receiptID int64) (*TxReceiptDetail, error) {
-	return m.getTxReceiptDetailByReceiptID(m.TableNameReceipt(), receiptID)
+	return m.getTxReceiptDetailByReceiptID(m.TableNameReceiptDetail(), receiptID)
 }
 
 // insertTxReceiptDetailForUnsigned TxReceiptDetailテーブルに未署名トランザクションのinputに使われたtxレコードを作成する
@@ -85,5 +85,5 @@ VALUES (:receipt_id, :input_txid, :input_vout, :input_address, :input_account, :
 // InsertTxReceiptDetailForUnsigned TxReceiptDetailテーブルに未署名トランザクションのinputに使われたtxレコードを作成する
 //TODO:BulkInsertがやりたい
 func (m *DB) InsertTxReceiptDetailForUnsigned(txReceiptDetails []TxReceiptDetail, tx *sqlx.Tx, isCommit bool) error {
-	return m.insertTxReceiptDetailForUnsigned(m.TableNameReceipt(), txReceiptDetails, tx, isCommit)
+	return m.insertTxReceiptDetailForUnsigned(m.TableNameReceiptDetail(), txReceiptDetails, tx, isCommit)
 }

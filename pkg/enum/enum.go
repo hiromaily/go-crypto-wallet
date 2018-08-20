@@ -12,6 +12,15 @@ const (
 	TxTypeCancel   TxType = "cancel"
 )
 
+//TxTypeValue tx_typeの値
+var TxTypeValue = map[TxType]uint8{
+	TxTypeUnsigned: 1,
+	TxTypeSigned:   2,
+	TxTypeSent:     3,
+	TxTypeDone:     4,
+	TxTypeCancel:   5,
+}
+
 //Action 入金/出金
 type Action uint8
 

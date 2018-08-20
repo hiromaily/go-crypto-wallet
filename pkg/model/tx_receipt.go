@@ -25,7 +25,7 @@ type TxReceipt struct {
 	TotalAmount       string     `db:"total_amount"`
 	Fee               string     `db:"fee"`
 	ReceiverAddress   string     `db:"receiver_address"`
-	TxType            int        `db:"current_tx_type"`
+	TxType            uint8      `db:"current_tx_type"` //TODO: intからuint8にできないか？
 	UnsignedUpdatedAt *time.Time `db:"unsigned_updated_at"`
 	SignedUpdatedAt   *time.Time `db:"signed_updated_at"`
 	SentUpdatedAt     *time.Time `db:"sent_updated_at"`
