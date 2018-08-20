@@ -49,7 +49,7 @@ func (m *DB) getTxReceiptDetailByReceiptID(tbl string, receiptID int64) (*TxRece
 }
 
 // GetTxReceiptDetailByReceiptID TxReceiptDetailテーブルから該当するIDのレコードを返す
-func (m *DB) GetTxReceiptDetailByReceiptID(tbl string, receiptID int64) (*TxReceiptDetail, error) {
+func (m *DB) GetTxReceiptDetailByReceiptID(receiptID int64) (*TxReceiptDetail, error) {
 	return m.getTxReceiptDetailByReceiptID(m.TableNameReceipt(), receiptID)
 }
 
@@ -84,29 +84,6 @@ VALUES (:receipt_id, :input_txid, :input_vout, :input_address, :input_account, :
 
 // InsertTxReceiptDetailForUnsigned TxReceiptDetailテーブルに未署名トランザクションのinputに使われたtxレコードを作成する
 //TODO:BulkInsertがやりたい
-func (m *DB) InsertTxReceiptDetailForUnsigned(tbl string, txReceiptDetails []TxReceiptDetail, tx *sqlx.Tx, isCommit bool) error {
-
-	sql := `
-INSERT INTO %s (receipt_id, input_txid, input_vout, input_address, input_account, input_amount, input_confirmations) 
-VALUES (:receipt_id, :input_txid, :input_vout, :input_address, :input_account, :input_amount, :input_confirmations)
-`
-	sql = fmt.Sprintf(sql, tbl)
-
-	if tx == nil {
-		tx = m.RDB.MustBegin()
-	}
-
-	for _, txReceiptDetail := range txReceiptDetails {
-		_, err := tx.NamedExec(sql, txReceiptDetail)
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
-	}
-
-	if isCommit {
-		tx.Commit()
-	}
-
-	return nil
+func (m *DB) InsertTxReceiptDetailForUnsigned(txReceiptDetails []TxReceiptDetail, tx *sqlx.Tx, isCommit bool) error {
+	return m.insertTxReceiptDetailForUnsigned(m.TableNameReceipt(), txReceiptDetails, tx, isCommit)
 }

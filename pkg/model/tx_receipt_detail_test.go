@@ -72,7 +72,7 @@ func TestInsertTxReceiptDetailForUnsigned(t *testing.T) {
 		},
 	}
 
-	err := db.InsertTxReceiptDetailForUnsigned(db.TableNameReceiptDetail(), txReceiptDetails, nil, true)
+	err := db.InsertTxReceiptDetailForUnsigned(txReceiptDetails, nil, true)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -231,7 +231,7 @@ func (w *Wallet) insertHexForUnsignedTx(hex string, total, fee btcutil.Amount, a
 		txReceiptDetails[idx].ReceiptID = txReceiptID
 	}
 
-	err = w.DB.InsertTxReceiptDetailForUnsigned(w.DB.TableNameReceiptDetail(), txReceiptDetails, tx, true)
+	err = w.DB.InsertTxReceiptDetailForUnsigned(txReceiptDetails, tx, true)
 	if err != nil {
 		return 0, errors.Errorf("DB.InsertTxReceiptDetailForUnsigned(): error: %v", err)
 	}
