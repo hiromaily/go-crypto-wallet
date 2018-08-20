@@ -196,7 +196,7 @@ func (w *Wallet) createRawTransactionForPayment(inputs []btcjson.TransactionInpu
 
 	// 3.TODO:お釣り用のoutputのトランザクションから、手数料を差し引かねばならい
 	// FIXME: これが足りない場合がめんどくさい。。。これをどう回避すべきか
-	for addr, _ := range outputs {
+	for addr := range outputs {
 		if addr.String() == w.BTC.PaymentAddress() {
 			outputs[addr] -= fee
 		}

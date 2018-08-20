@@ -9,7 +9,7 @@ import (
 
 func TestGetTxReceiptByID(t *testing.T) {
 	hexTx := "02000000ss2b5085ddcbe61200c54b29c2d664df31341cd72834ec03a6c0b71bba7054429cb0100000000ffffffffb9401d39321d17fe1ec07668256820b0ccd2184b9ad4a8083c9a7295641d52220100000000ffffffff0114ba9e0b0000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e8700000000"
-	count, err := db.GetTxReceiptByUnsignedHex(db.TableNameReceipt(), hexTx)
+	count, err := db.GetTxReceiptByUnsignedHex(hexTx)
 
 	if err != nil {
 		t.Fatal(err)
@@ -25,7 +25,7 @@ func TestInsertTxReceiptForUnsigned(t *testing.T) {
 	txReceipt.ReceiverAddress = "address"
 	txReceipt.TxType = 1
 
-	id, err := db.InsertTxReceiptForUnsigned(db.TableNameReceipt(), &txReceipt, nil, true)
+	id, err := db.InsertTxReceiptForUnsigned(&txReceipt, nil, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,7 +41,7 @@ func TestUpdateTxReceiptForSent(t *testing.T) {
 	txReceipt.SentUpdatedAt = &tm
 	txReceipt.TxType = 3 //未署名:TODO:Constとして定義しておく
 
-	affected, err := db.UpdateTxReceiptForSent(db.TableNameReceipt(), &txReceipt, nil, true)
+	affected, err := db.UpdateTxReceiptForSent(&txReceipt, nil, true)
 	if err != nil {
 		t.Fatal(err)
 	}

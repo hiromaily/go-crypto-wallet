@@ -56,7 +56,7 @@ func InitialSettings(confPath string) (*Wallet, error) {
 	//defer bit.Close()
 
 	//Wallet Object
-	wallet := Wallet{BTC: bit, DB: model.NewModel(rds)}
+	wallet := Wallet{BTC: bit, DB: model.NewDB(rds)}
 	return &wallet, nil
 }
 

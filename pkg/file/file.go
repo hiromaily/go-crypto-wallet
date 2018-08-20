@@ -30,6 +30,8 @@ func SetFilePath(receiptPath, paymentPath string) {
 	paymentFilePath = paymentPath
 }
 
+// CreateFilePath ファイルパスを生成する
+// TODO:Actionも名前として考慮すること
 func CreateFilePath(actionFlg enum.Action, txType enum.TxType, txID int64) string {
 	basePath := receiptFilePath
 	if actionFlg == 2 {
@@ -63,7 +65,7 @@ func CreateFilePath(actionFlg enum.Action, txType enum.TxType, txID int64) strin
 //	return fileName
 //}
 
-// WriteFile
+// WriteFile ファイルに書き込む
 func WriteFile(path, hexTx string) (string, error) {
 	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
 

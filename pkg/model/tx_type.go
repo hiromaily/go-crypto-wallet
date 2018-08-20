@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+//TxType tx_typeテーブル
 type TxType struct {
 	ID        int        `db:"id"`
 	Type      string     `db:"type"`

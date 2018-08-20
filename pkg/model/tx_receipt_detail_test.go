@@ -2,11 +2,13 @@ package model_test
 
 import (
 	"flag"
+	"os"
+	"testing"
+
+	_ "github.com/go-sql-driver/mysql"
 	. "github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/hiromaily/go-bitcoin/pkg/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/toml"
-	"os"
-	"testing"
 )
 
 var (
@@ -31,7 +33,7 @@ func setup() {
 		panic(err)
 	}
 
-	db = NewModel(rds)
+	db = NewDB(rds)
 }
 
 func teardown() {

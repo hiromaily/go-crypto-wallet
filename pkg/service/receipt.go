@@ -203,7 +203,7 @@ func (w *Wallet) storeHexOnGPS(hexTx string) {
 //TODO:引数の数が多いのはGoにおいてはBad practice...
 func (w *Wallet) insertHexForUnsignedTx(hex string, total, fee btcutil.Amount, addr string, txType int, txReceiptDetails []model.TxReceiptDetail) (int64, error) {
 	//1.内容が同じだと、生成されるhexもまったく同じ為、同一のhexが合った場合は処理をskipする
-	count, err := w.DB.GetTxReceiptByUnsignedHex(w.DB.TableNameReceipt(), hex)
+	count, err := w.DB.GetTxReceiptByUnsignedHex(hex)
 	if err != nil {
 		return 0, errors.Errorf("DB.GetTxReceiptByUnsignedHex(): error: %v", err)
 	}
@@ -221,13 +221,13 @@ func (w *Wallet) insertHexForUnsignedTx(hex string, total, fee btcutil.Amount, a
 	txReceipt.TxType = 1 //未署名:TODO:Constとして定義しておく
 
 	tx := w.DB.RDB.MustBegin()
-	txReceiptID, err := w.DB.InsertTxReceiptForUnsigned(w.DB.TableNameReceipt(), &txReceipt, tx, false)
+	txReceiptID, err := w.DB.InsertTxReceiptForUnsigned(&txReceipt, tx, false)
 	if err != nil {
 		return 0, errors.Errorf("DB.InsertTxReceiptForUnsigned(): error: %v", err)
 	}
 
 	//3.TxReceiptDetailテーブル
-	for idx, _ := range txReceiptDetails {
+	for idx := range txReceiptDetails {
 		txReceiptDetails[idx].ReceiptID = txReceiptID
 	}
 

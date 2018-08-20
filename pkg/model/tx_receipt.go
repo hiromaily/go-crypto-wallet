@@ -14,7 +14,7 @@ const (
 	tableNamePayment = "tx_payment"
 )
 
-// TxReceipt tx_receiptテーブル
+// TxReceipt tx_receiptテーブル(tx_paymentとしても利用)
 type TxReceipt struct {
 	ID            int64  `db:"id"`
 	UnsignedHexTx string `db:"unsigned_hex_tx"`
@@ -41,8 +41,8 @@ func (m *DB) TableNamePayment() string {
 	return tableNamePayment
 }
 
-// GetTxReceiptByID TxReceiptテーブルから該当するIDのレコードを返す
-func (m *DB) GetTxReceiptByID(tbl string, id int64) (*TxReceipt, error) {
+// getTxReceiptByID TxReceiptテーブルから該当するIDのレコードを返す
+func (m *DB) getTxReceiptByID(tbl string, id int64) (*TxReceipt, error) {
 	sql := "SELECT * FROM %s WHERE id=?"
 	sql = fmt.Sprintf(sql, tbl)
 
@@ -52,7 +52,13 @@ func (m *DB) GetTxReceiptByID(tbl string, id int64) (*TxReceipt, error) {
 	return &txReceipt, err
 }
 
-func (m *DB) GetTxReceiptByUnsignedHex(tbl, hex string) (int64, error) {
+// GetTxReceiptByID TxReceiptテーブルから該当するIDのレコードを返す
+func (m *DB) GetTxReceiptByID(id int64) (*TxReceipt, error) {
+	return m.getTxReceiptByID(m.TableNameReceipt(), id)
+}
+
+// getTxReceiptByUnsignedHex unsigned_hex_txをキーとしてレコードを取得する
+func (m *DB) getTxReceiptByUnsignedHex(tbl, hex string) (int64, error) {
 	var count int64
 	sql := "SELECT count(id) FROM %s WHERE unsigned_hex_tx=?"
 	sql = fmt.Sprintf(sql, tbl)
@@ -63,8 +69,13 @@ func (m *DB) GetTxReceiptByUnsignedHex(tbl, hex string) (int64, error) {
 	return count, err
 }
 
+// GetTxReceiptByUnsignedHex unsigned_hex_txをキーとしてレコードを取得する
+func (m *DB) GetTxReceiptByUnsignedHex(hex string) (int64, error) {
+	return m.getTxReceiptByUnsignedHex(m.TableNameReceipt(), hex)
+}
+
 // InsertTxReceiptForUnsigned TxReceiptテーブルに未署名トランザクションレコードを作成する
-func (m *DB) InsertTxReceiptForUnsigned(tbl string, txReceipt *TxReceipt, tx *sqlx.Tx, isCommit bool) (int64, error) {
+func (m *DB) insertTxReceiptForUnsigned(tbl string, txReceipt *TxReceipt, tx *sqlx.Tx, isCommit bool) (int64, error) {
 
 	sql := `
 INSERT INTO %s (unsigned_hex_tx, signed_hex_tx, sent_hash_tx, total_amount, fee, receiver_address, current_tx_type) 
@@ -89,8 +100,13 @@ VALUES (:unsigned_hex_tx, :signed_hex_tx, :sent_hash_tx, :total_amount, :fee, :r
 	return id, nil
 }
 
-// UpdateTxReceiptForSent TxReceiptテーブルのsigned_hex_tx, sent_hash_txを更新する
-func (m *DB) UpdateTxReceiptForSent(tbl string, txReceipt *TxReceipt, tx *sqlx.Tx, isCommit bool) (int64, error) {
+// InsertTxReceiptForUnsigned TxReceiptテーブルに未署名トランザクションレコードを作成する
+func (m *DB) InsertTxReceiptForUnsigned(txReceipt *TxReceipt, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	return m.insertTxReceiptForUnsigned(m.TableNameReceipt(), txReceipt, tx, isCommit)
+}
+
+// updsateTxReceiptForSent TxReceiptテーブルのsigned_hex_tx, sent_hash_txを更新する
+func (m *DB) updateTxReceiptForSent(tbl string, txReceipt *TxReceipt, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	if tx == nil {
 		tx = m.RDB.MustBegin()
 	}
@@ -113,4 +129,9 @@ UPDATE %s SET signed_hex_tx=:signed_hex_tx, sent_hash_tx=:sent_hash_tx, current_
 	affectedNum, _ := res.RowsAffected()
 
 	return affectedNum, nil
+}
+
+// UpdateTxReceiptForSent TxReceiptテーブルのsigned_hex_tx, sent_hash_txを更新する
+func (m *DB) UpdateTxReceiptForSent(txReceipt *TxReceipt, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	return m.updateTxReceiptForSent(m.TableNameReceipt(), txReceipt, tx, isCommit)
 }
