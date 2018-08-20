@@ -196,11 +196,9 @@ func (w *Wallet) createRawTransactionAndFee(inputs []btcjson.TransactionInput, i
 
 	// 8. GCSにトランザクションファイルを作成
 	//TODO:本来、この戻り値をDumpして、GCSに保存、それをDLして、USBに入れてコールドウォレットに移動しなくてはいけない
-	//TODO:Debug時はlocalに出力することとする。=> これはフラグで判別したほうがいいかもしれない
+	//TODO:Debug時はlocalに出力することとする。=> これはフラグで判別したほうがいいかもしれない/Interface型にして対応してもいいかも
 	var generatedFileName string
 	if txReceiptID != 0 {
-		//generatedFileName = file.WriteFileForUnsigned(txReceiptID, "inside/", hex)
-		//path := file.CreateFilePath(enum.ActionReceipt, enum.TxTypeUnsigned, txReceiptID)
 		path := file.CreateFilePath(enum.ActionTypeReceipt, enum.TxTypeUnsigned, txReceiptID)
 		generatedFileName, err = file.WriteFile(path, hex)
 		if err != nil {

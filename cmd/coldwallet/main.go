@@ -121,15 +121,15 @@ func switchFunction(wallet *service.Wallet) {
 		log.Printf("hex: %s\n, 署名完了: %t\n, fileName: %s", hexTx, isSigned, generatedFileName)
 		//TODO:isSigned: 送信までした署名はfalseになる??
 	case 5:
-		//TODO: importしたファイルからhex値を取得し、署名を行う
+		//TODO: importしたファイルからhex値を取得し、署名を行う(ReceiptかPaymentかはfileNameから判別))
 		// ./coldwallet -f 5 -i ./data/tx/receipt/10_unsigned_1534477741449699817
-		log.Print("Run: Importしたファイルからhex値を取得し、署名を行う")
+		log.Print("Run: Importしたファイルからhex値を取得し、署名を行う(Receipt)")
 		if opts.ImportFile == "" {
 			log.Fatal("file path is required as argument file when running")
 		}
 
 		//出金と入金で、フラグが変わるので注意
-		hexTx, isSigned, generatedFileName, err := wallet.SignatureFromFile(opts.ImportFile, enum.ActionTypeReceipt)
+		hexTx, isSigned, generatedFileName, err := wallet.SignatureFromFile(opts.ImportFile)
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}

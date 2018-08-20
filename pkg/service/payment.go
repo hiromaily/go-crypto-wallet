@@ -9,6 +9,7 @@ import (
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/file"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
 )
@@ -293,12 +294,8 @@ func (w *Wallet) createRawTransactionForPayment(inputs []btcjson.TransactionInpu
 	}
 
 	// 6. TODO:Databaseに必要な情報を保存
-	//txReceiptID, err := w.insertHexForUnsignedTx(hex, total+fee, fee, w.BTC.StoredAddress(), 1, txReceiptDetails)
-	//if err != nil {
-	//	return "", "", errors.Errorf("insertHexOnDB(): error: %v", err)
-	//}
 	//  txType //1.未署名
-	_, err = w.insertHexForUnsignedTxOnPayment(hex, inputTotal, outputTotal, fee, enum.TxTypeValue[enum.TxTypeUnsigned], txPaymentInputs, txPaymentOutputs)
+	txReceiptID, err := w.insertHexForUnsignedTxOnPayment(hex, inputTotal, outputTotal, fee, enum.TxTypeValue[enum.TxTypeUnsigned], txPaymentInputs, txPaymentOutputs)
 	//TODO:txReceiptID
 	if err != nil {
 		return "", "", errors.Errorf("insertHexOnDB(): error: %v", err)
@@ -306,15 +303,18 @@ func (w *Wallet) createRawTransactionForPayment(inputs []btcjson.TransactionInpu
 
 	// 7. GCSにトランザクションファイルを作成
 	//TODO:本来、この戻り値をDumpして、GCSに保存、それをDLして、USBに入れてコールドウォレットに移動しなくてはいけない
-	//TODO:Debug時はlocalに出力することとする
-	//FIXME:該当するtransactionのIDを設定せねばならない
-	//var generatedFileName string
-	//if txReceiptID != 0 {
-	//	generatedFileName = file.WriteFileForUnsigned(txReceiptID, hex)
-	//}
+	//TODO:Debug時はlocalに出力することとする。=> これはフラグで判別したほうがいいかもしれない/Interface型にして対応してもいいかも
+	var generatedFileName string
+	if txReceiptID != 0 {
+		path := file.CreateFilePath(enum.ActionTypePayment, enum.TxTypeUnsigned, txReceiptID)
+		generatedFileName, err = file.WriteFile(path, hex)
+		if err != nil {
+			return "", "", errors.Errorf("file.WriteFile(): error: %v", err)
+		}
+	}
 
 	//return hex, generatedFileName, nil
-	return hex, "", nil
+	return hex, generatedFileName, nil
 }
 
 //TODO:引数の数が多いのはGoにおいてはBad practice...

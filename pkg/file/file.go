@@ -39,25 +39,35 @@ func CreateFilePath(actionType enum.ActionType, txType enum.TxType, txID int64) 
 }
 
 // ParseFile ファイル名を解析する
-func ParseFile(filePath string, txType enum.TxType) (int64, string, error) {
+func ParseFile(filePath string, txType enum.TxType) (int64, enum.ActionType, string, error) {
 	//フルパスが渡されることも想定
 	tmp := strings.Split(filePath, "/")
 	fileName := tmp[len(tmp)-1]
 
 	//receipt_5_unsigned_1534466246366489473
+	//length
 	s := strings.Split(fileName, "_")
 	if len(s) != 4 {
-		return 0, "", errors.Errorf("error: invalid file: %s", fileName)
-	}
-	txReceiptID, err := strconv.ParseInt(s[1], 10, 64)
-	if err != nil {
-		return 0, "", errors.Errorf("error: invalid file: %s", fileName)
-	}
-	if s[2] != string(txType) {
-		return 0, "", errors.Errorf("error: invalid file: %s", fileName)
+		return 0, "", "", errors.Errorf("error: invalid file: %s", fileName)
 	}
 
-	return txReceiptID, s[2], nil
+	//Action
+	if !enum.ValidateActionType(s[0]) {
+		return 0, "", "", errors.Errorf("error: invalid file: %s", fileName)
+	}
+
+	//receiptID
+	txReceiptID, err := strconv.ParseInt(s[1], 10, 64)
+	if err != nil {
+		return 0, "", "", errors.Errorf("error: invalid file: %s", fileName)
+	}
+
+	//txType
+	if s[2] != string(txType) {
+		return 0, "", "", errors.Errorf("error: invalid file: %s", fileName)
+	}
+
+	return txReceiptID, enum.ActionType(s[0]), s[2], nil
 }
 
 // WriteFileForUnsigned [Debug用] localにファイルを出力する(実運用では、未署名ファイルはGCSにUpload)

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/file"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
@@ -14,7 +15,7 @@ import (
 func (w *Wallet) SendFromFile(filePath string) (string, error) {
 	//ファイル名から、tx_receipt_idを取得する
 	//5_unsigned_1534466246366489473
-	txReceiptID, _, err := file.ParseFile(filePath, "signed")
+	txReceiptID, actionType, _, err := file.ParseFile(filePath, "signed")
 	if err != nil {
 		return "", err
 	}
@@ -36,7 +37,7 @@ func (w *Wallet) SendFromFile(filePath string) (string, error) {
 	}
 
 	//DB更新
-	err = w.updateHexForSentTx(txReceiptID, signedHex, hash.String())
+	err = w.updateHexForSentTx(txReceiptID, signedHex, hash.String(), actionType)
 	if err != nil {
 		//TODO:仮にここでエラーが出たとしても、送信したという事実に変わりはない
 		return "", err
@@ -46,7 +47,7 @@ func (w *Wallet) SendFromFile(filePath string) (string, error) {
 }
 
 //
-func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID string) error {
+func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID string, actionType enum.ActionType) error {
 	//1.TxReceiptテーブル
 	t := time.Now()
 	txReceipt := model.TxTable{}
@@ -58,6 +59,7 @@ func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID strin
 
 	affectedNum, err := w.DB.UpdateTxReceiptForSent(
 		&txReceipt, nil, true)
+
 	if err != nil {
 		return errors.Errorf("DB.UpdateTxReceiptForSent(): error: %v", err)
 	}

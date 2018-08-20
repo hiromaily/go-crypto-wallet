@@ -21,6 +21,14 @@ var TxTypeValue = map[TxType]uint8{
 	TxTypeCancel:   5,
 }
 
+// ValidateTxType TxTypeのバリデーションを行う
+func ValidateTxType(val string) bool {
+	if _, ok := TxTypeValue[TxType(val)]; ok {
+		return true
+	}
+	return false
+}
+
 //ActionType 入金/出金
 type ActionType string
 
@@ -34,4 +42,12 @@ const (
 var ActionTypeValue = map[ActionType]uint8{
 	ActionTypeReceipt: 1,
 	ActionTypePayment: 2,
+}
+
+// ValidateActionType ActionTypeのバリデーションを行う
+func ValidateActionType(val string) bool {
+	if _, ok := ActionTypeValue[ActionType(val)]; ok {
+		return true
+	}
+	return false
 }
