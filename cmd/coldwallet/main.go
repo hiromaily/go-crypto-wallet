@@ -107,8 +107,7 @@ func switchFunction(wallet *service.Wallet) {
 
 		// service.MultiSigByHex(hex)を実行してみる。
 	case 4:
-		//Debug用
-		//TODO:HEXから署名を行う
+		//[Debug用]HEXから署名を行う
 		log.Print("Run: HEXから署名を行う")
 		//hex := "02000000019dcbbda4e5233051f2bed587c1d48e8e17aa21c2c3012097899bda5097ce78e20100000000ffffffff01042bbf070000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e8700000000"
 		//hex := "02000000032e0183cd8e082c185030b8eed4bf19bace65936960fe79736dc21f3b0586b7640100000000ffffffff8afd01d2ecdfeb1657ae7a0ecee9e89b86feb58ed10803cdf6c95d25354161ff0100000000ffffffffc6f7645941324cfe9e36194a6443e0f50fe9117c4964ad942f39833da60363ba0000000000ffffffff01f0be8e0d0000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e8700000000"
@@ -121,7 +120,7 @@ func switchFunction(wallet *service.Wallet) {
 		log.Printf("hex: %s\n, 署名完了: %t\n, fileName: %s", hexTx, isSigned, generatedFileName)
 		//TODO:isSigned: 送信までした署名はfalseになる??
 	case 5:
-		//TODO: importしたファイルからhex値を取得し、署名を行う(ReceiptかPaymentかはfileNameから判別))
+		// importしたファイルからhex値を取得し、署名を行う(ReceiptかPaymentかはfileNameから判別))
 		// ./coldwallet -f 5 -i ./data/tx/receipt/10_unsigned_1534477741449699817
 		log.Print("Run: Importしたファイルからhex値を取得し、署名を行う(Receipt)")
 		if opts.ImportFile == "" {
