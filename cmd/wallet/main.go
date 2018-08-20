@@ -6,7 +6,6 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/chaincfg"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/jessevdk/go-flags"
 )
@@ -140,7 +139,7 @@ func switchFunction(wallet *service.Wallet) {
 		log.Printf("[Debug] 送信までDONE!! %s", txID)
 	case 14:
 		log.Print("Run:出金トランザクション作成")
-		hex, err := wallet.CreateUnsignedTransactionForPayment()
+		hex, fileName, err := wallet.CreateUnsignedTransactionForPayment()
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
@@ -148,23 +147,23 @@ func switchFunction(wallet *service.Wallet) {
 			log.Printf("No utxo")
 			return
 		}
-		log.Printf("hex: %s", hex)
+		log.Printf("hex: %s, \nfileName: %s", hex, fileName)
 
-		//一連の動作も確認
+		//一連の動作も確認(一旦コメントアウト)
 		//署名
-		signedTx, isSigned, _, err := wallet.SignatureByHex(enum.ActionTypePayment, hex, 10)
-		if err != nil {
-			log.Fatalf("%+v", err)
-		}
-		if !isSigned {
-			log.Fatalf("signature is not enough")
-		}
-		//送信
-		hash, err := wallet.BTC.SendTransactionByHex(signedTx)
-		if err != nil {
-			log.Fatalf("%+v", err)
-		}
-		log.Printf("[Done] txID hash: %s", hash.String())
+		//signedTx, isSigned, _, err := wallet.SignatureByHex(enum.ActionTypePayment, hex, 10)
+		//if err != nil {
+		//	log.Fatalf("%+v", err)
+		//}
+		//if !isSigned {
+		//	log.Fatalf("signature is not enough")
+		//}
+		////送信
+		//hash, err := wallet.BTC.SendTransactionByHex(signedTx)
+		//if err != nil {
+		//	log.Fatalf("%+v", err)
+		//}
+		//log.Printf("[Done] txID hash: %s", hash.String())
 
 	case 20:
 		log.Print("Run: [Debug用]送金までの一連の流れを確認")

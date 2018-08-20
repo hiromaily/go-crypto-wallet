@@ -51,7 +51,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestInsertTxReceiptDetailForUnsigned(t *testing.T) {
-	txReceiptDetails := []TxReceiptInput{
+	txReceiptDetails := []TxInput{
 		{
 			ReceiptID:          1,
 			InputTxid:          "txidxxxxxx",

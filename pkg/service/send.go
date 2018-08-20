@@ -49,7 +49,7 @@ func (w *Wallet) SendFromFile(filePath string) (string, error) {
 func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID string) error {
 	//1.TxReceiptテーブル
 	t := time.Now()
-	txReceipt := model.TxReceipt{}
+	txReceipt := model.TxTable{}
 	txReceipt.ID = txReceiptID
 	txReceipt.SignedHexTx = signedHex
 	txReceipt.SentHashTx = sentTxID

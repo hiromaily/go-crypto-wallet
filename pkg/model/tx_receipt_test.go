@@ -14,7 +14,7 @@ var (
 )
 
 func TestInsertTxReceiptForUnsigned(t *testing.T) {
-	txReceipt := TxReceipt{}
+	txReceipt := TxTable{}
 	txReceipt.UnsignedHexTx = "12345"
 	txReceipt.TotalInputAmount = "1.5"
 	txReceipt.TotalOutputAmount = "1.3"
@@ -58,7 +58,7 @@ func TestGetTxReceiptByUnsignedHex(t *testing.T) {
 
 func TestUpdateTxReceiptForSent(t *testing.T) {
 	tm := time.Now()
-	txReceipt := TxReceipt{}
+	txReceipt := TxTable{}
 	txReceipt.ID = 1
 	txReceipt.SignedHexTx = "signedHex"
 	txReceipt.SentHashTx = "sentHashID"

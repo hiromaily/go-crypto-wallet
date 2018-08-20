@@ -20,7 +20,7 @@ const (
 )
 
 // TxReceiptOutput tx_receipt_outputテーブル
-type TxReceiptOutput struct {
+type TxOutput struct {
 	ID            int64      `db:"id"`
 	ReceiptID     int64      `db:"receipt_id"`
 	OutputAddress string     `db:"output_address"`
@@ -36,24 +36,24 @@ func (m *DB) TableNameReceiptOutput() string {
 }
 
 // getTxReceiptOutputByReceiptID TxReceiptOutputテーブルから該当するIDのレコードを返す
-func (m *DB) getTxReceiptOutputByReceiptID(tbl string, receiptID int64) (*TxReceiptOutput, error) {
+func (m *DB) getTxReceiptOutputByReceiptID(tbl string, receiptID int64) (*TxOutput, error) {
 	sql := "SELECT * FROM %s WHERE receipt_id=$1"
 	sql = fmt.Sprintf(sql, tbl)
 
-	txReceiptOutput := TxReceiptOutput{}
+	txReceiptOutput := TxOutput{}
 	err := m.RDB.Select(&txReceiptOutput, sql, receiptID)
 
 	return &txReceiptOutput, err
 }
 
 // GetTxReceiptOutputByReceiptID TxReceiptOutputテーブルから該当するIDのレコードを返す
-func (m *DB) GetTxReceiptOutputByReceiptID(receiptID int64) (*TxReceiptOutput, error) {
+func (m *DB) GetTxReceiptOutputByReceiptID(receiptID int64) (*TxOutput, error) {
 	return m.getTxReceiptOutputByReceiptID(m.TableNameReceiptOutput(), receiptID)
 }
 
 // insertTxReceiptOutputForUnsigned TxReceiptOutputテーブルに未署名トランザクションのoutputに使われたtxレコードを作成する
 //TODO:BulkInsertがやりたい
-func (m *DB) insertTxReceiptOutputForUnsigned(tbl string, txReceiptOutputs []TxReceiptOutput, tx *sqlx.Tx, isCommit bool) error {
+func (m *DB) insertTxReceiptOutputForUnsigned(tbl string, txReceiptOutputs []TxOutput, tx *sqlx.Tx, isCommit bool) error {
 
 	sql := `
 INSERT INTO %s (receipt_id, output_address, output_account, output_amount, is_change) 
@@ -82,6 +82,6 @@ VALUES (:receipt_id,  :output_address, :output_account, :output_amount, :is_chan
 
 // InsertTxReceiptOutputForUnsigned TxReceiptOutputテーブルに未署名トランザクションのoutputに使われたtxレコードを作成する
 //TODO:BulkInsertがやりたい
-func (m *DB) InsertTxReceiptOutputForUnsigned(txReceiptOutputs []TxReceiptOutput, tx *sqlx.Tx, isCommit bool) error {
+func (m *DB) InsertTxReceiptOutputForUnsigned(txReceiptOutputs []TxOutput, tx *sqlx.Tx, isCommit bool) error {
 	return m.insertTxReceiptOutputForUnsigned(m.TableNameReceiptOutput(), txReceiptOutputs, tx, isCommit)
 }

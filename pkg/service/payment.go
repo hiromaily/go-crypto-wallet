@@ -4,9 +4,12 @@ import (
 	"log"
 	"sort"
 
+	"fmt"
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
 )
 
@@ -22,6 +25,7 @@ type UserPayment struct {
 }
 
 // debug用データ作成
+// TODO:出金データとしてDB内にテーブルを作成する
 func (w *Wallet) createDebugUserPayment() []UserPayment {
 	//getnewaddress pay1
 	//2N33pRYgyuHn6K2xCrrq9dPzuW6ZAvFJfVz
@@ -78,10 +82,12 @@ func (w *Wallet) isFoundTxIDAndVout(txID string, vout uint32, inputs []btcjson.T
 }
 
 // CreateUnsignedTransactionForPayment 支払いのための未署名トランザクションを作成する
-func (w *Wallet) CreateUnsignedTransactionForPayment() (string, error) {
+func (w *Wallet) CreateUnsignedTransactionForPayment() (string, string, error) {
 	//DBから情報を取得、もしくはNatsからのリクエストをトリガーにするか、今はまだ未定
 	//とりあえず、テストデータで実装
 	//実際には、こちらもamountでソートしておく=> ソートは不要
+
+	//1.出金データを取得
 	userPayments := w.createDebugUserPayment()
 
 	//2.送信合計金額を算出
@@ -94,22 +100,24 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() (string, error) {
 	//getbalance hokan 6
 	balance, err := w.BTC.GetBalanceByAccountAndMinConf(w.BTC.PaymentAccountName(), w.BTC.ConfirmationBlock())
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	if balance <= userTotal {
-		return "", errors.New("Stored account balance is insufficient")
+		//残高が不足している
+		return "", "", errors.New("Stored account balance is insufficient")
 	}
 
 	//4. Listunspent()にてpaymentアカウント用のutxoをすべて取得する
 	//listunspent 6  9999999 [\"2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW\"]
 	addr, err := w.BTC.DecodeAddress(w.BTC.PaymentAddress())
 	if err != nil {
-		return "", errors.Errorf("DecodeAddress(): error: %v", err)
+		//toml内に定義あるアドレスなので、起動時にチェックすべき
+		return "", "", errors.Errorf("DecodeAddress(): error: %v", err)
 	}
 	unspentList, err := w.BTC.Client().ListUnspentMinMaxAddresses(6, 9999999, []btcutil.Address{addr})
 	if err != nil {
-		//致命的なエラー
-		return "", err
+		//ListUnspentが実行できない。致命的なエラー。この場合BitcoinCoreの再起動が必要
+		return "", "", err
 	}
 
 	//5. 送金の金額と近しいutxoでtxを作成するため、ソートしておく => 小さなutxoから利用していくのに便利だが、MUSTではない
@@ -122,29 +130,43 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() (string, error) {
 	//grok.Value(unspentList)
 
 	var (
-		inputs     []btcjson.TransactionInput
-		tmpOutputs = map[string]btcutil.Amount{}
-		outputs    = map[btcutil.Address]btcutil.Amount{}
+		inputs          []btcjson.TransactionInput
+		inputTotal      btcutil.Amount
+		txPaymentInputs []model.TxInput
+		outputs         = map[btcutil.Address]btcutil.Amount{}
+		//outputTotal     btcutil.Amount
+		tmpOutputs = map[string]btcutil.Amount{} //mapのkeyが、btcutil.Address型だとユニークかどうかkeyから判定できないため、判定用としてこちらを作成
+		isDone     bool
 	)
 
 	//6.合計金額を超えるまで、listunspentからinputsを作成する
-	var inputTotal btcutil.Amount
-	var isDone bool
-	for _, utxo := range unspentList {
+	for _, tx := range unspentList {
 		//utxo.Amount
 		//utxo.Vout
 		//utxo.TxID
-		amt, err := btcutil.NewAmount(utxo.Amount)
+		amt, err := btcutil.NewAmount(tx.Amount)
 		if err != nil {
 			log.Println("[Error] unexpected error:", err)
 			continue
 		}
 		inputTotal += amt
-		//新規利用のため、inputを作成
+
+		//utxoの新規利用のため、inputを作成
 		inputs = append(inputs, btcjson.TransactionInput{
-			Txid: utxo.TxID,
-			Vout: utxo.Vout,
+			Txid: tx.TxID,
+			Vout: tx.Vout,
 		})
+		// txReceiptInputs
+		txPaymentInputs = append(txPaymentInputs, model.TxInput{
+			ReceiptID:          0,
+			InputTxid:          tx.TxID,
+			InputVout:          tx.Vout,
+			InputAddress:       tx.Address,
+			InputAccount:       tx.Account,
+			InputAmount:        fmt.Sprintf("%f", tx.Amount),
+			InputConfirmations: tx.Confirmations,
+		})
+
 		if inputTotal > userTotal {
 			isDone = true
 			break
@@ -152,9 +174,11 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() (string, error) {
 	}
 	if !isDone {
 		//これは金額が足りなかったことを意味するので致命的
-		return "", errors.New("[fatal error] bitcoin is insufficient in trading account of ours")
+		//上記のGetBalanceByAccountAndMinConf()のチェックでここは通らないはず
+		return "", "", errors.New("[fatal error] bitcoin is insufficient in trading account of ours")
 	}
-	//outputは別途こちらで作成
+
+	//7.outputは別途こちらで作成
 	for _, userPayment := range userPayments {
 		if _, ok := tmpOutputs[userPayment.receiverAddr]; ok {
 			//加算する
@@ -166,8 +190,16 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() (string, error) {
 	}
 
 	//差分でお釣り用のoutputを作成する
+	//TODO:ユーザーの出金先にpaymentのアドレスの指定がある場合、何が起きる？？
 	change := inputTotal - userTotal
-	tmpOutputs[w.BTC.PaymentAddress()] = change
+	if _, ok := tmpOutputs[w.BTC.PaymentAddress()]; ok {
+		//加算
+		//TODO:こんなことが実運用でありえるか？
+		tmpOutputs[w.BTC.PaymentAddress()] += change
+	} else {
+		//新規
+		tmpOutputs[w.BTC.PaymentAddress()] = change
+	}
 
 	//tmpOutputsをoutputsとして変換する
 	for key, val := range tmpOutputs {
@@ -178,66 +210,101 @@ func (w *Wallet) CreateUnsignedTransactionForPayment() (string, error) {
 			continue
 		}
 		outputs[addr] = val
+
+		//total
+		//outputTotal += val
 	}
 
 	//TODO:inputsをすべてlockする
+
+	//Debug
 	grok.Value(inputs)
 	grok.Value(tmpOutputs)
 	grok.Value(outputs)
 
-	//rawtransactionを
 	// 一連の処理を実行
-	return w.createRawTransactionForPayment(inputs, outputs)
+	return w.createRawTransactionForPayment(inputs, inputTotal, txPaymentInputs, outputs)
 }
 
 //TODO:receipt側のロジックとほぼ同じ為、まとめたほうがいい(手数料のロジックのみ異なる)
-func (w *Wallet) createRawTransactionForPayment(inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount) (string, error) {
+func (w *Wallet) createRawTransactionForPayment(inputs []btcjson.TransactionInput, inputTotal btcutil.Amount,
+	txPaymentInputs []model.TxInput, outputs map[btcutil.Address]btcutil.Amount) (string, string, error) {
+
+	var outputTotal btcutil.Amount
+	txPaymentOutputs := []model.TxOutput{}
+
 	// 1.CreateRawTransactionWithOutput(仮で作成し、この後サイズから手数料を算出する)
 	msgTx, err := w.BTC.CreateRawTransactionWithOutput(inputs, outputs)
 	if err != nil {
-		return "", errors.Errorf("CreateRawTransactionWithOutput(): error: %v", err)
+		return "", "", errors.Errorf("CreateRawTransactionWithOutput(): error: %v", err)
 	}
 	log.Printf("[Debug] CreateRawTransactionWithOutput: %v\n", msgTx)
-	//grok.Value(msgTx)
 
 	// 2.fee算出
 	fee, err := w.BTC.GetTransactionFee(msgTx)
 	if err != nil {
-		return "", errors.Errorf("GetTransactionFee(): error: %v", err)
+		return "", "", errors.Errorf("GetTransactionFee(): error: %v", err)
 	}
 	log.Printf("[Debug]fee: %v", fee) //0.001183 BTC
 
 	// 3.TODO:お釣り用のoutputのトランザクションから、手数料を差し引かねばならい
-	// FIXME: これが足りない場合がめんどくさい。。。これをどう回避すべきか
-	for addr := range outputs {
+	//   TODO:fee分の変更が入ったので、厳密には、ここでoutputの調整が必要
+	//   FIXME: これが足りない場合がめんどくさい。。。これをどう回避すべきか
+	for addr, amt := range outputs {
 		if addr.String() == w.BTC.PaymentAddress() {
 			outputs[addr] -= fee
+			//break
+			txPaymentOutputs = append(txPaymentOutputs, model.TxOutput{
+				ReceiptID:     0,
+				OutputAddress: addr.String(),
+				OutputAccount: w.BTC.PaymentAccountName(),
+				OutputAmount:  w.BTC.AmountString(amt - fee),
+				IsChange:      true,
+			})
+		} else {
+			txPaymentOutputs = append(txPaymentOutputs, model.TxOutput{
+				ReceiptID:     0,
+				OutputAddress: addr.String(),
+				OutputAccount: "",
+				OutputAmount:  w.BTC.AmountString(amt),
+				IsChange:      false,
+			})
 		}
-	}
-	grok.Value(outputs)
+		//total
+		outputTotal += amt
 
-	//debug
-	//return "", nil
+	}
+	//total
+	outputTotal -= fee
+
+	//Debug
+	grok.Value(outputs)
 
 	// 4.再度 CreateRawTransaction
 	msgTx, err = w.BTC.CreateRawTransactionWithOutput(inputs, outputs)
 	if err != nil {
-		return "", errors.Errorf("CreateRawTransaction(): error: %v", err)
+		return "", "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
 
 	// 5.出力用にHexに変換する
 	hex, err := w.BTC.ToHex(msgTx)
 	if err != nil {
-		return "", errors.Errorf("w.BTC.ToHex(msgTx): error: %v", err)
+		return "", "", errors.Errorf("w.BTC.ToHex(msgTx): error: %v", err)
 	}
 
-	// 6. Databaseに必要な情報を保存
+	// 6. TODO:Databaseに必要な情報を保存
 	//txReceiptID, err := w.insertHexForUnsignedTx(hex, total+fee, fee, w.BTC.StoredAddress(), 1, txReceiptDetails)
 	//if err != nil {
 	//	return "", "", errors.Errorf("insertHexOnDB(): error: %v", err)
 	//}
+	//  txType //1.未署名
+	_, err = w.insertHexForUnsignedTxOnPayment(hex, inputTotal, outputTotal, fee, enum.TxTypeValue[enum.TxTypeUnsigned], txPaymentInputs, txPaymentOutputs)
+	//TODO:txReceiptID
+	if err != nil {
+		return "", "", errors.Errorf("insertHexOnDB(): error: %v", err)
+	}
 
-	// 6. GCSにトランザクションファイルを作成
+	// 7. GCSにトランザクションファイルを作成
 	//TODO:本来、この戻り値をDumpして、GCSに保存、それをDLして、USBに入れてコールドウォレットに移動しなくてはいけない
 	//TODO:Debug時はlocalに出力することとする
 	//FIXME:該当するtransactionのIDを設定せねばならない
@@ -247,105 +314,58 @@ func (w *Wallet) createRawTransactionForPayment(inputs []btcjson.TransactionInpu
 	//}
 
 	//return hex, generatedFileName, nil
-	return hex, nil
+	return hex, "", nil
 }
 
-// CreateUnsignedTransactionForPaymentOld 支払いのための未署名トランザクションを作成する
-// TODO:別ロジックとして考えるため、一旦退避
-//func (w *Wallet) CreateUnsignedTransactionForPaymentOld() error {
-//	//DBから情報を取得、もしくはNatsからのリクエストをトリガーにするか、今はまだ未定
-//	//とりあえず、テストデータで実装
-//	//実際には、こちらもamountでソートしておく
-//	userPayments := w.createDebugUserPayment()
-//
-//	//2. Listunspent()にてpaymentアカウント用のutxoをすべて取得する
-//	//listunspent 6  9999999 [\"2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW\"]
-//	addr, err := w.BTC.DecodeAddress(w.BTC.PaymentAddress())
-//	if err != nil {
-//		return errors.Errorf("DecodeAddress(): error: %v", err)
-//	}
-//	unspentList, err := w.BTC.Client().ListUnspentMinMaxAddresses(6, 9999999, []btcutil.Address{addr})
-//	if err != nil {
-//		//致命的なエラー
-//		return err
-//	}
-//
-//	//3. 送金の金額と近しいutxoでtxを作成するため、ソートしておく
-//	//unspentList[0].Amount
-//	sort.Slice(unspentList, func(i, j int) bool {
-//		//small to big
-//		return unspentList[i].Amount < unspentList[j].Amount
-//	})
-//
-//	//grok.Value(userPayments)
-//	grok.Value(unspentList)
-//
-//	var (
-//		inputs     []btcjson.TransactionInput
-//		tmpOutputs = map[string]btcutil.Amount{}
-//		outputs    = map[btcutil.Address]btcutil.Amount{}
-//	)
-//	//送信ユーザー毎に処理
-//	for _, userPayment := range userPayments {
-//		//送金金額をチェック
-//		//userPayment
-//		var isAllocated bool
-//		for idx, utxo := range unspentList {
-//			if utxo.Amount >= userPayment.amount {
-//				//利用可能 utxoを発見
-//				isAllocated = true
-//
-//				//if !(usedTxID == utxo.TxID && usedTxVout == utxo.Vout){
-//				if !w.isFoundTxIDAndVout(utxo.TxID, utxo.Vout, inputs) {
-//					//新規利用のため、inputを作成
-//					inputs = append(inputs, btcjson.TransactionInput{
-//						Txid: utxo.TxID,
-//						Vout: utxo.Vout,
-//					})
-//				}
-//				//Outputを更新
-//				//log.Println("[Debug]", userPayment.validRecAddr)
-//				//FIXME:userPayment.validRecAddrはポインタとして保持しているので、値が同じでも異なるものとして認識されてしまう。。。
-//				//if _, ok := outputs[userPayment.validRecAddr]; ok {
-//				if _, ok := tmpOutputs[userPayment.receiverAddr]; ok {
-//					//加算する
-//					//outputs[userPayment.validRecAddr] += userPayment.validAmount
-//					tmpOutputs[userPayment.receiverAddr] += userPayment.validAmount
-//				} else {
-//					//新規送信先を作成
-//					//outputs[userPayment.validRecAddr] = userPayment.validAmount
-//					tmpOutputs[userPayment.receiverAddr] = userPayment.validAmount
-//				}
-//				//unspentListも更新する
-//				unspentList[idx].Amount -= userPayment.amount
-//
-//				//
-//				break
-//			}
-//		}
-//		if !isAllocated {
-//			//送信に必要なutxoが見つからなかった。
-//			//こんな致命的なエラーは発生しないよう、運用せねばならない。
-//			log.Printf("[Error] unexpected error: proper utxo could not be found in our accout to send")
-//		}
-//	}
-//	//tmpOutputsをoutputsとして変換する
-//	for key, val := range tmpOutputs {
-//		addr, err = w.BTC.DecodeAddress(key)
-//		if err != nil {
-//			//これは本来事前にチェックされるため、ありえないはず
-//			log.Printf("[Error] unexpected error converting string to address")
-//		}
-//		outputs[addr] = val
-//	}
-//	//TODO:おつりを自分に送信せねばならない
-//	//inputsにあるものはすべて
-//	grok.Value(unspentList)
-//
-//	//TODO:inputsをすべてlockする
-//	grok.Value(inputs)
-//	//grok.Value(tmpOutputs)
-//	grok.Value(outputs)
-//
-//	return nil
-//}
+//TODO:引数の数が多いのはGoにおいてはBad practice...
+func (w *Wallet) insertHexForUnsignedTxOnPayment(hex string, inputTotal, outputTotal, fee btcutil.Amount, txType uint8,
+	txPaymentInputs []model.TxInput, txPaymentOutputs []model.TxOutput) (int64, error) {
+
+	//1.内容が同じだと、生成されるhexもまったく同じ為、同一のhexが合った場合は処理をskipする
+	count, err := w.DB.GetTxPaymentByUnsignedHex(hex)
+	if err != nil {
+		return 0, errors.Errorf("DB.GetTxPaymentByUnsignedHex(): error: %v", err)
+	}
+	if count != 0 {
+		//skip
+		return 0, nil
+	}
+
+	//2.TxPaymentテーブル
+	txPayment := model.TxTable{}
+	txPayment.UnsignedHexTx = hex
+	txPayment.TotalInputAmount = w.BTC.AmountString(inputTotal)
+	txPayment.TotalOutputAmount = w.BTC.AmountString(outputTotal)
+	txPayment.Fee = w.BTC.AmountString(fee)
+	txPayment.TxType = txType
+
+	tx := w.DB.RDB.MustBegin()
+	txReceiptID, err := w.DB.InsertTxPaymentForUnsigned(&txPayment, tx, false)
+	if err != nil {
+		return 0, errors.Errorf("DB.InsertTxPaymentForUnsigned(): error: %v", err)
+	}
+
+	//3.TxPaymentInputテーブル
+	//ReceiptIDの更新
+	for idx := range txPaymentInputs {
+		txPaymentInputs[idx].ReceiptID = txReceiptID
+	}
+
+	err = w.DB.InsertTxPaymentInputForUnsigned(txPaymentInputs, tx, false)
+	if err != nil {
+		return 0, errors.Errorf("DB.InsertTxPaymentInputForUnsigned(): error: %v", err)
+	}
+
+	//4.TxReceiptOutputテーブル
+	//ReceiptIDの更新
+	for idx := range txPaymentOutputs {
+		txPaymentOutputs[idx].ReceiptID = txReceiptID
+	}
+
+	err = w.DB.InsertTxPaymentOutputForUnsigned(txPaymentOutputs, tx, true)
+	if err != nil {
+		return 0, errors.Errorf("DB.InsertTxReceiptOutputForUnsigned(): error: %v", err)
+	}
+
+	return txReceiptID, nil
+}
