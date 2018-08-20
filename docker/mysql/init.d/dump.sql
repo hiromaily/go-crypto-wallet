@@ -142,7 +142,7 @@ CREATE TABLE `tx_receipt_output` (
   `output_address` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'outputに利用されるaddress(受け取る人)',
   `output_account` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'outputに利用されるaccount(受け取る人)',
   `output_amount`  DECIMAL(26,10) NOT NULL COMMENT'outputに利用されるamount(入金金額)',
-  `isChange`       BOOL DEFAULT false COMMENT'お釣り用のoutputであればtrue',
+  `is_change`      BOOL DEFAULT false COMMENT'お釣り用のoutputであればtrue',
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
   PRIMARY KEY (`id`),
   INDEX idx_receipt_id (`receipt_id`)

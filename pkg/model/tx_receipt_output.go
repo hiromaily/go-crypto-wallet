@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"fmt"
+	"github.com/jmoiron/sqlx"
+	"time"
+)
 
 //CREATE TABLE `tx_receipt_output` (
 //`id`             BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
@@ -29,4 +33,55 @@ type TxReceiptOutput struct {
 // TableNameReceiptOutput tx_receipt_outputテーブル名を返す
 func (m *DB) TableNameReceiptOutput() string {
 	return tableNameReceiptOutput
+}
+
+// getTxReceiptOutputByReceiptID TxReceiptOutputテーブルから該当するIDのレコードを返す
+func (m *DB) getTxReceiptOutputByReceiptID(tbl string, receiptID int64) (*TxReceiptOutput, error) {
+	sql := "SELECT * FROM %s WHERE receipt_id=$1"
+	sql = fmt.Sprintf(sql, tbl)
+
+	txReceiptOutput := TxReceiptOutput{}
+	err := m.RDB.Select(&txReceiptOutput, sql, receiptID)
+
+	return &txReceiptOutput, err
+}
+
+// GetTxReceiptOutputByReceiptID TxReceiptOutputテーブルから該当するIDのレコードを返す
+func (m *DB) GetTxReceiptOutputByReceiptID(receiptID int64) (*TxReceiptOutput, error) {
+	return m.getTxReceiptOutputByReceiptID(m.TableNameReceiptOutput(), receiptID)
+}
+
+// insertTxReceiptOutputForUnsigned TxReceiptOutputテーブルに未署名トランザクションのoutputに使われたtxレコードを作成する
+//TODO:BulkInsertがやりたい
+func (m *DB) insertTxReceiptOutputForUnsigned(tbl string, txReceiptOutputs []TxReceiptOutput, tx *sqlx.Tx, isCommit bool) error {
+
+	sql := `
+INSERT INTO %s (receipt_id, output_address, output_account, output_amount, is_change) 
+VALUES (:receipt_id,  :output_address, :output_account, :output_amount, :is_change)
+`
+	sql = fmt.Sprintf(sql, tbl)
+
+	if tx == nil {
+		tx = m.RDB.MustBegin()
+	}
+
+	for _, txReceiptOutput := range txReceiptOutputs {
+		_, err := tx.NamedExec(sql, txReceiptOutput)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	if isCommit {
+		tx.Commit()
+	}
+
+	return nil
+}
+
+// InsertTxReceiptOutputForUnsigned TxReceiptOutputテーブルに未署名トランザクションのoutputに使われたtxレコードを作成する
+//TODO:BulkInsertがやりたい
+func (m *DB) InsertTxReceiptOutputForUnsigned(txReceiptOutputs []TxReceiptOutput, tx *sqlx.Tx, isCommit bool) error {
+	return m.insertTxReceiptOutputForUnsigned(m.TableNameReceiptOutput(), txReceiptOutputs, tx, isCommit)
 }
