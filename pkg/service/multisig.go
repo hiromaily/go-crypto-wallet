@@ -6,6 +6,7 @@ import (
 )
 
 //TODO: こちらは不要になるはず。service/signature.go側にて開発
+//TODO: このファイルは削除予定
 
 // MultiSigByHex 一連のマルチシグアドレスに対しての署名処理
 // オフラインで使うことを想定

@@ -186,7 +186,8 @@ func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjs
 	var generatedFileName string
 	if txReceiptID != 0 {
 		//generatedFileName = file.WriteFileForUnsigned(txReceiptID, "inside/", hex)
-		path := file.CreateFilePath(enum.ActionReceipt, enum.TxTypeUnsigned, txReceiptID)
+		//path := file.CreateFilePath(enum.ActionReceipt, enum.TxTypeUnsigned, txReceiptID)
+		path := file.CreateFilePath(enum.ActionTypeReceipt, enum.TxTypeUnsigned, txReceiptID)
 		generatedFileName, err = file.WriteFile(path, hex)
 		if err != nil {
 			return "", "", errors.Errorf("file.WriteFile(): error: %v", err)

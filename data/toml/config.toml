@@ -30,5 +30,4 @@ pass = "cayenne"
 
 [file]
 # ここは開発時にしか必要ないはず
-receipt_path = "./data/tx/receipt/"
-payment_path  = "./data/tx/payment/"
+file_base_path = "./data/tx/"

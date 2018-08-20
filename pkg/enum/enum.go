@@ -21,11 +21,17 @@ var TxTypeValue = map[TxType]uint8{
 	TxTypeCancel:   5,
 }
 
-//Action 入金/出金
-type Action uint8
+//ActionType 入金/出金
+type ActionType string
 
 // action
 const (
-	ActionReceipt Action = iota + 1
-	ActionPayment
+	ActionTypeReceipt ActionType = "receipt"
+	ActionTypePayment ActionType = "payment"
 )
+
+//ActionTypeValue action_typeの値
+var ActionTypeValue = map[ActionType]uint8{
+	ActionTypeReceipt: 1,
+	ActionTypePayment: 2,
+}

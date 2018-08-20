@@ -6,6 +6,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/chaincfg"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/jessevdk/go-flags"
 )
@@ -151,7 +152,7 @@ func switchFunction(wallet *service.Wallet) {
 
 		//一連の動作も確認
 		//署名
-		signedTx, isSigned, _, err := wallet.SignatureByHex(hex, 10)
+		signedTx, isSigned, _, err := wallet.SignatureByHex(enum.ActionTypePayment, hex, 10)
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
