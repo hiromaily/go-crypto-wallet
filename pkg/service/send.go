@@ -52,11 +52,12 @@ func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID strin
 	txReceipt := model.TxReceipt{}
 	txReceipt.ID = txReceiptID
 	txReceipt.SignedHexTx = signedHex
-	txReceipt.SentHexTx = sentTxID
+	txReceipt.SentHashTx = sentTxID
 	txReceipt.SentUpdatedAt = &t
 	txReceipt.TxType = 3 //未署名:TODO:Constとして定義しておく
 
-	affectedNum, err := w.DB.UpdateTxReceiptForSent(&txReceipt, nil, true)
+	affectedNum, err := w.DB.UpdateTxReceiptForSent(
+		&txReceipt, nil, true)
 	if err != nil {
 		return errors.Errorf("DB.UpdateTxReceiptForSent(): error: %v", err)
 	}

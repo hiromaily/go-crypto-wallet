@@ -59,9 +59,9 @@ func (w *Wallet) DetectReceivedCoin() (string, string, error) {
 	}
 
 	var (
-		total            btcutil.Amount
-		inputs           []btcjson.TransactionInput
-		txReceiptDetails []model.TxReceiptDetail
+		total           btcutil.Amount
+		inputs          []btcjson.TransactionInput
+		txReceiptInputs []model.TxReceiptInput
 	)
 
 	for _, tx := range unspentList {
@@ -103,7 +103,7 @@ func (w *Wallet) DetectReceivedCoin() (string, string, error) {
 			Vout: tx.Vout,
 		})
 		// txReceiptDetails
-		txReceiptDetails = append(txReceiptDetails, model.TxReceiptDetail{
+		txReceiptInputs = append(txReceiptInputs, model.TxReceiptInput{
 			ReceiptID:    0,
 			InputTxid:    tx.TxID,
 			InputVout:    tx.Vout,
@@ -121,11 +121,11 @@ func (w *Wallet) DetectReceivedCoin() (string, string, error) {
 	}
 
 	// 一連の処理を実行
-	return w.createRawTransactionAndFee(total, inputs, txReceiptDetails)
+	return w.createRawTransactionAndFee(total, inputs, txReceiptInputs)
 }
 
 // createRawTransactionAndFee feeの抽出からtransaction作成、DBへの必要情報保存など、もろもろこちらで行う
-func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjson.TransactionInput, txReceiptDetails []model.TxReceiptDetail) (string, string, error) {
+func (w *Wallet) createRawTransactionAndFee(total btcutil.Amount, inputs []btcjson.TransactionInput, txReceiptDetails []model.TxReceiptInput) (string, string, error) {
 
 	// 1.CreateRawTransaction(仮で作成し、この後サイズから手数料を算出する)
 	log.Println("[Debug] w.BTC.StoredAddress() :", w.BTC.StoredAddress())
@@ -202,7 +202,7 @@ func (w *Wallet) storeHexOnGPS(hexTx string) {
 }
 
 //TODO:引数の数が多いのはGoにおいてはBad practice...
-func (w *Wallet) insertHexForUnsignedTx(hex string, total, fee btcutil.Amount, addr string, txType int, txReceiptDetails []model.TxReceiptDetail) (int64, error) {
+func (w *Wallet) insertHexForUnsignedTx(hex string, total, fee btcutil.Amount, addr string, txType int, txReceiptDetails []model.TxReceiptInput) (int64, error) {
 	//1.内容が同じだと、生成されるhexもまったく同じ為、同一のhexが合った場合は処理をskipする
 	count, err := w.DB.GetTxReceiptByUnsignedHex(hex)
 	if err != nil {
@@ -216,9 +216,9 @@ func (w *Wallet) insertHexForUnsignedTx(hex string, total, fee btcutil.Amount, a
 	//2.TxReceiptテーブル
 	txReceipt := model.TxReceipt{}
 	txReceipt.UnsignedHexTx = hex
-	txReceipt.TotalAmount = w.BTC.AmountString(total)
+	txReceipt.TotalInputAmount = w.BTC.AmountString(total)
 	txReceipt.Fee = w.BTC.AmountString(fee)
-	txReceipt.ReceiverAddress = addr
+	//txReceipt.ReceiverAddress = addr
 	txReceipt.TxType = enum.TxTypeValue[enum.TxTypeUnsigned] //1.未署名:TODO:Constとして定義しておく
 
 	tx := w.DB.RDB.MustBegin()
@@ -232,7 +232,7 @@ func (w *Wallet) insertHexForUnsignedTx(hex string, total, fee btcutil.Amount, a
 		txReceiptDetails[idx].ReceiptID = txReceiptID
 	}
 
-	err = w.DB.InsertTxReceiptDetailForUnsigned(txReceiptDetails, tx, true)
+	err = w.DB.InsertTxReceiptInputForUnsigned(txReceiptDetails, tx, true)
 	if err != nil {
 		return 0, errors.Errorf("DB.InsertTxReceiptDetailForUnsigned(): error: %v", err)
 	}

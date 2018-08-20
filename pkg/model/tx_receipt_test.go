@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	. "github.com/hiromaily/go-bitcoin/pkg/model"
 )
 
@@ -20,10 +21,11 @@ func TestGetTxReceiptByID(t *testing.T) {
 func TestInsertTxReceiptForUnsigned(t *testing.T) {
 	txReceipt := TxReceipt{}
 	txReceipt.UnsignedHexTx = "12345"
-	txReceipt.TotalAmount = "1.5"
+	txReceipt.TotalInputAmount = "1.5"
+	txReceipt.TotalOutputAmount = "1.3"
 	txReceipt.Fee = "0.2"
-	txReceipt.ReceiverAddress = "address"
-	txReceipt.TxType = 1
+	//txReceipt.ReceiverAddress = "address"
+	txReceipt.TxType = enum.TxTypeValue[enum.TxTypeUnsigned]
 
 	id, err := db.InsertTxReceiptForUnsigned(&txReceipt, nil, true)
 	if err != nil {
@@ -37,9 +39,9 @@ func TestUpdateTxReceiptForSent(t *testing.T) {
 	txReceipt := TxReceipt{}
 	txReceipt.ID = 1
 	txReceipt.SignedHexTx = "signedHex"
-	txReceipt.SentHexTx = "sentTxID"
+	txReceipt.SentHashTx = "sentHashID"
 	txReceipt.SentUpdatedAt = &tm
-	txReceipt.TxType = 3 //未署名:TODO:Constとして定義しておく
+	txReceipt.TxType = enum.TxTypeValue[enum.TxTypeSent]
 
 	affected, err := db.UpdateTxReceiptForSent(&txReceipt, nil, true)
 	if err != nil {

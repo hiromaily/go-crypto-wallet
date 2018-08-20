@@ -89,10 +89,11 @@ CREATE TABLE `tx_receipt` (
   `id`     BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
   `unsigned_hex_tx`     TEXT COLLATE utf8_unicode_ci NOT NULL COMMENT'未署名トランザクションのHex',
   `signed_hex_tx`       TEXT COLLATE utf8_unicode_ci DEFAULT NULL COMMENT'署名済トランザクションのHex',
-  `sent_hash_tx`         TEXT COLLATE utf8_unicode_ci DEFAULT NULL COMMENT'送信済トランザクションのHash',
-  `total_amount`        DECIMAL(26,10) NOT NULL COMMENT'手数料込みの送信される金額(実際は手数料が引かれるので、これより少ないAmoutが送金される)',
+  `sent_hash_tx`        TEXT COLLATE utf8_unicode_ci DEFAULT NULL COMMENT'送信済トランザクションのHash',
+  `total_input_amount`  DECIMAL(26,10) NOT NULL COMMENT'送信される金額合計',
+  `total_output_amount` DECIMAL(26,10) NOT NULL COMMENT'受信される金額合計(手数料は含まない',
   `fee`                 DECIMAL(26,10) NOT NULL COMMENT'手数料',
-  `receiver_address`    VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL COMMENT'受取先アドレス(固定だがlogも兼ねるので念の為保持する)',
+  /*`receiver_address`    VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL COMMENT'受取先アドレス(固定だがlogも兼ねるので念の為保持する)',*/
   `current_tx_type`     tinyint(1) NOT NULL COMMENT'現在のtx_type(ステータス)',
   `unsigned_updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'未署名トランザクション 更新日時',
   `signed_updated_at`   datetime DEFAULT NULL COMMENT'署名済トランザクション 更新日時',
@@ -106,13 +107,13 @@ CREATE TABLE `tx_receipt` (
 
 
 --
--- Table structure for table `tx_receipt_detail`
+-- Table structure for table `tx_receipt_input`
 --
 
-DROP TABLE IF EXISTS `tx_receipt_detail`;
+DROP TABLE IF EXISTS `tx_receipt_input`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `tx_receipt_detail` (
+CREATE TABLE `tx_receipt_input` (
   `id`             BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
   `receipt_id`     BIGINT(20) UNSIGNED NOT NULL COMMENT'tx_receipt ID',
   `input_txid`     VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'inputに利用されるtxid',
@@ -124,7 +125,28 @@ CREATE TABLE `tx_receipt_detail` (
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
   PRIMARY KEY (`id`),
   INDEX idx_receipt_id (`receipt_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='受け取り用トランザクション情報詳細Table';
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='受け取り用トランザクションに紐づくinputトランザクション情報Table';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
+--
+-- Table structure for table `tx_receipt_output`
+--
+
+DROP TABLE IF EXISTS `tx_receipt_output`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tx_receipt_output` (
+  `id`             BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
+  `receipt_id`     BIGINT(20) UNSIGNED NOT NULL COMMENT'tx_receipt ID',
+  `output_address` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'outputに利用されるaddress(受け取る人)',
+  `output_account` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'outputに利用されるaccount(受け取る人)',
+  `output_amount`  DECIMAL(26,10) NOT NULL COMMENT'outputに利用されるamount(入金金額)',
+  `isChange`       BOOL DEFAULT false COMMENT'お釣り用のoutputであればtrue',
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
+  PRIMARY KEY (`id`),
+  INDEX idx_receipt_id (`receipt_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='受け取り用トランザクション情報に紐づくoutput情報のTable';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 
@@ -139,10 +161,20 @@ CREATE TABLE `tx_payment` LIKE `tx_receipt`;
 
 
 --
--- Table structure for table `tx_payment`
+-- Table structure for table `tx_payment_input`
 --
 
-DROP TABLE IF EXISTS `tx_payment_detail`;
+DROP TABLE IF EXISTS `tx_payment_input`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `tx_payment_detail` LIKE `tx_receipt_detail`;
+CREATE TABLE `tx_payment_input` LIKE `tx_receipt_input`;
+
+
+--
+-- Table structure for table `tx_payment_output`
+--
+
+DROP TABLE IF EXISTS `tx_payment_output`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tx_payment_output` LIKE `tx_receipt_output`;

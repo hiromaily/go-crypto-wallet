@@ -51,7 +51,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestInsertTxReceiptDetailForUnsigned(t *testing.T) {
-	txReceiptDetails := []TxReceiptDetail{
+	txReceiptDetails := []TxReceiptInput{
 		{
 			ReceiptID:          1,
 			InputTxid:          "txidxxxxxx",
@@ -72,7 +72,7 @@ func TestInsertTxReceiptDetailForUnsigned(t *testing.T) {
 		},
 	}
 
-	err := db.InsertTxReceiptDetailForUnsigned(txReceiptDetails, nil, true)
+	err := db.InsertTxReceiptInputForUnsigned(txReceiptDetails, nil, true)
 	if err != nil {
 		t.Fatal(err)
 	}

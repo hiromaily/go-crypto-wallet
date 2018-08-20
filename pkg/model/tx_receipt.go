@@ -15,15 +15,13 @@ const (
 
 // TxReceipt tx_receiptテーブル
 type TxReceipt struct {
-	ID            int64  `db:"id"`
-	UnsignedHexTx string `db:"unsigned_hex_tx"`
-	SignedHexTx   string `db:"signed_hex_tx"`
-	SentHexTx     string `db:"sent_hash_tx"`
-	//TotalAmount   float64 `db:"total_amount"` //Float型はInsert後に誤差が生じる可能性がある
-	//Fee           float64 `db:"fee"`
-	TotalAmount       string     `db:"total_amount"`
+	ID                int64      `db:"id"`
+	UnsignedHexTx     string     `db:"unsigned_hex_tx"`
+	SignedHexTx       string     `db:"signed_hex_tx"`
+	SentHashTx        string     `db:"sent_hash_tx"`
+	TotalInputAmount  string     `db:"total_input_amount"`
+	TotalOutputAmount string     `db:"total_output_amount"`
 	Fee               string     `db:"fee"`
-	ReceiverAddress   string     `db:"receiver_address"`
 	TxType            uint8      `db:"current_tx_type"` //TODO: intからuint8にできないか？
 	UnsignedUpdatedAt *time.Time `db:"unsigned_updated_at"`
 	SignedUpdatedAt   *time.Time `db:"signed_updated_at"`
@@ -72,8 +70,8 @@ func (m *DB) GetTxReceiptByUnsignedHex(hex string) (int64, error) {
 func (m *DB) insertTxReceiptForUnsigned(tbl string, txReceipt *TxReceipt, tx *sqlx.Tx, isCommit bool) (int64, error) {
 
 	sql := `
-INSERT INTO %s (unsigned_hex_tx, signed_hex_tx, sent_hash_tx, total_amount, fee, receiver_address, current_tx_type) 
-VALUES (:unsigned_hex_tx, :signed_hex_tx, :sent_hash_tx, :total_amount, :fee, :receiver_address, :current_tx_type)
+INSERT INTO %s (unsigned_hex_tx, signed_hex_tx, sent_hash_tx, total_input_amount, total_output_amount, fee, current_tx_type) 
+VALUES (:unsigned_hex_tx, :signed_hex_tx, :sent_hash_tx, :total_input_amount, :total_output_amount, :fee, :current_tx_type)
 `
 	sql = fmt.Sprintf(sql, tbl)
 
