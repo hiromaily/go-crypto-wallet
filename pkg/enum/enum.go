@@ -9,7 +9,7 @@ const (
 	TxTypeSigned   TxType = "signed"
 	TxTypeSent     TxType = "sent"
 	TxTypeDone     TxType = "done"
-	TxTypeCancel   TxType = "cancel"
+	TxTypeCancel   TxType = "canceled"
 )
 
 //TxTypeValue tx_typeの値
