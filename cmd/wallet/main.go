@@ -83,6 +83,17 @@ func switchFunction(wallet *service.Wallet) {
 		//Debug
 		grok.Value(logData)
 	case 4:
+		//[Debug用]getnetworkinfoの呼び出し
+		log.Print("Run: INFO getnetworkinfo")
+		infoData, err := wallet.BTC.GetNetworkInfo()
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		//Debug
+		grok.Value(infoData)
+		log.Printf("%f", infoData.Relayfee)
+
+	case 5:
 		//[Debug用]ValidateAddress
 		log.Print("Run: AddressのValidationチェック")
 		err := wallet.BTC.ValidateAddress("2NFXSXxw8Fa6P6CSovkdjXE6UF4hupcTHtr")

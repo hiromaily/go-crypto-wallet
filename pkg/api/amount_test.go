@@ -18,6 +18,7 @@ func TestFloatBitToAmount(t *testing.T) {
 		{0.54, 54000000},
 		{0.0048, 480000},
 		{1.9520, 195200000},
+		{0.000010, 1000},
 	}
 	for _, val := range tests {
 		amt, err := btc.FloatBitToAmount(val.bit)

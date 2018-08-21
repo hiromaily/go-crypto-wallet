@@ -143,6 +143,10 @@ func (w *Wallet) createRawTransactionAndFee(inputs []btcjson.TransactionInput, i
 	}
 	log.Printf("[Debug]fee: %v", fee) //0.000208 BTC
 
+	//FIXME:処理が受理されないトランザクションを作るために、意図的に1Satothiのfeeでトランザクションを作る
+	//DEBUG: Relayfeeにより、最低でも1000Satoshi必要
+	//fee = 1000
+
 	// 3.手数料のために、totalを調整し、再度RawTransactionを作成する
 	//このパートのみが、出金とロジックが異なる
 	outputTotal = inputTotal - fee

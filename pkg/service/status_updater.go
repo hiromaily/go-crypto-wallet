@@ -49,12 +49,12 @@ func (w *Wallet) checkTransaction(hashs []string, actionType enum.ActionType) er
 			//指定にconfirmationに達したので、doneに更新する
 			if actionType == enum.ActionTypeReceipt {
 				_, err = w.DB.UpdateTxReceiptForDone(hash, nil, true)
-				if err != nil{
+				if err != nil {
 					return errors.Errorf("DB.UpdateTxReceiptForDone() error: %v", err)
 				}
 			} else if actionType == enum.ActionTypePayment {
 				_, err = w.DB.UpdateTxPaymentForDone(hash, nil, true)
-				if err != nil{
+				if err != nil {
 					return errors.Errorf("DB.UpdateTxPaymentForDone() error: %v", err)
 				}
 			}

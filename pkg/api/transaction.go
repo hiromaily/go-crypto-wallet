@@ -280,6 +280,8 @@ func (b *Bitcoin) SendRawTransaction(tx *wire.MsgTx) (*chainhash.Hash, error) {
 	//送信
 	hash, err := b.client.SendRawTransaction(tx, true)
 	if err != nil {
+		//feeを1Satoshiで試してみたら、
+		//-26: 66: min relay fee not metが出た
 		return nil, errors.Errorf("client.SendRawTransaction(): error: %v", err)
 	}
 
