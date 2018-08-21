@@ -3,8 +3,9 @@ package service
 import (
 	"log"
 
-	"github.com/pkg/errors"
 	"github.com/bookerzzz/grok"
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/pkg/errors"
 )
 
 // UpdateStatus tx_paymentテーブル/tx_receiptテーブルのcurrent_tx_typeが3(送信済)のものを監視し、statusをupdateする
@@ -18,8 +19,7 @@ func (w *Wallet) UpdateStatus() error {
 	log.Println(receiptHashs)
 
 	// hashの詳細を取得する
-	w.checkTransaction(receiptHashs)
-
+	w.checkTransaction(receiptHashs, enum.ActionTypeReceipt)
 
 	//2.tx_payment
 	paymentHashs, err := w.DB.GetSentTxHashOnTxPayment()
@@ -29,12 +29,12 @@ func (w *Wallet) UpdateStatus() error {
 	log.Println(paymentHashs)
 
 	// hashの詳細を取得する
-	w.checkTransaction(receiptHashs)
+	w.checkTransaction(paymentHashs, enum.ActionTypePayment)
 
 	return nil
 }
 
-func (w *Wallet) checkTransaction(hashs []string) error {
+func (w *Wallet) checkTransaction(hashs []string, actionType enum.ActionType) error {
 	for _, hash := range hashs {
 		tran, err := w.BTC.GetTransactionByTxID(hash)
 		if err != nil {
@@ -47,7 +47,17 @@ func (w *Wallet) checkTransaction(hashs []string) error {
 
 		if tran.Confirmations >= int64(w.BTC.ConfirmationBlock()) {
 			//指定にconfirmationに達したので、doneに更新する
-			log.Println("OK!")
+			if actionType == enum.ActionTypeReceipt {
+				_, err = w.DB.UpdateTxReceiptForDone(hash, nil, true)
+				if err != nil{
+					return errors.Errorf("DB.UpdateTxReceiptForDone() error: %v", err)
+				}
+			} else if actionType == enum.ActionTypePayment {
+				_, err = w.DB.UpdateTxPaymentForDone(hash, nil, true)
+				if err != nil{
+					return errors.Errorf("DB.UpdateTxPaymentForDone() error: %v", err)
+				}
+			}
 		}
 	}
 	return nil

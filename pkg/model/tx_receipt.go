@@ -146,3 +146,32 @@ UPDATE %s SET signed_hex_tx=:signed_hex_tx, sent_hash_tx=:sent_hash_tx, current_
 func (m *DB) UpdateTxReceiptForSent(txReceipt *TxTable, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	return m.updateTxReceiptForSent(m.TableNameReceipt(), txReceipt, tx, isCommit)
 }
+
+// updsateTxReceiptForDone TxReceiptテーブルの該当するsent_hash_txのレコードのcurrnt_tx_typeを更新する
+func (m *DB) updateTxReceiptForDone(tbl string, hash string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+
+	if tx == nil {
+		tx = m.RDB.MustBegin()
+	}
+
+	sql := `
+UPDATE %s SET current_tx_type=? WHERE sent_hash_tx=?
+`
+	sql = fmt.Sprintf(sql, tbl)
+	res, err := tx.Exec(sql, enum.TxTypeValue[enum.TxTypeDone], hash)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+	if isCommit {
+		tx.Commit()
+	}
+	affectedNum, _ := res.RowsAffected()
+
+	return affectedNum, nil
+}
+
+// UpdateTxReceiptForDone TxReceiptテーブルの該当するsent_hash_txのレコードのcurrnt_tx_typeを更新する
+func (m *DB) UpdateTxReceiptForDone(hash string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	return m.updateTxReceiptForDone(m.TableNameReceipt(), hash, tx, isCommit)
+}

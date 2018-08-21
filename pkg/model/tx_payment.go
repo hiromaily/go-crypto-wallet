@@ -39,3 +39,8 @@ func (m *DB) InsertTxPaymentForUnsigned(txReceipt *TxTable, tx *sqlx.Tx, isCommi
 func (m *DB) UpdateTxPaymentForSent(txReceipt *TxTable, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	return m.updateTxReceiptForSent(m.TableNamePayment(), txReceipt, tx, isCommit)
 }
+
+// UpdateTxPaymentForDone TxReceiptテーブルの該当するsent_hash_txのレコードのcurrnt_tx_typeを更新する
+func (m *DB) UpdateTxPaymentForDone(hash string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	return m.updateTxReceiptForDone(m.TableNamePayment(), hash, tx, isCommit)
+}
