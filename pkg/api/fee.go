@@ -63,3 +63,12 @@ func (b *Bitcoin) GetTransactionFee(tx *wire.MsgTx) (btcutil.Amount, error) {
 
 	return feeAsBit, nil
 }
+
+// ValidateAdjustmentFee 起動時に渡されたfeeの適用範囲をValidateする
+func (b *Bitcoin) ValidateAdjustmentFee(fee float64) bool {
+	//Rangeの範囲内であればOK
+	if fee >= b.FeeRangeMin() && fee <= b.FeeRangeMax() {
+		return true
+	}
+	return false
+}

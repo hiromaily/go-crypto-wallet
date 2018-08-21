@@ -27,11 +27,11 @@ type BitcoinConf struct {
 	Block   BitcoinBlockConf `toml:"block"`
 	Stored  BitcoinAddrConf  `toml:"stored"`
 	Payment BitcoinAddrConf  `toml:"payment"`
+	Fee     BitcoinFeeConf   `toml:"fee"`
 }
 
 // BitcoinBlockConf Bitcoinブロック情報
 type BitcoinBlockConf struct {
-	//ConfirmationNum int64 `toml:"confirmation_num"`
 	ConfirmationNum int `toml:"confirmation_num"`
 }
 
@@ -41,9 +41,10 @@ type BitcoinAddrConf struct {
 	AccountName string `toml:"account"`
 }
 
-// LevelDBConf LevelDB情報
-type LevelDBConf struct {
-	Path string `toml:"path"`
+// BitcoinFeeConf fee調整Range
+type BitcoinFeeConf struct {
+	AdjustmentMin float64 `toml:"adjustment_min"`
+	AdjustmentMax float64 `toml:"adjustment_max"`
 }
 
 // MySQLConf MySQL情報
@@ -52,6 +53,11 @@ type MySQLConf struct {
 	DB   string `toml:"dbname"`
 	User string `toml:"user"`
 	Pass string `toml:"pass"`
+}
+
+// LevelDBConf LevelDB情報
+type LevelDBConf struct {
+	Path string `toml:"path"`
 }
 
 // FileConf 保存されるtransactionファイル情報

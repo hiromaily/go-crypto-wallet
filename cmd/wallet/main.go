@@ -29,9 +29,11 @@ type Options struct {
 	//Configパス
 	ConfPath string `short:"c" long:"conf" default:"./data/toml/config.toml" description:"Path for configuration toml file"`
 	//実行される機能
-	Functionality uint8 `short:"f" long:"function" description:"Functionality: 1: generate key, 2: detect received coin, other: debug"`
+	Mode uint8 `short:"m" long:"mode" description:"Mode i.e.Functionality"`
 	//txファイルパス
 	ImportFile string `short:"i" long:"import" default:"" description:"import file path for hex"`
+	//調整fee
+	Fee float64 `short:"f" long:"fee" default:"" description:"adjustment fee"`
 }
 
 var (
@@ -60,7 +62,7 @@ func main() {
 func switchFunction(wallet *service.Wallet) {
 	// 処理をFunctionalityで切り替える
 	//TODO:ここから呼び出すべきはService系のみに統一したい
-	switch opts.Functionality {
+	switch opts.Mode {
 	case 1:
 		//[Debug用]入金検知処理後、lock解除を行う
 		log.Print("Run: lockされたトランザクションの解除")

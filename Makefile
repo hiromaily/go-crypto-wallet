@@ -14,10 +14,10 @@ bld:
 	go build -o coldwallet ./cmd/coldwallet/main.go
 
 wallet: bld
-	./wallet -f 1
+	./wallet -m 1
 
 cold-wallet: bld
-	./coldwallet -f 4
+	./coldwallet -m 4
 
 
 ###############################################################################
@@ -27,18 +27,18 @@ cold-wallet: bld
 
 # 入金データを集約し、未署名のトランザクションを作成する
 create-unsigned: bld
-	./wallet -f 11
+	./wallet -m 11
 
 # 未署名のトランザクションに署名する
 sign: bld
-	./coldwallet -f 5 -i ./data/tx/receipt/receipt_8_unsigned_1534832793024491932
+	./coldwallet -m 5 -i ./data/tx/receipt/receipt_8_unsigned_1534832793024491932
 
 # 署名済トランザクションを送信する
 send: bld
-	./wallet -f 13 -i ./data/tx/receipt/receipt_8_signed_1534832879778945174
+	./wallet -m 13 -i ./data/tx/receipt/receipt_8_signed_1534832879778945174
 
 # 送金ステータスを監視し、6confirmationsになったら、statusをdoneに更新する
-	./wallet -f 21
+	./wallet -m 21
 
 ###############################################################################
 # Run 出金
@@ -47,22 +47,22 @@ send: bld
 
 # 出金データから出金トランザクションを作成する
 create-payment: bld
-	./wallet -f 14
+	./wallet -m 14
 
 # 出金用に未署名のトランザクションに署名する
 sign-payment: bld
-	./coldwallet -f 5 -i ./data/tx/payment/payment_3_unsigned_1534832966995082772
+	./coldwallet -m 5 -i ./data/tx/payment/payment_3_unsigned_1534832966995082772
 
 # 出金用に署名済トランザクションを送信する
 send-payment: bld
-	./wallet -f 13 -i ./data/tx/payment/payment_3_signed_1534833088943126101
+	./wallet -m 13 -i ./data/tx/payment/payment_3_signed_1534833088943126101
 
 
 ###############################################################################
 # Run 送金監視
 ###############################################################################
 detect-sent-transaction:
-	./wallet -f 21
+	./wallet -m 21
 
 
 ###############################################################################

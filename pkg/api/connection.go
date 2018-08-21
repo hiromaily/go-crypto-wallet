@@ -14,12 +14,19 @@ type Bitcoin struct {
 	payment   KeyInfo
 	//confirmationBlock int64
 	confirmationBlock int
+	feeRange          FeeAdjustmentRate
 }
 
 // KeyInfo 公開鍵アドレスと紐づくアカウント名
 type KeyInfo struct {
 	address    string
 	acountName string
+}
+
+// FeeAdjustmentRate 手数料調整のRange
+type FeeAdjustmentRate struct {
+	min float64
+	max float64
 }
 
 // Connection is to local bitcoin core RPC server using HTTP POST mode
@@ -52,6 +59,8 @@ func Connection(conf *toml.BitcoinConf) (*Bitcoin, error) {
 	bit.payment.address = conf.Payment.Address
 	bit.payment.acountName = conf.Payment.AccountName
 	bit.confirmationBlock = conf.Block.ConfirmationNum
+	bit.feeRange.max = conf.Fee.AdjustmentMax
+	bit.feeRange.min = conf.Fee.AdjustmentMin
 
 	return &bit, err
 }
@@ -94,4 +103,14 @@ func (b *Bitcoin) PaymentAccountName() string {
 // ConfirmationBlock Confirmationに必要なブロック数を返す
 func (b *Bitcoin) ConfirmationBlock() int {
 	return b.confirmationBlock
+}
+
+// FeeRangeMax feeの調整倍率の最大値を返す
+func (b *Bitcoin) FeeRangeMax() float64 {
+	return b.feeRange.max
+}
+
+// FeeRangeMin feeの調整倍率の最小値を返す
+func (b *Bitcoin) FeeRangeMin() float64 {
+	return b.feeRange.min
 }
