@@ -141,13 +141,22 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 	if err != nil {
 		return "", "", errors.Errorf("GetTransactionFee(): error: %v", err)
 	}
-	log.Printf("[Debug]fee: %v, %f", fee, adjustmentFee) //0.000208 BTC
+	log.Printf("[Debug]first fee: %v, %f", fee, adjustmentFee) //0.000208 BTC
+
+	// 2.2.feeの調整
+	if w.BTC.ValidateAdjustmentFee(adjustmentFee) {
+		newFee, err := w.BTC.CalculateNewFee(fee, adjustmentFee)
+		if err != nil {
+			//logのみ表示
+			log.Println(err)
+		}
+		log.Printf("[Debug]adjusted fee: %v, newFee:%v", fee, newFee) //0.000208 BTC
+		fee = newFee
+	}
 
 	//FIXME:処理が受理されないトランザクションを作るために、意図的に1Satothiのfeeでトランザクションを作る
 	//DEBUG: Relayfeeにより、最低でも1000Satoshi必要
 	//fee = 1000
-
-
 
 	// 3.手数料のために、totalを調整し、再度RawTransactionを作成する
 	//このパートのみが、出金とロジックが異なる

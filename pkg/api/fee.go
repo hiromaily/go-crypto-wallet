@@ -72,3 +72,12 @@ func (b *Bitcoin) ValidateAdjustmentFee(fee float64) bool {
 	}
 	return false
 }
+
+// CalculateNewFee 手数料を調整する
+func (b *Bitcoin) CalculateNewFee(fee btcutil.Amount, adjustmentFee float64) (btcutil.Amount, error) {
+	newFee, err := b.FloatBitToAmount(fee.ToBTC() * adjustmentFee)
+	if err != nil {
+		return 0, errors.Errorf("FloatBitToAmount() error: %v", err)
+	}
+	return newFee, nil
+}

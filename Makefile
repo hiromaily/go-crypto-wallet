@@ -29,6 +29,10 @@ cold-wallet: bld
 create-unsigned: bld
 	./wallet -m 11
 
+# 入金データを集約し、未署名のトランザクションを作成する,更に手数料を調整したい場合
+create-unsigned-fee: bld
+	./wallet -m 11 -f 1.5
+
 # 未署名のトランザクションに署名する
 sign: bld
 	./coldwallet -m 5 -i ./data/tx/receipt/receipt_8_unsigned_1534832793024491932
