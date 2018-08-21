@@ -14,7 +14,7 @@ import (
 // SendFromFile 渡されたファイルから署名済transactionを読み取り、送信を行う
 func (w *Wallet) SendFromFile(filePath string) (string, error) {
 	//ファイル名から、tx_receipt_idを取得する
-	//5_unsigned_1534466246366489473
+	//payment_5_unsigned_1534466246366489473
 	txReceiptID, actionType, _, err := file.ParseFile(filePath, "signed")
 	if err != nil {
 		return "", err
