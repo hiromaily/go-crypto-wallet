@@ -16,7 +16,7 @@ func (m *DB) TableNamePaymentOutput() string {
 }
 
 // GetTxPaymentOutputByReceiptID TxReceiptInputテーブルから該当するIDのレコードを返す
-func (m *DB) GetTxPaymentOutputByReceiptID(receiptID int64) (*TxOutput, error) {
+func (m *DB) GetTxPaymentOutputByReceiptID(receiptID int64) ([]TxOutput, error) {
 	return m.getTxReceiptOutputByReceiptID(m.TableNamePaymentOutput(), receiptID)
 }
 

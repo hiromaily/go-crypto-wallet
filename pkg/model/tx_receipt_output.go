@@ -36,18 +36,18 @@ func (m *DB) TableNameReceiptOutput() string {
 }
 
 // getTxReceiptOutputByReceiptID TxReceiptOutputテーブルから該当するIDのレコードを返す
-func (m *DB) getTxReceiptOutputByReceiptID(tbl string, receiptID int64) (*TxOutput, error) {
-	sql := "SELECT * FROM %s WHERE receipt_id=$1"
+func (m *DB) getTxReceiptOutputByReceiptID(tbl string, receiptID int64) ([]TxOutput, error) {
+	sql := "SELECT * FROM %s WHERE receipt_id=?"
 	sql = fmt.Sprintf(sql, tbl)
 
-	txReceiptOutput := TxOutput{}
-	err := m.RDB.Select(&txReceiptOutput, sql, receiptID)
+	txReceiptOutputs := []TxOutput{}
+	err := m.RDB.Select(&txReceiptOutputs, sql, receiptID)
 
-	return &txReceiptOutput, err
+	return txReceiptOutputs, err
 }
 
 // GetTxReceiptOutputByReceiptID TxReceiptOutputテーブルから該当するIDのレコードを返す
-func (m *DB) GetTxReceiptOutputByReceiptID(receiptID int64) (*TxOutput, error) {
+func (m *DB) GetTxReceiptOutputByReceiptID(receiptID int64) ([]TxOutput, error) {
 	return m.getTxReceiptOutputByReceiptID(m.TableNameReceiptOutput(), receiptID)
 }
 

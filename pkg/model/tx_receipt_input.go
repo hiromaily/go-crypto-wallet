@@ -32,18 +32,18 @@ func (m *DB) TableNameReceiptInput() string {
 }
 
 // getTxReceiptInputByReceiptID TxReceiptInputテーブルから該当するIDのレコードを返す
-func (m *DB) getTxReceiptInputByReceiptID(tbl string, receiptID int64) (*TxInput, error) {
-	sql := "SELECT * FROM %s WHERE receipt_id=$1"
+func (m *DB) getTxReceiptInputByReceiptID(tbl string, receiptID int64) ([]TxInput, error) {
+	sql := "SELECT * FROM %s WHERE receipt_id=?"
 	sql = fmt.Sprintf(sql, tbl)
 
-	txReceiptInput := TxInput{}
-	err := m.RDB.Select(&txReceiptInput, sql, receiptID)
+	var txReceiptInputs []TxInput
+	err := m.RDB.Select(&txReceiptInputs, sql, receiptID)
 
-	return &txReceiptInput, err
+	return txReceiptInputs, err
 }
 
 // GetTxReceiptInputByReceiptID TxReceiptInputテーブルから該当するIDのレコードを返す
-func (m *DB) GetTxReceiptInputByReceiptID(receiptID int64) (*TxInput, error) {
+func (m *DB) GetTxReceiptInputByReceiptID(receiptID int64) ([]TxInput, error) {
 	return m.getTxReceiptInputByReceiptID(m.TableNameReceiptInput(), receiptID)
 }
 
