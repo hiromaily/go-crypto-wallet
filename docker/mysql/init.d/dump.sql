@@ -178,3 +178,34 @@ DROP TABLE IF EXISTS `tx_payment_output`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tx_payment_output` LIKE `tx_receipt_output`;
+
+
+--
+-- Table structure for table `payment_request`
+--
+
+DROP TABLE IF EXISTS `payment_request`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `payment_request` (
+  `id`           BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
+  `address_from` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'送信者アドレス',
+  `account_from` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'送信者アカウント名',
+  `address_to`   VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'受け取り者アドレス',
+  `amount`       DECIMAL(26,10) NOT NULL COMMENT'送金されるamount(出金金額)',
+  `updated_at`   datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='出金依頼情報のTable';
+
+
+/*テストデータのため本番では削除すること*/
+LOCK TABLES `payment_request` WRITE;
+/*!40000 ALTER TABLE `payment_request` DISABLE KEYS */;
+INSERT INTO `payment_request` VALUES
+  (1,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2N33pRYgyuHn6K2xCrrq9dPzuW6ZAvFJfVz',0.1,now()),
+  (2,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2NFd6TEUgSpy8LvttBgVrLB6ZBA5X9BSUSz',0.2,now()),
+  (3,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV',0.25,now()),
+  (4,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV',0.3,now()),
+  (5,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2N7WsiDc4yK7PoUL9saGE5ZGsbRQ8R9NafS',0.4,now());
+/*!40000 ALTER TABLE `payment_request` ENABLE KEYS */;
+UNLOCK TABLES;

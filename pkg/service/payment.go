@@ -15,6 +15,8 @@ import (
 )
 
 // ユーザーからの出金依頼事に出金する処理
+// Cayenneユーザーへの送金は内部振替が可能なため、こちらのWalletには依頼はこない
+
 
 // UserPayment ユーザーの支払先アドレスと金額
 type UserPayment struct {
