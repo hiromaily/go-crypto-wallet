@@ -186,6 +186,13 @@ func switchFunction(wallet *service.Wallet) {
 		//tx.MsgTx()
 		log.Printf("[Debug] 送信までDONE!! %s, %v", hash.String(), tx)
 
+	case 21:
+		log.Print("Run: 送信済ステータスのトランザクションを監視する")
+		err := wallet.UpdateStatus()
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+
 	default:
 		log.Print("Run: 検証コード")
 		// for test

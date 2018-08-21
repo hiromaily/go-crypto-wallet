@@ -29,6 +29,7 @@ type UserPayment struct {
 
 // debug用データ作成
 // TODO:出金データとしてDB内にテーブルを作成する
+// TODO:最終的に削除する
 func (w *Wallet) createDebugUserPayment() []UserPayment {
 	//getnewaddress pay1
 	//2N33pRYgyuHn6K2xCrrq9dPzuW6ZAvFJfVz

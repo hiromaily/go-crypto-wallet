@@ -25,6 +25,11 @@ func (m *DB) GetTxPaymentByUnsignedHex(hex string) (int64, error) {
 	return m.getTxReceiptByUnsignedHex(m.TableNamePayment(), hex)
 }
 
+// GetSentTxHashOnTxPayment TxPaymentテーブルから送信済ステータスであるsent_hash_txの配列を返す
+func (m *DB) GetSentTxHashOnTxPayment() ([]string, error) {
+	return m.getSentTxHashOnTxReceipt(m.TableNamePayment())
+}
+
 // InsertTxPaymentForUnsigned TxReceiptテーブルに未署名トランザクションレコードを作成する
 func (m *DB) InsertTxPaymentForUnsigned(txReceipt *TxTable, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	return m.insertTxReceiptForUnsigned(m.TableNamePayment(), txReceipt, tx, isCommit)

@@ -5,6 +5,7 @@ import (
 
 	"fmt"
 	"github.com/jmoiron/sqlx"
+	"github.com/mf-financial/cayenne_wallet/pkg/enum"
 )
 
 //enum.Actionに応じて、テーブルを切り替える
@@ -64,6 +65,24 @@ func (m *DB) getTxReceiptByUnsignedHex(tbl, hex string) (int64, error) {
 // GetTxReceiptByUnsignedHex unsigned_hex_txをキーとしてレコードを取得する
 func (m *DB) GetTxReceiptByUnsignedHex(hex string) (int64, error) {
 	return m.getTxReceiptByUnsignedHex(m.TableNameReceipt(), hex)
+}
+
+func (m *DB) getSentTxHashOnTxReceipt(tbl string) ([]string, error) {
+	var txHashs []string
+	sql := "SELECT sent_hash_tx FROM %s WHERE current_tx_type=?"
+	sql = fmt.Sprintf(sql, tbl)
+
+	err := m.RDB.Select(&txHashs, sql, enum.TxTypeValue[enum.TxTypeSent])
+	if err != nil {
+		return nil, err
+	}
+
+	return txHashs, nil
+}
+
+// GetSentTxHashOnTxReceipt TxReceiptテーブルから送信済ステータスであるsent_hash_txの配列を返す
+func (m *DB) GetSentTxHashOnTxReceipt() ([]string, error) {
+	return m.getSentTxHashOnTxReceipt(m.TableNameReceipt())
 }
 
 // InsertTxReceiptForUnsigned TxReceiptテーブルに未署名トランザクションレコードを作成する

@@ -364,6 +364,7 @@ func (b *Bitcoin) SequentialTransaction(hex string) (*chainhash.Hash, *btcutil.T
 	return hash, resTx, nil
 }
 
+// Sign 署名を行う
 //FIXME: これはColdWallet内で必要となるが、BitcoinCoreの機能が必要ないので、あれば実装しておきたい
 func (b *Bitcoin) Sign(tx *wire.MsgTx, strPrivateKey string) (string, error) {
 	// Key

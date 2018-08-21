@@ -52,7 +52,7 @@ VALUES (:address_from, :account_from, :address_to, :amount)
 	return nil
 }
 
-//
+// UpdatePaymentRequestForIsDone is_doneフィールドをtrueに更新する
 //TODO:暫定で追加したのみ、実際の仕様に合わせて修正が必要
 func (m *DB) UpdatePaymentRequestForIsDone(tx *sqlx.Tx, isCommit bool) (int64, error) {
 	sql := `
