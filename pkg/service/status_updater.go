@@ -58,6 +58,10 @@ func (w *Wallet) checkTransaction(hashs []string, actionType enum.ActionType) er
 					return errors.Errorf("DB.UpdateTxPaymentForDone() error: %v", err)
 				}
 			}
+		}else{
+			//TODO:DBのsent_updated_atフィールドから一定時間立っても、指定したconfirmationに達しないものはキャンセルにして、
+			//TODO:手数料を上げて再度トランザクションを作成する？？
+			log.Println("TODO:")
 		}
 	}
 	return nil
