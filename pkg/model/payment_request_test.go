@@ -40,7 +40,6 @@ func TestInsertPaymentRequest(t *testing.T) {
 		},
 	}
 
-	// FIXME: Error 1364: Field 'amount' doesn't have a default value
 	err := db.InsertPaymentRequest(paymentRequests, nil, true)
 	if err != nil {
 		t.Fatal(err)
@@ -48,7 +47,7 @@ func TestInsertPaymentRequest(t *testing.T) {
 }
 
 func TestUpdatePaymentRequestForIsDone(t *testing.T) {
-	t.SkipNow()
+	//t.SkipNow()
 	// FIXME: panic: reflect: call of reflect.Value.Type on zero Value
 	affected, err := db.UpdatePaymentRequestForIsDone(nil, true)
 	if err != nil {

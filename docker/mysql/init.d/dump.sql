@@ -193,6 +193,7 @@ CREATE TABLE `payment_request` (
   `account_from` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'送信者アカウント名',
   `address_to`   VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'受け取り者アドレス',
   `amount`       DECIMAL(26,10) NOT NULL COMMENT'送金されるamount(出金金額)',
+  `is_done`      BOOL DEFAULT false COMMENT'出金手続き(トランザクション作成)が完了済かどうか',
   `updated_at`   datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='出金依頼情報のTable';
@@ -202,10 +203,10 @@ CREATE TABLE `payment_request` (
 LOCK TABLES `payment_request` WRITE;
 /*!40000 ALTER TABLE `payment_request` DISABLE KEYS */;
 INSERT INTO `payment_request` VALUES
-  (1,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2N33pRYgyuHn6K2xCrrq9dPzuW6ZAvFJfVz',0.1,now()),
-  (2,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2NFd6TEUgSpy8LvttBgVrLB6ZBA5X9BSUSz',0.2,now()),
-  (3,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV',0.25,now()),
-  (4,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV',0.3,now()),
-  (5,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2N7WsiDc4yK7PoUL9saGE5ZGsbRQ8R9NafS',0.4,now());
+  (1,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2N33pRYgyuHn6K2xCrrq9dPzuW6ZAvFJfVz',0.1,false,now()),
+  (2,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2NFd6TEUgSpy8LvttBgVrLB6ZBA5X9BSUSz',0.2,false,now()),
+  (3,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV',0.25,false,now()),
+  (4,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV',0.3,false,now()),
+  (5,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2N7WsiDc4yK7PoUL9saGE5ZGsbRQ8R9NafS',0.4,false,now());
 /*!40000 ALTER TABLE `payment_request` ENABLE KEYS */;
 UNLOCK TABLES;

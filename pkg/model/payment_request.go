@@ -63,7 +63,9 @@ UPDATE payment_request SET is_done=true WHERE is_done=false
 		tx = m.RDB.MustBegin()
 	}
 
-	res, err := tx.NamedExec(sql, nil)
+	//res, err := tx.NamedExec(sql, nil)
+	//res := tx.MustExec(sql)
+	res, err := tx.Exec(sql)
 	if err != nil {
 		tx.Rollback()
 		return 0, err
