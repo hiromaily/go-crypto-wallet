@@ -15,7 +15,7 @@ func TestGetPaymentRequest(t *testing.T) {
 }
 
 func TestInsertPaymentRequest(t *testing.T) {
-	//t.SkipNow()
+
 	paymentRequests := []PaymentRequest{
 		{
 			AddressFrom: "2MuQ83G8hmCnz1bSiqKx4koKbNCptL39k24",
@@ -47,8 +47,7 @@ func TestInsertPaymentRequest(t *testing.T) {
 }
 
 func TestUpdatePaymentRequestForIsDone(t *testing.T) {
-	//t.SkipNow()
-	// FIXME: panic: reflect: call of reflect.Value.Type on zero Value
+
 	affected, err := db.UpdatePaymentRequestForIsDone(nil, true)
 	if err != nil {
 		t.Fatal(err)
