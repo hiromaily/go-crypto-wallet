@@ -115,7 +115,7 @@ func switchFunction(wallet *service.Wallet) {
 
 		//入金検知 + 未署名トランザクション作成
 		//TODO:この中でLoopする必要はない。実行するtaskrunner側で実行間隔を調整する。
-		hex, fileName, err := wallet.DetectReceivedCoin()
+		hex, fileName, err := wallet.DetectReceivedCoin(opts.Fee)
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
@@ -180,7 +180,7 @@ func switchFunction(wallet *service.Wallet) {
 		log.Print("Run: [Debug用]入金から送金までの一連の流れを確認")
 
 		//入金検知 + 未署名トランザクション作成
-		hex, fileName, err := wallet.DetectReceivedCoin()
+		hex, fileName, err := wallet.DetectReceivedCoin(opts.Fee)
 		if err != nil {
 			log.Fatal(err)
 		}

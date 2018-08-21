@@ -21,7 +21,7 @@ import (
 // - 未署名トランザクション作成(本機能)
 // - 署名(オフライン)
 // - 送信(オンライン)
-func (w *Wallet) DetectReceivedCoin() (string, string, error) {
+func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, error) {
 	log.Println("[DetectReceivedCoin]")
 	//TODO:このロジックを連続で走らせた場合、現在処理中のものが、タイミングによってはまた取得できてしまうかもしれない??
 	// => LockUnspent()
@@ -120,11 +120,11 @@ func (w *Wallet) DetectReceivedCoin() (string, string, error) {
 	}
 
 	// 一連の処理を実行
-	return w.createRawTransactionAndFee(inputs, inputTotal, txReceiptInputs)
+	return w.createRawTransactionAndFee(adjustmentFee, inputs, inputTotal, txReceiptInputs)
 }
 
 // createRawTransactionAndFee feeの抽出からtransaction作成、DBへの必要情報保存など、もろもろこちらで行う
-func (w *Wallet) createRawTransactionAndFee(inputs []btcjson.TransactionInput, inputTotal btcutil.Amount, txReceiptInputs []model.TxInput) (string, string, error) {
+func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcjson.TransactionInput, inputTotal btcutil.Amount, txReceiptInputs []model.TxInput) (string, string, error) {
 	var outputTotal btcutil.Amount
 
 	// 1.CreateRawTransaction(仮で作成し、この後サイズから手数料を算出する)
@@ -141,11 +141,13 @@ func (w *Wallet) createRawTransactionAndFee(inputs []btcjson.TransactionInput, i
 	if err != nil {
 		return "", "", errors.Errorf("GetTransactionFee(): error: %v", err)
 	}
-	log.Printf("[Debug]fee: %v", fee) //0.000208 BTC
+	log.Printf("[Debug]fee: %v, %f", fee, adjustmentFee) //0.000208 BTC
 
 	//FIXME:処理が受理されないトランザクションを作るために、意図的に1Satothiのfeeでトランザクションを作る
 	//DEBUG: Relayfeeにより、最低でも1000Satoshi必要
 	//fee = 1000
+
+
 
 	// 3.手数料のために、totalを調整し、再度RawTransactionを作成する
 	//このパートのみが、出金とロジックが異なる

@@ -23,7 +23,7 @@ type Options struct {
 	//Configパス
 	ConfPath string `short:"c" long:"conf" default:"./data/toml/config.toml" description:"Path for configuration toml file"`
 	//実行される機能
-	Functionality uint8 `short:"f" long:"function" description:"Functionality: 1: generate key, 2: detect received coin, other: debug"`
+	Mode uint8 `short:"m" long:"mode" description:"Mode i.e.Functionality"`
 	//HDウォレット用Key生成のためのseed情報
 	ParamSeed string `short:"d" long:"seed" default:"" description:"backup seed"`
 	//txファイルパス
@@ -66,7 +66,7 @@ func main() {
 func switchFunction(wallet *service.Wallet) {
 	// 処理をFunctionalityで切り替える
 	//TODO:ここから呼び出すべきはService系のみに統一したい
-	switch opts.Functionality {
+	switch opts.Mode {
 	case 1:
 		//TODO: 通常のKeyの生成
 		log.Print("Run: Keyの生成")
