@@ -58,3 +58,15 @@ func (m *DB) UpdateTxPaymentNotifiedByTxHash(hash string, tx *sqlx.Tx, isCommit 
 	txTypeValue := enum.TxTypeValue[enum.TxTypeNotified]
 	return m.updateTxTypeOnTxReceiptByTxHash(m.TableNamePayment(), hash, txTypeValue, tx, isCommit)
 }
+
+// UpdateTxPaymentDoneByID TxReceiptテーブルの該当するIDのレコードのcurrnt_tx_typeを更新する
+func (m *DB) UpdateTxPaymentDoneByID(ID int64, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	txTypeValue := enum.TxTypeValue[enum.TxTypeDone]
+	return m.updateTxTypeOnTxReceiptByID(m.TableNamePayment(), ID, txTypeValue, tx, isCommit)
+}
+
+// UpdateTxPaymentNotifiedByID TxReceiptテーブルの該当するIDのレコードのcurrnt_tx_typeを更新する
+func (m *DB) UpdateTxPaymentNotifiedByID(ID int64, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	txTypeValue := enum.TxTypeValue[enum.TxTypeNotified]
+	return m.updateTxTypeOnTxReceiptByID(m.TableNamePayment(), ID, txTypeValue, tx, isCommit)
+}

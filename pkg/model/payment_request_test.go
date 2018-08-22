@@ -46,18 +46,17 @@ func TestInsertPaymentRequest(t *testing.T) {
 	}
 }
 
-func TestUpdatePaymentRequestForIsDone(t *testing.T) {
+func TestUpdatePaymentIDOnPaymentRequest(t *testing.T) {
 
-	affected, err := db.UpdatePaymentRequestForIsDone(nil, true)
+	affected, err := db.UpdatePaymentIDOnPaymentRequest(999, []int64{1, 2, 3}, nil, true)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(affected)
 }
 
-func TestUpdatePaymentRequestForPaymentID(t *testing.T) {
-
-	affected, err := db.UpdatePaymentRequestForPaymentID(999, []int64{1, 2, 3}, nil, true)
+func TestUpdateIsDoneOnPaymentRequest(t *testing.T) {
+	affected, err := db.UpdateIsDoneOnPaymentRequest(999, nil, true)
 	if err != nil {
 		t.Fatal(err)
 	}

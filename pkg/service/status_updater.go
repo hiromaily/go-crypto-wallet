@@ -53,6 +53,7 @@ func (w *Wallet) checkTransaction(hashs []string, actionType enum.ActionType) er
 		//if err != nil {
 		//	return err
 		//}
+		//return nil
 
 		//現在のconfirmationをチェック
 		if tran.Confirmations >= int64(w.BTC.ConfirmationBlock()) {
@@ -110,13 +111,49 @@ func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) error {
 		}
 
 		// 4.通知後はstatusをnotifiedに変更する
-		_, err = w.DB.UpdateTxReceipNotifiedByTxHash(hash, nil, true)
+		_, err = w.DB.UpdateTxReceipNotifiedByID(receiptID, nil, true)
 		if err != nil {
-			return errors.Errorf("DB.UpdateTxReceipNotifiedByTxHash() error: %v", err)
+			return errors.Errorf("DB.UpdateTxReceipNotifiedByID() error: %v", err)
 		}
 
+	} else if actionType == enum.ActionTypePayment {
+		//TODO:出金の通知フローは異なる。。。inputsはstoredの内部アドレスになっているため、payment_requestテーブルから情報を取得しないといけない
+		log.Println("[Debug] notifyUsers() hash:", hash)
+		// 1.hashからidを取得(tx_receipt/tx_payment)
+		paymentID, err := w.DB.GetTxPaymentIDBySentHash(hash)
+		if err != nil {
+			return errors.Errorf("DB.GetTxPaymentIDBySentHash() error: %v", err)
+		}
+		log.Println("[Debug] notifyUsers() paymentID:", paymentID)
+
+		// 2.payment_requestテーブルから該当のpayment_idでレコードを取得
+		//txInputs, err := w.DB.GetTxReceiptInputByReceiptID(paymentID)
+		paymentUsers, err := w.DB.GetPaymentRequestByPaymentID(paymentID)
+		if err != nil {
+			return errors.Errorf("DB.GetPaymentRequestByPaymentID(%d) error: %v", paymentID, err)
+		}
+		if len(paymentUsers) == 0 {
+			log.Println("[Debug] notifyUsers() len(paymentUsers) == 0")
+			return nil
+		}
+
+		// 3.取得したinput_addressesに対して、入金が終了したことを通知する
+		// TODO:NatsのPublisherとして通知すればいいか？
+		for _, user := range paymentUsers {
+			log.Println("[Debug]user.AddressFrom: ", user.AddressFrom)
+		}
+
+		tx := w.DB.RDB.MustBegin()
+		// 4.通知後はstatusをnotifiedに変更する
+		_, err = w.DB.UpdateTxPaymentNotifiedByID(paymentID, tx, false)
+		if err != nil {
+			return errors.Errorf("DB.UpdateTxPaymentNotifiedByID() error: %v", err)
+		}
+
+		// 5.payment_requestテーブルのis_doneをtrueに更新する
+		w.DB.UpdateIsDoneOnPaymentRequest(paymentID, tx, true)
+
 	}
-	//TODO:出金の通知フローはまた別だな。。。inputsはstoredの内部アドレスになっている
 
 	return nil
 }

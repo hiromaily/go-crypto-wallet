@@ -30,6 +30,16 @@ func (m *DB) GetPaymentRequest() ([]PaymentRequest, error) {
 	return paymentRequests, err
 }
 
+// GetPaymentRequestByPaymentID PaymentRequestテーブル全体を返す
+func (m *DB) GetPaymentRequestByPaymentID(paymentID int64) ([]PaymentRequest, error) {
+	sql := "SELECT * FROM payment_request WHERE payment_id=?"
+
+	var paymentRequests []PaymentRequest
+	err := m.RDB.Select(&paymentRequests, sql, paymentID)
+
+	return paymentRequests, err
+}
+
 // InsertPaymentRequest PaymentRequestテーブルに出金依頼レコードを作成する
 //TODO:BulkInsertがやりたい
 func (m *DB) InsertPaymentRequest(paymentRequests []PaymentRequest, tx *sqlx.Tx, isCommit bool) error {
@@ -58,19 +68,21 @@ VALUES (:address_from, :account_from, :address_to, :amount)
 	return nil
 }
 
-// UpdatePaymentRequestForIsDone is_doneフィールドをtrueに更新する
+// UpdateIsDoneOnPaymentRequest is_doneフィールドをtrueに更新する
 //TODO:暫定で追加したのみ、実際の仕様に合わせて修正が必要
 //TODO:payment_idレコードを追加したので、is_doneフィールドはいらないかもしれない
-func (m *DB) UpdatePaymentRequestForIsDone(tx *sqlx.Tx, isCommit bool) (int64, error) {
+//TODO:一応、通知まで終わったレコードはdoneにしておく
+func (m *DB) UpdateIsDoneOnPaymentRequest(paymentID int64, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	sql := `
-UPDATE payment_request SET is_done=true WHERE is_done=false 
+UPDATE payment_request SET is_done=true WHERE payment_id=? 
 `
 
 	if tx == nil {
 		tx = m.RDB.MustBegin()
 	}
 
-	res, err := tx.Exec(sql)
+	//res, err := tx.Exec(sql)
+	res, err := tx.Exec(sql, paymentID)
 	if err != nil {
 		tx.Rollback()
 		return 0, err
@@ -83,8 +95,8 @@ UPDATE payment_request SET is_done=true WHERE is_done=false
 	return affectedNum, nil
 }
 
-// UpdatePaymentRequestForPaymentID 出金トランザクション作成済のレコードのpayment_idを更新する
-func (m *DB) UpdatePaymentRequestForPaymentID(paymentID int64, ids []int64, tx *sqlx.Tx, isCommit bool) (int64, error) {
+// UpdatePaymentIDOnPaymentRequest 出金トランザクション作成済のレコードのpayment_idを更新する
+func (m *DB) UpdatePaymentIDOnPaymentRequest(paymentID int64, ids []int64, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	sql := `
 UPDATE payment_request SET payment_id=? WHERE id IN (?) 
 `

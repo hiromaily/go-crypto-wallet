@@ -198,3 +198,39 @@ func (m *DB) UpdateTxReceipNotifiedByTxHash(hash string, tx *sqlx.Tx, isCommit b
 	txTypeValue := enum.TxTypeValue[enum.TxTypeNotified]
 	return m.updateTxTypeOnTxReceiptByTxHash(m.TableNameReceipt(), hash, txTypeValue, tx, isCommit)
 }
+
+// updateTxTypeOnTxReceiptByID TxReceiptテーブルの該当するIDのレコードのcurrnt_tx_typeを更新する
+func (m *DB) updateTxTypeOnTxReceiptByID(tbl string, ID int64, txTypeValue uint8, tx *sqlx.Tx, isCommit bool) (int64, error) {
+
+	if tx == nil {
+		tx = m.RDB.MustBegin()
+	}
+
+	sql := `
+UPDATE %s SET current_tx_type=? WHERE id=?
+`
+	sql = fmt.Sprintf(sql, tbl)
+	res, err := tx.Exec(sql, txTypeValue, ID)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+	if isCommit {
+		tx.Commit()
+	}
+	affectedNum, _ := res.RowsAffected()
+
+	return affectedNum, nil
+}
+
+// UpdateTxReceipDoneByID TxReceiptテーブルの該当するIDのレコードのcurrnt_tx_typeを更新する
+func (m *DB) UpdateTxReceipDoneByID(ID int64, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	txTypeValue := enum.TxTypeValue[enum.TxTypeDone]
+	return m.updateTxTypeOnTxReceiptByID(m.TableNameReceipt(), ID, txTypeValue, tx, isCommit)
+}
+
+// UpdateTxReceipNotifiedByID TxReceiptテーブルの該当するIDのレコードのcurrnt_tx_typeを更新する
+func (m *DB) UpdateTxReceipNotifiedByID(ID int64, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	txTypeValue := enum.TxTypeValue[enum.TxTypeNotified]
+	return m.updateTxTypeOnTxReceiptByID(m.TableNameReceipt(), ID, txTypeValue, tx, isCommit)
+}

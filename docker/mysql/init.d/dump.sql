@@ -94,15 +94,15 @@ CREATE TABLE `tx_receipt` (
   `total_input_amount`  DECIMAL(26,10) NOT NULL COMMENT'送信される金額合計',
   `total_output_amount` DECIMAL(26,10) NOT NULL COMMENT'受信される金額合計(手数料は含まない',
   `fee`                 DECIMAL(26,10) NOT NULL COMMENT'手数料',
-  /*`receiver_address`    VARCHAR(40) COLLATE utf8_unicode_ci NOT NULL COMMENT'受取先アドレス(固定だがlogも兼ねるので念の為保持する)',*/
   `current_tx_type`     tinyint(1) NOT NULL COMMENT'現在のtx_type(ステータス)',
   `unsigned_updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'未署名トランザクション 更新日時',
   `signed_updated_at`   datetime DEFAULT NULL COMMENT'署名済トランザクション 更新日時',
   `sent_updated_at`     datetime DEFAULT NULL COMMENT'送信済トランザクション 更新日時',
   PRIMARY KEY (`id`)
+  /*UNIQUE KEY `idx_unsigned_hex` (`unsigned_hex_tx`)*/
   /*INDEX idx_unsigned_hex (`unsigned_hex_tx(255)`),*/
   /*INDEX idx_signed_hex (`signed_hex_tx(255)`),*/
-  /*INDEX idx_sent_hex (`sent_hex_tx(255)`)*/
+  /*INDEX idx_sent_hash (`sent_hash_tx(255)`)*/
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='受け取り用トランザクション情報Table';
 /*!40101 SET character_set_client = @saved_cs_client */;
 

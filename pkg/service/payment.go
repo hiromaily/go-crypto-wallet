@@ -445,7 +445,7 @@ func (w *Wallet) insertHexForUnsignedTxOnPayment(hex string, inputTotal, outputT
 
 	//5. payment_requestのpayment_idを更新する paymentRequestIds
 	//txReceiptID
-	_, err = w.DB.UpdatePaymentRequestForPaymentID(txReceiptID, paymentRequestIds, tx, true)
+	_, err = w.DB.UpdatePaymentIDOnPaymentRequest(txReceiptID, paymentRequestIds, tx, true)
 	if err != nil {
 		return 0, errors.Errorf("DB.UpdatePaymentRequestForPaymentID(): error: %v", err)
 	}
