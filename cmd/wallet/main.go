@@ -34,6 +34,8 @@ type Options struct {
 	ImportFile string `short:"i" long:"import" default:"" description:"import file path for hex"`
 	//調整fee
 	Fee float64 `short:"f" long:"fee" default:"" description:"adjustment fee"`
+	//Debugモード
+	Debug bool `short:"d" long:"debug" description:"for only development use"`
 }
 
 var (
@@ -55,13 +57,116 @@ func main() {
 	}
 	defer wallet.Done()
 
-	//switch
-	switchFunction(wallet)
+	if opts.Debug {
+		//debug用 機能確認
+		debugForCheck(wallet)
+	} else {
+		//switch
+		switchFunction(wallet)
+	}
 }
 
 func switchFunction(wallet *service.Wallet) {
 	// 処理をFunctionalityで切り替える
 	//TODO:ここから呼び出すべきはService系のみに統一したい
+	switch opts.Mode {
+	case 1:
+		log.Print("Run: 入金処理検知")
+		//実際には署名処理は手動なので、ユーザーの任意のタイミングで走らせたほうがいい。
+		//入金検知 + 未署名トランザクション作成
+		hex, fileName, err := wallet.DetectReceivedCoin(opts.Fee)
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		if hex == "" {
+			log.Printf("No utxo")
+			return
+		}
+		log.Printf("[hex]: %s\n[fileName]: %s", hex, fileName)
+	case 2:
+		log.Print("Run: ファイルから署名済みtxを送信する")
+		// 1.GPSにupload(web管理画面から行う??)
+		// 2.Uploadされたtransactionファイルから、送信する？
+		if opts.ImportFile == "" {
+			log.Fatal("file path is required as argument file when running")
+		}
+		//フルパスを指定する
+		// ./wallet -f 2 -i ./data/tx/receipt/10_unsigned_1534477741449699817
+		txID, err := wallet.SendFromFile(opts.ImportFile)
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		log.Printf("[Debug] 送信までDONE!! %s", txID)
+	case 10:
+		log.Print("Run: [Debug用]入金から送金までの一連の流れを確認")
+
+		//入金検知 + 未署名トランザクション作成
+		hex, fileName, err := wallet.DetectReceivedCoin(opts.Fee)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if hex == "" {
+			log.Printf("No utxo")
+			return
+		}
+		log.Printf("[hex]: %s\n[fileName]: %s", hex, fileName)
+
+		//署名
+
+		//送信
+
+		//一連の署名から送信までの流れをチェック
+		//[WIF] cUW7ZSF9WX7FUTeHkuw5L9Rj26V5Kz8yCkYjZamyvATTwsu7KUCi - [Pub Address] muVSWToBoNWusjLCbxcQNBWTmPjioRLpaA
+		//hash, tx, err := wallet.BTC.SequentialTransaction(hex)
+		//if err != nil {
+		//	log.Fatalf("%+v", err)
+		//}
+		////tx.MsgTx()
+		//log.Printf("[Debug] 送信までDONE!! %s, %v", hash.String(), tx)
+
+	case 21:
+		log.Print("Run:出金のための未署名トランザクション作成")
+		hex, fileName, err := wallet.CreateUnsignedTransactionForPayment(opts.Fee)
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		if hex == "" {
+			log.Printf("No utxo")
+			return
+		}
+		log.Printf("hex: %s, \nfileName: %s", hex, fileName)
+
+		//一連の動作も確認(一旦コメントアウト)
+		//署名
+		//signedTx, isSigned, _, err := wallet.SignatureByHex(enum.ActionTypePayment, hex, 10)
+		//if err != nil {
+		//	log.Fatalf("%+v", err)
+		//}
+		//if !isSigned {
+		//	log.Fatalf("signature is not enough")
+		//}
+		////送信
+		//hash, err := wallet.BTC.SendTransactionByHex(signedTx)
+		//if err != nil {
+		//	log.Fatalf("%+v", err)
+		//}
+		//log.Printf("[Done] txID hash: %s", hash.String())
+
+	case 30:
+		log.Print("Run: 送信済ステータスのトランザクションを監視する")
+		err := wallet.UpdateStatus()
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+
+	default:
+		log.Print("該当Mode無し")
+	}
+
+}
+
+// 検証用
+func debugForCheck(wallet *service.Wallet) {
 	switch opts.Mode {
 	case 1:
 		//[Debug用]入金検知処理後、lock解除を行う
@@ -108,23 +213,7 @@ func switchFunction(wallet *service.Wallet) {
 		}
 
 		log.Print("Done!")
-
-	case 11:
-		log.Print("Run: 入金処理検知")
-		//実際には署名処理は手動なので、ユーザーの任意のタイミングで走らせたほうがいい。
-
-		//入金検知 + 未署名トランザクション作成
-		//TODO:この中でLoopする必要はない。実行するtaskrunner側で実行間隔を調整する。
-		hex, fileName, err := wallet.DetectReceivedCoin(opts.Fee)
-		if err != nil {
-			log.Fatalf("%+v", err)
-		}
-		if hex == "" {
-			log.Printf("No utxo")
-			return
-		}
-		log.Printf("[hex]: %s\n[fileName]: %s", hex, fileName)
-	case 12:
+	case 10:
 		//[Debug用]hexから署名済みtxを送信する
 		log.Print("Run: hexから署名済みtxを送信する")
 
@@ -134,79 +223,6 @@ func switchFunction(wallet *service.Wallet) {
 			log.Fatalf("%+v", err)
 		}
 		log.Printf("[Debug] 送信までDONE!! %s", hash.String())
-	case 13:
-		log.Print("Run: ファイルから署名済みtxを送信する")
-		// 1.GPSにupload(web管理画面から行う??)
-		// 2.Uploadされたtransactionファイルから、送信する？
-		if opts.ImportFile == "" {
-			log.Fatal("file path is required as argument file when running")
-		}
-		//フルパスを指定する
-		// ./wallet -f 13 -i ./data/tx/receipt/10_unsigned_1534477741449699817
-		txID, err := wallet.SendFromFile(opts.ImportFile)
-		if err != nil {
-			log.Fatalf("%+v", err)
-		}
-		log.Printf("[Debug] 送信までDONE!! %s", txID)
-	case 14:
-		log.Print("Run:出金トランザクション作成")
-		hex, fileName, err := wallet.CreateUnsignedTransactionForPayment(opts.Fee)
-		if err != nil {
-			log.Fatalf("%+v", err)
-		}
-		if hex == "" {
-			log.Printf("No utxo")
-			return
-		}
-		log.Printf("hex: %s, \nfileName: %s", hex, fileName)
-
-		//一連の動作も確認(一旦コメントアウト)
-		//署名
-		//signedTx, isSigned, _, err := wallet.SignatureByHex(enum.ActionTypePayment, hex, 10)
-		//if err != nil {
-		//	log.Fatalf("%+v", err)
-		//}
-		//if !isSigned {
-		//	log.Fatalf("signature is not enough")
-		//}
-		////送信
-		//hash, err := wallet.BTC.SendTransactionByHex(signedTx)
-		//if err != nil {
-		//	log.Fatalf("%+v", err)
-		//}
-		//log.Printf("[Done] txID hash: %s", hash.String())
-
-	case 20:
-		log.Print("Run: [Debug用]入金から送金までの一連の流れを確認")
-		//WARNING:このフローではデータベースにデータが作られないので注意
-
-		//入金検知 + 未署名トランザクション作成
-		hex, fileName, err := wallet.DetectReceivedCoin(opts.Fee)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if hex == "" {
-			log.Printf("No utxo")
-			return
-		}
-		log.Printf("hex: %s\n, fileName: %s", hex, fileName)
-
-		//一連の署名から送信までの流れをチェック
-		//[WIF] cUW7ZSF9WX7FUTeHkuw5L9Rj26V5Kz8yCkYjZamyvATTwsu7KUCi - [Pub Address] muVSWToBoNWusjLCbxcQNBWTmPjioRLpaA
-		hash, tx, err := wallet.BTC.SequentialTransaction(hex)
-		if err != nil {
-			log.Fatalf("%+v", err)
-		}
-		//tx.MsgTx()
-		log.Printf("[Debug] 送信までDONE!! %s, %v", hash.String(), tx)
-
-	case 21:
-		log.Print("Run: 送信済ステータスのトランザクションを監視する")
-		err := wallet.UpdateStatus()
-		if err != nil {
-			log.Fatalf("%+v", err)
-		}
-
 	default:
 		log.Print("Run: 検証コード")
 		// for test

@@ -220,6 +220,9 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 		}
 	}
 
+	// 9. 入金準備に入ったことをユーザーに通知
+	// TODO:NatsのPublisherとして通知すればいいか？
+
 	return hex, generatedFileName, nil
 }
 

@@ -389,7 +389,9 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 		}
 	}
 
-	//return hex, generatedFileName, nil
+	// 8. 出金準備に入ったことをユーザーに通知
+	// TODO:NatsのPublisherとして通知すればいいか？
+
 	return hex, generatedFileName, nil
 }
 

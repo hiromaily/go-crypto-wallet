@@ -19,7 +19,7 @@ func (b *Bitcoin) UnlockAllUnspentTransaction() error {
 		log.Printf("b.client.ListLockUnspent() %v", list)
 		err = b.client.LockUnspent(true, list)
 		if err != nil {
-			//FIXME: -8: Invalid parameter, expected unspent output たまにこのエラーが出る。。。
+			//FIXME: -8: Invalid parameter, expected unspent output たまにこのエラーが出る。。。Bitcoin Coreの再起動が必要
 			// Bitcoin Coreから先のP2Pネットワークへの接続が失敗しているときに起きる
 			// よって、Bitcoin Coreの再起動が必要
 			// loggingコマンド, もしくは ~/Library/Application Support/Bitcoin/testnet3/debug.logのチェック??
