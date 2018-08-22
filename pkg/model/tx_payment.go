@@ -21,7 +21,7 @@ func (m *DB) GetTxPaymentByID(id int64) (*TxTable, error) {
 	return m.getTxReceiptByID(m.TableNamePayment(), id)
 }
 
-// GetTxPaymentByUnsignedHex unsigned_hex_txをキーとしてレコード数を取得する
+// GetTxPaymentCountByUnsignedHex unsigned_hex_txをキーとしてレコード数を取得する
 func (m *DB) GetTxPaymentCountByUnsignedHex(hex string) (int64, error) {
 	return m.getTxReceiptCountByUnsignedHex(m.TableNamePayment(), hex)
 }
@@ -31,7 +31,7 @@ func (m *DB) GetTxPaymentIDBySentHash(hash string) (int64, error) {
 	return m.getTxReceiptIDBySentHash(m.TableNamePayment(), hash)
 }
 
-// GetSentTxHashOnTxPayment TxPaymentテーブルから送信済ステータスであるsent_hash_txの配列を返す
+// GetSentTxHashOnTxPaymentByTxTypeSent TxPaymentテーブルから送信済ステータスであるsent_hash_txの配列を返す
 func (m *DB) GetSentTxHashOnTxPaymentByTxTypeSent() ([]string, error) {
 	txTypeValue := enum.TxTypeValue[enum.TxTypeSent]
 	return m.getSentTxHashOnTxReceipt(m.TableNamePayment(), txTypeValue)

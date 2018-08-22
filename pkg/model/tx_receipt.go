@@ -61,7 +61,7 @@ func (m *DB) getTxReceiptCountByUnsignedHex(tbl, hex string) (int64, error) {
 	return count, err
 }
 
-// GetTxReceiptByUnsignedHex unsigned_hex_txをキーとしてレコード数を取得する
+// GetTxReceiptCountByUnsignedHex unsigned_hex_txをキーとしてレコード数を取得する
 func (m *DB) GetTxReceiptCountByUnsignedHex(hex string) (int64, error) {
 	return m.getTxReceiptCountByUnsignedHex(m.TableNameReceipt(), hex)
 }
@@ -77,7 +77,7 @@ func (m *DB) getTxReceiptIDBySentHash(tbl, hash string) (int64, error) {
 	return receiptID, err
 }
 
-// GetTxReceiptIDByUnsignedHex sent_hash_txをキーとしてreceipt_idを取得する
+// GetTxReceiptIDBySentHash sent_hash_txをキーとしてreceipt_idを取得する
 func (m *DB) GetTxReceiptIDBySentHash(hash string) (int64, error) {
 	return m.getTxReceiptIDBySentHash(m.TableNameReceipt(), hash)
 }
@@ -95,7 +95,7 @@ func (m *DB) getSentTxHashOnTxReceipt(tbl string, txTypeValue uint8) ([]string, 
 	return txHashs, nil
 }
 
-// GetSentTxHashOnTxReceipt TxReceiptテーブルから送信済ステータスであるsent_hash_txの配列を返す
+// GetSentTxHashOnTxReceiptByTxTypeSent TxReceiptテーブルから送信済ステータスであるsent_hash_txの配列を返す
 func (m *DB) GetSentTxHashOnTxReceiptByTxTypeSent() ([]string, error) {
 	txTypeValue := enum.TxTypeValue[enum.TxTypeSent]
 	return m.getSentTxHashOnTxReceipt(m.TableNameReceipt(), txTypeValue)
