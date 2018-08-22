@@ -15,6 +15,12 @@ import (
 
 // 入金チェックから、utxoを取得し、未署名トランザクションを作成する
 
+type DetectReceivedCoinResult struct {
+	Hex      string `json:"hex"`
+	FileName string `json:"file_name"`
+	Error    string `json:"error"`
+}
+
 // DetectReceivedCoin Wallet内アカウントに入金があれば、そこから、未署名のトランザクションを返す
 // 古い未署名のトランザクションは変動するfeeの関係で、stackしていく(再度実行時は差分を抽出する)仕様にはしていない。
 // 送信処理後には、unspent()でutxoとして取得できなくなるので、シーケンスで送信まで行うことを想定している
@@ -120,7 +126,17 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 	}
 
 	// 一連の処理を実行
-	return w.createRawTransactionAndFee(adjustmentFee, inputs, inputTotal, txReceiptInputs)
+	hex, fileName, err := w.createRawTransactionAndFee(adjustmentFee, inputs, inputTotal, txReceiptInputs)
+
+	// レスポンスのjsonオブジェクトを作成
+	//res := DetectReceivedCoinResult{
+	//	Hex: hex,
+	//	FileName: fileName,
+	//	Error: err.Error(),
+	//}
+	//b, err := json.Marshal(res)
+
+	return hex, fileName, err
 }
 
 // createRawTransactionAndFee feeの抽出からtransaction作成、DBへの必要情報保存など、もろもろこちらで行う

@@ -39,14 +39,14 @@ sign: bld
 
 # 署名済トランザクションを送信する
 send: bld
-	./wallet -m 2 -i ./data/tx/receipt/receipt_8_signed_1534832879778945174
+	./wallet -m 3 -i ./data/tx/receipt/receipt_8_signed_1534832879778945174
 
 # 送金ステータスを監視し、6confirmationsになったら、statusをdoneに更新する
-	./wallet -m 30
+	./wallet -m 10
 
 # テストデータ作成のために入金の一連の流れをまとめて実行する
 create-receipt-all: bld
-	./wallet -m 10
+	./wallet -m 20
 
 ###############################################################################
 # Run 出金
@@ -55,11 +55,11 @@ create-receipt-all: bld
 
 # 出金データから出金トランザクションを作成する
 create-payment: bld
-	./wallet -m 14
+	./wallet -m 2
 
 # 出金データから出金トランザクションを作成する(更に手数料を調整したい場合)
 create-payment-fee: bld
-	./wallet -m 14 -f 1.5
+	./wallet -m 2 -f 1.5
 
 # 出金用に未署名のトランザクションに署名する
 sign-payment: bld
@@ -67,9 +67,11 @@ sign-payment: bld
 
 # 出金用に署名済トランザクションを送信する
 send-payment: bld
-	./wallet -m 13 -i ./data/tx/payment/payment_3_signed_1534833088943126101
+	./wallet -m 3 -i ./data/tx/payment/payment_3_signed_1534833088943126101
 
 # テストデータ作成のために出金の一連の流れをまとめて実行する
+create-payment-all: bld
+	./wallet -m 21
 
 
 ###############################################################################

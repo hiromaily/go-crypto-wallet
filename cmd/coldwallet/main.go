@@ -28,6 +28,8 @@ type Options struct {
 	ParamSeed string `short:"d" long:"seed" default:"" description:"backup seed"`
 	//txファイルパス
 	ImportFile string `short:"i" long:"import" default:"" description:"import file path for hex"`
+	//Debugモード
+	Debug bool `short:"d" long:"debug" description:"for only development use"`
 }
 
 var (
@@ -127,7 +129,7 @@ func switchFunction(wallet *service.Wallet) {
 			log.Fatal("file path is required as argument file when running")
 		}
 
-		//出金と入金で、フラグが変わるので注意
+		//出金/入金の判別はファイル名から行う
 		hexTx, isSigned, generatedFileName, err := wallet.SignatureFromFile(opts.ImportFile)
 		if err != nil {
 			log.Fatalf("%+v", err)
