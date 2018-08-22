@@ -9,6 +9,7 @@ const (
 	TxTypeSigned   TxType = "signed"
 	TxTypeSent     TxType = "sent"
 	TxTypeDone     TxType = "done"
+	TxTypeNotified TxType = "notified"
 	TxTypeCancel   TxType = "canceled"
 )
 
@@ -18,7 +19,8 @@ var TxTypeValue = map[TxType]uint8{
 	TxTypeSigned:   2,
 	TxTypeSent:     3,
 	TxTypeDone:     4,
-	TxTypeCancel:   5,
+	TxTypeNotified: 5,
+	TxTypeCancel:   6,
 }
 
 // ValidateTxType TxTypeのバリデーションを行う

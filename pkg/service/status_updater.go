@@ -70,16 +70,17 @@ func (w *Wallet) checkTransaction(hashs []string, actionType enum.ActionType) er
 	return nil
 }
 
-func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType){
+func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) {
 	//[tx_receiptの場合]
 	if actionType == enum.ActionTypeReceipt {
 		// 1.hashからidを取得(tx_receipt/tx_payment)
-
 
 		// 2.tx_receipt_inputテーブルから該当のreceipt_idでレコードを取得
 
 		// 3.取得したinput_addressesに対して、入金が終了したことを通知する
 		// TODO:NatsのPublisherとして通知すればいいか？
+
+		// TODO:通知後はstatusをnotifiedに変更する
 	}
 
 }

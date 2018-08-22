@@ -50,7 +50,7 @@ func (m *DB) GetTxReceiptByID(id int64) (*TxTable, error) {
 	return m.getTxReceiptByID(m.TableNameReceipt(), id)
 }
 
-// getTxReceiptByUnsignedHex unsigned_hex_txをキーとしてレコードを取得する
+// getTxReceiptByUnsignedHex unsigned_hex_txをキーとしてレコード数を取得する
 func (m *DB) getTxReceiptCountByUnsignedHex(tbl, hex string) (int64, error) {
 	var count int64
 	sql := "SELECT count(id) FROM %s WHERE unsigned_hex_tx=?"
@@ -62,7 +62,7 @@ func (m *DB) getTxReceiptCountByUnsignedHex(tbl, hex string) (int64, error) {
 	return count, err
 }
 
-// GetTxReceiptByUnsignedHex unsigned_hex_txをキーとしてレコードを取得する
+// GetTxReceiptByUnsignedHex unsigned_hex_txをキーとしてレコード数を取得する
 func (m *DB) GetTxReceiptCountByUnsignedHex(hex string) (int64, error) {
 	return m.getTxReceiptCountByUnsignedHex(m.TableNameReceipt(), hex)
 }

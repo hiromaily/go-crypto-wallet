@@ -73,7 +73,8 @@ INSERT INTO `tx_type` VALUES
   (2,'signed',now()),
   (3,'sent',now()),
   (4,'done',now()),
-  (5,'canceled',now());
+  (5,'notified',now()),
+  (6,'canceled',now());
 /*!40000 ALTER TABLE `tx_type` ENABLE KEYS */;
 UNLOCK TABLES;
 

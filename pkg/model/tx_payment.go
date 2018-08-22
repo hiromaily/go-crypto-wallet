@@ -20,7 +20,7 @@ func (m *DB) GetTxPaymentByID(id int64) (*TxTable, error) {
 	return m.getTxReceiptByID(m.TableNamePayment(), id)
 }
 
-// GetTxPaymentByUnsignedHex unsigned_hex_txをキーとしてレコードを取得する
+// GetTxPaymentByUnsignedHex unsigned_hex_txをキーとしてレコード数を取得する
 func (m *DB) GetTxPaymentCountByUnsignedHex(hex string) (int64, error) {
 	return m.getTxReceiptCountByUnsignedHex(m.TableNamePayment(), hex)
 }
