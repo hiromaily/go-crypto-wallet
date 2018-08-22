@@ -178,6 +178,7 @@ func switchFunction(wallet *service.Wallet) {
 
 	case 20:
 		log.Print("Run: [Debug用]入金から送金までの一連の流れを確認")
+		//WARNING:このフローではデータベースにデータが作られないので注意
 
 		//入金検知 + 未署名トランザクション作成
 		hex, fileName, err := wallet.DetectReceivedCoin(opts.Fee)
