@@ -55,7 +55,7 @@ create-payment: bld
 	./wallet -m 14
 
 # 出金データから出金トランザクションを作成する,更に手数料を調整したい場合
-create-payment: bld
+create-payment-fee: bld
 	./wallet -m 14 -f 1.5
 
 # 出金用に未署名のトランザクションに署名する

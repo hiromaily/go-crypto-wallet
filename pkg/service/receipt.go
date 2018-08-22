@@ -232,7 +232,7 @@ func (w *Wallet) insertHexForUnsignedTxOnReceipt(hex string, inputTotal, outputT
 	txReceiptInputs []model.TxInput, txReceiptOutputs []model.TxOutput) (int64, error) {
 
 	//1.内容が同じだと、生成されるhexもまったく同じ為、同一のhexが合った場合は処理をskipする
-	count, err := w.DB.GetTxReceiptByUnsignedHex(hex)
+	count, err := w.DB.GetTxReceiptCountByUnsignedHex(hex)
 	if err != nil {
 		return 0, errors.Errorf("DB.GetTxReceiptByUnsignedHex(): error: %v", err)
 	}

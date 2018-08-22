@@ -21,8 +21,8 @@ func (m *DB) GetTxPaymentByID(id int64) (*TxTable, error) {
 }
 
 // GetTxPaymentByUnsignedHex unsigned_hex_txをキーとしてレコードを取得する
-func (m *DB) GetTxPaymentByUnsignedHex(hex string) (int64, error) {
-	return m.getTxReceiptByUnsignedHex(m.TableNamePayment(), hex)
+func (m *DB) GetTxPaymentCountByUnsignedHex(hex string) (int64, error) {
+	return m.getTxReceiptCountByUnsignedHex(m.TableNamePayment(), hex)
 }
 
 // GetSentTxHashOnTxPayment TxPaymentテーブルから送信済ステータスであるsent_hash_txの配列を返す
