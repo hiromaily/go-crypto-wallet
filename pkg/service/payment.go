@@ -392,7 +392,9 @@ func (w *Wallet) insertHexForUnsignedTxOnPayment(hex string, inputTotal, outputT
 	txPaymentInputs []model.TxInput, txPaymentOutputs []model.TxOutput, paymentRequestIds []int64) (int64, error) {
 
 	//1.内容が同じだと、生成されるhexもまったく同じ為、同一のhexが合った場合は処理をskipする
-	count, err := w.DB.GetTxPaymentCountByUnsignedHex(hex)
+	//count, err := w.DB.GetTxPaymentCountByUnsignedHex(hex)
+	count, err := w.DB.GetTxCountByUnsignedHex(enum.ActionTypePayment, hex)
+
 	if err != nil {
 		return 0, errors.Errorf("DB.GetTxPaymentByUnsignedHex(): error: %v", err)
 	}
@@ -410,7 +412,8 @@ func (w *Wallet) insertHexForUnsignedTxOnPayment(hex string, inputTotal, outputT
 	txPayment.TxType = txType
 
 	tx := w.DB.RDB.MustBegin()
-	txReceiptID, err := w.DB.InsertTxPaymentForUnsigned(&txPayment, tx, false)
+	//txReceiptID, err := w.DB.InsertTxPaymentForUnsigned(&txPayment, tx, false)
+	txReceiptID, err := w.DB.InsertTxForUnsigned(enum.ActionTypePayment, &txPayment, tx, false)
 	if err != nil {
 		return 0, errors.Errorf("DB.InsertTxPaymentForUnsigned(): error: %v", err)
 	}

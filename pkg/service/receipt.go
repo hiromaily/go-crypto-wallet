@@ -110,7 +110,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 
 	// 一連の処理を実行
 	hex, fileName, err := w.createRawTransactionAndFee(adjustmentFee, inputs, inputTotal, txReceiptInputs)
-	
+
 	return hex, fileName, err
 }
 
@@ -223,7 +223,8 @@ func (w *Wallet) insertHexForUnsignedTxOnReceipt(hex string, inputTotal, outputT
 	txReceiptInputs []model.TxInput, txReceiptOutputs []model.TxOutput) (int64, error) {
 
 	//1.内容が同じだと、生成されるhexもまったく同じ為、同一のhexが合った場合は処理をskipする
-	count, err := w.DB.GetTxReceiptCountByUnsignedHex(hex)
+	//count, err := w.DB.GetTxReceiptCountByUnsignedHex(hex)
+	count, err := w.DB.GetTxCountByUnsignedHex(enum.ActionTypeReceipt, hex)
 	if err != nil {
 		return 0, errors.Errorf("DB.GetTxReceiptByUnsignedHex(): error: %v", err)
 	}
@@ -241,7 +242,8 @@ func (w *Wallet) insertHexForUnsignedTxOnReceipt(hex string, inputTotal, outputT
 	txReceipt.TxType = txType
 
 	tx := w.DB.RDB.MustBegin()
-	txReceiptID, err := w.DB.InsertTxReceiptForUnsigned(&txReceipt, tx, false)
+	//txReceiptID, err := w.DB.InsertTxReceiptForUnsigned(&txReceipt, tx, false)
+	txReceiptID, err := w.DB.InsertTxForUnsigned(enum.ActionTypeReceipt, &txReceipt, tx, false)
 	if err != nil {
 		return 0, errors.Errorf("DB.InsertTxReceiptForUnsigned(): error: %v", err)
 	}

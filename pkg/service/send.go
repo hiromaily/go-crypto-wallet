@@ -64,13 +64,12 @@ func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID strin
 	)
 
 	//ActionTypeによって、処理を分ける
-	if actionType == enum.ActionTypeReceipt {
-		affectedNum, err = w.DB.UpdateTxReceiptForSent(
-			&txReceipt, nil, true)
-	} else if actionType == enum.ActionTypePayment {
-		affectedNum, err = w.DB.UpdateTxPaymentForSent(
-			&txReceipt, nil, true)
-	}
+	//if actionType == enum.ActionTypeReceipt {
+	//	affectedNum, err = w.DB.UpdateTxReceiptForSent(&txReceipt, nil, true)
+	//} else if actionType == enum.ActionTypePayment {
+	//	affectedNum, err = w.DB.UpdateTxPaymentForSent(&txReceipt, nil, true)
+	//}
+	affectedNum, err = w.DB.UpdateTxAfterSent(actionType, &txReceipt, nil, true)
 
 	if err != nil {
 		return errors.Errorf("DB.UpdateTxReceiptForSent(): error: %v", err)
