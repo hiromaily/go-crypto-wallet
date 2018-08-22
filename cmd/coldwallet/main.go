@@ -77,7 +77,6 @@ func switchFunction(wallet *service.Wallet) {
 	switch opts.Mode {
 	case 1:
 		// importしたファイルからhex値を取得し、署名を行う(ReceiptかPaymentかはfileNameから判別))
-		// ./coldwallet -f 5 -i ./data/tx/receipt/10_unsigned_1534477741449699817
 		log.Print("Run: Importしたファイルからhex値を取得し、署名を行う(Receipt)")
 		if opts.ImportFile == "" {
 			log.Fatal("file path is required as argument file when running")

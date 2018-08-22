@@ -104,8 +104,7 @@ func switchFunction(wallet *service.Wallet) {
 		if opts.ImportFile == "" {
 			log.Fatal("file path is required as argument file when running")
 		}
-		//フルパスを指定する
-		// ./wallet -f 2 -i ./data/tx/receipt/10_unsigned_1534477741449699817
+		// フルパスを指定する
 		txID, err := wallet.SendFromFile(opts.ImportFile)
 		if err != nil {
 			log.Fatalf("%+v", err)
