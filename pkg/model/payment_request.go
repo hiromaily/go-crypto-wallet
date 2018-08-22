@@ -60,6 +60,7 @@ VALUES (:address_from, :account_from, :address_to, :amount)
 
 // UpdatePaymentRequestForIsDone is_doneフィールドをtrueに更新する
 //TODO:暫定で追加したのみ、実際の仕様に合わせて修正が必要
+//TODO:payment_idレコードを追加したので、is_doneフィールドはいらないかもしれない
 func (m *DB) UpdatePaymentRequestForIsDone(tx *sqlx.Tx, isCommit bool) (int64, error) {
 	sql := `
 UPDATE payment_request SET is_done=true WHERE is_done=false 
