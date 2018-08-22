@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
-	"log"
-
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/txscript"
@@ -130,7 +128,7 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 	}
 
 	return txOutResult, nil
-	//log.Printf("TxOut: %v\n", txOut): Output
+	//logger.Infof("TxOut: %v\n", txOut): Output
 	//grok.Value(txOut)
 	//value *GetTxOutResult = {
 	//	BestBlock string = "00000000000000a080461b99935872934fa35bc705453f9f2ad7712b2228e849" 64
@@ -159,8 +157,6 @@ func (b *Bitcoin) CreateRawTransaction(sendAddr string, amount btcutil.Amount, i
 	if err != nil {
 		return nil, errors.Errorf("btcutil.DecodeAddress(%s): error: %v", sendAddr, err)
 	}
-
-	log.Printf("[Debug] amount:%d, %v", amount, amount) // 1.95 BTC => %v表示だと、単位まで表示される！
 
 	// パラメータを作成する
 	outputs := make(map[btcutil.Address]btcutil.Amount)
@@ -225,8 +221,7 @@ func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, err
 	if err != nil {
 		return nil, errors.Errorf("json.Unmarshal(): error: %v", err)
 	}
-
-	log.Printf("[Debug]fundRawTransactionResult: %v: %s\n", fundRawTransactionResult, fundRawTransactionResult.Hex)
+	//logger.Infof("fundRawTransactionResult: %v: %s\n", fundRawTransactionResult, fundRawTransactionResult.Hex)
 
 	return &fundRawTransactionResult, nil
 }
@@ -355,7 +350,6 @@ func (b *Bitcoin) SequentialTransaction(hex string) (*chainhash.Hash, *btcutil.T
 	if err != nil {
 		return nil, nil, err
 	}
-	log.Printf("[Debug] txID hash: %s", hash.String())
 
 	//txを取得
 	resTx, err := b.GetRawTransactionByHex(hash.String())

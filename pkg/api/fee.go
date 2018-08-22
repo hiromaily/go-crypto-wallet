@@ -40,10 +40,6 @@ func (b *Bitcoin) EstimateSmartFee() (float64, error) {
 		return 0, errors.Errorf("json.RawRequest(estimatesmartfee): error: %v", estimateResult.Errors[0])
 	}
 
-	//log.Printf("[Debug]Estimatesmartfee: %v: %f\n", estimateResult, estimateResult.FeeRate)
-	//1.116e-05
-	//0.000011 per 1kb
-
 	return estimateResult.FeeRate, nil
 }
 

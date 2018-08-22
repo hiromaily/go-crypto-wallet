@@ -80,6 +80,11 @@ func Error(args ...interface{}) {
 	sugaredLogger.Error(args...)
 }
 
+// Fatal uses fmt.Sprintf to log a templated message.
+func Fatal(args ...interface{}) {
+	sugaredLogger.Fatal(args...)
+}
+
 // Debugf fmt.Sprintf to log a templated message.
 func Debugf(format string, args ...interface{}) {
 	sugaredLogger.Debugf(format, args...)
@@ -98,6 +103,11 @@ func Warnf(format string, args ...interface{}) {
 // Errorf uses fmt.Sprintf to log a templated message.
 func Errorf(format string, args ...interface{}) {
 	sugaredLogger.Errorf(format, args...)
+}
+
+// Fatalf uses fmt.Sprintf to log a templated message.
+func Fatalf(format string, args ...interface{}) {
+	sugaredLogger.Fatalf(format, args...)
 }
 
 // ErrorWithStack errorのstack traceを表示する. github.com/pkg/errorsで作成されたものしかstack表示できないので注意

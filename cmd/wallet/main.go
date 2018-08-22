@@ -6,6 +6,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/chaincfg"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/jessevdk/go-flags"
 )
@@ -53,7 +54,7 @@ func main() {
 	//initialSettings()
 	wallet, err := service.InitialSettings(opts.ConfPath)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 	defer wallet.Done()
 
@@ -72,82 +73,82 @@ func switchFunction(wallet *service.Wallet) {
 	//TODO:ここから呼び出すべきはService系のみに統一したい
 	switch opts.Mode {
 	case 1:
-		log.Print("Run: 入金処理検知")
+		logger.Info("Run: 入金処理検知")
 		//実際には署名処理は手動なので、ユーザーの任意のタイミングで走らせたほうがいい。
 		//入金検知 + 未署名トランザクション作成
 		hex, fileName, err := wallet.DetectReceivedCoin(opts.Fee)
 		if err != nil {
-			log.Fatalf("%+v", err)
+			logger.Fatalf("%+v", err)
 		}
 		if hex == "" {
-			log.Printf("No utxo")
+			logger.Info("No utxo")
 			return
 		}
-		log.Printf("[hex]: %s\n[fileName]: %s", hex, fileName)
+		logger.Infof("[hex]: %s\n[fileName]: %s", hex, fileName)
 
 	case 2:
-		log.Print("Run:出金のための未署名トランザクション作成")
+		logger.Info("Run:出金のための未署名トランザクション作成")
 		hex, fileName, err := wallet.CreateUnsignedTransactionForPayment(opts.Fee)
 		if err != nil {
-			log.Fatalf("%+v", err)
+			logger.Fatalf("%+v", err)
 		}
 		if hex == "" {
-			log.Printf("No utxo")
+			logger.Info("No utxo")
 			return
 		}
-		log.Printf("[hex]: %s, \n[fileName]: %s", hex, fileName)
+		logger.Infof("[hex]: %s, \n[fileName]: %s", hex, fileName)
 
 	case 3:
-		log.Print("Run: ファイルから署名済みtxを送信する")
+		logger.Info("Run: ファイルから署名済みtxを送信する")
 		// 1.GPSにupload(web管理画面から行う??)
 		// 2.Uploadされたtransactionファイルから、送信する？
 		if opts.ImportFile == "" {
-			log.Fatal("file path is required as argument file when running")
+			logger.Fatal("file path is required as argument file when running")
 		}
 		// フルパスを指定する
 		txID, err := wallet.SendFromFile(opts.ImportFile)
 		if err != nil {
-			log.Fatalf("%+v", err)
+			logger.Fatalf("%+v", err)
 		}
-		log.Printf("[Done]送信までDONE!! txID: %s", txID)
+		logger.Infof("[Done]送信までDONE!! txID: %s", txID)
 
 	case 10:
-		log.Print("Run: 送信済ステータスのトランザクションを監視する")
+		logger.Info("Run: 送信済ステータスのトランザクションを監視する")
 		err := wallet.UpdateStatus()
 		if err != nil {
-			log.Fatalf("%+v", err)
+			logger.Fatalf("%+v", err)
 		}
 
 	case 20:
-		log.Print("Run: [Debug用]入金から送金までの一連の流れを確認")
+		logger.Info("Run: [Debug用]入金から送金までの一連の流れを確認")
 
 		//入金検知 + 未署名トランザクション作成
-		log.Print("[1]Run: 入金検知")
+		logger.Info("[1]Run: 入金検知")
 		hex, fileName, err := wallet.DetectReceivedCoin(opts.Fee)
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatalf("%+v", err)
 		}
 		if hex == "" {
-			log.Printf("No utxo")
+			logger.Info("No utxo")
 			return
 		}
-		log.Printf("[hex]: %s\n[fileName]: %s", hex, fileName)
+		logger.Infof("[hex]: %s\n[fileName]: %s", hex, fileName)
 
 		//署名(本来はColdWalletの機能)
-		log.Print("\n[2]Run: 署名")
+		logger.Info("\n[2]Run: 署名")
 		hexTx, isSigned, generatedFileName, err := wallet.SignatureFromFile(fileName)
 		if err != nil {
-			log.Fatalf("%+v", err)
+			logger.Fatalf("%+v", err)
 		}
-		log.Printf("[hex]: %s\n[署名完了]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName)
+		logger.Infof("[hex]: %s\n[署名完了]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName)
 
 		//送信
-		log.Print("\n[3]Run: 送信")
+		logger.Info("\n[3]Run: 送信")
 		txID, err := wallet.SendFromFile(generatedFileName)
 		if err != nil {
-			log.Fatalf("%+v", err)
+			logger.Fatalf("%+v", err)
 		}
-		log.Printf("[Done]送信までDONE!! txID: %s", txID)
+		logger.Infof("[Done]送信までDONE!! txID: %s", txID)
 
 		//一連の署名から送信までの流れをチェック
 		//[WIF] cUW7ZSF9WX7FUTeHkuw5L9Rj26V5Kz8yCkYjZamyvATTwsu7KUCi - [Pub Address] muVSWToBoNWusjLCbxcQNBWTmPjioRLpaA
@@ -159,38 +160,38 @@ func switchFunction(wallet *service.Wallet) {
 		//log.Printf("[Debug] 送信までDONE!! %s, %v", hash.String(), tx)
 
 	case 21:
-		log.Print("Run: [Debug用]出金から送金までの一連の流れを確認")
+		logger.Info("Run: [Debug用]出金から送金までの一連の流れを確認")
 
 		//出金準備
-		log.Print("[1]Run:出金のための未署名トランザクション作成")
+		logger.Info("[1]Run:出金のための未署名トランザクション作成")
 		hex, fileName, err := wallet.CreateUnsignedTransactionForPayment(opts.Fee)
 		if err != nil {
-			log.Fatalf("%+v", err)
+			logger.Fatalf("%+v", err)
 		}
 		if hex == "" {
-			log.Printf("No utxo")
+			logger.Info("No utxo")
 			return
 		}
-		log.Printf("[hex]: %s, \n[fileName]: %s", hex, fileName)
+		logger.Infof("[hex]: %s, \n[fileName]: %s", hex, fileName)
 
 		//署名(本来はColdWalletの機能)
-		log.Print("\n[2]Run: 署名")
+		logger.Info("\n[2]Run: 署名")
 		hexTx, isSigned, generatedFileName, err := wallet.SignatureFromFile(fileName)
 		if err != nil {
-			log.Fatalf("%+v", err)
+			logger.Fatalf("%+v", err)
 		}
-		log.Printf("[hex]: %s\n[署名完了]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName)
+		logger.Infof("[hex]: %s\n[署名完了]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName)
 
 		//送信
-		log.Print("\n[3]Run: 送信")
+		logger.Info("\n[3]Run: 送信")
 		txID, err := wallet.SendFromFile(generatedFileName)
 		if err != nil {
-			log.Fatalf("%+v", err)
+			logger.Fatalf("%+v", err)
 		}
-		log.Printf("[Done]送信までDONE!! txID: %s", txID)
+		logger.Infof("[Done]送信までDONE!! txID: %s", txID)
 
 	default:
-		log.Print("該当Mode無し")
+		logger.Info("該当Mode無し")
 	}
 
 }
