@@ -1,8 +1,8 @@
 package service
 
 import (
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/pkg/errors"
-	"log"
 )
 
 //TODO: こちらは不要になるはず。service/signature.go側にて開発
@@ -26,17 +26,16 @@ func (w *Wallet) MultiSigByHex(hex string) (string, error) {
 	}
 	//TODO:multisigでも1回でisSignedがtrueになった。。。
 	//つまり,実行環境化にて両方の秘密鍵が保持されている場合に、1回でOKになるのでは？
-	log.Printf("[Debug] isSigned01 is %t, false is expected.", isSigned)
+	logger.Debugf("xisSigned01 is %t, false is expected.", isSigned)
 
 	// 署名2
 	//signedTx2, isSigned, err := w.BTC.SignRawTransaction(signedTx1)
 	//if err != nil {
 	//	return "", err
 	//}
-	//log.Printf("[Debug] isSigned02 is %t, true is expected.", isSigned)
+	//logger.Debugf("xisSigned02 is %t, true is expected.", isSigned)
 
 	hexTx, err := w.BTC.ToHex(signedTx)
-	//hexTx, err := w.BTC.ToHex(signedTx2)
 	if err != nil {
 		return "", errors.Errorf("w.BTC.ToHex(msgTx): error: %v", err)
 	}

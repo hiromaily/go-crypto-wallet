@@ -4,6 +4,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/hiromaily/go-bitcoin/pkg/api"
 	"github.com/hiromaily/go-bitcoin/pkg/file"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/hiromaily/go-bitcoin/pkg/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/toml"
@@ -27,6 +28,9 @@ func InitialSettings(confPath string) (*Wallet, error) {
 		return nil, errors.Errorf("toml.New() error: %v", err)
 	}
 	grok.Value(conf)
+
+	// Log
+	logger.Initialize(conf.Environment)
 
 	// KVS
 	//db, err := kvs.InitDB(conf.LevelDB.Path)

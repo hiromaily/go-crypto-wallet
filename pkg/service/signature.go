@@ -4,7 +4,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/file"
 	"github.com/pkg/errors"
-	"log"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
 
 // coldwallet側から未署名トランザクションを読み込み、署名を行う
@@ -24,7 +24,7 @@ func (w *Wallet) signatureByHex(hex string) (string, bool, error) {
 	if err != nil {
 		return "", false, err
 	}
-	log.Printf("[Debug] isSigned01 is %t", isSigned)
+	logger.Debugf("isSigned is %t", isSigned)
 
 	hexTx, err := w.BTC.ToHex(signedTx)
 	if err != nil {
@@ -43,7 +43,6 @@ func (w *Wallet) SignatureByHex(actionType enum.ActionType, hex string, txReceip
 	if err != nil {
 		return "", isSigned, "", err
 	}
-	//log.Println("hex:", hexTx)
 
 	//ファイルに書き込む
 	path := file.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID)
@@ -77,7 +76,6 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 	if err != nil {
 		return "", isSigned, "", err
 	}
-	//log.Println("hex:", hexTx)
 
 	//ファイルに書き込む
 	path := file.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID)

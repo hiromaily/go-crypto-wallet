@@ -2,13 +2,13 @@ package service
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/file"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
 )
@@ -28,7 +28,6 @@ type DetectReceivedCoinResult struct {
 // - 署名(オフライン)
 // - 送信(オンライン)
 func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, error) {
-	log.Println("[DetectReceivedCoin]")
 	//TODO:このロジックを連続で走らせた場合、現在処理中のものが、タイミングによってはまた取得できてしまうかもしれない??
 	// => LockUnspent()
 
@@ -57,7 +56,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 	if err != nil {
 		return "", "", errors.Errorf("ListUnspentMin(): error: %v", err)
 	}
-	log.Println("[Debug]List Unspent")
+	logger.Debug("List Unspent")
 	grok.Value(unspentList) //Debug
 
 	if len(unspentList) == 0 {
@@ -71,16 +70,6 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 	)
 
 	for _, tx := range unspentList {
-		// Transaction詳細を取得 => これはこのタイミングでは不要
-		// (アカウント名によって、はじく、もしくはユーザーのアドレスの取得に必要)
-		//tran, err := w.BTC.GetTransactionByTxID(tx.TxID)
-		//if err != nil {
-		//	//このエラーは起こりえない
-		//	log.Printf("[Error] w.BTC.GetTransactionByTxID(): txID:%s, err:%v", tx.TxID, err)
-		//	continue
-		//}
-		//log.Println("[Debug]Transactions")
-		//grok.Value(tran)
 
 		//除外するアカウント
 		//TODO:本番環境ではこの条件がかわる気がする
@@ -93,7 +82,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 		amt, err := btcutil.NewAmount(tx.Amount)
 		if err != nil {
 			//このエラーは起こりえない
-			log.Printf("[Error] btcutil.NewAmount(): Amount:%f, err:%v", tx.Amount, err)
+			logger.Errorf("btcutil.NewAmount(%f): error:%v", tx.Amount, err)
 			continue
 		}
 		inputTotal += amt //合計
@@ -120,7 +109,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 		})
 
 	}
-	log.Printf("[Debug]Total Coin to send:%d(Satoshi) before fee calculated, input length: %d", inputTotal, len(inputs))
+	logger.Debugf("Total Coin to send:%d(Satoshi) before fee calculated, input length: %d", inputTotal, len(inputs))
 	if len(inputs) == 0 {
 		return "", "", nil
 	}
@@ -144,29 +133,26 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 	var outputTotal btcutil.Amount
 
 	// 1.CreateRawTransaction(仮で作成し、この後サイズから手数料を算出する)
-	log.Println("[Debug] w.BTC.StoredAddress() :", w.BTC.StoredAddress())
 	msgTx, err := w.BTC.CreateRawTransaction(w.BTC.StoredAddress(), inputTotal, inputs)
 	if err != nil {
 		return "", "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
-	log.Printf("[Debug] CreateRawTransaction: %v\n", msgTx)
-	//grok.Value(msgTx)
 
 	// 2.fee算出
 	fee, err := w.BTC.GetTransactionFee(msgTx)
 	if err != nil {
 		return "", "", errors.Errorf("GetTransactionFee(): error: %v", err)
 	}
-	log.Printf("[Debug]first fee: %v, %f", fee, adjustmentFee) //0.000208 BTC
+	logger.Debugf("first fee: %v, %f", fee, adjustmentFee) //0.000208 BTC
 
 	// 2.2.feeの調整
 	if w.BTC.ValidateAdjustmentFee(adjustmentFee) {
 		newFee, err := w.BTC.CalculateNewFee(fee, adjustmentFee)
 		if err != nil {
 			//logのみ表示
-			log.Println(err)
+			logger.Errorf("w.BTC.CalculateNewFee() error: %v", err)
 		}
-		log.Printf("[Debug]adjusted fee: %v, newFee:%v", fee, newFee) //0.000208 BTC
+		logger.Errorf("adjusted fee: %v, newFee:%v", fee, newFee) //0.000208 BTC
 		fee = newFee
 	}
 
@@ -180,7 +166,7 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 	if outputTotal <= 0 {
 		return "", "", errors.Errorf("calculated fee must be wrong: fee:%v, error: %v", fee, err)
 	}
-	log.Printf("[Debug]Total Coin to send:%d(Satoshi) after fee calculated, input length: %d", outputTotal, len(inputs))
+	logger.Debugf("Total Coin to send:%d(Satoshi) after fee calculated, input length: %d", outputTotal, len(inputs))
 
 	// 4.outputs作成
 	txReceiptOutputs := []model.TxOutput{

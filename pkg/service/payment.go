@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"log"
 	"sort"
 	"strconv"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/btcsuite/btcutil"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/file"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
 )
@@ -97,7 +97,8 @@ func (w *Wallet) createUserPayment() ([]UserPayment, []int64, error) {
 		userPayments[idx].receiverAddr = val.AddressTo
 		amt, err := strconv.ParseFloat(val.Amount, 64)
 		if err != nil {
-			//致命的なエラー、おきないはず
+			//致命的なエラー、起きるのであればプログラムがおかしい
+			logger.Error("payment_request table includes invalid amount field")
 			return nil, nil, errors.New("payment_request table includes invalid amount field")
 		}
 		userPayments[idx].amount = amt
@@ -105,9 +106,8 @@ func (w *Wallet) createUserPayment() ([]UserPayment, []int64, error) {
 		//Address TODO:このタイミングでaddressは不要かもしれない
 		userPayments[idx].validRecAddr, err = w.BTC.DecodeAddress(userPayments[idx].receiverAddr)
 		if err != nil {
-			//致命的なエラー
-			//これは本来事前にチェックされるため、ありえないはず
-			//log.Printf("[Error] unexpected error converting string to address")
+			//致命的なエラー: これは本来事前にチェックされるため、ありえないはず
+			logger.Error("unexpected error occurred converting string type receiverAddr to address type")
 			return nil, nil, errors.New("unexpected error occurred converting string type receiverAddr to address type")
 		}
 		//grok.Value(userPayments[idx].validRecAddr)
@@ -115,9 +115,8 @@ func (w *Wallet) createUserPayment() ([]UserPayment, []int64, error) {
 		//Amount
 		userPayments[idx].validAmount, err = w.BTC.FloatBitToAmount(userPayments[idx].amount)
 		if err != nil {
-			//致命的なエラー
-			//これは本来事前にチェックされるため、ありえないはず
-			//log.Printf("[Error] unexpected error converting float64 to Amount")
+			//致命的なエラー: これは本来事前にチェックされるため、ありえないはず
+			logger.Error("unexpected error occurred converting float64 type amount to Amount type")
 			return nil, nil, errors.New("unexpected error occurred converting float64 type amount to Amount type")
 		}
 	}
@@ -205,12 +204,9 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 
 	//6.合計金額を超えるまで、listunspentからinputsを作成する
 	for _, tx := range unspentList {
-		//utxo.Amount
-		//utxo.Vout
-		//utxo.TxID
 		amt, err := btcutil.NewAmount(tx.Amount)
 		if err != nil {
-			log.Println("[Error] unexpected error:", err)
+			logger.Errorf("btcutil.NewAmount(%v) error:", tx.Amount, err)
 			continue
 		}
 		inputTotal += amt
@@ -270,16 +266,13 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 		addr, err = w.BTC.DecodeAddress(key)
 		if err != nil {
 			//これは本来事前にチェックされるため、ありえないはず
-			log.Printf("[Error] unexpected error converting string to address")
+			logger.Error("unexpected error converting string to address")
 			continue
 		}
 		outputs[addr] = val
-
-		//total
-		//outputTotal += val
 	}
 
-	//TODO:inputsをすべてlockする
+	//TODO:inputsをすべてlockする必要がある？？
 
 	//Debug
 	grok.Value(inputs)
@@ -304,29 +297,28 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 	if err != nil {
 		return "", "", errors.Errorf("CreateRawTransactionWithOutput(): error: %v", err)
 	}
-	log.Printf("[Debug] CreateRawTransactionWithOutput: %v\n", msgTx)
+	logger.Debugf("CreateRawTransactionWithOutput: %v", msgTx)
 
 	// 2.fee算出
 	fee, err := w.BTC.GetTransactionFee(msgTx)
 	if err != nil {
 		return "", "", errors.Errorf("GetTransactionFee(): error: %v", err)
 	}
-	log.Printf("[Debug]first fee: %v", fee) //0.001183 BTC
+	logger.Debugf("first fee: %v", fee) //0.001183 BTC
 
 	// 2.2.feeの調整
 	if w.BTC.ValidateAdjustmentFee(adjustmentFee) {
 		newFee, err := w.BTC.CalculateNewFee(fee, adjustmentFee)
 		if err != nil {
 			//logのみ表示
-			log.Println(err)
+			logger.Error("BTC.CalculateNewFee() error: %v", err)
 		}
-		log.Printf("[Debug]adjusted fee: %v, newFee:%v", fee, newFee) //0.000208 BTC
+		logger.Debugf("adjusted fee: %v, newFee:%v", fee, newFee) //0.001183 BTC
 		fee = newFee
 	}
 
-	// 3.TODO:お釣り用のoutputのトランザクションから、手数料を差し引かねばならい
-	//   TODO:fee分の変更が入ったので、厳密には、ここでoutputの調整が必要
-	//   FIXME: これが足りない場合がめんどくさい。。。これをどう回避すべきか
+	// 3.お釣り用のoutputのトランザクションから、手数料を差し引く
+	// FIXME: これが足りない場合がめんどくさい。。。これをどう回避すべきか
 	for addr, amt := range outputs {
 		if addr.String() == w.BTC.PaymentAddress() {
 			outputs[addr] -= fee

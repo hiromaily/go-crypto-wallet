@@ -7,6 +7,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/api"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/key"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/hiromaily/go-bitcoin/pkg/toml"
 	"github.com/jessevdk/go-flags"
@@ -50,8 +51,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Log
+	logger.Initialize(conf.Environment)
+
 	// Connection to Bitcoin core
-	//bit, err := api.Connection(conf.Bitcoin.Host, conf.Bitcoin.User, conf.Bitcoin.Pass, true, true, conf.Bitcoin.IsMain)
 	bit, err := api.Connection(&conf.Bitcoin)
 	if err != nil {
 		log.Fatal(err)

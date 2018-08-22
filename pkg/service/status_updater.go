@@ -1,10 +1,9 @@
 package service
 
 import (
-	"log"
-
 	"github.com/bookerzzz/grok"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/pkg/errors"
 )
 
@@ -14,9 +13,9 @@ func (w *Wallet) UpdateStatus() error {
 	//1.tx_receipt
 	receiptHashs, err := w.DB.GetSentTxHashOnTxReceiptByTxTypeSent()
 	if err != nil {
-		errors.Errorf("DB.GetSentTxHashOnTxReceipt() error: %v", err)
+		return errors.Errorf("DB.GetSentTxHashOnTxReceipt() error: %v", err)
 	}
-	log.Println("[Debug] receiptHashs", receiptHashs)
+	logger.Debug("receiptHashes: ", receiptHashs)
 
 	// hashの詳細を取得する
 	err = w.checkTransaction(receiptHashs, enum.ActionTypeReceipt)
@@ -27,9 +26,9 @@ func (w *Wallet) UpdateStatus() error {
 	//2.tx_payment
 	paymentHashs, err := w.DB.GetSentTxHashOnTxPaymentByTxTypeSent()
 	if err != nil {
-		errors.Errorf("DB.GetSentTxHashOnTxPayment() error: %v", err)
+		return errors.Errorf("DB.GetSentTxHashOnTxPayment() error: %v", err)
 	}
-	log.Println("[Debug] paymentHashs", paymentHashs)
+	logger.Debug("paymentHashes: ", paymentHashs)
 
 	// hashの詳細を取得する
 	return w.checkTransaction(paymentHashs, enum.ActionTypePayment)
@@ -41,14 +40,14 @@ func (w *Wallet) checkTransaction(hashs []string, actionType enum.ActionType) er
 		//トランザクションの状態を取得
 		tran, err := w.BTC.GetTransactionByTxID(hash)
 		if err != nil {
-			log.Printf("w.BTC.GetTransactionByTxID(): txID:%s, err:%v", hash, err)
+			logger.Errorf("w.BTC.GetTransactionByTxID(): txID:%s, err:%v", hash, err)
 			//TODO:実際に起きる場合はcanceledに更新したほうがいいか？
 			continue
 		}
-		log.Println("[Debug]Transactions Confirmations")
+		logger.Debug("Transactions Confirmations")
 		grok.Value(tran.Confirmations)
 
-		//debug 終了したら消す
+		//[debug] 終了したら消す
 		//err = w.notifyUsers(hash, actionType)
 		//if err != nil {
 		//	return err
@@ -64,35 +63,47 @@ func (w *Wallet) checkTransaction(hashs []string, actionType enum.ActionType) er
 					return errors.Errorf("DB.UpdateTxReceipDoneByTxHash() error: %v", err)
 				}
 				//ユーザーに通知
-				w.notifyUsers(hash, actionType)
+				err = w.notifyUsers(hash, actionType)
+				//TODO:errはどう処理すべき？他にもhashがあるので、continueしてもいいか？
+				if err != nil {
+					logger.Errorf("w.notifyUsers(%s, %s) error:%v", hash, actionType, err)
+				}
 			} else if actionType == enum.ActionTypePayment {
 				_, err = w.DB.UpdateTxPaymentDoneByTxHash(hash, nil, true)
 				if err != nil {
 					return errors.Errorf("DB.UpdateTxPaymentDoneByTxHash() error: %v", err)
 				}
 				//ユーザーに通知
-				w.notifyUsers(hash, actionType)
+				err = w.notifyUsers(hash, actionType)
+				//TODO:errはどう処理すべき？他にもhashがあるので、continueしてもいいか？
+				if err != nil {
+					logger.Errorf("w.notifyUsers(%s, %s) error:%v", hash, actionType, err)
+				}
 			}
 		} else {
 			//TODO:TestNet環境だと1000satoshiでもトランザクションが処理されてしまう
 			//TODO:DBのsent_updated_atフィールドから一定時間立っても、指定したconfirmationに達しないものはキャンセルにして、
 			//TODO:手数料を上げて再度トランザクションを作成する？？
-			log.Println("TODO:一定時間を過ぎてもトランザクションが終了しないものは通知したほうがいいかもしれない。")
+			logger.Info("TODO:一定時間を過ぎてもトランザクションが終了しないものは通知したほうがいいかもしれない。")
 		}
 	}
+
 	return nil
 }
 
 func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) error {
+
+	logger.Debugf("notifyUsers() hash: %s", hash)
+
 	//[tx_receiptの場合]
 	if actionType == enum.ActionTypeReceipt {
-		log.Println("[Debug] notifyUsers() hash:", hash)
+
 		// 1.hashからidを取得(tx_receipt/tx_payment)
 		receiptID, err := w.DB.GetTxReceiptIDBySentHash(hash)
 		if err != nil {
 			return errors.Errorf("DB.GetTxReceiptIDBySentHash() error: %v", err)
 		}
-		log.Println("[Debug] notifyUsers() receiptID:", receiptID)
+		logger.Debug("notifyUsers() receiptID:", receiptID)
 
 		// 2.tx_receipt_inputテーブルから該当のreceipt_idでレコードを取得
 		txInputs, err := w.DB.GetTxReceiptInputByReceiptID(receiptID)
@@ -100,14 +111,14 @@ func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) error {
 			return errors.Errorf("DB.GetTxReceiptInputByReceiptID(%d) error: %v", receiptID, err)
 		}
 		if len(txInputs) == 0 {
-			log.Println("[Debug] notifyUsers() len(txInputs) == 0")
+			logger.Debug("notifyUsers() len(txInputs) == 0")
 			return nil
 		}
 
 		// 3.取得したinput_addressesに対して、入金が終了したことを通知する
 		// TODO:NatsのPublisherとして通知すればいいか？
 		for _, input := range txInputs {
-			log.Println("[Debug]input.InputAddress: ", input.InputAddress)
+			logger.Debug("input.InputAddress: ", input.InputAddress)
 		}
 
 		// 4.通知後はstatusをnotifiedに変更する
@@ -118,13 +129,12 @@ func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) error {
 
 	} else if actionType == enum.ActionTypePayment {
 		//TODO:出金の通知フローは異なる。。。inputsはstoredの内部アドレスになっているため、payment_requestテーブルから情報を取得しないといけない
-		log.Println("[Debug] notifyUsers() hash:", hash)
 		// 1.hashからidを取得(tx_receipt/tx_payment)
 		paymentID, err := w.DB.GetTxPaymentIDBySentHash(hash)
 		if err != nil {
 			return errors.Errorf("DB.GetTxPaymentIDBySentHash() error: %v", err)
 		}
-		log.Println("[Debug] notifyUsers() paymentID:", paymentID)
+		logger.Debugf("notifyUsers() paymentID: %d", paymentID)
 
 		// 2.payment_requestテーブルから該当のpayment_idでレコードを取得
 		//txInputs, err := w.DB.GetTxReceiptInputByReceiptID(paymentID)
@@ -133,14 +143,14 @@ func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) error {
 			return errors.Errorf("DB.GetPaymentRequestByPaymentID(%d) error: %v", paymentID, err)
 		}
 		if len(paymentUsers) == 0 {
-			log.Println("[Debug] notifyUsers() len(paymentUsers) == 0")
+			logger.Debug("[Debug] notifyUsers() len(paymentUsers) == 0")
 			return nil
 		}
 
 		// 3.取得したinput_addressesに対して、入金が終了したことを通知する
 		// TODO:NatsのPublisherとして通知すればいいか？
 		for _, user := range paymentUsers {
-			log.Println("[Debug]user.AddressFrom: ", user.AddressFrom)
+			logger.Debugf("user.AddressFrom: %s", user.AddressFrom)
 		}
 
 		tx := w.DB.RDB.MustBegin()

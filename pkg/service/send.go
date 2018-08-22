@@ -1,12 +1,13 @@
 package service
 
 import (
+	"time"
+
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/file"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
-	"log"
-	"time"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
 
 // coldwallet側で署名済みトランザクションを作成したものから、送金処理を行う
@@ -25,15 +26,14 @@ func (w *Wallet) SendFromFile(filePath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	log.Println(signedHex)
 
 	//送信
 	hash, err := w.BTC.SendTransactionByHex(signedHex)
 	if err != nil {
-		//TODO: これが失敗するのはどういうときか？
+		//TODO:本番環境ではBitcoinネットワークに取り込まれなくても、ここでエラーがでる？？その場合、手数料をあげて再トランザクションを生成するように促す必要がある
 		//-26: 16: mandatory-script-verify-flag-failed (Operation not valid with the current stack size)
 		//=> 署名が不十分だとこれが出るらしい
-		//TODO:本番環境ではBitcoinネットワークに取り込まれなくても、ここでエラーがでる？？その場合、手数料をあげて再トランザクションを生成するように促す必要がある
+		logger.Error("This error implies new transsaction should be created from the beginning")
 		return "", err
 	}
 

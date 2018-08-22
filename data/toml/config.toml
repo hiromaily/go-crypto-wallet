@@ -1,3 +1,5 @@
+environment = "dev"  # dev,prod
+
 [bitcoin]
 host = "127.0.0.1:18332"
 user = "xyz"
