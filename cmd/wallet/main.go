@@ -257,20 +257,7 @@ func debugForCheck(wallet *service.Wallet) {
 		}
 		log.Printf("[Debug] 送信までDONE!! %s", hash.String())
 	default:
-		log.Print("Run: 検証コード")
-		// for test
-		callAPI(wallet)
+		log.Print("該当Mode無し")
 	}
 
-}
-
-// 検証用
-func callAPI(wallet *service.Wallet) {
-	//txOut
-	//txOut, err := bit.GetTxOutByTxID("d0f3b258dda46a5980a0a9e1e6f818eb421be572d12e4e641b7b77e699ecddca", 0)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//log.Printf("TxOut: %v\n", txOut)
-	//grok.Value(txOut)
 }
