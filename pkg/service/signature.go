@@ -3,8 +3,8 @@ package service
 import (
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/file"
-	"github.com/pkg/errors"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
+	"github.com/pkg/errors"
 )
 
 // coldwallet側から未署名トランザクションを読み込み、署名を行う

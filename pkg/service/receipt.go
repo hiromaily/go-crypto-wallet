@@ -15,11 +15,11 @@ import (
 
 // 入金チェックから、utxoを取得し、未署名トランザクションを作成する
 
-type DetectReceivedCoinResult struct {
-	Hex      string `json:"hex"`
-	FileName string `json:"file_name"`
-	Error    string `json:"error"`
-}
+//type DetectReceivedCoinResult struct {
+//	Hex      string `json:"hex"`
+//	FileName string `json:"file_name"`
+//	Error    string `json:"error"`
+//}
 
 // DetectReceivedCoin Wallet内アカウントに入金があれば、そこから、未署名のトランザクションを返す
 // 古い未署名のトランザクションは変動するfeeの関係で、stackしていく(再度実行時は差分を抽出する)仕様にはしていない。

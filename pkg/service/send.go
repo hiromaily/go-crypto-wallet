@@ -5,9 +5,9 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/file"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
-	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
 
 // coldwallet側で署名済みトランザクションを作成したものから、送金処理を行う
