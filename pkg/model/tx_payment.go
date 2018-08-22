@@ -1,6 +1,7 @@
 package model
 
 import (
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -31,8 +32,9 @@ func (m *DB) GetTxPaymentIDBySentHash(hash string) (int64, error) {
 }
 
 // GetSentTxHashOnTxPayment TxPaymentテーブルから送信済ステータスであるsent_hash_txの配列を返す
-func (m *DB) GetSentTxHashOnTxPayment() ([]string, error) {
-	return m.getSentTxHashOnTxReceipt(m.TableNamePayment())
+func (m *DB) GetSentTxHashOnTxPaymentByTxTypeSent() ([]string, error) {
+	txTypeValue := enum.TxTypeValue[enum.TxTypeSent]
+	return m.getSentTxHashOnTxReceipt(m.TableNamePayment(), txTypeValue)
 }
 
 // InsertTxPaymentForUnsigned TxReceiptテーブルに未署名トランザクションレコードを作成する
@@ -45,7 +47,14 @@ func (m *DB) UpdateTxPaymentForSent(txReceipt *TxTable, tx *sqlx.Tx, isCommit bo
 	return m.updateTxReceiptForSent(m.TableNamePayment(), txReceipt, tx, isCommit)
 }
 
-// UpdateTxPaymentForDone TxReceiptテーブルの該当するsent_hash_txのレコードのcurrnt_tx_typeを更新する
-func (m *DB) UpdateTxPaymentForDone(hash string, tx *sqlx.Tx, isCommit bool) (int64, error) {
-	return m.updateTxReceiptForDone(m.TableNamePayment(), hash, tx, isCommit)
+// UpdateTxPaymentDoneByTxHash TxReceiptテーブルの該当するsent_hash_txのレコードのcurrnt_tx_typeを更新する
+func (m *DB) UpdateTxPaymentDoneByTxHash(hash string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	txTypeValue := enum.TxTypeValue[enum.TxTypeDone]
+	return m.updateTxTypeOnTxReceiptByTxHash(m.TableNamePayment(), hash, txTypeValue, tx, isCommit)
+}
+
+// UpdateTxPaymentNotifiedByTxHash TxReceiptテーブルの該当するsent_hash_txのレコードのcurrnt_tx_typeを更新する
+func (m *DB) UpdateTxPaymentNotifiedByTxHash(hash string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	txTypeValue := enum.TxTypeValue[enum.TxTypeNotified]
+	return m.updateTxTypeOnTxReceiptByTxHash(m.TableNamePayment(), hash, txTypeValue, tx, isCommit)
 }

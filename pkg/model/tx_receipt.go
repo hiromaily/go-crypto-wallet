@@ -1,11 +1,11 @@
 package model
 
 import (
+	"fmt"
 	"time"
 
-	"fmt"
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/jmoiron/sqlx"
-	"github.com/mf-financial/cayenne_wallet/pkg/enum"
 )
 
 //enum.Actionに応じて、テーブルを切り替える
@@ -69,7 +69,7 @@ func (m *DB) GetTxReceiptCountByUnsignedHex(hex string) (int64, error) {
 // getTxReceiptIDBySentHash sent_hash_txをキーとしてreceipt_idを取得する
 func (m *DB) getTxReceiptIDBySentHash(tbl, hash string) (int64, error) {
 	var receiptID int64
-	sql := "SELECT receipt_id FROM %s WHERE unsigned_hex_tx=?"
+	sql := "SELECT id FROM %s WHERE sent_hash_tx=?"
 	sql = fmt.Sprintf(sql, tbl)
 
 	err := m.RDB.Get(&receiptID, sql, hash)
@@ -82,7 +82,7 @@ func (m *DB) GetTxReceiptIDBySentHash(hash string) (int64, error) {
 	return m.getTxReceiptIDBySentHash(m.TableNameReceipt(), hash)
 }
 
-func (m *DB) getSentTxHashOnTxReceipt(tbl string) ([]string, error) {
+func (m *DB) getSentTxHashOnTxReceipt(tbl string, txTypeValue uint8) ([]string, error) {
 	var txHashs []string
 	sql := "SELECT sent_hash_tx FROM %s WHERE current_tx_type=?"
 	sql = fmt.Sprintf(sql, tbl)
@@ -96,8 +96,9 @@ func (m *DB) getSentTxHashOnTxReceipt(tbl string) ([]string, error) {
 }
 
 // GetSentTxHashOnTxReceipt TxReceiptテーブルから送信済ステータスであるsent_hash_txの配列を返す
-func (m *DB) GetSentTxHashOnTxReceipt() ([]string, error) {
-	return m.getSentTxHashOnTxReceipt(m.TableNameReceipt())
+func (m *DB) GetSentTxHashOnTxReceiptByTxTypeSent() ([]string, error) {
+	txTypeValue := enum.TxTypeValue[enum.TxTypeSent]
+	return m.getSentTxHashOnTxReceipt(m.TableNameReceipt(), txTypeValue)
 }
 
 // InsertTxReceiptForUnsigned TxReceiptテーブルに未署名トランザクションレコードを作成する
@@ -162,8 +163,8 @@ func (m *DB) UpdateTxReceiptForSent(txReceipt *TxTable, tx *sqlx.Tx, isCommit bo
 	return m.updateTxReceiptForSent(m.TableNameReceipt(), txReceipt, tx, isCommit)
 }
 
-// updsateTxReceiptForDone TxReceiptテーブルの該当するsent_hash_txのレコードのcurrnt_tx_typeを更新する
-func (m *DB) updateTxReceiptForDone(tbl string, hash string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+// updateTxTypeOnTxReceiptByTxHash TxReceiptテーブルの該当するsent_hash_txのレコードのcurrnt_tx_typeを更新する
+func (m *DB) updateTxTypeOnTxReceiptByTxHash(tbl string, hash string, txTypeValue uint8, tx *sqlx.Tx, isCommit bool) (int64, error) {
 
 	if tx == nil {
 		tx = m.RDB.MustBegin()
@@ -173,7 +174,7 @@ func (m *DB) updateTxReceiptForDone(tbl string, hash string, tx *sqlx.Tx, isComm
 UPDATE %s SET current_tx_type=? WHERE sent_hash_tx=?
 `
 	sql = fmt.Sprintf(sql, tbl)
-	res, err := tx.Exec(sql, enum.TxTypeValue[enum.TxTypeDone], hash)
+	res, err := tx.Exec(sql, txTypeValue, hash)
 	if err != nil {
 		tx.Rollback()
 		return 0, err
@@ -186,7 +187,14 @@ UPDATE %s SET current_tx_type=? WHERE sent_hash_tx=?
 	return affectedNum, nil
 }
 
-// UpdateTxReceiptForDone TxReceiptテーブルの該当するsent_hash_txのレコードのcurrnt_tx_typeを更新する
-func (m *DB) UpdateTxReceiptForDone(hash string, tx *sqlx.Tx, isCommit bool) (int64, error) {
-	return m.updateTxReceiptForDone(m.TableNameReceipt(), hash, tx, isCommit)
+// UpdateTxReceipDoneByTxHash TxReceiptテーブルの該当するsent_hash_txのレコードのcurrnt_tx_typeを更新する
+func (m *DB) UpdateTxReceipDoneByTxHash(hash string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	txTypeValue := enum.TxTypeValue[enum.TxTypeDone]
+	return m.updateTxTypeOnTxReceiptByTxHash(m.TableNameReceipt(), hash, txTypeValue, tx, isCommit)
+}
+
+// UpdateTxReceipNotifiedByTxHash TxReceiptテーブルの該当するsent_hash_txのレコードのcurrnt_tx_typeを更新する
+func (m *DB) UpdateTxReceipNotifiedByTxHash(hash string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	txTypeValue := enum.TxTypeValue[enum.TxTypeNotified]
+	return m.updateTxTypeOnTxReceiptByTxHash(m.TableNameReceipt(), hash, txTypeValue, tx, isCommit)
 }
