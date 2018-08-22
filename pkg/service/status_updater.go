@@ -36,6 +36,7 @@ func (w *Wallet) UpdateStatus() error {
 
 func (w *Wallet) checkTransaction(hashs []string, actionType enum.ActionType) error {
 	for _, hash := range hashs {
+		//トランザクションの状態を取得
 		tran, err := w.BTC.GetTransactionByTxID(hash)
 		if err != nil {
 			log.Printf("w.BTC.GetTransactionByTxID(): txID:%s, err:%v", hash, err)
@@ -45,19 +46,22 @@ func (w *Wallet) checkTransaction(hashs []string, actionType enum.ActionType) er
 		log.Println("[Debug]Transactions")
 		grok.Value(tran.Confirmations)
 
+		//現在のconfirmationをチェック
 		if tran.Confirmations >= int64(w.BTC.ConfirmationBlock()) {
-			//指定にconfirmationに達したので、doneに更新する
+			//指定にconfirmationに達したので、current_tx_typeをdoneに更新する
 			if actionType == enum.ActionTypeReceipt {
 				_, err = w.DB.UpdateTxReceiptForDone(hash, nil, true)
 				if err != nil {
 					return errors.Errorf("DB.UpdateTxReceiptForDone() error: %v", err)
 				}
+				//ユーザーに通知
 				w.notifyUsers(hash, actionType)
 			} else if actionType == enum.ActionTypePayment {
 				_, err = w.DB.UpdateTxPaymentForDone(hash, nil, true)
 				if err != nil {
 					return errors.Errorf("DB.UpdateTxPaymentForDone() error: %v", err)
 				}
+				//ユーザーに通知
 				w.notifyUsers(hash, actionType)
 			}
 		} else {
@@ -70,10 +74,14 @@ func (w *Wallet) checkTransaction(hashs []string, actionType enum.ActionType) er
 	return nil
 }
 
-func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) {
+func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) error {
 	//[tx_receiptの場合]
 	if actionType == enum.ActionTypeReceipt {
 		// 1.hashからidを取得(tx_receipt/tx_payment)
+		//receiptID, err := w.DB.GetTxReceiptIDBySentHash(hash)
+		//if err != nil {
+		//	return errors.Errorf("DB.GetTxReceiptIDBySentHash() error: %v", err)
+		//}
 
 		// 2.tx_receipt_inputテーブルから該当のreceipt_idでレコードを取得
 
@@ -82,5 +90,5 @@ func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) {
 
 		// TODO:通知後はstatusをnotifiedに変更する
 	}
-
+	return nil
 }

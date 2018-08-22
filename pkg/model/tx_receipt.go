@@ -56,7 +56,6 @@ func (m *DB) getTxReceiptCountByUnsignedHex(tbl, hex string) (int64, error) {
 	sql := "SELECT count(id) FROM %s WHERE unsigned_hex_tx=?"
 	sql = fmt.Sprintf(sql, tbl)
 
-	//err := m.RDB.Get(&count, "SELECT count(id) FROM tx_receipt WHERE unsigned_hex_tx=?", hex)
 	err := m.RDB.Get(&count, sql, hex)
 
 	return count, err
@@ -65,6 +64,22 @@ func (m *DB) getTxReceiptCountByUnsignedHex(tbl, hex string) (int64, error) {
 // GetTxReceiptByUnsignedHex unsigned_hex_txをキーとしてレコード数を取得する
 func (m *DB) GetTxReceiptCountByUnsignedHex(hex string) (int64, error) {
 	return m.getTxReceiptCountByUnsignedHex(m.TableNameReceipt(), hex)
+}
+
+// getTxReceiptIDBySentHash sent_hash_txをキーとしてreceipt_idを取得する
+func (m *DB) getTxReceiptIDBySentHash(tbl, hash string) (int64, error) {
+	var receiptID int64
+	sql := "SELECT receipt_id FROM %s WHERE unsigned_hex_tx=?"
+	sql = fmt.Sprintf(sql, tbl)
+
+	err := m.RDB.Get(&receiptID, sql, hash)
+
+	return receiptID, err
+}
+
+// GetTxReceiptIDByUnsignedHex sent_hash_txをキーとしてreceipt_idを取得する
+func (m *DB) GetTxReceiptIDBySentHash(hash string) (int64, error) {
+	return m.getTxReceiptIDBySentHash(m.TableNameReceipt(), hash)
 }
 
 func (m *DB) getSentTxHashOnTxReceipt(tbl string) ([]string, error) {
