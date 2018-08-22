@@ -61,11 +61,11 @@ func (w *Wallet) checkTransaction(hashs []string, actionType enum.ActionType) er
 		//トランザクションの状態を取得
 		tran, err := w.BTC.GetTransactionByTxID(hash)
 		if err != nil {
-			logger.Errorf("w.BTC.GetTransactionByTxID(): txID:%s, err:%v", hash, err)
+			logger.Errorf("ActionType: %s, w.BTC.GetTransactionByTxID(): txID:%s, err:%v", actionType, hash, err)
 			//TODO:実際に起きる場合はcanceledに更新したほうがいいか？
 			continue
 		}
-		logger.Debug("Transactions Confirmations")
+		logger.Debugf("ActionType: %s, Transactions Confirmations", actionType)
 		grok.Value(tran.Confirmations)
 
 		//[debug] 終了したら消す
@@ -86,7 +86,7 @@ func (w *Wallet) checkTransaction(hashs []string, actionType enum.ActionType) er
 			err = w.notifyUsers(hash, actionType)
 			//TODO:errはどう処理すべき？他にもhashがあるので、continueしてもいいか？
 			if err != nil {
-				logger.Errorf("w.notifyUsers(%s, %s) error:%v", hash, actionType, err)
+				logger.Errorf("ActionType: %s, w.notifyUsers(%s, %s) error:%v",actionType, hash, actionType, err)
 			}
 
 			//if actionType == enum.ActionTypeReceipt {
@@ -133,7 +133,7 @@ func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) error {
 		// 1.hashからidを取得(tx_receipt/tx_payment)
 		receiptID, err := w.DB.GetTxIDBySentHash(actionType, hash)
 		if err != nil {
-			return errors.Errorf("DB.GetTxIDBySentHash() error: %v", err)
+			return errors.Errorf("ActionType: %s, DB.GetTxIDBySentHash() error: %v", actionType, err)
 		}
 		logger.Debug("notifyUsers() receiptID:", receiptID)
 

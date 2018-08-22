@@ -1,5 +1,7 @@
 package model
 
+//tx_table.go側に集約
+
 //
 //import (
 //	"github.com/hiromaily/go-bitcoin/pkg/enum"
