@@ -61,13 +61,42 @@ func main() {
 	//Wallet Object
 	wallet := service.Wallet{BTC: bit, DB: nil}
 
-	//switch
-	switchFunction(&wallet)
+	if opts.Debug {
+		//debug用 機能確認
+		debugForCheck(&wallet)
+	} else {
+		//switch mode
+		switchFunction(&wallet)
+	}
 }
 
+// 実運用上利用するもののみ、こちらに定義する
 func switchFunction(wallet *service.Wallet) {
 	// 処理をFunctionalityで切り替える
 	//TODO:ここから呼び出すべきはService系のみに統一したい
+	switch opts.Mode {
+	case 1:
+		// importしたファイルからhex値を取得し、署名を行う(ReceiptかPaymentかはfileNameから判別))
+		// ./coldwallet -f 5 -i ./data/tx/receipt/10_unsigned_1534477741449699817
+		log.Print("Run: Importしたファイルからhex値を取得し、署名を行う(Receipt)")
+		if opts.ImportFile == "" {
+			log.Fatal("file path is required as argument file when running")
+		}
+
+		//出金/入金の判別はファイル名から行う
+		hexTx, isSigned, generatedFileName, err := wallet.SignatureFromFile(opts.ImportFile)
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		log.Printf("[hex]: %s\n[署名完了]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName)
+	default:
+		log.Print("該当Mode無し")
+	}
+
+}
+
+// 検証用
+func debugForCheck(wallet *service.Wallet) {
 	switch opts.Mode {
 	case 1:
 		//TODO: 通常のKeyの生成
@@ -121,29 +150,7 @@ func switchFunction(wallet *service.Wallet) {
 		}
 		log.Printf("hex: %s\n, 署名完了: %t\n, fileName: %s", hexTx, isSigned, generatedFileName)
 		//TODO:isSigned: 送信までした署名はfalseになる??
-	case 5:
-		// importしたファイルからhex値を取得し、署名を行う(ReceiptかPaymentかはfileNameから判別))
-		// ./coldwallet -f 5 -i ./data/tx/receipt/10_unsigned_1534477741449699817
-		log.Print("Run: Importしたファイルからhex値を取得し、署名を行う(Receipt)")
-		if opts.ImportFile == "" {
-			log.Fatal("file path is required as argument file when running")
-		}
-
-		//出金/入金の判別はファイル名から行う
-		hexTx, isSigned, generatedFileName, err := wallet.SignatureFromFile(opts.ImportFile)
-		if err != nil {
-			log.Fatalf("%+v", err)
-		}
-		log.Printf("[hex]: %s\n[署名完了]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName)
-
 	default:
-		log.Print("Run: 検証コード")
-		// for test
-		callAPI(wallet)
+		log.Print("該当Mode無し")
 	}
-
-}
-
-func callAPI(wallet *service.Wallet) {
-
 }

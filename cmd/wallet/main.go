@@ -61,11 +61,12 @@ func main() {
 		//debug用 機能確認
 		debugForCheck(wallet)
 	} else {
-		//switch
+		//switch mode
 		switchFunction(wallet)
 	}
 }
 
+// 実運用上利用するもののみ、こちらに定義する
 func switchFunction(wallet *service.Wallet) {
 	// 処理をFunctionalityで切り替える
 	//TODO:ここから呼び出すべきはService系のみに統一したい

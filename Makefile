@@ -63,7 +63,7 @@ create-payment-fee: bld
 
 # 出金用に未署名のトランザクションに署名する
 sign-payment: bld
-	./coldwallet -m 5 -i ./data/tx/payment/payment_3_unsigned_1534832966995082772
+	./coldwallet -m 1 -i ./data/tx/payment/payment_3_unsigned_1534832966995082772
 
 # 出金用に署名済トランザクションを送信する
 send-payment: bld
