@@ -150,7 +150,7 @@ func switchFunction(wallet *service.Wallet) {
 		log.Printf("[Debug] 送信までDONE!! %s", txID)
 	case 14:
 		log.Print("Run:出金トランザクション作成")
-		hex, fileName, err := wallet.CreateUnsignedTransactionForPayment()
+		hex, fileName, err := wallet.CreateUnsignedTransactionForPayment(opts.Fee)
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}

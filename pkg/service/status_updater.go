@@ -52,17 +52,34 @@ func (w *Wallet) checkTransaction(hashs []string, actionType enum.ActionType) er
 				if err != nil {
 					return errors.Errorf("DB.UpdateTxReceiptForDone() error: %v", err)
 				}
+				w.notifyUsers(hash, actionType)
 			} else if actionType == enum.ActionTypePayment {
 				_, err = w.DB.UpdateTxPaymentForDone(hash, nil, true)
 				if err != nil {
 					return errors.Errorf("DB.UpdateTxPaymentForDone() error: %v", err)
 				}
+				w.notifyUsers(hash, actionType)
 			}
 		} else {
+			//TODO:TestNet環境だと1000satoshiでもトランザクションが処理されてしまう
 			//TODO:DBのsent_updated_atフィールドから一定時間立っても、指定したconfirmationに達しないものはキャンセルにして、
 			//TODO:手数料を上げて再度トランザクションを作成する？？
-			log.Println("TODO:")
+			log.Println("TODO:一定時間を過ぎてもトランザクションが終了しないものは通知したほうがいいかもしれない。")
 		}
 	}
 	return nil
+}
+
+func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType){
+	//[tx_receiptの場合]
+	if actionType == enum.ActionTypeReceipt {
+		// 1.hashからidを取得(tx_receipt/tx_payment)
+
+
+		// 2.tx_receipt_inputテーブルから該当のreceipt_idでレコードを取得
+
+		// 3.取得したinput_addressesに対して、入金が終了したことを通知する
+		// TODO:NatsのPublisherとして通知すればいいか？
+	}
+
 }

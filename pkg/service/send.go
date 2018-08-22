@@ -33,6 +33,7 @@ func (w *Wallet) SendFromFile(filePath string) (string, error) {
 		//TODO: これが失敗するのはどういうときか？
 		//-26: 16: mandatory-script-verify-flag-failed (Operation not valid with the current stack size)
 		//=> 署名が不十分だとこれが出るらしい
+		//TODO:本番環境ではBitcoinネットワークに取り込まれなくても、ここでエラーがでる？？その場合、手数料をあげて再トランザクションを生成するように促す必要がある
 		return "", err
 	}
 

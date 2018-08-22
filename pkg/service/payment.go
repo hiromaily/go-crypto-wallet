@@ -283,15 +283,17 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 	grok.Value(outputs)
 
 	// 一連の処理を実行
-	return w.createRawTransactionForPayment(inputs, inputTotal, txPaymentInputs, outputs)
+	return w.createRawTransactionForPayment(adjustmentFee, inputs, inputTotal, txPaymentInputs, outputs)
 }
 
 //TODO:receipt側のロジックとほぼ同じ為、まとめたほうがいい(手数料のロジックのみ異なる)
-func (w *Wallet) createRawTransactionForPayment(inputs []btcjson.TransactionInput, inputTotal btcutil.Amount,
+func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []btcjson.TransactionInput, inputTotal btcutil.Amount,
 	txPaymentInputs []model.TxInput, outputs map[btcutil.Address]btcutil.Amount) (string, string, error) {
 
-	var outputTotal btcutil.Amount
-	txPaymentOutputs := []model.TxOutput{}
+	var (
+		outputTotal      btcutil.Amount
+		txPaymentOutputs []model.TxOutput
+	)
 
 	// 1.CreateRawTransactionWithOutput(仮で作成し、この後サイズから手数料を算出する)
 	msgTx, err := w.BTC.CreateRawTransactionWithOutput(inputs, outputs)
@@ -305,7 +307,18 @@ func (w *Wallet) createRawTransactionForPayment(inputs []btcjson.TransactionInpu
 	if err != nil {
 		return "", "", errors.Errorf("GetTransactionFee(): error: %v", err)
 	}
-	log.Printf("[Debug]fee: %v", fee) //0.001183 BTC
+	log.Printf("[Debug]first fee: %v", fee) //0.001183 BTC
+
+	// 2.2.feeの調整
+	if w.BTC.ValidateAdjustmentFee(adjustmentFee) {
+		newFee, err := w.BTC.CalculateNewFee(fee, adjustmentFee)
+		if err != nil {
+			//logのみ表示
+			log.Println(err)
+		}
+		log.Printf("[Debug]adjusted fee: %v, newFee:%v", fee, newFee) //0.000208 BTC
+		fee = newFee
+	}
 
 	// 3.TODO:お釣り用のoutputのトランザクションから、手数料を差し引かねばならい
 	//   TODO:fee分の変更が入ったので、厳密には、ここでoutputの調整が必要
