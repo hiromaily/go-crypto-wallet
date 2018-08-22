@@ -116,5 +116,7 @@ func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) error {
 		}
 
 	}
+	//TODO:出金の通知フローはまた別だな。。。inputsはstoredの内部アドレスになっている
+
 	return nil
 }

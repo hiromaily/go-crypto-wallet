@@ -54,3 +54,12 @@ func TestUpdatePaymentRequestForIsDone(t *testing.T) {
 	}
 	t.Log(affected)
 }
+
+func TestUpdatePaymentRequestForPaymentID(t *testing.T) {
+
+	affected, err := db.UpdatePaymentRequestForPaymentID(999, []int64{1, 2, 3}, nil, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(affected)
+}

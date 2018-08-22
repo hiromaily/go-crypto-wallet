@@ -190,6 +190,7 @@ DROP TABLE IF EXISTS `payment_request`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `payment_request` (
   `id`           BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
+  `payment_id`   BIGINT(20) UNSIGNED DEFAULT NULL COMMENT'tx_paymentのID',
   `address_from` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'送信者アドレス',
   `account_from` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'送信者アカウント名',
   `address_to`   VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'受け取り者アドレス',
@@ -204,10 +205,10 @@ CREATE TABLE `payment_request` (
 LOCK TABLES `payment_request` WRITE;
 /*!40000 ALTER TABLE `payment_request` DISABLE KEYS */;
 INSERT INTO `payment_request` VALUES
-  (1,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2N33pRYgyuHn6K2xCrrq9dPzuW6ZAvFJfVz',0.1,false,now()),
-  (2,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2NFd6TEUgSpy8LvttBgVrLB6ZBA5X9BSUSz',0.2,false,now()),
-  (3,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV',0.25,false,now()),
-  (4,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV',0.3,false,now()),
-  (5,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2N7WsiDc4yK7PoUL9saGE5ZGsbRQ8R9NafS',0.4,false,now());
+  (1,NULL,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2N33pRYgyuHn6K2xCrrq9dPzuW6ZAvFJfVz',0.1,false,now()),
+  (2,NULL,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2NFd6TEUgSpy8LvttBgVrLB6ZBA5X9BSUSz',0.2,false,now()),
+  (3,NULL,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV',0.25,false,now()),
+  (4,NULL,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV',0.3,false,now()),
+  (5,NULL,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2N7WsiDc4yK7PoUL9saGE5ZGsbRQ8R9NafS',0.4,false,now());
 /*!40000 ALTER TABLE `payment_request` ENABLE KEYS */;
 UNLOCK TABLES;

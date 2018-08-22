@@ -33,7 +33,7 @@ func TestInsertTxReceiptForUnsigned(t *testing.T) {
 
 func TestGetTxReceiptByID(t *testing.T) {
 	//TODO:testReceiptIDは引き継げない？？
-	testReceiptID = 2 //FIXME:とりあえず
+	testReceiptID = 1 //FIXME:とりあえず
 	if testReceiptID == 0 {
 		t.Fatal("testReceiptID should be set")
 	}

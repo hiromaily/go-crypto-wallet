@@ -1,13 +1,16 @@
 package model
 
 import (
-	"github.com/jmoiron/sqlx"
 	"time"
+
+	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 )
 
 //PaymentRequest payment_requestテーブル
 type PaymentRequest struct {
-	ID          int        `db:"id"`
+	ID          int64      `db:"id"`
+	PaymentID   *int64     `db:"payment_id"`
 	AddressFrom string     `db:"address_from"`
 	AccountFrom string     `db:"account_from"`
 	AddressTo   string     `db:"address_to"`
@@ -18,8 +21,11 @@ type PaymentRequest struct {
 
 // GetPaymentRequest PaymentRequestテーブル全体を返す
 func (m *DB) GetPaymentRequest() ([]PaymentRequest, error) {
+	//sql := "SELECT * FROM payment_request WHERE is_done=false"
+	sql := "SELECT * FROM payment_request WHERE payment_id IS NULL"
+
 	var paymentRequests []PaymentRequest
-	err := m.RDB.Select(&paymentRequests, "SELECT * FROM payment_request WHERE is_done=false")
+	err := m.RDB.Select(&paymentRequests, sql)
 
 	return paymentRequests, err
 }
@@ -63,8 +69,6 @@ UPDATE payment_request SET is_done=true WHERE is_done=false
 		tx = m.RDB.MustBegin()
 	}
 
-	//res, err := tx.NamedExec(sql, nil)
-	//res := tx.MustExec(sql)
 	res, err := tx.Exec(sql)
 	if err != nil {
 		tx.Rollback()
@@ -76,4 +80,36 @@ UPDATE payment_request SET is_done=true WHERE is_done=false
 	affectedNum, _ := res.RowsAffected()
 
 	return affectedNum, nil
+}
+
+// UpdatePaymentRequestForPaymentID 出金トランザクション作成済のレコードのpayment_idを更新する
+func (m *DB) UpdatePaymentRequestForPaymentID(paymentID int64, ids []int64, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	sql := `
+UPDATE payment_request SET payment_id=? WHERE id IN (?) 
+`
+
+	//In対応
+	query, args, err := sqlx.In(sql, paymentID, ids)
+	if err != nil {
+		return 0, errors.Errorf("sqlx.In() error: %v", err)
+	}
+	query = m.RDB.Rebind(query)
+
+	if tx == nil {
+		tx = m.RDB.MustBegin()
+	}
+
+	//res, err := tx.Exec(sql, paymentID, ids)
+	res, err := tx.Exec(query, args...)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+	if isCommit {
+		tx.Commit()
+	}
+	affectedNum, _ := res.RowsAffected()
+
+	return affectedNum, nil
+
 }

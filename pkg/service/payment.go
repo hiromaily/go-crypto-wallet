@@ -1,10 +1,11 @@
 package service
 
 import (
+	"fmt"
 	"log"
 	"sort"
+	"strconv"
 
-	"fmt"
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
@@ -12,7 +13,6 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/file"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
-	"strconv"
 )
 
 // ユーザーからの出金依頼事に出金する処理
@@ -30,71 +30,75 @@ type UserPayment struct {
 // debug用データ作成
 // TODO:出金データとしてDB内にテーブルを作成する
 // TODO:最終的に削除する
-func (w *Wallet) createDebugUserPayment() []UserPayment {
-	//getnewaddress pay1
-	//2N33pRYgyuHn6K2xCrrq9dPzuW6ZAvFJfVz
-
-	//getnewaddress pay2
-	//2NFd6TEUgSpy8LvttBgVrLB6ZBA5X9BSUSz
-
-	//getnewaddress pay3
-	//2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV
-
-	//getnewaddress pay4
-	//2N7WsiDc4yK7PoUL9saGE5ZGsbRQ8R9NafS
-
-	//5レコードあるが、4種類の送信先
-	userPayments := []UserPayment{
-		{"", "2N33pRYgyuHn6K2xCrrq9dPzuW6ZAvFJfVz", nil, 0.1, 0},
-		{"", "2NFd6TEUgSpy8LvttBgVrLB6ZBA5X9BSUSz", nil, 0.2, 0},
-		{"", "2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV", nil, 0.25, 0},
-		{"", "2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV", nil, 0.3, 0},
-		{"", "2N7WsiDc4yK7PoUL9saGE5ZGsbRQ8R9NafS", nil, 0.4, 0},
-	}
-
-	//btcutil.Address型, btcutil.Amount型に変換,
-	var err error
-	for idx, val := range userPayments {
-		//Address TODO:このタイミングでaddressは不要かもしれない
-		userPayments[idx].validRecAddr, err = w.BTC.DecodeAddress(val.receiverAddr)
-		if err != nil {
-			//これは本来事前にチェックされるため、ありえないはず
-			log.Printf("[Error] unexpected error converting string to address")
-		}
-		//grok.Value(userPayments[idx].validRecAddr)
-
-		//Amount
-		userPayments[idx].validAmount, err = w.BTC.FloatBitToAmount(val.amount)
-		if err != nil {
-			//これは本来事前にチェックされるため、ありえないはず
-			log.Printf("[Error] unexpected error converting float64 to Amount")
-		}
-	}
-
-	//Addressが重複する場合、合算したほうがいいかも => transactionのoutputを作成するタイミングで合算可能
-	return userPayments
-}
+//func (w *Wallet) createDebugUserPayment() []UserPayment {
+//	//getnewaddress pay1
+//	//2N33pRYgyuHn6K2xCrrq9dPzuW6ZAvFJfVz
+//
+//	//getnewaddress pay2
+//	//2NFd6TEUgSpy8LvttBgVrLB6ZBA5X9BSUSz
+//
+//	//getnewaddress pay3
+//	//2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV
+//
+//	//getnewaddress pay4
+//	//2N7WsiDc4yK7PoUL9saGE5ZGsbRQ8R9NafS
+//
+//	//5レコードあるが、4種類の送信先
+//	userPayments := []UserPayment{
+//		{"", "2N33pRYgyuHn6K2xCrrq9dPzuW6ZAvFJfVz", nil, 0.1, 0},
+//		{"", "2NFd6TEUgSpy8LvttBgVrLB6ZBA5X9BSUSz", nil, 0.2, 0},
+//		{"", "2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV", nil, 0.25, 0},
+//		{"", "2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV", nil, 0.3, 0},
+//		{"", "2N7WsiDc4yK7PoUL9saGE5ZGsbRQ8R9NafS", nil, 0.4, 0},
+//	}
+//
+//	//btcutil.Address型, btcutil.Amount型に変換,
+//	var err error
+//	for idx, val := range userPayments {
+//		//Address TODO:このタイミングでaddressは不要かもしれない
+//		userPayments[idx].validRecAddr, err = w.BTC.DecodeAddress(val.receiverAddr)
+//		if err != nil {
+//			//これは本来事前にチェックされるため、ありえないはず
+//			log.Printf("[Error] unexpected error converting string to address")
+//		}
+//		//grok.Value(userPayments[idx].validRecAddr)
+//
+//		//Amount
+//		userPayments[idx].validAmount, err = w.BTC.FloatBitToAmount(val.amount)
+//		if err != nil {
+//			//これは本来事前にチェックされるため、ありえないはず
+//			log.Printf("[Error] unexpected error converting float64 to Amount")
+//		}
+//	}
+//
+//	//Addressが重複する場合、合算したほうがいいかも => transactionのoutputを作成するタイミングで合算可能
+//	return userPayments
+//}
 
 // createUserPayment 出金依頼テーブルから処理するためのデータを取得する
-func (w *Wallet) createUserPayment() ([]UserPayment, error) {
+func (w *Wallet) createUserPayment() ([]UserPayment, []int64, error) {
 	paymentRequests, err := w.DB.GetPaymentRequest()
 	if err != nil {
-		return nil, errors.Errorf("DB.GetPaymentRequest() error: %v", err)
+		return nil, nil, errors.Errorf("DB.GetPaymentRequest() error: %v", err)
 	}
 	if len(paymentRequests) == 0 {
 		//処理するデータが存在しない。(エラーではない)
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	userPayments := make([]UserPayment, len(paymentRequests))
+	paymentRequestIds := make([]int64, len(paymentRequests))
 
+	//TODO:更新用にidの配列も保持しておくこと
 	for idx, val := range paymentRequests {
+		paymentRequestIds[idx] = val.ID
+
 		userPayments[idx].senderAddr = val.AddressFrom
 		userPayments[idx].receiverAddr = val.AddressTo
 		amt, err := strconv.ParseFloat(val.Amount, 64)
 		if err != nil {
 			//致命的なエラー、おきないはず
-			return nil, errors.New("payment_request table includes invalid amount field")
+			return nil, nil, errors.New("payment_request table includes invalid amount field")
 		}
 		userPayments[idx].amount = amt
 
@@ -104,7 +108,7 @@ func (w *Wallet) createUserPayment() ([]UserPayment, error) {
 			//致命的なエラー
 			//これは本来事前にチェックされるため、ありえないはず
 			//log.Printf("[Error] unexpected error converting string to address")
-			return nil, errors.New("unexpected error occurred converting string type receiverAddr to address type")
+			return nil, nil, errors.New("unexpected error occurred converting string type receiverAddr to address type")
 		}
 		//grok.Value(userPayments[idx].validRecAddr)
 
@@ -114,12 +118,12 @@ func (w *Wallet) createUserPayment() ([]UserPayment, error) {
 			//致命的なエラー
 			//これは本来事前にチェックされるため、ありえないはず
 			//log.Printf("[Error] unexpected error converting float64 to Amount")
-			return nil, errors.New("unexpected error occurred converting float64 type amount to Amount type")
+			return nil, nil, errors.New("unexpected error occurred converting float64 type amount to Amount type")
 		}
 	}
 
 	//Addressが重複する場合、合算したほうがいいかも => transactionのoutputを作成するタイミングで合算可能
-	return userPayments, nil
+	return userPayments, paymentRequestIds, nil
 }
 
 // isFoundTxIDAndVout 指定したtxIDとvoutに紐づくinputが既に存在しているか確認する
@@ -141,7 +145,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 
 	//1.出金データを取得
 	//userPayments := w.createDebugUserPayment()
-	userPayments, err := w.createUserPayment()
+	userPayments, paymentRequestIds, err := w.createUserPayment()
 	if err != nil {
 		return "", "", err
 	}
@@ -283,12 +287,12 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 	grok.Value(outputs)
 
 	// 一連の処理を実行
-	return w.createRawTransactionForPayment(adjustmentFee, inputs, inputTotal, txPaymentInputs, outputs)
+	return w.createRawTransactionForPayment(adjustmentFee, inputs, inputTotal, txPaymentInputs, outputs, paymentRequestIds)
 }
 
 //TODO:receipt側のロジックとほぼ同じ為、まとめたほうがいい(手数料のロジックのみ異なる)
 func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []btcjson.TransactionInput, inputTotal btcutil.Amount,
-	txPaymentInputs []model.TxInput, outputs map[btcutil.Address]btcutil.Amount) (string, string, error) {
+	txPaymentInputs []model.TxInput, outputs map[btcutil.Address]btcutil.Amount, paymentRequestIds []int64) (string, string, error) {
 
 	var (
 		outputTotal      btcutil.Amount
@@ -367,7 +371,7 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 
 	// 6. TODO:Databaseに必要な情報を保存
 	//  txType //1.未署名
-	txReceiptID, err := w.insertHexForUnsignedTxOnPayment(hex, inputTotal, outputTotal, fee, enum.TxTypeValue[enum.TxTypeUnsigned], txPaymentInputs, txPaymentOutputs)
+	txReceiptID, err := w.insertHexForUnsignedTxOnPayment(hex, inputTotal, outputTotal, fee, enum.TxTypeValue[enum.TxTypeUnsigned], txPaymentInputs, txPaymentOutputs, paymentRequestIds)
 	//TODO:txReceiptID
 	if err != nil {
 		return "", "", errors.Errorf("insertHexOnDB(): error: %v", err)
@@ -391,7 +395,7 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 
 //TODO:引数の数が多いのはGoにおいてはBad practice...
 func (w *Wallet) insertHexForUnsignedTxOnPayment(hex string, inputTotal, outputTotal, fee btcutil.Amount, txType uint8,
-	txPaymentInputs []model.TxInput, txPaymentOutputs []model.TxOutput) (int64, error) {
+	txPaymentInputs []model.TxInput, txPaymentOutputs []model.TxOutput, paymentRequestIds []int64) (int64, error) {
 
 	//1.内容が同じだと、生成されるhexもまったく同じ為、同一のhexが合った場合は処理をskipする
 	count, err := w.DB.GetTxPaymentCountByUnsignedHex(hex)
@@ -434,9 +438,16 @@ func (w *Wallet) insertHexForUnsignedTxOnPayment(hex string, inputTotal, outputT
 		txPaymentOutputs[idx].ReceiptID = txReceiptID
 	}
 
-	err = w.DB.InsertTxPaymentOutputForUnsigned(txPaymentOutputs, tx, true)
+	err = w.DB.InsertTxPaymentOutputForUnsigned(txPaymentOutputs, tx, false)
 	if err != nil {
 		return 0, errors.Errorf("DB.InsertTxReceiptOutputForUnsigned(): error: %v", err)
+	}
+
+	//5. payment_requestのpayment_idを更新する paymentRequestIds
+	//txReceiptID
+	_, err = w.DB.UpdatePaymentRequestForPaymentID(txReceiptID, paymentRequestIds, tx, true)
+	if err != nil {
+		return 0, errors.Errorf("DB.UpdatePaymentRequestForPaymentID(): error: %v", err)
 	}
 
 	return txReceiptID, nil
