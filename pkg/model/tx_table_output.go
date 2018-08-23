@@ -38,7 +38,7 @@ func (m *DB) getTxOutputByReceiptID(tbl string, receiptID int64) ([]TxOutput, er
 	sql := "SELECT * FROM %s WHERE receipt_id=?"
 	sql = fmt.Sprintf(sql, tbl)
 
-	txReceiptOutputs := []TxOutput{}
+	var txReceiptOutputs []TxOutput
 	err := m.RDB.Select(&txReceiptOutputs, sql, receiptID)
 
 	return txReceiptOutputs, err
