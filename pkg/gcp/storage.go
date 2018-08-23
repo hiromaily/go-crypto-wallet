@@ -84,6 +84,26 @@ func (s *Storage) WriteOnce(path, hex string) (string, error) {
 	return generatedFileName, nil
 }
 
+// ReadOnce セッションを保持しない、一度きりの読み込み処理
+func (s *Storage) ReadOnce(path, outputPath string) error {
+	cli, err := s.NewClient(context.Background())
+	if err != nil {
+		return errors.Errorf("storage.NewClient(): error: %v", err)
+	}
+
+	err = cli.ReadAndSave(path, outputPath, 0666)
+	if err != nil {
+		return errors.Errorf("storage.Write(): error: %v", err)
+	}
+
+	err = cli.Close()
+	if err != nil {
+		return errors.Errorf("storage.Close(): error: %v", err)
+	}
+
+	return nil
+}
+
 // NewBucket 新しいBucketオブジェクトを作成する
 func (e *ExtClient) NewBucket(bucketName string) {
 	e.bkt = e.client.Bucket(bucketName)
