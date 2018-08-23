@@ -81,6 +81,10 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 		}
 	}
 
+	//FIXME:処理が受理されないトランザクションを作るために、意図的に1Satothiのfeeでトランザクションを作る
+	//DEBUG: Relayfeeにより、最低でも1000Satoshi必要
+	//fee = 1000
+
 	// オプションがある場合、feeの調整
 	if b.validateAdjustmentFee(adjustmentFee) {
 		newFee, err := b.calculateNewFee(fee, adjustmentFee)

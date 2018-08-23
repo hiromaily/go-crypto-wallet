@@ -301,22 +301,6 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 
 	// 2.fee算出
 	fee, err := w.BTC.GetFee(msgTx, adjustmentFee)
-	//fee, err := w.BTC.GetTransactionFee(msgTx)
-	//if err != nil {
-	//	return "", "", errors.Errorf("GetTransactionFee(): error: %v", err)
-	//}
-	//logger.Debugf("first fee: %v", fee) //0.001183 BTC
-	//
-	//// 2.2.feeの調整
-	//if w.BTC.ValidateAdjustmentFee(adjustmentFee) {
-	//	newFee, err := w.BTC.CalculateNewFee(fee, adjustmentFee)
-	//	if err != nil {
-	//		//logのみ表示
-	//		logger.Error("BTC.CalculateNewFee() error: %v", err)
-	//	}
-	//	logger.Debugf("adjusted fee: %v, newFee:%v", fee, newFee) //0.001183 BTC
-	//	fee = newFee
-	//}
 
 	// 3.お釣り用のoutputのトランザクションから、手数料を差し引く
 	// FIXME: これが足りない場合がめんどくさい。。。これをどう回避すべきか
