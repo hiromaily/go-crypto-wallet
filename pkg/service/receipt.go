@@ -1,13 +1,14 @@
 package service
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/file"
+	"github.com/hiromaily/go-bitcoin/pkg/gcp"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
@@ -201,10 +202,25 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 	//TODO:Debug時はlocalに出力することとする。=> これはフラグで判別したほうがいいかもしれない/Interface型にして対応してもいいかも
 	var generatedFileName string
 	if txReceiptID != 0 {
-		path := file.CreateFilePath(enum.ActionTypeReceipt, enum.TxTypeUnsigned, txReceiptID)
-		generatedFileName, err = file.WriteFile(path, hex)
+		//To File
+		//path := file.CreateFilePath(enum.ActionTypeReceipt, enum.TxTypeUnsigned, txReceiptID)
+		//generatedFileName, err = file.WriteFile(path, hex)
+		//if err != nil {
+		//	return "", "", errors.Errorf("file.WriteFile(): error: %v", err)
+		//}
+		//To GCS TODO:冗長なので、まとめたほうがいい
+		path := gcp.CreateFilePath(enum.ActionTypeReceipt, enum.TxTypeUnsigned, txReceiptID)
+		err = w.GCS[enum.ActionTypeReceipt].NewClient(context.Background())
 		if err != nil {
-			return "", "", errors.Errorf("file.WriteFile(): error: %v", err)
+			return "", "", errors.Errorf("storage.NewClient(): error: %v", err)
+		}
+		generatedFileName, err = w.GCS[enum.ActionTypeReceipt].Write(path, []byte(hex))
+		if err != nil {
+			return "", "", errors.Errorf("storage.Write(): error: %v", err)
+		}
+		err = w.GCS[enum.ActionTypeReceipt].Close()
+		if err != nil {
+			return "", "", errors.Errorf("storage.Close(): error: %v", err)
 		}
 	}
 

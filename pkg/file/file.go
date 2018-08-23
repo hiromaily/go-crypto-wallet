@@ -70,32 +70,8 @@ func ParseFile(filePath string, txType enum.TxType) (int64, enum.ActionType, str
 	return txReceiptID, enum.ActionType(s[0]), s[2], nil
 }
 
-// WriteFileForUnsigned [Debug用] localにファイルを出力する(実運用では、未署名ファイルはGCSにUpload)
-// 戻り値としてファイル名を返す
-//func WriteFileForUnsigned(txReceiptID int64, path, hexTx string) string {
-//	filePrefix := strconv.FormatInt(txReceiptID, 10) + "_unsigned_"
-//
-//	return writeFileOnLocal(hexTx, path, filePrefix)
-//}
-
-// WriteFileForSigned localに署名済hexをファイルに出力する
-//func WriteFileForSigned(txReceiptID int64, path, hexTx string) string {
-//	filePrefix := strconv.FormatInt(txReceiptID, 10) + "_signed_"
-//
-//	return writeFileOnLocal(hexTx, path, filePrefix)
-//}
-
-//func WriteFileOnLocal(hexTx, path, filePrefix string) string {
-//	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
-//
-//	byteTx := []byte(hexTx)
-//	fileName := filePath + path + filePrefix + ts
-//	ioutil.WriteFile(fileName, byteTx, 0644)
-//
-//	return fileName
-//}
-
 // WriteFile ファイルに書き込む
+// TODO:ioをパラメータに持つか
 func WriteFile(path, hexTx string) (string, error) {
 	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
 

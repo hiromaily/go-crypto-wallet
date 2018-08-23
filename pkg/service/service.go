@@ -3,7 +3,9 @@ package service
 import (
 	"github.com/bookerzzz/grok"
 	"github.com/hiromaily/go-bitcoin/pkg/api"
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/file"
+	"github.com/hiromaily/go-bitcoin/pkg/gcp"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/hiromaily/go-bitcoin/pkg/rdb"
@@ -15,6 +17,7 @@ import (
 type Wallet struct {
 	BTC *api.Bitcoin
 	DB  *model.DB
+	GCS map[enum.ActionType]*gcp.Storage
 	//DB  *sqlx.DB
 	//Db  *kvs.LevelDB
 }
@@ -51,6 +54,15 @@ func InitialSettings(confPath string) (*Wallet, error) {
 		file.SetFilePath(conf.File.FileBasePath)
 	}
 
+	// GCS
+	gcs := make(map[enum.ActionType]*gcp.Storage)
+	if conf.GCS.ReceiptBucketName != "" {
+		gcs[enum.ActionTypeReceipt] = gcp.NewStorage(conf.GCS.ReceiptBucketName, conf.GCS.StorageKeyPath)
+	}
+	if conf.GCS.PaymentBucketName != "" {
+		gcs[enum.ActionTypePayment] = gcp.NewStorage(conf.GCS.PaymentBucketName, conf.GCS.StorageKeyPath)
+	}
+
 	// Connection to Bitcoin core
 	//bit, err := api.Connection(conf.Bitcoin.Host, conf.Bitcoin.User, conf.Bitcoin.Pass, true, true, conf.Bitcoin.IsMain)
 	bit, err := api.Connection(&conf.Bitcoin)
@@ -60,7 +72,7 @@ func InitialSettings(confPath string) (*Wallet, error) {
 	//defer bit.Close()
 
 	//Wallet Object
-	wallet := Wallet{BTC: bit, DB: model.NewDB(rds)}
+	wallet := Wallet{BTC: bit, DB: model.NewDB(rds), GCS: gcs}
 	return &wallet, nil
 }
 

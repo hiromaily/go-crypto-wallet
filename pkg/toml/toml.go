@@ -14,6 +14,7 @@ type Config struct {
 	//LevelDB LevelDBConf `toml:"leveldb"` //TODO:おそらく不要
 	MySQL MySQLConf `toml:"mysql"`
 	File  FileConf  `toml:"file"`
+	GCS   GCSConf   `toml:"gcs"`
 }
 
 // BitcoinConf Bitcoin情報
@@ -65,6 +66,13 @@ type MySQLConf struct {
 // import/export共にこのパスが使われる
 type FileConf struct {
 	FileBasePath string `toml:"file_base_path"`
+}
+
+// GCSConf Google Cloud Storage
+type GCSConf struct {
+	StorageKeyPath    string `toml:"storage_key_path"`
+	ReceiptBucketName string `toml:"receipt_bucket_name"`
+	PaymentBucketName string `toml:"payment_bucket_name"`
 }
 
 // load configfile
