@@ -256,6 +256,14 @@ func debugForCheck(wallet *service.Wallet) {
 			log.Fatalf("%+v", err)
 		}
 		log.Printf("[Debug] 送信までDONE!! %s", hash.String())
+	case 11:
+		//[Debug用]payment_requestテーブルの情報を初期化する
+		log.Print("Run: payment_requestテーブルの情報を初期化する")
+		_, err := wallet.DB.ResetAnyFlagOnPaymentRequestForTestOnly(nil, true)
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+
 	default:
 		log.Print("該当Mode無し")
 	}

@@ -126,3 +126,24 @@ UPDATE payment_request SET payment_id=? WHERE id IN (?)
 	return affectedNum, nil
 
 }
+
+// ResetAnyFlagOnPaymentRequestForTestOnly テーブルを初期化する(テストでしか使用することはない)
+func (m *DB) ResetAnyFlagOnPaymentRequestForTestOnly(tx *sqlx.Tx, isCommit bool) (int64, error) {
+	sql := "UPDATE payment_request SET is_done=false, payment_id=NULL"
+
+	if tx == nil {
+		tx = m.RDB.MustBegin()
+	}
+
+	res, err := tx.Exec(sql)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+	if isCommit {
+		tx.Commit()
+	}
+	affectedNum, _ := res.RowsAffected()
+
+	return affectedNum, nil
+}

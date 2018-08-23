@@ -90,9 +90,15 @@ func (m *DB) getSentTxHash(tbl string, txTypeValue uint8) ([]string, error) {
 	return txHashs, nil
 }
 
-// GetSentTxHashByTxTypeSent 送信済ステータスであるsent_hash_txの配列を返す
+// GetSentTxHashByTxTypeSent tx_typeが`sent`であるsent_hash_txの配列を返す
 func (m *DB) GetSentTxHashByTxTypeSent(actionType enum.ActionType) ([]string, error) {
 	txTypeValue := enum.TxTypeValue[enum.TxTypeSent]
+	return m.getSentTxHash(txTableName[actionType], txTypeValue)
+}
+
+// GetSentTxHashByTxTypeDone tx_typeが`done`のステータスであるsent_hash_txの配列を返す
+func (m *DB) GetSentTxHashByTxTypeDone(actionType enum.ActionType) ([]string, error) {
+	txTypeValue := enum.TxTypeValue[enum.TxTypeDone]
 	return m.getSentTxHash(txTableName[actionType], txTypeValue)
 }
 
