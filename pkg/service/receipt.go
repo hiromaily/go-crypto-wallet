@@ -159,8 +159,7 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 	}
 
 	// 7. Databaseに必要な情報を保存
-	//  txType //1.未署名
-	txReceiptID, err := w.insertHexForUnsignedTxOnReceipt(hex, inputTotal, outputTotal, fee, enum.TxTypeValue[enum.TxTypeUnsigned], txReceiptInputs, txReceiptOutputs)
+	txReceiptID, err := w.insertTxTableForUnsigned(enum.ActionTypeReceipt, hex, inputTotal, outputTotal, fee, enum.TxTypeValue[enum.TxTypeUnsigned], txReceiptInputs, txReceiptOutputs, nil)
 	if err != nil {
 		return "", "", errors.Errorf("insertHexOnDB(): error: %v", err)
 	}
@@ -183,14 +182,15 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 }
 
 //TODO:引数の数が多いのはGoにおいてはBad practice...
-func (w *Wallet) insertHexForUnsignedTxOnReceipt(hex string, inputTotal, outputTotal, fee btcutil.Amount, txType uint8,
-	txReceiptInputs []model.TxInput, txReceiptOutputs []model.TxOutput) (int64, error) {
+//[共通(receipt/payment)]
+func (w *Wallet) insertTxTableForUnsigned(actionType enum.ActionType, hex string, inputTotal, outputTotal, fee btcutil.Amount, txType uint8,
+	txInputs []model.TxInput, txOutputs []model.TxOutput, paymentRequestIds []int64) (int64, error) {
 
 	//1.内容が同じだと、生成されるhexもまったく同じ為、同一のhexが合った場合は処理をskipする
 	//count, err := w.DB.GetTxReceiptCountByUnsignedHex(hex)
-	count, err := w.DB.GetTxCountByUnsignedHex(enum.ActionTypeReceipt, hex)
+	count, err := w.DB.GetTxCountByUnsignedHex(actionType, hex)
 	if err != nil {
-		return 0, errors.Errorf("DB.GetTxReceiptByUnsignedHex(): error: %v", err)
+		return 0, errors.Errorf("DB.GetTxCountByUnsignedHex(): error: %v", err)
 	}
 	if count != 0 {
 		//skip
@@ -206,38 +206,52 @@ func (w *Wallet) insertHexForUnsignedTxOnReceipt(hex string, inputTotal, outputT
 	txReceipt.TxType = txType
 
 	tx := w.DB.RDB.MustBegin()
-	//txReceiptID, err := w.DB.InsertTxReceiptForUnsigned(&txReceipt, tx, false)
-	txReceiptID, err := w.DB.InsertTxForUnsigned(enum.ActionTypeReceipt, &txReceipt, tx, false)
+	txReceiptID, err := w.DB.InsertTxForUnsigned(actionType, &txReceipt, tx, false)
 	if err != nil {
-		return 0, errors.Errorf("DB.InsertTxReceiptForUnsigned(): error: %v", err)
+		return 0, errors.Errorf("DB.InsertTxForUnsigned(): error: %v", err)
 	}
 
 	//3.TxReceiptInputテーブル
 	//ReceiptIDの更新
-	for idx := range txReceiptInputs {
-		txReceiptInputs[idx].ReceiptID = txReceiptID
+	for idx := range txInputs {
+		txInputs[idx].ReceiptID = txReceiptID
 	}
-
-	err = w.DB.InsertTxInputForUnsigned(enum.ActionTypeReceipt, txReceiptInputs, tx, false)
+	err = w.DB.InsertTxInputForUnsigned(actionType, txInputs, tx, false)
 	if err != nil {
-		return 0, errors.Errorf("DB.InsertTxReceiptInputForUnsigned(): error: %v", err)
+		return 0, errors.Errorf("DB.InsertTxInputForUnsigned(): error: %v", err)
 	}
 
 	//4.TxReceiptOutputテーブル
 	//ReceiptIDの更新
-	for idx := range txReceiptOutputs {
-		txReceiptOutputs[idx].ReceiptID = txReceiptID
+	for idx := range txOutputs {
+		txOutputs[idx].ReceiptID = txReceiptID
 	}
 
-	err = w.DB.InsertTxOutputForUnsigned(enum.ActionTypeReceipt, txReceiptOutputs, tx, true)
+	//commit flag
+	isCommit := true
+	if actionType == enum.ActionTypePayment {
+		isCommit = false
+	}
+
+	err = w.DB.InsertTxOutputForUnsigned(actionType, txOutputs, tx, isCommit)
 	if err != nil {
-		return 0, errors.Errorf("DB.InsertTxReceiptOutputForUnsigned(): error: %v", err)
+		return 0, errors.Errorf("DB.InsertTxOutputForUnsigned(): error: %v", err)
+	}
+
+	//5. payment_requestのpayment_idを更新する paymentRequestIds
+	if actionType == enum.ActionTypePayment {
+		//txReceiptID
+		_, err = w.DB.UpdatePaymentIDOnPaymentRequest(txReceiptID, paymentRequestIds, tx, true)
+		if err != nil {
+			return 0, errors.Errorf("DB.UpdatePaymentIDOnPaymentRequest(): error: %v", err)
+		}
 	}
 
 	return txReceiptID, nil
 }
 
 // storeHex　hex情報を保存し、ファイル名を返す
+// [共通(receipt/payment)]
 func (w *Wallet) storeHex(hex string, id int64, actionType enum.ActionType) (string, error) {
 	var (
 		generatedFileName string
