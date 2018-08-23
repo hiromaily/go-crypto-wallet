@@ -424,7 +424,7 @@ func (w *Wallet) insertHexForUnsignedTxOnPayment(hex string, inputTotal, outputT
 		txPaymentInputs[idx].ReceiptID = txReceiptID
 	}
 
-	err = w.DB.InsertTxPaymentInputForUnsigned(txPaymentInputs, tx, false)
+	err = w.DB.InsertTxInputForUnsigned(enum.ActionTypePayment, txPaymentInputs, tx, false)
 	if err != nil {
 		return 0, errors.Errorf("DB.InsertTxPaymentInputForUnsigned(): error: %v", err)
 	}
@@ -435,7 +435,7 @@ func (w *Wallet) insertHexForUnsignedTxOnPayment(hex string, inputTotal, outputT
 		txPaymentOutputs[idx].ReceiptID = txReceiptID
 	}
 
-	err = w.DB.InsertTxPaymentOutputForUnsigned(txPaymentOutputs, tx, false)
+	err = w.DB.InsertTxOutputForUnsigned(enum.ActionTypePayment, txPaymentOutputs, tx, false)
 	if err != nil {
 		return 0, errors.Errorf("DB.InsertTxReceiptOutputForUnsigned(): error: %v", err)
 	}

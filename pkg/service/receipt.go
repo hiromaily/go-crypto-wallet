@@ -254,7 +254,7 @@ func (w *Wallet) insertHexForUnsignedTxOnReceipt(hex string, inputTotal, outputT
 		txReceiptInputs[idx].ReceiptID = txReceiptID
 	}
 
-	err = w.DB.InsertTxReceiptInputForUnsigned(txReceiptInputs, tx, false)
+	err = w.DB.InsertTxInputForUnsigned(enum.ActionTypeReceipt, txReceiptInputs, tx, false)
 	if err != nil {
 		return 0, errors.Errorf("DB.InsertTxReceiptInputForUnsigned(): error: %v", err)
 	}
@@ -265,7 +265,7 @@ func (w *Wallet) insertHexForUnsignedTxOnReceipt(hex string, inputTotal, outputT
 		txReceiptOutputs[idx].ReceiptID = txReceiptID
 	}
 
-	err = w.DB.InsertTxReceiptOutputForUnsigned(txReceiptOutputs, tx, true)
+	err = w.DB.InsertTxOutputForUnsigned(enum.ActionTypeReceipt, txReceiptOutputs, tx, true)
 	if err != nil {
 		return 0, errors.Errorf("DB.InsertTxReceiptOutputForUnsigned(): error: %v", err)
 	}

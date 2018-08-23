@@ -86,7 +86,7 @@ func (w *Wallet) checkTransaction(hashs []string, actionType enum.ActionType) er
 			err = w.notifyUsers(hash, actionType)
 			//TODO:errはどう処理すべき？他にもhashがあるので、continueしてもいいか？
 			if err != nil {
-				logger.Errorf("ActionType: %s, w.notifyUsers(%s, %s) error:%v",actionType, hash, actionType, err)
+				logger.Errorf("ActionType: %s, w.notifyUsers(%s, %s) error:%v", actionType, hash, actionType, err)
 			}
 
 			//if actionType == enum.ActionTypeReceipt {
@@ -138,7 +138,7 @@ func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) error {
 		logger.Debug("notifyUsers() receiptID:", receiptID)
 
 		// 2.tx_receipt_inputテーブルから該当のreceipt_idでレコードを取得
-		txInputs, err := w.DB.GetTxReceiptInputByReceiptID(receiptID)
+		txInputs, err := w.DB.GetTxInputByReceiptID(enum.ActionTypeReceipt, receiptID)
 		if err != nil {
 			return errors.Errorf("DB.GetTxReceiptInputByReceiptID(%d) error: %v", receiptID, err)
 		}
