@@ -128,7 +128,7 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 	fee, err := w.BTC.GetFee(msgTx, adjustmentFee)
 
 	// 3.手数料のために、totalを調整し、再度RawTransactionを作成する
-	//このパートのみが、出金とロジックが異なる
+	//このパートは、出金とロジックが異なる
 	outputTotal = inputTotal - fee
 	if outputTotal <= 0 {
 		return "", "", errors.Errorf("calculated fee must be wrong: fee:%v, error: %v", fee, err)
@@ -147,7 +147,6 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 	}
 
 	// 5.再度 CreateRawTransaction
-	//TODO:同一I/Fのために、outputsを作成して、CreateRawTransactionWithOutput()を呼び出したほうがいいかもしれない。
 	msgTx, err = w.BTC.CreateRawTransaction(w.BTC.StoredAddress(), outputTotal, inputs)
 	if err != nil {
 		return "", "", errors.Errorf("CreateRawTransaction(): error: %v", err)
@@ -158,17 +157,6 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 	if err != nil {
 		return "", "", errors.Errorf("w.BTC.ToHex(msgTx): error: %v", err)
 	}
-
-	//TODO:以下処理は不要だが、仕様がFIXするまでコメントアウトとしてのこしておく
-	//TODO:fundrawtransactionによる手数料の算出は全額送金においては機能しない
-	//https://bitcoincore.org/en/doc/0.16.2/rpc/rawtransactions/fundrawtransaction/
-	//res, err := w.BTC.FundRawTransaction(hex)
-	//if err != nil {
-	//	//FIXME:error: -4: Insufficient funds
-	//	return "", errors.Errorf("w.BTC.FundRawTransaction(hex): error: %v", err)
-	//}
-	//[Debug]res.Hex
-	//w.BTC.GetRawTransactionByHex(res.Hex)
 
 	// 7. Databaseに必要な情報を保存
 	//  txType //1.未署名
@@ -182,23 +170,9 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 	//TODO:Debug時はlocalに出力することとする。=> これはフラグで判別したほうがいいかもしれない/Interface型にして対応してもいいかも
 	var generatedFileName string
 	if txReceiptID != 0 {
-		//To File(本番では利用しない??)
-		if w.Env == enum.EnvDev {
-			path := file.CreateFilePath(enum.ActionTypeReceipt, enum.TxTypeUnsigned, txReceiptID, true)
-			generatedFileName, err = file.WriteFile(path, hex)
-			if err != nil {
-				return "", "", errors.Errorf("file.WriteFile(): error: %v", err)
-			}
-		}
-
-		//[WIP] GCS
-		path := file.CreateFilePath(enum.ActionTypeReceipt, enum.TxTypeUnsigned, txReceiptID, false)
-
-		//GCS上に、Clientを作成(セッションの関係で都度作成する)
-		//generatedFileName2, err := w.GCS[enum.ActionTypeReceipt].WriteOnce(path, hex)
-		_, err := w.GCS[enum.ActionTypeReceipt].WriteOnce(path, hex)
+		generatedFileName, err = w.storeHex(hex, txReceiptID, enum.ActionTypeReceipt)
 		if err != nil {
-			return "", "", errors.Errorf("storage.WriteOnce(): error: %v", err)
+			return "", "", errors.Errorf("wallet.storeHex(): error: %v", err)
 		}
 	}
 
@@ -206,10 +180,6 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 	// TODO:NatsのPublisherとして通知すればいいか？
 
 	return hex, generatedFileName, nil
-}
-
-func (w *Wallet) storeHexOnGPS(hexTx string) {
-
 }
 
 //TODO:引数の数が多いのはGoにおいてはBad practice...
@@ -265,4 +235,33 @@ func (w *Wallet) insertHexForUnsignedTxOnReceipt(hex string, inputTotal, outputT
 	}
 
 	return txReceiptID, nil
+}
+
+// storeHex　hex情報を保存し、ファイル名を返す
+func (w *Wallet) storeHex(hex string, id int64, actionType enum.ActionType) (string, error) {
+	var (
+		generatedFileName string
+		err               error
+	)
+
+	//To File(本番では利用しない??)
+	if w.Env == enum.EnvDev {
+		path := file.CreateFilePath(actionType, enum.TxTypeUnsigned, id, true)
+		generatedFileName, err = file.WriteFile(path, hex)
+		if err != nil {
+			return "", errors.Errorf("file.WriteFile(): error: %v", err)
+		}
+	}
+
+	//[WIP] GCS
+	path := file.CreateFilePath(actionType, enum.TxTypeUnsigned, id, false)
+
+	//GCS上に、Clientを作成(セッションの関係で都度作成する)
+	//generatedFileName2, err := w.GCS[enum.ActionTypeReceipt].WriteOnce(path, hex)
+	_, err = w.GCS[actionType].WriteOnce(path, hex)
+	if err != nil {
+		return "", errors.Errorf("storage.WriteOnce(): error: %v", err)
+	}
+
+	return generatedFileName, nil
 }

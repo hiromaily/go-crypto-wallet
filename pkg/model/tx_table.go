@@ -82,7 +82,7 @@ func (m *DB) getSentTxHash(tbl string, txTypeValue uint8) ([]string, error) {
 	sql := "SELECT sent_hash_tx FROM %s WHERE current_tx_type=?"
 	sql = fmt.Sprintf(sql, tbl)
 
-	err := m.RDB.Select(&txHashs, sql, enum.TxTypeValue[enum.TxTypeSent])
+	err := m.RDB.Select(&txHashs, sql, txTypeValue)
 	if err != nil {
 		return nil, err
 	}

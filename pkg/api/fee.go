@@ -123,7 +123,7 @@ func (b *Bitcoin) getMinRelayFee() (btcutil.Amount, error) {
 		return 0, errors.Errorf("GetNetworkInfo() error: %v", err)
 	}
 	if res.Relayfee == 0 {
-		return 0, errors.New("GetNetworkInfo().Relayfee error: RelayFee is not retrieved.")
+		return 0, errors.New("GetNetworkInfo().Relayfee error: RelayFee is not retrieved")
 	}
 	fee, err := b.FloatBitToAmount(res.Relayfee)
 	if err != nil {
