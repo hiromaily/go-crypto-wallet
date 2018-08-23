@@ -8,13 +8,6 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-//enum.Actionに応じて、テーブルを切り替える
-
-//const (
-//	tableNameReceiptInput = "tx_receipt_input"
-//	tableNamePaymentInput = "tx_payment_input"
-//)
-
 var txTableInputName = map[enum.ActionType]string{
 	"receipt": "tx_receipt_input",
 	"payment": "tx_payment_input",
@@ -33,7 +26,7 @@ type TxInput struct {
 	UpdatedAt          *time.Time `db:"updated_at"`
 }
 
-// getTxReceiptInputByReceiptID TxReceiptInputテーブルから該当するIDのレコードを返す
+// getTxInputByReceiptID 該当するIDのレコードを返す
 func (m *DB) getTxInputByReceiptID(tbl string, receiptID int64) ([]TxInput, error) {
 	sql := "SELECT * FROM %s WHERE receipt_id=?"
 	sql = fmt.Sprintf(sql, tbl)
@@ -44,12 +37,12 @@ func (m *DB) getTxInputByReceiptID(tbl string, receiptID int64) ([]TxInput, erro
 	return txReceiptInputs, err
 }
 
-// GetTxReceiptInputByReceiptID TxReceiptInputテーブルから該当するIDのレコードを返す
+// GetTxInputByReceiptID 該当するIDのレコードを返す
 func (m *DB) GetTxInputByReceiptID(actionType enum.ActionType, receiptID int64) ([]TxInput, error) {
 	return m.getTxInputByReceiptID(txTableInputName[actionType], receiptID)
 }
 
-// insertTxReceiptInputForUnsigned TxReceiptInputテーブルに未署名トランザクションのinputに使われたtxレコードを作成する
+// insertTxInputForUnsigned 未署名トランザクションのinputに使われたtxレコードを作成する
 //TODO:BulkInsertがやりたい
 func (m *DB) insertTxInputForUnsigned(tbl string, txReceiptInputs []TxInput, tx *sqlx.Tx, isCommit bool) error {
 
@@ -78,7 +71,7 @@ VALUES (:receipt_id, :input_txid, :input_vout, :input_address, :input_account, :
 	return nil
 }
 
-// InsertTxReceiptInputForUnsigned TxReceiptInputテーブルに未署名トランザクションのinputに使われたtxレコードを作成する
+// InsertTxInputForUnsigned 未署名トランザクションのinputに使われたtxレコードを作成する
 //TODO:BulkInsertがやりたい
 func (m *DB) InsertTxInputForUnsigned(actionType enum.ActionType, txReceiptInputs []TxInput, tx *sqlx.Tx, isCommit bool) error {
 	return m.insertTxInputForUnsigned(txTableInputName[actionType], txReceiptInputs, tx, isCommit)

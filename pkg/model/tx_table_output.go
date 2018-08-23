@@ -33,7 +33,7 @@ type TxOutput struct {
 	UpdatedAt     *time.Time `db:"updated_at"`
 }
 
-// getTxReceiptOutputByReceiptID TxReceiptOutputテーブルから該当するIDのレコードを返す
+// getTxOutputByReceiptID 該当するIDのレコードを返す
 func (m *DB) getTxOutputByReceiptID(tbl string, receiptID int64) ([]TxOutput, error) {
 	sql := "SELECT * FROM %s WHERE receipt_id=?"
 	sql = fmt.Sprintf(sql, tbl)
@@ -44,12 +44,12 @@ func (m *DB) getTxOutputByReceiptID(tbl string, receiptID int64) ([]TxOutput, er
 	return txReceiptOutputs, err
 }
 
-// GetTxReceiptOutputByReceiptID TxReceiptOutputテーブルから該当するIDのレコードを返す
+// GetTxOutputByReceiptID 該当するIDのレコードを返す
 func (m *DB) GetTxOutputByReceiptID(actionType enum.ActionType, receiptID int64) ([]TxOutput, error) {
 	return m.getTxOutputByReceiptID(txTableInputName[actionType], receiptID)
 }
 
-// insertTxReceiptOutputForUnsigned TxReceiptOutputテーブルに未署名トランザクションのoutputに使われたtxレコードを作成する
+// insertTxOutputForUnsigned 未署名トランザクションのoutputに使われたtxレコードを作成する
 //TODO:BulkInsertがやりたい
 func (m *DB) insertTxOutputForUnsigned(tbl string, txReceiptOutputs []TxOutput, tx *sqlx.Tx, isCommit bool) error {
 
@@ -78,7 +78,7 @@ VALUES (:receipt_id,  :output_address, :output_account, :output_amount, :is_chan
 	return nil
 }
 
-// InsertTxReceiptOutputForUnsigned TxReceiptOutputテーブルに未署名トランザクションのoutputに使われたtxレコードを作成する
+// InsertTxOutputForUnsigned 未署名トランザクションのoutputに使われたtxレコードを作成する
 //TODO:BulkInsertがやりたい
 func (m *DB) InsertTxOutputForUnsigned(actionType enum.ActionType, txReceiptOutputs []TxOutput, tx *sqlx.Tx, isCommit bool) error {
 	return m.insertTxOutputForUnsigned(txTableInputName[actionType], txReceiptOutputs, tx, isCommit)
