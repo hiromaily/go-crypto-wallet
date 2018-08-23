@@ -6,6 +6,7 @@ import (
 
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/pkg/errors"
 )
 
@@ -60,8 +61,42 @@ func (b *Bitcoin) GetTransactionFee(tx *wire.MsgTx) (btcutil.Amount, error) {
 	return feeAsBit, nil
 }
 
+// GetFee 手数料を総合的に判断し取得する
+func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount, error) {
+	//通常の取得
+	fee, err := b.GetTransactionFee(tx)
+	if err != nil {
+		return 0, errors.Errorf("GetTransactionFee(): error: %v", err)
+	}
+	logger.Debugf("[1]fee: %v", fee) //0.000208 BTC
+
+	//最低に満たない場合は、上書きをする
+	relayFee, err := b.getMinRelayFee()
+	if err != nil {
+		//logのみ
+		logger.Errorf("getMinRelayFee(): error: %v", err)
+	} else {
+		if fee < relayFee {
+			fee = relayFee
+		}
+	}
+
+	// オプションがある場合、feeの調整
+	if b.validateAdjustmentFee(adjustmentFee) {
+		newFee, err := b.calculateNewFee(fee, adjustmentFee)
+		if err != nil {
+			//logのみ表示
+			logger.Errorf("calculateNewFee() error: %v", err)
+		}
+		logger.Debugf("[2]adjusted newFee:%v", newFee) //0.000208 BTC
+		fee = newFee
+	}
+
+	return fee, nil
+}
+
 // ValidateAdjustmentFee 起動時に渡されたfeeの適用範囲をValidateする
-func (b *Bitcoin) ValidateAdjustmentFee(fee float64) bool {
+func (b *Bitcoin) validateAdjustmentFee(fee float64) bool {
 	//Rangeの範囲内であればOK
 	if fee >= b.FeeRangeMin() && fee <= b.FeeRangeMax() {
 		return true
@@ -70,10 +105,25 @@ func (b *Bitcoin) ValidateAdjustmentFee(fee float64) bool {
 }
 
 // CalculateNewFee 手数料を調整する
-func (b *Bitcoin) CalculateNewFee(fee btcutil.Amount, adjustmentFee float64) (btcutil.Amount, error) {
+func (b *Bitcoin) calculateNewFee(fee btcutil.Amount, adjustmentFee float64) (btcutil.Amount, error) {
 	newFee, err := b.FloatBitToAmount(fee.ToBTC() * adjustmentFee)
 	if err != nil {
 		return 0, errors.Errorf("FloatBitToAmount() error: %v", err)
 	}
 	return newFee, nil
+}
+
+func (b *Bitcoin) getMinRelayFee() (btcutil.Amount, error) {
+	res, err := b.GetNetworkInfo()
+	if err != nil {
+		return 0, errors.Errorf("GetNetworkInfo() error: %v", err)
+	}
+	if res.Relayfee == 0 {
+		return 0, errors.New("GetNetworkInfo().Relayfee error: RelayFee is not retrieved.")
+	}
+	fee, err := b.FloatBitToAmount(res.Relayfee)
+	if err != nil {
+		return 0, errors.Errorf("FloatBitToAmount() error: %v", err)
+	}
+	return fee, nil
 }

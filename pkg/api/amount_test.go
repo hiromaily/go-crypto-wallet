@@ -48,6 +48,8 @@ func TestCastStrBitToAmount(t *testing.T) {
 		{"8.04", 804000000},
 		{"0.5", 50000000},
 		{"0.0025", 250000},
+		{"0.0000040000", 400},
+		{"0.000010", 1000},
 	}
 	for _, val := range tests {
 		amt, err := btc.CastStrBitToAmount(val.bit)

@@ -124,23 +124,24 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 		return "", "", errors.Errorf("CreateRawTransaction(): error: %v", err)
 	}
 
-	// 2.fee算出
-	fee, err := w.BTC.GetTransactionFee(msgTx)
-	if err != nil {
-		return "", "", errors.Errorf("GetTransactionFee(): error: %v", err)
-	}
-	logger.Debugf("first fee: %v, %f", fee, adjustmentFee) //0.000208 BTC
-
-	// 2.2.feeの調整
-	if w.BTC.ValidateAdjustmentFee(adjustmentFee) {
-		newFee, err := w.BTC.CalculateNewFee(fee, adjustmentFee)
-		if err != nil {
-			//logのみ表示
-			logger.Errorf("w.BTC.CalculateNewFee() error: %v", err)
-		}
-		logger.Errorf("adjusted fee: %v, newFee:%v", fee, newFee) //0.000208 BTC
-		fee = newFee
-	}
+	// 2.fee算出 TODO:全部まとめよう。。。
+	fee, err := w.BTC.GetFee(msgTx, adjustmentFee)
+	//fee, err := w.BTC.GetTransactionFee(msgTx)
+	//if err != nil {
+	//	return "", "", errors.Errorf("GetTransactionFee(): error: %v", err)
+	//}
+	//logger.Debugf("first fee: %v, %f", fee, adjustmentFee) //0.000208 BTC
+	//
+	//// 2.2.feeの調整
+	//if w.BTC.ValidateAdjustmentFee(adjustmentFee) {
+	//	newFee, err := w.BTC.CalculateNewFee(fee, adjustmentFee)
+	//	if err != nil {
+	//		//logのみ表示
+	//		logger.Errorf("w.BTC.CalculateNewFee() error: %v", err)
+	//	}
+	//	logger.Errorf("adjusted fee: %v, newFee:%v", fee, newFee) //0.000208 BTC
+	//	fee = newFee
+	//}
 
 	//FIXME:処理が受理されないトランザクションを作るために、意図的に1Satothiのfeeでトランザクションを作る
 	//DEBUG: Relayfeeにより、最低でも1000Satoshi必要
@@ -201,7 +202,7 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 	//TODO:Debug時はlocalに出力することとする。=> これはフラグで判別したほうがいいかもしれない/Interface型にして対応してもいいかも
 	var generatedFileName string
 	if txReceiptID != 0 {
-		//To File(本番では利用しない)
+		//To File(本番では利用しない??)
 		if w.Env == enum.EnvDev {
 			path := file.CreateFilePath(enum.ActionTypeReceipt, enum.TxTypeUnsigned, txReceiptID, true)
 			generatedFileName, err = file.WriteFile(path, hex)
@@ -210,12 +211,12 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 			}
 		}
 
-		//GCS
-		//上書きされるが、問題ない
+		//[WIP] GCS
 		path := file.CreateFilePath(enum.ActionTypeReceipt, enum.TxTypeUnsigned, txReceiptID, false)
 
 		//GCS上に、Clientを作成(セッションの関係で都度作成する)
-		generatedFileName, err = w.GCS[enum.ActionTypeReceipt].WriteOnce(path, hex)
+		//generatedFileName2, err := w.GCS[enum.ActionTypeReceipt].WriteOnce(path, hex)
+		_, err := w.GCS[enum.ActionTypeReceipt].WriteOnce(path, hex)
 		if err != nil {
 			return "", "", errors.Errorf("storage.WriteOnce(): error: %v", err)
 		}

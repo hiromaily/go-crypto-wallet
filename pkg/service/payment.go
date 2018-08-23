@@ -300,22 +300,23 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 	logger.Debugf("CreateRawTransactionWithOutput: %v", msgTx)
 
 	// 2.fee算出
-	fee, err := w.BTC.GetTransactionFee(msgTx)
-	if err != nil {
-		return "", "", errors.Errorf("GetTransactionFee(): error: %v", err)
-	}
-	logger.Debugf("first fee: %v", fee) //0.001183 BTC
-
-	// 2.2.feeの調整
-	if w.BTC.ValidateAdjustmentFee(adjustmentFee) {
-		newFee, err := w.BTC.CalculateNewFee(fee, adjustmentFee)
-		if err != nil {
-			//logのみ表示
-			logger.Error("BTC.CalculateNewFee() error: %v", err)
-		}
-		logger.Debugf("adjusted fee: %v, newFee:%v", fee, newFee) //0.001183 BTC
-		fee = newFee
-	}
+	fee, err := w.BTC.GetFee(msgTx, adjustmentFee)
+	//fee, err := w.BTC.GetTransactionFee(msgTx)
+	//if err != nil {
+	//	return "", "", errors.Errorf("GetTransactionFee(): error: %v", err)
+	//}
+	//logger.Debugf("first fee: %v", fee) //0.001183 BTC
+	//
+	//// 2.2.feeの調整
+	//if w.BTC.ValidateAdjustmentFee(adjustmentFee) {
+	//	newFee, err := w.BTC.CalculateNewFee(fee, adjustmentFee)
+	//	if err != nil {
+	//		//logのみ表示
+	//		logger.Error("BTC.CalculateNewFee() error: %v", err)
+	//	}
+	//	logger.Debugf("adjusted fee: %v, newFee:%v", fee, newFee) //0.001183 BTC
+	//	fee = newFee
+	//}
 
 	// 3.お釣り用のoutputのトランザクションから、手数料を差し引く
 	// FIXME: これが足りない場合がめんどくさい。。。これをどう回避すべきか
@@ -383,12 +384,12 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 			}
 		}
 
-		//GCS
-		//上書きされるが、問題ない
+		//[WIP] GCS
 		path := file.CreateFilePath(enum.ActionTypePayment, enum.TxTypeUnsigned, txReceiptID, false)
 
 		//GCS上に、Clientを作成(セッションの関係で都度作成する)
-		generatedFileName, err = w.GCS[enum.ActionTypeReceipt].WriteOnce(path, hex)
+		//generatedFileName, err = w.GCS[enum.ActionTypeReceipt].WriteOnce(path, hex)
+		_, err = w.GCS[enum.ActionTypeReceipt].WriteOnce(path, hex)
 		if err != nil {
 			return "", "", errors.Errorf("storage.WriteOnce(): error: %v", err)
 		}
