@@ -46,7 +46,7 @@ func (m *DB) getTxOutputByReceiptID(tbl string, receiptID int64) ([]TxOutput, er
 
 // GetTxOutputByReceiptID 該当するIDのレコードを返す
 func (m *DB) GetTxOutputByReceiptID(actionType enum.ActionType, receiptID int64) ([]TxOutput, error) {
-	return m.getTxOutputByReceiptID(txTableInputName[actionType], receiptID)
+	return m.getTxOutputByReceiptID(txTableOutputName[actionType], receiptID)
 }
 
 // insertTxOutputForUnsigned 未署名トランザクションのoutputに使われたtxレコードを作成する
@@ -81,5 +81,5 @@ VALUES (:receipt_id,  :output_address, :output_account, :output_amount, :is_chan
 // InsertTxOutputForUnsigned 未署名トランザクションのoutputに使われたtxレコードを作成する
 //TODO:BulkInsertがやりたい
 func (m *DB) InsertTxOutputForUnsigned(actionType enum.ActionType, txReceiptOutputs []TxOutput, tx *sqlx.Tx, isCommit bool) error {
-	return m.insertTxOutputForUnsigned(txTableInputName[actionType], txReceiptOutputs, tx, isCommit)
+	return m.insertTxOutputForUnsigned(txTableOutputName[actionType], txReceiptOutputs, tx, isCommit)
 }
