@@ -3,6 +3,7 @@ package logger
 import (
 	"os"
 
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -22,18 +23,18 @@ func (le *nostackLevelEnabler) Enabled(zapcore.Level) bool {
 }
 
 // Initialize 設定を読み込みLoggerを初期化する。mainクラスなど起動時に呼ばれる想定
-func Initialize(env string) error {
+func Initialize(env enum.EnvironmentType) error {
 	return initZapLoggers(env)
 }
 
-func initZapLoggers(env string) error {
+func initZapLoggers(env enum.EnvironmentType) error {
 
 	var encoder zapcore.Encoder
 	switch env {
-	case "dev":
+	case enum.EnvDev:
 		encoderCfg := zap.NewDevelopmentEncoderConfig()
 		encoder = zapcore.NewConsoleEncoder(encoderCfg)
-	case "prod":
+	case enum.EnvProd:
 		encoder = zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
 	default:
 		return errors.Errorf("type should be set by [dev,prod] but %s is set", env)

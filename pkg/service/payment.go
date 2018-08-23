@@ -374,10 +374,23 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 	//TODO:Debug時はlocalに出力することとする。=> これはフラグで判別したほうがいいかもしれない/Interface型にして対応してもいいかも
 	var generatedFileName string
 	if txReceiptID != 0 {
-		path := file.CreateFilePath(enum.ActionTypePayment, enum.TxTypeUnsigned, txReceiptID)
-		generatedFileName, err = file.WriteFile(path, hex)
+		//To File(本番では利用しない)
+		if w.Env == enum.EnvDev {
+			path := file.CreateFilePath(enum.ActionTypePayment, enum.TxTypeUnsigned, txReceiptID, true)
+			generatedFileName, err = file.WriteFile(path, hex)
+			if err != nil {
+				return "", "", errors.Errorf("file.WriteFile(): error: %v", err)
+			}
+		}
+
+		//GCS
+		//上書きされるが、問題ない
+		path := file.CreateFilePath(enum.ActionTypePayment, enum.TxTypeUnsigned, txReceiptID, false)
+
+		//GCS上に、Clientを作成(セッションの関係で都度作成する)
+		generatedFileName, err = w.GCS[enum.ActionTypeReceipt].WriteOnce(path, hex)
 		if err != nil {
-			return "", "", errors.Errorf("file.WriteFile(): error: %v", err)
+			return "", "", errors.Errorf("storage.WriteOnce(): error: %v", err)
 		}
 	}
 

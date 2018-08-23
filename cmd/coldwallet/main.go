@@ -50,7 +50,7 @@ func main() {
 	}
 
 	// Log
-	logger.Initialize(conf.Environment)
+	logger.Initialize(enum.EnvironmentType(conf.Environment))
 
 	// Connection to Bitcoin core
 	bit, err := api.Connection(&conf.Bitcoin)
@@ -60,7 +60,7 @@ func main() {
 	defer bit.Close()
 
 	//Wallet Object
-	wallet := service.Wallet{BTC: bit, DB: nil}
+	wallet := service.Wallet{BTC: bit, DB: nil, Env: enum.EnvironmentType(conf.Environment)}
 
 	if opts.Debug {
 		//debug用 機能確認

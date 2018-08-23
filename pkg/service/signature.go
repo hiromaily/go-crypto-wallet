@@ -45,7 +45,7 @@ func (w *Wallet) SignatureByHex(actionType enum.ActionType, hex string, txReceip
 	}
 
 	//ファイルに書き込む
-	path := file.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID)
+	path := file.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID, true)
 	generatedFileName, err := file.WriteFile(path, hex)
 	if err != nil {
 		return "", isSigned, "", err
@@ -78,7 +78,7 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 	}
 
 	//ファイルに書き込む
-	path := file.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID)
+	path := file.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID, true)
 	generatedFileName, err := file.WriteFile(path, hexTx)
 	if err != nil {
 		return "", isSigned, "", err

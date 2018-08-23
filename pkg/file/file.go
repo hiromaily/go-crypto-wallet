@@ -31,11 +31,14 @@ func SetFilePath(basePath string) {
 
 // CreateFilePath 書き込み用として、ファイルパスを生成する(読み込みは渡されたパスをそのまま利用するのみ)
 // TODO:Actionも名前として考慮すること
-func CreateFilePath(actionType enum.ActionType, txType enum.TxType, txID int64) string {
-	baseDir := fmt.Sprintf("%s%s/", baseFilePath, string(actionType))
+func CreateFilePath(actionType enum.ActionType, txType enum.TxType, txID int64, withPath bool) string {
 
 	// ./data/tx/receipt/receipt_8_unsigned_1534744535097796209
-	return fmt.Sprintf("%s%s_%d_%s_", baseDir, string(actionType), txID, txType)
+	if withPath {
+		baseDir := fmt.Sprintf("%s%s/", baseFilePath, string(actionType))
+		return fmt.Sprintf("%s%s_%d_%s_", baseDir, string(actionType), txID, txType)
+	}
+	return fmt.Sprintf("%s_%d_%s_", string(actionType), txID, txType)
 }
 
 // ParseFile ファイル名を解析する

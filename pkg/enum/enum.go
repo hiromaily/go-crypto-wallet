@@ -53,3 +53,12 @@ func ValidateActionType(val string) bool {
 	}
 	return false
 }
+
+//EnvironmentType 実行環境
+type EnvironmentType string
+
+// environment
+const (
+	EnvDev  EnvironmentType = "dev"
+	EnvProd EnvironmentType = "prod"
+)

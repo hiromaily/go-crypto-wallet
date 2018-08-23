@@ -2,13 +2,14 @@ package gcp_test
 
 import (
 	"context"
-	"testing"
-
 	"fmt"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	. "github.com/hiromaily/go-bitcoin/pkg/gcp"
 	"os"
 	"strings"
+	"testing"
+
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/file"
+	. "github.com/hiromaily/go-bitcoin/pkg/gcp"
 )
 
 //[gcs]
@@ -24,7 +25,7 @@ func isGcpDir() bool {
 	return false
 }
 
-func initialStorage(t *testing.T) *Storage {
+func initialStorage(t *testing.T) *ExtClient {
 	//TODO: tomlから読み込むように修正する。そのうち
 	bucketName := "cayenne-dev-exchanges-yasui-bucket"
 	key := "./data/api_keys/cayenne-dev-strage.json"
@@ -36,24 +37,24 @@ func initialStorage(t *testing.T) *Storage {
 
 	//初期化処理
 	storage := NewStorage(bucketName, key)
-	err := storage.NewClient(context.Background())
+	cli, err := storage.NewClient(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	return storage
+	return cli
 }
 
 func TestSaveAndRead(t *testing.T) {
 	txReceiptID := int64(999)
 	hex := "storage_test"
-	path := CreateFilePath(enum.ActionTypeReceipt, enum.TxTypeUnsigned, txReceiptID)
+	path := file.CreateFilePath(enum.ActionTypeReceipt, enum.TxTypeUnsigned, txReceiptID, false)
 
 	//初期化処理
-	storage := initialStorage(t)
+	cli := initialStorage(t)
 
 	//書き込み
-	generatedFileName, err := storage.Write(path, []byte(hex))
+	generatedFileName, err := cli.Write(path, []byte(hex))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,13 +66,13 @@ func TestSaveAndRead(t *testing.T) {
 		outputPath = "../../" + outputPath
 	}
 
-	err = storage.ReadAndSave(generatedFileName, outputPath, 0666)
+	err = cli.ReadAndSave(generatedFileName, outputPath, 0666)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	//Close
-	err = storage.Close()
+	err = cli.Close()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,9 +80,9 @@ func TestSaveAndRead(t *testing.T) {
 
 func TestRead(t *testing.T) {
 	//初期化処理
-	storage := initialStorage(t)
+	cli := initialStorage(t)
 
-	fileName := "receipt_7_unsigned_1535006013969688978"
+	fileName := "payment_5_unsigned_1535011799610609638"
 
 	//読み込み
 	outputPath := fmt.Sprintf("./data/gcs/%s", fileName)
@@ -89,13 +90,13 @@ func TestRead(t *testing.T) {
 		outputPath = "../../" + outputPath
 	}
 
-	err := storage.ReadAndSave(fileName, outputPath, 0666)
+	err := cli.ReadAndSave(fileName, outputPath, 0666)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	//Close
-	err = storage.Close()
+	err = cli.Close()
 	if err != nil {
 		t.Fatal(err)
 	}

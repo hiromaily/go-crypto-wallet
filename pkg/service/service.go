@@ -20,6 +20,7 @@ type Wallet struct {
 	GCS map[enum.ActionType]*gcp.Storage
 	//DB  *sqlx.DB
 	//Db  *kvs.LevelDB
+	Env enum.EnvironmentType
 }
 
 //InitialSettings 実行前に必要なすべての設定をこちらで行う
@@ -33,7 +34,7 @@ func InitialSettings(confPath string) (*Wallet, error) {
 	grok.Value(conf)
 
 	// Log
-	logger.Initialize(conf.Environment)
+	logger.Initialize(enum.EnvironmentType(conf.Environment))
 
 	// KVS
 	//db, err := kvs.InitDB(conf.LevelDB.Path)
@@ -72,7 +73,7 @@ func InitialSettings(confPath string) (*Wallet, error) {
 	//defer bit.Close()
 
 	//Wallet Object
-	wallet := Wallet{BTC: bit, DB: model.NewDB(rds), GCS: gcs}
+	wallet := Wallet{BTC: bit, DB: model.NewDB(rds), GCS: gcs, Env: enum.EnvironmentType(conf.Environment)}
 	return &wallet, nil
 }
 
@@ -81,3 +82,8 @@ func (w *Wallet) Done() {
 	w.DB.RDB.Close()
 	w.BTC.Close()
 }
+
+// Env 実行環境(dev, prod)
+//func (w *Wallet) Env() enum.EnvironmentType {
+//	return w.env
+//}
