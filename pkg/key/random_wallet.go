@@ -8,6 +8,7 @@ import (
 )
 
 //ランダムウォレット
+//実運用では利用しない
 
 // CreatePrivateKey private keyを作成する
 func createPrivateKey(conf *chaincfg.Params) (*btcutil.WIF, error) {

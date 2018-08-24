@@ -88,8 +88,9 @@ func CreateAccount(conf *chaincfg.Params, seed []byte, actType AccountType) (str
 }
 
 // CreateKeysWithIndex 指定したindexに応じて複数のkeyを生成する
-//TODO: from - to指定のほうがいい
-func CreateKeysWithIndex(conf *chaincfg.Params, accountPrivateKey string, count uint32) ([]WalletKey, error) {
+// e.g. [1] idxFrom:0,  count 10 => 0-9
+//      [2] idxFrom:10, count 10 => 10-19
+func CreateKeysWithIndex(conf *chaincfg.Params, accountPrivateKey string, idxFrom, count uint32) ([]WalletKey, error) {
 	account, err := hdkeychain.NewKeyFromString(accountPrivateKey)
 	if err != nil {
 		return nil, err
@@ -101,31 +102,33 @@ func CreateKeysWithIndex(conf *chaincfg.Params, accountPrivateKey string, count 
 	}
 
 	// Index
-	//TODO: from - to指定のほうがいい
 	walletKeys := make([]WalletKey, count)
-	for i := uint32(0); i < count; i++ {
-		child, err1 := change.Child(i)
-		if err1 != nil {
-			err = err1
-			break
+	max := idxFrom + count
+	for i := uint32(idxFrom); i < max; i++ {
+		child, err := change.Child(i)
+		if err != nil {
+			return nil, err
 		}
+
 		// privateKey
 		privateKey, err := child.ECPrivKey()
 		if err != nil {
 			return nil, err
 		}
+
 		// WIF
 		wif, err := btcutil.NewWIF(privateKey, conf, false)
 		if err != nil {
 			return nil, err
 		}
-
-		//
 		strPrivateKey := wif.String()
+
+		// Address
 		address, err := child.Address(conf)
 		if err != nil {
 			return nil, err
 		}
+
 		walletKeys[i] = WalletKey{WIF: strPrivateKey, Address: address.String()}
 	}
 
