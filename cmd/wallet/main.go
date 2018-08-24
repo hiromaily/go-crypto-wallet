@@ -214,7 +214,7 @@ func debugForCheck(wallet *service.Wallet) {
 		}
 		log.Printf("Estimatesmartfee: %f\n", feePerKb)
 	case 3:
-		//[Debug用]手数料算出
+		//[Debug用]ロギング
 		log.Print("Run: ロギング logging")
 		logData, err := wallet.BTC.Logging()
 		if err != nil {
@@ -244,8 +244,8 @@ func debugForCheck(wallet *service.Wallet) {
 		if err == nil {
 			log.Fatal("something is wrong")
 		}
-
 		log.Print("Done!")
+
 	case 10:
 		//[Debug用]hexから署名済みtxを送信する
 		log.Print("Run: hexから署名済みtxを送信する")
@@ -256,6 +256,7 @@ func debugForCheck(wallet *service.Wallet) {
 			log.Fatalf("%+v", err)
 		}
 		log.Printf("[Debug] 送信までDONE!! %s", hash.String())
+
 	case 11:
 		//[Debug用]payment_requestテーブルの情報を初期化する
 		log.Print("Run: payment_requestテーブルの情報を初期化する")

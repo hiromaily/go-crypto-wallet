@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-//TODO:WIP
+//ランダムウォレット
 
 // CreatePrivateKey private keyを作成する
 func createPrivateKey(conf *chaincfg.Params) (*btcutil.WIF, error) {
@@ -23,10 +23,10 @@ func getAddressPubKey(wif *btcutil.WIF, conf *chaincfg.Params) (*btcutil.Address
 	return btcutil.NewAddressPubKey(wif.PrivKey.PubKey().SerializeCompressed(), conf)
 }
 
-//func (network Network) ImportPrivateKey(secretHex string) (*btcutil.WIF, error) {
+//func ImportPrivateKey(secretHex string) (*btcutil.WIF, error) {
 //}
 
-// ImportWIF stringをインポートし、WIFを生成する TODO:未
+// ImportWIF stringをインポートし、WIFを生成する
 func ImportWIF(wifStr string, conf *chaincfg.Params) (*btcutil.WIF, error) {
 	//  WIF(Wallet Import Format): 秘密鍵をより簡潔に表現したもの
 	wif, err := btcutil.DecodeWIF(wifStr)
