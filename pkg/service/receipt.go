@@ -26,9 +26,9 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 	// => LockUnspent()
 
 	// LockされたUnspentTransactionを解除する
-	if err := w.BTC.UnlockAllUnspentTransaction(); err != nil {
-		return "", "", err
-	}
+	//if err := w.BTC.UnlockAllUnspentTransaction(); err != nil {
+	//	return "", "", err
+	//}
 
 	//1. アカウント一覧からまとめて残高を取得
 	//type ListUnspentResult struct {
@@ -110,6 +110,11 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 
 	// 一連の処理を実行
 	hex, fileName, err := w.createRawTransactionAndFee(adjustmentFee, inputs, inputTotal, txReceiptInputs)
+
+	// LockされたUnspentTransactionを解除する
+	if err := w.BTC.UnlockAllUnspentTransaction(); err != nil {
+		return "", "", err
+	}
 
 	return hex, fileName, err
 }
