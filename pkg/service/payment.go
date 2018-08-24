@@ -26,54 +26,6 @@ type UserPayment struct {
 	validAmount  btcutil.Amount  //送金金額(変換後)
 }
 
-// debug用データ作成
-// TODO:出金データとしてDB内にテーブルを作成する
-// TODO:最終的に削除する
-//func (w *Wallet) createDebugUserPayment() []UserPayment {
-//	//getnewaddress pay1
-//	//2N33pRYgyuHn6K2xCrrq9dPzuW6ZAvFJfVz
-//
-//	//getnewaddress pay2
-//	//2NFd6TEUgSpy8LvttBgVrLB6ZBA5X9BSUSz
-//
-//	//getnewaddress pay3
-//	//2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV
-//
-//	//getnewaddress pay4
-//	//2N7WsiDc4yK7PoUL9saGE5ZGsbRQ8R9NafS
-//
-//	//5レコードあるが、4種類の送信先
-//	userPayments := []UserPayment{
-//		{"", "2N33pRYgyuHn6K2xCrrq9dPzuW6ZAvFJfVz", nil, 0.1, 0},
-//		{"", "2NFd6TEUgSpy8LvttBgVrLB6ZBA5X9BSUSz", nil, 0.2, 0},
-//		{"", "2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV", nil, 0.25, 0},
-//		{"", "2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV", nil, 0.3, 0},
-//		{"", "2N7WsiDc4yK7PoUL9saGE5ZGsbRQ8R9NafS", nil, 0.4, 0},
-//	}
-//
-//	//btcutil.Address型, btcutil.Amount型に変換,
-//	var err error
-//	for idx, val := range userPayments {
-//		//Address TODO:このタイミングでaddressは不要かもしれない
-//		userPayments[idx].validRecAddr, err = w.BTC.DecodeAddress(val.receiverAddr)
-//		if err != nil {
-//			//これは本来事前にチェックされるため、ありえないはず
-//			log.Printf("[Error] unexpected error converting string to address")
-//		}
-//		//grok.Value(userPayments[idx].validRecAddr)
-//
-//		//Amount
-//		userPayments[idx].validAmount, err = w.BTC.FloatBitToAmount(val.amount)
-//		if err != nil {
-//			//これは本来事前にチェックされるため、ありえないはず
-//			log.Printf("[Error] unexpected error converting float64 to Amount")
-//		}
-//	}
-//
-//	//Addressが重複する場合、合算したほうがいいかも => transactionのoutputを作成するタイミングで合算可能
-//	return userPayments
-//}
-
 // createUserPayment 出金依頼テーブルから処理するためのデータを取得する
 func (w *Wallet) createUserPayment() ([]UserPayment, []int64, error) {
 	paymentRequests, err := w.DB.GetPaymentRequest()
@@ -142,7 +94,6 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 	//実際には、こちらもamountでソートしておく=> ソートは不要
 
 	//1.出金データを取得
-	//userPayments := w.createDebugUserPayment()
 	userPayments, paymentRequestIds, err := w.createUserPayment()
 	if err != nil {
 		return "", "", err
