@@ -31,24 +31,26 @@ const (
 	AccountTypeClient    AccountType = 0 //ユーザーの入金受付用アドレス
 	AccountTypeReceipt   AccountType = 1 //入金を受け付けるアドレス用
 	AccountTypePayment   AccountType = 2 //出金時に支払いをするアドレス
-	AccountTypeMultisig1 AccountType = 3 //マルチシグアドレスのための承認アドレス１
-	AccountTypeMultisig2 AccountType = 4 //マルチシグアドレスのための承認アドレス１
+	AccountTypeMultisig  AccountType = 3 //マルチシグアドレスのための承認アドレス
 )
 
-//ChangeType 受け取り階層　TODO:一旦すべて0で統一してもいいのかも
+//TODO:同じアドレスを使い回すと、アドレスから総額情報がバレて危険
+//よって、内部利用のアドレスは毎回使い捨てにすること
+
+//ChangeType 受け取り階層
 type ChangeType uint32
 
 // change
 const (
 	ChangeTypeExternal ChangeType = 0 //外部送金者からの受け取り用 (ユーザー、集約用、マルチシグ)
-	ChangeTypeInternal ChangeType = 1 //自身のトランザクションのおつり用 (出金時に使うトレード用アドレス)
+	ChangeTypeInternal ChangeType = 1 //自身のトランザクションのおつり用 (出金時に使うトレード用アドレス) //TODO:これは使わないでいいかも
 )
 
 //e.g. for Mainnet
 //Client  => m/44/0/0/0/0~xxxxx
 //Receipt => m/44/0/1
 //Payment => m/44/0/2/0/0 => quoineから購入したものを受け取る用
-//Payment => m/44/0/2/1/0 => 出金による支払いに利用、かつ、おつりも受け取る => TODO:ChangeTypeによってアドレスが変わってしまったら、どう利用するのか
+//Payment => m/44/0/2/1/0 => 出金による支払いに利用、かつ、おつりも受け取る => TODO:ChangeTypeによってアドレスが変わってしまったら、どう運用するのか
 
 // CreateAccount アカウント階層までのprivateKey及び publicKeyを生成する
 func CreateAccount(conf *chaincfg.Params, seed []byte, actType AccountType) (string, string, error) {

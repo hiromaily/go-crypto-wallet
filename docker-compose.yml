@@ -4,6 +4,7 @@ volumes:
   db: {}
 
 services:
+  #for hot-wallet
   mysql:
     image: mysql:5.7
     volumes:
@@ -17,3 +18,18 @@ services:
       MYSQL_PASSWORD: cayenne
     ports:
       - "${MYSQL_PORT:-3307}:3306"
+
+  #for cold-wallet
+  mysql2:
+    image: mysql:5.7
+    volumes:
+    - db:/var/lib/mysql
+    - "./docker/mysql2/conf.d:/etc/mysql/conf.d"
+    - "./docker/mysql2/init.d:/docker-entrypoint-initdb.d"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cold_wallet
+      MYSQL_USER: cayenne
+      MYSQL_PASSWORD: cayenne
+    ports:
+    - "${MYSQL_PORT:-3307}:3306"
