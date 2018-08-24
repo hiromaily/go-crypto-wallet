@@ -6,9 +6,10 @@ import (
 	"github.com/btcsuite/btcutil/hdkeychain"
 )
 
-//PurposeType
+//PurposeType BIP44は44固定
 type PurposeType uint32
 
+// purpose
 const (
 	PurposeTypeBIP44 PurposeType = 44 //BIP44
 )
@@ -16,6 +17,7 @@ const (
 //CoinType コインの種類
 type CoinType uint32
 
+// coin_type
 const (
 	CoinTypeBitcoin CoinType = 0 //Bitcoin
 	CoinTypeTestnet CoinType = 1 //Testnet
@@ -24,6 +26,7 @@ const (
 //AccountType 利用目的
 type AccountType uint32
 
+// account
 const (
 	AccountTypeClient    AccountType = 0 //ユーザーの入金受付用アドレス
 	AccountTypeReceipt   AccountType = 1 //入金を受け付けるアドレス用
@@ -35,6 +38,7 @@ const (
 //ChangeType 受け取り階層　TODO:一旦すべて0で統一してもいいのかも
 type ChangeType uint32
 
+// change
 const (
 	ChangeTypeExternal ChangeType = 0 //外部送金者からの受け取り用 (ユーザー、集約用、マルチシグ)
 	ChangeTypeInternal ChangeType = 1 //自身のトランザクションのおつり用 (出金時に使うトレード用アドレス)

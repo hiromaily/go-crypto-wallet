@@ -116,10 +116,10 @@ bld-docker-go:
 # Bitcoin core
 ###############################################################################
 bitcoin-run:
-    bitcoind -daemon
+	bitcoind -daemon
 
 bitcoin-stop:
-    bitcoin-cli stop
+	bitcoin-cli stop
 
 
 ###############################################################################
