@@ -109,7 +109,7 @@ func debugForCheck(wallet *service.Wallet) {
 	case 2:
 		//TODO: HDウォレットによるKeyの作成 (まだ検証中)
 		logger.Info("Run: HDウォレット Keyの生成")
-		key.GenerateHDKey(opts.ParamSeed, wallet.BTC.GetChainConf())
+		//key.GenerateHDKey(opts.ParamSeed, wallet.BTC.GetChainConf())
 	case 3:
 		//TODO:Multisigの作成
 		logger.Info("Run: Multisigの作成")

@@ -9,3 +9,4 @@ data/tx/*
 data/gcs/*
 !.gitkeep
 cayenne-dev-strage.json
+hd_wallet.go
