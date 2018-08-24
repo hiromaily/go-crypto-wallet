@@ -9,9 +9,8 @@ import (
 	"github.com/btcsuite/btcutil/hdkeychain"
 )
 
-//TODO:WIP まだ検証段階
-//ちゃんとドキュメント(BIP)を読まないと罠にはまる。。。
-//BIP32, BIP44
+//HDウォレット(BIP44準拠)
+//TODO:BIP32, BIP44のドキュメントを読む
 
 // getSeed() is to return seed []byte
 func getSeed() ([]byte, error) {
