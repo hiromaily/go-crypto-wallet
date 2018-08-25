@@ -28,10 +28,10 @@ type AccountType uint32
 
 // account
 const (
-	AccountTypeClient    AccountType = 0 //ユーザーの入金受付用アドレス
-	AccountTypeReceipt   AccountType = 1 //入金を受け付けるアドレス用
-	AccountTypePayment   AccountType = 2 //出金時に支払いをするアドレス
-	AccountTypeMultisig  AccountType = 3 //マルチシグアドレスのための承認アドレス
+	AccountTypeClient   AccountType = 0 //ユーザーの入金受付用アドレス
+	AccountTypeReceipt  AccountType = 1 //入金を受け付けるアドレス用
+	AccountTypePayment  AccountType = 2 //出金時に支払いをするアドレス
+	AccountTypeMultisig AccountType = 3 //マルチシグアドレスのための承認アドレス
 )
 
 //TODO:同じアドレスを使い回すと、アドレスから総額情報がバレて危険
