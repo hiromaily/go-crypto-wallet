@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// GenerateSeed() seedを生成する []byte
+// GenerateSeed seedを生成する []byte
 func GenerateSeed() ([]byte, error) {
 	logger.Info("generate seed")
 	seed, err := hdkeychain.GenerateSeed(hdkeychain.RecommendedSeedLen)
@@ -18,6 +18,7 @@ func GenerateSeed() ([]byte, error) {
 	return seed, nil
 }
 
+// SeedToString stringにエンコードする
 func SeedToString(seed []byte) string {
 	base64seed := base64.StdEncoding.EncodeToString(seed)
 	//logger.Debug("generated seed(string):", base64seed)
@@ -25,6 +26,7 @@ func SeedToString(seed []byte) string {
 	return base64seed
 }
 
+// SeedToByte byte型にデコードする
 func SeedToByte(seed string) ([]byte, error) {
 	unbase64, err := base64.StdEncoding.DecodeString(seed)
 	if err != nil {

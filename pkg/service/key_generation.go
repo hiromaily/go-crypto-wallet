@@ -22,7 +22,7 @@ func (w *Wallet) InitialKeyGeneration() error {
 
 	// TODO:初回の生成数をどのように調整し、決定するか？とりあえず固定
 	// アカウント(Client)を生成
-	_, err = w.GenerateClientAccount(seed, 0, 100)
+	_, err = w.GenerateClientAccount(seed, 0, 10000)
 	if err != nil {
 		return errors.Errorf("GenerateClientAccount() error: %v", err)
 	}
@@ -40,7 +40,7 @@ func (w *Wallet) InitialKeyGeneration() error {
 	}
 
 	// アカウント(Multisig)を生成
-	_, err = w.GenerateMultisigAccount(seed, 0, 100)
+	_, err = w.GenerateMultisigAccount(seed, 0, 3)
 	if err != nil {
 		return errors.Errorf("GenerateMultisigAccount() error: %v", err)
 	}
