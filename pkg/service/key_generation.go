@@ -5,12 +5,32 @@ import (
 	"github.com/pkg/errors"
 )
 
-// InitialKeyGeneration
+//Seed生成は完全に分離したほうがいい
+//1.Seedの生成+DBに登録
+//2.Multisig Keyの生成+DBに登録(承認用は端末を分けて管理しないと意味がないかも)
+
+//CreateMultiSig(addmultisigaddress)にwalletにmultisig用のprivate keyを登録する
+//これのパラメータには、multisigしないと送金許可しないアドレス(receipt, payment)+承認用のアドレスをセット
+//これによって、生成されたアドレスから、送金する場合、パラメータにセットしたアドレスに紐づく秘密鍵が必要
+
+//含まれるもの
+//coldwallet1: client, receipt, payment
+//coldwallet2: multisig address
+//TODO: =>どこのマシンで、addmultisigaddressを行う？？
+
+
+//3.Client Keyの生成+DBに登録
+//4.Receipt Keyの生成 + Multisig対応 + DBに登録 (1日1Key消費するイメージ)
+//5.Payment Keyの生成+ Multisig + DBに登録 (1日1Key消費するイメージ)
+
+// InitialKeyGeneration 初回生成用のfunc
 func (w *Wallet) InitialKeyGeneration() error {
+
 	// Seed
-	seed, err := w.GenerateSeed()
+	seed, err := w.retrieveSeed()
+	//seed, err := w.GenerateSeed()
 	if err != nil {
-		return errors.Errorf("GenerateSeed() error: %v", err)
+		return errors.Errorf("retrieveSeed() error: %v", err)
 	}
 
 	//accounts := []key.AccountType{
