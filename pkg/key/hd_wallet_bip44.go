@@ -4,6 +4,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcutil"
 	"github.com/btcsuite/btcutil/hdkeychain"
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 )
 
 //PurposeType BIP44は44固定
@@ -65,8 +66,12 @@ func CreateAccount(conf *chaincfg.Params, seed []byte, actType AccountType) (str
 	if err != nil {
 		return "", "", err
 	}
-	//CoinType
-	coinType, err := purpose.Child(hdkeychain.HardenedKeyStart + 0)
+	//CoinType TODO:切り替えが必要
+	ct := uint32(CoinTypeBitcoin)
+	if conf.Name != string(enum.NetworkTypeMainNet){
+		ct = uint32(CoinTypeTestnet)
+	}
+	coinType, err := purpose.Child(hdkeychain.HardenedKeyStart + ct)
 	if err != nil {
 		return "", "", err
 	}

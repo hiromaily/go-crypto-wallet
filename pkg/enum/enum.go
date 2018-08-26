@@ -1,5 +1,14 @@
 package enum
 
+//NetworkType ネットワーク種別
+type NetworkType string
+
+// network type
+const (
+	NetworkTypeMainNet NetworkType = "mainnet"
+	NetworkTypeTestNet3   NetworkType = "testnet3"
+)
+
 //TxType トランザクション種別
 type TxType string
 
