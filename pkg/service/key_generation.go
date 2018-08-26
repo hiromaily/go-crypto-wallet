@@ -12,11 +12,14 @@ import (
 //CreateMultiSig(addmultisigaddress)にwalletにmultisig用のprivate keyを登録する
 //これのパラメータには、multisigしないと送金許可しないアドレス(receipt, payment)+承認用のアドレスをセット
 //これによって、生成されたアドレスから、送金する場合、パラメータにセットしたアドレスに紐づく秘密鍵が必要
+//payment,receiptのアドレスは、実際には、addmultisigaddressによって生成されたアドレスに置き換えられる。
 
 //含まれるもの
 //coldwallet1: client, receipt, payment
 //coldwallet2: multisig address
 //TODO: =>どこのマシンで、addmultisigaddressを行う？？
+
+//https://www.slideshare.net/ssusere174e3/ss-33733512
 
 
 //3.Client Keyの生成+DBに登録
