@@ -21,7 +21,6 @@ import (
 
 //https://www.slideshare.net/ssusere174e3/ss-33733512
 
-
 //3.Client Keyの生成+DBに登録
 //4.Receipt Keyの生成 + Multisig対応 + DBに登録 (1日1Key消費するイメージ)
 //5.Payment Keyの生成+ Multisig + DBに登録 (1日1Key消費するイメージ)
@@ -62,8 +61,8 @@ func (w *Wallet) InitialKeyGeneration() error {
 		return errors.Errorf("GeneratePaymentAccount() error: %v", err)
 	}
 
-	// アカウント(Multisig)を生成
-	_, err = w.GenerateMultisigAccount(seed, 0, 3)
+	// アカウント(Authorization)を生成
+	_, err = w.GenerateAuthorizationAccount(seed, 0, 3)
 	if err != nil {
 		return errors.Errorf("GenerateMultisigAccount() error: %v", err)
 	}
@@ -143,14 +142,14 @@ func (w *Wallet) GeneratePaymentAccount(seed []byte, idxFrom, count uint32) ([]k
 	return walletKeys, err
 }
 
-// GenerateMultisigAccount Paymentアカウントを生成する
-func (w *Wallet) GenerateMultisigAccount(seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
-	walletKeys, err := w.generateAccount(seed, idxFrom, count, key.AccountTypeMultisig)
+// GenerateAuthorizationAccount Paymentアカウントを生成する
+func (w *Wallet) GenerateAuthorizationAccount(seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
+	walletKeys, err := w.generateAccount(seed, idxFrom, count, key.AccountTypeAuthorization)
 	if err != nil {
-		return nil, errors.Errorf("key.generateAccount(AccountTypeMultisig) error: %s", err)
+		return nil, errors.Errorf("key.generateAccount(AccountTypeAuthorization) error: %s", err)
 	}
 
-	// TODO:DBにMultisigAccountのKey情報を登録
+	// TODO:DBにAuthorizationAccountのKey情報を登録
 
 	return walletKeys, err
 }
