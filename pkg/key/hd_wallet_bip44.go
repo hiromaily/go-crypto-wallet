@@ -27,7 +27,7 @@ const (
 //AccountType 利用目的
 type AccountType uint32
 
-// account
+// account_type
 const (
 	AccountTypeClient        AccountType = 0 //ユーザーの入金受付用アドレス
 	AccountTypeReceipt       AccountType = 1 //入金を受け付けるアドレス用
@@ -41,7 +41,7 @@ const (
 //ChangeType 受け取り階層
 type ChangeType uint32
 
-// change
+// change_type
 const (
 	ChangeTypeExternal ChangeType = 0 //外部送金者からの受け取り用 (ユーザー、集約用、マルチシグ)
 	ChangeTypeInternal ChangeType = 1 //自身のトランザクションのおつり用 (出金時に使うトレード用アドレス) //TODO:これは使わないでいいかも
