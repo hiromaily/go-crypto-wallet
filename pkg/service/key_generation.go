@@ -47,28 +47,28 @@ func (w *Wallet) InitialKeyGeneration() error {
 
 	// TODO:初回の生成数をどのように調整し、決定するか？とりあえず固定
 	// アカウント(Client)を生成
-	_, err = w.GenerateClientAccount(seed,  10000)
+	_, err = w.GenerateAccountKey(key.AccountTypeClient, seed, 10000)
 	if err != nil {
 		return errors.Errorf("GenerateClientAccount() error: %v", err)
 	}
 
 	// アカウント(Receipt)を生成
-	_, err = w.GenerateReceiptAccount(seed, 0, 100)
-	if err != nil {
-		return errors.Errorf("GenerateReceiptAccount() error: %v", err)
-	}
+	//_, err = w.GenerateReceiptAccount(seed, 0, 100)
+	//if err != nil {
+	//	return errors.Errorf("GenerateReceiptAccount() error: %v", err)
+	//}
 
 	// アカウント(Payment)を生成
-	_, err = w.GeneratePaymentAccount(seed, 0, 100)
-	if err != nil {
-		return errors.Errorf("GeneratePaymentAccount() error: %v", err)
-	}
+	//_, err = w.GeneratePaymentAccount(seed, 0, 100)
+	//if err != nil {
+	//	return errors.Errorf("GeneratePaymentAccount() error: %v", err)
+	//}
 
 	// アカウント(Authorization)を生成
-	_, err = w.GenerateAuthorizationAccount(seed, 0, 3)
-	if err != nil {
-		return errors.Errorf("GenerateMultisigAccount() error: %v", err)
-	}
+	//_, err = w.GenerateAuthorizationAccount(seed, 0, 3)
+	//if err != nil {
+	//	return errors.Errorf("GenerateMultisigAccount() error: %v", err)
+	//}
 
 	return nil
 }
@@ -113,10 +113,58 @@ func (w *Wallet) retrieveSeed() ([]byte, error) {
 	return nil, errors.Errorf("DB.GetSeedOne() error: %v", err)
 }
 
-// generateAccount AccountType属性のアカウントを生成する
-func (w *Wallet) generateAccount(seed []byte, idxFrom, count uint32, account key.AccountType) ([]key.WalletKey, error) {
-	// アカウント(Client)を生成
-	priv, _, err := key.CreateAccount(w.BTC.GetChainConf(), seed, account)
+// GenerateAccountKey AccountType属性のアカウントKeyを生成する
+func (w *Wallet) GenerateAccountKey(accountType key.AccountType, seed []byte, count uint32) ([]key.WalletKey, error) {
+	//現在のindexを取得
+	idx, err := w.DB.GetMaxIndex(accountType)
+	if err != nil {
+		//return nil, errors.Errorf("DB.GetMaxClientIndex() error: %s", err)
+		idx = 0
+	} else {
+		idx++
+	}
+	logger.Infof("idx: %d", idx)
+
+	return w.generateAccountKey(accountType, seed, uint32(idx), count)
+}
+
+// generateKey AccountType属性のアカウントKeyを生成する
+func (w *Wallet) generateAccountKey(accountType key.AccountType, seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
+	// HDウォレットのkeyを生成する
+	walletKeys, err := w.generateAccountKeyData(accountType, seed, idxFrom, count)
+	if err != nil {
+		return nil, errors.Errorf("key.generateAccount(AccountTypeClient) error: %s", err)
+	}
+
+	// keyTypeを取得
+	keyID, err := w.getKeyTypeByAccount(accountType)
+	if err != nil {
+		return nil, errors.Errorf("getKeyTypeByAccount(AccountTypeClient) error: %s", err)
+	}
+
+	// DBにClientAccountのKey情報を登録
+	accountKeyClients := make([]model.AccountKeyTable, len(walletKeys))
+	for idx, key := range walletKeys {
+		accountKeyClients[idx] = model.AccountKeyTable{
+			WalletAddress:      key.Address,
+			WalletImportFormat: key.WIF,
+			KeyType:            keyID,
+			Idx:                idxFrom,
+		}
+		idxFrom++
+	}
+	err = w.DB.InsertAccountKeyTable(accountType, accountKeyClients, nil, true)
+	if err != nil {
+		return nil, errors.Errorf("DB.InsertAccountKeyClient() error: %s", err)
+	}
+
+	return walletKeys, err
+}
+
+// generateKeyData AccountType属性のアカウントKeyを生成する
+func (w *Wallet) generateAccountKeyData(accountType key.AccountType, seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
+	// key生成
+	priv, _, err := key.CreateAccount(w.BTC.GetChainConf(), seed, accountType)
 	if err != nil {
 		return nil, errors.Errorf("key.CreateAccount() error: %s", err)
 	}
@@ -129,91 +177,41 @@ func (w *Wallet) generateAccount(seed []byte, idxFrom, count uint32, account key
 	return walletKeys, nil
 }
 
-// generateClientAccount Clientアカウントを生成する
-func (w *Wallet) GenerateClientAccount(seed []byte, count uint32) ([]key.WalletKey, error) {
-	//現在のindexを取得
-	idx, err := w.DB.GetMaxClientIndex()
-	if err != nil {
-		//return nil, errors.Errorf("DB.GetMaxClientIndex() error: %s", err)
-		idx = 0
-	}else{
-		idx++
-	}
-	logger.Infof("idx: %d", idx)
-
-	return w.generateClientAccount(seed, uint32(idx), count)
-}
-
-// generateClientAccount Clientアカウントを生成する
-func (w *Wallet) generateClientAccount(seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
-	// seedを取得
-	walletKeys, err := w.generateAccount(seed, idxFrom, count, key.AccountTypeClient)
-	if err != nil {
-		return nil, errors.Errorf("key.generateAccount(AccountTypeClient) error: %s", err)
-	}
-
-	// key_idを取得
-	keyID, err := w.getKeyTypeByAccount(key.AccountTypeClient)
-	if err != nil {
-		return nil, errors.Errorf("getKeyTypeByAccount(AccountTypeClient) error: %s", err)
-	}
-
-	// DBにClientAccountのKey情報を登録
-	accountKeyClients := make([]model.AccountKeyClient, len(walletKeys))
-	for idx, key := range walletKeys {
-		accountKeyClients[idx] = model.AccountKeyClient{
-			WalletAddress:      key.Address,
-			WalletImportFormat: key.WIF,
-			KeyType:            keyID,
-			Idx:                idxFrom,
-		}
-		idxFrom++
-	}
-
-	err = w.DB.InsertAccountKeyClient(accountKeyClients, nil, true)
-	if err != nil {
-		return nil, errors.Errorf("DB.InsertAccountKeyClient() error: %s", err)
-	}
-
-	return walletKeys, err
-}
-
 // GenerateReceiptAccount Receiptアカウントを生成する
-func (w *Wallet) GenerateReceiptAccount(seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
-	walletKeys, err := w.generateAccount(seed, idxFrom, count, key.AccountTypeReceipt)
-	if err != nil {
-		return nil, errors.Errorf("key.generateAccount(AccountTypeReceipt) error: %s", err)
-	}
-
-	// TODO:DBにReceiptAccountのKey情報を登録
-
-	return walletKeys, err
-}
+//func (w *Wallet) GenerateReceiptAccount(seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
+//	walletKeys, err := w.generateAccount(seed, idxFrom, count, key.AccountTypeReceipt)
+//	if err != nil {
+//		return nil, errors.Errorf("key.generateAccount(AccountTypeReceipt) error: %s", err)
+//	}
+//
+//	// TODO:DBにReceiptAccountのKey情報を登録
+//
+//	return walletKeys, err
+//}
 
 // GeneratePaymentAccount Paymentアカウントを生成する
-func (w *Wallet) GeneratePaymentAccount(seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
-	walletKeys, err := w.generateAccount(seed, idxFrom, count, key.AccountTypePayment)
-	if err != nil {
-		return nil, errors.Errorf("key.generateAccount(AccountTypePayment) error: %s", err)
-	}
-
-	// TODO:DBにPaymentAccountのKey情報を登録
-
-	return walletKeys, err
-}
+//func (w *Wallet) GeneratePaymentAccount(seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
+//	walletKeys, err := w.generateAccount(seed, idxFrom, count, key.AccountTypePayment)
+//	if err != nil {
+//		return nil, errors.Errorf("key.generateAccount(AccountTypePayment) error: %s", err)
+//	}
+//
+//	// TODO:DBにPaymentAccountのKey情報を登録
+//
+//	return walletKeys, err
+//}
 
 // GenerateAuthorizationAccount Paymentアカウントを生成する
-func (w *Wallet) GenerateAuthorizationAccount(seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
-	walletKeys, err := w.generateAccount(seed, idxFrom, count, key.AccountTypeAuthorization)
-	if err != nil {
-		return nil, errors.Errorf("key.generateAccount(AccountTypeAuthorization) error: %s", err)
-	}
-
-	// TODO:DBにAuthorizationAccountのKey情報を登録
-
-	return walletKeys, err
-}
-
+//func (w *Wallet) GenerateAuthorizationAccount(seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
+//	walletKeys, err := w.generateAccount(seed, idxFrom, count, key.AccountTypeAuthorization)
+//	if err != nil {
+//		return nil, errors.Errorf("key.generateAccount(AccountTypeAuthorization) error: %s", err)
+//	}
+//
+//	// TODO:DBにAuthorizationAccountのKey情報を登録
+//
+//	return walletKeys, err
+//}
 
 func (w *Wallet) getKeyTypeByAccount(accountType key.AccountType) (uint8, error) {
 	//accountType:0

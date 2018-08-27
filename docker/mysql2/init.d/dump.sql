@@ -136,14 +136,46 @@ DROP TABLE IF EXISTS `account_key_client`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `account_key_client` (
   `id`     BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `wallet_address`        VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'Walletアドレス',
-  `wallet_import_format`  VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'WIF',
-  `account`               VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'アドレスに紐づくアカウント名',
-  `key_type`              tinyint(1) UNSIGNED NOT NULL COMMENT'コインの種類',
+  `wallet_address`          VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'Walletアドレス',
+  `wallet_multisig_address` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'multisigとしてのWalletアドレス',
+  `wallet_import_format`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'WIF',
+  `account`                 VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'アドレスに紐づくアカウント名',
+  `key_type`                tinyint(1) UNSIGNED NOT NULL COMMENT'コインの種類',
   `idx`    BIGINT(20) UNSIGNED NOT NULL COMMENT'HDウォレット生成時のindex',
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_wallet_address` (`wallet_address`),
+  UNIQUE KEY `idx_wallet_multisig_address` (`wallet_multisig_address`),
   UNIQUE KEY `idx_wallet_import_format` (`wallet_import_format`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='受け取り用トランザクション情報Table';
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+
+--
+-- Table structure for table `account_key_receipt`
+--
+
+DROP TABLE IF EXISTS `account_key_receipt`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `account_key_receipt` LIKE `account_key_client`;
+
+
+--
+-- Table structure for table `account_key_payment`
+--
+
+DROP TABLE IF EXISTS `account_key_payment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `account_key_payment` LIKE `account_key_client`;
+
+
+--
+-- Table structure for table `account_key_authorization`
+--
+
+DROP TABLE IF EXISTS `account_key_authorization`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `account_key_authorization` LIKE `account_key_authorization`;

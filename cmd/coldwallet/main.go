@@ -128,7 +128,7 @@ func debugForCheck(wallet *service.Wallet) {
 			logger.Fatalf("%+v", err)
 		}
 		//keys, err := wallet.GenerateClientAccount(bSeed, 0, 100)
-		keys, err := wallet.GenerateClientAccount(bSeed,  100)
+		keys, err := wallet.GenerateAccountKey(key.AccountTypeClient, bSeed, 100)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
