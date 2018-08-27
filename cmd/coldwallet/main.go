@@ -109,7 +109,7 @@ func debugForCheck(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-		keys, err := wallet.GenerateAccountKey(key.AccountTypeClient, bSeed, 100)
+		keys, err := wallet.GenerateAccountKey(key.AccountTypeClient, bSeed, 10)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -121,7 +121,7 @@ func debugForCheck(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-		keys, err := wallet.GenerateAccountKey(key.AccountTypeReceipt, bSeed, 100)
+		keys, err := wallet.GenerateAccountKey(key.AccountTypeReceipt, bSeed, 10)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -133,7 +133,7 @@ func debugForCheck(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-		keys, err := wallet.GenerateAccountKey(key.AccountTypePayment, bSeed, 100)
+		keys, err := wallet.GenerateAccountKey(key.AccountTypePayment, bSeed, 5)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -146,7 +146,7 @@ func debugForCheck(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-		keys, err := wallet.GenerateAccountKey(key.AccountTypeAuthorization, bSeed, 100)
+		keys, err := wallet.GenerateAccountKey(key.AccountTypeAuthorization, bSeed, 2)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}

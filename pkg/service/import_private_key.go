@@ -22,6 +22,7 @@ func (w *Wallet) ImportPrivateKey(accountType key.AccountType) error {
 			//ここでエラーが出るのであれば生成ロジックが抜本的に問題があるので、return
 			return errors.Errorf("WIF is invalid format. btcutil.DecodeWIF(%s) error: %v", strWIF, err)
 		}
+		//TODO:rescanはいらないはず
 		err = w.BTC.ImportPrivKeyWithoutReScan(wif, "")
 		if err != nil {
 			//Bitcoin coreの状況によってエラーが返ることも想定する。よってエラー時はcontinue
