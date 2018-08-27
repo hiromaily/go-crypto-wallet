@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
+	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
 )
 
@@ -135,6 +136,18 @@ func (w *Wallet) GenerateClientAccount(seed []byte, idxFrom, count uint32) ([]ke
 	}
 
 	// TODO:DBにClientAccountのKey情報を登録
+	accountKeyClients := make([]model.AccountKeyClient, len(walletKeys))
+	for idx, key := range walletKeys {
+		accountKeyClients[idx] = model.AccountKeyClient{
+			WalletAddress:      key.Address,
+			WalletImportFormat: key.WIF,
+			KeyType:            0, //TODO:動的に取得したものをセット
+			Index:              idxFrom,
+		}
+		idxFrom++
+	}
+
+	w.DB.InsertAccountKeyClient()
 
 	return walletKeys, err
 }

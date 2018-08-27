@@ -1,13 +1,14 @@
 package main
 
 import (
+	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/chaincfg"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/jessevdk/go-flags"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 // HDウォレットとしてseed作成、keyを指定した数だけ生成し、出力する
@@ -114,13 +115,25 @@ func debugForCheck(wallet *service.Wallet) {
 	case 2:
 		//TODO: HDウォレットによるSeedの作成
 		logger.Info("Run: HDウォレット Seedの生成")
-		//key.GenerateHDKey(opts.ParamSeed, wallet.BTC.GetChainConf())
 		bSeed, err := wallet.GenerateSeed()
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
 		logger.Infof("seed: %s", key.SeedToString(bSeed))
 	case 3:
+		//TODO: ClientのKeyを作成する
+		logger.Info("Run: ClientのKeyを作成する")
+		bSeed, err := wallet.GenerateSeed()
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+		keys, err := wallet.GenerateClientAccount(bSeed, 0, 100)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+		grok.Value(keys)
+		//logger.Infof("seed: %s", key.SeedToString(bSeed))
+	case 5:
 		//TODO:Multisigの作成
 		logger.Info("Run: Multisigの作成")
 
@@ -137,7 +150,7 @@ func debugForCheck(wallet *service.Wallet) {
 		}
 		logger.Infof("multisig address: %s, redeemScript: %s", resAddr.Address, resAddr.RedeemScript)
 
-	case 4:
+	case 6:
 		//[Debug用]HEXから署名を行う
 		logger.Info("Run: HEXから署名を行う")
 		hex := "02000000021ed288be4c4d7923a0d044bb500a15b2eb0f2b3c5503293f251f7c94939a3f9f0000000000ffffffff557624120cdf3f4d092f35e5cd6b75418b76c3e3fd4c398357374e93cfe5c4200000000000ffffffff05c03b47030000000017a91419e70491572c55fb08ce90b0c6bf5cfe45a5420e87809698000000000017a9146b8902fc7a6a0bccea9dbd80a4c092c314227f618734e133070000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e87005a62020000000017a9149c877d6f21d5800ca60a7660ee56745f239b222b87002d31010000000017a914f575a0d1ddcfb98a11628826f1632453d718ff618700000000"

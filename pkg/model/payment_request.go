@@ -19,7 +19,7 @@ type PaymentRequest struct {
 	UpdatedAt   *time.Time `db:"updated_at"`
 }
 
-// GetPaymentRequest PaymentRequestテーブル全体を返す
+// GetPaymentRequestAll PaymentRequestテーブル全体を返す
 func (m *DB) GetPaymentRequestAll() ([]PaymentRequest, error) {
 	//sql := "SELECT * FROM payment_request WHERE is_done=false"
 	sql := "SELECT * FROM payment_request WHERE payment_id IS NULL"

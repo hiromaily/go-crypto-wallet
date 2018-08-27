@@ -12,7 +12,7 @@ type Seed struct {
 	UpdatedAt *time.Time `db:"updated_at"`
 }
 
-// GetSeed seedテーブル全体を返す(しかし、1行しかない想定)
+// GetSeedAll seedテーブル全体を返す(しかし、1行しかない想定)
 func (m *DB) GetSeedAll() ([]Seed, error) {
 	var seeds []Seed
 	err := m.RDB.Select(&seeds, "SELECT * FROM seed")
@@ -20,6 +20,7 @@ func (m *DB) GetSeedAll() ([]Seed, error) {
 	return seeds, err
 }
 
+// GetSeedOne idが１のseedを返す
 func (m *DB) GetSeedOne() (Seed, error) {
 	var seed Seed
 	err := m.RDB.Get(&seed, "SELECT * FROM seed WHERE id=1")
@@ -27,6 +28,7 @@ func (m *DB) GetSeedOne() (Seed, error) {
 	return seed, err
 }
 
+// GetSeedCount レコード数を返す
 func (m *DB) GetSeedCount() (int64, error) {
 	var count int64
 	err := m.RDB.Get(&count, "SELECT count(id) FROM seed")
@@ -34,6 +36,7 @@ func (m *DB) GetSeedCount() (int64, error) {
 	return count, err
 }
 
+// InsertSeed レコードをinsertする
 func (m *DB) InsertSeed(seed string, tx *sqlx.Tx, isCommit bool) (int64, error) {
 
 	sql := `

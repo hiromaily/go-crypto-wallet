@@ -107,6 +107,9 @@ run-info:
 gen-seed:
 	./coldwallet -d -m 2
 
+gen-client:
+	./coldwallet -d -m 3
+
 
 ###############################################################################
 # Test

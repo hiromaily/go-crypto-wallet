@@ -71,3 +71,17 @@ const (
 	EnvDev  EnvironmentType = "dev"
 	EnvProd EnvironmentType = "prod"
 )
+
+//EnvironmentTypeValue env_typeの値
+var EnvironmentTypeValue = map[EnvironmentType]uint8{
+	EnvDev:  1,
+	EnvProd: 2,
+}
+
+// ValidateEnvironmentType EnvironmentTypeのバリデーションを行う
+func ValidateEnvironmentType(val string) bool {
+	if _, ok := EnvironmentTypeValue[EnvironmentType(val)]; ok {
+		return true
+	}
+	return false
+}

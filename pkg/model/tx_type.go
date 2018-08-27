@@ -11,7 +11,7 @@ type TxType struct {
 	UpdatedAt *time.Time `db:"updated_at"`
 }
 
-// GetTxType tx_typeテーブル全体を返す
+// GetTxTypeAll tx_typeテーブル全体を返す
 func (m *DB) GetTxTypeAll() ([]TxType, error) {
 	var txTypes []TxType
 	err := m.RDB.Select(&txTypes, "SELECT * FROM tx_type")
