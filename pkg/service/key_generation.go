@@ -147,6 +147,7 @@ func (w *Wallet) generateAccountKey(accountType key.AccountType, seed []byte, id
 	for idx, key := range walletKeys {
 		accountKeyClients[idx] = model.AccountKeyTable{
 			WalletAddress:      key.Address,
+			WalletMultisigAddress:      "",
 			WalletImportFormat: key.WIF,
 			KeyType:            keyID,
 			Idx:                idxFrom,

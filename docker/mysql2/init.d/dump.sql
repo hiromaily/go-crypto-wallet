@@ -145,7 +145,7 @@ CREATE TABLE `account_key_client` (
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_wallet_address` (`wallet_address`),
-  UNIQUE KEY `idx_wallet_multisig_address` (`wallet_multisig_address`),
+  /*UNIQUE KEY `idx_wallet_multisig_address` (`wallet_multisig_address`),*/
   UNIQUE KEY `idx_wallet_import_format` (`wallet_import_format`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='受け取り用トランザクション情報Table';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -178,4 +178,4 @@ CREATE TABLE `account_key_payment` LIKE `account_key_client`;
 DROP TABLE IF EXISTS `account_key_authorization`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `account_key_authorization` LIKE `account_key_authorization`;
+CREATE TABLE `account_key_authorization` LIKE `account_key_client`;
