@@ -1,14 +1,15 @@
 version: '3'
 
 volumes:
-  db: {}
+  db1: {}
+  db2: {}
 
 services:
   #for hot-wallet
-  mysql:
+  mysql1:
     image: mysql:5.7
     volumes:
-      - db:/var/lib/mysql
+      - db1:/var/lib/mysql
       - "./docker/mysql/conf.d:/etc/mysql/conf.d"
       - "./docker/mysql/init.d:/docker-entrypoint-initdb.d"
     environment:
@@ -23,12 +24,12 @@ services:
   mysql2:
     image: mysql:5.7
     volumes:
-    - db:/var/lib/mysql
+    - db2:/var/lib/mysql
     - "./docker/mysql2/conf.d:/etc/mysql/conf.d"
     - "./docker/mysql2/init.d:/docker-entrypoint-initdb.d"
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: cold_wallet
+      MYSQL_DATABASE: cold_wallet1
       MYSQL_USER: cayenne
       MYSQL_PASSWORD: cayenne
     ports:
