@@ -43,25 +43,7 @@ func init() {
 }
 
 func main() {
-	//// Config
-	//conf, err := toml.New(opts.ConfPath)
-	//if err != nil {
-	//	logger.Fatal(err)
-	//}
-	//
-	//// Log
-	//logger.Initialize(enum.EnvironmentType(conf.Environment))
-	//
-	//// Connection to Bitcoin core
-	//bit, err := api.Connection(&conf.Bitcoin)
-	//if err != nil {
-	//	logger.Fatal(err)
-	//}
-	//defer bit.Close()
-	//
-	////Wallet Object
-	//wallet := service.Wallet{BTC: bit, DB: nil, Env: enum.EnvironmentType(conf.Environment)}
-
+	// Config
 	wallet, err := service.InitialSettings(opts.ConfPath)
 	if err != nil {
 		logger.Fatal(err)
