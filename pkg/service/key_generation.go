@@ -113,7 +113,7 @@ func (w *Wallet) retrieveSeed() ([]byte, error) {
 	return nil, errors.Errorf("DB.GetSeedOne() error: %v", err)
 }
 
-// generateAccount アカウントを生成する
+// generateAccount AccountType属性のアカウントを生成する
 func (w *Wallet) generateAccount(seed []byte, idxFrom, count uint32, account key.AccountType) ([]key.WalletKey, error) {
 	// アカウント(Client)を生成
 	priv, _, err := key.CreateAccount(w.BTC.GetChainConf(), seed, account)
