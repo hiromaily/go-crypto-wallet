@@ -120,9 +120,14 @@ CREATE TABLE `key_type` (
 LOCK TABLES `key_type` WRITE;
 /*!40000 ALTER TABLE `key_type` DISABLE KEYS */;
 INSERT INTO `key_type` VALUES
-  (1,44,1,0,0,'顧客用 TestNet環境のためのkey',now()),
-  (2,44,1,1,0,'入金保管用 TestNet環境のためのkey',now()),
-  (3,44,1,2,0,'支払い用 TestNet環境のためのkey',now());
+  (1,44,0,0,0,'顧客用 MainNet環境のためのkey',now()),
+  (2,44,0,1,0,'入金保管用 MainNet環境のためのkey',now()),
+  (3,44,0,2,0,'支払い用 MainNet環境のためのkey',now()),
+  (4,44,0,3,0,'承認用 MainNet環境のためのkey',now()),
+  (5,44,1,0,0,'顧客用 TestNet環境のためのkey',now()),
+  (6,44,1,1,0,'入金保管用 TestNet環境のためのkey',now()),
+  (7,44,1,2,0,'支払い用 TestNet環境のためのkey',now()),
+  (8,44,1,3,0,'承認用 TestNet環境のためのkey',now());
 /*!40000 ALTER TABLE `key_type` ENABLE KEYS */;
 UNLOCK TABLES;
 

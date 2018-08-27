@@ -110,6 +110,12 @@ gen-seed:
 gen-client:
 	./coldwallet -d -m 3
 
+gen-receipt:
+	./coldwallet -d -m 4
+
+gen-payment:
+	./coldwallet -d -m 5
+
 
 ###############################################################################
 # Test
