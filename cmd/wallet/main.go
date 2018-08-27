@@ -28,7 +28,7 @@ import (
 // Options コマンドラインオプション
 type Options struct {
 	//Configパス
-	ConfPath string `short:"c" long:"conf" default:"./data/toml/config.toml" description:"Path for configuration toml file"`
+	ConfPath string `short:"c" long:"conf" default:"./data/toml/watch_config.toml" description:"Path for configuration toml file"`
 	//実行される機能
 	Mode uint8 `short:"m" long:"mode" description:"Mode i.e.Functionality"`
 	//txファイルパス
