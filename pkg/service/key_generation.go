@@ -28,7 +28,6 @@ import (
 //4.Receipt Keyの生成 + Multisig対応 + DBに登録 (1日1Key消費するイメージ)
 //5.Payment Keyの生成+ Multisig + DBに登録 (1日1Key消費するイメージ)
 
-
 // GenerateSeed seedを生成する
 func (w *Wallet) GenerateSeed() ([]byte, error) {
 

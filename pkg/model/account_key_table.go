@@ -16,6 +16,7 @@ type AccountKeyTable struct {
 	Account               string     `db:"account"`
 	KeyType               uint8      `db:"key_type"`
 	Idx                   uint32     `db:"idx"`
+	IsImprotedPrivKey     bool       `db:"is_imported_priv_key"`
 	UpdatedAt             *time.Time `db:"updated_at"`
 }
 
@@ -60,6 +61,35 @@ func (m *DB) InsertAccountKeyTable(accountType key.AccountType, accountKeyTables
 	return m.insertAccountKeyTable(accountKeyTableName[accountType], accountKeyTables, tx, isCommit)
 }
 
+// updateIsImprotedPrivKey is_imported_priv_keyをtrueに更新する
+func (m *DB) updateIsImprotedPrivKey(tbl, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	sql := `
+UPDATE %s SET is_imported_priv_key=true WHERE wallet_import_format=? 
+`
+	sql = fmt.Sprintf(sql, tbl)
+
+	if tx == nil {
+		tx = m.RDB.MustBegin()
+	}
+
+	res, err := tx.Exec(sql, strWIF)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+	if isCommit {
+		tx.Commit()
+	}
+	affectedNum, _ := res.RowsAffected()
+
+	return affectedNum, nil
+}
+
+// UpdateIsImprotedPrivKey is_imported_priv_keyをtrueに更新する
+func (m *DB) UpdateIsImprotedPrivKey(accountType key.AccountType, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	return m.updateIsImprotedPrivKey(accountKeyTableName[accountType], strWIF, tx, isCommit)
+}
+
 //getMaxIndex indexの最大値を返す
 func (m *DB) getMaxIndex(tbl string) (int64, error) {
 	sql := "SELECT MAX(idx) from %s;"
@@ -74,4 +104,23 @@ func (m *DB) getMaxIndex(tbl string) (int64, error) {
 //GetMaxIndex indexの最大値を返す
 func (m *DB) GetMaxIndex(accountType key.AccountType) (int64, error) {
 	return m.getMaxIndex(accountKeyTableName[accountType])
+}
+
+//getNotImportedKeyWIF IsImprotedPrivKeyがfalseのレコードをすべて返す
+func (m *DB) getNotImportedKeyWIF(tbl string) ([]string, error) {
+	sql := "SELECT wallet_import_format from %s WHERE is_imported_priv_key=false;"
+	sql = fmt.Sprintf(sql, tbl)
+
+	var WIFs []string
+	err := m.RDB.Select(&WIFs, sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return WIFs, nil
+}
+
+//GetNotImportedKeyWIF IsImprotedPrivKeyがfalseのレコードをすべて返す
+func (m *DB) GetNotImportedKeyWIF(accountType key.AccountType) ([]string, error) {
+	return m.getNotImportedKeyWIF(accountKeyTableName[accountType])
 }
