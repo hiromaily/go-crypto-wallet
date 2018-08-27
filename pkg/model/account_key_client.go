@@ -12,7 +12,7 @@ type AccountKeyClient struct {
 	WalletImportFormat string     `db:"wallet_import_format"`
 	Account            string     `db:"account"`
 	KeyType            uint8      `db:"key_type"`
-	Index              uint32     `db:"index"`
+	Idx                uint32     `db:"idx"`
 	UpdatedAt          *time.Time `db:"updated_at"`
 }
 
@@ -20,10 +20,8 @@ type AccountKeyClient struct {
 //TODO:BulkInsertがやりたい
 func (m *DB) InsertAccountKeyClient(accountKeyClients []AccountKeyClient, tx *sqlx.Tx, isCommit bool) error {
 
-	sql := `
-INSERT INTO account_key_client (wallet_address, account_from, address_to, amount) 
-VALUES (:address_from, :account_from, :address_to, :amount)
-`
+	sql := "INSERT INTO account_key_client (wallet_address, wallet_import_format, account, key_type, idx) "
+	sql += "VALUES (:wallet_address, :wallet_import_format, :account, :key_type, :idx)"
 
 	if tx == nil {
 		tx = m.RDB.MustBegin()
@@ -42,4 +40,14 @@ VALUES (:address_from, :account_from, :address_to, :amount)
 	}
 
 	return nil
+}
+
+//GetMaxClientIndex indexの最大値を返す
+func (m *DB) GetMaxClientIndex() (int64, error) {
+	sql := "SELECT MAX(idx) from account_key_client;"
+
+	var idx int64
+	err := m.RDB.Get(&idx, sql)
+
+	return idx, err
 }

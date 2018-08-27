@@ -110,9 +110,10 @@ func CreateKeysWithIndex(conf *chaincfg.Params, accountPrivateKey string, idxFro
 
 	// Index
 	walletKeys := make([]WalletKey, count)
-	max := idxFrom + count
-	for i := uint32(idxFrom); i < max; i++ {
-		child, err := change.Child(i)
+	//max := idxFrom + count
+	//for i := uint32(idxFrom); i < max; i++ {
+	for i := uint32(0); i < count; i++ {
+		child, err := change.Child(idxFrom)
 		if err != nil {
 			return nil, err
 		}
@@ -137,6 +138,8 @@ func CreateKeysWithIndex(conf *chaincfg.Params, accountPrivateKey string, idxFro
 		}
 
 		walletKeys[i] = WalletKey{WIF: strPrivateKey, Address: address.String()}
+
+		idxFrom++
 	}
 
 	return walletKeys, nil

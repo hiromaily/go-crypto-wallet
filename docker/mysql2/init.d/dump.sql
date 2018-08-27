@@ -140,7 +140,7 @@ CREATE TABLE `account_key_client` (
   `wallet_import_format`  VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'WIF',
   `account`               VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'アドレスに紐づくアカウント名',
   `key_type`              tinyint(1) UNSIGNED NOT NULL COMMENT'コインの種類',
-  `index`  BIGINT(20) UNSIGNED NOT NULL COMMENT'HDウォレット生成時のindex',
+  `idx`    BIGINT(20) UNSIGNED NOT NULL COMMENT'HDウォレット生成時のindex',
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_wallet_address` (`wallet_address`),

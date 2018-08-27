@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
@@ -46,7 +47,7 @@ func (w *Wallet) InitialKeyGeneration() error {
 
 	// TODO:初回の生成数をどのように調整し、決定するか？とりあえず固定
 	// アカウント(Client)を生成
-	_, err = w.GenerateClientAccount(seed, 0, 10000)
+	_, err = w.GenerateClientAccount(seed,  10000)
 	if err != nil {
 		return errors.Errorf("GenerateClientAccount() error: %v", err)
 	}
@@ -128,26 +129,51 @@ func (w *Wallet) generateAccount(seed []byte, idxFrom, count uint32, account key
 	return walletKeys, nil
 }
 
-// GenerateClientAccount Clientアカウントを生成する
-func (w *Wallet) GenerateClientAccount(seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
+// generateClientAccount Clientアカウントを生成する
+func (w *Wallet) GenerateClientAccount(seed []byte, count uint32) ([]key.WalletKey, error) {
+	//現在のindexを取得
+	idx, err := w.DB.GetMaxClientIndex()
+	if err != nil {
+		//return nil, errors.Errorf("DB.GetMaxClientIndex() error: %s", err)
+		idx = 0
+	}else{
+		idx++
+	}
+	logger.Infof("idx: %d", idx)
+
+	return w.generateClientAccount(seed, uint32(idx), count)
+}
+
+// generateClientAccount Clientアカウントを生成する
+func (w *Wallet) generateClientAccount(seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
+	// seedを取得
 	walletKeys, err := w.generateAccount(seed, idxFrom, count, key.AccountTypeClient)
 	if err != nil {
 		return nil, errors.Errorf("key.generateAccount(AccountTypeClient) error: %s", err)
 	}
 
-	// TODO:DBにClientAccountのKey情報を登録
+	// key_idを取得
+	keyID, err := w.getKeyTypeByAccount(key.AccountTypeClient)
+	if err != nil {
+		return nil, errors.Errorf("getKeyTypeByAccount(AccountTypeClient) error: %s", err)
+	}
+
+	// DBにClientAccountのKey情報を登録
 	accountKeyClients := make([]model.AccountKeyClient, len(walletKeys))
 	for idx, key := range walletKeys {
 		accountKeyClients[idx] = model.AccountKeyClient{
 			WalletAddress:      key.Address,
 			WalletImportFormat: key.WIF,
-			KeyType:            0, //TODO:動的に取得したものをセット
-			Index:              idxFrom,
+			KeyType:            keyID,
+			Idx:                idxFrom,
 		}
 		idxFrom++
 	}
 
-	w.DB.InsertAccountKeyClient()
+	err = w.DB.InsertAccountKeyClient(accountKeyClients, nil, true)
+	if err != nil {
+		return nil, errors.Errorf("DB.InsertAccountKeyClient() error: %s", err)
+	}
 
 	return walletKeys, err
 }
@@ -186,4 +212,20 @@ func (w *Wallet) GenerateAuthorizationAccount(seed []byte, idxFrom, count uint32
 	// TODO:DBにAuthorizationAccountのKey情報を登録
 
 	return walletKeys, err
+}
+
+
+func (w *Wallet) getKeyTypeByAccount(accountType key.AccountType) (uint8, error) {
+	//accountType:0
+	//coin_typeを取得
+	ct := key.CoinTypeBitcoin
+	if w.BTC.GetChainConf().Name != string(enum.NetworkTypeMainNet) {
+		ct = key.CoinTypeTestnet
+	}
+	keyType, err := w.DB.GetKeyTypeByCoinAndAccountType(ct, accountType)
+	if err != nil {
+		return 0, errors.Errorf("DB.GetKeyTypeByCoinAndAccountType() error: %s", err)
+	}
+
+	return keyType.ID, nil
 }
