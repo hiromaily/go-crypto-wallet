@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/hiromaily/go-bitcoin/pkg/key"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/pkg/errors"
 )
 
@@ -73,21 +74,41 @@ func (w *Wallet) InitialKeyGeneration() error {
 // GenerateSeed seedを生成する
 func (w *Wallet) GenerateSeed() ([]byte, error) {
 
-	// 生成
-	bSeed, err := key.GenerateSeed()
+	//seed, err := w.DB.GetSeedOne()
+	//if err == nil && seed.Seed != "" {
+	//	logger.Info("seed have already been generated")
+	//	return key.SeedToByte(seed.Seed)
+	//}
+	bSeed, err := w.retrieveSeed()
+	if err == nil {
+		return bSeed, nil
+	}
+
+	// seed生成
+	bSeed, err = key.GenerateSeed()
 	if err != nil {
 		return nil, errors.Errorf("key.GenerateSeed() error: %s", err)
 	}
+	strSeed := key.SeedToString(bSeed)
 
-	// TODO:DBにseed情報を登録
+	// DBにseed情報を登録
+	_, err = w.DB.InsertSeed(strSeed, nil, true)
+	if err != nil {
+		return nil, errors.Errorf("key.InsertSeed() error: %s", err)
+	}
 
 	return bSeed, nil
 }
 
 func (w *Wallet) retrieveSeed() ([]byte, error) {
-	// TODO:DBからseed情報を登録
+	// DBからseed情報を登録
+	seed, err := w.DB.GetSeedOne()
+	if err == nil && seed.Seed != "" {
+		logger.Info("seed have already been generated")
+		return key.SeedToByte(seed.Seed)
+	}
 
-	return nil, nil
+	return nil, errors.Errorf("DB.GetSeedOne() error: %v", err)
 }
 
 // generateAccount アカウントを生成する

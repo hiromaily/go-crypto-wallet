@@ -5,7 +5,7 @@ import (
 )
 
 func TestGetTxType(t *testing.T) {
-	txTypes, err := db.GetTxType()
+	txTypes, err := db.GetTxTypeAll()
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -7,7 +7,7 @@ import (
 )
 
 func TestGetPaymentRequest(t *testing.T) {
-	paymentRequests, err := db.GetPaymentRequest()
+	paymentRequests, err := db.GetPaymentRequestAll()
 	if err != nil {
 		t.Fatal(err)
 	}

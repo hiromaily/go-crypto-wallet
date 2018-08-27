@@ -5,8 +5,8 @@ type NetworkType string
 
 // network type
 const (
-	NetworkTypeMainNet NetworkType = "mainnet"
-	NetworkTypeTestNet3   NetworkType = "testnet3"
+	NetworkTypeMainNet  NetworkType = "mainnet"
+	NetworkTypeTestNet3 NetworkType = "testnet3"
 )
 
 //TxType トランザクション種別

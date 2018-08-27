@@ -68,7 +68,7 @@ func CreateAccount(conf *chaincfg.Params, seed []byte, actType AccountType) (str
 	}
 	//CoinType TODO:切り替えが必要
 	ct := uint32(CoinTypeBitcoin)
-	if conf.Name != string(enum.NetworkTypeMainNet){
+	if conf.Name != string(enum.NetworkTypeMainNet) {
 		ct = uint32(CoinTypeTestnet)
 	}
 	coinType, err := purpose.Child(hdkeychain.HardenedKeyStart + ct)

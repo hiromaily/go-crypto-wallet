@@ -2,13 +2,12 @@ package main
 
 import (
 	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/hiromaily/go-bitcoin/pkg/api"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
-	"github.com/hiromaily/go-bitcoin/pkg/toml"
 	"github.com/jessevdk/go-flags"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 // HDウォレットとしてseed作成、keyを指定した数だけ生成し、出力する
@@ -20,11 +19,11 @@ import (
 // Options コマンドラインオプション
 type Options struct {
 	//Configパス
-	ConfPath string `short:"c" long:"conf" default:"./data/toml/config.toml" description:"Path for configuration toml file"`
+	ConfPath string `short:"c" long:"conf" default:"./data/toml/cold1_config.toml" description:"Path for configuration toml file"`
 	//実行される機能
 	Mode uint8 `short:"m" long:"mode" description:"Mode i.e.Functionality"`
 	//HDウォレット用Key生成のためのseed情報
-	ParamSeed string `short:"d" long:"seed" default:"" description:"backup seed"`
+	//ParamSeed string `short:"d" long:"seed" default:"" description:"backup seed"`
 	//txファイルパス
 	ImportFile string `short:"i" long:"import" default:"" description:"import file path for hex"`
 	//Debugモード
@@ -43,31 +42,37 @@ func init() {
 }
 
 func main() {
-	// Config
-	conf, err := toml.New(opts.ConfPath)
+	//// Config
+	//conf, err := toml.New(opts.ConfPath)
+	//if err != nil {
+	//	logger.Fatal(err)
+	//}
+	//
+	//// Log
+	//logger.Initialize(enum.EnvironmentType(conf.Environment))
+	//
+	//// Connection to Bitcoin core
+	//bit, err := api.Connection(&conf.Bitcoin)
+	//if err != nil {
+	//	logger.Fatal(err)
+	//}
+	//defer bit.Close()
+	//
+	////Wallet Object
+	//wallet := service.Wallet{BTC: bit, DB: nil, Env: enum.EnvironmentType(conf.Environment)}
+
+	wallet, err := service.InitialSettings(opts.ConfPath)
 	if err != nil {
 		logger.Fatal(err)
 	}
-
-	// Log
-	logger.Initialize(enum.EnvironmentType(conf.Environment))
-
-	// Connection to Bitcoin core
-	bit, err := api.Connection(&conf.Bitcoin)
-	if err != nil {
-		logger.Fatal(err)
-	}
-	defer bit.Close()
-
-	//Wallet Object
-	wallet := service.Wallet{BTC: bit, DB: nil, Env: enum.EnvironmentType(conf.Environment)}
+	defer wallet.Done()
 
 	if opts.Debug {
 		//debug用 機能確認
-		debugForCheck(&wallet)
+		debugForCheck(wallet)
 	} else {
 		//switch mode
-		switchFunction(&wallet)
+		switchFunction(wallet)
 	}
 }
 
@@ -107,9 +112,14 @@ func debugForCheck(wallet *service.Wallet) {
 		}
 		logger.Infof("[WIF] %s - [Pub Address] %s\n", wif.String(), pubAddress)
 	case 2:
-		//TODO: HDウォレットによるKeyの作成 (まだ検証中)
-		logger.Info("Run: HDウォレット Keyの生成")
+		//TODO: HDウォレットによるSeedの作成
+		logger.Info("Run: HDウォレット Seedの生成")
 		//key.GenerateHDKey(opts.ParamSeed, wallet.BTC.GetChainConf())
+		bSeed, err := wallet.GenerateSeed()
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+		logger.Infof("seed: %s", key.SeedToString(bSeed))
 	case 3:
 		//TODO:Multisigの作成
 		logger.Info("Run: Multisigの作成")

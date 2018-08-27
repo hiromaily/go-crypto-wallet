@@ -28,7 +28,7 @@ type UserPayment struct {
 
 // createUserPayment 出金依頼テーブルから処理するためのデータを取得する
 func (w *Wallet) createUserPayment() ([]UserPayment, []int64, error) {
-	paymentRequests, err := w.DB.GetPaymentRequest()
+	paymentRequests, err := w.DB.GetPaymentRequestAll()
 	if err != nil {
 		return nil, nil, errors.Errorf("DB.GetPaymentRequest() error: %v", err)
 	}

@@ -138,7 +138,7 @@ func (e *ExtClient) ReadAndSave(readFileName, saveFileName string, perm os.FileM
 	var r *storage.Reader
 	r, err = e.bkt.Object(readFileName).NewReader(e.ctx)
 	if err != nil {
-		err = errors.Errorf("bkt.Object() ", err)
+		err = errors.Errorf("bkt.Object() error: %v", err)
 		return
 	}
 	defer func() {
@@ -150,13 +150,13 @@ func (e *ExtClient) ReadAndSave(readFileName, saveFileName string, perm os.FileM
 	var body []byte
 	body, err = ioutil.ReadAll(r)
 	if err != nil {
-		err = errors.Errorf("ioutil.ReadAll() ", err)
+		err = errors.Errorf("ioutil.ReadAll() error: %v", err)
 		return
 	}
 	// Save
 	err = ioutil.WriteFile(saveFileName, body, perm)
 	if err != nil {
-		err = errors.Errorf("ioutil.WriteFile() ", err)
+		err = errors.Errorf("ioutil.WriteFile() error: %v", err)
 	}
 
 	return

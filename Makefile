@@ -13,11 +13,13 @@ bld:
 	go build -o wallet ./cmd/wallet/main.go
 	go build -o coldwallet ./cmd/coldwallet/main.go
 
-wallet: bld
-	./wallet -m 1
-
-cold-wallet: bld
-	./coldwallet -m 4
+bld-windows:
+	GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/wallet.exe ./cmd/wallet/main.go
+	GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/coldwallet.exe ./cmd/coldwallet/main.go
+	zip -r ./bin/windows_amd64/wallet.zip ./bin/windows_amd64/wallet.exe
+	zip -r ./bin/windows_amd64/coldwallet.zip ./bin/windows_amd64/coldwallet.exe
+	rm -f ./bin/windows_amd64/wallet.exe
+	rm -f ./bin/windows_amd64/coldwallet.exe
 
 
 ###############################################################################
@@ -83,7 +85,7 @@ detect-sent-transaction:
 
 
 ###############################################################################
-# Run 各種単体機能
+# Run 各種Debug機能
 ###############################################################################
 # 出金依頼データの再利用のため、DBを書き換える
 run-reset:
@@ -96,6 +98,14 @@ run-fee:
 # ネットワーク情報取得(getnetworkinfo)
 run-info:
 	./wallet -d -m 4
+
+
+###############################################################################
+# Run Key生成 機能
+###############################################################################
+# 出金依頼データの再利用のため、DBを書き換える
+gen-seed:
+	./coldwallet -d -m 2
 
 
 ###############################################################################
