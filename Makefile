@@ -116,6 +116,12 @@ gen-receipt:
 gen-payment:
 	./coldwallet -d -m 5
 
+import-priv:
+	./coldwallet -d -m 10
+
+export-pub:
+	./coldwallet -d -m 11
+
 
 ###############################################################################
 # Test

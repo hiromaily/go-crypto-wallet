@@ -35,9 +35,9 @@ pass = "cayenne"
 [leveldb]
 path = "./data/kvs/db"
 
-[file]
+[tx_file]
 # ここは開発時にしか必要ないはず
-file_base_path = "./data/tx/"
+base_path = "./data/tx/"
 
 [gcs]
 storage_key_path = "./data/api_keys/cayenne-dev-strage.json"

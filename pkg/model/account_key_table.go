@@ -2,9 +2,11 @@ package model
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/jmoiron/sqlx"
-	"time"
+	"github.com/pkg/errors"
 )
 
 // AccountKeyTable account_key_clientテーブル
@@ -17,6 +19,7 @@ type AccountKeyTable struct {
 	KeyType               uint8      `db:"key_type"`
 	Idx                   uint32     `db:"idx"`
 	IsImprotedPrivKey     bool       `db:"is_imported_priv_key"`
+	IsExprotedPubKey      bool       `db:"is_exported_pub_key"`
 	UpdatedAt             *time.Time `db:"updated_at"`
 }
 
@@ -90,6 +93,45 @@ func (m *DB) UpdateIsImprotedPrivKey(accountType key.AccountType, strWIF string,
 	return m.updateIsImprotedPrivKey(accountKeyTableName[accountType], strWIF, tx, isCommit)
 }
 
+// updateIsExprotedPubKey is_exported_pub_keyをtrueに更新する
+func (m *DB) updateIsExprotedPubKey(tbl string, accountType key.AccountType, pubKeys []string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	var sql string
+	if accountType == key.AccountTypeClient {
+		sql = "UPDATE %s SET is_exported_pub_key=true WHERE wallet_address IN (?);"
+	} else {
+		sql = "UPDATE %s SET is_exported_pub_key=true WHERE wallet_multisig_address IN (?) ;"
+	}
+	sql = fmt.Sprintf(sql, tbl)
+
+	//In対応
+	query, args, err := sqlx.In(sql, pubKeys)
+	if err != nil {
+		return 0, errors.Errorf("sqlx.In() error: %v", err)
+	}
+	query = m.RDB.Rebind(query)
+
+	if tx == nil {
+		tx = m.RDB.MustBegin()
+	}
+
+	res, err := tx.Exec(query, args...)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+	if isCommit {
+		tx.Commit()
+	}
+	affectedNum, _ := res.RowsAffected()
+
+	return affectedNum, nil
+}
+
+// UpdateIsExprotedPubKey is_exported_pub_keyをtrueに更新する
+func (m *DB) UpdateIsExprotedPubKey(accountType key.AccountType, pubKeys []string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	return m.updateIsExprotedPubKey(accountKeyTableName[accountType], accountType, pubKeys, tx, isCommit)
+}
+
 //getMaxIndex indexの最大値を返す
 func (m *DB) getMaxIndex(tbl string) (int64, error) {
 	sql := "SELECT MAX(idx) from %s;"
@@ -108,7 +150,7 @@ func (m *DB) GetMaxIndex(accountType key.AccountType) (int64, error) {
 
 //getNotImportedKeyWIF IsImprotedPrivKeyがfalseのレコードをすべて返す
 func (m *DB) getNotImportedKeyWIF(tbl string) ([]string, error) {
-	sql := "SELECT wallet_import_format from %s WHERE is_imported_priv_key=false;"
+	sql := "SELECT wallet_import_format FROM %s WHERE is_imported_priv_key=false;"
 	sql = fmt.Sprintf(sql, tbl)
 
 	var WIFs []string
@@ -123,4 +165,30 @@ func (m *DB) getNotImportedKeyWIF(tbl string) ([]string, error) {
 //GetNotImportedKeyWIF IsImprotedPrivKeyがfalseのレコードをすべて返す
 func (m *DB) GetNotImportedKeyWIF(accountType key.AccountType) ([]string, error) {
 	return m.getNotImportedKeyWIF(accountKeyTableName[accountType])
+}
+
+//getNotExportedPubKey IsExprotedPubKeyがfalseのレコードをすべて返す
+func (m *DB) getNotExportedPubKey(tbl string, accountType key.AccountType) ([]string, error) {
+	//wallet_address
+	//wallet_multisig_address
+	var sql string
+	if accountType == key.AccountTypeClient {
+		sql = "SELECT wallet_address FROM %s WHERE is_exported_pub_key=false;"
+	} else {
+		sql = "SELECT wallet_multisig_address FROM %s WHERE is_exported_pub_key=false;"
+	}
+	sql = fmt.Sprintf(sql, tbl)
+
+	var pubKeys []string
+	err := m.RDB.Select(&pubKeys, sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return pubKeys, nil
+}
+
+//GetNotExportedPubKey IsExprotedPubKeyがfalseのレコードをすべて返す
+func (m *DB) GetNotExportedPubKey(accountType key.AccountType) ([]string, error) {
+	return m.getNotExportedPubKey(accountKeyTableName[accountType], accountType)
 }

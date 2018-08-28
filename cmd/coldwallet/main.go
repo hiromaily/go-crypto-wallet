@@ -157,6 +157,12 @@ func debugForCheck(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
+	case 11:
+		//作成したPublicKeyをcsvファイルとしてexportする
+		err := wallet.ExportPublicKey(key.AccountTypeClient)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
 	case 20:
 		//TODO:Multisigの作成
 		logger.Info("Run: Multisigの作成")

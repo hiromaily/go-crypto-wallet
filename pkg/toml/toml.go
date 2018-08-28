@@ -9,12 +9,13 @@ import (
 
 // Config ルート
 type Config struct {
-	Environment string      `toml:"environment"`
-	Bitcoin     BitcoinConf `toml:"bitcoin"`
+	Environment string        `toml:"environment"`
+	Bitcoin     BitcoinConf   `toml:"bitcoin"`
+	MySQL       MySQLConf     `toml:"mysql"`
+	TxFile      TxFileConf    `toml:"tx_file"`
+	PubkeyCSV   PubKeyCSVConf `toml:"pubkey_csv"`
+	GCS         GCSConf       `toml:"gcs"`
 	//LevelDB LevelDBConf `toml:"leveldb"` //TODO:おそらく不要
-	MySQL MySQLConf `toml:"mysql"`
-	File  FileConf  `toml:"file"`
-	GCS   GCSConf   `toml:"gcs"`
 }
 
 // BitcoinConf Bitcoin情報
@@ -62,10 +63,16 @@ type MySQLConf struct {
 //	Path string `toml:"path"`
 //}
 
-// FileConf 保存されるtransactionファイル情報
+// TxFileConf 保存されるtransactionファイル情報
 // import/export共にこのパスが使われる
-type FileConf struct {
-	FileBasePath string `toml:"file_base_path"`
+type TxFileConf struct {
+	BasePath string `toml:"base_path"`
+}
+
+// PubKeyCSVConf 保存されるtransactionファイル情報
+// import/export共にこのパスが使われる
+type PubKeyCSVConf struct {
+	BasePath string `toml:"base_path"`
 }
 
 // GCSConf Google Cloud Storage

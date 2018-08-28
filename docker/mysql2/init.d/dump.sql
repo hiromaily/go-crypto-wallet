@@ -148,6 +148,7 @@ CREATE TABLE `account_key_client` (
   `key_type`                tinyint(1) UNSIGNED NOT NULL COMMENT'コインの種類',
   `idx`    BIGINT(20) UNSIGNED NOT NULL COMMENT'HDウォレット生成時のindex',
   `is_imported_priv_key`    BOOL DEFAULT false COMMENT'生成したPrivateKey(WIF)がbitcoin coreのwalletにimport済かどうか',
+  `is_exported_pub_key`     BOOL DEFAULT false COMMENT'生成したPublicKeyをWatchOnlyWallet用にCSVでexport済かどうか',
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_wallet_address` (`wallet_address`),

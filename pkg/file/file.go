@@ -11,7 +11,8 @@ import (
 	"strings"
 )
 
-// これは開発時にしか使われないはず
+// WatchOnlyWalletにおいては、開発時にしか使われないはず？
+// でもGCSからDLした先の保存ディレクトリは必要になるな
 
 var (
 	baseFilePath = "./data/tx/"

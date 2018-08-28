@@ -9,6 +9,8 @@ import (
 
 // ImportPrivateKey 指定したAccountTypeに属するテーブルのis_imported_priv_keyがfalseのWIFをImportPrivKeyRescanする
 func (w *Wallet) ImportPrivateKey(accountType key.AccountType) error {
+	//AccountType問わずimportは可能にしておく
+
 	//DBから未登録のPrivateKey情報を取得する
 	WIFs, err := w.DB.GetNotImportedKeyWIF(accountType)
 	if err != nil {
