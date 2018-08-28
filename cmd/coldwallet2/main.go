@@ -1,8 +1,10 @@
 package main
 
 import (
+	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/chaincfg"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/jessevdk/go-flags"
@@ -66,6 +68,18 @@ func switchFunction(wallet *service.Wallet) {
 	//TODO:ここから呼び出すべきはService系のみに統一したい
 	switch opts.Mode {
 	case 1:
+		//TODO:これはcoldwallet2(承認用)の機能
+		//AuthorizationのKeyを作成する
+		logger.Info("Run: AuthorizationのKeyを作成する")
+		bSeed, err := wallet.GenerateSeed()
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+		keys, err := wallet.GenerateAccountKey(enum.AccountTypeAuthorization, bSeed, 2)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+		grok.Value(keys)
 
 	default:
 		logger.Info("該当Mode無し")

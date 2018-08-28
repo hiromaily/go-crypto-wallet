@@ -10,11 +10,12 @@ import (
 )
 
 //ExportPublicKey publicのアドレスをcsvとして出力する
-func (w *Wallet) ExportPublicKey(accountType enum.AccountType) error {
+//TODO:watch only walletにセットするアドレスは、clientの場合は、wallet_address, receipt/paymentの場合、`wallet_multisig_address`
+func (w *Wallet) ExportPublicKey(accountType enum.AccountType, isMultisig bool) error {
 	//AccountType問わずexportは可能にしておく
 
 	//DBから該当するpublic keyを取得
-	pubKeys, err := w.DB.GetNotExportedPubKey(accountType)
+	pubKeys, err := w.DB.GetNotExportedPubKey(accountType, isMultisig)
 	if err != nil {
 		return errors.Errorf("key.GenerateSeed() error: %s", err)
 	}
@@ -32,8 +33,13 @@ func (w *Wallet) ExportPublicKey(accountType enum.AccountType) error {
 	}
 	logger.Infof("file name is %s", fileName)
 
+	if len(pubKeys) == 0 {
+		logger.Info("no public key in table")
+		return nil
+	}
+
 	//DBの該当レコードをアップデート
-	_, err = w.DB.UpdateIsExprotedPubKey(accountType, pubKeys, nil, true)
+	_, err = w.DB.UpdateIsExprotedPubKey(accountType, pubKeys,isMultisig, nil, true)
 	if err != nil {
 		return errors.Errorf("csv.UpdateIsExprotedPubKey() error: %s", err)
 	}

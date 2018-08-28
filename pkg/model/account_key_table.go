@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
@@ -94,12 +95,15 @@ func (m *DB) UpdateIsImprotedPrivKey(accountType enum.AccountType, strWIF string
 }
 
 // updateIsExprotedPubKey is_exported_pub_keyをtrueに更新する
-func (m *DB) updateIsExprotedPubKey(tbl string, accountType enum.AccountType, pubKeys []string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+func (m *DB) updateIsExprotedPubKey(tbl string, accountType enum.AccountType, pubKeys []string, isMultisig bool, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	var sql string
 	if accountType == enum.AccountTypeClient {
 		sql = "UPDATE %s SET is_exported_pub_key=true WHERE wallet_address IN (?);"
-	} else {
+	} else if accountType != enum.AccountTypeClient && isMultisig{
 		sql = "UPDATE %s SET is_exported_pub_key=true WHERE wallet_multisig_address IN (?) ;"
+	} else {
+		logger.Info("is_exported_pub_key is not needed to update")
+		return 0, nil
 	}
 	sql = fmt.Sprintf(sql, tbl)
 
@@ -128,8 +132,8 @@ func (m *DB) updateIsExprotedPubKey(tbl string, accountType enum.AccountType, pu
 }
 
 // UpdateIsExprotedPubKey is_exported_pub_keyをtrueに更新する
-func (m *DB) UpdateIsExprotedPubKey(accountType enum.AccountType, pubKeys []string, tx *sqlx.Tx, isCommit bool) (int64, error) {
-	return m.updateIsExprotedPubKey(accountKeyTableName[accountType], accountType, pubKeys, tx, isCommit)
+func (m *DB) UpdateIsExprotedPubKey(accountType enum.AccountType, pubKeys []string, isMultisig bool, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	return m.updateIsExprotedPubKey(accountKeyTableName[accountType], accountType, pubKeys, isMultisig, tx, isCommit)
 }
 
 //getMaxIndex indexの最大値を返す
@@ -168,11 +172,12 @@ func (m *DB) GetNotImportedKeyWIF(accountType enum.AccountType) ([]string, error
 }
 
 //getNotExportedPubKey IsExprotedPubKeyがfalseのレコードをすべて返す
-func (m *DB) getNotExportedPubKey(tbl string, accountType enum.AccountType) ([]string, error) {
+func (m *DB) getNotExportedPubKey(tbl string, accountType enum.AccountType, isMultisig bool) ([]string, error) {
 	//wallet_address
 	//wallet_multisig_address
 	var sql string
-	if accountType == enum.AccountTypeClient {
+	//if accountType == enum.AccountTypeClient {
+	if !isMultisig {
 		sql = "SELECT wallet_address FROM %s WHERE is_exported_pub_key=false;"
 	} else {
 		sql = "SELECT wallet_multisig_address FROM %s WHERE is_exported_pub_key=false;"
@@ -189,6 +194,6 @@ func (m *DB) getNotExportedPubKey(tbl string, accountType enum.AccountType) ([]s
 }
 
 //GetNotExportedPubKey IsExprotedPubKeyがfalseのレコードをすべて返す
-func (m *DB) GetNotExportedPubKey(accountType enum.AccountType) ([]string, error) {
-	return m.getNotExportedPubKey(accountKeyTableName[accountType], accountType)
+func (m *DB) GetNotExportedPubKey(accountType enum.AccountType, isMultisig bool) ([]string, error) {
+	return m.getNotExportedPubKey(accountKeyTableName[accountType], accountType, isMultisig)
 }

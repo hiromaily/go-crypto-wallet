@@ -142,31 +142,31 @@ func debugForCheck(wallet *service.Wallet) {
 			logger.Fatalf("%+v", err)
 		}
 		grok.Value(keys)
-	case 6:
-		//TODO:これはcoldwallet2(承認用)の機能
-		//AuthorizationのKeyを作成する
-		logger.Info("Run: AuthorizationのKeyを作成する")
-		bSeed, err := wallet.GenerateSeed()
-		if err != nil {
-			logger.Fatalf("%+v", err)
-		}
-		keys, err := wallet.GenerateAccountKey(enum.AccountTypeAuthorization, bSeed, 2)
-		if err != nil {
-			logger.Fatalf("%+v", err)
-		}
-		grok.Value(keys)
 	case 10:
-		//作成したPrivateKeyをWalletにimportする
+		//作成したPrivateKeyをColdWalletにimportする
 		err := wallet.ImportPrivateKey(enum.AccountTypeClient)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
 	case 11:
-		//作成したPublicKeyをcsvファイルとしてexportする
-		err := wallet.ExportPublicKey(enum.AccountTypeClient)
+		//[clientアカウント]作成したPublicKeyをcsvファイルとしてexportする
+		err := wallet.ExportPublicKey(enum.AccountTypeClient, false)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
+
+		//[payment/receiptアカウント]作成したPublicKeyをcsvファイルとしてexportする
+		//ここでexportしたものは、coldwallet2でmultisigの生成に利用する
+		err = wallet.ExportPublicKey(enum.AccountTypeReceipt, false)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+
+		err = wallet.ExportPublicKey(enum.AccountTypePayment, false)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+
 	case 20:
 		//TODO:Multisigの作成
 		logger.Info("Run: Multisigの作成")
