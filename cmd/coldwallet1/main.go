@@ -12,10 +12,16 @@ import (
 )
 
 // HDウォレットとしてseed作成、keyを指定した数だけ生成し、出力する
-// これは、ネットワーク環境下のwallet側から、
+// 対象アカウント: client, receipt, payment
+// 1. create seed
+// 2. create key
+// 3. run `importprivkey`
+// 4. export pubkey from DB
+
+// 5. 未署名トランザクションへの署名
 
 //TODO:encryptwalletコマンドによって、walletを暗号化した場合、秘密鍵を使用するタイミング(未署名トランザクションに署名する)
-// でパスフレーズの入力が必要になり
+// でパスフレーズの入力が必要になる
 
 // Options コマンドラインオプション
 type Options struct {
@@ -23,8 +29,6 @@ type Options struct {
 	ConfPath string `short:"c" long:"conf" default:"./data/toml/cold1_config.toml" description:"Path for configuration toml file"`
 	//実行される機能
 	Mode uint8 `short:"m" long:"mode" description:"Mode i.e.Functionality"`
-	//HDウォレット用Key生成のためのseed情報
-	//ParamSeed string `short:"d" long:"seed" default:"" description:"backup seed"`
 	//txファイルパス
 	ImportFile string `short:"i" long:"import" default:"" description:"import file path for hex"`
 	//Debugモード

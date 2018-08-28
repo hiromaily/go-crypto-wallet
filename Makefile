@@ -11,15 +11,15 @@ goget:
 ###############################################################################
 bld:
 	go build -o wallet ./cmd/wallet/main.go
-	go build -o coldwallet ./cmd/coldwallet/main.go
+	go build -o coldwallet1 ./cmd/coldwallet1/main.go
 
 bld-windows:
 	GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/wallet.exe ./cmd/wallet/main.go
-	GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/coldwallet.exe ./cmd/coldwallet/main.go
+	GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/coldwallet1.exe ./cmd/coldwallet1/main.go
 	zip -r ./bin/windows_amd64/wallet.zip ./bin/windows_amd64/wallet.exe
-	zip -r ./bin/windows_amd64/coldwallet.zip ./bin/windows_amd64/coldwallet.exe
+	zip -r ./bin/windows_amd64/coldwallet1.zip ./bin/windows_amd64/coldwallet1.exe
 	rm -f ./bin/windows_amd64/wallet.exe
-	rm -f ./bin/windows_amd64/coldwallet.exe
+	rm -f ./bin/windows_amd64/coldwallet1.exe
 
 
 ###############################################################################
@@ -37,7 +37,7 @@ create-unsigned-fee: bld
 
 # 未署名のトランザクションに署名する
 sign: bld
-	./coldwallet -m 5 -i ./data/tx/receipt/receipt_8_unsigned_1534832793024491932
+	./coldwallet1 -m 5 -i ./data/tx/receipt/receipt_8_unsigned_1534832793024491932
 
 # 署名済トランザクションを送信する
 send: bld
@@ -66,7 +66,7 @@ create-payment-fee: bld
 
 # 出金用に未署名のトランザクションに署名する
 sign-payment: bld
-	./coldwallet -m 1 -i ./data/tx/payment/payment_3_unsigned_1534832966995082772
+	./coldwallet1 -m 1 -i ./data/tx/payment/payment_3_unsigned_1534832966995082772
 
 # 出金用に署名済トランザクションを送信する
 send-payment: bld
@@ -109,26 +109,26 @@ import-pub:
 
 
 ###############################################################################
-# Run coldwallet: Key生成 機能
+# Run coldwallet1: Key生成 機能
 ###############################################################################
 # 出金依頼データの再利用のため、DBを書き換える
 gen-seed:
-	./coldwallet -d -m 2
+	./coldwallet1 -d -m 2
 
 gen-client:
-	./coldwallet -d -m 3
+	./coldwallet1 -d -m 3
 
 gen-receipt:
-	./coldwallet -d -m 4
+	./coldwallet1 -d -m 4
 
 gen-payment:
-	./coldwallet -d -m 5
+	./coldwallet1 -d -m 5
 
 import-priv:
-	./coldwallet -d -m 10
+	./coldwallet1 -d -m 10
 
 export-pub:
-	./coldwallet -d -m 11
+	./coldwallet1 -d -m 11
 
 
 ###############################################################################
@@ -160,4 +160,4 @@ bitcoin-stop:
 ###############################################################################
 .PHONY: clean
 clean:
-	rm -rf wallet coldwallet
+	rm -rf wallet coldwallet1

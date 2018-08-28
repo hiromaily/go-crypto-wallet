@@ -1,9 +1,11 @@
 .DS_Store
 .idea/
 wallet
-coldwallet
+coldwallet1
+coldwallet2
 !cmd/wallet
-!cmd/coldwallet
+!cmd/coldwallet1
+!cmd/coldwallet2
 data/kvs/*
 data/tx/*
 data/gcs/*
