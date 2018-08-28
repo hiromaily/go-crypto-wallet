@@ -3,7 +3,6 @@ package service
 import (
 	"github.com/hiromaily/go-bitcoin/pkg/csv"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
 )
@@ -18,7 +17,7 @@ func (w *Wallet) ImportPublicKey(fileName string, accountType enum.AccountType) 
 	//ファイル読み込み
 	pubKeys, err := csv.ImportPubKey(fileName)
 	if err != nil {
-		errors.Errorf("csv.ImportPubKey() error: %v", err)
+		return errors.Errorf("csv.ImportPubKey() error: %v", err)
 	}
 
 	//[]AccountPublicKeyTable
@@ -30,11 +29,11 @@ func (w *Wallet) ImportPublicKey(fileName string, accountType enum.AccountType) 
 	var pubKeyData []model.AccountPublicKeyTable
 	for _, key := range pubKeys {
 		//Bitcoin core APIから`importaddress`をcallする
-		err := w.BTC.ImportAddressWithLabel(key, account, false)
-		if err != nil {
-			logger.Errorf("BTC.ImportAddressWithLabel(%s) error: %v", key, err)
-			continue
-		}
+		//err := w.BTC.ImportAddressWithLabel(key, account, false)
+		//if err != nil {
+		//	logger.Errorf("BTC.ImportAddressWithLabel(%s) error: %v", key, err)
+		//	continue
+		//}
 
 		pubKeyData = append(pubKeyData, model.AccountPublicKeyTable{
 			WalletAddress: key,
@@ -43,9 +42,10 @@ func (w *Wallet) ImportPublicKey(fileName string, accountType enum.AccountType) 
 	}
 
 	//DBにInsert
-	err = w.DB.InsertAccountPubKeyTable(accountType, pubKeyData, nil, false)
+	err = w.DB.InsertAccountPubKeyTable(accountType, pubKeyData, nil, true)
+	//logger.Error(err)
 	if err != nil {
-		errors.Errorf("csv.DB.InsertAccountPubKeyTable() error: %v", err)
+		return errors.Errorf("csv.DB.InsertAccountPubKeyTable() error: %v", err)
 		//TODO:これが失敗したら、どうやって、登録済みのデータを再度Insertするか？
 	}
 

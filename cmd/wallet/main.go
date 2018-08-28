@@ -6,6 +6,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/chaincfg"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/jessevdk/go-flags"
@@ -114,6 +115,15 @@ func switchFunction(wallet *service.Wallet) {
 	case 10:
 		logger.Info("Run: 送信済ステータスのトランザクションを監視する")
 		err := wallet.UpdateStatus()
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+	case 11:
+		logger.Info("Run: coldwalletで生成したアドレスをwalletにimportする")
+		if opts.ImportFile == "" {
+			logger.Fatal("file path is required as argument file when running")
+		}
+		err := wallet.ImportPublicKey(opts.ImportFile, enum.AccountTypeClient)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}

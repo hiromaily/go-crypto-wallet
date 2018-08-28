@@ -53,5 +53,5 @@ VALUES (:wallet_address, :account)
 
 // InsertAccountPubKeyTable account_pubkey_table(client, payment, receipt...)テーブルにレコードを作成する
 func (m *DB) InsertAccountPubKeyTable(accountType enum.AccountType, accountPubKeyTables []AccountPublicKeyTable, tx *sqlx.Tx, isCommit bool) error {
-	return m.insertAccountPubKeyTable(accountKeyTableName[accountType], accountPubKeyTables, tx, isCommit)
+	return m.insertAccountPubKeyTable(accountPubKeyTableName[accountType], accountPubKeyTables, tx, isCommit)
 }
