@@ -1,5 +1,7 @@
 package service
 
+//Cold wallet
+
 import (
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/pkg/errors"

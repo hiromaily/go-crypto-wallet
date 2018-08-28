@@ -1,13 +1,16 @@
 package service
 
+//Cold wallet
+
 import (
 	"github.com/hiromaily/go-bitcoin/pkg/csv"
-	"github.com/hiromaily/go-bitcoin/pkg/key"
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/pkg/errors"
 )
 
-func (w *Wallet) ExportPublicKey(accountType key.AccountType) error {
+//ExportPublicKey publicのアドレスをcsvとして出力する
+func (w *Wallet) ExportPublicKey(accountType enum.AccountType) error {
 	//AccountType問わずexportは可能にしておく
 
 	//DBから該当するpublic keyを取得
@@ -17,13 +20,13 @@ func (w *Wallet) ExportPublicKey(accountType key.AccountType) error {
 	}
 
 	//accountTypeから必要なファイルパスを取得
-	at, err := w.DB.GetAccountTypeByID(accountType)
-	if err != nil {
-		return errors.Errorf("DB.GetAccountTypeByID() error: %s", err)
-	}
+	//at, err := w.DB.GetAccountTypeByID(accountType)
+	//if err != nil {
+	//	return errors.Errorf("DB.GetAccountTypeByID() error: %s", err)
+	//}
 
 	//CSVに書き出す
-	fileName, err := csv.ExportPubKey(pubKeys, at.Type)
+	fileName, err := csv.ExportPubKey(pubKeys, string(accountType))
 	if err != nil {
 		return errors.Errorf("csv.ExportPubKey() error: %s", err)
 	}

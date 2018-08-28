@@ -46,9 +46,7 @@ CREATE TABLE `seed` (
 -- Table structure for table `account_type`
 --
 
-DROP TABLE IF EXISTS `account_type`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/* DROP TABLE IF EXISTS `account_type`;
 CREATE TABLE `account_type` (
   `id`          tinyint(1) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
   `type`        VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL COMMENT'アカウント種別',
@@ -56,18 +54,15 @@ CREATE TABLE `account_type` (
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='アカウント種別テーブル';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
 
 LOCK TABLES `account_type` WRITE;
-/*!40000 ALTER TABLE `account_type` DISABLE KEYS */;
 INSERT INTO `account_type` VALUES
   (0,'client','顧客',now()),
   (1,'receipt','入金保管用',now()),
   (2,'payment','支払い用',now()),
   (3,'authorization','Multisigのための承認用',now());
-/*!40000 ALTER TABLE `account_type` ENABLE KEYS */;
 UNLOCK TABLES;
+*/
 
 
 --

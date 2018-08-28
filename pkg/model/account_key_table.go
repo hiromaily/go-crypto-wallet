@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hiromaily/go-bitcoin/pkg/key"
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
@@ -23,11 +23,11 @@ type AccountKeyTable struct {
 	UpdatedAt             *time.Time `db:"updated_at"`
 }
 
-var accountKeyTableName = map[key.AccountType]string{
-	0: "account_key_client",
-	1: "account_key_receipt",
-	2: "account_key_payment",
-	3: "account_key_authorization",
+var accountKeyTableName = map[enum.AccountType]string{
+	enum.AccountTypeClient:        "account_key_client",
+	enum.AccountTypeReceipt:       "account_key_receipt",
+	enum.AccountTypePayment:       "account_key_payment",
+	enum.AccountTypeAuthorization: "account_key_authorization",
 }
 
 // insertAccountKeyClient account_key_table(client, payment, receipt...)テーブルにレコードを作成する
@@ -60,7 +60,7 @@ VALUES (:wallet_address, :wallet_multisig_address, :wallet_import_format, :accou
 }
 
 // InsertAccountKeyTable account_key_table(client, payment, receipt...)テーブルにレコードを作成する
-func (m *DB) InsertAccountKeyTable(accountType key.AccountType, accountKeyTables []AccountKeyTable, tx *sqlx.Tx, isCommit bool) error {
+func (m *DB) InsertAccountKeyTable(accountType enum.AccountType, accountKeyTables []AccountKeyTable, tx *sqlx.Tx, isCommit bool) error {
 	return m.insertAccountKeyTable(accountKeyTableName[accountType], accountKeyTables, tx, isCommit)
 }
 
@@ -89,14 +89,14 @@ UPDATE %s SET is_imported_priv_key=true WHERE wallet_import_format=?
 }
 
 // UpdateIsImprotedPrivKey is_imported_priv_keyをtrueに更新する
-func (m *DB) UpdateIsImprotedPrivKey(accountType key.AccountType, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+func (m *DB) UpdateIsImprotedPrivKey(accountType enum.AccountType, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	return m.updateIsImprotedPrivKey(accountKeyTableName[accountType], strWIF, tx, isCommit)
 }
 
 // updateIsExprotedPubKey is_exported_pub_keyをtrueに更新する
-func (m *DB) updateIsExprotedPubKey(tbl string, accountType key.AccountType, pubKeys []string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+func (m *DB) updateIsExprotedPubKey(tbl string, accountType enum.AccountType, pubKeys []string, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	var sql string
-	if accountType == key.AccountTypeClient {
+	if accountType == enum.AccountTypeClient {
 		sql = "UPDATE %s SET is_exported_pub_key=true WHERE wallet_address IN (?);"
 	} else {
 		sql = "UPDATE %s SET is_exported_pub_key=true WHERE wallet_multisig_address IN (?) ;"
@@ -128,7 +128,7 @@ func (m *DB) updateIsExprotedPubKey(tbl string, accountType key.AccountType, pub
 }
 
 // UpdateIsExprotedPubKey is_exported_pub_keyをtrueに更新する
-func (m *DB) UpdateIsExprotedPubKey(accountType key.AccountType, pubKeys []string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+func (m *DB) UpdateIsExprotedPubKey(accountType enum.AccountType, pubKeys []string, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	return m.updateIsExprotedPubKey(accountKeyTableName[accountType], accountType, pubKeys, tx, isCommit)
 }
 
@@ -144,7 +144,7 @@ func (m *DB) getMaxIndex(tbl string) (int64, error) {
 }
 
 //GetMaxIndex indexの最大値を返す
-func (m *DB) GetMaxIndex(accountType key.AccountType) (int64, error) {
+func (m *DB) GetMaxIndex(accountType enum.AccountType) (int64, error) {
 	return m.getMaxIndex(accountKeyTableName[accountType])
 }
 
@@ -163,16 +163,16 @@ func (m *DB) getNotImportedKeyWIF(tbl string) ([]string, error) {
 }
 
 //GetNotImportedKeyWIF IsImprotedPrivKeyがfalseのレコードをすべて返す
-func (m *DB) GetNotImportedKeyWIF(accountType key.AccountType) ([]string, error) {
+func (m *DB) GetNotImportedKeyWIF(accountType enum.AccountType) ([]string, error) {
 	return m.getNotImportedKeyWIF(accountKeyTableName[accountType])
 }
 
 //getNotExportedPubKey IsExprotedPubKeyがfalseのレコードをすべて返す
-func (m *DB) getNotExportedPubKey(tbl string, accountType key.AccountType) ([]string, error) {
+func (m *DB) getNotExportedPubKey(tbl string, accountType enum.AccountType) ([]string, error) {
 	//wallet_address
 	//wallet_multisig_address
 	var sql string
-	if accountType == key.AccountTypeClient {
+	if accountType == enum.AccountTypeClient {
 		sql = "SELECT wallet_address FROM %s WHERE is_exported_pub_key=false;"
 	} else {
 		sql = "SELECT wallet_multisig_address FROM %s WHERE is_exported_pub_key=false;"
@@ -189,6 +189,6 @@ func (m *DB) getNotExportedPubKey(tbl string, accountType key.AccountType) ([]st
 }
 
 //GetNotExportedPubKey IsExprotedPubKeyがfalseのレコードをすべて返す
-func (m *DB) GetNotExportedPubKey(accountType key.AccountType) ([]string, error) {
+func (m *DB) GetNotExportedPubKey(accountType enum.AccountType) ([]string, error) {
 	return m.getNotExportedPubKey(accountKeyTableName[accountType], accountType)
 }

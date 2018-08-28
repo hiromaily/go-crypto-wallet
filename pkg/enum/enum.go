@@ -1,5 +1,28 @@
 package enum
 
+//EnvironmentType 実行環境
+type EnvironmentType string
+
+// environment
+const (
+	EnvDev  EnvironmentType = "dev"
+	EnvProd EnvironmentType = "prod"
+)
+
+//EnvironmentTypeValue env_typeの値
+var EnvironmentTypeValue = map[EnvironmentType]uint8{
+	EnvDev:  1,
+	EnvProd: 2,
+}
+
+// ValidateEnvironmentType EnvironmentTypeのバリデーションを行う
+func ValidateEnvironmentType(val string) bool {
+	if _, ok := EnvironmentTypeValue[EnvironmentType(val)]; ok {
+		return true
+	}
+	return false
+}
+
 //NetworkType ネットワーク種別
 type NetworkType string
 
@@ -8,6 +31,33 @@ const (
 	NetworkTypeMainNet  NetworkType = "mainnet"
 	NetworkTypeTestNet3 NetworkType = "testnet3"
 )
+
+//AccountType 利用目的
+type AccountType string
+
+// account_type
+const (
+	AccountTypeClient        AccountType = "client"        //ユーザーの入金受付用アドレス
+	AccountTypeReceipt       AccountType = "receipt"       //入金を受け付けるアドレス用
+	AccountTypePayment       AccountType = "payment"       //出金時に支払いをするアドレス
+	AccountTypeAuthorization AccountType = "authorization" //マルチシグアドレスのための承認アドレス
+)
+
+//AccountTypeValue tx_typeの値
+var AccountTypeValue = map[AccountType]uint8{
+	AccountTypeClient:        0,
+	AccountTypeReceipt:       2,
+	AccountTypePayment:       3,
+	AccountTypeAuthorization: 4,
+}
+
+// ValidateAccountType AccountTypeのバリデーションを行う
+func ValidateAccountType(val string) bool {
+	if _, ok := AccountTypeValue[AccountType(val)]; ok {
+		return true
+	}
+	return false
+}
 
 //TxType トランザクション種別
 type TxType string
@@ -58,29 +108,6 @@ var ActionTypeValue = map[ActionType]uint8{
 // ValidateActionType ActionTypeのバリデーションを行う
 func ValidateActionType(val string) bool {
 	if _, ok := ActionTypeValue[ActionType(val)]; ok {
-		return true
-	}
-	return false
-}
-
-//EnvironmentType 実行環境
-type EnvironmentType string
-
-// environment
-const (
-	EnvDev  EnvironmentType = "dev"
-	EnvProd EnvironmentType = "prod"
-)
-
-//EnvironmentTypeValue env_typeの値
-var EnvironmentTypeValue = map[EnvironmentType]uint8{
-	EnvDev:  1,
-	EnvProd: 2,
-}
-
-// ValidateEnvironmentType EnvironmentTypeのバリデーションを行う
-func ValidateEnvironmentType(val string) bool {
-	if _, ok := EnvironmentTypeValue[EnvironmentType(val)]; ok {
 		return true
 	}
 	return false

@@ -1,5 +1,7 @@
 package service
 
+//Watch only wallet
+
 import (
 	"github.com/bookerzzz/grok"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"

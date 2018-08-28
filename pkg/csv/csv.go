@@ -55,3 +55,21 @@ func ExportPubKey(pubKeys []string, strAccountType string) (string, error) {
 
 	return fileName, nil
 }
+
+// ImportPubKey pubkeyをファイルから読み込む
+func ImportPubKey(fileName string) ([]string, error) {
+	file, err := os.Open(fileName)
+	if err != nil {
+		return nil, errors.Errorf("os.Open(%s) error: %v", fileName, err)
+	}
+	defer file.Close()
+
+	var pubKeys []string
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		pubKeys = append(pubKeys, scanner.Text())
+	}
+
+	return pubKeys, nil
+}

@@ -109,7 +109,7 @@ func debugForCheck(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-		keys, err := wallet.GenerateAccountKey(key.AccountTypeClient, bSeed, 10)
+		keys, err := wallet.GenerateAccountKey(enum.AccountTypeClient, bSeed, 10)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -121,7 +121,7 @@ func debugForCheck(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-		keys, err := wallet.GenerateAccountKey(key.AccountTypeReceipt, bSeed, 10)
+		keys, err := wallet.GenerateAccountKey(enum.AccountTypeReceipt, bSeed, 10)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -133,7 +133,7 @@ func debugForCheck(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-		keys, err := wallet.GenerateAccountKey(key.AccountTypePayment, bSeed, 5)
+		keys, err := wallet.GenerateAccountKey(enum.AccountTypePayment, bSeed, 5)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -146,20 +146,20 @@ func debugForCheck(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-		keys, err := wallet.GenerateAccountKey(key.AccountTypeAuthorization, bSeed, 2)
+		keys, err := wallet.GenerateAccountKey(enum.AccountTypeAuthorization, bSeed, 2)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
 		grok.Value(keys)
 	case 10:
 		//作成したPrivateKeyをWalletにimportする
-		err := wallet.ImportPrivateKey(key.AccountTypeClient)
+		err := wallet.ImportPrivateKey(enum.AccountTypeClient)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
 	case 11:
 		//作成したPublicKeyをcsvファイルとしてexportする
-		err := wallet.ExportPublicKey(key.AccountTypeClient)
+		err := wallet.ExportPublicKey(enum.AccountTypeClient)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}

@@ -1,5 +1,7 @@
 package service
 
+//Watch only wallet
+
 import (
 	"time"
 

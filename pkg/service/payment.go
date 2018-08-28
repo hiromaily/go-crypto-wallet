@@ -1,5 +1,7 @@
 package service
 
+//Watch only wallet
+
 import (
 	"fmt"
 	"sort"
@@ -251,6 +253,9 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 
 	// 2.fee算出
 	fee, err := w.BTC.GetFee(msgTx, adjustmentFee)
+	if err != nil {
+		return "", "", errors.Errorf("BTC.GetFee(): error: %v", err)
+	}
 
 	// 3.お釣り用のoutputのトランザクションから、手数料を差し引く
 	// FIXME: これが足りない場合がめんどくさい。。。これをどう回避すべきか

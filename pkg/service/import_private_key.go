@@ -1,14 +1,16 @@
 package service
 
+//Cold wallet
+
 import (
 	"github.com/btcsuite/btcutil"
-	"github.com/hiromaily/go-bitcoin/pkg/key"
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/pkg/errors"
 )
 
 // ImportPrivateKey 指定したAccountTypeに属するテーブルのis_imported_priv_keyがfalseのWIFをImportPrivKeyRescanする
-func (w *Wallet) ImportPrivateKey(accountType key.AccountType) error {
+func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 	//AccountType問わずimportは可能にしておく
 
 	//DBから未登録のPrivateKey情報を取得する

@@ -1,5 +1,7 @@
 package service
 
+//Cold wallet
+
 import (
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/key"
@@ -69,7 +71,7 @@ func (w *Wallet) retrieveSeed() ([]byte, error) {
 }
 
 // GenerateAccountKey AccountType属性のアカウントKeyを生成する
-func (w *Wallet) GenerateAccountKey(accountType key.AccountType, seed []byte, count uint32) ([]key.WalletKey, error) {
+func (w *Wallet) GenerateAccountKey(accountType enum.AccountType, seed []byte, count uint32) ([]key.WalletKey, error) {
 	//現在のindexを取得
 	idx, err := w.DB.GetMaxIndex(accountType)
 	if err != nil {
@@ -84,7 +86,7 @@ func (w *Wallet) GenerateAccountKey(accountType key.AccountType, seed []byte, co
 }
 
 // generateKey AccountType属性のアカウントKeyを生成する
-func (w *Wallet) generateAccountKey(accountType key.AccountType, seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
+func (w *Wallet) generateAccountKey(accountType enum.AccountType, seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
 	// HDウォレットのkeyを生成する
 	walletKeys, err := w.generateAccountKeyData(accountType, seed, idxFrom, count)
 	if err != nil {
@@ -118,7 +120,7 @@ func (w *Wallet) generateAccountKey(accountType key.AccountType, seed []byte, id
 }
 
 // generateKeyData AccountType属性のアカウントKeyを生成する
-func (w *Wallet) generateAccountKeyData(accountType key.AccountType, seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
+func (w *Wallet) generateAccountKeyData(accountType enum.AccountType, seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
 	// key生成
 	priv, _, err := key.CreateAccount(w.BTC.GetChainConf(), seed, accountType)
 	if err != nil {
@@ -133,7 +135,7 @@ func (w *Wallet) generateAccountKeyData(accountType key.AccountType, seed []byte
 	return walletKeys, nil
 }
 
-func (w *Wallet) getKeyTypeByAccount(accountType key.AccountType) (uint8, error) {
+func (w *Wallet) getKeyTypeByAccount(accountType enum.AccountType) (uint8, error) {
 	//accountType:0
 	//coin_typeを取得
 	ct := key.CoinTypeBitcoin

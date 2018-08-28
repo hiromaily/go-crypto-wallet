@@ -1,8 +1,10 @@
 package model
 
 import (
-	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"time"
+
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/key"
 )
 
 //KeyType key_typeテーブル
@@ -17,7 +19,7 @@ type KeyType struct {
 }
 
 // GetKeyTypeByCoinAndAccountType 該当するIDのレコードを返す
-func (m *DB) GetKeyTypeByCoinAndAccountType(coinType key.CoinType, accountType key.AccountType) (*KeyType, error) {
+func (m *DB) GetKeyTypeByCoinAndAccountType(coinType key.CoinType, accountType enum.AccountType) (*KeyType, error) {
 	sql := "SELECT * FROM key_type WHERE coin_type=? AND account_type=? LIMIT 1"
 
 	kt := KeyType{}

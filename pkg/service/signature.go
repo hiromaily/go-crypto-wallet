@@ -1,5 +1,7 @@
 package service
 
+//Cold wallet
+
 import (
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/file"

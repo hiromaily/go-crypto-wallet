@@ -24,17 +24,6 @@ const (
 	CoinTypeTestnet CoinType = 1 //Testnet
 )
 
-//AccountType 利用目的
-type AccountType uint32
-
-// account_type
-const (
-	AccountTypeClient        AccountType = 0 //ユーザーの入金受付用アドレス
-	AccountTypeReceipt       AccountType = 1 //入金を受け付けるアドレス用
-	AccountTypePayment       AccountType = 2 //出金時に支払いをするアドレス
-	AccountTypeAuthorization AccountType = 3 //マルチシグアドレスのための承認アドレス
-)
-
 //TODO:同じアドレスを使い回すと、アドレスから総額情報がバレて危険
 //よって、内部利用のアドレスは毎回使い捨てにすること
 
@@ -54,7 +43,7 @@ const (
 //Payment => m/44/0/2/1/0 => 出金による支払いに利用、かつ、おつりも受け取る => TODO:ChangeTypeによってアドレスが変わってしまったら、どう運用するのか
 
 // CreateAccount アカウント階層までのprivateKey及び publicKeyを生成する
-func CreateAccount(conf *chaincfg.Params, seed []byte, actType AccountType) (string, string, error) {
+func CreateAccount(conf *chaincfg.Params, seed []byte, actType enum.AccountType) (string, string, error) {
 
 	//Master
 	masterKey, err := hdkeychain.NewMaster(seed, conf)
@@ -76,7 +65,7 @@ func CreateAccount(conf *chaincfg.Params, seed []byte, actType AccountType) (str
 		return "", "", err
 	}
 	//Account
-	account, err := coinType.Child(hdkeychain.HardenedKeyStart + uint32(actType))
+	account, err := coinType.Child(hdkeychain.HardenedKeyStart + uint32(enum.AccountTypeValue[actType]))
 	if err != nil {
 		return "", "", err
 	}
