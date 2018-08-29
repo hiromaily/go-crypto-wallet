@@ -3,8 +3,8 @@ package service
 //Cold wallet
 
 import (
-	"github.com/hiromaily/go-bitcoin/pkg/csv"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/pkg/errors"
 )
@@ -27,7 +27,7 @@ func (w *Wallet) ExportPublicKey(accountType enum.AccountType, isMultisig bool) 
 	//}
 
 	//CSVに書き出す
-	fileName, err := csv.ExportPubKey(pubKeys, string(accountType))
+	fileName, err := key.ExportPubKey(pubKeys, string(accountType))
 	if err != nil {
 		return errors.Errorf("csv.ExportPubKey() error: %s", err)
 	}

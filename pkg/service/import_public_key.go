@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/hiromaily/go-bitcoin/pkg/csv"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
 )
@@ -15,7 +15,7 @@ import (
 // ImportPublicKey csvファイルからpublicアドレスをimportする
 func (w *Wallet) ImportPublicKey(fileName string, accountType enum.AccountType) error {
 	//ファイル読み込み
-	pubKeys, err := csv.ImportPubKey(fileName)
+	pubKeys, err := key.ImportPubKey(fileName)
 	if err != nil {
 		return errors.Errorf("csv.ImportPubKey() error: %v", err)
 	}

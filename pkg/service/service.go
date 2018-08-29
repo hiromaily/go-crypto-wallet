@@ -3,9 +3,9 @@ package service
 import (
 	"github.com/bookerzzz/grok"
 	"github.com/hiromaily/go-bitcoin/pkg/api"
-	"github.com/hiromaily/go-bitcoin/pkg/csv"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/gcp"
+	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/hiromaily/go-bitcoin/pkg/rdb"
@@ -58,7 +58,7 @@ func InitialSettings(confPath string) (*Wallet, error) {
 
 	// PubkeyCSV
 	if conf.PubkeyFile.BasePath != "" {
-		csv.SetFilePath(conf.PubkeyFile.BasePath)
+		key.SetFilePath(conf.PubkeyFile.BasePath)
 	}
 
 	// GCS
