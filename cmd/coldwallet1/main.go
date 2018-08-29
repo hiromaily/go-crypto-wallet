@@ -72,6 +72,7 @@ func main() {
 		coldWallet2(wallet)
 	default:
 		logger.Warn("wallet option should be 1 or 2")
+		procedure.Show()
 	}
 }
 
@@ -236,7 +237,7 @@ func keyFunctionalities1(wallet *service.Wallet) {
 		//[coldwallet1のみ]
 		//作成したPaymentのPublicKeyをcsvファイルとしてexportする
 		logger.Info("Run: 作成したPaymentのPublicアドレスをcsvファイルとしてexportする")
-		err := wallet.ExportPublicKey(enum.AccountTypeReceipt, false)
+		err := wallet.ExportPublicKey(enum.AccountTypePayment, false)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}

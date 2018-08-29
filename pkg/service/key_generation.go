@@ -105,6 +105,7 @@ func (w *Wallet) generateAccountKey(accountType enum.AccountType, seed []byte, i
 		accountKeyClients[idx] = model.AccountKeyTable{
 			WalletAddress:         key.Address,
 			WalletMultisigAddress: "",
+			RedeemScript:          "",
 			WalletImportFormat:    key.WIF,
 			KeyType:               keyID,
 			Idx:                   idxFrom,

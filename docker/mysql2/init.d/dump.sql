@@ -69,9 +69,7 @@ UNLOCK TABLES;
 -- Table structure for table `coin_type`
 --
 
-DROP TABLE IF EXISTS `coin_type`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+/*DROP TABLE IF EXISTS `coin_type`;
 CREATE TABLE `coin_type` (
   `id`          tinyint(1) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
   `type`        VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL COMMENT'コイン種別',
@@ -79,16 +77,13 @@ CREATE TABLE `coin_type` (
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='コイン種別テーブル';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
 
 LOCK TABLES `coin_type` WRITE;
-/*!40000 ALTER TABLE `coin_type` DISABLE KEYS */;
 INSERT INTO `coin_type` VALUES
   (0,'mainnet','Bitcoin Mainnet',now()),
   (1,'testnet3','Bitcoin Testnet3',now());
-/*!40000 ALTER TABLE `coin_type` ENABLE KEYS */;
 UNLOCK TABLES;
+*/
 
 
 --
@@ -135,17 +130,17 @@ DROP TABLE IF EXISTS `account_key_client`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `account_key_client` (
-  `id`     BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
+  `id`                      BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
   `wallet_address`          VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'Walletアドレス',
-  `wallet_multisig_address` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'multisigとしてのWalletアドレス',
-  `redeem_script`           VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'multisigアドレス生成後に渡されるredeedScript',
+  `wallet_multisig_address` VARCHAR(255) COLLATE utf8_unicode_ci COMMENT'multisigとしてのWalletアドレス',
+  `redeem_script`           VARCHAR(255) COLLATE utf8_unicode_ci COMMENT'multisigアドレス生成後に渡されるredeedScript',
   `wallet_import_format`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'WIF',
-  `account`                 VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'アドレスに紐づくアカウント名',
+  `account`                 VARCHAR(255) COLLATE utf8_unicode_ci COMMENT'アドレスに紐づくアカウント名',
   `key_type`                tinyint(1) UNSIGNED NOT NULL COMMENT'コインの種類',
-  `idx`    BIGINT(20) UNSIGNED NOT NULL COMMENT'HDウォレット生成時のindex',
+  `idx`                     BIGINT(20) UNSIGNED NOT NULL COMMENT'HDウォレット生成時のindex',
   `is_imported_priv_key`    BOOL DEFAULT false COMMENT'生成したPrivateKey(WIF)がbitcoin coreのwalletにimport済かどうか',
   `is_exported_pub_key`     BOOL DEFAULT false COMMENT'生成したPublicKeyをWatchOnlyWallet用にCSVでexport済かどうか',
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
+  `updated_at`              datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_wallet_address` (`wallet_address`),
   /*UNIQUE KEY `idx_wallet_multisig_address` (`wallet_multisig_address`),*/
