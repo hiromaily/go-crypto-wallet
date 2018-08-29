@@ -28,12 +28,22 @@ import (
 type Options struct {
 	//Configパス
 	ConfPath string `short:"c" long:"conf" default:"./data/toml/cold1_config.toml" description:"Path for configuration toml file"`
-	//実行される機能
-	Mode uint8 `short:"m" long:"mode" description:"Mode i.e.Functionality"`
-	//txファイルパス
-	ImportFile string `short:"i" long:"import" default:"" description:"import file path for hex"`
+
+	//実行されるWallet大項目
+	WalletMode uint8 `short:"w" long:"wallet" description:"WalletMode: 1:coldwallet1, 2:coldwallet2"`
+
+	//署名モード
+	Sign bool `short:"s" long:"sign" description:"for key related use (generate/import/export)"`
+	//Keyモード
+	Key bool `short:"k" long:"key" description:"for key related use (generate/import/export)"`
 	//Debugモード
 	Debug bool `short:"d" long:"debug" description:"for only development use"`
+
+	//実行される詳細機能
+	Mode uint8 `short:"m" long:"mode" description:"Mode: detailed functionalities"`
+
+	//txファイルパス
+	ImportFile string `short:"i" long:"import" default:"" description:"import file path for hex"`
 }
 
 var (
@@ -55,19 +65,47 @@ func main() {
 	}
 	defer wallet.Done()
 
-	if opts.Debug {
-		//debug用 機能確認
-		debugForCheck(wallet)
-	} else {
-		//switch mode
-		switchFunction(wallet)
+	switch opts.WalletMode {
+	case 1:
+		coldWallet1(wallet)
+	case 2:
+		coldWallet2(wallet)
+	default:
+		logger.Error("wallet option should be 1 or 2")
 	}
 }
 
-// 実運用上利用するもののみ、こちらに定義する
-func switchFunction(wallet *service.Wallet) {
-	// 処理をFunctionalityで切り替える
-	//TODO:ここから呼び出すべきはService系のみに統一したい
+// coldWallet1 cold wallet1としての機能群
+func coldWallet1(wallet *service.Wallet) {
+	if opts.Sign {
+		//sign関連機能
+		signFunctionalities1(wallet)
+	} else if opts.Key {
+		//key関連機能
+		keyFunctionalities1(wallet)
+	} else {
+		//debug用 機能確認
+		debugForCheck(wallet)
+	}
+}
+
+// coldWallet2 cold wallet2としての機能群
+func coldWallet2(wallet *service.Wallet) {
+	if opts.Sign {
+		//sign関連機能
+		//signFunctionalities2(wallet)
+	} else if opts.Key {
+		//key関連機能
+		keyFunctionalities2(wallet)
+	} else {
+		//debug用 機能確認
+		debugForCheck(wallet)
+	}
+}
+
+// coldwallet1としての署名機能群
+func signFunctionalities1(wallet *service.Wallet) {
+	// 処理をModeで切り替える
 	switch opts.Mode {
 	case 1:
 		// importしたファイルからhex値を取得し、署名を行う(ReceiptかPaymentかはfileNameから判別))
@@ -83,24 +121,22 @@ func switchFunction(wallet *service.Wallet) {
 		}
 		logger.Infof("[hex]: %s\n[署名完了]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName)
 	default:
-		//logger.Info("該当Mode無し")
+		logger.Info("opts.Mode is out of range")
 		procedure.Show()
 	}
 }
 
-// 検証用
-func debugForCheck(wallet *service.Wallet) {
+// coldwallet2としての署名機能群
+//func signFunctionalities2(wallet *service.Wallet) {
+//	//とりあえず
+//	signFunctionalities1(wallet)
+//}
+
+// coldwallet1としてのKey関連機能群
+func keyFunctionalities1(wallet *service.Wallet) {
 	switch opts.Mode {
 	case 1:
-		//通常のKeyの生成
-		logger.Info("Run: Keyの生成")
-		//単一Keyの生成
-		wif, pubAddress, err := key.GenerateKey(wallet.BTC.GetChainConf())
-		if err != nil {
-			logger.Fatalf("%+v", err)
-		}
-		logger.Infof("[WIF] %s - [Pub Address] %s\n", wif.String(), pubAddress)
-	case 2:
+		//[coldwallet共通]
 		//HDウォレットによるSeedの作成
 		logger.Info("Run: HDウォレット Seedの生成")
 		bSeed, err := wallet.GenerateSeed()
@@ -108,7 +144,9 @@ func debugForCheck(wallet *service.Wallet) {
 			logger.Fatalf("%+v", err)
 		}
 		logger.Infof("seed: %s", key.SeedToString(bSeed))
-	case 3:
+
+	case 10:
+		//[coldwallet1のみ]
 		//ClientのKeyを作成する
 		logger.Info("Run: ClientのKeyを作成する")
 		bSeed, err := wallet.GenerateSeed()
@@ -120,19 +158,21 @@ func debugForCheck(wallet *service.Wallet) {
 			logger.Fatalf("%+v", err)
 		}
 		grok.Value(keys)
-	case 4:
+	case 11:
+		//[coldwallet1のみ]
 		//ReceiptのKeyを作成する
 		logger.Info("Run: ReceiptのKeyを作成する")
 		bSeed, err := wallet.GenerateSeed()
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-		keys, err := wallet.GenerateAccountKey(enum.AccountTypeReceipt, bSeed, 10)
+		keys, err := wallet.GenerateAccountKey(enum.AccountTypeReceipt, bSeed, 5)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
 		grok.Value(keys)
-	case 5:
+	case 12:
+		//[coldwallet1のみ]
 		//PaymentのKeyを作成する
 		logger.Info("Run: PaymentのKeyを作成する")
 		bSeed, err := wallet.GenerateSeed()
@@ -144,32 +184,156 @@ func debugForCheck(wallet *service.Wallet) {
 			logger.Fatalf("%+v", err)
 		}
 		grok.Value(keys)
-	case 10:
-		//作成したPrivateKeyをColdWalletにimportする
+
+	case 20:
+		//[coldwallet1のみ]
+		//作成したClientのPrivateKeyをColdWalletにimportする
+		logger.Info("Run: 作成したClientのPrivateKeyをColdWalletにimportする")
 		err := wallet.ImportPrivateKey(enum.AccountTypeClient)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-	case 11:
-		//[clientアカウント]作成したPublicKeyをcsvファイルとしてexportする
+	case 21:
+		//[coldwallet1のみ]
+		//作成したReceiptのPrivateKeyをColdWalletにimportする
+		logger.Info("Run: 作成したReceiptのPrivateKeyをColdWalletにimportする")
+		err := wallet.ImportPrivateKey(enum.AccountTypeReceipt)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+	case 23:
+		//[coldwallet1のみ]
+		//作成したPaymentのPrivateKeyをColdWalletにimportする
+		logger.Info("Run: 作成したPaymentのPrivateKeyをColdWalletにimportする")
+		err := wallet.ImportPrivateKey(enum.AccountTypePayment)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+
+	case 30:
+		//[coldwallet1のみ]
+		//作成したClientのPublicKeyをcsvファイルとしてexportする
+		logger.Info("Run: 作成したClientのPublicアドレスをcsvファイルとしてexportする")
 		err := wallet.ExportPublicKey(enum.AccountTypeClient, false)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-
-		//[payment/receiptアカウント]作成したPublicKeyをcsvファイルとしてexportする
-		//ここでexportしたものは、coldwallet2でmultisigの生成に利用する
-		err = wallet.ExportPublicKey(enum.AccountTypeReceipt, false)
+	case 31:
+		//[coldwallet1のみ]
+		//作成したReceiptのPublicKeyをcsvファイルとしてexportする
+		logger.Info("Run: 作成したReceiptのPublicアドレスをcsvファイルとしてexportする")
+		err := wallet.ExportPublicKey(enum.AccountTypeReceipt, false)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+	case 32:
+		//[coldwallet1のみ]
+		//作成したPaymentのPublicKeyをcsvファイルとしてexportする
+		logger.Info("Run: 作成したPaymentのPublicアドレスをcsvファイルとしてexportする")
+		err := wallet.ExportPublicKey(enum.AccountTypeReceipt, false)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
 
-		err = wallet.ExportPublicKey(enum.AccountTypePayment, false)
+	case 40:
+		//[coldwallet1のみ]
+		//TODO:coldwallet2からexportしたReceiptのmultisigアドレスをcoldWallet1にimportする
+		logger.Info("Run: coldwallet2からexportしたReceiptのmultisigアドレスをcoldWallet1にimportする")
+	case 41:
+		//[coldwallet1のみ]
+		//TODO:coldwallet2からexportしたPaymentのmultisigアドレスをcoldWallet1にimportする
+		logger.Info("Run: coldwallet2からexportしたReceiptのmultisigアドレスをcoldWallet1にimportする")
+
+	default:
+		logger.Info("opts.Mode is out of range")
+		procedure.Show()
+	}
+
+}
+
+// coldwallet2としてのKey関連機能群
+func keyFunctionalities2(wallet *service.Wallet) {
+	switch opts.Mode {
+	case 1:
+		//[coldwallet共通]
+		//HDウォレットによるSeedの作成
+		logger.Info("Run: HDウォレット Seedの生成")
+		bSeed, err := wallet.GenerateSeed()
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
+		logger.Infof("seed: %s", key.SeedToString(bSeed))
+
+	case 10:
+		//[coldwallet2のみ]
+		//AuthorizationのKeyを作成する
+		logger.Info("Run: AuthorizationのKeyを作成する")
+		bSeed, err := wallet.GenerateSeed()
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+		keys, err := wallet.GenerateAccountKey(enum.AccountTypeAuthorization, bSeed, 1)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+		grok.Value(keys)
 
 	case 20:
+		//[coldwallet2のみ]
+		//作成したAuthorizationのPrivateKeyをColdWalletにimportする
+		logger.Info("Run: 作成したAuthorizationのPrivateKeyをColdWalletにimportする")
+		err := wallet.ImportPrivateKey(enum.AccountTypeAuthorization)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+	case 40:
+		//[coldwallet2のみ]
+		//TODO:coldwallet1からexportしたReceiptのpublicアドレスをcoldWallet2にimportする
+		logger.Info("Run: coldwallet1からexportしたReceiptのpublicアドレスcoldWallet2にimportする")
+	case 41:
+		//[coldwallet2のみ]
+		//TODO:coldwallet1からexportしたPaymentのpublicアドレスをcoldWallet2にimportする
+		logger.Info("Run: coldwallet1からexportしたPaymentのpublicアドレスcoldWallet2にimportする")
+
+	case 50:
+		//[coldwallet2のみ]
+		//TODO:`addmultisigaddress`を実行する。パラメータは、receiptのアドレス、authorizationのアドレス
+		logger.Info("Run: `addmultisigaddress`を実行する。パラメータは、receiptのアドレス、authorizationのアドレス")
+	case 51:
+		//[coldwallet2のみ]
+		//TODO:`addmultisigaddress`を実行する。パラメータは、paymentのアドレス、authorizationのアドレス
+		logger.Info("Run: `addmultisigaddress`を実行する。パラメータは、receiptのアドレス、authorizationのアドレス")
+
+	case 60:
+		//[coldwallet2のみ]
+		//TODO:作成したReceiptのMultisigアドレスをcsvファイルとしてexportする
+		logger.Info("Run: 作成したReceiptのMultisigアドレスをcsvファイルとしてexportする")
+	case 61:
+		//[coldwallet2のみ]
+		//TODO:作成したPaymentのMultisigアドレスをcsvファイルとしてexportする
+		logger.Info("Run: 作成したPaymentのMultisigアドレスをcsvファイルとしてexportする")
+
+	default:
+		logger.Info("opts.Mode is out of range")
+		procedure.Show()
+	}
+
+}
+
+// Debug 検証用
+func debugForCheck(wallet *service.Wallet) {
+	switch opts.Mode {
+	case 1:
+		//通常のKeyの生成(実運用では使わない)
+		logger.Info("Run: Keyの生成")
+		//単一Keyの生成
+		wif, pubAddress, err := key.GenerateKey(wallet.BTC.GetChainConf())
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+		logger.Infof("[WIF] %s - [Pub Address] %s\n", wif.String(), pubAddress)
+
+	case 10:
 		//TODO:Multisigの作成
 		logger.Info("Run: Multisigの作成")
 
@@ -186,7 +350,7 @@ func debugForCheck(wallet *service.Wallet) {
 		}
 		logger.Infof("multisig address: %s, redeemScript: %s", resAddr.Address, resAddr.RedeemScript)
 
-	case 30:
+	case 20:
 		//[Debug用]HEXから署名を行う
 		logger.Info("Run: HEXから署名を行う")
 		hex := "02000000021ed288be4c4d7923a0d044bb500a15b2eb0f2b3c5503293f251f7c94939a3f9f0000000000ffffffff557624120cdf3f4d092f35e5cd6b75418b76c3e3fd4c398357374e93cfe5c4200000000000ffffffff05c03b47030000000017a91419e70491572c55fb08ce90b0c6bf5cfe45a5420e87809698000000000017a9146b8902fc7a6a0bccea9dbd80a4c092c314227f618734e133070000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e87005a62020000000017a9149c877d6f21d5800ca60a7660ee56745f239b222b87002d31010000000017a914f575a0d1ddcfb98a11628826f1632453d718ff618700000000"
@@ -197,7 +361,7 @@ func debugForCheck(wallet *service.Wallet) {
 		logger.Infof("hex: %s\n, 署名完了: %t\n, fileName: %s", hexTx, isSigned, generatedFileName)
 		//TODO:isSigned: 送信までした署名はfalseになる??
 	default:
-		logger.Info("該当Mode無し")
+		logger.Info("opts.Mode is out of range")
 		procedure.Show()
 	}
 }

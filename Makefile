@@ -17,13 +17,13 @@ bld:
 bld-windows:
 	GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/wallet.exe ./cmd/wallet/main.go
 	GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/coldwallet1.exe ./cmd/coldwallet1/main.go
-	GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/coldwallet2.exe ./cmd/coldwallet2/main.go
+	#GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/coldwallet2.exe ./cmd/coldwallet2/main.go
 	zip -r ./bin/windows_amd64/wallet.zip ./bin/windows_amd64/wallet.exe
 	zip -r ./bin/windows_amd64/coldwallet1.zip ./bin/windows_amd64/coldwallet1.exe
-	zip -r ./bin/windows_amd64/coldwallet2.zip ./bin/windows_amd64/coldwallet2.exe
+	#zip -r ./bin/windows_amd64/coldwallet2.zip ./bin/windows_amd64/coldwallet2.exe
 	rm -f ./bin/windows_amd64/wallet.exe
 	rm -f ./bin/windows_amd64/coldwallet1.exe
-	rm -f ./bin/windows_amd64/coldwallet2.exe
+	#rm -f ./bin/windows_amd64/coldwallet2.exe
 
 
 ###############################################################################
@@ -50,6 +50,7 @@ send: bld
 # 送金ステータスを監視し、6confirmationsになったら、statusをdoneに更新する
 	./wallet -m 10
 
+
 # テストデータ作成のために入金の一連の流れをまとめて実行する
 create-receipt-all: bld
 	./wallet -m 20
@@ -75,6 +76,7 @@ sign-payment: bld
 # 出金用に署名済トランザクションを送信する
 send-payment: bld
 	./wallet -m 3 -i ./data/tx/payment/payment_3_signed_1534833088943126101
+
 
 # テストデータ作成のために出金の一連の流れをまとめて実行する
 create-payment-all: bld
