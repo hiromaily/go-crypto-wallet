@@ -36,8 +36,10 @@ pass = "cayenne"
 path = "./data/kvs/db"
 
 [tx_file]
-# ここは開発時にしか必要ないはず
 base_path = "./data/tx/"
+
+[pubkey_file]
+base_path = "./data/pubkey/"
 
 [gcs]
 storage_key_path = "./data/api_keys/cayenne-dev-strage.json"

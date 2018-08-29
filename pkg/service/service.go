@@ -57,8 +57,8 @@ func InitialSettings(confPath string) (*Wallet, error) {
 	}
 
 	// PubkeyCSV
-	if conf.PubkeyCSV.BasePath != "" {
-		csv.SetFilePath(conf.PubkeyCSV.BasePath)
+	if conf.PubkeyFile.BasePath != "" {
+		csv.SetFilePath(conf.PubkeyFile.BasePath)
 	}
 
 	// GCS

@@ -12,14 +12,18 @@ goget:
 bld:
 	go build -o wallet ./cmd/wallet/main.go
 	go build -o coldwallet1 ./cmd/coldwallet1/main.go
+	go build -o coldwallet2 ./cmd/coldwallet2/main.go
 
 bld-windows:
 	GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/wallet.exe ./cmd/wallet/main.go
 	GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/coldwallet1.exe ./cmd/coldwallet1/main.go
+	GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/coldwallet2.exe ./cmd/coldwallet2/main.go
 	zip -r ./bin/windows_amd64/wallet.zip ./bin/windows_amd64/wallet.exe
 	zip -r ./bin/windows_amd64/coldwallet1.zip ./bin/windows_amd64/coldwallet1.exe
+	zip -r ./bin/windows_amd64/coldwallet2.zip ./bin/windows_amd64/coldwallet2.exe
 	rm -f ./bin/windows_amd64/wallet.exe
 	rm -f ./bin/windows_amd64/coldwallet1.exe
+	rm -f ./bin/windows_amd64/coldwallet2.exe
 
 
 ###############################################################################

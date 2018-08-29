@@ -8,6 +8,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/jessevdk/go-flags"
+	"github.com/hiromaily/go-bitcoin/pkg/procedure"
 )
 
 // HDウォレットとしてseed作成、keyを指定した数だけ生成し、出力する
@@ -75,18 +76,19 @@ func switchFunction(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-		keys, err := wallet.GenerateAccountKey(enum.AccountTypeAuthorization, bSeed, 2)
+		keys, err := wallet.GenerateAccountKey(enum.AccountTypeAuthorization, bSeed, 1)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
 		grok.Value(keys)
 
 	default:
-		logger.Info("該当Mode無し")
+		//logger.Info("該当Mode無し")
+		procedure.Show()
 	}
 }
 
 // 検証用
 func debugForCheck(wallet *service.Wallet) {
-
+	procedure.Show()
 }

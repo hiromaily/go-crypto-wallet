@@ -10,6 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/jessevdk/go-flags"
+	"github.com/hiromaily/go-bitcoin/pkg/procedure"
 )
 
 //こちらはHotwallet、ただし、Watch Only Walletとしての機能を実装していく。
@@ -200,7 +201,8 @@ func switchFunction(wallet *service.Wallet) {
 		logger.Infof("[Done]送信までDONE!! txID: %s", txID)
 
 	default:
-		logger.Info("該当Mode無し")
+		//logger.Info("該当Mode無し")
+		procedure.Show()
 	}
 
 }
@@ -276,7 +278,8 @@ func debugForCheck(wallet *service.Wallet) {
 		}
 
 	default:
-		log.Print("該当Mode無し")
+		//log.Print("該当Mode無し")
+		procedure.Show()
 	}
 
 }

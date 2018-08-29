@@ -138,6 +138,7 @@ CREATE TABLE `account_key_client` (
   `id`     BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
   `wallet_address`          VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'Walletアドレス',
   `wallet_multisig_address` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'multisigとしてのWalletアドレス',
+  `redeem_script`           VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'multisigアドレス生成後に渡されるredeedScript',
   `wallet_import_format`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'WIF',
   `account`                 VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'アドレスに紐づくアカウント名',
   `key_type`                tinyint(1) UNSIGNED NOT NULL COMMENT'コインの種類',

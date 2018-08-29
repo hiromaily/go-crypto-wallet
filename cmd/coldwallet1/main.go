@@ -9,6 +9,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/jessevdk/go-flags"
+	"github.com/hiromaily/go-bitcoin/pkg/procedure"
 )
 
 // HDウォレットとしてseed作成、keyを指定した数だけ生成し、出力する
@@ -82,7 +83,8 @@ func switchFunction(wallet *service.Wallet) {
 		}
 		logger.Infof("[hex]: %s\n[署名完了]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName)
 	default:
-		logger.Info("該当Mode無し")
+		//logger.Info("該当Mode無し")
+		procedure.Show()
 	}
 }
 
@@ -196,5 +198,6 @@ func debugForCheck(wallet *service.Wallet) {
 		//TODO:isSigned: 送信までした署名はfalseになる??
 	default:
 		logger.Info("該当Mode無し")
+		procedure.Show()
 	}
 }
