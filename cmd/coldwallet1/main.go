@@ -250,6 +250,25 @@ func keyFunctionalities1(wallet *service.Wallet) {
 		//TODO:coldwallet2からexportしたPaymentのmultisigアドレスをcoldWallet1にimportする
 		logger.Info("Run: coldwallet2からexportしたPaymentのmultisigアドレスをcoldWallet1にimportする")
 
+	//case 51:
+	//	//[coldwallet1のみ]
+	//	//multisigimport後、ReceiptのMultisigをcsvファイルとしてexportする (DBに出力済を登録する必要がある)
+	//	//=>TODO:しかし、coldwallet2側から出力されたファイルがそのまま使えるような？？
+	//	logger.Info("Run: 作成したReceiptのMultisigアドレスをcsvファイルとしてexportする")
+	//	err := wallet.ExportPublicKey(enum.AccountTypeReceipt, true)
+	//	if err != nil {
+	//		logger.Fatalf("%+v", err)
+	//	}
+	//case 52:
+	//	//[coldwallet1のみ]
+	//	//multisigimport後、PaymentのMultisigをcsvファイルとしてexportする (DBに出力済を登録する必要がある)
+	//	//=>TODO:しかし、coldwallet2側から出力されたファイルがそのまま使えるような？？
+	//	logger.Info("Run: 作成したPaymentのMultisigアドレスをcsvファイルとしてexportする")
+	//	err := wallet.ExportPublicKey(enum.AccountTypePayment, true)
+	//	if err != nil {
+	//		logger.Fatalf("%+v", err)
+	//	}
+
 	default:
 		logger.Warn("opts.Mode is out of range")
 		procedure.Show()

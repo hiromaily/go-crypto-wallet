@@ -209,6 +209,7 @@ import-payment-multisig-address:
 	./coldwallet1 -w 1 -k -m 41
 
 
+
 ###############################################################################
 # Cold wallet2 (Authorizationのキー/ Receipt/PaymentのMultisigアドレス管理)
 ###############################################################################
@@ -217,35 +218,44 @@ import-payment-multisig-address:
 ###############################################################################
 # seedを生成する
 gen-seed2:
-	./coldwallet1 -w 2 -k -m 1
+	./coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 1
 
 
 # Authorizationのkeyを生成する
 gen-authorization-key:
-	./coldwallet1 -w 2 -k -m 13
+	./coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 13
 
 
 # Authorizationのprivate keyをcoldwalletに登録する
 add-authorization-priv-key:
-	./coldwallet1 -w 2 -k -m 23
+	./coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 23
+
+
+# ReceiptのPublicアドレスをimportする
+import-receipt-pub-key:
+	./coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 33
+
+# PaymentのPublicアドレスをimportする
+import-payment-pub-key:
+	./coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 34
 
 
 # Receiptのmultisigアドレスを生成し、登録する
 add-multisig-receipt:
-	./coldwallet1 -w 2 -k -m 50
+	./coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 50
 
 # Paymentのmultisigアドレスを生成し、登録する
 add-multisig-payment:
-	./coldwallet1 -w 2 -k -m 50
+	./coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 51
 
 
 # Receiptのmultisigアドレスをexportする
 export-multisig-receipt:
-	./coldwallet1 -w 2 -k -m 60
+	./coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 60
 
 # Paymentのmultisigアドレスをexportする
 export-multisig-payment:
-	./coldwallet1 -w 2 -k -m 61
+	./coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 61
 
 
 ###############################################################################
