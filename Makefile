@@ -179,11 +179,11 @@ add-client-priv-key:
 	./coldwallet1 -w 1 -k -m 20
 
 # Receiptのprivate keyをcoldwalletに登録する
-add-client-priv-key:
+add-receipt-priv-key:
 	./coldwallet1 -w 1 -k -m 21
 
 # Paymentのprivate keyをcoldwalletに登録する
-add-client-priv-key:
+add-payment-priv-key:
 	./coldwallet1 -w 1 -k -m 22
 
 
@@ -244,7 +244,7 @@ export-multisig-receipt:
 	./coldwallet1 -w 2 -k -m 60
 
 # Paymentのmultisigアドレスをexportする
-export-multisig-receipt:
+export-multisig-payment:
 	./coldwallet1 -w 2 -k -m 61
 
 
