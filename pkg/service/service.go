@@ -5,12 +5,12 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/api"
 	"github.com/hiromaily/go-bitcoin/pkg/csv"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/file"
 	"github.com/hiromaily/go-bitcoin/pkg/gcp"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/hiromaily/go-bitcoin/pkg/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/toml"
+	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/pkg/errors"
 )
 
@@ -53,7 +53,7 @@ func InitialSettings(confPath string) (*Wallet, error) {
 
 	// TxFile
 	if conf.TxFile.BasePath != "" {
-		file.SetFilePath(conf.TxFile.BasePath)
+		txfile.SetFilePath(conf.TxFile.BasePath)
 	}
 
 	// PubkeyCSV

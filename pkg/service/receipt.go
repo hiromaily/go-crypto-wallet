@@ -9,9 +9,9 @@ import (
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/file"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
+	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/pkg/errors"
 )
 
@@ -267,15 +267,15 @@ func (w *Wallet) storeHex(hex string, id int64, actionType enum.ActionType) (str
 
 	//To File(本番では利用しない??)
 	if w.Env == enum.EnvDev {
-		path := file.CreateFilePath(actionType, enum.TxTypeUnsigned, id, true)
-		generatedFileName, err = file.WriteFile(path, hex)
+		path := txfile.CreateFilePath(actionType, enum.TxTypeUnsigned, id, true)
+		generatedFileName, err = txfile.WriteFile(path, hex)
 		if err != nil {
-			return "", errors.Errorf("file.WriteFile(): error: %v", err)
+			return "", errors.Errorf("txfile.WriteFile(): error: %v", err)
 		}
 	}
 
 	//[WIP] GCS
-	path := file.CreateFilePath(actionType, enum.TxTypeUnsigned, id, false)
+	path := txfile.CreateFilePath(actionType, enum.TxTypeUnsigned, id, false)
 
 	//GCS上に、Clientを作成(セッションの関係で都度作成する)
 	//generatedFileName2, err := w.GCS[enum.ActionTypeReceipt].WriteOnce(path, hex)

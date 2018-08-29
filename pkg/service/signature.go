@@ -4,8 +4,8 @@ package service
 
 import (
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/file"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
+	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/pkg/errors"
 )
 
@@ -47,8 +47,8 @@ func (w *Wallet) SignatureByHex(actionType enum.ActionType, hex string, txReceip
 	}
 
 	//ファイルに書き込む
-	path := file.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID, true)
-	generatedFileName, err := file.WriteFile(path, hex)
+	path := txfile.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID, true)
+	generatedFileName, err := txfile.WriteFile(path, hex)
 	if err != nil {
 		return "", isSigned, "", err
 	}
@@ -62,13 +62,13 @@ func (w *Wallet) SignatureByHex(actionType enum.ActionType, hex string, txReceip
 func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error) {
 	//ファイル名から、tx_receipt_idを取得する
 	//payment_5_unsigned_1534466246366489473
-	txReceiptID, actionType, _, err := file.ParseFile(filePath, "unsigned")
+	txReceiptID, actionType, _, err := txfile.ParseFile(filePath, "unsigned")
 	if err != nil {
 		return "", false, "", err
 	}
 
 	//ファイルからhexを読み取る
-	hex, err := file.ReadFile(filePath)
+	hex, err := txfile.ReadFile(filePath)
 	if err != nil {
 		return "", false, "", err
 	}
@@ -80,8 +80,8 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 	}
 
 	//ファイルに書き込む
-	path := file.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID, true)
-	generatedFileName, err := file.WriteFile(path, hexTx)
+	path := txfile.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID, true)
+	generatedFileName, err := txfile.WriteFile(path, hexTx)
 	if err != nil {
 		return "", isSigned, "", err
 	}

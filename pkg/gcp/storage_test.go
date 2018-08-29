@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/file"
 	. "github.com/hiromaily/go-bitcoin/pkg/gcp"
+	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 )
 
 //[gcs]
@@ -48,7 +48,7 @@ func initialStorage(t *testing.T) *ExtClient {
 func TestSaveAndRead(t *testing.T) {
 	txReceiptID := int64(999)
 	hex := "storage_test"
-	path := file.CreateFilePath(enum.ActionTypeReceipt, enum.TxTypeUnsigned, txReceiptID, false)
+	path := txfile.CreateFilePath(enum.ActionTypeReceipt, enum.TxTypeUnsigned, txReceiptID, false)
 
 	//初期化処理
 	cli := initialStorage(t)

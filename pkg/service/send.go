@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/file"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
+	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/pkg/errors"
 )
 
@@ -18,13 +18,13 @@ import (
 func (w *Wallet) SendFromFile(filePath string) (string, error) {
 	//ファイル名から、tx_receipt_idを取得する
 	//payment_5_unsigned_1534466246366489473
-	txReceiptID, actionType, _, err := file.ParseFile(filePath, "signed")
+	txReceiptID, actionType, _, err := txfile.ParseFile(filePath, "signed")
 	if err != nil {
 		return "", err
 	}
 
 	//ファイルからhexを読み取る
-	signedHex, err := file.ReadFile(filePath)
+	signedHex, err := txfile.ReadFile(filePath)
 	if err != nil {
 		return "", err
 	}
