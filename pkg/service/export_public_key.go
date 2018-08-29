@@ -39,7 +39,7 @@ func (w *Wallet) ExportPublicKey(accountType enum.AccountType, isMultisig bool) 
 	}
 
 	//DBの該当レコードをアップデート
-	_, err = w.DB.UpdateIsExprotedPubKey(accountType, pubKeys,isMultisig, nil, true)
+	_, err = w.DB.UpdateIsExprotedPubKey(accountType, pubKeys, isMultisig, nil, true)
 	if err != nil {
 		return errors.Errorf("csv.UpdateIsExprotedPubKey() error: %s", err)
 	}

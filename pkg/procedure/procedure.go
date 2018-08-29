@@ -7,19 +7,20 @@ type WalletType string
 
 // wallet_type
 const (
-	WalletTypeWatchOnly  WalletType = "watch_only" //生成したアドレスのみを保持し、Bitcoin core NWに接続可能なwallet
-	WalletTypeCold1      WalletType = "cold1"      //通常利用のkeyの生成から管理まで行う非ネットワーク環境下で利用するwallet
-	WalletTypeCold2      WalletType = "cold2"      //承認用のアカウント及び、Multisigアドレスの生成を行うwallet
+	WalletTypeWatchOnly WalletType = "watch_only" //生成したアドレスのみを保持し、Bitcoin core NWに接続可能なwallet
+	WalletTypeCold1     WalletType = "cold1"      //通常利用のkeyの生成から管理まで行う非ネットワーク環境下で利用するwallet
+	WalletTypeCold2     WalletType = "cold2"      //承認用のアカウント及び、Multisigアドレスの生成を行うwallet
 )
 
-type ProcedureType struct{
+// Procedure 手順に伴う情報グループ
+type Procedure struct {
 	WalletType WalletType
 	Indication string
 	Command    string
 }
 
 //Procedure env_typeの値
-var Procedure = []ProcedureType{
+var procedures = []Procedure{
 	{
 		WalletTypeCold1,
 		"generate seed",
@@ -98,6 +99,6 @@ var Procedure = []ProcedureType{
 }
 
 // Show Procedureを表示する
-func Show(){
-	grok.Value(Procedure)
+func Show() {
+	grok.Value(procedures)
 }

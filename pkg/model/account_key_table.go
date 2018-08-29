@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
@@ -99,7 +99,7 @@ func (m *DB) updateIsExprotedPubKey(tbl string, accountType enum.AccountType, pu
 	var sql string
 	if accountType == enum.AccountTypeClient {
 		sql = "UPDATE %s SET is_exported_pub_key=true WHERE wallet_address IN (?);"
-	} else if accountType != enum.AccountTypeClient && isMultisig{
+	} else if accountType != enum.AccountTypeClient && isMultisig {
 		sql = "UPDATE %s SET is_exported_pub_key=true WHERE wallet_multisig_address IN (?) ;"
 	} else {
 		logger.Info("is_exported_pub_key is not needed to update")

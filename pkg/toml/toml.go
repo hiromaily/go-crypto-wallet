@@ -9,9 +9,9 @@ import (
 
 // Config ルート
 type Config struct {
-	Environment string        `toml:"environment"`
-	Bitcoin     BitcoinConf   `toml:"bitcoin"`
-	MySQL       MySQLConf     `toml:"mysql"`
+	Environment string         `toml:"environment"`
+	Bitcoin     BitcoinConf    `toml:"bitcoin"`
+	MySQL       MySQLConf      `toml:"mysql"`
 	TxFile      TxFileConf     `toml:"tx_file"`
 	PubkeyFile  PubKeyFileConf `toml:"pubkey_file"`
 	GCS         GCSConf        `toml:"gcs"`
@@ -69,7 +69,7 @@ type TxFileConf struct {
 	BasePath string `toml:"base_path"`
 }
 
-// PubKeyCSVConf 保存されるtransactionファイル情報
+// PubKeyFileConf 保存されるtransactionファイル情報
 // import/export共にこのパスが使われる
 type PubKeyFileConf struct {
 	BasePath string `toml:"base_path"`

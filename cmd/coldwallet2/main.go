@@ -6,9 +6,9 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
+	"github.com/hiromaily/go-bitcoin/pkg/procedure"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/jessevdk/go-flags"
-	"github.com/hiromaily/go-bitcoin/pkg/procedure"
 )
 
 // HDウォレットとしてseed作成、keyを指定した数だけ生成し、出力する
