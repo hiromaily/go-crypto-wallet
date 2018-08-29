@@ -46,9 +46,9 @@ const (
 //AccountTypeValue tx_typeの値
 var AccountTypeValue = map[AccountType]uint8{
 	AccountTypeClient:        0,
-	AccountTypeReceipt:       2,
-	AccountTypePayment:       3,
-	AccountTypeAuthorization: 4,
+	AccountTypeReceipt:       1,
+	AccountTypePayment:       2,
+	AccountTypeAuthorization: 3,
 }
 
 // ValidateAccountType AccountTypeのバリデーションを行う

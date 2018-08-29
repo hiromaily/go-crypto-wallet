@@ -5,4 +5,17 @@ sudo apt-get update
 sudo apt-get install bitcoind
 
 mkdir ~/.bitcoin
-touch ~/.bitcoin/bitcoin.conf
+
+cat <<EOF >> ~/.bitcoin/bitcoin.conf
+testnet=1
+server=1
+rpcuser=cayenne
+rpcpassword=cayenne
+txindex=1
+zmqpubrawblock=tcp://127.0.0.1:29000
+zmqpubrawtx=tcp://127.0.0.1:2900
+
+rpcport=18332
+allowip=127.0.0.1
+rpcallowip=111.98.254.212
+EOF

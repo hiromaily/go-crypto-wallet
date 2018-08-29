@@ -71,7 +71,7 @@ func main() {
 	case 2:
 		coldWallet2(wallet)
 	default:
-		logger.Error("wallet option should be 1 or 2")
+		logger.Warn("wallet option should be 1 or 2")
 	}
 }
 
@@ -83,9 +83,12 @@ func coldWallet1(wallet *service.Wallet) {
 	} else if opts.Key {
 		//key関連機能
 		keyFunctionalities1(wallet)
-	} else {
+	} else if opts.Debug {
 		//debug用 機能確認
 		debugForCheck(wallet)
+	} else {
+		logger.Warn("either sign:-s, key:-k, debug:-d should be set as main function")
+		procedure.Show()
 	}
 }
 
@@ -97,13 +100,16 @@ func coldWallet2(wallet *service.Wallet) {
 	} else if opts.Key {
 		//key関連機能
 		keyFunctionalities2(wallet)
-	} else {
+	} else if opts.Debug {
 		//debug用 機能確認
 		debugForCheck(wallet)
+	} else {
+		logger.Warn("either sign:-s, key:-k, debug:-d should be set as main function")
+		procedure.Show()
 	}
 }
 
-// coldwallet1としての署名機能群
+// coldwallet1としての署名機能群 入金時の署名/TODO:出金時の署名1
 func signFunctionalities1(wallet *service.Wallet) {
 	// 処理をModeで切り替える
 	switch opts.Mode {
@@ -121,7 +127,7 @@ func signFunctionalities1(wallet *service.Wallet) {
 		}
 		logger.Infof("[hex]: %s\n[署名完了]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName)
 	default:
-		logger.Info("opts.Mode is out of range")
+		logger.Warn("opts.Mode is out of range")
 		procedure.Show()
 	}
 }
@@ -201,7 +207,7 @@ func keyFunctionalities1(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-	case 23:
+	case 22:
 		//[coldwallet1のみ]
 		//作成したPaymentのPrivateKeyをColdWalletにimportする
 		logger.Info("Run: 作成したPaymentのPrivateKeyをColdWalletにimportする")
@@ -242,10 +248,10 @@ func keyFunctionalities1(wallet *service.Wallet) {
 	case 41:
 		//[coldwallet1のみ]
 		//TODO:coldwallet2からexportしたPaymentのmultisigアドレスをcoldWallet1にimportする
-		logger.Info("Run: coldwallet2からexportしたReceiptのmultisigアドレスをcoldWallet1にimportする")
+		logger.Info("Run: coldwallet2からexportしたPaymentのmultisigアドレスをcoldWallet1にimportする")
 
 	default:
-		logger.Info("opts.Mode is out of range")
+		logger.Warn("opts.Mode is out of range")
 		procedure.Show()
 	}
 
@@ -264,7 +270,7 @@ func keyFunctionalities2(wallet *service.Wallet) {
 		}
 		logger.Infof("seed: %s", key.SeedToString(bSeed))
 
-	case 10:
+	case 13:
 		//[coldwallet2のみ]
 		//AuthorizationのKeyを作成する
 		logger.Info("Run: AuthorizationのKeyを作成する")
@@ -278,7 +284,7 @@ func keyFunctionalities2(wallet *service.Wallet) {
 		}
 		grok.Value(keys)
 
-	case 20:
+	case 23:
 		//[coldwallet2のみ]
 		//作成したAuthorizationのPrivateKeyをColdWalletにimportする
 		logger.Info("Run: 作成したAuthorizationのPrivateKeyをColdWalletにimportする")
@@ -286,11 +292,12 @@ func keyFunctionalities2(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-	case 40:
+
+	case 33:
 		//[coldwallet2のみ]
 		//TODO:coldwallet1からexportしたReceiptのpublicアドレスをcoldWallet2にimportする
 		logger.Info("Run: coldwallet1からexportしたReceiptのpublicアドレスcoldWallet2にimportする")
-	case 41:
+	case 34:
 		//[coldwallet2のみ]
 		//TODO:coldwallet1からexportしたPaymentのpublicアドレスをcoldWallet2にimportする
 		logger.Info("Run: coldwallet1からexportしたPaymentのpublicアドレスcoldWallet2にimportする")
@@ -314,7 +321,7 @@ func keyFunctionalities2(wallet *service.Wallet) {
 		logger.Info("Run: 作成したPaymentのMultisigアドレスをcsvファイルとしてexportする")
 
 	default:
-		logger.Info("opts.Mode is out of range")
+		logger.Warn("opts.Mode is out of range")
 		procedure.Show()
 	}
 
@@ -361,7 +368,7 @@ func debugForCheck(wallet *service.Wallet) {
 		logger.Infof("hex: %s\n, 署名完了: %t\n, fileName: %s", hexTx, isSigned, generatedFileName)
 		//TODO:isSigned: 送信までした署名はfalseになる??
 	default:
-		logger.Info("opts.Mode is out of range")
+		logger.Warn("opts.Mode is out of range")
 		procedure.Show()
 	}
 }
