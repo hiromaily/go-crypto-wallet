@@ -124,7 +124,7 @@ func switchFunction(wallet *service.Wallet) {
 		if opts.ImportFile == "" {
 			logger.Fatal("file path is required as argument file when running")
 		}
-		err := wallet.ImportPublicKey(opts.ImportFile, enum.AccountTypeClient)
+		err := wallet.ImportPublicKeyForWatchWallet(opts.ImportFile, enum.AccountTypeClient)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}

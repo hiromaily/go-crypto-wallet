@@ -132,10 +132,10 @@ DROP TABLE IF EXISTS `account_key_client`;
 CREATE TABLE `account_key_client` (
   `id`                      BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
   `wallet_address`          VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'Walletアドレス',
-  `wallet_multisig_address` VARCHAR(255) COLLATE utf8_unicode_ci COMMENT'multisigとしてのWalletアドレス',
-  `redeem_script`           VARCHAR(255) COLLATE utf8_unicode_ci COMMENT'multisigアドレス生成後に渡されるredeedScript',
+  `wallet_multisig_address` VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'multisigとしてのWalletアドレス',
+  `redeem_script`           VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'multisigアドレス生成後に渡されるredeedScript',
   `wallet_import_format`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'WIF',
-  `account`                 VARCHAR(255) COLLATE utf8_unicode_ci COMMENT'アドレスに紐づくアカウント名',
+  `account`                 VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'アドレスに紐づくアカウント名',
   `key_type`                tinyint(1) UNSIGNED NOT NULL COMMENT'コインの種類',
   `idx`                     BIGINT(20) UNSIGNED NOT NULL COMMENT'HDウォレット生成時のindex',
   `is_imported_priv_key`    BOOL DEFAULT false COMMENT'生成したPrivateKey(WIF)がbitcoin coreのwalletにimport済かどうか',

@@ -32,6 +32,15 @@ const (
 	NetworkTypeTestNet3 NetworkType = "testnet3"
 )
 
+//CoinType コインの種類
+type CoinType uint32
+
+// coin_type
+const (
+	CoinTypeBitcoin CoinType = 0 //Bitcoin
+	CoinTypeTestnet CoinType = 1 //Testnet
+)
+
 //AccountType 利用目的
 type AccountType string
 

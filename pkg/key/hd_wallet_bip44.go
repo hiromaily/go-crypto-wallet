@@ -15,15 +15,6 @@ const (
 	PurposeTypeBIP44 PurposeType = 44 //BIP44
 )
 
-//CoinType コインの種類
-type CoinType uint32
-
-// coin_type
-const (
-	CoinTypeBitcoin CoinType = 0 //Bitcoin
-	CoinTypeTestnet CoinType = 1 //Testnet
-)
-
 //TODO:同じアドレスを使い回すと、アドレスから総額情報がバレて危険
 //よって、内部利用のアドレスは毎回使い捨てにすること
 
@@ -56,9 +47,9 @@ func CreateAccount(conf *chaincfg.Params, seed []byte, actType enum.AccountType)
 		return "", "", err
 	}
 	//CoinType TODO:切り替えが必要
-	ct := uint32(CoinTypeBitcoin)
+	ct := uint32(enum.CoinTypeBitcoin)
 	if conf.Name != string(enum.NetworkTypeMainNet) {
-		ct = uint32(CoinTypeTestnet)
+		ct = uint32(enum.CoinTypeTestnet)
 	}
 	coinType, err := purpose.Child(hdkeychain.HardenedKeyStart + ct)
 	if err != nil {

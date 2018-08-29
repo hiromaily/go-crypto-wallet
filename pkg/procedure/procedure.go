@@ -59,7 +59,7 @@ var proceduresForPreparation = []Procedure{
 	{
 		WalletTypeCold2,
 		"import [receipt, payment] public address from csv to DB",
-		"./coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 33,34",
+		"./coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 33,34 -i ./data/pubkey/xxx.csv",
 	},
 	{
 		WalletTypeCold2,

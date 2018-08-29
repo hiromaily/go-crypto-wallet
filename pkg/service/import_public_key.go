@@ -3,8 +3,11 @@ package service
 import (
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/key"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
+	"strconv"
+	"strings"
 )
 
 //Watch only wallet
@@ -12,8 +15,8 @@ import (
 //CSVのpublickeyをDBにimportする、このとき、clientの場合はaccount無し
 //importしたclientをBitcoin core APIを通じて、walletにimportする
 
-// ImportPublicKey csvファイルからpublicアドレスをimportする
-func (w *Wallet) ImportPublicKey(fileName string, accountType enum.AccountType) error {
+// ImportPublicKeyForWatchWallet csvファイルからpublicアドレスをimportする for WatchOnyWallet
+func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum.AccountType) error {
 	//ファイル読み込み
 	pubKeys, err := key.ImportPubKey(fileName)
 	if err != nil {
@@ -29,11 +32,11 @@ func (w *Wallet) ImportPublicKey(fileName string, accountType enum.AccountType) 
 	var pubKeyData []model.AccountPublicKeyTable
 	for _, key := range pubKeys {
 		//Bitcoin core APIから`importaddress`をcallする
-		//err := w.BTC.ImportAddressWithLabel(key, account, false)
-		//if err != nil {
-		//	logger.Errorf("BTC.ImportAddressWithLabel(%s) error: %v", key, err)
-		//	continue
-		//}
+		err := w.BTC.ImportAddressWithLabel(key, account, false)
+		if err != nil {
+			logger.Errorf("BTC.ImportAddressWithLabel(%s) error: %v", key, err)
+			continue
+		}
 
 		pubKeyData = append(pubKeyData, model.AccountPublicKeyTable{
 			WalletAddress: key,
@@ -46,7 +49,52 @@ func (w *Wallet) ImportPublicKey(fileName string, accountType enum.AccountType) 
 	//logger.Error(err)
 	if err != nil {
 		return errors.Errorf("csv.DB.InsertAccountPubKeyTable() error: %v", err)
-		//TODO:これが失敗したら、どうやって、登録済みのデータを再度Insertするか？
+		//TODO:これが失敗したら、どうやって、登録済みのデータを再度Insertするか？再度実行すればOKのはず
+	}
+
+	return nil
+}
+
+// ImportPublicKeyForColdWallet2 csvファイルからpublicアドレスをimportする for Cold Wallet2
+func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum.AccountType) error {
+	//accountチェック
+	if accountType != enum.AccountTypeReceipt && accountType != enum.AccountTypePayment {
+		logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
+		return nil
+	}
+
+	//ファイル読み込み
+	pubKeys, err := key.ImportPubKey(fileName)
+	if err != nil {
+		return errors.Errorf("csv.ImportPubKey() error: %v", err)
+	}
+
+	// DBにClientAccountのKey情報を登録
+	accountKeyClients := make([]model.AccountKeyTable, len(pubKeys))
+	for i, key := range pubKeys {
+		inner := strings.Split(key, ",")
+		if len(inner) != 4 {
+			return errors.New("exported file should be changed as right specification")
+		}
+		kt, err := strconv.Atoi(inner[2])
+		if err != nil {
+			return errors.New("exported file should be changed as right specification")
+		}
+		idx, err := strconv.Atoi(inner[3])
+		if err != nil {
+			return errors.New("exported file should be changed as right specification")
+		}
+
+		accountKeyClients[i] = model.AccountKeyTable{
+			WalletAddress: inner[0],
+			Account:       inner[1],
+			KeyType:       uint8(kt),
+			Idx:           uint32(idx),
+		}
+	}
+	err = w.DB.InsertAccountKeyTable(accountType, accountKeyClients, nil, true)
+	if err != nil {
+		return errors.Errorf("DB.InsertAccountKeyClient() error: %s", err)
 	}
 
 	return nil

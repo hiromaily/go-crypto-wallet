@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
 )
 
@@ -72,4 +74,53 @@ func ImportPubKey(fileName string) ([]string, error) {
 	}
 
 	return pubKeys, nil
+}
+
+// ExportAccountKeyTable AccountKeyTableをファイルとして出力する
+func ExportAccountKeyTable(accountKeyTable []model.AccountKeyTable, strAccountType string) (string, error) {
+	//fileName
+	fileName := CreateFilePath(strAccountType)
+
+	file, err := os.Create(fileName)
+	//file, _ := os.OpenFile(*fileName, os.O_WRONLY | os.O_APPEND, 0644)
+	if err != nil {
+		return "", errors.Errorf("os.Create(%s) error: %v", fileName, err)
+	}
+	defer file.Close()
+
+	writer := bufio.NewWriter(file)
+	//type AccountKeyTable struct {
+	//	ID                    int64      `db:"id"`
+	//	WalletAddress         string     `db:"wallet_address"`
+	//	WalletMultisigAddress string     `db:"wallet_multisig_address"`
+	//	RedeemScript          string     `db:"redeem_script"`
+	//	WalletImportFormat    string     `db:"wallet_import_format"`
+	//	Account               string     `db:"account"`
+	//	KeyType               uint8      `db:"key_type"`
+	//	Idx                   uint32     `db:"idx"`
+	//	IsImprotedPrivKey     bool       `db:"is_imported_priv_key"`
+	//	IsExprotedPubKey      bool       `db:"is_exported_pub_key"`
+	//	UpdatedAt             *time.Time `db:"updated_at"`
+	//}
+
+	for _, record := range accountKeyTable {
+		//csvファイル
+		tmpData := []string{
+			record.WalletAddress,
+			record.Account,
+			strconv.Itoa(int(record.KeyType)),
+			strconv.Itoa(int(record.Idx)),
+		}
+		_, err = writer.WriteString(strings.Join(tmpData[:], ",") + "\n")
+		//_, err = writer.WriteString(record. + "\n")
+		if err != nil {
+			return "", errors.Errorf("writer.WriteString(%s) error: %v", fileName, err)
+		}
+	}
+	err = writer.Flush()
+	if err != nil {
+		return "", errors.Errorf("writer.Flush(%s) error: %v", fileName, err)
+	}
+
+	return fileName, nil
 }

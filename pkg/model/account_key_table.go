@@ -173,7 +173,7 @@ func (m *DB) GetNotImportedKeyWIF(accountType enum.AccountType) ([]string, error
 }
 
 //getNotExportedPubKey IsExprotedPubKeyがfalseのレコードをすべて返す
-func (m *DB) getNotExportedPubKey(tbl string, accountType enum.AccountType, isMultisig bool) ([]string, error) {
+func (m *DB) getPubkeyNotExportedPubKey(tbl string, accountType enum.AccountType, isMultisig bool) ([]string, error) {
 	//wallet_address
 	//wallet_multisig_address
 	var sql string
@@ -194,7 +194,26 @@ func (m *DB) getNotExportedPubKey(tbl string, accountType enum.AccountType, isMu
 	return pubKeys, nil
 }
 
-//GetNotExportedPubKey IsExprotedPubKeyがfalseのレコードをすべて返す
-func (m *DB) GetNotExportedPubKey(accountType enum.AccountType, isMultisig bool) ([]string, error) {
-	return m.getNotExportedPubKey(accountKeyTableName[accountType], accountType, isMultisig)
+//GetPubkeyNotExportedPubKey IsExprotedPubKeyがfalseのレコードをすべて返す
+func (m *DB) GetPubkeyNotExportedPubKey(accountType enum.AccountType, isMultisig bool) ([]string, error) {
+	return m.getPubkeyNotExportedPubKey(accountKeyTableName[accountType], accountType, isMultisig)
+}
+
+//getAllNotExportedPubKey IsExprotedPubKeyがfalseのレコードをすべて返す
+func (m *DB) getAllNotExportedPubKey(tbl string, accountType enum.AccountType) ([]AccountKeyTable, error) {
+	sql := "SELECT * FROM %s WHERE is_exported_pub_key=false;"
+	sql = fmt.Sprintf(sql, tbl)
+
+	var accountKeyTable []AccountKeyTable
+	err := m.RDB.Select(&accountKeyTable, sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return accountKeyTable, nil
+}
+
+//GetAllNotExportedPubKey IsExprotedPubKeyがfalseのレコードをすべて返す
+func (m *DB) GetAllNotExportedPubKey(accountType enum.AccountType) ([]AccountKeyTable, error) {
+	return m.getAllNotExportedPubKey(accountKeyTableName[accountType], accountType)
 }

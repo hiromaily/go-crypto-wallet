@@ -99,6 +99,12 @@ func (w *Wallet) generateAccountKey(accountType enum.AccountType, seed []byte, i
 		return nil, errors.Errorf("getKeyTypeByAccount(AccountTypeClient) error: %s", err)
 	}
 
+	// Account
+	var account string
+	if accountType != enum.AccountTypeClient {
+		account = string(accountType)
+	}
+
 	// DBにClientAccountのKey情報を登録
 	accountKeyClients := make([]model.AccountKeyTable, len(walletKeys))
 	for idx, key := range walletKeys {
@@ -107,6 +113,7 @@ func (w *Wallet) generateAccountKey(accountType enum.AccountType, seed []byte, i
 			WalletMultisigAddress: "",
 			RedeemScript:          "",
 			WalletImportFormat:    key.WIF,
+			Account:               account,
 			KeyType:               keyID,
 			Idx:                   idxFrom,
 		}
@@ -139,9 +146,9 @@ func (w *Wallet) generateAccountKeyData(accountType enum.AccountType, seed []byt
 func (w *Wallet) getKeyTypeByAccount(accountType enum.AccountType) (uint8, error) {
 	//accountType:0
 	//coin_typeを取得
-	ct := key.CoinTypeBitcoin
+	ct := enum.CoinTypeBitcoin
 	if w.BTC.GetChainConf().Name != string(enum.NetworkTypeMainNet) {
-		ct = key.CoinTypeTestnet
+		ct = enum.CoinTypeTestnet
 	}
 	keyType, err := w.DB.GetKeyTypeByCoinAndAccountType(ct, accountType)
 	if err != nil {

@@ -233,11 +233,11 @@ add-authorization-priv-key:
 
 # ReceiptのPublicアドレスをimportする
 import-receipt-pub-key:
-	./coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 33
+	./coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 33 -i ./data/pubkey/receipt_1535539416812080000.csv
 
 # PaymentのPublicアドレスをimportする
 import-payment-pub-key:
-	./coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 34
+	./coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 34 -i ./data/pubkey/payment_1535534696054752000.csv
 
 
 # Receiptのmultisigアドレスを生成し、登録する

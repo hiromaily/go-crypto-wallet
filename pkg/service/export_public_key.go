@@ -15,16 +15,15 @@ func (w *Wallet) ExportPublicKey(accountType enum.AccountType, isMultisig bool) 
 	//AccountType問わずexportは可能にしておく
 
 	//DBから該当するpublic keyを取得
-	pubKeys, err := w.DB.GetNotExportedPubKey(accountType, isMultisig)
+	pubKeys, err := w.DB.GetPubkeyNotExportedPubKey(accountType, isMultisig)
 	if err != nil {
-		return errors.Errorf("key.GenerateSeed() error: %s", err)
+		return errors.Errorf("key.GetPubkeyNotExportedPubKey() error: %s", err)
 	}
 
-	//accountTypeから必要なファイルパスを取得
-	//at, err := w.DB.GetAccountTypeByID(accountType)
-	//if err != nil {
-	//	return errors.Errorf("DB.GetAccountTypeByID() error: %s", err)
-	//}
+	if len(pubKeys) == 0 {
+		logger.Info("no public key in table")
+		return nil
+	}
 
 	//CSVに書き出す
 	fileName, err := key.ExportPubKey(pubKeys, string(accountType))
@@ -33,16 +32,37 @@ func (w *Wallet) ExportPublicKey(accountType enum.AccountType, isMultisig bool) 
 	}
 	logger.Infof("file name is %s", fileName)
 
-	if len(pubKeys) == 0 {
-		logger.Info("no public key in table")
-		return nil
-	}
-
 	//DBの該当レコードをアップデート
 	_, err = w.DB.UpdateIsExprotedPubKey(accountType, pubKeys, isMultisig, nil, true)
 	if err != nil {
 		return errors.Errorf("csv.UpdateIsExprotedPubKey() error: %s", err)
 	}
+
+	return nil
+}
+
+//ExportPublicKey publicのアドレスをcsvとして出力する
+//TODO:watch only walletにセットするアドレスは、clientの場合は、wallet_address, receipt/paymentの場合、`wallet_multisig_address`
+func (w *Wallet) ExportAllKeyTable(accountType enum.AccountType) error {
+	//AccountType問わずexportは可能にしておく
+
+	//DBから該当するpublic keyを取得
+	accountKeyTable, err := w.DB.GetAllNotExportedPubKey(accountType)
+	if err != nil {
+		return errors.Errorf("key.GetAllNotExportedPubKey() error: %s", err)
+	}
+
+	if len(accountKeyTable) == 0 {
+		logger.Info("no public key in table")
+		return nil
+	}
+
+	//CSVに書き出す
+	fileName, err := key.ExportAccountKeyTable(accountKeyTable, string(accountType))
+	if err != nil {
+		return errors.Errorf("csv.ExportAccountKeyTable() error: %s", err)
+	}
+	logger.Infof("file name is %s", fileName)
 
 	return nil
 }

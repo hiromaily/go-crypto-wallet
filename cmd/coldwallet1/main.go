@@ -229,7 +229,8 @@ func keyFunctionalities1(wallet *service.Wallet) {
 		//[coldwallet1のみ]
 		//作成したReceiptのPublicKeyをcsvファイルとしてexportする
 		logger.Info("Run: 作成したReceiptのPublicアドレスをcsvファイルとしてexportする")
-		err := wallet.ExportPublicKey(enum.AccountTypeReceipt, false)
+		//err := wallet.ExportPublicKey(enum.AccountTypeReceipt, false)
+		err := wallet.ExportAllKeyTable(enum.AccountTypeReceipt)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -237,7 +238,8 @@ func keyFunctionalities1(wallet *service.Wallet) {
 		//[coldwallet1のみ]
 		//作成したPaymentのPublicKeyをcsvファイルとしてexportする
 		logger.Info("Run: 作成したPaymentのPublicアドレスをcsvファイルとしてexportする")
-		err := wallet.ExportPublicKey(enum.AccountTypePayment, false)
+		//err := wallet.ExportPublicKey(enum.AccountTypePayment, false)
+		err := wallet.ExportAllKeyTable(enum.AccountTypePayment)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -317,6 +319,14 @@ func keyFunctionalities2(wallet *service.Wallet) {
 		//[coldwallet2のみ]
 		//TODO:coldwallet1からexportしたReceiptのpublicアドレスをcoldWallet2にimportする
 		logger.Info("Run: coldwallet1からexportしたReceiptのpublicアドレスcoldWallet2にimportする")
+		if opts.ImportFile == "" {
+			logger.Fatal("file path is required as argument file when running")
+		}
+		err := wallet.ImportPublicKeyForColdWallet2(opts.ImportFile, enum.AccountTypeReceipt)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+
 	case 34:
 		//[coldwallet2のみ]
 		//TODO:coldwallet1からexportしたPaymentのpublicアドレスをcoldWallet2にimportする
