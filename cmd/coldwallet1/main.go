@@ -219,7 +219,7 @@ func keyFunctionalities1(wallet *service.Wallet) {
 
 	case 30:
 		//[coldwallet1のみ]
-		//作成したClientのPublicKeyをcsvファイルとしてexportする
+		//作成したClientのPublicKeyをcsvファイルとしてexportする (watch only wallet用)
 		logger.Info("Run: 作成したClientのPublicアドレスをcsvファイルとしてexportする")
 		err := wallet.ExportPublicKey(enum.AccountTypeClient, false)
 		if err != nil {
@@ -227,19 +227,21 @@ func keyFunctionalities1(wallet *service.Wallet) {
 		}
 	case 31:
 		//[coldwallet1のみ]
-		//作成したReceiptのPublicKeyをcsvファイルとしてexportする
+		//作成したReceiptのPublicKeyをcsvファイルとしてexportする (coldwallet2用)
 		logger.Info("Run: 作成したReceiptのPublicアドレスをcsvファイルとしてexportする")
-		err := wallet.ExportPublicKey(enum.AccountTypeReceipt, false)
+		//err := wallet.ExportPublicKey(enum.AccountTypeReceipt, false)
 		//err := wallet.ExportAllKeyTable(enum.AccountTypeReceipt)
+		err := wallet.ExportFullPublicKey(enum.AccountTypeReceipt)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
 	case 32:
 		//[coldwallet1のみ]
-		//作成したPaymentのPublicKeyをcsvファイルとしてexportする
+		//作成したPaymentのPublicKeyをcsvファイルとしてexportする　(coldwallet2用)
 		logger.Info("Run: 作成したPaymentのPublicアドレスをcsvファイルとしてexportする")
-		err := wallet.ExportPublicKey(enum.AccountTypePayment, false)
+		//err := wallet.ExportPublicKey(enum.AccountTypePayment, false)
 		//err := wallet.ExportAllKeyTable(enum.AccountTypePayment)
+		err := wallet.ExportFullPublicKey(enum.AccountTypeReceipt)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}

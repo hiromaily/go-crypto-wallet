@@ -206,6 +206,27 @@ func (m *DB) GetPubkeyNotExportedPubKey(accountType enum.AccountType, isMultisig
 	return m.getPubkeyNotExportedPubKey(accountKeyTableName[accountType], accountType, isMultisig)
 }
 
+//getFullNotExportedPubKey IsExprotedPubKeyがfalseのレコードをすべて返す
+func (m *DB) getFullPubkeyNotExportedPubKey(tbl string) ([]string, error) {
+
+	var sql = "SELECT full_public_key FROM %s WHERE is_exported_pub_key=false;"
+	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
+
+	var pubKeys []string
+	err := m.RDB.Select(&pubKeys, sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return pubKeys, nil
+}
+
+//GetFullPubkeyNotExportedPubKey IsExprotedPubKeyがfalseのレコードをすべて返す
+func (m *DB) GetFullPubkeyNotExportedPubKey(accountType enum.AccountType) ([]string, error) {
+	return m.getFullPubkeyNotExportedPubKey(accountKeyTableName[accountType])
+}
+
 //getAllNotExportedPubKey IsExprotedPubKeyがfalseのレコードをすべて返す
 func (m *DB) getAllNotExportedPubKey(tbl string, accountType enum.AccountType) ([]AccountKeyTable, error) {
 	sql := "SELECT * FROM %s WHERE is_exported_pub_key=false;"
