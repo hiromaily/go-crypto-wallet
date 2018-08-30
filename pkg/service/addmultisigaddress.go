@@ -43,6 +43,7 @@ func (w *Wallet) AddMultisigAddressByAuthorization(accountType enum.AccountType)
 			fmt.Sprintf("multi_%s", accountType),
 		)
 		if err != nil {
+			//[Error] -5: no full public key for address mkPmdpo59gpU7ZioGYwwoMTQJjh7MiqUvd
 			logger.Errorf("BTC.CreateMultiSig(2,%s,%s) error: %s", val.WalletAddress, authKeyTable.WalletAddress, err)
 			continue
 		}

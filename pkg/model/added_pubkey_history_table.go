@@ -13,6 +13,7 @@ import (
 type AddedPubkeyHistoryTable struct {
 	ID                    int64      `db:"id"`
 	WalletAddress         string     `db:"wallet_address"`
+	FullPublicKey         string     `db:"full_public_key"`
 	AuthAddress1          string     `db:"auth_address1"`
 	AuthAddress2          string     `db:"auth_address2"`
 	WalletMultisigAddress string     `db:"wallet_multisig_address"`
@@ -30,8 +31,8 @@ var addedPubkeyHistoryTableName = map[enum.AccountType]string{
 func (m *DB) insertAddedPubkeyHistoryTable(tbl string, addedPubkeyHistoryTables []AddedPubkeyHistoryTable, tx *sqlx.Tx, isCommit bool) error {
 
 	sql := `
-INSERT INTO %s (wallet_address, auth_address1, auth_address2, wallet_multisig_address, redeem_script) 
-VALUES (:wallet_address, :auth_address1, :auth_address2, :wallet_multisig_address, :redeem_script)
+INSERT INTO %s (wallet_address, full_public_key, auth_address1, auth_address2, wallet_multisig_address, redeem_script) 
+VALUES (:wallet_address, :full_public_key, :auth_address1, :auth_address2, :wallet_multisig_address, :redeem_script)
 `
 	sql = fmt.Sprintf(sql, tbl)
 	logger.Debugf("sql: %s", sql)

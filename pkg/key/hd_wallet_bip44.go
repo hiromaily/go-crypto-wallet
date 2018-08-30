@@ -1,10 +1,13 @@
 package key
 
 import (
+	"encoding/hex"
+	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcutil"
 	"github.com/btcsuite/btcutil/hdkeychain"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
 
 //PurposeType BIP44は44固定
@@ -71,7 +74,32 @@ func CreateAccount(conf *chaincfg.Params, seed []byte, actType enum.AccountType)
 	strPrivateKey := account.String()
 	strPublicKey := publicKey.String()
 
+	// get full public key
+	//privKey, err := account.ECPrivKey()
+	//if err != nil {
+	//	logger.Errorf("fatal error occurred. program should be fixed. error: %s", err)
+	//	return "", "", "", err
+	//}
+
 	return strPrivateKey, strPublicKey, nil
+}
+
+// getPubKey fullのPublic Keyを返す
+func getFullPubKey(privKey *btcec.PrivateKey) string {
+	//bPubKey := privKey.PubKey().SerializeCompressed()
+	bPubKey := privKey.PubKey().SerializeUncompressed()
+
+	//logger.Debugf("bPubKey: %s", bPubKey)
+	//logger.Debugf("bPubKey hash: %s", btcutil.Hash160(bPubKey))
+
+	hexPubKey := hex.EncodeToString(bPubKey)
+	logger.Debugf("hex.EncodeToString(bPubKey): %s", hexPubKey)
+
+	//key *PublicKey
+	//bHexPubKey, _ := hex.DecodeString(hexPubKey)
+	//pubKey, _ := btcec.ParsePubKey(bHexPubKey, btcec.S256())
+
+	return hexPubKey
 }
 
 // CreateKeysWithIndex 指定したindexに応じて複数のkeyを生成する
@@ -104,6 +132,9 @@ func CreateKeysWithIndex(conf *chaincfg.Params, accountPrivateKey string, idxFro
 			return nil, err
 		}
 
+		// full public Key
+		//getFullPubKey(privateKey)
+
 		// WIF
 		wif, err := btcutil.NewWIF(privateKey, conf, false)
 		if err != nil {
@@ -117,7 +148,7 @@ func CreateKeysWithIndex(conf *chaincfg.Params, accountPrivateKey string, idxFro
 			return nil, err
 		}
 
-		walletKeys[i] = WalletKey{WIF: strPrivateKey, Address: address.String()}
+		walletKeys[i] = WalletKey{WIF: strPrivateKey, Address: address.String(), FullPubKey: getFullPubKey(privateKey)}
 
 		idxFrom++
 	}
