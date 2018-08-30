@@ -63,7 +63,7 @@ func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum
 		return nil
 	}
 
-	//ファイル読み込み
+	//ファイル読み込み(full public key)
 	pubKeys, err := key.ImportPubKey(fileName)
 	if err != nil {
 		return errors.Errorf("key.ImportPubKey() error: %v", err)
@@ -75,8 +75,10 @@ func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum
 		//TODO:とりあえず、1カラムのデータを前提でコーディングしておく
 		inner := strings.Split(key, ",")
 
+		//FIXME: WalletAddressは使わないので消す方向で
 		addedPubkeyHistorys[i] = model.AddedPubkeyHistoryTable{
 			WalletAddress:         inner[0],
+			FullPublicKey:         inner[0],
 			AuthAddress1:          "",
 			AuthAddress2:          "",
 			WalletMultisigAddress: "",

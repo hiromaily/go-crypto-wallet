@@ -3,7 +3,7 @@ environment = "dev"  # dev,prod
 [bitcoin]
 host = "35.221.115.208:18332"
 user = "cayenne"
-pass = "cayenne"
+pass = "ebisubook"
 http_post_mode = true
 disable_tls = true
 is_main = false #true: MainNetに接続、　false: TestNetに接続

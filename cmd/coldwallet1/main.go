@@ -193,6 +193,8 @@ func keyFunctionalities1(wallet *service.Wallet) {
 		grok.Value(keys)
 
 	case 20:
+		//TODO:[WIP]
+		//TODO: importPrivKeyは事前にBitcoin coreを再起動したほうがいいかもしれない
 		//[coldwallet1のみ]
 		//作成したClientのPrivateKeyをColdWalletにimportする
 		logger.Info("Run: 作成したClientのPrivateKeyをColdWalletにimportする")
@@ -208,6 +210,9 @@ func keyFunctionalities1(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
+		// getaddressesbyaccount "receipt" で確認
+		// DBに登録してあるwallet_addressと異なるものが表示される。(おそらく暗号化されている)
+		// TODO: どう復号化するか？
 	case 22:
 		//[coldwallet1のみ]
 		//作成したPaymentのPrivateKeyをColdWalletにimportする
@@ -216,6 +221,7 @@ func keyFunctionalities1(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
+		//getaddressesbyaccount "payment" で内容を確認
 
 	case 30:
 		//[coldwallet1のみ]
@@ -241,7 +247,7 @@ func keyFunctionalities1(wallet *service.Wallet) {
 		logger.Info("Run: 作成したPaymentのPublicアドレスをcsvファイルとしてexportする")
 		//err := wallet.ExportPublicKey(enum.AccountTypePayment, false)
 		//err := wallet.ExportAllKeyTable(enum.AccountTypePayment)
-		err := wallet.ExportFullPublicKey(enum.AccountTypeReceipt)
+		err := wallet.ExportFullPublicKey(enum.AccountTypePayment)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -297,6 +303,7 @@ func keyFunctionalities2(wallet *service.Wallet) {
 	case 13:
 		//[coldwallet2のみ]
 		//AuthorizationのKeyを作成する
+		//FIXME:とりあえず、1行しか追加できないようにしておくか？
 		logger.Info("Run: AuthorizationのKeyを作成する")
 		bSeed, err := wallet.GenerateSeed()
 		if err != nil {
@@ -309,6 +316,8 @@ func keyFunctionalities2(wallet *service.Wallet) {
 		grok.Value(keys)
 
 	case 23:
+		//TODO:[WIP]
+		//TODO: importPrivKeyは事前にBitcoin coreを再起動したほうがいいかもしれない
 		//[coldwallet2のみ]
 		//作成したAuthorizationのPrivateKeyをColdWalletにimportする
 		logger.Info("Run: 作成したAuthorizationのPrivateKeyをColdWalletにimportする")
@@ -316,6 +325,7 @@ func keyFunctionalities2(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
+		//getaddressesbyaccount "authorization" で内容を確認
 
 	case 33:
 		//[coldwallet2のみ]

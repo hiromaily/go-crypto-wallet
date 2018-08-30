@@ -148,7 +148,7 @@ func CreateKeysWithIndex(conf *chaincfg.Params, accountPrivateKey string, idxFro
 			return nil, err
 		}
 
-		walletKeys[i] = WalletKey{WIF: strPrivateKey, Address: address.String(), FullPubKey: getFullPubKey(privateKey)}
+		walletKeys[i] = WalletKey{WIF: strPrivateKey, Address: address.String(), EncodedAddress: address.EncodeAddress(), FullPubKey: getFullPubKey(privateKey)}
 
 		idxFrom++
 	}

@@ -10,6 +10,9 @@ import (
 )
 
 // ImportPrivateKey 指定したAccountTypeに属するテーブルのis_imported_priv_keyがfalseのWIFをImportPrivKeyRescanする
+// https://en.bitcoin.it/wiki/How_to_import_private_keys
+// TODO: import後は再起動が必要かもしれない
+// getaddressesbyaccount "" で内容を確認可能？？
 func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 	//AccountType問わずimportは可能にしておく
 
@@ -17,6 +20,16 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 	WIFs, err := w.DB.GetNotImportedKeyWIF(accountType)
 	if err != nil {
 		return errors.Errorf("key.GenerateSeed() error: %s", err)
+	}
+
+	if len(WIFs) == 0 {
+		logger.Info("No unimported Private Key")
+		return nil
+	}
+
+	var account string
+	if accountType != enum.AccountTypeClient {
+		account = string(accountType)
 	}
 
 	//bitcoin APIにて登録をする
@@ -27,7 +40,10 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 			return errors.Errorf("WIF is invalid format. btcutil.DecodeWIF(%s) error: %v", strWIF, err)
 		}
 		//TODO:rescanはいらないはず
-		err = w.BTC.ImportPrivKeyWithoutReScan(wif, "")
+		logger.Debugf("BTC.ImportPrivKeyWithoutReScan(%s, %s)", wif, account)
+		err = w.BTC.ImportPrivKeyWithoutReScan(wif, account)
+		//err = w.BTC.ImportPrivKeyWithoutReScan(wif, "")
+		//err = w.BTC.ImportPrivKey(wif)
 		if err != nil {
 			//Bitcoin coreの状況によってエラーが返ることも想定する。よってエラー時はcontinue
 			logger.Errorf("BTC.ImportPrivKeyWithoutReScan() error: %v", err)

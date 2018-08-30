@@ -120,6 +120,7 @@ func switchFunction(wallet *service.Wallet) {
 			logger.Fatalf("%+v", err)
 		}
 	case 11:
+		//TODO:improt後、getaddressesbyaccount "" で内容を確認??
 		logger.Info("Run: coldwalletで生成したアドレスをwalletにimportする")
 		if opts.ImportFile == "" {
 			logger.Fatal("file path is required as argument file when running")

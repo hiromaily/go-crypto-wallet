@@ -132,6 +132,7 @@ DROP TABLE IF EXISTS `account_key_client`;
 CREATE TABLE `account_key_client` (
   `id`                      BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
   `wallet_address`          VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'Walletアドレス',
+  `encoded_wallet_address`  VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'Encoded Walletアドレス',
   `full_public_key`         VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'full public key',
   `wallet_multisig_address` VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'multisigとしてのWalletアドレス',
   `redeem_script`           VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'multisigアドレス生成後に渡されるredeedScript',
