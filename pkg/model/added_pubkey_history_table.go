@@ -59,3 +59,53 @@ VALUES (:wallet_address, :auth_address1, :auth_address2, :wallet_multisig_addres
 func (m *DB) InsertAddedPubkeyHistoryTable(accountType enum.AccountType, addedPubkeyHistoryTables []AddedPubkeyHistoryTable, tx *sqlx.Tx, isCommit bool) error {
 	return m.insertAddedPubkeyHistoryTable(addedPubkeyHistoryTableName[accountType], addedPubkeyHistoryTables, tx, isCommit)
 }
+
+//getAddedPubkeyHistoryTableByNoWalletMultisigAddress WalletMultisigAddressが発行されていないレコードを返す
+func (m *DB) getAddedPubkeyHistoryTableByNoWalletMultisigAddress(tbl string, accountType enum.AccountType) ([]AddedPubkeyHistoryTable, error) {
+	sql := "SELECT * FROM %s WHERE wallet_multisig_address = '';"
+	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
+
+	var addedPubkeyHistoryTable []AddedPubkeyHistoryTable
+	err := m.RDB.Select(&addedPubkeyHistoryTable, sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return addedPubkeyHistoryTable, nil
+}
+
+//GetAddedPubkeyHistoryTableByNoWalletMultisigAddress WalletMultisigAddressが発行されていないレコードを返す
+func (m *DB) GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType enum.AccountType) ([]AddedPubkeyHistoryTable, error) {
+	return m.getAddedPubkeyHistoryTableByNoWalletMultisigAddress(addedPubkeyHistoryTableName[accountType], accountType)
+}
+
+// UpdatePaymentIDOnPaymentRequest 出金トランザクション作成済のレコードのpayment_idを更新する
+func (m *DB) updateAddedPubkeyHistoryTableByMultisigAddr(tbl, multiSigAddr, redeemScript, walletAddr string, tx *sqlx.Tx, isCommit bool) error {
+	sql := `
+UPDATE %s SET wallet_multisig_address=?, redeem_script=? WHERE wallet_address=? 
+`
+	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
+
+	if tx == nil {
+		tx = m.RDB.MustBegin()
+	}
+
+	_, err := tx.Exec(sql, multiSigAddr, redeemScript, walletAddr)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+	if isCommit {
+		tx.Commit()
+	}
+	//affectedNum, _ := res.RowsAffected()
+
+	return nil
+}
+
+// UpdateAddedPubkeyHistoryTableByMultisigAddr added_pubkey_history_table(payment, receipt...)テーブルのmultisigアドレスを更新する
+func (m *DB) UpdateAddedPubkeyHistoryTableByMultisigAddr(accountType enum.AccountType, multiSigAddr, redeemScript, walletAddr string, tx *sqlx.Tx, isCommit bool) error {
+	return m.updateAddedPubkeyHistoryTableByMultisigAddr(addedPubkeyHistoryTableName[accountType], multiSigAddr, redeemScript, walletAddr, tx, isCommit)
+}

@@ -343,11 +343,19 @@ func keyFunctionalities2(wallet *service.Wallet) {
 		//[coldwallet2のみ]
 		//TODO:`addmultisigaddress`を実行する。パラメータは、receiptのアドレス、authorizationのアドレス
 		logger.Info("Run: `addmultisigaddress`を実行する。パラメータは、receiptのアドレス、authorizationのアドレス")
+		err := wallet.AddMultisigAddressByAuthorization(enum.AccountTypeReceipt)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
 
 	case 51:
 		//[coldwallet2のみ]
 		//TODO:`addmultisigaddress`を実行する。パラメータは、paymentのアドレス、authorizationのアドレス
 		logger.Info("Run: `addmultisigaddress`を実行する。パラメータは、receiptのアドレス、authorizationのアドレス")
+		err := wallet.AddMultisigAddressByAuthorization(enum.AccountTypePayment)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
 
 	case 60:
 		//[coldwallet2のみ]

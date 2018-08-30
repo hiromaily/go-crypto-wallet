@@ -28,14 +28,14 @@ func (w *Wallet) ExportPublicKey(accountType enum.AccountType, isMultisig bool) 
 	//CSVに書き出す
 	fileName, err := key.ExportPubKey(pubKeys, string(accountType))
 	if err != nil {
-		return errors.Errorf("csv.ExportPubKey() error: %s", err)
+		return errors.Errorf("key.ExportPubKey() error: %s", err)
 	}
 	logger.Infof("file name is %s", fileName)
 
 	//DBの該当レコードをアップデート
 	_, err = w.DB.UpdateIsExprotedPubKey(accountType, pubKeys, isMultisig, nil, true)
 	if err != nil {
-		return errors.Errorf("csv.UpdateIsExprotedPubKey() error: %s", err)
+		return errors.Errorf("DB.UpdateIsExprotedPubKey() error: %s", err)
 	}
 
 	return nil
@@ -60,7 +60,7 @@ func (w *Wallet) ExportAllKeyTable(accountType enum.AccountType) error {
 	//CSVに書き出す
 	fileName, err := key.ExportAccountKeyTable(accountKeyTable, string(accountType))
 	if err != nil {
-		return errors.Errorf("csv.ExportAccountKeyTable() error: %s", err)
+		return errors.Errorf("key.ExportAccountKeyTable() error: %s", err)
 	}
 	logger.Infof("file name is %s", fileName)
 

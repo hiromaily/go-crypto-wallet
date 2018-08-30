@@ -48,7 +48,7 @@ func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum
 	err = w.DB.InsertAccountPubKeyTable(accountType, pubKeyData, nil, true)
 	//logger.Error(err)
 	if err != nil {
-		return errors.Errorf("csv.DB.InsertAccountPubKeyTable() error: %v", err)
+		return errors.Errorf("DB.InsertAccountPubKeyTable() error: %v", err)
 		//TODO:これが失敗したら、どうやって、登録済みのデータを再度Insertするか？再度実行すればOKのはず
 	}
 
