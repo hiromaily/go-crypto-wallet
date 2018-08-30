@@ -73,14 +73,7 @@ func CreateAccount(conf *chaincfg.Params, seed []byte, actType enum.AccountType)
 
 	strPrivateKey := account.String()
 	strPublicKey := publicKey.String()
-
-	// get full public key
-	//privKey, err := account.ECPrivKey()
-	//if err != nil {
-	//	logger.Errorf("fatal error occurred. program should be fixed. error: %s", err)
-	//	return "", "", "", err
-	//}
-
+	
 	return strPrivateKey, strPublicKey, nil
 }
 
