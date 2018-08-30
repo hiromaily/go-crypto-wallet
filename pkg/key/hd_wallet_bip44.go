@@ -7,7 +7,6 @@ import (
 	"github.com/btcsuite/btcutil"
 	"github.com/btcsuite/btcutil/hdkeychain"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
 
 //PurposeType BIP44は44固定
@@ -73,26 +72,8 @@ func CreateAccount(conf *chaincfg.Params, seed []byte, actType enum.AccountType)
 
 	strPrivateKey := account.String()
 	strPublicKey := publicKey.String()
-	
+
 	return strPrivateKey, strPublicKey, nil
-}
-
-// getPubKey fullのPublic Keyを返す
-func getFullPubKey(privKey *btcec.PrivateKey) string {
-	//bPubKey := privKey.PubKey().SerializeCompressed()
-	bPubKey := privKey.PubKey().SerializeUncompressed()
-
-	//logger.Debugf("bPubKey: %s", bPubKey)
-	//logger.Debugf("bPubKey hash: %s", btcutil.Hash160(bPubKey))
-
-	hexPubKey := hex.EncodeToString(bPubKey)
-	logger.Debugf("hex.EncodeToString(bPubKey): %s", hexPubKey)
-
-	//key *PublicKey
-	//bHexPubKey, _ := hex.DecodeString(hexPubKey)
-	//pubKey, _ := btcec.ParsePubKey(bHexPubKey, btcec.S256())
-
-	return hexPubKey
 }
 
 // CreateKeysWithIndex 指定したindexに応じて複数のkeyを生成する
@@ -141,10 +122,38 @@ func CreateKeysWithIndex(conf *chaincfg.Params, accountPrivateKey string, idxFro
 			return nil, err
 		}
 
+		// [Debug] different way to generate address
+		//serializedKey := privateKey.PubKey().SerializeCompressed()
+		//pubKeyAddr, err := btcutil.NewAddressPubKey(serializedKey, conf)
+		//log.Println("address.String()", address.String())       //mySBc7pWWXjBUmAtjBY3sCdgnPAvAzwCoA
+		//log.Println("pubKeyAddr.String()", pubKeyAddr.String()) //022c70901aac621c4436c4cb1f2daa8b9a6ff2c9d707b3f2639319d902679e1dfd
+		//log.Println("pubKeyAddr.AddressPubKeyHash().String()", pubKeyAddr.AddressPubKeyHash().String()) //mySBc7pWWXjBUmAtjBY3sCdgnPAvAzwCoA
+		//log.Println("getFullPubKey(privateKey)", getFullPubKey(privateKey)) //pubKeyAddr.String()とは微妙に異なる。。
+		//log.Println(" ")
+
+		//address.String() とaddress.EncodeAddress()は結果として同じ
 		walletKeys[i] = WalletKey{WIF: strPrivateKey, Address: address.String(), EncodedAddress: address.EncodeAddress(), FullPubKey: getFullPubKey(privateKey)}
 
 		idxFrom++
 	}
 
 	return walletKeys, nil
+}
+
+// getPubKey fullのPublic Keyを返す
+func getFullPubKey(privKey *btcec.PrivateKey) string {
+	//bPubKey := privKey.PubKey().SerializeCompressed()
+	bPubKey := privKey.PubKey().SerializeUncompressed()
+
+	//logger.Debugf("bPubKey: %s", bPubKey)
+	//logger.Debugf("bPubKey hash: %s", btcutil.Hash160(bPubKey))
+
+	hexPubKey := hex.EncodeToString(bPubKey)
+	//logger.Debugf("hex.EncodeToString(bPubKey): %s", hexPubKey)
+
+	//key *PublicKey
+	//bHexPubKey, _ := hex.DecodeString(hexPubKey)
+	//pubKey, _ := btcec.ParsePubKey(bHexPubKey, btcec.S256())
+
+	return hexPubKey
 }
