@@ -343,6 +343,7 @@ func keyFunctionalities2(wallet *service.Wallet) {
 		//[coldwallet2のみ]
 		//TODO:`addmultisigaddress`を実行する。パラメータは、receiptのアドレス、authorizationのアドレス
 		logger.Info("Run: `addmultisigaddress`を実行する。パラメータは、receiptのアドレス、authorizationのアドレス")
+
 	case 51:
 		//[coldwallet2のみ]
 		//TODO:`addmultisigaddress`を実行する。パラメータは、paymentのアドレス、authorizationのアドレス

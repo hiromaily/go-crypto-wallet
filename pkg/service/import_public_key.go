@@ -10,6 +10,7 @@ import (
 )
 
 //Watch only wallet
+//Cold wallet2
 
 //CSVのpublickeyをDBにimportする、このとき、clientの場合はaccount無し
 //importしたclientをBitcoin core APIを通じて、walletにimportする

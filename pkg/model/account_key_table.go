@@ -224,3 +224,23 @@ func (m *DB) getAllNotExportedPubKey(tbl string, accountType enum.AccountType) (
 func (m *DB) GetAllNotExportedPubKey(accountType enum.AccountType) ([]AccountKeyTable, error) {
 	return m.getAllNotExportedPubKey(accountKeyTableName[accountType], accountType)
 }
+
+//getOneByMaxID idが最大の1レコードを返す
+func (m *DB) getOneByMaxID(tbl string, accountType enum.AccountType) (*AccountKeyTable, error) {
+	sql := "SELECT * FROM %s ORDER BY ID DESC LIMIT 1;"
+	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
+
+	var accountKeyTable AccountKeyTable
+	err := m.RDB.Get(&accountKeyTable, sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return &accountKeyTable, nil
+}
+
+//GetOneByMaxID idが最大の1レコードを返す
+func (m *DB) GetOneByMaxID(accountType enum.AccountType) (*AccountKeyTable, error) {
+	return m.getOneByMaxID(accountKeyTableName[accountType], accountType)
+}

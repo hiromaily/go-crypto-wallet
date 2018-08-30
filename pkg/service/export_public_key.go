@@ -41,7 +41,7 @@ func (w *Wallet) ExportPublicKey(accountType enum.AccountType, isMultisig bool) 
 	return nil
 }
 
-//ExportPublicKey publicのアドレスをcsvとして出力する
+//ExportAllKeyTable publicのアドレスをcsvとして出力する
 //TODO:一旦使用中止
 func (w *Wallet) ExportAllKeyTable(accountType enum.AccountType) error {
 	//AccountType問わずexportは可能にしておく
