@@ -331,6 +331,13 @@ func keyFunctionalities2(wallet *service.Wallet) {
 		//[coldwallet2のみ]
 		//TODO:coldwallet1からexportしたPaymentのpublicアドレスをcoldWallet2にimportする
 		logger.Info("Run: coldwallet1からexportしたPaymentのpublicアドレスcoldWallet2にimportする")
+		if opts.ImportFile == "" {
+			logger.Fatal("file path is required as argument file when running")
+		}
+		err := wallet.ImportPublicKeyForColdWallet2(opts.ImportFile, enum.AccountTypePayment)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
 
 	case 50:
 		//[coldwallet2のみ]
