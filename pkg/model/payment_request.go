@@ -3,6 +3,7 @@ package model
 import (
 	"time"
 
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 )
@@ -23,6 +24,7 @@ type PaymentRequest struct {
 func (m *DB) GetPaymentRequestAll() ([]PaymentRequest, error) {
 	//sql := "SELECT * FROM payment_request WHERE is_done=false"
 	sql := "SELECT * FROM payment_request WHERE payment_id IS NULL"
+	logger.Debugf("sql: %s", sql)
 
 	var paymentRequests []PaymentRequest
 	err := m.RDB.Select(&paymentRequests, sql)
@@ -33,6 +35,7 @@ func (m *DB) GetPaymentRequestAll() ([]PaymentRequest, error) {
 // GetPaymentRequestByPaymentID PaymentRequestテーブル全体を返す
 func (m *DB) GetPaymentRequestByPaymentID(paymentID int64) ([]PaymentRequest, error) {
 	sql := "SELECT * FROM payment_request WHERE payment_id=?"
+	logger.Debugf("sql: %s", sql)
 
 	var paymentRequests []PaymentRequest
 	err := m.RDB.Select(&paymentRequests, sql, paymentID)
@@ -48,6 +51,7 @@ func (m *DB) InsertPaymentRequest(paymentRequests []PaymentRequest, tx *sqlx.Tx,
 INSERT INTO payment_request (address_from, account_from, address_to, amount) 
 VALUES (:address_from, :account_from, :address_to, :amount)
 `
+	logger.Debugf("sql: %s", sql)
 
 	if tx == nil {
 		tx = m.RDB.MustBegin()
@@ -76,6 +80,7 @@ func (m *DB) UpdateIsDoneOnPaymentRequest(paymentID int64, tx *sqlx.Tx, isCommit
 	sql := `
 UPDATE payment_request SET is_done=true WHERE payment_id=? 
 `
+	logger.Debugf("sql: %s", sql)
 
 	if tx == nil {
 		tx = m.RDB.MustBegin()
@@ -107,6 +112,7 @@ UPDATE payment_request SET payment_id=? WHERE id IN (?)
 		return 0, errors.Errorf("sqlx.In() error: %v", err)
 	}
 	query = m.RDB.Rebind(query)
+	logger.Debugf("sql: %s", query)
 
 	if tx == nil {
 		tx = m.RDB.MustBegin()
@@ -130,6 +136,7 @@ UPDATE payment_request SET payment_id=? WHERE id IN (?)
 // ResetAnyFlagOnPaymentRequestForTestOnly テーブルを初期化する(テストでしか使用することはない)
 func (m *DB) ResetAnyFlagOnPaymentRequestForTestOnly(tx *sqlx.Tx, isCommit bool) (int64, error) {
 	sql := "UPDATE payment_request SET is_done=false, payment_id=NULL"
+	logger.Debugf("sql: %s", sql)
 
 	if tx == nil {
 		tx = m.RDB.MustBegin()

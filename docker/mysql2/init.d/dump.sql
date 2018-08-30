@@ -177,3 +177,33 @@ DROP TABLE IF EXISTS `account_key_authorization`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `account_key_authorization` LIKE `account_key_client`;
+
+
+--
+-- Table structure for table `added_pubkey_history_receipt`
+--  coldwallet2用
+
+DROP TABLE IF EXISTS `added_pubkey_history_receipt`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `added_pubkey_history_receipt` (
+  `id`                      BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
+  `wallet_address`          VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'Walletアドレス',
+  `auth_address1`           VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'認証用Walletアドレス1',
+  `auth_address2`           VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'認証用Walletアドレス2',
+  `wallet_multisig_address` VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'multisigとしてのWalletアドレス',
+  `redeem_script`           VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'multisigアドレス生成後に渡されるredeedScript',
+  `updated_at`              datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_wallet_address` (`wallet_address`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='受け取り用multisigアドレス情報Table';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `added_pubkey_history_payment`
+--  coldwallet2用
+
+DROP TABLE IF EXISTS `added_pubkey_history_payment`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `added_pubkey_history_payment` LIKE `added_pubkey_history_receipt`;

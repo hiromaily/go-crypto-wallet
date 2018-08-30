@@ -6,7 +6,6 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
-	"strconv"
 	"strings"
 )
 
@@ -20,7 +19,7 @@ func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum
 	//ファイル読み込み
 	pubKeys, err := key.ImportPubKey(fileName)
 	if err != nil {
-		return errors.Errorf("csv.ImportPubKey() error: %v", err)
+		return errors.Errorf("key.ImportPubKey() error: %v", err)
 	}
 
 	//[]AccountPublicKeyTable
@@ -66,36 +65,55 @@ func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum
 	//ファイル読み込み
 	pubKeys, err := key.ImportPubKey(fileName)
 	if err != nil {
-		return errors.Errorf("csv.ImportPubKey() error: %v", err)
+		return errors.Errorf("key.ImportPubKey() error: %v", err)
 	}
 
-	// DBにClientAccountのKey情報を登録
-	accountKeyClients := make([]model.AccountKeyTable, len(pubKeys))
+	//added_pubkey_history_receiptテーブルにInsert
+	addedPubkeyHistorys := make([]model.AddedPubkeyHistoryTable, len(pubKeys))
 	for i, key := range pubKeys {
+		//TODO:とりあえず、1カラムのデータを前提でコーディングしておく
 		inner := strings.Split(key, ",")
-		if len(inner) != 4 {
-			return errors.New("exported file should be changed as right specification")
-		}
-		kt, err := strconv.Atoi(inner[2])
-		if err != nil {
-			return errors.New("exported file should be changed as right specification")
-		}
-		idx, err := strconv.Atoi(inner[3])
-		if err != nil {
-			return errors.New("exported file should be changed as right specification")
-		}
 
-		accountKeyClients[i] = model.AccountKeyTable{
-			WalletAddress: inner[0],
-			Account:       inner[1],
-			KeyType:       uint8(kt),
-			Idx:           uint32(idx),
+		addedPubkeyHistorys[i] = model.AddedPubkeyHistoryTable{
+			WalletAddress:         inner[0],
+			AuthAddress1:          "",
+			AuthAddress2:          "",
+			WalletMultisigAddress: "",
+			RedeemScript:          "",
 		}
 	}
-	err = w.DB.InsertAccountKeyTable(accountType, accountKeyClients, nil, true)
+	err = w.DB.InsertAddedPubkeyHistoryTable(accountType, addedPubkeyHistorys, nil, true)
 	if err != nil {
 		return errors.Errorf("DB.InsertAccountKeyClient() error: %s", err)
 	}
+
+	// DBにClientAccountのKey情報を登録 (CSVの読み込み)
+	//accountKeyClients := make([]model.AccountKeyTable, len(pubKeys))
+	//for i, key := range pubKeys {
+	//	inner := strings.Split(key, ",")
+	//	if len(inner) != 4 {
+	//		return errors.New("exported file should be changed as right specification")
+	//	}
+	//	kt, err := strconv.Atoi(inner[2])
+	//	if err != nil {
+	//		return errors.New("exported file should be changed as right specification")
+	//	}
+	//	idx, err := strconv.Atoi(inner[3])
+	//	if err != nil {
+	//		return errors.New("exported file should be changed as right specification")
+	//	}
+	//
+	//	accountKeyClients[i] = model.AccountKeyTable{
+	//		WalletAddress: inner[0],
+	//		Account:       inner[1],
+	//		KeyType:       uint8(kt),
+	//		Idx:           uint32(idx),
+	//	}
+	//}
+	//err = w.DB.InsertAccountKeyTable(accountType, accountKeyClients, nil, true)
+	//if err != nil {
+	//	return errors.Errorf("DB.InsertAccountKeyClient() error: %s", err)
+	//}
 
 	return nil
 }

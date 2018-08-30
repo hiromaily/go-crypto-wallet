@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
 
 //KeyType key_typeテーブル
@@ -20,6 +21,7 @@ type KeyType struct {
 // GetKeyTypeByCoinAndAccountType 該当するIDのレコードを返す
 func (m *DB) GetKeyTypeByCoinAndAccountType(coinType enum.CoinType, accountType enum.AccountType) (*KeyType, error) {
 	sql := "SELECT * FROM key_type WHERE coin_type=? AND account_type=? LIMIT 1"
+	logger.Debugf("sql: %s", sql)
 
 	kt := KeyType{}
 	err := m.RDB.Get(&kt, sql, coinType, accountType)

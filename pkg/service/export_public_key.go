@@ -42,7 +42,7 @@ func (w *Wallet) ExportPublicKey(accountType enum.AccountType, isMultisig bool) 
 }
 
 //ExportPublicKey publicのアドレスをcsvとして出力する
-//TODO:watch only walletにセットするアドレスは、clientの場合は、wallet_address, receipt/paymentの場合、`wallet_multisig_address`
+//TODO:一旦使用中止
 func (w *Wallet) ExportAllKeyTable(accountType enum.AccountType) error {
 	//AccountType問わずexportは可能にしておく
 

@@ -3,6 +3,7 @@ package model
 import (
 	"time"
 
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -44,6 +45,7 @@ func (m *DB) InsertSeed(seed string, tx *sqlx.Tx, isCommit bool) (int64, error) 
 INSERT INTO seed (seed, updated_at) 
 VALUES (:seed, :updated_at)
 `
+	logger.Debugf("sql: %s", sql)
 
 	t := time.Now()
 	seedRecord := Seed{

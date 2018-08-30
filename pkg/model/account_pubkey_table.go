@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -31,6 +32,7 @@ INSERT INTO %s (wallet_address, account)
 VALUES (:wallet_address, :account)
 `
 	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
 
 	if tx == nil {
 		tx = m.RDB.MustBegin()

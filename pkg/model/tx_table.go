@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -32,6 +33,7 @@ type TxTable struct {
 func (m *DB) getTxByID(tbl string, id int64) (*TxTable, error) {
 	sql := "SELECT * FROM %s WHERE id=?"
 	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
 
 	txReceipt := TxTable{}
 	err := m.RDB.Get(&txReceipt, sql, id)
@@ -49,6 +51,7 @@ func (m *DB) getTxCountByUnsignedHex(tbl, hex string) (int64, error) {
 	var count int64
 	sql := "SELECT count(id) FROM %s WHERE unsigned_hex_tx=?"
 	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
 
 	err := m.RDB.Get(&count, sql, hex)
 
@@ -65,6 +68,7 @@ func (m *DB) getTxIDBySentHash(tbl, hash string) (int64, error) {
 	var receiptID int64
 	sql := "SELECT id FROM %s WHERE sent_hash_tx=?"
 	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
 
 	err := m.RDB.Get(&receiptID, sql, hash)
 
@@ -81,6 +85,7 @@ func (m *DB) getSentTxHash(tbl string, txTypeValue uint8) ([]string, error) {
 	var txHashs []string
 	sql := "SELECT sent_hash_tx FROM %s WHERE current_tx_type=?"
 	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
 
 	err := m.RDB.Select(&txHashs, sql, txTypeValue)
 	if err != nil {
@@ -110,6 +115,7 @@ INSERT INTO %s (unsigned_hex_tx, signed_hex_tx, sent_hash_tx, total_input_amount
 VALUES (:unsigned_hex_tx, :signed_hex_tx, :sent_hash_tx, :total_input_amount, :total_output_amount, :fee, :current_tx_type)
 `
 	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
 
 	if tx == nil {
 		tx = m.RDB.MustBegin()
@@ -145,6 +151,7 @@ UPDATE %s SET signed_hex_tx=:signed_hex_tx, sent_hash_tx=:sent_hash_tx, current_
  WHERE id=:id
 `
 	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
 
 	res, err := tx.NamedExec(sql, txReceipt)
 	if err != nil {
@@ -175,6 +182,8 @@ func (m *DB) updateTxTypeByTxHash(tbl string, hash string, txTypeValue uint8, tx
 UPDATE %s SET current_tx_type=? WHERE sent_hash_tx=?
 `
 	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
+
 	res, err := tx.Exec(sql, txTypeValue, hash)
 	if err != nil {
 		tx.Rollback()
@@ -211,6 +220,8 @@ func (m *DB) updateTxTypeByID(tbl string, ID int64, txTypeValue uint8, tx *sqlx.
 UPDATE %s SET current_tx_type=? WHERE id=?
 `
 	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
+
 	res, err := tx.Exec(sql, txTypeValue, ID)
 	if err != nil {
 		tx.Rollback()

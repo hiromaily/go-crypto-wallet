@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -37,6 +38,7 @@ type TxOutput struct {
 func (m *DB) getTxOutputByReceiptID(tbl string, receiptID int64) ([]TxOutput, error) {
 	sql := "SELECT * FROM %s WHERE receipt_id=?"
 	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
 
 	var txReceiptOutputs []TxOutput
 	err := m.RDB.Select(&txReceiptOutputs, sql, receiptID)
@@ -58,6 +60,7 @@ INSERT INTO %s (receipt_id, output_address, output_account, output_amount, is_ch
 VALUES (:receipt_id,  :output_address, :output_account, :output_amount, :is_change)
 `
 	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
 
 	if tx == nil {
 		tx = m.RDB.MustBegin()

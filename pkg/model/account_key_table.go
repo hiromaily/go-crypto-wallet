@@ -41,6 +41,7 @@ INSERT INTO %s (wallet_address, wallet_multisig_address, redeem_script, wallet_i
 VALUES (:wallet_address, :wallet_multisig_address, :redeem_script, :wallet_import_format, :account, :key_type, :idx)
 `
 	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
 
 	if tx == nil {
 		tx = m.RDB.MustBegin()
@@ -72,6 +73,7 @@ func (m *DB) updateIsImprotedPrivKey(tbl, strWIF string, tx *sqlx.Tx, isCommit b
 UPDATE %s SET is_imported_priv_key=true WHERE wallet_import_format=? 
 `
 	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
 
 	if tx == nil {
 		tx = m.RDB.MustBegin()
@@ -114,6 +116,7 @@ func (m *DB) updateIsExprotedPubKey(tbl string, accountType enum.AccountType, pu
 		return 0, errors.Errorf("sqlx.In() error: %v", err)
 	}
 	query = m.RDB.Rebind(query)
+	logger.Debugf("sql: %s", query)
 
 	if tx == nil {
 		tx = m.RDB.MustBegin()
@@ -141,6 +144,7 @@ func (m *DB) UpdateIsExprotedPubKey(accountType enum.AccountType, pubKeys []stri
 func (m *DB) getMaxIndex(tbl string) (int64, error) {
 	sql := "SELECT MAX(idx) from %s;"
 	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
 
 	var idx int64
 	err := m.RDB.Get(&idx, sql)
@@ -157,6 +161,7 @@ func (m *DB) GetMaxIndex(accountType enum.AccountType) (int64, error) {
 func (m *DB) getNotImportedKeyWIF(tbl string) ([]string, error) {
 	sql := "SELECT wallet_import_format FROM %s WHERE is_imported_priv_key=false;"
 	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
 
 	var WIFs []string
 	err := m.RDB.Select(&WIFs, sql)
@@ -184,6 +189,7 @@ func (m *DB) getPubkeyNotExportedPubKey(tbl string, accountType enum.AccountType
 		sql = "SELECT wallet_multisig_address FROM %s WHERE is_exported_pub_key=false;"
 	}
 	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
 
 	var pubKeys []string
 	err := m.RDB.Select(&pubKeys, sql)
@@ -203,6 +209,7 @@ func (m *DB) GetPubkeyNotExportedPubKey(accountType enum.AccountType, isMultisig
 func (m *DB) getAllNotExportedPubKey(tbl string, accountType enum.AccountType) ([]AccountKeyTable, error) {
 	sql := "SELECT * FROM %s WHERE is_exported_pub_key=false;"
 	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
 
 	var accountKeyTable []AccountKeyTable
 	err := m.RDB.Select(&accountKeyTable, sql)
