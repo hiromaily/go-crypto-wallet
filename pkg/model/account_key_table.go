@@ -179,6 +179,26 @@ func (m *DB) GetNotImportedKeyWIF(accountType enum.AccountType) ([]string, error
 	return m.getNotImportedKeyWIF(accountKeyTableName[accountType])
 }
 
+//getAllNotImportedKey IsImprotedPrivKeyがfalseのレコードをすべて返す
+func (m *DB) getAllNotImportedKey(tbl string) ([]AccountKeyTable, error) {
+	sql := "SELECT * FROM %s WHERE is_imported_priv_key=false;"
+	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
+
+	var accountKeyTable []AccountKeyTable
+	err := m.RDB.Select(&accountKeyTable, sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return accountKeyTable, nil
+}
+
+//GetAllNotImportedKey IsImprotedPrivKeyがfalseのレコードをすべて返す
+func (m *DB) GetAllNotImportedKey(accountType enum.AccountType) ([]AccountKeyTable, error) {
+	return m.getAllNotImportedKey(accountKeyTableName[accountType])
+}
+
 //getNotExportedPubKey IsExprotedPubKeyがfalseのレコードをすべて返す
 func (m *DB) getPubkeyNotExportedPubKey(tbl string, accountType enum.AccountType, isMultisig bool) ([]string, error) {
 	//wallet_address

@@ -115,8 +115,10 @@ func CreateKeysWithIndex(conf *chaincfg.Params, accountPrivateKey string, idxFro
 		// full public Key
 		//getFullPubKey(privateKey)
 
-		// WIF
-		wif, err := btcutil.NewWIF(privateKey, conf, false)
+		// WIF　(compress: false)
+		//wif, err := btcutil.NewWIF(privateKey, conf, false)
+		// WIF　(compress: false)
+		wif, err := btcutil.NewWIF(privateKey, conf, true)
 		if err != nil {
 			return nil, err
 		}

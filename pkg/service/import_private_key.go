@@ -17,12 +17,13 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 	//AccountType問わずimportは可能にしておく
 
 	//DBから未登録のPrivateKey情報を取得する
-	WIFs, err := w.DB.GetNotImportedKeyWIF(accountType)
+	//WIFs, err := w.DB.GetNotImportedKeyWIF(accountType)
+	accountKeyTable, err := w.DB.GetAllNotImportedKey(accountType)
 	if err != nil {
 		return errors.Errorf("key.GenerateSeed() error: %s", err)
 	}
 
-	if len(WIFs) == 0 {
+	if len(accountKeyTable) == 0 {
 		logger.Info("No unimported Private Key")
 		return nil
 	}
@@ -33,11 +34,12 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 	}
 
 	//bitcoin APIにて登録をする
-	for _, strWIF := range WIFs {
-		wif, err := btcutil.DecodeWIF(strWIF)
+	for _, record := range accountKeyTable {
+		logger.Debugf("[%s] address: %s, WIF: %s", accountType, record.WalletAddress, record.WalletImportFormat)
+		wif, err := btcutil.DecodeWIF(record.WalletImportFormat)
 		if err != nil {
 			//ここでエラーが出るのであれば生成ロジックが抜本的に問題があるので、return
-			return errors.Errorf("WIF is invalid format. btcutil.DecodeWIF(%s) error: %v", strWIF, err)
+			return errors.Errorf("WIF is invalid format. btcutil.DecodeWIF(%s) error: %v", record.WalletImportFormat, err)
 		}
 		//TODO:rescanはいらないはず
 		logger.Debugf("BTC.ImportPrivKeyWithoutReScan(%s, %s)", wif, account)
@@ -50,16 +52,45 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 			continue
 		}
 		//update DB
-		_, err = w.DB.UpdateIsImprotedPrivKey(accountType, strWIF, nil, true)
+		_, err = w.DB.UpdateIsImprotedPrivKey(accountType, record.WalletImportFormat, nil, true)
 		if err != nil {
-			logger.Errorf("BTC.UpdateIsImprotedPrivKey(%s, %s) error: %v", accountType, strWIF, err)
+			logger.Errorf("BTC.UpdateIsImprotedPrivKey(%s, %s) error: %v", accountType, record.WalletImportFormat, err)
 		}
 
 		//TODO:getaddressesbyaccount "receipt"/"payment"で、登録されたアドレスが表示されるかチェック
-		//if accountType != enum.AccountTypeClient {
-		//	//getaccount address
-		//}
+		if accountType != enum.AccountTypeClient {
+			//getaccount address
+			account, err := w.BTC.GetAccount(record.WalletAddress)
+			if err != nil {
+				logger.Errorf("w.BTC.GetAccount(%s) error: %v", record.WalletAddress, err)
+			}
+			logger.Debugf("account[%s] is found", account)
+		}
 	}
+
+	//for _, strWIF := range WIFs {
+	//	logger.Debugf("[%s] strWIF: %s", accountType, strWIF)
+	//	wif, err := btcutil.DecodeWIF(strWIF)
+	//	if err != nil {
+	//		//ここでエラーが出るのであれば生成ロジックが抜本的に問題があるので、return
+	//		return errors.Errorf("WIF is invalid format. btcutil.DecodeWIF(%s) error: %v", strWIF, err)
+	//	}
+	//	//TODO:rescanはいらないはず
+	//	logger.Debugf("BTC.ImportPrivKeyWithoutReScan(%s, %s)", wif, account)
+	//	err = w.BTC.ImportPrivKeyWithoutReScan(wif, account)
+	//	//err = w.BTC.ImportPrivKeyWithoutReScan(wif, "")
+	//	//err = w.BTC.ImportPrivKey(wif)
+	//	if err != nil {
+	//		//Bitcoin coreの状況によってエラーが返ることも想定する。よってエラー時はcontinue
+	//		logger.Errorf("BTC.ImportPrivKeyWithoutReScan() error: %v", err)
+	//		continue
+	//	}
+	//	//update DB
+	//	_, err = w.DB.UpdateIsImprotedPrivKey(accountType, strWIF, nil, true)
+	//	if err != nil {
+	//		logger.Errorf("BTC.UpdateIsImprotedPrivKey(%s, %s) error: %v", accountType, strWIF, err)
+	//	}
+	//}
 
 	return nil
 }
