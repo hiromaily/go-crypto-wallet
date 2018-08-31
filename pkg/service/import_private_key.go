@@ -59,12 +59,20 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 
 		//TODO:getaddressesbyaccount "receipt"/"payment"で、登録されたアドレスが表示されるかチェック
 		if accountType != enum.AccountTypeClient {
-			//getaccount address
+			//1.getaccount address(wallet_address)
 			account, err := w.BTC.GetAccount(record.WalletAddress)
 			if err != nil {
 				logger.Errorf("w.BTC.GetAccount(%s) error: %v", record.WalletAddress, err)
 			}
-			logger.Debugf("account[%s] is found", account)
+			logger.Debugf("account[%s] is found by wallet_address:%s", account, record.WalletAddress)
+
+			//2.getaccount address(p2sh_segwit_address)
+			account, err = w.BTC.GetAccount(record.P2shSegwitAddress)
+			if err != nil {
+				logger.Errorf("w.BTC.GetAccount(%s) error: %v", record.P2shSegwitAddress, err)
+			}
+			logger.Debugf("account[%s] is found by p2sh_segwit_address:%s", account, record.P2shSegwitAddress)
+
 		}
 	}
 
