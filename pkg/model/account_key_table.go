@@ -14,7 +14,7 @@ import (
 type AccountKeyTable struct {
 	ID                    int64      `db:"id"`
 	WalletAddress         string     `db:"wallet_address"`
-	EncodedWalletAddress  string     `db:"encoded_wallet_address"`
+	P2shSegwitAddress     string     `db:"p2sh_segwit_address"`
 	FullPublicKey         string     `db:"full_public_key"`
 	WalletMultisigAddress string     `db:"wallet_multisig_address"`
 	RedeemScript          string     `db:"redeem_script"`
@@ -39,8 +39,8 @@ var accountKeyTableName = map[enum.AccountType]string{
 func (m *DB) insertAccountKeyTable(tbl string, accountKeyTables []AccountKeyTable, tx *sqlx.Tx, isCommit bool) error {
 
 	sql := `
-INSERT INTO %s (wallet_address, encoded_wallet_address, full_public_key, wallet_multisig_address, redeem_script, wallet_import_format, account, key_type, idx) 
-VALUES (:wallet_address, :encoded_wallet_address,:full_public_key, :wallet_multisig_address, :redeem_script, :wallet_import_format, :account, :key_type, :idx)
+INSERT INTO %s (wallet_address, p2sh_segwit_address, full_public_key, wallet_multisig_address, redeem_script, wallet_import_format, account, key_type, idx) 
+VALUES (:wallet_address, :p2sh_segwit_address,:full_public_key, :wallet_multisig_address, :redeem_script, :wallet_import_format, :account, :key_type, :idx)
 `
 	sql = fmt.Sprintf(sql, tbl)
 	logger.Debugf("sql: %s", sql)

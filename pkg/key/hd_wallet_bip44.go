@@ -2,11 +2,15 @@ package key
 
 import (
 	"encoding/hex"
+
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcd/chaincfg"
+	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcutil"
 	"github.com/btcsuite/btcutil/hdkeychain"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
+	"github.com/pkg/errors"
 )
 
 //PurposeType BIP44は44固定
@@ -15,6 +19,7 @@ type PurposeType uint32
 // purpose
 const (
 	PurposeTypeBIP44 PurposeType = 44 //BIP44
+	PurposeTypeBIP49 PurposeType = 49 //BIP49
 )
 
 //TODO:同じアドレスを使い回すと、アドレスから総額情報がバレて危険
@@ -45,6 +50,7 @@ func CreateAccount(conf *chaincfg.Params, seed []byte, actType enum.AccountType)
 	}
 	//Purpose
 	purpose, err := masterKey.Child(hdkeychain.HardenedKeyStart + uint32(PurposeTypeBIP44))
+	//purpose, err := masterKey.Child(hdkeychain.HardenedKeyStart + uint32(PurposeTypeBIP49))
 	if err != nil {
 		return "", "", err
 	}
@@ -122,17 +128,14 @@ func CreateKeysWithIndex(conf *chaincfg.Params, accountPrivateKey string, idxFro
 			return nil, err
 		}
 
-		// [Debug] different way to generate address
-		//serializedKey := privateKey.PubKey().SerializeCompressed()
-		//pubKeyAddr, err := btcutil.NewAddressPubKey(serializedKey, conf)
-		//log.Println("address.String()", address.String())       //mySBc7pWWXjBUmAtjBY3sCdgnPAvAzwCoA
-		//log.Println("pubKeyAddr.String()", pubKeyAddr.String()) //022c70901aac621c4436c4cb1f2daa8b9a6ff2c9d707b3f2639319d902679e1dfd
-		//log.Println("pubKeyAddr.AddressPubKeyHash().String()", pubKeyAddr.AddressPubKeyHash().String()) //mySBc7pWWXjBUmAtjBY3sCdgnPAvAzwCoA
-		//log.Println("getFullPubKey(privateKey)", getFullPubKey(privateKey)) //pubKeyAddr.String()とは微妙に異なる。。
-		//log.Println(" ")
+		// p2sh-segwit
+		p2shSegwit, err := getP2shSegwit(privateKey, conf)
+		if err != nil {
+			return nil, err
+		}
 
 		//address.String() とaddress.EncodeAddress()は結果として同じ
-		walletKeys[i] = WalletKey{WIF: strPrivateKey, Address: address.String(), EncodedAddress: address.EncodeAddress(), FullPubKey: getFullPubKey(privateKey)}
+		walletKeys[i] = WalletKey{WIF: strPrivateKey, Address: address.String(), P2shSegwit: p2shSegwit.String(), FullPubKey: getFullPubKey(privateKey)}
 
 		idxFrom++
 	}
@@ -140,12 +143,47 @@ func CreateKeysWithIndex(conf *chaincfg.Params, accountPrivateKey string, idxFro
 	return walletKeys, nil
 }
 
+//For only Debug
+func experimentalKey() {
+	// [Debug] different way to generate address
+	//serializedKey := privateKey.PubKey().SerializeCompressed()
+	//pubKeyAddr, err := btcutil.NewAddressPubKey(serializedKey, conf)
+	//log.Println("address.String()", address.String())       //mySBc7pWWXjBUmAtjBY3sCdgnPAvAzwCoA
+	//log.Println("pubKeyAddr.String()", pubKeyAddr.String()) //022c70901aac621c4436c4cb1f2daa8b9a6ff2c9d707b3f2639319d902679e1dfd
+	//log.Println("pubKeyAddr.AddressPubKeyHash().String()", pubKeyAddr.AddressPubKeyHash().String()) //mySBc7pWWXjBUmAtjBY3sCdgnPAvAzwCoA
+	//log.Println("getFullPubKey(privateKey)", getFullPubKey(privateKey)) //pubKeyAddr.String()とは微妙に異なる。。
+	//log.Println(" ")
+}
+
+// p2sh-segwitを返す
+func getP2shSegwit(privKey *btcec.PrivateKey, conf *chaincfg.Params) (*btcutil.AddressScriptHash, error) {
+	// []byte
+	publicKeyHash := btcutil.Hash160(privKey.PubKey().SerializeCompressed())
+	segwitAddress, err := btcutil.NewAddressWitnessPubKeyHash(publicKeyHash, conf)
+	if err != nil {
+		return nil, errors.Errorf("btcutil.NewAddressWitnessPubKeyHash() error: %s", err)
+	}
+	logger.Debugf("segwitAddress: %s", segwitAddress)
+
+	redeemScript, err := txscript.PayToAddrScript(segwitAddress)
+	if err != nil {
+		return nil, errors.Errorf("txscript.PayToAddrScript() error: %s", err)
+	}
+	logger.Debugf("redeemScript: %s", redeemScript)
+
+	address, err := btcutil.NewAddressScriptHash(redeemScript, conf)
+	if err != nil {
+		return nil, errors.Errorf("btcutil.NewAddressScriptHash() error: %s", err)
+	}
+	logger.Debugf("address.String() %s", address.String())
+
+	return address, nil
+}
+
 // getPubKey fullのPublic Keyを返す
 func getFullPubKey(privKey *btcec.PrivateKey) string {
 	//bPubKey := privKey.PubKey().SerializeCompressed()
 	bPubKey := privKey.PubKey().SerializeUncompressed()
-
-	//logger.Debugf("bPubKey: %s", bPubKey)
 	//logger.Debugf("bPubKey hash: %s", btcutil.Hash160(bPubKey))
 
 	hexPubKey := hex.EncodeToString(bPubKey)

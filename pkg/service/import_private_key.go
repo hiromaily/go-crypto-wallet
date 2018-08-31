@@ -54,6 +54,11 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 		if err != nil {
 			logger.Errorf("BTC.UpdateIsImprotedPrivKey(%s, %s) error: %v", accountType, strWIF, err)
 		}
+
+		//TODO:getaddressesbyaccount "receipt"/"payment"で、登録されたアドレスが表示されるかチェック
+		//if accountType != enum.AccountTypeClient {
+		//	//getaccount address
+		//}
 	}
 
 	return nil
