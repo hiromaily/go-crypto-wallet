@@ -25,7 +25,7 @@ func (w *Wallet) AddMultisigAddressByAuthorization(accountType enum.AccountType)
 	}
 	//grok.Value(authKeyTable)
 
-	//added_pubkey_history_xxxテーブルからwallet_addressを取得
+	//added_pubkey_history_xxxテーブルからwallet_address(full-pubkeyである必要がある)を取得
 	addedPubkeyHistoryTable, err := w.DB.GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType)
 	if err != nil {
 		return errors.Errorf("DB.GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(%s) error: %s", accountType, err)
@@ -50,7 +50,8 @@ func (w *Wallet) AddMultisigAddressByAuthorization(accountType enum.AccountType)
 
 		//レスポンスをadded_pubkey_history_xxxテーブルに保存
 		//err := w.DB.UpdateAddedPubkeyHistoryTableByMultisigAddr(accountType, "aaa", "bbb", val.WalletAddress, nil, true)
-		err = w.DB.UpdateAddedPubkeyHistoryTableByMultisigAddr(accountType, resAddr.Address, resAddr.RedeemScript, val.WalletAddress, nil, true)
+		err = w.DB.UpdateAddedPubkeyHistoryTableByMultisigAddr(accountType, resAddr.Address,
+			resAddr.RedeemScript, authKeyTable.WalletAddress, val.FullPublicKey, nil, true)
 		if err != nil {
 			logger.Errorf("DB.UpdateAddedPubkeyHistoryTableByMultisigAddr(%s) error: %s", accountType, err)
 		}

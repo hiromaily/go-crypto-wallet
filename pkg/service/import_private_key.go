@@ -18,7 +18,7 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 
 	//DBから未登録のPrivateKey情報を取得する
 	//WIFs, err := w.DB.GetNotImportedKeyWIF(accountType)
-	accountKeyTable, err := w.DB.GetAllNotImportedKey(accountType)
+	accountKeyTable, err := w.DB.GetAllByKeyStatus(accountType, enum.KeyStatusGenerated) //key_status=0
 	if err != nil {
 		return errors.Errorf("key.GenerateSeed() error: %s", err)
 	}
@@ -52,38 +52,34 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 			continue
 		}
 		//update DB
-		_, err = w.DB.UpdateIsImprotedPrivKey(accountType, record.WalletImportFormat, nil, true)
+		//_, err = w.DB.UpdateIsImprotedPrivKey(accountType, record.WalletImportFormat, nil, true)
+		_, err = w.DB.UpdateKeyStatusByWIF(accountType, enum.KeyStatusImportprivkey, record.WalletImportFormat, nil, true)
 		if err != nil {
-			logger.Errorf("BTC.UpdateIsImprotedPrivKey(%s, %s) error: %v", accountType, record.WalletImportFormat, err)
+			logger.Errorf("BTC.UpdateKeyStatusByWIF(%s, %s, %s) error: %v", accountType, enum.KeyStatusImportprivkey, record.WalletImportFormat, err)
 		}
 
-		//TODO:getaddressesbyaccount "receipt"/"payment"で、登録されたアドレスが表示されるかチェック
-		if accountType != enum.AccountTypeClient {
-			//1.getaccount address(wallet_address)
-			account, err := w.BTC.GetAccount(record.WalletAddress)
-			if err != nil {
-				logger.Errorf("w.BTC.GetAccount(%s) error: %v", record.WalletAddress, err)
-			}
-			logger.Debugf("account[%s] is found by wallet_address:%s", account, record.WalletAddress)
+		//アドレスがbitcoin core walletに登録されているかチェック
+		//1.getaccount address(wallet_address)
+		account, err := w.BTC.GetAccount(record.WalletAddress)
+		if err != nil {
+			logger.Errorf("w.BTC.GetAccount(%s) error: %v", record.WalletAddress, err)
+		}
+		logger.Debugf("account[%s] is found by wallet_address:%s", account, record.WalletAddress)
 
-			//2.getaccount address(p2sh_segwit_address)
-			account, err = w.BTC.GetAccount(record.P2shSegwitAddress)
-			if err != nil {
-				logger.Errorf("w.BTC.GetAccount(%s) error: %v", record.P2shSegwitAddress, err)
-			}
-			logger.Debugf("account[%s] is found by p2sh_segwit_address:%s", account, record.P2shSegwitAddress)
+		//2.getaccount address(p2sh_segwit_address)
+		account, err = w.BTC.GetAccount(record.P2shSegwitAddress)
+		if err != nil {
+			logger.Errorf("w.BTC.GetAccount(%s) error: %v", record.P2shSegwitAddress, err)
+		}
+		logger.Debugf("account[%s] is found by p2sh_segwit_address:%s", account, record.P2shSegwitAddress)
 
-			//3.TODO check full_public_key by validateaddress retrieving it
-			res, err := w.BTC.ValidateAddress(record.P2shSegwitAddress)
-			if err != nil {
-				logger.Errorf("w.BTC.ValidateAddress(%s) error: %v", record.P2shSegwitAddress, err)
-			}
-			if res.PubKey != record.FullPublicKey {
-				//027dbbe3e3d99187ccf8e8a9ffea50db732c0c40a49a242173bf54e04e00259fbf
-				//047dbbe3e3d99187ccf8e8a9ffea50db732c0c40a49a242173bf54e04e00259fbfbabad831e5a1cc34b3708e8b64f1bef06349a4ed33de9aa9fde415d6797eb8c2
-				//=>圧縮と非圧縮の差か？？
-				logger.Errorf("generating pubkey logic is wrong")
-			}
+		//3.TODO check full_public_key by validateaddress retrieving it
+		res, err := w.BTC.ValidateAddress(record.P2shSegwitAddress)
+		if err != nil {
+			logger.Errorf("w.BTC.ValidateAddress(%s) error: %v", record.P2shSegwitAddress, err)
+		}
+		if res.PubKey != record.FullPublicKey {
+			logger.Errorf("generating pubkey logic is wrong")
 		}
 	}
 

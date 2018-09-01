@@ -62,6 +62,12 @@ func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum
 		logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
 		return nil
 	}
+	//TODO:ImportするファイルのaccountTypeもチェックしたほうがBetter
+	//e.g. ./data/pubkey/receipt
+	tmp := strings.Split(strings.Split(fileName, "_")[0], "/")
+	if tmp[len(tmp)-1] != string(accountType) {
+		return errors.Errorf("mismatching between accountType(%s) and file prefix [%s]", accountType, tmp[0])
+	}
 
 	//ファイル読み込み(full public key)
 	pubKeys, err := key.ImportPubKey(fileName)
@@ -74,17 +80,26 @@ func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum
 	for i, key := range pubKeys {
 		//TODO:とりあえず、1カラムのデータを前提でコーディングしておく
 		inner := strings.Split(key, ",")
+		//tmpData := []string{
+		//	record.WalletAddress,
+		//	record.P2shSegwitAddress,
+		//	record.FullPublicKey,
+		//	record.WalletMultisigAddress,
+		//	record.Account,
+		//	strconv.Itoa(int(record.KeyType)),
+		//	strconv.Itoa(int(record.Idx)),
+		//}
 
-		//FIXME: WalletAddressは使わないので消す方向で
+		//TODO:ここでは、FullPublicKeyをセットする必要がある
 		addedPubkeyHistorys[i] = model.AddedPubkeyHistoryTable{
-			WalletAddress:         inner[0],
-			FullPublicKey:         inner[0],
+			FullPublicKey:         inner[2],
 			AuthAddress1:          "",
 			AuthAddress2:          "",
 			WalletMultisigAddress: "",
 			RedeemScript:          "",
 		}
 	}
+	//TODO:Upsertに変えたほうがいいか？Insert済の場合、エラーが出る
 	err = w.DB.InsertAddedPubkeyHistoryTable(accountType, addedPubkeyHistorys, nil, true)
 	if err != nil {
 		return errors.Errorf("DB.InsertAccountKeyClient() error: %s", err)

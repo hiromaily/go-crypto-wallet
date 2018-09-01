@@ -11,8 +11,8 @@ import (
 
 // AddedPubkeyHistoryTable added_pubkey_history_receiptテーブル
 type AddedPubkeyHistoryTable struct {
-	ID                    int64      `db:"id"`
-	WalletAddress         string     `db:"wallet_address"`
+	ID int64 `db:"id"`
+	//WalletAddress string `db:"wallet_address"`
 	FullPublicKey         string     `db:"full_public_key"`
 	AuthAddress1          string     `db:"auth_address1"`
 	AuthAddress2          string     `db:"auth_address2"`
@@ -31,8 +31,8 @@ var addedPubkeyHistoryTableName = map[enum.AccountType]string{
 func (m *DB) insertAddedPubkeyHistoryTable(tbl string, addedPubkeyHistoryTables []AddedPubkeyHistoryTable, tx *sqlx.Tx, isCommit bool) error {
 
 	sql := `
-INSERT INTO %s (wallet_address, full_public_key, auth_address1, auth_address2, wallet_multisig_address, redeem_script) 
-VALUES (:wallet_address, :full_public_key, :auth_address1, :auth_address2, :wallet_multisig_address, :redeem_script)
+INSERT INTO %s (full_public_key, auth_address1, auth_address2, wallet_multisig_address, redeem_script) 
+VALUES (:full_public_key, :auth_address1, :auth_address2, :wallet_multisig_address, :redeem_script)
 `
 	sql = fmt.Sprintf(sql, tbl)
 	logger.Debugf("sql: %s", sql)
@@ -82,9 +82,9 @@ func (m *DB) GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType enu
 }
 
 // UpdatePaymentIDOnPaymentRequest 出金トランザクション作成済のレコードのpayment_idを更新する
-func (m *DB) updateAddedPubkeyHistoryTableByMultisigAddr(tbl, multiSigAddr, redeemScript, walletAddr string, tx *sqlx.Tx, isCommit bool) error {
+func (m *DB) updateAddedPubkeyHistoryTableByMultisigAddr(tbl, multiSigAddr, redeemScript, authAddr1, fullPublicKey string, tx *sqlx.Tx, isCommit bool) error {
 	sql := `
-UPDATE %s SET wallet_multisig_address=?, redeem_script=? WHERE wallet_address=? 
+UPDATE %s SET wallet_multisig_address=?, redeem_script=?, auth_address1=? WHERE full_public_key=? 
 `
 	sql = fmt.Sprintf(sql, tbl)
 	logger.Debugf("sql: %s", sql)
@@ -93,7 +93,7 @@ UPDATE %s SET wallet_multisig_address=?, redeem_script=? WHERE wallet_address=?
 		tx = m.RDB.MustBegin()
 	}
 
-	_, err := tx.Exec(sql, multiSigAddr, redeemScript, walletAddr)
+	_, err := tx.Exec(sql, multiSigAddr, redeemScript, authAddr1, fullPublicKey)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -107,6 +107,6 @@ UPDATE %s SET wallet_multisig_address=?, redeem_script=? WHERE wallet_address=?
 }
 
 // UpdateAddedPubkeyHistoryTableByMultisigAddr added_pubkey_history_table(payment, receipt...)テーブルのmultisigアドレスを更新する
-func (m *DB) UpdateAddedPubkeyHistoryTableByMultisigAddr(accountType enum.AccountType, multiSigAddr, redeemScript, walletAddr string, tx *sqlx.Tx, isCommit bool) error {
-	return m.updateAddedPubkeyHistoryTableByMultisigAddr(addedPubkeyHistoryTableName[accountType], multiSigAddr, redeemScript, walletAddr, tx, isCommit)
+func (m *DB) UpdateAddedPubkeyHistoryTableByMultisigAddr(accountType enum.AccountType, multiSigAddr, redeemScript, authAddr1, fullPublicKey string, tx *sqlx.Tx, isCommit bool) error {
+	return m.updateAddedPubkeyHistoryTableByMultisigAddr(addedPubkeyHistoryTableName[accountType], multiSigAddr, redeemScript, authAddr1, fullPublicKey, tx, isCommit)
 }

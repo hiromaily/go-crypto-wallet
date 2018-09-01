@@ -43,50 +43,6 @@ CREATE TABLE `seed` (
 
 
 --
--- Table structure for table `account_type`
---
-
-/* DROP TABLE IF EXISTS `account_type`;
-CREATE TABLE `account_type` (
-  `id`          tinyint(1) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `type`        VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL COMMENT'アカウント種別',
-  `description` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'説明',
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='アカウント種別テーブル';
-
-LOCK TABLES `account_type` WRITE;
-INSERT INTO `account_type` VALUES
-  (0,'client','顧客',now()),
-  (1,'receipt','入金保管用',now()),
-  (2,'payment','支払い用',now()),
-  (3,'authorization','Multisigのための承認用',now());
-UNLOCK TABLES;
-*/
-
-
---
--- Table structure for table `coin_type`
---
-
-/*DROP TABLE IF EXISTS `coin_type`;
-CREATE TABLE `coin_type` (
-  `id`          tinyint(1) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `type`        VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL COMMENT'コイン種別',
-  `description` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'説明',
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='コイン種別テーブル';
-
-LOCK TABLES `coin_type` WRITE;
-INSERT INTO `coin_type` VALUES
-  (0,'mainnet','Bitcoin Mainnet',now()),
-  (1,'testnet3','Bitcoin Testnet3',now());
-UNLOCK TABLES;
-*/
-
-
---
 -- Table structure for table `key_type`
 --
 
@@ -140,12 +96,11 @@ CREATE TABLE `account_key_client` (
   `account`                 VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'アドレスに紐づくアカウント名',
   `key_type`                tinyint(1) UNSIGNED NOT NULL COMMENT'コインの種類',
   `idx`                     BIGINT(20) UNSIGNED NOT NULL COMMENT'HDウォレット生成時のindex',
-  `is_imported_priv_key`    BOOL DEFAULT false COMMENT'生成したPrivateKey(WIF)がbitcoin coreのwalletにimport済かどうか',
-  `is_exported_pub_key`     BOOL DEFAULT false COMMENT'生成したPublicKeyをWatchOnlyWallet用にCSVでexport済かどうか',
+  `key_status`              tinyint(1) UNSIGNED DEFAULT 0 NOT NULL COMMENT'keyの進捗ステータス',
   `updated_at`              datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_wallet_address` (`wallet_address`),
-  /*UNIQUE KEY `idx_wallet_multisig_address` (`wallet_multisig_address`),*/
+  UNIQUE KEY `idx_p2sh_segwit_address` (`p2sh_segwit_address`),
   UNIQUE KEY `idx_wallet_import_format` (`wallet_import_format`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='受け取り用トランザクション情報Table';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -190,7 +145,7 @@ DROP TABLE IF EXISTS `added_pubkey_history_receipt`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `added_pubkey_history_receipt` (
   `id`                      BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `wallet_address`          VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'Walletアドレス',
+  /*`wallet_address`          VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'Walletアドレス',*/
   `full_public_key`         VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'full public key',
   `auth_address1`           VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'認証用Walletアドレス1',
   `auth_address2`           VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'認証用Walletアドレス2',
@@ -198,7 +153,7 @@ CREATE TABLE `added_pubkey_history_receipt` (
   `redeem_script`           VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'multisigアドレス生成後に渡されるredeedScript',
   `updated_at`              datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_wallet_address` (`wallet_address`)
+  UNIQUE KEY `idx_full_public_key` (`full_public_key`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='受け取り用multisigアドレス情報Table';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
