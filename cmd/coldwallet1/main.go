@@ -193,7 +193,6 @@ func keyFunctionalities1(wallet *service.Wallet) {
 		grok.Value(keys)
 
 	case 20:
-		//TODO:[WIP]
 		//TODO: importPrivKeyは事前にBitcoin coreを再起動したほうがいいかもしれない
 		//[coldwallet1のみ]
 		//作成したClientのPrivateKeyをColdWalletにimportする

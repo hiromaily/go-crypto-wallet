@@ -136,7 +136,12 @@ func CreateKeysWithIndex(conf *chaincfg.Params, accountPrivateKey string, idxFro
 		}
 
 		//address.String() とaddress.EncodeAddress()は結果として同じ
-		walletKeys[i] = WalletKey{WIF: strPrivateKey, Address: address.String(), P2shSegwit: p2shSegwit.String(), FullPubKey: getFullPubKey(privateKey)}
+		walletKeys[i] = WalletKey{
+			WIF:        strPrivateKey,
+			Address:    address.String(),
+			P2shSegwit: p2shSegwit.String(),
+			FullPubKey: getFullPubKey(privateKey, true),
+		}
 
 		idxFrom++
 	}
@@ -182,9 +187,15 @@ func getP2shSegwit(privKey *btcec.PrivateKey, conf *chaincfg.Params) (*btcutil.A
 }
 
 // getPubKey fullのPublic Keyを返す
-func getFullPubKey(privKey *btcec.PrivateKey) string {
-	//bPubKey := privKey.PubKey().SerializeCompressed()
-	bPubKey := privKey.PubKey().SerializeUncompressed()
+func getFullPubKey(privKey *btcec.PrivateKey, isCompressed bool) string {
+	var bPubKey []byte
+	if isCompressed {
+		//Compressed
+		bPubKey = privKey.PubKey().SerializeCompressed()
+	} else {
+		//Uncompressed
+		bPubKey = privKey.PubKey().SerializeUncompressed()
+	}
 	//logger.Debugf("bPubKey hash: %s", btcutil.Hash160(bPubKey))
 
 	hexPubKey := hex.EncodeToString(bPubKey)

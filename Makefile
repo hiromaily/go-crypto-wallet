@@ -5,6 +5,10 @@
 goget:
 	go get -u -d -v ./...
 
+setup:
+	#https://github.com/direnv/direnv
+	brew install direnv
+
 
 ###############################################################################
 # Docker and compose
@@ -22,14 +26,17 @@ bitcoin-run:
 bitcoin-stop:
 	bitcoin-cli stop
 
+cd-btc-dir:
+	cd ~/Library/Application\ Support/Bitcoin
+
 
 ###############################################################################
 # Build
 ###############################################################################
 bld:
-	go build -o wallet ./cmd/wallet/main.go
-	go build -o coldwallet1 ./cmd/coldwallet1/main.go
-	#go build -o coldwallet2 ./cmd/coldwallet2/main.go
+	go build -i -v -o ${GOPATH}/bin/wallet ./cmd/wallet/main.go
+	go build -i -v -o ${GOPATH}/bin/coldwallet1 ./cmd/coldwallet1/main.go
+	#go build -i -o ${GOPATH}/bin/coldwallet2 ./cmd/coldwallet2/main.go
 
 bld-windows:
 	GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/wallet.exe ./cmd/wallet/main.go
@@ -41,6 +48,14 @@ bld-windows:
 	rm -f ./bin/windows_amd64/wallet.exe
 	rm -f ./bin/windows_amd64/coldwallet1.exe
 	#rm -f ./bin/windows_amd64/coldwallet2.exe
+
+
+###############################################################################
+# Module for management of dependency
+###############################################################################
+module:
+	# go.mod,go.sum files should be created
+	go mod init
 
 
 ###############################################################################

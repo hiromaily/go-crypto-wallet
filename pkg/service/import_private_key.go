@@ -74,7 +74,16 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 			logger.Debugf("account[%s] is found by p2sh_segwit_address:%s", account, record.P2shSegwitAddress)
 
 			//3.TODO check full_public_key by validateaddress retrieving it
-
+			res, err := w.BTC.ValidateAddress(record.P2shSegwitAddress)
+			if err != nil {
+				logger.Errorf("w.BTC.ValidateAddress(%s) error: %v", record.P2shSegwitAddress, err)
+			}
+			if res.PubKey != record.FullPublicKey {
+				//027dbbe3e3d99187ccf8e8a9ffea50db732c0c40a49a242173bf54e04e00259fbf
+				//047dbbe3e3d99187ccf8e8a9ffea50db732c0c40a49a242173bf54e04e00259fbfbabad831e5a1cc34b3708e8b64f1bef06349a4ed33de9aa9fde415d6797eb8c2
+				//=>圧縮と非圧縮の差か？？
+				logger.Errorf("generating pubkey logic is wrong")
+			}
 		}
 	}
 
