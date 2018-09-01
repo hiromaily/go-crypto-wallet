@@ -37,8 +37,7 @@ func (w *Wallet) ExportAccountKey(accountType enum.AccountType, keyStatus enum.K
 	//->これは別に定義しょう
 
 	//DBから該当する全レコード
-	//pubKeys, err := w.DB.GetPubkeyNotExportedPubKey(accountType, isMultisig)
-	accountKeyTable, err := w.DB.GetAllByKeyStatus(accountType, keyStatus)
+	accountKeyTable, err := w.DB.GetAllAccountKeyByKeyStatus(accountType, keyStatus)
 	if err != nil {
 		return "", errors.Errorf("key.GetAllByKeyStatus() error: %s", err)
 	}
@@ -49,7 +48,6 @@ func (w *Wallet) ExportAccountKey(accountType enum.AccountType, keyStatus enum.K
 	}
 
 	//CSVに書き出す
-	//fileName, err := key.ExportPubKey(pubKeys, string(accountType))
 	fileName, err := key.ExportAccountKeyTable(accountKeyTable, string(accountType),
 		enum.KeyStatusValue[keyStatus])
 	if err != nil {
@@ -58,19 +56,26 @@ func (w *Wallet) ExportAccountKey(accountType enum.AccountType, keyStatus enum.K
 	logger.Infof("file name is %s", fileName)
 
 	//DBの該当レコードをアップデート
-	//TODO
 	wifs := make([]string, len(accountKeyTable))
 	for idx, record := range accountKeyTable {
 		wifs[idx] = record.WalletImportFormat
 	}
-
-	logger.Debug(updateKeyStatus)
-
-	//_, err = w.DB.UpdateIsExprotedPubKey(accountType, pubKeys, isMultisig, nil, true)
 	_, err = w.DB.UpdateKeyStatusByWIFs(accountType, updateKeyStatus, wifs, nil, true)
 	if err != nil {
 		return "", errors.Errorf("DB.UpdateIsExprotedPubKey() error: %s", err)
 	}
 
 	return fileName, nil
+}
+
+//ExportAddedPubkeyHistory AddedPubkeyHistoryテーブルをcsvとして出力する
+func (w *Wallet) ExportAddedPubkeyHistory(accountType enum.AccountType) (string, error) {
+	//DBから該当する全レコード
+	//is_exported=falseで且つ、multisig_addressが生成済のレコードが対象
+
+	//CSVに書き出す
+
+	//DBの該当レコードをアップデート
+
+	return "", nil
 }

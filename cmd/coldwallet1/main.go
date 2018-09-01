@@ -453,6 +453,13 @@ func keyFunctionalities2(wallet *service.Wallet) {
 		//[coldwallet2のみ]
 		//TODO:作成したReceiptのMultisigアドレスをcsvファイルとしてexportする
 		logger.Info("Run: 作成したReceiptのMultisigアドレスをcsvファイルとしてexportする")
+		//added_pubkey_history_receipt
+		fileName, err := wallet.ExportAddedPubkeyHistory(enum.AccountTypeReceipt)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+		logger.Infof("fileName: %s", fileName)
+
 	case 61:
 		//[coldwallet2のみ]
 		//TODO:作成したPaymentのMultisigアドレスをcsvファイルとしてexportする

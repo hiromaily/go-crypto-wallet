@@ -72,8 +72,8 @@ func (m *DB) GetOneByMaxID(accountType enum.AccountType) (*AccountKeyTable, erro
 	return m.getOneByMaxID(accountKeyTableName[accountType], accountType)
 }
 
-// getAllByKeyStatus 指定したkeyStatusのレコードをすべて返す
-func (m *DB) getAllByKeyStatus(tbl string, keyStatus enum.KeyStatus) ([]AccountKeyTable, error) {
+// getAllAccountKeyByKeyStatus 指定したkeyStatusのレコードをすべて返す
+func (m *DB) getAllAccountKeyByKeyStatus(tbl string, keyStatus enum.KeyStatus) ([]AccountKeyTable, error) {
 	//sql := "SELECT * FROM %s WHERE is_imported_priv_key=false;"
 	sql := "SELECT * FROM %s WHERE key_status=?;"
 	sql = fmt.Sprintf(sql, tbl)
@@ -88,9 +88,9 @@ func (m *DB) getAllByKeyStatus(tbl string, keyStatus enum.KeyStatus) ([]AccountK
 	return accountKeyTable, nil
 }
 
-// GetAllByKeyStatus 指定したkeyStatusのレコードをすべて返す
-func (m *DB) GetAllByKeyStatus(accountType enum.AccountType, keyStatus enum.KeyStatus) ([]AccountKeyTable, error) {
-	return m.getAllByKeyStatus(accountKeyTableName[accountType], keyStatus)
+// GetAllAccountKeyByKeyStatus 指定したkeyStatusのレコードをすべて返す
+func (m *DB) GetAllAccountKeyByKeyStatus(accountType enum.AccountType, keyStatus enum.KeyStatus) ([]AccountKeyTable, error) {
+	return m.getAllAccountKeyByKeyStatus(accountKeyTableName[accountType], keyStatus)
 }
 
 // insertAccountKeyClient account_key_table(client, payment, receipt...)テーブルにレコードを作成する

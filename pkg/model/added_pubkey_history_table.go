@@ -26,6 +26,26 @@ var addedPubkeyHistoryTableName = map[enum.AccountType]string{
 	enum.AccountTypePayment: "added_pubkey_history_payment",
 }
 
+//getAddedPubkeyHistoryTableByNoWalletMultisigAddress WalletMultisigAddressが発行されていないレコードを返す
+func (m *DB) getAddedPubkeyHistoryTableByNoWalletMultisigAddress(tbl string, accountType enum.AccountType) ([]AddedPubkeyHistoryTable, error) {
+	sql := "SELECT * FROM %s WHERE wallet_multisig_address = '';"
+	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
+
+	var addedPubkeyHistoryTable []AddedPubkeyHistoryTable
+	err := m.RDB.Select(&addedPubkeyHistoryTable, sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return addedPubkeyHistoryTable, nil
+}
+
+//GetAddedPubkeyHistoryTableByNoWalletMultisigAddress WalletMultisigAddressが発行されていないレコードを返す
+func (m *DB) GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType enum.AccountType) ([]AddedPubkeyHistoryTable, error) {
+	return m.getAddedPubkeyHistoryTableByNoWalletMultisigAddress(addedPubkeyHistoryTableName[accountType], accountType)
+}
+
 // insertAddedPubkeyHistoryTable added_pubkey_history_table(payment, receipt...)テーブルにレコードを作成する
 //TODO:BulkInsertがやりたい
 func (m *DB) insertAddedPubkeyHistoryTable(tbl string, addedPubkeyHistoryTables []AddedPubkeyHistoryTable, tx *sqlx.Tx, isCommit bool) error {
@@ -59,26 +79,6 @@ VALUES (:full_public_key, :auth_address1, :auth_address2, :wallet_multisig_addre
 // InsertAddedPubkeyHistoryTable added_pubkey_history_table(payment, receipt...)テーブルにレコードを作成する
 func (m *DB) InsertAddedPubkeyHistoryTable(accountType enum.AccountType, addedPubkeyHistoryTables []AddedPubkeyHistoryTable, tx *sqlx.Tx, isCommit bool) error {
 	return m.insertAddedPubkeyHistoryTable(addedPubkeyHistoryTableName[accountType], addedPubkeyHistoryTables, tx, isCommit)
-}
-
-//getAddedPubkeyHistoryTableByNoWalletMultisigAddress WalletMultisigAddressが発行されていないレコードを返す
-func (m *DB) getAddedPubkeyHistoryTableByNoWalletMultisigAddress(tbl string, accountType enum.AccountType) ([]AddedPubkeyHistoryTable, error) {
-	sql := "SELECT * FROM %s WHERE wallet_multisig_address = '';"
-	sql = fmt.Sprintf(sql, tbl)
-	logger.Debugf("sql: %s", sql)
-
-	var addedPubkeyHistoryTable []AddedPubkeyHistoryTable
-	err := m.RDB.Select(&addedPubkeyHistoryTable, sql)
-	if err != nil {
-		return nil, err
-	}
-
-	return addedPubkeyHistoryTable, nil
-}
-
-//GetAddedPubkeyHistoryTableByNoWalletMultisigAddress WalletMultisigAddressが発行されていないレコードを返す
-func (m *DB) GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType enum.AccountType) ([]AddedPubkeyHistoryTable, error) {
-	return m.getAddedPubkeyHistoryTableByNoWalletMultisigAddress(addedPubkeyHistoryTableName[accountType], accountType)
 }
 
 // UpdatePaymentIDOnPaymentRequest 出金トランザクション作成済のレコードのpayment_idを更新する

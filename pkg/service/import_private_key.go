@@ -18,7 +18,7 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 
 	//DBから未登録のPrivateKey情報を取得する
 	//WIFs, err := w.DB.GetNotImportedKeyWIF(accountType)
-	accountKeyTable, err := w.DB.GetAllByKeyStatus(accountType, enum.KeyStatusGenerated) //key_status=0
+	accountKeyTable, err := w.DB.GetAllAccountKeyByKeyStatus(accountType, enum.KeyStatusGenerated) //key_status=0
 	if err != nil {
 		return errors.Errorf("key.GenerateSeed() error: %s", err)
 	}
@@ -41,7 +41,7 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 			//ここでエラーが出るのであれば生成ロジックが抜本的に問題があるので、return
 			return errors.Errorf("WIF is invalid format. btcutil.DecodeWIF(%s) error: %v", record.WalletImportFormat, err)
 		}
-		//TODO:rescanはいらないはず
+		//rescanはいらないはず
 		logger.Debugf("BTC.ImportPrivKeyWithoutReScan(%s, %s)", wif, account)
 		err = w.BTC.ImportPrivKeyWithoutReScan(wif, account)
 		//err = w.BTC.ImportPrivKeyWithoutReScan(wif, "")
@@ -73,7 +73,7 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 		}
 		logger.Debugf("account[%s] is found by p2sh_segwit_address:%s", account, record.P2shSegwitAddress)
 
-		//3.TODO check full_public_key by validateaddress retrieving it
+		//3.check full_public_key by validateaddress retrieving it
 		res, err := w.BTC.ValidateAddress(record.P2shSegwitAddress)
 		if err != nil {
 			logger.Errorf("w.BTC.ValidateAddress(%s) error: %v", record.P2shSegwitAddress, err)
