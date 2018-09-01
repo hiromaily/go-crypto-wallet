@@ -103,7 +103,7 @@ func development(wallet *service.Wallet) {
 		logger.Fatalf("%+v", err)
 	}
 
-	//generate key
+	//1.generate key
 	_, err = wallet.GenerateAccountKey(enum.AccountTypeClient, bSeed, 10)
 	if err != nil {
 		logger.Fatalf("%+v", err)
@@ -117,7 +117,7 @@ func development(wallet *service.Wallet) {
 		logger.Fatalf("%+v", err)
 	}
 
-	//importprivkey
+	//2.importprivkey
 	err = wallet.ImportPrivateKey(enum.AccountTypeClient)
 	if err != nil {
 		logger.Fatalf("%+v", err)
@@ -131,7 +131,7 @@ func development(wallet *service.Wallet) {
 		logger.Fatalf("%+v", err)
 	}
 
-	//export full public key
+	//3.export full public key
 	fileName1, err := wallet.ExportAccountKey(enum.AccountTypeReceipt, enum.KeyStatusImportprivkey)
 	if err != nil {
 		logger.Fatalf("%+v", err)
@@ -141,20 +141,22 @@ func development(wallet *service.Wallet) {
 		logger.Fatalf("%+v", err)
 	}
 
+	//------------------------------------------------------------------
 	//coldwallet2の機能だが、同一DBで検証
-	//generate key
+	//------------------------------------------------------------------
+	//1.generate key
 	_, err = wallet.GenerateAccountKey(enum.AccountTypeAuthorization, bSeed, 1)
 	if err != nil {
 		logger.Fatalf("%+v", err)
 	}
 
-	//importprivkey
+	//2.importprivkey
 	err = wallet.ImportPrivateKey(enum.AccountTypeAuthorization)
 	if err != nil {
 		logger.Fatalf("%+v", err)
 	}
 
-	// import publickey to history table
+	//3.import publickey to history table
 	err = wallet.ImportPublicKeyForColdWallet2(fileName1, enum.AccountTypeReceipt)
 	if err != nil {
 		logger.Fatalf("%+v", err)
@@ -164,7 +166,7 @@ func development(wallet *service.Wallet) {
 		logger.Fatalf("%+v", err)
 	}
 
-	//addmultisig
+	//4.addmultisig
 	err = wallet.AddMultisigAddressByAuthorization(enum.AccountTypeReceipt)
 	if err != nil {
 		logger.Fatalf("%+v", err)
