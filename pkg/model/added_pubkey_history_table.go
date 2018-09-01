@@ -11,13 +11,13 @@ import (
 
 // AddedPubkeyHistoryTable added_pubkey_history_receiptテーブル
 type AddedPubkeyHistoryTable struct {
-	ID int64 `db:"id"`
-	//WalletAddress string `db:"wallet_address"`
+	ID                    int64      `db:"id"`
 	FullPublicKey         string     `db:"full_public_key"`
 	AuthAddress1          string     `db:"auth_address1"`
 	AuthAddress2          string     `db:"auth_address2"`
 	WalletMultisigAddress string     `db:"wallet_multisig_address"`
 	RedeemScript          string     `db:"redeem_script"`
+	IsExported            bool       `db:"is_exported"`
 	UpdatedAt             *time.Time `db:"updated_at"`
 }
 
@@ -81,7 +81,7 @@ func (m *DB) InsertAddedPubkeyHistoryTable(accountType enum.AccountType, addedPu
 	return m.insertAddedPubkeyHistoryTable(addedPubkeyHistoryTableName[accountType], addedPubkeyHistoryTables, tx, isCommit)
 }
 
-// UpdatePaymentIDOnPaymentRequest 出金トランザクション作成済のレコードのpayment_idを更新する
+// updateAddedPubkeyHistoryTableByMultisigAddr added_pubkey_history_table(payment, receipt...)テーブルのmultisigアドレスを更新する
 func (m *DB) updateAddedPubkeyHistoryTableByMultisigAddr(tbl, multiSigAddr, redeemScript, authAddr1, fullPublicKey string, tx *sqlx.Tx, isCommit bool) error {
 	sql := `
 UPDATE %s SET wallet_multisig_address=?, redeem_script=?, auth_address1=? WHERE full_public_key=? 

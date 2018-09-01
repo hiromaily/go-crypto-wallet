@@ -151,6 +151,7 @@ CREATE TABLE `added_pubkey_history_receipt` (
   `auth_address2`           VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'認証用Walletアドレス2',
   `wallet_multisig_address` VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'multisigとしてのWalletアドレス',
   `redeem_script`           VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'multisigアドレス生成後に渡されるredeedScript',
+  `is_exported`             BOOL DEFAULT false COMMENT'CSV出力済かどうか',
   `updated_at`              datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_full_public_key` (`full_public_key`)

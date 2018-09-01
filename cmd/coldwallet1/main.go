@@ -280,7 +280,6 @@ func keyFunctionalities1(wallet *service.Wallet) {
 		grok.Value(keys)
 
 	case 20:
-		//TODO: importPrivKeyは事前にBitcoin coreを再起動したほうがいいかもしれない
 		//[coldwallet1のみ]
 		//作成したClientのPrivateKeyをColdWalletにimportする
 		logger.Info("Run: 作成したClientのPrivateKeyをColdWalletにimportする")
@@ -334,6 +333,7 @@ func keyFunctionalities1(wallet *service.Wallet) {
 			logger.Fatalf("%+v", err)
 		}
 		logger.Infof("fileName: %s", fileName)
+
 	case 40:
 		//[coldwallet1のみ]
 		//TODO:coldwallet2からexportしたReceiptのmultisigアドレスをcoldWallet1にimportする
