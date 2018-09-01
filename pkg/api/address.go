@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 )
@@ -51,14 +52,14 @@ func (b *Bitcoin) GetAddressesByAccount(accountName string) ([]btcutil.Address, 
 
 // ValidateAddress 渡されたアドレスの整合性をチェックする
 // TODO: こちらの機能はCayenne側でも必要だが、Cayenneから直接利用する場合、Bitcoin Coreの機能に依存しているので、煩雑になってしまう
-func (b *Bitcoin) ValidateAddress(addr string) error {
+func (b *Bitcoin) ValidateAddress(addr string) (*btcjson.ValidateAddressWalletResult, error) {
 	address, err := b.DecodeAddress(addr)
 	if err != nil {
-		return errors.Errorf("DecodeAddress(%s): error: %v", addr, err)
+		return nil, errors.Errorf("DecodeAddress(%s): error: %v", addr, err)
 	}
-	_, err = b.client.ValidateAddress(address)
+	res, err := b.client.ValidateAddress(address)
 	if err != nil {
-		return errors.Errorf("client.ValidateAddress(%s): error: %v", addr, err)
+		return nil, errors.Errorf("client.ValidateAddress(%s): error: %v", addr, err)
 	}
 	//debug
 	//type ValidateAddressWalletResult struct {
@@ -77,9 +78,9 @@ func (b *Bitcoin) ValidateAddress(addr string) error {
 	//}
 
 	//b, _ := json.MarshalIndent(acc, "", " ")
-	//log.Println(string(b))
+	//logger.Info(string(b))
 
-	return nil
+	return res, nil
 }
 
 // DecodeAddress string型のアドレスをDecodeしてAddress型に変換する

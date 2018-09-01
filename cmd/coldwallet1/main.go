@@ -33,7 +33,7 @@ type Options struct {
 	WalletMode uint8 `short:"w" long:"wallet" description:"WalletMode: 1:coldwallet1, 2:coldwallet2"`
 
 	//署名モード
-	Sign bool `short:"s" long:"sign" description:"for key related use (generate/import/export)"`
+	Sign bool `short:"s" long:"sign" description:"for signature"`
 	//Keyモード
 	Key bool `short:"k" long:"key" description:"for key related use (generate/import/export)"`
 	//Debugモード

@@ -54,7 +54,7 @@ func CreateAccount(conf *chaincfg.Params, seed []byte, actType enum.AccountType)
 	if err != nil {
 		return "", "", err
 	}
-	//CoinType TODO:切り替えが必要
+	//CoinType
 	ct := uint32(enum.CoinTypeBitcoin)
 	if conf.Name != string(enum.NetworkTypeMainNet) {
 		ct = uint32(enum.CoinTypeTestnet)
@@ -115,10 +115,9 @@ func CreateKeysWithIndex(conf *chaincfg.Params, accountPrivateKey string, idxFro
 		// full public Key
 		//getFullPubKey(privateKey)
 
-		// WIF　(compress: false)
-		//wif, err := btcutil.NewWIF(privateKey, conf, false)
-		// WIF　(compress: false)
+		// WIF　(compress: true) => bitcoin coreでは圧縮したアドレスを表示する
 		wif, err := btcutil.NewWIF(privateKey, conf, true)
+		//wif, err := btcutil.NewWIF(privateKey, conf, false)
 		if err != nil {
 			return nil, err
 		}

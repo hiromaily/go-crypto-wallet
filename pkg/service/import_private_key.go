@@ -73,6 +73,8 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 			}
 			logger.Debugf("account[%s] is found by p2sh_segwit_address:%s", account, record.P2shSegwitAddress)
 
+			//3.TODO check full_public_key by validateaddress retrieving it
+
 		}
 	}
 

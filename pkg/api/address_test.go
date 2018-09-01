@@ -58,7 +58,7 @@ func TestValidateAddress(t *testing.T) {
 		//t.Logf("check address: %s", val.addr)
 		fmt.Printf("check address: %s\n", val.addr)
 
-		err := wlt.BTC.ValidateAddress(val.addr)
+		_, err := wlt.BTC.ValidateAddress(val.addr)
 		if err != nil && !val.isErr {
 			t.Errorf("Unexpectedly error occorred. %v", err)
 		}
