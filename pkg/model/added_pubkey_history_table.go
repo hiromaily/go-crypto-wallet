@@ -9,7 +9,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// AddedPubkeyHistoryTable added_pubkey_history_receiptテーブル
+// AddedPubkeyHistoryTable added_pubkey_historyテーブル
 type AddedPubkeyHistoryTable struct {
 	ID                    int64      `db:"id"`
 	FullPublicKey         string     `db:"full_public_key"`
