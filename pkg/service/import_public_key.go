@@ -212,7 +212,7 @@ func (w *Wallet) ImportMultisigAddrForColdWallet1(fileName string, accountType e
 		}
 	}
 	//Update
-	err = w.DB.UpdateMultisigAddrOnAccountKeyTable(accountType, accountKeyTable, nil, true)
+	err = w.DB.UpdateMultisigAddrOnAccountKeyTableByFullPubKey(accountType, accountKeyTable, nil, true)
 	if err != nil {
 		return errors.Errorf("DB.UpdateMultisigAddrOnAccountKeyTable() error: %s", err)
 	}

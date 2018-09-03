@@ -35,8 +35,8 @@ var accountKeyTableName = map[enum.AccountType]string{
 	enum.AccountTypeAuthorization: "account_key_authorization",
 }
 
-//getMaxIndex indexの最大値を返す
-func (m *DB) getMaxIndex(tbl string) (int64, error) {
+//getMaxIndexOnAccountKeyTable indexの最大値を返す
+func (m *DB) getMaxIndexOnAccountKeyTable(tbl string) (int64, error) {
 	sql := "SELECT MAX(idx) from %s;"
 	sql = fmt.Sprintf(sql, tbl)
 	logger.Debugf("sql: %s", sql)
@@ -47,13 +47,13 @@ func (m *DB) getMaxIndex(tbl string) (int64, error) {
 	return idx, err
 }
 
-//GetMaxIndex indexの最大値を返す
-func (m *DB) GetMaxIndex(accountType enum.AccountType) (int64, error) {
-	return m.getMaxIndex(accountKeyTableName[accountType])
+//GetMaxIndexOnAccountKeyTable indexの最大値を返す
+func (m *DB) GetMaxIndexOnAccountKeyTable(accountType enum.AccountType) (int64, error) {
+	return m.getMaxIndexOnAccountKeyTable(accountKeyTableName[accountType])
 }
 
-//getOneByMaxID idが最大の1レコードを返す
-func (m *DB) getOneByMaxID(tbl string, accountType enum.AccountType) (*AccountKeyTable, error) {
+//getOneByMaxIDOnAccountKeyTable idが最大の1レコードを返す
+func (m *DB) getOneByMaxIDOnAccountKeyTable(tbl string, accountType enum.AccountType) (*AccountKeyTable, error) {
 	sql := "SELECT * FROM %s ORDER BY ID DESC LIMIT 1;"
 	sql = fmt.Sprintf(sql, tbl)
 	logger.Debugf("sql: %s", sql)
@@ -67,9 +67,9 @@ func (m *DB) getOneByMaxID(tbl string, accountType enum.AccountType) (*AccountKe
 	return &accountKeyTable, nil
 }
 
-//GetOneByMaxID idが最大の1レコードを返す
-func (m *DB) GetOneByMaxID(accountType enum.AccountType) (*AccountKeyTable, error) {
-	return m.getOneByMaxID(accountKeyTableName[accountType], accountType)
+//GetOneByMaxIDOnAccountKeyTable idが最大の1レコードを返す
+func (m *DB) GetOneByMaxIDOnAccountKeyTable(accountType enum.AccountType) (*AccountKeyTable, error) {
+	return m.getOneByMaxIDOnAccountKeyTable(accountKeyTableName[accountType], accountType)
 }
 
 // getAllAccountKeyByKeyStatus 指定したkeyStatusのレコードをすべて返す
@@ -194,8 +194,8 @@ func (m *DB) UpdateKeyStatusByWIFs(accountType enum.AccountType, keyStatus enum.
 	return m.updateKeyStatusByWIFs(accountKeyTableName[accountType], keyStatus, wifs, tx, isCommit)
 }
 
-// updateMultisigAddrOnAccountKeyTable wallet_multisig_addressを更新する
-func (m *DB) updateMultisigAddrOnAccountKeyTable(tbl string, accountKeyTable []AccountKeyTable, tx *sqlx.Tx, isCommit bool) error {
+// updateMultisigAddrOnAccountKeyTableByFullPubKey wallet_multisig_addressを更新する
+func (m *DB) updateMultisigAddrOnAccountKeyTableByFullPubKey(tbl string, accountKeyTable []AccountKeyTable, tx *sqlx.Tx, isCommit bool) error {
 	sql := `
 UPDATE %s SET wallet_multisig_address=:wallet_multisig_address, redeem_script=:redeem_script, key_status=:key_status, updated_at=:updated_at 
 WHERE full_public_key=:full_public_key
@@ -222,7 +222,7 @@ WHERE full_public_key=:full_public_key
 	return nil
 }
 
-// UpdateMultisigAddrOnAccountKeyTable wallet_multisig_addressを更新する
-func (m *DB) UpdateMultisigAddrOnAccountKeyTable(accountType enum.AccountType, accountKeyTable []AccountKeyTable, tx *sqlx.Tx, isCommit bool) error {
-	return m.updateMultisigAddrOnAccountKeyTable(accountKeyTableName[accountType], accountKeyTable, tx, isCommit)
+// UpdateMultisigAddrOnAccountKeyTableByFullPubKey wallet_multisig_addressを更新する
+func (m *DB) UpdateMultisigAddrOnAccountKeyTableByFullPubKey(accountType enum.AccountType, accountKeyTable []AccountKeyTable, tx *sqlx.Tx, isCommit bool) error {
+	return m.updateMultisigAddrOnAccountKeyTableByFullPubKey(accountKeyTableName[accountType], accountKeyTable, tx, isCommit)
 }

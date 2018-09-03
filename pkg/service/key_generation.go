@@ -74,7 +74,7 @@ func (w *Wallet) retrieveSeed() ([]byte, error) {
 // TODO:AccountTypeAuthorizationのときは、レコードがある場合は追加できないようにしたほうがいい？？
 func (w *Wallet) GenerateAccountKey(accountType enum.AccountType, seed []byte, count uint32) ([]key.WalletKey, error) {
 	//現在のindexを取得
-	idx, err := w.DB.GetMaxIndex(accountType)
+	idx, err := w.DB.GetMaxIndexOnAccountKeyTable(accountType)
 	if err != nil {
 		idx = 0
 	} else {
