@@ -453,7 +453,6 @@ func keyFunctionalities2(wallet *service.Wallet) {
 		//[coldwallet2のみ]
 		//TODO:作成したReceiptのMultisigアドレスをcsvファイルとしてexportする
 		logger.Info("Run: 作成したReceiptのMultisigアドレスをcsvファイルとしてexportする")
-		//added_pubkey_history_receipt
 		fileName, err := wallet.ExportAddedPubkeyHistory(enum.AccountTypeReceipt)
 		if err != nil {
 			logger.Fatalf("%+v", err)
@@ -464,6 +463,12 @@ func keyFunctionalities2(wallet *service.Wallet) {
 		//[coldwallet2のみ]
 		//TODO:作成したPaymentのMultisigアドレスをcsvファイルとしてexportする
 		logger.Info("Run: 作成したPaymentのMultisigアドレスをcsvファイルとしてexportする")
+
+		fileName, err := wallet.ExportAddedPubkeyHistory(enum.AccountTypePayment)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+		logger.Infof("fileName: %s", fileName)
 
 	default:
 		logger.Warn("opts.Mode is out of range")

@@ -39,7 +39,7 @@ func (w *Wallet) ExportAccountKey(accountType enum.AccountType, keyStatus enum.K
 	//DBから該当する全レコード
 	accountKeyTable, err := w.DB.GetAllAccountKeyByKeyStatus(accountType, keyStatus)
 	if err != nil {
-		return "", errors.Errorf("key.GetAllByKeyStatus() error: %s", err)
+		return "", errors.Errorf("DB.GetAllAccountKeyByKeyStatus() error: %s", err)
 	}
 
 	if len(accountKeyTable) == 0 {
@@ -51,7 +51,7 @@ func (w *Wallet) ExportAccountKey(accountType enum.AccountType, keyStatus enum.K
 	fileName, err := key.ExportAccountKeyTable(accountKeyTable, string(accountType),
 		enum.KeyStatusValue[keyStatus])
 	if err != nil {
-		return "", errors.Errorf("key.ExportPubKey() error: %s", err)
+		return "", errors.Errorf("key.ExportAccountKeyTable() error: %s", err)
 	}
 	logger.Infof("file name is %s", fileName)
 
@@ -69,13 +69,37 @@ func (w *Wallet) ExportAccountKey(accountType enum.AccountType, keyStatus enum.K
 }
 
 //ExportAddedPubkeyHistory AddedPubkeyHistoryテーブルをcsvとして出力する
+// coldwallet2から使用
 func (w *Wallet) ExportAddedPubkeyHistory(accountType enum.AccountType) (string, error) {
 	//DBから該当する全レコード
 	//is_exported=falseで且つ、multisig_addressが生成済のレコードが対象
+	addedPubkeyHistoryTable, err := w.DB.GetAddedPubkeyHistoryTableByNotExported(accountType)
+	if err != nil {
+		return "", errors.Errorf("DB.GetAddedPubkeyHistoryTableByNotExported() error: %s", err)
+	}
+
+	if len(addedPubkeyHistoryTable) == 0 {
+		logger.Info("no record in table")
+		return "", nil
+	}
 
 	//CSVに書き出す
+	fileName, err := key.ExportAddedPubkeyHistoryTable(addedPubkeyHistoryTable, string(accountType),
+		enum.KeyStatusValue[enum.KeyStatusMultiAddressImported])
+	if err != nil {
+		return "", errors.Errorf("key.ExportAccountKeyTable() error: %s", err)
+	}
+	logger.Infof("file name is %s", fileName)
 
 	//DBの該当レコードをアップデート
+	ids := make([]int64, len(addedPubkeyHistoryTable))
+	for idx, record := range addedPubkeyHistoryTable {
+		ids[idx] = record.ID
+	}
+	_, err = w.DB.UpdateIsExportedOnAddedPubkeyHistoryTable(accountType, ids, nil, true)
+	if err != nil {
+		return "", errors.Errorf("DB.UpdateIsExprotedPubKey() error: %s", err)
+	}
 
-	return "", nil
+	return fileName, nil
 }

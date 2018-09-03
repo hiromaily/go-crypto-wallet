@@ -7,6 +7,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 )
 
 // AddedPubkeyHistoryTable added_pubkey_historyテーブル
@@ -46,6 +47,26 @@ func (m *DB) GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType enu
 	return m.getAddedPubkeyHistoryTableByNoWalletMultisigAddress(addedPubkeyHistoryTableName[accountType], accountType)
 }
 
+//getAddedPubkeyHistoryTableByNoWalletMultisigAddress WalletMultisigAddressが発行済かつ、exportされていないレコードを返す
+func (m *DB) getAddedPubkeyHistoryTableByNotExported(tbl string, accountType enum.AccountType) ([]AddedPubkeyHistoryTable, error) {
+	sql := "SELECT * FROM %s WHERE wallet_multisig_address != '' AND is_exported=false;"
+	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
+
+	var addedPubkeyHistoryTable []AddedPubkeyHistoryTable
+	err := m.RDB.Select(&addedPubkeyHistoryTable, sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return addedPubkeyHistoryTable, nil
+}
+
+//GetAddedPubkeyHistoryTableByNotExported WalletMultisigAddressが発行済かつ、exportされていないレコードを返す
+func (m *DB) GetAddedPubkeyHistoryTableByNotExported(accountType enum.AccountType) ([]AddedPubkeyHistoryTable, error) {
+	return m.getAddedPubkeyHistoryTableByNotExported(addedPubkeyHistoryTableName[accountType], accountType)
+}
+
 // insertAddedPubkeyHistoryTable added_pubkey_history_table(payment, receipt...)テーブルにレコードを作成する
 //TODO:BulkInsertがやりたい
 func (m *DB) insertAddedPubkeyHistoryTable(tbl string, addedPubkeyHistoryTables []AddedPubkeyHistoryTable, tx *sqlx.Tx, isCommit bool) error {
@@ -81,8 +102,8 @@ func (m *DB) InsertAddedPubkeyHistoryTable(accountType enum.AccountType, addedPu
 	return m.insertAddedPubkeyHistoryTable(addedPubkeyHistoryTableName[accountType], addedPubkeyHistoryTables, tx, isCommit)
 }
 
-// updateAddedPubkeyHistoryTableByMultisigAddr added_pubkey_history_table(payment, receipt...)テーブルのmultisigアドレスを更新する
-func (m *DB) updateAddedPubkeyHistoryTableByMultisigAddr(tbl, multiSigAddr, redeemScript, authAddr1, fullPublicKey string, tx *sqlx.Tx, isCommit bool) error {
+// updateMultisigAddrOnAddedPubkeyHistoryTable added_pubkey_history_table(payment, receipt...)テーブルのmultisigアドレスを更新する
+func (m *DB) updateMultisigAddrOnAddedPubkeyHistoryTable(tbl, multiSigAddr, redeemScript, authAddr1, fullPublicKey string, tx *sqlx.Tx, isCommit bool) error {
 	sql := `
 UPDATE %s SET wallet_multisig_address=?, redeem_script=?, auth_address1=? WHERE full_public_key=? 
 `
@@ -106,7 +127,43 @@ UPDATE %s SET wallet_multisig_address=?, redeem_script=?, auth_address1=? WHERE 
 	return nil
 }
 
-// UpdateAddedPubkeyHistoryTableByMultisigAddr added_pubkey_history_table(payment, receipt...)テーブルのmultisigアドレスを更新する
-func (m *DB) UpdateAddedPubkeyHistoryTableByMultisigAddr(accountType enum.AccountType, multiSigAddr, redeemScript, authAddr1, fullPublicKey string, tx *sqlx.Tx, isCommit bool) error {
-	return m.updateAddedPubkeyHistoryTableByMultisigAddr(addedPubkeyHistoryTableName[accountType], multiSigAddr, redeemScript, authAddr1, fullPublicKey, tx, isCommit)
+// UpdateMultisigAddrOnAddedPubkeyHistoryTable added_pubkey_history_table(payment, receipt...)テーブルのmultisigアドレスを更新する
+func (m *DB) UpdateMultisigAddrOnAddedPubkeyHistoryTable(accountType enum.AccountType, multiSigAddr, redeemScript, authAddr1, fullPublicKey string, tx *sqlx.Tx, isCommit bool) error {
+	return m.updateMultisigAddrOnAddedPubkeyHistoryTable(addedPubkeyHistoryTableName[accountType], multiSigAddr, redeemScript, authAddr1, fullPublicKey, tx, isCommit)
+}
+
+// updateIsExportedOnAddedPubkeyHistoryTable added_pubkey_history_table(payment, receipt...)テーブルのis_exportedを更新する
+func (m *DB) updateIsExportedOnAddedPubkeyHistoryTable(tbl string, ids []int64, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	var sql string
+	sql = "UPDATE %s SET is_exported=true WHERE id IN (?);"
+	sql = fmt.Sprintf(sql, tbl)
+
+	//In対応
+	query, args, err := sqlx.In(sql, ids)
+	if err != nil {
+		return 0, errors.Errorf("sqlx.In() error: %v", err)
+	}
+	query = m.RDB.Rebind(query)
+	logger.Debugf("sql: %s", query)
+
+	if tx == nil {
+		tx = m.RDB.MustBegin()
+	}
+
+	res, err := tx.Exec(query, args...)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+	if isCommit {
+		tx.Commit()
+	}
+	affectedNum, _ := res.RowsAffected()
+
+	return affectedNum, nil
+}
+
+// UpdateIsExportedOnAddedPubkeyHistoryTable added_pubkey_history_table(payment, receipt...)テーブルのis_exportedを更新する
+func (m *DB) UpdateIsExportedOnAddedPubkeyHistoryTable(accountType enum.AccountType, ids []int64, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	return m.updateIsExportedOnAddedPubkeyHistoryTable(addedPubkeyHistoryTableName[accountType], ids, tx, isCommit)
 }
