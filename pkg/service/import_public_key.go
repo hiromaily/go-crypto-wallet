@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/bookerzzz/grok"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
@@ -32,22 +33,51 @@ func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum
 
 	var pubKeyData []model.AccountPublicKeyTable
 	for _, key := range pubKeys {
+		inner := strings.Split(key, ",")
+		grok.Value(inner)
+		var addr string
+		if accountType == enum.AccountTypeClient {
+			addr = inner[1] //p2sh_segwit_address
+		} else {
+			addr = inner[3] //wallet_import_format
+		}
+
 		//Bitcoin core APIから`importaddress`をcallする
-		err := w.BTC.ImportAddressWithLabel(key, account, false)
+		//TODO:1台のPCで検証しているときなど、すでにimport済の場合はエラーが出る
+		err := w.BTC.ImportAddressWithLabel(addr, account, false)
 		if err != nil {
-			logger.Errorf("BTC.ImportAddressWithLabel(%s) error: %v", key, err)
+			//-4: The wallet already contains the private key for this address or script
+			logger.Errorf("BTC.ImportAddressWithLabel(%s) error: %v", addr, err)
 			continue
 		}
 
 		pubKeyData = append(pubKeyData, model.AccountPublicKeyTable{
-			WalletAddress: key,
+			WalletAddress: addr,
 			Account:       account,
 		})
+
+		//watch only walletとして追加されているかチェックする
+		//1.getaccount address(wallet_address)
+		account, err := w.BTC.GetAccount(addr)
+		if err != nil {
+			logger.Errorf("w.BTC.GetAccount(%s) error: %v", addr, err)
+		}
+		logger.Debugf("account[%s] is found by wallet_address:%s", account, addr)
+
+		//2.check full_public_key by validateaddress retrieving it
+		res, err := w.BTC.ValidateAddress(addr)
+		if err != nil {
+			logger.Errorf("w.BTC.ValidateAddress(%s) error: %v", addr, err)
+		}
+		grok.Value(res)
+		//watch only walletを想定している
+		if !res.IsWatchOnly {
+			logger.Errorf("this address must be watch only wallet")
+		}
 	}
 
 	//DBにInsert
 	err = w.DB.InsertAccountPubKeyTable(accountType, pubKeyData, nil, true)
-	//logger.Error(err)
 	if err != nil {
 		return errors.Errorf("DB.InsertAccountPubKeyTable() error: %v", err)
 		//TODO:これが失敗したら、どうやって、登録済みのデータを再度Insertするか？再度実行すればOKのはず
@@ -137,7 +167,7 @@ func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum
 	return nil
 }
 
-// ImportMultisigAddrForColdWallet1 coldwallet2でexportされたmultisigアドレス情報をimportする
+// ImportMultisigAddrForColdWallet1 coldwallet2でexportされたmultisigアドレス情報をimportする for Cold Wallet1
 func (w *Wallet) ImportMultisigAddrForColdWallet1(fileName string, accountType enum.AccountType) error {
 	if accountType != enum.AccountTypeReceipt && accountType != enum.AccountTypePayment {
 		logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")

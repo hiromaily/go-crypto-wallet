@@ -38,9 +38,9 @@ type Options struct {
 	//出金モード
 	Payment bool `short:"p" long:"payment" description:"for payment"`
 	//送金モード
-	Send bool `short:"s" long:"payment" description:"for sending transaction"`
+	Send bool `short:"s" long:"sending" description:"for sending transaction"`
 	//ステータスチェックモード
-	Monitor bool `short:"m" long:"payment" description:"for monitoring transaction"`
+	Monitor bool `short:"n" long:"monitor" description:"for monitoring transaction"`
 	//bitcoin Commandモード
 	Cmd bool `short:"b" long:"bitcoin-command" description:"for bitcoin command"`
 	//Debugモード
@@ -104,7 +104,7 @@ func main() {
 //キー関連機能
 func keyFunctionalities(wallet *service.Wallet) {
 	switch opts.Mode {
-	case 11:
+	case 1:
 		//TODO:imporot後、getaddressesbyaccount "" で内容を確認??
 		logger.Info("Run: coldwalletで生成したアドレスをwalletにimportする")
 		if opts.ImportFile == "" {
@@ -114,6 +114,27 @@ func keyFunctionalities(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
+	case 2:
+		//TODO:imporot後、getaddressesbyaccount "" で内容を確認??
+		logger.Info("Run: coldwalletで生成したアドレスをwalletにimportする")
+		if opts.ImportFile == "" {
+			logger.Fatal("file path is required as argument file when running")
+		}
+		err := wallet.ImportPublicKeyForWatchWallet(opts.ImportFile, enum.AccountTypeReceipt)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+	case 3:
+		//TODO:imporot後、getaddressesbyaccount "" で内容を確認??
+		logger.Info("Run: coldwalletで生成したアドレスをwalletにimportする")
+		if opts.ImportFile == "" {
+			logger.Fatal("file path is required as argument file when running")
+		}
+		err := wallet.ImportPublicKeyForWatchWallet(opts.ImportFile, enum.AccountTypePayment)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+
 	default:
 		logger.Warn("opts.Mode is out of range")
 		procedure.Show()

@@ -357,26 +357,26 @@ func keyFunctionalities1(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-
-	//case 51:
-	//	//[coldwallet1のみ]
-	//	//multisigimport後、ReceiptのMultisigをcsvファイルとしてexportする (DBに出力済を登録する必要がある)
-	//	//=>TODO:しかし、coldwallet2側から出力されたファイルがそのまま使えるような？？
-	//	logger.Info("Run: 作成したReceiptのMultisigアドレスをcsvファイルとしてexportする")
-	//	err := wallet.ExportPublicKey(enum.AccountTypeReceipt, true)
-	//	if err != nil {
-	//		logger.Fatalf("%+v", err)
-	//	}
-	//case 52:
-	//	//[coldwallet1のみ]
-	//	//multisigimport後、PaymentのMultisigをcsvファイルとしてexportする (DBに出力済を登録する必要がある)
-	//	//=>TODO:しかし、coldwallet2側から出力されたファイルがそのまま使えるような？？
-	//	logger.Info("Run: 作成したPaymentのMultisigアドレスをcsvファイルとしてexportする")
-	//	err := wallet.ExportPublicKey(enum.AccountTypePayment, true)
-	//	if err != nil {
-	//		logger.Fatalf("%+v", err)
-	//	}
-
+	case 51:
+		//[coldwallet1のみ]
+		//multisigimport後、ReceiptのMultisigをcsvファイルとしてexportする (DBに出力済を登録する必要がある)
+		//=>TODO:しかし、coldwallet2側から出力されたファイルがそのまま使えるような？？しかし、情報の管理のために、一度coldwallet1にimportが必要
+		logger.Info("Run: 作成したReceiptのMultisigアドレスをcsvファイルとしてexportする")
+		fileName, err := wallet.ExportAccountKey(enum.AccountTypeReceipt, enum.KeyStatusMultiAddressImported)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+		logger.Infof("fileName: %s", fileName)
+	case 52:
+		//[coldwallet1のみ]
+		//multisigimport後、PaymentのMultisigをcsvファイルとしてexportする (DBに出力済を登録する必要がある)
+		//=>TODO:しかし、coldwallet2側から出力されたファイルがそのまま使えるような？？しかし、情報の管理のために、一度coldwallet1にimportが必要
+		logger.Info("Run: 作成したPaymentのMultisigアドレスをcsvファイルとしてexportする")
+		fileName, err := wallet.ExportAccountKey(enum.AccountTypePayment, enum.KeyStatusMultiAddressImported)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+		logger.Infof("fileName: %s", fileName)
 	default:
 		logger.Warn("opts.Mode is out of range")
 		procedure.Show()

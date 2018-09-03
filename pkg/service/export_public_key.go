@@ -84,8 +84,10 @@ func (w *Wallet) ExportAddedPubkeyHistory(accountType enum.AccountType) (string,
 	}
 
 	//CSVに書き出す
+	//TODO:何がわかりやすいか, このために新たなステータスを追加したほうがいいか
 	fileName, err := key.ExportAddedPubkeyHistoryTable(addedPubkeyHistoryTable, string(accountType),
-		enum.KeyStatusValue[enum.KeyStatusMultiAddressImported])
+		//enum.KeyStatusValue[enum.KeyStatusMultiAddressImported])
+		enum.KeyStatusValue[enum.KeyStatusPubkeyExported])
 	if err != nil {
 		return "", errors.Errorf("key.ExportAccountKeyTable() error: %s", err)
 	}

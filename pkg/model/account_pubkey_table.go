@@ -38,8 +38,8 @@ VALUES (:wallet_address, :account)
 		tx = m.RDB.MustBegin()
 	}
 
-	for _, accountPubKeyClient := range accountPubKeyTables {
-		_, err := tx.NamedExec(sql, accountPubKeyClient)
+	for _, accountPubKeyTable := range accountPubKeyTables {
+		_, err := tx.NamedExec(sql, accountPubKeyTable)
 		if err != nil {
 			tx.Rollback()
 			return err

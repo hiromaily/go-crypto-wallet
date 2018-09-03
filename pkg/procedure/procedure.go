@@ -58,8 +58,13 @@ var proceduresForPreparation = []Procedure{
 	},
 	{
 		WalletTypeCold2,
-		"import [receipt, payment] public address from csv to DB",
-		"coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 33,34 -i ./data/pubkey/xxx.csv",
+		"import [receipt] public address from csv to DB",
+		"coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 33 -i ./data/pubkey/xxx.csv",
+	},
+	{
+		WalletTypeCold2,
+		"import [payment] public address from csv to DB",
+		"coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 34 -i ./data/pubkey/xxx.csv",
 	},
 	{
 		WalletTypeCold2,
@@ -86,20 +91,25 @@ var proceduresForPreparation = []Procedure{
 		"import [payment] multisig address and redeemScript from csv to DB",
 		"coldwallet1 -w 1 -k -m 41 -i ./data/pubkey/xxx.csv",
 	},
-	//{
-	//	WalletTypeCold1,
-	//	"export [receipt, payment] multisig address as csv",
-	//	"make xxxx",
-	//},
 	{
-		WalletTypeWatchOnly,
-		"import [client] public address",
-		"make xxxx",
+		WalletTypeCold1,
+		"export [receipt, payment] multisig address as csv",
+		"coldwallet1 -w 1 -k -m 51, 52",
 	},
 	{
 		WalletTypeWatchOnly,
-		"import [receipt, payment] multisig address as public address",
-		"make xxxx",
+		"import [client] address for watch only wallet",
+		"wallet -k -m 1 -i ./data/pubkey/xxx.csv",
+	},
+	{
+		WalletTypeWatchOnly,
+		"import [receipt] address for watch only wallet",
+		"wallet -k -m 2 -i ./data/pubkey/xxx.csv",
+	},
+	{
+		WalletTypeWatchOnly,
+		"import [payment] address for watch only wallet",
+		"wallet -k -m 3 -i ./data/pubkey/xxx.csv",
 	},
 }
 
