@@ -398,8 +398,6 @@ func keyFunctionalities2(wallet *service.Wallet) {
 		grok.Value(keys)
 
 	case 23:
-		//TODO:[WIP]
-		//TODO: importPrivKeyは事前にBitcoin coreを再起動したほうがいいかもしれない
 		//[coldwallet2のみ]
 		//作成したAuthorizationのPrivateKeyをColdWalletにimportする
 		logger.Info("Run: 作成したAuthorizationのPrivateKeyをColdWalletにimportする")
@@ -411,7 +409,7 @@ func keyFunctionalities2(wallet *service.Wallet) {
 
 	case 33:
 		//[coldwallet2のみ]
-		//TODO:coldwallet1からexportしたReceiptのpublicアドレスをcoldWallet2にimportする
+		//coldwallet1からexportしたReceiptのpublicアドレスをcoldWallet2にimportする
 		logger.Info("Run: coldwallet1からexportしたReceiptのpublicアドレスcoldWallet2にimportする")
 		if opts.ImportFile == "" {
 			logger.Fatal("file path is required as argument file when running")
@@ -423,7 +421,7 @@ func keyFunctionalities2(wallet *service.Wallet) {
 
 	case 34:
 		//[coldwallet2のみ]
-		//TODO:coldwallet1からexportしたPaymentのpublicアドレスをcoldWallet2にimportする
+		//coldwallet1からexportしたPaymentのpublicアドレスをcoldWallet2にimportする
 		logger.Info("Run: coldwallet1からexportしたPaymentのpublicアドレスcoldWallet2にimportする")
 		if opts.ImportFile == "" {
 			logger.Fatal("file path is required as argument file when running")
@@ -435,7 +433,7 @@ func keyFunctionalities2(wallet *service.Wallet) {
 
 	case 50:
 		//[coldwallet2のみ]
-		//TODO:`addmultisigaddress`を実行する。パラメータは、receiptのアドレス、authorizationのアドレス
+		//`addmultisigaddress`を実行する。パラメータは、receiptのアドレス、authorizationのアドレス
 		logger.Info("Run: `addmultisigaddress`を実行する。パラメータは、receiptのアドレス、authorizationのアドレス")
 		err := wallet.AddMultisigAddressByAuthorization(enum.AccountTypeReceipt)
 		if err != nil {
@@ -444,7 +442,7 @@ func keyFunctionalities2(wallet *service.Wallet) {
 
 	case 51:
 		//[coldwallet2のみ]
-		//TODO:`addmultisigaddress`を実行する。パラメータは、paymentのアドレス、authorizationのアドレス
+		//`addmultisigaddress`を実行する。パラメータは、paymentのアドレス、authorizationのアドレス
 		logger.Info("Run: `addmultisigaddress`を実行する。パラメータは、receiptのアドレス、authorizationのアドレス")
 		err := wallet.AddMultisigAddressByAuthorization(enum.AccountTypePayment)
 		if err != nil {

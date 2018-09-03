@@ -11,7 +11,6 @@ import (
 
 // ImportPrivateKey 指定したAccountTypeに属するテーブルのis_imported_priv_keyがfalseのWIFをImportPrivKeyRescanする
 // https://en.bitcoin.it/wiki/How_to_import_private_keys
-// TODO: import後は再起動が必要かもしれない
 // getaddressesbyaccount "" で内容を確認可能？？
 func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 	//AccountType問わずimportは可能にしておく
@@ -59,28 +58,7 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 		}
 
 		//アドレスがbitcoin core walletに登録されているかチェック
-		//1.getaccount address(wallet_address)
-		account, err := w.BTC.GetAccount(record.WalletAddress)
-		if err != nil {
-			logger.Errorf("w.BTC.GetAccount(%s) error: %v", record.WalletAddress, err)
-		}
-		logger.Debugf("account[%s] is found by wallet_address:%s", account, record.WalletAddress)
-
-		//2.getaccount address(p2sh_segwit_address)
-		account, err = w.BTC.GetAccount(record.P2shSegwitAddress)
-		if err != nil {
-			logger.Errorf("w.BTC.GetAccount(%s) error: %v", record.P2shSegwitAddress, err)
-		}
-		logger.Debugf("account[%s] is found by p2sh_segwit_address:%s", account, record.P2shSegwitAddress)
-
-		//3.check full_public_key by validateaddress retrieving it
-		res, err := w.BTC.ValidateAddress(record.P2shSegwitAddress)
-		if err != nil {
-			logger.Errorf("w.BTC.ValidateAddress(%s) error: %v", record.P2shSegwitAddress, err)
-		}
-		if res.PubKey != record.FullPublicKey {
-			logger.Errorf("generating pubkey logic is wrong")
-		}
+		w.checkImportedAddress(record.WalletAddress, record.P2shSegwitAddress, record.FullPublicKey)
 	}
 
 	//for _, strWIF := range WIFs {
@@ -108,4 +86,29 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 	//}
 
 	return nil
+}
+
+func (w *Wallet) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPublicKey string) {
+	//1.getaccount address(wallet_address)
+	account, err := w.BTC.GetAccount(walletAddress)
+	if err != nil {
+		logger.Errorf("w.BTC.GetAccount(%s) error: %v", walletAddress, err)
+	}
+	logger.Debugf("account[%s] is found by wallet_address:%s", account, walletAddress)
+
+	//2.getaccount address(p2sh_segwit_address)
+	account, err = w.BTC.GetAccount(p2shSegwitAddress)
+	if err != nil {
+		logger.Errorf("w.BTC.GetAccount(%s) error: %v", p2shSegwitAddress, err)
+	}
+	logger.Debugf("account[%s] is found by p2sh_segwit_address:%s", account, p2shSegwitAddress)
+
+	//3.check full_public_key by validateaddress retrieving it
+	res, err := w.BTC.ValidateAddress(p2shSegwitAddress)
+	if err != nil {
+		logger.Errorf("w.BTC.ValidateAddress(%s) error: %v", p2shSegwitAddress, err)
+	}
+	if res.PubKey != fullPublicKey {
+		logger.Errorf("generating pubkey logic is wrong")
+	}
 }

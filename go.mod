@@ -12,7 +12,7 @@ require (
 	github.com/btcsuite/btcutil v0.0.0-20180706230648-ab6388e0c60a
 	github.com/btcsuite/go-socks v0.0.0-20170105172521-4720035b7bfd // indirect
 	github.com/btcsuite/websocket v0.0.0-20150119174127-31079b680792 // indirect
-	github.com/denisenkom/go-mssqldb v0.0.0-20180824013952-8fac8b954edb // indirect
+	github.com/denisenkom/go-mssqldb v0.0.0-20180901172138-1eb28afdf9b6 // indirect
 	github.com/gedex/inflector v0.0.0-20170307190818-16278e9db813 // indirect
 	github.com/go-sql-driver/mysql v1.4.0
 	github.com/golang/protobuf v1.2.0 // indirect
