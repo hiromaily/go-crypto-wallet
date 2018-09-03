@@ -23,6 +23,11 @@ type Procedure struct {
 var proceduresForPreparation = []Procedure{
 	{
 		WalletTypeCold1,
+		"for all",
+		"coldwallet1 -w 1 -d",
+	},
+	{
+		WalletTypeCold1,
 		"generate seed",
 		"coldwallet1 -w 1 -k -m 1",
 	},
@@ -94,7 +99,7 @@ var proceduresForPreparation = []Procedure{
 	{
 		WalletTypeCold1,
 		"export [receipt, payment] multisig address as csv",
-		"coldwallet1 -w 1 -k -m 51, 52",
+		"coldwallet1 -w 1 -k -m 50, 51",
 	},
 	{
 		WalletTypeWatchOnly,
