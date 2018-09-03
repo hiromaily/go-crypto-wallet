@@ -29,6 +29,8 @@ bitcoin-stop:
 cd-btc-dir:
 	cd ~/Library/Application\ Support/Bitcoin
 
+reset-wallet-for-bitcoin-core-for-development:
+    rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/wallet.dat
 
 ###############################################################################
 # Build
