@@ -338,10 +338,25 @@ func keyFunctionalities1(wallet *service.Wallet) {
 		//[coldwallet1のみ]
 		//TODO:coldwallet2からexportしたReceiptのmultisigアドレスをcoldWallet1にimportする
 		logger.Info("Run: coldwallet2からexportしたReceiptのmultisigアドレスをcoldWallet1にimportする")
+		if opts.ImportFile == "" {
+			logger.Fatal("file path is required as argument file when running")
+		}
+		err := wallet.ImportMultisigAddrForColdWallet1(opts.ImportFile, enum.AccountTypeReceipt)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+
 	case 41:
 		//[coldwallet1のみ]
 		//TODO:coldwallet2からexportしたPaymentのmultisigアドレスをcoldWallet1にimportする
 		logger.Info("Run: coldwallet2からexportしたPaymentのmultisigアドレスをcoldWallet1にimportする")
+		if opts.ImportFile == "" {
+			logger.Fatal("file path is required as argument file when running")
+		}
+		err := wallet.ImportMultisigAddrForColdWallet1(opts.ImportFile, enum.AccountTypePayment)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
 
 	//case 51:
 	//	//[coldwallet1のみ]

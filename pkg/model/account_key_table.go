@@ -194,6 +194,39 @@ func (m *DB) UpdateKeyStatusByWIFs(accountType enum.AccountType, keyStatus enum.
 	return m.updateKeyStatusByWIFs(accountKeyTableName[accountType], keyStatus, wifs, tx, isCommit)
 }
 
+// updateMultisigAddrOnAccountKeyTable wallet_multisig_addressを更新する
+func (m *DB) updateMultisigAddrOnAccountKeyTable(tbl string, accountKeyTable []AccountKeyTable, tx *sqlx.Tx, isCommit bool) error {
+	sql := `
+UPDATE %s SET wallet_multisig_address=:wallet_multisig_address, redeem_script=:redeem_script, key_status=:key_status, updated_at=:updated_at 
+WHERE full_public_key=:full_public_key
+`
+	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
+
+	if tx == nil {
+		tx = m.RDB.MustBegin()
+	}
+
+	for _, accountKey := range accountKeyTable {
+		_, err := tx.NamedExec(sql, accountKey)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	if isCommit {
+		tx.Commit()
+	}
+
+	return nil
+}
+
+// UpdateMultisigAddrOnAccountKeyTable wallet_multisig_addressを更新する
+func (m *DB) UpdateMultisigAddrOnAccountKeyTable(accountType enum.AccountType, accountKeyTable []AccountKeyTable, tx *sqlx.Tx, isCommit bool) error {
+	return m.updateMultisigAddrOnAccountKeyTable(accountKeyTableName[accountType], accountKeyTable, tx, isCommit)
+}
+
 // updateIsImprotedPrivKey is_imported_priv_keyをtrueに更新する
 //func (m *DB) updateIsImprotedPrivKey(tbl, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error) {
 //	sql := `

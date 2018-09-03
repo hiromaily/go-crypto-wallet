@@ -78,8 +78,13 @@ var proceduresForPreparation = []Procedure{
 	},
 	{
 		WalletTypeCold1,
-		"import [receipt, payment] multisig address, public address and redeemScript from csv to DB",
-		"coldwallet1 -w 1 -k -m 40,41",
+		"import [receipt] multisig address and redeemScript from csv to DB",
+		"coldwallet1 -w 1 -k -m 40 -i ./data/pubkey/xxx.csv",
+	},
+	{
+		WalletTypeCold1,
+		"import [payment] multisig address and redeemScript from csv to DB",
+		"coldwallet1 -w 1 -k -m 41 -i ./data/pubkey/xxx.csv",
 	},
 	//{
 	//	WalletTypeCold1,

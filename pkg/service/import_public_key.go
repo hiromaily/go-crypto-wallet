@@ -7,6 +7,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
 	"strings"
+	"time"
 )
 
 //Watch only wallet
@@ -132,6 +133,59 @@ func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum
 	//if err != nil {
 	//	return errors.Errorf("DB.InsertAccountKeyClient() error: %s", err)
 	//}
+
+	return nil
+}
+
+// ImportMultisigAddrForColdWallet1 coldwallet2でexportされたmultisigアドレス情報をimportする
+func (w *Wallet) ImportMultisigAddrForColdWallet1(fileName string, accountType enum.AccountType) error {
+	if accountType != enum.AccountTypeReceipt && accountType != enum.AccountTypePayment {
+		logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
+		return nil
+	}
+	//TODO:ImportするファイルのaccountTypeもチェックしたほうがBetter
+	//e.g. ./data/pubkey/receipt
+	tmp := strings.Split(strings.Split(fileName, "_")[0], "/")
+	if tmp[len(tmp)-1] != string(accountType) {
+		return errors.Errorf("mismatching between accountType(%s) and file prefix [%s]", accountType, tmp[0])
+	}
+
+	//ファイル読み込み(full public key)
+	pubKeys, err := key.ImportPubKey(fileName)
+	if err != nil {
+		return errors.Errorf("key.ImportPubKey() error: %v", err)
+	}
+
+	//added_pubkey_history_receiptテーブルにInsert
+	accountKeyTable := make([]model.AccountKeyTable, len(pubKeys))
+
+	tm := time.Now()
+	for i, key := range pubKeys {
+		//TODO:とりあえず、1カラムのデータを前提でコーディングしておく
+		inner := strings.Split(key, ",")
+		//csvファイル
+		//tmpData := []string{
+		//	record.FullPublicKey,
+		//	record.AuthAddress1,
+		//	record.AuthAddress2,
+		//	record.WalletMultisigAddress,
+		//	record.RedeemScript,
+		//}
+
+		//Upsertをかけるには情報が不足しているので、とりあえず1行ずつUpdateする
+		accountKeyTable[i] = model.AccountKeyTable{
+			FullPublicKey:         inner[0],
+			WalletMultisigAddress: inner[3],
+			RedeemScript:          inner[4],
+			KeyStatus:             enum.KeyStatusValue[enum.KeyStatusMultiAddressImported],
+			UpdatedAt:             &tm,
+		}
+	}
+	//Update
+	err = w.DB.UpdateMultisigAddrOnAccountKeyTable(accountType, accountKeyTable, nil, true)
+	if err != nil {
+		return errors.Errorf("DB.UpdateMultisigAddrOnAccountKeyTable() error: %s", err)
+	}
 
 	return nil
 }
