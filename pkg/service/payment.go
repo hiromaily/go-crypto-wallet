@@ -158,7 +158,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 	for _, tx := range unspentList {
 		amt, err := btcutil.NewAmount(tx.Amount)
 		if err != nil {
-			logger.Errorf("btcutil.NewAmount(%v) error:", tx.Amount, err)
+			logger.Errorf("btcutil.NewAmount(%v) error: %s", tx.Amount, err)
 			continue
 		}
 		inputTotal += amt

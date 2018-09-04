@@ -74,7 +74,7 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 	relayFee, err := b.getMinRelayFee()
 	if err != nil {
 		//logのみ
-		logger.Errorf("getMinRelayFee(): error: %v", err)
+		logger.Errorf("getMinRelayFee(): error: %s", err)
 	} else {
 		if fee < relayFee {
 			fee = relayFee
@@ -90,7 +90,7 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 		newFee, err := b.calculateNewFee(fee, adjustmentFee)
 		if err != nil {
 			//logのみ表示
-			logger.Errorf("calculateNewFee() error: %v", err)
+			logger.Errorf("calculateNewFee() error: %s", err)
 		}
 		logger.Debugf("[2]adjusted newFee:%v", newFee) //0.000208 BTC
 		fee = newFee

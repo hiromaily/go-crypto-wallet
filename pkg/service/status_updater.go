@@ -47,7 +47,7 @@ func (w *Wallet) updateStatusForTxTypeSent(actionType enum.ActionType) error {
 	for _, hash := range hashes {
 		err = w.checkTransaction(hash, actionType)
 		if err != nil {
-			logger.Errorf("ActionType: %s, w.checkTransaction(%s, %s) error:%v", actionType, hash, actionType, err)
+			logger.Errorf("ActionType: %s, w.checkTransaction(%s, %s) error:%s", actionType, hash, actionType, err)
 			continue
 		}
 	}
@@ -67,7 +67,7 @@ func (w *Wallet) updateStatusForTxTypeDone(actionType enum.ActionType) error {
 		//ユーザーに通知
 		id, err := w.notifyUsers(hash, actionType)
 		if err != nil {
-			logger.Errorf("ActionType: %s, w.notifyUsers(%s, %s) error:%v", actionType, hash, actionType, err)
+			logger.Errorf("ActionType: %s, w.notifyUsers(%s, %s) error:%s", actionType, hash, actionType, err)
 			continue
 		}
 		if id == 0 {
@@ -78,7 +78,7 @@ func (w *Wallet) updateStatusForTxTypeDone(actionType enum.ActionType) error {
 		err = w.updateTxTypeNotified(id, hash, actionType)
 		//仮にここがエラーになっても、通知は成功している。。。が、また処理が走ってしまう。。。
 		if err != nil {
-			logger.Errorf("ActionType: %s, w.updateTxTypeNotified(%s, %s) error:%v", actionType, hash, actionType, err)
+			logger.Errorf("ActionType: %s, w.updateTxTypeNotified(%s, %s) error:%s", actionType, hash, actionType, err)
 			continue
 		}
 	}
@@ -90,9 +90,9 @@ func (w *Wallet) checkTransaction(hash string, actionType enum.ActionType) error
 	//トランザクションの状態を取得
 	tran, err := w.BTC.GetTransactionByTxID(hash)
 	if err != nil {
-		//logger.Errorf("ActionType: %s, w.BTC.GetTransactionByTxID(): txID:%s, err:%v", actionType, hash, err)
+		//logger.Errorf("ActionType: %s, w.BTC.GetTransactionByTxID(): txID:%s, err:%s", actionType, hash, err)
 		//TODO:実際に起きる場合はcanceledに更新したほうがいいか？
-		return errors.Errorf("ActionType: %s, w.BTC.GetTransactionByTxID(): txID:%s, err:%v", actionType, hash, err)
+		return errors.Errorf("ActionType: %s, w.BTC.GetTransactionByTxID(): txID:%s, err:%s", actionType, hash, err)
 	}
 	logger.Debugf("ActionType: %s, Transactions Confirmations", actionType)
 	grok.Value(tran.Confirmations)

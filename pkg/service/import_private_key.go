@@ -47,14 +47,14 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 		//err = w.BTC.ImportPrivKey(wif)
 		if err != nil {
 			//Bitcoin coreの状況によってエラーが返ることも想定する。よってエラー時はcontinue
-			logger.Errorf("BTC.ImportPrivKeyWithoutReScan() error: %v", err)
+			logger.Errorf("BTC.ImportPrivKeyWithoutReScan() error: %s", err)
 			continue
 		}
 		//update DB
 		//_, err = w.DB.UpdateIsImprotedPrivKey(accountType, record.WalletImportFormat, nil, true)
 		_, err = w.DB.UpdateKeyStatusByWIF(accountType, enum.KeyStatusImportprivkey, record.WalletImportFormat, nil, true)
 		if err != nil {
-			logger.Errorf("BTC.UpdateKeyStatusByWIF(%s, %s, %s) error: %v", accountType, enum.KeyStatusImportprivkey, record.WalletImportFormat, err)
+			logger.Errorf("BTC.UpdateKeyStatusByWIF(%s, %s, %s) error: %s", accountType, enum.KeyStatusImportprivkey, record.WalletImportFormat, err)
 		}
 
 		//アドレスがbitcoin core walletに登録されているかチェック
@@ -75,13 +75,13 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 	//	//err = w.BTC.ImportPrivKey(wif)
 	//	if err != nil {
 	//		//Bitcoin coreの状況によってエラーが返ることも想定する。よってエラー時はcontinue
-	//		logger.Errorf("BTC.ImportPrivKeyWithoutReScan() error: %v", err)
+	//		logger.Errorf("BTC.ImportPrivKeyWithoutReScan() error: %s", err)
 	//		continue
 	//	}
 	//	//update DB
 	//	_, err = w.DB.UpdateIsImprotedPrivKey(accountType, strWIF, nil, true)
 	//	if err != nil {
-	//		logger.Errorf("BTC.UpdateIsImprotedPrivKey(%s, %s) error: %v", accountType, strWIF, err)
+	//		logger.Errorf("BTC.UpdateIsImprotedPrivKey(%s, %s) error: %s", accountType, strWIF, err)
 	//	}
 	//}
 
@@ -93,7 +93,7 @@ func (w *Wallet) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPubl
 	//1.getaccount address(wallet_address)
 	account, err := w.BTC.GetAccount(walletAddress)
 	if err != nil {
-		logger.Errorf("w.BTC.GetAccount(%s) error: %v", walletAddress, err)
+		logger.Errorf("w.BTC.GetAccount(%s) error: %s", walletAddress, err)
 		//for new version check
 		w.checkImportedAddressVer17(walletAddress, p2shSegwitAddress, fullPublicKey)
 		return
@@ -103,14 +103,14 @@ func (w *Wallet) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPubl
 	//2.getaccount address(p2sh_segwit_address)
 	account, err = w.BTC.GetAccount(p2shSegwitAddress)
 	if err != nil {
-		logger.Errorf("w.BTC.GetAccount(%s) error: %v", p2shSegwitAddress, err)
+		logger.Errorf("w.BTC.GetAccount(%s) error: %s", p2shSegwitAddress, err)
 	}
 	logger.Debugf("account[%s] is found by p2sh_segwit_address:%s", account, p2shSegwitAddress)
 
 	//3.check full_public_key by validateaddress retrieving it
 	res, err := w.BTC.ValidateAddress(p2shSegwitAddress)
 	if err != nil {
-		logger.Errorf("w.BTC.ValidateAddress(%s) error: %v", p2shSegwitAddress, err)
+		logger.Errorf("w.BTC.ValidateAddress(%s) error: %s", p2shSegwitAddress, err)
 	}
 	if res.PubKey != fullPublicKey {
 		logger.Errorf("generating pubkey logic is wrong")
@@ -124,21 +124,21 @@ func (w *Wallet) checkImportedAddressVer17(walletAddress, p2shSegwitAddress, ful
 	//getaddressinfo "address"
 	addrInfo, err := w.BTC.GetAddressInfo(walletAddress)
 	if err != nil {
-		logger.Errorf("w.BTC.GetAddressInfo(%s) error: %v", walletAddress, err)
+		logger.Errorf("w.BTC.GetAddressInfo(%s) error: %s", walletAddress, err)
 	}
 	logger.Debugf("account[%s] is found by wallet_address:%s", addrInfo.Label, walletAddress)
 
 	//2.getaccount address(p2sh_segwit_address)
 	addrInfo, err = w.BTC.GetAddressInfo(p2shSegwitAddress)
 	if err != nil {
-		logger.Errorf("w.BTC.GetAccount(%s) error: %v", p2shSegwitAddress, err)
+		logger.Errorf("w.BTC.GetAccount(%s) error: %s", p2shSegwitAddress, err)
 	}
 	logger.Debugf("account[%s] is found by p2sh_segwit_address:%s", addrInfo.Label, p2shSegwitAddress)
 
 	//3.getaccount address(p2sh_segwit_address)
 	addrInfo, err = w.BTC.GetAddressInfo(p2shSegwitAddress)
 	if err != nil {
-		logger.Errorf("w.BTC.GetAccount(%s) error: %v", p2shSegwitAddress, err)
+		logger.Errorf("w.BTC.GetAccount(%s) error: %s", p2shSegwitAddress, err)
 	}
 	logger.Debugf("account[%s] is found by p2sh_segwit_address:%s", addrInfo.Label, p2shSegwitAddress)
 

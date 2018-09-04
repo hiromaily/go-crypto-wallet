@@ -47,7 +47,7 @@ func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum
 		err := w.BTC.ImportAddressWithLabel(addr, account, false)
 		if err != nil {
 			//-4: The wallet already contains the private key for this address or script
-			logger.Errorf("BTC.ImportAddressWithLabel(%s) error: %v", addr, err)
+			logger.Errorf("BTC.ImportAddressWithLabel(%s) error: %s", addr, err)
 			continue
 		}
 
@@ -60,14 +60,14 @@ func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum
 		//1.getaccount address(wallet_address)
 		account, err := w.BTC.GetAccount(addr)
 		if err != nil {
-			logger.Errorf("w.BTC.GetAccount(%s) error: %v", addr, err)
+			logger.Errorf("w.BTC.GetAccount(%s) error: %s", addr, err)
 		}
 		logger.Debugf("account[%s] is found by wallet_address:%s", account, addr)
 
 		//2.check full_public_key by validateaddress retrieving it
 		res, err := w.BTC.ValidateAddress(addr)
 		if err != nil {
-			logger.Errorf("w.BTC.ValidateAddress(%s) error: %v", addr, err)
+			logger.Errorf("w.BTC.ValidateAddress(%s) error: %s", addr, err)
 		}
 		grok.Value(res)
 		//watch only walletを想定している

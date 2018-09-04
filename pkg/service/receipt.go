@@ -78,7 +78,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 		amt, err := btcutil.NewAmount(tx.Amount)
 		if err != nil {
 			//このエラーは起こりえない
-			logger.Errorf("btcutil.NewAmount(%f): error:%v", tx.Amount, err)
+			logger.Errorf("btcutil.NewAmount(%f): error:%s", tx.Amount, err)
 			continue
 		}
 		inputTotal += amt //合計

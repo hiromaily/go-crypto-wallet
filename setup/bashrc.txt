@@ -5,4 +5,4 @@ export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 alias mff='cd $GOPATH/src/github.com/mf-financial'
 alias mfw='cd $GOPATH/src/github.com/mf-financial/cayenne_wallet'
 alias btc='cd ~/Library/Application\ Support/Bitcoin'
-
+alias rstwlt='rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/wallet.dat'
