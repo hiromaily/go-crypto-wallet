@@ -38,7 +38,7 @@ func CreateFilePath(strAccountType string, keyStatus uint8) string {
 //	file, err := os.Create(fileName)
 //	//file, _ := os.OpenFile(*fileName, os.O_WRONLY | os.O_APPEND, 0644)
 //	if err != nil {
-//		return "", errors.Errorf("os.Create(%s) error: %v", fileName, err)
+//		return "", errors.Errorf("os.Create(%s) error: %s", fileName, err)
 //	}
 //	defer file.Close()
 //
@@ -47,12 +47,12 @@ func CreateFilePath(strAccountType string, keyStatus uint8) string {
 //		//csvファイルとしてだが、このケースでは、pubkeyの1カラムのみ
 //		_, err = writer.WriteString(key + "\n")
 //		if err != nil {
-//			return "", errors.Errorf("writer.WriteString(%s) error: %v", fileName, err)
+//			return "", errors.Errorf("writer.WriteString(%s) error: %s", fileName, err)
 //		}
 //	}
 //	err = writer.Flush()
 //	if err != nil {
-//		return "", errors.Errorf("writer.Flush(%s) error: %v", fileName, err)
+//		return "", errors.Errorf("writer.Flush(%s) error: %s", fileName, err)
 //	}
 //
 //	return fileName, nil
@@ -66,7 +66,7 @@ func ExportAccountKeyTable(accountKeyTable []model.AccountKeyTable, strAccountTy
 	file, err := os.Create(fileName)
 	//file, _ := os.OpenFile(*fileName, os.O_WRONLY | os.O_APPEND, 0644)
 	if err != nil {
-		return "", errors.Errorf("os.Create(%s) error: %v", fileName, err)
+		return "", errors.Errorf("os.Create(%s) error: %s", fileName, err)
 	}
 	defer file.Close()
 
@@ -100,12 +100,12 @@ func ExportAccountKeyTable(accountKeyTable []model.AccountKeyTable, strAccountTy
 		_, err = writer.WriteString(strings.Join(tmpData[:], ",") + "\n")
 		//_, err = writer.WriteString(record. + "\n")
 		if err != nil {
-			return "", errors.Errorf("writer.WriteString(%s) error: %v", fileName, err)
+			return "", errors.Errorf("writer.WriteString(%s) error: %s", fileName, err)
 		}
 	}
 	err = writer.Flush()
 	if err != nil {
-		return "", errors.Errorf("writer.Flush(%s) error: %v", fileName, err)
+		return "", errors.Errorf("writer.Flush(%s) error: %s", fileName, err)
 	}
 
 	return fileName, nil
@@ -118,7 +118,7 @@ func ExportAddedPubkeyHistoryTable(addedPubkeyHistoryTable []model.AddedPubkeyHi
 
 	file, err := os.Create(fileName)
 	if err != nil {
-		return "", errors.Errorf("os.Create(%s) error: %v", fileName, err)
+		return "", errors.Errorf("os.Create(%s) error: %s", fileName, err)
 	}
 	defer file.Close()
 
@@ -145,12 +145,12 @@ func ExportAddedPubkeyHistoryTable(addedPubkeyHistoryTable []model.AddedPubkeyHi
 		}
 		_, err = writer.WriteString(strings.Join(tmpData[:], ",") + "\n")
 		if err != nil {
-			return "", errors.Errorf("writer.WriteString(%s) error: %v", fileName, err)
+			return "", errors.Errorf("writer.WriteString(%s) error: %s", fileName, err)
 		}
 	}
 	err = writer.Flush()
 	if err != nil {
-		return "", errors.Errorf("writer.Flush(%s) error: %v", fileName, err)
+		return "", errors.Errorf("writer.Flush(%s) error: %s", fileName, err)
 	}
 
 	return fileName, nil
@@ -160,7 +160,7 @@ func ExportAddedPubkeyHistoryTable(addedPubkeyHistoryTable []model.AddedPubkeyHi
 func ImportPubKey(fileName string) ([]string, error) {
 	file, err := os.Open(fileName)
 	if err != nil {
-		return nil, errors.Errorf("os.Open(%s) error: %v", fileName, err)
+		return nil, errors.Errorf("os.Open(%s) error: %s", fileName, err)
 	}
 	defer file.Close()
 

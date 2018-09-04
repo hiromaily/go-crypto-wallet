@@ -32,7 +32,7 @@ type UserPayment struct {
 func (w *Wallet) createUserPayment() ([]UserPayment, []int64, error) {
 	paymentRequests, err := w.DB.GetPaymentRequestAll()
 	if err != nil {
-		return nil, nil, errors.Errorf("DB.GetPaymentRequest() error: %v", err)
+		return nil, nil, errors.Errorf("DB.GetPaymentRequestAll() error: %s", err)
 	}
 	if len(paymentRequests) == 0 {
 		//処理するデータが存在しない。(エラーではない)
@@ -127,7 +127,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 	addr, err := w.BTC.DecodeAddress(w.BTC.PaymentAddress())
 	if err != nil {
 		//toml内に定義あるアドレスなので、起動時にチェックすべき
-		return "", "", errors.Errorf("DecodeAddress(): error: %v", err)
+		return "", "", errors.Errorf("BTC.DecodeAddress(): error: %s", err)
 	}
 	unspentList, err := w.BTC.Client().ListUnspentMinMaxAddresses(6, 9999999, []btcutil.Address{addr})
 	if err != nil {
@@ -247,14 +247,14 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 	// 1.CreateRawTransactionWithOutput(仮で作成し、この後サイズから手数料を算出する)
 	msgTx, err := w.BTC.CreateRawTransactionWithOutput(inputs, outputs)
 	if err != nil {
-		return "", "", errors.Errorf("CreateRawTransactionWithOutput(): error: %v", err)
+		return "", "", errors.Errorf("BTC.CreateRawTransactionWithOutput(): error: %s", err)
 	}
 	logger.Debugf("CreateRawTransactionWithOutput: %v", msgTx)
 
 	// 2.fee算出
 	fee, err := w.BTC.GetFee(msgTx, adjustmentFee)
 	if err != nil {
-		return "", "", errors.Errorf("BTC.GetFee(): error: %v", err)
+		return "", "", errors.Errorf("BTC.GetFee(): error: %s", err)
 	}
 
 	// 3.お釣り用のoutputのトランザクションから、手数料を差し引く
@@ -292,13 +292,13 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 	// 4.再度 CreateRawTransaction
 	msgTx, err = w.BTC.CreateRawTransactionWithOutput(inputs, outputs)
 	if err != nil {
-		return "", "", errors.Errorf("CreateRawTransaction(): error: %v", err)
+		return "", "", errors.Errorf("BTC.CreateRawTransactionWithOutput(): error: %s", err)
 	}
 
 	// 5.出力用にHexに変換する
 	hex, err := w.BTC.ToHex(msgTx)
 	if err != nil {
-		return "", "", errors.Errorf("w.BTC.ToHex(msgTx): error: %v", err)
+		return "", "", errors.Errorf("BTC.ToHex(msgTx): error: %s", err)
 	}
 
 	// 6. Databaseに必要な情報を保存
@@ -306,7 +306,7 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 	//txReceiptID, err := w.insertHexForUnsignedTxOnPayment(hex, inputTotal, outputTotal, fee, enum.TxTypeValue[enum.TxTypeUnsigned], txPaymentInputs, txPaymentOutputs, paymentRequestIds)
 	txReceiptID, err := w.insertTxTableForUnsigned(enum.ActionTypePayment, hex, inputTotal, outputTotal, fee, enum.TxTypeValue[enum.TxTypeUnsigned], txPaymentInputs, txPaymentOutputs, paymentRequestIds)
 	if err != nil {
-		return "", "", errors.Errorf("insertHexOnDB(): error: %v", err)
+		return "", "", errors.Errorf("insertTxTableForUnsigned(): error: %s", err)
 	}
 
 	// 7. GCSにトランザクションファイルを作成
@@ -316,7 +316,7 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 	if txReceiptID != 0 {
 		generatedFileName, err = w.storeHex(hex, txReceiptID, enum.ActionTypePayment)
 		if err != nil {
-			return "", "", errors.Errorf("wallet.storeHex(): error: %v", err)
+			return "", "", errors.Errorf("wallet.storeHex(): error: %s", err)
 		}
 	}
 

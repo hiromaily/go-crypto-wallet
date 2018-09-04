@@ -88,14 +88,14 @@ func loadConfig(path string) (*Config, error) {
 	d, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, errors.Errorf(
-			"toml file can't not be read. [path]:%s: [error]:%v", path, err)
+			"toml file can't not be read. [path]:%s: [error]:%s", path, err)
 	}
 
 	//解析
 	var config Config
 	_, err = toml.Decode(string(d), &config)
 	if err != nil {
-		return nil, errors.New("toml file can't not be parsed")
+		return nil, errors.New("toml file can not be parsed")
 	}
 
 	return &config, nil

@@ -10,12 +10,12 @@ import (
 func (b *Bitcoin) GetAccount(addr string) (string, error) {
 	address, err := b.DecodeAddress(addr)
 	if err != nil {
-		return "", errors.Errorf("DecodeAddress(%s): error: %v", addr, err)
+		return "", errors.Errorf("DecodeAddress(%s): error: %s", addr, err)
 	}
 
 	accountName, err := b.client.GetAccount(address)
 	if err != nil {
-		return "", errors.Errorf("client.GetAccount(): error: %v", err)
+		return "", errors.Errorf("client.GetAccount(): error: %s", err)
 	}
 
 	return accountName, nil

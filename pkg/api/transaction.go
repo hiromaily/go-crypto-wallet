@@ -33,7 +33,7 @@ type FundRawTransactionResult struct {
 func (b *Bitcoin) ToHex(tx *wire.MsgTx) (string, error) {
 	buf := bytes.NewBuffer(make([]byte, 0, tx.SerializeSize()))
 	if err := tx.Serialize(buf); err != nil {
-		return "", errors.Errorf("tx.Serialize(): error: %v", err)
+		return "", errors.Errorf("tx.Serialize(): error: %s", err)
 	}
 	return hex.EncodeToString(buf.Bytes()), nil
 }
@@ -42,7 +42,7 @@ func (b *Bitcoin) ToHex(tx *wire.MsgTx) (string, error) {
 func (b *Bitcoin) ToMsgTx(txHex string) (*wire.MsgTx, error) {
 	byteHex, err := hex.DecodeString(txHex)
 	if err != nil {
-		return nil, errors.Errorf("hex.DecodeString(): error: %v", err)
+		return nil, errors.Errorf("hex.DecodeString(): error: %s", err)
 	}
 
 	var msgTx wire.MsgTx
@@ -57,11 +57,11 @@ func (b *Bitcoin) ToMsgTx(txHex string) (*wire.MsgTx, error) {
 func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*btcjson.TxRawResult, error) {
 	byteHex, err := hex.DecodeString(hexTx)
 	if err != nil {
-		return nil, errors.Errorf("hex.DecodeString(): error: %v", err)
+		return nil, errors.Errorf("hex.DecodeString(): error: %s", err)
 	}
 	resTx, err := b.client.DecodeRawTransaction(byteHex)
 	if err != nil {
-		return nil, errors.Errorf("client.DecodeRawTransaction(): error: %v", err)
+		return nil, errors.Errorf("client.DecodeRawTransaction(): error: %s", err)
 	}
 
 	return resTx, nil
@@ -72,12 +72,12 @@ func (b *Bitcoin) GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error) 
 
 	hashTx, err := chainhash.NewHashFromStr(strHashTx)
 	if err != nil {
-		return nil, errors.Errorf("chainhash.NewHashFromStr(%s): error: %v", strHashTx, err)
+		return nil, errors.Errorf("chainhash.NewHashFromStr(%s): error: %s", strHashTx, err)
 	}
 
 	tx, err := b.client.GetRawTransaction(hashTx)
 	if err != nil {
-		return nil, errors.Errorf("GetRawTransaction(hash): error: %v", err)
+		return nil, errors.Errorf("client.GetRawTransaction(hash): error: %s", err)
 	}
 	//MsgTx()
 	//tx.MsgTx()
@@ -90,11 +90,11 @@ func (b *Bitcoin) GetTransactionByTxID(txID string) (*btcjson.GetTransactionResu
 	// Transaction詳細を取得(必要な情報があるかどうか不明)
 	hashTx, err := chainhash.NewHashFromStr(txID)
 	if err != nil {
-		return nil, errors.Errorf("chainhash.NewHashFromStr(%s): error: %v", txID, err)
+		return nil, errors.Errorf("chainhash.NewHashFromStr(%s): error: %s", txID, err)
 	}
 	resTx, err := b.client.GetTransaction(hashTx)
 	if err != nil {
-		return nil, errors.Errorf("GetTransaction(%s): error: %v", hashTx, err)
+		return nil, errors.Errorf("client.GetTransaction(%s): error: %s", hashTx, err)
 	}
 	//type GetTransactionResult struct {
 	//	Amount          float64                       `json:"amount"`
@@ -118,13 +118,13 @@ func (b *Bitcoin) GetTransactionByTxID(txID string) (*btcjson.GetTransactionResu
 func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutResult, error) {
 	hash, err := chainhash.NewHashFromStr(txID)
 	if err != nil {
-		return nil, errors.Errorf("chainhash.NewHashFromStr(%s): error: %v", txID, err)
+		return nil, errors.Errorf("chainhash.NewHashFromStr(%s): error: %s", txID, err)
 	}
 
 	// Gettxout / txHash *chainhash.Hash, index uint32, mempool bool
 	txOutResult, err := b.client.GetTxOut(hash, index, false)
 	if err != nil {
-		return nil, errors.Errorf("GetTxOut(%s, %d, false): error: %v", hash, index, err)
+		return nil, errors.Errorf("client.GetTxOut(%s, %d, false): error: %s", hash, index, err)
 	}
 
 	return txOutResult, nil
@@ -155,7 +155,7 @@ func (b *Bitcoin) CreateRawTransaction(sendAddr string, amount btcutil.Amount, i
 	//TODO:sendAddrの厳密なチェックがセキュリティ的に必要な場面もありそう
 	sendAddrDecoded, err := btcutil.DecodeAddress(sendAddr, b.GetChainConf())
 	if err != nil {
-		return nil, errors.Errorf("btcutil.DecodeAddress(%s): error: %v", sendAddr, err)
+		return nil, errors.Errorf("btcutil.DecodeAddress(%s): error: %s", sendAddr, err)
 	}
 
 	// パラメータを作成する
@@ -175,7 +175,7 @@ func (b *Bitcoin) CreateRawTransactionWithOutput(inputs []btcjson.TransactionInp
 	// CreateRawTransaction
 	msgTx, err := b.client.CreateRawTransaction(inputs, outputs, &lockTime)
 	if err != nil {
-		return nil, errors.Errorf("btcutil.CreateRawTransaction(): error: %v", err)
+		return nil, errors.Errorf("btcutil.CreateRawTransaction(): error: %s", err)
 	}
 
 	return msgTx, nil
@@ -191,13 +191,13 @@ func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, err
 	//hex
 	bHex, err := json.Marshal(hex)
 	if err != nil {
-		return nil, errors.Errorf("json.Marchal(hex): error: %v", err)
+		return nil, errors.Errorf("json.Marchal(hex): error: %s", err)
 	}
 
 	//fee rate
 	feePerKb, err := b.EstimateSmartFee()
 	if err != nil {
-		return nil, errors.Errorf("EstimateSmartFee(): error: %v", err)
+		return nil, errors.Errorf("BTC.EstimateSmartFee(): error: %s", err)
 	}
 
 	bFeeRate, err := json.Marshal(struct {
@@ -206,20 +206,20 @@ func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, err
 		FeeRate: feePerKb,
 	})
 	if err != nil {
-		return nil, errors.Errorf("json.Marchal(feeRate): error: %v", err)
+		return nil, errors.Errorf("json.Marchal(feeRate): error: %s", err)
 	}
 
 	rawResult, err := b.client.RawRequest("fundrawtransaction", []json.RawMessage{bHex, bFeeRate})
 	//rawResult, err := b.client.RawRequest("fundrawtransaction", []json.RawMessage{bHex})
 	if err != nil {
 		//error: -4: Insufficient funds
-		return nil, errors.Errorf("json.RawRequest(fundrawtransaction): error: %v", err)
+		return nil, errors.Errorf("json.RawRequest(fundrawtransaction): error: %s", err)
 	}
 
 	fundRawTransactionResult := FundRawTransactionResult{}
 	err = json.Unmarshal([]byte(rawResult), &fundRawTransactionResult)
 	if err != nil {
-		return nil, errors.Errorf("json.Unmarshal(): error: %v", err)
+		return nil, errors.Errorf("json.Unmarshal(): error: %s", err)
 	}
 	//logger.Infof("fundRawTransactionResult: %v: %s\n", fundRawTransactionResult, fundRawTransactionResult.Hex)
 
@@ -233,7 +233,7 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) 
 	//署名
 	msgTx, isSigned, err := b.client.SignRawTransaction(tx)
 	if err != nil {
-		return nil, false, errors.Errorf("SignRawTransaction(): error: %v", err)
+		return nil, false, errors.Errorf("client.SignRawTransaction(): error: %s", err)
 	}
 	//Multisigの場合、これによって署名が終了したか判断するはず
 	//if !isSigned {
@@ -261,7 +261,7 @@ func (b *Bitcoin) SignRawTransactionByHex(hex string) (string, bool, error) {
 	//Hexに変換
 	hexTx, err := b.ToHex(signedTx)
 	if err != nil {
-		return "", false, errors.Errorf("w.BTC.ToHex(msgTx): error: %v", err)
+		return "", false, errors.Errorf("BTC.ToHex(msgTx): error: %s", err)
 	}
 
 	//return signedTx, nil
@@ -277,7 +277,7 @@ func (b *Bitcoin) SendRawTransaction(tx *wire.MsgTx) (*chainhash.Hash, error) {
 	if err != nil {
 		//feeを1Satoshiで試してみたら、
 		//-26: 66: min relay fee not metが出た
-		return nil, errors.Errorf("client.SendRawTransaction(): error: %v", err)
+		return nil, errors.Errorf("client.SendRawTransaction(): error: %s", err)
 	}
 
 	return hash, nil
@@ -296,7 +296,7 @@ func (b *Bitcoin) SendTransactionByHex(hex string) (*chainhash.Hash, error) {
 	hash, err := b.SendRawTransaction(msgTx)
 	//hash, err := b.client.SendRawTransaction(msgTx, true)
 	if err != nil {
-		return nil, errors.Errorf("SendRawTransaction(): error: %v", err)
+		return nil, errors.Errorf("BTC.SendRawTransaction(): error: %s", err)
 	}
 
 	//txID
@@ -314,14 +314,14 @@ func (b *Bitcoin) SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error) {
 	r := bytes.NewBuffer(rawTx)
 
 	if err := wireTx.Deserialize(r); err != nil {
-		return nil, errors.Errorf("wireTx.Deserialize(): error: %v", err)
+		return nil, errors.Errorf("wireTx.Deserialize(): error: %s", err)
 	}
 
 	//送信
 	hash, err := b.SendRawTransaction(wireTx)
 	//hash, err := b.client.SendRawTransaction(wireTx, true)
 	if err != nil {
-		return nil, errors.Errorf("SendRawTransaction(): error: %v", err)
+		return nil, errors.Errorf("BTC.SendRawTransaction(): error: %v", err)
 	}
 
 	return hash, nil
@@ -342,7 +342,7 @@ func (b *Bitcoin) SequentialTransaction(hex string) (*chainhash.Hash, *btcutil.T
 		return nil, nil, err
 	}
 	if !isSigned {
-		return nil, nil, errors.New("SignRawTransaction() can not sign on given transaction or multisig may be required")
+		return nil, nil, errors.New("BTC.SignRawTransaction() can not sign on given transaction or multisig may be required")
 	}
 
 	//送金(オンライン)

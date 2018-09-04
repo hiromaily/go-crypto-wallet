@@ -30,7 +30,7 @@ func (w *Wallet) signatureByHex(hex string) (string, bool, error) {
 
 	hexTx, err := w.BTC.ToHex(signedTx)
 	if err != nil {
-		return "", false, errors.Errorf("w.BTC.ToHex(msgTx): error: %v", err)
+		return "", false, errors.Errorf("w.BTC.ToHex(msgTx): error: %s", err)
 	}
 
 	return hexTx, isSigned, nil
@@ -62,7 +62,8 @@ func (w *Wallet) SignatureByHex(actionType enum.ActionType, hex string, txReceip
 func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error) {
 	//ファイル名から、tx_receipt_idを取得する
 	//payment_5_unsigned_1534466246366489473
-	txReceiptID, actionType, _, err := txfile.ParseFile(filePath, "unsigned")
+	//txReceiptID, actionType, _, err := txfile.ParseFile(filePath, "unsigned")
+	txReceiptID, actionType, _, err := txfile.ParseFile(filePath, enum.TxTypeUnsigned)
 	if err != nil {
 		return "", false, "", err
 	}

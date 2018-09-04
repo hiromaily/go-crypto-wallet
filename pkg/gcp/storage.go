@@ -51,7 +51,7 @@ func (s *Storage) NewClient(ctx context.Context) (*ExtClient, error) {
 		ext.client, err = storage.NewClient(ctx)
 	}
 	if err != nil {
-		return nil, errors.Errorf("storage.NewClient() error: %v", err)
+		return nil, errors.Errorf("storage.NewClient() error: %s", err)
 	}
 
 	// バケット
@@ -68,17 +68,17 @@ func (s *Storage) NewClient(ctx context.Context) (*ExtClient, error) {
 func (s *Storage) WriteOnce(path, hex string) (string, error) {
 	cli, err := s.NewClient(context.Background())
 	if err != nil {
-		return "", errors.Errorf("storage.NewClient(): error: %v", err)
+		return "", errors.Errorf("storage.NewClient(): error: %s", err)
 	}
 
 	generatedFileName, err := cli.Write(path, []byte(hex))
 	if err != nil {
-		return "", errors.Errorf("storage.Write(): error: %v", err)
+		return "", errors.Errorf("storage.Write(): error: %s", err)
 	}
 
 	err = cli.Close()
 	if err != nil {
-		return "", errors.Errorf("storage.Close(): error: %v", err)
+		return "", errors.Errorf("storage.Close(): error: %s", err)
 	}
 
 	return generatedFileName, nil
@@ -88,17 +88,17 @@ func (s *Storage) WriteOnce(path, hex string) (string, error) {
 func (s *Storage) ReadOnce(path, outputPath string) error {
 	cli, err := s.NewClient(context.Background())
 	if err != nil {
-		return errors.Errorf("storage.NewClient(): error: %v", err)
+		return errors.Errorf("storage.NewClient(): error: %s", err)
 	}
 
 	err = cli.ReadAndSave(path, outputPath, 0666)
 	if err != nil {
-		return errors.Errorf("storage.Write(): error: %v", err)
+		return errors.Errorf("storage.Write(): error: %s", err)
 	}
 
 	err = cli.Close()
 	if err != nil {
-		return errors.Errorf("storage.Close(): error: %v", err)
+		return errors.Errorf("storage.Close(): error: %s", err)
 	}
 
 	return nil
@@ -122,11 +122,11 @@ func (e *ExtClient) Write(path string, p []byte) (fileName string, err error) {
 	w := e.bkt.Object(fileName).NewWriter(e.ctx)
 	_, err = w.Write(p)
 	if err != nil {
-		err = errors.Errorf("w.Write() error: %v", err)
+		err = errors.Errorf("w.Write() error: %s", err)
 	}
 
 	if err2 := w.Close(); err2 != nil {
-		err = errors.Errorf("w.Close() error: %v", err2)
+		err = errors.Errorf("w.Close() error: %s", err2)
 	}
 
 	return
@@ -138,7 +138,7 @@ func (e *ExtClient) ReadAndSave(readFileName, saveFileName string, perm os.FileM
 	var r *storage.Reader
 	r, err = e.bkt.Object(readFileName).NewReader(e.ctx)
 	if err != nil {
-		err = errors.Errorf("bkt.Object() error: %v", err)
+		err = errors.Errorf("bkt.Object() error: %s", err)
 		return
 	}
 	defer func() {
@@ -150,13 +150,13 @@ func (e *ExtClient) ReadAndSave(readFileName, saveFileName string, perm os.FileM
 	var body []byte
 	body, err = ioutil.ReadAll(r)
 	if err != nil {
-		err = errors.Errorf("ioutil.ReadAll() error: %v", err)
+		err = errors.Errorf("ioutil.ReadAll() error: %s", err)
 		return
 	}
 	// Save
 	err = ioutil.WriteFile(saveFileName, body, perm)
 	if err != nil {
-		err = errors.Errorf("ioutil.WriteFile() error: %v", err)
+		err = errors.Errorf("ioutil.WriteFile() error: %s", err)
 	}
 
 	return

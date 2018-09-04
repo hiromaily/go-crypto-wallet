@@ -43,7 +43,7 @@ type GetAddressInfoResult struct {
 func (b *Bitcoin) CreateNewAddress(accountName string) (btcutil.Address, error) {
 	addr, err := b.client.GetNewAddress(accountName)
 	if err != nil {
-		return nil, errors.Errorf("client.GetNewAddress(%s): error: %v", accountName, err)
+		return nil, errors.Errorf("client.GetNewAddress(%s): error: %s", accountName, err)
 	}
 
 	return addr, nil
@@ -56,7 +56,7 @@ func (b *Bitcoin) CreateNewAddress(accountName string) (btcutil.Address, error) 
 func (b *Bitcoin) GetAccountAddress(accountName string) (btcutil.Address, error) {
 	addr, err := b.client.GetAccountAddress(accountName)
 	if err != nil {
-		return nil, errors.Errorf("client.GetAccountAddress(%s): error: %v", accountName, err)
+		return nil, errors.Errorf("client.GetAccountAddress(%s): error: %s", accountName, err)
 	}
 
 	return addr, nil
@@ -74,7 +74,7 @@ func (b *Bitcoin) GetAddressesByAccount(accountName string) ([]btcutil.Address, 
 
 	addrs, err := b.client.GetAddressesByAccount(accountName)
 	if err != nil {
-		return nil, errors.Errorf("client.GetAddressesByAccount(%s): error: %v", accountName, err)
+		return nil, errors.Errorf("client.GetAddressesByAccount(%s): error: %s", accountName, err)
 	}
 
 	return addrs, nil
@@ -85,11 +85,11 @@ func (b *Bitcoin) GetAddressesByAccount(accountName string) ([]btcutil.Address, 
 func (b *Bitcoin) ValidateAddress(addr string) (*btcjson.ValidateAddressWalletResult, error) {
 	address, err := b.DecodeAddress(addr)
 	if err != nil {
-		return nil, errors.Errorf("DecodeAddress(%s): error: %v", addr, err)
+		return nil, errors.Errorf("DecodeAddress(%s): error: %s", addr, err)
 	}
 	res, err := b.client.ValidateAddress(address)
 	if err != nil {
-		return nil, errors.Errorf("client.ValidateAddress(%s): error: %v", addr, err)
+		return nil, errors.Errorf("client.ValidateAddress(%s): error: %s", addr, err)
 	}
 	//debug
 	//type ValidateAddressWalletResult struct {
@@ -117,7 +117,7 @@ func (b *Bitcoin) ValidateAddress(addr string) (*btcjson.ValidateAddressWalletRe
 func (b *Bitcoin) DecodeAddress(addr string) (btcutil.Address, error) {
 	address, err := btcutil.DecodeAddress(addr, b.chainConf)
 	if err != nil {
-		return nil, errors.Errorf("btcutil.DecodeAddress() error: %v", err)
+		return nil, errors.Errorf("btcutil.DecodeAddress() error: %s", err)
 	}
 	return address, nil
 }
@@ -128,17 +128,17 @@ func (b *Bitcoin) DecodeAddress(addr string) (btcutil.Address, error) {
 func (b *Bitcoin) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
 	input, err := json.Marshal(string(addr))
 	if err != nil {
-		return nil, errors.Errorf("json.Marchal(): error: %v", err)
+		return nil, errors.Errorf("json.Marchal(): error: %s", err)
 	}
 	rawResult, err := b.client.RawRequest("getaddressinfo", []json.RawMessage{input})
 	if err != nil {
-		return nil, errors.Errorf("json.RawRequest(getaddressinfo): error: %v", err)
+		return nil, errors.Errorf("json.RawRequest(getaddressinfo): error: %s", err)
 	}
 
 	infoResult := GetAddressInfoResult{}
 	err = json.Unmarshal([]byte(rawResult), &infoResult)
 	if err != nil {
-		return nil, errors.Errorf("json.Unmarshal(): error: %v", err)
+		return nil, errors.Errorf("json.Unmarshal(): error: %s", err)
 	}
 
 	return &infoResult, nil

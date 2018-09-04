@@ -60,7 +60,7 @@ func (w *Wallet) ExportAccountKey(accountType enum.AccountType, keyStatus enum.K
 	}
 	_, err = w.DB.UpdateKeyStatusByWIFs(accountType, updateKeyStatus, wifs, nil, true)
 	if err != nil {
-		return "", errors.Errorf("DB.UpdateIsExprotedPubKey() error: %s", err)
+		return "", errors.Errorf("DB.UpdateKeyStatusByWIFs() error: %s", err)
 	}
 
 	//Multisig対応かどうかのジャッジ
@@ -90,7 +90,7 @@ func (w *Wallet) ExportAddedPubkeyHistory(accountType enum.AccountType) (string,
 		//enum.KeyStatusValue[enum.KeyStatusMultiAddressImported])
 		enum.KeyStatusValue[enum.KeyStatusPubkeyExported])
 	if err != nil {
-		return "", errors.Errorf("key.ExportAccountKeyTable() error: %s", err)
+		return "", errors.Errorf("key.ExportAddedPubkeyHistoryTable() error: %s", err)
 	}
 	logger.Infof("file name is %s", fileName)
 
@@ -101,7 +101,7 @@ func (w *Wallet) ExportAddedPubkeyHistory(accountType enum.AccountType) (string,
 	}
 	_, err = w.DB.UpdateIsExportedOnAddedPubkeyHistoryTable(accountType, ids, nil, true)
 	if err != nil {
-		return "", errors.Errorf("DB.UpdateIsExprotedPubKey() error: %s", err)
+		return "", errors.Errorf("DB.UpdateIsExportedOnAddedPubkeyHistoryTable() error: %s", err)
 	}
 
 	return fileName, nil

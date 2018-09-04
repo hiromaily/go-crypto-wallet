@@ -22,7 +22,7 @@ func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum
 	//ファイル読み込み
 	pubKeys, err := key.ImportPubKey(fileName)
 	if err != nil {
-		return errors.Errorf("key.ImportPubKey() error: %v", err)
+		return errors.Errorf("key.ImportPubKey() error: %s", err)
 	}
 
 	//[]AccountPublicKeyTable
@@ -63,7 +63,7 @@ func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum
 	//DBにInsert
 	err = w.DB.InsertAccountPubKeyTable(accountType, pubKeyData, nil, true)
 	if err != nil {
-		return errors.Errorf("DB.InsertAccountPubKeyTable() error: %v", err)
+		return errors.Errorf("DB.InsertAccountPubKeyTable() error: %s", err)
 		//TODO:これが失敗したら、どうやって、登録済みのデータを再度Insertするか？再度実行すればOKのはず
 	}
 
@@ -87,7 +87,7 @@ func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum
 	//ファイル読み込み(full public key)
 	pubKeys, err := key.ImportPubKey(fileName)
 	if err != nil {
-		return errors.Errorf("key.ImportPubKey() error: %v", err)
+		return errors.Errorf("key.ImportPubKey() error: %s", err)
 	}
 
 	//added_pubkey_history_receiptテーブルにInsert
@@ -117,7 +117,7 @@ func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum
 	//TODO:Upsertに変えたほうがいいか？Insert済の場合、エラーが出る
 	err = w.DB.InsertAddedPubkeyHistoryTable(accountType, addedPubkeyHistorys, nil, true)
 	if err != nil {
-		return errors.Errorf("DB.InsertAccountKeyClient() error: %s", err)
+		return errors.Errorf("DB.InsertAddedPubkeyHistoryTable() error: %s", err)
 	}
 
 	// DBにClientAccountのKey情報を登録 (CSVの読み込み)
@@ -167,7 +167,7 @@ func (w *Wallet) ImportMultisigAddrForColdWallet1(fileName string, accountType e
 	//ファイル読み込み(full public key)
 	pubKeys, err := key.ImportPubKey(fileName)
 	if err != nil {
-		return errors.Errorf("key.ImportPubKey() error: %v", err)
+		return errors.Errorf("key.ImportPubKey() error: %s", err)
 	}
 
 	//added_pubkey_history_receiptテーブルにInsert
@@ -198,7 +198,7 @@ func (w *Wallet) ImportMultisigAddrForColdWallet1(fileName string, accountType e
 	//Update
 	err = w.DB.UpdateMultisigAddrOnAccountKeyTableByFullPubKey(accountType, accountKeyTable, nil, true)
 	if err != nil {
-		return errors.Errorf("DB.UpdateMultisigAddrOnAccountKeyTable() error: %s", err)
+		return errors.Errorf("DB.UpdateMultisigAddrOnAccountKeyTableByFullPubKey() error: %s", err)
 	}
 
 	return nil

@@ -19,7 +19,7 @@ func (w *Wallet) UpdateStatus() error {
 	for _, actionType := range types {
 		err := w.updateStatusForTxTypeSent(actionType)
 		if err != nil {
-			return errors.Errorf("ActionType: %s, updateStatusForTxTypeSent() error: %v", actionType, err)
+			return errors.Errorf("ActionType: %s, updateStatusForTxTypeSent() error: %s", actionType, err)
 		}
 	}
 
@@ -27,7 +27,7 @@ func (w *Wallet) UpdateStatus() error {
 	for _, actionType := range types {
 		err := w.updateStatusForTxTypeDone(actionType)
 		if err != nil {
-			return errors.Errorf("ActionType: %s, updateStatusForTxTypeDone() error: %v", actionType, err)
+			return errors.Errorf("ActionType: %s, updateStatusForTxTypeDone() error: %s", actionType, err)
 		}
 	}
 
@@ -39,7 +39,7 @@ func (w *Wallet) updateStatusForTxTypeSent(actionType enum.ActionType) error {
 	// 更新
 	hashes, err := w.DB.GetSentTxHashByTxTypeSent(actionType)
 	if err != nil {
-		return errors.Errorf("ActionType: %s, DB.GetSentTxHashByTxTypeSent() error: %v", actionType, err)
+		return errors.Errorf("ActionType: %s, DB.GetSentTxHashByTxTypeSent() error: %s", actionType, err)
 	}
 	logger.Debugf("ActionType: %s, hashes: %v", actionType, hashes)
 
@@ -47,7 +47,7 @@ func (w *Wallet) updateStatusForTxTypeSent(actionType enum.ActionType) error {
 	for _, hash := range hashes {
 		err = w.checkTransaction(hash, actionType)
 		if err != nil {
-			logger.Errorf("ActionType: %s, w.checkTransaction(%s, %s) error:%s", actionType, hash, actionType, err)
+			logger.Errorf("ActionType: %s, w.checkTransaction(%s, %s) error: %s", actionType, hash, actionType, err)
 			continue
 		}
 	}
@@ -58,7 +58,7 @@ func (w *Wallet) updateStatusForTxTypeDone(actionType enum.ActionType) error {
 	// 更新
 	hashes, err := w.DB.GetSentTxHashByTxTypeDone(actionType)
 	if err != nil {
-		return errors.Errorf("ActionType: %s, DB.GetSentTxHashByTxTypeDone() error: %v", actionType, err)
+		return errors.Errorf("ActionType: %s, DB.GetSentTxHashByTxTypeDone() error: %s", actionType, err)
 	}
 	logger.Debugf("ActionType: %s, hashes: %v", actionType, hashes)
 
@@ -67,7 +67,7 @@ func (w *Wallet) updateStatusForTxTypeDone(actionType enum.ActionType) error {
 		//ユーザーに通知
 		id, err := w.notifyUsers(hash, actionType)
 		if err != nil {
-			logger.Errorf("ActionType: %s, w.notifyUsers(%s, %s) error:%s", actionType, hash, actionType, err)
+			logger.Errorf("ActionType: %s, w.notifyUsers(%s, %s) error: %s", actionType, hash, actionType, err)
 			continue
 		}
 		if id == 0 {
@@ -78,7 +78,7 @@ func (w *Wallet) updateStatusForTxTypeDone(actionType enum.ActionType) error {
 		err = w.updateTxTypeNotified(id, hash, actionType)
 		//仮にここがエラーになっても、通知は成功している。。。が、また処理が走ってしまう。。。
 		if err != nil {
-			logger.Errorf("ActionType: %s, w.updateTxTypeNotified(%s, %s) error:%s", actionType, hash, actionType, err)
+			logger.Errorf("ActionType: %s, w.updateTxTypeNotified(%s, %s) error: %s", actionType, hash, actionType, err)
 			continue
 		}
 	}
@@ -92,7 +92,7 @@ func (w *Wallet) checkTransaction(hash string, actionType enum.ActionType) error
 	if err != nil {
 		//logger.Errorf("ActionType: %s, w.BTC.GetTransactionByTxID(): txID:%s, err:%s", actionType, hash, err)
 		//TODO:実際に起きる場合はcanceledに更新したほうがいいか？
-		return errors.Errorf("ActionType: %s, w.BTC.GetTransactionByTxID(): txID:%s, err:%s", actionType, hash, err)
+		return errors.Errorf("ActionType: %s, w.BTC.GetTransactionByTxID(): txID:%s, err: %s", actionType, hash, err)
 	}
 	logger.Debugf("ActionType: %s, Transactions Confirmations", actionType)
 	grok.Value(tran.Confirmations)
@@ -109,7 +109,7 @@ func (w *Wallet) checkTransaction(hash string, actionType enum.ActionType) error
 		//指定にconfirmationに達したので、current_tx_typeをdoneに更新する
 		_, err = w.DB.UpdateTxTypeDoneByTxHash(actionType, hash, nil, true)
 		if err != nil {
-			return errors.Errorf("ActionType: %s, DB.UpdateTxDoneByTxHash() error: %v", actionType, err)
+			return errors.Errorf("ActionType: %s, DB.UpdateTxTypeDoneByTxHash() error: %s", actionType, err)
 		}
 	} else {
 		//TODO:TestNet環境だと1000satoshiでもトランザクションが処理されてしまう
@@ -137,14 +137,14 @@ func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) (int64, er
 		// 1.hashからidを取得(tx_receipt/tx_payment)
 		id, err = w.DB.GetTxIDBySentHash(actionType, hash)
 		if err != nil {
-			return 0, errors.Errorf("ActionType: %s, DB.GetTxIDBySentHash() error: %v", actionType, err)
+			return 0, errors.Errorf("ActionType: %s, DB.GetTxIDBySentHash() error: %s", actionType, err)
 		}
 		logger.Debug("notifyUsers() receiptID:", id)
 
 		// 2.tx_receipt_inputテーブルから該当のreceipt_idでレコードを取得
 		txInputs, err := w.DB.GetTxInputByReceiptID(enum.ActionTypeReceipt, id)
 		if err != nil {
-			return 0, errors.Errorf("ActionType: %s, DB.GetTxReceiptInputByReceiptID(%d) error: %v", actionType, id, err)
+			return 0, errors.Errorf("ActionType: %s, DB.GetTxInputByReceiptID(%d) error: %s", actionType, id, err)
 		}
 		if len(txInputs) == 0 {
 			logger.Debug("notifyUsers() len(txInputs) == 0")
@@ -163,14 +163,14 @@ func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) (int64, er
 		id, err = w.DB.GetTxIDBySentHash(actionType, hash)
 
 		if err != nil {
-			return 0, errors.Errorf("ActionType: %s, DB.GetTxPaymentIDBySentHash() error: %v", actionType, err)
+			return 0, errors.Errorf("ActionType: %s, DB.GetTxIDBySentHash() error: %s", actionType, err)
 		}
 		logger.Debugf("notifyUsers() paymentID: %d", id)
 
 		// 2.payment_requestテーブルから該当のpayment_idでレコードを取得
 		paymentUsers, err := w.DB.GetPaymentRequestByPaymentID(id)
 		if err != nil {
-			return 0, errors.Errorf("ActionType: %s, DB.GetPaymentRequestByPaymentID(%d) error: %v", actionType, id, err)
+			return 0, errors.Errorf("ActionType: %s, DB.GetPaymentRequestByPaymentID(%d) error: %s", actionType, id, err)
 		}
 		if len(paymentUsers) == 0 {
 			logger.Debug("[Debug] notifyUsers() len(paymentUsers) == 0")
@@ -196,7 +196,7 @@ func (w *Wallet) updateTxTypeNotified(id int64, hash string, actionType enum.Act
 		// 通知後はstatusをnotifiedに変更する
 		_, err := w.DB.UpdateTxTypeNotifiedByID(actionType, id, nil, true)
 		if err != nil {
-			return errors.Errorf("ActionType: %s, DB.UpdateTxTypeNotifiedByID() error: %v", actionType, err)
+			return errors.Errorf("ActionType: %s, DB.UpdateTxTypeNotifiedByID() error: %s", actionType, err)
 		}
 
 	} else if actionType == enum.ActionTypePayment {
@@ -204,13 +204,13 @@ func (w *Wallet) updateTxTypeNotified(id int64, hash string, actionType enum.Act
 		// 通知後はstatusをnotifiedに変更する
 		_, err := w.DB.UpdateTxTypeNotifiedByID(actionType, id, tx, false)
 		if err != nil {
-			return errors.Errorf("ActionType: %s, DB.UpdateTxTypeNotifiedByID() error: %v", actionType, err)
+			return errors.Errorf("ActionType: %s, DB.UpdateTxTypeNotifiedByID() error: %s", actionType, err)
 		}
 
 		// payment_requestテーブルのis_doneをtrueに更新する
 		_, err = w.DB.UpdateIsDoneOnPaymentRequest(id, tx, true)
 		if err != nil {
-			return errors.Errorf("ActionType: %s, DB.UpdateIsDoneOnPaymentRequest() error: %v", actionType, err)
+			return errors.Errorf("ActionType: %s, DB.UpdateIsDoneOnPaymentRequest() error: %s", actionType, err)
 		}
 	}
 

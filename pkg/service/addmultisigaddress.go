@@ -21,7 +21,7 @@ func (w *Wallet) AddMultisigAddressByAuthorization(accountType enum.AccountType)
 	//account_key_authorizationテーブルからAuthorizationのwallet_addressを取得
 	authKeyTable, err := w.DB.GetOneByMaxIDOnAccountKeyTable(enum.AccountTypeAuthorization)
 	if err != nil {
-		return errors.Errorf("DB.GetOneByMaxID(enum.AccountTypeAuthorization) error: %s", err)
+		return errors.Errorf("DB.GetOneByMaxIDOnAccountKeyTable(enum.AccountTypeAuthorization) error: %s", err)
 	}
 	//grok.Value(authKeyTable)
 

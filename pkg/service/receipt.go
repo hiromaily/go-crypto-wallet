@@ -50,7 +50,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 	// Watch only walletであれば、ListUnspentで実現可能
 	unspentList, err := w.BTC.Client().ListUnspentMin(6)
 	if err != nil {
-		return "", "", errors.Errorf("ListUnspentMin(): error: %v", err)
+		return "", "", errors.Errorf("BTC.Client().ListUnspentMin(): error: %s", err)
 	}
 	logger.Debug("List Unspent")
 	grok.Value(unspentList) //Debug
@@ -78,7 +78,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 		amt, err := btcutil.NewAmount(tx.Amount)
 		if err != nil {
 			//このエラーは起こりえない
-			logger.Errorf("btcutil.NewAmount(%f): error:%s", tx.Amount, err)
+			logger.Errorf("btcutil.NewAmount(%f): error: %s", tx.Amount, err)
 			continue
 		}
 		inputTotal += amt //合計
@@ -128,7 +128,7 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 	// 1.CreateRawTransaction(仮で作成し、この後サイズから手数料を算出する)
 	msgTx, err := w.BTC.CreateRawTransaction(w.BTC.StoredAddress(), inputTotal, inputs)
 	if err != nil {
-		return "", "", errors.Errorf("CreateRawTransaction(): error: %v", err)
+		return "", "", errors.Errorf("BTC.CreateRawTransaction(): error: %s", err)
 	}
 
 	// 2.fee算出
@@ -138,7 +138,7 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 	//このパートは、出金とロジックが異なる
 	outputTotal = inputTotal - fee
 	if outputTotal <= 0 {
-		return "", "", errors.Errorf("calculated fee must be wrong: fee:%v, error: %v", fee, err)
+		return "", "", errors.Errorf("calculated fee must be wrong: fee:%v, error: %s", fee, err)
 	}
 	logger.Debugf("Total Coin to send:%d(Satoshi) after fee calculated, input length: %d", outputTotal, len(inputs))
 
@@ -156,19 +156,19 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 	// 5.再度 CreateRawTransaction
 	msgTx, err = w.BTC.CreateRawTransaction(w.BTC.StoredAddress(), outputTotal, inputs)
 	if err != nil {
-		return "", "", errors.Errorf("CreateRawTransaction(): error: %v", err)
+		return "", "", errors.Errorf("BTC.CreateRawTransaction(): error: %s", err)
 	}
 
 	// 6.出力用にHexに変換する
 	hex, err := w.BTC.ToHex(msgTx)
 	if err != nil {
-		return "", "", errors.Errorf("w.BTC.ToHex(msgTx): error: %v", err)
+		return "", "", errors.Errorf("BTC.ToHex(msgTx): error: %s", err)
 	}
 
 	// 7. Databaseに必要な情報を保存
 	txReceiptID, err := w.insertTxTableForUnsigned(enum.ActionTypeReceipt, hex, inputTotal, outputTotal, fee, enum.TxTypeValue[enum.TxTypeUnsigned], txReceiptInputs, txReceiptOutputs, nil)
 	if err != nil {
-		return "", "", errors.Errorf("insertHexOnDB(): error: %v", err)
+		return "", "", errors.Errorf("insertTxTableForUnsigned(): error: %s", err)
 	}
 
 	// 8. GCSにトランザクションファイルを作成
@@ -178,7 +178,7 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 	if txReceiptID != 0 {
 		generatedFileName, err = w.storeHex(hex, txReceiptID, enum.ActionTypeReceipt)
 		if err != nil {
-			return "", "", errors.Errorf("wallet.storeHex(): error: %v", err)
+			return "", "", errors.Errorf("wallet.storeHex(): error: %s", err)
 		}
 	}
 
@@ -197,7 +197,7 @@ func (w *Wallet) insertTxTableForUnsigned(actionType enum.ActionType, hex string
 	//count, err := w.DB.GetTxReceiptCountByUnsignedHex(hex)
 	count, err := w.DB.GetTxCountByUnsignedHex(actionType, hex)
 	if err != nil {
-		return 0, errors.Errorf("DB.GetTxCountByUnsignedHex(): error: %v", err)
+		return 0, errors.Errorf("DB.GetTxCountByUnsignedHex(): error: %s", err)
 	}
 	if count != 0 {
 		//skip
@@ -215,7 +215,7 @@ func (w *Wallet) insertTxTableForUnsigned(actionType enum.ActionType, hex string
 	tx := w.DB.RDB.MustBegin()
 	txReceiptID, err := w.DB.InsertTxForUnsigned(actionType, &txReceipt, tx, false)
 	if err != nil {
-		return 0, errors.Errorf("DB.InsertTxForUnsigned(): error: %v", err)
+		return 0, errors.Errorf("DB.InsertTxForUnsigned(): error: %s", err)
 	}
 
 	//3.TxReceiptInputテーブル
@@ -225,7 +225,7 @@ func (w *Wallet) insertTxTableForUnsigned(actionType enum.ActionType, hex string
 	}
 	err = w.DB.InsertTxInputForUnsigned(actionType, txInputs, tx, false)
 	if err != nil {
-		return 0, errors.Errorf("DB.InsertTxInputForUnsigned(): error: %v", err)
+		return 0, errors.Errorf("DB.InsertTxInputForUnsigned(): error: %s", err)
 	}
 
 	//4.TxReceiptOutputテーブル
@@ -242,7 +242,7 @@ func (w *Wallet) insertTxTableForUnsigned(actionType enum.ActionType, hex string
 
 	err = w.DB.InsertTxOutputForUnsigned(actionType, txOutputs, tx, isCommit)
 	if err != nil {
-		return 0, errors.Errorf("DB.InsertTxOutputForUnsigned(): error: %v", err)
+		return 0, errors.Errorf("DB.InsertTxOutputForUnsigned(): error: %s", err)
 	}
 
 	//5. payment_requestのpayment_idを更新する paymentRequestIds
@@ -250,7 +250,7 @@ func (w *Wallet) insertTxTableForUnsigned(actionType enum.ActionType, hex string
 		//txReceiptID
 		_, err = w.DB.UpdatePaymentIDOnPaymentRequest(txReceiptID, paymentRequestIds, tx, true)
 		if err != nil {
-			return 0, errors.Errorf("DB.UpdatePaymentIDOnPaymentRequest(): error: %v", err)
+			return 0, errors.Errorf("DB.UpdatePaymentIDOnPaymentRequest(): error: %s", err)
 		}
 	}
 
@@ -270,7 +270,7 @@ func (w *Wallet) storeHex(hex string, id int64, actionType enum.ActionType) (str
 		path := txfile.CreateFilePath(actionType, enum.TxTypeUnsigned, id, true)
 		generatedFileName, err = txfile.WriteFile(path, hex)
 		if err != nil {
-			return "", errors.Errorf("txfile.WriteFile(): error: %v", err)
+			return "", errors.Errorf("txfile.WriteFile(): error: %s", err)
 		}
 	}
 
@@ -281,7 +281,7 @@ func (w *Wallet) storeHex(hex string, id int64, actionType enum.ActionType) (str
 	//generatedFileName2, err := w.GCS[enum.ActionTypeReceipt].WriteOnce(path, hex)
 	_, err = w.GCS[actionType].WriteOnce(path, hex)
 	if err != nil {
-		return "", errors.Errorf("storage.WriteOnce(): error: %v", err)
+		return "", errors.Errorf("storage.WriteOnce(): error: %s", err)
 	}
 
 	return generatedFileName, nil

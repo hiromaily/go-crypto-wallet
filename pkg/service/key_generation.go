@@ -33,11 +33,6 @@ import (
 // GenerateSeed seedを生成する
 func (w *Wallet) GenerateSeed() ([]byte, error) {
 
-	//seed, err := w.DB.GetSeedOne()
-	//if err == nil && seed.Seed != "" {
-	//	logger.Info("seed have already been generated")
-	//	return key.SeedToByte(seed.Seed)
-	//}
 	bSeed, err := w.retrieveSeed()
 	if err == nil {
 		return bSeed, nil
@@ -53,7 +48,7 @@ func (w *Wallet) GenerateSeed() ([]byte, error) {
 	// DBにseed情報を登録
 	_, err = w.DB.InsertSeed(strSeed, nil, true)
 	if err != nil {
-		return nil, errors.Errorf("key.InsertSeed() error: %s", err)
+		return nil, errors.Errorf("DB.InsertSeed() error: %s", err)
 	}
 
 	return bSeed, nil
@@ -67,7 +62,7 @@ func (w *Wallet) retrieveSeed() ([]byte, error) {
 		return key.SeedToByte(seed.Seed)
 	}
 
-	return nil, errors.Errorf("DB.GetSeedOne() error: %v", err)
+	return nil, errors.Errorf("DB.GetSeedOne() error: %s", err)
 }
 
 // GenerateAccountKey AccountType属性のアカウントKeyを生成する
@@ -90,7 +85,7 @@ func (w *Wallet) generateAccountKey(accountType enum.AccountType, seed []byte, i
 	// HDウォレットのkeyを生成する
 	walletKeys, err := w.generateAccountKeyData(accountType, seed, idxFrom, count)
 	if err != nil {
-		return nil, errors.Errorf("key.generateAccount(AccountTypeClient) error: %s", err)
+		return nil, errors.Errorf("key.generateAccountKeyData(AccountTypeClient) error: %s", err)
 	}
 
 	// keyTypeを取得
@@ -123,7 +118,7 @@ func (w *Wallet) generateAccountKey(accountType enum.AccountType, seed []byte, i
 	}
 	err = w.DB.InsertAccountKeyTable(accountType, accountKeyClients, nil, true)
 	if err != nil {
-		return nil, errors.Errorf("DB.InsertAccountKeyClient() error: %s", err)
+		return nil, errors.Errorf("DB.InsertAccountKeyTable() error: %s", err)
 	}
 
 	return walletKeys, err

@@ -83,7 +83,7 @@ func WriteFile(path, hexTx string) (string, error) {
 	fileName := path + ts
 	err := ioutil.WriteFile(fileName, byteTx, 0644)
 	if err != nil {
-		return "", errors.Errorf("ioutil.WriteFile(%s) error:%v", fileName, err)
+		return "", errors.Errorf("ioutil.WriteFile(%s) error: %s", fileName, err)
 	}
 
 	return fileName, nil
@@ -93,7 +93,7 @@ func WriteFile(path, hexTx string) (string, error) {
 func ReadFile(path string) (string, error) {
 	ret, err := ioutil.ReadFile(path)
 	if err != nil {
-		return "", errors.Errorf("ioutil.ReadFile(%s): error: %v", path, err)
+		return "", errors.Errorf("ioutil.ReadFile(%s): error: %s", path, err)
 	}
 
 	return string(ret), nil

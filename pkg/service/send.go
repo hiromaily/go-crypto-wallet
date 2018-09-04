@@ -74,10 +74,10 @@ func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID strin
 	affectedNum, err = w.DB.UpdateTxAfterSent(actionType, &txReceipt, nil, true)
 
 	if err != nil {
-		return errors.Errorf("DB.UpdateTxReceiptForSent(): error: %v", err)
+		return errors.Errorf("DB.UpdateTxAfterSent(): error: %s", err)
 	}
 	if affectedNum == 0 {
-		return errors.Errorf("DB.UpdateTxReceiptForSent(): tx_receipt table was not updated")
+		return errors.New("DB.UpdateTxAfterSent(): tx_receipt table was not updated")
 	}
 
 	return nil

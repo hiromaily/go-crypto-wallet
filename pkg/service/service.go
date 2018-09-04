@@ -30,7 +30,7 @@ func InitialSettings(confPath string) (*Wallet, error) {
 	// Config
 	conf, err := toml.New(confPath)
 	if err != nil {
-		return nil, errors.Errorf("toml.New() error: %v", err)
+		return nil, errors.Errorf("toml.New() error: %s", err)
 	}
 	grok.Value(conf)
 
@@ -47,7 +47,7 @@ func InitialSettings(confPath string) (*Wallet, error) {
 	// MySQL
 	rds, err := rdb.Connection(&conf.MySQL)
 	if err != nil {
-		return nil, errors.Errorf("rds.Connection() error: %v", err)
+		return nil, errors.Errorf("rds.Connection() error: %s", err)
 	}
 	//defer rds.Close()
 
@@ -74,7 +74,7 @@ func InitialSettings(confPath string) (*Wallet, error) {
 	//bit, err := api.Connection(conf.Bitcoin.Host, conf.Bitcoin.User, conf.Bitcoin.Pass, true, true, conf.Bitcoin.IsMain)
 	bit, err := api.Connection(&conf.Bitcoin)
 	if err != nil {
-		return nil, errors.Errorf("api.Connection error: %v", err)
+		return nil, errors.Errorf("api.Connection error: %s", err)
 	}
 	//defer bit.Close()
 

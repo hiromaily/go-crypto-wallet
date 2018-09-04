@@ -25,20 +25,20 @@ type EstimateSmartFeeResult struct {
 func (b *Bitcoin) EstimateSmartFee() (float64, error) {
 	input, err := json.Marshal(uint64(b.confirmationBlock)) //ここは固定(6)でいいはず
 	if err != nil {
-		return 0, errors.Errorf("json.Marchal(): error: %v", err)
+		return 0, errors.Errorf("json.Marchal(): error: %s", err)
 	}
 	rawResult, err := b.client.RawRequest("estimatesmartfee", []json.RawMessage{input})
 	if err != nil {
-		return 0, errors.Errorf("json.RawRequest(estimatesmartfee): error: %v", err)
+		return 0, errors.Errorf("json.RawRequest(estimatesmartfee): error: %s", err)
 	}
 
 	estimateResult := EstimateSmartFeeResult{}
 	err = json.Unmarshal([]byte(rawResult), &estimateResult)
 	if err != nil {
-		return 0, errors.Errorf("json.Unmarshal(): error: %v", err)
+		return 0, errors.Errorf("json.Unmarshal(): error: %s", err)
 	}
 	if len(estimateResult.Errors) != 0 {
-		return 0, errors.Errorf("json.RawRequest(estimatesmartfee): error: %v", estimateResult.Errors[0])
+		return 0, errors.Errorf("json.RawRequest(estimatesmartfee): error: %s", estimateResult.Errors[0])
 	}
 
 	return estimateResult.FeeRate, nil
@@ -48,14 +48,14 @@ func (b *Bitcoin) EstimateSmartFee() (float64, error) {
 func (b *Bitcoin) GetTransactionFee(tx *wire.MsgTx) (btcutil.Amount, error) {
 	feePerKB, err := b.EstimateSmartFee()
 	if err != nil {
-		return 0, errors.Errorf("EstimateSmartFee(): error: %v", err)
+		return 0, errors.Errorf("BTC.EstimateSmartFee(): error: %s", err)
 	}
 	fee := fmt.Sprintf("%f", feePerKB*float64(tx.SerializeSize())/1000)
 
 	//To Amount
 	feeAsBit, err := b.CastStrBitToAmount(fee)
 	if err != nil {
-		return 0, errors.Errorf("CastStrToSatoshi(%s): error: %v", fee, err)
+		return 0, errors.Errorf("BTC.CastStrToSatoshi(%s): error: %s", fee, err)
 	}
 
 	return feeAsBit, nil
@@ -66,7 +66,7 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 	//通常の取得
 	fee, err := b.GetTransactionFee(tx)
 	if err != nil {
-		return 0, errors.Errorf("GetTransactionFee(): error: %v", err)
+		return 0, errors.Errorf("BTC.GetTransactionFee(): error: %s", err)
 	}
 	logger.Debugf("[1]fee: %v", fee) //0.000208 BTC
 
@@ -74,7 +74,7 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 	relayFee, err := b.getMinRelayFee()
 	if err != nil {
 		//logのみ
-		logger.Errorf("getMinRelayFee(): error: %s", err)
+		logger.Errorf("BTC.getMinRelayFee(): error: %s", err)
 	} else {
 		if fee < relayFee {
 			fee = relayFee
@@ -90,7 +90,7 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 		newFee, err := b.calculateNewFee(fee, adjustmentFee)
 		if err != nil {
 			//logのみ表示
-			logger.Errorf("calculateNewFee() error: %s", err)
+			logger.Errorf("BTC.calculateNewFee() error: %s", err)
 		}
 		logger.Debugf("[2]adjusted newFee:%v", newFee) //0.000208 BTC
 		fee = newFee
@@ -112,7 +112,7 @@ func (b *Bitcoin) validateAdjustmentFee(fee float64) bool {
 func (b *Bitcoin) calculateNewFee(fee btcutil.Amount, adjustmentFee float64) (btcutil.Amount, error) {
 	newFee, err := b.FloatBitToAmount(fee.ToBTC() * adjustmentFee)
 	if err != nil {
-		return 0, errors.Errorf("FloatBitToAmount() error: %v", err)
+		return 0, errors.Errorf("BTC.FloatBitToAmount() error: %s", err)
 	}
 	return newFee, nil
 }
@@ -120,14 +120,14 @@ func (b *Bitcoin) calculateNewFee(fee btcutil.Amount, adjustmentFee float64) (bt
 func (b *Bitcoin) getMinRelayFee() (btcutil.Amount, error) {
 	res, err := b.GetNetworkInfo()
 	if err != nil {
-		return 0, errors.Errorf("GetNetworkInfo() error: %v", err)
+		return 0, errors.Errorf("BTC.GetNetworkInfo() error: %s", err)
 	}
 	if res.Relayfee == 0 {
 		return 0, errors.New("GetNetworkInfo().Relayfee error: RelayFee is not retrieved")
 	}
 	fee, err := b.FloatBitToAmount(res.Relayfee)
 	if err != nil {
-		return 0, errors.Errorf("FloatBitToAmount() error: %v", err)
+		return 0, errors.Errorf("BTC.FloatBitToAmount() error: %s", err)
 	}
 	return fee, nil
 }
