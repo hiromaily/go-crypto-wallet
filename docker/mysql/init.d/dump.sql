@@ -27,47 +27,6 @@ USE `wallet`;
 
 
 --
--- Table structure for table `block_checked`
---
-/*
-DROP TABLE IF EXISTS `block_checked`;
-CREATE TABLE `block_checked` (
-  `id`         tinyint(1) NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `count`      int(11) NOT NULL COMMENT'現在のチェックしたブロック数(番号)',
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='ブロック情報テーブル';
-
-LOCK TABLES `block_checked` WRITE;
-INSERT INTO `block_checked` VALUES
-  (1,10000,now());
-UNLOCK TABLES;
-*/
-
---
--- Table structure for table `tx_type`
---
-/*
-DROP TABLE IF EXISTS `tx_type`;
-CREATE TABLE `tx_type` (
-  `id`         tinyint(1) NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `type`       VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL COMMENT'トランザクション種別',
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='トランザクション種別テーブル';
-
-LOCK TABLES `tx_type` WRITE;
-INSERT INTO `tx_type` VALUES
-  (1,'unsigned',now()),
-  (2,'signed',now()),
-  (3,'sent',now()),
-  (4,'done',now()),
-  (5,'notified',now()),
-  (6,'canceled',now());
-UNLOCK TABLES;
-*/
-
---
 -- Table structure for table `tx_receipt`
 --
 
@@ -203,29 +162,6 @@ UNLOCK TABLES;
 
 
 --
--- Table structure for table `account_type` coldwallet1側でも利用する
---
-
-/* DROP TABLE IF EXISTS `account_type`;
-CREATE TABLE `account_type` (
-  `id`          tinyint(1) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `type`        VARCHAR(20) COLLATE utf8_unicode_ci NOT NULL COMMENT'アカウント種別',
-  `description` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'説明',
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='アカウント種別テーブル';
-
-LOCK TABLES `account_type` WRITE;
-INSERT INTO `account_type` VALUES
-  (0,'client','顧客',now()),
-  (1,'receipt','入金保管用',now()),
-  (2,'payment','支払い用',now()),
-  (3,'authorization','Multisigのための承認用',now());
-UNLOCK TABLES;
-*/
-
-
---
 -- Table structure for table `account_pubkey_client`
 --
 
@@ -236,6 +172,7 @@ CREATE TABLE `account_pubkey_client` (
   `id`     BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
   `wallet_address`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'Walletアドレス',
   `account`           VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'アドレスに紐づくアカウント名',
+  `is_allocated`      BOOL DEFAULT false COMMENT'アドレスが割り当てられたかどうか(未使用かどうか)',
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_wallet_address` (`wallet_address`)
@@ -250,15 +187,7 @@ CREATE TABLE `account_pubkey_client` (
 DROP TABLE IF EXISTS `account_pubkey_receipt`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `account_pubkey_receipt` (
-  `id`     BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `wallet_address`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'Walletアドレス',
-  `account`           VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'アドレスに紐づくアカウント名',
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_wallet_address` (`wallet_address`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='受け取り用Publicキー情報Table';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `account_pubkey_receipt` LIKE `account_pubkey_client`;
 
 
 --
@@ -268,12 +197,4 @@ CREATE TABLE `account_pubkey_receipt` (
 DROP TABLE IF EXISTS `account_pubkey_payment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `account_pubkey_payment` (
-  `id`     BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `wallet_address`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'Walletアドレス',
-  `account`           VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'アドレスに紐づくアカウント名',
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_wallet_address` (`wallet_address`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='支払い用Publicキー情報Table';
-/*!40101 SET character_set_client = @saved_cs_client */;
+CREATE TABLE `account_pubkey_payment` LIKE `account_pubkey_client`;

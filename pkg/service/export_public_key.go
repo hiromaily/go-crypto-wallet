@@ -18,23 +18,21 @@ func (w *Wallet) ExportAccountKey(accountType enum.AccountType, keyStatus enum.K
 	//Client          -> key_status=1ならok, wallet_address          isMultisig=false
 	//Receipt/Payment -> key_status=1ならok, full_public_key         isMultisig=false
 	//Receipt/Payment -> key_status=3ならok, wallet_multisig_address isMultisig=true
+
+	//TODO:Multisig対応かどうかのジャッジ
 	var updateKeyStatus enum.KeyStatus
-	if accountType == enum.AccountTypeClient {
-		updateKeyStatus = enum.KeyStatusAddressExported
+	if !enum.AccountTypeMultisig[accountType] {
+		updateKeyStatus = enum.KeyStatusAddressExported //4
 	} else {
-		if keyStatus == enum.KeyStatusImportprivkey {
-			updateKeyStatus = enum.KeyStatusPubkeyExported
-		} else if keyStatus == enum.KeyStatusMultiAddressImported {
-			updateKeyStatus = enum.KeyStatusAddressExported
+		if keyStatus == enum.KeyStatusImportprivkey { //1
+			updateKeyStatus = enum.KeyStatusPubkeyExported //2
+		} else if keyStatus == enum.KeyStatusMultiAddressImported { //3
+			updateKeyStatus = enum.KeyStatusAddressExported //4
 		}
 	}
 	if updateKeyStatus == "" {
 		return "", errors.New("parameters are wrong to call ExportAccountKey()")
 	}
-
-	//TODO:From coldwallet2
-	//history table
-	//->これは別に定義しょう
 
 	//DBから該当する全レコード
 	accountKeyTable, err := w.DB.GetAllAccountKeyByKeyStatus(accountType, keyStatus)
@@ -64,6 +62,9 @@ func (w *Wallet) ExportAccountKey(accountType enum.AccountType, keyStatus enum.K
 	if err != nil {
 		return "", errors.Errorf("DB.UpdateIsExprotedPubKey() error: %s", err)
 	}
+
+	//Multisig対応かどうかのジャッジ
+	logger.Info("Is this account[%s] for multisig: %t", accountType, enum.AccountTypeMultisig[accountType])
 
 	return fileName, nil
 }

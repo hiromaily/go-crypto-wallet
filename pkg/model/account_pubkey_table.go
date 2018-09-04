@@ -14,6 +14,7 @@ type AccountPublicKeyTable struct {
 	ID            int64      `db:"id"`
 	WalletAddress string     `db:"wallet_address"`
 	Account       string     `db:"account"`
+	IsAllocated   bool       `db:"is_allocated"`
 	UpdatedAt     *time.Time `db:"updated_at"`
 }
 

@@ -50,14 +50,28 @@ const (
 	AccountTypeReceipt       AccountType = "receipt"       //入金を受け付けるアドレス用
 	AccountTypePayment       AccountType = "payment"       //出金時に支払いをするアドレス
 	AccountTypeAuthorization AccountType = "authorization" //マルチシグアドレスのための承認アドレス
+	AccountTypeQuoine        AccountType = "quoine"        //Quoineから購入したcoinが入金されるであろうアドレス
+	AccountTypeFee           AccountType = "fee"           //手数料保管用アドレス
 )
 
-//AccountTypeValue tx_typeの値
+//AccountTypeValue account_typeの値
 var AccountTypeValue = map[AccountType]uint8{
 	AccountTypeClient:        0,
 	AccountTypeReceipt:       1,
 	AccountTypePayment:       2,
 	AccountTypeAuthorization: 3,
+	AccountTypeQuoine:        4,
+	AccountTypeFee:           5,
+}
+
+//AccountTypeMultisig account_type毎のmultisig対応アカウントかどうか
+var AccountTypeMultisig = map[AccountType]bool{
+	AccountTypeClient:        false,
+	AccountTypeReceipt:       true,
+	AccountTypePayment:       true,
+	AccountTypeAuthorization: false,
+	AccountTypeQuoine:        false,
+	AccountTypeFee:           false,
 }
 
 // ValidateAccountType AccountTypeのバリデーションを行う
