@@ -57,23 +57,7 @@ func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum
 		})
 
 		//watch only walletとして追加されているかチェックする
-		//1.getaccount address(wallet_address)
-		account, err := w.BTC.GetAccount(addr)
-		if err != nil {
-			logger.Errorf("w.BTC.GetAccount(%s) error: %s", addr, err)
-		}
-		logger.Debugf("account[%s] is found by wallet_address:%s", account, addr)
-
-		//2.check full_public_key by validateaddress retrieving it
-		res, err := w.BTC.ValidateAddress(addr)
-		if err != nil {
-			logger.Errorf("w.BTC.ValidateAddress(%s) error: %s", addr, err)
-		}
-		grok.Value(res)
-		//watch only walletを想定している
-		if !res.IsWatchOnly {
-			logger.Errorf("this address must be watch only wallet")
-		}
+		w.checkImportedPublicAddress(addr)
 	}
 
 	//DBにInsert
@@ -218,4 +202,48 @@ func (w *Wallet) ImportMultisigAddrForColdWallet1(fileName string, accountType e
 	}
 
 	return nil
+}
+
+//checkImportedPublicAddress watch only walletとして追加されているかチェックする
+func (w *Wallet) checkImportedPublicAddress(addr string) {
+	if w.BTC.Version() >= 170000 {
+		w.checkImportedPublicAddressVer17(addr)
+		return
+	}
+
+	//1.getaccount address(wallet_address)
+	account, err := w.BTC.GetAccount(addr)
+	if err != nil {
+		logger.Errorf("w.BTC.GetAccount(%s) error: %s", addr, err)
+	}
+	logger.Debugf("account[%s] is found by wallet_address:%s", account, addr)
+
+	//2.check full_public_key by validateaddress retrieving it
+	res, err := w.BTC.ValidateAddress(addr)
+	if err != nil {
+		logger.Errorf("w.BTC.ValidateAddress(%s) error: %s", addr, err)
+	}
+	grok.Value(res)
+	//watch only walletを想定している
+	if !res.IsWatchOnly {
+		logger.Errorf("this address must be watch only wallet")
+	}
+
+}
+
+//checkImportedPublicAddressVer17 watch only walletとして追加されているかチェックする (for bitcoin version 17)
+func (w *Wallet) checkImportedPublicAddressVer17(addr string) {
+	logger.Info("checkImportedPublicAddressVer17()")
+
+	//getaddressinfo "address"
+	addrInfo, err := w.BTC.GetAddressInfo(addr)
+	if err != nil {
+		logger.Errorf("w.BTC.GetAddressInfo(%s) error: %s", addr, err)
+	}
+	logger.Debugf("account[%s] is found by wallet_address:%s", addrInfo.Label, addr)
+
+	//watch only walletを想定している
+	if !addrInfo.Iswatchonly {
+		logger.Errorf("this address must be watch only wallet")
+	}
 }
