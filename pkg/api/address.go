@@ -1,10 +1,40 @@
 package api
 
 import (
+	"encoding/json"
+
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 )
+
+// GetAddressInfoResult getaddressinfoをcallしたresponseの型
+type GetAddressInfoResult struct {
+	Address      string `json:"address"`
+	ScriptPubKey string `json:"scriptPubKey"`
+	Ismine       bool   `json:"ismine"`
+	Iswatchonly  bool   `json:"iswatchonly"`
+	Isscript     bool   `json:"isscript"`
+	Iswitness    bool   `json:"iswitness"`
+	Script       string `json:"script"`
+	Hex          string `json:"hex"`
+	Pubkey       string `json:"pubkey"`
+	Embedded     struct {
+		Isscript       bool   `json:"isscript"`
+		Iswitness      bool   `json:"iswitness"`
+		WitnessVersion int    `json:"witness_version"`
+		WitnessProgram string `json:"witness_program"`
+		Pubkey         string `json:"pubkey"`
+		Address        string `json:"address"`
+		ScriptPubKey   string `json:"scriptPubKey"`
+	} `json:"embedded"`
+	Label     string `json:"label"`
+	Timestamp int64  `json:"timestamp"`
+	Labels    []struct {
+		Name    string `json:"name"`
+		Purpose string `json:"purpose"`
+	} `json:"labels"`
+}
 
 // CreateNewAddress アカウント名から新しいアドレスを生成する
 // 常に新しいアドレスが生成される
@@ -90,4 +120,26 @@ func (b *Bitcoin) DecodeAddress(addr string) (btcutil.Address, error) {
 		return nil, errors.Errorf("btcutil.DecodeAddress() error: %v", err)
 	}
 	return address, nil
+}
+
+// GetAddressInfo getaddressinfo RPC をcallする
+// version0.18より、getaccountは呼び出せなくなるので、こちらをcallすること
+// 従来のvalidateaddressより取得していたaddressの詳細情報もこちらから取得可能
+func (b *Bitcoin) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
+	input, err := json.Marshal(string(addr))
+	if err != nil {
+		return nil, errors.Errorf("json.Marchal(): error: %v", err)
+	}
+	rawResult, err := b.client.RawRequest("getaddressinfo", []json.RawMessage{input})
+	if err != nil {
+		return nil, errors.Errorf("json.RawRequest(getaddressinfo): error: %v", err)
+	}
+
+	infoResult := GetAddressInfoResult{}
+	err = json.Unmarshal([]byte(rawResult), &infoResult)
+	if err != nil {
+		return nil, errors.Errorf("json.Unmarshal(): error: %v", err)
+	}
+
+	return &infoResult, nil
 }

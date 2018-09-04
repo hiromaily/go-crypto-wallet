@@ -88,11 +88,15 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 	return nil
 }
 
+// checkImportedAddress addresssをチェックする (for bitcoin version 16)
 func (w *Wallet) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPublicKey string) {
 	//1.getaccount address(wallet_address)
 	account, err := w.BTC.GetAccount(walletAddress)
 	if err != nil {
 		logger.Errorf("w.BTC.GetAccount(%s) error: %v", walletAddress, err)
+		//for new version check
+		w.checkImportedAddressVer17(walletAddress, p2shSegwitAddress, fullPublicKey)
+		return
 	}
 	logger.Debugf("account[%s] is found by wallet_address:%s", account, walletAddress)
 
@@ -109,6 +113,36 @@ func (w *Wallet) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPubl
 		logger.Errorf("w.BTC.ValidateAddress(%s) error: %v", p2shSegwitAddress, err)
 	}
 	if res.PubKey != fullPublicKey {
+		logger.Errorf("generating pubkey logic is wrong")
+	}
+}
+
+// checkImportedAddress addresssをチェックする (for bitcoin version 17)
+func (w *Wallet) checkImportedAddressVer17(walletAddress, p2shSegwitAddress, fullPublicKey string) {
+	logger.Info("checkImportedAddressVer17()")
+
+	//getaddressinfo "address"
+	addrInfo, err := w.BTC.GetAddressInfo(walletAddress)
+	if err != nil {
+		logger.Errorf("w.BTC.GetAddressInfo(%s) error: %v", walletAddress, err)
+	}
+	logger.Debugf("account[%s] is found by wallet_address:%s", addrInfo.Label, walletAddress)
+
+	//2.getaccount address(p2sh_segwit_address)
+	addrInfo, err = w.BTC.GetAddressInfo(p2shSegwitAddress)
+	if err != nil {
+		logger.Errorf("w.BTC.GetAccount(%s) error: %v", p2shSegwitAddress, err)
+	}
+	logger.Debugf("account[%s] is found by p2sh_segwit_address:%s", addrInfo.Label, p2shSegwitAddress)
+
+	//3.getaccount address(p2sh_segwit_address)
+	addrInfo, err = w.BTC.GetAddressInfo(p2shSegwitAddress)
+	if err != nil {
+		logger.Errorf("w.BTC.GetAccount(%s) error: %v", p2shSegwitAddress, err)
+	}
+	logger.Debugf("account[%s] is found by p2sh_segwit_address:%s", addrInfo.Label, p2shSegwitAddress)
+
+	if addrInfo.Pubkey != fullPublicKey {
 		logger.Errorf("generating pubkey logic is wrong")
 	}
 }
