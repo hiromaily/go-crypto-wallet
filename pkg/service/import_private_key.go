@@ -90,6 +90,11 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 
 // checkImportedAddress addresssをチェックする (for bitcoin version 16)
 func (w *Wallet) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPublicKey string) {
+	if w.BTC.Version() >= 170000 {
+		w.checkImportedAddressVer17(walletAddress, p2shSegwitAddress, fullPublicKey)
+		return
+	}
+
 	//1.getaccount address(wallet_address)
 	account, err := w.BTC.GetAccount(walletAddress)
 	if err != nil {

@@ -3,18 +3,20 @@ package api
 import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/rpcclient"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/toml"
+	"github.com/pkg/errors"
 )
 
 // Bitcoin includes Client to call Json-RPC
 type Bitcoin struct {
-	client    *rpcclient.Client
-	chainConf *chaincfg.Params
-	stored    KeyInfo
-	payment   KeyInfo
-	//confirmationBlock int64
+	client            *rpcclient.Client
+	chainConf         *chaincfg.Params
+	stored            KeyInfo
+	payment           KeyInfo
 	confirmationBlock int
 	feeRange          FeeAdjustmentRate
+	version           int //179900
 }
 
 // KeyInfo 公開鍵アドレスと紐づくアカウント名
@@ -44,7 +46,7 @@ func Connection(conf *toml.BitcoinConf) (*Bitcoin, error) {
 	// not supported in HTTP POST mode.
 	client, err := rpcclient.New(connCfg, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.Errorf("rpcclient.New() error: %s", err)
 	}
 
 	bit := Bitcoin{client: client}
@@ -53,6 +55,14 @@ func Connection(conf *toml.BitcoinConf) (*Bitcoin, error) {
 	} else {
 		bit.chainConf = &chaincfg.TestNet3Params
 	}
+
+	//Bitcoinのバージョンを入れておく
+	netInfo, err := bit.GetNetworkInfo()
+	if err != nil {
+		return nil, errors.Errorf("bit.GetNetworkInfo() error: %s", err)
+	}
+	bit.version = netInfo.Version
+	logger.Infof("bitcoin server version: %d", netInfo.Version)
 
 	bit.stored.address = conf.Stored.Address
 	bit.stored.acountName = conf.Stored.AccountName
@@ -113,4 +123,9 @@ func (b *Bitcoin) FeeRangeMax() float64 {
 // FeeRangeMin feeの調整倍率の最小値を返す
 func (b *Bitcoin) FeeRangeMin() float64 {
 	return b.feeRange.min
+}
+
+// Version bitcoin coreのバージョンを返す
+func (b *Bitcoin) Version() int {
+	return b.version
 }
