@@ -93,7 +93,7 @@ func (w *Wallet) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPubl
 	//1.getaccount address(wallet_address)
 	account, err := w.BTC.GetAccount(walletAddress)
 	if err != nil {
-		logger.Errorf("w.BTC.GetAccount(%s) error: %s", walletAddress, err)
+		logger.Warnf("w.BTC.GetAccount(%s) error: %s", walletAddress, err)
 		//for new version check
 		w.checkImportedAddressVer17(walletAddress, p2shSegwitAddress, fullPublicKey)
 		return
