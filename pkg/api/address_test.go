@@ -12,7 +12,7 @@ import (
 
 var (
 	wlt      *service.Wallet
-	confPath = flag.String("conf", "../../data/toml/config.toml", "Path for configuration toml file")
+	confPath = flag.String("conf", "../../data/toml/watch_config.toml", "Path for configuration toml file")
 )
 
 func setup() {
