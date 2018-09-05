@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/icrowley/fake"
 )
 
@@ -15,8 +16,7 @@ func TestSetLabel(t *testing.T) {
 	}
 
 	// アドレスを生成
-	//_, err := wlt.BTC.ValidateAddress(val.addr)
-	bSeed, err := wlt.GenerateSeed()
+	bSeed, err := key.GenerateSeed()
 	if err != nil {
 		t.Fatal(err)
 	}
