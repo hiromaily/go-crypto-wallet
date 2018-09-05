@@ -212,7 +212,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 		}
 	}
 
-	//8.差分でお釣り用のoutputを作成する
+	//8.差分でお釣り用のoutputを作成する (paymentのおつりaddressに返金する処理)
 	//おつり受け取りのpaymentaddressが複数ある場合、何を使うか。とりあえずaddrs[0]
 	//TODO:ユーザーの出金先にpaymentのアドレスの指定が万が一でもある場合のためのロジック(イレギュラーだが運用上可能)
 	//FIXME: paymentが複数addressであることを考慮
