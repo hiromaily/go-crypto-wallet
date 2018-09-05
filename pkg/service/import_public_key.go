@@ -206,7 +206,7 @@ func (w *Wallet) ImportMultisigAddrForColdWallet1(fileName string, accountType e
 
 //checkImportedPublicAddress watch only walletとして追加されているかチェックする
 func (w *Wallet) checkImportedPublicAddress(addr string) {
-	if w.BTC.Version() >= 170000 {
+	if w.BTC.Version() >= enum.BTCVer17 {
 		w.checkImportedPublicAddressVer17(addr)
 		return
 	}

@@ -3,24 +3,25 @@ package api
 import (
 	"encoding/json"
 
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/pkg/errors"
 )
 
 // GetNetworkInfoResult getnetworkinfo RPC のレスポンス
 type GetNetworkInfoResult struct {
-	Version         int       `json:"version"`
-	Subversion      string    `json:"subversion"`
-	Protocolversion int       `json:"protocolversion"`
-	Localservices   string    `json:"localservices"`
-	Localrelay      bool      `json:"localrelay"`
-	Timeoffset      int       `json:"timeoffset"`
-	Networkactive   bool      `json:"networkactive"`
-	Connections     int       `json:"connections"`
-	Networks        []Network `json:"networks"`
-	Relayfee        float64   `json:"relayfee"`
-	Incrementalfee  float64   `json:"incrementalfee"`
-	Localaddresses  []string  `json:"localaddresses"`
-	Warnings        string    `json:"warnings"`
+	Version         enum.BTCVersion `json:"version"`
+	Subversion      string          `json:"subversion"`
+	Protocolversion int             `json:"protocolversion"`
+	Localservices   string          `json:"localservices"`
+	Localrelay      bool            `json:"localrelay"`
+	Timeoffset      int             `json:"timeoffset"`
+	Networkactive   bool            `json:"networkactive"`
+	Connections     int             `json:"connections"`
+	Networks        []Network       `json:"networks"`
+	Relayfee        float64         `json:"relayfee"`
+	Incrementalfee  float64         `json:"incrementalfee"`
+	Localaddresses  []string        `json:"localaddresses"`
+	Warnings        string          `json:"warnings"`
 }
 
 // Network ネットワーク情報

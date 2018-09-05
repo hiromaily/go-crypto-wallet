@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/rpcclient"
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/toml"
 	"github.com/pkg/errors"
@@ -16,7 +17,7 @@ type Bitcoin struct {
 	payment           KeyInfo
 	confirmationBlock int
 	feeRange          FeeAdjustmentRate
-	version           int //179900
+	version           enum.BTCVersion //179900
 }
 
 // KeyInfo 公開鍵アドレスと紐づくアカウント名
@@ -126,6 +127,6 @@ func (b *Bitcoin) FeeRangeMin() float64 {
 }
 
 // Version bitcoin coreのバージョンを返す
-func (b *Bitcoin) Version() int {
+func (b *Bitcoin) Version() enum.BTCVersion {
 	return b.version
 }

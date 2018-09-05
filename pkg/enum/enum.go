@@ -23,6 +23,16 @@ func ValidateEnvironmentType(val string) bool {
 	return false
 }
 
+//BTCVersion 実行環境
+type BTCVersion int
+
+// environment
+const (
+	BTCVer16 BTCVersion = 160000
+	BTCVer17 BTCVersion = 170000
+	BTCVer18 BTCVersion = 180000
+)
+
 //NetworkType ネットワーク種別
 type NetworkType string
 
