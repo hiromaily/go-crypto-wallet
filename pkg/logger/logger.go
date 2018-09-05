@@ -58,7 +58,6 @@ func initZapLoggers(env enum.EnvironmentType) error {
 	// FatalLevel logs a message, then calls os.Exit(1).
 	//FatalLevel
 
-
 	error := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool { return lvl >= zapcore.ErrorLevel })
 	info := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool { return lvl < zapcore.ErrorLevel })
 

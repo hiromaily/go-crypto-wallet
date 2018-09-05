@@ -348,6 +348,15 @@ func btcCommand(wallet *service.Wallet) {
 		if err == nil {
 			logger.Fatal("something is wrong")
 		}
+	case 6:
+		//入金検知のみ: listunspentのみ
+		logger.Info("Run: listunspentのみ")
+		unspentList, err := wallet.BTC.Client().ListUnspentMin(wallet.BTC.ConfirmationBlock()) //6
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+		logger.Debug("List Unspent")
+		grok.Value(unspentList) //Debug
 	default:
 		logger.Warn("opts.Mode is out of range")
 		procedure.ShowWallet()
