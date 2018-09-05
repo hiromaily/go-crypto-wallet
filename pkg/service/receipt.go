@@ -45,10 +45,8 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 	//	Spendable     bool    `json:"spendable"`
 	//}
 
-	//TODO:とりあえず、ListUnspentを使っているが、全ユーザーにGetUnspentByAddress()を使わないといけないかも
-	//TODO:ListUnspent内で、検索すべきBlock番号まで内部的に保持できてるっぽい
 	// Watch only walletであれば、ListUnspentで実現可能
-	unspentList, err := w.BTC.Client().ListUnspentMin(6)
+	unspentList, err := w.BTC.Client().ListUnspentMin(w.BTC.ConfirmationBlock()) //6
 	if err != nil {
 		return "", "", errors.Errorf("BTC.Client().ListUnspentMin(): error: %s", err)
 	}
@@ -69,8 +67,12 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 
 		//除外するアカウント
 		//TODO:本番環境ではこの条件がかわる気がする
-		if tx.Account == w.BTC.StoredAccountName() ||
-			tx.Account == w.BTC.PaymentAccountName() || tx.Account == "" {
+		//if tx.Account == w.BTC.StoredAccountName() ||
+		//	tx.Account == w.BTC.PaymentAccountName() || tx.Account == "" {
+		//	continue
+		//}
+		if tx.Account == string(enum.AccountTypeReceipt) ||
+			tx.Account == string(enum.AccountTypePayment) || tx.Account == "" {
 			continue
 		}
 
@@ -105,7 +107,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 		})
 
 	}
-	logger.Debugf("Total Coin to send:%d(Satoshi) before fee calculated, input length: %d", inputTotal, len(inputs))
+	logger.Debugf("total coin to send:%d(Satoshi) before fee calculated, input length: %d", inputTotal, len(inputs))
 	if len(inputs) == 0 {
 		return "", "", nil
 	}
@@ -125,8 +127,17 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcjson.TransactionInput, inputTotal btcutil.Amount, txReceiptInputs []model.TxInput) (string, string, error) {
 	var outputTotal btcutil.Amount
 
+	//TODO:w.BTC.StoredAddress() この部分をDatabaseから取得しないといけない
+	//TODO:送金時に、フラグ(is_allocated)をONにすることとする
+	pubkeyTable, err := w.DB.GetOneUnAllocatedAccountPubKeyTable(enum.AccountTypeReceipt)
+	if err != nil {
+		return "", "", errors.Errorf("DB.GetOneUnAllocatedAccountPubKeyTable(): error: %s", err)
+	}
+	storedAddr := pubkeyTable.WalletAddress //change from w.BTC.StoredAddress()
+	storedAccount := pubkeyTable.Account    //change from w.BTC.StoredAccountName()
+
 	// 1.CreateRawTransaction(仮で作成し、この後サイズから手数料を算出する)
-	msgTx, err := w.BTC.CreateRawTransaction(w.BTC.StoredAddress(), inputTotal, inputs)
+	msgTx, err := w.BTC.CreateRawTransaction(storedAddr, inputTotal, inputs)
 	if err != nil {
 		return "", "", errors.Errorf("BTC.CreateRawTransaction(): error: %s", err)
 	}
@@ -146,15 +157,15 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 	txReceiptOutputs := []model.TxOutput{
 		{
 			ReceiptID:     0,
-			OutputAddress: w.BTC.StoredAddress(),
-			OutputAccount: w.BTC.StoredAccountName(),
+			OutputAddress: storedAddr,
+			OutputAccount: storedAccount,
 			OutputAmount:  w.BTC.AmountString(outputTotal),
 			IsChange:      false,
 		},
 	}
 
 	// 5.再度 CreateRawTransaction
-	msgTx, err = w.BTC.CreateRawTransaction(w.BTC.StoredAddress(), outputTotal, inputs)
+	msgTx, err = w.BTC.CreateRawTransaction(storedAddr, outputTotal, inputs)
 	if err != nil {
 		return "", "", errors.Errorf("BTC.CreateRawTransaction(): error: %s", err)
 	}
