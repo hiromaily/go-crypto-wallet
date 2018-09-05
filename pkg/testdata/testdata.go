@@ -32,17 +32,21 @@ func CreateInitialTestData(m *model.DB, btc *api.Bitcoin) error{
 
 	//2. アドレスにaccount名を登録(bitcoin core経由)
 	for _ , pubkey := range accountPubKeyTable {
-		if btc.Version() >= enum.BTCVer17 {
-			err = btc.SetLabel(pubkey.WalletAddress, pubkey.Account)
-			if err != nil{
-				return errors.Errorf("btc.SetLabel() error: %s", err)
-			}
-		} else {
-			err = btc.SetAccount(pubkey.WalletAddress, pubkey.Account)
-			if err != nil{
-				return errors.Errorf("btc.SetAccount() error: %s", err)
-			}
+		err = btc.SetAccount(pubkey.WalletAddress, pubkey.Account)
+		if err != nil{
+			return errors.Errorf("btc.SetAccount() error: %s", err)
 		}
+		//if btc.Version() >= enum.BTCVer17 {
+		//	err = btc.SetLabel(pubkey.WalletAddress, pubkey.Account)
+		//	if err != nil{
+		//		return errors.Errorf("btc.SetLabel() error: %s", err)
+		//	}
+		//} else {
+		//	err = btc.SetAccount(pubkey.WalletAddress, pubkey.Account)
+		//	if err != nil{
+		//		return errors.Errorf("btc.SetAccount() error: %s", err)
+		//	}
+		//}
 	}
 
 	//3. payment_requestテーブルに情報をInsert
