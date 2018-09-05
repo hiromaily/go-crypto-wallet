@@ -84,7 +84,7 @@ func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID strin
 	return nil
 }
 
-//TODO:WIP
+//TODO:WIP 未検証
 func (w *Wallet) updateIsAllocatedForAccountPubkey(txReceiptID int64, actionType enum.ActionType) error {
 	//tx_receiptの場合のみ
 	if actionType == enum.ActionTypeReceipt {

@@ -111,25 +111,36 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 		userTotal += val.validAmount
 	}
 
-	//3.保管用アドレスの残高を確認し、金額が不足しているのであればエラー
-	//getbalance hokan 6
-	balance, err := w.BTC.GetBalanceByAccountAndMinConf(w.BTC.PaymentAccountName(), w.BTC.ConfirmationBlock())
+	//3.payment用アドレスの残高を確認し、金額が不足しているのであればエラー
+	//getbalance payment 6
+	//balance, err := w.BTC.GetBalanceByAccountAndMinConf(w.BTC.PaymentAccountName(), w.BTC.ConfirmationBlock())
+	balance, err := w.BTC.GetBalanceByAccountAndMinConf(string(enum.AccountTypePayment), w.BTC.ConfirmationBlock())
 	if err != nil {
 		return "", "", err
 	}
 	if balance <= userTotal {
 		//残高が不足している
-		return "", "", errors.New("Stored account balance is insufficient")
+		return "", "", errors.New("Payment account balance is insufficient")
 	}
 
 	//4. Listunspent()にてpaymentアカウント用のutxoをすべて取得する
 	//listunspent 6  9999999 [\"2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW\"]
-	addr, err := w.BTC.DecodeAddress(w.BTC.PaymentAddress())
+	//addr, err := w.BTC.DecodeAddress(w.BTC.PaymentAddress())
+	//if err != nil {
+	//	//toml内に定義あるアドレスなので、起動時にチェックすべき
+	//	return "", "", errors.Errorf("BTC.DecodeAddress(): error: %s", err)
+	//}
+	//unspentList, err := w.BTC.Client().ListUnspentMinMaxAddresses(6, 9999999, []btcutil.Address{addr})
+
+	//paymentが複数addressを持つことを考慮
+	addrs, err := w.BTC.GetAddressesByAccount(string(enum.AccountTypePayment))
 	if err != nil {
-		//toml内に定義あるアドレスなので、起動時にチェックすべき
-		return "", "", errors.Errorf("BTC.DecodeAddress(): error: %s", err)
+		return "", "", errors.Errorf("BTC.GetAddressesByAccount(): error: %s", err)
 	}
-	unspentList, err := w.BTC.Client().ListUnspentMinMaxAddresses(6, 9999999, []btcutil.Address{addr})
+	if len(addrs) == 0 {
+		return "", "", errors.New("Payment addresses could not be found")
+	}
+	unspentList, err := w.BTC.Client().ListUnspentMinMaxAddresses(w.BTC.ConfirmationBlock(), 9999999, addrs)
 	if err != nil {
 		//ListUnspentが実行できない。致命的なエラー。この場合BitcoinCoreの再起動が必要
 		return "", "", err
@@ -201,21 +212,25 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 		}
 	}
 
-	//差分でお釣り用のoutputを作成する
-	//TODO:ユーザーの出金先にpaymentのアドレスの指定がある場合、何が起きる？？
+	//8.差分でお釣り用のoutputを作成する
+	//おつり受け取りのpaymentaddressが複数ある場合、何を使うか。とりあえずaddrs[0]
+	//TODO:ユーザーの出金先にpaymentのアドレスの指定が万が一でもある場合のためのロジック(イレギュラーだが運用上可能)
+	//FIXME: paymentが複数addressであることを考慮
+	//FIXME:BIP44でaddressを生成したが、おつり用としては分けていない。これが問題をおこなさないか？
+	chargeAddr := addrs[0].String() //change from w.BTC.PaymentAddress()
 	change := inputTotal - userTotal
-	if _, ok := tmpOutputs[w.BTC.PaymentAddress()]; ok {
+	if _, ok := tmpOutputs[chargeAddr]; ok {
 		//加算
 		//TODO:こんなことが実運用でありえるか？
-		tmpOutputs[w.BTC.PaymentAddress()] += change
+		tmpOutputs[chargeAddr] += change
 	} else {
 		//新規
-		tmpOutputs[w.BTC.PaymentAddress()] = change
+		tmpOutputs[chargeAddr] = change
 	}
 
-	//tmpOutputsをoutputsとして変換する
+	//8-2.tmpOutputsをoutputsとして変換する
 	for key, val := range tmpOutputs {
-		addr, err = w.BTC.DecodeAddress(key)
+		addr, err := w.BTC.DecodeAddress(key)
 		if err != nil {
 			//これは本来事前にチェックされるため、ありえないはず
 			logger.Error("unexpected error converting string to address")
@@ -244,6 +259,8 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 		txPaymentOutputs []model.TxOutput
 	)
 
+	//w.BTC.PaymentAddress()
+
 	// 1.CreateRawTransactionWithOutput(仮で作成し、この後サイズから手数料を算出する)
 	msgTx, err := w.BTC.CreateRawTransactionWithOutput(inputs, outputs)
 	if err != nil {
@@ -260,13 +277,15 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 	// 3.お釣り用のoutputのトランザクションから、手数料を差し引く
 	// FIXME: これが足りない場合がめんどくさい。。。これをどう回避すべきか
 	for addr, amt := range outputs {
-		if addr.String() == w.BTC.PaymentAddress() {
+		//if addr.String() == w.BTC.PaymentAddress() {
+		if account, _ := w.BTC.GetAccount(addr.String()); account == string(enum.AccountTypePayment) {
 			outputs[addr] -= fee
 			//break
 			txPaymentOutputs = append(txPaymentOutputs, model.TxOutput{
 				ReceiptID:     0,
 				OutputAddress: addr.String(),
-				OutputAccount: w.BTC.PaymentAccountName(),
+				//OutputAccount: w.BTC.PaymentAccountName(),
+				OutputAccount: string(enum.AccountTypePayment),
 				OutputAmount:  w.BTC.AmountString(amt - fee),
 				IsChange:      true,
 			})

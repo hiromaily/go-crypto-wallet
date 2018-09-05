@@ -5,6 +5,8 @@ import (
 
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/pkg/errors"
 )
 
@@ -28,12 +30,20 @@ type GetAddressInfoResult struct {
 		Address        string `json:"address"`
 		ScriptPubKey   string `json:"scriptPubKey"`
 	} `json:"embedded"`
-	Label     string `json:"label"`
-	Timestamp int64  `json:"timestamp"`
-	Labels    []struct {
-		Name    string `json:"name"`
-		Purpose string `json:"purpose"`
-	} `json:"labels"`
+	Label     string  `json:"label"`
+	Timestamp int64   `json:"timestamp"`
+	Labels    []Label `json:"labels"`
+}
+
+// Label ラベル
+type Label struct {
+	Name    string `json:"name"`
+	Purpose string `json:"purpose"`
+}
+
+// Purpose 目的
+type Purpose struct {
+	Purpose string `json:"purpose"`
 }
 
 // CreateNewAddress アカウント名から新しいアドレスを生成する
@@ -49,11 +59,29 @@ func (b *Bitcoin) CreateNewAddress(accountName string) (btcutil.Address, error) 
 	return addr, nil
 }
 
+//GetAccountAddress アカウントに紐づくアドレスを返す
+// Deprecated, will be removed in V0.18.
+func (b *Bitcoin) GetAccountAddress(accountName string) (btcutil.Address, error) {
+	if b.Version() >= enum.BTCVer17 {
+		//TODO:複数件取得に変わるため、ゆくゆくは、この呼び出すはやめて、GetAddressesByLabel()を呼び出すようにする
+		addrs, err := b.GetAddressesByLabel(accountName)
+		if err != nil {
+			return nil, errors.Errorf("BTC.GetAddressesByLabel() error: %s", err)
+		}
+		if len(addrs) == 0 {
+			return nil, nil
+		}
+		return addrs[0], nil
+	}
+	return b.getAccountAddress(accountName)
+}
+
 // GetAccountAddress アカウントに紐づくアドレスを返す
 // => アカウントに紐づくアドレスが無い場合は新規アドレスを作成し、そのアドレス値を返す
 // => アカウントに紐づくアドレスが既にある場合は新規作成せずに既存アドレス値を返す。
 // => 既存アドレスがある場合でもそれが使用済み（一度以上BTCを受け取った）の場合には新規アドレスを作成し、そのアドレス値を返す。
-func (b *Bitcoin) GetAccountAddress(accountName string) (btcutil.Address, error) {
+// Deprecated, will be removed in V0.18.
+func (b *Bitcoin) getAccountAddress(accountName string) (btcutil.Address, error) {
 	addr, err := b.client.GetAccountAddress(accountName)
 	if err != nil {
 		return nil, errors.Errorf("client.GetAccountAddress(%s): error: %s", accountName, err)
@@ -62,9 +90,56 @@ func (b *Bitcoin) GetAccountAddress(accountName string) (btcutil.Address, error)
 	return addr, nil
 }
 
+// GetAddressesByLabel 指定したラベルに紐づくaddressをすべて返す
+func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, error) {
+	input, err := json.Marshal(string(labelName))
+	if err != nil {
+		return nil, errors.Errorf("json.Marchal(): error: %s", err)
+	}
+	rawResult, err := b.client.RawRequest("getaddressesbylabel", []json.RawMessage{input})
+	if err != nil {
+		return nil, errors.Errorf("json.RawRequest(getaddressesbylabel): error: %s", err)
+	}
+
+	var labels map[string]Purpose
+	err = json.Unmarshal([]byte(rawResult), &labels)
+	if err != nil {
+		return nil, errors.Errorf("json.Unmarshal(): error: %s", err)
+	}
+
+	resAddrs := make([]btcutil.Address, len(labels))
+	idx := 0
+	for key := range labels {
+		//key is address string
+		address, err := b.DecodeAddress(key)
+		if err != nil {
+			logger.Errorf("b.DecodeAddress(%s) error: %s", key, err)
+			continue
+		}
+
+		resAddrs[idx] = address
+		idx++
+	}
+
+	return resAddrs, nil
+}
+
 // GetAddressesByAccount アカウント名から紐づくすべてのアドレスを取得する
-// TODO:本番でaddressに対してアカウント名を紐付けることをするかどうか未定
 func (b *Bitcoin) GetAddressesByAccount(accountName string) ([]btcutil.Address, error) {
+	if b.Version() >= enum.BTCVer17 {
+		//TODO:複数件取得に変わるため、ゆくゆくは、この呼び出すはやめて、GetAddressesByLabel()を呼び出すようにする
+		addrs, err := b.GetAddressesByLabel(accountName)
+		if err != nil {
+			return nil, errors.Errorf("BTC.GetAddressesByLabel() error: %s", err)
+		}
+		return addrs, nil
+	}
+	return b.getAddressesByAccount(accountName)
+}
+
+// getAddressesByAccount アカウント名から紐づくすべてのアドレスを取得する
+// Deprecated, will be removed in V0.18
+func (b *Bitcoin) getAddressesByAccount(accountName string) ([]btcutil.Address, error) {
 	//Returns the list of addresses for the given account.
 	//アカウント名に紐づくアドレス一覧
 	//[
