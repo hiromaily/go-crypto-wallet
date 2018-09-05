@@ -49,7 +49,9 @@ func (b *Bitcoin) ImportAddress(pubkey string) error {
 
 // ImportAddressWithoutReScan Rescanせずにアドレスをwalletにimportする
 func (b *Bitcoin) ImportAddressWithoutReScan(pubkey string) error {
-	err := b.client.ImportAddressRescan(pubkey, false)
+	//FIXME: これはI/Fがずれてて使えない
+	//err := b.client.ImportAddressRescan(pubkey, false)
+	err := b.ImportAddressWithLabel(pubkey, "", false)
 	if err != nil {
 		return errors.Errorf("ImportAddressWithoutReScan(): error: %v", err)
 	}
