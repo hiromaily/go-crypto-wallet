@@ -72,7 +72,7 @@ func main() {
 		coldWallet2(wallet)
 	default:
 		logger.Warn("wallet option should be 1 or 2")
-		procedure.Show()
+		procedure.ShowColdWallet()
 	}
 }
 
@@ -89,7 +89,7 @@ func coldWallet1(wallet *service.Wallet) {
 		debugForCheck(wallet)
 	} else {
 		//logger.Warn("either sign:-s, key:-k, debug:-d should be set as main function")
-		procedure.Show()
+		procedure.ShowColdWallet()
 	}
 }
 
@@ -106,7 +106,7 @@ func coldWallet2(wallet *service.Wallet) {
 		debugForCheck(wallet)
 	} else {
 		logger.Warn("either sign:-s, key:-k, debug:-d should be set as main function")
-		procedure.Show()
+		procedure.ShowColdWallet()
 	}
 }
 
@@ -130,7 +130,7 @@ func signFunctionalities1(wallet *service.Wallet) {
 		logger.Infof("[hex]: %s\n[署名完了]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName)
 	default:
 		logger.Warn("opts.Mode is out of range")
-		procedure.Show()
+		procedure.ShowColdWallet()
 	}
 }
 
@@ -293,7 +293,7 @@ func keyFunctionalities1(wallet *service.Wallet) {
 		logger.Infof("fileName: %s", fileName)
 	default:
 		logger.Warn("opts.Mode is out of range")
-		procedure.Show()
+		procedure.ShowColdWallet()
 	}
 
 }
@@ -401,7 +401,7 @@ func keyFunctionalities2(wallet *service.Wallet) {
 
 	default:
 		logger.Warn("opts.Mode is out of range")
-		procedure.Show()
+		procedure.ShowColdWallet()
 	}
 
 }

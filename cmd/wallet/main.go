@@ -98,7 +98,7 @@ func main() {
 		debugForCheck(wallet)
 	} else {
 		logger.Warn("either sign:-s, key:-k, debug:-d should be set as main function")
-		procedure.Show()
+		procedure.ShowWallet()
 	}
 }
 
@@ -107,7 +107,7 @@ func keyFunctionalities(wallet *service.Wallet) {
 	switch opts.Mode {
 	case 1:
 		//TODO:imporot後、getaddressesbyaccount "" で内容を確認??
-		logger.Info("Run: coldwalletで生成したアドレスをwalletにimportする")
+		logger.Info("Run: coldwalletで生成した[client]アドレスをwalletにimportする")
 		if opts.ImportFile == "" {
 			logger.Fatal("file path is required as argument file when running")
 		}
@@ -117,7 +117,7 @@ func keyFunctionalities(wallet *service.Wallet) {
 		}
 	case 2:
 		//TODO:imporot後、getaddressesbyaccount "" で内容を確認??
-		logger.Info("Run: coldwalletで生成したアドレスをwalletにimportする")
+		logger.Info("Run: coldwalletで生成した[receipt]アドレスをwalletにimportする")
 		if opts.ImportFile == "" {
 			logger.Fatal("file path is required as argument file when running")
 		}
@@ -127,7 +127,7 @@ func keyFunctionalities(wallet *service.Wallet) {
 		}
 	case 3:
 		//TODO:imporot後、getaddressesbyaccount "" で内容を確認??
-		logger.Info("Run: coldwalletで生成したアドレスをwalletにimportする")
+		logger.Info("Run: coldwalletで生成した[payment]アドレスをwalletにimportする")
 		if opts.ImportFile == "" {
 			logger.Fatal("file path is required as argument file when running")
 		}
@@ -138,7 +138,7 @@ func keyFunctionalities(wallet *service.Wallet) {
 
 	default:
 		logger.Warn("opts.Mode is out of range")
-		procedure.Show()
+		procedure.ShowWallet()
 	}
 
 	//clientのaddress, receipt,paymentのmultisigアドレスをimportする
@@ -150,7 +150,7 @@ func keyFunctionalities(wallet *service.Wallet) {
 func receiptFunctionalities(wallet *service.Wallet) {
 	switch opts.Mode {
 	case 1:
-		logger.Info("Run: 入金処理検知")
+		logger.Info("Run: 入金処理検知 + 未署名トランザクション作成")
 		//実際には署名処理は手動なので、ユーザーの任意のタイミングで走らせたほうがいい。
 		//入金検知 + 未署名トランザクション作成
 		hex, fileName, err := wallet.DetectReceivedCoin(opts.Fee)
@@ -162,7 +162,11 @@ func receiptFunctionalities(wallet *service.Wallet) {
 			return
 		}
 		logger.Infof("[hex]: %s\n[fileName]: %s", hex, fileName)
-	case 20:
+	case 2:
+		logger.Info("Run: 入金処理検知 (確認のみ)")
+		//TODO:WIP
+
+	case 10:
 		logger.Info("Run: [Debug用]入金から送金までの一連の流れを確認")
 
 		//入金検知 + 未署名トランザクション作成
@@ -204,7 +208,7 @@ func receiptFunctionalities(wallet *service.Wallet) {
 
 	default:
 		logger.Warn("opts.Mode is out of range")
-		procedure.Show()
+		procedure.ShowWallet()
 	}
 
 }
@@ -212,7 +216,7 @@ func receiptFunctionalities(wallet *service.Wallet) {
 //出金関連機能
 func paymentFunctionalities(wallet *service.Wallet) {
 	switch opts.Mode {
-	case 2:
+	case 1:
 		logger.Info("Run:出金のための未署名トランザクション作成")
 		hex, fileName, err := wallet.CreateUnsignedTransactionForPayment(opts.Fee)
 		if err != nil {
@@ -223,7 +227,7 @@ func paymentFunctionalities(wallet *service.Wallet) {
 			return
 		}
 		logger.Infof("[hex]: %s, \n[fileName]: %s", hex, fileName)
-	case 21:
+	case 10:
 		logger.Info("Run: [Debug用]出金から送金までの一連の流れを確認")
 
 		//出金準備
@@ -256,14 +260,14 @@ func paymentFunctionalities(wallet *service.Wallet) {
 
 	default:
 		logger.Warn("opts.Mode is out of range")
-		procedure.Show()
+		procedure.ShowWallet()
 	}
 }
 
 //署名の送信 関連機能
 func sendingFunctionalities(wallet *service.Wallet) {
 	switch opts.Mode {
-	case 3:
+	case 1:
 		logger.Info("Run: ファイルから署名済みtxを送信する")
 		// 1.GPSにupload(web管理画面から行う??)
 		// 2.Uploadされたtransactionファイルから、送信する？
@@ -278,14 +282,14 @@ func sendingFunctionalities(wallet *service.Wallet) {
 		logger.Infof("[Done]送信までDONE!! txID: %s", txID)
 	default:
 		logger.Warn("opts.Mode is out of range")
-		procedure.Show()
+		procedure.ShowWallet()
 	}
 }
 
 //transactionの監視 関連機能
 func monitoringFunctionalities(wallet *service.Wallet) {
 	switch opts.Mode {
-	case 10:
+	case 1:
 		logger.Info("Run: 送信済ステータスのトランザクションを監視する")
 		err := wallet.UpdateStatus()
 		if err != nil {
@@ -293,7 +297,7 @@ func monitoringFunctionalities(wallet *service.Wallet) {
 		}
 	default:
 		logger.Warn("opts.Mode is out of range")
-		procedure.Show()
+		procedure.ShowWallet()
 	}
 
 }
@@ -346,7 +350,7 @@ func btcCommand(wallet *service.Wallet) {
 		}
 	default:
 		logger.Warn("opts.Mode is out of range")
-		procedure.Show()
+		procedure.ShowWallet()
 	}
 }
 
@@ -367,20 +371,9 @@ func debugForCheck(wallet *service.Wallet) {
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
-	case 10:
-		//[Debug用]hexから署名済みtxを送信する
-		logger.Info("Run: hexから署名済みtxを送信する")
-
-		hex := "020000000001019dcbbda4e5233051f2bed587c1d48e8e17aa21c2c3012097899bda5097ce78e201000000232200208e1343e11e4def66d7102d9b0f36f019188118df5a5f30dacdd1008928b12f5fffffffff01042bbf070000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e870400483045022100f4975a5ea23e5799b1df65d699f85236b9d00bcda8da333731ffa508285d3c59022037285857821ee68cbe5f74239299170686b108ce44e724a9a280a3ef9291746901483045022100f94ce83946b4698b8dfbb7cb75eece12932c5097017e70e60d924aeae1ec829a02206e7b2437e9747a9c28a3a3d7291ea16db1d2f0a60482cdb8eca91c28c01aba790147522103d69e07dbf6da065e6fae1ef5761d029b9ff9143e75d579ffc439d47484044bed2103748797877523b8b36add26c9e0fb6a023f05083dd4056aedc658d2932df1eb6052ae00000000"
-		hash, err := wallet.BTC.SendTransactionByHex(hex)
-		if err != nil {
-			log.Fatalf("%+v", err)
-		}
-		log.Printf("[Debug] 送信までDONE!! %s", hash.String())
-
 	default:
 		logger.Warn("opts.Mode is out of range")
-		procedure.Show()
+		procedure.ShowWallet()
 	}
 
 }

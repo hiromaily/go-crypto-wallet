@@ -19,8 +19,97 @@ type Procedure struct {
 	Command    string
 }
 
-//proceduresForPreparation セットアップに必要な手順
-var proceduresForPreparation = []Procedure{
+//proceduresForWallet コマンド一覧
+var proceduresForWallet = []Procedure{
+	{
+		WalletTypeWatchOnly,
+		"[キー管理]coldwalletで生成した[client]アドレスをwalletにimportする",
+		"wallet -k -m 1 -i ./data/pubkey/xxx.csv",
+	},
+	{
+		WalletTypeWatchOnly,
+		"[キー管理]coldwalletで生成した[receipt]アドレスをwalletにimportする",
+		"wallet -k -m 2 -i ./data/pubkey/xxx.csv",
+	},
+	{
+		WalletTypeWatchOnly,
+		"[キー管理]coldwalletで生成した[payment]アドレスをwalletにimportする",
+		"wallet -k -m 3 -i ./data/pubkey/xxx.csv",
+	},
+	{
+		WalletTypeWatchOnly,
+		"[入金管理]入金処理検知 + 未署名トランザクション作成",
+		"wallet -r -m 1",
+	},
+	{
+		WalletTypeWatchOnly,
+		"[入金管理]入金処理検知 (確認のみ)",
+		"wallet -r -m 2",
+	},
+	{
+		WalletTypeWatchOnly,
+		"[入金管理][Debug用]入金から送金までの一連の流れを確認",
+		"wallet -r -m 10",
+	},
+	{
+		WalletTypeWatchOnly,
+		"[出金管理]出金のための未署名トランザクション作成",
+		"wallet -p -m 1",
+	},
+	{
+		WalletTypeWatchOnly,
+		"[出金管理][Debug用]出金から送金までの一連の流れを確認",
+		"wallet -p -m 10",
+	},
+	{
+		WalletTypeWatchOnly,
+		"[署名送信管理]ファイルから署名済みtxを送信する",
+		"wallet -s -m 1 -i ./data/tx/xxxxx/xxxxx",
+	},
+	{
+		WalletTypeWatchOnly,
+		"[監視管理]送信済ステータスのトランザクションを監視する",
+		"wallet -n -m 1",
+	},
+	{
+		WalletTypeWatchOnly,
+		"[bitcoin cli] listlockunspent lockされたトランザクションの解除",
+		"wallet -b -m 1",
+	},
+	{
+		WalletTypeWatchOnly,
+		"[bitcoin cli] estimatesmartfee 手数料算出",
+		"wallet -b -m 2",
+	},
+	{
+		WalletTypeWatchOnly,
+		"[bitcoin cli] logging ロギング",
+		"wallet -b -m 3",
+	},
+	{
+		WalletTypeWatchOnly,
+		"[bitcoin cli] getnetworkinfo 情報取得",
+		"wallet -b -m 4",
+	},
+	{
+		WalletTypeWatchOnly,
+		"[bitcoin cli] validateaddress AddressのValidationチェック",
+		"wallet -b -m 5",
+	},
+	{
+		WalletTypeWatchOnly,
+		"[Debug]payment_requestテーブルを作成する",
+		"wallet -d -m 1",
+	},
+	{
+		WalletTypeWatchOnly,
+		"[Debug]payment_requestテーブルの情報を初期化する",
+		"wallet -d -m 2",
+	},
+}
+
+//proceduresForColdWallet セットアップに必要な手順
+var proceduresForColdWallet = []Procedure{
 	{
 		WalletTypeCold1,
 		"for all",
@@ -118,7 +207,12 @@ var proceduresForPreparation = []Procedure{
 	},
 }
 
-// Show Procedureを表示する
-func Show() {
-	grok.Value(proceduresForPreparation)
+// ShowWallet Procedureを表示する
+func ShowWallet() {
+	grok.Value(proceduresForWallet)
+}
+
+// ShowColdWallet Procedureを表示する
+func ShowColdWallet() {
+	grok.Value(proceduresForColdWallet)
 }
