@@ -47,28 +47,13 @@ func TestSetLabel(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		//
+		//セットされているか確認
+		info, err := wlt.BTC.GetAddressInfo(key.P2shSegwit)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if info.Label != labelName {
+			t.Errorf("Label:%s is expected but %s is returned", labelName, info.Label)
+		}
 	}
-
-	//var tests = []struct {
-	//	addr  string
-	//	isErr bool
-	//}{
-	//	{"2NFXSXxw8Fa6P6CSovkdjXE6UF4hupcTHtr", false},
-	//	{"2NDGkbQTwg2v1zP6yHZw3UJhmsBh9igsSos", false},
-	//	{"4VHGkbQTGg2vN5P6yHZw3UJhmsBh9igsSos", true},
-	//}
-	//
-	//for _, val := range tests {
-	//	//t.Logf("check address: %s", val.addr)
-	//	fmt.Printf("check address: %s\n", val.addr)
-	//
-	//	_, err := wlt.BTC.ValidateAddress(val.addr)
-	//	if err != nil && !val.isErr {
-	//		t.Errorf("Unexpectedly error occorred. %v", err)
-	//	}
-	//	if err == nil && val.isErr {
-	//		t.Error("Error is expected. However nothing happened.")
-	//	}
-	//}
 }

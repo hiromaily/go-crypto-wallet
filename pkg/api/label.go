@@ -31,8 +31,9 @@ func (b *Bitcoin) SetLabel(addr, label string) error {
 		return errors.Errorf("json.RawRequest(setlabel): error: %s", err)
 	}
 
-	//TODO:第二パラメータはnilで問題ないか？
-	err = json.Unmarshal([]byte(rawResult), nil)
+	//TODO:第二パラメータはnilで問題ないか？ => 問題があった。。。
+	var tmp interface{}
+	err = json.Unmarshal([]byte(rawResult), &tmp)
 	if err != nil {
 		return errors.Errorf("json.Unmarshal(): error: %s", err)
 	}
