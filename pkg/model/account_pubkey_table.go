@@ -24,6 +24,26 @@ var accountPubKeyTableName = map[enum.AccountType]string{
 	enum.AccountTypePayment: "account_pubkey_payment",
 }
 
+//getAllAccountPubKeyTable
+func (m *DB) getAllAccountPubKeyTable(tbl string) ([]AccountPublicKeyTable, error) {
+	sql := "SELECT * FROM %s;"
+	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
+
+	var accountKeyTable []AccountPublicKeyTable
+	err := m.RDB.Select(&accountKeyTable, sql)
+	if err != nil {
+		return nil, err
+	}
+
+	return accountKeyTable, nil
+}
+
+// GetAllAccountPubKeyTable account_pubkey_table(client, payment, receipt...)テーブルから全レコードを取得
+func (m *DB) GetAllAccountPubKeyTable(accountType enum.AccountType) ([]AccountPublicKeyTable, error) {
+	return m.getAllAccountPubKeyTable(accountPubKeyTableName[accountType])
+}
+
 // insertAccountPubKeyTable account_key_table(client, payment, receipt...)テーブルにレコードを作成する
 //TODO:BulkInsertがやりたい
 func (m *DB) insertAccountPubKeyTable(tbl string, accountPubKeyTables []AccountPublicKeyTable, tx *sqlx.Tx, isCommit bool) error {
@@ -57,4 +77,37 @@ VALUES (:wallet_address, :account)
 // InsertAccountPubKeyTable account_pubkey_table(client, payment, receipt...)テーブルにレコードを作成する
 func (m *DB) InsertAccountPubKeyTable(accountType enum.AccountType, accountPubKeyTables []AccountPublicKeyTable, tx *sqlx.Tx, isCommit bool) error {
 	return m.insertAccountPubKeyTable(accountPubKeyTableName[accountType], accountPubKeyTables, tx, isCommit)
+}
+
+// updateAccountOnAccountPubKeyTable Accountを更新する
+func (m *DB) updateAccountOnAccountPubKeyTable(tbl string, accountKeyTable []AccountPublicKeyTable, tx *sqlx.Tx, isCommit bool) error {
+	sql := `
+UPDATE %s SET account=:account, updated_at=:updated_at 
+WHERE id=:id
+`
+	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
+
+	if tx == nil {
+		tx = m.RDB.MustBegin()
+	}
+
+	for _, accountKey := range accountKeyTable {
+		_, err := tx.NamedExec(sql, accountKey)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	if isCommit {
+		tx.Commit()
+	}
+
+	return nil
+}
+
+// UpdateAccountOnAccountPubKeyTable Accountを更新する
+func (m *DB) UpdateAccountOnAccountPubKeyTable(accountType enum.AccountType, accountKeyTable []AccountPublicKeyTable, tx *sqlx.Tx, isCommit bool) error {
+	return m.updateAccountOnAccountPubKeyTable(accountPubKeyTableName[accountType], accountKeyTable, tx, isCommit)
 }

@@ -454,7 +454,7 @@ func debugForCheck(wallet *service.Wallet) {
 	}
 }
 
-//coldwallet1 -w 1 -m 0
+//coldwallet1 -w 1 -d
 func development(wallet *service.Wallet) {
 	//------------------------------------------------------------------
 	//coldwallet1の機能
@@ -582,16 +582,23 @@ func development(wallet *service.Wallet) {
 	//walletの機能
 	//------------------------------------------------------------------
 	//coldwalletで生成したアドレスをwalletにimportする
-	err = wallet.ImportPublicKeyForWatchWallet(fileName, enum.AccountTypeClient)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-	err = wallet.ImportPublicKeyForWatchWallet(fileName6, enum.AccountTypeReceipt)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-	err = wallet.ImportPublicKeyForWatchWallet(fileName7, enum.AccountTypePayment)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
+	//TODO:一台のPCで実行すると、service/import_public_key.go:50でエラーが出る
+	//error: -4: The wallet already contains the private key for this address or script
+	//err = wallet.ImportPublicKeyForWatchWallet(fileName, enum.AccountTypeClient)
+	//if err != nil {
+	//	logger.Fatalf("%+v", err)
+	//}
+	//err = wallet.ImportPublicKeyForWatchWallet(fileName6, enum.AccountTypeReceipt)
+	//if err != nil {
+	//	logger.Fatalf("%+v", err)
+	//}
+	//err = wallet.ImportPublicKeyForWatchWallet(fileName7, enum.AccountTypePayment)
+	//if err != nil {
+	//	logger.Fatalf("%+v", err)
+	//}
+
+	logger.Infof("next you should run\nwallet -k -m 1 -i %s,\nwallet -k -m 2 -i %s,\nwallet -k -m 3 -i %s", fileName, fileName6, fileName7)
+	//wallet -k -m 1 -i ./data/pubkey/xxx.csv
+	//wallet -k -m 2 -i ./data/pubkey/xxx.csv
+	//wallet -k -m 3 -i ./data/pubkey/xxx.csv
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/hiromaily/go-bitcoin/pkg/testdata"
 	"log"
 
 	"github.com/bookerzzz/grok"
@@ -353,15 +354,22 @@ func btcCommand(wallet *service.Wallet) {
 func debugForCheck(wallet *service.Wallet) {
 	switch opts.Mode {
 	case 1:
+		//[Debug用]payment_requestテーブルを作成する
+		logger.Info("Run: payment_requestテーブルを作成する")
+		err := testdata.CreateInitialTestData(wallet.DB, wallet.BTC)
+		if err != nil {
+			logger.Fatal(err)
+		}
+	case 2:
 		//[Debug用]payment_requestテーブルの情報を初期化する
-		log.Print("Run: payment_requestテーブルの情報を初期化する")
+		logger.Info("Run: payment_requestテーブルの情報を初期化する")
 		_, err := wallet.DB.ResetAnyFlagOnPaymentRequestForTestOnly(nil, true)
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
 	case 10:
 		//[Debug用]hexから署名済みtxを送信する
-		log.Print("Run: hexから署名済みtxを送信する")
+		logger.Info("Run: hexから署名済みtxを送信する")
 
 		hex := "020000000001019dcbbda4e5233051f2bed587c1d48e8e17aa21c2c3012097899bda5097ce78e201000000232200208e1343e11e4def66d7102d9b0f36f019188118df5a5f30dacdd1008928b12f5fffffffff01042bbf070000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e870400483045022100f4975a5ea23e5799b1df65d699f85236b9d00bcda8da333731ffa508285d3c59022037285857821ee68cbe5f74239299170686b108ce44e724a9a280a3ef9291746901483045022100f94ce83946b4698b8dfbb7cb75eece12932c5097017e70e60d924aeae1ec829a02206e7b2437e9747a9c28a3a3d7291ea16db1d2f0a60482cdb8eca91c28c01aba790147522103d69e07dbf6da065e6fae1ef5761d029b9ff9143e75d579ffc439d47484044bed2103748797877523b8b36add26c9e0fb6a023f05083dd4056aedc658d2932df1eb6052ae00000000"
 		hash, err := wallet.BTC.SendTransactionByHex(hex)
