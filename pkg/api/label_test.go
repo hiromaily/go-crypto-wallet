@@ -20,12 +20,19 @@ func TestSetLabel(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	keys, err := wlt.GenerateAccountKey(enum.AccountTypeClient, bSeed, 10)
+	//keys, err := wlt.GenerateAccountKey(enum.AccountTypeClient, bSeed, 10)
+	// key生成
+	priv, _, err := key.CreateAccount(wlt.BTC.GetChainConf(), bSeed, enum.AccountTypeClient)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	for _, key := range keys {
+	walletKeys, err := key.CreateKeysWithIndex(wlt.BTC.GetChainConf(), priv, 0, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, key := range walletKeys {
 		// アドレスをimport
 		err = wlt.BTC.ImportAddressWithoutReScan(key.P2shSegwit)
 		if err != nil {
