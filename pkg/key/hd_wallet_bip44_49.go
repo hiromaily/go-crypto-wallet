@@ -228,20 +228,7 @@ func (k Key) addressString(privKey *btcec.PrivateKey) (string, error) {
 	if err != nil {
 		return "", errors.Errorf("btcutil.NewAddressPubKeyHash() error: %s", err)
 	}
-
-	//Debug
-	//logger.Debugf("addrBCH: %t", addrBCH.IsForNet(k.conf))
-	//logger.Debugf("addrBCH: %s", addrBCH.String())
-	//grok.Value(addrBCH)
-
-	//Decodeするときあprefixが必要
-	//prefix, val, err := bchutil.DecodeCashAddress("bchtest:"+addrBCH.String())
-	//if err != nil {
-	//	return "", errors.Errorf("bchutil.DecodeCashAddress() error: %s", err)
-	//}
-	//logger.Debugf("prefix: %s", prefix)
-	//logger.Debugf("val: %v", val)
-
+	
 	//prefixを取得
 	prefix, ok := bchutil.Prefixes[k.conf.Name]
 	if !ok {
