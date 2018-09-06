@@ -148,26 +148,11 @@ func (k Key) CreateKeysWithIndex(accountPrivateKey string, idxFrom, count uint32
 		strPrivateKey := wif.String()
 
 		// Address(P2PKH) BTC/BCH
-		// (btcutil.NewAddressPubKeyHash(pkHash, net))
-		var (
-			//address  *btcutil.AddressPubKeyHash
-			//cashAddr *bchutil.CashAddressPubKeyHash
-			strAddr string
-		)
+		//  btcutil.NewAddressPubKeyHash(pkHash, net)
 		//if k.coinType == enum.BTC {
-		//	address, err = child.Address(k.conf)
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//	strAddr = address.String()
-		//} else {
-		//	cashAddr, err = k.cashAddress(privateKey)
-		//	if err != nil {
-		//		return nil, err
-		//	}
-		//	strAddr = cashAddr.String()
+		//	address, err := child.Address(k.conf)
 		//}
-		strAddr, err = k.addressString(privateKey)
+		strAddr, err := k.addressString(privateKey)
 		if err != nil {
 			return nil, err
 		}
@@ -192,16 +177,25 @@ func (k Key) CreateKeysWithIndex(accountPrivateKey string, idxFrom, count uint32
 	return walletKeys, nil
 }
 
-//For only Debug
-func experimentalKey() {
-	// [Debug] different way to generate address
-	//serializedKey := privateKey.PubKey().SerializeCompressed()
-	//pubKeyAddr, err := btcutil.NewAddressPubKey(serializedKey, conf)
-	//log.Println("address.String()", address.String())       //mySBc7pWWXjBUmAtjBY3sCdgnPAvAzwCoA
-	//log.Println("pubKeyAddr.String()", pubKeyAddr.String()) //022c70901aac621c4436c4cb1f2daa8b9a6ff2c9d707b3f2639319d902679e1dfd
-	//log.Println("pubKeyAddr.AddressPubKeyHash().String()", pubKeyAddr.AddressPubKeyHash().String()) //mySBc7pWWXjBUmAtjBY3sCdgnPAvAzwCoA
-	//log.Println("getFullPubKey(privateKey)", getFullPubKey(privateKey)) //pubKeyAddr.String()とは微妙に異なる。。
-	//log.Println(" ")
+// GetExtendedKey for only debug use
+func (k Key) GetExtendedKey(accountPrivateKey string) (*hdkeychain.ExtendedKey, error) {
+	account, err := hdkeychain.NewKeyFromString(accountPrivateKey)
+	if err != nil {
+		return nil, err
+	}
+	// Change
+	change, err := account.Child(uint32(ChangeTypeExternal))
+	if err != nil {
+		return nil, err
+	}
+
+	child, err := change.Child(0)
+	if err != nil {
+		return nil, err
+	}
+
+	// extendedKey
+	return child, nil
 }
 
 // BTC/BCHのaddress P2PKHを返す
@@ -228,7 +222,7 @@ func (k Key) addressString(privKey *btcec.PrivateKey) (string, error) {
 	if err != nil {
 		return "", errors.Errorf("btcutil.NewAddressPubKeyHash() error: %s", err)
 	}
-	
+
 	//prefixを取得
 	prefix, ok := bchutil.Prefixes[k.conf.Name]
 	if !ok {

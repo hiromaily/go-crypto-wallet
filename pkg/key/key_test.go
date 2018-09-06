@@ -2,12 +2,14 @@ package key_test
 
 import (
 	"flag"
-	"github.com/cpacia/bchutil"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"os"
 	"testing"
 
+	"github.com/btcsuite/btcutil"
+	"github.com/btcsuite/btcutil/hdkeychain"
+	"github.com/cpacia/bchutil"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	. "github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 )
@@ -109,7 +111,7 @@ func TestKeyIntegrationBTC2(t *testing.T) {
 
 	generateKeys(bSeed, enum.BTC, t)
 
-	//expecting
+	//expecting always when using same seed
 	//key_test.go:70: [Address] n34rJwoiPM6igHLqLUpfZmftc31u42gagZ
 	//key_test.go:71: [P2shSegwit] 2Mv6uWSWBYsoLkfCwr8nD6vMBDtjH4kpem2
 	//key_test.go:72: [FullPubKey] 023d7e14cd8c3f3682b7c6f83f6df44415e8e35f7d5abe11fa1a076494d7c11830
@@ -153,6 +155,8 @@ func TestKeyIntegrationBTC2(t *testing.T) {
 }
 
 func TestKeyIntegrationBCH(t *testing.T) {
+	t.SkipNow()
+
 	//BCHのconfとして利用する
 	wlt.BTC.OverrideChainParamsByBCH()
 
@@ -163,4 +167,59 @@ func TestKeyIntegrationBCH(t *testing.T) {
 	}
 
 	generateKeys(bSeed, enum.BCH, t)
+}
+
+//For Debug
+func TestCheckBTCPrivateKey(t *testing.T) {
+	conf := wlt.BTC.GetChainConf()
+
+	testSeed := "ggqMLyaZ7pwOXRdH8N2CWBf7L9gS/P8/p7oJdjp9M8U="
+	bSeed, err := SeedToByte(testSeed)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// BTC key生成
+	keyData := NewKey(enum.BTC, conf)
+
+	priv, _, err := keyData.CreateAccount(bSeed, enum.AccountTypeClient)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	child, err := keyData.GetExtendedKey(priv)
+	if err != nil {
+		t.Fatal(err)
+	}
+	experimentalKey(child, t)
+}
+
+//For only Debug
+func experimentalKey(child *hdkeychain.ExtendedKey, t *testing.T) {
+	conf := wlt.BTC.GetChainConf()
+
+	// Private Key
+	privateKey, err := child.ECPrivKey()
+
+	// WIF　(compress: true) => bitcoin coreでは圧縮したアドレスを表示する
+	wif, err := btcutil.NewWIF(privateKey, conf, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("WIF String:  %s", wif.String())
+
+	// Address(P2PKH)
+	address, err := child.Address(conf)
+	t.Logf("P2PKH Address String:  %s", address.String())
+
+	// Address(P2PKH) BTC
+	//keyData := key.NewKey(enum.BTC, conf)
+
+	//serializedKey := privateKey.PubKey().SerializeCompressed()
+	//pubKeyAddr, err := btcutil.NewAddressPubKey(serializedKey, conf)
+	//log.Println("address.String()", address.String())       //mySBc7pWWXjBUmAtjBY3sCdgnPAvAzwCoA
+	//log.Println("pubKeyAddr.String()", pubKeyAddr.String()) //022c70901aac621c4436c4cb1f2daa8b9a6ff2c9d707b3f2639319d902679e1dfd
+	//log.Println("pubKeyAddr.AddressPubKeyHash().String()", pubKeyAddr.AddressPubKeyHash().String()) //mySBc7pWWXjBUmAtjBY3sCdgnPAvAzwCoA
+	//log.Println("getFullPubKey(privateKey)", getFullPubKey(privateKey)) //pubKeyAddr.String()とは微妙に異なる。。
+	//log.Println(" ")
 }
