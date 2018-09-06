@@ -3,6 +3,7 @@ package btc
 import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/rpcclient"
+	"github.com/btcsuite/btcd/wire"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/toml"
@@ -86,9 +87,34 @@ func (b *Bitcoin) GetChainConf() *chaincfg.Params {
 	return b.chainConf
 }
 
+// SetChainConfNet conf.Netをセットする
+func (b *Bitcoin) SetChainConfNet(btcNet wire.BitcoinNet) {
+	b.chainConf.Net = btcNet
+}
+
 // Client clientオブジェクトを返す
 func (b *Bitcoin) Client() *rpcclient.Client {
 	return b.client
+}
+
+// ConfirmationBlock Confirmationに必要なブロック数を返す
+func (b *Bitcoin) ConfirmationBlock() int {
+	return b.confirmationBlock
+}
+
+// FeeRangeMax feeの調整倍率の最大値を返す
+func (b *Bitcoin) FeeRangeMax() float64 {
+	return b.feeRange.max
+}
+
+// FeeRangeMin feeの調整倍率の最小値を返す
+func (b *Bitcoin) FeeRangeMin() float64 {
+	return b.feeRange.min
+}
+
+// Version bitcoin coreのバージョンを返す
+func (b *Bitcoin) Version() enum.BTCVersion {
+	return b.version
 }
 
 // ReceiptAddress 入金用アドレスを返す
@@ -110,23 +136,3 @@ func (b *Bitcoin) Client() *rpcclient.Client {
 //func (b *Bitcoin) PaymentAccountName() string {
 //	return b.payment.acountName
 //}
-
-// ConfirmationBlock Confirmationに必要なブロック数を返す
-func (b *Bitcoin) ConfirmationBlock() int {
-	return b.confirmationBlock
-}
-
-// FeeRangeMax feeの調整倍率の最大値を返す
-func (b *Bitcoin) FeeRangeMax() float64 {
-	return b.feeRange.max
-}
-
-// FeeRangeMin feeの調整倍率の最小値を返す
-func (b *Bitcoin) FeeRangeMin() float64 {
-	return b.feeRange.min
-}
-
-// Version bitcoin coreのバージョンを返す
-func (b *Bitcoin) Version() enum.BTCVersion {
-	return b.version
-}
