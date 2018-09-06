@@ -164,7 +164,3 @@ func TestKeyIntegrationBCH(t *testing.T) {
 
 	generateKeys(bSeed, enum.BCH, t)
 }
-
-//func TestExperipentBCH(t *testing.T) {
-//	//
-//}
