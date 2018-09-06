@@ -135,6 +135,9 @@ func TestKeyIntegrationBTC2(t *testing.T) {
 }
 
 func TestKeyIntegrationBCH(t *testing.T) {
+	//BCHのconfとして利用する
+	wlt.BTC.OverrideChainParamsByBCH()
+
 	testSeed := "ggqMLyaZ7pwOXRdH8N2CWBf7L9gS/P8/p7oJdjp9M8U="
 	bSeed, err := SeedToByte(testSeed)
 	if err != nil {

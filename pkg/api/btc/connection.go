@@ -4,6 +4,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/btcsuite/btcd/wire"
+	"github.com/cpacia/bchutil"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/toml"
@@ -115,6 +116,19 @@ func (b *Bitcoin) FeeRangeMin() float64 {
 // Version bitcoin coreのバージョンを返す
 func (b *Bitcoin) Version() enum.BTCVersion {
 	return b.version
+}
+
+// OverrideChainParamsByBCH chaincfgをBCH用に上書きする
+func (b *Bitcoin) OverrideChainParamsByBCH() {
+	switch b.chainConf.Name {
+	case chaincfg.TestNet3Params.Name:
+		b.chainConf.Net = bchutil.TestnetMagic
+	case chaincfg.RegressionNetParams.Name:
+		b.chainConf.Net = bchutil.Regtestmagic
+	default:
+		//chaincfg.MainNetParams.Name
+		b.chainConf.Net = bchutil.MainnetMagic
+	}
 }
 
 // ReceiptAddress 入金用アドレスを返す
