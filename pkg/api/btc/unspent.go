@@ -1,4 +1,4 @@
-package api
+package btc
 
 import (
 	"github.com/btcsuite/btcd/btcjson"

@@ -1,10 +1,10 @@
-package api_test
+package btc_test
 
 import (
 	"testing"
 
 	"github.com/btcsuite/btcutil"
-	. "github.com/hiromaily/go-bitcoin/pkg/api"
+	. "github.com/hiromaily/go-bitcoin/pkg/api/btc"
 )
 
 // TestFloatBitToAmount

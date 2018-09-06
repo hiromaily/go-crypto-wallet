@@ -4,7 +4,6 @@ package service
 
 import (
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/pkg/errors"
 )
@@ -46,7 +45,7 @@ func (w *Wallet) ExportAccountKey(accountType enum.AccountType, keyStatus enum.K
 	}
 
 	//CSVに書き出す
-	fileName, err := key.ExportAccountKeyTable(accountKeyTable, string(accountType),
+	fileName, err := w.ExportAccountKeyTable(accountKeyTable, string(accountType),
 		enum.KeyStatusValue[keyStatus])
 	if err != nil {
 		return "", errors.Errorf("key.ExportAccountKeyTable() error: %s", err)
@@ -86,7 +85,7 @@ func (w *Wallet) ExportAddedPubkeyHistory(accountType enum.AccountType) (string,
 
 	//CSVに書き出す
 	//TODO:何がわかりやすいか, このために新たなステータスを追加したほうがいいか
-	fileName, err := key.ExportAddedPubkeyHistoryTable(addedPubkeyHistoryTable, string(accountType),
+	fileName, err := w.ExportAddedPubkeyHistoryTable(addedPubkeyHistoryTable, string(accountType),
 		//enum.KeyStatusValue[enum.KeyStatusMultiAddressImported])
 		enum.KeyStatusValue[enum.KeyStatusPubkeyExported])
 	if err != nil {

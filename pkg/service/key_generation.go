@@ -67,7 +67,7 @@ func (w *Wallet) retrieveSeed() ([]byte, error) {
 
 // GenerateAccountKey AccountType属性のアカウントKeyを生成する
 // TODO:AccountTypeAuthorizationのときは、レコードがある場合は追加できないようにしたほうがいい？？
-func (w *Wallet) GenerateAccountKey(accountType enum.AccountType, seed []byte, count uint32) ([]key.WalletKey, error) {
+func (w *Wallet) GenerateAccountKey(accountType enum.AccountType, coinType enum.CoinType, seed []byte, count uint32) ([]key.WalletKey, error) {
 	//現在のindexを取得
 	idx, err := w.DB.GetMaxIndexOnAccountKeyTable(accountType)
 	if err != nil {
@@ -77,13 +77,13 @@ func (w *Wallet) GenerateAccountKey(accountType enum.AccountType, seed []byte, c
 	}
 	logger.Infof("idx: %d", idx)
 
-	return w.generateAccountKey(accountType, seed, uint32(idx), count)
+	return w.generateAccountKey(accountType, coinType, seed, uint32(idx), count)
 }
 
 // generateKey AccountType属性のアカウントKeyを生成する
-func (w *Wallet) generateAccountKey(accountType enum.AccountType, seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
+func (w *Wallet) generateAccountKey(accountType enum.AccountType, coinType enum.CoinType, seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
 	// HDウォレットのkeyを生成する
-	walletKeys, err := w.generateAccountKeyData(accountType, seed, idxFrom, count)
+	walletKeys, err := w.generateAccountKeyData(accountType, coinType, seed, idxFrom, count)
 	if err != nil {
 		return nil, errors.Errorf("key.generateAccountKeyData(AccountTypeClient) error: %s", err)
 	}
@@ -125,14 +125,17 @@ func (w *Wallet) generateAccountKey(accountType enum.AccountType, seed []byte, i
 }
 
 // generateKeyData AccountType属性のアカウントKeyを生成する
-func (w *Wallet) generateAccountKeyData(accountType enum.AccountType, seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
+func (w *Wallet) generateAccountKeyData(accountType enum.AccountType, coinType enum.CoinType, seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
+	// Keyオブジェクト
+	keyData := key.NewKey(coinType, w.BTC.GetChainConf())
+
 	// key生成
-	priv, _, err := key.CreateAccount(w.BTC.GetChainConf(), seed, accountType)
+	priv, _, err := keyData.CreateAccount(seed, accountType)
 	if err != nil {
 		return nil, errors.Errorf("key.CreateAccount() error: %s", err)
 	}
 
-	walletKeys, err := key.CreateKeysWithIndex(w.BTC.GetChainConf(), priv, idxFrom, count)
+	walletKeys, err := keyData.CreateKeysWithIndex(priv, idxFrom, count)
 	if err != nil {
 		return nil, errors.Errorf("key.CreateKeysWithIndex() error: %s", err)
 	}
@@ -143,9 +146,9 @@ func (w *Wallet) generateAccountKeyData(accountType enum.AccountType, seed []byt
 func (w *Wallet) getKeyTypeByAccount(accountType enum.AccountType) (uint8, error) {
 	//accountType:0
 	//coin_typeを取得
-	ct := enum.CoinTypeBitcoin
+	ct := key.CoinTypeBitcoin
 	if w.BTC.GetChainConf().Name != string(enum.NetworkTypeMainNet) {
-		ct = enum.CoinTypeTestnet
+		ct = key.CoinTypeTestnet
 	}
 	keyType, err := w.DB.GetKeyTypeByCoinAndAccountType(ct, accountType)
 	if err != nil {

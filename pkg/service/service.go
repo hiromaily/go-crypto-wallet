@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/bookerzzz/grok"
-	"github.com/hiromaily/go-bitcoin/pkg/api"
+	"github.com/hiromaily/go-bitcoin/pkg/api/btc"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/gcp"
 	"github.com/hiromaily/go-bitcoin/pkg/key"
@@ -16,10 +16,9 @@ import (
 
 // Wallet 基底オブジェクト
 type Wallet struct {
-	BTC *api.Bitcoin
+	BTC *btc.Bitcoin
 	DB  *model.DB
 	GCS map[enum.ActionType]*gcp.Storage
-	//DB  *sqlx.DB
 	//Db  *kvs.LevelDB
 	Env enum.EnvironmentType
 }
@@ -71,10 +70,10 @@ func InitialSettings(confPath string) (*Wallet, error) {
 	}
 
 	// Connection to Bitcoin core
-	//bit, err := api.Connection(conf.Bitcoin.Host, conf.Bitcoin.User, conf.Bitcoin.Pass, true, true, conf.Bitcoin.IsMain)
-	bit, err := api.Connection(&conf.Bitcoin)
+	//bit, err := btc.Connection(conf.Bitcoin.Host, conf.Bitcoin.User, conf.Bitcoin.Pass, true, true, conf.Bitcoin.IsMain)
+	bit, err := btc.Connection(&conf.Bitcoin)
 	if err != nil {
-		return nil, errors.Errorf("api.Connection error: %s", err)
+		return nil, errors.Errorf("btc.Connection error: %s", err)
 	}
 	//defer bit.Close()
 

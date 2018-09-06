@@ -1,4 +1,4 @@
-package api
+package btc
 
 import (
 	"encoding/json"

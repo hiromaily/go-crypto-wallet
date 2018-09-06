@@ -3,7 +3,7 @@ package testdata
 import (
 	"time"
 
-	"github.com/hiromaily/go-bitcoin/pkg/api"
+	"github.com/hiromaily/go-bitcoin/pkg/api/btc"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/icrowley/fake"
@@ -11,7 +11,7 @@ import (
 )
 
 // CreateInitialTestData
-func CreateInitialTestData(m *model.DB, btc *api.Bitcoin) error{
+func CreateInitialTestData(m *model.DB, btc *btc.Bitcoin) error{
 	//1. account_pubkey_clientにアカウント名を仮登録
 	accountPubKeyTable, err := m.GetAllAccountPubKeyTable(enum.AccountTypeClient)
 	if err != nil{

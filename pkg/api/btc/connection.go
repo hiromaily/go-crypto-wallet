@@ -1,4 +1,4 @@
-package api
+package btc
 
 import (
 	"github.com/btcsuite/btcd/chaincfg"
@@ -11,10 +11,10 @@ import (
 
 // Bitcoin includes Client to call Json-RPC
 type Bitcoin struct {
-	client            *rpcclient.Client
-	chainConf         *chaincfg.Params
-	stored            KeyInfo
-	payment           KeyInfo
+	client    *rpcclient.Client
+	chainConf *chaincfg.Params
+	//receipt           KeyInfo
+	//payment           KeyInfo
 	confirmationBlock int
 	feeRange          FeeAdjustmentRate
 	version           enum.BTCVersion //179900
@@ -65,13 +65,13 @@ func Connection(conf *toml.BitcoinConf) (*Bitcoin, error) {
 	bit.version = netInfo.Version
 	logger.Infof("bitcoin server version: %d", netInfo.Version)
 
-	bit.stored.address = conf.Stored.Address
-	bit.stored.acountName = conf.Stored.AccountName
-	bit.payment.address = conf.Payment.Address
-	bit.payment.acountName = conf.Payment.AccountName
 	bit.confirmationBlock = conf.Block.ConfirmationNum
 	bit.feeRange.max = conf.Fee.AdjustmentMax
 	bit.feeRange.min = conf.Fee.AdjustmentMin
+	//bit.receipt.address = conf.Stored.Address
+	//bit.receipt.acountName = conf.Stored.AccountName
+	//bit.payment.address = conf.Payment.Address
+	//bit.payment.acountName = conf.Payment.AccountName
 
 	return &bit, err
 }
@@ -91,25 +91,25 @@ func (b *Bitcoin) Client() *rpcclient.Client {
 	return b.client
 }
 
-// StoredAddress 保管用アドレスを返す
-func (b *Bitcoin) StoredAddress() string {
-	return b.stored.address
-}
+// ReceiptAddress 入金用アドレスを返す
+//func (b *Bitcoin) ReceiptAddress() string {
+//	return b.receipt.address
+//}
 
-// StoredAccountName 保管用アカウント名を返す
-func (b *Bitcoin) StoredAccountName() string {
-	return b.stored.acountName
-}
+// ReceiptAccountName 入金用アカウント名を返す
+//func (b *Bitcoin) ReceiptAccountName() string {
+//	return b.receipt.acountName
+//}
 
 // PaymentAddress 支払い用アドレスを返す
-func (b *Bitcoin) PaymentAddress() string {
-	return b.payment.address
-}
+//func (b *Bitcoin) PaymentAddress() string {
+//	return b.payment.address
+//}
 
 // PaymentAccountName 支払い用アカウント名を返す
-func (b *Bitcoin) PaymentAccountName() string {
-	return b.payment.acountName
-}
+//func (b *Bitcoin) PaymentAccountName() string {
+//	return b.payment.acountName
+//}
 
 // ConfirmationBlock Confirmationに必要なブロック数を返す
 func (b *Bitcoin) ConfirmationBlock() int {

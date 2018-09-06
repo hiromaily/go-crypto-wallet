@@ -15,15 +15,13 @@ confirmation_num = 6 #Confirmationに必要なブロック数
 adjustment_min = 0.5 #オプションにて調整可能なMinimum値
 adjustment_max = 2.0 #オプションにて調整可能なMaximum値
 
-[bitcoin.stored]
-address = "2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW" #保管用アドレス
-#stored_address = "muVSWToBoNWusjLCbxcQNBWTmPjioRLpaA" #Debug保管用アドレス
-account = "hokan" #保管用アドレスに紐づくアカウント名
+#[bitcoin.stored]
+#address = "2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW" #保管用アドレス
+#account = "hokan" #保管用アドレスに紐づくアカウント名
 
-[bitcoin.payment]
-address = "2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW" #保管用アドレス
-#stored_address = "muVSWToBoNWusjLCbxcQNBWTmPjioRLpaA" #Debug保管用アドレス
-account = "hokan" #保管用アドレスに紐づくアカウント名
+#[bitcoin.payment]
+#address = "2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW" #保管用アドレス
+#account = "hokan" #保管用アドレスに紐づくアカウント名
 
 [mysql]
 host = "127.0.0.1:3307"
@@ -32,8 +30,8 @@ user = "cayenne"
 pass = "cayenne"
 
 # 使う予定はないが、念の為開発段階では残す
-[leveldb]
-path = "./data/kvs/db"
+#[leveldb]
+#path = "./data/kvs/db"
 
 [tx_file]
 base_path = "./data/tx/"

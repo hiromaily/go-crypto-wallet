@@ -161,7 +161,7 @@ func keyFunctionalities1(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-		keys, err := wallet.GenerateAccountKey(enum.AccountTypeClient, bSeed, 10)
+		keys, err := wallet.GenerateAccountKey(enum.AccountTypeClient, enum.BTC, bSeed, 10)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -174,7 +174,7 @@ func keyFunctionalities1(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-		keys, err := wallet.GenerateAccountKey(enum.AccountTypeReceipt, bSeed, 5)
+		keys, err := wallet.GenerateAccountKey(enum.AccountTypeReceipt, enum.BTC, bSeed, 5)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -187,7 +187,7 @@ func keyFunctionalities1(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-		keys, err := wallet.GenerateAccountKey(enum.AccountTypePayment, bSeed, 5)
+		keys, err := wallet.GenerateAccountKey(enum.AccountTypePayment, enum.BTC, bSeed, 5)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -320,7 +320,7 @@ func keyFunctionalities2(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-		keys, err := wallet.GenerateAccountKey(enum.AccountTypeAuthorization, bSeed, 1)
+		keys, err := wallet.GenerateAccountKey(enum.AccountTypeAuthorization, enum.BTC, bSeed, 1)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -466,15 +466,15 @@ func development(wallet *service.Wallet) {
 	}
 
 	//1.generate key
-	_, err = wallet.GenerateAccountKey(enum.AccountTypeClient, bSeed, 10)
+	_, err = wallet.GenerateAccountKey(enum.AccountTypeClient, enum.BTC, bSeed, 10)
 	if err != nil {
 		logger.Fatalf("%+v", err)
 	}
-	_, err = wallet.GenerateAccountKey(enum.AccountTypeReceipt, bSeed, 5)
+	_, err = wallet.GenerateAccountKey(enum.AccountTypeReceipt, enum.BTC, bSeed, 5)
 	if err != nil {
 		logger.Fatalf("%+v", err)
 	}
-	_, err = wallet.GenerateAccountKey(enum.AccountTypePayment, bSeed, 5)
+	_, err = wallet.GenerateAccountKey(enum.AccountTypePayment, enum.BTC, bSeed, 5)
 	if err != nil {
 		logger.Fatalf("%+v", err)
 	}
@@ -511,7 +511,7 @@ func development(wallet *service.Wallet) {
 	//coldwallet2の機能だが、同一DBで検証
 	//------------------------------------------------------------------
 	//1.generate key
-	_, err = wallet.GenerateAccountKey(enum.AccountTypeAuthorization, bSeed, 1)
+	_, err = wallet.GenerateAccountKey(enum.AccountTypeAuthorization, enum.BTC, bSeed, 1)
 	if err != nil {
 		logger.Fatalf("%+v", err)
 	}

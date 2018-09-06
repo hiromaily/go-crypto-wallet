@@ -2,14 +2,13 @@ package key
 
 import (
 	"encoding/hex"
-
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcutil"
 	"github.com/btcsuite/btcutil/hdkeychain"
+	"github.com/cpacia/bchutil"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/pkg/errors"
 )
 
@@ -34,17 +33,42 @@ const (
 	ChangeTypeInternal ChangeType = 1 //自身のトランザクションのおつり用 (出金時に使うトレード用アドレス) //TODO:これは使わないでいいかも
 )
 
+//CoinType コインの種類(
+type CoinType uint32
+
+// coin_type
+const (
+	CoinTypeBitcoin CoinType = 0 //Bitcoin
+	CoinTypeTestnet CoinType = 1 //Testnet
+)
+
 //e.g. for Mainnet
 //Client  => m/44/0/0/0/0~xxxxx
 //Receipt => m/44/0/1
 //Payment => m/44/0/2/0/0 => quoineから購入したものを受け取る用
 //Payment => m/44/0/2/1/0 => 出金による支払いに利用、かつ、おつりも受け取る => TODO:ChangeTypeによってアドレスが変わってしまったら、どう運用するのか
 
+// Key Keyオブジェクト
+type Key struct {
+	coinType enum.CoinType
+	conf     *chaincfg.Params
+}
+
+// NewKey Keyオブジェクトを返す
+func NewKey(coinType enum.CoinType, conf *chaincfg.Params) *Key {
+	keyData := Key{
+		coinType: coinType,
+		conf:     conf,
+	}
+
+	return &keyData
+}
+
 // CreateAccount アカウント階層までのprivateKey及び publicKeyを生成する
-func CreateAccount(conf *chaincfg.Params, seed []byte, actType enum.AccountType) (string, string, error) {
+func (k Key) CreateAccount(seed []byte, actType enum.AccountType) (string, string, error) {
 
 	//Master
-	masterKey, err := hdkeychain.NewMaster(seed, conf)
+	masterKey, err := hdkeychain.NewMaster(seed, k.conf)
 	if err != nil {
 		return "", "", err
 	}
@@ -55,9 +79,9 @@ func CreateAccount(conf *chaincfg.Params, seed []byte, actType enum.AccountType)
 		return "", "", err
 	}
 	//CoinType
-	ct := uint32(enum.CoinTypeBitcoin)
-	if conf.Name != string(enum.NetworkTypeMainNet) {
-		ct = uint32(enum.CoinTypeTestnet)
+	ct := uint32(CoinTypeBitcoin)
+	if k.conf.Name != string(enum.NetworkTypeMainNet) {
+		ct = uint32(CoinTypeTestnet)
 	}
 	coinType, err := purpose.Child(hdkeychain.HardenedKeyStart + ct)
 	if err != nil {
@@ -85,7 +109,7 @@ func CreateAccount(conf *chaincfg.Params, seed []byte, actType enum.AccountType)
 // CreateKeysWithIndex 指定したindexに応じて複数のkeyを生成する
 // e.g. [1] idxFrom:0,  count 10 => 0-9
 //      [2] idxFrom:10, count 10 => 10-19
-func CreateKeysWithIndex(conf *chaincfg.Params, accountPrivateKey string, idxFrom, count uint32) ([]WalletKey, error) {
+func (k Key) CreateKeysWithIndex(accountPrivateKey string, idxFrom, count uint32) ([]WalletKey, error) {
 	account, err := hdkeychain.NewKeyFromString(accountPrivateKey)
 	if err != nil {
 		return nil, err
@@ -116,21 +140,35 @@ func CreateKeysWithIndex(conf *chaincfg.Params, accountPrivateKey string, idxFro
 		//getFullPubKey(privateKey)
 
 		// WIF　(compress: true) => bitcoin coreでは圧縮したアドレスを表示する
-		wif, err := btcutil.NewWIF(privateKey, conf, true)
-		//wif, err := btcutil.NewWIF(privateKey, conf, false)
+		wif, err := btcutil.NewWIF(privateKey, k.conf, true)
 		if err != nil {
 			return nil, err
 		}
 		strPrivateKey := wif.String()
 
-		// Address
-		address, err := child.Address(conf)
-		if err != nil {
-			return nil, err
+		// Address(P2PKH)
+		// (btcutil.NewAddressPubKeyHash(pkHash, net))
+		var (
+			address  *btcutil.AddressPubKeyHash
+			cashAddr *bchutil.CashAddressPubKeyHash
+			strAddr  string
+		)
+		if k.coinType == enum.BTC {
+			address, err = child.Address(k.conf)
+			if err != nil {
+				return nil, err
+			}
+			strAddr = address.String()
+		} else {
+			cashAddr, err = k.cashAddress(privateKey)
+			if err != nil {
+				return nil, err
+			}
+			strAddr = cashAddr.String()
 		}
 
 		// p2sh-segwit
-		p2shSegwit, err := getP2shSegwit(privateKey, conf)
+		p2shSegwit, err := k.getP2shSegwit(privateKey)
 		if err != nil {
 			return nil, err
 		}
@@ -138,8 +176,8 @@ func CreateKeysWithIndex(conf *chaincfg.Params, accountPrivateKey string, idxFro
 		//address.String() とaddress.EncodeAddress()は結果として同じ
 		walletKeys[i] = WalletKey{
 			WIF:        strPrivateKey,
-			Address:    address.String(),
-			P2shSegwit: p2shSegwit.String(),
+			Address:    strAddr, //[P2PKH]AddressPubKeyHash is an Address for a pay-to-pubkey-hash
+			P2shSegwit: p2shSegwit,
 			FullPubKey: getFullPubKey(privateKey, true),
 		}
 
@@ -161,29 +199,62 @@ func experimentalKey() {
 	//log.Println(" ")
 }
 
-// p2sh-segwitを返す
-func getP2shSegwit(privKey *btcec.PrivateKey, conf *chaincfg.Params) (*btcutil.AddressScriptHash, error) {
+// BCHのaddress P2PKHを返す
+//  address, err := child.Address(conf)
+//  address.String() と同じ結果を返す
+//  I/Fが異なるため、cashのaddressを返す
+func (k Key) cashAddress(privKey *btcec.PrivateKey) (*bchutil.CashAddressPubKeyHash, error) {
+	if k.coinType == enum.BTC {
+		//BTC
+		//return btcutil.NewAddressPubKeyHash(pkHash, k.conf)
+		return nil, nil
+	}
+
+	serializedKey := privKey.PubKey().SerializeCompressed()
+	pkHash := btcutil.Hash160(serializedKey)
+	addr, err := btcutil.NewAddressPubKeyHash(pkHash, k.conf)
+	if err != nil {
+		return nil, errors.Errorf("btcutil.NewAddressPubKeyHash() error: %s", err)
+	}
+	//BCH
+	//return bchutil.NewCashAddressPubKeyHash(pkHash, k.conf)
+	return bchutil.NewCashAddressPubKeyHash(addr.ScriptAddress(), k.conf)
+}
+
+// p2sh-segwitのstringを返す
+// BCHは利用する予定はないが、念の為
+//func (k Key) getP2shSegwit(privKey *btcec.PrivateKey) (*btcutil.AddressScriptHash, error) {
+func (k Key) getP2shSegwit(privKey *btcec.PrivateKey) (string, error) {
 	// []byte
 	publicKeyHash := btcutil.Hash160(privKey.PubKey().SerializeCompressed())
-	segwitAddress, err := btcutil.NewAddressWitnessPubKeyHash(publicKeyHash, conf)
+	segwitAddress, err := btcutil.NewAddressWitnessPubKeyHash(publicKeyHash, k.conf)
 	if err != nil {
-		return nil, errors.Errorf("btcutil.NewAddressWitnessPubKeyHash() error: %s", err)
+		return "", errors.Errorf("btcutil.NewAddressWitnessPubKeyHash() error: %s", err)
 	}
-	logger.Debugf("segwitAddress: %s", segwitAddress)
+	//logger.Debugf("segwitAddress: %s", segwitAddress)
 
 	redeemScript, err := txscript.PayToAddrScript(segwitAddress)
 	if err != nil {
-		return nil, errors.Errorf("txscript.PayToAddrScript() error: %s", err)
+		return "", errors.Errorf("txscript.PayToAddrScript() error: %s", err)
 	}
-	logger.Debugf("redeemScript: %s", redeemScript)
+	//logger.Debugf("redeemScript: %s", redeemScript)
 
-	address, err := btcutil.NewAddressScriptHash(redeemScript, conf)
+	//BTC
+	if k.coinType == enum.BTC {
+		address, err := btcutil.NewAddressScriptHash(redeemScript, k.conf)
+		if err != nil {
+			return "", errors.Errorf("btcutil.NewAddressScriptHash() error: %s", err)
+		}
+		//logger.Debugf("address.String() %s", address.String())
+		return address.String(), nil
+	}
+	//BCH
+	address, err := bchutil.NewCashAddressScriptHash(redeemScript, k.conf)
 	if err != nil {
-		return nil, errors.Errorf("btcutil.NewAddressScriptHash() error: %s", err)
+		return "", errors.Errorf("bchutil.NewCashAddressScriptHash() error: %s", err)
 	}
-	logger.Debugf("address.String() %s", address.String())
-
-	return address, nil
+	//logger.Debugf("address.String() %s", address.String())
+	return address.String(), nil
 }
 
 // getPubKey fullのPublic Keyを返す

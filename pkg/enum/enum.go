@@ -23,6 +23,31 @@ func ValidateEnvironmentType(val string) bool {
 	return false
 }
 
+//CoinType Bitcoin種別(CayenneWalletで取引するcoinの種別)
+type CoinType string
+
+// coin_type
+const (
+	BTC CoinType = "btc"
+	BCH CoinType = "bch"
+	ETH CoinType = "eth"
+)
+
+//CoinTypeValue coin_typeの値
+var CoinTypeValue = map[CoinType]uint8{
+	BTC: 1,
+	BCH: 2,
+	ETH: 3,
+}
+
+// ValidateBitcoinType BitcoinTypeのバリデーションを行う
+func ValidateBitcoinType(val string) bool {
+	if _, ok := CoinTypeValue[CoinType(val)]; ok {
+		return true
+	}
+	return false
+}
+
 //BTCVersion 実行環境
 type BTCVersion int
 
@@ -38,17 +63,9 @@ type NetworkType string
 
 // network type
 const (
-	NetworkTypeMainNet  NetworkType = "mainnet"
-	NetworkTypeTestNet3 NetworkType = "testnet3"
-)
-
-//CoinType コインの種類
-type CoinType uint32
-
-// coin_type
-const (
-	CoinTypeBitcoin CoinType = 0 //Bitcoin
-	CoinTypeTestnet CoinType = 1 //Testnet
+	NetworkTypeMainNet    NetworkType = "mainnet"
+	NetworkTypeTestNet3   NetworkType = "testnet3"
+	NetworkTypeRegTestNet NetworkType = "regtest"
 )
 
 //AccountType 利用目的
