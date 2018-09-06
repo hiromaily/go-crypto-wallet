@@ -21,10 +21,10 @@ type Bitcoin struct {
 }
 
 // KeyInfo 公開鍵アドレスと紐づくアカウント名
-type KeyInfo struct {
-	address    string
-	acountName string
-}
+//type KeyInfo struct {
+//	address    string
+//	acountName string
+//}
 
 // FeeAdjustmentRate 手数料調整のRange
 type FeeAdjustmentRate struct {
