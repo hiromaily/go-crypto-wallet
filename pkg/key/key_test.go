@@ -2,6 +2,7 @@ package key_test
 
 import (
 	"flag"
+	"github.com/cpacia/bchutil"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"os"
 	"testing"
@@ -63,8 +64,25 @@ func generateKeys(bSeed []byte, coinType enum.CoinType, t *testing.T) {
 		t.Logf("[P2shSegwit] %s", k.P2shSegwit)
 		t.Logf("[FullPubKey] %s", k.FullPubKey)
 		t.Logf("[WIF] %s", k.WIF)
+
+		if coinType == enum.BCH {
+			//Decode
+			decodeForBCH(k.Address, t)
+		}
 	}
 
+}
+
+func decodeForBCH(addr string, t *testing.T) {
+	//prefix, ok := bchutil.Prefixes[wlt.BTC.GetChainConf().Name]
+	//if !ok {
+	//	t.Fatal("*chaincfg.Params is wrong")
+	//}
+	resPrefix, val, err := bchutil.DecodeCashAddress(addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("prefix: %s, val: %v", resPrefix, val)
 }
 
 func TestKeyIntegrationBTC(t *testing.T) {
@@ -146,3 +164,7 @@ func TestKeyIntegrationBCH(t *testing.T) {
 
 	generateKeys(bSeed, enum.BCH, t)
 }
+
+//func TestExperipentBCH(t *testing.T) {
+//	//
+//}

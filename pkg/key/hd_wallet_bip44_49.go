@@ -2,6 +2,7 @@ package key
 
 import (
 	"encoding/hex"
+	"fmt"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/txscript"
@@ -146,25 +147,29 @@ func (k Key) CreateKeysWithIndex(accountPrivateKey string, idxFrom, count uint32
 		}
 		strPrivateKey := wif.String()
 
-		// Address(P2PKH)
+		// Address(P2PKH) BTC/BCH
 		// (btcutil.NewAddressPubKeyHash(pkHash, net))
 		var (
-			address  *btcutil.AddressPubKeyHash
-			cashAddr *bchutil.CashAddressPubKeyHash
-			strAddr  string
+			//address  *btcutil.AddressPubKeyHash
+			//cashAddr *bchutil.CashAddressPubKeyHash
+			strAddr string
 		)
-		if k.coinType == enum.BTC {
-			address, err = child.Address(k.conf)
-			if err != nil {
-				return nil, err
-			}
-			strAddr = address.String()
-		} else {
-			cashAddr, err = k.cashAddress(privateKey)
-			if err != nil {
-				return nil, err
-			}
-			strAddr = cashAddr.String()
+		//if k.coinType == enum.BTC {
+		//	address, err = child.Address(k.conf)
+		//	if err != nil {
+		//		return nil, err
+		//	}
+		//	strAddr = address.String()
+		//} else {
+		//	cashAddr, err = k.cashAddress(privateKey)
+		//	if err != nil {
+		//		return nil, err
+		//	}
+		//	strAddr = cashAddr.String()
+		//}
+		strAddr, err = k.addressString(privateKey)
+		if err != nil {
+			return nil, err
 		}
 
 		// p2sh-segwit
@@ -199,26 +204,51 @@ func experimentalKey() {
 	//log.Println(" ")
 }
 
-// BCHのaddress P2PKHを返す
+// BTC/BCHのaddress P2PKHを返す
 //  address, err := child.Address(conf)
 //  address.String() と同じ結果を返す
-//  I/Fが異なるため、cashのaddressを返す
-func (k Key) cashAddress(privKey *btcec.PrivateKey) (*bchutil.CashAddressPubKeyHash, error) {
-	if k.coinType == enum.BTC {
-		//BTC
-		//return btcutil.NewAddressPubKeyHash(pkHash, k.conf)
-		return nil, nil
-	}
-
+func (k Key) addressString(privKey *btcec.PrivateKey) (string, error) {
 	serializedKey := privKey.PubKey().SerializeCompressed()
 	pkHash := btcutil.Hash160(serializedKey)
+
+	//*btcutil.AddressPubKeyHash
 	addr, err := btcutil.NewAddressPubKeyHash(pkHash, k.conf)
 	if err != nil {
-		return nil, errors.Errorf("btcutil.NewAddressPubKeyHash() error: %s", err)
+		return "", errors.Errorf("btcutil.NewAddressPubKeyHash() error: %s", err)
 	}
-	//BCH
+
+	if k.coinType == enum.BTC {
+		//BTC
+		return addr.String(), nil
+	}
+
+	//BCH *bchutil.CashAddressPubKeyHash
 	//return bchutil.NewCashAddressPubKeyHash(pkHash, k.conf)
-	return bchutil.NewCashAddressPubKeyHash(addr.ScriptAddress(), k.conf)
+	addrBCH, err := bchutil.NewCashAddressPubKeyHash(addr.ScriptAddress(), k.conf)
+	if err != nil {
+		return "", errors.Errorf("btcutil.NewAddressPubKeyHash() error: %s", err)
+	}
+
+	//Debug
+	//logger.Debugf("addrBCH: %t", addrBCH.IsForNet(k.conf))
+	//logger.Debugf("addrBCH: %s", addrBCH.String())
+	//grok.Value(addrBCH)
+
+	//Decodeするときあprefixが必要
+	//prefix, val, err := bchutil.DecodeCashAddress("bchtest:"+addrBCH.String())
+	//if err != nil {
+	//	return "", errors.Errorf("bchutil.DecodeCashAddress() error: %s", err)
+	//}
+	//logger.Debugf("prefix: %s", prefix)
+	//logger.Debugf("val: %v", val)
+
+	//prefixを取得
+	prefix, ok := bchutil.Prefixes[k.conf.Name]
+	if !ok {
+		return "", errors.New("[fatal error] chainConf *chaincfg.Params is wrong")
+	}
+
+	return fmt.Sprintf("%s:%s", prefix, addrBCH.String()), nil
 }
 
 // p2sh-segwitのstringを返す
