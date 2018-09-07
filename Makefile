@@ -14,10 +14,19 @@ setup:
 # Docker and compose
 ###############################################################################
 bld-docker-go:
-	docker build --no-cache -t cayenne-wallet-go:1.10.3 -f ./docker/golang/Dockerfile .
+	#docker build --no-cache -t cayenne-wallet-go:1.10.3 -f ./docker/golang/Dockerfile .
+	docker-compose build base-golang
+
+bld-docker-ubuntu:
+	docker-compose build base-ubuntu
+
+bld-docker-btc:
+    docker-compose build btc-wallet
 
 bld-docker-bch:
-    docker build --no-cache -t cayenne-wallet-bch:0.17 -f ./docker/bch/Dockerfile .
+    docker-compose -f docker-compose.bch.yml build bch
+
+
 
 ###############################################################################
 # Bitcoin core

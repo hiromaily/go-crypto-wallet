@@ -1,30 +1,79 @@
 version: '3'
 
 volumes:
-  btc: {}
+  btc1: {}
+  btc2: {}
+  btc3: {}
   db1: {}
   db2: {}
   db3: {}
 
 services:
   #########################################################################
+  #Images based on
+  #########################################################################
+  base-ubuntu:
+    build:
+      context: ./docker/ubuntu/
+      dockerfile: Dockerfile
+    image: cayenne-wallet-ubuntu:18.04
+
+  base-golang:
+    build:
+      context: ./docker/golang/
+      dockerfile: Dockerfile
+    image: cayenne-wallet-golang:1.11
+
+  #########################################################################
   #Bitcoin core
   #########################################################################
-  btc:
+  btc-wallet:
     build:
       context: ./docker/btc/
       dockerfile: Dockerfile
     image: cayenne-wallet-btc:0.17
     volumes:
-      - btc:/root/.bitcoin
-      - ./bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
+    - btc1:/root/.bitcoin
+    - ./bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
     ports:
     - "${RPC_PORT:-19332}:18332"
     stdin_open: true
     tty: true
-    #command: /usr/bin/bitcoind --conf=/root/.bitcoin/bitcoind.conf --printtoconsole
-    command: /usr/bin/bitcoind --printtoconsole
-    # docker-compose exec btc bash
+    command: /usr/bin/bitcoind --printtoconsole #--conf=/root/.bitcoin/bitcoind.conf
+    # docker-compose exec btc-wallet bash
+    # /root/.bitcoin/testnet3/wallets
+
+  btc-cold-wallet1:
+    image: cayenne-wallet-btc:0.17
+    volumes:
+    - btc2:/root/.bitcoin
+    - ./bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
+    ports:
+    - "${RPC_PORT:-19333}:18332"
+    stdin_open: true
+    tty: true
+    command: /usr/bin/bitcoind -maxconnections=0 --printtoconsole
+    # docker-compose exec btc-wallet bash
+    # /root/.bitcoin/testnet3/wallets
+
+  btc-cold-wallet2:
+    image: cayenne-wallet-btc:0.17
+    volumes:
+    - btc3:/root/.bitcoin
+    - ./bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
+    ports:
+    - "${RPC_PORT:-19333}:18332"
+    stdin_open: true
+    tty: true
+    command: /usr/bin/bitcoind -maxconnections=0 --printtoconsole
+    # docker-compose exec btc-wallet bash
+    # /root/.bitcoin/testnet3/wallets
+
+  #########################################################################
+  # Wallet
+  #########################################################################
+  #watch-only-wallet:
+
 
   #########################################################################
   #Database
@@ -33,19 +82,19 @@ services:
   btc-wallet-db:
     image: mysql:5.7
     volumes:
-      - db1:/var/lib/mysql
-      - "./docker/mysql/conf.d:/etc/mysql/conf.d"
-      - "./docker/mysql/init.d:/docker-entrypoint-initdb.d"
+    - db1:/var/lib/mysql
+    - "./docker/mysql/conf.d:/etc/mysql/conf.d"
+    - "./docker/mysql/init.d:/docker-entrypoint-initdb.d"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: wallet
       MYSQL_USER: cayenne
       MYSQL_PASSWORD: cayenne
     ports:
-      - "${MYSQL_PORT1:-3307}:3306"
+    - "${MYSQL_PORT1:-3307}:3306"
 
   #for cold-wallet1
-  btc-cold-wallet1:
+  btc-cold-wallet1-db:
     image: mysql:5.7
     volumes:
     - db2:/var/lib/mysql
@@ -60,7 +109,7 @@ services:
     - "${MYSQL_PORT2:-3308}:3306"
 
   #for cold-wallet2
-  btc-cold-wallet2:
+  btc-cold-wallet2-db:
     image: mysql:5.7
     volumes:
     - db3:/var/lib/mysql

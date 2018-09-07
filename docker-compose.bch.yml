@@ -23,7 +23,7 @@ services:
     stdin_open: true
     tty: true
     #command: /usr/bin/bitcoind --conf=/root/.bitcoin/bitcoind.conf --printtoconsole
-    command: /usr/bin/bitcoind --printtoconsole
+    command: /usr/bin/bitcoind -maxconnections=0 --printtoconsole
     # docker-compose exec bch bash
 
   #########################################################################
