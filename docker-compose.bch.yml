@@ -1,7 +1,7 @@
 version: '3'
 
 volumes:
-  btc: {}
+  bch: {}
   db1: {}
   db2: {}
   db3: {}
@@ -10,13 +10,13 @@ services:
   #########################################################################
   #Bitcoin core
   #########################################################################
-  btc:
+  bch:
     build:
-      context: ./docker/btc/
+      context: ./docker/bch/
       dockerfile: Dockerfile
-    image: cayenne-wallet-btc:0.17
+    image: cayenne-wallet-bch:0.17
     volumes:
-      - btc:/root/.bitcoin
+      - bch:/root/.bitcoin
       - ./bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
     ports:
     - "${RPC_PORT:-19332}:18332"
@@ -24,13 +24,13 @@ services:
     tty: true
     #command: /usr/bin/bitcoind --conf=/root/.bitcoin/bitcoind.conf --printtoconsole
     command: /usr/bin/bitcoind --printtoconsole
-    # docker-compose exec btc bash
+    # docker-compose exec bch bash
 
   #########################################################################
   #Database
   #########################################################################
   #for watch only wallet
-  btc-wallet-db:
+  bch-wallet-db:
     image: mysql:5.7
     volumes:
       - db1:/var/lib/mysql
@@ -45,7 +45,7 @@ services:
       - "${MYSQL_PORT1:-3307}:3306"
 
   #for cold-wallet1
-  btc-cold-wallet1:
+  bch-cold-wallet1:
     image: mysql:5.7
     volumes:
     - db2:/var/lib/mysql
@@ -60,7 +60,7 @@ services:
     - "${MYSQL_PORT2:-3308}:3306"
 
   #for cold-wallet2
-  btc-cold-wallet2:
+  bch-cold-wallet2:
     image: mysql:5.7
     volumes:
     - db3:/var/lib/mysql

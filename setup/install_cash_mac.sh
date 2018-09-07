@@ -13,7 +13,11 @@ cd bitcoin-abc
 
 ./autogen.sh
 
-brew link berkeley-db4 --force
+brew unlink berkeley-db@4
+brew unlink berkeley-db && brew link berkeley-db
+brew link --overwrite berkeley-db
+brew link berkeley-db --force
+
 #Warning: Already linked: /usr/local/Cellar/berkeley-db@4/4.8.30
 ./configure
 #configure: error: libdb_cxx headers missing, Bitcoin ABC requires this library for wallet functionality (--disable-wallet to disable wallet functionality)

@@ -16,6 +16,8 @@ setup:
 bld-docker-go:
 	docker build --no-cache -t cayenne-wallet-go:1.10.3 -f ./docker/golang/Dockerfile .
 
+bld-docker-bch:
+    docker build --no-cache -t cayenne-wallet-bch:0.17 -f ./docker/bch/Dockerfile .
 
 ###############################################################################
 # Bitcoin core
