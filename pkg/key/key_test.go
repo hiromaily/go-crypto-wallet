@@ -155,7 +155,7 @@ func TestKeyIntegrationBTC2(t *testing.T) {
 }
 
 func TestKeyIntegrationBCH(t *testing.T) {
-	t.SkipNow()
+	//t.SkipNow()
 
 	//BCHのconfとして利用する
 	wlt.BTC.OverrideChainParamsByBCH()

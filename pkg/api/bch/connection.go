@@ -7,10 +7,11 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/toml"
 )
 
-//TODO:bitcoin cashもBitcoinオブジェクトをそのまま使用するかも
-//その場合、confの上書きを行う
+//TODO: bitcoin cashもBitcoinオブジェクトをそのまま使用するかも
+//TODO: その場合、confの上書きを行う
+//TODO: addressのvaliationとかもロジックが違うはず
 
-// BitcoinCash includes Client to call Json-RPC
+// BitcoinCash embeds Bitcoin
 type BitcoinCash struct {
 	BTC btc.Bitcoin
 }
@@ -22,6 +23,7 @@ func Connection(conf *toml.BitcoinConf) (*BitcoinCash, error) {
 }
 
 // OverrideChainParamsByBCH chaincfgをBCH用に上書きする
+// TODO:リセットも必要かもしれない
 func (b *BitcoinCash) OverrideChainParamsByBCH() {
 	conf := b.BTC.GetChainConf()
 
