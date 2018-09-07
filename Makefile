@@ -21,10 +21,10 @@ bld-docker-ubuntu:
 	docker-compose build base-ubuntu
 
 bld-docker-btc:
-    docker-compose build btc-wallet
+	docker-compose build btc-wallet
 
 bld-docker-bch:
-    docker-compose -f docker-compose.bch.yml build bch
+	docker-compose -f docker-compose.bch.yml build bch
 
 
 
