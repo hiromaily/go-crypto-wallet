@@ -70,10 +70,28 @@ services:
     # /root/.bitcoin/testnet3/wallets
 
   #########################################################################
-  # Wallet
+  # Wallet App
   #########################################################################
-  #watch-only-wallet:
-
+  watch-only-wallet:
+    build:
+      context: ./docker/wallet/
+      dockerfile: Dockerfile
+    image: cayenne-wallet-app:1.0
+    links:
+      - btc-wallet-db:mysql-server
+    depends_on:
+      - btc-wallet-db
+    environment:
+      CGO_ENABLED: 0
+      GOOS: linux
+      #GO111MODULE: off
+    volumes:
+      - ./cmd:/go/src/github.com/mf-financial/cmd
+      - ./data:/go/src/github.com/mf-financial/data
+      - ./pkg:/go/src/github.com/mf-financial/pkg
+    stdin_open: true
+    tty: true
+    command: bash
 
   #########################################################################
   #Database
