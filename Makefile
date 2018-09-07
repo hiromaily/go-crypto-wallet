@@ -27,6 +27,16 @@ bld-docker-bch:
 	docker-compose -f docker-compose.bch.yml build bch
 
 
+###############################################################################
+# For inside docker container
+###############################################################################
+bld-linux:
+	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/wallet ./cmd/wallet/main.go
+	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/coldwallet1 ./cmd/coldwallet1/main.go
+
+#bld-from-local-to-container:
+#    docker-compose exec -it ${CONTAINER_NAME} bash ${WORKDIR}/docker-entrypoint.sh
+
 
 ###############################################################################
 # Bitcoin core

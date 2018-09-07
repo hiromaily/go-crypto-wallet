@@ -53,7 +53,7 @@ services:
     stdin_open: true
     tty: true
     command: /usr/bin/bitcoind -maxconnections=0 --printtoconsole
-    # docker-compose exec btc-wallet bash
+    # docker-compose exec btc-cold-wallet1 bash
     # /root/.bitcoin/testnet3/wallets
 
   btc-cold-wallet2:
@@ -62,11 +62,11 @@ services:
     - btc3:/root/.bitcoin
     - ./bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
     ports:
-    - "${RPC_PORT:-19333}:18332"
+    - "${RPC_PORT:-19334}:18332"
     stdin_open: true
     tty: true
     command: /usr/bin/bitcoind -maxconnections=0 --printtoconsole
-    # docker-compose exec btc-wallet bash
+    # docker-compose exec btc-cold-wallet2 bash
     # /root/.bitcoin/testnet3/wallets
 
   #########################################################################
@@ -84,14 +84,18 @@ services:
     environment:
       CGO_ENABLED: 0
       GOOS: linux
-      #GO111MODULE: off
+      GO111MODULE: "on"
     volumes:
-      - ./cmd:/go/src/github.com/mf-financial/cmd
-      - ./data:/go/src/github.com/mf-financial/data
-      - ./pkg:/go/src/github.com/mf-financial/pkg
+      - ./cmd:/go/src/github.com/mf-financial/cayenne_wallet/cmd
+      - ./data:/go/src/github.com/mf-financial/cayenne_wallet/data
+      - ./pkg:/go/src/github.com/mf-financial/cayenne_wallet/pkg
+      - ./go.mod:/go/src/github.com/mf-financial/cayenne_wallet/go.mod
+      - ./go.dum:/go/src/github.com/mf-financial/cayenne_wallet/go.sum
+      - ./Makefile:/go/src/github.com/mf-financial/cayenne_wallet/Makefile
     stdin_open: true
     tty: true
     command: bash
+    # docker-compose exec watch-only-wallet bash
 
   #########################################################################
   #Database
