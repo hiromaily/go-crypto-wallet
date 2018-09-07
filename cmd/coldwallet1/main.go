@@ -27,7 +27,7 @@ import (
 // Options コマンドラインオプション
 type Options struct {
 	//Configパス
-	ConfPath string `short:"c" long:"conf" default:"./data/toml/cold1_config.toml" description:"Path for configuration toml file"`
+	ConfPath string `short:"c" long:"conf" default:"./data/toml/local_cold1.toml" description:"Path for configuration toml file"`
 
 	//実行されるWallet大項目
 	WalletMode uint8 `short:"w" long:"wallet" description:"WalletMode: 1:coldwallet1, 2:coldwallet2"`

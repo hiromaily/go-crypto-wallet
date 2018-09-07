@@ -78,8 +78,10 @@ services:
       dockerfile: Dockerfile
     image: cayenne-wallet-app:1.0
     links:
+      - btc-wallet:btc-core
       - btc-wallet-db:mysql-server
     depends_on:
+      - btc-wallet
       - btc-wallet-db
     environment:
       CGO_ENABLED: 0

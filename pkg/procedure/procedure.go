@@ -138,42 +138,42 @@ var proceduresForColdWallet = []Procedure{
 	{
 		WalletTypeCold2,
 		"generate seed",
-		"coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 1",
+		"coldwallet1 -c ./data/toml/local_cold2.toml -w 2 -k -m 1",
 	},
 	{
 		WalletTypeCold2,
 		"generate [authorization] key",
-		"coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 13",
+		"coldwallet1 -c ./data/toml/local_cold2.toml -w 2 -k -m 13",
 	},
 	{
 		WalletTypeCold2,
 		"run `importprivkey` to register generated [authorization] private key",
-		"coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 23",
+		"coldwallet1 -c ./data/toml/local_cold2.toml -w 2 -k -m 23",
 	},
 	{
 		WalletTypeCold2,
 		"import [receipt] public address from csv to DB",
-		"coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 33 -i ./data/pubkey/xxx.csv",
+		"coldwallet1 -c ./data/toml/local_cold2.toml -w 2 -k -m 33 -i ./data/pubkey/xxx.csv",
 	},
 	{
 		WalletTypeCold2,
 		"import [payment] public address from csv to DB",
-		"coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 34 -i ./data/pubkey/xxx.csv",
+		"coldwallet1 -c ./data/toml/local_cold2.toml -w 2 -k -m 34 -i ./data/pubkey/xxx.csv",
 	},
 	{
 		WalletTypeCold2,
 		"run `addmultisigaddress` with [receipt] address as param1,authorization address as param2",
-		"coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 50",
+		"coldwallet1 -c ./data/toml/local_cold2.toml -w 2 -k -m 50",
 	},
 	{
 		WalletTypeCold2,
 		"run `addmultisigaddress` with [payment] address as param1,authorization address as param2",
-		"coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 51",
+		"coldwallet1 -c ./data/toml/local_cold2.toml -w 2 -k -m 51",
 	},
 	{
 		WalletTypeCold2,
 		"export [receipt, payment] multisig address, public address and redeemScript as csv",
-		"coldwallet1 -c ./data/toml/cold2_config.toml -w 2 -k -m 60,61",
+		"coldwallet1 -c ./data/toml/local_cold2.toml -w 2 -k -m 60,61",
 	},
 	{
 		WalletTypeCold1,
