@@ -1,5 +1,6 @@
 version: '3'
 
+# this volumes should be changed to local
 volumes:
   btc1: {}
   btc2: {}
@@ -95,7 +96,8 @@ services:
     stdin_open: true
     tty: true
     command: bash
-    # docker-compose exec watch-only-wallet bash
+    # docker-compose exec watch-only-wallet sh -c 'make goget bld-linux'
+    # docker-compose exec watch-only-wallet sh -c 'wallet -c xxx.toml xx xx'
 
   #########################################################################
   #Database
@@ -104,7 +106,7 @@ services:
   btc-wallet-db:
     image: mysql:5.7
     volumes:
-    - db1:/var/lib/mysql
+    - db1:/var/lib/mysql #this volume should be outside to keep on a permanent basis
     - "./docker/mysql/conf.d:/etc/mysql/conf.d"
     - "./docker/mysql/init.d:/docker-entrypoint-initdb.d"
     environment:
@@ -119,7 +121,7 @@ services:
   btc-cold-wallet1-db:
     image: mysql:5.7
     volumes:
-    - db2:/var/lib/mysql
+    - db2:/var/lib/mysql #this volume should be outside to keep on a permanent basis
     - "./docker/mysql2/conf.d:/etc/mysql/conf.d"
     - "./docker/mysql2/init.d:/docker-entrypoint-initdb.d"
     environment:
@@ -134,7 +136,7 @@ services:
   btc-cold-wallet2-db:
     image: mysql:5.7
     volumes:
-    - db3:/var/lib/mysql
+    - db3:/var/lib/mysql #this volume should be outside to keep on a permanent basis
     - "./docker/mysql2/conf.d:/etc/mysql/conf.d"
     - "./docker/mysql2/init.d:/docker-entrypoint-initdb.d"
     environment:
@@ -144,3 +146,27 @@ services:
       MYSQL_PASSWORD: cayenne
     ports:
     - "${MYSQL_PORT3:-3309}:3306"
+
+  #########################################################################
+  #Log monitoring
+  #########################################################################
+  #Elasticsearch
+  #https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.4.0
+    expose:
+      - 9200
+      - 9300
+    environment:
+      - discovery.type=single-node
+
+  #Grafana
+  grafana:
+    image: grafana/grafana:5.2.4
+    ports:
+      - 3000:3000
+    volumes:
+      #save to local
+      - ./docker/grafana:/var/lib/grafana
+    depends_on:
+      - elasticsearch
