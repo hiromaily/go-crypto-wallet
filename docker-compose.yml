@@ -40,6 +40,11 @@ services:
     - "${RPC_PORT:-19332}:18332"
     stdin_open: true
     tty: true
+#    logging:
+#      driver: fluentd
+#      options:
+#        fluentd-address: "localhost:24224"
+#        tag: "docker.{{.ID}}"
     command: /usr/bin/bitcoind --printtoconsole #--conf=/root/.bitcoin/bitcoind.conf
     # docker-compose exec btc-wallet bash
     # /root/.bitcoin/testnet3/wallets
@@ -150,6 +155,16 @@ services:
   #########################################################################
   #Log monitoring
   #########################################################################
+  #Fluentd
+  #https://www.fluentd.org/guides/recipes/docker-logging
+  #https://docs.docker.com/config/containers/logging/fluentd/
+  fluentd:
+    build:
+      context: ./docker/fluentd/
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+
   #Elasticsearch
   #https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html
   elasticsearch:
