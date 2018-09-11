@@ -122,13 +122,13 @@ gotest:
 # Run アドレスのImport機能
 ###############################################################################
 # coldwalletでexportしたpublicアドレスをimportする
-import-pub:
+import-pub1:
 	wallet -k -m 1 -i ./data/pubkey/client_1535423628425011000.csv
 
-import-pub:
+import-pub2:
 	wallet -k -m 2 -i ./data/pubkey/client_1535423628425011000.csv
 
-import-pub:
+import-pub3:
 	wallet -k -m 3 -i ./data/pubkey/client_1535423628425011000.csv
 
 
@@ -146,7 +146,7 @@ create-unsigned-fee: bld
 	wallet -r -m 1 -f 1.5
 
 # 入金確認のみ[WIP]
-create-unsigned: bld
+check-unsigned: bld
 	wallet -r -m 2
 
 # [coldwallet] 未署名のトランザクションに署名する
@@ -211,11 +211,11 @@ detect-sent-transaction:
 # Run 各種Debug機能
 ###############################################################################
 # 出金依頼データの作成を行う (coldwallet側で生成したデータをwalletにimport後)
-run-reset:
+run-create-testdata:
 	wallet -d -m 1
 
 # 出金依頼データの再利用のため、DBを書き換える
-run-reset:
+run-db-reset:
 	wallet -d -m 2
 
 
