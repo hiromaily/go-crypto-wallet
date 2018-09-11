@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/pkg/errors"
 )
 
@@ -21,6 +23,22 @@ import (
 //入金時における、トランザクション作成順序
 //[Online]  CreateRawTransaction
 //[Offline] SignRawTransactionByHex
+
+// SignRawTransactionWithWalletResult signrawtransactionwithwalletをcallしたresponseの型
+type SignRawTransactionWithWalletResult struct {
+	Hex      string                              `json:"hex"`
+	Complete bool                                `json:"complete"`
+	Errors   []SignRawTransactionWithWalletError `json:"errors"`
+}
+
+// SignRawTransactionWithWalletError SignRawTransactionWithWalletResult内のerrorオブジェクト
+type SignRawTransactionWithWalletError struct {
+	Txid      string `json:"txid"`
+	Vout      int64  `json:"vout"`
+	ScriptSig string `json:"scriptSig"`
+	Sequence  int64  `json:"sequence"`
+	Error     string `json:"error"`
+}
 
 // FundRawTransactionResult fundrawtransactionをcallしたresponseの型
 type FundRawTransactionResult struct {
@@ -231,6 +249,20 @@ func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, err
 // 秘密鍵を保持している側のwallet(つまりcold wallet)で実行することを想定
 func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) {
 	//署名
+	if b.Version() >= enum.BTCVer17 {
+		msgTx, isSigned, err := b.SignRawTransactionWithWallet(tx)
+		if err != nil {
+			return nil, false, errors.Errorf("BTC.SetLabel() error: %s", err)
+		}
+		return msgTx, isSigned, nil
+	}
+	return b.signRawTransaction(tx)
+}
+
+// signRawTransaction *wire.MsgTxからRawのトランザクションに署名する
+// Deprecated
+func (b *Bitcoin) signRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) {
+	//署名
 	msgTx, isSigned, err := b.client.SignRawTransaction(tx)
 	if err != nil {
 		return nil, false, errors.Errorf("client.SignRawTransaction(): error: %s", err)
@@ -241,6 +273,41 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) 
 	//}
 
 	return msgTx, isSigned, nil
+}
+
+// SignRawTransactionWithWallet Ver17から利用可能なSignRawTransaction
+func (b *Bitcoin) SignRawTransactionWithWallet(tx *wire.MsgTx) (*wire.MsgTx, bool, error) {
+	//hex tx
+	hexTx, err := b.ToHex(tx)
+	if err != nil {
+		return nil, false, errors.Errorf("BTC.ToHex(tx): error: %s", err)
+	}
+
+	input1, err := json.Marshal(hexTx)
+	if err != nil {
+		return nil, false, errors.Errorf("json.Marchal(txHex): error: %s", err)
+	}
+
+	rawResult, err := b.client.RawRequest("signrawtransactionwithwallet", []json.RawMessage{input1})
+	if err != nil {
+		return nil, false, errors.Errorf("json.RawRequest(signrawtransactionwithwallet): error: %s", err)
+	}
+	//SignRawTransactionWithWalletResult
+	signRawTxResult := SignRawTransactionWithWalletResult{}
+	err = json.Unmarshal([]byte(rawResult), &signRawTxResult)
+	if err != nil {
+		return nil, false, errors.Errorf("json.Unmarshal(): error: %s", err)
+	}
+	if len(signRawTxResult.Errors) != 0 {
+		return nil, false, errors.Errorf("json.RawRequest(signrawtransactionwithwallet): error: %s", signRawTxResult.Errors[0].Error)
+	}
+
+	msgTx, err := b.ToMsgTx(signRawTxResult.Hex)
+	if err != nil {
+		return nil, false, errors.Errorf("BTC.ToMsgTx(hex): error: %s", err)
+	}
+
+	return msgTx, signRawTxResult.Complete, nil
 }
 
 // SignRawTransactionByHex HexからRawトランザクションを生成し、署名する
