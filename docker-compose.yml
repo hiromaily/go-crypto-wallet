@@ -40,11 +40,11 @@ services:
     - "${RPC_PORT:-19332}:18332"
     stdin_open: true
     tty: true
-#    logging:
-#      driver: fluentd
-#      options:
-#        fluentd-address: "localhost:24224"
-#        tag: "docker.{{.ID}}"
+    #    logging:
+    #      driver: fluentd
+    #      options:
+    #        fluentd-address: "localhost:24224"
+    #        tag: "docker.{{.ID}}"
     command: /usr/bin/bitcoind --printtoconsole #--conf=/root/.bitcoin/bitcoind.conf
     # docker-compose exec btc-wallet bash
     # /root/.bitcoin/testnet3/wallets

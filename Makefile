@@ -25,8 +25,8 @@ bld-docker-ubuntu:
 bld-docker-btc:
 	docker-compose build btc-wallet
 
-bld-docker-bch:
-	docker-compose -f docker-compose.bch.yml build bch
+#bld-docker-bch:
+#	docker-compose -f docker-compose.bch.yml build bch
 
 up-docker-logger:
 	docker-compose up fluentd elasticsearch grafana
@@ -86,18 +86,18 @@ reset-wallet-for-bitcoin-core-for-development:
 bld:
 	go build -i -v -o ${GOPATH}/bin/wallet ./cmd/wallet/main.go
 	go build -i -v -o ${GOPATH}/bin/coldwallet1 ./cmd/coldwallet1/main.go
-	#go build -i -o ${GOPATH}/bin/coldwallet2 ./cmd/coldwallet2/main.go
+	go build -i -v -o ${GOPATH}/bin/coldwallet2 ./cmd/coldwallet2/main.go
 
 bld-windows:
 	GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/wallet.exe ./cmd/wallet/main.go
 	GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/coldwallet1.exe ./cmd/coldwallet1/main.go
-	#GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/coldwallet2.exe ./cmd/coldwallet2/main.go
+	GOOS=windows GOARCH=amd64 go build -o ./bin/windows_amd64/coldwallet2.exe ./cmd/coldwallet2/main.go
 	zip -r ./bin/windows_amd64/wallet.zip ./bin/windows_amd64/wallet.exe
 	zip -r ./bin/windows_amd64/coldwallet1.zip ./bin/windows_amd64/coldwallet1.exe
-	#zip -r ./bin/windows_amd64/coldwallet2.zip ./bin/windows_amd64/coldwallet2.exe
+	zip -r ./bin/windows_amd64/coldwallet2.zip ./bin/windows_amd64/coldwallet2.exe
 	rm -f ./bin/windows_amd64/wallet.exe
 	rm -f ./bin/windows_amd64/coldwallet1.exe
-	#rm -f ./bin/windows_amd64/coldwallet2.exe
+	rm -f ./bin/windows_amd64/coldwallet2.exe
 
 
 ###############################################################################
@@ -240,59 +240,59 @@ run-info:
 ###############################################################################
 # development
 develop:
-	coldwallet1 -w 1
+	coldwallet1 -d
 
 # seedを生成する
 gen-seed:
-	coldwallet1 -w 1 -k -m 1
+	coldwallet1 -k -m 1
 
 
 # Clientのkeyを生成する
 gen-client-key:
-	coldwallet1 -w 1 -k -m 10
+	coldwallet1 -k -m 10
 
 # Receiptのkeyを生成する
 gen-receipt-key:
-	coldwallet1 -w 1 -k -m 11
+	coldwallet1 -k -m 11
 
 # Paymentのkeyを生成する
 gen-payment:
-	coldwallet1 -w 1 -k -m 12
+	coldwallet1 -k -m 12
 
 
 # Clientのprivate keyをcoldwalletに登録する
 add-client-priv-key:
-	coldwallet1 -w 1 -k -m 20
+	coldwallet1 -k -m 20
 
 # Receiptのprivate keyをcoldwalletに登録する
 add-receipt-priv-key:
-	coldwallet1 -w 1 -k -m 21
+	coldwallet1 -k -m 21
 
 # Paymentのprivate keyをcoldwalletに登録する
 add-payment-priv-key:
-	coldwallet1 -w 1 -k -m 22
+	coldwallet1 -k -m 22
 
 
 # Clientのpubアドレスをexportする
 export-client-pub-key:
-	coldwallet1 -w 1 -k -m 30
+	coldwallet1 -k -m 30
 
 # Receiptのpubアドレスをexportする
 export-receipt-pub-key:
-	coldwallet1 -w 1 -k -m 31
+	coldwallet1 -k -m 31
 
 # Paymentのpubアドレスをexportする
 export-payment-pub-key:
-	coldwallet1 -w 1 -k -m 32
+	coldwallet1 -k -m 32
 
 
 # Receiptのmultisigアドレスをimportする
 import-receipt-multisig-address:
-	coldwallet1 -w 1 -k -m 40
+	coldwallet1 -k -m 40
 
 # Paymentのmultisigアドレスをimportする
 import-payment-multisig-address:
-	coldwallet1 -w 1 -k -m 41
+	coldwallet1 -k -m 41
 
 
 
@@ -304,44 +304,44 @@ import-payment-multisig-address:
 ###############################################################################
 # seedを生成する
 gen-seed2:
-	coldwallet1 -c ./data/toml/local_cold2.toml -w 2 -k -m 1
+	coldwallet2 -k -m 1
 
 
 # Authorizationのkeyを生成する
 gen-authorization-key:
-	coldwallet1 -c ./data/toml/local_cold2.toml -w 2 -k -m 13
+	coldwallet2 -k -m 13
 
 
 # Authorizationのprivate keyをcoldwalletに登録する
 add-authorization-priv-key:
-	coldwallet1 -c ./data/toml/local_cold2.toml -w 2 -k -m 23
+	coldwallet2 -k -m 23
 
 
 # ReceiptのPublicアドレス(full public key)をimportする
 import-receipt-pub-key:
-	coldwallet1 -c ./data/toml/local_cold2.toml -w 2 -k -m 33 -i ./data/pubkey/receipt_1535613888391656000.csv
+	coldwallet2 -k -m 33 -i ./data/pubkey/receipt_1535613888391656000.csv
 
 # PaymentのPublicアドレス(full public key)をimportする
 import-payment-pub-key:
-	coldwallet1 -c ./data/toml/local_cold2.toml -w 2 -k -m 34 -i ./data/pubkey/payment_1535613934762230000.csv
+	coldwallet2 -k -m 34 -i ./data/pubkey/payment_1535613934762230000.csv
 
 
 # Receiptのmultisigアドレスを生成し、登録する
 add-multisig-receipt:
-	coldwallet1 -c ./data/toml/local_cold2.toml -w 2 -k -m 50
+	coldwallet2 -k -m 50
 
 # Paymentのmultisigアドレスを生成し、登録する
 add-multisig-payment:
-	coldwallet1 -c ./data/toml/local_cold2.toml -w 2 -k -m 51
+	coldwallet2 -k -m 51
 
 
 # Receiptのmultisigアドレスをexportする
 export-multisig-receipt:
-	coldwallet1 -c ./data/toml/local_cold2.toml -w 2 -k -m 60
+	coldwallet2 -k -m 60
 
 # Paymentのmultisigアドレスをexportする
 export-multisig-payment:
-	coldwallet1 -c ./data/toml/local_cold2.toml -w 2 -k -m 61
+	coldwallet2 -k -m 61
 
 
 ###############################################################################

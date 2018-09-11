@@ -8,6 +8,12 @@ export GOPATH=$HOME/work/go
 export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 
 #docker-compose
+alias dcom='docker-compose'
+alias dcup='docker-compose up'
+alias dcdw='docker-compose down'
+alias dcdwv='docker-compose down -v'
+alias dcbld='docker-compose build'
+alias dcbldnc='docker-compose build --no-cache'
 alias dcps='docker ps -a'
 alias dcrmall='docker rm -f $(docker ps -a --format "{{.Names}}")'
 alias dcimgcln='docker rmi -f $(docker images -aqf "dangling=true" --no-trunc)'
