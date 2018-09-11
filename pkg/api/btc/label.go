@@ -8,9 +8,9 @@ import (
 )
 
 // GetReceivedByAccountResult getreceivedbyaccountresultをcallしたresponseの型
-type GetReceivedByAccountResult struct {
-	Amount float64 `json:"amount"`
-}
+//type GetReceivedByAccountResult struct {
+//	Amount float64 `json:"amount"`
+//}
 
 //GetLabel()は存在しない
 //GetAddressInfo()を呼び出すこと
@@ -62,12 +62,15 @@ func (b *Bitcoin) GetReceivedByLabelAndMinConf(accountName string, minConf int) 
 		return 0, errors.Errorf("json.RawRequest(getreceivedbylabel): error: %s", err)
 	}
 
-	getReceivedResult := GetReceivedByAccountResult{}
-	err = json.Unmarshal([]byte(rawResult), &getReceivedResult)
+	//getReceivedResult := GetReceivedByAccountResult{}
+	//err = json.Unmarshal([]byte(rawResult), &getReceivedResult)
+	var receivedAmt float64
+	err = json.Unmarshal([]byte(rawResult), &receivedAmt)
 	if err != nil {
 		return 0, errors.Errorf("json.Unmarshal(): error: %s", err)
 	}
 
 	//変換
-	return b.FloatBitToAmount(getReceivedResult.Amount)
+	//return b.FloatBitToAmount(getReceivedResult.Amount)
+	return b.FloatBitToAmount(receivedAmt)
 }
