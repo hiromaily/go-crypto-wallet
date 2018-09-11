@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"github.com/bookerzzz/grok"
 
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
@@ -252,7 +253,7 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) 
 	if b.Version() >= enum.BTCVer17 {
 		msgTx, isSigned, err := b.SignRawTransactionWithWallet(tx)
 		if err != nil {
-			return nil, false, errors.Errorf("BTC.SetLabel() error: %s", err)
+			return nil, false, errors.Errorf("BTC.SignRawTransactionWithWallet() error: %s", err)
 		}
 		return msgTx, isSigned, nil
 	}
@@ -299,6 +300,9 @@ func (b *Bitcoin) SignRawTransactionWithWallet(tx *wire.MsgTx) (*wire.MsgTx, boo
 		return nil, false, errors.Errorf("json.Unmarshal(): error: %s", err)
 	}
 	if len(signRawTxResult.Errors) != 0 {
+		//FIXME:error: Input not found or already spent
+		//[debug]
+		grok.Value(signRawTxResult)
 		return nil, false, errors.Errorf("json.RawRequest(signrawtransactionwithwallet): error: %s", signRawTxResult.Errors[0].Error)
 	}
 
