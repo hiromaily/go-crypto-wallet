@@ -112,9 +112,6 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 	}
 
 	//3.payment用アドレスの残高を確認し、金額が不足しているのであればエラー
-	//getbalance payment 6
-	//balance, err := w.BTC.GetBalanceByAccountAndMinConf(w.BTC.PaymentAccountName(), w.BTC.ConfirmationBlock())
-	//balance, err := w.BTC.GetBalanceByAccountAndMinConf(string(enum.AccountTypePayment), w.BTC.ConfirmationBlock())
 	balance, err := w.BTC.GetReceivedByAccountAndMinConf(string(enum.AccountTypePayment), w.BTC.ConfirmationBlock())
 	if err != nil {
 		return "", "", err
