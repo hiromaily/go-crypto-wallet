@@ -14,7 +14,7 @@ setup:
 # Docker and compose
 ###############################################################################
 bld-docker-all:
-    docker-compose build
+	docker-compose build
 
 bld-docker-go:
 	docker-compose build base-golang
@@ -28,8 +28,24 @@ bld-docker-btc:
 bld-docker-bch:
 	docker-compose -f docker-compose.bch.yml build bch
 
-up-docker1:
-    docker-compose up fluentd elasticsearch grafana
+up-docker-logger:
+	docker-compose up fluentd elasticsearch grafana
+
+up-docker-core:
+	docker-compose up btc-wallet btc-cold-wallet1 btc-cold-wallet2
+
+up-docker-dbs:
+	docker-compose up btc-wallet-db btc-cold-wallet1-db btc-cold-wallet2-db
+
+up-docker-apps:
+	docker-compose up watch-only-wallet
+
+up-docker-only-watch-wallet:
+	docker-compose up btc-wallet btc-wallet-db watch-only-wallet
+
+clear-db-volumes:
+	docker rm -f $(docker ps -a --format "{{.Names}}")
+	docker volume rm go-bitcoin_db1 go-bitcoin_db2 go-bitcoin_db3
 
 
 ###############################################################################
