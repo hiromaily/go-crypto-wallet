@@ -380,6 +380,15 @@ func debugForCheck(wallet *service.Wallet) {
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
+	case 3:
+		//[Debug用]payment_requestテーブルの情報を初期化する
+		logger.Info("Run: I/Fが変わってエラーが出るようになったのでテスト")
+		logger.Debugf("account: %s, confirmation block: %d", string(enum.AccountTypePayment), wallet.BTC.ConfirmationBlock())
+		balance, err := wallet.BTC.GetBalanceByAccountAndMinConf(string(enum.AccountTypePayment), wallet.BTC.ConfirmationBlock())
+		if err != nil {
+			log.Fatalf("%+v", err)
+		}
+		logger.Infof("balance: %v", balance)
 	default:
 		logger.Warn("opts.Mode is out of range")
 		procedure.ShowWallet()

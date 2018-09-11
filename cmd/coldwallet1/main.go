@@ -77,7 +77,7 @@ func main() {
 	}
 }
 
-// [coldwallet1]としての署名機能群 入金時の署名/出金時の署名
+// [coldwallet1]としての署名機能群 入金時の署名/出金時の署名[s]
 // TODO:出金時の署名は、coldwallet1/coldwallet2でそれぞれで署名が必要
 func signFunctionalities(wallet *service.Wallet) {
 	// 処理をModeで切り替える
@@ -101,7 +101,7 @@ func signFunctionalities(wallet *service.Wallet) {
 	}
 }
 
-// [coldwallet1]としてのKey関連機能群
+// [coldwallet1]としてのKey関連機能群[k]
 func keyFunctionalities(wallet *service.Wallet) {
 	switch opts.Mode {
 	case 1:
@@ -259,7 +259,7 @@ func keyFunctionalities(wallet *service.Wallet) {
 
 }
 
-// Debug 検証用
+// Debug 検証用[d]
 func debugForCheck(wallet *service.Wallet) {
 	switch opts.Mode {
 	case 1:
@@ -307,7 +307,7 @@ func debugForCheck(wallet *service.Wallet) {
 	}
 }
 
-//coldwallet1 -w 1 -d
+//coldwallet1 -d
 func development(wallet *service.Wallet) {
 	//------------------------------------------------------------------
 	//coldwallet1の機能
