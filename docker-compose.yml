@@ -104,12 +104,12 @@ services:
       GOOS: linux
       GO111MODULE: "on"
     volumes:
-      - ./cmd:/go/src/github.com/mf-financial/cayenne_wallet/cmd
-      - ./data:/go/src/github.com/mf-financial/cayenne_wallet/data
-      - ./pkg:/go/src/github.com/mf-financial/cayenne_wallet/pkg
-      - ./go.mod:/go/src/github.com/mf-financial/cayenne_wallet/go.mod
-      - ./go.sum:/go/src/github.com/mf-financial/cayenne_wallet/go.sum
-      - ./Makefile:/go/src/github.com/mf-financial/cayenne_wallet/Makefile
+      - ./cmd:/go/src/github.com/hiromaily/go-bitcon/cmd
+      - ./data:/go/src/github.com/hiromaily/go-bitcon/data
+      - ./pkg:/go/src/github.com/hiromaily/go-bitcon/pkg
+      - ./go.mod:/go/src/github.com/hiromaily/go-bitcon/go.mod
+      - ./go.sum:/go/src/github.com/hiromaily/go-bitcon/go.sum
+      - ./Makefile:/go/src/github.com/hiromaily/go-bitcon/Makefile
     stdin_open: true
     tty: true
     #    logging:
