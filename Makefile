@@ -13,8 +13,10 @@ setup:
 ###############################################################################
 # Docker and compose
 ###############################################################################
+bld-docker-all:
+    docker-compose build
+
 bld-docker-go:
-	#docker build --no-cache -t cayenne-wallet-go:1.10.3 -f ./docker/golang/Dockerfile .
 	docker-compose build base-golang
 
 bld-docker-ubuntu:
@@ -26,9 +28,18 @@ bld-docker-btc:
 bld-docker-bch:
 	docker-compose -f docker-compose.bch.yml build bch
 
+up-docker1:
+    docker-compose up fluentd elasticsearch grafana
+
 
 ###############################################################################
-# For inside docker container
+# Grafana
+###############################################################################
+# http://localhost:3000
+
+
+###############################################################################
+# From inside docker container
 ###############################################################################
 bld-linux:
 	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/wallet ./cmd/wallet/main.go
@@ -39,7 +50,7 @@ bld-linux:
 
 
 ###############################################################################
-# Bitcoin core
+# Bitcoin core on local
 ###############################################################################
 bitcoin-run:
 	bitcoind -daemon
@@ -54,7 +65,7 @@ reset-wallet-for-bitcoin-core-for-development:
 	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/wallet.dat
 
 ###############################################################################
-# Build
+# Build on local
 ###############################################################################
 bld:
 	go build -i -v -o ${GOPATH}/bin/wallet ./cmd/wallet/main.go
@@ -74,7 +85,7 @@ bld-windows:
 
 
 ###############################################################################
-# Module for management of dependency
+# Module for management of dependency on local
 ###############################################################################
 module:
 	# go.mod,go.sum files should be created
@@ -82,7 +93,7 @@ module:
 
 
 ###############################################################################
-# Test
+# Test on local
 ###############################################################################
 gotest:
 	go test -v ./...

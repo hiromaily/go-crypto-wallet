@@ -1,21 +1,28 @@
 # go-bitcoin
-ウォレット関連機能
+Wallet functionalities handling BTC, BCH, ETH and so on. Currencies would be added step by step.
 
-## Hotウォレット
-- ネットワーク環境下にて利用するウォレット  
-- 秘密鍵はこちらのウォレットでは管理せず、公開鍵のみを利用する(つまり Watch Only Wallet)
-- こちらでは、Bitcoin coreのAPIによって、入金情報を管理したり、未署名トランザクションの作成、署名済トランザクションの送信処理などを行う
+## Structures
+This is explained for BTC for now.
+There are mainly 3 wallets separately.
 
+### Watch only wallet
+- This wallet could access to BTC Network
+- Only Bitcoin address is stored. Private key is NOT stored here. That's why this is called watch only wallet.
+- It works as detection coin received, creation of unsigned transaction and client to call Bitcoin APIs.
 
-## Coldウォレット
-- 非ネットワーク環境下にて利用するウォレット  
-- キーの生成からバックアップ、秘密鍵の保持等、キーに関する機能をすべて担う
-- 未署名トランザクションへの署名を行う
+### Cold wallet1
+- This wallet is key management functionalities. It generates seed and private keys as HD wallet and exports address for watch only wallet.
+- Sign unsigned transaction by certain keys.
+- Outside network is not used at all.
+
+### Cold wallet2
+- This wallet is key management for authorization by multi-signature address. It also generates seed and private keys for authorization accounts.
+- Sign unsigned transaction by certain keys.
+- Outside network is not used at all.
 
 
 ## Install
-- 開発初期段階においては、depなどのパッケージ依存管理ツールは利用しない。
-- よって、以下コマンドで依存ファイルの最新を取得
+- This project is ongoing. Until project done to some extent, I don't use package management tool like dep. So you can get packages as below command.
 ```
 go get -u -d -v ./...'
 ```

@@ -10,5 +10,6 @@ data/kvs/*
 data/tx/*
 data/gcs/*
 data/pubkey/*.csv
+docker/grafana/*
 !.gitkeep
 cayenne-dev-strage.json

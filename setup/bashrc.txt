@@ -1,4 +1,5 @@
 alias ll='ls -al'
+
 export GOPATH=$HOME/work/go
 export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 
