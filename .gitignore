@@ -11,5 +11,6 @@ data/tx/*
 data/gcs/*
 data/pubkey/*.csv
 docker/grafana/*
+!docker/wallet
 !.gitkeep
 cayenne-dev-strage.json

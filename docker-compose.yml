@@ -98,12 +98,12 @@ services:
       - ./data:/go/src/github.com/mf-financial/cayenne_wallet/data
       - ./pkg:/go/src/github.com/mf-financial/cayenne_wallet/pkg
       - ./go.mod:/go/src/github.com/mf-financial/cayenne_wallet/go.mod
-      - ./go.dum:/go/src/github.com/mf-financial/cayenne_wallet/go.sum
+      - ./go.sum:/go/src/github.com/mf-financial/cayenne_wallet/go.sum
       - ./Makefile:/go/src/github.com/mf-financial/cayenne_wallet/Makefile
     stdin_open: true
     tty: true
     command: bash
-    # docker-compose exec watch-only-wallet sh -c 'make goget bld-linux'
+    # docker-compose exec watch-only-wallet sh -c 'make bld-linux'
     # docker-compose exec watch-only-wallet sh -c 'wallet -c xxx.toml xx xx'
 
   #########################################################################
