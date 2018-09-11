@@ -60,7 +60,7 @@ func InitialSettings(confPath string) (*Wallet, error) {
 		key.SetFilePath(conf.PubkeyFile.BasePath)
 	}
 
-	// GCS
+	// GCS (only watch only wallete)
 	gcs := make(map[enum.ActionType]*gcp.Storage)
 	if conf.GCS.ReceiptBucketName != "" {
 		gcs[enum.ActionTypeReceipt] = gcp.NewStorage(conf.GCS.ReceiptBucketName, conf.GCS.StorageKeyPath)

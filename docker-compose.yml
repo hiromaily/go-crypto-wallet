@@ -58,6 +58,11 @@ services:
     - "${RPC_PORT:-19333}:18332"
     stdin_open: true
     tty: true
+    #    logging:
+    #      driver: fluentd
+    #      options:
+    #        fluentd-address: "localhost:24224"
+    #        tag: "docker.{{.ID}}"
     command: /usr/bin/bitcoind -maxconnections=0 --printtoconsole
     # docker-compose exec btc-cold-wallet1 bash
     # /root/.bitcoin/testnet3/wallets
@@ -71,6 +76,11 @@ services:
     - "${RPC_PORT:-19334}:18332"
     stdin_open: true
     tty: true
+    #    logging:
+    #      driver: fluentd
+    #      options:
+    #        fluentd-address: "localhost:24224"
+    #        tag: "docker.{{.ID}}"
     command: /usr/bin/bitcoind -maxconnections=0 --printtoconsole
     # docker-compose exec btc-cold-wallet2 bash
     # /root/.bitcoin/testnet3/wallets
@@ -102,6 +112,11 @@ services:
       - ./Makefile:/go/src/github.com/mf-financial/cayenne_wallet/Makefile
     stdin_open: true
     tty: true
+    #    logging:
+    #      driver: fluentd
+    #      options:
+    #        fluentd-address: "localhost:24224"
+    #        tag: "docker.{{.ID}}"
     command: bash
     # docker-compose exec watch-only-wallet sh -c 'make bld-linux'
     # docker-compose exec watch-only-wallet sh -c 'wallet -c xxx.toml xx xx'
