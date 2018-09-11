@@ -11,7 +11,6 @@ import (
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/pkg/errors"
 )
 
@@ -250,13 +249,16 @@ func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, err
 // 秘密鍵を保持している側のwallet(つまりcold wallet)で実行することを想定
 func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) {
 	//署名
-	if b.Version() >= enum.BTCVer17 {
-		msgTx, isSigned, err := b.SignRawTransactionWithWallet(tx)
-		if err != nil {
-			return nil, false, errors.Errorf("BTC.SignRawTransactionWithWallet() error: %s", err)
-		}
-		return msgTx, isSigned, nil
-	}
+	//FIXME:SignRawTransactionWithWallet()はエラーが出て使えないので、暫定対応としてoptionでdeprecatedを無効化する
+	//restart bitcoind with -deprecatedrpc=signrawtransaction
+	//FIXME:一旦コメントアウト
+	//if b.Version() >= enum.BTCVer17 {
+	//	msgTx, isSigned, err := b.SignRawTransactionWithWallet(tx)
+	//	if err != nil {
+	//		return nil, false, errors.Errorf("BTC.SignRawTransactionWithWallet() error: %s", err)
+	//	}
+	//	return msgTx, isSigned, nil
+	//}
 	return b.signRawTransaction(tx)
 }
 
@@ -277,6 +279,8 @@ func (b *Bitcoin) signRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) 
 }
 
 // SignRawTransactionWithWallet Ver17から利用可能なSignRawTransaction
+// FIXME:まだエラーが出て使えない
+// restart bitcoind with -deprecatedrpc=signrawtransaction
 func (b *Bitcoin) SignRawTransactionWithWallet(tx *wire.MsgTx) (*wire.MsgTx, bool, error) {
 	//hex tx
 	hexTx, err := b.ToHex(tx)
@@ -301,8 +305,23 @@ func (b *Bitcoin) SignRawTransactionWithWallet(tx *wire.MsgTx) (*wire.MsgTx, boo
 	}
 	if len(signRawTxResult.Errors) != 0 {
 		//FIXME:error: Input not found or already spent
+		//もし、解決のためにパラメータprevtxsが必要となると、非常にめんどくさい。。。listunspentで取得可能だが。。。
 		//[debug]
 		grok.Value(signRawTxResult)
+		//value SignRawTransactionWithWalletResult = {
+		//	Hex string = "020000000138c14167c131202d81d054bce8c6726c87ca072f14b03ec121755f5983b1c0b70000000000ffffffff0600093d..." 486
+		//	Complete bool = false
+		//	Errors []SignRawTransactionWithWalletError = [
+		//		0 SignRawTransactionWithWalletError = {
+		//			Txid string = "b7c0b183595f7521c13eb0142f07ca876c72c6e8bc54d0812d2031c16741c138" 64
+		//			Vout int64 = 0
+		//			ScriptSig string = "" 0
+		//			Sequence int64 = 4294967295
+		//			Error string = "Input not found or already spent" 32
+		//		}
+		//	]
+		//}
+
 		return nil, false, errors.Errorf("json.RawRequest(signrawtransactionwithwallet): error: %s", signRawTxResult.Errors[0].Error)
 	}
 
