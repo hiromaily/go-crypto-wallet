@@ -384,7 +384,9 @@ func debugForCheck(wallet *service.Wallet) {
 		//[Debug用]payment_requestテーブルの情報を初期化する
 		logger.Info("Run: I/Fが変わってエラーが出るようになったのでテスト")
 		logger.Debugf("account: %s, confirmation block: %d", string(enum.AccountTypePayment), wallet.BTC.ConfirmationBlock())
-		balance, err := wallet.BTC.GetBalanceByAccountAndMinConf(string(enum.AccountTypePayment), wallet.BTC.ConfirmationBlock())
+		//balance, err := wallet.BTC.GetBalanceByAccountAndMinConf(string(enum.AccountTypePayment), wallet.BTC.ConfirmationBlock())
+		//FIXME:wallet.BTC.GetBalanceByAccountAndMinConf()の呼び出しをやめて、GetReceivedByAccountAndMinConf()をcallするように変更する
+		balance, err := wallet.BTC.GetReceivedByAccountAndMinConf(string(enum.AccountTypePayment), wallet.BTC.ConfirmationBlock())
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}

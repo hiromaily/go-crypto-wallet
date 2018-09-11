@@ -3,8 +3,14 @@ package btc
 import (
 	"encoding/json"
 
+	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 )
+
+// GetReceivedByAccountResult getreceivedbyaccountresultをcallしたresponseの型
+type GetReceivedByAccountResult struct {
+	Amount float64 `json:"amount"`
+}
 
 //GetLabel()は存在しない
 //GetAddressInfo()を呼び出すこと
@@ -38,4 +44,30 @@ func (b *Bitcoin) SetLabel(addr, label string) error {
 	}
 
 	return nil
+}
+
+// GetReceivedByLabelAndMinConf ラベルに対してのBalanceを取得する
+func (b *Bitcoin) GetReceivedByLabelAndMinConf(accountName string, minConf int) (btcutil.Amount, error) {
+	input1, err := json.Marshal(accountName)
+	if err != nil {
+		return 0, errors.Errorf("json.Marchal(accountName): error: %s", err)
+	}
+	input2, err := json.Marshal(minConf)
+	if err != nil {
+		return 0, errors.Errorf("json.Marchal(minConf): error: %s", err)
+	}
+
+	rawResult, err := b.client.RawRequest("getreceivedbylabel", []json.RawMessage{input1, input2})
+	if err != nil {
+		return 0, errors.Errorf("json.RawRequest(getreceivedbylabel): error: %s", err)
+	}
+
+	getReceivedResult := GetReceivedByAccountResult{}
+	err = json.Unmarshal([]byte(rawResult), &getReceivedResult)
+	if err != nil {
+		return 0, errors.Errorf("json.Unmarshal(): error: %s", err)
+	}
+
+	//変換
+	return b.FloatBitToAmount(getReceivedResult.Amount)
 }
