@@ -102,7 +102,7 @@ func main() {
 	}
 }
 
-//キー関連機能
+//キー関連機能[k]
 func keyFunctionalities(wallet *service.Wallet) {
 	switch opts.Mode {
 	case 1:
@@ -146,7 +146,7 @@ func keyFunctionalities(wallet *service.Wallet) {
 	//importmulti or importaddress
 }
 
-//入金関連機能
+//入金関連機能[r]
 func receiptFunctionalities(wallet *service.Wallet) {
 	switch opts.Mode {
 	case 1:
@@ -213,7 +213,7 @@ func receiptFunctionalities(wallet *service.Wallet) {
 
 }
 
-//出金関連機能
+//出金関連機能[p]
 func paymentFunctionalities(wallet *service.Wallet) {
 	switch opts.Mode {
 	case 1:
@@ -264,7 +264,7 @@ func paymentFunctionalities(wallet *service.Wallet) {
 	}
 }
 
-//署名の送信 関連機能
+//署名の送信 関連機能[s]
 func sendingFunctionalities(wallet *service.Wallet) {
 	switch opts.Mode {
 	case 1:
@@ -286,7 +286,7 @@ func sendingFunctionalities(wallet *service.Wallet) {
 	}
 }
 
-//transactionの監視 関連機能
+//transactionの監視 関連機能[n]
 func monitoringFunctionalities(wallet *service.Wallet) {
 	switch opts.Mode {
 	case 1:
@@ -302,7 +302,7 @@ func monitoringFunctionalities(wallet *service.Wallet) {
 
 }
 
-// bitcoin RPC command
+// bitcoin RPC command[b]
 func btcCommand(wallet *service.Wallet) {
 	switch opts.Mode {
 	case 1:
@@ -363,7 +363,7 @@ func btcCommand(wallet *service.Wallet) {
 	}
 }
 
-// 検証用
+// 検証用[d]
 func debugForCheck(wallet *service.Wallet) {
 	switch opts.Mode {
 	case 1:

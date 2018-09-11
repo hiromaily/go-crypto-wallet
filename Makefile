@@ -119,34 +119,52 @@ gotest:
 # Watch Only wallet
 ###############################################################################
 ###############################################################################
+# Run アドレスのImport機能
+###############################################################################
+# coldwalletでexportしたpublicアドレスをimportする
+import-pub:
+	wallet -k -m 1 -i ./data/pubkey/client_1535423628425011000.csv
+
+import-pub:
+	wallet -k -m 2 -i ./data/pubkey/client_1535423628425011000.csv
+
+import-pub:
+	wallet -k -m 3 -i ./data/pubkey/client_1535423628425011000.csv
+
+
+###############################################################################
 # Run 入金
 ###############################################################################
 # TODO:定期的に実行して、動作を確認すること(これを自動化しておきたい)
 
 # 入金データを集約し、未署名のトランザクションを作成する
 create-unsigned: bld
-	wallet -m 1
+	wallet -r -m 1
 
 # 入金データを集約し、未署名のトランザクションを作成する(更に手数料を調整したい場合)
 create-unsigned-fee: bld
-	wallet -m 1 -f 1.5
+	wallet -r -m 1 -f 1.5
+
+# 入金確認のみ[WIP]
+create-unsigned: bld
+	wallet -r -m 2
 
 # [coldwallet] 未署名のトランザクションに署名する
 sign: bld
-	coldwallet1 -w 1 -s -m 5 -i ./data/tx/receipt/receipt_8_unsigned_1534832793024491932
+	coldwallet1 -w 1 -s -m 1 -i ./data/tx/receipt/receipt_8_unsigned_1534832793024491932
 
 # 署名済トランザクションを送信する
 send: bld
-	wallet -m 3 -i ./data/tx/receipt/receipt_8_signed_1534832879778945174
+	wallet -s -m 1 -i ./data/tx/receipt/receipt_8_signed_1534832879778945174
 
 # 送金ステータスを監視し、6confirmationsになったら、statusをdoneに更新する
-	wallet -m 10
+	wallet -n -m 1
 
 
 # Debug用
 # テストデータ作成のために入金の一連の流れをまとめて実行する
 create-receipt-all: bld
-	wallet -m 20
+	wallet -r -m 10
 
 
 ###############################################################################
@@ -156,11 +174,11 @@ create-receipt-all: bld
 
 # 出金データから出金トランザクションを作成する
 create-payment: bld
-	wallet -m 2
+	wallet -p -m 1
 
 # 出金データから出金トランザクションを作成する(更に手数料を調整したい場合)
 create-payment-fee: bld
-	wallet -m 2 -f 1.5
+	wallet -p -m 1 -f 1.5
 
 
 # [coldwallet]出金用に未署名のトランザクションに署名する #出金時の署名は2回
@@ -173,38 +191,37 @@ sign-payment2: bld
 
 # 出金用に署名済トランザクションを送信する
 send-payment: bld
-	wallet -m 3 -i ./data/tx/payment/payment_3_signed_1534833088943126101
+	wallet -s -m 3 -i ./data/tx/payment/payment_3_signed_1534833088943126101
 
 
 # Debug用
 # テストデータ作成のために出金の一連の流れをまとめて実行する
 create-payment-all: bld
-	wallet -m 21
-
-
-###############################################################################
-# Run アドレスのImport機能
-###############################################################################
-# coldwalletでexportしたpublicアドレスをimportする
-# 追加されたアドレスを確認するには、`getaddressesbyaccount ""`コマンド
-import-pub:
-	wallet -m 11 -i ./data/pubkey/client_1535423628425011000.csv
+	wallet -p -m 1
 
 
 ###############################################################################
 # Run 送金監視
 ###############################################################################
 detect-sent-transaction:
-	wallet -m 10
+	wallet -n -m 1
 
 
 ###############################################################################
 # Run 各種Debug機能
 ###############################################################################
+# 出金依頼データの作成を行う (coldwallet側で生成したデータをwalletにimport後)
+run-reset:
+	wallet -d -m 1
+
 # 出金依頼データの再利用のため、DBを書き換える
 run-reset:
-	wallet -d -m 11
+	wallet -d -m 2
 
+
+###############################################################################
+# Run Bitcoin API
+###############################################################################
 # 現在の手数料算出(estimatesmartfee)
 run-fee:
 	wallet -d -m 2
