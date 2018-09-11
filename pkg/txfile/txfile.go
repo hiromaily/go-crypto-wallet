@@ -2,6 +2,7 @@ package txfile
 
 import (
 	"io/ioutil"
+	"os"
 	"strconv"
 	"time"
 
@@ -78,6 +79,14 @@ func ParseFile(filePath string, txType enum.TxType) (int64, enum.ActionType, str
 // TODO:ioをパラメータに持つか
 func WriteFile(path, hexTx string) (string, error) {
 	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
+
+	//TODO:ディレクトリが存在しなければ作成する？？
+	tmp1 := strings.Split(path, "/")
+	tmp2 := tmp1[0 : len(tmp1)-1]
+	dir := strings.Join(tmp2, "/")
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		os.Mkdir(dir, 0644)
+	}
 
 	byteTx := []byte(hexTx)
 	fileName := path + ts
