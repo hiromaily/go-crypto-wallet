@@ -52,8 +52,10 @@ func (w *Wallet) AddMultisigAddressByAuthorization(accountType enum.AccountType,
 		}
 
 		//レスポンスをadded_pubkey_history_xxxテーブルに保存
+		//err = w.DB.UpdateMultisigAddrOnAddedPubkeyHistoryTable(accountType, resAddr.Address,
+		//	resAddr.RedeemScript, authKeyTable.WalletAddress, val.FullPublicKey, nil, true)
 		err = w.DB.UpdateMultisigAddrOnAddedPubkeyHistoryTable(accountType, resAddr.Address,
-			resAddr.RedeemScript, authKeyTable.WalletAddress, val.FullPublicKey, nil, true)
+			resAddr.RedeemScript, authKeyTable.P2shSegwitAddress, val.FullPublicKey, nil, true)
 		if err != nil {
 			logger.Errorf("DB.UpdateMultisigAddrOnAddedPubkeyHistoryTable(%s) error: %s", accountType, err)
 		}
