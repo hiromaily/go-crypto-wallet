@@ -12,6 +12,7 @@ import (
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
 
 //TODO:参考に(中国語のサイト)
@@ -270,6 +271,25 @@ func (b *Bitcoin) signRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) 
 	if err != nil {
 		return nil, false, errors.Errorf("client.SignRawTransaction(): error: %s", err)
 	}
+
+	//Debug
+	if !isSigned{
+		logger.Debug("トランザクションHEXの結果比較スタート")
+		//compare tx hex
+		tx1, err := b.ToHex(tx)
+		if err != nil{
+			return nil, false, errors.Errorf("btc.ToHex(tx): error: %s", err)
+		}
+		tx2, err := b.ToHex(msgTx)
+		if err != nil{
+			return nil, false, errors.Errorf("btc.ToHex(msgTx): error: %s", err)
+		}
+		if tx1==tx2{
+			logger.Debug("トランザクションHEXの結果が同じであった。これでは意味がない。")
+		}
+	}
+
+
 	//Multisigの場合、これによって署名が終了したか判断するはず
 	//if !isSigned {
 	//	return nil, errors.New("SignRawTransaction() can not sign on given transaction")
@@ -450,7 +470,7 @@ func (b *Bitcoin) SequentialTransaction(hex string) (*chainhash.Hash, *btcutil.T
 	return hash, resTx, nil
 }
 
-// Sign 署名を行う
+// Sign 署名を行う without Bitcoin Core [WIP]
 //FIXME: これはColdWallet内で必要となるが、BitcoinCoreの機能が必要ないので、あれば実装しておきたい
 func (b *Bitcoin) Sign(tx *wire.MsgTx, strPrivateKey string) (string, error) {
 	// Key
