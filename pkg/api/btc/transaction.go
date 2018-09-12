@@ -293,7 +293,7 @@ func (b *Bitcoin) signRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) 
 		//	privKeysWIF []string) (*wire.MsgTx, bool, error) {
 
 		//Debug
-		msgTx, isSigned, err = b.client.SignRawTransaction3(tx, nil, []string{"cR5KECrkYF7RKi7v8DezyUCBdV1nYQF99gEapcCnzTRdXjWyiPgt"})
+		msgTx, isSigned, err = b.client.SignRawTransaction3(tx, nil, []string{"cNw2Kd7fJLcyXJ9UvgEAUahwb6aoiwpXG8kSPELmC5Q42QemP6vq","cR5KECrkYF7RKi7v8DezyUCBdV1nYQF99gEapcCnzTRdXjWyiPgt"})
 		if err != nil {
 			return nil, false, errors.Errorf("client.SignRawTransaction3(): error: %s", err)
 		}
