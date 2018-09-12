@@ -290,12 +290,16 @@ func (b *Bitcoin) signRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) 
 
 		//isSignedがfalseの場合、inputのtxとoutputのtxはまったく一緒だった
 		//ここから、関連するprivate keyは出力できないか？pubkeyscriptから抽出できるかもしれない。
-		grok.Value(tx.TxOut)
-		for _, txout := range tx.TxOut {
-			hexPubKey := hex.EncodeToString(txout.PkScript)
-			logger.Debug("hexPubKey:", hexPubKey)
-
-		}
+		//grok.Value(tx.TxOut)
+		//for _, txout := range tx.TxOut {
+		//	hexPubKey := hex.EncodeToString(txout.PkScript)
+		//	logger.Debug("hexPubKey:", hexPubKey)
+		//}
+		grok.Value(tx.TxIn)
+		//for _, txin := range tx.TxIn {
+		//	hexPubKey := hex.EncodeToString(txin.)
+		//	logger.Debug("hexPubKey:", hexPubKey)
+		//}
 	}
 
 	//Multisigの場合、これによって署名が終了したか判断するはず
