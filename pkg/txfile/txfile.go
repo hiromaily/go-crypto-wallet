@@ -44,7 +44,7 @@ func CreateFilePath(actionType enum.ActionType, txType enum.TxType, txID int64, 
 }
 
 // ParseFile ファイル名を解析する
-func ParseFile(filePath string, txType enum.TxType) (int64, enum.ActionType, string, error) {
+func ParseFile(filePath string, txTypes []enum.TxType) (int64, enum.ActionType, string, error) {
 	//フルパスが渡されることも想定
 	tmp := strings.Split(filePath, "/")
 	fileName := tmp[len(tmp)-1]
@@ -68,9 +68,12 @@ func ParseFile(filePath string, txType enum.TxType) (int64, enum.ActionType, str
 	}
 
 	//txType
-	if s[2] != string(txType) {
+	if !enum.ValidateTxType(s[2]) || !enum.TxType(s[2]).Search(txTypes) {
 		return 0, "", "", errors.Errorf("error: invalid file: %s", fileName)
 	}
+	//if s[2] != string(txType) {
+	//	return 0, "", "", errors.Errorf("error: invalid file: %s", fileName)
+	//}
 
 	return txReceiptID, enum.ActionType(s[0]), s[2], nil
 }

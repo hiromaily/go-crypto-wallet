@@ -18,7 +18,7 @@ import (
 func (w *Wallet) SendFromFile(filePath string) (string, error) {
 	//ファイル名から、tx_receipt_idを取得する
 	//payment_5_unsigned_1534466246366489473
-	txReceiptID, actionType, _, err := txfile.ParseFile(filePath, enum.TxTypeSigned)
+	txReceiptID, actionType, _, err := txfile.ParseFile(filePath, []enum.TxType{enum.TxTypeSigned})
 	if err != nil {
 		return "", errors.Errorf("txfile.ParseFile() error: %s", err)
 	}

@@ -63,7 +63,7 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 	//ファイル名から、tx_receipt_idを取得する
 	//payment_5_unsigned_1534466246366489473
 	//txReceiptID, actionType, _, err := txfile.ParseFile(filePath, "unsigned")
-	txReceiptID, actionType, _, err := txfile.ParseFile(filePath, enum.TxTypeUnsigned)
+	txReceiptID, actionType, _, err := txfile.ParseFile(filePath, []enum.TxType{enum.TxTypeUnsigned})
 	if err != nil {
 		return "", false, "", err
 	}
@@ -80,8 +80,15 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 		return "", isSigned, "", err
 	}
 
+	//TODO:署名が完了していないとき、TxTypeUnsigned2nd
+	txType := enum.TxTypeSigned
+	if isSigned == false {
+		txType = enum.TxTypeUnsigned2nd
+	}
+
 	//ファイルに書き込む
-	path := txfile.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID, true)
+	//path := txfile.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID, true)
+	path := txfile.CreateFilePath(actionType, txType, txReceiptID, true)
 	generatedFileName, err := txfile.WriteFile(path, hexTx)
 	if err != nil {
 		return "", isSigned, "", err

@@ -143,12 +143,13 @@ type TxType string
 
 // tx_type
 const (
-	TxTypeUnsigned TxType = "unsigned"
-	TxTypeSigned   TxType = "signed"
-	TxTypeSent     TxType = "sent"
-	TxTypeDone     TxType = "done"
-	TxTypeNotified TxType = "notified"
-	TxTypeCancel   TxType = "canceled"
+	TxTypeUnsigned    TxType = "unsigned"
+	TxTypeUnsigned2nd TxType = "unsigned2nd"
+	TxTypeSigned      TxType = "signed"
+	TxTypeSent        TxType = "sent"
+	TxTypeDone        TxType = "done"
+	TxTypeNotified    TxType = "notified"
+	TxTypeCancel      TxType = "canceled"
 )
 
 //TxTypeValue tx_typeの値
@@ -165,6 +166,16 @@ var TxTypeValue = map[TxType]uint8{
 func ValidateTxType(val string) bool {
 	if _, ok := TxTypeValue[TxType(val)]; ok {
 		return true
+	}
+	return false
+}
+
+// Search SliceのtxTypes内にtが含まれているかチェックする
+func (t TxType) Search(txTypes []TxType) bool {
+	for _, v := range txTypes {
+		if v == t {
+			return true
+		}
 	}
 	return false
 }
