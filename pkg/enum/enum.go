@@ -154,12 +154,13 @@ const (
 
 //TxTypeValue tx_typeの値
 var TxTypeValue = map[TxType]uint8{
-	TxTypeUnsigned: 1,
-	TxTypeSigned:   2,
-	TxTypeSent:     3,
-	TxTypeDone:     4,
-	TxTypeNotified: 5,
-	TxTypeCancel:   6,
+	TxTypeUnsigned:    1,
+	TxTypeUnsigned2nd: 2,
+	TxTypeSigned:      3,
+	TxTypeSent:        4,
+	TxTypeDone:        5,
+	TxTypeNotified:    6,
+	TxTypeCancel:      7,
 }
 
 // ValidateTxType TxTypeのバリデーションを行う
