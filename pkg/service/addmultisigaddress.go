@@ -11,7 +11,8 @@ import (
 
 // AddMultisigAddressByAuthorization account_key_authorizationテーブルのwallet_addressを認証者として、
 // added_pubkey_history_paymentテーブル内のwalletアドレスのmultisigアドレスを生成する
-func (w *Wallet) AddMultisigAddressByAuthorization(accountType enum.AccountType) error {
+// TODO:第4パラメータに、address_typeを追加する。Bitcoinの場合は、p2sh-segwit とする
+func (w *Wallet) AddMultisigAddressByAuthorization(accountType enum.AccountType, addressType enum.AddressType) error {
 	//accountチェック
 	if accountType != enum.AccountTypeReceipt && accountType != enum.AccountTypePayment {
 		logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
@@ -37,10 +38,12 @@ func (w *Wallet) AddMultisigAddressByAuthorization(accountType enum.AccountType)
 		resAddr, err := w.BTC.CreateMultiSig(
 			2,
 			[]string{
-				val.FullPublicKey,          // receipt or payment address
-				authKeyTable.WalletAddress, // authorization address
+				val.FullPublicKey, // receipt or payment address
+				//authKeyTable.WalletAddress, // authorization address TODO:P2shSegwitAddressじゃなくていいのか？これが原因でmultisigの送信に失敗した？？
+				authKeyTable.P2shSegwitAddress,
 			},
-			fmt.Sprintf("multi_%s", accountType),
+			fmt.Sprintf("multi_%s", accountType), //TODO:ここのアカウント名はどうすべきか
+			addressType,
 		)
 		if err != nil {
 			//[Error] -5: no full public key for address mkPmdpo59gpU7ZioGYwwoMTQJjh7MiqUvd

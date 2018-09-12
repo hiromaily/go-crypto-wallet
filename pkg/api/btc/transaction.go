@@ -293,7 +293,7 @@ func (b *Bitcoin) signRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) 
 		//	privKeysWIF []string) (*wire.MsgTx, bool, error) {
 
 		//Debug
-		msgTx, isSigned, err = b.client.SignRawTransaction3(tx, nil, []string{"cNw2Kd7fJLcyXJ9UvgEAUahwb6aoiwpXG8kSPELmC5Q42QemP6vq","cR5KECrkYF7RKi7v8DezyUCBdV1nYQF99gEapcCnzTRdXjWyiPgt"})
+		msgTx, isSigned, err = b.client.SignRawTransaction3(tx, nil, []string{"cNw2Kd7fJLcyXJ9UvgEAUahwb6aoiwpXG8kSPELmC5Q42QemP6vq", "cR5KECrkYF7RKi7v8DezyUCBdV1nYQF99gEapcCnzTRdXjWyiPgt"})
 		if err != nil {
 			return nil, false, errors.Errorf("client.SignRawTransaction3(): error: %s", err)
 		}
@@ -308,7 +308,7 @@ func (b *Bitcoin) signRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) 
 	return msgTx, isSigned, nil
 }
 
-func (b *Bitcoin) debugCompareTx(tx1, tx2 *wire.MsgTx){
+func (b *Bitcoin) debugCompareTx(tx1, tx2 *wire.MsgTx) {
 	hexTx1, err := b.ToHex(tx1)
 	if err != nil {
 		logger.Debugf("btc.ToHex(tx1): error: %s", err)

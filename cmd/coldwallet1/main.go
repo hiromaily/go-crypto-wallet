@@ -282,7 +282,7 @@ func debugForCheck(wallet *service.Wallet) {
 		//TODO: => おそらくBlankでもいい
 
 		//TODO: Multisigアドレス作成
-		resAddr, err := wallet.BTC.CreateMultiSig(2, []string{"2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP", "2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu"}, "multi01")
+		resAddr, err := wallet.BTC.CreateMultiSig(2, []string{"2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP", "2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu"}, "multi01", enum.AddressTypeP2shSegwit)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -386,11 +386,11 @@ func development(wallet *service.Wallet) {
 	}
 
 	//4.addmultisig
-	err = wallet.AddMultisigAddressByAuthorization(enum.AccountTypeReceipt)
+	err = wallet.AddMultisigAddressByAuthorization(enum.AccountTypeReceipt, enum.AddressTypeP2shSegwit)
 	if err != nil {
 		logger.Fatalf("%+v", err)
 	}
-	err = wallet.AddMultisigAddressByAuthorization(enum.AccountTypePayment)
+	err = wallet.AddMultisigAddressByAuthorization(enum.AccountTypePayment, enum.AddressTypeP2shSegwit)
 	if err != nil {
 		logger.Fatalf("%+v", err)
 	}

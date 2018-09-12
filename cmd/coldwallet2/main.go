@@ -168,7 +168,7 @@ func keyFunctionalities(wallet *service.Wallet) {
 		//[coldwallet2のみ]
 		//`addmultisigaddress`を実行する。パラメータは、receiptのアドレス、authorizationのアドレス
 		logger.Info("Run: `addmultisigaddress`を実行する。パラメータは、receiptのアドレス、authorizationのアドレス")
-		err := wallet.AddMultisigAddressByAuthorization(enum.AccountTypeReceipt)
+		err := wallet.AddMultisigAddressByAuthorization(enum.AccountTypeReceipt, enum.AddressTypeP2shSegwit)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -177,7 +177,7 @@ func keyFunctionalities(wallet *service.Wallet) {
 		//[coldwallet2のみ]
 		//`addmultisigaddress`を実行する。パラメータは、paymentのアドレス、authorizationのアドレス
 		logger.Info("Run: `addmultisigaddress`を実行する。パラメータは、receiptのアドレス、authorizationのアドレス")
-		err := wallet.AddMultisigAddressByAuthorization(enum.AccountTypePayment)
+		err := wallet.AddMultisigAddressByAuthorization(enum.AccountTypePayment, enum.AddressTypeP2shSegwit)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}

@@ -68,6 +68,23 @@ const (
 	NetworkTypeRegTestNet NetworkType = "regtest"
 )
 
+//AddressType address種別
+type AddressType string
+
+// address type
+const (
+	AddressTypeLegacy     AddressType = "legacy"
+	AddressTypeP2shSegwit AddressType = "p2sh-segwit"
+	AddressTypeBech32     AddressType = "bech32"
+)
+
+//AddressTypeValue address_typeの値
+var AddressTypeValue = map[AddressType]uint8{
+	AddressTypeLegacy:     0,
+	AddressTypeP2shSegwit: 1,
+	AddressTypeBech32:     2,
+}
+
 //AccountType 利用目的
 type AccountType string
 

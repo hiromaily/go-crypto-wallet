@@ -3,6 +3,7 @@ package btc
 import (
 	"encoding/json"
 
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/pkg/errors"
 )
 
@@ -17,7 +18,7 @@ type AddMultisigAddressResult struct {
 //  - addresses:    自分のアドレス+承認者のアドレスxN をいれていく
 // TODO:各ユーザーに割り振るアドレスは、Multisigのアドレスになる？？->これは集約用にいくだけなので、問題ないような
 // TODO:保管用のアドレスだったり、トレード用のアドレスはMultisig対応すべき
-func (b *Bitcoin) CreateMultiSig(requiredSigs int, addresses []string, accountName string) (*AddMultisigAddressResult, error) {
+func (b *Bitcoin) CreateMultiSig(requiredSigs int, addresses []string, accountName string, addressType enum.AddressType) (*AddMultisigAddressResult, error) {
 
 	if requiredSigs > len(addresses) {
 		return nil, errors.New("number of given address should be at least same to requiredSigs or more")
@@ -62,18 +63,31 @@ func (b *Bitcoin) CreateMultiSig(requiredSigs int, addresses []string, accountNa
 		return nil, errors.Errorf("json.Marchal(addresses): error: %v", err)
 	}
 
-	var jsonRawMsg []json.RawMessage
-
 	//accountName
-	if accountName != "" {
-		bAccountName, err := json.Marshal(accountName)
-		if err != nil {
-			return nil, errors.Errorf("json.Marchal(accountName): error: %v", err)
-		}
-		jsonRawMsg = []json.RawMessage{bRequiredSigs, bAddresses, bAccountName}
-	} else {
-		jsonRawMsg = []json.RawMessage{bRequiredSigs, bAddresses}
+	bAccount, err := json.Marshal(accountName)
+	if err != nil {
+		//return nil, errors.Errorf("json.Marchal(accountName): error: %v", err)
+		bAccount = nil
 	}
+
+	//addressType
+	bAddressType, err := json.Marshal(string(addressType))
+	if err != nil {
+		//return nil, errors.Errorf("json.Marchal(accountName): error: %v", err)
+		bAccount = nil
+	}
+
+	jsonRawMsg := []json.RawMessage{bRequiredSigs, bAddresses, bAccount, bAddressType}
+
+	//if accountName != "" {
+	//	bAccountName, err := json.Marshal(accountName)
+	//	if err != nil {
+	//		return nil, errors.Errorf("json.Marchal(accountName): error: %v", err)
+	//	}
+	//	jsonRawMsg = []json.RawMessage{bRequiredSigs, bAddresses, bAccountName}
+	//} else {
+	//	jsonRawMsg = []json.RawMessage{bRequiredSigs, bAddresses}
+	//}
 
 	//call addmultisigaddress
 	rawResult, err := b.client.RawRequest("addmultisigaddress", jsonRawMsg)
