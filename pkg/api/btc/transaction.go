@@ -276,17 +276,7 @@ func (b *Bitcoin) signRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) 
 	if !isSigned {
 		logger.Debug("トランザクションHEXの結果比較スタート")
 		////compare tx hex
-		//tx1, err := b.ToHex(tx)
-		//if err != nil {
-		//	return nil, false, errors.Errorf("btc.ToHex(tx): error: %s", err)
-		//}
-		//tx2, err := b.ToHex(msgTx)
-		//if err != nil {
-		//	return nil, false, errors.Errorf("btc.ToHex(msgTx): error: %s", err)
-		//}
-		//if tx1 == tx2 {
-		//	logger.Debug("トランザクションHEXの結果が同じであった。これでは意味がない。")
-		//}
+		//b.debugCompareTx(tx, msgTx)
 
 		//isSignedがfalseの場合、inputのtxとoutputのtxはまったく一緒だった
 		//ここから、関連するprivate keyは出力できないか？pubkeyscriptから抽出できるかもしれない。
@@ -295,11 +285,19 @@ func (b *Bitcoin) signRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) 
 		//	hexPubKey := hex.EncodeToString(txout.PkScript)
 		//	logger.Debug("hexPubKey:", hexPubKey)
 		//}
-		grok.Value(tx.TxIn)
-		//for _, txin := range tx.TxIn {
-		//	hexPubKey := hex.EncodeToString(txin.)
-		//	logger.Debug("hexPubKey:", hexPubKey)
-		//}
+		//grok.Value(tx.TxIn)
+
+		//WIF: cR5KECrkYF7RKi7v8DezyUCBdV1nYQF99gEapcCnzTRdXjWyiPgt
+		//func (c *Client) SignRawTransaction3(tx *wire.MsgTx,
+		//inputs []btcjson.RawTxInput,
+		//	privKeysWIF []string) (*wire.MsgTx, bool, error) {
+
+		//Debug
+		msgTx, isSigned, err = b.client.SignRawTransaction3(tx, nil, []string{"cR5KECrkYF7RKi7v8DezyUCBdV1nYQF99gEapcCnzTRdXjWyiPgt"})
+		if err != nil {
+			return nil, false, errors.Errorf("client.SignRawTransaction3(): error: %s", err)
+		}
+		b.debugCompareTx(tx, msgTx)
 	}
 
 	//Multisigの場合、これによって署名が終了したか判断するはず
@@ -308,6 +306,20 @@ func (b *Bitcoin) signRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) 
 	//}
 
 	return msgTx, isSigned, nil
+}
+
+func (b *Bitcoin) debugCompareTx(tx1, tx2 *wire.MsgTx){
+	hexTx1, err := b.ToHex(tx1)
+	if err != nil {
+		logger.Debugf("btc.ToHex(tx1): error: %s", err)
+	}
+	hexTx2, err := b.ToHex(tx2)
+	if err != nil {
+		logger.Debugf("btc.ToHex(tx2): error: %s", err)
+	}
+	if hexTx1 == hexTx2 {
+		logger.Debug("トランザクションHEXの結果が同じであった。これでは意味がない。")
+	}
 }
 
 // SignRawTransactionWithWallet Ver17から利用可能なSignRawTransaction
