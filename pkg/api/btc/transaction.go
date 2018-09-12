@@ -273,22 +273,25 @@ func (b *Bitcoin) signRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) 
 	}
 
 	//Debug
-	if !isSigned{
+	if !isSigned {
 		logger.Debug("トランザクションHEXの結果比較スタート")
-		//compare tx hex
-		tx1, err := b.ToHex(tx)
-		if err != nil{
-			return nil, false, errors.Errorf("btc.ToHex(tx): error: %s", err)
-		}
-		tx2, err := b.ToHex(msgTx)
-		if err != nil{
-			return nil, false, errors.Errorf("btc.ToHex(msgTx): error: %s", err)
-		}
-		if tx1==tx2{
-			logger.Debug("トランザクションHEXの結果が同じであった。これでは意味がない。")
-		}
-	}
+		////compare tx hex
+		//tx1, err := b.ToHex(tx)
+		//if err != nil {
+		//	return nil, false, errors.Errorf("btc.ToHex(tx): error: %s", err)
+		//}
+		//tx2, err := b.ToHex(msgTx)
+		//if err != nil {
+		//	return nil, false, errors.Errorf("btc.ToHex(msgTx): error: %s", err)
+		//}
+		//if tx1 == tx2 {
+		//	logger.Debug("トランザクションHEXの結果が同じであった。これでは意味がない。")
+		//}
 
+		//isSignedがfalseの場合、inputのtxとoutputのtxはまったく一緒だった
+		//ここから、関連するprivate keyは出力できないか？pubkeyscriptから抽出できるかもしれない。
+		grok.Value(tx.TxOut)
+	}
 
 	//Multisigの場合、これによって署名が終了したか判断するはず
 	//if !isSigned {
