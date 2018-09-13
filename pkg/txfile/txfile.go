@@ -78,6 +78,26 @@ func ParseFile(filePath string, txTypes []enum.TxType) (int64, enum.ActionType, 
 	return txReceiptID, enum.ActionType(s[0]), s[2], nil
 }
 
+// GetTxType txTypeを取得
+func GetTxType(filePath string) (enum.ActionType, error) {
+	//フルパスが渡されることも想定
+	tmp := strings.Split(filePath, "/")
+	fileName := tmp[len(tmp)-1]
+
+	//receipt_5_unsigned_1534466246366489473
+	//length
+	s := strings.Split(fileName, "_")
+	if len(s) != 4 {
+		return "", errors.Errorf("error: invalid file: %s", fileName)
+	}
+
+	//Action
+	if !enum.ValidateActionType(s[0]) {
+		return "", errors.Errorf("error: invalid file: %s", fileName)
+	}
+	return enum.ActionType(s[0]), nil
+}
+
 // WriteFile ファイルに書き込む
 // TODO:ioをパラメータに持つか
 func WriteFile(path, hexTx string) (string, error) {

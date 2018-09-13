@@ -270,15 +270,15 @@ func (w *Wallet) insertTxTableForUnsigned(actionType enum.ActionType, hex string
 
 // storeHex　hex情報を保存し、ファイル名を返す
 // [共通(receipt/payment)]
-func (w *Wallet) storeHex(hex, encodedPrevTxs string, id int64, actionType enum.ActionType) (string, error) {
+func (w *Wallet) storeHex(hex, encodedAddrsPrevs string, id int64, actionType enum.ActionType) (string, error) {
 	var (
 		generatedFileName string
 		err               error
 	)
 
 	savedata := hex
-	if encodedPrevTxs != "" {
-		savedata = fmt.Sprintf("%s,%s", savedata, encodedPrevTxs)
+	if encodedAddrsPrevs != "" {
+		savedata = fmt.Sprintf("%s,%s", savedata, encodedAddrsPrevs)
 	}
 
 	//To File

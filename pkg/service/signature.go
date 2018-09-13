@@ -3,8 +3,14 @@ package service
 //Cold wallet
 
 import (
+	"strings"
+
+	"github.com/bookerzzz/grok"
+	"github.com/btcsuite/btcd/wire"
+	"github.com/hiromaily/go-bitcoin/pkg/api/btc"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
+	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/pkg/errors"
 )
@@ -13,7 +19,7 @@ import (
 
 // signatureByHex 署名する
 // オフラインで使うことを想定
-func (w *Wallet) signatureByHex(hex string) (string, bool, error) {
+func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.ActionType) (string, bool, error) {
 	//first hex: 未署名トランザクションのhex
 	// Hexからトランザクションを取得
 	msgTx, err := w.BTC.ToMsgTx(hex)
@@ -22,7 +28,35 @@ func (w *Wallet) signatureByHex(hex string) (string, bool, error) {
 	}
 
 	// 署名
-	signedTx, isSigned, err := w.BTC.SignRawTransaction(msgTx)
+	var (
+		signedTx   *wire.MsgTx
+		isSigned   bool
+		addrsPrevs btc.AddrsPrevTxs
+	)
+
+	if encodedAddrsPrevs != "" {
+		//decodeする
+		serial.DecodeFromString(encodedAddrsPrevs, &addrsPrevs)
+		grok.Value(addrsPrevs)
+
+		//TODO:一旦debugしてから先に進もう
+		//どっちのアカウントかの情報も必要になるな
+
+		addrsPrevs.Addrs
+
+		//This is multisig!
+		//TODO:ここからどうやって、送信者(出金の場合はpayment)のアドレスを取得できる？
+		//取得後は、WIFを取得する
+		//hexをdecodeすればいい？decoderawtransactionが使えそう=>これは違った
+		//serializedTx []byte
+		//rawTx, err := w.BTC.DecodeRawTransaction(hex)
+		//if err != nil{
+		//	return "", false, errors.Errorf("BTC.DecodeRawTransaction() error: %s", err)
+		//}
+
+	} else {
+		signedTx, isSigned, err = w.BTC.SignRawTransaction(msgTx)
+	}
 	if err != nil {
 		return "", false, err
 	}
@@ -35,25 +69,6 @@ func (w *Wallet) signatureByHex(hex string) (string, bool, error) {
 
 	return hexTx, isSigned, nil
 
-}
-
-// SignatureByHex Hex文字列から署名を行う
-// TODO:出金/入金でフラグがほしいが、このfuncはDebug時にしか使わない
-func (w *Wallet) SignatureByHex(actionType enum.ActionType, hex string, txReceiptID int64) (string, bool, string, error) {
-	//署名
-	hexTx, isSigned, err := w.signatureByHex(hex)
-	if err != nil {
-		return "", isSigned, "", err
-	}
-
-	//ファイルに書き込む
-	path := txfile.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID, true)
-	generatedFileName, err := txfile.WriteFile(path, hex)
-	if err != nil {
-		return "", isSigned, "", err
-	}
-
-	return hexTx, isSigned, generatedFileName, nil
 }
 
 // SignatureFromFile 渡されたファイルからtransactionを読み取り、署名を行う
@@ -69,13 +84,26 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 	}
 
 	//ファイルからhexを読み取る
-	hex, err := txfile.ReadFile(filePath)
+	data, err := txfile.ReadFile(filePath)
 	if err != nil {
 		return "", false, "", err
 	}
 
+	var hex, encodedAddrsPrevs string
+
+	//encodedPrevTxs
+	//paymentの場合は、multisigのため、データが異なる
+	if actionType == enum.ActionTypePayment {
+		tmp := strings.Split(data, ",")
+		if len(tmp) != 2 {
+			return "", false, "", errors.New("imported tx data is wrong. encodedPrevTxs would not be found.")
+		}
+		hex = tmp[0]
+		encodedAddrsPrevs = tmp[1]
+	}
+
 	//署名
-	hexTx, isSigned, err := w.signatureByHex(hex)
+	hexTx, isSigned, err := w.signatureByHex(hex, encodedAddrsPrevs, actionType)
 	if err != nil {
 		return "", isSigned, "", err
 	}
@@ -90,6 +118,25 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 	//path := txfile.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID, true)
 	path := txfile.CreateFilePath(actionType, txType, txReceiptID, true)
 	generatedFileName, err := txfile.WriteFile(path, hexTx)
+	if err != nil {
+		return "", isSigned, "", err
+	}
+
+	return hexTx, isSigned, generatedFileName, nil
+}
+
+// SignatureByHex Hex文字列から署名を行う
+// TODO:出金/入金でフラグがほしいが、このfuncはDebug時にしか使わない
+func (w *Wallet) SignatureByHex(actionType enum.ActionType, hex string, txReceiptID int64) (string, bool, string, error) {
+	//署名
+	hexTx, isSigned, err := w.signatureByHex(hex, "")
+	if err != nil {
+		return "", isSigned, "", err
+	}
+
+	//ファイルに書き込む
+	path := txfile.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID, true)
+	generatedFileName, err := txfile.WriteFile(path, hex)
 	if err != nil {
 		return "", isSigned, "", err
 	}

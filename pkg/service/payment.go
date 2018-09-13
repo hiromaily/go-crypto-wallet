@@ -164,6 +164,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 		tmpOutputs = map[string]btcutil.Amount{} //mapのkeyが、btcutil.Address型だとユニークかどうかkeyから判定できないため、判定用としてこちらを作成
 		isDone     bool
 		prevTxs    []btc.PrevTx
+		addresses  []string
 	)
 
 	//6.合計金額を超えるまで、listunspentからinputsを作成する
@@ -200,6 +201,8 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 			RedeedScript: tx.RedeemScript,
 			Amount:       tx.Amount,
 		})
+		//tx.Address
+		addresses = append(addresses, tx.Address)
 
 		if inputTotal > userTotal {
 			isDone = true
@@ -252,6 +255,10 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 	}
 
 	//TODO:inputsをすべてlockする必要がある？？
+	addrsPrevs := btc.AddrsPrevTxs{
+		Addrs:   addresses,
+		PrevTxs: prevTxs,
+	}
 
 	//Debug
 	grok.Value(inputs)
@@ -260,13 +267,13 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 
 	// 一連の処理を実行
 	return w.createRawTransactionForPayment(adjustmentFee, inputs, inputTotal, txPaymentInputs, outputs,
-		paymentRequestIds, prevTxs)
+		paymentRequestIds, &addrsPrevs)
 }
 
 //TODO:receipt側のロジックとほぼ同じ為、まとめたほうがいい(手数料のロジックのみ異なる)
 func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []btcjson.TransactionInput,
 	inputTotal btcutil.Amount, txPaymentInputs []model.TxInput, outputs map[btcutil.Address]btcutil.Amount,
-	paymentRequestIds []int64, prevTxs []btc.PrevTx) (string, string, error) {
+	paymentRequestIds []int64, addrsPrevs *btc.AddrsPrevTxs) (string, string, error) {
 
 	var (
 		outputTotal      btcutil.Amount
@@ -341,19 +348,20 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 	}
 
 	// 7. serialize previous txs for multisig signature
-	grok.Value(prevTxs)
-	encodedPrevTxs, err := serial.EncodeToString(prevTxs)
+	grok.Value(addrsPrevs)
+	//TODO:パラメータは値かアドレスか
+	encodedAddrsPrevs, err := serial.EncodeToString(*addrsPrevs)
 	if err != nil {
 		return "", "", errors.Errorf("serial.EncodeToString(): error: %s", err)
 	}
-	logger.Debugf("encodedPrevTxs: %s", encodedPrevTxs)
+	logger.Debugf("encodedAddrsPrevs: %s", encodedAddrsPrevs)
 
 	// 8. GCSにトランザクションファイルを作成
 	//TODO:本来、この戻り値をDumpして、GCSに保存、それをDLして、USBに入れてコールドウォレットに移動しなくてはいけない
 	//TODO:Debug時はlocalに出力することとする。=> これはフラグで判別したほうがいいかもしれない/Interface型にして対応してもいいかも
 	var generatedFileName string
 	if txReceiptID != 0 {
-		generatedFileName, err = w.storeHex(hex, encodedPrevTxs, txReceiptID, enum.ActionTypePayment)
+		generatedFileName, err = w.storeHex(hex, encodedAddrsPrevs, txReceiptID, enum.ActionTypePayment)
 		if err != nil {
 			return "", "", errors.Errorf("wallet.storeHex(): error: %s", err)
 		}
