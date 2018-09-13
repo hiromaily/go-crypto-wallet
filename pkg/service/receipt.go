@@ -187,7 +187,7 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 	//TODO:Debug時はlocalに出力することとする。=> これはフラグで判別したほうがいいかもしれない/Interface型にして対応してもいいかも
 	var generatedFileName string
 	if txReceiptID != 0 {
-		generatedFileName, err = w.storeHex(hex, txReceiptID, enum.ActionTypeReceipt)
+		generatedFileName, err = w.storeHex(hex, "", txReceiptID, enum.ActionTypeReceipt)
 		if err != nil {
 			return "", "", errors.Errorf("wallet.storeHex(): error: %s", err)
 		}
@@ -270,16 +270,21 @@ func (w *Wallet) insertTxTableForUnsigned(actionType enum.ActionType, hex string
 
 // storeHex　hex情報を保存し、ファイル名を返す
 // [共通(receipt/payment)]
-func (w *Wallet) storeHex(hex string, id int64, actionType enum.ActionType) (string, error) {
+func (w *Wallet) storeHex(hex, encodedPrevTxs string, id int64, actionType enum.ActionType) (string, error) {
 	var (
 		generatedFileName string
 		err               error
 	)
 
-	//To File(本番では利用しない??)
+	savedata := hex
+	if encodedPrevTxs != "" {
+		savedata = fmt.Sprintf("%s,%s", savedata, encodedPrevTxs)
+	}
+
+	//To File
 	if w.Env == enum.EnvDev {
 		path := txfile.CreateFilePath(actionType, enum.TxTypeUnsigned, id, true)
-		generatedFileName, err = txfile.WriteFile(path, hex)
+		generatedFileName, err = txfile.WriteFile(path, savedata)
 		if err != nil {
 			return "", errors.Errorf("txfile.WriteFile(): error: %s", err)
 		}
@@ -289,8 +294,7 @@ func (w *Wallet) storeHex(hex string, id int64, actionType enum.ActionType) (str
 	path := txfile.CreateFilePath(actionType, enum.TxTypeUnsigned, id, false)
 
 	//GCS上に、Clientを作成(セッションの関係で都度作成する)
-	//generatedFileName2, err := w.GCS[enum.ActionTypeReceipt].WriteOnce(path, hex)
-	_, err = w.GCS[actionType].WriteOnce(path, hex)
+	_, err = w.GCS[actionType].WriteOnce(path, savedata)
 	if err != nil {
 		return "", errors.Errorf("storage.WriteOnce(): error: %s", err)
 	}

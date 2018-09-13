@@ -25,20 +25,28 @@ import (
 //[Online]  CreateRawTransaction
 //[Offline] SignRawTransactionByHex
 
-// SignRawTransactionWithWalletResult signrawtransactionwithwalletをcallしたresponseの型
-type SignRawTransactionWithWalletResult struct {
-	Hex      string                              `json:"hex"`
-	Complete bool                                `json:"complete"`
-	Errors   []SignRawTransactionWithWalletError `json:"errors"`
+// SignRawTransactionResult signrawtransactionwithwalletをcallしたresponseの型
+type SignRawTransactionResult struct {
+	Hex      string                    `json:"hex"`
+	Complete bool                      `json:"complete"`
+	Errors   []SignRawTransactionError `json:"errors"`
 }
 
 // SignRawTransactionWithWalletError SignRawTransactionWithWalletResult内のerrorオブジェクト
-type SignRawTransactionWithWalletError struct {
+type SignRawTransactionError struct {
 	Txid      string `json:"txid"`
 	Vout      int64  `json:"vout"`
 	ScriptSig string `json:"scriptSig"`
 	Sequence  int64  `json:"sequence"`
 	Error     string `json:"error"`
+}
+
+type PrevTx struct {
+	Txid         string  `json:"txid"`
+	Vout         uint32  `json:"vout"`
+	ScriptPubKey string  `json:"scriptPubKey"`
+	RedeedScript string  `json:"redeedScript"`
+	Amount       float64 `json:"amount"`
 }
 
 // FundRawTransactionResult fundrawtransactionをcallしたresponseの型
@@ -263,7 +271,7 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) 
 	return b.signRawTransaction(tx)
 }
 
-// signRawTransaction *wire.MsgTxからRawのトランザクションに署名する
+// signRawTransaction *wire.MsgTxからRawのトランザクションに署名する(Multisigには利用できない)
 // Deprecated
 func (b *Bitcoin) signRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) {
 	//署名
@@ -275,35 +283,26 @@ func (b *Bitcoin) signRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) 
 	//Debug
 	if !isSigned {
 		logger.Debug("トランザクションHEXの結果比較スタート")
-		////compare tx hex
-		//b.debugCompareTx(tx, msgTx)
-
-		//isSignedがfalseの場合、inputのtxとoutputのtxはまったく一緒だった
-		//ここから、関連するprivate keyは出力できないか？pubkeyscriptから抽出できるかもしれない。
-		//grok.Value(tx.TxOut)
-		//for _, txout := range tx.TxOut {
-		//	hexPubKey := hex.EncodeToString(txout.PkScript)
-		//	logger.Debug("hexPubKey:", hexPubKey)
-		//}
-		//grok.Value(tx.TxIn)
-
-		//WIF: cR5KECrkYF7RKi7v8DezyUCBdV1nYQF99gEapcCnzTRdXjWyiPgt
-		//func (c *Client) SignRawTransaction3(tx *wire.MsgTx,
-		//inputs []btcjson.RawTxInput,
-		//	privKeysWIF []string) (*wire.MsgTx, bool, error) {
-
-		//Debug
-		msgTx, isSigned, err = b.client.SignRawTransaction3(tx, nil, []string{"cNw2Kd7fJLcyXJ9UvgEAUahwb6aoiwpXG8kSPELmC5Q42QemP6vq", "cR5KECrkYF7RKi7v8DezyUCBdV1nYQF99gEapcCnzTRdXjWyiPgt"})
-		if err != nil {
-			return nil, false, errors.Errorf("client.SignRawTransaction3(): error: %s", err)
-		}
 		b.debugCompareTx(tx, msgTx)
 	}
 
-	//Multisigの場合、これによって署名が終了したか判断するはず
-	//if !isSigned {
-	//	return nil, errors.New("SignRawTransaction() can not sign on given transaction")
-	//}
+	return msgTx, isSigned, nil
+}
+
+// signRawTransaction *wire.MsgTxからRawのトランザクションに署名する(Multisigの場合はこちら)
+// Deprecated
+func (b *Bitcoin) signRawTransactionWithKey(tx *wire.MsgTx, inputs []btcjson.RawTxInput, privKeysWIF []string) (*wire.MsgTx, bool, error) {
+	//署名
+	msgTx, isSigned, err := b.client.SignRawTransaction3(tx, inputs, privKeysWIF)
+	if err != nil {
+		return nil, false, errors.Errorf("client.SignRawTransaction(): error: %s", err)
+	}
+
+	//Debug
+	if !isSigned {
+		logger.Debug("トランザクションHEXの結果比較スタート")
+		b.debugCompareTx(tx, msgTx)
+	}
 
 	return msgTx, isSigned, nil
 }
@@ -322,9 +321,61 @@ func (b *Bitcoin) debugCompareTx(tx1, tx2 *wire.MsgTx) {
 	}
 }
 
+// SignRawTransactionWithKey
+// Multisigの場合はこちら
+// For above ver17
+func (b *Bitcoin) SignRawTransactionWithKey(tx *wire.MsgTx, privKeysWIF []string, prevtxs []PrevTx) (*wire.MsgTx, bool, error) {
+	//hex tx
+	hexTx, err := b.ToHex(tx)
+	if err != nil {
+		return nil, false, errors.Errorf("BTC.ToHex(tx): error: %s", err)
+	}
+
+	input1, err := json.Marshal(hexTx)
+	if err != nil {
+		return nil, false, errors.Errorf("json.Marchal(txHex): error: %s", err)
+	}
+
+	//private keys
+	input2, err := json.Marshal(privKeysWIF)
+	if err != nil {
+		return nil, false, errors.Errorf("json.Marchal(privKeysWIF): error: %s", err)
+	}
+
+	//prevtxs
+	input3, err := json.Marshal(prevtxs)
+	if err != nil {
+		return nil, false, errors.Errorf("json.Marchal(prevtxs): error: %s", err)
+	}
+
+	rawResult, err := b.client.RawRequest("signrawtransactionwithkey", []json.RawMessage{input1, input2, input3})
+	if err != nil {
+		return nil, false, errors.Errorf("json.RawRequest(signrawtransactionwithkey): error: %s", err)
+	}
+
+	//SignRawTransactionResult
+	signRawTxResult := SignRawTransactionResult{}
+	err = json.Unmarshal([]byte(rawResult), &signRawTxResult)
+	if err != nil {
+		return nil, false, errors.Errorf("json.Unmarshal(): error: %s", err)
+	}
+	if len(signRawTxResult.Errors) != 0 {
+		grok.Value(signRawTxResult)
+		return nil, false, errors.Errorf("json.RawRequest(signrawtransactionwithwallet): error: %s", signRawTxResult.Errors[0].Error)
+	}
+
+	msgTx, err := b.ToMsgTx(signRawTxResult.Hex)
+	if err != nil {
+		return nil, false, errors.Errorf("BTC.ToMsgTx(hex): error: %s", err)
+	}
+
+	return msgTx, signRawTxResult.Complete, nil
+}
+
 // SignRawTransactionWithWallet Ver17から利用可能なSignRawTransaction
-// FIXME:まだエラーが出て使えない
+// FIXME:Multisigに利用はできない。入金時のclientアドレスはmultisig対応していないので、こちらには利用できると思う
 // restart bitcoind with -deprecatedrpc=signrawtransaction
+// For above ver17
 func (b *Bitcoin) SignRawTransactionWithWallet(tx *wire.MsgTx) (*wire.MsgTx, bool, error) {
 	//hex tx
 	hexTx, err := b.ToHex(tx)
@@ -341,8 +392,8 @@ func (b *Bitcoin) SignRawTransactionWithWallet(tx *wire.MsgTx) (*wire.MsgTx, boo
 	if err != nil {
 		return nil, false, errors.Errorf("json.RawRequest(signrawtransactionwithwallet): error: %s", err)
 	}
-	//SignRawTransactionWithWalletResult
-	signRawTxResult := SignRawTransactionWithWalletResult{}
+	//SignRawTransactionResult
+	signRawTxResult := SignRawTransactionResult{}
 	err = json.Unmarshal([]byte(rawResult), &signRawTxResult)
 	if err != nil {
 		return nil, false, errors.Errorf("json.Unmarshal(): error: %s", err)

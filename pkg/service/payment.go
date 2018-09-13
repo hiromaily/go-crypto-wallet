@@ -4,6 +4,8 @@ package service
 
 import (
 	"fmt"
+	"github.com/hiromaily/go-bitcoin/pkg/api/btc"
+	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"sort"
 	"strconv"
 
@@ -161,9 +163,11 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 		//outputTotal     btcutil.Amount
 		tmpOutputs = map[string]btcutil.Amount{} //mapのkeyが、btcutil.Address型だとユニークかどうかkeyから判定できないため、判定用としてこちらを作成
 		isDone     bool
+		prevTxs    []btc.PrevTx
 	)
 
 	//6.合計金額を超えるまで、listunspentからinputsを作成する
+	//TODO:singrawtransactionのために、btc.PrevTxの配列も作成する
 	for _, tx := range unspentList {
 		amt, err := btcutil.NewAmount(tx.Amount)
 		if err != nil {
@@ -188,11 +192,21 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 			InputConfirmations: tx.Confirmations,
 		})
 
+		// prevTxs(multisigアドレスからの送金時、未署名トランザクションへの署名に必要となる)
+		prevTxs = append(prevTxs, btc.PrevTx{
+			Txid:         tx.TxID,
+			Vout:         tx.Vout,
+			ScriptPubKey: tx.ScriptPubKey,
+			RedeedScript: tx.RedeemScript,
+			Amount:       tx.Amount,
+		})
+
 		if inputTotal > userTotal {
 			isDone = true
 			break
 		}
 	}
+
 	if !isDone {
 		//これは金額が足りなかったことを意味するので致命的
 		//上記のGetBalanceByAccountAndMinConf()のチェックでここは通らないはず
@@ -245,19 +259,19 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 	grok.Value(outputs)
 
 	// 一連の処理を実行
-	return w.createRawTransactionForPayment(adjustmentFee, inputs, inputTotal, txPaymentInputs, outputs, paymentRequestIds)
+	return w.createRawTransactionForPayment(adjustmentFee, inputs, inputTotal, txPaymentInputs, outputs,
+		paymentRequestIds, prevTxs)
 }
 
 //TODO:receipt側のロジックとほぼ同じ為、まとめたほうがいい(手数料のロジックのみ異なる)
-func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []btcjson.TransactionInput, inputTotal btcutil.Amount,
-	txPaymentInputs []model.TxInput, outputs map[btcutil.Address]btcutil.Amount, paymentRequestIds []int64) (string, string, error) {
+func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []btcjson.TransactionInput,
+	inputTotal btcutil.Amount, txPaymentInputs []model.TxInput, outputs map[btcutil.Address]btcutil.Amount,
+	paymentRequestIds []int64, prevTxs []btc.PrevTx) (string, string, error) {
 
 	var (
 		outputTotal      btcutil.Amount
 		txPaymentOutputs []model.TxOutput
 	)
-
-	//w.BTC.PaymentAddress()
 
 	// 1.CreateRawTransactionWithOutput(仮で作成し、この後サイズから手数料を算出する)
 	msgTx, err := w.BTC.CreateRawTransactionWithOutput(inputs, outputs)
@@ -304,7 +318,7 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 	outputTotal -= fee
 
 	//Debug
-	grok.Value(outputs)
+	//grok.Value(outputs)
 
 	// 4.再度 CreateRawTransaction
 	msgTx, err = w.BTC.CreateRawTransactionWithOutput(inputs, outputs)
@@ -326,18 +340,26 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 		return "", "", errors.Errorf("insertTxTableForUnsigned(): error: %s", err)
 	}
 
-	// 7. GCSにトランザクションファイルを作成
+	// 7. serialize previous txs for multisig signature
+	grok.Value(prevTxs)
+	encodedPrevTxs, err := serial.EncodeToString(prevTxs)
+	if err != nil {
+		return "", "", errors.Errorf("serial.EncodeToString(): error: %s", err)
+	}
+	logger.Debugf("encodedPrevTxs: %s", encodedPrevTxs)
+
+	// 8. GCSにトランザクションファイルを作成
 	//TODO:本来、この戻り値をDumpして、GCSに保存、それをDLして、USBに入れてコールドウォレットに移動しなくてはいけない
 	//TODO:Debug時はlocalに出力することとする。=> これはフラグで判別したほうがいいかもしれない/Interface型にして対応してもいいかも
 	var generatedFileName string
 	if txReceiptID != 0 {
-		generatedFileName, err = w.storeHex(hex, txReceiptID, enum.ActionTypePayment)
+		generatedFileName, err = w.storeHex(hex, encodedPrevTxs, txReceiptID, enum.ActionTypePayment)
 		if err != nil {
 			return "", "", errors.Errorf("wallet.storeHex(): error: %s", err)
 		}
 	}
 
-	// 8. 出金準備に入ったことをユーザーに通知
+	// 9. 出金準備に入ったことをユーザーに通知
 	// TODO:NatsのPublisherとして通知すればいいか？
 
 	return hex, generatedFileName, nil

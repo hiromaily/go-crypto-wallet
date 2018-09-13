@@ -18,7 +18,7 @@ import (
 //importしたclientをBitcoin core APIを通じて、walletにimportする
 
 // ImportPublicKeyForWatchWallet csvファイルからpublicアドレスをimportする for WatchOnyWallet
-func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum.AccountType) error {
+func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum.AccountType, isRescan bool) error {
 	//ファイル読み込み
 	pubKeys, err := key.ImportPubKey(fileName)
 	if err != nil {
@@ -44,7 +44,7 @@ func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum
 
 		//Bitcoin core APIから`importaddress`をcallする
 		//TODO:1台のPCで検証しているときなど、すでにimport済の場合はエラーが出る
-		err := w.BTC.ImportAddressWithLabel(addr, account, false)
+		err := w.BTC.ImportAddressWithLabel(addr, account, isRescan) //基本falseのはず
 		if err != nil {
 			//-4: The wallet already contains the private key for this address or script
 			logger.Errorf("BTC.ImportAddressWithLabel(%s) error: %s", addr, err)

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/pkg/errors"
 )
 
@@ -66,28 +67,18 @@ func (b *Bitcoin) CreateMultiSig(requiredSigs int, addresses []string, accountNa
 	//accountName
 	bAccount, err := json.Marshal(accountName)
 	if err != nil {
-		//return nil, errors.Errorf("json.Marchal(accountName): error: %v", err)
+		logger.Errorf("json.Marchal(accountName): error: %v", err)
 		bAccount = nil
 	}
 
 	//addressType
 	bAddressType, err := json.Marshal(string(addressType))
 	if err != nil {
-		//return nil, errors.Errorf("json.Marchal(accountName): error: %v", err)
-		bAccount = nil
+		logger.Errorf("json.Marchal(addressType): error: %v", err)
+		bAddressType = nil
 	}
 
 	jsonRawMsg := []json.RawMessage{bRequiredSigs, bAddresses, bAccount, bAddressType}
-
-	//if accountName != "" {
-	//	bAccountName, err := json.Marshal(accountName)
-	//	if err != nil {
-	//		return nil, errors.Errorf("json.Marchal(accountName): error: %v", err)
-	//	}
-	//	jsonRawMsg = []json.RawMessage{bRequiredSigs, bAddresses, bAccountName}
-	//} else {
-	//	jsonRawMsg = []json.RawMessage{bRequiredSigs, bAddresses}
-	//}
 
 	//call addmultisigaddress
 	rawResult, err := b.client.RawRequest("addmultisigaddress", jsonRawMsg)

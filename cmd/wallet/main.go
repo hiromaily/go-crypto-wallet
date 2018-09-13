@@ -54,6 +54,8 @@ type Options struct {
 	ImportFile string `short:"i" long:"import" default:"" description:"import file path for hex"`
 	//調整fee
 	Fee float64 `short:"f" long:"fee" default:"" description:"adjustment fee"`
+	//import時にscanするかどうか
+	IsRescan bool `short:"x" long:"rescan" description:"scan blocks when importing key"`
 }
 
 var (
@@ -111,7 +113,7 @@ func keyFunctionalities(wallet *service.Wallet) {
 		if opts.ImportFile == "" {
 			logger.Fatal("file path is required as argument file when running")
 		}
-		err := wallet.ImportPublicKeyForWatchWallet(opts.ImportFile, enum.AccountTypeClient)
+		err := wallet.ImportPublicKeyForWatchWallet(opts.ImportFile, enum.AccountTypeClient, opts.IsRescan)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -121,7 +123,7 @@ func keyFunctionalities(wallet *service.Wallet) {
 		if opts.ImportFile == "" {
 			logger.Fatal("file path is required as argument file when running")
 		}
-		err := wallet.ImportPublicKeyForWatchWallet(opts.ImportFile, enum.AccountTypeReceipt)
+		err := wallet.ImportPublicKeyForWatchWallet(opts.ImportFile, enum.AccountTypeReceipt, opts.IsRescan)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -131,7 +133,7 @@ func keyFunctionalities(wallet *service.Wallet) {
 		if opts.ImportFile == "" {
 			logger.Fatal("file path is required as argument file when running")
 		}
-		err := wallet.ImportPublicKeyForWatchWallet(opts.ImportFile, enum.AccountTypePayment)
+		err := wallet.ImportPublicKeyForWatchWallet(opts.ImportFile, enum.AccountTypePayment, opts.IsRescan)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
