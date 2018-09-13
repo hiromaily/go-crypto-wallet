@@ -12,7 +12,7 @@ import (
 	"github.com/jessevdk/go-flags"
 )
 
-// HDウォレットとしてseed作成、keyを指定した数だけ生成し、出力する
+// coldwallet2としてauthorizationのseed作成、keyを1つだけ生成し、出力する
 // 対象アカウント: client, receipt, payment
 // 1. create seed
 // 2. create key

@@ -166,24 +166,6 @@ func (b *Bitcoin) ValidateAddress(addr string) (*btcjson.ValidateAddressWalletRe
 	if err != nil {
 		return nil, errors.Errorf("client.ValidateAddress(%s): error: %s", addr, err)
 	}
-	//debug
-	//type ValidateAddressWalletResult struct {
-	//	IsValid      bool     `json:"isvalid"`
-	//	Address      string   `json:"address,omitempty"`
-	//	IsMine       bool     `json:"ismine,omitempty"`
-	//	IsWatchOnly  bool     `json:"iswatchonly,omitempty"`
-	//	IsScript     bool     `json:"isscript,omitempty"`
-	//	PubKey       string   `json:"pubkey,omitempty"`
-	//	IsCompressed bool     `json:"iscompressed,omitempty"`
-	//	Account      string   `json:"account,omitempty"`
-	//	Addresses    []string `json:"addresses,omitempty"`
-	//	Hex          string   `json:"hex,omitempty"`
-	//	Script       string   `json:"script,omitempty"`
-	//	SigsRequired int32    `json:"sigsrequired,omitempty"`
-	//}
-
-	//b, _ := json.MarshalIndent(acc, "", " ")
-	//logger.Info(string(b))
 
 	return res, nil
 }

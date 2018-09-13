@@ -21,10 +21,6 @@ import (
 //transactionの命名ルールについて
 //*wire.MsgTxなどは、txがsuffixとして扱われているため、それに習う。e.g. hexTx, hashTxなど
 
-//入金時における、トランザクション作成順序
-//[Online]  CreateRawTransaction
-//[Offline] SignRawTransactionByHex
-
 // SignRawTransactionResult signrawtransactionwithwalletをcallしたresponseの型
 type SignRawTransactionResult struct {
 	Hex      string                    `json:"hex"`
@@ -510,39 +506,6 @@ func (b *Bitcoin) SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error) {
 	}
 
 	return hash, nil
-}
-
-// SequentialTransaction [Debug用]: 一連の未署名トランザクション作成から送信までの流れ
-// TODO:Testに移動するか
-func (b *Bitcoin) SequentialTransaction(hex string) (*chainhash.Hash, *btcutil.Tx, error) {
-	// Hexからトランザクションを取得
-	msgTx, err := b.ToMsgTx(hex)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	//署名(オフライン)
-	signedTx, isSigned, err := b.SignRawTransaction(msgTx)
-	if err != nil {
-		return nil, nil, err
-	}
-	if !isSigned {
-		return nil, nil, errors.New("BTC.SignRawTransaction() can not sign on given transaction or multisig may be required")
-	}
-
-	//送金(オンライン)
-	hash, err := b.SendRawTransaction(signedTx)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	//txを取得
-	resTx, err := b.GetRawTransactionByHex(hash.String())
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return hash, resTx, nil
 }
 
 // Sign 署名を行う without Bitcoin Core [WIP]

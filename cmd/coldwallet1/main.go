@@ -12,7 +12,7 @@ import (
 	"github.com/jessevdk/go-flags"
 )
 
-// HDウォレットとしてseed作成、keyを指定した数だけ生成し、出力する
+// coldwalletとしてclient, payment, receiptのseed作成、keyを指定した数だけ生成し、出力する
 // 対象アカウント: client, receipt, payment
 // 1. create seed
 // 2. create key
@@ -170,7 +170,6 @@ func keyFunctionalities(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-		// getaddressesbyaccount "receipt" で確認
 	case 22:
 		//[coldwallet1のみ]
 		//作成したPaymentのPrivateKeyをColdWalletにimportする
@@ -179,7 +178,6 @@ func keyFunctionalities(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-		//getaddressesbyaccount "payment" で内容を確認
 
 	case 30:
 		//[coldwallet1のみ]
@@ -235,7 +233,7 @@ func keyFunctionalities(wallet *service.Wallet) {
 	case 50:
 		//[coldwallet1のみ]
 		//multisigimport後、ReceiptのMultisigをcsvファイルとしてexportする (DBに出力済を登録する必要がある)
-		//=>TODO:しかし、coldwallet2側から出力されたファイルがそのまま使えるような？？しかし、情報の管理のために、一度coldwallet1にimportが必要
+		//=>coldwallet2側から出力されたファイルがそのまま使えるが、情報の管理のために、一度coldwallet1にimportが必要
 		logger.Info("Run: 作成したReceiptのMultisigアドレスをcsvファイルとしてexportする")
 		fileName, err := wallet.ExportAccountKey(enum.AccountTypeReceipt, enum.KeyStatusMultiAddressImported)
 		if err != nil {
@@ -245,7 +243,7 @@ func keyFunctionalities(wallet *service.Wallet) {
 	case 51:
 		//[coldwallet1のみ]
 		//multisigimport後、PaymentのMultisigをcsvファイルとしてexportする (DBに出力済を登録する必要がある)
-		//=>TODO:しかし、coldwallet2側から出力されたファイルがそのまま使えるような？？しかし、情報の管理のために、一度coldwallet1にimportが必要
+		//=>coldwallet2側から出力されたファイルがそのまま使えるが、情報の管理のために、一度coldwallet1にimportが必要
 		logger.Info("Run: 作成したPaymentのMultisigアドレスをcsvファイルとしてexportする")
 		fileName, err := wallet.ExportAccountKey(enum.AccountTypePayment, enum.KeyStatusMultiAddressImported)
 		if err != nil {
@@ -272,16 +270,10 @@ func debugForCheck(wallet *service.Wallet) {
 		}
 		logger.Infof("[WIF] %s - [Pub Address] %s\n", wif.String(), pubAddress)
 	case 10:
-		//TODO:Multisigの作成
+		//Multisigの作成
 		logger.Info("Run: Multisigの作成")
 
-		//事前準備
-		//getnewaddress taro 2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP
-		//getnewaddress boss1 2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu
-		//TODO:ここで、AddMultisigAddressを使うのにパラメータとしてaccout名も渡さないといけない。。これをどうすべきか。。。
-		//TODO: => おそらくBlankでもいい
-
-		//TODO: Multisigアドレス作成
+		//Multisigアドレス作成
 		resAddr, err := wallet.BTC.CreateMultiSig(2, []string{"2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP", "2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu"}, "multi01", enum.AddressTypeP2shSegwit)
 		if err != nil {
 			logger.Fatalf("%+v", err)

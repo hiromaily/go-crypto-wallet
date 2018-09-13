@@ -17,8 +17,7 @@ type AddMultisigAddressResult struct {
 // CreateMultiSig マルチシグを Rawトランザクション用に作成する
 //  - requiredSigs: 取引成立に必要なサイン数
 //  - addresses:    自分のアドレス+承認者のアドレスxN をいれていく
-// TODO:各ユーザーに割り振るアドレスは、Multisigのアドレスになる？？->これは集約用にいくだけなので、問題ないような
-// TODO:保管用のアドレスだったり、トレード用のアドレスはMultisig対応すべき
+// clientのアドレスは不要。payment/receiptのアドレスはmultisig対応しておくこと
 func (b *Bitcoin) CreateMultiSig(requiredSigs int, addresses []string, accountName string, addressType enum.AddressType) (*AddMultisigAddressResult, error) {
 
 	if requiredSigs > len(addresses) {
