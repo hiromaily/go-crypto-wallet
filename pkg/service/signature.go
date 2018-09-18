@@ -41,8 +41,7 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 
 		//TODO:一旦debugしてから先に進もう
 		//どっちのアカウントかの情報も必要になるな
-
-		addrsPrevs.Addrs
+		//addrsPrevs.Addrs
 
 		//This is multisig!
 		//TODO:ここからどうやって、送信者(出金の場合はpayment)のアドレスを取得できる？
@@ -127,19 +126,19 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 
 // SignatureByHex Hex文字列から署名を行う
 // TODO:出金/入金でフラグがほしいが、このfuncはDebug時にしか使わない
-func (w *Wallet) SignatureByHex(actionType enum.ActionType, hex string, txReceiptID int64) (string, bool, string, error) {
-	//署名
-	hexTx, isSigned, err := w.signatureByHex(hex, "")
-	if err != nil {
-		return "", isSigned, "", err
-	}
-
-	//ファイルに書き込む
-	path := txfile.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID, true)
-	generatedFileName, err := txfile.WriteFile(path, hex)
-	if err != nil {
-		return "", isSigned, "", err
-	}
-
-	return hexTx, isSigned, generatedFileName, nil
-}
+//func (w *Wallet) SignatureByHex(actionType enum.ActionType, hex string, txReceiptID int64) (string, bool, string, error) {
+//	//署名
+//	hexTx, isSigned, err := w.signatureByHex(hex, "")
+//	if err != nil {
+//		return "", isSigned, "", err
+//	}
+//
+//	//ファイルに書き込む
+//	path := txfile.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID, true)
+//	generatedFileName, err := txfile.WriteFile(path, hex)
+//	if err != nil {
+//		return "", isSigned, "", err
+//	}
+//
+//	return hexTx, isSigned, generatedFileName, nil
+//}

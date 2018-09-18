@@ -37,6 +37,9 @@ up-docker-core:
 up-docker-dbs:
 	docker-compose up btc-wallet-db btc-cold-wallet1-db btc-cold-wallet2-db
 
+up-local-dev-btc:
+	docker-compose up btc-wallet btc-cold-wallet1 btc-cold-wallet2 btc-wallet-db btc-cold-wallet1-db btc-cold-wallet2-db
+
 up-docker-apps:
 	docker-compose up watch-only-wallet
 

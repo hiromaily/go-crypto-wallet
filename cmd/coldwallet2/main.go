@@ -27,7 +27,7 @@ import (
 // Options コマンドラインオプション
 type Options struct {
 	//Configパス
-	ConfPath string `short:"c" long:"conf" default:"./data/toml/local_cold2.toml" description:"Path for configuration toml file"`
+	ConfPath string `short:"c" long:"conf" default:"./data/toml/docker_cold2.toml" description:"Path for configuration toml file"`
 
 	//署名モード
 	Sign bool `short:"s" long:"sign" description:"for signature"`

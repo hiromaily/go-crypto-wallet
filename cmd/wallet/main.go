@@ -24,7 +24,7 @@ import (
 // Options コマンドラインオプション
 type Options struct {
 	//Configパス
-	ConfPath string `short:"c" long:"conf" default:"./data/toml/local_watch_only.toml" description:"Path for configuration toml file"`
+	ConfPath string `short:"c" long:"conf" default:"./data/toml/docker_watch_only.toml" description:"Path for configuration toml file"`
 
 	//Keyモード
 	Key bool `short:"k" long:"key" description:"for adding key"`
