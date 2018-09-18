@@ -94,7 +94,7 @@ func (m *DB) GetAllAccountKeyByKeyStatus(accountType enum.AccountType, keyStatus
 }
 
 func (m *DB) getAllAccountKeyByMultiAddrs(tbl string, addrs []string) ([]AccountKeyTable, error) {
-	sql := "SELECT wallet_import_format FROM %s WHERE wallet_multisig_address IN ?;"
+	sql := "SELECT * FROM %s WHERE wallet_multisig_address IN (?);"
 	sql = fmt.Sprintf(sql, tbl)
 	logger.Debugf("sql: %s", sql)
 

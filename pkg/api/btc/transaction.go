@@ -49,7 +49,7 @@ type PrevTx struct {
 	Txid         string  `json:"txid"`
 	Vout         uint32  `json:"vout"`
 	ScriptPubKey string  `json:"scriptPubKey"`
-	RedeedScript string  `json:"redeedScript"`
+	RedeemScript string  `json:"redeemScript"`
 	Amount       float64 `json:"amount"`
 }
 

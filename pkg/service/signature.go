@@ -69,14 +69,14 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 				logger.Error("redeemScript can not be found")
 				continue
 			}
-			addrsPrevs.PrevTxs[idx].RedeedScript = rs
+			addrsPrevs.PrevTxs[idx].RedeemScript = rs
 		}
 		grok.Value(addrsPrevs)
 
 		//署名
 		signedTx, isSigned, err = w.BTC.SignRawTransactionWithKey(msgTx, wips, addrsPrevs.PrevTxs)
 
-		panic("for now, it stops")
+		//panic("for now, it stops")
 
 	} else {
 		signedTx, isSigned, err = w.BTC.SignRawTransaction(msgTx)

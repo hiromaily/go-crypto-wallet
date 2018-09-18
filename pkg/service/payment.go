@@ -198,7 +198,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 			Txid:         tx.TxID,
 			Vout:         tx.Vout,
 			ScriptPubKey: tx.ScriptPubKey,
-			RedeedScript: tx.RedeemScript,
+			RedeemScript: tx.RedeemScript,
 			Amount:       tx.Amount,
 		})
 		//tx.Address
