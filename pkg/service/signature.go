@@ -152,6 +152,8 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 			hex = tmp[0]
 			encodedAddrsPrevs = tmp[1]
 			//TODO:署名が更に必要なので、ファイル出力時にこの情報も引き継ぐ必要がある
+		}else{
+			hex = data
 		}
 	}
 
