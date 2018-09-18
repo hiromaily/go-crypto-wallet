@@ -38,6 +38,7 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 	)
 
 	if encodedAddrsPrevs != "" {
+		//こちらの処理はMultisigの場合
 		//decodeする
 		serial.DecodeFromString(encodedAddrsPrevs, &addrsPrevs)
 		grok.Value(addrsPrevs)
@@ -76,20 +77,6 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 		signedTx, isSigned, err = w.BTC.SignRawTransactionWithKey(msgTx, wips, addrsPrevs.PrevTxs)
 
 		panic("for now, it stops")
-
-		//TODO:一旦debugしてから先に進もう
-		//どっちのアカウントかの情報も必要になるな
-		//addrsPrevs.Addrs
-
-		//This is multisig!
-		//TODO:ここからどうやって、送信者(出金の場合はpayment)のアドレスを取得できる？
-		//取得後は、WIFを取得する
-		//hexをdecodeすればいい？decoderawtransactionが使えそう=>これは違った
-		//serializedTx []byte
-		//rawTx, err := w.BTC.DecodeRawTransaction(hex)
-		//if err != nil{
-		//	return "", false, errors.Errorf("BTC.DecodeRawTransaction() error: %s", err)
-		//}
 
 	} else {
 		signedTx, isSigned, err = w.BTC.SignRawTransaction(msgTx)

@@ -436,9 +436,15 @@ func (b *Bitcoin) signRawTransactionWithKeyVer16(tx *wire.MsgTx, privKeysWIF []s
 	if err != nil {
 		return nil, false, errors.Errorf("json.Unmarshal(): error: %s", err)
 	}
+	//TODO:戻り値のmsgTxがブランクではない、かつ値が初期値と変化がある場合は、このエラーはskip可能
+	//	Signature must be zero for failed CHECK(MULTI)SIG operation
+	//  こちらのエラーはOK
 	if len(signRawTxResult.Errors) != 0 {
-		grok.Value(signRawTxResult)
-		return nil, false, errors.Errorf("json.RawRequest(signrawtransaction): error: %s", signRawTxResult.Errors[0].Error)
+		if signRawTxResult.Hex == "" || hexTx == signRawTxResult.Hex {
+			grok.Value(signRawTxResult)
+			return nil, false, errors.Errorf("json.RawRequest(signrawtransaction): error: %s", signRawTxResult.Errors[0].Error)
+		}
+		logger.Debugf("result error: %s", signRawTxResult.Errors[0].Error)
 	}
 
 	msgTx, err := b.ToMsgTx(signRawTxResult.Hex)
@@ -485,9 +491,15 @@ func (b *Bitcoin) signRawTransactionWithKeyVer17(tx *wire.MsgTx, privKeysWIF []s
 	if err != nil {
 		return nil, false, errors.Errorf("json.Unmarshal(): error: %s", err)
 	}
+	//TODO:戻り値のmsgTxがブランクではない、かつ値が初期値と変化がある場合は、このエラーはskip可能
+	//	Signature must be zero for failed CHECK(MULTI)SIG operation
+	//  こちらのエラーはOK
 	if len(signRawTxResult.Errors) != 0 {
-		grok.Value(signRawTxResult)
-		return nil, false, errors.Errorf("json.RawRequest(signrawtransactionwithkey): error: %s", signRawTxResult.Errors[0].Error)
+		if signRawTxResult.Hex == "" || hexTx == signRawTxResult.Hex {
+			grok.Value(signRawTxResult)
+			return nil, false, errors.Errorf("json.RawRequest(signrawtransactionwithkey): error: %s", signRawTxResult.Errors[0].Error)
+		}
+		logger.Debugf("result error: %s", signRawTxResult.Errors[0].Error)
 	}
 
 	msgTx, err := b.ToMsgTx(signRawTxResult.Hex)
