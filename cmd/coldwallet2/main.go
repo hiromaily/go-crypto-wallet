@@ -60,6 +60,7 @@ func main() {
 	if err != nil {
 		logger.Fatal(err)
 	}
+	wallet.Type = enum.WalletTypeCold2
 	defer wallet.Done()
 
 	if opts.Sign {

@@ -20,7 +20,8 @@ type Wallet struct {
 	DB  *model.DB
 	GCS map[enum.ActionType]*gcp.Storage
 	//Db  *kvs.LevelDB
-	Env enum.EnvironmentType
+	Env  enum.EnvironmentType
+	Type enum.WalletType
 }
 
 //InitialSettings 実行前に必要なすべての設定をこちらで行う

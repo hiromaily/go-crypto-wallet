@@ -21,21 +21,22 @@ import (
 
 // signatureByHex 署名する
 // オフラインで使うことを想定
-func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.ActionType) (string, bool, error) {
+func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.ActionType) (string, bool, string, error) {
 	//first hex: 未署名トランザクションのhex
 	// Hexからトランザクションを取得
 	msgTx, err := w.BTC.ToMsgTx(hex)
 	if err != nil {
-		return "", false, err
+		return "", false, "", err
 	}
 
 	// 署名
 	var (
-		signedTx    *wire.MsgTx
-		isSigned    bool
-		addrsPrevs  btc.AddrsPrevTxs
-		accountKeys []model.AccountKeyTable
-		wips        []string
+		signedTx             *wire.MsgTx
+		isSigned             bool
+		addrsPrevs           btc.AddrsPrevTxs
+		accountKeys          []model.AccountKeyTable
+		wips                 []string
+		newEncodedAddrsPrevs string
 	)
 
 	if encodedAddrsPrevs != "" {
@@ -49,13 +50,22 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 		//}
 
 		//WIPs, RedeedScriptを取得
-		if val, ok := enum.ActionToAccountMap[actionType]; ok {
-			accountKeys, err = w.DB.GetAllAccountKeyByMultiAddrs(val, addrsPrevs.Addrs)
+		//TODO:coldwallet1とcoldwallet2で挙動が違う
+		//coldwallet2の場合、AccountTypeAuthorizationが必要
+		if w.Type == enum.WalletTypeCold2 {
+			accountKeys, err = w.DB.GetAllAccountKeyByMultiAddrs(enum.AccountTypeAuthorization, addrsPrevs.Addrs)
 			if err != nil {
-				return "", false, errors.Errorf("DB.GetWIPByMultiAddrs() error: %s", err)
+				return "", false, "", errors.Errorf("DB.GetWIPByMultiAddrs() error: %s", err)
 			}
 		} else {
-			return "", false, errors.New("[Fatal] actionType can not be retrieved. it should be fixed programmatically")
+			if val, ok := enum.ActionToAccountMap[actionType]; ok {
+				accountKeys, err = w.DB.GetAllAccountKeyByMultiAddrs(val, addrsPrevs.Addrs)
+				if err != nil {
+					return "", false, "", errors.Errorf("DB.GetWIPByMultiAddrs() error: %s", err)
+				}
+			} else {
+				return "", false, "", errors.New("[Fatal] actionType can not be retrieved. it should be fixed programmatically")
+			}
 		}
 
 		//wip
@@ -63,16 +73,26 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 			wips = append(wips, val.WalletImportFormat)
 		}
 
-		//取得したredeemScriptをPrevTxsにマッピング
-		for idx, val := range addrsPrevs.Addrs {
-			rs := model.GetRedeedScriptByAddress(accountKeys, val)
-			if rs == "" {
-				logger.Error("redeemScript can not be found")
-				continue
+		if w.Type == enum.WalletTypeCold1 {
+			//取得したredeemScriptをPrevTxsにマッピング
+			for idx, val := range addrsPrevs.Addrs {
+				rs := model.GetRedeedScriptByAddress(accountKeys, val)
+				if rs == "" {
+					logger.Error("redeemScript can not be found")
+					continue
+				}
+				addrsPrevs.PrevTxs[idx].RedeemScript = rs
 			}
-			addrsPrevs.PrevTxs[idx].RedeemScript = rs
+			grok.Value(addrsPrevs)
+
+			//TODO:シリアライズして戻す
+			newEncodedAddrsPrevs, err = serial.EncodeToString(addrsPrevs)
+			if err != nil {
+				return "", false, "", errors.Errorf("serial.EncodeToString(): error: %s", err)
+			}
+		} else {
+			newEncodedAddrsPrevs = encodedAddrsPrevs
 		}
-		grok.Value(addrsPrevs)
 
 		//署名
 		signedTx, isSigned, err = w.BTC.SignRawTransactionWithKey(msgTx, wips, addrsPrevs.PrevTxs)
@@ -83,16 +103,16 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 		signedTx, isSigned, err = w.BTC.SignRawTransaction(msgTx)
 	}
 	if err != nil {
-		return "", false, err
+		return "", false, "", err
 	}
 	logger.Debugf("isSigned is %t", isSigned)
 
 	hexTx, err := w.BTC.ToHex(signedTx)
 	if err != nil {
-		return "", false, errors.Errorf("w.BTC.ToHex(msgTx): error: %s", err)
+		return "", false, "", errors.Errorf("w.BTC.ToHex(msgTx): error: %s", err)
 	}
 
-	return hexTx, isSigned, nil
+	return hexTx, isSigned, newEncodedAddrsPrevs, nil
 
 }
 
@@ -134,7 +154,7 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 	}
 
 	//署名
-	hexTx, isSigned, err := w.signatureByHex(hex, encodedAddrsPrevs, actionType)
+	hexTx, isSigned, newEncodedAddrsPrevs, err := w.signatureByHex(hex, encodedAddrsPrevs, actionType)
 	if err != nil {
 		return "", isSigned, "", err
 	}
@@ -146,8 +166,8 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 	txType := enum.TxTypeSigned
 	if isSigned == false {
 		txType = enum.TxTypeUnsigned2nd
-		if encodedAddrsPrevs != "" {
-			savedata = fmt.Sprintf("%s,%s", savedata, encodedAddrsPrevs)
+		if newEncodedAddrsPrevs != "" {
+			savedata = fmt.Sprintf("%s,%s", savedata, newEncodedAddrsPrevs)
 		}
 	}
 

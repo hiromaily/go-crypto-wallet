@@ -69,6 +69,7 @@ func main() {
 	if err != nil {
 		logger.Fatal(err)
 	}
+	wallet.Type = enum.WalletTypeWatchOnly
 	defer wallet.Done()
 
 	if opts.Key {

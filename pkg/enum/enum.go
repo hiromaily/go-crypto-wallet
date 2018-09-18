@@ -23,6 +23,23 @@ func ValidateEnvironmentType(val string) bool {
 	return false
 }
 
+//WalletType Walletタイプ
+type WalletType string
+
+// wallet_type
+const (
+	WalletTypeWatchOnly WalletType = "watch_only"
+	WalletTypeCold1     WalletType = "cold1"
+	WalletTypeCold2     WalletType = "cold2"
+)
+
+//WalletTypeValue env_typeの値
+var WalletTypeValue = map[WalletType]uint8{
+	WalletTypeWatchOnly: 1,
+	WalletTypeCold1:     2,
+	WalletTypeCold2:     3,
+}
+
 //CoinType Bitcoin種別(CayenneWalletで取引するcoinの種別)
 type CoinType string
 
