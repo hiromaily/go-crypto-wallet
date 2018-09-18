@@ -3,6 +3,7 @@ package service
 //Cold wallet
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/bookerzzz/grok"
@@ -128,6 +129,7 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 			}
 			hex = tmp[0]
 			encodedAddrsPrevs = tmp[1]
+			//TODO:署名が更に必要なので、ファイル出力時にこの情報も引き継ぐ必要がある
 		}
 	}
 
@@ -137,16 +139,22 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 		return "", isSigned, "", err
 	}
 
+	//ファイルに書き込むデータ
+	savedata := hexTx
+
 	//TODO:署名が完了していないとき、TxTypeUnsigned2nd
 	txType := enum.TxTypeSigned
 	if isSigned == false {
 		txType = enum.TxTypeUnsigned2nd
+		if encodedAddrsPrevs != "" {
+			savedata = fmt.Sprintf("%s,%s", savedata, encodedAddrsPrevs)
+		}
 	}
 
 	//ファイルに書き込む
 	//path := txfile.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID, true)
 	path := txfile.CreateFilePath(actionType, txType, txReceiptID, true)
-	generatedFileName, err := txfile.WriteFile(path, hexTx)
+	generatedFileName, err := txfile.WriteFile(path, savedata)
 	if err != nil {
 		return "", isSigned, "", err
 	}
