@@ -53,10 +53,11 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 		//TODO:coldwallet1とcoldwallet2で挙動が違う
 		//coldwallet2の場合、AccountTypeAuthorizationが必要
 		if w.Type == enum.WalletTypeCold2 {
-			accountKeys, err = w.DB.GetAllAccountKeyByMultiAddrs(enum.AccountTypeAuthorization, addrsPrevs.Addrs)
+			accountKey, err := w.DB.GetOneByMaxIDOnAccountKeyTable(enum.AccountTypeAuthorization)
 			if err != nil {
-				return "", false, "", errors.Errorf("DB.GetWIPByMultiAddrs() error: %s", err)
+				return "", false, "", errors.Errorf("DB.GetOneByMaxIDOnAccountKeyTable() error: %s", err)
 			}
+			accountKeys = append(accountKeys, *accountKey)
 		} else {
 			if val, ok := enum.ActionToAccountMap[actionType]; ok {
 				accountKeys, err = w.DB.GetAllAccountKeyByMultiAddrs(val, addrsPrevs.Addrs)
@@ -85,7 +86,7 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 			}
 			grok.Value(addrsPrevs)
 
-			//TODO:シリアライズして戻す
+			//redeemScriptセット後、シリアライズして戻す
 			newEncodedAddrsPrevs, err = serial.EncodeToString(addrsPrevs)
 			if err != nil {
 				return "", false, "", errors.Errorf("serial.EncodeToString(): error: %s", err)
