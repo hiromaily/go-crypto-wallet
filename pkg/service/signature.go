@@ -119,6 +119,7 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 // SignatureFromFile 渡されたファイルからtransactionを読み取り、署名を行う
 // ColdWalletの機能なので、渡されたfilePathをそのまま使う?
 // TODO:いずれにせよ、入金と出金で署名もMultisigかどうかで変わってくる
+// TODO:multisigとそうでないものでわけたほうがわかりやすいかも
 func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error) {
 	//ファイル名から、tx_receipt_idを取得する
 	//payment_5_unsigned_1534466246366489473
