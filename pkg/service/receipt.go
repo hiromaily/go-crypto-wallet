@@ -46,9 +46,10 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 	//}
 
 	// Watch only walletであれば、ListUnspentで実現可能
-	unspentList, err := w.BTC.Client().ListUnspentMin(w.BTC.ConfirmationBlock()) //6
+	//unspentList, err := w.BTC.Client().ListUnspentMin(w.BTC.ConfirmationBlock()) //6
+	unspentList, err := w.BTC.ListUnspent()
 	if err != nil {
-		return "", "", errors.Errorf("BTC.Client().ListUnspentMin(): error: %s", err)
+		return "", "", errors.Errorf("BTC.Client().ListUnspent(): error: %s", err)
 	}
 	logger.Debug("List Unspent")
 	grok.Value(unspentList) //Debug
@@ -71,8 +72,8 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 		//	tx.Account == w.BTC.PaymentAccountName() || tx.Account == "" {
 		//	continue
 		//}
-		if tx.Account == string(enum.AccountTypeReceipt) ||
-			tx.Account == string(enum.AccountTypePayment) || tx.Account == "" {
+		if tx.Label == string(enum.AccountTypeReceipt) ||
+			tx.Label == string(enum.AccountTypePayment) || tx.Label == "" {
 			continue
 		}
 
@@ -85,10 +86,11 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 		}
 		inputTotal += amt //合計
 
+		//TODO:Ver17対応
 		//lockunspentによって、該当トランザクションをロックして再度ListUnspent()で出力されることを防ぐ
-		if w.BTC.LockUnspent(tx) != nil {
-			continue
-		}
+		//if w.BTC.LockUnspent(tx) != nil {
+		//	continue
+		//}
 
 		// inputs
 		inputs = append(inputs, btcjson.TransactionInput{
@@ -101,7 +103,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 			InputTxid:          tx.TxID,
 			InputVout:          tx.Vout,
 			InputAddress:       tx.Address,
-			InputAccount:       tx.Account,
+			InputAccount:       tx.Label,
 			InputAmount:        fmt.Sprintf("%f", tx.Amount),
 			InputConfirmations: tx.Confirmations,
 		})
@@ -115,10 +117,11 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 	// 一連の処理を実行
 	hex, fileName, err := w.createRawTransactionAndFee(adjustmentFee, inputs, inputTotal, txReceiptInputs)
 
+	//TODO:Ver17対応
 	// LockされたUnspentTransactionを解除する
-	if err := w.BTC.UnlockAllUnspentTransaction(); err != nil {
-		return "", "", err
-	}
+	//if err := w.BTC.UnlockAllUnspentTransaction(); err != nil {
+	//	return "", "", err
+	//}
 
 	return hex, fileName, err
 }
