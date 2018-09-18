@@ -10,6 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/api/btc"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
+	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/pkg/errors"
@@ -29,15 +30,52 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 
 	// 署名
 	var (
-		signedTx   *wire.MsgTx
-		isSigned   bool
-		addrsPrevs btc.AddrsPrevTxs
+		signedTx    *wire.MsgTx
+		isSigned    bool
+		addrsPrevs  btc.AddrsPrevTxs
+		accountKeys []model.AccountKeyTable
+		wips        []string
 	)
 
 	if encodedAddrsPrevs != "" {
 		//decodeする
 		serial.DecodeFromString(encodedAddrsPrevs, &addrsPrevs)
 		grok.Value(addrsPrevs)
+		//type AddrsPrevTxs struct {
+		//	Addrs   []string
+		//	PrevTxs []PrevTx
+		//}
+
+		//WIPs, RedeedScriptを取得
+		if val, ok := enum.ActionToAccountMap[actionType]; ok {
+			accountKeys, err = w.DB.GetAllAccountKeyByMultiAddrs(val, addrsPrevs.Addrs)
+			if err != nil {
+				return "", false, errors.Errorf("DB.GetWIPByMultiAddrs() error: %s", err)
+			}
+		} else {
+			return "", false, errors.New("[Fatal] actionType can not be retrieved. it should be fixed programmatically")
+		}
+
+		//wip
+		for _, val := range accountKeys {
+			wips = append(wips, val.WalletImportFormat)
+		}
+
+		//取得したredeemScriptをPrevTxsにマッピング
+		for idx, val := range addrsPrevs.Addrs {
+			rs := model.GetRedeedScriptByAddress(accountKeys, val)
+			if rs == "" {
+				logger.Error("redeemScript can not be found")
+				continue
+			}
+			addrsPrevs.PrevTxs[idx].RedeedScript = rs
+		}
+		grok.Value(addrsPrevs)
+
+		//署名
+		signedTx, isSigned, err = w.BTC.SignRawTransactionWithKey(msgTx, wips, addrsPrevs.PrevTxs)
+
+		panic("for now, it stops")
 
 		//TODO:一旦debugしてから先に進もう
 		//どっちのアカウントかの情報も必要になるな
@@ -92,13 +130,18 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 
 	//encodedPrevTxs
 	//paymentの場合は、multisigのため、データが異なる
-	if actionType == enum.ActionTypePayment {
-		tmp := strings.Split(data, ",")
-		if len(tmp) != 2 {
-			return "", false, "", errors.New("imported tx data is wrong. encodedPrevTxs would not be found.")
+	//TODO:multisigかどうかの判別は、enum.AccountTypeMultisig[]で行う
+	//TODO:ActionType/AccountTypeの相互変換が必要かも
+	if val, ok := enum.ActionToAccountMap[actionType]; ok {
+		if enum.AccountTypeMultisig[val] {
+			//if actionType == enum.ActionTypePayment && enum.AccountTypeMultisig[enum.AccountTypePayment] {
+			tmp := strings.Split(data, ",")
+			if len(tmp) != 2 {
+				return "", false, "", errors.New("imported tx data is wrong. encodedPrevTxs would not be found")
+			}
+			hex = tmp[0]
+			encodedAddrsPrevs = tmp[1]
 		}
-		hex = tmp[0]
-		encodedAddrsPrevs = tmp[1]
 	}
 
 	//署名

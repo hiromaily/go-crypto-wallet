@@ -29,7 +29,7 @@ type SignRawTransactionResult struct {
 	Errors   []SignRawTransactionError `json:"errors"`
 }
 
-// SignRawTransactionWithWalletError SignRawTransactionWithWalletResult内のerrorオブジェクト
+// SignRawTransactionError SignRawTransactionResult内のerrorオブジェクト
 type SignRawTransactionError struct {
 	Txid      string `json:"txid"`
 	Vout      int64  `json:"vout"`
@@ -38,13 +38,13 @@ type SignRawTransactionError struct {
 	Error     string `json:"error"`
 }
 
-// AddrsPrevTxs
+// AddrsPrevTxs multisig用トランザクション生成時に必要な情報群
 type AddrsPrevTxs struct {
 	Addrs   []string
 	PrevTxs []PrevTx
 }
 
-// PrevTx
+// PrevTx multisig時のsignrawtransactionで必要なパラメータ
 type PrevTx struct {
 	Txid         string  `json:"txid"`
 	Vout         uint32  `json:"vout"`
@@ -264,20 +264,21 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) 
 	//FIXME:SignRawTransactionWithWallet()はエラーが出て使えないので、暫定対応としてoptionでdeprecatedを無効化する
 	//restart bitcoind with -deprecatedrpc=signrawtransaction
 	if b.Version() >= enum.BTCVer17 {
-		msgTx, isSigned, err := b.SignRawTransactionWithWallet(tx)
-		if err != nil {
-			return nil, false, errors.Errorf("BTC.SignRawTransactionWithWallet() error: %s", err)
-		}
-		return msgTx, isSigned, nil
+		return b.signRawTransactionWithWalletVer17(tx)
+		//msgTx, isSigned, err := b.signRawTransactionWithWallet(tx)
+		//if err != nil {
+		//	return nil, false, errors.Errorf("BTC.SignRawTransactionWithWallet() error: %s", err)
+		//}
+		//return msgTx, isSigned, nil
 	}
-	return b.signRawTransaction(tx)
+	return b.signRawTransactionWithWalletVer16(tx)
 }
 
 // SignRawTransactionWithWallet Ver17から利用可能なSignRawTransaction
 // FIXME:Multisigに利用はできない。入金時のclientアドレスはmultisig対応していないので、こちらには利用できると思う
 // restart bitcoind with -deprecatedrpc=signrawtransaction
 // For above ver17
-func (b *Bitcoin) SignRawTransactionWithWallet(tx *wire.MsgTx) (*wire.MsgTx, bool, error) {
+func (b *Bitcoin) signRawTransactionWithWalletVer17(tx *wire.MsgTx) (*wire.MsgTx, bool, error) {
 	//hex tx
 	hexTx, err := b.ToHex(tx)
 	if err != nil {
@@ -326,12 +327,18 @@ func (b *Bitcoin) SignRawTransactionWithWallet(tx *wire.MsgTx) (*wire.MsgTx, boo
 		return nil, false, errors.Errorf("BTC.ToMsgTx(hex): error: %s", err)
 	}
 
+	//Debug
+	if !signRawTxResult.Complete {
+		logger.Debug("トランザクションHEXの結果比較スタート")
+		b.debugCompareTx(tx, msgTx)
+	}
+
 	return msgTx, signRawTxResult.Complete, nil
 }
 
 // signRawTransaction *wire.MsgTxからRawのトランザクションに署名する(Multisigには利用できない)
 // Deprecated
-func (b *Bitcoin) signRawTransaction(tx *wire.MsgTx) (*wire.MsgTx, bool, error) {
+func (b *Bitcoin) signRawTransactionWithWalletVer16(tx *wire.MsgTx) (*wire.MsgTx, bool, error) {
 	//署名
 	msgTx, isSigned, err := b.client.SignRawTransaction(tx)
 	if err != nil {
@@ -361,26 +368,22 @@ func (b *Bitcoin) debugCompareTx(tx1, tx2 *wire.MsgTx) {
 	}
 }
 
-// SignRawTransactionWithKey
+// SignRawTransactionWithKey Multisig時、トランザクションへ署名をする
 // Multisigの場合はこちら
 // For above ver17
 func (b *Bitcoin) SignRawTransactionWithKey(tx *wire.MsgTx, privKeysWIF []string, prevtxs []PrevTx) (*wire.MsgTx, bool, error) {
 	//署名
-	//FIXME:SignRawTransactionWithWallet()はエラーが出て使えないので、暫定対応としてoptionでdeprecatedを無効化する
 	//restart bitcoind with -deprecatedrpc=signrawtransaction
 	if b.Version() >= enum.BTCVer17 {
 		return b.signRawTransactionWithKeyVer17(tx, privKeysWIF, prevtxs)
 	}
-	//TODO:[]btcjson.RawTxInputを作成しないといけない
-	//tx *wire.MsgTx, inputs []btcjson.RawTxInput, privKeysWIF []string
-	//return b.signRawTransactionWithKeyVer16(tx)
-	return nil, false, errors.New("SignRawTransactionWithKey() this part is not implemented yet")
+	return b.signRawTransactionWithKeyVer16(tx, privKeysWIF, prevtxs)
 }
 
-// signRawTransactionWithKeyVer16 *wire.MsgTxからRawのトランザクションに署名する(Multisigの場合はこちら)
+// signRawTransactionWithKeyVer15 *wire.MsgTxからRawのトランザクションに署名する(Multisigの場合はこちら)
 // Deprecated
-func (b *Bitcoin) signRawTransactionWithKeyVer16(tx *wire.MsgTx, inputs []btcjson.RawTxInput, privKeysWIF []string) (*wire.MsgTx, bool, error) {
-	//署名
+func (b *Bitcoin) signRawTransactionWithKeyVer15(tx *wire.MsgTx, inputs []btcjson.RawTxInput, privKeysWIF []string) (*wire.MsgTx, bool, error) {
+	//署名 => おそらく、I/Fが古くて使えない
 	msgTx, isSigned, err := b.client.SignRawTransaction3(tx, inputs, privKeysWIF)
 	if err != nil {
 		return nil, false, errors.Errorf("client.SignRawTransaction(): error: %s", err)
@@ -393,6 +396,57 @@ func (b *Bitcoin) signRawTransactionWithKeyVer16(tx *wire.MsgTx, inputs []btcjso
 	}
 
 	return msgTx, isSigned, nil
+}
+
+// signRawTransactionWithKeyVer16 *wire.MsgTxからRawのトランザクションに署名する(Multisigの場合はこちら)
+// Deprecated
+func (b *Bitcoin) signRawTransactionWithKeyVer16(tx *wire.MsgTx, privKeysWIF []string, prevtxs []PrevTx) (*wire.MsgTx, bool, error) {
+	//hex tx
+	hexTx, err := b.ToHex(tx)
+	if err != nil {
+		return nil, false, errors.Errorf("BTC.ToHex(tx): error: %s", err)
+	}
+
+	input1, err := json.Marshal(hexTx)
+	if err != nil {
+		return nil, false, errors.Errorf("json.Marchal(txHex): error: %s", err)
+	}
+
+	//ver17と似ているがパラメータの順番が異なる
+	//prevtxs
+	input2, err := json.Marshal(prevtxs)
+	if err != nil {
+		return nil, false, errors.Errorf("json.Marchal(prevtxs): error: %s", err)
+	}
+
+	//private keys
+	input3, err := json.Marshal(privKeysWIF)
+	if err != nil {
+		return nil, false, errors.Errorf("json.Marchal(privKeysWIF): error: %s", err)
+	}
+
+	rawResult, err := b.client.RawRequest("signrawtransaction", []json.RawMessage{input1, input2, input3})
+	if err != nil {
+		return nil, false, errors.Errorf("json.RawRequest(signrawtransaction): error: %s", err)
+	}
+
+	//SignRawTransactionResult
+	signRawTxResult := SignRawTransactionResult{}
+	err = json.Unmarshal([]byte(rawResult), &signRawTxResult)
+	if err != nil {
+		return nil, false, errors.Errorf("json.Unmarshal(): error: %s", err)
+	}
+	if len(signRawTxResult.Errors) != 0 {
+		grok.Value(signRawTxResult)
+		return nil, false, errors.Errorf("json.RawRequest(signrawtransaction): error: %s", signRawTxResult.Errors[0].Error)
+	}
+
+	msgTx, err := b.ToMsgTx(signRawTxResult.Hex)
+	if err != nil {
+		return nil, false, errors.Errorf("BTC.ToMsgTx(hex): error: %s", err)
+	}
+
+	return msgTx, signRawTxResult.Complete, nil
 }
 
 // signRawTransactionWithKeyVer17 *wire.MsgTxからRawのトランザクションに署名する(Multisigの場合はこちら)
@@ -433,7 +487,7 @@ func (b *Bitcoin) signRawTransactionWithKeyVer17(tx *wire.MsgTx, privKeysWIF []s
 	}
 	if len(signRawTxResult.Errors) != 0 {
 		grok.Value(signRawTxResult)
-		return nil, false, errors.Errorf("json.RawRequest(signrawtransactionwithwallet): error: %s", signRawTxResult.Errors[0].Error)
+		return nil, false, errors.Errorf("json.RawRequest(signrawtransactionwithkey): error: %s", signRawTxResult.Errors[0].Error)
 	}
 
 	msgTx, err := b.ToMsgTx(signRawTxResult.Hex)

@@ -93,6 +93,33 @@ func (m *DB) GetAllAccountKeyByKeyStatus(accountType enum.AccountType, keyStatus
 	return m.getAllAccountKeyByKeyStatus(accountKeyTableName[accountType], keyStatus)
 }
 
+func (m *DB) getAllAccountKeyByMultiAddrs(tbl string, addrs []string) ([]AccountKeyTable, error) {
+	sql := "SELECT wallet_import_format FROM %s WHERE wallet_multisig_address IN ?;"
+	sql = fmt.Sprintf(sql, tbl)
+	logger.Debugf("sql: %s", sql)
+
+	//In対応
+	query, args, err := sqlx.In(sql, addrs)
+	if err != nil {
+		return nil, errors.Errorf("sqlx.In() error: %v", err)
+	}
+	query = m.RDB.Rebind(query)
+	logger.Debugf("sql: %s", query)
+
+	var accountKeyTable []AccountKeyTable
+	err = m.RDB.Select(&accountKeyTable, query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	return accountKeyTable, nil
+}
+
+// GetAllAccountKeyByMultiAddrs WIPをmultiAddressから取得する
+func (m *DB) GetAllAccountKeyByMultiAddrs(accountType enum.AccountType, addrs []string) ([]AccountKeyTable, error) {
+	return m.getAllAccountKeyByMultiAddrs(accountKeyTableName[accountType], addrs)
+}
+
 // insertAccountKeyClient account_key_table(client, payment, receipt...)テーブルにレコードを作成する
 //TODO:BulkInsertがやりたい
 func (m *DB) insertAccountKeyTable(tbl string, accountKeyTables []AccountKeyTable, tx *sqlx.Tx, isCommit bool) error {
@@ -225,4 +252,14 @@ WHERE full_public_key=:full_public_key
 // UpdateMultisigAddrOnAccountKeyTableByFullPubKey wallet_multisig_addressを更新する
 func (m *DB) UpdateMultisigAddrOnAccountKeyTableByFullPubKey(accountType enum.AccountType, accountKeyTable []AccountKeyTable, tx *sqlx.Tx, isCommit bool) error {
 	return m.updateMultisigAddrOnAccountKeyTableByFullPubKey(accountKeyTableName[accountType], accountKeyTable, tx, isCommit)
+}
+
+// GetRedeedScriptByAddress 与えられたmultiSigアドレスから、RedeemScriptを取得する
+func GetRedeedScriptByAddress(accountKeys []AccountKeyTable, addr string) string {
+	for _, val := range accountKeys {
+		if val.WalletMultisigAddress == addr {
+			return val.RedeemScript
+		}
+	}
+	return ""
 }
