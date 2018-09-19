@@ -255,6 +255,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 	}
 
 	//TODO:inputsをすべてlockする必要がある？？
+
 	addrsPrevs := btc.AddrsPrevTxs{
 		Addrs:   addresses,
 		PrevTxs: prevTxs,
@@ -348,8 +349,6 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 	}
 
 	// 7. serialize previous txs for multisig signature
-	grok.Value(addrsPrevs)
-	//TODO:パラメータは値かアドレスか
 	encodedAddrsPrevs, err := serial.EncodeToString(*addrsPrevs)
 	if err != nil {
 		return "", "", errors.Errorf("serial.EncodeToString(): error: %s", err)

@@ -11,6 +11,7 @@ import (
 	"github.com/btcsuite/btcutil/hdkeychain"
 	"github.com/cpacia/bchutil"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/pkg/errors"
 )
 
@@ -163,6 +164,7 @@ func (k Key) CreateKeysWithIndex(accountPrivateKey string, idxFrom, count uint32
 		if err != nil {
 			return nil, err
 		}
+		logger.Debugf("Debug: %s", redeemScript)
 
 		//address.String() とaddress.EncodeAddress()は結果として同じ
 		walletKeys[i] = WalletKey{
@@ -250,7 +252,13 @@ func (k Key) getP2shSegwit(privKey *btcec.PrivateKey) (string, string, error) {
 	if err != nil {
 		return "", "", errors.Errorf("txscript.PayToAddrScript() error: %s", err)
 	}
-	//logger.Debugf("redeemScript: %s", redeemScript)
+
+	//この値はscriptPubKeyと一致するが、これはredeemScriptではない。
+	//getaddressinfo APIでp2sh_segwit_addressをサーチすると、embedded側のscriptPubKeyと一致した
+	//よって、この値は使えない。。。
+	//Redeem Script => Hash of RedeemScript => p2SH ScriptPubKey
+	//strRedeemScript := hex.EncodeToString(redeemScript)
+	var strRedeemScript string //暫定
 
 	//BTC
 	if k.coinType == enum.BTC {
@@ -259,7 +267,8 @@ func (k Key) getP2shSegwit(privKey *btcec.PrivateKey) (string, string, error) {
 			return "", "", errors.Errorf("btcutil.NewAddressScriptHash() error: %s", err)
 		}
 		//logger.Debugf("address.String() %s", address.String())
-		return address.String(), string(redeemScript), nil
+
+		return address.String(), strRedeemScript, nil
 	}
 	//BCH
 	address, err := bchutil.NewCashAddressScriptHash(redeemScript, k.conf)
@@ -267,7 +276,7 @@ func (k Key) getP2shSegwit(privKey *btcec.PrivateKey) (string, string, error) {
 		return "", "", errors.Errorf("bchutil.NewCashAddressScriptHash() error: %s", err)
 	}
 	//logger.Debugf("address.String() %s", address.String())
-	return address.String(), string(redeemScript), nil
+	return address.String(), strRedeemScript, nil
 }
 
 // getPubKey fullのPublic Keyを返す

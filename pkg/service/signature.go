@@ -53,6 +53,7 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 		//TODO:coldwallet1とcoldwallet2で挙動が違う
 		//coldwallet2の場合、AccountTypeAuthorizationが必要
 		if w.Type == enum.WalletTypeCold2 {
+			//account_key_authorizationテーブルから情報を取得
 			accountKey, err := w.DB.GetOneByMaxIDOnAccountKeyTable(enum.AccountTypeAuthorization)
 			if err != nil {
 				return "", false, "", errors.Errorf("DB.GetOneByMaxIDOnAccountKeyTable() error: %s", err)
@@ -60,6 +61,7 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 			accountKeys = append(accountKeys, *accountKey)
 		} else {
 			if val, ok := enum.ActionToAccountMap[actionType]; ok {
+				//account_key_payment/account_key_clientテーブルから取得
 				accountKeys, err = w.DB.GetAllAccountKeyByMultiAddrs(val, addrsPrevs.Addrs)
 				if err != nil {
 					return "", false, "", errors.Errorf("DB.GetWIPByMultiAddrs() error: %s", err)
@@ -74,25 +76,29 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 			wips = append(wips, val.WalletImportFormat)
 		}
 
-		if w.Type == enum.WalletTypeCold1 {
-			//取得したredeemScriptをPrevTxsにマッピング
-			for idx, val := range addrsPrevs.Addrs {
-				rs := model.GetRedeedScriptByAddress(accountKeys, val)
-				if rs == "" {
-					logger.Error("redeemScript can not be found")
-					continue
+		//multisigの場合のみの処理
+		accountType, ok := enum.ActionToAccountMap[actionType]
+		if ok && enum.AccountTypeMultisig[accountType] {
+			if w.Type == enum.WalletTypeCold1 {
+				//取得したredeemScriptをPrevTxsにマッピング
+				for idx, val := range addrsPrevs.Addrs {
+					rs := model.GetRedeedScriptByAddress(accountKeys, val)
+					if rs == "" {
+						logger.Error("redeemScript can not be found")
+						continue
+					}
+					addrsPrevs.PrevTxs[idx].RedeemScript = rs
 				}
-				addrsPrevs.PrevTxs[idx].RedeemScript = rs
-			}
-			grok.Value(addrsPrevs)
+				grok.Value(addrsPrevs)
 
-			//redeemScriptセット後、シリアライズして戻す
-			newEncodedAddrsPrevs, err = serial.EncodeToString(addrsPrevs)
-			if err != nil {
-				return "", false, "", errors.Errorf("serial.EncodeToString(): error: %s", err)
+				//redeemScriptセット後、シリアライズして戻す
+				newEncodedAddrsPrevs, err = serial.EncodeToString(addrsPrevs)
+				if err != nil {
+					return "", false, "", errors.Errorf("serial.EncodeToString(): error: %s", err)
+				}
+			} else {
+				newEncodedAddrsPrevs = encodedAddrsPrevs
 			}
-		} else {
-			newEncodedAddrsPrevs = encodedAddrsPrevs
 		}
 
 		//署名
@@ -142,19 +148,24 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 	//paymentの場合は、multisigのため、データが異なる
 	//TODO:multisigかどうかの判別は、enum.AccountTypeMultisig[]で行う
 	//TODO:ActionType/AccountTypeの相互変換が必要かも
-	if val, ok := enum.ActionToAccountMap[actionType]; ok {
-		if enum.AccountTypeMultisig[val] {
-			//if actionType == enum.ActionTypePayment && enum.AccountTypeMultisig[enum.AccountTypePayment] {
-			tmp := strings.Split(data, ",")
-			if len(tmp) != 2 {
-				return "", false, "", errors.New("imported tx data is wrong. encodedPrevTxs would not be found")
-			}
-			hex = tmp[0]
-			encodedAddrsPrevs = tmp[1]
-			//TODO:署名が更に必要なので、ファイル出力時にこの情報も引き継ぐ必要がある
-		} else {
-			hex = data
-		}
+	//if val, ok := enum.ActionToAccountMap[actionType]; ok {
+	//	if enum.AccountTypeMultisig[val] {
+	//		//if actionType == enum.ActionTypePayment && enum.AccountTypeMultisig[enum.AccountTypePayment] {
+	//		tmp := strings.Split(data, ",")
+	//		if len(tmp) != 2 {
+	//			return "", false, "", errors.New("imported tx data is wrong. encodedPrevTxs would not be found")
+	//		}
+	//		hex = tmp[0]
+	//		encodedAddrsPrevs = tmp[1]
+	//		//TODO:署名が更に必要なので、ファイル出力時にこの情報も引き継ぐ必要がある
+	//	} else {
+	//		hex = data
+	//	}
+	//}
+	tmp := strings.Split(data, ",")
+	hex = tmp[0]
+	if len(tmp) == 2 {
+		encodedAddrsPrevs = tmp[1]
 	}
 
 	//署名

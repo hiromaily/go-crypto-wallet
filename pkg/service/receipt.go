@@ -12,6 +12,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
+	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/pkg/errors"
 )
@@ -64,6 +65,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 		inputTotal      btcutil.Amount
 		txReceiptInputs []model.TxInput
 		prevTxs         []btc.PrevTx
+		addresses       []string
 	)
 
 	for _, tx := range unspentList {
@@ -118,15 +120,21 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 			RedeemScript: "", //TODO:redeemScriptはどうやって算出する??おそらく、txidから詳細を取得する必要がある?gettransactionはだめだった。。。
 			Amount:       tx.Amount,
 		})
-
+		//tx.Address
+		addresses = append(addresses, tx.Address)
 	}
 	logger.Debugf("total coin to send:%d(Satoshi) before fee calculated, input length: %d", inputTotal, len(inputs))
 	if len(inputs) == 0 {
 		return "", "", nil
 	}
 
+	addrsPrevs := btc.AddrsPrevTxs{
+		Addrs:   addresses,
+		PrevTxs: prevTxs,
+	}
+
 	// 一連の処理を実行
-	hex, fileName, err := w.createRawTransactionAndFee(adjustmentFee, inputs, inputTotal, txReceiptInputs)
+	hex, fileName, err := w.createRawTransactionAndFee(adjustmentFee, inputs, inputTotal, txReceiptInputs, &addrsPrevs)
 
 	//TODO:Ver17対応
 	// LockされたUnspentTransactionを解除する
@@ -138,7 +146,9 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 }
 
 // createRawTransactionAndFee feeの抽出からtransaction作成、DBへの必要情報保存など、もろもろこちらで行う
-func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcjson.TransactionInput, inputTotal btcutil.Amount, txReceiptInputs []model.TxInput) (string, string, error) {
+func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcjson.TransactionInput,
+	inputTotal btcutil.Amount, txReceiptInputs []model.TxInput, addrsPrevs *btc.AddrsPrevTxs) (string, string, error) {
+
 	var outputTotal btcutil.Amount
 
 	//TODO:w.BTC.StoredAddress() この部分をDatabaseから取得しないといけない
@@ -196,18 +206,25 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 		return "", "", errors.Errorf("insertTxTableForUnsigned(): error: %s", err)
 	}
 
-	// 8. GCSにトランザクションファイルを作成
+	// 8. serialize previous txs for multisig signature
+	encodedAddrsPrevs, err := serial.EncodeToString(*addrsPrevs)
+	if err != nil {
+		return "", "", errors.Errorf("serial.EncodeToString(): error: %s", err)
+	}
+	logger.Debugf("encodedAddrsPrevs: %s", encodedAddrsPrevs)
+
+	// 9. GCSにトランザクションファイルを作成
 	//TODO:本来、この戻り値をDumpして、GCSに保存、それをDLして、USBに入れてコールドウォレットに移動しなくてはいけない
 	//TODO:Debug時はlocalに出力することとする。=> これはフラグで判別したほうがいいかもしれない/Interface型にして対応してもいいかも
 	var generatedFileName string
 	if txReceiptID != 0 {
-		generatedFileName, err = w.storeHex(hex, "", txReceiptID, enum.ActionTypeReceipt)
+		generatedFileName, err = w.storeHex(hex, encodedAddrsPrevs, txReceiptID, enum.ActionTypeReceipt)
 		if err != nil {
 			return "", "", errors.Errorf("wallet.storeHex(): error: %s", err)
 		}
 	}
 
-	// 9. 入金準備に入ったことをユーザーに通知
+	// 10. 入金準備に入ったことをユーザーに通知
 	// TODO:NatsのPublisherとして通知すればいいか？
 
 	return hex, generatedFileName, nil
