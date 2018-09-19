@@ -19,6 +19,7 @@ type ListUnspentResult struct {
 	ScriptPubKey  string  `json:"scriptPubKey"`
 	Amount        float64 `json:"amount"`
 	Confirmations int64   `json:"confirmations"`
+	RedeemScript  string  `json:"redeemScript"`
 	Spendable     bool    `json:"spendable"`
 	Solvable      bool    `json:"solvable"` //new
 	Safe          bool    `json:"safe"`     //new
