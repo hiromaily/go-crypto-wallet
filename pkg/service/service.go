@@ -22,6 +22,7 @@ type Wallet struct {
 	//Db  *kvs.LevelDB
 	Env  enum.EnvironmentType
 	Type enum.WalletType
+	Seed string
 }
 
 //InitialSettings 実行前に必要なすべての設定をこちらで行う
@@ -37,19 +38,11 @@ func InitialSettings(confPath string) (*Wallet, error) {
 	// Log
 	logger.Initialize(enum.EnvironmentType(conf.Environment))
 
-	// KVS
-	//db, err := kvs.InitDB(conf.LevelDB.Path)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//defer db.Close()
-
 	// MySQL
 	rds, err := rdb.Connection(&conf.MySQL)
 	if err != nil {
 		return nil, errors.Errorf("rds.Connection() error: %s", err)
 	}
-	//defer rds.Close()
 
 	// TxFile
 	if conf.TxFile.BasePath != "" {
@@ -71,15 +64,19 @@ func InitialSettings(confPath string) (*Wallet, error) {
 	}
 
 	// Connection to Bitcoin core
-	//bit, err := btc.Connection(conf.Bitcoin.Host, conf.Bitcoin.User, conf.Bitcoin.Pass, true, true, conf.Bitcoin.IsMain)
 	bit, err := btc.Connection(&conf.Bitcoin)
 	if err != nil {
 		return nil, errors.Errorf("btc.Connection error: %s", err)
 	}
-	//defer bit.Close()
+
+	//seed (only dev mode)
+	var seed string
+	if conf.Key.Seed != "" && enum.EnvironmentType(conf.Environment) == enum.EnvDev {
+		seed = conf.Key.Seed
+	}
 
 	//Wallet Object
-	wallet := Wallet{BTC: bit, DB: model.NewDB(rds), GCS: gcs, Env: enum.EnvironmentType(conf.Environment)}
+	wallet := Wallet{BTC: bit, DB: model.NewDB(rds), GCS: gcs, Env: enum.EnvironmentType(conf.Environment), Seed: seed}
 	return &wallet, nil
 }
 
@@ -88,8 +85,3 @@ func (w *Wallet) Done() {
 	w.DB.RDB.Close()
 	w.BTC.Close()
 }
-
-// Env 実行環境(dev, prod)
-//func (w *Wallet) Env() enum.EnvironmentType {
-//	return w.env
-//}

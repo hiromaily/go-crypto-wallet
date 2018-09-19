@@ -45,6 +45,11 @@ func (w *Wallet) GenerateSeed() ([]byte, error) {
 	}
 	strSeed := key.SeedToString(bSeed)
 
+	// set default seed
+	if w.Env == enum.EnvDev && w.Seed != "" {
+		strSeed = w.Seed
+	}
+
 	// DBにseed情報を登録
 	_, err = w.DB.InsertSeed(strSeed, nil, true)
 	if err != nil {

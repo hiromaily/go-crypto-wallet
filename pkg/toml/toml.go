@@ -15,7 +15,7 @@ type Config struct {
 	TxFile      TxFileConf     `toml:"tx_file"`
 	PubkeyFile  PubKeyFileConf `toml:"pubkey_file"`
 	GCS         GCSConf        `toml:"gcs"`
-	//LevelDB LevelDBConf `toml:"leveldb"` //TODO:おそらく不要
+	Key         KeyConf        `toml:"key"`
 }
 
 // BitcoinConf Bitcoin情報
@@ -28,9 +28,7 @@ type BitcoinConf struct {
 	IsMain     bool   `toml:"is_main"`
 
 	Block BitcoinBlockConf `toml:"block"`
-	//Stored  BitcoinAddrConf  `toml:"stored"`
-	//Payment BitcoinAddrConf  `toml:"payment"`
-	Fee BitcoinFeeConf `toml:"fee"`
+	Fee   BitcoinFeeConf   `toml:"fee"`
 }
 
 // BitcoinBlockConf Bitcoinブロック情報
@@ -38,16 +36,15 @@ type BitcoinBlockConf struct {
 	ConfirmationNum int `toml:"confirmation_num"`
 }
 
-// BitcoinAddrConf 内部利用のためのBitcoin公開アドレス, アカウント情報
-//type BitcoinAddrConf struct {
-//	Address     string `toml:"address"`
-//	AccountName string `toml:"account"`
-//}
-
 // BitcoinFeeConf fee調整Range
 type BitcoinFeeConf struct {
 	AdjustmentMin float64 `toml:"adjustment_min"`
 	AdjustmentMax float64 `toml:"adjustment_max"`
+}
+
+// KeyConf keyのデフォルト情報(devモード時にしか利用しない)
+type KeyConf struct {
+	Seed string `toml:"seed"`
 }
 
 // MySQLConf MySQL情報
@@ -57,11 +54,6 @@ type MySQLConf struct {
 	User string `toml:"user"`
 	Pass string `toml:"pass"`
 }
-
-// LevelDBConf LevelDB情報
-//type LevelDBConf struct {
-//	Path string `toml:"path"`
-//}
 
 // TxFileConf 保存されるtransactionファイル情報
 // import/export共にこのパスが使われる
