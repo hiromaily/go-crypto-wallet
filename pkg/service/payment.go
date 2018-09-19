@@ -93,6 +93,10 @@ func (w *Wallet) isFoundTxIDAndVout(txID string, vout uint32, inputs []btcjson.T
 
 // CreateUnsignedTransactionForPayment 支払いのための未署名トランザクションを作成する
 func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (string, string, error) {
+	if w.Type != enum.WalletTypeWatchOnly {
+		return "", "", errors.New("it's available on WatchOnlyWallet")
+	}
+
 	//DBから情報を取得、もしくはNatsからのリクエストをトリガーにするか、今はまだ未定
 	//とりあえず、テストデータで実装
 	//実際には、こちらもamountでソートしておく=> ソートは不要

@@ -15,6 +15,10 @@ import (
 //ExportAddedPubkeyHistory AddedPubkeyHistoryテーブルをcsvとして出力する
 // coldwallet2から使用
 func (w *Wallet) ExportAddedPubkeyHistory(accountType enum.AccountType) (string, error) {
+	if w.Type != enum.WalletTypeCold2 {
+		return "", errors.New("it's available on Coldwallet2")
+	}
+
 	//DBから該当する全レコード
 	//is_exported=falseで且つ、multisig_addressが生成済のレコードが対象
 	addedPubkeyHistoryTable, err := w.DB.GetAddedPubkeyHistoryTableByNotExported(accountType)

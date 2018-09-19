@@ -16,6 +16,9 @@ import (
 //ExportAccountKey AccountKeyテーブルをcsvとして出力する
 //TODO:watch only walletにセットするアドレスは、clientの場合は、wallet_address, receipt/paymentの場合、`wallet_multisig_address`
 func (w *Wallet) ExportAccountKey(accountType enum.AccountType, keyStatus enum.KeyStatus) (string, error) {
+	if w.Type != enum.WalletTypeCold1 {
+		return "", errors.New("it's available on Coldwallet1")
+	}
 
 	//From coldwallet1
 	//Client          -> key_status=1ならok, wallet_address          isMultisig=false

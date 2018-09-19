@@ -11,6 +11,10 @@ import (
 
 // UpdateStatus tx_paymentテーブル/tx_receiptテーブルのcurrent_tx_typeが3(送信済)のものを監視し、statusをupdateする
 func (w *Wallet) UpdateStatus() error {
+	if w.Type != enum.WalletTypeWatchOnly {
+		return errors.New("it's available on WalletTypeWatchOnly")
+	}
+
 	//tx_typeが`done`で処理が止まっているものがあるという前提で、処理を分ける
 
 	types := []enum.ActionType{enum.ActionTypeReceipt, enum.ActionTypePayment}

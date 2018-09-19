@@ -13,6 +13,10 @@ import (
 // https://en.bitcoin.it/wiki/How_to_import_private_keys
 // getaddressesbyaccount "" で内容を確認可能？？
 func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
+	if w.Type == enum.WalletTypeWatchOnly {
+		return errors.New("it's available on Coldwallet1, Coldwallet2")
+	}
+
 	//AccountType問わずimportは可能にしておく
 
 	//DBから未登録のPrivateKey情報を取得する

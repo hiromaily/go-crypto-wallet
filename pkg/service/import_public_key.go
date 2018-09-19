@@ -19,6 +19,10 @@ import (
 
 // ImportPublicKeyForWatchWallet csvファイルからpublicアドレスをimportする for WatchOnyWallet
 func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum.AccountType, isRescan bool) error {
+	if w.Type != enum.WalletTypeWatchOnly {
+		return errors.New("it's available on WatchOnlyWallet")
+	}
+
 	//ファイル読み込み
 	pubKeys, err := key.ImportPubKey(fileName)
 	if err != nil {
@@ -72,6 +76,10 @@ func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum
 
 // ImportPublicKeyForColdWallet2 csvファイルからpublicアドレスをimportする for Cold Wallet2
 func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum.AccountType) error {
+	if w.Type != enum.WalletTypeCold2 {
+		return errors.New("it's available on Coldwallet2")
+	}
+
 	//accountチェック
 	if accountType != enum.AccountTypeReceipt && accountType != enum.AccountTypePayment {
 		logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
@@ -115,6 +123,10 @@ func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum
 
 // ImportMultisigAddrForColdWallet1 coldwallet2でexportされたmultisigアドレス情報をimportする for Cold Wallet1
 func (w *Wallet) ImportMultisigAddrForColdWallet1(fileName string, accountType enum.AccountType) error {
+	if w.Type != enum.WalletTypeCold1 {
+		return errors.New("it's available on Coldwallet1")
+	}
+
 	if accountType != enum.AccountTypeReceipt && accountType != enum.AccountTypePayment {
 		logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
 		return nil

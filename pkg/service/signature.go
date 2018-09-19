@@ -19,6 +19,63 @@ import (
 
 // coldwallet側から未署名トランザクションを読み込み、署名を行う
 
+// SignatureFromFile 渡されたファイルからtransactionを読み取り、署名を行う
+// TODO:いずれにせよ、入金と出金で署名もMultisigかどうかで変わってくる
+func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error) {
+	if w.Type == enum.WalletTypeWatchOnly {
+		return "", false, "", errors.New("it's available on ColdWallet1, ColdWallet2")
+	}
+
+	//ファイル名から、tx_receipt_idを取得する
+	//payment_5_unsigned_1534466246366489473
+	txReceiptID, actionType, _, err := txfile.ParseFile(filePath, []enum.TxType{enum.TxTypeUnsigned, enum.TxTypeUnsigned2nd})
+	if err != nil {
+		return "", false, "", err
+	}
+
+	//ファイルからhexを読み取る
+	data, err := txfile.ReadFile(filePath)
+	if err != nil {
+		return "", false, "", err
+	}
+
+	var hex, encodedAddrsPrevs string
+
+	//encodedPrevTxs
+	tmp := strings.Split(data, ",")
+	hex = tmp[0]
+	if len(tmp) == 2 {
+		encodedAddrsPrevs = tmp[1]
+	}
+
+	//署名
+	hexTx, isSigned, newEncodedAddrsPrevs, err := w.signatureByHex(hex, encodedAddrsPrevs, actionType)
+	if err != nil {
+		return "", isSigned, "", err
+	}
+
+	//ファイルに書き込むデータ
+	savedata := hexTx
+
+	//署名が完了していないとき、TxTypeUnsigned2nd
+	txType := enum.TxTypeSigned
+	if isSigned == false {
+		txType = enum.TxTypeUnsigned2nd
+		if newEncodedAddrsPrevs != "" {
+			savedata = fmt.Sprintf("%s,%s", savedata, newEncodedAddrsPrevs)
+		}
+	}
+
+	//ファイルに書き込む
+	path := txfile.CreateFilePath(actionType, txType, txReceiptID, true)
+	generatedFileName, err := txfile.WriteFile(path, savedata)
+	if err != nil {
+		return "", isSigned, "", err
+	}
+
+	return hexTx, isSigned, generatedFileName, nil
+}
+
 // signatureByHex 署名する
 // オフラインで使うことを想定
 func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.ActionType) (string, bool, string, error) {
@@ -118,57 +175,4 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 
 	return hexTx, isSigned, newEncodedAddrsPrevs, nil
 
-}
-
-// SignatureFromFile 渡されたファイルからtransactionを読み取り、署名を行う
-// TODO:いずれにせよ、入金と出金で署名もMultisigかどうかで変わってくる
-func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error) {
-	//ファイル名から、tx_receipt_idを取得する
-	//payment_5_unsigned_1534466246366489473
-	txReceiptID, actionType, _, err := txfile.ParseFile(filePath, []enum.TxType{enum.TxTypeUnsigned, enum.TxTypeUnsigned2nd})
-	if err != nil {
-		return "", false, "", err
-	}
-
-	//ファイルからhexを読み取る
-	data, err := txfile.ReadFile(filePath)
-	if err != nil {
-		return "", false, "", err
-	}
-
-	var hex, encodedAddrsPrevs string
-
-	//encodedPrevTxs
-	tmp := strings.Split(data, ",")
-	hex = tmp[0]
-	if len(tmp) == 2 {
-		encodedAddrsPrevs = tmp[1]
-	}
-
-	//署名
-	hexTx, isSigned, newEncodedAddrsPrevs, err := w.signatureByHex(hex, encodedAddrsPrevs, actionType)
-	if err != nil {
-		return "", isSigned, "", err
-	}
-
-	//ファイルに書き込むデータ
-	savedata := hexTx
-
-	//署名が完了していないとき、TxTypeUnsigned2nd
-	txType := enum.TxTypeSigned
-	if isSigned == false {
-		txType = enum.TxTypeUnsigned2nd
-		if newEncodedAddrsPrevs != "" {
-			savedata = fmt.Sprintf("%s,%s", savedata, newEncodedAddrsPrevs)
-		}
-	}
-
-	//ファイルに書き込む
-	path := txfile.CreateFilePath(actionType, txType, txReceiptID, true)
-	generatedFileName, err := txfile.WriteFile(path, savedata)
-	if err != nil {
-		return "", isSigned, "", err
-	}
-
-	return hexTx, isSigned, generatedFileName, nil
 }

@@ -24,6 +24,9 @@ import (
 
 // GenerateSeed seedを生成する
 func (w *Wallet) GenerateSeed() ([]byte, error) {
+	if w.Type == enum.WalletTypeWatchOnly {
+		return nil, errors.New("it's available on Coldwallet1, Coldwallet2")
+	}
 
 	bSeed, err := w.retrieveSeed()
 	if err == nil {
@@ -65,6 +68,10 @@ func (w *Wallet) retrieveSeed() ([]byte, error) {
 // GenerateAccountKey AccountType属性のアカウントKeyを生成する
 // TODO:AccountTypeAuthorizationのときは、レコードがある場合は追加できないようにしたほうがいい？？
 func (w *Wallet) GenerateAccountKey(accountType enum.AccountType, coinType enum.CoinType, seed []byte, count uint32) ([]key.WalletKey, error) {
+	if w.Type == enum.WalletTypeWatchOnly {
+		return nil, errors.New("it's available on Coldwallet1, Coldwallet2")
+	}
+
 	//現在のindexを取得
 	idx, err := w.DB.GetMaxIndexOnAccountKeyTable(accountType)
 	if err != nil {

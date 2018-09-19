@@ -16,6 +16,10 @@ import (
 
 // SendFromFile 渡されたファイルから署名済transactionを読み取り、送信を行う
 func (w *Wallet) SendFromFile(filePath string) (string, error) {
+	if w.Type != enum.WalletTypeWatchOnly {
+		return "", errors.New("it's available on WatchOnlyWallet")
+	}
+
 	//ファイル名から、tx_receipt_idを取得する
 	//payment_5_unsigned_1534466246366489473
 	txReceiptID, actionType, _, err := txfile.ParseFile(filePath, []enum.TxType{enum.TxTypeSigned})

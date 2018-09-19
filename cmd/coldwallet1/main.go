@@ -282,157 +282,157 @@ func debugForCheck(wallet *service.Wallet) {
 		logger.Infof("multisig address: %s, redeemScript: %s", resAddr.Address, resAddr.RedeemScript)
 	default:
 		logger.Warn("opts.Mode is out of range")
-		//procedure.Show()
+		procedure.ShowColdWallet1()
 		//開発用
-		development(wallet)
+		//development(wallet)
 	}
 }
 
 //coldwallet1 -d
-func development(wallet *service.Wallet) {
-	//------------------------------------------------------------------
-	//coldwallet1の機能
-	//------------------------------------------------------------------
-	//seed
-	bSeed, err := wallet.GenerateSeed()
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-
-	//1.generate key
-	_, err = wallet.GenerateAccountKey(enum.AccountTypeClient, enum.BTC, bSeed, 10)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-	_, err = wallet.GenerateAccountKey(enum.AccountTypeReceipt, enum.BTC, bSeed, 5)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-	_, err = wallet.GenerateAccountKey(enum.AccountTypePayment, enum.BTC, bSeed, 5)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-
-	//2.importprivkey
-	err = wallet.ImportPrivateKey(enum.AccountTypeClient)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-	err = wallet.ImportPrivateKey(enum.AccountTypeReceipt)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-	err = wallet.ImportPrivateKey(enum.AccountTypePayment)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-
-	//3.export full public key
-	fileName, err := wallet.ExportAccountKey(enum.AccountTypeClient, enum.KeyStatusImportprivkey)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-	fileName1, err := wallet.ExportAccountKey(enum.AccountTypeReceipt, enum.KeyStatusImportprivkey)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-	fileName2, err := wallet.ExportAccountKey(enum.AccountTypePayment, enum.KeyStatusImportprivkey)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-
-	//------------------------------------------------------------------
-	//coldwallet2の機能だが、同一DBで検証
-	//------------------------------------------------------------------
-	//1.generate key
-	_, err = wallet.GenerateAccountKey(enum.AccountTypeAuthorization, enum.BTC, bSeed, 1)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-
-	//2.importprivkey
-	err = wallet.ImportPrivateKey(enum.AccountTypeAuthorization)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-
-	//3.import publickey to history table
-	err = wallet.ImportPublicKeyForColdWallet2(fileName1, enum.AccountTypeReceipt)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-	err = wallet.ImportPublicKeyForColdWallet2(fileName2, enum.AccountTypePayment)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-
-	//4.addmultisig
-	err = wallet.AddMultisigAddressByAuthorization(enum.AccountTypeReceipt, enum.AddressTypeP2shSegwit)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-	err = wallet.AddMultisigAddressByAuthorization(enum.AccountTypePayment, enum.AddressTypeP2shSegwit)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-
-	//5.multisigアドレスとキーとなるアドレスをwatch only walletのためにexport
-	fileName3, err := wallet.ExportAddedPubkeyHistory(enum.AccountTypeReceipt)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-	fileName4, err := wallet.ExportAddedPubkeyHistory(enum.AccountTypePayment)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-
-	//------------------------------------------------------------------
-	//coldwallet1の機能
-	//------------------------------------------------------------------
-	//6.coldwallet2からexportしたReceiptのmultisigアドレスをcoldWallet1にimportする
-	err = wallet.ImportMultisigAddrForColdWallet1(fileName3, enum.AccountTypeReceipt)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-	err = wallet.ImportMultisigAddrForColdWallet1(fileName4, enum.AccountTypePayment)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-
-	//multisigimport後、ReceiptのMultisigをcsvファイルとしてexportする
-	fileName6, err := wallet.ExportAccountKey(enum.AccountTypeReceipt, enum.KeyStatusMultiAddressImported)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-	logger.Infof("fileName: %s", fileName6)
-
-	fileName7, err := wallet.ExportAccountKey(enum.AccountTypePayment, enum.KeyStatusMultiAddressImported)
-	if err != nil {
-		logger.Fatalf("%+v", err)
-	}
-	logger.Infof("fileName: %s", fileName7)
-
-	//------------------------------------------------------------------
-	//walletの機能
-	//------------------------------------------------------------------
-	//coldwalletで生成したアドレスをwalletにimportする
-	//TODO:一台のPCで実行すると、service/import_public_key.go:50でエラーが出る
-	//error: -4: The wallet already contains the private key for this address or script
-	//err = wallet.ImportPublicKeyForWatchWallet(fileName, enum.AccountTypeClient)
-	//if err != nil {
-	//	logger.Fatalf("%+v", err)
-	//}
-	//err = wallet.ImportPublicKeyForWatchWallet(fileName6, enum.AccountTypeReceipt)
-	//if err != nil {
-	//	logger.Fatalf("%+v", err)
-	//}
-	//err = wallet.ImportPublicKeyForWatchWallet(fileName7, enum.AccountTypePayment)
-	//if err != nil {
-	//	logger.Fatalf("%+v", err)
-	//}
-
-	logger.Infof("next you should run\nwallet -k -m 1 -i %s,\nwallet -k -m 2 -i %s,\nwallet -k -m 3 -i %s", fileName, fileName6, fileName7)
-	//wallet -k -m 1 -i ./data/pubkey/xxx.csv
-	//wallet -k -m 2 -i ./data/pubkey/xxx.csv
-	//wallet -k -m 3 -i ./data/pubkey/xxx.csv
-}
+//func development(wallet *service.Wallet) {
+//	//------------------------------------------------------------------
+//	//coldwallet1の機能
+//	//------------------------------------------------------------------
+//	//seed
+//	bSeed, err := wallet.GenerateSeed()
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//
+//	//1.generate key
+//	_, err = wallet.GenerateAccountKey(enum.AccountTypeClient, enum.BTC, bSeed, 10)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//	_, err = wallet.GenerateAccountKey(enum.AccountTypeReceipt, enum.BTC, bSeed, 5)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//	_, err = wallet.GenerateAccountKey(enum.AccountTypePayment, enum.BTC, bSeed, 5)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//
+//	//2.importprivkey
+//	err = wallet.ImportPrivateKey(enum.AccountTypeClient)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//	err = wallet.ImportPrivateKey(enum.AccountTypeReceipt)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//	err = wallet.ImportPrivateKey(enum.AccountTypePayment)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//
+//	//3.export full public key
+//	fileName, err := wallet.ExportAccountKey(enum.AccountTypeClient, enum.KeyStatusImportprivkey)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//	fileName1, err := wallet.ExportAccountKey(enum.AccountTypeReceipt, enum.KeyStatusImportprivkey)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//	fileName2, err := wallet.ExportAccountKey(enum.AccountTypePayment, enum.KeyStatusImportprivkey)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//
+//	//------------------------------------------------------------------
+//	//coldwallet2の機能だが、同一DBで検証
+//	//------------------------------------------------------------------
+//	//1.generate key
+//	_, err = wallet.GenerateAccountKey(enum.AccountTypeAuthorization, enum.BTC, bSeed, 1)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//
+//	//2.importprivkey
+//	err = wallet.ImportPrivateKey(enum.AccountTypeAuthorization)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//
+//	//3.import publickey to history table
+//	err = wallet.ImportPublicKeyForColdWallet2(fileName1, enum.AccountTypeReceipt)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//	err = wallet.ImportPublicKeyForColdWallet2(fileName2, enum.AccountTypePayment)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//
+//	//4.addmultisig
+//	err = wallet.AddMultisigAddressByAuthorization(enum.AccountTypeReceipt, enum.AddressTypeP2shSegwit)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//	err = wallet.AddMultisigAddressByAuthorization(enum.AccountTypePayment, enum.AddressTypeP2shSegwit)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//
+//	//5.multisigアドレスとキーとなるアドレスをwatch only walletのためにexport
+//	fileName3, err := wallet.ExportAddedPubkeyHistory(enum.AccountTypeReceipt)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//	fileName4, err := wallet.ExportAddedPubkeyHistory(enum.AccountTypePayment)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//
+//	//------------------------------------------------------------------
+//	//coldwallet1の機能
+//	//------------------------------------------------------------------
+//	//6.coldwallet2からexportしたReceiptのmultisigアドレスをcoldWallet1にimportする
+//	err = wallet.ImportMultisigAddrForColdWallet1(fileName3, enum.AccountTypeReceipt)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//	err = wallet.ImportMultisigAddrForColdWallet1(fileName4, enum.AccountTypePayment)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//
+//	//multisigimport後、ReceiptのMultisigをcsvファイルとしてexportする
+//	fileName6, err := wallet.ExportAccountKey(enum.AccountTypeReceipt, enum.KeyStatusMultiAddressImported)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//	logger.Infof("fileName: %s", fileName6)
+//
+//	fileName7, err := wallet.ExportAccountKey(enum.AccountTypePayment, enum.KeyStatusMultiAddressImported)
+//	if err != nil {
+//		logger.Fatalf("%+v", err)
+//	}
+//	logger.Infof("fileName: %s", fileName7)
+//
+//	//------------------------------------------------------------------
+//	//walletの機能
+//	//------------------------------------------------------------------
+//	//coldwalletで生成したアドレスをwalletにimportする
+//	//TODO:一台のPCで実行すると、service/import_public_key.go:50でエラーが出る
+//	//error: -4: The wallet already contains the private key for this address or script
+//	//err = wallet.ImportPublicKeyForWatchWallet(fileName, enum.AccountTypeClient)
+//	//if err != nil {
+//	//	logger.Fatalf("%+v", err)
+//	//}
+//	//err = wallet.ImportPublicKeyForWatchWallet(fileName6, enum.AccountTypeReceipt)
+//	//if err != nil {
+//	//	logger.Fatalf("%+v", err)
+//	//}
+//	//err = wallet.ImportPublicKeyForWatchWallet(fileName7, enum.AccountTypePayment)
+//	//if err != nil {
+//	//	logger.Fatalf("%+v", err)
+//	//}
+//
+//	logger.Infof("next you should run\nwallet -k -m 1 -i %s,\nwallet -k -m 2 -i %s,\nwallet -k -m 3 -i %s", fileName, fileName6, fileName7)
+//	//wallet -k -m 1 -i ./data/pubkey/xxx.csv
+//	//wallet -k -m 2 -i ./data/pubkey/xxx.csv
+//	//wallet -k -m 3 -i ./data/pubkey/xxx.csv
+//}

@@ -26,6 +26,9 @@ import (
 
 // DetectReceivedCoin Wallet内アカウントに入金があれば、そこから、未署名のトランザクションを返す
 func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, error) {
+	if w.Type != enum.WalletTypeWatchOnly {
+		return "", "", errors.New("it's available on WatchOnlyWallet")
+	}
 
 	// LockされたUnspentTransactionを解除する
 	//if err := w.BTC.UnlockAllUnspentTransaction(); err != nil {
