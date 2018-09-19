@@ -39,7 +39,7 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 		newEncodedAddrsPrevs string
 	)
 
-	if encodedAddrsPrevs != "" {
+	if encodedAddrsPrevs == "" {
 		//Bitcoin coreのバージョンがあがり、常に求められるようになった。。。
 		return "", false, "", errors.New("encodedAddrsPrevs must be set")
 	}
