@@ -117,53 +117,63 @@ var proceduresForColdWallet1 = []Procedure{
 	},
 	{
 		WalletTypeCold1,
-		"generate seed",
+		"[キー管理] generate seed",
 		"coldwallet1 -k -m 1",
 	},
 	{
 		WalletTypeCold1,
-		"generate [client, receipt, payment] key",
+		"[キー管理] generate [client, receipt, payment] key",
 		"coldwallet1 -k -m 10,11,12",
 	},
 	{
 		WalletTypeCold1,
-		"run `importprivkey` to register generated [client, receipt, payment] private key",
+		"[キー管理] run `importprivkey` to register generated [client, receipt, payment] private key",
 		"coldwallet1 -k -m 20,21,22",
 	},
 	{
 		WalletTypeCold1,
-		"export [client, receipt, payment] public address as csv => next coldwallet2",
+		"[キー管理] export [client, receipt, payment] public address as csv => next coldwallet2",
 		"coldwallet1 -k -m 30,31,32",
 	},
 	{
 		WalletTypeCold1,
-		"import [receipt] multisig address and redeemScript from csv to DB",
+		"[キー管理] import [receipt] multisig address and redeemScript from csv to DB",
 		"coldwallet1 -k -m 40 -i ./data/pubkey/xxx.csv",
 	},
 	{
 		WalletTypeCold1,
-		"import [payment] multisig address and redeemScript from csv to DB",
+		"[キー管理] import [payment] multisig address and redeemScript from csv to DB",
 		"coldwallet1 -k -m 41 -i ./data/pubkey/xxx.csv",
 	},
 	{
 		WalletTypeCold1,
-		"export [receipt, payment] multisig address as csv",
+		"[キー管理] export [receipt, payment] multisig address as csv",
 		"coldwallet1 -k -m 50, 51",
 	},
 	{
 		WalletTypeWatchOnly,
-		"import [client] address for watch only wallet",
+		"[キー管理] import [client] address for watch only wallet",
 		"wallet -k -m 1 -i ./data/pubkey/xxx.csv",
 	},
 	{
 		WalletTypeWatchOnly,
-		"import [receipt] address for watch only wallet",
+		"[キー管理] import [receipt] address for watch only wallet",
 		"wallet -k -m 2 -i ./data/pubkey/xxx.csv",
 	},
 	{
 		WalletTypeWatchOnly,
-		"import [payment] address for watch only wallet",
+		"[キー管理] import [payment] address for watch only wallet",
 		"wallet -k -m 3 -i ./data/pubkey/xxx.csv",
+	},
+	{
+		WalletTypeCold1,
+		"[署名管理] sign [receipt] tx",
+		"wallet -s -m 1 -i ./data/tx/receipt/xxx",
+	},
+	{
+		WalletTypeCold1,
+		"[署名管理] sign [payment] tx",
+		"wallet -s -m 1 -i ./data/tx/payment/xxx",
 	},
 }
 
@@ -171,43 +181,48 @@ var proceduresForColdWallet1 = []Procedure{
 var proceduresForColdWallet2 = []Procedure{
 	{
 		WalletTypeCold2,
-		"generate seed",
+		"[キー管理] generate seed",
 		"coldwallet2 -k -m 1",
 	},
 	{
 		WalletTypeCold2,
-		"generate [authorization] key",
+		"[キー管理] generate [authorization] key",
 		"coldwallet2 -k -m 13",
 	},
 	{
 		WalletTypeCold2,
-		"run `importprivkey` to register generated [authorization] private key",
+		"[キー管理] run `importprivkey` to register generated [authorization] private key",
 		"coldwallet2 -k -m 23",
 	},
 	{
 		WalletTypeCold2,
-		"import [receipt] public address from csv to DB",
+		"[キー管理] import [receipt] public address from csv to DB",
 		"coldwallet2 -k -m 33 -i ./data/pubkey/xxx.csv",
 	},
 	{
 		WalletTypeCold2,
-		"import [payment] public address from csv to DB",
+		"[キー管理] import [payment] public address from csv to DB",
 		"coldwallet2 -k -m 34 -i ./data/pubkey/xxx.csv",
 	},
 	{
 		WalletTypeCold2,
-		"run `addmultisigaddress` with [receipt] address as param1,authorization address as param2",
+		"[キー管理] run `addmultisigaddress` with [receipt] address as param1,authorization address as param2",
 		"coldwallet2 -k -m 50",
 	},
 	{
 		WalletTypeCold2,
-		"run `addmultisigaddress` with [payment] address as param1,authorization address as param2",
+		"[キー管理] run `addmultisigaddress` with [payment] address as param1,authorization address as param2",
 		"coldwallet2 -k -m 51",
 	},
 	{
 		WalletTypeCold2,
-		"export [receipt, payment] multisig address, public address and redeemScript as csv, next coldwallet1",
+		"[キー管理] export [receipt, payment] multisig address, public address and redeemScript as csv, next coldwallet1",
 		"coldwallet2 -k -m 60,61",
+	},
+	{
+		WalletTypeCold2,
+		"[署名管理] sign [payment] tx",
+		"wallet -s -m 1 -i ./data/tx/payment/xxx",
 	},
 }
 
