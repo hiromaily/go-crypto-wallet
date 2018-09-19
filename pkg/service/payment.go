@@ -4,7 +4,6 @@ package service
 
 import (
 	"fmt"
-	"sort"
 	"strconv"
 
 	"github.com/bookerzzz/grok"
@@ -128,25 +127,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 	}
 
 	//4. Listunspent()にてpaymentアカウント用のutxoをすべて取得する
-	//paymentが複数addressを持つことを考慮
-	addrs, err := w.BTC.GetAddressesByAccount(string(enum.AccountTypePayment))
-	if err != nil {
-		return "", "", errors.Errorf("BTC.GetAddressesByAccount(): error: %s", err)
-	}
-	if len(addrs) == 0 {
-		return "", "", errors.New("Payment addresses could not be found")
-	}
-	unspentList, err := w.BTC.Client().ListUnspentMinMaxAddresses(w.BTC.ConfirmationBlock(), 9999999, addrs)
-	if err != nil {
-		//ListUnspentが実行できない。致命的なエラー。この場合BitcoinCoreの再起動が必要
-		return "", "", err
-	}
-
-	//5. 送金の金額と近しいutxoでtxを作成するため、ソートしておく => 小さなutxoから利用していくのに便利だが、MUSTではない
-	sort.Slice(unspentList, func(i, j int) bool {
-		//small to big
-		return unspentList[i].Amount < unspentList[j].Amount
-	})
+	unspentList, addrs, err := w.BTC.ListUnspentByAccount(enum.AccountTypePayment)
 
 	var (
 		inputs          []btcjson.TransactionInput
@@ -159,7 +140,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 		addresses       []string
 	)
 
-	//6.合計金額を超えるまで、listunspentからinputsを作成する
+	//5.合計金額を超えるまで、listunspentからinputsを作成する
 	for _, tx := range unspentList {
 		amt, err := btcutil.NewAmount(tx.Amount)
 		if err != nil {
@@ -179,7 +160,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 			InputTxid:          tx.TxID,
 			InputVout:          tx.Vout,
 			InputAddress:       tx.Address,
-			InputAccount:       tx.Account,
+			InputAccount:       tx.Label,
 			InputAmount:        fmt.Sprintf("%f", tx.Amount),
 			InputConfirmations: tx.Confirmations,
 		})
@@ -207,7 +188,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 		return "", "", errors.New("[fatal error] bitcoin is insufficient in trading account of ours")
 	}
 
-	//7.outputは別途こちらで作成
+	//6.outputは別途こちらで作成
 	for _, userPayment := range userPayments {
 		if _, ok := tmpOutputs[userPayment.receiverAddr]; ok {
 			//加算する
@@ -218,23 +199,23 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 		}
 	}
 
-	//8.差分でお釣り用のoutputを作成する (paymentのおつりaddressに返金する処理)
+	//7.差分でお釣り用のoutputを作成する (paymentのおつりaddressに返金する処理)
 	//おつり受け取りのpaymentaddressが複数ある場合、何を使うか。とりあえずaddrs[0]
-	//TODO:ユーザーの出金先にpaymentのアドレスの指定が万が一でもある場合のためのロジック(イレギュラーだが運用上可能)
+	//TODO:ユーザーの出金先にpaymentのアドレスが指定された場合のためのロジック(イレギュラーだが運用上可能)
 	//FIXME: paymentが複数addressであることを考慮
 	//FIXME:BIP44でaddressを生成したが、おつり用としては分けていない。これが問題をおこなさないか？
 	chargeAddr := addrs[0].String() //change from w.BTC.PaymentAddress()
 	change := inputTotal - userTotal
 	if _, ok := tmpOutputs[chargeAddr]; ok {
 		//加算
-		//TODO:こんなことが実運用でありえるか？
+		//TODO:実運用ではありえない
 		tmpOutputs[chargeAddr] += change
 	} else {
 		//新規
 		tmpOutputs[chargeAddr] = change
 	}
 
-	//8-2.tmpOutputsをoutputsとして変換する
+	//8.tmpOutputsをoutputsとして変換する
 	for key, val := range tmpOutputs {
 		addr, err := w.BTC.DecodeAddress(key)
 		if err != nil {

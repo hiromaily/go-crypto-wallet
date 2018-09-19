@@ -44,6 +44,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 	grok.Value(unspentList) //Debug
 
 	if len(unspentList) == 0 {
+		logger.Info("no listunspent")
 		return "", "", nil
 	}
 
@@ -101,7 +102,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 			Txid:         tx.TxID,
 			Vout:         tx.Vout,
 			ScriptPubKey: tx.ScriptPubKey,
-			RedeemScript: "", //TODO:redeemScriptはどうやって算出する??おそらく、txidから詳細を取得する必要がある?gettransactionはだめだった。。。
+			RedeemScript: "", //multisigではない場合は、不要
 			Amount:       tx.Amount,
 		})
 
@@ -119,7 +120,8 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 	}
 
 	// 一連の処理を実行
-	hex, fileName, err := w.createRawTransactionAndFee(adjustmentFee, inputs, inputTotal, txReceiptInputs, &addrsPrevs)
+	hex, fileName, err := w.createRawTransactionAndFee(enum.ActionTypeReceipt, enum.AccountTypeReceipt, adjustmentFee,
+		inputs, inputTotal, txReceiptInputs, &addrsPrevs)
 
 	//TODO:Ver17対応が必要
 	// LockされたUnspentTransactionを解除する
@@ -131,13 +133,15 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 }
 
 // createRawTransactionAndFee feeの抽出からtransaction作成、DBへの必要情報保存など、もろもろこちらで行う
-func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcjson.TransactionInput,
-	inputTotal btcutil.Amount, txReceiptInputs []model.TxInput, addrsPrevs *btc.AddrsPrevTxs) (string, string, error) {
+// receipt/transfer共通
+func (w *Wallet) createRawTransactionAndFee(actionType enum.ActionType, accountType enum.AccountType,
+	adjustmentFee float64, inputs []btcjson.TransactionInput, inputTotal btcutil.Amount,
+	txReceiptInputs []model.TxInput, addrsPrevs *btc.AddrsPrevTxs) (string, string, error) {
 
 	var outputTotal btcutil.Amount
 
-	//TODO:送金時に、フラグ(is_allocated)をONにすることとする
-	pubkeyTable, err := w.DB.GetOneUnAllocatedAccountPubKeyTable(enum.AccountTypeReceipt)
+	//TODO:送金時に、フラグ(is_allocated)をONにすることとする(ここで設定するAccountは受信者)
+	pubkeyTable, err := w.DB.GetOneUnAllocatedAccountPubKeyTable(accountType)
 	if err != nil {
 		return "", "", errors.Errorf("DB.GetOneUnAllocatedAccountPubKeyTable(): error: %s", err)
 	}
@@ -185,7 +189,7 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 	}
 
 	// 7. Databaseに必要な情報を保存
-	txReceiptID, err := w.insertTxTableForUnsigned(enum.ActionTypeReceipt, hex, inputTotal, outputTotal, fee, enum.TxTypeValue[enum.TxTypeUnsigned], txReceiptInputs, txReceiptOutputs, nil)
+	txReceiptID, err := w.insertTxTableForUnsigned(actionType, hex, inputTotal, outputTotal, fee, enum.TxTypeValue[enum.TxTypeUnsigned], txReceiptInputs, txReceiptOutputs, nil)
 	if err != nil {
 		return "", "", errors.Errorf("insertTxTableForUnsigned(): error: %s", err)
 	}
@@ -202,7 +206,7 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 	//TODO:Debug時はlocalに出力することとする。=> これはフラグで判別したほうがいいかもしれない/Interface型にして対応してもいいかも
 	var generatedFileName string
 	if txReceiptID != 0 {
-		generatedFileName, err = w.storeHex(hex, encodedAddrsPrevs, txReceiptID, enum.ActionTypeReceipt)
+		generatedFileName, err = w.storeHex(hex, encodedAddrsPrevs, txReceiptID, actionType)
 		if err != nil {
 			return "", "", errors.Errorf("wallet.storeHex(): error: %s", err)
 		}
@@ -215,7 +219,7 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 }
 
 //TODO:引数の数が多いのはGoにおいてはBad practice...
-//[共通(receipt/payment)]
+//[共通(receipt/payment/transfer)]
 func (w *Wallet) insertTxTableForUnsigned(actionType enum.ActionType, hex string, inputTotal, outputTotal, fee btcutil.Amount, txType uint8,
 	txInputs []model.TxInput, txOutputs []model.TxOutput, paymentRequestIds []int64) (int64, error) {
 
@@ -260,6 +264,7 @@ func (w *Wallet) insertTxTableForUnsigned(actionType enum.ActionType, hex string
 	}
 
 	//commit flag
+	//paymentのみ、後続の処理が存在する(payment_requestテーブル)
 	isCommit := true
 	if actionType == enum.ActionTypePayment {
 		isCommit = false

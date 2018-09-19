@@ -113,6 +113,7 @@ const (
 	AccountTypeAuthorization AccountType = "authorization" //マルチシグアドレスのための承認アドレス
 	AccountTypeQuoine        AccountType = "quoine"        //Quoineから購入したcoinが入金されるであろうアドレス
 	AccountTypeFee           AccountType = "fee"           //手数料保管用アドレス
+	AccountTypeStored        AccountType = "stored"        //保管用アドレス(多額のコインはこちらに保管しておく
 )
 
 //AccountTypeValue account_typeの値
@@ -123,6 +124,7 @@ var AccountTypeValue = map[AccountType]uint8{
 	AccountTypeAuthorization: 3,
 	AccountTypeQuoine:        4,
 	AccountTypeFee:           5,
+	AccountTypeStored:        6,
 }
 
 //AccountTypeMultisig account_type毎のmultisig対応アカウントかどうか
@@ -220,8 +222,9 @@ type ActionType string
 
 // action
 const (
-	ActionTypeReceipt ActionType = "receipt"
-	ActionTypePayment ActionType = "payment"
+	ActionTypeReceipt  ActionType = "receipt"
+	ActionTypePayment  ActionType = "payment"
+	ActionTypeTransfer ActionType = "transfer"
 )
 
 //ActionTypeValue action_typeの値

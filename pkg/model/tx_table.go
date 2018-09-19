@@ -10,8 +10,9 @@ import (
 )
 
 var txTableName = map[enum.ActionType]string{
-	"receipt": "tx_receipt",
-	"payment": "tx_payment",
+	"receipt":  "tx_receipt",
+	"payment":  "tx_payment",
+	"transfer": "tx_transfer",
 }
 
 // TxTable tx_receipt/tx_paymentテーブル

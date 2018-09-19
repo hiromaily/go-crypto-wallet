@@ -19,8 +19,9 @@ import (
 //`updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
 
 var txTableOutputName = map[enum.ActionType]string{
-	"receipt": "tx_receipt_output",
-	"payment": "tx_payment_output",
+	"receipt":  "tx_receipt_output",
+	"payment":  "tx_payment_output",
+	"transfer": "tx_transfer_output",
 }
 
 // TxOutput tx_receipt_output/tx_payment_outputテーブル

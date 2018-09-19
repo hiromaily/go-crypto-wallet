@@ -129,6 +129,36 @@ CREATE TABLE `tx_payment_output` LIKE `tx_receipt_output`;
 
 
 --
+-- Table structure for table `tx_transfer`
+--
+
+DROP TABLE IF EXISTS `tx_transfer`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tx_transfer` LIKE `tx_receipt`;
+
+
+--
+-- Table structure for table `tx_transfer_input`
+--
+
+DROP TABLE IF EXISTS `tx_transfer_input`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tx_transfer_input` LIKE `tx_receipt_input`;
+
+
+--
+-- Table structure for table `tx_transfer_output`
+--
+
+DROP TABLE IF EXISTS `tx_transfer_output`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `tx_transfer_output` LIKE `tx_receipt_output`;
+
+
+--
 -- Table structure for table `payment_request`
 --
 
@@ -198,3 +228,33 @@ DROP TABLE IF EXISTS `account_pubkey_payment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `account_pubkey_payment` LIKE `account_pubkey_client`;
+
+
+--
+-- Table structure for table `account_pubkey_quoine`
+--
+
+DROP TABLE IF EXISTS `account_pubkey_quoine`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `account_pubkey_quoine` LIKE `account_pubkey_client`;
+
+
+--
+-- Table structure for table `account_pubkey_fee`
+--
+
+DROP TABLE IF EXISTS `account_pubkey_fee`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `account_pubkey_fee` LIKE `account_pubkey_client`;
+
+
+--
+-- Table structure for table `account_pubkey_stored`
+--
+
+DROP TABLE IF EXISTS `account_pubkey_stored`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `account_pubkey_stored` LIKE `account_pubkey_client`;

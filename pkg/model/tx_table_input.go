@@ -10,8 +10,9 @@ import (
 )
 
 var txTableInputName = map[enum.ActionType]string{
-	"receipt": "tx_receipt_input",
-	"payment": "tx_payment_input",
+	"receipt":  "tx_receipt_input",
+	"payment":  "tx_payment_input",
+	"transfer": "tx_transfer_input",
 }
 
 // TxInput tx_receipt_input/tx_payment_inputテーブル

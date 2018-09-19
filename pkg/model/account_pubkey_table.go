@@ -22,6 +22,9 @@ var accountPubKeyTableName = map[enum.AccountType]string{
 	enum.AccountTypeClient:  "account_pubkey_client",
 	enum.AccountTypeReceipt: "account_pubkey_receipt",
 	enum.AccountTypePayment: "account_pubkey_payment",
+	enum.AccountTypeQuoine:  "account_pubkey_quoine",
+	enum.AccountTypeFee:     "account_pubkey_fee",
+	enum.AccountTypeStored:  "account_pubkey_stored",
 }
 
 //getAllAccountPubKeyTable

@@ -42,3 +42,5 @@ coldwallet1 -k -m 51
 wallet -k -m 1 -x -i ./data/pubkey/xxx.csv
 wallet -k -m 2 -x -i ./data/pubkey/xxx.csv
 wallet -k -m 3 -x -i ./data/pubkey/xxx.csv
+
+wallet -d -m 1
