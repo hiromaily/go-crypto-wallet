@@ -10,21 +10,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-//Seed生成は完全に分離したほうがいい
 //1.Seedの生成+DBに登録
 //2.Multisig Keyの生成+DBに登録(承認用は端末を分けて管理しないと意味がないかも)
 
 //CreateMultiSig(addmultisigaddress)にwalletにmultisig用のprivate keyを登録する
 //これのパラメータには、multisigしないと送金許可しないアドレス(receipt, payment)+承認用のアドレスをセット
-//これによって、生成されたアドレスから、送金する場合、パラメータにセットしたアドレスに紐づく秘密鍵が必要
+//これによって、生成されたアドレスから送金する場合、パラメータにセットしたアドレスに紐づく秘密鍵が必要
 //payment,receiptのアドレスは、実際には、addmultisigaddressによって生成されたアドレスに置き換えられる。
-
-//含まれるもの
-//coldwallet1: client, receipt, payment
-//coldwallet2: multisig address
-//TODO: =>どこのマシンで、addmultisigaddressを行う？？
-
-//https://www.slideshare.net/ssusere174e3/ss-33733512
 
 //3.Client Keyの生成+DBに登録
 //4.Receipt Keyの生成 + Multisig対応 + DBに登録 (1日1Key消費するイメージ)

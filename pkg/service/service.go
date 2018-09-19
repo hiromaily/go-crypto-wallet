@@ -16,10 +16,9 @@ import (
 
 // Wallet 基底オブジェクト
 type Wallet struct {
-	BTC *btc.Bitcoin
-	DB  *model.DB
-	GCS map[enum.ActionType]*gcp.Storage
-	//Db  *kvs.LevelDB
+	BTC  *btc.Bitcoin
+	DB   *model.DB
+	GCS  map[enum.ActionType]*gcp.Storage
 	Env  enum.EnvironmentType
 	Type enum.WalletType
 	Seed string

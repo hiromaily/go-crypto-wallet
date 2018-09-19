@@ -26,29 +26,13 @@ import (
 
 // DetectReceivedCoin Wallet内アカウントに入金があれば、そこから、未署名のトランザクションを返す
 func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, error) {
-	//TODO:このロジックを連続で走らせた場合、現在処理中のものが、タイミングによってはまた取得できてしまうかもしれない??
-	// => LockUnspent()
 
 	// LockされたUnspentTransactionを解除する
 	//if err := w.BTC.UnlockAllUnspentTransaction(); err != nil {
 	//	return "", "", err
 	//}
 
-	//1. アカウント一覧からまとめて残高を取得
-	//type ListUnspentResult struct {
-	//	TxID          string  `json:"txid"`
-	//	Vout          uint32  `json:"vout"`
-	//	Address       string  `json:"address"`
-	//	Account       string  `json:"account"`
-	//	ScriptPubKey  string  `json:"scriptPubKey"`
-	//	RedeemScript  string  `json:"redeemScript,omitempty"`
-	//	Amount        float64 `json:"amount"`
-	//	Confirmations int64   `json:"confirmations"`
-	//	Spendable     bool    `json:"spendable"`
-	//}
-
 	// Watch only walletであれば、ListUnspentで実現可能
-	//unspentList, err := w.BTC.Client().ListUnspentMin(w.BTC.ConfirmationBlock()) //6
 	unspentList, err := w.BTC.ListUnspent()
 	if err != nil {
 		return "", "", errors.Errorf("BTC.Client().ListUnspent(): error: %s", err)
@@ -72,10 +56,6 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 
 		//除外するアカウント
 		//TODO:本番環境ではこの条件がかわる気がする
-		//if tx.Account == w.BTC.StoredAccountName() ||
-		//	tx.Account == w.BTC.PaymentAccountName() || tx.Account == "" {
-		//	continue
-		//}
 		if tx.Label == string(enum.AccountTypeReceipt) ||
 			tx.Label == string(enum.AccountTypePayment) || tx.Label == "" {
 			continue
@@ -90,7 +70,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 		}
 		inputTotal += amt //合計
 
-		//TODO:Ver17対応
+		//TODO:Ver17対応が必要
 		//lockunspentによって、該当トランザクションをロックして再度ListUnspent()で出力されることを防ぐ
 		//if w.BTC.LockUnspent(tx) != nil {
 		//	continue
@@ -101,6 +81,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 			Txid: tx.TxID,
 			Vout: tx.Vout,
 		})
+
 		// txReceiptInputs
 		txReceiptInputs = append(txReceiptInputs, model.TxInput{
 			ReceiptID:          0,
@@ -120,6 +101,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 			RedeemScript: "", //TODO:redeemScriptはどうやって算出する??おそらく、txidから詳細を取得する必要がある?gettransactionはだめだった。。。
 			Amount:       tx.Amount,
 		})
+
 		//tx.Address
 		addresses = append(addresses, tx.Address)
 	}
@@ -136,7 +118,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 	// 一連の処理を実行
 	hex, fileName, err := w.createRawTransactionAndFee(adjustmentFee, inputs, inputTotal, txReceiptInputs, &addrsPrevs)
 
-	//TODO:Ver17対応
+	//TODO:Ver17対応が必要
 	// LockされたUnspentTransactionを解除する
 	//if err := w.BTC.UnlockAllUnspentTransaction(); err != nil {
 	//	return "", "", err
@@ -151,7 +133,6 @@ func (w *Wallet) createRawTransactionAndFee(adjustmentFee float64, inputs []btcj
 
 	var outputTotal btcutil.Amount
 
-	//TODO:w.BTC.StoredAddress() この部分をDatabaseから取得しないといけない
 	//TODO:送金時に、フラグ(is_allocated)をONにすることとする
 	pubkeyTable, err := w.DB.GetOneUnAllocatedAccountPubKeyTable(enum.AccountTypeReceipt)
 	if err != nil {
@@ -236,7 +217,6 @@ func (w *Wallet) insertTxTableForUnsigned(actionType enum.ActionType, hex string
 	txInputs []model.TxInput, txOutputs []model.TxOutput, paymentRequestIds []int64) (int64, error) {
 
 	//1.内容が同じだと、生成されるhexもまったく同じ為、同一のhexが合った場合は処理をskipする
-	//count, err := w.DB.GetTxReceiptCountByUnsignedHex(hex)
 	count, err := w.DB.GetTxCountByUnsignedHex(actionType, hex)
 	if err != nil {
 		return 0, errors.Errorf("DB.GetTxCountByUnsignedHex(): error: %s", err)

@@ -97,13 +97,6 @@ func (w *Wallet) checkTransaction(hash string, actionType enum.ActionType) error
 	logger.Debugf("ActionType: %s, Transactions Confirmations", actionType)
 	grok.Value(tran.Confirmations)
 
-	//[debug] 終了したら消す
-	//err = w.notifyUsers(hash, actionType)
-	//if err != nil {
-	//	return err
-	//}
-	//return nil
-
 	//現在のconfirmationをチェック
 	if tran.Confirmations >= int64(w.BTC.ConfirmationBlock()) {
 		//指定にconfirmationに達したので、current_tx_typeをdoneに更新する

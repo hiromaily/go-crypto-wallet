@@ -22,7 +22,6 @@ import (
 // signatureByHex 署名する
 // オフラインで使うことを想定
 func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.ActionType) (string, bool, string, error) {
-	//first hex: 未署名トランザクションのhex
 	// Hexからトランザクションを取得
 	msgTx, err := w.BTC.ToMsgTx(hex)
 	if err != nil {
@@ -40,18 +39,12 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 	)
 
 	if encodedAddrsPrevs == "" {
-		//Bitcoin coreのバージョンがあがり、常に求められるようになった。。。
+		//Bitcoin coreのバージョン17から、常に必要
 		return "", false, "", errors.New("encodedAddrsPrevs must be set")
 	}
 
-	//こちらの処理はMultisigの場合
 	//decodeする
 	serial.DecodeFromString(encodedAddrsPrevs, &addrsPrevs)
-	grok.Value(addrsPrevs)
-	//type AddrsPrevTxs struct {
-	//	Addrs   []string
-	//	PrevTxs []PrevTx
-	//}
 
 	//WIPs, RedeedScriptを取得
 	//TODO:coldwallet1とcoldwallet2で挙動が違う
@@ -128,13 +121,10 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 }
 
 // SignatureFromFile 渡されたファイルからtransactionを読み取り、署名を行う
-// ColdWalletの機能なので、渡されたfilePathをそのまま使う?
 // TODO:いずれにせよ、入金と出金で署名もMultisigかどうかで変わってくる
-// TODO:multisigとそうでないものでわけたほうがわかりやすいかも
 func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error) {
 	//ファイル名から、tx_receipt_idを取得する
 	//payment_5_unsigned_1534466246366489473
-	//txReceiptID, actionType, _, err := txfile.ParseFile(filePath, "unsigned")
 	txReceiptID, actionType, _, err := txfile.ParseFile(filePath, []enum.TxType{enum.TxTypeUnsigned, enum.TxTypeUnsigned2nd})
 	if err != nil {
 		return "", false, "", err
@@ -149,23 +139,6 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 	var hex, encodedAddrsPrevs string
 
 	//encodedPrevTxs
-	//paymentの場合は、multisigのため、データが異なる
-	//TODO:multisigかどうかの判別は、enum.AccountTypeMultisig[]で行う
-	//TODO:ActionType/AccountTypeの相互変換が必要かも
-	//if val, ok := enum.ActionToAccountMap[actionType]; ok {
-	//	if enum.AccountTypeMultisig[val] {
-	//		//if actionType == enum.ActionTypePayment && enum.AccountTypeMultisig[enum.AccountTypePayment] {
-	//		tmp := strings.Split(data, ",")
-	//		if len(tmp) != 2 {
-	//			return "", false, "", errors.New("imported tx data is wrong. encodedPrevTxs would not be found")
-	//		}
-	//		hex = tmp[0]
-	//		encodedAddrsPrevs = tmp[1]
-	//		//TODO:署名が更に必要なので、ファイル出力時にこの情報も引き継ぐ必要がある
-	//	} else {
-	//		hex = data
-	//	}
-	//}
 	tmp := strings.Split(data, ",")
 	hex = tmp[0]
 	if len(tmp) == 2 {
@@ -181,7 +154,7 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 	//ファイルに書き込むデータ
 	savedata := hexTx
 
-	//TODO:署名が完了していないとき、TxTypeUnsigned2nd
+	//署名が完了していないとき、TxTypeUnsigned2nd
 	txType := enum.TxTypeSigned
 	if isSigned == false {
 		txType = enum.TxTypeUnsigned2nd
@@ -191,7 +164,6 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 	}
 
 	//ファイルに書き込む
-	//path := txfile.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID, true)
 	path := txfile.CreateFilePath(actionType, txType, txReceiptID, true)
 	generatedFileName, err := txfile.WriteFile(path, savedata)
 	if err != nil {
@@ -200,22 +172,3 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 
 	return hexTx, isSigned, generatedFileName, nil
 }
-
-// SignatureByHex Hex文字列から署名を行う
-// TODO:出金/入金でフラグがほしいが、このfuncはDebug時にしか使わない
-//func (w *Wallet) SignatureByHex(actionType enum.ActionType, hex string, txReceiptID int64) (string, bool, string, error) {
-//	//署名
-//	hexTx, isSigned, err := w.signatureByHex(hex, "")
-//	if err != nil {
-//		return "", isSigned, "", err
-//	}
-//
-//	//ファイルに書き込む
-//	path := txfile.CreateFilePath(actionType, enum.TxTypeSigned, txReceiptID, true)
-//	generatedFileName, err := txfile.WriteFile(path, hex)
-//	if err != nil {
-//		return "", isSigned, "", err
-//	}
-//
-//	return hexTx, isSigned, generatedFileName, nil
-//}

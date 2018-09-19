@@ -24,14 +24,12 @@ func (w *Wallet) AddMultisigAddressByAuthorization(accountType enum.AccountType,
 	if err != nil {
 		return errors.Errorf("DB.GetOneByMaxIDOnAccountKeyTable(enum.AccountTypeAuthorization) error: %s", err)
 	}
-	//grok.Value(authKeyTable)
 
 	//added_pubkey_history_xxxテーブルからwallet_address(full-pubkeyである必要がある)を取得
 	addedPubkeyHistoryTable, err := w.DB.GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType)
 	if err != nil {
 		return errors.Errorf("DB.GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(%s) error: %s", accountType, err)
 	}
-	//grok.Value(addedPubkeyHistoryTable)
 
 	//addmultisigaddress APIをcall
 	for _, val := range addedPubkeyHistoryTable {
@@ -39,7 +37,6 @@ func (w *Wallet) AddMultisigAddressByAuthorization(accountType enum.AccountType,
 			2,
 			[]string{
 				val.FullPublicKey, // receipt or payment address
-				//authKeyTable.WalletAddress, // authorization address TODO:P2shSegwitAddressじゃなくていいのか？これが原因でmultisigの送信に失敗した？？
 				authKeyTable.P2shSegwitAddress,
 			},
 			fmt.Sprintf("multi_%s", accountType), //TODO:ここのアカウント名はどうすべきか
@@ -52,8 +49,6 @@ func (w *Wallet) AddMultisigAddressByAuthorization(accountType enum.AccountType,
 		}
 
 		//レスポンスをadded_pubkey_history_xxxテーブルに保存
-		//err = w.DB.UpdateMultisigAddrOnAddedPubkeyHistoryTable(accountType, resAddr.Address,
-		//	resAddr.RedeemScript, authKeyTable.WalletAddress, val.FullPublicKey, nil, true)
 		err = w.DB.UpdateMultisigAddrOnAddedPubkeyHistoryTable(accountType, resAddr.Address,
 			resAddr.RedeemScript, authKeyTable.P2shSegwitAddress, val.FullPublicKey, nil, true)
 		if err != nil {

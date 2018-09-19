@@ -93,19 +93,9 @@ func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum
 	//added_pubkey_history_receiptテーブルにInsert
 	addedPubkeyHistorys := make([]model.AddedPubkeyHistoryTable, len(pubKeys))
 	for i, key := range pubKeys {
-		//TODO:とりあえず、1カラムのデータを前提でコーディングしておく
 		inner := strings.Split(key, ",")
-		//tmpData := []string{
-		//	record.WalletAddress,
-		//	record.P2shSegwitAddress,
-		//	record.FullPublicKey,
-		//	record.WalletMultisigAddress,
-		//	record.Account,
-		//	strconv.Itoa(int(record.KeyType)),
-		//	strconv.Itoa(int(record.Idx)),
-		//}
 
-		//TODO:ここでは、FullPublicKeyをセットする必要がある
+		//ここでは、FullPublicKeyをセットする必要がある
 		addedPubkeyHistorys[i] = model.AddedPubkeyHistoryTable{
 			FullPublicKey:         inner[2],
 			AuthAddress1:          "",
@@ -119,34 +109,6 @@ func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum
 	if err != nil {
 		return errors.Errorf("DB.InsertAddedPubkeyHistoryTable() error: %s", err)
 	}
-
-	// DBにClientAccountのKey情報を登録 (CSVの読み込み)
-	//accountKeyClients := make([]model.AccountKeyTable, len(pubKeys))
-	//for i, key := range pubKeys {
-	//	inner := strings.Split(key, ",")
-	//	if len(inner) != 4 {
-	//		return errors.New("exported file should be changed as right specification")
-	//	}
-	//	kt, err := strconv.Atoi(inner[2])
-	//	if err != nil {
-	//		return errors.New("exported file should be changed as right specification")
-	//	}
-	//	idx, err := strconv.Atoi(inner[3])
-	//	if err != nil {
-	//		return errors.New("exported file should be changed as right specification")
-	//	}
-	//
-	//	accountKeyClients[i] = model.AccountKeyTable{
-	//		WalletAddress: inner[0],
-	//		Account:       inner[1],
-	//		KeyType:       uint8(kt),
-	//		Idx:           uint32(idx),
-	//	}
-	//}
-	//err = w.DB.InsertAccountKeyTable(accountType, accountKeyClients, nil, true)
-	//if err != nil {
-	//	return errors.Errorf("DB.InsertAccountKeyClient() error: %s", err)
-	//}
 
 	return nil
 }

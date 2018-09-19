@@ -124,14 +124,6 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 	}
 
 	//4. Listunspent()にてpaymentアカウント用のutxoをすべて取得する
-	//listunspent 6  9999999 [\"2N54KrNdyuAkqvvadqSencgpr9XJZnwFYKW\"]
-	//addr, err := w.BTC.DecodeAddress(w.BTC.PaymentAddress())
-	//if err != nil {
-	//	//toml内に定義あるアドレスなので、起動時にチェックすべき
-	//	return "", "", errors.Errorf("BTC.DecodeAddress(): error: %s", err)
-	//}
-	//unspentList, err := w.BTC.Client().ListUnspentMinMaxAddresses(6, 9999999, []btcutil.Address{addr})
-
 	//paymentが複数addressを持つことを考慮
 	addrs, err := w.BTC.GetAddressesByAccount(string(enum.AccountTypePayment))
 	if err != nil {
@@ -152,23 +144,18 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 		return unspentList[i].Amount < unspentList[j].Amount
 	})
 
-	//grok.Value(userPayments)
-	//grok.Value(unspentList)
-
 	var (
 		inputs          []btcjson.TransactionInput
 		inputTotal      btcutil.Amount
 		txPaymentInputs []model.TxInput
 		outputs         = map[btcutil.Address]btcutil.Amount{}
-		//outputTotal     btcutil.Amount
-		tmpOutputs = map[string]btcutil.Amount{} //mapのkeyが、btcutil.Address型だとユニークかどうかkeyから判定できないため、判定用としてこちらを作成
-		isDone     bool
-		prevTxs    []btc.PrevTx
-		addresses  []string
+		tmpOutputs      = map[string]btcutil.Amount{} //mapのkeyが、btcutil.Address型だとユニークかどうかkeyから判定できないため、判定用としてこちらを作成
+		isDone          bool
+		prevTxs         []btc.PrevTx
+		addresses       []string
 	)
 
 	//6.合計金額を超えるまで、listunspentからinputsを作成する
-	//TODO:singrawtransactionのために、btc.PrevTxの配列も作成する
 	for _, tx := range unspentList {
 		amt, err := btcutil.NewAmount(tx.Amount)
 		if err != nil {
@@ -304,7 +291,6 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 			txPaymentOutputs = append(txPaymentOutputs, model.TxOutput{
 				ReceiptID:     0,
 				OutputAddress: addr.String(),
-				//OutputAccount: w.BTC.PaymentAccountName(),
 				OutputAccount: string(enum.AccountTypePayment),
 				OutputAmount:  w.BTC.AmountString(amt - fee),
 				IsChange:      true,
@@ -325,9 +311,6 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 	//total
 	outputTotal -= fee
 
-	//Debug
-	//grok.Value(outputs)
-
 	// 4.再度 CreateRawTransaction
 	msgTx, err = w.BTC.CreateRawTransactionWithOutput(inputs, outputs)
 	if err != nil {
@@ -342,7 +325,6 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 
 	// 6. Databaseに必要な情報を保存
 	//  txType //1.未署名
-	//txReceiptID, err := w.insertHexForUnsignedTxOnPayment(hex, inputTotal, outputTotal, fee, enum.TxTypeValue[enum.TxTypeUnsigned], txPaymentInputs, txPaymentOutputs, paymentRequestIds)
 	txReceiptID, err := w.insertTxTableForUnsigned(enum.ActionTypePayment, hex, inputTotal, outputTotal, fee, enum.TxTypeValue[enum.TxTypeUnsigned], txPaymentInputs, txPaymentOutputs, paymentRequestIds)
 	if err != nil {
 		return "", "", errors.Errorf("insertTxTableForUnsigned(): error: %s", err)
@@ -356,8 +338,6 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 	logger.Debugf("encodedAddrsPrevs: %s", encodedAddrsPrevs)
 
 	// 8. GCSにトランザクションファイルを作成
-	//TODO:本来、この戻り値をDumpして、GCSに保存、それをDLして、USBに入れてコールドウォレットに移動しなくてはいけない
-	//TODO:Debug時はlocalに出力することとする。=> これはフラグで判別したほうがいいかもしれない/Interface型にして対応してもいいかも
 	var generatedFileName string
 	if txReceiptID != 0 {
 		generatedFileName, err = w.storeHex(hex, encodedAddrsPrevs, txReceiptID, enum.ActionTypePayment)

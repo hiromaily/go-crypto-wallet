@@ -5,13 +5,52 @@ import (
 	"os"
 	"strings"
 
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/key"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
 	"github.com/pkg/errors"
 )
 
+//ExportAddedPubkeyHistory AddedPubkeyHistoryテーブルをcsvとして出力する
+// coldwallet2から使用
+func (w *Wallet) ExportAddedPubkeyHistory(accountType enum.AccountType) (string, error) {
+	//DBから該当する全レコード
+	//is_exported=falseで且つ、multisig_addressが生成済のレコードが対象
+	addedPubkeyHistoryTable, err := w.DB.GetAddedPubkeyHistoryTableByNotExported(accountType)
+	if err != nil {
+		return "", errors.Errorf("DB.GetAddedPubkeyHistoryTableByNotExported() error: %s", err)
+	}
+
+	if len(addedPubkeyHistoryTable) == 0 {
+		logger.Info("no record in table")
+		return "", nil
+	}
+
+	//CSVに書き出す
+	//TODO:何がわかりやすいか, このために新たなステータスを追加したほうがいいか
+	fileName, err := w.exportAddedPubkeyHistoryTable(addedPubkeyHistoryTable, string(accountType),
+		enum.KeyStatusValue[enum.KeyStatusPubkeyExported])
+	if err != nil {
+		return "", errors.Errorf("key.ExportAddedPubkeyHistoryTable() error: %s", err)
+	}
+	logger.Infof("file name is %s", fileName)
+
+	//DBの該当レコードをアップデート
+	ids := make([]int64, len(addedPubkeyHistoryTable))
+	for idx, record := range addedPubkeyHistoryTable {
+		ids[idx] = record.ID
+	}
+	_, err = w.DB.UpdateIsExportedOnAddedPubkeyHistoryTable(accountType, ids, nil, true)
+	if err != nil {
+		return "", errors.Errorf("DB.UpdateIsExportedOnAddedPubkeyHistoryTable() error: %s", err)
+	}
+
+	return fileName, nil
+}
+
 // ExportAddedPubkeyHistoryTable AddedPubkeyHistoryテーブルをcsvとして出力する
-func (w *Wallet) ExportAddedPubkeyHistoryTable(addedPubkeyHistoryTable []model.AddedPubkeyHistoryTable, strAccountType string, keyStatus uint8) (string, error) {
+func (w *Wallet) exportAddedPubkeyHistoryTable(addedPubkeyHistoryTable []model.AddedPubkeyHistoryTable, strAccountType string, keyStatus uint8) (string, error) {
 	//fileName
 	fileName := key.CreateFilePath(strAccountType, keyStatus)
 
@@ -23,16 +62,6 @@ func (w *Wallet) ExportAddedPubkeyHistoryTable(addedPubkeyHistoryTable []model.A
 
 	writer := bufio.NewWriter(file)
 
-	//type AddedPubkeyHistoryTable struct {
-	//	ID                    int64      `db:"id"`
-	//	FullPublicKey         string     `db:"full_public_key"`
-	//	AuthAddress1          string     `db:"auth_address1"`
-	//	AuthAddress2          string     `db:"auth_address2"`
-	//	WalletMultisigAddress string     `db:"wallet_multisig_address"`
-	//	RedeemScript          string     `db:"redeem_script"`
-	//	IsExported            bool       `db:"is_exported"`
-	//	UpdatedAt             *time.Time `db:"updated_at"`
-	//}
 	for _, record := range addedPubkeyHistoryTable {
 		//csvファイル
 		tmpData := []string{

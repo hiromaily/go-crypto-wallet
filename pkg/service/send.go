@@ -46,7 +46,7 @@ func (w *Wallet) SendFromFile(filePath string) (string, error) {
 		return "", errors.Errorf("w.updateHexForSentTx() error: %s", err)
 	}
 
-	//TODO:WIP:DB更新 account_pubkey_receiptのみ
+	//DB更新 account_pubkey_receiptのみ
 	err = w.updateIsAllocatedForAccountPubkey(txReceiptID, actionType)
 	if err != nil {
 		//TODO:仮にここでエラーが出たとしても、送信したという事実に変わりはない。ここのみを再度実行する仕組みが必要
@@ -84,7 +84,6 @@ func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID strin
 	return nil
 }
 
-//TODO:WIP 未検証
 func (w *Wallet) updateIsAllocatedForAccountPubkey(txReceiptID int64, actionType enum.ActionType) error {
 	//tx_receiptの場合のみ
 	if actionType == enum.ActionTypeReceipt {
