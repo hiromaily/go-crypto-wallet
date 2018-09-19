@@ -32,6 +32,8 @@ type Options struct {
 	Receipt bool `short:"r" long:"receipt" description:"for receipt"`
 	//出金モード
 	Payment bool `short:"p" long:"payment" description:"for payment"`
+	//内部アカウント送金モード
+	Transfer bool `short:"t" long:"transfer" description:"for transfer"`
 	//送金モード
 	Send bool `short:"s" long:"sending" description:"for sending transaction"`
 	//ステータスチェックモード
@@ -81,6 +83,9 @@ func main() {
 	} else if opts.Payment {
 		//出金関連機能
 		paymentFunctionalities(wallet)
+	} else if opts.Transfer {
+		//内部アカウント転送関連機能
+		transferFunctionalities(wallet)
 	} else if opts.Send {
 		//署名送信関連機能
 		sendingFunctionalities(wallet)
@@ -242,6 +247,23 @@ func paymentFunctionalities(wallet *service.Wallet) {
 	default:
 		logger.Warn("opts.Mode is out of range")
 		procedure.ShowWallet()
+	}
+}
+
+//内部アカウント転送関連機能[t]
+func transferFunctionalities(wallet *service.Wallet) {
+	switch opts.Mode {
+	case 1:
+		logger.Info("Run:内部アカウント転送のための未署名トランザクション作成")
+		hex, fileName, err := wallet.SendToAccount(enum.AccountTypeReceipt, enum.AccountTypePayment, 0)
+		if err != nil {
+			logger.Fatalf("%+v", err)
+		}
+		if hex == "" {
+			logger.Info("No utxo")
+			return
+		}
+		logger.Infof("[hex]: %s, \n[fileName]: %s", hex, fileName)
 	}
 }
 

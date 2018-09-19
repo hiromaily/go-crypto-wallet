@@ -137,6 +137,36 @@ CREATE TABLE `account_key_authorization` LIKE `account_key_client`;
 
 
 --
+-- Table structure for table `account_key_quoine`
+--
+
+DROP TABLE IF EXISTS `account_key_quoine`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `account_key_quoine` LIKE `account_key_client`;
+
+
+--
+-- Table structure for table `account_key_fee`
+--
+
+DROP TABLE IF EXISTS `account_key_fee`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `account_key_fee` LIKE `account_key_client`;
+
+
+--
+-- Table structure for table `account_key_stored`
+--
+
+DROP TABLE IF EXISTS `account_key_stored`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `account_key_fee` LIKE `account_key_stored`;
+
+
+--
 -- Table structure for table `added_pubkey_history_receipt`
 --  coldwallet2用
 
@@ -166,3 +196,33 @@ DROP TABLE IF EXISTS `added_pubkey_history_payment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `added_pubkey_history_payment` LIKE `added_pubkey_history_receipt`;
+
+
+--
+-- Table structure for table `added_pubkey_history_quoine`
+--  coldwallet2用
+
+DROP TABLE IF EXISTS `added_pubkey_history_quoine`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `added_pubkey_history_quoine` LIKE `added_pubkey_history_receipt`;
+
+
+--
+-- Table structure for table `added_pubkey_history_fee`
+--  coldwallet2用
+
+DROP TABLE IF EXISTS `added_pubkey_history_fee`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `added_pubkey_history_fee` LIKE `added_pubkey_history_receipt`;
+
+
+--
+-- Table structure for table `added_pubkey_history_stored`
+--  coldwallet2用
+
+DROP TABLE IF EXISTS `added_pubkey_history_stored`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `added_pubkey_history_stored` LIKE `added_pubkey_history_receipt`;
