@@ -8,6 +8,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
+	"github.com/hiromaily/go-bitcoin/pkg/api/btc"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
@@ -62,6 +63,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 		inputs          []btcjson.TransactionInput
 		inputTotal      btcutil.Amount
 		txReceiptInputs []model.TxInput
+		prevTxs         []btc.PrevTx
 	)
 
 	for _, tx := range unspentList {
@@ -106,6 +108,15 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 			InputAccount:       tx.Label,
 			InputAmount:        fmt.Sprintf("%f", tx.Amount),
 			InputConfirmations: tx.Confirmations,
+		})
+
+		// prevTxs(walletでの署名でもversion17からは必要になる。。。fuck)
+		prevTxs = append(prevTxs, btc.PrevTx{
+			Txid:         tx.TxID,
+			Vout:         tx.Vout,
+			ScriptPubKey: tx.ScriptPubKey,
+			RedeemScript: "", //TODO:redeemScriptはどうやって算出する??おそらく、txidから詳細を取得する必要がある?gettransactionはだめだった。。。
+			Amount:       tx.Amount,
 		})
 
 	}

@@ -159,17 +159,18 @@ func (k Key) CreateKeysWithIndex(accountPrivateKey string, idxFrom, count uint32
 		}
 
 		// p2sh-segwit
-		p2shSegwit, err := k.getP2shSegwit(privateKey)
+		p2shSegwit, redeemScript, err := k.getP2shSegwit(privateKey)
 		if err != nil {
 			return nil, err
 		}
 
 		//address.String() とaddress.EncodeAddress()は結果として同じ
 		walletKeys[i] = WalletKey{
-			WIF:        strPrivateKey,
-			Address:    strAddr, //[P2PKH]AddressPubKeyHash is an Address for a pay-to-pubkey-hash
-			P2shSegwit: p2shSegwit,
-			FullPubKey: getFullPubKey(privateKey, true),
+			WIF:          strPrivateKey,
+			Address:      strAddr, //[P2PKH]AddressPubKeyHash is an Address for a pay-to-pubkey-hash
+			P2shSegwit:   p2shSegwit,
+			FullPubKey:   getFullPubKey(privateKey, true),
+			RedeemScript: redeemScript,
 		}
 
 		idxFrom++
@@ -233,21 +234,21 @@ func (k Key) addressString(privKey *btcec.PrivateKey) (string, error) {
 	return fmt.Sprintf("%s:%s", prefix, addrBCH.String()), nil
 }
 
-// p2sh-segwitのstringを返す
+// p2sh-segwitと、redeemScriptのstringとを返す
 // BCHは利用する予定はないが、念の為
 //func (k Key) getP2shSegwit(privKey *btcec.PrivateKey) (*btcutil.AddressScriptHash, error) {
-func (k Key) getP2shSegwit(privKey *btcec.PrivateKey) (string, error) {
+func (k Key) getP2shSegwit(privKey *btcec.PrivateKey) (string, string, error) {
 	// []byte
 	publicKeyHash := btcutil.Hash160(privKey.PubKey().SerializeCompressed())
 	segwitAddress, err := btcutil.NewAddressWitnessPubKeyHash(publicKeyHash, k.conf)
 	if err != nil {
-		return "", errors.Errorf("btcutil.NewAddressWitnessPubKeyHash() error: %s", err)
+		return "", "", errors.Errorf("btcutil.NewAddressWitnessPubKeyHash() error: %s", err)
 	}
 	//logger.Debugf("segwitAddress: %s", segwitAddress)
 
 	redeemScript, err := txscript.PayToAddrScript(segwitAddress)
 	if err != nil {
-		return "", errors.Errorf("txscript.PayToAddrScript() error: %s", err)
+		return "", "", errors.Errorf("txscript.PayToAddrScript() error: %s", err)
 	}
 	//logger.Debugf("redeemScript: %s", redeemScript)
 
@@ -255,18 +256,18 @@ func (k Key) getP2shSegwit(privKey *btcec.PrivateKey) (string, error) {
 	if k.coinType == enum.BTC {
 		address, err := btcutil.NewAddressScriptHash(redeemScript, k.conf)
 		if err != nil {
-			return "", errors.Errorf("btcutil.NewAddressScriptHash() error: %s", err)
+			return "", "", errors.Errorf("btcutil.NewAddressScriptHash() error: %s", err)
 		}
 		//logger.Debugf("address.String() %s", address.String())
-		return address.String(), nil
+		return address.String(), string(redeemScript), nil
 	}
 	//BCH
 	address, err := bchutil.NewCashAddressScriptHash(redeemScript, k.conf)
 	if err != nil {
-		return "", errors.Errorf("bchutil.NewCashAddressScriptHash() error: %s", err)
+		return "", "", errors.Errorf("bchutil.NewCashAddressScriptHash() error: %s", err)
 	}
 	//logger.Debugf("address.String() %s", address.String())
-	return address.String(), nil
+	return address.String(), string(redeemScript), nil
 }
 
 // getPubKey fullのPublic Keyを返す

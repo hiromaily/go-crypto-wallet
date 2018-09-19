@@ -108,7 +108,7 @@ func (w *Wallet) generateAccountKey(accountType enum.AccountType, coinType enum.
 			P2shSegwitAddress:     key.P2shSegwit,
 			FullPublicKey:         key.FullPubKey,
 			WalletMultisigAddress: "",
-			RedeemScript:          "",
+			RedeemScript:          key.RedeemScript,
 			WalletImportFormat:    key.WIF,
 			Account:               account,
 			KeyType:               keyID,
