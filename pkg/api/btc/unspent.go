@@ -79,7 +79,6 @@ func (b *Bitcoin) listUnspentVer16() ([]ListUnspentResult, error) {
 	}
 
 	//[]btcjson.ListUnspentResult
-	//convert btcjson.ListUnspentResult to listunspentResult
 	converted := make([]ListUnspentResult, len(listUnspentResult))
 	for idx, val := range listUnspentResult {
 		converted[idx].TxID = val.TxID
@@ -96,7 +95,7 @@ func (b *Bitcoin) listUnspentVer16() ([]ListUnspentResult, error) {
 }
 
 func (b *Bitcoin) listUnspentVer17() ([]ListUnspentResult, error) {
-	input, err := json.Marshal(uint64(b.confirmationBlock)) //ここは固定(6)でいいはず
+	input, err := json.Marshal(uint64(b.confirmationBlock))
 	if err != nil {
 		return nil, errors.Errorf("json.Marchal(): error: %s", err)
 	}

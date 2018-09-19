@@ -200,6 +200,9 @@ func experimentalKey(child *hdkeychain.ExtendedKey, t *testing.T) {
 
 	// Private Key
 	privateKey, err := child.ECPrivKey()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	// WIF　(compress: true) => bitcoin coreでは圧縮したアドレスを表示する
 	wif, err := btcutil.NewWIF(privateKey, conf, true)
@@ -210,6 +213,9 @@ func experimentalKey(child *hdkeychain.ExtendedKey, t *testing.T) {
 
 	// Address(P2PKH)
 	address, err := child.Address(conf)
+	if err != nil {
+		t.Fatal(err)
+	}
 	t.Logf("P2PKH Address String:  %s", address.String())
 
 	// Address(P2PKH) BTC

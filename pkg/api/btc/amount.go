@@ -82,11 +82,11 @@ func (b *Bitcoin) GetBalanceByAccount(accountName string) (btcutil.Amount, error
 
 // GetBalanceByAccountAndMinConf アカウントに対してのBalanceを取得する
 // Deprecated: GetReceivedByAccountAndMinConf()を呼び出すように変更すること
-func (b *Bitcoin) GetBalanceByAccountAndMinConf(accountName string, minConf int) (btcutil.Amount, error) {
-	amt, err := b.client.GetBalanceMinConf(accountName, minConf)
-	if err != nil {
-		return 0, errors.Errorf("client.GetBalanceMinConf(%s): error: %s", accountName, err)
-	}
-
-	return amt, nil
-}
+//func (b *Bitcoin) GetBalanceByAccountAndMinConf(accountName string, minConf int) (btcutil.Amount, error) {
+//	amt, err := b.client.GetBalanceMinConf(accountName, minConf)
+//	if err != nil {
+//		return 0, errors.Errorf("client.GetBalanceMinConf(%s): error: %s", accountName, err)
+//	}
+//
+//	return amt, nil
+//}

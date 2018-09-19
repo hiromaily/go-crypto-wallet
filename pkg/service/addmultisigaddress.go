@@ -35,7 +35,7 @@ func (w *Wallet) AddMultisigAddressByAuthorization(accountType enum.AccountType,
 
 	//addmultisigaddress APIをcall
 	for _, val := range addedPubkeyHistoryTable {
-		resAddr, err := w.BTC.CreateMultiSig(
+		resAddr, err := w.BTC.AddMultisigAddress(
 			2,
 			[]string{
 				val.FullPublicKey, // receipt or payment address

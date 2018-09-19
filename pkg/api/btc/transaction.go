@@ -118,7 +118,7 @@ func (b *Bitcoin) GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error) 
 
 // GetTransactionByTxID txIDからトランザクション詳細を取得する
 func (b *Bitcoin) GetTransactionByTxID(txID string) (*btcjson.GetTransactionResult, error) {
-	// Transaction詳細を取得(必要な情報があるかどうか不明)
+	// Transaction詳細を取得
 	hashTx, err := chainhash.NewHashFromStr(txID)
 	if err != nil {
 		return nil, errors.Errorf("chainhash.NewHashFromStr(%s): error: %s", txID, err)
@@ -181,7 +181,7 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 // CreateRawTransaction Rawトランザクションを作成する
 //  => watch only wallet(online)で利用されることを想定
 // こちらは多対1用の送金、つまり入金時、集約用アドレスに一括して送信するケースで利用することを想定
-// [Noted] 手数料を考慮せず、全額送金しようとすると、SendRawTransaction()で、`min relay fee not met`
+// [Noted] 手数料を考慮せず、全額送金しようとすると、SendRawTransaction()で、`min relay fee not met`エラーが発生する
 func (b *Bitcoin) CreateRawTransaction(sendAddr string, amount btcutil.Amount, inputs []btcjson.TransactionInput) (*wire.MsgTx, error) {
 	//TODO:sendAddrの厳密なチェックがセキュリティ的に必要な場面もありそう
 	sendAddrDecoded, err := btcutil.DecodeAddress(sendAddr, b.GetChainConf())
@@ -192,10 +192,8 @@ func (b *Bitcoin) CreateRawTransaction(sendAddr string, amount btcutil.Amount, i
 	// パラメータを作成する
 	outputs := make(map[btcutil.Address]btcutil.Amount)
 	outputs[sendAddrDecoded] = amount //satoshi
-	//lockTime := int64(0) //TODO:Raw locktime ここは何をいれるべき？
 
 	// CreateRawTransaction
-	//TODO:ここから下はCreateRawTransactionWithOutput()を呼び出すことでコードの重複を防いだほうがいい。
 	return b.CreateRawTransactionWithOutput(inputs, outputs)
 }
 
@@ -213,7 +211,7 @@ func (b *Bitcoin) CreateRawTransactionWithOutput(inputs []btcjson.TransactionInp
 }
 
 // FundRawTransaction 送信したい金額に応じて、自動的にutxoを算出してくれる
-//  現時点で使う予定無し
+// 未使用のため、コメントアウトしておいてもいいかも
 func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, error) {
 	//fundrawtransaction
 	//https://bitcoincore.org/en/doc/0.16.2/rpc/rawtransactions/fundrawtransaction/
@@ -261,22 +259,15 @@ func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, err
 // 入金時のトランザクション(multisigではないトランザクション)用
 func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []PrevTx) (*wire.MsgTx, bool, error) {
 	//署名
-	//FIXME:SignRawTransactionWithWallet()はエラーが出て使えないので、暫定対応としてoptionでdeprecatedを無効化する
-	//restart bitcoind with -deprecatedrpc=signrawtransaction
 	if b.Version() >= enum.BTCVer17 {
 		return b.signRawTransactionWithWalletVer17(tx, prevtxs)
-		//msgTx, isSigned, err := b.signRawTransactionWithWallet(tx)
-		//if err != nil {
-		//	return nil, false, errors.Errorf("BTC.SignRawTransactionWithWallet() error: %s", err)
-		//}
-		//return msgTx, isSigned, nil
 	}
+	//restart bitcoind with -deprecatedrpc=signrawtransaction
 	return b.signRawTransactionWithWalletVer16(tx)
 }
 
 // SignRawTransactionWithWallet Ver17から利用可能なSignRawTransaction
 // FIXME:Multisigに利用はできない。入金時のclientアドレスはmultisig対応していないので、こちらには利用できると思う
-// restart bitcoind with -deprecatedrpc=signrawtransaction
 // For above ver17
 func (b *Bitcoin) signRawTransactionWithWalletVer17(tx *wire.MsgTx, prevtxs []PrevTx) (*wire.MsgTx, bool, error) {
 	//hex tx
@@ -343,6 +334,7 @@ func (b *Bitcoin) signRawTransactionWithWalletVer17(tx *wire.MsgTx, prevtxs []Pr
 }
 
 // signRawTransaction *wire.MsgTxからRawのトランザクションに署名する(Multisigには利用できない)
+// restart bitcoind with -deprecatedrpc=signrawtransaction
 // Deprecated
 func (b *Bitcoin) signRawTransactionWithWalletVer16(tx *wire.MsgTx) (*wire.MsgTx, bool, error) {
 	//署名
@@ -379,7 +371,6 @@ func (b *Bitcoin) debugCompareTx(tx1, tx2 *wire.MsgTx) {
 // For above ver17
 func (b *Bitcoin) SignRawTransactionWithKey(tx *wire.MsgTx, privKeysWIF []string, prevtxs []PrevTx) (*wire.MsgTx, bool, error) {
 	//署名
-	//restart bitcoind with -deprecatedrpc=signrawtransaction
 	if b.Version() >= enum.BTCVer17 {
 		return b.signRawTransactionWithKeyVer17(tx, privKeysWIF, prevtxs)
 	}
@@ -387,6 +378,7 @@ func (b *Bitcoin) SignRawTransactionWithKey(tx *wire.MsgTx, privKeysWIF []string
 }
 
 // signRawTransactionWithKeyVer15 *wire.MsgTxからRawのトランザクションに署名する(Multisigの場合はこちら)
+// restart bitcoind with -deprecatedrpc=signrawtransaction
 // Deprecated
 func (b *Bitcoin) signRawTransactionWithKeyVer15(tx *wire.MsgTx, inputs []btcjson.RawTxInput, privKeysWIF []string) (*wire.MsgTx, bool, error) {
 	//署名 => おそらく、I/Fが古くて使えない
@@ -405,6 +397,7 @@ func (b *Bitcoin) signRawTransactionWithKeyVer15(tx *wire.MsgTx, inputs []btcjso
 }
 
 // signRawTransactionWithKeyVer16 *wire.MsgTxからRawのトランザクションに署名する(Multisigの場合はこちら)
+// restart bitcoind with -deprecatedrpc=signrawtransaction
 // Deprecated
 func (b *Bitcoin) signRawTransactionWithKeyVer16(tx *wire.MsgTx, privKeysWIF []string, prevtxs []PrevTx) (*wire.MsgTx, bool, error) {
 	//hex tx
@@ -442,9 +435,9 @@ func (b *Bitcoin) signRawTransactionWithKeyVer16(tx *wire.MsgTx, privKeysWIF []s
 	if err != nil {
 		return nil, false, errors.Errorf("json.Unmarshal(): error: %s", err)
 	}
-	//TODO:戻り値のmsgTxがブランクではない、かつ値が初期値と変化がある場合は、このエラーはskip可能
+	//戻り値のmsgTxがブランクではない、かつ値が初期値と変化がある場合は、このエラーはskip可能
 	//	Signature must be zero for failed CHECK(MULTI)SIG operation
-	//  こちらのエラーはOK
+	//  => こちらのエラーはOK
 	if len(signRawTxResult.Errors) != 0 {
 		if signRawTxResult.Hex == "" || hexTx == signRawTxResult.Hex {
 			grok.Value(signRawTxResult)
@@ -499,7 +492,7 @@ func (b *Bitcoin) signRawTransactionWithKeyVer17(tx *wire.MsgTx, privKeysWIF []s
 	}
 	//TODO:戻り値のmsgTxがブランクではない、かつ値が初期値と変化がある場合は、このエラーはskip可能
 	//	Signature must be zero for failed CHECK(MULTI)SIG operation
-	//  こちらのエラーはOK
+	//  =>こちらのエラーはOK
 	if len(signRawTxResult.Errors) != 0 {
 		if signRawTxResult.Hex == "" || hexTx == signRawTxResult.Hex {
 			grok.Value(signRawTxResult)
@@ -516,49 +509,8 @@ func (b *Bitcoin) signRawTransactionWithKeyVer17(tx *wire.MsgTx, privKeysWIF []s
 	return msgTx, signRawTxResult.Complete, nil
 }
 
-// SignRawTransactionByHex HexからRawトランザクションを生成し、署名する
-// 秘密鍵を保持している側のwallet(つまりcold wallet)で実行することを想定
-// Debug用
-//func (b *Bitcoin) SignRawTransactionByHex(hex string) (string, bool, error) {
-//	// Hexからトランザクションを取得
-//	msgTx, err := b.ToMsgTx(hex)
-//	if err != nil {
-//		return "", false, err
-//	}
-//
-//	//署名
-//	signedTx, isSigned, err := b.SignRawTransaction(msgTx)
-//	if err != nil {
-//		return "", false, err
-//	}
-//
-//	//Hexに変換
-//	hexTx, err := b.ToHex(signedTx)
-//	if err != nil {
-//		return "", false, errors.Errorf("BTC.ToHex(msgTx): error: %s", err)
-//	}
-//
-//	//return signedTx, nil
-//	return hexTx, isSigned, nil
-//}
-
-// SendRawTransaction Rawトランザクションを送信する
-// こちらは一連の流れを調査するために、CreateRawTransaction()の戻りに合わせたI/F (実際の運用で利用されることはないはず)
-// オンラインで実行される必要がある
-func (b *Bitcoin) SendRawTransaction(tx *wire.MsgTx) (*chainhash.Hash, error) {
-	//送信
-	hash, err := b.client.SendRawTransaction(tx, true)
-	if err != nil {
-		//feeを1Satoshiで試してみたら、
-		//-26: 66: min relay fee not metが出た
-		return nil, errors.Errorf("client.SendRawTransaction(): error: %s", err)
-	}
-
-	return hash, nil
-}
-
 // SendTransactionByHex 外部から渡されたバイト列からRawトランザクションを送信する
-// オンラインで実行される必要がある
+// オンラインで実行される必要があるため、watchOnlyWallet専用
 func (b *Bitcoin) SendTransactionByHex(hex string) (*chainhash.Hash, error) {
 	// Hexからトランザクションを取得
 	msgTx, err := b.ToMsgTx(hex)
@@ -567,7 +519,7 @@ func (b *Bitcoin) SendTransactionByHex(hex string) (*chainhash.Hash, error) {
 	}
 
 	//送信
-	hash, err := b.SendRawTransaction(msgTx)
+	hash, err := b.sendRawTransaction(msgTx)
 	//hash, err := b.client.SendRawTransaction(msgTx, true)
 	if err != nil {
 		return nil, errors.Errorf("BTC.SendRawTransaction(): error: %s", err)
@@ -592,10 +544,22 @@ func (b *Bitcoin) SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error) {
 	}
 
 	//送信
-	hash, err := b.SendRawTransaction(wireTx)
-	//hash, err := b.client.SendRawTransaction(wireTx, true)
+	hash, err := b.sendRawTransaction(wireTx)
 	if err != nil {
 		return nil, errors.Errorf("BTC.SendRawTransaction(): error: %v", err)
+	}
+
+	return hash, nil
+}
+
+// sendRawTransaction Rawトランザクションを送信する
+func (b *Bitcoin) sendRawTransaction(tx *wire.MsgTx) (*chainhash.Hash, error) {
+	//送信
+	hash, err := b.client.SendRawTransaction(tx, true)
+	if err != nil {
+		//feeを1Satoshiで試してみたら、
+		//-26: 66: min relay fee not metが出た
+		return nil, errors.Errorf("client.SendRawTransaction(): error: %s", err)
 	}
 
 	return hash, nil

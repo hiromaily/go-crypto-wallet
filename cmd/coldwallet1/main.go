@@ -275,28 +275,16 @@ func debugForCheck(wallet *service.Wallet) {
 		logger.Info("Run: Multisigの作成")
 
 		//Multisigアドレス作成
-		resAddr, err := wallet.BTC.CreateMultiSig(2, []string{"2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP", "2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu"}, "multi01", enum.AddressTypeP2shSegwit)
+		resAddr, err := wallet.BTC.AddMultisigAddress(2, []string{"2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP", "2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu"}, "multi01", enum.AddressTypeP2shSegwit)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
 		logger.Infof("multisig address: %s, redeemScript: %s", resAddr.Address, resAddr.RedeemScript)
-
-	//case 20:
-	//	//[Debug用]HEXから署名を行う
-	//	logger.Info("Run: HEXから署名を行う")
-	//	hex := "02000000021ed288be4c4d7923a0d044bb500a15b2eb0f2b3c5503293f251f7c94939a3f9f0000000000ffffffff557624120cdf3f4d092f35e5cd6b75418b76c3e3fd4c398357374e93cfe5c4200000000000ffffffff05c03b47030000000017a91419e70491572c55fb08ce90b0c6bf5cfe45a5420e87809698000000000017a9146b8902fc7a6a0bccea9dbd80a4c092c314227f618734e133070000000017a9148191d41a7415a6a1f6ee14337e039f50b949e80e87005a62020000000017a9149c877d6f21d5800ca60a7660ee56745f239b222b87002d31010000000017a914f575a0d1ddcfb98a11628826f1632453d718ff618700000000"
-	//	hexTx, isSigned, generatedFileName, err := wallet.SignatureByHex(enum.ActionTypeReceipt, hex, 10)
-	//	if err != nil {
-	//		logger.Fatalf("%+v", err)
-	//	}
-	//	logger.Infof("hex: %s\n, 署名完了: %t\n, fileName: %s", hexTx, isSigned, generatedFileName)
-	//	//TODO:isSigned: 送信までした署名はfalseになる??
 	default:
 		logger.Warn("opts.Mode is out of range")
 		//procedure.Show()
 		//開発用
 		development(wallet)
-
 	}
 }
 

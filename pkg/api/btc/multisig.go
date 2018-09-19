@@ -14,11 +14,11 @@ type AddMultisigAddressResult struct {
 	RedeemScript string `json:"redeemScript"`
 }
 
-// CreateMultiSig マルチシグを Rawトランザクション用に作成する
+// AddMultisigAddress マルチシグを Rawトランザクション用に作成する
 //  - requiredSigs: 取引成立に必要なサイン数
 //  - addresses:    自分のアドレス+承認者のアドレスxN をいれていく
 // clientのアドレスは不要。payment/receiptのアドレスはmultisig対応しておくこと
-func (b *Bitcoin) CreateMultiSig(requiredSigs int, addresses []string, accountName string, addressType enum.AddressType) (*AddMultisigAddressResult, error) {
+func (b *Bitcoin) AddMultisigAddress(requiredSigs int, addresses []string, accountName string, addressType enum.AddressType) (*AddMultisigAddressResult, error) {
 
 	if requiredSigs > len(addresses) {
 		return nil, errors.New("number of given address should be at least same to requiredSigs or more")
