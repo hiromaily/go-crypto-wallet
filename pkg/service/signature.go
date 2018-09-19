@@ -40,75 +40,79 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 	)
 
 	if encodedAddrsPrevs != "" {
-		//こちらの処理はMultisigの場合
-		//decodeする
-		serial.DecodeFromString(encodedAddrsPrevs, &addrsPrevs)
-		grok.Value(addrsPrevs)
-		//type AddrsPrevTxs struct {
-		//	Addrs   []string
-		//	PrevTxs []PrevTx
-		//}
-
-		//WIPs, RedeedScriptを取得
-		//TODO:coldwallet1とcoldwallet2で挙動が違う
-		//coldwallet2の場合、AccountTypeAuthorizationが必要
-		if w.Type == enum.WalletTypeCold2 {
-			//account_key_authorizationテーブルから情報を取得
-			accountKey, err := w.DB.GetOneByMaxIDOnAccountKeyTable(enum.AccountTypeAuthorization)
-			if err != nil {
-				return "", false, "", errors.Errorf("DB.GetOneByMaxIDOnAccountKeyTable() error: %s", err)
-			}
-			accountKeys = append(accountKeys, *accountKey)
-		} else {
-			if val, ok := enum.ActionToAccountMap[actionType]; ok {
-				//account_key_payment/account_key_clientテーブルから取得
-				accountKeys, err = w.DB.GetAllAccountKeyByMultiAddrs(val, addrsPrevs.Addrs)
-				if err != nil {
-					return "", false, "", errors.Errorf("DB.GetWIPByMultiAddrs() error: %s", err)
-				}
-			} else {
-				return "", false, "", errors.New("[Fatal] actionType can not be retrieved. it should be fixed programmatically")
-			}
-		}
-
-		//wip
-		for _, val := range accountKeys {
-			wips = append(wips, val.WalletImportFormat)
-		}
-
-		//multisigの場合のみの処理
-		accountType, ok := enum.ActionToAccountMap[actionType]
-		if ok && enum.AccountTypeMultisig[accountType] {
-			if w.Type == enum.WalletTypeCold1 {
-				//取得したredeemScriptをPrevTxsにマッピング
-				for idx, val := range addrsPrevs.Addrs {
-					rs := model.GetRedeedScriptByAddress(accountKeys, val)
-					if rs == "" {
-						logger.Error("redeemScript can not be found")
-						continue
-					}
-					addrsPrevs.PrevTxs[idx].RedeemScript = rs
-				}
-				grok.Value(addrsPrevs)
-
-				//redeemScriptセット後、シリアライズして戻す
-				newEncodedAddrsPrevs, err = serial.EncodeToString(addrsPrevs)
-				if err != nil {
-					return "", false, "", errors.Errorf("serial.EncodeToString(): error: %s", err)
-				}
-			} else {
-				newEncodedAddrsPrevs = encodedAddrsPrevs
-			}
-		}
-
-		//署名
-		signedTx, isSigned, err = w.BTC.SignRawTransactionWithKey(msgTx, wips, addrsPrevs.PrevTxs)
-
-		//panic("for now, it stops")
-
-	} else {
-		signedTx, isSigned, err = w.BTC.SignRawTransaction(msgTx)
+		//Bitcoin coreのバージョンがあがり、常に求められるようになった。。。
+		return "", false, "", errors.New("encodedAddrsPrevs must be set")
 	}
+
+	//こちらの処理はMultisigの場合
+	//decodeする
+	serial.DecodeFromString(encodedAddrsPrevs, &addrsPrevs)
+	grok.Value(addrsPrevs)
+	//type AddrsPrevTxs struct {
+	//	Addrs   []string
+	//	PrevTxs []PrevTx
+	//}
+
+	//WIPs, RedeedScriptを取得
+	//TODO:coldwallet1とcoldwallet2で挙動が違う
+	//TODO:receiptの場合、wipsは不要
+	//coldwallet2の場合、AccountTypeAuthorizationが必要
+	if w.Type == enum.WalletTypeCold2 {
+		//account_key_authorizationテーブルから情報を取得
+		accountKey, err := w.DB.GetOneByMaxIDOnAccountKeyTable(enum.AccountTypeAuthorization)
+		if err != nil {
+			return "", false, "", errors.Errorf("DB.GetOneByMaxIDOnAccountKeyTable() error: %s", err)
+		}
+		accountKeys = append(accountKeys, *accountKey)
+	} else {
+		if val, ok := enum.ActionToAccountMap[actionType]; ok {
+			//account_key_payment/account_key_clientテーブルから取得
+			accountKeys, err = w.DB.GetAllAccountKeyByMultiAddrs(val, addrsPrevs.Addrs)
+			if err != nil {
+				return "", false, "", errors.Errorf("DB.GetWIPByMultiAddrs() error: %s", err)
+			}
+		} else {
+			return "", false, "", errors.New("[Fatal] actionType can not be retrieved. it should be fixed programmatically")
+		}
+	}
+
+	//wip
+	for _, val := range accountKeys {
+		wips = append(wips, val.WalletImportFormat)
+	}
+
+	//multisigの場合のみの処理
+	accountType, ok := enum.ActionToAccountMap[actionType]
+	if ok && enum.AccountTypeMultisig[accountType] {
+		if w.Type == enum.WalletTypeCold1 {
+			//取得したredeemScriptをPrevTxsにマッピング
+			for idx, val := range addrsPrevs.Addrs {
+				rs := model.GetRedeedScriptByAddress(accountKeys, val)
+				if rs == "" {
+					logger.Error("redeemScript can not be found")
+					continue
+				}
+				addrsPrevs.PrevTxs[idx].RedeemScript = rs
+			}
+			grok.Value(addrsPrevs)
+
+			//redeemScriptセット後、シリアライズして戻す
+			newEncodedAddrsPrevs, err = serial.EncodeToString(addrsPrevs)
+			if err != nil {
+				return "", false, "", errors.Errorf("serial.EncodeToString(): error: %s", err)
+			}
+		} else {
+			newEncodedAddrsPrevs = encodedAddrsPrevs
+		}
+	}
+
+	//署名
+	if actionType == enum.ActionTypePayment {
+		signedTx, isSigned, err = w.BTC.SignRawTransactionWithKey(msgTx, wips, addrsPrevs.PrevTxs)
+	} else {
+		signedTx, isSigned, err = w.BTC.SignRawTransaction(msgTx, addrsPrevs.PrevTxs)
+	}
+
 	if err != nil {
 		return "", false, "", err
 	}
