@@ -14,7 +14,7 @@ coldwallet1 -k -m 10 -n 5  -a receipt #receipt
 coldwallet1 -k -m 10 -n 5  -a payment #payment
 coldwallet1 -k -m 10 -n 5  -a quoine  #quoine
 coldwallet1 -k -m 10 -n 5  -a fee     #fee
-coldwallet1 -k -m 10 -n 5  -a store   #stored
+coldwallet1 -k -m 10 -n 5  -a stored  #stored
 
 #作成したAccountのPrivateKeyをColdWalletにimportする
 coldwallet1 -k -m 20 -a client
