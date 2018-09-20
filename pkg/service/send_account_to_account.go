@@ -120,8 +120,9 @@ func (w *Wallet) SendToAccount(from, to enum.AccountType, amount btcutil.Amount)
 	}
 
 	addrsPrevs := btc.AddrsPrevTxs{
-		Addrs:   addresses,
-		PrevTxs: prevTxs,
+		Addrs:         addresses,
+		PrevTxs:       prevTxs,
+		SenderAccount: from,
 	}
 
 	// 一連の処理を実行

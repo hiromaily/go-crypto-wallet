@@ -44,7 +44,7 @@ func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error
 	//encodedPrevTxs
 	tmp := strings.Split(data, ",")
 	hex = tmp[0]
-	if len(tmp) == 2 {
+	if len(tmp) > 1 {
 		encodedAddrsPrevs = tmp[1]
 	}
 
@@ -115,14 +115,21 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 		}
 		accountKeys = append(accountKeys, *accountKey)
 	} else {
-		if val, ok := enum.ActionToAccountMap[actionType]; ok {
-			//account_key_payment/account_key_clientテーブルから取得
-			accountKeys, err = w.DB.GetAllAccountKeyByMultiAddrs(val, addrsPrevs.Addrs)
-			if err != nil {
-				return "", false, "", errors.Errorf("DB.GetWIPByMultiAddrs() error: %s", err)
-			}
-		} else {
-			return "", false, "", errors.New("[Fatal] actionType can not be retrieved. it should be fixed programmatically")
+		//TODO:ActionTypeが`transfer`の場合、AccountのFromから判別しないといけない。。。
+		//=> addrsPrevs.SenderAccount を使うように変更
+		//if val, ok := enum.ActionToAccountMap[actionType]; ok {
+		//	//account_key_payment/account_key_clientテーブルから取得
+		//	accountKeys, err = w.DB.GetAllAccountKeyByMultiAddrs(val, addrsPrevs.Addrs)
+		//	if err != nil {
+		//		return "", false, "", errors.Errorf("DB.GetWIPByMultiAddrs() error: %s", err)
+		//	}
+		//} else {
+		//	return "", false, "", errors.New("[Fatal] actionType can not be retrieved. it should be fixed programmatically")
+		//}
+		//account_key_payment/account_key_clientテーブルから取得
+		accountKeys, err = w.DB.GetAllAccountKeyByMultiAddrs(addrsPrevs.SenderAccount, addrsPrevs.Addrs)
+		if err != nil {
+			return "", false, "", errors.Errorf("DB.GetWIPByMultiAddrs() error: %s", err)
 		}
 	}
 

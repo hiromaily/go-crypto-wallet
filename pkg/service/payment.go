@@ -232,8 +232,9 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 	//TODO:inputsをすべてlockする必要がある？？
 
 	addrsPrevs := btc.AddrsPrevTxs{
-		Addrs:   addresses,
-		PrevTxs: prevTxs,
+		Addrs:         addresses,
+		PrevTxs:       prevTxs,
+		SenderAccount: enum.AccountTypePayment,
 	}
 
 	//Debug

@@ -40,8 +40,9 @@ type SignRawTransactionError struct {
 
 // AddrsPrevTxs multisig用トランザクション生成時に必要な情報群
 type AddrsPrevTxs struct {
-	Addrs   []string
-	PrevTxs []PrevTx
+	Addrs         []string
+	PrevTxs       []PrevTx
+	SenderAccount enum.AccountType
 }
 
 // PrevTx multisig時のsignrawtransactionで必要なパラメータ

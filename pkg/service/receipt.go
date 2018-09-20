@@ -115,8 +115,9 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 	}
 
 	addrsPrevs := btc.AddrsPrevTxs{
-		Addrs:   addresses,
-		PrevTxs: prevTxs,
+		Addrs:         addresses,
+		PrevTxs:       prevTxs,
+		SenderAccount: enum.AccountTypeClient,
 	}
 
 	// 一連の処理を実行
