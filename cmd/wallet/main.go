@@ -43,7 +43,7 @@ type Options struct {
 	//Debugモード
 	Debug bool `short:"d" long:"debug" description:"for only development use"`
 
-	//実行される機能
+	//実行されるサブ機能
 	Mode uint8 `short:"m" long:"mode" description:"Mode i.e.Functionality"`
 
 	//txファイルパス
@@ -52,6 +52,8 @@ type Options struct {
 	Fee float64 `short:"f" long:"fee" default:"" description:"adjustment fee"`
 	//import時にscanするかどうか
 	IsRescan bool `short:"x" long:"rescan" description:"scan blocks when importing key"`
+	//アカウント
+	Account string `short:"a" long:"account" description:"account like client, receipt, payment"`
 }
 
 var (
@@ -104,36 +106,34 @@ func main() {
 	}
 }
 
+func checkImportFile() {
+	if opts.ImportFile == "" {
+		logger.Fatal("file path is required as option -i")
+	}
+}
+
+func checkAccountWithoutAuth() {
+	if opts.Account == "" || !enum.ValidateAccountType(opts.Account) ||
+		opts.Account == string(enum.AccountTypeAuthorization) {
+		logger.Fatal("Account[client, receipt, payment, quoine, fee, stored] should be set with -a option")
+	}
+}
+
 //キー関連機能[k]
 func keyFunctionalities(wallet *service.Wallet) {
 	switch opts.Mode {
 	case 1:
-		logger.Info("Run: coldwalletで生成した[client]アドレスをwalletにimportする")
-		if opts.ImportFile == "" {
-			logger.Fatal("file path is required as argument file when running")
-		}
-		err := wallet.ImportPublicKeyForWatchWallet(opts.ImportFile, enum.AccountTypeClient, opts.IsRescan)
+		logger.Info("Run: coldwalletで生成したAccountのアドレスをwalletにimportする")
+		checkImportFile()
+		checkAccountWithoutAuth()
+		logger.Infof("Run: Account[%s]", opts.Account)
+
+		//import public key
+		err := wallet.ImportPublicKeyForWatchWallet(opts.ImportFile, enum.AccountType(opts.Account), opts.IsRescan)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-	case 2:
-		logger.Info("Run: coldwalletで生成した[receipt]アドレスをwalletにimportする")
-		if opts.ImportFile == "" {
-			logger.Fatal("file path is required as argument file when running")
-		}
-		err := wallet.ImportPublicKeyForWatchWallet(opts.ImportFile, enum.AccountTypeReceipt, opts.IsRescan)
-		if err != nil {
-			logger.Fatalf("%+v", err)
-		}
-	case 3:
-		logger.Info("Run: coldwalletで生成した[payment]アドレスをwalletにimportする")
-		if opts.ImportFile == "" {
-			logger.Fatal("file path is required as argument file when running")
-		}
-		err := wallet.ImportPublicKeyForWatchWallet(opts.ImportFile, enum.AccountTypePayment, opts.IsRescan)
-		if err != nil {
-			logger.Fatalf("%+v", err)
-		}
+		logger.Info("Done!")
 
 	default:
 		logger.Warn("opts.Mode is out of range")

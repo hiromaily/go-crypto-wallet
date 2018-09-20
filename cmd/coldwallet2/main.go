@@ -36,7 +36,7 @@ type Options struct {
 	//Debugモード
 	Debug bool `short:"d" long:"debug" description:"for only development use"`
 
-	//実行される詳細機能
+	//実行されるサブ機能
 	Mode uint8 `short:"m" long:"mode" description:"Mode: detailed functionalities"`
 
 	//txファイルパス

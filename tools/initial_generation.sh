@@ -52,7 +52,7 @@ coldwallet2 -k -m 30 -i ./data/pubkey/xxx.csv -a quoine
 coldwallet2 -k -m 30 -i ./data/pubkey/xxx.csv -a fee
 coldwallet2 -k -m 30 -i ./data/pubkey/xxx.csv -a stored
 
-#`addmultisigaddress`を実行する。パラメータは、accountのアドレス、authorizationのアドレス
+#`addmultisigaddress`を実行し、multisigアドレスを生成する。パラメータは、accountのアドレス、authorizationのアドレス
 coldwallet2 -k -m 40 -a receipt
 coldwallet2 -k -m 40 -a payment
 coldwallet2 -k -m 40 -a quoine
@@ -88,8 +88,12 @@ coldwallet1 -k -m 50 -a stored
 ###############################################################################
 #watch only wallet
 ###############################################################################
-wallet -k -m 1 -x -i ./data/pubkey/xxx.csv
-wallet -k -m 2 -x -i ./data/pubkey/xxx.csv
-wallet -k -m 3 -x -i ./data/pubkey/xxx.csv
+#coldwalletで生成したAccountのアドレスをwalletにimportする
+wallet -k -m 1 -x -i ./data/pubkey/xxx.csv -a client #-x rescan=true(coreのwallet.datをリセットした場合)
+wallet -k -m 1 -x -i ./data/pubkey/xxx.csv -a payment
+wallet -k -m 1 -x -i ./data/pubkey/xxx.csv -a quoine
+wallet -k -m 1 -x -i ./data/pubkey/xxx.csv -a fee
+wallet -k -m 1 -x -i ./data/pubkey/xxx.csv -a stored
 
+#検証用に出金データを作成する
 wallet -d -m 1
