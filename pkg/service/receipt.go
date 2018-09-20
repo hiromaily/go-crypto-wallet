@@ -204,6 +204,7 @@ func (w *Wallet) createRawTransactionAndFee(actionType enum.ActionType, accountT
 	// 9. GCSにトランザクションファイルを作成
 	//TODO:本来、この戻り値をDumpして、GCSに保存、それをDLして、USBに入れてコールドウォレットに移動しなくてはいけない
 	//TODO:Debug時はlocalに出力することとする。=> これはフラグで判別したほうがいいかもしれない/Interface型にして対応してもいいかも
+	//TODO:ここでエラーが起きると、再生成するために、insertされたデータを削除しないといけない。DB更新より先にファイルを作成したほうがいい？？
 	var generatedFileName string
 	if txReceiptID != 0 {
 		generatedFileName, err = w.storeHex(hex, encodedAddrsPrevs, txReceiptID, actionType)

@@ -230,8 +230,9 @@ const (
 
 //ActionTypeValue action_typeの値
 var ActionTypeValue = map[ActionType]uint8{
-	ActionTypeReceipt: 1,
-	ActionTypePayment: 2,
+	ActionTypeReceipt:  1,
+	ActionTypePayment:  2,
+	ActionTypeTransfer: 3,
 }
 
 // ValidateActionType ActionTypeのバリデーションを行う
