@@ -31,6 +31,9 @@ var accountKeyTableName = map[enum.AccountType]string{
 	enum.AccountTypeClient:        "account_key_client",
 	enum.AccountTypeReceipt:       "account_key_receipt",
 	enum.AccountTypePayment:       "account_key_payment",
+	enum.AccountTypeQuoine:        "account_key_quoine",
+	enum.AccountTypeFee:           "account_key_payment",
+	enum.AccountTypeStored:        "account_key_stored",
 	enum.AccountTypeAuthorization: "account_key_authorization",
 }
 

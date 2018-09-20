@@ -25,6 +25,9 @@ type AddedPubkeyHistoryTable struct {
 var addedPubkeyHistoryTableName = map[enum.AccountType]string{
 	enum.AccountTypeReceipt: "added_pubkey_history_receipt",
 	enum.AccountTypePayment: "added_pubkey_history_payment",
+	enum.AccountTypeQuoine:  "added_pubkey_history_quoine",
+	enum.AccountTypeFee:     "added_pubkey_history_fee",
+	enum.AccountTypeStored:  "added_pubkey_history_stored",
 }
 
 //getAddedPubkeyHistoryTableByNoWalletMultisigAddress WalletMultisigAddressが発行されていないレコードを返す
