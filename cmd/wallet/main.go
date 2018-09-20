@@ -52,8 +52,10 @@ type Options struct {
 	Fee float64 `short:"f" long:"fee" default:"" description:"adjustment fee"`
 	//import時にscanするかどうか
 	IsRescan bool `short:"x" long:"rescan" description:"scan blocks when importing key"`
-	//アカウント
+	//アカウント (アカウント間送金の場合は、from account)
 	Account string `short:"a" long:"account" description:"account like client, receipt, payment"`
+	//アカウント (to account)
+	Account2 string `short:"t" long:"account_to" description:"account like client, receipt, payment"`
 }
 
 var (
@@ -116,6 +118,13 @@ func checkAccountWithoutAuth() {
 	if opts.Account == "" || !enum.ValidateAccountType(opts.Account) ||
 		opts.Account == string(enum.AccountTypeAuthorization) {
 		logger.Fatal("Account[client, receipt, payment, quoine, fee, stored] should be set with -a option")
+	}
+}
+
+func checkAccountWithoutAuthAndClient(account string) {
+	if account == "" || !enum.ValidateAccountType(account) ||
+		account == string(enum.AccountTypeAuthorization) || account == string(enum.AccountTypeClient) {
+		logger.Fatal("Account[receipt, payment, quoine, fee, stored] should be set with -a option")
 	}
 }
 
@@ -255,7 +264,10 @@ func transferFunctionalities(wallet *service.Wallet) {
 	switch opts.Mode {
 	case 1:
 		logger.Info("Run:内部アカウント転送のための未署名トランザクション作成")
-		hex, fileName, err := wallet.SendToAccount(enum.AccountTypeReceipt, enum.AccountTypePayment, 0)
+		checkAccountWithoutAuthAndClient(opts.Account)
+		checkAccountWithoutAuthAndClient(opts.Account2)
+
+		hex, fileName, err := wallet.SendToAccount(enum.AccountType(opts.Account), enum.AccountType(opts.Account2), 0)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}

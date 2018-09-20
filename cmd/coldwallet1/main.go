@@ -110,9 +110,7 @@ func signFunctionalities(wallet *service.Wallet) {
 	case 1:
 		// importしたファイルからhex値を取得し、署名を行う(ReceiptかPaymentかはfileNameから判別))
 		logger.Info("Run: Importしたファイルからhex値を取得し、署名を行う(Receipt)")
-		if opts.ImportFile == "" {
-			logger.Fatal("file path is required as argument file when running")
-		}
+		checkImportFile()
 
 		//出金/入金の判別はファイル名から行う
 		hexTx, isSigned, generatedFileName, err := wallet.SignatureFromFile(opts.ImportFile)
