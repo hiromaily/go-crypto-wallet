@@ -128,6 +128,9 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 
 	//4. Listunspent()にてpaymentアカウント用のutxoをすべて取得する
 	unspentList, addrs, err := w.BTC.ListUnspentByAccount(enum.AccountTypePayment)
+	if err != nil {
+		return "", "", errors.Errorf("BTC.ListUnspentByAccount() error: %s", err)
+	}
 
 	var (
 		inputs          []btcjson.TransactionInput

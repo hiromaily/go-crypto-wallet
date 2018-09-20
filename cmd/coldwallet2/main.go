@@ -41,6 +41,10 @@ type Options struct {
 
 	//txファイルパス
 	ImportFile string `short:"i" long:"import" default:"" description:"import file path for hex"`
+	//key生成時に発行する数
+	KeyNumber uint32 `short:"n" long:"keynumber" description:"key number for generation"`
+	//アカウント
+	Account string `short:"a" long:"account" description:"account like client, receipt, payment"`
 }
 
 var (
@@ -79,6 +83,25 @@ func main() {
 
 }
 
+func checkImportFile() {
+	if opts.ImportFile == "" {
+		logger.Fatal("file path is required as option -i")
+	}
+}
+
+func checkAccountWithoutAuthAndClient() {
+	if opts.Account == "" || !enum.ValidateAccountType(opts.Account) ||
+		opts.Account == string(enum.AccountTypeAuthorization) || opts.Account == string(enum.AccountTypeClient) {
+		logger.Fatal("Account[receipt, payment, quoine, fee, stored] should be set with -a option")
+	}
+}
+
+func checkAccountOnlyAuth() {
+	if opts.Account != string(enum.AccountTypeAuthorization) {
+		logger.Fatal("Account[authorization] should be set with -a option")
+	}
+}
+
 // [coldwallet1]としての署名機能群 入金時の署名/出金時の署名[s]
 // TODO:出金時の署名は、coldwallet1/coldwallet2でそれぞれで署名が必要
 func signFunctionalities(wallet *service.Wallet) {
@@ -87,9 +110,7 @@ func signFunctionalities(wallet *service.Wallet) {
 	case 1:
 		// importしたファイルからhex値を取得し、署名を行う(ReceiptかPaymentかはfileNameから判別))
 		logger.Info("Run: Importしたファイルからhex値を取得し、署名を行う(Receipt)")
-		if opts.ImportFile == "" {
-			logger.Fatal("file path is required as argument file when running")
-		}
+		checkImportFile()
 
 		//出金/入金の判別はファイル名から行う
 		hexTx, isSigned, generatedFileName, err := wallet.SignatureFromFile(opts.ImportFile)
@@ -116,89 +137,79 @@ func keyFunctionalities(wallet *service.Wallet) {
 		}
 		logger.Infof("seed: %s", key.SeedToString(bSeed))
 
-	case 13:
+	case 10:
 		//[coldwallet2のみ]
 		//AuthorizationのKeyを作成する
 		//FIXME:とりあえず、1行しか追加できないようにしておくか？
 		logger.Info("Run: AuthorizationのKeyを作成する")
+
+		//checkAccountOnlyAuth()
+
+		//seed
 		bSeed, err := wallet.GenerateSeed()
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
+
+		//generate
 		keys, err := wallet.GenerateAccountKey(enum.AccountTypeAuthorization, enum.BTC, bSeed, 1)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
 		grok.Value(keys)
 
-	case 23:
+	case 20:
 		//[coldwallet2のみ]
 		//作成したAuthorizationのPrivateKeyをColdWalletにimportする
 		logger.Info("Run: 作成したAuthorizationのPrivateKeyをColdWalletにimportする")
+
+		//import private key to coldwallet
 		err := wallet.ImportPrivateKey(enum.AccountTypeAuthorization)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-		//getaddressesbyaccount "authorization" で内容を確認
+		logger.Info("Done!")
 
-	case 33:
+	case 30:
 		//[coldwallet2のみ]
-		//coldwallet1からexportしたReceiptのpublicアドレスをcoldWallet2にimportする
-		logger.Info("Run: coldwallet1からexportしたReceiptのpublicアドレスcoldWallet2にimportする")
-		if opts.ImportFile == "" {
-			logger.Fatal("file path is required as argument file when running")
-		}
-		err := wallet.ImportPublicKeyForColdWallet2(opts.ImportFile, enum.AccountTypeReceipt)
+		//coldwallet1からexportしたAccountのpublicアドレスをcoldWallet2にimportする
+		logger.Info("Run: coldwallet1からexportしたAccountのpublicアドレスcoldWallet2にimportする")
+		checkImportFile()
+		checkAccountWithoutAuthAndClient()
+		logger.Infof("Run: Account[%s]", opts.Account)
+
+		//import public key to database
+		err := wallet.ImportPublicKeyForColdWallet2(opts.ImportFile, enum.AccountType(opts.Account))
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
+		logger.Info("Done!")
 
-	case 34:
+	case 40:
 		//[coldwallet2のみ]
-		//coldwallet1からexportしたPaymentのpublicアドレスをcoldWallet2にimportする
-		logger.Info("Run: coldwallet1からexportしたPaymentのpublicアドレスcoldWallet2にimportする")
-		if opts.ImportFile == "" {
-			logger.Fatal("file path is required as argument file when running")
-		}
-		err := wallet.ImportPublicKeyForColdWallet2(opts.ImportFile, enum.AccountTypePayment)
+		//`addmultisigaddress`を実行する。パラメータは、accountのアドレス、authorizationのアドレス
+		logger.Info("Run: `addmultisigaddress`を実行する。パラメータは、accountのアドレス、authorizationのアドレス")
+
+		checkAccountWithoutAuthAndClient()
+		logger.Infof("Run: Account[%s]", opts.Account)
+
+		//execute addmultisigaddress
+		err := wallet.AddMultisigAddressByAuthorization(enum.AccountType(opts.Account), enum.AddressTypeP2shSegwit)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
+		logger.Info("Done!")
 
 	case 50:
 		//[coldwallet2のみ]
-		//`addmultisigaddress`を実行する。パラメータは、receiptのアドレス、authorizationのアドレス
-		logger.Info("Run: `addmultisigaddress`を実行する。パラメータは、receiptのアドレス、authorizationのアドレス")
-		err := wallet.AddMultisigAddressByAuthorization(enum.AccountTypeReceipt, enum.AddressTypeP2shSegwit)
-		if err != nil {
-			logger.Fatalf("%+v", err)
-		}
+		//作成したAccountのMultisigアドレスをcsvファイルとしてexportする
+		logger.Info("Run: 作成したAccountのMultisigアドレスをcsvファイルとしてexportする")
 
-	case 51:
-		//[coldwallet2のみ]
-		//`addmultisigaddress`を実行する。パラメータは、paymentのアドレス、authorizationのアドレス
-		logger.Info("Run: `addmultisigaddress`を実行する。パラメータは、receiptのアドレス、authorizationのアドレス")
-		err := wallet.AddMultisigAddressByAuthorization(enum.AccountTypePayment, enum.AddressTypeP2shSegwit)
-		if err != nil {
-			logger.Fatalf("%+v", err)
-		}
+		checkAccountWithoutAuthAndClient()
+		logger.Infof("Run: Account[%s]", opts.Account)
 
-	case 60:
-		//[coldwallet2のみ]
-		//TODO:作成したReceiptのMultisigアドレスをcsvファイルとしてexportする
-		logger.Info("Run: 作成したReceiptのMultisigアドレスをcsvファイルとしてexportする")
-		fileName, err := wallet.ExportAddedPubkeyHistory(enum.AccountTypeReceipt)
-		if err != nil {
-			logger.Fatalf("%+v", err)
-		}
-		logger.Infof("fileName: %s", fileName)
-
-	case 61:
-		//[coldwallet2のみ]
-		//TODO:作成したPaymentのMultisigアドレスをcsvファイルとしてexportする
-		logger.Info("Run: 作成したPaymentのMultisigアドレスをcsvファイルとしてexportする")
-
-		fileName, err := wallet.ExportAddedPubkeyHistory(enum.AccountTypePayment)
+		//export multisig address
+		fileName, err := wallet.ExportAddedPubkeyHistory(enum.AccountType(opts.Account))
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}

@@ -132,9 +132,10 @@ var AccountTypeMultisig = map[AccountType]bool{
 	AccountTypeClient:        false,
 	AccountTypeReceipt:       true,
 	AccountTypePayment:       true,
+	AccountTypeQuoine:        true,
+	AccountTypeFee:           true,
+	AccountTypeStored:        true,
 	AccountTypeAuthorization: false,
-	AccountTypeQuoine:        false,
-	AccountTypeFee:           false,
 }
 
 // ValidateAccountType AccountTypeのバリデーションを行う

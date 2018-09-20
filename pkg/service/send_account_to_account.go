@@ -41,6 +41,10 @@ func (w *Wallet) SendToAccount(from, to enum.AccountType, amount btcutil.Amount)
 	//指定金額になるまで、utxoからinputを作成する
 	// Listunspent()にてpaymentアカウント用のutxoをすべて取得する
 	unspentList, _, err := w.BTC.ListUnspentByAccount(from)
+	if err != nil {
+		return "", "", errors.Errorf("BTC.ListUnspentByAccount(%s) error: %s", from, err)
+	}
+
 	if len(unspentList) == 0 {
 		logger.Infof("no listunspent for %s", from)
 		return "", "", nil
