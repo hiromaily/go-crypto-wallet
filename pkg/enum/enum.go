@@ -244,7 +244,7 @@ func ValidateActionType(val string) bool {
 }
 
 //ActionToAccountMap ActionTypeをAccountTypeでマッピングする
-var ActionToAccountMap = map[ActionType]AccountType{
-	ActionTypeReceipt: AccountTypeClient,
-	ActionTypePayment: AccountTypePayment,
-}
+//var ActionToAccountMap = map[ActionType]AccountType{
+//	ActionTypeReceipt: AccountTypeClient,
+//	ActionTypePayment: AccountTypePayment,
+//}

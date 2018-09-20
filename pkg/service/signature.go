@@ -139,8 +139,8 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 	}
 
 	//multisigの場合のみの処理
-	accountType, ok := enum.ActionToAccountMap[actionType]
-	if ok && enum.AccountTypeMultisig[accountType] {
+	//accountType, ok := enum.ActionToAccountMap[actionType]
+	if enum.AccountTypeMultisig[addrsPrevs.SenderAccount] {
 		if w.Type == enum.WalletTypeCold1 {
 			//取得したredeemScriptをPrevTxsにマッピング
 			for idx, val := range addrsPrevs.Addrs {
