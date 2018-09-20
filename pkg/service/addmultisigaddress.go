@@ -18,8 +18,13 @@ func (w *Wallet) AddMultisigAddressByAuthorization(accountType enum.AccountType,
 	}
 
 	//accountチェック
-	if accountType != enum.AccountTypeReceipt && accountType != enum.AccountTypePayment {
-		logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
+	//multisigであればこのチェックはOK
+	//if accountType != enum.AccountTypeReceipt && accountType != enum.AccountTypePayment {
+	//	logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
+	//	return nil
+	//}
+	if !enum.AccountTypeMultisig[accountType] {
+		logger.Info("This func is for only account witch uses multiaddress")
 		return nil
 	}
 

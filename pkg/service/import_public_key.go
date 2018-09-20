@@ -81,10 +81,16 @@ func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum
 	}
 
 	//accountチェック
-	if accountType != enum.AccountTypeReceipt && accountType != enum.AccountTypePayment {
-		logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
+	//multisigであればこのチェックはOK
+	//if accountType != enum.AccountTypeReceipt && accountType != enum.AccountTypePayment {
+	//	logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
+	//	return nil
+	//}
+	if !enum.AccountTypeMultisig[accountType] {
+		logger.Info("This func is for only account witch uses multiaddress")
 		return nil
 	}
+
 	//TODO:ImportするファイルのaccountTypeもチェックしたほうがBetter
 	//e.g. ./data/pubkey/receipt
 	tmp := strings.Split(strings.Split(fileName, "_")[0], "/")
@@ -127,10 +133,17 @@ func (w *Wallet) ImportMultisigAddrForColdWallet1(fileName string, accountType e
 		return errors.New("it's available on Coldwallet1")
 	}
 
-	if accountType != enum.AccountTypeReceipt && accountType != enum.AccountTypePayment {
-		logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
+	//accountチェック
+	//multisigであればこのチェックはOK
+	//if accountType != enum.AccountTypeReceipt && accountType != enum.AccountTypePayment {
+	//	logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
+	//	return nil
+	//}
+	if !enum.AccountTypeMultisig[accountType] {
+		logger.Info("This func is for only account witch uses multiaddress")
 		return nil
 	}
+
 	//TODO:ImportするファイルのaccountTypeもチェックしたほうがBetter
 	//e.g. ./data/pubkey/receipt
 	tmp := strings.Split(strings.Split(fileName, "_")[0], "/")
