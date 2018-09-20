@@ -46,11 +46,11 @@ coldwallet2 -k -m 10
 coldwallet2 -k -m 20
 
 #coldwallet1からexportしたAccountのpublicアドレスをcoldWallet2にimportする
-coldwallet2 -k -m 30 -i ./data/pubkey/xxx.csv -a receipt
-coldwallet2 -k -m 30 -i ./data/pubkey/xxx.csv -a payment
-coldwallet2 -k -m 30 -i ./data/pubkey/xxx.csv -a quoine
-coldwallet2 -k -m 30 -i ./data/pubkey/xxx.csv -a fee
-coldwallet2 -k -m 30 -i ./data/pubkey/xxx.csv -a stored
+coldwallet2 -k -m 30 -i ./data/pubkey/receipt_1_xxx.csv -a receipt
+coldwallet2 -k -m 30 -i ./data/pubkey/payment_1_xxx.csv -a payment
+coldwallet2 -k -m 30 -i ./data/pubkey/quoine_1_xxx.csv -a quoine
+coldwallet2 -k -m 30 -i ./data/pubkey/fee_1_xxx.csv -a fee
+coldwallet2 -k -m 30 -i ./data/pubkey/stored_1_xxx.csv -a stored
 
 #`addmultisigaddress`を実行し、multisigアドレスを生成する。パラメータは、accountのアドレス、authorizationのアドレス
 coldwallet2 -k -m 40 -a receipt
@@ -89,7 +89,7 @@ coldwallet1 -k -m 50 -a stored
 #watch only wallet
 ###############################################################################
 #coldwalletで生成したAccountのアドレスをwalletにimportする
-wallet -k -m 1 -x -i ./data/pubkey/xxx.csv -a client #-x rescan=true(coreのwallet.datをリセットした場合)
+wallet -k -m 1 -x -i ./data/pubkey/client_1_xxx.csv -a client #-x rescan=true(coreのwallet.datをリセットした場合)
 wallet -k -m 1 -x -i ./data/pubkey/xxx.csv -a payment
 wallet -k -m 1 -x -i ./data/pubkey/xxx.csv -a quoine
 wallet -k -m 1 -x -i ./data/pubkey/xxx.csv -a fee

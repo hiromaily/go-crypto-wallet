@@ -70,7 +70,7 @@ func (w *Wallet) ExportAccountKey(accountType enum.AccountType, keyStatus enum.K
 	}
 
 	//Multisig対応かどうかのジャッジ
-	logger.Info("Is this account[%s] for multisig: %t", accountType, enum.AccountTypeMultisig[accountType])
+	logger.Infof("Is this account[%s] for multisig: %t", accountType, enum.AccountTypeMultisig[accountType])
 
 	return fileName, nil
 }
