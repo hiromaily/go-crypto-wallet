@@ -97,7 +97,6 @@ func (w *Wallet) exportAccountKeyTable(accountKeyTable []model.AccountKeyTable, 
 			record.FullPublicKey,
 			record.WalletMultisigAddress,
 			record.Account,
-			strconv.Itoa(int(record.KeyType)),
 			strconv.Itoa(int(record.Idx)),
 		}
 		_, err = writer.WriteString(strings.Join(tmpData[:], ",") + "\n")

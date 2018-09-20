@@ -22,7 +22,6 @@ type AccountKeyTable struct {
 	RedeemScript          string     `db:"redeem_script"`
 	WalletImportFormat    string     `db:"wallet_import_format"`
 	Account               string     `db:"account"`
-	KeyType               uint8      `db:"key_type"`
 	Idx                   uint32     `db:"idx"`
 	KeyStatus             uint8      `db:"key_status"`
 	UpdatedAt             *time.Time `db:"updated_at"`
@@ -125,8 +124,8 @@ func (m *DB) GetAllAccountKeyByMultiAddrs(accountType enum.AccountType, addrs []
 func (m *DB) insertAccountKeyTable(tbl string, accountKeyTables []AccountKeyTable, tx *sqlx.Tx, isCommit bool) error {
 
 	sql := `
-INSERT INTO %s (wallet_address, p2sh_segwit_address, full_public_key, wallet_multisig_address, redeem_script, wallet_import_format, account, key_type, idx) 
-VALUES (:wallet_address, :p2sh_segwit_address,:full_public_key, :wallet_multisig_address, :redeem_script, :wallet_import_format, :account, :key_type, :idx)
+INSERT INTO %s (wallet_address, p2sh_segwit_address, full_public_key, wallet_multisig_address, redeem_script, wallet_import_format, account, idx) 
+VALUES (:wallet_address, :p2sh_segwit_address,:full_public_key, :wallet_multisig_address, :redeem_script, :wallet_import_format, :account, :idx)
 `
 	sql = fmt.Sprintf(sql, tbl)
 	logger.Debugf("sql: %s", sql)
