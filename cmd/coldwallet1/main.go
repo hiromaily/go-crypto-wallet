@@ -189,7 +189,7 @@ func keyFunctionalities(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-		logger.Infof("fileName: %s", fileName)
+		logger.Infof("[fileName]: %s", fileName)
 
 	case 40:
 		//[coldwallet1のみ]
@@ -219,7 +219,7 @@ func keyFunctionalities(wallet *service.Wallet) {
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
-		logger.Infof("fileName: %s", fileName)
+		logger.Infof("[fileName]: %s", fileName)
 
 	default:
 		logger.Warn("opts.Mode is out of range")

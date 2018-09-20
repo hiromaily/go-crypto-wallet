@@ -404,6 +404,11 @@ func debugForCheck(wallet *service.Wallet) {
 			log.Fatalf("%+v", err)
 		}
 		logger.Infof("balance: %v", balance)
+	case 4:
+		//bash戻り値検証用
+		logger.Info("aaabbb")
+		logger.Info("[fileName]: ./data/pubkey/stored_1_1537438241658920000.csv")
+
 	default:
 		logger.Warn("opts.Mode is out of range")
 		procedure.ShowWallet()
