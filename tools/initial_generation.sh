@@ -71,11 +71,11 @@ coldwallet2 -k -m 50 -a stored
 #coldwallet1
 ###############################################################################
 #coldwallet2からexportしたAccountのmultisigアドレスをcoldWallet1にimportする
-coldwallet1 -k -m 40 -i ./data/pubkey/xxx.csv -a receipt
-coldwallet1 -k -m 40 -i ./data/pubkey/xxx.csv -a payment
-coldwallet1 -k -m 40 -i ./data/pubkey/xxx.csv -a quoine
-coldwallet1 -k -m 40 -i ./data/pubkey/xxx.csv -a fee
-coldwallet1 -k -m 40 -i ./data/pubkey/xxx.csv -a stored
+coldwallet1 -k -m 40 -i ./data/pubkey/receipt_2_xxx.csv -a receipt
+coldwallet1 -k -m 40 -i ./data/pubkey/payment_2_xxx.csv -a payment
+coldwallet1 -k -m 40 -i ./data/pubkey/quoine_2_xxx.csv -a quoine
+coldwallet1 -k -m 40 -i ./data/pubkey/fee_2_xxx.csv -a fee
+coldwallet1 -k -m 40 -i ./data/pubkey/stored_2xxx.csv -a stored
 
 #multisigのimport後、AccountのMultisigをcsvファイルとしてexportする
 coldwallet1 -k -m 50 -a receipt
@@ -89,11 +89,13 @@ coldwallet1 -k -m 50 -a stored
 #watch only wallet
 ###############################################################################
 #coldwalletで生成したAccountのアドレスをwalletにimportする
-wallet -k -m 1 -x -i ./data/pubkey/client_1_xxx.csv -a client #-x rescan=true(coreのwallet.datをリセットした場合)
-wallet -k -m 1 -x -i ./data/pubkey/xxx.csv -a payment
-wallet -k -m 1 -x -i ./data/pubkey/xxx.csv -a quoine
-wallet -k -m 1 -x -i ./data/pubkey/xxx.csv -a fee
-wallet -k -m 1 -x -i ./data/pubkey/xxx.csv -a stored
+#wallet -k -m 1 -x -i ./data/pubkey/client_1_xxx.csv -a client #-x rescan=true(coreのwallet.datをリセットした場合)
+wallet -k -m 1 -i ./data/pubkey/client_1_xxx.csv -a client
+wallet -k -m 1 -i ./data/pubkey/receipt_3_xxx.csv -a receipt
+wallet -k -m 1 -i ./data/pubkey/payment_3_xxx.csv -a payment
+wallet -k -m 1 -i ./data/pubkey/quoine_3_xxx.csv -a quoine
+wallet -k -m 1 -i ./data/pubkey/fee_3_xxx.csv -a fee
+wallet -k -m 1 -i ./data/pubkey/stored_3_xxx.csv -a stored
 
 #検証用に出金データを作成する
 wallet -d -m 1
