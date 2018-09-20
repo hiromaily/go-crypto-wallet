@@ -94,6 +94,7 @@ function watch_only_import_keys() {
     wallet -d -m 1
 }
 
+# $ ./tools/integration_on_docker.sh 99
 function generate_all() {
    #seedを生成
     coldwallet1 -k -m 1
@@ -129,7 +130,7 @@ function generate_all() {
 
     #coldwallet1からexportしたAccountのpublicアドレスをcoldWallet2にimportする
     coldwallet2 -k -m 30 -i ${file_receipt##*\[fileName\]: } -a receipt
-    coldwallet2 -k -m 30 -i ${file_payent##*\[fileName\]: } -a payment
+    coldwallet2 -k -m 30 -i ${file_payment##*\[fileName\]: } -a payment
     coldwallet2 -k -m 30 -i ${file_quoine##*\[fileName\]: } -a quoine
     coldwallet2 -k -m 30 -i ${file_fee##*\[fileName\]: } -a fee
     coldwallet2 -k -m 30 -i ${file_stored##*\[fileName\]: } -a stored
