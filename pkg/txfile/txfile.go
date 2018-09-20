@@ -99,16 +99,15 @@ func GetTxType(filePath string) (enum.ActionType, error) {
 }
 
 // WriteFile ファイルに書き込む
-// TODO:ioをパラメータに持つか
 func WriteFile(path, hexTx string) (string, error) {
 	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
 
-	//TODO:ディレクトリが存在しなければ作成する？？
+	//ディレクトリが存在しなければ作成する
 	tmp1 := strings.Split(path, "/")
 	tmp2 := tmp1[0 : len(tmp1)-1]
 	dir := strings.Join(tmp2, "/")
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		os.Mkdir(dir, 0644)
+		os.Mkdir(dir, 0755)
 	}
 
 	byteTx := []byte(hexTx)

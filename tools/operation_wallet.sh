@@ -7,7 +7,7 @@ wallet -r -m 1
 wallet -p -m 1
 
 #内部アカウント間の送金 + 未署名トランザクション作成
-wallet -t -m 1 -a receipt -t payment
+wallet -t -m 1 -a receipt -z payment
 
 #署名済トランザクションの送信
 wallet -s -m 1

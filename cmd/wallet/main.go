@@ -55,7 +55,7 @@ type Options struct {
 	//アカウント (アカウント間送金の場合は、from account)
 	Account string `short:"a" long:"account" description:"account like client, receipt, payment"`
 	//アカウント (to account)
-	Account2 string `short:"t" long:"account_to" description:"account like client, receipt, payment"`
+	Account2 string `short:"z" long:"account_to" description:"account like client, receipt, payment"`
 }
 
 var (
