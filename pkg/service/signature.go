@@ -164,7 +164,8 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 	}
 
 	//署名
-	if actionType == enum.ActionTypePayment {
+	//multisigかどうかで判別
+	if enum.AccountTypeMultisig[addrsPrevs.SenderAccount] {
 		signedTx, isSigned, err = w.BTC.SignRawTransactionWithKey(msgTx, wips, addrsPrevs.PrevTxs)
 	} else {
 		signedTx, isSigned, err = w.BTC.SignRawTransaction(msgTx, addrsPrevs.PrevTxs)

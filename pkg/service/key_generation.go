@@ -34,15 +34,20 @@ func (w *Wallet) GenerateSeed() ([]byte, error) {
 	}
 
 	// seed生成
-	bSeed, err = key.GenerateSeed()
-	if err != nil {
-		return nil, errors.Errorf("key.GenerateSeed() error: %s", err)
-	}
-	strSeed := key.SeedToString(bSeed)
-
 	// set default seed
+	var strSeed string
 	if w.Env == enum.EnvDev && w.Seed != "" {
 		strSeed = w.Seed
+		bSeed, err = key.SeedToByte(strSeed)
+		if err != nil {
+			return nil, errors.Errorf("key.SeedToByte() error: %s", err)
+		}
+	} else {
+		bSeed, err = key.GenerateSeed()
+		if err != nil {
+			return nil, errors.Errorf("key.GenerateSeed() error: %s", err)
+		}
+		strSeed = key.SeedToString(bSeed)
 	}
 
 	// DBにseed情報を登録
