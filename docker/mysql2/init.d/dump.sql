@@ -43,42 +43,6 @@ CREATE TABLE `seed` (
 
 
 --
--- Table structure for table `key_type`
---
-
-DROP TABLE IF EXISTS `key_type`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `key_type` (
-  `id`           tinyint(1) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `purpose`      tinyint(1) UNSIGNED NOT NULL COMMENT'purpose',
-  `coin_type`    tinyint(1) UNSIGNED NOT NULL COMMENT'コインの種類(Mainnet, Testnet)',
-  `account_type` tinyint(1) UNSIGNED NOT NULL COMMENT'利用目的',
-  `change_type`  tinyint(1) UNSIGNED NOT NULL COMMENT'受け取り階層',
-  `description`  VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'説明',
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Key種別テーブル';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
-
-/*まずはcoin_type:1 => Testnet用として作成する*/
-LOCK TABLES `key_type` WRITE;
-/*!40000 ALTER TABLE `key_type` DISABLE KEYS */;
-INSERT INTO `key_type` VALUES
-  (1,44,0,0,0,'顧客用 MainNet環境のためのkey',now()),
-  (2,44,0,1,0,'入金保管用 MainNet環境のためのkey',now()),
-  (3,44,0,2,0,'支払い用 MainNet環境のためのkey',now()),
-  (4,44,0,3,0,'承認用 MainNet環境のためのkey',now()),
-  (5,44,1,0,0,'顧客用 TestNet環境のためのkey',now()),
-  (6,44,1,1,0,'入金保管用 TestNet環境のためのkey',now()),
-  (7,44,1,2,0,'支払い用 TestNet環境のためのkey',now()),
-  (8,44,1,3,0,'承認用 TestNet環境のためのkey',now());
-/*!40000 ALTER TABLE `key_type` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
---
 -- Table structure for table `account_key_client`
 --
 
@@ -94,7 +58,6 @@ CREATE TABLE `account_key_client` (
   `redeem_script`           VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'multisigアドレス生成後に渡されるredeedScript',
   `wallet_import_format`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'WIF',
   `account`                 VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'アドレスに紐づくアカウント名',
-  `key_type`                tinyint(1) UNSIGNED NOT NULL COMMENT'コインの種類',
   `idx`                     BIGINT(20) UNSIGNED NOT NULL COMMENT'HDウォレット生成時のindex',
   `key_status`              tinyint(1) UNSIGNED DEFAULT 0 NOT NULL COMMENT'keyの進捗ステータス',
   `updated_at`              datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
@@ -163,7 +126,7 @@ CREATE TABLE `account_key_fee` LIKE `account_key_client`;
 DROP TABLE IF EXISTS `account_key_stored`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `account_key_fee` LIKE `account_key_stored`;
+CREATE TABLE `account_key_stored` LIKE `account_key_client`;
 
 
 --
