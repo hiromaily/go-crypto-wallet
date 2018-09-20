@@ -37,5 +37,6 @@ adjustment_max = 2.0 #オプションにて調整可能なMaximum値
 # watch_only
 [gcs]
 storage_key_path = "./data/api_keys/cayenne-dev-strage.json"
-receipt_bucket_name = "cayenne-dev-exchanges-yasui-bucket"
-payment_bucket_name = "cayenne-dev-exchanges-yasui-bucket"
+receipt_bucket_name  = "cayenne-dev-exchanges-yasui-bucket"
+payment_bucket_name  = "cayenne-dev-exchanges-yasui-bucket"
+transfer_bucket_name = "cayenne-dev-exchanges-yasui-bucket"

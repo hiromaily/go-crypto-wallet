@@ -61,6 +61,9 @@ func InitialSettings(confPath string) (*Wallet, error) {
 	if conf.GCS.PaymentBucketName != "" {
 		gcs[enum.ActionTypePayment] = gcp.NewStorage(conf.GCS.PaymentBucketName, conf.GCS.StorageKeyPath)
 	}
+	if conf.GCS.TransferBucketName != "" {
+		gcs[enum.ActionTypeTransfer] = gcp.NewStorage(conf.GCS.TransferBucketName, conf.GCS.StorageKeyPath)
+	}
 
 	// Connection to Bitcoin core
 	bit, err := btc.Connection(&conf.Bitcoin)

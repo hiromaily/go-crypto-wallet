@@ -69,9 +69,10 @@ type PubKeyFileConf struct {
 
 // GCSConf Google Cloud Storage
 type GCSConf struct {
-	StorageKeyPath    string `toml:"storage_key_path"`
-	ReceiptBucketName string `toml:"receipt_bucket_name"`
-	PaymentBucketName string `toml:"payment_bucket_name"`
+	StorageKeyPath     string `toml:"storage_key_path"`
+	ReceiptBucketName  string `toml:"receipt_bucket_name"`
+	PaymentBucketName  string `toml:"payment_bucket_name"`
+	TransferBucketName string `toml:"transfer_bucket_name"`
 }
 
 // load configfile
