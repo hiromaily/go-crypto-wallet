@@ -29,11 +29,11 @@ func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum
 		return errors.Errorf("key.ImportPubKey() error: %s", err)
 	}
 
-	//[]AccountPublicKeyTable
+	//[]AccountPublicKeyTable //import時にアカウント名をcoreのwalletに登録する
 	account := string(accountType)
-	if accountType == enum.AccountTypeClient {
-		account = ""
-	}
+	//if accountType == enum.AccountTypeClient {
+	//	account = ""
+	//}
 
 	var pubKeyData []model.AccountPublicKeyTable
 	for _, key := range pubKeys {

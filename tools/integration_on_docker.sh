@@ -226,7 +226,7 @@ function generate_additional_key() {
 
 # 自動テスト(全ロジックをこのtestにて検証する)
 # TODO:送金後の、6confirmationチェックロジックの実装
-# $ ./tools/integration_on_docker.sh 8
+# $ ./tools/integration_on_docker.sh 99
 function auto_testing() {
     #check
     #docker-compose exec btc-wallet bitcoin-cli getnetworkinfo
@@ -236,17 +236,21 @@ function auto_testing() {
     generate_additional_key receipt 1
     generate_additional_key payment 2
 
-    #quoineアカウントからpaymentアカウントに出金する
-    file_unsigned=$(wallet -t -m 1 -a quoine -z payment)
-    #署名1
-    file_signed1=`coldwallet1 -s -m 1 -i "${file_unsigned##*\[fileName\]: }"`
-    #署名2
-    file_signed2=`coldwallet2 -s -m 1 -i "${file_signed1##*\[fileName\]: }"`
-    #送信
-    wallet -s -m 1 -i ${file_signed2##*\[fileName\]: }
-
-    #run after 6confirmation, so monitoring is required
-    #check_confirmation payment
+#    #quoineアカウントからpaymentアカウントに出金する
+#    file_unsigned=$(wallet -t -m 1 -a quoine -z payment)
+#    #TODO:file名が取得できなければSkip
+#    #署名1
+#    file_signed1=`coldwallet1 -s -m 1 -i "${file_unsigned##*\[fileName\]: }"`
+#    #署名2
+#    file_signed2=`coldwallet2 -s -m 1 -i "${file_signed1##*\[fileName\]: }"`
+#    #送信
+#    wallet -s -m 1 -i ${file_signed2##*\[fileName\]: }
+#
+#    #run after 6confirmation, so monitoring is required
+#    #check_confirmation payment
+#    while [ $(check_confirmation payment) -eq 0 ];do
+#        echo 'waiting payment for confirmation until 6...' && sleep 60;
+#    done
 
     #検証用出金データをリセット
     wallet -d -m 2
@@ -260,6 +264,9 @@ function auto_testing() {
     wallet -s -m 1 -i ${file_signed2##*\[fileName\]: }
 
     #run after 6confirmation, so monitoring is required
+    while [ $(check_confirmation client) -eq 0 ];do
+        echo 'waiting client for confirmation until 6...' && sleep 60;
+    done
 
     #入金 + 未署名トランザクション作成
     file_unsigned=$(wallet -r -m 1)
@@ -271,6 +278,9 @@ function auto_testing() {
     wallet -s -m 1 -i ${file_signed2##*\[fileName\]: }
 
     #run after 6confirmation, so monitoring is required
+    while [ $(check_confirmation receipt) -eq 0 ];do
+        echo 'waiting receipt for confirmation until 6...' && sleep 60;
+    done
 
     #receiptアカウントからpaymentアカウントに出金する
     file_unsigned=$(wallet -t -m 1 -a receipt -z payment)
@@ -282,16 +292,40 @@ function auto_testing() {
     wallet -s -m 1 -i ${file_signed2##*\[fileName\]: }
 
     #run after 6confirmation, so monitoring is required
+    while [ $(check_confirmation payment) -eq 0 ];do
+        echo 'waiting payment for confirmation until 6...' && sleep 60;
+    done
 
+    echo Done
 }
 
+# $ ./tools/integration_on_docker.sh 8
 # $1 account
 function check_confirmation() {
-    echo check 6 confirmation
-    wallet -n -m 1
-    # or listunspent by accountを使う??
+    ret=0
+    #echo check 6 confirmation
+    #wallet -n -m 1
+    # listunspent command
+    #docker-compose exec btc-wallet bitcoin-cli listunspent 6 | jq '.[]'
+    json_data=$(docker-compose exec btc-wallet bitcoin-cli listunspent 6)
+    len=$(echo $json_data | jq length)
+    for i in $( seq 0 $(($len - 1)) ); do
+        row=$(echo $json_data | jq .[$i])
+        account=$(echo $row | jq '.account')
+        if [ `echo ${account} | grep ${1}` ] ; then
+            conf=$(echo $row | jq '.confirmations')
+            if [ $conf -ge 6 ]; then
+                ret=1
+            fi
+        fi
+    done
 
+    echo $ret
 }
+
+###############################################################################
+# main
+###############################################################################
 
 set -eu
 
@@ -304,7 +338,6 @@ echo prameter1 is $1
 #echo ${ret##*\[fileName\]: }
 
 
-# main
 if [ $1 -eq 1 ]; then
     cold1_generate_key
 elif [ $1 -eq 2 ]; then
@@ -325,6 +358,9 @@ elif [ $1 -eq 7 ]; then
     #generate_additional_key payment 5
     generate_additional_key quoine 5
 elif [ $1 -eq 8 ]; then
+    ret=$(check_confirmation payment)
+    echo $ret
+elif [ $1 -eq 99 ]; then
     #auto testing
     auto_testing
 else

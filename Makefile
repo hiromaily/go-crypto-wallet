@@ -8,6 +8,7 @@ goget:
 setup:
 	#https://github.com/direnv/direnv
 	brew install direnv
+	brew install jq
 
 
 ###############################################################################
