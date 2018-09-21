@@ -17,7 +17,7 @@ func (w *Wallet) UpdateStatus() error {
 
 	//tx_typeが`done`で処理が止まっているものがあるという前提で、処理を分ける
 
-	types := []enum.ActionType{enum.ActionTypeReceipt, enum.ActionTypePayment}
+	types := []enum.ActionType{enum.ActionTypeReceipt, enum.ActionTypePayment, enum.ActionTypeTransfer}
 
 	//1.ここでは送信済のみが対象
 	for _, actionType := range types {
@@ -38,9 +38,9 @@ func (w *Wallet) UpdateStatus() error {
 	return nil
 }
 
-//
+// current_tx_type更新処理
 func (w *Wallet) updateStatusForTxTypeSent(actionType enum.ActionType) error {
-	// 更新
+	// 送信済statusのものを取得
 	hashes, err := w.DB.GetSentTxHashByTxTypeSent(actionType)
 	if err != nil {
 		return errors.Errorf("ActionType: %s, DB.GetSentTxHashByTxTypeSent() error: %s", actionType, err)

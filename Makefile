@@ -60,7 +60,7 @@ clear-db-volumes:
 # Automation on docker
 ###############################################################################
 auto-generation:
-    ./tools/integration_on_docker.sh 99
+	./tools/integration_on_docker.sh 99
 
 
 

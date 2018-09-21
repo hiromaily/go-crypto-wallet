@@ -288,6 +288,9 @@ function auto_testing() {
 # $1 account
 function check_confirmation() {
     echo check 6 confirmation
+    wallet -n -m 1
+    # or listunspent by accountを使う??
+
 }
 
 set -eu
