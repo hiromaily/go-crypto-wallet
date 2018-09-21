@@ -189,7 +189,6 @@ function generate_additional_key() {
     fi
     #TODO:account名の厳密なチェックが必要かも
 
-
     #keyを生成
     coldwallet1 -k -m 10 -n $2 -a $1
 
@@ -301,6 +300,7 @@ function auto_testing() {
 
 # $ ./tools/integration_on_docker.sh 8
 # $1 account
+#TODO: bitcoin coreのVer17だとaccountからlabel
 function check_confirmation() {
     ret=0
     #echo check 6 confirmation
@@ -312,6 +312,9 @@ function check_confirmation() {
     for i in $( seq 0 $(($len - 1)) ); do
         row=$(echo $json_data | jq .[$i])
         account=$(echo $row | jq '.account')
+        if [ -n "account" ]; then
+            account=$(echo $row | jq '.label')
+        fi
         if [ `echo ${account} | grep ${1}` ] ; then
             conf=$(echo $row | jq '.confirmations')
             if [ $conf -ge 6 ]; then
