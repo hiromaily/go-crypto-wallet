@@ -94,7 +94,8 @@ function watch_only_import_keys() {
     wallet -d -m 1
 }
 
-# $ ./tools/integration_on_docker.sh 99
+# 初回実行用、seed及び、アカウント各種のキーを生成する
+#1. $ ./tools/integration_on_docker.sh 6
 function generate_all() {
    #seedを生成
     coldwallet1 -k -m 1
@@ -175,6 +176,120 @@ function generate_all() {
     wallet -d -m 1
 }
 
+# 指定したアカウントのkeyを追加で生成
+# generate_additional_key accountName number
+# e.g. generate_additional_key client 5
+# $ ./tools/integration_on_docker.sh 7
+function generate_additional_key() {
+    if test "$1" = "" ; then
+        echo argument1 is required as account
+    fi
+    if test "$2" = "" ; then
+        echo argument2 is required as key number
+    fi
+    #TODO:account名の厳密なチェックが必要かも
+
+
+    #keyを生成
+    coldwallet1 -k -m 10 -n $2 -a $1
+
+    #作成したAccountのPrivateKeyをColdWalletにimportする
+    coldwallet1 -k -m 20 -a $1
+
+    #作成したAccountのPublicアドレスをcsvファイルとしてexportする"
+    file_name=$(coldwallet1 -k -m 30 -a "$1")
+
+    #client, authorization は除外
+    if [ $1 != client ] && [ $1 != authorization ]; then
+        #coldwallet1からexportしたAccountのpublicアドレスをcoldWallet2にimportする
+        coldwallet2 -k -m 30 -i ${file_name##*\[fileName\]: } -a $1
+
+        #`addmultisigaddress`を実行し、multisigアドレスを生成する。パラメータは、accountのアドレス、authorizationのアドレス
+        coldwallet2 -k -m 40 -a $1
+
+        #作成したAccountのMultisigアドレスをcsvファイルとしてexportする
+        file_name=$(coldwallet2 -k -m 50 -a "$1")
+
+        #coldwallet2からexportしたAccountのmultisigアドレスをcoldWallet1にimportする
+        coldwallet1 -k -m 40 -i ${file_name##*\[fileName\]: } -a $1
+
+        #multisigのimport後、AccountのMultisigをcsvファイルとしてexportする
+        file_name=$(coldwallet1 -k -m 50 -a "$1")
+    fi
+
+    #authorization は除外
+    if [ $1 != authorization ]; then
+        #coldwalletで生成したAccountのアドレスをwalletにimportする
+        wallet -k -m 1 -i ${file_name##*\[fileName\]: } -a $1
+    fi
+}
+
+# 自動テスト(全ロジックをこのtestにて検証する)
+# TODO:送金後の、6confirmationチェックロジックの実装
+# $ ./tools/integration_on_docker.sh 8
+function auto_testing() {
+    #check
+    #docker-compose exec btc-wallet bitcoin-cli getnetworkinfo
+    #docker-compose exec btc-wallet bitcoin-cli listunspent
+
+    #test用にkeyを新たに追加(TODO:アカウント別にkeyを追記するshが必要)
+    generate_additional_key receipt 1
+    generate_additional_key payment 2
+
+    #quoineアカウントからpaymentアカウントに出金する
+    file_unsigned=$(wallet -t -m 1 -a quoine -z payment)
+    #署名1
+    file_signed1=`coldwallet1 -s -m 1 -i "${file_unsigned##*\[fileName\]: }"`
+    #署名2
+    file_signed2=`coldwallet2 -s -m 1 -i "${file_signed1##*\[fileName\]: }"`
+    #送信
+    wallet -s -m 1 -i ${file_signed2##*\[fileName\]: }
+
+    #run after 6confirmation, so monitoring is required
+    #check_confirmation payment
+
+    #検証用出金データをリセット
+    wallet -d -m 2
+    #出金 + 未署名トランザクション作成
+    file_unsigned=$(wallet -p -m 1)
+    #署名1
+    file_signed1=`coldwallet1 -s -m 1 -i "${file_unsigned##*\[fileName\]: }"`
+    #署名2
+    file_signed2=`coldwallet2 -s -m 1 -i "${file_signed1##*\[fileName\]: }"`
+    #送信
+    wallet -s -m 1 -i ${file_signed2##*\[fileName\]: }
+
+    #run after 6confirmation, so monitoring is required
+
+    #入金 + 未署名トランザクション作成
+    file_unsigned=$(wallet -r -m 1)
+    #署名1
+    file_signed1=`coldwallet1 -s -m 1 -i "${file_unsigned##*\[fileName\]: }"`
+    #署名2
+    file_signed2=`coldwallet2 -s -m 1 -i "${file_signed1##*\[fileName\]: }"`
+    #送信
+    wallet -s -m 1 -i ${file_signed2##*\[fileName\]: }
+
+    #run after 6confirmation, so monitoring is required
+
+    #receiptアカウントからpaymentアカウントに出金する
+    file_unsigned=$(wallet -t -m 1 -a receipt -z payment)
+    #署名1
+    file_signed1=`coldwallet1 -s -m 1 -i "${file_unsigned##*\[fileName\]: }"`
+    #署名2
+    file_signed2=`coldwallet2 -s -m 1 -i "${file_signed1##*\[fileName\]: }"`
+    #送信
+    wallet -s -m 1 -i ${file_signed2##*\[fileName\]: }
+
+    #run after 6confirmation, so monitoring is required
+
+}
+
+# $1 account
+function check_confirmation() {
+    echo check 6 confirmation
+}
+
 set -eu
 
 # make sure parameter
@@ -197,6 +312,18 @@ elif [ $1 -eq 4 ]; then
     cold1_import_export_keys
 elif [ $1 -eq 5 ]; then
     watch_only_import_keys
-else
+elif [ $1 -eq 6 ]; then
+    #generate all keys
     generate_all
+elif [ $1 -eq 7 ]; then
+    #add key
+    #generate_additional_key client 5
+    #generate_additional_key receipt 5
+    #generate_additional_key payment 5
+    generate_additional_key quoine 5
+elif [ $1 -eq 8 ]; then
+    #auto testing
+    auto_testing
+else
+    echo argument is out of range
 fi

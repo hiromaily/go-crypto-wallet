@@ -13,6 +13,7 @@ setup:
 ###############################################################################
 # Docker and compose
 ###############################################################################
+# ビルド
 bld-docker-all:
 	docker-compose build
 
@@ -28,20 +29,24 @@ bld-docker-btc:
 #bld-docker-bch:
 #	docker-compose -f docker-compose.bch.yml build bch
 
-up-docker-logger:
-	docker-compose up fluentd elasticsearch grafana
-
-up-docker-core:
-	docker-compose up btc-wallet btc-cold-wallet1 btc-cold-wallet2
-
-up-docker-dbs:
-	docker-compose up btc-wallet-db btc-cold-wallet1-db btc-cold-wallet2-db
-
+#bitcoin coreとdbをまとめて起動(基本的にこれを使うことになるはず)
 up-local-dev-btc:
 	docker-compose up btc-wallet btc-cold-wallet1 btc-cold-wallet2 btc-wallet-db btc-cold-wallet1-db btc-cold-wallet2-db
 
+#bitcoin coreのみ起動
+up-docker-core:
+	docker-compose up btc-wallet btc-cold-wallet1 btc-cold-wallet2
+
+#データベースのみ起動
+up-docker-dbs:
+	docker-compose up btc-wallet-db btc-cold-wallet1-db btc-cold-wallet2-db
+
 up-docker-apps:
 	docker-compose up watch-only-wallet
+
+#ログ系システムのみ起動
+up-docker-logger:
+	docker-compose up fluentd elasticsearch grafana
 
 up-docker-only-watch-wallet:
 	docker-compose up btc-wallet btc-wallet-db watch-only-wallet
@@ -49,6 +54,14 @@ up-docker-only-watch-wallet:
 clear-db-volumes:
 	docker rm -f $(docker ps -a --format "{{.Names}}")
 	docker volume rm go-bitcoin_db1 go-bitcoin_db2 go-bitcoin_db3
+
+
+###############################################################################
+# Automation on docker
+###############################################################################
+auto-generation:
+    ./tools/integration_on_docker.sh 99
+
 
 
 ###############################################################################

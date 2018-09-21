@@ -10,7 +10,7 @@ wallet -p -m 1
 wallet -t -m 1 -a receipt -z payment
 
 #署名済トランザクションの送信
-wallet -s -m 1
+wallet -s -m 1 -i xxxxx
 
 #トランザクションのステータス監視
 wallet -n -m 1

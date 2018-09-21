@@ -48,6 +48,7 @@ services:
     #        tag: "docker.{{.ID}}"
     command: /usr/bin/bitcoind --printtoconsole #--conf=/root/.bitcoin/bitcoind.conf
     # docker-compose exec btc-wallet bash
+    # docker-compose exec btc-wallet bitcoin-cli getnetworkinfo
     # /root/.bitcoin/testnet3/wallets
 
   btc-cold-wallet1:
