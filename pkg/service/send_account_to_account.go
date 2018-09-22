@@ -13,6 +13,7 @@ import (
 
 //SendToAccount 内部アカウント間での送金
 // amountが0のとき、全額送金する
+// TODO:実行後、`listtransactions`methodで確認できるかも(未チェック)
 func (w *Wallet) SendToAccount(from, to enum.AccountType, amount btcutil.Amount) (string, string, error) {
 	if w.Type != enum.WalletTypeWatchOnly {
 		return "", "", errors.New("it's available on WatchOnlyWallet")
