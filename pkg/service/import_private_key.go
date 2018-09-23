@@ -31,10 +31,11 @@ func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
 		return nil
 	}
 
-	var account string
-	if accountType != enum.AccountTypeClient {
-		account = string(accountType)
-	}
+	//var account string
+	//if accountType != enum.AccountTypeClient {
+	//	account = string(accountType)
+	//}
+	account := string(accountType)
 
 	//bitcoin APIにて登録をする
 	for _, record := range accountKeyTable {

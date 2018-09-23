@@ -98,10 +98,11 @@ func (w *Wallet) generateAccountKey(accountType enum.AccountType, coinType enum.
 	}
 
 	// Account
-	var account string
-	if accountType != enum.AccountTypeClient {
-		account = string(accountType)
-	}
+	//var account string
+	//if accountType != enum.AccountTypeClient {
+	//	account = string(accountType)
+	//}
+	account := string(accountType)
 
 	// DBにClientAccountのKey情報を登録
 	accountKeyClients := make([]model.AccountKeyTable, len(walletKeys))
