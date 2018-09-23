@@ -107,6 +107,7 @@ func (b *Bitcoin) Version() enum.BTCVersion {
 }
 
 // OverrideChainParamsByBCH chaincfgをBCH用に上書きする
+// FIXME: BCHはこちらではなく、bchパッケージ側で動作できるように修正すること
 func (b *Bitcoin) OverrideChainParamsByBCH() {
 	switch b.chainConf.Name {
 	case chaincfg.TestNet3Params.Name:

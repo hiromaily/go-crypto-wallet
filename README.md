@@ -26,3 +26,6 @@ There are mainly 3 wallets separately.
 ```
 go get -u -d -v ./...'
 ```
+
+## Project layout patterns
+- The `pkg` layout pattern, refer to the [linked](https://medium.com/golang-learn/go-project-layout-e5213cdcfaa2) URLs for details.
