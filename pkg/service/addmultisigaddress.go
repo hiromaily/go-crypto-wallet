@@ -41,6 +41,7 @@ func (w *Wallet) AddMultisigAddressByAuthorization(accountType enum.AccountType,
 	}
 
 	//addmultisigaddress APIをcall
+	//FIXME:multisigのN:Mは可変でも可能なようにロジックを組み立てる
 	for _, val := range addedPubkeyHistoryTable {
 		resAddr, err := w.BTC.AddMultisigAddress(
 			2,
@@ -53,7 +54,7 @@ func (w *Wallet) AddMultisigAddressByAuthorization(accountType enum.AccountType,
 		)
 		if err != nil {
 			//[Error] -5: no full public key for address mkPmdpo59gpU7ZioGYwwoMTQJjh7MiqUvd
-			logger.Errorf("BTC.CreateMultiSig(2,%s,%s) error: %s", val.FullPublicKey, authKeyTable.WalletAddress, err)
+			logger.Errorf("BTC.CreateMultiSig(2,%s,%s) error: %s", val.FullPublicKey, authKeyTable.P2shSegwitAddress, err)
 			continue
 		}
 
