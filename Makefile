@@ -56,6 +56,11 @@ clear-db-volumes:
 	docker rm -f $(docker ps -a --format "{{.Names}}")
 	docker volume rm go-bitcoin_db1 go-bitcoin_db2 go-bitcoin_db3
 
+remove-wallet-dat:
+	rm -rf ./docker/btc/data1/testnet3/wallets/wallet.data
+	rm -rf ./docker/btc/data2/testnet3/wallets/wallet.data
+	rm -rf ./docker/btc/data3/testnet3/wallets/wallet.data
+
 
 ###############################################################################
 # Automation on docker
