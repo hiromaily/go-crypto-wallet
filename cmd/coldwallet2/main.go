@@ -30,7 +30,7 @@ import (
 // Options コマンドラインオプション
 type Options struct {
 	//Configパス
-	ConfPath string `short:"c" long:"conf" default:"./data/toml/docker_cold2.toml" description:"Path for configuration toml file"`
+	ConfPath string `short:"c" long:"conf" default:"" description:"Path for configuration toml file"`
 
 	//署名モード
 	Sign bool `short:"s" long:"sign" description:"for signature"`
@@ -62,14 +62,13 @@ func init() {
 }
 
 func main() {
-	//環境変数があれば、それを優先し、パラメータに上書きする
 	env := os.Getenv("WALLET_COLD2_CONF")
-	if env != "" {
-		opts.ConfPath = env
+	if opts.ConfPath != "" {
+		env = opts.ConfPath
 	}
 
 	// Config
-	wallet, err := service.InitialSettings(opts.ConfPath)
+	wallet, err := service.InitialSettings(env)
 	if err != nil {
 		// ここでエラーが出た場合、まだloggerの初期化が終わってない
 		//logger.Fatal(err)
