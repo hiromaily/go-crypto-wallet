@@ -36,7 +36,9 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 	//}
 
 	// Watch only walletであれば、ListUnspentで実現可能
-	unspentList, err := w.BTC.ListUnspent()
+	//unspentList, err := w.BTC.ListUnspent()
+	unspentList, _, err := w.BTC.ListUnspentByAccount(enum.AccountTypeClient)
+
 	if err != nil {
 		return "", "", errors.Errorf("BTC.Client().ListUnspent(): error: %s", err)
 	}
@@ -59,11 +61,11 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 	for _, tx := range unspentList {
 
 		//除外するアカウント
-		//TODO:本番環境ではこの条件がかわる気がする
-		if tx.Label == string(enum.AccountTypeReceipt) ||
-			tx.Label == string(enum.AccountTypePayment) || tx.Label == "" {
-			continue
-		}
+		//TODO:本番環境ではこの条件がかわる気がする=>はじめからclientアカウントの情報を取得しておく
+		//if tx.Label == string(enum.AccountTypeReceipt) ||
+		//	tx.Label == string(enum.AccountTypePayment) || tx.Label == "" {
+		//	continue
+		//}
 
 		// Amount
 		amt, err := btcutil.NewAmount(tx.Amount)
