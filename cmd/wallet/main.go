@@ -73,14 +73,17 @@ func init() {
 func main() {
 	//環境変数があれば、それを優先し、パラメータに上書きする
 	env := os.Getenv("WALLET_WATCH_CONF")
-	if env != ""{
+	if env != "" {
+		log.Println(env)
 		opts.ConfPath = env
 	}
 
 	//initialSettings()
 	wallet, err := service.InitialSettings(opts.ConfPath)
 	if err != nil {
-		logger.Fatal(err)
+		// ここでエラーが出た場合、まだloggerの初期化が終わってない
+		//logger.Fatal(err)
+		log.Fatal(err)
 	}
 	wallet.Type = enum.WalletTypeWatchOnly
 	defer wallet.Done()
@@ -398,7 +401,7 @@ func debugForCheck(wallet *service.Wallet) {
 		logger.Info("Run: payment_requestテーブルの情報を初期化する")
 		_, err := wallet.DB.ResetAnyFlagOnPaymentRequestForTestOnly(nil, true)
 		if err != nil {
-			log.Fatalf("%+v", err)
+			logger.Fatalf("%+v", err)
 		}
 	case 3:
 		//[Debug用]payment_requestテーブルの情報を初期化する

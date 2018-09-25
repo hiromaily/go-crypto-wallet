@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/chaincfg"
 	_ "github.com/go-sql-driver/mysql"
@@ -62,14 +64,16 @@ func init() {
 func main() {
 	//環境変数があれば、それを優先し、パラメータに上書きする
 	env := os.Getenv("WALLET_COLD1_CONF")
-	if env != ""{
+	if env != "" {
 		opts.ConfPath = env
 	}
 
 	// Config
 	wallet, err := service.InitialSettings(opts.ConfPath)
 	if err != nil {
-		logger.Fatal(err)
+		// ここでエラーが出た場合、まだloggerの初期化が終わってない
+		//logger.Fatal(err)
+		log.Fatal(err)
 	}
 	wallet.Type = enum.WalletTypeCold1
 	defer wallet.Done()
