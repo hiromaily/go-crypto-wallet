@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/chaincfg"
@@ -70,6 +71,12 @@ func init() {
 }
 
 func main() {
+	//環境変数があれば、それを優先し、パラメータに上書きする
+	env := os.Getenv("WALLET_WATCH_CONF")
+	if env != ""{
+		opts.ConfPath = env
+	}
+
 	//initialSettings()
 	wallet, err := service.InitialSettings(opts.ConfPath)
 	if err != nil {
@@ -408,7 +415,6 @@ func debugForCheck(wallet *service.Wallet) {
 		//bash戻り値検証用
 		logger.Info("aaabbb")
 		logger.Info("[fileName]: ./data/pubkey/stored_1_1537438241658920000.csv")
-
 	default:
 		logger.Warn("opts.Mode is out of range")
 		procedure.ShowWallet()

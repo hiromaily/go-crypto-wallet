@@ -10,6 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/procedure"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/jessevdk/go-flags"
+	"os"
 )
 
 // coldwallet2としてauthorizationのseed作成、keyを1つだけ生成し、出力する
@@ -59,6 +60,12 @@ func init() {
 }
 
 func main() {
+	//環境変数があれば、それを優先し、パラメータに上書きする
+	env := os.Getenv("WALLET_COLD2_CONF")
+	if env != ""{
+		opts.ConfPath = env
+	}
+
 	// Config
 	wallet, err := service.InitialSettings(opts.ConfPath)
 	if err != nil {

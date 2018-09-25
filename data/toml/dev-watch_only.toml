@@ -16,7 +16,8 @@ base_path = "./data/pubkey/"
 
 # watch_only/cold_wallet
 [bitcoin]
-host = "35.221.115.208:18332"
+#host = "35.221.115.208:18332"
+host = "104.198.116.20:18332"
 user = "cayenne"
 pass = "ebisubook"
 http_post_mode = true
