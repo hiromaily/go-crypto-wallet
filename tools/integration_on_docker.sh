@@ -223,34 +223,43 @@ function generate_additional_key() {
     fi
 }
 
-# 自動テスト(全ロジックをこのtestにて検証する)
-# TODO:送金後の、6confirmationチェックロジックの実装
-# $ ./tools/integration_on_docker.sh 99
-function auto_testing() {
-    #check
-    #docker-compose exec btc-wallet bitcoin-cli getnetworkinfo
-    #docker-compose exec btc-wallet bitcoin-cli listunspent
+#quoineアカウントからpaymentアカウントに出金する
+function quoine_to_payment() {
+    file_unsigned=$(wallet -t -m 1 -a quoine -z payment)
+    #TODO:file名が取得できなければSkip
+    #署名1
+    file_signed1=`coldwallet1 -s -m 1 -i "${file_unsigned##*\[fileName\]: }"`
+    #署名2
+    file_signed2=`coldwallet2 -s -m 1 -i "${file_signed1##*\[fileName\]: }"`
+    #送信
+    wallet -s -m 1 -i ${file_signed2##*\[fileName\]: }
 
-    #test用にkeyを新たに追加(TODO:アカウント別にkeyを追記するshが必要)
-    generate_additional_key receipt 1
-    generate_additional_key payment 2
+    #run after 6confirmation, so monitoring is required
+    #check_confirmation payment
+    while [ $(check_confirmation payment) -eq 0 ];do
+        echo 'waiting payment for confirmation until 6...' && sleep 60;
+    done
+}
 
-#    #quoineアカウントからpaymentアカウントに出金する
-#    file_unsigned=$(wallet -t -m 1 -a quoine -z payment)
-#    #TODO:file名が取得できなければSkip
-#    #署名1
-#    file_signed1=`coldwallet1 -s -m 1 -i "${file_unsigned##*\[fileName\]: }"`
-#    #署名2
-#    file_signed2=`coldwallet2 -s -m 1 -i "${file_signed1##*\[fileName\]: }"`
-#    #送信
-#    wallet -s -m 1 -i ${file_signed2##*\[fileName\]: }
-#
-#    #run after 6confirmation, so monitoring is required
-#    #check_confirmation payment
-#    while [ $(check_confirmation payment) -eq 0 ];do
-#        echo 'waiting payment for confirmation until 6...' && sleep 60;
-#    done
+#receiptアカウントからpaymentアカウントに出金する
+function receipt_to_payment() {
+    #receiptアカウントからpaymentアカウントに出金する
+    file_unsigned=$(wallet -t -m 1 -a receipt -z payment)
+    #署名1
+    file_signed1=`coldwallet1 -s -m 1 -i "${file_unsigned##*\[fileName\]: }"`
+    #署名2
+    file_signed2=`coldwallet2 -s -m 1 -i "${file_signed1##*\[fileName\]: }"`
+    #送信
+    wallet -s -m 1 -i ${file_signed2##*\[fileName\]: }
 
+    #run after 6confirmation, so monitoring is required
+    while [ $(check_confirmation payment) -eq 0 ];do
+        echo 'waiting payment for confirmation until 6...' && sleep 60;
+    done
+}
+
+#出金処理
+function payment() {
     #検証用出金データをリセット
     wallet -d -m 2
     #出金 + 未署名トランザクション作成
@@ -266,36 +275,46 @@ function auto_testing() {
     while [ $(check_confirmation client) -eq 0 ];do
         echo 'waiting client for confirmation until 6...' && sleep 60;
     done
+}
 
+#入金処理 マルチシグではない
+function receipt() {
     #入金 + 未署名トランザクション作成
     file_unsigned=$(wallet -r -m 1)
     #署名1
-    file_signed1=`coldwallet1 -s -m 1 -i "${file_unsigned##*\[fileName\]: }"`
-    #署名2
-    file_signed2=`coldwallet2 -s -m 1 -i "${file_signed1##*\[fileName\]: }"`
+    file_signed=`coldwallet1 -s -m 1 -i "${file_unsigned##*\[fileName\]: }"`
     #送信
-    wallet -s -m 1 -i ${file_signed2##*\[fileName\]: }
+    wallet -s -m 1 -i ${file_signed##*\[fileName\]: }
 
     #run after 6confirmation, so monitoring is required
     while [ $(check_confirmation receipt) -eq 0 ];do
         echo 'waiting receipt for confirmation until 6...' && sleep 60;
     done
+}
+
+# 自動テスト(全ロジックをこのtestにて検証する)
+# TODO:送金後の、6confirmationチェックロジックの実装
+# $ ./tools/integration_on_docker.sh 99
+function auto_testing() {
+    #check
+    #docker-compose exec btc-wallet bitcoin-cli getnetworkinfo
+    #docker-compose exec btc-wallet bitcoin-cli listunspent
+
+    #test用にkeyを新たに追加(TODO:アカウント別にkeyを追記するshが必要)
+    generate_additional_key receipt 1
+    generate_additional_key payment 3
+
+    #quoineアカウントからpaymentアカウントに出金する
+    quoine_to_payment
+
+    #出金処理
+    payment
+
+    #入金
+    receipt
 
     #receiptアカウントからpaymentアカウントに出金する
-    file_unsigned=$(wallet -t -m 1 -a receipt -z payment)
-    #署名1
-    file_signed1=`coldwallet1 -s -m 1 -i "${file_unsigned##*\[fileName\]: }"`
-    #署名2
-    file_signed2=`coldwallet2 -s -m 1 -i "${file_signed1##*\[fileName\]: }"`
-    #送信
-    wallet -s -m 1 -i ${file_signed2##*\[fileName\]: }
-
-    #run after 6confirmation, so monitoring is required
-    while [ $(check_confirmation payment) -eq 0 ];do
-        echo 'waiting payment for confirmation until 6...' && sleep 60;
-    done
-
-    echo Done
+    receipt_to_payment
 }
 
 # $ ./tools/integration_on_docker.sh 8
@@ -307,7 +326,11 @@ function check_confirmation() {
     #wallet -n -m 1
     # listunspent command
     #docker-compose exec btc-wallet bitcoin-cli listunspent 6 | jq '.[]'
-    json_data=$(docker-compose exec btc-wallet bitcoin-cli listunspent 6)
+
+    #内部のDockerでBitcoin coreが動いている場合
+    #json_data=$(docker-compose exec btc-wallet bitcoin-cli listunspent 6)
+    #GCP上でBitcoin coreが動いている場合
+    json_data=$(bitcoin-cli -rpcconnect=104.198.116.20 -rpcport=18332 -rpcuser=cayenne -rpcpassword=ebisubook listunspent 6)
     len=$(echo $json_data | jq length)
     for i in $( seq 0 $(($len - 1)) ); do
         row=$(echo $json_data | jq .[$i])
@@ -361,8 +384,25 @@ elif [ $1 -eq 7 ]; then
     #generate_additional_key payment 5
     generate_additional_key quoine 5
 elif [ $1 -eq 8 ]; then
+    #just check
     ret=$(check_confirmation payment)
     echo $ret
+elif [ $1 -eq 10 ]; then
+    generate_additional_key payment 1
+    #quoineアカウントからpaymentアカウントに出金する
+    quoine_to_payment
+elif [ $1 -eq 11 ]; then
+    generate_additional_key payment 1
+    #出金処理
+    payment
+elif [ $1 -eq 12 ]; then
+    generate_additional_key receipt 1
+    #入金
+    receipt
+elif [ $1 -eq 13 ]; then
+    generate_additional_key payment 1
+    #receiptアカウントからpaymentアカウントに出金する
+    receipt_to_payment
 elif [ $1 -eq 99 ]; then
     #auto testing
     auto_testing

@@ -1,12 +1,12 @@
 package testdata
 
 import (
-	"time"
+	//"time"
 
 	"github.com/hiromaily/go-bitcoin/pkg/api/btc"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
-	"github.com/icrowley/fake"
+	//"github.com/icrowley/fake"
 	"github.com/pkg/errors"
 )
 
@@ -17,37 +17,38 @@ func CreateInitialTestData(m *model.DB, btc *btc.Bitcoin) error{
 	if err != nil{
 		return errors.Errorf("DB.GetAllAccountPubKeyTable() error: %s", err)
 	}
-	for idx , _ := range accountPubKeyTable {
-		tm := time.Now()
-		accountPubKeyTable[idx].Account = fake.FirstName()
-		accountPubKeyTable[idx].UpdatedAt = &tm
-	}
-
-	//update
-	tx := m.RDB.MustBegin()
-	err = m.UpdateAccountOnAccountPubKeyTable(enum.AccountTypeClient, accountPubKeyTable, tx, false)
-	if err != nil{
-		return errors.Errorf("DB.UpdateAccountOnAccountPubKeyTable() error: %s", err)
-	}
+	//for idx , _ := range accountPubKeyTable {
+	//	tm := time.Now()
+	//	accountPubKeyTable[idx].Account = fake.FirstName()
+	//	accountPubKeyTable[idx].UpdatedAt = &tm
+	//}
+	//
+	////update
+	//tx := m.RDB.MustBegin()
+	//err = m.UpdateAccountOnAccountPubKeyTable(enum.AccountTypeClient, accountPubKeyTable, tx, false)
+	//if err != nil{
+	//	return errors.Errorf("DB.UpdateAccountOnAccountPubKeyTable() error: %s", err)
+	//}
 
 	//2. アドレスにaccount名を登録(bitcoin core経由)
-	for _ , pubkey := range accountPubKeyTable {
-		err = btc.SetAccount(pubkey.WalletAddress, pubkey.Account)
-		if err != nil{
-			return errors.Errorf("btc.SetAccount() error: %s", err)
-		}
-		//if btc.Version() >= enum.BTCVer17 {
-		//	err = btc.SetLabel(pubkey.WalletAddress, pubkey.Account)
-		//	if err != nil{
-		//		return errors.Errorf("btc.SetLabel() error: %s", err)
-		//	}
-		//} else {
-		//	err = btc.SetAccount(pubkey.WalletAddress, pubkey.Account)
-		//	if err != nil{
-		//		return errors.Errorf("btc.SetAccount() error: %s", err)
-		//	}
-		//}
-	}
+	//for _ , pubkey := range accountPubKeyTable {
+	//	//err = btc.SetAccount(pubkey.WalletAddress, pubkey.Account)
+	//	err = btc.SetAccount(pubkey.WalletAddress, string(enum.AccountTypeClient))
+	//	if err != nil{
+	//		return errors.Errorf("btc.SetAccount() error: %s", err)
+	//	}
+	//	//if btc.Version() >= enum.BTCVer17 {
+	//	//	err = btc.SetLabel(pubkey.WalletAddress, pubkey.Account)
+	//	//	if err != nil{
+	//	//		return errors.Errorf("btc.SetLabel() error: %s", err)
+	//	//	}
+	//	//} else {
+	//	//	err = btc.SetAccount(pubkey.WalletAddress, pubkey.Account)
+	//	//	if err != nil{
+	//	//		return errors.Errorf("btc.SetAccount() error: %s", err)
+	//	//	}
+	//	//}
+	//}
 
 	//3. payment_requestテーブルに情報をInsert
 	paymentRequests := []model.PaymentRequest{
@@ -88,7 +89,8 @@ func CreateInitialTestData(m *model.DB, btc *btc.Bitcoin) error{
 		},
 	}
 	//insert
-	err = m.InsertPaymentRequest(paymentRequests, tx, true)
+	//err = m.InsertPaymentRequest(paymentRequests, tx, true)
+	err = m.InsertPaymentRequest(paymentRequests, nil, true)
 	if err != nil{
 		return errors.Errorf("btc.InsertPaymentRequest() error: %s", err)
 	}
