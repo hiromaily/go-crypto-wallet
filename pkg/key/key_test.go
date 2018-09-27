@@ -158,7 +158,8 @@ func TestKeyIntegrationBCH(t *testing.T) {
 	//t.SkipNow()
 
 	//BCHのconfとして利用する
-	wlt.BTC.OverrideChainParamsByBCH()
+	//FIXME: 一旦コメントアウトしたので、bch側から実行できるようにする
+	//wlt.BTC.OverrideChainParamsByBCH()
 
 	testSeed := "ggqMLyaZ7pwOXRdH8N2CWBf7L9gS/P8/p7oJdjp9M8U="
 	bSeed, err := SeedToByte(testSeed)

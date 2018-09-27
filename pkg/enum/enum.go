@@ -47,14 +47,14 @@ type CoinType string
 const (
 	BTC CoinType = "btc"
 	BCH CoinType = "bch"
-	ETH CoinType = "eth"
+	//ETH CoinType = "eth"
 )
 
 //CoinTypeValue coin_typeの値
 var CoinTypeValue = map[CoinType]uint8{
 	BTC: 1,
 	BCH: 2,
-	ETH: 3,
+	//ETH: 3,
 }
 
 // ValidateBitcoinType BitcoinTypeのバリデーションを行う

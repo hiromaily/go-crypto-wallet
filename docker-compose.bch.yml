@@ -1,30 +1,34 @@
 version: '3'
 
 volumes:
-  bch: {}
-  db1: {}
-  db2: {}
-  db3: {}
+  bch-db1: {}
+  bch-db2: {}
+  bch-db3: {}
 
 services:
   #########################################################################
   #Bitcoin core
   #########################################################################
-  bch:
+  bch-wallet:
     build:
       context: ./docker/bch/
       dockerfile: Dockerfile
     image: cayenne-wallet-bch:0.17
     volumes:
-      - bch:/root/.bitcoin
-      - ./bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
+    - ./docker/bch/data1:/root/.bitcoin
     ports:
     - "${RPC_PORT:-19332}:18332"
     stdin_open: true
     tty: true
-    #command: /usr/bin/bitcoind --conf=/root/.bitcoin/bitcoind.conf --printtoconsole
-    command: /usr/bin/bitcoind -maxconnections=0 --printtoconsole
-    # docker-compose exec bch bash
+    #    logging:
+    #      driver: fluentd
+    #      options:
+    #        fluentd-address: "localhost:24224"
+    #        tag: "docker.{{.ID}}"
+    command: /usr/bin/bitcoind --printtoconsole #--conf=/root/.bitcoin/bitcoind.conf
+    # docker-compose -f docker-compose.bch.yml exec bch-wallet bash
+    # docker-compose -f docker-compose.bch.yml exec bch-wallet bitcoin-cli getnetworkinfo
+    # /root/.bitcoin/testnet3/wallets
 
   #########################################################################
   #Database
@@ -33,7 +37,7 @@ services:
   bch-wallet-db:
     image: mysql:5.7
     volumes:
-      - db1:/var/lib/mysql
+      - bch-db1:/var/lib/mysql
       - "./docker/mysql/conf.d:/etc/mysql/conf.d"
       - "./docker/mysql/init.d:/docker-entrypoint-initdb.d"
     environment:
@@ -48,7 +52,7 @@ services:
   bch-cold-wallet1:
     image: mysql:5.7
     volumes:
-    - db2:/var/lib/mysql
+    - bch-db2:/var/lib/mysql
     - "./docker/mysql2/conf.d:/etc/mysql/conf.d"
     - "./docker/mysql2/init.d:/docker-entrypoint-initdb.d"
     environment:
@@ -63,7 +67,7 @@ services:
   bch-cold-wallet2:
     image: mysql:5.7
     volumes:
-    - db3:/var/lib/mysql
+    - bch-db3:/var/lib/mysql
     - "./docker/mysql2/conf.d:/etc/mysql/conf.d"
     - "./docker/mysql2/init.d:/docker-entrypoint-initdb.d"
     environment:

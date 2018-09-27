@@ -1,4 +1,5 @@
 environment = "dev"  # dev,prod
+coin_type = "bch"    # btc, bch
 
 # watch_only/cold_wallet
 [mysql]

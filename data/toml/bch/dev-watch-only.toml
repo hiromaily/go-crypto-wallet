@@ -1,0 +1,42 @@
+environment = "dev"  # dev,prod
+coin_type = "bch"    # btc, bch
+
+# watch_only/cold_wallet
+[mysql]
+host = "127.0.0.1:3307"
+dbname = "wallet"
+user = "cayenne"
+pass = "cayenne"
+
+# watch_only/cold_wallet
+[tx_file]
+base_path = "./data/tx/"
+
+[pubkey_file]
+base_path = "./data/pubkey/"
+
+# watch_only/cold_wallet
+[bitcoin]
+#host = "35.221.115.208:18332"
+host = "104.198.116.20:18332"
+user = "cayenne"
+pass = "ebisubook"
+http_post_mode = true
+disable_tls = true
+is_main = false #true: MainNetに接続、　false: TestNetに接続
+
+# watch_only
+[bitcoin.block]
+confirmation_num = 6 #Confirmationに必要なブロック数
+
+# watch_only
+[bitcoin.fee]
+adjustment_min = 0.5 #オプションにて調整可能なMinimum値
+adjustment_max = 2.0 #オプションにて調整可能なMaximum値
+
+# watch_only
+[gcs]
+storage_key_path = "./data/api_keys/cayenne-dev-strage.json"
+receipt_bucket_name  = "cayenne-dev-exchanges-yasui-bucket"
+payment_bucket_name  = "cayenne-dev-exchanges-yasui-bucket"
+transfer_bucket_name = "cayenne-dev-exchanges-yasui-bucket"

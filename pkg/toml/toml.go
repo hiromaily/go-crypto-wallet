@@ -10,6 +10,7 @@ import (
 // Config ルート
 type Config struct {
 	Environment string         `toml:"environment"`
+	CoinType    string         `toml:"coin_type"`
 	Bitcoin     BitcoinConf    `toml:"bitcoin"`
 	MySQL       MySQLConf      `toml:"mysql"`
 	TxFile      TxFileConf     `toml:"tx_file"`

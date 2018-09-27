@@ -28,7 +28,9 @@ bld-docker-btc:
 	docker-compose build btc-wallet
 
 #bld-docker-bch:
-#	docker-compose -f docker-compose.bch.yml build bch
+#	docker-compose -f docker-compose.bch.yml build bch-wallet
+#up-docker-bch:
+#	docker-compose -f docker-compose.bch.yml up bch-wallet
 
 #bitcoin coreとdbをまとめて起動(基本的にこれを使うことになるはず)
 up-local-dev-btc:

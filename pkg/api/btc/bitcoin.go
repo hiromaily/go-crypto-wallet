@@ -4,7 +4,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/btcsuite/btcd/wire"
-	"github.com/cpacia/bchutil"
+	//"github.com/cpacia/bchutil"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/toml"
@@ -18,6 +18,7 @@ type Bitcoin struct {
 	confirmationBlock int
 	feeRange          FeeAdjustmentRate
 	version           enum.BTCVersion //179900
+	coinType          enum.CoinType   //btc
 }
 
 // FeeAdjustmentRate 手数料調整のRange
@@ -26,24 +27,7 @@ type FeeAdjustmentRate struct {
 	max float64
 }
 
-// Connection is to local bitcoin core RPC server using HTTP POST mode
-//func Connection(host, user, pass string, postMode, tls, isMain bool) (*Bitcoin, error) {
-func Connection(conf *toml.BitcoinConf) (*Bitcoin, error) {
-	connCfg := &rpcclient.ConnConfig{
-		Host:         conf.Host,
-		User:         conf.User,
-		Pass:         conf.Pass,
-		HTTPPostMode: conf.PostMode,   // Bitcoin core only supports HTTP POST mode
-		DisableTLS:   conf.DisableTLS, // Bitcoin core does not provide TLS by default
-	}
-
-	// Notice the notification parameter is nil since notifications are
-	// not supported in HTTP POST mode.
-	client, err := rpcclient.New(connCfg, nil)
-	if err != nil {
-		return nil, errors.Errorf("rpcclient.New() error: %s", err)
-	}
-
+func NewBitcoin(client *rpcclient.Client, conf *toml.BitcoinConf) (*Bitcoin, error) {
 	bit := Bitcoin{client: client}
 	if conf.IsMain {
 		bit.chainConf = &chaincfg.MainNetParams
@@ -59,11 +43,13 @@ func Connection(conf *toml.BitcoinConf) (*Bitcoin, error) {
 	bit.version = netInfo.Version
 	logger.Infof("bitcoin server version: %d", netInfo.Version)
 
+	bit.coinType = enum.BTC
+
 	bit.confirmationBlock = conf.Block.ConfirmationNum
 	bit.feeRange.max = conf.Fee.AdjustmentMax
 	bit.feeRange.min = conf.Fee.AdjustmentMin
 
-	return &bit, err
+	return &bit, nil
 }
 
 // Close コネクションを切断する
@@ -74,6 +60,10 @@ func (b *Bitcoin) Close() {
 // GetChainConf 接続先であるMainNet/TestNetに応じて必要なconfを返す
 func (b *Bitcoin) GetChainConf() *chaincfg.Params {
 	return b.chainConf
+}
+
+func (b *Bitcoin) SetChainConf(conf *chaincfg.Params) {
+	b.chainConf = conf
 }
 
 // SetChainConfNet conf.Netをセットする
@@ -101,21 +91,20 @@ func (b *Bitcoin) FeeRangeMin() float64 {
 	return b.feeRange.min
 }
 
+func (b *Bitcoin) SetVersion(ver enum.BTCVersion) {
+	b.version = ver
+}
+
 // Version bitcoin coreのバージョンを返す
 func (b *Bitcoin) Version() enum.BTCVersion {
 	return b.version
 }
 
-// OverrideChainParamsByBCH chaincfgをBCH用に上書きする
-// FIXME: BCHはこちらではなく、bchパッケージ側で動作できるように修正すること
-func (b *Bitcoin) OverrideChainParamsByBCH() {
-	switch b.chainConf.Name {
-	case chaincfg.TestNet3Params.Name:
-		b.chainConf.Net = bchutil.TestnetMagic
-	case chaincfg.RegressionNetParams.Name:
-		b.chainConf.Net = bchutil.Regtestmagic
-	default:
-		//chaincfg.MainNetParams.Name
-		b.chainConf.Net = bchutil.MainnetMagic
-	}
+func (b *Bitcoin) SetCoinType(coinType enum.CoinType) {
+	b.coinType = coinType
+}
+
+// Bitcoinの種別(btc, bch)を返す
+func (b *Bitcoin) CoinType() enum.CoinType {
+	return b.coinType
 }

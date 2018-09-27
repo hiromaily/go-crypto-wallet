@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/bookerzzz/grok"
-	"github.com/hiromaily/go-bitcoin/pkg/api/btc"
+	"github.com/hiromaily/go-bitcoin/pkg/api"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/gcp"
 	"github.com/hiromaily/go-bitcoin/pkg/key"
@@ -16,7 +16,8 @@ import (
 
 // Wallet 基底オブジェクト
 type Wallet struct {
-	BTC  *btc.Bitcoin
+	//BTC  *btc.Bitcoin
+	BTC  api.Bitcoiner
 	DB   *model.DB
 	GCS  map[enum.ActionType]*gcp.Storage
 	Env  enum.EnvironmentType
@@ -33,6 +34,11 @@ func InitialSettings(confPath string) (*Wallet, error) {
 		return nil, errors.Errorf("toml.New() error: %s", err)
 	}
 	grok.Value(conf)
+
+	// CoinType
+	if !enum.ValidateBitcoinType(conf.CoinType) {
+		return nil, errors.New("CoinType is invalid in toml file")
+	}
 
 	// Log
 	logger.Initialize(enum.EnvironmentType(conf.Environment))
@@ -66,7 +72,7 @@ func InitialSettings(confPath string) (*Wallet, error) {
 	}
 
 	// Connection to Bitcoin core
-	bit, err := btc.Connection(&conf.Bitcoin)
+	bit, err := api.Connection(&conf.Bitcoin, enum.CoinType(conf.CoinType))
 	if err != nil {
 		return nil, errors.Errorf("btc.Connection error: %s", err)
 	}
