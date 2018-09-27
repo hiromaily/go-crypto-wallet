@@ -26,6 +26,7 @@ type FeeAdjustmentRate struct {
 	max float64
 }
 
+// NewBitcoin Bitcoinオブジェクトを返す
 func NewBitcoin(client *rpcclient.Client, conf *toml.BitcoinConf) (*Bitcoin, error) {
 	bit := Bitcoin{client: client}
 	if conf.IsMain {
@@ -61,6 +62,7 @@ func (b *Bitcoin) GetChainConf() *chaincfg.Params {
 	return b.chainConf
 }
 
+// SetChainConf chainConfをセットする
 func (b *Bitcoin) SetChainConf(conf *chaincfg.Params) {
 	b.chainConf = conf
 }
@@ -90,6 +92,7 @@ func (b *Bitcoin) FeeRangeMin() float64 {
 	return b.feeRange.min
 }
 
+// SetVersion バージョン情報をセットする
 func (b *Bitcoin) SetVersion(ver enum.BTCVersion) {
 	b.version = ver
 }
@@ -99,11 +102,12 @@ func (b *Bitcoin) Version() enum.BTCVersion {
 	return b.version
 }
 
+// SetCoinType CoinTypeをセットする
 func (b *Bitcoin) SetCoinType(coinType enum.CoinType) {
 	b.coinType = coinType
 }
 
-// Bitcoinの種別(btc, bch)を返す
+// CoinType Bitcoinの種別(btc, bch)を返す
 func (b *Bitcoin) CoinType() enum.CoinType {
 	return b.coinType
 }

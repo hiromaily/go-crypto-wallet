@@ -11,6 +11,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 )
 
+// Bitcoiner Bitcoin/BitcoinCash Interface
 type Bitcoiner interface {
 	//account.go
 	GetAccount(addr string) (string, error)
