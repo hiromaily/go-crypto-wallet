@@ -37,7 +37,7 @@ func Connection(conf *toml.BitcoinConf, coinType enum.CoinType) (Bitcoiner, erro
 
 		return bit, err
 	}
-	//BTH
+	//BCH
 	bitc, err := bch.NewBitcoinCash(client, conf)
 	if err != nil {
 		return nil, errors.Errorf("bitc.NewBitcoinCash() error: %s", err)

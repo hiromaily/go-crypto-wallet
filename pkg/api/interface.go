@@ -37,7 +37,7 @@ type Bitcoiner interface {
 	//block.go
 	GetBlockCount() (int64, error)
 
-	//connection.go
+	//bitcoin.go
 	Close()
 	GetChainConf() *chaincfg.Params
 	SetChainConfNet(btcNet wire.BitcoinNet)
