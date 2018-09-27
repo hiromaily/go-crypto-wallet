@@ -279,7 +279,10 @@ func (w *Wallet) insertTxTableForUnsigned(actionType enum.ActionType, hex string
 		return 0, errors.Errorf("DB.InsertTxOutputForUnsigned(): error: %s", err)
 	}
 
-	//5. payment_requestのpayment_idを更新する paymentRequestIds
+	//TODO:未着手
+	//5.Toに指定されたaccount_pubkey_receiptなどの使用されたwalletのis_allocatedを1に更新する
+
+	//6. payment_requestのpayment_idを更新する paymentRequestIds
 	if actionType == enum.ActionTypePayment {
 		//txReceiptID
 		_, err = w.DB.UpdatePaymentIDOnPaymentRequest(txReceiptID, paymentRequestIds, tx, true)

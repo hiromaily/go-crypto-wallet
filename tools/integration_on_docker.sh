@@ -380,9 +380,9 @@ elif [ $1 -eq 6 ]; then
 elif [ $1 -eq 7 ]; then
     #add key
     #generate_additional_key client 5
-    #generate_additional_key receipt 5
+    generate_additional_key receipt 1
     #generate_additional_key payment 5
-    generate_additional_key quoine 5
+    #generate_additional_key quoine 5
 elif [ $1 -eq 8 ]; then
     #just check
     ret=$(check_confirmation payment)
