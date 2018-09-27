@@ -335,7 +335,7 @@ function check_confirmation() {
     for i in $( seq 0 $(($len - 1)) ); do
         row=$(echo $json_data | jq .[$i])
         account=$(echo $row | jq '.account')
-        if [ -n "account" ]; then
+        if [! -n "$account" ]; then
             account=$(echo $row | jq '.label')
         fi
         if [ `echo ${account} | grep ${1}` ] ; then
