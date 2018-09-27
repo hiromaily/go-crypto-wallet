@@ -1,5 +1,5 @@
 # go-bitcoin
-Wallet functionalities handling BTC, BCH, ETH and so on. Currencies would be added step by step.
+Wallet functionalities handling BTC, BCH and so on. Currencies would be added step by step.
 
 ## Structures
 This is explained for BTC for now.
