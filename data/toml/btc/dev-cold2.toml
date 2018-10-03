@@ -26,4 +26,4 @@ is_main = false #true: MainNetに接続、　false: TestNetに接続
 
 # default seed of key used when dev mode
 [key]
-seed = "Ve5Kkaba4SQGavc/pWXazZuYD4mE53+qV9tLeRTS5t4="
+seed = "avKWGNMuokyFotVk5L7QhdywY+X4gC0xuz3LUuZZGVw="

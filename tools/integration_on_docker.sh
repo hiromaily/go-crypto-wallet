@@ -165,10 +165,10 @@ function generate_all() {
     file_stored=$(coldwallet1 -k -m 50 -a stored)
 
     #coldwalletで生成したAccountのアドレスをwalletにimportする
-    wallet -k -m 1 -x -i ${file_client##*\[fileName\]: } -a client
-    wallet -k -m 1 -x -i ${file_receipt##*\[fileName\]: } -a receipt
-    wallet -k -m 1 -x -i ${file_payment##*\[fileName\]: } -a payment
-    wallet -k -m 1 -x -i ${file_quoine##*\[fileName\]: } -a quoine
+    wallet -k -m 1 -i ${file_client##*\[fileName\]: } -a client
+    wallet -k -m 1 -i ${file_receipt##*\[fileName\]: } -a receipt
+    wallet -k -m 1 -i ${file_payment##*\[fileName\]: } -a payment
+    wallet -k -m 1 -i ${file_quoine##*\[fileName\]: } -a quoine
     wallet -k -m 1 -i ${file_fee##*\[fileName\]: } -a fee
     wallet -k -m 1 -i ${file_stored##*\[fileName\]: } -a stored
 

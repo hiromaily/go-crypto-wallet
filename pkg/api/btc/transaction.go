@@ -264,7 +264,7 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []PrevTx) (*wire.Ms
 		return b.signRawTransactionWithWalletVer17(tx, prevtxs)
 	}
 	//restart bitcoind with -deprecatedrpc=signrawtransaction
-	return b.signRawTransactionWithWalletVer16(tx)
+	return b.signRawTransactionWithWalletVer16(tx, prevtxs)
 }
 
 // SignRawTransactionWithWallet Ver17から利用可能なSignRawTransaction
@@ -337,20 +337,72 @@ func (b *Bitcoin) signRawTransactionWithWalletVer17(tx *wire.MsgTx, prevtxs []Pr
 // signRawTransaction *wire.MsgTxからRawのトランザクションに署名する(Multisigには利用できない)
 // restart bitcoind with -deprecatedrpc=signrawtransaction
 // Deprecated
-func (b *Bitcoin) signRawTransactionWithWalletVer16(tx *wire.MsgTx) (*wire.MsgTx, bool, error) {
-	//署名
-	msgTx, isSigned, err := b.client.SignRawTransaction(tx)
+// prevtxs []PrevTxのパラメータがないと動かなくなったので、一旦コメントアウト
+//func (b *Bitcoin) signRawTransactionWithWalletVer16(tx *wire.MsgTx) (*wire.MsgTx, bool, error) {
+//	logger.Info("signRawTransactionWithWalletVer16()")
+//	//署名
+//	msgTx, isSigned, err := b.client.SignRawTransaction(tx)
+//	if err != nil {
+//		return nil, false, errors.Errorf("client.SignRawTransaction(): error: %s", err)
+//	}
+//
+//	//Debug
+//	if !isSigned {
+//		logger.Debug("トランザクションHEXの結果比較スタート")
+//		b.debugCompareTx(tx, msgTx)
+//	}
+//
+//	return msgTx, isSigned, nil
+//}
+
+func (b *Bitcoin) signRawTransactionWithWalletVer16(tx *wire.MsgTx, prevtxs []PrevTx) (*wire.MsgTx, bool, error) {
+	logger.Info("signRawTransactionWithWalletVer16()")
+
+	//hex tx
+	hexTx, err := b.ToHex(tx)
 	if err != nil {
-		return nil, false, errors.Errorf("client.SignRawTransaction(): error: %s", err)
+		return nil, false, errors.Errorf("BTC.ToHex(tx): error: %s", err)
+	}
+
+	input1, err := json.Marshal(hexTx)
+	if err != nil {
+		return nil, false, errors.Errorf("json.Marchal(txHex): error: %s", err)
+	}
+
+	//prevtxs
+	input2, err := json.Marshal(prevtxs)
+	if err != nil {
+		return nil, false, errors.Errorf("json.Marchal(prevtxs): error: %s", err)
+	}
+
+	rawResult, err := b.client.RawRequest("signrawtransaction", []json.RawMessage{input1, input2})
+	if err != nil {
+		return nil, false, errors.Errorf("json.RawRequest(signrawtransaction): error: %s", err)
+	}
+	//SignRawTransactionResult
+	signRawTxResult := SignRawTransactionResult{}
+	err = json.Unmarshal([]byte(rawResult), &signRawTxResult)
+	if err != nil {
+		return nil, false, errors.Errorf("json.Unmarshal(): error: %s", err)
+	}
+	if len(signRawTxResult.Errors) != 0 {
+		grok.Value(signRawTxResult)
+
+		return nil, false, errors.Errorf("json.RawRequest(signrawtransactionwithwallet): error: %s", signRawTxResult.Errors[0].Error)
+	}
+
+	msgTx, err := b.ToMsgTx(signRawTxResult.Hex)
+	if err != nil {
+		return nil, false, errors.Errorf("BTC.ToMsgTx(hex): error: %s", err)
 	}
 
 	//Debug
-	if !isSigned {
+	if !signRawTxResult.Complete {
 		logger.Debug("トランザクションHEXの結果比較スタート")
 		b.debugCompareTx(tx, msgTx)
 	}
 
-	return msgTx, isSigned, nil
+	return msgTx, signRawTxResult.Complete, nil
 }
 
 func (b *Bitcoin) debugCompareTx(tx1, tx2 *wire.MsgTx) {
