@@ -12,11 +12,6 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 )
 
-//[gcs]
-//storage_key_path = "./data/api_keys/cayenne-dev-strage.json"
-//receipt_bucket_name = "cayenne-dev-exchanges-yasui-bucket"
-//payment_bucket_name = "cayenne-dev-exchanges-yasui-bucket"
-
 func isGcpDir() bool {
 	dir, _ := os.Getwd()
 	if s := strings.Split(dir, "/"); s[len(s)-1] == "gcp" {
@@ -28,7 +23,7 @@ func isGcpDir() bool {
 func initialStorage(t *testing.T) *ExtClient {
 	//TODO: tomlから読み込むように修正する。そのうち
 	bucketName := "cayenne-dev-exchanges-yasui-bucket"
-	key := "./data/api_keys/cayenne-dev-strage.json"
+	key := "./data/api_keys/dev-strage.json"
 
 	//PWDで実行環境に応じてパスを切り替える
 	if isGcpDir() {

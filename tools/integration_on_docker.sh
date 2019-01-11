@@ -330,7 +330,7 @@ function check_confirmation() {
     #内部のDockerでBitcoin coreが動いている場合
     #json_data=$(docker-compose exec btc-wallet bitcoin-cli listunspent 6)
     #GCP上でBitcoin coreが動いている場合
-    json_data=$(bitcoin-cli -rpcconnect=104.198.116.20 -rpcport=18332 -rpcuser=cayenne -rpcpassword=ebisubook listunspent 6)
+    json_data=$(bitcoin-cli -rpcconnect=104.198.116.20 -rpcport=18332 -rpcuser=hiromaily -rpcpassword=hiromaily listunspent 6)
     len=$(echo $json_data | jq length)
     for i in $( seq 0 $(($len - 1)) ); do
         row=$(echo $json_data | jq .[$i])

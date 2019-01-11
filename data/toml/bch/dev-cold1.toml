@@ -5,8 +5,8 @@ coin_type = "bch"    # btc, bch
 [mysql]
 host = "127.0.0.1:3308"
 dbname = "cold_wallet1"
-user = "cayenne"
-pass = "cayenne"
+user = "hiromaily"
+pass = "hiromaily"
 
 # watch_only/cold_wallet
 [tx_file]
@@ -17,9 +17,9 @@ base_path = "./data/pubkey/"
 
 # watch_only/cold_wallet
 [bitcoin]
-host = "35.200.13.193:18332"
-user = "cayenne"
-pass = "ebisubook"
+host = "127.0.0.1:18332"
+user = "hiromaily"
+pass = "hiromaily"
 http_post_mode = true
 disable_tls = true
 is_main = false #true: MainNetに接続、　false: TestNetに接続

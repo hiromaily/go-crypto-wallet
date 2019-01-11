@@ -5,8 +5,8 @@ coin_type = "bch"    # btc, bch
 [mysql]
 host = "127.0.0.1:3309"
 dbname = "cold_wallet1"
-user = "cayenne"
-pass = "cayenne"
+user = "hiromaily"
+pass = "hiromaily"
 
 # watch_only/cold_wallet
 [tx_file]

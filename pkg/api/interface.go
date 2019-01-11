@@ -41,12 +41,15 @@ type Bitcoiner interface {
 	//bitcoin.go
 	Close()
 	GetChainConf() *chaincfg.Params
+	SetChainConf(conf *chaincfg.Params)
 	SetChainConfNet(btcNet wire.BitcoinNet)
 	Client() *rpcclient.Client
 	ConfirmationBlock() int
 	FeeRangeMax() float64
 	FeeRangeMin() float64
+	SetVersion(ver enum.BTCVersion)
 	Version() enum.BTCVersion
+	SetCoinType(coinType enum.CoinType)
 	CoinType() enum.CoinType
 
 	//fee.go

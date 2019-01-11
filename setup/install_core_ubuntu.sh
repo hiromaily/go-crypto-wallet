@@ -9,8 +9,8 @@ mkdir ~/.bitcoin
 cat <<EOF >> ~/.bitcoin/bitcoin.conf
 testnet=1
 server=1
-rpcuser=cayenne
-rpcpassword=cayenne
+rpcuser=hiromaily
+rpcpassword=hiromaily
 txindex=1
 zmqpubrawblock=tcp://127.0.0.1:29000
 zmqpubrawtx=tcp://127.0.0.1:2900

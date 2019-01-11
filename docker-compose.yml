@@ -17,13 +17,13 @@ services:
     build:
       context: ./docker/ubuntu/
       dockerfile: Dockerfile
-    image: cayenne-wallet-ubuntu:18.04
+    image: wallet-ubuntu:18.04
 
   base-golang:
     build:
       context: ./docker/golang/
       dockerfile: Dockerfile
-    image: cayenne-wallet-golang:1.11
+    image: wallet-golang:1.11
 
   #########################################################################
   #Bitcoin core
@@ -32,7 +32,7 @@ services:
     build:
       context: ./docker/btc/
       dockerfile: Dockerfile
-    image: cayenne-wallet-btc:0.17
+    image: wallet-btc:0.17
     volumes:
     #- btc1:/root/.bitcoin
     #- ./bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
@@ -52,7 +52,7 @@ services:
     # /root/.bitcoin/testnet3/wallets
 
   btc-cold-wallet1:
-    image: cayenne-wallet-btc:0.17
+    image: wallet-btc:0.17
     volumes:
     #- btc2:/root/.bitcoin
     #- ./bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
@@ -71,7 +71,7 @@ services:
     # /root/.bitcoin/testnet3/wallets
 
   btc-cold-wallet2:
-    image: cayenne-wallet-btc:0.17
+    image: wallet-btc:0.17
     volumes:
     #- btc3:/root/.bitcoin
     #- ./bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
@@ -96,7 +96,7 @@ services:
 #    build:
 #      context: ./docker/wallet/
 #      dockerfile: Dockerfile
-#    image: cayenne-wallet-app:1.0
+#    image: wallet-app:1.0
 #    links:
 #      - btc-wallet:btc-core
 #      - btc-wallet-db:mysql-server
@@ -138,8 +138,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: wallet
-      MYSQL_USER: cayenne
-      MYSQL_PASSWORD: cayenne
+      MYSQL_USER: hiromaily
+      MYSQL_PASSWORD: hiromaily
     ports:
     - "${MYSQL_PORT1:-3307}:3306"
 
@@ -153,8 +153,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: cold_wallet1
-      MYSQL_USER: cayenne
-      MYSQL_PASSWORD: cayenne
+      MYSQL_USER: hiromaily
+      MYSQL_PASSWORD: hiromaily
     ports:
     - "${MYSQL_PORT2:-3308}:3306"
 
@@ -168,44 +168,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: cold_wallet1
-      MYSQL_USER: cayenne
-      MYSQL_PASSWORD: cayenne
+      MYSQL_USER: hiromaily
+      MYSQL_PASSWORD: hiromaily
     ports:
     - "${MYSQL_PORT3:-3309}:3306"
-
-  #########################################################################
-  #Log monitoring
-  #########################################################################
-#  #Fluentd
-#  #https://www.fluentd.org/guides/recipes/docker-logging
-#  #https://docs.docker.com/config/containers/logging/fluentd/
-#  fluentd:
-#    build:
-#      context: ./docker/fluentd/
-#    ports:
-#      - "24224:24224"
-#      - "24224:24224/udp"
-#
-#  #Elasticsearch
-#  #https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html
-#  elasticsearch:
-#    image: docker.elastic.co/elasticsearch/elasticsearch:6.4.0
-#    expose:
-#      - 9200
-#      - 9300
-#    environment:
-#      - discovery.type=single-node
-#    volumes:
-#      #save to local
-#      - ./docker/elasticsearch/data:/usr/share/elasticsearch/data
-#
-#  #Grafana
-#  grafana:
-#    image: grafana/grafana:5.2.4
-#    ports:
-#      - 3000:3000
-#    volumes:
-#      #save to local
-#      - ./docker/grafana:/var/lib/grafana
-#    depends_on:
-#      - elasticsearch

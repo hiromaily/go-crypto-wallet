@@ -13,7 +13,7 @@ services:
     build:
       context: ./docker/bch/
       dockerfile: Dockerfile
-    image: cayenne-wallet-bch:0.17
+    image: wallet-bch:0.17
     volumes:
     - ./docker/bch/data1:/root/.bitcoin
     ports:
@@ -43,8 +43,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: wallet
-      MYSQL_USER: cayenne
-      MYSQL_PASSWORD: cayenne
+      MYSQL_USER: hiromaily
+      MYSQL_PASSWORD: hiromaily
     ports:
       - "${MYSQL_PORT1:-3307}:3306"
 
@@ -58,8 +58,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: cold_wallet1
-      MYSQL_USER: cayenne
-      MYSQL_PASSWORD: cayenne
+      MYSQL_USER: hiromaily
+      MYSQL_PASSWORD: hiromaily
     ports:
     - "${MYSQL_PORT2:-3308}:3306"
 
@@ -73,7 +73,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: cold_wallet1
-      MYSQL_USER: cayenne
-      MYSQL_PASSWORD: cayenne
+      MYSQL_USER: hiromaily
+      MYSQL_PASSWORD: hiromaily
     ports:
     - "${MYSQL_PORT3:-3309}:3306"

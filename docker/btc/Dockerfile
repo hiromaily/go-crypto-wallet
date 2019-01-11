@@ -1,4 +1,4 @@
-FROM cayenne-wallet-ubuntu:18.04
+FROM wallet-ubuntu:18.04
 #FROM ubuntu:18.04
 
 #RUN apt-get update && \
