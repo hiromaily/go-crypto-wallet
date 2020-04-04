@@ -13,7 +13,7 @@ services:
     build:
       context: ./docker/bch/
       dockerfile: Dockerfile
-    image: wallet-bch:0.17
+    image: wallet-bch:0.19
     volumes:
     - ./docker/bch/data1:/root/.bitcoin
     ports:
@@ -34,7 +34,7 @@ services:
   #Database
   #########################################################################
   #for watch only wallet
-  bch-wallet-db:
+  db-bch-wallet:
     image: mysql:5.7
     volumes:
       - bch-db1:/var/lib/mysql
@@ -48,8 +48,8 @@ services:
     ports:
       - "${MYSQL_PORT1:-3307}:3306"
 
-  #for cold-wallet1
-  bch-cold-wallet1:
+  #for keygen wallet
+  db-bch-keygen:
     image: mysql:5.7
     volumes:
     - bch-db2:/var/lib/mysql
@@ -63,8 +63,8 @@ services:
     ports:
     - "${MYSQL_PORT2:-3308}:3306"
 
-  #for cold-wallet2
-  bch-cold-wallet2:
+  #for signature wallet
+  db-bch-signature:
     image: mysql:5.7
     volumes:
     - bch-db3:/var/lib/mysql

@@ -23,7 +23,7 @@ services:
     build:
       context: ./docker/golang/
       dockerfile: Dockerfile
-    image: wallet-golang:1.11
+    image: wallet-golang:1.14.1
 
   #########################################################################
   #Bitcoin core
@@ -32,10 +32,10 @@ services:
     build:
       context: ./docker/btc/
       dockerfile: Dockerfile
-    image: wallet-btc:0.17
+    image: wallet-btc:0.19
     volumes:
     #- btc1:/root/.bitcoin
-    #- ./bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
+    #- ./docs/bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
     - ./docker/btc/data1:/root/.bitcoin
     ports:
     - "${RPC_PORT:-19332}:18332"
@@ -51,11 +51,11 @@ services:
     # docker-compose exec btc-wallet bitcoin-cli getnetworkinfo
     # /root/.bitcoin/testnet3/wallets
 
-  btc-cold-wallet1:
-    image: wallet-btc:0.17
+  btc-keygen:
+    image: wallet-btc:0.19
     volumes:
     #- btc2:/root/.bitcoin
-    #- ./bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
+    #- ./docs/bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
     - ./docker/btc/data2:/root/.bitcoin
     ports:
     - "${RPC_PORT:-19333}:18332"
@@ -67,14 +67,14 @@ services:
     #        fluentd-address: "localhost:24224"
     #        tag: "docker.{{.ID}}"
     command: /usr/bin/bitcoind -maxconnections=0 --printtoconsole
-    # docker-compose exec btc-cold-wallet1 bash
+    # docker-compose exec btc-keygen bash
     # /root/.bitcoin/testnet3/wallets
 
-  btc-cold-wallet2:
+  btc-signature:
     image: wallet-btc:0.17
     volumes:
     #- btc3:/root/.bitcoin
-    #- ./bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
+    #- ./docs/bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
     - ./docker/btc/data3:/root/.bitcoin
     ports:
     - "${RPC_PORT:-19334}:18332"
@@ -86,8 +86,56 @@ services:
     #        fluentd-address: "localhost:24224"
     #        tag: "docker.{{.ID}}"
     command: /usr/bin/bitcoind -maxconnections=0 --printtoconsole
-    # docker-compose exec btc-cold-wallet2 bash
+    # docker-compose exec btc-signature bash
     # /root/.bitcoin/testnet3/wallets
+
+  #########################################################################
+  #Database
+  #########################################################################
+  #for watch only wallet
+  db-btc-wallet:
+    image: mysql:5.7
+    volumes:
+    - db1:/var/lib/mysql #this volume should be outside to keep on a permanent basis
+    - "./docker/mysql/conf.d:/etc/mysql/conf.d"
+    - "./docker/mysql/init.d:/docker-entrypoint-initdb.d"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wallet
+      MYSQL_USER: hiromaily
+      MYSQL_PASSWORD: hiromaily
+    ports:
+    - "${MYSQL_PORT1:-3307}:3306"
+
+  #for keygen wallet
+  db-btc-keygen:
+    image: mysql:5.7
+    volumes:
+    - db2:/var/lib/mysql #this volume should be outside to keep on a permanent basis
+    - "./docker/mysql2/conf.d:/etc/mysql/conf.d"
+    - "./docker/mysql2/init.d:/docker-entrypoint-initdb.d"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cold_wallet1
+      MYSQL_USER: hiromaily
+      MYSQL_PASSWORD: hiromaily
+    ports:
+    - "${MYSQL_PORT2:-3308}:3306"
+
+  #for signature wallet
+  db-btc-signature:
+    image: mysql:5.7
+    volumes:
+    - db3:/var/lib/mysql #this volume should be outside to keep on a permanent basis
+    - "./docker/mysql2/conf.d:/etc/mysql/conf.d"
+    - "./docker/mysql2/init.d:/docker-entrypoint-initdb.d"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cold_wallet1
+      MYSQL_USER: hiromaily
+      MYSQL_PASSWORD: hiromaily
+    ports:
+    - "${MYSQL_PORT3:-3309}:3306"
 
   #########################################################################
   # Wallet App
@@ -124,51 +172,3 @@ services:
 #    command: bash
 #    # docker-compose exec watch-only-wallet sh -c 'make bld-linux'
 #    # docker-compose exec watch-only-wallet sh -c 'wallet -c xxx.toml xx xx'
-
-  #########################################################################
-  #Database
-  #########################################################################
-  #for watch only wallet
-  btc-wallet-db:
-    image: mysql:5.7
-    volumes:
-    - db1:/var/lib/mysql #this volume should be outside to keep on a permanent basis
-    - "./docker/mysql/conf.d:/etc/mysql/conf.d"
-    - "./docker/mysql/init.d:/docker-entrypoint-initdb.d"
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: wallet
-      MYSQL_USER: hiromaily
-      MYSQL_PASSWORD: hiromaily
-    ports:
-    - "${MYSQL_PORT1:-3307}:3306"
-
-  #for cold-wallet1
-  btc-cold-wallet1-db:
-    image: mysql:5.7
-    volumes:
-    - db2:/var/lib/mysql #this volume should be outside to keep on a permanent basis
-    - "./docker/mysql2/conf.d:/etc/mysql/conf.d"
-    - "./docker/mysql2/init.d:/docker-entrypoint-initdb.d"
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: cold_wallet1
-      MYSQL_USER: hiromaily
-      MYSQL_PASSWORD: hiromaily
-    ports:
-    - "${MYSQL_PORT2:-3308}:3306"
-
-  #for cold-wallet2
-  btc-cold-wallet2-db:
-    image: mysql:5.7
-    volumes:
-    - db3:/var/lib/mysql #this volume should be outside to keep on a permanent basis
-    - "./docker/mysql2/conf.d:/etc/mysql/conf.d"
-    - "./docker/mysql2/init.d:/docker-entrypoint-initdb.d"
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: cold_wallet1
-      MYSQL_USER: hiromaily
-      MYSQL_PASSWORD: hiromaily
-    ports:
-    - "${MYSQL_PORT3:-3309}:3306"

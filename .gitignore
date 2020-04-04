@@ -4,8 +4,8 @@ wallet
 coldwallet1
 coldwallet2
 !cmd/wallet
-!cmd/coldwallet1
-!cmd/coldwallet2
+!cmd/keygen-wallet
+!cmd/signature-wallet
 data/kvs/*
 data/tx/*
 data/gcs/*
