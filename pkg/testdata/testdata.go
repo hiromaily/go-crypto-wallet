@@ -2,20 +2,20 @@ package testdata
 
 import (
 	//"time"
-
-	"github.com/hiromaily/go-bitcoin/pkg/api"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+
 	//"github.com/icrowley/fake"
 	"github.com/pkg/errors"
 )
 
 // CreateInitialTestData
 //func CreateInitialTestData(m *model.DB, btc *btc.Bitcoin) error{
-func CreateInitialTestData(m *model.DB, btc api.Bitcoiner) error{
+func CreateInitialTestData(m *model.DB, btc api.Bitcoiner) error {
 	//1. account_pubkey_clientにアカウント名を仮登録
 	accountPubKeyTable, err := m.GetAllAccountPubKeyTable(enum.AccountTypeClient)
-	if err != nil{
+	if err != nil {
 		return errors.Errorf("DB.GetAllAccountPubKeyTable() error: %s", err)
 	}
 	//for idx , _ := range accountPubKeyTable {
@@ -56,43 +56,43 @@ func CreateInitialTestData(m *model.DB, btc api.Bitcoiner) error{
 		{
 			AddressFrom: accountPubKeyTable[0].WalletAddress,
 			AccountFrom: accountPubKeyTable[0].Account,
-			AddressTo: accountPubKeyTable[5].WalletAddress,
-			Amount: "0.01",
- 			IsDone: false,
+			AddressTo:   accountPubKeyTable[5].WalletAddress,
+			Amount:      "0.01",
+			IsDone:      false,
 		},
 		{
 			AddressFrom: accountPubKeyTable[1].WalletAddress,
 			AccountFrom: accountPubKeyTable[1].Account,
-			AddressTo: accountPubKeyTable[6].WalletAddress,
-			Amount: "0.02",
-			IsDone: false,
+			AddressTo:   accountPubKeyTable[6].WalletAddress,
+			Amount:      "0.02",
+			IsDone:      false,
 		},
 		{
 			AddressFrom: accountPubKeyTable[2].WalletAddress,
 			AccountFrom: accountPubKeyTable[2].Account,
-			AddressTo: accountPubKeyTable[7].WalletAddress,
-			Amount: "0.025",
-			IsDone: false,
+			AddressTo:   accountPubKeyTable[7].WalletAddress,
+			Amount:      "0.025",
+			IsDone:      false,
 		},
 		{
 			AddressFrom: accountPubKeyTable[3].WalletAddress,
 			AccountFrom: accountPubKeyTable[3].Account,
-			AddressTo: accountPubKeyTable[8].WalletAddress,
-			Amount: "0.03",
-			IsDone: false,
+			AddressTo:   accountPubKeyTable[8].WalletAddress,
+			Amount:      "0.03",
+			IsDone:      false,
 		},
 		{
 			AddressFrom: accountPubKeyTable[4].WalletAddress,
 			AccountFrom: accountPubKeyTable[4].Account,
-			AddressTo: accountPubKeyTable[9].WalletAddress,
-			Amount: "0.035",
-			IsDone: false,
+			AddressTo:   accountPubKeyTable[9].WalletAddress,
+			Amount:      "0.035",
+			IsDone:      false,
 		},
 	}
 	//insert
 	//err = m.InsertPaymentRequest(paymentRequests, tx, true)
 	err = m.InsertPaymentRequest(paymentRequests, nil, true)
-	if err != nil{
+	if err != nil {
 		return errors.Errorf("btc.InsertPaymentRequest() error: %s", err)
 	}
 

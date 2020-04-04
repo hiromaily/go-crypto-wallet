@@ -2,9 +2,11 @@ package key
 
 import (
 	"encoding/base64"
+
 	"github.com/btcsuite/btcutil/hdkeychain"
-	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/pkg/errors"
+
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
 
 // GenerateSeed seedを生成する []byte

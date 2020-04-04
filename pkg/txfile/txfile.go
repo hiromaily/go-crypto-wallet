@@ -1,15 +1,16 @@
 package txfile
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
-	"fmt"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/pkg/errors"
-	"strings"
+
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 )
 
 // WatchOnlyWalletにおいては、開発時にしか使われないはず？

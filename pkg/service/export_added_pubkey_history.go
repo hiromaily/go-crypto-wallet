@@ -5,11 +5,12 @@ import (
 	"os"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
-	"github.com/pkg/errors"
 )
 
 //ExportAddedPubkeyHistory AddedPubkeyHistoryテーブルをcsvとして出力する

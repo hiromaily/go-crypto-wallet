@@ -2,17 +2,18 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/chaincfg"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jessevdk/go-flags"
+
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/procedure"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
-	"github.com/jessevdk/go-flags"
-	"os"
 )
 
 // coldwalletとしてclient, payment, receiptのseed作成、keyを指定した数だけ生成し、出力する

@@ -7,12 +7,13 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/chaincfg"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jessevdk/go-flags"
+
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/procedure"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
 	"github.com/hiromaily/go-bitcoin/pkg/testdata"
-	"github.com/jessevdk/go-flags"
 )
 
 //Watch Only Wallet

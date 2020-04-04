@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	. "github.com/hiromaily/go-bitcoin/pkg/kvs"
+	. "github.com/hiromaily/go-bitcoin/pkg/db/kvs"
 )
 
 var db *LevelDB

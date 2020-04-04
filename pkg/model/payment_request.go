@@ -3,9 +3,10 @@ package model
 import (
 	"time"
 
-	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
+
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
 
 //PaymentRequest payment_requestテーブル

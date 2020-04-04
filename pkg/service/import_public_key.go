@@ -1,14 +1,16 @@
 package service
 
 import (
+	"strings"
+	"time"
+
 	"github.com/bookerzzz/grok"
+	"github.com/pkg/errors"
+
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
-	"github.com/pkg/errors"
-	"strings"
-	"time"
 )
 
 //Watch only wallet

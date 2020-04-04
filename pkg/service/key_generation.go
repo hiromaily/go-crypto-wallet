@@ -3,11 +3,12 @@ package service
 //Cold wallet
 
 import (
+	"github.com/pkg/errors"
+
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
-	"github.com/pkg/errors"
 )
 
 //1.Seedの生成+DBに登録

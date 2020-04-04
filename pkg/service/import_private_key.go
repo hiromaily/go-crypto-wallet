@@ -4,9 +4,10 @@ package service
 
 import (
 	"github.com/btcsuite/btcutil"
+	"github.com/pkg/errors"
+
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
-	"github.com/pkg/errors"
 )
 
 // ImportPrivateKey 指定したAccountTypeに属するテーブルのis_imported_priv_keyがfalseのWIFをImportPrivKeyRescanする

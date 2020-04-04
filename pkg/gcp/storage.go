@@ -4,12 +4,12 @@ import (
 	"context"
 	"io/ioutil"
 	"os"
+	"strconv"
+	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/pkg/errors"
 	"google.golang.org/api/option"
-	"strconv"
-	"time"
 )
 
 // Storage Storage操作オブジェクト

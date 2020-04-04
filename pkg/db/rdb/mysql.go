@@ -3,9 +3,10 @@ package rdb
 import (
 	"fmt"
 
-	"github.com/hiromaily/go-bitcoin/pkg/toml"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
+
+	"github.com/hiromaily/go-bitcoin/pkg/toml"
 )
 
 //sqlx

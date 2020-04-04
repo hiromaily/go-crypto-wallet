@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
+
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
 
 // AddedPubkeyHistoryTable added_pubkey_historyテーブル

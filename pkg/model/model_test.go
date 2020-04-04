@@ -6,8 +6,9 @@ import (
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
+
+	"github.com/hiromaily/go-bitcoin/pkg/db/rdb"
 	. "github.com/hiromaily/go-bitcoin/pkg/model"
-	"github.com/hiromaily/go-bitcoin/pkg/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/toml"
 )
 

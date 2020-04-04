@@ -4,9 +4,11 @@ package service
 
 import (
 	"fmt"
+
+	"github.com/pkg/errors"
+
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
-	"github.com/pkg/errors"
 )
 
 // AddMultisigAddressByAuthorization account_key_authorizationテーブルのwallet_addressを認証者として、

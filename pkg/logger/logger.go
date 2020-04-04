@@ -3,11 +3,12 @@ package logger
 import (
 	"os"
 
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc/status"
+
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 )
 
 var (
