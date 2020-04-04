@@ -8,9 +8,9 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 )
 
 //Watch only wallet

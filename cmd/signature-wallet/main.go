@@ -10,10 +10,10 @@ import (
 	"github.com/jessevdk/go-flags"
 
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/procedure"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 )
 
 // coldwallet2としてauthorizationのseed作成、keyを1つだけ生成し、出力する

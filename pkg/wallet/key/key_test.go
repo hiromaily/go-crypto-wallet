@@ -11,8 +11,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	. "github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/service"
+	. "github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 )
 
 var (

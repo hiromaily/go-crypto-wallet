@@ -1,8 +1,5 @@
 .DS_Store
 .idea/
-wallet
-coldwallet1
-coldwallet2
 !cmd/wallet
 !cmd/keygen-wallet
 !cmd/signature-wallet

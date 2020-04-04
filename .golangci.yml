@@ -1,0 +1,47 @@
+run:
+  deadline: 10m
+  build-tags:
+    - integration
+  skip-dirs:
+    - vendor
+    - data
+    - data
+
+linters-settings:
+  misspell:
+    locale: US
+  goimports:
+    # put imports beginning with prefix after 3rd-party packages;
+    # it's a comma-separated list of prefixes
+    local-prefixes: github.com/hiromaily
+  #unused:
+  #  check-exported: true
+  golint:
+    min-confidence: 0.8
+
+issues:
+  exclude:
+    - type name will be used
+    - "HeaderMap is deprecated: HeaderMap exists"
+  exclude-use-default: false
+
+linters:
+  disable-all: true
+  enable:
+    - deadcode
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - structcheck
+    - typecheck
+    - unused
+    - varcheck
+    - goimports
+    - misspell
+    - golint
+  presets:
+    # only next presets exist: (bugs|complexity|format|performance|style|unused)
+    - format
+    - unused
+  fast: false

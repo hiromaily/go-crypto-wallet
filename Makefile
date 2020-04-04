@@ -2,13 +2,46 @@
 ###############################################################################
 # Initial
 ###############################################################################
+.PHONY: setup-mac
+setup-mac:
+	brew install jq
+
 .PHONY: goget
 goget:
 	go get -u -d -v ./...
 
-.PHONY: setup-mac
-setup-mac:
-	brew install jq
+.PHONY: imports
+imports:
+	./scripts/imports.sh
+
+.PHONY: lint
+lint:
+	golangci-lint run --fix
+
+###############################################################################
+# From inside docker container
+###############################################################################
+.PHONY: bld-linux
+bld-linux:
+	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/wallet ./cmd/wallet/main.go
+	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/keygen ./cmd/keygen-wallet/main.go
+	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/sign ./cmd/signature-wallet/main.go
+
+###############################################################################
+# Build on local
+###############################################################################
+.PHONY: bld
+bld:
+	go build -i -v -o ${GOPATH}/bin/wallet ./cmd/wallet/main.go
+	go build -i -v -o ${GOPATH}/bin/keygen ./cmd/keygen-wallet/main.go
+	go build -i -v -o ${GOPATH}/bin/sign ./cmd/signature-wallet/main.go
+
+###############################################################################
+# Test on local
+###############################################################################
+.PHONY: gotest
+gotest:
+	go test -v ./...
 
 
 ###############################################################################
@@ -77,31 +110,6 @@ remove-wallet-dat:
 
 
 ###############################################################################
-# Automation on docker
-###############################################################################
-.PHONY: auto-generation
-auto-generation:
-	./tools/integration_on_docker.sh 99
-
-
-
-###############################################################################
-# Grafana
-###############################################################################
-# http://localhost:3000
-
-
-###############################################################################
-# From inside docker container
-###############################################################################
-.PHONY: bld-linux
-bld-linux:
-	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/wallet ./cmd/wallet/main.go
-	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/keygen ./cmd/keygen-wallet/main.go
-	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/sign ./cmd/signature-wallet/main.go
-
-
-###############################################################################
 # Bitcoin core on local
 ###############################################################################
 .PHONY: bitcoin-run
@@ -120,21 +128,19 @@ cd-btc-dir:
 reset-wallet-dat:
 	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/wallet.dat
 
-###############################################################################
-# Build on local
-###############################################################################
-.PHONY: bld
-bld:
-	go build -i -v -o ${GOPATH}/bin/wallet ./cmd/wallet/main.go
-	go build -i -v -o ${GOPATH}/bin/keygen ./cmd/keygen-wallet/main.go
-	go build -i -v -o ${GOPATH}/bin/sign ./cmd/signature-wallet/main.go
 
 ###############################################################################
-# Test on local
+# Grafana
 ###############################################################################
-.PHONY: gotest
-gotest:
-	go test -v ./...
+# http://localhost:3000
+
+
+###############################################################################
+# Automation on docker
+###############################################################################
+.PHONY: auto-generation
+auto-generation:
+	./tools/integration_on_docker.sh 99
 
 
 ###############################################################################
