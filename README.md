@@ -10,12 +10,12 @@ There are mainly 3 wallets separately.
 - Only Bitcoin address is stored. Private key is NOT stored here. That's why this is called watch only wallet.
 - It works as detection coin received, creation of unsigned transaction and client to call Bitcoin APIs.
 
-### Cold wallet1
+### Keygen wallet as cold wallet
 - This wallet is key management functionalities. It generates seed and private keys as HD wallet and exports address for watch only wallet.
 - Sign unsigned transaction by certain keys.
 - Outside network is not used at all.
 
-### Cold wallet2
+### Signature wallet as cold wallet
 - This wallet is key management for authorization by multi-signature address. It also generates seed and private keys for authorization accounts.
 - Sign unsigned transaction by certain keys.
 - Outside network is not used at all.

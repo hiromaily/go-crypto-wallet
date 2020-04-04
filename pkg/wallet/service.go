@@ -1,4 +1,4 @@
-package service
+package wallet
 
 import (
 	"github.com/bookerzzz/grok"

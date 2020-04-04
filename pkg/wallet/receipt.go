@@ -1,4 +1,4 @@
-package service
+package wallet
 
 //Watch only wallet
 

@@ -16,6 +16,10 @@ imports:
 
 .PHONY: lint
 lint:
+	golangci-lint run
+
+.PHONY: lintfix
+lintfix:
 	golangci-lint run --fix
 
 ###############################################################################

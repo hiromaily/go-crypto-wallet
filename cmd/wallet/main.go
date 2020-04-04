@@ -12,7 +12,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/procedure"
-	"github.com/hiromaily/go-bitcoin/pkg/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/testdata"
 )
 
@@ -78,7 +78,7 @@ func main() {
 	}
 
 	//initialSettings()
-	wallet, err := service.InitialSettings(env)
+	wallet, err := wallet.InitialSettings(env)
 	if err != nil {
 		// ここでエラーが出た場合、まだloggerの初期化が終わってない
 		//logger.Fatal(err)
@@ -138,7 +138,7 @@ func checkAccountWithoutAuthAndClient(account string) {
 }
 
 //キー関連機能[k]
-func keyFunctionalities(wallet *service.Wallet) {
+func keyFunctionalities(wallet *wallet.Wallet) {
 	switch opts.Mode {
 	case 1:
 		logger.Info("Run: coldwalletで生成したAccountのアドレスをwalletにimportする")
@@ -160,7 +160,7 @@ func keyFunctionalities(wallet *service.Wallet) {
 }
 
 //入金関連機能[r]
-func receiptFunctionalities(wallet *service.Wallet) {
+func receiptFunctionalities(wallet *wallet.Wallet) {
 	switch opts.Mode {
 	case 1:
 		logger.Info("Run: 入金処理検知 + 未署名トランザクション作成")
@@ -218,7 +218,7 @@ func receiptFunctionalities(wallet *service.Wallet) {
 }
 
 //出金関連機能[p]
-func paymentFunctionalities(wallet *service.Wallet) {
+func paymentFunctionalities(wallet *wallet.Wallet) {
 	switch opts.Mode {
 	case 1:
 		logger.Info("Run:出金のための未署名トランザクション作成")
@@ -269,7 +269,7 @@ func paymentFunctionalities(wallet *service.Wallet) {
 }
 
 //内部アカウント転送関連機能[t]
-func transferFunctionalities(wallet *service.Wallet) {
+func transferFunctionalities(wallet *wallet.Wallet) {
 	switch opts.Mode {
 	case 1:
 		logger.Info("Run:内部アカウント転送のための未署名トランザクション作成")
@@ -289,7 +289,7 @@ func transferFunctionalities(wallet *service.Wallet) {
 }
 
 //署名の送信 関連機能[s]
-func sendingFunctionalities(wallet *service.Wallet) {
+func sendingFunctionalities(wallet *wallet.Wallet) {
 	switch opts.Mode {
 	case 1:
 		logger.Info("Run: ファイルから署名済みtxを送信する")
@@ -309,7 +309,7 @@ func sendingFunctionalities(wallet *service.Wallet) {
 }
 
 //transactionの監視 関連機能[n]
-func monitoringFunctionalities(wallet *service.Wallet) {
+func monitoringFunctionalities(wallet *wallet.Wallet) {
 	switch opts.Mode {
 	case 1:
 		logger.Info("Run: 送信済ステータスのトランザクションを監視する")
@@ -325,7 +325,7 @@ func monitoringFunctionalities(wallet *service.Wallet) {
 }
 
 // bitcoin RPC command[b]
-func btcCommand(wallet *service.Wallet) {
+func btcCommand(wallet *wallet.Wallet) {
 	switch opts.Mode {
 	case 1:
 		//入金検知処理後、lockされたunspenttransactionの解除を行う
@@ -386,7 +386,7 @@ func btcCommand(wallet *service.Wallet) {
 }
 
 // 検証用[d]
-func debugForCheck(wallet *service.Wallet) {
+func debugForCheck(wallet *wallet.Wallet) {
 	switch opts.Mode {
 	case 1:
 		//[Debug用]payment_requestテーブルを作成する
