@@ -1,6 +1,12 @@
 # go-bitcoin
 Wallet functionalities handling BTC, BCH and so on. Currencies would be added step by step.
 
+## Note
+Drastic refactoring is ongoing
+
+- any comments should be English, not Japanese
+- apply for domain driven design
+
 ## Structures
 This is explained for BTC for now.
 There are mainly 3 wallets separately.
