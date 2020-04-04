@@ -1,4 +1,4 @@
-FROM golang:1.11
+FROM golang:1.14.1
 
 #RUN echo $GOPATH => /go
 

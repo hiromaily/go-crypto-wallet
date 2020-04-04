@@ -1,0 +1,32 @@
+#basic
+alias ll='ls -al'
+alias pd='pushd'
+alias pp='popd'
+
+#golang
+export GOPATH=$HOME/work/go
+export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+
+#docker-compose
+alias dcom='docker-compose'
+alias dcup='docker-compose up'
+alias dcdw='docker-compose down'
+alias dcdwv='docker-compose down -v'
+alias dcbld='docker-compose build'
+alias dcbldnc='docker-compose build --no-cache'
+alias dcps='docker ps -a'
+alias dcrmall='docker rm -f $(docker ps -a --format "{{.Names}}")'
+alias dcimgcln='docker rmi -f $(docker images -aqf "dangling=true" --no-trunc)'
+alias dvrmall='docker volume prune'
+
+#mff
+alias mff='cd $GOPATH/src/github.com/mf-financial'
+
+#bitcoin
+alias mfw='cd $GOPATH/src/github.com/hiromaily/go-bitcon'
+alias btc='cd ~/Library/Application\ Support/Bitcoin'
+alias rstwlt='rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/wallet.dat'
+
+alias bitstart='bitcoind -daemon -deprecatedrpc=signrawtransaction'
+alias bitstart-cold='bitcoind -daemon -maxconnections=0 -deprecatedrpc=signrawtransaction'
+alias bitstop='bitcoin-cli stop'
