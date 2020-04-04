@@ -15,7 +15,7 @@ import (
 // added_pubkey_history_paymentテーブル内のwalletアドレスのmultisigアドレスを生成する
 // TODO:第4パラメータに、address_typeを追加する。Bitcoinの場合は、p2sh-segwit とする
 func (w *Wallet) AddMultisigAddressByAuthorization(accountType enum.AccountType, addressType enum.AddressType) error {
-	if w.Type != enum.WalletTypeCold2 {
+	if w.Type != enum.WalletTypeSignature {
 		return errors.New("it's available on Coldwallet2")
 	}
 

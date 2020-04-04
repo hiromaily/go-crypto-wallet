@@ -78,7 +78,7 @@ func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum
 
 // ImportPublicKeyForColdWallet2 csvファイルからpublicアドレスをimportする for Cold Wallet2
 func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum.AccountType) error {
-	if w.Type != enum.WalletTypeCold2 {
+	if w.Type != enum.WalletTypeSignature {
 		return errors.New("it's available on Coldwallet2")
 	}
 
@@ -131,7 +131,7 @@ func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum
 
 // ImportMultisigAddrForColdWallet1 coldwallet2でexportされたmultisigアドレス情報をimportする for Cold Wallet1
 func (w *Wallet) ImportMultisigAddrForColdWallet1(fileName string, accountType enum.AccountType) error {
-	if w.Type != enum.WalletTypeCold1 {
+	if w.Type != enum.WalletTypeKeyGen {
 		return errors.New("it's available on Coldwallet1")
 	}
 

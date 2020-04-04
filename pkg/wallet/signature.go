@@ -108,7 +108,7 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 	//TODO:coldwallet1とcoldwallet2で挙動が違う
 	//TODO:receiptの場合、wipsは不要
 	//coldwallet2の場合、AccountTypeAuthorizationが必要
-	if w.Type == enum.WalletTypeCold2 {
+	if w.Type == enum.WalletTypeSignature {
 		//account_key_authorizationテーブルから情報を取得
 		accountKey, err := w.DB.GetOneByMaxIDOnAccountKeyTable(enum.AccountTypeAuthorization)
 		if err != nil {
@@ -142,7 +142,7 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 	//multisigの場合のみの処理
 	//accountType, ok := enum.ActionToAccountMap[actionType]
 	if enum.AccountTypeMultisig[addrsPrevs.SenderAccount] {
-		if w.Type == enum.WalletTypeCold1 {
+		if w.Type == enum.WalletTypeKeyGen {
 			//取得したredeemScriptをPrevTxsにマッピング
 			for idx, val := range addrsPrevs.Addrs {
 				rs := model.GetRedeedScriptByAddress(accountKeys, val)

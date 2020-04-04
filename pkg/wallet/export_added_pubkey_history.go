@@ -16,7 +16,7 @@ import (
 //ExportAddedPubkeyHistory AddedPubkeyHistoryテーブルをcsvとして出力する
 // coldwallet2から使用
 func (w *Wallet) ExportAddedPubkeyHistory(accountType enum.AccountType) (string, error) {
-	if w.Type != enum.WalletTypeCold2 {
+	if w.Type != enum.WalletTypeSignature {
 		return "", errors.New("it's available on Coldwallet2")
 	}
 

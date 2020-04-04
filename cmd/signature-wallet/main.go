@@ -67,7 +67,7 @@ func main() {
 	if opts.ConfPath != "" {
 		confPath = opts.ConfPath
 	}
-	
+
 	// Config
 	wallet, err := wallet.InitialSettings(confPath)
 	if err != nil {
@@ -75,7 +75,7 @@ func main() {
 		//logger.Fatal(err)
 		log.Fatal(err)
 	}
-	wallet.Type = enum.WalletTypeCold2
+	wallet.Type = enum.WalletTypeSignature
 	defer wallet.Done()
 
 	if opts.Sign {
