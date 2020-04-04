@@ -63,13 +63,13 @@ func init() {
 }
 
 func main() {
-	env := os.Getenv("WALLET_COLD2_CONF")
+	confPath := os.Getenv("WALLET_COLD2_CONF")
 	if opts.ConfPath != "" {
-		env = opts.ConfPath
+		confPath = opts.ConfPath
 	}
-
+	
 	// Config
-	wallet, err := wallet.InitialSettings(env)
+	wallet, err := wallet.InitialSettings(confPath)
 	if err != nil {
 		// ここでエラーが出た場合、まだloggerの初期化が終わってない
 		//logger.Fatal(err)

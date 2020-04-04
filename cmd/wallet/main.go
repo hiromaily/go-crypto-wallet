@@ -12,8 +12,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/procedure"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/testdata"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
 //Watch Only Wallet
@@ -72,13 +72,13 @@ func init() {
 }
 
 func main() {
-	env := os.Getenv("WALLET_WATCH_CONF")
+	confPath := os.Getenv("WALLET_WATCH_CONF")
 	if opts.ConfPath != "" {
-		env = opts.ConfPath
+		confPath = opts.ConfPath
 	}
 
 	//initialSettings()
-	wallet, err := wallet.InitialSettings(env)
+	wallet, err := wallet.InitialSettings(confPath)
 	if err != nil {
 		// ここでエラーが出た場合、まだloggerの初期化が終わってない
 		//logger.Fatal(err)
