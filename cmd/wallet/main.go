@@ -17,13 +17,13 @@ import (
 )
 
 //Watch Only Wallet
-//ネットワークへの接続はGCP上のBitcoin Core
-//Watch Only Walletとしてのセットアップが必要
+//Bitcoin Core would be on GCP network for production
+//setup is required as watch only wallet
 
-//TODO:ウォレットの定期バックアップ機能 + import機能
-//TODO:生成したkeyの暗号化処理のpkgが必要になるはず
+//TODO:back up wallet data periodically and import functionality
+//TODO:generated key must be encrypted
 
-// Options コマンドラインオプション
+// Options is command line options
 type Options struct {
 	//Configパス
 	ConfPath string `short:"c" long:"conf" default:"" description:"Path for configuration toml file"`
@@ -72,7 +72,7 @@ func init() {
 }
 
 func main() {
-	confPath := os.Getenv("WALLET_WATCH_CONF")
+	confPath := os.Getenv("WATCH_WALLET_CONF")
 	if opts.ConfPath != "" {
 		confPath = opts.ConfPath
 	}

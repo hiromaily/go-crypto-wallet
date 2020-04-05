@@ -63,7 +63,7 @@ func init() {
 }
 
 func main() {
-	confPath := os.Getenv("WALLET_COLD2_CONF")
+	confPath := os.Getenv("SIGNATURE_WALLET_CONF")
 	if opts.ConfPath != "" {
 		confPath = opts.ConfPath
 	}
