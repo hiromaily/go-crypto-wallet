@@ -14,6 +14,10 @@ const (
 	AccountTypeAuthorization AccountType = "authorization" //マルチシグアドレスのための承認アドレス
 )
 
+func (a AccountType) String() string {
+	return string(a)
+}
+
 //AccountTypeValue account_typeの値
 var AccountTypeValue = map[AccountType]uint8{
 	AccountTypeClient:        0,

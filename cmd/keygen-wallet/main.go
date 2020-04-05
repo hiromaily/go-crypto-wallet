@@ -102,14 +102,14 @@ func checkImportFile() {
 
 func checkAccountWithoutAuth() {
 	if opts.Account == "" || !account.ValidateAccountType(opts.Account) ||
-		opts.Account == string(account.AccountTypeAuthorization) {
+		opts.Account == account.AccountTypeAuthorization.String() {
 		logger.Fatal("Account[client, receipt, payment, quoine, fee, stored] should be set with -a option")
 	}
 }
 
 func checkAccountWithoutAuthAndClient() {
 	if opts.Account == "" || !account.ValidateAccountType(opts.Account) ||
-		opts.Account == string(account.AccountTypeAuthorization) || opts.Account == string(account.AccountTypeClient) {
+		opts.Account == account.AccountTypeAuthorization.String() || opts.Account == account.AccountTypeClient.String() {
 		logger.Fatal("Account[receipt, payment, quoine, fee, stored] should be set with -a option")
 	}
 }

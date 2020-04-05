@@ -126,14 +126,14 @@ func checkImportFile() {
 
 func checkAccountWithoutAuth() {
 	if opts.Account == "" || !account.ValidateAccountType(opts.Account) ||
-		opts.Account == string(account.AccountTypeAuthorization) {
+		opts.Account == account.AccountTypeAuthorization.String() {
 		logger.Fatal("Account[client, receipt, payment, quoine, fee, stored] should be set with -a option")
 	}
 }
 
 func checkAccountWithoutAuthAndClient(acnt string) {
 	if acnt == "" || !account.ValidateAccountType(acnt) ||
-		acnt == string(account.AccountTypeAuthorization) || acnt == string(account.AccountTypeClient) {
+		acnt == account.AccountTypeAuthorization.String() || acnt == account.AccountTypeClient.String() {
 		logger.Fatal("Account[receipt, payment, quoine, fee, stored] should be set with -a option")
 	}
 }
@@ -406,10 +406,10 @@ func debugForCheck(wallet *wallet.Wallet) {
 	case 3:
 		//[Debug用]payment_requestテーブルの情報を初期化する
 		logger.Info("Run: I/Fが変わってエラーが出るようになったのでテスト")
-		logger.Debugf("account: %s, confirmation block: %d", string(account.AccountTypePayment), wallet.BTC.ConfirmationBlock())
+		logger.Debugf("account: %s, confirmation block: %d", account.AccountTypePayment.String(), wallet.BTC.ConfirmationBlock())
 		//FIXME:wallet.BTC.GetBalanceByAccountAndMinConf()の呼び出しをやめて、GetReceivedByAccountAndMinConf()をcallするように変更する
 		//balance, err := wallet.BTC.GetBalanceByAccountAndMinConf(string(enum.AccountTypePayment), wallet.BTC.ConfirmationBlock())
-		balance, err := wallet.BTC.GetReceivedByAccountAndMinConf(string(account.AccountTypePayment), wallet.BTC.ConfirmationBlock())
+		balance, err := wallet.BTC.GetReceivedByAccountAndMinConf(account.AccountTypePayment.String(), wallet.BTC.ConfirmationBlock())
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}
