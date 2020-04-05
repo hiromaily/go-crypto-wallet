@@ -8,6 +8,7 @@ import (
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btc"
 )
@@ -99,7 +100,7 @@ type Bitcoiner interface {
 	UnlockAllUnspentTransaction() error
 	LockUnspent(tx btcjson.ListUnspentResult) error
 	ListUnspent() ([]btc.ListUnspentResult, error)
-	ListUnspentByAccount(accountType enum.AccountType) ([]btc.ListUnspentResult, []btcutil.Address, error)
+	ListUnspentByAccount(accountType account.AccountType) ([]btc.ListUnspentResult, []btcutil.Address, error)
 
 	//wallet.go
 	BackupWallet(fileName string) error

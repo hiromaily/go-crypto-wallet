@@ -12,6 +12,7 @@ import (
 	"github.com/cpacia/bchutil"
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
@@ -69,7 +70,7 @@ func NewKey(coinType enum.CoinType, conf *chaincfg.Params) *Key {
 }
 
 // CreateAccount アカウント階層までのprivateKey及び publicKeyを生成する
-func (k Key) CreateAccount(seed []byte, actType enum.AccountType) (string, string, error) {
+func (k Key) CreateAccount(seed []byte, actType account.AccountType) (string, string, error) {
 
 	//Master
 	masterKey, err := hdkeychain.NewMaster(seed, k.conf)
@@ -92,7 +93,7 @@ func (k Key) CreateAccount(seed []byte, actType enum.AccountType) (string, strin
 		return "", "", err
 	}
 	//Account
-	account, err := coinType.Child(hdkeychain.HardenedKeyStart + uint32(enum.AccountTypeValue[actType]))
+	account, err := coinType.Child(hdkeychain.HardenedKeyStart + uint32(account.AccountTypeValue[actType]))
 	if err != nil {
 		return "", "", err
 	}

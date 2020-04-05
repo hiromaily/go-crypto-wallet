@@ -6,6 +6,7 @@ import (
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
@@ -13,7 +14,7 @@ import (
 // ImportPrivateKey 指定したAccountTypeに属するテーブルのis_imported_priv_keyがfalseのWIFをImportPrivKeyRescanする
 // https://en.bitcoin.it/wiki/How_to_import_private_keys
 // getaddressesbyaccount "" で内容を確認可能？？
-func (w *Wallet) ImportPrivateKey(accountType enum.AccountType) error {
+func (w *Wallet) ImportPrivateKey(accountType account.AccountType) error {
 	if w.Type == enum.WalletTypeWatchOnly {
 		return errors.New("it's available on Coldwallet1, Coldwallet2")
 	}

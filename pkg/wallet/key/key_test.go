@@ -10,6 +10,7 @@ import (
 	"github.com/cpacia/bchutil"
 	_ "github.com/go-sql-driver/mysql"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	. "github.com/hiromaily/go-bitcoin/pkg/wallet/key"
@@ -52,7 +53,7 @@ func generateKeys(bSeed []byte, coinType enum.CoinType, t *testing.T) {
 	// key生成
 	keyData := NewKey(coinType, wlt.BTC.GetChainConf())
 
-	priv, _, err := keyData.CreateAccount(bSeed, enum.AccountTypeClient)
+	priv, _, err := keyData.CreateAccount(bSeed, account.AccountTypeClient)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -184,7 +185,7 @@ func TestCheckBTCPrivateKey(t *testing.T) {
 	// BTC key生成
 	keyData := NewKey(enum.BTC, conf)
 
-	priv, _, err := keyData.CreateAccount(bSeed, enum.AccountTypeClient)
+	priv, _, err := keyData.CreateAccount(bSeed, account.AccountTypeClient)
 	if err != nil {
 		t.Fatal(err)
 	}

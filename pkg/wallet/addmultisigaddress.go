@@ -7,6 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
@@ -14,7 +15,7 @@ import (
 // AddMultisigAddressByAuthorization account_key_authorizationテーブルのwallet_addressを認証者として、
 // added_pubkey_history_paymentテーブル内のwalletアドレスのmultisigアドレスを生成する
 // TODO:第4パラメータに、address_typeを追加する。Bitcoinの場合は、p2sh-segwit とする
-func (w *Wallet) AddMultisigAddressByAuthorization(accountType enum.AccountType, addressType enum.AddressType) error {
+func (w *Wallet) AddMultisigAddressByAuthorization(accountType account.AccountType, addressType enum.AddressType) error {
 	if w.Type != enum.WalletTypeSignature {
 		return errors.New("it's available on Coldwallet2")
 	}
@@ -25,13 +26,13 @@ func (w *Wallet) AddMultisigAddressByAuthorization(accountType enum.AccountType,
 	//	logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
 	//	return nil
 	//}
-	if !enum.AccountTypeMultisig[accountType] {
+	if !account.AccountTypeMultisig[accountType] {
 		logger.Info("This func is for only account witch uses multiaddress")
 		return nil
 	}
 
 	//account_key_authorizationテーブルからAuthorizationのwallet_addressを取得
-	authKeyTable, err := w.DB.GetOneByMaxIDOnAccountKeyTable(enum.AccountTypeAuthorization)
+	authKeyTable, err := w.DB.GetOneByMaxIDOnAccountKeyTable(account.AccountTypeAuthorization)
 	if err != nil {
 		return errors.Errorf("DB.GetOneByMaxIDOnAccountKeyTable(enum.AccountTypeAuthorization) error: %s", err)
 	}

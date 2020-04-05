@@ -10,6 +10,7 @@ import (
 	"github.com/btcsuite/btcd/wire"
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
@@ -110,7 +111,7 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 	//coldwallet2の場合、AccountTypeAuthorizationが必要
 	if w.Type == enum.WalletTypeSignature {
 		//account_key_authorizationテーブルから情報を取得
-		accountKey, err := w.DB.GetOneByMaxIDOnAccountKeyTable(enum.AccountTypeAuthorization)
+		accountKey, err := w.DB.GetOneByMaxIDOnAccountKeyTable(account.AccountTypeAuthorization)
 		if err != nil {
 			return "", false, "", errors.Errorf("DB.GetOneByMaxIDOnAccountKeyTable() error: %s", err)
 		}
@@ -141,7 +142,7 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 
 	//multisigの場合のみの処理
 	//accountType, ok := enum.ActionToAccountMap[actionType]
-	if enum.AccountTypeMultisig[addrsPrevs.SenderAccount] {
+	if account.AccountTypeMultisig[addrsPrevs.SenderAccount] {
 		if w.Type == enum.WalletTypeKeyGen {
 			//取得したredeemScriptをPrevTxsにマッピング
 			for idx, val := range addrsPrevs.Addrs {
@@ -166,7 +167,7 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 
 	//署名
 	//multisigかどうかで判別
-	if enum.AccountTypeMultisig[addrsPrevs.SenderAccount] {
+	if account.AccountTypeMultisig[addrsPrevs.SenderAccount] {
 		signedTx, isSigned, err = w.BTC.SignRawTransactionWithKey(msgTx, wips, addrsPrevs.PrevTxs)
 	} else {
 		signedTx, isSigned, err = w.BTC.SignRawTransaction(msgTx, addrsPrevs.PrevTxs)

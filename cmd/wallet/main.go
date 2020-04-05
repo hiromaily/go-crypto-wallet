@@ -9,6 +9,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jessevdk/go-flags"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/procedure"
@@ -124,15 +125,15 @@ func checkImportFile() {
 }
 
 func checkAccountWithoutAuth() {
-	if opts.Account == "" || !enum.ValidateAccountType(opts.Account) ||
-		opts.Account == string(enum.AccountTypeAuthorization) {
+	if opts.Account == "" || !account.ValidateAccountType(opts.Account) ||
+		opts.Account == string(account.AccountTypeAuthorization) {
 		logger.Fatal("Account[client, receipt, payment, quoine, fee, stored] should be set with -a option")
 	}
 }
 
-func checkAccountWithoutAuthAndClient(account string) {
-	if account == "" || !enum.ValidateAccountType(account) ||
-		account == string(enum.AccountTypeAuthorization) || account == string(enum.AccountTypeClient) {
+func checkAccountWithoutAuthAndClient(acnt string) {
+	if acnt == "" || !account.ValidateAccountType(acnt) ||
+		acnt == string(account.AccountTypeAuthorization) || acnt == string(account.AccountTypeClient) {
 		logger.Fatal("Account[receipt, payment, quoine, fee, stored] should be set with -a option")
 	}
 }
@@ -147,7 +148,7 @@ func keyFunctionalities(wallet *wallet.Wallet) {
 		logger.Infof("Run: Account[%s]", opts.Account)
 
 		//import public key
-		err := wallet.ImportPublicKeyForWatchWallet(opts.ImportFile, enum.AccountType(opts.Account), opts.IsRescan)
+		err := wallet.ImportPublicKeyForWatchWallet(opts.ImportFile, account.AccountType(opts.Account), opts.IsRescan)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -276,7 +277,7 @@ func transferFunctionalities(wallet *wallet.Wallet) {
 		checkAccountWithoutAuthAndClient(opts.Account)
 		checkAccountWithoutAuthAndClient(opts.Account2)
 
-		hex, fileName, err := wallet.SendToAccount(enum.AccountType(opts.Account), enum.AccountType(opts.Account2), 0)
+		hex, fileName, err := wallet.SendToAccount(account.AccountType(opts.Account), account.AccountType(opts.Account2), 0)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -405,10 +406,10 @@ func debugForCheck(wallet *wallet.Wallet) {
 	case 3:
 		//[Debug用]payment_requestテーブルの情報を初期化する
 		logger.Info("Run: I/Fが変わってエラーが出るようになったのでテスト")
-		logger.Debugf("account: %s, confirmation block: %d", string(enum.AccountTypePayment), wallet.BTC.ConfirmationBlock())
+		logger.Debugf("account: %s, confirmation block: %d", string(account.AccountTypePayment), wallet.BTC.ConfirmationBlock())
 		//FIXME:wallet.BTC.GetBalanceByAccountAndMinConf()の呼び出しをやめて、GetReceivedByAccountAndMinConf()をcallするように変更する
 		//balance, err := wallet.BTC.GetBalanceByAccountAndMinConf(string(enum.AccountTypePayment), wallet.BTC.ConfirmationBlock())
-		balance, err := wallet.BTC.GetReceivedByAccountAndMinConf(string(enum.AccountTypePayment), wallet.BTC.ConfirmationBlock())
+		balance, err := wallet.BTC.GetReceivedByAccountAndMinConf(string(account.AccountTypePayment), wallet.BTC.ConfirmationBlock())
 		if err != nil {
 			log.Fatalf("%+v", err)
 		}

@@ -7,6 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
@@ -28,14 +29,14 @@ type AccountKeyTable struct {
 	UpdatedAt             *time.Time `db:"updated_at"`
 }
 
-var accountKeyTableName = map[enum.AccountType]string{
-	enum.AccountTypeClient:        "account_key_client",
-	enum.AccountTypeReceipt:       "account_key_receipt",
-	enum.AccountTypePayment:       "account_key_payment",
-	enum.AccountTypeQuoine:        "account_key_quoine",
-	enum.AccountTypeFee:           "account_key_fee",
-	enum.AccountTypeStored:        "account_key_stored",
-	enum.AccountTypeAuthorization: "account_key_authorization",
+var accountKeyTableName = map[account.AccountType]string{
+	account.AccountTypeClient:        "account_key_client",
+	account.AccountTypeReceipt:       "account_key_receipt",
+	account.AccountTypePayment:       "account_key_payment",
+	account.AccountTypeQuoine:        "account_key_quoine",
+	account.AccountTypeFee:           "account_key_fee",
+	account.AccountTypeStored:        "account_key_stored",
+	account.AccountTypeAuthorization: "account_key_authorization",
 }
 
 //getMaxIndexOnAccountKeyTable indexの最大値を返す
@@ -51,12 +52,12 @@ func (m *DB) getMaxIndexOnAccountKeyTable(tbl string) (int64, error) {
 }
 
 //GetMaxIndexOnAccountKeyTable indexの最大値を返す
-func (m *DB) GetMaxIndexOnAccountKeyTable(accountType enum.AccountType) (int64, error) {
+func (m *DB) GetMaxIndexOnAccountKeyTable(accountType account.AccountType) (int64, error) {
 	return m.getMaxIndexOnAccountKeyTable(accountKeyTableName[accountType])
 }
 
 //getOneByMaxIDOnAccountKeyTable idが最大の1レコードを返す
-func (m *DB) getOneByMaxIDOnAccountKeyTable(tbl string, accountType enum.AccountType) (*AccountKeyTable, error) {
+func (m *DB) getOneByMaxIDOnAccountKeyTable(tbl string, accountType account.AccountType) (*AccountKeyTable, error) {
 	sql := "SELECT * FROM %s ORDER BY ID DESC LIMIT 1;"
 	sql = fmt.Sprintf(sql, tbl)
 	logger.Debugf("sql: %s", sql)
@@ -71,7 +72,7 @@ func (m *DB) getOneByMaxIDOnAccountKeyTable(tbl string, accountType enum.Account
 }
 
 //GetOneByMaxIDOnAccountKeyTable idが最大の1レコードを返す
-func (m *DB) GetOneByMaxIDOnAccountKeyTable(accountType enum.AccountType) (*AccountKeyTable, error) {
+func (m *DB) GetOneByMaxIDOnAccountKeyTable(accountType account.AccountType) (*AccountKeyTable, error) {
 	return m.getOneByMaxIDOnAccountKeyTable(accountKeyTableName[accountType], accountType)
 }
 
@@ -92,7 +93,7 @@ func (m *DB) getAllAccountKeyByKeyStatus(tbl string, keyStatus enum.KeyStatus) (
 }
 
 // GetAllAccountKeyByKeyStatus 指定したkeyStatusのレコードをすべて返す
-func (m *DB) GetAllAccountKeyByKeyStatus(accountType enum.AccountType, keyStatus enum.KeyStatus) ([]AccountKeyTable, error) {
+func (m *DB) GetAllAccountKeyByKeyStatus(accountType account.AccountType, keyStatus enum.KeyStatus) ([]AccountKeyTable, error) {
 	return m.getAllAccountKeyByKeyStatus(accountKeyTableName[accountType], keyStatus)
 }
 
@@ -119,7 +120,7 @@ func (m *DB) getAllAccountKeyByMultiAddrs(tbl string, addrs []string) ([]Account
 }
 
 // GetAllAccountKeyByMultiAddrs WIPをmultiAddressから取得する
-func (m *DB) GetAllAccountKeyByMultiAddrs(accountType enum.AccountType, addrs []string) ([]AccountKeyTable, error) {
+func (m *DB) GetAllAccountKeyByMultiAddrs(accountType account.AccountType, addrs []string) ([]AccountKeyTable, error) {
 	return m.getAllAccountKeyByMultiAddrs(accountKeyTableName[accountType], addrs)
 }
 
@@ -154,7 +155,7 @@ VALUES (:wallet_address, :p2sh_segwit_address,:full_public_key, :wallet_multisig
 }
 
 // InsertAccountKeyTable account_key_table(client, payment, receipt...)テーブルにレコードを作成する
-func (m *DB) InsertAccountKeyTable(accountType enum.AccountType, accountKeyTables []AccountKeyTable, tx *sqlx.Tx, isCommit bool) error {
+func (m *DB) InsertAccountKeyTable(accountType account.AccountType, accountKeyTables []AccountKeyTable, tx *sqlx.Tx, isCommit bool) error {
 	return m.insertAccountKeyTable(accountKeyTableName[accountType], accountKeyTables, tx, isCommit)
 }
 
@@ -184,7 +185,7 @@ UPDATE %s SET key_status=? WHERE wallet_import_format=?
 }
 
 // UpdateKeyStatusByWIF key_statusを更新する
-func (m *DB) UpdateKeyStatusByWIF(accountType enum.AccountType, keyStatus enum.KeyStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+func (m *DB) UpdateKeyStatusByWIF(accountType account.AccountType, keyStatus enum.KeyStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	return m.updateKeyStatusByWIF(accountKeyTableName[accountType], keyStatus, strWIF, tx, isCommit)
 }
 
@@ -220,7 +221,7 @@ func (m *DB) updateKeyStatusByWIFs(tbl string, keyStatus enum.KeyStatus, wifs []
 }
 
 // UpdateKeyStatusByWIFs key_statusを更新する
-func (m *DB) UpdateKeyStatusByWIFs(accountType enum.AccountType, keyStatus enum.KeyStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+func (m *DB) UpdateKeyStatusByWIFs(accountType account.AccountType, keyStatus enum.KeyStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	return m.updateKeyStatusByWIFs(accountKeyTableName[accountType], keyStatus, wifs, tx, isCommit)
 }
 
@@ -253,7 +254,7 @@ WHERE full_public_key=:full_public_key
 }
 
 // UpdateMultisigAddrOnAccountKeyTableByFullPubKey wallet_multisig_addressを更新する
-func (m *DB) UpdateMultisigAddrOnAccountKeyTableByFullPubKey(accountType enum.AccountType, accountKeyTable []AccountKeyTable, tx *sqlx.Tx, isCommit bool) error {
+func (m *DB) UpdateMultisigAddrOnAccountKeyTableByFullPubKey(accountType account.AccountType, accountKeyTable []AccountKeyTable, tx *sqlx.Tx, isCommit bool) error {
 	return m.updateMultisigAddrOnAccountKeyTableByFullPubKey(accountKeyTableName[accountType], accountKeyTable, tx, isCommit)
 }
 

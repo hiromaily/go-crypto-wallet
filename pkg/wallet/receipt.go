@@ -10,6 +10,7 @@ import (
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
@@ -38,7 +39,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 
 	// Watch only walletであれば、ListUnspentで実現可能
 	//unspentList, err := w.BTC.ListUnspent()
-	unspentList, _, err := w.BTC.ListUnspentByAccount(enum.AccountTypeClient)
+	unspentList, _, err := w.BTC.ListUnspentByAccount(account.AccountTypeClient)
 
 	if err != nil {
 		return "", "", errors.Errorf("BTC.Client().ListUnspent(): error: %s", err)
@@ -120,11 +121,11 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 	addrsPrevs := btc.AddrsPrevTxs{
 		Addrs:         addresses,
 		PrevTxs:       prevTxs,
-		SenderAccount: enum.AccountTypeClient,
+		SenderAccount: account.AccountTypeClient,
 	}
 
 	// 一連の処理を実行
-	hex, fileName, err := w.createRawTransactionAndFee(enum.ActionTypeReceipt, enum.AccountTypeReceipt, adjustmentFee,
+	hex, fileName, err := w.createRawTransactionAndFee(enum.ActionTypeReceipt, account.AccountTypeReceipt, adjustmentFee,
 		inputs, inputTotal, txReceiptInputs, &addrsPrevs)
 
 	//TODO:Ver17対応が必要
@@ -138,7 +139,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 
 // createRawTransactionAndFee feeの抽出からtransaction作成、DBへの必要情報保存など、もろもろこちらで行う
 // receipt/transfer共通
-func (w *Wallet) createRawTransactionAndFee(actionType enum.ActionType, accountType enum.AccountType,
+func (w *Wallet) createRawTransactionAndFee(actionType enum.ActionType, accountType account.AccountType,
 	adjustmentFee float64, inputs []btcjson.TransactionInput, inputTotal btcutil.Amount,
 	txReceiptInputs []model.TxInput, addrsPrevs *btc.AddrsPrevTxs) (string, string, error) {
 

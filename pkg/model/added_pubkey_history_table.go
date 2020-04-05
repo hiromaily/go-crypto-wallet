@@ -7,7 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
 
@@ -23,16 +23,16 @@ type AddedPubkeyHistoryTable struct {
 	UpdatedAt             *time.Time `db:"updated_at"`
 }
 
-var addedPubkeyHistoryTableName = map[enum.AccountType]string{
-	enum.AccountTypeReceipt: "added_pubkey_history_receipt",
-	enum.AccountTypePayment: "added_pubkey_history_payment",
-	enum.AccountTypeQuoine:  "added_pubkey_history_quoine",
-	enum.AccountTypeFee:     "added_pubkey_history_fee",
-	enum.AccountTypeStored:  "added_pubkey_history_stored",
+var addedPubkeyHistoryTableName = map[account.AccountType]string{
+	account.AccountTypeReceipt: "added_pubkey_history_receipt",
+	account.AccountTypePayment: "added_pubkey_history_payment",
+	account.AccountTypeQuoine:  "added_pubkey_history_quoine",
+	account.AccountTypeFee:     "added_pubkey_history_fee",
+	account.AccountTypeStored:  "added_pubkey_history_stored",
 }
 
 //getAddedPubkeyHistoryTableByNoWalletMultisigAddress WalletMultisigAddressが発行されていないレコードを返す
-func (m *DB) getAddedPubkeyHistoryTableByNoWalletMultisigAddress(tbl string, accountType enum.AccountType) ([]AddedPubkeyHistoryTable, error) {
+func (m *DB) getAddedPubkeyHistoryTableByNoWalletMultisigAddress(tbl string, accountType account.AccountType) ([]AddedPubkeyHistoryTable, error) {
 	sql := "SELECT * FROM %s WHERE wallet_multisig_address = '';"
 	sql = fmt.Sprintf(sql, tbl)
 	logger.Debugf("sql: %s", sql)
@@ -47,12 +47,12 @@ func (m *DB) getAddedPubkeyHistoryTableByNoWalletMultisigAddress(tbl string, acc
 }
 
 //GetAddedPubkeyHistoryTableByNoWalletMultisigAddress WalletMultisigAddressが発行されていないレコードを返す
-func (m *DB) GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType enum.AccountType) ([]AddedPubkeyHistoryTable, error) {
+func (m *DB) GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType account.AccountType) ([]AddedPubkeyHistoryTable, error) {
 	return m.getAddedPubkeyHistoryTableByNoWalletMultisigAddress(addedPubkeyHistoryTableName[accountType], accountType)
 }
 
 //getAddedPubkeyHistoryTableByNoWalletMultisigAddress WalletMultisigAddressが発行済かつ、exportされていないレコードを返す
-func (m *DB) getAddedPubkeyHistoryTableByNotExported(tbl string, accountType enum.AccountType) ([]AddedPubkeyHistoryTable, error) {
+func (m *DB) getAddedPubkeyHistoryTableByNotExported(tbl string, accountType account.AccountType) ([]AddedPubkeyHistoryTable, error) {
 	sql := "SELECT * FROM %s WHERE wallet_multisig_address != '' AND is_exported=false;"
 	sql = fmt.Sprintf(sql, tbl)
 	logger.Debugf("sql: %s", sql)
@@ -67,7 +67,7 @@ func (m *DB) getAddedPubkeyHistoryTableByNotExported(tbl string, accountType enu
 }
 
 //GetAddedPubkeyHistoryTableByNotExported WalletMultisigAddressが発行済かつ、exportされていないレコードを返す
-func (m *DB) GetAddedPubkeyHistoryTableByNotExported(accountType enum.AccountType) ([]AddedPubkeyHistoryTable, error) {
+func (m *DB) GetAddedPubkeyHistoryTableByNotExported(accountType account.AccountType) ([]AddedPubkeyHistoryTable, error) {
 	return m.getAddedPubkeyHistoryTableByNotExported(addedPubkeyHistoryTableName[accountType], accountType)
 }
 
@@ -102,7 +102,7 @@ VALUES (:full_public_key, :auth_address1, :auth_address2, :wallet_multisig_addre
 }
 
 // InsertAddedPubkeyHistoryTable added_pubkey_history_table(payment, receipt...)テーブルにレコードを作成する
-func (m *DB) InsertAddedPubkeyHistoryTable(accountType enum.AccountType, addedPubkeyHistoryTables []AddedPubkeyHistoryTable, tx *sqlx.Tx, isCommit bool) error {
+func (m *DB) InsertAddedPubkeyHistoryTable(accountType account.AccountType, addedPubkeyHistoryTables []AddedPubkeyHistoryTable, tx *sqlx.Tx, isCommit bool) error {
 	return m.insertAddedPubkeyHistoryTable(addedPubkeyHistoryTableName[accountType], addedPubkeyHistoryTables, tx, isCommit)
 }
 
@@ -132,7 +132,7 @@ UPDATE %s SET wallet_multisig_address=?, redeem_script=?, auth_address1=? WHERE 
 }
 
 // UpdateMultisigAddrOnAddedPubkeyHistoryTable added_pubkey_history_table(payment, receipt...)テーブルのmultisigアドレスを更新する
-func (m *DB) UpdateMultisigAddrOnAddedPubkeyHistoryTable(accountType enum.AccountType, multiSigAddr, redeemScript, authAddr1, fullPublicKey string, tx *sqlx.Tx, isCommit bool) error {
+func (m *DB) UpdateMultisigAddrOnAddedPubkeyHistoryTable(accountType account.AccountType, multiSigAddr, redeemScript, authAddr1, fullPublicKey string, tx *sqlx.Tx, isCommit bool) error {
 	return m.updateMultisigAddrOnAddedPubkeyHistoryTable(addedPubkeyHistoryTableName[accountType], multiSigAddr, redeemScript, authAddr1, fullPublicKey, tx, isCommit)
 }
 
@@ -168,6 +168,6 @@ func (m *DB) updateIsExportedOnAddedPubkeyHistoryTable(tbl string, ids []int64, 
 }
 
 // UpdateIsExportedOnAddedPubkeyHistoryTable added_pubkey_history_table(payment, receipt...)テーブルのis_exportedを更新する
-func (m *DB) UpdateIsExportedOnAddedPubkeyHistoryTable(accountType enum.AccountType, ids []int64, tx *sqlx.Tx, isCommit bool) (int64, error) {
+func (m *DB) UpdateIsExportedOnAddedPubkeyHistoryTable(accountType account.AccountType, ids []int64, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	return m.updateIsExportedOnAddedPubkeyHistoryTable(addedPubkeyHistoryTableName[accountType], ids, tx, isCommit)
 }

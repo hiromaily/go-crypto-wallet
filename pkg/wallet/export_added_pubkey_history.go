@@ -7,6 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
@@ -15,7 +16,7 @@ import (
 
 //ExportAddedPubkeyHistory AddedPubkeyHistoryテーブルをcsvとして出力する
 // coldwallet2から使用
-func (w *Wallet) ExportAddedPubkeyHistory(accountType enum.AccountType) (string, error) {
+func (w *Wallet) ExportAddedPubkeyHistory(accountType account.AccountType) (string, error) {
 	if w.Type != enum.WalletTypeSignature {
 		return "", errors.New("it's available on Coldwallet2")
 	}

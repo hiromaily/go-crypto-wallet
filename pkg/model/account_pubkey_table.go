@@ -6,7 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
 
@@ -19,13 +19,13 @@ type AccountPublicKeyTable struct {
 	UpdatedAt     *time.Time `db:"updated_at"`
 }
 
-var accountPubKeyTableName = map[enum.AccountType]string{
-	enum.AccountTypeClient:  "account_pubkey_client",
-	enum.AccountTypeReceipt: "account_pubkey_receipt",
-	enum.AccountTypePayment: "account_pubkey_payment",
-	enum.AccountTypeQuoine:  "account_pubkey_quoine",
-	enum.AccountTypeFee:     "account_pubkey_fee",
-	enum.AccountTypeStored:  "account_pubkey_stored",
+var accountPubKeyTableName = map[account.AccountType]string{
+	account.AccountTypeClient:  "account_pubkey_client",
+	account.AccountTypeReceipt: "account_pubkey_receipt",
+	account.AccountTypePayment: "account_pubkey_payment",
+	account.AccountTypeQuoine:  "account_pubkey_quoine",
+	account.AccountTypeFee:     "account_pubkey_fee",
+	account.AccountTypeStored:  "account_pubkey_stored",
 }
 
 //getAllAccountPubKeyTable
@@ -44,7 +44,7 @@ func (m *DB) getAllAccountPubKeyTable(tbl string) ([]AccountPublicKeyTable, erro
 }
 
 // GetAllAccountPubKeyTable account_pubkey_table(client, payment, receipt...)テーブルから全レコードを取得
-func (m *DB) GetAllAccountPubKeyTable(accountType enum.AccountType) ([]AccountPublicKeyTable, error) {
+func (m *DB) GetAllAccountPubKeyTable(accountType account.AccountType) ([]AccountPublicKeyTable, error) {
 	return m.getAllAccountPubKeyTable(accountPubKeyTableName[accountType])
 }
 
@@ -64,7 +64,7 @@ func (m *DB) getOneUnAllocatedAccountPubKeyTable(tbl string) (*AccountPublicKeyT
 }
 
 // GetOneUnAllocatedAccountPubKeyTable account_pubkey_table(client, payment, receipt...)テーブルからis_allocated=falseの1レコードを取得
-func (m *DB) GetOneUnAllocatedAccountPubKeyTable(accountType enum.AccountType) (*AccountPublicKeyTable, error) {
+func (m *DB) GetOneUnAllocatedAccountPubKeyTable(accountType account.AccountType) (*AccountPublicKeyTable, error) {
 	return m.getOneUnAllocatedAccountPubKeyTable(accountPubKeyTableName[accountType])
 }
 
@@ -99,7 +99,7 @@ VALUES (:wallet_address, :account)
 }
 
 // InsertAccountPubKeyTable account_pubkey_table(client, payment, receipt...)テーブルにレコードを作成する
-func (m *DB) InsertAccountPubKeyTable(accountType enum.AccountType, accountPubKeyTables []AccountPublicKeyTable, tx *sqlx.Tx, isCommit bool) error {
+func (m *DB) InsertAccountPubKeyTable(accountType account.AccountType, accountPubKeyTables []AccountPublicKeyTable, tx *sqlx.Tx, isCommit bool) error {
 	return m.insertAccountPubKeyTable(accountPubKeyTableName[accountType], accountPubKeyTables, tx, isCommit)
 }
 
@@ -132,7 +132,7 @@ WHERE id=:id
 }
 
 // UpdateAccountOnAccountPubKeyTable Accountを更新する
-func (m *DB) UpdateAccountOnAccountPubKeyTable(accountType enum.AccountType, accountKeyTable []AccountPublicKeyTable, tx *sqlx.Tx, isCommit bool) error {
+func (m *DB) UpdateAccountOnAccountPubKeyTable(accountType account.AccountType, accountKeyTable []AccountPublicKeyTable, tx *sqlx.Tx, isCommit bool) error {
 	return m.updateAccountOnAccountPubKeyTable(accountPubKeyTableName[accountType], accountKeyTable, tx, isCommit)
 }
 
@@ -165,6 +165,6 @@ WHERE wallet_address=:wallet_address
 }
 
 // UpdateIsAllocatedOnAccountPubKeyTable IsAllocatedを更新する
-func (m *DB) UpdateIsAllocatedOnAccountPubKeyTable(accountType enum.AccountType, accountKeyTable []AccountPublicKeyTable, tx *sqlx.Tx, isCommit bool) error {
+func (m *DB) UpdateIsAllocatedOnAccountPubKeyTable(accountType account.AccountType, accountKeyTable []AccountPublicKeyTable, tx *sqlx.Tx, isCommit bool) error {
 	return m.updateIsAllocatedOnAccountPubKeyTable(accountPubKeyTableName[accountType], accountKeyTable, tx, isCommit)
 }

@@ -9,6 +9,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jessevdk/go-flags"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/procedure"
@@ -101,14 +102,14 @@ func checkImportFile() {
 }
 
 func checkAccountWithoutAuthAndClient() {
-	if opts.Account == "" || !enum.ValidateAccountType(opts.Account) ||
-		opts.Account == string(enum.AccountTypeAuthorization) || opts.Account == string(enum.AccountTypeClient) {
+	if opts.Account == "" || !account.ValidateAccountType(opts.Account) ||
+		opts.Account == string(account.AccountTypeAuthorization) || opts.Account == string(account.AccountTypeClient) {
 		logger.Fatal("Account[receipt, payment, quoine, fee, stored] should be set with -a option")
 	}
 }
 
 func checkAccountOnlyAuth() {
-	if opts.Account != string(enum.AccountTypeAuthorization) {
+	if opts.Account != string(account.AccountTypeAuthorization) {
 		logger.Fatal("Account[authorization] should be set with -a option")
 	}
 }
@@ -163,7 +164,7 @@ func keyFunctionalities(wallet *wallet.Wallet) {
 		}
 
 		//generate
-		keys, err := wallet.GenerateAccountKey(enum.AccountTypeAuthorization, enum.BTC, bSeed, 1)
+		keys, err := wallet.GenerateAccountKey(account.AccountTypeAuthorization, enum.BTC, bSeed, 1)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -175,7 +176,7 @@ func keyFunctionalities(wallet *wallet.Wallet) {
 		logger.Info("Run: 作成したAuthorizationのPrivateKeyをColdWalletにimportする")
 
 		//import private key to coldwallet
-		err := wallet.ImportPrivateKey(enum.AccountTypeAuthorization)
+		err := wallet.ImportPrivateKey(account.AccountTypeAuthorization)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -190,7 +191,7 @@ func keyFunctionalities(wallet *wallet.Wallet) {
 		logger.Infof("Run: Account[%s]", opts.Account)
 
 		//import public key to database
-		err := wallet.ImportPublicKeyForColdWallet2(opts.ImportFile, enum.AccountType(opts.Account))
+		err := wallet.ImportPublicKeyForColdWallet2(opts.ImportFile, account.AccountType(opts.Account))
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -205,7 +206,7 @@ func keyFunctionalities(wallet *wallet.Wallet) {
 		logger.Infof("Run: Account[%s]", opts.Account)
 
 		//execute addmultisigaddress
-		err := wallet.AddMultisigAddressByAuthorization(enum.AccountType(opts.Account), enum.AddressTypeP2shSegwit)
+		err := wallet.AddMultisigAddressByAuthorization(account.AccountType(opts.Account), enum.AddressTypeP2shSegwit)
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}
@@ -220,7 +221,7 @@ func keyFunctionalities(wallet *wallet.Wallet) {
 		logger.Infof("Run: Account[%s]", opts.Account)
 
 		//export multisig address
-		fileName, err := wallet.ExportAddedPubkeyHistory(enum.AccountType(opts.Account))
+		fileName, err := wallet.ExportAddedPubkeyHistory(account.AccountType(opts.Account))
 		if err != nil {
 			logger.Fatalf("%+v", err)
 		}

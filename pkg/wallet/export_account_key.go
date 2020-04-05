@@ -8,6 +8,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
@@ -16,7 +17,7 @@ import (
 
 //ExportAccountKey AccountKeyテーブルをcsvとして出力する
 //TODO:watch only walletにセットするアドレスは、clientの場合は、wallet_address, receipt/paymentの場合、`wallet_multisig_address`
-func (w *Wallet) ExportAccountKey(accountType enum.AccountType, keyStatus enum.KeyStatus) (string, error) {
+func (w *Wallet) ExportAccountKey(accountType account.AccountType, keyStatus enum.KeyStatus) (string, error) {
 	if w.Type != enum.WalletTypeKeyGen {
 		return "", errors.New("it's available on Coldwallet1")
 	}
@@ -28,7 +29,7 @@ func (w *Wallet) ExportAccountKey(accountType enum.AccountType, keyStatus enum.K
 
 	//TODO:Multisig対応かどうかのジャッジ
 	var updateKeyStatus enum.KeyStatus
-	if !enum.AccountTypeMultisig[accountType] {
+	if !account.AccountTypeMultisig[accountType] {
 		updateKeyStatus = enum.KeyStatusAddressExported //4
 	} else {
 		if keyStatus == enum.KeyStatusImportprivkey { //1
@@ -71,7 +72,7 @@ func (w *Wallet) ExportAccountKey(accountType enum.AccountType, keyStatus enum.K
 	}
 
 	//Multisig対応かどうかのジャッジ
-	logger.Infof("Is this account[%s] for multisig: %t", accountType, enum.AccountTypeMultisig[accountType])
+	logger.Infof("Is this account[%s] for multisig: %t", accountType, account.AccountTypeMultisig[accountType])
 
 	return fileName, nil
 }

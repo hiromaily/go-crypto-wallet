@@ -7,6 +7,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
@@ -112,7 +113,7 @@ func (w *Wallet) updateIsAllocatedForAccountPubkey(txReceiptID int64, actionType
 	accountPublicKeyTable[0].IsAllocated = true
 	accountPublicKeyTable[0].UpdatedAt = &tm
 
-	w.DB.UpdateIsAllocatedOnAccountPubKeyTable(enum.AccountTypeReceipt, accountPublicKeyTable, nil, true)
+	w.DB.UpdateIsAllocatedOnAccountPubKeyTable(account.AccountTypeReceipt, accountPublicKeyTable, nil, true)
 
 	return nil
 }

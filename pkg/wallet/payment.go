@@ -11,6 +11,7 @@ import (
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
@@ -118,7 +119,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 	}
 
 	//3.payment用アドレスの残高を確認し、金額が不足しているのであればエラー
-	balance, err := w.BTC.GetReceivedByAccountAndMinConf(string(enum.AccountTypePayment), w.BTC.ConfirmationBlock())
+	balance, err := w.BTC.GetReceivedByAccountAndMinConf(string(account.AccountTypePayment), w.BTC.ConfirmationBlock())
 	if err != nil {
 		return "", "", err
 	}
@@ -128,7 +129,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 	}
 
 	//4. Listunspent()にてpaymentアカウント用のutxoをすべて取得する
-	unspentList, addrs, err := w.BTC.ListUnspentByAccount(enum.AccountTypePayment)
+	unspentList, addrs, err := w.BTC.ListUnspentByAccount(account.AccountTypePayment)
 	if err != nil {
 		return "", "", errors.Errorf("BTC.ListUnspentByAccount() error: %s", err)
 	}
@@ -235,7 +236,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 	addrsPrevs := btc.AddrsPrevTxs{
 		Addrs:         addresses,
 		PrevTxs:       prevTxs,
-		SenderAccount: enum.AccountTypePayment,
+		SenderAccount: account.AccountTypePayment,
 	}
 
 	//Debug
@@ -275,13 +276,13 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 	// FIXME: これが足りない場合がめんどくさい。。。これをどう回避すべきか
 	for addr, amt := range outputs {
 		//if addr.String() == w.BTC.PaymentAddress() {
-		if account, _ := w.BTC.GetAccount(addr.String()); account == string(enum.AccountTypePayment) {
+		if acnt, _ := w.BTC.GetAccount(addr.String()); acnt == string(account.AccountTypePayment) {
 			outputs[addr] -= fee
 			//break
 			txPaymentOutputs = append(txPaymentOutputs, model.TxOutput{
 				ReceiptID:     0,
 				OutputAddress: addr.String(),
-				OutputAccount: string(enum.AccountTypePayment),
+				OutputAccount: string(account.AccountTypePayment),
 				OutputAmount:  w.BTC.AmountString(amt - fee),
 				IsChange:      true,
 			})

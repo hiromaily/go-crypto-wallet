@@ -6,6 +6,7 @@ import (
 
 	"github.com/icrowley/fake"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 )
@@ -25,7 +26,7 @@ func TestSetLabel(t *testing.T) {
 	// key生成
 	keyData := key.NewKey(enum.BTC, wlt.BTC.GetChainConf())
 
-	priv, _, err := keyData.CreateAccount(bSeed, enum.AccountTypeClient)
+	priv, _, err := keyData.CreateAccount(bSeed, account.AccountTypeClient)
 	if err != nil {
 		t.Fatal(err)
 	}

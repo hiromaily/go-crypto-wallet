@@ -7,6 +7,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
@@ -20,7 +21,7 @@ import (
 //importしたclientをBitcoin core APIを通じて、walletにimportする
 
 // ImportPublicKeyForWatchWallet csvファイルからpublicアドレスをimportする for WatchOnyWallet
-func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum.AccountType, isRescan bool) error {
+func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType account.AccountType, isRescan bool) error {
 	if w.Type != enum.WalletTypeWatchOnly {
 		return errors.New("it's available on WatchOnlyWallet")
 	}
@@ -32,7 +33,7 @@ func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum
 	}
 
 	//[]AccountPublicKeyTable //import時にアカウント名をcoreのwalletに登録する
-	account := string(accountType)
+	acnt := string(accountType)
 	//if accountType == enum.AccountTypeClient {
 	//	account = ""
 	//}
@@ -42,7 +43,7 @@ func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum
 		inner := strings.Split(key, ",")
 		grok.Value(inner)
 		var addr string
-		if accountType == enum.AccountTypeClient {
+		if accountType == account.AccountTypeClient {
 			addr = inner[1] //p2sh_segwit_address
 		} else {
 			addr = inner[3] //wallet_import_format
@@ -50,7 +51,7 @@ func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum
 
 		//Bitcoin core APIから`importaddress`をcallする
 		//TODO:1台のPCで検証しているときなど、すでにimport済の場合はエラーが出る
-		err := w.BTC.ImportAddressWithLabel(addr, account, isRescan) //基本falseのはず
+		err := w.BTC.ImportAddressWithLabel(addr, acnt, isRescan) //基本falseのはず
 		if err != nil {
 			//-4: The wallet already contains the private key for this address or script
 			logger.Errorf("BTC.ImportAddressWithLabel(%s) error: %s", addr, err)
@@ -59,7 +60,7 @@ func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum
 
 		pubKeyData = append(pubKeyData, model.AccountPublicKeyTable{
 			WalletAddress: addr,
-			Account:       account,
+			Account:       acnt,
 		})
 
 		//watch only walletとして追加されているかチェックする
@@ -77,7 +78,7 @@ func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType enum
 }
 
 // ImportPublicKeyForColdWallet2 csvファイルからpublicアドレスをimportする for Cold Wallet2
-func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum.AccountType) error {
+func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType account.AccountType) error {
 	if w.Type != enum.WalletTypeSignature {
 		return errors.New("it's available on Coldwallet2")
 	}
@@ -88,7 +89,7 @@ func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum
 	//	logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
 	//	return nil
 	//}
-	if !enum.AccountTypeMultisig[accountType] {
+	if !account.AccountTypeMultisig[accountType] {
 		logger.Info("This func is for only account witch uses multiaddress")
 		return nil
 	}
@@ -130,7 +131,7 @@ func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType enum
 }
 
 // ImportMultisigAddrForColdWallet1 coldwallet2でexportされたmultisigアドレス情報をimportする for Cold Wallet1
-func (w *Wallet) ImportMultisigAddrForColdWallet1(fileName string, accountType enum.AccountType) error {
+func (w *Wallet) ImportMultisigAddrForColdWallet1(fileName string, accountType account.AccountType) error {
 	if w.Type != enum.WalletTypeKeyGen {
 		return errors.New("it's available on Coldwallet1")
 	}
@@ -141,7 +142,7 @@ func (w *Wallet) ImportMultisigAddrForColdWallet1(fileName string, accountType e
 	//	logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
 	//	return nil
 	//}
-	if !enum.AccountTypeMultisig[accountType] {
+	if !account.AccountTypeMultisig[accountType] {
 		logger.Info("This func is for only account witch uses multiaddress")
 		return nil
 	}

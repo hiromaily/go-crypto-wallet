@@ -7,6 +7,7 @@ import (
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
@@ -16,7 +17,7 @@ import (
 //SendToAccount 内部アカウント間での送金
 // amountが0のとき、全額送金する
 // TODO:実行後、`listtransactions`methodで確認できるかも(未チェック)
-func (w *Wallet) SendToAccount(from, to enum.AccountType, amount btcutil.Amount) (string, string, error) {
+func (w *Wallet) SendToAccount(from, to account.AccountType, amount btcutil.Amount) (string, string, error) {
 	if w.Type != enum.WalletTypeWatchOnly {
 		return "", "", errors.New("it's available on WatchOnlyWallet")
 	}
@@ -24,7 +25,7 @@ func (w *Wallet) SendToAccount(from, to enum.AccountType, amount btcutil.Amount)
 	//Validation
 	//とりあえず、receipt to paymentで実装
 	//AccountTypeClient, AccountTypeAuthorizationは除外する
-	if to == enum.AccountTypeClient || to == enum.AccountTypeAuthorization {
+	if to == account.AccountTypeClient || to == account.AccountTypeAuthorization {
 		return "", "", errors.New("Client, Authorization account can not receive coin")
 	}
 	if from == to {

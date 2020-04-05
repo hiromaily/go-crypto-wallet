@@ -10,6 +10,7 @@ import (
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 )
 
@@ -125,7 +126,7 @@ func (b *Bitcoin) listUnspentVer17() ([]ListUnspentResult, error) {
 }
 
 // ListUnspentByAccount 指定したアカウントのlistunspentを取得する
-func (b *Bitcoin) ListUnspentByAccount(accountType enum.AccountType) ([]ListUnspentResult, []btcutil.Address, error) {
+func (b *Bitcoin) ListUnspentByAccount(accountType account.AccountType) ([]ListUnspentResult, []btcutil.Address, error) {
 	addrs, err := b.GetAddressesByAccount(string(accountType))
 	if err != nil {
 		return nil, nil, errors.Errorf("BTC.GetAddressesByAccount(): error: %s", err)

@@ -13,6 +13,7 @@ import (
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
@@ -43,7 +44,7 @@ type SignRawTransactionError struct {
 type AddrsPrevTxs struct {
 	Addrs         []string
 	PrevTxs       []PrevTx
-	SenderAccount enum.AccountType
+	SenderAccount account.AccountType
 }
 
 // PrevTx multisig時のsignrawtransactionで必要なパラメータ
