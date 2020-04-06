@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
 
 const keyName = "key"
@@ -16,7 +16,7 @@ const keyName = "key"
 type KeyCommand struct {
 	version string
 	ui      cli.Ui
-	wallet  *wallet.Wallet
+	wallet  *service.Wallet
 }
 
 func (c *KeyCommand) Synopsis() string {

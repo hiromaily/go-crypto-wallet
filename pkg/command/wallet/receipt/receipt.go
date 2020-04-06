@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
 
 const receiptName = "receipt"
@@ -16,7 +16,7 @@ const receiptName = "receipt"
 type ReceiptCommand struct {
 	version string
 	ui      cli.Ui
-	wallet  *wallet.Wallet
+	wallet  *service.Wallet
 }
 
 func (c *ReceiptCommand) Synopsis() string {
@@ -26,9 +26,9 @@ func (c *ReceiptCommand) Synopsis() string {
 func (c *ReceiptCommand) Help() string {
 	return `Usage: wallet receipt [Subcommands...]
 Subcommands:
-  create  create transaction file
-  find    receipts from bitcoin blockchain network
-  debug   sequences from creating transaction to sing on transaction
+  create  create receipt transaction file
+  find    find receipts transaction from bitcoin blockchain network
+  debug   sequences from creating receipts transaction, sign, send signed transaction
 `
 }
 

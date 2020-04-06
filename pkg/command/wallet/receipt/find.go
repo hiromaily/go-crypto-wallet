@@ -2,9 +2,10 @@ package receipt
 
 import (
 	"flag"
+
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
 
 const findName = "find"
@@ -12,7 +13,7 @@ const findName = "find"
 //find subcommand
 type FindCommand struct {
 	ui     cli.Ui
-	wallet *wallet.Wallet
+	wallet *service.Wallet
 }
 
 func (c *FindCommand) Synopsis() string {

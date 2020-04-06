@@ -1,4 +1,4 @@
-package receipt
+package payment
 
 import (
 	"flag"
@@ -18,11 +18,11 @@ type CreateTxCommand struct {
 }
 
 func (c *CreateTxCommand) Synopsis() string {
-	return "detect transaction for our client addresses and create receipt unsigned transaction"
+	return "create payment unsigned transaction"
 }
 
 func (c *CreateTxCommand) Help() string {
-	return `Usage: wallet receipt create [options...]
+	return `Usage: wallet payment create [options...]
 Options:
   -fee  adjustment fee
 `

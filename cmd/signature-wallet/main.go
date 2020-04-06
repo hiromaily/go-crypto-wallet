@@ -13,8 +13,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/procedure"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
 
 // coldwallet2としてauthorizationのseed作成、keyを1つだけ生成し、出力する
@@ -70,7 +70,7 @@ func main() {
 	}
 
 	// Config
-	wallet, err := wallet.InitialSettings(confPath)
+	wallet, err := service.InitialSettings(confPath)
 	if err != nil {
 		// ここでエラーが出た場合、まだloggerの初期化が終わってない
 		//logger.Fatal(err)
@@ -116,7 +116,7 @@ func checkAccountOnlyAuth() {
 
 // [coldwallet1]としての署名機能群 入金時の署名/出金時の署名[s]
 // TODO:出金時の署名は、coldwallet1/coldwallet2でそれぞれで署名が必要
-func signFunctionalities(wallet *wallet.Wallet) {
+func signFunctionalities(wallet *service.Wallet) {
 	// 処理をModeで切り替える
 	switch opts.Mode {
 	case 1:
@@ -137,7 +137,7 @@ func signFunctionalities(wallet *wallet.Wallet) {
 }
 
 // [coldwallet2]としてのKey関連機能群[k]
-func keyFunctionalities(wallet *wallet.Wallet) {
+func keyFunctionalities(wallet *service.Wallet) {
 	switch opts.Mode {
 	case 1:
 		//[coldwallet共通]
@@ -235,7 +235,7 @@ func keyFunctionalities(wallet *wallet.Wallet) {
 }
 
 // Debug 検証用[d]
-func debugForCheck(wallet *wallet.Wallet) {
+func debugForCheck(wallet *service.Wallet) {
 	//development(wallet)
 	procedure.ShowColdWallet2()
 }

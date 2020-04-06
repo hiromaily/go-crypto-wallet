@@ -3,9 +3,10 @@ package receipt
 import (
 	"flag"
 	"fmt"
+
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
 
 const debugName = "debug"
@@ -13,7 +14,7 @@ const debugName = "debug"
 //debug subcommand
 type DebugSequenceCommand struct {
 	ui     cli.Ui
-	wallet *wallet.Wallet
+	wallet *service.Wallet
 }
 
 func (c *DebugSequenceCommand) Synopsis() string {
