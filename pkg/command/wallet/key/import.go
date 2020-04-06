@@ -1,10 +1,9 @@
-package wallet
+package key
 
 import (
 	"flag"
 	"fmt"
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
@@ -19,7 +18,7 @@ type ImportCommand struct {
 }
 
 func (c *ImportCommand) Synopsis() string {
-	return "key importing functionality"
+	return "import generatd addresses by keygen wallet"
 }
 
 func (c *ImportCommand) Help() string {
@@ -42,6 +41,7 @@ func (c *ImportCommand) Run(args []string) int {
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
+
 	c.ui.Output(fmt.Sprintf("-file: %s", filePath))
 
 	//validator
@@ -51,6 +51,7 @@ func (c *ImportCommand) Run(args []string) int {
 	}
 	if !account.ValidateAccountType(acnt) {
 		c.ui.Error("account option [-account] is invalid")
+		return 1
 	}
 	if account.AccountTypeAuthorization.Is(acnt) {
 		c.ui.Error(fmt.Sprintf("account: %s is not allowd", account.AccountTypeAuthorization))
@@ -60,9 +61,10 @@ func (c *ImportCommand) Run(args []string) int {
 	//import public key
 	err := c.wallet.ImportPublicKeyForWatchWallet(filePath, account.AccountType(acnt), isRescan)
 	if err != nil {
-		logger.Fatalf("%+v", err)
+		c.ui.Error(fmt.Sprintf("fail to call ImportPublicKeyForWatchWallet() %+v", err))
+		return 1
 	}
-	logger.Info("Done!")
+	c.ui.Info("Done!")
 
 	return 0
 }

@@ -1,4 +1,4 @@
-package wallet
+package key
 
 import (
 	"flag"
@@ -49,7 +49,7 @@ func (c *KeyCommand) Run(args []string) int {
 
 	code, err := cl.Run()
 	if err != nil {
-		log.Printf("fail to call Run() import: %v\n", err)
+		log.Printf("fail to call Run() subcommand of key: %v\n", err)
 	}
 	return code
 }
