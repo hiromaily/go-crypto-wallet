@@ -18,7 +18,30 @@ func (a AccountType) String() string {
 	return string(a)
 }
 
-//AccountTypeValue account_typeの値
+func (a AccountType) Is(v string) bool {
+	return a.String() == v
+}
+
+//AccountTypeMap account_type mapper
+var AccountTypeMap = map[string]AccountType{
+	"client":        AccountTypeClient,
+	"receipt":       AccountTypeReceipt,
+	"payment":       AccountTypePayment,
+	"quoine":        AccountTypeQuoine,
+	"fee":           AccountTypeFee,
+	"stored":        AccountTypeStored,
+	"authorization": AccountTypeAuthorization,
+}
+
+// ValidateAccountType AccountTypeのバリデーションを行う
+func ValidateAccountType(v string) bool {
+	if _, ok := AccountTypeMap[v]; ok {
+		return true
+	}
+	return false
+}
+
+//AccountTypeValue account_type value
 var AccountTypeValue = map[AccountType]uint8{
 	AccountTypeClient:        0,
 	AccountTypeReceipt:       1,
@@ -38,12 +61,4 @@ var AccountTypeMultisig = map[AccountType]bool{
 	AccountTypeFee:           true,
 	AccountTypeStored:        true,
 	AccountTypeAuthorization: false,
-}
-
-// ValidateAccountType AccountTypeのバリデーションを行う
-func ValidateAccountType(val string) bool {
-	if _, ok := AccountTypeValue[AccountType(val)]; ok {
-		return true
-	}
-	return false
 }
