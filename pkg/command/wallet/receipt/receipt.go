@@ -2,6 +2,7 @@ package receipt
 
 import (
 	"flag"
+	"fmt"
 	"log"
 
 	"github.com/mitchellh/cli"
@@ -10,7 +11,12 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
 
-const receiptName = "receipt"
+const (
+	receiptName = "receipt"
+	createName  = "create"
+	findName    = "find"
+	debugName   = "debug"
+)
 
 //receipt subcommand
 type ReceiptCommand struct {
@@ -23,13 +29,19 @@ func (c *ReceiptCommand) Synopsis() string {
 	return "receipt functionality"
 }
 
+var (
+	createSynopsis = "create a receipt transaction file for client account"
+	findSynopsis   = "find a receipt transactions for client account from bitcoin blockchain network"
+	debugSynopsis  = "execute series of flows from creation of a receiving transaction to sending of a transaction"
+)
+
 func (c *ReceiptCommand) Help() string {
-	return `Usage: wallet receipt [Subcommands...]
+	return fmt.Sprintf(`Usage: wallet receipt [Subcommands...]
 Subcommands:
-  create  create receipt transaction file
-  find    find receipts transaction from bitcoin blockchain network
-  debug   sequences from creating receipts transaction, sign, send signed transaction
-`
+  create  %s
+  find    %s
+  debug   %s
+`, createSynopsis, findSynopsis, debugSynopsis)
 }
 
 func (c *ReceiptCommand) Run(args []string) int {

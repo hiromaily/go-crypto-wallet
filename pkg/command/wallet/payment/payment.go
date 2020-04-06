@@ -2,6 +2,7 @@ package payment
 
 import (
 	"flag"
+	"fmt"
 	"log"
 
 	"github.com/mitchellh/cli"
@@ -10,7 +11,11 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
 
-const paymentName = "paymentName"
+const (
+	paymentName = "paymentName"
+	createName  = "create"
+	debugName   = "debug"
+)
 
 //payment subcommand
 type PaymentCommand struct {
@@ -23,13 +28,17 @@ func (c *PaymentCommand) Synopsis() string {
 	return "payment functionality"
 }
 
+var (
+	createSynopsis = "create a payment transaction file"
+	debugSynopsis  = "execute series of flows from creation of a payment transaction to sending of a transaction"
+)
+
 func (c *PaymentCommand) Help() string {
-	return `Usage: wallet payment [Subcommands...]
+	return fmt.Sprintf(`Usage: wallet payment [Subcommands...]
 Subcommands:
-  create  create payment transaction file
-  find    find payments preparation from database
-  debug   sequences from creating payments transaction, sing, send signed transaction
-`
+  create  %s
+  debug   %s
+`, createSynopsis, debugSynopsis)
 }
 
 func (c *PaymentCommand) Run(args []string) int {
@@ -46,18 +55,12 @@ func (c *PaymentCommand) Run(args []string) int {
 				wallet: c.wallet,
 			}, nil
 		},
-		//"find": func() (cli.Command, error) {
-		//	return &FindCommand{
-		//		ui:     command.ClolorUI(),
-		//		wallet: c.wallet,
-		//	}, nil
-		//},
-		//"debug": func() (cli.Command, error) {
-		//	return &DebugSequenceCommand{
-		//		ui:     command.ClolorUI(),
-		//		wallet: c.wallet,
-		//	}, nil
-		//},
+		"debug": func() (cli.Command, error) {
+			return &DebugSequenceCommand{
+				ui:     command.ClolorUI(),
+				wallet: c.wallet,
+			}, nil
+		},
 	}
 	cl := command.CreateSubCommand(paymentName, c.version, args, cmds)
 

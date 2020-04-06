@@ -2,13 +2,12 @@ package receipt
 
 import (
 	"flag"
+	"fmt"
 
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
-
-const findName = "find"
 
 //find subcommand
 type FindCommand struct {
@@ -17,17 +16,19 @@ type FindCommand struct {
 }
 
 func (c *FindCommand) Synopsis() string {
-	return "detect receipt to our addressed and crate receipt unsigned transaction"
+	return fmt.Sprintf("%s", findSynopsis)
 }
 
 func (c *FindCommand) Help() string {
-	return `Usage: wallet receipt create [options...]
+	return `Usage: wallet receipt find [options...]
 Options:
   -fee  adjustment fee
 `
 }
 
 func (c *FindCommand) Run(args []string) int {
+	c.ui.Output(c.Synopsis())
+
 	flags := flag.NewFlagSet(findName, flag.ContinueOnError)
 	if err := flags.Parse(args); err != nil {
 		return 1

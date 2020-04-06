@@ -9,8 +9,6 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
 
-const debugName = "debug"
-
 //debug subcommand
 type DebugSequenceCommand struct {
 	ui     cli.Ui
@@ -18,17 +16,18 @@ type DebugSequenceCommand struct {
 }
 
 func (c *DebugSequenceCommand) Synopsis() string {
-	return "detect receipt to our addressed and crate receipt unsigned transaction"
+	return fmt.Sprintf("%s", debugSynopsis)
 }
 
 func (c *DebugSequenceCommand) Help() string {
-	return `Usage: wallet receipt create [options...]
+	return `Usage: wallet receipt debug [options...]
 Options:
   -fee  adjustment fee
 `
 }
 
 func (c *DebugSequenceCommand) Run(args []string) int {
+	c.ui.Output(c.Synopsis())
 	var (
 		fee float64
 	)

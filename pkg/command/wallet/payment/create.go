@@ -9,8 +9,6 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
 
-const createName = "create"
-
 //create subcommand
 type CreateTxCommand struct {
 	ui     cli.Ui
@@ -18,7 +16,7 @@ type CreateTxCommand struct {
 }
 
 func (c *CreateTxCommand) Synopsis() string {
-	return "create payment unsigned transaction"
+	return fmt.Sprintf("%s", createSynopsis)
 }
 
 func (c *CreateTxCommand) Help() string {
@@ -40,11 +38,10 @@ func (c *CreateTxCommand) Run(args []string) int {
 
 	c.ui.Output(fmt.Sprintf("-fee: %f", fee))
 
-	// Detect receipt transaction from outside and create receipt unsigned transaction
-	// It would be run manually on the daily basis because signature is manual task
-	hex, fileName, err := c.wallet.DetectReceivedCoin(fee)
+	// Create payment transaction
+	hex, fileName, err := c.wallet.CreateUnsignedTransactionForPayment(fee)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call DetectReceivedCoin() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call CreateUnsignedTransactionForPayment() %+v", err))
 		return 1
 	}
 	if hex == "" {
