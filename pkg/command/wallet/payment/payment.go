@@ -3,7 +3,6 @@ package payment
 import (
 	"flag"
 	"fmt"
-	"log"
 
 	"github.com/mitchellh/cli"
 
@@ -66,7 +65,7 @@ func (c *PaymentCommand) Run(args []string) int {
 
 	code, err := cl.Run()
 	if err != nil {
-		log.Printf("fail to call Run() subcommand of payment: %v\n", err)
+		c.ui.Error(fmt.Sprintf("fail to call Run() subcommand of payment: %v", err))
 	}
 	return code
 }

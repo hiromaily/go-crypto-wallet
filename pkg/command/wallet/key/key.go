@@ -2,7 +2,7 @@ package key
 
 import (
 	"flag"
-	"log"
+	"fmt"
 
 	"github.com/mitchellh/cli"
 
@@ -49,7 +49,7 @@ func (c *KeyCommand) Run(args []string) int {
 
 	code, err := cl.Run()
 	if err != nil {
-		log.Printf("fail to call Run() subcommand of key: %v\n", err)
+		c.ui.Error(fmt.Sprintf("fail to call Run() subcommand of key: %v", err))
 	}
 	return code
 }
