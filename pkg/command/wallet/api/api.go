@@ -27,12 +27,12 @@ func (c *APICommand) Synopsis() string {
 }
 
 var (
-	unlocktxSynopsis        = ""
-	estimatefeeSynopsis     = ""
-	loggingSynopsis         = ""
-	getnetworkinfoSynopsis  = ""
-	validateaddressSynopsis = ""
-	listunspentSynopsis     = ""
+	unlocktxSynopsis        = "unlock locked transaction for unspent transaction"
+	estimatefeeSynopsis     = "estimate fee"
+	loggingSynopsis         = "logging"
+	getnetworkinfoSynopsis  = "call getnetworkinfo"
+	validateaddressSynopsis = "validate address"
+	listunspentSynopsis     = "call listunspent"
 )
 
 func (c *APICommand) Help() string {

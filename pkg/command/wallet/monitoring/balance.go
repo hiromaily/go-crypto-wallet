@@ -2,6 +2,7 @@ package monitoring
 
 import (
 	"flag"
+
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
