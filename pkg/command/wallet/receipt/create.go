@@ -11,6 +11,7 @@ import (
 
 //create subcommand
 type CreateTxCommand struct {
+	name   string
 	ui     cli.Ui
 	wallet *service.Wallet
 }
@@ -34,7 +35,7 @@ func (c *CreateTxCommand) Run(args []string) int {
 		fee     float64
 		isCheck bool
 	)
-	flags := flag.NewFlagSet(createName, flag.ContinueOnError)
+	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
 	flags.Float64Var(&fee, "fee", 0, "adjustment fee")
 	flags.BoolVar(&isCheck, "check", false, "only check client addresses, not create unsigned transaction")
 	if err := flags.Parse(args); err != nil {

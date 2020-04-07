@@ -12,12 +12,11 @@ import (
 
 const (
 	receiptName = "receipt"
-	createName  = "create"
-	debugName   = "debug"
 )
 
 //receipt subcommand
 type ReceiptCommand struct {
+	name    string
 	version string
 	ui      cli.Ui
 	wallet  *service.Wallet

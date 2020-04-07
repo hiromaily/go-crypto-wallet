@@ -16,6 +16,7 @@ const (
 
 //transfer subcommand
 type TransferCommand struct {
+	name   string
 	ui     cli.Ui
 	wallet *service.Wallet
 }

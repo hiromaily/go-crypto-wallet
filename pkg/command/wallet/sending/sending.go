@@ -15,6 +15,7 @@ const (
 
 //sending subcommand
 type SendingCommand struct {
+	name   string
 	ui     cli.Ui
 	wallet *service.Wallet
 }

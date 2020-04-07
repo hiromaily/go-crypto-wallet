@@ -11,13 +11,12 @@ import (
 )
 
 const (
-	paymentName = "paymentName"
-	createName  = "create"
-	debugName   = "debug"
+	paymentName = "payment"
 )
 
 //payment subcommand
 type PaymentCommand struct {
+	name    string
 	version string
 	ui      cli.Ui
 	wallet  *service.Wallet
@@ -52,12 +51,14 @@ func (c *PaymentCommand) Run(args []string) int {
 	cmds := map[string]cli.CommandFactory{
 		"create": func() (cli.Command, error) {
 			return &CreateTxCommand{
+				name:   "create",
 				ui:     command.ClolorUI(),
 				wallet: c.wallet,
 			}, nil
 		},
 		"debug": func() (cli.Command, error) {
 			return &DebugSequenceCommand{
+				name:   "debug",
 				ui:     command.ClolorUI(),
 				wallet: c.wallet,
 			}, nil

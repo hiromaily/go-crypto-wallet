@@ -11,6 +11,7 @@ import (
 
 //debug subcommand
 type DebugSequenceCommand struct {
+	name   string
 	ui     cli.Ui
 	wallet *service.Wallet
 }
@@ -32,7 +33,7 @@ func (c *DebugSequenceCommand) Run(args []string) int {
 	var (
 		fee float64
 	)
-	flags := flag.NewFlagSet(debugName, flag.ContinueOnError)
+	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
 	flags.Float64Var(&fee, "fee", 0, "adjustment fee")
 	if err := flags.Parse(args); err != nil {
 		return 1

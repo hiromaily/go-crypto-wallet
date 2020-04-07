@@ -10,10 +10,9 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
 
-const importName = "import"
-
 //import subcommand
 type ImportCommand struct {
+	name   string
 	ui     cli.Ui
 	wallet *service.Wallet
 }
@@ -37,7 +36,7 @@ func (c *ImportCommand) Run(args []string) int {
 		acnt     string
 		isRescan bool
 	)
-	flags := flag.NewFlagSet(importName, flag.ContinueOnError)
+	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
 	flags.StringVar(&filePath, "file", "", "import file path for generated addresses")
 	flags.StringVar(&acnt, "account", "", "user account")
 	flags.BoolVar(&isRescan, "rescan", false, "run rescan when importing addresses or not")

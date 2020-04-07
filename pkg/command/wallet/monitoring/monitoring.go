@@ -12,12 +12,11 @@ import (
 
 const (
 	montoringName = "montoring"
-	senttxName    = "senttx"
-	balanceName   = "balance"
 )
 
 //montoring subcommand
 type MontoringCommand struct {
+	name    string
 	version string
 	ui      cli.Ui
 	wallet  *service.Wallet
@@ -52,12 +51,14 @@ func (c *MontoringCommand) Run(args []string) int {
 	cmds := map[string]cli.CommandFactory{
 		"senttx": func() (cli.Command, error) {
 			return &SentTxCommand{
+				name:   "senttx",
 				ui:     command.ClolorUI(),
 				wallet: c.wallet,
 			}, nil
 		},
 		"balance": func() (cli.Command, error) {
 			return &BalanceCommand{
+				name:   "balance",
 				ui:     command.ClolorUI(),
 				wallet: c.wallet,
 			}, nil

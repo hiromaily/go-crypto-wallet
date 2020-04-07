@@ -11,6 +11,7 @@ import (
 
 //senttx subcommand
 type SentTxCommand struct {
+	name   string
 	ui     cli.Ui
 	wallet *service.Wallet
 }
@@ -32,7 +33,7 @@ func (c *SentTxCommand) Run(args []string) int {
 	var (
 		acnt string
 	)
-	flags := flag.NewFlagSet(senttxName, flag.ContinueOnError)
+	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
 	flags.StringVar(&acnt, "account", "", "account for monitoring")
 	if err := flags.Parse(args); err != nil {
 		return 1

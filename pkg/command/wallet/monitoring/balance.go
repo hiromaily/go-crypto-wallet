@@ -11,6 +11,7 @@ import (
 
 //balance subcommand
 type BalanceCommand struct {
+	name   string
 	ui     cli.Ui
 	wallet *service.Wallet
 }
@@ -32,7 +33,7 @@ func (c *BalanceCommand) Run(args []string) int {
 	var (
 		acnt string
 	)
-	flags := flag.NewFlagSet(balanceName, flag.ContinueOnError)
+	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
 	flags.StringVar(&acnt, "account", "", "account for monitoring")
 	if err := flags.Parse(args); err != nil {
 		return 1

@@ -14,6 +14,7 @@ const keyName = "key"
 
 //key subcommand
 type KeyCommand struct {
+	name    string
 	version string
 	ui      cli.Ui
 	wallet  *service.Wallet
@@ -42,6 +43,7 @@ func (c *KeyCommand) Run(args []string) int {
 	cmds := map[string]cli.CommandFactory{
 		"import": func() (cli.Command, error) {
 			return &ImportCommand{
+				name:   "import",
 				ui:     command.ClolorUI(),
 				wallet: c.wallet,
 			}, nil
