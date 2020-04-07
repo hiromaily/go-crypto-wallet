@@ -11,13 +11,14 @@ import (
 
 //debug subcommand
 type DebugSequenceCommand struct {
-	name   string
-	ui     cli.Ui
-	wallet *service.Wallet
+	name     string
+	synopsis string
+	ui       cli.Ui
+	wallet   *service.Wallet
 }
 
 func (c *DebugSequenceCommand) Synopsis() string {
-	return fmt.Sprintf("%s", debugSynopsis)
+	return c.synopsis
 }
 
 func (c *DebugSequenceCommand) Help() string {

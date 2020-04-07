@@ -24,11 +24,15 @@ func (c *KeyCommand) Synopsis() string {
 	return "key importing functionality"
 }
 
+var (
+	importSynopsis = "import generatd addresses by keygen wallet"
+)
+
 func (c *KeyCommand) Help() string {
-	return `Usage: wallet key [Subcommands...]
+	return fmt.Sprintf(`Usage: wallet key [Subcommands...]
 Subcommands:
-  import  import file 
-`
+  import  %s
+`, importSynopsis)
 }
 
 func (c *KeyCommand) Run(args []string) int {
@@ -43,9 +47,10 @@ func (c *KeyCommand) Run(args []string) int {
 	cmds := map[string]cli.CommandFactory{
 		"import": func() (cli.Command, error) {
 			return &ImportCommand{
-				name:   "import",
-				ui:     command.ClolorUI(),
-				wallet: c.wallet,
+				name:     "import",
+				synopsis: importSynopsis,
+				ui:       command.ClolorUI(),
+				wallet:   c.wallet,
 			}, nil
 		},
 	}
@@ -53,7 +58,7 @@ func (c *KeyCommand) Run(args []string) int {
 
 	code, err := cl.Run()
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call Run() subcommand of key: %v", err))
+		c.ui.Error(fmt.Sprintf("fail to call Run() subcommand of %s: %v", keyName, err))
 	}
 	return code
 }

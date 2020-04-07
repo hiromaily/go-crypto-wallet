@@ -51,16 +51,18 @@ func (c *MontoringCommand) Run(args []string) int {
 	cmds := map[string]cli.CommandFactory{
 		"senttx": func() (cli.Command, error) {
 			return &SentTxCommand{
-				name:   "senttx",
-				ui:     command.ClolorUI(),
-				wallet: c.wallet,
+				name:     "senttx",
+				synopsis: senttxSynopsis,
+				ui:       command.ClolorUI(),
+				wallet:   c.wallet,
 			}, nil
 		},
 		"balance": func() (cli.Command, error) {
 			return &BalanceCommand{
-				name:   "balance",
-				ui:     command.ClolorUI(),
-				wallet: c.wallet,
+				name:     "balance",
+				synopsis: balanceSynopsis,
+				ui:       command.ClolorUI(),
+				wallet:   c.wallet,
 			}, nil
 		},
 	}
@@ -68,7 +70,7 @@ func (c *MontoringCommand) Run(args []string) int {
 
 	code, err := cl.Run()
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call Run() subcommand of monitoring: %v", err))
+		c.ui.Error(fmt.Sprintf("fail to call Run() subcommand of %s: %v", montoringName, err))
 	}
 	return code
 }

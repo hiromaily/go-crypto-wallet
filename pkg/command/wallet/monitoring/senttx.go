@@ -11,13 +11,14 @@ import (
 
 //senttx subcommand
 type SentTxCommand struct {
-	name   string
-	ui     cli.Ui
-	wallet *service.Wallet
+	name     string
+	synopsis string
+	ui       cli.Ui
+	wallet   *service.Wallet
 }
 
 func (c *SentTxCommand) Synopsis() string {
-	return fmt.Sprintf("%s", senttxSynopsis)
+	return c.synopsis
 }
 
 func (c *SentTxCommand) Help() string {

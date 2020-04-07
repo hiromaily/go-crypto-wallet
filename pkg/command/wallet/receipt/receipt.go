@@ -51,14 +51,18 @@ func (c *ReceiptCommand) Run(args []string) int {
 	cmds := map[string]cli.CommandFactory{
 		"create": func() (cli.Command, error) {
 			return &CreateTxCommand{
-				ui:     command.ClolorUI(),
-				wallet: c.wallet,
+				name:     "create",
+				synopsis: createSynopsis,
+				ui:       command.ClolorUI(),
+				wallet:   c.wallet,
 			}, nil
 		},
 		"debug": func() (cli.Command, error) {
 			return &DebugSequenceCommand{
-				ui:     command.ClolorUI(),
-				wallet: c.wallet,
+				name:     "debug",
+				synopsis: debugSynopsis,
+				ui:       command.ClolorUI(),
+				wallet:   c.wallet,
 			}, nil
 		},
 	}
@@ -66,7 +70,7 @@ func (c *ReceiptCommand) Run(args []string) int {
 
 	code, err := cl.Run()
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call Run() subcommand of receipt: %v", err))
+		c.ui.Error(fmt.Sprintf("fail to call Run() subcommand of %s: %v", receiptName, err))
 	}
 	return code
 }

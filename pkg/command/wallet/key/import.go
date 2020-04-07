@@ -12,13 +12,14 @@ import (
 
 //import subcommand
 type ImportCommand struct {
-	name   string
-	ui     cli.Ui
-	wallet *service.Wallet
+	name     string
+	synopsis string
+	ui       cli.Ui
+	wallet   *service.Wallet
 }
 
 func (c *ImportCommand) Synopsis() string {
-	return "import generatd addresses by keygen wallet"
+	return c.synopsis
 }
 
 func (c *ImportCommand) Help() string {

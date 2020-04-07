@@ -11,13 +11,14 @@ import (
 
 //create subcommand
 type CreateTxCommand struct {
-	name   string
-	ui     cli.Ui
-	wallet *service.Wallet
+	name     string
+	synopsis string
+	ui       cli.Ui
+	wallet   *service.Wallet
 }
 
 func (c *CreateTxCommand) Synopsis() string {
-	return fmt.Sprintf("%s", createSynopsis)
+	return c.synopsis
 }
 
 func (c *CreateTxCommand) Help() string {
