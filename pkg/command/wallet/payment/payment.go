@@ -41,6 +41,8 @@ Subcommands:
 }
 
 func (c *PaymentCommand) Run(args []string) int {
+	c.ui.Output(c.Synopsis())
+
 	flags := flag.NewFlagSet(paymentName, flag.ContinueOnError)
 	if err := flags.Parse(args); err != nil {
 		return 1

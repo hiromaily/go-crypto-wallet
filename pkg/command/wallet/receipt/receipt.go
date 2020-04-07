@@ -13,7 +13,6 @@ import (
 const (
 	receiptName = "receipt"
 	createName  = "create"
-	findName    = "find"
 	debugName   = "debug"
 )
 
@@ -30,7 +29,6 @@ func (c *ReceiptCommand) Synopsis() string {
 
 var (
 	createSynopsis = "create a receipt transaction file for client account"
-	findSynopsis   = "find a receipt transactions for client account from bitcoin blockchain network"
 	debugSynopsis  = "execute series of flows from creation of a receiving transaction to sending of a transaction"
 )
 
@@ -38,12 +36,13 @@ func (c *ReceiptCommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet receipt [Subcommands...]
 Subcommands:
   create  %s
-  find    %s
   debug   %s
-`, createSynopsis, findSynopsis, debugSynopsis)
+`, createSynopsis, debugSynopsis)
 }
 
 func (c *ReceiptCommand) Run(args []string) int {
+	c.ui.Output(c.Synopsis())
+
 	flags := flag.NewFlagSet(receiptName, flag.ContinueOnError)
 	if err := flags.Parse(args); err != nil {
 		return 1
@@ -53,12 +52,6 @@ func (c *ReceiptCommand) Run(args []string) int {
 	cmds := map[string]cli.CommandFactory{
 		"create": func() (cli.Command, error) {
 			return &CreateTxCommand{
-				ui:     command.ClolorUI(),
-				wallet: c.wallet,
-			}, nil
-		},
-		"find": func() (cli.Command, error) {
-			return &FindCommand{
 				ui:     command.ClolorUI(),
 				wallet: c.wallet,
 			}, nil

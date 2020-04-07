@@ -22,6 +22,30 @@ func (a AccountType) Is(v string) bool {
 	return a.String() == v
 }
 
+func Allow(acnt string, accountList []AccountType) bool {
+	if !ValidateAccountType(acnt) {
+		return false
+	}
+	for _, v := range accountList {
+		if acnt == v.String() {
+			return true
+		}
+	}
+	return false
+}
+
+func NotAllow(acnt string, accountList []AccountType) bool {
+	if !ValidateAccountType(acnt) {
+		return false
+	}
+	for _, v := range accountList {
+		if acnt == v.String() {
+			return false
+		}
+	}
+	return true
+}
+
 //AccountTypeMap account_type mapper
 var AccountTypeMap = map[string]AccountType{
 	"client":        AccountTypeClient,

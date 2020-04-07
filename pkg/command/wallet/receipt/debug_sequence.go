@@ -28,6 +28,7 @@ Options:
 
 func (c *DebugSequenceCommand) Run(args []string) int {
 	c.ui.Output(c.Synopsis())
+
 	var (
 		fee float64
 	)

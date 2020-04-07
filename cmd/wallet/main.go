@@ -21,8 +21,16 @@ import (
 //Bitcoin Core would be on GCP network for production
 //setup is required as watch only wallet
 
-//TODO:back up wallet data periodically and import functionality
-//TODO:generated key must be encrypted
+//TODO: bitcoin functionalities
+// - back up wallet data periodically and import functionality
+// - generated key must be encrypted
+// - transfer with amount
+//TODO:
+// - logger interface: stdout(ui), log format
+// - repository interface (from mysql, mock, redis and so on)
+// - service interface
+// - procedure pkg move to help of command
+// - change Japanese to English
 
 // Options is command line options
 type Options struct {

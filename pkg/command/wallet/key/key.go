@@ -31,6 +31,8 @@ Subcommands:
 }
 
 func (c *KeyCommand) Run(args []string) int {
+	c.ui.Output(c.Synopsis())
+
 	flags := flag.NewFlagSet(keyName, flag.ContinueOnError)
 	if err := flags.Parse(args); err != nil {
 		return 1

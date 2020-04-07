@@ -27,6 +27,8 @@ Options:
 }
 
 func (c *CreateTxCommand) Run(args []string) int {
+	c.ui.Output(c.Synopsis())
+
 	var (
 		fee float64
 	)

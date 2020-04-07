@@ -34,11 +34,15 @@ Options:
 
 //WIP
 func (c *TransferCommand) Run(args []string) int {
+	c.ui.Output(c.Synopsis())
+
 	var (
 		account1 string
 		account2 string
 	)
 	flags := flag.NewFlagSet(transferName, flag.ContinueOnError)
+	flags.StringVar(&account1, "account1", "", "account for transfer from")
+	flags.StringVar(&account2, "account2", "", "account for transfer to")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
@@ -52,20 +56,12 @@ func (c *TransferCommand) Run(args []string) int {
 		c.ui.Error("account option [-account2] is invalid")
 		return 1
 	}
-	if account.AccountTypeAuthorization.Is(account1) {
-		c.ui.Error(fmt.Sprintf("account1: %s is not allowd", account.AccountTypeAuthorization))
+	if !account.NotAllow(account1, []account.AccountType{account.AccountTypeAuthorization, account.AccountTypeClient}) {
+		c.ui.Error(fmt.Sprintf("account1: %s/%s is not allowd", account.AccountTypeAuthorization, account.AccountTypeClient))
 		return 1
 	}
-	if account.AccountTypeClient.Is(account1) {
-		c.ui.Error(fmt.Sprintf("account1: %s is not allowd", account.AccountTypeClient))
-		return 1
-	}
-	if account.AccountTypeAuthorization.Is(account2) {
-		c.ui.Error(fmt.Sprintf("account2: %s is not allowd", account.AccountTypeAuthorization))
-		return 1
-	}
-	if account.AccountTypeClient.Is(account2) {
-		c.ui.Error(fmt.Sprintf("account2: %s is not allowd", account.AccountTypeClient))
+	if !account.NotAllow(account2, []account.AccountType{account.AccountTypeAuthorization, account.AccountTypeClient}) {
+		c.ui.Error(fmt.Sprintf("account2: %s/%s is not allowd", account.AccountTypeAuthorization, account.AccountTypeClient))
 		return 1
 	}
 

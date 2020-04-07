@@ -22,17 +22,21 @@ func (c *CreateTxCommand) Synopsis() string {
 func (c *CreateTxCommand) Help() string {
 	return `Usage: wallet receipt create [options...]
 Options:
-  -fee  adjustment fee
+  -fee    adjustment fee
+  -check  only check client addresses, not create unsigned transaction
 `
 }
 
 func (c *CreateTxCommand) Run(args []string) int {
 	c.ui.Output(c.Synopsis())
+
 	var (
-		fee float64
+		fee     float64
+		isCheck bool
 	)
 	flags := flag.NewFlagSet(createName, flag.ContinueOnError)
 	flags.Float64Var(&fee, "fee", 0, "adjustment fee")
+	flags.BoolVar(&isCheck, "check", false, "only check client addresses, not create unsigned transaction")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}

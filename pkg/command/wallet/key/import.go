@@ -30,6 +30,8 @@ Options:
 }
 
 func (c *ImportCommand) Run(args []string) int {
+	c.ui.Output(c.Synopsis())
+
 	var (
 		filePath string
 		acnt     string
