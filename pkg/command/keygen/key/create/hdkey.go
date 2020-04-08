@@ -9,26 +9,26 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
-// key subcommand
-type KeyCommand struct {
+//hd key subcommand
+type HDKeyCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
 	wallet   wallet.Keygener
 }
 
-func (c *KeyCommand) Synopsis() string {
+func (c *HDKeyCommand) Synopsis() string {
 	return c.synopsis
 }
 
-func (c *KeyCommand) Help() string {
-	return `Usage: keygen key create key [options...]
+func (c *HDKeyCommand) Help() string {
+	return `Usage: keygen key create hdkey [options...]
 Options:
   -table  target table name
 `
 }
 
-func (c *KeyCommand) Run(args []string) int {
+func (c *HDKeyCommand) Run(args []string) int {
 	c.ui.Output(c.Synopsis())
 
 	var (

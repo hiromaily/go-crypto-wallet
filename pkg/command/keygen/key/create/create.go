@@ -24,16 +24,20 @@ func (c *CreateCommand) Synopsis() string {
 }
 
 var (
-	keySynopsis  = "create key"
-	seedSynopsis = "create seed"
+	keySynopsis      = "create key for debug use"
+	hdkeySynopsis    = "create HD key"
+	seedSynopsis     = "create seed"
+	multisigSynopsis = "multisig address for debug use"
 )
 
 func (c *CreateCommand) Help() string {
 	return fmt.Sprintf(`Usage: keygen create [Subcommands...]
 Subcommands:
-  key   %s
-  seed  %s
-`, keySynopsis, seedSynopsis)
+  key       %s
+  hdkey     %s
+  seed      %s
+  multisig  %s
+`, keySynopsis, keySynopsis, seedSynopsis, multisigSynopsis)
 }
 
 func (c *CreateCommand) Run(args []string) int {
@@ -47,9 +51,17 @@ func (c *CreateCommand) Run(args []string) int {
 	//farther subcommand import
 	cmds := map[string]cli.CommandFactory{
 		"key": func() (cli.Command, error) {
-			return &KeyCommand{
-				name:     "create",
+			return &HDKeyCommand{
+				name:     "key",
 				synopsis: keySynopsis,
+				ui:       command.ClolorUI(),
+				wallet:   c.Wallet,
+			}, nil
+		},
+		"hdkey": func() (cli.Command, error) {
+			return &HDKeyCommand{
+				name:     "hdkey",
+				synopsis: hdkeySynopsis,
 				ui:       command.ClolorUI(),
 				wallet:   c.Wallet,
 			}, nil
@@ -58,6 +70,14 @@ func (c *CreateCommand) Run(args []string) int {
 			return &SeedCommand{
 				name:     "seed",
 				synopsis: seedSynopsis,
+				ui:       command.ClolorUI(),
+				wallet:   c.Wallet,
+			}, nil
+		},
+		"multisig": func() (cli.Command, error) {
+			return &MultisigCommand{
+				name:     "multisig",
+				synopsis: multisigSynopsis,
 				ui:       command.ClolorUI(),
 				wallet:   c.Wallet,
 			}, nil

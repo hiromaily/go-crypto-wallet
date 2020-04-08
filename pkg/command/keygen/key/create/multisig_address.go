@@ -9,26 +9,26 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
-// key subcommand
-type KeyCommand struct {
+// multisig subcommand
+type MultisigCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
 	wallet   wallet.Keygener
 }
 
-func (c *KeyCommand) Synopsis() string {
+func (c *MultisigCommand) Synopsis() string {
 	return c.synopsis
 }
 
-func (c *KeyCommand) Help() string {
-	return `Usage: keygen key create key [options...]
+func (c *MultisigCommand) Help() string {
+	return `Usage: keygen key create multisig [options...]
 Options:
   -table  target table name
 `
 }
 
-func (c *KeyCommand) Run(args []string) int {
+func (c *MultisigCommand) Run(args []string) int {
 	c.ui.Output(c.Synopsis())
 
 	var (

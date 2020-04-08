@@ -111,38 +111,21 @@ func main() {
 		log.Printf("fail to call Run() %s command: %v", wallet.WalletTypeKeyGen.String(), err)
 	}
 	os.Exit(code)
-}
 
-//TODO: after making sure command works, this code is deleted
-func main2() {
-	confPath := os.Getenv("KEYGEN_WALLET_CONF")
-	if opts.ConfPath != "" {
-		confPath = opts.ConfPath
-	}
-
-	// Config
-	wallet, err := service.InitialSettings(confPath)
-	if err != nil {
-		// ここでエラーが出た場合、まだloggerの初期化が終わってない
-		//logger.Fatal(err)
-		log.Fatal(err)
-	}
-	wallet.Type = enum.WalletTypeKeyGen
-	defer wallet.Done()
-
-	if opts.Sign {
-		//sign関連機能
-		signFunctionalities(wallet)
-	} else if opts.Key {
-		//key関連機能
-		keyFunctionalities(wallet)
-	} else if opts.Debug {
-		//debug用 機能確認
-		debugForCheck(wallet)
-	} else {
-		//logger.Warn("either sign:-s, key:-k, debug:-d should be set as main function")
-		procedure.ShowColdWallet1()
-	}
+	//TODO: after making sure command works, this code is deleted
+	//if opts.Sign {
+	//	//sign関連機能
+	//	signFunctionalities(wallet)
+	//} else if opts.Key {
+	//	//key関連機能
+	//	keyFunctionalities(wallet)
+	//} else if opts.Debug {
+	//	//debug用 機能確認
+	//	debugForCheck(wallet)
+	//} else {
+	//	//logger.Warn("either sign:-s, key:-k, debug:-d should be set as main function")
+	//	procedure.ShowColdWallet1()
+	//}
 }
 
 func checkImportFile() {
