@@ -1,4 +1,4 @@
-package service
+package wallet
 
 import (
 	"bufio"
@@ -17,7 +17,8 @@ import (
 //ExportAddedPubkeyHistory AddedPubkeyHistoryテーブルをcsvとして出力する
 // coldwallet2から使用
 func (w *Wallet) ExportAddedPubkeyHistory(accountType account.AccountType) (string, error) {
-	if w.Type != enum.WalletTypeSignature {
+	//TODO:remove it
+	if w.Type != WalletTypeSignature {
 		return "", errors.New("it's available on Coldwallet2")
 	}
 

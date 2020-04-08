@@ -7,7 +7,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
 //listunspent subcommand
@@ -15,7 +15,7 @@ type ListUnspentCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   *service.Wallet
+	wallet   wallet.Walleter
 }
 
 func (c *ListUnspentCommand) Synopsis() string {
@@ -35,7 +35,7 @@ func (c *ListUnspentCommand) Run(args []string) int {
 	}
 
 	// call listunspent
-	unspentList, err := c.wallet.BTC.Client().ListUnspentMin(c.wallet.BTC.ConfirmationBlock()) //6
+	unspentList, err := c.wallet.GetBTC().Client().ListUnspentMin(c.wallet.GetBTC().ConfirmationBlock()) //6
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call BTC.ListUnspentMin() %+v", err))
 		return 1

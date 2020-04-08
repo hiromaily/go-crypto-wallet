@@ -6,7 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
-	"github.com/hiromaily/go-bitcoin/pkg/toml"
+	"github.com/hiromaily/go-bitcoin/pkg/config"
 )
 
 //sqlx
@@ -14,7 +14,7 @@ import (
 
 // Connection MySQLサーバーに接続する
 // TODO:リトライ機能も必要
-func Connection(conf *toml.MySQLConf) (*sqlx.DB, error) {
+func Connection(conf *config.MySQLConf) (*sqlx.DB, error) {
 	db, err := sqlx.Connect("mysql",
 		fmt.Sprintf(
 			"%s:%s@tcp(%s)/%s?parseTime=true",

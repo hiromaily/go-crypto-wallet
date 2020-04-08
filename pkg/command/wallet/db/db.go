@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
 //db subcommand
@@ -15,7 +15,7 @@ type DBCommand struct {
 	Name    string
 	Version string
 	UI      cli.Ui
-	Wallet  *service.Wallet
+	Wallet  wallet.Walleter
 }
 
 func (c *DBCommand) Synopsis() string {

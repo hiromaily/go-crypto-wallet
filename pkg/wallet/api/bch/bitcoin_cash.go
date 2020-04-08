@@ -6,8 +6,8 @@ import (
 	"github.com/cpacia/bchutil"
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/config"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/toml"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btc"
 )
 
@@ -19,7 +19,7 @@ type BitcoinCash struct {
 }
 
 // NewBitcoinCash BitcoinCashオブジェクトを返す
-func NewBitcoinCash(client *rpcclient.Client, conf *toml.BitcoinConf) (*BitcoinCash, error) {
+func NewBitcoinCash(client *rpcclient.Client, conf *config.BitcoinConf) (*BitcoinCash, error) {
 	//bitcoin base
 	bit, err := btc.NewBitcoin(client, conf)
 	if err != nil {

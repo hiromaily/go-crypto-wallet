@@ -10,8 +10,8 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
 	wcmd "github.com/hiromaily/go-bitcoin/pkg/command/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/config"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
 //Watch Only Wallet
@@ -83,23 +83,15 @@ var (
 //}
 
 func main() {
-	//confPath := os.Getenv("WATCH_WALLET_CONF")
-	//if opts.ConfPath != "" {
-	//	confPath = opts.ConfPath
-	//}
-
 	// command line
 	var (
 		confPath  string
 		isHelp    bool
 		isVersion bool
-		wallet    *service.Wallet
+		walletIF  wallet.Walleter
 	)
 	flags := flag.NewFlagSet("main", flag.ContinueOnError)
 	flags.StringVar(&confPath, "conf", os.Getenv("WATCH_WALLET_CONF"), "config file path")
-	//FIXME: In this case, should version and help are redefined??
-	//FIXME: usage should be overwriden
-	// Usage: wallet [--version] [--help] <command> [<args>]
 	flags.BoolVar(&isVersion, "version", false, "show version")
 	flags.BoolVar(&isHelp, "help", false, "show help")
 	if err := flags.Parse(os.Args[1:]); err != nil {
@@ -114,21 +106,29 @@ func main() {
 
 	// help
 	if !isHelp && len(os.Args) > 1 {
-		var err error
-		//initialSettings()
-		wallet, err = service.InitialSettings(confPath)
+		// Config
+		conf, err := config.New(confPath)
 		if err != nil {
-			// ここでエラーが出た場合、まだloggerの初期化が終わってない
-			//logger.Fatal(err)
 			log.Fatal(err)
 		}
-		wallet.Type = enum.WalletTypeWatchOnly
-		defer wallet.Done()
+		//grok.Value(conf)
+		regi := NewRegistry(conf, wallet.WalletTypeWatchOnly)
+		walletIF = regi.NewWalleter()
+
+		//initialSettings()
+		//wallet, err = service.InitialSettings(confPath)
+		//if err != nil {
+		//	// ここでエラーが出た場合、まだloggerの初期化が終わってない
+		//	//logger.Fatal(err)
+		//	log.Fatal(err)
+		//}
+		//wallet.Type = enum.WalletTypeWatchOnly
+		//defer wallet.Done()
 	}
 
 	//sub command
 	args := flags.Args()
-	cmds := wcmd.WalletSubCommands(wallet, appVersion)
+	cmds := wcmd.WalletSubCommands(walletIF, appVersion)
 	cl := command.CreateSubCommand(appName, appVersion, args, cmds)
 	cl.HelpFunc = command.HelpFunc(cl.Name)
 

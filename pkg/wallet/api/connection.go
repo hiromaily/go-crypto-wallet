@@ -4,15 +4,15 @@ import (
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/config"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/toml"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/bch"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btc"
 )
 
 // Connection is to local bitcoin core RPC server using HTTP POST mode
 //func Connection(conf *toml.BitcoinConf) (*Bitcoin, error) {
-func Connection(conf *toml.BitcoinConf, coinType enum.CoinType) (Bitcoiner, error) {
+func Connection(conf *config.BitcoinConf, coinType enum.CoinType) (Bitcoiner, error) {
 	connCfg := &rpcclient.ConnConfig{
 		Host:         conf.Host,
 		User:         conf.User,

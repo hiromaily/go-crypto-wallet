@@ -6,9 +6,9 @@ import (
 	"github.com/btcsuite/btcd/wire"
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/config"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
-	"github.com/hiromaily/go-bitcoin/pkg/toml"
 )
 
 // Bitcoin includes Client to call Json-RPC
@@ -28,7 +28,7 @@ type FeeAdjustmentRate struct {
 }
 
 // NewBitcoin Bitcoinオブジェクトを返す
-func NewBitcoin(client *rpcclient.Client, conf *toml.BitcoinConf) (*Bitcoin, error) {
+func NewBitcoin(client *rpcclient.Client, conf *config.BitcoinConf) (*Bitcoin, error) {
 	bit := Bitcoin{client: client}
 	if conf.IsMain {
 		bit.chainConf = &chaincfg.MainNetParams

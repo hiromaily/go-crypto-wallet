@@ -1,45 +1,5 @@
 package enum
 
-//EnvironmentType 実行環境
-type EnvironmentType string
-
-// environment
-const (
-	EnvDev  EnvironmentType = "dev"
-	EnvProd EnvironmentType = "prod"
-)
-
-//EnvironmentTypeValue env_typeの値
-var EnvironmentTypeValue = map[EnvironmentType]uint8{
-	EnvDev:  1,
-	EnvProd: 2,
-}
-
-// ValidateEnvironmentType EnvironmentTypeのバリデーションを行う
-func ValidateEnvironmentType(val string) bool {
-	if _, ok := EnvironmentTypeValue[EnvironmentType(val)]; ok {
-		return true
-	}
-	return false
-}
-
-//WalletType Walletタイプ
-type WalletType string
-
-// wallet_type
-const (
-	WalletTypeWatchOnly WalletType = "watch_only"
-	WalletTypeKeyGen    WalletType = "keygen"
-	WalletTypeSignature WalletType = "signature"
-)
-
-//WalletTypeValue env_typeの値
-var WalletTypeValue = map[WalletType]uint8{
-	WalletTypeWatchOnly: 1,
-	WalletTypeKeyGen:    2,
-	WalletTypeSignature: 3,
-}
-
 //CoinType Bitcoin種別(CayenneWalletで取引するcoinの種別)
 type CoinType string
 

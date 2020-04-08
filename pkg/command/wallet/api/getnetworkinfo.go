@@ -7,7 +7,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
 //getnetworkinfo subcommand
@@ -15,7 +15,7 @@ type GetnetworkInfoCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   *service.Wallet
+	wallet   wallet.Walleter
 }
 
 func (c *GetnetworkInfoCommand) Synopsis() string {
@@ -35,7 +35,7 @@ func (c *GetnetworkInfoCommand) Run(args []string) int {
 	}
 
 	// call getnetworkinfo
-	infoData, err := c.wallet.BTC.GetNetworkInfo()
+	infoData, err := c.wallet.GetBTC().GetNetworkInfo()
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call BTC.GetNetworkInfo() %+v", err))
 		return 1

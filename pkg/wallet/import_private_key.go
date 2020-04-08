@@ -1,4 +1,4 @@
-package service
+package wallet
 
 //Cold wallet
 
@@ -15,7 +15,8 @@ import (
 // https://en.bitcoin.it/wiki/How_to_import_private_keys
 // getaddressesbyaccount "" で内容を確認可能？？
 func (w *Wallet) ImportPrivateKey(accountType account.AccountType) error {
-	if w.Type == enum.WalletTypeWatchOnly {
+	//TODO:remove it
+	if w.Type == WalletTypeWatchOnly {
 		return errors.New("it's available on Coldwallet1, Coldwallet2")
 	}
 

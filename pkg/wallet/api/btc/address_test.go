@@ -8,11 +8,11 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
 var (
-	wlt      *service.Wallet
+	wlt      *wallet.Wallet
 	confPath = flag.String("conf", "../../data/toml/local_watch_only.toml", "Path for configuration toml file")
 )
 
@@ -23,11 +23,12 @@ func setup() {
 
 	flag.Parse()
 
-	var err error
-	wlt, err = service.InitialSettings(*confPath)
-	if err != nil {
-		panic(err)
-	}
+	//FIXME:
+	//var err error
+	//wlt, err = service.InitialSettings(*confPath)
+	//if err != nil {
+	//	panic(err)
+	//}
 }
 
 func teardown() {

@@ -5,7 +5,7 @@ import (
 
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
 //balance subcommand
@@ -13,7 +13,7 @@ type BalanceCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   *service.Wallet
+	wallet   wallet.Walleter
 }
 
 func (c *BalanceCommand) Synopsis() string {

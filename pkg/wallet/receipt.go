@@ -1,4 +1,4 @@
-package service
+package wallet
 
 //Watch only wallet
 
@@ -28,7 +28,8 @@ import (
 
 // DetectReceivedCoin Wallet内アカウントに入金があれば、そこから、未署名のトランザクションを返す
 func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, error) {
-	if w.Type != enum.WalletTypeWatchOnly {
+	//TODO:remove it
+	if w.Type != WalletTypeWatchOnly {
 		return "", "", errors.New("it's available on WatchOnlyWallet")
 	}
 
@@ -310,21 +311,10 @@ func (w *Wallet) storeHex(hex, encodedAddrsPrevs string, id int64, actionType en
 	}
 
 	//To File
-	if w.Env == enum.EnvDev {
-		path := txfile.CreateFilePath(actionType, enum.TxTypeUnsigned, id, true)
-		generatedFileName, err = txfile.WriteFile(path, savedata)
-		if err != nil {
-			return "", errors.Errorf("txfile.WriteFile(): error: %s", err)
-		}
-	}
-
-	//[WIP] GCS
-	path := txfile.CreateFilePath(actionType, enum.TxTypeUnsigned, id, false)
-
-	//GCS上に、Clientを作成(セッションの関係で都度作成する)
-	_, err = w.GCS[actionType].WriteOnce(path, savedata)
+	path := txfile.CreateFilePath(actionType, enum.TxTypeUnsigned, id, true)
+	generatedFileName, err = txfile.WriteFile(path, savedata)
 	if err != nil {
-		return "", errors.Errorf("storage.WriteOnce(): error: %s", err)
+		return "", errors.Errorf("txfile.WriteFile(): error: %s", err)
 	}
 
 	return generatedFileName, nil

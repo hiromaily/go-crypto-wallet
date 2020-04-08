@@ -13,8 +13,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/procedure"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
 
 // coldwallet2としてauthorizationのseed作成、keyを1つだけ生成し、出力する
@@ -70,7 +70,7 @@ func main() {
 	}
 
 	// Config
-	wallet, err := service.InitialSettings(confPath)
+	wallet, err := wallet.InitialSettings(confPath)
 	if err != nil {
 		// ここでエラーが出た場合、まだloggerの初期化が終わってない
 		//logger.Fatal(err)

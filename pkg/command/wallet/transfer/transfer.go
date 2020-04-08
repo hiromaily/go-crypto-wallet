@@ -7,14 +7,14 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
 //transfer subcommand
 type TransferCommand struct {
 	Name   string
 	UI     cli.Ui
-	Wallet *service.Wallet
+	Wallet wallet.Walleter
 }
 
 func (c *TransferCommand) Synopsis() string {

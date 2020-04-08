@@ -1,4 +1,4 @@
-package service
+package wallet
 
 //Watch only wallet
 
@@ -18,7 +18,8 @@ import (
 
 // SendFromFile 渡されたファイルから署名済transactionを読み取り、送信を行う
 func (w *Wallet) SendFromFile(filePath string) (string, error) {
-	if w.Type != enum.WalletTypeWatchOnly {
+	//TODO:remove it
+	if w.Type != WalletTypeWatchOnly {
 		return "", errors.New("it's available on WatchOnlyWallet")
 	}
 

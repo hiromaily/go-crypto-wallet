@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
 //balance subcommand
@@ -15,7 +15,7 @@ type BalanceCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   *service.Wallet
+	wallet   wallet.Walleter
 }
 
 func (c *BalanceCommand) Synopsis() string {
@@ -49,7 +49,7 @@ func (c *BalanceCommand) Run(args []string) int {
 	}
 
 	// get received by account
-	balance, err := c.wallet.BTC.GetReceivedByAccountAndMinConf(acnt, c.wallet.BTC.ConfirmationBlock())
+	balance, err := c.wallet.GetBTC().GetReceivedByAccountAndMinConf(acnt, c.wallet.GetBTC().ConfirmationBlock())
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call BTC.GetReceivedByAccountAndMinConf() %+v", err))
 		return 1

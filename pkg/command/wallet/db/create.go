@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/testdata"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
 //create subcommand
@@ -15,7 +15,7 @@ type CreateCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   *service.Wallet
+	wallet   wallet.Walleter
 }
 
 func (c *CreateCommand) Synopsis() string {
@@ -51,7 +51,7 @@ func (c *CreateCommand) Run(args []string) int {
 	}
 
 	//create payment_request table
-	err := testdata.CreateInitialTestData(c.wallet.DB, c.wallet.BTC)
+	err := testdata.CreateInitialTestData(c.wallet.GetDB(), c.wallet.GetBTC())
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call testdata.CreateInitialTestData() %+v", err))
 		return 1

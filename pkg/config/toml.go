@@ -1,10 +1,12 @@
-package toml
+package config
 
 import (
 	"io/ioutil"
 
 	"github.com/BurntSushi/toml"
 	"github.com/pkg/errors"
+
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 )
 
 // Config ルート
@@ -76,6 +78,26 @@ type GCSConf struct {
 	TransferBucketName string `toml:"transfer_bucket_name"`
 }
 
+// New configオブジェクトを生成する
+func New(file string) (*Config, error) {
+	if file == "" {
+		return nil, errors.New("file should be passed")
+	}
+
+	var err error
+	conf, err := loadConfig(file)
+	if err != nil {
+		return nil, err
+	}
+
+	//validate
+	if err = conf.validate(); err != nil {
+		return nil, err
+	}
+
+	return conf, nil
+}
+
 // load configfile
 func loadConfig(path string) (*Config, error) {
 	//読み込み
@@ -95,17 +117,10 @@ func loadConfig(path string) (*Config, error) {
 	return &config, nil
 }
 
-// New configオブジェクトを生成する
-func New(file string) (*Config, error) {
-	if file == "" {
-		return nil, errors.New("file should be passed")
+func (c *Config) validate() error {
+	// CoinType
+	if !enum.ValidateBitcoinType(c.CoinType) {
+		return errors.New("CoinType is invalid in toml file")
 	}
-
-	var err error
-	conf, err := loadConfig(file)
-	if err != nil {
-		return nil, err
-	}
-
-	return conf, nil
+	return nil
 }

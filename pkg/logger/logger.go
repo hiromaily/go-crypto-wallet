@@ -3,12 +3,8 @@ package logger
 import (
 	"os"
 
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"google.golang.org/grpc/status"
-
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
 )
 
 var (
@@ -24,22 +20,25 @@ func (le *nostackLevelEnabler) Enabled(zapcore.Level) bool {
 }
 
 // Initialize 設定を読み込みLoggerを初期化する。mainクラスなど起動時に呼ばれる想定
-func Initialize(env enum.EnvironmentType) error {
-	return initZapLoggers(env)
+func Initialize() error {
+	return initZapLoggers()
 }
 
-func initZapLoggers(env enum.EnvironmentType) error {
+func initZapLoggers() error {
 
-	var encoder zapcore.Encoder
-	switch env {
-	case enum.EnvDev:
-		encoderCfg := zap.NewDevelopmentEncoderConfig()
-		encoder = zapcore.NewConsoleEncoder(encoderCfg)
-	case enum.EnvProd:
-		encoder = zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
-	default:
-		return errors.Errorf("type should be set by [dev,prod] but %s is set", env)
-	}
+	//FIXME
+	//var encoder zapcore.Encoder
+	//switch env {
+	//case enum.EnvDev:
+	//	encoderCfg := zap.NewDevelopmentEncoderConfig()
+	//	encoder = zapcore.NewConsoleEncoder(encoderCfg)
+	//case enum.EnvProd:
+	//	encoder = zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
+	//default:
+	//	return errors.Errorf("type should be set by [dev,prod] but %s is set", env)
+	//}
+	encoder := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
+
 	// DebugLevel logs are typically voluminous, and are usually disabled in
 	// production.
 	//DebugLevel Level = iota - 1
@@ -131,7 +130,7 @@ func Fatalf(format string, args ...interface{}) {
 }
 
 // ErrorWithStack errorのstack traceを表示する. github.com/pkg/errorsで作成されたものしかstack表示できないので注意
+// TODO:
 func ErrorWithStack(error error) {
-	st := status.Convert(error)
-	noStackSugaredLogger.Errorf("error with stack trace: %+v, details = %+v", error, st.Details())
+	noStackSugaredLogger.Errorf("error with stack trace: %+v", error)
 }

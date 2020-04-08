@@ -1,4 +1,4 @@
-package service
+package wallet
 
 //Watch only wallet
 
@@ -94,7 +94,8 @@ func (w *Wallet) isFoundTxIDAndVout(txID string, vout uint32, inputs []btcjson.T
 
 // CreateUnsignedTransactionForPayment 支払いのための未署名トランザクションを作成する
 func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (string, string, error) {
-	if w.Type != enum.WalletTypeWatchOnly {
+	//TODO:remove it
+	if w.Type != WalletTypeWatchOnly {
 		return "", "", errors.New("it's available on WatchOnlyWallet")
 	}
 

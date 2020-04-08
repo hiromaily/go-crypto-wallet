@@ -6,7 +6,7 @@ import (
 
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
 //validateaddress subcommand
@@ -14,7 +14,7 @@ type ValidateAddressCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   *service.Wallet
+	wallet   wallet.Walleter
 }
 
 func (c *ValidateAddressCommand) Synopsis() string {
@@ -42,7 +42,7 @@ func (c *ValidateAddressCommand) Run(args []string) int {
 	}
 
 	// validate address
-	_, err := c.wallet.BTC.ValidateAddress(address)
+	_, err := c.wallet.GetBTC().ValidateAddress(address)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call BTC.ValidateAddress() %+v", err))
 		return 1

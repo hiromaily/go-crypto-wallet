@@ -1,4 +1,4 @@
-package service
+package wallet
 
 import (
 	"strings"
@@ -22,7 +22,8 @@ import (
 
 // ImportPublicKeyForWatchWallet csvファイルからpublicアドレスをimportする for WatchOnyWallet
 func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType account.AccountType, isRescan bool) error {
-	if w.Type != enum.WalletTypeWatchOnly {
+	//TODO:remove it
+	if w.Type != WalletTypeWatchOnly {
 		return errors.New("it's available on WatchOnlyWallet")
 	}
 
@@ -79,7 +80,7 @@ func (w *Wallet) ImportPublicKeyForWatchWallet(fileName string, accountType acco
 
 // ImportPublicKeyForColdWallet2 csvファイルからpublicアドレスをimportする for Cold Wallet2
 func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType account.AccountType) error {
-	if w.Type != enum.WalletTypeSignature {
+	if w.Type != WalletTypeSignature {
 		return errors.New("it's available on Coldwallet2")
 	}
 
@@ -132,7 +133,7 @@ func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType acco
 
 // ImportMultisigAddrForColdWallet1 coldwallet2でexportされたmultisigアドレス情報をimportする for Cold Wallet1
 func (w *Wallet) ImportMultisigAddrForColdWallet1(fileName string, accountType account.AccountType) error {
-	if w.Type != enum.WalletTypeKeyGen {
+	if w.Type != WalletTypeKeyGen {
 		return errors.New("it's available on Coldwallet1")
 	}
 

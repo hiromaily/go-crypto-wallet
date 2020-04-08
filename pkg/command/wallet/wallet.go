@@ -12,10 +12,10 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/receipt"
 	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/sending"
 	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/transfer"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
-func WalletSubCommands(wallet *service.Wallet, version string) map[string]cli.CommandFactory {
+func WalletSubCommands(wallet wallet.Walleter, version string) map[string]cli.CommandFactory {
 	return map[string]cli.CommandFactory{
 		"api": func() (cli.Command, error) {
 			return &api.APICommand{

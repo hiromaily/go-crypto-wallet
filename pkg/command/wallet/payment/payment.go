@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
 //payment subcommand
@@ -15,7 +15,7 @@ type PaymentCommand struct {
 	Name    string
 	Version string
 	UI      cli.Ui
-	Wallet  *service.Wallet
+	Wallet  wallet.Walleter
 }
 
 func (c *PaymentCommand) Synopsis() string {

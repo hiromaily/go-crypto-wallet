@@ -6,7 +6,7 @@ import (
 
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
 //reset subcommand
@@ -14,7 +14,7 @@ type ResetCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   *service.Wallet
+	wallet   wallet.Walleter
 }
 
 func (c *ResetCommand) Synopsis() string {
@@ -50,7 +50,7 @@ func (c *ResetCommand) Run(args []string) int {
 	}
 
 	//reset payment_request table
-	_, err := c.wallet.DB.ResetAnyFlagOnPaymentRequestForTestOnly(nil, true)
+	_, err := c.wallet.GetDB().ResetAnyFlagOnPaymentRequestForTestOnly(nil, true)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call db.ResetAnyFlagOnPaymentRequestForTestOnly() %+v", err))
 		return 1

@@ -6,7 +6,7 @@ import (
 
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
 //debug subcommand
@@ -14,7 +14,7 @@ type DebugSequenceCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   *service.Wallet
+	wallet   wallet.Walleter
 }
 
 func (c *DebugSequenceCommand) Synopsis() string {
@@ -56,23 +56,24 @@ func (c *DebugSequenceCommand) Run(args []string) int {
 	}
 	c.ui.Output(fmt.Sprintf("[hex]: %s\n[fileName]: %s", hex, fileName))
 
+	//FIXME: no SignatureFromFile in walleter interface
 	// 2. sign on unsigned transaction. actually it is available for sign wallet
-	c.ui.Info("\n[2]Run: sign")
-	hexTx, isSigned, generatedFileName, err := c.wallet.SignatureFromFile(fileName)
-	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call SignatureFromFile() %+v", err))
-		return 1
-	}
-	c.ui.Output(fmt.Sprintf("[hex]: %s\n[署名完了]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName))
+	//c.ui.Info("\n[2]Run: sign")
+	//hexTx, isSigned, generatedFileName, err := c.wallet.SignatureFromFile(fileName)
+	//if err != nil {
+	//	c.ui.Error(fmt.Sprintf("fail to call SignatureFromFile() %+v", err))
+	//	return 1
+	//}
+	//c.ui.Output(fmt.Sprintf("[hex]: %s\n[署名完了]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName))
 
 	// 3. send signed transaction to blockchain network
-	c.ui.Info("\n[3]Run: send signed transaction")
-	txID, err := c.wallet.SendFromFile(generatedFileName)
-	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call SendFromFile() %+v", err))
-		return 1
-	}
-	c.ui.Info(fmt.Sprintf("[Done] sent transaction ID:%s", txID))
+	//c.ui.Info("\n[3]Run: send signed transaction")
+	//txID, err := c.wallet.SendFromFile(generatedFileName)
+	//if err != nil {
+	//	c.ui.Error(fmt.Sprintf("fail to call SendFromFile() %+v", err))
+	//	return 1
+	//}
+	//c.ui.Info(fmt.Sprintf("[Done] sent transaction ID:%s", txID))
 
 	return 0
 }

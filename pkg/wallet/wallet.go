@@ -4,8 +4,8 @@ import (
 	"github.com/btcsuite/btcutil"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
+	"github.com/hiromaily/go-bitcoin/pkg/model"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 )
 
 // Walleter is for watch only wallet service interface
@@ -16,25 +16,43 @@ type Walleter interface {
 	SendToAccount(from, to account.AccountType, amount btcutil.Amount) (string, string, error)
 	SendFromFile(filePath string) (string, error)
 	UpdateStatus() error
+	Done()
+	GetDB() *model.DB
+	GetBTC() api.Bitcoiner
+	GetType() WalletType
 }
 
-// Keygener is for keygen wallet service interface
-type Keygener interface {
-	SignatureFromFile(filePath string) (string, bool, string, error)
-	GenerateSeed() ([]byte, error)
-	GenerateAccountKey(accountType account.AccountType, coinType enum.CoinType, seed []byte, count uint32) ([]key.WalletKey, error)
-	ImportPrivateKey(accountType account.AccountType) error
-	ExportAccountKey(accountType account.AccountType, keyStatus enum.KeyStatus) (string, error)
-	ImportMultisigAddrForColdWallet1(fileName string, accountType account.AccountType) error
+// Wallet 基底オブジェクト
+type Wallet struct {
+	BTC  api.Bitcoiner
+	DB   *model.DB //TODO:should be interface
+	Type WalletType
+	Seed string
 }
 
-// Signer is for signature wallet service interface
-type Signer interface {
-	SignatureFromFile(filePath string) (string, bool, string, error)
-	GenerateSeed() ([]byte, error)
-	GenerateAccountKey(accountType account.AccountType, coinType enum.CoinType, seed []byte, count uint32) ([]key.WalletKey, error)
-	ImportPrivateKey(accountType account.AccountType) error
-	ImportPublicKeyForColdWallet2(fileName string, accountType account.AccountType) error
-	AddMultisigAddressByAuthorization(accountType account.AccountType, addressType enum.AddressType) error
-	ExportAddedPubkeyHistory(accountType account.AccountType) (string, error)
+func NewWallet(bit api.Bitcoiner, rds *model.DB, typ WalletType, seed string) *Wallet {
+	return &Wallet{
+		BTC:  bit,
+		DB:   rds,
+		Type: typ,
+		Seed: seed,
+	}
+}
+
+// Done 終了時に必要な処理
+func (w *Wallet) Done() {
+	w.DB.RDB.Close()
+	w.BTC.Close()
+}
+
+func (w *Wallet) GetDB() *model.DB {
+	return w.DB
+}
+
+func (w *Wallet) GetBTC() api.Bitcoiner {
+	return w.BTC
+}
+
+func (w *Wallet) GetType() WalletType {
+	return w.Type
 }

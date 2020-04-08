@@ -6,7 +6,7 @@ import (
 
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
 //unlocktx subcommand
@@ -14,7 +14,7 @@ type UnLockTxCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   *service.Wallet
+	wallet   wallet.Walleter
 }
 
 func (c *UnLockTxCommand) Synopsis() string {
@@ -34,7 +34,7 @@ func (c *UnLockTxCommand) Run(args []string) int {
 	}
 
 	// unlock locked transaction for unspent transaction
-	err := c.wallet.BTC.UnlockAllUnspentTransaction()
+	err := c.wallet.GetBTC().UnlockAllUnspentTransaction()
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call BTC.UnlockAllUnspentTransaction() %+v", err))
 		return 1

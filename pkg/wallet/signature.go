@@ -1,4 +1,4 @@
-package service
+package wallet
 
 //Cold wallet
 
@@ -24,7 +24,8 @@ import (
 // SignatureFromFile 渡されたファイルからtransactionを読み取り、署名を行う
 // TODO:いずれにせよ、入金と出金で署名もMultisigかどうかで変わってくる
 func (w *Wallet) SignatureFromFile(filePath string) (string, bool, string, error) {
-	if w.Type == enum.WalletTypeWatchOnly {
+	//TODO:remove it
+	if w.Type == WalletTypeWatchOnly {
 		return "", false, "", errors.New("it's available on ColdWallet1, ColdWallet2")
 	}
 
@@ -109,7 +110,7 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 	//TODO:coldwallet1とcoldwallet2で挙動が違う
 	//TODO:receiptの場合、wipsは不要
 	//coldwallet2の場合、AccountTypeAuthorizationが必要
-	if w.Type == enum.WalletTypeSignature {
+	if w.Type == WalletTypeSignature {
 		//account_key_authorizationテーブルから情報を取得
 		accountKey, err := w.DB.GetOneByMaxIDOnAccountKeyTable(account.AccountTypeAuthorization)
 		if err != nil {
@@ -143,7 +144,7 @@ func (w *Wallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.A
 	//multisigの場合のみの処理
 	//accountType, ok := enum.ActionToAccountMap[actionType]
 	if account.AccountTypeMultisig[addrsPrevs.SenderAccount] {
-		if w.Type == enum.WalletTypeKeyGen {
+		if w.Type == WalletTypeKeyGen {
 			//取得したredeemScriptをPrevTxsにマッピング
 			for idx, val := range addrsPrevs.Addrs {
 				rs := model.GetRedeedScriptByAddress(accountKeys, val)

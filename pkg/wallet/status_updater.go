@@ -1,4 +1,4 @@
-package service
+package wallet
 
 //Watch only wallet
 
@@ -12,7 +12,8 @@ import (
 
 // UpdateStatus tx_paymentテーブル/tx_receiptテーブルのcurrent_tx_typeが3(送信済)のものを監視し、statusをupdateする
 func (w *Wallet) UpdateStatus() error {
-	if w.Type != enum.WalletTypeWatchOnly {
+	//TODO:remove it
+	if w.Type != WalletTypeWatchOnly {
 		return errors.New("it's available on WalletTypeWatchOnly")
 	}
 

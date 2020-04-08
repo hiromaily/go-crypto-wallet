@@ -6,14 +6,14 @@ import (
 
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
 //sending subcommand
 type SendingCommand struct {
 	Name   string
 	UI     cli.Ui
-	Wallet *service.Wallet
+	Wallet wallet.Walleter
 }
 
 func (c *SendingCommand) Synopsis() string {

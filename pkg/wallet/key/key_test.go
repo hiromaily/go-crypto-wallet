@@ -12,12 +12,12 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	. "github.com/hiromaily/go-bitcoin/pkg/wallet/key"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
 
 var (
-	wlt      *service.Wallet
+	wlt      *wallet.Wallet
 	confPath = flag.String("conf", "../../data/toml/local_watch_only.toml", "Path for configuration toml file")
 )
 
@@ -28,11 +28,12 @@ func setup() {
 
 	flag.Parse()
 
-	var err error
-	wlt, err = service.InitialSettings(*confPath)
-	if err != nil {
-		panic(err)
-	}
+	//var err error
+	//FIXME:
+	//wlt, err = service.InitialSettings(*confPath)
+	//if err != nil {
+	//	panic(err)
+	//}
 }
 
 func teardown() {

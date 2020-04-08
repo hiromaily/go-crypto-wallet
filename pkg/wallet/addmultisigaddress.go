@@ -1,6 +1,6 @@
-package service
+package wallet
 
-//Cold wallet2
+//signature-wallet
 
 import (
 	"fmt"
@@ -16,7 +16,8 @@ import (
 // added_pubkey_history_paymentテーブル内のwalletアドレスのmultisigアドレスを生成する
 // TODO:第4パラメータに、address_typeを追加する。Bitcoinの場合は、p2sh-segwit とする
 func (w *Wallet) AddMultisigAddressByAuthorization(accountType account.AccountType, addressType enum.AddressType) error {
-	if w.Type != enum.WalletTypeSignature {
+	//TODO:remove it
+	if w.Type != WalletTypeSignature {
 		return errors.New("it's available on Coldwallet2")
 	}
 

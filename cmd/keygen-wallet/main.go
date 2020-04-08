@@ -14,7 +14,6 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/procedure"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
 
 // coldwalletとしてclient, payment, receiptのseed作成、keyを指定した数だけ生成し、出力する

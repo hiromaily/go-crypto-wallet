@@ -1,4 +1,4 @@
-package service
+package wallet
 
 import (
 	"bufio"
@@ -18,7 +18,8 @@ import (
 //ExportAccountKey AccountKeyテーブルをcsvとして出力する
 //TODO:watch only walletにセットするアドレスは、clientの場合は、wallet_address, receipt/paymentの場合、`wallet_multisig_address`
 func (w *Wallet) ExportAccountKey(accountType account.AccountType, keyStatus enum.KeyStatus) (string, error) {
-	if w.Type != enum.WalletTypeKeyGen {
+	//TODO:remove it
+	if w.Type != WalletTypeKeyGen {
 		return "", errors.New("it's available on Coldwallet1")
 	}
 

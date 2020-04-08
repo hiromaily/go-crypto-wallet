@@ -7,7 +7,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
 //logging subcommand
@@ -15,7 +15,7 @@ type LoggingCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   *service.Wallet
+	wallet   wallet.Walleter
 }
 
 func (c *LoggingCommand) Synopsis() string {
@@ -35,7 +35,7 @@ func (c *LoggingCommand) Run(args []string) int {
 	}
 
 	// logging
-	logData, err := c.wallet.BTC.Logging()
+	logData, err := c.wallet.GetBTC().Logging()
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call BTC.Logging() %+v", err))
 		return 1

@@ -7,9 +7,9 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
+	"github.com/hiromaily/go-bitcoin/pkg/config"
 	"github.com/hiromaily/go-bitcoin/pkg/db/rdb"
 	. "github.com/hiromaily/go-bitcoin/pkg/model"
-	"github.com/hiromaily/go-bitcoin/pkg/toml"
 )
 
 var (
@@ -24,7 +24,7 @@ func setup() {
 	}
 	flag.Parse()
 
-	conf, err := toml.New(*confPath)
+	conf, err := config.New(*confPath)
 	if err != nil {
 		panic(err)
 	}

@@ -1,4 +1,4 @@
-package service
+package wallet
 
 //Cold wallet
 
@@ -26,7 +26,8 @@ import (
 
 // GenerateSeed seedを生成する
 func (w *Wallet) GenerateSeed() ([]byte, error) {
-	if w.Type == enum.WalletTypeWatchOnly {
+	//TODO:remove it
+	if w.Type == WalletTypeWatchOnly {
 		return nil, errors.New("it's available on Coldwallet1, Coldwallet2")
 	}
 
@@ -38,19 +39,26 @@ func (w *Wallet) GenerateSeed() ([]byte, error) {
 	// seed生成
 	// set default seed
 	var strSeed string
-	if w.Env == enum.EnvDev && w.Seed != "" {
-		strSeed = w.Seed
-		bSeed, err = key.SeedToByte(strSeed)
-		if err != nil {
-			return nil, errors.Errorf("key.SeedToByte() error: %s", err)
-		}
-	} else {
-		bSeed, err = key.GenerateSeed()
-		if err != nil {
-			return nil, errors.Errorf("key.GenerateSeed() error: %s", err)
-		}
-		strSeed = key.SeedToString(bSeed)
+
+	//TODO: envは削除するので、一旦本番モードで実装
+	bSeed, err = key.GenerateSeed()
+	if err != nil {
+		return nil, errors.Errorf("key.GenerateSeed() error: %s", err)
 	}
+	strSeed = key.SeedToString(bSeed)
+	//if w.Env == enum.EnvDev && w.Seed != "" {
+	//	strSeed = w.Seed
+	//	bSeed, err = key.SeedToByte(strSeed)
+	//	if err != nil {
+	//		return nil, errors.Errorf("key.SeedToByte() error: %s", err)
+	//	}
+	//} else {
+	//	bSeed, err = key.GenerateSeed()
+	//	if err != nil {
+	//		return nil, errors.Errorf("key.GenerateSeed() error: %s", err)
+	//	}
+	//	strSeed = key.SeedToString(bSeed)
+	//}
 
 	// DBにseed情報を登録
 	_, err = w.DB.InsertSeed(strSeed, nil, true)
@@ -75,7 +83,7 @@ func (w *Wallet) retrieveSeed() ([]byte, error) {
 // GenerateAccountKey AccountType属性のアカウントKeyを生成する
 // TODO:AccountTypeAuthorizationのときは、レコードがある場合は追加できないようにしたほうがいい？？
 func (w *Wallet) GenerateAccountKey(accountType account.AccountType, coinType enum.CoinType, seed []byte, count uint32) ([]key.WalletKey, error) {
-	if w.Type == enum.WalletTypeWatchOnly {
+	if w.Type == WalletTypeWatchOnly {
 		return nil, errors.New("it's available on Coldwallet1, Coldwallet2")
 	}
 

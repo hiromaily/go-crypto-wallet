@@ -1,4 +1,4 @@
-package service
+package wallet
 
 import (
 	"fmt"
@@ -18,7 +18,8 @@ import (
 // amountが0のとき、全額送金する
 // TODO:実行後、`listtransactions`methodで確認できるかも(未チェック)
 func (w *Wallet) SendToAccount(from, to account.AccountType, amount btcutil.Amount) (string, string, error) {
-	if w.Type != enum.WalletTypeWatchOnly {
+	//TODO:remove it
+	if w.Type != WalletTypeWatchOnly {
 		return "", "", errors.New("it's available on WatchOnlyWallet")
 	}
 
