@@ -15,8 +15,6 @@ import (
 )
 
 //Watch Only Wallet
-//Bitcoin Core would be on GCP network for production
-//setup is required as watch only wallet
 
 //TODO: bitcoin functionalities
 // - back up wallet data periodically and import functionality
@@ -71,16 +69,7 @@ import (
 var (
 	appName    = "wallet"
 	appVersion = "1.0.0"
-	//opts      Options
-	//chainConf *chaincfg.Params
 )
-
-//TODO: after making sure command works, this code is deleted
-//func init() {
-//	if _, err := flags.Parse(&opts); err != nil {
-//		panic(err)
-//	}
-//}
 
 func main() {
 	// command line
@@ -88,7 +77,7 @@ func main() {
 		confPath  string
 		isHelp    bool
 		isVersion bool
-		walletIF  wallet.Walleter
+		walleter  wallet.Walleter
 	)
 	flags := flag.NewFlagSet("main", flag.ContinueOnError)
 	flags.StringVar(&confPath, "conf", os.Getenv("WATCH_WALLET_CONF"), "config file path")
@@ -106,29 +95,19 @@ func main() {
 
 	// help
 	if !isHelp && len(os.Args) > 1 {
-		// Config
+		// config
 		conf, err := config.New(confPath)
 		if err != nil {
 			log.Fatal(err)
 		}
-		//grok.Value(conf)
+		// create wallet
 		regi := NewRegistry(conf, wallet.WalletTypeWatchOnly)
-		walletIF = regi.NewWalleter()
-
-		//initialSettings()
-		//wallet, err = service.InitialSettings(confPath)
-		//if err != nil {
-		//	// ここでエラーが出た場合、まだloggerの初期化が終わってない
-		//	//logger.Fatal(err)
-		//	log.Fatal(err)
-		//}
-		//wallet.Type = enum.WalletTypeWatchOnly
-		//defer wallet.Done()
+		walleter = regi.NewWalleter()
 	}
 
 	//sub command
 	args := flags.Args()
-	cmds := wcmd.WalletSubCommands(walletIF, appVersion)
+	cmds := wcmd.WalletSubCommands(walleter, appVersion)
 	cl := command.CreateSubCommand(appName, appVersion, args, cmds)
 	cl.HelpFunc = command.HelpFunc(cl.Name)
 
