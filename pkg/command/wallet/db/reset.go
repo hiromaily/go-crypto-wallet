@@ -3,6 +3,7 @@ package db
 import (
 	"flag"
 	"fmt"
+
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"

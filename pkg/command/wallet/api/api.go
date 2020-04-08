@@ -10,16 +10,12 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
 
-const (
-	apiName = "api"
-)
-
 //api subcommand
 type APICommand struct {
-	name    string
-	version string
-	ui      cli.Ui
-	wallet  *service.Wallet
+	Name    string
+	Version string
+	UI      cli.Ui
+	Wallet  *service.Wallet
 }
 
 func (c *APICommand) Synopsis() string {
@@ -33,6 +29,7 @@ var (
 	getnetworkinfoSynopsis  = "call getnetworkinfo"
 	validateaddressSynopsis = "validate address"
 	listunspentSynopsis     = "call listunspent"
+	balanceSynopsis         = "get balance for account"
 )
 
 func (c *APICommand) Help() string {
@@ -48,9 +45,9 @@ Subcommands:
 }
 
 func (c *APICommand) Run(args []string) int {
-	c.ui.Output(c.Synopsis())
+	c.UI.Output(c.Synopsis())
 
-	flags := flag.NewFlagSet(apiName, flag.ContinueOnError)
+	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
@@ -62,7 +59,7 @@ func (c *APICommand) Run(args []string) int {
 				name:     "unlocktx",
 				synopsis: unlocktxSynopsis,
 				ui:       command.ClolorUI(),
-				wallet:   c.wallet,
+				wallet:   c.Wallet,
 			}, nil
 		},
 		"estimatefee": func() (cli.Command, error) {
@@ -70,7 +67,7 @@ func (c *APICommand) Run(args []string) int {
 				name:     "estimatefee",
 				synopsis: estimatefeeSynopsis,
 				ui:       command.ClolorUI(),
-				wallet:   c.wallet,
+				wallet:   c.Wallet,
 			}, nil
 		},
 		"logging": func() (cli.Command, error) {
@@ -78,7 +75,7 @@ func (c *APICommand) Run(args []string) int {
 				name:     "logging",
 				synopsis: loggingSynopsis,
 				ui:       command.ClolorUI(),
-				wallet:   c.wallet,
+				wallet:   c.Wallet,
 			}, nil
 		},
 		"getnetworkinfo": func() (cli.Command, error) {
@@ -86,7 +83,7 @@ func (c *APICommand) Run(args []string) int {
 				name:     "getnetworkinfo",
 				synopsis: getnetworkinfoSynopsis,
 				ui:       command.ClolorUI(),
-				wallet:   c.wallet,
+				wallet:   c.Wallet,
 			}, nil
 		},
 		"validateaddress": func() (cli.Command, error) {
@@ -94,7 +91,7 @@ func (c *APICommand) Run(args []string) int {
 				name:     "validateaddress",
 				synopsis: validateaddressSynopsis,
 				ui:       command.ClolorUI(),
-				wallet:   c.wallet,
+				wallet:   c.Wallet,
 			}, nil
 		},
 		"listunspent": func() (cli.Command, error) {
@@ -102,15 +99,23 @@ func (c *APICommand) Run(args []string) int {
 				name:     "listunspent",
 				synopsis: listunspentSynopsis,
 				ui:       command.ClolorUI(),
-				wallet:   c.wallet,
+				wallet:   c.Wallet,
+			}, nil
+		},
+		"balance": func() (cli.Command, error) {
+			return &BalanceCommand{
+				name:     "balance",
+				synopsis: balanceSynopsis,
+				ui:       command.ClolorUI(),
+				wallet:   c.Wallet,
 			}, nil
 		},
 	}
-	cl := command.CreateSubCommand(apiName, c.version, args, cmds)
+	cl := command.CreateSubCommand(c.Name, c.Version, args, cmds)
 
 	code, err := cl.Run()
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call Run() subcommand of %s: %v", apiName, err))
+		c.UI.Error(fmt.Sprintf("fail to call Run() subcommand of %s: %v", c.Name, err))
 	}
 	return code
 }

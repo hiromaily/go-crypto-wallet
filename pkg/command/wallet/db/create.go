@@ -3,10 +3,10 @@ package db
 import (
 	"flag"
 	"fmt"
-	"github.com/hiromaily/go-bitcoin/pkg/testdata"
 
 	"github.com/mitchellh/cli"
 
+	"github.com/hiromaily/go-bitcoin/pkg/testdata"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
 
