@@ -5,7 +5,6 @@
 !cmd/signature-wallet
 data/kvs/*
 data/tx/*
-data/gcs/*
 data/pubkey/*.csv
 docker/grafana/*
 docker/btc/data1/testnet3/*
@@ -16,4 +15,3 @@ docker/bch/data2/testnet3/*
 docker/bch/data3/testnet3/*
 !docker/wallet
 !.gitkeep
-cayenne-dev-strage.json
