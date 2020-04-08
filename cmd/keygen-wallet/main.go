@@ -1,13 +1,17 @@
 package main
 
 import (
+	"flag"
+	"fmt"
+	"github.com/hiromaily/go-bitcoin/pkg/command"
+	"github.com/hiromaily/go-bitcoin/pkg/command/keygen"
+	"github.com/hiromaily/go-bitcoin/pkg/config"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"log"
 	"os"
 
 	"github.com/bookerzzz/grok"
-	"github.com/btcsuite/btcd/chaincfg"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/jessevdk/go-flags"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
@@ -16,53 +20,101 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 )
 
-// coldwalletとしてclient, payment, receiptのseed作成、keyを指定した数だけ生成し、出力する
-// 対象アカウント: client, receipt, payment
-// 1. create seed
-// 2. create key
-// 3. run `importprivkey`
-// 4. export pubkey from DB
+// keygen wallet as cold wallet
+//  generate key and seed for account
+//  target account: client, receipt, payment
 
-// 5. 未署名トランザクションへの署名
+// procedure
+//  1. create seed
+//  2. create key
+//  3. run `importprivkey`
+//  4. export pubkey from DB
+//  5. sing on unsigned transaction
+//   sign for unsigned transaction (multisig addresses are required to sign by multiple devices)
 
-//TODO:encryptwalletコマンドによって、walletを暗号化した場合、秘密鍵を使用するタイミング(未署名トランザクションに署名する)
-// でパスフレーズの入力が必要になる
+//TODO: bitcoin functionalities
+// - encrypt wallet itself by `encryptwallet` command
+// - passphrase would be required when using secret key to sign unsigned transaction
 
-// Options コマンドラインオプション
-type Options struct {
-	//Configパス
-	ConfPath string `short:"c" long:"conf" default:"" description:"Path for configuration toml file"`
-
-	//署名モード
-	Sign bool `short:"s" long:"sign" description:"for signature"`
-	//Keyモード
-	Key bool `short:"k" long:"key" description:"for key related use (generate/import/export)"`
-	//Debugモード
-	Debug bool `short:"d" long:"debug" description:"for only development use"`
-
-	//実行されるサブ機能
-	Mode uint8 `short:"m" long:"mode" description:"Mode: detailed functionalities"`
-
-	//txファイルパス
-	ImportFile string `short:"i" long:"import" default:"" description:"import file path for hex"`
-	//key生成時に発行する数
-	KeyNumber uint32 `short:"n" long:"keynumber" description:"key number for generation"`
-	//アカウント
-	Account string `short:"a" long:"account" description:"account like client, receipt, payment"`
-}
+//TODO: after making sure command works, this code is deleted
+//type Options struct {
+//	//Configパス
+//	ConfPath string `short:"c" long:"conf" default:"" description:"Path for configuration toml file"`
+//
+//	//署名モード
+//	Sign bool `short:"s" long:"sign" description:"for signature"`
+//	//Keyモード
+//	Key bool `short:"k" long:"key" description:"for key related use (generate/import/export)"`
+//	//Debugモード
+//	Debug bool `short:"d" long:"debug" description:"for only development use"`
+//
+//	//実行されるサブ機能
+//	Mode uint8 `short:"m" long:"mode" description:"Mode: detailed functionalities"`
+//
+//	//txファイルパス
+//	ImportFile string `short:"i" long:"import" default:"" description:"import file path for hex"`
+//	//key生成時に発行する数
+//	KeyNumber uint32 `short:"n" long:"keynumber" description:"key number for generation"`
+//	//アカウント
+//	Account string `short:"a" long:"account" description:"account like client, receipt, payment"`
+//}
 
 var (
-	opts      Options
-	chainConf *chaincfg.Params
+	appName    = wallet.WalletTypeKeyGen.String()
+	appVersion = "1.0.0"
 )
 
-func init() {
-	if _, err := flags.Parse(&opts); err != nil {
-		panic(err)
+func main() {
+	// command line
+	var (
+		confPath  string
+		isHelp    bool
+		isVersion bool
+		walleter  wallet.Keygener
+	)
+	flags := flag.NewFlagSet("main", flag.ContinueOnError)
+	flags.StringVar(&confPath, "conf", os.Getenv("KEYGEN_WALLET_CONF"), "config file path")
+	flags.BoolVar(&isVersion, "version", false, "show version")
+	flags.BoolVar(&isHelp, "help", false, "show help")
+	if err := flags.Parse(os.Args[1:]); err != nil {
+		log.Fatal(err)
 	}
+
+	// version
+	if isVersion {
+		fmt.Printf("%s v%s\n", appName, appVersion)
+		os.Exit(0)
+	}
+
+	// help
+	if !isHelp && len(os.Args) > 1 {
+		// config
+		conf, err := config.New(confPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// create wallet
+		regi := NewRegistry(conf, wallet.WalletTypeKeyGen)
+		walleter = regi.NewKeygener()
+	}
+
+	//sub command
+	args := flags.Args()
+	cmds := keygen.WalletSubCommands(walleter, appVersion)
+	cl := command.CreateSubCommand(appName, appVersion, args, cmds)
+	cl.HelpFunc = command.HelpFunc(cl.Name)
+
+	flags.Usage = func() { fmt.Println(cl.HelpFunc(cl.Commands)) }
+
+	code, err := cl.Run()
+	if err != nil {
+		log.Printf("fail to call Run() %s command: %v", wallet.WalletTypeKeyGen.String(), err)
+	}
+	os.Exit(code)
 }
 
-func main() {
+//TODO: after making sure command works, this code is deleted
+func main2() {
 	confPath := os.Getenv("KEYGEN_WALLET_CONF")
 	if opts.ConfPath != "" {
 		confPath = opts.ConfPath

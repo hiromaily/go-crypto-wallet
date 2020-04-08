@@ -14,7 +14,10 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
-//Watch Only Wallet
+// wallet as watch only wallet
+//  this wallet works online, so bitcoin network is required to call APIs
+//  create unsigned transaction
+//  send signed transaction
 
 //TODO: bitcoin functionalities
 // - back up wallet data periodically and import functionality
@@ -67,7 +70,7 @@ import (
 //}
 
 var (
-	appName    = "wallet"
+	appName    = wallet.WalletTypeWatchOnly.String()
 	appVersion = "1.0.0"
 )
 
@@ -115,7 +118,7 @@ func main() {
 
 	code, err := cl.Run()
 	if err != nil {
-		log.Printf("fail to call Run() wallet command: %v", err)
+		log.Printf("fail to call Run() %s command: %v", wallet.WalletTypeWatchOnly.String(), err)
 	}
 	os.Exit(code)
 

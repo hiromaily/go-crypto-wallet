@@ -16,7 +16,7 @@ import (
 
 // Registry is for registry interface
 type Registry interface {
-	NewWalleter() wallet.Walleter
+	NewKeygener() wallet.Keygener
 }
 
 type registry struct {
@@ -33,12 +33,13 @@ func NewRegistry(conf *config.Config, walletType wallet.WalletType) Registry {
 }
 
 // NewBooker is to register for booker interface
-func (r *registry) NewWalleter() wallet.Walleter {
+func (r *registry) NewKeygener() wallet.Keygener {
 
-	return wallet.NewWallet(
+	return wallet.NewKeygenWallet(
 		r.newBTC(),
 		r.newStorager(),
 		r.walletType,
+		r.newSeed(),
 	)
 }
 
@@ -78,4 +79,14 @@ func (r *registry) setFilePath() {
 	if r.conf.PubkeyFile.BasePath != "" {
 		key.SetFilePath(r.conf.PubkeyFile.BasePath)
 	}
+}
+
+//TODO: delete after fixing
+func (r *registry) newSeed() string {
+	//seed (only dev mode)
+	var seed string
+	if r.conf.Key.Seed != "" {
+		seed = r.conf.Key.Seed
+	}
+	return seed
 }

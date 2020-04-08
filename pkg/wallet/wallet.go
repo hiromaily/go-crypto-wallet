@@ -22,24 +22,22 @@ type Walleter interface {
 	GetType() WalletType
 }
 
-// Wallet 基底オブジェクト
+// Wallet watch only wallet object
 type Wallet struct {
 	BTC  api.Bitcoiner
 	DB   *model.DB //TODO:should be interface
 	Type WalletType
-	Seed string
 }
 
-func NewWallet(bit api.Bitcoiner, rds *model.DB, typ WalletType, seed string) *Wallet {
+func NewWallet(bit api.Bitcoiner, rds *model.DB, typ WalletType) *Wallet {
 	return &Wallet{
 		BTC:  bit,
 		DB:   rds,
 		Type: typ,
-		Seed: seed,
 	}
 }
 
-// Done 終了時に必要な処理
+// Done should be called before exit
 func (w *Wallet) Done() {
 	w.DB.RDB.Close()
 	w.BTC.Close()

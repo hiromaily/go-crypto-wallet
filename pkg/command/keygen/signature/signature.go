@@ -1,33 +1,32 @@
-package sending
+package signature
 
 import (
 	"flag"
 	"fmt"
-
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
 //sending subcommand
-type SendingCommand struct {
+type SignatureCommand struct {
 	Name   string
 	UI     cli.Ui
-	Wallet wallet.Walleter
+	Wallet wallet.Keygener
 }
 
-func (c *SendingCommand) Synopsis() string {
-	return "send signed transaction to bitcoin blockchain network"
+func (c *SignatureCommand) Synopsis() string {
+	return "sign on unsigned transaction (account would be found from file name)"
 }
 
-func (c *SendingCommand) Help() string {
+func (c *SignatureCommand) Help() string {
 	return `Usage: wallet sending [options...]
 Options:
-  -file  signed transaction file path
+  -file  unsigned transaction file path
 `
 }
 
-func (c *SendingCommand) Run(args []string) int {
+func (c *SignatureCommand) Run(args []string) int {
 	c.UI.Output(c.Synopsis())
 
 	var (
@@ -45,14 +44,14 @@ func (c *SendingCommand) Run(args []string) int {
 		return 1
 	}
 
-	// send signed transactions
-	txID, err := c.Wallet.SendFromFile(filePath)
+	// sign on unsigned transactions, action(receipt/payment) could be found from file name
+	hexTx, isSigned, generatedFileName, err := c.Wallet.SignatureFromFile(filePath)
 	if err != nil {
 		c.UI.Error(fmt.Sprintf("fail to call SendFromFile() %+v", err))
 	}
 
 	//TODO: output should be json if json option is true
-	c.UI.Output(fmt.Sprintf("[Done]送信までDONE!! txID: %s", txID))
+	c.UI.Output(fmt.Sprintf("[hex]: %s\n[署名完了]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName))
 
 	return 0
 }
