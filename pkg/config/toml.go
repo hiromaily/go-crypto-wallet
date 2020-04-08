@@ -11,13 +11,11 @@ import (
 
 // Config ルート
 type Config struct {
-	Environment string         `toml:"environment"`
 	CoinType    string         `toml:"coin_type"`
 	Bitcoin     BitcoinConf    `toml:"bitcoin"`
 	MySQL       MySQLConf      `toml:"mysql"`
 	TxFile      TxFileConf     `toml:"tx_file"`
 	PubkeyFile  PubKeyFileConf `toml:"pubkey_file"`
-	GCS         GCSConf        `toml:"gcs"`
 	Key         KeyConf        `toml:"key"`
 }
 
@@ -68,14 +66,6 @@ type TxFileConf struct {
 // import/export共にこのパスが使われる
 type PubKeyFileConf struct {
 	BasePath string `toml:"base_path"`
-}
-
-// GCSConf Google Cloud Storage
-type GCSConf struct {
-	StorageKeyPath     string `toml:"storage_key_path"`
-	ReceiptBucketName  string `toml:"receipt_bucket_name"`
-	PaymentBucketName  string `toml:"payment_bucket_name"`
-	TransferBucketName string `toml:"transfer_bucket_name"`
 }
 
 // New configオブジェクトを生成する

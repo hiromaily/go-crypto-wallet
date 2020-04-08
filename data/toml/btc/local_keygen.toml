@@ -1,10 +1,9 @@
-environment = "dev"  # dev,prod
 coin_type = "btc"    # btc, bch
 
 # watch_only/cold_wallet
 [mysql]
-host = "127.0.0.1:3307"
-dbname = "wallet"
+host = "127.0.0.1:3308"
+dbname = "cold_wallet1"
 user = "hiromaily"
 pass = "hiromaily"
 
@@ -18,17 +17,12 @@ base_path = "./data/pubkey/"
 # watch_only/cold_wallet
 [bitcoin]
 host = "127.0.0.1:18332"
-user = "hiromaily"
-pass = "hiromaily"
+user = "xyz"
+pass = "xyz"
 http_post_mode = true
 disable_tls = true
 is_main = false #true: MainNetに接続、　false: TestNetに接続
 
-# watch_only
-[bitcoin.block]
-confirmation_num = 6 #Confirmationに必要なブロック数
-
-# watch_only
-[bitcoin.fee]
-adjustment_min = 0.5 #オプションにて調整可能なMinimum値
-adjustment_max = 2.0 #オプションにて調整可能なMaximum値
+# default seed of key used when dev mode
+[key]
+seed = "Ve5Kkaba4SQGavc/pWXazZuYD4mE53+qV9tLeRTS5t4="
