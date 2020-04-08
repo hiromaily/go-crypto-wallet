@@ -10,19 +10,20 @@ import (
 
 // GetNetworkInfoResult getnetworkinfo RPC のレスポンス
 type GetNetworkInfoResult struct {
-	Version         enum.BTCVersion `json:"version"`
-	Subversion      string          `json:"subversion"`
-	Protocolversion int             `json:"protocolversion"`
-	Localservices   string          `json:"localservices"`
-	Localrelay      bool            `json:"localrelay"`
-	Timeoffset      int             `json:"timeoffset"`
-	Networkactive   bool            `json:"networkactive"`
-	Connections     int             `json:"connections"`
-	Networks        []Network       `json:"networks"`
-	Relayfee        float64         `json:"relayfee"`
-	Incrementalfee  float64         `json:"incrementalfee"`
-	Localaddresses  []string        `json:"localaddresses"`
-	Warnings        string          `json:"warnings"`
+	Version            enum.BTCVersion `json:"version"`
+	Subversion         string          `json:"subversion"`
+	Protocolversion    int             `json:"protocolversion"`
+	Localservices      string          `json:"localservices"`
+	Localservicesnames []string        `json:"localservicesnames"`
+	Localrelay         bool            `json:"localrelay"`
+	Timeoffset         int             `json:"timeoffset"`
+	Networkactive      bool            `json:"networkactive"`
+	Connections        int             `json:"connections"`
+	Networks           []Network       `json:"networks"`
+	Relayfee           float64         `json:"relayfee"`
+	Incrementalfee     float64         `json:"incrementalfee"`
+	Localaddresses     []LocalAddress  `json:"localaddresses"`
+	Warnings           string          `json:"warnings"`
 }
 
 // Network ネットワーク情報
@@ -32,6 +33,12 @@ type Network struct {
 	Reachable                 bool   `json:"reachable"`
 	Proxy                     string `json:"proxy"`
 	ProxyRandomizeCredentials bool   `json:"proxy_randomize_credentials"`
+}
+
+type LocalAddress struct {
+	Address string `json:"address"`
+	Port    int    `json:"port"`
+	Score   int    `json:"score"`
 }
 
 // GetNetworkInfo getnetworkinfo RPC をcallする
