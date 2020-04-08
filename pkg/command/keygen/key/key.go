@@ -3,6 +3,8 @@ package key
 import (
 	"flag"
 	"fmt"
+	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/key/export"
+	_import "github.com/hiromaily/go-bitcoin/pkg/command/keygen/key/import"
 
 	"github.com/mitchellh/cli"
 
@@ -58,7 +60,7 @@ func (c *KeyCommand) Run(args []string) int {
 			}, nil
 		},
 		"export": func() (cli.Command, error) {
-			return &ExportCommand{
+			return &export.ExportCommand{
 				Name:        "export",
 				Version:     c.Version,
 				SynopsisExp: exportSynopsis,
@@ -67,7 +69,7 @@ func (c *KeyCommand) Run(args []string) int {
 			}, nil
 		},
 		"import": func() (cli.Command, error) {
-			return &ImportCommand{
+			return &_import.ImportCommand{
 				Name:        "import",
 				Version:     c.Version,
 				SynopsisExp: importSynopsis,
