@@ -71,7 +71,7 @@ services:
     # /root/.bitcoin/testnet3/wallets
 
   btc-signature:
-    image: wallet-btc:0.17
+    image: wallet-btc:0.19
     volumes:
     #- btc3:/root/.bitcoin
     #- ./docs/bitcoin.example.conf:/root/.bitcoin/bitcoin.conf

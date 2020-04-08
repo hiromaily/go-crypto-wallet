@@ -1,10 +1,11 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"os"
 
-	"github.com/btcsuite/btcd/chaincfg"
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
@@ -25,6 +26,7 @@ import (
 // - logger interface: stdout(ui), log format
 // - repository interface (from mysql, mock, redis and so on)
 // - service interface
+// - btc command for mock is required
 // - procedure pkg move to help of command
 // - change Japanese to English
 
@@ -67,9 +69,10 @@ import (
 //}
 
 var (
-	version = "1.0.0"
+	appName    = "wallet"
+	appVersion = "1.0.0"
 	//opts      Options
-	chainConf *chaincfg.Params
+	//chainConf *chaincfg.Params
 )
 
 //TODO: after making sure command works, this code is deleted
@@ -80,25 +83,57 @@ var (
 //}
 
 func main() {
-	confPath := os.Getenv("WATCH_WALLET_CONF")
+	//confPath := os.Getenv("WATCH_WALLET_CONF")
 	//if opts.ConfPath != "" {
 	//	confPath = opts.ConfPath
 	//}
 
-	//initialSettings()
-	wallet, err := service.InitialSettings(confPath)
-	if err != nil {
-		// ここでエラーが出た場合、まだloggerの初期化が終わってない
-		//logger.Fatal(err)
+	// command line
+	var (
+		confPath  string
+		isHelp    bool
+		isVersion bool
+		wallet    *service.Wallet
+	)
+	flags := flag.NewFlagSet("main", flag.ContinueOnError)
+	flags.StringVar(&confPath, "conf", os.Getenv("WATCH_WALLET_CONF"), "config file path")
+	//FIXME: In this case, should version and help are redefined??
+	//FIXME: usage should be overwriden
+	// Usage: wallet [--version] [--help] <command> [<args>]
+	flags.BoolVar(&isVersion, "version", false, "show version")
+	flags.BoolVar(&isHelp, "help", false, "show help")
+	if err := flags.Parse(os.Args[1:]); err != nil {
 		log.Fatal(err)
 	}
-	wallet.Type = enum.WalletTypeWatchOnly
-	defer wallet.Done()
 
-	//command line
-	args := os.Args[1:]
-	cmds := wcmd.WalletSubCommands(wallet, version)
-	cl := command.CreateSubCommand("wallet", version, args, cmds)
+	// version
+	if isVersion {
+		fmt.Printf("%s v%s\n", appName, appVersion)
+		os.Exit(0)
+	}
+
+	// help
+	if !isHelp && len(os.Args) > 1 {
+		var err error
+		//initialSettings()
+		wallet, err = service.InitialSettings(confPath)
+		if err != nil {
+			// ここでエラーが出た場合、まだloggerの初期化が終わってない
+			//logger.Fatal(err)
+			log.Fatal(err)
+		}
+		wallet.Type = enum.WalletTypeWatchOnly
+		defer wallet.Done()
+	}
+
+	//sub command
+	args := flags.Args()
+	cmds := wcmd.WalletSubCommands(wallet, appVersion)
+	cl := command.CreateSubCommand(appName, appVersion, args, cmds)
+	cl.HelpFunc = command.HelpFunc(cl.Name)
+
+	flags.Usage = func() { fmt.Println(cl.HelpFunc(cl.Commands)) }
+
 	code, err := cl.Run()
 	if err != nil {
 		log.Printf("fail to call Run() wallet command: %v", err)

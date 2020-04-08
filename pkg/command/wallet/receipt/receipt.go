@@ -10,16 +10,12 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
 
-const (
-	receiptName = "receipt"
-)
-
 //receipt subcommand
 type ReceiptCommand struct {
-	name    string
-	version string
-	ui      cli.Ui
-	wallet  *service.Wallet
+	Name    string
+	Version string
+	UI      cli.Ui
+	Wallet  *service.Wallet
 }
 
 func (c *ReceiptCommand) Synopsis() string {
@@ -40,9 +36,9 @@ Subcommands:
 }
 
 func (c *ReceiptCommand) Run(args []string) int {
-	c.ui.Output(c.Synopsis())
+	c.UI.Output(c.Synopsis())
 
-	flags := flag.NewFlagSet(receiptName, flag.ContinueOnError)
+	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
@@ -54,7 +50,7 @@ func (c *ReceiptCommand) Run(args []string) int {
 				name:     "create",
 				synopsis: createSynopsis,
 				ui:       command.ClolorUI(),
-				wallet:   c.wallet,
+				wallet:   c.Wallet,
 			}, nil
 		},
 		"debug": func() (cli.Command, error) {
@@ -62,15 +58,15 @@ func (c *ReceiptCommand) Run(args []string) int {
 				name:     "debug",
 				synopsis: debugSynopsis,
 				ui:       command.ClolorUI(),
-				wallet:   c.wallet,
+				wallet:   c.Wallet,
 			}, nil
 		},
 	}
-	cl := command.CreateSubCommand(receiptName, c.version, args, cmds)
+	cl := command.CreateSubCommand(c.Name, c.Version, args, cmds)
 
 	code, err := cl.Run()
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call Run() subcommand of %s: %v", receiptName, err))
+		c.UI.Error(fmt.Sprintf("fail to call Run() subcommand of %s: %v", c.Name, err))
 	}
 	return code
 }

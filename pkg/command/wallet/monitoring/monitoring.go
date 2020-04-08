@@ -10,19 +10,15 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
 
-const (
-	montoringName = "montoring"
-)
-
 //montoring subcommand
-type MontoringCommand struct {
-	name    string
-	version string
-	ui      cli.Ui
-	wallet  *service.Wallet
+type MonitoringCommand struct {
+	Name    string
+	Version string
+	UI      cli.Ui
+	Wallet  *service.Wallet
 }
 
-func (c *MontoringCommand) Synopsis() string {
+func (c *MonitoringCommand) Synopsis() string {
 	return "montoring functionality"
 }
 
@@ -31,7 +27,7 @@ var (
 	balanceSynopsis = "monitor balance"
 )
 
-func (c *MontoringCommand) Help() string {
+func (c *MonitoringCommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet receipt [Subcommands...]
 Subcommands:
   senttx   %s
@@ -39,10 +35,10 @@ Subcommands:
 `, senttxSynopsis, balanceSynopsis)
 }
 
-func (c *MontoringCommand) Run(args []string) int {
-	c.ui.Output(c.Synopsis())
+func (c *MonitoringCommand) Run(args []string) int {
+	c.UI.Output(c.Synopsis())
 
-	flags := flag.NewFlagSet(montoringName, flag.ContinueOnError)
+	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
@@ -54,7 +50,7 @@ func (c *MontoringCommand) Run(args []string) int {
 				name:     "senttx",
 				synopsis: senttxSynopsis,
 				ui:       command.ClolorUI(),
-				wallet:   c.wallet,
+				wallet:   c.Wallet,
 			}, nil
 		},
 		"balance": func() (cli.Command, error) {
@@ -62,15 +58,15 @@ func (c *MontoringCommand) Run(args []string) int {
 				name:     "balance",
 				synopsis: balanceSynopsis,
 				ui:       command.ClolorUI(),
-				wallet:   c.wallet,
+				wallet:   c.Wallet,
 			}, nil
 		},
 	}
-	cl := command.CreateSubCommand(montoringName, c.version, args, cmds)
+	cl := command.CreateSubCommand(c.Name, c.Version, args, cmds)
 
 	code, err := cl.Run()
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call Run() subcommand of %s: %v", montoringName, err))
+		c.UI.Error(fmt.Sprintf("fail to call Run() subcommand of %s: %v", c.Name, err))
 	}
 	return code
 }

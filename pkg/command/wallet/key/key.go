@@ -10,14 +10,12 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
 
-const keyName = "key"
-
 //key subcommand
 type KeyCommand struct {
-	name    string
-	version string
-	ui      cli.Ui
-	wallet  *service.Wallet
+	Name    string
+	Version string
+	UI      cli.Ui
+	Wallet  *service.Wallet
 }
 
 func (c *KeyCommand) Synopsis() string {
@@ -36,9 +34,9 @@ Subcommands:
 }
 
 func (c *KeyCommand) Run(args []string) int {
-	c.ui.Output(c.Synopsis())
+	c.UI.Output(c.Synopsis())
 
-	flags := flag.NewFlagSet(keyName, flag.ContinueOnError)
+	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
@@ -50,15 +48,15 @@ func (c *KeyCommand) Run(args []string) int {
 				name:     "import",
 				synopsis: importSynopsis,
 				ui:       command.ClolorUI(),
-				wallet:   c.wallet,
+				wallet:   c.Wallet,
 			}, nil
 		},
 	}
-	cl := command.CreateSubCommand(keyName, c.version, args, cmds)
+	cl := command.CreateSubCommand(c.Name, c.Version, args, cmds)
 
 	code, err := cl.Run()
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call Run() subcommand of %s: %v", keyName, err))
+		c.UI.Error(fmt.Sprintf("fail to call Run() subcommand of %s: %v", c.Name, err))
 	}
 	return code
 }
