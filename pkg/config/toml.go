@@ -11,12 +11,12 @@ import (
 
 // Config ルート
 type Config struct {
-	CoinType    string         `toml:"coin_type"`
-	Bitcoin     BitcoinConf    `toml:"bitcoin"`
-	MySQL       MySQLConf      `toml:"mysql"`
-	TxFile      TxFileConf     `toml:"tx_file"`
-	PubkeyFile  PubKeyFileConf `toml:"pubkey_file"`
-	Key         KeyConf        `toml:"key"`
+	CoinType   string         `toml:"coin_type"`
+	Bitcoin    BitcoinConf    `toml:"bitcoin"`
+	MySQL      MySQLConf      `toml:"mysql"`
+	TxFile     TxFileConf     `toml:"tx_file"`
+	PubkeyFile PubKeyFileConf `toml:"pubkey_file"`
+	Key        KeyConf        `toml:"key"`
 }
 
 // BitcoinConf Bitcoin情報

@@ -22,7 +22,7 @@ func (c *KeyCommand) Synopsis() string {
 }
 
 func (c *KeyCommand) Help() string {
-	return `Usage: keygen key create [options...]
+	return `Usage: keygen key create key [options...]
 Options:
   -table  target table name
 `

@@ -1,11 +1,12 @@
 package keygen
 
 import (
+	"github.com/mitchellh/cli"
+
 	"github.com/hiromaily/go-bitcoin/pkg/command"
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/key"
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/signature"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/mitchellh/cli"
 )
 
 func WalletSubCommands(wallet wallet.Keygener, version string) map[string]cli.CommandFactory {

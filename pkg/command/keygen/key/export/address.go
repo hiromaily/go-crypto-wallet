@@ -1,4 +1,4 @@
-package create
+package export
 
 import (
 	"flag"
@@ -9,26 +9,26 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
-//seed subcommand
-type SeedCommand struct {
+//address subcommand
+type AddressCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
 	wallet   wallet.Keygener
 }
 
-func (c *SeedCommand) Synopsis() string {
+func (c *AddressCommand) Synopsis() string {
 	return c.synopsis
 }
 
-func (c *SeedCommand) Help() string {
-	return `Usage: keygen key create seed [options...]
+func (c *AddressCommand) Help() string {
+	return `Usage: keygen key export address [options...]
 Options:
   -table  target table name
 `
 }
 
-func (c *SeedCommand) Run(args []string) int {
+func (c *AddressCommand) Run(args []string) int {
 	c.ui.Output(c.Synopsis())
 
 	var (
