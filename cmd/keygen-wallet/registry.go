@@ -34,12 +34,13 @@ func NewRegistry(conf *config.Config, walletType wallet.WalletType) Registry {
 
 // NewBooker is to register for booker interface
 func (r *registry) NewKeygener() wallet.Keygener {
+	r.newLogger()
+	r.setFilePath()
 
-	return wallet.NewKeygenWallet(
+	return wallet.NewWallet(
 		r.newBTC(),
 		r.newStorager(),
 		r.walletType,
-		r.newSeed(),
 	)
 }
 
@@ -79,14 +80,4 @@ func (r *registry) setFilePath() {
 	if r.conf.PubkeyFile.BasePath != "" {
 		key.SetFilePath(r.conf.PubkeyFile.BasePath)
 	}
-}
-
-//TODO: delete after fixing
-func (r *registry) newSeed() string {
-	//seed (only dev mode)
-	var seed string
-	if r.conf.Key.Seed != "" {
-		seed = r.conf.Key.Seed
-	}
-	return seed
 }

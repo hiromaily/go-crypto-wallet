@@ -41,6 +41,5 @@ func (c *KeyCommand) Run(args []string) int {
 		c.ui.Error(fmt.Sprintf("fail to call key.GenerateKey() %+v", err))
 	}
 	c.ui.Info(fmt.Sprintf("[WIF] %s - [Pub Address] %s", wif.String(), pubAddress))
-
 	return 0
 }
