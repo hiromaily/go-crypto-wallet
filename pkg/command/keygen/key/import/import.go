@@ -24,8 +24,8 @@ func (c *ImportCommand) Synopsis() string {
 }
 
 var (
-	privkeySynopsis  = "import private key"
-	multisigSynopsis = "import multisig address"
+	privkeySynopsis  = "import generated private key in database to keygen wallet"
+	multisigSynopsis = "import multisig addresses exported by signature wallet from csv file to database"
 )
 
 func (c *ImportCommand) Help() string {

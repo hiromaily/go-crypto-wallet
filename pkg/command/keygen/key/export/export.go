@@ -24,8 +24,8 @@ func (c *ExportCommand) Synopsis() string {
 }
 
 var (
-	addressSynopsis  = "export address"
-	multisigSynopsis = "export multisig address"
+	addressSynopsis  = "export generated PublicKey as csv file to use at watch only wallet"
+	multisigSynopsis = "export multisig addresses as csv file"
 )
 
 func (c *ExportCommand) Help() string {

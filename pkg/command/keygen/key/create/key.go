@@ -7,6 +7,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 )
 
 // key subcommand
@@ -22,40 +23,24 @@ func (c *KeyCommand) Synopsis() string {
 }
 
 func (c *KeyCommand) Help() string {
-	return `Usage: keygen key create key [options...]
-Options:
-  -table  target table name
+	return `Usage: keygen key create key
 `
 }
 
 func (c *KeyCommand) Run(args []string) int {
 	c.ui.Output(c.Synopsis())
 
-	var (
-		tableName string
-	)
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
-	flags.StringVar(&tableName, "table", "", "table name of database")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
 
-	c.ui.Output(fmt.Sprintf("-table: %s", tableName))
-
-	////validator
-	//if tableName == "" {
-	//	tableName = "payment_request"
-	//	//c.ui.Error("table name option [-table] is required")
-	//	//return 1
-	//}
-	//
-	////create payment_request table
-	//err := testdata.CreateInitialTestData(c.wallet.GetDB(), c.wallet.GetBTC())
-	//if err != nil {
-	//	c.ui.Error(fmt.Sprintf("fail to call testdata.CreateInitialTestData() %+v", err))
-	//	return 1
-	//}
-	//c.ui.Info("Done!")
+	// create one key for debug use
+	wif, pubAddress, err := key.GenerateKey(c.wallet.GetBTC().GetChainConf())
+	if err != nil {
+		c.ui.Error(fmt.Sprintf("fail to call key.GenerateKey() %+v", err))
+	}
+	c.ui.Info(fmt.Sprintf("[WIF] %s - [Pub Address] %s", wif.String(), pubAddress))
 
 	return 0
 }

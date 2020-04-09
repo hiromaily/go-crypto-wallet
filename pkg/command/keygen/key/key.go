@@ -3,13 +3,13 @@ package key
 import (
 	"flag"
 	"fmt"
-	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/key/export"
-	_import "github.com/hiromaily/go-bitcoin/pkg/command/keygen/key/import"
 
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/key/create"
+	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/key/export"
+	_import "github.com/hiromaily/go-bitcoin/pkg/command/keygen/key/import"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 

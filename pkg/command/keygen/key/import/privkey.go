@@ -6,6 +6,7 @@ import (
 
 	"github.com/mitchellh/cli"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
@@ -24,7 +25,7 @@ func (c *PrivKeyCommand) Synopsis() string {
 func (c *PrivKeyCommand) Help() string {
 	return `Usage: keygen key import privkey [options...]
 Options:
-  -table  target table name
+  -account  target account
 `
 }
 
@@ -32,30 +33,30 @@ func (c *PrivKeyCommand) Run(args []string) int {
 	c.ui.Output(c.Synopsis())
 
 	var (
-		tableName string
+		acnt string
 	)
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
-	flags.StringVar(&tableName, "table", "", "table name of database")
+	flags.StringVar(&acnt, "account", "", "target account")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
 
-	c.ui.Output(fmt.Sprintf("-table: %s", tableName))
+	//validator
+	if !account.ValidateAccountType(acnt) {
+		c.ui.Error("account option [-account] is invalid")
+		return 1
+	}
+	if !account.NotAllow(acnt, []account.AccountType{account.AccountTypeAuthorization}) {
+		c.ui.Error(fmt.Sprintf("account: %s is not allowd", account.AccountTypeAuthorization))
+		return 1
+	}
 
-	////validator
-	//if tableName == "" {
-	//	tableName = "payment_request"
-	//	//c.ui.Error("table name option [-table] is required")
-	//	//return 1
-	//}
-	//
-	////create payment_request table
-	//err := testdata.CreateInitialTestData(c.wallet.GetDB(), c.wallet.GetBTC())
-	//if err != nil {
-	//	c.ui.Error(fmt.Sprintf("fail to call testdata.CreateInitialTestData() %+v", err))
-	//	return 1
-	//}
-	//c.ui.Info("Done!")
+	//import generated private key to keygen wallet
+	err := c.wallet.ImportPrivateKey(account.AccountType(acnt))
+	if err != nil {
+		c.ui.Error(fmt.Sprintf("fail to call ImportPrivateKey() %+v", err))
+	}
+	c.ui.Output("Done!")
 
 	return 0
 }

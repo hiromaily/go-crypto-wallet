@@ -6,6 +6,8 @@ import (
 
 	"github.com/mitchellh/cli"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
@@ -24,7 +26,7 @@ func (c *AddressCommand) Synopsis() string {
 func (c *AddressCommand) Help() string {
 	return `Usage: keygen key export address [options...]
 Options:
-  -table  target table name
+  -account  target account
 `
 }
 
@@ -32,30 +34,30 @@ func (c *AddressCommand) Run(args []string) int {
 	c.ui.Output(c.Synopsis())
 
 	var (
-		tableName string
+		acnt string
 	)
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
-	flags.StringVar(&tableName, "table", "", "table name of database")
+	flags.StringVar(&acnt, "account", "", "target account")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
 
-	c.ui.Output(fmt.Sprintf("-table: %s", tableName))
+	//validator
+	if !account.ValidateAccountType(acnt) {
+		c.ui.Error("account option [-account] is invalid")
+		return 1
+	}
+	if !account.NotAllow(acnt, []account.AccountType{account.AccountTypeAuthorization}) {
+		c.ui.Error(fmt.Sprintf("account: %s is not allowd", account.AccountTypeAuthorization))
+		return 1
+	}
 
-	////validator
-	//if tableName == "" {
-	//	tableName = "payment_request"
-	//	//c.ui.Error("table name option [-table] is required")
-	//	//return 1
-	//}
-	//
-	////create payment_request table
-	//err := testdata.CreateInitialTestData(c.wallet.GetDB(), c.wallet.GetBTC())
-	//if err != nil {
-	//	c.ui.Error(fmt.Sprintf("fail to call testdata.CreateInitialTestData() %+v", err))
-	//	return 1
-	//}
-	//c.ui.Info("Done!")
+	// export generated PublicKey as csv file to use at watch only wallet
+	fileName, err := c.wallet.ExportAccountKey(account.AccountType(acnt), enum.KeyStatusImportprivkey)
+	if err != nil {
+		c.ui.Error(fmt.Sprintf("fail to call ExportAccountKey() %+v", err))
+	}
+	c.ui.Output(fmt.Sprintf("[fileName]: %s", fileName))
 
 	return 0
 }

@@ -24,7 +24,7 @@ func (c *CreateCommand) Synopsis() string {
 }
 
 var (
-	keySynopsis      = "create key for debug use"
+	keySynopsis      = "create one key for debug use"
 	hdkeySynopsis    = "create HD key"
 	seedSynopsis     = "create seed"
 	multisigSynopsis = "multisig address for debug use"

@@ -4,8 +4,10 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/bookerzzz/grok"
 	"github.com/mitchellh/cli"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
@@ -24,7 +26,8 @@ func (c *HDKeyCommand) Synopsis() string {
 func (c *HDKeyCommand) Help() string {
 	return `Usage: keygen key create hdkey [options...]
 Options:
-  -table  target table name
+  -keynum   number of generating hd key
+  -account  target account
 `
 }
 
@@ -32,30 +35,44 @@ func (c *HDKeyCommand) Run(args []string) int {
 	c.ui.Output(c.Synopsis())
 
 	var (
-		tableName string
+		keyNum uint64
+		acnt   string
 	)
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
-	flags.StringVar(&tableName, "table", "", "table name of database")
+	flags.Uint64Var(&keyNum, "keynum", 0, "number of generating hd key")
+	flags.StringVar(&acnt, "account", "", "target account")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
 
-	c.ui.Output(fmt.Sprintf("-table: %s", tableName))
+	//validator
+	if keyNum == 0 {
+		c.ui.Error("number of key option [-keynum] is required")
+		return 1
+	}
+	if !account.ValidateAccountType(acnt) {
+		c.ui.Error("account option [-account] is invalid")
+		return 1
+	}
+	if !account.NotAllow(acnt, []account.AccountType{account.AccountTypeAuthorization}) {
+		c.ui.Error(fmt.Sprintf("account: %s is not allowd", account.AccountTypeAuthorization))
+		return 1
+	}
 
-	////validator
-	//if tableName == "" {
-	//	tableName = "payment_request"
-	//	//c.ui.Error("table name option [-table] is required")
-	//	//return 1
-	//}
-	//
-	////create payment_request table
-	//err := testdata.CreateInitialTestData(c.wallet.GetDB(), c.wallet.GetBTC())
-	//if err != nil {
-	//	c.ui.Error(fmt.Sprintf("fail to call testdata.CreateInitialTestData() %+v", err))
-	//	return 1
-	//}
-	//c.ui.Info("Done!")
+	// create seed
+	bSeed, err := c.wallet.GenerateSeed()
+	if err != nil {
+		c.ui.Error(fmt.Sprintf("fail to call GenerateSeed() %+v", err))
+		return 1
+	}
+
+	//generate key for hd wallet
+	keys, err := c.wallet.GenerateAccountKey(account.AccountType(acnt), c.wallet.GetBTC().CoinType(), bSeed, uint32(keyNum))
+	if err != nil {
+		c.ui.Error(fmt.Sprintf("fail to call GenerateAccountKey() %+v", err))
+		return 1
+	}
+	grok.Value(keys)
 
 	return 0
 }
