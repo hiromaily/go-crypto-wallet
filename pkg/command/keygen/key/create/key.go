@@ -39,6 +39,7 @@ func (c *KeyCommand) Run(args []string) int {
 	wif, pubAddress, err := key.GenerateKey(c.wallet.GetBTC().GetChainConf())
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call key.GenerateKey() %+v", err))
+		return 1
 	}
 	c.ui.Info(fmt.Sprintf("[WIF] %s - [Pub Address] %s", wif.String(), pubAddress))
 	return 0

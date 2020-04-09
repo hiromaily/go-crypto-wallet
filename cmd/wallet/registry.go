@@ -32,7 +32,7 @@ func NewRegistry(conf *config.Config, walletType wallet.WalletType) Registry {
 	}
 }
 
-// NewBooker is to register for booker interface
+// NewWalleter is to register for walleter interface
 func (r *registry) NewWalleter() wallet.Walleter {
 	r.newLogger()
 	r.setFilePath()

@@ -15,7 +15,7 @@ type PrivKeyCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   wallet.Keygener
+	wallet   wallet.Signer
 }
 
 func (c *PrivKeyCommand) Synopsis() string {
@@ -23,39 +23,22 @@ func (c *PrivKeyCommand) Synopsis() string {
 }
 
 func (c *PrivKeyCommand) Help() string {
-	return `Usage: keygen key import privkey [options...]
-Options:
-  -account  target account
+	return `Usage: sign key import privkey
 `
 }
 
 func (c *PrivKeyCommand) Run(args []string) int {
 	c.ui.Output(c.Synopsis())
 
-	var (
-		acnt string
-	)
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
-	flags.StringVar(&acnt, "account", "", "target account")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
 
-	//validator
-	if !account.ValidateAccountType(acnt) {
-		c.ui.Error("account option [-account] is invalid")
-		return 1
-	}
-	if !account.NotAllow(acnt, []account.AccountType{account.AccountTypeAuthorization}) {
-		c.ui.Error(fmt.Sprintf("account: %s is not allowd", account.AccountTypeAuthorization))
-		return 1
-	}
-
-	//import generated private key to keygen wallet
-	err := c.wallet.ImportPrivateKey(account.AccountType(acnt))
+	// import generated private key for Authorization account to database
+	err := c.wallet.ImportPrivateKey(account.AccountTypeAuthorization)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call ImportPrivateKey() %+v", err))
-		return 1
 	}
 	c.ui.Output("Done!")
 

@@ -16,7 +16,7 @@ import (
 
 // Registry is for registry interface
 type Registry interface {
-	NewKeygener() wallet.Keygener
+	NewSigner() wallet.Signer
 }
 
 type registry struct {
@@ -32,8 +32,8 @@ func NewRegistry(conf *config.Config, walletType wallet.WalletType) Registry {
 	}
 }
 
-// NewKeygener is to register for keygener interface
-func (r *registry) NewKeygener() wallet.Keygener {
+// NewSigner is to register for Signer interface
+func (r *registry) NewSigner() wallet.Signer {
 	r.newLogger()
 	r.setFilePath()
 

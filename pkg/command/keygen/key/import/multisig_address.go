@@ -62,6 +62,7 @@ func (c *MultisigCommand) Run(args []string) int {
 	err := c.wallet.ImportMultisigAddrForColdWallet1(filePath, account.AccountType(acnt))
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call ImportMultisigAddrForColdWallet1() %+v", err))
+		return 1
 	}
 	c.ui.Output("Done!")
 

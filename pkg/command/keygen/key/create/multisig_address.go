@@ -39,6 +39,7 @@ func (c *MultisigCommand) Run(args []string) int {
 	resAddr, err := c.wallet.GetBTC().AddMultisigAddress(2, []string{"2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP", "2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu"}, "multi01", enum.AddressTypeP2shSegwit)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call AddMultisigAddress() %+v", err))
+		return 1
 	}
 	c.ui.Info(fmt.Sprintf("multisig address: %s, redeemScript: %s", resAddr.Address, resAddr.RedeemScript))
 

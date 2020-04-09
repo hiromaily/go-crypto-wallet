@@ -7,30 +7,29 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
-//address subcommand
-type AddressCommand struct {
+//multisig subcommand
+type MultisigCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   wallet.Keygener
+	wallet   wallet.Signer
 }
 
-func (c *AddressCommand) Synopsis() string {
+func (c *MultisigCommand) Synopsis() string {
 	return c.synopsis
 }
 
-func (c *AddressCommand) Help() string {
-	return `Usage: keygen key export address [options...]
+func (c *MultisigCommand) Help() string {
+	return `Usage: sign key export multisig [options...]
 Options:
   -account  target account
 `
 }
 
-func (c *AddressCommand) Run(args []string) int {
+func (c *MultisigCommand) Run(args []string) int {
 	c.ui.Output(c.Synopsis())
 
 	var (
@@ -47,15 +46,15 @@ func (c *AddressCommand) Run(args []string) int {
 		c.ui.Error("account option [-account] is invalid")
 		return 1
 	}
-	if !account.NotAllow(acnt, []account.AccountType{account.AccountTypeAuthorization}) {
-		c.ui.Error(fmt.Sprintf("account: %s is not allowd", account.AccountTypeAuthorization))
+	if !account.NotAllow(acnt, []account.AccountType{account.AccountTypeAuthorization, account.AccountTypeClient}) {
+		c.ui.Error(fmt.Sprintf("account: %s/%s is not allowd", account.AccountTypeAuthorization, account.AccountTypeClient))
 		return 1
 	}
 
-	// export generated PublicKey as csv file to use at watch only wallet
-	fileName, err := c.wallet.ExportAccountKey(account.AccountType(acnt), enum.KeyStatusImportprivkey)
+	// export created multisig address as csv file
+	fileName, err := c.wallet.ExportAddedPubkeyHistory(account.AccountType(acnt))
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call ExportAccountKey() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call ExportAddedPubkeyHistory() %+v", err))
 		return 1
 	}
 	c.ui.Output(fmt.Sprintf("[fileName]: %s", fileName))

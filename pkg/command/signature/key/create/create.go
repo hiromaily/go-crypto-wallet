@@ -16,7 +16,7 @@ type CreateCommand struct {
 	Version     string
 	SynopsisExp string
 	UI          cli.Ui
-	Wallet      wallet.Keygener
+	Wallet      wallet.Signer
 }
 
 func (c *CreateCommand) Synopsis() string {
@@ -24,20 +24,16 @@ func (c *CreateCommand) Synopsis() string {
 }
 
 var (
-	keySynopsis      = "create one key for debug use"
-	hdkeySynopsis    = "create HD key"
-	seedSynopsis     = "create seed"
-	multisigSynopsis = "multisig address for debug use"
+	hdkeySynopsis = "create key for hd wallet for Authorization account"
+	seedSynopsis  = "create seed"
 )
 
 func (c *CreateCommand) Help() string {
-	return fmt.Sprintf(`Usage: keygen create [Subcommands...]
+	return fmt.Sprintf(`Usage: sign create [Subcommands...]
 Subcommands:
-  key       %s
   hdkey     %s
   seed      %s
-  multisig  %s
-`, keySynopsis, hdkeySynopsis, seedSynopsis, multisigSynopsis)
+`, hdkeySynopsis, seedSynopsis)
 }
 
 func (c *CreateCommand) Run(args []string) int {
@@ -50,14 +46,6 @@ func (c *CreateCommand) Run(args []string) int {
 
 	//farther subcommand import
 	cmds := map[string]cli.CommandFactory{
-		"key": func() (cli.Command, error) {
-			return &HDKeyCommand{
-				name:     "key",
-				synopsis: keySynopsis,
-				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
-			}, nil
-		},
 		"hdkey": func() (cli.Command, error) {
 			return &HDKeyCommand{
 				name:     "hdkey",
@@ -70,14 +58,6 @@ func (c *CreateCommand) Run(args []string) int {
 			return &SeedCommand{
 				name:     "seed",
 				synopsis: seedSynopsis,
-				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
-			}, nil
-		},
-		"multisig": func() (cli.Command, error) {
-			return &MultisigCommand{
-				name:     "multisig",
-				synopsis: multisigSynopsis,
 				ui:       command.ClolorUI(),
 				wallet:   c.Wallet,
 			}, nil

@@ -1,4 +1,4 @@
-package export
+package add
 
 import (
 	"flag"
@@ -16,7 +16,7 @@ type MultisigCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   wallet.Keygener
+	wallet   wallet.Signer
 }
 
 func (c *MultisigCommand) Synopsis() string {
@@ -24,7 +24,7 @@ func (c *MultisigCommand) Synopsis() string {
 }
 
 func (c *MultisigCommand) Help() string {
-	return `Usage: keygen key export multisig address [options...]
+	return `Usage: sign key add multisig [options...]
 Options:
   -account  target account
 `
@@ -52,13 +52,14 @@ func (c *MultisigCommand) Run(args []string) int {
 		return 1
 	}
 
-	// export multisig addresses as csv file
-	fileName, err := c.wallet.ExportAccountKey(account.AccountType(acnt), enum.KeyStatusMultiAddressImported)
+	// call `addmultisigaddress` which adds a P2SH multisig address to the wallet
+	//  address would be acount and authorization
+	err := c.wallet.AddMultisigAddressByAuthorization(account.AccountType(acnt), enum.AddressTypeP2shSegwit)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call ExportAccountKey() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call AddMultisigAddressByAuthorization() %+v", err))
 		return 1
 	}
-	c.ui.Output(fmt.Sprintf("[fileName]: %s", fileName))
+	c.ui.Output("Done!")
 
 	return 0
 }
