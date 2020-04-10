@@ -9,17 +9,16 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 )
 
-// Config ルート
+// Config root config
 type Config struct {
 	CoinType   string         `toml:"coin_type"`
 	Bitcoin    BitcoinConf    `toml:"bitcoin"`
 	MySQL      MySQLConf      `toml:"mysql"`
 	TxFile     TxFileConf     `toml:"tx_file"`
 	PubkeyFile PubKeyFileConf `toml:"pubkey_file"`
-	Key        KeyConf        `toml:"key"`
 }
 
-// BitcoinConf Bitcoin情報
+// BitcoinConf Bitcoin information
 type BitcoinConf struct {
 	Host       string `toml:"host"`
 	User       string `toml:"user"`
@@ -32,23 +31,18 @@ type BitcoinConf struct {
 	Fee   BitcoinFeeConf   `toml:"fee"`
 }
 
-// BitcoinBlockConf Bitcoinブロック情報
+// BitcoinBlockConf block information of Bitcoin
 type BitcoinBlockConf struct {
 	ConfirmationNum int `toml:"confirmation_num"`
 }
 
-// BitcoinFeeConf fee調整Range
+// BitcoinFeeConf range of adjustment calculated fee when sending coin
 type BitcoinFeeConf struct {
 	AdjustmentMin float64 `toml:"adjustment_min"`
 	AdjustmentMax float64 `toml:"adjustment_max"`
 }
 
-// KeyConf keyのデフォルト情報(devモード時にしか利用しない)
-type KeyConf struct {
-	Seed string `toml:"seed"`
-}
-
-// MySQLConf MySQL情報
+// MySQLConf MySQL info
 type MySQLConf struct {
 	Host string `toml:"host"`
 	DB   string `toml:"dbname"`
@@ -56,19 +50,17 @@ type MySQLConf struct {
 	Pass string `toml:"pass"`
 }
 
-// TxFileConf 保存されるtransactionファイル情報
-// import/export共にこのパスが使われる
+// TxFileConf saved transaction file path which is used when import/export file
 type TxFileConf struct {
 	BasePath string `toml:"base_path"`
 }
 
-// PubKeyFileConf 保存されるtransactionファイル情報
-// import/export共にこのパスが使われる
+// PubKeyFileConf saved pubKey file path which is used when import/export file
 type PubKeyFileConf struct {
 	BasePath string `toml:"base_path"`
 }
 
-// New configオブジェクトを生成する
+// New create config
 func New(file string) (*Config, error) {
 	if file == "" {
 		return nil, errors.New("file should be passed")
@@ -88,16 +80,14 @@ func New(file string) (*Config, error) {
 	return conf, nil
 }
 
-// load configfile
+// load config file
 func loadConfig(path string) (*Config, error) {
-	//読み込み
 	d, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, errors.Errorf(
 			"toml file can't not be read. [path]:%s: [error]:%s", path, err)
 	}
 
-	//解析
 	var config Config
 	_, err = toml.Decode(string(d), &config)
 	if err != nil {
@@ -107,6 +97,7 @@ func loadConfig(path string) (*Config, error) {
 	return &config, nil
 }
 
+// validate config
 func (c *Config) validate() error {
 	// CoinType
 	if !enum.ValidateBitcoinType(c.CoinType) {

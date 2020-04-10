@@ -1,6 +1,6 @@
 package account
 
-//AccountType 利用目的
+//AccountType utilization purpose of address
 type AccountType string
 
 // account_type
@@ -57,7 +57,7 @@ var AccountTypeMap = map[string]AccountType{
 	"authorization": AccountTypeAuthorization,
 }
 
-// ValidateAccountType AccountTypeのバリデーションを行う
+// ValidateAccountType validate AccountType
 func ValidateAccountType(v string) bool {
 	if _, ok := AccountTypeMap[v]; ok {
 		return true
@@ -76,7 +76,7 @@ var AccountTypeValue = map[AccountType]uint8{
 	AccountTypeAuthorization: 6,
 }
 
-//AccountTypeMultisig account_type毎のmultisig対応アカウントかどうか
+//AccountTypeMultisig true: account type is for multisig address
 var AccountTypeMultisig = map[AccountType]bool{
 	AccountTypeClient:        false,
 	AccountTypeReceipt:       true,
