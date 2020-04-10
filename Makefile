@@ -36,9 +36,9 @@ bld-linux:
 ###############################################################################
 .PHONY: bld
 bld:
-	go build -i -v -o ${GOPATH}/bin/wallet ./cmd/wallet/main.go
-	#go build -i -v -o ${GOPATH}/bin/keygen ./cmd/keygen-wallet/main.go
-	#go build -i -v -o ${GOPATH}/bin/sign ./cmd/signature-wallet/main.go
+	go build -i -v -o ${GOPATH}/bin/wallet ./cmd/wallet/
+	#go build -i -v -o ${GOPATH}/bin/keygen ./cmd/keygen-wallet/
+	#go build -i -v -o ${GOPATH}/bin/sign ./cmd/signature-wallet/
 
 run: bld
 	wallet -conf ./data/toml/btc/local_watch_only.toml
