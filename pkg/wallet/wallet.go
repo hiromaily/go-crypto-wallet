@@ -2,6 +2,8 @@ package wallet
 
 import (
 	"github.com/btcsuite/btcutil"
+	"github.com/opentracing/opentracing-go"
+	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
@@ -24,33 +26,37 @@ type Walleter interface {
 
 // Wallet watch only wallet object
 type Wallet struct {
-	BTC  api.Bitcoiner
-	DB   *model.DB //TODO:should be interface
-	Type WalletType
+	btc      api.Bitcoiner
+	logger   *zap.Logger
+	tracer   opentracing.Tracer
+	storager *model.DB //TODO:should be interface
+	wtype    WalletType
 }
 
-func NewWallet(bit api.Bitcoiner, rds *model.DB, typ WalletType) *Wallet {
+func NewWallet(btc api.Bitcoiner, logger *zap.Logger, tracer opentracing.Tracer, storager *model.DB, wtype WalletType) *Wallet {
 	return &Wallet{
-		BTC:  bit,
-		DB:   rds,
-		Type: typ,
+		btc:      btc,
+		logger:   logger,
+		tracer:   tracer,
+		storager: storager,
+		wtype:    wtype,
 	}
 }
 
 // Done should be called before exit
 func (w *Wallet) Done() {
-	w.DB.RDB.Close()
-	w.BTC.Close()
+	w.storager.RDB.Close()
+	w.btc.Close()
 }
 
 func (w *Wallet) GetDB() *model.DB {
-	return w.DB
+	return w.storager
 }
 
 func (w *Wallet) GetBTC() api.Bitcoiner {
-	return w.BTC
+	return w.btc
 }
 
 func (w *Wallet) GetType() WalletType {
-	return w.Type
+	return w.wtype
 }

@@ -56,7 +56,7 @@ func (r *registry) newBTC() api.Bitcoiner {
 //TODO: change to interface
 func (r *registry) newStorager() *model.DB {
 	// MySQL
-	rds, err := rdb.Connection(&r.conf.MySQL)
+	rds, err := rdb.NewMySQL(&r.conf.MySQL)
 	if err != nil {
 		panic(fmt.Sprintf("rds.Connection() error: %s", err))
 	}
@@ -65,8 +65,8 @@ func (r *registry) newStorager() *model.DB {
 
 //TODO: change to interface
 func (r *registry) newLogger() {
-	// Log
-	logger.Initialize()
+	// logger
+	logger.NewLogger(&r.conf.Logger)
 }
 
 //TODO: move to somewhere

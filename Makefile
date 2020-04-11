@@ -22,6 +22,11 @@ lint:
 lintfix:
 	golangci-lint run --fix
 
+.PHONY: generate-db-definition
+generate-db-definition:
+	sqlboiler --wipe mysql
+	sqlboiler --config sqlboiler.keygen.toml --wipe mysql
+
 ###############################################################################
 # From inside docker container
 ###############################################################################
@@ -37,15 +42,15 @@ bld-linux:
 .PHONY: bld
 bld:
 	go build -i -v -o ${GOPATH}/bin/wallet ./cmd/wallet/
-	#go build -i -v -o ${GOPATH}/bin/keygen ./cmd/keygen-wallet/
-	#go build -i -v -o ${GOPATH}/bin/sign ./cmd/signature-wallet/
+	go build -i -v -o ${GOPATH}/bin/keygen ./cmd/keygen-wallet/
+	go build -i -v -o ${GOPATH}/bin/sign ./cmd/signature-wallet/
 
 run: bld
 	wallet -conf ./data/toml/btc/local_watch_only.toml
 
 # wallet -conf ./data/toml/btc/local_watch_only.toml api estimatefee
 
-# docker-compose up db-btc-wallet
+# make up-docker-db
 
 # bitcoin-cli
 #bitcoin-cli -rpcuser=xyz -rpcpassword=xyz getnetworkinfo
@@ -157,7 +162,9 @@ auto-generation:
 ###############################################################################
 # Operation
 ###############################################################################
-include ./Makefile_operation
+include ./Makefile_watch_op.mk
+include ./Makefile_keygen_op.mk
+include ./Makefile_signature_op.mk
 
 
 ###############################################################################

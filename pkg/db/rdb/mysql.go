@@ -12,10 +12,14 @@ import (
 //sqlx
 // http://jmoiron.github.io/sqlx/#bindvars
 
+//sqlboiler
+// https://github.com/volatiletech/sqlboiler
+
 // Connection connect to MySQL server
 // TODO:
 //  - retry functionality and retry count should be configured in config file
-func Connection(conf *config.MySQLConf) (*sqlx.DB, error) {
+//  - change sqlx.DB to basic one because it would be replaced sqlboiler
+func NewMySQL(conf *config.MySQL) (*sqlx.DB, error) {
 	db, err := sqlx.Connect("mysql",
 		fmt.Sprintf(
 			"%s:%s@tcp(%s)/%s?parseTime=true",

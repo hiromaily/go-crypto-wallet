@@ -1,17 +1,21 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
-
+	"github.com/jmoiron/sqlx"
+	"go.uber.org/zap"
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	"github.com/hiromaily/go-bitcoin/pkg/db/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model"
+	"github.com/hiromaily/go-bitcoin/pkg/tracer"
 	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
+	"github.com/opentracing/opentracing-go"
 )
 
 // Registry is for registry interface
@@ -20,8 +24,9 @@ type Registry interface {
 }
 
 type registry struct {
-	conf       *config.Config
-	walletType wallet.WalletType
+	conf        *config.Config
+	mysqlClient *sqlx.DB
+	walletType  wallet.WalletType
 }
 
 // NewRegistry is to register regstry interface
@@ -34,11 +39,13 @@ func NewRegistry(conf *config.Config, walletType wallet.WalletType) Registry {
 
 // NewWalleter is to register for walleter interface
 func (r *registry) NewWalleter() wallet.Walleter {
-	r.newLogger()
+	//TODO: should be interface
 	r.setFilePath()
 
 	return wallet.NewWallet(
 		r.newBTC(),
+		r.newLogger(),
+		r.newTracer(),
 		r.newStorager(),
 		r.walletType,
 	)
@@ -53,20 +60,31 @@ func (r *registry) newBTC() api.Bitcoiner {
 	return bit
 }
 
-//TODO: change to interface
-func (r *registry) newStorager() *model.DB {
-	// MySQL
-	rds, err := rdb.Connection(&r.conf.MySQL)
-	if err != nil {
-		panic(fmt.Sprintf("rds.Connection() error: %s", err))
-	}
-	return model.NewDB(rds)
+func (r *registry) newLogger() *zap.Logger {
+	return logger.NewZapLogger(&r.conf.Logger)
 }
 
-//TODO: change to interface
-func (r *registry) newLogger() {
-	// Log
-	logger.Initialize()
+func (r *registry) newTracer() opentracing.Tracer {
+	return tracer.NewTracer(r.conf.Tracer)
+}
+
+//TODO: change return as interface
+func (r *registry) newStorager() *model.DB {
+	// if there are multiple options, set proper one
+	// storager interface as MySQL
+	return db.NewGenreItemRepository(r.NewMySQLSlaveClient())
+	//return model.NewDB(r.newMySQLClient())
+}
+
+func (r *registry) newMySQLClient() *sqlx.DB {
+	if r.mysqlClient == nil {
+		dbConn, err := rdb.NewMySQL(&r.conf.MySQL)
+		if err != nil {
+			panic(err)
+		}
+		r.mysqlClient = dbConn
+	}
+	return r.mysqlClient
 }
 
 //TODO: move to somewhere

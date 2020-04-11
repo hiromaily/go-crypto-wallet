@@ -24,7 +24,7 @@ import (
 // - generated key must be encrypted
 // - transfer with amount
 //TODO:
-// - logger interface: stdout(ui), log format
+// - logger interface: stdout(ui), log format, open tracing
 // - repository interface (from mysql, mock, redis and so on)
 // - service interface
 // - btc command for mock is required
