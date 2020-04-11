@@ -5,13 +5,10 @@ import (
 
 	"github.com/btcsuite/btcutil/hdkeychain"
 	"github.com/pkg/errors"
-
-	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
 
 // GenerateSeed seedを生成する []byte
 func GenerateSeed() ([]byte, error) {
-	logger.Info("generate seed")
 	seed, err := hdkeychain.GenerateSeed(hdkeychain.RecommendedSeedLen)
 	if err != nil {
 		return nil, err

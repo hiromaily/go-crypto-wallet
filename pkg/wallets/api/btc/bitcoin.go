@@ -19,6 +19,7 @@ type Bitcoin struct {
 	feeRange          FeeAdjustmentRate
 	version           enum.BTCVersion //179900
 	coinType          enum.CoinType   //btc
+	logger            *zap.Logger
 }
 
 // FeeAdjustmentRate 手数料調整のRange
@@ -29,7 +30,10 @@ type FeeAdjustmentRate struct {
 
 // NewBitcoin Bitcoinオブジェクトを返す
 func NewBitcoin(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logger) (*Bitcoin, error) {
-	bit := Bitcoin{client: client}
+	bit := Bitcoin{
+		client: client,
+		logger: logger,
+	}
 	if conf.IsMain {
 		bit.chainConf = &chaincfg.MainNetParams
 	} else {
@@ -42,7 +46,7 @@ func NewBitcoin(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logg
 		return nil, errors.Errorf("bit.GetNetworkInfo() error: %s", err)
 	}
 	bit.version = netInfo.Version
-	logger.Infof("bitcoin server version: %d", netInfo.Version)
+	bit.logger.Info("bitcoin rpc server", zap.Int("version", netInfo.Version.Int()))
 
 	bit.coinType = enum.BTC
 

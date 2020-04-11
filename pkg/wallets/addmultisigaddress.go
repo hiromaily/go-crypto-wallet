@@ -4,6 +4,7 @@ package wallets
 
 import (
 	"fmt"
+	"go.uber.org/zap"
 
 	"github.com/pkg/errors"
 
@@ -57,7 +58,11 @@ func (w *Wallet) AddMultisigAddressByAuthorization(accountType account.AccountTy
 		)
 		if err != nil {
 			//[Error] -5: no full public key for address mkPmdpo59gpU7ZioGYwwoMTQJjh7MiqUvd
-			w.logger.Errorf("BTC.CreateMultiSig(2,%s,%s) error: %s", val.FullPublicKey, authKeyTable.P2shSegwitAddress, err)
+			w.logger.Error(
+				"fail to call btc.CreateMultiSig(2,,) ",
+				zap.String("full public key", val.FullPublicKey),
+				zap.String("p2sh segwit address", authKeyTable.P2shSegwitAddress),
+				zap.Error(err))
 			continue
 		}
 
@@ -65,7 +70,10 @@ func (w *Wallet) AddMultisigAddressByAuthorization(accountType account.AccountTy
 		err = w.storager.UpdateMultisigAddrOnAddedPubkeyHistoryTable(accountType, resAddr.Address,
 			resAddr.RedeemScript, authKeyTable.P2shSegwitAddress, val.FullPublicKey, nil, true)
 		if err != nil {
-			w.logger.Errorf("DB.UpdateMultisigAddrOnAddedPubkeyHistoryTable(%s) error: %s", accountType, err)
+			w.logger.Error(
+				"fail to call db.UpdateMultisigAddrOnAddedPubkeyHistoryTable()",
+				zap.String("accountType", accountType.String()),
+				zap.Error(err))
 		}
 	}
 

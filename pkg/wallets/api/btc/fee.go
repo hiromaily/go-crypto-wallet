@@ -3,12 +3,11 @@ package btc
 import (
 	"encoding/json"
 	"fmt"
+	"go.uber.org/zap"
 
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
-
-	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
 
 // EstimateSmartFeeResult estimatesmartfeeをcallしたresponseの型
@@ -69,13 +68,13 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 	if err != nil {
 		return 0, errors.Errorf("BTC.GetTransactionFee(): error: %s", err)
 	}
-	logger.Debugf("[1]fee: %v", fee) //0.000208 BTC
+	b.logger.Debug("called GetTransactionFee()", zap.Any("fee", fee)) //0.000208 BTC
 
 	//最低に満たない場合は、上書きをする
 	relayFee, err := b.getMinRelayFee()
 	if err != nil {
-		//logのみ
-		logger.Errorf("BTC.getMinRelayFee(): error: %s", err)
+		//only log
+		b.logger.Error("fail to call btc.getMinRelayFee()", zap.Error(err))
 	} else {
 		if fee < relayFee {
 			fee = relayFee
@@ -86,10 +85,10 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 	if b.validateAdjustmentFee(adjustmentFee) {
 		newFee, err := b.calculateNewFee(fee, adjustmentFee)
 		if err != nil {
-			//logのみ表示
-			logger.Errorf("BTC.calculateNewFee() error: %s", err)
+			//only log
+			b.logger.Error("fail to call btc.calculateNewFee()", zap.Error(err))
 		}
-		logger.Debugf("[2]adjusted newFee:%v", newFee) //0.000208 BTC
+		b.logger.Debug("called btc.calculateNewFee()", zap.Any("adjusted newFee", newFee)) //0.000208 BTC
 		fee = newFee
 	}
 

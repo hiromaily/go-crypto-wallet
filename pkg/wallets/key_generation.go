@@ -139,7 +139,7 @@ func (w *Wallet) generateAccountKey(accountType account.AccountType, coinType en
 // generateKeyData AccountType属性のアカウントKeyを生成する
 func (w *Wallet) generateAccountKeyData(accountType account.AccountType, coinType enum.CoinType, seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
 	// Keyオブジェクト
-	keyData := key.NewKey(coinType, w.btc.GetChainConf())
+	keyData := key.NewKey(coinType, w.btc.GetChainConf(), w.logger)
 
 	// key生成
 	priv, _, err := keyData.CreateAccount(seed, accountType)

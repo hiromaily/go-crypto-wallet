@@ -14,7 +14,7 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/logger"
+	"go.uber.org/zap"
 )
 
 //PurposeType BIP44は44固定
@@ -57,6 +57,7 @@ const (
 type Key struct {
 	coinType enum.CoinType
 	conf     *chaincfg.Params
+	logger   *zap.Logger
 }
 
 // NewKey Keyオブジェクトを返す
@@ -166,7 +167,7 @@ func (k Key) CreateKeysWithIndex(accountPrivateKey string, idxFrom, count uint32
 		if err != nil {
 			return nil, err
 		}
-		logger.Debugf("Debug: %s", redeemScript)
+		k.logger.Debug("Debug getP2shSegwit()", zap.String("redeemScript", redeemScript))
 
 		//address.String() とaddress.EncodeAddress()は結果として同じ
 		walletKeys[i] = WalletKey{

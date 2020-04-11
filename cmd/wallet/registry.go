@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/btcsuite/btcd/rpcclient"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/opentracing/opentracing-go"
@@ -28,6 +29,8 @@ type Registry interface {
 type registry struct {
 	conf        *config.Config
 	mysqlClient *sqlx.DB
+	logger      *zap.Logger
+	rpcClient   *rpcclient.Client
 	walletType  wallets.WalletType
 }
 
@@ -53,11 +56,19 @@ func (r *registry) NewWalleter() wallets.Walleter {
 	)
 }
 
+func (r *registry) newRPCClient() *rpcclient.Client {
+	var err error
+	if r.rpcClient == nil {
+		r.rpcClient, err = api.NewRPCClient(&r.conf.Bitcoin)
+	}
+	if err != nil {
+		panic(err)
+	}
+	return r.rpcClient
+}
+
 func (r *registry) newBTC() api.Bitcoiner {
-	// Connection to Bitcoin core
-	// TODO: coinType should be judged here
-	// TODO: name should be NewBitcoin or NewBitcoinCash
-	bit, err := api.Connection(&r.conf.Bitcoin, enum.CoinType(r.conf.CoinType))
+	bit, err := api.NewBitcoin(r.newRPCClient(), &r.conf.Bitcoin, r.newLogger(), enum.CoinType(r.conf.CoinType))
 	if err != nil {
 		panic(fmt.Sprintf("btc.Connection error: %s", err))
 	}
@@ -65,7 +76,10 @@ func (r *registry) newBTC() api.Bitcoiner {
 }
 
 func (r *registry) newLogger() *zap.Logger {
-	return logger.NewZapLogger(&r.conf.Logger)
+	if r.logger == nil {
+		r.logger = logger.NewZapLogger(&r.conf.Logger)
+	}
+	return r.logger
 }
 
 func (r *registry) newTracer() opentracing.Tracer {

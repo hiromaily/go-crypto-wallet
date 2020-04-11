@@ -2,13 +2,13 @@ package btc
 
 import (
 	"encoding/json"
+	"go.uber.org/zap"
 
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
 
 // GetAddressInfoResult getaddressinfoをcallしたresponseの型
@@ -114,7 +114,10 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 		//key is address string
 		address, err := b.DecodeAddress(key)
 		if err != nil {
-			logger.Errorf("b.DecodeAddress(%s) error: %s", key, err)
+			b.logger.Error(
+				"fail to call b.DecodeAddress()",
+				zap.String("address", key),
+				zap.Error(err))
 			continue
 		}
 

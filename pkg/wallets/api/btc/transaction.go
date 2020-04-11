@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"go.uber.org/zap"
 
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
@@ -15,7 +16,6 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
 
 //TODO:参考に(中国語のサイト)
@@ -329,7 +329,7 @@ func (b *Bitcoin) signRawTransactionWithWalletVer17(tx *wire.MsgTx, prevtxs []Pr
 
 	//Debug
 	if !signRawTxResult.Complete {
-		logger.Debug("トランザクションHEXの結果比較スタート")
+		b.logger.Debug("トランザクションHEXの結果比較スタート")
 		b.debugCompareTx(tx, msgTx)
 	}
 
@@ -358,7 +358,7 @@ func (b *Bitcoin) signRawTransactionWithWalletVer17(tx *wire.MsgTx, prevtxs []Pr
 //}
 
 func (b *Bitcoin) signRawTransactionWithWalletVer16(tx *wire.MsgTx, prevtxs []PrevTx) (*wire.MsgTx, bool, error) {
-	logger.Info("signRawTransactionWithWalletVer16()")
+	b.logger.Info("signRawTransactionWithWalletVer16()")
 
 	//hex tx
 	hexTx, err := b.ToHex(tx)
@@ -400,7 +400,7 @@ func (b *Bitcoin) signRawTransactionWithWalletVer16(tx *wire.MsgTx, prevtxs []Pr
 
 	//Debug
 	if !signRawTxResult.Complete {
-		logger.Debug("トランザクションHEXの結果比較スタート")
+		b.logger.Debug("トランザクションHEXの結果比較スタート")
 		b.debugCompareTx(tx, msgTx)
 	}
 
@@ -410,14 +410,14 @@ func (b *Bitcoin) signRawTransactionWithWalletVer16(tx *wire.MsgTx, prevtxs []Pr
 func (b *Bitcoin) debugCompareTx(tx1, tx2 *wire.MsgTx) {
 	hexTx1, err := b.ToHex(tx1)
 	if err != nil {
-		logger.Debugf("btc.ToHex(tx1): error: %s", err)
+		b.logger.Debug("fail to call btc.ToHex(tx1)", zap.Error(err))
 	}
 	hexTx2, err := b.ToHex(tx2)
 	if err != nil {
-		logger.Debugf("btc.ToHex(tx2): error: %s", err)
+		b.logger.Debug("fail to call btc.ToHex(tx2)", zap.Error(err))
 	}
 	if hexTx1 == hexTx2 {
-		logger.Debug("トランザクションHEXの結果が同じであった。これでは意味がない。")
+		b.logger.Debug("トランザクションHEXの結果が同じであった。これでは意味がない。")
 	}
 }
 
@@ -444,7 +444,7 @@ func (b *Bitcoin) signRawTransactionWithKeyVer15(tx *wire.MsgTx, inputs []btcjso
 
 	//Debug
 	if !isSigned {
-		logger.Debug("トランザクションHEXの結果比較スタート")
+		b.logger.Debug("トランザクションHEXの結果比較スタート")
 		b.debugCompareTx(tx, msgTx)
 	}
 
@@ -498,7 +498,7 @@ func (b *Bitcoin) signRawTransactionWithKeyVer16(tx *wire.MsgTx, privKeysWIF []s
 			grok.Value(signRawTxResult)
 			return nil, false, errors.Errorf("json.RawRequest(signrawtransaction): error: %s", signRawTxResult.Errors[0].Error)
 		}
-		logger.Debugf("result error: %s", signRawTxResult.Errors[0].Error)
+		b.logger.Debug("Errors in signRawTxResult", zap.Any("errors", signRawTxResult.Errors[0].Error))
 	}
 
 	msgTx, err := b.ToMsgTx(signRawTxResult.Hex)
@@ -553,7 +553,7 @@ func (b *Bitcoin) signRawTransactionWithKeyVer17(tx *wire.MsgTx, privKeysWIF []s
 			grok.Value(signRawTxResult)
 			return nil, false, errors.Errorf("json.RawRequest(signrawtransactionwithkey): error: %s", signRawTxResult.Errors[0].Error)
 		}
-		logger.Debugf("result error: %s", signRawTxResult.Errors[0].Error)
+		b.logger.Debug("Errors in signRawTxResult", zap.Any("errors", signRawTxResult.Errors[0].Error))
 	}
 
 	msgTx, err := b.ToMsgTx(signRawTxResult.Hex)

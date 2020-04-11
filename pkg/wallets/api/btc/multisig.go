@@ -2,11 +2,11 @@ package btc
 
 import (
 	"encoding/json"
+	"go.uber.org/zap"
 
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/logger"
 )
 
 // AddMultisigAddressResult addmultisigaddressをcallしたresponseの型
@@ -67,14 +67,20 @@ func (b *Bitcoin) AddMultisigAddress(requiredSigs int, addresses []string, accou
 	//accountName
 	bAccount, err := json.Marshal(accountName)
 	if err != nil {
-		logger.Errorf("json.Marchal(accountName): error: %v", err)
+		b.logger.Error(
+			"fail to json.Marshal(accountName)",
+			zap.String("accountName", accountName),
+			zap.Error(err))
 		bAccount = nil
 	}
 
 	//addressType
 	bAddressType, err := json.Marshal(string(addressType))
 	if err != nil {
-		logger.Errorf("json.Marchal(addressType): error: %v", err)
+		b.logger.Error(
+			"fail to json.Marchal(addressType)",
+			zap.String("addressType", addressType.String()),
+			zap.Error(err))
 		bAddressType = nil
 	}
 

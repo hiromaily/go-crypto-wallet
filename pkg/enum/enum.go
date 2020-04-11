@@ -36,6 +36,10 @@ const (
 	BTCVer19 BTCVersion = 190000
 )
 
+func (v BTCVersion) Int() int {
+	return int(v)
+}
+
 //NetworkType ネットワーク種別
 type NetworkType string
 
@@ -55,6 +59,10 @@ const (
 	AddressTypeP2shSegwit AddressType = "p2sh-segwit"
 	AddressTypeBech32     AddressType = "bech32"
 )
+
+func (a AddressType) String() string {
+	return string(a)
+}
 
 //AddressTypeValue address_typeの値
 var AddressTypeValue = map[AddressType]uint8{

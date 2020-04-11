@@ -2,18 +2,18 @@ package api
 
 import (
 	"github.com/btcsuite/btcd/rpcclient"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/btc"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/bch"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/btc"
 )
 
-// Connection is to local bitcoin core RPC server using HTTP POST mode
-//func Connection(conf *toml.BitcoinConf) (*Bitcoin, error) {
-func NewBitcoin(conf *config.Bitcoin, logger *zap.Logger, coinType enum.CoinType) (Bitcoiner, error) {
+//NewRPCClient try to connect bitcoin core RPCserver to create client instance
+// using HTTP POST mode
+func NewRPCClient(conf *config.Bitcoin) (*rpcclient.Client, error) {
 	connCfg := &rpcclient.ConnConfig{
 		Host:         conf.Host,
 		User:         conf.User,
@@ -28,17 +28,20 @@ func NewBitcoin(conf *config.Bitcoin, logger *zap.Logger, coinType enum.CoinType
 	if err != nil {
 		return nil, errors.Errorf("rpcclient.New() error: %s", err)
 	}
+	return client, err
+}
 
-	//BTC
-	if coinType == enum.BTC {
-		// New
+// NewBitcoin creates bitcoin/bitcoin cash instance according to coinType
+func NewBitcoin(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logger, coinType enum.CoinType) (Bitcoiner, error) {
+	switch coinType {
+	case enum.BTC:
 		bit, err := btc.NewBitcoin(client, conf, logger)
 		if err != nil {
 			return nil, errors.Errorf("btc.NewBitcoin() error: %s", err)
 		}
 
 		return bit, err
-	} else if coinType == enum.BCH {
+	case enum.BCH:
 		//BCH
 		bitc, err := bch.NewBitcoinCash(client, conf, logger)
 		if err != nil {
@@ -47,6 +50,5 @@ func NewBitcoin(conf *config.Bitcoin, logger *zap.Logger, coinType enum.CoinType
 
 		return bitc, err
 	}
-
 	return nil, errors.New("coinType is out of range. It should be set by `btc`,`bch`")
 }
