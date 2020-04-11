@@ -3,7 +3,6 @@
 !cmd/wallet
 !cmd/keygen-wallet
 !cmd/signature-wallet
-data/kvs/*
 data/tx/*
 data/pubkey/*.csv
 docker/grafana/*

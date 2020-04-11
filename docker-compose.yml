@@ -1,17 +1,13 @@
-version: '3'
+version: '3.7'
 
-# this volumes should be changed to local
 volumes:
-  #btc1: {}
-  #btc2: {}
-  #btc3: {}
-  db1: {}
-  db2: {}
-  db3: {}
+  btc-wallet-db: {}
+  btc-keygen-db: {}
+  btc-signature-db: {}
 
 services:
   #########################################################################
-  #Images based on
+  # Images based on
   #########################################################################
   base-ubuntu:
     build:
@@ -26,7 +22,7 @@ services:
     image: wallet-golang:1.14.1
 
   #########################################################################
-  #Bitcoin core
+  # Bitcoin core
   #########################################################################
   btc-wallet:
     build:
@@ -38,7 +34,7 @@ services:
     #- ./docs/bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
     - ./docker/btc/data1:/root/.bitcoin
     ports:
-    - "${RPC_PORT:-19332}:18332"
+    - "${BTC_WALLET_RPC_PORT:-19332}:18332"
     stdin_open: true
     tty: true
     #    logging:
@@ -58,7 +54,7 @@ services:
     #- ./docs/bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
     - ./docker/btc/data2:/root/.bitcoin
     ports:
-    - "${RPC_PORT:-19333}:18332"
+    - "${BTC_KEYGEN_RPC_PORT:-19333}:18332"
     stdin_open: true
     tty: true
     #    logging:
@@ -77,7 +73,7 @@ services:
     #- ./docs/bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
     - ./docker/btc/data3:/root/.bitcoin
     ports:
-    - "${RPC_PORT:-19334}:18332"
+    - "${BTC_SIGNATURE_RPC_PORT:-19334}:18332"
     stdin_open: true
     tty: true
     #    logging:
@@ -90,52 +86,52 @@ services:
     # /root/.bitcoin/testnet3/wallets
 
   #########################################################################
-  #Database
+  # Database
   #########################################################################
-  #for watch only wallet
-  db-btc-wallet:
+  # watch only wallet
+  btc-wallet-db:
     image: mysql:5.7
     volumes:
-    - db1:/var/lib/mysql #this volume should be outside to keep on a permanent basis
-    - "./docker/mysql/conf.d:/etc/mysql/conf.d"
-    - "./docker/mysql/init.d:/docker-entrypoint-initdb.d"
+    - btc-wallet-db:/var/lib/mysql #this volume should be outside to keep on a permanent basis
+    - "./docker/mysql/wallet/conf.d:/etc/mysql/conf.d"
+    - "./docker/mysql/wallet/init.d:/docker-entrypoint-initdb.d"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: wallet
       MYSQL_USER: hiromaily
       MYSQL_PASSWORD: hiromaily
     ports:
-    - "${MYSQL_PORT1:-3307}:3306"
+    - "${BTC_WALLET_MYSQL_PORT:-3307}:3306"
 
-  #for keygen wallet
-  db-btc-keygen:
+  # keygen wallet
+  btc-keygen-db:
     image: mysql:5.7
     volumes:
-    - db2:/var/lib/mysql #this volume should be outside to keep on a permanent basis
-    - "./docker/mysql2/conf.d:/etc/mysql/conf.d"
-    - "./docker/mysql2/init.d:/docker-entrypoint-initdb.d"
+    - btc-keygen-db:/var/lib/mysql #this volume should be outside to keep on a permanent basis
+    - "./docker/mysql/keygen/conf.d:/etc/mysql/conf.d"
+    - "./docker/mysql/keygen/init.d:/docker-entrypoint-initdb.d"
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: cold_wallet1
+      MYSQL_DATABASE: keygen
       MYSQL_USER: hiromaily
       MYSQL_PASSWORD: hiromaily
     ports:
-    - "${MYSQL_PORT2:-3308}:3306"
+    - "${BTC_WALLET_MYSQL_PORT:-3308}:3306"
 
-  #for signature wallet
-  db-btc-signature:
+  # signature wallet
+  btc-signature-db:
     image: mysql:5.7
     volumes:
-    - db3:/var/lib/mysql #this volume should be outside to keep on a permanent basis
-    - "./docker/mysql2/conf.d:/etc/mysql/conf.d"
-    - "./docker/mysql2/init.d:/docker-entrypoint-initdb.d"
+    - btc-signature-db:/var/lib/mysql #this volume should be outside to keep on a permanent basis
+    - "./docker/mysql/signature/conf.d:/etc/mysql/conf.d"
+    - "./docker/mysql/signature/init.d:/docker-entrypoint-initdb.d"
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: cold_wallet1
+      MYSQL_DATABASE: signature
       MYSQL_USER: hiromaily
       MYSQL_PASSWORD: hiromaily
     ports:
-    - "${MYSQL_PORT3:-3309}:3306"
+    - "${BTC_WALLET_MYSQL_PORT:-3309}:3306"
 
   #########################################################################
   # Wallet App

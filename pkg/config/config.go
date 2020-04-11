@@ -13,6 +13,7 @@ import (
 type Config struct {
 	CoinType   string         `toml:"coin_type"`
 	Bitcoin    BitcoinConf    `toml:"bitcoin"`
+	Logger     LoggerConf     `toml:"bitcoin"`
 	MySQL      MySQLConf      `toml:"mysql"`
 	TxFile     TxFileConf     `toml:"tx_file"`
 	PubkeyFile PubKeyFileConf `toml:"pubkey_file"`
@@ -40,6 +41,12 @@ type BitcoinBlockConf struct {
 type BitcoinFeeConf struct {
 	AdjustmentMin float64 `toml:"adjustment_min"`
 	AdjustmentMax float64 `toml:"adjustment_max"`
+}
+
+// LoggerConf logger info
+type LoggerConf struct {
+	Service string `toml:"host"`
+	Level   string `toml:"level"`
 }
 
 // MySQLConf MySQL info

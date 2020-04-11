@@ -1,0 +1,29 @@
+coin_type = "btc" # btc, bch
+
+[bitcoin]
+host = "127.0.0.1:18332"
+user = "xyz"
+pass = "xyz"
+http_post_mode = true
+disable_tls = true
+is_main = false #true: MainNet,false: TestNet
+
+[logger]
+service = "keygen-wallet"
+level = "debug" # debug, info, warn, error
+
+[mysql]
+host = "127.0.0.1:3308"
+dbname = "keygen"
+user = "hiromaily"
+pass = "hiromaily"
+
+[tx_file]
+base_path = "./data/tx/"
+
+[pubkey_file]
+base_path = "./data/pubkey/"
+
+# default seed of key used when dev mode
+#[key]
+#seed = "Ve5Kkaba4SQGavc/pWXazZuYD4mE53+qV9tLeRTS5t4="

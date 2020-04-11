@@ -1,13 +1,13 @@
-version: '3'
+version: '3.7'
 
 volumes:
-  bch-db1: {}
-  bch-db2: {}
-  bch-db3: {}
+  bch-wallet-db: {}
+  bch-keygen-db: {}
+  bch-signature-db: {}
 
 services:
   #########################################################################
-  #Bitcoin core
+  # Bitcoin core
   #########################################################################
   bch-wallet:
     build:
@@ -17,7 +17,7 @@ services:
     volumes:
     - ./docker/bch/data1:/root/.bitcoin
     ports:
-    - "${RPC_PORT:-19332}:18332"
+    - "${BCH_WALLET_RPC_PORT:-19332}:18332"
     stdin_open: true
     tty: true
     #    logging:
@@ -31,49 +31,49 @@ services:
     # /root/.bitcoin/testnet3/wallets
 
   #########################################################################
-  #Database
+  # Database
   #########################################################################
-  #for watch only wallet
-  db-bch-wallet:
+  # watch only wallet
+  bch-wallet-db:
     image: mysql:5.7
     volumes:
-      - bch-db1:/var/lib/mysql
-      - "./docker/mysql/conf.d:/etc/mysql/conf.d"
-      - "./docker/mysql/init.d:/docker-entrypoint-initdb.d"
+      - bch-wallet-db:/var/lib/mysql
+      - "./docker/mysql/wallet/conf.d:/etc/mysql/conf.d"
+      - "./docker/mysql/wallet/init.d:/docker-entrypoint-initdb.d"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: wallet
       MYSQL_USER: hiromaily
       MYSQL_PASSWORD: hiromaily
     ports:
-      - "${MYSQL_PORT1:-3307}:3306"
+      - "${BCH_WALLET_MYSQL_PORT:-3307}:3306"
 
-  #for keygen wallet
-  db-bch-keygen:
+  # keygen wallet
+  bch-keygen-db:
     image: mysql:5.7
     volumes:
-    - bch-db2:/var/lib/mysql
-    - "./docker/mysql2/conf.d:/etc/mysql/conf.d"
-    - "./docker/mysql2/init.d:/docker-entrypoint-initdb.d"
+    - bch-keygen-db:/var/lib/mysql
+    - "./docker/mysql/keygen/conf.d:/etc/mysql/conf.d"
+    - "./docker/mysql/keygen//init.d:/docker-entrypoint-initdb.d"
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: cold_wallet1
+      MYSQL_DATABASE: keygen
       MYSQL_USER: hiromaily
       MYSQL_PASSWORD: hiromaily
     ports:
-    - "${MYSQL_PORT2:-3308}:3306"
+    - "${BCH_WALLET_MYSQL_PORT:-3308}:3306"
 
-  #for signature wallet
-  db-bch-signature:
+  # signature wallet
+  bch-signature-db:
     image: mysql:5.7
     volumes:
-    - bch-db3:/var/lib/mysql
-    - "./docker/mysql2/conf.d:/etc/mysql/conf.d"
-    - "./docker/mysql2/init.d:/docker-entrypoint-initdb.d"
+    - bch-signature-db:/var/lib/mysql
+    - "./docker/mysql/signature/conf.d:/etc/mysql/conf.d"
+    - "./docker/mysql/signature/init.d:/docker-entrypoint-initdb.d"
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: cold_wallet1
+      MYSQL_DATABASE: signature
       MYSQL_USER: hiromaily
       MYSQL_PASSWORD: hiromaily
     ports:
-    - "${MYSQL_PORT3:-3309}:3306"
+    - "${BCH_WALLET_MYSQL_PORT:-3309}:3306"

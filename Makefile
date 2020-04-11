@@ -43,12 +43,12 @@ bld:
 run: bld
 	wallet -conf ./data/toml/btc/local_watch_only.toml
 
+# wallet -conf ./data/toml/btc/local_watch_only.toml api estimatefee
+
 # docker-compose up db-btc-wallet
 
 # bitcoin-cli
 #bitcoin-cli -rpcuser=xyz -rpcpassword=xyz getnetworkinfo
-
-# wallet -conf ./data/toml/btc/local_watch_only.toml api estimatefee
 
 ###############################################################################
 # Test on local
@@ -83,41 +83,38 @@ bld-docker-btc:
 #up-docker-bch:
 #	docker-compose -f docker-compose.bch.yml up bch-wallet
 
-#bitcoin coreとdbをまとめて起動(基本的にこれを使うことになるはず)
-.PHONY: up-local-dev-btc
-up-local-dev-btc:
-	docker-compose up btc-wallet btc-keygen btc-signature db-btc-wallet db-btc-keygen db-btc-signature
-
-#bitcoin coreのみ起動
-.PHONY: up-docker-core
-up-docker-core:
+.PHONY: up-docker-btc
+up-docker-btc:
 	docker-compose up btc-wallet btc-keygen btc-signature
 
-#データベースのみ起動
-.PHONY: up-docker-dbs
-up-docker-dbs:
-	docker-compose up db-btc-wallet db-btc-keygen db-btc-signature
+.PHONY: up-docker-db
+up-docker-db:
+	docker-compose up btc-wallet-db btc-keygen-db btc-signature-db
 
-.PHONY: up-docker-apps
-up-docker-apps:
-	docker-compose up watch-only-wallet
+.PHONY: up-docker-only-watch-wallet
+up-docker-only-watch-wallet:
+	docker-compose up btc-wallet btc-wallet-db
 
-#ログ系システムのみ起動
+.PHONY: up-docker-btc-all
+up-docker-btc-all: up-docker-btc up-docker-db
+
+#.PHONY: up-docker-apps
+#up-docker-apps:
+#	docker-compose up watch-only-wallet
+
+# logging and monitoring
 .PHONY: up-docker-logger
 up-docker-logger:
 	docker-compose up fluentd elasticsearch grafana
 
-.PHONY: up-docker-only-watch-wallet
-up-docker-only-watch-wallet:
-	docker-compose up btc-wallet db-btc-wallet watch-only-wallet
 
-.PHONY: clear-db-volumes
-clear-db-volumes:
+.PHONY: rm-db-volumes
+rm-db-volumes:
 	docker rm -f $(docker ps -a --format "{{.Names}}")
-	docker volume rm go-bitcoin_db1 go-bitcoin_db2 go-bitcoin_db3
+	docker volume rm btc-wallet-db btc-keygen-db btc-signature-db
 
-.PHONY: remove-wallet-dat
-remove-wallet-dat:
+.PHONY: rm-docker-wallet-dat-all
+rm-docker-wallet-dat-all:
 	rm -rf ./docker/btc/data1/testnet3/wallets/wallet.data
 	rm -rf ./docker/btc/data2/testnet3/wallets/wallet.data
 	rm -rf ./docker/btc/data3/testnet3/wallets/wallet.data
@@ -138,8 +135,8 @@ bitcoin-stop:
 cd-btc-dir:
 	cd ~/Library/Application\ Support/Bitcoin
 
-.PHONY: reset-wallet-dat
-reset-wallet-dat:
+.PHONY: rm-local-wallet-dat
+rm-local-wallet-dat:
 	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/wallet.dat
 
 
@@ -154,7 +151,7 @@ reset-wallet-dat:
 ###############################################################################
 .PHONY: auto-generation
 auto-generation:
-	./tools/integration_on_docker.sh 99
+	./scripts/operation/integration_on_docker.sh 99
 
 
 ###############################################################################
