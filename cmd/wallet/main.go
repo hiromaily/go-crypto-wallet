@@ -11,7 +11,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/command"
 	wcmd "github.com/hiromaily/go-bitcoin/pkg/command/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/config"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
 // wallet as watch only wallet
@@ -70,7 +70,7 @@ import (
 //}
 
 var (
-	appName    = wallet.WalletTypeWatchOnly.String()
+	appName    = wallets.WalletTypeWatchOnly.String()
 	appVersion = "1.0.0"
 )
 
@@ -80,7 +80,7 @@ func main() {
 		confPath  string
 		isHelp    bool
 		isVersion bool
-		walleter  wallet.Walleter
+		walleter  wallets.Walleter
 	)
 	flags := flag.NewFlagSet("main", flag.ContinueOnError)
 	flags.StringVar(&confPath, "conf", os.Getenv("WATCH_WALLET_CONF"), "config file path")
@@ -104,7 +104,7 @@ func main() {
 			log.Fatal(err)
 		}
 		// create wallet
-		regi := NewRegistry(conf, wallet.WalletTypeWatchOnly)
+		regi := NewRegistry(conf, wallets.WalletTypeWatchOnly)
 		walleter = regi.NewWalleter()
 	}
 
@@ -118,7 +118,7 @@ func main() {
 
 	code, err := cl.Run()
 	if err != nil {
-		log.Printf("fail to call Run() %s command: %v", wallet.WalletTypeWatchOnly.String(), err)
+		log.Printf("fail to call Run() %s command: %v", wallets.WalletTypeWatchOnly.String(), err)
 	}
 	os.Exit(code)
 

@@ -27,6 +27,21 @@ generate-db-definition:
 	sqlboiler --wipe mysql
 	sqlboiler --config sqlboiler.keygen.toml --wipe mysql
 
+
+# ifacemaker is tool which makes interface from struct
+.PHONY: generate-go-interface
+generate-go-interface:
+	#walletrepo
+	ifacemaker -f pkg/model/rdb/walletrepo/account_pubkey_repo.go -s WalletRepository -i WalletStorager -p rdb
+	ifacemaker -f pkg/model/rdb/walletrepo/payment_request_repo.go -s WalletRepository -i WalletStorager -p rdb
+	ifacemaker -f pkg/model/rdb/walletrepo/tx_input_repo.go -s WalletRepository -i WalletStorager -p rdb
+	ifacemaker -f pkg/model/rdb/walletrepo/tx_output_repo.go -s WalletRepository -i WalletStorager -p rdb
+	ifacemaker -f pkg/model/rdb/walletrepo/tx_repo.go -s WalletRepository -i WalletStorager -p rdb
+	#keygenrepo
+	ifacemaker -f pkg/model/rdb/keygenrepo/account_key_repo.go -s KeygenRepository -i KeygenStorager -p rdb
+	ifacemaker -f pkg/model/rdb/keygenrepo/added_pubkey_history_repo.go -s KeygenRepository -i KeygenStorager -p rdb
+	ifacemaker -f pkg/model/rdb/keygenrepo/seed_repo.go -s KeygenRepository -i KeygenStorager -p rdb
+
 ###############################################################################
 # From inside docker container
 ###############################################################################

@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
 //add subcommand
@@ -16,7 +16,7 @@ type AddCommand struct {
 	Version     string
 	SynopsisExp string
 	UI          cli.Ui
-	Wallet      wallet.Signer
+	Wallet      wallets.Signer
 }
 
 func (c *AddCommand) Synopsis() string {

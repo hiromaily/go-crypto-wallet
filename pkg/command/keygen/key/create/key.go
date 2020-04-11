@@ -6,8 +6,8 @@ import (
 
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 )
 
 // key subcommand
@@ -15,7 +15,7 @@ type KeyCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   wallet.Keygener
+	wallet   wallets.Keygener
 }
 
 func (c *KeyCommand) Synopsis() string {

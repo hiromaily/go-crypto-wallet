@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
 //multisig subcommand
@@ -15,7 +15,7 @@ type MultisigCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   wallet.Signer
+	wallet   wallets.Signer
 }
 
 func (c *MultisigCommand) Synopsis() string {

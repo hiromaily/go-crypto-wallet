@@ -6,7 +6,7 @@ import (
 
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
 //create subcommand
@@ -14,7 +14,7 @@ type CreateTxCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   wallet.Walleter
+	wallet   wallets.Walleter
 }
 
 func (c *CreateTxCommand) Synopsis() string {

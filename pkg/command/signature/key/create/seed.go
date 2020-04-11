@@ -6,8 +6,8 @@ import (
 
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 )
 
 //TODO: this code is almost same to keygen wallet
@@ -17,7 +17,7 @@ type SeedCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   wallet.Signer
+	wallet   wallets.Signer
 }
 
 func (c *SeedCommand) Synopsis() string {

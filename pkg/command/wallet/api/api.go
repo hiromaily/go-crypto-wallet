@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
 //api subcommand
@@ -15,7 +15,7 @@ type APICommand struct {
 	Name    string
 	Version string
 	UI      cli.Ui
-	Wallet  wallet.Walleter
+	Wallet  wallets.Walleter
 }
 
 func (c *APICommand) Synopsis() string {

@@ -1,36 +1,38 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
+
 	"github.com/jmoiron/sqlx"
+	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
+
 	"github.com/hiromaily/go-bitcoin/pkg/config"
-	"github.com/hiromaily/go-bitcoin/pkg/db/rdb"
+	mysql "github.com/hiromaily/go-bitcoin/pkg/db/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
-	"github.com/hiromaily/go-bitcoin/pkg/model"
+	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
+	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tracer"
 	"github.com/hiromaily/go-bitcoin/pkg/txfile"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
-	"github.com/opentracing/opentracing-go"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 )
 
 // Registry is for registry interface
 type Registry interface {
-	NewWalleter() wallet.Walleter
+	NewWalleter() wallets.Walleter
 }
 
 type registry struct {
 	conf        *config.Config
 	mysqlClient *sqlx.DB
-	walletType  wallet.WalletType
+	walletType  wallets.WalletType
 }
 
-// NewRegistry is to register regstry interface
-func NewRegistry(conf *config.Config, walletType wallet.WalletType) Registry {
+// NewRegistry is to register registry interface
+func NewRegistry(conf *config.Config, walletType wallets.WalletType) Registry {
 	return &registry{
 		conf:       conf,
 		walletType: walletType,
@@ -38,11 +40,11 @@ func NewRegistry(conf *config.Config, walletType wallet.WalletType) Registry {
 }
 
 // NewWalleter is to register for walleter interface
-func (r *registry) NewWalleter() wallet.Walleter {
+func (r *registry) NewWalleter() wallets.Walleter {
 	//TODO: should be interface
 	r.setFilePath()
 
-	return wallet.NewWallet(
+	return wallets.NewWallet(
 		r.newBTC(),
 		r.newLogger(),
 		r.newTracer(),
@@ -53,6 +55,8 @@ func (r *registry) NewWalleter() wallet.Walleter {
 
 func (r *registry) newBTC() api.Bitcoiner {
 	// Connection to Bitcoin core
+	// TODO: coinType should be judged here
+	// TODO: name should be NewBitcoin or NewBitcoinCash
 	bit, err := api.Connection(&r.conf.Bitcoin, enum.CoinType(r.conf.CoinType))
 	if err != nil {
 		panic(fmt.Sprintf("btc.Connection error: %s", err))
@@ -68,17 +72,18 @@ func (r *registry) newTracer() opentracing.Tracer {
 	return tracer.NewTracer(r.conf.Tracer)
 }
 
-//TODO: change return as interface
-func (r *registry) newStorager() *model.DB {
+func (r *registry) newStorager() rdb.WalletStorager {
 	// if there are multiple options, set proper one
 	// storager interface as MySQL
-	return db.NewGenreItemRepository(r.NewMySQLSlaveClient())
-	//return model.NewDB(r.newMySQLClient())
+	return walletrepo.NewWalletRepository(
+		r.newMySQLClient(),
+		r.newLogger(),
+	)
 }
 
 func (r *registry) newMySQLClient() *sqlx.DB {
 	if r.mysqlClient == nil {
-		dbConn, err := rdb.NewMySQL(&r.conf.MySQL)
+		dbConn, err := mysql.NewMySQL(&r.conf.MySQL)
 		if err != nil {
 			panic(err)
 		}

@@ -11,7 +11,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/command/signature/key/create"
 	"github.com/hiromaily/go-bitcoin/pkg/command/signature/key/export"
 	_import "github.com/hiromaily/go-bitcoin/pkg/command/signature/key/import"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
 //key subcommand
@@ -19,7 +19,7 @@ type KeyCommand struct {
 	Name    string
 	Version string
 	UI      cli.Ui
-	Wallet  wallet.Signer
+	Wallet  wallets.Signer
 }
 
 func (c *KeyCommand) Synopsis() string {

@@ -8,7 +8,7 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
 //multisig subcommand
@@ -16,7 +16,7 @@ type MultisigCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   wallet.Keygener
+	wallet   wallets.Keygener
 }
 
 func (c *MultisigCommand) Synopsis() string {

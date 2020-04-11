@@ -11,7 +11,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/command"
 	"github.com/hiromaily/go-bitcoin/pkg/command/signature"
 	"github.com/hiromaily/go-bitcoin/pkg/config"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
 // signature wallet as cold wallet
@@ -54,7 +54,7 @@ import (
 //}
 
 var (
-	appName    = wallet.WalletTypeSignature.String()
+	appName    = wallets.WalletTypeSignature.String()
 	appVersion = "1.0.0"
 )
 
@@ -64,7 +64,7 @@ func main() {
 		confPath  string
 		isHelp    bool
 		isVersion bool
-		walleter  wallet.Signer
+		walleter  wallets.Signer
 	)
 	flags := flag.NewFlagSet("main", flag.ContinueOnError)
 	flags.StringVar(&confPath, "conf", os.Getenv("SIGNATURE_WALLET_CONF"), "config file path")
@@ -88,7 +88,7 @@ func main() {
 			log.Fatal(err)
 		}
 		// create wallet
-		regi := NewRegistry(conf, wallet.WalletTypeSignature)
+		regi := NewRegistry(conf, wallets.WalletTypeSignature)
 		walleter = regi.NewSigner()
 	}
 
@@ -102,7 +102,7 @@ func main() {
 
 	code, err := cl.Run()
 	if err != nil {
-		log.Printf("fail to call Run() %s command: %v", wallet.WalletTypeKeyGen.String(), err)
+		log.Printf("fail to call Run() %s command: %v", wallets.WalletTypeKeyGen.String(), err)
 	}
 	os.Exit(code)
 

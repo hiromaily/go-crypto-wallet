@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
 //privkey subcommand
@@ -15,7 +15,7 @@ type PrivKeyCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   wallet.Keygener
+	wallet   wallets.Keygener
 }
 
 func (c *PrivKeyCommand) Synopsis() string {

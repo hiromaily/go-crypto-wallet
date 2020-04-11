@@ -6,8 +6,8 @@ import (
 
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 )
 
 //seed subcommand
@@ -15,7 +15,7 @@ type SeedCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   wallet.Keygener
+	wallet   wallets.Keygener
 }
 
 func (c *SeedCommand) Synopsis() string {

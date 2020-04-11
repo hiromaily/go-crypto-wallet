@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/key/create"
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/key/export"
 	_import "github.com/hiromaily/go-bitcoin/pkg/command/keygen/key/import"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
 //key subcommand
@@ -18,7 +18,7 @@ type KeyCommand struct {
 	Name    string
 	Version string
 	UI      cli.Ui
-	Wallet  wallet.Keygener
+	Wallet  wallets.Keygener
 }
 
 func (c *KeyCommand) Synopsis() string {

@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
 // export subcommand
@@ -16,7 +16,7 @@ type ExportCommand struct {
 	Version     string
 	SynopsisExp string
 	UI          cli.Ui
-	Wallet      wallet.Keygener
+	Wallet      wallets.Keygener
 }
 
 func (c *ExportCommand) Synopsis() string {

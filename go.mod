@@ -20,16 +20,18 @@ require (
 	github.com/corpix/uarand v0.0.0-20170903190822-2b8494104d86 // indirect
 	github.com/cpacia/bchutil v0.0.0-20181003130114-b126f6a35b6c
 	github.com/denisenkom/go-mssqldb v0.0.0-20180901172138-1eb28afdf9b6 // indirect
-	github.com/friendsofgo/errors v0.9.2 // indirect
+	github.com/ericlagergren/decimal v0.0.0-20191206042408-88212e6cfca9 // indirect
+	github.com/friendsofgo/errors v0.9.2
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/gedex/inflector v0.0.0-20170307190818-16278e9db813 // indirect
 	github.com/go-playground/validator/v10 v10.2.0
 	github.com/go-sql-driver/mysql v1.5.0
+	github.com/gofrs/uuid v3.2.0+incompatible // indirect
 	github.com/golang/lint v0.0.0-20180702182130-06c8688daad7 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/googleapis/gax-go v2.0.2+incompatible // indirect
 	github.com/icrowley/fake v0.0.0-20180203215853-4178557ae428
-	github.com/jessevdk/go-flags v1.4.0
+	github.com/jessevdk/go-flags v1.4.1-0.20181029123624-5de817a9aa20
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/knq/snaker v0.0.0-20180306023312-d9ad1e7f342a // indirect
 	github.com/lib/pq v1.0.0 // indirect
@@ -52,8 +54,10 @@ require (
 	github.com/tinylib/msgp v1.1.2 // indirect
 	github.com/uber/jaeger-client-go v2.22.1+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible
+	github.com/vburenin/ifacemaker v1.1.0 // indirect
 	github.com/volatiletech/inflect v0.0.0-20170731032912-e7201282ae8d // indirect
-	github.com/volatiletech/sqlboiler v3.7.0+incompatible // indirect
+	github.com/volatiletech/null v8.0.0+incompatible
+	github.com/volatiletech/sqlboiler v3.7.0+incompatible
 	github.com/xo/dburl v0.0.0-20180921222126-e33971d4c132 // indirect
 	github.com/xo/xo v0.0.0-20180624015629-61f41375ea6f // indirect
 	github.com/xo/xoutil v0.0.0-20171112033149-46189f4026a5 // indirect

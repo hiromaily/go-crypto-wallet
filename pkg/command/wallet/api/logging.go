@@ -7,7 +7,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
 //logging subcommand
@@ -15,7 +15,7 @@ type LoggingCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   wallet.Walleter
+	wallet   wallets.Walleter
 }
 
 func (c *LoggingCommand) Synopsis() string {
