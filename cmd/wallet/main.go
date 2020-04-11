@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 	"log"
 	"os"
 
@@ -70,7 +71,7 @@ import (
 //}
 
 var (
-	appName    = wallets.WalletTypeWatchOnly.String()
+	appName    = types.WalletTypeWatchOnly.String()
 	appVersion = "1.0.0"
 )
 
@@ -104,7 +105,7 @@ func main() {
 			log.Fatal(err)
 		}
 		// create wallet
-		regi := NewRegistry(conf, wallets.WalletTypeWatchOnly)
+		regi := NewRegistry(conf, types.WalletTypeWatchOnly)
 		walleter = regi.NewWalleter()
 	}
 
@@ -118,7 +119,7 @@ func main() {
 
 	code, err := cl.Run()
 	if err != nil {
-		log.Printf("fail to call Run() %s command: %v", wallets.WalletTypeWatchOnly.String(), err)
+		log.Printf("fail to call Run() %s command: %v", types.WalletTypeWatchOnly.String(), err)
 	}
 	os.Exit(code)
 

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 	"log"
 	"os"
 
@@ -54,7 +55,7 @@ import (
 //}
 
 var (
-	appName    = wallets.WalletTypeKeyGen.String()
+	appName    = types.WalletTypeKeyGen.String()
 	appVersion = "1.0.0"
 )
 
@@ -88,7 +89,7 @@ func main() {
 			log.Fatal(err)
 		}
 		// create wallet
-		regi := NewRegistry(conf, wallets.WalletTypeKeyGen)
+		regi := NewRegistry(conf, types.WalletTypeKeyGen)
 		walleter = regi.NewKeygener()
 	}
 
@@ -102,7 +103,7 @@ func main() {
 
 	code, err := cl.Run()
 	if err != nil {
-		log.Printf("fail to call Run() %s command: %v", wallets.WalletTypeKeyGen.String(), err)
+		log.Printf("fail to call Run() %s command: %v", types.WalletTypeKeyGen.String(), err)
 	}
 	os.Exit(code)
 

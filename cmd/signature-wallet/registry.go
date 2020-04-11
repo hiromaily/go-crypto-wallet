@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 

@@ -1,6 +1,7 @@
-package wallets
+package signature
 
 import (
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 
@@ -23,7 +24,7 @@ type Signer interface {
 	Done()
 	GetDB() rdb.SignatureStorager
 	GetBTC() api.Bitcoiner
-	GetType() WalletType
+	GetType() types.WalletType
 }
 
 // Signature signature wallet object
@@ -33,7 +34,7 @@ type Signature struct {
 	logger   *zap.Logger
 	tracer   opentracing.Tracer
 	storager rdb.SignatureStorager
-	wtype    WalletType
+	wtype    types.WalletType
 }
 
 func NewSignature(
@@ -41,7 +42,7 @@ func NewSignature(
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
 	storager rdb.SignatureStorager,
-	wtype WalletType) *Signature {
+	wtype types.WalletType) *Signature {
 
 	return &Signature{
 		btc:      btc,
@@ -66,6 +67,6 @@ func (w *Signature) GetBTC() api.Bitcoiner {
 	return w.btc
 }
 
-func (w *Signature) GetType() WalletType {
+func (w *Signature) GetType() types.WalletType {
 	return w.wtype
 }
