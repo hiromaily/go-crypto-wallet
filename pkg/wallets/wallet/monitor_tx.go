@@ -1,20 +1,17 @@
-package wallets
+package wallet
 
 //Watch only wallet
 
 import (
 	"github.com/bookerzzz/grok"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 )
 
 // UpdateStatus tx_paymentテーブル/tx_receiptテーブルのcurrent_tx_typeが3(送信済)のものを監視し、statusをupdateする
 func (w *Wallet) UpdateStatus() error {
-	//TODO:remove it
-	if w.wtype != WalletTypeWatchOnly {
-		return errors.New("it's available on WalletTypeWatchOnly")
-	}
 
 	//tx_typeが`done`で処理が止まっているものがあるという前提で、処理を分ける
 
@@ -46,13 +43,20 @@ func (w *Wallet) updateStatusForTxTypeSent(actionType enum.ActionType) error {
 	if err != nil {
 		return errors.Errorf("ActionType: %s, DB.GetSentTxHashByTxTypeSent() error: %s", actionType, err)
 	}
-	w.logger.Debugf("ActionType: %s, hashes: %v", actionType, hashes)
+	w.logger.Debug(
+		"called storager.GetSentTxHashByTxTypeSent()",
+		zap.String("actionType", actionType.String()),
+		zap.Any("hashes", hashes))
 
 	// hashの詳細を取得し、confirmationをチェックし、指定数以上であれば、ux_typeを更新する
 	for _, hash := range hashes {
 		err = w.checkTransaction(hash, actionType)
 		if err != nil {
-			w.logger.Errorf("ActionType: %s, w.checkTransaction(%s, %s) error: %s", actionType, hash, actionType, err)
+			w.logger.Error(
+				"fail to call w.checkTransaction()",
+				zap.String("actionType",actionType.String()),
+				zap.String("hash",hash),
+				zap.Error(err))
 			continue
 		}
 	}
@@ -65,14 +69,21 @@ func (w *Wallet) updateStatusForTxTypeDone(actionType enum.ActionType) error {
 	if err != nil {
 		return errors.Errorf("ActionType: %s, DB.GetSentTxHashByTxTypeDone() error: %s", actionType, err)
 	}
-	w.logger.Debugf("ActionType: %s, hashes: %v", actionType, hashes)
+	w.logger.Debug(
+		"called storager.GetSentTxHashByTxTypeDone()",
+		zap.String("actionType", actionType.String()),
+		zap.Any("hashes", hashes))
 
 	// 通知する
 	for _, hash := range hashes {
 		//ユーザーに通知
 		id, err := w.notifyUsers(hash, actionType)
 		if err != nil {
-			w.logger.Errorf("ActionType: %s, w.notifyUsers(%s, %s) error: %s", actionType, hash, actionType, err)
+			w.logger.Error(
+				"fail to call w.notifyUsers()",
+				zap.String("actionType",actionType.String()),
+				zap.String("hash",hash),
+				zap.Error(err))
 			continue
 		}
 		if id == 0 {
@@ -83,7 +94,11 @@ func (w *Wallet) updateStatusForTxTypeDone(actionType enum.ActionType) error {
 		err = w.updateTxTypeNotified(id, hash, actionType)
 		//仮にここがエラーになっても、通知は成功している。。。が、また処理が走ってしまう。。。
 		if err != nil {
-			w.logger.Errorf("ActionType: %s, w.updateTxTypeNotified(%s, %s) error: %s", actionType, hash, actionType, err)
+			w.logger.Error(
+				"fail to call w.updateTxTypeNotified()",
+				zap.String("actionType",actionType.String()),
+				zap.String("hash", hash),
+				zap.Error(err))
 			continue
 		}
 	}
@@ -99,7 +114,7 @@ func (w *Wallet) checkTransaction(hash string, actionType enum.ActionType) error
 		//TODO:実際に起きる場合はcanceledに更新したほうがいいか？
 		return errors.Errorf("ActionType: %s, w.BTC.GetTransactionByTxID(): txID:%s, err: %s", actionType, hash, err)
 	}
-	w.logger.Debugf("ActionType: %s, Transactions Confirmations", actionType)
+	w.logger.Debug("Transactions Confirmations", zap.String("actionType",actionType.String()))
 	grok.Value(tran.Confirmations)
 
 	//現在のconfirmationをチェック
@@ -121,7 +136,10 @@ func (w *Wallet) checkTransaction(hash string, actionType enum.ActionType) error
 
 // notifyUsers 入金/出金が終了したことを通知する
 func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) (int64, error) {
-	w.logger.Debugf("ActionType: %s, notifyUsers() hash: %s", actionType, hash)
+	w.logger.Debug(
+		"w.notifyUsers()",
+		zap.String("actionType",actionType.String()),
+		zap.String("hash", hash))
 
 	//id: receiptID/paymentID
 	var (
@@ -137,7 +155,7 @@ func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) (int64, er
 		if err != nil {
 			return 0, errors.Errorf("ActionType: %s, DB.GetTxIDBySentHash() error: %s", actionType, err)
 		}
-		w.logger.Debug("notifyUsers() receiptID:", id)
+		w.logger.Debug("w.notifyUsers()", zap.Int64("receiptID",id))
 
 		// 2.tx_receipt_inputテーブルから該当のreceipt_idでレコードを取得
 		txInputs, err := w.storager.GetTxInputByReceiptID(enum.ActionTypeReceipt, id)
@@ -152,7 +170,7 @@ func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) (int64, er
 		// 3.取得したinput_addressesに対して、入金が終了したことを通知する
 		// TODO:NatsのPublisherとして通知すればいいか？
 		for _, input := range txInputs {
-			w.logger.Debug("input.InputAddress: ", input.InputAddress)
+			w.logger.Debug("check txInputs", zap.String("input.InputAddress",input.InputAddress))
 		}
 
 	} else if actionType == enum.ActionTypePayment {
@@ -163,7 +181,7 @@ func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) (int64, er
 		if err != nil {
 			return 0, errors.Errorf("ActionType: %s, DB.GetTxIDBySentHash() error: %s", actionType, err)
 		}
-		w.logger.Debugf("notifyUsers() paymentID: %d", id)
+		w.logger.Debug("notifyUsers()", zap.Int64("paymentID",id))
 
 		// 2.payment_requestテーブルから該当のpayment_idでレコードを取得
 		paymentUsers, err := w.storager.GetPaymentRequestByPaymentID(id)
@@ -178,7 +196,7 @@ func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) (int64, er
 		// 3.取得したinput_addressesに対して、入金が終了したことを通知する
 		// TODO:NatsのPublisherとして通知すればいいか？
 		for _, user := range paymentUsers {
-			w.logger.Debugf("user.AddressFrom: %s", user.AddressFrom)
+			w.logger.Debug("check paymentUsers", zap.String("user.AddressFrom", user.AddressFrom))
 		}
 	}
 

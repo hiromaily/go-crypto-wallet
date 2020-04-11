@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/btcsuite/btcd/rpcclient"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/wallet"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/opentracing/opentracing-go"
@@ -16,14 +18,13 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tracer"
 	"github.com/hiromaily/go-bitcoin/pkg/txfile"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 )
 
 // Registry is for registry interface
 type Registry interface {
-	NewWalleter() wallets.Walleter
+	NewWalleter() wallet.Walleter
 }
 
 type registry struct {
@@ -31,11 +32,11 @@ type registry struct {
 	mysqlClient *sqlx.DB
 	logger      *zap.Logger
 	rpcClient   *rpcclient.Client
-	walletType  wallets.WalletType
+	walletType  types.WalletType
 }
 
 // NewRegistry is to register registry interface
-func NewRegistry(conf *config.Config, walletType wallets.WalletType) Registry {
+func NewRegistry(conf *config.Config, walletType types.WalletType) Registry {
 	return &registry{
 		conf:       conf,
 		walletType: walletType,
@@ -43,11 +44,11 @@ func NewRegistry(conf *config.Config, walletType wallets.WalletType) Registry {
 }
 
 // NewWalleter is to register for walleter interface
-func (r *registry) NewWalleter() wallets.Walleter {
+func (r *registry) NewWalleter() wallet.Walleter {
 	//TODO: should be interface
 	r.setFilePath()
 
-	return wallets.NewWallet(
+	return wallet.NewWallet(
 		r.newBTC(),
 		r.newLogger(),
 		r.newTracer(),

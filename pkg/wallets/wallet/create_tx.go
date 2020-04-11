@@ -1,7 +1,9 @@
-package wallets
+package wallet
 
 import (
 	"fmt"
+	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
+	"go.uber.org/zap"
 
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
@@ -16,10 +18,6 @@ import (
 // amountが0のとき、全額送金する
 // TODO:実行後、`listtransactions`methodで確認できるかも(未チェック)
 func (w *Wallet) SendToAccount(from, to account.AccountType, amount btcutil.Amount) (string, string, error) {
-	//TODO:remove it
-	if w.wtype != WalletTypeWatchOnly {
-		return "", "", errors.New("it's available on WatchOnlyWallet")
-	}
 
 	//Validation
 	//とりあえず、receipt to paymentで実装
@@ -32,7 +30,7 @@ func (w *Wallet) SendToAccount(from, to account.AccountType, amount btcutil.Amou
 	}
 
 	//残高確認
-	balance, err := w.btc.GetReceivedByAccountAndMinConf(string(from), w.btc.ConfirmationBlock())
+	balance, err := w.btc.GetReceivedByAccountAndMinConf(from.String(), w.btc.ConfirmationBlock())
 	if err != nil {
 		return "", "", err
 	}
@@ -49,7 +47,7 @@ func (w *Wallet) SendToAccount(from, to account.AccountType, amount btcutil.Amou
 	}
 
 	if len(unspentList) == 0 {
-		w.logger.Infof("no listunspent for %s", from)
+		w.logger.Info("no listunspent for from account", zap.String("account", from.String()))
 		return "", "", nil
 	}
 
@@ -57,7 +55,7 @@ func (w *Wallet) SendToAccount(from, to account.AccountType, amount btcutil.Amou
 	var (
 		inputs          []btcjson.TransactionInput
 		inputTotal      btcutil.Amount
-		txReceiptInputs []TxInput
+		txReceiptInputs []walletrepo.TxInput
 		prevTxs         []btc.PrevTx
 		addresses       []string
 	)
@@ -68,7 +66,10 @@ func (w *Wallet) SendToAccount(from, to account.AccountType, amount btcutil.Amou
 		amt, err := btcutil.NewAmount(tx.Amount)
 		if err != nil {
 			//このエラーは起こりえない
-			w.logger.Errorf("btcutil.NewAmount(%f): error: %s", tx.Amount, err)
+			w.logger.Error(
+				"btcutil.NewAmount()",
+				zap.Float64("amount", tx.Amount),
+				zap.Error(err))
 			continue
 		}
 		inputTotal += amt //合計
@@ -86,7 +87,7 @@ func (w *Wallet) SendToAccount(from, to account.AccountType, amount btcutil.Amou
 		})
 
 		// txReceiptInputs
-		txReceiptInputs = append(txReceiptInputs, TxInput{
+		txReceiptInputs = append(txReceiptInputs, walletrepo.TxInput{
 			ReceiptID:          0,
 			InputTxid:          tx.TxID,
 			InputVout:          tx.Vout,
@@ -117,7 +118,10 @@ func (w *Wallet) SendToAccount(from, to account.AccountType, amount btcutil.Amou
 		}
 	}
 
-	w.logger.Debugf("total coin to send:%d(Satoshi) before fee calculated, input length: %d", inputTotal, len(inputs))
+	w.logger.Debug(
+		"total coin to send (Satoshi) before fee calculated, input length: %d",
+		zap.Any("amount",inputTotal),
+		zap.Int("len(inputs)",len(inputs)))
 	if len(inputs) == 0 {
 		return "", "", nil
 	}

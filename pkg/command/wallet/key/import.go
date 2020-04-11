@@ -62,9 +62,9 @@ func (c *ImportCommand) Run(args []string) int {
 	}
 
 	//import public key
-	err := c.wallet.ImportPublicKeyForWatchWallet(filePath, account.AccountType(acnt), isRescan)
+	err := c.wallet.ImportPublicKey(filePath, account.AccountType(acnt), isRescan)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call ImportPublicKeyForWatchWallet() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call ImportPublicKey() %+v", err))
 		return 1
 	}
 	c.ui.Info("Done!")

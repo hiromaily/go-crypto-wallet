@@ -1,9 +1,9 @@
-package wallets
-
-//Watch only wallet
+package wallet
 
 import (
 	"fmt"
+	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
+	"go.uber.org/zap"
 
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
@@ -27,9 +27,6 @@ import (
 // DetectReceivedCoin Wallet内アカウントに入金があれば、そこから、未署名のトランザクションを返す
 func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, error) {
 	//TODO:remove it
-	if w.wtype != WalletTypeWatchOnly {
-		return "", "", errors.New("it's available on WatchOnlyWallet")
-	}
 
 	// LockされたUnspentTransactionを解除する
 	//if err := w.BTC.UnlockAllUnspentTransaction(); err != nil {
@@ -54,7 +51,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 	var (
 		inputs          []btcjson.TransactionInput
 		inputTotal      btcutil.Amount
-		txReceiptInputs []TxInput
+		txReceiptInputs []walletrepo.TxInput
 		prevTxs         []btc.PrevTx
 		addresses       []string
 	)
@@ -72,7 +69,10 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 		amt, err := btcutil.NewAmount(tx.Amount)
 		if err != nil {
 			//このエラーは起こりえない
-			w.logger.Errorf("btcutil.NewAmount(%f): error: %s", tx.Amount, err)
+			w.logger.Error(
+				"btcutil.NewAmount()",
+				zap.Float64("tx amount", tx.Amount),
+				zap.Error(err))
 			continue
 		}
 		inputTotal += amt //合計
@@ -90,7 +90,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 		})
 
 		// txReceiptInputs
-		txReceiptInputs = append(txReceiptInputs, TxInput{
+		txReceiptInputs = append(txReceiptInputs, walletrepo.TxInput{
 			ReceiptID:          0,
 			InputTxid:          tx.TxID,
 			InputVout:          tx.Vout,
@@ -112,7 +112,10 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 		//tx.Address
 		addresses = append(addresses, tx.Address)
 	}
-	w.logger.Debugf("total coin to send:%d(Satoshi) before fee calculated, input length: %d", inputTotal, len(inputs))
+	w.logger.Debug(
+		"total coin to send (Satoshi) before fee calculated",
+		zap.Any("amount", inputTotal),
+		zap.Int("len(inputs)", len(inputs)))
 	if len(inputs) == 0 {
 		return "", "", nil
 	}
@@ -140,7 +143,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 // receipt/transfer共通
 func (w *Wallet) createRawTransactionAndFee(actionType enum.ActionType, accountType account.AccountType,
 	adjustmentFee float64, inputs []btcjson.TransactionInput, inputTotal btcutil.Amount,
-	txReceiptInputs []TxInput, addrsPrevs *btc.AddrsPrevTxs) (string, string, error) {
+	txReceiptInputs []walletrepo.TxInput, addrsPrevs *btc.AddrsPrevTxs) (string, string, error) {
 
 	var outputTotal btcutil.Amount
 
@@ -167,15 +170,18 @@ func (w *Wallet) createRawTransactionAndFee(actionType enum.ActionType, accountT
 	if outputTotal <= 0 {
 		return "", "", errors.Errorf("calculated fee must be wrong: fee:%v, error: %s", fee, err)
 	}
-	w.logger.Debugf("Total Coin to send:%d(Satoshi) after fee calculated, input length: %d", outputTotal, len(inputs))
+	w.logger.Debug(
+		"Total Coin to send:%d(Satoshi) after fee calculated, input length: %d",
+		zap.Any("amount",outputTotal),
+		zap.Int("len(inputs)", len(inputs)))
 
 	// 4.outputs作成
-	txReceiptOutputs := []TxOutput{
+	txReceiptOutputs := []walletrepo.TxOutput{
 		{
 			ReceiptID:     0,
 			OutputAddress: storedAddr,
 			OutputAccount: storedAccount,
-			OutputAmount:  w.BTC.AmountString(outputTotal),
+			OutputAmount:  w.btc.AmountString(outputTotal),
 			IsChange:      false,
 		},
 	}
@@ -203,7 +209,7 @@ func (w *Wallet) createRawTransactionAndFee(actionType enum.ActionType, accountT
 	if err != nil {
 		return "", "", errors.Errorf("serial.EncodeToString(): error: %s", err)
 	}
-	w.logger.Debugf("encodedAddrsPrevs: %s", encodedAddrsPrevs)
+	w.logger.Debug("encodedAddrsPrevs", zap.String("encodedAddrsPrevs", encodedAddrsPrevs))
 
 	// 9. GCSにトランザクションファイルを作成
 	//TODO:本来、この戻り値をDumpして、GCSに保存、それをDLして、USBに入れてコールドウォレットに移動しなくてはいけない
@@ -226,7 +232,7 @@ func (w *Wallet) createRawTransactionAndFee(actionType enum.ActionType, accountT
 //TODO:引数の数が多いのはGoにおいてはBad practice...
 //[共通(receipt/payment/transfer)]
 func (w *Wallet) insertTxTableForUnsigned(actionType enum.ActionType, hex string, inputTotal, outputTotal, fee btcutil.Amount, txType uint8,
-	txInputs []TxInput, txOutputs []TxOutput, paymentRequestIds []int64) (int64, error) {
+	txInputs []walletrepo.TxInput, txOutputs []walletrepo.TxOutput, paymentRequestIds []int64) (int64, error) {
 
 	//1.内容が同じだと、生成されるhexもまったく同じ為、同一のhexが合った場合は処理をskipする
 	count, err := w.storager.GetTxCountByUnsignedHex(actionType, hex)
@@ -239,7 +245,7 @@ func (w *Wallet) insertTxTableForUnsigned(actionType enum.ActionType, hex string
 	}
 
 	//2.TxReceiptテーブル
-	txReceipt := TxTable{}
+	txReceipt := walletrepo.TxTable{}
 	txReceipt.UnsignedHexTx = hex
 	txReceipt.TotalInputAmount = w.btc.AmountString(inputTotal)
 	txReceipt.TotalOutputAmount = w.btc.AmountString(outputTotal)

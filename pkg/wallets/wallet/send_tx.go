@@ -1,8 +1,7 @@
-package wallets
-
-//Watch only wallet
+package wallet
 
 import (
+	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 	"time"
 
 	"github.com/pkg/errors"
@@ -16,10 +15,6 @@ import (
 
 // SendFromFile 渡されたファイルから署名済transactionを読み取り、送信を行う
 func (w *Wallet) SendFromFile(filePath string) (string, error) {
-	//TODO:remove it
-	if w.wtype != WalletTypeWatchOnly {
-		return "", errors.New("it's available on WatchOnlyWallet")
-	}
 
 	//ファイル名から、tx_receipt_idを取得する
 	//payment_5_unsigned_1534466246366489473
@@ -65,7 +60,7 @@ func (w *Wallet) SendFromFile(filePath string) (string, error) {
 func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID string, actionType enum.ActionType) error {
 	//1.TxReceiptテーブル
 	t := time.Now()
-	txReceipt := TxTable{}
+	txReceipt := walletrepo.TxTable{}
 	txReceipt.ID = txReceiptID
 	txReceipt.SignedHexTx = signedHex
 	txReceipt.SentHashTx = sentTxID
@@ -107,7 +102,7 @@ func (w *Wallet) updateIsAllocatedForAccountPubkey(txReceiptID int64, actionType
 	//2.account_pubkey_receiptのwallet_addressで検索し、is_allocatedがfalseであれば、trueに更新する
 	//tx_paymentの場合、勝手に分散されていて、使用済かどうかは、Quoineから補充するタイミングで、更新する必要がある
 	tm := time.Now()
-	accountPublicKeyTable := make([]AccountPublicKeyTable, 1)
+	accountPublicKeyTable := make([]walletrepo.AccountPublicKeyTable, 1)
 	accountPublicKeyTable[0].WalletAddress = txOutputs[0].OutputAddress
 	accountPublicKeyTable[0].IsAllocated = true
 	accountPublicKeyTable[0].UpdatedAt = &tm

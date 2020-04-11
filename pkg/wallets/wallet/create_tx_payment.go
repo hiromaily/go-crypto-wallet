@@ -1,9 +1,11 @@
-package wallets
+package wallet
 
 //Watch only wallet
 
 import (
 	"fmt"
+	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
+	"go.uber.org/zap"
 	"strconv"
 
 	"github.com/bookerzzz/grok"
@@ -90,12 +92,8 @@ func (w *Wallet) isFoundTxIDAndVout(txID string, vout uint32, inputs []btcjson.T
 	return false
 }
 
-// CreateUnsignedTransactionForPayment 支払いのための未署名トランザクションを作成する
-func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (string, string, error) {
-	//TODO:remove it
-	if w.wtype != WalletTypeWatchOnly {
-		return "", "", errors.New("it's available on WatchOnlyWallet")
-	}
+// CreateUnsignedPaymentTx 支払いのための未署名トランザクションを作成する
+func (w *Wallet) CreateUnsignedPaymentTx(adjustmentFee float64) (string, string, error) {
 
 	//DBから情報を取得、もしくはNatsからのリクエストをトリガーにするか、今はまだ未定
 	//とりあえず、テストデータで実装
@@ -136,7 +134,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 	var (
 		inputs          []btcjson.TransactionInput
 		inputTotal      btcutil.Amount
-		txPaymentInputs []TxInput
+		txPaymentInputs []walletrepo.TxInput
 		outputs         = map[btcutil.Address]btcutil.Amount{}
 		tmpOutputs      = map[string]btcutil.Amount{} //mapのkeyが、btcutil.Address型だとユニークかどうかkeyから判定できないため、判定用としてこちらを作成
 		isDone          bool
@@ -148,7 +146,10 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 	for _, tx := range unspentList {
 		amt, err := btcutil.NewAmount(tx.Amount)
 		if err != nil {
-			w.logger.Errorf("btcutil.NewAmount(%v) error: %s", tx.Amount, err)
+			w.logger.Error(
+				"btcutil.NewAmount()",
+				zap.Any("amount",tx.Amount),
+				zap.Error(err))
 			continue
 		}
 		inputTotal += amt
@@ -159,7 +160,7 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 			Vout: tx.Vout,
 		})
 		// txReceiptInputs
-		txPaymentInputs = append(txPaymentInputs, TxInput{
+		txPaymentInputs = append(txPaymentInputs, walletrepo.TxInput{
 			ReceiptID:          0,
 			InputTxid:          tx.TxID,
 			InputVout:          tx.Vout,
@@ -250,12 +251,12 @@ func (w *Wallet) CreateUnsignedTransactionForPayment(adjustmentFee float64) (str
 
 //TODO:receipt側のロジックとほぼ同じ為、まとめたほうがいい(手数料のロジックのみ異なる)
 func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []btcjson.TransactionInput,
-	inputTotal btcutil.Amount, txPaymentInputs []TxInput, outputs map[btcutil.Address]btcutil.Amount,
+	inputTotal btcutil.Amount, txPaymentInputs []walletrepo.TxInput, outputs map[btcutil.Address]btcutil.Amount,
 	paymentRequestIds []int64, addrsPrevs *btc.AddrsPrevTxs) (string, string, error) {
 
 	var (
 		outputTotal      btcutil.Amount
-		txPaymentOutputs []TxOutput
+		txPaymentOutputs []walletrepo.TxOutput
 	)
 
 	// 1.CreateRawTransactionWithOutput(仮で作成し、この後サイズから手数料を算出する)
@@ -263,7 +264,8 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 	if err != nil {
 		return "", "", errors.Errorf("BTC.CreateRawTransactionWithOutput(): error: %s", err)
 	}
-	w.logger.Debugf("CreateRawTransactionWithOutput: %v", msgTx)
+	w.logger.Debug("CreateRawTransactionWithOutput",
+		zap.Any("CreateRawTransactionWithOutput",msgTx))
 
 	// 2.fee算出
 	fee, err := w.btc.GetFee(msgTx, adjustmentFee)
@@ -278,15 +280,15 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 		if acnt, _ := w.btc.GetAccount(addr.String()); acnt == string(account.AccountTypePayment) {
 			outputs[addr] -= fee
 			//break
-			txPaymentOutputs = append(txPaymentOutputs, TxOutput{
+			txPaymentOutputs = append(txPaymentOutputs, walletrepo.TxOutput{
 				ReceiptID:     0,
 				OutputAddress: addr.String(),
 				OutputAccount: string(account.AccountTypePayment),
-				OutputAmount:  w.BTC.AmountString(amt - fee),
+				OutputAmount:  w.btc.AmountString(amt - fee),
 				IsChange:      true,
 			})
 		} else {
-			txPaymentOutputs = append(txPaymentOutputs, TxOutput{
+			txPaymentOutputs = append(txPaymentOutputs, walletrepo.TxOutput{
 				ReceiptID:     0,
 				OutputAddress: addr.String(),
 				OutputAccount: "",
@@ -325,7 +327,9 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 	if err != nil {
 		return "", "", errors.Errorf("serial.EncodeToString(): error: %s", err)
 	}
-	w.logger.Debugf("encodedAddrsPrevs: %s", encodedAddrsPrevs)
+	w.logger.Debug(
+		"encodedAddrsPrevs",
+		zap.String("encodedAddrsPrevs",encodedAddrsPrevs))
 
 	// 8. GCSにトランザクションファイルを作成
 	var generatedFileName string

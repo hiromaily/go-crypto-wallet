@@ -43,9 +43,9 @@ func (c *CreateTxCommand) Run(args []string) int {
 	c.ui.Output(fmt.Sprintf("-fee: %f", fee))
 
 	// Create payment transaction
-	hex, fileName, err := c.wallet.CreateUnsignedTransactionForPayment(fee)
+	hex, fileName, err := c.wallet.CreateUnsignedPaymentTx(fee)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call CreateUnsignedTransactionForPayment() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call CreateUnsignedPaymentTx() %+v", err))
 		return 1
 	}
 	if hex == "" {

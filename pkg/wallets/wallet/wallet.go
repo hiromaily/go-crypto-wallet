@@ -1,7 +1,8 @@
-package wallets
+package wallet
 
 import (
 	"github.com/btcsuite/btcutil"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 
@@ -12,16 +13,16 @@ import (
 
 // Walleter is for watch only wallet service interface
 type Walleter interface {
-	ImportPublicKeyForWatchWallet(fileName string, accountType account.AccountType, isRescan bool) error
+	ImportPublicKey(fileName string, accountType account.AccountType, isRescan bool) error
 	DetectReceivedCoin(adjustmentFee float64) (string, string, error)
-	CreateUnsignedTransactionForPayment(adjustmentFee float64) (string, string, error)
+	CreateUnsignedPaymentTx(adjustmentFee float64) (string, string, error)
 	SendToAccount(from, to account.AccountType, amount btcutil.Amount) (string, string, error)
 	SendFromFile(filePath string) (string, error)
 	UpdateStatus() error
 	Done()
 	GetDB() rdb.WalletStorager
 	GetBTC() api.Bitcoiner
-	GetType() WalletType
+	GetType() types.WalletType
 }
 
 // Wallet watch only wallet object
@@ -30,7 +31,7 @@ type Wallet struct {
 	logger   *zap.Logger
 	tracer   opentracing.Tracer
 	storager rdb.WalletStorager
-	wtype    WalletType
+	wtype    types.WalletType
 }
 
 func NewWallet(
@@ -38,7 +39,7 @@ func NewWallet(
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
 	storager rdb.WalletStorager,
-	wtype WalletType) *Wallet {
+	wtype types.WalletType) *Wallet {
 
 	return &Wallet{
 		btc:      btc,
@@ -63,6 +64,6 @@ func (w *Wallet) GetBTC() api.Bitcoiner {
 	return w.btc
 }
 
-func (w *Wallet) GetType() WalletType {
+func (w *Wallet) GetType() types.WalletType {
 	return w.wtype
 }

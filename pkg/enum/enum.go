@@ -153,6 +153,10 @@ const (
 	ActionTypeTransfer ActionType = "transfer"
 )
 
+func (a ActionType) String() string {
+	return string(a)
+}
+
 //ActionTypeValue action_typeの値
 var ActionTypeValue = map[ActionType]uint8{
 	ActionTypeReceipt:  1,
