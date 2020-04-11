@@ -1,6 +1,7 @@
-package wallets
+package keygen
 
 import (
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 
@@ -22,7 +23,7 @@ type Keygener interface {
 	Done()
 	GetDB() rdb.KeygenStorager
 	GetBTC() api.Bitcoiner
-	GetType() WalletType
+	GetType() types.WalletType
 }
 
 // Keygen keygen wallet object
@@ -32,7 +33,7 @@ type Keygen struct {
 	logger   *zap.Logger
 	tracer   opentracing.Tracer
 	storager rdb.KeygenStorager
-	wtype    WalletType
+	wtype    types.WalletType
 }
 
 func NewKeygen(
@@ -40,7 +41,7 @@ func NewKeygen(
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
 	storager rdb.KeygenStorager,
-	wtype WalletType) *Keygen {
+	wtype types.WalletType) *Keygen {
 
 	return &Keygen{
 		btc:      btc,
@@ -65,6 +66,6 @@ func (w *Keygen) GetBTC() api.Bitcoiner {
 	return w.btc
 }
 
-func (w *Keygen) GetType() WalletType {
+func (w *Keygen) GetType() types.WalletType {
 	return w.wtype
 }

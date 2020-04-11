@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/wallet"
@@ -71,7 +70,7 @@ func (r *registry) newRPCClient() *rpcclient.Client {
 func (r *registry) newBTC() api.Bitcoiner {
 	bit, err := api.NewBitcoin(r.newRPCClient(), &r.conf.Bitcoin, r.newLogger(), enum.CoinType(r.conf.CoinType))
 	if err != nil {
-		panic(fmt.Sprintf("btc.Connection error: %s", err))
+		panic(err)
 	}
 	return bit
 }

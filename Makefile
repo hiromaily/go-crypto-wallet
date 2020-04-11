@@ -177,7 +177,7 @@ auto-generation:
 ###############################################################################
 # Operation
 ###############################################################################
-include ./Makefile_watch_op.mk
+include ./Makefile_wallet_op.mk
 include ./Makefile_keygen_op.mk
 include ./Makefile_signature_op.mk
 

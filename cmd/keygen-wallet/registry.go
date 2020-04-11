@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/btcsuite/btcd/rpcclient"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/opentracing/opentracing-go"
@@ -31,11 +32,11 @@ type registry struct {
 	mysqlClient *sqlx.DB
 	logger      *zap.Logger
 	rpcClient   *rpcclient.Client
-	walletType  wallets.WalletType
+	walletType  types.WalletType
 }
 
 // NewRegistry is to register registry interface
-func NewRegistry(conf *config.Config, walletType wallets.WalletType) Registry {
+func NewRegistry(conf *config.Config, walletType types.WalletType) Registry {
 	return &registry{
 		conf:       conf,
 		walletType: walletType,
@@ -72,7 +73,7 @@ func (r *registry) newRPCClient() *rpcclient.Client {
 func (r *registry) newBTC() api.Bitcoiner {
 	bit, err := api.NewBitcoin(r.newRPCClient(), &r.conf.Bitcoin, r.newLogger(), enum.CoinType(r.conf.CoinType))
 	if err != nil {
-		panic(fmt.Sprintf("btc.Connection error: %s", err))
+		panic(err)
 	}
 	return bit
 }
