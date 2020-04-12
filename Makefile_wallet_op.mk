@@ -2,111 +2,145 @@
 # Watch Only Wallet
 ###############################################################################
 ###############################################################################
-# import public addresses exported by keygen wallet
+# import address
 ###############################################################################
+# import public addresses exported by keygen wallet
 #make filepath=./data/pubkey/client_1535423628425011000.csv import-pubkey
 .PHONY: import-pubkey
 import-pubkey:
-	wallet key
+	wallet key key importing functionality ${filepath}
 	#wallet -k -m 1 -i ./data/pubkey/client_1535423628425011000.csv
 
 
 ###############################################################################
-# Run 入金
+# receipt transaction
 ###############################################################################
-# TODO:定期的に実行して、動作を確認すること(これを自動化しておきたい)
+# detect receipt addresses and create unsigned transaction for client
+.PHONY: create-receipt-tx
+create-receipt-tx:
+	wallet receipt create -fee 0.5
+	#wallet -r -m 1
 
-# 入金データを集約し、未署名のトランザクションを作成する
-create-unsigned: bld
-	wallet -r -m 1
+# WIP: only check client address
+.PHONY: create-client-tx
+check-client-address:
+	wallet receipt create -check
 
-# 入金データを集約し、未署名のトランザクションを作成する(更に手数料を調整したい場合)
-create-unsigned-fee: bld
-	wallet -r -m 1 -f 1.5
-
-# 入金確認のみ[WIP]
-check-unsigned: bld
-	wallet -r -m 2
-
-# [coldwallet] 未署名のトランザクションに署名する
-sign: bld
-	coldwallet1 -w 1 -s -m 1 -i ./data/tx/receipt/receipt_8_unsigned_1534832793024491932
-
-# 署名済トランザクションを送信する
-send: bld
-	wallet -s -m 1 -i ./data/tx/receipt/receipt_8_signed_1534832879778945174
-
-# 送金ステータスを監視し、6confirmationsになったら、statusをdoneに更新する
-	wallet -n -m 1
+# Note: debug use
+# WIP: execute series of flows from creation of a receiving transaction to sending of a transaction
+.PHONY: create-receipt-all
+create-receipt-all:
+	wallet receipt debug
+	#wallet -r -m 10
 
 
-# Debug用
-# テストデータ作成のために入金の一連の流れをまとめて実行する
-create-receipt-all: bld
-	wallet -r -m 10
+# wallet receipt create
+# sign xxxx
 
 
 ###############################################################################
-# Run 出金
+# send transaction
 ###############################################################################
-# TODO:定期的に実行して、動作を確認すること(これを自動化しておきたい)
-
-# 出金データから出金トランザクションを作成する
-create-payment: bld
-	wallet -p -m 1
-
-# 出金データから出金トランザクションを作成する(更に手数料を調整したい場合)
-create-payment-fee: bld
-	wallet -p -m 1 -f 1.5
-
-
-# [coldwallet]出金用に未署名のトランザクションに署名する #出金時の署名は2回
-sign-payment1: bld
-	coldwallet1 -s -m 1 -i ./data/tx/payment/payment_3_unsigned_1534832966995082772
-
-sign-payment2: bld
-	coldwallet2 -s -m 1 -i ./data/tx/payment/payment_3_unsigned_1534832966995082772
-
-
-# 出金用に署名済トランザクションを送信する
-send-payment: bld
-	wallet -s -m 3 -i ./data/tx/payment/payment_3_signed_1534833088943126101
-
-
-# Debug用
-# テストデータ作成のために出金の一連の流れをまとめて実行する
-create-payment-all: bld
-	wallet -p -m 1
+# send signed transaction (receipt/payment/transfer)
+#make filepath=./data/tx/receipt/receipt_8_signed_1534832879778945174 send-tx
+.PHONY: send-tx
+send-tx:
+	wallet sending -file ${filepath}
+	#wallet -s -m 1 -i ./data/tx/receipt/receipt_8_signed_1534832879778945174
 
 
 ###############################################################################
-# Run 送金監視
+# monitor transaction
 ###############################################################################
-detect-sent-transaction:
-	wallet -n -m 1
+# check status of sent tx until 6 confirmations then update status
+#make acnt=client monitor-tx
+.PHONY: monitor-tx
+monitor-tx:
+	wallet monitoring senttx -account ${acnt}
+	#wallet -n -m 1
 
-
-###############################################################################
-# Run 各種Debug機能
-###############################################################################
-# 出金依頼データの作成を行う (coldwallet側で生成したデータをwalletにimport後)
-run-create-testdata:
-	wallet -d -m 1
-
-# 出金依頼データの再利用のため、DBを書き換える
-run-db-reset:
-	wallet -d -m 2
+# WIP: monitor account balance
+#make acnt=client monitor-balance
+.PHONY: monitor-balance
+monitor-balance:
+	wallet monitoring balance -account ${acnt}
 
 
 ###############################################################################
-# Run Bitcoin API
+# payment transaction
 ###############################################################################
-# 現在の手数料算出(estimatesmartfee)
-run-fee:
-	wallet -d -m 2
-	#wallet -c ./data/toml/dev1-btccore01.toml -d -m 2
+# create payment request from payment table
+.PHONY: create-payment-tx
+create-payment-tx:
+	wallet payment create -fee 0.5
 
-# ネットワーク情報取得(getnetworkinfo)
-run-info:
-	wallet -d -m 4
+# Note: debug use
+# WIP: execute series of flows from creation of payment transaction to sending of a transaction
+.PHONY: create-payment-all
+create-payment-all:
+	wallet payment debug
 
+
+###############################################################################
+# operation for debug / creating test data on database
+###############################################################################
+# create payment data on database
+# Note: available after generated pub keys are imported on wallet
+.PHONY: create-testdata
+create-testdata:
+	wallet db create
+	#wallet -d -m 1
+
+# reset payment testdata
+.PHONY: reset-testdata
+reset-testdata:
+	wallet db reset
+	#wallet -d -m 2
+
+
+###############################################################################
+# Bitcoin API
+###############################################################################
+#balance            get balance for account
+#estimatefee        estimate fee
+#getnetworkinfo     call getnetworkinfo
+#listunspent        call listunspent
+#logging            logging
+#unlocktx           unlock locked transaction for unspent transaction
+#validateaddress    validate address
+
+# get balance for account
+.PHONY: api-balance
+api-balance:
+	wallet api balance
+
+# estimate fee
+.PHONY: api-estimatefee
+api-estimatefee:
+	wallet api estimatefee
+
+# call getnetworkinfo
+.PHONY: api-getnetworkinfo
+api-getnetworkinfo:
+	wallet api getnetworkinfo
+
+# call listunspent
+.PHONY: api-listunspent
+api-listunspent:
+	wallet api listunspent
+
+# logging
+.PHONY: api-logging
+api-logging:
+	wallet api logging
+
+# unlock locked transaction for unspent transaction
+.PHONY: api-unlocktx
+api-unlocktx:
+	wallet api unlocktx
+
+# validateaddress
+#make addr=xxxxx api-validateaddress
+.PHONY: api-validateaddress
+api-validateaddress:
+	wallet api validateaddress -address ${addr}

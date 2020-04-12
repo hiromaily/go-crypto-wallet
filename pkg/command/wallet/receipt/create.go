@@ -9,6 +9,10 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
+// TODO
+//  - how to display help? upper layer's help displays by `wallet receipt create -h`
+//  - as workaround, add undefined flag like `wallet receipt create -a`
+
 //create subcommand
 type CreateTxCommand struct {
 	name     string

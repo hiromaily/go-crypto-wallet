@@ -2,6 +2,18 @@
 # keygen wallet
 ###############################################################################
 
+# [coldwallet] 未署名のトランザクションに署名する
+sign: bld
+	coldwallet1 -w 1 -s -m 1 -i ./data/tx/receipt/receipt_8_unsigned_1534832793024491932
+
+# [coldwallet]出金用に未署名のトランザクションに署名する #出金時の署名は2回
+sign-payment1: bld
+	coldwallet1 -s -m 1 -i ./data/tx/payment/payment_3_unsigned_1534832966995082772
+
+sign-payment2: bld
+	coldwallet2 -s -m 1 -i ./data/tx/payment/payment_3_unsigned_1534832966995082772
+
+
 # development
 develop:
 	coldwallet1 -d

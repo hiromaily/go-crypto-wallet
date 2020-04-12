@@ -41,6 +41,12 @@ func (c *ValidateAddressCommand) Run(args []string) int {
 		return 1
 	}
 
+	// validate args
+	if address == "" {
+		c.ui.Error("address option [-address] is required")
+		return 1
+	}
+
 	// validate address
 	_, err := c.wallet.GetBTC().ValidateAddress(address)
 	if err != nil {

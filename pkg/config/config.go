@@ -1,7 +1,6 @@
 package config
 
 import (
-	"github.com/bookerzzz/grok"
 	"io/ioutil"
 
 	"github.com/BurntSushi/toml"
@@ -99,7 +98,7 @@ func New(file string) (*Config, error) {
 	}
 
 	//debug
-	grok.Value(conf)
+	//grok.Value(conf)
 
 	//validate
 	if err = conf.validate(); err != nil {
