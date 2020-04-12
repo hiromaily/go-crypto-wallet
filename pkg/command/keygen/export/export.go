@@ -12,15 +12,14 @@ import (
 
 // export subcommand
 type ExportCommand struct {
-	Name        string
-	Version     string
-	SynopsisExp string
-	UI          cli.Ui
-	Wallet      wallets.Keygener
+	Name    string
+	Version string
+	UI      cli.Ui
+	Wallet  wallets.Keygener
 }
 
 func (c *ExportCommand) Synopsis() string {
-	return c.SynopsisExp
+	return "export resources"
 }
 
 var (

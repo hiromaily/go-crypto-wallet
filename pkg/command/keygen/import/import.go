@@ -12,15 +12,14 @@ import (
 
 // import subcommand
 type ImportCommand struct {
-	Name        string
-	Version     string
-	SynopsisExp string
-	UI          cli.Ui
-	Wallet      wallets.Keygener
+	Name    string
+	Version string
+	UI      cli.Ui
+	Wallet  wallets.Keygener
 }
 
 func (c *ImportCommand) Synopsis() string {
-	return c.SynopsisExp
+	return "import resources"
 }
 
 var (

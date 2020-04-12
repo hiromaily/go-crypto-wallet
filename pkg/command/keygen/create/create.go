@@ -12,15 +12,14 @@ import (
 
 //create subcommand
 type CreateCommand struct {
-	Name        string
-	Version     string
-	SynopsisExp string
-	UI          cli.Ui
-	Wallet      wallets.Keygener
+	Name    string
+	Version string
+	UI      cli.Ui
+	Wallet  wallets.Keygener
 }
 
 func (c *CreateCommand) Synopsis() string {
-	return c.SynopsisExp
+	return "create resources"
 }
 
 var (

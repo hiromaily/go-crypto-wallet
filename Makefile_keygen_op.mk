@@ -22,6 +22,10 @@ create-hdkey:
 ###############################################################################
 # import private key to keygen wallet
 ###############################################################################
+.PHONY: import-priv-key
+import-priv-key:
+	keygen key import privkey
+
 
 # Clientのprivate keyをcoldwalletに登録する
 add-client-priv-key:

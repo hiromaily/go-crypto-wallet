@@ -37,6 +37,9 @@ create-receipt-all:
 # wallet receipt create
 # sign xxxx
 
+# TODO
+# - wallet create [payment/receipt]
+# - wallet debug  [payment/receipt]
 
 ###############################################################################
 # send transaction

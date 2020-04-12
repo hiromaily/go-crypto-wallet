@@ -1,12 +1,13 @@
 package config
 
 import (
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 	"io/ioutil"
 
 	"github.com/BurntSushi/toml"
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
+
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
 //TODO:
