@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-bitcoin/pkg/action"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
@@ -127,7 +128,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 	}
 
 	// 一連の処理を実行
-	hex, fileName, err := w.createRawTransactionAndFee(enum.ActionTypeReceipt, account.AccountTypeReceipt, adjustmentFee,
+	hex, fileName, err := w.createRawTransactionAndFee(action.ActionTypeReceipt, account.AccountTypeReceipt, adjustmentFee,
 		inputs, inputTotal, txReceiptInputs, &addrsPrevs)
 
 	//TODO:Ver17対応が必要
@@ -141,7 +142,7 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 
 // createRawTransactionAndFee feeの抽出からtransaction作成、DBへの必要情報保存など、もろもろこちらで行う
 // receipt/transfer共通
-func (w *Wallet) createRawTransactionAndFee(actionType enum.ActionType, accountType account.AccountType,
+func (w *Wallet) createRawTransactionAndFee(actionType action.ActionType, accountType account.AccountType,
 	adjustmentFee float64, inputs []btcjson.TransactionInput, inputTotal btcutil.Amount,
 	txReceiptInputs []walletrepo.TxInput, addrsPrevs *btc.AddrsPrevTxs) (string, string, error) {
 
@@ -231,7 +232,7 @@ func (w *Wallet) createRawTransactionAndFee(actionType enum.ActionType, accountT
 
 //TODO:引数の数が多いのはGoにおいてはBad practice...
 //[共通(receipt/payment/transfer)]
-func (w *Wallet) insertTxTableForUnsigned(actionType enum.ActionType, hex string, inputTotal, outputTotal, fee btcutil.Amount, txType uint8,
+func (w *Wallet) insertTxTableForUnsigned(actionType action.ActionType, hex string, inputTotal, outputTotal, fee btcutil.Amount, txType uint8,
 	txInputs []walletrepo.TxInput, txOutputs []walletrepo.TxOutput, paymentRequestIds []int64) (int64, error) {
 
 	//1.内容が同じだと、生成されるhexもまったく同じ為、同一のhexが合った場合は処理をskipする
@@ -277,7 +278,7 @@ func (w *Wallet) insertTxTableForUnsigned(actionType enum.ActionType, hex string
 	//commit flag
 	//paymentのみ、後続の処理が存在する(payment_requestテーブル)
 	isCommit := true
-	if actionType == enum.ActionTypePayment {
+	if actionType == action.ActionTypePayment {
 		isCommit = false
 	}
 
@@ -290,7 +291,7 @@ func (w *Wallet) insertTxTableForUnsigned(actionType enum.ActionType, hex string
 	//5.Toに指定されたaccount_pubkey_receiptなどの使用されたwalletのis_allocatedを1に更新する
 
 	//6. payment_requestのpayment_idを更新する paymentRequestIds
-	if actionType == enum.ActionTypePayment {
+	if actionType == action.ActionTypePayment {
 		//txReceiptID
 		_, err = w.storager.UpdatePaymentIDOnPaymentRequest(txReceiptID, paymentRequestIds, tx, true)
 		if err != nil {
@@ -303,7 +304,7 @@ func (w *Wallet) insertTxTableForUnsigned(actionType enum.ActionType, hex string
 
 // storeHex　hex情報を保存し、ファイル名を返す
 // [共通(receipt/payment)]
-func (w *Wallet) storeHex(hex, encodedAddrsPrevs string, id int64, actionType enum.ActionType) (string, error) {
+func (w *Wallet) storeHex(hex, encodedAddrsPrevs string, id int64, actionType action.ActionType) (string, error) {
 	var (
 		generatedFileName string
 		err               error

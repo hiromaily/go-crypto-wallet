@@ -42,6 +42,10 @@ generate-go-interface:
 	ifacemaker -f pkg/model/rdb/keygenrepo/added_pubkey_history_repo.go -s KeygenRepository -i KeygenStorager -p rdb
 	ifacemaker -f pkg/model/rdb/keygenrepo/seed_repo.go -s KeygenRepository -i KeygenStorager -p rdb
 
+# git tag
+#git tag v2.0.0 cfeca390b781af79321fb644c056bf6e755fdc7e
+#git push origin v2.0.0
+
 ###############################################################################
 # From inside docker container
 ###############################################################################

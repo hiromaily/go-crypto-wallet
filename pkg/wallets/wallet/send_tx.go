@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-bitcoin/pkg/action"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/txfile"
@@ -57,7 +58,7 @@ func (w *Wallet) SendFromFile(filePath string) (string, error) {
 }
 
 //
-func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID string, actionType enum.ActionType) error {
+func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID string, actionType action.ActionType) error {
 	//1.TxReceiptテーブル
 	t := time.Now()
 	txReceipt := walletrepo.TxTable{}
@@ -84,9 +85,9 @@ func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID strin
 	return nil
 }
 
-func (w *Wallet) updateIsAllocatedForAccountPubkey(txReceiptID int64, actionType enum.ActionType) error {
+func (w *Wallet) updateIsAllocatedForAccountPubkey(txReceiptID int64, actionType action.ActionType) error {
 	//tx_receiptの場合のみ
-	if actionType == enum.ActionTypeReceipt {
+	if actionType == action.ActionTypeReceipt {
 		return nil
 	}
 

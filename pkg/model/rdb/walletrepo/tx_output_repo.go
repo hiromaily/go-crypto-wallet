@@ -6,10 +6,10 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/action"
 )
 
-var txOutputTableName = map[enum.ActionType]string{
+var txOutputTableName = map[action.ActionType]string{
 	"receipt":  "tx_receipt_output",
 	"payment":  "tx_payment_output",
 	"transfer": "tx_transfer_output",
@@ -39,7 +39,7 @@ func (r *WalletRepository) getTxOutputByReceiptID(tbl string, receiptID int64) (
 }
 
 // GetTxOutputByReceiptID 該当するIDのレコードを返す
-func (r *WalletRepository) GetTxOutputByReceiptID(actionType enum.ActionType, receiptID int64) ([]TxOutput, error) {
+func (r *WalletRepository) GetTxOutputByReceiptID(actionType action.ActionType, receiptID int64) ([]TxOutput, error) {
 	return r.getTxOutputByReceiptID(txOutputTableName[actionType], receiptID)
 }
 
@@ -75,6 +75,6 @@ VALUES (:receipt_id,  :output_address, :output_account, :output_amount, :is_chan
 
 // InsertTxOutputForUnsigned 未署名トランザクションのoutputに使われたtxレコードを作成する
 //TODO:BulkInsertがやりたい
-func (r *WalletRepository) InsertTxOutputForUnsigned(actionType enum.ActionType, txReceiptOutputs []TxOutput, tx *sqlx.Tx, isCommit bool) error {
+func (r *WalletRepository) InsertTxOutputForUnsigned(actionType action.ActionType, txReceiptOutputs []TxOutput, tx *sqlx.Tx, isCommit bool) error {
 	return r.insertTxOutputForUnsigned(txOutputTableName[actionType], txReceiptOutputs, tx, isCommit)
 }

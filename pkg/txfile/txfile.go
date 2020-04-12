@@ -10,6 +10,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/action"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 )
 
@@ -34,7 +35,7 @@ func SetFilePath(basePath string) {
 
 // CreateFilePath 書き込み用として、ファイルパスを生成する(読み込みは渡されたパスをそのまま利用するのみ)
 // TODO:Actionも名前として考慮すること
-func CreateFilePath(actionType enum.ActionType, txType enum.TxType, txID int64, withPath bool) string {
+func CreateFilePath(actionType action.ActionType, txType enum.TxType, txID int64, withPath bool) string {
 
 	// ./data/tx/receipt/receipt_8_unsigned_1534744535097796209
 	if withPath {
@@ -45,7 +46,7 @@ func CreateFilePath(actionType enum.ActionType, txType enum.TxType, txID int64, 
 }
 
 // ParseFile ファイル名を解析する
-func ParseFile(filePath string, txTypes []enum.TxType) (int64, enum.ActionType, string, error) {
+func ParseFile(filePath string, txTypes []enum.TxType) (int64, action.ActionType, string, error) {
 	//フルパスが渡されることも想定
 	tmp := strings.Split(filePath, "/")
 	fileName := tmp[len(tmp)-1]
@@ -58,7 +59,7 @@ func ParseFile(filePath string, txTypes []enum.TxType) (int64, enum.ActionType, 
 	}
 
 	//Action
-	if !enum.ValidateActionType(s[0]) {
+	if !action.ValidateActionType(s[0]) {
 		return 0, "", "", errors.Errorf("error: invalid file: %s", fileName)
 	}
 
@@ -76,11 +77,11 @@ func ParseFile(filePath string, txTypes []enum.TxType) (int64, enum.ActionType, 
 	//	return 0, "", "", errors.Errorf("error: invalid file: %s", fileName)
 	//}
 
-	return txReceiptID, enum.ActionType(s[0]), s[2], nil
+	return txReceiptID, action.ActionType(s[0]), s[2], nil
 }
 
 // GetTxType txTypeを取得
-func GetTxType(filePath string) (enum.ActionType, error) {
+func GetTxType(filePath string) (action.ActionType, error) {
 	//フルパスが渡されることも想定
 	tmp := strings.Split(filePath, "/")
 	fileName := tmp[len(tmp)-1]
@@ -93,10 +94,10 @@ func GetTxType(filePath string) (enum.ActionType, error) {
 	}
 
 	//Action
-	if !enum.ValidateActionType(s[0]) {
+	if !action.ValidateActionType(s[0]) {
 		return "", errors.Errorf("error: invalid file: %s", fileName)
 	}
-	return enum.ActionType(s[0]), nil
+	return action.ActionType(s[0]), nil
 }
 
 // WriteFile ファイルに書き込む

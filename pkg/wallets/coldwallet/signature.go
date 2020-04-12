@@ -12,6 +12,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-bitcoin/pkg/action"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
@@ -82,7 +83,7 @@ func (w *ColdWallet) SignatureFromFile(filePath string) (string, bool, string, e
 
 // signatureByHex 署名する
 // オフラインで使うことを想定
-func (w *ColdWallet) signatureByHex(hex, encodedAddrsPrevs string, actionType enum.ActionType) (string, bool, string, error) {
+func (w *ColdWallet) signatureByHex(hex, encodedAddrsPrevs string, actionType action.ActionType) (string, bool, string, error) {
 	// Hexからトランザクションを取得
 	msgTx, err := w.btc.ToMsgTx(hex)
 	if err != nil {
@@ -121,7 +122,7 @@ func (w *ColdWallet) signatureByHex(hex, encodedAddrsPrevs string, actionType en
 	} else {
 		//TODO:ActionTypeが`transfer`の場合、AccountのFromから判別しないといけない。。。
 		//=> addrsPrevs.SenderAccount を使うように変更
-		//if val, ok := enum.ActionToAccountMap[actionType]; ok {
+		//if val, ok := action.ActionToAccountMap[actionType]; ok {
 		//	//account_key_payment/account_key_clientテーブルから取得
 		//	accountKeys, err = w.DB.GetAllAccountKeyByMultiAddrs(val, addrsPrevs.Addrs)
 		//	if err != nil {
@@ -143,7 +144,7 @@ func (w *ColdWallet) signatureByHex(hex, encodedAddrsPrevs string, actionType en
 	}
 
 	//multisigの場合のみの処理
-	//accountType, ok := enum.ActionToAccountMap[actionType]
+	//accountType, ok := action.ActionToAccountMap[actionType]
 	if account.AccountTypeMultisig[addrsPrevs.SenderAccount] {
 		if w.wtype == types.WalletTypeKeyGen {
 			//取得したredeemScriptをPrevTxsにマッピング

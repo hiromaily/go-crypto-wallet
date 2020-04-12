@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/action"
 )
 
 // UpdateStatus tx_paymentテーブル/tx_receiptテーブルのcurrent_tx_typeが3(送信済)のものを監視し、statusをupdateする
@@ -15,7 +15,7 @@ func (w *Wallet) UpdateStatus() error {
 
 	//tx_typeが`done`で処理が止まっているものがあるという前提で、処理を分ける
 
-	types := []enum.ActionType{enum.ActionTypeReceipt, enum.ActionTypePayment, enum.ActionTypeTransfer}
+	types := []action.ActionType{action.ActionTypeReceipt, action.ActionTypePayment, action.ActionTypeTransfer}
 
 	//1.ここでは送信済のみが対象
 	for _, actionType := range types {
@@ -37,7 +37,7 @@ func (w *Wallet) UpdateStatus() error {
 }
 
 // current_tx_type更新処理
-func (w *Wallet) updateStatusForTxTypeSent(actionType enum.ActionType) error {
+func (w *Wallet) updateStatusForTxTypeSent(actionType action.ActionType) error {
 	// 送信済statusのものを取得
 	hashes, err := w.storager.GetSentTxHashByTxTypeSent(actionType)
 	if err != nil {
@@ -63,7 +63,7 @@ func (w *Wallet) updateStatusForTxTypeSent(actionType enum.ActionType) error {
 	return nil
 }
 
-func (w *Wallet) updateStatusForTxTypeDone(actionType enum.ActionType) error {
+func (w *Wallet) updateStatusForTxTypeDone(actionType action.ActionType) error {
 	// 更新
 	hashes, err := w.storager.GetSentTxHashByTxTypeDone(actionType)
 	if err != nil {
@@ -106,7 +106,7 @@ func (w *Wallet) updateStatusForTxTypeDone(actionType enum.ActionType) error {
 }
 
 // checkTransaction Bitcoin core APIでhashの状況をチェックし、もろもろ更新、通知を行う
-func (w *Wallet) checkTransaction(hash string, actionType enum.ActionType) error {
+func (w *Wallet) checkTransaction(hash string, actionType action.ActionType) error {
 	//トランザクションの状態を取得
 	tran, err := w.btc.GetTransactionByTxID(hash)
 	if err != nil {
@@ -135,7 +135,7 @@ func (w *Wallet) checkTransaction(hash string, actionType enum.ActionType) error
 }
 
 // notifyUsers 入金/出金が終了したことを通知する
-func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) (int64, error) {
+func (w *Wallet) notifyUsers(hash string, actionType action.ActionType) (int64, error) {
 	w.logger.Debug(
 		"w.notifyUsers()",
 		zap.String("actionType", actionType.String()),
@@ -148,7 +148,7 @@ func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) (int64, er
 	)
 
 	//[tx_receiptの場合]
-	if actionType == enum.ActionTypeReceipt {
+	if actionType == action.ActionTypeReceipt {
 
 		// 1.hashからidを取得(tx_receipt/tx_payment)
 		id, err = w.storager.GetTxIDBySentHash(actionType, hash)
@@ -158,7 +158,7 @@ func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) (int64, er
 		w.logger.Debug("w.notifyUsers()", zap.Int64("receiptID", id))
 
 		// 2.tx_receipt_inputテーブルから該当のreceipt_idでレコードを取得
-		txInputs, err := w.storager.GetTxInputByReceiptID(enum.ActionTypeReceipt, id)
+		txInputs, err := w.storager.GetTxInputByReceiptID(action.ActionTypeReceipt, id)
 		if err != nil {
 			return 0, errors.Errorf("ActionType: %s, DB.GetTxInputByReceiptID(%d) error: %s", actionType, id, err)
 		}
@@ -173,7 +173,7 @@ func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) (int64, er
 			w.logger.Debug("check txInputs", zap.String("input.InputAddress", input.InputAddress))
 		}
 
-	} else if actionType == enum.ActionTypePayment {
+	} else if actionType == action.ActionTypePayment {
 		//出金の通知フローは異なる。inputsはstoredの内部アドレスになっているため、payment_requestテーブルから情報を取得しないといけない
 		// 1.hashからidを取得(tx_receipt/tx_payment)
 		id, err = w.storager.GetTxIDBySentHash(actionType, hash)
@@ -204,17 +204,17 @@ func (w *Wallet) notifyUsers(hash string, actionType enum.ActionType) (int64, er
 }
 
 //updateTxTypeNotified tx_typeを通知済に更新する
-func (w *Wallet) updateTxTypeNotified(id int64, hash string, actionType enum.ActionType) error {
+func (w *Wallet) updateTxTypeNotified(id int64, hash string, actionType action.ActionType) error {
 	//id: receiptID/paymentID
 
-	if actionType == enum.ActionTypeReceipt {
+	if actionType == action.ActionTypeReceipt {
 		// 通知後はstatusをnotifiedに変更する
 		_, err := w.storager.UpdateTxTypeNotifiedByID(actionType, id, nil, true)
 		if err != nil {
 			return errors.Errorf("ActionType: %s, DB.UpdateTxTypeNotifiedByID() error: %s", actionType, err)
 		}
 
-	} else if actionType == enum.ActionTypePayment {
+	} else if actionType == action.ActionTypePayment {
 		tx := w.storager.MustBegin()
 		// 通知後はstatusをnotifiedに変更する
 		_, err := w.storager.UpdateTxTypeNotifiedByID(actionType, id, tx, false)

@@ -6,10 +6,11 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
+	"github.com/hiromaily/go-bitcoin/pkg/action"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 )
 
-var txTableName = map[enum.ActionType]string{
+var txTableName = map[action.ActionType]string{
 	"receipt":  "tx_receipt",
 	"payment":  "tx_payment",
 	"transfer": "tx_transfer",
@@ -43,7 +44,7 @@ func (r *WalletRepository) getTxByID(tbl string, id int64) (*TxTable, error) {
 }
 
 // GetTxByID 該当するIDのレコードを返す
-func (r *WalletRepository) GetTxByID(actionType enum.ActionType, id int64) (*TxTable, error) {
+func (r *WalletRepository) GetTxByID(actionType action.ActionType, id int64) (*TxTable, error) {
 	return r.getTxByID(txTableName[actionType], id)
 }
 
@@ -60,7 +61,7 @@ func (r *WalletRepository) getTxCountByUnsignedHex(tbl, hex string) (int64, erro
 }
 
 // GetTxCountByUnsignedHex unsigned_hex_txをキーとしてレコード数を取得する
-func (r *WalletRepository) GetTxCountByUnsignedHex(actionType enum.ActionType, hex string) (int64, error) {
+func (r *WalletRepository) GetTxCountByUnsignedHex(actionType action.ActionType, hex string) (int64, error) {
 	return r.getTxCountByUnsignedHex(txTableName[actionType], hex)
 }
 
@@ -77,7 +78,7 @@ func (r *WalletRepository) getTxIDBySentHash(tbl, hash string) (int64, error) {
 }
 
 // GetTxIDBySentHash sent_hash_txをキーとしてreceipt_idを取得する
-func (r *WalletRepository) GetTxIDBySentHash(actionType enum.ActionType, hash string) (int64, error) {
+func (r *WalletRepository) GetTxIDBySentHash(actionType action.ActionType, hash string) (int64, error) {
 	return r.getTxIDBySentHash(txTableName[actionType], hash)
 }
 
@@ -97,13 +98,13 @@ func (r *WalletRepository) getSentTxHash(tbl string, txTypeValue uint8) ([]strin
 }
 
 // GetSentTxHashByTxTypeSent tx_typeが`sent`であるsent_hash_txの配列を返す
-func (r *WalletRepository) GetSentTxHashByTxTypeSent(actionType enum.ActionType) ([]string, error) {
+func (r *WalletRepository) GetSentTxHashByTxTypeSent(actionType action.ActionType) ([]string, error) {
 	txTypeValue := enum.TxTypeValue[enum.TxTypeSent]
 	return r.getSentTxHash(txTableName[actionType], txTypeValue)
 }
 
 // GetSentTxHashByTxTypeDone tx_typeが`done`のステータスであるsent_hash_txの配列を返す
-func (r *WalletRepository) GetSentTxHashByTxTypeDone(actionType enum.ActionType) ([]string, error) {
+func (r *WalletRepository) GetSentTxHashByTxTypeDone(actionType action.ActionType) ([]string, error) {
 	txTypeValue := enum.TxTypeValue[enum.TxTypeDone]
 	return r.getSentTxHash(txTableName[actionType], txTypeValue)
 }
@@ -136,7 +137,7 @@ VALUES (:unsigned_hex_tx, :signed_hex_tx, :sent_hash_tx, :total_input_amount, :t
 }
 
 // InsertTxForUnsigned 未署名トランザクションレコードを作成する
-func (r *WalletRepository) InsertTxForUnsigned(actionType enum.ActionType, txReceipt *TxTable, tx *sqlx.Tx, isCommit bool) (int64, error) {
+func (r *WalletRepository) InsertTxForUnsigned(actionType action.ActionType, txReceipt *TxTable, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	return r.insertTxForUnsigned(txTableName[actionType], txReceipt, tx, isCommit)
 }
 
@@ -168,7 +169,7 @@ UPDATE %s SET signed_hex_tx=:signed_hex_tx, sent_hash_tx=:sent_hash_tx, current_
 }
 
 // UpdateTxAfterSent signed_hex_tx, sent_hash_txを更新する
-func (r *WalletRepository) UpdateTxAfterSent(actionType enum.ActionType, txReceipt *TxTable, tx *sqlx.Tx, isCommit bool) (int64, error) {
+func (r *WalletRepository) UpdateTxAfterSent(actionType action.ActionType, txReceipt *TxTable, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	return r.updateTxAfterSent(txTableName[actionType], txReceipt, tx, isCommit)
 }
 
@@ -199,13 +200,13 @@ UPDATE %s SET current_tx_type=? WHERE sent_hash_tx=?
 }
 
 // UpdateTxTypeDoneByTxHash 該当するsent_hash_txのレコードのcurrnt_tx_typeを更新する
-func (r *WalletRepository) UpdateTxTypeDoneByTxHash(actionType enum.ActionType, hash string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+func (r *WalletRepository) UpdateTxTypeDoneByTxHash(actionType action.ActionType, hash string, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	txTypeValue := enum.TxTypeValue[enum.TxTypeDone]
 	return r.updateTxTypeByTxHash(txTableName[actionType], hash, txTypeValue, tx, isCommit)
 }
 
 // UpdateTxTypeNotifiedByTxHash 該当するsent_hash_txのレコードのcurrnt_tx_typeを更新する
-func (r *WalletRepository) UpdateTxTypeNotifiedByTxHash(actionType enum.ActionType, hash string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+func (r *WalletRepository) UpdateTxTypeNotifiedByTxHash(actionType action.ActionType, hash string, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	txTypeValue := enum.TxTypeValue[enum.TxTypeNotified]
 	return r.updateTxTypeByTxHash(txTableName[actionType], hash, txTypeValue, tx, isCommit)
 }
@@ -237,13 +238,13 @@ UPDATE %s SET current_tx_type=? WHERE id=?
 }
 
 // UpdateTxTypeDoneByID 該当するIDのレコードのcurrnt_tx_typeを更新する
-func (r *WalletRepository) UpdateTxTypeDoneByID(actionType enum.ActionType, ID int64, tx *sqlx.Tx, isCommit bool) (int64, error) {
+func (r *WalletRepository) UpdateTxTypeDoneByID(actionType action.ActionType, ID int64, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	txTypeValue := enum.TxTypeValue[enum.TxTypeDone]
 	return r.updateTxTypeByID(txTableName[actionType], ID, txTypeValue, tx, isCommit)
 }
 
 // UpdateTxTypeNotifiedByID 該当するIDのレコードのcurrnt_tx_typeを更新する
-func (r *WalletRepository) UpdateTxTypeNotifiedByID(actionType enum.ActionType, ID int64, tx *sqlx.Tx, isCommit bool) (int64, error) {
+func (r *WalletRepository) UpdateTxTypeNotifiedByID(actionType action.ActionType, ID int64, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	txTypeValue := enum.TxTypeValue[enum.TxTypeNotified]
 	return r.updateTxTypeByID(txTableName[actionType], ID, txTypeValue, tx, isCommit)
 }

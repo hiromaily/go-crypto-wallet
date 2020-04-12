@@ -13,6 +13,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-bitcoin/pkg/action"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
@@ -317,7 +318,7 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 
 	// 6. Databaseに必要な情報を保存
 	//  txType //1.未署名
-	txReceiptID, err := w.insertTxTableForUnsigned(enum.ActionTypePayment, hex, inputTotal, outputTotal, fee, enum.TxTypeValue[enum.TxTypeUnsigned], txPaymentInputs, txPaymentOutputs, paymentRequestIds)
+	txReceiptID, err := w.insertTxTableForUnsigned(action.ActionTypePayment, hex, inputTotal, outputTotal, fee, enum.TxTypeValue[enum.TxTypeUnsigned], txPaymentInputs, txPaymentOutputs, paymentRequestIds)
 	if err != nil {
 		return "", "", errors.Errorf("insertTxTableForUnsigned(): error: %s", err)
 	}
@@ -334,7 +335,7 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 	// 8. GCSにトランザクションファイルを作成
 	var generatedFileName string
 	if txReceiptID != 0 {
-		generatedFileName, err = w.storeHex(hex, encodedAddrsPrevs, txReceiptID, enum.ActionTypePayment)
+		generatedFileName, err = w.storeHex(hex, encodedAddrsPrevs, txReceiptID, action.ActionTypePayment)
 		if err != nil {
 			return "", "", errors.Errorf("wallet.storeHex(): error: %s", err)
 		}

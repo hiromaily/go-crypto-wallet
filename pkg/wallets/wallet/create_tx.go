@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/action"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/btc"
 )
@@ -133,7 +133,7 @@ func (w *Wallet) SendToAccount(from, to account.AccountType, amount btcutil.Amou
 	}
 
 	// 一連の処理を実行
-	hex, fileName, err := w.createRawTransactionAndFee(enum.ActionTypeTransfer, to, 0, inputs,
+	hex, fileName, err := w.createRawTransactionAndFee(action.ActionTypeTransfer, to, 0, inputs,
 		inputTotal, txReceiptInputs, &addrsPrevs)
 
 	return hex, fileName, err
