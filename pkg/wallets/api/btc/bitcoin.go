@@ -11,7 +11,7 @@ import (
 	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 )
 
-// Bitcoin includes Client to call Json-RPC
+// Bitcoin includes client to call Json-RPC
 type Bitcoin struct {
 	client            *rpcclient.Client
 	chainConf         *chaincfg.Params
@@ -28,22 +28,27 @@ type FeeAdjustmentRate struct {
 	max float64
 }
 
-// NewBitcoin Bitcoinオブジェクトを返す
+// NewBitcoin creates bitcoin object
 func NewBitcoin(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logger) (*Bitcoin, error) {
 	bit := Bitcoin{
 		client: client,
 		logger: logger,
 	}
-	if conf.IsMain {
+	switch conf.NetworkType {
+	case ctype.NetworkTypeMainNet:
 		bit.chainConf = &chaincfg.MainNetParams
-	} else {
+	case ctype.NetworkTypeTestNet3:
 		bit.chainConf = &chaincfg.TestNet3Params
+	case ctype.NetworkTypeRegTestNet:
+		bit.chainConf = &chaincfg.TestNet3Params
+	default:
+		return nil, errors.Errorf("bitcoin network type is invalid in config")
 	}
 
-	//Bitcoinのバージョンを入れておく
+	// set bitcoin version
 	netInfo, err := bit.GetNetworkInfo()
 	if err != nil {
-		return nil, errors.Errorf("bit.GetNetworkInfo() error: %s", err)
+		return nil, errors.Wrap(err, "fail to call bit.GetNetworkInfo()")
 	}
 	if ctype.RequiredVersion > netInfo.Version {
 		return nil, errors.Errorf("bitcoin core version should be %d +, but version %d is detected", ctype.RequiredVersion, netInfo.Version)
@@ -61,7 +66,7 @@ func NewBitcoin(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logg
 	return &bit, nil
 }
 
-// Close コネクションを切断する
+// Close disconnect from bitcoin core server
 func (b *Bitcoin) Close() {
 	b.client.Shutdown()
 }

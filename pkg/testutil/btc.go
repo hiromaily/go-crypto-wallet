@@ -28,7 +28,7 @@ func GetBTC() api.Bitcoiner {
 		log.Fatalf("$PROJECT_PATH should be defined as environment variable")
 	}
 
-	confPath := fmt.Sprintf("%s/data/toml/btc/wallet.toml", projPath)
+	confPath := fmt.Sprintf("%s/data/config/btc/wallet.toml", projPath)
 	conf, err := config.New(confPath, types.WalletTypeWatchOnly)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)

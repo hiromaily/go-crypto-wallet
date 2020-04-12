@@ -54,16 +54,6 @@ func (r *registry) NewSigner() wallets.Signer {
 		r.newStorager(),
 		r.walletType,
 	)
-
-	//FIXME: wallet.NewWallet doesn't have rdb.SignatureStorager
-	// How should it be fixed?? NewSignature should be defined based on NewWallet
-	//return wallets.NewSignature(
-	//	r.newBTC(),
-	//	r.newLogger(),
-	//	r.newTracer(),
-	//	r.newStorager(),
-	//	r.walletType,
-	//)
 }
 
 func (r *registry) newRPCClient() *rpcclient.Client {

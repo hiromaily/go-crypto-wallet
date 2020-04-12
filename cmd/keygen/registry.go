@@ -15,7 +15,6 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
-	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/coldwallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
@@ -54,17 +53,6 @@ func (r *registry) NewKeygener() wallets.Keygener {
 		r.newStorager(),
 		r.walletType,
 	)
-
-	//FIXME: wallet.NewWallet doesn't have rdb.KeygenStorager
-	// How should it be fixed?? NewKeygen should be defined based on NewWallet
-	//return keygen.NewKeygen(
-	//	r.newBTC(),
-	//	r.newLogger(),
-	//	r.newTracer(),
-	//	r.newStorager(),
-	//	r.walletType,
-	//	r.newColdWallet(),
-	//)
 }
 
 func (r *registry) newRPCClient() *rpcclient.Client {
@@ -79,7 +67,7 @@ func (r *registry) newRPCClient() *rpcclient.Client {
 }
 
 func (r *registry) newBTC() api.Bitcoiner {
-	bit, err := api.NewBitcoin(r.newRPCClient(), &r.conf.Bitcoin, r.newLogger(), ctype.CoinType(r.conf.CoinType))
+	bit, err := api.NewBitcoin(r.newRPCClient(), &r.conf.Bitcoin, r.newLogger(), r.conf.CoinType)
 	if err != nil {
 		panic(err)
 	}

@@ -15,7 +15,6 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
-	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/wallet"
@@ -68,7 +67,7 @@ func (r *registry) newRPCClient() *rpcclient.Client {
 }
 
 func (r *registry) newBTC() api.Bitcoiner {
-	bit, err := api.NewBitcoin(r.newRPCClient(), &r.conf.Bitcoin, r.newLogger(), ctype.CoinType(r.conf.CoinType))
+	bit, err := api.NewBitcoin(r.newRPCClient(), &r.conf.Bitcoin, r.newLogger(), r.conf.CoinType)
 	if err != nil {
 		panic(err)
 	}

@@ -6,7 +6,7 @@ user = "xyz"
 pass = "xyz"
 http_post_mode = true
 disable_tls = true
-is_main = false #true: MainNet,false: TestNet
+network_type = "testnet3" # mainnet, testnet3, regtest
 
 [bitcoin.block]
 confirmation_num = 6 #block number for required confirmation

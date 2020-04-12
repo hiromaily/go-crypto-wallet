@@ -18,7 +18,7 @@ package key_test
 //
 //var (
 //	wlt      *wallets.Wallet
-//	confPath = flag.String("conf", "../../data/toml/local_watch_only.toml", "Path for configuration toml file")
+//	confPath = flag.String("conf", "../../data/config/btc/wallet.toml", "Path for configuration toml file")
 //)
 //
 //func setup() {

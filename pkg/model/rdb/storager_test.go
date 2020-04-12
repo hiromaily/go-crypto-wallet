@@ -7,7 +7,7 @@ package rdb_test
 //TODO: test as integration test
 //var (
 //	db       *DB
-//	confPath = flag.String("conf", "../../data/toml/local_watch_only.toml", "Path for configuration toml file")
+//	confPath = flag.String("conf", "../../data/config/btc/wallet.toml", "Path for configuration toml file")
 //)
 //
 //func setup() {
