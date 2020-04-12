@@ -1,8 +1,8 @@
 .DS_Store
 .idea/
 !cmd/wallet
-!cmd/keygen-wallet
-!cmd/signature-wallet
+!cmd/keygen
+!cmd/signature
 data/tx/*
 data/pubkey/*.csv
 docker/grafana/*

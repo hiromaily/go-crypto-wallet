@@ -52,8 +52,8 @@ generate-go-interface:
 .PHONY: bld-linux
 bld-linux:
 	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/wallet ./cmd/wallet/main.go
-	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/keygen ./cmd/keygen-wallet/main.go
-	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/sign ./cmd/signature-wallet/main.go
+	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/keygen ./cmd/keygen/main.go
+	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/sign ./cmd/signature/main.go
 
 ###############################################################################
 # Build on local
@@ -61,8 +61,8 @@ bld-linux:
 .PHONY: bld
 bld:
 	go build -i -v -o ${GOPATH}/bin/wallet ./cmd/wallet/
-	go build -i -v -o ${GOPATH}/bin/keygen ./cmd/keygen-wallet/
-	go build -i -v -o ${GOPATH}/bin/sign ./cmd/signature-wallet/
+	go build -i -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
+	go build -i -v -o ${GOPATH}/bin/sign ./cmd/signature/
 
 run: bld
 	wallet -conf ./data/toml/btc/local_watch_only.toml
