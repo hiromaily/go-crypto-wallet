@@ -127,9 +127,9 @@ func (b *Bitcoin) listUnspentVer17() ([]ListUnspentResult, error) {
 
 // ListUnspentByAccount 指定したアカウントのlistunspentを取得する
 func (b *Bitcoin) ListUnspentByAccount(accountType account.AccountType) ([]ListUnspentResult, []btcutil.Address, error) {
-	addrs, err := b.GetAddressesByAccount(string(accountType))
+	addrs, err := b.GetAddressesByLabel(string(accountType))
 	if err != nil {
-		return nil, nil, errors.Errorf("BTC.GetAddressesByAccount(): error: %s", err)
+		return nil, nil, errors.Errorf("btc.GetAddressesByLabel(): error: %s", err)
 	}
 	if len(addrs) == 0 {
 		return nil, nil, errors.Errorf("%s addresses could not be found", accountType)

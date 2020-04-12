@@ -14,30 +14,20 @@ create-seed:
 # create hdkey for acounts
 .PHONY: create-hdkey
 create-hdkey:
-	keygen key create hdkey -account client -keynum 10
-	keygen key create hdkey -account receipt -keynum 10
-	keygen key create hdkey -account payment -keynum 10
-
+	keygen create hdkey -account client -keynum 10
+	keygen create hdkey -account receipt -keynum 10
+	keygen create hdkey -account payment -keynum 10
 
 ###############################################################################
 # import private key to keygen wallet
 ###############################################################################
+# FIXME: error happened by this command
 .PHONY: import-priv-key
 import-priv-key:
-	keygen key import privkey
+	keygen import privkey -account client
+	keygen import privkey -account receipt
+	keygen import privkey -account payment
 
-
-# Clientのprivate keyをcoldwalletに登録する
-add-client-priv-key:
-	coldwallet1 -k -m 20
-
-# Receiptのprivate keyをcoldwalletに登録する
-add-receipt-priv-key:
-	coldwallet1 -k -m 21
-
-# Paymentのprivate keyをcoldwalletに登録する
-add-payment-priv-key:
-	coldwallet1 -k -m 22
 
 
 

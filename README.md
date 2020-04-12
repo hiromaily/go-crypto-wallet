@@ -1,13 +1,17 @@
 # go-bitcoin
 Wallet functionalities handling BTC, BCH and so on. Currencies would be added step by step.
 
-## Note
+### Note
 Drastic refactoring is ongoing
 
+- handling bitcoin core version 0.19
 - any comments should be English, not Japanese
 - apply for domain driven design
 
-## Structures
+## Requirements
+Bitcoin Core 0.19 minimum
+
+## Wallet Type
 This is explained for BTC for now.
 There are mainly 3 wallets separately.
 

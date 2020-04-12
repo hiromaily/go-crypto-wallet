@@ -22,13 +22,10 @@ type Bitcoiner interface {
 	GetReceivedByAccountAndMinConf(accountName string, minConf int) (btcutil.Amount, error)
 
 	//address.go
-	CreateNewAddress(accountName string) (btcutil.Address, error)
-	GetAccountAddress(accountName string) (btcutil.Address, error)
+	GetAddressInfo(addr string) (*btc.GetAddressInfoResult, error)
 	GetAddressesByLabel(labelName string) ([]btcutil.Address, error)
-	GetAddressesByAccount(accountName string) ([]btcutil.Address, error)
 	ValidateAddress(addr string) (*btcjson.ValidateAddressWalletResult, error)
 	DecodeAddress(addr string) (btcutil.Address, error)
-	GetAddressInfo(addr string) (*btc.GetAddressInfoResult, error)
 
 	//amount.go
 	AmountString(amt btcutil.Amount) string

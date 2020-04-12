@@ -9,7 +9,6 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/keystatus"
-	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
@@ -83,59 +82,14 @@ func (w *ColdWallet) ImportPrivateKey(accountType account.AccountType) error {
 	return nil
 }
 
-// checkImportedAddress addresssをチェックする (for bitcoin version 16)
+// checkImportedAddress check imported address
 func (w *ColdWallet) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPublicKey string) {
-	if w.btc.Version() >= ctype.BTCVer17 {
-		w.checkImportedAddressVer17(walletAddress, p2shSegwitAddress, fullPublicKey)
-		return
-	}
-
-	//1.getaccount address(wallet_address)
-	account, err := w.btc.GetAccount(walletAddress)
-	if err != nil {
-		w.logger.Warn(
-			"fail to call btc.GetAccount()",
-			zap.String("walletAddress", walletAddress),
-			zap.Error(err))
-		//for new version check
-		w.checkImportedAddressVer17(walletAddress, p2shSegwitAddress, fullPublicKey)
-		return
-	}
-	w.logger.Debug(
-		"account is found",
-		zap.String("account", account),
-		zap.String("walletAddress", walletAddress))
-
-	//2.getaccount address(p2sh_segwit_address)
-	account, err = w.btc.GetAccount(p2shSegwitAddress)
-	if err != nil {
-		w.logger.Error(
-			"fail to call btc.GetAccount()",
-			zap.String("p2shSegwitAddress", p2shSegwitAddress),
-			zap.Error(err))
-	}
-	w.logger.Debug(
-		"account is found by p2sh_segwit_address",
-		zap.String("account", account),
-		zap.String("p2shSegwitAddress", p2shSegwitAddress))
-
-	//3.check full_public_key by validateaddress retrieving it
-	res, err := w.btc.ValidateAddress(p2shSegwitAddress)
-	if err != nil {
-		w.logger.Error(
-			"fail to call btc.ValidateAddress()",
-			zap.String("p2shSegwitAddress", p2shSegwitAddress),
-			zap.Error(err))
-	}
-	if res.PubKey != fullPublicKey {
-		w.logger.Error("generating pubkey logic is wrong")
-	}
-}
-
-// checkImportedAddress addresssをチェックする (for bitcoin version 17)
-func (w *ColdWallet) checkImportedAddressVer17(walletAddress, p2shSegwitAddress, fullPublicKey string) {
-	w.logger.Info("checkImportedAddressVer17()")
-
+	w.logger.Info("checkImportedAddress")
+	//if w.btc.Version() >= ctype.BTCVer17 {
+	//	w.checkImportedAddressVer17(walletAddress, p2shSegwitAddress, fullPublicKey)
+	//	return
+	//}
+	//For now, version17 is expected
 	//getaddressinfo "address"
 	addrInfo, err := w.btc.GetAddressInfo(walletAddress)
 	if err != nil {
@@ -178,4 +132,10 @@ func (w *ColdWallet) checkImportedAddressVer17(walletAddress, p2shSegwitAddress,
 	if addrInfo.Pubkey != fullPublicKey {
 		w.logger.Error("generating pubkey logic is wrong")
 	}
+}
+
+// checkImportedAddress addresssをチェックする (for bitcoin version 17)
+func (w *ColdWallet) checkImportedAddressVer19(walletAddress, p2shSegwitAddress, fullPublicKey string) {
+	w.logger.Info("checkImportedAddressVer19()")
+
 }
