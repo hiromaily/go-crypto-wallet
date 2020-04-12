@@ -30,7 +30,7 @@ func (w *Wallet) SendToAccount(from, to account.AccountType, amount btcutil.Amou
 	}
 
 	//残高確認
-	balance, err := w.btc.GetReceivedByAccountAndMinConf(from.String(), w.btc.ConfirmationBlock())
+	balance, err := w.btc.GetReceivedByLabelAndMinConf(from.String(), w.btc.ConfirmationBlock())
 	if err != nil {
 		return "", "", err
 	}

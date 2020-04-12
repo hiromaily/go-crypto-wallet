@@ -18,8 +18,6 @@ import (
 type Bitcoiner interface {
 	//account.go
 	GetAccount(addr string) (string, error)
-	SetAccount(addr, account string) error
-	GetReceivedByAccountAndMinConf(accountName string, minConf int) (btcutil.Amount, error)
 
 	//address.go
 	GetAddressInfo(addr string) (*btc.GetAddressInfoResult, error)

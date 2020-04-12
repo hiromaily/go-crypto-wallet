@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// LoggingResult logging RPC のレスポンス
+// LoggingResult stores response of PRC `logging`
 type LoggingResult struct {
 	Net         int64 `json:"net"`
 	Tor         int64 `json:"tor"`
@@ -41,7 +41,7 @@ func (b *Bitcoin) Logging() (*LoggingResult, error) {
 	loggingResult := LoggingResult{}
 	err = json.Unmarshal([]byte(rawResult), &loggingResult)
 	if err != nil {
-		return nil, errors.Errorf("json.Unmarshal(): error: %v", err)
+		return nil, errors.Wrap(err, "fail to call json.Unmarshal()")
 	}
 
 	return &loggingResult, nil

@@ -1,49 +1,91 @@
 package btc_test
 
-//import (
-//	"flag"
-//	"fmt"
-//	"os"
-//	"testing"
-//
-//	_ "github.com/go-sql-driver/mysql"
-//
-//	"github.com/hiromaily/go-bitcoin/pkg/wallets"
-//)
-//
-//var (
-//	wlt      *wallets.Wallet
-//	confPath = flag.String("conf", "../../data/toml/local_watch_only.toml", "Path for configuration toml file")
-//)
-//
-//func setup() {
-//	if wlt != nil {
-//		return
-//	}
-//
-//	flag.Parse()
-//
-//	//FIXME:
-//	//var err error
-//	//wlt, err = service.InitialSettings(*confPath)
-//	//if err != nil {
-//	//	panic(err)
-//	//}
-//}
-//
-//func teardown() {
-//	wlt.Done()
-//}
-//
-//func TestMain(m *testing.M) {
-//	setup()
-//
-//	code := m.Run()
-//
-//	teardown()
-//
-//	os.Exit(code)
-//}
+import (
+	"testing"
+
+	_ "github.com/go-sql-driver/mysql"
+
+	"github.com/hiromaily/go-bitcoin/pkg/testutil"
+)
+
+//TODO: mock of bitcoin interface is required to test
+
+func TestGetAddressInfo(t *testing.T) {
+	//t.SkipNow()
+	bc := testutil.GetBTC()
+
+	type args struct {
+		addr string
+	}
+	type want struct {
+		err error
+	}
+	tests := []struct {
+		name string
+		args args
+		want want
+	}{
+		{
+			name: "happy path",
+			args: args{"mvTRCKpKVUUv3QgMEn838xXDDZS5SSEhnj"},
+			want: want{nil},
+		},
+		{
+			name: "happy path",
+			args: args{"n3f97rFX5p1vbwKqkdhjT6QjaiqBw6TfxQ"},
+			want: want{nil},
+		},
+		{
+			name: "happy path",
+			args: args{"n3f97rFX5p1vbwKqkdhjT6QjaiqBw6TfxQ"},
+			want: want{nil},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			res, err := bc.GetAddressInfo(tt.args.addr)
+			if err != tt.want.err {
+				t.Errorf("GetAddressInfo() = %v, want %v", err, tt.want.err)
+			}
+			t.Log(res)
+		})
+	}
+	bc.Close()
+}
+
+func TestGetAddressesByLabel(t *testing.T) {
+	//t.SkipNow()
+	bc := testutil.GetBTC()
+	type args struct {
+		labelName string
+	}
+	type want struct {
+		err error
+	}
+	tests := []struct {
+		name string
+		args args
+		want want
+	}{
+		{
+			name: "happy path",
+			args: args{"client"},
+			want: want{nil},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got, err := bc.GetAddressesByLabel(tt.args.labelName); err != tt.want.err {
+				t.Errorf("GetAddressesByLabel() = %v, want %v", got, tt.want)
+			} else {
+				t.Log(got)
+			}
+		})
+	}
+	bc.Close()
+}
+
 //
 //// TestValidateAddress
 //func TestValidateAddress(t *testing.T) {

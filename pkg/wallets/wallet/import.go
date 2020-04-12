@@ -9,7 +9,6 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
-	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 )
 
@@ -73,45 +72,7 @@ func (w *Wallet) ImportPublicKey(fileName string, accountType account.AccountTyp
 
 //checkImportedPublicAddress watch only walletとして追加されているかチェックする
 func (w *Wallet) checkImportedPublicAddress(addr string) {
-	if w.btc.Version() >= ctype.BTCVer17 {
-		w.checkImportedPublicAddressVer17(addr)
-		return
-	}
-
-	//1.getaccount address(wallet_address)
-	account, err := w.btc.GetAccount(addr)
-	if err != nil {
-		w.logger.Error(
-			"w.btc.GetAccount()",
-			zap.String("address", addr),
-			zap.Error(err))
-	}
-	w.logger.Debug(
-		"account is found",
-		zap.String("account", account),
-		zap.String("address", addr))
-
-	//2.check full_public_key by validateaddress retrieving it
-	res, err := w.btc.ValidateAddress(addr)
-	if err != nil {
-		w.logger.Error(
-			"w.btc.ValidateAddress()",
-			zap.String("address", addr),
-			zap.Error(err))
-	}
-	grok.Value(res)
-	//watch only walletを想定している
-	if !res.IsWatchOnly {
-		w.logger.Error("this address must be watch only wallet")
-	}
-
-}
-
-//checkImportedPublicAddressVer17 watch only walletとして追加されているかチェックする (for bitcoin version 17)
-func (w *Wallet) checkImportedPublicAddressVer17(addr string) {
-	w.logger.Info("checkImportedPublicAddressVer17()")
-
-	//getaddressinfo "address"
+	//if w.btc.Version() >= ctype.BTCVer17 {
 	addrInfo, err := w.btc.GetAddressInfo(addr)
 	if err != nil {
 		w.logger.Error(
@@ -120,11 +81,12 @@ func (w *Wallet) checkImportedPublicAddressVer17(addr string) {
 			zap.Error(err))
 	}
 	w.logger.Debug("account is found",
-		zap.String("account", addrInfo.Label),
+		zap.String("account", addrInfo.GetLabelName()),
 		zap.String("address", addr))
 
-	//watch only walletを想定している
+	//`watch only wallet` is expected
 	if !addrInfo.Iswatchonly {
 		w.logger.Error("this address must be watch only wallet")
 	}
+
 }

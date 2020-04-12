@@ -9,45 +9,67 @@ import (
 	"go.uber.org/zap"
 )
 
-// GetAddressInfoResult getaddressinfoをcallしたresponseの型
+// GetAddressInfoResult stores response of PRC `getaddressinfo`
 type GetAddressInfoResult struct {
-	Address      string `json:"address"`
-	ScriptPubKey string `json:"scriptPubKey"`
-	Ismine       bool   `json:"ismine"`
-	Iswatchonly  bool   `json:"iswatchonly"`
-	Isscript     bool   `json:"isscript"`
-	Iswitness    bool   `json:"iswitness"`
-	Script       string `json:"script"`
-	Hex          string `json:"hex"`
-	Pubkey       string `json:"pubkey"`
-	Embedded     struct {
-		Isscript       bool   `json:"isscript"`
-		Iswitness      bool   `json:"iswitness"`
-		WitnessVersion int    `json:"witness_version"`
-		WitnessProgram string `json:"witness_program"`
-		Pubkey         string `json:"pubkey"`
-		Address        string `json:"address"`
-		ScriptPubKey   string `json:"scriptPubKey"`
-	} `json:"embedded"`
-	Label     string  `json:"label"`
-	Timestamp int64   `json:"timestamp"`
-	Labels    []Label `json:"labels"`
+	Address      string   `json:"address"`
+	ScriptPubKey string   `json:"scriptPubKey"`
+	Ismine       bool     `json:"ismine"`
+	Solvable     bool     `json:"solvable"`
+	Desc         string   `json:"desc"`
+	Iswatchonly  bool     `json:"iswatchonly"`
+	Isscript     bool     `json:"isscript"`
+	Iswitness    bool     `json:"iswitness"`
+	Pubkey       string   `json:"pubkey"`
+	Iscompressed bool     `json:"iscompressed"`
+	Ischange     bool     `json:"ischange"`
+	Timestamp    int      `json:"timestamp"`
+	Labels       []string `json:"labels"`
 }
 
-// Label ラベル
-type Label struct {
-	Name    string `json:"name"`
-	Purpose string `json:"purpose"`
+func (a *GetAddressInfoResult) GetLabelName() string {
+	if len(a.Labels) != 0 {
+		return a.Labels[0]
+	}
+	return ""
 }
 
-// Purpose 目的
+// GetAddressInfo call RPC `getaddressinfo`
+//{
+//  "address": "mvTRCKpKVUUv3QgMEn838xXDDZS5SSEhnj",
+//  "scriptPubKey": "76a914a3deadcdee77d544692dfc64eb321cccc9e036f188ac",
+//  "ismine": true,
+//  "solvable": true,
+//  "desc": "pkh([a3deadcd]02f4d649c24780191d31d4fa23bff91f3fb2646b47d7ef32714e5322059586765e)#q4e9d52m",
+//  "iswatchonly": false,
+//  "isscript": false,
+//  "iswitness": false,
+//  "pubkey": "02f4d649c24780191d31d4fa23bff91f3fb2646b47d7ef32714e5322059586765e",
+//  "iscompressed": true,
+//  "ischange": false,
+//  "timestamp": 1,
+//  "labels": [
+//    "client"
+//  ]
+//}
+
+// Purpose stores part of response of PRC `getaddressesbylabel`
 type Purpose struct {
 	Purpose string `json:"purpose"`
 }
 
-// GetAddressInfo getaddressinfo RPC をcallする
-// version0.18より、getaccountは呼び出せなくなるので、こちらをcallすること
-// 従来のvalidateaddressより取得していたaddressの詳細情報もこちらから取得可能
+//{
+//  "mvTRCKpKVUUv3QgMEn838xXDDZS5SSEhnj": {
+//    "purpose": "receive"
+//  },
+//  "2MwYRJrBZ4fqAbdME7uCfRisyp3Mp8ooP6Y": {
+//    "purpose": "receive"
+//  },
+//  "tb1q5002mn0wwl25g6fdl3jwkvsueny7qdh3a7670e": {
+//    "purpose": "receive"
+//  }
+//}
+
+// it can be used as an alternative to `getaccount`, `validateaddress`
 func (b *Bitcoin) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
 	input, err := json.Marshal(string(addr))
 	if err != nil {
@@ -55,7 +77,7 @@ func (b *Bitcoin) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
 	}
 	rawResult, err := b.client.RawRequest("getaddressinfo", []json.RawMessage{input})
 	if err != nil {
-		return nil, errors.Errorf("json.RawRequest(getaddressinfo): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call json.RawRequest(getaddressinfo)")
 	}
 
 	infoResult := GetAddressInfoResult{}
@@ -67,24 +89,28 @@ func (b *Bitcoin) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
 	return &infoResult, nil
 }
 
-// GetAddressesByLabel 指定したラベルに紐づくaddressをすべて返す
+// GetAddressesByLabel returns addresses of account(label)
 func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, error) {
 	//if b.Version() >= ctype.BTCVer17 {
+	// input for rpc api
 	input, err := json.Marshal(string(labelName))
 	if err != nil {
-		return nil, errors.Errorf("json.Marchal(): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call json.Marchal()")
 	}
+	// call getaddressesbylabel
 	rawResult, err := b.client.RawRequest("getaddressesbylabel", []json.RawMessage{input})
 	if err != nil {
-		return nil, errors.Errorf("json.RawRequest(getaddressesbylabel): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call json.RawRequest(getaddressesbylabel)")
 	}
 
+	// unmarshal response
 	var labels map[string]Purpose
 	err = json.Unmarshal([]byte(rawResult), &labels)
 	if err != nil {
 		return nil, errors.Errorf("json.Unmarshal(): error: %s", err)
 	}
 
+	// retrieve
 	resAddrs := make([]btcutil.Address, len(labels))
 	idx := 0
 	for key := range labels {
@@ -105,11 +131,11 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 	return resAddrs, nil
 }
 
-// ValidateAddress 渡されたアドレスの整合性をチェックする
+// ValidateAddress validate address
 func (b *Bitcoin) ValidateAddress(addr string) (*btcjson.ValidateAddressWalletResult, error) {
 	address, err := b.DecodeAddress(addr)
 	if err != nil {
-		return nil, errors.Errorf("DecodeAddress(%s): error: %s", addr, err)
+		return nil, errors.Wrapf(err, "fail to call btc.DecodeAddress(%s)", addr)
 	}
 	res, err := b.client.ValidateAddress(address)
 	if err != nil {
@@ -119,11 +145,11 @@ func (b *Bitcoin) ValidateAddress(addr string) (*btcjson.ValidateAddressWalletRe
 	return res, nil
 }
 
-// DecodeAddress string型のアドレスをDecodeしてAddress型に変換する
+// DecodeAddress decode string address to type Address
 func (b *Bitcoin) DecodeAddress(addr string) (btcutil.Address, error) {
 	address, err := btcutil.DecodeAddress(addr, b.chainConf)
 	if err != nil {
-		return nil, errors.Errorf("btcutil.DecodeAddress() error: %s", err)
+		return nil, errors.Wrap(err, "fail to call btcutil.DecodeAddress()")
 	}
 	return address, nil
 }

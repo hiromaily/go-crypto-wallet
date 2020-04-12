@@ -49,7 +49,7 @@ func (c *BalanceCommand) Run(args []string) int {
 	}
 
 	// get received by account
-	balance, err := c.wallet.GetBTC().GetReceivedByAccountAndMinConf(acnt, c.wallet.GetBTC().ConfirmationBlock())
+	balance, err := c.wallet.GetBTC().GetReceivedByLabelAndMinConf(acnt, c.wallet.GetBTC().ConfirmationBlock())
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call BTC.GetReceivedByAccountAndMinConf() %+v", err))
 		return 1
