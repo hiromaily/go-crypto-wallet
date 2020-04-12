@@ -4,12 +4,12 @@ import (
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 )
 
 // GetAccount 渡されたアドレスから該当するアカウント名を取得する
 func (b *Bitcoin) GetAccount(addr string) (string, error) {
-	if b.Version() >= enum.BTCVer17 {
+	if b.Version() >= ctype.BTCVer17 {
 		res, err := b.GetAddressInfo(addr)
 		if err != nil {
 			return "", errors.Errorf("BTC.GetAddressInfo() error: %s", err)
@@ -37,7 +37,7 @@ func (b *Bitcoin) getAccount(addr string) (string, error) {
 
 // SetAccount 既存のimport済のアドレスにアカウント名をセットする
 func (b *Bitcoin) SetAccount(addr, account string) error {
-	if b.Version() >= enum.BTCVer17 {
+	if b.Version() >= ctype.BTCVer17 {
 		err := b.SetLabel(addr, account)
 		if err != nil {
 			return errors.Errorf("BTC.SetLabel() error: %s", err)
@@ -65,7 +65,7 @@ func (b *Bitcoin) setAccount(addr, account string) error {
 
 // GetReceivedByAccountAndMinConf アカウントに対してのBalanceを取得する
 func (b *Bitcoin) GetReceivedByAccountAndMinConf(accountName string, minConf int) (btcutil.Amount, error) {
-	if b.Version() >= enum.BTCVer17 {
+	if b.Version() >= ctype.BTCVer17 {
 		amt, err := b.GetReceivedByLabelAndMinConf(accountName, minConf)
 		if err != nil {
 			return 0, errors.Errorf("BTC.GetReceivedByLabelAndMinConf() error: %s", err)

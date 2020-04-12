@@ -61,8 +61,8 @@ func (w *Wallet) DetectReceivedCoin(adjustmentFee float64) (string, string, erro
 
 		//除外するアカウント
 		//TODO:本番環境ではこの条件がかわる気がする=>はじめからclientアカウントの情報を取得しておく
-		//if tx.Label == string(enum.AccountTypeReceipt) ||
-		//	tx.Label == string(enum.AccountTypePayment) || tx.Label == "" {
+		//if tx.Label == string(ctype.AccountTypeReceipt) ||
+		//	tx.Label == string(ctype.AccountTypePayment) || tx.Label == "" {
 		//	continue
 		//}
 

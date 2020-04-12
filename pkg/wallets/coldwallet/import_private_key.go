@@ -8,8 +8,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/keystatus"
+	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
@@ -37,7 +37,7 @@ func (w *ColdWallet) ImportPrivateKey(accountType account.AccountType) error {
 	}
 
 	//var account string
-	//if accountType != enum.AccountTypeClient {
+	//if accountType != ctype.AccountTypeClient {
 	//	account = string(accountType)
 	//}
 	account := string(accountType)
@@ -85,7 +85,7 @@ func (w *ColdWallet) ImportPrivateKey(accountType account.AccountType) error {
 
 // checkImportedAddress addresssをチェックする (for bitcoin version 16)
 func (w *ColdWallet) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPublicKey string) {
-	if w.btc.Version() >= enum.BTCVer17 {
+	if w.btc.Version() >= ctype.BTCVer17 {
 		w.checkImportedAddressVer17(walletAddress, p2shSegwitAddress, fullPublicKey)
 		return
 	}

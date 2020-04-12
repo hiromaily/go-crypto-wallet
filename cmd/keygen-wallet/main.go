@@ -197,7 +197,7 @@ func main() {
 //		}
 //
 //		//generate
-//		keys, err := wallet.GenerateAccountKey(account.AccountType(opts.Account), enum.BTC, bSeed, opts.KeyNumber)
+//		keys, err := wallet.GenerateAccountKey(account.AccountType(opts.Account), ctype.BTC, bSeed, opts.KeyNumber)
 //		if err != nil {
 //			logger.Fatalf("%+v", err)
 //		}
@@ -287,7 +287,7 @@ func main() {
 //		logger.Info("Run: Multisigの作成")
 //
 //		//Multisigアドレス作成
-//		resAddr, err := wallet.BTC.AddMultisigAddress(2, []string{"2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP", "2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu"}, "multi01", enum.AddressTypeP2shSegwit)
+//		resAddr, err := wallet.BTC.AddMultisigAddress(2, []string{"2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP", "2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu"}, "multi01", ctype.AddressTypeP2shSegwit)
 //		if err != nil {
 //			logger.Fatalf("%+v", err)
 //		}

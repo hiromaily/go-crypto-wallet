@@ -24,7 +24,7 @@ func (w *ColdWallet) AddMultisigAddressByAuthorization(accountType account.Accou
 
 	//accountチェック
 	//multisigであればこのチェックはOK
-	//if accountType != enum.AccountTypeReceipt && accountType != enum.AccountTypePayment {
+	//if accountType != ctype.AccountTypeReceipt && accountType != ctype.AccountTypePayment {
 	//	logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
 	//	return nil
 	//}
@@ -36,7 +36,7 @@ func (w *ColdWallet) AddMultisigAddressByAuthorization(accountType account.Accou
 	//account_key_authorizationテーブルからAuthorizationのwallet_addressを取得
 	authKeyTable, err := w.storager.GetOneByMaxIDOnAccountKeyTable(account.AccountTypeAuthorization)
 	if err != nil {
-		return errors.Errorf("DB.GetOneByMaxIDOnAccountKeyTable(enum.AccountTypeAuthorization) error: %s", err)
+		return errors.Errorf("DB.GetOneByMaxIDOnAccountKeyTable(ctype.AccountTypeAuthorization) error: %s", err)
 	}
 
 	//added_pubkey_history_xxxテーブルからwallet_address(full-pubkeyである必要がある)を取得

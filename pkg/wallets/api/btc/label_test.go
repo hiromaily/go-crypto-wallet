@@ -7,14 +7,14 @@ package btc_test
 //	"github.com/icrowley/fake"
 //
 //	"github.com/hiromaily/go-bitcoin/pkg/account"
-//	"github.com/hiromaily/go-bitcoin/pkg/enum"
+//	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 //	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 //)
 //
 //// TestSetLabel
 //func TestSetLabel(t *testing.T) {
-//	if wlt.BTC.Version() < enum.BTCVer17 {
-//		t.Skipf("BTC version should be above %d", enum.BTCVer17)
+//	if wlt.BTC.Version() < ctype.BTCVer17 {
+//		t.Skipf("BTC version should be above %d", ctype.BTCVer17)
 //	}
 //
 //	// アドレスを生成
@@ -22,9 +22,9 @@ package btc_test
 //	if err != nil {
 //		t.Fatal(err)
 //	}
-//	//keys, err := wlt.GenerateAccountKey(enum.AccountTypeClient, bSeed, 10)
+//	//keys, err := wlt.GenerateAccountKey(ctype.AccountTypeClient, bSeed, 10)
 //	// key生成
-//	keyData := key.NewKey(enum.BTC, wlt.BTC.GetChainConf())
+//	keyData := key.NewKey(ctype.BTC, wlt.BTC.GetChainConf())
 //
 //	priv, _, err := keyData.CreateAccount(bSeed, account.AccountTypeClient)
 //	if err != nil {

@@ -3,7 +3,7 @@ package walletrepo_test
 //TODO: use mock interface
 //TODO: procedure of test is Insert, Select, Update, Select
 //var (
-//	types = []enum.ActionType{enum.ActionTypeReceipt, enum.ActionTypePayment}
+//	types = []ctype.ActionType{ctype.ActionTypeReceipt, ctype.ActionTypePayment}
 //)
 //
 //
@@ -11,8 +11,8 @@ package walletrepo_test
 //
 //	var (
 //		//テストで利用するシーケンシャルなデータ
-//		testTableID  = make(map[enum.ActionType]int64)
-//		testTableHEX = make(map[enum.ActionType]string)
+//		testTableID  = make(map[ctype.ActionType]int64)
+//		testTableHEX = make(map[ctype.ActionType]string)
 //		err          error
 //	)
 //
@@ -23,7 +23,7 @@ package walletrepo_test
 //		txTable.TotalInputAmount = "1.5"
 //		txTable.TotalOutputAmount = "1.3"
 //		txTable.Fee = "0.2"
-//		txTable.TxType = enum.TxTypeValue[enum.TxTypeUnsigned]
+//		txTable.TxType = ctype.TxTypeValue[ctype.TxTypeUnsigned]
 //
 //		for _, typ := range types {
 //			testTableID[typ], err = db.InsertTxForUnsigned(typ, &txTable, nil, true)
@@ -75,7 +75,7 @@ package walletrepo_test
 //			txTable.SignedHexTx = "signedHex"
 //			txTable.SentHashTx = "sentHashID"
 //			txTable.SentUpdatedAt = &tm
-//			txTable.TxType = enum.TxTypeValue[enum.TxTypeSent]
+//			txTable.TxType = ctype.TxTypeValue[ctype.TxTypeSent]
 //
 //			affected, err := db.UpdateTxAfterSent(typ, &txTable, nil, true)
 //			if err != nil {

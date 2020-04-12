@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/config"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 )
 
 // Bitcoin includes Client to call Json-RPC
@@ -17,8 +17,8 @@ type Bitcoin struct {
 	chainConf         *chaincfg.Params
 	confirmationBlock int
 	feeRange          FeeAdjustmentRate
-	version           enum.BTCVersion //179900
-	coinType          enum.CoinType   //btc
+	version           ctype.BTCVersion //179900
+	coinType          ctype.CoinType   //btc
 	logger            *zap.Logger
 }
 
@@ -48,7 +48,7 @@ func NewBitcoin(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logg
 	bit.version = netInfo.Version
 	bit.logger.Info("bitcoin rpc server", zap.Int("version", netInfo.Version.Int()))
 
-	bit.coinType = enum.BTC
+	bit.coinType = ctype.BTC
 
 	bit.confirmationBlock = conf.Block.ConfirmationNum
 	bit.feeRange.max = conf.Fee.AdjustmentMax
@@ -98,21 +98,21 @@ func (b *Bitcoin) FeeRangeMin() float64 {
 }
 
 // SetVersion バージョン情報をセットする
-func (b *Bitcoin) SetVersion(ver enum.BTCVersion) {
+func (b *Bitcoin) SetVersion(ver ctype.BTCVersion) {
 	b.version = ver
 }
 
 // Version bitcoin coreのバージョンを返す
-func (b *Bitcoin) Version() enum.BTCVersion {
+func (b *Bitcoin) Version() ctype.BTCVersion {
 	return b.version
 }
 
 // SetCoinType CoinTypeをセットする
-func (b *Bitcoin) SetCoinType(coinType enum.CoinType) {
+func (b *Bitcoin) SetCoinType(coinType ctype.CoinType) {
 	b.coinType = coinType
 }
 
 // CoinType Bitcoinの種別(btc, bch)を返す
-func (b *Bitcoin) CoinType() enum.CoinType {
+func (b *Bitcoin) CoinType() ctype.CoinType {
 	return b.coinType
 }

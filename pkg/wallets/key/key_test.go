@@ -11,7 +11,7 @@ package key_test
 //	_ "github.com/go-sql-driver/mysql"
 //
 //	"github.com/hiromaily/go-bitcoin/pkg/account"
-//	"github.com/hiromaily/go-bitcoin/pkg/enum"
+//	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 //	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 //	. "github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 //)
@@ -50,7 +50,7 @@ package key_test
 //	os.Exit(code)
 //}
 //
-//func generateKeys(bSeed []byte, coinType enum.CoinType, t *testing.T) {
+//func generateKeys(bSeed []byte, coinType ctype.CoinType, t *testing.T) {
 //	// key生成
 //	keyData := NewKey(coinType, wlt.BTC.GetChainConf())
 //
@@ -70,7 +70,7 @@ package key_test
 //		t.Logf("[FullPubKey] %s", k.FullPubKey)
 //		t.Logf("[WIF] %s", k.WIF)
 //
-//		if coinType == enum.BCH {
+//		if coinType == ctype.BCH {
 //			//Decode
 //			decodeForBCH(k.Address, t)
 //		}
@@ -100,7 +100,7 @@ package key_test
 //	}
 //
 //	t.Logf("[seed] %s", SeedToString(bSeed))
-//	generateKeys(bSeed, enum.BTC, t)
+//	generateKeys(bSeed, ctype.BTC, t)
 //}
 //
 //func TestKeyIntegrationBTC2(t *testing.T) {
@@ -112,7 +112,7 @@ package key_test
 //		t.Fatal(err)
 //	}
 //
-//	generateKeys(bSeed, enum.BTC, t)
+//	generateKeys(bSeed, ctype.BTC, t)
 //
 //	//expecting always when using same seed
 //	//key_test.go:70: [Address] n34rJwoiPM6igHLqLUpfZmftc31u42gagZ
@@ -170,7 +170,7 @@ package key_test
 //		t.Fatal(err)
 //	}
 //
-//	generateKeys(bSeed, enum.BCH, t)
+//	generateKeys(bSeed, ctype.BCH, t)
 //}
 //
 ////For Debug
@@ -184,7 +184,7 @@ package key_test
 //	}
 //
 //	// BTC key生成
-//	keyData := NewKey(enum.BTC, conf)
+//	keyData := NewKey(ctype.BTC, conf)
 //
 //	priv, _, err := keyData.CreateAccount(bSeed, account.AccountTypeClient)
 //	if err != nil {
@@ -223,7 +223,7 @@ package key_test
 //	t.Logf("P2PKH Address String:  %s", address.String())
 //
 //	// Address(P2PKH) BTC
-//	//keyData := key.NewKey(enum.BTC, conf)
+//	//keyData := key.NewKey(ctype.BTC, conf)
 //
 //	//serializedKey := privateKey.PubKey().SerializeCompressed()
 //	//pubKeyAddr, err := btcutil.NewAddressPubKey(serializedKey, conf)

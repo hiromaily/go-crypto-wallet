@@ -5,25 +5,25 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 )
 
 // GetNetworkInfoResult getnetworkinfo RPC のレスポンス
 type GetNetworkInfoResult struct {
-	Version            enum.BTCVersion `json:"version"`
-	Subversion         string          `json:"subversion"`
-	Protocolversion    int             `json:"protocolversion"`
-	Localservices      string          `json:"localservices"`
-	Localservicesnames []string        `json:"localservicesnames"`
-	Localrelay         bool            `json:"localrelay"`
-	Timeoffset         int             `json:"timeoffset"`
-	Networkactive      bool            `json:"networkactive"`
-	Connections        int             `json:"connections"`
-	Networks           []Network       `json:"networks"`
-	Relayfee           float64         `json:"relayfee"`
-	Incrementalfee     float64         `json:"incrementalfee"`
-	Localaddresses     []LocalAddress  `json:"localaddresses"`
-	Warnings           string          `json:"warnings"`
+	Version            ctype.BTCVersion `json:"version"`
+	Subversion         string           `json:"subversion"`
+	Protocolversion    int              `json:"protocolversion"`
+	Localservices      string           `json:"localservices"`
+	Localservicesnames []string         `json:"localservicesnames"`
+	Localrelay         bool             `json:"localrelay"`
+	Timeoffset         int              `json:"timeoffset"`
+	Networkactive      bool             `json:"networkactive"`
+	Connections        int              `json:"connections"`
+	Networks           []Network        `json:"networks"`
+	Relayfee           float64          `json:"relayfee"`
+	Incrementalfee     float64          `json:"incrementalfee"`
+	Localaddresses     []LocalAddress   `json:"localaddresses"`
+	Warnings           string           `json:"warnings"`
 }
 
 // Network ネットワーク情報

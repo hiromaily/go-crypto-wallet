@@ -21,7 +21,7 @@ func (w *ColdWallet) ImportPublicKeyForColdWallet2(fileName string, accountType 
 
 	//accountチェック
 	//multisigであればこのチェックはOK
-	//if accountType != enum.AccountTypeReceipt && accountType != enum.AccountTypePayment {
+	//if accountType != ctype.AccountTypeReceipt && accountType != ctype.AccountTypePayment {
 	//	logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
 	//	return nil
 	//}
@@ -74,7 +74,7 @@ func (w *ColdWallet) ImportMultisigAddrForColdWallet1(fileName string, accountTy
 
 	//accountチェック
 	//multisigであればこのチェックはOK
-	//if accountType != enum.AccountTypeReceipt && accountType != enum.AccountTypePayment {
+	//if accountType != ctype.AccountTypeReceipt && accountType != ctype.AccountTypePayment {
 	//	logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
 	//	return nil
 	//}

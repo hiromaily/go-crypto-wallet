@@ -15,7 +15,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 )
 
 //TODO:参考に(中国語のサイト)
@@ -262,7 +262,7 @@ func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, err
 // 入金時のトランザクション(multisigではないトランザクション)用
 func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []PrevTx) (*wire.MsgTx, bool, error) {
 	//署名
-	if b.Version() >= enum.BTCVer17 {
+	if b.Version() >= ctype.BTCVer17 {
 		return b.signRawTransactionWithWalletVer17(tx, prevtxs)
 	}
 	//restart bitcoind with -deprecatedrpc=signrawtransaction
@@ -426,7 +426,7 @@ func (b *Bitcoin) debugCompareTx(tx1, tx2 *wire.MsgTx) {
 // For above ver17
 func (b *Bitcoin) SignRawTransactionWithKey(tx *wire.MsgTx, privKeysWIF []string, prevtxs []PrevTx) (*wire.MsgTx, bool, error) {
 	//署名
-	if b.Version() >= enum.BTCVer17 {
+	if b.Version() >= ctype.BTCVer17 {
 		return b.signRawTransactionWithKeyVer17(tx, privKeysWIF, prevtxs)
 	}
 	return b.signRawTransactionWithKeyVer16(tx, privKeysWIF, prevtxs)

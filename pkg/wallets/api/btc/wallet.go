@@ -5,7 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 )
 
 //{
@@ -103,7 +103,7 @@ func (b *Bitcoin) WalletPassphraseChange(old, new string) error {
 //  applied to the new wallet (eg -zapwallettxes, upgradewallet, rescan, etc).
 //  e.g. bitcoin-cli loadwallet "test.dat"
 func (b *Bitcoin) LoadWallet(fileName string) error {
-	if b.Version() < enum.BTCVer17 {
+	if b.Version() < ctype.BTCVer17 {
 		return errors.New("`loadwallet` is available from bitcoin version 0.17")
 	}
 	//loadwallet "filename"
@@ -134,7 +134,7 @@ func (b *Bitcoin) LoadWallet(fileName string) error {
 //  Specifying the wallet name on a wallet endpoint is invalid.
 //  e.g. bitcoin-cli unloadwallet wallet_name
 func (b *Bitcoin) UnLoadWallet(fileName string) error {
-	if b.Version() < enum.BTCVer17 {
+	if b.Version() < ctype.BTCVer17 {
 		return errors.New("`unloadwallet` is available from bitcoin version 0.17")
 	}
 	//unloadwallet ( "wallet_name" )
@@ -152,7 +152,7 @@ func (b *Bitcoin) UnLoadWallet(fileName string) error {
 
 // CreateWallet Creates and loads a new wallet
 func (b *Bitcoin) CreateWallet(fileName string, disablePrivKey bool) error {
-	if b.Version() < enum.BTCVer17 {
+	if b.Version() < ctype.BTCVer17 {
 		return errors.New("`createwallet` is available from bitcoin version 0.17")
 	}
 	//createwallet "wallet_name" ( disable_private_keys )

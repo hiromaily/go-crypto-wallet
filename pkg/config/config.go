@@ -130,7 +130,7 @@ func (c *Config) validate() error {
 	}
 
 	// CoinType
-	//if !enum.ValidateBitcoinType(c.CoinType) {
+	//if !ctype.ValidateBitcoinType(c.CoinType) {
 	//	return errors.New("CoinType is invalid in toml file")
 	//}
 	return nil

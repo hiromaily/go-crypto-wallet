@@ -8,8 +8,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/config"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/btc"
+	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 )
 
 //TODO: BitcoinCash特有の機能は同一func名でOverrideすること
@@ -43,7 +43,7 @@ func NewBitcoinCash(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.
 	//bitc.SetVersion(netInfo.Version)
 	//logger.Infof("bitcoin server version: %d", netInfo.Version)
 
-	bitc.SetCoinType(enum.BCH)
+	bitc.SetCoinType(ctype.BCH)
 
 	return &bitc, nil
 }

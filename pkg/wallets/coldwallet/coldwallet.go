@@ -31,7 +31,7 @@ import (
 //type KeySigner interface {
 //	SignatureFromFile(filePath string) (string, bool, string, error)
 //	GenerateSeed() ([]byte, error)
-//	GenerateAccountKey(accountType account.AccountType, coinType enum.CoinType, seed []byte, count uint32) ([]key.WalletKey, error)
+//	GenerateAccountKey(accountType account.AccountType, coinType ctype.CoinType, seed []byte, count uint32) ([]key.WalletKey, error)
 //	ImportPrivateKey(accountType account.AccountType) error
 //}
 

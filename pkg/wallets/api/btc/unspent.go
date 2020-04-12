@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 )
 
 // ListUnspentResult listunspentの戻り値
@@ -83,7 +83,7 @@ func (b *Bitcoin) convertListUnspent(listUnspent []btcjson.ListUnspentResult) []
 
 // ListUnspent listunspentを呼び出す
 func (b *Bitcoin) ListUnspent() ([]ListUnspentResult, error) {
-	if b.Version() >= enum.BTCVer17 {
+	if b.Version() >= ctype.BTCVer17 {
 		return b.listUnspentVer17()
 	}
 	return b.listUnspentVer16()
@@ -137,7 +137,7 @@ func (b *Bitcoin) ListUnspentByAccount(accountType account.AccountType) ([]ListU
 
 	var unspentList []ListUnspentResult
 
-	if b.Version() >= enum.BTCVer17 {
+	if b.Version() >= ctype.BTCVer17 {
 		unspentList, err = b.listUnspentByAccountVer17(addrs)
 		if err != nil {
 			return nil, nil, errors.Errorf("BTC.listUnspentByAccountVer17() error: %s", err)

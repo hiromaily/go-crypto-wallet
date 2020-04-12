@@ -193,7 +193,7 @@ func main() {
 //		}
 //
 //		//generate
-//		keys, err := wallet.GenerateAccountKey(account.AccountTypeAuthorization, enum.BTC, bSeed, 1)
+//		keys, err := wallet.GenerateAccountKey(account.AccountTypeAuthorization, ctype.BTC, bSeed, 1)
 //		if err != nil {
 //			logger.Fatalf("%+v", err)
 //		}
@@ -235,7 +235,7 @@ func main() {
 //		logger.Infof("Run: Account[%s]", opts.Account)
 //
 //		//execute addmultisigaddress
-//		err := wallet.AddMultisigAddressByAuthorization(account.AccountType(opts.Account), enum.AddressTypeP2shSegwit)
+//		err := wallet.AddMultisigAddressByAuthorization(account.AccountType(opts.Account), ctype.AddressTypeP2shSegwit)
 //		if err != nil {
 //			logger.Fatalf("%+v", err)
 //		}

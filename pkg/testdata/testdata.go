@@ -19,7 +19,7 @@ package testdata
 //	//
 //	////update
 //	//tx := m.RDB.MustBegin()
-//	//err = m.UpdateAccountOnAccountPubKeyTable(enum.AccountTypeClient, accountPubKeyTable, tx, false)
+//	//err = m.UpdateAccountOnAccountPubKeyTable(ctype.AccountTypeClient, accountPubKeyTable, tx, false)
 //	//if err != nil{
 //	//	return errors.Errorf("DB.UpdateAccountOnAccountPubKeyTable() error: %s", err)
 //	//}
@@ -27,11 +27,11 @@ package testdata
 //	//2. アドレスにaccount名を登録(bitcoin core経由)
 //	//for _ , pubkey := range accountPubKeyTable {
 //	//	//err = btc.SetAccount(pubkey.WalletAddress, pubkey.Account)
-//	//	err = btc.SetAccount(pubkey.WalletAddress, string(enum.AccountTypeClient))
+//	//	err = btc.SetAccount(pubkey.WalletAddress, string(ctype.AccountTypeClient))
 //	//	if err != nil{
 //	//		return errors.Errorf("btc.SetAccount() error: %s", err)
 //	//	}
-//	//	//if btc.Version() >= enum.BTCVer17 {
+//	//	//if btc.Version() >= ctype.BTCVer17 {
 //	//	//	err = btc.SetLabel(pubkey.WalletAddress, pubkey.Account)
 //	//	//	if err != nil{
 //	//	//		return errors.Errorf("btc.SetLabel() error: %s", err)

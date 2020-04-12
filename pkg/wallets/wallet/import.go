@@ -8,8 +8,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
+	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 )
 
@@ -25,7 +25,7 @@ func (w *Wallet) ImportPublicKey(fileName string, accountType account.AccountTyp
 
 	//[]AccountPublicKeyTable //import時にアカウント名をcoreのwalletに登録する
 	acnt := string(accountType)
-	//if accountType == enum.AccountTypeClient {
+	//if accountType == ctype.AccountTypeClient {
 	//	account = ""
 	//}
 
@@ -73,7 +73,7 @@ func (w *Wallet) ImportPublicKey(fileName string, accountType account.AccountTyp
 
 //checkImportedPublicAddress watch only walletとして追加されているかチェックする
 func (w *Wallet) checkImportedPublicAddress(addr string) {
-	if w.btc.Version() >= enum.BTCVer17 {
+	if w.btc.Version() >= ctype.BTCVer17 {
 		w.checkImportedPublicAddressVer17(addr)
 		return
 	}

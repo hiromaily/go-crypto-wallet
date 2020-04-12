@@ -445,7 +445,7 @@ func main() {
 //		logger.Info("Run: I/Fが変わってエラーが出るようになったのでテスト")
 //		logger.Debugf("account: %s, confirmation block: %d", account.AccountTypePayment.String(), wallet.BTC.ConfirmationBlock())
 //		//FIXME:wallet.BTC.GetBalanceByAccountAndMinConf()の呼び出しをやめて、GetReceivedByAccountAndMinConf()をcallするように変更する
-//		//balance, err := wallet.BTC.GetBalanceByAccountAndMinConf(string(enum.AccountTypePayment), wallet.BTC.ConfirmationBlock())
+//		//balance, err := wallet.BTC.GetBalanceByAccountAndMinConf(string(ctype.AccountTypePayment), wallet.BTC.ConfirmationBlock())
 //		balance, err := wallet.BTC.GetReceivedByAccountAndMinConf(account.AccountTypePayment.String(), wallet.BTC.ConfirmationBlock())
 //		if err != nil {
 //			log.Fatalf("%+v", err)

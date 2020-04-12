@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 )
 
 // GetAddressInfoResult getaddressinfoをcallしたresponseの型
@@ -63,7 +63,7 @@ func (b *Bitcoin) CreateNewAddress(accountName string) (btcutil.Address, error) 
 //GetAccountAddress アカウントに紐づくアドレスを返す
 // Deprecated, will be removed in V0.18.
 func (b *Bitcoin) GetAccountAddress(accountName string) (btcutil.Address, error) {
-	if b.Version() >= enum.BTCVer17 {
+	if b.Version() >= ctype.BTCVer17 {
 		//TODO:複数件取得に変わるため、ゆくゆくは、この呼び出すはやめて、GetAddressesByLabel()を呼び出すようにする
 		addrs, err := b.GetAddressesByLabel(accountName)
 		if err != nil {
@@ -130,7 +130,7 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 
 // GetAddressesByAccount アカウント名から紐づくすべてのアドレスを取得する
 func (b *Bitcoin) GetAddressesByAccount(accountName string) ([]btcutil.Address, error) {
-	if b.Version() >= enum.BTCVer17 {
+	if b.Version() >= ctype.BTCVer17 {
 		//TODO:複数件取得に変わるため、ゆくゆくは、この呼び出すはやめて、GetAddressesByLabel()を呼び出すようにする
 		addrs, err := b.GetAddressesByLabel(accountName)
 		if err != nil {

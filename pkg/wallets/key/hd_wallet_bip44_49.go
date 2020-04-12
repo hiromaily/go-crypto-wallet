@@ -14,7 +14,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 )
 
 //PurposeType BIP44は44固定
@@ -55,13 +55,13 @@ const (
 
 // Key Keyオブジェクト
 type Key struct {
-	coinType enum.CoinType
+	coinType ctype.CoinType
 	conf     *chaincfg.Params
 	logger   *zap.Logger
 }
 
 // NewKey Keyオブジェクトを返す
-func NewKey(coinType enum.CoinType, conf *chaincfg.Params, logger *zap.Logger) *Key {
+func NewKey(coinType ctype.CoinType, conf *chaincfg.Params, logger *zap.Logger) *Key {
 	keyData := Key{
 		coinType: coinType,
 		conf:     conf,
@@ -87,7 +87,7 @@ func (k Key) CreateAccount(seed []byte, actType account.AccountType) (string, st
 	}
 	//CoinType
 	ct := uint32(CoinTypeBitcoin)
-	if k.conf.Name != string(enum.NetworkTypeMainNet) {
+	if k.conf.Name != string(ctype.NetworkTypeMainNet) {
 		ct = uint32(CoinTypeTestnet)
 	}
 	coinType, err := purpose.Child(hdkeychain.HardenedKeyStart + ct)
@@ -155,7 +155,7 @@ func (k Key) CreateKeysWithIndex(accountPrivateKey string, idxFrom, count uint32
 
 		// Address(P2PKH) BTC/BCH
 		//  btcutil.NewAddressPubKeyHash(pkHash, net)
-		//if k.coinType == enum.BTC {
+		//if k.coinType == ctype.BTC {
 		//	address, err := child.Address(k.conf)
 		//}
 		strAddr, err := k.addressString(privateKey)
@@ -219,7 +219,7 @@ func (k Key) addressString(privKey *btcec.PrivateKey) (string, error) {
 		return "", errors.Errorf("btcutil.NewAddressPubKeyHash() error: %s", err)
 	}
 
-	if k.coinType == enum.BTC {
+	if k.coinType == ctype.BTC {
 		//BTC
 		return addr.String(), nil
 	}
@@ -265,7 +265,7 @@ func (k Key) getP2shSegwit(privKey *btcec.PrivateKey) (string, string, error) {
 	var strRedeemScript string //暫定
 
 	//BTC
-	if k.coinType == enum.BTC {
+	if k.coinType == ctype.BTC {
 		address, err := btcutil.NewAddressScriptHash(redeemScript, k.conf)
 		if err != nil {
 			return "", "", errors.Errorf("btcutil.NewAddressScriptHash() error: %s", err)
