@@ -27,10 +27,6 @@ import (
 
 // GenerateSeed seedを生成する
 func (w *ColdWallet) GenerateSeed() ([]byte, error) {
-	//TODO:remove it
-	if w.wtype == types.WalletTypeWatchOnly {
-		return nil, errors.New("it's available on Coldwallet1, Coldwallet2")
-	}
 
 	bSeed, err := w.retrieveSeed()
 	if err == nil {

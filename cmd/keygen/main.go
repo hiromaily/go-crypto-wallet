@@ -31,31 +31,9 @@ import (
 // - encrypt wallet itself by `encryptwallet` command
 // - passphrase would be required when using secret key to sign unsigned transaction
 
-//TODO: after making sure command works, this code is deleted
-//type Options struct {
-//	//Configパス
-//	ConfPath string `short:"c" long:"conf" default:"" description:"Path for configuration toml file"`
-//
-//	//署名モード
-//	Sign bool `short:"s" long:"sign" description:"for signature"`
-//	//Keyモード
-//	Key bool `short:"k" long:"key" description:"for key related use (generate/import/export)"`
-//	//Debugモード
-//	Debug bool `short:"d" long:"debug" description:"for only development use"`
-//
-//	//実行されるサブ機能
-//	Mode uint8 `short:"m" long:"mode" description:"Mode: detailed functionalities"`
-//
-//	//txファイルパス
-//	ImportFile string `short:"i" long:"import" default:"" description:"import file path for hex"`
-//	//key生成時に発行する数
-//	KeyNumber uint32 `short:"n" long:"keynumber" description:"key number for generation"`
-//	//アカウント
-//	Account string `short:"a" long:"account" description:"account like client, receipt, payment"`
-//}
-
 var (
-	appName    = types.WalletTypeKeyGen.String()
+	walletType = types.WalletTypeKeyGen
+	appName    = walletType.String()
 	appVersion = "2.0.0"
 )
 
@@ -84,12 +62,12 @@ func main() {
 	// help
 	if !isHelp && len(os.Args) > 1 {
 		// config
-		conf, err := config.New(confPath)
+		conf, err := config.New(confPath, walletType)
 		if err != nil {
 			log.Fatal(err)
 		}
 		// create wallet
-		regi := NewRegistry(conf, types.WalletTypeKeyGen)
+		regi := NewRegistry(conf, walletType)
 		walleter = regi.NewKeygener()
 	}
 
@@ -103,25 +81,48 @@ func main() {
 
 	code, err := cl.Run()
 	if err != nil {
-		log.Printf("fail to call Run() %s command: %v", types.WalletTypeKeyGen.String(), err)
+		log.Printf("fail to call Run() %s command: %v", appName, err)
 	}
 	os.Exit(code)
-
-	//TODO: after making sure command works, this code is deleted
-	//if opts.Sign {
-	//	//sign関連機能
-	//	signFunctionalities(wallet)
-	//} else if opts.Key {
-	//	//key関連機能
-	//	keyFunctionalities(wallet)
-	//} else if opts.Debug {
-	//	//debug用 機能確認
-	//	debugForCheck(wallet)
-	//} else {
-	//	//logger.Warn("either sign:-s, key:-k, debug:-d should be set as main function")
-	//	procedure.ShowColdWallet1()
-	//}
 }
+
+//TODO: after making sure command works, this code is deleted
+//type Options struct {
+//	//Configパス
+//	ConfPath string `short:"c" long:"conf" default:"" description:"Path for configuration toml file"`
+//
+//	//署名モード
+//	Sign bool `short:"s" long:"sign" description:"for signature"`
+//	//Keyモード
+//	Key bool `short:"k" long:"key" description:"for key related use (generate/import/export)"`
+//	//Debugモード
+//	Debug bool `short:"d" long:"debug" description:"for only development use"`
+//
+//	//実行されるサブ機能
+//	Mode uint8 `short:"m" long:"mode" description:"Mode: detailed functionalities"`
+//
+//	//txファイルパス
+//	ImportFile string `short:"i" long:"import" default:"" description:"import file path for hex"`
+//	//key生成時に発行する数
+//	KeyNumber uint32 `short:"n" long:"keynumber" description:"key number for generation"`
+//	//アカウント
+//	Account string `short:"a" long:"account" description:"account like client, receipt, payment"`
+//}
+
+//TODO: after making sure command works, this code is deleted
+//if opts.Sign {
+//	//sign関連機能
+//	signFunctionalities(wallet)
+//} else if opts.Key {
+//	//key関連機能
+//	keyFunctionalities(wallet)
+//} else if opts.Debug {
+//	//debug用 機能確認
+//	debugForCheck(wallet)
+//} else {
+//	//logger.Warn("either sign:-s, key:-k, debug:-d should be set as main function")
+//	procedure.ShowColdWallet1()
+//}
 
 //TODO: after making sure command works, this code is deleted
 //func checkImportFile() {

@@ -32,6 +32,61 @@ import (
 // - procedure pkg move to help of command
 // - change Japanese to English
 
+var (
+	walletType = types.WalletTypeWatchOnly
+	appName    = walletType.String()
+	appVersion = "2.0.0"
+)
+
+func main() {
+	// command line
+	var (
+		confPath  string
+		isHelp    bool
+		isVersion bool
+		walleter  wallets.Walleter
+	)
+	flags := flag.NewFlagSet("main", flag.ContinueOnError)
+	flags.StringVar(&confPath, "conf", os.Getenv("WATCH_WALLET_CONF"), "config file path")
+	flags.BoolVar(&isVersion, "version", false, "show version")
+	flags.BoolVar(&isHelp, "help", false, "show help")
+	if err := flags.Parse(os.Args[1:]); err != nil {
+		log.Fatal(err)
+	}
+
+	// version
+	if isVersion {
+		fmt.Printf("%s v%s\n", appName, appVersion)
+		os.Exit(0)
+	}
+
+	// help
+	if !isHelp && len(os.Args) > 1 {
+		// config
+		conf, err := config.New(confPath, walletType)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// create wallet
+		regi := NewRegistry(conf, walletType)
+		walleter = regi.NewWalleter()
+	}
+
+	//sub command
+	args := flags.Args()
+	cmds := wcmd.WalletSubCommands(walleter, appVersion)
+	cl := command.CreateSubCommand(appName, appVersion, args, cmds)
+	cl.HelpFunc = command.HelpFunc(cl.Name)
+
+	flags.Usage = func() { fmt.Println(cl.HelpFunc(cl.Commands)) }
+
+	code, err := cl.Run()
+	if err != nil {
+		log.Printf("fail to call Run() %s command: %v", appName, err)
+	}
+	os.Exit(code)
+}
+
 //TODO: after making sure command works, this code is deleted
 // Options is command line options
 //type Options struct {
@@ -70,89 +125,35 @@ import (
 //	Account2 string `short:"z" long:"account_to" description:"account like client, receipt, payment"`
 //}
 
-var (
-	appName    = types.WalletTypeWatchOnly.String()
-	appVersion = "2.0.0"
-)
-
-func main() {
-	// command line
-	var (
-		confPath  string
-		isHelp    bool
-		isVersion bool
-		walleter  wallets.Walleter
-	)
-	flags := flag.NewFlagSet("main", flag.ContinueOnError)
-	flags.StringVar(&confPath, "conf", os.Getenv("WATCH_WALLET_CONF"), "config file path")
-	flags.BoolVar(&isVersion, "version", false, "show version")
-	flags.BoolVar(&isHelp, "help", false, "show help")
-	if err := flags.Parse(os.Args[1:]); err != nil {
-		log.Fatal(err)
-	}
-
-	// version
-	if isVersion {
-		fmt.Printf("%s v%s\n", appName, appVersion)
-		os.Exit(0)
-	}
-
-	// help
-	if !isHelp && len(os.Args) > 1 {
-		// config
-		conf, err := config.New(confPath)
-		if err != nil {
-			log.Fatal(err)
-		}
-		// create wallet
-		regi := NewRegistry(conf, types.WalletTypeWatchOnly)
-		walleter = regi.NewWalleter()
-	}
-
-	//sub command
-	args := flags.Args()
-	cmds := wcmd.WalletSubCommands(walleter, appVersion)
-	cl := command.CreateSubCommand(appName, appVersion, args, cmds)
-	cl.HelpFunc = command.HelpFunc(cl.Name)
-
-	flags.Usage = func() { fmt.Println(cl.HelpFunc(cl.Commands)) }
-
-	code, err := cl.Run()
-	if err != nil {
-		log.Printf("fail to call Run() %s command: %v", types.WalletTypeWatchOnly.String(), err)
-	}
-	os.Exit(code)
-
-	//TODO: after making sure command works, this code is deleted
-	//if opts.Key {
-	//	//キー関連機能
-	//	keyFunctionalities(wallet)
-	//} else if opts.Receipt {
-	//	//入金関連機能
-	//	receiptFunctionalities(wallet)
-	//} else if opts.Payment {
-	//	//出金関連機能
-	//	paymentFunctionalities(wallet)
-	//} else if opts.Transfer {
-	//	//内部アカウント転送関連機能
-	//	transferFunctionalities(wallet)
-	//} else if opts.Send {
-	//	//署名送信関連機能
-	//	sendingFunctionalities(wallet)
-	//} else if opts.Monitor {
-	//	//transaction監視関連機能
-	//	monitoringFunctionalities(wallet)
-	//} else if opts.Cmd {
-	//	//BTCコマンド実行
-	//	btcCommand(wallet)
-	//} else if opts.Debug {
-	//	//debug用 機能確認
-	//	debugForCheck(wallet)
-	//} else {
-	//	logger.Warn("either sign:-s, key:-k, debug:-d should be set as main function")
-	//	procedure.ShowWallet()
-	//}
-}
+//TODO: after making sure command works, this code is deleted
+//if opts.Key {
+//	//キー関連機能
+//	keyFunctionalities(wallet)
+//} else if opts.Receipt {
+//	//入金関連機能
+//	receiptFunctionalities(wallet)
+//} else if opts.Payment {
+//	//出金関連機能
+//	paymentFunctionalities(wallet)
+//} else if opts.Transfer {
+//	//内部アカウント転送関連機能
+//	transferFunctionalities(wallet)
+//} else if opts.Send {
+//	//署名送信関連機能
+//	sendingFunctionalities(wallet)
+//} else if opts.Monitor {
+//	//transaction監視関連機能
+//	monitoringFunctionalities(wallet)
+//} else if opts.Cmd {
+//	//BTCコマンド実行
+//	btcCommand(wallet)
+//} else if opts.Debug {
+//	//debug用 機能確認
+//	debugForCheck(wallet)
+//} else {
+//	logger.Warn("either sign:-s, key:-k, debug:-d should be set as main function")
+//	procedure.ShowWallet()
+//}
 
 //TODO: after making sure command works, this code is deleted
 //func checkImportFile() {

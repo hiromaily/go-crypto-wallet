@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 	"io/ioutil"
 
 	"github.com/BurntSushi/toml"
@@ -37,8 +38,10 @@ type Bitcoin struct {
 }
 
 // BitcoinBlock block information of Bitcoin
+// FIXME: keygen/signature wallet doesn't have this value
+//  so validation can not be used
 type BitcoinBlock struct {
-	ConfirmationNum int `toml:"confirmation_num" validate:"required"`
+	ConfirmationNum int `toml:"confirmation_num"`
 }
 
 // BitcoinFee range of adjustment calculated fee when sending coin
@@ -86,7 +89,7 @@ type PubKeyFile struct {
 }
 
 // New create config
-func New(file string) (*Config, error) {
+func New(file string, wtype types.WalletType) (*Config, error) {
 	if file == "" {
 		return nil, errors.New("file should be passed")
 	}
@@ -101,7 +104,7 @@ func New(file string) (*Config, error) {
 	//grok.Value(conf)
 
 	//validate
-	if err = conf.validate(); err != nil {
+	if err = conf.validate(wtype); err != nil {
 		return nil, err
 	}
 
@@ -126,13 +129,19 @@ func loadConfig(path string) (*Config, error) {
 }
 
 // validate config
-func (c *Config) validate() error {
+func (c *Config) validate(wtype types.WalletType) error {
 	validate := validator.New()
 	if err := validate.Struct(c); err != nil {
 		return err
 	}
 
-	// CoinType
+	switch wtype {
+	case types.WalletTypeWatchOnly:
+		if c.Bitcoin.Block.ConfirmationNum == 0 {
+			return errors.New("Block ConfirmationNum is required in toml file")
+		}
+	default:
+	}
 	//if !ctype.ValidateBitcoinType(c.CoinType) {
 	//	return errors.New("CoinType is invalid in toml file")
 	//}

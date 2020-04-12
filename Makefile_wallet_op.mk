@@ -46,7 +46,6 @@ create-receipt-all:
 .PHONY: send-tx
 send-tx:
 	wallet sending -file ${filepath}
-	#wallet -s -m 1 -i ./data/tx/receipt/receipt_8_signed_1534832879778945174
 
 
 ###############################################################################
@@ -57,7 +56,6 @@ send-tx:
 .PHONY: monitor-tx
 monitor-tx:
 	wallet monitoring senttx -account ${acnt}
-	#wallet -n -m 1
 
 # WIP: monitor account balance
 #make acnt=client monitor-balance
@@ -89,13 +87,11 @@ create-payment-all:
 .PHONY: create-testdata
 create-testdata:
 	wallet db create
-	#wallet -d -m 1
 
 # reset payment testdata
 .PHONY: reset-testdata
 reset-testdata:
 	wallet db reset
-	#wallet -d -m 2
 
 
 ###############################################################################

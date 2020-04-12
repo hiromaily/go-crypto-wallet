@@ -12,6 +12,10 @@ is_main = false #true: MainNet,false: TestNet
 service = "keygen"
 level = "debug" # debug, info, warn, error
 
+# only available for watch only wallet, but definition is required as none
+[tracer]
+type = "none"  # none, jaeger, datadog
+
 [mysql]
 host = "127.0.0.1:3308"
 dbname = "keygen"
