@@ -9,7 +9,7 @@ disable_tls = true
 is_main = false #true: MainNet,false: TestNet
 
 [logger]
-service = "signature-wallet"
+service = "signature"
 level = "debug" # debug, info, warn, error
 
 [mysql]

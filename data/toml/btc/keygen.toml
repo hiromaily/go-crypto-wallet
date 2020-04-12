@@ -9,7 +9,7 @@ disable_tls = true
 is_main = false #true: MainNet,false: TestNet
 
 [logger]
-service = "keygen-wallet"
+service = "keygen"
 level = "debug" # debug, info, warn, error
 
 [mysql]

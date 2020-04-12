@@ -16,8 +16,17 @@ adjustment_min = 0.5 # adjustable minimum fee magnification
 adjustment_max = 2.0 # adjustable maximum fee magnification
 
 [logger]
-service = "watch-wallet"
+service = "wallet"
 level = "debug" # debug, info, warn, error
+
+# only available for watch only wallet
+[tracer]
+type = "none"  # none, jaeger, datadog
+
+[tracer.jaeger]
+service_name = "wallet"
+collector_endpoint = "http://127.0.0.1:14268/api/traces"
+sampling_probability = 0.5  # 0.001 to 1.0
 
 [mysql]
 host = "127.0.0.1:3307"

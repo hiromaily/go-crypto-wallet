@@ -1,18 +1,14 @@
 ###############################################################################
-# Watch Only wallet
+# Watch Only Wallet
 ###############################################################################
 ###############################################################################
-# Run アドレスのImport機能
+# import public addresses exported by keygen wallet
 ###############################################################################
-# keygen-walletでexportしたpublicアドレスをimportする
-import-pub1:
-	wallet -k -m 1 -i ./data/pubkey/client_1535423628425011000.csv
-
-import-pub2:
-	wallet -k -m 2 -i ./data/pubkey/client_1535423628425011000.csv
-
-import-pub3:
-	wallet -k -m 3 -i ./data/pubkey/client_1535423628425011000.csv
+#make filepath=./data/pubkey/client_1535423628425011000.csv import-pubkey
+.PHONY: import-pubkey
+import-pubkey:
+	wallet key
+	#wallet -k -m 1 -i ./data/pubkey/client_1535423628425011000.csv
 
 
 ###############################################################################

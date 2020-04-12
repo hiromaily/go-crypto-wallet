@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/bookerzzz/grok"
 	"io/ioutil"
 
 	"github.com/BurntSushi/toml"
@@ -16,7 +17,7 @@ import (
 type Config struct {
 	CoinType   string     `toml:"coin_type" validate:"oneof=btc bch"`
 	Bitcoin    Bitcoin    `toml:"bitcoin"`
-	Logger     Logger     `toml:"bitcoin"`
+	Logger     Logger     `toml:"logger"`
 	Tracer     Tracer     `toml:"tracer"`
 	MySQL      MySQL      `toml:"mysql"`
 	TxFile     TxFile     `toml:"tx_file"`
@@ -49,7 +50,7 @@ type BitcoinFee struct {
 
 // Logger logger info
 type Logger struct {
-	Service string `toml:"host" validate:"required"`
+	Service string `toml:"service" validate:"required"`
 	Level   string `toml:"level" validate:"required"`
 }
 
@@ -96,6 +97,9 @@ func New(file string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	//debug
+	grok.Value(conf)
 
 	//validate
 	if err = conf.validate(); err != nil {
