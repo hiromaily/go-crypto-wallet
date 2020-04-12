@@ -6,7 +6,6 @@ import (
 
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/testdata"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
@@ -51,12 +50,15 @@ func (c *CreateCommand) Run(args []string) int {
 	}
 
 	//create payment_request table
-	err := testdata.CreateInitialTestData(c.wallet.GetDB(), c.wallet.GetBTC())
-	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call testdata.CreateInitialTestData() %+v", err))
-		return 1
-	}
-	c.ui.Info("Done!")
+	//FIXME: CreateInitialTestData is under refactoring
+	c.ui.Info("FIXME: CreateInitialTestData is under refactoring")
+
+	//err := testdata.CreateInitialTestData(c.wallet.GetDB(), c.wallet.GetBTC())
+	//if err != nil {
+	//	c.ui.Error(fmt.Sprintf("fail to call testdata.CreateInitialTestData() %+v", err))
+	//	return 1
+	//}
+	//c.ui.Info("Done!")
 
 	return 0
 }

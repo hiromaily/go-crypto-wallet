@@ -1,20 +1,21 @@
-package wallets
+package coldwallet
 
 import (
 	"strings"
 	"time"
 
-	"github.com/bookerzzz/grok"
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
 // ImportPublicKeyForColdWallet2 csvファイルからpublicアドレスをimportする for Cold Wallet2
-func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType account.AccountType) error {
-	if w.wtype != WalletTypeSignature {
+func (w *ColdWallet) ImportPublicKeyForColdWallet2(fileName string, accountType account.AccountType) error {
+	if w.wtype != types.WalletTypeSignature {
 		return errors.New("it's available on Coldwallet2")
 	}
 
@@ -43,12 +44,12 @@ func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType acco
 	}
 
 	//added_pubkey_history_receiptテーブルにInsert
-	addedPubkeyHistorys := make([]AddedPubkeyHistoryTable, len(pubKeys))
+	addedPubkeyHistorys := make([]coldrepo.AddedPubkeyHistoryTable, len(pubKeys))
 	for i, key := range pubKeys {
 		inner := strings.Split(key, ",")
 
 		//ここでは、FullPublicKeyをセットする必要がある
-		addedPubkeyHistorys[i] = AddedPubkeyHistoryTable{
+		addedPubkeyHistorys[i] = coldrepo.AddedPubkeyHistoryTable{
 			FullPublicKey:         inner[2],
 			AuthAddress1:          "",
 			AuthAddress2:          "",
@@ -66,8 +67,8 @@ func (w *Wallet) ImportPublicKeyForColdWallet2(fileName string, accountType acco
 }
 
 // ImportMultisigAddrForColdWallet1 coldwallet2でexportされたmultisigアドレス情報をimportする for Cold Wallet1
-func (w *Wallet) ImportMultisigAddrForColdWallet1(fileName string, accountType account.AccountType) error {
-	if w.wtype != WalletTypeKeyGen {
+func (w *ColdWallet) ImportMultisigAddrForColdWallet1(fileName string, accountType account.AccountType) error {
+	if w.wtype != types.WalletTypeKeyGen {
 		return errors.New("it's available on Coldwallet1")
 	}
 
@@ -96,7 +97,7 @@ func (w *Wallet) ImportMultisigAddrForColdWallet1(fileName string, accountType a
 	}
 
 	//added_pubkey_history_receiptテーブルにInsert
-	accountKeyTable := make([]AccountKeyTable, len(pubKeys))
+	accountKeyTable := make([]coldrepo.AccountKeyTable, len(pubKeys))
 
 	tm := time.Now()
 	for i, key := range pubKeys {
@@ -112,7 +113,7 @@ func (w *Wallet) ImportMultisigAddrForColdWallet1(fileName string, accountType a
 		//}
 
 		//Upsertをかけるには情報が不足しているので、とりあえず1行ずつUpdateする
-		accountKeyTable[i] = AccountKeyTable{
+		accountKeyTable[i] = coldrepo.AccountKeyTable{
 			FullPublicKey:         inner[0],
 			WalletMultisigAddress: inner[3],
 			RedeemScript:          inner[4],
@@ -128,4 +129,3 @@ func (w *Wallet) ImportMultisigAddrForColdWallet1(fileName string, accountType a
 
 	return nil
 }
-

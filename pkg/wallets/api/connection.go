@@ -2,13 +2,13 @@ package api
 
 import (
 	"github.com/btcsuite/btcd/rpcclient"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/btc"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/bch"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/btc"
 )
 
 //NewRPCClient try to connect bitcoin core RPCserver to create client instance

@@ -5,8 +5,7 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/keygenrepo"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/signaturerepo"
+	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 )
 
@@ -47,52 +46,76 @@ type WalletStorager interface {
 	UpdateTxTypeNotifiedByID(actionType enum.ActionType, ID int64, tx *sqlx.Tx, isCommit bool) (int64, error)
 }
 
-//TODO: use only required func
-type KeygenStorager interface {
+type ColdStorager interface {
 	Close() error
 	//acount_pubkey_repo
 	GetMaxIndexOnAccountKeyTable(accountType account.AccountType) (int64, error)
-	GetOneByMaxIDOnAccountKeyTable(accountType account.AccountType) (*keygenrepo.AccountKeyTable, error)
-	GetAllAccountKeyByKeyStatus(accountType account.AccountType, keyStatus enum.KeyStatus) ([]keygenrepo.AccountKeyTable, error)
-	GetAllAccountKeyByMultiAddrs(accountType account.AccountType, addrs []string) ([]keygenrepo.AccountKeyTable, error)
-	InsertAccountKeyTable(accountType account.AccountType, accountKeyTables []keygenrepo.AccountKeyTable, tx *sqlx.Tx, isCommit bool) error
+	GetOneByMaxIDOnAccountKeyTable(accountType account.AccountType) (*coldrepo.AccountKeyTable, error)
+	GetAllAccountKeyByKeyStatus(accountType account.AccountType, keyStatus enum.KeyStatus) ([]coldrepo.AccountKeyTable, error)
+	GetAllAccountKeyByMultiAddrs(accountType account.AccountType, addrs []string) ([]coldrepo.AccountKeyTable, error)
+	InsertAccountKeyTable(accountType account.AccountType, accountKeyTables []coldrepo.AccountKeyTable, tx *sqlx.Tx, isCommit bool) error
 	UpdateKeyStatusByWIF(accountType account.AccountType, keyStatus enum.KeyStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error)
 	UpdateKeyStatusByWIFs(accountType account.AccountType, keyStatus enum.KeyStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error)
-	UpdateMultisigAddrOnAccountKeyTableByFullPubKey(accountType account.AccountType, accountKeyTable []keygenrepo.AccountKeyTable, tx *sqlx.Tx, isCommit bool) error
+	UpdateMultisigAddrOnAccountKeyTableByFullPubKey(accountType account.AccountType, accountKeyTable []coldrepo.AccountKeyTable, tx *sqlx.Tx, isCommit bool) error
 	//added_pubkey_history_repo
-	GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType account.AccountType) ([]keygenrepo.AddedPubkeyHistoryTable, error)
-	GetAddedPubkeyHistoryTableByNotExported(accountType account.AccountType) ([]keygenrepo.AddedPubkeyHistoryTable, error)
-	InsertAddedPubkeyHistoryTable(accountType account.AccountType, addedPubkeyHistoryTables []keygenrepo.AddedPubkeyHistoryTable, tx *sqlx.Tx, isCommit bool) error
+	GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType account.AccountType) ([]coldrepo.AddedPubkeyHistoryTable, error)
+	GetAddedPubkeyHistoryTableByNotExported(accountType account.AccountType) ([]coldrepo.AddedPubkeyHistoryTable, error)
+	InsertAddedPubkeyHistoryTable(accountType account.AccountType, addedPubkeyHistoryTables []coldrepo.AddedPubkeyHistoryTable, tx *sqlx.Tx, isCommit bool) error
 	UpdateMultisigAddrOnAddedPubkeyHistoryTable(accountType account.AccountType, multiSigAddr, redeemScript, authAddr1, fullPublicKey string, tx *sqlx.Tx, isCommit bool) error
 	UpdateIsExportedOnAddedPubkeyHistoryTable(accountType account.AccountType, ids []int64, tx *sqlx.Tx, isCommit bool) (int64, error)
 	//seed_repo
-	GetSeedAll() ([]keygenrepo.Seed, error)
-	GetSeedOne() (keygenrepo.Seed, error)
+	GetSeedAll() ([]coldrepo.Seed, error)
+	GetSeedOne() (coldrepo.Seed, error)
 	GetSeedCount() (int64, error)
 	InsertSeed(seed string, tx *sqlx.Tx, isCommit bool) (int64, error)
 }
 
 //TODO: use only required func
-type SignatureStorager interface {
-	Close() error
-	//acount_pubkey_repo
-	GetMaxIndexOnAccountKeyTable(accountType account.AccountType) (int64, error)
-	GetOneByMaxIDOnAccountKeyTable(accountType account.AccountType) (*signaturerepo.AccountKeyTable, error)
-	GetAllAccountKeyByKeyStatus(accountType account.AccountType, keyStatus enum.KeyStatus) ([]signaturerepo.AccountKeyTable, error)
-	GetAllAccountKeyByMultiAddrs(accountType account.AccountType, addrs []string) ([]signaturerepo.AccountKeyTable, error)
-	InsertAccountKeyTable(accountType account.AccountType, accountKeyTables []signaturerepo.AccountKeyTable, tx *sqlx.Tx, isCommit bool) error
-	UpdateKeyStatusByWIF(accountType account.AccountType, keyStatus enum.KeyStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error)
-	UpdateKeyStatusByWIFs(accountType account.AccountType, keyStatus enum.KeyStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error)
-	UpdateMultisigAddrOnAccountKeyTableByFullPubKey(accountType account.AccountType, accountKeyTable []signaturerepo.AccountKeyTable, tx *sqlx.Tx, isCommit bool) error
-	//added_pubkey_history_repo
-	GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType account.AccountType) ([]signaturerepo.AddedPubkeyHistoryTable, error)
-	GetAddedPubkeyHistoryTableByNotExported(accountType account.AccountType) ([]signaturerepo.AddedPubkeyHistoryTable, error)
-	InsertAddedPubkeyHistoryTable(accountType account.AccountType, addedPubkeyHistoryTables []signaturerepo.AddedPubkeyHistoryTable, tx *sqlx.Tx, isCommit bool) error
-	UpdateMultisigAddrOnAddedPubkeyHistoryTable(accountType account.AccountType, multiSigAddr, redeemScript, authAddr1, fullPublicKey string, tx *sqlx.Tx, isCommit bool) error
-	UpdateIsExportedOnAddedPubkeyHistoryTable(accountType account.AccountType, ids []int64, tx *sqlx.Tx, isCommit bool) (int64, error)
-	//seed_repo
-	GetSeedAll() ([]signaturerepo.Seed, error)
-	GetSeedOne() (signaturerepo.Seed, error)
-	GetSeedCount() (int64, error)
-	InsertSeed(seed string, tx *sqlx.Tx, isCommit bool) (int64, error)
-}
+//type KeygenStorager interface {
+//	Close() error
+//	//acount_pubkey_repo
+//	GetMaxIndexOnAccountKeyTable(accountType account.AccountType) (int64, error)
+//	GetOneByMaxIDOnAccountKeyTable(accountType account.AccountType) (*keygenrepo.AccountKeyTable, error)
+//	GetAllAccountKeyByKeyStatus(accountType account.AccountType, keyStatus enum.KeyStatus) ([]keygenrepo.AccountKeyTable, error)
+//	GetAllAccountKeyByMultiAddrs(accountType account.AccountType, addrs []string) ([]keygenrepo.AccountKeyTable, error)
+//	InsertAccountKeyTable(accountType account.AccountType, accountKeyTables []keygenrepo.AccountKeyTable, tx *sqlx.Tx, isCommit bool) error
+//	UpdateKeyStatusByWIF(accountType account.AccountType, keyStatus enum.KeyStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error)
+//	UpdateKeyStatusByWIFs(accountType account.AccountType, keyStatus enum.KeyStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error)
+//	UpdateMultisigAddrOnAccountKeyTableByFullPubKey(accountType account.AccountType, accountKeyTable []keygenrepo.AccountKeyTable, tx *sqlx.Tx, isCommit bool) error
+//	//added_pubkey_history_repo
+//	GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType account.AccountType) ([]keygenrepo.AddedPubkeyHistoryTable, error)
+//	GetAddedPubkeyHistoryTableByNotExported(accountType account.AccountType) ([]keygenrepo.AddedPubkeyHistoryTable, error)
+//	InsertAddedPubkeyHistoryTable(accountType account.AccountType, addedPubkeyHistoryTables []keygenrepo.AddedPubkeyHistoryTable, tx *sqlx.Tx, isCommit bool) error
+//	UpdateMultisigAddrOnAddedPubkeyHistoryTable(accountType account.AccountType, multiSigAddr, redeemScript, authAddr1, fullPublicKey string, tx *sqlx.Tx, isCommit bool) error
+//	UpdateIsExportedOnAddedPubkeyHistoryTable(accountType account.AccountType, ids []int64, tx *sqlx.Tx, isCommit bool) (int64, error)
+//	//seed_repo
+//	GetSeedAll() ([]keygenrepo.Seed, error)
+//	GetSeedOne() (keygenrepo.Seed, error)
+//	GetSeedCount() (int64, error)
+//	InsertSeed(seed string, tx *sqlx.Tx, isCommit bool) (int64, error)
+//}
+
+//TODO: use only required func
+//type SignatureStorager interface {
+//	Close() error
+//	//acount_pubkey_repo
+//	GetMaxIndexOnAccountKeyTable(accountType account.AccountType) (int64, error)
+//	GetOneByMaxIDOnAccountKeyTable(accountType account.AccountType) (*signaturerepo.AccountKeyTable, error)
+//	GetAllAccountKeyByKeyStatus(accountType account.AccountType, keyStatus enum.KeyStatus) ([]signaturerepo.AccountKeyTable, error)
+//	GetAllAccountKeyByMultiAddrs(accountType account.AccountType, addrs []string) ([]signaturerepo.AccountKeyTable, error)
+//	InsertAccountKeyTable(accountType account.AccountType, accountKeyTables []signaturerepo.AccountKeyTable, tx *sqlx.Tx, isCommit bool) error
+//	UpdateKeyStatusByWIF(accountType account.AccountType, keyStatus enum.KeyStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error)
+//	UpdateKeyStatusByWIFs(accountType account.AccountType, keyStatus enum.KeyStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error)
+//	UpdateMultisigAddrOnAccountKeyTableByFullPubKey(accountType account.AccountType, accountKeyTable []signaturerepo.AccountKeyTable, tx *sqlx.Tx, isCommit bool) error
+//	//added_pubkey_history_repo
+//	GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType account.AccountType) ([]signaturerepo.AddedPubkeyHistoryTable, error)
+//	GetAddedPubkeyHistoryTableByNotExported(accountType account.AccountType) ([]signaturerepo.AddedPubkeyHistoryTable, error)
+//	InsertAddedPubkeyHistoryTable(accountType account.AccountType, addedPubkeyHistoryTables []signaturerepo.AddedPubkeyHistoryTable, tx *sqlx.Tx, isCommit bool) error
+//	UpdateMultisigAddrOnAddedPubkeyHistoryTable(accountType account.AccountType, multiSigAddr, redeemScript, authAddr1, fullPublicKey string, tx *sqlx.Tx, isCommit bool) error
+//	UpdateIsExportedOnAddedPubkeyHistoryTable(accountType account.AccountType, ids []int64, tx *sqlx.Tx, isCommit bool) (int64, error)
+//	//seed_repo
+//	GetSeedAll() ([]signaturerepo.Seed, error)
+//	GetSeedOne() (signaturerepo.Seed, error)
+//	GetSeedCount() (int64, error)
+//	InsertSeed(seed string, tx *sqlx.Tx, isCommit bool) (int64, error)
+//}

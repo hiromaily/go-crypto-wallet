@@ -2,9 +2,6 @@ package main
 
 import (
 	"github.com/btcsuite/btcd/rpcclient"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/wallet"
-
 	"github.com/jmoiron/sqlx"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
@@ -17,13 +14,16 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tracer"
 	"github.com/hiromaily/go-bitcoin/pkg/txfile"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/wallet"
 )
 
 // Registry is for registry interface
 type Registry interface {
-	NewWalleter() wallet.Walleter
+	NewWalleter() wallets.Walleter
 }
 
 type registry struct {
@@ -43,7 +43,7 @@ func NewRegistry(conf *config.Config, walletType types.WalletType) Registry {
 }
 
 // NewWalleter is to register for walleter interface
-func (r *registry) NewWalleter() wallet.Walleter {
+func (r *registry) NewWalleter() wallets.Walleter {
 	//TODO: should be interface
 	r.setFilePath()
 

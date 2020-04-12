@@ -2,11 +2,11 @@ package btc
 
 import (
 	"encoding/json"
-	"go.uber.org/zap"
 
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 )

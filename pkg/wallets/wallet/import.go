@@ -1,14 +1,16 @@
 package wallet
 
 import (
+	"strings"
+
 	"github.com/bookerzzz/grok"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
+
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
-	"go.uber.org/zap"
-	"strings"
-	"github.com/pkg/errors"
 )
 
 //CSVのpublickeyをDBにimportする、このとき、clientの場合はaccount無し
@@ -94,7 +96,7 @@ func (w *Wallet) checkImportedPublicAddress(addr string) {
 	if err != nil {
 		w.logger.Error(
 			"w.btc.ValidateAddress()",
-			zap.String("address",addr),
+			zap.String("address", addr),
 			zap.Error(err))
 	}
 	grok.Value(res)
@@ -114,7 +116,7 @@ func (w *Wallet) checkImportedPublicAddressVer17(addr string) {
 	if err != nil {
 		w.logger.Error(
 			"w.btc.GetAddressInfo()",
-			zap.String("address",addr),
+			zap.String("address", addr),
 			zap.Error(err))
 	}
 	w.logger.Debug("account is found",
@@ -126,4 +128,3 @@ func (w *Wallet) checkImportedPublicAddressVer17(addr string) {
 		w.logger.Error("this address must be watch only wallet")
 	}
 }
-

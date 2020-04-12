@@ -1,4 +1,4 @@
-package wallets
+package coldwallet
 
 import (
 	"bufio"
@@ -6,17 +6,20 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
 //ExportAddedPubkeyHistory AddedPubkeyHistoryテーブルをcsvとして出力する
 // coldwallet2から使用
-func (w *Wallet) ExportAddedPubkeyHistory(accountType account.AccountType) (string, error) {
+func (w *ColdWallet) ExportAddedPubkeyHistory(accountType account.AccountType) (string, error) {
 	//TODO:remove it
-	if w.wtype != WalletTypeSignature {
+	if w.wtype != types.WalletTypeSignature {
 		return "", errors.New("it's available on Coldwallet2")
 	}
 
@@ -39,7 +42,9 @@ func (w *Wallet) ExportAddedPubkeyHistory(accountType account.AccountType) (stri
 	if err != nil {
 		return "", errors.Errorf("key.ExportAddedPubkeyHistoryTable() error: %s", err)
 	}
-	w.logger.Infof("file name is %s", fileName)
+	w.logger.Info(
+		"call exportAddedPubkeyHistoryTable()",
+		zap.String("fileName", fileName))
 
 	//DBの該当レコードをアップデート
 	ids := make([]int64, len(addedPubkeyHistoryTable))
@@ -54,8 +59,8 @@ func (w *Wallet) ExportAddedPubkeyHistory(accountType account.AccountType) (stri
 	return fileName, nil
 }
 
-// ExportAddedPubkeyHistoryTable AddedPubkeyHistoryテーブルをcsvとして出力する
-func (w *Wallet) exportAddedPubkeyHistoryTable(addedPubkeyHistoryTable []AddedPubkeyHistoryTable, strAccountType string, keyStatus uint8) (string, error) {
+// ExportAddedPubkeyHistoryTable AddedPubkeyHistoryテーブルをcsvとして出力すsる
+func (w *ColdWallet) exportAddedPubkeyHistoryTable(addedPubkeyHistoryTable []coldrepo.AddedPubkeyHistoryTable, strAccountType string, keyStatus uint8) (string, error) {
 	//fileName
 	fileName := key.CreateFilePath(strAccountType, keyStatus)
 

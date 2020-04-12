@@ -11,10 +11,10 @@ import (
 	"github.com/btcsuite/btcutil/hdkeychain"
 	"github.com/cpacia/bchutil"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
-	"go.uber.org/zap"
 )
 
 //PurposeType BIP44は44固定
@@ -61,10 +61,11 @@ type Key struct {
 }
 
 // NewKey Keyオブジェクトを返す
-func NewKey(coinType enum.CoinType, conf *chaincfg.Params) *Key {
+func NewKey(coinType enum.CoinType, conf *chaincfg.Params, logger *zap.Logger) *Key {
 	keyData := Key{
 		coinType: coinType,
 		conf:     conf,
+		logger:   logger,
 	}
 
 	return &keyData

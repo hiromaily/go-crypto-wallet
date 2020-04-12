@@ -3,11 +3,11 @@ package btc
 import (
 	"encoding/json"
 	"fmt"
-	"go.uber.org/zap"
 
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 )
 
 // EstimateSmartFeeResult estimatesmartfeeをcallしたresponseの型

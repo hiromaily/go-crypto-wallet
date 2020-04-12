@@ -1,30 +1,30 @@
 package keygen
 
 import (
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 
-	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
-// Keygener is for keygen wallet service interface
-type Keygener interface {
-	SignatureFromFile(filePath string) (string, bool, string, error)
-	GenerateSeed() ([]byte, error)
-	GenerateAccountKey(accountType account.AccountType, coinType enum.CoinType, seed []byte, count uint32) ([]key.WalletKey, error)
-	ImportPrivateKey(accountType account.AccountType) error
-	ExportAccountKey(accountType account.AccountType, keyStatus enum.KeyStatus) (string, error)
-	ImportMultisigAddrForColdWallet1(fileName string, accountType account.AccountType) error
-	Done()
-	GetDB() rdb.KeygenStorager
-	GetBTC() api.Bitcoiner
-	GetType() types.WalletType
-}
+//// Keygener is for keygen wallet service interface
+//type Keygener interface {
+//	coldwallet.KeySigner
+//
+//	KeygenExclusiver
+//
+//	Done()
+//	GetDB() rdb.KeygenStorager
+//	GetBTC() api.Bitcoiner
+//	GetType() types.WalletType
+//}
+//
+//type KeygenExclusiver interface {
+//	ExportAccountKey(accountType account.AccountType, keyStatus enum.KeyStatus) (string, error)
+//	ImportMultisigAddrForColdWallet1(fileName string, accountType account.AccountType) error
+//}
 
 // Keygen keygen wallet object
 //  it is almost same to Wallet object, difference is storager interface
@@ -32,15 +32,16 @@ type Keygen struct {
 	btc      api.Bitcoiner
 	logger   *zap.Logger
 	tracer   opentracing.Tracer
-	storager rdb.KeygenStorager
+	storager rdb.ColdStorager
 	wtype    types.WalletType
 }
 
+// NewKeygen may be Not used anywhere
 func NewKeygen(
 	btc api.Bitcoiner,
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
-	storager rdb.KeygenStorager,
+	storager rdb.ColdStorager,
 	wtype types.WalletType) *Keygen {
 
 	return &Keygen{
@@ -58,7 +59,7 @@ func (w *Keygen) Done() {
 	w.btc.Close()
 }
 
-func (w *Keygen) GetDB() rdb.KeygenStorager {
+func (w *Keygen) GetDB() rdb.ColdStorager {
 	return w.storager
 }
 

@@ -1,10 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"github.com/btcsuite/btcd/rpcclient"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
-
 	"github.com/jmoiron/sqlx"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
@@ -14,12 +11,14 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/keygenrepo"
+	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tracer"
 	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/coldwallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
 // Registry is for registry interface
@@ -48,15 +47,24 @@ func (r *registry) NewKeygener() wallets.Keygener {
 	//TODO: should be interface
 	r.setFilePath()
 
-	//FIXME: wallet.NewWallet doesn't have rdb.KeygenStorager
-	// How should it be fixed?? NewKeygen should be defined based on NewWallet
-	return wallets.NewKeygen(
+	return coldwallet.NewColdWalet(
 		r.newBTC(),
 		r.newLogger(),
 		r.newTracer(),
 		r.newStorager(),
 		r.walletType,
 	)
+
+	//FIXME: wallet.NewWallet doesn't have rdb.KeygenStorager
+	// How should it be fixed?? NewKeygen should be defined based on NewWallet
+	//return keygen.NewKeygen(
+	//	r.newBTC(),
+	//	r.newLogger(),
+	//	r.newTracer(),
+	//	r.newStorager(),
+	//	r.walletType,
+	//	r.newColdWallet(),
+	//)
 }
 
 func (r *registry) newRPCClient() *rpcclient.Client {
@@ -89,10 +97,11 @@ func (r *registry) newTracer() opentracing.Tracer {
 	return tracer.NewTracer(r.conf.Tracer)
 }
 
-func (r *registry) newStorager() rdb.KeygenStorager {
+//func (r *registry) newStorager() rdb.KeygenStorager {
+func (r *registry) newStorager() rdb.ColdStorager {
 	// if there are multiple options, set proper one
 	// storager interface as MySQL
-	return keygenrepo.NewKeygenRepository(
+	return coldrepo.NewColdRepository(
 		r.newMySQLClient(),
 		r.newLogger(),
 	)

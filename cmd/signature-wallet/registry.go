@@ -2,8 +2,6 @@ package main
 
 import (
 	"github.com/btcsuite/btcd/rpcclient"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
-
 	"github.com/jmoiron/sqlx"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
@@ -13,12 +11,14 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/signaturerepo"
+	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tracer"
 	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/coldwallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
 // Registry is for registry interface
@@ -47,15 +47,23 @@ func (r *registry) NewSigner() wallets.Signer {
 	//TODO: should be interface
 	r.setFilePath()
 
-	//FIXME: wallet.NewWallet doesn't have rdb.SignatureStorager
-	// How should it be fixed?? NewSignature should be defined based on NewWallet
-	return wallets.NewSignature(
+	return coldwallet.NewColdWalet(
 		r.newBTC(),
 		r.newLogger(),
 		r.newTracer(),
 		r.newStorager(),
 		r.walletType,
 	)
+
+	//FIXME: wallet.NewWallet doesn't have rdb.SignatureStorager
+	// How should it be fixed?? NewSignature should be defined based on NewWallet
+	//return wallets.NewSignature(
+	//	r.newBTC(),
+	//	r.newLogger(),
+	//	r.newTracer(),
+	//	r.newStorager(),
+	//	r.walletType,
+	//)
 }
 
 func (r *registry) newRPCClient() *rpcclient.Client {
@@ -88,10 +96,11 @@ func (r *registry) newTracer() opentracing.Tracer {
 	return tracer.NewTracer(r.conf.Tracer)
 }
 
-func (r *registry) newStorager() rdb.SignatureStorager {
+//func (r *registry) newStorager() rdb.SignatureStorager {
+func (r *registry) newStorager() rdb.ColdStorager {
 	// if there are multiple options, set proper one
 	// storager interface as MySQL
-	return signaturerepo.NewSignatureRepository(
+	return coldrepo.NewColdRepository(
 		r.newMySQLClient(),
 		r.newLogger(),
 	)

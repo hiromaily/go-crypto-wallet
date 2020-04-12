@@ -1,23 +1,24 @@
-package wallets
+package coldwallet
 
 //signature-wallet
 
 import (
 	"fmt"
-	"go.uber.org/zap"
 
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
 // AddMultisigAddressByAuthorization account_key_authorizationテーブルのwallet_addressを認証者として、
 // added_pubkey_history_paymentテーブル内のwalletアドレスのmultisigアドレスを生成する
 // TODO:第4パラメータに、address_typeを追加する。Bitcoinの場合は、p2sh-segwit とする
-func (w *Wallet) AddMultisigAddressByAuthorization(accountType account.AccountType, addressType enum.AddressType) error {
+func (w *ColdWallet) AddMultisigAddressByAuthorization(accountType account.AccountType, addressType enum.AddressType) error {
 	//TODO:remove it
-	if w.wtype != WalletTypeSignature {
+	if w.wtype != types.WalletTypeSignature {
 		return errors.New("it's available on Coldwallet2")
 	}
 

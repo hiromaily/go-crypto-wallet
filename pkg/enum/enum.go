@@ -83,6 +83,10 @@ const (
 	KeyStatusAddressExported      KeyStatus = "address_exported"       //addressがexportされた
 )
 
+func (k KeyStatus) String() string {
+	return string(k)
+}
+
 //KeyStatusValue key_statusの値
 var KeyStatusValue = map[KeyStatus]uint8{
 	KeyStatusGenerated:            0,

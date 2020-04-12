@@ -4,17 +4,17 @@ package wallet
 
 import (
 	"fmt"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
-	"go.uber.org/zap"
 	"strconv"
 
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/btc"
 )
@@ -148,7 +148,7 @@ func (w *Wallet) CreateUnsignedPaymentTx(adjustmentFee float64) (string, string,
 		if err != nil {
 			w.logger.Error(
 				"btcutil.NewAmount()",
-				zap.Any("amount",tx.Amount),
+				zap.Any("amount", tx.Amount),
 				zap.Error(err))
 			continue
 		}
@@ -265,7 +265,7 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 		return "", "", errors.Errorf("BTC.CreateRawTransactionWithOutput(): error: %s", err)
 	}
 	w.logger.Debug("CreateRawTransactionWithOutput",
-		zap.Any("CreateRawTransactionWithOutput",msgTx))
+		zap.Any("CreateRawTransactionWithOutput", msgTx))
 
 	// 2.fee算出
 	fee, err := w.btc.GetFee(msgTx, adjustmentFee)
@@ -329,7 +329,7 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 	}
 	w.logger.Debug(
 		"encodedAddrsPrevs",
-		zap.String("encodedAddrsPrevs",encodedAddrsPrevs))
+		zap.String("encodedAddrsPrevs", encodedAddrsPrevs))
 
 	// 8. GCSにトランザクションファイルを作成
 	var generatedFileName string

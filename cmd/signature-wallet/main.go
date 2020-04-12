@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 	"log"
 	"os"
 
@@ -13,6 +12,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/command/signature"
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
 // signature wallet as cold wallet

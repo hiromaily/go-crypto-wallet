@@ -9,12 +9,15 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/btc"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
 // coldwallet側から未署名トランザクションを読み込み、署名を行う
@@ -22,6 +25,10 @@ import (
 // SignatureFromFile 渡されたファイルからtransactionを読み取り、署名を行う
 // TODO:いずれにせよ、入金と出金で署名もMultisigかどうかで変わってくる
 func (w *ColdWallet) SignatureFromFile(filePath string) (string, bool, string, error) {
+	//TODO:remove it
+	if w.wtype == types.WalletTypeWatchOnly {
+		return "", false, "", errors.New("it's available on ColdWallet1, ColdWallet2")
+	}
 
 	//ファイル名から、tx_receipt_idを取得する
 	//payment_5_unsigned_1534466246366489473
@@ -46,7 +53,6 @@ func (w *ColdWallet) SignatureFromFile(filePath string) (string, bool, string, e
 	}
 
 	//署名
-	//TODO:ここだけ、オブジェクトを切り替えといいなあ。。。
 	hexTx, isSigned, newEncodedAddrsPrevs, err := w.signatureByHex(hex, encodedAddrsPrevs, actionType)
 	if err != nil {
 		return "", isSigned, "", err
@@ -88,7 +94,7 @@ func (w *ColdWallet) signatureByHex(hex, encodedAddrsPrevs string, actionType en
 		signedTx             *wire.MsgTx
 		isSigned             bool
 		addrsPrevs           btc.AddrsPrevTxs
-		accountKeys          []AccountKeyTable
+		accountKeys          []coldrepo.AccountKeyTable
 		wips                 []string
 		newEncodedAddrsPrevs string
 	)
@@ -105,7 +111,7 @@ func (w *ColdWallet) signatureByHex(hex, encodedAddrsPrevs string, actionType en
 	//TODO:coldwallet1とcoldwallet2で挙動が違う
 	//TODO:receiptの場合、wipsは不要
 	//coldwallet2の場合、AccountTypeAuthorizationが必要
-	if w.wtype == WalletTypeSignature {
+	if w.wtype == types.WalletTypeSignature {
 		//account_key_authorizationテーブルから情報を取得
 		accountKey, err := w.storager.GetOneByMaxIDOnAccountKeyTable(account.AccountTypeAuthorization)
 		if err != nil {
@@ -139,10 +145,10 @@ func (w *ColdWallet) signatureByHex(hex, encodedAddrsPrevs string, actionType en
 	//multisigの場合のみの処理
 	//accountType, ok := enum.ActionToAccountMap[actionType]
 	if account.AccountTypeMultisig[addrsPrevs.SenderAccount] {
-		if w.wtype == WalletTypeKeyGen {
+		if w.wtype == types.WalletTypeKeyGen {
 			//取得したredeemScriptをPrevTxsにマッピング
 			for idx, val := range addrsPrevs.Addrs {
-				rs := GetRedeedScriptByAddress(accountKeys, val)
+				rs := coldrepo.GetRedeedScriptByAddress(accountKeys, val)
 				if rs == "" {
 					w.logger.Error("redeemScript can not be found")
 					continue
@@ -172,7 +178,9 @@ func (w *ColdWallet) signatureByHex(hex, encodedAddrsPrevs string, actionType en
 	if err != nil {
 		return "", false, "", err
 	}
-	w.logger.Debugf("isSigned is %t", isSigned)
+	w.logger.Debug(
+		"call btc.SignRawTransaction()",
+		zap.Bool("isSigned", isSigned))
 
 	hexTx, err := w.btc.ToHex(signedTx)
 	if err != nil {

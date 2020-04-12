@@ -1,4 +1,4 @@
-package wallets
+package coldwallet
 
 import (
 	"bufio"
@@ -7,17 +7,20 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
 //ExportAccountKey AccountKeyテーブルをcsvとして出力する
 //TODO:watch only walletにセットするアドレスは、clientの場合は、wallet_address, receipt/paymentの場合、`wallet_multisig_address`
-func (w *Wallet) ExportAccountKey(accountType account.AccountType, keyStatus enum.KeyStatus) (string, error) {
+func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus enum.KeyStatus) (string, error) {
 	//TODO:remove it
-	if w.wtype != WalletTypeKeyGen {
+	if w.wtype != types.WalletTypeKeyGen {
 		return "", errors.New("it's available on Coldwallet1")
 	}
 
@@ -58,7 +61,7 @@ func (w *Wallet) ExportAccountKey(accountType account.AccountType, keyStatus enu
 	if err != nil {
 		return "", errors.Errorf("key.exportAccountKeyTable() error: %s", err)
 	}
-	w.logger.Infof("file name is %s", fileName)
+	w.logger.Info("call exportAccountKeyTable()", zap.String("fileName", fileName))
 
 	//DBの該当レコードをアップデート
 	wifs := make([]string, len(accountKeyTable))
@@ -71,13 +74,16 @@ func (w *Wallet) ExportAccountKey(accountType account.AccountType, keyStatus enu
 	}
 
 	//Multisig対応かどうかのジャッジ
-	w.logger.Infof("Is this account[%s] for multisig: %t", accountType, account.AccountTypeMultisig[accountType])
+	w.logger.Info(
+		"Is this account[%s] for multisig: %t",
+		zap.String("accountType", accountType.String()),
+		zap.Bool("isMultisig", account.AccountTypeMultisig[accountType]))
 
 	return fileName, nil
 }
 
 // exportAccountKeyTable AccountKeyTableをファイルとして出力する
-func (w *Wallet) exportAccountKeyTable(accountKeyTable []AccountKeyTable, strAccountType string, keyStatus uint8) (string, error) {
+func (w *ColdWallet) exportAccountKeyTable(accountKeyTable []coldrepo.AccountKeyTable, strAccountType string, keyStatus uint8) (string, error) {
 	//fileName
 	fileName := key.CreateFilePath(strAccountType, keyStatus)
 

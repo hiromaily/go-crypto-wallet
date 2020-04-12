@@ -2,16 +2,16 @@ package wallet
 
 import (
 	"fmt"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
-	"go.uber.org/zap"
 
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/btc"
@@ -172,7 +172,7 @@ func (w *Wallet) createRawTransactionAndFee(actionType enum.ActionType, accountT
 	}
 	w.logger.Debug(
 		"Total Coin to send:%d(Satoshi) after fee calculated, input length: %d",
-		zap.Any("amount",outputTotal),
+		zap.Any("amount", outputTotal),
 		zap.Int("len(inputs)", len(inputs)))
 
 	// 4.outputs作成
