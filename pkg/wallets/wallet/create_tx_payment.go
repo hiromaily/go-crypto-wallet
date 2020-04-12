@@ -14,9 +14,9 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/action"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
+	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/btc"
 )
 
@@ -318,7 +318,7 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 
 	// 6. Databaseに必要な情報を保存
 	//  txType //1.未署名
-	txReceiptID, err := w.insertTxTableForUnsigned(action.ActionTypePayment, hex, inputTotal, outputTotal, fee, enum.TxTypeValue[enum.TxTypeUnsigned], txPaymentInputs, txPaymentOutputs, paymentRequestIds)
+	txReceiptID, err := w.insertTxTableForUnsigned(action.ActionTypePayment, hex, inputTotal, outputTotal, fee, tx.TxTypeValue[tx.TxTypeUnsigned], txPaymentInputs, txPaymentOutputs, paymentRequestIds)
 	if err != nil {
 		return "", "", errors.Errorf("insertTxTableForUnsigned(): error: %s", err)
 	}

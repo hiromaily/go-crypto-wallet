@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/address"
 )
 
 // AddMultisigAddressResult addmultisigaddressをcallしたresponseの型
@@ -19,7 +19,7 @@ type AddMultisigAddressResult struct {
 //  - requiredSigs: 取引成立に必要なサイン数
 //  - addresses:    自分のアドレス+承認者のアドレスxN をいれていく
 // clientのアドレスは不要。payment/receiptのアドレスはmultisig対応しておくこと
-func (b *Bitcoin) AddMultisigAddress(requiredSigs int, addresses []string, accountName string, addressType enum.AddressType) (*AddMultisigAddressResult, error) {
+func (b *Bitcoin) AddMultisigAddress(requiredSigs int, addresses []string, accountName string, addressType address.AddressType) (*AddMultisigAddressResult, error) {
 
 	if requiredSigs > len(addresses) {
 		return nil, errors.New("number of given address should be at least same to requiredSigs or more")

@@ -13,9 +13,9 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/action"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
+	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/btc"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
@@ -33,7 +33,7 @@ func (w *ColdWallet) SignatureFromFile(filePath string) (string, bool, string, e
 
 	//ファイル名から、tx_receipt_idを取得する
 	//payment_5_unsigned_1534466246366489473
-	txReceiptID, actionType, _, err := txfile.ParseFile(filePath, []enum.TxType{enum.TxTypeUnsigned, enum.TxTypeUnsigned2nd})
+	txReceiptID, actionType, _, err := txfile.ParseFile(filePath, []tx.TxType{tx.TxTypeUnsigned, tx.TxTypeUnsigned2nd})
 	if err != nil {
 		return "", false, "", err
 	}
@@ -63,9 +63,9 @@ func (w *ColdWallet) SignatureFromFile(filePath string) (string, bool, string, e
 	savedata := hexTx
 
 	//署名が完了していないとき、TxTypeUnsigned2nd
-	txType := enum.TxTypeSigned
+	txType := tx.TxTypeSigned
 	if isSigned == false {
-		txType = enum.TxTypeUnsigned2nd
+		txType = tx.TxTypeUnsigned2nd
 		if newEncodedAddrsPrevs != "" {
 			savedata = fmt.Sprintf("%s,%s", savedata, newEncodedAddrsPrevs)
 		}

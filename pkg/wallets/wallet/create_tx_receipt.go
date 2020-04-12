@@ -11,9 +11,9 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/action"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
+	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/btc"
 )
@@ -200,7 +200,7 @@ func (w *Wallet) createRawTransactionAndFee(actionType action.ActionType, accoun
 	}
 
 	// 7. Databaseに必要な情報を保存
-	txReceiptID, err := w.insertTxTableForUnsigned(actionType, hex, inputTotal, outputTotal, fee, enum.TxTypeValue[enum.TxTypeUnsigned], txReceiptInputs, txReceiptOutputs, nil)
+	txReceiptID, err := w.insertTxTableForUnsigned(actionType, hex, inputTotal, outputTotal, fee, tx.TxTypeValue[tx.TxTypeUnsigned], txReceiptInputs, txReceiptOutputs, nil)
 	if err != nil {
 		return "", "", errors.Errorf("insertTxTableForUnsigned(): error: %s", err)
 	}
@@ -316,7 +316,7 @@ func (w *Wallet) storeHex(hex, encodedAddrsPrevs string, id int64, actionType ac
 	}
 
 	//To File
-	path := txfile.CreateFilePath(actionType, enum.TxTypeUnsigned, id, true)
+	path := txfile.CreateFilePath(actionType, tx.TxTypeUnsigned, id, true)
 	generatedFileName, err = txfile.WriteFile(path, savedata)
 	if err != nil {
 		return "", errors.Errorf("txfile.WriteFile(): error: %s", err)

@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/keystatus"
 )
 
 // AccountKeyTable account_key_clientテーブル
@@ -74,14 +74,14 @@ func (r *KeygenRepository) GetOneByMaxIDOnAccountKeyTable(accountType account.Ac
 }
 
 // getAllAccountKeyByKeyStatus 指定したkeyStatusのレコードをすべて返す
-func (r *KeygenRepository) getAllAccountKeyByKeyStatus(tbl string, keyStatus enum.KeyStatus) ([]AccountKeyTable, error) {
+func (r *KeygenRepository) getAllAccountKeyByKeyStatus(tbl string, keyStatus keystatus.KeyStatus) ([]AccountKeyTable, error) {
 	//sql := "SELECT * FROM %s WHERE is_imported_priv_key=false;"
 	sql := "SELECT * FROM %s WHERE key_status=?;"
 	sql = fmt.Sprintf(sql, tbl)
 	//logger.Debugf("sql: %s", sql)
 
 	var accountKeyTable []AccountKeyTable
-	err := r.db.Select(&accountKeyTable, sql, enum.KeyStatusValue[keyStatus])
+	err := r.db.Select(&accountKeyTable, sql, keystatus.KeyStatusValue[keyStatus])
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func (r *KeygenRepository) getAllAccountKeyByKeyStatus(tbl string, keyStatus enu
 }
 
 // GetAllAccountKeyByKeyStatus 指定したkeyStatusのレコードをすべて返す
-func (r *KeygenRepository) GetAllAccountKeyByKeyStatus(accountType account.AccountType, keyStatus enum.KeyStatus) ([]AccountKeyTable, error) {
+func (r *KeygenRepository) GetAllAccountKeyByKeyStatus(accountType account.AccountType, keyStatus keystatus.KeyStatus) ([]AccountKeyTable, error) {
 	return r.getAllAccountKeyByKeyStatus(accountKeyTableName[accountType], keyStatus)
 }
 
@@ -157,7 +157,7 @@ func (r *KeygenRepository) InsertAccountKeyTable(accountType account.AccountType
 }
 
 // updateKeyStatus key_statusを更新する
-func (r *KeygenRepository) updateKeyStatusByWIF(tbl string, keyStatus enum.KeyStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+func (r *KeygenRepository) updateKeyStatusByWIF(tbl string, keyStatus keystatus.KeyStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	sql := `
 UPDATE %s SET key_status=? WHERE wallet_import_format=?
 `
@@ -168,7 +168,7 @@ UPDATE %s SET key_status=? WHERE wallet_import_format=?
 		tx = r.db.MustBegin()
 	}
 
-	res, err := tx.Exec(sql, enum.KeyStatusValue[keyStatus], strWIF)
+	res, err := tx.Exec(sql, keystatus.KeyStatusValue[keyStatus], strWIF)
 	if err != nil {
 		tx.Rollback()
 		return 0, err
@@ -182,15 +182,15 @@ UPDATE %s SET key_status=? WHERE wallet_import_format=?
 }
 
 // UpdateKeyStatusByWIF key_statusを更新する
-func (r *KeygenRepository) UpdateKeyStatusByWIF(accountType account.AccountType, keyStatus enum.KeyStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+func (r *KeygenRepository) UpdateKeyStatusByWIF(accountType account.AccountType, keyStatus keystatus.KeyStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	return r.updateKeyStatusByWIF(accountKeyTableName[accountType], keyStatus, strWIF, tx, isCommit)
 }
 
 // updateKeyStatusByWIFs key_statusを更新する
-func (r *KeygenRepository) updateKeyStatusByWIFs(tbl string, keyStatus enum.KeyStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+func (r *KeygenRepository) updateKeyStatusByWIFs(tbl string, keyStatus keystatus.KeyStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	var sql string
 	sql = "UPDATE %s SET key_status=%d WHERE wallet_import_format IN (?);"
-	sql = fmt.Sprintf(sql, tbl, enum.KeyStatusValue[keyStatus])
+	sql = fmt.Sprintf(sql, tbl, keystatus.KeyStatusValue[keyStatus])
 
 	//In対応
 	query, args, err := sqlx.In(sql, wifs)
@@ -218,7 +218,7 @@ func (r *KeygenRepository) updateKeyStatusByWIFs(tbl string, keyStatus enum.KeyS
 }
 
 // UpdateKeyStatusByWIFs key_statusを更新する
-func (r *KeygenRepository) UpdateKeyStatusByWIFs(accountType account.AccountType, keyStatus enum.KeyStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+func (r *KeygenRepository) UpdateKeyStatusByWIFs(accountType account.AccountType, keyStatus keystatus.KeyStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	return r.updateKeyStatusByWIFs(accountKeyTableName[accountType], keyStatus, wifs, tx, isCommit)
 }
 

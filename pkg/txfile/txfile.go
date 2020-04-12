@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-bitcoin/pkg/action"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/tx"
 )
 
 // WatchOnlyWalletにおいては、開発時にしか使われないはず？
@@ -35,7 +35,7 @@ func SetFilePath(basePath string) {
 
 // CreateFilePath 書き込み用として、ファイルパスを生成する(読み込みは渡されたパスをそのまま利用するのみ)
 // TODO:Actionも名前として考慮すること
-func CreateFilePath(actionType action.ActionType, txType enum.TxType, txID int64, withPath bool) string {
+func CreateFilePath(actionType action.ActionType, txType tx.TxType, txID int64, withPath bool) string {
 
 	// ./data/tx/receipt/receipt_8_unsigned_1534744535097796209
 	if withPath {
@@ -46,7 +46,7 @@ func CreateFilePath(actionType action.ActionType, txType enum.TxType, txID int64
 }
 
 // ParseFile ファイル名を解析する
-func ParseFile(filePath string, txTypes []enum.TxType) (int64, action.ActionType, string, error) {
+func ParseFile(filePath string, txTypes []tx.TxType) (int64, action.ActionType, string, error) {
 	//フルパスが渡されることも想定
 	tmp := strings.Split(filePath, "/")
 	fileName := tmp[len(tmp)-1]
@@ -70,7 +70,7 @@ func ParseFile(filePath string, txTypes []enum.TxType) (int64, action.ActionType
 	}
 
 	//txType
-	if !enum.ValidateTxType(s[2]) || !enum.TxType(s[2]).Search(txTypes) {
+	if !tx.ValidateTxType(s[2]) || !tx.TxType(s[2]).Search(txTypes) {
 		return 0, "", "", errors.Errorf("error: invalid file: %s", fileName)
 	}
 	//if s[2] != string(txType) {

@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
@@ -54,7 +54,7 @@ func (c *MultisigCommand) Run(args []string) int {
 
 	// call `addmultisigaddress` which adds a P2SH multisig address to the wallet
 	//  address would be acount and authorization
-	err := c.wallet.AddMultisigAddressByAuthorization(account.AccountType(acnt), enum.AddressTypeP2shSegwit)
+	err := c.wallet.AddMultisigAddressByAuthorization(account.AccountType(acnt), address.AddressTypeP2shSegwit)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call AddMultisigAddressByAuthorization() %+v", err))
 		return 1

@@ -9,6 +9,7 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/keystatus"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
@@ -25,7 +26,7 @@ func (w *ColdWallet) ImportPrivateKey(accountType account.AccountType) error {
 
 	//DBから未登録のPrivateKey情報を取得する
 	//WIFs, err := w.DB.GetNotImportedKeyWIF(accountType)
-	accountKeyTable, err := w.storager.GetAllAccountKeyByKeyStatus(accountType, enum.KeyStatusGenerated) //key_status=0
+	accountKeyTable, err := w.storager.GetAllAccountKeyByKeyStatus(accountType, keystatus.KeyStatusGenerated) //key_status=0
 	if err != nil {
 		return errors.Errorf("key.GenerateSeed() error: %s", err)
 	}
@@ -65,12 +66,12 @@ func (w *ColdWallet) ImportPrivateKey(accountType account.AccountType) error {
 		}
 		//update DB
 		//_, err = w.DB.UpdateIsImprotedPrivKey(accountType, record.WalletImportFormat, nil, true)
-		_, err = w.storager.UpdateKeyStatusByWIF(accountType, enum.KeyStatusImportprivkey, record.WalletImportFormat, nil, true)
+		_, err = w.storager.UpdateKeyStatusByWIF(accountType, keystatus.KeyStatusImportprivkey, record.WalletImportFormat, nil, true)
 		if err != nil {
 			w.logger.Error(
 				"fail to call btc.UpdateKeyStatusByWIF()",
 				zap.String("accountType", accountType.String()),
-				zap.String("KeyStatus", enum.KeyStatusImportprivkey.String()),
+				zap.String("KeyStatus", keystatus.KeyStatusImportprivkey.String()),
 				zap.String("record.WalletImportFormat", record.WalletImportFormat),
 				zap.Error(err))
 		}

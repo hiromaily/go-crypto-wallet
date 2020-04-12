@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/keystatus"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
@@ -117,7 +117,7 @@ func (w *ColdWallet) ImportMultisigAddrForColdWallet1(fileName string, accountTy
 			FullPublicKey:         inner[0],
 			WalletMultisigAddress: inner[3],
 			RedeemScript:          inner[4],
-			KeyStatus:             enum.KeyStatusValue[enum.KeyStatusMultiAddressImported],
+			KeyStatus:             keystatus.KeyStatusValue[keystatus.KeyStatusMultiAddressImported],
 			UpdatedAt:             &tm,
 		}
 	}

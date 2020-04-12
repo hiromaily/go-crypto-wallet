@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/keystatus"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
@@ -18,7 +18,7 @@ import (
 
 //ExportAccountKey AccountKeyテーブルをcsvとして出力する
 //TODO:watch only walletにセットするアドレスは、clientの場合は、wallet_address, receipt/paymentの場合、`wallet_multisig_address`
-func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus enum.KeyStatus) (string, error) {
+func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus keystatus.KeyStatus) (string, error) {
 	//TODO:remove it
 	if w.wtype != types.WalletTypeKeyGen {
 		return "", errors.New("it's available on Coldwallet1")
@@ -30,14 +30,14 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus
 	//Receipt/Payment -> key_status=3ならok, wallet_multisig_address isMultisig=true
 
 	//TODO:Multisig対応かどうかのジャッジ
-	var updateKeyStatus enum.KeyStatus
+	var updateKeyStatus keystatus.KeyStatus
 	if !account.AccountTypeMultisig[accountType] {
-		updateKeyStatus = enum.KeyStatusAddressExported //4
+		updateKeyStatus = keystatus.KeyStatusAddressExported //4
 	} else {
-		if keyStatus == enum.KeyStatusImportprivkey { //1
-			updateKeyStatus = enum.KeyStatusPubkeyExported //2
-		} else if keyStatus == enum.KeyStatusMultiAddressImported { //3
-			updateKeyStatus = enum.KeyStatusAddressExported //4
+		if keyStatus == keystatus.KeyStatusImportprivkey { //1
+			updateKeyStatus = keystatus.KeyStatusPubkeyExported //2
+		} else if keyStatus == keystatus.KeyStatusMultiAddressImported { //3
+			updateKeyStatus = keystatus.KeyStatusAddressExported //4
 		}
 	}
 	if updateKeyStatus == "" {
@@ -57,7 +57,7 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus
 
 	//CSVに書き出す
 	fileName, err := w.exportAccountKeyTable(accountKeyTable, string(accountType),
-		enum.KeyStatusValue[keyStatus])
+		keystatus.KeyStatusValue[keyStatus])
 	if err != nil {
 		return "", errors.Errorf("key.exportAccountKeyTable() error: %s", err)
 	}

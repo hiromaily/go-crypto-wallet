@@ -4,7 +4,9 @@ import (
 	"github.com/btcsuite/btcutil"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/keystatus"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
@@ -58,7 +60,7 @@ type Keygener interface {
 }
 
 type KeygenExclusiver interface {
-	ExportAccountKey(accountType account.AccountType, keyStatus enum.KeyStatus) (string, error)
+	ExportAccountKey(accountType account.AccountType, keyStatus keystatus.KeyStatus) (string, error)
 	ImportMultisigAddrForColdWallet1(fileName string, accountType account.AccountType) error
 }
 
@@ -76,6 +78,6 @@ type Signer interface {
 
 type SignatureExclusiver interface {
 	ImportPublicKeyForColdWallet2(fileName string, accountType account.AccountType) error
-	AddMultisigAddressByAuthorization(accountType account.AccountType, addressType enum.AddressType) error
+	AddMultisigAddressByAuthorization(accountType account.AccountType, addressType address.AddressType) error
 	ExportAddedPubkeyHistory(accountType account.AccountType) (string, error)
 }

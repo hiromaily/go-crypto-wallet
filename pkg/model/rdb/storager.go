@@ -5,7 +5,7 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/action"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/keystatus"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 )
@@ -52,11 +52,11 @@ type ColdStorager interface {
 	//acount_pubkey_repo
 	GetMaxIndexOnAccountKeyTable(accountType account.AccountType) (int64, error)
 	GetOneByMaxIDOnAccountKeyTable(accountType account.AccountType) (*coldrepo.AccountKeyTable, error)
-	GetAllAccountKeyByKeyStatus(accountType account.AccountType, keyStatus enum.KeyStatus) ([]coldrepo.AccountKeyTable, error)
+	GetAllAccountKeyByKeyStatus(accountType account.AccountType, keyStatus keystatus.KeyStatus) ([]coldrepo.AccountKeyTable, error)
 	GetAllAccountKeyByMultiAddrs(accountType account.AccountType, addrs []string) ([]coldrepo.AccountKeyTable, error)
 	InsertAccountKeyTable(accountType account.AccountType, accountKeyTables []coldrepo.AccountKeyTable, tx *sqlx.Tx, isCommit bool) error
-	UpdateKeyStatusByWIF(accountType account.AccountType, keyStatus enum.KeyStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error)
-	UpdateKeyStatusByWIFs(accountType account.AccountType, keyStatus enum.KeyStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error)
+	UpdateKeyStatusByWIF(accountType account.AccountType, keyStatus keystatus.KeyStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error)
+	UpdateKeyStatusByWIFs(accountType account.AccountType, keyStatus keystatus.KeyStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error)
 	UpdateMultisigAddrOnAccountKeyTableByFullPubKey(accountType account.AccountType, accountKeyTable []coldrepo.AccountKeyTable, tx *sqlx.Tx, isCommit bool) error
 	//added_pubkey_history_repo
 	GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType account.AccountType) ([]coldrepo.AddedPubkeyHistoryTable, error)
@@ -77,11 +77,11 @@ type ColdStorager interface {
 //	//acount_pubkey_repo
 //	GetMaxIndexOnAccountKeyTable(accountType account.AccountType) (int64, error)
 //	GetOneByMaxIDOnAccountKeyTable(accountType account.AccountType) (*keygenrepo.AccountKeyTable, error)
-//	GetAllAccountKeyByKeyStatus(accountType account.AccountType, keyStatus enum.KeyStatus) ([]keygenrepo.AccountKeyTable, error)
+//	GetAllAccountKeyByKeyStatus(accountType account.AccountType, keyStatus keystatus.KeyStatus) ([]keygenrepo.AccountKeyTable, error)
 //	GetAllAccountKeyByMultiAddrs(accountType account.AccountType, addrs []string) ([]keygenrepo.AccountKeyTable, error)
 //	InsertAccountKeyTable(accountType account.AccountType, accountKeyTables []keygenrepo.AccountKeyTable, tx *sqlx.Tx, isCommit bool) error
-//	UpdateKeyStatusByWIF(accountType account.AccountType, keyStatus enum.KeyStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error)
-//	UpdateKeyStatusByWIFs(accountType account.AccountType, keyStatus enum.KeyStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error)
+//	UpdateKeyStatusByWIF(accountType account.AccountType, keyStatus keystatus.KeyStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error)
+//	UpdateKeyStatusByWIFs(accountType account.AccountType, keyStatus keystatus.KeyStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error)
 //	UpdateMultisigAddrOnAccountKeyTableByFullPubKey(accountType account.AccountType, accountKeyTable []keygenrepo.AccountKeyTable, tx *sqlx.Tx, isCommit bool) error
 //	//added_pubkey_history_repo
 //	GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType account.AccountType) ([]keygenrepo.AddedPubkeyHistoryTable, error)
@@ -102,11 +102,11 @@ type ColdStorager interface {
 //	//acount_pubkey_repo
 //	GetMaxIndexOnAccountKeyTable(accountType account.AccountType) (int64, error)
 //	GetOneByMaxIDOnAccountKeyTable(accountType account.AccountType) (*signaturerepo.AccountKeyTable, error)
-//	GetAllAccountKeyByKeyStatus(accountType account.AccountType, keyStatus enum.KeyStatus) ([]signaturerepo.AccountKeyTable, error)
+//	GetAllAccountKeyByKeyStatus(accountType account.AccountType, keyStatus keystatus.KeyStatus) ([]signaturerepo.AccountKeyTable, error)
 //	GetAllAccountKeyByMultiAddrs(accountType account.AccountType, addrs []string) ([]signaturerepo.AccountKeyTable, error)
 //	InsertAccountKeyTable(accountType account.AccountType, accountKeyTables []signaturerepo.AccountKeyTable, tx *sqlx.Tx, isCommit bool) error
-//	UpdateKeyStatusByWIF(accountType account.AccountType, keyStatus enum.KeyStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error)
-//	UpdateKeyStatusByWIFs(accountType account.AccountType, keyStatus enum.KeyStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error)
+//	UpdateKeyStatusByWIF(accountType account.AccountType, keyStatus keystatus.KeyStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error)
+//	UpdateKeyStatusByWIFs(accountType account.AccountType, keyStatus keystatus.KeyStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error)
 //	UpdateMultisigAddrOnAccountKeyTableByFullPubKey(accountType account.AccountType, accountKeyTable []signaturerepo.AccountKeyTable, tx *sqlx.Tx, isCommit bool) error
 //	//added_pubkey_history_repo
 //	GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType account.AccountType) ([]signaturerepo.AddedPubkeyHistoryTable, error)

@@ -9,6 +9,7 @@ import (
 	"github.com/btcsuite/btcutil"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/btc"
 )
@@ -78,7 +79,7 @@ type Bitcoiner interface {
 	Logging() (*btc.LoggingResult, error)
 
 	//multisig.go
-	AddMultisigAddress(requiredSigs int, addresses []string, accountName string, addressType enum.AddressType) (*btc.AddMultisigAddressResult, error)
+	AddMultisigAddress(requiredSigs int, addresses []string, accountName string, addressType address.AddressType) (*btc.AddMultisigAddressResult, error)
 
 	//transaction.go
 	ToHex(tx *wire.MsgTx) (string, error)

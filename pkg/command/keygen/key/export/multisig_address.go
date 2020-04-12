@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
+	"github.com/hiromaily/go-bitcoin/pkg/keystatus"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
@@ -53,7 +53,7 @@ func (c *MultisigCommand) Run(args []string) int {
 	}
 
 	// export multisig addresses as csv file
-	fileName, err := c.wallet.ExportAccountKey(account.AccountType(acnt), enum.KeyStatusMultiAddressImported)
+	fileName, err := c.wallet.ExportAccountKey(account.AccountType(acnt), keystatus.KeyStatusMultiAddressImported)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call ExportAccountKey() %+v", err))
 		return 1

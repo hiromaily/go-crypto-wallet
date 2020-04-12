@@ -7,8 +7,8 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/action"
-	"github.com/hiromaily/go-bitcoin/pkg/enum"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
+	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 )
 
@@ -19,7 +19,7 @@ func (w *Wallet) SendFromFile(filePath string) (string, error) {
 
 	//ファイル名から、tx_receipt_idを取得する
 	//payment_5_unsigned_1534466246366489473
-	txReceiptID, actionType, _, err := txfile.ParseFile(filePath, []enum.TxType{enum.TxTypeSigned})
+	txReceiptID, actionType, _, err := txfile.ParseFile(filePath, []tx.TxType{tx.TxTypeSigned})
 	if err != nil {
 		return "", errors.Errorf("txfile.ParseFile() error: %s", err)
 	}
@@ -66,7 +66,7 @@ func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID strin
 	txReceipt.SignedHexTx = signedHex
 	txReceipt.SentHashTx = sentTxID
 	txReceipt.SentUpdatedAt = &t
-	txReceipt.TxType = enum.TxTypeValue[enum.TxTypeSent] //3:未署名
+	txReceipt.TxType = tx.TxTypeValue[tx.TxTypeSent] //3:未署名
 
 	var (
 		affectedNum int64
