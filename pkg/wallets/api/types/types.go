@@ -42,7 +42,6 @@ type BTCVersion int
 
 // environment
 const (
-	BTCVer16 BTCVersion = 160000
 	BTCVer17 BTCVersion = 170000
 	BTCVer18 BTCVersion = 180000
 	BTCVer19 BTCVersion = 190000
@@ -51,6 +50,8 @@ const (
 func (v BTCVersion) Int() int {
 	return int(v)
 }
+
+const RequiredVersion = BTCVer19
 
 //----------------------------------------------------
 // NetworkType

@@ -45,6 +45,10 @@ func NewBitcoin(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logg
 	if err != nil {
 		return nil, errors.Errorf("bit.GetNetworkInfo() error: %s", err)
 	}
+	if ctype.RequiredVersion > netInfo.Version {
+		return nil, errors.Errorf("bitcoin core version should be %d +, but version %d is detected", ctype.RequiredVersion, netInfo.Version)
+	}
+
 	bit.version = netInfo.Version
 	bit.logger.Info("bitcoin rpc server", zap.Int("version", netInfo.Version.Int()))
 
