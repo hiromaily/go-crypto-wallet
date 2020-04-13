@@ -11,6 +11,7 @@ network_type = "testnet3" # mainnet, testnet3, regtest
 [logger]
 service = "keygen"
 level = "debug" # debug, info, warn, error
+env = "custom" # dev, prod, custom :for only zap logger
 
 # only available for watch only wallet, but definition is required as none
 [tracer]

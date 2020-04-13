@@ -64,8 +64,21 @@ bld:
 	go build -i -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
 	go build -i -v -o ${GOPATH}/bin/sign ./cmd/signature/
 
-run: bld
-	wallet -conf ./data/toml/btc/local_watch_only.toml
+.PHONY: bldw
+bldw:
+	go build -i -v -o ${GOPATH}/bin/wallet ./cmd/wallet/
+
+.PHONY: bldk
+bldk:
+	go build -i -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
+
+.PHONY: blds
+blds:
+	go build -i -v -o ${GOPATH}/bin/sign ./cmd/signature/
+
+
+run:
+	go run ./cmd/wallet/ -conf ./data/config/btc/wallet.toml
 
 # wallet -conf ./data/toml/btc/local_watch_only.toml api estimatefee
 

@@ -4,26 +4,54 @@ import (
 	"io"
 	"os"
 
-	"github.com/yudai/pp"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 )
 
-func NewLoggerWithWriter(w io.Writer, enab zapcore.LevelEnabler) *zap.Logger {
-	pp.ColoringEnabled = false
+type LogEnv string
+
+const (
+	LogDev    LogEnv = "dev"
+	LogProd   LogEnv = "prod"
+	LogCustom LogEnv = "custom"
+)
+
+func (e LogEnv) String() string {
+	return string(e)
+}
+
+func NewLoggerWithWriter(w io.Writer, lv zapcore.LevelEnabler, env LogEnv) *zap.Logger {
+	//pp.ColoringEnabled = false
+
+	zap.NewExample()
 
 	writer := zapcore.AddSync(w)
 
-	encoderConfig := zap.NewProductionEncoderConfig()
-	encoderConfig.TimeKey = "time"
-	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	var encoderCfg zapcore.EncoderConfig
+	switch env {
+	case LogDev:
+		encoderCfg = zap.NewDevelopmentEncoderConfig()
+	case LogCustom:
+		encoderCfg = zapcore.EncoderConfig{
+			MessageKey:     "msg",
+			LevelKey:       "lv",
+			EncodeLevel:    zapcore.LowercaseLevelEncoder,
+			EncodeTime:     zapcore.ISO8601TimeEncoder,
+			EncodeDuration: zapcore.StringDurationEncoder,
+		}
+	//case LogProd:
+	default:
+		encoderCfg = zap.NewProductionEncoderConfig()
+		encoderCfg.TimeKey = "time"
+		encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
+	}
 
-	jsonEncoder := zapcore.NewJSONEncoder(encoderConfig)
+	jsonEncoder := zapcore.NewJSONEncoder(encoderCfg)
 
 	cores := []zapcore.Core{
-		zapcore.NewCore(jsonEncoder, writer, enab),
+		zapcore.NewCore(jsonEncoder, writer, lv),
 	}
 
 	logger := zap.New(zapcore.NewTee(cores...),
@@ -51,5 +79,5 @@ func getLogLevel(level string) zapcore.LevelEnabler {
 }
 
 func NewZapLogger(conf *config.Logger) *zap.Logger {
-	return NewLoggerWithWriter(os.Stdout, getLogLevel(conf.Level)).Named(conf.Service)
+	return NewLoggerWithWriter(os.Stdout, getLogLevel(conf.Level), LogEnv(conf.Env)).Named(conf.Service)
 }

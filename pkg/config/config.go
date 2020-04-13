@@ -56,6 +56,7 @@ type BitcoinFee struct {
 type Logger struct {
 	Service string `toml:"service" validate:"required"`
 	Level   string `toml:"level" validate:"required"`
+	Env     string `toml:"env" validate:"oneof=dev prod custom"`
 }
 
 // Tracer is open tracing
