@@ -8,38 +8,41 @@
 #make filepath=./data/pubkey/client_1535423628425011000.csv import-pubkey
 .PHONY: import-pubkey
 import-pubkey:
-	wallet key key importing functionality ${filepath}
+	wallet import key -file ${filepath}
 	#wallet -k -m 1 -i ./data/pubkey/client_1535423628425011000.csv
 
 
 ###############################################################################
-# receipt transaction
+# create transaction
 ###############################################################################
 # detect receipt addresses and create unsigned transaction for client
 .PHONY: create-receipt-tx
 create-receipt-tx:
-	wallet receipt create -fee 0.5
+	wallet create receipt -fee 0.5
 	#wallet -r -m 1
-
-# WIP: only check client address
-.PHONY: create-client-tx
-check-client-address:
-	wallet receipt create -check
 
 # Note: debug use
 # WIP: execute series of flows from creation of a receiving transaction to sending of a transaction
 .PHONY: create-receipt-all
 create-receipt-all:
-	wallet receipt debug
+	wallet create receipt -debug
 	#wallet -r -m 10
 
+# create payment request from payment table
+.PHONY: create-payment-tx
+create-payment-tx:
+	wallet create payment -fee 0.5
 
-# wallet receipt create
-# sign xxxx
+# Note: debug use
+# WIP: execute series of flows from creation of payment transaction to sending of a transaction
+.PHONY: create-payment-all
+create-payment-all:
+	wallet create payment -debug
 
-# TODO
-# - wallet create [payment/receipt]
-# - wallet debug  [payment/receipt]
+# create transfer unsigned transaction among accounts
+.PHONY: create-transfer-tx
+create-transfer-tx:
+	wallet create transfer -account1 ${acnt1} -account2 ${acnt2}
 
 ###############################################################################
 # send transaction
@@ -48,7 +51,7 @@ create-receipt-all:
 #make filepath=./data/tx/receipt/receipt_8_signed_1534832879778945174 send-tx
 .PHONY: send-tx
 send-tx:
-	wallet sending -file ${filepath}
+	wallet send -file ${filepath}
 
 
 ###############################################################################
@@ -58,28 +61,13 @@ send-tx:
 #make acnt=client monitor-tx
 .PHONY: monitor-tx
 monitor-tx:
-	wallet monitoring senttx -account ${acnt}
+	wallet monitor senttx -account ${acnt}
 
 # WIP: monitor account balance
 #make acnt=client monitor-balance
 .PHONY: monitor-balance
 monitor-balance:
-	wallet monitoring balance -account ${acnt}
-
-
-###############################################################################
-# payment transaction
-###############################################################################
-# create payment request from payment table
-.PHONY: create-payment-tx
-create-payment-tx:
-	wallet payment create -fee 0.5
-
-# Note: debug use
-# WIP: execute series of flows from creation of payment transaction to sending of a transaction
-.PHONY: create-payment-all
-create-payment-all:
-	wallet payment debug
+	wallet monitor balance -account ${acnt}
 
 
 ###############################################################################

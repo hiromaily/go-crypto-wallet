@@ -107,7 +107,7 @@ func (w *ColdWallet) checkImportedAddress(walletAddress, p2shSegwitAddress, full
 	}
 	w.logger.Debug(
 		"account is found by p2sh_segwit_address",
-		zap.String("acount", acnt),
+		zap.String("account", acnt),
 		zap.String("p2shSegwitAddress", p2shSegwitAddress))
 
 	//3.getaccount address(p2sh_segwit_address)
@@ -120,7 +120,7 @@ func (w *ColdWallet) checkImportedAddress(walletAddress, p2shSegwitAddress, full
 	}
 	w.logger.Debug(
 		"account is found by p2sh_segwit_address",
-		zap.String("acount", addrInfo.GetLabelName()),
+		zap.String("account", addrInfo.GetLabelName()),
 		zap.String("p2shSegwitAddress", p2shSegwitAddress))
 
 	if addrInfo.Pubkey != fullPublicKey {

@@ -5,7 +5,7 @@ import (
 )
 
 // GetAccount returns account name of address
-// `getaccount` should be called because getacount RPC is gone from version 0.18
+// `getaccount` should be called because getaccount RPC is gone from version 0.18
 func (b *Bitcoin) GetAccount(addr string) (string, error) {
 	res, err := b.GetAddressInfo(addr)
 	if err != nil {

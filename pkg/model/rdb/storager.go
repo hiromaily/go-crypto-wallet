@@ -14,7 +14,7 @@ import (
 type WalletStorager interface {
 	Close() error
 	MustBegin() *sqlx.Tx
-	//acount_pubkey_repo
+	//account_pubkey_repo
 	GetAllAccountPubKeyTable(accountType account.AccountType) ([]walletrepo.AccountPublicKeyTable, error)
 	GetOneUnAllocatedAccountPubKeyTable(accountType account.AccountType) (*walletrepo.AccountPublicKeyTable, error)
 	InsertAccountPubKeyTable(accountType account.AccountType, accountPubKeyTables []walletrepo.AccountPublicKeyTable, tx *sqlx.Tx, isCommit bool) error
@@ -49,7 +49,7 @@ type WalletStorager interface {
 
 type ColdStorager interface {
 	Close() error
-	//acount_pubkey_repo
+	//account_pubkey_repo
 	GetMaxIndexOnAccountKeyTable(accountType account.AccountType) (int64, error)
 	GetOneByMaxIDOnAccountKeyTable(accountType account.AccountType) (*coldrepo.AccountKeyTable, error)
 	GetAllAccountKeyByKeyStatus(accountType account.AccountType, keyStatus keystatus.KeyStatus) ([]coldrepo.AccountKeyTable, error)
