@@ -72,7 +72,6 @@ func (w *Wallet) ImportPublicKey(fileName string, accountType account.AccountTyp
 
 //checkImportedPublicAddress watch only walletとして追加されているかチェックする
 func (w *Wallet) checkImportedPublicAddress(addr string) {
-	//if w.btc.Version() >= ctype.BTCVer17 {
 	addrInfo, err := w.btc.GetAddressInfo(addr)
 	if err != nil {
 		w.logger.Error(

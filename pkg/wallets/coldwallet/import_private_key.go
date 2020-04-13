@@ -85,8 +85,6 @@ func (w *ColdWallet) ImportPrivateKey(accountType account.AccountType) error {
 // checkImportedAddress check imported address
 func (w *ColdWallet) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPublicKey string) {
 	w.logger.Info("checkImportedAddress")
-	//if w.btc.Version() >= ctype.BTCVer17 {
-
 	acnt, err := w.btc.GetAccount(walletAddress)
 	if err != nil {
 		w.logger.Error(

@@ -11,7 +11,6 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 )
 
 // ListUnspentResult listunspentの戻り値
@@ -83,26 +82,6 @@ func (b *Bitcoin) convertListUnspent(listUnspent []btcjson.ListUnspentResult) []
 
 // ListUnspent listunspentを呼び出す
 func (b *Bitcoin) ListUnspent() ([]ListUnspentResult, error) {
-	if b.Version() >= ctype.BTCVer17 {
-		return b.listUnspentVer17()
-	}
-	return b.listUnspentVer16()
-}
-
-func (b *Bitcoin) listUnspentVer16() ([]ListUnspentResult, error) {
-	listUnspentResult, err := b.client.ListUnspentMin(b.ConfirmationBlock())
-	if err != nil {
-		return nil, errors.Errorf("client.ListUnspentMin(): error: %s", err)
-	}
-
-	if len(listUnspentResult) == 0 {
-		return nil, nil
-	}
-
-	return b.convertListUnspent(listUnspentResult), nil
-}
-
-func (b *Bitcoin) listUnspentVer17() ([]ListUnspentResult, error) {
 	input, err := json.Marshal(uint64(b.confirmationBlock))
 	if err != nil {
 		return nil, errors.Errorf("json.Marchal(): error: %s", err)
@@ -137,16 +116,9 @@ func (b *Bitcoin) ListUnspentByAccount(accountType account.AccountType) ([]ListU
 
 	var unspentList []ListUnspentResult
 
-	if b.Version() >= ctype.BTCVer17 {
-		unspentList, err = b.listUnspentByAccountVer17(addrs)
-		if err != nil {
-			return nil, nil, errors.Errorf("BTC.listUnspentByAccountVer17() error: %s", err)
-		}
-	} else {
-		unspentList, err = b.listUnspentByAccountVer16(addrs)
-		if err != nil {
-			return nil, nil, errors.Errorf("BTC.listUnspentByAccountVer16() error: %s", err)
-		}
+	unspentList, err = b.listUnspentByAccount(addrs)
+	if err != nil {
+		return nil, nil, errors.Errorf("BTC.listUnspentByAccountVer17() error: %s", err)
 	}
 
 	//送金の金額と近しいutxoでtxを作成するため、ソートしておく => 小さなutxoから利用していくのに便利だが、MUSTではない
@@ -158,21 +130,7 @@ func (b *Bitcoin) ListUnspentByAccount(accountType account.AccountType) ([]ListU
 	return unspentList, addrs, nil
 }
 
-func (b *Bitcoin) listUnspentByAccountVer16(addrs []btcutil.Address) ([]ListUnspentResult, error) {
-	listUnspentResult, err := b.client.ListUnspentMinMaxAddresses(b.ConfirmationBlock(), 9999999, addrs)
-	if err != nil {
-		//ListUnspentが実行できない。致命的なエラー。この場合BitcoinCoreの再起動が必要
-		return nil, err
-	}
-
-	if len(listUnspentResult) == 0 {
-		return nil, nil
-	}
-
-	return b.convertListUnspent(listUnspentResult), nil
-}
-
-func (b *Bitcoin) listUnspentByAccountVer17(addrs []btcutil.Address) ([]ListUnspentResult, error) {
+func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address) ([]ListUnspentResult, error) {
 	input1, err := json.Marshal(uint64(b.confirmationBlock))
 	if err != nil {
 		return nil, errors.Errorf("json.Marchal(): error: %s", err)

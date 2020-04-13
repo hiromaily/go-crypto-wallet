@@ -91,7 +91,6 @@ func (b *Bitcoin) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
 
 // GetAddressesByLabel returns addresses of account(label)
 func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, error) {
-	//if b.Version() >= ctype.BTCVer17 {
 	// input for rpc api
 	input, err := json.Marshal(string(labelName))
 	if err != nil {
