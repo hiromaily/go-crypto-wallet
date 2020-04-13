@@ -1,7 +1,5 @@
 package coldwallet
 
-//Cold wallet
-
 import (
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
@@ -12,118 +10,113 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
-// ImportPrivateKey 指定したAccountTypeに属するテーブルのis_imported_priv_keyがfalseのWIFをImportPrivKeyRescanする
-// https://en.bitcoin.it/wiki/How_to_import_private_keys
-// getaddressesbyaccount "" で内容を確認可能？？
+// ImportPrivateKey
+//  - get WIF whose is_imported_priv_key is false for given account from database
+//  - then call ImportPrivKey(wif) without rescan
 func (w *ColdWallet) ImportPrivateKey(accountType account.AccountType) error {
-	//TODO:remove it
 	if w.wtype == types.WalletTypeWatchOnly {
-		return errors.New("it's available on Coldwallet1, Coldwallet2")
+		return errors.New("it's available on only coldwallet")
 	}
 
-	//AccountType問わずimportは可能にしておく
-
-	//DBから未登録のPrivateKey情報を取得する
-	//WIFs, err := w.DB.GetNotImportedKeyWIF(accountType)
+	//1. retrieve records(private key) from account_key table
 	accountKeyTable, err := w.storager.GetAllAccountKeyByKeyStatus(accountType, keystatus.KeyStatusGenerated) //key_status=0
 	if err != nil {
-		return errors.Errorf("key.GenerateSeed() error: %s", err)
+		return errors.Wrap(err, "fail to call storager.GetAllAccountKeyByKeyStatus()")
 	}
-
 	if len(accountKeyTable) == 0 {
-		w.logger.Info("No unimported Private Key")
+		w.logger.Info("no unimported private key")
 		return nil
 	}
 
-	//var account string
-	//if accountType != ctype.AccountTypeClient {
-	//	account = string(accountType)
-	//}
-	account := string(accountType)
-
-	//bitcoin APIにて登録をする
 	for _, record := range accountKeyTable {
 		w.logger.Debug(
-			"call GetAllAccountKeyByKeyStatus()",
-			zap.String("accountType", accountType.String()),
-			zap.String("record.WalletAddress", record.WalletAddress),
-			zap.String("record.WalletImportFormat", record.WalletImportFormat))
+			"target records",
+			zap.String("account_type", accountType.String()),
+			zap.String("wallet_address", record.WalletAddress),
+			zap.String("wif", record.WalletImportFormat))
+		// decode wif
 		wif, err := btcutil.DecodeWIF(record.WalletImportFormat)
 		if err != nil {
-			//ここでエラーが出るのであれば生成ロジックが抜本的に問題があるので、return
-			return errors.Errorf(
-				"fail to call btcutil.DecodeWIF(%s). WIF is invalid format.  error: %v", record.WalletImportFormat, err)
+			return errors.Wrapf(err, "fail to call btcutil.DecodeWIF(%s). WIF is invalid format", record.WalletImportFormat)
 		}
-		//rescanはいらないはず
-		err = w.btc.ImportPrivKeyWithoutReScan(wif, account)
-		//err = w.BTC.ImportPrivKeyWithoutReScan(wif, "")
-		//err = w.BTC.ImportPrivKey(wif)
+
+		// import private key by wif without rescan
+		err = w.btc.ImportPrivKeyWithoutReScan(wif, accountType.String())
 		if err != nil {
-			//Bitcoin coreの状況によってエラーが返ることも想定する。よってエラー時はcontinue
-			w.logger.Error("fail to call btc.ImportPrivKeyWithoutReScan()", zap.Error(err))
+			//error would be returned sometimes according to condition of bitcoin core
+			//for now, it continues even if error occurred
+			w.logger.Warn(
+				"fail to call btc.ImportPrivKeyWithoutReScan()",
+				zap.String("wif", record.WalletImportFormat),
+				zap.Error(err))
 			continue
 		}
+
 		//update DB
-		//_, err = w.DB.UpdateIsImprotedPrivKey(accountType, record.WalletImportFormat, nil, true)
 		_, err = w.storager.UpdateKeyStatusByWIF(accountType, keystatus.KeyStatusImportprivkey, record.WalletImportFormat, nil, true)
 		if err != nil {
 			w.logger.Error(
-				"fail to call btc.UpdateKeyStatusByWIF()",
-				zap.String("accountType", accountType.String()),
-				zap.String("KeyStatus", keystatus.KeyStatusImportprivkey.String()),
+				"fail to update table by calling btc.UpdateKeyStatusByWIF()",
+				zap.String("target_table", "account_key_account"),
+				zap.String("account_type", accountType.String()),
 				zap.String("record.WalletImportFormat", record.WalletImportFormat),
 				zap.Error(err))
 		}
 
-		//アドレスがbitcoin core walletに登録されているかチェック
+		// check address was stored in bitcoin core by importing private key
 		w.checkImportedAddress(record.WalletAddress, record.P2shSegwitAddress, record.FullPublicKey)
 	}
 
 	return nil
 }
 
-// checkImportedAddress check imported address
+// checkImportedAddress check address was stored in bitcoin core by importing private key
+// debug usage
 func (w *ColdWallet) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPublicKey string) {
-	w.logger.Info("checkImportedAddress")
+	//Note,
+	//GetAccount() calls GetAddressInfo() internally
+
+	//1.call `getaccount` by wallet_address
 	acnt, err := w.btc.GetAccount(walletAddress)
 	if err != nil {
-		w.logger.Error(
-			"fail to call btc.GetAddressInfo()",
+		w.logger.Warn(
+			"fail to call btc.GetAccount()",
 			zap.String("walletAddress", walletAddress),
 			zap.Error(err))
+	} else {
+		w.logger.Debug(
+			"account is found",
+			zap.String("account", acnt),
+			zap.String("walletAddress", walletAddress))
 	}
-	w.logger.Debug(
-		"account is found by wallet_address",
-		zap.String("account", acnt),
-		zap.String("walletAddress", walletAddress))
 
-	//2.getaccount address(p2sh_segwit_address)
-	acnt, err = w.btc.GetAccount(walletAddress)
+	//2.call `getaccount` by p2sh_segwit_address
+	acnt, err = w.btc.GetAccount(p2shSegwitAddress)
 	if err != nil {
-		w.logger.Error(
+		w.logger.Warn(
 			"fail to call btc.GetAccount()",
 			zap.String("p2shSegwitAddress", p2shSegwitAddress),
 			zap.Error(err))
+		return
 	}
 	w.logger.Debug(
 		"account is found by p2sh_segwit_address",
 		zap.String("account", acnt),
 		zap.String("p2shSegwitAddress", p2shSegwitAddress))
 
-	//3.getaccount address(p2sh_segwit_address)
+	//3.call `getaddressinfo` by p2sh_segwit_address
 	addrInfo, err := w.btc.GetAddressInfo(p2shSegwitAddress)
 	if err != nil {
-		w.logger.Error(
-			"fail to call btc.GetAccount()",
+		w.logger.Warn(
+			"fail to call btc.GetAddressInfo()",
 			zap.String("p2shSegwitAddress", p2shSegwitAddress),
 			zap.Error(err))
-	}
-	w.logger.Debug(
-		"account is found by p2sh_segwit_address",
-		zap.String("account", addrInfo.GetLabelName()),
-		zap.String("p2shSegwitAddress", p2shSegwitAddress))
-
-	if addrInfo.Pubkey != fullPublicKey {
-		w.logger.Error("generating pubkey logic is wrong")
+	} else {
+		if addrInfo.Pubkey != fullPublicKey {
+			w.logger.Warn(
+				"pubkey is not matched",
+				zap.String("in_bitcoin_core", addrInfo.Pubkey),
+				zap.String("in_database", fullPublicKey))
+		}
 	}
 }
