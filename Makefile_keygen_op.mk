@@ -21,62 +21,41 @@ create-hdkey:
 ###############################################################################
 # import private key to keygen wallet
 ###############################################################################
-# FIXME: error happened by this command
-.PHONY: import-priv-key
-import-priv-key:
+.PHONY: import-privkey
+import-privkey:
 	keygen import privkey -account client
 	keygen import privkey -account receipt
 	keygen import privkey -account payment
 
+###############################################################################
+# export public key as csv file
+###############################################################################
+.PHONY: export-pubkey
+export-pubkey:
+	keygen export address -account client
+	keygen export address -account receipt
+	keygen export address -account payment
 
+###############################################################################
+# import multisig address from csv file
+###############################################################################
+.PHONY: import-multisig
+import-multisig:
+	keygen import multisig -account receipt
+	keygen import multisig -account payment
 
-
-
-# Clientのpubアドレスをexportする
-export-client-pub-key:
-	coldwallet1 -k -m 30
-
-# Receiptのpubアドレスをexportする
-export-receipt-pub-key:
-	coldwallet1 -k -m 31
-
-# Paymentのpubアドレスをexportする
-export-payment-pub-key:
-	coldwallet1 -k -m 32
-
-
-# Receiptのmultisigアドレスをimportする
-import-receipt-multisig-address:
-	coldwallet1 -k -m 40
-
-# Paymentのmultisigアドレスをimportする
-import-payment-multisig-address:
-	coldwallet1 -k -m 41
-
-
-
-
-
-
-
-
-
-
-
-#
-
-# [coldwallet] 未署名のトランザクションに署名する
-sign: bld
-	coldwallet1 -w 1 -s -m 1 -i ./data/tx/receipt/receipt_8_unsigned_1534832793024491932
+###############################################################################
+# sign on unsigned transaction as first signature
+#  multisig requireds multiple signature
+###############################################################################
+#make filepath=./data/tx/receipt/receipt_8_unsigned_1534832793024491932 sign-unsignedtx
+.PHONY: sign-unsignedtx
+sign-unsignedtx:
+	keygen sign file ${filepath}
 
 # [coldwallet]出金用に未署名のトランザクションに署名する #出金時の署名は2回
-sign-payment1: bld
-	coldwallet1 -s -m 1 -i ./data/tx/payment/payment_3_unsigned_1534832966995082772
-
-sign-payment2: bld
-	coldwallet2 -s -m 1 -i ./data/tx/payment/payment_3_unsigned_1534832966995082772
-
-
-
-
-
+#sign-payment1: bld
+#	coldwallet1 -s -m 1 -i ./data/tx/payment/payment_3_unsigned_1534832966995082772
+#
+#sign-payment2: bld
+#	coldwallet2 -s -m 1 -i ./data/tx/payment/payment_3_unsigned_1534832966995082772

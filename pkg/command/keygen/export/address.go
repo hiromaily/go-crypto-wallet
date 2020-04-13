@@ -52,7 +52,7 @@ func (c *AddressCommand) Run(args []string) int {
 		return 1
 	}
 
-	// export generated PublicKey as csv file to use at watch only wallet
+	// export generated PublicKey as csv file
 	fileName, err := c.wallet.ExportAccountKey(account.AccountType(acnt), keystatus.KeyStatusImportprivkey)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call ExportAccountKey() %+v", err))
