@@ -13,12 +13,13 @@ import-pubkey:
 
 
 ###############################################################################
-# create transaction
+# create unsigned transaction
 ###############################################################################
 # detect receipt addresses and create unsigned transaction for client
+#make fee=0.5 create-receipt-tx
 .PHONY: create-receipt-tx
 create-receipt-tx:
-	wallet create receipt -fee 0.5
+	wallet create receipt -fee ${fee}
 	#wallet -r -m 1
 
 # Note: debug use
@@ -29,9 +30,10 @@ create-receipt-all:
 	#wallet -r -m 10
 
 # create payment request from payment table
+#make fee=0.5 create-payment-tx
 .PHONY: create-payment-tx
 create-payment-tx:
-	wallet create payment -fee 0.5
+	wallet create payment -fee ${fee}
 
 # Note: debug use
 # WIP: execute series of flows from creation of payment transaction to sending of a transaction
