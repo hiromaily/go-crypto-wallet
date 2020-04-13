@@ -23,7 +23,7 @@ func (c *PrivKeyCommand) Synopsis() string {
 }
 
 func (c *PrivKeyCommand) Help() string {
-	return `Usage: sign key import privkey
+	return `Usage: sign import privkey
 `
 }
 

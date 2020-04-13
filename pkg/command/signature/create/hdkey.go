@@ -24,7 +24,7 @@ func (c *HDKeyCommand) Synopsis() string {
 }
 
 func (c *HDKeyCommand) Help() string {
-	return `Usage: sign key create hdkey
+	return `Usage: sign create hdkey
 `
 }
 

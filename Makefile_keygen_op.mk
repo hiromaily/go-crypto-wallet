@@ -8,7 +8,7 @@
 # create seed
 .PHONY: create-seed
 create-seed:
-	keygen key create seed
+	keygen create seed
 	#seed: 00ySYFfazp+41jyOuLxFb2tWNfIGRmDpGFOBLrneuoQ=
 
 # create hdkey for acounts

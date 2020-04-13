@@ -8,7 +8,7 @@
 #make filepath=./data/pubkey/client_1535423628425011000.csv import-pubkey
 .PHONY: import-pubkey
 import-pubkey:
-	wallet import key -file ${filepath}
+	wallet import key -acount client -file ${filepath}
 	#wallet -k -m 1 -i ./data/pubkey/client_1535423628425011000.csv
 
 

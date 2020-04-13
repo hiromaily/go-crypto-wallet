@@ -25,7 +25,7 @@ func (c *SeedCommand) Synopsis() string {
 }
 
 func (c *SeedCommand) Help() string {
-	return `Usage: sign key create seed
+	return `Usage: sign create seed
 `
 }
 

@@ -23,7 +23,7 @@ func (c *MultisigCommand) Synopsis() string {
 }
 
 func (c *MultisigCommand) Help() string {
-	return `Usage: sign key export multisig [options...]
+	return `Usage: sign export multisig [options...]
 Options:
   -account  target account
 `

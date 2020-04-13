@@ -1,4 +1,4 @@
-package signature
+package sign
 
 import (
 	"flag"
@@ -9,25 +9,25 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
-//sending subcommand
-type SignatureCommand struct {
+//sign subcommand
+type SignCommand struct {
 	Name   string
 	UI     cli.Ui
 	Wallet wallets.Signer
 }
 
-func (c *SignatureCommand) Synopsis() string {
-	return "sign on unsigned transaction (account would be found from file name)"
+func (c *SignCommand) Synopsis() string {
+	return "sign on signed transaction for multsig address (account would be found from file name)"
 }
 
-func (c *SignatureCommand) Help() string {
-	return `Usage: wallet sending [options...]
+func (c *SignCommand) Help() string {
+	return `Usage: sign sign [options...]
 Options:
-  -file  unsigned transaction file path
+  -file  signed transaction file path for multisig address
 `
 }
 
-func (c *SignatureCommand) Run(args []string) int {
+func (c *SignCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 
 	var (
@@ -45,7 +45,7 @@ func (c *SignatureCommand) Run(args []string) int {
 		return 1
 	}
 
-	// sign on unsigned transactions, action(receipt/payment) could be found from file name
+	// sign on signed transactions for multisig, action(receipt/payment) could be found from file name
 	hexTx, isSigned, generatedFileName, err := c.Wallet.SignatureFromFile(filePath)
 	if err != nil {
 		c.UI.Error(fmt.Sprintf("fail to call SendFromFile() %+v", err))

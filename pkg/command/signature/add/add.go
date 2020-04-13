@@ -1,4 +1,4 @@
-package export
+package add
 
 import (
 	"flag"
@@ -10,31 +10,30 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
-// export subcommand
-type ExportCommand struct {
+//add subcommand
+type AddCommand struct {
 	Name        string
 	Version     string
-	SynopsisExp string
 	UI          cli.Ui
 	Wallet      wallets.Signer
 }
 
-func (c *ExportCommand) Synopsis() string {
-	return c.SynopsisExp
+func (c *AddCommand) Synopsis() string {
+	return "add key for multisig address"
 }
 
 var (
-	multisigSynopsis = ""
+	multisigSynopsis = "call `addmultisigaddress` which adds a P2SH multisig address to the wallet"
 )
 
-func (c *ExportCommand) Help() string {
-	return fmt.Sprintf(`Usage: sign export [Subcommands...]
+func (c *AddCommand) Help() string {
+	return fmt.Sprintf(`Usage: sign add [Subcommands...]
 Subcommands:
   multisig     %s
 `, multisigSynopsis)
 }
 
-func (c *ExportCommand) Run(args []string) int {
+func (c *AddCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 
 	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
