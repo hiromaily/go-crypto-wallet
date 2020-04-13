@@ -1,20 +1,31 @@
 #!/bin/sh
 
-#After `docker-compose up`
+#After reset database and `docker-compose up`
+
+# reset wallet.dat
+rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/wallet.dat
+sleep 5
 
 ###############################################################################
-#coldwallet1
+# keygen wallet
 ###############################################################################
-#seedを生成
-coldwallet1 -k -m 1
+# create seed
+keygen create seed
 
-#keyを生成
-coldwallet1 -k -m 10 -n 10 -a client  #client
-coldwallet1 -k -m 10 -n 5  -a receipt #receipt
-coldwallet1 -k -m 10 -n 5  -a payment #payment
-coldwallet1 -k -m 10 -n 5  -a quoine  #quoine
-coldwallet1 -k -m 10 -n 5  -a fee     #fee
-coldwallet1 -k -m 10 -n 5  -a stored  #stored
+# create hdkey for client, receipt, payment account
+keygen create hdkey -account client -keynum 10
+keygen create hdkey -account receipt -keynum 10
+keygen create hdkey -account payment -keynum 10
+keygen create hdkey -account stored -keynum 10
+
+# import generated private key into keygen wallet
+keygen import privkey -account client
+keygen import privkey -account receipt
+keygen import privkey -account payment
+keygen import privkey -account stored
+
+
+
 
 #作成したAccountのPrivateKeyをColdWalletにimportする
 coldwallet1 -k -m 20 -a client

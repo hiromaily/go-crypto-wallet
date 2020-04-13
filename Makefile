@@ -142,13 +142,7 @@ up-docker-logger:
 .PHONY: rm-db-volumes
 rm-db-volumes:
 	docker rm -f $(docker ps -a --format "{{.Names}}")
-	docker volume rm btc-wallet-db btc-keygen-db btc-signature-db
-
-.PHONY: rm-docker-wallet-dat-all
-rm-docker-wallet-dat-all:
-	rm -rf ./docker/btc/data1/testnet3/wallets/wallet.data
-	rm -rf ./docker/btc/data2/testnet3/wallets/wallet.data
-	rm -rf ./docker/btc/data3/testnet3/wallets/wallet.data
+	docker volume rm -f $(docker volume ls --format "{{.Name}}")
 
 
 ###############################################################################
@@ -166,9 +160,19 @@ bitcoin-stop:
 cd-btc-dir:
 	cd ~/Library/Application\ Support/Bitcoin
 
+
+###############################################################################
+# wallet.dat
+###############################################################################
 .PHONY: rm-local-wallet-dat
 rm-local-wallet-dat:
 	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/wallet.dat
+
+.PHONY: rm-docker-wallet-dat-all
+rm-docker-wallet-dat-all:
+	rm -rf ./docker/btc/data1/testnet3/wallets/wallet.data
+	rm -rf ./docker/btc/data2/testnet3/wallets/wallet.data
+	rm -rf ./docker/btc/data3/testnet3/wallets/wallet.data
 
 
 ###############################################################################
@@ -197,5 +201,6 @@ include ./Makefile_signature_op.mk
 # Utility
 ###############################################################################
 .PHONY: clean
-clean:
-	rm -rf wallet keygen sign
+clean: rm-db-volumes rm-local-wallet-dat
+
+#after that, run `make up-docker-db`

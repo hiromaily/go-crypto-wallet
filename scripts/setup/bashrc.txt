@@ -1,4 +1,5 @@
-#basic
+#bashrc setting for macos
+
 alias ll='ls -al'
 alias pd='pushd'
 alias pp='popd'
@@ -19,14 +20,11 @@ alias dcrmall='docker rm -f $(docker ps -a --format "{{.Names}}")'
 alias dcimgcln='docker rmi -f $(docker images -aqf "dangling=true" --no-trunc)'
 alias dvrmall='docker volume prune'
 
-#mff
-alias mff='cd $GOPATH/src/github.com/mf-financial'
-
 #bitcoin
 alias mfw='cd $GOPATH/src/github.com/hiromaily/go-bitcon'
 alias btc='cd ~/Library/Application\ Support/Bitcoin'
 alias rstwlt='rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/wallet.dat'
 
 alias bitstart='bitcoind -daemon -deprecatedrpc=signrawtransaction'
-alias bitstart-cold='bitcoind -daemon -maxconnections=0 -deprecatedrpc=signrawtransaction'
+alias bitstart-cold='bitcoind -daemon -maxconnections=0'
 alias bitstop='bitcoin-cli stop'
