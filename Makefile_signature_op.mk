@@ -1,7 +1,11 @@
 
 ###############################################################################
-# Cold wallet2 (Authorizationのキー/ Receipt/PaymentのMultisigアドレス管理)
+# Signature Wallet for generating key of only authorization account
+#  and multisig address,
+#  and signature for multisig addresses
 ###############################################################################
+
+
 
 # seedを生成する
 gen-seed2:
