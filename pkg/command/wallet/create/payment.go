@@ -1,4 +1,4 @@
-package payment
+package create
 
 import (
 	"flag"
@@ -9,38 +9,62 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
-//debug subcommand
-type DebugSequenceCommand struct {
+//payment subcommand
+type PaymentCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
 	wallet   wallets.Walleter
 }
 
-func (c *DebugSequenceCommand) Synopsis() string {
+func (c *PaymentCommand) Synopsis() string {
 	return c.synopsis
 }
 
-func (c *DebugSequenceCommand) Help() string {
-	return `Usage: wallet payment debug [options...]
+func (c *PaymentCommand) Help() string {
+	return `Usage: wallet create payment [options...]
 Options:
   -fee  adjustment fee
+  -debug  execute series of flows from creation of a receiving transaction to sending of a transaction
 `
 }
 
-func (c *DebugSequenceCommand) Run(args []string) int {
-	c.ui.Output(c.Synopsis())
+func (c *PaymentCommand) Run(args []string) int {
+	c.ui.Info(c.Synopsis())
 
 	var (
-		fee float64
+		fee     float64
+		isDebug bool
 	)
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
 	flags.Float64Var(&fee, "fee", 0, "adjustment fee")
+	flags.BoolVar(&isDebug, "debug", false, "execute series of flows from creation of a receiving transaction to sending of a transaction")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
 
-	c.ui.Output(fmt.Sprintf("-fee: %f", fee))
+	if isDebug {
+		return c.runDebug(fee)
+	}
+
+	// Create payment transaction
+	hex, fileName, err := c.wallet.CreateUnsignedPaymentTx(fee)
+	if err != nil {
+		c.ui.Error(fmt.Sprintf("fail to call CreateUnsignedPaymentTx() %+v", err))
+		return 1
+	}
+	if hex == "" {
+		c.ui.Info("No utxo")
+		return 0
+	}
+	//TODO: output should be json if json option is true
+	c.ui.Output(fmt.Sprintf("[hex]: %s\n[fileName]: %s", hex, fileName))
+
+	return 0
+}
+
+func (c *PaymentCommand) runDebug(fee float64) int {
+	c.ui.Output("debug mode")
 
 	// 1. Create a payment transaction
 	c.ui.Info("[1]Run: Detect payment transaction")

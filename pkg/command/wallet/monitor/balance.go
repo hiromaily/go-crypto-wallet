@@ -1,4 +1,4 @@
-package monitoring
+package monitor
 
 import (
 	"flag"
@@ -21,14 +21,14 @@ func (c *BalanceCommand) Synopsis() string {
 }
 
 func (c *BalanceCommand) Help() string {
-	return `Usage: wallet monitoring balance [options...]
+	return `Usage: wallet monitor balance [options...]
 Options:
   -account  target account
 `
 }
 
 func (c *BalanceCommand) Run(args []string) int {
-	c.ui.Output(c.Synopsis())
+	c.ui.Info(c.Synopsis())
 
 	var (
 		acnt string

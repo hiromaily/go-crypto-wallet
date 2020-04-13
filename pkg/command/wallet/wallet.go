@@ -5,18 +5,46 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
 	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/create"
 	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/db"
-	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/key"
-	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/monitoring"
-	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/payment"
-	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/receipt"
-	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/sending"
-	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/transfer"
+	_import "github.com/hiromaily/go-bitcoin/pkg/command/wallet/import"
+	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/monitor"
+	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/send"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
 func WalletSubCommands(wallet wallets.Walleter, version string) map[string]cli.CommandFactory {
 	return map[string]cli.CommandFactory{
+		"import": func() (cli.Command, error) {
+			return &_import.ImportCommand{
+				Name:    "import",
+				Version: version,
+				UI:      command.ClolorUI(),
+				Wallet:  wallet,
+			}, nil
+		},
+		"create": func() (cli.Command, error) {
+			return &create.CreateCommand{
+				Name:   "transfer",
+				UI:     command.ClolorUI(),
+				Wallet: wallet,
+			}, nil
+		},
+		"send": func() (cli.Command, error) {
+			return &send.SendCommand{
+				Name:   "send",
+				UI:     command.ClolorUI(),
+				Wallet: wallet,
+			}, nil
+		},
+		"monitor": func() (cli.Command, error) {
+			return &monitor.MonitorCommand{
+				Name:    "monitor",
+				Version: version,
+				UI:      command.ClolorUI(),
+				Wallet:  wallet,
+			}, nil
+		},
 		"api": func() (cli.Command, error) {
 			return &api.APICommand{
 				Name:    "api",
@@ -31,52 +59,6 @@ func WalletSubCommands(wallet wallets.Walleter, version string) map[string]cli.C
 				Version: version,
 				UI:      command.ClolorUI(),
 				Wallet:  wallet,
-			}, nil
-		},
-		"key": func() (cli.Command, error) {
-			return &key.KeyCommand{
-				Name:    "key",
-				Version: version,
-				UI:      command.ClolorUI(),
-				Wallet:  wallet,
-			}, nil
-		},
-		"monitoring": func() (cli.Command, error) {
-			return &monitoring.MonitoringCommand{
-				Name:    "monitoring",
-				Version: version,
-				UI:      command.ClolorUI(),
-				Wallet:  wallet,
-			}, nil
-		},
-		"payment": func() (cli.Command, error) {
-			return &payment.PaymentCommand{
-				Name:    "payment",
-				Version: version,
-				UI:      command.ClolorUI(),
-				Wallet:  wallet,
-			}, nil
-		},
-		"receipt": func() (cli.Command, error) {
-			return &receipt.ReceiptCommand{
-				Name:    "receipt",
-				Version: version,
-				UI:      command.ClolorUI(),
-				Wallet:  wallet,
-			}, nil
-		},
-		"sending": func() (cli.Command, error) {
-			return &sending.SendingCommand{
-				Name:   "sending",
-				UI:     command.ClolorUI(),
-				Wallet: wallet,
-			}, nil
-		},
-		"transfer": func() (cli.Command, error) {
-			return &transfer.TransferCommand{
-				Name:   "transfer",
-				UI:     command.ClolorUI(),
-				Wallet: wallet,
 			}, nil
 		},
 	}

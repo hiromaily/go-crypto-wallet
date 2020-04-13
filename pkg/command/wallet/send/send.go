@@ -1,4 +1,4 @@
-package sending
+package send
 
 import (
 	"flag"
@@ -9,26 +9,26 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
-//sending subcommand
-type SendingCommand struct {
+//send subcommand
+type SendCommand struct {
 	Name   string
 	UI     cli.Ui
 	Wallet wallets.Walleter
 }
 
-func (c *SendingCommand) Synopsis() string {
+func (c *SendCommand) Synopsis() string {
 	return "send signed transaction to bitcoin blockchain network"
 }
 
-func (c *SendingCommand) Help() string {
-	return `Usage: wallet sending [options...]
+func (c *SendCommand) Help() string {
+	return `Usage: wallet send [options...]
 Options:
   -file  signed transaction file path
 `
 }
 
-func (c *SendingCommand) Run(args []string) int {
-	c.UI.Output(c.Synopsis())
+func (c *SendCommand) Run(args []string) int {
+	c.UI.Info(c.Synopsis())
 
 	var (
 		filePath string

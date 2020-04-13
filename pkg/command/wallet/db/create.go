@@ -29,7 +29,7 @@ Options:
 }
 
 func (c *CreateCommand) Run(args []string) int {
-	c.ui.Output(c.Synopsis())
+	c.ui.Info(c.Synopsis())
 
 	var (
 		tableName string

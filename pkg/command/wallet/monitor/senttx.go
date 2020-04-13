@@ -1,4 +1,4 @@
-package monitoring
+package monitor
 
 import (
 	"flag"
@@ -22,14 +22,14 @@ func (c *SentTxCommand) Synopsis() string {
 }
 
 func (c *SentTxCommand) Help() string {
-	return `Usage: wallet monitoring sendtx [options...]
+	return `Usage: wallet monitor sendtx [options...]
 Options:
   -account  target account
 `
 }
 
 func (c *SentTxCommand) Run(args []string) int {
-	c.ui.Output(c.Synopsis())
+	c.ui.Info(c.Synopsis())
 
 	var (
 		acnt string

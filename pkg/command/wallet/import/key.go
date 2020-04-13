@@ -1,4 +1,4 @@
-package key
+package _import
 
 import (
 	"flag"
@@ -10,27 +10,27 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
-//import subcommand
-type ImportCommand struct {
+//key subcommand
+type KeyCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
 	wallet   wallets.Walleter
 }
 
-func (c *ImportCommand) Synopsis() string {
+func (c *KeyCommand) Synopsis() string {
 	return c.synopsis
 }
 
-func (c *ImportCommand) Help() string {
-	return `Usage: wallet key import [options...]
+func (c *KeyCommand) Help() string {
+	return `Usage: wallet import key [options...]
 Options:
   -file  import file path for generated addresses
 `
 }
 
-func (c *ImportCommand) Run(args []string) int {
-	c.ui.Output(c.Synopsis())
+func (c *KeyCommand) Run(args []string) int {
+	c.ui.Info(c.Synopsis())
 
 	var (
 		filePath string
@@ -61,7 +61,7 @@ func (c *ImportCommand) Run(args []string) int {
 		return 1
 	}
 
-	//import public key
+	//import public key(address)
 	err := c.wallet.ImportPublicKey(filePath, account.AccountType(acnt), isRescan)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call ImportPublicKey() %+v", err))

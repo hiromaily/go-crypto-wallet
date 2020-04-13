@@ -26,7 +26,7 @@ func (c *UnLockTxCommand) Help() string {
 }
 
 func (c *UnLockTxCommand) Run(args []string) int {
-	c.ui.Output(c.Synopsis())
+	c.ui.Info(c.Synopsis())
 
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
 	if err := flags.Parse(args); err != nil {

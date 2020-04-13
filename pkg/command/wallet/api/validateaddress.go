@@ -29,7 +29,7 @@ Options:
 }
 
 func (c *ValidateAddressCommand) Run(args []string) int {
-	c.ui.Output(c.Synopsis())
+	c.ui.Info(c.Synopsis())
 
 	var (
 		address string

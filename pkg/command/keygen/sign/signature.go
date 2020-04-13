@@ -28,7 +28,7 @@ Options:
 }
 
 func (c *SignatureCommand) Run(args []string) int {
-	c.UI.Output(c.Synopsis())
+	c.UI.Info(c.Synopsis())
 
 	var (
 		filePath string

@@ -30,7 +30,7 @@ Options:
 }
 
 func (c *BalanceCommand) Run(args []string) int {
-	c.ui.Output(c.Synopsis())
+	c.ui.Info(c.Synopsis())
 
 	var (
 		acnt string

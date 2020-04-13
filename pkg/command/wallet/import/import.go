@@ -1,4 +1,4 @@
-package key
+package _import
 
 import (
 	"flag"
@@ -10,31 +10,31 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
-//key subcommand
-type KeyCommand struct {
+//import subcommand
+type ImportCommand struct {
 	Name    string
 	Version string
 	UI      cli.Ui
 	Wallet  wallets.Walleter
 }
 
-func (c *KeyCommand) Synopsis() string {
-	return "key importing functionality"
+func (c *ImportCommand) Synopsis() string {
+	return "importing functionality"
 }
 
 var (
-	importSynopsis = "import generatd addresses by keygen wallet"
+	keySynopsis = "import generatd addresses by keygen wallet"
 )
 
-func (c *KeyCommand) Help() string {
-	return fmt.Sprintf(`Usage: wallet key [Subcommands...]
+func (c *ImportCommand) Help() string {
+	return fmt.Sprintf(`Usage: wallet import [Subcommands...]
 Subcommands:
-  import  %s
-`, importSynopsis)
+  key  %s
+`, keySynopsis)
 }
 
-func (c *KeyCommand) Run(args []string) int {
-	c.UI.Output(c.Synopsis())
+func (c *ImportCommand) Run(args []string) int {
+	c.UI.Info(c.Synopsis())
 
 	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
 	if err := flags.Parse(args); err != nil {
@@ -43,10 +43,10 @@ func (c *KeyCommand) Run(args []string) int {
 
 	//farther subcommand import
 	cmds := map[string]cli.CommandFactory{
-		"import": func() (cli.Command, error) {
-			return &ImportCommand{
-				name:     "import",
-				synopsis: importSynopsis,
+		"key": func() (cli.Command, error) {
+			return &KeyCommand{
+				name:     "key",
+				synopsis: keySynopsis,
 				ui:       command.ClolorUI(),
 				wallet:   c.Wallet,
 			}, nil

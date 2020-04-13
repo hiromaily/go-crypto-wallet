@@ -1,4 +1,4 @@
-package monitoring
+package monitor
 
 import (
 	"flag"
@@ -10,15 +10,15 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 
-//montoring subcommand
-type MonitoringCommand struct {
+//montor subcommand
+type MonitorCommand struct {
 	Name    string
 	Version string
 	UI      cli.Ui
 	Wallet  wallets.Walleter
 }
 
-func (c *MonitoringCommand) Synopsis() string {
+func (c *MonitorCommand) Synopsis() string {
 	return "montoring functionality"
 }
 
@@ -27,16 +27,16 @@ var (
 	balanceSynopsis = "monitor balance"
 )
 
-func (c *MonitoringCommand) Help() string {
-	return fmt.Sprintf(`Usage: wallet receipt [Subcommands...]
+func (c *MonitorCommand) Help() string {
+	return fmt.Sprintf(`Usage: wallet monitor [Subcommands...]
 Subcommands:
   senttx   %s
   balance  %s
 `, senttxSynopsis, balanceSynopsis)
 }
 
-func (c *MonitoringCommand) Run(args []string) int {
-	c.UI.Output(c.Synopsis())
+func (c *MonitorCommand) Run(args []string) int {
+	c.UI.Info(c.Synopsis())
 
 	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
 	if err := flags.Parse(args); err != nil {

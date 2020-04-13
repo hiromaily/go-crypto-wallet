@@ -15,28 +15,26 @@ type CreateCommand struct {
 	Name    string
 	Version string
 	UI      cli.Ui
-	Wallet  wallets.Keygener
+	Wallet  wallets.Walleter
 }
 
 func (c *CreateCommand) Synopsis() string {
-	return "create resources"
+	return "creating functionality"
 }
 
 var (
-	keySynopsis      = "create one key for debug use"
-	hdkeySynopsis    = "create HD key"
-	seedSynopsis     = "create seed"
-	multisigSynopsis = "multisig address for debug use"
+	receiptSynopsis  = "create a receipt unsigned transaction file for client account"
+	paymentSynopsis  = "create a payment unsigned transaction file for payment account"
+	transferSynopsis = "create a transfer unsigned transaction file between accounts"
 )
 
 func (c *CreateCommand) Help() string {
-	return fmt.Sprintf(`Usage: keygen create [Subcommands...]
+	return fmt.Sprintf(`Usage: wallet create [Subcommands...]
 Subcommands:
-  key       %s
-  hdkey     %s
-  seed      %s
-  multisig  %s
-`, keySynopsis, hdkeySynopsis, seedSynopsis, multisigSynopsis)
+  receipt  %s
+  payment  %s
+  transfer %s
+`, receiptSynopsis, paymentSynopsis, transferSynopsis)
 }
 
 func (c *CreateCommand) Run(args []string) int {
@@ -49,34 +47,26 @@ func (c *CreateCommand) Run(args []string) int {
 
 	//farther subcommand import
 	cmds := map[string]cli.CommandFactory{
-		"key": func() (cli.Command, error) {
-			return &HDKeyCommand{
-				name:     "key",
-				synopsis: keySynopsis,
+		"receipt": func() (cli.Command, error) {
+			return &ReceiptCommand{
+				name:     "receipt",
+				synopsis: receiptSynopsis,
 				ui:       command.ClolorUI(),
 				wallet:   c.Wallet,
 			}, nil
 		},
-		"hdkey": func() (cli.Command, error) {
-			return &HDKeyCommand{
-				name:     "hdkey",
-				synopsis: hdkeySynopsis,
+		"payment": func() (cli.Command, error) {
+			return &PaymentCommand{
+				name:     "payment",
+				synopsis: paymentSynopsis,
 				ui:       command.ClolorUI(),
 				wallet:   c.Wallet,
 			}, nil
 		},
-		"seed": func() (cli.Command, error) {
-			return &SeedCommand{
-				name:     "seed",
-				synopsis: seedSynopsis,
-				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
-			}, nil
-		},
-		"multisig": func() (cli.Command, error) {
-			return &MultisigCommand{
-				name:     "multisig",
-				synopsis: multisigSynopsis,
+		"transfer": func() (cli.Command, error) {
+			return &TransferCommand{
+				name:     "transfer",
+				synopsis: transferSynopsis,
 				ui:       command.ClolorUI(),
 				wallet:   c.Wallet,
 			}, nil

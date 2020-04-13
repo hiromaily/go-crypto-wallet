@@ -35,7 +35,7 @@ Subcommands:
 }
 
 func (c *ExportCommand) Run(args []string) int {
-	c.UI.Output(c.Synopsis())
+	c.UI.Info(c.Synopsis())
 
 	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
 	if err := flags.Parse(args); err != nil {
