@@ -36,17 +36,19 @@ keygen export address -account stored
 ###############################################################################
 # create seed
 sign create seed
-# done
 
 # create hdkey for authorization
 sign create hdkey
+
+# import generated private key into sign wallet
+sign import privkey
 # done
 
+# import pubkey exported from keygen wallet into sign wallet
+sign import address -account receipt -file receipt_1_1586831083436291000.csv
+sign import address -account payment -file
+sign import address -account stored -file
 
-
-
-#作成したAuthのPrivateKeyをColdWalletにimportする
-coldwallet2 -k -m 20
 
 #coldwallet1からexportしたAccountのpublicアドレスをcoldWallet2にimportする
 coldwallet2 -k -m 30 -i ./data/pubkey/receipt_1_xxx.csv -a receipt

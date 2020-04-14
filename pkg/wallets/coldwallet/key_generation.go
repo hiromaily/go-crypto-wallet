@@ -3,14 +3,11 @@ package coldwallet
 //cold wallet (keygen, sing)
 
 import (
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
-
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/wkey"
+	"github.com/pkg/errors"
 )
 
 //1. generate seed and store it in database
@@ -77,43 +74,28 @@ func (w *ColdWallet) retrieveSeed() ([]byte, error) {
 	return nil, errors.New("somehow seed retrieved from database is blank ")
 }
 
-// GenerateAccountKey AccountType属性のアカウントKeyを生成する
-// TODO:AccountTypeAuthorizationのときは、レコードがある場合は追加できないようにしたほうがいい？？
-func (w *ColdWallet) GenerateAccountKey(accountType account.AccountType, coinType ctype.CoinType, seed []byte, count uint32) ([]wkey.WalletKey, error) {
-	if w.wtype == types.WalletTypeWatchOnly {
-		return nil, errors.New("it's available on Coldwallet1, Coldwallet2")
-	}
+// GeneratePubKey generate pubkey for account
+// TODO: if acount is AccountTypeAuthorization and there is already record, it should stop creation
+func (w *ColdWallet) GeneratePubKey(
+	accountType account.AccountType,
+	coinType ctype.CoinType,
+	seed []byte, count uint32) ([]wkey.WalletKey, error) {
 
-	//現在のindexを取得
-	idx, err := w.storager.GetMaxIndexOnAccountKeyTable(accountType)
+	//get latest index
+	idxFrom, err := w.storager.GetMaxIndexOnAccountKeyTable(accountType)
 	if err != nil {
-		idx = 0
+		idxFrom = 0
 	} else {
-		idx++
+		idxFrom++
 	}
-	w.logger.Info(
-		"call storager.GetMaxIndexOnAccountKeyTable() current index",
-		zap.Int64("idx", idx))
 
-	return w.generateAccountKey(accountType, coinType, seed, uint32(idx), count)
-}
-
-// generateKey AccountType属性のアカウントKeyを生成する
-func (w *ColdWallet) generateAccountKey(accountType account.AccountType, coinType ctype.CoinType, seed []byte, idxFrom, count uint32) ([]wkey.WalletKey, error) {
-	// HDウォレットのkeyを生成する
-	walletKeys, err := w.generateAccountKeyData(accountType, coinType, seed, idxFrom, count)
+	// generate hd wallet key
+	walletKeys, err := w.generateHDKey(accountType, coinType, seed, uint32(idxFrom), count)
 	if err != nil {
-		return nil, errors.Errorf("key.generateAccountKeyData(AccountTypeClient) error: %s", err)
+		return nil, errors.Wrap(err, "fail to call key.generateAccountKeyData()")
 	}
 
-	// Account
-	//var account string
-	//if accountType != ctype.AccountTypeClient {
-	//	account = string(accountType)
-	//}
-	account := string(accountType)
-
-	// DBにClientAccountのKey情報を登録
+	// insert key information to account_key_table
 	accountKeyClients := make([]coldrepo.AccountKeyTable, len(walletKeys))
 	for idx, key := range walletKeys {
 		accountKeyClients[idx] = coldrepo.AccountKeyTable{
@@ -123,33 +105,38 @@ func (w *ColdWallet) generateAccountKey(accountType account.AccountType, coinTyp
 			WalletMultisigAddress: "",
 			RedeemScript:          key.RedeemScript,
 			WalletImportFormat:    key.WIF,
-			Account:               account,
-			Idx:                   idxFrom,
+			Account:               accountType.String(),
+			Idx:                   uint32(idxFrom),
 		}
 		idxFrom++
 	}
 	err = w.storager.InsertAccountKeyTable(accountType, accountKeyClients, nil, true)
 	if err != nil {
-		return nil, errors.Errorf("DB.InsertAccountKeyTable() error: %s", err)
+		return nil, errors.Wrap(err, "fail to call storager.InsertAccountKeyTable()")
 	}
 
 	return walletKeys, err
 }
 
-// generateKeyData AccountType属性のアカウントKeyを生成する
-func (w *ColdWallet) generateAccountKeyData(accountType account.AccountType, coinType ctype.CoinType, seed []byte, idxFrom, count uint32) ([]wkey.WalletKey, error) {
-	// Keyオブジェクト
+func (w *ColdWallet) generateHDKey(
+	accountType account.AccountType,
+	coinType ctype.CoinType,
+	seed []byte,
+	idxFrom,
+	count uint32) ([]wkey.WalletKey, error) {
+
+	// key object
 	keyData := wkey.NewKey(coinType, w.btc.GetChainConf(), w.logger)
 
-	// key生成
+	// generate private key
 	priv, _, err := keyData.CreateAccount(seed, accountType)
 	if err != nil {
-		return nil, errors.Errorf("key.CreateAccount() error: %s", err)
+		return nil, errors.Wrap(err, "fail to call keyData.CreateAccount()")
 	}
-
+	// generate key with private key and index
 	walletKeys, err := keyData.CreateKeysWithIndex(priv, idxFrom, count)
 	if err != nil {
-		return nil, errors.Errorf("key.CreateKeysWithIndex() error: %s", err)
+		return nil, errors.Wrap(err, "fail to call keyData.CreateKeysWithIndex()")
 	}
 
 	return walletKeys, nil
