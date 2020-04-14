@@ -13,6 +13,11 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
+//CreateMultiSig(addmultisigaddress)にwalletにmultisig用のprivate keyを登録する
+//これのパラメータには、multisigしないと送金許可しないアドレス(receipt, payment)+承認用のアドレスをセット
+//これによって、生成されたアドレスから送金する場合、パラメータにセットしたアドレスに紐づく秘密鍵が必要
+//payment,receiptのアドレスは、実際には、addmultisigaddressによって生成されたアドレスに置き換えられる。
+
 // AddMultisigAddressByAuthorization account_key_authorizationテーブルのwallet_addressを認証者として、
 // added_pubkey_history_paymentテーブル内のwalletアドレスのmultisigアドレスを生成する
 // TODO:第4パラメータに、address_typeを追加する。Bitcoinの場合は、p2sh-segwit とする

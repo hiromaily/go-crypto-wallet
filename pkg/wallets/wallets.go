@@ -43,6 +43,7 @@ type Coldwalleter interface {
 type KeySigner interface {
 	SignatureFromFile(filePath string) (string, bool, string, error)
 	GenerateSeed() ([]byte, error)
+	StoreSeed(strSeed string) ([]byte, error)
 	GenerateAccountKey(accountType account.AccountType, coinType ctype.CoinType, seed []byte, count uint32) ([]wkey.WalletKey, error)
 	ImportPrivateKey(accountType account.AccountType) error
 }

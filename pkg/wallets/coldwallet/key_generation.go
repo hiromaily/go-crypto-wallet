@@ -1,6 +1,6 @@
 package coldwallet
 
-//Cold wallet
+//cold wallet (keygen, sing)
 
 import (
 	"github.com/pkg/errors"
@@ -13,68 +13,68 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/wkey"
 )
 
-//1.Seedの生成+DBに登録
-//2.Multisig Keyの生成+DBに登録(承認用は端末を分けて管理しないと意味がないかも)
-
-//CreateMultiSig(addmultisigaddress)にwalletにmultisig用のprivate keyを登録する
-//これのパラメータには、multisigしないと送金許可しないアドレス(receipt, payment)+承認用のアドレスをセット
-//これによって、生成されたアドレスから送金する場合、パラメータにセットしたアドレスに紐づく秘密鍵が必要
-//payment,receiptのアドレスは、実際には、addmultisigaddressによって生成されたアドレスに置き換えられる。
-
-//3.Client Keyの生成+DBに登録
+//1. generate seed and store it in database
+//2. generate multisig key and store it in database
+//    auth device should be separated into each auth accounts (auth1, auth2 ...)
+//3. generate pubkey for client and store it in database
 //4.Receipt Keyの生成 + Multisig対応 + DBに登録 (1日1Key消費するイメージ)
 //5.Payment Keyの生成+ Multisig + DBに登録 (1日1Key消費するイメージ)
 
-// GenerateSeed seedを生成する
+// GenerateSeed generate seed and store it in database
 func (w *ColdWallet) GenerateSeed() ([]byte, error) {
 
+	// retrieve seed from database
 	bSeed, err := w.retrieveSeed()
 	if err == nil {
 		return bSeed, nil
 	}
 
-	// seed生成
-	// set default seed
-	var strSeed string
-
-	//TODO: envは削除するので、一旦本番モードで実装
+	// generate seed
 	bSeed, err = wkey.GenerateSeed()
 	if err != nil {
-		return nil, errors.Errorf("key.GenerateSeed() error: %s", err)
+		return nil, errors.Wrap(err, "fail to call key.GenerateSeed()")
 	}
-	strSeed = wkey.SeedToString(bSeed)
-	//if w.Env == ctype.EnvDev && w.Seed != "" {
-	//	strSeed = w.Seed
-	//	bSeed, err = key.SeedToByte(strSeed)
-	//	if err != nil {
-	//		return nil, errors.Errorf("key.SeedToByte() error: %s", err)
-	//	}
-	//} else {
-	//	bSeed, err = key.GenerateSeed()
-	//	if err != nil {
-	//		return nil, errors.Errorf("key.GenerateSeed() error: %s", err)
-	//	}
-	//	strSeed = key.SeedToString(bSeed)
-	//}
+	strSeed := wkey.SeedToString(bSeed)
 
-	// DBにseed情報を登録
+	// insert seed in database
 	_, err = w.storager.InsertSeed(strSeed, nil, true)
 	if err != nil {
-		return nil, errors.Errorf("DB.InsertSeed() error: %s", err)
+		return nil, errors.Wrap(err, "fail to call storager.InsertSeed()")
 	}
 
 	return bSeed, nil
 }
 
+// store given seed from command line args
+//  development use
+func (w *ColdWallet) StoreSeed(strSeed string) ([]byte, error) {
+	bSeed, err := wkey.SeedToByte(strSeed)
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to call key.SeedToByte() ")
+	}
+
+	// insert seed in database
+	_, err = w.storager.InsertSeed(strSeed, nil, true)
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to call storager.InsertSeed()")
+	}
+
+	return bSeed, nil
+}
+
+// retrieve seed from database
 func (w *ColdWallet) retrieveSeed() ([]byte, error) {
-	// DBからseed情報を登録
+	// get seed from database, seed is expected only one record
 	seed, err := w.storager.GetSeedOne()
 	if err == nil && seed.Seed != "" {
 		w.logger.Info("seed have already been generated")
 		return wkey.SeedToByte(seed.Seed)
 	}
-
-	return nil, errors.Errorf("DB.GetSeedOne() error: %s", err)
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to call storager.GetSeedOne()")
+	}
+	// in this case, though err didn't happen, but seed is blank
+	return nil, errors.New("somehow seed retrieved from database is blank ")
 }
 
 // GenerateAccountKey AccountType属性のアカウントKeyを生成する
