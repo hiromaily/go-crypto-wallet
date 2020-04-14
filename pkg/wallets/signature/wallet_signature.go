@@ -22,7 +22,7 @@ import (
 //}
 //
 //type SignatureExclusiver interface {
-//	ImportPublicKeyForColdWallet2(fileName string, accountType account.AccountType) error
+//	ImportPubKeyForColdWallet2(fileName string, accountType account.AccountType) error
 //	AddMultisigAddressByAuthorization(accountType account.AccountType, addressType ctype.AddressType) error
 //	ExportAddedPubkeyHistory(accountType account.AccountType) (string, error)
 //}

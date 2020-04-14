@@ -3,7 +3,6 @@ package wallet
 import (
 	"strings"
 
-	"github.com/bookerzzz/grok"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -11,26 +10,20 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 )
 
-//CSVのpublickeyをDBにimportする、このとき、clientの場合はaccount無し
-//importしたclientをBitcoin core APIを通じて、walletにimportする
-// ImportPublicKeyForWatchWallet csvファイルからpublicアドレスをimportする for WatchOnyWallet
-func (w *Wallet) ImportPublicKey(fileName string, accountType account.AccountType, isRescan bool) error {
-	//ファイル読み込み
+// ImportPubKey import PubKey from csv filecsv into database,
+//  - if account is client, which doesn't have account ??
+func (w *Wallet) ImportPubKey(fileName string, accountType account.AccountType, isRescan bool) error {
+	// read pubkey
 	pubKeys, err := w.addrFileStorager.ImportPubKey(fileName)
 	if err != nil {
-		return errors.Errorf("key.ImportPubKey() error: %s", err)
+		return errors.Wrap(err, "fail to call key.ImportPubKey()")
 	}
 
-	//[]AccountPublicKeyTable //import時にアカウント名をcoreのwalletに登録する
-	acnt := string(accountType)
-	//if accountType == ctype.AccountTypeClient {
-	//	account = ""
-	//}
-
-	var pubKeyData []walletrepo.AccountPublicKeyTable
+	//var pubKeyData []walletrepo.AccountPublicKeyTable
+	pubKeyData := make([]walletrepo.AccountPublicKeyTable, 0, len(pubKeys))
 	for _, key := range pubKeys {
 		inner := strings.Split(key, ",")
-		grok.Value(inner)
+		//kind of required address is different according to account
 		var addr string
 		if accountType == account.AccountTypeClient {
 			addr = inner[1] //p2sh_segwit_address
@@ -38,45 +31,51 @@ func (w *Wallet) ImportPublicKey(fileName string, accountType account.AccountTyp
 			addr = inner[3] //wallet_import_format
 		}
 
-		//Bitcoin core APIから`importaddress`をcallする
-		//TODO:1台のPCで検証しているときなど、すでにimport済の場合はエラーが出る
-		err := w.btc.ImportAddressWithLabel(addr, acnt, isRescan) //基本falseのはず
+		//call bitcoin API `importaddress` with account(label)
+		//Note: Error would occur when using only 1 bitcoin core server under development
+		// because address is already imported
+		//isRescan would be `false` usually
+		err := w.btc.ImportAddressWithLabel(addr, accountType.String(), isRescan)
 		if err != nil {
 			//-4: The wallet already contains the private key for this address or script
-			w.logger.Error(
-				"btc.ImportAddressWithLabel(%s) error: %s",
+			w.logger.Warn(
+				"fail to call btc.ImportAddressWithLabel() but continue following addresses",
 				zap.String("address", addr),
+				zap.String("account_type", accountType.String()),
 				zap.Error(err))
 			continue
 		}
 
 		pubKeyData = append(pubKeyData, walletrepo.AccountPublicKeyTable{
 			WalletAddress: addr,
-			Account:       acnt,
+			Account:       accountType.String(),
 		})
 
-		//watch only walletとして追加されているかチェックする
-		w.checkImportedPublicAddress(addr)
+		//confirm pubkey is added as watch only wallet
+		w.checkImportedPubKey(addr)
 	}
 
-	//DBにInsert
+	//insert imported pubKey
 	err = w.storager.InsertAccountPubKeyTable(accountType, pubKeyData, nil, true)
 	if err != nil {
-		return errors.Errorf("DB.InsertAccountPubKeyTable() error: %s", err)
-		//TODO:これが失敗したら、どうやって、登録済みのデータを再度Insertするか？再度実行すればOKのはず
+		return errors.Wrap(err, "fail to call storager.InsertAccountPubKeyTable()")
+		//TODO:What if this inserting is failed, how it can be recovered to keep consistancy
+		// pubkey is added in wallet, but database doesn't have records
+		// try to run this func again
 	}
 
 	return nil
 }
 
-//checkImportedPublicAddress watch only walletとして追加されているかチェックする
-func (w *Wallet) checkImportedPublicAddress(addr string) {
+//checkImportedPubKey confirm pubkey is added as watch only wallet
+func (w *Wallet) checkImportedPubKey(addr string) {
 	addrInfo, err := w.btc.GetAddressInfo(addr)
 	if err != nil {
 		w.logger.Error(
-			"w.btc.GetAddressInfo()",
+			"fail to call btc.GetAddressInfo()",
 			zap.String("address", addr),
 			zap.Error(err))
+		return
 	}
 	w.logger.Debug("account is found",
 		zap.String("account", addrInfo.GetLabelName()),
@@ -86,5 +85,4 @@ func (w *Wallet) checkImportedPublicAddress(addr string) {
 	if !addrInfo.Iswatchonly {
 		w.logger.Error("this address must be watch only wallet")
 	}
-
 }

@@ -59,9 +59,9 @@ func (c *MultisigCommand) Run(args []string) int {
 	}
 
 	// import multisig addresses exported by signature wallet from csv file to database
-	err := c.wallet.ImportMultisigAddrForColdWallet1(filePath, account.AccountType(acnt))
+	err := c.wallet.ImportMultisigAddress(filePath, account.AccountType(acnt))
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call ImportMultisigAddrForColdWallet1() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call ImportMultisigAddress() %+v", err))
 		return 1
 	}
 	c.ui.Output("Done!")

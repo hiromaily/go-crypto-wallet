@@ -221,7 +221,7 @@ func main() {
 //		logger.Infof("Run: Account[%s]", opts.Account)
 //
 //		//import public key to database
-//		err := wallet.ImportPublicKeyForColdWallet2(opts.ImportFile, account.AccountType(opts.Account))
+//		err := wallet.ImportPubKeyForColdWallet2(opts.ImportFile, account.AccountType(opts.Account))
 //		if err != nil {
 //			logger.Fatalf("%+v", err)
 //		}

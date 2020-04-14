@@ -243,7 +243,7 @@ func main() {
 //		logger.Infof("Run: Account[%s]", opts.Account)
 //
 //		//import multisig address from csv to database
-//		err := wallet.ImportMultisigAddrForColdWallet1(opts.ImportFile, account.AccountType(opts.Account))
+//		err := wallet.ImportMultisigAddress(opts.ImportFile, account.AccountType(opts.Account))
 //		if err != nil {
 //			logger.Fatalf("%+v", err)
 //		}

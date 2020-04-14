@@ -19,33 +19,28 @@ func (w *ColdWallet) ImportPubKey(fileName string, accountType account.AccountTy
 		return errors.New("it's available on sign wallet")
 	}
 
-	//validate account, onl
+	//validate account, only multisig account is ok
 	if !account.AccountTypeMultisig[accountType] {
 		w.logger.Info("multisig address can be imported, but this account is not")
 		return nil
 	}
 
-	//TODO:ImportするファイルのaccountTypeもチェックしたほうがBetter
-	//e.g. ./data/pubkey/receipt/
-	//receipt_1_1586831083436291000.csv
-	//receipt_1_1586831083436291000.csv
-	tmp := strings.Split(strings.Split(fileName, "_")[0], "/")
-	if tmp[len(tmp)-1] != string(accountType) {
-		return errors.Errorf("mismatching between accountType(%s) and file prefix [%s]", accountType, tmp[0])
+	//validate file name
+	if err := w.addrFileStorager.ValidateFilePath(fileName, accountType); err != nil {
+		return err
 	}
 
-	//ファイル読み込み(full public key)
+	// read file for full public key
 	pubKeys, err := w.addrFileStorager.ImportPubKey(fileName)
 	if err != nil {
-		return errors.Errorf("key.ImportPubKey() error: %s", err)
+		return errors.Wrapf(err, "fail to call fileStorager.ImportPubKey() fileName: %s", fileName)
 	}
 
-	//added_pubkey_history_receiptテーブルにInsert
+	// insert full pubKey into added_pubkey_history_table
 	addedPubkeyHistorys := make([]coldrepo.AddedPubkeyHistoryTable, len(pubKeys))
 	for i, key := range pubKeys {
 		inner := strings.Split(key, ",")
-
-		//ここでは、FullPublicKeyをセットする必要がある
+		//FullPublicKey is required
 		addedPubkeyHistorys[i] = coldrepo.AddedPubkeyHistoryTable{
 			FullPublicKey:         inner[2],
 			AuthAddress1:          "",
@@ -54,17 +49,17 @@ func (w *ColdWallet) ImportPubKey(fileName string, accountType account.AccountTy
 			RedeemScript:          "",
 		}
 	}
-	//TODO:Upsertに変えたほうがいいか？Insert済の場合、エラーが出る
+	//TODO:Upsert would be better to prevent error which occur when data is already inserted
 	err = w.storager.InsertAddedPubkeyHistoryTable(accountType, addedPubkeyHistorys, nil, true)
 	if err != nil {
-		return errors.Errorf("DB.InsertAddedPubkeyHistoryTable() error: %s", err)
+		return errors.Wrap(err, "fail to call storager.InsertAddedPubkeyHistoryTable()")
 	}
 
 	return nil
 }
 
-// ImportMultisigAddrForColdWallet1 coldwallet2でexportされたmultisigアドレス情報をimportする for Cold Wallet1
-func (w *ColdWallet) ImportMultisigAddrForColdWallet1(fileName string, accountType account.AccountType) error {
+// ImportMultisigAddress coldwallet2でexportされたmultisigアドレス情報をimportする for Cold Wallet1
+func (w *ColdWallet) ImportMultisigAddress(fileName string, accountType account.AccountType) error {
 	if w.wtype != types.WalletTypeKeyGen {
 		return errors.New("it's available on Coldwallet1")
 	}

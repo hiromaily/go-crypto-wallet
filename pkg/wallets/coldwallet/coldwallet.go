@@ -1,42 +1,15 @@
 package coldwallet
 
 import (
-	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 
+	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
-// About structure
-// Wallets/wallet
-//        /coldwallet ... has any func for both keygen and signature
-//        /keygen     ... has only keygen interface
-//        /signature  ... has only signature interface
-
-//// Coldwalleter may be Not used anywhere
-//type Coldwalleter interface {
-//	KeySigner
-//	keygen.KeygenExclusiver
-//	signature.SignatureExclusiver
-//
-//	Done()
-//	GetDB() rdb.ColdStorager
-//	GetBTC() api.Bitcoiner
-//	GetType() types.WalletType
-//}
-//
-//// common interface for keygen/signature
-//type KeySigner interface {
-//	SignatureFromFile(filePath string) (string, bool, string, error)
-//	GenerateSeed() ([]byte, error)
-//	GenerateAccountKey(accountType account.AccountType, coinType ctype.CoinType, seed []byte, count uint32) ([]key.WalletKey, error)
-//	ImportPrivateKey(accountType account.AccountType) error
-//}
-
-// TODO: this object has to includes any func in structure
 // ColdWallet coldwallet for keygen/signature object
 type ColdWallet struct {
 	btc              api.Bitcoiner

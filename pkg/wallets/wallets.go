@@ -12,9 +12,15 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/wkey"
 )
 
+// About structure
+// Wallets/wallet
+//        /coldwallet ... has any func for both keygen and signature
+//        /keygen     ... has only keygen interface
+//        /signature  ... has only signature interface
+
 // Walleter is for watch only wallet service interface
 type Walleter interface {
-	ImportPublicKey(fileName string, accountType account.AccountType, isRescan bool) error
+	ImportPubKey(fileName string, accountType account.AccountType, isRescan bool) error
 	DetectReceivedCoin(adjustmentFee float64) (string, string, error)
 	CreateUnsignedPaymentTx(adjustmentFee float64) (string, string, error)
 	SendToAccount(from, to account.AccountType, amount btcutil.Amount) (string, string, error)
@@ -61,7 +67,7 @@ type Keygener interface {
 
 type KeygenExclusiver interface {
 	ExportAccountKey(accountType account.AccountType, keyStatus address.AddressStatus) (string, error)
-	ImportMultisigAddrForColdWallet1(fileName string, accountType account.AccountType) error
+	ImportMultisigAddress(fileName string, accountType account.AccountType) error
 }
 
 // Signer is for signature wallet service interface

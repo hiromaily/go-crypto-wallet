@@ -186,7 +186,7 @@ func main() {
 //		logger.Infof("Run: Account[%s]", opts.Account)
 //
 //		//import public key
-//		err := wallet.ImportPublicKeyForWatchWallet(opts.ImportFile, account.AccountType(opts.Account), opts.IsRescan)
+//		err := wallet.ImportPubKeyForWatchWallet(opts.ImportFile, account.AccountType(opts.Account), opts.IsRescan)
 //		if err != nil {
 //			logger.Fatalf("%+v", err)
 //		}

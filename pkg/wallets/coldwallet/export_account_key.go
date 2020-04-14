@@ -21,9 +21,8 @@ import (
 //  - acount others: `wallet_multisig_address`
 // this func is expected to be used by only keygen
 func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus address.AddressStatus) (string, error) {
-	//TODO:remove it
 	if w.wtype != types.WalletTypeKeyGen {
-		return "", errors.New("it's available on Coldwallet1")
+		return "", errors.New("it's available on keygen wallet")
 	}
 
 	//Note: condition of data in database at keygen wallet
@@ -48,7 +47,7 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus
 	}
 
 	//export csv file
-	fileName, err := w.exportAccountKeyTable(accountKeyTable, accountType,
+	fileName, err := w.exportAccountKey(accountKeyTable, accountType,
 		address.AddressStatusValue[keyStatus])
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call w.exportAccountKeyTable()")
@@ -93,10 +92,10 @@ func getAddressStatus(currentKey address.AddressStatus, accountType account.Acco
 	return ""
 }
 
-// exportAccountKeyTable export account_key_table as csv file
-func (w *ColdWallet) exportAccountKeyTable(accountKeyTable []coldrepo.AccountKeyTable, accountType account.AccountType, keyStatusVal uint8) (string, error) {
+// exportAccountKey export account_key_table as csv file
+// TODO: export logic could be defined as address.Storager
+func (w *ColdWallet) exportAccountKey(accountKeyTable []coldrepo.AccountKeyTable, accountType account.AccountType, keyStatusVal uint8) (string, error) {
 	//create fileName
-	//fileName := key.CreateFilePath(accountType.String(), keyStatusVal)
 	fileName := w.addrFileStorager.CreateFilePath(accountType, keyStatusVal)
 
 	file, err := os.Create(fileName)
