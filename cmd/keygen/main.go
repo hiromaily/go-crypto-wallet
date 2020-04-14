@@ -228,7 +228,7 @@ func main() {
 //		logger.Infof("Run: Account[%s]", opts.Account)
 //
 //		//export public key as csv
-//		fileName, err := wallet.ExportAccountKey(account.AccountType(opts.Account), keystatus.KeyStatusImportprivkey)
+//		fileName, err := wallet.ExportAccountKey(account.AccountType(opts.Account), keystatus.AddressStatusImportprivkey)
 //		if err != nil {
 //			logger.Fatalf("%+v", err)
 //		}
@@ -258,7 +258,7 @@ func main() {
 //		logger.Infof("Run: Account[%s]", opts.Account)
 //
 //		//export account key
-//		fileName, err := wallet.ExportAccountKey(account.AccountType(opts.Account), keystatus.KeyStatusMultiAddressImported)
+//		fileName, err := wallet.ExportAccountKey(account.AccountType(opts.Account), keystatus.AddressStatusMultiAddressImported)
 //		if err != nil {
 //			logger.Fatalf("%+v", err)
 //		}

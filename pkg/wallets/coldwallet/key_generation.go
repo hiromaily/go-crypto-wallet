@@ -3,11 +3,12 @@ package coldwallet
 //cold wallet (keygen, sing)
 
 import (
+	"github.com/pkg/errors"
+
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/wkey"
-	"github.com/pkg/errors"
 )
 
 //1. generate seed and store it in database

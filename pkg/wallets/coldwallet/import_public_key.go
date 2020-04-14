@@ -7,30 +7,29 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
-// ImportPublicKeyForColdWallet2 csvファイルからpublicアドレスをimportする for Cold Wallet2
-func (w *ColdWallet) ImportPublicKeyForColdWallet2(fileName string, accountType account.AccountType) error {
+// ImportPubKey import pubKey from csv file for sign wallet
+//  only multisig account is available
+func (w *ColdWallet) ImportPubKey(fileName string, accountType account.AccountType) error {
 	if w.wtype != types.WalletTypeSignature {
-		return errors.New("it's available on Coldwallet2")
+		return errors.New("it's available on sign wallet")
 	}
 
-	//accountチェック
-	//multisigであればこのチェックはOK
-	//if accountType != ctype.AccountTypeReceipt && accountType != ctype.AccountTypePayment {
-	//	logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
-	//	return nil
-	//}
+	//validate account, onl
 	if !account.AccountTypeMultisig[accountType] {
-		w.logger.Info("This func is for only account witch uses multiaddress")
+		w.logger.Info("multisig address can be imported, but this account is not")
 		return nil
 	}
 
 	//TODO:ImportするファイルのaccountTypeもチェックしたほうがBetter
-	//e.g. ./data/pubkey/receipt
+	//e.g. ./data/pubkey/receipt/
+	//receipt_1_1586831083436291000.csv
+	//receipt_1_1586831083436291000.csv
 	tmp := strings.Split(strings.Split(fileName, "_")[0], "/")
 	if tmp[len(tmp)-1] != string(accountType) {
 		return errors.Errorf("mismatching between accountType(%s) and file prefix [%s]", accountType, tmp[0])
@@ -116,7 +115,7 @@ func (w *ColdWallet) ImportMultisigAddrForColdWallet1(fileName string, accountTy
 			FullPublicKey:         inner[0],
 			WalletMultisigAddress: inner[3],
 			RedeemScript:          inner[4],
-			KeyStatus:             key.KeyStatusValue[key.KeyStatusMultiAddressImported],
+			AddressStatus:         address.AddressStatusValue[address.AddressStatusMultiAddressImported],
 			UpdatedAt:             &tm,
 		}
 	}

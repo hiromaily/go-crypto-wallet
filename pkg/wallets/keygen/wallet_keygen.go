@@ -22,7 +22,7 @@ import (
 //}
 //
 //type KeygenExclusiver interface {
-//	ExportAccountKey(accountType account.AccountType, keyStatus keystatus.KeyStatus) (string, error)
+//	ExportAccountKey(accountType account.AccountType, keyStatus keystatus.AddressStatus) (string, error)
 //	ImportMultisigAddrForColdWallet1(fileName string, accountType account.AccountType) error
 //}
 

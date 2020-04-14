@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
@@ -20,7 +21,7 @@ import (
 //  - acount client: `wallet_address`
 //  - acount others: `wallet_multisig_address`
 // this func is expected to be used by only keygen
-func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus key.KeyStatus) (string, error) {
+func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus address.AddressStatus) (string, error) {
 	//TODO:remove it
 	if w.wtype != types.WalletTypeKeyGen {
 		return "", errors.New("it's available on Coldwallet1")
@@ -32,15 +33,15 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus
 	// - account: others, key_status==3, isMultisig==true then export address for `wallet_multisig_address`
 
 	// exptected key status for update
-	updateKeyStatus := getKeyStatus(keyStatus, accountType)
-	if updateKeyStatus == "" {
+	updateAddressStatus := getAddressStatus(keyStatus, accountType)
+	if updateAddressStatus == "" {
 		return "", errors.New("it can't export file anymore")
 	}
 
 	// get account key
-	accountKeyTable, err := w.storager.GetAllAccountKeyByKeyStatus(accountType, keyStatus)
+	accountKeyTable, err := w.storager.GetAllAccountKeyByAddressStatus(accountType, keyStatus)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call storager.GetAllAccountKeyByKeyStatus()")
+		return "", errors.Wrap(err, "fail to call storager.GetAllAccountKeyByAddressStatus()")
 	}
 	if len(accountKeyTable) == 0 {
 		w.logger.Info("no records in account_key table")
@@ -49,7 +50,7 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus
 
 	//export csv file
 	fileName, err := exportAccountKeyTable(accountKeyTable, accountType,
-		key.KeyStatusValue[keyStatus])
+		address.AddressStatusValue[keyStatus])
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call w.exportAccountKeyTable()")
 	}
@@ -59,9 +60,9 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus
 	for idx, record := range accountKeyTable {
 		wifs[idx] = record.WalletImportFormat
 	}
-	_, err = w.storager.UpdateKeyStatusByWIFs(accountType, updateKeyStatus, wifs, nil, true)
+	_, err = w.storager.UpdateAddressStatusByWIFs(accountType, updateAddressStatus, wifs, nil, true)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call storager.UpdateKeyStatusByWIFs()")
+		return "", errors.Wrap(err, "fail to call storager.UpdateAddressStatusByWIFs()")
 	}
 
 	w.logger.Debug(
@@ -72,22 +73,22 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus
 	return fileName, nil
 }
 
-func getKeyStatus(currentKey key.KeyStatus, accountType account.AccountType) key.KeyStatus {
+func getAddressStatus(currentKey address.AddressStatus, accountType account.AccountType) address.AddressStatus {
 	//TODO: Though file is already exported, allow to export again?? Yes
 	// if you wanna export file again, update keystatus in database manually
-	//if keystatus.KeyStatusValue[currentKey] >= keystatus.KeyStatusValue[keystatus.KeyStatusAddressExported]{
+	//if keystatus.AddressStatusValue[currentKey] >= keystatus.AddressStatusValue[keystatus.AddressStatusAddressExported]{
 	//	return ""
 	//}
 	if !account.AccountTypeMultisig[accountType] {
 		// not multisig account
 		//TODO: current key status should be checked as well
-		return key.KeyStatusAddressExported //4
+		return address.AddressStatusAddressExported //4
 	} else {
 		// multisig account
-		if currentKey == key.KeyStatusImportprivkey { //1
-			return key.KeyStatusPubkeyExported //2
-		} else if currentKey == key.KeyStatusMultiAddressImported { //3
-			return key.KeyStatusAddressExported //4
+		if currentKey == address.AddressStatusPrivKeyImported { //1
+			return address.AddressStatusPubkeyExported //2
+		} else if currentKey == address.AddressStatusMultiAddressImported { //3
+			return address.AddressStatusAddressExported //4
 		}
 	}
 	return ""

@@ -2,15 +2,14 @@ package wallets
 
 import (
 	"github.com/btcsuite/btcutil"
-	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/wkey"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
-	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
+	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/wkey"
 )
 
 // Walleter is for watch only wallet service interface
@@ -61,7 +60,7 @@ type Keygener interface {
 }
 
 type KeygenExclusiver interface {
-	ExportAccountKey(accountType account.AccountType, keyStatus key.KeyStatus) (string, error)
+	ExportAccountKey(accountType account.AccountType, keyStatus address.AddressStatus) (string, error)
 	ImportMultisigAddrForColdWallet1(fileName string, accountType account.AccountType) error
 }
 
@@ -78,7 +77,7 @@ type Signer interface {
 }
 
 type SignatureExclusiver interface {
-	ImportPublicKeyForColdWallet2(fileName string, accountType account.AccountType) error
+	ImportPubKey(fileName string, accountType account.AccountType) error
 	AddMultisigAddressByAuthorization(accountType account.AccountType, addressType address.AddressType) error
 	ExportAddedPubkeyHistory(accountType account.AccountType) (string, error)
 }

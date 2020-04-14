@@ -46,8 +46,8 @@ sign import privkey
 
 # import pubkey exported from keygen wallet into sign wallet
 sign import address -account receipt -file receipt_1_1586831083436291000.csv
-sign import address -account payment -file
-sign import address -account stored -file
+sign import address -account payment -file payment_1_1586831473462845000.csv
+sign import address -account stored -file stored_1_1586834862891724000.csv
 
 
 #coldwallet1からexportしたAccountのpublicアドレスをcoldWallet2にimportする
