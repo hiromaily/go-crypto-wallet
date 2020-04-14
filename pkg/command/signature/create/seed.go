@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/wkey"
 )
 
 //TODO: this code is almost same to keygen wallet
@@ -43,7 +43,7 @@ func (c *SeedCommand) Run(args []string) int {
 		c.ui.Error(fmt.Sprintf("fail to call GenerateSeed() %+v", err))
 		return 1
 	}
-	c.ui.Info(fmt.Sprintf("seed: %s", key.SeedToString(bSeed)))
+	c.ui.Info(fmt.Sprintf("seed: %s", wkey.SeedToString(bSeed)))
 
 	return 0
 }

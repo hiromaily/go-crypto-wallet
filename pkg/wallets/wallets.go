@@ -5,12 +5,12 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
-	"github.com/hiromaily/go-bitcoin/pkg/keystatus"
+	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
 	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/wkey"
 )
 
 // Walleter is for watch only wallet service interface
@@ -43,7 +43,7 @@ type Coldwalleter interface {
 type KeySigner interface {
 	SignatureFromFile(filePath string) (string, bool, string, error)
 	GenerateSeed() ([]byte, error)
-	GenerateAccountKey(accountType account.AccountType, coinType ctype.CoinType, seed []byte, count uint32) ([]key.WalletKey, error)
+	GenerateAccountKey(accountType account.AccountType, coinType ctype.CoinType, seed []byte, count uint32) ([]wkey.WalletKey, error)
 	ImportPrivateKey(accountType account.AccountType) error
 }
 
@@ -60,7 +60,7 @@ type Keygener interface {
 }
 
 type KeygenExclusiver interface {
-	ExportAccountKey(accountType account.AccountType, keyStatus keystatus.KeyStatus) (string, error)
+	ExportAccountKey(accountType account.AccountType, keyStatus key.KeyStatus) (string, error)
 	ImportMultisigAddrForColdWallet1(fileName string, accountType account.AccountType) error
 }
 

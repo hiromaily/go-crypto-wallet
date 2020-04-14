@@ -1,4 +1,4 @@
-package keystatus
+package key
 
 //----------------------------------------------------
 // KeyStatus

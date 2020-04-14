@@ -1,14 +1,14 @@
 package signature
 
 import (
-	"github.com/hiromaily/go-bitcoin/pkg/command/signature/add"
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
-	_import "github.com/hiromaily/go-bitcoin/pkg/command/signature/import"
-	"github.com/hiromaily/go-bitcoin/pkg/command/signature/sign"
+	"github.com/hiromaily/go-bitcoin/pkg/command/signature/add"
 	"github.com/hiromaily/go-bitcoin/pkg/command/signature/create"
 	"github.com/hiromaily/go-bitcoin/pkg/command/signature/export"
+	_import "github.com/hiromaily/go-bitcoin/pkg/command/signature/import"
+	"github.com/hiromaily/go-bitcoin/pkg/command/signature/sign"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 )
 

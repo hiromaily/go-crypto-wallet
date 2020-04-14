@@ -9,8 +9,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/wkey"
 )
 
 //1.Seedの生成+DBに登録
@@ -38,11 +38,11 @@ func (w *ColdWallet) GenerateSeed() ([]byte, error) {
 	var strSeed string
 
 	//TODO: envは削除するので、一旦本番モードで実装
-	bSeed, err = key.GenerateSeed()
+	bSeed, err = wkey.GenerateSeed()
 	if err != nil {
 		return nil, errors.Errorf("key.GenerateSeed() error: %s", err)
 	}
-	strSeed = key.SeedToString(bSeed)
+	strSeed = wkey.SeedToString(bSeed)
 	//if w.Env == ctype.EnvDev && w.Seed != "" {
 	//	strSeed = w.Seed
 	//	bSeed, err = key.SeedToByte(strSeed)
@@ -71,7 +71,7 @@ func (w *ColdWallet) retrieveSeed() ([]byte, error) {
 	seed, err := w.storager.GetSeedOne()
 	if err == nil && seed.Seed != "" {
 		w.logger.Info("seed have already been generated")
-		return key.SeedToByte(seed.Seed)
+		return wkey.SeedToByte(seed.Seed)
 	}
 
 	return nil, errors.Errorf("DB.GetSeedOne() error: %s", err)
@@ -79,7 +79,7 @@ func (w *ColdWallet) retrieveSeed() ([]byte, error) {
 
 // GenerateAccountKey AccountType属性のアカウントKeyを生成する
 // TODO:AccountTypeAuthorizationのときは、レコードがある場合は追加できないようにしたほうがいい？？
-func (w *ColdWallet) GenerateAccountKey(accountType account.AccountType, coinType ctype.CoinType, seed []byte, count uint32) ([]key.WalletKey, error) {
+func (w *ColdWallet) GenerateAccountKey(accountType account.AccountType, coinType ctype.CoinType, seed []byte, count uint32) ([]wkey.WalletKey, error) {
 	if w.wtype == types.WalletTypeWatchOnly {
 		return nil, errors.New("it's available on Coldwallet1, Coldwallet2")
 	}
@@ -99,7 +99,7 @@ func (w *ColdWallet) GenerateAccountKey(accountType account.AccountType, coinTyp
 }
 
 // generateKey AccountType属性のアカウントKeyを生成する
-func (w *ColdWallet) generateAccountKey(accountType account.AccountType, coinType ctype.CoinType, seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
+func (w *ColdWallet) generateAccountKey(accountType account.AccountType, coinType ctype.CoinType, seed []byte, idxFrom, count uint32) ([]wkey.WalletKey, error) {
 	// HDウォレットのkeyを生成する
 	walletKeys, err := w.generateAccountKeyData(accountType, coinType, seed, idxFrom, count)
 	if err != nil {
@@ -137,9 +137,9 @@ func (w *ColdWallet) generateAccountKey(accountType account.AccountType, coinTyp
 }
 
 // generateKeyData AccountType属性のアカウントKeyを生成する
-func (w *ColdWallet) generateAccountKeyData(accountType account.AccountType, coinType ctype.CoinType, seed []byte, idxFrom, count uint32) ([]key.WalletKey, error) {
+func (w *ColdWallet) generateAccountKeyData(accountType account.AccountType, coinType ctype.CoinType, seed []byte, idxFrom, count uint32) ([]wkey.WalletKey, error) {
 	// Keyオブジェクト
-	keyData := key.NewKey(coinType, w.btc.GetChainConf(), w.logger)
+	keyData := wkey.NewKey(coinType, w.btc.GetChainConf(), w.logger)
 
 	// key生成
 	priv, _, err := keyData.CreateAccount(seed, accountType)

@@ -1,4 +1,4 @@
-package key_test
+package wkey_test
 
 //import (
 //	"flag"

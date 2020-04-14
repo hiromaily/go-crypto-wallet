@@ -7,9 +7,8 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/keystatus"
+	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
@@ -100,9 +99,9 @@ func (w *ColdWallet) ImportMultisigAddrForColdWallet1(fileName string, accountTy
 	accountKeyTable := make([]coldrepo.AccountKeyTable, len(pubKeys))
 
 	tm := time.Now()
-	for i, key := range pubKeys {
+	for i, pubkey := range pubKeys {
 		//TODO:とりあえず、1カラムのデータを前提でコーディングしておく
-		inner := strings.Split(key, ",")
+		inner := strings.Split(pubkey, ",")
 		//csvファイル
 		//tmpData := []string{
 		//	record.FullPublicKey,
@@ -117,7 +116,7 @@ func (w *ColdWallet) ImportMultisigAddrForColdWallet1(fileName string, accountTy
 			FullPublicKey:         inner[0],
 			WalletMultisigAddress: inner[3],
 			RedeemScript:          inner[4],
-			KeyStatus:             keystatus.KeyStatusValue[keystatus.KeyStatusMultiAddressImported],
+			KeyStatus:             key.KeyStatusValue[key.KeyStatusMultiAddressImported],
 			UpdatedAt:             &tm,
 		}
 	}

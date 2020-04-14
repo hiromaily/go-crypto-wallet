@@ -9,9 +9,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/keystatus"
+	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
@@ -38,7 +37,7 @@ func (w *ColdWallet) ExportAddedPubkeyHistory(accountType account.AccountType) (
 	//CSVに書き出す
 	//TODO:何がわかりやすいか, このために新たなステータスを追加したほうがいいか
 	fileName, err := w.exportAddedPubkeyHistoryTable(addedPubkeyHistoryTable, string(accountType),
-		keystatus.KeyStatusValue[keystatus.KeyStatusPubkeyExported])
+		key.KeyStatusValue[key.KeyStatusPubkeyExported])
 	if err != nil {
 		return "", errors.Errorf("key.ExportAddedPubkeyHistoryTable() error: %s", err)
 	}

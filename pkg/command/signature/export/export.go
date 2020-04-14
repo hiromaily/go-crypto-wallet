@@ -12,10 +12,10 @@ import (
 
 // export subcommand
 type ExportCommand struct {
-	Name        string
-	Version     string
-	UI          cli.Ui
-	Wallet      wallets.Signer
+	Name    string
+	Version string
+	UI      cli.Ui
+	Wallet  wallets.Signer
 }
 
 func (c *ExportCommand) Synopsis() string {

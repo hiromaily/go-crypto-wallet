@@ -8,8 +8,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 )
 
 //CSVのpublickeyをDBにimportする、このとき、clientの場合はaccount無し

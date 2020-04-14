@@ -1,4 +1,4 @@
-package key
+package wkey
 
 import (
 	"github.com/btcsuite/btcd/btcec"

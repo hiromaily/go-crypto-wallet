@@ -8,6 +8,7 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	mysql "github.com/hiromaily/go-bitcoin/pkg/db/rdb"
+	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
@@ -15,7 +16,6 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/wallet"
 )

@@ -1,4 +1,4 @@
-package key
+package wkey
 
 // WalletKey Walletのキーペア
 type WalletKey struct {

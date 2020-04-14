@@ -1,4 +1,4 @@
-package key
+package wkey
 
 import (
 	"encoding/hex"

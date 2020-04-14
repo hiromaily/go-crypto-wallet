@@ -25,15 +25,14 @@ keygen import privkey -account payment
 keygen import privkey -account stored
 # done
 
+# export created public address as csv
+keygen export address -account client
+keygen export address -account receipt
+keygen export address -account payment
+keygen export address -account stored
 
 
-#作成したAccountのPrivateKeyをColdWalletにimportする
-coldwallet1 -k -m 20 -a client
-coldwallet1 -k -m 20 -a receipt
-coldwallet1 -k -m 20 -a payment
-coldwallet1 -k -m 20 -a quoine
-coldwallet1 -k -m 20 -a fee
-coldwallet1 -k -m 20 -a stored
+
 
 #作成したAccountのPublicアドレスをcsvファイルとしてexportする"
 coldwallet1 -k -m 30 -a client

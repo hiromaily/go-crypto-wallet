@@ -6,7 +6,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/keystatus"
+	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
@@ -19,7 +19,7 @@ func (w *ColdWallet) ImportPrivateKey(accountType account.AccountType) error {
 	}
 
 	//1. retrieve records(private key) from account_key table
-	accountKeyTable, err := w.storager.GetAllAccountKeyByKeyStatus(accountType, keystatus.KeyStatusGenerated) //key_status=0
+	accountKeyTable, err := w.storager.GetAllAccountKeyByKeyStatus(accountType, key.KeyStatusGenerated) //key_status=0
 	if err != nil {
 		return errors.Wrap(err, "fail to call storager.GetAllAccountKeyByKeyStatus()")
 	}
@@ -53,7 +53,7 @@ func (w *ColdWallet) ImportPrivateKey(accountType account.AccountType) error {
 		}
 
 		//update DB
-		_, err = w.storager.UpdateKeyStatusByWIF(accountType, keystatus.KeyStatusImportprivkey, record.WalletImportFormat, nil, true)
+		_, err = w.storager.UpdateKeyStatusByWIF(accountType, key.KeyStatusImportprivkey, record.WalletImportFormat, nil, true)
 		if err != nil {
 			w.logger.Error(
 				"fail to update table by calling btc.UpdateKeyStatusByWIF()",

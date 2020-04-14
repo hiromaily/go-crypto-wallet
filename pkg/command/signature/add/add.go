@@ -12,10 +12,10 @@ import (
 
 //add subcommand
 type AddCommand struct {
-	Name        string
-	Version     string
-	UI          cli.Ui
-	Wallet      wallets.Signer
+	Name    string
+	Version string
+	UI      cli.Ui
+	Wallet  wallets.Signer
 }
 
 func (c *AddCommand) Synopsis() string {
