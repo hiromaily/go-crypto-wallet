@@ -83,12 +83,12 @@ type MySQL struct {
 
 // TxFile saved transaction file path which is used when import/export file
 type TxFile struct {
-	BasePath string `toml:"base_path"`
+	BasePath string `toml:"base_path" validate:"required"`
 }
 
 // PubKeyFile saved pubKey file path which is used when import/export file
 type PubKeyFile struct {
-	BasePath string `toml:"base_path"`
+	BasePath string `toml:"base_path" validate:"required"`
 }
 
 // New create config

@@ -8,7 +8,6 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
-	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
@@ -36,7 +35,7 @@ func (w *ColdWallet) ImportPubKey(fileName string, accountType account.AccountTy
 	}
 
 	//ファイル読み込み(full public key)
-	pubKeys, err := key.ImportPubKey(fileName)
+	pubKeys, err := w.addrFileStorager.ImportPubKey(fileName)
 	if err != nil {
 		return errors.Errorf("key.ImportPubKey() error: %s", err)
 	}
@@ -89,7 +88,7 @@ func (w *ColdWallet) ImportMultisigAddrForColdWallet1(fileName string, accountTy
 	}
 
 	//ファイル読み込み(full public key)
-	pubKeys, err := key.ImportPubKey(fileName)
+	pubKeys, err := w.addrFileStorager.ImportPubKey(fileName)
 	if err != nil {
 		return errors.Errorf("key.ImportPubKey() error: %s", err)
 	}

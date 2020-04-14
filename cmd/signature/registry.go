@@ -2,18 +2,17 @@ package main
 
 import (
 	"github.com/btcsuite/btcd/rpcclient"
+	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/jmoiron/sqlx"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	mysql "github.com/hiromaily/go-bitcoin/pkg/db/rdb"
-	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tracer"
-	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
 	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
@@ -44,14 +43,12 @@ func NewRegistry(conf *config.Config, walletType types.WalletType) Registry {
 
 // NewSigner is to register for Signer interface
 func (r *registry) NewSigner() wallets.Signer {
-	//TODO: should be interface
-	r.setFilePath()
-
 	return coldwallet.NewColdWalet(
 		r.newBTC(),
 		r.newLogger(),
 		r.newTracer(),
 		r.newStorager(),
+		r.newAddressFileStorager(),
 		r.walletType,
 	)
 }
@@ -107,15 +104,17 @@ func (r *registry) newMySQLClient() *sqlx.DB {
 	return r.mysqlClient
 }
 
-//TODO: move to somewhere
-func (r *registry) setFilePath() {
-	// TxFile
-	if r.conf.TxFile.BasePath != "" {
-		txfile.SetFilePath(r.conf.TxFile.BasePath)
-	}
-
-	// PubkeyCSV
-	if r.conf.PubkeyFile.BasePath != "" {
-		key.SetFilePath(r.conf.PubkeyFile.BasePath)
-	}
+func (r *registry) newAddressFileStorager() address.Storager {
+	return address.NewCSVRepository(
+		r.conf.PubkeyFile.BasePath,
+		r.newLogger(),
+	)
 }
+
+//TODO: implementation
+//func (r *registry) newTxFileStorager() address.Storager {
+//	return address.NewCSVRepository(
+//		r.conf.PubkeyFile.BasePath,
+//		r.newLogger(),
+//	)
+//}

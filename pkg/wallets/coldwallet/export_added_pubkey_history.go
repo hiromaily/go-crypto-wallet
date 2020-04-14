@@ -10,7 +10,6 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
-	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
@@ -37,7 +36,7 @@ func (w *ColdWallet) ExportAddedPubkeyHistory(accountType account.AccountType) (
 
 	//CSVに書き出す
 	//TODO:何がわかりやすいか, このために新たなステータスを追加したほうがいいか
-	fileName, err := w.exportAddedPubkeyHistoryTable(addedPubkeyHistoryTable, string(accountType),
+	fileName, err := w.exportAddedPubkeyHistoryTable(addedPubkeyHistoryTable, accountType,
 		address.AddressStatusValue[address.AddressStatusPubkeyExported])
 	if err != nil {
 		return "", errors.Errorf("key.ExportAddedPubkeyHistoryTable() error: %s", err)
@@ -60,9 +59,9 @@ func (w *ColdWallet) ExportAddedPubkeyHistory(accountType account.AccountType) (
 }
 
 // ExportAddedPubkeyHistoryTable AddedPubkeyHistoryテーブルをcsvとして出力すsる
-func (w *ColdWallet) exportAddedPubkeyHistoryTable(addedPubkeyHistoryTable []coldrepo.AddedPubkeyHistoryTable, strAccountType string, keyStatus uint8) (string, error) {
+func (w *ColdWallet) exportAddedPubkeyHistoryTable(addedPubkeyHistoryTable []coldrepo.AddedPubkeyHistoryTable, accountType account.AccountType, keyStatus uint8) (string, error) {
 	//fileName
-	fileName := key.CreateFilePath(strAccountType, keyStatus)
+	fileName := w.addrFileStorager.CreateFilePath(accountType, keyStatus)
 
 	file, err := os.Create(fileName)
 	if err != nil {

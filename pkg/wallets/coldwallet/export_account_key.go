@@ -11,7 +11,6 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
-	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
@@ -49,7 +48,7 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus
 	}
 
 	//export csv file
-	fileName, err := exportAccountKeyTable(accountKeyTable, accountType,
+	fileName, err := w.exportAccountKeyTable(accountKeyTable, accountType,
 		address.AddressStatusValue[keyStatus])
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call w.exportAccountKeyTable()")
@@ -95,9 +94,10 @@ func getAddressStatus(currentKey address.AddressStatus, accountType account.Acco
 }
 
 // exportAccountKeyTable export account_key_table as csv file
-func exportAccountKeyTable(accountKeyTable []coldrepo.AccountKeyTable, accountType account.AccountType, keyStatusVal uint8) (string, error) {
+func (w *ColdWallet) exportAccountKeyTable(accountKeyTable []coldrepo.AccountKeyTable, accountType account.AccountType, keyStatusVal uint8) (string, error) {
 	//create fileName
-	fileName := key.CreateFilePath(accountType.String(), keyStatusVal)
+	//fileName := key.CreateFilePath(accountType.String(), keyStatusVal)
+	fileName := w.addrFileStorager.CreateFilePath(accountType, keyStatusVal)
 
 	file, err := os.Create(fileName)
 	if err != nil {

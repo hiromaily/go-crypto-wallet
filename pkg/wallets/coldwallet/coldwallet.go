@@ -1,6 +1,7 @@
 package coldwallet
 
 import (
+	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 
@@ -38,11 +39,12 @@ import (
 // TODO: this object has to includes any func in structure
 // ColdWallet coldwallet for keygen/signature object
 type ColdWallet struct {
-	btc      api.Bitcoiner
-	logger   *zap.Logger
-	tracer   opentracing.Tracer
-	storager rdb.ColdStorager
-	wtype    types.WalletType
+	btc              api.Bitcoiner
+	logger           *zap.Logger
+	tracer           opentracing.Tracer
+	storager         rdb.ColdStorager
+	addrFileStorager address.Storager
+	wtype            types.WalletType
 }
 
 func NewColdWalet(
@@ -50,14 +52,16 @@ func NewColdWalet(
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
 	storager rdb.ColdStorager,
+	addrFileStorager address.Storager,
 	wtype types.WalletType) *ColdWallet {
 
 	return &ColdWallet{
-		btc:      btc,
-		logger:   logger,
-		tracer:   tracer,
-		storager: storager,
-		wtype:    wtype,
+		btc:              btc,
+		logger:           logger,
+		tracer:           tracer,
+		storager:         storager,
+		addrFileStorager: addrFileStorager,
+		wtype:            wtype,
 	}
 }
 

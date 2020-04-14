@@ -8,7 +8,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/key"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 )
 
@@ -17,7 +16,7 @@ import (
 // ImportPublicKeyForWatchWallet csvファイルからpublicアドレスをimportする for WatchOnyWallet
 func (w *Wallet) ImportPublicKey(fileName string, accountType account.AccountType, isRescan bool) error {
 	//ファイル読み込み
-	pubKeys, err := key.ImportPubKey(fileName)
+	pubKeys, err := w.addrFileStorager.ImportPubKey(fileName)
 	if err != nil {
 		return errors.Errorf("key.ImportPubKey() error: %s", err)
 	}
