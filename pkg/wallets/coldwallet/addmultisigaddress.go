@@ -1,6 +1,6 @@
 package coldwallet
 
-//signature-wallet
+// sign wallet
 
 import (
 	"fmt"
@@ -13,53 +13,48 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
-//CreateMultiSig(addmultisigaddress)にwalletにmultisig用のprivate keyを登録する
-//これのパラメータには、multisigしないと送金許可しないアドレス(receipt, payment)+承認用のアドレスをセット
-//これによって、生成されたアドレスから送金する場合、パラメータにセットしたアドレスに紐づく秘密鍵が必要
-//payment,receiptのアドレスは、実際には、addmultisigaddressによって生成されたアドレスに置き換えられる。
-
-// AddMultisigAddressByAuthorization account_key_authorizationテーブルのwallet_addressを認証者として、
-// added_pubkey_history_paymentテーブル内のwalletアドレスのmultisigアドレスを生成する
-// TODO:第4パラメータに、address_typeを追加する。Bitcoinの場合は、p2sh-segwit とする
-func (w *ColdWallet) AddMultisigAddressByAuthorization(accountType account.AccountType, addressType address.AddressType) error {
+// AddMultisigAddress add multisig address by address for auth and given account
+// - allowed account is only who has multisig addresses and auth addresses
+// - if 3:5 proportion is required, at least 4 different auth accounts should be parepared in advance
+// - when sending coin from multisig address, 、related priv key is required which is related to addresses in parameters
+// - actually address is overridden by multisig addresses in multisig acccount
+// - 4th parameter must be`p2sh-segwit` addressType in Bitcoin
+func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, addressType address.AddressType) error {
 	//TODO:remove it
 	if w.wtype != types.WalletTypeSignature {
-		return errors.New("it's available on Coldwallet2")
+		return errors.New("it's available on sign wallet")
 	}
-
-	//accountチェック
-	//multisigであればこのチェックはOK
-	//if accountType != ctype.AccountTypeReceipt && accountType != ctype.AccountTypePayment {
-	//	logger.Info("AccountType should be AccountTypeReceipt or AccountTypePayment")
-	//	return nil
-	//}
+	// validate
 	if !account.AccountTypeMultisig[accountType] {
-		w.logger.Info("This func is for only account witch uses multiaddress")
+		w.logger.Info("only multisig account is allowed")
 		return nil
 	}
+	if !account.NotAllow(accountType.String(), []account.AccountType{account.AccountTypeAuthorization, account.AccountTypeClient}) {
+		return errors.Errorf("account: %s/%s is not allowed", account.AccountTypeAuthorization, account.AccountTypeClient)
+	}
 
-	//account_key_authorizationテーブルからAuthorizationのwallet_addressを取得
+	// get one wallet_address for Authorization account from account_key_authorization table
 	authKeyTable, err := w.storager.GetOneByMaxIDOnAccountKeyTable(account.AccountTypeAuthorization)
 	if err != nil {
-		return errors.Errorf("DB.GetOneByMaxIDOnAccountKeyTable(ctype.AccountTypeAuthorization) error: %s", err)
+		return errors.Wrap(err, "fail to call storager.GetOneByMaxIDOnAccountKeyTable(AccountTypeAuthorization)")
 	}
-
-	//added_pubkey_history_xxxテーブルからwallet_address(full-pubkeyである必要がある)を取得
+	// get full-pub-key for given account from added_pubkey_history_table
 	addedPubkeyHistoryTable, err := w.storager.GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType)
 	if err != nil {
-		return errors.Errorf("DB.GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(%s) error: %s", accountType, err)
+		return errors.Wrapf(err, "fail to call storager.GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(%s)", accountType.String())
 	}
 
-	//addmultisigaddress APIをcall
-	//FIXME:multisigのN:Mは可変でも可能なようにロジックを組み立てる
+	// call bitcoinAPI `addmultisigaddress`
+	//FIXME: for now only 2:2 proportion is available
+	// - however N:M should be adjustable
 	for _, val := range addedPubkeyHistoryTable {
 		resAddr, err := w.btc.AddMultisigAddress(
 			2,
 			[]string{
-				val.FullPublicKey, // receipt or payment address
+				val.FullPublicKey, // receipt, payment, stored ...
 				authKeyTable.P2shSegwitAddress,
 			},
-			fmt.Sprintf("multi_%s", accountType), //TODO:ここのアカウント名はどうすべきか
+			fmt.Sprintf("multi_%s", accountType), //TODO:what account name is understandable?
 			addressType,
 		)
 		if err != nil {
@@ -72,7 +67,7 @@ func (w *ColdWallet) AddMultisigAddressByAuthorization(accountType account.Accou
 			continue
 		}
 
-		//レスポンスをadded_pubkey_history_xxxテーブルに保存
+		// store generated address into added_pubkey_history_table
 		err = w.storager.UpdateMultisigAddrOnAddedPubkeyHistoryTable(accountType, resAddr.Address,
 			resAddr.RedeemScript, authKeyTable.P2shSegwitAddress, val.FullPublicKey, nil, true)
 		if err != nil {

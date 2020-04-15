@@ -236,7 +236,7 @@ func main() {
 //		logger.Infof("Run: Account[%s]", opts.Account)
 //
 //		//execute addmultisigaddress
-//		err := wallet.AddMultisigAddressByAuthorization(account.AccountType(opts.Account), ctype.AddressTypeP2shSegwit)
+//		err := wallet.AddMultisigAddress(account.AccountType(opts.Account), ctype.AddressTypeP2shSegwit)
 //		if err != nil {
 //			logger.Fatalf("%+v", err)
 //		}

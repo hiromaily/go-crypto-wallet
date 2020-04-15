@@ -84,6 +84,6 @@ type Signer interface {
 
 type SignatureExclusiver interface {
 	ImportPubKey(fileName string, accountType account.AccountType) error
-	AddMultisigAddressByAuthorization(accountType account.AccountType, addressType address.AddressType) error
+	AddMultisigAddress(accountType account.AccountType, addressType address.AddressType) error
 	ExportAddedPubkeyHistory(accountType account.AccountType) (string, error)
 }

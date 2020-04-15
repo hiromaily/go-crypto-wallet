@@ -25,33 +25,6 @@ func (b *Bitcoin) AddMultisigAddress(requiredSigs int, addresses []string, accou
 		return nil, errors.New("number of given address should be at least same to requiredSigs or more")
 	}
 
-	//20180814時点で、pkg側にバグがあるため、NativeのJson RPCを使わざるを得ない
-	//addrs := make([]btcutil.Address, len(addresses))
-	//for idx, ad := range addresses {
-	//	add, err := b.DecodeAddress(ad)
-	//	if err != nil {
-	//		return nil, err
-	//	}
-	//	//
-	//	//addrs = append(addrs, add)
-	//	addrs[idx] = add
-	//}
-
-	// deprecateされているので、こちらは使用しない。
-	//res, err := b.client.CreateMultisig(requiredSigs, addrs)
-	//error: -5: Invalid public key
-	// Note that from v0.16, createmultisig no longer accepts addresses.
-	// Clients must transition to using addmultisigaddress to create multisig addresses with addresses known to the wallet before upgrading to v0.17.
-	// To use the deprecated functionality, start bitcoind with -deprecatedrpc=createmultisig
-
-	// こちらのfuncはjsonのI/Fが実際のBitcoin coreのAPIから乖離してしまっている。。。
-	// btcsuite/btcd/rpcclient/wallet.goの (r FutureAddMultisigAddressResult) Receive() のI/Fが古くてjsonとしてParseできん。。。
-	//resAddr, err := b.client.AddMultisigAddress(requiredSigs, addrs, accountName)
-	//if err != nil {
-	//	//error: json: cannot unmarshal object into Go value of type string
-	//	return nil, errors.Errorf("client.CreateMultisig(): error: %v", err)
-	//}
-
 	//requiredSigs
 	bRequiredSigs, err := json.Marshal(requiredSigs)
 	if err != nil {

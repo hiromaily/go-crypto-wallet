@@ -74,9 +74,6 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus
 func getAddressStatus(currentKey address.AddressStatus, accountType account.AccountType) address.AddressStatus {
 	//TODO: Though file is already exported, allow to export again?? Yes
 	// if you wanna export file again, update keystatus in database manually
-	//if keystatus.AddressStatusValue[currentKey] >= keystatus.AddressStatusValue[keystatus.AddressStatusAddressExported]{
-	//	return ""
-	//}
 	if !account.AccountTypeMultisig[accountType] {
 		// not multisig account
 		//TODO: current key status should be checked as well

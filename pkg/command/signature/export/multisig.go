@@ -47,7 +47,7 @@ func (c *MultisigCommand) Run(args []string) int {
 		return 1
 	}
 	if !account.NotAllow(acnt, []account.AccountType{account.AccountTypeAuthorization, account.AccountTypeClient}) {
-		c.ui.Error(fmt.Sprintf("account: %s/%s is not allowd", account.AccountTypeAuthorization, account.AccountTypeClient))
+		c.ui.Error(fmt.Sprintf("account: %s/%s is not allowed", account.AccountTypeAuthorization, account.AccountTypeClient))
 		return 1
 	}
 

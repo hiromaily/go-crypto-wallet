@@ -55,7 +55,7 @@ func (c *HDKeyCommand) Run(args []string) int {
 		return 1
 	}
 	if !account.NotAllow(acnt, []account.AccountType{account.AccountTypeAuthorization}) {
-		c.ui.Error(fmt.Sprintf("account: %s is not allowd", account.AccountTypeAuthorization))
+		c.ui.Error(fmt.Sprintf("account: %s is not allowed", account.AccountTypeAuthorization))
 		return 1
 	}
 

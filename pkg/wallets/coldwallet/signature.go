@@ -1,7 +1,5 @@
 package coldwallet
 
-//Cold wallet
-
 import (
 	"fmt"
 	"strings"

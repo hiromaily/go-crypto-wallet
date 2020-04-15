@@ -55,11 +55,11 @@ func (c *TransferCommand) Run(args []string) int {
 		return 1
 	}
 	if !account.NotAllow(account1, []account.AccountType{account.AccountTypeAuthorization, account.AccountTypeClient}) {
-		c.ui.Error(fmt.Sprintf("account1: %s/%s is not allowd", account.AccountTypeAuthorization, account.AccountTypeClient))
+		c.ui.Error(fmt.Sprintf("account1: %s/%s is not allowed", account.AccountTypeAuthorization, account.AccountTypeClient))
 		return 1
 	}
 	if !account.NotAllow(account2, []account.AccountType{account.AccountTypeAuthorization, account.AccountTypeClient}) {
-		c.ui.Error(fmt.Sprintf("account2: %s/%s is not allowd", account.AccountTypeAuthorization, account.AccountTypeClient))
+		c.ui.Error(fmt.Sprintf("account2: %s/%s is not allowed", account.AccountTypeAuthorization, account.AccountTypeClient))
 		return 1
 	}
 

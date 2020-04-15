@@ -57,7 +57,7 @@ func (c *KeyCommand) Run(args []string) int {
 		return 1
 	}
 	if account.AccountTypeAuthorization.Is(acnt) {
-		c.ui.Error(fmt.Sprintf("account: %s is not allowd", account.AccountTypeAuthorization))
+		c.ui.Error(fmt.Sprintf("account: %s is not allowed", account.AccountTypeAuthorization))
 		return 1
 	}
 

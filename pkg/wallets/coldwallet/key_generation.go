@@ -76,7 +76,7 @@ func (w *ColdWallet) retrieveSeed() ([]byte, error) {
 }
 
 // GeneratePubKey generate pubkey for account
-// TODO: if acount is AccountTypeAuthorization and there is already record, it should stop creation
+// TODO: if account is AccountTypeAuthorization and there is already record, it should stop creation
 func (w *ColdWallet) GeneratePubKey(
 	accountType account.AccountType,
 	coinType ctype.CoinType,

@@ -13,7 +13,7 @@ import (
 // ImportPubKey import PubKey from csv filecsv into database,
 //  - if account is client, which doesn't have account ??
 func (w *Wallet) ImportPubKey(fileName string, accountType account.AccountType, isRescan bool) error {
-	// read pubkey
+	// read file for public key
 	pubKeys, err := w.addrFileStorager.ImportPubKey(fileName)
 	if err != nil {
 		return errors.Wrap(err, "fail to call key.ImportPubKey()")

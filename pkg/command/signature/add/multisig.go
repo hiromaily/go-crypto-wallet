@@ -48,15 +48,15 @@ func (c *MultisigCommand) Run(args []string) int {
 		return 1
 	}
 	if !account.NotAllow(acnt, []account.AccountType{account.AccountTypeAuthorization, account.AccountTypeClient}) {
-		c.ui.Error(fmt.Sprintf("account: %s/%s is not allowd", account.AccountTypeAuthorization, account.AccountTypeClient))
+		c.ui.Error(fmt.Sprintf("account: %s/%s is not allowed", account.AccountTypeAuthorization, account.AccountTypeClient))
 		return 1
 	}
 
 	// call `addmultisigaddress` which adds a P2SH multisig address to the wallet
 	//  address would be account and authorization
-	err := c.wallet.AddMultisigAddressByAuthorization(account.AccountType(acnt), address.AddressTypeP2shSegwit)
+	err := c.wallet.AddMultisigAddress(account.AccountType(acnt), address.AddressTypeP2shSegwit)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call AddMultisigAddressByAuthorization() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call AddMultisigAddress() %+v", err))
 		return 1
 	}
 	c.ui.Output("Done!")
