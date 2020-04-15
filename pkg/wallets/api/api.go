@@ -74,7 +74,7 @@ type Bitcoiner interface {
 	Logging() (*btc.LoggingResult, error)
 
 	//multisig.go
-	AddMultisigAddress(requiredSigs int, addresses []string, accountName string, addressType address.AddressType) (*btc.AddMultisigAddressResult, error)
+	AddMultisigAddress(requiredSigs int, addresses []string, accountName string, addressType address.AddrType) (*btc.AddMultisigAddressResult, error)
 
 	//transaction.go
 	ToHex(tx *wire.MsgTx) (string, error)

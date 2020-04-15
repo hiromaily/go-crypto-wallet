@@ -228,7 +228,7 @@ func main() {
 //		logger.Infof("Run: Account[%s]", opts.Account)
 //
 //		//export public key as csv
-//		fileName, err := wallet.ExportAccountKey(account.AccountType(opts.Account), keystatus.AddressStatusImportprivkey)
+//		fileName, err := wallet.ExportAccountKey(account.AccountType(opts.Account), keystatus.AddrStatusImportprivkey)
 //		if err != nil {
 //			logger.Fatalf("%+v", err)
 //		}
@@ -258,7 +258,7 @@ func main() {
 //		logger.Infof("Run: Account[%s]", opts.Account)
 //
 //		//export account key
-//		fileName, err := wallet.ExportAccountKey(account.AccountType(opts.Account), keystatus.AddressStatusMultiAddressImported)
+//		fileName, err := wallet.ExportAccountKey(account.AccountType(opts.Account), keystatus.AddrStatusMultiAddressImported)
 //		if err != nil {
 //			logger.Fatalf("%+v", err)
 //		}
@@ -288,7 +288,7 @@ func main() {
 //		logger.Info("Run: Multisigの作成")
 //
 //		//Multisigアドレス作成
-//		resAddr, err := wallet.BTC.AddMultisigAddress(2, []string{"2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP", "2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu"}, "multi01", ctype.AddressTypeP2shSegwit)
+//		resAddr, err := wallet.BTC.AddMultisigAddress(2, []string{"2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP", "2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu"}, "multi01", ctype.AddrTypeP2shSegwit)
 //		if err != nil {
 //			logger.Fatalf("%+v", err)
 //		}

@@ -19,7 +19,7 @@ type AddMultisigAddressResult struct {
 //  - requiredSigs: 取引成立に必要なサイン数
 //  - addresses:    自分のアドレス+承認者のアドレスxN をいれていく
 // clientのアドレスは不要。payment/receiptのアドレスはmultisig対応しておくこと
-func (b *Bitcoin) AddMultisigAddress(requiredSigs int, addresses []string, accountName string, addressType address.AddressType) (*AddMultisigAddressResult, error) {
+func (b *Bitcoin) AddMultisigAddress(requiredSigs int, addresses []string, accountName string, addressType address.AddrType) (*AddMultisigAddressResult, error) {
 
 	if requiredSigs > len(addresses) {
 		return nil, errors.New("number of given address should be at least same to requiredSigs or more")
@@ -48,16 +48,16 @@ func (b *Bitcoin) AddMultisigAddress(requiredSigs int, addresses []string, accou
 	}
 
 	//addressType
-	bAddressType, err := json.Marshal(string(addressType))
+	bAddrType, err := json.Marshal(string(addressType))
 	if err != nil {
 		b.logger.Error(
 			"fail to json.Marchal(addressType)",
 			zap.String("addressType", addressType.String()),
 			zap.Error(err))
-		bAddressType = nil
+		bAddrType = nil
 	}
 
-	jsonRawMsg := []json.RawMessage{bRequiredSigs, bAddresses, bAccount, bAddressType}
+	jsonRawMsg := []json.RawMessage{bRequiredSigs, bAddresses, bAccount, bAddrType}
 
 	//call addmultisigaddress
 	rawResult, err := b.client.RawRequest("addmultisigaddress", jsonRawMsg)

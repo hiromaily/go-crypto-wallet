@@ -19,7 +19,7 @@ import (
 // - when sending coin from multisig address, 、related priv key is required which is related to addresses in parameters
 // - actually address is overridden by multisig addresses in multisig acccount
 // - 4th parameter must be`p2sh-segwit` addressType in Bitcoin
-func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, addressType address.AddressType) error {
+func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, addressType address.AddrType) error {
 	//TODO:remove it
 	if w.wtype != types.WalletTypeSignature {
 		return errors.New("it's available on sign wallet")

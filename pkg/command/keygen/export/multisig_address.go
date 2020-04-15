@@ -53,7 +53,7 @@ func (c *MultisigCommand) Run(args []string) int {
 	}
 
 	// export multisig addresses as csv file
-	fileName, err := c.wallet.ExportAccountKey(account.AccountType(acnt), address.AddressStatusMultiAddressImported)
+	fileName, err := c.wallet.ExportAccountKey(account.AccountType(acnt), address.AddrStatusMultiAddressImported)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call ExportAccountKey() %+v", err))
 		return 1

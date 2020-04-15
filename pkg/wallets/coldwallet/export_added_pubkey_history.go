@@ -36,7 +36,7 @@ func (w *ColdWallet) ExportAddedPubkeyHistory(accountType account.AccountType) (
 
 	// export data in added_pubkey_history table as csv file
 	fileName, err := w.exportAddedPubkeyHistoryTable(addedPubkeyHistoryTable, accountType,
-		address.AddressStatusValue[address.AddressStatusPubkeyExported])
+		address.AddrStatusValue[address.AddrStatusPubkeyExported])
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call exportAddedPubkeyHistoryTable()")
 	}

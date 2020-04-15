@@ -66,7 +66,7 @@ type Keygener interface {
 }
 
 type KeygenExclusiver interface {
-	ExportAccountKey(accountType account.AccountType, keyStatus address.AddressStatus) (string, error)
+	ExportAccountKey(accountType account.AccountType, keyStatus address.AddrStatus) (string, error)
 	ImportMultisigAddress(fileName string, accountType account.AccountType) error
 }
 
@@ -84,6 +84,6 @@ type Signer interface {
 
 type SignatureExclusiver interface {
 	ImportPubKey(fileName string, accountType account.AccountType) error
-	AddMultisigAddress(accountType account.AccountType, addressType address.AddressType) error
+	AddMultisigAddress(accountType account.AccountType, addressType address.AddrType) error
 	ExportAddedPubkeyHistory(accountType account.AccountType) (string, error)
 }

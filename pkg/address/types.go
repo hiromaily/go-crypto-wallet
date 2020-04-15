@@ -1,63 +1,62 @@
 package address
 
 //----------------------------------------------------
-// AddressType
+// AddrType
 //----------------------------------------------------
 
-//AddressType address type for bitcoin
-type AddressType string
+//AddrType address type for bitcoin
+type AddrType string
 
 // address type
 const (
-	AddressTypeLegacy     AddressType = "legacy"
-	AddressTypeP2shSegwit AddressType = "p2sh-segwit"
-	AddressTypeBech32     AddressType = "bech32"
+	AddrTypeLegacy     AddrType = "legacy"
+	AddrTypeP2shSegwit AddrType = "p2sh-segwit"
+	AddrTypeBech32     AddrType = "bech32"
 )
 
-func (a AddressType) String() string {
+func (a AddrType) String() string {
 	return string(a)
 }
 
-// AddressTypeValue value
-var AddressTypeValue = map[AddressType]uint8{
-	AddressTypeLegacy:     0,
-	AddressTypeP2shSegwit: 1,
-	AddressTypeBech32:     2,
+// AddrTypeValue value
+var AddrTypeValue = map[AddrType]uint8{
+	AddrTypeLegacy:     0,
+	AddrTypeP2shSegwit: 1,
+	AddrTypeBech32:     2,
 }
 
 //----------------------------------------------------
-// AddressStatus
+// AddrStatus
 //----------------------------------------------------
 
-// FIXME: name should be just Status
-// AddressStatus address generation progress for records in database
-type AddressStatus string
+// AddrStatus address generation progress for records in database
+type AddrStatus string
 
 // address_status
 const (
-	AddressStatusHDKeyGenerated       AddressStatus = "generated"              // hd_walletによってkeyが生成された
-	AddressStatusPrivKeyImported      AddressStatus = "importprivkey"          // importprivkeyが実行された
-	AddressStatusPubkeyExported       AddressStatus = "pubkey_exported"        // pubkeyがexportされた(receipt/payment)
-	AddressStatusMultiAddressImported AddressStatus = "multi_address_imported" // multiaddがimportされた(receipt/payment)
-	AddressStatusAddressExported      AddressStatus = "address_exported"       // addressがexportされた
+	AddrStatusHDKeyGenerated       AddrStatus = "generated"              // hd_walletによってkeyが生成された
+	AddrStatusPrivKeyImported      AddrStatus = "importprivkey"          // importprivkeyが実行された
+	AddrStatusPubkeyExported       AddrStatus = "pubkey_exported"        // pubkeyがexportされた(receipt/payment)
+	AddrStatusMultiAddressImported AddrStatus = "multi_address_imported" // multiaddがimportされた(receipt/payment)
+	AddrStatusAddressExported      AddrStatus = "address_exported"       // addressがexportされた
 )
 
-func (a AddressStatus) String() string {
+func (a AddrStatus) String() string {
 	return string(a)
 }
 
-// AddressStatusValue value
-var AddressStatusValue = map[AddressStatus]uint8{
-	AddressStatusHDKeyGenerated:       0,
-	AddressStatusPrivKeyImported:      1,
-	AddressStatusPubkeyExported:       2,
-	AddressStatusMultiAddressImported: 3,
-	AddressStatusAddressExported:      4,
+// AddrStatusValue value
+var AddrStatusValue = map[AddrStatus]uint8{
+	AddrStatusHDKeyGenerated:       0,
+	AddrStatusPrivKeyImported:      1,
+	AddrStatusPubkeyExported:       2,
+	AddrStatusMultiAddressImported: 3,
+	AddrStatusAddressExported:      4,
 }
 
-// ValidateAddressStatus validates AddressStatus
-func ValidateAddressStatus(val string) bool {
-	if _, ok := AddressStatusValue[AddressStatus(val)]; ok {
+// ValidateAddrStatus validates AddrStatus
+func ValidateAddrStatus(val string) bool {
+	if _, ok := AddrStatusValue[AddrStatus(val)]; ok {
 		return true
 	}
 	return false

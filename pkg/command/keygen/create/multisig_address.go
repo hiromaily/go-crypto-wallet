@@ -40,7 +40,7 @@ func (c *MultisigCommand) Run(args []string) int {
 		2,
 		[]string{"2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP", "2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu"},
 		"multi01",
-		address.AddressTypeP2shSegwit)
+		address.AddrTypeP2shSegwit)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call AddMultisigAddress() %+v", err))
 		return 1

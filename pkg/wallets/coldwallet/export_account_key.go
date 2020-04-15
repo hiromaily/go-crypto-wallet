@@ -20,7 +20,7 @@ import (
 //  - acount client: `wallet_address`
 //  - acount others: `wallet_multisig_address`
 // this func is expected to be used by only keygen
-func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus address.AddressStatus) (string, error) {
+func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus address.AddrStatus) (string, error) {
 	if w.wtype != types.WalletTypeKeyGen {
 		return "", errors.New("it's available on keygen wallet")
 	}
@@ -31,15 +31,15 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus
 	// - account: others, key_status==3, isMultisig==true then export address for `wallet_multisig_address`
 
 	// exptected key status for update
-	updateAddressStatus := getAddressStatus(keyStatus, accountType)
-	if updateAddressStatus == "" {
+	updateAddrStatus := getAddrStatus(keyStatus, accountType)
+	if updateAddrStatus == "" {
 		return "", errors.New("it can't export file anymore")
 	}
 
 	// get account key
-	accountKeyTable, err := w.storager.GetAllAccountKeyByAddressStatus(accountType, keyStatus)
+	accountKeyTable, err := w.storager.GetAllAccountKeyByAddrStatus(accountType, keyStatus)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call storager.GetAllAccountKeyByAddressStatus()")
+		return "", errors.Wrap(err, "fail to call storager.GetAllAccountKeyByAddrStatus()")
 	}
 	if len(accountKeyTable) == 0 {
 		w.logger.Info("no records in account_key table")
@@ -48,7 +48,7 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus
 
 	//export csv file
 	fileName, err := w.exportAccountKey(accountKeyTable, accountType,
-		address.AddressStatusValue[keyStatus])
+		address.AddrStatusValue[keyStatus])
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call w.exportAccountKeyTable()")
 	}
@@ -58,9 +58,9 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus
 	for idx, record := range accountKeyTable {
 		wifs[idx] = record.WalletImportFormat
 	}
-	_, err = w.storager.UpdateAddressStatusByWIFs(accountType, updateAddressStatus, wifs, nil, true)
+	_, err = w.storager.UpdateAddrStatusByWIFs(accountType, updateAddrStatus, wifs, nil, true)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call storager.UpdateAddressStatusByWIFs()")
+		return "", errors.Wrap(err, "fail to call storager.UpdateAddrStatusByWIFs()")
 	}
 
 	w.logger.Debug(
@@ -71,19 +71,19 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus
 	return fileName, nil
 }
 
-func getAddressStatus(currentKey address.AddressStatus, accountType account.AccountType) address.AddressStatus {
+func getAddrStatus(currentKey address.AddrStatus, accountType account.AccountType) address.AddrStatus {
 	//TODO: Though file is already exported, allow to export again?? Yes
 	// if you wanna export file again, update keystatus in database manually
 	if !account.AccountTypeMultisig[accountType] {
 		// not multisig account
 		//TODO: current key status should be checked as well
-		return address.AddressStatusAddressExported //4
+		return address.AddrStatusAddressExported //4
 	} else {
 		// multisig account
-		if currentKey == address.AddressStatusPrivKeyImported { //1
-			return address.AddressStatusPubkeyExported //2
-		} else if currentKey == address.AddressStatusMultiAddressImported { //3
-			return address.AddressStatusAddressExported //4
+		if currentKey == address.AddrStatusPrivKeyImported { //1
+			return address.AddrStatusPubkeyExported //2
+		} else if currentKey == address.AddrStatusMultiAddressImported { //3
+			return address.AddrStatusAddressExported //4
 		}
 	}
 	return ""

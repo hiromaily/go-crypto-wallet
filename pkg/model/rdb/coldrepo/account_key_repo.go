@@ -22,7 +22,7 @@ type AccountKeyTable struct {
 	WalletImportFormat    string     `db:"wallet_import_format"`
 	Account               string     `db:"account"`
 	Idx                   uint32     `db:"idx"`
-	AddressStatus         uint8      `db:"key_status"`
+	AddrStatus            uint8      `db:"key_status"`
 	UpdatedAt             *time.Time `db:"updated_at"`
 }
 
@@ -73,15 +73,15 @@ func (r *ColdRepository) GetOneByMaxIDOnAccountKeyTable(accountType account.Acco
 	return r.getOneByMaxIDOnAccountKeyTable(accountKeyTableName[accountType], accountType)
 }
 
-// getAllAccountKeyByAddressStatus 指定したkeyStatusのレコードをすべて返す
-func (r *ColdRepository) getAllAccountKeyByAddressStatus(tbl string, keyStatus address.AddressStatus) ([]AccountKeyTable, error) {
+// getAllAccountKeyByAddrStatus 指定したkeyStatusのレコードをすべて返す
+func (r *ColdRepository) getAllAccountKeyByAddrStatus(tbl string, keyStatus address.AddrStatus) ([]AccountKeyTable, error) {
 	//sql := "SELECT * FROM %s WHERE is_imported_priv_key=false;"
 	sql := "SELECT * FROM %s WHERE key_status=?;"
 	sql = fmt.Sprintf(sql, tbl)
 	//logger.Debugf("sql: %s", sql)
 
 	var accountKeyTable []AccountKeyTable
-	err := r.db.Select(&accountKeyTable, sql, address.AddressStatusValue[keyStatus])
+	err := r.db.Select(&accountKeyTable, sql, address.AddrStatusValue[keyStatus])
 	if err != nil {
 		return nil, err
 	}
@@ -89,9 +89,9 @@ func (r *ColdRepository) getAllAccountKeyByAddressStatus(tbl string, keyStatus a
 	return accountKeyTable, nil
 }
 
-// GetAllAccountKeyByAddressStatus 指定したkeyStatusのレコードをすべて返す
-func (r *ColdRepository) GetAllAccountKeyByAddressStatus(accountType account.AccountType, keyStatus address.AddressStatus) ([]AccountKeyTable, error) {
-	return r.getAllAccountKeyByAddressStatus(accountKeyTableName[accountType], keyStatus)
+// GetAllAccountKeyByAddrStatus 指定したkeyStatusのレコードをすべて返す
+func (r *ColdRepository) GetAllAccountKeyByAddrStatus(accountType account.AccountType, keyStatus address.AddrStatus) ([]AccountKeyTable, error) {
+	return r.getAllAccountKeyByAddrStatus(accountKeyTableName[accountType], keyStatus)
 }
 
 func (r *ColdRepository) getAllAccountKeyByMultiAddrs(tbl string, addrs []string) ([]AccountKeyTable, error) {
@@ -156,8 +156,8 @@ func (r *ColdRepository) InsertAccountKeyTable(accountType account.AccountType, 
 	return r.insertAccountKeyTable(accountKeyTableName[accountType], accountKeyTables, tx, isCommit)
 }
 
-// updateAddressStatus key_statusを更新する
-func (r *ColdRepository) updateAddressStatusByWIF(tbl string, keyStatus address.AddressStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+// updateAddrStatus key_statusを更新する
+func (r *ColdRepository) updateAddrStatusByWIF(tbl string, keyStatus address.AddrStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	sql := `
 UPDATE %s SET key_status=? WHERE wallet_import_format=?
 `
@@ -168,7 +168,7 @@ UPDATE %s SET key_status=? WHERE wallet_import_format=?
 		tx = r.db.MustBegin()
 	}
 
-	res, err := tx.Exec(sql, address.AddressStatusValue[keyStatus], strWIF)
+	res, err := tx.Exec(sql, address.AddrStatusValue[keyStatus], strWIF)
 	if err != nil {
 		tx.Rollback()
 		return 0, err
@@ -181,16 +181,16 @@ UPDATE %s SET key_status=? WHERE wallet_import_format=?
 	return affectedNum, nil
 }
 
-// UpdateAddressStatusByWIF key_statusを更新する
-func (r *ColdRepository) UpdateAddressStatusByWIF(accountType account.AccountType, keyStatus address.AddressStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error) {
-	return r.updateAddressStatusByWIF(accountKeyTableName[accountType], keyStatus, strWIF, tx, isCommit)
+// UpdateAddrStatusByWIF key_statusを更新する
+func (r *ColdRepository) UpdateAddrStatusByWIF(accountType account.AccountType, keyStatus address.AddrStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	return r.updateAddrStatusByWIF(accountKeyTableName[accountType], keyStatus, strWIF, tx, isCommit)
 }
 
-// updateAddressStatusByWIFs key_statusを更新する
-func (r *ColdRepository) updateAddressStatusByWIFs(tbl string, keyStatus address.AddressStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+// updateAddrStatusByWIFs key_statusを更新する
+func (r *ColdRepository) updateAddrStatusByWIFs(tbl string, keyStatus address.AddrStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error) {
 	var sql string
 	sql = "UPDATE %s SET key_status=%d WHERE wallet_import_format IN (?);"
-	sql = fmt.Sprintf(sql, tbl, address.AddressStatusValue[keyStatus])
+	sql = fmt.Sprintf(sql, tbl, address.AddrStatusValue[keyStatus])
 
 	//In対応
 	query, args, err := sqlx.In(sql, wifs)
@@ -217,9 +217,9 @@ func (r *ColdRepository) updateAddressStatusByWIFs(tbl string, keyStatus address
 	return affectedNum, nil
 }
 
-// UpdateAddressStatusByWIFs key_statusを更新する
-func (r *ColdRepository) UpdateAddressStatusByWIFs(accountType account.AccountType, keyStatus address.AddressStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error) {
-	return r.updateAddressStatusByWIFs(accountKeyTableName[accountType], keyStatus, wifs, tx, isCommit)
+// UpdateAddrStatusByWIFs key_statusを更新する
+func (r *ColdRepository) UpdateAddrStatusByWIFs(accountType account.AccountType, keyStatus address.AddrStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error) {
+	return r.updateAddrStatusByWIFs(accountKeyTableName[accountType], keyStatus, wifs, tx, isCommit)
 }
 
 // updateMultisigAddrOnAccountKeyTableByFullPubKey wallet_multisig_addressを更新する

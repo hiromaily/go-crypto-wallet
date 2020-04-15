@@ -94,7 +94,7 @@ func (w *ColdWallet) ImportMultisigAddress(fileName string, accountType account.
 			FullPublicKey:         inner[0],
 			WalletMultisigAddress: inner[3],
 			RedeemScript:          inner[4],
-			AddressStatus:         address.AddressStatusValue[address.AddressStatusMultiAddressImported],
+			AddrStatus:            address.AddrStatusValue[address.AddrStatusMultiAddressImported],
 			UpdatedAt:             &tm,
 		}
 	}
