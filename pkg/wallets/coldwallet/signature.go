@@ -14,30 +14,25 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
-	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/btc"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
-// coldwallet側から未署名トランザクションを読み込み、署名を行う
+// sing on unsigned transaction
 
-// SignatureFromFile 渡されたファイルからtransactionを読み取り、署名を行う
+// SignTx 渡されたファイルからtransactionを読み取り、署名を行う
 // TODO:いずれにせよ、入金と出金で署名もMultisigかどうかで変わってくる
-func (w *ColdWallet) SignatureFromFile(filePath string) (string, bool, string, error) {
-	//TODO:remove it
-	if w.wtype == types.WalletTypeWatchOnly {
-		return "", false, "", errors.New("it's available on ColdWallet1, ColdWallet2")
-	}
+func (w *ColdWallet) SignTx(filePath string) (string, bool, string, error) {
 
 	//ファイル名から、tx_receipt_idを取得する
 	//payment_5_unsigned_1534466246366489473
-	txReceiptID, actionType, _, err := txfile.ParseFile(filePath, []tx.TxType{tx.TxTypeUnsigned, tx.TxTypeUnsigned2nd})
+	actionType, _, txReceiptID, err := w.txFileRepo.ValidateFilePath(filePath, []tx.TxType{tx.TxTypeUnsigned, tx.TxTypeUnsigned2nd})
 	if err != nil {
 		return "", false, "", err
 	}
 
 	//ファイルからhexを読み取る
-	data, err := txfile.ReadFile(filePath)
+	data, err := w.txFileRepo.ReadFile(filePath)
 	if err != nil {
 		return "", false, "", err
 	}
@@ -70,8 +65,8 @@ func (w *ColdWallet) SignatureFromFile(filePath string) (string, bool, string, e
 	}
 
 	//ファイルに書き込む
-	path := txfile.CreateFilePath(actionType, txType, txReceiptID, true)
-	generatedFileName, err := txfile.WriteFile(path, savedata)
+	path := w.txFileRepo.CreateFilePath(actionType, txType, txReceiptID)
+	generatedFileName, err := w.txFileRepo.WriteFile(path, savedata)
 	if err != nil {
 		return "", isSigned, "", err
 	}

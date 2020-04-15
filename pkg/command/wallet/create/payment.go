@@ -79,12 +79,12 @@ func (c *PaymentCommand) runDebug(fee float64) int {
 	}
 	c.ui.Output(fmt.Sprintf("[hex]: %s\n[fileName]: %s", hex, fileName))
 
-	//FIXME: no SignatureFromFile in walleter interface
+	//FIXME: no SignTx in walleter interface
 	// 2. sign on unsigned transaction. actually it is available for sign wallet
 	//c.ui.Info("\n[2]Run: sign")
-	//hexTx, isSigned, generatedFileName, err := c.wallet.SignatureFromFile(fileName)
+	//hexTx, isSigned, generatedFileName, err := c.wallet.SignTx(fileName)
 	//if err != nil {
-	//	c.ui.Error(fmt.Sprintf("fail to call SignatureFromFile() %+v", err))
+	//	c.ui.Error(fmt.Sprintf("fail to call SignTx() %+v", err))
 	//	return 1
 	//}
 	//c.ui.Output(fmt.Sprintf("[hex]: %s\n[署名完了]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName))

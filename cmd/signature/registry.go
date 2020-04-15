@@ -13,6 +13,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tracer"
+	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
 	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
@@ -49,6 +50,7 @@ func (r *registry) NewSigner() wallets.Signer {
 		r.newTracer(),
 		r.newStorager(),
 		r.newAddressFileStorager(),
+		r.newTxFileStorager(),
 		r.walletType,
 	)
 }
@@ -105,16 +107,15 @@ func (r *registry) newMySQLClient() *sqlx.DB {
 }
 
 func (r *registry) newAddressFileStorager() address.Storager {
-	return address.NewCSVRepository(
+	return address.NewFileRepository(
 		r.conf.PubkeyFile.BasePath,
 		r.newLogger(),
 	)
 }
 
-//TODO: implementation
-//func (r *registry) newTxFileStorager() address.Storager {
-//	return address.NewCSVRepository(
-//		r.conf.PubkeyFile.BasePath,
-//		r.newLogger(),
-//	)
-//}
+func (r *registry) newTxFileStorager() tx.Storager {
+	return tx.NewFileRepository(
+		r.conf.PubkeyFile.BasePath,
+		r.newLogger(),
+	)
+}

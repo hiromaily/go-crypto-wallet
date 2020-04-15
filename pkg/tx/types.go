@@ -18,6 +18,10 @@ const (
 	TxTypeCancel      TxType = "canceled"
 )
 
+func (t TxType) String() string {
+	return string(t)
+}
+
 //TxTypeValue tx_typeの値
 var TxTypeValue = map[TxType]uint8{
 	TxTypeUnsigned:    1,
@@ -37,7 +41,7 @@ func ValidateTxType(val string) bool {
 	return false
 }
 
-// Search SliceのtxTypes内にtが含まれているかチェックする
+// Search SliceのtxTypes内に`t`が含まれているかチェックする
 func (t TxType) Search(txTypes []TxType) bool {
 	for _, v := range txTypes {
 		if v == t {

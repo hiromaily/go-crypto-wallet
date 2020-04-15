@@ -14,7 +14,6 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
-	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/btc"
 )
 
@@ -316,8 +315,8 @@ func (w *Wallet) storeHex(hex, encodedAddrsPrevs string, id int64, actionType ac
 	}
 
 	//To File
-	path := txfile.CreateFilePath(actionType, tx.TxTypeUnsigned, id, true)
-	generatedFileName, err = txfile.WriteFile(path, savedata)
+	path := w.txFileRepo.CreateFilePath(actionType, tx.TxTypeUnsigned, id)
+	generatedFileName, err = w.txFileRepo.WriteFile(path, savedata)
 	if err != nil {
 		return "", errors.Errorf("txfile.WriteFile(): error: %s", err)
 	}

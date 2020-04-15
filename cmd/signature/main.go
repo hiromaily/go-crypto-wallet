@@ -155,7 +155,7 @@ func main() {
 //		checkImportFile()
 //
 //		//出金/入金の判別はファイル名から行う
-//		hexTx, isSigned, generatedFileName, err := wallet.SignatureFromFile(opts.ImportFile)
+//		hexTx, isSigned, generatedFileName, err := wallet.SignTx(opts.ImportFile)
 //		if err != nil {
 //			logger.Fatalf("%+v", err)
 //		}

@@ -57,7 +57,7 @@ func (w *ColdWallet) ExportAddedPubkeyHistory(accountType account.AccountType) (
 // TODO: export logic could be defined as address.Storager
 func (w *ColdWallet) exportAddedPubkeyHistoryTable(addedPubkeyHistoryTable []coldrepo.AddedPubkeyHistoryTable, accountType account.AccountType, keyStatus uint8) (string, error) {
 	//fileName
-	fileName := w.addrFileStorager.CreateFilePath(accountType, keyStatus)
+	fileName := w.addrFileRepo.CreateFilePath(accountType, keyStatus)
 
 	file, err := os.Create(fileName)
 	if err != nil {

@@ -6,18 +6,20 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
+	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
 // Wallet watch only wallet object
 type Wallet struct {
-	btc              api.Bitcoiner
-	logger           *zap.Logger
-	tracer           opentracing.Tracer
-	storager         rdb.WalletStorager
-	addrFileStorager address.Storager
-	wtype            types.WalletType
+	btc          api.Bitcoiner
+	logger       *zap.Logger
+	tracer       opentracing.Tracer
+	storager     rdb.WalletStorager
+	addrFileRepo address.Storager
+	txFileRepo   tx.Storager
+	wtype        types.WalletType
 }
 
 func NewWallet(
@@ -25,16 +27,18 @@ func NewWallet(
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
 	storager rdb.WalletStorager,
-	addrFileStorager address.Storager,
+	addrFileRepo address.Storager,
+	txFileRepo tx.Storager,
 	wtype types.WalletType) *Wallet {
 
 	return &Wallet{
-		btc:              btc,
-		logger:           logger,
-		tracer:           tracer,
-		storager:         storager,
-		addrFileStorager: addrFileStorager,
-		wtype:            wtype,
+		btc:          btc,
+		logger:       logger,
+		tracer:       tracer,
+		storager:     storager,
+		addrFileRepo: addrFileRepo,
+		txFileRepo:   txFileRepo,
+		wtype:        wtype,
 	}
 }
 

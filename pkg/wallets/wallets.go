@@ -49,7 +49,7 @@ type KeySigner interface {
 	GenerateSeed() ([]byte, error)
 	StoreSeed(strSeed string) ([]byte, error)
 	GeneratePubKey(accountType account.AccountType, coinType ctype.CoinType, seed []byte, count uint32) ([]wkey.WalletKey, error)
-	SignatureFromFile(filePath string) (string, bool, string, error)
+	SignTx(filePath string) (string, bool, string, error)
 	ImportPrivateKey(accountType account.AccountType) error
 }
 

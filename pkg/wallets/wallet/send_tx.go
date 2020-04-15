@@ -9,7 +9,6 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/action"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
-	"github.com/hiromaily/go-bitcoin/pkg/txfile"
 )
 
 // coldwallet側で署名済みトランザクションを作成したものから、送金処理を行う
@@ -19,13 +18,13 @@ func (w *Wallet) SendFromFile(filePath string) (string, error) {
 
 	//ファイル名から、tx_receipt_idを取得する
 	//payment_5_unsigned_1534466246366489473
-	txReceiptID, actionType, _, err := txfile.ParseFile(filePath, []tx.TxType{tx.TxTypeSigned})
+	actionType, _, txReceiptID, err := w.txFileRepo.ValidateFilePath(filePath, []tx.TxType{tx.TxTypeSigned})
 	if err != nil {
-		return "", errors.Errorf("txfile.ParseFile() error: %s", err)
+		return "", errors.Errorf("txfile.ValidateFilePath() error: %s", err)
 	}
 
 	//ファイルからhexを読み取る
-	signedHex, err := txfile.ReadFile(filePath)
+	signedHex, err := w.txFileRepo.ReadFile(filePath)
 	if err != nil {
 		return "", errors.Errorf("txfile.ReadFile() error: %s", err)
 	}

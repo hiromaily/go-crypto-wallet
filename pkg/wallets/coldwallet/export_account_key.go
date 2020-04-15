@@ -93,7 +93,7 @@ func getAddressStatus(currentKey address.AddressStatus, accountType account.Acco
 // TODO: export logic could be defined as address.Storager
 func (w *ColdWallet) exportAccountKey(accountKeyTable []coldrepo.AccountKeyTable, accountType account.AccountType, keyStatusVal uint8) (string, error) {
 	//create fileName
-	fileName := w.addrFileStorager.CreateFilePath(accountType, keyStatusVal)
+	fileName := w.addrFileRepo.CreateFilePath(accountType, keyStatusVal)
 
 	file, err := os.Create(fileName)
 	if err != nil {

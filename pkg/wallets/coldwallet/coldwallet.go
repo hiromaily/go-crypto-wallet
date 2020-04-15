@@ -6,18 +6,20 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
+	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
 // ColdWallet coldwallet for keygen/signature object
 type ColdWallet struct {
-	btc              api.Bitcoiner
-	logger           *zap.Logger
-	tracer           opentracing.Tracer
-	storager         rdb.ColdStorager
-	addrFileStorager address.Storager
-	wtype            types.WalletType
+	btc          api.Bitcoiner
+	logger       *zap.Logger
+	tracer       opentracing.Tracer
+	storager     rdb.ColdStorager
+	addrFileRepo address.Storager
+	txFileRepo   tx.Storager
+	wtype        types.WalletType
 }
 
 func NewColdWalet(
@@ -25,16 +27,18 @@ func NewColdWalet(
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
 	storager rdb.ColdStorager,
-	addrFileStorager address.Storager,
+	addrFileRepo address.Storager,
+	txFileRepo tx.Storager,
 	wtype types.WalletType) *ColdWallet {
 
 	return &ColdWallet{
-		btc:              btc,
-		logger:           logger,
-		tracer:           tracer,
-		storager:         storager,
-		addrFileStorager: addrFileStorager,
-		wtype:            wtype,
+		btc:          btc,
+		logger:       logger,
+		tracer:       tracer,
+		storager:     storager,
+		addrFileRepo: addrFileRepo,
+		txFileRepo:   txFileRepo,
+		wtype:        wtype,
 	}
 }
 

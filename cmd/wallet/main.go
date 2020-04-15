@@ -235,7 +235,7 @@ func main() {
 //
 //		//署名(本来はColdWalletの機能)
 //		logger.Info("\n[2]Run: 署名")
-//		hexTx, isSigned, generatedFileName, err := wallet.SignatureFromFile(fileName)
+//		hexTx, isSigned, generatedFileName, err := wallet.SignTx(fileName)
 //		if err != nil {
 //			logger.Fatalf("%+v", err)
 //		}
@@ -287,7 +287,7 @@ func main() {
 //
 //		//署名(本来はColdWalletの機能)
 //		logger.Info("\n[2]Run: 署名")
-//		hexTx, isSigned, generatedFileName, err := wallet.SignatureFromFile(fileName)
+//		hexTx, isSigned, generatedFileName, err := wallet.SignTx(fileName)
 //		if err != nil {
 //			logger.Fatalf("%+v", err)
 //		}
