@@ -20,7 +20,7 @@ import (
 //  - acount client: `wallet_address`
 //  - acount others: `wallet_multisig_address`
 // this func is expected to be used by only keygen
-func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus address.AddrStatus) (string, error) {
+func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, addrStatus address.AddrStatus) (string, error) {
 	if w.wtype != types.WalletTypeKeyGen {
 		return "", errors.New("it's available on keygen wallet")
 	}
@@ -31,13 +31,13 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus
 	// - account: others, key_status==3, isMultisig==true then export address for `wallet_multisig_address`
 
 	// exptected key status for update
-	updateAddrStatus := getAddrStatus(keyStatus, accountType)
+	updateAddrStatus := getAddrStatus(addrStatus, accountType)
 	if updateAddrStatus == "" {
 		return "", errors.New("it can't export file anymore")
 	}
 
 	// get account key
-	accountKeyTable, err := w.storager.GetAllAccountKeyByAddrStatus(accountType, keyStatus)
+	accountKeyTable, err := w.storager.GetAllAccountKeyByAddrStatus(accountType, addrStatus)
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call storager.GetAllAccountKeyByAddrStatus()")
 	}
@@ -48,7 +48,7 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, keyStatus
 
 	//export csv file
 	fileName, err := w.exportAccountKey(accountKeyTable, accountType,
-		address.AddrStatusValue[keyStatus])
+		address.AddrStatusValue[addrStatus])
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call w.exportAccountKeyTable()")
 	}
@@ -91,9 +91,9 @@ func getAddrStatus(currentKey address.AddrStatus, accountType account.AccountTyp
 
 // exportAccountKey export account_key_table as csv file
 // TODO: export logic could be defined as address.Storager
-func (w *ColdWallet) exportAccountKey(accountKeyTable []coldrepo.AccountKeyTable, accountType account.AccountType, keyStatusVal uint8) (string, error) {
+func (w *ColdWallet) exportAccountKey(accountKeyTable []coldrepo.AccountKeyTable, accountType account.AccountType, addrStatusVal uint8) (string, error) {
 	//create fileName
-	fileName := w.addrFileRepo.CreateFilePath(accountType, keyStatusVal)
+	fileName := w.addrFileRepo.CreateFilePath(accountType, addrStatusVal)
 
 	file, err := os.Create(fileName)
 	if err != nil {

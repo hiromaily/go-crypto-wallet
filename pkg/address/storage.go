@@ -15,7 +15,7 @@ import (
 )
 
 type Storager interface {
-	CreateFilePath(accountType account.AccountType, keyStatus uint8) string
+	CreateFilePath(accountType account.AccountType, addrStatus uint8) string
 	ValidateFilePath(fileName string, accountType account.AccountType) error
 	ImportPubKey(fileName string) ([]string, error)
 }
@@ -39,10 +39,10 @@ func NewFileRepository(filePath string, logger *zap.Logger) *FileRepository {
 // CreateFilePath create file path for csv file
 // Format:
 //  - ./data/pubkey/client_1534744535097796209.csv
-func (r *FileRepository) CreateFilePath(accountType account.AccountType, keyStatus uint8) string {
+func (r *FileRepository) CreateFilePath(accountType account.AccountType, addrStatus uint8) string {
 	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
 
-	return fmt.Sprintf("%s%s_%d_%s.csv", r.filePath, accountType.String(), keyStatus, ts)
+	return fmt.Sprintf("%s%s_%d_%s.csv", r.filePath, accountType.String(), addrStatus, ts)
 }
 
 // ValidateFilePath validate fileName

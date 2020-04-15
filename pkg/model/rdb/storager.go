@@ -52,11 +52,11 @@ type ColdStorager interface {
 	//account_pubkey_repo
 	GetMaxIndexOnAccountKeyTable(accountType account.AccountType) (int64, error)
 	GetOneByMaxIDOnAccountKeyTable(accountType account.AccountType) (*coldrepo.AccountKeyTable, error)
-	GetAllAccountKeyByAddrStatus(accountType account.AccountType, keyStatus address.AddrStatus) ([]coldrepo.AccountKeyTable, error)
+	GetAllAccountKeyByAddrStatus(accountType account.AccountType, addrStatus address.AddrStatus) ([]coldrepo.AccountKeyTable, error)
 	GetAllAccountKeyByMultiAddrs(accountType account.AccountType, addrs []string) ([]coldrepo.AccountKeyTable, error)
 	InsertAccountKeyTable(accountType account.AccountType, accountKeyTables []coldrepo.AccountKeyTable, tx *sqlx.Tx, isCommit bool) error
-	UpdateAddrStatusByWIF(accountType account.AccountType, keyStatus address.AddrStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error)
-	UpdateAddrStatusByWIFs(accountType account.AccountType, keyStatus address.AddrStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error)
+	UpdateAddrStatusByWIF(accountType account.AccountType, addrStatus address.AddrStatus, strWIF string, tx *sqlx.Tx, isCommit bool) (int64, error)
+	UpdateAddrStatusByWIFs(accountType account.AccountType, addrStatus address.AddrStatus, wifs []string, tx *sqlx.Tx, isCommit bool) (int64, error)
 	UpdateMultisigAddrOnAccountKeyTableByFullPubKey(accountType account.AccountType, accountKeyTable []coldrepo.AccountKeyTable, tx *sqlx.Tx, isCommit bool) error
 	//added_pubkey_history_repo
 	GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType account.AccountType) ([]coldrepo.AddedPubkeyHistoryTable, error)

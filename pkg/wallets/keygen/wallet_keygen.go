@@ -22,7 +22,7 @@ import (
 //}
 //
 //type KeygenExclusiver interface {
-//	ExportAccountKey(accountType account.AccountType, keyStatus keystatus.AddrStatus) (string, error)
+//	ExportAccountKey(accountType account.AccountType, addrStatus keystatus.AddrStatus) (string, error)
 //	ImportMultisigAddress(fileName string, accountType account.AccountType) error
 //}
 

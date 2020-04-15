@@ -2,17 +2,18 @@ package coldwallet
 
 import (
 	"fmt"
-	"go.uber.org/zap"
 	"strings"
 
 	"github.com/btcsuite/btcd/wire"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
+
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/btc"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
-	"github.com/pkg/errors"
 )
 
 // sing on unsigned transaction

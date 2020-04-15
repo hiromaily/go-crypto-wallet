@@ -66,7 +66,7 @@ type Keygener interface {
 }
 
 type KeygenExclusiver interface {
-	ExportAccountKey(accountType account.AccountType, keyStatus address.AddrStatus) (string, error)
+	ExportAccountKey(accountType account.AccountType, addrStatus address.AddrStatus) (string, error)
 	ImportMultisigAddress(fileName string, accountType account.AccountType) error
 }
 
