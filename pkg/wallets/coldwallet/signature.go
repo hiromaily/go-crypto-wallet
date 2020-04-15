@@ -2,71 +2,72 @@ package coldwallet
 
 import (
 	"fmt"
+	"go.uber.org/zap"
 	"strings"
 
-	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/wire"
-	"github.com/pkg/errors"
-	"go.uber.org/zap"
-
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/action"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/btc"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
+	"github.com/pkg/errors"
 )
 
 // sing on unsigned transaction
 
-// SignTx 渡されたファイルからtransactionを読み取り、署名を行う
-// TODO:いずれにせよ、入金と出金で署名もMultisigかどうかで変わってくる
+// SignTx sign on tx in csv file
+// - logic would vary among account, addressType like multisig
+// - returns tx, isSigned, generatedFileName, error
 func (w *ColdWallet) SignTx(filePath string) (string, bool, string, error) {
 
-	//ファイル名から、tx_receipt_idを取得する
-	//payment_5_unsigned_1534466246366489473
+	// get tx_receipt_id from tx file name
+	//  if payment_5_unsigned_1534466246366489473, 5 is target
 	actionType, _, txReceiptID, err := w.txFileRepo.ValidateFilePath(filePath, []tx.TxType{tx.TxTypeUnsigned, tx.TxTypeUnsigned2nd})
 	if err != nil {
 		return "", false, "", err
 	}
 
-	//ファイルからhexを読み取る
+	// get hex tx from file
 	data, err := w.txFileRepo.ReadFile(filePath)
 	if err != nil {
 		return "", false, "", err
 	}
 
-	var hex, encodedAddrsPrevs string
-
-	//encodedPrevTxs
+	var hex, encodedPrevsAddrs string
 	tmp := strings.Split(data, ",")
+	//file: hex, prev_address
 	hex = tmp[0]
 	if len(tmp) > 1 {
-		encodedAddrsPrevs = tmp[1]
+		encodedPrevsAddrs = tmp[1]
+	}
+	if encodedPrevsAddrs == "" {
+		//it's required data since Bitcoin core ver17
+		return "", false, "", errors.New("encodedPrevsAddrs must be set in csv file")
 	}
 
-	//署名
-	hexTx, isSigned, newEncodedAddrsPrevs, err := w.signatureByHex(hex, encodedAddrsPrevs, actionType)
+	// sing
+	hexTx, isSigned, newEncodedPrevsAddrs, err := w.sign(hex, encodedPrevsAddrs)
 	if err != nil {
 		return "", isSigned, "", err
 	}
 
-	//ファイルに書き込むデータ
-	savedata := hexTx
+	// hexTx for save data as file
+	saveData := hexTx
 
-	//署名が完了していないとき、TxTypeUnsigned2nd
+	// if sign is not finished because of multisig, TxType is TxTypeUnsigned2nd
 	txType := tx.TxTypeSigned
-	if isSigned == false {
+	if !isSigned {
 		txType = tx.TxTypeUnsigned2nd
-		if newEncodedAddrsPrevs != "" {
-			savedata = fmt.Sprintf("%s,%s", savedata, newEncodedAddrsPrevs)
+		if newEncodedPrevsAddrs != "" {
+			saveData = fmt.Sprintf("%s,%s", saveData, newEncodedPrevsAddrs)
 		}
 	}
 
-	//ファイルに書き込む
+	// write file
 	path := w.txFileRepo.CreateFilePath(actionType, txType, txReceiptID)
-	generatedFileName, err := w.txFileRepo.WriteFile(path, savedata)
+	generatedFileName, err := w.txFileRepo.WriteFile(path, saveData)
 	if err != nil {
 		return "", isSigned, "", err
 	}
@@ -74,113 +75,108 @@ func (w *ColdWallet) SignTx(filePath string) (string, bool, string, error) {
 	return hexTx, isSigned, generatedFileName, nil
 }
 
-// signatureByHex 署名する
-// オフラインで使うことを想定
-func (w *ColdWallet) signatureByHex(hex, encodedAddrsPrevs string, actionType action.ActionType) (string, bool, string, error) {
-	// Hexからトランザクションを取得
+// sign
+// - coin is sent [from] account to [to] account then sernder's privKey(from account) is required
+// - [actionType:receipt]  [from] client [to] receipt, (not multisig addr)
+// - [actionType:payment]  [from] payment [to] unknown, (multisig addr)
+// - [actionType:transfer] [from] from [to] to, (multisig addr)
+// TODO:transfer action is not implemented yet ??
+func (w *ColdWallet) sign(hex, encodedPrevsAddrs string) (string, bool, string, error) {
+	// get tx from hex
 	msgTx, err := w.btc.ToMsgTx(hex)
 	if err != nil {
 		return "", false, "", err
 	}
 
-	// 署名
 	var (
 		signedTx             *wire.MsgTx
 		isSigned             bool
-		addrsPrevs           btc.AddrsPrevTxs
+		prevsAddrs           btc.AddrsPrevTxs
 		accountKeys          []coldrepo.AccountKeyTable
 		wips                 []string
-		newEncodedAddrsPrevs string
+		newEncodedPrevsAddrs string
 	)
 
-	if encodedAddrsPrevs == "" {
-		//Bitcoin coreのバージョン17から、常に必要
-		return "", false, "", errors.New("encodedAddrsPrevs must be set")
-	}
+	// decode encodedPrevsAddrs to prevsAddrs
+	serial.DecodeFromString(encodedPrevsAddrs, &prevsAddrs)
 
-	//decodeする
-	serial.DecodeFromString(encodedAddrsPrevs, &addrsPrevs)
-
-	//WIPs, RedeedScriptを取得
-	//TODO:coldwallet1とcoldwallet2で挙動が違う
-	//TODO:receiptの場合、wipsは不要
-	//coldwallet2の場合、AccountTypeAuthorizationが必要
-	if w.wtype == types.WalletTypeSignature {
-		//account_key_authorizationテーブルから情報を取得
-		accountKey, err := w.storager.GetOneByMaxIDOnAccountKeyTable(account.AccountTypeAuthorization)
-		if err != nil {
-			return "", false, "", errors.Errorf("DB.GetOneByMaxIDOnAccountKeyTable() error: %s", err)
-		}
-		accountKeys = append(accountKeys, *accountKey)
-	} else {
-		//TODO:ActionTypeが`transfer`の場合、AccountのFromから判別しないといけない。。。
-		//=> addrsPrevs.SenderAccount を使うように変更
-		//if val, ok := action.ActionToAccountMap[actionType]; ok {
-		//	//account_key_payment/account_key_clientテーブルから取得
-		//	accountKeys, err = w.DB.GetAllAccountKeyByMultiAddrs(val, addrsPrevs.Addrs)
-		//	if err != nil {
-		//		return "", false, "", errors.Errorf("DB.GetWIPByMultiAddrs() error: %s", err)
-		//	}
-		//} else {
-		//	return "", false, "", errors.New("[Fatal] actionType can not be retrieved. it should be fixed programmatically")
-		//}
-		//account_key_payment/account_key_clientテーブルから取得
-		accountKeys, err = w.storager.GetAllAccountKeyByMultiAddrs(addrsPrevs.SenderAccount, addrsPrevs.Addrs)
+	// get WIPs, RedeedScript
+	// - logic vary between keygen wallet and sign wallet (actually multisig or not)
+	// - sign wallet requires AccountTypeAuthorization
+	// - TODO: wips is not used if action is receipt because client account is not multisig address
+	switch w.wtype {
+	case types.WalletTypeKeyGen:
+		//TODO: if ActionType==`transfer`, address for from account is required
+		// => logic is changed. addrsPrevs.SenderAccount is used for getting sender information
+		// address must be multisig address
+		// get data from account_key_table
+		accountKeys, err = w.storager.GetAllAccountKeyByMultiAddrs(prevsAddrs.SenderAccount, prevsAddrs.Addrs)
 		if err != nil {
 			return "", false, "", errors.Errorf("DB.GetWIPByMultiAddrs() error: %s", err)
 		}
+	case types.WalletTypeSignature:
+		// sign wallet is used from 2nd signature, only multisig address
+		// get data from account_key_authorization table
+		// TODO: client account doesn't have multisig address, so this code could be skipped
+		accountKey, err := w.storager.GetOneByMaxIDOnAccountKeyTable(account.AccountTypeAuthorization)
+		if err != nil {
+			return "", false, "", errors.Wrap(err, "fail to call storager.GetOneByMaxIDOnAccountKeyTable()")
+		}
+		accountKeys = append(accountKeys, *accountKey)
+	default:
+		return "", false, "", errors.Errorf("WalletType is invalid: %s", w.wtype.String())
 	}
 
-	//wip
+	// retrieve WIPs
 	for _, val := range accountKeys {
 		wips = append(wips, val.WalletImportFormat)
 	}
 
-	//multisigの場合のみの処理
-	//accountType, ok := action.ActionToAccountMap[actionType]
-	if account.AccountTypeMultisig[addrsPrevs.SenderAccount] {
-		if w.wtype == types.WalletTypeKeyGen {
-			//取得したredeemScriptをPrevTxsにマッピング
-			for idx, val := range addrsPrevs.Addrs {
+	//if sender account is multisig account
+	if account.AccountTypeMultisig[prevsAddrs.SenderAccount] {
+		switch w.wtype {
+		case types.WalletTypeKeyGen:
+			// mapping redeemScript to PrevTxs
+			for idx, val := range prevsAddrs.Addrs {
 				rs := coldrepo.GetRedeedScriptByAddress(accountKeys, val)
 				if rs == "" {
 					w.logger.Error("redeemScript can not be found")
 					continue
 				}
-				addrsPrevs.PrevTxs[idx].RedeemScript = rs
+				prevsAddrs.PrevTxs[idx].RedeemScript = rs
 			}
-			grok.Value(addrsPrevs)
+			//grok.Value(prevsAddrs)
 
-			//redeemScriptセット後、シリアライズして戻す
-			newEncodedAddrsPrevs, err = serial.EncodeToString(addrsPrevs)
+			// serialize prevsAddrs with redeemScript
+			newEncodedPrevsAddrs, err = serial.EncodeToString(prevsAddrs)
 			if err != nil {
 				return "", false, "", errors.Errorf("serial.EncodeToString(): error: %s", err)
 			}
-		} else {
-			newEncodedAddrsPrevs = encodedAddrsPrevs
+		case types.WalletTypeSignature:
+			newEncodedPrevsAddrs = encodedPrevsAddrs
+		default:
+			return "", false, "", errors.Errorf("WalletType is invalid: %s", w.wtype.String())
 		}
 	}
 
-	//署名
-	//multisigかどうかで判別
-	if account.AccountTypeMultisig[addrsPrevs.SenderAccount] {
-		signedTx, isSigned, err = w.btc.SignRawTransactionWithKey(msgTx, wips, addrsPrevs.PrevTxs)
+	//sign
+	if account.AccountTypeMultisig[prevsAddrs.SenderAccount] {
+		//wips is required
+		signedTx, isSigned, err = w.btc.SignRawTransactionWithKey(msgTx, wips, prevsAddrs.PrevTxs)
 	} else {
-		signedTx, isSigned, err = w.btc.SignRawTransaction(msgTx, addrsPrevs.PrevTxs)
+		signedTx, isSigned, err = w.btc.SignRawTransaction(msgTx, prevsAddrs.PrevTxs)
 	}
-
 	if err != nil {
 		return "", false, "", err
 	}
-	w.logger.Debug(
-		"call btc.SignRawTransaction()",
-		zap.Bool("isSigned", isSigned))
-
 	hexTx, err := w.btc.ToHex(signedTx)
 	if err != nil {
 		return "", false, "", errors.Errorf("w.BTC.ToHex(msgTx): error: %s", err)
 	}
+	w.logger.Debug(
+		"call btc.SignRawTransaction()",
+		zap.String("hexTx", hexTx),
+		zap.Bool("isSigned", isSigned))
 
-	return hexTx, isSigned, newEncodedAddrsPrevs, nil
-
+	return hexTx, isSigned, newEncodedPrevsAddrs, nil
 }
