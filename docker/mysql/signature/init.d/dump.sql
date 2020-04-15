@@ -59,7 +59,7 @@ CREATE TABLE `account_key_client` (
   `wallet_import_format`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'WIF',
   `account`                 VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'アドレスに紐づくアカウント名',
   `idx`                     BIGINT(20) UNSIGNED NOT NULL COMMENT'HDウォレット生成時のindex',
-  `key_status`              tinyint(1) UNSIGNED DEFAULT 0 NOT NULL COMMENT'keyの進捗ステータス',
+  `addr_status`             tinyint(1) UNSIGNED DEFAULT 0 NOT NULL COMMENT'addresssの進捗ステータス',
   `updated_at`              datetime DEFAULT CURRENT_TIMESTAMP COMMENT'更新日時',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_wallet_address` (`wallet_address`),
