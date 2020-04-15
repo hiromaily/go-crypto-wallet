@@ -82,7 +82,10 @@ func (w *Wallet) checkImportedPubKey(addr string) {
 		zap.String("address", addr))
 
 	//`watch only wallet` is expected
+	//TODO: if wallet,keygen,sign is working on only one bitcoin core server,
+	// result would be `iswatchonly=false`
 	if !addrInfo.Iswatchonly {
-		w.logger.Error("this address must be watch only wallet")
+		w.logger.Warn("this address must be watch only wallet")
+		//grok.Value(addrInfo)
 	}
 }
