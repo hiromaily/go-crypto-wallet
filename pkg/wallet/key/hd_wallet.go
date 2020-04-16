@@ -44,6 +44,8 @@ const (
 )
 
 // CoinType creates a separate subtree for every cryptocoin
+//  which come from `CoinType` in go-bitcoin/pkg/wallet/coin/types.go
+
 type CoinType uint32
 
 func (t CoinType) Uint32() uint32 {
@@ -52,14 +54,6 @@ func (t CoinType) Uint32() uint32 {
 
 // coin_type
 // https://github.com/satoshilabs/slips/blob/master/slip-0044.md
-const (
-	CoinTypeBitcoin     CoinType = 0   // Bitcoin
-	CoinTypeTestnet     CoinType = 1   // Testnet (all coins)
-	CoinTypeLitecoin    CoinType = 2   // Litecoin
-	CoinTypeEther       CoinType = 60  // Ether
-	CoinTypeRipple      CoinType = 144 // Ripple
-	CoinTypeBitcoinCash          = 145 // Bitcoin Cash
-)
 
 // Account
 // account come from `AccountType` in go-bitcoin/pkg/account.go
@@ -79,19 +73,21 @@ const (
 
 // Key Key object
 type Key struct {
-	purpose  PurposeType
-	coinType coin.CoinType
-	conf     *chaincfg.Params
-	logger   *zap.Logger
+	purpose      PurposeType
+	coinType     coin.CoinType
+	coinTypeCode coin.CoinTypeCode
+	conf         *chaincfg.Params
+	logger       *zap.Logger
 }
 
 // NewKey returns Key
-func NewKey(purpose PurposeType, coinType coin.CoinType, conf *chaincfg.Params, logger *zap.Logger) *Key {
+func NewKey(purpose PurposeType, coinTypeCode coin.CoinTypeCode, conf *chaincfg.Params, logger *zap.Logger) *Key {
 	keyData := Key{
-		purpose:  purpose,
-		coinType: coinType,
-		conf:     conf,
-		logger:   logger,
+		purpose:      purpose,
+		coinType:     coinTypeCode.CoinType(conf),
+		coinTypeCode: coinTypeCode,
+		conf:         conf,
+		logger:       logger,
 	}
 
 	return &keyData
@@ -120,13 +116,8 @@ func (k Key) createKeyByAccount(seed []byte, actType account.AccountType) (*hdke
 	if err != nil {
 		return nil, nil, err
 	}
-	//CoinType, default is CoinTypeTestnet
-	//TODO: improve more
-	ct := CoinTypeTestnet.Uint32()
-	if k.conf.Name == coin.NetworkTypeMainNet.String() {
-		ct = CoinTypeBitcoin.Uint32()
-	}
-	coinType, err := purpose.Child(hdkeychain.HardenedKeyStart + ct)
+	//CoinType
+	coinType, err := purpose.Child(hdkeychain.HardenedKeyStart + k.coinType.Uint32())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -207,32 +198,10 @@ func (k Key) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxFrom
 			FullPubKey:   getFullPubKey(privateKey, true),
 			RedeemScript: redeemScript,
 		}
-
 		//idxFrom++
 	}
 
 	return walletKeys, nil
-}
-
-// GetExtendedKey for only debug use
-func (k Key) GetExtendedKey(accountPrivateKey string) (*hdkeychain.ExtendedKey, error) {
-	account, err := hdkeychain.NewKeyFromString(accountPrivateKey)
-	if err != nil {
-		return nil, err
-	}
-	// Change
-	change, err := account.Child(uint32(ChangeTypeExternal))
-	if err != nil {
-		return nil, err
-	}
-
-	child, err := change.Child(0)
-	if err != nil {
-		return nil, err
-	}
-
-	// extendedKey
-	return child, nil
 }
 
 // BTC/BCHのaddress P2PKHを返す
@@ -248,7 +217,7 @@ func (k Key) addressString(privKey *btcec.PrivateKey) (string, error) {
 		return "", errors.Errorf("btcutil.NewAddressPubKeyHash() error: %s", err)
 	}
 
-	if k.coinType == coin.BTC {
+	if k.coinTypeCode == coin.BTC {
 		//BTC
 		return addr.String(), nil
 	}
@@ -294,7 +263,7 @@ func (k Key) getP2shSegwit(privKey *btcec.PrivateKey) (string, string, error) {
 	var strRedeemScript string //暫定
 
 	//BTC
-	if k.coinType == coin.BTC {
+	if k.coinTypeCode == coin.BTC {
 		address, err := btcutil.NewAddressScriptHash(redeemScript, k.conf)
 		if err != nil {
 			return "", "", errors.Errorf("btcutil.NewAddressScriptHash() error: %s", err)
@@ -332,4 +301,25 @@ func getFullPubKey(privKey *btcec.PrivateKey, isCompressed bool) string {
 	//pubKey, _ := btcec.ParsePubKey(bHexPubKey, btcec.S256())
 
 	return hexPubKey
+}
+
+// GetExtendedKey for only debug use
+func GetExtendedKey(accountPrivateKey string) (*hdkeychain.ExtendedKey, error) {
+	account, err := hdkeychain.NewKeyFromString(accountPrivateKey)
+	if err != nil {
+		return nil, err
+	}
+	// Change
+	change, err := account.Child(ChangeTypeExternal.Uint32())
+	if err != nil {
+		return nil, err
+	}
+
+	child, err := change.Child(0)
+	if err != nil {
+		return nil, err
+	}
+
+	// extendedKey
+	return child, nil
 }

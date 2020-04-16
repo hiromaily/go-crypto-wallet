@@ -45,10 +45,10 @@ type Bitcoiner interface {
 	ConfirmationBlock() int
 	FeeRangeMax() float64
 	FeeRangeMin() float64
-	SetVersion(ver coin.BTCVersion)
+	//SetVersion(ver coin.BTCVersion)
 	Version() coin.BTCVersion
-	SetCoinType(coinType coin.CoinType)
-	CoinType() coin.CoinType
+	//SetCoinTypeCode(coinType coin.CoinTypeCode)
+	CoinTypeCode() coin.CoinTypeCode
 
 	//fee.go
 	EstimateSmartFee() (float64, error)

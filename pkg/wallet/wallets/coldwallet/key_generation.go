@@ -79,7 +79,7 @@ func (w *ColdWallet) retrieveSeed() ([]byte, error) {
 // TODO: if account is AccountTypeAuthorization and there is already record, it should stop creation
 func (w *ColdWallet) GeneratePubKey(
 	accountType account.AccountType,
-	coinType coin.CoinType,
+	coinTypeCode coin.CoinTypeCode,
 	seed []byte, count uint32) ([]key.WalletKey, error) {
 
 	//get latest index
@@ -91,7 +91,7 @@ func (w *ColdWallet) GeneratePubKey(
 	}
 
 	// generate hd wallet key
-	walletKeys, err := w.generateHDKey(accountType, coinType, seed, uint32(idxFrom), count)
+	walletKeys, err := w.generateHDKey(accountType, coinTypeCode, seed, uint32(idxFrom), count)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call key.generateAccountKeyData()")
 	}
@@ -121,14 +121,14 @@ func (w *ColdWallet) GeneratePubKey(
 
 func (w *ColdWallet) generateHDKey(
 	accountType account.AccountType,
-	coinType coin.CoinType,
+	coinTypeCode coin.CoinTypeCode,
 	seed []byte,
 	idxFrom,
 	count uint32) ([]key.WalletKey, error) {
 
 	// key object
 	//TODO: interface and repository
-	keyData := key.NewKey(key.PurposeTypeBIP44, coinType, w.btc.GetChainConf(), w.logger)
+	keyData := key.NewKey(key.PurposeTypeBIP44, coinTypeCode, w.btc.GetChainConf(), w.logger)
 
 	// generate key
 	walletKeys, err := keyData.CreateKey(seed, accountType, idxFrom, count)

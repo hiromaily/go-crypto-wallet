@@ -49,5 +49,4 @@ func TestValidateTxType(t *testing.T) {
 			}
 		})
 	}
-
 }

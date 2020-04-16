@@ -17,13 +17,13 @@ import (
 
 // Config root config
 type Config struct {
-	CoinType   coin.CoinType `toml:"coin_type" validate:"oneof=btc bch"`
-	Bitcoin    Bitcoin       `toml:"bitcoin"`
-	Logger     Logger        `toml:"logger"`
-	Tracer     Tracer        `toml:"tracer"`
-	MySQL      MySQL         `toml:"mysql"`
-	TxFile     TxFile        `toml:"tx_file"`
-	PubkeyFile PubKeyFile    `toml:"pubkey_file"`
+	CoinTypeCode coin.CoinTypeCode `toml:"coin_type" validate:"oneof=btc bch"`
+	Bitcoin      Bitcoin           `toml:"bitcoin"`
+	Logger       Logger            `toml:"logger"`
+	Tracer       Tracer            `toml:"tracer"`
+	MySQL        MySQL             `toml:"mysql"`
+	TxFile       TxFile            `toml:"tx_file"`
+	PubkeyFile   PubKeyFile        `toml:"pubkey_file"`
 }
 
 // Bitcoin Bitcoin information

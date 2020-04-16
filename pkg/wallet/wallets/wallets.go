@@ -49,7 +49,7 @@ type Coldwalleter interface {
 type KeySigner interface {
 	GenerateSeed() ([]byte, error)
 	StoreSeed(strSeed string) ([]byte, error)
-	GeneratePubKey(accountType account.AccountType, coinType coin.CoinType, seed []byte, count uint32) ([]key.WalletKey, error)
+	GeneratePubKey(accountType account.AccountType, coinTypeCode coin.CoinTypeCode, seed []byte, count uint32) ([]key.WalletKey, error)
 	ImportPrivateKey(accountType account.AccountType) error
 	SignTx(filePath string) (string, bool, string, error)
 }

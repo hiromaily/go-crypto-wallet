@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/btcsuite/btcd/rpcclient"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/jmoiron/sqlx"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
@@ -32,6 +33,7 @@ type registry struct {
 	mysqlClient *sqlx.DB
 	logger      *zap.Logger
 	rpcClient   *rpcclient.Client
+	btc         api.Bitcoiner
 	walletType  types.WalletType
 }
 
@@ -50,6 +52,7 @@ func (r *registry) NewKeygener() wallets.Keygener {
 		r.newLogger(),
 		r.newTracer(),
 		r.newStorager(),
+		r.newKeyGenerator(),
 		r.newAddressFileStorager(),
 		r.newTxFileStorager(),
 		r.walletType,
@@ -68,11 +71,14 @@ func (r *registry) newRPCClient() *rpcclient.Client {
 }
 
 func (r *registry) newBTC() api.Bitcoiner {
-	bit, err := api.NewBitcoin(r.newRPCClient(), &r.conf.Bitcoin, r.newLogger(), r.conf.CoinType)
-	if err != nil {
-		panic(err)
+	var err error
+	if r.btc == nil{
+		r.btc, err = api.NewBitcoin(r.newRPCClient(), &r.conf.Bitcoin, r.newLogger(), r.conf.CoinTypeCode)
+		if err != nil {
+			panic(err)
+		}
 	}
-	return bit
+	return r.btc
 }
 
 func (r *registry) newLogger() *zap.Logger {
@@ -94,6 +100,14 @@ func (r *registry) newStorager() rdb.ColdStorager {
 		r.newMySQLClient(),
 		r.newLogger(),
 	)
+}
+
+func (r *registry) newKeyGenerator() key.Generator{
+	return key.NewKey(
+		key.PurposeTypeBIP44,
+		r.conf.CoinTypeCode,
+		r.newBTC().GetChainConf(),
+		r.newLogger())
 }
 
 func (r *registry) newMySQLClient() *sqlx.DB {

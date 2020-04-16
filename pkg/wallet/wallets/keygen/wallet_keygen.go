@@ -1,6 +1,7 @@
 package keygen
 
 import (
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 
@@ -9,23 +10,6 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
-//// Keygener is for keygen wallet service interface
-//type Keygener interface {
-//	coldwallet.KeySigner
-//
-//	KeygenExclusiver
-//
-//	Done()
-//	GetDB() rdb.KeygenStorager
-//	GetBTC() api.Bitcoiner
-//	GetType() types.WalletType
-//}
-//
-//type KeygenExclusiver interface {
-//	ExportAccountKey(accountType account.AccountType, addrStatus keystatus.AddrStatus) (string, error)
-//	ImportMultisigAddress(fileName string, accountType account.AccountType) error
-//}
-
 // Keygen keygen wallet object
 //  it is almost same to Wallet object, difference is storager interface
 type Keygen struct {
@@ -33,6 +17,7 @@ type Keygen struct {
 	logger   *zap.Logger
 	tracer   opentracing.Tracer
 	storager rdb.ColdStorager
+	keyGenerator key.Generator
 	wtype    types.WalletType
 }
 
@@ -42,6 +27,7 @@ func NewKeygen(
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
 	storager rdb.ColdStorager,
+	keyGenerator key.Generator,
 	wtype types.WalletType) *Keygen {
 
 	return &Keygen{
@@ -49,6 +35,7 @@ func NewKeygen(
 		logger:   logger,
 		tracer:   tracer,
 		storager: storager,
+		keyGenerator: keyGenerator,
 		wtype:    wtype,
 	}
 }

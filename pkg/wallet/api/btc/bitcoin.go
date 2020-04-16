@@ -15,10 +15,10 @@ import (
 type Bitcoin struct {
 	client            *rpcclient.Client
 	chainConf         *chaincfg.Params
+	coinTypeCode      coin.CoinTypeCode //btc
+	version           coin.BTCVersion   //179900
 	confirmationBlock int
 	feeRange          FeeAdjustmentRate
-	version           coin.BTCVersion //179900
-	coinType          coin.CoinType   //btc
 	logger            *zap.Logger
 }
 
@@ -29,18 +29,26 @@ type FeeAdjustmentRate struct {
 }
 
 // NewBitcoin creates bitcoin object
-func NewBitcoin(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logger) (*Bitcoin, error) {
+func NewBitcoin(
+	client *rpcclient.Client,
+	coinTypeCode coin.CoinTypeCode,
+	conf *config.Bitcoin,
+	logger *zap.Logger) (*Bitcoin, error) {
+
 	bit := Bitcoin{
 		client: client,
 		logger: logger,
 	}
+
+	bit.coinTypeCode = coinTypeCode
+
 	switch conf.NetworkType {
 	case coin.NetworkTypeMainNet:
 		bit.chainConf = &chaincfg.MainNetParams
 	case coin.NetworkTypeTestNet3:
 		bit.chainConf = &chaincfg.TestNet3Params
 	case coin.NetworkTypeRegTestNet:
-		bit.chainConf = &chaincfg.TestNet3Params
+		bit.chainConf = &chaincfg.RegressionNetParams
 	default:
 		return nil, errors.Errorf("bitcoin network type is invalid in config")
 	}
@@ -53,11 +61,8 @@ func NewBitcoin(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logg
 	if coin.RequiredVersion > netInfo.Version {
 		return nil, errors.Errorf("bitcoin core version should be %d +, but version %d is detected", coin.RequiredVersion, netInfo.Version)
 	}
-
 	bit.version = netInfo.Version
 	bit.logger.Info("bitcoin rpc server", zap.Int("version", netInfo.Version.Int()))
-
-	bit.coinType = coin.BTC
 
 	bit.confirmationBlock = conf.Block.ConfirmationNum
 	bit.feeRange.max = conf.Fee.AdjustmentMax
@@ -106,22 +111,22 @@ func (b *Bitcoin) FeeRangeMin() float64 {
 	return b.feeRange.min
 }
 
-// SetVersion バージョン情報をセットする
-func (b *Bitcoin) SetVersion(ver coin.BTCVersion) {
-	b.version = ver
-}
+// SetVersion set version
+//func (b *Bitcoin) SetVersion(ver coin.BTCVersion) {
+//	b.version = ver
+//}
 
-// Version bitcoin coreのバージョンを返す
+// Version returns core version
 func (b *Bitcoin) Version() coin.BTCVersion {
 	return b.version
 }
 
-// SetCoinType CoinTypeをセットする
-func (b *Bitcoin) SetCoinType(coinType coin.CoinType) {
-	b.coinType = coinType
-}
+// SetCoinTypeCode set CoinTypeCode
+//func (b *Bitcoin) SetCoinTypeCode(coinTypeCode coin.CoinTypeCode) {
+//	b.coinTypeCode = coinTypeCode
+//}
 
-// CoinType Bitcoinの種別(btc, bch)を返す
-func (b *Bitcoin) CoinType() coin.CoinType {
-	return b.coinType
+// CoinTypeCode returns CoinTypeCOde
+func (b *Bitcoin) CoinTypeCode() coin.CoinTypeCode {
+	return b.coinTypeCode
 }

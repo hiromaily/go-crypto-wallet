@@ -1,33 +1,67 @@
 package coin
 
+import "github.com/btcsuite/btcd/chaincfg"
+
 //----------------------------------------------------
 // CoinType
 //----------------------------------------------------
+// CoinType creates a separate subtree for every cryptocoin
+type CoinType uint32
 
-//CoinType Bitcoin種別(CayenneWalletで取引するcoinの種別)
-type CoinType string
-
-// coin_type
-const (
-	BTC CoinType = "btc"
-	BCH CoinType = "bch"
-	//ETH CoinType = "eth"
-)
-
-//CoinTypeValue coin_typeの値
-var CoinTypeValue = map[CoinType]uint8{
-	BTC: 1,
-	BCH: 2,
-	//ETH: 3,
+func (c CoinType) Uint32() uint32 {
+	return uint32(c)
 }
 
-func (c CoinType) String() string {
+// coin_type
+// https://github.com/satoshilabs/slips/blob/master/slip-0044.md
+const (
+	CoinTypeBitcoin     CoinType = 0   // Bitcoin
+	CoinTypeTestnet     CoinType = 1   // Testnet (all coins)
+	CoinTypeLitecoin    CoinType = 2   // Litecoin
+	CoinTypeEther       CoinType = 60  // Ether
+	CoinTypeRipple      CoinType = 144 // Ripple
+	CoinTypeBitcoinCash          = 145 // Bitcoin Cash
+)
+
+//CoinTypeCode coin type
+type CoinTypeCode string
+
+// coin_type_code
+const (
+	BTC CoinTypeCode = "btc"
+	BCH CoinTypeCode = "bch"
+	LTC CoinTypeCode = "ltc"
+	ETH CoinTypeCode = "eth"
+	XRP CoinTypeCode = "xrp"
+)
+
+func (c CoinTypeCode) String() string {
 	return string(c)
 }
 
-// ValidateBitcoinType BitcoinTypeのバリデーションを行う
-func ValidateBitcoinType(val string) bool {
-	if _, ok := CoinTypeValue[CoinType(val)]; ok {
+func (c CoinTypeCode) CoinType(conf *chaincfg.Params) CoinType {
+	if conf.Name != NetworkTypeMainNet.String() {
+		return CoinTypeTestnet
+	}
+	if coinType, ok := CoinTypeCodeValue[c]; ok {
+		return coinType
+	}
+	// coinType could not found
+	return CoinTypeTestnet
+}
+
+//CoinTypeValue value
+var CoinTypeCodeValue = map[CoinTypeCode]CoinType{
+	BTC: CoinTypeBitcoin,
+	BCH: CoinTypeBitcoinCash,
+	LTC: CoinTypeLitecoin,
+	ETH: CoinTypeEther,
+	XRP: CoinTypeRipple,
+}
+
+// ValidateCoinTypeCode validate
+func ValidateCoinTypeCode(val string) bool {
+	if _, ok := CoinTypeCodeValue[CoinTypeCode(val)]; ok {
 		return true
 	}
 	return false
@@ -37,10 +71,10 @@ func ValidateBitcoinType(val string) bool {
 // BTCVersion
 //----------------------------------------------------
 
-//BTCVersion 実行環境
+//BTCVersion version
 type BTCVersion int
 
-// environment
+// expected version
 const (
 	BTCVer17 BTCVersion = 170000
 	BTCVer18 BTCVersion = 180000
@@ -57,7 +91,7 @@ const RequiredVersion = BTCVer19
 // NetworkType
 //----------------------------------------------------
 
-//NetworkType ネットワーク種別
+//NetworkType network type
 type NetworkType string
 
 // network type

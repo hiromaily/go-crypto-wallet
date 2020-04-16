@@ -20,30 +20,20 @@ type BitcoinCash struct {
 }
 
 // NewBitcoinCash BitcoinCashオブジェクトを返す
-func NewBitcoinCash(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logger) (*BitcoinCash, error) {
+func NewBitcoinCash(
+	client *rpcclient.Client,
+	coinTypeCode coin.CoinTypeCode,
+	conf *config.Bitcoin,
+	logger *zap.Logger) (*BitcoinCash, error) {
+
 	//bitcoin base
-	bit, err := btc.NewBitcoin(client, conf, logger)
+	bit, err := btc.NewBitcoin(client, coinTypeCode, conf, logger)
 	if err != nil {
 		return nil, errors.Errorf("btc.NewBitcoin() error: %s", err)
 	}
 
 	bitc := BitcoinCash{Bitcoin: *bit}
-	//if conf.IsMain {
-	//	bitc.SetChainConf(&chaincfg.MainNetParams)
-	//} else {
-	//	bitc.SetChainConf(&chaincfg.TestNet3Params)
-	//}
 	bitc.initChainParams()
-
-	//Bitcoinのバージョンを入れておく
-	//netInfo, err := bitc.GetNetworkInfo()
-	//if err != nil {
-	//	return nil, errors.Errorf("bit.GetNetworkInfo() error: %s", err)
-	//}
-	//bitc.SetVersion(netInfo.Version)
-	//logger.Infof("bitcoin server version: %d", netInfo.Version)
-
-	bitc.SetCoinType(coin.BCH)
 
 	return &bitc, nil
 }

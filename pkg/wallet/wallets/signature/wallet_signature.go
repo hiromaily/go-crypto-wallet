@@ -1,6 +1,7 @@
 package signature
 
 import (
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 
@@ -9,24 +10,6 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
-//// Signer is for signature wallet service interface
-//type Signer interface {
-//	coldwallet.KeySigner
-//
-//	SignatureExclusiver
-//
-//	Done()
-//	GetDB() rdb.SignatureStorager
-//	GetBTC() api.Bitcoiner
-//	GetType() types.WalletType
-//}
-//
-//type SignatureExclusiver interface {
-//	ImportPubKeyForColdWallet2(fileName string, accountType account.AccountType) error
-//	AddMultisigAddress(accountType account.AccountType, addressType ctype.AddrType) error
-//	ExportAddedPubkeyHistory(accountType account.AccountType) (string, error)
-//}
-
 // Signature signature wallet object
 //  it is almost same to Wallet object, difference is storager interface
 type Signature struct {
@@ -34,6 +17,7 @@ type Signature struct {
 	logger   *zap.Logger
 	tracer   opentracing.Tracer
 	storager rdb.ColdStorager
+	keyGenerator key.Generator
 	wtype    types.WalletType
 }
 
@@ -43,6 +27,7 @@ func NewSignature(
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
 	storager rdb.ColdStorager,
+	keyGenerator key.Generator,
 	wtype types.WalletType) *Signature {
 
 	return &Signature{
@@ -50,6 +35,7 @@ func NewSignature(
 		logger:   logger,
 		tracer:   tracer,
 		storager: storager,
+		keyGenerator: keyGenerator,
 		wtype:    wtype,
 	}
 }
