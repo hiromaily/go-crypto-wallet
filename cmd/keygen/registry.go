@@ -103,7 +103,7 @@ func (r *registry) newStorager() rdb.ColdStorager {
 }
 
 func (r *registry) newKeyGenerator() key.Generator {
-	return key.NewKey(
+	return key.NewHDKey(
 		key.PurposeTypeBIP44,
 		r.conf.CoinTypeCode,
 		r.newBTC().GetChainConf(),

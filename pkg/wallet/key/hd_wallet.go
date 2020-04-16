@@ -71,8 +71,8 @@ const (
 	ChangeTypeInternal ChangeType = 1 // constant 1 for internal chain (also known as change addresses)
 )
 
-// Key Key object
-type Key struct {
+// HDKey HD Wallet Key object
+type HDKey struct {
 	purpose      PurposeType
 	coinType     coin.CoinType
 	coinTypeCode coin.CoinTypeCode
@@ -81,8 +81,8 @@ type Key struct {
 }
 
 // NewKey returns Key
-func NewKey(purpose PurposeType, coinTypeCode coin.CoinTypeCode, conf *chaincfg.Params, logger *zap.Logger) *Key {
-	keyData := Key{
+func NewHDKey(purpose PurposeType, coinTypeCode coin.CoinTypeCode, conf *chaincfg.Params, logger *zap.Logger) *HDKey {
+	keyData := HDKey{
 		purpose:      purpose,
 		coinType:     coinTypeCode.CoinType(conf),
 		coinTypeCode: coinTypeCode,
@@ -93,7 +93,7 @@ func NewKey(purpose PurposeType, coinTypeCode coin.CoinTypeCode, conf *chaincfg.
 	return &keyData
 }
 
-func (k Key) CreateKey(seed []byte, actType account.AccountType, idxFrom, count uint32) ([]WalletKey, error) {
+func (k *HDKey) CreateKey(seed []byte, actType account.AccountType, idxFrom, count uint32) ([]WalletKey, error) {
 	// create privateKey, publicKey by account level
 	privKey, _, err := k.createKeyByAccount(seed, actType)
 	if err != nil {
@@ -104,7 +104,7 @@ func (k Key) CreateKey(seed []byte, actType account.AccountType, idxFrom, count 
 }
 
 // createKeyByAccount create privateKey, publicKey by account level
-func (k Key) createKeyByAccount(seed []byte, actType account.AccountType) (*hdkeychain.ExtendedKey, *hdkeychain.ExtendedKey, error) {
+func (k *HDKey) createKeyByAccount(seed []byte, actType account.AccountType) (*hdkeychain.ExtendedKey, *hdkeychain.ExtendedKey, error) {
 
 	//Master
 	masterKey, err := hdkeychain.NewMaster(seed, k.conf)
@@ -143,7 +143,7 @@ func (k Key) createKeyByAccount(seed []byte, actType account.AccountType) (*hdke
 // createKeysWithIndex create keys by index and count
 // e.g. - idxFrom:0,  count 10 => 0-9
 //      - idxFrom:10, count 10 => 10-19
-func (k Key) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxFrom, count uint32) ([]WalletKey, error) {
+func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxFrom, count uint32) ([]WalletKey, error) {
 	//accountPrivKey, err := hdkeychain.NewKeyFromString(accountPrivKey)
 
 	// Change
@@ -166,122 +166,118 @@ func (k Key) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxFrom
 			return nil, err
 		}
 
-		// full public Key
-		//getFullPubKey(privateKey)
-
 		// WIF　(compressed: true) => bitcoin core expresses compressed address
 		wif, err := btcutil.NewWIF(privateKey, k.conf, true)
 		if err != nil {
 			return nil, err
 		}
 
-		// Address(P2PKH) BTC/BCH
-		strAddr, err := k.addressString(privateKey)
+		// get P2PKH address as string for BTC/BCH
+		//if only BTC, this logic would be enough
+		//address, err := child.Address(conf)
+		//address.String()
+		strP2PKHAddr, err := k.getP2pkhAddr(privateKey)
 		if err != nil {
 			return nil, err
 		}
 
-		// p2sh-segwit
-		p2shSegwit, redeemScript, err := k.getP2shSegwit(privateKey)
+		// p2sh-segwit address
+		p2shSegwit, redeemScript, err := k.getP2shSegwitAddr(privateKey)
 		if err != nil {
 			return nil, err
 		}
-		if redeemScript != "" {
-			k.logger.Debug("result of getP2shSegwit()", zap.String("redeemScript", redeemScript))
-		}
 
-		//address.String() とaddress.EncodeAddress()は結果として同じ
+		// address.String() is equal to address.EncodeAddress()
 		walletKeys[i] = WalletKey{
 			WIF:          wif.String(),
-			Address:      strAddr, //[P2PKH]AddressPubKeyHash is an Address for a pay-to-pubkey-hash
+			Address:      strP2PKHAddr, //[P2PKH]AddressPubKeyHash is an Address for a pay-to-pubkey-hash
 			P2shSegwit:   p2shSegwit,
 			FullPubKey:   getFullPubKey(privateKey, true),
 			RedeemScript: redeemScript,
 		}
-		//idxFrom++
 	}
 
 	return walletKeys, nil
 }
 
-// BTC/BCHのaddress P2PKHを返す
-//  address, err := child.Address(conf)
-//  address.String() と同じ結果を返す
-func (k Key) addressString(privKey *btcec.PrivateKey) (string, error) {
-	serializedKey := privKey.PubKey().SerializeCompressed()
-	pkHash := btcutil.Hash160(serializedKey)
+// get Address(P2PKH) as string for BTC/BCH
+func (k *HDKey) getP2pkhAddr(privKey *btcec.PrivateKey) (string, error) {
+	serializedPubKey := privKey.PubKey().SerializeCompressed()
+	pkHash := btcutil.Hash160(serializedPubKey)
 
 	//*btcutil.AddressPubKeyHash
-	addr, err := btcutil.NewAddressPubKeyHash(pkHash, k.conf)
+	p2PKHAddr, err := btcutil.NewAddressPubKeyHash(pkHash, k.conf)
 	if err != nil {
-		return "", errors.Errorf("btcutil.NewAddressPubKeyHash() error: %s", err)
+		return "", errors.Wrapf(err, "fail to call btcutil.NewAddressPubKeyHash()")
 	}
 
-	if k.coinTypeCode == coin.BTC {
-		//BTC
-		return addr.String(), nil
+	switch k.coinTypeCode {
+	case coin.BTC:
+		return p2PKHAddr.String(), nil
+	case coin.BCH:
+		k.getP2PKHAddrBCH(p2PKHAddr)
 	}
+	return "", errors.Errorf("getP2pkhAddr() is not implemented for %s", k.coinTypeCode)
+}
 
-	//BCH *bchutil.CashAddressPubKeyHash
-	//return bchutil.NewCashAddressPubKeyHash(pkHash, k.conf)
-	addrBCH, err := bchutil.NewCashAddressPubKeyHash(addr.ScriptAddress(), k.conf)
+// BCH *bchutil.CashAddressPubKeyHash
+func (k *HDKey) getP2PKHAddrBCH(p2PKHAddr *btcutil.AddressPubKeyHash) (string, error) {
+	addrBCH, err := bchutil.NewCashAddressPubKeyHash(p2PKHAddr.ScriptAddress(), k.conf)
 	if err != nil {
-		return "", errors.Errorf("btcutil.NewAddressPubKeyHash() error: %s", err)
+		return "", errors.Wrap(err, "fail to call btcutil.NewAddressPubKeyHash()")
 	}
 
-	//prefixを取得
+	// get prefix
 	prefix, ok := bchutil.Prefixes[k.conf.Name]
 	if !ok {
-		return "", errors.New("[fatal error] chainConf *chaincfg.Params is wrong")
+		return "", errors.Errorf("invalid BCH *chaincfg : %s", k.conf.Name)
 	}
-
 	return fmt.Sprintf("%s:%s", prefix, addrBCH.String()), nil
 }
 
-// p2sh-segwitと、redeemScriptのstringとを返す
-// BCHは利用する予定はないが、念の為
-//func (k Key) getP2shSegwit(privKey *btcec.PrivateKey) (*btcutil.AddressScriptHash, error) {
-func (k Key) getP2shSegwit(privKey *btcec.PrivateKey) (string, string, error) {
+// FIXME: getting RedeemScript is not fixed yet
+// get p2sh-segwit address and redeemScript as string
+//  - it's for only BTC
+//  - Though BCH would not require it, just in case
+func (k *HDKey) getP2shSegwitAddr(privKey *btcec.PrivateKey) (string, string, error) {
 	// []byte
-	publicKeyHash := btcutil.Hash160(privKey.PubKey().SerializeCompressed())
-	segwitAddress, err := btcutil.NewAddressWitnessPubKeyHash(publicKeyHash, k.conf)
+	pubKeyHash := btcutil.Hash160(privKey.PubKey().SerializeCompressed())
+	segwitAddress, err := btcutil.NewAddressWitnessPubKeyHash(pubKeyHash, k.conf)
 	if err != nil {
-		return "", "", errors.Errorf("btcutil.NewAddressWitnessPubKeyHash() error: %s", err)
-	}
-	//logger.Debugf("segwitAddress: %s", segwitAddress)
-
-	redeemScript, err := txscript.PayToAddrScript(segwitAddress)
-	if err != nil {
-		return "", "", errors.Errorf("txscript.PayToAddrScript() error: %s", err)
+		return "", "", errors.Wrap(err, "fail to call btcutil.NewAddressWitnessPubKeyHash()")
 	}
 
-	//この値はscriptPubKeyと一致するが、これはredeemScriptではない。
-	//getaddressinfo APIでp2sh_segwit_addressをサーチすると、embedded側のscriptPubKeyと一致した
-	//よって、この値は使えない。。。
-	//Redeem Script => Hash of RedeemScript => p2SH ScriptPubKey
-	//strRedeemScript := hex.EncodeToString(redeemScript)
-	var strRedeemScript string //暫定
+	//FIXME: getting RedeemScript is not fixed yet
+	// get redeemScript
+	payToAddrScript, err := txscript.PayToAddrScript(segwitAddress)
+	if err != nil {
+		return "", "", errors.Wrap(err, "fail to call txscript.PayToAddrScript()")
+	}
 
-	//BTC
-	if k.coinTypeCode == coin.BTC {
-		address, err := btcutil.NewAddressScriptHash(redeemScript, k.conf)
+	// value of payToAddrScript is equal to scriptPubKey, but it's not redeemScript
+	// if call `getaddressinfo` API, result includes this value as scriptPubKey in embedded in p2sh_segwit_address
+	// That's why payToAddrScript is not used as redeemScript
+	// Redeem Script => Hash of RedeemScript => p2SH ScriptPubKey
+
+	var strRedeemScript string //FIXME: not implemented yet
+	switch k.coinTypeCode {
+	case coin.BTC:
+		address, err := btcutil.NewAddressScriptHash(payToAddrScript, k.conf)
 		if err != nil {
-			return "", "", errors.Errorf("btcutil.NewAddressScriptHash() error: %s", err)
+			return "", "", errors.Wrap(err, "fail to call btcutil.NewAddressScriptHash()")
 		}
-		//logger.Debugf("address.String() %s", address.String())
-
+		return address.String(), strRedeemScript, nil
+	case coin.BCH:
+		address, err := bchutil.NewCashAddressScriptHash(payToAddrScript, k.conf)
+		if err != nil {
+			return "", "", errors.Wrap(err, "fail to call bchutil.NewCashAddressScriptHash()")
+		}
 		return address.String(), strRedeemScript, nil
 	}
-	//BCH
-	address, err := bchutil.NewCashAddressScriptHash(redeemScript, k.conf)
-	if err != nil {
-		return "", "", errors.Errorf("bchutil.NewCashAddressScriptHash() error: %s", err)
-	}
-	//logger.Debugf("address.String() %s", address.String())
-	return address.String(), strRedeemScript, nil
+	return "", "", errors.Errorf("getP2shSegwitAddr() is not implemented yet for %s", k.coinTypeCode)
 }
 
-// getPubKey fullのPublic Keyを返す
+// getPubKey returns full Public Key
 func getFullPubKey(privKey *btcec.PrivateKey, isCompressed bool) string {
 	var bPubKey []byte
 	if isCompressed {
@@ -291,35 +287,6 @@ func getFullPubKey(privKey *btcec.PrivateKey, isCompressed bool) string {
 		//Uncompressed
 		bPubKey = privKey.PubKey().SerializeUncompressed()
 	}
-	//logger.Debugf("bPubKey hash: %s", btcutil.Hash160(bPubKey))
-
 	hexPubKey := hex.EncodeToString(bPubKey)
-	//logger.Debugf("hex.EncodeToString(bPubKey): %s", hexPubKey)
-
-	//key *PublicKey
-	//bHexPubKey, _ := hex.DecodeString(hexPubKey)
-	//pubKey, _ := btcec.ParsePubKey(bHexPubKey, btcec.S256())
-
 	return hexPubKey
-}
-
-// GetExtendedKey for only debug use
-func GetExtendedKey(accountPrivateKey string) (*hdkeychain.ExtendedKey, error) {
-	account, err := hdkeychain.NewKeyFromString(accountPrivateKey)
-	if err != nil {
-		return nil, err
-	}
-	// Change
-	change, err := account.Child(ChangeTypeExternal.Uint32())
-	if err != nil {
-		return nil, err
-	}
-
-	child, err := change.Child(0)
-	if err != nil {
-		return nil, err
-	}
-
-	// extendedKey
-	return child, nil
 }

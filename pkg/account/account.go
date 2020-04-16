@@ -68,9 +68,9 @@ var AccountTypeValue = map[AccountType]uint32{
 	AccountTypeClient:        0,
 	AccountTypeReceipt:       1,
 	AccountTypePayment:       2,
-	AccountTypeFee:           4,
-	AccountTypeStored:        5,
-	AccountTypeAuthorization: 6,
+	AccountTypeFee:           3,
+	AccountTypeStored:        4,
+	AccountTypeAuthorization: 5,
 }
 
 //AccountTypeMultisig true: account type is for multisig address
@@ -78,7 +78,6 @@ var AccountTypeMultisig = map[AccountType]bool{
 	AccountTypeClient:        false,
 	AccountTypeReceipt:       true,
 	AccountTypePayment:       true,
-	AccountTypeQuoine:        true,
 	AccountTypeFee:           true,
 	AccountTypeStored:        true,
 	AccountTypeAuthorization: false,

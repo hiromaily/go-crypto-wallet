@@ -19,7 +19,6 @@ func EncodeToString(data interface{}) (string, error) {
 
 // DecodeFromString is binary decoder
 func DecodeFromString(str string, data interface{}) error {
-	//u := User{}
 	by, err := base64.StdEncoding.DecodeString(str)
 	if err != nil {
 		return err
