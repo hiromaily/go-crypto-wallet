@@ -10,7 +10,7 @@ import (
 	_import "github.com/hiromaily/go-bitcoin/pkg/command/wallet/import"
 	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/monitor"
 	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/send"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
 func WalletSubCommands(wallet wallets.Walleter, version string) map[string]cli.CommandFactory {

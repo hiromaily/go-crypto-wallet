@@ -11,8 +11,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/command"
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen"
 	"github.com/hiromaily/go-bitcoin/pkg/config"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
 // keygen wallet as cold wallet

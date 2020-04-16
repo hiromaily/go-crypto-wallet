@@ -7,8 +7,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/coin"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
 //TODO:

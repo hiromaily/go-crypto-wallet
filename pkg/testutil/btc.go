@@ -7,9 +7,9 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/coin"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
 var bc api.Bitcoiner

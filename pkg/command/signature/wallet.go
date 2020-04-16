@@ -9,7 +9,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/command/signature/export"
 	_import "github.com/hiromaily/go-bitcoin/pkg/command/signature/import"
 	"github.com/hiromaily/go-bitcoin/pkg/command/signature/sign"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
 func WalletSubCommands(wallet wallets.Signer, version string) map[string]cli.CommandFactory {

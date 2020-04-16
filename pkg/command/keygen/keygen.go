@@ -8,7 +8,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/export"
 	_import "github.com/hiromaily/go-bitcoin/pkg/command/keygen/import"
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/sign"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
 func WalletSubCommands(wallet wallets.Keygener, version string) map[string]cli.CommandFactory {

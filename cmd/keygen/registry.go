@@ -16,10 +16,10 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 
 	//"github.com/hiromaily/go-bitcoin/pkg/txfile"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/coldwallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwallet"
 )
 
 // Registry is for registry interface
