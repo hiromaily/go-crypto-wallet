@@ -26,9 +26,9 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, addrStatu
 	}
 
 	//Note: condition of data in database at keygen wallet
-	// - account: client, key_status==1, isMultisig==false then export address for `wallet_address`
-	// - acccunt: others, key_status==1, isMultisig==false then export address for `full_public_key`
-	// - account: others, key_status==3, isMultisig==true then export address for `wallet_multisig_address`
+	// - account: client, addr_status==1, isMultisig==false then export address for `wallet_address`
+	// - acccunt: others, addr_status==1, isMultisig==false then export address for `full_public_key`
+	// - account: others, addr_status==3, isMultisig==true then export address for `wallet_multisig_address`
 
 	// exptected key status for update
 	updateAddrStatus := getAddrStatus(addrStatus, accountType)

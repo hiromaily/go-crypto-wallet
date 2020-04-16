@@ -195,12 +195,15 @@ rm-docker-wallet-dat-all:
 
 
 ###############################################################################
-# Automation on docker
+# auto generator
 ###############################################################################
-.PHONY: auto-generation
-auto-generation:
-	./scripts/operation/integration_on_docker.sh 99
+.PHONY: generate-key-local
+generate-key-local:
+	./scripts/operation/generate-local.sh
 
+#.PHONY: generate-key-docker
+#generate-key-docker:
+#	./scripts/operation/generate-docker.sh 99
 
 ###############################################################################
 # Operation
