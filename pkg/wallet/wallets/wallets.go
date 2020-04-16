@@ -7,7 +7,6 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
@@ -49,7 +48,7 @@ type Coldwalleter interface {
 type KeySigner interface {
 	GenerateSeed() ([]byte, error)
 	StoreSeed(strSeed string) ([]byte, error)
-	GeneratePubKey(accountType account.AccountType, coinTypeCode coin.CoinTypeCode, seed []byte, count uint32) ([]key.WalletKey, error)
+	GeneratePubKey(accountType account.AccountType, seed []byte, count uint32) ([]key.WalletKey, error)
 	ImportPrivateKey(accountType account.AccountType) error
 	SignTx(filePath string) (string, bool, string, error)
 }

@@ -25,7 +25,6 @@ type AddedPubkeyHistoryTable struct {
 var addedPubkeyHistoryTableName = map[account.AccountType]string{
 	account.AccountTypeReceipt: "added_pubkey_history_receipt",
 	account.AccountTypePayment: "added_pubkey_history_payment",
-	account.AccountTypeQuoine:  "added_pubkey_history_quoine",
 	account.AccountTypeFee:     "added_pubkey_history_fee",
 	account.AccountTypeStored:  "added_pubkey_history_stored",
 }

@@ -231,16 +231,6 @@ CREATE TABLE `account_pubkey_payment` LIKE `account_pubkey_client`;
 
 
 --
--- Table structure for table `account_pubkey_quoine`
---
-
-DROP TABLE IF EXISTS `account_pubkey_quoine`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `account_pubkey_quoine` LIKE `account_pubkey_client`;
-
-
---
 -- Table structure for table `account_pubkey_fee`
 --
 

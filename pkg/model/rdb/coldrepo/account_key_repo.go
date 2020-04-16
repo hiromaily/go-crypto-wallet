@@ -30,7 +30,6 @@ var accountKeyTableName = map[account.AccountType]string{
 	account.AccountTypeClient:        "account_key_client",
 	account.AccountTypeReceipt:       "account_key_receipt",
 	account.AccountTypePayment:       "account_key_payment",
-	account.AccountTypeQuoine:        "account_key_quoine",
 	account.AccountTypeFee:           "account_key_fee",
 	account.AccountTypeStored:        "account_key_stored",
 	account.AccountTypeAuthorization: "account_key_authorization",

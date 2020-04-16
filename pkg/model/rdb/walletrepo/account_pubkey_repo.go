@@ -22,7 +22,6 @@ var accountPubKeyTableName = map[account.AccountType]string{
 	account.AccountTypeClient:  "account_pubkey_client",
 	account.AccountTypeReceipt: "account_pubkey_receipt",
 	account.AccountTypePayment: "account_pubkey_payment",
-	account.AccountTypeQuoine:  "account_pubkey_quoine",
 	account.AccountTypeFee:     "account_pubkey_fee",
 	account.AccountTypeStored:  "account_pubkey_stored",
 }

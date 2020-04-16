@@ -1,24 +1,24 @@
 package keygen
 
 import (
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
 // Keygen keygen wallet object
 //  it is almost same to Wallet object, difference is storager interface
 type Keygen struct {
-	btc      api.Bitcoiner
-	logger   *zap.Logger
-	tracer   opentracing.Tracer
-	storager rdb.ColdStorager
+	btc          api.Bitcoiner
+	logger       *zap.Logger
+	tracer       opentracing.Tracer
+	storager     rdb.ColdStorager
 	keyGenerator key.Generator
-	wtype    types.WalletType
+	wtype        types.WalletType
 }
 
 // NewKeygen may be Not used anywhere
@@ -31,12 +31,12 @@ func NewKeygen(
 	wtype types.WalletType) *Keygen {
 
 	return &Keygen{
-		btc:      btc,
-		logger:   logger,
-		tracer:   tracer,
-		storager: storager,
+		btc:          btc,
+		logger:       logger,
+		tracer:       tracer,
+		storager:     storager,
 		keyGenerator: keyGenerator,
-		wtype:    wtype,
+		wtype:        wtype,
 	}
 }
 

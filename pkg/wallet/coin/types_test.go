@@ -1,14 +1,15 @@
 package coin
 
 import (
-	"github.com/btcsuite/btcd/chaincfg"
 	"testing"
+
+	"github.com/btcsuite/btcd/chaincfg"
 )
 
 func TestCoinType(t *testing.T) {
 	type args struct {
 		strCoinTypeCode string
-		conf *chaincfg.Params
+		conf            *chaincfg.Params
 	}
 	tests := []struct {
 		name string

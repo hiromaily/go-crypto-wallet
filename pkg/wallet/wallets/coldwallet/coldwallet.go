@@ -1,7 +1,6 @@
 package coldwallet
 
 import (
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 
@@ -9,6 +8,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 

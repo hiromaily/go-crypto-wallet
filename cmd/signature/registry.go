@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/btcsuite/btcd/rpcclient"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/jmoiron/sqlx"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
@@ -16,6 +15,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/tracer"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwallet"
@@ -70,7 +70,7 @@ func (r *registry) newRPCClient() *rpcclient.Client {
 
 func (r *registry) newBTC() api.Bitcoiner {
 	var err error
-	if r.btc == nil{
+	if r.btc == nil {
 		r.btc, err = api.NewBitcoin(r.newRPCClient(), &r.conf.Bitcoin, r.newLogger(), r.conf.CoinTypeCode)
 		if err != nil {
 			panic(err)
@@ -100,7 +100,7 @@ func (r *registry) newStorager() rdb.ColdStorager {
 	)
 }
 
-func (r *registry) newKeyGenerator() key.Generator{
+func (r *registry) newKeyGenerator() key.Generator {
 	return key.NewKey(
 		key.PurposeTypeBIP44,
 		r.conf.CoinTypeCode,

@@ -44,7 +44,7 @@ func (c *HDKeyCommand) Run(args []string) int {
 	}
 
 	// create key for hd wallet for Authorization account
-	keys, err := c.wallet.GeneratePubKey(account.AccountTypeAuthorization, c.wallet.GetBTC().CoinTypeCode(), bSeed, 1)
+	keys, err := c.wallet.GeneratePubKey(account.AccountTypeAuthorization, bSeed, 1)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call GenerateAccountKey() %+v", err))
 		return 1

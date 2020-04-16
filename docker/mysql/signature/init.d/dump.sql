@@ -90,16 +90,6 @@ CREATE TABLE `account_key_payment` LIKE `account_key_client`;
 
 
 --
--- Table structure for table `account_key_quoine`
---
-
-DROP TABLE IF EXISTS `account_key_quoine`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `account_key_quoine` LIKE `account_key_client`;
-
-
---
 -- Table structure for table `account_key_fee`
 --
 
@@ -159,16 +149,6 @@ DROP TABLE IF EXISTS `added_pubkey_history_payment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `added_pubkey_history_payment` LIKE `added_pubkey_history_receipt`;
-
-
---
--- Table structure for table `added_pubkey_history_quoine`
---  for sigunature database
-
-DROP TABLE IF EXISTS `added_pubkey_history_quoine`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `added_pubkey_history_quoine` LIKE `added_pubkey_history_receipt`;
 
 
 --
