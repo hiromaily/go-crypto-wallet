@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/wkey"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 )
 
 //seed subcommand
@@ -59,7 +59,7 @@ func (c *SeedCommand) Run(args []string) int {
 			return 1
 		}
 	}
-	c.ui.Info(fmt.Sprintf("seed: %s", wkey.SeedToString(bSeed)))
+	c.ui.Info(fmt.Sprintf("seed: %s", key.SeedToString(bSeed)))
 
 	return 0
 }

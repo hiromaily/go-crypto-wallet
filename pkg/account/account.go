@@ -66,7 +66,7 @@ func ValidateAccountType(v string) bool {
 }
 
 //AccountTypeValue account_type value
-var AccountTypeValue = map[AccountType]uint8{
+var AccountTypeValue = map[AccountType]uint32{
 	AccountTypeClient:        0,
 	AccountTypeReceipt:       1,
 	AccountTypePayment:       2,

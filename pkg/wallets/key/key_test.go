@@ -1,4 +1,4 @@
-package wkey_test
+package key_test
 
 //import (
 //	"flag"
@@ -11,7 +11,7 @@ package wkey_test
 //	_ "github.com/go-sql-driver/mysql"
 //
 //	"github.com/hiromaily/go-bitcoin/pkg/account"
-//	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
+//	"github.com/hiromaily/go-bitcoin/pkg/wallets/coin"
 //	"github.com/hiromaily/go-bitcoin/pkg/wallets"
 //	. "github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 //)

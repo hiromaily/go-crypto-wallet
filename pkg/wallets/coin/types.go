@@ -1,4 +1,4 @@
-package types
+package coin
 
 //----------------------------------------------------
 // CoinType
@@ -66,3 +66,7 @@ const (
 	NetworkTypeTestNet3   NetworkType = "testnet3"
 	NetworkTypeRegTestNet NetworkType = "regtest"
 )
+
+func (n NetworkType) String() string {
+	return string(n)
+}

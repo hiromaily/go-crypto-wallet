@@ -7,7 +7,7 @@ package btc_test
 //	"github.com/icrowley/fake"
 //
 //	"github.com/hiromaily/go-bitcoin/pkg/account"
-//	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
+//	"github.com/hiromaily/go-bitcoin/pkg/wallets/coin"
 //	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 //)
 //

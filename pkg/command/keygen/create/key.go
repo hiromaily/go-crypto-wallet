@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/wallets"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/wkey"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 )
 
 // key subcommand
@@ -36,7 +36,7 @@ func (c *KeyCommand) Run(args []string) int {
 	}
 
 	// create one key for debug use
-	wif, pubAddress, err := wkey.GenerateKey(c.wallet.GetBTC().GetChainConf())
+	wif, pubAddress, err := key.GenerateWIF(c.wallet.GetBTC().GetChainConf())
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call key.GenerateKey() %+v", err))
 		return 1

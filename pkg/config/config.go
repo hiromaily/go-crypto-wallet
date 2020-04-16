@@ -7,7 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 
-	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
@@ -17,23 +17,23 @@ import (
 
 // Config root config
 type Config struct {
-	CoinType   ctype.CoinType `toml:"coin_type" validate:"oneof=btc bch"`
-	Bitcoin    Bitcoin        `toml:"bitcoin"`
-	Logger     Logger         `toml:"logger"`
-	Tracer     Tracer         `toml:"tracer"`
-	MySQL      MySQL          `toml:"mysql"`
-	TxFile     TxFile         `toml:"tx_file"`
-	PubkeyFile PubKeyFile     `toml:"pubkey_file"`
+	CoinType   coin.CoinType `toml:"coin_type" validate:"oneof=btc bch"`
+	Bitcoin    Bitcoin       `toml:"bitcoin"`
+	Logger     Logger        `toml:"logger"`
+	Tracer     Tracer        `toml:"tracer"`
+	MySQL      MySQL         `toml:"mysql"`
+	TxFile     TxFile        `toml:"tx_file"`
+	PubkeyFile PubKeyFile    `toml:"pubkey_file"`
 }
 
 // Bitcoin Bitcoin information
 type Bitcoin struct {
-	Host        string            `toml:"host" validate:"required"`
-	User        string            `toml:"user" validate:"required"`
-	Pass        string            `toml:"pass" validate:"required"`
-	PostMode    bool              `toml:"http_post_mode"`
-	DisableTLS  bool              `toml:"disable_tls"`
-	NetworkType ctype.NetworkType `toml:"network_type" validate:"oneof=mainnet testnet3 regtest"`
+	Host        string           `toml:"host" validate:"required"`
+	User        string           `toml:"user" validate:"required"`
+	Pass        string           `toml:"pass" validate:"required"`
+	PostMode    bool             `toml:"http_post_mode"`
+	DisableTLS  bool             `toml:"disable_tls"`
+	NetworkType coin.NetworkType `toml:"network_type" validate:"oneof=mainnet testnet3 regtest"`
 
 	Block BitcoinBlock `toml:"block"`
 	Fee   BitcoinFee   `toml:"fee"`

@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/config"
-	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/coin"
 )
 
 // Bitcoin includes client to call Json-RPC
@@ -17,8 +17,8 @@ type Bitcoin struct {
 	chainConf         *chaincfg.Params
 	confirmationBlock int
 	feeRange          FeeAdjustmentRate
-	version           ctype.BTCVersion //179900
-	coinType          ctype.CoinType   //btc
+	version           coin.BTCVersion //179900
+	coinType          coin.CoinType   //btc
 	logger            *zap.Logger
 }
 
@@ -35,11 +35,11 @@ func NewBitcoin(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logg
 		logger: logger,
 	}
 	switch conf.NetworkType {
-	case ctype.NetworkTypeMainNet:
+	case coin.NetworkTypeMainNet:
 		bit.chainConf = &chaincfg.MainNetParams
-	case ctype.NetworkTypeTestNet3:
+	case coin.NetworkTypeTestNet3:
 		bit.chainConf = &chaincfg.TestNet3Params
-	case ctype.NetworkTypeRegTestNet:
+	case coin.NetworkTypeRegTestNet:
 		bit.chainConf = &chaincfg.TestNet3Params
 	default:
 		return nil, errors.Errorf("bitcoin network type is invalid in config")
@@ -50,14 +50,14 @@ func NewBitcoin(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logg
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call bit.GetNetworkInfo()")
 	}
-	if ctype.RequiredVersion > netInfo.Version {
-		return nil, errors.Errorf("bitcoin core version should be %d +, but version %d is detected", ctype.RequiredVersion, netInfo.Version)
+	if coin.RequiredVersion > netInfo.Version {
+		return nil, errors.Errorf("bitcoin core version should be %d +, but version %d is detected", coin.RequiredVersion, netInfo.Version)
 	}
 
 	bit.version = netInfo.Version
 	bit.logger.Info("bitcoin rpc server", zap.Int("version", netInfo.Version.Int()))
 
-	bit.coinType = ctype.BTC
+	bit.coinType = coin.BTC
 
 	bit.confirmationBlock = conf.Block.ConfirmationNum
 	bit.feeRange.max = conf.Fee.AdjustmentMax
@@ -107,21 +107,21 @@ func (b *Bitcoin) FeeRangeMin() float64 {
 }
 
 // SetVersion バージョン情報をセットする
-func (b *Bitcoin) SetVersion(ver ctype.BTCVersion) {
+func (b *Bitcoin) SetVersion(ver coin.BTCVersion) {
 	b.version = ver
 }
 
 // Version bitcoin coreのバージョンを返す
-func (b *Bitcoin) Version() ctype.BTCVersion {
+func (b *Bitcoin) Version() coin.BTCVersion {
 	return b.version
 }
 
 // SetCoinType CoinTypeをセットする
-func (b *Bitcoin) SetCoinType(coinType ctype.CoinType) {
+func (b *Bitcoin) SetCoinType(coinType coin.CoinType) {
 	b.coinType = coinType
 }
 
 // CoinType Bitcoinの種別(btc, bch)を返す
-func (b *Bitcoin) CoinType() ctype.CoinType {
+func (b *Bitcoin) CoinType() coin.CoinType {
 	return b.coinType
 }

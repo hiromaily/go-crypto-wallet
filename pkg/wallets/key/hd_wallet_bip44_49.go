@@ -1,4 +1,4 @@
-package wkey
+package key
 
 import (
 	"encoding/hex"
@@ -14,55 +14,81 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/coin"
 )
 
-//PurposeType BIP44は44固定
+//TODO: except client address, same address is used only once due to security
+// - address could be traced easily
+// - so any internal addresses should be disposable
+
+//BIP44
+//https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#Purpose
+// m / purpose' / coin_type' / account' / change / address_index
+
+//e.g.  BIP44, Bitcoin Mainnet
+//Client account  => m/44/0/0/0/0~xxxxx
+//Receipt account => m/44/0/1/0/0~xxxxx
+//Payment account => m/44/0/2/0/0~xxxxx
+
+// PurposeType BIP44/BIP49, for now 44 is used as fixed value
 type PurposeType uint32
 
-// purpose
+func (t PurposeType) Uint32() uint32 {
+	return uint32(t)
+}
+
+// purpose depends on BIP, BIP44  is a constant set to `44`
 const (
 	PurposeTypeBIP44 PurposeType = 44 //BIP44
 	PurposeTypeBIP49 PurposeType = 49 //BIP49
 )
 
-//TODO:同じアドレスを使い回すと、アドレスから総額情報がバレて危険
-//よって、内部利用のアドレスは毎回使い捨てにすること
+// CoinType creates a separate subtree for every cryptocoin
+type CoinType uint32
 
-//ChangeType 受け取り階層
+func (t CoinType) Uint32() uint32 {
+	return uint32(t)
+}
+
+// coin_type
+// https://github.com/satoshilabs/slips/blob/master/slip-0044.md
+const (
+	CoinTypeBitcoin     CoinType = 0   // Bitcoin
+	CoinTypeTestnet     CoinType = 1   // Testnet (all coins)
+	CoinTypeLitecoin    CoinType = 2   // Litecoin
+	CoinTypeEther       CoinType = 60  // Ether
+	CoinTypeRipple      CoinType = 144 // Ripple
+	CoinTypeBitcoinCash          = 145 // Bitcoin Cash
+)
+
+// Account
+// account come from `AccountType` in go-bitcoin/pkg/account.go
+
+//ChangeType  external or internal use
 type ChangeType uint32
+
+func (t ChangeType) Uint32() uint32 {
+	return uint32(t)
+}
 
 // change_type
 const (
-	ChangeTypeExternal ChangeType = 0 //外部送金者からの受け取り用 (ユーザー、集約用、マルチシグ)
-	ChangeTypeInternal ChangeType = 1 //自身のトランザクションのおつり用 (出金時に使うトレード用アドレス) //TODO:これは使わないでいいかも
+	ChangeTypeExternal ChangeType = 0 // constant 0 is used for external chain
+	ChangeTypeInternal ChangeType = 1 // constant 1 for internal chain (also known as change addresses)
 )
 
-//CoinType コインの種類(
-type CoinType uint32
-
-// coin_type
-const (
-	CoinTypeBitcoin CoinType = 0 //Bitcoin
-	CoinTypeTestnet CoinType = 1 //Testnet
-)
-
-//e.g. for Mainnet
-//Client  => m/44/0/0/0/0~xxxxx
-//Receipt => m/44/0/1
-//Payment => m/44/0/2/0/0 => quoineから購入したものを受け取る用
-//Payment => m/44/0/2/1/0 => 出金による支払いに利用、かつ、おつりも受け取る => TODO:ChangeTypeによってアドレスが変わってしまったら、どう運用するのか
-
-// Key Keyオブジェクト
+// Key Key object
 type Key struct {
-	coinType ctype.CoinType
+	purpose  PurposeType
+	coinType coin.CoinType
 	conf     *chaincfg.Params
 	logger   *zap.Logger
 }
 
-// NewKey Keyオブジェクトを返す
-func NewKey(coinType ctype.CoinType, conf *chaincfg.Params, logger *zap.Logger) *Key {
+// NewKey returns Key
+func NewKey(purpose PurposeType, coinType coin.CoinType, conf *chaincfg.Params, logger *zap.Logger) *Key {
 	keyData := Key{
+		purpose:  purpose,
 		coinType: coinType,
 		conf:     conf,
 		logger:   logger,
@@ -71,68 +97,74 @@ func NewKey(coinType ctype.CoinType, conf *chaincfg.Params, logger *zap.Logger) 
 	return &keyData
 }
 
-// CreateAccount アカウント階層までのprivateKey及び publicKeyを生成する
-func (k Key) CreateAccount(seed []byte, actType account.AccountType) (string, string, error) {
+func (k Key) CreateKey(seed []byte, actType account.AccountType, idxFrom, count uint32) ([]WalletKey, error) {
+	// create privateKey, publicKey by account level
+	privKey, _, err := k.createKeyByAccount(seed, actType)
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to call createKeyByAccount()")
+	}
+	// create keys by index and count
+	return k.createKeysWithIndex(privKey, idxFrom, count)
+}
+
+// createKeyByAccount create privateKey, publicKey by account level
+func (k Key) createKeyByAccount(seed []byte, actType account.AccountType) (*hdkeychain.ExtendedKey, *hdkeychain.ExtendedKey, error) {
 
 	//Master
 	masterKey, err := hdkeychain.NewMaster(seed, k.conf)
 	if err != nil {
-		return "", "", err
+		return nil, nil, err
 	}
 	//Purpose
-	purpose, err := masterKey.Child(hdkeychain.HardenedKeyStart + uint32(PurposeTypeBIP44))
-	//purpose, err := masterKey.Child(hdkeychain.HardenedKeyStart + uint32(PurposeTypeBIP49))
+	purpose, err := masterKey.Child(hdkeychain.HardenedKeyStart + k.purpose.Uint32())
 	if err != nil {
-		return "", "", err
+		return nil, nil, err
 	}
-	//CoinType
-	ct := uint32(CoinTypeBitcoin)
-	if k.conf.Name != string(ctype.NetworkTypeMainNet) {
-		ct = uint32(CoinTypeTestnet)
+	//CoinType, default is CoinTypeTestnet
+	//TODO: improve more
+	ct := CoinTypeTestnet.Uint32()
+	if k.conf.Name == coin.NetworkTypeMainNet.String() {
+		ct = CoinTypeBitcoin.Uint32()
 	}
 	coinType, err := purpose.Child(hdkeychain.HardenedKeyStart + ct)
 	if err != nil {
-		return "", "", err
+		return nil, nil, err
 	}
 	//Account
-	account, err := coinType.Child(hdkeychain.HardenedKeyStart + uint32(account.AccountTypeValue[actType]))
+	accountPrivKey, err := coinType.Child(hdkeychain.HardenedKeyStart + account.AccountTypeValue[actType])
 	if err != nil {
-		return "", "", err
+		return nil, nil, err
 	}
 	//Change
 	//Index
 
-	publicKey, err := account.Neuter()
+	// get pubKey
+	publicKey, err := accountPrivKey.Neuter()
 	if err != nil {
-		return "", "", err
+		return nil, nil, err
 	}
 
-	strPrivateKey := account.String()
-	strPublicKey := publicKey.String()
-
-	return strPrivateKey, strPublicKey, nil
+	//strPrivateKey := account.String()
+	//strPublicKey := publicKey.String()
+	return accountPrivKey, publicKey, nil
 }
 
-// CreateKeysWithIndex 指定したindexに応じて複数のkeyを生成する
-// e.g. [1] idxFrom:0,  count 10 => 0-9
-//      [2] idxFrom:10, count 10 => 10-19
-func (k Key) CreateKeysWithIndex(accountPrivateKey string, idxFrom, count uint32) ([]WalletKey, error) {
-	account, err := hdkeychain.NewKeyFromString(accountPrivateKey)
-	if err != nil {
-		return nil, err
-	}
+// createKeysWithIndex create keys by index and count
+// e.g. - idxFrom:0,  count 10 => 0-9
+//      - idxFrom:10, count 10 => 10-19
+func (k Key) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxFrom, count uint32) ([]WalletKey, error) {
+	//accountPrivKey, err := hdkeychain.NewKeyFromString(accountPrivKey)
+
 	// Change
-	change, err := account.Child(uint32(ChangeTypeExternal))
+	change, err := accountPrivKey.Child(ChangeTypeExternal.Uint32())
 	if err != nil {
 		return nil, err
 	}
 
 	// Index
 	walletKeys := make([]WalletKey, count)
-	//max := idxFrom + count
-	//for i := uint32(idxFrom); i < max; i++ {
 	for i := uint32(0); i < count; i++ {
-		child, err := change.Child(idxFrom)
+		child, err := change.Child(idxFrom + i)
 		if err != nil {
 			return nil, err
 		}
@@ -146,18 +178,13 @@ func (k Key) CreateKeysWithIndex(accountPrivateKey string, idxFrom, count uint32
 		// full public Key
 		//getFullPubKey(privateKey)
 
-		// WIF　(compress: true) => bitcoin coreでは圧縮したアドレスを表示する
+		// WIF　(compressed: true) => bitcoin core expresses compressed address
 		wif, err := btcutil.NewWIF(privateKey, k.conf, true)
 		if err != nil {
 			return nil, err
 		}
-		strPrivateKey := wif.String()
 
 		// Address(P2PKH) BTC/BCH
-		//  btcutil.NewAddressPubKeyHash(pkHash, net)
-		//if k.coinType == ctype.BTC {
-		//	address, err := child.Address(k.conf)
-		//}
 		strAddr, err := k.addressString(privateKey)
 		if err != nil {
 			return nil, err
@@ -168,18 +195,20 @@ func (k Key) CreateKeysWithIndex(accountPrivateKey string, idxFrom, count uint32
 		if err != nil {
 			return nil, err
 		}
-		k.logger.Debug("Debug getP2shSegwit()", zap.String("redeemScript", redeemScript))
+		if redeemScript != "" {
+			k.logger.Debug("result of getP2shSegwit()", zap.String("redeemScript", redeemScript))
+		}
 
 		//address.String() とaddress.EncodeAddress()は結果として同じ
 		walletKeys[i] = WalletKey{
-			WIF:          strPrivateKey,
+			WIF:          wif.String(),
 			Address:      strAddr, //[P2PKH]AddressPubKeyHash is an Address for a pay-to-pubkey-hash
 			P2shSegwit:   p2shSegwit,
 			FullPubKey:   getFullPubKey(privateKey, true),
 			RedeemScript: redeemScript,
 		}
 
-		idxFrom++
+		//idxFrom++
 	}
 
 	return walletKeys, nil
@@ -219,7 +248,7 @@ func (k Key) addressString(privKey *btcec.PrivateKey) (string, error) {
 		return "", errors.Errorf("btcutil.NewAddressPubKeyHash() error: %s", err)
 	}
 
-	if k.coinType == ctype.BTC {
+	if k.coinType == coin.BTC {
 		//BTC
 		return addr.String(), nil
 	}
@@ -265,7 +294,7 @@ func (k Key) getP2shSegwit(privKey *btcec.PrivateKey) (string, string, error) {
 	var strRedeemScript string //暫定
 
 	//BTC
-	if k.coinType == ctype.BTC {
+	if k.coinType == coin.BTC {
 		address, err := btcutil.NewAddressScriptHash(redeemScript, k.conf)
 		if err != nil {
 			return "", "", errors.Errorf("btcutil.NewAddressScriptHash() error: %s", err)

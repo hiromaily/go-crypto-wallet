@@ -7,8 +7,8 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
-	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/wkey"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/coin"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 )
 
 //1. generate seed and store it in database
@@ -28,11 +28,11 @@ func (w *ColdWallet) GenerateSeed() ([]byte, error) {
 	}
 
 	// generate seed
-	bSeed, err = wkey.GenerateSeed()
+	bSeed, err = key.GenerateSeed()
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call key.GenerateSeed()")
 	}
-	strSeed := wkey.SeedToString(bSeed)
+	strSeed := key.SeedToString(bSeed)
 
 	// insert seed in database
 	_, err = w.storager.InsertSeed(strSeed, nil, true)
@@ -46,7 +46,7 @@ func (w *ColdWallet) GenerateSeed() ([]byte, error) {
 // store given seed from command line args
 //  development use
 func (w *ColdWallet) StoreSeed(strSeed string) ([]byte, error) {
-	bSeed, err := wkey.SeedToByte(strSeed)
+	bSeed, err := key.SeedToByte(strSeed)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call key.SeedToByte() ")
 	}
@@ -66,7 +66,7 @@ func (w *ColdWallet) retrieveSeed() ([]byte, error) {
 	seed, err := w.storager.GetSeedOne()
 	if err == nil && seed.Seed != "" {
 		w.logger.Info("seed have already been generated")
-		return wkey.SeedToByte(seed.Seed)
+		return key.SeedToByte(seed.Seed)
 	}
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call storager.GetSeedOne()")
@@ -79,8 +79,8 @@ func (w *ColdWallet) retrieveSeed() ([]byte, error) {
 // TODO: if account is AccountTypeAuthorization and there is already record, it should stop creation
 func (w *ColdWallet) GeneratePubKey(
 	accountType account.AccountType,
-	coinType ctype.CoinType,
-	seed []byte, count uint32) ([]wkey.WalletKey, error) {
+	coinType coin.CoinType,
+	seed []byte, count uint32) ([]key.WalletKey, error) {
 
 	//get latest index
 	idxFrom, err := w.storager.GetMaxIndexOnAccountKeyTable(accountType)
@@ -121,24 +121,19 @@ func (w *ColdWallet) GeneratePubKey(
 
 func (w *ColdWallet) generateHDKey(
 	accountType account.AccountType,
-	coinType ctype.CoinType,
+	coinType coin.CoinType,
 	seed []byte,
 	idxFrom,
-	count uint32) ([]wkey.WalletKey, error) {
+	count uint32) ([]key.WalletKey, error) {
 
 	// key object
-	keyData := wkey.NewKey(coinType, w.btc.GetChainConf(), w.logger)
+	//TODO: interface and repository
+	keyData := key.NewKey(key.PurposeTypeBIP44, coinType, w.btc.GetChainConf(), w.logger)
 
-	// generate private key
-	priv, _, err := keyData.CreateAccount(seed, accountType)
+	// generate key
+	walletKeys, err := keyData.CreateKey(seed, accountType, idxFrom, count)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call keyData.CreateAccount()")
+		return nil, errors.Wrap(err, "fail to call keyData.CreateKey()")
 	}
-	// generate key with private key and index
-	walletKeys, err := keyData.CreateKeysWithIndex(priv, idxFrom, count)
-	if err != nil {
-		return nil, errors.Wrap(err, "fail to call keyData.CreateKeysWithIndex()")
-	}
-
 	return walletKeys, nil
 }

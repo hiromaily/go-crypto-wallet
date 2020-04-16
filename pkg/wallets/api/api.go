@@ -11,7 +11,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/btc"
-	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/coin"
 )
 
 // Bitcoiner Bitcoin/BitcoinCash Interface
@@ -45,10 +45,10 @@ type Bitcoiner interface {
 	ConfirmationBlock() int
 	FeeRangeMax() float64
 	FeeRangeMin() float64
-	SetVersion(ver ctype.BTCVersion)
-	Version() ctype.BTCVersion
-	SetCoinType(coinType ctype.CoinType)
-	CoinType() ctype.CoinType
+	SetVersion(ver coin.BTCVersion)
+	Version() coin.BTCVersion
+	SetCoinType(coinType coin.CoinType)
+	CoinType() coin.CoinType
 
 	//fee.go
 	EstimateSmartFee() (float64, error)

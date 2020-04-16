@@ -8,7 +8,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/bch"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api/btc"
-	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/coin"
 )
 
 //NewRPCClient try to connect bitcoin core RPCserver to create client instance
@@ -32,16 +32,16 @@ func NewRPCClient(conf *config.Bitcoin) (*rpcclient.Client, error) {
 }
 
 // NewBitcoin creates bitcoin/bitcoin cash instance according to coinType
-func NewBitcoin(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logger, coinType ctype.CoinType) (Bitcoiner, error) {
+func NewBitcoin(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logger, coinType coin.CoinType) (Bitcoiner, error) {
 	switch coinType {
-	case ctype.BTC:
+	case coin.BTC:
 		bit, err := btc.NewBitcoin(client, conf, logger)
 		if err != nil {
 			return nil, errors.Errorf("btc.NewBitcoin() error: %s", err)
 		}
 
 		return bit, err
-	case ctype.BCH:
+	case coin.BCH:
 		//BCH
 		bitc, err := bch.NewBitcoinCash(client, conf, logger)
 		if err != nil {

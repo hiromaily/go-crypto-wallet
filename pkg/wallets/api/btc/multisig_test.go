@@ -3,7 +3,7 @@ package btc_test
 //import (
 //	"testing"
 //
-//	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
+//	"github.com/hiromaily/go-bitcoin/pkg/wallets/coin"
 //)
 //
 //// TestCreateMultiSig

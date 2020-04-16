@@ -7,9 +7,9 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
-	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/coin"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
-	"github.com/hiromaily/go-bitcoin/pkg/wallets/wkey"
 )
 
 // About structure
@@ -26,6 +26,7 @@ type Walleter interface {
 	SendToAccount(from, to account.AccountType, amount btcutil.Amount) (string, string, error)
 	SendFromFile(filePath string) (string, error)
 	UpdateStatus() error
+
 	Done()
 	GetDB() rdb.WalletStorager
 	GetBTC() api.Bitcoiner
@@ -48,15 +49,14 @@ type Coldwalleter interface {
 type KeySigner interface {
 	GenerateSeed() ([]byte, error)
 	StoreSeed(strSeed string) ([]byte, error)
-	GeneratePubKey(accountType account.AccountType, coinType ctype.CoinType, seed []byte, count uint32) ([]wkey.WalletKey, error)
-	SignTx(filePath string) (string, bool, string, error)
+	GeneratePubKey(accountType account.AccountType, coinType coin.CoinType, seed []byte, count uint32) ([]key.WalletKey, error)
 	ImportPrivateKey(accountType account.AccountType) error
+	SignTx(filePath string) (string, bool, string, error)
 }
 
 // Keygener is for keygen wallet service interface
 type Keygener interface {
 	KeySigner
-
 	KeygenExclusiver
 
 	Done()
@@ -73,7 +73,6 @@ type KeygenExclusiver interface {
 // Signer is for signature wallet service interface
 type Signer interface {
 	KeySigner
-
 	SignatureExclusiver
 
 	Done()

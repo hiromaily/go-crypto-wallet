@@ -8,7 +8,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/api"
-	ctype "github.com/hiromaily/go-bitcoin/pkg/wallets/api/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallets/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallets/types"
 )
 
@@ -42,7 +42,7 @@ func GetBTC() api.Bitcoiner {
 	if err != nil {
 		log.Fatalf("fail to create bitcoin core client: %v", err)
 	}
-	bc, err = api.NewBitcoin(client, &conf.Bitcoin, logger, ctype.CoinType(conf.CoinType))
+	bc, err = api.NewBitcoin(client, &conf.Bitcoin, logger, coin.CoinType(conf.CoinType))
 	if err != nil {
 		log.Fatalf("fail to create btc instance: %v", err)
 	}
