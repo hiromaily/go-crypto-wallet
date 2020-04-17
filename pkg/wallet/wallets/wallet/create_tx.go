@@ -34,6 +34,7 @@ type parsedTx struct {
 // - sender account: client, receiver account: receipt
 // - if amount=0, all coin is sent
 // FIXME: receiver account covers fee, but is should be flexible
+// TODO: change functionality is not implemented yet
 // TODO: after this func, what if `listtransactions` api is called to see result
 func (w *Wallet) createTx(
 	sender,

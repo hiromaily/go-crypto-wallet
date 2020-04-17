@@ -83,64 +83,72 @@ func (w *Wallet) CreatePaymentTx(adjustmentFee float64) (string, string, error) 
 	}
 
 	// payment logic exclusively
-	var (
-		outputs    = map[btcutil.Address]btcutil.Amount{}
-		tmpOutputs = map[string]btcutil.Amount{} //mapのkeyが、btcutil.Address型だとユニークかどうかkeyから判定できないため、判定用としてこちらを作成
-	)
+	// create payment txOutputs
+	changeAddr := unspentAddrs[0].String() //this is actually sender's address because it's for change
+	changeAmount := inputTotal - userTotal
+	txOutputs := w.createPaymentOutputs(userPayments, changeAddr, changeAmount)
 
-	//6.outputは別途こちらで作成
-	for _, userPayment := range userPayments {
-		grok.Value(userPayment)
-		if _, ok := tmpOutputs[userPayment.receiverAddr]; ok {
-			//加算する
-			tmpOutputs[userPayment.receiverAddr] += userPayment.validAmount
-		} else {
-			//新規送信先を作成
-			tmpOutputs[userPayment.receiverAddr] = userPayment.validAmount
-		}
-	}
-
-	//7.差分でお釣り用のoutputを作成する (paymentのおつりaddressに返金する処理)
-	//おつり受け取りのpaymentaddressが複数ある場合、何を使うか。とりあえずaddrs[0]
-	//TODO:ユーザーの出金先にpaymentのアドレスが指定された場合のためのロジック(イレギュラーだが運用上可能)
-	//FIXME: paymentが複数addressであることを考慮
-	//FIXME:BIP44でaddressを生成したが、おつり用としては分けていない。これが問題をおこなさないか？
-	chargeAddr := unspentAddrs[0].String() //change from w.BTC.PaymentAddress()
-	change := inputTotal - userTotal
-	if _, ok := tmpOutputs[chargeAddr]; ok {
-		//加算
-		//TODO:実運用ではありえない
-		tmpOutputs[chargeAddr] += change
-	} else {
-		//新規
-		tmpOutputs[chargeAddr] = change
-	}
-
-	//8.tmpOutputsをoutputsとして変換する
-	for key, val := range tmpOutputs {
-		addr, err := w.btc.DecodeAddress(key)
-		if err != nil {
-			//これは本来事前にチェックされるため、ありえないはず
-			w.logger.Error("unexpected error converting string to address")
-			continue
-		}
-		outputs[addr] = val
-	}
-
-	//Debug
-	grok.Value(parsedTx.txInputs)
-	grok.Value(tmpOutputs)
-	grok.Value(outputs)
-
-	// 一連の処理を実行
+	// create raw tx
 	return w.createRawTransactionForPayment(
 		adjustmentFee,
 		parsedTx.txInputs,
 		inputTotal,
 		parsedTx.txRepoTxInputs,
-		outputs,
+		txOutputs,
 		&addrsPrevs,
 		paymentRequestIds)
+}
+
+func (w *Wallet) createPaymentOutputs(userPayments []UserPayment, changeAddr string, changeAmount btcutil.Amount) map[btcutil.Address]btcutil.Amount {
+	var (
+		txOutputs = map[btcutil.Address]btcutil.Amount{}
+		//if key of map is btcutil.Address which is interface type, uniqueness can't be found from map key
+		// so this key is string
+		tmpOutputs = map[string]btcutil.Amount{}
+	)
+
+	// create txOutput from userPayment
+	for _, userPayment := range userPayments {
+		if _, ok := tmpOutputs[userPayment.receiverAddr]; ok {
+			// if there are multiple receiver same address in user_payment,
+			//  sum these
+			tmpOutputs[userPayment.receiverAddr] += userPayment.validAmount
+		} else {
+			// new receiver address
+			tmpOutputs[userPayment.receiverAddr] = userPayment.validAmount
+		}
+	}
+
+	// add txOutput as change address and amount for change
+	//TODO:
+	// - what if user register for address which is same to payment address?
+	//   Though it's impossible in real but systematically possible
+	// - BIP44, hdwallet has `ChangeType`. ideally this address should be used
+	if _, ok := tmpOutputs[changeAddr]; ok {
+		// in real, this is impossible
+		tmpOutputs[changeAddr] += changeAmount
+	} else {
+		// of course, change address is new in txOutputs
+		tmpOutputs[changeAddr] = changeAmount
+	}
+
+	// create txOutputs from tmpOutputs switching string address type to btcutil.Address
+	for strAddr, amount := range tmpOutputs {
+		addr, err := w.btc.DecodeAddress(strAddr)
+		if err != nil {
+			// this case is inpossible because addresses are checked in advance
+			w.logger.Error("fail to call DecodeAddress",
+				zap.String("address", strAddr))
+			continue
+		}
+		txOutputs[addr] = amount
+	}
+
+	//Debug
+	//grok.Value(tmpOutputs)
+	grok.Value(txOutputs)
+
+	return txOutputs
 }
 
 //TODO:receipt側のロジックとほぼ同じ為、まとめたほうがいい(手数料のロジックのみ異なる)
