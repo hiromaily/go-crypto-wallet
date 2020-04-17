@@ -17,20 +17,20 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 )
 
-//TODO:参考に(中国語のサイト)
-//https://www.haowuliaoa.com/article/info/11350.html
+// refer to https://www.haowuliaoa.com/article/info/11350.html (Chinese site)
 
-//transactionの命名ルールについて
-//*wire.MsgTxなどは、txがsuffixとして扱われているため、それに習う。e.g. hexTx, hashTxなど
+// naming regulation for transaction
+// as example, *wire.MsgTx is that tx is used as suffix
+// so tx should be named like hexTx, hashTx
 
-// SignRawTransactionResult signrawtransactionwithwalletをcallしたresponseの型
+// SignRawTransactionResult response of api `signrawtransactionwithwallet`
 type SignRawTransactionResult struct {
 	Hex      string                    `json:"hex"`
 	Complete bool                      `json:"complete"`
 	Errors   []SignRawTransactionError `json:"errors"`
 }
 
-// SignRawTransactionError SignRawTransactionResult内のerrorオブジェクト
+// SignRawTransactionError error object in SignRawTransactionResult
 type SignRawTransactionError struct {
 	Txid      string `json:"txid"`
 	Vout      int64  `json:"vout"`
@@ -39,14 +39,14 @@ type SignRawTransactionError struct {
 	Error     string `json:"error"`
 }
 
-// AddrsPrevTxs multisig用トランザクション生成時に必要な情報群
+// AddrsPrevTxs is used when creating tx for multisig address
 type AddrsPrevTxs struct {
 	Addrs         []string
 	PrevTxs       []PrevTx
 	SenderAccount account.AccountType
 }
 
-// PrevTx multisig時のsignrawtransactionで必要なパラメータ
+// PrevTx is required parameters for api `signrawtransaction` for multisig address
 type PrevTx struct {
 	Txid         string  `json:"txid"`
 	Vout         uint32  `json:"vout"`
@@ -55,62 +55,63 @@ type PrevTx struct {
 	Amount       float64 `json:"amount"`
 }
 
-// FundRawTransactionResult fundrawtransactionをcallしたresponseの型
+// FundRawTransactionResult response of api `fundrawtransaction`
 type FundRawTransactionResult struct {
 	Hex       string `json:"hex"`
 	Fee       int64  `json:"fee"`
 	Changepos int64  `json:"changepos"`
 }
 
-// ToHex 16進数のstringに変換する
+// ToHex convert wire.MsgTx to string of Hexadecimal(16進数)
 func (b *Bitcoin) ToHex(tx *wire.MsgTx) (string, error) {
 	buf := bytes.NewBuffer(make([]byte, 0, tx.SerializeSize()))
 	if err := tx.Serialize(buf); err != nil {
-		return "", errors.Errorf("tx.Serialize(): error: %s", err)
+		return "", errors.Wrap(err, "fail to call tx.Serialize()")
 	}
 	return hex.EncodeToString(buf.Bytes()), nil
 }
 
-//ToMsgTx 16進数のstringから、wire.MsgTxに変換する
+// ToMsgTx convert string of Hexadecimal(16進数) to wire.MsgTx
 func (b *Bitcoin) ToMsgTx(txHex string) (*wire.MsgTx, error) {
 	byteHex, err := hex.DecodeString(txHex)
 	if err != nil {
-		return nil, errors.Errorf("hex.DecodeString(): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call hex.DecodeString()")
 	}
 
 	var msgTx wire.MsgTx
 	if err := msgTx.Deserialize(bytes.NewReader(byteHex)); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "fail to call hex.Deserialize()")
 	}
 
 	return &msgTx, nil
 }
 
-// DecodeRawTransaction Hex stringをデコードして、Rawのトランザクションデータに変換する
+// DecodeRawTransaction returns information about a transaction given its serialized byte
 func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*btcjson.TxRawResult, error) {
 	byteHex, err := hex.DecodeString(hexTx)
 	if err != nil {
-		return nil, errors.Errorf("hex.DecodeString(): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call hex.DecodeString()")
 	}
 	resTx, err := b.client.DecodeRawTransaction(byteHex)
 	if err != nil {
-		return nil, errors.Errorf("client.DecodeRawTransaction(): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call btc.client.DecodeRawTransaction()")
 	}
 
 	return resTx, nil
 }
 
-// GetRawTransactionByHex Hexからトランザクションを取得する
+// GetRawTransactionByHex get tx from hex string
+// unused for now
 func (b *Bitcoin) GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error) {
 
 	hashTx, err := chainhash.NewHashFromStr(strHashTx)
 	if err != nil {
-		return nil, errors.Errorf("chainhash.NewHashFromStr(%s): error: %s", strHashTx, err)
+		return nil, errors.Wrapf(err, "fail to call chainhash.NewHashFromStr(%s)", strHashTx)
 	}
 
 	tx, err := b.client.GetRawTransaction(hashTx)
 	if err != nil {
-		return nil, errors.Errorf("client.GetRawTransaction(hash): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call btc.client.GetRawTransaction(hash)")
 	}
 	//MsgTx()
 	//tx.MsgTx()
@@ -118,16 +119,15 @@ func (b *Bitcoin) GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error) 
 	return tx, nil
 }
 
-// GetTransactionByTxID txIDからトランザクション詳細を取得する
+// GetTransactionByTxID get transaction result by txID
 func (b *Bitcoin) GetTransactionByTxID(txID string) (*btcjson.GetTransactionResult, error) {
-	// Transaction詳細を取得
 	hashTx, err := chainhash.NewHashFromStr(txID)
 	if err != nil {
-		return nil, errors.Errorf("chainhash.NewHashFromStr(%s): error: %s", txID, err)
+		return nil, errors.Wrapf(err, "fail to call chainhash.NewHashFromStr(%s)", txID)
 	}
 	resTx, err := b.client.GetTransaction(hashTx)
 	if err != nil {
-		return nil, errors.Errorf("client.GetTransaction(%s): error: %s", hashTx, err)
+		return nil, errors.Wrapf(err, "fail to call btc.client.GetTransaction(%s)", hashTx)
 	}
 	//type GetTransactionResult struct {
 	//	Amount          float64                       `json:"amount"`
@@ -147,22 +147,20 @@ func (b *Bitcoin) GetTransactionByTxID(txID string) (*btcjson.GetTransactionResu
 	return resTx, nil
 }
 
-// GetTxOutByTxID TxOutを指定したトランザクションIDから取得する
+// GetTxOutByTxID get txOut by txID and index
 func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutResult, error) {
 	hash, err := chainhash.NewHashFromStr(txID)
 	if err != nil {
-		return nil, errors.Errorf("chainhash.NewHashFromStr(%s): error: %s", txID, err)
+		return nil, errors.Wrapf(err, "fail to call chainhash.NewHashFromStr(%s)", txID)
 	}
 
 	// Gettxout / txHash *chainhash.Hash, index uint32, mempool bool
 	txOutResult, err := b.client.GetTxOut(hash, index, false)
 	if err != nil {
-		return nil, errors.Errorf("client.GetTxOut(%s, %d, false): error: %s", hash, index, err)
+		return nil, errors.Wrapf(err, "fail to call btc.client.GetTxOut(%s, %d, false)", hash, index)
 	}
 
 	return txOutResult, nil
-	//logger.Infof("TxOut: %v\n", txOut): Output
-	//grok.Value(txOut)
 	//value *GetTxOutResult = {
 	//	BestBlock string = "00000000000000a080461b99935872934fa35bc705453f9f2ad7712b2228e849" 64
 	//	Confirmations int64 = 473
@@ -212,23 +210,22 @@ func (b *Bitcoin) CreateRawTransactionWithOutput(inputs []btcjson.TransactionInp
 	return msgTx, nil
 }
 
-// FundRawTransaction 送信したい金額に応じて、自動的にutxoを算出してくれる
-// 未使用のため、コメントアウトしておいてもいいかも
+// FundRawTransaction Add inputs to a transaction until it has enough in value to meet its out value.
+// TODO: unused for now, but it looks useful
 func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, error) {
 	//fundrawtransaction
-	//https://bitcoincore.org/en/doc/0.16.2/rpc/rawtransactions/fundrawtransaction/
-	//"{\"changePosition\":2}"
+	//https://bitcoincore.org/en/doc/0.19.0/rpc/rawtransactions/fundrawtransaction/
 
 	//hex
 	bHex, err := json.Marshal(hex)
 	if err != nil {
-		return nil, errors.Errorf("json.Marchal(hex): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call json.Marchal(hex)")
 	}
 
 	//fee rate
 	feePerKb, err := b.EstimateSmartFee()
 	if err != nil {
-		return nil, errors.Errorf("BTC.EstimateSmartFee(): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call btc.EstimateSmartFee()")
 	}
 
 	bFeeRate, err := json.Marshal(struct {
@@ -237,112 +234,80 @@ func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, err
 		FeeRate: feePerKb,
 	})
 	if err != nil {
-		return nil, errors.Errorf("json.Marchal(feeRate): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call json.Marchal(feeRate)")
 	}
 
 	rawResult, err := b.client.RawRequest("fundrawtransaction", []json.RawMessage{bHex, bFeeRate})
-	//rawResult, err := b.client.RawRequest("fundrawtransaction", []json.RawMessage{bHex})
 	if err != nil {
 		//error: -4: Insufficient funds
-		return nil, errors.Errorf("json.RawRequest(fundrawtransaction): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call json.RawRequest(fundrawtransaction)")
 	}
 
 	fundRawTransactionResult := FundRawTransactionResult{}
 	err = json.Unmarshal([]byte(rawResult), &fundRawTransactionResult)
 	if err != nil {
-		return nil, errors.Errorf("json.Unmarshal(): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}
-	//logger.Infof("fundRawTransactionResult: %v: %s\n", fundRawTransactionResult, fundRawTransactionResult.Hex)
 
 	return &fundRawTransactionResult, nil
 }
 
-// SignRawTransaction *wire.MsgTxからRawのトランザクションに署名する
-// 入金時のトランザクション(multisigではないトランザクション)用
-// SignRawTransactionWithWallet Ver17から利用可能なSignRawTransaction
-// FIXME:Multisigに利用はできない。入金時のclientアドレスはmultisig対応していないので、こちらには利用できると思う
-// For above ver17
+// SignRawTransaction sign on raw unsigned tx for `not multisig address` like client account
+// - this would be used for receipt action
+// - for multisig, refer to `SignRawTransactionWithKey()`
+// - TODO: this code can be shared with SignRawTransactionWithKey()
 func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []PrevTx) (*wire.MsgTx, bool, error) {
 	//hex tx
 	hexTx, err := b.ToHex(tx)
 	if err != nil {
-		return nil, false, errors.Errorf("BTC.ToHex(tx): error: %s", err)
+		return nil, false, errors.Wrap(err, "fail to call btc.ToHex(tx)")
 	}
 
 	input1, err := json.Marshal(hexTx)
 	if err != nil {
-		return nil, false, errors.Errorf("json.Marchal(txHex): error: %s", err)
+		return nil, false, errors.Wrap(err, "fail to call json.Marchal(hexTx)")
 	}
 
 	//prevtxs
 	input2, err := json.Marshal(prevtxs)
 	if err != nil {
-		return nil, false, errors.Errorf("json.Marchal(prevtxs): error: %s", err)
+		return nil, false, errors.Wrap(err, "fail to call json.Marchal(prevtxs)")
 	}
 
+	// call api `signrawtransactionwithwallet`
 	rawResult, err := b.client.RawRequest("signrawtransactionwithwallet", []json.RawMessage{input1, input2})
 	if err != nil {
-		return nil, false, errors.Errorf("json.RawRequest(signrawtransactionwithwallet): error: %s", err)
+		return nil, false, errors.Wrap(err, "fail to call json.RawRequest(signrawtransactionwithwallet)")
 	}
-	//SignRawTransactionResult
 	signRawTxResult := SignRawTransactionResult{}
 	err = json.Unmarshal([]byte(rawResult), &signRawTxResult)
 	if err != nil {
-		return nil, false, errors.Errorf("json.Unmarshal(): error: %s", err)
+		return nil, false, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}
 	if len(signRawTxResult.Errors) != 0 {
-		//FIXME:error: Input not found or already spent
-		//もし、解決のためにパラメータprevtxsが必要となると、非常にめんどくさい。。。listunspentで取得可能だが。。。
-		//[debug]
-		grok.Value(signRawTxResult)
-		//value SignRawTransactionWithWalletResult = {
-		//	Hex string = "020000000138c14167c131202d81d054bce8c6726c87ca072f14b03ec121755f5983b1c0b70000000000ffffffff0600093d..." 486
-		//	Complete bool = false
-		//	Errors []SignRawTransactionWithWalletError = [
-		//		0 SignRawTransactionWithWalletError = {
-		//			Txid string = "b7c0b183595f7521c13eb0142f07ca876c72c6e8bc54d0812d2031c16741c138" 64
-		//			Vout int64 = 0
-		//			ScriptSig string = "" 0
-		//			Sequence int64 = 4294967295
-		//			Error string = "Input not found or already spent" 32
-		//		}
-		//	]
-		//}
-
-		return nil, false, errors.Errorf("json.RawRequest(signrawtransactionwithwallet): error: %s", signRawTxResult.Errors[0].Error)
+		return nil, false, errors.Errorf("fail to call json.RawRequest(signrawtransactionwithwallet): error: %s", signRawTxResult.Errors[0].Error)
 	}
 
 	msgTx, err := b.ToMsgTx(signRawTxResult.Hex)
 	if err != nil {
-		return nil, false, errors.Errorf("BTC.ToMsgTx(hex): error: %s", err)
+		return nil, false, errors.Wrap(err, "fail to call btc.ToMsgTx(hex)")
 	}
 
-	//Debug
+	//Debug to compare tx before and after
 	if !signRawTxResult.Complete {
-		b.logger.Debug("トランザクションHEXの結果比較スタート")
+		b.logger.Debug("sign is not completed yet")
 		b.debugCompareTx(tx, msgTx)
 	}
 
 	return msgTx, signRawTxResult.Complete, nil
 }
 
-func (b *Bitcoin) debugCompareTx(tx1, tx2 *wire.MsgTx) {
-	hexTx1, err := b.ToHex(tx1)
-	if err != nil {
-		b.logger.Debug("fail to call btc.ToHex(tx1)", zap.Error(err))
-	}
-	hexTx2, err := b.ToHex(tx2)
-	if err != nil {
-		b.logger.Debug("fail to call btc.ToHex(tx2)", zap.Error(err))
-	}
-	if hexTx1 == hexTx2 {
-		b.logger.Debug("トランザクションHEXの結果が同じであった。これでは意味がない。")
-	}
-}
+// SignRawTransaction sign on raw unsigned tx for `not multisig address` like client account
+// - this would be used for receipt action
+// - for multisig, refer to `SignRawTransactionWithKey()`
 
-// SignRawTransactionWithKey Multisig時、トランザクションへ署名をする
-// Multisigの場合はこちら
-// signRawTransactionWithKeyVer17 *wire.MsgTxからRawのトランザクションに署名する(Multisigの場合はこちら)
+// SignRawTransactionWithKey sign on raw unsigned tx for `multisig address`
+// - for multisig
 func (b *Bitcoin) SignRawTransactionWithKey(tx *wire.MsgTx, privKeysWIF []string, prevtxs []PrevTx) (*wire.MsgTx, bool, error) {
 	//if b.Version() >= ctype.BTCVer17 {
 	//hex tx
@@ -483,4 +448,19 @@ func (b *Bitcoin) Sign(tx *wire.MsgTx, strPrivateKey string) (string, error) {
 	}
 
 	return hexTx, nil
+}
+
+func (b *Bitcoin) debugCompareTx(tx1, tx2 *wire.MsgTx) {
+	b.logger.Debug("compare tx before and after")
+	hexTx1, err := b.ToHex(tx1)
+	if err != nil {
+		b.logger.Debug("fail to call btc.ToHex(tx1)", zap.Error(err))
+	}
+	hexTx2, err := b.ToHex(tx2)
+	if err != nil {
+		b.logger.Debug("fail to call btc.ToHex(tx2)", zap.Error(err))
+	}
+	if hexTx1 == hexTx2 {
+		b.logger.Debug("hexTx before is same to hexTx after. Something program is wrong")
+	}
 }

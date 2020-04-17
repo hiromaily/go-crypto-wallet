@@ -32,7 +32,7 @@ func (w *Wallet) createRawTx(
 	txRepoTxInputs []walletrepo.TxInput,
 	addrsPrevs *btc.AddrsPrevTxs) (string, string, error) {
 
-	//1. get unallocated address for receiver
+	// 1. get unallocated address for receiver
 	pubkeyTable, err := w.storager.GetOneUnAllocatedAccountPubKeyTable(receiverAccountType)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call storager.GetOneUnAllocatedAccountPubKeyTable()")
@@ -132,10 +132,17 @@ func (w *Wallet) calculateOutputTotal(msgTx *wire.MsgTx, adjustmentFee float64, 
 	return outputTotal, fee, nil
 }
 
-//TODO:引数の数が多いのはGoにおいてはBad practice...
-//[共通(receipt/payment/transfer)]
-func (w *Wallet) insertTxTableForUnsigned(actionType action.ActionType, hex string, inputTotal, outputTotal, fee btcutil.Amount, txType uint8,
-	txInputs []walletrepo.TxInput, txOutputs []walletrepo.TxOutput, paymentRequestIds []int64) (int64, error) {
+// - available from receipt/payment/transfer action
+func (w *Wallet) insertTxTableForUnsigned(
+	actionType action.ActionType,
+	hex string,
+	inputTotal,
+	outputTotal,
+	fee btcutil.Amount,
+	txType uint8,
+	txInputs []walletrepo.TxInput,
+	txOutputs []walletrepo.TxOutput,
+	paymentRequestIds []int64) (int64, error) {
 
 	//1.内容が同じだと、生成されるhexもまったく同じ為、同一のhexが合った場合は処理をskipする
 	count, err := w.storager.GetTxCountByUnsignedHex(actionType, hex)
@@ -204,8 +211,8 @@ func (w *Wallet) insertTxTableForUnsigned(actionType action.ActionType, hex stri
 	return txReceiptID, nil
 }
 
-// storeHex　hex情報を保存し、ファイル名を返す
-// [共通(receipt/payment)]
+// generateHexFile　to generate file for hex and encoded previous addresses
+// - available from receipt/payment/transfer action
 func (w *Wallet) generateHexFile(actionType action.ActionType, hex, encodedAddrsPrevs string, id int64) (string, error) {
 	var (
 		generatedFileName string
@@ -217,11 +224,11 @@ func (w *Wallet) generateHexFile(actionType action.ActionType, hex, encodedAddrs
 		savedata = fmt.Sprintf("%s,%s", savedata, encodedAddrsPrevs)
 	}
 
-	//To File
+	// create file
 	path := w.txFileRepo.CreateFilePath(actionType, tx.TxTypeUnsigned, id)
 	generatedFileName, err = w.txFileRepo.WriteFile(path, savedata)
 	if err != nil {
-		return "", errors.Errorf("txfile.WriteFile(): error: %s", err)
+		return "", errors.Wrap(err,"fail to call txFileRepo.WriteFile()")
 	}
 
 	return generatedFileName, nil

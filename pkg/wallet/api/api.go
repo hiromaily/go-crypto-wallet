@@ -83,7 +83,7 @@ type Bitcoiner interface {
 	GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error)
 	GetTransactionByTxID(txID string) (*btcjson.GetTransactionResult, error)
 	GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutResult, error)
-	CreateRawTransaction(sendAddr string, amount btcutil.Amount, inputs []btcjson.TransactionInput) (*wire.MsgTx, error)
+	CreateRawTransaction(receiverAddr string, amount btcutil.Amount, inputs []btcjson.TransactionInput) (*wire.MsgTx, error)
 	CreateRawTransactionWithOutput(inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount) (*wire.MsgTx, error)
 	FundRawTransaction(hex string) (*btc.FundRawTransactionResult, error)
 	SignRawTransaction(tx *wire.MsgTx, prevtxs []btc.PrevTx) (*wire.MsgTx, bool, error)

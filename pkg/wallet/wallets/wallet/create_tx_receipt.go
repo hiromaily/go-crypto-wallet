@@ -27,7 +27,9 @@ type parsedTx struct {
 	addresses      []string
 }
 
-// DetectReceivedCoin Wallet内アカウントに入金があれば、そこから、未署名のトランザクションを返す
+// CreateReceiptTx create unsigned tx if client accounts have coins
+// - sender account: client, receiver account: receipt
+// - receiver account covers fee
 func (w *Wallet) CreateReceiptTx(adjustmentFee float64) (string, string, error) {
 	fixedAccount := account.AccountTypeClient
 
@@ -65,6 +67,7 @@ func (w *Wallet) CreateReceiptTx(adjustmentFee float64) (string, string, error) 
 		&addrsPrevs)
 
 	//TODO: notify what unsigned tx is created
+	// => in command pkg
 
 	return hex, fileName, err
 }
