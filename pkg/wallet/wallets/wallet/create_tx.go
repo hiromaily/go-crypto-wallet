@@ -144,17 +144,17 @@ func (w *Wallet) insertTxTableForUnsigned(
 	txOutputs []walletrepo.TxOutput,
 	paymentRequestIds []int64) (int64, error) {
 
-	//1.内容が同じだと、生成されるhexもまったく同じ為、同一のhexが合った場合は処理をskipする
+	// 1. skip if same hex is already stored
 	count, err := w.storager.GetTxCountByUnsignedHex(actionType, hex)
 	if err != nil {
-		return 0, errors.Errorf("DB.GetTxCountByUnsignedHex(): error: %s", err)
+		return 0, errors.Wrap(err, "fail to call storager.GetTxCountByUnsignedHex()")
 	}
 	if count != 0 {
 		//skip
 		return 0, nil
 	}
 
-	//2.TxReceiptテーブル
+	// 2.TxReceipt table
 	txReceipt := walletrepo.TxTable{}
 	txReceipt.UnsignedHexTx = hex
 	txReceipt.TotalInputAmount = w.btc.AmountString(inputTotal)
@@ -162,56 +162,53 @@ func (w *Wallet) insertTxTableForUnsigned(
 	txReceipt.Fee = w.btc.AmountString(fee)
 	txReceipt.TxType = txType
 
+	// start db transaction
 	tx := w.storager.MustBegin()
 	txReceiptID, err := w.storager.InsertTxForUnsigned(actionType, &txReceipt, tx, false)
 	if err != nil {
-		return 0, errors.Errorf("DB.InsertTxForUnsigned(): error: %s", err)
+		return 0, errors.Wrap(err, "fail to call storager.InsertTxForUnsigned()")
 	}
 
-	//3.TxReceiptInputテーブル
-	//ReceiptIDの更新
+	// 3.TxReceiptInput table
+	// update ReceiptID
 	for idx := range txInputs {
 		txInputs[idx].ReceiptID = txReceiptID
 	}
 	err = w.storager.InsertTxInputForUnsigned(actionType, txInputs, tx, false)
 	if err != nil {
-		return 0, errors.Errorf("DB.InsertTxInputForUnsigned(): error: %s", err)
+		return 0, errors.Wrap(err, "fail to call storager.InsertTxInputForUnsigned()")
 	}
 
-	//4.TxReceiptOutputテーブル
-	//ReceiptIDの更新
+	// 4.TxReceiptOutput table
+	// update ReceiptID
 	for idx := range txOutputs {
 		txOutputs[idx].ReceiptID = txReceiptID
 	}
-
 	//commit flag
-	//paymentのみ、後続の処理が存在する(payment_requestテーブル)
 	isCommit := true
 	if actionType == action.ActionTypePayment {
 		isCommit = false
 	}
-
 	err = w.storager.InsertTxOutputForUnsigned(actionType, txOutputs, tx, isCommit)
 	if err != nil {
-		return 0, errors.Errorf("DB.InsertTxOutputForUnsigned(): error: %s", err)
+		return 0, errors.Wrap(err, "storager.InsertTxOutputForUnsigned()")
 	}
 
-	//TODO:未着手
-	//5.Toに指定されたaccount_pubkey_receiptなどの使用されたwalletのis_allocatedを1に更新する
+	//TODO: not implemented yet
+	// 5. address for receiver account should be updated `is_allocated=1`
 
-	//6. payment_requestのpayment_idを更新する paymentRequestIds
+	// 6. update payment_id in payment_request table for only action.ActionTypePayment
 	if actionType == action.ActionTypePayment {
-		//txReceiptID
 		_, err = w.storager.UpdatePaymentIDOnPaymentRequest(txReceiptID, paymentRequestIds, tx, true)
 		if err != nil {
-			return 0, errors.Errorf("DB.UpdatePaymentIDOnPaymentRequest(): error: %s", err)
+			return 0, errors.Wrap(err, "storager.UpdatePaymentIDOnPaymentRequest()")
 		}
 	}
 
 	return txReceiptID, nil
 }
 
-// generateHexFile　to generate file for hex and encoded previous addresses
+// generateHexFile generate file for hex and encoded previous addresses
 // - available from receipt/payment/transfer action
 func (w *Wallet) generateHexFile(actionType action.ActionType, hex, encodedAddrsPrevs string, id int64) (string, error) {
 	var (
@@ -228,7 +225,7 @@ func (w *Wallet) generateHexFile(actionType action.ActionType, hex, encodedAddrs
 	path := w.txFileRepo.CreateFilePath(actionType, tx.TxTypeUnsigned, id)
 	generatedFileName, err = w.txFileRepo.WriteFile(path, savedata)
 	if err != nil {
-		return "", errors.Wrap(err,"fail to call txFileRepo.WriteFile()")
+		return "", errors.Wrap(err, "fail to call txFileRepo.WriteFile()")
 	}
 
 	return generatedFileName, nil

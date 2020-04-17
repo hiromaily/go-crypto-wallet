@@ -56,6 +56,8 @@ func (w *Wallet) CreateReceiptTx(adjustmentFee float64) (string, string, error) 
 		SenderAccount: fixedAccount,
 	}
 
+	//TODO: how this code can be integrated with CreateTransferTx ??
+
 	// create raw tx
 	hex, fileName, err := w.createRawTx(
 		action.ActionTypeReceipt,
