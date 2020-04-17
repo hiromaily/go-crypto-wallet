@@ -37,13 +37,11 @@ func (c *ReceiptCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
 	var (
-		fee float64
-		//isCheck bool
+		fee     float64
 		isDebug bool
 	)
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
 	flags.Float64Var(&fee, "fee", 0, "adjustment fee")
-	//flags.BoolVar(&isCheck, "check", false, "only check client addresses, not create unsigned transaction")
 	flags.BoolVar(&isDebug, "debug", false, "execute series of flows from creation of a receiving transaction to sending of a transaction")
 	if err := flags.Parse(args); err != nil {
 		return 1
@@ -55,9 +53,9 @@ func (c *ReceiptCommand) Run(args []string) int {
 
 	// Detect transaction for clients from blockchain network and create receipt unsigned transaction
 	// It would be run manually on the daily basis because signature is manual task
-	hex, fileName, err := c.wallet.DetectReceivedCoin(fee)
+	hex, fileName, err := c.wallet.CreateReceiptTx(fee)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call DetectReceivedCoin() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call CreateReceiptTx() %+v", err))
 		return 1
 	}
 	if hex == "" {
@@ -76,9 +74,9 @@ func (c *ReceiptCommand) runDebug(fee float64) int {
 	// make sure sequence from detecting receipt transactions, sign on unsigned transaction, send signed transaction
 	// 1.Detect receipt transaction from outside and create receipt unsigned transaction
 	c.ui.Info("[1]Run: Detect receipt transaction")
-	hex, fileName, err := c.wallet.DetectReceivedCoin(fee)
+	hex, fileName, err := c.wallet.CreateReceiptTx(fee)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call DetectReceivedCoin() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call CreateReceiptTx() %+v", err))
 		return 1
 	}
 	if hex == "" {

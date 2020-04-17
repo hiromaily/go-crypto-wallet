@@ -335,7 +335,7 @@ func (w *Wallet) createRawTransactionForPayment(adjustmentFee float64, inputs []
 	// 8. GCSにトランザクションファイルを作成
 	var generatedFileName string
 	if txReceiptID != 0 {
-		generatedFileName, err = w.storeHex(hex, encodedAddrsPrevs, txReceiptID, action.ActionTypePayment)
+		generatedFileName, err = w.generateHexFile(action.ActionTypePayment, hex, encodedAddrsPrevs, txReceiptID)
 		if err != nil {
 			return "", "", errors.Errorf("wallet.storeHex(): error: %s", err)
 		}

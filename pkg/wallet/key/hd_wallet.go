@@ -182,7 +182,7 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 		}
 
 		// p2sh-segwit address
-		p2shSegwit, redeemScript, err := k.getP2shSegwitAddr(privateKey)
+		strP2shSegwit, redeemScript, err := k.getP2shSegwitAddr(privateKey)
 		if err != nil {
 			return nil, err
 		}
@@ -191,7 +191,7 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 		walletKeys[i] = WalletKey{
 			WIF:          wif.String(),
 			Address:      strP2PKHAddr, //[P2PKH]AddressPubKeyHash is an Address for a pay-to-pubkey-hash
-			P2shSegwit:   p2shSegwit,
+			P2shSegwit:   strP2shSegwit,
 			FullPubKey:   getFullPubKey(privateKey, true),
 			RedeemScript: redeemScript,
 		}

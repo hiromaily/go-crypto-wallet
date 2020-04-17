@@ -113,7 +113,7 @@ func (r *registry) newAddressFileStorager() address.Storager {
 
 func (r *registry) newTxFileStorager() tx.Storager {
 	return tx.NewFileRepository(
-		r.conf.PubkeyFile.BasePath,
+		r.conf.TxFile.BasePath,
 		r.newLogger(),
 	)
 }

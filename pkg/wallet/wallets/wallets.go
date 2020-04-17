@@ -20,7 +20,7 @@ import (
 // Walleter is for watch only wallet service interface
 type Walleter interface {
 	ImportPubKey(fileName string, accountType account.AccountType, isRescan bool) error
-	DetectReceivedCoin(adjustmentFee float64) (string, string, error)
+	CreateReceiptTx(adjustmentFee float64) (string, string, error)
 	CreateUnsignedPaymentTx(adjustmentFee float64) (string, string, error)
 	SendToAccount(from, to account.AccountType, amount btcutil.Amount) (string, string, error)
 	SendFromFile(filePath string) (string, error)

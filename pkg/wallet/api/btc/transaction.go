@@ -184,11 +184,11 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 //  => watch only wallet(online)で利用されることを想定
 // こちらは多対1用の送金、つまり入金時、集約用アドレスに一括して送信するケースで利用することを想定
 // [Noted] 手数料を考慮せず、全額送金しようとすると、SendRawTransaction()で、`min relay fee not met`エラーが発生する
-func (b *Bitcoin) CreateRawTransaction(sendAddr string, amount btcutil.Amount, inputs []btcjson.TransactionInput) (*wire.MsgTx, error) {
+func (b *Bitcoin) CreateRawTransaction(receiverAddr string, amount btcutil.Amount, inputs []btcjson.TransactionInput) (*wire.MsgTx, error) {
 	//TODO:sendAddrの厳密なチェックがセキュリティ的に必要な場面もありそう
-	sendAddrDecoded, err := btcutil.DecodeAddress(sendAddr, b.GetChainConf())
+	sendAddrDecoded, err := btcutil.DecodeAddress(receiverAddr, b.GetChainConf())
 	if err != nil {
-		return nil, errors.Errorf("btcutil.DecodeAddress(%s): error: %s", sendAddr, err)
+		return nil, errors.Wrapf(err, "fail to call btcutil.DecodeAddress(%s)", receiverAddr)
 	}
 
 	// パラメータを作成する
