@@ -1,8 +1,6 @@
 package wallet
 
 import (
-	"strconv"
-
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
@@ -251,74 +249,4 @@ func (w *Wallet) createRawTransactionForPayment(
 	// TODO:NatsのPublisherとして通知すればいいか？
 
 	return hex, generatedFileName, nil
-}
-
-// UserPayment ユーザーの支払先アドレスと金額
-type UserPayment struct {
-	senderAddr   string          //送信者のアドレス (履歴を追うためだけに保持)
-	receiverAddr string          //受信者のアドレス
-	validRecAddr btcutil.Address //受診者のアドレス(変換後)
-	amount       float64         //送信金額
-	validAmount  btcutil.Amount  //送金金額(変換後)
-}
-
-// createUserPayment 出金依頼テーブルから処理するためのデータを取得する
-func (w *Wallet) createUserPayment() ([]UserPayment, []int64, error) {
-	paymentRequests, err := w.storager.GetPaymentRequestAll()
-	if err != nil {
-		return nil, nil, errors.Errorf("DB.GetPaymentRequestAll() error: %s", err)
-	}
-	if len(paymentRequests) == 0 {
-		//処理するデータが存在しない。(エラーではない)
-		return nil, nil, nil
-	}
-
-	userPayments := make([]UserPayment, len(paymentRequests))
-	paymentRequestIds := make([]int64, len(paymentRequests))
-
-	//TODO:更新用にidの配列も保持しておくこと
-	for idx, val := range paymentRequests {
-		paymentRequestIds[idx] = val.ID
-
-		userPayments[idx].senderAddr = val.AddressFrom
-		userPayments[idx].receiverAddr = val.AddressTo
-		amt, err := strconv.ParseFloat(val.Amount, 64)
-		if err != nil {
-			//致命的なエラー、起きるのであればプログラムがおかしい
-			w.logger.Error("payment_request table includes invalid amount field")
-			return nil, nil, errors.New("payment_request table includes invalid amount field")
-		}
-		userPayments[idx].amount = amt
-
-		//Address TODO:このタイミングでaddressは不要かもしれない
-		userPayments[idx].validRecAddr, err = w.btc.DecodeAddress(userPayments[idx].receiverAddr)
-		if err != nil {
-			//致命的なエラー: これは本来事前にチェックされるため、ありえないはず
-			w.logger.Error("unexpected error occurred converting string type receiverAddr to address type")
-			return nil, nil, errors.New("unexpected error occurred converting string type receiverAddr to address type")
-		}
-		//grok.Value(userPayments[idx].validRecAddr)
-
-		//Amount
-		userPayments[idx].validAmount, err = w.btc.FloatBitToAmount(userPayments[idx].amount)
-		if err != nil {
-			//致命的なエラー: これは本来事前にチェックされるため、ありえないはず
-			w.logger.Error("unexpected error occurred converting float64 type amount to Amount type")
-			return nil, nil, errors.New("unexpected error occurred converting float64 type amount to Amount type")
-		}
-	}
-
-	//Addressが重複する場合、合算したほうがいいかも => transactionのoutputを作成するタイミングで合算可能
-	return userPayments, paymentRequestIds, nil
-}
-
-// isFoundTxIDAndVout 指定したtxIDとvoutに紐づくinputが既に存在しているか確認する
-// TODO:utilityとして有用なので、transaction.goに移動するか
-func (w *Wallet) isFoundTxIDAndVout(txID string, vout uint32, inputs []btcjson.TransactionInput) bool {
-	for _, val := range inputs {
-		if val.Txid == txID && val.Vout == vout {
-			return true
-		}
-	}
-	return false
 }
