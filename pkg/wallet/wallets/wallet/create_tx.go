@@ -2,8 +2,8 @@ package wallet
 
 import (
 	"fmt"
-	"github.com/bookerzzz/grok"
 
+	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
@@ -22,7 +22,7 @@ type parsedTx struct {
 	txInputs       []btcjson.TransactionInput
 	txRepoTxInputs []walletrepo.TxInput
 	prevTxs        []btc.PrevTx
-	addresses      []string
+	addresses      []string //input, sender's address
 }
 
 // - check unspentTx for sender account
@@ -32,7 +32,9 @@ type parsedTx struct {
 
 // create unsigned tx
 // - sender account: client, receiver account: receipt
-// - receiver account covers fee
+// - if amount=0, all coin is sent
+// FIXME: receiver account covers fee, but is should be flexible
+// TODO: after this func, what if `listtransactions` api is called to see result
 func (w *Wallet) createTx(
 	sender,
 	receiver account.AccountType,
@@ -40,21 +42,38 @@ func (w *Wallet) createTx(
 	amount btcutil.Amount,
 	adjustmentFee float64) (string, string, error) {
 
+	//amount
+	// - receiptAction: it's 0. total amount in clients to receipt
+	// - transferAction: if 0, total amount of sender to receiver
+	//                   if not 0, amount is sent from sender to receiver
+	// - paymentAction: total amount in payment users
+
+	w.logger.Debug("createTx()",
+		zap.String("sender_acount", sender.String()),
+		zap.String("receiver_acount", receiver.String()),
+		zap.String("target_action", targetAction.String()),
+		zap.Any("amount", amount),
+		zap.Float64("adjustmentFee", adjustmentFee))
+
 	// get listUnspent
-	unspentList, err := w.getUnspentList(sender)
+	unspentList, _, err := w.getUnspentList(sender)
 	if len(unspentList) == 0 {
 		w.logger.Info("no listunspent")
 		return "", "", nil
 	}
 
 	// parse listUnspent
-	parsedTx, inputTotal := w.parseListUnspentTx(unspentList, amount)
+	parsedTx, inputTotal, isDone := w.parseListUnspentTx(unspentList, amount)
 	w.logger.Debug(
 		"total coin to send (Satoshi) before fee calculated",
 		zap.Any("input_amount", inputTotal),
 		zap.Int("len(inputs)", len(parsedTx.txInputs)))
 	if len(parsedTx.txInputs) == 0 {
+		w.logger.Info("no input tx in listUnspent")
 		return "", "", nil
+	}
+	if !isDone {
+		return "", "", errors.New("sender account can't meet amount to send")
 	}
 
 	addrsPrevs := btc.AddrsPrevTxs{
@@ -63,7 +82,7 @@ func (w *Wallet) createTx(
 		SenderAccount: sender,
 	}
 
-	//TODO: how this code can be integrated with CreateTransferTx ??
+	//TODO: in transfer, if amount is set, change must be created but not implemented yet
 
 	// create raw tx
 	hex, fileName, err := w.createRawTx(
@@ -83,33 +102,38 @@ func (w *Wallet) createTx(
 
 // call API `unspentlist`
 // no result and no error is possible, so caller should check both returned value
-func (w *Wallet) getUnspentList(accountType account.AccountType) ([]btc.ListUnspentResult, error) {
+func (w *Wallet) getUnspentList(accountType account.AccountType) ([]btc.ListUnspentResult, []btcutil.Address, error) {
 	// unlock locked UnspentTransaction
 	//if err := w.BTC.UnlockAllUnspentTransaction(); err != nil {
 	//	return "", "", err
 	//}
 
 	// get listUnspent
-	unspentList, _, err := w.btc.ListUnspentByAccount(accountType)
+	unspentList, unspentAddrs, err := w.btc.ListUnspentByAccount(accountType)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call btc.Client().ListUnspent()")
+		return nil, nil, errors.Wrap(err, "fail to call btc.Client().ListUnspent()")
 	}
 	grok.Value(unspentList)
 	if len(unspentList) == 0 {
 		w.logger.Info("no listunspent")
-		return nil, nil
+		return nil, nil, nil
 	}
-	return unspentList, nil
+	return unspentList, unspentAddrs, nil
 }
 
 // parse result of listUnspent
 // retured *parsedTx could be nil
-func (w *Wallet) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount btcutil.Amount) (*parsedTx, btcutil.Amount) {
+func (w *Wallet) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount btcutil.Amount) (*parsedTx, btcutil.Amount, bool) {
 	var inputTotal btcutil.Amount
 	txInputs := make([]btcjson.TransactionInput, 0, len(unspentList))
 	txRepoTxInputs := make([]walletrepo.TxInput, 0, len(unspentList))
 	prevTxs := make([]btc.PrevTx, 0, len(unspentList))
 	addresses := make([]string, 0, len(unspentList))
+
+	var isDone bool //if isDone is false, sender can't meet amount
+	if amount == 0 {
+		isDone = true
+	}
 
 	for _, tx := range unspentList {
 		// Amount
@@ -139,11 +163,12 @@ func (w *Wallet) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount 
 			InputConfirmations: tx.Confirmations,
 		})
 
+		//TODO: if sender is client account, RedeemScript is blank
 		prevTxs = append(prevTxs, btc.PrevTx{
 			Txid:         tx.TxID,
 			Vout:         tx.Vout,
 			ScriptPubKey: tx.ScriptPubKey,
-			RedeemScript: "", //required if target account is multsig address
+			RedeemScript: tx.RedeemScript, //required if target account is multsig address
 			Amount:       tx.Amount,
 		})
 
@@ -154,6 +179,7 @@ func (w *Wallet) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount 
 			continue
 		}
 		if inputTotal > amount {
+			isDone = true
 			break
 		}
 	}
@@ -163,7 +189,7 @@ func (w *Wallet) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount 
 		txRepoTxInputs: txRepoTxInputs,
 		prevTxs:        prevTxs,
 		addresses:      addresses,
-	}, inputTotal
+	}, inputTotal, isDone
 }
 
 // createRawTx create raw tx

@@ -42,9 +42,9 @@ func (c *SentTxCommand) Run(args []string) int {
 
 	// monitor sent transactions
 	//TODO: add account parameter
-	err := c.wallet.UpdateStatus()
+	err := c.wallet.UpdateTxStatus()
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call UpdateStatus() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call UpdateTxStatus() %+v", err))
 		return 1
 	}
 

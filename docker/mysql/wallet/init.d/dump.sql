@@ -178,17 +178,15 @@ CREATE TABLE `payment_request` (
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='出金依頼情報のTable';
 
 
-/*テストデータのため本番では削除すること*/
-/*
+/*this is test data for development*/
 LOCK TABLES `payment_request` WRITE;
 INSERT INTO `payment_request` VALUES
-  (1,NULL,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2N33pRYgyuHn6K2xCrrq9dPzuW6ZAvFJfVz',0.1,false,now()),
-  (2,NULL,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2NFd6TEUgSpy8LvttBgVrLB6ZBA5X9BSUSz',0.2,false,now()),
-  (3,NULL,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV',0.25,false,now()),
-  (4,NULL,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV',0.3,false,now()),
-  (5,NULL,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','yasui','2N7WsiDc4yK7PoUL9saGE5ZGsbRQ8R9NafS',0.4,false,now());
+  (1,NULL,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','tom1','2N33pRYgyuHn6K2xCrrq9dPzuW6ZAvFJfVz',0.001,false,now()),
+  (2,NULL,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','tom2','2NFd6TEUgSpy8LvttBgVrLB6ZBA5X9BSUSz',0.002,false,now()),
+  (3,NULL,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','tom3','2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV',0.0025,false,now()),
+  (4,NULL,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','tom4','2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV',0.0015,false,now()),
+  (5,NULL,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','tom5','2N7WsiDc4yK7PoUL9saGE5ZGsbRQ8R9NafS',0.0022,false,now());
 UNLOCK TABLES;
-*/
 
 
 --

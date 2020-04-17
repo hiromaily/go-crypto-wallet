@@ -10,8 +10,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/action"
 )
 
-// UpdateStatus tx_paymentテーブル/tx_receiptテーブルのcurrent_tx_typeが3(送信済)のものを監視し、statusをupdateする
-func (w *Wallet) UpdateStatus() error {
+// UpdateTxStatus tx_paymentテーブル/tx_receiptテーブルのcurrent_tx_typeが3(送信済)のものを監視し、statusをupdateする
+func (w *Wallet) UpdateTxStatus() error {
 
 	//tx_typeが`done`で処理が止まっているものがあるという前提で、処理を分ける
 

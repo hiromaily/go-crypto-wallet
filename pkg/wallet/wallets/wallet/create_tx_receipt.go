@@ -6,6 +6,8 @@ import (
 )
 
 // CreateReceiptTx create unsigned tx if client accounts have coins
+// - sender: client, receiver: receipt
+// - receiver account covers fee, but is should be flexible
 func (w *Wallet) CreateReceiptTx(adjustmentFee float64) (string, string, error) {
 	sender := account.AccountTypeClient
 	receiver := account.AccountTypeReceipt

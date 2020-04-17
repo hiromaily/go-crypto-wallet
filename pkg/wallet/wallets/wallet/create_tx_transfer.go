@@ -1,19 +1,18 @@
 package wallet
 
 import (
+	"github.com/pkg/errors"
+
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/action"
-	"github.com/pkg/errors"
 )
 
-// CreateTransferTx transfer coin among internal account except client, authorization
-// - if amount=0, all coin is sent
-// TODO: temporary fixed account is used `receipt to payment`
-// TODO: after this func, what if `listtransactions` api is called to see result
+// CreateTransferTx create unsigned tx for transfer coin among internal account except client, authorization
+// FIXME: for now, receiver account covers fee, but is should be flexible
 func (w *Wallet) CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error) {
 	targetAction := action.ActionTypeTransfer
 
-	// validation
+	// validation account
 	if receiver == account.AccountTypeClient || receiver == account.AccountTypeAuthorization {
 		return "", "", errors.New("invalid receiver account. client, authorization account is not allowed as receiver")
 	}
