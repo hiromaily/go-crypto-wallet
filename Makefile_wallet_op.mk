@@ -44,7 +44,7 @@ create-payment-all:
 # create transfer unsigned transaction among accounts
 .PHONY: create-transfer-tx
 create-transfer-tx:
-	wallet create transfer -account1 ${acnt1} -account2 ${acnt2}
+	wallet create transfer -account1 ${acnt1} -account2 ${acnt2} -amount ${amount}
 
 ###############################################################################
 # send transaction

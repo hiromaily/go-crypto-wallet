@@ -13,8 +13,8 @@ import (
 
 // coldwallet側で署名済みトランザクションを作成したものから、送金処理を行う
 
-// SendFromFile 渡されたファイルから署名済transactionを読み取り、送信を行う
-func (w *Wallet) SendFromFile(filePath string) (string, error) {
+// SendTx 渡されたファイルから署名済transactionを読み取り、送信を行う
+func (w *Wallet) SendTx(filePath string) (string, error) {
 
 	//ファイル名から、tx_receipt_idを取得する
 	//payment_5_unsigned_1534466246366489473

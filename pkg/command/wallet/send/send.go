@@ -46,9 +46,9 @@ func (c *SendCommand) Run(args []string) int {
 	}
 
 	// send signed transactions
-	txID, err := c.Wallet.SendFromFile(filePath)
+	txID, err := c.Wallet.SendTx(filePath)
 	if err != nil {
-		c.UI.Error(fmt.Sprintf("fail to call SendFromFile() %+v", err))
+		c.UI.Error(fmt.Sprintf("fail to call SendTx() %+v", err))
 		return 1
 	}
 

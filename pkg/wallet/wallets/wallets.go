@@ -1,8 +1,6 @@
 package wallets
 
 import (
-	"github.com/btcsuite/btcutil"
-
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
@@ -21,9 +19,9 @@ import (
 type Walleter interface {
 	ImportPubKey(fileName string, accountType account.AccountType, isRescan bool) error
 	CreateReceiptTx(adjustmentFee float64) (string, string, error)
+	CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error)
 	CreateUnsignedPaymentTx(adjustmentFee float64) (string, string, error)
-	SendToAccount(from, to account.AccountType, amount btcutil.Amount) (string, string, error)
-	SendFromFile(filePath string) (string, error)
+	SendTx(filePath string) (string, error)
 	UpdateStatus() error
 
 	Done()

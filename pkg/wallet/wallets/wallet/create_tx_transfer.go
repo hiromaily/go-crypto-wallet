@@ -14,41 +14,44 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btc"
 )
 
-//SendToAccount 内部アカウント間での送金
-// amountが0のとき、全額送金する
-// TODO: アカウントがまだ固定
-// TODO:実行後、`listtransactions`methodで確認できるかも(未チェック)
-func (w *Wallet) SendToAccount(from, to account.AccountType, amount btcutil.Amount) (string, string, error) {
+// CreateTransferTx transfer coin among internal account except client, authorization
+// - if amount=0, all coin is sent
+// TODO: temporary fixed account is used `receipt to payment`
+// TODO: after this func, what if `listtransactions` api is called to see result
+func (w *Wallet) CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error) {
 
-	//Validation
-	//とりあえず、receipt to paymentで実装
-	//AccountTypeClient, AccountTypeAuthorizationは除外する
-	if to == account.AccountTypeClient || to == account.AccountTypeAuthorization {
-		return "", "", errors.New("Client, Authorization account can not receive coin")
+	// validation
+	if receiver == account.AccountTypeClient || receiver == account.AccountTypeAuthorization {
+		return "", "", errors.New("invalid receiver account. client, authorization account is not allowed as receiver")
 	}
-	if from == to {
-		return "", "", errors.New("Validation error. `from` and `to` accountType should be different")
+	if sender == receiver {
+		return "", "", errors.New("invalid account. sender and receiver is same")
+	}
+	//amount btcutil.Amount
+	amount, err := w.btc.FloatBitToAmount(floatAmount)
+	if err != nil {
+		return "", "", err
 	}
 
-	//残高確認
-	balance, err := w.btc.GetReceivedByLabelAndMinConf(from.String(), w.btc.ConfirmationBlock())
+	// check balance for sender
+	balance, err := w.btc.GetReceivedByLabelAndMinConf(sender.String(), w.btc.ConfirmationBlock())
 	if err != nil {
 		return "", "", err
 	}
 	if balance <= amount {
-		//残高が不足している
-		return "", "", errors.Errorf("%s account balance is insufficient", from)
+		//balance is short
+		return "", "", errors.Errorf("account: %s balance is insufficient", sender)
 	}
 
 	//指定金額になるまで、utxoからinputを作成する
 	// Listunspent()にてpaymentアカウント用のutxoをすべて取得する
-	unspentList, _, err := w.btc.ListUnspentByAccount(from)
+	unspentList, _, err := w.btc.ListUnspentByAccount(sender)
 	if err != nil {
-		return "", "", errors.Errorf("BTC.ListUnspentByAccount(%s) error: %s", from, err)
+		return "", "", errors.Errorf("BTC.ListUnspentByAccount(%s) error: %s", sender, err)
 	}
 
 	if len(unspentList) == 0 {
-		w.logger.Info("no listunspent for from account", zap.String("account", from.String()))
+		w.logger.Info("no listunspent for from account", zap.String("account", sender.String()))
 		return "", "", nil
 	}
 
@@ -130,11 +133,11 @@ func (w *Wallet) SendToAccount(from, to account.AccountType, amount btcutil.Amou
 	addrsPrevs := btc.AddrsPrevTxs{
 		Addrs:         addresses,
 		PrevTxs:       prevTxs,
-		SenderAccount: from,
+		SenderAccount: sender,
 	}
 
 	// 一連の処理を実行
-	hex, fileName, err := w.createRawTx(action.ActionTypeTransfer, to, 0, inputs,
+	hex, fileName, err := w.createRawTx(action.ActionTypeTransfer, receiver, 0, inputs,
 		inputTotal, txReceiptInputs, &addrsPrevs)
 
 	return hex, fileName, err

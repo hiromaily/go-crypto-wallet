@@ -315,7 +315,7 @@ func main() {
 //		checkAccountWithoutAuthAndClient(opts.Account)
 //		checkAccountWithoutAuthAndClient(opts.Account2)
 //
-//		hex, fileName, err := wallet.SendToAccount(account.AccountType(opts.Account), account.AccountType(opts.Account2), 0)
+//		hex, fileName, err := wallet.CreateReceiptTx(account.AccountType(opts.Account), account.AccountType(opts.Account2), 0)
 //		if err != nil {
 //			logger.Fatalf("%+v", err)
 //		}

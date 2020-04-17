@@ -25,22 +25,27 @@ func (c *TransferCommand) Synopsis() string {
 func (c *TransferCommand) Help() string {
 	return `Usage: wallet create transfer [options...]
 Options:
-  -account1  account for transfer from
-  -account2  account for transfer to
+  -account1  sender account
+  -account2  receiver account
+  -amount    amount to send coin. if amount=0, all coin is sent
+  -fee       adjustment fee
 `
 }
 
-//WIP
 func (c *TransferCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
 	var (
 		account1 string
 		account2 string
+		amount   float64
+		fee      float64
 	)
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
-	flags.StringVar(&account1, "account1", "", "account for transfer from")
-	flags.StringVar(&account2, "account2", "", "account for transfer to")
+	flags.StringVar(&account1, "account1", "", "sender account")
+	flags.StringVar(&account2, "account2", "", "receiver account")
+	flags.Float64Var(&amount, "amount", 0, "amount to send coin")
+	flags.Float64Var(&fee, "fee", 0, "adjustment fee")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
@@ -54,19 +59,27 @@ func (c *TransferCommand) Run(args []string) int {
 		c.ui.Error("account option [-account2] is invalid")
 		return 1
 	}
-	if !account.NotAllow(account1, []account.AccountType{account.AccountTypeAuthorization, account.AccountTypeClient}) {
-		c.ui.Error(fmt.Sprintf("account1: %s/%s is not allowed", account.AccountTypeAuthorization, account.AccountTypeClient))
-		return 1
-	}
-	if !account.NotAllow(account2, []account.AccountType{account.AccountTypeAuthorization, account.AccountTypeClient}) {
-		c.ui.Error(fmt.Sprintf("account2: %s/%s is not allowed", account.AccountTypeAuthorization, account.AccountTypeClient))
-		return 1
-	}
+	// This logic should be implemented in wallet.CreateTransferTx()
+	//if !account.NotAllow(account1, []account.AccountType{account.AccountTypeAuthorization, account.AccountTypeClient}) {
+	//	c.ui.Error(fmt.Sprintf("account1: %s/%s is not allowed", account.AccountTypeAuthorization, account.AccountTypeClient))
+	//	return 1
+	//}
+	//if !account.NotAllow(account2, []account.AccountType{account.AccountTypeAuthorization, account.AccountTypeClient}) {
+	//	c.ui.Error(fmt.Sprintf("account2: %s/%s is not allowed", account.AccountTypeAuthorization, account.AccountTypeClient))
+	//	return 1
+	//}
+	//if amount == 0{
+	//	c.ui.Error("amount option [-amount] is invalid")
+	//}
 
-	//TODO: amount should be set
-	hex, fileName, err := c.wallet.SendToAccount(account.AccountType(account1), account.AccountType(account2), 0)
+	hex, fileName, err := c.wallet.CreateTransferTx(
+		account.AccountType(account1),
+		account.AccountType(account2),
+		amount,
+		fee)
+
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call SendToAccount() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call CreateTransferTx() %+v", err))
 		return 1
 	}
 	if hex == "" {

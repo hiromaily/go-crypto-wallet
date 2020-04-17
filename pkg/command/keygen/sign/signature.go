@@ -48,7 +48,7 @@ func (c *SignatureCommand) Run(args []string) int {
 	// sign on unsigned transactions, action(receipt/payment) could be found from file name
 	hexTx, isSigned, generatedFileName, err := c.Wallet.SignTx(filePath)
 	if err != nil {
-		c.UI.Error(fmt.Sprintf("fail to call SendFromFile() %+v", err))
+		c.UI.Error(fmt.Sprintf("fail to call SignTx() %+v", err))
 	}
 
 	//TODO: output should be json if json option is true
