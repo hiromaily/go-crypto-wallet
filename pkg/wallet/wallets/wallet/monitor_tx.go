@@ -1,56 +1,55 @@
 package wallet
 
-//Watch only wallet
-
 import (
-	"github.com/bookerzzz/grok"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/action"
 )
 
-// UpdateTxStatus tx_paymentテーブル/tx_receiptテーブルのcurrent_tx_typeが3(送信済)のものを監視し、statusをupdateする
+// UpdateTxStatus update transaction status
+// - monitor transaction whose tx_type=3(TxTypeSent) in tx_payment/tx_receipt/tx_transfer
 func (w *Wallet) UpdateTxStatus() error {
+	//TODO: as possibility tx_type is not updated from `done`
 
-	//tx_typeが`done`で処理が止まっているものがあるという前提で、処理を分ける
+	types := []action.ActionType{
+		action.ActionTypeReceipt,
+		action.ActionTypePayment,
+		action.ActionTypeTransfer,
+	}
 
-	types := []action.ActionType{action.ActionTypeReceipt, action.ActionTypePayment, action.ActionTypeTransfer}
-
-	//1.ここでは送信済のみが対象
+	//1. update tx_type for TxTypeSent
 	for _, actionType := range types {
 		err := w.updateStatusForTxTypeSent(actionType)
 		if err != nil {
-			return errors.Errorf("ActionType: %s, updateStatusForTxTypeSent() error: %s", actionType, err)
+			return errors.Wrapf(err, "fail to call updateStatusForTxTypeSent() ActionType: %s", actionType)
 		}
 	}
 
-	//2.tx_typeがdoneのトランザクションに対して、通知
+	//2. update tx_type for TxTypeDone
+	// - TODO: notification
 	for _, actionType := range types {
 		err := w.updateStatusForTxTypeDone(actionType)
 		if err != nil {
-			return errors.Errorf("ActionType: %s, updateStatusForTxTypeDone() error: %s", actionType, err)
+			return errors.Wrapf(err, "fail to call updateStatusForTxTypeDone() ActionType: %s", actionType)
 		}
 	}
 
 	return nil
 }
 
-// current_tx_type更新処理
+// update TxTypeSent to TxTypeDone if confirmation is 6 or more
 func (w *Wallet) updateStatusForTxTypeSent(actionType action.ActionType) error {
-	// 送信済statusのものを取得
+	// get records whose status is TxTypeSent
 	hashes, err := w.storager.GetSentTxHashByTxTypeSent(actionType)
 	if err != nil {
-		return errors.Errorf("ActionType: %s, DB.GetSentTxHashByTxTypeSent() error: %s", actionType, err)
+		return errors.Wrapf(err, "fail to call storager.GetSentTxHashByTxTypeSent() ActionType: %s", actionType)
 	}
-	w.logger.Debug(
-		"called storager.GetSentTxHashByTxTypeSent()",
-		zap.String("actionType", actionType.String()),
-		zap.Any("hashes", hashes))
 
-	// hashの詳細を取得し、confirmationをチェックし、指定数以上であれば、ux_typeを更新する
+	// get hash in detail and check confirmation
+	// update txType if confirmation is 6 or more (or configured number
 	for _, hash := range hashes {
-		err = w.checkTransaction(hash, actionType)
+		err = w.checkTxConfirmation(hash, actionType)
 		if err != nil {
 			w.logger.Error(
 				"fail to call w.checkTransaction()",
@@ -64,20 +63,19 @@ func (w *Wallet) updateStatusForTxTypeSent(actionType action.ActionType) error {
 }
 
 func (w *Wallet) updateStatusForTxTypeDone(actionType action.ActionType) error {
-	// 更新
+	// get records whose status is TxTypeDone
 	hashes, err := w.storager.GetSentTxHashByTxTypeDone(actionType)
 	if err != nil {
-		return errors.Errorf("ActionType: %s, DB.GetSentTxHashByTxTypeDone() error: %s", actionType, err)
+		return errors.Wrapf(err, "fail to call storager.GetSentTxHashByTxTypeDone()", actionType)
 	}
 	w.logger.Debug(
 		"called storager.GetSentTxHashByTxTypeDone()",
 		zap.String("actionType", actionType.String()),
 		zap.Any("hashes", hashes))
 
-	// 通知する
+	// notify tx get done
 	for _, hash := range hashes {
-		//ユーザーに通知
-		id, err := w.notifyUsers(hash, actionType)
+		txID, err := w.notifyTxDone(hash, actionType)
 		if err != nil {
 			w.logger.Error(
 				"fail to call w.notifyUsers()",
@@ -86,13 +84,14 @@ func (w *Wallet) updateStatusForTxTypeDone(actionType action.ActionType) error {
 				zap.Error(err))
 			continue
 		}
-		if id == 0 {
+		// update is already done
+		if txID == 0 {
 			continue
 		}
 
-		//通知が成功したので、tx_typeを更新する(別funcで対応)
-		err = w.updateTxTypeNotified(id, actionType)
-		//仮にここがエラーになっても、通知は成功している。。。が、また処理が走ってしまう。。。
+		// update tx_type to TxTypeNotified
+		err = w.updateTxTypeNotified(txID, actionType)
+		//TODO: even if update is failed, notification is done. so how to manage??
 		if err != nil {
 			w.logger.Error(
 				"fail to call w.updateTxTypeNotified()",
@@ -105,128 +104,125 @@ func (w *Wallet) updateStatusForTxTypeDone(actionType action.ActionType) error {
 	return nil
 }
 
-// checkTransaction Bitcoin core APIでhashの状況をチェックし、もろもろ更新、通知を行う
-func (w *Wallet) checkTransaction(hash string, actionType action.ActionType) error {
-	//トランザクションの状態を取得
+// checkTxConfirmation check confirmation for hash tx
+func (w *Wallet) checkTxConfirmation(hash string, actionType action.ActionType) error {
+	// get tx in detail by RPC `gettransaction`
 	tran, err := w.btc.GetTransactionByTxID(hash)
 	if err != nil {
-		//logger.Errorf("ActionType: %s, w.BTC.GetTransactionByTxID(): txID:%s, err:%s", actionType, hash, err)
-		//TODO:実際に起きる場合はcanceledに更新したほうがいいか？
-		return errors.Errorf("ActionType: %s, w.BTC.GetTransactionByTxID(): txID:%s, err: %s", actionType, hash, err)
+		return errors.Wrapf(err, "fail to call btc.GetTransactionByTxID(): ActionType: %s, txID:%s", actionType, hash)
 	}
-	w.logger.Debug("Transactions Confirmations", zap.String("actionType", actionType.String()))
-	grok.Value(tran.Confirmations)
+	w.logger.Debug("confirmation detail",
+		zap.String("actionType", actionType.String()),
+		zap.Int64("confirmation", tran.Confirmations))
 
-	//現在のconfirmationをチェック
+	// check current confirmation
 	if tran.Confirmations >= int64(w.btc.ConfirmationBlock()) {
-		//指定にconfirmationに達したので、current_tx_typeをdoneに更新する
+		//current confirmation meet 6 or more
 		_, err = w.storager.UpdateTxTypeDoneByTxHash(actionType, hash, nil, true)
 		if err != nil {
-			return errors.Errorf("ActionType: %s, DB.UpdateTxTypeDoneByTxHash() error: %s", actionType, err)
+			return errors.Wrapf(err, "fail to call storager.UpdateTxTypeDoneByTxHash() ActionType: %s", actionType)
 		}
 	} else {
-		//TODO:TestNet環境だと1000satoshiでもトランザクションが処理されてしまう
-		//TODO:DBのsent_updated_atフィールドから一定時間立っても、指定したconfirmationに達しないものはキャンセルにして、
-		//TODO:手数料を上げて再度トランザクションを作成する？？
-		w.logger.Info("TODO:一定時間を過ぎてもトランザクションが終了しないものは通知したほうがいいかもしれない。")
+		// not completed yet
+		//TODO: what if confirmation doesn't proceed for a long time after signed tx is sent
+		// - should it be canceled??
+		// - then raise fee and should unsigned tx be re-created again??
+		w.logger.Info("confirmation is not met yet",
+			zap.Int("want", w.btc.ConfirmationBlock()),
+			zap.Int64("got", tran.Confirmations))
 	}
 
 	return nil
 }
 
-// notifyUsers 入金/出金が終了したことを通知する
-func (w *Wallet) notifyUsers(hash string, actionType action.ActionType) (int64, error) {
-	w.logger.Debug(
-		"w.notifyUsers()",
-		zap.String("actionType", actionType.String()),
-		zap.String("hash", hash))
+// notifyTxDone notify tx is sent and met specific confirmation number
+func (w *Wallet) notifyTxDone(hash string, actionType action.ActionType) (int64, error) {
 
-	//id: receiptID/paymentID
 	var (
-		id  int64
-		err error
+		txID int64
+		err  error
 	)
 
-	//[tx_receiptの場合]
-	if actionType == action.ActionTypeReceipt {
-
-		// 1.hashからidを取得(tx_receipt/tx_payment)
-		id, err = w.storager.GetTxIDBySentHash(actionType, hash)
+	switch actionType {
+	case action.ActionTypeReceipt:
+		// 1. get txID from hash
+		txID, err = w.storager.GetTxIDBySentHash(actionType, hash)
 		if err != nil {
-			return 0, errors.Errorf("ActionType: %s, DB.GetTxIDBySentHash() error: %s", actionType, err)
+			return 0, errors.Wrapf(err, "fail to call storager.GetTxIDBySentHash() ActionType: %s", actionType)
 		}
-		w.logger.Debug("w.notifyUsers()", zap.Int64("receiptID", id))
 
-		// 2.tx_receipt_inputテーブルから該当のreceipt_idでレコードを取得
-		txInputs, err := w.storager.GetTxInputByReceiptID(action.ActionTypeReceipt, id)
+		// 2. get txInputs
+		txInputs, err := w.storager.GetTxInputByReceiptID(actionType, txID)
 		if err != nil {
-			return 0, errors.Errorf("ActionType: %s, DB.GetTxInputByReceiptID(%d) error: %s", actionType, id, err)
+			return 0, errors.Wrapf(err, "fail to call storager.GetTxInputByReceiptID(%d) ActionType: %s", txID, actionType)
 		}
 		if len(txInputs) == 0 {
-			w.logger.Debug("notifyUsers() len(txInputs) == 0")
+			w.logger.Debug("txInputs is not found in tx_input table",
+				zap.Int64("tx_id", txID))
 			return 0, nil
 		}
 
-		// 3.取得したinput_addressesに対して、入金が終了したことを通知する
-		// TODO:NatsのPublisherとして通知すればいいか？
+		// 3. notify to given input_addresses tx is done
+		// TODO:how to notify
 		for _, input := range txInputs {
-			w.logger.Debug("check txInputs", zap.String("input.InputAddress", input.InputAddress))
+			w.logger.Debug("address in txInputs", zap.String("input.InputAddress", input.InputAddress))
+		}
+	case action.ActionTypePayment:
+		// 1. get txID from hash
+		txID, err = w.storager.GetTxIDBySentHash(actionType, hash)
+		if err != nil {
+			return 0, errors.Wrapf(err, "fail to call storager.GetTxIDBySentHash() ActionType: %s", actionType)
 		}
 
-	} else if actionType == action.ActionTypePayment {
-		//出金の通知フローは異なる。inputsはstoredの内部アドレスになっているため、payment_requestテーブルから情報を取得しないといけない
-		// 1.hashからidを取得(tx_receipt/tx_payment)
-		id, err = w.storager.GetTxIDBySentHash(actionType, hash)
-
+		// 2. get info from payment_request table
+		paymentUsers, err := w.storager.GetPaymentRequestByPaymentID(txID)
 		if err != nil {
-			return 0, errors.Errorf("ActionType: %s, DB.GetTxIDBySentHash() error: %s", actionType, err)
-		}
-		w.logger.Debug("notifyUsers()", zap.Int64("paymentID", id))
-
-		// 2.payment_requestテーブルから該当のpayment_idでレコードを取得
-		paymentUsers, err := w.storager.GetPaymentRequestByPaymentID(id)
-		if err != nil {
-			return 0, errors.Errorf("ActionType: %s, DB.GetPaymentRequestByPaymentID(%d) error: %s", actionType, id, err)
+			return 0, errors.Wrapf(err, "fail to call storager.GetPaymentRequestByPaymentID(%d) ActionType: %s", txID, actionType)
 		}
 		if len(paymentUsers) == 0 {
-			w.logger.Debug("[Debug] notifyUsers() len(paymentUsers) == 0")
+			w.logger.Debug("payment user is not found",
+				zap.Int64("tx_id", txID))
 			return 0, nil
 		}
 
-		// 3.取得したinput_addressesに対して、入金が終了したことを通知する
-		// TODO:NatsのPublisherとして通知すればいいか？
+		// 3. notify to given input_addresses tx is done
+		// TODO:how to notify
 		for _, user := range paymentUsers {
-			w.logger.Debug("check paymentUsers", zap.String("user.AddressFrom", user.AddressFrom))
+			w.logger.Debug("address in paymentUsers", zap.String("user.AddressFrom", user.AddressFrom))
 		}
+	case action.ActionTypeTransfer:
+		//TODO: not implemented yet
+		w.logger.Warn("action.ActionTypeTransfer is not implemented yet in notifyTxDone()")
+		return 0, errors.New("action.ActionTypeTransfer is not implemented yet in notifyTxDone()")
 	}
 
-	return id, nil
+	return txID, nil
 }
 
-//updateTxTypeNotified tx_typeを通知済に更新する
+//upadte tx_type TxTypeNotified
 func (w *Wallet) updateTxTypeNotified(id int64, actionType action.ActionType) error {
-	//id: receiptID/paymentID
-
-	if actionType == action.ActionTypeReceipt {
-		// 通知後はstatusをnotifiedに変更する
+	switch actionType {
+	case action.ActionTypeReceipt:
 		_, err := w.storager.UpdateTxTypeNotifiedByID(actionType, id, nil, true)
 		if err != nil {
-			return errors.Errorf("ActionType: %s, DB.UpdateTxTypeNotifiedByID() error: %s", actionType, err)
+			return errors.Wrapf(err, "fail to call storager.UpdateTxTypeNotifiedByID() ActionType: %s", actionType)
 		}
-
-	} else if actionType == action.ActionTypePayment {
+	case action.ActionTypePayment:
 		tx := w.storager.MustBegin()
-		// 通知後はstatusをnotifiedに変更する
 		_, err := w.storager.UpdateTxTypeNotifiedByID(actionType, id, tx, false)
 		if err != nil {
-			return errors.Errorf("ActionType: %s, DB.UpdateTxTypeNotifiedByID() error: %s", actionType, err)
+			return errors.Wrapf(err, "fail to call storager.UpdateTxTypeNotifiedByID() ActionType: %s", actionType)
 		}
 
-		// payment_requestテーブルのis_doneをtrueに更新する
+		// update is_done=true in payment_request
 		_, err = w.storager.UpdateIsDoneOnPaymentRequest(id, tx, true)
 		if err != nil {
-			return errors.Errorf("ActionType: %s, DB.UpdateIsDoneOnPaymentRequest() error: %s", actionType, err)
+			return errors.Wrapf(err, "fail to call storager.UpdateIsDoneOnPaymentRequest() ActionType: %s", actionType)
 		}
+	case action.ActionTypeTransfer:
+		//TODO: not implemented yet
+		w.logger.Warn("action.ActionTypeTransfer is not implemented yet in updateTxTypeNotified()")
+		return errors.New("action.ActionTypeTransfer is not implemented yet in updateTxTypeNotified()")
 	}
 
 	return nil
