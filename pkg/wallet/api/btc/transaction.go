@@ -199,7 +199,7 @@ func (b *Bitcoin) CreateRawTransaction(receiverAddr string, amount btcutil.Amoun
 
 // CreateRawTransactionWithOutput 出金時に1対多で送信する場合に利用するトランザクションを作成する
 func (b *Bitcoin) CreateRawTransactionWithOutput(inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount) (*wire.MsgTx, error) {
-	lockTime := int64(0) //TODO:Raw locktime ここは何をいれるべき？
+	lockTime := int64(0) //TODO:Raw locktime what value is exactly required??
 
 	// CreateRawTransaction
 	msgTx, err := b.client.CreateRawTransaction(inputs, outputs, &lockTime)
@@ -406,7 +406,7 @@ func (b *Bitcoin) sendRawTransaction(tx *wire.MsgTx) (*chainhash.Hash, error) {
 	// send
 	hash, err := b.client.SendRawTransaction(tx, true)
 	if err != nil {
-		// error occured when trying to send tx with minimum fee(1Satoshi)
+		// error occurred when trying to send tx with minimum fee(1Satoshi)
 		//  -26: 66: min relay fee not met
 		return nil, errors.Wrap(err, "fail to call btc.client.SendRawTransaction()")
 	}

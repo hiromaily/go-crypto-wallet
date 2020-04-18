@@ -3,7 +3,6 @@ package testutil
 import (
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
@@ -13,15 +12,16 @@ import (
 
 var bc api.Bitcoiner
 
+//FIXME: hard coded
 func GetBTC() api.Bitcoiner {
 	if bc != nil {
 		return bc
 	}
 	// create bitcoin instance
 	// config
-	projPath := os.Getenv("PROJECT_PATH")
+	//projPath := os.Getenv("PROJECT_PATH")
 	//TODO: delete it
-	projPath = "/Users/hy/work/go/src/github.com/hiromaily/go-bitcoin"
+	projPath := "/Users/hy/work/go/src/github.com/hiromaily/go-bitcoin"
 
 	if projPath == "" {
 		log.Fatalf("$PROJECT_PATH should be defined as environment variable")
@@ -32,7 +32,7 @@ func GetBTC() api.Bitcoiner {
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
-	//TODO: if config should be overriden, here
+	//TODO: if config should be overridden, here
 
 	// logger
 	logger := logger.NewZapLogger(&conf.Logger)

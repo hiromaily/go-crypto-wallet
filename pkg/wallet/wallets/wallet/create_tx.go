@@ -58,6 +58,9 @@ func (w *Wallet) createTx(
 
 	// get listUnspent
 	unspentList, _, err := w.getUnspentList(sender)
+	if err != nil {
+		return "", "", errors.Wrap(err, "fail to call getUnspentList()")
+	}
 	if len(unspentList) == 0 {
 		w.logger.Info("no listunspent")
 		return "", "", nil
@@ -209,6 +212,7 @@ func (w *Wallet) createRawTx(
 	addrsPrevs *btc.AddrsPrevTxs) (string, string, error) {
 
 	// 1. get unallocated address for receiver
+	// - receipt/transfer
 	pubkeyTable, err := w.storager.GetOneUnAllocatedAccountPubKeyTable(receiverAccountType)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call storager.GetOneUnAllocatedAccountPubKeyTable()")
@@ -217,15 +221,19 @@ func (w *Wallet) createRawTx(
 	//storedAccount := pubkeyTable.Account //used to OutputAccount before
 
 	// 2. create raw transaction as temporary use
-	//  - later calculate by tx size
+	// - receipt/transfer
+	// - later calculate by tx size
+	//TODO: payment call `CreateRawTransactionWithOutput`
 	msgTx, err := w.btc.CreateRawTransaction(receiverAddr, inputTotal, txInputs)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call btc.CreateRawTransaction()")
 	}
 
 	// 3. calculate fee and output total
+	// - receipt/transfer
 	//  - adjust outputTotal by fee and re-run CreateRawTransaction
 	//  - this logic would be different from payment
+	//TODO: payment has different logic
 	outputTotal, fee, err := w.calculateOutputTotal(msgTx, adjustmentFee, inputTotal)
 	if err != nil {
 		return "", "", err
@@ -245,19 +253,23 @@ func (w *Wallet) createRawTx(
 		},
 	}
 
-	// 4. re call CreateRawTransaction by output
+	// 4. re call CreateRawTransaction
+	// - receipt/transfer
+	//TODO: payment call `CreateRawTransactionWithOutput`
 	msgTx, err = w.btc.CreateRawTransaction(receiverAddr, outputTotal, txInputs)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call btc.CreateRawTransaction()")
 	}
 
 	// 5. convert msgTx to hex
+	// - receipt/transfer/payment
 	hex, err := w.btc.ToHex(msgTx)
 	if err != nil {
-		return "", "", errors.Errorf("BTC.ToHex(msgTx): error: %s", err)
+		return "", "", errors.Wrap(err, "fail to call btc.ToHex(msgTx)")
 	}
 
 	// 6. insert to tx_table for unsigned tx
+	// - receipt/transfer/payment
 	//  - txReceiptID would be 0 if record is already existing then csv file is not created
 	txReceiptID, err := w.insertTxTableForUnsigned(
 		actionType,
@@ -274,6 +286,7 @@ func (w *Wallet) createRawTx(
 	}
 
 	// 7. serialize previous txs for multisig signature
+	// - receipt/transfer/payment
 	encodedAddrsPrevs, err := serial.EncodeToString(*addrsPrevs)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call serial.EncodeToString()")
@@ -281,6 +294,7 @@ func (w *Wallet) createRawTx(
 	w.logger.Debug("encodedAddrsPrevs", zap.String("encodedAddrsPrevs", encodedAddrsPrevs))
 
 	// 8. generate tx file
+	// - receipt/transfer/payment
 	//TODO: how to recover when error occurred here
 	// - inserted data in database must be deleted to generate hex file
 	var generatedFileName string
@@ -297,6 +311,9 @@ func (w *Wallet) createRawTx(
 func (w *Wallet) calculateOutputTotal(msgTx *wire.MsgTx, adjustmentFee float64, inputTotal btcutil.Amount) (btcutil.Amount, btcutil.Amount, error) {
 	var outputTotal btcutil.Amount
 	fee, err := w.btc.GetFee(msgTx, adjustmentFee)
+	if err != nil {
+		return 0, 0, errors.Wrap(err, "fail to call btc.GetFee()")
+	}
 	outputTotal = inputTotal - fee
 	if outputTotal <= 0 {
 		w.logger.Debug(

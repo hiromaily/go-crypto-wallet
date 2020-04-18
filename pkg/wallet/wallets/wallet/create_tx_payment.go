@@ -3,6 +3,7 @@ package wallet
 import (
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
+	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -56,6 +57,9 @@ func (w *Wallet) CreatePaymentTx(adjustmentFee float64) (string, string, error) 
 
 	// get listUnspent
 	unspentList, unspentAddrs, err := w.getUnspentList(sender)
+	if err != nil {
+		return "", "", errors.Wrap(err, "fail to call getUnspentList()")
+	}
 	if len(unspentList) == 0 {
 		w.logger.Info("no listunspent")
 		return "", "", nil
@@ -87,7 +91,7 @@ func (w *Wallet) CreatePaymentTx(adjustmentFee float64) (string, string, error) 
 	txOutputs := w.createPaymentOutputs(userPayments, changeAddr, changeAmount)
 
 	// create raw tx
-	return w.createRawTransactionForPayment(
+	return w.createRawPaymentTx(
 		adjustmentFee,
 		parsedTx.txInputs,
 		inputTotal,
@@ -134,7 +138,7 @@ func (w *Wallet) createPaymentOutputs(userPayments []UserPayment, changeAddr str
 	for strAddr, amount := range tmpOutputs {
 		addr, err := w.btc.DecodeAddress(strAddr)
 		if err != nil {
-			// this case is inpossible because addresses are checked in advance
+			// this case is impossible because addresses are checked in advance
 			w.logger.Error("fail to call DecodeAddress",
 				zap.String("address", strAddr))
 			continue
@@ -149,42 +153,106 @@ func (w *Wallet) createPaymentOutputs(userPayments []UserPayment, changeAddr str
 	return txOutputs
 }
 
-//TODO:receipt側のロジックとほぼ同じ為、まとめたほうがいい(手数料のロジックのみ異なる)
-func (w *Wallet) createRawTransactionForPayment(
+//TODO: logic is similar with createRawTx()
+func (w *Wallet) createRawPaymentTx(
 	adjustmentFee float64,
-	inputs []btcjson.TransactionInput,
+	txInputs []btcjson.TransactionInput,
 	inputTotal btcutil.Amount,
 	txPaymentInputs []walletrepo.TxInput,
-	outputs map[btcutil.Address]btcutil.Amount,
+	txPrevOutputs map[btcutil.Address]btcutil.Amount,
 	addrsPrevs *btc.AddrsPrevTxs,
 	paymentRequestIds []int64) (string, string, error) {
 
-	var (
-		outputTotal      btcutil.Amount
-		txPaymentOutputs []walletrepo.TxOutput
-	)
+	// 1. get unallocated address for receiver (done already)
 
-	// 1.CreateRawTransactionWithOutput(仮で作成し、この後サイズから手数料を算出する)
-	msgTx, err := w.btc.CreateRawTransactionWithOutput(inputs, outputs)
+	// 2. create raw transaction as temporary use
+	msgTx, err := w.btc.CreateRawTransactionWithOutput(txInputs, txPrevOutputs)
 	if err != nil {
-		return "", "", errors.Errorf("BTC.CreateRawTransactionWithOutput(): error: %s", err)
+		return "", "", errors.Wrap(err, "fail to call btc.CreateRawTransactionWithOutput()")
 	}
-	w.logger.Debug("CreateRawTransactionWithOutput",
-		zap.Any("CreateRawTransactionWithOutput", msgTx))
 
-	// 2.fee算出
+	// 3. calculate fee and output total
+	// - receipt/transfer
+	//  - adjust outputTotal by fee and re-run CreateRawTransaction
+	outputTotal, fee, txOutputs, txPaymentOutputs, err := w.calculatePaymentOutputTotal(msgTx, adjustmentFee, inputTotal, txPrevOutputs)
+	if err != nil {
+		return "", "", err
+	}
+	w.logger.Debug(
+		"total coin to send (Satoshi) after fee calculated",
+		zap.Any("output_amount", outputTotal),
+		zap.Int("len(inputs)", len(txInputs)))
+
+	// 4. re call CreateRawTransactionWithOutput
+	msgTx, err = w.btc.CreateRawTransactionWithOutput(txInputs, txOutputs)
+	if err != nil {
+		return "", "", errors.Wrap(err, "fail to call btc.CreateRawTransactionWithOutput()")
+	}
+
+	// 5. convert msgTx to hex
+	hex, err := w.btc.ToHex(msgTx)
+	if err != nil {
+		return "", "", errors.Wrap(err, "fail to call btc.ToHex(msgTx)")
+	}
+
+	// 6. insert to tx_table for unsigned tx
+	//  - txReceiptID would be 0 if record is already existing then csv file is not created
+	txReceiptID, err := w.insertTxTableForUnsigned(
+		action.ActionTypePayment,
+		hex, inputTotal,
+		outputTotal,
+		fee,
+		tx.TxTypeValue[tx.TxTypeUnsigned],
+		txPaymentInputs,
+		txPaymentOutputs,
+		paymentRequestIds)
+
+	if err != nil {
+		return "", "", errors.Wrap(err, "fail to call insertTxTableForUnsigned()")
+	}
+
+	// 7. serialize previous txs for multisig signature
+	encodedAddrsPrevs, err := serial.EncodeToString(*addrsPrevs)
+	if err != nil {
+		return "", "", errors.Wrap(err, "fail to call serial.EncodeToString()")
+	}
+	w.logger.Debug(
+		"encodedAddrsPrevs",
+		zap.String("encodedAddrsPrevs", encodedAddrsPrevs))
+
+	// 8. generate tx file
+	var generatedFileName string
+	if txReceiptID != 0 {
+		generatedFileName, err = w.generateHexFile(action.ActionTypePayment, hex, encodedAddrsPrevs, txReceiptID)
+		if err != nil {
+			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
+		}
+	}
+
+	return hex, generatedFileName, nil
+}
+
+func (w *Wallet) calculatePaymentOutputTotal(
+	msgTx *wire.MsgTx,
+	adjustmentFee float64,
+	inputTotal btcutil.Amount,
+	txOutputs map[btcutil.Address]btcutil.Amount,
+) (btcutil.Amount, btcutil.Amount, map[btcutil.Address]btcutil.Amount, []walletrepo.TxOutput, error) {
+
 	fee, err := w.btc.GetFee(msgTx, adjustmentFee)
 	if err != nil {
-		return "", "", errors.Errorf("BTC.GetFee(): error: %s", err)
+		return 0, 0, nil, nil, errors.Wrap(err, "fail to call btc.GetFee()")
 	}
 
-	// 3.お釣り用のoutputのトランザクションから、手数料を差し引く
-	// FIXME: これが足りない場合がめんどくさい。。。これをどう回避すべきか
-	for addr, amt := range outputs {
-		//if addr.String() == w.BTC.PaymentAddress() {
+	var outputTotal btcutil.Amount
+	txPaymentOutputs := make([]walletrepo.TxOutput, 0, len(txOutputs))
+
+	// subtract fee from output transaction for change
+	// FIXME: what if change is short, should re-run form the beginning with shortage-flag
+	for addr, amt := range txOutputs {
 		if acnt, _ := w.btc.GetAccount(addr.String()); acnt == string(account.AccountTypePayment) {
-			outputs[addr] -= fee
-			//break
+			//chang address
+			txOutputs[addr] -= fee
 			txPaymentOutputs = append(txPaymentOutputs, walletrepo.TxOutput{
 				ReceiptID:     0,
 				OutputAddress: addr.String(),
@@ -201,52 +269,16 @@ func (w *Wallet) createRawTransactionForPayment(
 				IsChange:      false,
 			})
 		}
-		//total
 		outputTotal += amt
-
 	}
 	//total
 	outputTotal -= fee
-
-	// 4.再度 CreateRawTransaction
-	msgTx, err = w.btc.CreateRawTransactionWithOutput(inputs, outputs)
-	if err != nil {
-		return "", "", errors.Errorf("BTC.CreateRawTransactionWithOutput(): error: %s", err)
+	if outputTotal <= 0 {
+		w.logger.Debug(
+			"inputTotal is short of coin to pay fee",
+			zap.Any("amount", inputTotal),
+			zap.Any("len(inputs)", fee))
+		return 0, 0, nil, nil, errors.Wrapf(err, "inputTotal is short of coin to pay fee")
 	}
-
-	// 5.出力用にHexに変換する
-	hex, err := w.btc.ToHex(msgTx)
-	if err != nil {
-		return "", "", errors.Errorf("BTC.ToHex(msgTx): error: %s", err)
-	}
-
-	// 6. Databaseに必要な情報を保存
-	//  txType //1.未署名
-	txReceiptID, err := w.insertTxTableForUnsigned(action.ActionTypePayment, hex, inputTotal, outputTotal, fee, tx.TxTypeValue[tx.TxTypeUnsigned], txPaymentInputs, txPaymentOutputs, paymentRequestIds)
-	if err != nil {
-		return "", "", errors.Errorf("insertTxTableForUnsigned(): error: %s", err)
-	}
-
-	// 7. serialize previous txs for multisig signature
-	encodedAddrsPrevs, err := serial.EncodeToString(*addrsPrevs)
-	if err != nil {
-		return "", "", errors.Errorf("serial.EncodeToString(): error: %s", err)
-	}
-	w.logger.Debug(
-		"encodedAddrsPrevs",
-		zap.String("encodedAddrsPrevs", encodedAddrsPrevs))
-
-	// 8. GCSにトランザクションファイルを作成
-	var generatedFileName string
-	if txReceiptID != 0 {
-		generatedFileName, err = w.generateHexFile(action.ActionTypePayment, hex, encodedAddrsPrevs, txReceiptID)
-		if err != nil {
-			return "", "", errors.Errorf("wallet.storeHex(): error: %s", err)
-		}
-	}
-
-	// 9. 出金準備に入ったことをユーザーに通知
-	// TODO:NatsのPublisherとして通知すればいいか？
-
-	return hex, generatedFileName, nil
+	return outputTotal, fee, txOutputs, txPaymentOutputs, nil
 }
