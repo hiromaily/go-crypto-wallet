@@ -91,7 +91,7 @@ func (w *Wallet) updateStatusForTxTypeDone(actionType action.ActionType) error {
 		}
 
 		//通知が成功したので、tx_typeを更新する(別funcで対応)
-		err = w.updateTxTypeNotified(id, hash, actionType)
+		err = w.updateTxTypeNotified(id, actionType)
 		//仮にここがエラーになっても、通知は成功している。。。が、また処理が走ってしまう。。。
 		if err != nil {
 			w.logger.Error(
@@ -204,7 +204,7 @@ func (w *Wallet) notifyUsers(hash string, actionType action.ActionType) (int64, 
 }
 
 //updateTxTypeNotified tx_typeを通知済に更新する
-func (w *Wallet) updateTxTypeNotified(id int64, hash string, actionType action.ActionType) error {
+func (w *Wallet) updateTxTypeNotified(id int64, actionType action.ActionType) error {
 	//id: receiptID/paymentID
 
 	if actionType == action.ActionTypeReceipt {

@@ -80,7 +80,7 @@ type HDKey struct {
 	logger       *zap.Logger
 }
 
-// NewKey returns Key
+// NewHDKey returns Key
 func NewHDKey(purpose PurposeType, coinTypeCode coin.CoinTypeCode, conf *chaincfg.Params, logger *zap.Logger) *HDKey {
 	keyData := HDKey{
 		purpose:      purpose,

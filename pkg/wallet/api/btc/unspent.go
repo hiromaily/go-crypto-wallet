@@ -64,23 +64,6 @@ func (b *Bitcoin) LockUnspent(tx btcjson.ListUnspentResult) error {
 	return nil
 }
 
-func (b *Bitcoin) convertListUnspent(listUnspent []btcjson.ListUnspentResult) []ListUnspentResult {
-	//[]btcjson.ListUnspentResult
-	converted := make([]ListUnspentResult, len(listUnspent))
-	for idx, val := range listUnspent {
-		converted[idx].TxID = val.TxID
-		converted[idx].Vout = val.Vout
-		converted[idx].Address = val.Address
-		converted[idx].Label = val.Account
-		converted[idx].ScriptPubKey = val.ScriptPubKey
-		converted[idx].Amount = val.Amount
-		converted[idx].Confirmations = val.Confirmations
-		converted[idx].Spendable = val.Spendable
-	}
-
-	return converted
-}
-
 // ListUnspent listunspentを呼び出す
 func (b *Bitcoin) ListUnspent() ([]ListUnspentResult, error) {
 	input, err := json.Marshal(uint64(b.confirmationBlock))

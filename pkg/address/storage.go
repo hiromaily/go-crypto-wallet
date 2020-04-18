@@ -28,7 +28,7 @@ type FileRepository struct {
 	logger   *zap.Logger
 }
 
-// NewCSVRepository
+// NewFileRepository
 func NewFileRepository(filePath string, logger *zap.Logger) *FileRepository {
 	return &FileRepository{
 		filePath: filePath,

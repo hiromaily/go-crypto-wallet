@@ -10,7 +10,7 @@ type ColdRepository struct {
 	logger *zap.Logger
 }
 
-// KeygenRepository
+// NewColdRepository
 func NewColdRepository(db *sqlx.DB, logger *zap.Logger) *ColdRepository {
 	return &ColdRepository{
 		db:     db,

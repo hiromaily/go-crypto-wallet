@@ -19,7 +19,7 @@ type MonitorCommand struct {
 }
 
 func (c *MonitorCommand) Synopsis() string {
-	return "montoring functionality"
+	return "monitoring functionality"
 }
 
 var (

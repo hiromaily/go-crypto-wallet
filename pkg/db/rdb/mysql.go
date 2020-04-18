@@ -15,7 +15,7 @@ import (
 //sqlboiler
 // https://github.com/volatiletech/sqlboiler
 
-// Connection connect to MySQL server
+// NewMySQL connect to MySQL server
 // TODO:
 //  - retry functionality and retry count should be configured in config file
 //  - change sqlx.DB to basic one because it would be replaced sqlboiler

@@ -5,6 +5,7 @@ import "github.com/btcsuite/btcd/chaincfg"
 //----------------------------------------------------
 // CoinType
 //----------------------------------------------------
+
 // CoinType creates a separate subtree for every cryptocoin
 type CoinType uint32
 
@@ -50,7 +51,7 @@ func (c CoinTypeCode) CoinType(conf *chaincfg.Params) CoinType {
 	return CoinTypeTestnet
 }
 
-//CoinTypeValue value
+//CoinTypeCodeValue value
 var CoinTypeCodeValue = map[CoinTypeCode]CoinType{
 	BTC: CoinTypeBitcoin,
 	BCH: CoinTypeBitcoinCash,

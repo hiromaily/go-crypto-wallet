@@ -53,7 +53,7 @@ func (r *ColdRepository) GetMaxIndexOnAccountKeyTable(accountType account.Accoun
 }
 
 //getOneByMaxIDOnAccountKeyTable idが最大の1レコードを返す
-func (r *ColdRepository) getOneByMaxIDOnAccountKeyTable(tbl string, accountType account.AccountType) (*AccountKeyTable, error) {
+func (r *ColdRepository) getOneByMaxIDOnAccountKeyTable(tbl string) (*AccountKeyTable, error) {
 	sql := "SELECT * FROM %s ORDER BY ID DESC LIMIT 1;"
 	sql = fmt.Sprintf(sql, tbl)
 	//logger.Debugf("sql: %s", sql)
@@ -69,7 +69,7 @@ func (r *ColdRepository) getOneByMaxIDOnAccountKeyTable(tbl string, accountType 
 
 //GetOneByMaxIDOnAccountKeyTable idが最大の1レコードを返す
 func (r *ColdRepository) GetOneByMaxIDOnAccountKeyTable(accountType account.AccountType) (*AccountKeyTable, error) {
-	return r.getOneByMaxIDOnAccountKeyTable(accountKeyTableName[accountType], accountType)
+	return r.getOneByMaxIDOnAccountKeyTable(accountKeyTableName[accountType])
 }
 
 // getAllAccountKeyByAddrStatus 指定したaddrStatusのレコードをすべて返す

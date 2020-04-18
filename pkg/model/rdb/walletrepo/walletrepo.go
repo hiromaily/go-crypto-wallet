@@ -10,7 +10,7 @@ type WalletRepository struct {
 	logger *zap.Logger
 }
 
-// WalletRepository
+// NewWalletRepository
 func NewWalletRepository(db *sqlx.DB, logger *zap.Logger) *WalletRepository {
 	return &WalletRepository{
 		db:     db,

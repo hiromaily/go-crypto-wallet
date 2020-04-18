@@ -30,7 +30,7 @@ var addedPubkeyHistoryTableName = map[account.AccountType]string{
 }
 
 //getAddedPubkeyHistoryTableByNoWalletMultisigAddress WalletMultisigAddressが発行されていないレコードを返す
-func (r *ColdRepository) getAddedPubkeyHistoryTableByNoWalletMultisigAddress(tbl string, accountType account.AccountType) ([]AddedPubkeyHistoryTable, error) {
+func (r *ColdRepository) getAddedPubkeyHistoryTableByNoWalletMultisigAddress(tbl string) ([]AddedPubkeyHistoryTable, error) {
 	sql := "SELECT * FROM %s WHERE wallet_multisig_address = '';"
 	sql = fmt.Sprintf(sql, tbl)
 	//logger.Debugf("sql: %s", sql)
@@ -46,11 +46,11 @@ func (r *ColdRepository) getAddedPubkeyHistoryTableByNoWalletMultisigAddress(tbl
 
 //GetAddedPubkeyHistoryTableByNoWalletMultisigAddress WalletMultisigAddressが発行されていないレコードを返す
 func (r *ColdRepository) GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType account.AccountType) ([]AddedPubkeyHistoryTable, error) {
-	return r.getAddedPubkeyHistoryTableByNoWalletMultisigAddress(addedPubkeyHistoryTableName[accountType], accountType)
+	return r.getAddedPubkeyHistoryTableByNoWalletMultisigAddress(addedPubkeyHistoryTableName[accountType])
 }
 
 //getAddedPubkeyHistoryTableByNoWalletMultisigAddress WalletMultisigAddressが発行済かつ、exportされていないレコードを返す
-func (r *ColdRepository) getAddedPubkeyHistoryTableByNotExported(tbl string, accountType account.AccountType) ([]AddedPubkeyHistoryTable, error) {
+func (r *ColdRepository) getAddedPubkeyHistoryTableByNotExported(tbl string) ([]AddedPubkeyHistoryTable, error) {
 	sql := "SELECT * FROM %s WHERE wallet_multisig_address != '' AND is_exported=false;"
 	sql = fmt.Sprintf(sql, tbl)
 	//logger.Debugf("sql: %s", sql)
@@ -66,7 +66,7 @@ func (r *ColdRepository) getAddedPubkeyHistoryTableByNotExported(tbl string, acc
 
 //GetAddedPubkeyHistoryTableByNotExported WalletMultisigAddressが発行済かつ、exportされていないレコードを返す
 func (r *ColdRepository) GetAddedPubkeyHistoryTableByNotExported(accountType account.AccountType) ([]AddedPubkeyHistoryTable, error) {
-	return r.getAddedPubkeyHistoryTableByNotExported(addedPubkeyHistoryTableName[accountType], accountType)
+	return r.getAddedPubkeyHistoryTableByNotExported(addedPubkeyHistoryTableName[accountType])
 }
 
 // insertAddedPubkeyHistoryTable added_pubkey_history_table(payment, receipt...)テーブルにレコードを作成する
