@@ -4,7 +4,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// GetBlockCount get block count
+// GetBlockCount gets block count
 //  e.g. 1383526
 func (b *Bitcoin) GetBlockCount() (int64, error) {
 	blockCnt, err := b.client.GetBlockCount()

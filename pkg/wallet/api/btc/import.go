@@ -7,83 +7,83 @@ import (
 	"github.com/pkg/errors"
 )
 
-// ImportPrivKey WIFをwalletに登録する
+// ImportPrivKey import privKey to wallet
+// - Rescan  *bool `jsonrpcdefault:"true"`
 func (b *Bitcoin) ImportPrivKey(privKeyWIF *btcutil.WIF) error {
 	err := b.client.ImportPrivKey(privKeyWIF)
 	if err != nil {
-		return errors.Errorf("ImportPrivKey(): error: %v", err)
+		return errors.Wrap(err, "fail to call client.ImportPrivKey()")
 	}
 
 	return nil
 }
 
-// ImportPrivKeyLabel WIFをwalletに登録する、label付き
+// ImportPrivKeyLabel import privKey with label to wallet
+// - Rescan  *bool `jsonrpcdefault:"true"`
 func (b *Bitcoin) ImportPrivKeyLabel(privKeyWIF *btcutil.WIF, label string) error {
 	err := b.client.ImportPrivKeyLabel(privKeyWIF, label)
 	if err != nil {
-		return errors.Errorf("ImportPrivKeyLabel(): error: %v", err)
+		return errors.Wrap(err, "fail to call client.ImportPrivKeyLabel()")
 	}
 
 	return nil
 }
 
-// ImportPrivKeyWithoutReScan WIFをwalletに登録する、rescanはしない
+// ImportPrivKeyWithoutReScan import privKey without rescan to wallet
 func (b *Bitcoin) ImportPrivKeyWithoutReScan(privKeyWIF *btcutil.WIF, label string) error {
 	err := b.client.ImportPrivKeyRescan(privKeyWIF, label, false)
 	if err != nil {
-		return errors.Errorf("ImportPrivKeyRescan(): error: %v", err)
+		return errors.Wrap(err, "fail to call ImportPrivKeyRescan()")
 	}
 
 	return nil
 }
 
-// ImportAddress アドレスをwalletにimportする
+// ImportAddress import pubkey to wallet
 func (b *Bitcoin) ImportAddress(pubkey string) error {
 	err := b.client.ImportAddress(pubkey)
 	if err != nil {
-		return errors.Errorf("ImportAddress(): error: %v", err)
+		return errors.Wrap(err, "fail to call ImportAddress()")
 	}
 
 	return nil
 }
 
-// ImportAddressWithoutReScan Rescanせずにアドレスをwalletにimportする
+// ImportAddressWithoutReScan import pubkey without rescan
 func (b *Bitcoin) ImportAddressWithoutReScan(pubkey string) error {
-	//これはI/Fがずれてて使えない
-	//err := b.client.ImportAddressRescan(pubkey, false)
 	err := b.ImportAddressWithLabel(pubkey, "", false)
 	if err != nil {
-		return errors.Errorf("ImportAddressWithoutReScan(): error: %v", err)
+		return errors.Wrap(err, "fail to call ImportAddressWithoutReScan()")
 	}
 
 	return nil
 }
 
-// ImportAddressWithLabel address, label, rescanをパラメータとしaddressをwalletにimportする
+// ImportAddressWithLabel import geven address with label to wallet
+// - rescan is adjustable
 func (b *Bitcoin) ImportAddressWithLabel(address, label string, rescan bool) error {
-	//requiredSigs
 	bAddress, err := json.Marshal(address)
 	if err != nil {
-		return errors.Errorf("json.Marchal(address): error: %v", err)
+		return errors.Wrap(err, "fail to call json.Marchal(address)")
 	}
 
 	//addresses
 	bLabel, err := json.Marshal(label)
 	if err != nil {
-		return errors.Errorf("json.Marchal(label): error: %v", err)
+		return errors.Wrap(err, "fail to call json.Marchal(label)")
 	}
 
 	//rescan
 	bRescan, err := json.Marshal(rescan)
 	if err != nil {
-		return errors.Errorf("json.Marchal(rescan): error: %v", err)
+		return errors.Wrap(err, "fail to call json.Marchal(rescan)")
 	}
 	jsonRawMsg := []json.RawMessage{bAddress, bLabel, bRescan}
 
 	//call importaddress
 	_, err = b.client.RawRequest("importaddress", jsonRawMsg)
 	if err != nil {
-		return errors.Errorf("client.RawRequest(importaddress): error: %v", err)
+		return errors.Wrap(err, "fail to call client.RawRequest(importaddress)")
 	}
 
 	return nil

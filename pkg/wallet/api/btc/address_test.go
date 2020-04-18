@@ -10,6 +10,7 @@ import (
 
 //TODO: mock of bitcoin interface is required to test
 
+// TestGetAddressInfo is test for GetAddressInfo
 func TestGetAddressInfo(t *testing.T) {
 	//t.SkipNow()
 	bc := testutil.GetBTC()
@@ -54,6 +55,7 @@ func TestGetAddressInfo(t *testing.T) {
 	bc.Close()
 }
 
+// TestGetAddressesByLabel is test for GetAddressesByLabel
 func TestGetAddressesByLabel(t *testing.T) {
 	//t.SkipNow()
 	bc := testutil.GetBTC()

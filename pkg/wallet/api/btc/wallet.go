@@ -9,7 +9,7 @@ import (
 )
 
 //{
-//"filename": "/Applications/sample01.dat"
+//  "filename": "/Applications/sample01.dat"
 //}
 
 const (
@@ -17,41 +17,41 @@ const (
 	importWallet = "importwallet"
 )
 
-// WalletResult dumpwallet/dumpwallet RPC のレスポンス
+// WalletResult is response type of PRC `dumpwallet`/`dumpwallet`
 type WalletResult struct {
 	FileName string `json:"filename"`
 }
 
-// LoadWalletResult loadwallet/createwallet　RPCのレスポンス
+// LoadWalletResult is response type of PRC `loadwallet`/`unloadwallet`
 type LoadWalletResult struct {
 	WalletName string `json:"name"`
 	Warning    string `json:"warning"`
 }
 
-// BackupWallet walletファイルをunloadする
+// BackupWallet unload wallet.dat
 //  Safely copies current wallet file to destination, which can be a directory or a path with filename
 func (b *Bitcoin) BackupWallet(fileName string) error {
 	//backupwallet
 	bFileName, err := json.Marshal(fileName)
 	if err != nil {
-		return errors.Errorf("json.Marchal(): error: %s", err)
+		return errors.Wrap(err, "fail to call json.Marchal(filename)")
 	}
 	_, err = b.client.RawRequest("backupwallet", []json.RawMessage{bFileName})
 	if err != nil {
-		return errors.Errorf("json.RawRequest(backupwallet): error: %s", err)
+		return errors.Wrap(err, "failt to call json.RawRequest(backupwallet)")
 	}
 
 	return nil
 }
 
-// DumpWallet walletを指定したファイル名でdumpする (これをすることでkeyの存在しないwalletが作られるはず)
-//  fileNameは絶対パス
-//  This does not allow overwriting existing files.
+// DumpWallet dump wallet.dat
+//  - fileName: full path
+//  - This does not allow overwriting existing files.
 func (b *Bitcoin) DumpWallet(fileName string) error {
 	return b.dumpImportWallet(fileName, dumpWallet)
 }
 
-// ImportWallet walletファイルをimportする
+// ImportWallet import wallet.dat
 func (b *Bitcoin) ImportWallet(fileName string) error {
 	return b.dumpImportWallet(fileName, importWallet)
 }
@@ -59,45 +59,44 @@ func (b *Bitcoin) ImportWallet(fileName string) error {
 func (b *Bitcoin) dumpImportWallet(fileName, method string) error {
 	bFileName, err := json.Marshal(string(fileName))
 	if err != nil {
-		return errors.Errorf("json.Marchal(): error: %s", err)
+		return errors.Wrap(err, "fail to call json.Marchal(filename)")
 	}
 
 	rawResult, err := b.client.RawRequest(method, []json.RawMessage{bFileName})
 	if err != nil {
-		return errors.Errorf("json.RawRequest(%s): error: %s", method, err)
+		return errors.Wrapf(err, "fail to call json.RawRequest(%s)", method)
 	}
 
 	var walletResult WalletResult
 	err = json.Unmarshal([]byte(rawResult), &walletResult)
 	if err != nil {
-		return errors.Errorf("json.Unmarshal(): error: %s", err)
+		return errors.Wrap(err, "json.Unmarshal(rawResult)")
 	}
 
 	return nil
 }
 
-// EncryptWallet Walletの初回パスフレーズを設定
-// 0.16.2の場合、`encryptwallet`というmethod名になっている。これは古いのかも
+// EncryptWallet encrypt wallet by pass phrase
 func (b *Bitcoin) EncryptWallet(passphrase string) error {
 	return b.client.CreateEncryptedWallet(passphrase)
 }
 
-// WalletLock walletにロックをかける(walletpassphraseによってロックを解除するまで利用できない)
+// WalletLock lock wallet
 func (b *Bitcoin) WalletLock() error {
 	return b.client.WalletLock()
 }
 
-// WalletPassphrase ロックを解除する
+// WalletPassphrase unlock wallet
 func (b *Bitcoin) WalletPassphrase(passphrase string, timeoutSecs int64) error {
 	return b.client.WalletPassphrase(passphrase, timeoutSecs)
 }
 
-// WalletPassphraseChange パスフレーズを変更する
+// WalletPassphraseChange change pass phrase
 func (b *Bitcoin) WalletPassphraseChange(old, new string) error {
 	return b.client.WalletPassphraseChange(old, new)
 }
 
-// LoadWallet walletファイルをimportする
+// LoadWallet import wallet dat
 //  Loads a wallet from a wallet file or directory.
 //  Note that all wallet command-line options used when starting bitcoind will be
 //  applied to the new wallet (eg -zapwallettxes, upgradewallet, rescan, etc).
@@ -109,27 +108,27 @@ func (b *Bitcoin) LoadWallet(fileName string) error {
 	//loadwallet "filename"
 	bFileName, err := json.Marshal(fileName)
 	if err != nil {
-		return errors.Errorf("json.Marchal(): error: %s", err)
+		return errors.Wrap(err, "fail to call json.Marchal(fileName)")
 	}
 	rawResult, err := b.client.RawRequest("loadwallet", []json.RawMessage{bFileName})
 	if err != nil {
-		return errors.Errorf("json.RawRequest(loadwallet): error: %s", err)
+		return errors.Wrap(err, "fail to call json.RawRequest(loadwallet)")
 	}
 
 	loadWalletResult := LoadWalletResult{}
 	err = json.Unmarshal([]byte(rawResult), &loadWalletResult)
 	if err != nil {
-		return errors.Errorf("json.Unmarshal(): error: %s", err)
+		return errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}
 	if loadWalletResult.Warning != "" {
-		//TODO:この扱いをどうするか
-		return errors.Errorf("json.RawRequest(loadwallet): warning: %s", loadWalletResult.Warning)
+		//TODO: how to handle this warning
+		return errors.Errorf("detect warning: %s", loadWalletResult.Warning)
 	}
 
 	return nil
 }
 
-// UnLoadWallet walletファイルをunloadする
+// UnLoadWallet unload wallet dat
 //  Unloads the wallet referenced by the request endpoint otherwise unloads the wallet specified in the argument.
 //  Specifying the wallet name on a wallet endpoint is invalid.
 //  e.g. bitcoin-cli unloadwallet wallet_name
@@ -140,11 +139,11 @@ func (b *Bitcoin) UnLoadWallet(fileName string) error {
 	//unloadwallet ( "wallet_name" )
 	bFileName, err := json.Marshal(fileName)
 	if err != nil {
-		return errors.Errorf("json.Marchal(): error: %s", err)
+		return errors.Wrap(err, "fail to call json.Marchal()")
 	}
 	_, err = b.client.RawRequest("unloadwallet", []json.RawMessage{bFileName})
 	if err != nil {
-		return errors.Errorf("json.RawRequest(unloadwallet): error: %s", err)
+		return errors.Errorf("fail to call json.RawRequest(unloadwallet)")
 	}
 
 	return nil
@@ -158,27 +157,27 @@ func (b *Bitcoin) CreateWallet(fileName string, disablePrivKey bool) error {
 	//createwallet "wallet_name" ( disable_private_keys )
 	bFileName, err := json.Marshal(fileName)
 	if err != nil {
-		return errors.Errorf("json.Marchal(): error: %s", err)
+		return errors.Wrap(err, "fail to call json.Marchal(fileName)")
 	}
 
 	bDisablePrivKey, err := json.Marshal(disablePrivKey)
 	if err != nil {
-		return errors.Errorf("json.Marchal(): error: %s", err)
+		return errors.Wrap(err, "fail to call json.Marchal(bool)")
 	}
 
 	rawResult, err := b.client.RawRequest("createwallet", []json.RawMessage{bFileName, bDisablePrivKey})
 	if err != nil {
-		return errors.Errorf("json.RawRequest(createwallet): error: %s", err)
+		return errors.Wrap(err, "fail to call json.RawRequest(createwallet)")
 	}
 
 	loadWalletResult := LoadWalletResult{}
 	err = json.Unmarshal([]byte(rawResult), &loadWalletResult)
 	if err != nil {
-		return errors.Errorf("json.Unmarshal(): error: %s", err)
+		return errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}
 	if loadWalletResult.Warning != "" {
-		//TODO:この扱いをどうするか
-		return errors.Errorf("json.RawRequest(loadwallet): warning: %s", loadWalletResult.Warning)
+		//TODO: how to handle this warning
+		return errors.Errorf("detect warning: %s", loadWalletResult.Warning)
 	}
 
 	return nil

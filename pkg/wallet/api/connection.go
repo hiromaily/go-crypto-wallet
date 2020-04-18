@@ -50,5 +50,5 @@ func NewBitcoin(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logg
 
 		return bitc, err
 	}
-	return nil, errors.New("coinType is out of range. It should be set by `btc`,`bch`")
+	return nil, errors.Errorf("coinType %s is not defined", coinTypeCode.String())
 }

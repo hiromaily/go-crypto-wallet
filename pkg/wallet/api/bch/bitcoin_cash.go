@@ -19,7 +19,7 @@ type BitcoinCash struct {
 	btc.Bitcoin
 }
 
-// NewBitcoinCash BitcoinCashオブジェクトを返す
+// NewBitcoinCash bitcoin cash instance based on Bitcoin
 func NewBitcoinCash(
 	client *rpcclient.Client,
 	coinTypeCode coin.CoinTypeCode,

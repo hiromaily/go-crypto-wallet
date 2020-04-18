@@ -23,7 +23,7 @@ import (
 // as example, *wire.MsgTx is that tx is used as suffix
 // so tx should be named like hexTx, hashTx
 
-// SignRawTransactionResult response of api `signrawtransactionwithwallet`
+// SignRawTransactionResult is response type of PRC `signrawtransactionwithwallet`
 type SignRawTransactionResult struct {
 	Hex      string                    `json:"hex"`
 	Complete bool                      `json:"complete"`
@@ -178,33 +178,30 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 	//}
 }
 
-// CreateRawTransaction Rawトランザクションを作成する
-//  => watch only wallet(online)で利用されることを想定
-// こちらは多対1用の送金、つまり入金時、集約用アドレスに一括して送信するケースで利用することを想定
-// [Noted] 手数料を考慮せず、全額送金しようとすると、SendRawTransaction()で、`min relay fee not met`エラーが発生する
-func (b *Bitcoin) CreateRawTransaction(receiverAddr string, amount btcutil.Amount, inputs []btcjson.TransactionInput) (*wire.MsgTx, error) {
-	//TODO:sendAddrの厳密なチェックがセキュリティ的に必要な場面もありそう
-	sendAddrDecoded, err := btcutil.DecodeAddress(receiverAddr, b.GetChainConf())
+// CreateRawTransaction create raw transaction
+//  - for receipt/transfer action
+func (b *Bitcoin) CreateRawTransaction(receiverAddr string, amount btcutil.Amount, txInputs []btcjson.TransactionInput) (*wire.MsgTx, error) {
+	receiverAddrDecoded, err := btcutil.DecodeAddress(receiverAddr, b.GetChainConf())
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to call btcutil.DecodeAddress(%s)", receiverAddr)
 	}
 
-	// パラメータを作成する
-	outputs := make(map[btcutil.Address]btcutil.Amount)
-	outputs[sendAddrDecoded] = amount //satoshi
+	txOutputs := make(map[btcutil.Address]btcutil.Amount)
+	txOutputs[receiverAddrDecoded] = amount //satoshi
 
 	// CreateRawTransaction
-	return b.CreateRawTransactionWithOutput(inputs, outputs)
+	return b.CreateRawTransactionWithOutput(txInputs, txOutputs)
 }
 
-// CreateRawTransactionWithOutput 出金時に1対多で送信する場合に利用するトランザクションを作成する
+// CreateRawTransactionWithOutput create raw transaction
+//  - for payment action
 func (b *Bitcoin) CreateRawTransactionWithOutput(inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount) (*wire.MsgTx, error) {
 	lockTime := int64(0) //TODO:Raw locktime what value is exactly required??
 
 	// CreateRawTransaction
 	msgTx, err := b.client.CreateRawTransaction(inputs, outputs, &lockTime)
 	if err != nil {
-		return nil, errors.Errorf("btcutil.CreateRawTransaction(): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call btcutil.CreateRawTransaction()")
 	}
 
 	return msgTx, nil

@@ -9,38 +9,42 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 )
 
-// AddMultisigAddressResult addmultisigaddressをcallしたresponseの型
+// AddMultisigAddressResult is response type of PRC `addmultisigaddress`
 type AddMultisigAddressResult struct {
 	Address      string `json:"address"`
 	RedeemScript string `json:"redeemScript"`
 }
 
-// AddMultisigAddress マルチシグを Rawトランザクション用に作成する
-//  - requiredSigs: 取引成立に必要なサイン数
-//  - addresses:    自分のアドレス+承認者のアドレスxN をいれていく
-// clientのアドレスは不要。payment/receiptのアドレスはmultisig対応しておくこと
-func (b *Bitcoin) AddMultisigAddress(requiredSigs int, addresses []string, accountName string, addressType address.AddrType) (*AddMultisigAddressResult, error) {
+// AddMultisigAddress create multisig address
+//  - requiredSigs: required number of signature for transaction
+//  - addresses:    list of addresses(e.g. client, auth1, auth2, auth3
+//  - [N:M] e.g. 2:5 => requiredSigs=2, addresses[addr1, addr2, addr3, addr4, addr5]
+func (b *Bitcoin) AddMultisigAddress(
+	requiredSigs int,
+	addresses []string,
+	accountName string,
+	addressType address.AddrType) (*AddMultisigAddressResult, error) {
 
 	if requiredSigs > len(addresses) {
-		return nil, errors.New("number of given address should be at least same to requiredSigs or more")
+		return nil, errors.Errorf("number of given address doesn't meet number of requiredSigs: requiredSigs:%d, len(addresses):%d", requiredSigs, len(addresses))
 	}
 
 	//requiredSigs
 	bRequiredSigs, err := json.Marshal(requiredSigs)
 	if err != nil {
-		return nil, errors.Errorf("json.Marchal(requiredSigs): error: %v", err)
+		return nil, errors.Wrap(err, "fail to call json.Marchal(requiredSigs)")
 	}
 
 	//addresses
 	bAddresses, err := json.Marshal(addresses)
 	if err != nil {
-		return nil, errors.Errorf("json.Marchal(addresses): error: %v", err)
+		return nil, errors.Wrap(err, "fail to call json.Marchal(addresses)")
 	}
 
 	//accountName
 	bAccount, err := json.Marshal(accountName)
 	if err != nil {
-		b.logger.Error(
+		b.logger.Warn(
 			"fail to json.Marshal(accountName)",
 			zap.String("accountName", accountName),
 			zap.Error(err))
@@ -48,9 +52,9 @@ func (b *Bitcoin) AddMultisigAddress(requiredSigs int, addresses []string, accou
 	}
 
 	//addressType
-	bAddrType, err := json.Marshal(string(addressType))
+	bAddrType, err := json.Marshal(addressType.String())
 	if err != nil {
-		b.logger.Error(
+		b.logger.Warn(
 			"fail to json.Marchal(addressType)",
 			zap.String("addressType", addressType.String()),
 			zap.Error(err))
@@ -62,13 +66,13 @@ func (b *Bitcoin) AddMultisigAddress(requiredSigs int, addresses []string, accou
 	//call addmultisigaddress
 	rawResult, err := b.client.RawRequest("addmultisigaddress", jsonRawMsg)
 	if err != nil {
-		return nil, errors.Errorf("client.RawRequest(addmultisigaddress): error: %v", err)
+		return nil, errors.Wrap(err, "fail to call client.RawRequest(addmultisigaddress)")
 	}
 
 	multisigAddrResult := AddMultisigAddressResult{}
 	err = json.Unmarshal([]byte(rawResult), &multisigAddrResult)
 	if err != nil {
-		return nil, errors.Errorf("json.Unmarshal(multisigAddrResult): error: %v", err)
+		return nil, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}
 
 	return &multisigAddrResult, nil

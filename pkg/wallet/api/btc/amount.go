@@ -12,12 +12,12 @@ import (
 //btcutil.Amount => Satoshi
 //float64 => BTC
 
-// AmountString convert amount `1.0 BTC` to `1.0` as string
+// AmountString converts amount `1.0 BTC` to `1.0` as string
 func (b *Bitcoin) AmountString(amt btcutil.Amount) string {
 	return strings.TrimRight(amt.String(), " BTC")
 }
 
-// FloatToAmount convert float to amount
+// FloatToAmount converts float to amount
 // e.g. 0.54 to 54000000
 func (b *Bitcoin) FloatToAmount(f float64) (btcutil.Amount, error) {
 	amt, err := btcutil.NewAmount(f)
@@ -28,7 +28,7 @@ func (b *Bitcoin) FloatToAmount(f float64) (btcutil.Amount, error) {
 	return amt, nil
 }
 
-// StrToAmount convert string to amount
+// StrToAmount converts string to amount
 func (b *Bitcoin) StrToAmount(s string) (btcutil.Amount, error) {
 	f, err := strconv.ParseFloat(s, 64)
 	if err != nil {
@@ -43,7 +43,7 @@ func (b *Bitcoin) StrToAmount(s string) (btcutil.Amount, error) {
 	return amt, nil
 }
 
-// StrSatoshiToAmount convert satoshi of string type to amount
+// StrSatoshiToAmount converts satoshi of string type to amount
 func (b *Bitcoin) StrSatoshiToAmount(s string) (btcutil.Amount, error) {
 	f, err := strconv.ParseFloat(s, 64)
 	if err != nil {

@@ -8,7 +8,7 @@ import (
 	. "github.com/hiromaily/go-bitcoin/pkg/wallet/api/btc"
 )
 
-// TestFloatToAmount
+// TestFloatToAmount is test for FloatToAmount
 func TestFloatToAmount(t *testing.T) {
 	var btc = Bitcoin{}
 
@@ -37,7 +37,7 @@ func TestFloatToAmount(t *testing.T) {
 	}
 }
 
-// TestStrSatoshiToAmount
+// TestStrSatoshiToAmount is test for StrToAmount
 func TestStrToAmount(t *testing.T) {
 	var btc = Bitcoin{}
 
@@ -67,7 +67,7 @@ func TestStrToAmount(t *testing.T) {
 	}
 }
 
-// TestStrSatoshiToAmount
+// TestStrSatoshiToAmount is test for StrSatoshiToAmount
 func TestStrSatoshiToAmount(t *testing.T) {
 	var btc = Bitcoin{}
 
@@ -95,7 +95,8 @@ func TestStrSatoshiToAmount(t *testing.T) {
 	}
 }
 
-func TestCaluculation(t *testing.T) {
+// Caluculation is test for calculation of amount
+func TestCalculation(t *testing.T) {
 	var tests = []struct {
 		val1 float64
 		val2 float64
@@ -113,5 +114,4 @@ func TestCaluculation(t *testing.T) {
 		}
 		t.Logf("%f + %f = %f", v.val1, v.val2, res)
 	}
-
 }

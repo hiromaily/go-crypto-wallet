@@ -13,7 +13,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 )
 
-// ListUnspentResult listunspentの戻り値
+// ListUnspentResult is response type of PRC `listunspent`
 type ListUnspentResult struct {
 	TxID          string  `json:"txid"`
 	Vout          uint32  `json:"vout"`
@@ -29,32 +29,28 @@ type ListUnspentResult struct {
 	Safe          bool    `json:"safe"`
 }
 
-// UnlockAllUnspentTransaction Lockされたトランザクションの解除
+// UnlockAllUnspentTransaction unlock locked unspent tx
 func (b *Bitcoin) UnlockAllUnspentTransaction() error {
 	list, err := b.client.ListLockUnspent() //[]*wire.OutPoint
 	if err != nil {
-		return errors.Errorf("client.ListLockUnspent(): error: %s", err)
+		return errors.Wrap(err, "fail to call client.ListLockUnspent()")
 	}
 
 	if len(list) != 0 {
 		err = b.client.LockUnspent(true, list)
 		if err != nil {
-			//FIXME: -8: Invalid parameter, expected unspent output たまにこのエラーが出る。。。Bitcoin Coreの再起動が必要
-			// Bitcoin Coreから先のP2Pネットワークへの接続が失敗しているときに起きる
-			// よって、Bitcoin Coreの再起動が必要
-			// loggingコマンド, もしくは ~/Library/Application Support/Bitcoin/testnet3/debug.logのチェック??
-			return errors.Errorf("client.LockUnspent(): error: %s", err)
+			return errors.Wrap(err, "fail to call client.LockUnspent()")
 		}
 	}
 
 	return nil
 }
 
-// LockUnspent 渡されたtxIDをロックする
+// LockUnspent lock given txID
 func (b *Bitcoin) LockUnspent(tx btcjson.ListUnspentResult) error {
 	txIDHash, err := chainhash.NewHashFromStr(tx.TxID)
 	if err != nil {
-		return errors.Errorf("chainhash.NewHashFromStr(): error: %s", err)
+		return errors.Wrapf(err, "fail to call chainhash.NewHashFromStr(%s)", tx.TxID)
 	}
 	outpoint := wire.NewOutPoint(txIDHash, tx.Vout)
 	err = b.client.LockUnspent(false, []*wire.OutPoint{outpoint})
@@ -64,21 +60,21 @@ func (b *Bitcoin) LockUnspent(tx btcjson.ListUnspentResult) error {
 	return nil
 }
 
-// ListUnspent listunspentを呼び出す
+// ListUnspent call RPC `listunspent`
 func (b *Bitcoin) ListUnspent() ([]ListUnspentResult, error) {
 	input, err := json.Marshal(uint64(b.confirmationBlock))
 	if err != nil {
-		return nil, errors.Errorf("json.Marchal(): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call json.Marchal()")
 	}
 	rawResult, err := b.client.RawRequest("listunspent", []json.RawMessage{input})
 	if err != nil {
-		return nil, errors.Errorf("json.RawRequest(listunspent): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call json.RawRequest(listunspent)")
 	}
 
 	var listunspentResult []ListUnspentResult
 	err = json.Unmarshal([]byte(rawResult), &listunspentResult)
 	if err != nil {
-		return nil, errors.Errorf("json.Unmarshal(): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call json.Unmarshal()")
 	}
 
 	if len(listunspentResult) == 0 {
@@ -88,24 +84,24 @@ func (b *Bitcoin) ListUnspent() ([]ListUnspentResult, error) {
 	return listunspentResult, nil
 }
 
-// ListUnspentByAccount 指定したアカウントのlistunspentを取得する
+// ListUnspentByAccount get listunspent by account
 func (b *Bitcoin) ListUnspentByAccount(accountType account.AccountType) ([]ListUnspentResult, []btcutil.Address, error) {
-	addrs, err := b.GetAddressesByLabel(string(accountType))
+	addrs, err := b.GetAddressesByLabel(accountType.String())
 	if err != nil {
-		return nil, nil, errors.Errorf("btc.GetAddressesByLabel(): error: %s", err)
+		return nil, nil, errors.Wrap(err, "fail to call btc.GetAddressesByLabel()")
 	}
 	if len(addrs) == 0 {
-		return nil, nil, errors.Errorf("%s addresses could not be found", accountType)
+		return nil, nil, errors.Errorf("address for %s can not be found", accountType)
 	}
 
 	var unspentList []ListUnspentResult
 
 	unspentList, err = b.listUnspentByAccount(addrs)
 	if err != nil {
-		return nil, nil, errors.Errorf("BTC.listUnspentByAccountVer17() error: %s", err)
+		return nil, nil, errors.Wrap(err, "fail to call btc.listUnspentByAccount()")
 	}
 
-	//送金の金額と近しいutxoでtxを作成するため、ソートしておく => 小さなutxoから利用していくのに便利だが、MUSTではない
+	// sort amount by ascending (small to big)
 	sort.Slice(unspentList, func(i, j int) bool {
 		//small to big
 		return unspentList[i].Amount < unspentList[j].Amount
@@ -117,12 +113,12 @@ func (b *Bitcoin) ListUnspentByAccount(accountType account.AccountType) ([]ListU
 func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address) ([]ListUnspentResult, error) {
 	input1, err := json.Marshal(uint64(b.confirmationBlock))
 	if err != nil {
-		return nil, errors.Errorf("json.Marchal(): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call json.Marchal(confirmationBlock)")
 	}
 
 	input2, err := json.Marshal(uint64(9999999))
 	if err != nil {
-		return nil, errors.Errorf("json.Marchal(): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call json.Marchal(9999999)")
 	}
 
 	//address
@@ -133,18 +129,18 @@ func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address) ([]ListUnspentRe
 
 	input3, err := json.Marshal(strAddrs)
 	if err != nil {
-		return nil, errors.Errorf("json.Marchal(): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call json.Marchal(addresses)")
 	}
 
 	rawResult, err := b.client.RawRequest("listunspent", []json.RawMessage{input1, input2, input3})
 	if err != nil {
-		return nil, errors.Errorf("json.RawRequest(listunspent): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call json.RawRequest(listunspent)")
 	}
 
 	var listunspentResult []ListUnspentResult
 	err = json.Unmarshal([]byte(rawResult), &listunspentResult)
 	if err != nil {
-		return nil, errors.Errorf("json.Unmarshal(): error: %s", err)
+		return nil, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}
 
 	if len(listunspentResult) == 0 {

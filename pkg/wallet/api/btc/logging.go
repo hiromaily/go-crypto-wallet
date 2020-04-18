@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// LoggingResult stores response of PRC `logging`
+// LoggingResult is response type of PRC `logging`
 type LoggingResult struct {
 	Net         int64 `json:"net"`
 	Tor         int64 `json:"tor"`
@@ -31,17 +31,17 @@ type LoggingResult struct {
 	LevelDB     int64 `json:"leveldb"`
 }
 
-// Logging logging RPC をcallする
+// Logging calls RPC `logging`
 func (b *Bitcoin) Logging() (*LoggingResult, error) {
 	rawResult, err := b.client.RawRequest("logging", []json.RawMessage{})
 	if err != nil {
-		return nil, errors.Errorf("json.RawRequest(logging): error: %v", err)
+		return nil, errors.Wrap(err, "fail to call json.RawRequest(logging)")
 	}
 
 	loggingResult := LoggingResult{}
 	err = json.Unmarshal([]byte(rawResult), &loggingResult)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Unmarshal()")
+		return nil, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}
 
 	return &loggingResult, nil

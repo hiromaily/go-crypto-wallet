@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// SetLabel set account to existing imported address
+// SetLabel sets account to existing imported address
 func (b *Bitcoin) SetLabel(addr, label string) error {
 	_, err := b.DecodeAddress(addr)
 	if err != nil {
@@ -36,8 +36,9 @@ func (b *Bitcoin) SetLabel(addr, label string) error {
 	return nil
 }
 
-// GetReceivedByLabelAndMinConf return balance by label(account)
+// GetReceivedByLabelAndMinConf returns balance by label(account)
 // FIXME: even if spent utxo is left as balance
+// - please use GetBalanceByAccount()
 //func (b *Bitcoin) GetReceivedByLabelAndMinConf(accountName string, minConf int) (btcutil.Amount, error) {
 //	input1, err := json.Marshal(accountName)
 //	if err != nil {

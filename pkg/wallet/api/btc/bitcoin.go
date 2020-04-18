@@ -22,7 +22,7 @@ type Bitcoin struct {
 	logger            *zap.Logger
 }
 
-// FeeAdjustmentRate 手数料調整のRange
+// FeeAdjustmentRate range of fee adjustment rate
 type FeeAdjustmentRate struct {
 	min float64
 	max float64
@@ -76,57 +76,47 @@ func (b *Bitcoin) Close() {
 	b.client.Shutdown()
 }
 
-// GetChainConf 接続先であるMainNet/TestNetに応じて必要なconfを返す
+// GetChainConf returns chain conf
 func (b *Bitcoin) GetChainConf() *chaincfg.Params {
 	return b.chainConf
 }
 
-// SetChainConf chainConfをセットする
+// SetChainConf sets chain conf
 func (b *Bitcoin) SetChainConf(conf *chaincfg.Params) {
 	b.chainConf = conf
 }
 
-// SetChainConfNet conf.Netをセットする
+// SetChainConfNet sets conf.Net
 func (b *Bitcoin) SetChainConfNet(btcNet wire.BitcoinNet) {
 	b.chainConf.Net = btcNet
 }
 
-// Client clientオブジェクトを返す
+// Client returns client
 func (b *Bitcoin) Client() *rpcclient.Client {
 	return b.client
 }
 
-// ConfirmationBlock Confirmationに必要なブロック数を返す
+// ConfirmationBlock returns confirmation block count
 func (b *Bitcoin) ConfirmationBlock() int {
 	return b.confirmationBlock
 }
 
-// FeeRangeMax feeの調整倍率の最大値を返す
+// FeeRangeMax return maximum fee rate for adjustment
 func (b *Bitcoin) FeeRangeMax() float64 {
 	return b.feeRange.max
 }
 
-// FeeRangeMin feeの調整倍率の最小値を返す
+// FeeRangeMin returns minimum fee rate for adjustment
 func (b *Bitcoin) FeeRangeMin() float64 {
 	return b.feeRange.min
 }
-
-// SetVersion set version
-//func (b *Bitcoin) SetVersion(ver coin.BTCVersion) {
-//	b.version = ver
-//}
 
 // Version returns core version
 func (b *Bitcoin) Version() coin.BTCVersion {
 	return b.version
 }
 
-// SetCoinTypeCode set CoinTypeCode
-//func (b *Bitcoin) SetCoinTypeCode(coinTypeCode coin.CoinTypeCode) {
-//	b.coinTypeCode = coinTypeCode
-//}
-
-// CoinTypeCode returns CoinTypeCOde
+// CoinTypeCode returns CoinTypeCode
 func (b *Bitcoin) CoinTypeCode() coin.CoinTypeCode {
 	return b.coinTypeCode
 }

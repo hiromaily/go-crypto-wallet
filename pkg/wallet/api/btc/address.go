@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// GetAddressInfoResult stores response of PRC `getaddressinfo`
+// GetAddressInfoResult is response type of PRC `getaddressinfo`
 type GetAddressInfoResult struct {
 	Address      string   `json:"address"`
 	ScriptPubKey string   `json:"scriptPubKey"`
@@ -26,6 +26,7 @@ type GetAddressInfoResult struct {
 	Labels       []string `json:"labels"`
 }
 
+// GetLabelName returns label name
 func (a *GetAddressInfoResult) GetLabelName() string {
 	if len(a.Labels) != 0 {
 		return a.Labels[0]
@@ -69,7 +70,7 @@ type Purpose struct {
 //  }
 //}
 
-// it can be used as an alternative to `getaccount`, `validateaddress`
+// GetAddressInfo can be used as an alternative to `getaccount`, `validateaddress`
 func (b *Bitcoin) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
 	input, err := json.Marshal(string(addr))
 	if err != nil {

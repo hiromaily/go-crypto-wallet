@@ -33,7 +33,7 @@ func (b *Bitcoin) ListAccounts() (map[string]btcutil.Amount, error) {
 	return listAmts, nil
 }
 
-// GetBalanceByAccount get balance for account
+// GetBalance gets balance
 func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
 	input1, err := json.Marshal("*")
 	if err != nil {
@@ -58,6 +58,7 @@ func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
 	return b.FloatToAmount(amount)
 }
 
+// GetBalanceByAccount gets balance by account
 func (b *Bitcoin) GetBalanceByAccount(accountType account.AccountType) (btcutil.Amount, error) {
 	unspentList, _, err := b.ListUnspentByAccount(accountType)
 	if err != nil {

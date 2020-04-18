@@ -8,7 +8,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
-// GetNetworkInfoResult getnetworkinfo RPC のレスポンス
+// GetNetworkInfoResult is response type of PRC `getnetworkinfo`
 type GetNetworkInfoResult struct {
 	Version            coin.BTCVersion `json:"version"`
 	Subversion         string          `json:"subversion"`
@@ -26,7 +26,7 @@ type GetNetworkInfoResult struct {
 	Warnings           string          `json:"warnings"`
 }
 
-// Network ネットワーク情報
+// Network network info
 type Network struct {
 	Name                      string `json:"name"`
 	Limited                   bool   `json:"limited"`
@@ -35,23 +35,24 @@ type Network struct {
 	ProxyRandomizeCredentials bool   `json:"proxy_randomize_credentials"`
 }
 
+// LocalAddress local address
 type LocalAddress struct {
 	Address string `json:"address"`
 	Port    int    `json:"port"`
 	Score   int    `json:"score"`
 }
 
-// GetNetworkInfo getnetworkinfo RPC をcallする
+// GetNetworkInfo call RPC `getnetworkinfo`
 func (b *Bitcoin) GetNetworkInfo() (*GetNetworkInfoResult, error) {
 	rawResult, err := b.client.RawRequest("getnetworkinfo", []json.RawMessage{})
 	if err != nil {
-		return nil, errors.Errorf("json.RawRequest(logging): error: %v", err)
+		return nil, errors.Wrap(err, "fail to call json.RawRequest(getnetworkinfo)")
 	}
 
 	networkInfoResult := GetNetworkInfoResult{}
 	err = json.Unmarshal([]byte(rawResult), &networkInfoResult)
 	if err != nil {
-		return nil, errors.Errorf("json.Unmarshal(): error: %v", err)
+		return nil, errors.Wrap(err, "fail to call json.Unmarshal()")
 	}
 
 	return &networkInfoResult, nil
