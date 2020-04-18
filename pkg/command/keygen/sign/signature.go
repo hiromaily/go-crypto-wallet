@@ -52,7 +52,7 @@ func (c *SignatureCommand) Run(args []string) int {
 	}
 
 	//TODO: output should be json if json option is true
-	c.UI.Output(fmt.Sprintf("[hex]: %s\n[署名完了]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName))
+	c.UI.Output(fmt.Sprintf("[hex]: %s\n[isCompleted]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName))
 
 	return 0
 }

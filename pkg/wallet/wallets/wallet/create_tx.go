@@ -415,7 +415,7 @@ func (w *Wallet) generateHexFile(actionType action.ActionType, hex, encodedAddrs
 	}
 
 	// create file
-	path := w.txFileRepo.CreateFilePath(actionType, tx.TxTypeUnsigned, id)
+	path := w.txFileRepo.CreateFilePath(actionType, tx.TxTypeUnsigned, id, 0)
 	generatedFileName, err = w.txFileRepo.WriteFile(path, savedata)
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call txFileRepo.WriteFile()")

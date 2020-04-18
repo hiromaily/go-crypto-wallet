@@ -15,8 +15,8 @@ import (
 func (w *Wallet) SendTx(filePath string) (string, error) {
 
 	// get tx_receipt_id from file name
-	//payment_5_unsigned_1534466246366489473
-	actionType, _, txReceiptID, err := w.txFileRepo.ValidateFilePath(filePath, []tx.TxType{tx.TxTypeSigned})
+	//payment_5_unsigned_1_1534466246366489473
+	actionType, _, txReceiptID, _, err := w.txFileRepo.ValidateFilePath(filePath, tx.TxTypeSigned)
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call txFileRepo.ValidateFilePath()")
 	}

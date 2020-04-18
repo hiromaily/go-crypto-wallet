@@ -15,9 +15,9 @@ import (
 )
 
 type Storager interface {
-	CreateFilePath(actionType action.ActionType, txType TxType, txID int64) string
+	CreateFilePath(actionType action.ActionType, txType TxType, txID int64,signedCount int) string
 	GetFileNameType(filePath string) (*FileName, error)
-	ValidateFilePath(filePath string, txTypes []TxType) (action.ActionType, TxType, int64, error)
+	ValidateFilePath(filePath string, expectedTxType TxType) (action.ActionType, TxType, int64, int, error)
 	ReadFile(path string) (string, error)
 	WriteFile(path, hexTx string) (string, error)
 }
@@ -32,6 +32,7 @@ type FileName struct {
 	ActionType  action.ActionType
 	TxType      TxType
 	TxReceiptID int64
+	SignedCount int
 }
 
 // NewFileRepository
@@ -43,33 +44,34 @@ func NewFileRepository(filePath string, logger *zap.Logger) *FileRepository {
 }
 
 // about file structure
-// e.g. ./data/tx/receipt/receipt_8_unsigned_1534744535097796209
-//  - ./data/tx/ : file path
-//  - receipt/   : actionType
-//  - receipt_8_unsigned_1534744535097796209 : {actionType}_{txReceiptID}_{txType}_{timestamp}
+// e.g. ./data/tx/receipt/receipt_8_unsigned_0_1534744535097796209
+//  - ./data/tx/ dir : file path
+//  - receipt/   dir : actionType
+//  - receipt_8_unsigned_0_1534744535097796209 : {actionType}_{txReceiptID}_{txType}_{signedCount}_{timestamp}
 
 // CreateFilePath create file path for transaction file
-func (r *FileRepository) CreateFilePath(actionType action.ActionType, txType TxType, txID int64) string {
+func (r *FileRepository) CreateFilePath(actionType action.ActionType, txType TxType, txID int64, signedCount int) string {
 
-	// ./data/tx/receipt/receipt_8_unsigned_1534744535097796209
+	// ./data/tx/receipt/receipt_8_unsigned_0_1534744535097796209
 	baseDir := fmt.Sprintf("%s%s/", r.filePath, actionType.String())
-	return fmt.Sprintf("%s%s_%d_%s_", baseDir, actionType.String(), txID, txType)
+	return fmt.Sprintf("%s%s_%d_%s_%d_", baseDir, actionType.String(), txID, txType, signedCount)
 }
 
 // GetFileNameType returns as FileName type
 func (r *FileRepository) GetFileNameType(filePath string) (*FileName, error) {
 	// just file path or full path
-	//./data/tx/receipt/receipt_8_unsigned_1534744535097796209
+	//./data/tx/receipt/receipt_8_unsigned_0_1534744535097796209
 	tmp := strings.Split(filePath, "/")
 	fileName := tmp[len(tmp)-1]
 
-	//receipt_5_unsigned_1534466246366489473
+	//receipt_5_unsigned_0_1534466246366489473
 	//s[0]: actionType
 	//s[1]: txReceiptID
 	//s[2]: txType
-	//s[3]: timestamp
+	//s[3]: signedCount , first value is 0
+	//s[4]: timestamp
 	s := strings.Split(fileName, "_")
-	if len(s) != 4 {
+	if len(s) != 5 {
 		return nil, errors.Errorf("invalid file path: %s", fileName)
 	}
 
@@ -77,7 +79,7 @@ func (r *FileRepository) GetFileNameType(filePath string) (*FileName, error) {
 
 	//Action
 	if !action.ValidateActionType(s[0]) {
-		return nil, errors.Errorf("invalid file path: %s", fileName)
+		return nil, errors.Errorf("invalid file name: %s", fileName)
 	}
 	fileNameType.ActionType = action.ActionType(s[0])
 
@@ -85,29 +87,37 @@ func (r *FileRepository) GetFileNameType(filePath string) (*FileName, error) {
 	var err error
 	fileNameType.TxReceiptID, err = strconv.ParseInt(s[1], 10, 64)
 	if err != nil {
-		return nil, errors.Errorf("invalid file path: %s", fileName)
+		return nil, errors.Errorf("invalid file name: %s", fileName)
 	}
 
 	//txType
 	if !ValidateTxType(s[2]) {
-		return nil, errors.Errorf("error: invalid file: %s", fileName)
+		return nil, errors.Errorf("error: invalid name: %s", fileName)
 	}
 	fileNameType.TxType = TxType(s[2])
+
+	//signedCount
+	signedCount, err := strconv.Atoi(s[3])
+	if err != nil{
+		return nil, errors.Errorf("error: invalid name: %s", fileName)
+	}
+	fileNameType.SignedCount = signedCount
 
 	return &fileNameType, nil
 }
 
 // ValidateFilePath validate file path which could be full path
-func (r *FileRepository) ValidateFilePath(filePath string, expectedTxTypes []TxType) (action.ActionType, TxType, int64, error) {
+func (r *FileRepository) ValidateFilePath(filePath string, expectedTxType TxType) (action.ActionType, TxType, int64, int, error) {
 	fileType, err := r.GetFileNameType(filePath)
 	if err != nil {
-		return "", "", 0, err
+		return "", "", 0, 0, err
 	}
 	//txType
-	if !(fileType.TxType).Search(expectedTxTypes) {
-		return "", "", 0, errors.Errorf("txType is invalid: %s", fileType.TxType)
+	//if !(fileType.TxType).Search(expectedTxTypes) {
+	if fileType.TxType != expectedTxType{
+		return "", "", 0, 0, errors.Errorf("txType is invalid: %s", fileType.TxType)
 	}
-	return fileType.ActionType, fileType.TxType, fileType.TxReceiptID, nil
+	return fileType.ActionType, fileType.TxType, fileType.TxReceiptID, fileType.SignedCount, nil
 }
 
 // ReadFile read file

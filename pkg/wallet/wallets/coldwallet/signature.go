@@ -24,8 +24,8 @@ import (
 func (w *ColdWallet) SignTx(filePath string) (string, bool, string, error) {
 
 	// get tx_receipt_id from tx file name
-	//  if payment_5_unsigned_1534466246366489473, 5 is target
-	actionType, _, txReceiptID, err := w.txFileRepo.ValidateFilePath(filePath, []tx.TxType{tx.TxTypeUnsigned, tx.TxTypeUnsigned2nd})
+	//  if payment_5_unsigned_0_1534466246366489473, 5 is target
+	actionType, _, txReceiptID, signedCount, err := w.txFileRepo.ValidateFilePath(filePath, tx.TxTypeUnsigned)
 	if err != nil {
 		return "", false, "", err
 	}
@@ -57,17 +57,18 @@ func (w *ColdWallet) SignTx(filePath string) (string, bool, string, error) {
 	// hexTx for save data as file
 	saveData := hexTx
 
-	// if sign is not finished because of multisig, TxType is TxTypeUnsigned2nd
+	// if sign is not finished because of multisig, signedCount should be increment
 	txType := tx.TxTypeSigned
 	if !isSigned {
-		txType = tx.TxTypeUnsigned2nd
+		txType = tx.TxTypeUnsigned
+		signedCount++
 		if newEncodedPrevsAddrs != "" {
 			saveData = fmt.Sprintf("%s,%s", saveData, newEncodedPrevsAddrs)
 		}
 	}
 
 	// write file
-	path := w.txFileRepo.CreateFilePath(actionType, txType, txReceiptID)
+	path := w.txFileRepo.CreateFilePath(actionType, txType, txReceiptID, signedCount)
 	generatedFileName, err := w.txFileRepo.WriteFile(path, saveData)
 	if err != nil {
 		return "", isSigned, "", err
