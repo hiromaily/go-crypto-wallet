@@ -11,7 +11,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//balance subcommand
+// BalanceCommand balance subcommand
 type BalanceCommand struct {
 	name     string
 	synopsis string
@@ -19,10 +19,12 @@ type BalanceCommand struct {
 	wallet   wallets.Walleter
 }
 
+// Synopsis
 func (c *BalanceCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *BalanceCommand) Help() string {
 	return `Usage: wallet api balance [options...]
 Options:
@@ -30,6 +32,7 @@ Options:
 `
 }
 
+// Run
 func (c *BalanceCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
@@ -49,7 +52,6 @@ func (c *BalanceCommand) Run(args []string) int {
 		return 1
 	}
 
-	//TODO: get all balance without account
 	var (
 		balance btcutil.Amount
 		err     error

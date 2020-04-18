@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//add subcommand
+// AddCommand add subcommand
 type AddCommand struct {
 	Name    string
 	Version string
@@ -18,6 +18,7 @@ type AddCommand struct {
 	Wallet  wallets.Signer
 }
 
+// Synopsis
 func (c *AddCommand) Synopsis() string {
 	return "add key for multisig address"
 }
@@ -26,6 +27,7 @@ var (
 	multisigSynopsis = "call `addmultisigaddress` which adds a P2SH multisig address to the wallet"
 )
 
+// Help
 func (c *AddCommand) Help() string {
 	return fmt.Sprintf(`Usage: sign add [Subcommands...]
 Subcommands:
@@ -33,6 +35,7 @@ Subcommands:
 `, multisigSynopsis)
 }
 
+// RUn
 func (c *AddCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

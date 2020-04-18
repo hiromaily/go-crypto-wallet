@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//transfer subcommand
+// TransferCommand transfer subcommand
 type TransferCommand struct {
 	name     string
 	synopsis string
@@ -18,10 +18,12 @@ type TransferCommand struct {
 	wallet   wallets.Walleter
 }
 
+// Synopsis
 func (c *TransferCommand) Synopsis() string {
 	return "create unsigned transaction for transfer among accounts"
 }
 
+// Help
 func (c *TransferCommand) Help() string {
 	return `Usage: wallet create transfer [options...]
 Options:
@@ -32,6 +34,7 @@ Options:
 `
 }
 
+// Run
 func (c *TransferCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

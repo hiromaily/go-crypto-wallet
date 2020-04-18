@@ -11,7 +11,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//address subcommand
+// AddressCommand address subcommand
 type AddressCommand struct {
 	name     string
 	synopsis string
@@ -19,10 +19,12 @@ type AddressCommand struct {
 	wallet   wallets.Keygener
 }
 
+// Synopsis
 func (c *AddressCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *AddressCommand) Help() string {
 	return `Usage: keygen key export address [options...]
 Options:
@@ -30,6 +32,7 @@ Options:
 `
 }
 
+// Run
 func (c *AddressCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

@@ -12,6 +12,7 @@ import (
 
 var bc api.Bitcoiner
 
+// GetBTC returns btc instance
 //FIXME: hard coded
 func GetBTC() api.Bitcoiner {
 	if bc != nil {

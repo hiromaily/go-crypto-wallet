@@ -9,17 +9,19 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//sending subcommand
+// SignatureCommand sending subcommand
 type SignatureCommand struct {
 	Name   string
 	UI     cli.Ui
 	Wallet wallets.Keygener
 }
 
+// Synopsis
 func (c *SignatureCommand) Synopsis() string {
 	return "sign on unsigned transaction (account would be found from file name)"
 }
 
+// Help
 func (c *SignatureCommand) Help() string {
 	return `Usage: wallet sending [options...]
 Options:
@@ -27,6 +29,7 @@ Options:
 `
 }
 
+// Run
 func (c *SignatureCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

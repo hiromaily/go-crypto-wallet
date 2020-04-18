@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//create subcommand
+// CreateCommand create subcommand
 type CreateCommand struct {
 	Name    string
 	Version string
@@ -18,6 +18,7 @@ type CreateCommand struct {
 	Wallet  wallets.Walleter
 }
 
+// Synopsis
 func (c *CreateCommand) Synopsis() string {
 	return "creating functionality"
 }
@@ -28,6 +29,7 @@ var (
 	transferSynopsis = "create a transfer unsigned transaction file between accounts"
 )
 
+// Help
 func (c *CreateCommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet create [Subcommands...]
 Subcommands:
@@ -37,6 +39,7 @@ Subcommands:
 `, receiptSynopsis, paymentSynopsis, transferSynopsis)
 }
 
+// Run
 func (c *CreateCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

@@ -11,6 +11,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
+// WalletSubCommands
 func WalletSubCommands(wallet wallets.Keygener, version string) map[string]cli.CommandFactory {
 	return map[string]cli.CommandFactory{
 		"create": func() (cli.Command, error) {

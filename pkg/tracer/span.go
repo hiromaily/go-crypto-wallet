@@ -1,6 +1,7 @@
 package tracer
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -18,15 +19,18 @@ type Span struct {
 	logger *zap.Logger
 }
 
+// NewSpan
 func NewSpan(s opentracing.Span) *Span {
 	return &Span{span: s}
 }
 
+// WithLogger
 func (s *Span) WithLogger(logger *zap.Logger) *Span {
 	s.logger = logger
 	return s
 }
 
+// Tag
 func (s *Span) Tag(key string, value interface{}) {
 	if s != nil {
 		if s.span != nil {
@@ -35,6 +39,7 @@ func (s *Span) Tag(key string, value interface{}) {
 	}
 }
 
+// Error
 func (s *Span) Error(msg string, fields ...zapcore.Field) {
 	if s != nil && s.logger != nil {
 		s.logger.Error(msg, fields...)
@@ -42,6 +47,7 @@ func (s *Span) Error(msg string, fields ...zapcore.Field) {
 	s.LogSpan(msg, fields...)
 }
 
+// Warn
 func (s *Span) Warn(msg string, fields ...zapcore.Field) {
 	if s != nil && s.logger != nil {
 		s.logger.Warn(msg, fields...)
@@ -49,6 +55,7 @@ func (s *Span) Warn(msg string, fields ...zapcore.Field) {
 	s.LogSpan(msg, fields...)
 }
 
+// Info
 func (s *Span) Info(msg string, fields ...zapcore.Field) {
 	if s != nil && s.logger != nil {
 		s.logger.Info(msg, fields...)
@@ -56,6 +63,7 @@ func (s *Span) Info(msg string, fields ...zapcore.Field) {
 	s.LogSpan(msg, fields...)
 }
 
+// Debug
 func (s *Span) Debug(msg string, fields ...zapcore.Field) {
 	if s != nil && s.logger != nil {
 		s.logger.Debug(msg, fields...)
@@ -63,6 +71,7 @@ func (s *Span) Debug(msg string, fields ...zapcore.Field) {
 	s.LogSpan(msg, fields...)
 }
 
+// LogSpan
 func (s *Span) LogSpan(msg string, fields ...zapcore.Field) {
 	if s != nil && s.span != nil {
 		opentracingFields := make([]opentracinglog.Field, 0, len(fields)+2)
@@ -72,6 +81,7 @@ func (s *Span) LogSpan(msg string, fields ...zapcore.Field) {
 	}
 }
 
+// Finish
 func (s *Span) Finish() {
 	if s != nil {
 		if s.span != nil {
@@ -80,11 +90,30 @@ func (s *Span) Finish() {
 	}
 }
 
+// NewChild returns new child span
 func (s *Span) NewChild(name string) *Span {
 	if s != nil && s.span != nil {
 		return NewChildSpan(s, name)
 	}
 	return nil
+}
+
+// NewChildSpan returns new child span
+func NewChildSpan(parentSpan *Span, name string) *Span {
+	if parentSpan == nil || parentSpan.span == nil {
+		return nil
+	}
+	ps := parentSpan.span
+	span := ps.Tracer().StartSpan(
+		name,
+		opentracing.ChildOf(ps.Context()),
+	)
+	return NewSpan(span).WithLogger(parentSpan.logger)
+}
+
+func NewChildSpanFromContext(ctx context.Context, name string) *Span {
+	parentSpan := opentracing.SpanFromContext(ctx)
+	return NewChildSpan(NewSpan(parentSpan), name)
 }
 
 // EmptySpan is only for development

@@ -4,7 +4,7 @@ package address
 // AddrType
 //----------------------------------------------------
 
-//AddrType address type for bitcoin
+// AddrType address type for bitcoin
 type AddrType string
 
 // address type
@@ -14,6 +14,7 @@ const (
 	AddrTypeBech32     AddrType = "bech32"
 )
 
+// String
 func (a AddrType) String() string {
 	return string(a)
 }
@@ -41,6 +42,7 @@ const (
 	AddrStatusAddressExported      AddrStatus = "address_exported"       // addressがexportされた
 )
 
+// String
 func (a AddrStatus) String() string {
 	return string(a)
 }

@@ -114,7 +114,7 @@ func New(file string, wtype types.WalletType) (*Config, error) {
 	return conf, nil
 }
 
-// load config file
+// loadConfig load config file
 func loadConfig(path string) (*Config, error) {
 	d, err := ioutil.ReadFile(path)
 	if err != nil {

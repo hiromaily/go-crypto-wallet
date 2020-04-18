@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//listunspent subcommand
+// ListUnspentCommand listunspent subcommand
 type ListUnspentCommand struct {
 	name     string
 	synopsis string
@@ -18,14 +18,17 @@ type ListUnspentCommand struct {
 	wallet   wallets.Walleter
 }
 
+// Synopsis
 func (c *ListUnspentCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *ListUnspentCommand) Help() string {
 	return `Usage: wallet api listunspent`
 }
 
+// Run
 func (c *ListUnspentCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

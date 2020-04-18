@@ -10,6 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 )
 
+// WalletStorager is wallet storager interface
 // TODO: decouple interface into interface of each repo
 type WalletStorager interface {
 	Close() error
@@ -47,6 +48,7 @@ type WalletStorager interface {
 	UpdateTxTypeNotifiedByID(actionType action.ActionType, ID int64, tx *sqlx.Tx, isCommit bool) (int64, error)
 }
 
+// ColdStorager is coldwalet storager interface
 type ColdStorager interface {
 	Close() error
 	//account_pubkey_repo

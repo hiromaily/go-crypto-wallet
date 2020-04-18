@@ -9,7 +9,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//create subcommand
+// CreateCommand create subcommand
 type CreateCommand struct {
 	name     string
 	synopsis string
@@ -17,10 +17,12 @@ type CreateCommand struct {
 	wallet   wallets.Walleter
 }
 
+// Synopsis
 func (c *CreateCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *CreateCommand) Help() string {
 	return `Usage: wallet db create [options...]
 Options:
@@ -28,6 +30,7 @@ Options:
 `
 }
 
+// Run
 func (c *CreateCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

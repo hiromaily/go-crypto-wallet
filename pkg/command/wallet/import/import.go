@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//import subcommand
+// ImportCommand import subcommand
 type ImportCommand struct {
 	Name    string
 	Version string
@@ -18,6 +18,7 @@ type ImportCommand struct {
 	Wallet  wallets.Walleter
 }
 
+// Synopsis
 func (c *ImportCommand) Synopsis() string {
 	return "importing functionality"
 }
@@ -26,6 +27,7 @@ var (
 	keySynopsis = "import generatd addresses by keygen wallet"
 )
 
+// Help
 func (c *ImportCommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet import [Subcommands...]
 Subcommands:
@@ -33,6 +35,7 @@ Subcommands:
 `, keySynopsis)
 }
 
+// Run
 func (c *ImportCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

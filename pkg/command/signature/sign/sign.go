@@ -9,17 +9,19 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//sign subcommand
+// SignCommand sign subcommand
 type SignCommand struct {
 	Name   string
 	UI     cli.Ui
 	Wallet wallets.Signer
 }
 
+// Synopsis
 func (c *SignCommand) Synopsis() string {
 	return "sign on signed transaction for multsig address (account would be found from file name)"
 }
 
+// Help
 func (c *SignCommand) Help() string {
 	return `Usage: sign sign [options...]
 Options:
@@ -27,6 +29,7 @@ Options:
 `
 }
 
+// Run
 func (c *SignCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

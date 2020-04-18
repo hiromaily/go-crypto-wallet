@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-// export subcommand
+// ExportCommand export subcommand
 type ExportCommand struct {
 	Name    string
 	Version string
@@ -18,6 +18,7 @@ type ExportCommand struct {
 	Wallet  wallets.Signer
 }
 
+// Synopsis
 func (c *ExportCommand) Synopsis() string {
 	return "export resources"
 }
@@ -26,6 +27,7 @@ var (
 	multisigSynopsis = "export multisig addresses"
 )
 
+// Help
 func (c *ExportCommand) Help() string {
 	return fmt.Sprintf(`Usage: sign export [Subcommands...]
 Subcommands:
@@ -33,6 +35,7 @@ Subcommands:
 `, multisigSynopsis)
 }
 
+// Run
 func (c *ExportCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

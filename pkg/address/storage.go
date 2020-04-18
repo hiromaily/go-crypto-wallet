@@ -14,13 +14,12 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 )
 
+// Storager
 type Storager interface {
 	CreateFilePath(accountType account.AccountType, addrStatus uint8) string
 	ValidateFilePath(fileName string, accountType account.AccountType) error
 	ImportPubKey(fileName string) ([]string, error)
 }
-
-//TODO: create new GCSRepository with Storager interface
 
 // FileRepository to store pubkey as csv file
 type FileRepository struct {

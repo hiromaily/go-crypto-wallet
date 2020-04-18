@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//montor subcommand
+// MonitorCommand montor subcommand
 type MonitorCommand struct {
 	Name    string
 	Version string
@@ -18,6 +18,7 @@ type MonitorCommand struct {
 	Wallet  wallets.Walleter
 }
 
+// Synopsis
 func (c *MonitorCommand) Synopsis() string {
 	return "monitoring functionality"
 }
@@ -27,6 +28,7 @@ var (
 	balanceSynopsis = "monitor balance"
 )
 
+// Help
 func (c *MonitorCommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet monitor [Subcommands...]
 Subcommands:
@@ -35,6 +37,7 @@ Subcommands:
 `, senttxSynopsis, balanceSynopsis)
 }
 
+// Run
 func (c *MonitorCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

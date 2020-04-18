@@ -12,6 +12,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 )
 
+// StartJaegerTracer returns jaeger tracer
 func StartJaegerTracer(conf config.TracerDetail) opentracing.Tracer {
 	return setJaegerTracer(conf, conf.IsDebug)
 }

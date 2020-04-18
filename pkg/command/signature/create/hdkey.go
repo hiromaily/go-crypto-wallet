@@ -11,7 +11,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//hd key subcommand
+// HDKeyCommand hd key subcommand
 type HDKeyCommand struct {
 	name     string
 	synopsis string
@@ -19,15 +19,18 @@ type HDKeyCommand struct {
 	wallet   wallets.Signer
 }
 
+// Synopsis
 func (c *HDKeyCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *HDKeyCommand) Help() string {
 	return `Usage: sign create hdkey
 `
 }
 
+// Run
 func (c *HDKeyCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

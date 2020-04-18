@@ -13,6 +13,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
+// WalletSubCommands
 func WalletSubCommands(wallet wallets.Walleter, version string) map[string]cli.CommandFactory {
 	return map[string]cli.CommandFactory{
 		"import": func() (cli.Command, error) {

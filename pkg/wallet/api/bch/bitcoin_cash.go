@@ -38,7 +38,7 @@ func NewBitcoinCash(
 	return &bitc, nil
 }
 
-// initChainParams bitcoin cash用に書き換える
+// initChainParams overrides chain parms as for bitcoin cash
 func (b *BitcoinCash) initChainParams() {
 	conf := b.GetChainConf()
 

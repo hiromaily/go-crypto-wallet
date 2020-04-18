@@ -9,7 +9,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//unlocktx subcommand
+// UnLockTxCommand unlocktx subcommand
 type UnLockTxCommand struct {
 	name     string
 	synopsis string
@@ -17,14 +17,17 @@ type UnLockTxCommand struct {
 	wallet   wallets.Walleter
 }
 
+// Synopsis
 func (c *UnLockTxCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *UnLockTxCommand) Help() string {
 	return `Usage: wallet api unlocktx`
 }
 
+// Run
 func (c *UnLockTxCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

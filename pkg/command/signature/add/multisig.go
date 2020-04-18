@@ -11,7 +11,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//multisig subcommand
+// MultisigCommand multisig subcommand
 type MultisigCommand struct {
 	name     string
 	synopsis string
@@ -19,10 +19,12 @@ type MultisigCommand struct {
 	wallet   wallets.Signer
 }
 
+// Synopsis
 func (c *MultisigCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *MultisigCommand) Help() string {
 	return `Usage: sign add multisig [options...]
 Options:
@@ -30,6 +32,7 @@ Options:
 `
 }
 
+// Run
 func (c *MultisigCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

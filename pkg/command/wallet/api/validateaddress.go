@@ -9,7 +9,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//validateaddress subcommand
+// ValidateAddressCommand validateaddress subcommand
 type ValidateAddressCommand struct {
 	name     string
 	synopsis string
@@ -17,10 +17,12 @@ type ValidateAddressCommand struct {
 	wallet   wallets.Walleter
 }
 
+// Synopsis
 func (c *ValidateAddressCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *ValidateAddressCommand) Help() string {
 	return `Usage: wallet api validateaddress [options...]
 Options:
@@ -28,6 +30,7 @@ Options:
 `
 }
 
+// Run
 func (c *ValidateAddressCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

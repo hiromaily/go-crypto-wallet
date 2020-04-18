@@ -9,7 +9,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//payment subcommand
+// PaymentCommand payment subcommand
 type PaymentCommand struct {
 	name     string
 	synopsis string
@@ -17,10 +17,12 @@ type PaymentCommand struct {
 	wallet   wallets.Walleter
 }
 
+// Synopsis
 func (c *PaymentCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *PaymentCommand) Help() string {
 	return `Usage: wallet create payment [options...]
 Options:
@@ -28,6 +30,7 @@ Options:
 `
 }
 
+// Run
 func (c *PaymentCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

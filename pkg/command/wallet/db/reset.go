@@ -9,7 +9,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//reset subcommand
+// ResetCommand reset subcommand
 type ResetCommand struct {
 	name     string
 	synopsis string
@@ -17,10 +17,12 @@ type ResetCommand struct {
 	wallet   wallets.Walleter
 }
 
+// Synopsis
 func (c *ResetCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *ResetCommand) Help() string {
 	return `Usage: wallet db reset [options...]
 Options:
@@ -28,6 +30,7 @@ Options:
 `
 }
 
+// Run
 func (c *ResetCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

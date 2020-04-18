@@ -9,7 +9,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//estimatefee subcommand
+// EstimateFeeCommand estimatefee subcommand
 type EstimateFeeCommand struct {
 	name     string
 	synopsis string
@@ -17,14 +17,17 @@ type EstimateFeeCommand struct {
 	wallet   wallets.Walleter
 }
 
+// Synopsis
 func (c *EstimateFeeCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *EstimateFeeCommand) Help() string {
 	return `Usage: wallet api estimatefee`
 }
 
+// Run
 func (c *EstimateFeeCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

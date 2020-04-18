@@ -9,7 +9,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//senttx subcommand
+// SentTxCommand senttx subcommand
 type SentTxCommand struct {
 	name     string
 	synopsis string
@@ -17,10 +17,12 @@ type SentTxCommand struct {
 	wallet   wallets.Walleter
 }
 
+// Synopsis
 func (c *SentTxCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *SentTxCommand) Help() string {
 	return `Usage: wallet monitor sendtx [options...]
 Options:
@@ -28,6 +30,7 @@ Options:
 `
 }
 
+// Run
 func (c *SentTxCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

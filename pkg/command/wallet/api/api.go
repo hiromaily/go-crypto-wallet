@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//api subcommand
+// APICommand api subcommand
 type APICommand struct {
 	Name    string
 	Version string
@@ -18,6 +18,7 @@ type APICommand struct {
 	Wallet  wallets.Walleter
 }
 
+// Synopsis
 func (c *APICommand) Synopsis() string {
 	return "Bitcoin API functionality"
 }
@@ -32,6 +33,7 @@ var (
 	balanceSynopsis         = "get balance for account"
 )
 
+// Help
 func (c *APICommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet api [Subcommands...]
 Subcommands:
@@ -44,6 +46,7 @@ Subcommands:
 `, unlocktxSynopsis, estimatefeeSynopsis, loggingSynopsis, getnetworkinfoSynopsis, validateaddressSynopsis, listunspentSynopsis)
 }
 
+// Run
 func (c *APICommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

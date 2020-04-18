@@ -10,21 +10,23 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 )
 
+// LogEnv dev/prod/custom
 type LogEnv string
 
+// log_type
 const (
 	LogDev    LogEnv = "dev"
 	LogProd   LogEnv = "prod"
 	LogCustom LogEnv = "custom"
 )
 
+// String
 func (e LogEnv) String() string {
 	return string(e)
 }
 
+// NewLoggerWithWriter
 func NewLoggerWithWriter(w io.Writer, lv zapcore.LevelEnabler, env LogEnv) *zap.Logger {
-	//pp.ColoringEnabled = false
-
 	zap.NewExample()
 
 	writer := zapcore.AddSync(w)
@@ -78,6 +80,7 @@ func getLogLevel(level string) zapcore.LevelEnabler {
 	}
 }
 
+// NewZapLogger returns *zap.Logger
 func NewZapLogger(conf *config.Logger) *zap.Logger {
 	return NewLoggerWithWriter(os.Stdout, getLogLevel(conf.Level), LogEnv(conf.Env)).Named(conf.Service)
 }

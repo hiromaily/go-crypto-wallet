@@ -8,6 +8,7 @@ import (
 	"github.com/mitchellh/cli"
 )
 
+// CreateSubCommand creates sub command calling cli.NewCLI
 func CreateSubCommand(appName, version string, args []string, commands map[string]cli.CommandFactory) *cli.CLI {
 	c := cli.NewCLI(appName, version)
 	c.Args = args
@@ -17,6 +18,7 @@ func CreateSubCommand(appName, version string, args []string, commands map[strin
 	return c
 }
 
+// ClolorUI returns cli.ColoredUi
 func ClolorUI() *cli.ColoredUi {
 	return &cli.ColoredUi{
 		InfoColor:  cli.UiColorBlue,
@@ -29,6 +31,8 @@ func ClolorUI() *cli.ColoredUi {
 	}
 }
 
+// HelpFunc modify default help explanation
+//  if new args are added on the top, modify this func
 func HelpFunc(appName string) func(c map[string]cli.CommandFactory) string {
 	return func(c map[string]cli.CommandFactory) string {
 		// Replace basic help header by new one

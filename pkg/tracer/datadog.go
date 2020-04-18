@@ -10,11 +10,13 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 )
 
+// TraceLog
 type TraceLog struct {
 	TraceID string `json:"trace_id"`
 	SpanID  string `json:"span_id"`
 }
 
+// StartDatadogTracer return datadog tracer
 func StartDatadogTracer(conf config.TracerDetail, hostName string) opentracing.Tracer {
 	opts := []tracer.StartOption{
 		tracer.WithServiceName(conf.ServiceName),

@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-// key subcommand
+// KeyCommand key subcommand
 type KeyCommand struct {
 	name     string
 	synopsis string
@@ -18,15 +18,18 @@ type KeyCommand struct {
 	wallet   wallets.Keygener
 }
 
+// Synopsis
 func (c *KeyCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *KeyCommand) Help() string {
 	return `Usage: keygen key create key
 `
 }
 
+// Run
 func (c *KeyCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

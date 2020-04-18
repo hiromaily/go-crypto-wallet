@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//key subcommand
+// KeyCommand key subcommand
 type KeyCommand struct {
 	name     string
 	synopsis string
@@ -18,10 +18,12 @@ type KeyCommand struct {
 	wallet   wallets.Walleter
 }
 
+// Synopsis
 func (c *KeyCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *KeyCommand) Help() string {
 	return `Usage: wallet import key [options...]
 Options:
@@ -29,6 +31,7 @@ Options:
 `
 }
 
+// Run
 func (c *KeyCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

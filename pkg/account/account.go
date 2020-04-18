@@ -1,6 +1,6 @@
 package account
 
-//AccountType utilization purpose of address
+// AccountType utilization purpose of address
 type AccountType string
 
 // account_type
@@ -14,14 +14,17 @@ const (
 	AccountTypeAuthorization AccountType = "authorization" //マルチシグアドレスのための承認アドレス
 )
 
+// String
 func (a AccountType) String() string {
 	return string(a)
 }
 
+// Is
 func (a AccountType) Is(v string) bool {
 	return a.String() == v
 }
 
+// Allow
 func Allow(acnt string, accountList []AccountType) bool {
 	if !ValidateAccountType(acnt) {
 		return false
@@ -34,6 +37,7 @@ func Allow(acnt string, accountList []AccountType) bool {
 	return false
 }
 
+// NotAllow
 func NotAllow(acnt string, accountList []AccountType) bool {
 	if !ValidateAccountType(acnt) {
 		return false
@@ -46,7 +50,7 @@ func NotAllow(acnt string, accountList []AccountType) bool {
 	return true
 }
 
-//AccountTypeMap account_type mapper
+// AccountTypeMap account_type mapper
 var AccountTypeMap = map[string]AccountType{
 	"client":        AccountTypeClient,
 	"receipt":       AccountTypeReceipt,
@@ -64,7 +68,7 @@ func ValidateAccountType(v string) bool {
 	return false
 }
 
-//AccountTypeValue account_type value
+// AccountTypeValue account_type value
 var AccountTypeValue = map[AccountType]uint32{
 	AccountTypeClient:        0,
 	AccountTypeReceipt:       1,
@@ -74,7 +78,7 @@ var AccountTypeValue = map[AccountType]uint32{
 	AccountTypeAuthorization: 5,
 }
 
-//AccountTypeMultisig true: account type is for multisig address
+// AccountTypeMultisig true: account type is for multisig address
 var AccountTypeMultisig = map[AccountType]bool{
 	AccountTypeClient:        false,
 	AccountTypeReceipt:       true,

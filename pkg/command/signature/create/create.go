@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//create subcommand
+// CreateCommand create subcommand
 type CreateCommand struct {
 	Name    string
 	Version string
@@ -18,6 +18,7 @@ type CreateCommand struct {
 	Wallet  wallets.Signer
 }
 
+// Synopsis
 func (c *CreateCommand) Synopsis() string {
 	return "create resources"
 }
@@ -27,6 +28,7 @@ var (
 	seedSynopsis  = "create seed"
 )
 
+// Help
 func (c *CreateCommand) Help() string {
 	return fmt.Sprintf(`Usage: sign create [Subcommands...]
 Subcommands:
@@ -35,6 +37,7 @@ Subcommands:
 `, hdkeySynopsis, seedSynopsis)
 }
 
+// Run
 func (c *CreateCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

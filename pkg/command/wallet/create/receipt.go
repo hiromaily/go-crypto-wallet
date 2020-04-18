@@ -13,7 +13,7 @@ import (
 //  - how to display help? upper layer's help displays by `wallet receipt create -h`
 //  - as workaround, add undefined flag like `wallet receipt create -a`
 
-//receipt subcommand
+// ReceiptCommand receipt subcommand
 type ReceiptCommand struct {
 	name     string
 	synopsis string
@@ -21,10 +21,12 @@ type ReceiptCommand struct {
 	wallet   wallets.Walleter
 }
 
+// Synopsis
 func (c *ReceiptCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *ReceiptCommand) Help() string {
 	return `Usage: wallet create receipt [options...]
 Options:
@@ -32,6 +34,7 @@ Options:
 `
 }
 
+// Run
 func (c *ReceiptCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

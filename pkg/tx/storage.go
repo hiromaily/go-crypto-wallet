@@ -14,6 +14,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/action"
 )
 
+// Storager is tx storager
 type Storager interface {
 	CreateFilePath(actionType action.ActionType, txType TxType, txID int64, signedCount int) string
 	GetFileNameType(filePath string) (*FileName, error)
@@ -22,12 +23,13 @@ type Storager interface {
 	WriteFile(path, hexTx string) (string, error)
 }
 
-// FileRepository to store transaction info as csv file
+// FileRepository is to store transaction info as csv file
 type FileRepository struct {
 	filePath string
 	logger   *zap.Logger
 }
 
+// FileName
 type FileName struct {
 	ActionType  action.ActionType
 	TxType      TxType

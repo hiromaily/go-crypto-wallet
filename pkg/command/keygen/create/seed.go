@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//seed subcommand
+// SeedCommand seed subcommand
 type SeedCommand struct {
 	name     string
 	synopsis string
@@ -18,10 +18,12 @@ type SeedCommand struct {
 	wallet   wallets.Keygener
 }
 
+// Synopsis
 func (c *SeedCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *SeedCommand) Help() string {
 	return `Usage: keygen key create seed  [options...]
 Options:
@@ -29,6 +31,7 @@ Options:
 `
 }
 
+// Run
 func (c *SeedCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//db subcommand
+// DBCommand db subcommand
 type DBCommand struct {
 	Name    string
 	Version string
@@ -18,6 +18,7 @@ type DBCommand struct {
 	Wallet  wallets.Walleter
 }
 
+// Synopsis
 func (c *DBCommand) Synopsis() string {
 	return "Database functionality"
 }
@@ -27,6 +28,7 @@ var (
 	resetSynopsis  = "reset table"
 )
 
+// Help
 func (c *DBCommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet db [Subcommands...]
 Subcommands:
@@ -35,6 +37,7 @@ Subcommands:
 `, createSynopsis, resetSynopsis)
 }
 
+// Run
 func (c *DBCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

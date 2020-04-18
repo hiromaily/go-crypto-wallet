@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//logging subcommand
+// LoggingCommand logging subcommand
 type LoggingCommand struct {
 	name     string
 	synopsis string
@@ -18,14 +18,17 @@ type LoggingCommand struct {
 	wallet   wallets.Walleter
 }
 
+// Synopsis
 func (c *LoggingCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *LoggingCommand) Help() string {
 	return `Usage: wallet api logging`
 }
 
+// Run
 func (c *LoggingCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//create subcommand
+// CreateCommand create subcommand
 type CreateCommand struct {
 	Name    string
 	Version string
@@ -18,6 +18,7 @@ type CreateCommand struct {
 	Wallet  wallets.Keygener
 }
 
+// Synopsis
 func (c *CreateCommand) Synopsis() string {
 	return "create resources"
 }
@@ -29,6 +30,7 @@ var (
 	multisigSynopsis = "multisig address for debug use"
 )
 
+// Help
 func (c *CreateCommand) Help() string {
 	return fmt.Sprintf(`Usage: keygen create [Subcommands...]
 Subcommands:
@@ -39,6 +41,7 @@ Subcommands:
 `, keySynopsis, hdkeySynopsis, seedSynopsis, multisigSynopsis)
 }
 
+// Run
 func (c *CreateCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

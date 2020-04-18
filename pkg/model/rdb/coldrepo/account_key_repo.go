@@ -11,7 +11,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 )
 
-// AccountKeyTable account_key_clientテーブル
+// AccountKeyTable account_key_client table
 type AccountKeyTable struct {
 	ID                    int64      `db:"id"`
 	WalletAddress         string     `db:"wallet_address"`

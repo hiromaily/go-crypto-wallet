@@ -1,7 +1,6 @@
 package tracer
 
 import (
-	"context"
 	"os"
 
 	"github.com/opentracing/opentracing-go"
@@ -24,27 +23,12 @@ func NewTracer(conf config.Tracer) opentracing.Tracer {
 	return NoopTracer()
 }
 
-func NewChildSpan(parentSpan *Span, name string) *Span {
-	if parentSpan == nil || parentSpan.span == nil {
-		return nil
-	}
-	ps := parentSpan.span
-	span := ps.Tracer().StartSpan(
-		name,
-		opentracing.ChildOf(ps.Context()),
-	)
-	return NewSpan(span).WithLogger(parentSpan.logger)
-}
-
-func NewChildSpanFromContext(ctx context.Context, name string) *Span {
-	parentSpan := opentracing.SpanFromContext(ctx)
-	return NewChildSpan(NewSpan(parentSpan), name)
-}
-
+// NoopTracer returns empty tracer
 func NoopTracer() opentracing.Tracer {
 	return opentracing.NoopTracer{}
 }
 
+// NoopSpan
 func NoopSpan(name string) opentracing.Span {
 	return NoopTracer().StartSpan(name)
 }

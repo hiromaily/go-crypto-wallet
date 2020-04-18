@@ -9,17 +9,19 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//send subcommand
+// SendCommand send subcommand
 type SendCommand struct {
 	Name   string
 	UI     cli.Ui
 	Wallet wallets.Walleter
 }
 
+// Synopsis
 func (c *SendCommand) Synopsis() string {
 	return "send signed transaction to bitcoin blockchain network"
 }
 
+// Help
 func (c *SendCommand) Help() string {
 	return `Usage: wallet send [options...]
 Options:
@@ -27,6 +29,7 @@ Options:
 `
 }
 
+// Run
 func (c *SendCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

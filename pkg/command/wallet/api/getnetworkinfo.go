@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//getnetworkinfo subcommand
+// GetnetworkInfoCommand getnetworkinfo subcommand
 type GetnetworkInfoCommand struct {
 	name     string
 	synopsis string
@@ -18,14 +18,17 @@ type GetnetworkInfoCommand struct {
 	wallet   wallets.Walleter
 }
 
+// Synopsis
 func (c *GetnetworkInfoCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *GetnetworkInfoCommand) Help() string {
 	return `Usage: wallet api getnetworkinfo`
 }
 
+// Run
 func (c *GetnetworkInfoCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

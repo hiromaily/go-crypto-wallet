@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//privkey subcommand
+// PrivKeyCommand privkey subcommand
 type PrivKeyCommand struct {
 	name     string
 	synopsis string
@@ -18,15 +18,18 @@ type PrivKeyCommand struct {
 	wallet   wallets.Signer
 }
 
+// Synopsis
 func (c *PrivKeyCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *PrivKeyCommand) Help() string {
 	return `Usage: sign import privkey
 `
 }
 
+// Run
 func (c *PrivKeyCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

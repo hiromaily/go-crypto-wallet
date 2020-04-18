@@ -11,7 +11,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-//hd key subcommand
+// HDKeyCommand hdkey subcommand
 type HDKeyCommand struct {
 	name     string
 	synopsis string
@@ -19,10 +19,12 @@ type HDKeyCommand struct {
 	wallet   wallets.Keygener
 }
 
+// Synopsis
 func (c *HDKeyCommand) Synopsis() string {
 	return c.synopsis
 }
 
+// Help
 func (c *HDKeyCommand) Help() string {
 	return `Usage: keygen key create hdkey [options...]
 Options:
@@ -31,6 +33,7 @@ Options:
 `
 }
 
+// Run
 func (c *HDKeyCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
