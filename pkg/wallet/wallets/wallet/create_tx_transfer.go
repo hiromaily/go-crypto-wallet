@@ -21,7 +21,7 @@ func (w *Wallet) CreateTransferTx(sender, receiver account.AccountType, floatAmo
 	}
 
 	//amount btcutil.Amount
-	amount, err := w.btc.FloatBitToAmount(floatAmount)
+	amount, err := w.btc.FloatToAmount(floatAmount)
 	if err != nil {
 		return "", "", err
 	}

@@ -18,6 +18,9 @@ import (
 type Bitcoiner interface {
 	//account.go
 	GetAccount(addr string) (string, error)
+	ListAccounts() (map[string]btcutil.Amount, error)
+	GetBalance() (float64, error)
+	GetBalanceByAccount(accountType account.AccountType) (float64, error)
 
 	//address.go
 	GetAddressInfo(addr string) (*btc.GetAddressInfoResult, error)
@@ -27,11 +30,9 @@ type Bitcoiner interface {
 
 	//amount.go
 	AmountString(amt btcutil.Amount) string
-	FloatBitToAmount(f float64) (btcutil.Amount, error)
-	CastStrBitToAmount(s string) (btcutil.Amount, error)
-	CastStrSatoshiToAmount(s string) (btcutil.Amount, error)
-	ListAccounts() (map[string]btcutil.Amount, error)
-	GetBalanceByAccount(accountName string) (btcutil.Amount, error)
+	FloatToAmount(f float64) (btcutil.Amount, error)
+	StrToAmount(s string) (btcutil.Amount, error)
+	StrSatoshiToAmount(s string) (btcutil.Amount, error)
 
 	//block.go
 	GetBlockCount() (int64, error)

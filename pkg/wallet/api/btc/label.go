@@ -16,11 +16,11 @@ func (b *Bitcoin) SetLabel(addr, label string) error {
 
 	input1, err := json.Marshal(string(addr))
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.Marchal()")
+		return errors.Wrap(err, "fail to call json.Marchal(addr)")
 	}
 	input2, err := json.Marshal(string(label))
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.Marchal()")
+		return errors.Wrap(err, "fail to call json.Marchal(label)")
 	}
 
 	rawResult, err := b.client.RawRequest("setlabel", []json.RawMessage{input1, input2})
@@ -31,13 +31,14 @@ func (b *Bitcoin) SetLabel(addr, label string) error {
 	var tmp interface{}
 	err = json.Unmarshal([]byte(rawResult), &tmp)
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.Unmarshal()")
+		return errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}
 
 	return nil
 }
 
 // GetReceivedByLabelAndMinConf return balance by label(account)
+// FIXME: even if spent utxo is left as balance
 func (b *Bitcoin) GetReceivedByLabelAndMinConf(accountName string, minConf int) (btcutil.Amount, error) {
 	input1, err := json.Marshal(accountName)
 	if err != nil {
@@ -60,5 +61,5 @@ func (b *Bitcoin) GetReceivedByLabelAndMinConf(accountName string, minConf int) 
 	}
 
 	//convert float to amout
-	return b.FloatBitToAmount(receivedAmt)
+	return b.FloatToAmount(receivedAmt)
 }

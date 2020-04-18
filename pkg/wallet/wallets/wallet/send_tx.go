@@ -11,54 +11,49 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 )
 
-// coldwallet側で署名済みトランザクションを作成したものから、送金処理を行う
-
-// SendTx 渡されたファイルから署名済transactionを読み取り、送信を行う
+// SendTx send signed tx by keygen/sign walet
 func (w *Wallet) SendTx(filePath string) (string, error) {
 
-	//ファイル名から、tx_receipt_idを取得する
+	// get tx_receipt_id from file name
 	//payment_5_unsigned_1534466246366489473
 	actionType, _, txReceiptID, err := w.txFileRepo.ValidateFilePath(filePath, []tx.TxType{tx.TxTypeSigned})
 	if err != nil {
-		return "", errors.Errorf("txfile.ValidateFilePath() error: %s", err)
+		return "", errors.Wrap(err, "fail to call txFileRepo.ValidateFilePath()")
 	}
 
-	//ファイルからhexを読み取る
+	// read hex from file
 	signedHex, err := w.txFileRepo.ReadFile(filePath)
 	if err != nil {
-		return "", errors.Errorf("txfile.ReadFile() error: %s", err)
+		return "", errors.Wrap(err, "fail to call txFileRepo.ReadFile()")
 	}
 
-	//送信
+	// send signed tx
 	hash, err := w.btc.SendTransactionByHex(signedHex)
 	if err != nil {
-		//TODO:本番環境ではBitcoinネットワークに取り込まれなくても、ここでエラーがでる？？その場合、手数料をあげて再トランザクションを生成するように促す必要がある
+		// if signature is not completed
 		//-26: 16: mandatory-script-verify-flag-failed (Operation not valid with the current stack size)
-		//=> 署名が不十分だとこれが出るらしい
-		w.logger.Error("This error implies new transsaction should be created from the beginning")
-		return "", errors.Errorf("BTC.SendTransactionByHex() error: %s", err)
+		return "", errors.Wrap(err, "fail to call btc.SendTransactionByHex()")
 	}
 
-	//DB更新 tx_receipt/tx_payment
+	// update tx_table
 	err = w.updateHexForSentTx(txReceiptID, signedHex, hash.String(), actionType)
 	if err != nil {
-		//TODO:仮にここでエラーが出たとしても、送信したという事実に変わりはない。ここのみを再度実行する仕組みが必要
-		return "", errors.Errorf("w.updateHexForSentTx() error: %s", err)
+		//TODO: even if error occurred, tx is already sent. so db should be corrected manually
+		return "", errors.Wrap(err, "fail to call updateHexForSentTx(), but tx is sent")
 	}
 
-	//DB更新 account_pubkey_receiptのみ
+	// update account_pubkey_table
 	err = w.updateIsAllocatedForAccountPubkey(txReceiptID, actionType)
 	if err != nil {
-		//TODO:仮にここでエラーが出たとしても、送信したという事実に変わりはない。ここのみを再度実行する仕組みが必要
-		return "", errors.Errorf("w.updateIsAllocatedForAccountPubkey() error: %s", err)
+		//TODO: even if error occurred, tx is already sent. so db should be corrected manually
+		return "", errors.Wrap(err, "fail to call updateIsAllocatedForAccountPubkey()")
 	}
 
 	return hash.String(), nil
 }
 
-//
 func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID string, actionType action.ActionType) error {
-	//1.TxReceiptテーブル
+	// 1.TxReceipt table
 	t := time.Now()
 	txReceipt := walletrepo.TxTable{}
 	txReceipt.ID = txReceiptID
@@ -75,39 +70,41 @@ func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID strin
 	affectedNum, err = w.storager.UpdateTxAfterSent(actionType, &txReceipt, nil, true)
 
 	if err != nil {
-		return errors.Errorf("DB.UpdateTxAfterSent(): error: %s", err)
+		return errors.Wrap(err, "fail to call storager.UpdateTxAfterSent()")
 	}
 	if affectedNum == 0 {
-		return errors.New("DB.UpdateTxAfterSent(): tx_receipt table was not updated")
+		return errors.New("tx_table was not updated by storager.UpdateTxAfterSent()")
 	}
 
 	return nil
 }
 
 func (w *Wallet) updateIsAllocatedForAccountPubkey(txReceiptID int64, actionType action.ActionType) error {
-	//tx_receiptの場合のみ
 	if actionType == action.ActionTypeReceipt {
 		return nil
 	}
 
-	//1.tx_receipt_outputのreceipt_idに一致する1レコードのoutput_addressを取得
+	// get txOutputs from .tx_receipt_output by receipt_id
 	txOutputs, err := w.storager.GetTxOutputByReceiptID(actionType, txReceiptID)
 	if err != nil {
-		return errors.Errorf("DB.GetTxOutputByReceiptID(): error: %s", err)
+		return errors.Wrap(err, "fail to call storager.GetTxOutputByReceiptID()")
 	}
 	if len(txOutputs) == 0 {
 		return errors.New("output tx could not be found in tx_receipt_output")
 	}
 
-	//2.account_pubkey_receiptのwallet_addressで検索し、is_allocatedがfalseであれば、trueに更新する
-	//tx_paymentの場合、勝手に分散されていて、使用済かどうかは、Quoineから補充するタイミングで、更新する必要がある
+	// search record from account_pubkey_receipt by wallet_address
+	// if is_allocated=`false`, update it `true`
 	tm := time.Now()
 	accountPublicKeyTable := make([]walletrepo.AccountPublicKeyTable, 1)
 	accountPublicKeyTable[0].WalletAddress = txOutputs[0].OutputAddress
 	accountPublicKeyTable[0].IsAllocated = true
 	accountPublicKeyTable[0].UpdatedAt = &tm
 
-	w.storager.UpdateIsAllocatedOnAccountPubKeyTable(account.AccountTypeReceipt, accountPublicKeyTable, nil, true)
+	err = w.storager.UpdateIsAllocatedOnAccountPubKeyTable(account.AccountTypeReceipt, accountPublicKeyTable, nil, true)
+	if err != nil {
+		return errors.Wrap(err, "fail to call storager.UpdateIsAllocatedOnAccountPubKeyTable()")
+	}
 
 	return nil
 }

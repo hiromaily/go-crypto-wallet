@@ -55,7 +55,7 @@ func (w *Wallet) createUserPayment() ([]UserPayment, []int64, error) {
 		}
 
 		// amount
-		userPayments[idx].validAmount, err = w.btc.FloatBitToAmount(userPayments[idx].amount)
+		userPayments[idx].validAmount, err = w.btc.FloatToAmount(userPayments[idx].amount)
 		if err != nil {
 			// fatal error
 			w.logger.Error("unexpected error occurred converting amount from float64 type to Amount type")

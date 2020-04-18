@@ -8,8 +8,8 @@ import (
 	. "github.com/hiromaily/go-bitcoin/pkg/wallet/api/btc"
 )
 
-// TestFloatBitToAmount
-func TestFloatBitToAmount(t *testing.T) {
+// TestFloatToAmount
+func TestFloatToAmount(t *testing.T) {
 	var btc = Bitcoin{}
 
 	var tests = []struct {
@@ -22,7 +22,7 @@ func TestFloatBitToAmount(t *testing.T) {
 		{0.000010, 1000},
 	}
 	for _, val := range tests {
-		amt, err := btc.FloatBitToAmount(val.bit)
+		amt, err := btc.FloatToAmount(val.bit)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -37,8 +37,8 @@ func TestFloatBitToAmount(t *testing.T) {
 	}
 }
 
-// TestCastStrSatoshiToAmount
-func TestCastStrBitToAmount(t *testing.T) {
+// TestStrSatoshiToAmount
+func TestStrToAmount(t *testing.T) {
 	var btc = Bitcoin{}
 
 	var tests = []struct {
@@ -53,7 +53,7 @@ func TestCastStrBitToAmount(t *testing.T) {
 		{"0.000010", 1000},
 	}
 	for _, val := range tests {
-		amt, err := btc.CastStrBitToAmount(val.bit)
+		amt, err := btc.StrToAmount(val.bit)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -67,8 +67,8 @@ func TestCastStrBitToAmount(t *testing.T) {
 	}
 }
 
-// TestCastStrSatoshiToAmount
-func TestCastStrSatoshiToAmount(t *testing.T) {
+// TestStrSatoshiToAmount
+func TestStrSatoshiToAmount(t *testing.T) {
 	var btc = Bitcoin{}
 
 	var tests = []struct {
@@ -81,7 +81,7 @@ func TestCastStrSatoshiToAmount(t *testing.T) {
 		{"250000", 0.0025},
 	}
 	for _, val := range tests {
-		amt, err := btc.CastStrSatoshiToAmount(val.satoshi)
+		amt, err := btc.StrSatoshiToAmount(val.satoshi)
 		if err != nil {
 			t.Fatal(err)
 		}

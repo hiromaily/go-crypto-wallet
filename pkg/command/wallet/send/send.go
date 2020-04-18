@@ -53,7 +53,7 @@ func (c *SendCommand) Run(args []string) int {
 	}
 
 	//TODO: output should be json if json option is true
-	c.UI.Output(fmt.Sprintf("[Done]送信までDONE!! txID: %s", txID))
+	c.UI.Output(fmt.Sprintf("tx is sent!! txID: %s", txID))
 
 	return 0
 }

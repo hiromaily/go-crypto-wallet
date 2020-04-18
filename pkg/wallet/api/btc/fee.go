@@ -53,7 +53,7 @@ func (b *Bitcoin) GetTransactionFee(tx *wire.MsgTx) (btcutil.Amount, error) {
 	fee := fmt.Sprintf("%f", feePerKB*float64(tx.SerializeSize())/1000)
 
 	//To Amount
-	feeAsBit, err := b.CastStrBitToAmount(fee)
+	feeAsBit, err := b.StrToAmount(fee)
 	if err != nil {
 		return 0, errors.Errorf("BTC.CastStrToSatoshi(%s): error: %s", fee, err)
 	}
@@ -106,9 +106,9 @@ func (b *Bitcoin) validateAdjustmentFee(fee float64) bool {
 
 // CalculateNewFee 手数料を調整する
 func (b *Bitcoin) calculateNewFee(fee btcutil.Amount, adjustmentFee float64) (btcutil.Amount, error) {
-	newFee, err := b.FloatBitToAmount(fee.ToBTC() * adjustmentFee)
+	newFee, err := b.FloatToAmount(fee.ToBTC() * adjustmentFee)
 	if err != nil {
-		return 0, errors.Errorf("BTC.FloatBitToAmount() error: %s", err)
+		return 0, errors.Errorf("BTC.FloatToAmount() error: %s", err)
 	}
 	return newFee, nil
 }
@@ -121,9 +121,9 @@ func (b *Bitcoin) getMinRelayFee() (btcutil.Amount, error) {
 	if res.Relayfee == 0 {
 		return 0, errors.New("GetNetworkInfo().Relayfee error: RelayFee is not retrieved")
 	}
-	fee, err := b.FloatBitToAmount(res.Relayfee)
+	fee, err := b.FloatToAmount(res.Relayfee)
 	if err != nil {
-		return 0, errors.Errorf("BTC.FloatBitToAmount() error: %s", err)
+		return 0, errors.Errorf("BTC.FloatToAmount() error: %s", err)
 	}
 	return fee, nil
 }
