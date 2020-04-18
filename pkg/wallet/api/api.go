@@ -19,8 +19,8 @@ type Bitcoiner interface {
 	//account.go
 	GetAccount(addr string) (string, error)
 	ListAccounts() (map[string]btcutil.Amount, error)
-	GetBalance() (float64, error)
-	GetBalanceByAccount(accountType account.AccountType) (float64, error)
+	GetBalance() (btcutil.Amount, error)
+	GetBalanceByAccount(accountType account.AccountType) (btcutil.Amount, error)
 
 	//address.go
 	GetAddressInfo(addr string) (*btc.GetAddressInfoResult, error)
@@ -69,7 +69,7 @@ type Bitcoiner interface {
 
 	//label.go
 	SetLabel(addr, label string) error
-	GetReceivedByLabelAndMinConf(accountName string, minConf int) (btcutil.Amount, error)
+	//GetReceivedByLabelAndMinConf(accountName string, minConf int) (btcutil.Amount, error)
 
 	//logging.go
 	Logging() (*btc.LoggingResult, error)

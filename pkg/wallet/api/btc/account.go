@@ -2,9 +2,11 @@ package btc
 
 import (
 	"encoding/json"
+
 	"github.com/btcsuite/btcutil"
-	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/pkg/errors"
+
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 )
 
 // GetAccount returns account name of address
@@ -32,7 +34,7 @@ func (b *Bitcoin) ListAccounts() (map[string]btcutil.Amount, error) {
 }
 
 // GetBalanceByAccount get balance for account
-func (b *Bitcoin) GetBalance() (float64, error) {
+func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
 	input1, err := json.Marshal("*")
 	if err != nil {
 		return 0, errors.Wrapf(err, "fail to call json.Marchal(dummy)")
@@ -53,10 +55,10 @@ func (b *Bitcoin) GetBalance() (float64, error) {
 		return 0, errors.Wrap(err, "fail to json.Unmarshal(rawResult)")
 	}
 
-	return amount, nil
+	return b.FloatToAmount(amount)
 }
 
-func (b *Bitcoin) GetBalanceByAccount(accountType account.AccountType) (float64, error) {
+func (b *Bitcoin) GetBalanceByAccount(accountType account.AccountType) (btcutil.Amount, error) {
 	unspentList, _, err := b.ListUnspentByAccount(accountType)
 	if err != nil {
 		return 0, errors.Wrapf(err, "fail to call btc.ListUnspentByAccount(%s)", accountType.String())
@@ -65,5 +67,5 @@ func (b *Bitcoin) GetBalanceByAccount(accountType account.AccountType) (float64,
 	for _, tx := range unspentList {
 		totalAmout += tx.Amount
 	}
-	return totalAmout, nil
+	return b.FloatToAmount(totalAmout)
 }

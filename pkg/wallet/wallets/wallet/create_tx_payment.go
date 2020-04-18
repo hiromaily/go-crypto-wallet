@@ -41,7 +41,8 @@ func (w *Wallet) CreatePaymentTx(adjustmentFee float64) (string, string, error) 
 	}
 
 	// get balance for payment account
-	balance, err := w.btc.GetReceivedByLabelAndMinConf(account.AccountTypePayment.String(), w.btc.ConfirmationBlock())
+	balance, err := w.btc.GetBalanceByAccount(account.AccountTypePayment)
+	//balance, err := w.btc.GetReceivedByLabelAndMinConf(account.AccountTypePayment.String(), w.btc.ConfirmationBlock())
 	if err != nil {
 		return "", "", err
 	}

@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/btcsuite/btcutil"
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
@@ -50,7 +51,7 @@ func (c *BalanceCommand) Run(args []string) int {
 
 	//TODO: get all balance without account
 	var (
-		balance float64
+		balance btcutil.Amount
 		err     error
 	)
 	if acnt == "" {

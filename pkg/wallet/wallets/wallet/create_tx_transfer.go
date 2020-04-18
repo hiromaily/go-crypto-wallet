@@ -27,7 +27,8 @@ func (w *Wallet) CreateTransferTx(sender, receiver account.AccountType, floatAmo
 	}
 
 	// check balance for sender
-	balance, err := w.btc.GetReceivedByLabelAndMinConf(sender.String(), w.btc.ConfirmationBlock())
+	balance, err := w.btc.GetBalanceByAccount(sender)
+	//balance, err := w.btc.GetReceivedByLabelAndMinConf(sender.String(), w.btc.ConfirmationBlock())
 	if err != nil {
 		return "", "", err
 	}

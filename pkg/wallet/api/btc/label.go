@@ -3,7 +3,6 @@ package btc
 import (
 	"encoding/json"
 
-	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 )
 
@@ -39,27 +38,27 @@ func (b *Bitcoin) SetLabel(addr, label string) error {
 
 // GetReceivedByLabelAndMinConf return balance by label(account)
 // FIXME: even if spent utxo is left as balance
-func (b *Bitcoin) GetReceivedByLabelAndMinConf(accountName string, minConf int) (btcutil.Amount, error) {
-	input1, err := json.Marshal(accountName)
-	if err != nil {
-		return 0, errors.Wrap(err, "fail to call json.Marchal(accountName)")
-	}
-	input2, err := json.Marshal(minConf)
-	if err != nil {
-		return 0, errors.Wrap(err, "fail to call json.Marchal(minConf)")
-	}
-
-	rawResult, err := b.client.RawRequest("getreceivedbylabel", []json.RawMessage{input1, input2})
-	if err != nil {
-		return 0, errors.Wrap(err, "fail to call json.RawRequest(getreceivedbylabel)")
-	}
-
-	var receivedAmt float64
-	err = json.Unmarshal([]byte(rawResult), &receivedAmt)
-	if err != nil {
-		return 0, errors.Wrap(err, "fail to call json.Unmarshal()")
-	}
-
-	//convert float to amout
-	return b.FloatToAmount(receivedAmt)
-}
+//func (b *Bitcoin) GetReceivedByLabelAndMinConf(accountName string, minConf int) (btcutil.Amount, error) {
+//	input1, err := json.Marshal(accountName)
+//	if err != nil {
+//		return 0, errors.Wrap(err, "fail to call json.Marchal(accountName)")
+//	}
+//	input2, err := json.Marshal(minConf)
+//	if err != nil {
+//		return 0, errors.Wrap(err, "fail to call json.Marchal(minConf)")
+//	}
+//
+//	rawResult, err := b.client.RawRequest("getreceivedbylabel", []json.RawMessage{input1, input2})
+//	if err != nil {
+//		return 0, errors.Wrap(err, "fail to call json.RawRequest(getreceivedbylabel)")
+//	}
+//
+//	var receivedAmt float64
+//	err = json.Unmarshal([]byte(rawResult), &receivedAmt)
+//	if err != nil {
+//		return 0, errors.Wrap(err, "fail to call json.Unmarshal()")
+//	}
+//
+//	//convert float to amout
+//	return b.FloatToAmount(receivedAmt)
+//}
