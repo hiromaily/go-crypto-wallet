@@ -15,7 +15,7 @@ import (
 )
 
 type Storager interface {
-	CreateFilePath(actionType action.ActionType, txType TxType, txID int64,signedCount int) string
+	CreateFilePath(actionType action.ActionType, txType TxType, txID int64, signedCount int) string
 	GetFileNameType(filePath string) (*FileName, error)
 	ValidateFilePath(filePath string, expectedTxType TxType) (action.ActionType, TxType, int64, int, error)
 	ReadFile(path string) (string, error)
@@ -98,7 +98,7 @@ func (r *FileRepository) GetFileNameType(filePath string) (*FileName, error) {
 
 	//signedCount
 	signedCount, err := strconv.Atoi(s[3])
-	if err != nil{
+	if err != nil {
 		return nil, errors.Errorf("error: invalid name: %s", fileName)
 	}
 	fileNameType.SignedCount = signedCount
@@ -114,7 +114,7 @@ func (r *FileRepository) ValidateFilePath(filePath string, expectedTxType TxType
 	}
 	//txType
 	//if !(fileType.TxType).Search(expectedTxTypes) {
-	if fileType.TxType != expectedTxType{
+	if fileType.TxType != expectedTxType {
 		return "", "", 0, 0, errors.Errorf("txType is invalid: %s", fileType.TxType)
 	}
 	return fileType.ActionType, fileType.TxType, fileType.TxReceiptID, fileType.SignedCount, nil

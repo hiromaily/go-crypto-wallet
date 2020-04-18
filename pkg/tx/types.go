@@ -9,12 +9,12 @@ type TxType string
 
 // tx_type
 const (
-	TxTypeUnsigned    TxType = "unsigned"
-	TxTypeSigned      TxType = "signed"
-	TxTypeSent        TxType = "sent"
-	TxTypeDone        TxType = "done"
-	TxTypeNotified    TxType = "notified"
-	TxTypeCancel      TxType = "canceled"
+	TxTypeUnsigned TxType = "unsigned"
+	TxTypeSigned   TxType = "signed"
+	TxTypeSent     TxType = "sent"
+	TxTypeDone     TxType = "done"
+	TxTypeNotified TxType = "notified"
+	TxTypeCancel   TxType = "canceled"
 )
 
 func (t TxType) String() string {
@@ -23,12 +23,12 @@ func (t TxType) String() string {
 
 //TxTypeValue value
 var TxTypeValue = map[TxType]uint8{
-	TxTypeUnsigned:    1,
-	TxTypeSigned:      2,
-	TxTypeSent:        3,
-	TxTypeDone:        4,
-	TxTypeNotified:    5,
-	TxTypeCancel:      6,
+	TxTypeUnsigned: 1,
+	TxTypeSigned:   2,
+	TxTypeSent:     3,
+	TxTypeDone:     4,
+	TxTypeNotified: 5,
+	TxTypeCancel:   6,
 }
 
 // ValidateTxType validate string
