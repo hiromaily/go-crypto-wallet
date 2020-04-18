@@ -9,6 +9,7 @@ import "github.com/btcsuite/btcd/chaincfg"
 // CoinType creates a separate subtree for every cryptocoin
 type CoinType uint32
 
+// Uint32 is converter
 func (c CoinType) Uint32() uint32 {
 	return uint32(c)
 }
@@ -24,7 +25,7 @@ const (
 	CoinTypeBitcoinCash          = 145 // Bitcoin Cash
 )
 
-//CoinTypeCode coin type
+//CoinTypeCode coin type code
 type CoinTypeCode string
 
 // coin_type_code
@@ -36,10 +37,12 @@ const (
 	XRP CoinTypeCode = "xrp"
 )
 
+// String converter
 func (c CoinTypeCode) String() string {
 	return string(c)
 }
 
+// CoinType returns CoinType
 func (c CoinTypeCode) CoinType(conf *chaincfg.Params) CoinType {
 	if conf.Name != NetworkTypeMainNet.String() {
 		return CoinTypeTestnet
@@ -51,7 +54,7 @@ func (c CoinTypeCode) CoinType(conf *chaincfg.Params) CoinType {
 	return CoinTypeTestnet
 }
 
-//CoinTypeCodeValue value
+// CoinTypeCodeValue value
 var CoinTypeCodeValue = map[CoinTypeCode]CoinType{
 	BTC: CoinTypeBitcoin,
 	BCH: CoinTypeBitcoinCash,
@@ -72,7 +75,7 @@ func ValidateCoinTypeCode(val string) bool {
 // BTCVersion
 //----------------------------------------------------
 
-//BTCVersion version
+// BTCVersion version
 type BTCVersion int
 
 // expected version
@@ -82,17 +85,19 @@ const (
 	BTCVer19 BTCVersion = 190000
 )
 
+// Int converter
 func (v BTCVersion) Int() int {
 	return int(v)
 }
 
+// RequiredVersion is required version for this wallet apps
 const RequiredVersion = BTCVer19
 
 //----------------------------------------------------
 // NetworkType
 //----------------------------------------------------
 
-//NetworkType network type
+// NetworkType network type
 type NetworkType string
 
 // network type
@@ -102,6 +107,7 @@ const (
 	NetworkTypeRegTestNet NetworkType = "regtest"
 )
 
+// String converter
 func (n NetworkType) String() string {
 	return string(n)
 }

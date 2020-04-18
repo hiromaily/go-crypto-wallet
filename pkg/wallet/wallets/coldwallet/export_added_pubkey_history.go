@@ -14,7 +14,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
-//ExportAddedPubkeyHistory export data in added_pubkey_history table as csv file
+// ExportAddedPubkeyHistory export data in added_pubkey_history table as csv file
 func (w *ColdWallet) ExportAddedPubkeyHistory(accountType account.AccountType) (string, error) {
 	if w.wtype != types.WalletTypeSignature {
 		return "", errors.New("it's available on sign wallet")

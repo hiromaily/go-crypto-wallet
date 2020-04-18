@@ -18,6 +18,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btc"
 )
 
+// create_tx.go is for common func among create transaction fuctionalites
+
 type parsedTx struct {
 	txInputs       []btcjson.TransactionInput
 	txRepoTxInputs []walletrepo.TxInput

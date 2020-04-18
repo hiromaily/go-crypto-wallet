@@ -46,14 +46,17 @@ func (w *Keygen) Done() {
 	w.btc.Close()
 }
 
+// GetDB gets storager
 func (w *Keygen) GetDB() rdb.ColdStorager {
 	return w.storager
 }
 
+// GetBTC gets btc
 func (w *Keygen) GetBTC() api.Bitcoiner {
 	return w.btc
 }
 
+// GetType gets wallet type
 func (w *Keygen) GetType() types.WalletType {
 	return w.wtype
 }

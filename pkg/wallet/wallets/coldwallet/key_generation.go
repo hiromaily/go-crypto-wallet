@@ -42,7 +42,7 @@ func (w *ColdWallet) GenerateSeed() ([]byte, error) {
 	return bSeed, nil
 }
 
-// store given seed from command line args
+// StoreSeed stores given seed from command line args
 //  development use
 func (w *ColdWallet) StoreSeed(strSeed string) ([]byte, error) {
 	bSeed, err := key.SeedToByte(strSeed)

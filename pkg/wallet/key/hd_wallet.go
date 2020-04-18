@@ -33,6 +33,7 @@ import (
 // PurposeType BIP44/BIP49, for now 44 is used as fixed value
 type PurposeType uint32
 
+// Uint32 converter
 func (t PurposeType) Uint32() uint32 {
 	return uint32(t)
 }
@@ -45,9 +46,9 @@ const (
 
 // CoinType creates a separate subtree for every cryptocoin
 //  which come from `CoinType` in go-bitcoin/pkg/wallet/coin/types.go
-
 type CoinType uint32
 
+// Uint32 converter
 func (t CoinType) Uint32() uint32 {
 	return uint32(t)
 }
@@ -93,6 +94,7 @@ func NewHDKey(purpose PurposeType, coinTypeCode coin.CoinTypeCode, conf *chaincf
 	return &keyData
 }
 
+// CreateKey create hd key
 func (k *HDKey) CreateKey(seed []byte, actType account.AccountType, idxFrom, count uint32) ([]WalletKey, error) {
 	// create privateKey, publicKey by account level
 	privKey, _, err := k.createKeyByAccount(seed, actType)
@@ -220,7 +222,7 @@ func (k *HDKey) getP2pkhAddr(privKey *btcec.PrivateKey) (string, error) {
 	return "", errors.Errorf("getP2pkhAddr() is not implemented for %s", k.coinTypeCode)
 }
 
-// BCH *bchutil.CashAddressPubKeyHash
+// getP2PKHAddrBCH get P2PKH Addr for BCH
 func (k *HDKey) getP2PKHAddrBCH(p2PKHAddr *btcutil.AddressPubKeyHash) (string, error) {
 	addrBCH, err := bchutil.NewCashAddressPubKeyHash(p2PKHAddr.ScriptAddress(), k.conf)
 	if err != nil {
@@ -235,10 +237,10 @@ func (k *HDKey) getP2PKHAddrBCH(p2PKHAddr *btcutil.AddressPubKeyHash) (string, e
 	return fmt.Sprintf("%s:%s", prefix, addrBCH.String()), nil
 }
 
-// FIXME: getting RedeemScript is not fixed yet
-// get p2sh-segwit address and redeemScript as string
+// getP2shSegwitAddr get p2sh-segwit address and redeemScript as string
 //  - it's for only BTC
 //  - Though BCH would not require it, just in case
+// FIXME: getting RedeemScript is not fixed yet
 func (k *HDKey) getP2shSegwitAddr(privKey *btcec.PrivateKey) (string, string, error) {
 	// []byte
 	pubKeyHash := btcutil.Hash160(privKey.PubKey().SerializeCompressed())
@@ -277,7 +279,7 @@ func (k *HDKey) getP2shSegwitAddr(privKey *btcec.PrivateKey) (string, string, er
 	return "", "", errors.Errorf("getP2shSegwitAddr() is not implemented yet for %s", k.coinTypeCode)
 }
 
-// getPubKey returns full Public Key
+// getFullPubKey returns full Public Key
 func getFullPubKey(privKey *btcec.PrivateKey, isCompressed bool) string {
 	var bPubKey []byte
 	if isCompressed {

@@ -67,7 +67,7 @@ func (w *Wallet) ImportPubKey(fileName string, accountType account.AccountType, 
 	return nil
 }
 
-//checkImportedPubKey confirm pubkey is added as watch only wallet
+// checkImportedPubKey confirm pubkey is added as watch only wallet
 func (w *Wallet) checkImportedPubKey(addr string) {
 	addrInfo, err := w.btc.GetAddressInfo(addr)
 	if err != nil {

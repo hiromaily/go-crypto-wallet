@@ -30,7 +30,7 @@ type Walleter interface {
 	GetType() types.WalletType
 }
 
-// Coldwalleter may be Not used anywhere
+// Coldwalleter may not be used anywhere
 type Coldwalleter interface {
 	KeySigner
 	KeygenExclusiver
@@ -42,7 +42,7 @@ type Coldwalleter interface {
 	GetType() types.WalletType
 }
 
-// common interface for keygen/signature
+// KeySigner is common interface for keygen/signature
 type KeySigner interface {
 	GenerateSeed() ([]byte, error)
 	StoreSeed(strSeed string) ([]byte, error)
@@ -62,6 +62,7 @@ type Keygener interface {
 	GetType() types.WalletType
 }
 
+// KeygenExclusiver is for only Keygen interface
 type KeygenExclusiver interface {
 	ExportAccountKey(accountType account.AccountType, addrStatus address.AddrStatus) (string, error)
 	ImportMultisigAddress(fileName string, accountType account.AccountType) error
@@ -78,6 +79,7 @@ type Signer interface {
 	GetType() types.WalletType
 }
 
+// SignatureExclusiver is for only signature interface
 type SignatureExclusiver interface {
 	ImportPubKey(fileName string, accountType account.AccountType) error
 	AddMultisigAddress(accountType account.AccountType, addressType address.AddrType) error

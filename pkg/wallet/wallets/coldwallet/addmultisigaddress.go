@@ -10,7 +10,6 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
 // AddMultisigAddress add multisig address by address for auth and given account
@@ -20,10 +19,6 @@ import (
 // - actually address is overridden by multisig addresses in multisig acccount
 // - 4th parameter must be`p2sh-segwit` addressType in Bitcoin
 func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, addressType address.AddrType) error {
-	//TODO:remove it
-	if w.wtype != types.WalletTypeSignature {
-		return errors.New("it's available on sign wallet")
-	}
 	// validate
 	if !account.AccountTypeMultisig[accountType] {
 		w.logger.Info("only multisig account is allowed")

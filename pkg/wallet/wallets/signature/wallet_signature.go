@@ -46,14 +46,17 @@ func (w *Signature) Done() {
 	w.btc.Close()
 }
 
+// GetDB gets storager
 func (w *Signature) GetDB() rdb.ColdStorager {
 	return w.storager
 }
 
+// GetBTC gets btc
 func (w *Signature) GetBTC() api.Bitcoiner {
 	return w.btc
 }
 
+// GetType gets wallet type
 func (w *Signature) GetType() types.WalletType {
 	return w.wtype
 }

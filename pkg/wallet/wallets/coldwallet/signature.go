@@ -82,7 +82,6 @@ func (w *ColdWallet) SignTx(filePath string) (string, bool, string, error) {
 // - [actionType:receipt]  [from] client [to] receipt, (not multisig addr)
 // - [actionType:payment]  [from] payment [to] unknown, (multisig addr)
 // - [actionType:transfer] [from] from [to] to, (multisig addr)
-// TODO:transfer action is not implemented yet ??
 func (w *ColdWallet) sign(hex, encodedPrevsAddrs string) (string, bool, string, error) {
 	// get tx from hex
 	msgTx, err := w.btc.ToMsgTx(hex)

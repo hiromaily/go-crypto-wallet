@@ -4,6 +4,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 )
 
+// Generator is key generator interface
 type Generator interface {
 	CreateKey(seed []byte, actType account.AccountType, idxFrom, count uint32) ([]WalletKey, error)
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 )
 
+// TestCoinType is test for coinTypeCode.CoinType()
 func TestCoinType(t *testing.T) {
 	type args struct {
 		strCoinTypeCode string

@@ -22,6 +22,7 @@ type Wallet struct {
 	wtype        types.WalletType
 }
 
+// NewWallet returns Wallet object
 func NewWallet(
 	btc api.Bitcoiner,
 	logger *zap.Logger,
@@ -48,14 +49,17 @@ func (w *Wallet) Done() {
 	w.btc.Close()
 }
 
+// GetDB gets storager
 func (w *Wallet) GetDB() rdb.WalletStorager {
 	return w.storager
 }
 
+// GetBTC gets btc
 func (w *Wallet) GetBTC() api.Bitcoiner {
 	return w.btc
 }
 
+// GetType gets wallet type
 func (w *Wallet) GetType() types.WalletType {
 	return w.wtype
 }

@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
-// ImportPrivateKey
+// ImportPrivateKey imports privKey
 //  - get WIF whose is_imported_priv_key is false for given account from database
 //  - then call ImportPrivKey(wif) without rescan
 func (w *ColdWallet) ImportPrivateKey(accountType account.AccountType) error {
