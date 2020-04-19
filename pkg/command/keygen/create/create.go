@@ -18,7 +18,7 @@ type CreateCommand struct {
 	Wallet  wallets.Keygener
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *CreateCommand) Synopsis() string {
 	return "create resources"
 }
@@ -30,7 +30,7 @@ var (
 	multisigSynopsis = "multisig address for debug use"
 )
 
-// Help
+// Help returns usage for this subcommand
 func (c *CreateCommand) Help() string {
 	return fmt.Sprintf(`Usage: keygen create [Subcommands...]
 Subcommands:
@@ -41,7 +41,7 @@ Subcommands:
 `, keySynopsis, hdkeySynopsis, seedSynopsis, multisigSynopsis)
 }
 
-// Run
+// Run executes this subcommand
 func (c *CreateCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

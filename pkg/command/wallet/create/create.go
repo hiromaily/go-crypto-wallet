@@ -18,7 +18,7 @@ type CreateCommand struct {
 	Wallet  wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *CreateCommand) Synopsis() string {
 	return "creating functionality"
 }
@@ -29,7 +29,7 @@ var (
 	transferSynopsis = "create a transfer unsigned transaction file between accounts"
 )
 
-// Help
+// Help returns usage for this subcommand
 func (c *CreateCommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet create [Subcommands...]
 Subcommands:
@@ -39,7 +39,7 @@ Subcommands:
 `, receiptSynopsis, paymentSynopsis, transferSynopsis)
 }
 
-// Run
+// Run executes this subcommand
 func (c *CreateCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

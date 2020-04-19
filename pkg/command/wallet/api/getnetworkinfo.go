@@ -18,17 +18,17 @@ type GetnetworkInfoCommand struct {
 	wallet   wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *GetnetworkInfoCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *GetnetworkInfoCommand) Help() string {
 	return `Usage: wallet api getnetworkinfo`
 }
 
-// Run
+// Run executes this subcommand
 func (c *GetnetworkInfoCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

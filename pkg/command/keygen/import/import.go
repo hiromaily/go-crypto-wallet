@@ -18,7 +18,7 @@ type ImportCommand struct {
 	Wallet  wallets.Keygener
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *ImportCommand) Synopsis() string {
 	return "import resources"
 }
@@ -28,7 +28,7 @@ var (
 	multisigSynopsis = "import multisig addresses exported by signature wallet from csv file to database"
 )
 
-// Help
+// Help returns usage for this subcommand
 func (c *ImportCommand) Help() string {
 	return fmt.Sprintf(`Usage: keygen import [Subcommands...]
 Subcommands:
@@ -37,7 +37,7 @@ Subcommands:
 `, privkeySynopsis, multisigSynopsis)
 }
 
-// Help
+// Run executes this subcommand
 func (c *ImportCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

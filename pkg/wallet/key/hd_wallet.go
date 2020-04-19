@@ -62,6 +62,7 @@ func (t CoinType) Uint32() uint32 {
 //ChangeType  external or internal use
 type ChangeType uint32
 
+// Uint32 converter
 func (t ChangeType) Uint32() uint32 {
 	return uint32(t)
 }
@@ -241,6 +242,7 @@ func (k *HDKey) getP2PKHAddrBCH(p2PKHAddr *btcutil.AddressPubKeyHash) (string, e
 //  - it's for only BTC
 //  - Though BCH would not require it, just in case
 // FIXME: getting RedeemScript is not fixed yet
+// nolint:unparam
 func (k *HDKey) getP2shSegwitAddr(privKey *btcec.PrivateKey) (string, string, error) {
 	// []byte
 	pubKeyHash := btcutil.Hash160(privKey.PubKey().SerializeCompressed())

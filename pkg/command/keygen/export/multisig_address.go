@@ -19,12 +19,12 @@ type MultisigCommand struct {
 	wallet   wallets.Keygener
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *MultisigCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *MultisigCommand) Help() string {
 	return `Usage: keygen key export multisig address [options...]
 Options:
@@ -32,7 +32,7 @@ Options:
 `
 }
 
-// Run
+// Run executes this subcommand
 func (c *MultisigCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

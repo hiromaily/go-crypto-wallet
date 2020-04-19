@@ -17,17 +17,17 @@ type UnLockTxCommand struct {
 	wallet   wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *UnLockTxCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *UnLockTxCommand) Help() string {
 	return `Usage: wallet api unlocktx`
 }
 
-// Run
+// Run executes this subcommand
 func (c *UnLockTxCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

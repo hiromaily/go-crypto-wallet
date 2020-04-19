@@ -17,12 +17,12 @@ type CreateCommand struct {
 	wallet   wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *CreateCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *CreateCommand) Help() string {
 	return `Usage: wallet db create [options...]
 Options:
@@ -30,7 +30,7 @@ Options:
 `
 }
 
-// Run
+// Run executes this subcommand
 func (c *CreateCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

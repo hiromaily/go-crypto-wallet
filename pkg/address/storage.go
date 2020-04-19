@@ -14,20 +14,20 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 )
 
-// Storager
+// Storager address storage interface
 type Storager interface {
 	CreateFilePath(accountType account.AccountType, addrStatus uint8) string
 	ValidateFilePath(fileName string, accountType account.AccountType) error
 	ImportPubKey(fileName string) ([]string, error)
 }
 
-// FileRepository to store pubkey as csv file
+// FileRepository is repository to store pubkey as csv file
 type FileRepository struct {
 	filePath string
 	logger   *zap.Logger
 }
 
-// NewFileRepository
+// NewFileRepository returns FileRepository
 func NewFileRepository(filePath string, logger *zap.Logger) *FileRepository {
 	return &FileRepository{
 		filePath: filePath,

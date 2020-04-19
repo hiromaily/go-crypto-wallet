@@ -18,7 +18,7 @@ type ExportCommand struct {
 	Wallet  wallets.Keygener
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *ExportCommand) Synopsis() string {
 	return "export resources"
 }
@@ -28,7 +28,7 @@ var (
 	multisigSynopsis = "export multisig addresses as csv file"
 )
 
-// Help
+// Help returns usage for this subcommand
 func (c *ExportCommand) Help() string {
 	return fmt.Sprintf(`Usage: keygen export [Subcommands...]
 Subcommands:
@@ -37,7 +37,7 @@ Subcommands:
 `, addressSynopsis, multisigSynopsis)
 }
 
-// Run
+// Run executes this subcommand
 func (c *ExportCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

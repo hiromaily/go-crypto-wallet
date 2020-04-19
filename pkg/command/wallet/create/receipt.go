@@ -21,12 +21,12 @@ type ReceiptCommand struct {
 	wallet   wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *ReceiptCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *ReceiptCommand) Help() string {
 	return `Usage: wallet create receipt [options...]
 Options:
@@ -34,7 +34,7 @@ Options:
 `
 }
 
-// Run
+// Run executes this subcommand
 func (c *ReceiptCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 )
 
-// TraceLog
+// TraceLog includes trace_id and span_id
 type TraceLog struct {
 	TraceID string `json:"trace_id"`
 	SpanID  string `json:"span_id"`

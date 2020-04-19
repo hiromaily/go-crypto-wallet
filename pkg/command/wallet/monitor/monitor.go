@@ -18,7 +18,7 @@ type MonitorCommand struct {
 	Wallet  wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *MonitorCommand) Synopsis() string {
 	return "monitoring functionality"
 }
@@ -28,7 +28,7 @@ var (
 	balanceSynopsis = "monitor balance"
 )
 
-// Help
+// Help returns usage for this subcommand
 func (c *MonitorCommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet monitor [Subcommands...]
 Subcommands:
@@ -37,7 +37,7 @@ Subcommands:
 `, senttxSynopsis, balanceSynopsis)
 }
 
-// Run
+// Run executes this subcommand
 func (c *MonitorCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

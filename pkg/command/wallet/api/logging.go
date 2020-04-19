@@ -18,17 +18,17 @@ type LoggingCommand struct {
 	wallet   wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *LoggingCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *LoggingCommand) Help() string {
 	return `Usage: wallet api logging`
 }
 
-// Run
+// Run executes this subcommand
 func (c *LoggingCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

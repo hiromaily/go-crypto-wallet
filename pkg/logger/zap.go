@@ -20,12 +20,12 @@ const (
 	LogCustom LogEnv = "custom"
 )
 
-// String
+// String converter
 func (e LogEnv) String() string {
 	return string(e)
 }
 
-// NewLoggerWithWriter
+// NewLoggerWithWriter returns *zap.Logger
 func NewLoggerWithWriter(w io.Writer, lv zapcore.LevelEnabler, env LogEnv) *zap.Logger {
 	zap.NewExample()
 

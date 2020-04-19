@@ -18,7 +18,7 @@ type AddCommand struct {
 	Wallet  wallets.Signer
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *AddCommand) Synopsis() string {
 	return "add key for multisig address"
 }
@@ -27,7 +27,7 @@ var (
 	multisigSynopsis = "call `addmultisigaddress` which adds a P2SH multisig address to the wallet"
 )
 
-// Help
+// Help returns usage for this subcommand
 func (c *AddCommand) Help() string {
 	return fmt.Sprintf(`Usage: sign add [Subcommands...]
 Subcommands:
@@ -35,7 +35,7 @@ Subcommands:
 `, multisigSynopsis)
 }
 
-// RUn
+// Run executes this subcommand
 func (c *AddCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

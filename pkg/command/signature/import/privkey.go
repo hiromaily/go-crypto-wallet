@@ -18,18 +18,18 @@ type PrivKeyCommand struct {
 	wallet   wallets.Signer
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *PrivKeyCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *PrivKeyCommand) Help() string {
 	return `Usage: sign import privkey
 `
 }
 
-// Run
+// Run executes this subcommand
 func (c *PrivKeyCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

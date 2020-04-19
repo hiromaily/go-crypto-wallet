@@ -24,13 +24,11 @@ import (
 // - back up wallet data periodically and import functionality
 // - generated key must be encrypted
 // - transfer with amount
+// - transfer for monitoring
 //TODO:
 // - logger interface: stdout(ui), log format, open tracing
 // - repository interface (from mysql, mock, redis and so on)
-// - service interface
 // - btc command for mock is required
-// - procedure pkg move to help of command
-// - change Japanese to English
 
 var (
 	walletType = types.WalletTypeWatchOnly

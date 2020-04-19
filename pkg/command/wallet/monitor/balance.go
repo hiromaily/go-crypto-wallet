@@ -16,12 +16,12 @@ type BalanceCommand struct {
 	wallet   wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *BalanceCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *BalanceCommand) Help() string {
 	return `Usage: wallet monitor balance [options...]
 Options:
@@ -29,7 +29,7 @@ Options:
 `
 }
 
-// Run
+// Run executes this subcommand
 func (c *BalanceCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

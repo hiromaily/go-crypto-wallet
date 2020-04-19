@@ -18,12 +18,12 @@ type PrivKeyCommand struct {
 	wallet   wallets.Keygener
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *PrivKeyCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *PrivKeyCommand) Help() string {
 	return `Usage: keygen key import privkey [options...]
 Options:
@@ -31,7 +31,7 @@ Options:
 `
 }
 
-// Run
+// Run executes this subcommand
 func (c *PrivKeyCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

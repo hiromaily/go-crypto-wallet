@@ -18,12 +18,12 @@ type KeyCommand struct {
 	wallet   wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *KeyCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *KeyCommand) Help() string {
 	return `Usage: wallet import key [options...]
 Options:
@@ -31,7 +31,7 @@ Options:
 `
 }
 
-// Run
+// Run executes this subcommand
 func (c *KeyCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

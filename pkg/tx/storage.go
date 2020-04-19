@@ -29,7 +29,7 @@ type FileRepository struct {
 	logger   *zap.Logger
 }
 
-// FileName
+// FileName is object for items in fine name
 type FileName struct {
 	ActionType  action.ActionType
 	TxType      TxType
@@ -37,7 +37,7 @@ type FileName struct {
 	SignedCount int
 }
 
-// NewFileRepository
+// NewFileRepository returns FileRepository
 func NewFileRepository(filePath string, logger *zap.Logger) *FileRepository {
 	return &FileRepository{
 		filePath: filePath,

@@ -16,12 +16,12 @@ type SignCommand struct {
 	Wallet wallets.Signer
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *SignCommand) Synopsis() string {
 	return "sign on signed transaction for multsig address (account would be found from file name)"
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *SignCommand) Help() string {
 	return `Usage: sign sign [options...]
 Options:
@@ -29,7 +29,7 @@ Options:
 `
 }
 
-// Run
+// Run executes this subcommand
 func (c *SignCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

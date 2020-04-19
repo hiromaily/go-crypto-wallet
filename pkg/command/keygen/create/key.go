@@ -18,18 +18,18 @@ type KeyCommand struct {
 	wallet   wallets.Keygener
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *KeyCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *KeyCommand) Help() string {
 	return `Usage: keygen key create key
 `
 }
 
-// Run
+// Run executes this subcommand
 func (c *KeyCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

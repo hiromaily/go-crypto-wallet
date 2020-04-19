@@ -14,7 +14,7 @@ const (
 	AddrTypeBech32     AddrType = "bech32"
 )
 
-// String
+// String converter
 func (a AddrType) String() string {
 	return string(a)
 }
@@ -33,16 +33,16 @@ var AddrTypeValue = map[AddrType]uint8{
 // AddrStatus address generation progress for records in database
 type AddrStatus string
 
-// address_status
+// address_status for keygen wallet
 const (
-	AddrStatusHDKeyGenerated       AddrStatus = "generated"              // hd_walletによってkeyが生成された
-	AddrStatusPrivKeyImported      AddrStatus = "importprivkey"          // importprivkeyが実行された
-	AddrStatusPubkeyExported       AddrStatus = "pubkey_exported"        // pubkeyがexportされた(receipt/payment)
-	AddrStatusMultiAddressImported AddrStatus = "multi_address_imported" // multiaddがimportされた(receipt/payment)
-	AddrStatusAddressExported      AddrStatus = "address_exported"       // addressがexportされた
+	AddrStatusHDKeyGenerated       AddrStatus = "generated"              // key is created by keygen wallet
+	AddrStatusPrivKeyImported      AddrStatus = "importprivkey"          // importprivkey is excuted
+	AddrStatusPubkeyExported       AddrStatus = "pubkey_exported"        // pubkey is exported
+	AddrStatusMultiAddressImported AddrStatus = "multi_address_imported" // multiadd is imported
+	AddrStatusAddressExported      AddrStatus = "address_exported"       // address is exported
 )
 
-// String
+// String converter
 func (a AddrStatus) String() string {
 	return string(a)
 }

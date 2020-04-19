@@ -14,17 +14,17 @@ const (
 	AccountTypeAuthorization AccountType = "authorization" //マルチシグアドレスのための承認アドレス
 )
 
-// String
+// String converter
 func (a AccountType) String() string {
 	return string(a)
 }
 
-// Is
+// Is compare with params
 func (a AccountType) Is(v string) bool {
 	return a.String() == v
 }
 
-// Allow
+// Allow return true if acnt is in list
 func Allow(acnt string, accountList []AccountType) bool {
 	if !ValidateAccountType(acnt) {
 		return false
@@ -37,7 +37,7 @@ func Allow(acnt string, accountList []AccountType) bool {
 	return false
 }
 
-// NotAllow
+// NotAllow return true if acnt is not in list
 func NotAllow(acnt string, accountList []AccountType) bool {
 	if !ValidateAccountType(acnt) {
 		return false

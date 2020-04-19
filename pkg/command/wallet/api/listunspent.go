@@ -18,17 +18,17 @@ type ListUnspentCommand struct {
 	wallet   wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *ListUnspentCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *ListUnspentCommand) Help() string {
 	return `Usage: wallet api listunspent`
 }
 
-// Run
+// Run executes this subcommand
 func (c *ListUnspentCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

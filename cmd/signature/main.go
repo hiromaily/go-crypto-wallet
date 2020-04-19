@@ -30,7 +30,7 @@ import (
 //TODO: bitcoin functionalities
 // - encrypt wallet itself by `encryptwallet` command
 // - passphrase would be required when using secret key to sign unsigned transaction
-
+// - multisig with bigger number e.g. 3:5
 var (
 	walletType = types.WalletTypeSignature
 	appName    = walletType.String()

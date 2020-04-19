@@ -20,12 +20,12 @@ type SeedCommand struct {
 	wallet   wallets.Signer
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *SeedCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *SeedCommand) Help() string {
 	return `Usage: sign create seed [options...]
 Options:
@@ -33,7 +33,7 @@ Options:
 `
 }
 
-// Run
+// Run executes this subcommand
 func (c *SeedCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

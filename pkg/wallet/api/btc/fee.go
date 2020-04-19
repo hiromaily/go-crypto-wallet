@@ -69,7 +69,7 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 	}
 	b.logger.Debug("called GetTransactionFee()", zap.Any("fee", fee)) //0.000208 BTC
 
-	// if response doesn't meet minumum fee, it should be overridden
+	// if response doesn't meet minimum fee, it should be overridden
 	relayFee, err := b.getMinRelayFee()
 	if err != nil {
 		b.logger.Warn("fail to call btc.getMinRelayFee() but continue", zap.Error(err))

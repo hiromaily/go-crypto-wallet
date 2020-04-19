@@ -78,13 +78,12 @@ func getAddrStatus(currentKey address.AddrStatus, accountType account.AccountTyp
 		// not multisig account
 		//TODO: current key status should be checked as well
 		return address.AddrStatusAddressExported //4
-	} else {
-		// multisig account
-		if currentKey == address.AddrStatusPrivKeyImported { //1
-			return address.AddrStatusPubkeyExported //2
-		} else if currentKey == address.AddrStatusMultiAddressImported { //3
-			return address.AddrStatusAddressExported //4
-		}
+	}
+	// multisig account
+	if currentKey == address.AddrStatusPrivKeyImported { //1
+		return address.AddrStatusPubkeyExported //2
+	} else if currentKey == address.AddrStatusMultiAddressImported { //3
+		return address.AddrStatusAddressExported //4
 	}
 	return ""
 }

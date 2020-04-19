@@ -18,7 +18,7 @@ type DBCommand struct {
 	Wallet  wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *DBCommand) Synopsis() string {
 	return "Database functionality"
 }
@@ -28,7 +28,7 @@ var (
 	resetSynopsis  = "reset table"
 )
 
-// Help
+// Help returns usage for this subcommand
 func (c *DBCommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet db [Subcommands...]
 Subcommands:
@@ -37,7 +37,7 @@ Subcommands:
 `, createSynopsis, resetSynopsis)
 }
 
-// Run
+// Run executes this subcommand
 func (c *DBCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

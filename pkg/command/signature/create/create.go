@@ -18,7 +18,7 @@ type CreateCommand struct {
 	Wallet  wallets.Signer
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *CreateCommand) Synopsis() string {
 	return "create resources"
 }
@@ -28,7 +28,7 @@ var (
 	seedSynopsis  = "create seed"
 )
 
-// Help
+// Help returns usage for this subcommand
 func (c *CreateCommand) Help() string {
 	return fmt.Sprintf(`Usage: sign create [Subcommands...]
 Subcommands:
@@ -37,7 +37,7 @@ Subcommands:
 `, hdkeySynopsis, seedSynopsis)
 }
 
-// Run
+// Run executes this subcommand
 func (c *CreateCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

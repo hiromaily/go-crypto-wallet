@@ -46,23 +46,3 @@ func HelpFunc(appName string) func(c map[string]cli.CommandFactory) string {
 		return s
 	}
 }
-
-func SearchArg(key string) bool {
-	for _, v := range os.Args[1:] {
-		if v == key {
-			return true
-		}
-	}
-	return false
-}
-
-func SearchArgs(keys []string) bool {
-	for _, v := range os.Args[1:] {
-		for _, key := range keys {
-			if v == key {
-				return true
-			}
-		}
-	}
-	return false
-}

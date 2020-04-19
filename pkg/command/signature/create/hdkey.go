@@ -19,18 +19,18 @@ type HDKeyCommand struct {
 	wallet   wallets.Signer
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *HDKeyCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *HDKeyCommand) Help() string {
 	return `Usage: sign create hdkey
 `
 }
 
-// Run
+// Run executes this subcommand
 func (c *HDKeyCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

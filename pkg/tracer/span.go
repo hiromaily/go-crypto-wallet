@@ -19,18 +19,18 @@ type Span struct {
 	logger *zap.Logger
 }
 
-// NewSpan
+// NewSpan returns new span
 func NewSpan(s opentracing.Span) *Span {
 	return &Span{span: s}
 }
 
-// WithLogger
+// WithLogger set logger
 func (s *Span) WithLogger(logger *zap.Logger) *Span {
 	s.logger = logger
 	return s
 }
 
-// Tag
+// Tag setTag
 func (s *Span) Tag(key string, value interface{}) {
 	if s != nil {
 		if s.span != nil {
@@ -39,7 +39,7 @@ func (s *Span) Tag(key string, value interface{}) {
 	}
 }
 
-// Error
+// Error if logger is not nil, run logger.Error()
 func (s *Span) Error(msg string, fields ...zapcore.Field) {
 	if s != nil && s.logger != nil {
 		s.logger.Error(msg, fields...)
@@ -47,7 +47,7 @@ func (s *Span) Error(msg string, fields ...zapcore.Field) {
 	s.LogSpan(msg, fields...)
 }
 
-// Warn
+// Warn if logger is not nil, run logger.Warn()
 func (s *Span) Warn(msg string, fields ...zapcore.Field) {
 	if s != nil && s.logger != nil {
 		s.logger.Warn(msg, fields...)
@@ -55,7 +55,7 @@ func (s *Span) Warn(msg string, fields ...zapcore.Field) {
 	s.LogSpan(msg, fields...)
 }
 
-// Info
+// Info if logger is not nil, run logger.Info()
 func (s *Span) Info(msg string, fields ...zapcore.Field) {
 	if s != nil && s.logger != nil {
 		s.logger.Info(msg, fields...)
@@ -63,7 +63,7 @@ func (s *Span) Info(msg string, fields ...zapcore.Field) {
 	s.LogSpan(msg, fields...)
 }
 
-// Debug
+// Debug if logger is not nil, run logger.Debug()
 func (s *Span) Debug(msg string, fields ...zapcore.Field) {
 	if s != nil && s.logger != nil {
 		s.logger.Debug(msg, fields...)
@@ -71,7 +71,7 @@ func (s *Span) Debug(msg string, fields ...zapcore.Field) {
 	s.LogSpan(msg, fields...)
 }
 
-// LogSpan
+// LogSpan log to span
 func (s *Span) LogSpan(msg string, fields ...zapcore.Field) {
 	if s != nil && s.span != nil {
 		opentracingFields := make([]opentracinglog.Field, 0, len(fields)+2)
@@ -81,7 +81,7 @@ func (s *Span) LogSpan(msg string, fields ...zapcore.Field) {
 	}
 }
 
-// Finish
+// Finish finish span
 func (s *Span) Finish() {
 	if s != nil {
 		if s.span != nil {
@@ -111,6 +111,7 @@ func NewChildSpan(parentSpan *Span, name string) *Span {
 	return NewSpan(span).WithLogger(parentSpan.logger)
 }
 
+// NewChildSpanFromContext returns new span with ctx
 func NewChildSpanFromContext(ctx context.Context, name string) *Span {
 	parentSpan := opentracing.SpanFromContext(ctx)
 	return NewChildSpan(NewSpan(parentSpan), name)

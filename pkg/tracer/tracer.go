@@ -28,7 +28,7 @@ func NoopTracer() opentracing.Tracer {
 	return opentracing.NoopTracer{}
 }
 
-// NoopSpan
+// NoopSpan returns opentracing.NoopTracer{}
 func NoopSpan(name string) opentracing.Span {
 	return NoopTracer().StartSpan(name)
 }

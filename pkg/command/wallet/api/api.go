@@ -18,7 +18,7 @@ type APICommand struct {
 	Wallet  wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *APICommand) Synopsis() string {
 	return "Bitcoin API functionality"
 }
@@ -33,7 +33,7 @@ var (
 	balanceSynopsis         = "get balance for account"
 )
 
-// Help
+// Help returns usage for this subcommand
 func (c *APICommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet api [Subcommands...]
 Subcommands:
@@ -46,7 +46,7 @@ Subcommands:
 `, unlocktxSynopsis, estimatefeeSynopsis, loggingSynopsis, getnetworkinfoSynopsis, validateaddressSynopsis, listunspentSynopsis)
 }
 
-// Run
+// Run executes this subcommand
 func (c *APICommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

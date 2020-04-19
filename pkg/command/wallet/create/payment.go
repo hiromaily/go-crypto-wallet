@@ -17,12 +17,12 @@ type PaymentCommand struct {
 	wallet   wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *PaymentCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *PaymentCommand) Help() string {
 	return `Usage: wallet create payment [options...]
 Options:
@@ -30,7 +30,7 @@ Options:
 `
 }
 
-// Run
+// Run executes this subcommand
 func (c *PaymentCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

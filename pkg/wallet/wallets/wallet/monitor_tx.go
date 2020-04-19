@@ -66,7 +66,7 @@ func (w *Wallet) updateStatusForTxTypeDone(actionType action.ActionType) error {
 	// get records whose status is TxTypeDone
 	hashes, err := w.storager.GetSentTxHashByTxTypeDone(actionType)
 	if err != nil {
-		return errors.Wrapf(err, "fail to call storager.GetSentTxHashByTxTypeDone()", actionType)
+		return errors.Wrapf(err, "fail to call storager.GetSentTxHashByTxTypeDone() ActionType: %s", actionType)
 	}
 	w.logger.Debug(
 		"called storager.GetSentTxHashByTxTypeDone()",

@@ -17,12 +17,12 @@ type ResetCommand struct {
 	wallet   wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *ResetCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *ResetCommand) Help() string {
 	return `Usage: wallet db reset [options...]
 Options:
@@ -30,7 +30,7 @@ Options:
 `
 }
 
-// Run
+// Run executes this subcommand
 func (c *ResetCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

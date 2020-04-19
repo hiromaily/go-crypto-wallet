@@ -17,17 +17,17 @@ type EstimateFeeCommand struct {
 	wallet   wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *EstimateFeeCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *EstimateFeeCommand) Help() string {
 	return `Usage: wallet api estimatefee`
 }
 
-// Run
+// Run executes this subcommand
 func (c *EstimateFeeCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

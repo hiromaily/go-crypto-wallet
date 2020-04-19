@@ -66,6 +66,7 @@ type Tracer struct {
 	Datadog TracerDetail `toml:"datadog"`
 }
 
+// TracerDetail includes specific service config
 type TracerDetail struct {
 	ServiceName         string  `toml:"service_name"`
 	CollectorEndpoint   string  `toml:"collector_endpoint"`

@@ -17,12 +17,12 @@ type ValidateAddressCommand struct {
 	wallet   wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *ValidateAddressCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *ValidateAddressCommand) Help() string {
 	return `Usage: wallet api validateaddress [options...]
 Options:
@@ -30,7 +30,7 @@ Options:
 `
 }
 
-// Run
+// Run executes this subcommand
 func (c *ValidateAddressCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

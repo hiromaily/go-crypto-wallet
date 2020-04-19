@@ -5,12 +5,13 @@ import (
 	"go.uber.org/zap"
 )
 
+// ColdRepository is repository for keygen/sign wallet
 type ColdRepository struct {
 	db     *sqlx.DB
 	logger *zap.Logger
 }
 
-// NewColdRepository
+// NewColdRepository returns ColdRepository
 func NewColdRepository(db *sqlx.DB, logger *zap.Logger) *ColdRepository {
 	return &ColdRepository{
 		db:     db,
@@ -18,6 +19,7 @@ func NewColdRepository(db *sqlx.DB, logger *zap.Logger) *ColdRepository {
 	}
 }
 
+// Close db connection
 func (r *ColdRepository) Close() error {
 	return r.db.Close()
 }

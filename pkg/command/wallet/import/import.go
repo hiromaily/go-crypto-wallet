@@ -18,7 +18,7 @@ type ImportCommand struct {
 	Wallet  wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *ImportCommand) Synopsis() string {
 	return "importing functionality"
 }
@@ -27,7 +27,7 @@ var (
 	keySynopsis = "import generatd addresses by keygen wallet"
 )
 
-// Help
+// Help returns usage for this subcommand
 func (c *ImportCommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet import [Subcommands...]
 Subcommands:
@@ -35,7 +35,7 @@ Subcommands:
 `, keySynopsis)
 }
 
-// Run
+// Run executes this subcommand
 func (c *ImportCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

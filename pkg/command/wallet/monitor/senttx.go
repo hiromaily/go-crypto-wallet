@@ -17,12 +17,12 @@ type SentTxCommand struct {
 	wallet   wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *SentTxCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *SentTxCommand) Help() string {
 	return `Usage: wallet monitor sendtx [options...]
 Options:
@@ -30,7 +30,7 @@ Options:
 `
 }
 
-// Run
+// Run executes this subcommand
 func (c *SentTxCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

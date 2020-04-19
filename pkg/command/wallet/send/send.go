@@ -16,12 +16,12 @@ type SendCommand struct {
 	Wallet wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *SendCommand) Synopsis() string {
 	return "send signed transaction to bitcoin blockchain network"
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *SendCommand) Help() string {
 	return `Usage: wallet send [options...]
 Options:
@@ -29,7 +29,7 @@ Options:
 `
 }
 
-// Run
+// Run executes this subcommand
 func (c *SendCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

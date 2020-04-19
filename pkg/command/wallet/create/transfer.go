@@ -18,12 +18,12 @@ type TransferCommand struct {
 	wallet   wallets.Walleter
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *TransferCommand) Synopsis() string {
 	return "create unsigned transaction for transfer among accounts"
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *TransferCommand) Help() string {
 	return `Usage: wallet create transfer [options...]
 Options:
@@ -34,7 +34,7 @@ Options:
 `
 }
 
-// Run
+// Run executes this subcommand
 func (c *TransferCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

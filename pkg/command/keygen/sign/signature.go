@@ -16,12 +16,12 @@ type SignatureCommand struct {
 	Wallet wallets.Keygener
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *SignatureCommand) Synopsis() string {
 	return "sign on unsigned transaction (account would be found from file name)"
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *SignatureCommand) Help() string {
 	return `Usage: wallet sending [options...]
 Options:
@@ -29,7 +29,7 @@ Options:
 `
 }
 
-// Run
+// Run executes this subcommand
 func (c *SignatureCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

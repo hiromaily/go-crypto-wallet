@@ -19,12 +19,12 @@ type AddressCommand struct {
 	wallet   wallets.Keygener
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *AddressCommand) Synopsis() string {
 	return c.synopsis
 }
 
-// Help
+// Help returns usage for this subcommand
 func (c *AddressCommand) Help() string {
 	return `Usage: keygen key export address [options...]
 Options:
@@ -32,7 +32,7 @@ Options:
 `
 }
 
-// Run
+// Run executes this subcommand
 func (c *AddressCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 

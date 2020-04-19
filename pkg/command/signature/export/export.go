@@ -18,7 +18,7 @@ type ExportCommand struct {
 	Wallet  wallets.Signer
 }
 
-// Synopsis
+// Synopsis is explanation for this subcommand
 func (c *ExportCommand) Synopsis() string {
 	return "export resources"
 }
@@ -27,7 +27,7 @@ var (
 	multisigSynopsis = "export multisig addresses"
 )
 
-// Help
+// Help returns usage for this subcommand
 func (c *ExportCommand) Help() string {
 	return fmt.Sprintf(`Usage: sign export [Subcommands...]
 Subcommands:
@@ -35,7 +35,7 @@ Subcommands:
 `, multisigSynopsis)
 }
 
-// Run
+// Run executes this subcommand
 func (c *ExportCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 

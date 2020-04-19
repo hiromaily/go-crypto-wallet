@@ -426,7 +426,7 @@ func (w *Wallet) generateHexFile(actionType action.ActionType, hex, encodedAddrs
 	return generatedFileName, nil
 }
 
-// isFoundTxIDAndVout find out txID and vout from related txInputs
+// IsFoundTxIDAndVout finds out txID and vout from related txInputs
 // nolint: unused
 func (w *Wallet) IsFoundTxIDAndVout(txID string, vout uint32, inputs []btcjson.TransactionInput) bool {
 	for _, val := range inputs {
