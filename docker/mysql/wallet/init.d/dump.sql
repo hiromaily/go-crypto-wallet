@@ -179,6 +179,7 @@ CREATE TABLE `payment_request` (
 
 
 /*this is test data for development*/
+/*
 LOCK TABLES `payment_request` WRITE;
 INSERT INTO `payment_request` VALUES
   (1,NULL,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','tom1','2N33pRYgyuHn6K2xCrrq9dPzuW6ZAvFJfVz',0.001,false,now()),
@@ -187,7 +188,7 @@ INSERT INTO `payment_request` VALUES
   (4,NULL,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','tom4','2MucBdUqkP5XqNFVTCj35H6WQPC5u2a2BKV',0.0015,false,now()),
   (5,NULL,'2NFAtuEUzfhEqWgiKYEkSAXUYRutnH75Hkf','tom5','2N7WsiDc4yK7PoUL9saGE5ZGsbRQ8R9NafS',0.0022,false,now());
 UNLOCK TABLES;
-
+*/
 
 --
 -- Table structure for table `account_pubkey_client`

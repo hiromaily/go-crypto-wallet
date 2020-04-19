@@ -6,7 +6,6 @@
 #rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/wallet.dat
 #sleep 5
 
-
 set -eu
 
 ###############################################################################
@@ -87,5 +86,3 @@ wallet import key -account client -file ${file_pubkey_client##*\[fileName\]: }
 wallet import key -account receipt -file ${file_multisig_receipt##*\[fileName\]: }
 wallet import key -account payment -file ${file_multisig_payment##*\[fileName\]: }
 wallet import key -account stored -file ${file_multisig_stored##*\[fileName\]: }
-
-#bitcoin-cli -rpcuser=xyz -rpcpassword=xyz getaddressinfo 2NFGyMVYxV5zw3B4xfEQTwrxv5uFEVP95mg

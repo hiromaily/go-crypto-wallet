@@ -80,12 +80,6 @@ blds:
 run:
 	go run ./cmd/wallet/ -conf ./data/config/btc/wallet.toml
 
-# wallet -conf ./data/toml/btc/local_watch_only.toml api estimatefee
-
-# make up-docker-db
-
-# bitcoin-cli
-#bitcoin-cli -rpcuser=xyz -rpcpassword=xyz getnetworkinfo
 
 ###############################################################################
 # Test on local
@@ -195,15 +189,26 @@ rm-docker-wallet-dat-all:
 
 
 ###############################################################################
-# auto generator
+# auto key generator
 ###############################################################################
 .PHONY: generate-key-local
 generate-key-local:
-	./scripts/operation/generate-local.sh
+	./scripts/operation/generate-key-local.sh
 
-#.PHONY: generate-key-docker
-#generate-key-docker:
-#	./scripts/operation/generate-docker.sh 99
+# preparation
+# make clean
+
+
+###############################################################################
+# auto key generator
+###############################################################################
+.PHONY: reset-payment-request
+reset-payment-request:
+	mysql -h 127.0.0.1 -u root -p${MYSQL_ROOT_PASSWORD} -P 3307 < ./docker/mysql/wallet/init.d/payment_request.sql
+
+.PHONY: reset-payment-request-docker
+reset-payment-request-docker:
+	docker-compose exec btc-wallet-db mysql -u root -proot  -e "$(cat ./docker/mysql/wallet/init.d/payment_request.sql)"
 
 ###############################################################################
 # Operation
@@ -220,3 +225,6 @@ include ./Makefile_signature_op.mk
 clean: rm-db-volumes rm-local-wallet-dat
 
 #after that, run `make up-docker-db`
+
+# bitcoin-cli
+#bitcoin-cli -rpcuser=xyz -rpcpassword=xyz getnetworkinfo
