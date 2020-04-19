@@ -7,7 +7,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/command/signature/add"
 	"github.com/hiromaily/go-bitcoin/pkg/command/signature/create"
 	"github.com/hiromaily/go-bitcoin/pkg/command/signature/export"
-	_import "github.com/hiromaily/go-bitcoin/pkg/command/signature/import"
+	"github.com/hiromaily/go-bitcoin/pkg/command/signature/imports"
 	"github.com/hiromaily/go-bitcoin/pkg/command/signature/sign"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
@@ -40,7 +40,7 @@ func WalletSubCommands(wallet wallets.Signer, version string) map[string]cli.Com
 			}, nil
 		},
 		"import": func() (cli.Command, error) {
-			return &_import.ImportCommand{
+			return &imports.ImportCommand{
 				Name:    "import",
 				Version: version,
 				UI:      command.ClolorUI(),

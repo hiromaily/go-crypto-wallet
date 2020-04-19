@@ -7,7 +7,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/create"
 	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/db"
-	_import "github.com/hiromaily/go-bitcoin/pkg/command/wallet/import"
+	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/imports"
 	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/monitor"
 	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/send"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
@@ -18,7 +18,7 @@ import (
 func WalletSubCommands(wallet wallets.Walleter, version string) map[string]cli.CommandFactory {
 	return map[string]cli.CommandFactory{
 		"import": func() (cli.Command, error) {
-			return &_import.ImportCommand{
+			return &imports.ImportCommand{
 				Name:    "import",
 				Version: version,
 				UI:      command.ClolorUI(),

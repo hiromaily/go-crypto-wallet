@@ -6,7 +6,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/command"
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/create"
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/export"
-	_import "github.com/hiromaily/go-bitcoin/pkg/command/keygen/import"
+	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/imports"
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/sign"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
@@ -31,7 +31,7 @@ func WalletSubCommands(wallet wallets.Keygener, version string) map[string]cli.C
 			}, nil
 		},
 		"import": func() (cli.Command, error) {
-			return &_import.ImportCommand{
+			return &imports.ImportCommand{
 				Name:    "import",
 				Version: version,
 				UI:      command.ClolorUI(),

@@ -1,4 +1,4 @@
-package _import
+package imports
 
 import (
 	"flag"
@@ -15,24 +15,26 @@ type ImportCommand struct {
 	Name    string
 	Version string
 	UI      cli.Ui
-	Wallet  wallets.Walleter
+	Wallet  wallets.Keygener
 }
 
 // Synopsis is explanation for this subcommand
 func (c *ImportCommand) Synopsis() string {
-	return "importing functionality"
+	return "import resources"
 }
 
 var (
-	keySynopsis = "import generatd addresses by keygen wallet"
+	privkeySynopsis  = "import generated private key in database to keygen wallet"
+	multisigSynopsis = "import multisig addresses exported by signature wallet from csv file to database"
 )
 
 // Help returns usage for this subcommand
 func (c *ImportCommand) Help() string {
-	return fmt.Sprintf(`Usage: wallet import [Subcommands...]
+	return fmt.Sprintf(`Usage: keygen import [Subcommands...]
 Subcommands:
-  key  %s
-`, keySynopsis)
+  privkey   %s
+  multisig  %s
+`, privkeySynopsis, multisigSynopsis)
 }
 
 // Run executes this subcommand
@@ -46,10 +48,18 @@ func (c *ImportCommand) Run(args []string) int {
 
 	//farther subcommand import
 	cmds := map[string]cli.CommandFactory{
-		"key": func() (cli.Command, error) {
-			return &KeyCommand{
-				name:     "key",
-				synopsis: keySynopsis,
+		"privkey": func() (cli.Command, error) {
+			return &PrivKeyCommand{
+				name:     "privkey",
+				synopsis: privkeySynopsis,
+				ui:       command.ClolorUI(),
+				wallet:   c.Wallet,
+			}, nil
+		},
+		"multisig": func() (cli.Command, error) {
+			return &MultisigCommand{
+				name:     "multisig",
+				synopsis: multisigSynopsis,
 				ui:       command.ClolorUI(),
 				wallet:   c.Wallet,
 			}, nil
