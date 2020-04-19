@@ -3,6 +3,7 @@ package create
 import (
 	"flag"
 	"fmt"
+	"os"
 
 	"github.com/mitchellh/cli"
 
@@ -47,6 +48,11 @@ func (c *SeedCommand) Run(args []string) int {
 	flags.StringVar(&seed, "seed", "", "given seed is used to store in database instead of generating new seed (development use)")
 	if err := flags.Parse(args); err != nil {
 		return 1
+	}
+
+	if seed == "" {
+		seed = os.Getenv("SIGN_SEED")
+		c.ui.Info("seed is found from environment variable")
 	}
 
 	if seed != "" {
