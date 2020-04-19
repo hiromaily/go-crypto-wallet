@@ -7,7 +7,8 @@
 
 ## Bitcoin Cli
 [bitcoin-cli](https://chainquery.com/bitcoin-cli)
-
+```
 bitcoind -daemon      # Starts the bitcoin daemon.
 bitcoin-cli --help    # Outputs a list of command-line options.
 bitcoin-cli help      # Outputs a list of RPC commands when the daemon is running.
+```
