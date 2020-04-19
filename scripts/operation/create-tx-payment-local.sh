@@ -30,5 +30,6 @@ echo 'sign on 2nd '${tx_file_signed##*\[fileName\]: }
 tx_file_signed2=`sign sign -file "${tx_file_signed##*\[fileName\]: }"`
 
 # send signed tx
-#echo 'send tx '${tx_file_signed2##*\[fileName\]: }
-#tx_id=`wallet send -file "${tx_file_signed2##*\[fileName\]: }"`
+echo 'send tx '${tx_file_signed2##*\[fileName\]: }
+tx_id=`wallet send -file "${tx_file_signed2##*\[fileName\]: }"`
+echo 'txID:'${tx_id}
