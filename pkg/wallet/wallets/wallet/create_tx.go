@@ -3,7 +3,6 @@ package wallet
 import (
 	"fmt"
 
-	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
@@ -42,7 +41,7 @@ func (w *Wallet) createTx(
 	sender,
 	receiver account.AccountType,
 	targetAction action.ActionType,
-	amount btcutil.Amount,
+	requiredAmount btcutil.Amount,
 	adjustmentFee float64) (string, string, error) {
 
 	//amount
@@ -55,11 +54,11 @@ func (w *Wallet) createTx(
 		zap.String("sender_acount", sender.String()),
 		zap.String("receiver_acount", receiver.String()),
 		zap.String("target_action", targetAction.String()),
-		zap.Any("amount", amount),
+		zap.Any("required_amount", requiredAmount),
 		zap.Float64("adjustmentFee", adjustmentFee))
 
-	// get listUnspent
-	unspentList, _, err := w.getUnspentList(sender)
+	// 1. get listUnspent
+	unspentList, unspentAddrs, err := w.getUnspentList(sender)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call getUnspentList()")
 	}
@@ -67,19 +66,27 @@ func (w *Wallet) createTx(
 		w.logger.Info("no listunspent")
 		return "", "", nil
 	}
+	w.logger.Debug("getUnspentList()",
+		zap.Any("unspentList", unspentList),
+		zap.Any("unspentAddrs", unspentAddrs))
 
-	// parse listUnspent
-	parsedTx, inputTotal, isDone := w.parseListUnspentTx(unspentList, amount)
-	w.logger.Debug(
-		"total coin to send (Satoshi) before fee calculated",
-		zap.Any("input_amount", inputTotal),
-		zap.Int("len(inputs)", len(parsedTx.txInputs)))
+	// 2. parse listUnspent
+	parsedTx, inputTotal, isDone := w.parseListUnspentTx(unspentList, requiredAmount)
 	if len(parsedTx.txInputs) == 0 {
 		w.logger.Info("no input tx in listUnspent")
 		return "", "", nil
 	}
 	if !isDone {
 		return "", "", errors.New("sender account can't meet amount to send")
+	}
+	w.logger.Debug(
+		"amount",
+		zap.Any("requiredAmount", requiredAmount),
+		zap.Any("input_total", inputTotal),
+		zap.Int("len(inputs)", len(parsedTx.txInputs)),
+	)
+	if requiredAmount != 0 {
+		w.logger.Debug("amount", zap.Any("expected_change", inputTotal-requiredAmount))
 	}
 
 	addrsPrevs := btc.AddrsPrevTxs{
@@ -88,16 +95,37 @@ func (w *Wallet) createTx(
 		SenderAccount: sender,
 	}
 
-	//TODO: in transfer, if amount is set, change must be created but not implemented yet
+	// 3. create txOutputs
+	// unspentAddrs[0] is used as change receipt (that's why sender's address is used)
+	//pubkeyTable, err := w.storager.GetOneUnAllocatedAccountPubKeyTable(sender)
+	//if err != nil {
+	//	return "", "", errors.Wrap(err, "fail to call storager.GetOneUnAllocatedAccountPubKeyTable()")
+	//}
+	//w.logger.Debug("pubkeyTable", zap.String("address", pubkeyTable.WalletAddress))
+	//txPrevOutputs, err := w.createTxOutputs(targetAction, receiver, requiredAmount, inputTotal, pubkeyTable.WalletAddress)
+
+	var isChange bool
+	if requiredAmount != 0 {
+		isChange = true
+	}
+	txPrevOutputs, err := w.createTxOutputs(receiver, requiredAmount, inputTotal, unspentAddrs[0], isChange)
+	if err != nil {
+		return "", "", errors.Wrap(err, "fail to call createTxOutputs()")
+	}
+	w.logger.Debug("txPrevOutputs",
+		zap.Int("len(txPrevOutputs)", len(txPrevOutputs)))
+	//"txPrevOutputsError":"json: unsupported type: map[btcutil.Address]btcutil.Amount"
 
 	// create raw tx
 	hex, fileName, err := w.createRawTx(
 		targetAction,
+		sender,
 		receiver,
 		adjustmentFee,
 		parsedTx.txInputs,
 		inputTotal,
 		parsedTx.txRepoTxInputs,
+		txPrevOutputs,
 		&addrsPrevs)
 
 	//TODO: notify what unsigned tx is created
@@ -108,21 +136,16 @@ func (w *Wallet) createTx(
 
 // call API `unspentlist`
 // no result and no error is possible, so caller should check both returned value
-func (w *Wallet) getUnspentList(accountType account.AccountType) ([]btc.ListUnspentResult, []btcutil.Address, error) {
+func (w *Wallet) getUnspentList(accountType account.AccountType) ([]btc.ListUnspentResult, []string, error) {
 	// unlock locked UnspentTransaction
-	//if err := w.BTC.UnlockAllUnspentTransaction(); err != nil {
+	//if err := w.BTC.UnlockUnspent(); err != nil {
 	//	return "", "", err
 	//}
 
 	// get listUnspent
 	unspentList, unspentAddrs, err := w.btc.ListUnspentByAccount(accountType)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call btc.Client().ListUnspent()")
-	}
-	grok.Value(unspentList)
-	if len(unspentList) == 0 {
-		w.logger.Info("no listunspent")
-		return nil, nil, nil
+		return nil, nil, errors.Wrap(err, "fail to call btc.Client().ListUnspentByAccount()")
 	}
 	return unspentList, unspentAddrs, nil
 }
@@ -198,6 +221,58 @@ func (w *Wallet) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount 
 	}, inputTotal, isDone
 }
 
+//TODO: this code should be integrated with ActionTypePayment
+func (w *Wallet) createTxOutputs(
+	reciver account.AccountType,
+	requiredAmount btcutil.Amount,
+	inputTotal btcutil.Amount,
+	senderAddr string,
+	isChange bool) (map[btcutil.Address]btcutil.Amount, error) {
+
+	// 1. get unallocated address for receiver
+	// - receipt/transfer
+	pubkeyTable, err := w.storager.GetOneUnAllocatedAccountPubKeyTable(reciver)
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to call storager.GetOneUnAllocatedAccountPubKeyTable()")
+	}
+	receiverAddr := pubkeyTable.WalletAddress
+
+	// 2. create receiver txOutput
+	receiverDecodedAddr, err := btcutil.DecodeAddress(receiverAddr, w.btc.GetChainConf())
+	if err != nil {
+		return nil, errors.Wrapf(err, "fail to call btcutil.DecodeAddress(%s)", receiverAddr)
+	}
+	txPrevOutputs := make(map[btcutil.Address]btcutil.Amount)
+	if isChange {
+		txPrevOutputs[receiverDecodedAddr] = requiredAmount //satoshi
+	} else {
+		txPrevOutputs[receiverDecodedAddr] = inputTotal //satoshi
+	}
+	w.logger.Debug("receiver txOutput",
+		zap.String("receiverAddr", receiverAddr),
+		zap.Any("receivedAmount", txPrevOutputs[receiverDecodedAddr]))
+
+	// 3. if change is required
+	if isChange {
+		w.logger.Debug("change is required")
+		senderDecodedAddr, err := btcutil.DecodeAddress(senderAddr, w.btc.GetChainConf())
+		if err != nil {
+			return nil, errors.Wrapf(err, "fail to call btcutil.DecodeAddress(%s)", receiverAddr)
+		}
+
+		// for change
+		// TODO: what if (inputTotal - requiredAmount) = 0,
+		//  fee can not be paid from txOutput for change
+		txPrevOutputs[senderDecodedAddr] = inputTotal - requiredAmount
+
+		w.logger.Debug("change(sender) txOutput",
+			zap.String("senderAddr", senderAddr),
+			zap.Any("inputTotal - requiredAmount", inputTotal-requiredAmount))
+
+	}
+	return txPrevOutputs, nil
+}
+
 // createRawTx create raw tx
 // - calculate fee
 // - create raw tx
@@ -205,76 +280,74 @@ func (w *Wallet) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount 
 // - available from receipt/transfer action
 //TODO: is_allocated should be updated to true when tx sent
 func (w *Wallet) createRawTx(
-	actionType action.ActionType,
-	receiverAccountType account.AccountType,
+	targetAction action.ActionType,
+	sender account.AccountType,
+	receiver account.AccountType,
 	adjustmentFee float64,
 	txInputs []btcjson.TransactionInput,
 	inputTotal btcutil.Amount,
 	txRepoTxInputs []walletrepo.TxInput,
+	txPrevOutputs map[btcutil.Address]btcutil.Amount,
 	addrsPrevs *btc.AddrsPrevTxs) (string, string, error) {
 
-	// 1. get unallocated address for receiver
-	// - receipt/transfer
-	pubkeyTable, err := w.storager.GetOneUnAllocatedAccountPubKeyTable(receiverAccountType)
-	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call storager.GetOneUnAllocatedAccountPubKeyTable()")
-	}
-	receiverAddr := pubkeyTable.WalletAddress
-	//storedAccount := pubkeyTable.Account //used to OutputAccount before
-
-	// 2. create raw transaction as temporary use
+	// 1. create raw transaction as temporary use
 	// - receipt/transfer
 	// - later calculate by tx size
-	//TODO: payment call `CreateRawTransactionWithOutput`
-	msgTx, err := w.btc.CreateRawTransaction(receiverAddr, inputTotal, txInputs)
+	msgTx, err := w.btc.CreateRawTransaction(txInputs, txPrevOutputs)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call btc.CreateRawTransaction()")
 	}
 
-	// 3. calculate fee and output total
+	// 2. calculate fee and output total
 	// - receipt/transfer
 	//  - adjust outputTotal by fee and re-run CreateRawTransaction
 	//  - this logic would be different from payment
 	//TODO: payment has different logic
-	outputTotal, fee, err := w.calculateOutputTotal(msgTx, adjustmentFee, inputTotal)
+	outputTotal, fee, txOutputs, txRepoTxOutputs, err := w.calculateOutputTotal(sender, receiver, msgTx, adjustmentFee, inputTotal, txPrevOutputs)
 	if err != nil {
 		return "", "", err
 	}
-	w.logger.Debug(
-		"total coin to send (Satoshi) after fee calculated",
-		zap.Any("output_amount", outputTotal),
-		zap.Int("len(inputs)", len(txInputs)))
+	w.logger.Debug("txOutputs", zap.Int("len(txOutputs)", len(txOutputs)))
+	w.logger.Debug("txRepoTxOutputs", zap.Int("len(txRepoTxOutputs)", len(txRepoTxOutputs)))
+	//zap.Any("txOutputs", txOutputs),
+	//zap.Any("txRepoTxOutputs", txRepoTxOutputs),
 
-	txRepoTxOutputs := []walletrepo.TxOutput{
-		{
-			ReceiptID:     0,
-			OutputAddress: receiverAddr,
-			OutputAccount: receiverAccountType.String(),
-			OutputAmount:  w.btc.AmountString(outputTotal),
-			IsChange:      false,
-		},
+	//for debug
+	//map[btcutil.Address]btcutil.Amount
+	for addr, amt := range txOutputs {
+		w.logger.Debug("txOutputs",
+			zap.String("address_string", addr.String()),
+			zap.String("address_encoded", addr.EncodeAddress()),
+			zap.String("amount", amt.String()),
+		)
+	}
+	for _, v := range txRepoTxOutputs {
+		w.logger.Debug("txRepoTxOutputs",
+			zap.String("output_account", v.OutputAccount),
+			zap.String("output_address", v.OutputAddress),
+			zap.String("output_amount", v.OutputAmount),
+		)
 	}
 
-	// 4. re call CreateRawTransaction
+	// 3. re call CreateRawTransaction
 	// - receipt/transfer
-	//TODO: payment call `CreateRawTransactionWithOutput`
-	msgTx, err = w.btc.CreateRawTransaction(receiverAddr, outputTotal, txInputs)
+	msgTx, err = w.btc.CreateRawTransaction(txInputs, txOutputs)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call btc.CreateRawTransaction()")
 	}
 
-	// 5. convert msgTx to hex
+	// 4. convert msgTx to hex
 	// - receipt/transfer/payment
 	hex, err := w.btc.ToHex(msgTx)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call btc.ToHex(msgTx)")
 	}
 
-	// 6. insert to tx_table for unsigned tx
+	// 5. insert to tx_table for unsigned tx
 	// - receipt/transfer/payment
 	//  - txReceiptID would be 0 if record is already existing then csv file is not created
 	txReceiptID, err := w.insertTxTableForUnsigned(
-		actionType,
+		targetAction,
 		hex,
 		inputTotal,
 		outputTotal,
@@ -287,7 +360,7 @@ func (w *Wallet) createRawTx(
 		return "", "", errors.Wrap(err, "fail to call insertTxTableForUnsigned()")
 	}
 
-	// 7. serialize previous txs for multisig signature
+	// 6. serialize previous txs for multisig signature
 	// - receipt/transfer/payment
 	encodedAddrsPrevs, err := serial.EncodeToString(*addrsPrevs)
 	if err != nil {
@@ -295,13 +368,13 @@ func (w *Wallet) createRawTx(
 	}
 	w.logger.Debug("encodedAddrsPrevs", zap.String("encodedAddrsPrevs", encodedAddrsPrevs))
 
-	// 8. generate tx file
+	// 7. generate tx file
 	// - receipt/transfer/payment
 	//TODO: how to recover when error occurred here
 	// - inserted data in database must be deleted to generate hex file
 	var generatedFileName string
 	if txReceiptID != 0 {
-		generatedFileName, err = w.generateHexFile(actionType, hex, encodedAddrsPrevs, txReceiptID)
+		generatedFileName, err = w.generateHexFile(targetAction, hex, encodedAddrsPrevs, txReceiptID)
 		if err != nil {
 			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
 		}
@@ -310,21 +383,82 @@ func (w *Wallet) createRawTx(
 	return hex, generatedFileName, nil
 }
 
-func (w *Wallet) calculateOutputTotal(msgTx *wire.MsgTx, adjustmentFee float64, inputTotal btcutil.Amount) (btcutil.Amount, btcutil.Amount, error) {
-	var outputTotal btcutil.Amount
+func (w *Wallet) calculateOutputTotal(
+	sender account.AccountType,
+	receiver account.AccountType,
+	msgTx *wire.MsgTx,
+	adjustmentFee float64,
+	inputTotal btcutil.Amount,
+	txPrevOutputs map[btcutil.Address]btcutil.Amount,
+) (btcutil.Amount, btcutil.Amount, map[btcutil.Address]btcutil.Amount, []walletrepo.TxOutput, error) {
+
+	// get fee
 	fee, err := w.btc.GetFee(msgTx, adjustmentFee)
 	if err != nil {
-		return 0, 0, errors.Wrap(err, "fail to call btc.GetFee()")
+		return 0, 0, nil, nil, errors.Wrap(err, "fail to call btc.GetFee()")
 	}
-	outputTotal = inputTotal - fee
+	var outputTotal btcutil.Amount
+	txRepoOutputs := make([]walletrepo.TxOutput, 0, len(txPrevOutputs))
+
+	// subtract fee from output transaction for change
+	// FIXME: what if change is short, should re-run form the beginning with shortage-flag
+	for addr, amt := range txPrevOutputs {
+		if len(txPrevOutputs) == 1 {
+			//no change
+			txPrevOutputs[addr] -= fee
+			txRepoOutputs = append(txRepoOutputs, walletrepo.TxOutput{
+				ReceiptID:     0,
+				OutputAddress: addr.String(),
+				OutputAccount: receiver.String(),
+				OutputAmount:  w.btc.AmountString(amt - fee),
+				IsChange:      false,
+			})
+			outputTotal += amt
+			break
+		}
+
+		if acnt, _ := w.btc.GetAccount(addr.String()); acnt == sender.String() {
+			w.logger.Debug("detect sender account in calculateOutputTotal")
+			//chang address
+			txPrevOutputs[addr] -= fee
+			txRepoOutputs = append(txRepoOutputs, walletrepo.TxOutput{
+				ReceiptID:     0,
+				OutputAddress: addr.String(),
+				OutputAccount: sender.String(),
+				OutputAmount:  w.btc.AmountString(amt - fee),
+				IsChange:      true,
+			})
+		} else {
+			txRepoOutputs = append(txRepoOutputs, walletrepo.TxOutput{
+				ReceiptID:     0,
+				OutputAddress: addr.String(),
+				OutputAccount: receiver.String(),
+				OutputAmount:  w.btc.AmountString(amt),
+				IsChange:      false,
+			})
+		}
+		outputTotal += amt
+	}
+	w.logger.Debug("calculateOutputTotal",
+		zap.Any("fee", fee),
+		zap.Any("outputTotal (before fee adjustment)", outputTotal),
+		zap.Any("outputTotal by (inputTotal - fee)", inputTotal-fee),
+		zap.Any("outputTotal by (outputTotal - fee)", outputTotal-fee),
+	)
+
+	//result of total should be same
+	outputTotal = inputTotal - fee //for no change type
+	//outputTotal -= fee
+
 	if outputTotal <= 0 {
 		w.logger.Debug(
 			"inputTotal is short of coin to pay fee",
-			zap.Any("amount", inputTotal),
-			zap.Any("len(inputs)", fee))
-		return 0, 0, errors.Wrapf(err, "inputTotal is short of coin to pay fee")
+			zap.Any("amount of inputTotal", inputTotal),
+			zap.Any("fee", fee))
+		return 0, 0, nil, nil, errors.Wrapf(err, "inputTotal is short of coin to pay fee")
 	}
-	return outputTotal, fee, nil
+
+	return outputTotal, fee, txPrevOutputs, txRepoOutputs, nil
 }
 
 // - available from receipt/payment/transfer action

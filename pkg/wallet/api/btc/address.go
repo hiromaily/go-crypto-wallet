@@ -91,6 +91,9 @@ func (b *Bitcoin) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
 }
 
 // GetAddressesByLabel returns addresses of account(label)
+// Note: even if client has 5 addresses, it returns 15 addresses
+//  it seems 3 different address types are returned respectively
+// For now, it would be better to stop using it
 func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, error) {
 	// input for rpc api
 	input, err := json.Marshal(string(labelName))

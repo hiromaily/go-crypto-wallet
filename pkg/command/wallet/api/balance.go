@@ -36,9 +36,7 @@ Options:
 func (c *BalanceCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
-	var (
-		acnt string
-	)
+	var acnt string
 
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
 	flags.StringVar(&acnt, "account", "", "account")
@@ -47,7 +45,7 @@ func (c *BalanceCommand) Run(args []string) int {
 	}
 
 	//validator
-	if !account.ValidateAccountType(acnt) {
+	if acnt != "" && !account.ValidateAccountType(acnt) {
 		c.ui.Error("account option [-account] is invalid")
 		return 1
 	}

@@ -2,6 +2,7 @@ package btc
 
 import (
 	"encoding/json"
+	"go.uber.org/zap"
 	"sort"
 
 	"github.com/btcsuite/btcd/btcjson"
@@ -29,8 +30,8 @@ type ListUnspentResult struct {
 	Safe          bool    `json:"safe"`
 }
 
-// UnlockAllUnspentTransaction unlock locked unspent tx
-func (b *Bitcoin) UnlockAllUnspentTransaction() error {
+// UnlockUnspent unlock locked unspent tx
+func (b *Bitcoin) UnlockUnspent() error {
 	list, err := b.client.ListLockUnspent() //[]*wire.OutPoint
 	if err != nil {
 		return errors.Wrap(err, "fail to call client.ListLockUnspent()")
@@ -85,7 +86,7 @@ func (b *Bitcoin) ListUnspent() ([]ListUnspentResult, error) {
 }
 
 // ListUnspentByAccount get listunspent by account
-func (b *Bitcoin) ListUnspentByAccount(accountType account.AccountType) ([]ListUnspentResult, []btcutil.Address, error) {
+func (b *Bitcoin) ListUnspentByAccount(accountType account.AccountType) ([]ListUnspentResult, []string, error) {
 	addrs, err := b.GetAddressesByLabel(accountType.String())
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "fail to call btc.GetAddressesByLabel()")
@@ -100,6 +101,8 @@ func (b *Bitcoin) ListUnspentByAccount(accountType account.AccountType) ([]ListU
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "fail to call btc.listUnspentByAccount()")
 	}
+	//for debug use
+	filterdAddrs := b.getUnspentListAddrs(unspentList, accountType)
 
 	// sort amount by ascending (small to big)
 	sort.Slice(unspentList, func(i, j int) bool {
@@ -107,7 +110,21 @@ func (b *Bitcoin) ListUnspentByAccount(accountType account.AccountType) ([]ListU
 		return unspentList[i].Amount < unspentList[j].Amount
 	})
 
-	return unspentList, addrs, nil
+	return unspentList, filterdAddrs, nil
+}
+
+// for debug use
+func (b *Bitcoin) getUnspentListAddrs(unspentList []ListUnspentResult, accountType account.AccountType) []string {
+	addrs := make([]string, 0, len(unspentList))
+	for _, unspent := range unspentList {
+		if unspent.Label != accountType.String() {
+			b.logger.Warn("listUnspentByAccount() returns address for wrong account",
+				zap.String("got", unspent.Label),
+				zap.String("want", accountType.String()))
+		}
+		addrs = append(addrs, unspent.Address)
+	}
+	return addrs
 }
 
 func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address) ([]ListUnspentResult, error) {

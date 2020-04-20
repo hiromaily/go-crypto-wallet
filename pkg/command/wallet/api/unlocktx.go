@@ -37,9 +37,9 @@ func (c *UnLockTxCommand) Run(args []string) int {
 	}
 
 	// unlock locked transaction for unspent transaction
-	err := c.wallet.GetBTC().UnlockAllUnspentTransaction()
+	err := c.wallet.GetBTC().UnlockUnspent()
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call BTC.UnlockAllUnspentTransaction() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call BTC.UnlockUnspent() %+v", err))
 		return 1
 	}
 

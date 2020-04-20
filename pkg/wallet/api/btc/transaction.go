@@ -180,22 +180,22 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 
 // CreateRawTransaction create raw transaction
 //  - for receipt/transfer action
-func (b *Bitcoin) CreateRawTransaction(receiverAddr string, amount btcutil.Amount, txInputs []btcjson.TransactionInput) (*wire.MsgTx, error) {
-	receiverAddrDecoded, err := btcutil.DecodeAddress(receiverAddr, b.GetChainConf())
-	if err != nil {
-		return nil, errors.Wrapf(err, "fail to call btcutil.DecodeAddress(%s)", receiverAddr)
-	}
+//func (b *Bitcoin) CreateRawTransaction(receiverAddr string, amount btcutil.Amount, txInputs []btcjson.TransactionInput) (*wire.MsgTx, error) {
+//	receiverAddrDecoded, err := btcutil.DecodeAddress(receiverAddr, b.GetChainConf())
+//	if err != nil {
+//		return nil, errors.Wrapf(err, "fail to call btcutil.DecodeAddress(%s)", receiverAddr)
+//	}
+//
+//	txOutputs := make(map[btcutil.Address]btcutil.Amount)
+//	txOutputs[receiverAddrDecoded] = amount //satoshi
+//
+//	// CreateRawTransaction
+//	return b.CreateRawTransactionWithOutput(txInputs, txOutputs)
+//}
 
-	txOutputs := make(map[btcutil.Address]btcutil.Amount)
-	txOutputs[receiverAddrDecoded] = amount //satoshi
-
-	// CreateRawTransaction
-	return b.CreateRawTransactionWithOutput(txInputs, txOutputs)
-}
-
-// CreateRawTransactionWithOutput create raw transaction
+// CreateRawTransaction create raw transaction
 //  - for payment action
-func (b *Bitcoin) CreateRawTransactionWithOutput(inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount) (*wire.MsgTx, error) {
+func (b *Bitcoin) CreateRawTransaction(inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount) (*wire.MsgTx, error) {
 	lockTime := int64(0) //TODO:Raw locktime what value is exactly required??
 
 	// CreateRawTransaction

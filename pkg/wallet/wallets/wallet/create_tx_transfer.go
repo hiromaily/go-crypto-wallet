@@ -21,7 +21,7 @@ func (w *Wallet) CreateTransferTx(sender, receiver account.AccountType, floatAmo
 	}
 
 	//amount btcutil.Amount
-	amount, err := w.btc.FloatToAmount(floatAmount)
+	requiredAmount, err := w.btc.FloatToAmount(floatAmount)
 	if err != nil {
 		return "", "", err
 	}
@@ -32,11 +32,11 @@ func (w *Wallet) CreateTransferTx(sender, receiver account.AccountType, floatAmo
 	if err != nil {
 		return "", "", err
 	}
-	if balance <= amount {
+	if balance <= requiredAmount {
 		//balance is short
 		return "", "", errors.Errorf("account: %s balance is insufficient", sender)
 	}
 
 	// create transfer transaction
-	return w.createTx(sender, receiver, targetAction, amount, adjustmentFee)
+	return w.createTx(sender, receiver, targetAction, requiredAmount, adjustmentFee)
 }

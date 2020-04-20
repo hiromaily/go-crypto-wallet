@@ -20,12 +20,7 @@ tx_file_signed=`keygen sign -file "${tx_file##*\[fileName\]: }"`
 # send signed tx
 echo 'send tx '${tx_file_signed##*\[fileName\]: }
 tx_id=`wallet send -file "${tx_file_signed##*\[fileName\]: }"`
-#tx is sent!! txID: a473a8bd3424e2b1e81155bf55e407b06342795cc3779a1cb194a3f532551030
-
-# check confirmation
-#${tx_id##*txID: }
-#bitcoin-cli -rpcuser=xyz -rpcpassword=xyz gettransaction a473a8bd3424e2b1e81155bf55e407b06342795cc3779a1cb194a3f532551030
-#bitcoin-cli -rpcuser=xyz -rpcpassword=xyz gettransaction a473a8bd3424e2b1e81155bf55e407b06342795cc3779a1cb194a3f532551030 | jq .confirmations
+echo 'txID:'${tx_id##*txID: }
 
 # check confirmation
 bitcoin-cli -rpcuser=xyz -rpcpassword=xyz gettransaction ${tx_id##*txID: } | jq .confirmations
