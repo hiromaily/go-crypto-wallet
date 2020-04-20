@@ -3,11 +3,11 @@ package api
 import (
 	"flag"
 	"fmt"
-	"github.com/hiromaily/go-bitcoin/pkg/account"
 
 	"github.com/bookerzzz/grok"
 	"github.com/mitchellh/cli"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 

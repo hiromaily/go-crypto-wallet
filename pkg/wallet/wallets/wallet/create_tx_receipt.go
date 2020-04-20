@@ -18,5 +18,5 @@ func (w *Wallet) CreateReceiptTx(adjustmentFee float64) (string, string, error) 
 	}
 
 	// create receipt transaction
-	return w.createTx(sender, receiver, targetAction, requiredAmount, adjustmentFee)
+	return w.createTx(sender, receiver, targetAction, requiredAmount, adjustmentFee, nil, nil)
 }

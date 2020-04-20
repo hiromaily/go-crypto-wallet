@@ -42,7 +42,9 @@ func (w *Wallet) createTx(
 	receiver account.AccountType,
 	targetAction action.ActionType,
 	requiredAmount btcutil.Amount,
-	adjustmentFee float64) (string, string, error) {
+	adjustmentFee float64,
+	paymentRequestIds []int64,
+	userPayments []UserPayment) (string, string, error) {
 
 	//amount
 	// - receiptAction: it's 0. total amount in clients to receipt
@@ -96,21 +98,29 @@ func (w *Wallet) createTx(
 	}
 
 	// 3. create txOutputs
-	// unspentAddrs[0] is used as change receipt (that's why sender's address is used)
-	//pubkeyTable, err := w.storager.GetOneUnAllocatedAccountPubKeyTable(sender)
-	//if err != nil {
-	//	return "", "", errors.Wrap(err, "fail to call storager.GetOneUnAllocatedAccountPubKeyTable()")
-	//}
-	//w.logger.Debug("pubkeyTable", zap.String("address", pubkeyTable.WalletAddress))
-	//txPrevOutputs, err := w.createTxOutputs(targetAction, receiver, requiredAmount, inputTotal, pubkeyTable.WalletAddress)
+	var txPrevOutputs map[btcutil.Address]btcutil.Amount
+	switch targetAction {
+	case action.ActionTypeReceipt, action.ActionTypeTransfer:
+		var isChange bool
+		if requiredAmount != 0 {
+			isChange = true
+		}
+		txPrevOutputs, err = w.createTxOutputs(receiver, requiredAmount, inputTotal, unspentAddrs[0], isChange)
+		if err != nil {
+			return "", "", errors.Wrap(err, "fail to call createTxOutputs()")
+		}
+	case action.ActionTypePayment:
+		changeAddr := unspentAddrs[0] //this is actually sender's address because it's for change
+		changeAmount := inputTotal - requiredAmount
+		w.logger.Debug("before createPaymentOutputs()",
+			zap.Any("change_addr", changeAddr),
+			zap.Any("change_amount", changeAmount))
+		txPrevOutputs = w.createPaymentOutputs(userPayments, changeAddr, changeAmount)
+		w.logger.Debug("txPrevOutputs",
+			zap.Int("len(txPrevOutputs)", len(txPrevOutputs)))
 
-	var isChange bool
-	if requiredAmount != 0 {
-		isChange = true
-	}
-	txPrevOutputs, err := w.createTxOutputs(receiver, requiredAmount, inputTotal, unspentAddrs[0], isChange)
-	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call createTxOutputs()")
+	default:
+		return "", "", errors.Errorf("invalid actionType: %s", targetAction)
 	}
 	w.logger.Debug("txPrevOutputs",
 		zap.Int("len(txPrevOutputs)", len(txPrevOutputs)))
@@ -126,7 +136,8 @@ func (w *Wallet) createTx(
 		inputTotal,
 		parsedTx.txRepoTxInputs,
 		txPrevOutputs,
-		&addrsPrevs)
+		&addrsPrevs,
+		paymentRequestIds)
 
 	//TODO: notify what unsigned tx is created
 	// => in command pkg
@@ -288,7 +299,8 @@ func (w *Wallet) createRawTx(
 	inputTotal btcutil.Amount,
 	txRepoTxInputs []walletrepo.TxInput,
 	txPrevOutputs map[btcutil.Address]btcutil.Amount,
-	addrsPrevs *btc.AddrsPrevTxs) (string, string, error) {
+	addrsPrevs *btc.AddrsPrevTxs,
+	paymentRequestIds []int64) (string, string, error) {
 
 	// 1. create raw transaction as temporary use
 	// - receipt/transfer
@@ -355,7 +367,7 @@ func (w *Wallet) createRawTx(
 		tx.TxTypeValue[tx.TxTypeUnsigned],
 		txRepoTxInputs,
 		txRepoTxOutputs,
-		nil)
+		paymentRequestIds)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call insertTxTableForUnsigned()")
 	}

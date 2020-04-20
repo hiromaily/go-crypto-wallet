@@ -38,5 +38,5 @@ func (w *Wallet) CreateTransferTx(sender, receiver account.AccountType, floatAmo
 	}
 
 	// create transfer transaction
-	return w.createTx(sender, receiver, targetAction, requiredAmount, adjustmentFee)
+	return w.createTx(sender, receiver, targetAction, requiredAmount, adjustmentFee, nil, nil)
 }
