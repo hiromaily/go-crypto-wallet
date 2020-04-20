@@ -1,15 +1,12 @@
 # go-bitcoin
 
-<img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-bitcoin/master/images/bitcoin-img.svg">
+<img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-bitcoin/master/images/bitcoin-img.svg?sanitize=true">
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/hiromaily/go-bitcoin)](https://goreportcard.com/report/github.com/hiromaily/go-bitcoin)
+[![codebeat badge](https://codebeat.co/badges/792a7c07-2352-4b7e-8083-0a323368b26f)](https://codebeat.co/projects/github-com-hiromaily-go-bitcoin-master)
+[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://raw.githubusercontent.com/hiromaily/go-gin-wrapper/master/LICENSE)
 
 Wallet functionalities handling BTC, BCH and so on. Currencies would be added step by step.
-
-### Note
-Drastic refactoring is ongoing
-
-- handling bitcoin core version 0.19
-- any comments should be English, not Japanese
-- apply for domain driven design
 
 ## Requirements
 - Bitcoin Core 0.18 minimum
