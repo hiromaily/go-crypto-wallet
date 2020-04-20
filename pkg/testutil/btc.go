@@ -3,6 +3,7 @@ package testutil
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
@@ -18,16 +19,8 @@ func GetBTC() api.Bitcoiner {
 	if bc != nil {
 		return bc
 	}
-	// create bitcoin instance
-	// config
-	//projPath := os.Getenv("PROJECT_PATH")
-	//TODO: delete it
-	projPath := "/Users/hy/work/go/src/github.com/hiromaily/go-bitcoin"
 
-	if projPath == "" {
-		log.Fatalf("$PROJECT_PATH should be defined as environment variable")
-	}
-
+	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-bitcoin", os.Getenv("GOPATH"))
 	confPath := fmt.Sprintf("%s/data/config/btc/wallet.toml", projPath)
 	conf, err := config.New(confPath, types.WalletTypeWatchOnly)
 	if err != nil {

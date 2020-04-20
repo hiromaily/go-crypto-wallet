@@ -6,6 +6,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+// listlabels
+
 // SetLabel sets account to existing imported address
 func (b *Bitcoin) SetLabel(addr, label string) error {
 	_, err := b.DecodeAddress(addr)

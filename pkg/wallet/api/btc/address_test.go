@@ -3,8 +3,6 @@ package btc_test
 import (
 	"testing"
 
-	_ "github.com/go-sql-driver/mysql"
-
 	"github.com/hiromaily/go-bitcoin/pkg/testutil"
 )
 
