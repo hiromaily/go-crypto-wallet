@@ -8,27 +8,28 @@ import (
 
 // LoggingResult is response type of PRC `logging`
 type LoggingResult struct {
-	Net         int64 `json:"net"`
-	Tor         int64 `json:"tor"`
-	Mempool     int64 `json:"mempool"`
-	HTTP        int64 `json:"http"`
-	Bench       int64 `json:"bench"`
-	Zmq         int64 `json:"zmq"`
-	DB          int64 `json:"db"`
-	RPC         int64 `json:"rpc"`
-	EstimateFee int64 `json:"estimatefee"`
-	Addrman     int64 `json:"addrman"`
-	SelectCoins int64 `json:"selectcoins"`
-	ReIndex     int64 `json:"reindex"`
-	CmpctBlock  int64 `json:"cmpctblock"`
-	Rand        int64 `json:"rand"`
-	Prune       int64 `json:"prune"`
-	Proxy       int64 `json:"proxy"`
-	MempoolRej  int64 `json:"mempoolrej"`
-	LibEvent    int64 `json:"libevent"`
-	CoinDB      int64 `json:"coindb"`
-	Qt          int64 `json:"qt"`
-	LevelDB     int64 `json:"leveldb"`
+	Net         bool `json:"net"`
+	Tor         bool `json:"tor"`
+	Mempool     bool `json:"mempool"`
+	HTTP        bool `json:"http"`
+	Bench       bool `json:"bench"`
+	Zmq         bool `json:"zmq"`
+	Walletdb    bool `json:"walletdb"`
+	RPC         bool `json:"rpc"`
+	Estimatefee bool `json:"estimatefee"`
+	Addrman     bool `json:"addrman"`
+	Selectcoins bool `json:"selectcoins"`
+	Reindex     bool `json:"reindex"`
+	Cmpctblock  bool `json:"cmpctblock"`
+	Rand        bool `json:"rand"`
+	Prune       bool `json:"prune"`
+	Proxy       bool `json:"proxy"`
+	Mempoolrej  bool `json:"mempoolrej"`
+	Libevent    bool `json:"libevent"`
+	Coindb      bool `json:"coindb"`
+	Qt          bool `json:"qt"`
+	Leveldb     bool `json:"leveldb"`
+	Validation  bool `json:"validation"`
 }
 
 // Logging calls RPC `logging`

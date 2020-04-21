@@ -60,7 +60,7 @@ func (b *Bitcoin) GetTransactionFee(tx *wire.MsgTx) (btcutil.Amount, error) {
 	return feeAsBit, nil
 }
 
-// GetFee get fee with preferable logic for me
+// GetFee get more preferable fee
 func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount, error) {
 	// get tx fee
 	fee, err := b.GetTransactionFee(tx)

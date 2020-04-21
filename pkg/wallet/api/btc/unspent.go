@@ -127,6 +127,14 @@ func (b *Bitcoin) getUnspentListAddrs(unspentList []ListUnspentResult, accountTy
 	return addrs
 }
 
+func (b *Bitcoin) getUnspentListAmount(unspentList []ListUnspentResult) float64 {
+	var sum float64
+	for _, unspent := range unspentList {
+		sum += unspent.Amount
+	}
+	return sum
+}
+
 func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address) ([]ListUnspentResult, error) {
 	input1, err := json.Marshal(uint64(b.confirmationBlock))
 	if err != nil {

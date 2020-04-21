@@ -2,12 +2,17 @@ package btc
 
 import (
 	"encoding/json"
+
 	"github.com/btcsuite/btcutil"
-	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/pkg/errors"
+
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 )
 
 // GetBalance gets balance
+// - It would include dirty outputs already spent tx, so it maybe useless
+//  - wallet does not have the "avoid reuse" feature enabled
+//  - `bitcoin-cli getbalance "*" 6 true true`
 func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
 	input1, err := json.Marshal("*")
 	if err != nil {
@@ -32,6 +37,15 @@ func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
 	return b.FloatToAmount(amount)
 }
 
+func (b *Bitcoin) GetBalanceByListUnspent() (btcutil.Amount, error) {
+	listunspentResult, err := b.ListUnspent()
+	if err != nil{
+		return 0, err
+	}
+	sum := b.getUnspentListAmount(listunspentResult)
+	return b.FloatToAmount(sum)
+}
+
 // GetBalanceByAccount gets balance by account
 func (b *Bitcoin) GetBalanceByAccount(accountType account.AccountType) (btcutil.Amount, error) {
 	unspentList, _, err := b.ListUnspentByAccount(accountType)
@@ -44,4 +58,3 @@ func (b *Bitcoin) GetBalanceByAccount(accountType account.AccountType) (btcutil.
 	}
 	return b.FloatToAmount(totalAmout)
 }
-

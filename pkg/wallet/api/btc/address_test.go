@@ -86,7 +86,7 @@ func TestGetAddressesByLabel(t *testing.T) {
 	bc.Close()
 }
 
-// TestValidateAddress
+// TestValidateAddress is test for ValidateAddress
 func TestValidateAddress(t *testing.T) {
 	bc := testutil.GetBTC()
 

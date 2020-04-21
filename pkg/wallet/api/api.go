@@ -33,6 +33,7 @@ type Bitcoiner interface {
 
 	//balance.go
 	GetBalance() (btcutil.Amount, error)
+	GetBalanceByListUnspent() (btcutil.Amount, error)
 	GetBalanceByAccount(accountType account.AccountType) (btcutil.Amount, error)
 
 	//block.go

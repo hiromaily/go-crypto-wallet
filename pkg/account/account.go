@@ -12,6 +12,7 @@ const (
 	AccountTypeStored        AccountType = "stored"        //保管用アドレス(多額のコインはこちらに保管しておく
 	AccountTypeAnonymous     AccountType = "anonymous"     // payment user
 	AccountTypeAuthorization AccountType = "authorization" //マルチシグアドレスのための承認アドレス
+	AccountTypeTest          AccountType = "test"          //for unittest
 )
 
 // String converter

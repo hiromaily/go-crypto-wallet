@@ -128,7 +128,7 @@ func (b *Bitcoin) ValidateAddress(addr string) (*ValidateAddressResult, error) {
 	if err != nil {
 		return nil, errors.Errorf("json.Unmarshal(): error: %s", err)
 	}
-	if !result.IsValid{
+	if !result.IsValid {
 		return nil, errors.Errorf("this address is invalid: %v", result)
 	}
 
