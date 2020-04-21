@@ -86,28 +86,47 @@ func TestGetAddressesByLabel(t *testing.T) {
 	bc.Close()
 }
 
-//
-//// TestValidateAddress
-//func TestValidateAddress(t *testing.T) {
-//	var tests = []struct {
-//		addr  string
-//		isErr bool
-//	}{
-//		{"2NFXSXxw8Fa6P6CSovkdjXE6UF4hupcTHtr", false},
-//		{"2NDGkbQTwg2v1zP6yHZw3UJhmsBh9igsSos", false},
-//		{"4VHGkbQTGg2vN5P6yHZw3UJhmsBh9igsSos", true},
-//	}
-//
-//	for _, val := range tests {
-//		//t.Logf("check address: %s", val.addr)
-//		fmt.Printf("check address: %s\n", val.addr)
-//
-//		_, err := wlt.BTC.ValidateAddress(val.addr)
-//		if err != nil && !val.isErr {
-//			t.Errorf("Unexpectedly error occorred. %v", err)
-//		}
-//		if err == nil && val.isErr {
-//			t.Error("Error is expected. However nothing happened.")
-//		}
-//	}
-//}
+// TestValidateAddress
+func TestValidateAddress(t *testing.T) {
+	bc := testutil.GetBTC()
+
+	type args struct {
+		addr string
+	}
+	type want struct {
+		isErr bool
+	}
+	tests := []struct {
+		name string
+		args args
+		want want
+	}{
+		{
+			name: "happy path",
+			args: args{"2NFXSXxw8Fa6P6CSovkdjXE6UF4hupcTHtr"},
+			want: want{false},
+		},
+		{
+			name: "happy path",
+			args: args{"2NDGkbQTwg2v1zP6yHZw3UJhmsBh9igsSos"},
+			want: want{false},
+		},
+		{
+			name: "wrong address",
+			args: args{"4VHGkbQTGg2vN5P6yHZw3UJhmsBh9igsSos"},
+			want: want{true},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got, err := bc.ValidateAddress(tt.args.addr); (err != nil) != tt.want.isErr {
+				t.Errorf("ValidateAddress() = %v, isErr %v", err, tt.want.isErr)
+			} else {
+				t.Log(got)
+			}
+		})
+	}
+
+	bc.Close()
+}

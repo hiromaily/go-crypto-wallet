@@ -3,7 +3,6 @@ package btc
 import (
 	"encoding/json"
 
-	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -26,6 +25,16 @@ type GetAddressInfoResult struct {
 	Labels       []string `json:"labels"`
 }
 
+type ValidateAddressResult struct {
+	IsValid           bool   `json:"isvalid"`
+	Address           string `json:"address"`
+	ScriptPubKey      string `json:"scriptPubKey"`
+	IsScript          bool   `json:"isscript"`
+	IsWitness         bool   `json:"iswitness"`
+	WitnessVersion    int    `json:"witness_version,omitempty"`
+	WitnessProgramHex string `json:"witness_program,omitempty"`
+}
+
 // GetLabelName returns label name
 func (a *GetAddressInfoResult) GetLabelName() string {
 	if len(a.Labels) != 0 {
@@ -34,41 +43,10 @@ func (a *GetAddressInfoResult) GetLabelName() string {
 	return ""
 }
 
-// GetAddressInfo call RPC `getaddressinfo`
-//{
-//  "address": "mvTRCKpKVUUv3QgMEn838xXDDZS5SSEhnj",
-//  "scriptPubKey": "76a914a3deadcdee77d544692dfc64eb321cccc9e036f188ac",
-//  "ismine": true,
-//  "solvable": true,
-//  "desc": "pkh([a3deadcd]02f4d649c24780191d31d4fa23bff91f3fb2646b47d7ef32714e5322059586765e)#q4e9d52m",
-//  "iswatchonly": false,
-//  "isscript": false,
-//  "iswitness": false,
-//  "pubkey": "02f4d649c24780191d31d4fa23bff91f3fb2646b47d7ef32714e5322059586765e",
-//  "iscompressed": true,
-//  "ischange": false,
-//  "timestamp": 1,
-//  "labels": [
-//    "client"
-//  ]
-//}
-
 // Purpose stores part of response of PRC `getaddressesbylabel`
 type Purpose struct {
 	Purpose string `json:"purpose"`
 }
-
-//{
-//  "mvTRCKpKVUUv3QgMEn838xXDDZS5SSEhnj": {
-//    "purpose": "receive"
-//  },
-//  "2MwYRJrBZ4fqAbdME7uCfRisyp3Mp8ooP6Y": {
-//    "purpose": "receive"
-//  },
-//  "tb1q5002mn0wwl25g6fdl3jwkvsueny7qdh3a7670e": {
-//    "purpose": "receive"
-//  }
-//}
 
 // GetAddressInfo can be used as an alternative to `getaccount`, `validateaddress`
 func (b *Bitcoin) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
@@ -135,18 +113,40 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 }
 
 // ValidateAddress validate address
-func (b *Bitcoin) ValidateAddress(addr string) (*btcjson.ValidateAddressWalletResult, error) {
-	address, err := b.DecodeAddress(addr)
+func (b *Bitcoin) ValidateAddress(addr string) (*ValidateAddressResult, error) {
+	input, err := json.Marshal(string(addr))
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to call btc.DecodeAddress(%s)", addr)
+		return nil, errors.Errorf("json.Marchal(): error: %s", err)
 	}
-	res, err := b.client.ValidateAddress(address)
+	rawResult, err := b.client.RawRequest("validateaddress", []json.RawMessage{input})
 	if err != nil {
-		return nil, errors.Errorf("client.ValidateAddress(%s): error: %s", addr, err)
+		return nil, errors.Wrap(err, "fail to call json.RawRequest(validateaddress)")
 	}
 
-	return res, nil
+	result := ValidateAddressResult{}
+	err = json.Unmarshal([]byte(rawResult), &result)
+	if err != nil {
+		return nil, errors.Errorf("json.Unmarshal(): error: %s", err)
+	}
+	if !result.IsValid{
+		return nil, errors.Errorf("this address is invalid: %v", result)
+	}
+
+	return &result, nil
 }
+
+//func (b *Bitcoin) ValidateAddress(addr string) (*btcjson.ValidateAddressWalletResult, error) {
+//	address, err := b.DecodeAddress(addr)
+//	if err != nil {
+//		return nil, errors.Wrapf(err, "fail to call btc.DecodeAddress(%s)", addr)
+//	}
+//	res, err := b.client.ValidateAddress(address)
+//	if err != nil {
+//		return nil, errors.Errorf("client.ValidateAddress(%s): error: %s", addr, err)
+//	}
+//
+//	return res, nil
+//}
 
 // DecodeAddress decode string address to type Address
 func (b *Bitcoin) DecodeAddress(addr string) (btcutil.Address, error) {

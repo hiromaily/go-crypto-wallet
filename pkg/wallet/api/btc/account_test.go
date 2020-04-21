@@ -50,17 +50,3 @@ func TestGetAccount(t *testing.T) {
 	}
 	bc.Close()
 }
-
-// TestListAccounts is test for ListAccounts
-func TestListAccounts(t *testing.T) {
-	//t.SkipNow()
-	bc := testutil.GetBTC()
-
-	if res, err := bc.GetBalance(); err != nil{
-		t.Errorf("fail to call ListAccounts(): %v", err)
-	}else{
-		t.Log(res)
-	}
-
-	bc.Close()
-}

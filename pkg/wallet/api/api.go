@@ -22,7 +22,7 @@ type Bitcoiner interface {
 	//address.go
 	GetAddressInfo(addr string) (*btc.GetAddressInfoResult, error)
 	GetAddressesByLabel(labelName string) ([]btcutil.Address, error)
-	ValidateAddress(addr string) (*btcjson.ValidateAddressWalletResult, error)
+	ValidateAddress(addr string) (*btc.ValidateAddressResult, error)
 	DecodeAddress(addr string) (btcutil.Address, error)
 
 	//amount.go

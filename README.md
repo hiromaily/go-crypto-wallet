@@ -9,7 +9,7 @@
 Wallet functionalities handling BTC, BCH and so on. Currencies would be added step by step.
 
 ## Requirements
-- Bitcoin Core 0.18 minimum
+- Bitcoin Core 0.18+
 - MySQL 5.7
 - Golang 1.13+
 - Docker
