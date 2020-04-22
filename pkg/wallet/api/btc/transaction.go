@@ -26,11 +26,11 @@ import (
 type GetTransactionResult struct {
 	Amount            float64                `json:"amount"`
 	Fee               float64                `json:"fee"`
-	Confirmations     int64                  `json:"confirmations"`
+	Confirmations     uint64                 `json:"confirmations"`
 	Blockhash         string                 `json:"blockhash"`
-	Blockheight       int64                  `json:"blockheight"`
-	Blockindex        int64                  `json:"blockindex"`
-	Blocktime         int64                  `json:"blocktime"`
+	Blockheight       uint64                 `json:"blockheight"`
+	Blockindex        uint64                 `json:"blockindex"`
+	Blocktime         uint64                 `json:"blocktime"`
 	Txid              string                 `json:"txid"`
 	Walletconflicts   []interface{}          `json:"walletconflicts"`
 	Time              int64                  `json:"time"`
@@ -45,7 +45,7 @@ type GetTransactionDetail struct {
 	Category  string  `json:"category"`
 	Amount    float64 `json:"amount"`
 	Label     string  `json:"label"`
-	Vout      int     `json:"vout"`
+	Vout      uint32  `json:"vout"`
 	Fee       float64 `json:"fee,omitempty"`
 	Abandoned bool    `json:"abandoned,omitempty"`
 }
@@ -53,20 +53,20 @@ type GetTransactionDetail struct {
 type TxRawResult struct {
 	Txid     string      `json:"txid"`
 	Hash     string      `json:"hash"`
-	Version  int         `json:"version"`
-	Size     int         `json:"size"`
-	Vsize    int         `json:"vsize"`
-	Weight   int         `json:"weight"`
-	Locktime int         `json:"locktime"`
+	Version  uint32      `json:"version"`
+	Size     int32       `json:"size"`
+	Vsize    int32       `json:"vsize"`
+	Weight   int32       `json:"weight"`
+	Locktime uint32      `json:"locktime"`
 	Vin      []TxRawVin  `json:"vin"`
 	Vout     []TxRawVout `json:"vout"`
 }
 
 type TxRawVin struct {
 	Txid      string    `json:"txid"`
-	Vout      int       `json:"vout"`
+	Vout      uint32    `json:"vout"`
 	ScriptSig ScriptSig `json:"scriptSig"`
-	Sequence  int64     `json:"sequence"`
+	Sequence  uint32    `json:"sequence"`
 }
 
 type ScriptSig struct {
@@ -76,14 +76,14 @@ type ScriptSig struct {
 
 type TxRawVout struct {
 	Value        float64      `json:"value"`
-	N            int          `json:"n"`
+	N            uint32       `json:"n"`
 	ScriptPubKey ScriptPubKey `json:"scriptPubKey"`
 }
 
 type ScriptPubKey struct {
 	Asm       string   `json:"asm"`
 	Hex       string   `json:"hex"`
-	ReqSigs   int      `json:"reqSigs"`
+	ReqSigs   uint32   `json:"reqSigs"`
 	Type      string   `json:"type"`
 	Addresses []string `json:"addresses"`
 }
@@ -98,9 +98,9 @@ type SignRawTransactionResult struct {
 // SignRawTransactionError error object in SignRawTransactionResult
 type SignRawTransactionError struct {
 	Txid      string `json:"txid"`
-	Vout      int64  `json:"vout"`
+	Vout      uint32 `json:"vout"`
 	ScriptSig string `json:"scriptSig"`
-	Sequence  int64  `json:"sequence"`
+	Sequence  uint32 `json:"sequence"`
 	Error     string `json:"error"`
 }
 

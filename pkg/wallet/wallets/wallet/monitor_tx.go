@@ -113,10 +113,10 @@ func (w *Wallet) checkTxConfirmation(hash string, actionType action.ActionType) 
 	}
 	w.logger.Debug("confirmation detail",
 		zap.String("actionType", actionType.String()),
-		zap.Int64("confirmation", tran.Confirmations))
+		zap.Uint64("confirmation", tran.Confirmations))
 
 	// check current confirmation
-	if tran.Confirmations >= int64(w.btc.ConfirmationBlock()) {
+	if tran.Confirmations >= uint64(w.btc.ConfirmationBlock()) {
 		//current confirmation meet 6 or more
 		_, err = w.storager.UpdateTxTypeDoneByTxHash(actionType, hash, nil, true)
 		if err != nil {
@@ -128,8 +128,8 @@ func (w *Wallet) checkTxConfirmation(hash string, actionType action.ActionType) 
 		// - should it be canceled??
 		// - then raise fee and should unsigned tx be re-created again??
 		w.logger.Info("confirmation is not met yet",
-			zap.Int("want", w.btc.ConfirmationBlock()),
-			zap.Int64("got", tran.Confirmations))
+			zap.Uint64("want", w.btc.ConfirmationBlock()),
+			zap.Uint64("got", tran.Confirmations))
 	}
 
 	return nil

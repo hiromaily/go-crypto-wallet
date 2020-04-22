@@ -12,13 +12,13 @@ import (
 type GetNetworkInfoResult struct {
 	Version            coin.BTCVersion `json:"version"`
 	Subversion         string          `json:"subversion"`
-	Protocolversion    int             `json:"protocolversion"`
+	Protocolversion    uint32          `json:"protocolversion"`
 	Localservices      string          `json:"localservices"`
 	Localservicesnames []string        `json:"localservicesnames"`
 	Localrelay         bool            `json:"localrelay"`
-	Timeoffset         int             `json:"timeoffset"`
+	Timeoffset         int64           `json:"timeoffset"`
 	Networkactive      bool            `json:"networkactive"`
-	Connections        int             `json:"connections"`
+	Connections        uint32          `json:"connections"`
 	Networks           []Network       `json:"networks"`
 	Relayfee           float64         `json:"relayfee"`
 	Incrementalfee     float64         `json:"incrementalfee"`

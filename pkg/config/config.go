@@ -43,7 +43,7 @@ type Bitcoin struct {
 // FIXME: keygen/signature wallet doesn't have this value
 //  so validation can not be used
 type BitcoinBlock struct {
-	ConfirmationNum int `toml:"confirmation_num"`
+	ConfirmationNum uint64 `toml:"confirmation_num"`
 }
 
 // BitcoinFee range of adjustment calculated fee when sending coin

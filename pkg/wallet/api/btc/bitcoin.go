@@ -17,7 +17,7 @@ type Bitcoin struct {
 	chainConf         *chaincfg.Params
 	coinTypeCode      coin.CoinTypeCode //btc
 	version           coin.BTCVersion   //179900
-	confirmationBlock int
+	confirmationBlock uint64
 	feeRange          FeeAdjustmentRate
 	logger            *zap.Logger
 }
@@ -97,7 +97,7 @@ func (b *Bitcoin) Client() *rpcclient.Client {
 }
 
 // ConfirmationBlock returns confirmation block count
-func (b *Bitcoin) ConfirmationBlock() int {
+func (b *Bitcoin) ConfirmationBlock() uint64 {
 	return b.confirmationBlock
 }
 

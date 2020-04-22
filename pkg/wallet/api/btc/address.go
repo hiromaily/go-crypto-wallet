@@ -21,7 +21,7 @@ type GetAddressInfoResult struct {
 	Pubkey       string   `json:"pubkey"`
 	Iscompressed bool     `json:"iscompressed"`
 	Ischange     bool     `json:"ischange"`
-	Timestamp    int      `json:"timestamp"`
+	Timestamp    int64    `json:"timestamp"`
 	Labels       []string `json:"labels"`
 }
 
@@ -31,7 +31,7 @@ type ValidateAddressResult struct {
 	ScriptPubKey      string `json:"scriptPubKey"`
 	IsScript          bool   `json:"isscript"`
 	IsWitness         bool   `json:"iswitness"`
-	WitnessVersion    int    `json:"witness_version,omitempty"`
+	WitnessVersion    uint32 `json:"witness_version,omitempty"`
 	WitnessProgramHex string `json:"witness_program,omitempty"`
 }
 

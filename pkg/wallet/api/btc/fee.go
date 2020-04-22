@@ -14,7 +14,7 @@ import (
 type EstimateSmartFeeResult struct {
 	FeeRate float64  `json:"feerate"`
 	Errors  []string `json:"errors"`
-	Blocks  int64    `json:"blocks"`
+	Blocks  uint64   `json:"blocks"`
 }
 
 // Making Sense of Bitcoin Transaction Fees

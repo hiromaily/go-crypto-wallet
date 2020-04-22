@@ -45,7 +45,7 @@ type Bitcoiner interface {
 	SetChainConf(conf *chaincfg.Params)
 	SetChainConfNet(btcNet wire.BitcoinNet)
 	Client() *rpcclient.Client
-	ConfirmationBlock() int
+	ConfirmationBlock() uint64
 	FeeRangeMax() float64
 	FeeRangeMin() float64
 	//SetVersion(ver coin.BTCVersion)
