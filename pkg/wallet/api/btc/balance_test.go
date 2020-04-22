@@ -19,7 +19,7 @@ func TestGetBalance(t *testing.T) {
 		t.Log(res)
 	}
 
-	bc.Close()
+	//bc.Close()
 }
 
 // TestGetBalanceByAccount is test for GetBalanceByAccount
@@ -65,5 +65,5 @@ func TestGetBalanceByAccount(t *testing.T) {
 		})
 	}
 
-	bc.Close()
+	//bc.Close()
 }

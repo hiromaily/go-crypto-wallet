@@ -154,10 +154,12 @@ func (w *Wallet) getUnspentList(accountType account.AccountType) ([]btc.ListUnsp
 	//}
 
 	// get listUnspent
-	unspentList, unspentAddrs, err := w.btc.ListUnspentByAccount(accountType)
+	unspentList, err := w.btc.ListUnspentByAccount(accountType)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "fail to call btc.Client().ListUnspentByAccount()")
 	}
+	unspentAddrs := w.btc.GetUnspentListAddrs(unspentList, accountType)
+
 	return unspentList, unspentAddrs, nil
 }
 

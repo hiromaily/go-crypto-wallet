@@ -18,5 +18,5 @@ func TestEstimateSmartFee(t *testing.T) {
 		t.Logf("%f", res)
 	}
 
-	bc.Close()
+	//bc.Close()
 }

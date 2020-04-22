@@ -50,7 +50,7 @@ func TestGetAddressInfo(t *testing.T) {
 			t.Log(res)
 		})
 	}
-	bc.Close()
+	//bc.Close()()()
 }
 
 // TestGetAddressesByLabel is test for GetAddressesByLabel
@@ -83,7 +83,7 @@ func TestGetAddressesByLabel(t *testing.T) {
 			}
 		})
 	}
-	bc.Close()
+	//bc.Close()()()
 }
 
 // TestValidateAddress is test for ValidateAddress
@@ -128,5 +128,5 @@ func TestValidateAddress(t *testing.T) {
 		})
 	}
 
-	bc.Close()
+	//bc.Close()
 }

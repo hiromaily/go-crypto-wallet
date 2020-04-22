@@ -18,5 +18,5 @@ func TestGetNetworkInfo(t *testing.T) {
 		t.Log(res)
 	}
 
-	bc.Close()
+	//bc.Close()
 }

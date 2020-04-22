@@ -95,10 +95,11 @@ type Bitcoiner interface {
 	Sign(tx *wire.MsgTx, strPrivateKey string) (string, error)
 
 	//unspent.go
-	UnlockUnspent() error
-	LockUnspent(tx btcjson.ListUnspentResult) error
 	ListUnspent() ([]btc.ListUnspentResult, error)
-	ListUnspentByAccount(accountType account.AccountType) ([]btc.ListUnspentResult, []string, error)
+	ListUnspentByAccount(accountType account.AccountType) ([]btc.ListUnspentResult, error)
+	GetUnspentListAddrs(unspentList []btc.ListUnspentResult, accountType account.AccountType) []string
+	LockUnspent(tx *btc.ListUnspentResult) error
+	UnlockUnspent() error
 
 	//wallet.go
 	BackupWallet(fileName string) error
