@@ -6,12 +6,12 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/testutil"
 )
 
-// TestGetBlockCount is test for GetBlockCount
+// TestLogging is test for GetLogging
 func TestLogging(t *testing.T) {
 	//t.SkipNow()
 	bc := testutil.GetBTC()
 
-	// GetBalance
+	// Logging
 	if res, err := bc.Logging(); err != nil {
 		t.Errorf("fail to call Logging(): %v", err)
 	} else {

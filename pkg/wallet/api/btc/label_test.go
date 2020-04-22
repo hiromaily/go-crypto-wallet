@@ -21,7 +21,7 @@ func TestSetLabel(t *testing.T) {
 	}
 	// import address
 	// this scan address
-	//err = bc.ImportAddress(pubKey)
+	//err = bc.ImportAddressWithoutReScan(pubKey)
 	err = bc.ImportAddressWithoutReScan(pubKey)
 	if err != nil {
 		t.Fatalf("fail to call ImportAddress(): %v", err)

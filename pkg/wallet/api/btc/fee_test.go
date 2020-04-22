@@ -11,7 +11,7 @@ func TestEstimateSmartFee(t *testing.T) {
 	//t.SkipNow()
 	bc := testutil.GetBTC()
 
-	// GetBalance
+	// EstimateSmartFee
 	if res, err := bc.EstimateSmartFee(); err != nil {
 		t.Errorf("fail to call EstimateSmartFee(): %v", err)
 	} else {
