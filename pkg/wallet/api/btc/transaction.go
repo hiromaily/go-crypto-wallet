@@ -20,8 +20,73 @@ import (
 // refer to https://www.haowuliaoa.com/article/info/11350.html (Chinese site)
 
 // naming regulation for transaction
-// as example, *wire.MsgTx is that tx is used as suffix
-// so tx should be named like hexTx, hashTx
+//  - as example, *wire.MsgTx is that tx is used as suffix
+//  - so tx should be named like hexTx, hashTx
+
+type GetTransactionResult struct {
+	Amount            float64                `json:"amount"`
+	Fee               float64                `json:"fee"`
+	Confirmations     int64                  `json:"confirmations"`
+	Blockhash         string                 `json:"blockhash"`
+	Blockheight       int64                  `json:"blockheight"`
+	Blockindex        int64                  `json:"blockindex"`
+	Blocktime         int64                  `json:"blocktime"`
+	Txid              string                 `json:"txid"`
+	Walletconflicts   []interface{}          `json:"walletconflicts"`
+	Time              int64                  `json:"time"`
+	Timereceived      int64                  `json:"timereceived"`
+	Bip125Replaceable string                 `json:"bip125-replaceable"`
+	Details           []GetTransactionDetail `json:"details"`
+	Hex               string                 `json:"hex"`
+}
+
+type GetTransactionDetail struct {
+	Address   string  `json:"address"`
+	Category  string  `json:"category"`
+	Amount    float64 `json:"amount"`
+	Label     string  `json:"label"`
+	Vout      int     `json:"vout"`
+	Fee       float64 `json:"fee,omitempty"`
+	Abandoned bool    `json:"abandoned,omitempty"`
+}
+
+type TxRawResult struct {
+	Txid     string      `json:"txid"`
+	Hash     string      `json:"hash"`
+	Version  int         `json:"version"`
+	Size     int         `json:"size"`
+	Vsize    int         `json:"vsize"`
+	Weight   int         `json:"weight"`
+	Locktime int         `json:"locktime"`
+	Vin      []TxRawVin  `json:"vin"`
+	Vout     []TxRawVout `json:"vout"`
+}
+
+type TxRawVin struct {
+	Txid      string    `json:"txid"`
+	Vout      int       `json:"vout"`
+	ScriptSig ScriptSig `json:"scriptSig"`
+	Sequence  int64     `json:"sequence"`
+}
+
+type ScriptSig struct {
+	Asm string `json:"asm"`
+	Hex string `json:"hex"`
+}
+
+type TxRawVout struct {
+	Value        float64      `json:"value"`
+	N            int          `json:"n"`
+	ScriptPubKey ScriptPubKey `json:"scriptPubKey"`
+}
+
+type ScriptPubKey struct {
+	Asm       string   `json:"asm"`
+	Hex       string   `json:"hex"`
+	ReqSigs   int      `json:"reqSigs"`
+	Type      string   `json:"type"`
+	Addresses []string `json:"addresses"`
+}
 
 // SignRawTransactionResult is response type of PRC `signrawtransactionwithwallet`
 type SignRawTransactionResult struct {
@@ -86,68 +151,42 @@ func (b *Bitcoin) ToMsgTx(txHex string) (*wire.MsgTx, error) {
 	return &msgTx, nil
 }
 
-// DecodeRawTransaction returns information about a transaction given its serialized byte
-func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*btcjson.TxRawResult, error) {
-	byteHex, err := hex.DecodeString(hexTx)
+func (b *Bitcoin) GetTransaction(txID string) (*GetTransactionResult, error) {
+	input, err := json.Marshal(string(txID))
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call hex.DecodeString()")
+		return nil, errors.Errorf("json.Marchal(txID): error: %s", err)
 	}
-	resTx, err := b.client.DecodeRawTransaction(byteHex)
+	rawResult, err := b.client.RawRequest("gettransaction", []json.RawMessage{input})
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call btc.client.DecodeRawTransaction()")
-	}
-
-	return resTx, nil
-}
-
-// GetRawTransactionByHex get tx from hex string
-// unused for now
-func (b *Bitcoin) GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error) {
-
-	hashTx, err := chainhash.NewHashFromStr(strHashTx)
-	if err != nil {
-		return nil, errors.Wrapf(err, "fail to call chainhash.NewHashFromStr(%s)", strHashTx)
+		return nil, errors.Wrap(err, "fail to call json.RawRequest(gettransaction)")
 	}
 
-	tx, err := b.client.GetRawTransaction(hashTx)
+	result := GetTransactionResult{}
+	err = json.Unmarshal([]byte(rawResult), &result)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call btc.client.GetRawTransaction(hash)")
+		return nil, errors.Errorf("json.Unmarshal(rawResult): error: %s", err)
 	}
-	//MsgTx()
-	//tx.MsgTx()
 
-	return tx, nil
+	return &result, nil
 }
 
 // GetTransactionByTxID get transaction result by txID
-func (b *Bitcoin) GetTransactionByTxID(txID string) (*btcjson.GetTransactionResult, error) {
-	hashTx, err := chainhash.NewHashFromStr(txID)
-	if err != nil {
-		return nil, errors.Wrapf(err, "fail to call chainhash.NewHashFromStr(%s)", txID)
-	}
-	resTx, err := b.client.GetTransaction(hashTx)
-	if err != nil {
-		return nil, errors.Wrapf(err, "fail to call btc.client.GetTransaction(%s)", hashTx)
-	}
-	//type GetTransactionResult struct {
-	//	Amount          float64                       `json:"amount"`
-	//	Fee             float64                       `json:"fee,omitempty"`
-	//	Confirmations   int64                         `json:"confirmations"`
-	//	BlockHash       string                        `json:"blockhash"`
-	//	BlockIndex      int64                         `json:"blockindex"`
-	//	BlockTime       int64                         `json:"blocktime"`
-	//	TxID            string                        `json:"txid"`
-	//	WalletConflicts []string                      `json:"walletconflicts"`
-	//	Time            int64                         `json:"time"`
-	//	TimeReceived    int64                         `json:"timereceived"`
-	//	Details         []GetTransactionDetailsResult `json:"details"`
-	//	Hex             string                        `json:"hex"`
+func (b *Bitcoin) GetTransactionByTxID(txID string) (*GetTransactionResult, error) {
+	//hashTx, err := chainhash.NewHashFromStr(txID)
+	//if err != nil {
+	//	return nil, errors.Wrapf(err, "fail to call chainhash.NewHashFromStr(%s)", txID)
 	//}
+	//resTx, err := b.client.GetTransaction(hashTx)
+	resTx, err := b.GetTransaction(txID)
+	if err != nil {
+		return nil, errors.Wrapf(err, "fail to call btc.GetTransaction(%s)", txID)
+	}
 
 	return resTx, nil
 }
 
 // GetTxOutByTxID get txOut by txID and index
+//  - it's not used anywhere
 func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutResult, error) {
 	hash, err := chainhash.NewHashFromStr(txID)
 	if err != nil {
@@ -155,6 +194,7 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 	}
 
 	// Gettxout / txHash *chainhash.Hash, index uint32, mempool bool
+	//  client.GetTxOut is not outdated yet (at bitcoin core 0.19)
 	txOutResult, err := b.client.GetTxOut(hash, index, false)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to call btc.client.GetTxOut(%s, %d, false)", hash, index)
@@ -178,20 +218,49 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 	//}
 }
 
-// CreateRawTransaction create raw transaction
-//  - for receipt/transfer action
-//func (b *Bitcoin) CreateRawTransaction(receiverAddr string, amount btcutil.Amount, txInputs []btcjson.TransactionInput) (*wire.MsgTx, error) {
-//	receiverAddrDecoded, err := btcutil.DecodeAddress(receiverAddr, b.GetChainConf())
-//	if err != nil {
-//		return nil, errors.Wrapf(err, "fail to call btcutil.DecodeAddress(%s)", receiverAddr)
-//	}
-//
-//	txOutputs := make(map[btcutil.Address]btcutil.Amount)
-//	txOutputs[receiverAddrDecoded] = amount //satoshi
-//
-//	// CreateRawTransaction
-//	return b.CreateRawTransactionWithOutput(txInputs, txOutputs)
-//}
+// DecodeRawTransaction returns information about a transaction given its serialized byte
+func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*TxRawResult, error) {
+	//byteHex, err := hex.DecodeString(hexTx)
+	//if err != nil {
+	//	return nil, errors.Wrap(err, "fail to call hex.DecodeString()")
+	//}
+	//resTx, err := b.client.DecodeRawTransaction(byteHex)
+	input, err := json.Marshal(string(hexTx))
+	if err != nil {
+		return nil, errors.Errorf("json.Marchal(txID): error: %s", err)
+	}
+	rawResult, err := b.client.RawRequest("decoderawtransaction", []json.RawMessage{input})
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to call json.RawRequest(decoderawtransaction)")
+	}
+
+	result := TxRawResult{}
+	err = json.Unmarshal([]byte(rawResult), &result)
+	if err != nil {
+		return nil, errors.Errorf("json.Unmarshal(rawResult): error: %s", err)
+	}
+
+	return &result, nil
+}
+
+// GetRawTransactionByHex get tx from hex string
+// unused for now
+func (b *Bitcoin) GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error) {
+
+	hashTx, err := chainhash.NewHashFromStr(strHashTx)
+	if err != nil {
+		return nil, errors.Wrapf(err, "fail to call chainhash.NewHashFromStr(%s)", strHashTx)
+	}
+
+	tx, err := b.client.GetRawTransaction(hashTx)
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to call btc.client.GetRawTransaction(hash)")
+	}
+	//MsgTx()
+	//tx.MsgTx()
+
+	return tx, nil
+}
 
 // CreateRawTransaction create raw transaction
 //  - for payment action

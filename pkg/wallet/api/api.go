@@ -82,10 +82,10 @@ type Bitcoiner interface {
 	//transaction.go
 	ToHex(tx *wire.MsgTx) (string, error)
 	ToMsgTx(txHex string) (*wire.MsgTx, error)
-	DecodeRawTransaction(hexTx string) (*btcjson.TxRawResult, error)
-	GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error)
-	GetTransactionByTxID(txID string) (*btcjson.GetTransactionResult, error)
+	GetTransactionByTxID(txID string) (*btc.GetTransactionResult, error)
 	GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutResult, error)
+	DecodeRawTransaction(hexTx string) (*btc.TxRawResult, error)
+	GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error)
 	CreateRawTransaction(inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount) (*wire.MsgTx, error)
 	FundRawTransaction(hex string) (*btc.FundRawTransactionResult, error)
 	SignRawTransaction(tx *wire.MsgTx, prevtxs []btc.PrevTx) (*wire.MsgTx, bool, error)
