@@ -25,7 +25,7 @@ lintfix:
 .PHONY: generate-db-definition
 generate-db-definition:
 	sqlboiler --wipe mysql
-	sqlboiler --config sqlboiler.keygen.toml --wipe mysql
+	#sqlboiler --config sqlboiler.keygen.toml --wipe mysql
 
 
 # ifacemaker is tool which makes interface from struct

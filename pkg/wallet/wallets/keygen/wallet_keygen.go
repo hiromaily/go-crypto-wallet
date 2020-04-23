@@ -16,7 +16,7 @@ type Keygen struct {
 	btc          api.Bitcoiner
 	logger       *zap.Logger
 	tracer       opentracing.Tracer
-	storager     rdb.ColdStorager
+	repo         rdb.ColdStorager
 	keyGenerator key.Generator
 	wtype        types.WalletType
 }
@@ -26,7 +26,7 @@ func NewKeygen(
 	btc api.Bitcoiner,
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
-	storager rdb.ColdStorager,
+	repo rdb.ColdStorager,
 	keyGenerator key.Generator,
 	wtype types.WalletType) *Keygen {
 
@@ -34,7 +34,7 @@ func NewKeygen(
 		btc:          btc,
 		logger:       logger,
 		tracer:       tracer,
-		storager:     storager,
+		repo:         repo,
 		keyGenerator: keyGenerator,
 		wtype:        wtype,
 	}
@@ -42,13 +42,13 @@ func NewKeygen(
 
 // Done should be called before exit
 func (w *Keygen) Done() {
-	w.storager.Close()
+	w.repo.Close()
 	w.btc.Close()
 }
 
 // GetDB gets storager
 func (w *Keygen) GetDB() rdb.ColdStorager {
-	return w.storager
+	return w.repo
 }
 
 // GetBTC gets btc

@@ -95,7 +95,7 @@ func (r *registry) newStorager() rdb.ColdStorager {
 	// if there are multiple options, set proper one
 	// storager interface as MySQL
 	return coldrepo.NewColdRepository(
-		r.newMySQLClient(),
+		r.newMySQLXClient(),
 		r.newLogger(),
 	)
 }
@@ -108,9 +108,9 @@ func (r *registry) newKeyGenerator() key.Generator {
 		r.newLogger())
 }
 
-func (r *registry) newMySQLClient() *sqlx.DB {
+func (r *registry) newMySQLXClient() *sqlx.DB {
 	if r.mysqlClient == nil {
-		dbConn, err := mysql.NewMySQL(&r.conf.MySQL)
+		dbConn, err := mysql.NewMySQLX(&r.conf.MySQL)
 		if err != nil {
 			panic(err)
 		}
@@ -126,7 +126,7 @@ func (r *registry) newAddressFileStorager() address.Storager {
 	)
 }
 
-func (r *registry) newTxFileStorager() tx.Storager {
+func (r *registry) newTxFileStorager() tx.FileStorager {
 	return tx.NewFileRepository(
 		r.conf.TxFile.BasePath,
 		r.newLogger(),

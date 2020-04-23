@@ -15,7 +15,7 @@ import (
 )
 
 // Storager is tx storager
-type Storager interface {
+type FileStorager interface {
 	CreateFilePath(actionType action.ActionType, txType TxType, txID int64, signedCount int) string
 	GetFileNameType(filePath string) (*FileName, error)
 	ValidateFilePath(filePath string, expectedTxType TxType) (action.ActionType, TxType, int64, int, error)

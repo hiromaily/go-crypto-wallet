@@ -17,10 +17,10 @@ type ColdWallet struct {
 	btc          api.Bitcoiner
 	logger       *zap.Logger
 	tracer       opentracing.Tracer
-	storager     rdb.ColdStorager
+	repo         rdb.ColdStorager
 	keyGenerator key.Generator
 	addrFileRepo address.Storager
-	txFileRepo   tx.Storager
+	txFileRepo   tx.FileStorager
 	wtype        types.WalletType
 }
 
@@ -29,17 +29,17 @@ func NewColdWalet(
 	btc api.Bitcoiner,
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
-	storager rdb.ColdStorager,
+	repo rdb.ColdStorager,
 	keyGenerator key.Generator,
 	addrFileRepo address.Storager,
-	txFileRepo tx.Storager,
+	txFileRepo tx.FileStorager,
 	wtype types.WalletType) *ColdWallet {
 
 	return &ColdWallet{
 		btc:          btc,
 		logger:       logger,
 		tracer:       tracer,
-		storager:     storager,
+		repo:         repo,
 		keyGenerator: keyGenerator,
 		addrFileRepo: addrFileRepo,
 		txFileRepo:   txFileRepo,
@@ -49,13 +49,13 @@ func NewColdWalet(
 
 // Done should be called before exit
 func (w *ColdWallet) Done() {
-	w.storager.Close()
+	w.repo.Close()
 	w.btc.Close()
 }
 
 // GetDB gets storager
 func (w *ColdWallet) GetDB() rdb.ColdStorager {
-	return w.storager
+	return w.repo
 }
 
 // GetBTC gets btc

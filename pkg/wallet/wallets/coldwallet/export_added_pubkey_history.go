@@ -22,7 +22,7 @@ func (w *ColdWallet) ExportAddedPubkeyHistory(accountType account.AccountType) (
 
 	// get record in added_pybkey_history table
 	// condition: is_exported==false and multisig_address is already created
-	addedPubkeyHistoryTable, err := w.storager.GetAddedPubkeyHistoryTableByNotExported(accountType)
+	addedPubkeyHistoryTable, err := w.repo.GetAddedPubkeyHistoryTableByNotExported(accountType)
 	if err != nil {
 		return "", errors.Wrap(err, "storager.GetAddedPubkeyHistoryTableByNotExported()")
 	}
@@ -46,7 +46,7 @@ func (w *ColdWallet) ExportAddedPubkeyHistory(accountType account.AccountType) (
 	for idx, record := range addedPubkeyHistoryTable {
 		ids[idx] = record.ID
 	}
-	_, err = w.storager.UpdateIsExportedOnAddedPubkeyHistoryTable(accountType, ids, nil, true)
+	_, err = w.repo.UpdateIsExportedOnAddedPubkeyHistoryTable(accountType, ids, nil, true)
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call storager.UpdateIsExportedOnAddedPubkeyHistoryTable()")
 	}

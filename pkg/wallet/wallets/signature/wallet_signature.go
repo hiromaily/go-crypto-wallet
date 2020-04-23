@@ -16,7 +16,7 @@ type Signature struct {
 	btc          api.Bitcoiner
 	logger       *zap.Logger
 	tracer       opentracing.Tracer
-	storager     rdb.ColdStorager
+	repo         rdb.ColdStorager
 	keyGenerator key.Generator
 	wtype        types.WalletType
 }
@@ -26,7 +26,7 @@ func NewSignature(
 	btc api.Bitcoiner,
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
-	storager rdb.ColdStorager,
+	repo rdb.ColdStorager,
 	keyGenerator key.Generator,
 	wtype types.WalletType) *Signature {
 
@@ -34,7 +34,7 @@ func NewSignature(
 		btc:          btc,
 		logger:       logger,
 		tracer:       tracer,
-		storager:     storager,
+		repo:         repo,
 		keyGenerator: keyGenerator,
 		wtype:        wtype,
 	}
@@ -42,13 +42,13 @@ func NewSignature(
 
 // Done should be called before exit
 func (w *Signature) Done() {
-	w.storager.Close()
+	w.repo.Close()
 	w.btc.Close()
 }
 
 // GetDB gets storager
 func (w *Signature) GetDB() rdb.ColdStorager {
-	return w.storager
+	return w.repo
 }
 
 // GetBTC gets btc

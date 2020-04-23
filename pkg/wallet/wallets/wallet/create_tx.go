@@ -244,7 +244,7 @@ func (w *Wallet) createTxOutputs(
 
 	// 1. get unallocated address for receiver
 	// - receipt/transfer
-	pubkeyTable, err := w.storager.GetOneUnAllocatedAccountPubKeyTable(reciver)
+	pubkeyTable, err := w.repo.GetOneUnAllocatedAccountPubKeyTable(reciver)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call storager.GetOneUnAllocatedAccountPubKeyTable()")
 	}
@@ -488,7 +488,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 	paymentRequestIds []int64) (int64, error) {
 
 	// 1. skip if same hex is already stored
-	count, err := w.storager.GetTxCountByUnsignedHex(actionType, hex)
+	count, err := w.repo.GetTxCountByUnsignedHex(actionType, hex)
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call storager.GetTxCountByUnsignedHex()")
 	}
@@ -506,8 +506,8 @@ func (w *Wallet) insertTxTableForUnsigned(
 	txReceipt.TxType = txType
 
 	// start db transaction
-	tx := w.storager.MustBegin()
-	txReceiptID, err := w.storager.InsertTxForUnsigned(actionType, &txReceipt, tx, false)
+	tx := w.repo.MustBegin()
+	txReceiptID, err := w.repo.InsertTxForUnsigned(actionType, &txReceipt, tx, false)
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call storager.InsertTxForUnsigned()")
 	}
@@ -517,7 +517,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 	for idx := range txInputs {
 		txInputs[idx].ReceiptID = txReceiptID
 	}
-	err = w.storager.InsertTxInputForUnsigned(actionType, txInputs, tx, false)
+	err = w.repo.InsertTxInputForUnsigned(actionType, txInputs, tx, false)
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call storager.InsertTxInputForUnsigned()")
 	}
@@ -532,7 +532,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 	if actionType == action.ActionTypePayment {
 		isCommit = false
 	}
-	err = w.storager.InsertTxOutputForUnsigned(actionType, txOutputs, tx, isCommit)
+	err = w.repo.InsertTxOutputForUnsigned(actionType, txOutputs, tx, isCommit)
 	if err != nil {
 		return 0, errors.Wrap(err, "storager.InsertTxOutputForUnsigned()")
 	}
@@ -542,7 +542,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 
 	// 6. update payment_id in payment_request table for only action.ActionTypePayment
 	if actionType == action.ActionTypePayment {
-		_, err = w.storager.UpdatePaymentIDOnPaymentRequest(txReceiptID, paymentRequestIds, tx, true)
+		_, err = w.repo.UpdatePaymentIDOnPaymentRequest(txReceiptID, paymentRequestIds, tx, true)
 		if err != nil {
 			return 0, errors.Wrap(err, "storager.UpdatePaymentIDOnPaymentRequest()")
 		}

@@ -29,12 +29,12 @@ func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, address
 	}
 
 	// get one wallet_address for Authorization account from account_key_authorization table
-	authKeyTable, err := w.storager.GetOneByMaxIDOnAccountKeyTable(account.AccountTypeAuthorization)
+	authKeyTable, err := w.repo.GetOneByMaxIDOnAccountKeyTable(account.AccountTypeAuthorization)
 	if err != nil {
 		return errors.Wrap(err, "fail to call storager.GetOneByMaxIDOnAccountKeyTable(AccountTypeAuthorization)")
 	}
 	// get full-pub-key for given account from added_pubkey_history_table
-	addedPubkeyHistoryTable, err := w.storager.GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType)
+	addedPubkeyHistoryTable, err := w.repo.GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType)
 	if err != nil {
 		return errors.Wrapf(err, "fail to call storager.GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(%s)", accountType.String())
 	}
@@ -63,7 +63,7 @@ func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, address
 		}
 
 		// store generated address into added_pubkey_history_table
-		err = w.storager.UpdateMultisigAddrOnAddedPubkeyHistoryTable(accountType, resAddr.Address,
+		err = w.repo.UpdateMultisigAddrOnAddedPubkeyHistoryTable(accountType, resAddr.Address,
 			resAddr.RedeemScript, authKeyTable.P2shSegwitAddress, val.FullPublicKey, nil, true)
 		if err != nil {
 			w.logger.Error(

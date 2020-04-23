@@ -1,6 +1,6 @@
 no-hooks = true
 no-tests = true
-output = "./pkg/models/wallet"
+output = "./pkg/models/rdb"
 
 [mysql]
 dbname = "wallet"
@@ -10,23 +10,16 @@ user = "root"
 pass = "root"
 sslmode = "false"
 whitelist = [
-    "tx_receipt",
-    "tx_receipt_input",
-    "tx_receipt_output",
-    "tx_payment",
-    "tx_payment_input",
-    "tx_payment_output",
-    "tx_transfer",
-    "tx_transfer_input",
-    "tx_transfer_output",
+    "tx",
+    "tx_input",
+    "tx_output",
     "payment_request",
-    "account_pubkey_client",
-    "account_pubkey_receipt",
-    "account_pubkey_payment",
-    "account_pubkey_quoine",
-    "account_pubkey_fee",
-    "account_pubkey_stored"
+    "pubkey",
+    "seed",
+    "account_key",
+    "multisig_pubkey_history"
 ]
+tinyint_as_int = true
 
 #[aliases.tables.tx_receipt.columns]
 #current_tx_type = "CurrentTxType"

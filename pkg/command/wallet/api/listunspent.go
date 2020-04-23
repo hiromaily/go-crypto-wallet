@@ -52,12 +52,14 @@ func (c *ListUnspentCommand) Run(args []string) int {
 
 	if acnt != "" {
 		// call listunspent
-		unspentList, unspentAddrs, err := c.wallet.GetBTC().ListUnspentByAccount(account.AccountType(acnt))
+		unspentList, err := c.wallet.GetBTC().ListUnspentByAccount(account.AccountType(acnt))
 		if err != nil {
 			c.ui.Error(fmt.Sprintf("fail to call btc.ListUnspentByAccount() %+v", err))
 			return 1
 		}
 		grok.Value(unspentList)
+
+		unspentAddrs := c.wallet.GetBTC().GetUnspentListAddrs(unspentList, account.AccountType(acnt))
 		for _, addr := range unspentAddrs {
 			grok.Value(addr)
 		}

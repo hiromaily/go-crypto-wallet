@@ -111,7 +111,7 @@ func (w *ColdWallet) sign(hex, encodedPrevsAddrs string) (string, bool, string, 
 		// => logic is changed. addrsPrevs.SenderAccount is used for getting sender information
 		// address must be multisig address
 		// get data from account_key_table
-		accountKeys, err = w.storager.GetAllAccountKeyByMultiAddrs(prevsAddrs.SenderAccount, prevsAddrs.Addrs)
+		accountKeys, err = w.repo.GetAllAccountKeyByMultiAddrs(prevsAddrs.SenderAccount, prevsAddrs.Addrs)
 		if err != nil {
 			return "", false, "", errors.Errorf("DB.GetWIPByMultiAddrs() error: %s", err)
 		}
@@ -119,7 +119,7 @@ func (w *ColdWallet) sign(hex, encodedPrevsAddrs string) (string, bool, string, 
 		// sign wallet is used from 2nd signature, only multisig address
 		// get data from account_key_authorization table
 		// TODO: client account doesn't have multisig address, so this code could be skipped
-		accountKey, err := w.storager.GetOneByMaxIDOnAccountKeyTable(account.AccountTypeAuthorization)
+		accountKey, err := w.repo.GetOneByMaxIDOnAccountKeyTable(account.AccountTypeAuthorization)
 		if err != nil {
 			return "", false, "", errors.Wrap(err, "fail to call storager.GetOneByMaxIDOnAccountKeyTable()")
 		}

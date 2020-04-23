@@ -19,7 +19,7 @@ func (w *ColdWallet) ImportPrivateKey(accountType account.AccountType) error {
 	}
 
 	//1. retrieve records(private key) from account_key table
-	accountKeyTable, err := w.storager.GetAllAccountKeyByAddrStatus(accountType, address.AddrStatusHDKeyGenerated) //addr_status=0
+	accountKeyTable, err := w.repo.GetAllAccountKeyByAddrStatus(accountType, address.AddrStatusHDKeyGenerated) //addr_status=0
 	if err != nil {
 		return errors.Wrap(err, "fail to call storager.GetAllAccountKeyByAddrStatus()")
 	}
@@ -53,7 +53,7 @@ func (w *ColdWallet) ImportPrivateKey(accountType account.AccountType) error {
 		}
 
 		//update DB
-		_, err = w.storager.UpdateAddrStatusByWIF(accountType, address.AddrStatusPrivKeyImported, record.WalletImportFormat, nil, true)
+		_, err = w.repo.UpdateAddrStatusByWIF(accountType, address.AddrStatusPrivKeyImported, record.WalletImportFormat, nil, true)
 		if err != nil {
 			w.logger.Error(
 				"fail to update table by calling btc.UpdateAddrStatusByWIF()",

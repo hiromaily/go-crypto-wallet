@@ -50,7 +50,7 @@ func (w *ColdWallet) ImportPubKey(fileName string, accountType account.AccountTy
 		}
 	}
 	//TODO:Upsert would be better to prevent error which occur when data is already inserted
-	err = w.storager.InsertAddedPubkeyHistoryTable(accountType, addedPubkeyHistorys, nil, true)
+	err = w.repo.InsertAddedPubkeyHistoryTable(accountType, addedPubkeyHistorys, nil, true)
 	if err != nil {
 		return errors.Wrap(err, "fail to call storager.InsertAddedPubkeyHistoryTable()")
 	}
@@ -99,7 +99,7 @@ func (w *ColdWallet) ImportMultisigAddress(fileName string, accountType account.
 		}
 	}
 	//TODO: Upsert would be better??
-	err = w.storager.UpdateMultisigAddrOnAccountKeyTableByFullPubKey(accountType, accountKeyTable, nil, true)
+	err = w.repo.UpdateMultisigAddrOnAccountKeyTableByFullPubKey(accountType, accountKeyTable, nil, true)
 	if err != nil {
 		return errors.Errorf("DB.UpdateMultisigAddrOnAccountKeyTableByFullPubKey() error: %s", err)
 	}

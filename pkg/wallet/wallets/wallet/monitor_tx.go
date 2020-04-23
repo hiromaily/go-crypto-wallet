@@ -41,7 +41,7 @@ func (w *Wallet) UpdateTxStatus() error {
 // update TxTypeSent to TxTypeDone if confirmation is 6 or more
 func (w *Wallet) updateStatusForTxTypeSent(actionType action.ActionType) error {
 	// get records whose status is TxTypeSent
-	hashes, err := w.storager.GetSentTxHashByTxTypeSent(actionType)
+	hashes, err := w.repo.GetSentTxHashByTxTypeSent(actionType)
 	if err != nil {
 		return errors.Wrapf(err, "fail to call storager.GetSentTxHashByTxTypeSent() ActionType: %s", actionType)
 	}
@@ -64,7 +64,7 @@ func (w *Wallet) updateStatusForTxTypeSent(actionType action.ActionType) error {
 
 func (w *Wallet) updateStatusForTxTypeDone(actionType action.ActionType) error {
 	// get records whose status is TxTypeDone
-	hashes, err := w.storager.GetSentTxHashByTxTypeDone(actionType)
+	hashes, err := w.repo.GetSentTxHashByTxTypeDone(actionType)
 	if err != nil {
 		return errors.Wrapf(err, "fail to call storager.GetSentTxHashByTxTypeDone() ActionType: %s", actionType)
 	}
@@ -118,7 +118,7 @@ func (w *Wallet) checkTxConfirmation(hash string, actionType action.ActionType) 
 	// check current confirmation
 	if tran.Confirmations >= uint64(w.btc.ConfirmationBlock()) {
 		//current confirmation meet 6 or more
-		_, err = w.storager.UpdateTxTypeDoneByTxHash(actionType, hash, nil, true)
+		_, err = w.repo.UpdateTxTypeDoneByTxHash(actionType, hash, nil, true)
 		if err != nil {
 			return errors.Wrapf(err, "fail to call storager.UpdateTxTypeDoneByTxHash() ActionType: %s", actionType)
 		}
@@ -146,13 +146,13 @@ func (w *Wallet) notifyTxDone(hash string, actionType action.ActionType) (int64,
 	switch actionType {
 	case action.ActionTypeReceipt:
 		// 1. get txID from hash
-		txID, err = w.storager.GetTxIDBySentHash(actionType, hash)
+		txID, err = w.repo.GetTxIDBySentHash(actionType, hash)
 		if err != nil {
 			return 0, errors.Wrapf(err, "fail to call storager.GetTxIDBySentHash() ActionType: %s", actionType)
 		}
 
 		// 2. get txInputs
-		txInputs, err := w.storager.GetTxInputByReceiptID(actionType, txID)
+		txInputs, err := w.repo.GetTxInputByReceiptID(actionType, txID)
 		if err != nil {
 			return 0, errors.Wrapf(err, "fail to call storager.GetTxInputByReceiptID(%d) ActionType: %s", txID, actionType)
 		}
@@ -169,13 +169,13 @@ func (w *Wallet) notifyTxDone(hash string, actionType action.ActionType) (int64,
 		}
 	case action.ActionTypePayment:
 		// 1. get txID from hash
-		txID, err = w.storager.GetTxIDBySentHash(actionType, hash)
+		txID, err = w.repo.GetTxIDBySentHash(actionType, hash)
 		if err != nil {
 			return 0, errors.Wrapf(err, "fail to call storager.GetTxIDBySentHash() ActionType: %s", actionType)
 		}
 
 		// 2. get info from payment_request table
-		paymentUsers, err := w.storager.GetPaymentRequestByPaymentID(txID)
+		paymentUsers, err := w.repo.GetPaymentRequestByPaymentID(txID)
 		if err != nil {
 			return 0, errors.Wrapf(err, "fail to call storager.GetPaymentRequestByPaymentID(%d) ActionType: %s", txID, actionType)
 		}
@@ -203,19 +203,19 @@ func (w *Wallet) notifyTxDone(hash string, actionType action.ActionType) (int64,
 func (w *Wallet) updateTxTypeNotified(id int64, actionType action.ActionType) error {
 	switch actionType {
 	case action.ActionTypeReceipt:
-		_, err := w.storager.UpdateTxTypeNotifiedByID(actionType, id, nil, true)
+		_, err := w.repo.UpdateTxTypeNotifiedByID(actionType, id, nil, true)
 		if err != nil {
 			return errors.Wrapf(err, "fail to call storager.UpdateTxTypeNotifiedByID() ActionType: %s", actionType)
 		}
 	case action.ActionTypePayment:
-		tx := w.storager.MustBegin()
-		_, err := w.storager.UpdateTxTypeNotifiedByID(actionType, id, tx, false)
+		tx := w.repo.MustBegin()
+		_, err := w.repo.UpdateTxTypeNotifiedByID(actionType, id, tx, false)
 		if err != nil {
 			return errors.Wrapf(err, "fail to call storager.UpdateTxTypeNotifiedByID() ActionType: %s", actionType)
 		}
 
 		// update is_done=true in payment_request
-		_, err = w.storager.UpdateIsDoneOnPaymentRequest(id, tx, true)
+		_, err = w.repo.UpdateIsDoneOnPaymentRequest(id, tx, true)
 		if err != nil {
 			return errors.Wrapf(err, "fail to call storager.UpdateIsDoneOnPaymentRequest() ActionType: %s", actionType)
 		}

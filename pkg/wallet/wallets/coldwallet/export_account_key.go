@@ -37,7 +37,7 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, addrStatu
 	}
 
 	// get account key
-	accountKeyTable, err := w.storager.GetAllAccountKeyByAddrStatus(accountType, addrStatus)
+	accountKeyTable, err := w.repo.GetAllAccountKeyByAddrStatus(accountType, addrStatus)
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call storager.GetAllAccountKeyByAddrStatus()")
 	}
@@ -58,7 +58,7 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, addrStatu
 	for idx, record := range accountKeyTable {
 		wifs[idx] = record.WalletImportFormat
 	}
-	_, err = w.storager.UpdateAddrStatusByWIFs(accountType, updateAddrStatus, wifs, nil, true)
+	_, err = w.repo.UpdateAddrStatusByWIFs(accountType, updateAddrStatus, wifs, nil, true)
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call storager.UpdateAddrStatusByWIFs()")
 	}

@@ -56,7 +56,7 @@ func (w *Wallet) ImportPubKey(fileName string, accountType account.AccountType, 
 	}
 
 	//insert imported pubKey
-	err = w.storager.InsertAccountPubKeyTable(accountType, pubKeyData, nil, true)
+	err = w.repo.InsertAccountPubKeyTable(accountType, pubKeyData, nil, true)
 	if err != nil {
 		return errors.Wrap(err, "fail to call storager.InsertAccountPubKeyTable()")
 		//TODO:What if this inserting is failed, how it can be recovered to keep consistancy

@@ -16,9 +16,9 @@ type Wallet struct {
 	btc          api.Bitcoiner
 	logger       *zap.Logger
 	tracer       opentracing.Tracer
-	storager     rdb.WalletStorager
+	repo         rdb.WalletStorager
 	addrFileRepo address.Storager
-	txFileRepo   tx.Storager
+	txFileRepo   tx.FileStorager
 	wtype        types.WalletType
 }
 
@@ -27,16 +27,16 @@ func NewWallet(
 	btc api.Bitcoiner,
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
-	storager rdb.WalletStorager,
+	repo rdb.WalletStorager,
 	addrFileRepo address.Storager,
-	txFileRepo tx.Storager,
+	txFileRepo tx.FileStorager,
 	wtype types.WalletType) *Wallet {
 
 	return &Wallet{
 		btc:          btc,
 		logger:       logger,
 		tracer:       tracer,
-		storager:     storager,
+		repo:         repo,
 		addrFileRepo: addrFileRepo,
 		txFileRepo:   txFileRepo,
 		wtype:        wtype,
@@ -45,13 +45,13 @@ func NewWallet(
 
 // Done should be called before exit
 func (w *Wallet) Done() {
-	w.storager.Close()
+	w.repo.Close()
 	w.btc.Close()
 }
 
 // GetDB gets storager
 func (w *Wallet) GetDB() rdb.WalletStorager {
-	return w.storager
+	return w.repo
 }
 
 // GetBTC gets btc

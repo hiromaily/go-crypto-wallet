@@ -1,6 +1,6 @@
 no-hooks = true
 no-tests = true
-output = "./pkg/models/keygen"
+output = "./pkg/models/rdb/wallet"
 
 [mysql]
 dbname = "keygen"
@@ -11,18 +11,8 @@ pass = "root"
 sslmode = "false"
 whitelist = [
     "seed",
-    "account_key_client",
-    "account_key_receipt",
-    "account_key_payment",
-    "account_key_quoine",
-    "account_key_fee",
-    "account_key_stored",
-    "account_key_authorization",
-    "added_pubkey_history_receipt",
-    "added_pubkey_history_payment",
-    "added_pubkey_history_quoine",
-    "added_pubkey_history_fee",
-    "added_pubkey_history_stored"
+    "account_key",
+    "multisig_pubkey_history",
 ]
 
 #[aliases.tables.tx_receipt.columns]

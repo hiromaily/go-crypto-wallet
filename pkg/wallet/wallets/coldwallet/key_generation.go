@@ -34,7 +34,7 @@ func (w *ColdWallet) GenerateSeed() ([]byte, error) {
 	strSeed := key.SeedToString(bSeed)
 
 	// insert seed in database
-	_, err = w.storager.InsertSeed(strSeed, nil, true)
+	_, err = w.repo.InsertSeed(strSeed, nil, true)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call storager.InsertSeed()")
 	}
@@ -51,7 +51,7 @@ func (w *ColdWallet) StoreSeed(strSeed string) ([]byte, error) {
 	}
 
 	// insert seed in database
-	_, err = w.storager.InsertSeed(strSeed, nil, true)
+	_, err = w.repo.InsertSeed(strSeed, nil, true)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call storager.InsertSeed()")
 	}
@@ -62,7 +62,7 @@ func (w *ColdWallet) StoreSeed(strSeed string) ([]byte, error) {
 // retrieve seed from database
 func (w *ColdWallet) retrieveSeed() ([]byte, error) {
 	// get seed from database, seed is expected only one record
-	seed, err := w.storager.GetSeedOne()
+	seed, err := w.repo.GetSeedOne()
 	if err == nil && seed.Seed != "" {
 		w.logger.Info("seed have already been generated")
 		return key.SeedToByte(seed.Seed)
@@ -81,7 +81,7 @@ func (w *ColdWallet) GeneratePubKey(
 	seed []byte, count uint32) ([]key.WalletKey, error) {
 
 	//get latest index
-	idxFrom, err := w.storager.GetMaxIndexOnAccountKeyTable(accountType)
+	idxFrom, err := w.repo.GetMaxIndexOnAccountKeyTable(accountType)
 	if err != nil {
 		idxFrom = 0
 	} else {
@@ -109,7 +109,7 @@ func (w *ColdWallet) GeneratePubKey(
 		}
 		idxFrom++
 	}
-	err = w.storager.InsertAccountKeyTable(accountType, accountKeyClients, nil, true)
+	err = w.repo.InsertAccountKeyTable(accountType, accountKeyClients, nil, true)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call storager.InsertAccountKeyTable()")
 	}
