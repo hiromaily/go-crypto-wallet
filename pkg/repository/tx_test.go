@@ -13,6 +13,7 @@ import (
 // TestTx is test for any data operation
 func TestTx(t *testing.T) {
 	txRepo := testutil.NewTxRepository()
+	//bc := testutil.GetBTC()
 
 	inputAmt := types.Decimal{Big: new(decimal.Big)}
 	inputAmt.Big, _ = inputAmt.SetString("0.100")

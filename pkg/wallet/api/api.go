@@ -7,6 +7,7 @@ import (
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
+	"github.com/volatiletech/sqlboiler/types"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
@@ -27,6 +28,7 @@ type Bitcoiner interface {
 
 	//amount.go
 	AmountString(amt btcutil.Amount) string
+	AmountToDecimal(amt btcutil.Amount) types.Decimal
 	FloatToAmount(f float64) (btcutil.Amount, error)
 	StrToAmount(s string) (btcutil.Amount, error)
 	StrSatoshiToAmount(s string) (btcutil.Amount, error)

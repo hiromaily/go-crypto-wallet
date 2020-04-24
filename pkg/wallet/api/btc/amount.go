@@ -1,6 +1,8 @@
 package btc
 
 import (
+	"github.com/ericlagergren/decimal"
+	"github.com/volatiletech/sqlboiler/types"
 	"strconv"
 	"strings"
 
@@ -15,6 +17,14 @@ import (
 // AmountString converts amount `1.0 BTC` to `1.0` as string
 func (b *Bitcoin) AmountString(amt btcutil.Amount) string {
 	return strings.TrimRight(amt.String(), " BTC")
+}
+
+// AmountToDecimal converts amount `1.0 BTC` to `1.0` as decimal
+func (b *Bitcoin) AmountToDecimal(amt btcutil.Amount) types.Decimal {
+	strAmt := strings.TrimRight(amt.String(), " BTC")
+	dAmt := types.Decimal{Big: new(decimal.Big)}
+	dAmt.Big, _ = dAmt.SetString(strAmt)
+	return dAmt
 }
 
 // FloatToAmount converts float to amount
