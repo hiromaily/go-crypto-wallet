@@ -98,6 +98,9 @@ func (r *txRepository) GetSentHashTx(txType tx.TxType) ([]string, error) {
 // InsertUnsignedTx
 // - replaced from InsertTxForUnsigned()
 func (r *txRepository) InsertUnsignedTx(txItem *models.TX) error {
+	//set coin
+	txItem.Coin = r.coinTypeCode.String()
+
 	ctx := context.Background()
 	if err := txItem.Insert(ctx, r.dbConn, boil.Infer()); err != nil {
 		return errors.Wrap(err, "failed to call txItem.Insert()")

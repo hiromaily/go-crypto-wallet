@@ -10,6 +10,34 @@ setup-mac:
 goget:
 	go get -u -d -v ./...
 
+# https://github.com/volatiletech/sqlboiler/issues/633
+# https://github.com/volatiletech/sqlboiler/issues/607
+# sqlboiler 3.6.1 cannot convert type: types.Decimal => named tag: v3.3.1 in github.com/ericlagergren/decimal works
+# https://github.com/golang/go/issues/35732
+# https://forum.golangbridge.org/t/solved-error-when-using-go-modules-in-existing-project/15908/9
+.PHONY: install-tool
+install-tool: SQLBOILER_VERSION=3.7
+install-tool:
+	echo SQLBOILER_VERSION is $(SQLBOILER_VERSION)
+	go get github.com/volatiletech/sqlboiler@v$(SQLBOILER_VERSION)
+	go get github.com/volatiletech/sqlboiler/drivers/sqlboiler-mysql@v$(SQLBOILER_VERSION)
+
+.PHONY: update-decimal
+update-decimal:
+	#go get -u github.com/ericlagergren/decimal@v3.3.1 => error
+	#go mod edit -require github.com/ericlagergren/decimal@v3.3.1
+	#GONOSUMDB=github.com/ericlagergren/decimal go install github.com/volatiletech/sqlboiler
+	go get github.com/ericlagergren/decimal@v0.0.0-20181231230500-73749d4874d5
+
+.PHONY: install-tool-temp
+install-tool-temp:
+	#cd ${GOPATH}/src/github.com/ericlagergren/decimal
+	#git checkout tags/v3.3.1 -b v3-3-1
+	cd ${GOPATH}/src/github.com/volatiletech/sqlboiler
+	git pull
+	go get ./...
+	go build -i -v -o ${GOPATH}/bin/sqlboiler .
+
 .PHONY: imports
 imports:
 	./scripts/imports.sh
@@ -50,7 +78,7 @@ generate-go-interface:
 # From inside docker container
 ###############################################################################
 .PHONY: bld-linux
-bld-linux:
+bld-linux: update-decimal
 	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/wallet ./cmd/wallet/main.go
 	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/keygen ./cmd/keygen/main.go
 	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/sign ./cmd/signature/main.go
@@ -59,7 +87,7 @@ bld-linux:
 # Build on local
 ###############################################################################
 .PHONY: bld
-bld:
+bld: update-decimal
 	go build -i -v -o ${GOPATH}/bin/wallet ./cmd/wallet/
 	go build -i -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
 	go build -i -v -o ${GOPATH}/bin/sign ./cmd/signature/
