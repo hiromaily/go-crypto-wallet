@@ -21,7 +21,7 @@ func (w *ColdWallet) ImportPrivateKey(accountType account.AccountType) error {
 	//1. retrieve records(private key) from account_key table
 	accountKeyTable, err := w.repo.GetAllAccountKeyByAddrStatus(accountType, address.AddrStatusHDKeyGenerated) //addr_status=0
 	if err != nil {
-		return errors.Wrap(err, "fail to call storager.GetAllAccountKeyByAddrStatus()")
+		return errors.Wrap(err, "fail to call repo.GetAllAccountKeyByAddrStatus()")
 	}
 	if len(accountKeyTable) == 0 {
 		w.logger.Info("no unimported private key")

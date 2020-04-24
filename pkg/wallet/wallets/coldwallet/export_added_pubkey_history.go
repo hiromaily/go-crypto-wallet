@@ -48,7 +48,7 @@ func (w *ColdWallet) ExportAddedPubkeyHistory(accountType account.AccountType) (
 	}
 	_, err = w.repo.UpdateIsExportedOnAddedPubkeyHistoryTable(accountType, ids, nil, true)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call storager.UpdateIsExportedOnAddedPubkeyHistoryTable()")
+		return "", errors.Wrap(err, "fail to call repo.UpdateIsExportedOnAddedPubkeyHistoryTable()")
 	}
 
 	return fileName, nil

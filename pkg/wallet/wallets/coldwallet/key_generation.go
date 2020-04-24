@@ -36,7 +36,7 @@ func (w *ColdWallet) GenerateSeed() ([]byte, error) {
 	// insert seed in database
 	_, err = w.repo.InsertSeed(strSeed, nil, true)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call storager.InsertSeed()")
+		return nil, errors.Wrap(err, "fail to call repo.InsertSeed()")
 	}
 
 	return bSeed, nil
@@ -53,7 +53,7 @@ func (w *ColdWallet) StoreSeed(strSeed string) ([]byte, error) {
 	// insert seed in database
 	_, err = w.repo.InsertSeed(strSeed, nil, true)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call storager.InsertSeed()")
+		return nil, errors.Wrap(err, "fail to call repo.InsertSeed()")
 	}
 
 	return bSeed, nil
@@ -68,7 +68,7 @@ func (w *ColdWallet) retrieveSeed() ([]byte, error) {
 		return key.SeedToByte(seed.Seed)
 	}
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call storager.GetSeedOne()")
+		return nil, errors.Wrap(err, "fail to call repo.GetSeedOne()")
 	}
 	// in this case, though err didn't happen, but seed is blank
 	return nil, errors.New("somehow seed retrieved from database is blank ")
@@ -111,7 +111,7 @@ func (w *ColdWallet) GeneratePubKey(
 	}
 	err = w.repo.InsertAccountKeyTable(accountType, accountKeyClients, nil, true)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call storager.InsertAccountKeyTable()")
+		return nil, errors.Wrap(err, "fail to call repo.InsertAccountKeyTable()")
 	}
 
 	return walletKeys, err

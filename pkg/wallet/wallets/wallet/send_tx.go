@@ -70,7 +70,7 @@ func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID strin
 	affectedNum, err = w.repo.UpdateTxAfterSent(actionType, &txReceipt, nil, true)
 
 	if err != nil {
-		return errors.Wrap(err, "fail to call storager.UpdateTxAfterSent()")
+		return errors.Wrap(err, "fail to call repo.UpdateTxAfterSent()")
 	}
 	if affectedNum == 0 {
 		return errors.New("tx_table was not updated by storager.UpdateTxAfterSent()")
@@ -87,7 +87,7 @@ func (w *Wallet) updateIsAllocatedForAccountPubkey(txReceiptID int64, actionType
 	// get txOutputs from .tx_receipt_output by receipt_id
 	txOutputs, err := w.repo.GetTxOutputByReceiptID(actionType, txReceiptID)
 	if err != nil {
-		return errors.Wrap(err, "fail to call storager.GetTxOutputByReceiptID()")
+		return errors.Wrap(err, "fail to call repo.GetTxOutputByReceiptID()")
 	}
 	if len(txOutputs) == 0 {
 		return errors.New("output tx could not be found in tx_receipt_output")
@@ -103,7 +103,7 @@ func (w *Wallet) updateIsAllocatedForAccountPubkey(txReceiptID int64, actionType
 
 	err = w.repo.UpdateIsAllocatedOnAccountPubKeyTable(account.AccountTypeReceipt, accountPublicKeyTable, nil, true)
 	if err != nil {
-		return errors.Wrap(err, "fail to call storager.UpdateIsAllocatedOnAccountPubKeyTable()")
+		return errors.Wrap(err, "fail to call repo.UpdateIsAllocatedOnAccountPubKeyTable()")
 	}
 
 	return nil

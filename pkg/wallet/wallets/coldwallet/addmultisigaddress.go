@@ -31,12 +31,12 @@ func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, address
 	// get one wallet_address for Authorization account from account_key_authorization table
 	authKeyTable, err := w.repo.GetOneByMaxIDOnAccountKeyTable(account.AccountTypeAuthorization)
 	if err != nil {
-		return errors.Wrap(err, "fail to call storager.GetOneByMaxIDOnAccountKeyTable(AccountTypeAuthorization)")
+		return errors.Wrap(err, "fail to call repo.GetOneByMaxIDOnAccountKeyTable(AccountTypeAuthorization)")
 	}
 	// get full-pub-key for given account from added_pubkey_history_table
 	addedPubkeyHistoryTable, err := w.repo.GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType)
 	if err != nil {
-		return errors.Wrapf(err, "fail to call storager.GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(%s)", accountType.String())
+		return errors.Wrapf(err, "fail to call repo.GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(%s)", accountType.String())
 	}
 
 	// call bitcoinAPI `addmultisigaddress`

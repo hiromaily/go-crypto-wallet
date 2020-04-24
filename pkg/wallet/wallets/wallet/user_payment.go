@@ -21,7 +21,7 @@ func (w *Wallet) createUserPayment() ([]UserPayment, []int64, error) {
 	// get payment_request
 	paymentRequests, err := w.repo.GetPaymentRequestAll()
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call storager.GetPaymentRequestAll()")
+		return nil, nil, errors.Wrap(err, "fail to call repo.GetPaymentRequestAll()")
 	}
 	if len(paymentRequests) == 0 {
 		w.logger.Debug("no data in payment_request")

@@ -52,7 +52,7 @@ func (w *ColdWallet) ImportPubKey(fileName string, accountType account.AccountTy
 	//TODO:Upsert would be better to prevent error which occur when data is already inserted
 	err = w.repo.InsertAddedPubkeyHistoryTable(accountType, addedPubkeyHistorys, nil, true)
 	if err != nil {
-		return errors.Wrap(err, "fail to call storager.InsertAddedPubkeyHistoryTable()")
+		return errors.Wrap(err, "fail to call repo.InsertAddedPubkeyHistoryTable()")
 	}
 
 	return nil

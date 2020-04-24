@@ -121,7 +121,7 @@ func (w *ColdWallet) sign(hex, encodedPrevsAddrs string) (string, bool, string, 
 		// TODO: client account doesn't have multisig address, so this code could be skipped
 		accountKey, err := w.repo.GetOneByMaxIDOnAccountKeyTable(account.AccountTypeAuthorization)
 		if err != nil {
-			return "", false, "", errors.Wrap(err, "fail to call storager.GetOneByMaxIDOnAccountKeyTable()")
+			return "", false, "", errors.Wrap(err, "fail to call repo.GetOneByMaxIDOnAccountKeyTable()")
 		}
 		accountKeys = append(accountKeys, *accountKey)
 	default:

@@ -246,7 +246,7 @@ func (w *Wallet) createTxOutputs(
 	// - receipt/transfer
 	pubkeyTable, err := w.repo.GetOneUnAllocatedAccountPubKeyTable(reciver)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call storager.GetOneUnAllocatedAccountPubKeyTable()")
+		return nil, errors.Wrap(err, "fail to call repo.GetOneUnAllocatedAccountPubKeyTable()")
 	}
 	receiverAddr := pubkeyTable.WalletAddress
 
@@ -490,7 +490,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 	// 1. skip if same hex is already stored
 	count, err := w.repo.GetTxCountByUnsignedHex(actionType, hex)
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call storager.GetTxCountByUnsignedHex()")
+		return 0, errors.Wrap(err, "fail to call repo.GetTxCountByUnsignedHex()")
 	}
 	if count != 0 {
 		//skip
@@ -509,7 +509,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 	tx := w.repo.MustBegin()
 	txReceiptID, err := w.repo.InsertTxForUnsigned(actionType, &txReceipt, tx, false)
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call storager.InsertTxForUnsigned()")
+		return 0, errors.Wrap(err, "fail to call repo.InsertTxForUnsigned()")
 	}
 
 	// 3.TxReceiptInput table
@@ -519,7 +519,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 	}
 	err = w.repo.InsertTxInputForUnsigned(actionType, txInputs, tx, false)
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call storager.InsertTxInputForUnsigned()")
+		return 0, errors.Wrap(err, "fail to call repo.InsertTxInputForUnsigned()")
 	}
 
 	// 4.TxReceiptOutput table

@@ -39,7 +39,7 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, addrStatu
 	// get account key
 	accountKeyTable, err := w.repo.GetAllAccountKeyByAddrStatus(accountType, addrStatus)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call storager.GetAllAccountKeyByAddrStatus()")
+		return "", errors.Wrap(err, "fail to call repo.GetAllAccountKeyByAddrStatus()")
 	}
 	if len(accountKeyTable) == 0 {
 		w.logger.Info("no records in account_key table")
@@ -60,7 +60,7 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, addrStatu
 	}
 	_, err = w.repo.UpdateAddrStatusByWIFs(accountType, updateAddrStatus, wifs, nil, true)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call storager.UpdateAddrStatusByWIFs()")
+		return "", errors.Wrap(err, "fail to call repo.UpdateAddrStatusByWIFs()")
 	}
 
 	w.logger.Debug(
