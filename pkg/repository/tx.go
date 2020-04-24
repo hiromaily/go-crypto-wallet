@@ -3,9 +3,9 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/pkg/errors"
-	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
 	"github.com/volatiletech/sqlboiler/queries/qm"
@@ -16,18 +16,21 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
+type TxRepository interface {
+	GetOne(id uint64) (*models.TX, error)
+	GetCount(hex string) (int64, error)
+	GetTxIDBySentHash(hash string) (uint64, error)
+	GetSentHashTx(txType tx.TxType) ([]string, error)
+	InsertUnsignedTx(txItem *models.TX) (uint64, error)
+	Update(txItem *models.TX) (int64, error)
+	DeleteAll() (int64, error)
+}
+
 type txRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
 	logger       *zap.Logger
-}
-
-type TxItem struct {
-	ID         uint        `boil:"id"`
-	MasterID   uint        `boil:"genre_master_id"`
-	Code       string      `boil:"genre_code"`
-	ParentCode null.String `boil:"parent_code"`
 }
 
 func NewTxRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) TxRepository {
@@ -42,15 +45,17 @@ func NewTxRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap
 // GetOne get one record by ID
 // - replaced from GetTxByID
 func (r *txRepository) GetOne(id uint64) (*models.TX, error) {
-	sql := `SELECT * FROM $1 WHERE id=$2`
+	//sql := fmt.Sprintf(`SELECT * FROM %s WHERE id=%d`, r.tableName, id)
 	ctx := context.Background()
 
-	var txItem models.TX
-	err := queries.Raw(sql, r.tableName, id).Bind(ctx, r.dbConn, &txItem)
+	//var txItem models.TX
+	//err := queries.Raw(sql).Bind(ctx, r.dbConn, &txItem)
+	txItem, err := models.FindTX(ctx, r.dbConn, id)
 	if err != nil {
-		return nil, errors.Wrapf(err, "failed to call queries.Raw() sql:%s", sql)
+		return nil, errors.Wrap(err, "failed to call models.FindTX()")
+		//return nil, errors.Wrapf(err, "failed to call queries.Raw() sql:%s", sql)
 	}
-	return &txItem, nil
+	return txItem, nil
 }
 
 // GetCount get count by hex string
@@ -69,12 +74,25 @@ func (r *txRepository) GetCount(hex string) (int64, error) {
 
 // GetOne get one record by ID
 // - replaced from GetTxIDBySentHash
-func (r *txRepository) GetTxID(hash string) (uint64, error) {
-	sql := `SELECT id FROM $1 WHERE sent_hash_tx=$2`
+func (r *txRepository) GetTxIDBySentHash(hash string) (uint64, error) {
+	sql := fmt.Sprintf(`SELECT id FROM %s WHERE sent_hash_tx="%s"`, r.tableName, hash)
 	ctx := context.Background()
 
 	var txItem models.TX
-	err := queries.Raw(sql, r.tableName, hash).Bind(ctx, r.dbConn, &txItem)
+	err := queries.Raw(sql).Bind(ctx, r.dbConn, &txItem)
+	if err != nil {
+		return 0, errors.Wrapf(err, "failed to call queries.Raw() sql:%s", sql)
+	}
+	return txItem.ID, nil
+}
+
+//OK
+func (r *txRepository) getTxIDByUnsignedHexTx(hex string) (uint64, error) {
+	sql := fmt.Sprintf(`SELECT id FROM %s WHERE unsigned_hex_tx="%s"`, r.tableName, hex)
+	ctx := context.Background()
+
+	var txItem models.TX
+	err := queries.Raw(sql).Bind(ctx, r.dbConn, &txItem)
 	if err != nil {
 		return 0, errors.Wrapf(err, "failed to call queries.Raw() sql:%s", sql)
 	}
@@ -84,11 +102,11 @@ func (r *txRepository) GetTxID(hash string) (uint64, error) {
 // GetSentHashTx
 // - replaced from GetSentTxHashByTxTypeSent, GetSentTxHashByTxTypeDone
 func (r *txRepository) GetSentHashTx(txType tx.TxType) ([]string, error) {
-	sql := `SELECT sent_hash_tx FROM $1 WHERE current_tx_type=$2`
+	sql := fmt.Sprintf(`SELECT sent_hash_tx FROM %s WHERE current_tx_type="%s"`, r.tableName, txType.String())
 	ctx := context.Background()
 
 	var txItems []string
-	err := queries.Raw(sql, r.tableName, txType.String()).Bind(ctx, r.dbConn, &txItems)
+	err := queries.Raw(sql).Bind(ctx, r.dbConn, &txItems)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to call queries.Raw() sql:%s", sql)
 	}
@@ -97,21 +115,34 @@ func (r *txRepository) GetSentHashTx(txType tx.TxType) ([]string, error) {
 
 // InsertUnsignedTx
 // - replaced from InsertTxForUnsigned()
-func (r *txRepository) InsertUnsignedTx(txItem *models.TX) error {
+func (r *txRepository) InsertUnsignedTx(txItem *models.TX) (uint64, error) {
 	//set coin
 	txItem.Coin = r.coinTypeCode.String()
 
 	ctx := context.Background()
 	if err := txItem.Insert(ctx, r.dbConn, boil.Infer()); err != nil {
-		return errors.Wrap(err, "failed to call txItem.Insert()")
+		return 0, errors.Wrap(err, "failed to call txItem.Insert()")
 	}
-	//TODO: how to get LastInsertId()??
-	return nil
+	//TODO: how to get LastInsertId() without implementation
+	// search by txItem.UnsignedHexTX
+	id, err := r.getTxIDByUnsignedHexTx(txItem.UnsignedHexTX)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }
 
 // UpdateTx
 // - replaced from UpdateTxAfterSent
-func (r *txRepository) UpdateTx(txItem *models.TX) (int64, error) {
+func (r *txRepository) Update(txItem *models.TX) (int64, error) {
 	ctx := context.Background()
 	return txItem.Update(ctx, r.dbConn, boil.Infer())
+}
+
+// Delete
+func (r *txRepository) DeleteAll() (int64, error) {
+	ctx := context.Background()
+	txItems, _ := models.Txes().All(ctx, r.dbConn)
+	return txItems.DeleteAll(ctx, r.dbConn)
 }

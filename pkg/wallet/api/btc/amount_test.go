@@ -8,6 +8,48 @@ import (
 	. "github.com/hiromaily/go-bitcoin/pkg/wallet/api/btc"
 )
 
+// TestAmountString is test for FloatToAmount
+func TestAmountString(t *testing.T) {
+	var btc = Bitcoin{}
+
+	var tests = []struct {
+		amt  btcutil.Amount
+		want string
+	}{
+		{54000000, "0.54"},
+		{480000, "0.0048"},
+		{195200000, "1.952"},
+		{1000, "0.00001"},
+	}
+	for _, val := range tests {
+		res := btc.AmountString(val.amt)
+		if res != val.want {
+			t.Errorf("AmountString() = %s, want %s", res, val.want)
+		}
+	}
+}
+
+// TestAmountToDecimal is test for AmountToDecimal
+func TestAmountToDecimal(t *testing.T) {
+	var btc = Bitcoin{}
+
+	var tests = []struct {
+		amt  btcutil.Amount
+		want string
+	}{
+		{54000000, "0.54"},
+		{480000, "0.0048"},
+		{195200000, "1.952"},
+		{1000, "0.00001"},
+	}
+	for _, val := range tests {
+		res := btc.AmountToDecimal(val.amt)
+		if res.String() != val.want {
+			t.Errorf("AmountString() = %v, want %s", res, val.want)
+		}
+	}
+}
+
 // TestFloatToAmount is test for FloatToAmount
 func TestFloatToAmount(t *testing.T) {
 	var btc = Bitcoin{}
@@ -27,7 +69,7 @@ func TestFloatToAmount(t *testing.T) {
 			t.Fatal(err)
 		}
 		if amt != val.want {
-			t.Errorf("result is %d however %d is expected.", amt, val.want)
+			t.Errorf("FloatToAmount() = %d, want %d", amt, val.want)
 		}
 		//amt.ToBTC() //float64
 
@@ -58,7 +100,7 @@ func TestStrToAmount(t *testing.T) {
 			t.Fatal(err)
 		}
 		if amt != val.want {
-			t.Errorf("result is %d however %d is expected.", amt, val.want)
+			t.Errorf("StrToAmount() = %d, want %d", amt, val.want)
 		}
 
 		t.Logf("satoshi: %d, %v", amt, amt)
@@ -86,7 +128,7 @@ func TestStrSatoshiToAmount(t *testing.T) {
 			t.Fatal(err)
 		}
 		if amt.ToBTC() != val.want {
-			t.Errorf("result is %d however %f is expected.", amt, val.want)
+			t.Errorf("StrToAmount() = %d, want %f", amt, val.want)
 		}
 
 		t.Logf("satoshi: %d, %v", amt, amt)
@@ -110,7 +152,7 @@ func TestCalculation(t *testing.T) {
 		amt2, _ := btcutil.NewAmount(v.val2)
 		res := (amt1 + amt2).ToBTC()
 		if res != v.want {
-			t.Errorf("result is %f however %f is expected.", res, v.want)
+			t.Errorf("StrToAmount() = %f, want %f", res, v.want)
 		}
 		t.Logf("%f + %f = %f", v.val1, v.val2, res)
 	}

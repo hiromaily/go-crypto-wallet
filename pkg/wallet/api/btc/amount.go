@@ -1,13 +1,13 @@
 package btc
 
 import (
-	"github.com/ericlagergren/decimal"
-	"github.com/volatiletech/sqlboiler/types"
 	"strconv"
 	"strings"
 
 	"github.com/btcsuite/btcutil"
+	"github.com/ericlagergren/decimal"
 	"github.com/pkg/errors"
+	"github.com/volatiletech/sqlboiler/types"
 )
 
 //0.00000001 BTC=1 Satoshi
