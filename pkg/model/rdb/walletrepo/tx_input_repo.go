@@ -1,10 +1,7 @@
 package walletrepo
 
 import (
-	"fmt"
 	"time"
-
-	"github.com/jmoiron/sqlx"
 
 	"github.com/hiromaily/go-bitcoin/pkg/action"
 )
@@ -47,36 +44,36 @@ type TxInput struct {
 
 // insertTxInputForUnsigned 未署名トランザクションのinputに使われたtxレコードを作成する
 //TODO:BulkInsertがやりたい
-func (r *WalletRepository) insertTxInputForUnsigned(tbl string, txReceiptInputs []TxInput, tx *sqlx.Tx, isCommit bool) error {
-
-	sql := `
-INSERT INTO %s (receipt_id, input_txid, input_vout, input_address, input_account, input_amount, input_confirmations) 
-VALUES (:receipt_id, :input_txid, :input_vout, :input_address, :input_account, :input_amount, :input_confirmations)
-`
-	sql = fmt.Sprintf(sql, tbl)
-	//logger.Debugf("sql: %s", sql)
-
-	if tx == nil {
-		tx = r.db.MustBegin()
-	}
-
-	for _, txReceiptInput := range txReceiptInputs {
-		_, err := tx.NamedExec(sql, txReceiptInput)
-		if err != nil {
-			tx.Rollback()
-			return err
-		}
-	}
-
-	if isCommit {
-		tx.Commit()
-	}
-
-	return nil
-}
+//func (r *WalletRepository) insertTxInputForUnsigned(tbl string, txReceiptInputs []TxInput, tx *sqlx.Tx, isCommit bool) error {
+//
+//	sql := `
+//INSERT INTO %s (receipt_id, input_txid, input_vout, input_address, input_account, input_amount, input_confirmations)
+//VALUES (:receipt_id, :input_txid, :input_vout, :input_address, :input_account, :input_amount, :input_confirmations)
+//`
+//	sql = fmt.Sprintf(sql, tbl)
+//	//logger.Debugf("sql: %s", sql)
+//
+//	if tx == nil {
+//		tx = r.db.MustBegin()
+//	}
+//
+//	for _, txReceiptInput := range txReceiptInputs {
+//		_, err := tx.NamedExec(sql, txReceiptInput)
+//		if err != nil {
+//			tx.Rollback()
+//			return err
+//		}
+//	}
+//
+//	if isCommit {
+//		tx.Commit()
+//	}
+//
+//	return nil
+//}
 
 // InsertTxInputForUnsigned 未署名トランザクションのinputに使われたtxレコードを作成する
 //TODO:BulkInsertがやりたい
-func (r *WalletRepository) InsertTxInputForUnsigned(actionType action.ActionType, txReceiptInputs []TxInput, tx *sqlx.Tx, isCommit bool) error {
-	return r.insertTxInputForUnsigned(txInputTableName[actionType], txReceiptInputs, tx, isCommit)
-}
+//func (r *WalletRepository) InsertTxInputForUnsigned(actionType action.ActionType, txReceiptInputs []TxInput, tx *sqlx.Tx, isCommit bool) error {
+//	return r.insertTxInputForUnsigned(txInputTableName[actionType], txReceiptInputs, tx, isCommit)
+//}

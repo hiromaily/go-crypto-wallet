@@ -4,7 +4,6 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/action"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
@@ -30,10 +29,10 @@ type WalletStorager interface {
 	ResetAnyFlagOnPaymentRequestForTestOnly(tx *sqlx.Tx, isCommit bool) (int64, error)
 	//tx_input_repo
 	//GetTxInputByReceiptID(actionType action.ActionType, receiptID int64) ([]walletrepo.TxInput, error)
-	InsertTxInputForUnsigned(actionType action.ActionType, txReceiptInputs []walletrepo.TxInput, tx *sqlx.Tx, isCommit bool) error
+	//InsertTxInputForUnsigned(actionType action.ActionType, txReceiptInputs []walletrepo.TxInput, tx *sqlx.Tx, isCommit bool) error
 	//tx_output_repo
-	GetTxOutputByReceiptID(actionType action.ActionType, receiptID int64) ([]walletrepo.TxOutput, error)
-	InsertTxOutputForUnsigned(actionType action.ActionType, txReceiptOutputs []walletrepo.TxOutput, tx *sqlx.Tx, isCommit bool) error
+	//GetTxOutputByReceiptID(actionType action.ActionType, receiptID int64) ([]walletrepo.TxOutput, error)
+	//InsertTxOutputForUnsigned(actionType action.ActionType, txReceiptOutputs []walletrepo.TxOutput, tx *sqlx.Tx, isCommit bool) error
 	//tx_repo
 	//GetTxByID(actionType action.ActionType, id int64) (*walletrepo.TxTable, error)
 	//GetTxCountByUnsignedHex(actionType action.ActionType, hex string) (int64, error)

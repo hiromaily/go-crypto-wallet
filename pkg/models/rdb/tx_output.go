@@ -30,7 +30,7 @@ type TXOutput struct {
 	OutputAddress string        `boil:"output_address" json:"output_address" toml:"output_address" yaml:"output_address"`
 	OutputAccount string        `boil:"output_account" json:"output_account" toml:"output_account" yaml:"output_account"`
 	OutputAmount  types.Decimal `boil:"output_amount" json:"output_amount" toml:"output_amount" yaml:"output_amount"`
-	IsChange      null.Int8     `boil:"is_change" json:"is_change,omitempty" toml:"is_change" yaml:"is_change,omitempty"`
+	IsChange      bool          `boil:"is_change" json:"is_change" toml:"is_change" yaml:"is_change"`
 	UpdatedAt     null.Time     `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
 	R *txOutputR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -63,7 +63,7 @@ var TXOutputWhere = struct {
 	OutputAddress whereHelperstring
 	OutputAccount whereHelperstring
 	OutputAmount  whereHelpertypes_Decimal
-	IsChange      whereHelpernull_Int8
+	IsChange      whereHelperbool
 	UpdatedAt     whereHelpernull_Time
 }{
 	ID:            whereHelperint64{field: "`tx_output`.`id`"},
@@ -71,7 +71,7 @@ var TXOutputWhere = struct {
 	OutputAddress: whereHelperstring{field: "`tx_output`.`output_address`"},
 	OutputAccount: whereHelperstring{field: "`tx_output`.`output_account`"},
 	OutputAmount:  whereHelpertypes_Decimal{field: "`tx_output`.`output_amount`"},
-	IsChange:      whereHelpernull_Int8{field: "`tx_output`.`is_change`"},
+	IsChange:      whereHelperbool{field: "`tx_output`.`is_change`"},
 	UpdatedAt:     whereHelpernull_Time{field: "`tx_output`.`updated_at`"},
 }
 

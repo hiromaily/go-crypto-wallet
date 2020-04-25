@@ -34,7 +34,7 @@ CREATE TABLE `tx` (
   `total_input_amount`  DECIMAL(26,10) NOT NULL COMMENT'total amount of coin to send',
   `total_output_amount` DECIMAL(26,10) NOT NULL COMMENT'total amount of coin to receive without fee',
   `fee`                 DECIMAL(26,10) NOT NULL COMMENT'fee',
-  `current_tx_type`     tinyint(1) NOT NULL DEFAULT 1 COMMENT'current transaction type',
+  `current_tx_type`     tinyint(2) NOT NULL DEFAULT 1 COMMENT'current transaction type',
   `unsigned_updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date for unsigned transaction created',
   `sent_updated_at`     datetime DEFAULT NULL COMMENT'updated date for signed transaction sent',
   PRIMARY KEY (`id`),
@@ -84,7 +84,7 @@ CREATE TABLE `tx_output` (
   `output_address` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'receiver address for output',
   `output_account` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'receiver account for output',
   `output_amount`  DECIMAL(26,10) NOT NULL COMMENT'amount of coin to receive',
-  `is_change`      BOOL DEFAULT false COMMENT'true: output is for fee',
+  `is_change`      BOOL NOT NULL DEFAULT false COMMENT'true: output is for fee',
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',
   PRIMARY KEY (`id`),
   INDEX idx_tx_id (`tx_id`)

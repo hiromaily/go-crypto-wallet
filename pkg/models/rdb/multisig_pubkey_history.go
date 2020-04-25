@@ -32,7 +32,7 @@ type MultisigPubkeyHistory struct {
 	AuthAddress2          string      `boil:"auth_address2" json:"auth_address2" toml:"auth_address2" yaml:"auth_address2"`
 	WalletMultisigAddress string      `boil:"wallet_multisig_address" json:"wallet_multisig_address" toml:"wallet_multisig_address" yaml:"wallet_multisig_address"`
 	RedeemScript          string      `boil:"redeem_script" json:"redeem_script" toml:"redeem_script" yaml:"redeem_script"`
-	IsExported            null.Int8   `boil:"is_exported" json:"is_exported,omitempty" toml:"is_exported" yaml:"is_exported,omitempty"`
+	IsExported            null.Bool   `boil:"is_exported" json:"is_exported,omitempty" toml:"is_exported" yaml:"is_exported,omitempty"`
 	UpdatedAt             null.Time   `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
 	R *multisigPubkeyHistoryR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -65,26 +65,26 @@ var MultisigPubkeyHistoryColumns = struct {
 
 // Generated where
 
-type whereHelpernull_Int8 struct{ field string }
+type whereHelpernull_Bool struct{ field string }
 
-func (w whereHelpernull_Int8) EQ(x null.Int8) qm.QueryMod {
+func (w whereHelpernull_Bool) EQ(x null.Bool) qm.QueryMod {
 	return qmhelper.WhereNullEQ(w.field, false, x)
 }
-func (w whereHelpernull_Int8) NEQ(x null.Int8) qm.QueryMod {
+func (w whereHelpernull_Bool) NEQ(x null.Bool) qm.QueryMod {
 	return qmhelper.WhereNullEQ(w.field, true, x)
 }
-func (w whereHelpernull_Int8) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Int8) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_Int8) LT(x null.Int8) qm.QueryMod {
+func (w whereHelpernull_Bool) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Bool) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_Bool) LT(x null.Bool) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LT, x)
 }
-func (w whereHelpernull_Int8) LTE(x null.Int8) qm.QueryMod {
+func (w whereHelpernull_Bool) LTE(x null.Bool) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LTE, x)
 }
-func (w whereHelpernull_Int8) GT(x null.Int8) qm.QueryMod {
+func (w whereHelpernull_Bool) GT(x null.Bool) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GT, x)
 }
-func (w whereHelpernull_Int8) GTE(x null.Int8) qm.QueryMod {
+func (w whereHelpernull_Bool) GTE(x null.Bool) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
@@ -97,7 +97,7 @@ var MultisigPubkeyHistoryWhere = struct {
 	AuthAddress2          whereHelperstring
 	WalletMultisigAddress whereHelperstring
 	RedeemScript          whereHelperstring
-	IsExported            whereHelpernull_Int8
+	IsExported            whereHelpernull_Bool
 	UpdatedAt             whereHelpernull_Time
 }{
 	ID:                    whereHelperuint64{field: "`multisig_pubkey_history`.`id`"},
@@ -108,7 +108,7 @@ var MultisigPubkeyHistoryWhere = struct {
 	AuthAddress2:          whereHelperstring{field: "`multisig_pubkey_history`.`auth_address2`"},
 	WalletMultisigAddress: whereHelperstring{field: "`multisig_pubkey_history`.`wallet_multisig_address`"},
 	RedeemScript:          whereHelperstring{field: "`multisig_pubkey_history`.`redeem_script`"},
-	IsExported:            whereHelpernull_Int8{field: "`multisig_pubkey_history`.`is_exported`"},
+	IsExported:            whereHelpernull_Bool{field: "`multisig_pubkey_history`.`is_exported`"},
 	UpdatedAt:             whereHelpernull_Time{field: "`multisig_pubkey_history`.`updated_at`"},
 }
 

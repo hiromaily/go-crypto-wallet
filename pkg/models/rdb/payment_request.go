@@ -32,7 +32,7 @@ type PaymentRequest struct {
 	SenderAccount   string        `boil:"sender_account" json:"sender_account" toml:"sender_account" yaml:"sender_account"`
 	ReceiverAddress string        `boil:"receiver_address" json:"receiver_address" toml:"receiver_address" yaml:"receiver_address"`
 	Amount          types.Decimal `boil:"amount" json:"amount" toml:"amount" yaml:"amount"`
-	IsDone          null.Int8     `boil:"is_done" json:"is_done,omitempty" toml:"is_done" yaml:"is_done,omitempty"`
+	IsDone          null.Bool     `boil:"is_done" json:"is_done,omitempty" toml:"is_done" yaml:"is_done,omitempty"`
 	UpdatedAt       null.Time     `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
 	R *paymentRequestR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -131,7 +131,7 @@ var PaymentRequestWhere = struct {
 	SenderAccount   whereHelperstring
 	ReceiverAddress whereHelperstring
 	Amount          whereHelpertypes_Decimal
-	IsDone          whereHelpernull_Int8
+	IsDone          whereHelpernull_Bool
 	UpdatedAt       whereHelpernull_Time
 }{
 	ID:              whereHelperint64{field: "`payment_request`.`id`"},
@@ -141,7 +141,7 @@ var PaymentRequestWhere = struct {
 	SenderAccount:   whereHelperstring{field: "`payment_request`.`sender_account`"},
 	ReceiverAddress: whereHelperstring{field: "`payment_request`.`receiver_address`"},
 	Amount:          whereHelpertypes_Decimal{field: "`payment_request`.`amount`"},
-	IsDone:          whereHelpernull_Int8{field: "`payment_request`.`is_done`"},
+	IsDone:          whereHelpernull_Bool{field: "`payment_request`.`is_done`"},
 	UpdatedAt:       whereHelpernull_Time{field: "`payment_request`.`updated_at`"},
 }
 

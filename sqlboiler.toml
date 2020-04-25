@@ -19,7 +19,7 @@ whitelist = [
     "account_key",
     "multisig_pubkey_history"
 ]
-tinyint_as_int = true
+#tinyint_as_int = true
 
 #[aliases.tables.tx_receipt.columns]
 #current_tx_type = "CurrentTxType"

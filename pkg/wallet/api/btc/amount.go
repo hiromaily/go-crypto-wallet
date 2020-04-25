@@ -1,6 +1,7 @@
 package btc
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -22,6 +23,13 @@ func (b *Bitcoin) AmountString(amt btcutil.Amount) string {
 // AmountToDecimal converts amount `1.0 BTC` to `1.0` as decimal
 func (b *Bitcoin) AmountToDecimal(amt btcutil.Amount) types.Decimal {
 	strAmt := strings.TrimRight(amt.String(), " BTC")
+	dAmt := types.Decimal{Big: new(decimal.Big)}
+	dAmt.Big, _ = dAmt.SetString(strAmt)
+	return dAmt
+}
+
+func (b *Bitcoin) FloatToDecimal(f float64) types.Decimal {
+	strAmt := fmt.Sprintf("%f", f)
 	dAmt := types.Decimal{Big: new(decimal.Big)}
 	dAmt.Big, _ = dAmt.SetString(strAmt)
 	return dAmt

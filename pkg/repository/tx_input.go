@@ -49,7 +49,7 @@ func (r *txInputRepository) GetOne(id int64) (*models.TXInput, error) {
 }
 
 // GetAllByTxID
-// - replaced from GetTxByID
+// - replaced from GetTxInputByReceiptID
 func (r *txInputRepository) GetAllByTxID(id int64) ([]*models.TXInput, error) {
 	ctx := context.Background()
 	txItems, err := models.TXInputs(
@@ -63,13 +63,14 @@ func (r *txInputRepository) GetAllByTxID(id int64) ([]*models.TXInput, error) {
 	return txItems, nil
 }
 
-// Insert inserts records
-// - replaced from InsertTxInputForUnsigned()
+// Insert inserts one record
 func (r *txInputRepository) Insert(txItem *models.TXInput) error {
 	ctx := context.Background()
 	return txItem.Insert(ctx, r.dbConn, boil.Infer())
 }
 
+// Insert inserts multiple records
+// - replaced from InsertTxInputForUnsigned()
 func (r *txInputRepository) InsertBulk(txItems []*models.TXInput) error {
 	ctx := context.Background()
 	return models.TXInputSlice(txItems).InsertAll(ctx, r.dbConn, boil.Infer())

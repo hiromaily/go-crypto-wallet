@@ -84,9 +84,9 @@ func (w *Wallet) updateIsAllocatedForAccountPubkey(txReceiptID int64, actionType
 	}
 
 	// get txOutputs from .tx_receipt_output by receipt_id
-	txOutputs, err := w.repo.GetTxOutputByReceiptID(actionType, txReceiptID)
+	txOutputs, err := w.txOutRepo.GetAllByTxID(txReceiptID)
 	if err != nil {
-		return errors.Wrap(err, "fail to call repo.GetTxOutputByReceiptID()")
+		return errors.Wrap(err, "fail to call txOutRepo.GetAllByTxID()")
 	}
 	if len(txOutputs) == 0 {
 		return errors.New("output tx could not be found in tx_receipt_output")

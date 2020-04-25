@@ -29,6 +29,7 @@ type Bitcoiner interface {
 	//amount.go
 	AmountString(amt btcutil.Amount) string
 	AmountToDecimal(amt btcutil.Amount) types.Decimal
+	FloatToDecimal(f float64) types.Decimal
 	FloatToAmount(f float64) (btcutil.Amount, error)
 	StrToAmount(s string) (btcutil.Amount, error)
 	StrSatoshiToAmount(s string) (btcutil.Amount, error)

@@ -11,7 +11,6 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/action"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
@@ -22,7 +21,7 @@ import (
 
 type parsedTx struct {
 	txInputs       []btcjson.TransactionInput
-	txRepoTxInputs []walletrepo.TxInput
+	txRepoTxInputs []*models.TXInput
 	prevTxs        []btc.PrevTx
 	addresses      []string //input, sender's address
 }
@@ -169,7 +168,7 @@ func (w *Wallet) getUnspentList(accountType account.AccountType) ([]btc.ListUnsp
 func (w *Wallet) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount btcutil.Amount) (*parsedTx, btcutil.Amount, bool) {
 	var inputTotal btcutil.Amount
 	txInputs := make([]btcjson.TransactionInput, 0, len(unspentList))
-	txRepoTxInputs := make([]walletrepo.TxInput, 0, len(unspentList))
+	txRepoTxInputs := make([]*models.TXInput, 0, len(unspentList))
 	prevTxs := make([]btc.PrevTx, 0, len(unspentList))
 	addresses := make([]string, 0, len(unspentList))
 
@@ -196,14 +195,14 @@ func (w *Wallet) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount 
 			Vout: tx.Vout,
 		})
 
-		txRepoTxInputs = append(txRepoTxInputs, walletrepo.TxInput{
-			ReceiptID:          0,
+		txRepoTxInputs = append(txRepoTxInputs, &models.TXInput{
+			TXID:               0,
 			InputTxid:          tx.TxID,
 			InputVout:          tx.Vout,
 			InputAddress:       tx.Address,
 			InputAccount:       tx.Label,
-			InputAmount:        fmt.Sprintf("%f", tx.Amount),
-			InputConfirmations: tx.Confirmations,
+			InputAmount:        w.btc.FloatToDecimal(tx.Amount),
+			InputConfirmations: uint64(tx.Confirmations),
 		})
 
 		//TODO: if sender is client account, RedeemScript is blank
@@ -300,7 +299,7 @@ func (w *Wallet) createRawTx(
 	adjustmentFee float64,
 	txInputs []btcjson.TransactionInput,
 	inputTotal btcutil.Amount,
-	txRepoTxInputs []walletrepo.TxInput,
+	txRepoTxInputs []*models.TXInput,
 	txPrevOutputs map[btcutil.Address]btcutil.Amount,
 	addrsPrevs *btc.AddrsPrevTxs,
 	paymentRequestIds []int64) (string, string, error) {
@@ -340,7 +339,7 @@ func (w *Wallet) createRawTx(
 		w.logger.Debug("txRepoTxOutputs",
 			zap.String("output_account", v.OutputAccount),
 			zap.String("output_address", v.OutputAddress),
-			zap.String("output_amount", v.OutputAmount),
+			zap.String("output_amount", v.OutputAmount.String()),
 		)
 	}
 
@@ -367,7 +366,6 @@ func (w *Wallet) createRawTx(
 		inputTotal,
 		outputTotal,
 		fee,
-		tx.TxTypeValue[tx.TxTypeUnsigned],
 		txRepoTxInputs,
 		txRepoTxOutputs,
 		paymentRequestIds)
@@ -405,7 +403,7 @@ func (w *Wallet) calculateOutputTotal(
 	adjustmentFee float64,
 	inputTotal btcutil.Amount,
 	txPrevOutputs map[btcutil.Address]btcutil.Amount,
-) (btcutil.Amount, btcutil.Amount, map[btcutil.Address]btcutil.Amount, []walletrepo.TxOutput, error) {
+) (btcutil.Amount, btcutil.Amount, map[btcutil.Address]btcutil.Amount, []*models.TXOutput, error) {
 
 	// get fee
 	fee, err := w.btc.GetFee(msgTx, adjustmentFee)
@@ -413,7 +411,7 @@ func (w *Wallet) calculateOutputTotal(
 		return 0, 0, nil, nil, errors.Wrap(err, "fail to call btc.GetFee()")
 	}
 	var outputTotal btcutil.Amount
-	txRepoOutputs := make([]walletrepo.TxOutput, 0, len(txPrevOutputs))
+	txRepoOutputs := make([]*models.TXOutput, 0, len(txPrevOutputs))
 
 	// subtract fee from output transaction for change
 	// FIXME: what if change is short, should re-run form the beginning with shortage-flag
@@ -421,11 +419,11 @@ func (w *Wallet) calculateOutputTotal(
 		if len(txPrevOutputs) == 1 {
 			//no change
 			txPrevOutputs[addr] -= fee
-			txRepoOutputs = append(txRepoOutputs, walletrepo.TxOutput{
-				ReceiptID:     0,
+			txRepoOutputs = append(txRepoOutputs, &models.TXOutput{
+				TXID:          0,
 				OutputAddress: addr.String(),
 				OutputAccount: receiver.String(),
-				OutputAmount:  w.btc.AmountString(amt - fee),
+				OutputAmount:  w.btc.AmountToDecimal(amt - fee),
 				IsChange:      false,
 			})
 			outputTotal += amt
@@ -436,19 +434,19 @@ func (w *Wallet) calculateOutputTotal(
 			w.logger.Debug("detect sender account in calculateOutputTotal")
 			//chang address
 			txPrevOutputs[addr] -= fee
-			txRepoOutputs = append(txRepoOutputs, walletrepo.TxOutput{
-				ReceiptID:     0,
+			txRepoOutputs = append(txRepoOutputs, &models.TXOutput{
+				TXID:          0,
 				OutputAddress: addr.String(),
 				OutputAccount: sender.String(),
-				OutputAmount:  w.btc.AmountString(amt - fee),
+				OutputAmount:  w.btc.AmountToDecimal(amt - fee),
 				IsChange:      true,
 			})
 		} else {
-			txRepoOutputs = append(txRepoOutputs, walletrepo.TxOutput{
-				ReceiptID:     0,
+			txRepoOutputs = append(txRepoOutputs, &models.TXOutput{
+				TXID:          0,
 				OutputAddress: addr.String(),
 				OutputAccount: receiver.String(),
-				OutputAmount:  w.btc.AmountString(amt),
+				OutputAmount:  w.btc.AmountToDecimal(amt),
 				IsChange:      false,
 			})
 		}
@@ -483,9 +481,8 @@ func (w *Wallet) insertTxTableForUnsigned(
 	inputTotal,
 	outputTotal,
 	fee btcutil.Amount,
-	txType uint8,
-	txInputs []walletrepo.TxInput,
-	txOutputs []walletrepo.TxOutput,
+	txInputs []*models.TXInput,
+	txOutputs []*models.TXOutput,
 	paymentRequestIds []int64) (int64, error) {
 
 	// 1. skip if same hex is already stored
@@ -500,13 +497,12 @@ func (w *Wallet) insertTxTableForUnsigned(
 	}
 
 	// 2.TxReceipt table //TODO: remove after replacement is done
-	txReceipt := walletrepo.TxTable{}
-	txReceipt.UnsignedHexTx = hex
-	txReceipt.TotalInputAmount = w.btc.AmountString(inputTotal)
-	txReceipt.TotalOutputAmount = w.btc.AmountString(outputTotal)
-	txReceipt.Fee = w.btc.AmountString(fee)
-	txReceipt.TxType = txType
-
+	//txReceipt := walletrepo.TxTable{}
+	//txReceipt.UnsignedHexTx = hex
+	//txReceipt.TotalInputAmount = w.btc.AmountString(inputTotal)
+	//txReceipt.TotalOutputAmount = w.btc.AmountString(outputTotal)
+	//txReceipt.Fee = w.btc.AmountString(fee)
+	//txReceipt.TxType = txType
 	txItem := &models.TX{
 		Action:            action.ActionTypePayment.String(),
 		UnsignedHexTX:     hex,
@@ -525,24 +521,24 @@ func (w *Wallet) insertTxTableForUnsigned(
 	// 3.TxReceiptInput table
 	// update ReceiptID
 	for idx := range txInputs {
-		txInputs[idx].ReceiptID = txReceiptID
+		txInputs[idx].TXID = txReceiptID
 	}
-	err = w.repo.InsertTxInputForUnsigned(actionType, txInputs, tx, false)
+	err = w.txInRepo.InsertBulk(txInputs)
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call repo.InsertTxInputForUnsigned()")
+		return 0, errors.Wrap(err, "fail to call txInRepo.InsertBulk()")
 	}
 
 	// 4.TxReceiptOutput table
 	// update ReceiptID
 	for idx := range txOutputs {
-		txOutputs[idx].ReceiptID = txReceiptID
+		txOutputs[idx].TXID = txReceiptID
 	}
-	//commit flag
-	isCommit := true
-	if actionType == action.ActionTypePayment {
-		isCommit = false
-	}
-	err = w.repo.InsertTxOutputForUnsigned(actionType, txOutputs, tx, isCommit)
+	//commit flag //TODO: transaction
+	//isCommit := true
+	//if actionType == action.ActionTypePayment {
+	//	isCommit = false
+	//}
+	err = w.txOutRepo.InsertBulk(txOutputs)
 	if err != nil {
 		return 0, errors.Wrap(err, "storager.InsertTxOutputForUnsigned()")
 	}
