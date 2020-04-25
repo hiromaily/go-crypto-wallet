@@ -752,3 +752,54 @@ func SeedExists(ctx context.Context, exec boil.ContextExecutor, iD int8) (bool, 
 
 	return exists, nil
 }
+
+// InsertAll inserts all rows with the specified column values, using an executor.
+func (o SeedSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+	ln := int64(len(o))
+	if ln == 0 {
+		return nil
+	}
+	var sql string
+	vals := []interface{}{}
+	for i, row := range o {
+		if !boil.TimestampsAreSkipped(ctx) {
+			currTime := time.Now().In(boil.GetLocation())
+
+			if queries.MustTime(row.UpdatedAt).IsZero() {
+				queries.SetScanner(&row.UpdatedAt, currTime)
+			}
+		}
+
+		nzDefaults := queries.NonZeroDefaultSet(seedColumnsWithDefault, row)
+		wl, _ := columns.InsertColumnSet(
+			seedAllColumns,
+			seedColumnsWithDefault,
+			seedColumnsWithoutDefault,
+			nzDefaults,
+		)
+		if i == 0 {
+			sql = "INSERT INTO `seed` " + "(`" + strings.Join(wl, "`,`") + "`)" + " VALUES "
+		}
+		sql += strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), len(vals)+1, len(wl))
+		if i != len(o)-1 {
+			sql += ","
+		}
+		valMapping, err := queries.BindMapping(seedType, seedMapping, wl)
+		if err != nil {
+			return err
+		}
+		value := reflect.Indirect(reflect.ValueOf(row))
+		vals = append(vals, queries.ValuesFromMapping(value, valMapping)...)
+	}
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, sql)
+		fmt.Fprintln(boil.DebugWriter, vals...)
+	}
+
+	_, err := exec.ExecContext(ctx, sql, vals...)
+	if err != nil {
+		return errors.Wrap(err, "models: unable to insert into seed")
+	}
+
+	return nil
+}

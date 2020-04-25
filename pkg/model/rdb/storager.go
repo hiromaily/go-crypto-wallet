@@ -29,7 +29,7 @@ type WalletStorager interface {
 	UpdatePaymentIDOnPaymentRequest(paymentID int64, ids []int64, tx *sqlx.Tx, isCommit bool) (int64, error)
 	ResetAnyFlagOnPaymentRequestForTestOnly(tx *sqlx.Tx, isCommit bool) (int64, error)
 	//tx_input_repo
-	GetTxInputByReceiptID(actionType action.ActionType, receiptID int64) ([]walletrepo.TxInput, error)
+	//GetTxInputByReceiptID(actionType action.ActionType, receiptID int64) ([]walletrepo.TxInput, error)
 	InsertTxInputForUnsigned(actionType action.ActionType, txReceiptInputs []walletrepo.TxInput, tx *sqlx.Tx, isCommit bool) error
 	//tx_output_repo
 	GetTxOutputByReceiptID(actionType action.ActionType, receiptID int64) ([]walletrepo.TxOutput, error)

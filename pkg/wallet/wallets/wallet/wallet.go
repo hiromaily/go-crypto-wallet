@@ -19,6 +19,7 @@ type Wallet struct {
 	tracer       opentracing.Tracer
 	repo         rdb.WalletStorager
 	txRepo       repository.TxRepository
+	txInRepo     repository.TxInputRepository
 	addrFileRepo address.Storager
 	txFileRepo   tx.FileStorager
 	wtype        types.WalletType
@@ -31,6 +32,7 @@ func NewWallet(
 	tracer opentracing.Tracer,
 	repo rdb.WalletStorager,
 	txRepo repository.TxRepository,
+	txInRepo repository.TxInputRepository,
 	addrFileRepo address.Storager,
 	txFileRepo tx.FileStorager,
 	wtype types.WalletType) *Wallet {
@@ -41,6 +43,7 @@ func NewWallet(
 		tracer:       tracer,
 		repo:         repo,
 		txRepo:       txRepo,
+		txInRepo:     txInRepo,
 		addrFileRepo: addrFileRepo,
 		txFileRepo:   txFileRepo,
 		wtype:        wtype,

@@ -50,9 +50,12 @@ lintfix:
 
 .PHONY: generate-db-definition
 generate-db-definition:
-	sqlboiler --wipe mysql
+	sqlboiler --wipe \
+	--templates ${GOPATH}/src/github.com/volatiletech/sqlboiler/templates,\
+	${GOPATH}/src/github.com/volatiletech/sqlboiler/templates_test,\
+	${GOPATH}/src/github.com/hiromaily/go-bitcoin/templates \
+	mysql
 	#sqlboiler --config sqlboiler.keygen.toml --wipe mysql
-
 
 # ifacemaker is tool which makes interface from struct
 .PHONY: generate-go-interface

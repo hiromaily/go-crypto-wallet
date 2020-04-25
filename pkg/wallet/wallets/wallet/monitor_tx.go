@@ -153,9 +153,9 @@ func (w *Wallet) notifyTxDone(hash string, actionType action.ActionType) (int64,
 		}
 
 		// 2. get txInputs
-		txInputs, err := w.repo.GetTxInputByReceiptID(actionType, txID)
+		txInputs, err := w.txInRepo.GetAllByTxID(txID)
 		if err != nil {
-			return 0, errors.Wrapf(err, "fail to call repo.GetTxInputByReceiptID(%d) ActionType: %s", txID, actionType)
+			return 0, errors.Wrapf(err, "fail to call txInRepo.GetAllByTxID(%d) ActionType: %s", txID, actionType)
 		}
 		if len(txInputs) == 0 {
 			w.logger.Debug("txInputs is not found in tx_input table",

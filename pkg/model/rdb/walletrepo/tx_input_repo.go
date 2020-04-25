@@ -29,21 +29,21 @@ type TxInput struct {
 }
 
 // getTxInputByReceiptID 該当するIDのレコードを返す
-func (r *WalletRepository) getTxInputByReceiptID(tbl string, receiptID int64) ([]TxInput, error) {
-	sql := "SELECT * FROM %s WHERE receipt_id=?"
-	sql = fmt.Sprintf(sql, tbl)
-	//logger.Debugf("sql: %s", sql)
-
-	var txReceiptInputs []TxInput
-	err := r.db.Select(&txReceiptInputs, sql, receiptID)
-
-	return txReceiptInputs, err
-}
+//func (r *WalletRepository) getTxInputByReceiptID(tbl string, receiptID int64) ([]TxInput, error) {
+//	sql := "SELECT * FROM %s WHERE receipt_id=?"
+//	sql = fmt.Sprintf(sql, tbl)
+//	//logger.Debugf("sql: %s", sql)
+//
+//	var txReceiptInputs []TxInput
+//	err := r.db.Select(&txReceiptInputs, sql, receiptID)
+//
+//	return txReceiptInputs, err
+//}
 
 // GetTxInputByReceiptID 該当するIDのレコードを返す
-func (r *WalletRepository) GetTxInputByReceiptID(actionType action.ActionType, receiptID int64) ([]TxInput, error) {
-	return r.getTxInputByReceiptID(txInputTableName[actionType], receiptID)
-}
+//func (r *WalletRepository) GetTxInputByReceiptID(actionType action.ActionType, receiptID int64) ([]TxInput, error) {
+//	return r.getTxInputByReceiptID(txInputTableName[actionType], receiptID)
+//}
 
 // insertTxInputForUnsigned 未署名トランザクションのinputに使われたtxレコードを作成する
 //TODO:BulkInsertがやりたい

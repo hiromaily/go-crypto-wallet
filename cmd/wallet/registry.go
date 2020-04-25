@@ -53,6 +53,7 @@ func (r *registry) NewWalleter() wallets.Walleter {
 		r.newTracer(),
 		r.newStorager(),
 		r.newTxRepo(),
+		r.newTxInputRepo(),
 		r.newAddressFileStorager(),
 		r.newTxFileStorager(),
 		r.walletType,
@@ -100,6 +101,14 @@ func (r *registry) newStorager() rdb.WalletStorager {
 
 func (r *registry) newTxRepo() repository.TxRepository {
 	return repository.NewTxRepository(
+		r.newMySQLClient(),
+		r.conf.CoinTypeCode,
+		r.newLogger(),
+	)
+}
+
+func (r *registry) newTxInputRepo() repository.TxInputRepository {
+	return repository.NewTxInputRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),

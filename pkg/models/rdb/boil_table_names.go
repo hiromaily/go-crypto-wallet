@@ -10,6 +10,8 @@ var TableNames = struct {
 	Pubkey                string
 	Seed                  string
 	TX                    string
+	TXInput               string
+	TXOutput              string
 }{
 	AccountKey:            "account_key",
 	MultisigPubkeyHistory: "multisig_pubkey_history",
@@ -17,4 +19,6 @@ var TableNames = struct {
 	Pubkey:                "pubkey",
 	Seed:                  "seed",
 	TX:                    "tx",
+	TXInput:               "tx_input",
+	TXOutput:              "tx_output",
 }

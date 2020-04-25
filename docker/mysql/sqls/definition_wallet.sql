@@ -55,11 +55,11 @@ CREATE TABLE `tx` (
 DROP TABLE IF EXISTS `tx_input`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `tx_receipt_input` (
+CREATE TABLE `tx_input` (
   `id`             BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
   `tx_id`          BIGINT(20) NOT NULL COMMENT'tx table ID',
   `input_txid`     VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'txid for input',
-  `input_vout`     INT(11) NOT NULL COMMENT'vout for input',
+  `input_vout`     MEDIUMINT(11) UNSIGNED NOT NULL COMMENT'vout for input',
   `input_address`  VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'sender address for input',
   `input_account`  VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'sender account for input',
   `input_amount`   DECIMAL(26,10) NOT NULL COMMENT'amount of coin to send for input',
@@ -78,7 +78,7 @@ CREATE TABLE `tx_receipt_input` (
 DROP TABLE IF EXISTS `tx_output`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `tx_receipt_output` (
+CREATE TABLE `tx_output` (
   `id`             BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
   `tx_id`          BIGINT(20) NOT NULL COMMENT'tx table ID',
   `output_address` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'receiver address for output',

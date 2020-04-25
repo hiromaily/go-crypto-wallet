@@ -37,6 +37,7 @@ type txRepository struct {
 	logger       *zap.Logger
 }
 
+// NewTxRepository returns TxRepository interface
 func NewTxRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) TxRepository {
 	return &txRepository{
 		dbConn:       dbConn,
@@ -46,8 +47,8 @@ func NewTxRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap
 	}
 }
 
-// GetOne get one record by ID
-// - replaced from GetTxByID
+// GetOne returns one record by ID
+// - replaced from GetTxInputByReceiptID
 func (r *txRepository) GetOne(id int64) (*models.TX, error) {
 	//sql := fmt.Sprintf(`SELECT * FROM %s WHERE id=%d`, r.tableName, id)
 	ctx := context.Background()
@@ -62,7 +63,7 @@ func (r *txRepository) GetOne(id int64) (*models.TX, error) {
 	return txItem, nil
 }
 
-// GetCount get count by hex string
+// GetCountByUnsignedHex returns count by hex string
 // - replaced from GetTxCountByUnsignedHex
 func (r *txRepository) GetCountByUnsignedHex(actionType action.ActionType, hex string) (int64, error) {
 	ctx := context.Background()
@@ -78,7 +79,7 @@ func (r *txRepository) GetCountByUnsignedHex(actionType action.ActionType, hex s
 	return count, nil
 }
 
-// GetOne get one record by ID
+// GetTxIDBySentHash returns txID  by sentHashTx
 // - replaced from GetTxIDBySentHash
 func (r *txRepository) GetTxIDBySentHash(actionType action.ActionType, hash string) (int64, error) {
 	//sql := fmt.Sprintf(`SELECT id FROM %s WHERE sent_hash_tx="%s"`, r.tableName, hash)
@@ -116,7 +117,7 @@ func (r *txRepository) getTxIDByUnsignedHexTx(actionType action.ActionType, hex 
 	return txItem.ID, nil
 }
 
-// GetSentHashTx
+// GetSentHashTx returns list of sent_hash_tx by txType
 // - replaced from GetSentTxHashByTxTypeSent, GetSentTxHashByTxTypeDone
 func (r *txRepository) GetSentHashTx(actionType action.ActionType, txType tx.TxType) ([]string, error) {
 	//sql := fmt.Sprintf(`SELECT sent_hash_tx FROM %s WHERE current_tx_type="%s"`, r.tableName, txType.String())
@@ -141,7 +142,7 @@ func (r *txRepository) GetSentHashTx(actionType action.ActionType, txType tx.TxT
 	return hashes, nil
 }
 
-// InsertUnsignedTx
+// InsertUnsignedTx inserts records
 // - replaced from InsertTxForUnsigned()
 func (r *txRepository) InsertUnsignedTx(actionType action.ActionType, txItem *models.TX) (int64, error) {
 	//set coin
@@ -161,13 +162,13 @@ func (r *txRepository) InsertUnsignedTx(actionType action.ActionType, txItem *mo
 	return id, nil
 }
 
-// Update
+// Update updates by models.Tx (entire update)
 func (r *txRepository) Update(txItem *models.TX) (int64, error) {
 	ctx := context.Background()
 	return txItem.Update(ctx, r.dbConn, boil.Infer())
 }
 
-// UpdateAfterTxSent
+// UpdateAfterTxSent updates when tx sent
 // - replaced from UpdateTxAfterSent
 func (r *txRepository) UpdateAfterTxSent(
 	txID int64,
@@ -189,7 +190,7 @@ func (r *txRepository) UpdateAfterTxSent(
 	).UpdateAll(ctx, r.dbConn, updCols)
 }
 
-// UpdateTxType
+// UpdateTxType updates txType
 // - replaced from UpdateTxTypeNotifiedByID
 func (r *txRepository) UpdateTxType(id int64, txType tx.TxType) (int64, error) {
 	//UPDATE %s SET current_tx_type=? WHERE id=?
@@ -204,7 +205,7 @@ func (r *txRepository) UpdateTxType(id int64, txType tx.TxType) (int64, error) {
 	).UpdateAll(ctx, r.dbConn, updCols)
 }
 
-// UpdateTxTypeBySentHashTx
+// UpdateTxTypeBySentHashTx updates txType
 // - replaced from UpdateTxTypeDoneByTxHash
 func (r *txRepository) UpdateTxTypeBySentHashTx(actionType action.ActionType, txType tx.TxType, sentHashTx string) (int64, error) {
 	//UPDATE %s SET current_tx_type=? WHERE sent_hash_tx=?
@@ -221,7 +222,7 @@ func (r *txRepository) UpdateTxTypeBySentHashTx(actionType action.ActionType, tx
 	).UpdateAll(ctx, r.dbConn, updCols)
 }
 
-// Delete
+// DeleteAll deletes all records
 func (r *txRepository) DeleteAll() (int64, error) {
 	ctx := context.Background()
 	txItems, _ := models.Txes().All(ctx, r.dbConn)
