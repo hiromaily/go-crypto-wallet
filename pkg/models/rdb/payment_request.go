@@ -25,9 +25,9 @@ import (
 
 // PaymentRequest is an object representing the database table.
 type PaymentRequest struct {
-	ID              uint64        `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID              int64         `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Coin            string        `boil:"coin" json:"coin" toml:"coin" yaml:"coin"`
-	PaymentID       null.Uint64   `boil:"payment_id" json:"payment_id,omitempty" toml:"payment_id" yaml:"payment_id,omitempty"`
+	PaymentID       null.Int64    `boil:"payment_id" json:"payment_id,omitempty" toml:"payment_id" yaml:"payment_id,omitempty"`
 	SenderAddress   string        `boil:"sender_address" json:"sender_address" toml:"sender_address" yaml:"sender_address"`
 	SenderAccount   string        `boil:"sender_account" json:"sender_account" toml:"sender_account" yaml:"sender_account"`
 	ReceiverAddress string        `boil:"receiver_address" json:"receiver_address" toml:"receiver_address" yaml:"receiver_address"`
@@ -63,26 +63,42 @@ var PaymentRequestColumns = struct {
 
 // Generated where
 
-type whereHelpernull_Uint64 struct{ field string }
+type whereHelperint64 struct{ field string }
 
-func (w whereHelpernull_Uint64) EQ(x null.Uint64) qm.QueryMod {
+func (w whereHelperint64) EQ(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint64) NEQ(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint64) LT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint64) LTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint64) GT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint64) GTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperint64) IN(slice []int64) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+
+type whereHelpernull_Int64 struct{ field string }
+
+func (w whereHelpernull_Int64) EQ(x null.Int64) qm.QueryMod {
 	return qmhelper.WhereNullEQ(w.field, false, x)
 }
-func (w whereHelpernull_Uint64) NEQ(x null.Uint64) qm.QueryMod {
+func (w whereHelpernull_Int64) NEQ(x null.Int64) qm.QueryMod {
 	return qmhelper.WhereNullEQ(w.field, true, x)
 }
-func (w whereHelpernull_Uint64) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Uint64) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_Uint64) LT(x null.Uint64) qm.QueryMod {
+func (w whereHelpernull_Int64) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Int64) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_Int64) LT(x null.Int64) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LT, x)
 }
-func (w whereHelpernull_Uint64) LTE(x null.Uint64) qm.QueryMod {
+func (w whereHelpernull_Int64) LTE(x null.Int64) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LTE, x)
 }
-func (w whereHelpernull_Uint64) GT(x null.Uint64) qm.QueryMod {
+func (w whereHelpernull_Int64) GT(x null.Int64) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GT, x)
 }
-func (w whereHelpernull_Uint64) GTE(x null.Uint64) qm.QueryMod {
+func (w whereHelpernull_Int64) GTE(x null.Int64) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
@@ -108,9 +124,9 @@ func (w whereHelpertypes_Decimal) GTE(x types.Decimal) qm.QueryMod {
 }
 
 var PaymentRequestWhere = struct {
-	ID              whereHelperuint64
+	ID              whereHelperint64
 	Coin            whereHelperstring
-	PaymentID       whereHelpernull_Uint64
+	PaymentID       whereHelpernull_Int64
 	SenderAddress   whereHelperstring
 	SenderAccount   whereHelperstring
 	ReceiverAddress whereHelperstring
@@ -118,9 +134,9 @@ var PaymentRequestWhere = struct {
 	IsDone          whereHelpernull_Int8
 	UpdatedAt       whereHelpernull_Time
 }{
-	ID:              whereHelperuint64{field: "`payment_request`.`id`"},
+	ID:              whereHelperint64{field: "`payment_request`.`id`"},
 	Coin:            whereHelperstring{field: "`payment_request`.`coin`"},
-	PaymentID:       whereHelpernull_Uint64{field: "`payment_request`.`payment_id`"},
+	PaymentID:       whereHelpernull_Int64{field: "`payment_request`.`payment_id`"},
 	SenderAddress:   whereHelperstring{field: "`payment_request`.`sender_address`"},
 	SenderAccount:   whereHelperstring{field: "`payment_request`.`sender_account`"},
 	ReceiverAddress: whereHelperstring{field: "`payment_request`.`receiver_address`"},
@@ -251,7 +267,7 @@ func PaymentRequests(mods ...qm.QueryMod) paymentRequestQuery {
 
 // FindPaymentRequest retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindPaymentRequest(ctx context.Context, exec boil.ContextExecutor, iD uint64, selectCols ...string) (*PaymentRequest, error) {
+func FindPaymentRequest(ctx context.Context, exec boil.ContextExecutor, iD int64, selectCols ...string) (*PaymentRequest, error) {
 	paymentRequestObj := &PaymentRequest{}
 
 	sel := "*"
@@ -355,7 +371,7 @@ func (o *PaymentRequest) Insert(ctx context.Context, exec boil.ContextExecutor, 
 		return ErrSyncFail
 	}
 
-	o.ID = uint64(lastID)
+	o.ID = int64(lastID)
 	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == paymentRequestMapping["id"] {
 		goto CacheNoHooks
 	}
@@ -633,7 +649,7 @@ func (o *PaymentRequest) Upsert(ctx context.Context, exec boil.ContextExecutor, 
 		return ErrSyncFail
 	}
 
-	o.ID = uint64(lastID)
+	o.ID = int64(lastID)
 	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == paymentRequestMapping["id"] {
 		goto CacheNoHooks
 	}
@@ -788,7 +804,7 @@ func (o *PaymentRequestSlice) ReloadAll(ctx context.Context, exec boil.ContextEx
 }
 
 // PaymentRequestExists checks if the PaymentRequest row exists.
-func PaymentRequestExists(ctx context.Context, exec boil.ContextExecutor, iD uint64) (bool, error) {
+func PaymentRequestExists(ctx context.Context, exec boil.ContextExecutor, iD int64) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from `payment_request` where `id`=? limit 1)"
 

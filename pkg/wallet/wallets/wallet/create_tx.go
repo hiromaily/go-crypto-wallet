@@ -2,6 +2,7 @@ package wallet
 
 import (
 	"fmt"
+	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/wire"
@@ -488,16 +489,17 @@ func (w *Wallet) insertTxTableForUnsigned(
 	paymentRequestIds []int64) (int64, error) {
 
 	// 1. skip if same hex is already stored
-	count, err := w.repo.GetTxCountByUnsignedHex(actionType, hex)
+	//count, err := w.repo.GetTxCountByUnsignedHex(actionType, hex)
+	count, err := w.txRepo.GetCountByUnsignedHex(actionType, hex)
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call repo.GetTxCountByUnsignedHex()")
+		return 0, errors.Wrap(err, "fail to call txRepo.GetCount()")
 	}
 	if count != 0 {
 		//skip
 		return 0, nil
 	}
 
-	// 2.TxReceipt table
+	// 2.TxReceipt table //TODO: remove after replacemnet is done
 	txReceipt := walletrepo.TxTable{}
 	txReceipt.UnsignedHexTx = hex
 	txReceipt.TotalInputAmount = w.btc.AmountString(inputTotal)
@@ -505,11 +507,19 @@ func (w *Wallet) insertTxTableForUnsigned(
 	txReceipt.Fee = w.btc.AmountString(fee)
 	txReceipt.TxType = txType
 
-	// start db transaction
+	txItem := &models.TX{
+		Action:            action.ActionTypePayment.String(),
+		UnsignedHexTX:     hex,
+		TotalInputAmount:  w.btc.AmountToDecimal(inputTotal),
+		TotalOutputAmount: w.btc.AmountToDecimal(outputTotal),
+		Fee:               w.btc.AmountToDecimal(fee),
+	}
+
+	// start db transaction //TODO: implement tx
 	tx := w.repo.MustBegin()
-	txReceiptID, err := w.repo.InsertTxForUnsigned(actionType, &txReceipt, tx, false)
+	txReceiptID, err := w.txRepo.InsertUnsignedTx(actionType, txItem)
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call repo.InsertTxForUnsigned()")
+		return 0, errors.Wrap(err, "fail to call txRepo.InsertUnsignedTx()")
 	}
 
 	// 3.TxReceiptInput table

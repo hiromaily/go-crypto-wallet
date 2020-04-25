@@ -21,6 +21,10 @@ func (t TxType) String() string {
 	return string(t)
 }
 
+func (t TxType) Int8() int8 {
+	return int8(TxTypeValue[t])
+}
+
 //TxTypeValue value
 var TxTypeValue = map[TxType]uint8{
 	TxTypeUnsigned: 1,

@@ -1,6 +1,7 @@
 package wallet
 
 import (
+	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -41,9 +42,9 @@ func (w *Wallet) UpdateTxStatus() error {
 // update TxTypeSent to TxTypeDone if confirmation is 6 or more
 func (w *Wallet) updateStatusForTxTypeSent(actionType action.ActionType) error {
 	// get records whose status is TxTypeSent
-	hashes, err := w.repo.GetSentTxHashByTxTypeSent(actionType)
+	hashes, err := w.txRepo.GetSentHashTx(actionType, tx.TxTypeSent)
 	if err != nil {
-		return errors.Wrapf(err, "fail to call repo.GetSentTxHashByTxTypeSent() ActionType: %s", actionType)
+		return errors.Wrapf(err, "fail to call txRepo.GetSentHashTx() ActionType: %s, TxTypeSent", actionType)
 	}
 
 	// get hash in detail and check confirmation
@@ -64,12 +65,12 @@ func (w *Wallet) updateStatusForTxTypeSent(actionType action.ActionType) error {
 
 func (w *Wallet) updateStatusForTxTypeDone(actionType action.ActionType) error {
 	// get records whose status is TxTypeDone
-	hashes, err := w.repo.GetSentTxHashByTxTypeDone(actionType)
+	hashes, err := w.txRepo.GetSentHashTx(actionType, tx.TxTypeDone)
 	if err != nil {
-		return errors.Wrapf(err, "fail to call repo.GetSentTxHashByTxTypeDone() ActionType: %s", actionType)
+		return errors.Wrapf(err, "fail to call txRepo.GetSentHashTx() ActionType: %s, TxTypeDone", actionType)
 	}
 	w.logger.Debug(
-		"called storager.GetSentTxHashByTxTypeDone()",
+		"called storager.GetSentHashTx(TxTypeDone)",
 		zap.String("actionType", actionType.String()),
 		zap.Any("hashes", hashes))
 
@@ -146,9 +147,9 @@ func (w *Wallet) notifyTxDone(hash string, actionType action.ActionType) (int64,
 	switch actionType {
 	case action.ActionTypeReceipt:
 		// 1. get txID from hash
-		txID, err = w.repo.GetTxIDBySentHash(actionType, hash)
+		txID, err = w.txRepo.GetTxIDBySentHash(actionType, hash)
 		if err != nil {
-			return 0, errors.Wrapf(err, "fail to call repo.GetTxIDBySentHash() ActionType: %s", actionType)
+			return 0, errors.Wrapf(err, "fail to call txRepo.GetTxIDBySentHash() ActionType: %s", actionType)
 		}
 
 		// 2. get txInputs
@@ -169,9 +170,9 @@ func (w *Wallet) notifyTxDone(hash string, actionType action.ActionType) (int64,
 		}
 	case action.ActionTypePayment:
 		// 1. get txID from hash
-		txID, err = w.repo.GetTxIDBySentHash(actionType, hash)
+		txID, err = w.txRepo.GetTxIDBySentHash(actionType, hash)
 		if err != nil {
-			return 0, errors.Wrapf(err, "fail to call repo.GetTxIDBySentHash() ActionType: %s", actionType)
+			return 0, errors.Wrapf(err, "fail to call txRepo.GetTxIDBySentHash() ActionType: %s", actionType)
 		}
 
 		// 2. get info from payment_request table

@@ -24,12 +24,13 @@ DROP TABLE IF EXISTS `tx`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tx` (
-  `id`                  BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'transaction ID',
+  /*`id`                  BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'transaction ID',*/
+  `id`                  BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'transaction ID',
   `coin`                ENUM('btc', 'bch') NOT NULL COMMENT'coin type code',
   `action`              ENUM('receipt', 'payment', 'transfer') NOT NULL COMMENT'action type',
   `unsigned_hex_tx`     TEXT COLLATE utf8_unicode_ci NOT NULL COMMENT'HEX string for unsigned transaction',
-  `signed_hex_tx`       TEXT COLLATE utf8_unicode_ci DEFAULT '' COMMENT'HEX string for signed transaction',
-  `sent_hash_tx`        TEXT COLLATE utf8_unicode_ci DEFAULT '' COMMENT'Hash for sent transaction',
+  `signed_hex_tx`       TEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT'HEX string for signed transaction',
+  `sent_hash_tx`        TEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT'Hash for sent transaction',
   `total_input_amount`  DECIMAL(26,10) NOT NULL COMMENT'total amount of coin to send',
   `total_output_amount` DECIMAL(26,10) NOT NULL COMMENT'total amount of coin to receive without fee',
   `fee`                 DECIMAL(26,10) NOT NULL COMMENT'fee',
@@ -55,8 +56,8 @@ DROP TABLE IF EXISTS `tx_input`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tx_receipt_input` (
-  `id`             BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `tx_id`          BIGINT(20) UNSIGNED NOT NULL COMMENT'tx table ID',
+  `id`             BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
+  `tx_id`          BIGINT(20) NOT NULL COMMENT'tx table ID',
   `input_txid`     VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'txid for input',
   `input_vout`     INT(11) NOT NULL COMMENT'vout for input',
   `input_address`  VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'sender address for input',
@@ -78,8 +79,8 @@ DROP TABLE IF EXISTS `tx_output`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tx_receipt_output` (
-  `id`             BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `tx_id`          BIGINT(20) UNSIGNED NOT NULL COMMENT'tx table ID',
+  `id`             BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
+  `tx_id`          BIGINT(20) NOT NULL COMMENT'tx table ID',
   `output_address` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'receiver address for output',
   `output_account` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'receiver account for output',
   `output_amount`  DECIMAL(26,10) NOT NULL COMMENT'amount of coin to receive',
@@ -99,15 +100,15 @@ DROP TABLE IF EXISTS `payment_request`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `payment_request` (
-  `id`           BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `coin`         ENUM('btc', 'bch') NOT NULL COMMENT'coin type code',
-  `payment_id`   BIGINT(20) UNSIGNED DEFAULT NULL COMMENT'tx table ID for payment action',
-  `sender_address` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'sender address',
-  `sender_account` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'sender account',
-  `receiver_address`   VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'receiver address',
-  `amount`       DECIMAL(26,10) NOT NULL COMMENT'amount of coin to send',
-  `is_done`      BOOL DEFAULT false COMMENT'true: unsigned transaction is created',
-  `updated_at`   datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',
+  `id`                BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
+  `coin`              ENUM('btc', 'bch') NOT NULL COMMENT'coin type code',
+  `payment_id`        BIGINT(20) DEFAULT NULL COMMENT'tx table ID for payment action',
+  `sender_address`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'sender address',
+  `sender_account`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'sender account',
+  `receiver_address`  VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'receiver address',
+  `amount`            DECIMAL(26,10) NOT NULL COMMENT'amount of coin to send',
+  `is_done`           BOOL DEFAULT false COMMENT'true: unsigned transaction is created',
+  `updated_at`        datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',
   PRIMARY KEY (`id`),
   INDEX idx_coin (`coin`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='table for payment request';
@@ -133,7 +134,7 @@ DROP TABLE IF EXISTS `pubkey`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `pubkey` (
-  `id`                BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
+  `id`                BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
   `coin`              ENUM('btc', 'bch') NOT NULL COMMENT'coin type code',
   `account`           ENUM('client', 'receipt', 'payment', 'stored', 'fee') NOT NULL COMMENT'account type',
   `wallet_address`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'wallet address',

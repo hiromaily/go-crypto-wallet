@@ -52,28 +52,27 @@ func (w *Wallet) SendTx(filePath string) (string, error) {
 	return hash.String(), nil
 }
 
-func (w *Wallet) updateHexForSentTx(txReceiptID int64, signedHex, sentTxID string, actionType action.ActionType) error {
+func (w *Wallet) updateHexForSentTx(txID int64, signedHex, sentHashTx string, actionType action.ActionType) error {
 	// 1.TxReceipt table
-	t := time.Now()
-	txReceipt := walletrepo.TxTable{}
-	txReceipt.ID = txReceiptID
-	txReceipt.SignedHexTx = signedHex
-	txReceipt.SentHashTx = sentTxID
-	txReceipt.SentUpdatedAt = &t
-	txReceipt.TxType = tx.TxTypeValue[tx.TxTypeSent] //3:未署名
+	//t := time.Now()
+	//txReceipt := walletrepo.TxTable{}
+	//txReceipt.ID = txReceiptID
+	//txReceipt.SignedHexTx = signedHex
+	//txReceipt.SentHashTx = sentTxID
+	//txReceipt.SentUpdatedAt = &t
+	//txReceipt.TxType = tx.TxTypeValue[tx.TxTypeSent]
 
 	var (
 		affectedNum int64
 		err         error
 	)
 
-	affectedNum, err = w.repo.UpdateTxAfterSent(actionType, &txReceipt, nil, true)
-
+	affectedNum, err = w.txRepo.UpdateAfterTxSent(txID, tx.TxTypeSent, signedHex, sentHashTx)
 	if err != nil {
-		return errors.Wrap(err, "fail to call repo.UpdateTxAfterSent()")
+		return errors.Wrap(err, "fail to call txRepo.UpdateAfterTxSent()")
 	}
 	if affectedNum == 0 {
-		return errors.New("tx_table was not updated by storager.UpdateTxAfterSent()")
+		return errors.New("tx_table was not updated by txRepo.UpdateAfterTxSent()")
 	}
 
 	return nil

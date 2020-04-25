@@ -25,12 +25,12 @@ import (
 
 // TX is an object representing the database table.
 type TX struct {
-	ID                uint64        `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID                int64         `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Coin              string        `boil:"coin" json:"coin" toml:"coin" yaml:"coin"`
 	Action            string        `boil:"action" json:"action" toml:"action" yaml:"action"`
 	UnsignedHexTX     string        `boil:"unsigned_hex_tx" json:"unsigned_hex_tx" toml:"unsigned_hex_tx" yaml:"unsigned_hex_tx"`
-	SignedHexTX       null.String   `boil:"signed_hex_tx" json:"signed_hex_tx,omitempty" toml:"signed_hex_tx" yaml:"signed_hex_tx,omitempty"`
-	SentHashTX        null.String   `boil:"sent_hash_tx" json:"sent_hash_tx,omitempty" toml:"sent_hash_tx" yaml:"sent_hash_tx,omitempty"`
+	SignedHexTX       string        `boil:"signed_hex_tx" json:"signed_hex_tx" toml:"signed_hex_tx" yaml:"signed_hex_tx"`
+	SentHashTX        string        `boil:"sent_hash_tx" json:"sent_hash_tx" toml:"sent_hash_tx" yaml:"sent_hash_tx"`
 	TotalInputAmount  types.Decimal `boil:"total_input_amount" json:"total_input_amount" toml:"total_input_amount" yaml:"total_input_amount"`
 	TotalOutputAmount types.Decimal `boil:"total_output_amount" json:"total_output_amount" toml:"total_output_amount" yaml:"total_output_amount"`
 	Fee               types.Decimal `boil:"fee" json:"fee" toml:"fee" yaml:"fee"`
@@ -73,12 +73,12 @@ var TXColumns = struct {
 // Generated where
 
 var TXWhere = struct {
-	ID                whereHelperuint64
+	ID                whereHelperint64
 	Coin              whereHelperstring
 	Action            whereHelperstring
 	UnsignedHexTX     whereHelperstring
-	SignedHexTX       whereHelpernull_String
-	SentHashTX        whereHelpernull_String
+	SignedHexTX       whereHelperstring
+	SentHashTX        whereHelperstring
 	TotalInputAmount  whereHelpertypes_Decimal
 	TotalOutputAmount whereHelpertypes_Decimal
 	Fee               whereHelpertypes_Decimal
@@ -86,12 +86,12 @@ var TXWhere = struct {
 	UnsignedUpdatedAt whereHelpernull_Time
 	SentUpdatedAt     whereHelpernull_Time
 }{
-	ID:                whereHelperuint64{field: "`tx`.`id`"},
+	ID:                whereHelperint64{field: "`tx`.`id`"},
 	Coin:              whereHelperstring{field: "`tx`.`coin`"},
 	Action:            whereHelperstring{field: "`tx`.`action`"},
 	UnsignedHexTX:     whereHelperstring{field: "`tx`.`unsigned_hex_tx`"},
-	SignedHexTX:       whereHelpernull_String{field: "`tx`.`signed_hex_tx`"},
-	SentHashTX:        whereHelpernull_String{field: "`tx`.`sent_hash_tx`"},
+	SignedHexTX:       whereHelperstring{field: "`tx`.`signed_hex_tx`"},
+	SentHashTX:        whereHelperstring{field: "`tx`.`sent_hash_tx`"},
 	TotalInputAmount:  whereHelpertypes_Decimal{field: "`tx`.`total_input_amount`"},
 	TotalOutputAmount: whereHelpertypes_Decimal{field: "`tx`.`total_output_amount`"},
 	Fee:               whereHelpertypes_Decimal{field: "`tx`.`fee`"},
@@ -222,7 +222,7 @@ func Txes(mods ...qm.QueryMod) txQuery {
 
 // FindTX retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindTX(ctx context.Context, exec boil.ContextExecutor, iD uint64, selectCols ...string) (*TX, error) {
+func FindTX(ctx context.Context, exec boil.ContextExecutor, iD int64, selectCols ...string) (*TX, error) {
 	txObj := &TX{}
 
 	sel := "*"
@@ -319,7 +319,7 @@ func (o *TX) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil
 		return ErrSyncFail
 	}
 
-	o.ID = uint64(lastID)
+	o.ID = int64(lastID)
 	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == txMapping["id"] {
 		goto CacheNoHooks
 	}
@@ -586,7 +586,7 @@ func (o *TX) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumn
 		return ErrSyncFail
 	}
 
-	o.ID = uint64(lastID)
+	o.ID = int64(lastID)
 	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == txMapping["id"] {
 		goto CacheNoHooks
 	}
@@ -741,7 +741,7 @@ func (o *TXSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) erro
 }
 
 // TXExists checks if the TX row exists.
-func TXExists(ctx context.Context, exec boil.ContextExecutor, iD uint64) (bool, error) {
+func TXExists(ctx context.Context, exec boil.ContextExecutor, iD int64) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from `tx` where `id`=? limit 1)"
 

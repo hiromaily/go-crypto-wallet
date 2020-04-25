@@ -24,7 +24,7 @@ import (
 
 // Pubkey is an object representing the database table.
 type Pubkey struct {
-	ID            uint64    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID            int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Coin          string    `boil:"coin" json:"coin" toml:"coin" yaml:"coin"`
 	Account       string    `boil:"account" json:"account" toml:"account" yaml:"account"`
 	WalletAddress string    `boil:"wallet_address" json:"wallet_address" toml:"wallet_address" yaml:"wallet_address"`
@@ -54,14 +54,14 @@ var PubkeyColumns = struct {
 // Generated where
 
 var PubkeyWhere = struct {
-	ID            whereHelperuint64
+	ID            whereHelperint64
 	Coin          whereHelperstring
 	Account       whereHelperstring
 	WalletAddress whereHelperstring
 	IsAllocated   whereHelpernull_Int8
 	UpdatedAt     whereHelpernull_Time
 }{
-	ID:            whereHelperuint64{field: "`pubkey`.`id`"},
+	ID:            whereHelperint64{field: "`pubkey`.`id`"},
 	Coin:          whereHelperstring{field: "`pubkey`.`coin`"},
 	Account:       whereHelperstring{field: "`pubkey`.`account`"},
 	WalletAddress: whereHelperstring{field: "`pubkey`.`wallet_address`"},
@@ -191,7 +191,7 @@ func Pubkeys(mods ...qm.QueryMod) pubkeyQuery {
 
 // FindPubkey retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindPubkey(ctx context.Context, exec boil.ContextExecutor, iD uint64, selectCols ...string) (*Pubkey, error) {
+func FindPubkey(ctx context.Context, exec boil.ContextExecutor, iD int64, selectCols ...string) (*Pubkey, error) {
 	pubkeyObj := &Pubkey{}
 
 	sel := "*"
@@ -295,7 +295,7 @@ func (o *Pubkey) Insert(ctx context.Context, exec boil.ContextExecutor, columns 
 		return ErrSyncFail
 	}
 
-	o.ID = uint64(lastID)
+	o.ID = int64(lastID)
 	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == pubkeyMapping["id"] {
 		goto CacheNoHooks
 	}
@@ -574,7 +574,7 @@ func (o *Pubkey) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCo
 		return ErrSyncFail
 	}
 
-	o.ID = uint64(lastID)
+	o.ID = int64(lastID)
 	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == pubkeyMapping["id"] {
 		goto CacheNoHooks
 	}
@@ -729,7 +729,7 @@ func (o *PubkeySlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) 
 }
 
 // PubkeyExists checks if the Pubkey row exists.
-func PubkeyExists(ctx context.Context, exec boil.ContextExecutor, iD uint64) (bool, error) {
+func PubkeyExists(ctx context.Context, exec boil.ContextExecutor, iD int64) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from `pubkey` where `id`=? limit 1)"
 
