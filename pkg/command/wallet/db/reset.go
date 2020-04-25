@@ -53,12 +53,8 @@ func (c *ResetCommand) Run(args []string) int {
 	}
 
 	//reset payment_request table
-	_, err := c.wallet.GetDB().ResetAnyFlagOnPaymentRequestForTestOnly(nil, true)
-	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call db.ResetAnyFlagOnPaymentRequestForTestOnly() %+v", err))
-		return 1
-	}
-	c.ui.Info("Done!")
+	//FIXME: ResetTestData is under refactoring
+	c.ui.Info("FIXME: ResetTestData is under refactoring")
 
 	return 0
 }

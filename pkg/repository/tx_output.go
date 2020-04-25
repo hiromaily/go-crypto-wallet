@@ -27,6 +27,7 @@ type txOutputRepository struct {
 	logger       *zap.Logger
 }
 
+// NewTxOutputRepository returns TxOutputRepository interface
 func NewTxOutputRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) TxOutputRepository {
 	return &txOutputRepository{
 		dbConn:       dbConn,

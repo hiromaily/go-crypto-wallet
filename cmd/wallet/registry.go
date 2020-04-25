@@ -55,6 +55,7 @@ func (r *registry) NewWalleter() wallets.Walleter {
 		r.newTxRepo(),
 		r.newTxInputRepo(),
 		r.newTxOutputRepo(),
+		r.newPaymentRequestRepo(),
 		r.newAddressFileStorager(),
 		r.newTxFileStorager(),
 		r.walletType,
@@ -118,6 +119,14 @@ func (r *registry) newTxInputRepo() repository.TxInputRepository {
 
 func (r *registry) newTxOutputRepo() repository.TxOutputRepository {
 	return repository.NewTxOutputRepository(
+		r.newMySQLClient(),
+		r.conf.CoinTypeCode,
+		r.newLogger(),
+	)
+}
+
+func (r *registry) newPaymentRequestRepo() repository.PaymentRequestRepository {
+	return repository.NewPaymentRequestRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),

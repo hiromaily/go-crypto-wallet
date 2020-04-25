@@ -511,8 +511,8 @@ func (w *Wallet) insertTxTableForUnsigned(
 		Fee:               w.btc.AmountToDecimal(fee),
 	}
 
-	// start db transaction //TODO: implement tx
-	tx := w.repo.MustBegin()
+	// start db transaction //TODO: implement transaction
+	//tx := w.repo.MustBegin()
 	txID, err := w.txRepo.InsertUnsignedTx(actionType, txItem)
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call txRepo.InsertUnsignedTx()")
@@ -533,7 +533,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 	for idx := range txOutputs {
 		txOutputs[idx].TXID = txID
 	}
-	//commit flag //TODO: transaction
+	//commit flag //TODO: transaction with defer
 	//isCommit := true
 	//if actionType == action.ActionTypePayment {
 	//	isCommit = false
@@ -548,7 +548,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 
 	// 6. update payment_id in payment_request table for only action.ActionTypePayment
 	if actionType == action.ActionTypePayment {
-		_, err = w.repo.UpdatePaymentIDOnPaymentRequest(txID, paymentRequestIds, tx, true)
+		_, err = w.payReqRepo.UpdatePaymentID(txID, paymentRequestIds) //TODO: transaction commit
 		if err != nil {
 			return 0, errors.Wrap(err, "storager.UpdatePaymentIDOnPaymentRequest()")
 		}

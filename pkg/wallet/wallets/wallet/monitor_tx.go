@@ -176,7 +176,7 @@ func (w *Wallet) notifyTxDone(hash string, actionType action.ActionType) (int64,
 		}
 
 		// 2. get info from payment_request table
-		paymentUsers, err := w.repo.GetPaymentRequestByPaymentID(txID)
+		paymentUsers, err := w.payReqRepo.GetAllByPaymentID(txID)
 		if err != nil {
 			return 0, errors.Wrapf(err, "fail to call repo.GetPaymentRequestByPaymentID(%d) ActionType: %s", txID, actionType)
 		}
@@ -189,7 +189,7 @@ func (w *Wallet) notifyTxDone(hash string, actionType action.ActionType) (int64,
 		// 3. notify to given input_addresses tx is done
 		// TODO:how to notify
 		for _, user := range paymentUsers {
-			w.logger.Debug("address in paymentUsers", zap.String("user.AddressFrom", user.AddressFrom))
+			w.logger.Debug("address in paymentUsers", zap.String("user.AddressFrom", user.SenderAddress))
 		}
 	case action.ActionTypeTransfer:
 		//TODO: not implemented yet
@@ -209,14 +209,14 @@ func (w *Wallet) updateTxTypeNotified(id int64, actionType action.ActionType) er
 			return errors.Wrapf(err, "fail to call repo.UpdateTxTypeNotifiedByID() ActionType: %s", actionType)
 		}
 	case action.ActionTypePayment:
-		dtx := w.repo.MustBegin()
+		//dtx := w.repo.MustBegin() //TODO: db transaction
 		_, err := w.txRepo.UpdateTxType(id, tx.TxTypeNotified)
 		if err != nil {
 			return errors.Wrapf(err, "fail to call repo.UpdateTxTypeNotifiedByID() ActionType: %s", actionType)
 		}
 
 		// update is_done=true in payment_request
-		_, err = w.repo.UpdateIsDoneOnPaymentRequest(id, dtx, true)
+		_, err = w.payReqRepo.UpdateIsDone(id)
 		if err != nil {
 			return errors.Wrapf(err, "fail to call repo.UpdateIsDoneOnPaymentRequest() ActionType: %s", actionType)
 		}

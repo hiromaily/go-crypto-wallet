@@ -19,7 +19,7 @@ type UserPayment struct {
 // createUserPayment get payment data from payment_request table
 func (w *Wallet) createUserPayment() ([]UserPayment, []int64, error) {
 	// get payment_request
-	paymentRequests, err := w.repo.GetPaymentRequestAll()
+	paymentRequests, err := w.payReqRepo.GetAll()
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "fail to call repo.GetPaymentRequestAll()")
 	}
@@ -35,9 +35,9 @@ func (w *Wallet) createUserPayment() ([]UserPayment, []int64, error) {
 	for idx, val := range paymentRequests {
 		paymentRequestIds[idx] = val.ID
 
-		userPayments[idx].senderAddr = val.AddressFrom
-		userPayments[idx].receiverAddr = val.AddressTo
-		amt, err := strconv.ParseFloat(val.Amount, 64)
+		userPayments[idx].senderAddr = val.SenderAddress
+		userPayments[idx].receiverAddr = val.ReceiverAddress
+		amt, err := strconv.ParseFloat(val.Amount.String(), 64)
 		if err != nil {
 			// fatal error because table includes invalid data
 			w.logger.Error("payment_request table includes invalid amount field")

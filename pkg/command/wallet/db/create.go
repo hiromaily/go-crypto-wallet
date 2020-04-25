@@ -56,12 +56,5 @@ func (c *CreateCommand) Run(args []string) int {
 	//FIXME: CreateInitialTestData is under refactoring
 	c.ui.Info("FIXME: CreateInitialTestData is under refactoring")
 
-	//err := testdata.CreateInitialTestData(c.wallet.GetDB(), c.wallet.GetBTC())
-	//if err != nil {
-	//	c.ui.Error(fmt.Sprintf("fail to call testdata.CreateInitialTestData() %+v", err))
-	//	return 1
-	//}
-	//c.ui.Info("Done!")
-
 	return 0
 }
