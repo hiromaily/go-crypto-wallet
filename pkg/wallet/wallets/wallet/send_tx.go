@@ -16,7 +16,7 @@ func (w *Wallet) SendTx(filePath string) (string, error) {
 
 	// get tx_receipt_id from file name
 	//payment_5_unsigned_1_1534466246366489473
-	actionType, _, txReceiptID, _, err := w.txFileRepo.ValidateFilePath(filePath, tx.TxTypeSigned)
+	actionType, _, txID, _, err := w.txFileRepo.ValidateFilePath(filePath, tx.TxTypeSigned)
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call txFileRepo.ValidateFilePath()")
 	}
@@ -36,14 +36,14 @@ func (w *Wallet) SendTx(filePath string) (string, error) {
 	}
 
 	// update tx_table
-	err = w.updateHexForSentTx(txReceiptID, signedHex, hash.String(), actionType)
+	err = w.updateHexForSentTx(txID, signedHex, hash.String(), actionType)
 	if err != nil {
 		//TODO: even if error occurred, tx is already sent. so db should be corrected manually
 		return "", errors.Wrap(err, "fail to call updateHexForSentTx(), but tx is sent")
 	}
 
 	// update account_pubkey_table
-	err = w.updateIsAllocatedForAccountPubkey(txReceiptID, actionType)
+	err = w.updateIsAllocatedForAccountPubkey(txID, actionType)
 	if err != nil {
 		//TODO: even if error occurred, tx is already sent. so db should be corrected manually
 		return "", errors.Wrap(err, "fail to call updateIsAllocatedForAccountPubkey()")
@@ -56,7 +56,7 @@ func (w *Wallet) updateHexForSentTx(txID int64, signedHex, sentHashTx string, ac
 	// 1.TxReceipt table
 	//t := time.Now()
 	//txReceipt := walletrepo.TxTable{}
-	//txReceipt.ID = txReceiptID
+	//txReceipt.ID = txID
 	//txReceipt.SignedHexTx = signedHex
 	//txReceipt.SentHashTx = sentTxID
 	//txReceipt.SentUpdatedAt = &t
@@ -78,13 +78,13 @@ func (w *Wallet) updateHexForSentTx(txID int64, signedHex, sentHashTx string, ac
 	return nil
 }
 
-func (w *Wallet) updateIsAllocatedForAccountPubkey(txReceiptID int64, actionType action.ActionType) error {
+func (w *Wallet) updateIsAllocatedForAccountPubkey(txID int64, actionType action.ActionType) error {
 	if actionType == action.ActionTypeReceipt {
 		return nil
 	}
 
 	// get txOutputs from .tx_receipt_output by receipt_id
-	txOutputs, err := w.txOutRepo.GetAllByTxID(txReceiptID)
+	txOutputs, err := w.txOutRepo.GetAllByTxID(txID)
 	if err != nil {
 		return errors.Wrap(err, "fail to call txOutRepo.GetAllByTxID()")
 	}

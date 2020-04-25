@@ -359,8 +359,8 @@ func (w *Wallet) createRawTx(
 
 	// 5. insert to tx_table for unsigned tx
 	// - receipt/transfer/payment
-	//  - txReceiptID would be 0 if record is already existing then csv file is not created
-	txReceiptID, err := w.insertTxTableForUnsigned(
+	//  - txID would be 0 if record is already existing then csv file is not created
+	txID, err := w.insertTxTableForUnsigned(
 		targetAction,
 		hex,
 		inputTotal,
@@ -386,8 +386,8 @@ func (w *Wallet) createRawTx(
 	//TODO: how to recover when error occurred here
 	// - inserted data in database must be deleted to generate hex file
 	var generatedFileName string
-	if txReceiptID != 0 {
-		generatedFileName, err = w.generateHexFile(targetAction, hex, encodedAddrsPrevs, txReceiptID)
+	if txID != 0 {
+		generatedFileName, err = w.generateHexFile(targetAction, hex, encodedAddrsPrevs, txID)
 		if err != nil {
 			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
 		}
@@ -513,7 +513,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 
 	// start db transaction //TODO: implement tx
 	tx := w.repo.MustBegin()
-	txReceiptID, err := w.txRepo.InsertUnsignedTx(actionType, txItem)
+	txID, err := w.txRepo.InsertUnsignedTx(actionType, txItem)
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call txRepo.InsertUnsignedTx()")
 	}
@@ -521,7 +521,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 	// 3.TxReceiptInput table
 	// update ReceiptID
 	for idx := range txInputs {
-		txInputs[idx].TXID = txReceiptID
+		txInputs[idx].TXID = txID
 	}
 	err = w.txInRepo.InsertBulk(txInputs)
 	if err != nil {
@@ -531,7 +531,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 	// 4.TxReceiptOutput table
 	// update ReceiptID
 	for idx := range txOutputs {
-		txOutputs[idx].TXID = txReceiptID
+		txOutputs[idx].TXID = txID
 	}
 	//commit flag //TODO: transaction
 	//isCommit := true
@@ -548,13 +548,13 @@ func (w *Wallet) insertTxTableForUnsigned(
 
 	// 6. update payment_id in payment_request table for only action.ActionTypePayment
 	if actionType == action.ActionTypePayment {
-		_, err = w.repo.UpdatePaymentIDOnPaymentRequest(txReceiptID, paymentRequestIds, tx, true)
+		_, err = w.repo.UpdatePaymentIDOnPaymentRequest(txID, paymentRequestIds, tx, true)
 		if err != nil {
 			return 0, errors.Wrap(err, "storager.UpdatePaymentIDOnPaymentRequest()")
 		}
 	}
 
-	return txReceiptID, nil
+	return txID, nil
 }
 
 // generateHexFile generate file for hex and encoded previous addresses
