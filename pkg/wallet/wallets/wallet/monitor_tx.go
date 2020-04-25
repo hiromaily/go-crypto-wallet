@@ -1,11 +1,11 @@
 package wallet
 
 import (
-	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/action"
+	"github.com/hiromaily/go-bitcoin/pkg/tx"
 )
 
 // UpdateTxStatus update transaction status
@@ -44,7 +44,7 @@ func (w *Wallet) updateStatusForTxTypeSent(actionType action.ActionType) error {
 	// get records whose status is TxTypeSent
 	hashes, err := w.txRepo.GetSentHashTx(actionType, tx.TxTypeSent)
 	if err != nil {
-		return errors.Wrapf(err, "fail to call txRepo.GetSentHashTx() ActionType: %s, TxTypeSent", actionType)
+		return errors.Wrapf(err, "fail to call txRepo.GetSentHashTx(TxTypeSent) ActionType: %s", actionType)
 	}
 
 	// get hash in detail and check confirmation
@@ -67,7 +67,7 @@ func (w *Wallet) updateStatusForTxTypeDone(actionType action.ActionType) error {
 	// get records whose status is TxTypeDone
 	hashes, err := w.txRepo.GetSentHashTx(actionType, tx.TxTypeDone)
 	if err != nil {
-		return errors.Wrapf(err, "fail to call txRepo.GetSentHashTx() ActionType: %s, TxTypeDone", actionType)
+		return errors.Wrapf(err, "fail to call txRepo.GetSentHashTx(TxTypeDone) ActionType: %s", actionType)
 	}
 	w.logger.Debug(
 		"called storager.GetSentHashTx(TxTypeDone)",
@@ -119,9 +119,9 @@ func (w *Wallet) checkTxConfirmation(hash string, actionType action.ActionType) 
 	// check current confirmation
 	if tran.Confirmations >= uint64(w.btc.ConfirmationBlock()) {
 		//current confirmation meet 6 or more
-		_, err = w.repo.UpdateTxTypeDoneByTxHash(actionType, hash, nil, true)
+		_, err = w.txRepo.UpdateTxTypeBySentHashTx(actionType, tx.TxTypeDone, hash)
 		if err != nil {
-			return errors.Wrapf(err, "fail to call repo.UpdateTxTypeDoneByTxHash() ActionType: %s", actionType)
+			return errors.Wrapf(err, "fail to call repo.UpdateTxType(tx.TxTypeDone) ActionType: %s", actionType)
 		}
 	} else {
 		// not completed yet
@@ -200,23 +200,23 @@ func (w *Wallet) notifyTxDone(hash string, actionType action.ActionType) (int64,
 	return txID, nil
 }
 
-//upadte tx_type TxTypeNotified
+// update tx_type TxTypeNotified
 func (w *Wallet) updateTxTypeNotified(id int64, actionType action.ActionType) error {
 	switch actionType {
 	case action.ActionTypeReceipt:
-		_, err := w.repo.UpdateTxTypeNotifiedByID(actionType, id, nil, true)
+		_, err := w.txRepo.UpdateTxType(id, tx.TxTypeNotified)
 		if err != nil {
 			return errors.Wrapf(err, "fail to call repo.UpdateTxTypeNotifiedByID() ActionType: %s", actionType)
 		}
 	case action.ActionTypePayment:
-		tx := w.repo.MustBegin()
-		_, err := w.repo.UpdateTxTypeNotifiedByID(actionType, id, tx, false)
+		dtx := w.repo.MustBegin()
+		_, err := w.txRepo.UpdateTxType(id, tx.TxTypeNotified)
 		if err != nil {
 			return errors.Wrapf(err, "fail to call repo.UpdateTxTypeNotifiedByID() ActionType: %s", actionType)
 		}
 
 		// update is_done=true in payment_request
-		_, err = w.repo.UpdateIsDoneOnPaymentRequest(id, tx, true)
+		_, err = w.repo.UpdateIsDoneOnPaymentRequest(id, dtx, true)
 		if err != nil {
 			return errors.Wrapf(err, "fail to call repo.UpdateIsDoneOnPaymentRequest() ActionType: %s", actionType)
 		}

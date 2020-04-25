@@ -2,7 +2,6 @@ package wallet
 
 import (
 	"fmt"
-	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/wire"
@@ -13,6 +12,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/action"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
+	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btc"
@@ -499,7 +499,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 		return 0, nil
 	}
 
-	// 2.TxReceipt table //TODO: remove after replacemnet is done
+	// 2.TxReceipt table //TODO: remove after replacement is done
 	txReceipt := walletrepo.TxTable{}
 	txReceipt.UnsignedHexTx = hex
 	txReceipt.TotalInputAmount = w.btc.AmountString(inputTotal)

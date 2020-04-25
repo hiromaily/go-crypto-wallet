@@ -3,10 +3,10 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"github.com/volatiletech/null"
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries/qm"
 	"go.uber.org/zap"
@@ -25,7 +25,8 @@ type TxRepository interface {
 	InsertUnsignedTx(actionType action.ActionType, txItem *models.TX) (int64, error)
 	Update(txItem *models.TX) (int64, error)
 	UpdateAfterTxSent(txID int64, txType tx.TxType, signedHex, sentHashTx string) (int64, error)
-	UpdateTxType(actionType action.ActionType, txType tx.TxType, sentHashTx string) (int64, error)
+	UpdateTxType(id int64, txType tx.TxType) (int64, error)
+	UpdateTxTypeBySentHashTx(actionType action.ActionType, txType tx.TxType, sentHashTx string) (int64, error)
 	DeleteAll() (int64, error)
 }
 
@@ -188,9 +189,24 @@ func (r *txRepository) UpdateAfterTxSent(
 	).UpdateAll(ctx, r.dbConn, updCols)
 }
 
-//UpdateTxType
+// UpdateTxType
+// - replaced from UpdateTxTypeNotifiedByID
+func (r *txRepository) UpdateTxType(id int64, txType tx.TxType) (int64, error) {
+	//UPDATE %s SET current_tx_type=? WHERE id=?
+	ctx := context.Background()
+
+	// Set updating columns
+	updCols := map[string]interface{}{
+		models.TXColumns.CurrentTXType: txType.Int8(),
+	}
+	return models.Txes(
+		qm.Where("id=?", id), //unique
+	).UpdateAll(ctx, r.dbConn, updCols)
+}
+
+// UpdateTxTypeBySentHashTx
 // - replaced from UpdateTxTypeDoneByTxHash
-func (r *txRepository) UpdateTxType(actionType action.ActionType, txType tx.TxType, sentHashTx string) (int64, error) {
+func (r *txRepository) UpdateTxTypeBySentHashTx(actionType action.ActionType, txType tx.TxType, sentHashTx string) (int64, error) {
 	//UPDATE %s SET current_tx_type=? WHERE sent_hash_tx=?
 	ctx := context.Background()
 

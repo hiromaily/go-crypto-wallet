@@ -42,10 +42,10 @@ type WalletStorager interface {
 	//GetSentTxHashByTxTypeDone(actionType action.ActionType) ([]string, error)
 	//InsertTxForUnsigned(actionType action.ActionType, txReceipt *walletrepo.TxTable, tx *sqlx.Tx, isCommit bool) (int64, error)
 	//UpdateTxAfterSent(actionType action.ActionType, txReceipt *walletrepo.TxTable, tx *sqlx.Tx, isCommit bool) (int64, error)
-	UpdateTxTypeDoneByTxHash(actionType action.ActionType, hash string, tx *sqlx.Tx, isCommit bool) (int64, error)
-	UpdateTxTypeNotifiedByTxHash(actionType action.ActionType, hash string, tx *sqlx.Tx, isCommit bool) (int64, error)
-	UpdateTxTypeDoneByID(actionType action.ActionType, ID int64, tx *sqlx.Tx, isCommit bool) (int64, error)
-	UpdateTxTypeNotifiedByID(actionType action.ActionType, ID int64, tx *sqlx.Tx, isCommit bool) (int64, error)
+	//UpdateTxTypeDoneByTxHash(actionType action.ActionType, hash string, tx *sqlx.Tx, isCommit bool) (int64, error)
+	//UpdateTxTypeNotifiedByTxHash(actionType action.ActionType, hash string, tx *sqlx.Tx, isCommit bool) (int64, error)
+	//UpdateTxTypeDoneByID(actionType action.ActionType, ID int64, tx *sqlx.Tx, isCommit bool) (int64, error)
+	//UpdateTxTypeNotifiedByID(actionType action.ActionType, ID int64, tx *sqlx.Tx, isCommit bool) (int64, error)
 }
 
 // ColdStorager is coldwalet storager interface

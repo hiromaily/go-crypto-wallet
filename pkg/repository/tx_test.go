@@ -1,14 +1,15 @@
 package repository_test
 
 import (
-	"github.com/ericlagergren/decimal"
-	"github.com/hiromaily/go-bitcoin/pkg/tx"
-	"github.com/volatiletech/sqlboiler/types"
 	"testing"
+
+	"github.com/ericlagergren/decimal"
+	"github.com/volatiletech/sqlboiler/types"
 
 	"github.com/hiromaily/go-bitcoin/pkg/action"
 	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/testutil"
+	"github.com/hiromaily/go-bitcoin/pkg/tx"
 )
 
 // TestTx is test for any data operation
@@ -114,14 +115,32 @@ func TestTx(t *testing.T) {
 	}
 
 	// update txType
-	_, err = txRepo.UpdateTxType(actionType, tx.TxTypeDone, sentHashTx)
+	_, err = txRepo.UpdateTxTypeBySentHashTx(actionType, tx.TxTypeDone, sentHashTx)
+	if err != nil {
+		t.Fatalf("fail to call UpdateTxTypeBySentHashTx() %v", err)
+	}
 	// check updated record
 	tmpTx, err = txRepo.GetOne(txItem.ID)
 	if err != nil {
 		t.Fatalf("fail to call GetOne() %v", err)
 	}
 	if tmpTx.CurrentTXType != tx.TxTypeDone.Int8() {
-		t.Errorf("Update() = %s, want %s", tmpTx.SignedHexTX, signedHex)
+		t.Errorf("Update() = %d, want %d", tmpTx.CurrentTXType, tx.TxTypeDone.Int8())
+		return
+	}
+
+	// update txType
+	_, err = txRepo.UpdateTxType(txItem.ID, tx.TxTypeNotified)
+	if err != nil {
+		t.Fatalf("fail to call UpdateTxType() %v", err)
+	}
+	// check updated record
+	tmpTx, err = txRepo.GetOne(txItem.ID)
+	if err != nil {
+		t.Fatalf("fail to call GetOne() %v", err)
+	}
+	if tmpTx.CurrentTXType != tx.TxTypeNotified.Int8() {
+		t.Errorf("Update() = %d, want %d", tmpTx.CurrentTXType, tx.TxTypeNotified.Int8())
 		return
 	}
 

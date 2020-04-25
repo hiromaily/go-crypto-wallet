@@ -1,13 +1,9 @@
 package walletrepo
 
 import (
-	"fmt"
 	"time"
 
-	"github.com/jmoiron/sqlx"
-
 	"github.com/hiromaily/go-bitcoin/pkg/action"
-	"github.com/hiromaily/go-bitcoin/pkg/tx"
 )
 
 var txTableName = map[action.ActionType]string{
@@ -83,19 +79,19 @@ type TxTable struct {
 //}
 
 // getSentTxHash
-func (r *WalletRepository) getSentTxHash(tbl string, txTypeValue uint8) ([]string, error) {
-	var txHashs []string
-	sql := "SELECT sent_hash_tx FROM %s WHERE current_tx_type=?"
-	sql = fmt.Sprintf(sql, tbl)
-	//logger.Debugf("sql: %s", sql)
-
-	err := r.db.Select(&txHashs, sql, txTypeValue)
-	if err != nil {
-		return nil, err
-	}
-
-	return txHashs, nil
-}
+//func (r *WalletRepository) getSentTxHash(tbl string, txTypeValue uint8) ([]string, error) {
+//	var txHashs []string
+//	sql := "SELECT sent_hash_tx FROM %s WHERE current_tx_type=?"
+//	sql = fmt.Sprintf(sql, tbl)
+//	//logger.Debugf("sql: %s", sql)
+//
+//	err := r.db.Select(&txHashs, sql, txTypeValue)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	return txHashs, nil
+//}
 
 // GetSentTxHashByTxTypeSent tx_typeが`sent`であるsent_hash_txの配列を返す
 //func (r *WalletRepository) GetSentTxHashByTxTypeSent(actionType action.ActionType) ([]string, error) {
@@ -174,77 +170,77 @@ func (r *WalletRepository) getSentTxHash(tbl string, txTypeValue uint8) ([]strin
 //}
 
 // updateTxTypeByTxHash 該当するsent_hash_txのレコードのcurrnt_tx_typeを更新する
-func (r *WalletRepository) updateTxTypeByTxHash(tbl string, hash string, txTypeValue uint8, tx *sqlx.Tx, isCommit bool) (int64, error) {
-
-	if tx == nil {
-		tx = r.db.MustBegin()
-	}
-
-	sql := `
-UPDATE %s SET current_tx_type=? WHERE sent_hash_tx=?
-`
-	sql = fmt.Sprintf(sql, tbl)
-	//logger.Debugf("sql: %s", sql)
-
-	res, err := tx.Exec(sql, txTypeValue, hash)
-	if err != nil {
-		tx.Rollback()
-		return 0, err
-	}
-	if isCommit {
-		tx.Commit()
-	}
-	affectedNum, _ := res.RowsAffected()
-
-	return affectedNum, nil
-}
+//func (r *WalletRepository) updateTxTypeByTxHash(tbl string, hash string, txTypeValue uint8, tx *sqlx.Tx, isCommit bool) (int64, error) {
+//
+//	if tx == nil {
+//		tx = r.db.MustBegin()
+//	}
+//
+//	sql := `
+//UPDATE %s SET current_tx_type=? WHERE sent_hash_tx=?
+//`
+//	sql = fmt.Sprintf(sql, tbl)
+//	//logger.Debugf("sql: %s", sql)
+//
+//	res, err := tx.Exec(sql, txTypeValue, hash)
+//	if err != nil {
+//		tx.Rollback()
+//		return 0, err
+//	}
+//	if isCommit {
+//		tx.Commit()
+//	}
+//	affectedNum, _ := res.RowsAffected()
+//
+//	return affectedNum, nil
+//}
 
 // UpdateTxTypeDoneByTxHash 該当するsent_hash_txのレコードのcurrnt_tx_typeを更新する
-func (r *WalletRepository) UpdateTxTypeDoneByTxHash(actionType action.ActionType, hash string, dbtx *sqlx.Tx, isCommit bool) (int64, error) {
-	txTypeValue := tx.TxTypeValue[tx.TxTypeDone]
-	return r.updateTxTypeByTxHash(txTableName[actionType], hash, txTypeValue, dbtx, isCommit)
-}
+//func (r *WalletRepository) UpdateTxTypeDoneByTxHash(actionType action.ActionType, hash string, dbtx *sqlx.Tx, isCommit bool) (int64, error) {
+//	txTypeValue := tx.TxTypeValue[tx.TxTypeDone]
+//	return r.updateTxTypeByTxHash(txTableName[actionType], hash, txTypeValue, dbtx, isCommit)
+//}
 
 // UpdateTxTypeNotifiedByTxHash 該当するsent_hash_txのレコードのcurrnt_tx_typeを更新する
-func (r *WalletRepository) UpdateTxTypeNotifiedByTxHash(actionType action.ActionType, hash string, dbtx *sqlx.Tx, isCommit bool) (int64, error) {
-	txTypeValue := tx.TxTypeValue[tx.TxTypeNotified]
-	return r.updateTxTypeByTxHash(txTableName[actionType], hash, txTypeValue, dbtx, isCommit)
-}
+//func (r *WalletRepository) UpdateTxTypeNotifiedByTxHash(actionType action.ActionType, hash string, dbtx *sqlx.Tx, isCommit bool) (int64, error) {
+//	txTypeValue := tx.TxTypeValue[tx.TxTypeNotified]
+//	return r.updateTxTypeByTxHash(txTableName[actionType], hash, txTypeValue, dbtx, isCommit)
+//}
 
 // updateTxTypeByID 該当するIDのレコードのcurrnt_tx_typeを更新する
-func (r *WalletRepository) updateTxTypeByID(tbl string, ID int64, txTypeValue uint8, tx *sqlx.Tx, isCommit bool) (int64, error) {
-
-	if tx == nil {
-		tx = r.db.MustBegin()
-	}
-
-	sql := `
-UPDATE %s SET current_tx_type=? WHERE id=?
-`
-	sql = fmt.Sprintf(sql, tbl)
-	//logger.Debugf("sql: %s", sql)
-
-	res, err := tx.Exec(sql, txTypeValue, ID)
-	if err != nil {
-		tx.Rollback()
-		return 0, err
-	}
-	if isCommit {
-		tx.Commit()
-	}
-	affectedNum, _ := res.RowsAffected()
-
-	return affectedNum, nil
-}
+//func (r *WalletRepository) updateTxTypeByID(tbl string, ID int64, txTypeValue uint8, tx *sqlx.Tx, isCommit bool) (int64, error) {
+//
+//	if tx == nil {
+//		tx = r.db.MustBegin()
+//	}
+//
+//	sql := `
+//UPDATE %s SET current_tx_type=? WHERE id=?
+//`
+//	sql = fmt.Sprintf(sql, tbl)
+//	//logger.Debugf("sql: %s", sql)
+//
+//	res, err := tx.Exec(sql, txTypeValue, ID)
+//	if err != nil {
+//		tx.Rollback()
+//		return 0, err
+//	}
+//	if isCommit {
+//		tx.Commit()
+//	}
+//	affectedNum, _ := res.RowsAffected()
+//
+//	return affectedNum, nil
+//}
 
 // UpdateTxTypeDoneByID 該当するIDのレコードのcurrnt_tx_typeを更新する
-func (r *WalletRepository) UpdateTxTypeDoneByID(actionType action.ActionType, ID int64, dbtx *sqlx.Tx, isCommit bool) (int64, error) {
-	txTypeValue := tx.TxTypeValue[tx.TxTypeDone]
-	return r.updateTxTypeByID(txTableName[actionType], ID, txTypeValue, dbtx, isCommit)
-}
+//func (r *WalletRepository) UpdateTxTypeDoneByID(actionType action.ActionType, ID int64, dbtx *sqlx.Tx, isCommit bool) (int64, error) {
+//	txTypeValue := tx.TxTypeValue[tx.TxTypeDone]
+//	return r.updateTxTypeByID(txTableName[actionType], ID, txTypeValue, dbtx, isCommit)
+//}
 
 // UpdateTxTypeNotifiedByID 該当するIDのレコードのcurrnt_tx_typeを更新する
-func (r *WalletRepository) UpdateTxTypeNotifiedByID(actionType action.ActionType, ID int64, dbtx *sqlx.Tx, isCommit bool) (int64, error) {
-	txTypeValue := tx.TxTypeValue[tx.TxTypeNotified]
-	return r.updateTxTypeByID(txTableName[actionType], ID, txTypeValue, dbtx, isCommit)
-}
+//func (r *WalletRepository) UpdateTxTypeNotifiedByID(actionType action.ActionType, ID int64, dbtx *sqlx.Tx, isCommit bool) (int64, error) {
+//	txTypeValue := tx.TxTypeValue[tx.TxTypeNotified]
+//	return r.updateTxTypeByID(txTableName[actionType], ID, txTypeValue, dbtx, isCommit)
+//}
