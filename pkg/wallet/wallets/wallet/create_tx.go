@@ -496,15 +496,9 @@ func (w *Wallet) insertTxTableForUnsigned(
 		return 0, nil
 	}
 
-	// 2.TxReceipt table //TODO: remove after replacement is done
-	//txReceipt := walletrepo.TxTable{}
-	//txReceipt.UnsignedHexTx = hex
-	//txReceipt.TotalInputAmount = w.btc.AmountString(inputTotal)
-	//txReceipt.TotalOutputAmount = w.btc.AmountString(outputTotal)
-	//txReceipt.Fee = w.btc.AmountString(fee)
-	//txReceipt.TxType = txType
+	// 2.TxReceipt table
 	txItem := &models.TX{
-		Action:            action.ActionTypePayment.String(),
+		Action:            actionType.String(),
 		UnsignedHexTX:     hex,
 		TotalInputAmount:  w.btc.AmountToDecimal(inputTotal),
 		TotalOutputAmount: w.btc.AmountToDecimal(outputTotal),
