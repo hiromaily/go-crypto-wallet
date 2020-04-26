@@ -29,12 +29,12 @@ func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, address
 	}
 
 	// get one wallet_address for Authorization account from account_key_authorization table
-	authKeyTable, err := w.repo.GetOneByMaxIDOnAccountKeyTable(account.AccountTypeAuthorization)
+	authKeyTable, err := w.repo.AccountKey().GetOneMaxID(account.AccountTypeAuthorization)
 	if err != nil {
 		return errors.Wrap(err, "fail to call repo.GetOneByMaxIDOnAccountKeyTable(AccountTypeAuthorization)")
 	}
 	// get full-pub-key for given account from added_pubkey_history_table
-	addedPubkeyHistoryTable, err := w.repo.GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(accountType)
+	multisigHistoryTable, err := w.repo.MultisigHistory().GetAllNoMultisig(accountType)
 	if err != nil {
 		return errors.Wrapf(err, "fail to call repo.GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(%s)", accountType.String())
 	}
@@ -42,12 +42,12 @@ func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, address
 	// call bitcoinAPI `addmultisigaddress`
 	//FIXME: for now only 2:2 proportion is available
 	// - however N:M should be adjustable
-	for _, val := range addedPubkeyHistoryTable {
+	for _, val := range multisigHistoryTable {
 		resAddr, err := w.btc.AddMultisigAddress(
 			2,
 			[]string{
 				val.FullPublicKey, // receipt, payment, stored ...
-				authKeyTable.P2shSegwitAddress,
+				authKeyTable.P2SHSegwitAddress,
 			},
 			fmt.Sprintf("multi_%s", accountType), //TODO:what account name is understandable?
 			addressType,
@@ -57,14 +57,14 @@ func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, address
 			w.logger.Error(
 				"fail to call btc.CreateMultiSig(2,,) ",
 				zap.String("full public key", val.FullPublicKey),
-				zap.String("p2sh segwit address", authKeyTable.P2shSegwitAddress),
+				zap.String("p2sh segwit address", authKeyTable.P2SHSegwitAddress),
 				zap.Error(err))
 			continue
 		}
 
 		// store generated address into added_pubkey_history_table
-		err = w.repo.UpdateMultisigAddrOnAddedPubkeyHistoryTable(accountType, resAddr.Address,
-			resAddr.RedeemScript, authKeyTable.P2shSegwitAddress, val.FullPublicKey, nil, true)
+		_, err = w.repo.MultisigHistory().UpdateMultisigAddr(accountType, resAddr.Address,
+			resAddr.RedeemScript, authKeyTable.P2SHSegwitAddress, val.FullPublicKey)
 		if err != nil {
 			w.logger.Error(
 				"fail to call db.UpdateMultisigAddrOnAddedPubkeyHistoryTable()",

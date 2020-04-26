@@ -1,8 +1,9 @@
 package main
 
 import (
+	"database/sql"
+
 	"github.com/btcsuite/btcd/rpcclient"
-	"github.com/jmoiron/sqlx"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 
@@ -10,8 +11,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	mysql "github.com/hiromaily/go-bitcoin/pkg/db/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
+	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tracer"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
@@ -30,7 +30,7 @@ type Registry interface {
 
 type registry struct {
 	conf        *config.Config
-	mysqlClient *sqlx.DB
+	mysqlClient *sql.DB
 	logger      *zap.Logger
 	rpcClient   *rpcclient.Client
 	btc         api.Bitcoiner
@@ -51,7 +51,7 @@ func (r *registry) NewKeygener() wallets.Keygener {
 		r.newBTC(),
 		r.newLogger(),
 		r.newTracer(),
-		r.newStorager(),
+		r.newRepository(),
 		r.newKeyGenerator(),
 		r.newAddressFileStorager(),
 		r.newTxFileStorager(),
@@ -93,11 +93,38 @@ func (r *registry) newTracer() opentracing.Tracer {
 }
 
 //func (r *registry) newStorager() rdb.KeygenStorager {
-func (r *registry) newStorager() rdb.ColdStorager {
+func (r *registry) newRepository() coldrepo.ColdRepository {
 	// if there are multiple options, set proper one
 	// storager interface as MySQL
-	return coldrepo.NewColdRepository(
-		r.newMySQLXClient(),
+	return coldrepo.NewColdWalletRepository(
+		r.newMySQLClient(),
+		r.newLogger(),
+		r.newSeedRepo(),
+		r.newAccountKeyRepo(),
+		r.newMultisigRepo(),
+	)
+}
+
+func (r *registry) newSeedRepo() coldrepo.SeedRepository {
+	return coldrepo.NewSeedRepository(
+		r.newMySQLClient(),
+		r.conf.CoinTypeCode,
+		r.newLogger(),
+	)
+}
+
+func (r *registry) newAccountKeyRepo() coldrepo.AccountKeyRepository {
+	return coldrepo.NewAccountKeyRepository(
+		r.newMySQLClient(),
+		r.conf.CoinTypeCode,
+		r.newLogger(),
+	)
+}
+
+func (r *registry) newMultisigRepo() coldrepo.MultisigHistoryRepository {
+	return coldrepo.NewMultisigHistoryRepository(
+		r.newMySQLClient(),
+		r.conf.CoinTypeCode,
 		r.newLogger(),
 	)
 }
@@ -110,9 +137,9 @@ func (r *registry) newKeyGenerator() key.Generator {
 		r.newLogger())
 }
 
-func (r *registry) newMySQLXClient() *sqlx.DB {
+func (r *registry) newMySQLClient() *sql.DB {
 	if r.mysqlClient == nil {
-		dbConn, err := mysql.NewMySQLX(&r.conf.MySQL)
+		dbConn, err := mysql.NewMySQL(&r.conf.MySQL)
 		if err != nil {
 			panic(err)
 		}

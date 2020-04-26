@@ -15,7 +15,7 @@ import (
 
 type SeedRepository interface {
 	GetOne() (*models.Seed, error)
-	Insert(item *models.Seed) error
+	Insert(strSeed string) error
 }
 
 type seedRepository struct {
@@ -51,9 +51,12 @@ func (r *seedRepository) GetOne() (*models.Seed, error) {
 
 // Insert inserts record
 // - replaced from InsertSeed()
-func (r *seedRepository) Insert(item *models.Seed) error {
+func (r *seedRepository) Insert(strSeed string) error {
 	//set coin
-	item.Coin = r.coinTypeCode.String()
+	item := &models.Seed{
+		Coin: r.coinTypeCode.String(),
+		Seed: strSeed,
+	}
 
 	ctx := context.Background()
 	if err := item.Insert(ctx, r.dbConn, boil.Infer()); err != nil {

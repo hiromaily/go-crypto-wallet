@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
+	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 )
 
@@ -34,9 +34,9 @@ func (w *ColdWallet) GenerateSeed() ([]byte, error) {
 	strSeed := key.SeedToString(bSeed)
 
 	// insert seed in database
-	_, err = w.repo.InsertSeed(strSeed, nil, true)
+	err = w.repo.Seed().Insert(strSeed)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call repo.InsertSeed()")
+		return nil, errors.Wrap(err, "fail to call repo.Seed().Insert()")
 	}
 
 	return bSeed, nil
@@ -51,7 +51,7 @@ func (w *ColdWallet) StoreSeed(strSeed string) ([]byte, error) {
 	}
 
 	// insert seed in database
-	_, err = w.repo.InsertSeed(strSeed, nil, true)
+	err = w.repo.Seed().Insert(strSeed)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call repo.InsertSeed()")
 	}
@@ -62,7 +62,7 @@ func (w *ColdWallet) StoreSeed(strSeed string) ([]byte, error) {
 // retrieve seed from database
 func (w *ColdWallet) retrieveSeed() ([]byte, error) {
 	// get seed from database, seed is expected only one record
-	seed, err := w.repo.GetSeedOne()
+	seed, err := w.repo.Seed().GetOne()
 	if err == nil && seed.Seed != "" {
 		w.logger.Info("seed have already been generated")
 		return key.SeedToByte(seed.Seed)
@@ -81,7 +81,7 @@ func (w *ColdWallet) GeneratePubKey(
 	seed []byte, count uint32) ([]key.WalletKey, error) {
 
 	//get latest index
-	idxFrom, err := w.repo.GetMaxIndexOnAccountKeyTable(accountType)
+	idxFrom, err := w.repo.AccountKey().GetMaxIndex(accountType)
 	if err != nil {
 		idxFrom = 0
 	} else {
@@ -95,23 +95,24 @@ func (w *ColdWallet) GeneratePubKey(
 	}
 
 	// insert key information to account_key_table
-	accountKeyClients := make([]coldrepo.AccountKeyTable, len(walletKeys))
+	accountKeyClients := make([]*models.AccountKey, len(walletKeys))
 	for idx, key := range walletKeys {
-		accountKeyClients[idx] = coldrepo.AccountKeyTable{
+		accountKeyClients[idx] = &models.AccountKey{
+			Coin:                  w.GetBTC().CoinTypeCode().String(),
+			Account:               accountType.String(),
 			WalletAddress:         key.Address,
-			P2shSegwitAddress:     key.P2shSegwit,
+			P2SHSegwitAddress:     key.P2shSegwit,
 			FullPublicKey:         key.FullPubKey,
 			WalletMultisigAddress: "",
 			RedeemScript:          key.RedeemScript,
 			WalletImportFormat:    key.WIF,
-			Account:               accountType.String(),
-			Idx:                   uint32(idxFrom),
+			Idx:                   idxFrom,
 		}
 		idxFrom++
 	}
-	err = w.repo.InsertAccountKeyTable(accountType, accountKeyClients, nil, true)
+	err = w.repo.AccountKey().InsertBulk(accountKeyClients)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call repo.InsertAccountKeyTable()")
+		return nil, errors.Wrap(err, "fail to call repo.AccountKey().InsertBulk()")
 	}
 
 	return walletKeys, err

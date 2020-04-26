@@ -4,7 +4,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
+	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
@@ -16,7 +16,7 @@ type Signature struct {
 	btc          api.Bitcoiner
 	logger       *zap.Logger
 	tracer       opentracing.Tracer
-	repo         rdb.ColdStorager
+	repo         coldrepo.ColdRepository
 	keyGenerator key.Generator
 	wtype        types.WalletType
 }
@@ -26,7 +26,7 @@ func NewSignature(
 	btc api.Bitcoiner,
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
-	repo rdb.ColdStorager,
+	repo coldrepo.ColdRepository,
 	keyGenerator key.Generator,
 	wtype types.WalletType) *Signature {
 
@@ -44,11 +44,6 @@ func NewSignature(
 func (w *Signature) Done() {
 	w.repo.Close()
 	w.btc.Close()
-}
-
-// GetDB gets storager
-func (w *Signature) GetDB() rdb.ColdStorager {
-	return w.repo
 }
 
 // GetBTC gets btc

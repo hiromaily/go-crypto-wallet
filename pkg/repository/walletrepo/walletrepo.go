@@ -6,7 +6,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// WalletStorager is wallet repository interface
+// WalletRepository is wallet repository interface
 type WalletRepository interface {
 	Close() error
 	BeginTx() (*sql.Tx, error)
@@ -17,7 +17,7 @@ type WalletRepository interface {
 	Pubkey() PubkeyRepository
 }
 
-// WalletRepository is repository for wallet
+// walletRepository is repository for wallet
 type walletRepository struct {
 	db     *sql.DB
 	logger *zap.Logger

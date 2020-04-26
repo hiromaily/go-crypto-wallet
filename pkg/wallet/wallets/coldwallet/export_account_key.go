@@ -11,7 +11,7 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
+	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
@@ -37,9 +37,9 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, addrStatu
 	}
 
 	// get account key
-	accountKeyTable, err := w.repo.GetAllAccountKeyByAddrStatus(accountType, addrStatus)
+	accountKeyTable, err := w.repo.AccountKey().GetAllAddrStatus(accountType, addrStatus)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call repo.GetAllAccountKeyByAddrStatus()")
+		return "", errors.Wrap(err, "fail to call repo.AccountKey().GetAllAddrStatus()")
 	}
 	if len(accountKeyTable) == 0 {
 		w.logger.Info("no records in account_key table")
@@ -58,9 +58,9 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, addrStatu
 	for idx, record := range accountKeyTable {
 		wifs[idx] = record.WalletImportFormat
 	}
-	_, err = w.repo.UpdateAddrStatusByWIFs(accountType, updateAddrStatus, wifs, nil, true)
+	_, err = w.repo.AccountKey().UpdateAddrStatus(accountType, updateAddrStatus, wifs)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call repo.UpdateAddrStatusByWIFs()")
+		return "", errors.Wrap(err, "fail to call repo.AccountKey().UpdateAddrStatus()")
 	}
 
 	w.logger.Debug(
@@ -90,7 +90,7 @@ func getAddrStatus(currentKey address.AddrStatus, accountType account.AccountTyp
 
 // exportAccountKey export account_key_table as csv file
 // TODO: export logic could be defined as address.Storager
-func (w *ColdWallet) exportAccountKey(accountKeyTable []coldrepo.AccountKeyTable, accountType account.AccountType, addrStatusVal uint8) (string, error) {
+func (w *ColdWallet) exportAccountKey(accountKeyTable []*models.AccountKey, accountType account.AccountType, addrStatusVal uint8) (string, error) {
 	//create fileName
 	fileName := w.addrFileRepo.CreateFilePath(accountType, addrStatusVal)
 
@@ -106,7 +106,7 @@ func (w *ColdWallet) exportAccountKey(accountKeyTable []coldrepo.AccountKeyTable
 		//each line of csv data
 		tmpData := []string{
 			record.WalletAddress,
-			record.P2shSegwitAddress,
+			record.P2SHSegwitAddress,
 			record.FullPublicKey,
 			record.WalletMultisigAddress,
 			record.Account,

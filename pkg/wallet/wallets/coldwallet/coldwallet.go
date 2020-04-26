@@ -5,7 +5,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/address"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
+	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
@@ -17,7 +17,7 @@ type ColdWallet struct {
 	btc          api.Bitcoiner
 	logger       *zap.Logger
 	tracer       opentracing.Tracer
-	repo         rdb.ColdStorager
+	repo         coldrepo.ColdRepository
 	keyGenerator key.Generator
 	addrFileRepo address.Storager
 	txFileRepo   tx.FileStorager
@@ -29,7 +29,7 @@ func NewColdWalet(
 	btc api.Bitcoiner,
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
-	repo rdb.ColdStorager,
+	repo coldrepo.ColdRepository,
 	keyGenerator key.Generator,
 	addrFileRepo address.Storager,
 	txFileRepo tx.FileStorager,
@@ -51,11 +51,6 @@ func NewColdWalet(
 func (w *ColdWallet) Done() {
 	w.repo.Close()
 	w.btc.Close()
-}
-
-// GetDB gets storager
-func (w *ColdWallet) GetDB() rdb.ColdStorager {
-	return w.repo
 }
 
 // GetBTC gets btc

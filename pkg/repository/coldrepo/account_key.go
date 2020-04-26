@@ -11,19 +11,20 @@ import (
 	"github.com/volatiletech/sqlboiler/queries/qm"
 	"go.uber.org/zap"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
 type AccountKeyRepository interface {
-	GetMaxIndex() (int64, error)
-	GetOneMaxID() (*models.AccountKey, error)
-	GetAllAddrStatus(addrStatus address.AddrStatus) ([]*models.AccountKey, error)
-	GetAllMultiAddr(addrs []string) ([]*models.AccountKey, error)
+	GetMaxIndex(accountType account.AccountType) (int64, error)
+	GetOneMaxID(accountType account.AccountType) (*models.AccountKey, error)
+	GetAllAddrStatus(accountType account.AccountType, addrStatus address.AddrStatus) ([]*models.AccountKey, error)
+	GetAllMultiAddr(accountType account.AccountType, addrs []string) ([]*models.AccountKey, error)
 	InsertBulk(items []*models.AccountKey) error
-	UpdateAddrStatus(addrStatus address.AddrStatus, strWIF string) (int64, error)
-	UpdateMultisigAddr(items []*models.AccountKey) (int64, error)
+	UpdateAddrStatus(accountType account.AccountType, addrStatus address.AddrStatus, strWIFs []string) (int64, error)
+	UpdateMultisigAddr(accountType account.AccountType, items []*models.AccountKey) (int64, error)
 }
 
 type accountKeyRepository struct {
@@ -45,7 +46,7 @@ func NewAccountKeyRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, log
 
 // GetMaxIndex returns max id
 // - replaced from GetMaxIndexOnAccountKeyTable
-func (r *accountKeyRepository) GetMaxIndex() (int64, error) {
+func (r *accountKeyRepository) GetMaxIndex(accountType account.AccountType) (int64, error) {
 	//sql := "SELECT MAX(idx) from %s;"
 	ctx := context.Background()
 
@@ -53,6 +54,7 @@ func (r *accountKeyRepository) GetMaxIndex() (int64, error) {
 	err := models.AccountKeys(
 		qm.Select("MAX(idx)"),
 		qm.Where("coin=?", r.coinTypeCode.String()),
+		qm.And("account=?", accountType.String()),
 	).Bind(ctx, r.dbConn, &maxCount)
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to call models.AccountKeys().Bind()")
@@ -62,12 +64,13 @@ func (r *accountKeyRepository) GetMaxIndex() (int64, error) {
 
 // GetOneMaxID returns one records by max id
 // - replaced from GetOneByMaxIDOnAccountKeyTable
-func (r *accountKeyRepository) GetOneMaxID() (*models.AccountKey, error) {
+func (r *accountKeyRepository) GetOneMaxID(accountType account.AccountType) (*models.AccountKey, error) {
 	//sql := "SELECT * FROM %s ORDER BY ID DESC LIMIT 1;"
 	ctx := context.Background()
 
 	item, err := models.AccountKeys(
 		qm.Where("coin=?", r.coinTypeCode.String()),
+		qm.And("account=?", accountType.String()),
 		qm.OrderBy("id DESC"),
 	).One(ctx, r.dbConn)
 	if err != nil {
@@ -78,12 +81,13 @@ func (r *accountKeyRepository) GetOneMaxID() (*models.AccountKey, error) {
 
 // GetAllAddrStatus returns all AccountKey by addr_status
 // - replaced from GetAllAccountKeyByAddrStatus
-func (r *accountKeyRepository) GetAllAddrStatus(addrStatus address.AddrStatus) ([]*models.AccountKey, error) {
+func (r *accountKeyRepository) GetAllAddrStatus(accountType account.AccountType, addrStatus address.AddrStatus) ([]*models.AccountKey, error) {
 	//sql := "SELECT * FROM %s WHERE addr_status=?;"
 	ctx := context.Background()
 
 	items, err := models.AccountKeys(
 		qm.Where("coin=?", r.coinTypeCode.String()),
+		qm.And("account=?", accountType.String()),
 		qm.And("addr_status=?", addrStatus.Int8()),
 	).All(ctx, r.dbConn)
 	if err != nil {
@@ -95,7 +99,7 @@ func (r *accountKeyRepository) GetAllAddrStatus(addrStatus address.AddrStatus) (
 
 // GetAllMultiAddr returns all AccountKey by multisig_address
 // - replaced from GetAllAccountKeyByMultiAddrs
-func (r *accountKeyRepository) GetAllMultiAddr(addrs []string) ([]*models.AccountKey, error) {
+func (r *accountKeyRepository) GetAllMultiAddr(accountType account.AccountType, addrs []string) ([]*models.AccountKey, error) {
 	//sql := "SELECT * FROM %s WHERE wallet_multisig_address IN (?);"
 	ctx := context.Background()
 
@@ -106,6 +110,7 @@ func (r *accountKeyRepository) GetAllMultiAddr(addrs []string) ([]*models.Accoun
 
 	items, err := models.AccountKeys(
 		qm.Where("coin=?", r.coinTypeCode.String()),
+		qm.And("account=?", accountType.String()),
 		qm.AndIn("wallet_multisig_address IN ?", targetAddrs...),
 	).All(ctx, r.dbConn)
 	if err != nil {
@@ -124,7 +129,7 @@ func (r *accountKeyRepository) InsertBulk(items []*models.AccountKey) error {
 
 // UpdateAddrStatus updates addr_status
 // - replaced from UpdateAddrStatusByWIF
-func (r *accountKeyRepository) UpdateAddrStatus(addrStatus address.AddrStatus, strWIF string) (int64, error) {
+func (r *accountKeyRepository) UpdateAddrStatus(accountType account.AccountType, addrStatus address.AddrStatus, strWIFs []string) (int64, error) {
 	//sql := `UPDATE %s SET addr_status=? WHERE wallet_import_format=?`
 	ctx := context.Background()
 
@@ -132,16 +137,23 @@ func (r *accountKeyRepository) UpdateAddrStatus(addrStatus address.AddrStatus, s
 	updCols := map[string]interface{}{
 		models.AccountKeyColumns.AddrStatus: addrStatus.Int8(),
 	}
+
+	targetWIFs := make([]interface{}, len(strWIFs))
+	for i, v := range strWIFs {
+		targetWIFs[i] = v
+	}
+
 	return models.AccountKeys(
 		qm.Where("coin=?", r.coinTypeCode.String()),
-		qm.And("wallet_import_format=?", strWIF),
+		qm.And("account=?", accountType.String()),
+		qm.And("wallet_import_format IN ?", targetWIFs...),
 	).UpdateAll(ctx, r.dbConn, updCols)
 }
 
 // UpdateMultisigAddr updates multisig_address
 // - replaced from UpdateMultisigAddrOnAccountKeyTableByFullPubKey
 // TODO: how to update multiple records
-func (r *accountKeyRepository) UpdateMultisigAddr(items []*models.AccountKey) (int64, error) {
+func (r *accountKeyRepository) UpdateMultisigAddr(accountType account.AccountType, items []*models.AccountKey) (int64, error) {
 	//	sql := `
 	//UPDATE %s SET wallet_multisig_address=:wallet_multisig_address, redeem_script=:redeem_script, addr_status=:addr_status, updated_at=:updated_at
 	//WHERE full_public_key=:full_public_key`
@@ -170,6 +182,7 @@ func (r *accountKeyRepository) UpdateMultisigAddr(items []*models.AccountKey) (i
 		}
 		_, err := models.AccountKeys(
 			qm.Where("coin=?", r.coinTypeCode.String()),
+			qm.And("account=?", accountType.String()),
 			qm.And("full_public_key=?", item.FullPublicKey),
 		).UpdateAll(ctx, r.dbConn, updCols)
 		if err != nil {
@@ -180,7 +193,7 @@ func (r *accountKeyRepository) UpdateMultisigAddr(items []*models.AccountKey) (i
 }
 
 // GetRedeedScriptByAddress 与えられたmultiSigアドレスから、RedeemScriptを取得する
-func GetRedeedScriptByAddress(accountKeys []models.AccountKey, addr string) string {
+func GetRedeedScriptByAddress(accountKeys []*models.AccountKey, addr string) string {
 	for _, val := range accountKeys {
 		if val.WalletMultisigAddress == addr {
 			return val.RedeemScript

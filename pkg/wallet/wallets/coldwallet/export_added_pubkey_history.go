@@ -10,7 +10,7 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
+	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
@@ -22,12 +22,12 @@ func (w *ColdWallet) ExportAddedPubkeyHistory(accountType account.AccountType) (
 
 	// get record in added_pybkey_history table
 	// condition: is_exported==false and multisig_address is already created
-	addedPubkeyHistoryTable, err := w.repo.GetAddedPubkeyHistoryTableByNotExported(accountType)
+	multisigHistoryTable, err := w.repo.MultisigHistory().GetAllNotExported(accountType)
 	if err != nil {
-		return "", errors.Wrap(err, "storager.GetAddedPubkeyHistoryTableByNotExported()")
+		return "", errors.Wrap(err, "repo.MultisigHistory().GetAllNotExported()")
 	}
 
-	if len(addedPubkeyHistoryTable) == 0 {
+	if len(multisigHistoryTable) == 0 {
 		w.logger.Info(
 			"no records in added_pubkey_history table",
 			zap.String("account", accountType.String()))
@@ -35,27 +35,27 @@ func (w *ColdWallet) ExportAddedPubkeyHistory(accountType account.AccountType) (
 	}
 
 	// export data in added_pubkey_history table as csv file
-	fileName, err := w.exportAddedPubkeyHistoryTable(addedPubkeyHistoryTable, accountType,
+	fileName, err := w.exportAddedPubkeyHistoryTable(multisigHistoryTable, accountType,
 		address.AddrStatusValue[address.AddrStatusPubkeyExported])
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call exportAddedPubkeyHistoryTable()")
 	}
 
 	// update current status
-	ids := make([]int64, len(addedPubkeyHistoryTable))
-	for idx, record := range addedPubkeyHistoryTable {
+	ids := make([]int64, len(multisigHistoryTable))
+	for idx, record := range multisigHistoryTable {
 		ids[idx] = record.ID
 	}
-	_, err = w.repo.UpdateIsExportedOnAddedPubkeyHistoryTable(accountType, ids, nil, true)
+	_, err = w.repo.MultisigHistory().UpdateIsExported(accountType, ids)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call repo.UpdateIsExportedOnAddedPubkeyHistoryTable()")
+		return "", errors.Wrap(err, "fail to call repo.MultisigHistory().UpdateIsExported()")
 	}
 
 	return fileName, nil
 }
 
 // TODO: export logic could be defined as address.Storager
-func (w *ColdWallet) exportAddedPubkeyHistoryTable(addedPubkeyHistoryTable []coldrepo.AddedPubkeyHistoryTable, accountType account.AccountType, addrStatus uint8) (string, error) {
+func (w *ColdWallet) exportAddedPubkeyHistoryTable(multisigHistoryTable []*models.MultisigHistory, accountType account.AccountType, addrStatus uint8) (string, error) {
 	//fileName
 	fileName := w.addrFileRepo.CreateFilePath(accountType, addrStatus)
 
@@ -67,7 +67,7 @@ func (w *ColdWallet) exportAddedPubkeyHistoryTable(addedPubkeyHistoryTable []col
 
 	writer := bufio.NewWriter(file)
 
-	for _, record := range addedPubkeyHistoryTable {
+	for _, record := range multisigHistoryTable {
 		//each line of csv data
 		tmpData := []string{
 			record.FullPublicKey,

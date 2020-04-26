@@ -4,7 +4,6 @@ import (
 	"database/sql"
 
 	"github.com/btcsuite/btcd/rpcclient"
-	"github.com/jmoiron/sqlx"
 	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 
@@ -27,12 +26,11 @@ type Registry interface {
 }
 
 type registry struct {
-	conf         *config.Config
-	mysqlXClient *sqlx.DB
-	mysqlClient  *sql.DB
-	logger       *zap.Logger
-	rpcClient    *rpcclient.Client
-	walletType   types.WalletType
+	conf        *config.Config
+	mysqlClient *sql.DB
+	logger      *zap.Logger
+	rpcClient   *rpcclient.Client
+	walletType  types.WalletType
 }
 
 // NewRegistry is to register registry interface

@@ -19,7 +19,7 @@ func (w *ColdWallet) ImportPrivateKey(accountType account.AccountType) error {
 	}
 
 	//1. retrieve records(private key) from account_key table
-	accountKeyTable, err := w.repo.GetAllAccountKeyByAddrStatus(accountType, address.AddrStatusHDKeyGenerated) //addr_status=0
+	accountKeyTable, err := w.repo.AccountKey().GetAllAddrStatus(accountType, address.AddrStatusHDKeyGenerated) //addr_status=0
 	if err != nil {
 		return errors.Wrap(err, "fail to call repo.GetAllAccountKeyByAddrStatus()")
 	}
@@ -53,10 +53,10 @@ func (w *ColdWallet) ImportPrivateKey(accountType account.AccountType) error {
 		}
 
 		//update DB
-		_, err = w.repo.UpdateAddrStatusByWIF(accountType, address.AddrStatusPrivKeyImported, record.WalletImportFormat, nil, true)
+		_, err = w.repo.AccountKey().UpdateAddrStatus(accountType, address.AddrStatusPrivKeyImported, []string{record.WalletImportFormat})
 		if err != nil {
 			w.logger.Error(
-				"fail to update table by calling btc.UpdateAddrStatusByWIF()",
+				"fail to call repo.AccountKey().UpdateAddrStatus()",
 				zap.String("target_table", "account_key_account"),
 				zap.String("account_type", accountType.String()),
 				zap.String("record.WalletImportFormat", record.WalletImportFormat),
@@ -64,7 +64,7 @@ func (w *ColdWallet) ImportPrivateKey(accountType account.AccountType) error {
 		}
 
 		// check address was stored in bitcoin core by importing private key
-		w.checkImportedAddress(record.WalletAddress, record.P2shSegwitAddress, record.FullPublicKey)
+		w.checkImportedAddress(record.WalletAddress, record.P2SHSegwitAddress, record.FullPublicKey)
 	}
 
 	return nil

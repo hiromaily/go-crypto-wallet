@@ -2,13 +2,12 @@ package coldwallet
 
 import (
 	"strings"
-	"time"
 
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
+	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
@@ -37,11 +36,13 @@ func (w *ColdWallet) ImportPubKey(fileName string, accountType account.AccountTy
 	}
 
 	// insert full pubKey into added_pubkey_history_table
-	addedPubkeyHistorys := make([]coldrepo.AddedPubkeyHistoryTable, len(pubKeys))
+	multisigHistorys := make([]*models.MultisigHistory, len(pubKeys))
 	for i, key := range pubKeys {
 		inner := strings.Split(key, ",")
 		//FullPublicKey is required
-		addedPubkeyHistorys[i] = coldrepo.AddedPubkeyHistoryTable{
+		multisigHistorys[i] = &models.MultisigHistory{
+			Coin:                  w.GetBTC().CoinTypeCode().String(),
+			Account:               accountType.String(),
 			FullPublicKey:         inner[2],
 			AuthAddress1:          "",
 			AuthAddress2:          "",
@@ -50,7 +51,7 @@ func (w *ColdWallet) ImportPubKey(fileName string, accountType account.AccountTy
 		}
 	}
 	//TODO:Upsert would be better to prevent error which occur when data is already inserted
-	err = w.repo.InsertAddedPubkeyHistoryTable(accountType, addedPubkeyHistorys, nil, true)
+	err = w.repo.MultisigHistory().InsertBulk(multisigHistorys)
 	if err != nil {
 		return errors.Wrap(err, "fail to call repo.InsertAddedPubkeyHistoryTable()")
 	}
@@ -79,9 +80,8 @@ func (w *ColdWallet) ImportMultisigAddress(fileName string, accountType account.
 	}
 
 	//added_pubkey_history_receiptテーブルにInsert
-	accountKeyTable := make([]coldrepo.AccountKeyTable, len(pubKeys))
+	accountKeyTable := make([]*models.AccountKey, len(pubKeys))
 
-	tm := time.Now()
 	for i, pubkey := range pubKeys {
 		inner := strings.Split(pubkey, ",")
 		// csv file structure
@@ -90,18 +90,17 @@ func (w *ColdWallet) ImportMultisigAddress(fileName string, accountType account.
 		//	record.AuthAddress2,
 		//	record.WalletMultisigAddress,
 		//	record.RedeemScript,
-		accountKeyTable[i] = coldrepo.AccountKeyTable{
+		accountKeyTable[i] = &models.AccountKey{
 			FullPublicKey:         inner[0],
 			WalletMultisigAddress: inner[3],
 			RedeemScript:          inner[4],
-			AddrStatus:            address.AddrStatusValue[address.AddrStatusMultiAddressImported],
-			UpdatedAt:             &tm,
+			AddrStatus:            address.AddrStatusMultiAddressImported.Int8(),
 		}
 	}
 	//TODO: Upsert would be better??
-	err = w.repo.UpdateMultisigAddrOnAccountKeyTableByFullPubKey(accountType, accountKeyTable, nil, true)
+	_, err = w.repo.AccountKey().UpdateMultisigAddr(accountType, accountKeyTable)
 	if err != nil {
-		return errors.Errorf("DB.UpdateMultisigAddrOnAccountKeyTableByFullPubKey() error: %s", err)
+		return errors.Wrapf(err, "fail to call repo.AccountKey().UpdateMultisigAddr()")
 	}
 
 	return nil

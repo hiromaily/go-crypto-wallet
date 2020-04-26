@@ -3,7 +3,6 @@ package wallets
 import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
@@ -36,7 +35,6 @@ type Coldwalleter interface {
 	SignatureExclusiver
 
 	Done()
-	GetDB() rdb.ColdStorager
 	GetBTC() api.Bitcoiner
 	GetType() types.WalletType
 }
@@ -56,7 +54,6 @@ type Keygener interface {
 	KeygenExclusiver
 
 	Done()
-	GetDB() rdb.ColdStorager
 	GetBTC() api.Bitcoiner
 	GetType() types.WalletType
 }
@@ -73,7 +70,6 @@ type Signer interface {
 	SignatureExclusiver
 
 	Done()
-	GetDB() rdb.ColdStorager
 	GetBTC() api.Bitcoiner
 	GetType() types.WalletType
 }

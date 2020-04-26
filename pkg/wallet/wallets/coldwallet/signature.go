@@ -9,7 +9,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
+	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
+	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btc"
@@ -93,7 +94,7 @@ func (w *ColdWallet) sign(hex, encodedPrevsAddrs string) (string, bool, string, 
 		signedTx             *wire.MsgTx
 		isSigned             bool
 		prevsAddrs           btc.AddrsPrevTxs
-		accountKeys          []coldrepo.AccountKeyTable
+		accountKeys          []*models.AccountKey
 		wips                 []string
 		newEncodedPrevsAddrs string
 	)
@@ -111,19 +112,19 @@ func (w *ColdWallet) sign(hex, encodedPrevsAddrs string) (string, bool, string, 
 		// => logic is changed. addrsPrevs.SenderAccount is used for getting sender information
 		// address must be multisig address
 		// get data from account_key_table
-		accountKeys, err = w.repo.GetAllAccountKeyByMultiAddrs(prevsAddrs.SenderAccount, prevsAddrs.Addrs)
+		accountKeys, err = w.repo.AccountKey().GetAllMultiAddr(prevsAddrs.SenderAccount, prevsAddrs.Addrs)
 		if err != nil {
-			return "", false, "", errors.Errorf("DB.GetWIPByMultiAddrs() error: %s", err)
+			return "", false, "", errors.Wrap(err, "DB.GetWIPByMultiAddrs()")
 		}
 	case types.WalletTypeSignature:
 		// sign wallet is used from 2nd signature, only multisig address
 		// get data from account_key_authorization table
 		// TODO: client account doesn't have multisig address, so this code could be skipped
-		accountKey, err := w.repo.GetOneByMaxIDOnAccountKeyTable(account.AccountTypeAuthorization)
+		accountKey, err := w.repo.AccountKey().GetOneMaxID(account.AccountTypeAuthorization)
 		if err != nil {
 			return "", false, "", errors.Wrap(err, "fail to call repo.GetOneByMaxIDOnAccountKeyTable()")
 		}
-		accountKeys = append(accountKeys, *accountKey)
+		accountKeys = append(accountKeys, accountKey)
 	default:
 		return "", false, "", errors.Errorf("WalletType is invalid: %s", w.wtype.String())
 	}

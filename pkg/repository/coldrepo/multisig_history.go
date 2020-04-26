@@ -9,16 +9,17 @@ import (
 	"github.com/volatiletech/sqlboiler/queries/qm"
 	"go.uber.org/zap"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
 type MultisigHistoryRepository interface {
-	GetAllNoMultisig() ([]*models.MultisigHistory, error)
-	GetAllNotExported() ([]*models.MultisigHistory, error)
+	GetAllNoMultisig(accountType account.AccountType) ([]*models.MultisigHistory, error)
+	GetAllNotExported(accountType account.AccountType) ([]*models.MultisigHistory, error)
 	InsertBulk(items []*models.MultisigHistory) error
-	UpdateMultisigAddr(multiSigAddr, redeemScript, authAddr1, fullPublicKey string) (int64, error)
-	UpdateIsExported(ids []int64) (int64, error)
+	UpdateMultisigAddr(accountType account.AccountType, multiSigAddr, redeemScript, authAddr1, fullPublicKey string) (int64, error)
+	UpdateIsExported(accountType account.AccountType, ids []int64) (int64, error)
 }
 
 type multisigHistoryRepository struct {
@@ -40,12 +41,13 @@ func NewMultisigHistoryRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode
 
 // GetAllNoMultisig returns all MultisigHistory by blank mulstisig_address
 // - replaced from GetAddedPubkeyHistoryTableByNoWalletMultisigAddress
-func (r *multisigHistoryRepository) GetAllNoMultisig() ([]*models.MultisigHistory, error) {
+func (r *multisigHistoryRepository) GetAllNoMultisig(accountType account.AccountType) ([]*models.MultisigHistory, error) {
 	//sql := "SELECT * FROM %s WHERE wallet_multisig_address = '';"
 	ctx := context.Background()
 
 	items, err := models.MultisigHistories(
 		qm.Where("coin=?", r.coinTypeCode.String()),
+		qm.And("account=?", accountType.String()),
 		qm.And("wallet_multisig_address=?", ""),
 	).All(ctx, r.dbConn)
 	if err != nil {
@@ -56,12 +58,13 @@ func (r *multisigHistoryRepository) GetAllNoMultisig() ([]*models.MultisigHistor
 
 // GetAllNotExported returns all MultisigHistory by not exported
 // - replaced from GetAddedPubkeyHistoryTableByNotExported
-func (r *multisigHistoryRepository) GetAllNotExported() ([]*models.MultisigHistory, error) {
+func (r *multisigHistoryRepository) GetAllNotExported(accountType account.AccountType) ([]*models.MultisigHistory, error) {
 	//sql := "SELECT * FROM %s WHERE wallet_multisig_address != '' AND is_exported=false;"
 	ctx := context.Background()
 
 	items, err := models.MultisigHistories(
 		qm.Where("coin=?", r.coinTypeCode.String()),
+		qm.And("account=?", accountType.String()),
 		qm.And("wallet_multisig_address!=?", ""),
 		qm.And("is_exported=?", false),
 	).All(ctx, r.dbConn)
@@ -80,7 +83,7 @@ func (r *multisigHistoryRepository) InsertBulk(items []*models.MultisigHistory) 
 
 // UpdateMultisigAddr updates multisig_address
 // - replaced from UpdateMultisigAddrOnAddedPubkeyHistoryTable
-func (r *multisigHistoryRepository) UpdateMultisigAddr(multiSigAddr, redeemScript, authAddr1, fullPublicKey string) (int64, error) {
+func (r *multisigHistoryRepository) UpdateMultisigAddr(accountType account.AccountType, multiSigAddr, redeemScript, authAddr1, fullPublicKey string) (int64, error) {
 	//sql := `UPDATE %s SET wallet_multisig_address=?, redeem_script=?, auth_address1=? WHERE full_public_key=?`
 	ctx := context.Background()
 
@@ -92,13 +95,14 @@ func (r *multisigHistoryRepository) UpdateMultisigAddr(multiSigAddr, redeemScrip
 	}
 	return models.AccountKeys(
 		qm.Where("coin=?", r.coinTypeCode.String()),
+		qm.And("account=?", accountType.String()),
 		qm.And("full_public_key=?", fullPublicKey),
 	).UpdateAll(ctx, r.dbConn, updCols)
 }
 
 // UpdateIsExported updates is_exported
 // - replaced from UpdateIsExportedOnAddedPubkeyHistoryTable
-func (r *multisigHistoryRepository) UpdateIsExported(ids []int64) (int64, error) {
+func (r *multisigHistoryRepository) UpdateIsExported(accountType account.AccountType, ids []int64) (int64, error) {
 	//sql = "UPDATE %s SET is_exported=true WHERE id IN (?);"
 	ctx := context.Background()
 
