@@ -17,7 +17,7 @@ whitelist = [
     "pubkey",
     "seed",
     "account_key",
-    "multisig_pubkey_history"
+    "multisig_history"
 ]
 #tinyint_as_int = true
 

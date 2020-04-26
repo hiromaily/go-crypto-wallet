@@ -66,7 +66,7 @@ CREATE TABLE `account_key` (
 
 
 --
--- Table structure for table `multisig_pubkey_history`
+-- Table structure for table `multisig_history`
 --  for sigunature database
 
 DROP TABLE IF EXISTS `multisig_history`;

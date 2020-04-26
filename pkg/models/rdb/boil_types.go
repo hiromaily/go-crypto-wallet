@@ -67,6 +67,20 @@ const (
 	AccountKeyAccountAuth    = "auth"
 )
 
+// Enum values for multisig_history.coin
+const (
+	MultisigHistoryCoinBTC = "btc"
+	MultisigHistoryCoinBCH = "bch"
+)
+
+// Enum values for multisig_history.account
+const (
+	MultisigHistoryAccountReceipt = "receipt"
+	MultisigHistoryAccountPayment = "payment"
+	MultisigHistoryAccountStored  = "stored"
+	MultisigHistoryAccountFee     = "fee"
+)
+
 // Enum values for payment_request.coin
 const (
 	PaymentRequestCoinBTC = "btc"
