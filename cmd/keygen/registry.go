@@ -2,10 +2,10 @@ package main
 
 import (
 	"database/sql"
-	"github.com/volatiletech/sqlboiler/boil"
 
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/opentracing/opentracing-go"
+	"github.com/volatiletech/sqlboiler/boil"
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/address"

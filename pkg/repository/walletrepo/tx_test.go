@@ -15,12 +15,6 @@ import (
 // TestTx is test for any data operation
 func TestTx(t *testing.T) {
 	//boil.DebugMode = true
-
-	//tx, err := db.Begin()
-	// Rollback or commit
-	//tx.Commit()
-	//tx.Rollback()
-
 	txRepo := testutil.NewTxRepository()
 
 	// Delete records

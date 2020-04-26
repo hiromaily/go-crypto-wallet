@@ -10,12 +10,16 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	mysql "github.com/hiromaily/go-bitcoin/pkg/db/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
+	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/repository/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
-var txRepo walletrepo.TxRepository
+var (
+	txRepo         walletrepo.TxRepository
+	accountKeyRepo coldrepo.AccountKeyRepository
+)
 
 func NewTxRepository() walletrepo.TxRepository {
 	if txRepo != nil {
@@ -41,4 +45,30 @@ func NewTxRepository() walletrepo.TxRepository {
 
 	txRepo = walletrepo.NewTxRepository(db, coin.BTC, logger)
 	return txRepo
+}
+
+func NewAccountKeyRepository() coldrepo.AccountKeyRepository {
+	if accountKeyRepo != nil {
+		return accountKeyRepo
+	}
+
+	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-bitcoin", os.Getenv("GOPATH"))
+	confPath := fmt.Sprintf("%s/data/config/btc/wallet.toml", projPath)
+	conf, err := config.New(confPath, types.WalletTypeWatchOnly)
+	if err != nil {
+		log.Fatalf("fail to create config: %v", err)
+	}
+	//TODO: if config should be overridden, here
+
+	// logger
+	logger := logger.NewZapLogger(&conf.Logger)
+
+	// db
+	db, err := mysql.NewMySQL(&conf.MySQL)
+	if err != nil {
+		log.Fatalf("fail to create db: %v", err)
+	}
+
+	accountKeyRepo = coldrepo.NewAccountKeyRepository(db, coin.BTC, logger)
+	return accountKeyRepo
 }

@@ -149,7 +149,7 @@ func (r *accountKeyRepository) UpdateAddrStatus(accountType account.AccountType,
 	return models.AccountKeys(
 		qm.Where("coin=?", r.coinTypeCode.String()),
 		qm.And("account=?", accountType.String()),
-		qm.And("wallet_import_format IN ?", targetWIFs...),
+		qm.AndIn("wallet_import_format IN ?", targetWIFs...),
 	).UpdateAll(ctx, r.dbConn, updCols)
 }
 
