@@ -47,8 +47,9 @@ func (w *Wallet) ImportPubKey(fileName string, accountType account.AccountType, 
 		}
 
 		pubKeyData = append(pubKeyData, &models.Pubkey{
-			WalletAddress: addr,
+			Coin:          w.GetBTC().CoinTypeCode().String(),
 			Account:       accountType.String(),
+			WalletAddress: addr,
 		})
 
 		//confirm pubkey is added as watch only wallet
