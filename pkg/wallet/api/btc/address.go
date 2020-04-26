@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// GetAddressInfoResult is response type of PRC `getaddressinfo`
+// GetAddressInfoResult is response type of RPC `getaddressinfo`
 type GetAddressInfoResult struct {
 	Address      string   `json:"address"`
 	ScriptPubKey string   `json:"scriptPubKey"`
@@ -25,6 +25,7 @@ type GetAddressInfoResult struct {
 	Labels       []string `json:"labels"`
 }
 
+// ValidateAddressResult is response type of RPC `validateaddress`
 type ValidateAddressResult struct {
 	IsValid           bool   `json:"isvalid"`
 	Address           string `json:"address"`

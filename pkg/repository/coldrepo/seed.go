@@ -13,6 +13,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
+// SeedRepository is repository for seed table
 type SeedRepository interface {
 	GetOne() (*models.Seed, error)
 	Insert(strSeed string) error

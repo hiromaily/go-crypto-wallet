@@ -4,7 +4,7 @@ package tx
 // TxType
 //----------------------------------------------------
 
-//TxType transaction status
+// TxType transaction status
 type TxType string
 
 // tx_type
@@ -17,15 +17,17 @@ const (
 	TxTypeCancel   TxType = "canceled"
 )
 
+// String converter
 func (t TxType) String() string {
 	return string(t)
 }
 
+// Int8 converter
 func (t TxType) Int8() int8 {
 	return int8(TxTypeValue[t])
 }
 
-//TxTypeValue value
+// TxTypeValue value
 var TxTypeValue = map[TxType]uint8{
 	TxTypeUnsigned: 1,
 	TxTypeSigned:   2,
@@ -42,13 +44,3 @@ func ValidateTxType(val string) bool {
 	}
 	return false
 }
-
-// Search search `t` from list of txTxType
-//func (t TxType) Search(txTypes []TxType) bool {
-//	for _, v := range txTypes {
-//		if v == t {
-//			return true
-//		}
-//	}
-//	return false
-//}

@@ -25,6 +25,7 @@ type coldRepository struct {
 }
 
 // NewColdWalletRepository returns ColdRepository
+// nolint:golint
 func NewColdWalletRepository(
 	db *sql.DB,
 	logger *zap.Logger,

@@ -13,6 +13,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
+// TxOutputRepository is repository for tx_out table
 type TxOutputRepository interface {
 	GetOne(id int64) (*models.TXOutput, error)
 	GetAllByTxID(id int64) ([]*models.TXOutput, error)

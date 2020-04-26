@@ -23,6 +23,7 @@ import (
 //  - as example, *wire.MsgTx is that tx is used as suffix
 //  - so tx should be named like hexTx, hashTx
 
+// GetTransactionResult is result of RPC `gettransaction`
 type GetTransactionResult struct {
 	Amount            float64                `json:"amount"`
 	Fee               float64                `json:"fee"`
@@ -40,6 +41,7 @@ type GetTransactionResult struct {
 	Hex               string                 `json:"hex"`
 }
 
+// GetTransactionDetail is parts of GetTransactionResult
 type GetTransactionDetail struct {
 	Address   string  `json:"address"`
 	Category  string  `json:"category"`
@@ -50,6 +52,7 @@ type GetTransactionDetail struct {
 	Abandoned bool    `json:"abandoned,omitempty"`
 }
 
+// TxRawResult is result of RPC `decoderawtransaction`
 type TxRawResult struct {
 	Txid     string      `json:"txid"`
 	Hash     string      `json:"hash"`
@@ -62,6 +65,7 @@ type TxRawResult struct {
 	Vout     []TxRawVout `json:"vout"`
 }
 
+// TxRawVin is parts of TxRawResult
 type TxRawVin struct {
 	Txid      string    `json:"txid"`
 	Vout      uint32    `json:"vout"`
@@ -69,17 +73,20 @@ type TxRawVin struct {
 	Sequence  uint32    `json:"sequence"`
 }
 
+// ScriptSig is parts of TxRawVin
 type ScriptSig struct {
 	Asm string `json:"asm"`
 	Hex string `json:"hex"`
 }
 
+// TxRawVout is parts of TxRawResult
 type TxRawVout struct {
 	Value        float64      `json:"value"`
 	N            uint32       `json:"n"`
 	ScriptPubKey ScriptPubKey `json:"scriptPubKey"`
 }
 
+// ScriptPubKey is parts of TxRawVout
 type ScriptPubKey struct {
 	Asm       string   `json:"asm"`
 	Hex       string   `json:"hex"`
@@ -151,6 +158,7 @@ func (b *Bitcoin) ToMsgTx(txHex string) (*wire.MsgTx, error) {
 	return &msgTx, nil
 }
 
+// GetTransaction returns GetTransactionResult by gettransaction RPC
 func (b *Bitcoin) GetTransaction(txID string) (*GetTransactionResult, error) {
 	input, err := json.Marshal(string(txID))
 	if err != nil {

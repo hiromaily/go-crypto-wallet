@@ -37,6 +37,7 @@ func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
 	return b.FloatToAmount(amount)
 }
 
+// GetBalanceByListUnspent gets balance by rpc `listunspent`
 func (b *Bitcoin) GetBalanceByListUnspent() (btcutil.Amount, error) {
 	listunspentResult, err := b.ListUnspent()
 	if err != nil {

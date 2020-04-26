@@ -13,6 +13,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
+// TxInputRepository is repository for tx_input table
 type TxInputRepository interface {
 	GetOne(id int64) (*models.TXInput, error)
 	GetAllByTxID(id int64) ([]*models.TXInput, error)

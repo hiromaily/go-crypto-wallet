@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/ericlagergren/decimal"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/volatiletech/sqlboiler/types"
 
 	"github.com/hiromaily/go-bitcoin/pkg/action"

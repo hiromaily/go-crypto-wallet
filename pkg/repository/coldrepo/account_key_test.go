@@ -3,6 +3,8 @@ package coldrepo_test
 import (
 	"testing"
 
+	_ "github.com/go-sql-driver/mysql"
+
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/testutil"

@@ -13,6 +13,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
+// PaymentRequestRepository is repository for payment_request table
 type PaymentRequestRepository interface {
 	GetAll() ([]*models.PaymentRequest, error)
 	GetAllByPaymentID(paymentID int64) ([]*models.PaymentRequest, error)

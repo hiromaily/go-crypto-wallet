@@ -17,6 +17,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
+// AccountKeyRepository is repository for account_key table
 type AccountKeyRepository interface {
 	GetMaxIndex(accountType account.AccountType) (int64, error)
 	GetOneMaxID(accountType account.AccountType) (*models.AccountKey, error)

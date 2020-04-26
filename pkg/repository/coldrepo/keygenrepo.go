@@ -24,6 +24,7 @@ type keygenRepository struct {
 }
 
 // NewKeygenWalletRepository returns WalletRepository
+// nolint:golint
 func NewKeygenWalletRepository(
 	db *sql.DB,
 	logger *zap.Logger,

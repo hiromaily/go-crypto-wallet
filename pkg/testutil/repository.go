@@ -5,8 +5,6 @@ import (
 	"log"
 	"os"
 
-	_ "github.com/go-sql-driver/mysql"
-
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	mysql "github.com/hiromaily/go-bitcoin/pkg/db/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
@@ -21,6 +19,7 @@ var (
 	accountKeyRepo coldrepo.AccountKeyRepository
 )
 
+// NewTxRepository returns TxRepository for test
 func NewTxRepository() walletrepo.TxRepository {
 	if txRepo != nil {
 		return txRepo
@@ -47,6 +46,7 @@ func NewTxRepository() walletrepo.TxRepository {
 	return txRepo
 }
 
+// NewAccountKeyRepository returns AccountKeyRepository for test
 func NewAccountKeyRepository() coldrepo.AccountKeyRepository {
 	if accountKeyRepo != nil {
 		return accountKeyRepo

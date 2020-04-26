@@ -29,6 +29,7 @@ type walletRepository struct {
 }
 
 // NewWalletRepository returns WalletRepository
+// nolint:golint
 func NewWalletRepository(
 	db *sql.DB,
 	logger *zap.Logger,

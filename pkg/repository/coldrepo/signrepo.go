@@ -25,6 +25,7 @@ type signRepository struct {
 }
 
 // NewSignWalletRepository returns SignRepository
+// nolint:golint
 func NewSignWalletRepository(
 	db *sql.DB,
 	logger *zap.Logger,

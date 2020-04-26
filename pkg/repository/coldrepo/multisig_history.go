@@ -14,6 +14,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
+// MultisigHistoryRepository is repository for multisig_history table
 type MultisigHistoryRepository interface {
 	GetAllNoMultisig(accountType account.AccountType) ([]*models.MultisigHistory, error)
 	GetAllNotExported(accountType account.AccountType) ([]*models.MultisigHistory, error)
@@ -29,7 +30,7 @@ type multisigHistoryRepository struct {
 	logger       *zap.Logger
 }
 
-// NewAccountKeyRepository returns AccountKeyRepository interface
+// NewMultisigHistoryRepository returns MultisigHistoryRepository interface
 func NewMultisigHistoryRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) MultisigHistoryRepository {
 	return &multisigHistoryRepository{
 		dbConn:       dbConn,

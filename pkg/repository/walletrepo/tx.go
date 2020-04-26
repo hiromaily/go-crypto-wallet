@@ -17,6 +17,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
+// TxRepository is repository for tx table
 type TxRepository interface {
 	GetOne(id int64) (*models.TX, error)
 	GetCountByUnsignedHex(actionType action.ActionType, hex string) (int64, error)

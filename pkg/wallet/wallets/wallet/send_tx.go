@@ -2,8 +2,8 @@ package wallet
 
 import (
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
-	"github.com/hiromaily/go-bitcoin/pkg/action"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 )
 
@@ -16,6 +16,8 @@ func (w *Wallet) SendTx(filePath string) (string, error) {
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call txFileRepo.ValidateFilePath()")
 	}
+
+	w.logger.Debug("send_tx", zap.String("action_type", actionType.String()))
 
 	// read hex from file
 	signedHex, err := w.txFileRepo.ReadFile(filePath)
@@ -32,14 +34,14 @@ func (w *Wallet) SendTx(filePath string) (string, error) {
 	}
 
 	// update tx_table
-	err = w.updateHexForSentTx(txID, signedHex, hash.String(), actionType)
+	err = w.updateHexForSentTx(txID, signedHex, hash.String())
 	if err != nil {
 		//TODO: even if error occurred, tx is already sent. so db should be corrected manually
 		return "", errors.Wrap(err, "fail to call updateHexForSentTx(), but tx is sent")
 	}
 
 	// update account_pubkey_table
-	err = w.updateIsAllocatedForAccountPubkey(txID, actionType)
+	err = w.updateIsAllocatedForAccountPubkey(txID)
 	if err != nil {
 		//TODO: even if error occurred, tx is already sent. so db should be corrected manually
 		return "", errors.Wrap(err, "fail to call updateIsAllocatedForAccountPubkey()")
@@ -48,7 +50,7 @@ func (w *Wallet) SendTx(filePath string) (string, error) {
 	return hash.String(), nil
 }
 
-func (w *Wallet) updateHexForSentTx(txID int64, signedHex, sentHashTx string, actionType action.ActionType) error {
+func (w *Wallet) updateHexForSentTx(txID int64, signedHex, sentHashTx string) error {
 	// 1.TxReceipt table
 	//t := time.Now()
 	//txReceipt := walletrepo.TxTable{}
@@ -74,10 +76,10 @@ func (w *Wallet) updateHexForSentTx(txID int64, signedHex, sentHashTx string, ac
 	return nil
 }
 
-func (w *Wallet) updateIsAllocatedForAccountPubkey(txID int64, actionType action.ActionType) error {
-	if actionType == action.ActionTypeReceipt {
-		return nil
-	}
+func (w *Wallet) updateIsAllocatedForAccountPubkey(txID int64) error {
+	//if actionType == action.ActionTypeReceipt {
+	//	return nil
+	//}
 
 	// get txOutputs from .tx_receipt_output by receipt_id
 	txOutputs, err := w.repo.TxOutput().GetAllByTxID(txID)
@@ -87,14 +89,6 @@ func (w *Wallet) updateIsAllocatedForAccountPubkey(txID int64, actionType action
 	if len(txOutputs) == 0 {
 		return errors.New("output tx could not be found in tx_receipt_output")
 	}
-
-	// search record from account_pubkey_receipt by wallet_address
-	// if is_allocated=`false`, update it `true`
-	//tm := time.Now()
-	//accountPublicKeyTable := make([]walletrepo.AccountPublicKeyTable, 1)
-	//accountPublicKeyTable[0].WalletAddress = txOutputs[0].OutputAddress
-	//accountPublicKeyTable[0].IsAllocated = true
-	//accountPublicKeyTable[0].UpdatedAt = &tm
 
 	//accountType := account.AccountType(txOutputs[0].OutputAccount)
 	_, err = w.repo.Pubkey().UpdateIsAllocated(true, txOutputs[0].OutputAddress)

@@ -16,6 +16,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
+// PubkeyRepository is repository for pubkey table
 type PubkeyRepository interface {
 	//GetAll(accountType account.AccountType) ([]*models.Pubkey, error)
 	GetOneUnAllocated(accountType account.AccountType) (*models.Pubkey, error)

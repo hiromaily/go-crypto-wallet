@@ -5,6 +5,7 @@ import "github.com/btcsuite/btcd/chaincfg"
 //----------------------------------------------------
 // CoinType
 //----------------------------------------------------
+
 // CoinType creates a separate subtree for every cryptocoin
 type CoinType uint32
 

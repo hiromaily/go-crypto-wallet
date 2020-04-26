@@ -81,6 +81,7 @@ func (b *Bitcoin) ListUnspentByAccount(accountType account.AccountType) ([]ListU
 	return unspentList, nil
 }
 
+// GetUnspentListAddrs returns address from unspentList
 func (b *Bitcoin) GetUnspentListAddrs(unspentList []ListUnspentResult, accountType account.AccountType) []string {
 	addrs := make([]string, 0, len(unspentList))
 	for _, unspent := range unspentList {

@@ -28,6 +28,7 @@ func (b *Bitcoin) AmountToDecimal(amt btcutil.Amount) types.Decimal {
 	return dAmt
 }
 
+// FloatToDecimal converts float to decimal
 func (b *Bitcoin) FloatToDecimal(f float64) types.Decimal {
 	strAmt := fmt.Sprintf("%f", f)
 	dAmt := types.Decimal{Big: new(decimal.Big)}
