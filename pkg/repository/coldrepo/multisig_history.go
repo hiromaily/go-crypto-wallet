@@ -93,7 +93,7 @@ func (r *multisigHistoryRepository) UpdateMultisigAddr(accountType account.Accou
 		models.MultisigHistoryColumns.RedeemScript:          redeemScript,
 		models.MultisigHistoryColumns.AuthAddress1:          authAddr1,
 	}
-	return models.AccountKeys(
+	return models.MultisigHistories(
 		qm.Where("coin=?", r.coinTypeCode.String()),
 		qm.And("account=?", accountType.String()),
 		qm.And("full_public_key=?", fullPublicKey),
@@ -116,7 +116,7 @@ func (r *multisigHistoryRepository) UpdateIsExported(accountType account.Account
 		targetIDs[i] = v
 	}
 
-	return models.AccountKeys(
+	return models.MultisigHistories(
 		qm.Where("coin=?", r.coinTypeCode.String()),
 		qm.AndIn("id IN ?", targetIDs...),
 	).UpdateAll(ctx, r.dbConn, updCols)

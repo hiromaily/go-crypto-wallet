@@ -63,11 +63,15 @@ func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, address
 		}
 
 		// store generated address into added_pubkey_history_table
-		_, err = w.repo.MultisigHistory().UpdateMultisigAddr(accountType, resAddr.Address,
-			resAddr.RedeemScript, authKeyTable.P2SHSegwitAddress, val.FullPublicKey)
+		_, err = w.repo.MultisigHistory().UpdateMultisigAddr(
+			accountType,
+			resAddr.Address,
+			resAddr.RedeemScript,
+			authKeyTable.P2SHSegwitAddress,
+			val.FullPublicKey)
 		if err != nil {
 			w.logger.Error(
-				"fail to call db.UpdateMultisigAddrOnAddedPubkeyHistoryTable()",
+				"fail to call repo.MultisigHistory().UpdateMultisigAddr()",
 				zap.String("accountType", accountType.String()),
 				zap.Error(err))
 		}
