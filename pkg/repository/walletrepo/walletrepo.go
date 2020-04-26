@@ -36,7 +36,7 @@ func NewWalletRepository(
 	txInRepo TxInputRepository,
 	txOutRepo TxOutputRepository,
 	payReqRepo PaymentRequestRepository,
-	pubkeyRepo PubkeyRepository) WalletRepository {
+	pubkeyRepo PubkeyRepository) *walletRepository {
 
 	return &walletRepository{
 		db:                       db,

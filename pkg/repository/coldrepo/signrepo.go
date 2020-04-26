@@ -30,7 +30,7 @@ func NewSignWalletRepository(
 	logger *zap.Logger,
 	seedRepo SeedRepository,
 	accountKeyRepo AccountKeyRepository,
-	multisigRepo MultisigHistoryRepository) SignRepository {
+	multisigRepo MultisigHistoryRepository) *signRepository {
 
 	return &signRepository{
 		db:                        db,

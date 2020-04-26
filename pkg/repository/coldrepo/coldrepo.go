@@ -30,7 +30,7 @@ func NewColdWalletRepository(
 	logger *zap.Logger,
 	seedRepo SeedRepository,
 	accountKeyRepo AccountKeyRepository,
-	multisigRepo MultisigHistoryRepository) ColdRepository {
+	multisigRepo MultisigHistoryRepository) *coldRepository {
 
 	return &coldRepository{
 		db:                        db,

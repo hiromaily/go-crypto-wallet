@@ -28,7 +28,7 @@ func NewKeygenWalletRepository(
 	db *sql.DB,
 	logger *zap.Logger,
 	seedRepo SeedRepository,
-	accountKeyRepo AccountKeyRepository) KeygenRepository {
+	accountKeyRepo AccountKeyRepository) *keygenRepository {
 
 	return &keygenRepository{
 		db:                   db,
