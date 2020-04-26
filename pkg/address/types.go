@@ -47,6 +47,11 @@ func (a AddrStatus) String() string {
 	return string(a)
 }
 
+// Int8 converter
+func (a AddrStatus) Int8() int8 {
+	return int8(AddrStatusValue[a])
+}
+
 // AddrStatusValue value
 var AddrStatusValue = map[AddrStatus]uint8{
 	AddrStatusHDKeyGenerated:       0,

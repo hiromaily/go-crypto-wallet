@@ -107,7 +107,7 @@ CREATE TABLE `payment_request` (
   `sender_account`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'sender account',
   `receiver_address`  VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'receiver address',
   `amount`            DECIMAL(26,10) NOT NULL COMMENT'amount of coin to send',
-  `is_done`           BOOL DEFAULT false COMMENT'true: unsigned transaction is created',
+  `is_done`           BOOL NOT NULL DEFAULT false COMMENT'true: unsigned transaction is created',
   `updated_at`        datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',
   PRIMARY KEY (`id`),
   INDEX idx_coin (`coin`)
@@ -138,7 +138,7 @@ CREATE TABLE `pubkey` (
   `coin`              ENUM('btc', 'bch') NOT NULL COMMENT'coin type code',
   `account`           ENUM('client', 'receipt', 'payment', 'stored', 'fee') NOT NULL COMMENT'account type',
   `wallet_address`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'wallet address',
-  `is_allocated`      BOOL DEFAULT false COMMENT'true: address is allocated(used)',
+  `is_allocated`      BOOL NOT NULL DEFAULT false COMMENT'true: address is allocated(used)',
   `updated_at`        datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_wallet_address` (`wallet_address`),

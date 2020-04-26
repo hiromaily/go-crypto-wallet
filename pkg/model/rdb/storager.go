@@ -27,8 +27,6 @@ type ColdStorager interface {
 	UpdateMultisigAddrOnAddedPubkeyHistoryTable(accountType account.AccountType, multiSigAddr, redeemScript, authAddr1, fullPublicKey string, tx *sqlx.Tx, isCommit bool) error
 	UpdateIsExportedOnAddedPubkeyHistoryTable(accountType account.AccountType, ids []int64, tx *sqlx.Tx, isCommit bool) (int64, error)
 	//seed_repo
-	GetSeedAll() ([]coldrepo.Seed, error)
 	GetSeedOne() (coldrepo.Seed, error)
-	GetSeedCount() (int64, error)
 	InsertSeed(seed string, tx *sqlx.Tx, isCommit bool) (int64, error)
 }

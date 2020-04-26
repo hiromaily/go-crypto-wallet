@@ -24,8 +24,8 @@ DROP TABLE IF EXISTS `seed`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `seed` (
-  `id`         tinyint(1) NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `coin`       ENUM('btc', 'bch') COMMENT'coin type code',
+  `id`         tinyint(2) NOT NULL AUTO_INCREMENT COMMENT'ID',
+  `coin`       ENUM('btc', 'bch') NOT NULL COMMENT'coin type code',
   `seed`       VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'seed',
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',
   PRIMARY KEY (`id`),
@@ -42,17 +42,18 @@ DROP TABLE IF EXISTS `account_key`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `account_key` (
-  `id`                      BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `coin`                    ENUM('btc', 'bch') COMMENT'coin type code',
-  `account`                 ENUM('client', 'receipt', 'payment', 'stored', 'fee', 'auth') COMMENT'account type',
+  /*`id`                      BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',*/
+  `id`                      BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
+  `coin`                    ENUM('btc', 'bch') NOT NULL COMMENT'coin type code',
+  `account`                 ENUM('client', 'receipt', 'payment', 'stored', 'fee', 'auth') NOT NULL COMMENT'account type',
   `wallet_address`          VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'address as standard pubkey script that Pays To PubKey Hash (P2PKH)',
   `p2sh_segwit_address`     VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'p2sh-segwit address',
   `full_public_key`         VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'full public key',
   `wallet_multisig_address` VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'multisig address',
   `redeem_script`           VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'redeedScript after multisig address generated',
   `wallet_import_format`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'WIF',
-  `idx`                     BIGINT(20) UNSIGNED NOT NULL COMMENT'index for hd wallet',
-  `addr_status`             tinyint(1) UNSIGNED DEFAULT 0 NOT NULL COMMENT'progress status for address generating',
+  `idx`                     BIGINT(20) NOT NULL COMMENT'index for hd wallet',
+  `addr_status`             tinyint(2) DEFAULT 0 NOT NULL COMMENT'progress status for address generating',
   `updated_at`              datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_wallet_address` (`wallet_address`),
@@ -68,19 +69,19 @@ CREATE TABLE `account_key` (
 -- Table structure for table `multisig_pubkey_history`
 --  for sigunature database
 
-DROP TABLE IF EXISTS `multisig_pubkey_history`;
+DROP TABLE IF EXISTS `multisig_history`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `multisig_pubkey_history` (
+CREATE TABLE `multisig_history` (
   `id`                      BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `coin`                    ENUM('btc', 'bch') COMMENT'coin type code',
-  `account`                 ENUM('receipt', 'payment', 'stored', 'fee') COMMENT'multisig account type',
+  `coin`                    ENUM('btc', 'bch') NOT NULL COMMENT'coin type code',
+  `account`                 ENUM('receipt', 'payment', 'stored', 'fee') NOT NULL COMMENT'multisig account type',
   `full_public_key`         VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'full public key',
   `auth_address1`           VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'1st address for authorization',
   `auth_address2`           VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'2nd address for authorization',
   `wallet_multisig_address` VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'multisig address',
   `redeem_script`           VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'redeedScript after multisig address generated',
-  `is_exported`             BOOL DEFAULT false COMMENT'true: csv file exported',
+  `is_exported`             BOOL NOT NULL DEFAULT false COMMENT'true: csv file exported',
   `updated_at`              datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_full_public_key` (`full_public_key`),

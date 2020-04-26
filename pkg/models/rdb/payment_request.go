@@ -32,7 +32,7 @@ type PaymentRequest struct {
 	SenderAccount   string        `boil:"sender_account" json:"sender_account" toml:"sender_account" yaml:"sender_account"`
 	ReceiverAddress string        `boil:"receiver_address" json:"receiver_address" toml:"receiver_address" yaml:"receiver_address"`
 	Amount          types.Decimal `boil:"amount" json:"amount" toml:"amount" yaml:"amount"`
-	IsDone          null.Bool     `boil:"is_done" json:"is_done,omitempty" toml:"is_done" yaml:"is_done,omitempty"`
+	IsDone          bool          `boil:"is_done" json:"is_done" toml:"is_done" yaml:"is_done"`
 	UpdatedAt       null.Time     `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
 	R *paymentRequestR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -62,22 +62,6 @@ var PaymentRequestColumns = struct {
 }
 
 // Generated where
-
-type whereHelperint64 struct{ field string }
-
-func (w whereHelperint64) EQ(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperint64) NEQ(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperint64) LT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperint64) LTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperint64) GT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperint64) GTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-func (w whereHelperint64) IN(slice []int64) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
 
 type whereHelpernull_Int64 struct{ field string }
 
@@ -123,6 +107,15 @@ func (w whereHelpertypes_Decimal) GTE(x types.Decimal) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelperbool struct{ field string }
+
+func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+
 var PaymentRequestWhere = struct {
 	ID              whereHelperint64
 	Coin            whereHelperstring
@@ -131,7 +124,7 @@ var PaymentRequestWhere = struct {
 	SenderAccount   whereHelperstring
 	ReceiverAddress whereHelperstring
 	Amount          whereHelpertypes_Decimal
-	IsDone          whereHelpernull_Bool
+	IsDone          whereHelperbool
 	UpdatedAt       whereHelpernull_Time
 }{
 	ID:              whereHelperint64{field: "`payment_request`.`id`"},
@@ -141,7 +134,7 @@ var PaymentRequestWhere = struct {
 	SenderAccount:   whereHelperstring{field: "`payment_request`.`sender_account`"},
 	ReceiverAddress: whereHelperstring{field: "`payment_request`.`receiver_address`"},
 	Amount:          whereHelpertypes_Decimal{field: "`payment_request`.`amount`"},
-	IsDone:          whereHelpernull_Bool{field: "`payment_request`.`is_done`"},
+	IsDone:          whereHelperbool{field: "`payment_request`.`is_done`"},
 	UpdatedAt:       whereHelpernull_Time{field: "`payment_request`.`updated_at`"},
 }
 

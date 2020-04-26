@@ -51,7 +51,10 @@ func NewWalletRepository(
 
 // Close close db connection
 func (r *walletRepository) Close() error {
-	return r.db.Close()
+	if r.db != nil {
+		return r.db.Close()
+	}
+	return nil
 }
 
 // BeginTx starts transaction

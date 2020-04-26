@@ -13,28 +13,12 @@ type Seed struct {
 	UpdatedAt *time.Time `db:"updated_at"`
 }
 
-// GetSeedAll seedテーブル全体を返す(しかし、1行しかない想定)
-func (r *ColdRepository) GetSeedAll() ([]Seed, error) {
-	var seeds []Seed
-	err := r.db.Select(&seeds, "SELECT * FROM seed")
-
-	return seeds, err
-}
-
 // GetSeedOne idが１のseedを返す
 func (r *ColdRepository) GetSeedOne() (Seed, error) {
 	var seed Seed
 	err := r.db.Get(&seed, "SELECT * FROM seed WHERE id=1")
 
 	return seed, err
-}
-
-// GetSeedCount レコード数を返す
-func (r *ColdRepository) GetSeedCount() (int64, error) {
-	var count int64
-	err := r.db.Get(&count, "SELECT count(id) FROM seed")
-
-	return count, err
 }
 
 // InsertSeed レコードをinsertする

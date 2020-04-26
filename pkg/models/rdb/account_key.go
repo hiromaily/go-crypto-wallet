@@ -24,18 +24,18 @@ import (
 
 // AccountKey is an object representing the database table.
 type AccountKey struct {
-	ID                    uint64      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Coin                  null.String `boil:"coin" json:"coin,omitempty" toml:"coin" yaml:"coin,omitempty"`
-	Account               null.String `boil:"account" json:"account,omitempty" toml:"account" yaml:"account,omitempty"`
-	WalletAddress         string      `boil:"wallet_address" json:"wallet_address" toml:"wallet_address" yaml:"wallet_address"`
-	P2SHSegwitAddress     string      `boil:"p2sh_segwit_address" json:"p2sh_segwit_address" toml:"p2sh_segwit_address" yaml:"p2sh_segwit_address"`
-	FullPublicKey         string      `boil:"full_public_key" json:"full_public_key" toml:"full_public_key" yaml:"full_public_key"`
-	WalletMultisigAddress string      `boil:"wallet_multisig_address" json:"wallet_multisig_address" toml:"wallet_multisig_address" yaml:"wallet_multisig_address"`
-	RedeemScript          string      `boil:"redeem_script" json:"redeem_script" toml:"redeem_script" yaml:"redeem_script"`
-	WalletImportFormat    string      `boil:"wallet_import_format" json:"wallet_import_format" toml:"wallet_import_format" yaml:"wallet_import_format"`
-	Idx                   uint64      `boil:"idx" json:"idx" toml:"idx" yaml:"idx"`
-	AddrStatus            uint8       `boil:"addr_status" json:"addr_status" toml:"addr_status" yaml:"addr_status"`
-	UpdatedAt             null.Time   `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	ID                    int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Coin                  string    `boil:"coin" json:"coin" toml:"coin" yaml:"coin"`
+	Account               string    `boil:"account" json:"account" toml:"account" yaml:"account"`
+	WalletAddress         string    `boil:"wallet_address" json:"wallet_address" toml:"wallet_address" yaml:"wallet_address"`
+	P2SHSegwitAddress     string    `boil:"p2sh_segwit_address" json:"p2sh_segwit_address" toml:"p2sh_segwit_address" yaml:"p2sh_segwit_address"`
+	FullPublicKey         string    `boil:"full_public_key" json:"full_public_key" toml:"full_public_key" yaml:"full_public_key"`
+	WalletMultisigAddress string    `boil:"wallet_multisig_address" json:"wallet_multisig_address" toml:"wallet_multisig_address" yaml:"wallet_multisig_address"`
+	RedeemScript          string    `boil:"redeem_script" json:"redeem_script" toml:"redeem_script" yaml:"redeem_script"`
+	WalletImportFormat    string    `boil:"wallet_import_format" json:"wallet_import_format" toml:"wallet_import_format" yaml:"wallet_import_format"`
+	Idx                   int64     `boil:"idx" json:"idx" toml:"idx" yaml:"idx"`
+	AddrStatus            int8      `boil:"addr_status" json:"addr_status" toml:"addr_status" yaml:"addr_status"`
+	UpdatedAt             null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
 	R *accountKeyR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L accountKeyL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -71,43 +71,20 @@ var AccountKeyColumns = struct {
 
 // Generated where
 
-type whereHelperuint64 struct{ field string }
+type whereHelperint64 struct{ field string }
 
-func (w whereHelperuint64) EQ(x uint64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperuint64) NEQ(x uint64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperuint64) LT(x uint64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperuint64) LTE(x uint64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperuint64) GT(x uint64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperuint64) GTE(x uint64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-func (w whereHelperuint64) IN(slice []uint64) qm.QueryMod {
+func (w whereHelperint64) EQ(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint64) NEQ(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint64) LT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint64) LTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint64) GT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint64) GTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperint64) IN(slice []int64) qm.QueryMod {
 	values := make([]interface{}, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
 	}
 	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-
-type whereHelpernull_String struct{ field string }
-
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
 type whereHelperstring struct{ field string }
@@ -126,15 +103,15 @@ func (w whereHelperstring) IN(slice []string) qm.QueryMod {
 	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
 
-type whereHelperuint8 struct{ field string }
+type whereHelperint8 struct{ field string }
 
-func (w whereHelperuint8) EQ(x uint8) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperuint8) NEQ(x uint8) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperuint8) LT(x uint8) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperuint8) LTE(x uint8) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperuint8) GT(x uint8) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperuint8) GTE(x uint8) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-func (w whereHelperuint8) IN(slice []uint8) qm.QueryMod {
+func (w whereHelperint8) EQ(x int8) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint8) NEQ(x int8) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint8) LT(x int8) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint8) LTE(x int8) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint8) GT(x int8) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint8) GTE(x int8) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+func (w whereHelperint8) IN(slice []int8) qm.QueryMod {
 	values := make([]interface{}, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
@@ -166,30 +143,30 @@ func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
 }
 
 var AccountKeyWhere = struct {
-	ID                    whereHelperuint64
-	Coin                  whereHelpernull_String
-	Account               whereHelpernull_String
+	ID                    whereHelperint64
+	Coin                  whereHelperstring
+	Account               whereHelperstring
 	WalletAddress         whereHelperstring
 	P2SHSegwitAddress     whereHelperstring
 	FullPublicKey         whereHelperstring
 	WalletMultisigAddress whereHelperstring
 	RedeemScript          whereHelperstring
 	WalletImportFormat    whereHelperstring
-	Idx                   whereHelperuint64
-	AddrStatus            whereHelperuint8
+	Idx                   whereHelperint64
+	AddrStatus            whereHelperint8
 	UpdatedAt             whereHelpernull_Time
 }{
-	ID:                    whereHelperuint64{field: "`account_key`.`id`"},
-	Coin:                  whereHelpernull_String{field: "`account_key`.`coin`"},
-	Account:               whereHelpernull_String{field: "`account_key`.`account`"},
+	ID:                    whereHelperint64{field: "`account_key`.`id`"},
+	Coin:                  whereHelperstring{field: "`account_key`.`coin`"},
+	Account:               whereHelperstring{field: "`account_key`.`account`"},
 	WalletAddress:         whereHelperstring{field: "`account_key`.`wallet_address`"},
 	P2SHSegwitAddress:     whereHelperstring{field: "`account_key`.`p2sh_segwit_address`"},
 	FullPublicKey:         whereHelperstring{field: "`account_key`.`full_public_key`"},
 	WalletMultisigAddress: whereHelperstring{field: "`account_key`.`wallet_multisig_address`"},
 	RedeemScript:          whereHelperstring{field: "`account_key`.`redeem_script`"},
 	WalletImportFormat:    whereHelperstring{field: "`account_key`.`wallet_import_format`"},
-	Idx:                   whereHelperuint64{field: "`account_key`.`idx`"},
-	AddrStatus:            whereHelperuint8{field: "`account_key`.`addr_status`"},
+	Idx:                   whereHelperint64{field: "`account_key`.`idx`"},
+	AddrStatus:            whereHelperint8{field: "`account_key`.`addr_status`"},
 	UpdatedAt:             whereHelpernull_Time{field: "`account_key`.`updated_at`"},
 }
 
@@ -315,7 +292,7 @@ func AccountKeys(mods ...qm.QueryMod) accountKeyQuery {
 
 // FindAccountKey retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindAccountKey(ctx context.Context, exec boil.ContextExecutor, iD uint64, selectCols ...string) (*AccountKey, error) {
+func FindAccountKey(ctx context.Context, exec boil.ContextExecutor, iD int64, selectCols ...string) (*AccountKey, error) {
 	accountKeyObj := &AccountKey{}
 
 	sel := "*"
@@ -419,7 +396,7 @@ func (o *AccountKey) Insert(ctx context.Context, exec boil.ContextExecutor, colu
 		return ErrSyncFail
 	}
 
-	o.ID = uint64(lastID)
+	o.ID = int64(lastID)
 	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == accountKeyMapping["id"] {
 		goto CacheNoHooks
 	}
@@ -700,7 +677,7 @@ func (o *AccountKey) Upsert(ctx context.Context, exec boil.ContextExecutor, upda
 		return ErrSyncFail
 	}
 
-	o.ID = uint64(lastID)
+	o.ID = int64(lastID)
 	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == accountKeyMapping["id"] {
 		goto CacheNoHooks
 	}
@@ -855,7 +832,7 @@ func (o *AccountKeySlice) ReloadAll(ctx context.Context, exec boil.ContextExecut
 }
 
 // AccountKeyExists checks if the AccountKey row exists.
-func AccountKeyExists(ctx context.Context, exec boil.ContextExecutor, iD uint64) (bool, error) {
+func AccountKeyExists(ctx context.Context, exec boil.ContextExecutor, iD int64) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from `account_key` where `id`=? limit 1)"
 

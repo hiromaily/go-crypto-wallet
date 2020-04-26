@@ -4,21 +4,19 @@
 package models
 
 var TableNames = struct {
-	AccountKey            string
-	MultisigPubkeyHistory string
-	PaymentRequest        string
-	Pubkey                string
-	Seed                  string
-	TX                    string
-	TXInput               string
-	TXOutput              string
+	AccountKey     string
+	PaymentRequest string
+	Pubkey         string
+	Seed           string
+	TX             string
+	TXInput        string
+	TXOutput       string
 }{
-	AccountKey:            "account_key",
-	MultisigPubkeyHistory: "multisig_pubkey_history",
-	PaymentRequest:        "payment_request",
-	Pubkey:                "pubkey",
-	Seed:                  "seed",
-	TX:                    "tx",
-	TXInput:               "tx_input",
-	TXOutput:              "tx_output",
+	AccountKey:     "account_key",
+	PaymentRequest: "payment_request",
+	Pubkey:         "pubkey",
+	Seed:           "seed",
+	TX:             "tx",
+	TXInput:        "tx_input",
+	TXOutput:       "tx_output",
 }

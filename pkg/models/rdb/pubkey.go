@@ -28,7 +28,7 @@ type Pubkey struct {
 	Coin          string    `boil:"coin" json:"coin" toml:"coin" yaml:"coin"`
 	Account       string    `boil:"account" json:"account" toml:"account" yaml:"account"`
 	WalletAddress string    `boil:"wallet_address" json:"wallet_address" toml:"wallet_address" yaml:"wallet_address"`
-	IsAllocated   null.Bool `boil:"is_allocated" json:"is_allocated,omitempty" toml:"is_allocated" yaml:"is_allocated,omitempty"`
+	IsAllocated   bool      `boil:"is_allocated" json:"is_allocated" toml:"is_allocated" yaml:"is_allocated"`
 	UpdatedAt     null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
 	R *pubkeyR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -58,14 +58,14 @@ var PubkeyWhere = struct {
 	Coin          whereHelperstring
 	Account       whereHelperstring
 	WalletAddress whereHelperstring
-	IsAllocated   whereHelpernull_Bool
+	IsAllocated   whereHelperbool
 	UpdatedAt     whereHelpernull_Time
 }{
 	ID:            whereHelperint64{field: "`pubkey`.`id`"},
 	Coin:          whereHelperstring{field: "`pubkey`.`coin`"},
 	Account:       whereHelperstring{field: "`pubkey`.`account`"},
 	WalletAddress: whereHelperstring{field: "`pubkey`.`wallet_address`"},
-	IsAllocated:   whereHelpernull_Bool{field: "`pubkey`.`is_allocated`"},
+	IsAllocated:   whereHelperbool{field: "`pubkey`.`is_allocated`"},
 	UpdatedAt:     whereHelpernull_Time{field: "`pubkey`.`updated_at`"},
 }
 

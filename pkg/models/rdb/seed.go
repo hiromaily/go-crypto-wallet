@@ -24,10 +24,10 @@ import (
 
 // Seed is an object representing the database table.
 type Seed struct {
-	ID        bool        `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Coin      null.String `boil:"coin" json:"coin,omitempty" toml:"coin" yaml:"coin,omitempty"`
-	Seed      string      `boil:"seed" json:"seed" toml:"seed" yaml:"seed"`
-	UpdatedAt null.Time   `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	ID        int8      `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Coin      string    `boil:"coin" json:"coin" toml:"coin" yaml:"coin"`
+	Seed      string    `boil:"seed" json:"seed" toml:"seed" yaml:"seed"`
+	UpdatedAt null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
 	R *seedR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L seedL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -47,23 +47,14 @@ var SeedColumns = struct {
 
 // Generated where
 
-type whereHelperbool struct{ field string }
-
-func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-
 var SeedWhere = struct {
-	ID        whereHelperbool
-	Coin      whereHelpernull_String
+	ID        whereHelperint8
+	Coin      whereHelperstring
 	Seed      whereHelperstring
 	UpdatedAt whereHelpernull_Time
 }{
-	ID:        whereHelperbool{field: "`seed`.`id`"},
-	Coin:      whereHelpernull_String{field: "`seed`.`coin`"},
+	ID:        whereHelperint8{field: "`seed`.`id`"},
+	Coin:      whereHelperstring{field: "`seed`.`coin`"},
 	Seed:      whereHelperstring{field: "`seed`.`seed`"},
 	UpdatedAt: whereHelpernull_Time{field: "`seed`.`updated_at`"},
 }
@@ -190,7 +181,7 @@ func Seeds(mods ...qm.QueryMod) seedQuery {
 
 // FindSeed retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindSeed(ctx context.Context, exec boil.ContextExecutor, iD bool, selectCols ...string) (*Seed, error) {
+func FindSeed(ctx context.Context, exec boil.ContextExecutor, iD int8, selectCols ...string) (*Seed, error) {
 	seedObj := &Seed{}
 
 	sel := "*"
@@ -276,15 +267,26 @@ func (o *Seed) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 		fmt.Fprintln(writer, cache.query)
 		fmt.Fprintln(writer, vals)
 	}
-	_, err = exec.ExecContext(ctx, cache.query, vals...)
+	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
 		return errors.Wrap(err, "models: unable to insert into seed")
 	}
 
+	var lastID int64
 	var identifierCols []interface{}
 
 	if len(cache.retMapping) == 0 {
+		goto CacheNoHooks
+	}
+
+	lastID, err = result.LastInsertId()
+	if err != nil {
+		return ErrSyncFail
+	}
+
+	o.ID = int8(lastID)
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == seedMapping["id"] {
 		goto CacheNoHooks
 	}
 
@@ -542,16 +544,27 @@ func (o *Seed) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColu
 		fmt.Fprintln(writer, cache.query)
 		fmt.Fprintln(writer, vals)
 	}
-	_, err = exec.ExecContext(ctx, cache.query, vals...)
+	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
 		return errors.Wrap(err, "models: unable to upsert for seed")
 	}
 
+	var lastID int64
 	var uniqueMap []uint64
 	var nzUniqueCols []interface{}
 
 	if len(cache.retMapping) == 0 {
+		goto CacheNoHooks
+	}
+
+	lastID, err = result.LastInsertId()
+	if err != nil {
+		return ErrSyncFail
+	}
+
+	o.ID = int8(lastID)
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == seedMapping["id"] {
 		goto CacheNoHooks
 	}
 
@@ -705,7 +718,7 @@ func (o *SeedSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) er
 }
 
 // SeedExists checks if the Seed row exists.
-func SeedExists(ctx context.Context, exec boil.ContextExecutor, iD bool) (bool, error) {
+func SeedExists(ctx context.Context, exec boil.ContextExecutor, iD int8) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from `seed` where `id`=? limit 1)"
 
