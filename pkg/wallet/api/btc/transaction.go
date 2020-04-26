@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"strings"
 
 	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcjson"
@@ -482,6 +483,10 @@ func (b *Bitcoin) sendRawTransaction(tx *wire.MsgTx) (*chainhash.Hash, error) {
 	if err != nil {
 		// error occurred when trying to send tx with minimum fee(1Satoshi)
 		//  -26: 66: min relay fee not met
+		if strings.Contains(err.Error(), "-27: Transaction already in block chain") {
+			b.logger.Info("Transaction already in block chain")
+			return nil, nil
+		}
 		return nil, errors.Wrap(err, "fail to call btc.client.SendRawTransaction()")
 	}
 

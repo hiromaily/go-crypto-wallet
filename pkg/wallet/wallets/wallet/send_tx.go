@@ -33,6 +33,11 @@ func (w *Wallet) SendTx(filePath string) (string, error) {
 		return "", errors.Wrap(err, "fail to call btc.SendTransactionByHex()")
 	}
 
+	if hash == nil {
+		//tx is already sent
+		return "", nil
+	}
+
 	// update tx_table
 	err = w.updateHexForSentTx(txID, signedHex, hash.String())
 	if err != nil {
