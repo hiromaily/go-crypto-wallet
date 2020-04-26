@@ -33,7 +33,7 @@ import (
 var (
 	walletType = types.WalletTypeWatchOnly
 	appName    = walletType.String()
-	appVersion = "2.1.0"
+	appVersion = "2.2.0"
 )
 
 func main() {
