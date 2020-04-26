@@ -24,7 +24,7 @@ import (
 
 // MultisigHistory is an object representing the database table.
 type MultisigHistory struct {
-	ID                    uint64    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ID                    int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Coin                  string    `boil:"coin" json:"coin" toml:"coin" yaml:"coin"`
 	Account               string    `boil:"account" json:"account" toml:"account" yaml:"account"`
 	FullPublicKey         string    `boil:"full_public_key" json:"full_public_key" toml:"full_public_key" yaml:"full_public_key"`
@@ -65,22 +65,6 @@ var MultisigHistoryColumns = struct {
 
 // Generated where
 
-type whereHelperuint64 struct{ field string }
-
-func (w whereHelperuint64) EQ(x uint64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperuint64) NEQ(x uint64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperuint64) LT(x uint64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperuint64) LTE(x uint64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperuint64) GT(x uint64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperuint64) GTE(x uint64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-func (w whereHelperuint64) IN(slice []uint64) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
-	for _, value := range slice {
-		values = append(values, value)
-	}
-	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
-}
-
 type whereHelperbool struct{ field string }
 
 func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
@@ -91,7 +75,7 @@ func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field
 func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
 var MultisigHistoryWhere = struct {
-	ID                    whereHelperuint64
+	ID                    whereHelperint64
 	Coin                  whereHelperstring
 	Account               whereHelperstring
 	FullPublicKey         whereHelperstring
@@ -102,7 +86,7 @@ var MultisigHistoryWhere = struct {
 	IsExported            whereHelperbool
 	UpdatedAt             whereHelpernull_Time
 }{
-	ID:                    whereHelperuint64{field: "`multisig_history`.`id`"},
+	ID:                    whereHelperint64{field: "`multisig_history`.`id`"},
 	Coin:                  whereHelperstring{field: "`multisig_history`.`coin`"},
 	Account:               whereHelperstring{field: "`multisig_history`.`account`"},
 	FullPublicKey:         whereHelperstring{field: "`multisig_history`.`full_public_key`"},
@@ -236,7 +220,7 @@ func MultisigHistories(mods ...qm.QueryMod) multisigHistoryQuery {
 
 // FindMultisigHistory retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindMultisigHistory(ctx context.Context, exec boil.ContextExecutor, iD uint64, selectCols ...string) (*MultisigHistory, error) {
+func FindMultisigHistory(ctx context.Context, exec boil.ContextExecutor, iD int64, selectCols ...string) (*MultisigHistory, error) {
 	multisigHistoryObj := &MultisigHistory{}
 
 	sel := "*"
@@ -340,7 +324,7 @@ func (o *MultisigHistory) Insert(ctx context.Context, exec boil.ContextExecutor,
 		return ErrSyncFail
 	}
 
-	o.ID = uint64(lastID)
+	o.ID = int64(lastID)
 	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == multisigHistoryMapping["id"] {
 		goto CacheNoHooks
 	}
@@ -619,7 +603,7 @@ func (o *MultisigHistory) Upsert(ctx context.Context, exec boil.ContextExecutor,
 		return ErrSyncFail
 	}
 
-	o.ID = uint64(lastID)
+	o.ID = int64(lastID)
 	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == multisigHistoryMapping["id"] {
 		goto CacheNoHooks
 	}
@@ -774,7 +758,7 @@ func (o *MultisigHistorySlice) ReloadAll(ctx context.Context, exec boil.ContextE
 }
 
 // MultisigHistoryExists checks if the MultisigHistory row exists.
-func MultisigHistoryExists(ctx context.Context, exec boil.ContextExecutor, iD uint64) (bool, error) {
+func MultisigHistoryExists(ctx context.Context, exec boil.ContextExecutor, iD int64) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from `multisig_history` where `id`=? limit 1)"
 

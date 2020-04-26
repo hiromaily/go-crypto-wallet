@@ -1,17 +1,24 @@
 package coldrepo
 
 import (
+	"context"
 	"database/sql"
-	"github.com/hiromaily/go-bitcoin/pkg/address"
-	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
-	"github.com/volatiletech/sqlboiler/queries/qm"
 
+	"github.com/pkg/errors"
+	"github.com/volatiletech/sqlboiler/boil"
+	"github.com/volatiletech/sqlboiler/queries/qm"
 	"go.uber.org/zap"
 
+	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
 type MultisigHistoryRepository interface {
+	GetAllNoMultisig() ([]*models.MultisigHistory, error)
+	GetAllNotExported() ([]*models.MultisigHistory, error)
+	InsertBulk(items []*models.MultisigHistory) error
+	UpdateMultisigAddr(multiSigAddr, redeemScript, authAddr1, fullPublicKey string) (int64, error)
+	UpdateIsExported(ids []int64) (int64, error)
 }
 
 type multisigHistoryRepository struct {
@@ -23,7 +30,7 @@ type multisigHistoryRepository struct {
 
 // NewAccountKeyRepository returns AccountKeyRepository interface
 func NewMultisigHistoryRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) MultisigHistoryRepository {
-	return &accountKeyRepository{
+	return &multisigHistoryRepository{
 		dbConn:       dbConn,
 		tableName:    "multisig_history",
 		coinTypeCode: coinTypeCode,
@@ -31,19 +38,82 @@ func NewMultisigHistoryRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode
 	}
 }
 
-// GetAllAddrStatus returns all AccountKey by addr_status
+// GetAllNoMultisig returns all MultisigHistory by blank mulstisig_address
 // - replaced from GetAddedPubkeyHistoryTableByNoWalletMultisigAddress
-func (r *accountKeyRepository) GetAllNoMultisig() ([]*models.MultisigHistory, error) {
-	//sql := "SELECT * FROM %s WHERE addr_status=?;"
+func (r *multisigHistoryRepository) GetAllNoMultisig() ([]*models.MultisigHistory, error) {
+	//sql := "SELECT * FROM %s WHERE wallet_multisig_address = '';"
 	ctx := context.Background()
 
-	items, err := models.AccountKeys(
+	items, err := models.MultisigHistories(
 		qm.Where("coin=?", r.coinTypeCode.String()),
-		qm.And("addr_status=?", addrStatus.Int8()),
+		qm.And("wallet_multisig_address=?", ""),
 	).All(ctx, r.dbConn)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call models.AccountKeys().All()")
+		return nil, errors.Wrap(err, "failed to call models.MultisigHistories().All()")
+	}
+	return items, nil
+}
+
+// GetAllNotExported returns all MultisigHistory by not exported
+// - replaced from GetAddedPubkeyHistoryTableByNotExported
+func (r *multisigHistoryRepository) GetAllNotExported() ([]*models.MultisigHistory, error) {
+	//sql := "SELECT * FROM %s WHERE wallet_multisig_address != '' AND is_exported=false;"
+	ctx := context.Background()
+
+	items, err := models.MultisigHistories(
+		qm.Where("coin=?", r.coinTypeCode.String()),
+		qm.And("wallet_multisig_address!=?", ""),
+		qm.And("is_exported=?", false),
+	).All(ctx, r.dbConn)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to call models.MultisigHistories().All()")
+	}
+	return items, nil
+}
+
+// Insert inserts multiple records
+// - replaced from InsertAddedPubkeyHistoryTable()
+func (r *multisigHistoryRepository) InsertBulk(items []*models.MultisigHistory) error {
+	ctx := context.Background()
+	return models.MultisigHistorySlice(items).InsertAll(ctx, r.dbConn, boil.Infer())
+}
+
+// UpdateMultisigAddr updates multisig_address
+// - replaced from UpdateMultisigAddrOnAddedPubkeyHistoryTable
+func (r *multisigHistoryRepository) UpdateMultisigAddr(multiSigAddr, redeemScript, authAddr1, fullPublicKey string) (int64, error) {
+	//sql := `UPDATE %s SET wallet_multisig_address=?, redeem_script=?, auth_address1=? WHERE full_public_key=?`
+	ctx := context.Background()
+
+	// Set updating columns
+	updCols := map[string]interface{}{
+		models.MultisigHistoryColumns.WalletMultisigAddress: multiSigAddr,
+		models.MultisigHistoryColumns.RedeemScript:          redeemScript,
+		models.MultisigHistoryColumns.AuthAddress1:          authAddr1,
+	}
+	return models.AccountKeys(
+		qm.Where("coin=?", r.coinTypeCode.String()),
+		qm.And("full_public_key=?", fullPublicKey),
+	).UpdateAll(ctx, r.dbConn, updCols)
+}
+
+// UpdateIsExported updates is_exported
+// - replaced from UpdateIsExportedOnAddedPubkeyHistoryTable
+func (r *multisigHistoryRepository) UpdateIsExported(ids []int64) (int64, error) {
+	//sql = "UPDATE %s SET is_exported=true WHERE id IN (?);"
+	ctx := context.Background()
+
+	// Set updating columns
+	updCols := map[string]interface{}{
+		models.MultisigHistoryColumns.IsExported: true,
 	}
 
-	return items, nil
+	targetIDs := make([]interface{}, len(ids))
+	for i, v := range ids {
+		targetIDs[i] = v
+	}
+
+	return models.AccountKeys(
+		qm.Where("coin=?", r.coinTypeCode.String()),
+		qm.AndIn("id IN ?", targetIDs...),
+	).UpdateAll(ctx, r.dbConn, updCols)
 }

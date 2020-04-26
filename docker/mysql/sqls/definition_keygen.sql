@@ -73,7 +73,7 @@ DROP TABLE IF EXISTS `multisig_history`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `multisig_history` (
-  `id`                      BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',
+  `id`                      BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
   `coin`                    ENUM('btc', 'bch') NOT NULL COMMENT'coin type code',
   `account`                 ENUM('receipt', 'payment', 'stored', 'fee') NOT NULL COMMENT'multisig account type',
   `full_public_key`         VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'full public key',
