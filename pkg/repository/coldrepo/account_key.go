@@ -50,16 +50,19 @@ func (r *accountKeyRepository) GetMaxIndex(accountType account.AccountType) (int
 	//sql := "SELECT MAX(idx) from %s;"
 	ctx := context.Background()
 
-	var maxCount int64
+	type Response struct {
+		MaxCount int64 `boil:"max_count"`
+	}
+	var maxCount Response
 	err := models.AccountKeys(
-		qm.Select("MAX(idx)"),
+		qm.Select("MAX(idx) as max_count"),
 		qm.Where("coin=?", r.coinTypeCode.String()),
 		qm.And("account=?", accountType.String()),
 	).Bind(ctx, r.dbConn, &maxCount)
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to call models.AccountKeys().Bind()")
 	}
-	return maxCount, nil
+	return maxCount.MaxCount, nil
 }
 
 // GetOneMaxID returns one records by max id
