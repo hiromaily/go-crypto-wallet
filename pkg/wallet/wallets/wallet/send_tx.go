@@ -64,7 +64,7 @@ func (w *Wallet) updateHexForSentTx(txID int64, signedHex, sentHashTx string, ac
 		err         error
 	)
 
-	affectedNum, err = w.txRepo.UpdateAfterTxSent(txID, tx.TxTypeSent, signedHex, sentHashTx)
+	affectedNum, err = w.repo.Tx().UpdateAfterTxSent(txID, tx.TxTypeSent, signedHex, sentHashTx)
 	if err != nil {
 		return errors.Wrap(err, "fail to call txRepo.UpdateAfterTxSent()")
 	}
@@ -81,7 +81,7 @@ func (w *Wallet) updateIsAllocatedForAccountPubkey(txID int64, actionType action
 	}
 
 	// get txOutputs from .tx_receipt_output by receipt_id
-	txOutputs, err := w.txOutRepo.GetAllByTxID(txID)
+	txOutputs, err := w.repo.TxOutput().GetAllByTxID(txID)
 	if err != nil {
 		return errors.Wrap(err, "fail to call txOutRepo.GetAllByTxID()")
 	}
@@ -97,7 +97,7 @@ func (w *Wallet) updateIsAllocatedForAccountPubkey(txID int64, actionType action
 	//accountPublicKeyTable[0].IsAllocated = true
 	//accountPublicKeyTable[0].UpdatedAt = &tm
 
-	_, err = w.pubkeyRepo.UpdateIsAllocated(true, account.AccountTypeReceipt, txOutputs[0].OutputAddress)
+	_, err = w.repo.Pubkey().UpdateIsAllocated(true, account.AccountTypeReceipt, txOutputs[0].OutputAddress)
 	if err != nil {
 		return errors.Wrap(err, "fail to call pubkeyRepo.UpdateIsAllocated()")
 	}

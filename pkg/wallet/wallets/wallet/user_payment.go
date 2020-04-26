@@ -19,7 +19,7 @@ type UserPayment struct {
 // createUserPayment get payment data from payment_request table
 func (w *Wallet) createUserPayment() ([]UserPayment, []int64, error) {
 	// get payment_request
-	paymentRequests, err := w.payReqRepo.GetAll()
+	paymentRequests, err := w.repo.PayReq().GetAll()
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "fail to call repo.GetPaymentRequestAll()")
 	}

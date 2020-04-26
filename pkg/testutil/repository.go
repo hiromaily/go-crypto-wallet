@@ -10,14 +10,14 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	mysql "github.com/hiromaily/go-bitcoin/pkg/db/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
-	"github.com/hiromaily/go-bitcoin/pkg/repository"
+	"github.com/hiromaily/go-bitcoin/pkg/repository/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
-var txRepo repository.TxRepository
+var txRepo walletrepo.TxRepository
 
-func NewTxRepository() repository.TxRepository {
+func NewTxRepository() walletrepo.TxRepository {
 	if txRepo != nil {
 		return txRepo
 	}
@@ -39,6 +39,6 @@ func NewTxRepository() repository.TxRepository {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	txRepo = repository.NewTxRepository(db, coin.BTC, logger)
+	txRepo = walletrepo.NewTxRepository(db, coin.BTC, logger)
 	return txRepo
 }

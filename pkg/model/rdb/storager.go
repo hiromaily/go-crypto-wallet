@@ -8,17 +8,6 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
 )
 
-// WalletStorager is wallet storager interface
-// TODO: decouple interface into interface of each repo
-type WalletStorager interface {
-	Close() error
-	MustBegin() *sqlx.Tx
-	//account_pubkey_repo
-	//GetOneUnAllocatedAccountPubKeyTable(accountType account.AccountType) (*walletrepo.AccountPublicKeyTable, error)
-	//InsertAccountPubKeyTable(accountType account.AccountType, accountPubKeyTables []walletrepo.AccountPublicKeyTable, tx *sqlx.Tx, isCommit bool) error
-	//UpdateIsAllocatedOnAccountPubKeyTable(accountType account.AccountType, accountKeyTable []walletrepo.AccountPublicKeyTable, tx *sqlx.Tx, isCommit bool) error
-}
-
 // ColdStorager is coldwalet storager interface
 type ColdStorager interface {
 	Close() error

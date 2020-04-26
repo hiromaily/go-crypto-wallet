@@ -12,9 +12,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	mysql "github.com/hiromaily/go-bitcoin/pkg/db/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
-	"github.com/hiromaily/go-bitcoin/pkg/repository"
+	"github.com/hiromaily/go-bitcoin/pkg/repository/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tracer"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
@@ -51,12 +49,12 @@ func (r *registry) NewWalleter() wallets.Walleter {
 		r.newBTC(),
 		r.newLogger(),
 		r.newTracer(),
-		r.newStorager(),
-		r.newTxRepo(),
-		r.newTxInputRepo(),
-		r.newTxOutputRepo(),
-		r.newPaymentRequestRepo(),
-		r.newPubkeyRepo(),
+		r.newRepository(),
+		//r.newTxRepo(),
+		//r.newTxInputRepo(),
+		//r.newTxOutputRepo(),
+		//r.newPaymentRequestRepo(),
+		//r.newPubkeyRepo(),
 		r.newAddressFileStorager(),
 		r.newTxFileStorager(),
 		r.walletType,
@@ -93,49 +91,54 @@ func (r *registry) newTracer() opentracing.Tracer {
 	return tracer.NewTracer(r.conf.Tracer)
 }
 
-func (r *registry) newStorager() rdb.WalletStorager {
+func (r *registry) newRepository() walletrepo.WalletRepository {
 	// if there are multiple options, set proper one
 	// storager interface as MySQL
 	return walletrepo.NewWalletRepository(
-		r.newMySQLXClient(),
+		r.newMySQLClient(),
 		r.newLogger(),
+		r.newTxRepo(),
+		r.newTxInputRepo(),
+		r.newTxOutputRepo(),
+		r.newPaymentRequestRepo(),
+		r.newPubkeyRepo(),
 	)
 }
 
-func (r *registry) newTxRepo() repository.TxRepository {
-	return repository.NewTxRepository(
+func (r *registry) newTxRepo() walletrepo.TxRepository {
+	return walletrepo.NewTxRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
 	)
 }
 
-func (r *registry) newTxInputRepo() repository.TxInputRepository {
-	return repository.NewTxInputRepository(
+func (r *registry) newTxInputRepo() walletrepo.TxInputRepository {
+	return walletrepo.NewTxInputRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
 	)
 }
 
-func (r *registry) newTxOutputRepo() repository.TxOutputRepository {
-	return repository.NewTxOutputRepository(
+func (r *registry) newTxOutputRepo() walletrepo.TxOutputRepository {
+	return walletrepo.NewTxOutputRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
 	)
 }
 
-func (r *registry) newPaymentRequestRepo() repository.PaymentRequestRepository {
-	return repository.NewPaymentRequestRepository(
+func (r *registry) newPaymentRequestRepo() walletrepo.PaymentRequestRepository {
+	return walletrepo.NewPaymentRequestRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
 	)
 }
 
-func (r *registry) newPubkeyRepo() repository.PubkeyRepository {
-	return repository.NewPubkeyRepository(
+func (r *registry) newPubkeyRepo() walletrepo.PubkeyRepository {
+	return walletrepo.NewPubkeyRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
@@ -151,17 +154,6 @@ func (r *registry) newMySQLClient() *sql.DB {
 		r.mysqlClient = dbConn
 	}
 	return r.mysqlClient
-}
-
-func (r *registry) newMySQLXClient() *sqlx.DB {
-	if r.mysqlXClient == nil {
-		dbConn, err := mysql.NewMySQLX(&r.conf.MySQL)
-		if err != nil {
-			panic(err)
-		}
-		r.mysqlXClient = dbConn
-	}
-	return r.mysqlXClient
 }
 
 func (r *registry) newAddressFileStorager() address.Storager {

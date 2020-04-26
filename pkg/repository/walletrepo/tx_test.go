@@ -1,4 +1,4 @@
-package repository_test
+package walletrepo_test
 
 import (
 	"testing"

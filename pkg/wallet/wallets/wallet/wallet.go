@@ -5,8 +5,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/address"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb"
-	"github.com/hiromaily/go-bitcoin/pkg/repository"
+	"github.com/hiromaily/go-bitcoin/pkg/repository/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
@@ -14,15 +13,15 @@ import (
 
 // Wallet watch only wallet object
 type Wallet struct {
-	btc          api.Bitcoiner
-	logger       *zap.Logger
-	tracer       opentracing.Tracer
-	repo         rdb.WalletStorager
-	txRepo       repository.TxRepository
-	txInRepo     repository.TxInputRepository
-	txOutRepo    repository.TxOutputRepository
-	payReqRepo   repository.PaymentRequestRepository
-	pubkeyRepo   repository.PubkeyRepository
+	btc    api.Bitcoiner
+	logger *zap.Logger
+	tracer opentracing.Tracer
+	repo   walletrepo.WalletRepository
+	//txRepo       walletrepo.TxRepository
+	//txInRepo     walletrepo.TxInputRepository
+	//txOutRepo    walletrepo.TxOutputRepository
+	//payReqRepo   walletrepo.PaymentRequestRepository
+	//pubkeyRepo   walletrepo.PubkeyRepository
 	addrFileRepo address.Storager
 	txFileRepo   tx.FileStorager
 	wtype        types.WalletType
@@ -33,26 +32,26 @@ func NewWallet(
 	btc api.Bitcoiner,
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
-	repo rdb.WalletStorager,
-	txRepo repository.TxRepository,
-	txInRepo repository.TxInputRepository,
-	txOutRepo repository.TxOutputRepository,
-	payReqRepo repository.PaymentRequestRepository,
-	pubkeyRepo repository.PubkeyRepository,
+	repo walletrepo.WalletRepository,
+	//txRepo walletrepo.TxRepository,
+	//txInRepo walletrepo.TxInputRepository,
+	//txOutRepo walletrepo.TxOutputRepository,
+	//payReqRepo walletrepo.PaymentRequestRepository,
+	//pubkeyRepo walletrepo.PubkeyRepository,
 	addrFileRepo address.Storager,
 	txFileRepo tx.FileStorager,
 	wtype types.WalletType) *Wallet {
 
 	return &Wallet{
-		btc:          btc,
-		logger:       logger,
-		tracer:       tracer,
-		repo:         repo,
-		txRepo:       txRepo,
-		txInRepo:     txInRepo,
-		txOutRepo:    txOutRepo,
-		payReqRepo:   payReqRepo,
-		pubkeyRepo:   pubkeyRepo,
+		btc:    btc,
+		logger: logger,
+		tracer: tracer,
+		repo:   repo,
+		//txRepo:       txRepo,
+		//txInRepo:     txInRepo,
+		//txOutRepo:    txOutRepo,
+		//payReqRepo:   payReqRepo,
+		//pubkeyRepo:   pubkeyRepo,
 		addrFileRepo: addrFileRepo,
 		txFileRepo:   txFileRepo,
 		wtype:        wtype,
@@ -63,11 +62,6 @@ func NewWallet(
 func (w *Wallet) Done() {
 	w.repo.Close()
 	w.btc.Close()
-}
-
-// GetDB gets storager
-func (w *Wallet) GetDB() rdb.WalletStorager {
-	return w.repo
 }
 
 // GetBTC gets btc

@@ -42,7 +42,7 @@ func (w *Wallet) UpdateTxStatus() error {
 // update TxTypeSent to TxTypeDone if confirmation is 6 or more
 func (w *Wallet) updateStatusForTxTypeSent(actionType action.ActionType) error {
 	// get records whose status is TxTypeSent
-	hashes, err := w.txRepo.GetSentHashTx(actionType, tx.TxTypeSent)
+	hashes, err := w.repo.Tx().GetSentHashTx(actionType, tx.TxTypeSent)
 	if err != nil {
 		return errors.Wrapf(err, "fail to call txRepo.GetSentHashTx(TxTypeSent) ActionType: %s", actionType)
 	}
@@ -65,7 +65,7 @@ func (w *Wallet) updateStatusForTxTypeSent(actionType action.ActionType) error {
 
 func (w *Wallet) updateStatusForTxTypeDone(actionType action.ActionType) error {
 	// get records whose status is TxTypeDone
-	hashes, err := w.txRepo.GetSentHashTx(actionType, tx.TxTypeDone)
+	hashes, err := w.repo.Tx().GetSentHashTx(actionType, tx.TxTypeDone)
 	if err != nil {
 		return errors.Wrapf(err, "fail to call txRepo.GetSentHashTx(TxTypeDone) ActionType: %s", actionType)
 	}
@@ -119,7 +119,7 @@ func (w *Wallet) checkTxConfirmation(hash string, actionType action.ActionType) 
 	// check current confirmation
 	if tran.Confirmations >= uint64(w.btc.ConfirmationBlock()) {
 		//current confirmation meet 6 or more
-		_, err = w.txRepo.UpdateTxTypeBySentHashTx(actionType, tx.TxTypeDone, hash)
+		_, err = w.repo.Tx().UpdateTxTypeBySentHashTx(actionType, tx.TxTypeDone, hash)
 		if err != nil {
 			return errors.Wrapf(err, "fail to call repo.UpdateTxType(tx.TxTypeDone) ActionType: %s", actionType)
 		}
@@ -147,13 +147,13 @@ func (w *Wallet) notifyTxDone(hash string, actionType action.ActionType) (int64,
 	switch actionType {
 	case action.ActionTypeReceipt:
 		// 1. get txID from hash
-		txID, err = w.txRepo.GetTxIDBySentHash(actionType, hash)
+		txID, err = w.repo.Tx().GetTxIDBySentHash(actionType, hash)
 		if err != nil {
 			return 0, errors.Wrapf(err, "fail to call txRepo.GetTxIDBySentHash() ActionType: %s", actionType)
 		}
 
 		// 2. get txInputs
-		txInputs, err := w.txInRepo.GetAllByTxID(txID)
+		txInputs, err := w.repo.TxInput().GetAllByTxID(txID)
 		if err != nil {
 			return 0, errors.Wrapf(err, "fail to call txInRepo.GetAllByTxID(%d) ActionType: %s", txID, actionType)
 		}
@@ -170,13 +170,13 @@ func (w *Wallet) notifyTxDone(hash string, actionType action.ActionType) (int64,
 		}
 	case action.ActionTypePayment:
 		// 1. get txID from hash
-		txID, err = w.txRepo.GetTxIDBySentHash(actionType, hash)
+		txID, err = w.repo.Tx().GetTxIDBySentHash(actionType, hash)
 		if err != nil {
 			return 0, errors.Wrapf(err, "fail to call txRepo.GetTxIDBySentHash() ActionType: %s", actionType)
 		}
 
 		// 2. get info from payment_request table
-		paymentUsers, err := w.payReqRepo.GetAllByPaymentID(txID)
+		paymentUsers, err := w.repo.PayReq().GetAllByPaymentID(txID)
 		if err != nil {
 			return 0, errors.Wrapf(err, "fail to call repo.GetPaymentRequestByPaymentID(%d) ActionType: %s", txID, actionType)
 		}
@@ -204,19 +204,19 @@ func (w *Wallet) notifyTxDone(hash string, actionType action.ActionType) (int64,
 func (w *Wallet) updateTxTypeNotified(id int64, actionType action.ActionType) error {
 	switch actionType {
 	case action.ActionTypeReceipt:
-		_, err := w.txRepo.UpdateTxType(id, tx.TxTypeNotified)
+		_, err := w.repo.Tx().UpdateTxType(id, tx.TxTypeNotified)
 		if err != nil {
 			return errors.Wrapf(err, "fail to call repo.UpdateTxTypeNotifiedByID() ActionType: %s", actionType)
 		}
 	case action.ActionTypePayment:
 		//dtx := w.repo.MustBegin() //TODO: db transaction
-		_, err := w.txRepo.UpdateTxType(id, tx.TxTypeNotified)
+		_, err := w.repo.Tx().UpdateTxType(id, tx.TxTypeNotified)
 		if err != nil {
 			return errors.Wrapf(err, "fail to call repo.UpdateTxTypeNotifiedByID() ActionType: %s", actionType)
 		}
 
 		// update is_done=true in payment_request
-		_, err = w.payReqRepo.UpdateIsDone(id)
+		_, err = w.repo.PayReq().UpdateIsDone(id)
 		if err != nil {
 			return errors.Wrapf(err, "fail to call repo.UpdateIsDoneOnPaymentRequest() ActionType: %s", actionType)
 		}

@@ -244,7 +244,7 @@ func (w *Wallet) createTxOutputs(
 
 	// 1. get unallocated address for receiver
 	// - receipt/transfer
-	pubkeyTable, err := w.pubkeyRepo.GetOneUnAllocated(reciver)
+	pubkeyTable, err := w.repo.Pubkey().GetOneUnAllocated(reciver)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call pubkeyRepo.GetOneUnAllocated()")
 	}
@@ -487,7 +487,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 
 	// 1. skip if same hex is already stored
 	//count, err := w.repo.GetTxCountByUnsignedHex(actionType, hex)
-	count, err := w.txRepo.GetCountByUnsignedHex(actionType, hex)
+	count, err := w.repo.Tx().GetCountByUnsignedHex(actionType, hex)
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call txRepo.GetCount()")
 	}
@@ -513,7 +513,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 
 	// start db transaction //TODO: implement transaction
 	//tx := w.repo.MustBegin()
-	txID, err := w.txRepo.InsertUnsignedTx(actionType, txItem)
+	txID, err := w.repo.Tx().InsertUnsignedTx(actionType, txItem)
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call txRepo.InsertUnsignedTx()")
 	}
@@ -523,7 +523,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 	for idx := range txInputs {
 		txInputs[idx].TXID = txID
 	}
-	err = w.txInRepo.InsertBulk(txInputs)
+	err = w.repo.TxInput().InsertBulk(txInputs)
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call txInRepo.InsertBulk()")
 	}
@@ -538,7 +538,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 	//if actionType == action.ActionTypePayment {
 	//	isCommit = false
 	//}
-	err = w.txOutRepo.InsertBulk(txOutputs)
+	err = w.repo.TxOutput().InsertBulk(txOutputs)
 	if err != nil {
 		return 0, errors.Wrap(err, "storager.InsertTxOutputForUnsigned()")
 	}
@@ -548,7 +548,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 
 	// 6. update payment_id in payment_request table for only action.ActionTypePayment
 	if actionType == action.ActionTypePayment {
-		_, err = w.payReqRepo.UpdatePaymentID(txID, paymentRequestIds) //TODO: transaction commit
+		_, err = w.repo.PayReq().UpdatePaymentID(txID, paymentRequestIds) //TODO: transaction commit
 		if err != nil {
 			return 0, errors.Wrap(err, "storager.UpdatePaymentIDOnPaymentRequest()")
 		}

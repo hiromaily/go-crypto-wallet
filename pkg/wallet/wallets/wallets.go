@@ -25,7 +25,6 @@ type Walleter interface {
 	UpdateTxStatus() error
 
 	Done()
-	GetDB() rdb.WalletStorager
 	GetBTC() api.Bitcoiner
 	GetType() types.WalletType
 }
