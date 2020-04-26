@@ -53,7 +53,11 @@ func (w *ColdWallet) ImportPubKey(fileName string, accountType account.AccountTy
 	//TODO:Upsert would be better to prevent error which occur when data is already inserted
 	err = w.repo.MultisigHistory().InsertBulk(multisigHistorys)
 	if err != nil {
-		return errors.Wrap(err, "fail to call repo.InsertAddedPubkeyHistoryTable()")
+		if strings.Contains(err.Error(), "1062: Duplicate entry") {
+			w.logger.Info("full-pubkey is already imported")
+		} else {
+			return errors.Wrap(err, "fail to call repo.InsertAddedPubkeyHistoryTable()")
+		}
 	}
 
 	return nil

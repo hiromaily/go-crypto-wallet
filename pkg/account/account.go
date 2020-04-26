@@ -5,14 +5,14 @@ type AccountType string
 
 // account_type
 const (
-	AccountTypeClient        AccountType = "client"        //ユーザーの入金受付用アドレス
-	AccountTypeReceipt       AccountType = "receipt"       //入金を受け付けるアドレス用
-	AccountTypePayment       AccountType = "payment"       //出金時に支払いをするアドレス
-	AccountTypeFee           AccountType = "fee"           //手数料保管用アドレス
-	AccountTypeStored        AccountType = "stored"        //保管用アドレス(多額のコインはこちらに保管しておく
-	AccountTypeAnonymous     AccountType = "anonymous"     // payment user
-	AccountTypeAuthorization AccountType = "authorization" //マルチシグアドレスのための承認アドレス
-	AccountTypeTest          AccountType = "test"          //for unittest
+	AccountTypeClient        AccountType = "client"    // for client receipt address
+	AccountTypeReceipt       AccountType = "receipt"   // for receipt action
+	AccountTypePayment       AccountType = "payment"   // for payment action
+	AccountTypeFee           AccountType = "fee"       // for transaction fee
+	AccountTypeStored        AccountType = "stored"    // storage for huge amount of coin
+	AccountTypeAnonymous     AccountType = "anonymous" // payment user
+	AccountTypeAuthorization AccountType = "auth"      // authorization for multi address
+	AccountTypeTest          AccountType = "test"      // for unittest
 )
 
 // String converter
