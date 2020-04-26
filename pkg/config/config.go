@@ -76,10 +76,11 @@ type TracerDetail struct {
 
 // MySQL MySQL info
 type MySQL struct {
-	Host string `toml:"host" validate:"required"`
-	DB   string `toml:"dbname" validate:"required"`
-	User string `toml:"user" validate:"required"`
-	Pass string `toml:"pass" validate:"required"`
+	Host  string `toml:"host" validate:"required"`
+	DB    string `toml:"dbname" validate:"required"`
+	User  string `toml:"user" validate:"required"`
+	Pass  string `toml:"pass" validate:"required"`
+	Debug bool   `toml:"debug"`
 }
 
 // TxFile saved transaction file path which is used when import/export file

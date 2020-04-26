@@ -4,6 +4,7 @@ package coldwallet
 
 import (
 	"github.com/pkg/errors"
+	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
@@ -83,10 +84,15 @@ func (w *ColdWallet) GeneratePubKey(
 	//get latest index
 	idxFrom, err := w.repo.AccountKey().GetMaxIndex(accountType)
 	if err != nil {
+		w.logger.Debug("fail by repo.AccountKey().GetMaxIndex()", zap.Error(err))
 		idxFrom = 0
 	} else {
 		idxFrom++
 	}
+	w.logger.Debug("max_index",
+		zap.String("account_type", accountType.String()),
+		zap.Int64("current_index", idxFrom),
+	)
 
 	// generate hd wallet key
 	walletKeys, err := w.generateHDKey(accountType, seed, uint32(idxFrom), count)

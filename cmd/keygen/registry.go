@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"github.com/volatiletech/sqlboiler/boil"
 
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/opentracing/opentracing-go"
@@ -145,6 +146,10 @@ func (r *registry) newMySQLClient() *sql.DB {
 		}
 		r.mysqlClient = dbConn
 	}
+	if r.conf.MySQL.Debug {
+		boil.DebugMode = true
+	}
+
 	return r.mysqlClient
 }
 
