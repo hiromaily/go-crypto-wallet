@@ -3,7 +3,6 @@ package wallet
 import (
 	"github.com/pkg/errors"
 
-	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/action"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 )
@@ -97,7 +96,8 @@ func (w *Wallet) updateIsAllocatedForAccountPubkey(txID int64, actionType action
 	//accountPublicKeyTable[0].IsAllocated = true
 	//accountPublicKeyTable[0].UpdatedAt = &tm
 
-	_, err = w.repo.Pubkey().UpdateIsAllocated(true, account.AccountTypeReceipt, txOutputs[0].OutputAddress)
+	//accountType := account.AccountType(txOutputs[0].OutputAccount)
+	_, err = w.repo.Pubkey().UpdateIsAllocated(true, txOutputs[0].OutputAddress)
 	if err != nil {
 		return errors.Wrap(err, "fail to call pubkeyRepo.UpdateIsAllocated()")
 	}

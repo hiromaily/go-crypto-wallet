@@ -20,7 +20,7 @@ type PubkeyRepository interface {
 	//GetAll(accountType account.AccountType) ([]*models.Pubkey, error)
 	GetOneUnAllocated(accountType account.AccountType) (*models.Pubkey, error)
 	InsertBulk(items []*models.Pubkey) error
-	UpdateIsAllocated(isAllocated bool, accountType account.AccountType, pubkey string) (int64, error)
+	UpdateIsAllocated(isAllocated bool, pubkey string) (int64, error)
 }
 
 type pubkeyRepository struct {
@@ -81,7 +81,7 @@ func (r *pubkeyRepository) InsertBulk(items []*models.Pubkey) error {
 
 // UpdateIsAllocated updates is_allocated
 // - replaced from UpdateIsAllocatedOnAccountPubKeyTable
-func (r *pubkeyRepository) UpdateIsAllocated(isAllocated bool, accountType account.AccountType, pubkey string) (int64, error) {
+func (r *pubkeyRepository) UpdateIsAllocated(isAllocated bool, pubkey string) (int64, error) {
 	//	sql := `UPDATE %s SET is_allocated=:is_allocated, updated_at=:updated_at
 	//WHERE wallet_address=:wallet_address`
 	ctx := context.Background()
@@ -93,7 +93,6 @@ func (r *pubkeyRepository) UpdateIsAllocated(isAllocated bool, accountType accou
 	}
 	return models.Pubkeys(
 		qm.Where("coin=?", r.coinTypeCode.String()),
-		qm.And("account=?", accountType.String()),
 		qm.And("wallet_address=?", pubkey),
 	).UpdateAll(ctx, r.dbConn, updCols)
 }
