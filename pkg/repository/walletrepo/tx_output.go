@@ -55,8 +55,7 @@ func (r *txOutputRepository) GetOne(id int64) (*models.TXOutput, error) {
 func (r *txOutputRepository) GetAllByTxID(id int64) ([]*models.TXOutput, error) {
 	ctx := context.Background()
 	txItems, err := models.TXOutputs(
-		qm.Where("coin=?", r.coinTypeCode.String()),
-		qm.And("tx_id=?", id),
+		qm.Where("tx_id=?", id),
 	).All(ctx, r.dbConn)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to call models.TXOutputs().All()")

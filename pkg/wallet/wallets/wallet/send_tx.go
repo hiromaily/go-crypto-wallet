@@ -81,10 +81,10 @@ func (w *Wallet) updateIsAllocatedForAccountPubkey(txID int64) error {
 	//	return nil
 	//}
 
-	// get txOutputs from .tx_receipt_output by receipt_id
+	// get txOutputs by tx_id
 	txOutputs, err := w.repo.TxOutput().GetAllByTxID(txID)
 	if err != nil {
-		return errors.Wrap(err, "fail to call txOutRepo.GetAllByTxID()")
+		return errors.Wrap(err, "fail to call repo.TxOutput().GetAllByTxID()")
 	}
 	if len(txOutputs) == 0 {
 		return errors.New("output tx could not be found in tx_receipt_output")
@@ -93,7 +93,7 @@ func (w *Wallet) updateIsAllocatedForAccountPubkey(txID int64) error {
 	//accountType := account.AccountType(txOutputs[0].OutputAccount)
 	_, err = w.repo.Pubkey().UpdateIsAllocated(true, txOutputs[0].OutputAddress)
 	if err != nil {
-		return errors.Wrap(err, "fail to call pubkeyRepo.UpdateIsAllocated()")
+		return errors.Wrap(err, "fail to call repo.Pubkey().UpdateIsAllocated()")
 	}
 
 	return nil
