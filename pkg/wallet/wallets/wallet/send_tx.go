@@ -1,13 +1,10 @@
 package wallet
 
 import (
-	"time"
-
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/action"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 )
 
@@ -94,15 +91,15 @@ func (w *Wallet) updateIsAllocatedForAccountPubkey(txID int64, actionType action
 
 	// search record from account_pubkey_receipt by wallet_address
 	// if is_allocated=`false`, update it `true`
-	tm := time.Now()
-	accountPublicKeyTable := make([]walletrepo.AccountPublicKeyTable, 1)
-	accountPublicKeyTable[0].WalletAddress = txOutputs[0].OutputAddress
-	accountPublicKeyTable[0].IsAllocated = true
-	accountPublicKeyTable[0].UpdatedAt = &tm
+	//tm := time.Now()
+	//accountPublicKeyTable := make([]walletrepo.AccountPublicKeyTable, 1)
+	//accountPublicKeyTable[0].WalletAddress = txOutputs[0].OutputAddress
+	//accountPublicKeyTable[0].IsAllocated = true
+	//accountPublicKeyTable[0].UpdatedAt = &tm
 
-	err = w.repo.UpdateIsAllocatedOnAccountPubKeyTable(account.AccountTypeReceipt, accountPublicKeyTable, nil, true)
+	_, err = w.pubkeyRepo.UpdateIsAllocated(true, account.AccountTypeReceipt, txOutputs[0].OutputAddress)
 	if err != nil {
-		return errors.Wrap(err, "fail to call repo.UpdateIsAllocatedOnAccountPubKeyTable()")
+		return errors.Wrap(err, "fail to call pubkeyRepo.UpdateIsAllocated()")
 	}
 
 	return nil

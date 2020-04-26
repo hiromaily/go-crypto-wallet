@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
+	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 )
 
 // ImportPubKey import PubKey from csv filecsv into database,
@@ -20,7 +20,7 @@ func (w *Wallet) ImportPubKey(fileName string, accountType account.AccountType, 
 	}
 
 	//var pubKeyData []walletrepo.AccountPublicKeyTable
-	pubKeyData := make([]walletrepo.AccountPublicKeyTable, 0, len(pubKeys))
+	pubKeyData := make([]*models.Pubkey, 0, len(pubKeys))
 	for _, key := range pubKeys {
 		inner := strings.Split(key, ",")
 		//kind of required address is different according to account
@@ -46,7 +46,7 @@ func (w *Wallet) ImportPubKey(fileName string, accountType account.AccountType, 
 			continue
 		}
 
-		pubKeyData = append(pubKeyData, walletrepo.AccountPublicKeyTable{
+		pubKeyData = append(pubKeyData, &models.Pubkey{
 			WalletAddress: addr,
 			Account:       accountType.String(),
 		})
@@ -56,9 +56,9 @@ func (w *Wallet) ImportPubKey(fileName string, accountType account.AccountType, 
 	}
 
 	//insert imported pubKey
-	err = w.repo.InsertAccountPubKeyTable(accountType, pubKeyData, nil, true)
+	err = w.pubkeyRepo.InsertBulk(pubKeyData)
 	if err != nil {
-		return errors.Wrap(err, "fail to call repo.InsertAccountPubKeyTable()")
+		return errors.Wrap(err, "fail to call pubkeyRepo.InsertBulk()")
 		//TODO:What if this inserting is failed, how it can be recovered to keep consistancy
 		// pubkey is added in wallet, but database doesn't have records
 		// try to run this func again

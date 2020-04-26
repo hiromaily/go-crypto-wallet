@@ -6,7 +6,6 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/coldrepo"
-	"github.com/hiromaily/go-bitcoin/pkg/model/rdb/walletrepo"
 )
 
 // WalletStorager is wallet storager interface
@@ -15,11 +14,9 @@ type WalletStorager interface {
 	Close() error
 	MustBegin() *sqlx.Tx
 	//account_pubkey_repo
-	GetAllAccountPubKeyTable(accountType account.AccountType) ([]walletrepo.AccountPublicKeyTable, error)
-	GetOneUnAllocatedAccountPubKeyTable(accountType account.AccountType) (*walletrepo.AccountPublicKeyTable, error)
-	InsertAccountPubKeyTable(accountType account.AccountType, accountPubKeyTables []walletrepo.AccountPublicKeyTable, tx *sqlx.Tx, isCommit bool) error
-	UpdateAccountOnAccountPubKeyTable(accountType account.AccountType, accountKeyTable []walletrepo.AccountPublicKeyTable, tx *sqlx.Tx, isCommit bool) error
-	UpdateIsAllocatedOnAccountPubKeyTable(accountType account.AccountType, accountKeyTable []walletrepo.AccountPublicKeyTable, tx *sqlx.Tx, isCommit bool) error
+	//GetOneUnAllocatedAccountPubKeyTable(accountType account.AccountType) (*walletrepo.AccountPublicKeyTable, error)
+	//InsertAccountPubKeyTable(accountType account.AccountType, accountPubKeyTables []walletrepo.AccountPublicKeyTable, tx *sqlx.Tx, isCommit bool) error
+	//UpdateIsAllocatedOnAccountPubKeyTable(accountType account.AccountType, accountKeyTable []walletrepo.AccountPublicKeyTable, tx *sqlx.Tx, isCommit bool) error
 }
 
 // ColdStorager is coldwalet storager interface

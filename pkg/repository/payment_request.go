@@ -3,12 +3,14 @@ package repository
 import (
 	"context"
 	"database/sql"
-	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
+
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries/qm"
 	"go.uber.org/zap"
+
+	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
 type PaymentRequestRepository interface {
@@ -93,7 +95,7 @@ func (r *paymentRequestRepository) UpdatePaymentID(paymentID int64, ids []int64)
 	}
 
 	return models.PaymentRequests(
-		qm.WhereIn("id IN ?", targetIDs...),
+		qm.WhereIn("id IN ?", targetIDs...), //unique
 	).UpdateAll(ctx, r.dbConn, updCols)
 }
 
@@ -108,6 +110,7 @@ func (r *paymentRequestRepository) UpdateIsDone(paymentID int64) (int64, error) 
 		models.PaymentRequestColumns.IsDone: true,
 	}
 	return models.PaymentRequests(
-		qm.Where("payment_id=?", paymentID),
+		qm.Where("coin=?", r.coinTypeCode.String()),
+		qm.And("payment_id=?", paymentID),
 	).UpdateAll(ctx, r.dbConn, updCols)
 }

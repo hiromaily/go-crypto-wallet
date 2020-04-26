@@ -22,6 +22,7 @@ type Wallet struct {
 	txInRepo     repository.TxInputRepository
 	txOutRepo    repository.TxOutputRepository
 	payReqRepo   repository.PaymentRequestRepository
+	pubkeyRepo   repository.PubkeyRepository
 	addrFileRepo address.Storager
 	txFileRepo   tx.FileStorager
 	wtype        types.WalletType
@@ -37,6 +38,7 @@ func NewWallet(
 	txInRepo repository.TxInputRepository,
 	txOutRepo repository.TxOutputRepository,
 	payReqRepo repository.PaymentRequestRepository,
+	pubkeyRepo repository.PubkeyRepository,
 	addrFileRepo address.Storager,
 	txFileRepo tx.FileStorager,
 	wtype types.WalletType) *Wallet {
@@ -50,6 +52,7 @@ func NewWallet(
 		txInRepo:     txInRepo,
 		txOutRepo:    txOutRepo,
 		payReqRepo:   payReqRepo,
+		pubkeyRepo:   pubkeyRepo,
 		addrFileRepo: addrFileRepo,
 		txFileRepo:   txFileRepo,
 		wtype:        wtype,
