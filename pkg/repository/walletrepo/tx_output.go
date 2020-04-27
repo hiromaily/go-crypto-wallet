@@ -73,6 +73,17 @@ func (r *txOutputRepository) Insert(txItem *models.TXOutput) error {
 // Insert inserts multiple records
 // - replaced from InsertTxOutputForUnsigned()
 func (r *txOutputRepository) InsertBulk(txItems []*models.TXOutput) error {
-	ctx := context.Background()
-	return models.TXOutputSlice(txItems).InsertAll(ctx, r.dbConn, boil.Infer())
+	//FIXME: when comuns includes booleans and both value is included in that comun,
+	// this func causes error
+	// Error 1136: Column count doesn't match value count at row 5
+	//ctx := context.Background()
+	//return models.TXOutputSlice(txItems).InsertAll(ctx, r.dbConn, boil.Infer())
+
+	// this code is temporary
+	for _, item := range txItems {
+		if err := r.Insert(item); err != nil {
+			return err
+		}
+	}
+	return nil
 }

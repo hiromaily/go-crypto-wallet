@@ -5,14 +5,14 @@ type AccountType string
 
 // account_type
 const (
-	AccountTypeClient        AccountType = "client"    // for client receipt address
-	AccountTypeReceipt       AccountType = "receipt"   // for receipt action
-	AccountTypePayment       AccountType = "payment"   // for payment action
+	AccountTypeClient        AccountType = "client"    // users who created address
+	AccountTypeReceipt       AccountType = "receipt"   // this address is used as receiver for receipt
+	AccountTypePayment       AccountType = "payment"   // this address is used as sender for payment
 	AccountTypeFee           AccountType = "fee"       // for transaction fee
-	AccountTypeStored        AccountType = "stored"    // storage for huge amount of coin
-	AccountTypeAnonymous     AccountType = "anonymous" // payment user
-	AccountTypeAuthorization AccountType = "auth"      // authorization for multi address
-	AccountTypeTest          AccountType = "test"      // for unittest
+	AccountTypeStored        AccountType = "stored"    // this address is used as receiver to store huge amount of coin
+	AccountTypeAnonymous     AccountType = "anonymous" // payment receiver account
+	AccountTypeAuthorization AccountType = "auth"      // authorization account for multisig address
+	AccountTypeTest          AccountType = "test"      // unittest only
 )
 
 // String converter

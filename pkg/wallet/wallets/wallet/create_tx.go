@@ -2,7 +2,6 @@ package wallet
 
 import (
 	"fmt"
-
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
@@ -534,7 +533,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 	//}
 	err = w.repo.TxOutput().InsertBulk(txOutputs)
 	if err != nil {
-		return 0, errors.Wrap(err, "storager.InsertTxOutputForUnsigned()")
+		return 0, errors.Wrap(err, "repo.TxOutput().InsertBulk()")
 	}
 
 	//TODO: not implemented yet
@@ -544,7 +543,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 	if actionType == action.ActionTypePayment {
 		_, err = w.repo.PayReq().UpdatePaymentID(txID, paymentRequestIds) //TODO: transaction commit
 		if err != nil {
-			return 0, errors.Wrap(err, "storager.UpdatePaymentIDOnPaymentRequest()")
+			return 0, errors.Wrap(err, "repo.PayReq().UpdatePaymentID(txID, paymentRequestIds)")
 		}
 	}
 

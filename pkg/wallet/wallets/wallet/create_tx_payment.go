@@ -14,7 +14,7 @@ import (
 // - sender account(payment) covers fee, but is should be flexible
 func (w *Wallet) CreatePaymentTx(adjustmentFee float64) (string, string, error) {
 	sender := account.AccountTypePayment
-	receiver := account.AccountType("")
+	receiver := account.AccountTypeAnonymous
 	targetAction := action.ActionTypePayment
 
 	// get payment data from payment_request
