@@ -21,7 +21,7 @@ func (w *Wallet) UpdateTxStatus() error {
 
 	//1. update tx_type for TxTypeSent
 	for _, actionType := range types {
-		err := w.updateStatusForTxTypeSent(actionType)
+		err := w.updateStatusTxTypeSent(actionType)
 		if err != nil {
 			return errors.Wrapf(err, "fail to call updateStatusForTxTypeSent() ActionType: %s", actionType)
 		}
@@ -30,7 +30,7 @@ func (w *Wallet) UpdateTxStatus() error {
 	//2. update tx_type for TxTypeDone
 	// - TODO: notification
 	for _, actionType := range types {
-		err := w.updateStatusForTxTypeDone(actionType)
+		err := w.updateStatusTxTypeDone(actionType)
 		if err != nil {
 			return errors.Wrapf(err, "fail to call updateStatusForTxTypeDone() ActionType: %s", actionType)
 		}
@@ -40,7 +40,7 @@ func (w *Wallet) UpdateTxStatus() error {
 }
 
 // update TxTypeSent to TxTypeDone if confirmation is 6 or more
-func (w *Wallet) updateStatusForTxTypeSent(actionType action.ActionType) error {
+func (w *Wallet) updateStatusTxTypeSent(actionType action.ActionType) error {
 	// get records whose status is TxTypeSent
 	hashes, err := w.repo.Tx().GetSentHashTx(actionType, tx.TxTypeSent)
 	if err != nil {
@@ -50,7 +50,7 @@ func (w *Wallet) updateStatusForTxTypeSent(actionType action.ActionType) error {
 	// get hash in detail and check confirmation
 	// update txType if confirmation is 6 or more (or configured number
 	for _, hash := range hashes {
-		err = w.checkTxConfirmation(hash, actionType)
+		isDone, err := w.checkTxConfirmation(hash, actionType)
 		if err != nil {
 			w.logger.Error(
 				"fail to call w.checkTransaction()",
@@ -59,18 +59,25 @@ func (w *Wallet) updateStatusForTxTypeSent(actionType action.ActionType) error {
 				zap.Error(err))
 			continue
 		}
+		if isDone {
+			// current confirmation meets 6 or more
+			_, err = w.repo.Tx().UpdateTxTypeBySentHashTx(actionType, tx.TxTypeDone, hash)
+			if err != nil {
+				return errors.Wrapf(err, "fail to call repo.Tx().UpdateTxTypeBySentHashTx(tx.TxTypeDone) ActionType: %s", actionType)
+			}
+		}
 	}
 	return nil
 }
 
-func (w *Wallet) updateStatusForTxTypeDone(actionType action.ActionType) error {
+func (w *Wallet) updateStatusTxTypeDone(actionType action.ActionType) error {
 	// get records whose status is TxTypeDone
 	hashes, err := w.repo.Tx().GetSentHashTx(actionType, tx.TxTypeDone)
 	if err != nil {
 		return errors.Wrapf(err, "fail to call txRepo.GetSentHashTx(TxTypeDone) ActionType: %s", actionType)
 	}
 	w.logger.Debug(
-		"called storager.GetSentHashTx(TxTypeDone)",
+		"called repo.Tx().GetSentHashTx(TxTypeDone)",
 		zap.String("actionType", actionType.String()),
 		zap.Any("hashes", hashes))
 
@@ -106,11 +113,11 @@ func (w *Wallet) updateStatusForTxTypeDone(actionType action.ActionType) error {
 }
 
 // checkTxConfirmation check confirmation for hash tx
-func (w *Wallet) checkTxConfirmation(hash string, actionType action.ActionType) error {
+func (w *Wallet) checkTxConfirmation(hash string, actionType action.ActionType) (bool, error) {
 	// get tx in detail by RPC `gettransaction`
 	tran, err := w.btc.GetTransactionByTxID(hash)
 	if err != nil {
-		return errors.Wrapf(err, "fail to call btc.GetTransactionByTxID(): ActionType: %s, txID:%s", actionType, hash)
+		return false, errors.Wrapf(err, "fail to call btc.GetTransactionByTxID(): ActionType: %s, txID:%s", actionType, hash)
 	}
 	w.logger.Debug("confirmation detail",
 		zap.String("actionType", actionType.String()),
@@ -118,11 +125,8 @@ func (w *Wallet) checkTxConfirmation(hash string, actionType action.ActionType) 
 
 	// check current confirmation
 	if tran.Confirmations >= uint64(w.btc.ConfirmationBlock()) {
-		//current confirmation meet 6 or more
-		_, err = w.repo.Tx().UpdateTxTypeBySentHashTx(actionType, tx.TxTypeDone, hash)
-		if err != nil {
-			return errors.Wrapf(err, "fail to call repo.UpdateTxType(tx.TxTypeDone) ActionType: %s", actionType)
-		}
+		// current confirmation meets 6 or more
+		return true, nil
 	} else {
 		// not completed yet
 		//TODO: what if confirmation doesn't proceed for a long time after signed tx is sent
@@ -133,7 +137,7 @@ func (w *Wallet) checkTxConfirmation(hash string, actionType action.ActionType) 
 			zap.Uint64("got", tran.Confirmations))
 	}
 
-	return nil
+	return false, nil
 }
 
 // notifyTxDone notify tx is sent and met specific confirmation number
@@ -206,13 +210,23 @@ func (w *Wallet) updateTxTypeNotified(id int64, actionType action.ActionType) er
 	case action.ActionTypeReceipt:
 		_, err := w.repo.Tx().UpdateTxType(id, tx.TxTypeNotified)
 		if err != nil {
-			return errors.Wrapf(err, "fail to call repo.UpdateTxTypeNotifiedByID() ActionType: %s", actionType)
+			return errors.Wrapf(err, "fail to call repo.Tx().UpdateTxType(tx.TxTypeNotified) ActionType: %s", actionType)
 		}
 	case action.ActionTypePayment:
-		//dtx := w.repo.MustBegin() //TODO: db transaction
-		_, err := w.repo.Tx().UpdateTxType(id, tx.TxTypeNotified)
+		dtx, err := w.repo.BeginTx()
 		if err != nil {
-			return errors.Wrapf(err, "fail to call repo.UpdateTxTypeNotifiedByID() ActionType: %s", actionType)
+			return errors.Wrapf(err, "fail to start transaction")
+		}
+		defer func() {
+			if err != nil {
+				dtx.Rollback()
+			} else {
+				dtx.Commit()
+			}
+		}()
+		_, err = w.repo.Tx().UpdateTxType(id, tx.TxTypeNotified)
+		if err != nil {
+			return errors.Wrapf(err, "fail to call repo.Tx().UpdateTxType(tx.TxTypeNotified) ActionType: %s", actionType)
 		}
 
 		// update is_done=true in payment_request
@@ -221,7 +235,7 @@ func (w *Wallet) updateTxTypeNotified(id int64, actionType action.ActionType) er
 			return errors.Wrapf(err, "fail to call repo.UpdateIsDoneOnPaymentRequest() ActionType: %s", actionType)
 		}
 	case action.ActionTypeTransfer:
-		//TODO: not implemented yet
+		//TODO: not implemented yet, it could be same to action.ActionTypeReceipt
 		w.logger.Warn("action.ActionTypeTransfer is not implemented yet in updateTxTypeNotified()")
 		return errors.New("action.ActionTypeTransfer is not implemented yet in updateTxTypeNotified()")
 	}
