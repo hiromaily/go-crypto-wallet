@@ -154,10 +154,11 @@ wallet send -file xxx.csv
 
 ## TODO
 - [x] Change ORM to sqlboiler
-- [ ] Implement proper database transaction.
+- [x] Implement proper database transaction.
+- [ ] Re-design procedure for creating Multisig address.
+- [ ] Backup/Restore for wallet.dat. If wallt.dat is broken, it's not easy to recover.
 - [ ] Refactoring logic for unsigned transaction creation.
 - [ ] Flexible multisig proportion M:N. For now only 2:2 fixed proportion is available.
-- [ ] Backup/Restore for wallet.dat. If wallt.dat is broken, it's not easy to recover.
 - [ ] Multisig-address is used only once because of security reason, so after tx is sent, related receiver addresses should be updated by is_allocated=true.
 - [ ] Tweak key generation logic for multisig address for BCH.
 - [ ] Lock/Unlock wallet for security reason, authorized operator is available.

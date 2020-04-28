@@ -127,15 +127,15 @@ func (w *Wallet) checkTxConfirmation(hash string, actionType action.ActionType) 
 	if tran.Confirmations >= uint64(w.btc.ConfirmationBlock()) {
 		// current confirmation meets 6 or more
 		return true, nil
-	} else {
-		// not completed yet
-		//TODO: what if confirmation doesn't proceed for a long time after signed tx is sent
-		// - should it be canceled??
-		// - then raise fee and should unsigned tx be re-created again??
-		w.logger.Info("confirmation is not met yet",
-			zap.Uint64("want", w.btc.ConfirmationBlock()),
-			zap.Uint64("got", tran.Confirmations))
 	}
+
+	// not completed yet
+	//TODO: what if confirmation doesn't proceed for a long time after signed tx is sent
+	// - should it be canceled??
+	// - then raise fee and should unsigned tx be re-created again??
+	w.logger.Info("confirmation is not met yet",
+		zap.Uint64("want", w.btc.ConfirmationBlock()),
+		zap.Uint64("got", tran.Confirmations))
 
 	return false, nil
 }

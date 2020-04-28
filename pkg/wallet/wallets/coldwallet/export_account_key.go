@@ -17,8 +17,8 @@ import (
 
 //ExportAccountKey export key information in account_key_table as csv file
 // required address in watch only wallet
-//  - acount client: `wallet_address`
-//  - acount others: `wallet_multisig_address`
+//  - account client: `wallet_address`
+//  - account others: `wallet_multisig_address`
 // this func is expected to be used by only keygen
 func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, addrStatus address.AddrStatus) (string, error) {
 	if w.wtype != types.WalletTypeKeyGen {
@@ -33,7 +33,7 @@ func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, addrStatu
 	// exptected key status for update
 	updateAddrStatus := getAddrStatus(addrStatus, accountType)
 	if updateAddrStatus == "" {
-		return "", errors.New("it can't export file anymore")
+		return "", errors.Errorf("addrStatus would be out of range to export: %s", addrStatus.String())
 	}
 
 	// get account key

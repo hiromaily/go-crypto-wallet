@@ -14,18 +14,17 @@ import (
 
 // AddMultisigAddress add multisig address by address for auth and given account
 // - allowed account is only who has multisig addresses and auth addresses
-// - if 3:5 proportion is required, at least 4 different auth accounts should be parepared in advance
+// - if 3:5 proportion is required, at least 4 different auth accounts should be prepared in advance
 // - when sending coin from multisig address, 、related priv key is required which is related to addresses in parameters
-// - actually address is overridden by multisig addresses in multisig acccount
+// - actually address is overridden by multisig addresses in multisig account
 // - 4th parameter must be`p2sh-segwit` addressType in Bitcoin
 func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, addressType address.AddrType) error {
+	//for sign wallet
+
 	// validate
 	if !account.AccountTypeMultisig[accountType] {
 		w.logger.Info("only multisig account is allowed")
 		return nil
-	}
-	if !account.NotAllow(accountType.String(), []account.AccountType{account.AccountTypeAuthorization, account.AccountTypeClient}) {
-		return errors.Errorf("account: %s/%s is not allowed", account.AccountTypeAuthorization, account.AccountTypeClient)
 	}
 
 	// get one wallet_address for Authorization account from account_key_authorization table
@@ -33,10 +32,10 @@ func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, address
 	if err != nil {
 		return errors.Wrap(err, "fail to call repo.GetOneByMaxIDOnAccountKeyTable(AccountTypeAuthorization)")
 	}
-	// get full-pub-key for given account from added_pubkey_history_table
+	// get full-pub-key for given account from multisig_history_table
 	multisigHistoryTable, err := w.repo.MultisigHistory().GetAllNoMultisig(accountType)
 	if err != nil {
-		return errors.Wrapf(err, "fail to call repo.GetAddedPubkeyHistoryTableByNoWalletMultisigAddress(%s)", accountType.String())
+		return errors.Wrapf(err, "fail to call repo.MultisigHistory().GetAllNoMultisig(%s)", accountType.String())
 	}
 
 	// call bitcoinAPI `addmultisigaddress`
