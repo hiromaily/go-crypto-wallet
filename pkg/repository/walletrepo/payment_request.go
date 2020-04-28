@@ -20,6 +20,7 @@ type PaymentRequestRepository interface {
 	InsertBulk(items []*models.PaymentRequest) error
 	UpdatePaymentID(paymentID int64, ids []int64) (int64, error)
 	UpdateIsDone(paymentID int64) (int64, error)
+	DeleteAll() (int64, error)
 }
 
 type paymentRequestRepository struct {
@@ -114,4 +115,11 @@ func (r *paymentRequestRepository) UpdateIsDone(paymentID int64) (int64, error) 
 		qm.Where("coin=?", r.coinTypeCode.String()),
 		qm.And("payment_id=?", paymentID),
 	).UpdateAll(ctx, r.dbConn, updCols)
+}
+
+// DeleteAll deletes all records
+func (r *paymentRequestRepository) DeleteAll() (int64, error) {
+	ctx := context.Background()
+	items, _ := models.PaymentRequests().All(ctx, r.dbConn)
+	return items.DeleteAll(ctx, r.dbConn)
 }

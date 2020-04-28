@@ -3,6 +3,7 @@ package wallets
 import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
+	"github.com/hiromaily/go-bitcoin/pkg/repository/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
@@ -24,6 +25,7 @@ type Walleter interface {
 	UpdateTxStatus() error
 
 	Done()
+	GetDB() walletrepo.WalletRepository // for debug use
 	GetBTC() api.Bitcoiner
 	GetType() types.WalletType
 }

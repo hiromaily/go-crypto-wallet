@@ -121,7 +121,6 @@ addr-test:
 	go test -tags=integration -v -run pkg/wallets/api/btc/...
 	go test -tags=integration -v -run GetAddressInfo pkg/wallets/api/btc/...
 	go test -v pkg/wallets/api/btc/... -run GetAddressInfo
-	go test -v yaml/yaml_test.go -run TestYAMLTable -log 1
 #// +build integration
 
 

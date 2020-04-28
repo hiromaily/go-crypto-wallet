@@ -18,7 +18,7 @@ import (
 
 // PubkeyRepository is repository for pubkey table
 type PubkeyRepository interface {
-	//GetAll(accountType account.AccountType) ([]*models.Pubkey, error)
+	GetAll(accountType account.AccountType) ([]*models.Pubkey, error)
 	GetOneUnAllocated(accountType account.AccountType) (*models.Pubkey, error)
 	InsertBulk(items []*models.Pubkey) error
 	UpdateIsAllocated(isAllocated bool, pubkey string) (int64, error)
@@ -42,19 +42,19 @@ func NewPubkeyRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger 
 }
 
 // GetAll returns all records by account
-//func (r *pubkeyRepository) GetAll(accountType account.AccountType) ([]*models.Pubkey, error) {
-//	//sql := "SELECT * FROM %s;"
-//	ctx := context.Background()
-//
-//	items, err := models.Pubkeys(
-//		qm.Where("coin=?", r.coinTypeCode.String()),
-//		qm.And("account=?", accountType.String()),
-//	).All(ctx, r.dbConn)
-//	if err != nil {
-//		return nil, errors.Wrap(err, "failed to call models.Pubkeys().All()")
-//	}
-//	return items, nil
-//}
+func (r *pubkeyRepository) GetAll(accountType account.AccountType) ([]*models.Pubkey, error) {
+	//sql := "SELECT * FROM %s WHERE account=%s;"
+	ctx := context.Background()
+
+	items, err := models.Pubkeys(
+		qm.Where("coin=?", r.coinTypeCode.String()),
+		qm.And("account=?", accountType.String()),
+	).All(ctx, r.dbConn)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to call models.Pubkeys().All()")
+	}
+	return items, nil
+}
 
 // GetOneUnAllocated returns one records by is_allocated=false
 // - replaced from GetOneUnAllocatedAccountPubKeyTable

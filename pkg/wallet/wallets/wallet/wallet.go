@@ -43,15 +43,10 @@ func NewWallet(
 	wtype types.WalletType) *Wallet {
 
 	return &Wallet{
-		btc:    btc,
-		logger: logger,
-		tracer: tracer,
-		repo:   repo,
-		//txRepo:       txRepo,
-		//txInRepo:     txInRepo,
-		//txOutRepo:    txOutRepo,
-		//payReqRepo:   payReqRepo,
-		//pubkeyRepo:   pubkeyRepo,
+		btc:          btc,
+		logger:       logger,
+		tracer:       tracer,
+		repo:         repo,
 		addrFileRepo: addrFileRepo,
 		txFileRepo:   txFileRepo,
 		wtype:        wtype,
@@ -62,6 +57,11 @@ func NewWallet(
 func (w *Wallet) Done() {
 	w.repo.Close()
 	w.btc.Close()
+}
+
+// GetDB gets repository
+func (w *Wallet) GetDB() walletrepo.WalletRepository {
+	return w.repo
 }
 
 // GetBTC gets btc
