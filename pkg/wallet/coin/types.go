@@ -22,7 +22,7 @@ const (
 	CoinTypeLitecoin    CoinType = 2   // Litecoin
 	CoinTypeEther       CoinType = 60  // Ether
 	CoinTypeRipple      CoinType = 144 // Ripple
-	CoinTypeBitcoinCash          = 145 // Bitcoin Cash
+	CoinTypeBitcoinCash CoinType = 145 // Bitcoin Cash
 )
 
 //CoinTypeCode coin type code

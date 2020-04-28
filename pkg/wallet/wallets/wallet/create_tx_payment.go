@@ -52,7 +52,7 @@ func (w *Wallet) CreatePaymentTx(adjustmentFee float64) (string, string, error) 
 }
 
 // userPayments is given for receiverAddr
-func (w *Wallet) createPaymentOutputs(userPayments []UserPayment, changeAddr string, changeAmount btcutil.Amount) map[btcutil.Address]btcutil.Amount {
+func (w *Wallet) createPaymentTxOutputs(userPayments []UserPayment, changeAddr string, changeAmount btcutil.Amount) map[btcutil.Address]btcutil.Amount {
 	var (
 		txOutputs = map[btcutil.Address]btcutil.Amount{}
 		//if key of map is btcutil.Address which is interface type, uniqueness can't be found from map key
