@@ -66,7 +66,7 @@ func (c *CreateCommand) Run(args []string) int {
 		}
 
 		// get client pubkeys
-		pubkeyItems, err := c.wallet.GetDB().Pubkey().GetAll(account.AccountTypeClient)
+		pubkeyItems, err := c.wallet.GetDB().Addr().GetAll(account.AccountTypeClient)
 		if err != nil {
 			c.ui.Error(fmt.Sprintf("fail to call wallet.GetDB().Pubkey().GetAll() %+v", err))
 			return 1

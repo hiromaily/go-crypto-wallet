@@ -10,9 +10,9 @@ import (
 	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 )
 
-// ImportPubKey import PubKey from csv filecsv into database,
+// ImportAddress import PubKey from csv filecsv into database,
 //  - if account is client, which doesn't have account ??
-func (w *Wallet) ImportPubKey(fileName string, accountType account.AccountType, isRescan bool) error {
+func (w *Wallet) ImportAddress(fileName string, accountType account.AccountType, isRescan bool) error {
 	// read file for public key
 	pubKeys, err := w.addrFileRepo.ImportPubKey(fileName)
 	if err != nil {
@@ -20,7 +20,7 @@ func (w *Wallet) ImportPubKey(fileName string, accountType account.AccountType, 
 	}
 
 	//var pubKeyData []walletrepo.AccountPublicKeyTable
-	pubKeyData := make([]*models.Pubkey, 0, len(pubKeys))
+	pubKeyData := make([]*models.Address, 0, len(pubKeys))
 	for _, key := range pubKeys {
 		inner := strings.Split(key, ",")
 		//kind of required address is different according to account
@@ -46,7 +46,7 @@ func (w *Wallet) ImportPubKey(fileName string, accountType account.AccountType, 
 			continue
 		}
 
-		pubKeyData = append(pubKeyData, &models.Pubkey{
+		pubKeyData = append(pubKeyData, &models.Address{
 			Coin:          w.GetBTC().CoinTypeCode().String(),
 			Account:       accountType.String(),
 			WalletAddress: addr,
@@ -57,7 +57,7 @@ func (w *Wallet) ImportPubKey(fileName string, accountType account.AccountType, 
 	}
 
 	//insert imported pubKey
-	err = w.repo.Pubkey().InsertBulk(pubKeyData)
+	err = w.repo.Addr().InsertBulk(pubKeyData)
 	if err != nil {
 		return errors.Wrap(err, "fail to call repo.Pubkey().InsertBulk()")
 		//TODO:What if this inserting is failed, how it can be recovered to keep consistancy

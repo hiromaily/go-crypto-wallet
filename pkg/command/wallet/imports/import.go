@@ -24,15 +24,15 @@ func (c *ImportCommand) Synopsis() string {
 }
 
 var (
-	keySynopsis = "import generatd addresses by keygen wallet"
+	addressSynopsis = "import generatd addresses by keygen wallet"
 )
 
 // Help returns usage for this subcommand
 func (c *ImportCommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet import [Subcommands...]
 Subcommands:
-  key  %s
-`, keySynopsis)
+  address  %s
+`, addressSynopsis)
 }
 
 // Run executes this subcommand
@@ -46,10 +46,10 @@ func (c *ImportCommand) Run(args []string) int {
 
 	//farther subcommand import
 	cmds := map[string]cli.CommandFactory{
-		"key": func() (cli.Command, error) {
-			return &KeyCommand{
-				name:     "key",
-				synopsis: keySynopsis,
+		"address": func() (cli.Command, error) {
+			return &AddressCommand{
+				name:     "address",
+				synopsis: addressSynopsis,
 				ui:       command.ClolorUI(),
 				wallet:   c.Wallet,
 			}, nil

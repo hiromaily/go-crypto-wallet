@@ -48,6 +48,8 @@ lint:
 lintfix:
 	golangci-lint run --fix
 
+# FIXME: file is not generated with --templates option if files are existing
+# As workaround, modify files in ./templates/..
 .PHONY: generate-db-definition
 generate-db-definition:
 	sqlboiler --wipe \
@@ -55,7 +57,10 @@ generate-db-definition:
 	${GOPATH}/src/github.com/volatiletech/sqlboiler/templates_test,\
 	${GOPATH}/src/github.com/hiromaily/go-bitcoin/templates \
 	mysql
-	#sqlboiler --config sqlboiler.keygen.toml --wipe mysql
+
+.PHONY: sqlboiler
+sqlboiler:
+	sqlboiler --wipe mysql
 
 # ifacemaker is tool which makes interface from struct
 .PHONY: generate-go-interface

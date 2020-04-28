@@ -176,27 +176,28 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 		}
 
 		// get P2PKH address as string for BTC/BCH
-		//if only BTC, this logic would be enough
-		//address, err := child.Address(conf)
-		//address.String()
-		strP2PKHAddr, err := k.getP2pkhAddr(privateKey)
+		// - P2PKH Address, Pay To PubKey Hash
+		// - if only BTC, this logic would be enough
+		//  address, err := child.Address(conf)
+		//  address.String()
+		strP2PKHAddr, err := k.getP2PKHAddr(privateKey)
 		if err != nil {
 			return nil, err
 		}
 
-		// p2sh-segwit address
-		strP2shSegwit, redeemScript, err := k.getP2shSegwitAddr(privateKey)
+		// P2SH-SegWit address
+		strP2SHSegWitAddr, redeemScript, err := k.getP2SHSegWitAddr(privateKey)
 		if err != nil {
 			return nil, err
 		}
 
 		// address.String() is equal to address.EncodeAddress()
 		walletKeys[i] = WalletKey{
-			WIF:          wif.String(),
-			Address:      strP2PKHAddr, //[P2PKH]AddressPubKeyHash is an Address for a pay-to-pubkey-hash
-			P2shSegwit:   strP2shSegwit,
-			FullPubKey:   getFullPubKey(privateKey, true),
-			RedeemScript: redeemScript,
+			WIF:            wif.String(),
+			P2PKHAddr:      strP2PKHAddr,
+			P2SHSegWitAddr: strP2SHSegWitAddr,
+			FullPubKey:     getFullPubKey(privateKey, true),
+			RedeemScript:   redeemScript,
 		}
 	}
 
@@ -204,7 +205,9 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 }
 
 // get Address(P2PKH) as string for BTC/BCH
-func (k *HDKey) getP2pkhAddr(privKey *btcec.PrivateKey) (string, error) {
+// P2PKH Address, Pay To PubKey Hash
+// https://bitcoin.org/en/glossary/p2pkh-address
+func (k *HDKey) getP2PKHAddr(privKey *btcec.PrivateKey) (string, error) {
 	serializedPubKey := privKey.PubKey().SerializeCompressed()
 	pkHash := btcutil.Hash160(serializedPubKey)
 
@@ -238,12 +241,12 @@ func (k *HDKey) getP2PKHAddrBCH(p2PKHAddr *btcutil.AddressPubKeyHash) (string, e
 	return fmt.Sprintf("%s:%s", prefix, addrBCH.String()), nil
 }
 
-// getP2shSegwitAddr get p2sh-segwit address and redeemScript as string
+// getP2SHSegWitAddr get P2SH-SegWit address (P2SH nested SegWit) and redeemScript as string
 //  - it's for only BTC
 //  - Though BCH would not require it, just in case
 // FIXME: getting RedeemScript is not fixed yet
 // nolint:unparam
-func (k *HDKey) getP2shSegwitAddr(privKey *btcec.PrivateKey) (string, string, error) {
+func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, error) {
 	// []byte
 	pubKeyHash := btcutil.Hash160(privKey.PubKey().SerializeCompressed())
 	segwitAddress, err := btcutil.NewAddressWitnessPubKeyHash(pubKeyHash, k.conf)

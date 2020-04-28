@@ -85,7 +85,7 @@ func (w *Wallet) updateIsAllocatedAccountPubkey(txID int64) error {
 		return errors.New("output tx could not be found in tx_receipt_output")
 	}
 
-	_, err = w.repo.Pubkey().UpdateIsAllocated(true, txOutputs[0].OutputAddress)
+	_, err = w.repo.Addr().UpdateIsAllocated(true, txOutputs[0].OutputAddress)
 	if err != nil {
 		return errors.Wrap(err, "fail to call repo.Pubkey().UpdateIsAllocated()")
 	}

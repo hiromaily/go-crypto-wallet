@@ -32,7 +32,8 @@ func (w *ColdWallet) ImportPrivateKey(accountType account.AccountType) error {
 		w.logger.Debug(
 			"target records",
 			zap.String("account_type", accountType.String()),
-			zap.String("wallet_address", record.WalletAddress),
+			zap.String("P2PKH_address", record.P2PKHAddress),
+			zap.String("P2SH_segwit_address", record.P2SHSegwitAddress),
 			zap.String("wif", record.WalletImportFormat))
 		// decode wif
 		wif, err := btcutil.DecodeWIF(record.WalletImportFormat)
@@ -64,7 +65,7 @@ func (w *ColdWallet) ImportPrivateKey(accountType account.AccountType) error {
 		}
 
 		// check address was stored in bitcoin core by importing private key
-		w.checkImportedAddress(record.WalletAddress, record.P2SHSegwitAddress, record.FullPublicKey)
+		w.checkImportedAddress(record.P2PKHAddress, record.P2SHSegwitAddress, record.FullPublicKey)
 	}
 
 	return nil

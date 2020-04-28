@@ -127,13 +127,13 @@ UNLOCK TABLES;
 */
 
 --
--- Table structure for table `pubkey`
+-- Table structure for table `address`
 --
 
-DROP TABLE IF EXISTS `pubkey`;
+DROP TABLE IF EXISTS `address`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `pubkey` (
+CREATE TABLE `address` (
   `id`                BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
   `coin`              ENUM('btc', 'bch') NOT NULL COMMENT'coin type code',
   `account`           ENUM('client', 'receipt', 'payment', 'stored', 'fee') NOT NULL COMMENT'account type',

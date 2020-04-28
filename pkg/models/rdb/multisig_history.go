@@ -24,78 +24,74 @@ import (
 
 // MultisigHistory is an object representing the database table.
 type MultisigHistory struct {
-	ID                    int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Coin                  string    `boil:"coin" json:"coin" toml:"coin" yaml:"coin"`
-	Account               string    `boil:"account" json:"account" toml:"account" yaml:"account"`
-	FullPublicKey         string    `boil:"full_public_key" json:"full_public_key" toml:"full_public_key" yaml:"full_public_key"`
-	AuthAddress1          string    `boil:"auth_address1" json:"auth_address1" toml:"auth_address1" yaml:"auth_address1"`
-	AuthAddress2          string    `boil:"auth_address2" json:"auth_address2" toml:"auth_address2" yaml:"auth_address2"`
-	WalletMultisigAddress string    `boil:"wallet_multisig_address" json:"wallet_multisig_address" toml:"wallet_multisig_address" yaml:"wallet_multisig_address"`
-	RedeemScript          string    `boil:"redeem_script" json:"redeem_script" toml:"redeem_script" yaml:"redeem_script"`
-	IsExported            bool      `boil:"is_exported" json:"is_exported" toml:"is_exported" yaml:"is_exported"`
-	UpdatedAt             null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	ID              int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Coin            string    `boil:"coin" json:"coin" toml:"coin" yaml:"coin"`
+	Account         string    `boil:"account" json:"account" toml:"account" yaml:"account"`
+	FullPublicKey   string    `boil:"full_public_key" json:"full_public_key" toml:"full_public_key" yaml:"full_public_key"`
+	AuthAddress1    string    `boil:"auth_address1" json:"auth_address1" toml:"auth_address1" yaml:"auth_address1"`
+	AuthAddress2    string    `boil:"auth_address2" json:"auth_address2" toml:"auth_address2" yaml:"auth_address2"`
+	AuthAddress3    string    `boil:"auth_address3" json:"auth_address3" toml:"auth_address3" yaml:"auth_address3"`
+	MultisigAddress string    `boil:"multisig_address" json:"multisig_address" toml:"multisig_address" yaml:"multisig_address"`
+	RedeemScript    string    `boil:"redeem_script" json:"redeem_script" toml:"redeem_script" yaml:"redeem_script"`
+	IsExported      bool      `boil:"is_exported" json:"is_exported" toml:"is_exported" yaml:"is_exported"`
+	UpdatedAt       null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
 	R *multisigHistoryR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L multisigHistoryL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var MultisigHistoryColumns = struct {
-	ID                    string
-	Coin                  string
-	Account               string
-	FullPublicKey         string
-	AuthAddress1          string
-	AuthAddress2          string
-	WalletMultisigAddress string
-	RedeemScript          string
-	IsExported            string
-	UpdatedAt             string
+	ID              string
+	Coin            string
+	Account         string
+	FullPublicKey   string
+	AuthAddress1    string
+	AuthAddress2    string
+	AuthAddress3    string
+	MultisigAddress string
+	RedeemScript    string
+	IsExported      string
+	UpdatedAt       string
 }{
-	ID:                    "id",
-	Coin:                  "coin",
-	Account:               "account",
-	FullPublicKey:         "full_public_key",
-	AuthAddress1:          "auth_address1",
-	AuthAddress2:          "auth_address2",
-	WalletMultisigAddress: "wallet_multisig_address",
-	RedeemScript:          "redeem_script",
-	IsExported:            "is_exported",
-	UpdatedAt:             "updated_at",
+	ID:              "id",
+	Coin:            "coin",
+	Account:         "account",
+	FullPublicKey:   "full_public_key",
+	AuthAddress1:    "auth_address1",
+	AuthAddress2:    "auth_address2",
+	AuthAddress3:    "auth_address3",
+	MultisigAddress: "multisig_address",
+	RedeemScript:    "redeem_script",
+	IsExported:      "is_exported",
+	UpdatedAt:       "updated_at",
 }
 
 // Generated where
 
-type whereHelperbool struct{ field string }
-
-func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-
 var MultisigHistoryWhere = struct {
-	ID                    whereHelperint64
-	Coin                  whereHelperstring
-	Account               whereHelperstring
-	FullPublicKey         whereHelperstring
-	AuthAddress1          whereHelperstring
-	AuthAddress2          whereHelperstring
-	WalletMultisigAddress whereHelperstring
-	RedeemScript          whereHelperstring
-	IsExported            whereHelperbool
-	UpdatedAt             whereHelpernull_Time
+	ID              whereHelperint64
+	Coin            whereHelperstring
+	Account         whereHelperstring
+	FullPublicKey   whereHelperstring
+	AuthAddress1    whereHelperstring
+	AuthAddress2    whereHelperstring
+	AuthAddress3    whereHelperstring
+	MultisigAddress whereHelperstring
+	RedeemScript    whereHelperstring
+	IsExported      whereHelperbool
+	UpdatedAt       whereHelpernull_Time
 }{
-	ID:                    whereHelperint64{field: "`multisig_history`.`id`"},
-	Coin:                  whereHelperstring{field: "`multisig_history`.`coin`"},
-	Account:               whereHelperstring{field: "`multisig_history`.`account`"},
-	FullPublicKey:         whereHelperstring{field: "`multisig_history`.`full_public_key`"},
-	AuthAddress1:          whereHelperstring{field: "`multisig_history`.`auth_address1`"},
-	AuthAddress2:          whereHelperstring{field: "`multisig_history`.`auth_address2`"},
-	WalletMultisigAddress: whereHelperstring{field: "`multisig_history`.`wallet_multisig_address`"},
-	RedeemScript:          whereHelperstring{field: "`multisig_history`.`redeem_script`"},
-	IsExported:            whereHelperbool{field: "`multisig_history`.`is_exported`"},
-	UpdatedAt:             whereHelpernull_Time{field: "`multisig_history`.`updated_at`"},
+	ID:              whereHelperint64{field: "`multisig_history`.`id`"},
+	Coin:            whereHelperstring{field: "`multisig_history`.`coin`"},
+	Account:         whereHelperstring{field: "`multisig_history`.`account`"},
+	FullPublicKey:   whereHelperstring{field: "`multisig_history`.`full_public_key`"},
+	AuthAddress1:    whereHelperstring{field: "`multisig_history`.`auth_address1`"},
+	AuthAddress2:    whereHelperstring{field: "`multisig_history`.`auth_address2`"},
+	AuthAddress3:    whereHelperstring{field: "`multisig_history`.`auth_address3`"},
+	MultisigAddress: whereHelperstring{field: "`multisig_history`.`multisig_address`"},
+	RedeemScript:    whereHelperstring{field: "`multisig_history`.`redeem_script`"},
+	IsExported:      whereHelperbool{field: "`multisig_history`.`is_exported`"},
+	UpdatedAt:       whereHelpernull_Time{field: "`multisig_history`.`updated_at`"},
 }
 
 // MultisigHistoryRels is where relationship names are stored.
@@ -115,8 +111,8 @@ func (*multisigHistoryR) NewStruct() *multisigHistoryR {
 type multisigHistoryL struct{}
 
 var (
-	multisigHistoryAllColumns            = []string{"id", "coin", "account", "full_public_key", "auth_address1", "auth_address2", "wallet_multisig_address", "redeem_script", "is_exported", "updated_at"}
-	multisigHistoryColumnsWithoutDefault = []string{"coin", "account", "full_public_key", "auth_address1", "auth_address2", "wallet_multisig_address", "redeem_script"}
+	multisigHistoryAllColumns            = []string{"id", "coin", "account", "full_public_key", "auth_address1", "auth_address2", "auth_address3", "multisig_address", "redeem_script", "is_exported", "updated_at"}
+	multisigHistoryColumnsWithoutDefault = []string{"coin", "account", "full_public_key", "auth_address1", "auth_address2", "auth_address3", "multisig_address", "redeem_script"}
 	multisigHistoryColumnsWithDefault    = []string{"id", "is_exported", "updated_at"}
 	multisigHistoryPrimaryKeyColumns     = []string{"id"}
 )
@@ -783,6 +779,7 @@ func (o MultisigHistorySlice) InsertAll(ctx context.Context, exec boil.ContextEx
 	if ln == 0 {
 		return nil
 	}
+
 	var sql string
 	vals := []interface{}{}
 	for i, row := range o {

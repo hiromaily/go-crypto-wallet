@@ -100,7 +100,7 @@ func (r *registry) newRepository() walletrepo.WalletRepository {
 		r.newTxInputRepo(),
 		r.newTxOutputRepo(),
 		r.newPaymentRequestRepo(),
-		r.newPubkeyRepo(),
+		r.newAddressRepo(),
 	)
 }
 
@@ -136,8 +136,8 @@ func (r *registry) newPaymentRequestRepo() walletrepo.PaymentRequestRepository {
 	)
 }
 
-func (r *registry) newPubkeyRepo() walletrepo.PubkeyRepository {
-	return walletrepo.NewPubkeyRepository(
+func (r *registry) newAddressRepo() walletrepo.AddressRepository {
+	return walletrepo.NewAddressRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),

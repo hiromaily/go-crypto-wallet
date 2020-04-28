@@ -6,10 +6,9 @@
 ###############################################################################
 # import public addresses exported by keygen wallet
 #make filepath=./data/pubkey/client_1535423628425011000.csv import-pubkey
-.PHONY: import-pubkey
+.PHONY: import-address
 import-pubkey:
-	wallet import key -acount client -file ${filepath}
-	#wallet -k -m 1 -i ./data/pubkey/client_1535423628425011000.csv
+	wallet import address -acount client -file ${filepath}
 
 
 ###############################################################################
@@ -20,14 +19,12 @@ import-pubkey:
 .PHONY: create-receipt-tx
 create-receipt-tx:
 	wallet create receipt -fee ${fee}
-	#wallet -r -m 1
 
 # Note: debug use
 # WIP: execute series of flows from creation of a receiving transaction to sending of a transaction
 .PHONY: create-receipt-all
 create-receipt-all:
 	wallet create receipt -debug
-	#wallet -r -m 10
 
 # create payment request from payment table
 #make fee=0.5 create-payment-tx

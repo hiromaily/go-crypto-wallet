@@ -49,7 +49,7 @@ func (r *multisigHistoryRepository) GetAllNoMultisig(accountType account.Account
 	items, err := models.MultisigHistories(
 		qm.Where("coin=?", r.coinTypeCode.String()),
 		qm.And("account=?", accountType.String()),
-		qm.And("wallet_multisig_address=?", ""),
+		qm.And("multisig_address=?", ""),
 	).All(ctx, r.dbConn)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to call models.MultisigHistories().All()")
@@ -66,7 +66,7 @@ func (r *multisigHistoryRepository) GetAllNotExported(accountType account.Accoun
 	items, err := models.MultisigHistories(
 		qm.Where("coin=?", r.coinTypeCode.String()),
 		qm.And("account=?", accountType.String()),
-		qm.And("wallet_multisig_address!=?", ""),
+		qm.And("multisig_address!=?", ""),
 		qm.And("is_exported=?", false),
 	).All(ctx, r.dbConn)
 	if err != nil {
@@ -90,9 +90,9 @@ func (r *multisigHistoryRepository) UpdateMultisigAddr(accountType account.Accou
 
 	// Set updating columns
 	updCols := map[string]interface{}{
-		models.MultisigHistoryColumns.WalletMultisigAddress: multiSigAddr,
-		models.MultisigHistoryColumns.RedeemScript:          redeemScript,
-		models.MultisigHistoryColumns.AuthAddress1:          authAddr1,
+		models.MultisigHistoryColumns.MultisigAddress: multiSigAddr,
+		models.MultisigHistoryColumns.RedeemScript:    redeemScript,
+		models.MultisigHistoryColumns.AuthAddress1:    authAddr1,
 	}
 	return models.MultisigHistories(
 		qm.Where("coin=?", r.coinTypeCode.String()),

@@ -22,8 +22,8 @@ import (
 	"github.com/volatiletech/sqlboiler/strmangle"
 )
 
-// Pubkey is an object representing the database table.
-type Pubkey struct {
+// Address is an object representing the database table.
+type Address struct {
 	ID            int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Coin          string    `boil:"coin" json:"coin" toml:"coin" yaml:"coin"`
 	Account       string    `boil:"account" json:"account" toml:"account" yaml:"account"`
@@ -31,11 +31,11 @@ type Pubkey struct {
 	IsAllocated   bool      `boil:"is_allocated" json:"is_allocated" toml:"is_allocated" yaml:"is_allocated"`
 	UpdatedAt     null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
-	R *pubkeyR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L pubkeyL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	R *addressR `boil:"-" json:"-" toml:"-" yaml:"-"`
+	L addressL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
-var PubkeyColumns = struct {
+var AddressColumns = struct {
 	ID            string
 	Coin          string
 	Account       string
@@ -53,7 +53,16 @@ var PubkeyColumns = struct {
 
 // Generated where
 
-var PubkeyWhere = struct {
+type whereHelperbool struct{ field string }
+
+func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+
+var AddressWhere = struct {
 	ID            whereHelperint64
 	Coin          whereHelperstring
 	Account       whereHelperstring
@@ -61,58 +70,58 @@ var PubkeyWhere = struct {
 	IsAllocated   whereHelperbool
 	UpdatedAt     whereHelpernull_Time
 }{
-	ID:            whereHelperint64{field: "`pubkey`.`id`"},
-	Coin:          whereHelperstring{field: "`pubkey`.`coin`"},
-	Account:       whereHelperstring{field: "`pubkey`.`account`"},
-	WalletAddress: whereHelperstring{field: "`pubkey`.`wallet_address`"},
-	IsAllocated:   whereHelperbool{field: "`pubkey`.`is_allocated`"},
-	UpdatedAt:     whereHelpernull_Time{field: "`pubkey`.`updated_at`"},
+	ID:            whereHelperint64{field: "`address`.`id`"},
+	Coin:          whereHelperstring{field: "`address`.`coin`"},
+	Account:       whereHelperstring{field: "`address`.`account`"},
+	WalletAddress: whereHelperstring{field: "`address`.`wallet_address`"},
+	IsAllocated:   whereHelperbool{field: "`address`.`is_allocated`"},
+	UpdatedAt:     whereHelpernull_Time{field: "`address`.`updated_at`"},
 }
 
-// PubkeyRels is where relationship names are stored.
-var PubkeyRels = struct {
+// AddressRels is where relationship names are stored.
+var AddressRels = struct {
 }{}
 
-// pubkeyR is where relationships are stored.
-type pubkeyR struct {
+// addressR is where relationships are stored.
+type addressR struct {
 }
 
 // NewStruct creates a new relationship struct
-func (*pubkeyR) NewStruct() *pubkeyR {
-	return &pubkeyR{}
+func (*addressR) NewStruct() *addressR {
+	return &addressR{}
 }
 
-// pubkeyL is where Load methods for each relationship are stored.
-type pubkeyL struct{}
+// addressL is where Load methods for each relationship are stored.
+type addressL struct{}
 
 var (
-	pubkeyAllColumns            = []string{"id", "coin", "account", "wallet_address", "is_allocated", "updated_at"}
-	pubkeyColumnsWithoutDefault = []string{"coin", "account", "wallet_address"}
-	pubkeyColumnsWithDefault    = []string{"id", "is_allocated", "updated_at"}
-	pubkeyPrimaryKeyColumns     = []string{"id"}
+	addressAllColumns            = []string{"id", "coin", "account", "wallet_address", "is_allocated", "updated_at"}
+	addressColumnsWithoutDefault = []string{"coin", "account", "wallet_address"}
+	addressColumnsWithDefault    = []string{"id", "is_allocated", "updated_at"}
+	addressPrimaryKeyColumns     = []string{"id"}
 )
 
 type (
-	// PubkeySlice is an alias for a slice of pointers to Pubkey.
-	// This should generally be used opposed to []Pubkey.
-	PubkeySlice []*Pubkey
+	// AddressSlice is an alias for a slice of pointers to Address.
+	// This should generally be used opposed to []Address.
+	AddressSlice []*Address
 
-	pubkeyQuery struct {
+	addressQuery struct {
 		*queries.Query
 	}
 )
 
 // Cache for insert, update and upsert
 var (
-	pubkeyType                 = reflect.TypeOf(&Pubkey{})
-	pubkeyMapping              = queries.MakeStructMapping(pubkeyType)
-	pubkeyPrimaryKeyMapping, _ = queries.BindMapping(pubkeyType, pubkeyMapping, pubkeyPrimaryKeyColumns)
-	pubkeyInsertCacheMut       sync.RWMutex
-	pubkeyInsertCache          = make(map[string]insertCache)
-	pubkeyUpdateCacheMut       sync.RWMutex
-	pubkeyUpdateCache          = make(map[string]updateCache)
-	pubkeyUpsertCacheMut       sync.RWMutex
-	pubkeyUpsertCache          = make(map[string]insertCache)
+	addressType                 = reflect.TypeOf(&Address{})
+	addressMapping              = queries.MakeStructMapping(addressType)
+	addressPrimaryKeyMapping, _ = queries.BindMapping(addressType, addressMapping, addressPrimaryKeyColumns)
+	addressInsertCacheMut       sync.RWMutex
+	addressInsertCache          = make(map[string]insertCache)
+	addressUpdateCacheMut       sync.RWMutex
+	addressUpdateCache          = make(map[string]updateCache)
+	addressUpsertCacheMut       sync.RWMutex
+	addressUpsertCache          = make(map[string]insertCache)
 )
 
 var (
@@ -123,9 +132,9 @@ var (
 	_ = qmhelper.Where
 )
 
-// One returns a single pubkey record from the query.
-func (q pubkeyQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Pubkey, error) {
-	o := &Pubkey{}
+// One returns a single address record from the query.
+func (q addressQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Address, error) {
+	o := &Address{}
 
 	queries.SetLimit(q.Query, 1)
 
@@ -134,26 +143,26 @@ func (q pubkeyQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Pubke
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: failed to execute a one query for pubkey")
+		return nil, errors.Wrap(err, "models: failed to execute a one query for address")
 	}
 
 	return o, nil
 }
 
-// All returns all Pubkey records from the query.
-func (q pubkeyQuery) All(ctx context.Context, exec boil.ContextExecutor) (PubkeySlice, error) {
-	var o []*Pubkey
+// All returns all Address records from the query.
+func (q addressQuery) All(ctx context.Context, exec boil.ContextExecutor) (AddressSlice, error) {
+	var o []*Address
 
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
-		return nil, errors.Wrap(err, "models: failed to assign all query results to Pubkey slice")
+		return nil, errors.Wrap(err, "models: failed to assign all query results to Address slice")
 	}
 
 	return o, nil
 }
 
-// Count returns the count of all Pubkey records in the query.
-func (q pubkeyQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+// Count returns the count of all Address records in the query.
+func (q addressQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -161,14 +170,14 @@ func (q pubkeyQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int6
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to count pubkey rows")
+		return 0, errors.Wrap(err, "models: failed to count address rows")
 	}
 
 	return count, nil
 }
 
 // Exists checks if the row exists in the table.
-func (q pubkeyQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
+func (q addressQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -177,49 +186,49 @@ func (q pubkeyQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (boo
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return false, errors.Wrap(err, "models: failed to check if pubkey exists")
+		return false, errors.Wrap(err, "models: failed to check if address exists")
 	}
 
 	return count > 0, nil
 }
 
-// Pubkeys retrieves all the records using an executor.
-func Pubkeys(mods ...qm.QueryMod) pubkeyQuery {
-	mods = append(mods, qm.From("`pubkey`"))
-	return pubkeyQuery{NewQuery(mods...)}
+// Addresses retrieves all the records using an executor.
+func Addresses(mods ...qm.QueryMod) addressQuery {
+	mods = append(mods, qm.From("`address`"))
+	return addressQuery{NewQuery(mods...)}
 }
 
-// FindPubkey retrieves a single record by ID with an executor.
+// FindAddress retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindPubkey(ctx context.Context, exec boil.ContextExecutor, iD int64, selectCols ...string) (*Pubkey, error) {
-	pubkeyObj := &Pubkey{}
+func FindAddress(ctx context.Context, exec boil.ContextExecutor, iD int64, selectCols ...string) (*Address, error) {
+	addressObj := &Address{}
 
 	sel := "*"
 	if len(selectCols) > 0 {
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from `pubkey` where `id`=?", sel,
+		"select %s from `address` where `id`=?", sel,
 	)
 
 	q := queries.Raw(query, iD)
 
-	err := q.Bind(ctx, exec, pubkeyObj)
+	err := q.Bind(ctx, exec, addressObj)
 	if err != nil {
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: unable to select from pubkey")
+		return nil, errors.Wrap(err, "models: unable to select from address")
 	}
 
-	return pubkeyObj, nil
+	return addressObj, nil
 }
 
 // Insert a single record using an executor.
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
-func (o *Pubkey) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+func (o *Address) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no pubkey provided for insertion")
+		return errors.New("models: no address provided for insertion")
 	}
 
 	var err error
@@ -231,39 +240,39 @@ func (o *Pubkey) Insert(ctx context.Context, exec boil.ContextExecutor, columns 
 		}
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(pubkeyColumnsWithDefault, o)
+	nzDefaults := queries.NonZeroDefaultSet(addressColumnsWithDefault, o)
 
 	key := makeCacheKey(columns, nzDefaults)
-	pubkeyInsertCacheMut.RLock()
-	cache, cached := pubkeyInsertCache[key]
-	pubkeyInsertCacheMut.RUnlock()
+	addressInsertCacheMut.RLock()
+	cache, cached := addressInsertCache[key]
+	addressInsertCacheMut.RUnlock()
 
 	if !cached {
 		wl, returnColumns := columns.InsertColumnSet(
-			pubkeyAllColumns,
-			pubkeyColumnsWithDefault,
-			pubkeyColumnsWithoutDefault,
+			addressAllColumns,
+			addressColumnsWithDefault,
+			addressColumnsWithoutDefault,
 			nzDefaults,
 		)
 
-		cache.valueMapping, err = queries.BindMapping(pubkeyType, pubkeyMapping, wl)
+		cache.valueMapping, err = queries.BindMapping(addressType, addressMapping, wl)
 		if err != nil {
 			return err
 		}
-		cache.retMapping, err = queries.BindMapping(pubkeyType, pubkeyMapping, returnColumns)
+		cache.retMapping, err = queries.BindMapping(addressType, addressMapping, returnColumns)
 		if err != nil {
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO `pubkey` (`%s`) %%sVALUES (%s)%%s", strings.Join(wl, "`,`"), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO `address` (`%s`) %%sVALUES (%s)%%s", strings.Join(wl, "`,`"), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO `pubkey` () VALUES ()%s%s"
+			cache.query = "INSERT INTO `address` () VALUES ()%s%s"
 		}
 
 		var queryOutput, queryReturning string
 
 		if len(cache.retMapping) != 0 {
-			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `pubkey` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, pubkeyPrimaryKeyColumns))
+			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `address` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, addressPrimaryKeyColumns))
 		}
 
 		cache.query = fmt.Sprintf(cache.query, queryOutput, queryReturning)
@@ -280,7 +289,7 @@ func (o *Pubkey) Insert(ctx context.Context, exec boil.ContextExecutor, columns 
 	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
-		return errors.Wrap(err, "models: unable to insert into pubkey")
+		return errors.Wrap(err, "models: unable to insert into address")
 	}
 
 	var lastID int64
@@ -296,7 +305,7 @@ func (o *Pubkey) Insert(ctx context.Context, exec boil.ContextExecutor, columns 
 	}
 
 	o.ID = int64(lastID)
-	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == pubkeyMapping["id"] {
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == addressMapping["id"] {
 		goto CacheNoHooks
 	}
 
@@ -311,23 +320,23 @@ func (o *Pubkey) Insert(ctx context.Context, exec boil.ContextExecutor, columns 
 	}
 	err = exec.QueryRowContext(ctx, cache.retQuery, identifierCols...).Scan(queries.PtrsFromMapping(value, cache.retMapping)...)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to populate default values for pubkey")
+		return errors.Wrap(err, "models: unable to populate default values for address")
 	}
 
 CacheNoHooks:
 	if !cached {
-		pubkeyInsertCacheMut.Lock()
-		pubkeyInsertCache[key] = cache
-		pubkeyInsertCacheMut.Unlock()
+		addressInsertCacheMut.Lock()
+		addressInsertCache[key] = cache
+		addressInsertCacheMut.Unlock()
 	}
 
 	return nil
 }
 
-// Update uses an executor to update the Pubkey.
+// Update uses an executor to update the Address.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
-func (o *Pubkey) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+func (o *Address) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
 
@@ -336,28 +345,28 @@ func (o *Pubkey) Update(ctx context.Context, exec boil.ContextExecutor, columns 
 
 	var err error
 	key := makeCacheKey(columns, nil)
-	pubkeyUpdateCacheMut.RLock()
-	cache, cached := pubkeyUpdateCache[key]
-	pubkeyUpdateCacheMut.RUnlock()
+	addressUpdateCacheMut.RLock()
+	cache, cached := addressUpdateCache[key]
+	addressUpdateCacheMut.RUnlock()
 
 	if !cached {
 		wl := columns.UpdateColumnSet(
-			pubkeyAllColumns,
-			pubkeyPrimaryKeyColumns,
+			addressAllColumns,
+			addressPrimaryKeyColumns,
 		)
 
 		if !columns.IsWhitelist() {
 			wl = strmangle.SetComplement(wl, []string{"created_at"})
 		}
 		if len(wl) == 0 {
-			return 0, errors.New("models: unable to update pubkey, could not build whitelist")
+			return 0, errors.New("models: unable to update address, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE `pubkey` SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE `address` SET %s WHERE %s",
 			strmangle.SetParamNames("`", "`", 0, wl),
-			strmangle.WhereClause("`", "`", 0, pubkeyPrimaryKeyColumns),
+			strmangle.WhereClause("`", "`", 0, addressPrimaryKeyColumns),
 		)
-		cache.valueMapping, err = queries.BindMapping(pubkeyType, pubkeyMapping, append(wl, pubkeyPrimaryKeyColumns...))
+		cache.valueMapping, err = queries.BindMapping(addressType, addressMapping, append(wl, addressPrimaryKeyColumns...))
 		if err != nil {
 			return 0, err
 		}
@@ -373,42 +382,42 @@ func (o *Pubkey) Update(ctx context.Context, exec boil.ContextExecutor, columns 
 	var result sql.Result
 	result, err = exec.ExecContext(ctx, cache.query, values...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update pubkey row")
+		return 0, errors.Wrap(err, "models: unable to update address row")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by update for pubkey")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by update for address")
 	}
 
 	if !cached {
-		pubkeyUpdateCacheMut.Lock()
-		pubkeyUpdateCache[key] = cache
-		pubkeyUpdateCacheMut.Unlock()
+		addressUpdateCacheMut.Lock()
+		addressUpdateCache[key] = cache
+		addressUpdateCacheMut.Unlock()
 	}
 
 	return rowsAff, nil
 }
 
 // UpdateAll updates all rows with the specified column values.
-func (q pubkeyQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (q addressQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all for pubkey")
+		return 0, errors.Wrap(err, "models: unable to update all for address")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected for pubkey")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected for address")
 	}
 
 	return rowsAff, nil
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
-func (o PubkeySlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (o AddressSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	ln := int64(len(o))
 	if ln == 0 {
 		return 0, nil
@@ -430,13 +439,13 @@ func (o PubkeySlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, c
 
 	// Append all of the primary key values for each column
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), pubkeyPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), addressPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE `pubkey` SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE `address` SET %s WHERE %s",
 		strmangle.SetParamNames("`", "`", 0, colNames),
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, pubkeyPrimaryKeyColumns, len(o)))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, addressPrimaryKeyColumns, len(o)))
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -445,26 +454,26 @@ func (o PubkeySlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, c
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all in pubkey slice")
+		return 0, errors.Wrap(err, "models: unable to update all in address slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all pubkey")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all address")
 	}
 	return rowsAff, nil
 }
 
-var mySQLPubkeyUniqueColumns = []string{
+var mySQLAddressUniqueColumns = []string{
 	"id",
 	"wallet_address",
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
-func (o *Pubkey) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
+func (o *Address) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no pubkey provided for upsert")
+		return errors.New("models: no address provided for upsert")
 	}
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
@@ -472,8 +481,8 @@ func (o *Pubkey) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCo
 		queries.SetScanner(&o.UpdatedAt, currTime)
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(pubkeyColumnsWithDefault, o)
-	nzUniques := queries.NonZeroDefaultSet(mySQLPubkeyUniqueColumns, o)
+	nzDefaults := queries.NonZeroDefaultSet(addressColumnsWithDefault, o)
+	nzUniques := queries.NonZeroDefaultSet(mySQLAddressUniqueColumns, o)
 
 	if len(nzUniques) == 0 {
 		return errors.New("cannot upsert with a table that cannot conflict on a unique column")
@@ -501,42 +510,42 @@ func (o *Pubkey) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCo
 	key := buf.String()
 	strmangle.PutBuffer(buf)
 
-	pubkeyUpsertCacheMut.RLock()
-	cache, cached := pubkeyUpsertCache[key]
-	pubkeyUpsertCacheMut.RUnlock()
+	addressUpsertCacheMut.RLock()
+	cache, cached := addressUpsertCache[key]
+	addressUpsertCacheMut.RUnlock()
 
 	var err error
 
 	if !cached {
 		insert, ret := insertColumns.InsertColumnSet(
-			pubkeyAllColumns,
-			pubkeyColumnsWithDefault,
-			pubkeyColumnsWithoutDefault,
+			addressAllColumns,
+			addressColumnsWithDefault,
+			addressColumnsWithoutDefault,
 			nzDefaults,
 		)
 		update := updateColumns.UpdateColumnSet(
-			pubkeyAllColumns,
-			pubkeyPrimaryKeyColumns,
+			addressAllColumns,
+			addressPrimaryKeyColumns,
 		)
 
 		if len(update) == 0 {
-			return errors.New("models: unable to upsert pubkey, could not build update column list")
+			return errors.New("models: unable to upsert address, could not build update column list")
 		}
 
 		ret = strmangle.SetComplement(ret, nzUniques)
-		cache.query = buildUpsertQueryMySQL(dialect, "pubkey", update, insert)
+		cache.query = buildUpsertQueryMySQL(dialect, "address", update, insert)
 		cache.retQuery = fmt.Sprintf(
-			"SELECT %s FROM `pubkey` WHERE %s",
+			"SELECT %s FROM `address` WHERE %s",
 			strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, ret), ","),
 			strmangle.WhereClause("`", "`", 0, nzUniques),
 		)
 
-		cache.valueMapping, err = queries.BindMapping(pubkeyType, pubkeyMapping, insert)
+		cache.valueMapping, err = queries.BindMapping(addressType, addressMapping, insert)
 		if err != nil {
 			return err
 		}
 		if len(ret) != 0 {
-			cache.retMapping, err = queries.BindMapping(pubkeyType, pubkeyMapping, ret)
+			cache.retMapping, err = queries.BindMapping(addressType, addressMapping, ret)
 			if err != nil {
 				return err
 			}
@@ -558,7 +567,7 @@ func (o *Pubkey) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCo
 	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
-		return errors.Wrap(err, "models: unable to upsert for pubkey")
+		return errors.Wrap(err, "models: unable to upsert for address")
 	}
 
 	var lastID int64
@@ -575,13 +584,13 @@ func (o *Pubkey) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCo
 	}
 
 	o.ID = int64(lastID)
-	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == pubkeyMapping["id"] {
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == addressMapping["id"] {
 		goto CacheNoHooks
 	}
 
-	uniqueMap, err = queries.BindMapping(pubkeyType, pubkeyMapping, nzUniques)
+	uniqueMap, err = queries.BindMapping(addressType, addressMapping, nzUniques)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to retrieve unique values for pubkey")
+		return errors.Wrap(err, "models: unable to retrieve unique values for address")
 	}
 	nzUniqueCols = queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), uniqueMap)
 
@@ -592,28 +601,28 @@ func (o *Pubkey) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCo
 	}
 	err = exec.QueryRowContext(ctx, cache.retQuery, nzUniqueCols...).Scan(returns...)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to populate default values for pubkey")
+		return errors.Wrap(err, "models: unable to populate default values for address")
 	}
 
 CacheNoHooks:
 	if !cached {
-		pubkeyUpsertCacheMut.Lock()
-		pubkeyUpsertCache[key] = cache
-		pubkeyUpsertCacheMut.Unlock()
+		addressUpsertCacheMut.Lock()
+		addressUpsertCache[key] = cache
+		addressUpsertCacheMut.Unlock()
 	}
 
 	return nil
 }
 
-// Delete deletes a single Pubkey record with an executor.
+// Delete deletes a single Address record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *Pubkey) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *Address) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("models: no Pubkey provided for delete")
+		return 0, errors.New("models: no Address provided for delete")
 	}
 
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), pubkeyPrimaryKeyMapping)
-	sql := "DELETE FROM `pubkey` WHERE `id`=?"
+	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), addressPrimaryKeyMapping)
+	sql := "DELETE FROM `address` WHERE `id`=?"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -622,52 +631,52 @@ func (o *Pubkey) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, 
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete from pubkey")
+		return 0, errors.Wrap(err, "models: unable to delete from address")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for pubkey")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for address")
 	}
 
 	return rowsAff, nil
 }
 
 // DeleteAll deletes all matching rows.
-func (q pubkeyQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q addressQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if q.Query == nil {
-		return 0, errors.New("models: no pubkeyQuery provided for delete all")
+		return 0, errors.New("models: no addressQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from pubkey")
+		return 0, errors.Wrap(err, "models: unable to delete all from address")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for pubkey")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for address")
 	}
 
 	return rowsAff, nil
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o PubkeySlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o AddressSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if len(o) == 0 {
 		return 0, nil
 	}
 
 	var args []interface{}
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), pubkeyPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), addressPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM `pubkey` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, pubkeyPrimaryKeyColumns, len(o))
+	sql := "DELETE FROM `address` WHERE " +
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, addressPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -676,12 +685,12 @@ func (o PubkeySlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from pubkey slice")
+		return 0, errors.Wrap(err, "models: unable to delete all from address slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for pubkey")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for address")
 	}
 
 	return rowsAff, nil
@@ -689,8 +698,8 @@ func (o PubkeySlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (
 
 // Reload refetches the object from the database
 // using the primary keys with an executor.
-func (o *Pubkey) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindPubkey(ctx, exec, o.ID)
+func (o *Address) Reload(ctx context.Context, exec boil.ContextExecutor) error {
+	ret, err := FindAddress(ctx, exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -701,26 +710,26 @@ func (o *Pubkey) Reload(ctx context.Context, exec boil.ContextExecutor) error {
 
 // ReloadAll refetches every row with matching primary key column values
 // and overwrites the original object slice with the newly updated slice.
-func (o *PubkeySlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
+func (o *AddressSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
 	if o == nil || len(*o) == 0 {
 		return nil
 	}
 
-	slice := PubkeySlice{}
+	slice := AddressSlice{}
 	var args []interface{}
 	for _, obj := range *o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), pubkeyPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), addressPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT `pubkey`.* FROM `pubkey` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, pubkeyPrimaryKeyColumns, len(*o))
+	sql := "SELECT `address`.* FROM `address` WHERE " +
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, addressPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
 
 	err := q.Bind(ctx, exec, &slice)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to reload all in PubkeySlice")
+		return errors.Wrap(err, "models: unable to reload all in AddressSlice")
 	}
 
 	*o = slice
@@ -728,10 +737,10 @@ func (o *PubkeySlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) 
 	return nil
 }
 
-// PubkeyExists checks if the Pubkey row exists.
-func PubkeyExists(ctx context.Context, exec boil.ContextExecutor, iD int64) (bool, error) {
+// AddressExists checks if the Address row exists.
+func AddressExists(ctx context.Context, exec boil.ContextExecutor, iD int64) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from `pubkey` where `id`=? limit 1)"
+	sql := "select exists(select 1 from `address` where `id`=? limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -742,18 +751,19 @@ func PubkeyExists(ctx context.Context, exec boil.ContextExecutor, iD int64) (boo
 
 	err := row.Scan(&exists)
 	if err != nil {
-		return false, errors.Wrap(err, "models: unable to check if pubkey exists")
+		return false, errors.Wrap(err, "models: unable to check if address exists")
 	}
 
 	return exists, nil
 }
 
 // InsertAll inserts all rows with the specified column values, using an executor.
-func (o PubkeySlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+func (o AddressSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	ln := int64(len(o))
 	if ln == 0 {
 		return nil
 	}
+
 	var sql string
 	vals := []interface{}{}
 	for i, row := range o {
@@ -765,21 +775,21 @@ func (o PubkeySlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, c
 			}
 		}
 
-		nzDefaults := queries.NonZeroDefaultSet(pubkeyColumnsWithDefault, row)
+		nzDefaults := queries.NonZeroDefaultSet(addressColumnsWithDefault, row)
 		wl, _ := columns.InsertColumnSet(
-			pubkeyAllColumns,
-			pubkeyColumnsWithDefault,
-			pubkeyColumnsWithoutDefault,
+			addressAllColumns,
+			addressColumnsWithDefault,
+			addressColumnsWithoutDefault,
 			nzDefaults,
 		)
 		if i == 0 {
-			sql = "INSERT INTO `pubkey` " + "(`" + strings.Join(wl, "`,`") + "`)" + " VALUES "
+			sql = "INSERT INTO `address` " + "(`" + strings.Join(wl, "`,`") + "`)" + " VALUES "
 		}
 		sql += strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), len(vals)+1, len(wl))
 		if i != len(o)-1 {
 			sql += ","
 		}
-		valMapping, err := queries.BindMapping(pubkeyType, pubkeyMapping, wl)
+		valMapping, err := queries.BindMapping(addressType, addressMapping, wl)
 		if err != nil {
 			return err
 		}
@@ -793,7 +803,7 @@ func (o PubkeySlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, c
 
 	_, err := exec.ExecContext(ctx, sql, vals...)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to insert into pubkey")
+		return errors.Wrap(err, "models: unable to insert into address")
 	}
 
 	return nil

@@ -67,6 +67,21 @@ const (
 	AccountKeyAccountAuth    = "auth"
 )
 
+// Enum values for address.coin
+const (
+	AddressCoinBTC = "btc"
+	AddressCoinBCH = "bch"
+)
+
+// Enum values for address.account
+const (
+	AddressAccountClient  = "client"
+	AddressAccountReceipt = "receipt"
+	AddressAccountPayment = "payment"
+	AddressAccountStored  = "stored"
+	AddressAccountFee     = "fee"
+)
+
 // Enum values for multisig_history.coin
 const (
 	MultisigHistoryCoinBTC = "btc"
@@ -85,21 +100,6 @@ const (
 const (
 	PaymentRequestCoinBTC = "btc"
 	PaymentRequestCoinBCH = "bch"
-)
-
-// Enum values for pubkey.coin
-const (
-	PubkeyCoinBTC = "btc"
-	PubkeyCoinBCH = "bch"
-)
-
-// Enum values for pubkey.account
-const (
-	PubkeyAccountClient  = "client"
-	PubkeyAccountReceipt = "receipt"
-	PubkeyAccountPayment = "payment"
-	PubkeyAccountStored  = "stored"
-	PubkeyAccountFee     = "fee"
 )
 
 // Enum values for seed.coin

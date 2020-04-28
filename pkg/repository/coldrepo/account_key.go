@@ -115,7 +115,7 @@ func (r *accountKeyRepository) GetAllMultiAddr(accountType account.AccountType, 
 	items, err := models.AccountKeys(
 		qm.Where("coin=?", r.coinTypeCode.String()),
 		qm.And("account=?", accountType.String()),
-		qm.AndIn("wallet_multisig_address IN ?", targetAddrs...),
+		qm.AndIn("multisig_address IN ?", targetAddrs...),
 	).All(ctx, r.dbConn)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to call models.AccountKeys().All()")
@@ -179,10 +179,10 @@ func (r *accountKeyRepository) UpdateMultisigAddr(accountType account.AccountTyp
 	for _, item := range items {
 		// Set updating columns
 		updCols := map[string]interface{}{
-			models.AccountKeyColumns.WalletMultisigAddress: item.WalletMultisigAddress,
-			models.AccountKeyColumns.RedeemScript:          item.RedeemScript,
-			models.AccountKeyColumns.AddrStatus:            item.AddrStatus,
-			models.AccountKeyColumns.UpdatedAt:             null.TimeFrom(time.Now()),
+			models.AccountKeyColumns.MultisigAddress: item.MultisigAddress,
+			models.AccountKeyColumns.RedeemScript:    item.RedeemScript,
+			models.AccountKeyColumns.AddrStatus:      item.AddrStatus,
+			models.AccountKeyColumns.UpdatedAt:       null.TimeFrom(time.Now()),
 		}
 		_, err := models.AccountKeys(
 			qm.Where("coin=?", r.coinTypeCode.String()),
@@ -196,10 +196,10 @@ func (r *accountKeyRepository) UpdateMultisigAddr(accountType account.AccountTyp
 	return 0, nil
 }
 
-// GetRedeedScriptByAddress 与えられたmultiSigアドレスから、RedeemScriptを取得する
+// GetRedeedScriptByAddress returns RedeemScript from given multisig address
 func GetRedeedScriptByAddress(accountKeys []*models.AccountKey, addr string) string {
 	for _, val := range accountKeys {
-		if val.WalletMultisigAddress == addr {
+		if val.MultisigAddress == addr {
 			return val.RedeemScript
 		}
 	}

@@ -242,7 +242,7 @@ func (w *Wallet) createTxOutputs(
 
 	// 1. get unallocated address for receiver
 	// - receipt/transfer
-	pubkeyTable, err := w.repo.Pubkey().GetOneUnAllocated(reciver)
+	pubkeyTable, err := w.repo.Addr().GetOneUnAllocated(reciver)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call pubkeyRepo.GetOneUnAllocated()")
 	}

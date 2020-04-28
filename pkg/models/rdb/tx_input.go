@@ -801,6 +801,7 @@ func (o TXInputSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, 
 	if ln == 0 {
 		return nil
 	}
+
 	var sql string
 	vals := []interface{}{}
 	for i, row := range o {

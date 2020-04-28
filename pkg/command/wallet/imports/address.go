@@ -10,8 +10,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-// KeyCommand key subcommand
-type KeyCommand struct {
+// AddressCommand address subcommand
+type AddressCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
@@ -19,20 +19,20 @@ type KeyCommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (c *KeyCommand) Synopsis() string {
+func (c *AddressCommand) Synopsis() string {
 	return c.synopsis
 }
 
 // Help returns usage for this subcommand
-func (c *KeyCommand) Help() string {
-	return `Usage: wallet import key [options...]
+func (c *AddressCommand) Help() string {
+	return `Usage: wallet import address [options...]
 Options:
   -file  import file path for generated addresses
 `
 }
 
 // Run executes this subcommand
-func (c *KeyCommand) Run(args []string) int {
+func (c *AddressCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
 	var (
@@ -64,10 +64,10 @@ func (c *KeyCommand) Run(args []string) int {
 		return 1
 	}
 
-	//import public key(address)
-	err := c.wallet.ImportPubKey(filePath, account.AccountType(acnt), isRescan)
+	//import public address
+	err := c.wallet.ImportAddress(filePath, account.AccountType(acnt), isRescan)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call ImportPubKey() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call ImportAddress() %+v", err))
 		return 1
 	}
 	c.ui.Info("Done!")

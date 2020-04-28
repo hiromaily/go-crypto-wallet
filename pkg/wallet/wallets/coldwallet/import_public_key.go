@@ -41,13 +41,14 @@ func (w *ColdWallet) ImportPubKey(fileName string, accountType account.AccountTy
 		inner := strings.Split(key, ",")
 		//FullPublicKey is required
 		multisigHistorys[i] = &models.MultisigHistory{
-			Coin:                  w.GetBTC().CoinTypeCode().String(),
-			Account:               accountType.String(),
-			FullPublicKey:         inner[2],
-			AuthAddress1:          "",
-			AuthAddress2:          "",
-			WalletMultisigAddress: "",
-			RedeemScript:          "",
+			Coin:            w.GetBTC().CoinTypeCode().String(),
+			Account:         accountType.String(),
+			FullPublicKey:   inner[2],
+			AuthAddress1:    "",
+			AuthAddress2:    "",
+			AuthAddress3:    "",
+			MultisigAddress: "",
+			RedeemScript:    "",
 		}
 	}
 	//TODO:Upsert would be better to prevent error which occur when data is already inserted
@@ -95,10 +96,10 @@ func (w *ColdWallet) ImportMultisigAddress(fileName string, accountType account.
 		//	record.WalletMultisigAddress,
 		//	record.RedeemScript,
 		accountKeyTable[i] = &models.AccountKey{
-			FullPublicKey:         inner[0],
-			WalletMultisigAddress: inner[3],
-			RedeemScript:          inner[4],
-			AddrStatus:            address.AddrStatusMultiAddressImported.Int8(),
+			FullPublicKey:   inner[0],
+			MultisigAddress: inner[3],
+			RedeemScript:    inner[4],
+			AddrStatus:      address.AddrStatusMultiAddressImported.Int8(),
 		}
 	}
 	//TODO: Upsert would be better??

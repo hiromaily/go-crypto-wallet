@@ -17,7 +17,7 @@ import (
 
 // Walleter is for watch only wallet service interface
 type Walleter interface {
-	ImportPubKey(fileName string, accountType account.AccountType, isRescan bool) error
+	ImportAddress(fileName string, accountType account.AccountType, isRescan bool) error
 	CreateReceiptTx(adjustmentFee float64) (string, string, error)
 	CreatePaymentTx(adjustmentFee float64) (string, string, error)
 	CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error)

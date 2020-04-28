@@ -14,7 +14,7 @@ type WalletRepository interface {
 	TxInput() TxInputRepository
 	TxOutput() TxOutputRepository
 	PayReq() PaymentRequestRepository
-	Pubkey() PubkeyRepository
+	Addr() AddressRepository
 }
 
 // walletRepository is repository for wallet
@@ -25,7 +25,7 @@ type walletRepository struct {
 	TxInputRepository
 	TxOutputRepository
 	PaymentRequestRepository
-	PubkeyRepository
+	AddressRepository
 }
 
 // NewWalletRepository returns WalletRepository
@@ -37,7 +37,7 @@ func NewWalletRepository(
 	txInRepo TxInputRepository,
 	txOutRepo TxOutputRepository,
 	payReqRepo PaymentRequestRepository,
-	pubkeyRepo PubkeyRepository) *walletRepository {
+	addrRepo AddressRepository) *walletRepository {
 
 	return &walletRepository{
 		db:                       db,
@@ -46,7 +46,7 @@ func NewWalletRepository(
 		TxInputRepository:        txInRepo,
 		TxOutputRepository:       txOutRepo,
 		PaymentRequestRepository: payReqRepo,
-		PubkeyRepository:         pubkeyRepo,
+		AddressRepository:        addrRepo,
 	}
 }
 
@@ -79,6 +79,6 @@ func (r *walletRepository) PayReq() PaymentRequestRepository {
 	return r.PaymentRequestRepository
 }
 
-func (r *walletRepository) Pubkey() PubkeyRepository {
-	return r.PubkeyRepository
+func (r *walletRepository) Addr() AddressRepository {
+	return r.AddressRepository
 }

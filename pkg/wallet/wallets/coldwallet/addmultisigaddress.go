@@ -12,11 +12,10 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 )
 
-// AddMultisigAddress add multisig address by address for auth and given account
-// - allowed account is only who has multisig addresses and auth addresses
+// AddMultisigAddress add multisig address by auth account address and given account address
+// https://bitcoincore.org/en/doc/0.19.0/rpc/wallet/addmultisigaddress/
 // - if 3:5 proportion is required, at least 4 different auth accounts should be prepared in advance
 // - when sending coin from multisig address, 、related priv key is required which is related to addresses in parameters
-// - actually address is overridden by multisig addresses in multisig account
 // - 4th parameter must be`p2sh-segwit` addressType in Bitcoin
 func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, addressType address.AddrType) error {
 	//for sign wallet
@@ -48,7 +47,7 @@ func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, address
 				val.FullPublicKey, // receipt, payment, stored ...
 				authKeyTable.P2SHSegwitAddress,
 			},
-			fmt.Sprintf("multi_%s", accountType), //TODO:what account name is understandable?
+			fmt.Sprintf("multi_%s", accountType), //this is not important
 			addressType,
 		)
 		if err != nil {

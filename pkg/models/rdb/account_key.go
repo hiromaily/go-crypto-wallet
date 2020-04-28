@@ -24,49 +24,49 @@ import (
 
 // AccountKey is an object representing the database table.
 type AccountKey struct {
-	ID                    int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Coin                  string    `boil:"coin" json:"coin" toml:"coin" yaml:"coin"`
-	Account               string    `boil:"account" json:"account" toml:"account" yaml:"account"`
-	WalletAddress         string    `boil:"wallet_address" json:"wallet_address" toml:"wallet_address" yaml:"wallet_address"`
-	P2SHSegwitAddress     string    `boil:"p2sh_segwit_address" json:"p2sh_segwit_address" toml:"p2sh_segwit_address" yaml:"p2sh_segwit_address"`
-	FullPublicKey         string    `boil:"full_public_key" json:"full_public_key" toml:"full_public_key" yaml:"full_public_key"`
-	WalletMultisigAddress string    `boil:"wallet_multisig_address" json:"wallet_multisig_address" toml:"wallet_multisig_address" yaml:"wallet_multisig_address"`
-	RedeemScript          string    `boil:"redeem_script" json:"redeem_script" toml:"redeem_script" yaml:"redeem_script"`
-	WalletImportFormat    string    `boil:"wallet_import_format" json:"wallet_import_format" toml:"wallet_import_format" yaml:"wallet_import_format"`
-	Idx                   int64     `boil:"idx" json:"idx" toml:"idx" yaml:"idx"`
-	AddrStatus            int8      `boil:"addr_status" json:"addr_status" toml:"addr_status" yaml:"addr_status"`
-	UpdatedAt             null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	ID                 int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Coin               string    `boil:"coin" json:"coin" toml:"coin" yaml:"coin"`
+	Account            string    `boil:"account" json:"account" toml:"account" yaml:"account"`
+	P2PKHAddress       string    `boil:"p2pkh_address" json:"p2pkh_address" toml:"p2pkh_address" yaml:"p2pkh_address"`
+	P2SHSegwitAddress  string    `boil:"p2sh_segwit_address" json:"p2sh_segwit_address" toml:"p2sh_segwit_address" yaml:"p2sh_segwit_address"`
+	FullPublicKey      string    `boil:"full_public_key" json:"full_public_key" toml:"full_public_key" yaml:"full_public_key"`
+	MultisigAddress    string    `boil:"multisig_address" json:"multisig_address" toml:"multisig_address" yaml:"multisig_address"`
+	RedeemScript       string    `boil:"redeem_script" json:"redeem_script" toml:"redeem_script" yaml:"redeem_script"`
+	WalletImportFormat string    `boil:"wallet_import_format" json:"wallet_import_format" toml:"wallet_import_format" yaml:"wallet_import_format"`
+	Idx                int64     `boil:"idx" json:"idx" toml:"idx" yaml:"idx"`
+	AddrStatus         int8      `boil:"addr_status" json:"addr_status" toml:"addr_status" yaml:"addr_status"`
+	UpdatedAt          null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
 	R *accountKeyR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L accountKeyL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var AccountKeyColumns = struct {
-	ID                    string
-	Coin                  string
-	Account               string
-	WalletAddress         string
-	P2SHSegwitAddress     string
-	FullPublicKey         string
-	WalletMultisigAddress string
-	RedeemScript          string
-	WalletImportFormat    string
-	Idx                   string
-	AddrStatus            string
-	UpdatedAt             string
+	ID                 string
+	Coin               string
+	Account            string
+	P2PKHAddress       string
+	P2SHSegwitAddress  string
+	FullPublicKey      string
+	MultisigAddress    string
+	RedeemScript       string
+	WalletImportFormat string
+	Idx                string
+	AddrStatus         string
+	UpdatedAt          string
 }{
-	ID:                    "id",
-	Coin:                  "coin",
-	Account:               "account",
-	WalletAddress:         "wallet_address",
-	P2SHSegwitAddress:     "p2sh_segwit_address",
-	FullPublicKey:         "full_public_key",
-	WalletMultisigAddress: "wallet_multisig_address",
-	RedeemScript:          "redeem_script",
-	WalletImportFormat:    "wallet_import_format",
-	Idx:                   "idx",
-	AddrStatus:            "addr_status",
-	UpdatedAt:             "updated_at",
+	ID:                 "id",
+	Coin:               "coin",
+	Account:            "account",
+	P2PKHAddress:       "p2pkh_address",
+	P2SHSegwitAddress:  "p2sh_segwit_address",
+	FullPublicKey:      "full_public_key",
+	MultisigAddress:    "multisig_address",
+	RedeemScript:       "redeem_script",
+	WalletImportFormat: "wallet_import_format",
+	Idx:                "idx",
+	AddrStatus:         "addr_status",
+	UpdatedAt:          "updated_at",
 }
 
 // Generated where
@@ -143,31 +143,31 @@ func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
 }
 
 var AccountKeyWhere = struct {
-	ID                    whereHelperint64
-	Coin                  whereHelperstring
-	Account               whereHelperstring
-	WalletAddress         whereHelperstring
-	P2SHSegwitAddress     whereHelperstring
-	FullPublicKey         whereHelperstring
-	WalletMultisigAddress whereHelperstring
-	RedeemScript          whereHelperstring
-	WalletImportFormat    whereHelperstring
-	Idx                   whereHelperint64
-	AddrStatus            whereHelperint8
-	UpdatedAt             whereHelpernull_Time
+	ID                 whereHelperint64
+	Coin               whereHelperstring
+	Account            whereHelperstring
+	P2PKHAddress       whereHelperstring
+	P2SHSegwitAddress  whereHelperstring
+	FullPublicKey      whereHelperstring
+	MultisigAddress    whereHelperstring
+	RedeemScript       whereHelperstring
+	WalletImportFormat whereHelperstring
+	Idx                whereHelperint64
+	AddrStatus         whereHelperint8
+	UpdatedAt          whereHelpernull_Time
 }{
-	ID:                    whereHelperint64{field: "`account_key`.`id`"},
-	Coin:                  whereHelperstring{field: "`account_key`.`coin`"},
-	Account:               whereHelperstring{field: "`account_key`.`account`"},
-	WalletAddress:         whereHelperstring{field: "`account_key`.`wallet_address`"},
-	P2SHSegwitAddress:     whereHelperstring{field: "`account_key`.`p2sh_segwit_address`"},
-	FullPublicKey:         whereHelperstring{field: "`account_key`.`full_public_key`"},
-	WalletMultisigAddress: whereHelperstring{field: "`account_key`.`wallet_multisig_address`"},
-	RedeemScript:          whereHelperstring{field: "`account_key`.`redeem_script`"},
-	WalletImportFormat:    whereHelperstring{field: "`account_key`.`wallet_import_format`"},
-	Idx:                   whereHelperint64{field: "`account_key`.`idx`"},
-	AddrStatus:            whereHelperint8{field: "`account_key`.`addr_status`"},
-	UpdatedAt:             whereHelpernull_Time{field: "`account_key`.`updated_at`"},
+	ID:                 whereHelperint64{field: "`account_key`.`id`"},
+	Coin:               whereHelperstring{field: "`account_key`.`coin`"},
+	Account:            whereHelperstring{field: "`account_key`.`account`"},
+	P2PKHAddress:       whereHelperstring{field: "`account_key`.`p2pkh_address`"},
+	P2SHSegwitAddress:  whereHelperstring{field: "`account_key`.`p2sh_segwit_address`"},
+	FullPublicKey:      whereHelperstring{field: "`account_key`.`full_public_key`"},
+	MultisigAddress:    whereHelperstring{field: "`account_key`.`multisig_address`"},
+	RedeemScript:       whereHelperstring{field: "`account_key`.`redeem_script`"},
+	WalletImportFormat: whereHelperstring{field: "`account_key`.`wallet_import_format`"},
+	Idx:                whereHelperint64{field: "`account_key`.`idx`"},
+	AddrStatus:         whereHelperint8{field: "`account_key`.`addr_status`"},
+	UpdatedAt:          whereHelpernull_Time{field: "`account_key`.`updated_at`"},
 }
 
 // AccountKeyRels is where relationship names are stored.
@@ -187,8 +187,8 @@ func (*accountKeyR) NewStruct() *accountKeyR {
 type accountKeyL struct{}
 
 var (
-	accountKeyAllColumns            = []string{"id", "coin", "account", "wallet_address", "p2sh_segwit_address", "full_public_key", "wallet_multisig_address", "redeem_script", "wallet_import_format", "idx", "addr_status", "updated_at"}
-	accountKeyColumnsWithoutDefault = []string{"coin", "account", "wallet_address", "p2sh_segwit_address", "full_public_key", "wallet_multisig_address", "redeem_script", "wallet_import_format", "idx"}
+	accountKeyAllColumns            = []string{"id", "coin", "account", "p2pkh_address", "p2sh_segwit_address", "full_public_key", "multisig_address", "redeem_script", "wallet_import_format", "idx", "addr_status", "updated_at"}
+	accountKeyColumnsWithoutDefault = []string{"coin", "account", "p2pkh_address", "p2sh_segwit_address", "full_public_key", "multisig_address", "redeem_script", "wallet_import_format", "idx"}
 	accountKeyColumnsWithDefault    = []string{"id", "addr_status", "updated_at"}
 	accountKeyPrimaryKeyColumns     = []string{"id"}
 )
@@ -558,7 +558,7 @@ func (o AccountKeySlice) UpdateAll(ctx context.Context, exec boil.ContextExecuto
 
 var mySQLAccountKeyUniqueColumns = []string{
 	"id",
-	"wallet_address",
+	"p2pkh_address",
 	"p2sh_segwit_address",
 	"wallet_import_format",
 }
@@ -857,6 +857,7 @@ func (o AccountKeySlice) InsertAll(ctx context.Context, exec boil.ContextExecuto
 	if ln == 0 {
 		return nil
 	}
+
 	var sql string
 	vals := []interface{}{}
 	for i, row := range o {

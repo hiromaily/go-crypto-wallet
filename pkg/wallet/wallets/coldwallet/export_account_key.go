@@ -105,10 +105,10 @@ func (w *ColdWallet) exportAccountKey(accountKeyTable []*models.AccountKey, acco
 	for _, record := range accountKeyTable {
 		//each line of csv data
 		tmpData := []string{
-			record.WalletAddress,
+			record.P2PKHAddress,
 			record.P2SHSegwitAddress,
 			record.FullPublicKey,
-			record.WalletMultisigAddress,
+			record.MultisigAddress,
 			record.Account,
 			strconv.Itoa(int(record.Idx)),
 		}

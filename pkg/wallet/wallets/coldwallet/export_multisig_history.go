@@ -35,7 +35,7 @@ func (w *ColdWallet) ExportAddedPubkeyHistory(accountType account.AccountType) (
 	}
 
 	// export data in added_pubkey_history table as csv file
-	fileName, err := w.exportAddedPubkeyHistoryTable(multisigHistoryTable, accountType,
+	fileName, err := w.exportMultisigHistoryTable(multisigHistoryTable, accountType,
 		address.AddrStatusValue[address.AddrStatusPubkeyExported])
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call exportAddedPubkeyHistoryTable()")
@@ -55,7 +55,7 @@ func (w *ColdWallet) ExportAddedPubkeyHistory(accountType account.AccountType) (
 }
 
 // TODO: export logic could be defined as address.Storager
-func (w *ColdWallet) exportAddedPubkeyHistoryTable(multisigHistoryTable []*models.MultisigHistory, accountType account.AccountType, addrStatus uint8) (string, error) {
+func (w *ColdWallet) exportMultisigHistoryTable(multisigHistoryTable []*models.MultisigHistory, accountType account.AccountType, addrStatus uint8) (string, error) {
 	//fileName
 	fileName := w.addrFileRepo.CreateFilePath(accountType, addrStatus)
 
@@ -73,7 +73,7 @@ func (w *ColdWallet) exportAddedPubkeyHistoryTable(multisigHistoryTable []*model
 			record.FullPublicKey,
 			record.AuthAddress1,
 			record.AuthAddress2,
-			record.WalletMultisigAddress,
+			record.MultisigAddress,
 			record.RedeemScript,
 		}
 		_, err = writer.WriteString(strings.Join(tmpData[:], ",") + "\n")

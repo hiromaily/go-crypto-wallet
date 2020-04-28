@@ -104,15 +104,15 @@ func (w *ColdWallet) GeneratePubKey(
 	accountKeyClients := make([]*models.AccountKey, len(walletKeys))
 	for idx, key := range walletKeys {
 		accountKeyClients[idx] = &models.AccountKey{
-			Coin:                  w.GetBTC().CoinTypeCode().String(),
-			Account:               accountType.String(),
-			WalletAddress:         key.Address,
-			P2SHSegwitAddress:     key.P2shSegwit,
-			FullPublicKey:         key.FullPubKey,
-			WalletMultisigAddress: "",
-			RedeemScript:          key.RedeemScript,
-			WalletImportFormat:    key.WIF,
-			Idx:                   idxFrom,
+			Coin:               w.GetBTC().CoinTypeCode().String(),
+			Account:            accountType.String(),
+			P2PKHAddress:       key.P2PKHAddr,
+			P2SHSegwitAddress:  key.P2SHSegWitAddr,
+			FullPublicKey:      key.FullPubKey,
+			MultisigAddress:    "",
+			RedeemScript:       key.RedeemScript,
+			WalletImportFormat: key.WIF,
+			Idx:                idxFrom,
 		}
 		idxFrom++
 	}

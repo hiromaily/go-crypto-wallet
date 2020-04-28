@@ -10,10 +10,11 @@ type Generator interface {
 }
 
 // WalletKey keys
+// - P2PKHAddr is not used anywhere, P2SHSegWitAddr should be used.
 type WalletKey struct {
-	WIF          string
-	Address      string
-	P2shSegwit   string
-	FullPubKey   string
-	RedeemScript string
+	WIF            string
+	P2PKHAddr      string
+	P2SHSegWitAddr string
+	FullPubKey     string
+	RedeemScript   string
 }

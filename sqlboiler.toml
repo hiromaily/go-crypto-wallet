@@ -14,7 +14,7 @@ whitelist = [
     "tx_input",
     "tx_output",
     "payment_request",
-    "pubkey",
+    "address",
     "seed",
     "account_key",
     "multisig_history"
