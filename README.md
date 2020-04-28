@@ -16,7 +16,7 @@ Wallet functionalities handling BTC, BCH and so on. Currencies would be added st
 
 ## Wallet Type
 This is explained for BTC for now.
-There are mainly 3 wallets separately.
+There are mainly 3 wallets separately and these wallets are expected to be installed each diffrent devices.
 
 ### Watch only wallet
 - This wallet could access to BTC Network
@@ -123,7 +123,7 @@ wallet import key -account receipt -file xxx.csv
 wallet import key -account payment -file xxx.csv
 ```
 
-### Operation
+### Operation for receipt action
 ```
 # check client addresses if it receives coin
 wallet create receipt
@@ -133,7 +133,39 @@ keygen sign -file xxx.file
 
 # send signed tx
 wallet send -file xxx.csv
+
 ```
+
+### Operation for payment action
+```
+# check payment_request if there are requests
+wallet create payment
+
+# sign on keygen wallet for first sigunature
+keygen sign -file xxx.file
+
+# sign on sign wallet for second sigunature
+sign sign -file xxx.file
+
+# send signed tx
+wallet send -file xxx.csv
+
+```
+
+## TODO
+- [x] Change ORM to sqlboiler
+- [ ] Implement proper database transaction.
+- [ ] Refactoring logic for unsigned transaction creation.
+- [ ] Flexible multisig proportion M:N. For now only 2:2 fixed proportion is available.
+- [ ] Backup/Restore for wallet.dat. If wallt.dat is broken, it's not easy to recover.
+- [ ] Tweak key generation logic for multisig address for BCH.
+- [ ] Lock/Unlock wallet for security reason, authorized operator is available.
+- [ ] Various monitoring patterns to detect suspicious operations.
+- [ ] Scaling Bitcoin Core server and synchronize wallet.dat among Bitcoin Core cluster.
+- [ ] High coverage of UnitTest.
+- [ ] Add CircleCI or other CI service
+- [ ] Add new coins like Ethereum.
+
 
 ## Project layout patterns
 - The `pkg` layout pattern, refer to the [linked](https://medium.com/golang-learn/go-project-layout-e5213cdcfaa2) URLs for details.
