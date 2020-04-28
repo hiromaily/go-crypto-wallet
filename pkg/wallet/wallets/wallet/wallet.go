@@ -7,8 +7,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/repository/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
+	wtype "github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
 // Wallet watch only wallet object
@@ -24,7 +24,7 @@ type Wallet struct {
 	//pubkeyRepo   walletrepo.PubkeyRepository
 	addrFileRepo address.Storager
 	txFileRepo   tx.FileStorager
-	wtype        types.WalletType
+	wtype        wtype.WalletType
 }
 
 // NewWallet returns Wallet object
@@ -40,7 +40,7 @@ func NewWallet(
 	//pubkeyRepo walletrepo.PubkeyRepository,
 	addrFileRepo address.Storager,
 	txFileRepo tx.FileStorager,
-	wtype types.WalletType) *Wallet {
+	wtype wtype.WalletType) *Wallet {
 
 	return &Wallet{
 		btc:          btc,
@@ -70,6 +70,6 @@ func (w *Wallet) GetBTC() api.Bitcoiner {
 }
 
 // GetType gets wallet type
-func (w *Wallet) GetType() types.WalletType {
+func (w *Wallet) GetType() wtype.WalletType {
 	return w.wtype
 }

@@ -14,7 +14,7 @@ import (
 //  - if account is client, which doesn't have account ??
 func (w *Wallet) ImportAddress(fileName string, accountType account.AccountType, isRescan bool) error {
 	// read file for public key
-	pubKeys, err := w.addrFileRepo.ImportPubKey(fileName)
+	pubKeys, err := w.addrFileRepo.ImportAddress(fileName)
 	if err != nil {
 		return errors.Wrap(err, "fail to call key.ImportPubKey()")
 	}

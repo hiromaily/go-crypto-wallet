@@ -7,8 +7,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
 //TODO:
@@ -94,7 +94,7 @@ type PubKeyFile struct {
 }
 
 // New create config
-func New(file string, wtype types.WalletType) (*Config, error) {
+func New(file string, wtype wallet.WalletType) (*Config, error) {
 	if file == "" {
 		return nil, errors.New("file should be passed")
 	}
@@ -134,14 +134,14 @@ func loadConfig(path string) (*Config, error) {
 }
 
 // validate config
-func (c *Config) validate(wtype types.WalletType) error {
+func (c *Config) validate(wtype wallet.WalletType) error {
 	validate := validator.New()
 	if err := validate.Struct(c); err != nil {
 		return err
 	}
 
 	switch wtype {
-	case types.WalletTypeWatchOnly:
+	case wallet.WalletTypeWatchOnly:
 		if c.Bitcoin.Block.ConfirmationNum == 0 {
 			return errors.New("Block ConfirmationNum is required in toml file")
 		}

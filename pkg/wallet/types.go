@@ -1,4 +1,4 @@
-package types
+package wallet
 
 //WalletType wallet type
 type WalletType string

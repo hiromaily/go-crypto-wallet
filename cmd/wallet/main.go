@@ -11,7 +11,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/command"
 	wcmd "github.com/hiromaily/go-bitcoin/pkg/command/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/config"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
@@ -31,7 +31,7 @@ import (
 // - btc command for mock is required
 
 var (
-	walletType = types.WalletTypeWatchOnly
+	walletType = wallet.WalletTypeWatchOnly
 	appName    = walletType.String()
 	appVersion = "2.2.0"
 )

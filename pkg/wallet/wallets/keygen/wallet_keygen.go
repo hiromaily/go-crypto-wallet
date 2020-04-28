@@ -5,9 +5,9 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
 // Keygen keygen wallet object
@@ -18,7 +18,7 @@ type Keygen struct {
 	tracer       opentracing.Tracer
 	repo         coldrepo.ColdRepository
 	keyGenerator key.Generator
-	wtype        types.WalletType
+	wtype        wallet.WalletType
 }
 
 // NewKeygen may be Not used anywhere
@@ -28,7 +28,7 @@ func NewKeygen(
 	tracer opentracing.Tracer,
 	repo coldrepo.ColdRepository,
 	keyGenerator key.Generator,
-	wtype types.WalletType) *Keygen {
+	wtype wallet.WalletType) *Keygen {
 
 	return &Keygen{
 		btc:          btc,
@@ -52,6 +52,6 @@ func (w *Keygen) GetBTC() api.Bitcoiner {
 }
 
 // GetType gets wallet type
-func (w *Keygen) GetType() types.WalletType {
+func (w *Keygen) GetType() wallet.WalletType {
 	return w.wtype
 }

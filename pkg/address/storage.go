@@ -18,7 +18,7 @@ import (
 type Storager interface {
 	CreateFilePath(accountType account.AccountType, addrStatus uint8) string
 	ValidateFilePath(fileName string, accountType account.AccountType) error
-	ImportPubKey(fileName string) ([]string, error)
+	ImportAddress(fileName string) ([]string, error)
 }
 
 // FileRepository is repository to store pubkey as csv file
@@ -54,8 +54,8 @@ func (r *FileRepository) ValidateFilePath(fileName string, accountType account.A
 	return nil
 }
 
-// ImportPubKey import pubkey from csv file
-func (r *FileRepository) ImportPubKey(fileName string) ([]string, error) {
+// ImportAddress import pubkey from csv file
+func (r *FileRepository) ImportAddress(fileName string) ([]string, error) {
 	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, errors.Errorf("os.Open(%s) error: %s", fileName, err)

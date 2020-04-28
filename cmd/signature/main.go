@@ -11,7 +11,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/command"
 	"github.com/hiromaily/go-bitcoin/pkg/command/signature"
 	"github.com/hiromaily/go-bitcoin/pkg/config"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
@@ -32,7 +32,7 @@ import (
 // - passphrase would be required when using secret key to sign unsigned transaction
 // - multisig with bigger number e.g. 3:5
 var (
-	walletType = types.WalletTypeSignature
+	walletType = wallet.WalletTypeSignature
 	appName    = walletType.String()
 	appVersion = "2.2.0"
 )

@@ -4,9 +4,9 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/repository/walletrepo"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
 // About structure
@@ -27,7 +27,7 @@ type Walleter interface {
 	Done()
 	GetDB() walletrepo.WalletRepository // for debug use
 	GetBTC() api.Bitcoiner
-	GetType() types.WalletType
+	GetType() wallet.WalletType
 }
 
 // Coldwalleter may not be used anywhere
@@ -38,7 +38,7 @@ type Coldwalleter interface {
 
 	Done()
 	GetBTC() api.Bitcoiner
-	GetType() types.WalletType
+	GetType() wallet.WalletType
 }
 
 // KeySigner is common interface for keygen/signature
@@ -57,7 +57,7 @@ type Keygener interface {
 
 	Done()
 	GetBTC() api.Bitcoiner
-	GetType() types.WalletType
+	GetType() wallet.WalletType
 }
 
 // KeygenExclusiver is for only Keygen interface
@@ -73,7 +73,7 @@ type Signer interface {
 
 	Done()
 	GetBTC() api.Bitcoiner
-	GetType() types.WalletType
+	GetType() wallet.WalletType
 }
 
 // SignatureExclusiver is for only signature interface

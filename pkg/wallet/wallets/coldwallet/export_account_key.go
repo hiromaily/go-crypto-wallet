@@ -12,7 +12,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 )
 
 //ExportAccountKey export key information in account_key_table as csv file
@@ -21,7 +21,7 @@ import (
 //  - account others: `wallet_multisig_address`
 // this func is expected to be used by only keygen
 func (w *ColdWallet) ExportAccountKey(accountType account.AccountType, addrStatus address.AddrStatus) (string, error) {
-	if w.wtype != types.WalletTypeKeyGen {
+	if w.wtype != wallet.WalletTypeKeyGen {
 		return "", errors.New("it's available on keygen wallet")
 	}
 

@@ -7,9 +7,9 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
 // ColdWallet coldwallet for keygen/signature object
@@ -21,7 +21,7 @@ type ColdWallet struct {
 	keyGenerator key.Generator
 	addrFileRepo address.Storager
 	txFileRepo   tx.FileStorager
-	wtype        types.WalletType
+	wtype        wallet.WalletType
 }
 
 // NewColdWalet returns ColdWallet instance
@@ -33,7 +33,7 @@ func NewColdWalet(
 	keyGenerator key.Generator,
 	addrFileRepo address.Storager,
 	txFileRepo tx.FileStorager,
-	wtype types.WalletType) *ColdWallet {
+	wtype wallet.WalletType) *ColdWallet {
 
 	return &ColdWallet{
 		btc:          btc,
@@ -59,6 +59,6 @@ func (w *ColdWallet) GetBTC() api.Bitcoiner {
 }
 
 // GetType gets wallet type
-func (w *ColdWallet) GetType() types.WalletType {
+func (w *ColdWallet) GetType() wallet.WalletType {
 	return w.wtype
 }

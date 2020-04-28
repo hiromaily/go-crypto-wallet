@@ -18,8 +18,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 
 	//"github.com/hiromaily/go-bitcoin/pkg/txfile"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwallet"
 )
@@ -35,11 +35,11 @@ type registry struct {
 	logger      *zap.Logger
 	rpcClient   *rpcclient.Client
 	btc         api.Bitcoiner
-	walletType  types.WalletType
+	walletType  wallet.WalletType
 }
 
 // NewRegistry is to register registry interface
-func NewRegistry(conf *config.Config, walletType types.WalletType) Registry {
+func NewRegistry(conf *config.Config, walletType wallet.WalletType) Registry {
 	return &registry{
 		conf:       conf,
 		walletType: walletType,

@@ -10,8 +10,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/repository/walletrepo"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
 var (
@@ -27,7 +27,7 @@ func NewTxRepository() walletrepo.TxRepository {
 
 	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-bitcoin", os.Getenv("GOPATH"))
 	confPath := fmt.Sprintf("%s/data/config/btc/wallet.toml", projPath)
-	conf, err := config.New(confPath, types.WalletTypeWatchOnly)
+	conf, err := config.New(confPath, wallet.WalletTypeWatchOnly)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
@@ -54,7 +54,7 @@ func NewAccountKeyRepository() coldrepo.AccountKeyRepository {
 
 	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-bitcoin", os.Getenv("GOPATH"))
 	confPath := fmt.Sprintf("%s/data/config/btc/wallet.toml", projPath)
-	conf, err := config.New(confPath, types.WalletTypeWatchOnly)
+	conf, err := config.New(confPath, wallet.WalletTypeWatchOnly)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}

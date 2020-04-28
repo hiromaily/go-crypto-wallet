@@ -15,8 +15,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/repository/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tracer"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
+	wtype "github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/wallet"
 )
@@ -31,11 +31,11 @@ type registry struct {
 	mysqlClient *sql.DB
 	logger      *zap.Logger
 	rpcClient   *rpcclient.Client
-	walletType  types.WalletType
+	walletType  wtype.WalletType
 }
 
 // NewRegistry is to register registry interface
-func NewRegistry(conf *config.Config, walletType types.WalletType) Registry {
+func NewRegistry(conf *config.Config, walletType wtype.WalletType) Registry {
 	return &registry{
 		conf:       conf,
 		walletType: walletType,
@@ -49,11 +49,6 @@ func (r *registry) NewWalleter() wallets.Walleter {
 		r.newLogger(),
 		r.newTracer(),
 		r.newRepository(),
-		//r.newTxRepo(),
-		//r.newTxInputRepo(),
-		//r.newTxOutputRepo(),
-		//r.newPaymentRequestRepo(),
-		//r.newPubkeyRepo(),
 		r.newAddressFileStorager(),
 		r.newTxFileStorager(),
 		r.walletType,

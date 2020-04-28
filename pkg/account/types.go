@@ -10,8 +10,8 @@ const (
 	AccountTypePayment       AccountType = "payment"   // this address is used as sender for payment
 	AccountTypeFee           AccountType = "fee"       // for transaction fee
 	AccountTypeStored        AccountType = "stored"    // this address is used as receiver to store huge amount of coin
-	AccountTypeAnonymous     AccountType = "anonymous" // payment receiver account
 	AccountTypeAuthorization AccountType = "auth"      // authorization account for multisig address
+	AccountTypeAnonymous     AccountType = "anonymous" // payment receiver account
 	AccountTypeTest          AccountType = "test"      // unittest only
 )
 
@@ -58,7 +58,9 @@ var AccountTypeMap = map[string]AccountType{
 	"payment":       AccountTypePayment,
 	"fee":           AccountTypeFee,
 	"stored":        AccountTypeStored,
-	"authorization": AccountTypeAuthorization,
+	"auth": AccountTypeAuthorization,
+	"anonymous": AccountTypeAnonymous,
+	"test": AccountTypeTest,
 }
 
 // ValidateAccountType validate AccountType
@@ -77,6 +79,8 @@ var AccountTypeValue = map[AccountType]uint32{
 	AccountTypeFee:           3,
 	AccountTypeStored:        4,
 	AccountTypeAuthorization: 5,
+	AccountTypeAnonymous: 99,
+	AccountTypeTest: 100,
 }
 
 // AccountTypeMultisig true: account type is for multisig address

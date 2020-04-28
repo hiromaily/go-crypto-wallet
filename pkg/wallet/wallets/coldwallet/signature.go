@@ -13,8 +13,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btc"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/types"
 )
 
 // sing on unsigned transaction
@@ -107,7 +107,7 @@ func (w *ColdWallet) sign(hex, encodedPrevsAddrs string) (string, bool, string, 
 	// - sign wallet requires AccountTypeAuthorization
 	// - TODO: wips is not used if action is receipt because client account is not multisig address
 	switch w.wtype {
-	case types.WalletTypeKeyGen:
+	case wallet.WalletTypeKeyGen:
 		//TODO: if ActionType==`transfer`, address for from account is required
 		// => logic is changed. addrsPrevs.SenderAccount is used for getting sender information
 		// address must be multisig address
@@ -116,7 +116,7 @@ func (w *ColdWallet) sign(hex, encodedPrevsAddrs string) (string, bool, string, 
 		if err != nil {
 			return "", false, "", errors.Wrap(err, "DB.GetWIPByMultiAddrs()")
 		}
-	case types.WalletTypeSignature:
+	case wallet.WalletTypeSignature:
 		// sign wallet is used from 2nd signature, only multisig address
 		// get data from account_key_authorization table
 		// TODO: client account doesn't have multisig address, so this code could be skipped
@@ -137,7 +137,7 @@ func (w *ColdWallet) sign(hex, encodedPrevsAddrs string) (string, bool, string, 
 	//if sender account is multisig account
 	if account.AccountTypeMultisig[prevsAddrs.SenderAccount] {
 		switch w.wtype {
-		case types.WalletTypeKeyGen:
+		case wallet.WalletTypeKeyGen:
 			// mapping redeemScript to PrevTxs
 			for idx, val := range prevsAddrs.Addrs {
 				rs := coldrepo.GetRedeedScriptByAddress(accountKeys, val)
@@ -154,7 +154,7 @@ func (w *ColdWallet) sign(hex, encodedPrevsAddrs string) (string, bool, string, 
 			if err != nil {
 				return "", false, "", errors.Errorf("serial.EncodeToString(): error: %s", err)
 			}
-		case types.WalletTypeSignature:
+		case wallet.WalletTypeSignature:
 			newEncodedPrevsAddrs = encodedPrevsAddrs
 		default:
 			return "", false, "", errors.Errorf("WalletType is invalid: %s", w.wtype.String())
