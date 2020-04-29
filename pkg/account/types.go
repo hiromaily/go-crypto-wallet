@@ -80,15 +80,6 @@ var AccountTypeValue = map[AccountType]uint32{
 	AccountTypeTest:          100,
 }
 
-// AccountTypeMultisig true: account type is for multisig address
-var AccountTypeMultisig = map[AccountType]bool{
-	AccountTypeClient:        false,
-	AccountTypeDeposit:       true,
-	AccountTypePayment:       true,
-	AccountTypeStored:        true,
-	AccountTypeAuthorization: false,
-}
-
 //----------------------------------------------------
 // AuthType
 //----------------------------------------------------
@@ -120,3 +111,44 @@ const (
 func (a AuthType) String() string {
 	return string(a)
 }
+
+//----------------------------------------------------
+// Multisig address involved accounts
+//----------------------------------------------------
+
+// MultisigAccounts proportion of multisig address M:N
+var MultisigAccounts = map[AccountType]map[int][]AuthType{
+	AccountTypeDeposit: { //2:5+1
+		2: {AuthType1, AuthType2, AuthType3, AuthType4, AuthType5},
+	},
+	AccountTypePayment: { //2:5+1
+		2: {AuthType1, AuthType2, AuthType3, AuthType4, AuthType5},
+	},
+	AccountTypeStored: { //3:5+1
+		3: {AuthType1, AuthType2, AuthType3, AuthType4, AuthType5},
+	},
+}
+
+// IsMultisigAccount validates Multisig account or not
+func IsMultisigAccount(v AccountType) bool {
+	if _, ok := AccountTypeMultisig[v]; ok {
+		return true
+	}
+	return false
+}
+
+// AccountTypeMultisig true: account type is for multisig address
+// TODO: this func should be replaced to IsMultisigAccount(accountType)
+var AccountTypeMultisig = map[AccountType]bool{
+	AccountTypeClient:        false,
+	AccountTypeDeposit:       true,
+	AccountTypePayment:       true,
+	AccountTypeStored:        true,
+	AccountTypeAuthorization: false,
+}
+
+// TODO: not implemented
+// Each of sign wallets have AuthType
+// Operator1 would have AuthType1
+// Operator2 would have AuthType2
+// And this information should be embedded when building sign wallet
