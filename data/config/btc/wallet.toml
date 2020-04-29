@@ -2,6 +2,8 @@ coin_type = "btc" # btc, bch
 
 [bitcoin]
 host = "127.0.0.1:18332"
+# if specific wallet want to be used like `bitcoin-cli -rpcwallet=watch`
+#host = "127.0.0.1:18332/wallet/watch"
 user = "xyz"
 pass = "xyz"
 http_post_mode = true

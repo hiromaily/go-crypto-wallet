@@ -64,6 +64,7 @@ func NewBitcoin(
 	bit.version = netInfo.Version
 	bit.logger.Info("bitcoin rpc server", zap.Int("version", netInfo.Version.Int()))
 
+	// set other information from config
 	bit.confirmationBlock = conf.Block.ConfirmationNum
 	bit.feeRange.max = conf.Fee.AdjustmentMax
 	bit.feeRange.min = conf.Fee.AdjustmentMin
