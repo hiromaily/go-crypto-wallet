@@ -13,8 +13,8 @@ import (
 //  - how to display help? upper layer's help displays by `wallet deposit create -h`
 //  - as workaround, add undefined flag like `wallet deposit create -a`
 
-// ReceiptCommand deposit subcommand
-type ReceiptCommand struct {
+// DepositCommand deposit subcommand
+type DepositCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
@@ -22,12 +22,12 @@ type ReceiptCommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (c *ReceiptCommand) Synopsis() string {
+func (c *DepositCommand) Synopsis() string {
 	return c.synopsis
 }
 
 // Help returns usage for this subcommand
-func (c *ReceiptCommand) Help() string {
+func (c *DepositCommand) Help() string {
 	return `Usage: wallet create deposit [options...]
 Options:
   -fee    adjustment fee
@@ -35,7 +35,7 @@ Options:
 }
 
 // Run executes this subcommand
-func (c *ReceiptCommand) Run(args []string) int {
+func (c *DepositCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
 	var (
@@ -49,9 +49,9 @@ func (c *ReceiptCommand) Run(args []string) int {
 
 	// Detect transaction for clients from blockchain network and create deposit unsigned transaction
 	// It would be run manually on the daily basis because signature is manual task
-	hex, fileName, err := c.wallet.CreateReceiptTx(fee)
+	hex, fileName, err := c.wallet.CreateDepositTx(fee)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call CreateReceiptTx() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call CreateDepositTx() %+v", err))
 		return 1
 	}
 	if hex == "" {

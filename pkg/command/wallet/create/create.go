@@ -51,7 +51,7 @@ func (c *CreateCommand) Run(args []string) int {
 	//farther subcommand import
 	cmds := map[string]cli.CommandFactory{
 		"deposit": func() (cli.Command, error) {
-			return &ReceiptCommand{
+			return &DepositCommand{
 				name:     "deposit",
 				synopsis: depositSynopsis,
 				ui:       command.ClolorUI(),
