@@ -88,3 +88,35 @@ var AccountTypeMultisig = map[AccountType]bool{
 	AccountTypeStored:        true,
 	AccountTypeAuthorization: false,
 }
+
+//----------------------------------------------------
+// AuthType
+//----------------------------------------------------
+
+// AuthType is for authorization account details
+//  this account is used for authorization of multisig address on sing wallet
+type AuthType string
+
+// auth_account_type, this type is used for operators with sign wallet
+const (
+	AuthType1  AuthType = "auth1" // operator1 would own sign wallet with this account
+	AuthType2  AuthType = "auth2"
+	AuthType3  AuthType = "auth3"
+	AuthType4  AuthType = "auth4"
+	AuthType5  AuthType = "auth5"
+	AuthType6  AuthType = "auth6"
+	AuthType7  AuthType = "auth7"
+	AuthType8  AuthType = "auth8"
+	AuthType9  AuthType = "auth9"
+	AuthType10 AuthType = "auth10"
+	AuthType11 AuthType = "auth11"
+	AuthType12 AuthType = "auth12"
+	AuthType13 AuthType = "auth13"
+	AuthType14 AuthType = "auth14"
+	AuthType15 AuthType = "auth15"
+)
+
+// String converter
+func (a AuthType) String() string {
+	return string(a)
+}
