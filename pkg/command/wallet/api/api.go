@@ -77,7 +77,7 @@ func (c *APICommand) Run(args []string) int {
 		"getaddressinfo": func() (cli.Command, error) {
 			return &GetAddressInfoCommand{
 				name:     "getnetworkinfo",
-				synopsis: getnetworkinfoSynopsis,
+				synopsis: getaddressinfoSynopsis,
 				ui:       command.ClolorUI(),
 				wallet:   c.Wallet,
 			}, nil

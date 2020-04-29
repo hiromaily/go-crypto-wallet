@@ -328,7 +328,7 @@ func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, err
 }
 
 // SignRawTransaction sign on raw unsigned tx for `not multisig address` like client account
-// - this would be used for receipt action
+// - this would be used for deposit action
 // - for multisig, refer to `SignRawTransactionWithKey()`
 // - TODO: this code can be shared with SignRawTransactionWithKey() to some extend
 func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []PrevTx) (*wire.MsgTx, bool, error) {

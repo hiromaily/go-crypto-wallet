@@ -26,7 +26,7 @@ func TestGetAccount(t *testing.T) {
 		{
 			name: "happy path",
 			args: args{"2N4TcHSCteXwiF2dj8SQijj3w2HieR4x6r5"},
-			want: want{"receipt", nil},
+			want: want{"deposit", nil},
 		},
 		{
 			name: "happy path",

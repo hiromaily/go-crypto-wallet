@@ -45,7 +45,7 @@ func TestGetBalanceByAccount(t *testing.T) {
 		},
 		{
 			name: "happy path",
-			args: args{account.AccountTypeReceipt},
+			args: args{account.AccountTypeDeposit},
 			want: want{false},
 		},
 		{

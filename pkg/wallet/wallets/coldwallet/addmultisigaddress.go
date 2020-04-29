@@ -46,7 +46,7 @@ func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, address
 		resAddr, err := w.btc.AddMultisigAddress(
 			2,
 			[]string{
-				val.FullPublicKey, // receipt, payment, stored ...
+				val.FullPublicKey,              // deposit, payment, stored ...
 				authKeyTable.P2SHSegwitAddress, //TODO: what if address is changed to authKeyTable.FullPublicKey??
 			},
 			fmt.Sprintf("multi_%s", accountType), //this is not important

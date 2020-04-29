@@ -24,9 +24,9 @@ import (
 // - returns tx, isSigned, generatedFileName, error
 func (w *ColdWallet) SignTx(filePath string) (string, bool, string, error) {
 
-	// get tx_receipt_id from tx file name
+	// get tx_deposit_id from tx file name
 	//  if payment_5_unsigned_0_1534466246366489473, 5 is target
-	actionType, _, txReceiptID, signedCount, err := w.txFileRepo.ValidateFilePath(filePath, tx.TxTypeUnsigned)
+	actionType, _, txID, signedCount, err := w.txFileRepo.ValidateFilePath(filePath, tx.TxTypeUnsigned)
 	if err != nil {
 		return "", false, "", err
 	}
@@ -69,7 +69,7 @@ func (w *ColdWallet) SignTx(filePath string) (string, bool, string, error) {
 	}
 
 	// write file
-	path := w.txFileRepo.CreateFilePath(actionType, txType, txReceiptID, signedCount)
+	path := w.txFileRepo.CreateFilePath(actionType, txType, txID, signedCount)
 	generatedFileName, err := w.txFileRepo.WriteFile(path, saveData)
 	if err != nil {
 		return "", isSigned, "", err
@@ -80,7 +80,7 @@ func (w *ColdWallet) SignTx(filePath string) (string, bool, string, error) {
 
 // sign
 // - coin is sent [from] account to [to] account then sernder's privKey(from account) is required
-// - [actionType:receipt]  [from] client [to] receipt, (not multisig addr)
+// - [actionType:deposit]  [from] client [to] deposit, (not multisig addr)
 // - [actionType:payment]  [from] payment [to] unknown, (multisig addr)
 // - [actionType:transfer] [from] from [to] to, (multisig addr)
 func (w *ColdWallet) sign(hex, encodedPrevsAddrs string) (string, bool, string, error) {
@@ -105,7 +105,7 @@ func (w *ColdWallet) sign(hex, encodedPrevsAddrs string) (string, bool, string, 
 	// get WIPs, RedeedScript
 	// - logic vary between keygen wallet and sign wallet (actually multisig or not)
 	// - sign wallet requires AccountTypeAuthorization
-	// - TODO: wips is not used if action is receipt because client account is not multisig address
+	// - TODO: wips is not used if action is deposit because client account is not multisig address
 	switch w.wtype {
 	case wallet.WalletTypeKeyGen:
 		//TODO: if ActionType==`transfer`, address for from account is required

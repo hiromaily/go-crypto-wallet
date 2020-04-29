@@ -1,11 +1,11 @@
 package action
 
-// ActionType operation (receipt, payment, transfer)
+// ActionType operation (deposit, payment, transfer)
 type ActionType string
 
 // action_type
 const (
-	ActionTypeReceipt  ActionType = "receipt"
+	ActionTypeDeposit  ActionType = "deposit"
 	ActionTypePayment  ActionType = "payment"
 	ActionTypeTransfer ActionType = "transfer"
 )
@@ -17,7 +17,7 @@ func (a ActionType) String() string {
 
 // ActionTypeValue value
 var ActionTypeValue = map[ActionType]uint8{
-	ActionTypeReceipt:  1,
+	ActionTypeDeposit:  1,
 	ActionTypePayment:  2,
 	ActionTypeTransfer: 3,
 }

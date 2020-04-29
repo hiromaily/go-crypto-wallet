@@ -33,7 +33,7 @@ type FileRepository struct {
 type FileName struct {
 	ActionType  action.ActionType
 	TxType      TxType
-	TxReceiptID int64
+	TxID        int64
 	SignedCount int
 }
 
@@ -46,15 +46,15 @@ func NewFileRepository(filePath string, logger *zap.Logger) *FileRepository {
 }
 
 // about file structure
-// e.g. ./data/tx/receipt/receipt_8_unsigned_0_1534744535097796209
+// e.g. ./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209
 //  - ./data/tx/ dir : file path
-//  - receipt/   dir : actionType
-//  - receipt_8_unsigned_0_1534744535097796209 : {actionType}_{txReceiptID}_{txType}_{signedCount}_{timestamp}
+//  - deposit/   dir : actionType
+//  - deposit_8_unsigned_0_1534744535097796209 : {actionType}_{txID}_{txType}_{signedCount}_{timestamp}
 
 // CreateFilePath create file path for transaction file
 func (r *FileRepository) CreateFilePath(actionType action.ActionType, txType TxType, txID int64, signedCount int) string {
 
-	// ./data/tx/receipt/receipt_8_unsigned_0_1534744535097796209
+	// ./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209
 	baseDir := fmt.Sprintf("%s%s/", r.filePath, actionType.String())
 	return fmt.Sprintf("%s%s_%d_%s_%d_", baseDir, actionType.String(), txID, txType, signedCount)
 }
@@ -62,13 +62,13 @@ func (r *FileRepository) CreateFilePath(actionType action.ActionType, txType TxT
 // GetFileNameType returns as FileName type
 func (r *FileRepository) GetFileNameType(filePath string) (*FileName, error) {
 	// just file path or full path
-	//./data/tx/receipt/receipt_8_unsigned_0_1534744535097796209
+	//./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209
 	tmp := strings.Split(filePath, "/")
 	fileName := tmp[len(tmp)-1]
 
-	//receipt_5_unsigned_0_1534466246366489473
+	//deposit_5_unsigned_0_1534466246366489473
 	//s[0]: actionType
-	//s[1]: txReceiptID
+	//s[1]: txID
 	//s[2]: txType
 	//s[3]: signedCount , first value is 0
 	//s[4]: timestamp
@@ -85,9 +85,9 @@ func (r *FileRepository) GetFileNameType(filePath string) (*FileName, error) {
 	}
 	fileNameType.ActionType = action.ActionType(s[0])
 
-	//receiptID
+	//txID
 	var err error
-	fileNameType.TxReceiptID, err = strconv.ParseInt(s[1], 10, 64)
+	fileNameType.TxID, err = strconv.ParseInt(s[1], 10, 64)
 	if err != nil {
 		return nil, errors.Errorf("invalid file name: %s", fileName)
 	}
@@ -119,7 +119,7 @@ func (r *FileRepository) ValidateFilePath(filePath string, expectedTxType TxType
 	if fileType.TxType != expectedTxType {
 		return "", "", 0, 0, errors.Errorf("txType is invalid: %s", fileType.TxType)
 	}
-	return fileType.ActionType, fileType.TxType, fileType.TxReceiptID, fileType.SignedCount, nil
+	return fileType.ActionType, fileType.TxType, fileType.TxID, fileType.SignedCount, nil
 }
 
 // ReadFile read file

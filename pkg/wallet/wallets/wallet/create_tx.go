@@ -32,11 +32,11 @@ type parsedTx struct {
 // - after signed tx sent, utxo could not be retrieved by listUnspent() anymore
 
 // create unsigned tx
-// - [actionType:receipt] sender account: client,  receiver account: receipt
+// - [actionType:deposit] sender account: client,  receiver account: deposit
 // - [actionType:payment] sender account: payment, receiver account: anonymous
 // - [actionType:transfer] sender account: it depends on params, receiver account: it depends on params
 // value of given requiredAmount
-// - receiptAction:  0. total amount in clients to receipt
+// - depositAction:  0. total amount in clients to deposit
 // - transferAction: if 0, total amount of sender is sent to receiver
 //                   if not 0, amount is sent from sender to receiver
 // - paymentAction: 0. total amount in payment users
@@ -100,7 +100,7 @@ func (w *Wallet) createTx(
 	// 3. create txOutputs
 	var txPrevOutputs map[btcutil.Address]btcutil.Amount
 	switch targetAction {
-	case action.ActionTypeReceipt, action.ActionTypeTransfer:
+	case action.ActionTypeDeposit, action.ActionTypeTransfer:
 		var isChange bool
 		if requiredAmount != 0 {
 			isChange = true
@@ -232,7 +232,7 @@ func (w *Wallet) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount 
 	}, inputTotal, isDone
 }
 
-// for ActionTypeReceipt, ActionTypeTransfer
+// for ActionTypeDeposit, ActionTypeTransfer
 func (w *Wallet) createTxOutputs(
 	reciver account.AccountType,
 	requiredAmount btcutil.Amount,
@@ -241,7 +241,7 @@ func (w *Wallet) createTxOutputs(
 	isChange bool) (map[btcutil.Address]btcutil.Amount, error) {
 
 	// 1. get unallocated address for receiver
-	// - receipt/transfer
+	// - deposit/transfer
 	pubkeyTable, err := w.repo.Addr().GetOneUnAllocated(reciver)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call pubkeyRepo.GetOneUnAllocated()")
@@ -288,7 +288,7 @@ func (w *Wallet) createTxOutputs(
 // - calculate fee
 // - create raw tx
 // - insert data to detabase
-// - available from receipt/transfer action
+// - available from deposit/transfer action
 func (w *Wallet) createRawTx(
 	targetAction action.ActionType,
 	sender account.AccountType,
@@ -509,7 +509,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 	}
 
 	// 3.TxReceiptInput table
-	// update ReceiptID
+	//  update txID
 	for idx := range txInputs {
 		txInputs[idx].TXID = txID
 	}
@@ -519,7 +519,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 	}
 
 	// 4.TxReceiptOutput table
-	// update ReceiptID
+	//  update txID
 	for idx := range txOutputs {
 		txOutputs[idx].TXID = txID
 	}

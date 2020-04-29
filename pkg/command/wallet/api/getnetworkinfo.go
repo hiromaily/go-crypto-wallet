@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-// GetnetworkInfoCommand getnetworkinfo subcommand
+// GetNetworkInfoCommand getnetworkinfo subcommand
 type GetNetworkInfoCommand struct {
 	name     string
 	synopsis string

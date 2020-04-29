@@ -9,12 +9,12 @@ import (
 )
 
 // UpdateTxStatus update transaction status
-// - monitor transaction whose tx_type=3(TxTypeSent) in tx_payment/tx_receipt/tx_transfer
+// - monitor transaction whose tx_type=3(TxTypeSent) in tx_payment/tx_deposit/tx_transfer
 func (w *Wallet) UpdateTxStatus() error {
 	//TODO: as possibility tx_type is not updated from `done`
 
 	types := []action.ActionType{
-		action.ActionTypeReceipt,
+		action.ActionTypeDeposit,
 		action.ActionTypePayment,
 		action.ActionTypeTransfer,
 	}
@@ -149,7 +149,7 @@ func (w *Wallet) notifyTxDone(hash string, actionType action.ActionType) (int64,
 	)
 
 	switch actionType {
-	case action.ActionTypeReceipt:
+	case action.ActionTypeDeposit:
 		// 1. get txID from hash
 		txID, err = w.repo.Tx().GetTxIDBySentHash(actionType, hash)
 		if err != nil {
@@ -207,7 +207,7 @@ func (w *Wallet) notifyTxDone(hash string, actionType action.ActionType) (int64,
 // update tx_type TxTypeNotified
 func (w *Wallet) updateTxTypeNotified(id int64, actionType action.ActionType) error {
 	switch actionType {
-	case action.ActionTypeReceipt:
+	case action.ActionTypeDeposit:
 		_, err := w.repo.Tx().UpdateTxType(id, tx.TxTypeNotified)
 		if err != nil {
 			return errors.Wrapf(err, "fail to call repo.Tx().UpdateTxType(tx.TxTypeNotified) ActionType: %s", actionType)
@@ -235,7 +235,7 @@ func (w *Wallet) updateTxTypeNotified(id int64, actionType action.ActionType) er
 			return errors.Wrapf(err, "fail to call repo.UpdateIsDoneOnPaymentRequest() ActionType: %s", actionType)
 		}
 	case action.ActionTypeTransfer:
-		//TODO: not implemented yet, it could be same to action.ActionTypeReceipt
+		//TODO: not implemented yet, it could be same to action.ActionTypeDeposit
 		w.logger.Warn("action.ActionTypeTransfer is not implemented yet in updateTxTypeNotified()")
 		return errors.New("action.ActionTypeTransfer is not implemented yet in updateTxTypeNotified()")
 	}

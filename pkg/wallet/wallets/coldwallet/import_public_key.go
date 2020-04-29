@@ -84,9 +84,7 @@ func (w *ColdWallet) ImportMultisigAddress(fileName string, accountType account.
 		return errors.Errorf("key.ImportPubKey() error: %s", err)
 	}
 
-	//added_pubkey_history_receiptテーブルにInsert
 	accountKeyTable := make([]*models.AccountKey, len(pubKeys))
-
 	for i, pubkey := range pubKeys {
 		inner := strings.Split(pubkey, ",")
 		// csv file structure

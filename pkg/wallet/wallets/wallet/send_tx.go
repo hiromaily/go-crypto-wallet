@@ -11,7 +11,7 @@ import (
 // SendTx send signed tx by keygen/sign walet
 func (w *Wallet) SendTx(filePath string) (string, error) {
 
-	// get tx_receipt_id from file name
+	// get tx_deposit_id from file name
 	//payment_5_unsigned_1_1534466246366489473
 	actionType, _, txID, _, err := w.txFileRepo.ValidateFilePath(filePath, tx.TxTypeSigned)
 	if err != nil {
@@ -82,7 +82,7 @@ func (w *Wallet) updateIsAllocatedAccountPubkey(txID int64) error {
 		return errors.Wrap(err, "fail to call repo.TxOutput().GetAllByTxID()")
 	}
 	if len(txOutputs) == 0 {
-		return errors.New("output tx could not be found in tx_receipt_output")
+		return errors.New("output tx could not be found in tx_deposit_output")
 	}
 
 	_, err = w.repo.Addr().UpdateIsAllocated(true, txOutputs[0].OutputAddress)

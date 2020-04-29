@@ -3,6 +3,7 @@ package api
 import (
 	"flag"
 	"fmt"
+
 	"github.com/bookerzzz/grok"
 	"github.com/mitchellh/cli"
 
@@ -46,7 +47,6 @@ func (c *GetAddressInfoCommand) Run(args []string) int {
 		c.ui.Error("address option [-address] is required")
 		return 1
 	}
-
 
 	// call getaddressinfo
 	addrData, err := c.wallet.GetBTC().GetAddressInfo(addr)

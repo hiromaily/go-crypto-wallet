@@ -17,7 +17,7 @@ import (
 
 // keygen wallet as cold wallet
 //  generate key and seed for account
-//  target account: client, receipt, payment
+//  target account: client, deposit, payment
 
 // procedure
 //  1. create seed

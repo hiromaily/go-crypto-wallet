@@ -24,7 +24,7 @@ func (c *CreateCommand) Synopsis() string {
 }
 
 var (
-	receiptSynopsis  = "create a receipt unsigned transaction file for client account"
+	depositSynopsis  = "create a deposit unsigned transaction file for client account"
 	paymentSynopsis  = "create a payment unsigned transaction file for payment account"
 	transferSynopsis = "create a transfer unsigned transaction file between accounts"
 )
@@ -33,10 +33,10 @@ var (
 func (c *CreateCommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet create [Subcommands...]
 Subcommands:
-  receipt  %s
+  deposit  %s
   payment  %s
   transfer %s
-`, receiptSynopsis, paymentSynopsis, transferSynopsis)
+`, depositSynopsis, paymentSynopsis, transferSynopsis)
 }
 
 // Run executes this subcommand
@@ -50,10 +50,10 @@ func (c *CreateCommand) Run(args []string) int {
 
 	//farther subcommand import
 	cmds := map[string]cli.CommandFactory{
-		"receipt": func() (cli.Command, error) {
+		"deposit": func() (cli.Command, error) {
 			return &ReceiptCommand{
-				name:     "receipt",
-				synopsis: receiptSynopsis,
+				name:     "deposit",
+				synopsis: depositSynopsis,
 				ui:       command.ClolorUI(),
 				wallet:   c.Wallet,
 			}, nil

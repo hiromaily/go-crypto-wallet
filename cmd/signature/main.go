@@ -17,7 +17,7 @@ import (
 
 // signature wallet as cold wallet
 //  generate one key and seed for only authorization account
-//  target account: client, receipt, payment
+//  target account: client, deposit, payment
 
 // procedure
 //  1. create seed

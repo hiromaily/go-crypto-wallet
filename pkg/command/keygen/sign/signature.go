@@ -48,7 +48,7 @@ func (c *SignatureCommand) Run(args []string) int {
 		return 1
 	}
 
-	// sign on unsigned transactions, action(receipt/payment) could be found from file name
+	// sign on unsigned transactions, action(deposit/payment) could be found from file name
 	hexTx, isSigned, generatedFileName, err := c.Wallet.SignTx(filePath)
 	if err != nil {
 		c.UI.Error(fmt.Sprintf("fail to call SignTx() %+v", err))

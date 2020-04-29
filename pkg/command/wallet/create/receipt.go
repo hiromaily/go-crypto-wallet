@@ -10,10 +10,10 @@ import (
 )
 
 // TODO
-//  - how to display help? upper layer's help displays by `wallet receipt create -h`
-//  - as workaround, add undefined flag like `wallet receipt create -a`
+//  - how to display help? upper layer's help displays by `wallet deposit create -h`
+//  - as workaround, add undefined flag like `wallet deposit create -a`
 
-// ReceiptCommand receipt subcommand
+// ReceiptCommand deposit subcommand
 type ReceiptCommand struct {
 	name     string
 	synopsis string
@@ -28,7 +28,7 @@ func (c *ReceiptCommand) Synopsis() string {
 
 // Help returns usage for this subcommand
 func (c *ReceiptCommand) Help() string {
-	return `Usage: wallet create receipt [options...]
+	return `Usage: wallet create deposit [options...]
 Options:
   -fee    adjustment fee
 `
@@ -47,7 +47,7 @@ func (c *ReceiptCommand) Run(args []string) int {
 		return 1
 	}
 
-	// Detect transaction for clients from blockchain network and create receipt unsigned transaction
+	// Detect transaction for clients from blockchain network and create deposit unsigned transaction
 	// It would be run manually on the daily basis because signature is manual task
 	hex, fileName, err := c.wallet.CreateReceiptTx(fee)
 	if err != nil {
