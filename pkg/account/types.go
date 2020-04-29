@@ -8,7 +8,6 @@ const (
 	AccountTypeClient        AccountType = "client"    // users who created address
 	AccountTypeDeposit       AccountType = "deposit"   // this address is used as receiver for deposit
 	AccountTypePayment       AccountType = "payment"   // this address is used as sender for payment
-	AccountTypeFee           AccountType = "fee"       // for transaction fee
 	AccountTypeStored        AccountType = "stored"    // this address is used as receiver to store huge amount of coin
 	AccountTypeAuthorization AccountType = "auth"      // authorization account for multisig address
 	AccountTypeAnonymous     AccountType = "anonymous" // payment receiver account
@@ -56,7 +55,6 @@ var AccountTypeMap = map[string]AccountType{
 	"client":    AccountTypeClient,
 	"deposit":   AccountTypeDeposit,
 	"payment":   AccountTypePayment,
-	"fee":       AccountTypeFee,
 	"stored":    AccountTypeStored,
 	"auth":      AccountTypeAuthorization,
 	"anonymous": AccountTypeAnonymous,
@@ -76,9 +74,8 @@ var AccountTypeValue = map[AccountType]uint32{
 	AccountTypeClient:        0,
 	AccountTypeDeposit:       1,
 	AccountTypePayment:       2,
-	AccountTypeFee:           3,
-	AccountTypeStored:        4,
-	AccountTypeAuthorization: 5,
+	AccountTypeStored:        3,
+	AccountTypeAuthorization: 4,
 	AccountTypeAnonymous:     99,
 	AccountTypeTest:          100,
 }
@@ -88,7 +85,6 @@ var AccountTypeMultisig = map[AccountType]bool{
 	AccountTypeClient:        false,
 	AccountTypeDeposit:       true,
 	AccountTypePayment:       true,
-	AccountTypeFee:           true,
 	AccountTypeStored:        true,
 	AccountTypeAuthorization: false,
 }

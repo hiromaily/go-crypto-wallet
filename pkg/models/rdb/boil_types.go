@@ -63,7 +63,6 @@ const (
 	AccountKeyAccountDeposit = "deposit"
 	AccountKeyAccountPayment = "payment"
 	AccountKeyAccountStored  = "stored"
-	AccountKeyAccountFee     = "fee"
 	AccountKeyAccountAuth    = "auth"
 )
 
@@ -79,7 +78,6 @@ const (
 	AddressAccountDeposit = "deposit"
 	AddressAccountPayment = "payment"
 	AddressAccountStored  = "stored"
-	AddressAccountFee     = "fee"
 )
 
 // Enum values for multisig_history.coin
@@ -93,7 +91,6 @@ const (
 	MultisigHistoryAccountDeposit = "deposit"
 	MultisigHistoryAccountPayment = "payment"
 	MultisigHistoryAccountStored  = "stored"
-	MultisigHistoryAccountFee     = "fee"
 )
 
 // Enum values for payment_request.coin

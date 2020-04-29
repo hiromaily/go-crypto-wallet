@@ -136,7 +136,7 @@ DROP TABLE IF EXISTS `address`;
 CREATE TABLE `address` (
   `id`                BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
   `coin`              ENUM('btc', 'bch') NOT NULL COMMENT'coin type code',
-  `account`           ENUM('client', 'deposit', 'payment', 'stored', 'fee') NOT NULL COMMENT'account type',
+  `account`           ENUM('client', 'deposit', 'payment', 'stored') NOT NULL COMMENT'account type',
   `wallet_address`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'wallet address',
   `is_allocated`      BOOL NOT NULL DEFAULT false COMMENT'true: address is allocated(used)',
   `updated_at`        datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',

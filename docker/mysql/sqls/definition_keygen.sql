@@ -45,7 +45,7 @@ CREATE TABLE `account_key` (
   /*`id`                      BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',*/
   `id`                      BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
   `coin`                    ENUM('btc', 'bch') NOT NULL COMMENT'coin type code',
-  `account`                 ENUM('client', 'deposit', 'payment', 'stored', 'fee', 'auth') NOT NULL COMMENT'account type',
+  `account`                 ENUM('client', 'deposit', 'payment', 'stored', 'auth') NOT NULL COMMENT'account type',
   `p2pkh_address`           VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'address as standard pubkey script that Pays To PubKey Hash (P2PKH)',
   `p2sh_segwit_address`     VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'p2sh-segwit address',
   `full_public_key`         VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'full public key',
@@ -75,7 +75,7 @@ DROP TABLE IF EXISTS `multisig_history`;
 CREATE TABLE `multisig_history` (
   `id`                      BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
   `coin`                    ENUM('btc', 'bch') NOT NULL COMMENT'coin type code',
-  `account`                 ENUM('deposit', 'payment', 'stored', 'fee') NOT NULL COMMENT'multisig account type',
+  `account`                 ENUM('deposit', 'payment', 'stored') NOT NULL COMMENT'multisig account type',
   `full_public_key`         VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'full public key',
   `auth_address1`           VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'1st address for authorization',
   `auth_address2`           VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'2nd address for authorization',
