@@ -17,6 +17,8 @@ import (
 // - if 3:5 proportion is required, at least 4 different auth accounts should be prepared in advance
 // - when sending coin from multisig address, 、related priv key is required which is related to addresses in parameters
 // - 4th parameter must be`p2sh-segwit` addressType in Bitcoin
+//  What is the difference between createmultisig and addmultisigaddress?
+// - https://bitcointalk.org/index.php?topic=3402541.0
 func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, addressType address.AddrType) error {
 	//for sign wallet
 
@@ -45,7 +47,7 @@ func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, address
 			2,
 			[]string{
 				val.FullPublicKey, // receipt, payment, stored ...
-				authKeyTable.P2SHSegwitAddress,
+				authKeyTable.P2SHSegwitAddress, //TODO: what if address is changed to authKeyTable.FullPublicKey??
 			},
 			fmt.Sprintf("multi_%s", accountType), //this is not important
 			addressType,

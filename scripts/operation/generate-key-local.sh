@@ -10,6 +10,10 @@
 # - reset wallet.dat
 #   $ rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/wallet.dat
 #   $ docker-compose up btc-wallet-db btc-keygen-db btc-signature-db
+# - load wallet
+#	$ bitcoin-cli loadwallet watch
+#	$ bitcoin-cli loadwallet keygen
+#	$ bitcoin-cli loadwallet sign
 
 set -eu
 
