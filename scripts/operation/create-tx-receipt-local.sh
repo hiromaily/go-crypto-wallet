@@ -23,4 +23,4 @@ tx_id=`wallet send -file "${tx_file_signed##*\[fileName\]: }"`
 echo 'txID:'${tx_id##*txID: }
 
 # check confirmation
-bitcoin-cli -rpcuser=xyz -rpcpassword=xyz gettransaction ${tx_id##*txID: } | jq .confirmations
+bitcoin-cli -rpcuser=xyz -rpcpassword=xyz -rpcwallet=watch gettransaction ${tx_id##*txID: } | jq .confirmations
