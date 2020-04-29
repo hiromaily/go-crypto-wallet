@@ -23,7 +23,7 @@ func (w *Wallet) UpdateTxStatus() error {
 	for _, actionType := range types {
 		err := w.updateStatusTxTypeSent(actionType)
 		if err != nil {
-			return errors.Wrapf(err, "fail to call updateStatusForTxTypeSent() ActionType: %s", actionType)
+			return errors.Wrapf(err, "fail to call updateStatusTxTypeSent() ActionType: %s", actionType)
 		}
 	}
 
@@ -32,7 +32,7 @@ func (w *Wallet) UpdateTxStatus() error {
 	for _, actionType := range types {
 		err := w.updateStatusTxTypeDone(actionType)
 		if err != nil {
-			return errors.Wrapf(err, "fail to call updateStatusForTxTypeDone() ActionType: %s", actionType)
+			return errors.Wrapf(err, "fail to call updateStatusTxTypeDone() ActionType: %s", actionType)
 		}
 	}
 

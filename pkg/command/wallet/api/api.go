@@ -24,13 +24,14 @@ func (c *APICommand) Synopsis() string {
 }
 
 var (
-	unlocktxSynopsis        = "unlock locked transaction for unspent transaction"
-	estimatefeeSynopsis     = "estimate fee"
-	loggingSynopsis         = "logging"
-	getnetworkinfoSynopsis  = "call getnetworkinfo"
-	validateaddressSynopsis = "validate address"
-	listunspentSynopsis     = "call listunspent"
 	balanceSynopsis         = "get balance for account"
+	estimatefeeSynopsis     = "estimate fee"
+	getnetworkinfoSynopsis  = "call getnetworkinfo"
+	getaddressinfoSynopsis  = "call getaddressinfo"
+	listunspentSynopsis     = "call listunspent"
+	loggingSynopsis         = "logging"
+	unlocktxSynopsis        = "unlock locked transaction for unspent transaction"
+	validateaddressSynopsis = "validate address"
 )
 
 // Help returns usage for this subcommand
@@ -57,10 +58,10 @@ func (c *APICommand) Run(args []string) int {
 
 	//farther subcommand import
 	cmds := map[string]cli.CommandFactory{
-		"unlocktx": func() (cli.Command, error) {
-			return &UnLockTxCommand{
-				name:     "unlocktx",
-				synopsis: unlocktxSynopsis,
+		"balance": func() (cli.Command, error) {
+			return &BalanceCommand{
+				name:     "balance",
+				synopsis: balanceSynopsis,
 				ui:       command.ClolorUI(),
 				wallet:   c.Wallet,
 			}, nil
@@ -73,26 +74,18 @@ func (c *APICommand) Run(args []string) int {
 				wallet:   c.Wallet,
 			}, nil
 		},
-		"logging": func() (cli.Command, error) {
-			return &LoggingCommand{
-				name:     "logging",
-				synopsis: loggingSynopsis,
-				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
-			}, nil
-		},
-		"getnetworkinfo": func() (cli.Command, error) {
-			return &GetnetworkInfoCommand{
+		"getaddressinfo": func() (cli.Command, error) {
+			return &GetAddressInfoCommand{
 				name:     "getnetworkinfo",
 				synopsis: getnetworkinfoSynopsis,
 				ui:       command.ClolorUI(),
 				wallet:   c.Wallet,
 			}, nil
 		},
-		"validateaddress": func() (cli.Command, error) {
-			return &ValidateAddressCommand{
-				name:     "validateaddress",
-				synopsis: validateaddressSynopsis,
+		"getnetworkinfo": func() (cli.Command, error) {
+			return &GetNetworkInfoCommand{
+				name:     "getnetworkinfo",
+				synopsis: getnetworkinfoSynopsis,
 				ui:       command.ClolorUI(),
 				wallet:   c.Wallet,
 			}, nil
@@ -105,10 +98,26 @@ func (c *APICommand) Run(args []string) int {
 				wallet:   c.Wallet,
 			}, nil
 		},
-		"balance": func() (cli.Command, error) {
-			return &BalanceCommand{
-				name:     "balance",
-				synopsis: balanceSynopsis,
+		"logging": func() (cli.Command, error) {
+			return &LoggingCommand{
+				name:     "logging",
+				synopsis: loggingSynopsis,
+				ui:       command.ClolorUI(),
+				wallet:   c.Wallet,
+			}, nil
+		},
+		"unlocktx": func() (cli.Command, error) {
+			return &UnLockTxCommand{
+				name:     "unlocktx",
+				synopsis: unlocktxSynopsis,
+				ui:       command.ClolorUI(),
+				wallet:   c.Wallet,
+			}, nil
+		},
+		"validateaddress": func() (cli.Command, error) {
+			return &ValidateAddressCommand{
+				name:     "validateaddress",
+				synopsis: validateaddressSynopsis,
 				ui:       command.ClolorUI(),
 				wallet:   c.Wallet,
 			}, nil

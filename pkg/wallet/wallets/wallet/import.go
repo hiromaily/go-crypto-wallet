@@ -19,7 +19,6 @@ func (w *Wallet) ImportAddress(fileName string, accountType account.AccountType,
 		return errors.Wrap(err, "fail to call key.ImportPubKey()")
 	}
 
-	//var pubKeyData []walletrepo.AccountPublicKeyTable
 	pubKeyData := make([]*models.Address, 0, len(pubKeys))
 	for _, key := range pubKeys {
 		inner := strings.Split(key, ",")
@@ -28,7 +27,7 @@ func (w *Wallet) ImportAddress(fileName string, accountType account.AccountType,
 		if accountType == account.AccountTypeClient {
 			addr = inner[1] //p2sh_segwit_address
 		} else {
-			addr = inner[3] //wallet_import_format
+			addr = inner[3] //multisig_address
 		}
 
 		//call bitcoin API `importaddress` with account(label)

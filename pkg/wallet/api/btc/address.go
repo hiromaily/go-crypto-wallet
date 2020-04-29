@@ -57,7 +57,7 @@ func (b *Bitcoin) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
 	}
 	rawResult, err := b.client.RawRequest("getaddressinfo", []json.RawMessage{input})
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.RawRequest(getaddressinfo)")
+		return nil, errors.Wrapf(err, "fail to call json.RawRequest(getaddressinfo) %s", addr)
 	}
 
 	infoResult := GetAddressInfoResult{}

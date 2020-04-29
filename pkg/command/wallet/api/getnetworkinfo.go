@@ -11,7 +11,7 @@ import (
 )
 
 // GetnetworkInfoCommand getnetworkinfo subcommand
-type GetnetworkInfoCommand struct {
+type GetNetworkInfoCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
@@ -19,17 +19,17 @@ type GetnetworkInfoCommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (c *GetnetworkInfoCommand) Synopsis() string {
+func (c *GetNetworkInfoCommand) Synopsis() string {
 	return c.synopsis
 }
 
 // Help returns usage for this subcommand
-func (c *GetnetworkInfoCommand) Help() string {
+func (c *GetNetworkInfoCommand) Help() string {
 	return `Usage: wallet api getnetworkinfo`
 }
 
 // Run executes this subcommand
-func (c *GetnetworkInfoCommand) Run(args []string) int {
+func (c *GetNetworkInfoCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
