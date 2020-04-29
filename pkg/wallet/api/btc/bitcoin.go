@@ -73,7 +73,9 @@ func NewBitcoin(
 
 // Close disconnect from bitcoin core server
 func (b *Bitcoin) Close() {
-	b.client.Shutdown()
+	if b.client != nil {
+		b.client.Shutdown()
+	}
 }
 
 // GetChainConf returns chain conf
@@ -89,11 +91,6 @@ func (b *Bitcoin) SetChainConf(conf *chaincfg.Params) {
 // SetChainConfNet sets conf.Net
 func (b *Bitcoin) SetChainConfNet(btcNet wire.BitcoinNet) {
 	b.chainConf.Net = btcNet
-}
-
-// Client returns client
-func (b *Bitcoin) Client() *rpcclient.Client {
-	return b.client
 }
 
 // ConfirmationBlock returns confirmation block count

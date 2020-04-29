@@ -30,7 +30,7 @@ func (w *ColdWallet) ImportPubKey(fileName string, accountType account.AccountTy
 	}
 
 	// read file for full public key
-	pubKeys, err := w.addrFileRepo.ImportPubKey(fileName)
+	pubKeys, err := w.addrFileRepo.ImportAddress(fileName)
 	if err != nil {
 		return errors.Wrapf(err, "fail to call fileStorager.ImportPubKey() fileName: %s", fileName)
 	}
@@ -79,7 +79,7 @@ func (w *ColdWallet) ImportMultisigAddress(fileName string, accountType account.
 	}
 
 	// read file for full public key
-	pubKeys, err := w.addrFileRepo.ImportPubKey(fileName)
+	pubKeys, err := w.addrFileRepo.ImportAddress(fileName)
 	if err != nil {
 		return errors.Errorf("key.ImportPubKey() error: %s", err)
 	}

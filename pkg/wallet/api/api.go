@@ -4,7 +4,6 @@ import (
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
-	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/btcsuite/btcutil"
 	"github.com/volatiletech/sqlboiler/types"
@@ -47,13 +46,10 @@ type Bitcoiner interface {
 	GetChainConf() *chaincfg.Params
 	SetChainConf(conf *chaincfg.Params)
 	SetChainConfNet(btcNet wire.BitcoinNet)
-	Client() *rpcclient.Client
 	ConfirmationBlock() uint64
 	FeeRangeMax() float64
 	FeeRangeMin() float64
-	//SetVersion(ver coin.BTCVersion)
 	Version() coin.BTCVersion
-	//SetCoinTypeCode(coinType coin.CoinTypeCode)
 	CoinTypeCode() coin.CoinTypeCode
 
 	//fee.go
