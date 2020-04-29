@@ -7,7 +7,7 @@ set -eu
 
 # create unsigned tx
 echo 'create transfer tx'
-tx_file=$(wallet create transfer -account1 receipt -account2 payment)
+tx_file=$(wallet create transfer -account1 deposit -account2 payment)
 if [ "`echo $tx_file | grep 'No utxo'`" ]; then
   echo 'No utxo'
   exit 0

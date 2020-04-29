@@ -15,7 +15,7 @@ create-seed:
 .PHONY: create-hdkey
 create-hdkey:
 	keygen create hdkey -account client -keynum 10
-	keygen create hdkey -account receipt -keynum 10
+	keygen create hdkey -account deposit -keynum 10
 	keygen create hdkey -account payment -keynum 10
 
 ###############################################################################
@@ -24,7 +24,7 @@ create-hdkey:
 .PHONY: import-privkey
 import-privkey:
 	keygen import privkey -account client
-	keygen import privkey -account receipt
+	keygen import privkey -account deposit
 	keygen import privkey -account payment
 
 ###############################################################################
@@ -33,7 +33,7 @@ import-privkey:
 .PHONY: export-pubkey
 export-pubkey:
 	keygen export address -account client
-	keygen export address -account receipt
+	keygen export address -account deposit
 	keygen export address -account payment
 
 ###############################################################################
@@ -41,14 +41,14 @@ export-pubkey:
 ###############################################################################
 .PHONY: import-multisig
 import-multisig:
-	keygen import multisig -account receipt
+	keygen import multisig -account deposit
 	keygen import multisig -account payment
 
 ###############################################################################
 # sign on unsigned transaction as first signature
 #  multisig requireds multiple signature
 ###############################################################################
-#make filepath=./data/tx/receipt/receipt_8_unsigned_1534832793024491932 sign-unsignedtx
+#make filepath=./data/tx/deposit/deposit_8_unsigned_1534832793024491932 sign-unsignedtx
 .PHONY: sign-unsignedtx
 sign-unsignedtx:
 	keygen sign file ${filepath}

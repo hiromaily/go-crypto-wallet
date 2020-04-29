@@ -17,7 +17,7 @@
 
 
 --
--- Table structure for table `tx_receipt`
+-- Table structure for table `tx_deposit`
 --
 
 DROP TABLE IF EXISTS `tx`;
@@ -27,7 +27,7 @@ CREATE TABLE `tx` (
   /*`id`                  BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'transaction ID',*/
   `id`                  BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'transaction ID',
   `coin`                ENUM('btc', 'bch') NOT NULL COMMENT'coin type code',
-  `action`              ENUM('receipt', 'payment', 'transfer') NOT NULL COMMENT'action type',
+  `action`              ENUM('deposit', 'payment', 'transfer') NOT NULL COMMENT'action type',
   `unsigned_hex_tx`     TEXT COLLATE utf8_unicode_ci NOT NULL COMMENT'HEX string for unsigned transaction',
   `signed_hex_tx`       TEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT'HEX string for signed transaction',
   `sent_hash_tx`        TEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT'Hash for sent transaction',
@@ -136,7 +136,7 @@ DROP TABLE IF EXISTS `address`;
 CREATE TABLE `address` (
   `id`                BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
   `coin`              ENUM('btc', 'bch') NOT NULL COMMENT'coin type code',
-  `account`           ENUM('client', 'receipt', 'payment', 'stored', 'fee') NOT NULL COMMENT'account type',
+  `account`           ENUM('client', 'deposit', 'payment', 'stored', 'fee') NOT NULL COMMENT'account type',
   `wallet_address`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'wallet address',
   `is_allocated`      BOOL NOT NULL DEFAULT false COMMENT'true: address is allocated(used)',
   `updated_at`        datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',

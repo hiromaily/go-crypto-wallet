@@ -60,7 +60,7 @@ const (
 // Enum values for account_key.account
 const (
 	AccountKeyAccountClient  = "client"
-	AccountKeyAccountReceipt = "receipt"
+	AccountKeyAccountDeposit = "deposit"
 	AccountKeyAccountPayment = "payment"
 	AccountKeyAccountStored  = "stored"
 	AccountKeyAccountFee     = "fee"
@@ -76,7 +76,7 @@ const (
 // Enum values for address.account
 const (
 	AddressAccountClient  = "client"
-	AddressAccountReceipt = "receipt"
+	AddressAccountDeposit = "deposit"
 	AddressAccountPayment = "payment"
 	AddressAccountStored  = "stored"
 	AddressAccountFee     = "fee"
@@ -90,7 +90,7 @@ const (
 
 // Enum values for multisig_history.account
 const (
-	MultisigHistoryAccountReceipt = "receipt"
+	MultisigHistoryAccountDeposit = "deposit"
 	MultisigHistoryAccountPayment = "payment"
 	MultisigHistoryAccountStored  = "stored"
 	MultisigHistoryAccountFee     = "fee"
@@ -116,7 +116,7 @@ const (
 
 // Enum values for tx.action
 const (
-	TXActionReceipt  = "receipt"
+	TXActionDeposit  = "deposit"
 	TXActionPayment  = "payment"
 	TXActionTransfer = "transfer"
 )

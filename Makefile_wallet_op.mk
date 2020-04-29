@@ -14,17 +14,17 @@ import-pubkey:
 ###############################################################################
 # create unsigned transaction
 ###############################################################################
-# detect receipt addresses and create unsigned transaction for client
-#make fee=0.5 create-receipt-tx
-.PHONY: create-receipt-tx
-create-receipt-tx:
-	wallet create receipt -fee ${fee}
+# detect deposit addresses and create unsigned transaction for client
+#make fee=0.5 create-deposit-tx
+.PHONY: create-deposit-tx
+create-deposit-tx:
+	wallet create deposit -fee ${fee}
 
 # Note: debug use
 # WIP: execute series of flows from creation of a receiving transaction to sending of a transaction
-.PHONY: create-receipt-all
-create-receipt-all:
-	wallet create receipt -debug
+.PHONY: create-deposit-all
+create-deposit-all:
+	wallet create deposit -debug
 
 # create payment request from payment table
 #make fee=0.5 create-payment-tx
@@ -46,8 +46,8 @@ create-transfer-tx:
 ###############################################################################
 # send transaction
 ###############################################################################
-# send signed transaction (receipt/payment/transfer)
-#make filepath=./data/tx/receipt/receipt_8_signed_1534832879778945174 send-tx
+# send signed transaction (deposit/payment/transfer)
+#make filepath=./data/tx/deposit/deposit_8_signed_1534832879778945174 send-tx
 .PHONY: send-tx
 send-tx:
 	wallet send -file ${filepath}

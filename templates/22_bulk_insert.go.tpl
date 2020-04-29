@@ -7,7 +7,6 @@ func (o {{$alias.UpSingular}}Slice) InsertAll({{if .NoContext}}exec boil.Executo
     if ln == 0 {
         return nil
     }
-
     var sql string
     vals := []interface{}{}
     for i, row := range o {

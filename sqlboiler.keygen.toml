@@ -15,5 +15,5 @@ whitelist = [
     "multisig_pubkey_history",
 ]
 
-#[aliases.tables.tx_receipt.columns]
+#[aliases.tables.tx_deposit.columns]
 #current_tx_type = "CurrentTxType"

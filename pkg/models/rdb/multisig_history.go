@@ -779,7 +779,6 @@ func (o MultisigHistorySlice) InsertAll(ctx context.Context, exec boil.ContextEx
 	if ln == 0 {
 		return nil
 	}
-
 	var sql string
 	vals := []interface{}{}
 	for i, row := range o {

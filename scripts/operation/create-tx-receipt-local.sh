@@ -6,8 +6,8 @@
 set -eu
 
 # create unsigned tx
-echo 'create receipt tx'
-tx_file=$(wallet create receipt)
+echo 'create deposit tx'
+tx_file=$(wallet create deposit)
 if [ "`echo $tx_file | grep 'No utxo'`" ]; then
   echo 'No utxo'
   exit 0
