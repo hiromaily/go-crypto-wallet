@@ -202,20 +202,6 @@ cd-btc-dir:
 
 
 ###############################################################################
-# wallet.dat
-###############################################################################
-.PHONY: rm-local-wallet-dat
-rm-local-wallet-dat:
-	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/wallet.dat
-
-.PHONY: rm-docker-wallet-dat-all
-rm-docker-wallet-dat-all:
-	rm -rf ./docker/btc/data1/testnet3/wallets/wallet.data
-	rm -rf ./docker/btc/data2/testnet3/wallets/wallet.data
-	rm -rf ./docker/btc/data3/testnet3/wallets/wallet.data
-
-
-###############################################################################
 # Grafana
 ###############################################################################
 # http://localhost:3000
@@ -228,8 +214,6 @@ rm-docker-wallet-dat-all:
 generate-key-local:
 	./scripts/operation/generate-key-local.sh
 
-# preparation
-# make clean
 
 
 ###############################################################################
@@ -252,6 +236,52 @@ include ./Makefile_signature_op.mk
 
 
 ###############################################################################
+# wallet
+###############################################################################
+# run only once, even if wallet.dat is removed
+.PHONY: create-wallets
+create-wallets:
+	bitcoin-cli createwallet watch
+	bitcoin-cli createwallet keygen
+	bitcoin-cli createwallet sign
+
+# list loaded wallets (listed wallet is not needed to load, these wallet can be unloaded
+.PHONY: list-wallets
+list-wallets:
+	bitcoin-cli listwallets
+
+.PHONY: load-wallet
+load-wallets:
+	bitcoin-cli loadwallet watch
+	bitcoin-cli loadwallet keygen
+	bitcoin-cli loadwallet sign
+
+.PHONY: unload-wallet
+unload-wallet:
+	bitcoin-cli -rpcwallet=watch unloadwallet
+	bitcoin-cli -rpcwallet=keygen unloadwallet
+	bitcoin-cli -rpcwallet=sign unloadwallet
+
+.PHONY: dump-wallet
+dump-wallet:
+	bitcoin-cli -rpcwallet=watch dumpwallet "watch"
+	bitcoin-cli -rpcwallet=keygen dumpwallet "keygen"
+	bitcoin-cli -rpcwallet=sign dumpwallet "sign"
+
+.PHONY: rm-local-wallet-dat
+rm-local-wallet-dat:
+	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/wallet.dat
+	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/sign/wallet.dat
+	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/sign/keygen.dat
+	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/sign/sign.dat
+
+.PHONY: rm-docker-wallet-dat
+rm-docker-wallet-dat:
+	rm -rf ./docker/btc/data1/testnet3/wallets/wallet.data
+	rm -rf ./docker/btc/data2/testnet3/wallets/wallet.data
+	rm -rf ./docker/btc/data3/testnet3/wallets/wallet.data
+
+###############################################################################
 # Utility
 ###############################################################################
 .PHONY: clean
@@ -261,3 +291,4 @@ clean: rm-db-volumes rm-local-wallet-dat
 
 # bitcoin-cli
 #bitcoin-cli -rpcuser=xyz -rpcpassword=xyz getnetworkinfo
+

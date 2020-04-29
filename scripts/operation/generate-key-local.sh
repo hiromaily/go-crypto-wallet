@@ -1,10 +1,15 @@
 #!/bin/sh
 
-#After reset database and `docker-compose up`
+# Prerequisite
+# create wallet
+#  $ bitcoin-cli createwallet watch
+#  $ bitcoin-cli createwallet keygen
+#  $ bitcoin-cli createwallet sign
 
-# reset wallet.dat
-#rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/wallet.dat
-#sleep 5
+# reset database and wallet if you want to start from the beginning
+# - reset wallet.dat
+#   $ rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/wallet.dat
+#   $ docker-compose up btc-wallet-db btc-keygen-db btc-signature-db
 
 set -eu
 
