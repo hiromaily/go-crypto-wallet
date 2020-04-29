@@ -8,12 +8,6 @@
 
 Wallet functionalities handling BTC, BCH and so on. Currencies would be added step by step.
 
-## Requirements
-- Bitcoin Core 0.18+
-- MySQL 5.7
-- Golang 1.13+
-- Docker
-
 ## Wallet Type
 This is explained for BTC for now.
 There are mainly 3 wallets separately and these wallets are expected to be installed each diffrent devices.
@@ -32,6 +26,23 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 - This wallet is signature management for authorization by multi-signature address. It also generates seed and private keys for authorization accounts.
 - Sign unsigned transaction as second sigunature. Mustisig address must require this wallet.
 - Outside network is not used at all because of cold wallet.
+
+## Workflow diagram
+### 1. Generate keys
+![generate keys](https://raw.githubusercontent.com/hiromaily/go-bitcoin/master/images/0_key%20generation%20diagram.png?raw=true)
+
+### 2. Create unsigned transaction, Sign on unsigned tx, Send signed tx for non-multisig address.
+![create tx](https://raw.githubusercontent.com/hiromaily/go-bitcoin/master/images/1_Handle%20transactions%20for%20non-multisig%20address.png?raw=true)
+
+### 3. Create unsigned transaction, Sign on unsigned tx, Send signed tx for multisig address.
+![create tx for multisig](https://raw.githubusercontent.com/hiromaily/go-bitcoin/master/images/2_Handle%20transactions%20for%20multisig%20address.png?raw=true)
+
+
+## Requirements
+- Bitcoin Core 0.18+
+- MySQL 5.7
+- Golang 1.13+
+- Docker
 
 
 ## Install on local
