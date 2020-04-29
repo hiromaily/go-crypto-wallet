@@ -244,6 +244,7 @@ create-wallets:
 	bitcoin-cli createwallet watch
 	bitcoin-cli createwallet keygen
 	bitcoin-cli createwallet sign
+	bitcoin-cli listwallets
 
 # list loaded wallets (listed wallet is not needed to load, these wallet can be unloaded
 .PHONY: list-wallets

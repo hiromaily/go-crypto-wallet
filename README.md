@@ -35,13 +35,28 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 
 
 ## Install on local
-At least, one bitcoin core server and 3 different database are required.  
+At least, one bitcoin core server and 3 different databases are required.  
 After [bitcoin core installation](https://github.com/bitcoin/bitcoin/blob/master/doc/build-osx.md) is done
 ```
-# for database on docker
-docker-compose up btc-wallet-db btc-keygen-db btc-signature-db
+# run database on docker
+$ docker-compose up btc-wallet-db btc-keygen-db btc-signature-db
 
-# build src
+# run bitcoind
+$ bitcoind
+
+# create wallets separately
+$ bitcoin-cli createwallet watch
+$ bitcoin-cli createwallet keygen
+$ bitcoin-cli createwallet sign
+$ bitcoin-cli listwallets
+[
+  "",
+  "watch",
+  "keygen",
+  "sign"
+]
+
+# build source
 go build -i -v -o ${GOPATH}/bin/wallet ./cmd/wallet/
 go build -i -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
 go build -i -v -o ${GOPATH}/bin/sign ./cmd/signature/
