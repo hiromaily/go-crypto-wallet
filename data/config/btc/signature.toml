@@ -12,8 +12,9 @@ network_type = "testnet3" # mainnet, testnet3, regtest
 
 [logger]
 service = "signature"
-level = "debug" # debug, info, warn, error
 env = "custom" # dev, prod, custom :for only zap logger
+level = "debug" # debug, info, warn, error
+is_stacktrace = true
 
 # only available for watch only wallet, but definition is required as none
 [tracer]

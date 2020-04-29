@@ -13,7 +13,6 @@ import (
 
 //TODO:
 // - use https://github.com/spf13/viper
-// - use https://github.com/go-playground/validator [done]
 
 // Config root config
 type Config struct {
@@ -54,9 +53,10 @@ type BitcoinFee struct {
 
 // Logger logger info
 type Logger struct {
-	Service string `toml:"service" validate:"required"`
-	Level   string `toml:"level" validate:"required"`
-	Env     string `toml:"env" validate:"oneof=dev prod custom"`
+	Service  string `toml:"service" validate:"required"`
+	Env      string `toml:"env" validate:"oneof=dev prod custom"`
+	Level    string `toml:"level" validate:"required"`
+	IsLogger bool   `toml:"is_logger"`
 }
 
 // Tracer is open tracing

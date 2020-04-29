@@ -26,7 +26,7 @@ func (e LogEnv) String() string {
 }
 
 // NewLoggerWithWriter returns *zap.Logger
-func NewLoggerWithWriter(w io.Writer, lv zapcore.LevelEnabler, env LogEnv) *zap.Logger {
+func NewLoggerWithWriter(w io.Writer, env LogEnv, lv zapcore.LevelEnabler, isStackTrace bool) *zap.Logger {
 	zap.NewExample()
 
 	writer := zapcore.AddSync(w)
@@ -55,12 +55,14 @@ func NewLoggerWithWriter(w io.Writer, lv zapcore.LevelEnabler, env LogEnv) *zap.
 	cores := []zapcore.Core{
 		zapcore.NewCore(jsonEncoder, writer, lv),
 	}
-
-	logger := zap.New(zapcore.NewTee(cores...),
-		zap.AddStacktrace(zap.ErrorLevel),
+	options := []zap.Option{
 		zap.AddCaller(),
 		zap.AddCallerSkip(1),
-	)
+	}
+	if isStackTrace {
+		options = append(options, zap.AddStacktrace(zap.ErrorLevel))
+	}
+	logger := zap.New(zapcore.NewTee(cores...), options...)
 
 	return logger
 }
@@ -82,5 +84,9 @@ func getLogLevel(level string) zapcore.LevelEnabler {
 
 // NewZapLogger returns *zap.Logger
 func NewZapLogger(conf *config.Logger) *zap.Logger {
-	return NewLoggerWithWriter(os.Stdout, getLogLevel(conf.Level), LogEnv(conf.Env)).Named(conf.Service)
+	return NewLoggerWithWriter(
+		os.Stdout,
+		LogEnv(conf.Env),
+		getLogLevel(conf.Level),
+		conf.IsLogger).Named(conf.Service)
 }

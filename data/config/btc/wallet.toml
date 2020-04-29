@@ -19,8 +19,9 @@ adjustment_max = 2.0 # adjustable maximum fee magnification
 
 [logger]
 service = "wallet"
-level = "debug" # debug, info, warn, error
 env = "custom" # dev, prod, custom :for only zap logger
+level = "debug" # debug, info, warn, error
+is_stacktrace = true
 
 # only available for watch only wallet
 [tracer]
