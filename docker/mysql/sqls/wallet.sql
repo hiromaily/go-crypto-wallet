@@ -11,5 +11,5 @@ USE `wallet`;
 source /sqls/definition_wallet.sql
 source /sqls/payment_request.sql
 -- keygen table definition for sqlboiler
-source /sqls/definition_keygen.sql
+-- source /sqls/definition_keygen.sql
 
