@@ -1,6 +1,6 @@
 -- MySQL dump 10.14  Distrib 5.7.28, for osx10.14 (x86_64)
 --
--- Host: 127.0.0.1    Database: keygen
+-- Host: 127.0.0.1    Database: sign
 -- ------------------------------------------------------
 -- Server version	5.7.28
 
@@ -35,17 +35,16 @@ CREATE TABLE `seed` (
 
 
 --
--- Table structure for table `account_key`
+-- Table structure for table `auth_account_key`
 --
 
-DROP TABLE IF EXISTS `account_key`;
+DROP TABLE IF EXISTS `auth_account_key`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `account_key` (
-  /*`id`                      BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',*/
-  `id`                      BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
+CREATE TABLE `auth_account_key` (
+  `id`                      SMALLINT(5) NOT NULL AUTO_INCREMENT COMMENT'ID',
   `coin`                    ENUM('btc', 'bch') NOT NULL COMMENT'coin type code',
-  `account`                 ENUM('client', 'deposit', 'payment', 'stored') NOT NULL COMMENT'account type',
+  `auth_account`            VARCHAR(20)  COLLATE utf8_unicode_ci NOT NULL COMMENT'auth type',
   `p2pkh_address`           VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'address as standard pubkey script that Pays To PubKey Hash (P2PKH)',
   `p2sh_segwit_address`     VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'p2sh-segwit address',
   `full_public_key`         VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'full public key',
@@ -56,30 +55,11 @@ CREATE TABLE `account_key` (
   `addr_status`             tinyint(2) DEFAULT 0 NOT NULL COMMENT'progress status for address generating',
   `updated_at`              datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',
   PRIMARY KEY (`id`),
+  UNIQUE KEY `idex_coin_auth_account` (`coin`, `auth_account`),
   UNIQUE KEY `idx_p2pkh_address` (`p2pkh_address`),
   UNIQUE KEY `idx_p2sh_segwit_address` (`p2sh_segwit_address`),
   UNIQUE KEY `idx_wallet_import_format` (`wallet_import_format`),
   INDEX idx_coin (`coin`),
-  INDEX idx_account (`account`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='table for keys for any account';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `auth_pub_key`
---
-
-DROP TABLE IF EXISTS `auth_pub_key`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `auth_pub_key` (
-  `id`                      SMALLINT(5) NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `coin`                    ENUM('btc', 'bch') NOT NULL COMMENT'coin type code',
-  `auth_account`            VARCHAR(20)  COLLATE utf8_unicode_ci NOT NULL COMMENT'auth type',
-  `full_public_key`         VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'full public key',
-  `updated_at`              datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idex_coin_auth_account` (`coin`, `auth_account`),
-  UNIQUE KEY `idx_full_public_key` (`full_public_key`),
-  INDEX idx_coin (`coin`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='table for auth key exported from sign db';
+  INDEX idx_auth_account (`auth_account`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='table for keys for auth account';
 /*!40101 SET character_set_client = @saved_cs_client */;

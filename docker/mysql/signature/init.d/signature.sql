@@ -7,5 +7,5 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/ `signature` /*!40100 DEFAULT CHARACTER 
 
 USE `signature`;
 
--- signature table definition #TODO: adjustment
-source /sqls/definition_keygen.sql
+-- signature table definition
+source /sqls/definition_sign.sql

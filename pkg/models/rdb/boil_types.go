@@ -63,7 +63,6 @@ const (
 	AccountKeyAccountDeposit = "deposit"
 	AccountKeyAccountPayment = "payment"
 	AccountKeyAccountStored  = "stored"
-	AccountKeyAccountAuth    = "auth"
 )
 
 // Enum values for address.coin
@@ -80,17 +79,16 @@ const (
 	AddressAccountStored  = "stored"
 )
 
-// Enum values for multisig_history.coin
+// Enum values for auth_account_key.coin
 const (
-	MultisigHistoryCoinBTC = "btc"
-	MultisigHistoryCoinBCH = "bch"
+	AuthAccountKeyCoinBTC = "btc"
+	AuthAccountKeyCoinBCH = "bch"
 )
 
-// Enum values for multisig_history.account
+// Enum values for auth_pub_key.coin
 const (
-	MultisigHistoryAccountDeposit = "deposit"
-	MultisigHistoryAccountPayment = "payment"
-	MultisigHistoryAccountStored  = "stored"
+	AuthPubKeyCoinBTC = "btc"
+	AuthPubKeyCoinBCH = "bch"
 )
 
 // Enum values for payment_request.coin
