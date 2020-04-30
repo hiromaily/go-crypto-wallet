@@ -74,11 +74,12 @@ type Signer interface {
 	Done()
 	GetBTC() api.Bitcoiner
 	GetType() wallet.WalletType
+	GetAuthType() account.AuthType
 }
 
 // SignatureExclusiver is for only signature interface
 type SignatureExclusiver interface {
 	ImportPubKey(fileName string, accountType account.AccountType) error
-	AddMultisigAddress(accountType account.AccountType, addressType address.AddrType) error
+	AddMultisigAddress(accountType account.AccountType, authType account.AuthType, addressType address.AddrType) error
 	ExportAddedPubkeyHistory(accountType account.AccountType) (string, error)
 }

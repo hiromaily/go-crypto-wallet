@@ -70,6 +70,9 @@ func main() {
 		regi := NewRegistry(conf, walletType)
 		walleter = regi.NewKeygener()
 	}
+	defer func() {
+		walleter.Done()
+	}()
 
 	//sub command
 	args := flags.Args()

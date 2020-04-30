@@ -107,6 +107,33 @@ const (
 	AuthType15 AuthType = "auth15"
 )
 
+// ValidateAuthType validate AuthType
+func ValidateAuthType(v string) bool {
+	if _, ok := AuthTypeMap[v]; ok {
+		return true
+	}
+	return false
+}
+
+// AuthTypeMap auth_type mapper
+var AuthTypeMap = map[string]AuthType{
+	"auth1":  AuthType1,
+	"auth2":  AuthType2,
+	"auth3":  AuthType3,
+	"auth4":  AuthType4,
+	"auth5":  AuthType5,
+	"auth6":  AuthType6,
+	"auth7":  AuthType7,
+	"auth8":  AuthType8,
+	"auth9":  AuthType9,
+	"auth10": AuthType10,
+	"auth11": AuthType11,
+	"auth12": AuthType12,
+	"auth13": AuthType13,
+	"auth14": AuthType14,
+	"auth15": AuthType15,
+}
+
 // String converter
 func (a AuthType) String() string {
 	return string(a)

@@ -87,7 +87,7 @@ generate-go-interface:
 bld-linux: update-decimal
 	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/wallet ./cmd/wallet/main.go
 	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/keygen ./cmd/keygen/main.go
-	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/sign ./cmd/signature/main.go
+	CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.authName=auth1" -o /go/bin/sign ./cmd/signature/main.go
 
 ###############################################################################
 # Build on local
@@ -96,7 +96,7 @@ bld-linux: update-decimal
 bld: update-decimal
 	go build -i -v -o ${GOPATH}/bin/wallet ./cmd/wallet/
 	go build -i -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
-	go build -i -v -o ${GOPATH}/bin/sign ./cmd/signature/
+	go build -ldflags "-X main.authName=auth1" -i -v -o ${GOPATH}/bin/sign ./cmd/signature/
 
 .PHONY: bldw
 bldw:
@@ -108,7 +108,7 @@ bldk:
 
 .PHONY: blds
 blds:
-	go build -i -v -o ${GOPATH}/bin/sign ./cmd/signature/
+	go build -ldflags "-X main.authName=auth1" -i -v -o ${GOPATH}/bin/sign ./cmd/signature/
 
 
 run:

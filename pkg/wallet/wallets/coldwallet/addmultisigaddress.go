@@ -19,8 +19,12 @@ import (
 // - 4th parameter must be`p2sh-segwit` addressType in Bitcoin
 //  What is the difference between createmultisig and addmultisigaddress?
 // - https://bitcointalk.org/index.php?topic=3402541.0
-func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, addressType address.AddrType) error {
+func (w *ColdWallet) AddMultisigAddress(accountType account.AccountType, authType account.AuthType, addressType address.AddrType) error {
 	//for sign wallet
+	w.logger.Debug("addmultisigaddress",
+		zap.String("account_type", accountType.String()),
+		zap.String("auth_type", authType.String()),
+	)
 
 	// validate
 	if !account.AccountTypeMultisig[accountType] {

@@ -57,7 +57,7 @@ func (c *MultisigCommand) Run(args []string) int {
 
 	// call `addmultisigaddress` which adds a P2SH multisig address to the wallet
 	//  address would be account and authorization
-	err := c.wallet.AddMultisigAddress(account.AccountType(acnt), address.AddrTypeP2shSegwit)
+	err := c.wallet.AddMultisigAddress(account.AccountType(acnt), c.wallet.GetAuthType(), address.AddrTypeP2shSegwit)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call AddMultisigAddress() %+v", err))
 		return 1

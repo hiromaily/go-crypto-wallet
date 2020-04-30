@@ -2,12 +2,14 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/opentracing/opentracing-go"
 	"github.com/volatiletech/sqlboiler/boil"
 	"go.uber.org/zap"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	mysql "github.com/hiromaily/go-bitcoin/pkg/db/rdb"
@@ -20,6 +22,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/signature"
 )
 
 // Registry is for registry interface
@@ -29,23 +32,37 @@ type Registry interface {
 
 type registry struct {
 	conf        *config.Config
-	mysqlClient *sql.DB
-	logger      *zap.Logger
-	rpcClient   *rpcclient.Client
-	btc         api.Bitcoiner
 	walletType  wallet.WalletType
+	authType    account.AuthType
+	logger      *zap.Logger
+	btc         api.Bitcoiner
+	rpcClient   *rpcclient.Client
+	mysqlClient *sql.DB
 }
 
 // NewRegistry is to register registry interface
-func NewRegistry(conf *config.Config, walletType wallet.WalletType) Registry {
+func NewRegistry(conf *config.Config, walletType wallet.WalletType, authName string) Registry {
+	// validate
+	if !account.ValidateAuthType(authName) {
+		panic(fmt.Sprintf("authName is invalid. this should be embedded when building: %s", authName))
+	}
+
 	return &registry{
 		conf:       conf,
 		walletType: walletType,
+		authType:   account.AuthTypeMap[authName],
 	}
 }
 
 // NewSigner is to register for Signer interface
 func (r *registry) NewSigner() wallets.Signer {
+	return signature.NewSignature(
+		r.newColdWalleter(),
+		r.authType,
+	)
+}
+
+func (r *registry) newColdWalleter() wallets.Coldwalleter {
 	return coldwallet.NewColdWalet(
 		r.newBTC(),
 		r.newLogger(),

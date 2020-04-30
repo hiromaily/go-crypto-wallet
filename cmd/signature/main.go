@@ -35,6 +35,7 @@ var (
 	walletType = wallet.WalletTypeSignature
 	appName    = walletType.String()
 	appVersion = "2.2.0"
+	authName   = "" // this account is supposed to be embedded when building
 )
 
 func main() {
@@ -55,7 +56,7 @@ func main() {
 
 	// version
 	if isVersion {
-		fmt.Printf("%s v%s\n", appName, appVersion)
+		fmt.Printf("%s v%s for %s\n", appName, appVersion, authName)
 		os.Exit(0)
 	}
 
@@ -67,9 +68,12 @@ func main() {
 			log.Fatal(err)
 		}
 		// create wallet
-		regi := NewRegistry(conf, walletType)
+		regi := NewRegistry(conf, walletType, authName)
 		walleter = regi.NewSigner()
 	}
+	defer func() {
+		walleter.Done()
+	}()
 
 	//sub command
 	args := flags.Args()

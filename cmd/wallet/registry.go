@@ -28,10 +28,10 @@ type Registry interface {
 
 type registry struct {
 	conf        *config.Config
-	mysqlClient *sql.DB
+	walletType  wtype.WalletType
 	logger      *zap.Logger
 	rpcClient   *rpcclient.Client
-	walletType  wtype.WalletType
+	mysqlClient *sql.DB
 }
 
 // NewRegistry is to register registry interface
