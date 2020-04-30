@@ -97,6 +97,8 @@ bld: update-decimal
 	go build -i -v -o ${GOPATH}/bin/wallet ./cmd/wallet/
 	go build -i -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
 	go build -ldflags "-X main.authName=auth1" -i -v -o ${GOPATH}/bin/sign ./cmd/signature/
+	go build -ldflags "-X main.authName=auth2" -i -v -o ${GOPATH}/bin/sign2 ./cmd/signature/
+	go build -ldflags "-X main.authName=auth3" -i -v -o ${GOPATH}/bin/sign3 ./cmd/signature/
 
 .PHONY: bldw
 bldw:
@@ -109,6 +111,8 @@ bldk:
 .PHONY: blds
 blds:
 	go build -ldflags "-X main.authName=auth1" -i -v -o ${GOPATH}/bin/sign ./cmd/signature/
+	go build -ldflags "-X main.authName=auth2" -i -v -o ${GOPATH}/bin/sign2 ./cmd/signature/
+	go build -ldflags "-X main.authName=auth3" -i -v -o ${GOPATH}/bin/sign3 ./cmd/signature/
 
 
 run:
