@@ -7,7 +7,7 @@ import (
 )
 
 // WalletRepository is wallet repository interface
-type WalletRepository interface {
+type WalletRepositorier interface {
 	Close() error
 	BeginTx() (*sql.Tx, error)
 	Tx() TxRepository
@@ -18,7 +18,7 @@ type WalletRepository interface {
 }
 
 // walletRepository is repository for wallet
-type walletRepository struct {
+type WalletRepository struct {
 	db     *sql.DB
 	logger *zap.Logger
 	TxRepository
@@ -29,7 +29,6 @@ type walletRepository struct {
 }
 
 // NewWalletRepository returns WalletRepository
-// nolint:golint
 func NewWalletRepository(
 	db *sql.DB,
 	logger *zap.Logger,
@@ -37,9 +36,9 @@ func NewWalletRepository(
 	txInRepo TxInputRepository,
 	txOutRepo TxOutputRepository,
 	payReqRepo PaymentRequestRepository,
-	addrRepo AddressRepository) *walletRepository {
+	addrRepo AddressRepository) *WalletRepository {
 
-	return &walletRepository{
+	return &WalletRepository{
 		db:                       db,
 		logger:                   logger,
 		TxRepository:             txRepo,
@@ -51,7 +50,7 @@ func NewWalletRepository(
 }
 
 // Close close db connection
-func (r *walletRepository) Close() error {
+func (r *WalletRepository) Close() error {
 	if r.db != nil {
 		return r.db.Close()
 	}
@@ -59,26 +58,26 @@ func (r *walletRepository) Close() error {
 }
 
 // BeginTx starts transaction
-func (r *walletRepository) BeginTx() (*sql.Tx, error) {
+func (r *WalletRepository) BeginTx() (*sql.Tx, error) {
 	return r.db.Begin()
 }
 
-func (r *walletRepository) Tx() TxRepository {
+func (r *WalletRepository) Tx() TxRepository {
 	return r.TxRepository
 }
 
-func (r *walletRepository) TxInput() TxInputRepository {
+func (r *WalletRepository) TxInput() TxInputRepository {
 	return r.TxInputRepository
 }
 
-func (r *walletRepository) TxOutput() TxOutputRepository {
+func (r *WalletRepository) TxOutput() TxOutputRepository {
 	return r.TxOutputRepository
 }
 
-func (r *walletRepository) PayReq() PaymentRequestRepository {
+func (r *WalletRepository) PayReq() PaymentRequestRepository {
 	return r.PaymentRequestRepository
 }
 
-func (r *walletRepository) Addr() AddressRepository {
+func (r *WalletRepository) Addr() AddressRepository {
 	return r.AddressRepository
 }

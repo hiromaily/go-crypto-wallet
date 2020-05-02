@@ -85,7 +85,7 @@ func (r *registry) newTracer() opentracing.Tracer {
 	return tracer.NewTracer(r.conf.Tracer)
 }
 
-func (r *registry) newRepository() walletrepo.WalletRepository {
+func (r *registry) newRepository() walletrepo.WalletRepositorier {
 	// if there are multiple options, set proper one
 	// storager interface as MySQL
 	return walletrepo.NewWalletRepository(

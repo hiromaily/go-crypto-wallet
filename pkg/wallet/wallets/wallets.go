@@ -25,7 +25,7 @@ type Watcher interface {
 	UpdateTxStatus() error
 
 	Done()
-	GetDB() walletrepo.WalletRepository // for debug use
+	GetDB() walletrepo.WalletRepositorier // for debug use
 	GetBTC() api.Bitcoiner
 	GetType() wallet.WalletType
 }

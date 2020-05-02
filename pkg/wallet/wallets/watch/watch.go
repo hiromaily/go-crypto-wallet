@@ -16,7 +16,7 @@ type Watch struct {
 	btc          api.Bitcoiner
 	logger       *zap.Logger
 	tracer       opentracing.Tracer
-	repo         walletrepo.WalletRepository
+	repo         walletrepo.WalletRepositorier
 	addrFileRepo address.FileStorager
 	txFileRepo   tx.FileStorager
 	wtype        wtype.WalletType
@@ -27,7 +27,7 @@ func NewWatch(
 	btc api.Bitcoiner,
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
-	repo walletrepo.WalletRepository,
+	repo walletrepo.WalletRepositorier,
 	addrFileRepo address.FileStorager,
 	txFileRepo tx.FileStorager,
 	wtype wtype.WalletType) *Watch {
@@ -50,7 +50,7 @@ func (w *Watch) Done() {
 }
 
 // GetDB gets repository
-func (w *Watch) GetDB() walletrepo.WalletRepository {
+func (w *Watch) GetDB() walletrepo.WalletRepositorier {
 	return w.repo
 }
 
