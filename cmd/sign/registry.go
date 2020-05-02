@@ -19,8 +19,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwalletsrv"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwalletsrv/signsrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldsrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldsrv/signsrv"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/sign"
 )
 
@@ -69,16 +69,16 @@ func (r *registry) NewSigner() wallets.Signer {
 	)
 }
 
-func (r *registry) newSeeder() coldwalletsrv.Seeder {
-	return coldwalletsrv.NewSeed(
+func (r *registry) newSeeder() coldsrv.Seeder {
+	return coldsrv.NewSeed(
 		r.newLogger(),
 		r.newSeedRepo(),
 		r.walletType,
 	)
 }
 
-func (r *registry) newHdWallter() coldwalletsrv.HDWalleter {
-	return coldwalletsrv.NewHDWallet(
+func (r *registry) newHdWallter() coldsrv.HDWalleter {
+	return coldsrv.NewHDWallet(
 		r.newLogger(),
 		r.newHdWalletRepo(),
 		r.newKeyGenerator(),
@@ -87,8 +87,8 @@ func (r *registry) newHdWallter() coldwalletsrv.HDWalleter {
 	)
 }
 
-func (r *registry) newHdWalletRepo() coldwalletsrv.HDWalletRepo {
-	return coldwalletsrv.NewAuthHDWalletRepo(
+func (r *registry) newHdWalletRepo() coldsrv.HDWalletRepo {
+	return coldsrv.NewAuthHDWalletRepo(
 		r.newAuthKeyRepo(),
 		r.authType,
 	)
@@ -114,8 +114,8 @@ func (r *registry) newFullPubkeyExporter() signsrv.FullPubkeyExporter {
 		r.walletType,
 	)
 }
-func (r *registry) newSigner() coldwalletsrv.Signer {
-	return coldwalletsrv.NewSign(
+func (r *registry) newSigner() coldsrv.Signer {
+	return coldsrv.NewSign(
 		r.newBTC(),
 		r.newLogger(),
 		r.newAccountKeyRepo(),

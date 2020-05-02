@@ -8,8 +8,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwalletsrv"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwalletsrv/keygensrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldsrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldsrv/keygensrv"
 )
 
 // Keygen is keygen wallet object
@@ -18,26 +18,26 @@ type Keygen struct {
 	btc    api.Bitcoiner
 	dbConn *sql.DB
 	wtype  wallet.WalletType
-	coldwalletsrv.Seeder
-	coldwalletsrv.HDWalleter
+	coldsrv.Seeder
+	coldsrv.HDWalleter
 	keygensrv.PrivKeyer
 	keygensrv.FullPubKeyImporter
 	keygensrv.Multisiger
 	keygensrv.AddressExporter
-	coldwalletsrv.Signer
+	coldsrv.Signer
 }
 
 // NewKeygen returns Keygen object
 func NewKeygen(
 	btc api.Bitcoiner,
 	dbConn *sql.DB,
-	seeder coldwalletsrv.Seeder,
-	hdWallter coldwalletsrv.HDWalleter,
+	seeder coldsrv.Seeder,
+	hdWallter coldsrv.HDWalleter,
 	privKeyer keygensrv.PrivKeyer,
 	pubkeyImporter keygensrv.FullPubKeyImporter,
 	multisiger keygensrv.Multisiger,
 	addressExporter keygensrv.AddressExporter,
-	signer coldwalletsrv.Signer,
+	signer coldsrv.Signer,
 	wtype wallet.WalletType) *Keygen {
 
 	return &Keygen{

@@ -1,4 +1,4 @@
-package coldwalletsrv
+package coldsrv
 
 import (
 	"fmt"

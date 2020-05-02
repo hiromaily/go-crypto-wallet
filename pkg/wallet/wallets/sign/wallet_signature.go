@@ -7,8 +7,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwalletsrv"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwalletsrv/signsrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldsrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldsrv/signsrv"
 )
 
 // Sign is sign wallet object
@@ -17,11 +17,11 @@ type Sign struct {
 	dbConn      *sql.DB
 	authAccount account.AuthType
 	wtype       wallet.WalletType
-	coldwalletsrv.Seeder
-	coldwalletsrv.HDWalleter
+	coldsrv.Seeder
+	coldsrv.HDWalleter
 	signsrv.PrivKeyer
 	signsrv.FullPubkeyExporter
-	coldwalletsrv.Signer
+	coldsrv.Signer
 }
 
 // NewSign returns Sign object
@@ -30,11 +30,11 @@ func NewSign(
 	btc api.Bitcoiner,
 	dbConn *sql.DB,
 	authAccount account.AuthType,
-	seeder coldwalletsrv.Seeder,
-	hdWallter coldwalletsrv.HDWalleter,
+	seeder coldsrv.Seeder,
+	hdWallter coldsrv.HDWalleter,
 	privKeyer signsrv.PrivKeyer,
 	fullPubkeyExporter signsrv.FullPubkeyExporter,
-	signer coldwalletsrv.Signer,
+	signer coldsrv.Signer,
 	wtype wallet.WalletType) *Sign {
 
 	return &Sign{
