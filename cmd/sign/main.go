@@ -34,7 +34,7 @@ import (
 var (
 	walletType = wallet.WalletTypeSignature
 	appName    = walletType.String()
-	appVersion = "2.2.0"
+	appVersion = "2.3.0"
 	authName   = "" // this account is supposed to be embedded when building
 )
 
