@@ -5,13 +5,30 @@ type AccountType string
 
 // account_type
 const (
-	AccountTypeClient        AccountType = "client"    // users who created address
-	AccountTypeDeposit       AccountType = "deposit"   // this address is used as receiver for deposit
-	AccountTypePayment       AccountType = "payment"   // this address is used as sender for payment
-	AccountTypeStored        AccountType = "stored"    // this address is used as receiver to store huge amount of coin
-	AccountTypeAuthorization AccountType = "auth"      // authorization account for multisig address
-	AccountTypeAnonymous     AccountType = "anonymous" // payment receiver account
-	AccountTypeTest          AccountType = "test"      // unittest only
+	AccountTypeClient  AccountType = "client"  // users who created address
+	AccountTypeDeposit AccountType = "deposit" // this address is used as receiver for deposit
+	AccountTypePayment AccountType = "payment" // this address is used as sender for payment
+	AccountTypeStored  AccountType = "stored"  // this address is used as receiver to store huge amount of coin
+
+	AccountTypeAuthorization AccountType = "auth"   // authorization account for multisig address
+	AccountTypeAuth1         AccountType = "auth1"  // it's used for key creation
+	AccountTypeAuth2         AccountType = "auth2"  // it's used for key creation
+	AccountTypeAuth3         AccountType = "auth3"  // it's used for key creation
+	AccountTypeAuth4         AccountType = "auth4"  // it's used for key creation
+	AccountTypeAuth5         AccountType = "auth5"  // it's used for key creation
+	AccountTypeAuth6         AccountType = "auth6"  // it's used for key creation
+	AccountTypeAuth7         AccountType = "auth7"  // it's used for key creation
+	AccountTypeAuth8         AccountType = "auth8"  // it's used for key creation
+	AccountTypeAuth9         AccountType = "auth9"  // it's used for key creation
+	AccountTypeAuth10        AccountType = "auth10" // it's used for key creation
+	AccountTypeAuth11        AccountType = "auth11" // it's used for key creation
+	AccountTypeAuth12        AccountType = "auth12" // it's used for key creation
+	AccountTypeAuth13        AccountType = "auth13" // it's used for key creation
+	AccountTypeAuth14        AccountType = "auth14" // it's used for key creation
+	AccountTypeAuth15        AccountType = "auth15" // it's used for key creation
+
+	AccountTypeAnonymous AccountType = "anonymous" // payment receiver account
+	AccountTypeTest      AccountType = "test"      // unittest only
 )
 
 // String converter
@@ -52,11 +69,28 @@ func NotAllow(acnt string, accountList []AccountType) bool {
 
 // AccountTypeMap account_type mapper
 var AccountTypeMap = map[string]AccountType{
-	"client":    AccountTypeClient,
-	"deposit":   AccountTypeDeposit,
-	"payment":   AccountTypePayment,
-	"stored":    AccountTypeStored,
-	"auth":      AccountTypeAuthorization,
+	"client":  AccountTypeClient,
+	"deposit": AccountTypeDeposit,
+	"payment": AccountTypePayment,
+	"stored":  AccountTypeStored,
+
+	"auth":   AccountTypeAuthorization,
+	"auth1":  AccountTypeAuth1,
+	"auth2":  AccountTypeAuth2,
+	"auth3":  AccountTypeAuth3,
+	"auth4":  AccountTypeAuth4,
+	"auth5":  AccountTypeAuth5,
+	"auth6":  AccountTypeAuth6,
+	"auth7":  AccountTypeAuth7,
+	"auth8":  AccountTypeAuth8,
+	"auth9":  AccountTypeAuth9,
+	"auth10": AccountTypeAuth10,
+	"auth11": AccountTypeAuth11,
+	"auth12": AccountTypeAuth12,
+	"auth13": AccountTypeAuth13,
+	"auth14": AccountTypeAuth14,
+	"auth15": AccountTypeAuth15,
+
 	"anonymous": AccountTypeAnonymous,
 	"test":      AccountTypeTest,
 }
@@ -70,14 +104,37 @@ func ValidateAccountType(v string) bool {
 }
 
 // AccountTypeValue account_type value
+// Note: if key is not found, value is 0
 var AccountTypeValue = map[AccountType]uint32{
 	AccountTypeClient:        0,
 	AccountTypeDeposit:       1,
 	AccountTypePayment:       2,
 	AccountTypeStored:        3,
-	AccountTypeAuthorization: 4,
-	AccountTypeAnonymous:     99,
-	AccountTypeTest:          100,
+
+	AccountTypeAuthorization: 10,
+	AccountTypeAuth1: 11,
+	AccountTypeAuth2: 12,
+	AccountTypeAuth3: 13,
+	AccountTypeAuth4: 14,
+	AccountTypeAuth5: 15,
+	AccountTypeAuth6: 16,
+	AccountTypeAuth7: 17,
+	AccountTypeAuth8: 18,
+	AccountTypeAuth9: 19,
+	AccountTypeAuth10: 20,
+	AccountTypeAuth11: 21,
+	AccountTypeAuth12: 22,
+	AccountTypeAuth13: 23,
+	AccountTypeAuth14: 24,
+	AccountTypeAuth15: 25,
+
+	AccountTypeAnonymous: 99,
+	AccountTypeTest:      100,
+}
+
+// String converter
+func (a AccountType) Uint32() uint32 {
+	return AccountTypeValue[a]
 }
 
 //----------------------------------------------------
@@ -139,6 +196,10 @@ func (a AuthType) String() string {
 	return string(a)
 }
 
+func (a AuthType) AccountType() AccountType {
+	return AccountTypeMap[a.String()]
+}
+
 //----------------------------------------------------
 // Multisig address involved accounts
 //----------------------------------------------------
@@ -158,7 +219,7 @@ var MultisigAccounts = map[AccountType]map[int][]AuthType{
 
 // IsMultisigAccount validates Multisig account or not
 func IsMultisigAccount(v AccountType) bool {
-	if _, ok := AccountTypeMultisig[v]; ok {
+	if _, ok := MultisigAccounts[v]; ok {
 		return true
 	}
 	return false
@@ -166,16 +227,10 @@ func IsMultisigAccount(v AccountType) bool {
 
 // AccountTypeMultisig true: account type is for multisig address
 // TODO: this func should be replaced to IsMultisigAccount(accountType)
-var AccountTypeMultisig = map[AccountType]bool{
-	AccountTypeClient:        false,
-	AccountTypeDeposit:       true,
-	AccountTypePayment:       true,
-	AccountTypeStored:        true,
-	AccountTypeAuthorization: false,
-}
-
-// TODO: not implemented
-// Each of sign wallets have AuthType
-// Operator1 would have AuthType1
-// Operator2 would have AuthType2
-// And this information should be embedded when building sign wallet
+//var AccountTypeMultisig = map[AccountType]bool{
+//	AccountTypeClient:        false,
+//	AccountTypeDeposit:       true,
+//	AccountTypePayment:       true,
+//	AccountTypeStored:        true,
+//	AccountTypeAuthorization: false,
+//}

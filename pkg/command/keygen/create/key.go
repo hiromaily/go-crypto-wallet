@@ -25,7 +25,7 @@ func (c *KeyCommand) Synopsis() string {
 
 // Help returns usage for this subcommand
 func (c *KeyCommand) Help() string {
-	return `Usage: keygen key create key
+	return `Usage: keygen create key
 `
 }
 

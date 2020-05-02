@@ -40,12 +40,14 @@ func main() {
 	// command line
 	var (
 		confPath  string
+		btcWallet string
 		isHelp    bool
 		isVersion bool
 		walleter  wallets.Walleter
 	)
 	flags := flag.NewFlagSet("main", flag.ContinueOnError)
 	flags.StringVar(&confPath, "conf", os.Getenv("WATCH_WALLET_CONF"), "config file path")
+	flags.StringVar(&btcWallet, "wallet", "", "specify wallet in bitcoin core")
 	flags.BoolVar(&isVersion, "version", false, "show version")
 	flags.BoolVar(&isHelp, "help", false, "show help")
 	if err := flags.Parse(os.Args[1:]); err != nil {
@@ -65,6 +67,12 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		// override conf.Bitcoin.Host
+		if btcWallet != "" {
+			conf.Bitcoin.Host = fmt.Sprintf("%s/wallet/%s", conf.Bitcoin.Host, btcWallet)
+		}
+		log.Println("conf.Bitcoin.Host:", conf.Bitcoin.Host)
+
 		// create wallet
 		regi := NewRegistry(conf, walletType)
 		walleter = regi.NewWalleter()

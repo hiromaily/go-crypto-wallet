@@ -22,19 +22,19 @@ import (
 	"github.com/volatiletech/sqlboiler/strmangle"
 )
 
-// AuthPubKey is an object representing the database table.
-type AuthPubKey struct {
+// AuthFullpubkey is an object representing the database table.
+type AuthFullpubkey struct {
 	ID            int16     `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Coin          string    `boil:"coin" json:"coin" toml:"coin" yaml:"coin"`
 	AuthAccount   string    `boil:"auth_account" json:"auth_account" toml:"auth_account" yaml:"auth_account"`
 	FullPublicKey string    `boil:"full_public_key" json:"full_public_key" toml:"full_public_key" yaml:"full_public_key"`
 	UpdatedAt     null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
-	R *authPubKeyR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L authPubKeyL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	R *authFullpubkeyR `boil:"-" json:"-" toml:"-" yaml:"-"`
+	L authFullpubkeyL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
-var AuthPubKeyColumns = struct {
+var AuthFullpubkeyColumns = struct {
 	ID            string
 	Coin          string
 	AuthAccount   string
@@ -50,64 +50,64 @@ var AuthPubKeyColumns = struct {
 
 // Generated where
 
-var AuthPubKeyWhere = struct {
+var AuthFullpubkeyWhere = struct {
 	ID            whereHelperint16
 	Coin          whereHelperstring
 	AuthAccount   whereHelperstring
 	FullPublicKey whereHelperstring
 	UpdatedAt     whereHelpernull_Time
 }{
-	ID:            whereHelperint16{field: "`auth_pub_key`.`id`"},
-	Coin:          whereHelperstring{field: "`auth_pub_key`.`coin`"},
-	AuthAccount:   whereHelperstring{field: "`auth_pub_key`.`auth_account`"},
-	FullPublicKey: whereHelperstring{field: "`auth_pub_key`.`full_public_key`"},
-	UpdatedAt:     whereHelpernull_Time{field: "`auth_pub_key`.`updated_at`"},
+	ID:            whereHelperint16{field: "`auth_fullpubkey`.`id`"},
+	Coin:          whereHelperstring{field: "`auth_fullpubkey`.`coin`"},
+	AuthAccount:   whereHelperstring{field: "`auth_fullpubkey`.`auth_account`"},
+	FullPublicKey: whereHelperstring{field: "`auth_fullpubkey`.`full_public_key`"},
+	UpdatedAt:     whereHelpernull_Time{field: "`auth_fullpubkey`.`updated_at`"},
 }
 
-// AuthPubKeyRels is where relationship names are stored.
-var AuthPubKeyRels = struct {
+// AuthFullpubkeyRels is where relationship names are stored.
+var AuthFullpubkeyRels = struct {
 }{}
 
-// authPubKeyR is where relationships are stored.
-type authPubKeyR struct {
+// authFullpubkeyR is where relationships are stored.
+type authFullpubkeyR struct {
 }
 
 // NewStruct creates a new relationship struct
-func (*authPubKeyR) NewStruct() *authPubKeyR {
-	return &authPubKeyR{}
+func (*authFullpubkeyR) NewStruct() *authFullpubkeyR {
+	return &authFullpubkeyR{}
 }
 
-// authPubKeyL is where Load methods for each relationship are stored.
-type authPubKeyL struct{}
+// authFullpubkeyL is where Load methods for each relationship are stored.
+type authFullpubkeyL struct{}
 
 var (
-	authPubKeyAllColumns            = []string{"id", "coin", "auth_account", "full_public_key", "updated_at"}
-	authPubKeyColumnsWithoutDefault = []string{"coin", "auth_account", "full_public_key"}
-	authPubKeyColumnsWithDefault    = []string{"id", "updated_at"}
-	authPubKeyPrimaryKeyColumns     = []string{"id"}
+	authFullpubkeyAllColumns            = []string{"id", "coin", "auth_account", "full_public_key", "updated_at"}
+	authFullpubkeyColumnsWithoutDefault = []string{"coin", "auth_account", "full_public_key"}
+	authFullpubkeyColumnsWithDefault    = []string{"id", "updated_at"}
+	authFullpubkeyPrimaryKeyColumns     = []string{"id"}
 )
 
 type (
-	// AuthPubKeySlice is an alias for a slice of pointers to AuthPubKey.
-	// This should generally be used opposed to []AuthPubKey.
-	AuthPubKeySlice []*AuthPubKey
+	// AuthFullpubkeySlice is an alias for a slice of pointers to AuthFullpubkey.
+	// This should generally be used opposed to []AuthFullpubkey.
+	AuthFullpubkeySlice []*AuthFullpubkey
 
-	authPubKeyQuery struct {
+	authFullpubkeyQuery struct {
 		*queries.Query
 	}
 )
 
 // Cache for insert, update and upsert
 var (
-	authPubKeyType                 = reflect.TypeOf(&AuthPubKey{})
-	authPubKeyMapping              = queries.MakeStructMapping(authPubKeyType)
-	authPubKeyPrimaryKeyMapping, _ = queries.BindMapping(authPubKeyType, authPubKeyMapping, authPubKeyPrimaryKeyColumns)
-	authPubKeyInsertCacheMut       sync.RWMutex
-	authPubKeyInsertCache          = make(map[string]insertCache)
-	authPubKeyUpdateCacheMut       sync.RWMutex
-	authPubKeyUpdateCache          = make(map[string]updateCache)
-	authPubKeyUpsertCacheMut       sync.RWMutex
-	authPubKeyUpsertCache          = make(map[string]insertCache)
+	authFullpubkeyType                 = reflect.TypeOf(&AuthFullpubkey{})
+	authFullpubkeyMapping              = queries.MakeStructMapping(authFullpubkeyType)
+	authFullpubkeyPrimaryKeyMapping, _ = queries.BindMapping(authFullpubkeyType, authFullpubkeyMapping, authFullpubkeyPrimaryKeyColumns)
+	authFullpubkeyInsertCacheMut       sync.RWMutex
+	authFullpubkeyInsertCache          = make(map[string]insertCache)
+	authFullpubkeyUpdateCacheMut       sync.RWMutex
+	authFullpubkeyUpdateCache          = make(map[string]updateCache)
+	authFullpubkeyUpsertCacheMut       sync.RWMutex
+	authFullpubkeyUpsertCache          = make(map[string]insertCache)
 )
 
 var (
@@ -118,9 +118,9 @@ var (
 	_ = qmhelper.Where
 )
 
-// One returns a single authPubKey record from the query.
-func (q authPubKeyQuery) One(ctx context.Context, exec boil.ContextExecutor) (*AuthPubKey, error) {
-	o := &AuthPubKey{}
+// One returns a single authFullpubkey record from the query.
+func (q authFullpubkeyQuery) One(ctx context.Context, exec boil.ContextExecutor) (*AuthFullpubkey, error) {
+	o := &AuthFullpubkey{}
 
 	queries.SetLimit(q.Query, 1)
 
@@ -129,26 +129,26 @@ func (q authPubKeyQuery) One(ctx context.Context, exec boil.ContextExecutor) (*A
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: failed to execute a one query for auth_pub_key")
+		return nil, errors.Wrap(err, "models: failed to execute a one query for auth_fullpubkey")
 	}
 
 	return o, nil
 }
 
-// All returns all AuthPubKey records from the query.
-func (q authPubKeyQuery) All(ctx context.Context, exec boil.ContextExecutor) (AuthPubKeySlice, error) {
-	var o []*AuthPubKey
+// All returns all AuthFullpubkey records from the query.
+func (q authFullpubkeyQuery) All(ctx context.Context, exec boil.ContextExecutor) (AuthFullpubkeySlice, error) {
+	var o []*AuthFullpubkey
 
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
-		return nil, errors.Wrap(err, "models: failed to assign all query results to AuthPubKey slice")
+		return nil, errors.Wrap(err, "models: failed to assign all query results to AuthFullpubkey slice")
 	}
 
 	return o, nil
 }
 
-// Count returns the count of all AuthPubKey records in the query.
-func (q authPubKeyQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+// Count returns the count of all AuthFullpubkey records in the query.
+func (q authFullpubkeyQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -156,14 +156,14 @@ func (q authPubKeyQuery) Count(ctx context.Context, exec boil.ContextExecutor) (
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to count auth_pub_key rows")
+		return 0, errors.Wrap(err, "models: failed to count auth_fullpubkey rows")
 	}
 
 	return count, nil
 }
 
 // Exists checks if the row exists in the table.
-func (q authPubKeyQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
+func (q authFullpubkeyQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -172,49 +172,49 @@ func (q authPubKeyQuery) Exists(ctx context.Context, exec boil.ContextExecutor) 
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return false, errors.Wrap(err, "models: failed to check if auth_pub_key exists")
+		return false, errors.Wrap(err, "models: failed to check if auth_fullpubkey exists")
 	}
 
 	return count > 0, nil
 }
 
-// AuthPubKeys retrieves all the records using an executor.
-func AuthPubKeys(mods ...qm.QueryMod) authPubKeyQuery {
-	mods = append(mods, qm.From("`auth_pub_key`"))
-	return authPubKeyQuery{NewQuery(mods...)}
+// AuthFullpubkeys retrieves all the records using an executor.
+func AuthFullpubkeys(mods ...qm.QueryMod) authFullpubkeyQuery {
+	mods = append(mods, qm.From("`auth_fullpubkey`"))
+	return authFullpubkeyQuery{NewQuery(mods...)}
 }
 
-// FindAuthPubKey retrieves a single record by ID with an executor.
+// FindAuthFullpubkey retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindAuthPubKey(ctx context.Context, exec boil.ContextExecutor, iD int16, selectCols ...string) (*AuthPubKey, error) {
-	authPubKeyObj := &AuthPubKey{}
+func FindAuthFullpubkey(ctx context.Context, exec boil.ContextExecutor, iD int16, selectCols ...string) (*AuthFullpubkey, error) {
+	authFullpubkeyObj := &AuthFullpubkey{}
 
 	sel := "*"
 	if len(selectCols) > 0 {
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from `auth_pub_key` where `id`=?", sel,
+		"select %s from `auth_fullpubkey` where `id`=?", sel,
 	)
 
 	q := queries.Raw(query, iD)
 
-	err := q.Bind(ctx, exec, authPubKeyObj)
+	err := q.Bind(ctx, exec, authFullpubkeyObj)
 	if err != nil {
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: unable to select from auth_pub_key")
+		return nil, errors.Wrap(err, "models: unable to select from auth_fullpubkey")
 	}
 
-	return authPubKeyObj, nil
+	return authFullpubkeyObj, nil
 }
 
 // Insert a single record using an executor.
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
-func (o *AuthPubKey) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+func (o *AuthFullpubkey) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no auth_pub_key provided for insertion")
+		return errors.New("models: no auth_fullpubkey provided for insertion")
 	}
 
 	var err error
@@ -226,39 +226,39 @@ func (o *AuthPubKey) Insert(ctx context.Context, exec boil.ContextExecutor, colu
 		}
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(authPubKeyColumnsWithDefault, o)
+	nzDefaults := queries.NonZeroDefaultSet(authFullpubkeyColumnsWithDefault, o)
 
 	key := makeCacheKey(columns, nzDefaults)
-	authPubKeyInsertCacheMut.RLock()
-	cache, cached := authPubKeyInsertCache[key]
-	authPubKeyInsertCacheMut.RUnlock()
+	authFullpubkeyInsertCacheMut.RLock()
+	cache, cached := authFullpubkeyInsertCache[key]
+	authFullpubkeyInsertCacheMut.RUnlock()
 
 	if !cached {
 		wl, returnColumns := columns.InsertColumnSet(
-			authPubKeyAllColumns,
-			authPubKeyColumnsWithDefault,
-			authPubKeyColumnsWithoutDefault,
+			authFullpubkeyAllColumns,
+			authFullpubkeyColumnsWithDefault,
+			authFullpubkeyColumnsWithoutDefault,
 			nzDefaults,
 		)
 
-		cache.valueMapping, err = queries.BindMapping(authPubKeyType, authPubKeyMapping, wl)
+		cache.valueMapping, err = queries.BindMapping(authFullpubkeyType, authFullpubkeyMapping, wl)
 		if err != nil {
 			return err
 		}
-		cache.retMapping, err = queries.BindMapping(authPubKeyType, authPubKeyMapping, returnColumns)
+		cache.retMapping, err = queries.BindMapping(authFullpubkeyType, authFullpubkeyMapping, returnColumns)
 		if err != nil {
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO `auth_pub_key` (`%s`) %%sVALUES (%s)%%s", strings.Join(wl, "`,`"), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO `auth_fullpubkey` (`%s`) %%sVALUES (%s)%%s", strings.Join(wl, "`,`"), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO `auth_pub_key` () VALUES ()%s%s"
+			cache.query = "INSERT INTO `auth_fullpubkey` () VALUES ()%s%s"
 		}
 
 		var queryOutput, queryReturning string
 
 		if len(cache.retMapping) != 0 {
-			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `auth_pub_key` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, authPubKeyPrimaryKeyColumns))
+			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `auth_fullpubkey` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, authFullpubkeyPrimaryKeyColumns))
 		}
 
 		cache.query = fmt.Sprintf(cache.query, queryOutput, queryReturning)
@@ -275,7 +275,7 @@ func (o *AuthPubKey) Insert(ctx context.Context, exec boil.ContextExecutor, colu
 	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
-		return errors.Wrap(err, "models: unable to insert into auth_pub_key")
+		return errors.Wrap(err, "models: unable to insert into auth_fullpubkey")
 	}
 
 	var lastID int64
@@ -291,7 +291,7 @@ func (o *AuthPubKey) Insert(ctx context.Context, exec boil.ContextExecutor, colu
 	}
 
 	o.ID = int16(lastID)
-	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == authPubKeyMapping["id"] {
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == authFullpubkeyMapping["id"] {
 		goto CacheNoHooks
 	}
 
@@ -306,23 +306,23 @@ func (o *AuthPubKey) Insert(ctx context.Context, exec boil.ContextExecutor, colu
 	}
 	err = exec.QueryRowContext(ctx, cache.retQuery, identifierCols...).Scan(queries.PtrsFromMapping(value, cache.retMapping)...)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to populate default values for auth_pub_key")
+		return errors.Wrap(err, "models: unable to populate default values for auth_fullpubkey")
 	}
 
 CacheNoHooks:
 	if !cached {
-		authPubKeyInsertCacheMut.Lock()
-		authPubKeyInsertCache[key] = cache
-		authPubKeyInsertCacheMut.Unlock()
+		authFullpubkeyInsertCacheMut.Lock()
+		authFullpubkeyInsertCache[key] = cache
+		authFullpubkeyInsertCacheMut.Unlock()
 	}
 
 	return nil
 }
 
-// Update uses an executor to update the AuthPubKey.
+// Update uses an executor to update the AuthFullpubkey.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
-func (o *AuthPubKey) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+func (o *AuthFullpubkey) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
 
@@ -331,28 +331,28 @@ func (o *AuthPubKey) Update(ctx context.Context, exec boil.ContextExecutor, colu
 
 	var err error
 	key := makeCacheKey(columns, nil)
-	authPubKeyUpdateCacheMut.RLock()
-	cache, cached := authPubKeyUpdateCache[key]
-	authPubKeyUpdateCacheMut.RUnlock()
+	authFullpubkeyUpdateCacheMut.RLock()
+	cache, cached := authFullpubkeyUpdateCache[key]
+	authFullpubkeyUpdateCacheMut.RUnlock()
 
 	if !cached {
 		wl := columns.UpdateColumnSet(
-			authPubKeyAllColumns,
-			authPubKeyPrimaryKeyColumns,
+			authFullpubkeyAllColumns,
+			authFullpubkeyPrimaryKeyColumns,
 		)
 
 		if !columns.IsWhitelist() {
 			wl = strmangle.SetComplement(wl, []string{"created_at"})
 		}
 		if len(wl) == 0 {
-			return 0, errors.New("models: unable to update auth_pub_key, could not build whitelist")
+			return 0, errors.New("models: unable to update auth_fullpubkey, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE `auth_pub_key` SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE `auth_fullpubkey` SET %s WHERE %s",
 			strmangle.SetParamNames("`", "`", 0, wl),
-			strmangle.WhereClause("`", "`", 0, authPubKeyPrimaryKeyColumns),
+			strmangle.WhereClause("`", "`", 0, authFullpubkeyPrimaryKeyColumns),
 		)
-		cache.valueMapping, err = queries.BindMapping(authPubKeyType, authPubKeyMapping, append(wl, authPubKeyPrimaryKeyColumns...))
+		cache.valueMapping, err = queries.BindMapping(authFullpubkeyType, authFullpubkeyMapping, append(wl, authFullpubkeyPrimaryKeyColumns...))
 		if err != nil {
 			return 0, err
 		}
@@ -368,42 +368,42 @@ func (o *AuthPubKey) Update(ctx context.Context, exec boil.ContextExecutor, colu
 	var result sql.Result
 	result, err = exec.ExecContext(ctx, cache.query, values...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update auth_pub_key row")
+		return 0, errors.Wrap(err, "models: unable to update auth_fullpubkey row")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by update for auth_pub_key")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by update for auth_fullpubkey")
 	}
 
 	if !cached {
-		authPubKeyUpdateCacheMut.Lock()
-		authPubKeyUpdateCache[key] = cache
-		authPubKeyUpdateCacheMut.Unlock()
+		authFullpubkeyUpdateCacheMut.Lock()
+		authFullpubkeyUpdateCache[key] = cache
+		authFullpubkeyUpdateCacheMut.Unlock()
 	}
 
 	return rowsAff, nil
 }
 
 // UpdateAll updates all rows with the specified column values.
-func (q authPubKeyQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (q authFullpubkeyQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all for auth_pub_key")
+		return 0, errors.Wrap(err, "models: unable to update all for auth_fullpubkey")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected for auth_pub_key")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected for auth_fullpubkey")
 	}
 
 	return rowsAff, nil
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
-func (o AuthPubKeySlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (o AuthFullpubkeySlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	ln := int64(len(o))
 	if ln == 0 {
 		return 0, nil
@@ -425,13 +425,13 @@ func (o AuthPubKeySlice) UpdateAll(ctx context.Context, exec boil.ContextExecuto
 
 	// Append all of the primary key values for each column
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), authPubKeyPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), authFullpubkeyPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE `auth_pub_key` SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE `auth_fullpubkey` SET %s WHERE %s",
 		strmangle.SetParamNames("`", "`", 0, colNames),
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, authPubKeyPrimaryKeyColumns, len(o)))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, authFullpubkeyPrimaryKeyColumns, len(o)))
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -440,26 +440,26 @@ func (o AuthPubKeySlice) UpdateAll(ctx context.Context, exec boil.ContextExecuto
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all in authPubKey slice")
+		return 0, errors.Wrap(err, "models: unable to update all in authFullpubkey slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all authPubKey")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all authFullpubkey")
 	}
 	return rowsAff, nil
 }
 
-var mySQLAuthPubKeyUniqueColumns = []string{
+var mySQLAuthFullpubkeyUniqueColumns = []string{
 	"id",
 	"full_public_key",
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
-func (o *AuthPubKey) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
+func (o *AuthFullpubkey) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no auth_pub_key provided for upsert")
+		return errors.New("models: no auth_fullpubkey provided for upsert")
 	}
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
@@ -467,8 +467,8 @@ func (o *AuthPubKey) Upsert(ctx context.Context, exec boil.ContextExecutor, upda
 		queries.SetScanner(&o.UpdatedAt, currTime)
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(authPubKeyColumnsWithDefault, o)
-	nzUniques := queries.NonZeroDefaultSet(mySQLAuthPubKeyUniqueColumns, o)
+	nzDefaults := queries.NonZeroDefaultSet(authFullpubkeyColumnsWithDefault, o)
+	nzUniques := queries.NonZeroDefaultSet(mySQLAuthFullpubkeyUniqueColumns, o)
 
 	if len(nzUniques) == 0 {
 		return errors.New("cannot upsert with a table that cannot conflict on a unique column")
@@ -496,42 +496,42 @@ func (o *AuthPubKey) Upsert(ctx context.Context, exec boil.ContextExecutor, upda
 	key := buf.String()
 	strmangle.PutBuffer(buf)
 
-	authPubKeyUpsertCacheMut.RLock()
-	cache, cached := authPubKeyUpsertCache[key]
-	authPubKeyUpsertCacheMut.RUnlock()
+	authFullpubkeyUpsertCacheMut.RLock()
+	cache, cached := authFullpubkeyUpsertCache[key]
+	authFullpubkeyUpsertCacheMut.RUnlock()
 
 	var err error
 
 	if !cached {
 		insert, ret := insertColumns.InsertColumnSet(
-			authPubKeyAllColumns,
-			authPubKeyColumnsWithDefault,
-			authPubKeyColumnsWithoutDefault,
+			authFullpubkeyAllColumns,
+			authFullpubkeyColumnsWithDefault,
+			authFullpubkeyColumnsWithoutDefault,
 			nzDefaults,
 		)
 		update := updateColumns.UpdateColumnSet(
-			authPubKeyAllColumns,
-			authPubKeyPrimaryKeyColumns,
+			authFullpubkeyAllColumns,
+			authFullpubkeyPrimaryKeyColumns,
 		)
 
 		if len(update) == 0 {
-			return errors.New("models: unable to upsert auth_pub_key, could not build update column list")
+			return errors.New("models: unable to upsert auth_fullpubkey, could not build update column list")
 		}
 
 		ret = strmangle.SetComplement(ret, nzUniques)
-		cache.query = buildUpsertQueryMySQL(dialect, "auth_pub_key", update, insert)
+		cache.query = buildUpsertQueryMySQL(dialect, "auth_fullpubkey", update, insert)
 		cache.retQuery = fmt.Sprintf(
-			"SELECT %s FROM `auth_pub_key` WHERE %s",
+			"SELECT %s FROM `auth_fullpubkey` WHERE %s",
 			strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, ret), ","),
 			strmangle.WhereClause("`", "`", 0, nzUniques),
 		)
 
-		cache.valueMapping, err = queries.BindMapping(authPubKeyType, authPubKeyMapping, insert)
+		cache.valueMapping, err = queries.BindMapping(authFullpubkeyType, authFullpubkeyMapping, insert)
 		if err != nil {
 			return err
 		}
 		if len(ret) != 0 {
-			cache.retMapping, err = queries.BindMapping(authPubKeyType, authPubKeyMapping, ret)
+			cache.retMapping, err = queries.BindMapping(authFullpubkeyType, authFullpubkeyMapping, ret)
 			if err != nil {
 				return err
 			}
@@ -553,7 +553,7 @@ func (o *AuthPubKey) Upsert(ctx context.Context, exec boil.ContextExecutor, upda
 	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
-		return errors.Wrap(err, "models: unable to upsert for auth_pub_key")
+		return errors.Wrap(err, "models: unable to upsert for auth_fullpubkey")
 	}
 
 	var lastID int64
@@ -570,13 +570,13 @@ func (o *AuthPubKey) Upsert(ctx context.Context, exec boil.ContextExecutor, upda
 	}
 
 	o.ID = int16(lastID)
-	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == authPubKeyMapping["id"] {
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == authFullpubkeyMapping["id"] {
 		goto CacheNoHooks
 	}
 
-	uniqueMap, err = queries.BindMapping(authPubKeyType, authPubKeyMapping, nzUniques)
+	uniqueMap, err = queries.BindMapping(authFullpubkeyType, authFullpubkeyMapping, nzUniques)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to retrieve unique values for auth_pub_key")
+		return errors.Wrap(err, "models: unable to retrieve unique values for auth_fullpubkey")
 	}
 	nzUniqueCols = queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), uniqueMap)
 
@@ -587,28 +587,28 @@ func (o *AuthPubKey) Upsert(ctx context.Context, exec boil.ContextExecutor, upda
 	}
 	err = exec.QueryRowContext(ctx, cache.retQuery, nzUniqueCols...).Scan(returns...)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to populate default values for auth_pub_key")
+		return errors.Wrap(err, "models: unable to populate default values for auth_fullpubkey")
 	}
 
 CacheNoHooks:
 	if !cached {
-		authPubKeyUpsertCacheMut.Lock()
-		authPubKeyUpsertCache[key] = cache
-		authPubKeyUpsertCacheMut.Unlock()
+		authFullpubkeyUpsertCacheMut.Lock()
+		authFullpubkeyUpsertCache[key] = cache
+		authFullpubkeyUpsertCacheMut.Unlock()
 	}
 
 	return nil
 }
 
-// Delete deletes a single AuthPubKey record with an executor.
+// Delete deletes a single AuthFullpubkey record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *AuthPubKey) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *AuthFullpubkey) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("models: no AuthPubKey provided for delete")
+		return 0, errors.New("models: no AuthFullpubkey provided for delete")
 	}
 
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), authPubKeyPrimaryKeyMapping)
-	sql := "DELETE FROM `auth_pub_key` WHERE `id`=?"
+	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), authFullpubkeyPrimaryKeyMapping)
+	sql := "DELETE FROM `auth_fullpubkey` WHERE `id`=?"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -617,52 +617,52 @@ func (o *AuthPubKey) Delete(ctx context.Context, exec boil.ContextExecutor) (int
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete from auth_pub_key")
+		return 0, errors.Wrap(err, "models: unable to delete from auth_fullpubkey")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for auth_pub_key")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for auth_fullpubkey")
 	}
 
 	return rowsAff, nil
 }
 
 // DeleteAll deletes all matching rows.
-func (q authPubKeyQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q authFullpubkeyQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if q.Query == nil {
-		return 0, errors.New("models: no authPubKeyQuery provided for delete all")
+		return 0, errors.New("models: no authFullpubkeyQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from auth_pub_key")
+		return 0, errors.Wrap(err, "models: unable to delete all from auth_fullpubkey")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for auth_pub_key")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for auth_fullpubkey")
 	}
 
 	return rowsAff, nil
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o AuthPubKeySlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o AuthFullpubkeySlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if len(o) == 0 {
 		return 0, nil
 	}
 
 	var args []interface{}
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), authPubKeyPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), authFullpubkeyPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM `auth_pub_key` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, authPubKeyPrimaryKeyColumns, len(o))
+	sql := "DELETE FROM `auth_fullpubkey` WHERE " +
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, authFullpubkeyPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -671,12 +671,12 @@ func (o AuthPubKeySlice) DeleteAll(ctx context.Context, exec boil.ContextExecuto
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from authPubKey slice")
+		return 0, errors.Wrap(err, "models: unable to delete all from authFullpubkey slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for auth_pub_key")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for auth_fullpubkey")
 	}
 
 	return rowsAff, nil
@@ -684,8 +684,8 @@ func (o AuthPubKeySlice) DeleteAll(ctx context.Context, exec boil.ContextExecuto
 
 // Reload refetches the object from the database
 // using the primary keys with an executor.
-func (o *AuthPubKey) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindAuthPubKey(ctx, exec, o.ID)
+func (o *AuthFullpubkey) Reload(ctx context.Context, exec boil.ContextExecutor) error {
+	ret, err := FindAuthFullpubkey(ctx, exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -696,26 +696,26 @@ func (o *AuthPubKey) Reload(ctx context.Context, exec boil.ContextExecutor) erro
 
 // ReloadAll refetches every row with matching primary key column values
 // and overwrites the original object slice with the newly updated slice.
-func (o *AuthPubKeySlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
+func (o *AuthFullpubkeySlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
 	if o == nil || len(*o) == 0 {
 		return nil
 	}
 
-	slice := AuthPubKeySlice{}
+	slice := AuthFullpubkeySlice{}
 	var args []interface{}
 	for _, obj := range *o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), authPubKeyPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), authFullpubkeyPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT `auth_pub_key`.* FROM `auth_pub_key` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, authPubKeyPrimaryKeyColumns, len(*o))
+	sql := "SELECT `auth_fullpubkey`.* FROM `auth_fullpubkey` WHERE " +
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, authFullpubkeyPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
 
 	err := q.Bind(ctx, exec, &slice)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to reload all in AuthPubKeySlice")
+		return errors.Wrap(err, "models: unable to reload all in AuthFullpubkeySlice")
 	}
 
 	*o = slice
@@ -723,10 +723,10 @@ func (o *AuthPubKeySlice) ReloadAll(ctx context.Context, exec boil.ContextExecut
 	return nil
 }
 
-// AuthPubKeyExists checks if the AuthPubKey row exists.
-func AuthPubKeyExists(ctx context.Context, exec boil.ContextExecutor, iD int16) (bool, error) {
+// AuthFullpubkeyExists checks if the AuthFullpubkey row exists.
+func AuthFullpubkeyExists(ctx context.Context, exec boil.ContextExecutor, iD int16) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from `auth_pub_key` where `id`=? limit 1)"
+	sql := "select exists(select 1 from `auth_fullpubkey` where `id`=? limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -737,19 +737,18 @@ func AuthPubKeyExists(ctx context.Context, exec boil.ContextExecutor, iD int16) 
 
 	err := row.Scan(&exists)
 	if err != nil {
-		return false, errors.Wrap(err, "models: unable to check if auth_pub_key exists")
+		return false, errors.Wrap(err, "models: unable to check if auth_fullpubkey exists")
 	}
 
 	return exists, nil
 }
 
 // InsertAll inserts all rows with the specified column values, using an executor.
-func (o AuthPubKeySlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+func (o AuthFullpubkeySlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	ln := int64(len(o))
 	if ln == 0 {
 		return nil
 	}
-
 	var sql string
 	vals := []interface{}{}
 	for i, row := range o {
@@ -761,21 +760,21 @@ func (o AuthPubKeySlice) InsertAll(ctx context.Context, exec boil.ContextExecuto
 			}
 		}
 
-		nzDefaults := queries.NonZeroDefaultSet(authPubKeyColumnsWithDefault, row)
+		nzDefaults := queries.NonZeroDefaultSet(authFullpubkeyColumnsWithDefault, row)
 		wl, _ := columns.InsertColumnSet(
-			authPubKeyAllColumns,
-			authPubKeyColumnsWithDefault,
-			authPubKeyColumnsWithoutDefault,
+			authFullpubkeyAllColumns,
+			authFullpubkeyColumnsWithDefault,
+			authFullpubkeyColumnsWithoutDefault,
 			nzDefaults,
 		)
 		if i == 0 {
-			sql = "INSERT INTO `auth_pub_key` " + "(`" + strings.Join(wl, "`,`") + "`)" + " VALUES "
+			sql = "INSERT INTO `auth_fullpubkey` " + "(`" + strings.Join(wl, "`,`") + "`)" + " VALUES "
 		}
 		sql += strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), len(vals)+1, len(wl))
 		if i != len(o)-1 {
 			sql += ","
 		}
-		valMapping, err := queries.BindMapping(authPubKeyType, authPubKeyMapping, wl)
+		valMapping, err := queries.BindMapping(authFullpubkeyType, authFullpubkeyMapping, wl)
 		if err != nil {
 			return err
 		}
@@ -789,7 +788,7 @@ func (o AuthPubKeySlice) InsertAll(ctx context.Context, exec boil.ContextExecuto
 
 	_, err := exec.ExecContext(ctx, sql, vals...)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to insert into auth_pub_key")
+		return errors.Wrap(err, "models: unable to insert into auth_fullpubkey")
 	}
 
 	return nil

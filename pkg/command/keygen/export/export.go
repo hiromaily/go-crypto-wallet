@@ -24,8 +24,7 @@ func (c *ExportCommand) Synopsis() string {
 }
 
 var (
-	addressSynopsis  = "export generated PublicKey as csv file"
-	multisigSynopsis = "export multisig addresses as csv file"
+	addressSynopsis = "export generated PublicKey as csv file"
 )
 
 // Help returns usage for this subcommand
@@ -33,8 +32,7 @@ func (c *ExportCommand) Help() string {
 	return fmt.Sprintf(`Usage: keygen export [Subcommands...]
 Subcommands:
   address   %s
-  multisig  %s
-`, addressSynopsis, multisigSynopsis)
+`, addressSynopsis)
 }
 
 // Run executes this subcommand
@@ -52,14 +50,6 @@ func (c *ExportCommand) Run(args []string) int {
 			return &AddressCommand{
 				name:     "address",
 				synopsis: addressSynopsis,
-				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
-			}, nil
-		},
-		"multisig": func() (cli.Command, error) {
-			return &MultisigCommand{
-				name:     "multisig",
-				synopsis: multisigSynopsis,
 				ui:       command.ClolorUI(),
 				wallet:   c.Wallet,
 			}, nil

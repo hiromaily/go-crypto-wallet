@@ -5,6 +5,7 @@
 !cmd/signature
 data/tx/*
 data/pubkey/*.csv
+data/address/*.csv
 docker/grafana/*
 docker/btc/data1/testnet3/*
 docker/btc/data2/testnet3/*

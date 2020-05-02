@@ -35,11 +35,10 @@ type AddrStatus string
 
 // address_status for keygen wallet
 const (
-	AddrStatusHDKeyGenerated       AddrStatus = "generated"              // key is created by keygen wallet
-	AddrStatusPrivKeyImported      AddrStatus = "importprivkey"          // importprivkey is excuted
-	AddrStatusPubkeyExported       AddrStatus = "pubkey_exported"        // pubkey is exported
-	AddrStatusMultiAddressImported AddrStatus = "multi_address_imported" // multiadd is imported
-	AddrStatusAddressExported      AddrStatus = "address_exported"       // address is exported
+	AddrStatusHDKeyGenerated           AddrStatus = "hdkey_generated"
+	AddrStatusPrivKeyImported          AddrStatus = "privkey_imported"
+	AddrStatusMultisigAddressGenerated AddrStatus = "multisig_address_generated"
+	AddrStatusAddressExported          AddrStatus = "address_exported"
 )
 
 // String converter
@@ -54,11 +53,10 @@ func (a AddrStatus) Int8() int8 {
 
 // AddrStatusValue value
 var AddrStatusValue = map[AddrStatus]uint8{
-	AddrStatusHDKeyGenerated:       0,
-	AddrStatusPrivKeyImported:      1,
-	AddrStatusPubkeyExported:       2,
-	AddrStatusMultiAddressImported: 3,
-	AddrStatusAddressExported:      4,
+	AddrStatusHDKeyGenerated:           0,
+	AddrStatusPrivKeyImported:          1,
+	AddrStatusMultisigAddressGenerated: 2,
+	AddrStatusAddressExported:          3,
 }
 
 // ValidateAddrStatus validates AddrStatus

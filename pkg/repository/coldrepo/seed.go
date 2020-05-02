@@ -13,13 +13,14 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
-// SeedRepository is repository for seed table
-type SeedRepository interface {
+// SeedRepositorier is SeedRepository interface
+type SeedRepositorier interface {
 	GetOne() (*models.Seed, error)
 	Insert(strSeed string) error
 }
 
-type seedRepository struct {
+// SeedRepository is repository for seed table
+type SeedRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
@@ -27,8 +28,8 @@ type seedRepository struct {
 }
 
 // NewSeedRepository returns SeedRepository interface
-func NewSeedRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) SeedRepository {
-	return &seedRepository{
+func NewSeedRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *SeedRepository {
+	return &SeedRepository{
 		dbConn:       dbConn,
 		tableName:    "seed",
 		coinTypeCode: coinTypeCode,
@@ -37,8 +38,7 @@ func NewSeedRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *z
 }
 
 // GetOne returns one record
-// - replaced from GetSeedOne
-func (r *seedRepository) GetOne() (*models.Seed, error) {
+func (r *SeedRepository) GetOne() (*models.Seed, error) {
 	ctx := context.Background()
 
 	item, err := models.Seeds(
@@ -51,8 +51,7 @@ func (r *seedRepository) GetOne() (*models.Seed, error) {
 }
 
 // Insert inserts record
-// - replaced from InsertSeed()
-func (r *seedRepository) Insert(strSeed string) error {
+func (r *SeedRepository) Insert(strSeed string) error {
 	//set coin
 	item := &models.Seed{
 		Coin: r.coinTypeCode.String(),

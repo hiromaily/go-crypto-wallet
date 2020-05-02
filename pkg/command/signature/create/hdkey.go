@@ -7,7 +7,6 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
@@ -40,14 +39,14 @@ func (c *HDKeyCommand) Run(args []string) int {
 	}
 
 	// create seed
-	bSeed, err := c.wallet.GenerateSeed()
+	bSeed, err := c.wallet.Seed().Generate()
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call GenerateSeed() %+v", err))
 		return 1
 	}
 
 	// create key for hd wallet for Authorization account
-	keys, err := c.wallet.GeneratePubKey(account.AccountTypeAuthorization, bSeed, 1)
+	keys, err := c.wallet.HDWallet().Generate(c.wallet.GetAuthType().AccountType(), bSeed, 1)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call GenerateAccountKey() %+v", err))
 		return 1

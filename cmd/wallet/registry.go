@@ -153,7 +153,7 @@ func (r *registry) newMySQLClient() *sql.DB {
 	return r.mysqlClient
 }
 
-func (r *registry) newAddressFileStorager() address.Storager {
+func (r *registry) newAddressFileStorager() address.FileStorager {
 	return address.NewFileRepository(
 		r.conf.PubkeyFile.BasePath,
 		r.newLogger(),

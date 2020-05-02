@@ -26,7 +26,7 @@ func (c *HDKeyCommand) Synopsis() string {
 
 // Help returns usage for this subcommand
 func (c *HDKeyCommand) Help() string {
-	return `Usage: keygen key create hdkey [options...]
+	return `Usage: keygen create hdkey [options...]
 Options:
   -keynum   number of generating hd key
   -account  target account
@@ -63,14 +63,14 @@ func (c *HDKeyCommand) Run(args []string) int {
 	}
 
 	// create seed
-	bSeed, err := c.wallet.GenerateSeed()
+	bSeed, err := c.wallet.Seed().Generate()
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call GenerateSeed() %+v", err))
 		return 1
 	}
 
 	//generate key for hd wallet
-	keys, err := c.wallet.GeneratePubKey(account.AccountType(acnt), bSeed, uint32(keyNum))
+	keys, err := c.wallet.HDWallet().Generate(account.AccountType(acnt), bSeed, uint32(keyNum))
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call GenerateAccountKey() %+v", err))
 		return 1

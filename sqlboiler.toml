@@ -17,7 +17,7 @@ whitelist = [
     "address",
     "seed",
     "account_key",
-    "auth_pub_key",
+    "auth_fullpubkey",
     "auth_account_key"
 ]
 #tinyint_as_int = true

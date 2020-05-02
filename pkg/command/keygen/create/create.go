@@ -27,7 +27,7 @@ var (
 	keySynopsis      = "create one key for debug use"
 	hdkeySynopsis    = "create HD key"
 	seedSynopsis     = "create seed"
-	multisigSynopsis = "multisig address for debug use"
+	multisigSynopsis = "create multisig address"
 )
 
 // Help returns usage for this subcommand

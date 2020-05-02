@@ -96,9 +96,9 @@ func NewHDKey(purpose PurposeType, coinTypeCode coin.CoinTypeCode, conf *chaincf
 }
 
 // CreateKey create hd key
-func (k *HDKey) CreateKey(seed []byte, actType account.AccountType, idxFrom, count uint32) ([]WalletKey, error) {
+func (k *HDKey) CreateKey(seed []byte, accountType account.AccountType, idxFrom, count uint32) ([]WalletKey, error) {
 	// create privateKey, publicKey by account level
-	privKey, _, err := k.createKeyByAccount(seed, actType)
+	privKey, _, err := k.createKeyByAccount(seed, accountType)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call createKeyByAccount()")
 	}
@@ -107,7 +107,7 @@ func (k *HDKey) CreateKey(seed []byte, actType account.AccountType, idxFrom, cou
 }
 
 // createKeyByAccount create privateKey, publicKey by account level
-func (k *HDKey) createKeyByAccount(seed []byte, actType account.AccountType) (*hdkeychain.ExtendedKey, *hdkeychain.ExtendedKey, error) {
+func (k *HDKey) createKeyByAccount(seed []byte, accountType account.AccountType) (*hdkeychain.ExtendedKey, *hdkeychain.ExtendedKey, error) {
 
 	//Master
 	masterKey, err := hdkeychain.NewMaster(seed, k.conf)
@@ -125,7 +125,12 @@ func (k *HDKey) createKeyByAccount(seed []byte, actType account.AccountType) (*h
 		return nil, nil, err
 	}
 	//Account
-	accountPrivKey, err := coinType.Child(hdkeychain.HardenedKeyStart + account.AccountTypeValue[actType])
+	k.logger.Debug(
+		"create_key_by_account",
+		zap.String("account_type", accountType.String()),
+		zap.Uint32("account_value", accountType.Uint32()),
+	)
+	accountPrivKey, err := coinType.Child(hdkeychain.HardenedKeyStart + accountType.Uint32())
 	if err != nil {
 		return nil, nil, err
 	}

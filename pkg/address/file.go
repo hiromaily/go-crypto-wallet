@@ -14,9 +14,9 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 )
 
-// Storager address storage interface
-type Storager interface {
-	CreateFilePath(accountType account.AccountType, addrStatus uint8) string
+// FileStorager address storage interface
+type FileStorager interface {
+	CreateFilePath(accountType account.AccountType) string
 	ValidateFilePath(fileName string, accountType account.AccountType) error
 	ImportAddress(fileName string) ([]string, error)
 }
@@ -38,15 +38,15 @@ func NewFileRepository(filePath string, logger *zap.Logger) *FileRepository {
 // CreateFilePath create file path for csv file
 // Format:
 //  - ./data/pubkey/client_1534744535097796209.csv
-func (r *FileRepository) CreateFilePath(accountType account.AccountType, addrStatus uint8) string {
+func (r *FileRepository) CreateFilePath(accountType account.AccountType) string {
 	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
 
-	return fmt.Sprintf("%s%s_%d_%s.csv", r.filePath, accountType.String(), addrStatus, ts)
+	return fmt.Sprintf("%s%s_%s.csv", r.filePath, accountType.String(), ts)
 }
 
 // ValidateFilePath validate fileName
 func (r *FileRepository) ValidateFilePath(fileName string, accountType account.AccountType) error {
-	//e.g. ./data/pubkey/deposit/deposit_1_1586831083436291000.csv
+	//e.g. ./data/pubkey/deposit/deposit_1586831083436291000.csv
 	tmp := strings.Split(strings.Split(fileName, "_")[0], "/")
 	if tmp[len(tmp)-1] != accountType.String() {
 		return errors.Errorf("mismatching between accountType [%s] and file prefix [%s]", accountType, tmp[0])

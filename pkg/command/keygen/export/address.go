@@ -7,7 +7,6 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
@@ -56,7 +55,7 @@ func (c *AddressCommand) Run(args []string) int {
 	}
 
 	// export generated PublicKey as csv file
-	fileName, err := c.wallet.ExportAccountKey(account.AccountType(acnt), address.AddrStatusPrivKeyImported)
+	fileName, err := c.wallet.AddressExport().ExportAddress(account.AccountType(acnt))
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call ExportAccountKey() %+v", err))
 		return 1

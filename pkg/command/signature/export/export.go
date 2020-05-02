@@ -24,15 +24,15 @@ func (c *ExportCommand) Synopsis() string {
 }
 
 var (
-	multisigSynopsis = "export multisig addresses"
+	fullpubkeySynopsis = "export full pubkey"
 )
 
 // Help returns usage for this subcommand
 func (c *ExportCommand) Help() string {
 	return fmt.Sprintf(`Usage: sign export [Subcommands...]
 Subcommands:
-  multisig     %s
-`, multisigSynopsis)
+  fullpubkey   %s
+`, fullpubkeySynopsis)
 }
 
 // Run executes this subcommand
@@ -46,10 +46,10 @@ func (c *ExportCommand) Run(args []string) int {
 
 	//farther subcommand import
 	cmds := map[string]cli.CommandFactory{
-		"multisig": func() (cli.Command, error) {
-			return &MultisigCommand{
-				name:     "multisig",
-				synopsis: multisigSynopsis,
+		"fullpubkey": func() (cli.Command, error) {
+			return &FullPubkeyCommand{
+				name:     "fullpubkey",
+				synopsis: fullpubkeySynopsis,
 				ui:       command.ClolorUI(),
 				wallet:   c.Wallet,
 			}, nil

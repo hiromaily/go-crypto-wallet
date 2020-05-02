@@ -38,7 +38,7 @@ func HelpFunc(appName string) func(c map[string]cli.CommandFactory) string {
 		// Replace basic help header by new one
 		// because it doesn't show optional flags.
 		header := fmt.Sprintf(
-			"Usage: %s [-version] [-help] [-conf] <command> [<args>]",
+			"Usage: %s [-version] [-help] [-conf] [-wallet] <command> [<args>]",
 			appName)
 		s := cli.BasicHelpFunc(appName)(c)
 		i := strings.Index(s, "\n")

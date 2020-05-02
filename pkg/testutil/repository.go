@@ -16,7 +16,7 @@ import (
 
 var (
 	txRepo         walletrepo.TxRepository
-	accountKeyRepo coldrepo.AccountKeyRepository
+	accountKeyRepo *coldrepo.AccountKeyRepository
 )
 
 // NewTxRepository returns TxRepository for test
@@ -47,7 +47,7 @@ func NewTxRepository() walletrepo.TxRepository {
 }
 
 // NewAccountKeyRepository returns AccountKeyRepository for test
-func NewAccountKeyRepository() coldrepo.AccountKeyRepository {
+func NewAccountKeyRepository() coldrepo.AccountKeyRepositorier {
 	if accountKeyRepo != nil {
 		return accountKeyRepo
 	}

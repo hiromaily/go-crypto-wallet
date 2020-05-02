@@ -7,7 +7,7 @@ var TableNames = struct {
 	AccountKey     string
 	Address        string
 	AuthAccountKey string
-	AuthPubKey     string
+	AuthFullpubkey string
 	PaymentRequest string
 	Seed           string
 	TX             string
@@ -17,7 +17,7 @@ var TableNames = struct {
 	AccountKey:     "account_key",
 	Address:        "address",
 	AuthAccountKey: "auth_account_key",
-	AuthPubKey:     "auth_pub_key",
+	AuthFullpubkey: "auth_fullpubkey",
 	PaymentRequest: "payment_request",
 	Seed:           "seed",
 	TX:             "tx",

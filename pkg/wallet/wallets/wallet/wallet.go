@@ -13,16 +13,11 @@ import (
 
 // Wallet watch only wallet object
 type Wallet struct {
-	btc    api.Bitcoiner
-	logger *zap.Logger
-	tracer opentracing.Tracer
-	repo   walletrepo.WalletRepository
-	//txRepo       walletrepo.TxRepository
-	//txInRepo     walletrepo.TxInputRepository
-	//txOutRepo    walletrepo.TxOutputRepository
-	//payReqRepo   walletrepo.PaymentRequestRepository
-	//pubkeyRepo   walletrepo.PubkeyRepository
-	addrFileRepo address.Storager
+	btc          api.Bitcoiner
+	logger       *zap.Logger
+	tracer       opentracing.Tracer
+	repo         walletrepo.WalletRepository
+	addrFileRepo address.FileStorager
 	txFileRepo   tx.FileStorager
 	wtype        wtype.WalletType
 }
@@ -33,12 +28,7 @@ func NewWallet(
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
 	repo walletrepo.WalletRepository,
-	//txRepo walletrepo.TxRepository,
-	//txInRepo walletrepo.TxInputRepository,
-	//txOutRepo walletrepo.TxOutputRepository,
-	//payReqRepo walletrepo.PaymentRequestRepository,
-	//pubkeyRepo walletrepo.PubkeyRepository,
-	addrFileRepo address.Storager,
+	addrFileRepo address.FileStorager,
 	txFileRepo tx.FileStorager,
 	wtype wtype.WalletType) *Wallet {
 

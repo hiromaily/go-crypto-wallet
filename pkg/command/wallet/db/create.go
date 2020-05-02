@@ -58,11 +58,11 @@ func (c *CreateCommand) Run(args []string) int {
 	case "payment_request":
 		// create payment_request table
 		amtList := []float64{
-			0.001,
-			0.002,
-			0.0025,
-			0.0015,
-			0.003,
+			0.00001,
+			0.00002,
+			0.000025,
+			0.000015,
+			0.00003,
 		}
 
 		// get client pubkeys

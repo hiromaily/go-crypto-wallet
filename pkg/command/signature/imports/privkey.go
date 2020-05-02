@@ -6,7 +6,6 @@ import (
 
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
@@ -39,7 +38,7 @@ func (c *PrivKeyCommand) Run(args []string) int {
 	}
 
 	// import generated private key for Authorization account to database
-	err := c.wallet.ImportPrivateKey(account.AccountTypeAuthorization)
+	err := c.wallet.PrivKey().Import()
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call ImportPrivateKey() %+v", err))
 	}

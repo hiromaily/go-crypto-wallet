@@ -4,7 +4,6 @@ import (
 	"database/sql"
 
 	"github.com/btcsuite/btcd/rpcclient"
-	"github.com/opentracing/opentracing-go"
 	"github.com/volatiletech/sqlboiler/boil"
 	"go.uber.org/zap"
 
@@ -13,15 +12,14 @@ import (
 	mysql "github.com/hiromaily/go-bitcoin/pkg/db/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
-	"github.com/hiromaily/go-bitcoin/pkg/tracer"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
-
-	//"github.com/hiromaily/go-bitcoin/pkg/txfile"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwalletsrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwalletsrv/keygensrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/keygen"
 )
 
 // Registry is for registry interface
@@ -47,14 +45,92 @@ func NewRegistry(conf *config.Config, walletType wallet.WalletType) Registry {
 }
 
 // NewKeygener is to register for keygener interface
+// Which is better ?
+// - create each interface getter to difine as interface
+// - return struct itself
+//func (r *registry) NewKeygener() *keygen.Keygen {
 func (r *registry) NewKeygener() wallets.Keygener {
-	return coldwallet.NewColdWalet(
+	return keygen.NewKeygen(
+		r.newBTC(),
+		r.newMySQLClient(),
+		r.newSeeder(),
+		r.newHdWallter(),
+		r.newPrivKeyer(),
+		r.newFullPubKeyImporter(),
+		r.newMultisiger(),
+		r.newAddressExporter(),
+		r.newSigner(),
+		r.walletType,
+	)
+}
+
+func (r *registry) newSeeder() coldwalletsrv.Seeder {
+	return coldwalletsrv.NewSeed(
+		r.newLogger(),
+		r.newSeedRepo(),
+		r.walletType,
+	)
+}
+
+func (r *registry) newHdWallter() coldwalletsrv.HDWalleter {
+	return coldwalletsrv.NewHDWallet(
+		r.newLogger(),
+		r.newHdWalletRepo(),
+		r.newKeyGenerator(),
+		r.conf.CoinTypeCode,
+		r.walletType,
+	)
+}
+
+func (r *registry) newHdWalletRepo() coldwalletsrv.HDWalletRepo {
+	return coldwalletsrv.NewAccountHDWalletRepo(
+		r.newAccountKeyRepo(),
+	)
+}
+
+func (r *registry) newPrivKeyer() keygensrv.PrivKeyer {
+	return keygensrv.NewPrivKey(
 		r.newBTC(),
 		r.newLogger(),
-		r.newTracer(),
-		r.newRepository(),
-		r.newKeyGenerator(),
+		r.newAccountKeyRepo(),
+		r.walletType,
+	)
+}
+
+func (r *registry) newFullPubKeyImporter() keygensrv.FullPubKeyImporter {
+	return keygensrv.NewFullPubkeyImport(
+		r.newBTC(),
+		r.newLogger(),
+		r.newAuthFullPubKeyRepo(),
+		r.newPubkeyFileStorager(),
+		r.walletType,
+	)
+}
+
+func (r *registry) newMultisiger() keygensrv.Multisiger {
+	return keygensrv.NewMultisig(
+		r.newBTC(),
+		r.newLogger(),
+		r.newAuthFullPubKeyRepo(),
+		r.newAccountKeyRepo(),
+		r.walletType,
+	)
+}
+
+func (r *registry) newAddressExporter() keygensrv.AddressExporter {
+	return keygensrv.NewAddressExport(
+		r.newLogger(),
+		r.newAccountKeyRepo(),
 		r.newAddressFileStorager(),
+		r.walletType,
+	)
+}
+func (r *registry) newSigner() coldwalletsrv.Signer {
+	return coldwalletsrv.NewSign(
+		r.newBTC(),
+		r.newLogger(),
+		r.newAccountKeyRepo(),
+		r.newAuthKeyRepo(),
 		r.newTxFileStorager(),
 		r.walletType,
 	)
@@ -89,24 +165,7 @@ func (r *registry) newLogger() *zap.Logger {
 	return r.logger
 }
 
-func (r *registry) newTracer() opentracing.Tracer {
-	return tracer.NewTracer(r.conf.Tracer)
-}
-
-//func (r *registry) newStorager() rdb.KeygenStorager {
-func (r *registry) newRepository() coldrepo.ColdRepository {
-	// if there are multiple options, set proper one
-	// storager interface as MySQL
-	return coldrepo.NewColdWalletRepository(
-		r.newMySQLClient(),
-		r.newLogger(),
-		r.newSeedRepo(),
-		r.newAccountKeyRepo(),
-		r.newMultisigRepo(),
-	)
-}
-
-func (r *registry) newSeedRepo() coldrepo.SeedRepository {
+func (r *registry) newSeedRepo() coldrepo.SeedRepositorier {
 	return coldrepo.NewSeedRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
@@ -114,7 +173,7 @@ func (r *registry) newSeedRepo() coldrepo.SeedRepository {
 	)
 }
 
-func (r *registry) newAccountKeyRepo() coldrepo.AccountKeyRepository {
+func (r *registry) newAccountKeyRepo() coldrepo.AccountKeyRepositorier {
 	return coldrepo.NewAccountKeyRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
@@ -122,10 +181,19 @@ func (r *registry) newAccountKeyRepo() coldrepo.AccountKeyRepository {
 	)
 }
 
-func (r *registry) newMultisigRepo() coldrepo.MultisigHistoryRepository {
-	return coldrepo.NewMultisigHistoryRepository(
+func (r *registry) newAuthFullPubKeyRepo() coldrepo.AuthFullPubkeyRepositorier {
+	return coldrepo.NewAuthFullPubkeyRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
+		r.newLogger(),
+	)
+}
+
+func (r *registry) newAuthKeyRepo() coldrepo.AuthAccountKeyRepositorier {
+	return coldrepo.NewAuthAccountKeyRepository(
+		r.newMySQLClient(),
+		r.conf.CoinTypeCode,
+		"",
 		r.newLogger(),
 	)
 }
@@ -153,7 +221,14 @@ func (r *registry) newMySQLClient() *sql.DB {
 	return r.mysqlClient
 }
 
-func (r *registry) newAddressFileStorager() address.Storager {
+func (r *registry) newAddressFileStorager() address.FileStorager {
+	return address.NewFileRepository(
+		r.conf.AddressFile.BasePath,
+		r.newLogger(),
+	)
+}
+
+func (r *registry) newPubkeyFileStorager() address.FileStorager {
 	return address.NewFileRepository(
 		r.conf.PubkeyFile.BasePath,
 		r.newLogger(),

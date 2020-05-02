@@ -99,6 +99,8 @@ bld: update-decimal
 	go build -ldflags "-X main.authName=auth1" -i -v -o ${GOPATH}/bin/sign ./cmd/signature/
 	go build -ldflags "-X main.authName=auth2" -i -v -o ${GOPATH}/bin/sign2 ./cmd/signature/
 	go build -ldflags "-X main.authName=auth3" -i -v -o ${GOPATH}/bin/sign3 ./cmd/signature/
+	go build -ldflags "-X main.authName=auth4" -i -v -o ${GOPATH}/bin/sign4 ./cmd/signature/
+	go build -ldflags "-X main.authName=auth5" -i -v -o ${GOPATH}/bin/sign5 ./cmd/signature/
 
 .PHONY: bldw
 bldw:
@@ -113,6 +115,8 @@ blds:
 	go build -ldflags "-X main.authName=auth1" -i -v -o ${GOPATH}/bin/sign ./cmd/signature/
 	go build -ldflags "-X main.authName=auth2" -i -v -o ${GOPATH}/bin/sign2 ./cmd/signature/
 	go build -ldflags "-X main.authName=auth3" -i -v -o ${GOPATH}/bin/sign3 ./cmd/signature/
+	go build -ldflags "-X main.authName=auth4" -i -v -o ${GOPATH}/bin/sign4 ./cmd/signature/
+	go build -ldflags "-X main.authName=auth5" -i -v -o ${GOPATH}/bin/sign5 ./cmd/signature/
 
 
 run:
@@ -247,7 +251,11 @@ include ./Makefile_signature_op.mk
 create-wallets:
 	bitcoin-cli createwallet watch
 	bitcoin-cli createwallet keygen
-	bitcoin-cli createwallet sign
+	bitcoin-cli createwallet sign1
+	bitcoin-cli createwallet sign2
+	bitcoin-cli createwallet sign3
+	bitcoin-cli createwallet sign4
+	bitcoin-cli createwallet sign5
 	bitcoin-cli listwallets
 
 # list loaded wallets (listed wallet is not needed to load, these wallet can be unloaded
@@ -259,26 +267,34 @@ list-wallets:
 load-wallets:
 	bitcoin-cli loadwallet watch
 	bitcoin-cli loadwallet keygen
-	bitcoin-cli loadwallet sign
+	bitcoin-cli loadwallet sign1
+	bitcoin-cli loadwallet sign2
+	bitcoin-cli loadwallet sign3
+	bitcoin-cli loadwallet sign4
+	bitcoin-cli loadwallet sign5
 
-.PHONY: unload-wallet
-unload-wallet:
-	bitcoin-cli -rpcwallet=watch unloadwallet
-	bitcoin-cli -rpcwallet=keygen unloadwallet
-	bitcoin-cli -rpcwallet=sign unloadwallet
+#.PHONY: unload-wallet
+#unload-wallet:
+#	bitcoin-cli -rpcwallet=watch unloadwallet
+#	bitcoin-cli -rpcwallet=keygen unloadwallet
+#	bitcoin-cli -rpcwallet=sign1 unloadwallet
 
-.PHONY: dump-wallet
-dump-wallet:
-	bitcoin-cli -rpcwallet=watch dumpwallet "watch"
-	bitcoin-cli -rpcwallet=keygen dumpwallet "keygen"
-	bitcoin-cli -rpcwallet=sign dumpwallet "sign"
+#.PHONY: dump-wallet
+#dump-wallet:
+#	bitcoin-cli -rpcwallet=watch dumpwallet "watch"
+#	bitcoin-cli -rpcwallet=keygen dumpwallet "keygen"
+#	bitcoin-cli -rpcwallet=sign dumpwallet "sign"
 
 .PHONY: rm-local-wallet-dat
 rm-local-wallet-dat:
 	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/wallet.dat
-	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/sign/wallet.dat
-	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/sign/keygen.dat
-	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/sign/sign.dat
+	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/watch
+	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/keygen
+	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/sign1
+	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/sign2
+	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/sign3
+	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/sign4
+	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/sign5
 
 .PHONY: rm-docker-wallet-dat
 rm-docker-wallet-dat:

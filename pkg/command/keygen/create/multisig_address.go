@@ -6,6 +6,7 @@ import (
 
 	"github.com/mitchellh/cli"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
@@ -25,7 +26,9 @@ func (c *MultisigCommand) Synopsis() string {
 
 // Help returns usage for this subcommand
 func (c *MultisigCommand) Help() string {
-	return `Usage: keygen key create multisig
+	return `Usage: keygen create multisig [options...]
+Options:
+  -account  target account
 `
 }
 
@@ -33,22 +36,26 @@ func (c *MultisigCommand) Help() string {
 func (c *MultisigCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
+	var acnt string
+
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
+	flags.StringVar(&acnt, "account", "", "target account")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
 
-	// create multisig address for debug use
-	resAddr, err := c.wallet.GetBTC().AddMultisigAddress(
-		2,
-		[]string{"2N7ZwUXpo841GZDpxLGFqrhr1xwMzTba7ZP", "2NAm558FWpiaJQLz838vbzBPpqmKxyeyxsu"},
-		"multi01",
-		address.AddrTypeP2shSegwit)
-	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call AddMultisigAddress() %+v", err))
+	//validator
+	if !account.ValidateAccountType(acnt) {
+		c.ui.Error("account option [-account] is invalid")
 		return 1
 	}
-	c.ui.Info(fmt.Sprintf("multisig address: %s, redeemScript: %s", resAddr.Address, resAddr.RedeemScript))
+
+	// create multisig address
+	err := c.wallet.Multisig().AddMultisigAddress(account.AccountType(acnt), address.AddrTypeP2shSegwit)
+	if err != nil {
+		c.ui.Error(fmt.Sprintf("fail to call Multisig().AddMultisigAddress() %+v", err))
+		return 1
+	}
 
 	return 0
 }

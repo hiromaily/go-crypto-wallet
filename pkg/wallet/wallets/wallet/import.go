@@ -25,9 +25,9 @@ func (w *Wallet) ImportAddress(fileName string, accountType account.AccountType,
 		//kind of required address is different according to account
 		var addr string
 		if accountType == account.AccountTypeClient {
-			addr = inner[1] //p2sh_segwit_address
+			addr = inner[2] //p2sh_segwit_address
 		} else {
-			addr = inner[3] //multisig_address
+			addr = inner[4] //multisig_address
 		}
 
 		//call bitcoin API `importaddress` with account(label)

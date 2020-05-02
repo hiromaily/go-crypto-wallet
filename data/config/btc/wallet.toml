@@ -42,5 +42,8 @@ debug = true
 [tx_file]
 base_path = "./data/tx/"
 
+[address_file]
+base_path = "./data/address/"
+
 [pubkey_file]
 base_path = "./data/pubkey/"

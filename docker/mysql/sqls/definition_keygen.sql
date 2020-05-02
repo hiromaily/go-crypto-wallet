@@ -50,7 +50,7 @@ CREATE TABLE `account_key` (
   `p2sh_segwit_address`     VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'p2sh-segwit address',
   `full_public_key`         VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'full public key',
   `multisig_address`        VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'multisig address',
-  `redeem_script`           VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'redeedScript after multisig address generated',
+  `redeem_script`           VARCHAR(1000) COLLATE utf8_unicode_ci DEFAULT '' NOT NULL COMMENT'redeedScript after multisig address generated',
   `wallet_import_format`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'WIF',
   `idx`                     BIGINT(20) NOT NULL COMMENT'index for hd wallet',
   `addr_status`             tinyint(2) DEFAULT 0 NOT NULL COMMENT'progress status for address generating',
@@ -65,13 +65,13 @@ CREATE TABLE `account_key` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `auth_pub_key`
+-- Table structure for table `auth_fullpubkey`
 --
 
-DROP TABLE IF EXISTS `auth_pub_key`;
+DROP TABLE IF EXISTS `auth_fullpubkey`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `auth_pub_key` (
+CREATE TABLE `auth_fullpubkey` (
   `id`                      SMALLINT(5) NOT NULL AUTO_INCREMENT COMMENT'ID',
   `coin`                    ENUM('btc', 'bch') NOT NULL COMMENT'coin type code',
   `auth_account`            VARCHAR(20)  COLLATE utf8_unicode_ci NOT NULL COMMENT'auth type',

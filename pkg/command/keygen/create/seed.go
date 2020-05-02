@@ -55,14 +55,14 @@ func (c *SeedCommand) Run(args []string) int {
 
 	if seed != "" {
 		// store seed into database, not generate seed
-		bSeed, err = c.wallet.StoreSeed(seed)
+		bSeed, err = c.wallet.Seed().Store(seed)
 		if err != nil {
 			c.ui.Error(fmt.Sprintf("fail to call StoreSeed() %+v", err))
 			return 1
 		}
 	} else {
 		// create seed
-		bSeed, err = c.wallet.GenerateSeed()
+		bSeed, err = c.wallet.Seed().Generate()
 		if err != nil {
 			c.ui.Error(fmt.Sprintf("fail to call GenerateSeed() %+v", err))
 			return 1

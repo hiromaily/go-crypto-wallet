@@ -4,7 +4,6 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
-	"github.com/hiromaily/go-bitcoin/pkg/command/signature/add"
 	"github.com/hiromaily/go-bitcoin/pkg/command/signature/create"
 	"github.com/hiromaily/go-bitcoin/pkg/command/signature/export"
 	"github.com/hiromaily/go-bitcoin/pkg/command/signature/imports"
@@ -15,14 +14,6 @@ import (
 // WalletSubCommands returns subcommand for signature
 func WalletSubCommands(wallet wallets.Signer, version string) map[string]cli.CommandFactory {
 	return map[string]cli.CommandFactory{
-		"add": func() (cli.Command, error) {
-			return &add.AddCommand{
-				Name:    "add",
-				Version: version,
-				UI:      command.ClolorUI(),
-				Wallet:  wallet,
-			}, nil
-		},
 		"create": func() (cli.Command, error) {
 			return &create.CreateCommand{
 				Name:    "add",

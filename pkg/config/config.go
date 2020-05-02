@@ -22,6 +22,7 @@ type Config struct {
 	Tracer       Tracer            `toml:"tracer"`
 	MySQL        MySQL             `toml:"mysql"`
 	TxFile       TxFile            `toml:"tx_file"`
+	AddressFile  AddressFile       `toml:"address_file"`
 	PubkeyFile   PubKeyFile        `toml:"pubkey_file"`
 }
 
@@ -90,6 +91,11 @@ type TxFile struct {
 
 // PubKeyFile saved pubKey file path which is used when import/export file
 type PubKeyFile struct {
+	BasePath string `toml:"base_path" validate:"required"`
+}
+
+// AddressFile saved address file path which is used when import/export file
+type AddressFile struct {
 	BasePath string `toml:"base_path" validate:"required"`
 }
 

@@ -2,11 +2,12 @@ package wallets
 
 import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/repository/walletrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwalletsrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwalletsrv/keygensrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwalletsrv/signsrv"
 )
 
 // About structure
@@ -31,55 +32,50 @@ type Walleter interface {
 }
 
 // Coldwalleter may not be used anywhere
-type Coldwalleter interface {
-	KeySigner
-	KeygenExclusiver
-	SignatureExclusiver
-
-	Done()
-	GetBTC() api.Bitcoiner
-	GetType() wallet.WalletType
-}
+//type Coldwalleter interface {
+//	KeySigner
+//	KeygenExclusiver
+//	SignatureExclusiver
+//
+//	Done()
+//	GetBTC() api.Bitcoiner
+//	GetType() wallet.WalletType
+//}
 
 // KeySigner is common interface for keygen/signature
-type KeySigner interface {
-	GenerateSeed() ([]byte, error)
-	StoreSeed(strSeed string) ([]byte, error)
-	GeneratePubKey(accountType account.AccountType, seed []byte, count uint32) ([]key.WalletKey, error)
-	ImportPrivateKey(accountType account.AccountType) error
-	SignTx(filePath string) (string, bool, string, error)
-}
+//type KeySigner interface {
+//	GenerateSeed() ([]byte, error)
+//	StoreSeed(strSeed string) ([]byte, error)
+//	GeneratePubKey(accountType account.AccountType, seed []byte, count uint32) ([]key.WalletKey, error)
+//	ImportPrivateKey(accountType account.AccountType) error
+//	SignTx(filePath string) (string, bool, string, error)
+//}
 
 // Keygener is for keygen wallet service interface
 type Keygener interface {
-	KeySigner
-	KeygenExclusiver
+	Seed() coldwalletsrv.Seeder
+	HDWallet() coldwalletsrv.HDWalleter
+	PrivKey() keygensrv.PrivKeyer
+	FullPubKeyImport() keygensrv.FullPubKeyImporter
+	Multisig() keygensrv.Multisiger
+	AddressExport() keygensrv.AddressExporter
+	Sign() coldwalletsrv.Signer
 
 	Done()
 	GetBTC() api.Bitcoiner
 	GetType() wallet.WalletType
-}
-
-// KeygenExclusiver is for only Keygen interface
-type KeygenExclusiver interface {
-	ExportAccountKey(accountType account.AccountType, addrStatus address.AddrStatus) (string, error)
-	ImportMultisigAddress(fileName string, accountType account.AccountType) error
 }
 
 // Signer is for signature wallet service interface
 type Signer interface {
-	KeySigner
-	SignatureExclusiver
+	Seed() coldwalletsrv.Seeder
+	HDWallet() coldwalletsrv.HDWalleter
+	PrivKey() signsrv.PrivKeyer
+	FullPubkeyExport() signsrv.FullPubkeyExporter
+	Sign() coldwalletsrv.Signer
 
 	Done()
 	GetBTC() api.Bitcoiner
 	GetType() wallet.WalletType
 	GetAuthType() account.AuthType
-}
-
-// SignatureExclusiver is for only signature interface
-type SignatureExclusiver interface {
-	ImportPubKey(fileName string, accountType account.AccountType) error
-	AddMultisigAddress(accountType account.AccountType, authType account.AuthType, addressType address.AddrType) error
-	ExportAddedPubkeyHistory(accountType account.AccountType) (string, error)
 }

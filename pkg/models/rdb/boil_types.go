@@ -85,10 +85,10 @@ const (
 	AuthAccountKeyCoinBCH = "bch"
 )
 
-// Enum values for auth_pub_key.coin
+// Enum values for auth_fullpubkey.coin
 const (
-	AuthPubKeyCoinBTC = "btc"
-	AuthPubKeyCoinBCH = "bch"
+	AuthFullpubkeyCoinBTC = "btc"
+	AuthFullpubkeyCoinBCH = "bch"
 )
 
 // Enum values for payment_request.coin
