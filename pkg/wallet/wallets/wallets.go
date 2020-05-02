@@ -43,7 +43,7 @@ type Keygener interface {
 
 	Done()
 	GetBTC() api.Bitcoiner
-	GetType() wallet.WalletType
+	//GetType() wallet.WalletType
 }
 
 // Signer is for signature wallet service interface
@@ -56,7 +56,7 @@ type Signer interface {
 	SignTx(filePath string) (string, bool, string, error)
 
 	Done()
-	GetBTC() api.Bitcoiner
-	GetType() wallet.WalletType
+	//GetBTC() api.Bitcoiner
+	//GetType() wallet.WalletType
 	GetAuthType() account.AuthType
 }
