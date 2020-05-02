@@ -17,32 +17,48 @@ create-hdkey:
 	keygen create hdkey -account client -keynum 10
 	keygen create hdkey -account deposit -keynum 10
 	keygen create hdkey -account payment -keynum 10
+	keygen create hdkey -account stored -keynum 10
 
 ###############################################################################
-# import private key to keygen wallet
+# import private key
 ###############################################################################
 .PHONY: import-privkey
 import-privkey:
 	keygen import privkey -account client
 	keygen import privkey -account deposit
 	keygen import privkey -account payment
+	keygen import privkey -account stored
 
 ###############################################################################
-# export public key as csv file
+# import full-pubkey
 ###############################################################################
-.PHONY: export-pubkey
-export-pubkey:
+#make filepath=./data/pubkey/auth1_1588399093997165000.csv import-fullpubkey
+.PHONY: import-fullpubkey
+import-fullpubkey:
+	keygen import fullpubkey -file ${filepath}
+	keygen import fullpubkey -file ${filepath}
+	keygen import fullpubkey -file ${filepath}
+	keygen import fullpubkey -file ${filepath}
+	keygen import fullpubkey -file ${filepath}
+
+###############################################################################
+# create multisig address
+###############################################################################
+.PHONY: create-multisig
+create-multisig:
+	keygen create multisig -account deposit
+	keygen create multisig -account payment
+	keygen create multisig -account stored
+
+###############################################################################
+# export address
+###############################################################################
+.PHONY: export-address
+export-address:
 	keygen export address -account client
 	keygen export address -account deposit
 	keygen export address -account payment
-
-###############################################################################
-# import multisig address from csv file
-###############################################################################
-.PHONY: import-multisig
-import-multisig:
-	keygen import multisig -account deposit
-	keygen import multisig -account payment
+	keygen export address -account stored
 
 ###############################################################################
 # sign on unsigned transaction as first signature
@@ -52,10 +68,3 @@ import-multisig:
 .PHONY: sign-unsignedtx
 sign-unsignedtx:
 	keygen sign file ${filepath}
-
-# [coldwallet]出金用に未署名のトランザクションに署名する #出金時の署名は2回
-#sign-payment1: bld
-#	coldwallet1 -s -m 1 -i ./data/tx/payment/payment_3_unsigned_1534832966995082772
-#
-#sign-payment2: bld
-#	coldwallet2 -s -m 1 -i ./data/tx/payment/payment_3_unsigned_1534832966995082772
