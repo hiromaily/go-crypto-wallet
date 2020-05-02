@@ -63,14 +63,14 @@ func (c *HDKeyCommand) Run(args []string) int {
 	}
 
 	// create seed
-	bSeed, err := c.wallet.Seed().Generate()
+	bSeed, err := c.wallet.GenerateSeed()
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call GenerateSeed() %+v", err))
 		return 1
 	}
 
 	//generate key for hd wallet
-	keys, err := c.wallet.HDWallet().Generate(account.AccountType(acnt), bSeed, uint32(keyNum))
+	keys, err := c.wallet.GenerateAccountKey(account.AccountType(acnt), bSeed, uint32(keyNum))
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call GenerateAccountKey() %+v", err))
 		return 1

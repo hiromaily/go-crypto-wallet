@@ -3,8 +3,11 @@ package keygen
 import (
 	"database/sql"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwalletsrv"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwalletsrv/keygensrv"
 )
@@ -22,12 +25,6 @@ type Keygen struct {
 	keygensrv.Multisiger
 	keygensrv.AddressExporter
 	coldwalletsrv.Signer
-	//Seeder          coldwalletsrv.Seeder
-	//HdWallter       coldwalletsrv.HDWalleter
-	//PrivKeyer       coldwalletsrv.PrivKeyer
-	//PubkeyImporter  keygensrv.PubKeyImporter
-	//Multisiger      keygensrv.Multisiger
-	//AddressExporter keygensrv.AddressExporter
 }
 
 // NewKeygen returns Keygen object
@@ -57,6 +54,46 @@ func NewKeygen(
 	}
 }
 
+// GenerateSeed generates seed
+func (k *Keygen) GenerateSeed() ([]byte, error) {
+	return k.Seeder.Generate()
+}
+
+// StoreSeed stores seed
+func (k *Keygen) StoreSeed(strSeed string) ([]byte, error) {
+	return k.Seeder.Store(strSeed)
+}
+
+// GenerateAccountKey generates account keys
+func (k *Keygen) GenerateAccountKey(accountType account.AccountType, seed []byte, count uint32) ([]key.WalletKey, error) {
+	return k.HDWalleter.Generate(accountType, seed, count)
+}
+
+// ImportPrivKey imports privKey
+func (k *Keygen) ImportPrivKey(accountType account.AccountType) error {
+	return k.PrivKeyer.Import(accountType)
+}
+
+// ImportFullPubKey imports full-pubkey
+func (k *Keygen) ImportFullPubKey(fileName string) error {
+	return k.FullPubKeyImporter.ImportFullPubKey(fileName)
+}
+
+// CreateMultisigAddress creates multi sig address returns Multisiger interface
+func (k *Keygen) CreateMultisigAddress(accountType account.AccountType, addressType address.AddrType) error {
+	return k.Multisiger.AddMultisigAddress(accountType, addressType)
+}
+
+// ExportAddress exports address
+func (k *Keygen) ExportAddress(accountType account.AccountType) (string, error) {
+	return k.AddressExporter.ExportAddress(accountType)
+}
+
+// SignTx signs on transaction
+func (k *Keygen) SignTx(filePath string) (string, bool, string, error) {
+	return k.Signer.SignTx(filePath)
+}
+
 // Done should be called before exit
 func (k *Keygen) Done() {
 	k.dbConn.Close()
@@ -76,39 +113,4 @@ func (k *Keygen) GetBTC() api.Bitcoiner {
 // GetType gets wallet type
 func (k *Keygen) GetType() wallet.WalletType {
 	return k.wtype
-}
-
-// Seed returns Seeder interface
-func (k *Keygen) Seed() coldwalletsrv.Seeder {
-	return k.Seeder
-}
-
-// HDWallet returns HDWalleter interface
-func (k *Keygen) HDWallet() coldwalletsrv.HDWalleter {
-	return k.HDWalleter
-}
-
-// PrivKey returns PrivKeyer interface
-func (k *Keygen) PrivKey() keygensrv.PrivKeyer {
-	return k.PrivKeyer
-}
-
-// FullPubKeyImport returns PubKeyImporter interface
-func (k *Keygen) FullPubKeyImport() keygensrv.FullPubKeyImporter {
-	return k.FullPubKeyImporter
-}
-
-// Multisig returns Multisiger interface
-func (k *Keygen) Multisig() keygensrv.Multisiger {
-	return k.Multisiger
-}
-
-// AddressExport returns AddressExporter interface
-func (k *Keygen) AddressExport() keygensrv.AddressExporter {
-	return k.AddressExporter
-}
-
-// Sign returns Signer interface
-func (k *Keygen) Sign() coldwalletsrv.Signer {
-	return k.Signer
 }

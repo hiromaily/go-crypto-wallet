@@ -37,9 +37,9 @@ func (c *FullPubkeyCommand) Run(args []string) int {
 	}
 
 	// export full pubkey as csv file
-	fileName, err := c.wallet.FullPubkeyExport().ExportFullPubkey()
+	fileName, err := c.wallet.ExportFullPubkey()
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call ExportAddedPubkeyHistory() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call ExportFullPubkey() %+v", err))
 		return 1
 	}
 	c.ui.Output(fmt.Sprintf("[fileName]: %s", fileName))

@@ -38,9 +38,9 @@ func (c *PrivKeyCommand) Run(args []string) int {
 	}
 
 	// import generated private key for Authorization account to database
-	err := c.wallet.PrivKey().Import()
+	err := c.wallet.ImportPrivKey()
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call ImportPrivateKey() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call ImportPrivKey() %+v", err))
 	}
 	c.ui.Output("Done!")
 

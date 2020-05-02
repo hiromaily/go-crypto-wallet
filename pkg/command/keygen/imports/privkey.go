@@ -55,9 +55,9 @@ func (c *PrivKeyCommand) Run(args []string) int {
 	}
 
 	//import generated private key to keygen wallet
-	err := c.wallet.PrivKey().Import(account.AccountType(acnt))
+	err := c.wallet.ImportPrivKey(account.AccountType(acnt))
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call ImportPrivateKey() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call ImportPrivKey() %+v", err))
 		return 1
 	}
 	c.ui.Output("Done!")

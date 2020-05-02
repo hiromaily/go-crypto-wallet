@@ -50,9 +50,9 @@ func (c *FullPubKeyCommand) Run(args []string) int {
 	}
 
 	//import generated private key to keygen wallet
-	err := c.wallet.FullPubKeyImport().ImportFullPubKey(fileName)
+	err := c.wallet.ImportFullPubKey(fileName)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call FullPubKeyImport().ImportFullPubKey() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call ImportFullPubKey() %+v", err))
 		return 1
 	}
 	c.ui.Output("Done!")

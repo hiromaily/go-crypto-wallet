@@ -39,16 +39,16 @@ func (c *HDKeyCommand) Run(args []string) int {
 	}
 
 	// create seed
-	bSeed, err := c.wallet.Seed().Generate()
+	bSeed, err := c.wallet.GenerateSeed()
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call GenerateSeed() %+v", err))
 		return 1
 	}
 
 	// create key for hd wallet for Authorization account
-	keys, err := c.wallet.HDWallet().Generate(c.wallet.GetAuthType().AccountType(), bSeed, 1)
+	keys, err := c.wallet.GenerateAuthKey(c.wallet.GetAuthType().AccountType(), bSeed, 1)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call GenerateAccountKey() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call GenerateAuthKey() %+v", err))
 		return 1
 	}
 	grok.Value(keys)

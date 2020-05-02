@@ -51,9 +51,9 @@ func (c *MultisigCommand) Run(args []string) int {
 	}
 
 	// create multisig address
-	err := c.wallet.Multisig().AddMultisigAddress(account.AccountType(acnt), address.AddrTypeP2shSegwit)
+	err := c.wallet.CreateMultisigAddress(account.AccountType(acnt), address.AddrTypeP2shSegwit)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call Multisig().AddMultisigAddress() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call CreateMultisigAddress() %+v", err))
 		return 1
 	}
 

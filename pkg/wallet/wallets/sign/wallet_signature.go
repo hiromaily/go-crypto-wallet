@@ -6,6 +6,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwalletsrv"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldwalletsrv/signsrv"
 )
@@ -49,6 +50,36 @@ func NewSign(
 	}
 }
 
+// GenerateSeed generates seed
+func (s *Sign) GenerateSeed() ([]byte, error) {
+	return s.Seeder.Generate()
+}
+
+// StoreSeed stores seed
+func (s *Sign) StoreSeed(strSeed string) ([]byte, error) {
+	return s.Seeder.Store(strSeed)
+}
+
+// GenerateAuthKey generates account keys
+func (s *Sign) GenerateAuthKey(accountType account.AccountType, seed []byte, count uint32) ([]key.WalletKey, error) {
+	return s.HDWalleter.Generate(accountType, seed, count)
+}
+
+// ImportPrivKey imports privKey
+func (s *Sign) ImportPrivKey() error {
+	return s.PrivKeyer.Import()
+}
+
+// ExportFullPubkey exports full-pubkey
+func (s *Sign) ExportFullPubkey() (string, error) {
+	return s.FullPubkeyExporter.ExportFullPubkey()
+}
+
+// SignTx signs on transaction
+func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
+	return s.Signer.SignTx(filePath)
+}
+
 // Done should be called before exit
 func (s *Sign) Done() {
 	s.dbConn.Close()
@@ -73,29 +104,4 @@ func (s *Sign) GetType() wallet.WalletType {
 // GetAuthType gets auth_type
 func (s *Sign) GetAuthType() account.AuthType {
 	return s.authAccount
-}
-
-// Seed returns Seeder interface
-func (s *Sign) Seed() coldwalletsrv.Seeder {
-	return s.Seeder
-}
-
-// HDWallet returns HDWalleter interface
-func (s *Sign) HDWallet() coldwalletsrv.HDWalleter {
-	return s.HDWalleter
-}
-
-// PrivKey returns PrivKeyer interface
-func (s *Sign) PrivKey() signsrv.PrivKeyer {
-	return s.PrivKeyer
-}
-
-// FullPubkeyExport returns FullPubkeyExporter interface
-func (s *Sign) FullPubkeyExport() signsrv.FullPubkeyExporter {
-	return s.FullPubkeyExporter
-}
-
-// Sign returns Signer interface
-func (s *Sign) Sign() coldwalletsrv.Signer {
-	return s.Signer
 }

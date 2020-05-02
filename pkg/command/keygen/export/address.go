@@ -55,9 +55,9 @@ func (c *AddressCommand) Run(args []string) int {
 	}
 
 	// export generated PublicKey as csv file
-	fileName, err := c.wallet.AddressExport().ExportAddress(account.AccountType(acnt))
+	fileName, err := c.wallet.ExportAddress(account.AccountType(acnt))
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call ExportAccountKey() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call ExportAddress() %+v", err))
 		return 1
 	}
 	c.ui.Output(fmt.Sprintf("[fileName]: %s", fileName))
