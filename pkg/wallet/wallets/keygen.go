@@ -1,4 +1,4 @@
-package keygen
+package wallets
 
 import (
 	"database/sql"
@@ -8,8 +8,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldsrv"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldsrv/keygensrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv/keygensrv"
 )
 
 // Keygen is keygen wallet object

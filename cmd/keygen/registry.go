@@ -16,10 +16,9 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv/keygensrv"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldsrv"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldsrv/keygensrv"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/keygen"
 )
 
 // Registry is for registry interface
@@ -50,7 +49,7 @@ func NewRegistry(conf *config.Config, walletType wallet.WalletType) Registry {
 // - return struct itself
 //func (r *registry) NewKeygener() *keygen.Keygen {
 func (r *registry) NewKeygener() wallets.Keygener {
-	return keygen.NewKeygen(
+	return wallets.NewKeygen(
 		r.newBTC(),
 		r.newMySQLClient(),
 		r.newSeeder(),

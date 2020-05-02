@@ -18,10 +18,9 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv/signsrv"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldsrv"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldsrv/signsrv"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/sign"
 )
 
 // Registry is for registry interface
@@ -56,7 +55,7 @@ func NewRegistry(conf *config.Config, walletType wallet.WalletType, authName str
 // NewSigner is to register for Signer interface
 // NewKeygener is to register for keygener interface
 func (r *registry) NewSigner() wallets.Signer {
-	return sign.NewSign(
+	return wallets.NewSign(
 		r.newBTC(),
 		r.newMySQLClient(),
 		r.authType,

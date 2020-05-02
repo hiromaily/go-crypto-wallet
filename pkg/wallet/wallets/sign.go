@@ -1,4 +1,4 @@
-package sign
+package wallets
 
 import (
 	"database/sql"
@@ -7,8 +7,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldsrv"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/coldsrv/signsrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv/signsrv"
 )
 
 // Sign is sign wallet object
