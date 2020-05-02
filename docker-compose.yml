@@ -1,9 +1,9 @@
 version: '3.7'
 
 volumes:
-  btc-wallet-db: {}
+  btc-watch-db: {}
   btc-keygen-db: {}
-  btc-signature-db: {}
+  btc-sign-db: {}
 
 services:
   #########################################################################
@@ -24,17 +24,17 @@ services:
   #########################################################################
   # Bitcoin core
   #########################################################################
-  btc-wallet:
+  btc-watch:
     build:
       context: ./docker/btc/
       dockerfile: Dockerfile
-    image: wallet-btc:0.19
+    image: btc-wallet:0.19
     volumes:
     #- btc1:/root/.bitcoin
     #- ./docs/bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
     - ./docker/btc/data1:/root/.bitcoin
     ports:
-    - "${BTC_WALLET_RPC_PORT:-19332}:18332"
+    - "${BTC_WATCH_RPC_PORT:-19332}:18332"
     stdin_open: true
     tty: true
     #    logging:
@@ -43,12 +43,12 @@ services:
     #        fluentd-address: "localhost:24224"
     #        tag: "docker.{{.ID}}"
     command: /usr/bin/bitcoind --printtoconsole #--conf=/root/.bitcoin/bitcoind.conf
-    # docker-compose exec btc-wallet bash
-    # docker-compose exec btc-wallet bitcoin-cli getnetworkinfo
+    # docker-compose exec btc-watch bash
+    # docker-compose exec btc-watch bitcoin-cli getnetworkinfo
     # /root/.bitcoin/testnet3/wallets
 
   btc-keygen:
-    image: wallet-btc:0.19
+    image: btc-wallet:0.19
     volumes:
     #- btc2:/root/.bitcoin
     #- ./docs/bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
@@ -66,14 +66,14 @@ services:
     # docker-compose exec btc-keygen bash
     # /root/.bitcoin/testnet3/wallets
 
-  btc-signature:
-    image: wallet-btc:0.19
+  btc-sign:
+    image: btc-wallet:0.19
     volumes:
     #- btc3:/root/.bitcoin
     #- ./docs/bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
     - ./docker/btc/data3:/root/.bitcoin
     ports:
-    - "${BTC_SIGNATURE_RPC_PORT:-19334}:18332"
+    - "${BTC_SIGN_RPC_PORT:-19334}:18332"
     stdin_open: true
     tty: true
     #    logging:
@@ -82,29 +82,29 @@ services:
     #        fluentd-address: "localhost:24224"
     #        tag: "docker.{{.ID}}"
     command: /usr/bin/bitcoind -maxconnections=0 --printtoconsole
-    # docker-compose exec btc-signature bash
+    # docker-compose exec btc-sign bash
     # /root/.bitcoin/testnet3/wallets
 
   #########################################################################
   # Database
   #########################################################################
   # watch only wallet
-  btc-wallet-db:
+  btc-watch-db:
     image: mysql:5.7
     volumes:
-    - btc-wallet-db:/var/lib/mysql #this volume should be outside to keep on a permanent basis
+    - btc-watch-db:/var/lib/mysql #this volume should be outside to keep on a permanent basis
     - "./docker/mysql/sqls:/sqls"
-    - "./docker/mysql/wallet/conf.d:/etc/mysql/conf.d"
-    - "./docker/mysql/wallet/init.d:/docker-entrypoint-initdb.d"
+    - "./docker/mysql/watch/conf.d:/etc/mysql/conf.d"
+    - "./docker/mysql/watch/init.d:/docker-entrypoint-initdb.d"
     #- "./docker/mysql/scripts:/docker-entrypoint-initdb.d"
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: wallet
+      MYSQL_DATABASE: watch
       MYSQL_USER: hiromaily
       MYSQL_PASSWORD: hiromaily
-      ENV: wallet
+      ENV: watch
     ports:
-    - "${BTC_WALLET_MYSQL_PORT:-3307}:3306"
+    - "${BTC_WATCH_MYSQL_PORT:-3307}:3306"
 
   # keygen wallet
   btc-keygen-db:
@@ -122,25 +122,25 @@ services:
       MYSQL_PASSWORD: hiromaily
       ENV: keygen
     ports:
-    - "${BTC_WALLET_MYSQL_PORT:-3308}:3306"
+    - "${BTC_KEYGEN_MYSQL_PORT:-3308}:3306"
 
-  # signature wallet
-  btc-signature-db:
+  # sign wallet
+  btc-sign-db:
     image: mysql:5.7
     volumes:
-    - btc-signature-db:/var/lib/mysql #this volume should be outside to keep on a permanent basis
+    - btc-sign-db:/var/lib/mysql #this volume should be outside to keep on a permanent basis
     - "./docker/mysql/sqls:/sqls"
-    - "./docker/mysql/signature/conf.d:/etc/mysql/conf.d"
-    - "./docker/mysql/signature/init.d:/docker-entrypoint-initdb.d"
+    - "./docker/mysql/sign/conf.d:/etc/mysql/conf.d"
+    - "./docker/mysql/sign/init.d:/docker-entrypoint-initdb.d"
     #- "./docker/mysql/scripts:/docker-entrypoint-initdb.d"
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: signature
+      MYSQL_DATABASE: sign
       MYSQL_USER: hiromaily
       MYSQL_PASSWORD: hiromaily
-      ENV: signature
+      ENV: sign
     ports:
-    - "${BTC_WALLET_MYSQL_PORT:-3309}:3306"
+    - "${BTC_SIGN_MYSQL_PORT:-3309}:3306"
 
   #########################################################################
   # Open Tracing
@@ -167,11 +167,11 @@ services:
 #      dockerfile: Dockerfile
 #    image: wallet-app:1.0
 #    links:
-#      - btc-wallet:btc-core
-#      - btc-wallet-db:mysql-server
+#      - btc-watch:btc-core
+#      - btc-watch-db:mysql-server
 #    depends_on:
-#      - btc-wallet
-#      - btc-wallet-db
+#      - btc-watch
+#      - btc-watch-db
 #    environment:
 #      CGO_ENABLED: 0
 #      GOOS: linux

@@ -15,7 +15,7 @@ type ImportCommand struct {
 	Name    string
 	Version string
 	UI      cli.Ui
-	Wallet  wallets.Walleter
+	Wallet  wallets.Watcher
 }
 
 // Synopsis is explanation for this subcommand

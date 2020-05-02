@@ -106,33 +106,33 @@ func ValidateAccountType(v string) bool {
 // AccountTypeValue account_type value
 // Note: if key is not found, value is 0
 var AccountTypeValue = map[AccountType]uint32{
-	AccountTypeClient:        0,
-	AccountTypeDeposit:       1,
-	AccountTypePayment:       2,
-	AccountTypeStored:        3,
+	AccountTypeClient:  0,
+	AccountTypeDeposit: 1,
+	AccountTypePayment: 2,
+	AccountTypeStored:  3,
 
 	AccountTypeAuthorization: 10,
-	AccountTypeAuth1: 11,
-	AccountTypeAuth2: 12,
-	AccountTypeAuth3: 13,
-	AccountTypeAuth4: 14,
-	AccountTypeAuth5: 15,
-	AccountTypeAuth6: 16,
-	AccountTypeAuth7: 17,
-	AccountTypeAuth8: 18,
-	AccountTypeAuth9: 19,
-	AccountTypeAuth10: 20,
-	AccountTypeAuth11: 21,
-	AccountTypeAuth12: 22,
-	AccountTypeAuth13: 23,
-	AccountTypeAuth14: 24,
-	AccountTypeAuth15: 25,
+	AccountTypeAuth1:         11,
+	AccountTypeAuth2:         12,
+	AccountTypeAuth3:         13,
+	AccountTypeAuth4:         14,
+	AccountTypeAuth5:         15,
+	AccountTypeAuth6:         16,
+	AccountTypeAuth7:         17,
+	AccountTypeAuth8:         18,
+	AccountTypeAuth9:         19,
+	AccountTypeAuth10:        20,
+	AccountTypeAuth11:        21,
+	AccountTypeAuth12:        22,
+	AccountTypeAuth13:        23,
+	AccountTypeAuth14:        24,
+	AccountTypeAuth15:        25,
 
 	AccountTypeAnonymous: 99,
 	AccountTypeTest:      100,
 }
 
-// String converter
+// Uint32 converter
 func (a AccountType) Uint32() uint32 {
 	return AccountTypeValue[a]
 }
@@ -196,6 +196,7 @@ func (a AuthType) String() string {
 	return string(a)
 }
 
+// AccountType converter
 func (a AuthType) AccountType() AccountType {
 	return AccountTypeMap[a.String()]
 }

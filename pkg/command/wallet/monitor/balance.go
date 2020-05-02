@@ -13,7 +13,7 @@ type BalanceCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   wallets.Walleter
+	wallet   wallets.Watcher
 }
 
 // Synopsis is explanation for this subcommand

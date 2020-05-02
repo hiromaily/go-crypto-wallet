@@ -1,4 +1,4 @@
-package wallet
+package watch
 
 import (
 	"github.com/pkg/errors"
@@ -10,7 +10,7 @@ import (
 
 // UpdateTxStatus update transaction status
 // - monitor transaction whose tx_type=3(TxTypeSent) in tx_payment/tx_deposit/tx_transfer
-func (w *Wallet) UpdateTxStatus() error {
+func (w *Watch) UpdateTxStatus() error {
 	//TODO: as possibility tx_type is not updated from `done`
 
 	types := []action.ActionType{
@@ -40,7 +40,7 @@ func (w *Wallet) UpdateTxStatus() error {
 }
 
 // update TxTypeSent to TxTypeDone if confirmation is 6 or more
-func (w *Wallet) updateStatusTxTypeSent(actionType action.ActionType) error {
+func (w *Watch) updateStatusTxTypeSent(actionType action.ActionType) error {
 	// get records whose status is TxTypeSent
 	hashes, err := w.repo.Tx().GetSentHashTx(actionType, tx.TxTypeSent)
 	if err != nil {
@@ -70,7 +70,7 @@ func (w *Wallet) updateStatusTxTypeSent(actionType action.ActionType) error {
 	return nil
 }
 
-func (w *Wallet) updateStatusTxTypeDone(actionType action.ActionType) error {
+func (w *Watch) updateStatusTxTypeDone(actionType action.ActionType) error {
 	// get records whose status is TxTypeDone
 	hashes, err := w.repo.Tx().GetSentHashTx(actionType, tx.TxTypeDone)
 	if err != nil {
@@ -113,7 +113,7 @@ func (w *Wallet) updateStatusTxTypeDone(actionType action.ActionType) error {
 }
 
 // checkTxConfirmation check confirmation for hash tx
-func (w *Wallet) checkTxConfirmation(hash string, actionType action.ActionType) (bool, error) {
+func (w *Watch) checkTxConfirmation(hash string, actionType action.ActionType) (bool, error) {
 	// get tx in detail by RPC `gettransaction`
 	tran, err := w.btc.GetTransactionByTxID(hash)
 	if err != nil {
@@ -141,7 +141,7 @@ func (w *Wallet) checkTxConfirmation(hash string, actionType action.ActionType) 
 }
 
 // notifyTxDone notify tx is sent and met specific confirmation number
-func (w *Wallet) notifyTxDone(hash string, actionType action.ActionType) (int64, error) {
+func (w *Watch) notifyTxDone(hash string, actionType action.ActionType) (int64, error) {
 
 	var (
 		txID int64
@@ -205,7 +205,7 @@ func (w *Wallet) notifyTxDone(hash string, actionType action.ActionType) (int64,
 }
 
 // update tx_type TxTypeNotified
-func (w *Wallet) updateTxTypeNotified(id int64, actionType action.ActionType) error {
+func (w *Watch) updateTxTypeNotified(id int64, actionType action.ActionType) error {
 	switch actionType {
 	case action.ActionTypeDeposit:
 		_, err := w.repo.Tx().UpdateTxType(id, tx.TxTypeNotified)

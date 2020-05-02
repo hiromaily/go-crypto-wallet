@@ -9,31 +9,33 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
-	wcmd "github.com/hiromaily/go-bitcoin/pkg/command/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/command/sign"
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-// wallet as watch only wallet
-//  this wallet works online, so bitcoin network is required to call APIs
-//  create unsigned transaction
-//  send signed transaction
+// sign wallet as cold wallet
+//  generate one key and seed for only authorization account
+//  target account: client, deposit, payment
+
+// procedure
+//  1. create seed
+//  2. create key
+//  3. run `importprivkey`
+//  4. export pubkey from DB
+//  5. sing on unsigned transaction
+//   sign for unsigned transaction (multisig addresses are required to sign by multiple devices)
 
 //TODO: bitcoin functionalities
-// - back up wallet data periodically and import functionality
-// - generated key must be encrypted
-// - transfer with amount
-// - transfer for monitoring
-//TODO:
-// - logger interface: stdout(ui), log format, open tracing
-// - repository interface (from mysql, mock, redis and so on)
-// - btc command for mock is required
-
+// - encrypt wallet itself by `encryptwallet` command
+// - passphrase would be required when using secret key to sign unsigned transaction
+// - multisig with bigger number e.g. 3:5
 var (
-	walletType = wallet.WalletTypeWatchOnly
+	walletType = wallet.WalletTypeSignature
 	appName    = walletType.String()
 	appVersion = "2.2.0"
+	authName   = "" // this account is supposed to be embedded when building
 )
 
 func main() {
@@ -43,10 +45,10 @@ func main() {
 		btcWallet string
 		isHelp    bool
 		isVersion bool
-		walleter  wallets.Walleter
+		walleter  wallets.Signer
 	)
 	flags := flag.NewFlagSet("main", flag.ContinueOnError)
-	flags.StringVar(&confPath, "conf", os.Getenv("WATCH_WALLET_CONF"), "config file path")
+	flags.StringVar(&confPath, "conf", os.Getenv("SIGN_WALLET_CONF"), "config file path")
 	flags.StringVar(&btcWallet, "wallet", "", "specify wallet in bitcoin core")
 	flags.BoolVar(&isVersion, "version", false, "show version")
 	flags.BoolVar(&isHelp, "help", false, "show help")
@@ -56,7 +58,7 @@ func main() {
 
 	// version
 	if isVersion {
-		fmt.Printf("%s v%s\n", appName, appVersion)
+		fmt.Printf("%s v%s for %s\n", appName, appVersion, authName)
 		os.Exit(0)
 	}
 
@@ -74,8 +76,8 @@ func main() {
 		log.Println("conf.Bitcoin.Host:", conf.Bitcoin.Host)
 
 		// create wallet
-		regi := NewRegistry(conf, walletType)
-		walleter = regi.NewWalleter()
+		regi := NewRegistry(conf, walletType, authName)
+		walleter = regi.NewSigner()
 	}
 	defer func() {
 		walleter.Done()
@@ -83,7 +85,7 @@ func main() {
 
 	//sub command
 	args := flags.Args()
-	cmds := wcmd.WalletSubCommands(walleter, appVersion)
+	cmds := sign.WalletSubCommands(walleter, appVersion)
 	cl := command.CreateSubCommand(appName, appVersion, args, cmds)
 	cl.HelpFunc = command.HelpFunc(cl.Name)
 

@@ -1,4 +1,4 @@
-package wallet
+package watch
 
 import (
 	"github.com/pkg/errors"
@@ -9,7 +9,7 @@ import (
 )
 
 // SendTx send signed tx by keygen/sign walet
-func (w *Wallet) SendTx(filePath string) (string, error) {
+func (w *Watch) SendTx(filePath string) (string, error) {
 
 	// get tx_deposit_id from file name
 	//payment_5_unsigned_1_1534466246366489473
@@ -75,7 +75,7 @@ func (w *Wallet) SendTx(filePath string) (string, error) {
 	return hash.String(), nil
 }
 
-func (w *Wallet) updateIsAllocatedAccountPubkey(txID int64) error {
+func (w *Watch) updateIsAllocatedAccountPubkey(txID int64) error {
 	// get txOutputs by tx_id
 	txOutputs, err := w.repo.TxOutput().GetAllByTxID(txID)
 	if err != nil {

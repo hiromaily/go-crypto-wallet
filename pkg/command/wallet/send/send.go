@@ -13,7 +13,7 @@ import (
 type SendCommand struct {
 	Name   string
 	UI     cli.Ui
-	Wallet wallets.Walleter
+	Wallet wallets.Watcher
 }
 
 // Synopsis is explanation for this subcommand

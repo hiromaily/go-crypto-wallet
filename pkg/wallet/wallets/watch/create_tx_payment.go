@@ -1,8 +1,7 @@
-package wallet
+package watch
 
 import (
 	"github.com/btcsuite/btcutil"
-	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
@@ -12,7 +11,7 @@ import (
 // CreatePaymentTx create unsigned tx for user(anonymous addresses)
 // sender: payment, receiver: addresses coming from user_payment table
 // - sender account(payment) covers fee, but is should be flexible
-func (w *Wallet) CreatePaymentTx(adjustmentFee float64) (string, string, error) {
+func (w *Watch) CreatePaymentTx(adjustmentFee float64) (string, string, error) {
 	sender := account.AccountTypePayment
 	receiver := account.AccountTypeAnonymous
 	targetAction := action.ActionTypePayment
@@ -41,7 +40,8 @@ func (w *Wallet) CreatePaymentTx(adjustmentFee float64) (string, string, error) 
 	}
 	if balance <= requiredAmount {
 		//balance is short
-		return "", "", errors.New("balance for payment account is insufficient")
+		w.logger.Info("balance for payment account is insufficient")
+		return "", "", nil
 	}
 	w.logger.Debug("payment balane and userTotal",
 		zap.Any("balance", balance),
@@ -52,7 +52,7 @@ func (w *Wallet) CreatePaymentTx(adjustmentFee float64) (string, string, error) 
 }
 
 // userPayments is given for receiverAddr
-func (w *Wallet) createPaymentTxOutputs(userPayments []UserPayment, changeAddr string, changeAmount btcutil.Amount) map[btcutil.Address]btcutil.Amount {
+func (w *Watch) createPaymentTxOutputs(userPayments []UserPayment, changeAddr string, changeAmount btcutil.Amount) map[btcutil.Address]btcutil.Amount {
 	var (
 		txOutputs = map[btcutil.Address]btcutil.Amount{}
 		//if key of map is btcutil.Address which is interface type, uniqueness can't be found from map key

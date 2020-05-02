@@ -9,7 +9,7 @@ services:
   #########################################################################
   # Bitcoin core
   #########################################################################
-  bch-wallet:
+  bch-watch:
     build:
       context: ./docker/bch/
       dockerfile: Dockerfile
@@ -26,18 +26,18 @@ services:
     #        fluentd-address: "localhost:24224"
     #        tag: "docker.{{.ID}}"
     command: /usr/bin/bitcoind --printtoconsole #--conf=/root/.bitcoin/bitcoind.conf
-    # docker-compose -f docker-compose.bch.yml exec bch-wallet bash
-    # docker-compose -f docker-compose.bch.yml exec bch-wallet bitcoin-cli getnetworkinfo
+    # docker-compose -f docker-compose.bch.yml exec bch-watch bash
+    # docker-compose -f docker-compose.bch.yml exec bch-watch bitcoin-cli getnetworkinfo
     # /root/.bitcoin/testnet3/wallets
 
   #########################################################################
   # Database
   #########################################################################
   # watch only wallet
-  bch-wallet-db:
+  bch-watch-db:
     image: mysql:5.7
     volumes:
-      - bch-wallet-db:/var/lib/mysql
+      - bch-watch-db:/var/lib/mysql
       - "./docker/mysql/wallet/conf.d:/etc/mysql/conf.d"
       - "./docker/mysql/wallet/init.d:/docker-entrypoint-initdb.d"
     environment:

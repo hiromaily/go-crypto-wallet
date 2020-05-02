@@ -8,7 +8,7 @@
 #make filepath=./data/pubkey/client_1535423628425011000.csv import-pubkey
 .PHONY: import-address
 import-pubkey:
-	wallet import address -acount client -file ${filepath}
+	watch import address -acount client -file ${filepath}
 
 
 ###############################################################################
@@ -18,30 +18,30 @@ import-pubkey:
 #make fee=0.5 create-deposit-tx
 .PHONY: create-deposit-tx
 create-deposit-tx:
-	wallet create deposit -fee ${fee}
+	watch create deposit -fee ${fee}
 
 # Note: debug use
 # WIP: execute series of flows from creation of a receiving transaction to sending of a transaction
 .PHONY: create-deposit-all
 create-deposit-all:
-	wallet create deposit -debug
+	watch create deposit -debug
 
 # create payment request from payment table
 #make fee=0.5 create-payment-tx
 .PHONY: create-payment-tx
 create-payment-tx:
-	wallet create payment -fee ${fee}
+	watch create payment -fee ${fee}
 
 # Note: debug use
 # WIP: execute series of flows from creation of payment transaction to sending of a transaction
 .PHONY: create-payment-all
 create-payment-all:
-	wallet create payment -debug
+	watch create payment -debug
 
 # create transfer unsigned transaction among accounts
 .PHONY: create-transfer-tx
 create-transfer-tx:
-	wallet create transfer -account1 ${acnt1} -account2 ${acnt2} -amount ${amount}
+	watch create transfer -account1 ${acnt1} -account2 ${acnt2} -amount ${amount}
 
 ###############################################################################
 # send transaction
@@ -50,7 +50,7 @@ create-transfer-tx:
 #make filepath=./data/tx/deposit/deposit_8_signed_1534832879778945174 send-tx
 .PHONY: send-tx
 send-tx:
-	wallet send -file ${filepath}
+	watch send -file ${filepath}
 
 
 ###############################################################################
@@ -60,13 +60,13 @@ send-tx:
 #make acnt=client monitor-tx
 .PHONY: monitor-tx
 monitor-tx:
-	wallet monitor senttx -account ${acnt}
+	watch monitor senttx -account ${acnt}
 
 # WIP: monitor account balance
 #make acnt=client monitor-balance
 .PHONY: monitor-balance
 monitor-balance:
-	wallet monitor balance -account ${acnt}
+	watch monitor balance -account ${acnt}
 
 
 ###############################################################################
@@ -76,12 +76,12 @@ monitor-balance:
 # Note: available after generated pub keys are imported on wallet
 .PHONY: create-testdata
 create-testdata:
-	wallet db create
+	watch db create
 
 # reset payment testdata
 .PHONY: reset-testdata
 reset-testdata:
-	wallet db reset
+	watch db reset
 
 
 ###############################################################################
@@ -98,35 +98,35 @@ reset-testdata:
 # get balance for account
 .PHONY: api-balance
 api-balance:
-	wallet api balance
+	watch api balance
 
 # estimate fee
 .PHONY: api-estimatefee
 api-estimatefee:
-	wallet api estimatefee
+	watch api estimatefee
 
 # call getnetworkinfo
 .PHONY: api-getnetworkinfo
 api-getnetworkinfo:
-	wallet api getnetworkinfo
+	watch api getnetworkinfo
 
 # call listunspent
 .PHONY: api-listunspent
 api-listunspent:
-	wallet api listunspent
+	watch api listunspent
 
 # logging
 .PHONY: api-logging
 api-logging:
-	wallet api logging
+	watch api logging
 
 # unlock locked transaction for unspent transaction
 .PHONY: api-unlocktx
 api-unlocktx:
-	wallet api unlocktx
+	watch api unlocktx
 
 # validateaddress
 #make addr=xxxxx api-validateaddress
 .PHONY: api-validateaddress
 api-validateaddress:
-	wallet api validateaddress -address ${addr}
+	watch api validateaddress -address ${addr}

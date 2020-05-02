@@ -1,8 +1,8 @@
 .DS_Store
 .idea/
-!cmd/wallet
+!cmd/watch
 !cmd/keygen
-!cmd/signature
+!cmd/sign
 data/tx/*
 data/pubkey/*.csv
 data/address/*.csv

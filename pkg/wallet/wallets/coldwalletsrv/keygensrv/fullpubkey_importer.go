@@ -27,7 +27,7 @@ type FullPubkeyImport struct {
 	wtype              wallet.WalletType
 }
 
-// NewPubkeyImport returns pubkeyImport object
+// NewFullPubkeyImport returns FullPubkeyImport object
 func NewFullPubkeyImport(
 	btc api.Bitcoiner,
 	logger *zap.Logger,
@@ -44,7 +44,7 @@ func NewFullPubkeyImport(
 	}
 }
 
-// ImportPubKey imports auth pubKey from csv in keygen wallet
+// ImportFullPubKey imports auth fullpubKey from csv
 func (p *FullPubkeyImport) ImportFullPubKey(fileName string) error {
 	//validate file name
 	//if err := p.pubkeyFileRepo.ValidateFilePath(fileName, account.AccountTypeAuthorization); err != nil {

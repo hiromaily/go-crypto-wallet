@@ -1,6 +1,6 @@
 
 ###############################################################################
-# Signature Wallet for generating key of only authorization account
+# Sign Wallet for generating key of only authorization account
 #  and multisig address,
 #  and signature for multisig addresses
 ###############################################################################

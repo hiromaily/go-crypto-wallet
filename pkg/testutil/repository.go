@@ -26,7 +26,7 @@ func NewTxRepository() walletrepo.TxRepository {
 	}
 
 	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-bitcoin", os.Getenv("GOPATH"))
-	confPath := fmt.Sprintf("%s/data/config/btc/wallet.toml", projPath)
+	confPath := fmt.Sprintf("%s/data/config/btc/watch.toml", projPath)
 	conf, err := config.New(confPath, wallet.WalletTypeWatchOnly)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
@@ -53,7 +53,7 @@ func NewAccountKeyRepository() coldrepo.AccountKeyRepositorier {
 	}
 
 	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-bitcoin", os.Getenv("GOPATH"))
-	confPath := fmt.Sprintf("%s/data/config/btc/wallet.toml", projPath)
+	confPath := fmt.Sprintf("%s/data/config/btc/watch.toml", projPath)
 	conf, err := config.New(confPath, wallet.WalletTypeWatchOnly)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)

@@ -7,7 +7,7 @@ set -eu
 
 # create unsigned tx
 echo 'create transfer tx'
-tx_file=$(wallet create transfer -account1 deposit -account2 payment)
+tx_file=$(watch create transfer -account1 deposit -account2 payment)
 if [ "`echo $tx_file | grep 'No utxo'`" ]; then
   echo 'No utxo'
   exit 0
@@ -23,5 +23,5 @@ tx_file_signed2=`sign sign -file "${tx_file_signed##*\[fileName\]: }"`
 
 # send signed tx
 echo 'send tx '${tx_file_signed2##*\[fileName\]: }
-tx_id=`wallet send -file "${tx_file_signed2##*\[fileName\]: }"`
+tx_id=`watch send -file "${tx_file_signed2##*\[fileName\]: }"`
 echo 'txID:'${tx_id##*txID: }

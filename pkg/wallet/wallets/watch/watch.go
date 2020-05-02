@@ -1,4 +1,4 @@
-package wallet
+package watch
 
 import (
 	"github.com/opentracing/opentracing-go"
@@ -11,8 +11,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 )
 
-// Wallet watch only wallet object
-type Wallet struct {
+// Watch watch only wallet object
+type Watch struct {
 	btc          api.Bitcoiner
 	logger       *zap.Logger
 	tracer       opentracing.Tracer
@@ -22,17 +22,17 @@ type Wallet struct {
 	wtype        wtype.WalletType
 }
 
-// NewWallet returns Wallet object
-func NewWallet(
+// NewWatch returns Watch object
+func NewWatch(
 	btc api.Bitcoiner,
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
 	repo walletrepo.WalletRepository,
 	addrFileRepo address.FileStorager,
 	txFileRepo tx.FileStorager,
-	wtype wtype.WalletType) *Wallet {
+	wtype wtype.WalletType) *Watch {
 
-	return &Wallet{
+	return &Watch{
 		btc:          btc,
 		logger:       logger,
 		tracer:       tracer,
@@ -44,22 +44,22 @@ func NewWallet(
 }
 
 // Done should be called before exit
-func (w *Wallet) Done() {
+func (w *Watch) Done() {
 	w.repo.Close()
 	w.btc.Close()
 }
 
 // GetDB gets repository
-func (w *Wallet) GetDB() walletrepo.WalletRepository {
+func (w *Watch) GetDB() walletrepo.WalletRepository {
 	return w.repo
 }
 
 // GetBTC gets btc
-func (w *Wallet) GetBTC() api.Bitcoiner {
+func (w *Watch) GetBTC() api.Bitcoiner {
 	return w.btc
 }
 
 // GetType gets wallet type
-func (w *Wallet) GetType() wtype.WalletType {
+func (w *Watch) GetType() wtype.WalletType {
 	return w.wtype
 }

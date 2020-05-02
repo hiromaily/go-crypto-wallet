@@ -50,7 +50,7 @@ At least, one bitcoin core server and 3 different databases are required.
 After [bitcoin core installation](https://github.com/bitcoin/bitcoin/blob/master/doc/build-osx.md) is done
 ```
 # run database on docker
-$ docker-compose up btc-wallet-db btc-keygen-db btc-signature-db
+$ docker-compose up btc-watch-db btc-keygen-db btc-signature-db
 
 # run bitcoind
 $ bitcoind
@@ -74,9 +74,9 @@ go build -i -v -o ${GOPATH}/bin/sign ./cmd/signature/
 ```
 
 ### Configuration
-- [wallet.toml](https://github.com/hiromaily/go-bitcoin/blob/master/data/config/btc/wallet.toml)
+- [wallet.toml](https://github.com/hiromaily/go-bitcoin/blob/master/data/config/btc/watch.toml)
 - [keygen.toml](https://github.com/hiromaily/go-bitcoin/blob/master/data/config/btc/keygen.toml)
-- [signature.toml](https://github.com/hiromaily/go-bitcoin/blob/master/data/config/btc/signature.toml)
+- [signature.toml](https://github.com/hiromaily/go-bitcoin/blob/master/data/config/btc/sign.toml)
 
 ## Example
 - [see scripts](https://github.com/hiromaily/go-bitcoin/tree/master/scripts/operation)

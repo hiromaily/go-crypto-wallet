@@ -16,8 +16,8 @@ import (
 //        /keygen     ... has only keygen interface
 //        /signature  ... has only signature interface
 
-// Walleter is for watch only wallet service interface
-type Walleter interface {
+// Watcher is for watch only wallet service interface
+type Watcher interface {
 	ImportAddress(fileName string, accountType account.AccountType, isRescan bool) error
 	CreateDepositTx(adjustmentFee float64) (string, string, error)
 	CreatePaymentTx(adjustmentFee float64) (string, string, error)

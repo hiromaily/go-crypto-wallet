@@ -1,4 +1,4 @@
-package wallet
+package watch
 
 import (
 	"fmt"
@@ -43,7 +43,7 @@ type parsedTx struct {
 
 // FIXME: receiver account covers fee, but is should be flexible
 // TODO: after this func, what if `listtransactions` api is called to see result
-func (w *Wallet) createTx(
+func (w *Watch) createTx(
 	sender,
 	receiver account.AccountType,
 	targetAction action.ActionType,
@@ -144,7 +144,7 @@ func (w *Wallet) createTx(
 
 // call API `unspentlist`
 // no result and no error is possible, so caller should check both returned value
-func (w *Wallet) getUnspentList(accountType account.AccountType) ([]btc.ListUnspentResult, []string, error) {
+func (w *Watch) getUnspentList(accountType account.AccountType) ([]btc.ListUnspentResult, []string, error) {
 	// unlock locked UnspentTransaction
 	//if err := w.BTC.UnlockUnspent(); err != nil {
 	//	return "", "", err
@@ -162,7 +162,7 @@ func (w *Wallet) getUnspentList(accountType account.AccountType) ([]btc.ListUnsp
 
 // parse result of listUnspent
 // retured *parsedTx could be nil
-func (w *Wallet) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount btcutil.Amount) (*parsedTx, btcutil.Amount, bool) {
+func (w *Watch) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount btcutil.Amount) (*parsedTx, btcutil.Amount, bool) {
 	var inputTotal btcutil.Amount
 	txInputs := make([]btcjson.TransactionInput, 0, len(unspentList))
 	txRepoTxInputs := make([]*models.TXInput, 0, len(unspentList))
@@ -233,7 +233,7 @@ func (w *Wallet) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount 
 }
 
 // for ActionTypeDeposit, ActionTypeTransfer
-func (w *Wallet) createTxOutputs(
+func (w *Watch) createTxOutputs(
 	reciver account.AccountType,
 	requiredAmount btcutil.Amount,
 	inputTotal btcutil.Amount,
@@ -289,7 +289,7 @@ func (w *Wallet) createTxOutputs(
 // - create raw tx
 // - insert data to detabase
 // - available from deposit/transfer action
-func (w *Wallet) createRawTx(
+func (w *Watch) createRawTx(
 	targetAction action.ActionType,
 	sender account.AccountType,
 	receiver account.AccountType,
@@ -382,7 +382,7 @@ func (w *Wallet) createRawTx(
 	return hex, generatedFileName, nil
 }
 
-func (w *Wallet) calculateOutputTotal(
+func (w *Watch) calculateOutputTotal(
 	sender account.AccountType,
 	receiver account.AccountType,
 	msgTx *wire.MsgTx,
@@ -460,7 +460,7 @@ func (w *Wallet) calculateOutputTotal(
 	return outputTotal, fee, txPrevOutputs, txRepoOutputs, nil
 }
 
-func (w *Wallet) insertTxTableForUnsigned(
+func (w *Watch) insertTxTableForUnsigned(
 	actionType action.ActionType,
 	hex string,
 	inputTotal,
@@ -540,7 +540,7 @@ func (w *Wallet) insertTxTableForUnsigned(
 }
 
 // generateHexFile generate file for hex and encoded previous addresses
-func (w *Wallet) generateHexFile(actionType action.ActionType, hex, encodedAddrsPrevs string, id int64) (string, error) {
+func (w *Watch) generateHexFile(actionType action.ActionType, hex, encodedAddrsPrevs string, id int64) (string, error) {
 	var (
 		generatedFileName string
 		err               error
@@ -563,7 +563,7 @@ func (w *Wallet) generateHexFile(actionType action.ActionType, hex, encodedAddrs
 
 // IsFoundTxIDAndVout finds out txID and vout from related txInputs
 // nolint: unused
-func (w *Wallet) IsFoundTxIDAndVout(txID string, vout uint32, inputs []btcjson.TransactionInput) bool {
+func (w *Watch) IsFoundTxIDAndVout(txID string, vout uint32, inputs []btcjson.TransactionInput) bool {
 	for _, val := range inputs {
 		if val.Txid == txID && val.Vout == vout {
 			return true

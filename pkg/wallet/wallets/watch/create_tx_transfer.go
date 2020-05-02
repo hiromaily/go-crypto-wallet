@@ -1,4 +1,4 @@
-package wallet
+package watch
 
 import (
 	"github.com/pkg/errors"
@@ -9,7 +9,7 @@ import (
 
 // CreateTransferTx create unsigned tx for transfer coin among internal account except client, authorization
 // FIXME: for now, receiver account covers fee, but is should be flexible
-func (w *Wallet) CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error) {
+func (w *Watch) CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error) {
 	targetAction := action.ActionTypeTransfer
 
 	// validation account

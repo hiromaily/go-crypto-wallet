@@ -1,4 +1,4 @@
-package wallet
+package watch
 
 import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
@@ -8,7 +8,7 @@ import (
 // CreateDepositTx create unsigned tx if client accounts have coins
 // - sender: client, receiver: deposit
 // - receiver account covers fee, but is should be flexible
-func (w *Wallet) CreateDepositTx(adjustmentFee float64) (string, string, error) {
+func (w *Watch) CreateDepositTx(adjustmentFee float64) (string, string, error) {
 	sender := account.AccountTypeClient
 	receiver := account.AccountTypeDeposit
 	targetAction := action.ActionTypeDeposit

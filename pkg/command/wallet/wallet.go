@@ -15,7 +15,7 @@ import (
 
 // WalletSubCommands returns subcommand for wallet
 // nolint: golint
-func WalletSubCommands(wallet wallets.Walleter, version string) map[string]cli.CommandFactory {
+func WalletSubCommands(wallet wallets.Watcher, version string) map[string]cli.CommandFactory {
 	return map[string]cli.CommandFactory{
 		"import": func() (cli.Command, error) {
 			return &imports.ImportCommand{

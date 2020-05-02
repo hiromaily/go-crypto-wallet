@@ -1,4 +1,4 @@
-package wallet
+package watch
 
 import (
 	"strings"
@@ -12,7 +12,7 @@ import (
 
 // ImportAddress import PubKey from csv filecsv into database,
 //  - if account is client, which doesn't have account ??
-func (w *Wallet) ImportAddress(fileName string, accountType account.AccountType, isRescan bool) error {
+func (w *Watch) ImportAddress(fileName string, accountType account.AccountType, isRescan bool) error {
 	// read file for public key
 	pubKeys, err := w.addrFileRepo.ImportAddress(fileName)
 	if err != nil {
@@ -68,7 +68,7 @@ func (w *Wallet) ImportAddress(fileName string, accountType account.AccountType,
 }
 
 // checkImportedPubKey confirm pubkey is added as watch only wallet
-func (w *Wallet) checkImportedPubKey(addr string) {
+func (w *Watch) checkImportedPubKey(addr string) {
 	addrInfo, err := w.btc.GetAddressInfo(addr)
 	if err != nil {
 		w.logger.Error(

@@ -2,7 +2,7 @@
 
 ## Caution when generating models by SqlBoiler
 
-##### 1. remove comment out in wallet.sql 
+##### 1. remove comment out in watch.sql 
 ```
 -- source /sqls/definition_keygen.sql
 ```

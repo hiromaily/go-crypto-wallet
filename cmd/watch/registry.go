@@ -18,12 +18,12 @@ import (
 	wtype "github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/watch"
 )
 
 // Registry is for registry interface
 type Registry interface {
-	NewWalleter() wallets.Walleter
+	NewWalleter() wallets.Watcher
 }
 
 type registry struct {
@@ -43,8 +43,8 @@ func NewRegistry(conf *config.Config, walletType wtype.WalletType) Registry {
 }
 
 // NewWalleter is to register for walleter interface
-func (r *registry) NewWalleter() wallets.Walleter {
-	return wallet.NewWallet(
+func (r *registry) NewWalleter() wallets.Watcher {
+	return watch.NewWatch(
 		r.newBTC(),
 		r.newLogger(),
 		r.newTracer(),

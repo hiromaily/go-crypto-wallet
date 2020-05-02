@@ -1,4 +1,4 @@
-package wallet
+package watch
 
 import (
 	"strconv"
@@ -17,7 +17,7 @@ type UserPayment struct {
 }
 
 // createUserPayment get payment data from payment_request table
-func (w *Wallet) createUserPayment() ([]UserPayment, []int64, error) {
+func (w *Watch) createUserPayment() ([]UserPayment, []int64, error) {
 	// get payment_request
 	paymentRequests, err := w.repo.PayReq().GetAll()
 	if err != nil {

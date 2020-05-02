@@ -63,18 +63,18 @@ sqlboiler:
 	sqlboiler --wipe mysql
 
 # ifacemaker is tool which makes interface from struct
-.PHONY: generate-go-interface
-generate-go-interface:
-	#walletrepo
-	ifacemaker -f pkg/model/rdb/walletrepo/account_pubkey_repo.go -s WalletRepository -i WalletStorager -p rdb
-	ifacemaker -f pkg/model/rdb/walletrepo/payment_request_repo.go -s WalletRepository -i WalletStorager -p rdb
-	ifacemaker -f pkg/model/rdb/walletrepo/tx_input_repo.go -s WalletRepository -i WalletStorager -p rdb
-	ifacemaker -f pkg/model/rdb/walletrepo/tx_output_repo.go -s WalletRepository -i WalletStorager -p rdb
-	ifacemaker -f pkg/model/rdb/walletrepo/tx_repo.go -s WalletRepository -i WalletStorager -p rdb
-	#keygenrepo
-	ifacemaker -f pkg/model/rdb/keygenrepo/account_key_repo.go -s KeygenRepository -i KeygenStorager -p rdb
-	ifacemaker -f pkg/model/rdb/keygenrepo/added_pubkey_history_repo.go -s KeygenRepository -i KeygenStorager -p rdb
-	ifacemaker -f pkg/model/rdb/keygenrepo/seed_repo.go -s KeygenRepository -i KeygenStorager -p rdb
+#.PHONY: generate-go-interface
+#generate-go-interface:
+#	#walletrepo
+#	ifacemaker -f pkg/model/rdb/walletrepo/account_pubkey_repo.go -s WalletRepository -i WalletStorager -p rdb
+#	ifacemaker -f pkg/model/rdb/walletrepo/payment_request_repo.go -s WalletRepository -i WalletStorager -p rdb
+#	ifacemaker -f pkg/model/rdb/walletrepo/tx_input_repo.go -s WalletRepository -i WalletStorager -p rdb
+#	ifacemaker -f pkg/model/rdb/walletrepo/tx_output_repo.go -s WalletRepository -i WalletStorager -p rdb
+#	ifacemaker -f pkg/model/rdb/walletrepo/tx_repo.go -s WalletRepository -i WalletStorager -p rdb
+#	#keygenrepo
+#	ifacemaker -f pkg/model/rdb/keygenrepo/account_key_repo.go -s KeygenRepository -i KeygenStorager -p rdb
+#	ifacemaker -f pkg/model/rdb/keygenrepo/added_pubkey_history_repo.go -s KeygenRepository -i KeygenStorager -p rdb
+#	ifacemaker -f pkg/model/rdb/keygenrepo/seed_repo.go -s KeygenRepository -i KeygenStorager -p rdb
 
 # git tag
 #git tag v2.0.0 cfeca390b781af79321fb644c056bf6e755fdc7e
@@ -85,26 +85,26 @@ generate-go-interface:
 ###############################################################################
 .PHONY: bld-linux
 bld-linux: update-decimal
-	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/wallet ./cmd/wallet/main.go
+	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/watch ./cmd/watch/main.go
 	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/keygen ./cmd/keygen/main.go
-	CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.authName=auth1" -o /go/bin/sign ./cmd/signature/main.go
+	CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.authName=auth1" -o /go/bin/sign ./cmd/sign/main.go
 
 ###############################################################################
 # Build on local
 ###############################################################################
 .PHONY: bld
 bld: update-decimal
-	go build -i -v -o ${GOPATH}/bin/wallet ./cmd/wallet/
+	go build -i -v -o ${GOPATH}/bin/watch ./cmd/watch/
 	go build -i -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
-	go build -ldflags "-X main.authName=auth1" -i -v -o ${GOPATH}/bin/sign ./cmd/signature/
-	go build -ldflags "-X main.authName=auth2" -i -v -o ${GOPATH}/bin/sign2 ./cmd/signature/
-	go build -ldflags "-X main.authName=auth3" -i -v -o ${GOPATH}/bin/sign3 ./cmd/signature/
-	go build -ldflags "-X main.authName=auth4" -i -v -o ${GOPATH}/bin/sign4 ./cmd/signature/
-	go build -ldflags "-X main.authName=auth5" -i -v -o ${GOPATH}/bin/sign5 ./cmd/signature/
+	go build -ldflags "-X main.authName=auth1" -i -v -o ${GOPATH}/bin/sign ./cmd/sign/
+	go build -ldflags "-X main.authName=auth2" -i -v -o ${GOPATH}/bin/sign2 ./cmd/sign/
+	go build -ldflags "-X main.authName=auth3" -i -v -o ${GOPATH}/bin/sign3 ./cmd/sign/
+	go build -ldflags "-X main.authName=auth4" -i -v -o ${GOPATH}/bin/sign4 ./cmd/sign/
+	go build -ldflags "-X main.authName=auth5" -i -v -o ${GOPATH}/bin/sign5 ./cmd/sign/
 
 .PHONY: bldw
 bldw:
-	go build -i -v -o ${GOPATH}/bin/wallet ./cmd/wallet/
+	go build -i -v -o ${GOPATH}/bin/watch ./cmd/watch/
 
 .PHONY: bldk
 bldk:
@@ -112,15 +112,15 @@ bldk:
 
 .PHONY: blds
 blds:
-	go build -ldflags "-X main.authName=auth1" -i -v -o ${GOPATH}/bin/sign ./cmd/signature/
-	go build -ldflags "-X main.authName=auth2" -i -v -o ${GOPATH}/bin/sign2 ./cmd/signature/
-	go build -ldflags "-X main.authName=auth3" -i -v -o ${GOPATH}/bin/sign3 ./cmd/signature/
-	go build -ldflags "-X main.authName=auth4" -i -v -o ${GOPATH}/bin/sign4 ./cmd/signature/
-	go build -ldflags "-X main.authName=auth5" -i -v -o ${GOPATH}/bin/sign5 ./cmd/signature/
+	go build -ldflags "-X main.authName=auth1" -i -v -o ${GOPATH}/bin/sign ./cmd/sign/
+	go build -ldflags "-X main.authName=auth2" -i -v -o ${GOPATH}/bin/sign2 ./cmd/sign/
+	go build -ldflags "-X main.authName=auth3" -i -v -o ${GOPATH}/bin/sign3 ./cmd/sign/
+	go build -ldflags "-X main.authName=auth4" -i -v -o ${GOPATH}/bin/sign4 ./cmd/sign/
+	go build -ldflags "-X main.authName=auth5" -i -v -o ${GOPATH}/bin/sign5 ./cmd/sign/
 
 
 run:
-	go run ./cmd/wallet/ -conf ./data/config/btc/wallet.toml
+	go run ./cmd/watch/ -conf ./data/config/btc/watch.toml
 
 
 ###############################################################################
@@ -155,24 +155,24 @@ bld-docker-ubuntu:
 
 .PHONY: bld-docker-btc
 bld-docker-btc:
-	docker-compose build btc-wallet
+	docker-compose build btc-watch
 
 #bld-docker-bch:
-#	docker-compose -f docker-compose.bch.yml build bch-wallet
+#	docker-compose -f docker-compose.bch.yml build bch-watch
 #up-docker-bch:
-#	docker-compose -f docker-compose.bch.yml up bch-wallet
+#	docker-compose -f docker-compose.bch.yml up bch-watch
 
 .PHONY: up-docker-btc
 up-docker-btc:
-	docker-compose up btc-wallet btc-keygen btc-signature
+	docker-compose up btc-watch btc-keygen btc-sign
 
 .PHONY: up-docker-db
 up-docker-db:
-	docker-compose up btc-wallet-db btc-keygen-db btc-signature-db
+	docker-compose up btc-watch-db btc-keygen-db btc-sign-db
 
-.PHONY: up-docker-only-watch-wallet
-up-docker-only-watch-wallet:
-	docker-compose up btc-wallet btc-wallet-db
+.PHONY: up-docker-watch-only-wallet
+up-docker-watch-only-wallet:
+	docker-compose up btc-watch btc-watch-db
 
 .PHONY: up-docker-btc-all
 up-docker-btc-all: up-docker-btc up-docker-db
@@ -229,18 +229,18 @@ generate-key-local:
 ###############################################################################
 .PHONY: reset-payment-request
 reset-payment-request:
-	mysql -h 127.0.0.1 -u root -p${MYSQL_ROOT_PASSWORD} -P 3307 < ./docker/mysql/wallet/init.d/payment_request.sql
+	mysql -h 127.0.0.1 -u root -p${MYSQL_ROOT_PASSWORD} -P 3307 < ./docker/mysql/watch/init.d/payment_request.sql
 
 .PHONY: reset-payment-request-docker
 reset-payment-request-docker:
-	docker-compose exec btc-wallet-db mysql -u root -proot  -e "$(cat ./docker/mysql/wallet/init.d/payment_request.sql)"
+	docker-compose exec btc-watch-db mysql -u root -proot  -e "$(cat ./docker/mysql/watch/init.d/payment_request.sql)"
 
 ###############################################################################
 # Operation
 ###############################################################################
-include ./Makefile_wallet_op.mk
+include ./Makefile_watch_op.mk
 include ./Makefile_keygen_op.mk
-include ./Makefile_signature_op.mk
+include ./Makefile_sign_op.mk
 
 
 ###############################################################################
