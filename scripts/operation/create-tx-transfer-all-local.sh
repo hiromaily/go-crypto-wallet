@@ -21,6 +21,11 @@ tx_file_signed=`keygen sign -file "${tx_file##*\[fileName\]: }"`
 echo 'sign on 2nd '${tx_file_signed##*\[fileName\]: }
 tx_file_signed2=`sign -wallet sign1 sign -file "${tx_file_signed##*\[fileName\]: }"`
 
+# sign on sign wallet for 3rd signature
+#echo 'sign on 3rd '${tx_file_signed##*\[fileName\]: }
+#tx_file_signed3=`sign2 -wallet sign2 sign -file "${tx_file_signe2d##*\[fileName\]: }"`
+
+
 # send signed tx
 echo 'send tx '${tx_file_signed2##*\[fileName\]: }
 tx_id=`watch send -file "${tx_file_signed2##*\[fileName\]: }"`

@@ -264,6 +264,7 @@ create-wallets:
 list-wallets:
 	bitcoin-cli listwallets
 
+# required after bitcoind restarted
 .PHONY: load-wallet
 load-wallets:
 	bitcoin-cli loadwallet watch
