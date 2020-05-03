@@ -16,26 +16,19 @@ import (
 )
 
 // sign wallet as cold wallet
-//  generate one key and seed for only authorization account
-//  target account: client, deposit, payment
-
-// procedure
-//  1. create seed
-//  2. create key
-//  3. run `importprivkey`
-//  4. export pubkey from DB
-//  5. sing on unsigned transaction
-//   sign for unsigned transaction (multisig addresses are required to sign by multiple devices)
+//  - generate one key and seed for only auth accounts
+//  - sing on unsigned transaction as second or more signature
+//   (multisig addresses require signature)
 
 //TODO: bitcoin functionalities
 // - encrypt wallet itself by `encryptwallet` command
 // - passphrase would be required when using secret key to sign unsigned transaction
-// - multisig with bigger number e.g. 3:5
+
 var (
 	walletType = wallet.WalletTypeSign
 	appName    = walletType.String()
 	appVersion = "2.3.0"
-	authName   = "" // this account is supposed to be embedded when building
+	authName   = "" // this value is supposed to be embedded when building
 )
 
 func main() {

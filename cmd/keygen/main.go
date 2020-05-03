@@ -16,16 +16,10 @@ import (
 )
 
 // keygen wallet as cold wallet
-//  generate key and seed for account
-//  target account: client, deposit, payment
-
-// procedure
-//  1. create seed
-//  2. create key
-//  3. run `importprivkey`
-//  4. export pubkey from DB
-//  5. sing on unsigned transaction
-//   sign for unsigned transaction (multisig addresses are required to sign by multiple devices)
+//  - generate key and seed for accounts
+//  - create multisig address with full pubkey of auth accounts
+//  - sing on unsigned transaction as first signature
+//   (signature would not be completed if address is multisig)
 
 //TODO: bitcoin functionalities
 // - encrypt wallet itself by `encryptwallet` command
