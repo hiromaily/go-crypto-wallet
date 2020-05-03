@@ -2,6 +2,7 @@ package btc
 
 import (
 	"encoding/json"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -51,17 +52,25 @@ func (b *Bitcoin) AddMultisigAddress(
 		bAccount = nil
 	}
 
-	//addressType
-	bAddrType, err := json.Marshal(addressType.String())
-	if err != nil {
-		b.logger.Warn(
-			"fail to json.Marchal(addressType)",
-			zap.String("addressType", addressType.String()),
-			zap.Error(err))
-		bAddrType = nil
-	}
+	//addressType for only BTC
+	var jsonRawMsg []json.RawMessage
+	switch b.coinTypeCode {
+	case coin.BTC:
+		bAddrType, err := json.Marshal(addressType.String())
+		if err != nil {
+			b.logger.Warn(
+				"fail to json.Marchal(addressType)",
+				zap.String("addressType", addressType.String()),
+				zap.Error(err))
+			bAddrType = nil
+		}
 
-	jsonRawMsg := []json.RawMessage{bRequiredSigs, bAddresses, bAccount, bAddrType}
+		jsonRawMsg = []json.RawMessage{bRequiredSigs, bAddresses, bAccount, bAddrType}
+	case coin.BCH:
+		jsonRawMsg = []json.RawMessage{bRequiredSigs, bAddresses, bAccount}
+	default:
+		return nil, errors.Errorf("not implemented for %s in AddMultisigAddress()", b.coinTypeCode.String())
+	}
 
 	//call addmultisigaddress
 	rawResult, err := b.Client.RawRequest("addmultisigaddress", jsonRawMsg)
