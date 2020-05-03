@@ -25,7 +25,7 @@ type AddressExporter interface {
 type AddressExport struct {
 	logger         *zap.Logger
 	accountKeyRepo coldrepo.AccountKeyRepositorier
-	addrFileRepo   address.FileStorager
+	addrFileRepo   address.FileRepositorier
 	wtype          wallet.WalletType
 }
 
@@ -33,7 +33,7 @@ type AddressExport struct {
 func NewAddressExport(
 	logger *zap.Logger,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
-	addrFileRepo address.FileStorager,
+	addrFileRepo address.FileRepositorier,
 	wtype wallet.WalletType) *AddressExport {
 
 	return &AddressExport{

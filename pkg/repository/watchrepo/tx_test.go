@@ -1,4 +1,4 @@
-package walletrepo_test
+package watchrepo_test
 
 import (
 	"testing"

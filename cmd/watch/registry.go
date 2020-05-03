@@ -12,13 +12,13 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	mysql "github.com/hiromaily/go-bitcoin/pkg/db/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
-	"github.com/hiromaily/go-bitcoin/pkg/repository/walletrepo"
+	"github.com/hiromaily/go-bitcoin/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tracer"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	wtype "github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/watchsrv"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/watch"
 )
 
 // Registry is for registry interface
@@ -44,13 +44,67 @@ func NewRegistry(conf *config.Config, walletType wtype.WalletType) Registry {
 
 // NewWalleter is to register for walleter interface
 func (r *registry) NewWalleter() wallets.Watcher {
-	return watch.NewWatch(
+	return wallets.NewWatch(
 		r.newBTC(),
+		r.newMySQLClient(),
 		r.newLogger(),
 		r.newTracer(),
-		r.newRepository(),
-		r.newAddressFileStorager(),
-		r.newTxFileStorager(),
+		r.newAddressImporter(),
+		r.newTxCreator(),
+		r.newTxSender(),
+		r.newTxMonitorer(),
+		r.walletType,
+	)
+}
+
+func (r *registry) newAddressImporter() watchsrv.AddressImporter {
+	return watchsrv.NewAddressImport(
+		r.newBTC(),
+		r.newLogger(),
+		r.newMySQLClient(),
+		r.newAddressRepo(),
+		r.newAddressFileRepo(),
+		r.conf.CoinTypeCode,
+		r.walletType,
+	)
+}
+
+func (r *registry) newTxCreator() watchsrv.TxCreator {
+	return watchsrv.NewTxCreate(
+		r.newBTC(),
+		r.newLogger(),
+		r.newMySQLClient(),
+		r.newAddressRepo(),
+		r.newTxRepo(),
+		r.newTxInputRepo(),
+		r.newTxOutputRepo(),
+		r.newPaymentRequestRepo(),
+		r.newTxFileRepo(),
+		r.walletType,
+	)
+}
+
+func (r *registry) newTxSender() watchsrv.TxSender {
+	return watchsrv.NewTxSend(
+		r.newBTC(),
+		r.newLogger(),
+		r.newMySQLClient(),
+		r.newAddressRepo(),
+		r.newTxRepo(),
+		r.newTxOutputRepo(),
+		r.newTxFileRepo(),
+		r.walletType,
+	)
+}
+
+func (r *registry) newTxMonitorer() watchsrv.TxMonitorer {
+	return watchsrv.NewTxMonitor(
+		r.newBTC(),
+		r.newLogger(),
+		r.newMySQLClient(),
+		r.newTxRepo(),
+		r.newTxInputRepo(),
+		r.newPaymentRequestRepo(),
 		r.walletType,
 	)
 }
@@ -67,7 +121,12 @@ func (r *registry) newRPCClient() *rpcclient.Client {
 }
 
 func (r *registry) newBTC() api.Bitcoiner {
-	bit, err := api.NewBitcoin(r.newRPCClient(), &r.conf.Bitcoin, r.newLogger(), r.conf.CoinTypeCode)
+	bit, err := api.NewBitcoin(
+		r.newRPCClient(),
+		&r.conf.Bitcoin,
+		r.newLogger(),
+		r.conf.CoinTypeCode,
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -85,54 +144,40 @@ func (r *registry) newTracer() opentracing.Tracer {
 	return tracer.NewTracer(r.conf.Tracer)
 }
 
-func (r *registry) newRepository() walletrepo.WalletRepositorier {
-	// if there are multiple options, set proper one
-	// storager interface as MySQL
-	return walletrepo.NewWalletRepository(
-		r.newMySQLClient(),
-		r.newLogger(),
-		r.newTxRepo(),
-		r.newTxInputRepo(),
-		r.newTxOutputRepo(),
-		r.newPaymentRequestRepo(),
-		r.newAddressRepo(),
-	)
-}
-
-func (r *registry) newTxRepo() walletrepo.TxRepository {
-	return walletrepo.NewTxRepository(
+func (r *registry) newTxRepo() watchrepo.TxRepositorier {
+	return watchrepo.NewTxRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
 	)
 }
 
-func (r *registry) newTxInputRepo() walletrepo.TxInputRepository {
-	return walletrepo.NewTxInputRepository(
+func (r *registry) newTxInputRepo() watchrepo.TxInputRepositorier {
+	return watchrepo.NewTxInputRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
 	)
 }
 
-func (r *registry) newTxOutputRepo() walletrepo.TxOutputRepository {
-	return walletrepo.NewTxOutputRepository(
+func (r *registry) newTxOutputRepo() watchrepo.TxOutputRepositorier {
+	return watchrepo.NewTxOutputRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
 	)
 }
 
-func (r *registry) newPaymentRequestRepo() walletrepo.PaymentRequestRepository {
-	return walletrepo.NewPaymentRequestRepository(
+func (r *registry) newPaymentRequestRepo() watchrepo.PaymentRequestRepositorier {
+	return watchrepo.NewPaymentRequestRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
 	)
 }
 
-func (r *registry) newAddressRepo() walletrepo.AddressRepository {
-	return walletrepo.NewAddressRepository(
+func (r *registry) newAddressRepo() watchrepo.AddressRepositorier {
+	return watchrepo.NewAddressRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
@@ -153,14 +198,14 @@ func (r *registry) newMySQLClient() *sql.DB {
 	return r.mysqlClient
 }
 
-func (r *registry) newAddressFileStorager() address.FileStorager {
+func (r *registry) newAddressFileRepo() address.FileRepositorier {
 	return address.NewFileRepository(
 		r.conf.PubkeyFile.BasePath,
 		r.newLogger(),
 	)
 }
 
-func (r *registry) newTxFileStorager() tx.FileStorager {
+func (r *registry) newTxFileRepo() tx.FileRepositorier {
 	return tx.NewFileRepository(
 		r.conf.TxFile.BasePath,
 		r.newLogger(),

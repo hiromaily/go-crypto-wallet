@@ -200,14 +200,14 @@ func (r *registry) newMySQLClient() *sql.DB {
 	return r.mysqlClient
 }
 
-func (r *registry) newPubkeyFileStorager() address.FileStorager {
+func (r *registry) newPubkeyFileStorager() address.FileRepositorier {
 	return address.NewFileRepository(
 		r.conf.PubkeyFile.BasePath,
 		r.newLogger(),
 	)
 }
 
-func (r *registry) newTxFileStorager() tx.FileStorager {
+func (r *registry) newTxFileStorager() tx.FileRepositorier {
 	return tx.NewFileRepository(
 		r.conf.TxFile.BasePath,
 		r.newLogger(),

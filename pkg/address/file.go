@@ -14,8 +14,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 )
 
-// FileStorager address storage interface
-type FileStorager interface {
+// FileRepositorier is address storage interface
+type FileRepositorier interface {
 	CreateFilePath(accountType account.AccountType) string
 	ValidateFilePath(fileName string, accountType account.AccountType) error
 	ImportAddress(fileName string) ([]string, error)

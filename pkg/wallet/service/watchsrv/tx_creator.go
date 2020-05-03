@@ -1,6 +1,7 @@
-package watch
+package watchsrv
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcjson"
@@ -12,19 +13,15 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/action"
 	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
+	"github.com/hiromaily/go-bitcoin/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btc"
 )
 
 // create_tx.go is for common func among create transaction fuctionalites
-
-type parsedTx struct {
-	txInputs       []btcjson.TransactionInput
-	txRepoTxInputs []*models.TXInput
-	prevTxs        []btc.PrevTx
-	addresses      []string //input, sender's address
-}
 
 // - check unspentTx for sender account
 // - get utxo and create unsigned tx
@@ -41,9 +38,64 @@ type parsedTx struct {
 //                   if not 0, amount is sent from sender to receiver
 // - paymentAction: 0. total amount in payment users
 
+// TxCreator is TxCreator interface
+type TxCreator interface {
+	CreateDepositTx(adjustmentFee float64) (string, string, error)
+	CreatePaymentTx(adjustmentFee float64) (string, string, error)
+	CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error)
+}
+
+// TxCreate type
+type TxCreate struct {
+	btc          api.Bitcoiner
+	logger       *zap.Logger
+	dbConn       *sql.DB
+	addrRepo     watchrepo.AddressRepositorier
+	txRepo       watchrepo.TxRepositorier
+	txInputRepo  watchrepo.TxInputRepositorier
+	txOutputRepo watchrepo.TxOutputRepositorier
+	payReqRepo   watchrepo.PaymentRequestRepositorier
+	txFileRepo   tx.FileRepositorier
+	wtype        wallet.WalletType
+}
+
+// NewTxCreate returns TxCreate object
+func NewTxCreate(
+	btc api.Bitcoiner,
+	logger *zap.Logger,
+	dbConn *sql.DB,
+	addrRepo watchrepo.AddressRepositorier,
+	txRepo watchrepo.TxRepositorier,
+	txInputRepo watchrepo.TxInputRepositorier,
+	txOutputRepo watchrepo.TxOutputRepositorier,
+	payReqRepo watchrepo.PaymentRequestRepositorier,
+	txFileRepo tx.FileRepositorier,
+	wtype wallet.WalletType) *TxCreate {
+
+	return &TxCreate{
+		btc:          btc,
+		logger:       logger,
+		dbConn:       dbConn,
+		addrRepo:     addrRepo,
+		txRepo:       txRepo,
+		txInputRepo:  txInputRepo,
+		txOutputRepo: txOutputRepo,
+		payReqRepo:   payReqRepo,
+		txFileRepo:   txFileRepo,
+		wtype:        wtype,
+	}
+}
+
+type parsedTx struct {
+	txInputs       []btcjson.TransactionInput
+	txRepoTxInputs []*models.TXInput
+	prevTxs        []btc.PrevTx
+	addresses      []string //input, sender's address
+}
+
 // FIXME: receiver account covers fee, but is should be flexible
 // TODO: after this func, what if `listtransactions` api is called to see result
-func (w *Watch) createTx(
+func (t *TxCreate) createTx(
 	sender,
 	receiver account.AccountType,
 	targetAction action.ActionType,
@@ -52,7 +104,7 @@ func (w *Watch) createTx(
 	paymentRequestIds []int64,
 	userPayments []UserPayment) (string, string, error) {
 
-	w.logger.Debug("createTx()",
+	t.logger.Debug("createTx()",
 		zap.String("sender_acount", sender.String()),
 		zap.String("receiver_acount", receiver.String()),
 		zap.String("target_action", targetAction.String()),
@@ -60,35 +112,35 @@ func (w *Watch) createTx(
 		zap.Float64("adjustmentFee", adjustmentFee))
 
 	// 1. get listUnspent
-	unspentList, unspentAddrs, err := w.getUnspentList(sender)
+	unspentList, unspentAddrs, err := t.getUnspentList(sender)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call getUnspentList()")
 	}
 	if len(unspentList) == 0 {
-		w.logger.Info("no listunspent")
+		t.logger.Info("no listunspent")
 		return "", "", nil
 	}
-	w.logger.Debug("getUnspentList()",
+	t.logger.Debug("getUnspentList()",
 		zap.Any("unspentList", unspentList),
 		zap.Any("unspentAddrs", unspentAddrs))
 
 	// 2. parse listUnspent
-	parsedTx, inputTotal, isDone := w.parseListUnspentTx(unspentList, requiredAmount)
+	parsedTx, inputTotal, isDone := t.parseListUnspentTx(unspentList, requiredAmount)
 	if len(parsedTx.txInputs) == 0 {
-		w.logger.Info("no input tx in listUnspent")
+		t.logger.Info("no input tx in listUnspent")
 		return "", "", nil
 	}
 	if !isDone {
 		return "", "", errors.New("sender account can't meet amount to send")
 	}
-	w.logger.Debug(
+	t.logger.Debug(
 		"amount",
 		zap.Any("requiredAmount", requiredAmount),
 		zap.Any("input_total", inputTotal),
 		zap.Int("len(inputs)", len(parsedTx.txInputs)),
 	)
 	if requiredAmount != 0 {
-		w.logger.Debug("amount", zap.Any("expected_change", inputTotal-requiredAmount))
+		t.logger.Debug("amount", zap.Any("expected_change", inputTotal-requiredAmount))
 	}
 
 	addrsPrevs := btc.AddrsPrevTxs{
@@ -105,29 +157,29 @@ func (w *Watch) createTx(
 		if requiredAmount != 0 {
 			isChange = true
 		}
-		txPrevOutputs, err = w.createTxOutputs(receiver, requiredAmount, inputTotal, unspentAddrs[0], isChange)
+		txPrevOutputs, err = t.createTxOutputs(receiver, requiredAmount, inputTotal, unspentAddrs[0], isChange)
 		if err != nil {
 			return "", "", errors.Wrap(err, "fail to call createTxOutputs()")
 		}
 	case action.ActionTypePayment:
 		changeAddr := unspentAddrs[0] //this is actually sender's address because it's for change
 		changeAmount := inputTotal - requiredAmount
-		w.logger.Debug("before createPaymentOutputs()",
+		t.logger.Debug("before createPaymentOutputs()",
 			zap.Any("change_addr", changeAddr),
 			zap.Any("change_amount", changeAmount))
-		txPrevOutputs = w.createPaymentTxOutputs(userPayments, changeAddr, changeAmount)
-		w.logger.Debug("txPrevOutputs",
+		txPrevOutputs = t.createPaymentTxOutputs(userPayments, changeAddr, changeAmount)
+		t.logger.Debug("txPrevOutputs",
 			zap.Int("len(txPrevOutputs)", len(txPrevOutputs)))
 
 	default:
 		return "", "", errors.Errorf("invalid actionType: %s", targetAction)
 	}
-	w.logger.Debug("txPrevOutputs",
+	t.logger.Debug("txPrevOutputs",
 		zap.Int("len(txPrevOutputs)", len(txPrevOutputs)))
 	//"txPrevOutputsError":"json: unsupported type: map[btcutil.Address]btcutil.Amount"
 
 	// create raw tx
-	hex, fileName, err := w.createRawTx(
+	hex, fileName, err := t.createRawTx(
 		targetAction,
 		sender,
 		receiver,
@@ -144,25 +196,25 @@ func (w *Watch) createTx(
 
 // call API `unspentlist`
 // no result and no error is possible, so caller should check both returned value
-func (w *Watch) getUnspentList(accountType account.AccountType) ([]btc.ListUnspentResult, []string, error) {
+func (t *TxCreate) getUnspentList(accountType account.AccountType) ([]btc.ListUnspentResult, []string, error) {
 	// unlock locked UnspentTransaction
 	//if err := w.BTC.UnlockUnspent(); err != nil {
 	//	return "", "", err
 	//}
 
 	// get listUnspent
-	unspentList, err := w.btc.ListUnspentByAccount(accountType)
+	unspentList, err := t.btc.ListUnspentByAccount(accountType)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "fail to call btc.ListUnspentByAccount()")
 	}
-	unspentAddrs := w.btc.GetUnspentListAddrs(unspentList, accountType)
+	unspentAddrs := t.btc.GetUnspentListAddrs(unspentList, accountType)
 
 	return unspentList, unspentAddrs, nil
 }
 
 // parse result of listUnspent
 // retured *parsedTx could be nil
-func (w *Watch) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount btcutil.Amount) (*parsedTx, btcutil.Amount, bool) {
+func (t *TxCreate) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount btcutil.Amount) (*parsedTx, btcutil.Amount, bool) {
 	var inputTotal btcutil.Amount
 	txInputs := make([]btcjson.TransactionInput, 0, len(unspentList))
 	txRepoTxInputs := make([]*models.TXInput, 0, len(unspentList))
@@ -179,7 +231,7 @@ func (w *Watch) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount b
 		amt, err := btcutil.NewAmount(tx.Amount)
 		if err != nil {
 			//this error is not expected
-			w.logger.Error(
+			t.logger.Error(
 				"fail to call btcutil.NewAmount() then skipped",
 				zap.String("tx_id", tx.TxID),
 				zap.Float64("tx_amount", tx.Amount),
@@ -199,7 +251,7 @@ func (w *Watch) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount b
 			InputVout:          tx.Vout,
 			InputAddress:       tx.Address,
 			InputAccount:       tx.Label,
-			InputAmount:        w.btc.FloatToDecimal(tx.Amount),
+			InputAmount:        t.btc.FloatToDecimal(tx.Amount),
 			InputConfirmations: uint64(tx.Confirmations),
 		})
 
@@ -233,7 +285,7 @@ func (w *Watch) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount b
 }
 
 // for ActionTypeDeposit, ActionTypeTransfer
-func (w *Watch) createTxOutputs(
+func (t *TxCreate) createTxOutputs(
 	reciver account.AccountType,
 	requiredAmount btcutil.Amount,
 	inputTotal btcutil.Amount,
@@ -242,14 +294,14 @@ func (w *Watch) createTxOutputs(
 
 	// 1. get unallocated address for receiver
 	// - deposit/transfer
-	pubkeyTable, err := w.repo.Addr().GetOneUnAllocated(reciver)
+	pubkeyTable, err := t.addrRepo.GetOneUnAllocated(reciver)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call pubkeyRepo.GetOneUnAllocated()")
 	}
 	receiverAddr := pubkeyTable.WalletAddress
 
 	// 2. create receiver txOutput
-	receiverDecodedAddr, err := btcutil.DecodeAddress(receiverAddr, w.btc.GetChainConf())
+	receiverDecodedAddr, err := btcutil.DecodeAddress(receiverAddr, t.btc.GetChainConf())
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to call btcutil.DecodeAddress(%s)", receiverAddr)
 	}
@@ -259,14 +311,14 @@ func (w *Watch) createTxOutputs(
 	} else {
 		txPrevOutputs[receiverDecodedAddr] = inputTotal //satoshi
 	}
-	w.logger.Debug("receiver txOutput",
+	t.logger.Debug("receiver txOutput",
 		zap.String("receiverAddr", receiverAddr),
 		zap.Any("receivedAmount", txPrevOutputs[receiverDecodedAddr]))
 
 	// 3. if change is required
 	if isChange {
-		w.logger.Debug("change is required")
-		senderDecodedAddr, err := btcutil.DecodeAddress(senderAddr, w.btc.GetChainConf())
+		t.logger.Debug("change is required")
+		senderDecodedAddr, err := btcutil.DecodeAddress(senderAddr, t.btc.GetChainConf())
 		if err != nil {
 			return nil, errors.Wrapf(err, "fail to call btcutil.DecodeAddress(%s)", receiverAddr)
 		}
@@ -276,7 +328,7 @@ func (w *Watch) createTxOutputs(
 		//  fee can not be paid from txOutput for change
 		txPrevOutputs[senderDecodedAddr] = inputTotal - requiredAmount
 
-		w.logger.Debug("change(sender) txOutput",
+		t.logger.Debug("change(sender) txOutput",
 			zap.String("senderAddr", senderAddr),
 			zap.Any("inputTotal - requiredAmount", inputTotal-requiredAmount))
 
@@ -289,7 +341,7 @@ func (w *Watch) createTxOutputs(
 // - create raw tx
 // - insert data to detabase
 // - available from deposit/transfer action
-func (w *Watch) createRawTx(
+func (t *TxCreate) createRawTx(
 	targetAction action.ActionType,
 	sender account.AccountType,
 	receiver account.AccountType,
@@ -303,7 +355,7 @@ func (w *Watch) createRawTx(
 
 	// 1. create raw transaction as temporary use
 	//  - later calculate by tx size
-	msgTx, err := w.btc.CreateRawTransaction(txInputs, txPrevOutputs)
+	msgTx, err := t.btc.CreateRawTransaction(txInputs, txPrevOutputs)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call btc.CreateRawTransaction()")
 	}
@@ -311,23 +363,23 @@ func (w *Watch) createRawTx(
 	// 2. calculate fee and output total
 	//  - adjust outputTotal by fee and re-run CreateRawTransaction
 	//  - this logic would be different from payment
-	outputTotal, fee, txOutputs, txRepoTxOutputs, err := w.calculateOutputTotal(sender, receiver, msgTx, adjustmentFee, inputTotal, txPrevOutputs)
+	outputTotal, fee, txOutputs, txRepoTxOutputs, err := t.calculateOutputTotal(sender, receiver, msgTx, adjustmentFee, inputTotal, txPrevOutputs)
 	if err != nil {
 		return "", "", err
 	}
-	w.logger.Debug("txOutputs", zap.Int("len(txOutputs)", len(txOutputs)))
-	w.logger.Debug("txRepoTxOutputs", zap.Int("len(txRepoTxOutputs)", len(txRepoTxOutputs)))
+	t.logger.Debug("txOutputs", zap.Int("len(txOutputs)", len(txOutputs)))
+	t.logger.Debug("txRepoTxOutputs", zap.Int("len(txRepoTxOutputs)", len(txRepoTxOutputs)))
 
 	// for debug
 	for addr, amt := range txOutputs {
-		w.logger.Debug("txOutputs",
+		t.logger.Debug("txOutputs",
 			zap.String("address_string", addr.String()),
 			zap.String("address_encoded", addr.EncodeAddress()),
 			zap.String("amount", amt.String()),
 		)
 	}
 	for _, v := range txRepoTxOutputs {
-		w.logger.Debug("txRepoTxOutputs",
+		t.logger.Debug("txRepoTxOutputs",
 			zap.String("output_account", v.OutputAccount),
 			zap.String("output_address", v.OutputAddress),
 			zap.String("output_amount", v.OutputAmount.String()),
@@ -335,20 +387,20 @@ func (w *Watch) createRawTx(
 	}
 
 	// 3. re call CreateRawTransaction
-	msgTx, err = w.btc.CreateRawTransaction(txInputs, txOutputs)
+	msgTx, err = t.btc.CreateRawTransaction(txInputs, txOutputs)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call btc.CreateRawTransaction()")
 	}
 
 	// 4. convert msgTx to hex
-	hex, err := w.btc.ToHex(msgTx)
+	hex, err := t.btc.ToHex(msgTx)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call btc.ToHex(msgTx)")
 	}
 
 	// 5. insert to tx_table for unsigned tx
 	//  - txID would be 0 if record is already existing then csv file is not created
-	txID, err := w.insertTxTableForUnsigned(
+	txID, err := t.insertTxTableForUnsigned(
 		targetAction,
 		hex,
 		inputTotal,
@@ -366,14 +418,14 @@ func (w *Watch) createRawTx(
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call serial.EncodeToString()")
 	}
-	w.logger.Debug("encodedAddrsPrevs", zap.String("encodedAddrsPrevs", encodedAddrsPrevs))
+	t.logger.Debug("encodedAddrsPrevs", zap.String("encodedAddrsPrevs", encodedAddrsPrevs))
 
 	// 7. generate tx file
 	//TODO: how to recover when error occurred here
 	// - inserted data in database must be deleted to generate hex file
 	var generatedFileName string
 	if txID != 0 {
-		generatedFileName, err = w.generateHexFile(targetAction, hex, encodedAddrsPrevs, txID)
+		generatedFileName, err = t.generateHexFile(targetAction, hex, encodedAddrsPrevs, txID)
 		if err != nil {
 			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
 		}
@@ -382,7 +434,7 @@ func (w *Watch) createRawTx(
 	return hex, generatedFileName, nil
 }
 
-func (w *Watch) calculateOutputTotal(
+func (t *TxCreate) calculateOutputTotal(
 	sender account.AccountType,
 	receiver account.AccountType,
 	msgTx *wire.MsgTx,
@@ -392,7 +444,7 @@ func (w *Watch) calculateOutputTotal(
 ) (btcutil.Amount, btcutil.Amount, map[btcutil.Address]btcutil.Amount, []*models.TXOutput, error) {
 
 	// get fee
-	fee, err := w.btc.GetFee(msgTx, adjustmentFee)
+	fee, err := t.btc.GetFee(msgTx, adjustmentFee)
 	if err != nil {
 		return 0, 0, nil, nil, errors.Wrap(err, "fail to call btc.GetFee()")
 	}
@@ -409,22 +461,22 @@ func (w *Watch) calculateOutputTotal(
 				TXID:          0,
 				OutputAddress: addr.String(),
 				OutputAccount: receiver.String(),
-				OutputAmount:  w.btc.AmountToDecimal(amt - fee),
+				OutputAmount:  t.btc.AmountToDecimal(amt - fee),
 				IsChange:      false,
 			})
 			outputTotal += amt
 			break
 		}
 
-		if acnt, _ := w.btc.GetAccount(addr.String()); acnt == sender.String() {
-			w.logger.Debug("detect sender account in calculateOutputTotal")
+		if acnt, _ := t.btc.GetAccount(addr.String()); acnt == sender.String() {
+			t.logger.Debug("detect sender account in calculateOutputTotal")
 			// address is used for change
 			txPrevOutputs[addr] -= fee
 			txRepoOutputs = append(txRepoOutputs, &models.TXOutput{
 				TXID:          0,
 				OutputAddress: addr.String(),
 				OutputAccount: sender.String(),
-				OutputAmount:  w.btc.AmountToDecimal(amt - fee),
+				OutputAmount:  t.btc.AmountToDecimal(amt - fee),
 				IsChange:      true,
 			})
 		} else {
@@ -432,13 +484,13 @@ func (w *Watch) calculateOutputTotal(
 				TXID:          0,
 				OutputAddress: addr.String(),
 				OutputAccount: receiver.String(),
-				OutputAmount:  w.btc.AmountToDecimal(amt),
+				OutputAmount:  t.btc.AmountToDecimal(amt),
 				IsChange:      false,
 			})
 		}
 		outputTotal += amt
 	}
-	w.logger.Debug("calculateOutputTotal",
+	t.logger.Debug("calculateOutputTotal",
 		zap.Any("fee", fee),
 		zap.Any("outputTotal (before fee adjustment)", outputTotal),
 		zap.Any("outputTotal by (inputTotal - fee)", inputTotal-fee),
@@ -450,7 +502,7 @@ func (w *Watch) calculateOutputTotal(
 	//outputTotal -= fee
 
 	if outputTotal <= 0 {
-		w.logger.Debug(
+		t.logger.Debug(
 			"inputTotal is short of coin to pay fee",
 			zap.Any("amount of inputTotal", inputTotal),
 			zap.Any("fee", fee))
@@ -460,7 +512,7 @@ func (w *Watch) calculateOutputTotal(
 	return outputTotal, fee, txPrevOutputs, txRepoOutputs, nil
 }
 
-func (w *Watch) insertTxTableForUnsigned(
+func (t *TxCreate) insertTxTableForUnsigned(
 	actionType action.ActionType,
 	hex string,
 	inputTotal,
@@ -471,7 +523,7 @@ func (w *Watch) insertTxTableForUnsigned(
 	paymentRequestIds []int64) (int64, error) {
 
 	// 1. skip if same hex is already stored
-	count, err := w.repo.Tx().GetCountByUnsignedHex(actionType, hex)
+	count, err := t.txRepo.GetCountByUnsignedHex(actionType, hex)
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call repo.Tx().GetCountByUnsignedHex()")
 	}
@@ -484,13 +536,13 @@ func (w *Watch) insertTxTableForUnsigned(
 	txItem := &models.TX{
 		Action:            actionType.String(),
 		UnsignedHexTX:     hex,
-		TotalInputAmount:  w.btc.AmountToDecimal(inputTotal),
-		TotalOutputAmount: w.btc.AmountToDecimal(outputTotal),
-		Fee:               w.btc.AmountToDecimal(fee),
+		TotalInputAmount:  t.btc.AmountToDecimal(inputTotal),
+		TotalOutputAmount: t.btc.AmountToDecimal(outputTotal),
+		Fee:               t.btc.AmountToDecimal(fee),
 	}
 
 	// start database transaction
-	dtx, err := w.repo.BeginTx()
+	dtx, err := t.dbConn.Begin()
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to start transaction")
 	}
@@ -503,7 +555,7 @@ func (w *Watch) insertTxTableForUnsigned(
 	}()
 
 	//tx := w.repo.MustBegin()
-	txID, err := w.repo.Tx().InsertUnsignedTx(actionType, txItem)
+	txID, err := t.txRepo.InsertUnsignedTx(actionType, txItem)
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call repo.Tx().InsertUnsignedTx()")
 	}
@@ -513,7 +565,7 @@ func (w *Watch) insertTxTableForUnsigned(
 	for idx := range txInputs {
 		txInputs[idx].TXID = txID
 	}
-	err = w.repo.TxInput().InsertBulk(txInputs)
+	err = t.txInputRepo.InsertBulk(txInputs)
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call txInRepo.InsertBulk()")
 	}
@@ -523,14 +575,14 @@ func (w *Watch) insertTxTableForUnsigned(
 	for idx := range txOutputs {
 		txOutputs[idx].TXID = txID
 	}
-	err = w.repo.TxOutput().InsertBulk(txOutputs)
+	err = t.txOutputRepo.InsertBulk(txOutputs)
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call repo.TxOutput().InsertBulk()")
 	}
 
 	// 5. update payment_id in payment_request table for only action.ActionTypePayment
 	if actionType == action.ActionTypePayment {
-		_, err = w.repo.PayReq().UpdatePaymentID(txID, paymentRequestIds)
+		_, err = t.payReqRepo.UpdatePaymentID(txID, paymentRequestIds)
 		if err != nil {
 			return 0, errors.Wrap(err, "fail to call repo.PayReq().UpdatePaymentID(txID, paymentRequestIds)")
 		}
@@ -540,7 +592,7 @@ func (w *Watch) insertTxTableForUnsigned(
 }
 
 // generateHexFile generate file for hex and encoded previous addresses
-func (w *Watch) generateHexFile(actionType action.ActionType, hex, encodedAddrsPrevs string, id int64) (string, error) {
+func (t *TxCreate) generateHexFile(actionType action.ActionType, hex, encodedAddrsPrevs string, id int64) (string, error) {
 	var (
 		generatedFileName string
 		err               error
@@ -552,8 +604,8 @@ func (w *Watch) generateHexFile(actionType action.ActionType, hex, encodedAddrsP
 	}
 
 	// create file
-	path := w.txFileRepo.CreateFilePath(actionType, tx.TxTypeUnsigned, id, 0)
-	generatedFileName, err = w.txFileRepo.WriteFile(path, savedata)
+	path := t.txFileRepo.CreateFilePath(actionType, tx.TxTypeUnsigned, id, 0)
+	generatedFileName, err = t.txFileRepo.WriteFile(path, savedata)
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call txFileRepo.WriteFile()")
 	}
@@ -563,7 +615,7 @@ func (w *Watch) generateHexFile(actionType action.ActionType, hex, encodedAddrsP
 
 // IsFoundTxIDAndVout finds out txID and vout from related txInputs
 // nolint: unused
-func (w *Watch) IsFoundTxIDAndVout(txID string, vout uint32, inputs []btcjson.TransactionInput) bool {
+func (t *TxCreate) IsFoundTxIDAndVout(txID string, vout uint32, inputs []btcjson.TransactionInput) bool {
 	for _, val := range inputs {
 		if val.Txid == txID && val.Vout == vout {
 			return true

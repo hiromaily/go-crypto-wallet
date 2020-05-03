@@ -28,7 +28,7 @@ type Sign struct {
 	logger         *zap.Logger
 	accountKeyRepo coldrepo.AccountKeyRepositorier
 	authKeyRepo    coldrepo.AuthAccountKeyRepositorier
-	txFileRepo     tx.FileStorager
+	txFileRepo     tx.FileRepositorier
 	wtype          wallet.WalletType
 }
 
@@ -38,7 +38,7 @@ func NewSign(
 	logger *zap.Logger,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
-	txFileRepo tx.FileStorager,
+	txFileRepo tx.FileRepositorier,
 	wtype wallet.WalletType) *Sign {
 
 	return &Sign{

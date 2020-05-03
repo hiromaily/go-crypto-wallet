@@ -23,7 +23,7 @@ type FullPubkeyImport struct {
 	btc                api.Bitcoiner
 	logger             *zap.Logger
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier
-	pubkeyFileRepo     address.FileStorager
+	pubkeyFileRepo     address.FileRepositorier
 	wtype              wallet.WalletType
 }
 
@@ -32,7 +32,7 @@ func NewFullPubkeyImport(
 	btc api.Bitcoiner,
 	logger *zap.Logger,
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier,
-	pubkeyFileRepo address.FileStorager,
+	pubkeyFileRepo address.FileRepositorier,
 	wtype wallet.WalletType) *FullPubkeyImport {
 
 	return &FullPubkeyImport{

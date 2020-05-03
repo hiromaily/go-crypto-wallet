@@ -25,7 +25,7 @@ type FullPubkeyExporter interface {
 type FullPubkeyExport struct {
 	logger         *zap.Logger
 	authKeyRepo    coldrepo.AuthAccountKeyRepositorier
-	pubkeyFileRepo address.FileStorager
+	pubkeyFileRepo address.FileRepositorier
 	coinTypeCode   coin.CoinTypeCode
 	authType       account.AuthType
 	wtype          wallet.WalletType
@@ -35,7 +35,7 @@ type FullPubkeyExport struct {
 func NewFullPubkeyExport(
 	logger *zap.Logger,
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
-	pubkeyFileRepo address.FileStorager,
+	pubkeyFileRepo address.FileRepositorier,
 	coinTypeCode coin.CoinTypeCode,
 	authType account.AuthType,
 	wtype wallet.WalletType) *FullPubkeyExport {

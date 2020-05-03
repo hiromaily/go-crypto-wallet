@@ -1,4 +1,4 @@
-package watch
+package watchsrv
 
 import (
 	"github.com/pkg/errors"
@@ -9,7 +9,7 @@ import (
 
 // CreateTransferTx create unsigned tx for transfer coin among internal account except client, authorization
 // FIXME: for now, receiver account covers fee, but is should be flexible
-func (w *Watch) CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error) {
+func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error) {
 	targetAction := action.ActionTypeTransfer
 
 	// validation account
@@ -21,13 +21,13 @@ func (w *Watch) CreateTransferTx(sender, receiver account.AccountType, floatAmou
 	}
 
 	//amount btcutil.Amount
-	requiredAmount, err := w.btc.FloatToAmount(floatAmount)
+	requiredAmount, err := t.btc.FloatToAmount(floatAmount)
 	if err != nil {
 		return "", "", err
 	}
 
 	// check balance for sender
-	balance, err := w.btc.GetBalanceByAccount(sender)
+	balance, err := t.btc.GetBalanceByAccount(sender)
 	//balance, err := w.btc.GetReceivedByLabelAndMinConf(sender.String(), w.btc.ConfirmationBlock())
 	if err != nil {
 		return "", "", err
@@ -38,5 +38,5 @@ func (w *Watch) CreateTransferTx(sender, receiver account.AccountType, floatAmou
 	}
 
 	// create transfer transaction
-	return w.createTx(sender, receiver, targetAction, requiredAmount, adjustmentFee, nil, nil)
+	return t.createTx(sender, receiver, targetAction, requiredAmount, adjustmentFee, nil, nil)
 }

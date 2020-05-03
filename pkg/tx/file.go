@@ -14,8 +14,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/action"
 )
 
-// FileStorager is file storager for tx info
-type FileStorager interface {
+// FileRepositorier is file storager for tx info
+type FileRepositorier interface {
 	CreateFilePath(actionType action.ActionType, txType TxType, txID int64, signedCount int) string
 	GetFileNameType(filePath string) (*FileName, error)
 	ValidateFilePath(filePath string, expectedTxType TxType) (action.ActionType, TxType, int64, int, error)

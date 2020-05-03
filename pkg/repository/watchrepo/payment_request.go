@@ -1,4 +1,4 @@
-package walletrepo
+package watchrepo
 
 import (
 	"context"
@@ -13,8 +13,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
-// PaymentRequestRepository is repository for payment_request table
-type PaymentRequestRepository interface {
+// PaymentRequestRepositorier is PaymentRequestRepository interface
+type PaymentRequestRepositorier interface {
 	GetAll() ([]*models.PaymentRequest, error)
 	GetAllByPaymentID(paymentID int64) ([]*models.PaymentRequest, error)
 	InsertBulk(items []*models.PaymentRequest) error
@@ -23,16 +23,17 @@ type PaymentRequestRepository interface {
 	DeleteAll() (int64, error)
 }
 
-type paymentRequestRepository struct {
+// PaymentRequestRepository is repository for payment_request table
+type PaymentRequestRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
 	logger       *zap.Logger
 }
 
-// NewPaymentRequestRepository returns NewPaymentRequestRepository interface
-func NewPaymentRequestRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) PaymentRequestRepository {
-	return &paymentRequestRepository{
+// NewPaymentRequestRepository returns PaymentRequestRepository object
+func NewPaymentRequestRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *PaymentRequestRepository {
+	return &PaymentRequestRepository{
 		dbConn:       dbConn,
 		tableName:    "payment_request",
 		coinTypeCode: coinTypeCode,
@@ -41,8 +42,7 @@ func NewPaymentRequestRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode,
 }
 
 // GetAll returns all records whose payment_id is null
-// - replaced from GetPaymentRequestAll
-func (r *paymentRequestRepository) GetAll() ([]*models.PaymentRequest, error) {
+func (r *PaymentRequestRepository) GetAll() ([]*models.PaymentRequest, error) {
 	//sql := "SELECT * FROM payment_request WHERE payment_id IS NULL"
 	ctx := context.Background()
 
@@ -57,8 +57,7 @@ func (r *paymentRequestRepository) GetAll() ([]*models.PaymentRequest, error) {
 }
 
 // GetAllByPaymentID returns all records searched by payment_id
-// - replaced from GetPaymentRequestByPaymentID
-func (r *paymentRequestRepository) GetAllByPaymentID(paymentID int64) ([]*models.PaymentRequest, error) {
+func (r *PaymentRequestRepository) GetAllByPaymentID(paymentID int64) ([]*models.PaymentRequest, error) {
 	//sql := "SELECT * FROM payment_request WHERE payment_id=?"
 	ctx := context.Background()
 
@@ -72,16 +71,14 @@ func (r *paymentRequestRepository) GetAllByPaymentID(paymentID int64) ([]*models
 	return prItems, nil
 }
 
-// Insert inserts multiple records
-// - replaced from InsertPaymentRequest()
-func (r *paymentRequestRepository) InsertBulk(items []*models.PaymentRequest) error {
+// InsertBulk inserts multiple records
+func (r *PaymentRequestRepository) InsertBulk(items []*models.PaymentRequest) error {
 	ctx := context.Background()
 	return models.PaymentRequestSlice(items).InsertAll(ctx, r.dbConn, boil.Infer())
 }
 
 // UpdatePaymentID updates isDone
-// - replaced from UpdatePaymentIDOnPaymentRequest
-func (r *paymentRequestRepository) UpdatePaymentID(paymentID int64, ids []int64) (int64, error) {
+func (r *PaymentRequestRepository) UpdatePaymentID(paymentID int64, ids []int64) (int64, error) {
 	//sql := `UPDATE payment_request SET payment_id=? WHERE id IN (?)`
 	ctx := context.Background()
 
@@ -102,8 +99,7 @@ func (r *paymentRequestRepository) UpdatePaymentID(paymentID int64, ids []int64)
 }
 
 // UpdateIsDone updates isDone
-// - replaced from UpdateTxTypeNotifiedByID
-func (r *paymentRequestRepository) UpdateIsDone(paymentID int64) (int64, error) {
+func (r *PaymentRequestRepository) UpdateIsDone(paymentID int64) (int64, error) {
 	//sql := `UPDATE payment_request SET is_done=true WHERE payment_id=?`
 	ctx := context.Background()
 
@@ -118,7 +114,7 @@ func (r *paymentRequestRepository) UpdateIsDone(paymentID int64) (int64, error) 
 }
 
 // DeleteAll deletes all records
-func (r *paymentRequestRepository) DeleteAll() (int64, error) {
+func (r *PaymentRequestRepository) DeleteAll() (int64, error) {
 	ctx := context.Background()
 	items, _ := models.PaymentRequests().All(ctx, r.dbConn)
 	return items.DeleteAll(ctx, r.dbConn)

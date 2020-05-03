@@ -1,4 +1,4 @@
-package walletrepo
+package watchrepo
 
 import (
 	"context"
@@ -13,24 +13,25 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
-// TxInputRepository is repository for tx_input table
-type TxInputRepository interface {
+// TxInputRepositorier is TxInputRepository interface
+type TxInputRepositorier interface {
 	GetOne(id int64) (*models.TXInput, error)
 	GetAllByTxID(id int64) ([]*models.TXInput, error)
 	Insert(txItem *models.TXInput) error
 	InsertBulk(txItems []*models.TXInput) error
 }
 
-type txInputRepository struct {
+// TxInputRepository is repository for tx_input table
+type TxInputRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
 	logger       *zap.Logger
 }
 
-// NewTxInputRepository returns TxInputRepository interface
-func NewTxInputRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) TxInputRepository {
-	return &txInputRepository{
+// NewTxInputRepository returns TxInputRepository object
+func NewTxInputRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *TxInputRepository {
+	return &TxInputRepository{
 		dbConn:       dbConn,
 		tableName:    "tx_input",
 		coinTypeCode: coinTypeCode,
@@ -39,8 +40,7 @@ func NewTxInputRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger
 }
 
 // GetOne get one record by ID
-// - replaced from GetTxByID
-func (r *txInputRepository) GetOne(id int64) (*models.TXInput, error) {
+func (r *TxInputRepository) GetOne(id int64) (*models.TXInput, error) {
 	ctx := context.Background()
 
 	txItem, err := models.FindTXInput(ctx, r.dbConn, id) //unique
@@ -50,9 +50,8 @@ func (r *txInputRepository) GetOne(id int64) (*models.TXInput, error) {
 	return txItem, nil
 }
 
-// GetAllByTxID
-// - replaced from GetTxInputByReceiptID
-func (r *txInputRepository) GetAllByTxID(id int64) ([]*models.TXInput, error) {
+// GetAllByTxID returns all records searched by tx_id
+func (r *TxInputRepository) GetAllByTxID(id int64) ([]*models.TXInput, error) {
 	ctx := context.Background()
 	txItems, err := models.TXInputs(
 		qm.Where("coin=?", r.coinTypeCode.String()),
@@ -66,14 +65,13 @@ func (r *txInputRepository) GetAllByTxID(id int64) ([]*models.TXInput, error) {
 }
 
 // Insert inserts one record
-func (r *txInputRepository) Insert(txItem *models.TXInput) error {
+func (r *TxInputRepository) Insert(txItem *models.TXInput) error {
 	ctx := context.Background()
 	return txItem.Insert(ctx, r.dbConn, boil.Infer())
 }
 
-// Insert inserts multiple records
-// - replaced from InsertTxInputForUnsigned()
-func (r *txInputRepository) InsertBulk(txItems []*models.TXInput) error {
+// InsertBulk inserts multiple records
+func (r *TxInputRepository) InsertBulk(txItems []*models.TXInput) error {
 	ctx := context.Background()
 	return models.TXInputSlice(txItems).InsertAll(ctx, r.dbConn, boil.Infer())
 }

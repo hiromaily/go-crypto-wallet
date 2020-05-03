@@ -1,20 +1,63 @@
-package watch
+package watchsrv
 
 import (
+	"database/sql"
 	"strings"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-bitcoin/pkg/address"
 	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
+	"github.com/hiromaily/go-bitcoin/pkg/repository/watchrepo"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
+
+// AddressImporter is AddressImporter interface
+type AddressImporter interface {
+	ImportAddress(fileName string, accountType account.AccountType, isRescan bool) error
+}
+
+// AddressImport type
+type AddressImport struct {
+	btc          api.Bitcoiner
+	logger       *zap.Logger
+	dbConn       *sql.DB
+	addrRepo     watchrepo.AddressRepositorier
+	addrFileRepo address.FileRepositorier
+	coinTypeCode coin.CoinTypeCode
+	wtype        wallet.WalletType
+}
+
+// NewAddressImport returns AddressImport object
+func NewAddressImport(
+	btc api.Bitcoiner,
+	logger *zap.Logger,
+	dbConn *sql.DB,
+	addrRepo watchrepo.AddressRepositorier,
+	addrFileRepo address.FileRepositorier,
+	coinTypeCode coin.CoinTypeCode,
+	wtype wallet.WalletType) *AddressImport {
+
+	return &AddressImport{
+		btc:          btc,
+		logger:       logger,
+		dbConn:       dbConn,
+		addrRepo:     addrRepo,
+		addrFileRepo: addrFileRepo,
+		coinTypeCode: coinTypeCode,
+		wtype:        wtype,
+	}
+}
 
 // ImportAddress import PubKey from csv filecsv into database,
 //  - if account is client, which doesn't have account ??
-func (w *Watch) ImportAddress(fileName string, accountType account.AccountType, isRescan bool) error {
+func (a *AddressImport) ImportAddress(fileName string, accountType account.AccountType, isRescan bool) error {
 	// read file for public key
-	pubKeys, err := w.addrFileRepo.ImportAddress(fileName)
+	pubKeys, err := a.addrFileRepo.ImportAddress(fileName)
 	if err != nil {
 		return errors.Wrap(err, "fail to call key.ImportPubKey()")
 	}
@@ -34,10 +77,10 @@ func (w *Watch) ImportAddress(fileName string, accountType account.AccountType, 
 		//Note: Error would occur when using only 1 bitcoin core server under development
 		// because address is already imported
 		//isRescan would be `false` usually
-		err := w.btc.ImportAddressWithLabel(addr, accountType.String(), isRescan)
+		err := a.btc.ImportAddressWithLabel(addr, accountType.String(), isRescan)
 		if err != nil {
 			//-4: The wallet already contains the private key for this address or script
-			w.logger.Warn(
+			a.logger.Warn(
 				"fail to call btc.ImportAddressWithLabel() but continue following addresses",
 				zap.String("address", addr),
 				zap.String("account_type", accountType.String()),
@@ -46,17 +89,17 @@ func (w *Watch) ImportAddress(fileName string, accountType account.AccountType, 
 		}
 
 		pubKeyData = append(pubKeyData, &models.Address{
-			Coin:          w.GetBTC().CoinTypeCode().String(),
+			Coin:          a.coinTypeCode.String(),
 			Account:       accountType.String(),
 			WalletAddress: addr,
 		})
 
 		//confirm pubkey is added as watch only wallet
-		w.checkImportedPubKey(addr)
+		a.checkImportedPubKey(addr)
 	}
 
 	//insert imported pubKey
-	err = w.repo.Addr().InsertBulk(pubKeyData)
+	err = a.addrRepo.InsertBulk(pubKeyData)
 	if err != nil {
 		return errors.Wrap(err, "fail to call repo.Pubkey().InsertBulk()")
 		//TODO:What if this inserting is failed, how it can be recovered to keep consistancy
@@ -68,16 +111,16 @@ func (w *Watch) ImportAddress(fileName string, accountType account.AccountType, 
 }
 
 // checkImportedPubKey confirm pubkey is added as watch only wallet
-func (w *Watch) checkImportedPubKey(addr string) {
-	addrInfo, err := w.btc.GetAddressInfo(addr)
+func (a *AddressImport) checkImportedPubKey(addr string) {
+	addrInfo, err := a.btc.GetAddressInfo(addr)
 	if err != nil {
-		w.logger.Error(
+		a.logger.Error(
 			"fail to call btc.GetAddressInfo()",
 			zap.String("address", addr),
 			zap.Error(err))
 		return
 	}
-	w.logger.Debug("account is found",
+	a.logger.Debug("account is found",
 		zap.String("account", addrInfo.GetLabelName()),
 		zap.String("address", addr))
 
@@ -85,7 +128,7 @@ func (w *Watch) checkImportedPubKey(addr string) {
 	//TODO: if wallet,keygen,sign is working on only one bitcoin core server,
 	// result would be `iswatchonly=false`
 	if !addrInfo.Iswatchonly {
-		w.logger.Warn("this address must be watch only wallet")
+		a.logger.Warn("this address must be watch only wallet")
 		//grok.Value(addrInfo)
 	}
 }

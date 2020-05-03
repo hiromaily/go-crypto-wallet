@@ -9,18 +9,18 @@ import (
 	mysql "github.com/hiromaily/go-bitcoin/pkg/db/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
-	"github.com/hiromaily/go-bitcoin/pkg/repository/walletrepo"
+	"github.com/hiromaily/go-bitcoin/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
 var (
-	txRepo         walletrepo.TxRepository
+	txRepo         *watchrepo.TxRepository
 	accountKeyRepo *coldrepo.AccountKeyRepository
 )
 
 // NewTxRepository returns TxRepository for test
-func NewTxRepository() walletrepo.TxRepository {
+func NewTxRepository() watchrepo.TxRepositorier {
 	if txRepo != nil {
 		return txRepo
 	}
@@ -42,7 +42,7 @@ func NewTxRepository() walletrepo.TxRepository {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	txRepo = walletrepo.NewTxRepository(db, coin.BTC, logger)
+	txRepo = watchrepo.NewTxRepository(db, coin.BTC, logger)
 	return txRepo
 }
 

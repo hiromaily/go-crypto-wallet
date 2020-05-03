@@ -1,4 +1,4 @@
-package walletrepo
+package watchrepo
 
 import (
 	"context"
@@ -16,24 +16,25 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
-// AddressRepository is repository for Address table
-type AddressRepository interface {
+// AddressRepositorier is AddressRepository interface
+type AddressRepositorier interface {
 	GetAll(accountType account.AccountType) ([]*models.Address, error)
 	GetOneUnAllocated(accountType account.AccountType) (*models.Address, error)
 	InsertBulk(items []*models.Address) error
 	UpdateIsAllocated(isAllocated bool, Address string) (int64, error)
 }
 
-type addressRepository struct {
+// AddressRepository is repository for address table
+type AddressRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
 	logger       *zap.Logger
 }
 
-// NewAddressRepository returns NewAddressRepository interface
-func NewAddressRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) AddressRepository {
-	return &addressRepository{
+// NewAddressRepository returns AddressRepository object
+func NewAddressRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *AddressRepository {
+	return &AddressRepository{
 		dbConn:       dbConn,
 		tableName:    "address",
 		coinTypeCode: coinTypeCode,
@@ -42,7 +43,7 @@ func NewAddressRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger
 }
 
 // GetAll returns all records by account
-func (r *addressRepository) GetAll(accountType account.AccountType) ([]*models.Address, error) {
+func (r *AddressRepository) GetAll(accountType account.AccountType) ([]*models.Address, error) {
 	//sql := "SELECT * FROM %s WHERE account=%s;"
 	ctx := context.Background()
 
@@ -57,8 +58,7 @@ func (r *addressRepository) GetAll(accountType account.AccountType) ([]*models.A
 }
 
 // GetOneUnAllocated returns one records by is_allocated=false
-// - replaced from GetOneUnAllocatedAccountAddressTable
-func (r *addressRepository) GetOneUnAllocated(accountType account.AccountType) (*models.Address, error) {
+func (r *AddressRepository) GetOneUnAllocated(accountType account.AccountType) (*models.Address, error) {
 	//sql := "SELECT * FROM %s WHERE is_allocated=false ORDER BY id LIMIT 1;"
 	ctx := context.Background()
 
@@ -73,16 +73,14 @@ func (r *addressRepository) GetOneUnAllocated(accountType account.AccountType) (
 	return item, nil
 }
 
-// Insert inserts multiple records
-// - replaced from InsertAccountAddressTable()
-func (r *addressRepository) InsertBulk(items []*models.Address) error {
+// InsertBulk inserts multiple records
+func (r *AddressRepository) InsertBulk(items []*models.Address) error {
 	ctx := context.Background()
 	return models.AddressSlice(items).InsertAll(ctx, r.dbConn, boil.Infer())
 }
 
 // UpdateIsAllocated updates is_allocated
-// - replaced from UpdateIsAllocatedOnAccountAddressTable
-func (r *addressRepository) UpdateIsAllocated(isAllocated bool, Address string) (int64, error) {
+func (r *AddressRepository) UpdateIsAllocated(isAllocated bool, Address string) (int64, error) {
 	//	sql := `UPDATE %s SET is_allocated=:is_allocated, updated_at=:updated_at
 	//WHERE wallet_address=:wallet_address`
 	ctx := context.Background()

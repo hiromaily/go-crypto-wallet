@@ -1,4 +1,4 @@
-package walletrepo
+package watchrepo
 
 import (
 	"context"
@@ -13,24 +13,25 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
-// TxOutputRepository is repository for tx_out table
-type TxOutputRepository interface {
+// TxOutputRepositorier is TxOutputRepository interface
+type TxOutputRepositorier interface {
 	GetOne(id int64) (*models.TXOutput, error)
 	GetAllByTxID(id int64) ([]*models.TXOutput, error)
 	Insert(txItem *models.TXOutput) error
 	InsertBulk(txItems []*models.TXOutput) error
 }
 
-type txOutputRepository struct {
+// TxOutputRepository is repository for tx_output table
+type TxOutputRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
 	logger       *zap.Logger
 }
 
-// NewTxOutputRepository returns TxOutputRepository interface
-func NewTxOutputRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) TxOutputRepository {
-	return &txOutputRepository{
+// NewTxOutputRepository returns TxOutputRepository object
+func NewTxOutputRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *TxOutputRepository {
+	return &TxOutputRepository{
 		dbConn:       dbConn,
 		tableName:    "tx_output",
 		coinTypeCode: coinTypeCode,
@@ -39,8 +40,7 @@ func NewTxOutputRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logge
 }
 
 // GetOne get one record by ID
-// - replaced from GetTxByID
-func (r *txOutputRepository) GetOne(id int64) (*models.TXOutput, error) {
+func (r *TxOutputRepository) GetOne(id int64) (*models.TXOutput, error) {
 	ctx := context.Background()
 
 	txItem, err := models.FindTXOutput(ctx, r.dbConn, id) //unique
@@ -50,9 +50,8 @@ func (r *txOutputRepository) GetOne(id int64) (*models.TXOutput, error) {
 	return txItem, nil
 }
 
-// GetAllByTxID
-// - replaced from GetTxOutputByReceiptID
-func (r *txOutputRepository) GetAllByTxID(id int64) ([]*models.TXOutput, error) {
+// GetAllByTxID returns all records searched by tx_id
+func (r *TxOutputRepository) GetAllByTxID(id int64) ([]*models.TXOutput, error) {
 	ctx := context.Background()
 	txItems, err := models.TXOutputs(
 		qm.Where("tx_id=?", id),
@@ -65,14 +64,13 @@ func (r *txOutputRepository) GetAllByTxID(id int64) ([]*models.TXOutput, error) 
 }
 
 // Insert inserts one record
-func (r *txOutputRepository) Insert(txItem *models.TXOutput) error {
+func (r *TxOutputRepository) Insert(txItem *models.TXOutput) error {
 	ctx := context.Background()
 	return txItem.Insert(ctx, r.dbConn, boil.Infer())
 }
 
-// Insert inserts multiple records
-// - replaced from InsertTxOutputForUnsigned()
-func (r *txOutputRepository) InsertBulk(txItems []*models.TXOutput) error {
+// InsertBulk inserts multiple records
+func (r *TxOutputRepository) InsertBulk(txItems []*models.TXOutput) error {
 	//FIXME: when comuns includes booleans and both value is included in that comun,
 	// this func causes error
 	// Error 1136: Column count doesn't match value count at row 5
