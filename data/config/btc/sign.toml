@@ -22,7 +22,7 @@ type = "none"  # none, jaeger, datadog
 
 [mysql]
 host = "127.0.0.1:3309"
-dbname = "signature"
+dbname = "sign"
 user = "hiromaily"
 pass = "hiromaily"
 debug = true

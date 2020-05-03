@@ -34,7 +34,7 @@ sampling_probability = 0.5  # 0.001 to 1.0
 
 [mysql]
 host = "127.0.0.1:3307"
-dbname = "wallet"
+dbname = "watch"
 user = "hiromaily"
 pass = "hiromaily"
 debug = true
