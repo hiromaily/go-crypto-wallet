@@ -64,7 +64,7 @@ func (b *Bitcoin) AddMultisigAddress(
 	jsonRawMsg := []json.RawMessage{bRequiredSigs, bAddresses, bAccount, bAddrType}
 
 	//call addmultisigaddress
-	rawResult, err := b.client.RawRequest("addmultisigaddress", jsonRawMsg)
+	rawResult, err := b.Client.RawRequest("addmultisigaddress", jsonRawMsg)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call client.RawRequest(addmultisigaddress)")
 	}

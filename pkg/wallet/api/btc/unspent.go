@@ -35,7 +35,7 @@ func (b *Bitcoin) ListUnspent() ([]ListUnspentResult, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Marchal()")
 	}
-	rawResult, err := b.client.RawRequest("listunspent", []json.RawMessage{input})
+	rawResult, err := b.Client.RawRequest("listunspent", []json.RawMessage{input})
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.RawRequest(listunspent)")
 	}
@@ -125,7 +125,7 @@ func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address) ([]ListUnspentRe
 		return nil, errors.Wrap(err, "fail to call json.Marchal(addresses)")
 	}
 
-	rawResult, err := b.client.RawRequest("listunspent", []json.RawMessage{input1, input2, input3})
+	rawResult, err := b.Client.RawRequest("listunspent", []json.RawMessage{input1, input2, input3})
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.RawRequest(listunspent)")
 	}
@@ -151,7 +151,7 @@ func (b *Bitcoin) LockUnspent(tx *ListUnspentResult) error {
 		return errors.Wrapf(err, "fail to call chainhash.NewHashFromStr(%s)", tx.TxID)
 	}
 	outpoint := wire.NewOutPoint(txIDHash, tx.Vout)
-	err = b.client.LockUnspent(false, []*wire.OutPoint{outpoint})
+	err = b.Client.LockUnspent(false, []*wire.OutPoint{outpoint})
 	if err != nil {
 		return err
 	}
@@ -161,13 +161,13 @@ func (b *Bitcoin) LockUnspent(tx *ListUnspentResult) error {
 // UnlockUnspent unlock locked unspent tx
 //1st param unlock (true)
 func (b *Bitcoin) UnlockUnspent() error {
-	list, err := b.client.ListLockUnspent() //[]*wire.OutPoint
+	list, err := b.Client.ListLockUnspent() //[]*wire.OutPoint
 	if err != nil {
 		return errors.Wrap(err, "fail to call client.ListLockUnspent()")
 	}
 
 	if len(list) != 0 {
-		err = b.client.LockUnspent(true, list)
+		err = b.Client.LockUnspent(true, list)
 		if err != nil {
 			return errors.Wrap(err, "fail to call client.LockUnspent()")
 		}

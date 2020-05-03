@@ -44,7 +44,7 @@ type LocalAddress struct {
 
 // GetNetworkInfo call RPC `getnetworkinfo`
 func (b *Bitcoin) GetNetworkInfo() (*GetNetworkInfoResult, error) {
-	rawResult, err := b.client.RawRequest("getnetworkinfo", []json.RawMessage{})
+	rawResult, err := b.Client.RawRequest("getnetworkinfo", []json.RawMessage{})
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.RawRequest(getnetworkinfo)")
 	}

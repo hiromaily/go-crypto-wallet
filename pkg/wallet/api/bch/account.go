@@ -1,4 +1,4 @@
-package btc
+package bch
 
 import (
 	"github.com/pkg/errors"
@@ -6,11 +6,11 @@ import (
 
 // GetAccount returns account name of address
 // `getaccount` should be called because getaccount RPC is gone from version 0.18
-func (b *Bitcoin) GetAccount(addr string) (string, error) {
+func (b *BitcoinCash) GetAccount(addr string) (string, error) {
 	// actually `getaddressinfo` is called
 	res, err := b.GetAddressInfo(addr)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call btc.GetAddressInfo()")
+		return "", errors.Wrap(err, "fail to call btc.GetAddressInfo()in bch")
 	}
 	if len(res.Labels) == 0 {
 		return "", nil

@@ -10,6 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
 // PrivKeyer is PrivKeyer service
@@ -101,44 +102,50 @@ func (p *PrivKey) Import() error {
 
 // checkImportedAddress check address was stored in bitcoin core by importing private key
 // debug use
+// FIXME: this code is same to keygensrv/privkey_importer.go
 func (p *PrivKey) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPublicKey string) {
 	//Note,
 	//GetAccount() calls GetAddressInfo() internally
 
-	//1.call `getaccount` by wallet_address
-	acnt, err := p.btc.GetAccount(walletAddress)
-	if err != nil {
-		p.logger.Warn(
-			"fail to call btc.GetAccount()",
-			zap.String("walletAddress", walletAddress),
-			zap.Error(err))
-	} else {
-		p.logger.Debug(
-			"account is found",
-			zap.String("account", acnt),
-			zap.String("walletAddress", walletAddress))
+	var (
+		targetAddr string
+		addrType   address.AddrType
+	)
+
+	switch p.btc.CoinTypeCode() {
+	case coin.BTC:
+		targetAddr = p2shSegwitAddress
+		addrType = address.AddrTypeP2shSegwit
+	case coin.BCH:
+		targetAddr = walletAddress
+		addrType = address.AddrTypeBCHCashAddr
+	default:
+		p.logger.Warn("this coin type is not implemented in checkImportedAddress()",
+			zap.String("coin_type_code", p.btc.CoinTypeCode().String()))
+		return
 	}
 
-	//2.call `getaccount` by p2sh_segwit_address
-	acnt, err = p.btc.GetAccount(p2shSegwitAddress)
+	// 1.call `getaccount` by target_address
+	//FIXME: error occurred in BCH
+	acnt, err := p.btc.GetAccount(targetAddr)
 	if err != nil {
 		p.logger.Warn(
 			"fail to call btc.GetAccount()",
-			zap.String("p2shSegwitAddress", p2shSegwitAddress),
+			zap.String(addrType.String(), targetAddr),
 			zap.Error(err))
 		return
 	}
 	p.logger.Debug(
-		"account is found by p2sh_segwit_address",
+		"account is found",
 		zap.String("account", acnt),
-		zap.String("p2shSegwitAddress", p2shSegwitAddress))
+		zap.String(addrType.String(), targetAddr))
 
-	//3.call `getaddressinfo` by p2sh_segwit_address
-	addrInfo, err := p.btc.GetAddressInfo(p2shSegwitAddress)
+	// 2.call `getaddressinfo` by target_address
+	addrInfo, err := p.btc.GetAddressInfo(targetAddr)
 	if err != nil {
 		p.logger.Warn(
 			"fail to call btc.GetAddressInfo()",
-			zap.String("p2shSegwitAddress", p2shSegwitAddress),
+			zap.String(addrType.String(), targetAddr),
 			zap.Error(err))
 	} else {
 		if addrInfo.Pubkey != fullPublicKey {

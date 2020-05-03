@@ -34,7 +34,7 @@ type LoggingResult struct {
 
 // Logging calls RPC `logging`
 func (b *Bitcoin) Logging() (*LoggingResult, error) {
-	rawResult, err := b.client.RawRequest("logging", []json.RawMessage{})
+	rawResult, err := b.Client.RawRequest("logging", []json.RawMessage{})
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.RawRequest(logging)")
 	}

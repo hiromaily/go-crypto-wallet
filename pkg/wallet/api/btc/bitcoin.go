@@ -13,7 +13,7 @@ import (
 
 // Bitcoin includes client to call Json-RPC
 type Bitcoin struct {
-	client            *rpcclient.Client
+	Client            *rpcclient.Client
 	chainConf         *chaincfg.Params
 	coinTypeCode      coin.CoinTypeCode //btc
 	version           coin.BTCVersion   //179900
@@ -36,7 +36,7 @@ func NewBitcoin(
 	logger *zap.Logger) (*Bitcoin, error) {
 
 	bit := Bitcoin{
-		client: client,
+		Client: client,
 		logger: logger,
 	}
 
@@ -74,8 +74,8 @@ func NewBitcoin(
 
 // Close disconnect from bitcoin core server
 func (b *Bitcoin) Close() {
-	if b.client != nil {
-		b.client.Shutdown()
+	if b.Client != nil {
+		b.Client.Shutdown()
 	}
 }
 

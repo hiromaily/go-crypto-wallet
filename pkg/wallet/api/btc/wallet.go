@@ -36,7 +36,7 @@ func (b *Bitcoin) BackupWallet(fileName string) error {
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.Marchal(filename)")
 	}
-	_, err = b.client.RawRequest("backupwallet", []json.RawMessage{bFileName})
+	_, err = b.Client.RawRequest("backupwallet", []json.RawMessage{bFileName})
 	if err != nil {
 		return errors.Wrap(err, "failt to call json.RawRequest(backupwallet)")
 	}
@@ -62,7 +62,7 @@ func (b *Bitcoin) dumpImportWallet(fileName, method string) error {
 		return errors.Wrap(err, "fail to call json.Marchal(filename)")
 	}
 
-	rawResult, err := b.client.RawRequest(method, []json.RawMessage{bFileName})
+	rawResult, err := b.Client.RawRequest(method, []json.RawMessage{bFileName})
 	if err != nil {
 		return errors.Wrapf(err, "fail to call json.RawRequest(%s)", method)
 	}
@@ -78,22 +78,22 @@ func (b *Bitcoin) dumpImportWallet(fileName, method string) error {
 
 // EncryptWallet encrypt wallet by pass phrase
 func (b *Bitcoin) EncryptWallet(passphrase string) error {
-	return b.client.CreateEncryptedWallet(passphrase)
+	return b.Client.CreateEncryptedWallet(passphrase)
 }
 
 // WalletLock lock wallet
 func (b *Bitcoin) WalletLock() error {
-	return b.client.WalletLock()
+	return b.Client.WalletLock()
 }
 
 // WalletPassphrase unlock wallet
 func (b *Bitcoin) WalletPassphrase(passphrase string, timeoutSecs int64) error {
-	return b.client.WalletPassphrase(passphrase, timeoutSecs)
+	return b.Client.WalletPassphrase(passphrase, timeoutSecs)
 }
 
 // WalletPassphraseChange change pass phrase
 func (b *Bitcoin) WalletPassphraseChange(old, new string) error {
-	return b.client.WalletPassphraseChange(old, new)
+	return b.Client.WalletPassphraseChange(old, new)
 }
 
 // LoadWallet import wallet dat
@@ -110,7 +110,7 @@ func (b *Bitcoin) LoadWallet(fileName string) error {
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.Marchal(fileName)")
 	}
-	rawResult, err := b.client.RawRequest("loadwallet", []json.RawMessage{bFileName})
+	rawResult, err := b.Client.RawRequest("loadwallet", []json.RawMessage{bFileName})
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.RawRequest(loadwallet)")
 	}
@@ -141,7 +141,7 @@ func (b *Bitcoin) UnLoadWallet(fileName string) error {
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.Marchal()")
 	}
-	_, err = b.client.RawRequest("unloadwallet", []json.RawMessage{bFileName})
+	_, err = b.Client.RawRequest("unloadwallet", []json.RawMessage{bFileName})
 	if err != nil {
 		return errors.Errorf("fail to call json.RawRequest(unloadwallet)")
 	}
@@ -165,7 +165,7 @@ func (b *Bitcoin) CreateWallet(fileName string, disablePrivKey bool) error {
 		return errors.Wrap(err, "fail to call json.Marchal(bool)")
 	}
 
-	rawResult, err := b.client.RawRequest("createwallet", []json.RawMessage{bFileName, bDisablePrivKey})
+	rawResult, err := b.Client.RawRequest("createwallet", []json.RawMessage{bFileName, bDisablePrivKey})
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.RawRequest(createwallet)")
 	}

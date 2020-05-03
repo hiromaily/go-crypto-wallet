@@ -26,7 +26,7 @@ func (b *Bitcoin) EstimateSmartFee() (float64, error) {
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call json.Marchal(confirmationBlock)")
 	}
-	rawResult, err := b.client.RawRequest("estimatesmartfee", []json.RawMessage{input})
+	rawResult, err := b.Client.RawRequest("estimatesmartfee", []json.RawMessage{input})
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call json.RawRequest(estimatesmartfee)")
 	}

@@ -10,7 +10,7 @@ import (
 // ImportPrivKey import privKey to wallet
 // - Rescan  *bool `jsonrpcdefault:"true"`
 func (b *Bitcoin) ImportPrivKey(privKeyWIF *btcutil.WIF) error {
-	err := b.client.ImportPrivKey(privKeyWIF)
+	err := b.Client.ImportPrivKey(privKeyWIF)
 	if err != nil {
 		return errors.Wrap(err, "fail to call client.ImportPrivKey()")
 	}
@@ -21,7 +21,7 @@ func (b *Bitcoin) ImportPrivKey(privKeyWIF *btcutil.WIF) error {
 // ImportPrivKeyLabel import privKey with label to wallet
 // - Rescan  *bool `jsonrpcdefault:"true"`
 func (b *Bitcoin) ImportPrivKeyLabel(privKeyWIF *btcutil.WIF, label string) error {
-	err := b.client.ImportPrivKeyLabel(privKeyWIF, label)
+	err := b.Client.ImportPrivKeyLabel(privKeyWIF, label)
 	if err != nil {
 		return errors.Wrap(err, "fail to call client.ImportPrivKeyLabel()")
 	}
@@ -31,7 +31,7 @@ func (b *Bitcoin) ImportPrivKeyLabel(privKeyWIF *btcutil.WIF, label string) erro
 
 // ImportPrivKeyWithoutReScan import privKey without rescan to wallet
 func (b *Bitcoin) ImportPrivKeyWithoutReScan(privKeyWIF *btcutil.WIF, label string) error {
-	err := b.client.ImportPrivKeyRescan(privKeyWIF, label, false)
+	err := b.Client.ImportPrivKeyRescan(privKeyWIF, label, false)
 	if err != nil {
 		return errors.Wrap(err, "fail to call ImportPrivKeyRescan()")
 	}
@@ -41,7 +41,7 @@ func (b *Bitcoin) ImportPrivKeyWithoutReScan(privKeyWIF *btcutil.WIF, label stri
 
 // ImportAddress import pubkey to wallet
 func (b *Bitcoin) ImportAddress(pubkey string) error {
-	err := b.client.ImportAddress(pubkey)
+	err := b.Client.ImportAddress(pubkey)
 	if err != nil {
 		return errors.Wrap(err, "fail to call ImportAddress()")
 	}
@@ -81,7 +81,7 @@ func (b *Bitcoin) ImportAddressWithLabel(address, label string, rescan bool) err
 	jsonRawMsg := []json.RawMessage{bAddress, bLabel, bRescan}
 
 	//call importaddress
-	_, err = b.client.RawRequest("importaddress", jsonRawMsg)
+	_, err = b.Client.RawRequest("importaddress", jsonRawMsg)
 	if err != nil {
 		return errors.Wrap(err, "fail to call client.RawRequest(importaddress)")
 	}

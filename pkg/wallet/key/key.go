@@ -10,7 +10,8 @@ type Generator interface {
 }
 
 // WalletKey keys
-// - P2PKHAddr is not used anywhere, P2SHSegWitAddr should be used.
+// - [BTC] P2PKHAddr is not used anywhere, P2SHSegWitAddr should be used.
+// - [BCH] P2SHSegWitAddr is invalid. P2PKHAddr should be used.
 type WalletKey struct {
 	WIF            string
 	P2PKHAddr      string

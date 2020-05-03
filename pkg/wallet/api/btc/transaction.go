@@ -165,7 +165,7 @@ func (b *Bitcoin) GetTransaction(txID string) (*GetTransactionResult, error) {
 	if err != nil {
 		return nil, errors.Errorf("json.Marchal(txID): error: %s", err)
 	}
-	rawResult, err := b.client.RawRequest("gettransaction", []json.RawMessage{input})
+	rawResult, err := b.Client.RawRequest("gettransaction", []json.RawMessage{input})
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.RawRequest(gettransaction)")
 	}
@@ -185,7 +185,7 @@ func (b *Bitcoin) GetTransactionByTxID(txID string) (*GetTransactionResult, erro
 	//if err != nil {
 	//	return nil, errors.Wrapf(err, "fail to call chainhash.NewHashFromStr(%s)", txID)
 	//}
-	//resTx, err := b.client.GetTransaction(hashTx)
+	//resTx, err := b.Client.GetTransaction(hashTx)
 	resTx, err := b.GetTransaction(txID)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to call btc.GetTransaction(%s)", txID)
@@ -204,7 +204,7 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 
 	// Gettxout / txHash *chainhash.Hash, index uint32, mempool bool
 	//  client.GetTxOut is not outdated yet (at bitcoin core 0.19)
-	txOutResult, err := b.client.GetTxOut(hash, index, false)
+	txOutResult, err := b.Client.GetTxOut(hash, index, false)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to call btc.client.GetTxOut(%s, %d, false)", hash, index)
 	}
@@ -233,12 +233,12 @@ func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*TxRawResult, error) {
 	//if err != nil {
 	//	return nil, errors.Wrap(err, "fail to call hex.DecodeString()")
 	//}
-	//resTx, err := b.client.DecodeRawTransaction(byteHex)
+	//resTx, err := b.Client.DecodeRawTransaction(byteHex)
 	input, err := json.Marshal(string(hexTx))
 	if err != nil {
 		return nil, errors.Errorf("json.Marchal(txID): error: %s", err)
 	}
-	rawResult, err := b.client.RawRequest("decoderawtransaction", []json.RawMessage{input})
+	rawResult, err := b.Client.RawRequest("decoderawtransaction", []json.RawMessage{input})
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.RawRequest(decoderawtransaction)")
 	}
@@ -261,7 +261,7 @@ func (b *Bitcoin) GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error) 
 		return nil, errors.Wrapf(err, "fail to call chainhash.NewHashFromStr(%s)", strHashTx)
 	}
 
-	tx, err := b.client.GetRawTransaction(hashTx)
+	tx, err := b.Client.GetRawTransaction(hashTx)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call btc.client.GetRawTransaction(hash)")
 	}
@@ -277,7 +277,7 @@ func (b *Bitcoin) CreateRawTransaction(inputs []btcjson.TransactionInput, output
 	lockTime := int64(0) //TODO:Raw locktime what value is exactly required??
 
 	// CreateRawTransaction
-	msgTx, err := b.client.CreateRawTransaction(inputs, outputs, &lockTime)
+	msgTx, err := b.Client.CreateRawTransaction(inputs, outputs, &lockTime)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call btcutil.CreateRawTransaction()")
 	}
@@ -312,7 +312,7 @@ func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, err
 		return nil, errors.Wrap(err, "fail to call json.Marchal(feeRate)")
 	}
 
-	rawResult, err := b.client.RawRequest("fundrawtransaction", []json.RawMessage{bHex, bFeeRate})
+	rawResult, err := b.Client.RawRequest("fundrawtransaction", []json.RawMessage{bHex, bFeeRate})
 	if err != nil {
 		//error: -4: Insufficient funds
 		return nil, errors.Wrap(err, "fail to call json.RawRequest(fundrawtransaction)")
@@ -350,7 +350,7 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []PrevTx) (*wire.Ms
 	}
 
 	// call api `signrawtransactionwithwallet`
-	rawResult, err := b.client.RawRequest("signrawtransactionwithwallet", []json.RawMessage{input1, input2})
+	rawResult, err := b.Client.RawRequest("signrawtransactionwithwallet", []json.RawMessage{input1, input2})
 	if err != nil {
 		return nil, false, errors.Wrap(err, "fail to call json.RawRequest(signrawtransactionwithwallet)")
 	}
@@ -407,7 +407,7 @@ func (b *Bitcoin) SignRawTransactionWithKey(tx *wire.MsgTx, privKeysWIF []string
 	}
 
 	// call api `signrawtransactionwithkey`
-	rawResult, err := b.client.RawRequest("signrawtransactionwithkey", []json.RawMessage{input1, input2, input3})
+	rawResult, err := b.Client.RawRequest("signrawtransactionwithkey", []json.RawMessage{input1, input2, input3})
 	if err != nil {
 		return nil, false, errors.Wrap(err, "fail to call json.RawRequest(signrawtransactionwithkey)")
 	}
@@ -479,7 +479,7 @@ func (b *Bitcoin) SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error) {
 // sendRawTransaction send raw transaction
 func (b *Bitcoin) sendRawTransaction(tx *wire.MsgTx) (*chainhash.Hash, error) {
 	// send
-	hash, err := b.client.SendRawTransaction(tx, true)
+	hash, err := b.Client.SendRawTransaction(tx, true)
 	if err != nil {
 		// error occurred when trying to send tx with minimum fee(1Satoshi)
 		//  -26: 66: min relay fee not met

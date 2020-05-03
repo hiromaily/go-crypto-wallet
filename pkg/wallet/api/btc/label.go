@@ -24,7 +24,7 @@ func (b *Bitcoin) SetLabel(addr, label string) error {
 		return errors.Wrap(err, "fail to call json.Marchal(label)")
 	}
 
-	rawResult, err := b.client.RawRequest("setlabel", []json.RawMessage{input1, input2})
+	rawResult, err := b.Client.RawRequest("setlabel", []json.RawMessage{input1, input2})
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.RawRequest(setlabel)")
 	}
@@ -51,7 +51,7 @@ func (b *Bitcoin) SetLabel(addr, label string) error {
 //		return 0, errors.Wrap(err, "fail to call json.Marchal(minConf)")
 //	}
 //
-//	rawResult, err := b.client.RawRequest("getreceivedbylabel", []json.RawMessage{input1, input2})
+//	rawResult, err := b.Client.RawRequest("getreceivedbylabel", []json.RawMessage{input1, input2})
 //	if err != nil {
 //		return 0, errors.Wrap(err, "fail to call json.RawRequest(getreceivedbylabel)")
 //	}

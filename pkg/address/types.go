@@ -9,9 +9,10 @@ type AddrType string
 
 // address type
 const (
-	AddrTypeLegacy     AddrType = "legacy"
-	AddrTypeP2shSegwit AddrType = "p2sh-segwit"
-	AddrTypeBech32     AddrType = "bech32"
+	AddrTypeLegacy      AddrType = "legacy"
+	AddrTypeP2shSegwit  AddrType = "p2sh-segwit"
+	AddrTypeBech32      AddrType = "bech32"
+	AddrTypeBCHCashAddr AddrType = "BCH-CashAddr"
 )
 
 // String converter
@@ -21,9 +22,10 @@ func (a AddrType) String() string {
 
 // AddrTypeValue value
 var AddrTypeValue = map[AddrType]uint8{
-	AddrTypeLegacy:     0,
-	AddrTypeP2shSegwit: 1,
-	AddrTypeBech32:     2,
+	AddrTypeLegacy:      0,
+	AddrTypeP2shSegwit:  1,
+	AddrTypeBech32:      2,
+	AddrTypeBCHCashAddr: 3,
 }
 
 //----------------------------------------------------

@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"log"
 	"os"
 
@@ -13,6 +12,7 @@ import (
 	wcmd "github.com/hiromaily/go-bitcoin/pkg/command/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
@@ -72,7 +72,7 @@ func main() {
 			log.Println("conf.Bitcoin.Host:", conf.Bitcoin.Host)
 		}
 		// override conf.CoinTypeCode
-		if os.Getenv("COIN_TYPE") != "" && coin.ValidateCoinTypeCode(os.Getenv("COIN_TYPE")){
+		if os.Getenv("COIN_TYPE") != "" && coin.ValidateCoinTypeCode(os.Getenv("COIN_TYPE")) {
 			conf.CoinTypeCode = coin.CoinTypeCode(os.Getenv("COIN_TYPE"))
 			log.Println("conf.CoinTypeCode:", conf.CoinTypeCode)
 		}

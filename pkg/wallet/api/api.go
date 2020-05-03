@@ -16,7 +16,7 @@ import (
 
 // Bitcoiner Bitcoin/BitcoinCash Interface
 type Bitcoiner interface {
-	//account.go
+	//account.go -> wrapper of GetAddressInfo to return account
 	GetAccount(addr string) (string, error)
 
 	//address.go

@@ -23,7 +23,7 @@ func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
 		return 0, errors.Wrapf(err, "fail to call json.Marchal(%d)", b.confirmationBlock)
 	}
 
-	rawResult, err := b.client.RawRequest("getbalance", []json.RawMessage{input1, input2})
+	rawResult, err := b.Client.RawRequest("getbalance", []json.RawMessage{input1, input2})
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call json.RawRequest(getbalance)")
 	}
