@@ -23,9 +23,7 @@ type Watcher interface {
 	CreatePaymentRequest() error
 
 	Done()
-	//GetDB() watchrepo.WalletRepositorier // for debug use
 	GetBTC() api.Bitcoiner
-	GetType() wtype.WalletType
 }
 
 // Watch watch only wallet object
@@ -110,17 +108,7 @@ func (w *Watch) Done() {
 	w.btc.Close()
 }
 
-// GetDB gets repository
-//func (w *Watch) GetDB() watchrepo.WalletRepositorier {
-//	return w.
-//}
-
 // GetBTC gets btc
 func (w *Watch) GetBTC() api.Bitcoiner {
 	return w.btc
-}
-
-// GetType gets wallet type
-func (w *Watch) GetType() wtype.WalletType {
-	return w.wtype
 }

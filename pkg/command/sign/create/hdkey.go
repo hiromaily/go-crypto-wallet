@@ -46,7 +46,7 @@ func (c *HDKeyCommand) Run(args []string) int {
 	}
 
 	// create key for hd wallet for Authorization account
-	keys, err := c.wallet.GenerateAuthKey(c.wallet.GetAuthType().AccountType(), bSeed, 1)
+	keys, err := c.wallet.GenerateAuthKey(bSeed, 1)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call GenerateAuthKey() %+v", err))
 		return 1

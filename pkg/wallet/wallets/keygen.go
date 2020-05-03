@@ -25,7 +25,6 @@ type Keygener interface {
 
 	Done()
 	GetBTC() api.Bitcoiner
-	//GetType() wallet.WalletType
 }
 
 // Keygen is keygen wallet object
@@ -115,17 +114,7 @@ func (k *Keygen) Done() {
 	k.btc.Close()
 }
 
-// BeginTx starts transaction
-//func (k *Keygen) BeginTx() (*sql.Tx, error) {
-//	return k.dbConn.Begin()
-//}
-
 // GetBTC gets btc
 func (k *Keygen) GetBTC() api.Bitcoiner {
 	return k.btc
-}
-
-// GetType gets wallet type
-func (k *Keygen) GetType() wallet.WalletType {
-	return k.wtype
 }

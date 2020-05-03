@@ -15,15 +15,12 @@ import (
 type Signer interface {
 	GenerateSeed() ([]byte, error)
 	StoreSeed(strSeed string) ([]byte, error)
-	GenerateAuthKey(accountType account.AccountType, seed []byte, count uint32) ([]key.WalletKey, error)
+	GenerateAuthKey(seed []byte, count uint32) ([]key.WalletKey, error)
 	ImportPrivKey() error
 	ExportFullPubkey() (string, error)
 	SignTx(filePath string) (string, bool, string, error)
 
 	Done()
-	//GetBTC() api.Bitcoiner
-	//GetType() wallet.WalletType
-	GetAuthType() account.AuthType
 }
 
 // Sign is sign wallet object
@@ -75,8 +72,8 @@ func (s *Sign) StoreSeed(strSeed string) ([]byte, error) {
 }
 
 // GenerateAuthKey generates account keys
-func (s *Sign) GenerateAuthKey(accountType account.AccountType, seed []byte, count uint32) ([]key.WalletKey, error) {
-	return s.HDWalleter.Generate(accountType, seed, count)
+func (s *Sign) GenerateAuthKey(seed []byte, count uint32) ([]key.WalletKey, error) {
+	return s.HDWalleter.Generate(s.authAccount.AccountType(), seed, count)
 }
 
 // ImportPrivKey imports privKey
@@ -98,24 +95,4 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 func (s *Sign) Done() {
 	s.dbConn.Close()
 	s.btc.Close()
-}
-
-// BeginTx starts transaction
-//func (k *Keygen) BeginTx() (*sql.Tx, error) {
-//	return k.dbConn.Begin()
-//}
-
-// GetBTC gets btc
-func (s *Sign) GetBTC() api.Bitcoiner {
-	return s.btc
-}
-
-// GetType gets wallet type
-func (s *Sign) GetType() wallet.WalletType {
-	return s.wtype
-}
-
-// GetAuthType gets auth_type
-func (s *Sign) GetAuthType() account.AuthType {
-	return s.authAccount
 }
