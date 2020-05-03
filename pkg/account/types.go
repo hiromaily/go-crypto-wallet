@@ -225,13 +225,3 @@ func IsMultisigAccount(v AccountType) bool {
 	}
 	return false
 }
-
-// AccountTypeMultisig true: account type is for multisig address
-// TODO: this func should be replaced to IsMultisigAccount(accountType)
-//var AccountTypeMultisig = map[AccountType]bool{
-//	AccountTypeClient:        false,
-//	AccountTypeDeposit:       true,
-//	AccountTypePayment:       true,
-//	AccountTypeStored:        true,
-//	AccountTypeAuthorization: false,
-//}
