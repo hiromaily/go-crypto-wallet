@@ -79,6 +79,8 @@ const (
 	BTCVer17 BTCVersion = 170000
 	BTCVer18 BTCVersion = 180000
 	BTCVer19 BTCVersion = 190000
+	BTCVer20 BTCVersion = 200000
+	BTCVer21 BTCVersion = 210000 // for BCH version
 )
 
 // Int converter

@@ -226,7 +226,7 @@ func (k *HDKey) getP2PKHAddr(privKey *btcec.PrivateKey) (string, error) {
 	case coin.BTC:
 		return p2PKHAddr.String(), nil
 	case coin.BCH:
-		k.getP2PKHAddrBCH(p2PKHAddr)
+		return k.getP2PKHAddrBCH(p2PKHAddr)
 	}
 	return "", errors.Errorf("getP2pkhAddr() is not implemented for %s", k.coinTypeCode)
 }

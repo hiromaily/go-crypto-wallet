@@ -68,7 +68,14 @@ func (a *AddressImport) ImportAddress(fileName string, accountType account.Accou
 		//kind of required address is different according to account
 		var addr string
 		if accountType == account.AccountTypeClient {
-			addr = inner[2] //p2sh_segwit_address
+			switch a.btc.CoinTypeCode() {
+			case coin.BTC:
+				addr = inner[2] //p2sh_segwit_address
+			case coin.BCH:
+				addr = inner[1] //p2pkh_address
+			default:
+				return errors.Errorf("coinTypeCode is out of range: %s", a.btc.CoinTypeCode().String())
+			}
 		} else {
 			addr = inner[4] //multisig_address
 		}

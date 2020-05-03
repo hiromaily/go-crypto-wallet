@@ -10,7 +10,7 @@ services:
       dockerfile: Dockerfile
     image: wallet-bch:0.19
     volumes:
-    - ./docker/bch/data1:/root/.bitcoin
+    - ./docker/bch/data:/root/.bitcoin
     ports:
     - "${BCH_WALLET_RPC_PORT:-19332}:18332"
     stdin_open: true

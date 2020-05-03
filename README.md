@@ -194,6 +194,7 @@ watch send -file xxx.csv
 - [x] Implement proper database transaction.
 - [x] Re-design procedure for creating Multisig address.
 - [x] Flexible multisig proportion M:N. For now only 2:2 fixed proportion is available.
+- [ ] Tweak for another coin like BCH
 - [ ] Implement `encryptwallet` to keygen/sign wallets
 - [ ] Lock/Unlock wallet for security reason, authorized operator is available.
 - [ ] Backup/Restore for wallet.dat. If wallt.dat is broken, it's not easy to recover.

@@ -265,6 +265,8 @@ list-wallets:
 	bitcoin-cli listwallets
 
 # required after bitcoind restarted
+# however, it takes much time in bitcoin ABC (for BCH)
+#  so, removing any wallet.dat from server before restarting in BCH, then create wallet again.
 .PHONY: load-wallet
 load-wallets:
 	bitcoin-cli loadwallet watch

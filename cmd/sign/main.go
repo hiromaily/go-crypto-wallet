@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"log"
 	"os"
 
@@ -65,8 +66,13 @@ func main() {
 		// override conf.Bitcoin.Host
 		if btcWallet != "" {
 			conf.Bitcoin.Host = fmt.Sprintf("%s/wallet/%s", conf.Bitcoin.Host, btcWallet)
+			log.Println("conf.Bitcoin.Host:", conf.Bitcoin.Host)
 		}
-		log.Println("conf.Bitcoin.Host:", conf.Bitcoin.Host)
+		// override conf.CoinTypeCode
+		if os.Getenv("COIN_TYPE") != "" && coin.ValidateCoinTypeCode(os.Getenv("COIN_TYPE")){
+			conf.CoinTypeCode = coin.CoinTypeCode(os.Getenv("COIN_TYPE"))
+			log.Println("conf.CoinTypeCode:", conf.CoinTypeCode)
+		}
 
 		// create wallet
 		regi := NewRegistry(conf, walletType, authName)
