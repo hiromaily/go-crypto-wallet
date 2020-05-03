@@ -19,7 +19,7 @@ tx_file_signed=`keygen sign -file "${tx_file##*\[fileName\]: }"`
 
 # sign on sign wallet for 2nd signature
 echo 'sign on 2nd '${tx_file_signed##*\[fileName\]: }
-tx_file_signed2=`sign sign -file "${tx_file_signed##*\[fileName\]: }"`
+tx_file_signed2=`sign -wallet sign1 sign -file "${tx_file_signed##*\[fileName\]: }"`
 
 # send signed tx
 echo 'send tx '${tx_file_signed2##*\[fileName\]: }
