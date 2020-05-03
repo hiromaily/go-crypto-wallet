@@ -136,9 +136,14 @@ func (r *registry) newRPCClient() *rpcclient.Client {
 }
 
 func (r *registry) newBTC() api.Bitcoiner {
-	var err error
-	if r.btc == nil {
-		r.btc, err = api.NewBitcoin(r.newRPCClient(), &r.conf.Bitcoin, r.newLogger(), r.conf.CoinTypeCode)
+	if r.btc == nil{
+		var err error
+		r.btc, err = api.NewBitcoin(
+			r.newRPCClient(),
+			&r.conf.Bitcoin,
+			r.newLogger(),
+			r.conf.CoinTypeCode,
+		)
 		if err != nil {
 			panic(err)
 		}

@@ -31,6 +31,7 @@ type registry struct {
 	walletType  wtype.WalletType
 	logger      *zap.Logger
 	rpcClient   *rpcclient.Client
+	btc         api.Bitcoiner
 	mysqlClient *sql.DB
 }
 
@@ -122,27 +123,30 @@ func (r *registry) newPaymentRequestCreator() watchsrv.PaymentRequestCreator {
 }
 
 func (r *registry) newRPCClient() *rpcclient.Client {
-	var err error
 	if r.rpcClient == nil {
+		var err error
 		r.rpcClient, err = api.NewRPCClient(&r.conf.Bitcoin)
-	}
-	if err != nil {
-		panic(err)
+		if err != nil {
+			panic(err)
+		}
 	}
 	return r.rpcClient
 }
 
 func (r *registry) newBTC() api.Bitcoiner {
-	bit, err := api.NewBitcoin(
-		r.newRPCClient(),
-		&r.conf.Bitcoin,
-		r.newLogger(),
-		r.conf.CoinTypeCode,
-	)
-	if err != nil {
-		panic(err)
+	if r.btc == nil{
+		var err error
+		r.btc, err = api.NewBitcoin(
+			r.newRPCClient(),
+			&r.conf.Bitcoin,
+			r.newLogger(),
+			r.conf.CoinTypeCode,
+		)
+		if err != nil {
+			panic(err)
+		}
 	}
-	return bit
+	return r.btc
 }
 
 func (r *registry) newLogger() *zap.Logger {
