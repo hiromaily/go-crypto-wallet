@@ -12,8 +12,23 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv/keygensrv"
 )
 
+// Keygener is for keygen wallet service interface
+type Keygener interface {
+	GenerateSeed() ([]byte, error)
+	StoreSeed(strSeed string) ([]byte, error)
+	GenerateAccountKey(accountType account.AccountType, seed []byte, count uint32) ([]key.WalletKey, error)
+	ImportPrivKey(accountType account.AccountType) error
+	ImportFullPubKey(fileName string) error
+	CreateMultisigAddress(accountType account.AccountType, addressType address.AddrType) error
+	ExportAddress(accountType account.AccountType) (string, error)
+	SignTx(filePath string) (string, bool, string, error)
+
+	Done()
+	GetBTC() api.Bitcoiner
+	//GetType() wallet.WalletType
+}
+
 // Keygen is keygen wallet object
-// TODO: maybe each services should be exported variable, not embedded innterface
 type Keygen struct {
 	btc    api.Bitcoiner
 	dbConn *sql.DB

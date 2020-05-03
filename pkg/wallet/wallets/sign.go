@@ -11,6 +11,21 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv/signsrv"
 )
 
+// Signer is for signature wallet service interface
+type Signer interface {
+	GenerateSeed() ([]byte, error)
+	StoreSeed(strSeed string) ([]byte, error)
+	GenerateAuthKey(accountType account.AccountType, seed []byte, count uint32) ([]key.WalletKey, error)
+	ImportPrivKey() error
+	ExportFullPubkey() (string, error)
+	SignTx(filePath string) (string, bool, string, error)
+
+	Done()
+	//GetBTC() api.Bitcoiner
+	//GetType() wallet.WalletType
+	GetAuthType() account.AuthType
+}
+
 // Sign is sign wallet object
 type Sign struct {
 	btc         api.Bitcoiner
@@ -25,7 +40,6 @@ type Sign struct {
 }
 
 // NewSign returns Sign object
-// TODO: maybe each services should be exported variable, not embedded innterface
 func NewSign(
 	btc api.Bitcoiner,
 	dbConn *sql.DB,
