@@ -25,7 +25,6 @@ func (c *DBCommand) Synopsis() string {
 
 var (
 	createSynopsis = "create table"
-	resetSynopsis  = "reset table"
 )
 
 // Help returns usage for this subcommand
@@ -33,8 +32,7 @@ func (c *DBCommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet db [Subcommands...]
 Subcommands:
   create  %s
-  reset  %s
-`, createSynopsis, resetSynopsis)
+`, createSynopsis)
 }
 
 // Run executes this subcommand
@@ -52,14 +50,6 @@ func (c *DBCommand) Run(args []string) int {
 			return &CreateCommand{
 				name:     "create",
 				synopsis: createSynopsis,
-				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
-			}, nil
-		},
-		"reset": func() (cli.Command, error) {
-			return &ResetCommand{
-				name:     "reset",
-				synopsis: resetSynopsis,
 				ui:       command.ClolorUI(),
 				wallet:   c.Wallet,
 			}, nil

@@ -20,6 +20,7 @@ type Watcher interface {
 	CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error)
 	SendTx(filePath string) (string, error)
 	UpdateTxStatus() error
+	CreatePaymentRequest() error
 
 	Done()
 	//GetDB() watchrepo.WalletRepositorier // for debug use
@@ -37,6 +38,7 @@ type Watch struct {
 	watchsrv.TxCreator
 	watchsrv.TxSender
 	watchsrv.TxMonitorer
+	watchsrv.PaymentRequestCreator
 	wtype wtype.WalletType
 }
 
@@ -50,18 +52,20 @@ func NewWatch(
 	txCreator watchsrv.TxCreator,
 	txSender watchsrv.TxSender,
 	txMonitorer watchsrv.TxMonitorer,
+	paymentRequestCreator watchsrv.PaymentRequestCreator,
 	wtype wtype.WalletType) *Watch {
 
 	return &Watch{
-		btc:             btc,
-		logger:          logger,
-		dbConn:          dbConn,
-		tracer:          tracer,
-		AddressImporter: addrImporter,
-		TxCreator:       txCreator,
-		TxSender:        txSender,
-		TxMonitorer:     txMonitorer,
-		wtype:           wtype,
+		btc:                   btc,
+		logger:                logger,
+		dbConn:                dbConn,
+		tracer:                tracer,
+		AddressImporter:       addrImporter,
+		TxCreator:             txCreator,
+		TxSender:              txSender,
+		TxMonitorer:           txMonitorer,
+		PaymentRequestCreator: paymentRequestCreator,
+		wtype:                 wtype,
 	}
 }
 
@@ -93,6 +97,11 @@ func (w *Watch) UpdateTxStatus() error {
 // SendTx sends signed transaction
 func (w *Watch) SendTx(filePath string) (string, error) {
 	return w.TxSender.SendTx(filePath)
+}
+
+// CreatePaymentRequest creates payment_request dummy data for development
+func (w *Watch) CreatePaymentRequest() error {
+	return w.PaymentRequestCreator.CreatePaymentRequest()
 }
 
 // Done should be called before exit

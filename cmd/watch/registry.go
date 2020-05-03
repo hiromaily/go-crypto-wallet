@@ -53,6 +53,7 @@ func (r *registry) NewWalleter() wallets.Watcher {
 		r.newTxCreator(),
 		r.newTxSender(),
 		r.newTxMonitorer(),
+		r.newPaymentRequestCreator(),
 		r.walletType,
 	)
 }
@@ -104,6 +105,17 @@ func (r *registry) newTxMonitorer() watchsrv.TxMonitorer {
 		r.newMySQLClient(),
 		r.newTxRepo(),
 		r.newTxInputRepo(),
+		r.newPaymentRequestRepo(),
+		r.walletType,
+	)
+}
+
+func (r *registry) newPaymentRequestCreator() watchsrv.PaymentRequestCreator {
+	return watchsrv.NewPaymentRequestCreate(
+		r.newBTC(),
+		r.newLogger(),
+		r.newMySQLClient(),
+		r.newAddressRepo(),
 		r.newPaymentRequestRepo(),
 		r.walletType,
 	)
