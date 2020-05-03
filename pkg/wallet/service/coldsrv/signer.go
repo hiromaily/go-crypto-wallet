@@ -195,7 +195,7 @@ func (s *Sign) signMultisig(msgTx *wire.MsgTx, prevsAddrs *btc.AddrsPrevTxs) (*w
 			return nil, false, "", errors.Wrap(err, "fail to call serial.EncodeToString()")
 		}
 
-	case wallet.WalletTypeSignature:
+	case wallet.WalletTypeSign:
 		authKey, err := s.authKeyRepo.GetOne("")
 		if err != nil {
 			return nil, false, "", errors.Wrap(err, "fail to call authKeyRepo.GetOne()")

@@ -5,9 +5,9 @@ type WalletType string
 
 // wallet_type
 const (
-	WalletTypeWatchOnly WalletType = "wallet"
+	WalletTypeWatchOnly WalletType = "watch"
 	WalletTypeKeyGen    WalletType = "keygen"
-	WalletTypeSignature WalletType = "signature"
+	WalletTypeSign      WalletType = "sign"
 )
 
 // String converter
@@ -19,5 +19,5 @@ func (w WalletType) String() string {
 var WalletTypeValue = map[WalletType]uint8{
 	WalletTypeWatchOnly: 1,
 	WalletTypeKeyGen:    2,
-	WalletTypeSignature: 3,
+	WalletTypeSign:      3,
 }

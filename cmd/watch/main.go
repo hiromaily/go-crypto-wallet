@@ -15,7 +15,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
-// wallet as watch only wallet
+// watch as watch only wallet
 //  this wallet works online, so bitcoin network is required to call APIs
 //  create unsigned transaction
 //  send signed transaction
@@ -23,11 +23,9 @@ import (
 //TODO: bitcoin functionalities
 // - back up wallet data periodically and import functionality
 // - generated key must be encrypted
-// - transfer with amount
 // - transfer for monitoring
 //TODO:
 // - logger interface: stdout(ui), log format, open tracing
-// - repository interface (from mysql, mock, redis and so on)
 // - btc command for mock is required
 
 var (

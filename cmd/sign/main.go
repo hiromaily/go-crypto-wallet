@@ -32,7 +32,7 @@ import (
 // - passphrase would be required when using secret key to sign unsigned transaction
 // - multisig with bigger number e.g. 3:5
 var (
-	walletType = wallet.WalletTypeSignature
+	walletType = wallet.WalletTypeSign
 	appName    = walletType.String()
 	appVersion = "2.3.0"
 	authName   = "" // this account is supposed to be embedded when building
