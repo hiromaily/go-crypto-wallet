@@ -1,4 +1,4 @@
-FROM wallet-golang:1.11
+FROM wallet-golang:1.14.1
 
 #RUN go get -u github.com/hiromaily/go-bitcon/...
 
