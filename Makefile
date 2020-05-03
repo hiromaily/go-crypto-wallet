@@ -145,48 +145,49 @@ addr-test:
 bld-docker-all:
 	docker-compose build
 
+# build golang image
 .PHONY: bld-docker-go
 bld-docker-go:
 	docker-compose build base-golang
 
+# build ubuntu image
 .PHONY: bld-docker-ubuntu
 bld-docker-ubuntu:
 	docker-compose build base-ubuntu
 
+# build bitcoin core server
 .PHONY: bld-docker-btc
 bld-docker-btc:
 	docker-compose build btc-watch
 
-#bld-docker-bch:
-#	docker-compose -f docker-compose.bch.yml build bch-watch
-#up-docker-bch:
-#	docker-compose -f docker-compose.bch.yml up bch-watch
+# build bitcoin cash core server
+.PHONY: bld-docker-bch
+bld-docker-bch:
+	docker-compose -f docker-compose.bch.yml build bch-watch
 
+
+# run bitcoin core server
 .PHONY: up-docker-btc
 up-docker-btc:
 	docker-compose up btc-watch btc-keygen btc-sign
 
+# run bitcoin cash core server
+.PHONY: up-docker-bch
+up-docker-bch:
+	docker-compose -f docker-compose.bch.yml up bch-watch
+
+# run all databases
 .PHONY: up-docker-db
 up-docker-db:
 	docker-compose up btc-watch-db btc-keygen-db btc-sign-db
 
-.PHONY: up-docker-watch-only-wallet
-up-docker-watch-only-wallet:
-	docker-compose up btc-watch btc-watch-db
-
-.PHONY: up-docker-btc-all
-up-docker-btc-all: up-docker-btc up-docker-db
-
-#.PHONY: up-docker-apps
-#up-docker-apps:
-#	docker-compose up watch-only-wallet
-
+# run logging middleware
 # logging and monitoring
 .PHONY: up-docker-logger
 up-docker-logger:
 	docker-compose up fluentd elasticsearch grafana
 
-
+# remove database volumes
 .PHONY: rm-db-volumes
 rm-db-volumes:
 	docker rm -f $(docker ps -a --format "{{.Names}}")
