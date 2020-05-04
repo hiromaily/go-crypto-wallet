@@ -120,7 +120,7 @@ blds:
 
 
 run:
-	go run ./cmd/watch/ -conf ./data/config/btc/watch.toml
+	go run ./cmd/watch/ -conf ./data/config/watch.toml
 
 
 ###############################################################################

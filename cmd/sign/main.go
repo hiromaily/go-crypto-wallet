@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"log"
 	"os"
 
@@ -12,7 +13,6 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/command/sign"
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
@@ -35,15 +35,17 @@ var (
 func main() {
 	// command line
 	var (
-		confPath  string
-		btcWallet string
-		isHelp    bool
-		isVersion bool
-		walleter  wallets.Signer
+		confPath     string
+		btcWallet    string
+		coinTypeCode string
+		isHelp       bool
+		isVersion    bool
+		walleter     wallets.Signer
 	)
 	flags := flag.NewFlagSet("main", flag.ContinueOnError)
-	flags.StringVar(&confPath, "conf", os.Getenv("SIGN_WALLET_CONF"), "config file path")
-	flags.StringVar(&btcWallet, "wallet", "", "specify wallet in bitcoin core")
+	flags.StringVar(&confPath, "conf", "", "config file path")
+	flags.StringVar(&coinTypeCode, "coin", "btc", "coin type code `btc`, `bch`")
+	flags.StringVar(&btcWallet, "wallet", "", "specify wallet.dat in bitcoin core")
 	flags.BoolVar(&isVersion, "version", false, "show version")
 	flags.BoolVar(&isHelp, "help", false, "show help")
 	if err := flags.Parse(os.Args[1:]); err != nil {
@@ -56,10 +58,25 @@ func main() {
 		os.Exit(0)
 	}
 
+	// validate coinTypeCode
+	if !coin.ValidateCoinTypeCode(coinTypeCode) {
+		log.Fatal("coin args is invalid. `btc`, `bch` is allowed")
+	}
+
+	// set config path if environment variable is existing
+	if confPath == "" {
+		switch coinTypeCode {
+		case coin.BTC.String():
+			confPath = os.Getenv("BTC_SIGN_WALLET_CONF")
+		case coin.BCH.String():
+			confPath = os.Getenv("BCH_SIGN_WALLET_CONF")
+		}
+	}
+
 	// help
 	if !isHelp && len(os.Args) > 1 {
 		// config
-		conf, err := config.New(confPath, walletType)
+		conf, err := config.New(confPath, walletType, coin.CoinTypeCode(coinTypeCode))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -67,11 +84,6 @@ func main() {
 		if btcWallet != "" {
 			conf.Bitcoin.Host = fmt.Sprintf("%s/wallet/%s", conf.Bitcoin.Host, btcWallet)
 			log.Println("conf.Bitcoin.Host:", conf.Bitcoin.Host)
-		}
-		// override conf.CoinTypeCode
-		if os.Getenv("COIN_TYPE") != "" && coin.ValidateCoinTypeCode(os.Getenv("COIN_TYPE")) {
-			conf.CoinTypeCode = coin.CoinTypeCode(os.Getenv("COIN_TYPE"))
-			log.Println("conf.CoinTypeCode:", conf.CoinTypeCode)
 		}
 
 		// create wallet

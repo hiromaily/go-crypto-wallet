@@ -7,9 +7,12 @@
 #!cmd/keygen
 #!cmd/sign
 
-data/tx/*
-data/pubkey/*
-data/address/*
+data/btc/tx/*
+data/btc/pubkey/*
+data/btc/address/*
+data/bch/tx/*
+data/bch/pubkey/*
+data/bch/address/*
 
 docker/grafana/*
 docker/btc/data/testnet3

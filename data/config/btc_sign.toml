@@ -1,0 +1,40 @@
+#coin_type = "btc" # btc, bch
+
+[bitcoin]
+host = "127.0.0.1:18332"
+# if specific wallet want to be used like `bitcoin-cli -rpcwallet=sign`
+#host = "127.0.0.1:18332/wallet/sign"
+user = "xyz"
+pass = "xyz"
+http_post_mode = true
+disable_tls = true
+network_type = "testnet3" # mainnet, testnet3, regtest
+
+[logger]
+service = "btc-sign"
+env = "custom" # dev, prod, custom :for only zap logger
+level = "debug" # debug, info, warn, error
+is_stacktrace = true
+
+# only available for watch only wallet, but definition is required as none
+[tracer]
+type = "none"  # none, jaeger, datadog
+
+[mysql]
+host = "127.0.0.1:3309"
+dbname = "sign"
+user = "hiromaily"
+pass = "hiromaily"
+debug = true
+
+[tx_file]
+base_path = "./data/btc/tx/"
+
+[address_file]
+base_path = "./data/btc/address/"
+
+[pubkey_file]
+base_path = "./data/btc/pubkey/"
+
+#[key]
+#seed = "Hj3H3GB6KzFpy4Yt6CEuVdXIDX5VRXGrvgbVkW37xhc="

@@ -16,7 +16,8 @@ import (
 
 // Config root config
 type Config struct {
-	CoinTypeCode coin.CoinTypeCode `toml:"coin_type" validate:"oneof=btc bch"`
+	//CoinTypeCode coin.CoinTypeCode `toml:"coin_type" validate:"oneof=btc bch"`
+	CoinTypeCode coin.CoinTypeCode `toml:"coin_type"`
 	Bitcoin      Bitcoin           `toml:"bitcoin"`
 	Logger       Logger            `toml:"logger"`
 	Tracer       Tracer            `toml:"tracer"`
@@ -100,7 +101,7 @@ type AddressFile struct {
 }
 
 // New create config
-func New(file string, wtype wallet.WalletType) (*Config, error) {
+func New(file string, wtype wallet.WalletType, coinTypeCode coin.CoinTypeCode) (*Config, error) {
 	if file == "" {
 		return nil, errors.New("file should be passed")
 	}
@@ -113,6 +114,8 @@ func New(file string, wtype wallet.WalletType) (*Config, error) {
 
 	//debug
 	//grok.Value(conf)
+
+	conf.CoinTypeCode = coinTypeCode
 
 	//validate
 	if err = conf.validate(wtype); err != nil {
@@ -153,8 +156,5 @@ func (c *Config) validate(wtype wallet.WalletType) error {
 		}
 	default:
 	}
-	//if !ctype.ValidateBitcoinType(c.CoinType) {
-	//	return errors.New("CoinType is invalid in toml file")
-	//}
 	return nil
 }

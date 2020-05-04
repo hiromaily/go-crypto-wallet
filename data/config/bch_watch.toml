@@ -1,9 +1,9 @@
-coin_type = "btc" # btc, bch
+#coin_type = "bch" # btc, bch
 
 [bitcoin]
-#host = "127.0.0.1:18332"
+#host = "127.0.0.1:19332"
 # if specific wallet want to be used like `bitcoin-cli -rpcwallet=watch`
-host = "127.0.0.1:18332/wallet/watch"
+host = "127.0.0.1:19332/wallet/watch"
 user = "xyz"
 pass = "xyz"
 http_post_mode = true
@@ -11,14 +11,14 @@ disable_tls = true
 network_type = "testnet3" # mainnet, testnet3, regtest
 
 [bitcoin.block]
-confirmation_num = 6 #block number for required confirmation
+confirmation_num = 4 #block number for required confirmation
 
 [bitcoin.fee]
 adjustment_min = 0.5 # adjustable minimum fee magnification
 adjustment_max = 2.0 # adjustable maximum fee magnification
 
 [logger]
-service = "wallet"
+service = "bch-wallet"
 env = "custom" # dev, prod, custom :for only zap logger
 level = "debug" # debug, info, warn, error
 is_stacktrace = true
@@ -40,10 +40,10 @@ pass = "hiromaily"
 debug = true
 
 [tx_file]
-base_path = "./data/tx/"
+base_path = "./data/bch/tx/"
 
 [address_file]
-base_path = "./data/address/"
+base_path = "./data/bch/address/"
 
 [pubkey_file]
-base_path = "./data/pubkey/"
+base_path = "./data/bch/pubkey/"

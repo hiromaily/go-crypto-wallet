@@ -2,6 +2,7 @@ package testutil
 
 import (
 	"fmt"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"log"
 	"os"
 
@@ -21,8 +22,8 @@ func GetBTC() api.Bitcoiner {
 	}
 
 	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-bitcoin", os.Getenv("GOPATH"))
-	confPath := fmt.Sprintf("%s/data/config/btc/watch.toml", projPath)
-	conf, err := config.New(confPath, wallet.WalletTypeWatchOnly)
+	confPath := fmt.Sprintf("%s/data/config/watch.toml", projPath)
+	conf, err := config.New(confPath, wallet.WalletTypeWatchOnly, coin.BTC)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}

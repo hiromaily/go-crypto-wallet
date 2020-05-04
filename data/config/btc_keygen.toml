@@ -1,4 +1,4 @@
-coin_type = "btc" # btc, bch
+#coin_type = "btc" # btc, bch
 
 [bitcoin]
 #host = "127.0.0.1:18332"
@@ -11,7 +11,7 @@ disable_tls = true
 network_type = "testnet3" # mainnet, testnet3, regtest
 
 [logger]
-service = "keygen"
+service = "btc-keygen"
 env = "custom" # dev, prod, custom :for only zap logger
 level = "debug" # debug, info, warn, error
 is_stacktrace = true
@@ -28,13 +28,13 @@ pass = "hiromaily"
 debug = true
 
 [tx_file]
-base_path = "./data/tx/"
+base_path = "./data/btc/tx/"
 
 [address_file]
-base_path = "./data/address/"
+base_path = "./data/btc/address/"
 
 [pubkey_file]
-base_path = "./data/pubkey/"
+base_path = "./data/btc/pubkey/"
 
 # default seed of key used when dev mode
 #[key]

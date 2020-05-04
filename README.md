@@ -116,9 +116,9 @@ go build -ldflags "-X main.authName=auth5" -i -v -o ${GOPATH}/bin/sign5 ./cmd/si
 ```
 
 ### Configuration
-- [watch.toml](https://github.com/hiromaily/go-bitcoin/blob/master/data/config/btc/watch.toml)
-- [keygen.toml](https://github.com/hiromaily/go-bitcoin/blob/master/data/config/btc/keygen.toml)
-- [sign.toml](https://github.com/hiromaily/go-bitcoin/blob/master/data/config/btc/sign.toml)
+- [watch.toml](https://github.com/hiromaily/go-bitcoin/blob/master/data/config/watch.toml)
+- [keygen.toml](https://github.com/hiromaily/go-bitcoin/blob/master/data/config/keygen.toml)
+- [sign.toml](https://github.com/hiromaily/go-bitcoin/blob/master/data/config/sign.toml)
 
 ## Example
 - [see scripts](https://github.com/hiromaily/go-bitcoin/tree/master/scripts/operation)
