@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -75,6 +76,12 @@ func main() {
 		if os.Getenv("COIN_TYPE") != "" && coin.ValidateCoinTypeCode(os.Getenv("COIN_TYPE")) {
 			conf.CoinTypeCode = coin.CoinTypeCode(os.Getenv("COIN_TYPE"))
 			log.Println("conf.CoinTypeCode:", conf.CoinTypeCode)
+		}
+		// override conf.CoinTypeCode
+		if os.Getenv("CONFIRMATION_NUM") != "" {
+			if num, err := strconv.ParseInt(os.Getenv("CONFIRMATION_NUM"), 10, 64); err == nil {
+				conf.Bitcoin.Block.ConfirmationNum = uint64(num)
+			}
 		}
 
 		// create wallet

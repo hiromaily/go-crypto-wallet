@@ -31,6 +31,8 @@ type ListUnspentResult struct {
 
 // ListUnspent call RPC `listunspent`
 func (b *Bitcoin) ListUnspent() ([]ListUnspentResult, error) {
+	b.logger.Debug("call ListUnspent()", zap.Uint64("confirmation", b.confirmationBlock))
+
 	input, err := json.Marshal(uint64(b.confirmationBlock))
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Marchal()")
