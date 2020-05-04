@@ -305,7 +305,7 @@ rm-docker-wallet-dat:
 	# BTC
 	rm -rf ./docker/btc/data/testnet3/wallets/wallet.data
 	# BCH
-	rm -rf ./docker/bch/data/testnet3/wallets/wallet.data
+	rm -rf ./docker/bch/data/testnet3/wallets/wallet.dat
 	rm -rf ./docker/bch/data/testnet3/wallets/watch
 	rm -rf ./docker/bch/data/testnet3/wallets/keygen
 	rm -rf ./docker/bch/data/testnet3/wallets/sign1

@@ -10,4 +10,4 @@ RUN add-apt-repository ppa:bitcoin-abc/ppa && \
 RUN apt-get update && \
     apt-get install -y libstdc++-7-dev bitcoind
 
-#EXPOSE 8332 8333 18332 18333
+EXPOSE 8332 8333 18332 18333

@@ -5,22 +5,21 @@ services:
   # Bitcoin core
   #########################################################################
   bch-watch:
-    build:
-      context: ./docker/bch/
-      dockerfile: Dockerfile
-    image: wallet-bch:0.19
+    image: zquestz/bitcoin-cash-node:0.21.1
+    # https://hub.docker.com/r/zquestz/bitcoin-cash-node/tags
+    # https://github.com/zquestz/docker-bitcoin
     volumes:
-    - ./docker/bch/data:/root/.bitcoin
+      - ./docker/bch/data:/data
     ports:
-    - "${BCH_WALLET_RPC_PORT:-19332}:18332"
+      - "${BCH_WALLET_RPC_PORT:-19332}:18332"
     stdin_open: true
     tty: true
-    #    logging:
-    #      driver: fluentd
-    #      options:
-    #        fluentd-address: "localhost:24224"
-    #        tag: "docker.{{.ID}}"
-    command: /usr/bin/bitcoind --printtoconsole #--conf=/root/.bitcoin/bitcoind.conf
-    # docker-compose -f docker-compose.bch.yml exec bch-watch bash
-    # docker-compose -f docker-compose.bch.yml exec bch-watch bitcoin-cli getnetworkinfo
-    # /root/.bitcoin/testnet3/wallets
+    #command: /usr/local/bin/bitcoind --printtoconsole --conf=/data/bitcoind.conf
+
+# up bch-watch
+# $ docker-compose -f docker-compose.bch.yml up bch-watch
+# login
+# $ docker-compose -f docker-compose.bch.yml exec bch-watch bash
+#  - # bitcoin-cli -rpcuser=xyz -rpcpassword=xyz -rpcport=18332 getnetworkinfo
+# run command
+# $ docker-compose -f docker-compose.bch.yml exec bch-watch bitcoin-cli -rpcuser=xyz -rpcpassword=xyz -rpcport=18332 getnetworkinfo

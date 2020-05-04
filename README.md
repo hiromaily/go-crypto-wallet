@@ -88,19 +88,31 @@ $ bitcoind
 # create wallets separately
 $ bitcoin-cli createwallet watch
 $ bitcoin-cli createwallet keygen
-$ bitcoin-cli createwallet sign
+$ bitcoin-cli createwallet sign1
+$ bitcoin-cli createwallet sign2
+$ bitcoin-cli createwallet sign3
+$ bitcoin-cli createwallet sign4
+$ bitcoin-cli createwallet sign5
 $ bitcoin-cli listwallets
 [
   "",
   "watch",
   "keygen",
-  "sign"
+  "sign1",
+  "sign2",
+  "sign3",
+  "sign4",
+  "sign5"
 ]
 
 # build source
 go build -i -v -o ${GOPATH}/bin/watch ./cmd/watch/
 go build -i -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
-go build -i -v -o ${GOPATH}/bin/sign ./cmd/sign/
+go build -ldflags "-X main.authName=auth1" -i -v -o ${GOPATH}/bin/sign ./cmd/sign/
+go build -ldflags "-X main.authName=auth2" -i -v -o ${GOPATH}/bin/sign2 ./cmd/sign/
+go build -ldflags "-X main.authName=auth3" -i -v -o ${GOPATH}/bin/sign3 ./cmd/sign/
+go build -ldflags "-X main.authName=auth4" -i -v -o ${GOPATH}/bin/sign4 ./cmd/sign/
+go build -ldflags "-X main.authName=auth5" -i -v -o ${GOPATH}/bin/sign5 ./cmd/sign/
 ```
 
 ### Configuration
