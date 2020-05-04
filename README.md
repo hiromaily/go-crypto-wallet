@@ -6,26 +6,55 @@
 [![codebeat badge](https://codebeat.co/badges/792a7c07-2352-4b7e-8083-0a323368b26f)](https://codebeat.co/projects/github-com-hiromaily-go-bitcoin-master)
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://raw.githubusercontent.com/hiromaily/go-gin-wrapper/master/LICENSE)
 
-Wallet functionalities handling BTC, BCH and so on. Currencies would be added step by step.
+Wallet functionalities to create raw transaction, to sing on unsigned transaction, to send signed transaction for BTC, BCH and so on.   
+Currenc
+
+## Expected use cases
+### 1.Deposit functionality
+- Pubkey addresses are given to our users first.
+- Users would want to deposit coins on our system.
+- After users sent coins to their given addresses, these all amount of coins are sent to our safe addresses managed offline by cold wallet
+
+### 2.Payment functionality
+- Users would want to withdraw their coins to specific addresses.
+- Transaction is created and sent after payment is requested by users.
+
+### 3.Transfer functionality
+- Internal use. Each accounts can transfer coins among internal accounts.
+
 
 ## Wallet Type
-This is explained for BTC for now.
-There are mainly 3 wallets separately and these wallets are expected to be installed each diffrent devices.
+This is explained for BTC/BCH for now.  
+There are mainly 3 wallets separately and these wallets are expected to be installed in each different devices.
 
-### Watch only wallet
-- This wallet could access to BTC Network
-- Only Bitcoin public address is stored. Private key is NOT stored here for security reason. That's why this is called watch only wallet.
-- It works for creating unsigned transaction, sending signed transaction and monitoring trasaction status.
+### 1.Watch only wallet
+- Only this wallet run online to access to BTC/BCH Nodes.
+- Only pubkey address is stored. Private key is NOT stored for security reason. That's why this is called `watch only wallet`.
+- Major functionalities are
+    - creating unsigned transaction
+    - sending signed transaction
+    - monitoring transaction status.
 
-### Keygen wallet as cold wallet
-- This wallet is key management functionalities. It generates seed and private keys as HD wallet and exports address for watch only wallet.
-- Sign unsigned transaction as first signature. Multisig address can not be completed by only this wallet.
-- Outside network is not used at all because of cold wallet.
+### 2.Keygen wallet as cold wallet
+- Key management functionalities for accounts.  
+- This wallet is expected to work offline.
+- Major functionalities are
+    - generating seed for accounts
+    - generating keys based on `HD Wallet`
+    - generating multisig addressed according to account setting
+    - exporting pubkey addresses as csv file which is imported from `Watch only wallet`
+    - signing on unsigned transaction as first sign. However, multisig addresses could not be completed by only this wallet.
 
-### Signature wallet as cold wallet
-- This wallet is signature management for authorization by multi-signature address. It also generates seed and private keys for authorization accounts.
-- Sign unsigned transaction as second sigunature. Mustisig address must require this wallet.
-- Outside network is not used at all because of cold wallet.
+### 3.Sign wallet as cold wallet (Auth wallet)
+- The internal authorization operators would use this wallet to sign on unsigned transaction for multisig addresses.
+- Each of operators would be given own authorization account and Sing wallet apps.
+- This wallet is expected to work offline.
+- Major functionalities are
+    - generating seed for accounts for own auth account
+    - generating keys based on `HD Wallet` for own auth account
+    - exporting full-pubkey addresses as csv file which is imported from `Keygen wallet` to generate multisig address
+    - signing on unsigned transaction as second or more signs for multisig addresses.
+
 
 ## Workflow diagram
 ### 1. Generate keys
@@ -39,7 +68,8 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 
 
 ## Requirements
-- Bitcoin Core 0.18+
+- [Bitcoin Core 0.18+ for Bitcoin node](https://bitcoin.org/en/bitcoin-core/)
+- [Bitcoin 0.21+ for Bitcoin cash node](https://www.bitcoinabc.org/)
 - MySQL 5.7
 - Golang 1.13+
 - Docker
