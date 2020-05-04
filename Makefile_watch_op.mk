@@ -7,8 +7,8 @@
 # import public addresses exported by keygen wallet
 #make filepath=./data/pubkey/client_1535423628425011000.csv import-pubkey
 .PHONY: import-address
-import-pubkey:
-	watch import address -acount client -file ${filepath}
+import-address:
+	watch import address -file ${filepath}
 
 
 ###############################################################################

@@ -101,6 +101,7 @@ func (a *AddressExport) exportAccountKey(accountKeyTable []*models.AccountKey, a
 	for _, record := range accountKeyTable {
 		//each line of csv data
 		tmpData := []string{
+			record.Coin,
 			record.Account,
 			record.P2PKHAddress,
 			record.P2SHSegwitAddress,

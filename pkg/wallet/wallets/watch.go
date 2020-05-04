@@ -14,7 +14,7 @@ import (
 
 // Watcher is for watch only wallet service interface
 type Watcher interface {
-	ImportAddress(fileName string, accountType account.AccountType, isRescan bool) error
+	ImportAddress(fileName string, isRescan bool) error
 	CreateDepositTx(adjustmentFee float64) (string, string, error)
 	CreatePaymentTx(adjustmentFee float64) (string, string, error)
 	CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error)
@@ -68,8 +68,8 @@ func NewWatch(
 }
 
 // ImportAddress imports address
-func (w *Watch) ImportAddress(fileName string, accountType account.AccountType, isRescan bool) error {
-	return w.AddressImporter.ImportAddress(fileName, accountType, isRescan)
+func (w *Watch) ImportAddress(fileName string, isRescan bool) error {
+	return w.AddressImporter.ImportAddress(fileName, isRescan)
 }
 
 // CreateDepositTx creates deposit unsigned transaction

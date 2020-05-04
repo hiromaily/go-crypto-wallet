@@ -1,6 +1,8 @@
 package keygensrv
 
 import (
+	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -46,10 +48,6 @@ func NewFullPubkeyImport(
 
 // ImportFullPubKey imports auth fullpubKey from csv
 func (p *FullPubkeyImport) ImportFullPubKey(fileName string) error {
-	//validate file name
-	//if err := p.pubkeyFileRepo.ValidateFilePath(fileName, account.AccountTypeAuthorization); err != nil {
-	//	return err
-	//}
 
 	// read file for full public key
 	pubKeys, err := p.pubkeyFileRepo.ImportAddress(fileName)
@@ -61,6 +59,14 @@ func (p *FullPubkeyImport) ImportFullPubKey(fileName string) error {
 	fullPubKeys := make([]*models.AuthFullpubkey, len(pubKeys))
 	for i, key := range pubKeys {
 		inner := strings.Split(key, ",")
+
+		// validate
+		if !coin.ValidateCoinTypeCode(inner[0]) || coin.CoinTypeCode(inner[0]) != p.btc.CoinTypeCode() {
+			return errors.Errorf("coinTypeCode is invalid. got %s, want %s", inner[0], p.btc.CoinTypeCode().String())
+		}
+		if !account.ValidateAuthType(inner[1]) {
+			return errors.Errorf("auth account is invalid: %s", inner[1])
+		}
 
 		fullPubKeys[i] = &models.AuthFullpubkey{
 			Coin:          inner[0],

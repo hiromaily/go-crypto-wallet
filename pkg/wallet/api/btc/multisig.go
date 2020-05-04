@@ -2,12 +2,12 @@ package btc
 
 import (
 	"encoding/json"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/address"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
 // AddMultisigAddressResult is response type of PRC `addmultisigaddress`

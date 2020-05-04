@@ -210,11 +210,11 @@ var MultisigAccounts = map[AccountType]map[int][]AuthType{
 	AccountTypeDeposit: { //2:5+1
 		2: {AuthType1, AuthType2, AuthType3, AuthType4, AuthType5},
 	},
-	AccountTypePayment: { //2:5+1
-		2: {AuthType1, AuthType2, AuthType3, AuthType4, AuthType5},
-	},
-	AccountTypeStored: { //3:5+1
+	AccountTypePayment: { //3:5+1
 		3: {AuthType1, AuthType2, AuthType3, AuthType4, AuthType5},
+	},
+	AccountTypeStored: { //4:5+1
+		4: {AuthType1, AuthType2, AuthType3, AuthType4, AuthType5},
 	},
 }
 
