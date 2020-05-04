@@ -3,21 +3,16 @@
 
 .envrc
 
-!cmd/watch
-!cmd/keygen
-!cmd/sign
+#!cmd/watch
+#!cmd/keygen
+#!cmd/sign
 
 data/tx/*
-data/pubkey/*.csv
-data/address/*.csv
+data/pubkey/*
+data/address/*
 
 docker/grafana/*
-docker/btc/data1/testnet3/*
-docker/btc/data2/testnet3/*
-docker/btc/data3/testnet3/*
-docker/bch/data/testnet3/*
-docker/bch/data2/testnet3/*
-docker/bch/data3/testnet3/*
-!docker/wallet
+docker/btc/data/testnet3
+docker/bch/data/testnet3
 
 !.gitkeep

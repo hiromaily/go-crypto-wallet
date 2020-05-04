@@ -190,9 +190,9 @@ up-docker-logger:
 # remove database volumes
 .PHONY: rm-db-volumes
 rm-db-volumes:
-	docker rm -f $(docker ps -a --format "{{.Names}}")
-	docker volume rm -f $(docker volume ls --format "{{.Name}}")
-
+	#docker rm -f $(docker ps -a --format "{{.Names}}")
+	#docker volume rm -f $(docker volume ls --format "{{.Name}}")
+	docker-compose down -v
 
 ###############################################################################
 # Bitcoin core on local
@@ -302,13 +302,32 @@ rm-local-wallet-dat:
 
 .PHONY: rm-docker-wallet-dat
 rm-docker-wallet-dat:
-	rm -rf ./docker/btc/data1/testnet3/wallets/wallet.data
-	rm -rf ./docker/btc/data2/testnet3/wallets/wallet.data
-	rm -rf ./docker/btc/data3/testnet3/wallets/wallet.data
+	# BTC
+	rm -rf ./docker/btc/data/testnet3/wallets/wallet.data
+	# BCH
+	rm -rf ./docker/bch/data/testnet3/wallets/wallet.data
+	rm -rf ./docker/bch/data/testnet3/wallets/watch
+	rm -rf ./docker/bch/data/testnet3/wallets/keygen
+	rm -rf ./docker/bch/data/testnet3/wallets/sign1
+	rm -rf ./docker/bch/data/testnet3/wallets/sign2
+	rm -rf ./docker/bch/data/testnet3/wallets/sign3
+	rm -rf ./docker/bch/data/testnet3/wallets/sign4
+	rm -rf ./docker/bch/data/testnet3/wallets/sign5
 
 ###############################################################################
 # Utility
 ###############################################################################
+.PHONY: rm-files
+rm-files:
+	rm -rf ./data/address/*.csv
+	rm -rf ./data/pubkey/*.csv
+	rm -rf ./data/tx/deposit/*
+	rm -rf ./data/tx/payment/*
+	rm -rf ./data/tx/transfer/*
+	touch ./data/tx/deposit/.gitkeep
+	touch ./data/tx/payment/.gitkeep
+	touch ./data/tx/transfer/.gitkeep
+
 .PHONY: clean
 clean: rm-db-volumes rm-local-wallet-dat
 

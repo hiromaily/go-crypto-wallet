@@ -92,3 +92,5 @@ watch import address -account client -file ${file_address_client##*\[fileName\]:
 watch import address -account deposit -file ${file_address_deposit##*\[fileName\]: }
 watch import address -account payment -file ${file_address_payment##*\[fileName\]: }
 watch import address -account stored -file ${file_address_stored##*\[fileName\]: }
+
+#TODO: remove account parameter
