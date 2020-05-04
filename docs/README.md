@@ -13,5 +13,10 @@ bitcoin-cli help      # Outputs a list of RPC commands when the daemon is runnin
 ```
 
 ## Development on testnet  
+#### BTC
 - [Bitcoin testnet3 faucet](https://coinfaucet.eu/en/btc-testnet/)
 - [BlockCypher](https://live.blockcypher.com/btc-testnet/)
+
+#### BCH
+- [Bitcoin cash testnet3 faucet](https://developer.bitcoin.com/faucets/bch/)
+- [Bitcoin cash BlockCypher](https://explorer.bitcoin.com/tbch)
