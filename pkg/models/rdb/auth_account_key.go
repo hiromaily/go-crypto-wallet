@@ -29,6 +29,7 @@ type AuthAccountKey struct {
 	AuthAccount        string    `boil:"auth_account" json:"auth_account" toml:"auth_account" yaml:"auth_account"`
 	P2PKHAddress       string    `boil:"p2pkh_address" json:"p2pkh_address" toml:"p2pkh_address" yaml:"p2pkh_address"`
 	P2SHSegwitAddress  string    `boil:"p2sh_segwit_address" json:"p2sh_segwit_address" toml:"p2sh_segwit_address" yaml:"p2sh_segwit_address"`
+	Bech32Address      string    `boil:"bech32_address" json:"bech32_address" toml:"bech32_address" yaml:"bech32_address"`
 	FullPublicKey      string    `boil:"full_public_key" json:"full_public_key" toml:"full_public_key" yaml:"full_public_key"`
 	MultisigAddress    string    `boil:"multisig_address" json:"multisig_address" toml:"multisig_address" yaml:"multisig_address"`
 	RedeemScript       string    `boil:"redeem_script" json:"redeem_script" toml:"redeem_script" yaml:"redeem_script"`
@@ -47,6 +48,7 @@ var AuthAccountKeyColumns = struct {
 	AuthAccount        string
 	P2PKHAddress       string
 	P2SHSegwitAddress  string
+	Bech32Address      string
 	FullPublicKey      string
 	MultisigAddress    string
 	RedeemScript       string
@@ -60,6 +62,7 @@ var AuthAccountKeyColumns = struct {
 	AuthAccount:        "auth_account",
 	P2PKHAddress:       "p2pkh_address",
 	P2SHSegwitAddress:  "p2sh_segwit_address",
+	Bech32Address:      "bech32_address",
 	FullPublicKey:      "full_public_key",
 	MultisigAddress:    "multisig_address",
 	RedeemScript:       "redeem_script",
@@ -93,6 +96,7 @@ var AuthAccountKeyWhere = struct {
 	AuthAccount        whereHelperstring
 	P2PKHAddress       whereHelperstring
 	P2SHSegwitAddress  whereHelperstring
+	Bech32Address      whereHelperstring
 	FullPublicKey      whereHelperstring
 	MultisigAddress    whereHelperstring
 	RedeemScript       whereHelperstring
@@ -106,6 +110,7 @@ var AuthAccountKeyWhere = struct {
 	AuthAccount:        whereHelperstring{field: "`auth_account_key`.`auth_account`"},
 	P2PKHAddress:       whereHelperstring{field: "`auth_account_key`.`p2pkh_address`"},
 	P2SHSegwitAddress:  whereHelperstring{field: "`auth_account_key`.`p2sh_segwit_address`"},
+	Bech32Address:      whereHelperstring{field: "`auth_account_key`.`bech32_address`"},
 	FullPublicKey:      whereHelperstring{field: "`auth_account_key`.`full_public_key`"},
 	MultisigAddress:    whereHelperstring{field: "`auth_account_key`.`multisig_address`"},
 	RedeemScript:       whereHelperstring{field: "`auth_account_key`.`redeem_script`"},
@@ -132,8 +137,8 @@ func (*authAccountKeyR) NewStruct() *authAccountKeyR {
 type authAccountKeyL struct{}
 
 var (
-	authAccountKeyAllColumns            = []string{"id", "coin", "auth_account", "p2pkh_address", "p2sh_segwit_address", "full_public_key", "multisig_address", "redeem_script", "wallet_import_format", "idx", "addr_status", "updated_at"}
-	authAccountKeyColumnsWithoutDefault = []string{"coin", "auth_account", "p2pkh_address", "p2sh_segwit_address", "full_public_key", "multisig_address", "redeem_script", "wallet_import_format", "idx"}
+	authAccountKeyAllColumns            = []string{"id", "coin", "auth_account", "p2pkh_address", "p2sh_segwit_address", "bech32_address", "full_public_key", "multisig_address", "redeem_script", "wallet_import_format", "idx", "addr_status", "updated_at"}
+	authAccountKeyColumnsWithoutDefault = []string{"coin", "auth_account", "p2pkh_address", "p2sh_segwit_address", "bech32_address", "full_public_key", "multisig_address", "redeem_script", "wallet_import_format", "idx"}
 	authAccountKeyColumnsWithDefault    = []string{"id", "addr_status", "updated_at"}
 	authAccountKeyPrimaryKeyColumns     = []string{"id"}
 )
@@ -505,6 +510,7 @@ var mySQLAuthAccountKeyUniqueColumns = []string{
 	"id",
 	"p2pkh_address",
 	"p2sh_segwit_address",
+	"bech32_address",
 	"wallet_import_format",
 }
 

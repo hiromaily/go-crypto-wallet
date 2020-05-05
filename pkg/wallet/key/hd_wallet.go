@@ -3,6 +3,7 @@ package key
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/btcsuite/btcutil/bech32"
 
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcd/chaincfg"
@@ -72,6 +73,8 @@ const (
 	ChangeTypeExternal ChangeType = 0 // constant 0 is used for external chain
 	ChangeTypeInternal ChangeType = 1 // constant 1 for internal chain (also known as change addresses)
 )
+
+const hrb = "bitcoin" // human-readable part
 
 // HDKey HD Wallet Key object
 type HDKey struct {
@@ -196,11 +199,19 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 			return nil, err
 		}
 
+		// Bech32 address
+		// TODO: hrb should be passed from outside
+		strBech32Addr, err := getBech32Addr(wif, hrb)
+		if err != nil{
+			return nil, err
+		}
+
 		// address.String() is equal to address.EncodeAddress()
 		walletKeys[i] = WalletKey{
 			WIF:            wif.String(),
 			P2PKHAddr:      strP2PKHAddr,
 			P2SHSegWitAddr: strP2SHSegWitAddr,
+			Bech32Addr:     strBech32Addr,
 			FullPubKey:     getFullPubKey(privateKey, true),
 			RedeemScript:   redeemScript,
 		}
@@ -287,6 +298,28 @@ func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, er
 		return address.String(), strRedeemScript, nil
 	}
 	return "", "", errors.Errorf("getP2shSegwitAddr() is not implemented yet for %s", k.coinTypeCode)
+}
+
+func getBech32Addr(wif *btcutil.WIF, hrp string) (string, error) {
+
+	keyHash := btcutil.Hash160(wif.SerializePubKey())
+
+	conv, err := bech32.ConvertBits(keyHash, 8, 5, true)
+	if err != nil {
+		return "", errors.Wrap(err, "fail to call bech32.ConvertBits()")
+	}
+
+	p := []byte{0}
+	for i := 0; i < len(conv); i ++ {
+		p = append(p, conv[i])
+	}
+
+	encoded, err := bech32.Encode(hrp, p)
+	if err != nil {
+		return "", errors.Wrap(err, "fail to call bech32.Encode()")
+	}
+
+	return encoded, nil
 }
 
 // getFullPubKey returns full Public Key

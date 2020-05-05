@@ -3,7 +3,7 @@ no-tests = true
 output = "./pkg/models/rdb"
 
 [mysql]
-dbname = "wallet"
+dbname = "watch"
 host = "localhost"
 port = 3307
 user = "root"
