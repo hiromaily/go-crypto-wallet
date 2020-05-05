@@ -3,7 +3,6 @@ package keygensrv
 import (
 	"bufio"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -100,15 +99,7 @@ func (a *AddressExport) exportAccountKey(accountKeyTable []*models.AccountKey, a
 	// export any address, wallet side chooses proper address/
 	for _, record := range accountKeyTable {
 		//each line of csv data
-		tmpData := []string{
-			record.Coin,
-			record.Account,
-			record.P2PKHAddress,
-			record.P2SHSegwitAddress,
-			record.FullPublicKey,
-			record.MultisigAddress,
-			strconv.Itoa(int(record.Idx)),
-		}
+		tmpData := address.CreateLine(record)
 		_, err = writer.WriteString(strings.Join(tmpData[:], ",") + "\n")
 		if err != nil {
 			return "", errors.Wrapf(err, "fail to call writer.WriteString(%s)", fileName)

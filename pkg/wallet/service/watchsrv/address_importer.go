@@ -67,53 +67,48 @@ func (a *AddressImport) ImportAddress(fileName string, isRescan bool) error {
 		// coin, account, ...
 		inner := strings.Split(key, ",")
 
-		// validate
-		if !coin.ValidateCoinTypeCode(inner[0]) || coin.CoinTypeCode(inner[0]) != a.btc.CoinTypeCode() {
-			return errors.Errorf("coinTypeCode is invalid. got %s, want %s", inner[0], a.btc.CoinTypeCode().String())
+		addrFmt, err := address.ConvertLine(a.btc.CoinTypeCode(), inner)
+		if err != nil {
+			return err
 		}
-		//strAccount = inner[1]
-		if !account.ValidateAccountType(inner[1]) {
-			return errors.Errorf("account is invalid: %s", inner[1])
-		}
-		a.logger.Debug("import address", zap.String("account", inner[1]))
 
-		var addr string
-		if inner[1] == account.AccountTypeClient.String() {
+		var targetAddr string
+		if addrFmt.AccountType == account.AccountTypeClient {
 			switch a.btc.CoinTypeCode() {
 			case coin.BTC:
-				addr = inner[3] //p2sh_segwit_address
+				targetAddr = addrFmt.P2SHSegwitAddress //p2sh_segwit_address
 			case coin.BCH:
-				addr = inner[2] //p2pkh_address
+				targetAddr = addrFmt.P2PKHAddress //p2pkh_address
 			default:
 				return errors.Errorf("coinTypeCode is out of range: %s", a.btc.CoinTypeCode().String())
 			}
 		} else {
-			addr = inner[5] //multisig_address
+			targetAddr = addrFmt.MultisigAddress //multisig_address
 		}
 
 		//call bitcoin API `importaddress` with account(label)
 		//Note: Error would occur when using only 1 bitcoin core server under development
 		// because address is already imported
 		//isRescan would be `false` usually
-		err := a.btc.ImportAddressWithLabel(addr, inner[1], isRescan)
+		err = a.btc.ImportAddressWithLabel(targetAddr, addrFmt.AccountType.String(), isRescan)
 		if err != nil {
 			//-4: The wallet already contains the private key for this address or script
 			a.logger.Warn(
 				"fail to call btc.ImportAddressWithLabel() but continue following addresses",
-				zap.String("address", addr),
-				zap.String("account_type", inner[1]),
+				zap.String("address", targetAddr),
+				zap.String("account_type", addrFmt.AccountType.String()),
 				zap.Error(err))
 			continue
 		}
 
 		pubKeyData = append(pubKeyData, &models.Address{
 			Coin:          a.coinTypeCode.String(),
-			Account:       inner[1],
-			WalletAddress: addr,
+			Account:       addrFmt.AccountType.String(),
+			WalletAddress: targetAddr,
 		})
 
 		//confirm pubkey is added as watch only wallet
-		a.checkImportedPubKey(addr)
+		a.checkImportedPubKey(targetAddr)
 	}
 
 	//insert imported pubKey
