@@ -219,14 +219,17 @@ cd-btc-dir:
 ###############################################################################
 # auto key generator
 ###############################################################################
-.PHONY: generate-key-local
-generate-key-local:
-	./scripts/operation/generate-key-local.sh
+.PHONY: generate-btc-key-local
+generate-btc-key-local:
+	./scripts/operation/generate-key-local.sh btc
 
+.PHONY: generate-bch-key-local
+generate-bch-key-local:
+	./scripts/operation/generate-key-local.sh bch
 
 
 ###############################################################################
-# auto key generator
+# payment request
 ###############################################################################
 .PHONY: reset-payment-request
 reset-payment-request:

@@ -53,7 +53,8 @@ func (h *HDWallet) Generate(
 	//get latest index
 	idxFrom, err := h.repo.GetMaxIndex(accountType)
 	if err != nil {
-		return nil, err
+		h.logger.Info(err.Error())
+		return nil, nil
 	}
 	h.logger.Debug("max_index",
 		zap.String("account_type", accountType.String()),

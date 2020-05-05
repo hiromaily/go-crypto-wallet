@@ -36,7 +36,7 @@ func CreateLine(accountKeyItem *models.AccountKey) []string {
 
 // ConvertLine converts line to AddressFormat
 func ConvertLine(coinTypeCode coin.CoinTypeCode, line []string) (*AddressFormat, error) {
-	if len(line) != 3 {
+	if len(line) != 7 {
 		return nil, errors.New("csv format is invalid")
 	}
 

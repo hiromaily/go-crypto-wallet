@@ -12,6 +12,9 @@
 
 set -eu
 
+
+COIN="${1:?btc}"
+
 ###############################################################################
 # keygen wallet
 ###############################################################################
@@ -19,16 +22,16 @@ set -eu
 keygen create seed
 
 # create hdkey for client, deposit, payment account
-keygen create hdkey -account client -keynum 10
-keygen create hdkey -account deposit -keynum 10
-keygen create hdkey -account payment -keynum 10
-keygen create hdkey -account stored -keynum 10
+keygen -coin ${COIN} create hdkey -account client -keynum 10
+keygen -coin ${COIN} create hdkey -account deposit -keynum 10
+keygen -coin ${COIN} create hdkey -account payment -keynum 10
+keygen -coin ${COIN} create hdkey -account stored -keynum 10
 
 # import generated private key into keygen wallet
-keygen import privkey -account client
-keygen import privkey -account deposit
-keygen import privkey -account payment
-keygen import privkey -account stored
+keygen -coin ${COIN} import privkey -account client
+keygen -coin ${COIN} import privkey -account deposit
+keygen -coin ${COIN} import privkey -account payment
+keygen -coin ${COIN} import privkey -account stored
 
 
 ###############################################################################
@@ -38,26 +41,26 @@ keygen import privkey -account stored
 sign create seed
 
 # create hdkey for authorization
-sign -wallet sign1 create hdkey
-sign2 -wallet sign2 create hdkey
-sign3 -wallet sign3 create hdkey
-sign4 -wallet sign4 create hdkey
-sign5 -wallet sign5 create hdkey
+sign -coin ${COIN} -wallet sign1 create hdkey
+sign2 -coin ${COIN} -wallet sign2 create hdkey
+sign3 -coin ${COIN} -wallet sign3 create hdkey
+sign4 -coin ${COIN} -wallet sign4 create hdkey
+sign5 -coin ${COIN} -wallet sign5 create hdkey
 
 # import generated private key into sign wallet
-sign -wallet sign1 import privkey
-sign2 -wallet sign2 import privkey
-sign3 -wallet sign3 import privkey
-sign4 -wallet sign4 import privkey
-sign5 -wallet sign5 import privkey
+sign -coin ${COIN} -wallet sign1 import privkey
+sign2 -coin ${COIN} -wallet sign2 import privkey
+sign3 -coin ${COIN} -wallet sign3 import privkey
+sign4 -coin ${COIN} -wallet sign4 import privkey
+sign5 -coin ${COIN} -wallet sign5 import privkey
 
 # export full-pubkey as csv file
 # sign -wallet sign1 export fullpubkey
-file_fullpubkey_auth1=$(sign -wallet sign1 export fullpubkey)
-file_fullpubkey_auth2=$(sign2 -wallet sign2 export fullpubkey)
-file_fullpubkey_auth3=$(sign3 -wallet sign3 export fullpubkey)
-file_fullpubkey_auth4=$(sign4 -wallet sign4 export fullpubkey)
-file_fullpubkey_auth5=$(sign5 -wallet sign5 export fullpubkey)
+file_fullpubkey_auth1=$(sign -coin "${COIN}" -wallet sign1 export fullpubkey)
+file_fullpubkey_auth2=$(sign2 -coin "${COIN}" -wallet sign2 export fullpubkey)
+file_fullpubkey_auth3=$(sign3 -coin "${COIN}" -wallet sign3 export fullpubkey)
+file_fullpubkey_auth4=$(sign4 -coin "${COIN}" -wallet sign4 export fullpubkey)
+file_fullpubkey_auth5=$(sign5 -coin "${COIN}" -wallet sign5 export fullpubkey)
 
 
 ###############################################################################
@@ -65,22 +68,22 @@ file_fullpubkey_auth5=$(sign5 -wallet sign5 export fullpubkey)
 ###############################################################################
 # import full-pubkey
 # keygen import fullpubkey -file ./data/pubkey/auth1_1588399093997165000.csv
-keygen import fullpubkey -file ${file_fullpubkey_auth1##*\[fileName\]: }
-keygen import fullpubkey -file ${file_fullpubkey_auth2##*\[fileName\]: }
-keygen import fullpubkey -file ${file_fullpubkey_auth3##*\[fileName\]: }
-keygen import fullpubkey -file ${file_fullpubkey_auth4##*\[fileName\]: }
-keygen import fullpubkey -file ${file_fullpubkey_auth5##*\[fileName\]: }
+keygen -coin ${COIN} import fullpubkey -file ${file_fullpubkey_auth1##*\[fileName\]: }
+keygen -coin ${COIN} import fullpubkey -file ${file_fullpubkey_auth2##*\[fileName\]: }
+keygen -coin ${COIN} import fullpubkey -file ${file_fullpubkey_auth3##*\[fileName\]: }
+keygen -coin ${COIN} import fullpubkey -file ${file_fullpubkey_auth4##*\[fileName\]: }
+keygen -coin ${COIN} import fullpubkey -file ${file_fullpubkey_auth5##*\[fileName\]: }
 
 # create multisig address
-keygen create multisig -account deposit
-keygen create multisig -account payment
-keygen create multisig -account stored
+keygen -coin ${COIN} create multisig -account deposit
+keygen -coin ${COIN} create multisig -account payment
+keygen -coin ${COIN} create multisig -account stored
 
 # export address
-file_address_client=$(keygen export address -account client)
-file_address_deposit=$(keygen export address -account deposit)
-file_address_payment=$(keygen export address -account payment)
-file_address_stored=$(keygen export address -account stored)
+file_address_client=$(keygen -coin "${COIN}" export address -account client)
+file_address_deposit=$(keygen -coin "${COIN}" export address -account deposit)
+file_address_payment=$(keygen -coin "${COIN}" export address -account payment)
+file_address_stored=$(keygen -coin "${COIN}" export address -account stored)
 
 
 ###############################################################################
@@ -88,7 +91,7 @@ file_address_stored=$(keygen export address -account stored)
 ###############################################################################
 # import addresses generated by keygen wallet
 # if wallet.dat is deleted, rescan is required by `-rescan`
-watch import address -file ${file_address_client##*\[fileName\]: }
-watch import address -file ${file_address_deposit##*\[fileName\]: }
-watch import address -file ${file_address_payment##*\[fileName\]: }
-watch import address -file ${file_address_stored##*\[fileName\]: }
+watch -coin ${COIN} import address -file ${file_address_client##*\[fileName\]: }
+watch -coin ${COIN} import address -file ${file_address_deposit##*\[fileName\]: }
+watch -coin ${COIN} import address -file ${file_address_payment##*\[fileName\]: }
+watch -coin ${COIN} import address -file ${file_address_stored##*\[fileName\]: }
