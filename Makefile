@@ -349,14 +349,14 @@ rm-docker-wallet-dat:
 
 .PHONY: rm-files
 rm-files:
-	rm -rf ./data/address/*.csv
-	rm -rf ./data/pubkey/*.csv
-	rm -rf ./data/tx/deposit/*
-	rm -rf ./data/tx/payment/*
-	rm -rf ./data/tx/transfer/*
-	touch ./data/tx/deposit/.gitkeep
-	touch ./data/tx/payment/.gitkeep
-	touch ./data/tx/transfer/.gitkeep
+	rm -rf ./data/btc/address/*.csv
+	rm -rf ./data/btc/pubkey/*.csv
+	rm -rf ./data/btc/tx/deposit/*
+	rm -rf ./data/btc/tx/payment/*
+	rm -rf ./data/btc/tx/transfer/*
+	touch ./data/btc/tx/deposit/.gitkeep
+	touch ./data/btc/tx/payment/.gitkeep
+	touch ./data/btc/tx/transfer/.gitkeep
 
 .PHONY: clean
 clean: rm-db-volumes rm-local-wallet-dat
