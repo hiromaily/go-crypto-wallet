@@ -59,6 +59,7 @@ func (r *registry) NewSigner() wallets.Signer {
 		r.newBTC(),
 		r.newMySQLClient(),
 		r.authType,
+		r.conf.AddressType,
 		r.newSeeder(),
 		r.newHdWallter(),
 		r.newPrivKeyer(),

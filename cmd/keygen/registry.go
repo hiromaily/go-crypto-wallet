@@ -52,6 +52,7 @@ func (r *registry) NewKeygener() wallets.Keygener {
 	return wallets.NewKeygen(
 		r.newBTC(),
 		r.newMySQLClient(),
+		r.conf.AddressType,
 		r.newSeeder(),
 		r.newHdWallter(),
 		r.newPrivKeyer(),

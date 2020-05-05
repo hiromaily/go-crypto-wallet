@@ -29,6 +29,7 @@ type AddressImport struct {
 	addrRepo     watchrepo.AddressRepositorier
 	addrFileRepo address.FileRepositorier
 	coinTypeCode coin.CoinTypeCode
+	addrType     address.AddrType
 	wtype        wallet.WalletType
 }
 
@@ -40,6 +41,7 @@ func NewAddressImport(
 	addrRepo watchrepo.AddressRepositorier,
 	addrFileRepo address.FileRepositorier,
 	coinTypeCode coin.CoinTypeCode,
+	addrType address.AddrType,
 	wtype wallet.WalletType) *AddressImport {
 
 	return &AddressImport{
@@ -49,6 +51,7 @@ func NewAddressImport(
 		addrRepo:     addrRepo,
 		addrFileRepo: addrFileRepo,
 		coinTypeCode: coinTypeCode,
+		addrType:     addrType,
 		wtype:        wtype,
 	}
 }
@@ -76,7 +79,12 @@ func (a *AddressImport) ImportAddress(fileName string, isRescan bool) error {
 		if addrFmt.AccountType == account.AccountTypeClient {
 			switch a.btc.CoinTypeCode() {
 			case coin.BTC:
-				targetAddr = addrFmt.P2SHSegwitAddress //p2sh_segwit_address
+				switch a.addrType {
+				case address.AddrTypeBech32:
+					targetAddr = addrFmt.Bech32Address
+				default:
+					targetAddr = addrFmt.P2SHSegwitAddress //p2sh_segwit_address
+				}
 			case coin.BCH:
 				targetAddr = addrFmt.P2PKHAddress //p2pkh_address
 			default:

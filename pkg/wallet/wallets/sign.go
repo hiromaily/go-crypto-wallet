@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
@@ -29,6 +30,7 @@ type Sign struct {
 	btc         api.Bitcoiner
 	dbConn      *sql.DB
 	authAccount account.AuthType
+	addrType    address.AddrType
 	wtype       wallet.WalletType
 	coldsrv.Seeder
 	coldsrv.HDWalleter
@@ -42,6 +44,7 @@ func NewSign(
 	btc api.Bitcoiner,
 	dbConn *sql.DB,
 	authAccount account.AuthType,
+	addrType address.AddrType,
 	seeder coldsrv.Seeder,
 	hdWallter coldsrv.HDWalleter,
 	privKeyer signsrv.PrivKeyer,
@@ -53,12 +56,13 @@ func NewSign(
 		btc:                btc,
 		dbConn:             dbConn,
 		authAccount:        authAccount,
+		addrType:           addrType,
+		wtype:              wtype,
 		Seeder:             seeder,
 		HDWalleter:         hdWallter,
 		PrivKeyer:          privKeyer,
 		FullPubkeyExporter: fullPubkeyExporter,
 		Signer:             signer,
-		wtype:              wtype,
 	}
 }
 

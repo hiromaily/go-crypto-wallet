@@ -50,6 +50,7 @@ func (r *registry) NewWalleter() wallets.Watcher {
 		r.newMySQLClient(),
 		r.newLogger(),
 		r.newTracer(),
+		r.conf.AddressType,
 		r.newAddressImporter(),
 		r.newTxCreator(),
 		r.newTxSender(),
@@ -67,6 +68,7 @@ func (r *registry) newAddressImporter() watchsrv.AddressImporter {
 		r.newAddressRepo(),
 		r.newAddressFileRepo(),
 		r.conf.CoinTypeCode,
+		r.conf.AddressType,
 		r.walletType,
 	)
 }

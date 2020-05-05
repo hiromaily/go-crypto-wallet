@@ -7,6 +7,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-bitcoin/pkg/address"
 	wtype "github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/watchsrv"
@@ -28,16 +29,17 @@ type Watcher interface {
 
 // Watch watch only wallet object
 type Watch struct {
-	btc    api.Bitcoiner
-	dbConn *sql.DB
-	logger *zap.Logger
-	tracer opentracing.Tracer
+	btc      api.Bitcoiner
+	dbConn   *sql.DB
+	logger   *zap.Logger
+	tracer   opentracing.Tracer
+	addrType address.AddrType
+	wtype    wtype.WalletType
 	watchsrv.AddressImporter
 	watchsrv.TxCreator
 	watchsrv.TxSender
 	watchsrv.TxMonitorer
 	watchsrv.PaymentRequestCreator
-	wtype wtype.WalletType
 }
 
 // NewWatch returns Watch object
@@ -46,6 +48,7 @@ func NewWatch(
 	dbConn *sql.DB,
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
+	addrType address.AddrType,
 	addrImporter watchsrv.AddressImporter,
 	txCreator watchsrv.TxCreator,
 	txSender watchsrv.TxSender,
@@ -58,12 +61,13 @@ func NewWatch(
 		logger:                logger,
 		dbConn:                dbConn,
 		tracer:                tracer,
+		addrType:              addrType,
+		wtype:                 wtype,
 		AddressImporter:       addrImporter,
 		TxCreator:             txCreator,
 		TxSender:              txSender,
 		TxMonitorer:           txMonitorer,
 		PaymentRequestCreator: paymentRequestCreator,
-		wtype:                 wtype,
 	}
 }
 

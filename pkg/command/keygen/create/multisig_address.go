@@ -7,7 +7,6 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
@@ -51,7 +50,7 @@ func (c *MultisigCommand) Run(args []string) int {
 	}
 
 	// create multisig address
-	err := c.wallet.CreateMultisigAddress(account.AccountType(acnt), address.AddrTypeP2shSegwit)
+	err := c.wallet.CreateMultisigAddress(account.AccountType(acnt))
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call CreateMultisigAddress() %+v", err))
 		return 1

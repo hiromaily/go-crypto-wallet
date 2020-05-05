@@ -19,7 +19,7 @@ type Keygener interface {
 	GenerateAccountKey(accountType account.AccountType, seed []byte, count uint32) ([]key.WalletKey, error)
 	ImportPrivKey(accountType account.AccountType) error
 	ImportFullPubKey(fileName string) error
-	CreateMultisigAddress(accountType account.AccountType, addressType address.AddrType) error
+	CreateMultisigAddress(accountType account.AccountType) error
 	ExportAddress(accountType account.AccountType) (string, error)
 	SignTx(filePath string) (string, bool, string, error)
 
@@ -29,9 +29,10 @@ type Keygener interface {
 
 // Keygen is keygen wallet object
 type Keygen struct {
-	btc    api.Bitcoiner
-	dbConn *sql.DB
-	wtype  wallet.WalletType
+	btc      api.Bitcoiner
+	dbConn   *sql.DB
+	addrType address.AddrType
+	wtype    wallet.WalletType
 	coldsrv.Seeder
 	coldsrv.HDWalleter
 	keygensrv.PrivKeyer
@@ -45,6 +46,7 @@ type Keygen struct {
 func NewKeygen(
 	btc api.Bitcoiner,
 	dbConn *sql.DB,
+	addrType address.AddrType,
 	seeder coldsrv.Seeder,
 	hdWallter coldsrv.HDWalleter,
 	privKeyer keygensrv.PrivKeyer,
@@ -57,6 +59,8 @@ func NewKeygen(
 	return &Keygen{
 		btc:                btc,
 		dbConn:             dbConn,
+		addrType:           addrType,
+		wtype:              wtype,
 		Seeder:             seeder,
 		HDWalleter:         hdWallter,
 		PrivKeyer:          privKeyer,
@@ -64,7 +68,6 @@ func NewKeygen(
 		Multisiger:         multisiger,
 		AddressExporter:    addressExporter,
 		Signer:             signer,
-		wtype:              wtype,
 	}
 }
 
@@ -94,8 +97,8 @@ func (k *Keygen) ImportFullPubKey(fileName string) error {
 }
 
 // CreateMultisigAddress creates multi sig address returns Multisiger interface
-func (k *Keygen) CreateMultisigAddress(accountType account.AccountType, addressType address.AddrType) error {
-	return k.Multisiger.AddMultisigAddress(accountType, addressType)
+func (k *Keygen) CreateMultisigAddress(accountType account.AccountType) error {
+	return k.Multisiger.AddMultisigAddress(accountType, k.addrType)
 }
 
 // ExportAddress exports address
