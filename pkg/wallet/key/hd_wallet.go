@@ -4,11 +4,11 @@ import (
 	"encoding/hex"
 	"fmt"
 
+	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcutil"
-	"github.com/btcsuite/btcutil/bech32"
 	"github.com/btcsuite/btcutil/hdkeychain"
 	"github.com/cpacia/bchutil"
 	"github.com/pkg/errors"
@@ -73,8 +73,6 @@ const (
 	ChangeTypeExternal ChangeType = 0 // constant 0 is used for external chain
 	ChangeTypeInternal ChangeType = 1 // constant 1 for internal chain (also known as change addresses)
 )
-
-const hrb = "bitcoin" // human-readable part
 
 // HDKey HD Wallet Key object
 type HDKey struct {
@@ -183,6 +181,8 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 			return nil, err
 		}
 
+		// P2SH address
+
 		// get P2PKH address as string for BTC/BCH
 		// - P2PKH Address, Pay To PubKey Hash
 		// - if only BTC, this logic would be enough
@@ -200,18 +200,19 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 		}
 
 		// Bech32 address
-		// TODO: hrb should be passed from outside
-		strBech32Addr, err := getBech32Addr(wif, hrb)
+		bech32Addr, err := k.getBech32Addr(wif)
 		if err != nil {
 			return nil, err
 		}
+
+		grok.Value(bech32Addr)
 
 		// address.String() is equal to address.EncodeAddress()
 		walletKeys[i] = WalletKey{
 			WIF:            wif.String(),
 			P2PKHAddr:      strP2PKHAddr,
 			P2SHSegWitAddr: strP2SHSegWitAddr,
-			Bech32Addr:     strBech32Addr,
+			Bech32Addr:     bech32Addr.EncodeAddress(),
 			FullPubKey:     getFullPubKey(privateKey, true),
 			RedeemScript:   redeemScript,
 		}
@@ -300,26 +301,14 @@ func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, er
 	return "", "", errors.Errorf("getP2shSegwitAddr() is not implemented yet for %s", k.coinTypeCode)
 }
 
-func getBech32Addr(wif *btcutil.WIF, hrp string) (string, error) {
-
-	keyHash := btcutil.Hash160(wif.SerializePubKey())
-
-	conv, err := bech32.ConvertBits(keyHash, 8, 5, true)
+// getBech32Addr returns bech32 address
+func (k *HDKey) getBech32Addr(wif *btcutil.WIF) (*btcutil.AddressWitnessPubKeyHash, error) {
+	witnessProg := btcutil.Hash160(wif.SerializePubKey())
+	bech32Addr, err := btcutil.NewAddressWitnessPubKeyHash(witnessProg, k.conf)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call bech32.ConvertBits()")
+		return nil, errors.Wrap(err, "fail to call NewAddressWitnessPubKeyHash()")
 	}
-
-	p := []byte{0}
-	for i := 0; i < len(conv); i++ {
-		p = append(p, conv[i])
-	}
-
-	encoded, err := bech32.Encode(hrp, p)
-	if err != nil {
-		return "", errors.Wrap(err, "fail to call bech32.Encode()")
-	}
-
-	return encoded, nil
+	return bech32Addr, nil
 }
 
 // getFullPubKey returns full Public Key
