@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"log"
 	"os"
 
@@ -13,6 +12,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen"
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 

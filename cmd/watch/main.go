@@ -3,15 +3,16 @@ package main
 import (
 	"flag"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"log"
 	"os"
+
+	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
 	wcmd "github.com/hiromaily/go-bitcoin/pkg/command/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 

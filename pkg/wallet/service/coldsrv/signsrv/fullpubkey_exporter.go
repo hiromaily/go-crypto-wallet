@@ -2,7 +2,6 @@ package signsrv
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 
 	"github.com/pkg/errors"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
+	"github.com/hiromaily/go-bitcoin/pkg/fullpubkey"
 	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
@@ -81,8 +81,8 @@ func (f *FullPubkeyExport) exportAccountKey(authKeyTable *models.AuthAccountKey,
 	writer := bufio.NewWriter(file)
 
 	//output: coinType, authType, fullPubkey
-	if _, err = writer.WriteString(
-		fmt.Sprintf("%s,%s,%s\n", f.coinTypeCode.String(), authType.String(), authKeyTable.FullPublicKey)); err != nil {
+	_, err = writer.WriteString(fullpubkey.CreateLine(f.coinTypeCode, authType, authKeyTable.FullPublicKey))
+	if err != nil {
 		return "", errors.Wrapf(err, "fail to call writer.WriteString(%s)", fileName)
 	}
 	if err = writer.Flush(); err != nil {

@@ -1,14 +1,13 @@
 package keygensrv
 
 import (
-	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"strings"
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/address"
+	"github.com/hiromaily/go-bitcoin/pkg/fullpubkey"
 	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
@@ -60,18 +59,15 @@ func (p *FullPubkeyImport) ImportFullPubKey(fileName string) error {
 	for i, key := range pubKeys {
 		inner := strings.Split(key, ",")
 
-		// validate
-		if !coin.ValidateCoinTypeCode(inner[0]) || coin.CoinTypeCode(inner[0]) != p.btc.CoinTypeCode() {
-			return errors.Errorf("coinTypeCode is invalid. got %s, want %s", inner[0], p.btc.CoinTypeCode().String())
-		}
-		if !account.ValidateAuthType(inner[1]) {
-			return errors.Errorf("auth account is invalid: %s", inner[1])
+		fpk, err := fullpubkey.ConvertLine(p.btc.CoinTypeCode(), inner)
+		if err != nil {
+			return err
 		}
 
 		fullPubKeys[i] = &models.AuthFullpubkey{
-			Coin:          inner[0],
-			AuthAccount:   inner[1],
-			FullPublicKey: inner[2],
+			Coin:          fpk.CoinTypeCode.String(),
+			AuthAccount:   fpk.AuthType.String(),
+			FullPublicKey: fpk.FullPubKey,
 		}
 	}
 	//TODO:Upsert would be better to prevent error which occur when data is already inserted

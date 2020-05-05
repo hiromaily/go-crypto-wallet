@@ -2,7 +2,6 @@ package testutil
 
 import (
 	"fmt"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"log"
 	"os"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
 var bc api.Bitcoiner
