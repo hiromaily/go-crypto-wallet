@@ -207,14 +207,14 @@ func (r *registry) newMySQLClient() *sql.DB {
 
 func (r *registry) newPubkeyFileStorager() address.FileRepositorier {
 	return address.NewFileRepository(
-		r.conf.PubkeyFile.BasePath,
+		r.conf.FilePath.FullPubKey,
 		r.newLogger(),
 	)
 }
 
 func (r *registry) newTxFileStorager() tx.FileRepositorier {
 	return tx.NewFileRepository(
-		r.conf.TxFile.BasePath,
+		r.conf.FilePath.Tx,
 		r.newLogger(),
 	)
 }

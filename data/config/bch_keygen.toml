@@ -27,14 +27,10 @@ user = "hiromaily"
 pass = "hiromaily"
 debug = true
 
-[tx_file]
-base_path = "./data/bch/tx/"
-
-[address_file]
-base_path = "./data/bch/address/"
-
-[pubkey_file]
-base_path = "./data/bch/pubkey/"
+[file_path]
+tx = "./data/bch/tx/"
+address = "./data/bch/address/"
+full_pubkey = "./data/bch/fullpubkey/"
 
 # default seed of key used when dev mode
 #[key]

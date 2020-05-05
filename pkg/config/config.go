@@ -22,9 +22,7 @@ type Config struct {
 	Logger       Logger            `toml:"logger"`
 	Tracer       Tracer            `toml:"tracer"`
 	MySQL        MySQL             `toml:"mysql"`
-	TxFile       TxFile            `toml:"tx_file"`
-	AddressFile  AddressFile       `toml:"address_file"`
-	PubkeyFile   PubKeyFile        `toml:"pubkey_file"`
+	FilePath     FilePath          `toml:"tx_file"`
 }
 
 // Bitcoin Bitcoin information
@@ -85,9 +83,11 @@ type MySQL struct {
 	Debug bool   `toml:"debug"`
 }
 
-// TxFile saved transaction file path which is used when import/export file
-type TxFile struct {
-	BasePath string `toml:"base_path" validate:"required"`
+// FilePath if file path group
+type FilePath struct {
+	Tx         string `toml:"tx" validate:"required"`
+	Address    string `toml:"address" validate:"required"`
+	FullPubKey string `toml:"full_pubkey" validate:"required"`
 }
 
 // PubKeyFile saved pubKey file path which is used when import/export file

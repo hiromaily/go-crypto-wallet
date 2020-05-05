@@ -27,14 +27,10 @@ user = "hiromaily"
 pass = "hiromaily"
 debug = true
 
-[tx_file]
-base_path = "./data/btc/tx/"
-
-[address_file]
-base_path = "./data/btc/address/"
-
-[pubkey_file]
-base_path = "./data/btc/pubkey/"
+[file_path]
+tx = "./data/btc/tx/"
+address = "./data/btc/address/"
+full_pubkey = "./data/btc/fullpubkey/"
 
 #[key]
 #seed = "Hj3H3GB6KzFpy4Yt6CEuVdXIDX5VRXGrvgbVkW37xhc="

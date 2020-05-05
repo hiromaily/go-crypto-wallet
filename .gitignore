@@ -8,10 +8,10 @@
 #!cmd/sign
 
 data/btc/tx/*
-data/btc/pubkey/*
+data/btc/fullpubkey/*
 data/btc/address/*
 data/bch/tx/*
-data/bch/pubkey/*
+data/bch/fullpubkey/*
 data/bch/address/*
 
 docker/grafana/*
