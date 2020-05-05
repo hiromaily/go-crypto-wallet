@@ -280,6 +280,17 @@ load-wallets:
 	bitcoin-cli loadwallet sign4
 	bitcoin-cli loadwallet sign5
 
+.PHONY: load-wallet
+encrypto-wallets:
+	keygen api encryptwallet -passphrase test
+	sign -wallet sign1 api encryptwallet -passphrase test
+	sign2 -wallet sign2 api encryptwallet -passphrase test
+	sign3 -wallet sign3 api encryptwallet -passphrase test
+	sign4 -wallet sign4 api encryptwallet -passphrase test
+	sign5 -wallet sign5 api encryptwallet -passphrase test
+
+
+
 #.PHONY: unload-wallet
 #unload-wallet:
 #	bitcoin-cli -rpcwallet=watch unloadwallet
@@ -292,6 +303,9 @@ load-wallets:
 #	bitcoin-cli -rpcwallet=keygen dumpwallet "keygen"
 #	bitcoin-cli -rpcwallet=sign dumpwallet "sign"
 
+###############################################################################
+# Utility
+###############################################################################
 .PHONY: rm-local-wallet-dat
 rm-local-wallet-dat:
 	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/wallet.dat
@@ -317,9 +331,7 @@ rm-docker-wallet-dat:
 	rm -rf ./docker/bch/data/testnet3/wallets/sign4
 	rm -rf ./docker/bch/data/testnet3/wallets/sign5
 
-###############################################################################
-# Utility
-###############################################################################
+
 .PHONY: rm-files
 rm-files:
 	rm -rf ./data/address/*.csv

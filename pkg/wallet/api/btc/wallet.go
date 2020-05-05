@@ -38,7 +38,7 @@ func (b *Bitcoin) BackupWallet(fileName string) error {
 	}
 	_, err = b.Client.RawRequest("backupwallet", []json.RawMessage{bFileName})
 	if err != nil {
-		return errors.Wrap(err, "failt to call json.RawRequest(backupwallet)")
+		return errors.Wrap(err, "fail to call json.RawRequest(backupwallet)")
 	}
 
 	return nil
@@ -77,8 +77,19 @@ func (b *Bitcoin) dumpImportWallet(fileName, method string) error {
 }
 
 // EncryptWallet encrypt wallet by pass phrase
+// https://bitcoincore.org/en/doc/0.19.0/rpc/wallet/encryptwallet/
 func (b *Bitcoin) EncryptWallet(passphrase string) error {
-	return b.Client.CreateEncryptedWallet(passphrase)
+	//backupwallet
+	input1, err := json.Marshal(passphrase)
+	if err != nil {
+		return errors.Wrap(err, "fail to call json.Marchal(passphrase)")
+	}
+	_, err = b.Client.RawRequest("encryptwallet", []json.RawMessage{input1})
+	if err != nil {
+		return errors.Wrap(err, "fail to call json.RawRequest(encryptwallet)")
+	}
+
+	return nil
 }
 
 // WalletLock lock wallet

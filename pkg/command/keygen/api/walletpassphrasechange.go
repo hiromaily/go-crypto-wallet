@@ -45,11 +45,11 @@ func (c *WalletPassphraseChangeCommand) Run(args []string) int {
 	}
 
 	//validator
-	if old != "" {
+	if old == "" {
 		c.ui.Error("old passphrase option [-old] is required")
 		return 1
 	}
-	if new != "" {
+	if new == "" {
 		c.ui.Error("new passphrase option [-new] is required")
 		return 1
 	}

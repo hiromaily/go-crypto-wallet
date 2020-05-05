@@ -43,7 +43,7 @@ func (c *EncryptWalletCommand) Run(args []string) int {
 	}
 
 	//validator
-	if passphrase != "" {
+	if passphrase == "" {
 		c.ui.Error("passphrase option [-passphrase] is required")
 		return 1
 	}
