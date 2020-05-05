@@ -28,6 +28,9 @@ keygen -coin ${COIN} create hdkey -account payment -keynum 10
 keygen -coin ${COIN} create hdkey -account stored -keynum 10
 
 # import generated private key into keygen wallet
+# if wallet is encrypted, walletpassphrase is required before
+keygen api walletpassphrase -passphrase test
+
 keygen -coin ${COIN} import privkey -account client
 keygen -coin ${COIN} import privkey -account deposit
 keygen -coin ${COIN} import privkey -account payment
@@ -48,6 +51,13 @@ sign4 -coin ${COIN} -wallet sign4 create hdkey
 sign5 -coin ${COIN} -wallet sign5 create hdkey
 
 # import generated private key into sign wallet
+# if wallet is encrypted, walletpassphrase is required before
+sign -coin ${COIN} -wallet sign1 api walletpassphrase -passphrase test
+sign2 -coin ${COIN} -wallet sign2 api walletpassphrase -passphrase test
+sign3 -coin ${COIN} -wallet sign3 api walletpassphrase -passphrase test
+sign4 -coin ${COIN} -wallet sign4 api walletpassphrase -passphrase test
+sign5 -coin ${COIN} -wallet sign5 api walletpassphrase -passphrase test
+
 sign -coin ${COIN} -wallet sign1 import privkey
 sign2 -coin ${COIN} -wallet sign2 import privkey
 sign3 -coin ${COIN} -wallet sign3 import privkey

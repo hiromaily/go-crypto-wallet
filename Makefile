@@ -290,7 +290,6 @@ encrypto-wallets:
 	sign5 -wallet sign5 api encryptwallet -passphrase test
 
 
-
 #.PHONY: unload-wallet
 #unload-wallet:
 #	bitcoin-cli -rpcwallet=watch unloadwallet

@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/bookerzzz/grok"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/txscript"
@@ -204,8 +203,6 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 		if err != nil {
 			return nil, err
 		}
-
-		grok.Value(bech32Addr)
 
 		// address.String() is equal to address.EncodeAddress()
 		walletKeys[i] = WalletKey{
