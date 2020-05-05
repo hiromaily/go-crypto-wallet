@@ -9,8 +9,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 )
 
-// DumpWalletCommand dumpwallet subcommand
-type DumpWalletCommand struct {
+// ImportWalletCommand importwallet subcommand
+type ImportWalletCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
@@ -18,12 +18,12 @@ type DumpWalletCommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (c *DumpWalletCommand) Synopsis() string {
+func (c *ImportWalletCommand) Synopsis() string {
 	return c.synopsis
 }
 
 // Help returns usage for this subcommand
-func (c *DumpWalletCommand) Help() string {
+func (c *ImportWalletCommand) Help() string {
 	return `Usage: keygen api dumpwallet [options...]
 Options:
   -file  filename
@@ -31,7 +31,7 @@ Options:
 }
 
 // Run executes this subcommand
-func (c *DumpWalletCommand) Run(args []string) int {
+func (c *ImportWalletCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
 	var fileName string
@@ -48,13 +48,13 @@ func (c *DumpWalletCommand) Run(args []string) int {
 		return 1
 	}
 
-	err := c.btc.DumpWallet(fileName)
+	err := c.btc.ImportWallet(fileName)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call btc.DumpWallet() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call btc.ImportWallet() %+v", err))
 		return 1
 	}
 
-	c.ui.Info("wallet file is dumped!")
+	c.ui.Info("wallet file is imported!")
 
 	return 0
 }

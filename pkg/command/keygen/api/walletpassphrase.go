@@ -9,7 +9,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 )
 
-// WalletPassphraseCommand balance subcommand
+// WalletPassphraseCommand walletpassphrase subcommand
 type WalletPassphraseCommand struct {
 	name     string
 	synopsis string

@@ -309,10 +309,14 @@ dump-wallet:
 	sign4 -wallet sign4 api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-bitcoin/data/dump/sign4.bk
 	sign5 -wallet sign4 api walletpassphrase -passphrase test
 	sign5 -wallet sign4 api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-bitcoin/data/dump/sign5.bk
-
 	#bitcoin-cli -rpcwallet=watch dumpwallet "watch"
 	#bitcoin-cli -rpcwallet=keygen dumpwallet "keygen"
 	#bitcoin-cli -rpcwallet=sign dumpwallet "sign"
+
+#.PHONY: import-wallet
+import-wallet:
+	keygen api walletpassphrase -passphrase test
+	keygen api importwallet -file ${GOPATH}/src/github.com/hiromaily/go-bitcoin/data/dump/keygen.bk
 
 ###############################################################################
 # Utility
