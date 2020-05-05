@@ -3,12 +3,12 @@ package key
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/btcsuite/btcutil/bech32"
 
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcutil"
+	"github.com/btcsuite/btcutil/bech32"
 	"github.com/btcsuite/btcutil/hdkeychain"
 	"github.com/cpacia/bchutil"
 	"github.com/pkg/errors"
@@ -202,7 +202,7 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 		// Bech32 address
 		// TODO: hrb should be passed from outside
 		strBech32Addr, err := getBech32Addr(wif, hrb)
-		if err != nil{
+		if err != nil {
 			return nil, err
 		}
 
@@ -310,7 +310,7 @@ func getBech32Addr(wif *btcutil.WIF, hrp string) (string, error) {
 	}
 
 	p := []byte{0}
-	for i := 0; i < len(conv); i ++ {
+	for i := 0; i < len(conv); i++ {
 		p = append(p, conv[i])
 	}
 

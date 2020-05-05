@@ -16,6 +16,7 @@ type AddressFormat struct {
 	AccountType       account.AccountType
 	P2PKHAddress      string
 	P2SHSegwitAddress string
+	Bech32Address     string
 	FullPublicKey     string
 	MultisigAddress   string
 	Idx               string
@@ -28,6 +29,7 @@ func CreateLine(accountKeyItem *models.AccountKey) []string {
 		accountKeyItem.Account,
 		accountKeyItem.P2PKHAddress,
 		accountKeyItem.P2SHSegwitAddress,
+		accountKeyItem.Bech32Address,
 		accountKeyItem.FullPublicKey,
 		accountKeyItem.MultisigAddress,
 		strconv.Itoa(int(accountKeyItem.Idx)),
@@ -36,7 +38,7 @@ func CreateLine(accountKeyItem *models.AccountKey) []string {
 
 // ConvertLine converts line to AddressFormat
 func ConvertLine(coinTypeCode coin.CoinTypeCode, line []string) (*AddressFormat, error) {
-	if len(line) != 7 {
+	if len(line) != 8 {
 		return nil, errors.New("csv format is invalid")
 	}
 
@@ -53,8 +55,9 @@ func ConvertLine(coinTypeCode coin.CoinTypeCode, line []string) (*AddressFormat,
 		AccountType:       account.AccountType(line[1]),
 		P2PKHAddress:      line[2],
 		P2SHSegwitAddress: line[3],
-		FullPublicKey:     line[4],
-		MultisigAddress:   line[5],
-		Idx:               line[6],
+		Bech32Address:     line[4],
+		FullPublicKey:     line[5],
+		MultisigAddress:   line[6],
+		Idx:               line[7],
 	}, nil
 }
