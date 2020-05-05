@@ -7,6 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 
+	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
@@ -16,13 +17,13 @@ import (
 
 // Config root config
 type Config struct {
-	//CoinTypeCode coin.CoinTypeCode `toml:"coin_type" validate:"oneof=btc bch"`
+	AddressType  address.AddrType  `toml:"address_type" validate:"oneof=p2sh-segwit bech32 BCH-CashAddr"`
 	CoinTypeCode coin.CoinTypeCode `toml:"coin_type"`
 	Bitcoin      Bitcoin           `toml:"bitcoin"`
 	Logger       Logger            `toml:"logger"`
 	Tracer       Tracer            `toml:"tracer"`
 	MySQL        MySQL             `toml:"mysql"`
-	FilePath     FilePath          `toml:"tx_file"`
+	FilePath     FilePath          `toml:"file_path"`
 }
 
 // Bitcoin Bitcoin information
