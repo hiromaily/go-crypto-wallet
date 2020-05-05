@@ -30,11 +30,11 @@ keygen -coin ${COIN} create hdkey -account stored -keynum 10
 # import generated private key into keygen wallet
 # if wallet is encrypted, walletpassphrase is required before
 keygen api walletpassphrase -passphrase test
-
 keygen -coin ${COIN} import privkey -account client
 keygen -coin ${COIN} import privkey -account deposit
 keygen -coin ${COIN} import privkey -account payment
 keygen -coin ${COIN} import privkey -account stored
+keygen api walletlock
 
 
 ###############################################################################
@@ -52,17 +52,26 @@ sign5 -coin ${COIN} -wallet sign5 create hdkey
 
 # import generated private key into sign wallet
 # if wallet is encrypted, walletpassphrase is required before
-sign -coin ${COIN} -wallet sign1 api walletpassphrase -passphrase test
-sign2 -coin ${COIN} -wallet sign2 api walletpassphrase -passphrase test
-sign3 -coin ${COIN} -wallet sign3 api walletpassphrase -passphrase test
-sign4 -coin ${COIN} -wallet sign4 api walletpassphrase -passphrase test
-sign5 -coin ${COIN} -wallet sign5 api walletpassphrase -passphrase test
 
+sign -coin ${COIN} -wallet sign1 api walletpassphrase -passphrase test
 sign -coin ${COIN} -wallet sign1 import privkey
+sign -coin ${COIN} -wallet sign1 api walletlock
+
+sign2 -coin ${COIN} -wallet sign2 api walletpassphrase -passphrase test
 sign2 -coin ${COIN} -wallet sign2 import privkey
+sign2 -coin ${COIN} -wallet sign2 api walletlock
+
+sign3 -coin ${COIN} -wallet sign3 api walletpassphrase -passphrase test
 sign3 -coin ${COIN} -wallet sign3 import privkey
+sign3 -coin ${COIN} -wallet sign3 api walletlock
+
+sign4 -coin ${COIN} -wallet sign4 api walletpassphrase -passphrase test
 sign4 -coin ${COIN} -wallet sign4 import privkey
+sign4 -coin ${COIN} -wallet sign4 api walletlock
+
+sign5 -coin ${COIN} -wallet sign5 api walletpassphrase -passphrase test
 sign5 -coin ${COIN} -wallet sign5 import privkey
+sign5 -coin ${COIN} -wallet sign5 api walletlock
 
 # export full-pubkey as csv file
 # sign -wallet sign1 export fullpubkey

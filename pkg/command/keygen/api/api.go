@@ -28,6 +28,7 @@ var (
 	walletpassphraseSynopsis = `stores the wallet decryption key in memory for 'timeout' seconds.\n
 this is needed prior to performing transactions related to private keys such as sending bitcoins`
 	walletpassphrasechangeSynopsis = "changes the wallet passphrase from 'oldpassphrase' to 'newpassphrase'"
+	walletlockSynopsis             = "removes the wallet encryption key from memory, locking the wallet"
 )
 
 // Help returns usage for this subcommand
@@ -37,7 +38,8 @@ Subcommands:
   encryptwallet          %s
   walletpassphrase       %s
   walletpassphrasechange %s
-`, encryptwalletSynopsis, walletpassphraseSynopsis, walletpassphrasechangeSynopsis)
+  walletlock             %s
+`, encryptwalletSynopsis, walletpassphraseSynopsis, walletpassphrasechangeSynopsis, walletlockSynopsis)
 }
 
 // Run executes this subcommand
@@ -71,6 +73,14 @@ func (c *APICommand) Run(args []string) int {
 			return &WalletPassphraseChangeCommand{
 				name:     "walletpassphrasechange",
 				synopsis: walletpassphrasechangeSynopsis,
+				ui:       command.ClolorUI(),
+				btc:      c.BTC,
+			}, nil
+		},
+		"walletlock": func() (cli.Command, error) {
+			return &WalletLockCommand{
+				name:     "walletlock",
+				synopsis: walletlockSynopsis,
 				ui:       command.ClolorUI(),
 				btc:      c.BTC,
 			}, nil
