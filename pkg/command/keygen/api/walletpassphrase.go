@@ -48,13 +48,13 @@ func (c *WalletPassphraseCommand) Run(args []string) int {
 		return 1
 	}
 
-	err := c.btc.WalletPassphrase(passphrase, 5)
+	err := c.btc.WalletPassphrase(passphrase, 10)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call btc.WalletPassphrase() %+v", err))
 		return 1
 	}
 
-	c.ui.Info("wallet encryption is unlocked for 5s!")
+	c.ui.Info("wallet encryption is unlocked for 10s!")
 
 	return 0
 }

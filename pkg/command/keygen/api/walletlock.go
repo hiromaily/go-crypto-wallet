@@ -38,7 +38,7 @@ func (c *WalletLockCommand) Run(args []string) int {
 
 	err := c.btc.WalletLock()
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call btc.EncryptWallet() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call WalletLock() %+v", err))
 		return 1
 	}
 

@@ -280,8 +280,14 @@ load-wallets:
 	bitcoin-cli loadwallet sign4
 	bitcoin-cli loadwallet sign5
 
-.PHONY: load-wallet
-encrypto-wallets:
+#.PHONY: unload-wallet
+#unload-wallet:
+#	bitcoin-cli -rpcwallet=watch unloadwallet
+#	bitcoin-cli -rpcwallet=keygen unloadwallet
+#	bitcoin-cli -rpcwallet=sign1 unloadwallet
+
+.PHONY: encrypt-wallets
+encrypt-wallets:
 	keygen api encryptwallet -passphrase test
 	sign -wallet sign1 api encryptwallet -passphrase test
 	sign2 -wallet sign2 api encryptwallet -passphrase test
@@ -289,18 +295,24 @@ encrypto-wallets:
 	sign4 -wallet sign4 api encryptwallet -passphrase test
 	sign5 -wallet sign5 api encryptwallet -passphrase test
 
-
-#.PHONY: unload-wallet
-#unload-wallet:
-#	bitcoin-cli -rpcwallet=watch unloadwallet
-#	bitcoin-cli -rpcwallet=keygen unloadwallet
-#	bitcoin-cli -rpcwallet=sign1 unloadwallet
-
 #.PHONY: dump-wallet
-#dump-wallet:
-#	bitcoin-cli -rpcwallet=watch dumpwallet "watch"
-#	bitcoin-cli -rpcwallet=keygen dumpwallet "keygen"
-#	bitcoin-cli -rpcwallet=sign dumpwallet "sign"
+dump-wallet:
+	keygen api walletpassphrase -passphrase test
+	keygen api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-bitcoin/data/dump/keygen.bk
+	sign -wallet sign1 api walletpassphrase -passphrase test
+	sign -wallet sign1 api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-bitcoin/data/dump/sign1.bk
+	sign2 -wallet sign2 api walletpassphrase -passphrase test
+	sign2 -wallet sign2 api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-bitcoin/data/dump/sign2.bk
+	sign3 -wallet sign3 api walletpassphrase -passphrase test
+	sign3 -wallet sign3 api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-bitcoin/data/dump/sign3.bk
+	sign4 -wallet sign4 api walletpassphrase -passphrase test
+	sign4 -wallet sign4 api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-bitcoin/data/dump/sign4.bk
+	sign5 -wallet sign4 api walletpassphrase -passphrase test
+	sign5 -wallet sign4 api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-bitcoin/data/dump/sign5.bk
+
+	#bitcoin-cli -rpcwallet=watch dumpwallet "watch"
+	#bitcoin-cli -rpcwallet=keygen dumpwallet "keygen"
+	#bitcoin-cli -rpcwallet=sign dumpwallet "sign"
 
 ###############################################################################
 # Utility

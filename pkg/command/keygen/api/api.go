@@ -29,6 +29,7 @@ var (
 this is needed prior to performing transactions related to private keys such as sending bitcoins`
 	walletpassphrasechangeSynopsis = "changes the wallet passphrase from 'oldpassphrase' to 'newpassphrase'"
 	walletlockSynopsis             = "removes the wallet encryption key from memory, locking the wallet"
+	dumpwalletSynopsis             = "dumps all wallet keys in a human-readable format to a server-side file"
 )
 
 // Help returns usage for this subcommand
@@ -39,7 +40,8 @@ Subcommands:
   walletpassphrase       %s
   walletpassphrasechange %s
   walletlock             %s
-`, encryptwalletSynopsis, walletpassphraseSynopsis, walletpassphrasechangeSynopsis, walletlockSynopsis)
+  dumpwallet             %s
+`, encryptwalletSynopsis, walletpassphraseSynopsis, walletpassphrasechangeSynopsis, walletlockSynopsis, dumpwalletSynopsis)
 }
 
 // Run executes this subcommand
@@ -81,6 +83,14 @@ func (c *APICommand) Run(args []string) int {
 			return &WalletLockCommand{
 				name:     "walletlock",
 				synopsis: walletlockSynopsis,
+				ui:       command.ClolorUI(),
+				btc:      c.BTC,
+			}, nil
+		},
+		"dumpwallet": func() (cli.Command, error) {
+			return &DumpWalletCommand{
+				name:     "dumpwallet",
+				synopsis: dumpwalletSynopsis,
 				ui:       command.ClolorUI(),
 				btc:      c.BTC,
 			}, nil
