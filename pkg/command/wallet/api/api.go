@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 )
 
 // APICommand api subcommand
@@ -15,7 +15,7 @@ type APICommand struct {
 	Name    string
 	Version string
 	UI      cli.Ui
-	Wallet  wallets.Watcher
+	BTC     api.Bitcoiner
 }
 
 // Synopsis is explanation for this subcommand
@@ -63,7 +63,7 @@ func (c *APICommand) Run(args []string) int {
 				name:     "balance",
 				synopsis: balanceSynopsis,
 				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
+				btc:      c.BTC,
 			}, nil
 		},
 		"estimatefee": func() (cli.Command, error) {
@@ -71,7 +71,7 @@ func (c *APICommand) Run(args []string) int {
 				name:     "estimatefee",
 				synopsis: estimatefeeSynopsis,
 				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
+				btc:      c.BTC,
 			}, nil
 		},
 		"getaddressinfo": func() (cli.Command, error) {
@@ -79,7 +79,7 @@ func (c *APICommand) Run(args []string) int {
 				name:     "getnetworkinfo",
 				synopsis: getaddressinfoSynopsis,
 				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
+				btc:      c.BTC,
 			}, nil
 		},
 		"getnetworkinfo": func() (cli.Command, error) {
@@ -87,7 +87,7 @@ func (c *APICommand) Run(args []string) int {
 				name:     "getnetworkinfo",
 				synopsis: getnetworkinfoSynopsis,
 				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
+				btc:      c.BTC,
 			}, nil
 		},
 		"listunspent": func() (cli.Command, error) {
@@ -95,7 +95,7 @@ func (c *APICommand) Run(args []string) int {
 				name:     "listunspent",
 				synopsis: listunspentSynopsis,
 				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
+				btc:      c.BTC,
 			}, nil
 		},
 		"logging": func() (cli.Command, error) {
@@ -103,7 +103,7 @@ func (c *APICommand) Run(args []string) int {
 				name:     "logging",
 				synopsis: loggingSynopsis,
 				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
+				btc:      c.BTC,
 			}, nil
 		},
 		"unlocktx": func() (cli.Command, error) {
@@ -111,7 +111,7 @@ func (c *APICommand) Run(args []string) int {
 				name:     "unlocktx",
 				synopsis: unlocktxSynopsis,
 				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
+				btc:      c.BTC,
 			}, nil
 		},
 		"validateaddress": func() (cli.Command, error) {
@@ -119,7 +119,7 @@ func (c *APICommand) Run(args []string) int {
 				name:     "validateaddress",
 				synopsis: validateaddressSynopsis,
 				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
+				btc:      c.BTC,
 			}, nil
 		},
 	}

@@ -7,7 +7,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 )
 
 // GetAddressInfoCommand getaddressinfo subcommand
@@ -15,7 +15,7 @@ type GetAddressInfoCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   wallets.Watcher
+	btc      api.Bitcoiner
 }
 
 // Synopsis is explanation for this subcommand
@@ -49,7 +49,7 @@ func (c *GetAddressInfoCommand) Run(args []string) int {
 	}
 
 	// call getaddressinfo
-	addrData, err := c.wallet.GetBTC().GetAddressInfo(addr)
+	addrData, err := c.btc.GetAddressInfo(addr)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call BTC.GetAddressInfo() %+v", err))
 		return 1

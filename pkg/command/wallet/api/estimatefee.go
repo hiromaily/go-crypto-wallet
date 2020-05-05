@@ -6,7 +6,7 @@ import (
 
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 )
 
 // EstimateFeeCommand estimatefee subcommand
@@ -14,7 +14,7 @@ type EstimateFeeCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   wallets.Watcher
+	btc      api.Bitcoiner
 }
 
 // Synopsis is explanation for this subcommand
@@ -37,7 +37,7 @@ func (c *EstimateFeeCommand) Run(args []string) int {
 	}
 
 	// estimate fee
-	feePerKb, err := c.wallet.GetBTC().EstimateSmartFee()
+	feePerKb, err := c.btc.EstimateSmartFee()
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call BTC.EstimateSmartFee() %+v", err))
 		return 1

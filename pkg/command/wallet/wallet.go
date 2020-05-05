@@ -52,7 +52,7 @@ func WalletSubCommands(wallet wallets.Watcher, version string) map[string]cli.Co
 				Name:    "api",
 				Version: version,
 				UI:      command.ClolorUI(),
-				Wallet:  wallet,
+				BTC:     wallet.GetBTC(),
 			}, nil
 		},
 		"db": func() (cli.Command, error) {

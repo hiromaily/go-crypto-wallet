@@ -8,7 +8,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 )
 
 // BalanceCommand balance subcommand
@@ -16,7 +16,7 @@ type BalanceCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   wallets.Watcher
+	btc      api.Bitcoiner
 }
 
 // Synopsis is explanation for this subcommand
@@ -55,14 +55,14 @@ func (c *BalanceCommand) Run(args []string) int {
 		err     error
 	)
 	if acnt == "" {
-		balance, err = c.wallet.GetBTC().GetBalance()
+		balance, err = c.btc.GetBalance()
 		if err != nil {
 			c.ui.Error(fmt.Sprintf("fail to call btc.GetBalance() %+v", err))
 			return 1
 		}
 	} else {
 		//get received by account
-		balance, err = c.wallet.GetBTC().GetBalanceByAccount(account.AccountType(acnt))
+		balance, err = c.btc.GetBalanceByAccount(account.AccountType(acnt))
 		if err != nil {
 			c.ui.Error(fmt.Sprintf("fail to call btc.GetBalanceByAccount() %+v", err))
 			return 1

@@ -21,6 +21,7 @@ type Signer interface {
 	SignTx(filePath string) (string, bool, string, error)
 
 	Done()
+	GetBTC() api.Bitcoiner
 }
 
 // Sign is sign wallet object
@@ -95,4 +96,9 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 func (s *Sign) Done() {
 	s.dbConn.Close()
 	s.btc.Close()
+}
+
+// GetBTC gets btc
+func (s *Sign) GetBTC() api.Bitcoiner {
+	return s.btc
 }

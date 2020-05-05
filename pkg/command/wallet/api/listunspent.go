@@ -8,7 +8,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 )
 
 // ListUnspentCommand listunspent subcommand
@@ -16,7 +16,7 @@ type ListUnspentCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   wallets.Watcher
+	btc      api.Bitcoiner
 }
 
 // Synopsis is explanation for this subcommand
@@ -52,21 +52,21 @@ func (c *ListUnspentCommand) Run(args []string) int {
 
 	if acnt != "" {
 		// call listunspent
-		unspentList, err := c.wallet.GetBTC().ListUnspentByAccount(account.AccountType(acnt))
+		unspentList, err := c.btc.ListUnspentByAccount(account.AccountType(acnt))
 		if err != nil {
 			c.ui.Error(fmt.Sprintf("fail to call btc.ListUnspentByAccount() %+v", err))
 			return 1
 		}
 		grok.Value(unspentList)
 
-		unspentAddrs := c.wallet.GetBTC().GetUnspentListAddrs(unspentList, account.AccountType(acnt))
+		unspentAddrs := c.btc.GetUnspentListAddrs(unspentList, account.AccountType(acnt))
 		for _, addr := range unspentAddrs {
 			grok.Value(addr)
 		}
 	} else {
 		// call listunspent
 		// ListUnspentMin doesn't have proper response, label can't be retrieved
-		unspentList, err := c.wallet.GetBTC().ListUnspent()
+		unspentList, err := c.btc.ListUnspent()
 		if err != nil {
 			c.ui.Error(fmt.Sprintf("fail to call btc.ListUnspent() %+v", err))
 			return 1

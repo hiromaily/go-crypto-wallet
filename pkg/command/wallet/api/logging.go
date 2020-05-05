@@ -7,7 +7,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
 )
 
 // LoggingCommand logging subcommand
@@ -15,7 +15,7 @@ type LoggingCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	wallet   wallets.Watcher
+	btc      api.Bitcoiner
 }
 
 // Synopsis is explanation for this subcommand
@@ -38,7 +38,7 @@ func (c *LoggingCommand) Run(args []string) int {
 	}
 
 	// logging
-	logData, err := c.wallet.GetBTC().Logging()
+	logData, err := c.btc.Logging()
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call BTC.Logging() %+v", err))
 		return 1
