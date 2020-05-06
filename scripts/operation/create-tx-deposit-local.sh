@@ -15,7 +15,9 @@ fi
 
 # sign on keygen wallet
 echo 'sign on '${tx_file##*\[fileName\]: }
+keygen api walletpassphrase -passphrase test
 tx_file_signed=`keygen sign -file "${tx_file##*\[fileName\]: }"`
+keygen api walletlock
 
 # send signed tx
 echo 'send tx '${tx_file_signed##*\[fileName\]: }
