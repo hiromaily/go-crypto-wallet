@@ -175,14 +175,14 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 			return nil, err
 		}
 
-		// WIF　(compressed: true) => bitcoin core expresses compressed address
-		wif, err := btcutil.NewWIF(privateKey, k.conf, true)
-		if err != nil {
-			return nil, err
-		}
-
 		switch k.coinTypeCode {
 		case coin.BTC, coin.BCH:
+			// WIF　(compressed: true) => bitcoin core expresses compressed address
+			wif, err := btcutil.NewWIF(privateKey, k.conf, true)
+			if err != nil {
+				return nil, err
+			}
+
 			strP2PKHAddr, strP2SHSegWitAddr, bech32Addr, redeemScript, err := k.btcAddrs(wif, privateKey)
 			if err != nil {
 				return nil, err
