@@ -9,7 +9,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	wtype "github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/watchsrv"
 )
 
@@ -24,12 +24,12 @@ type Watcher interface {
 	CreatePaymentRequest() error
 
 	Done()
-	GetBTC() api.Bitcoiner
+	GetBTC() btcgrp.Bitcoiner
 }
 
 // BTCWatch watch only wallet object
 type BTCWatch struct {
-	btc      api.Bitcoiner
+	btc      btcgrp.Bitcoiner
 	dbConn   *sql.DB
 	logger   *zap.Logger
 	tracer   opentracing.Tracer
@@ -44,7 +44,7 @@ type BTCWatch struct {
 
 // NewBTCWatch returns Watch object
 func NewBTCWatch(
-	btc api.Bitcoiner,
+	btc btcgrp.Bitcoiner,
 	dbConn *sql.DB,
 	logger *zap.Logger,
 	tracer opentracing.Tracer,
@@ -113,6 +113,6 @@ func (w *BTCWatch) Done() {
 }
 
 // GetBTC gets btc
-func (w *BTCWatch) GetBTC() api.Bitcoiner {
+func (w *BTCWatch) GetBTC() btcgrp.Bitcoiner {
 	return w.btc
 }

@@ -1,4 +1,4 @@
-package api
+package btcgrp
 
 import (
 	"github.com/btcsuite/btcd/btcjson"
@@ -10,7 +10,7 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btc"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp/btc"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 

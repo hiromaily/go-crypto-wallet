@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
 )
 
 // Multisiger is Multisiger service
@@ -20,7 +20,7 @@ type Multisiger interface {
 
 // Multisig type
 type Multisig struct {
-	btc                api.Bitcoiner
+	btc                btcgrp.Bitcoiner
 	logger             *zap.Logger
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier
 	accountKeyRepo     coldrepo.AccountKeyRepositorier
@@ -29,7 +29,7 @@ type Multisig struct {
 
 // NewMultisig returns multisig
 func NewMultisig(
-	btc api.Bitcoiner,
+	btc btcgrp.Bitcoiner,
 	logger *zap.Logger,
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,

@@ -11,7 +11,7 @@ import (
 	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
 )
 
 // FullPubKeyImporter is FullPubkeyImport service
@@ -21,7 +21,7 @@ type FullPubKeyImporter interface {
 
 // FullPubkeyImport type
 type FullPubkeyImport struct {
-	btc                api.Bitcoiner
+	btc                btcgrp.Bitcoiner
 	logger             *zap.Logger
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier
 	pubkeyFileRepo     address.FileRepositorier
@@ -30,7 +30,7 @@ type FullPubkeyImport struct {
 
 // NewFullPubkeyImport returns FullPubkeyImport object
 func NewFullPubkeyImport(
-	btc api.Bitcoiner,
+	btc btcgrp.Bitcoiner,
 	logger *zap.Logger,
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier,
 	pubkeyFileRepo address.FileRepositorier,

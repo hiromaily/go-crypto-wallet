@@ -12,7 +12,7 @@ import (
 	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
 )
 
 // PaymentRequestCreator is PaymentRequestCreate interface
@@ -22,7 +22,7 @@ type PaymentRequestCreator interface {
 
 // PaymentRequestCreate type
 type PaymentRequestCreate struct {
-	btc        api.Bitcoiner
+	btc        btcgrp.Bitcoiner
 	logger     *zap.Logger
 	dbConn     *sql.DB
 	addrRepo   watchrepo.AddressRepositorier
@@ -32,7 +32,7 @@ type PaymentRequestCreate struct {
 
 // NewPaymentRequestCreate returns PaymentRequestCreate object
 func NewPaymentRequestCreate(
-	btc api.Bitcoiner,
+	btc btcgrp.Bitcoiner,
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,

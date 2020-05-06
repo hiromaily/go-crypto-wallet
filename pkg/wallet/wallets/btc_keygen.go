@@ -6,7 +6,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv/keygensrv"
@@ -24,12 +24,12 @@ type Keygener interface {
 	SignTx(filePath string) (string, bool, string, error)
 
 	Done()
-	GetBTC() api.Bitcoiner
+	GetBTC() btcgrp.Bitcoiner
 }
 
 // BTCKeygen is keygen wallet object
 type BTCKeygen struct {
-	btc      api.Bitcoiner
+	btc      btcgrp.Bitcoiner
 	dbConn   *sql.DB
 	addrType address.AddrType
 	wtype    wallet.WalletType
@@ -44,7 +44,7 @@ type BTCKeygen struct {
 
 // NewBTCKeygen returns Keygen object
 func NewBTCKeygen(
-	btc api.Bitcoiner,
+	btc btcgrp.Bitcoiner,
 	dbConn *sql.DB,
 	addrType address.AddrType,
 	seeder coldsrv.Seeder,
@@ -118,6 +118,6 @@ func (k *BTCKeygen) Done() {
 }
 
 // GetBTC gets btc
-func (k *BTCKeygen) GetBTC() api.Bitcoiner {
+func (k *BTCKeygen) GetBTC() btcgrp.Bitcoiner {
 	return k.btc
 }

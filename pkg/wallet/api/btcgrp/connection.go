@@ -1,4 +1,4 @@
-package api
+package btcgrp
 
 import (
 	"github.com/btcsuite/btcd/rpcclient"
@@ -6,8 +6,8 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/config"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/bch"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btc"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp/bch"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp/btc"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 

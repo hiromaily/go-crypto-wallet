@@ -12,7 +12,7 @@ import (
 	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
@@ -23,7 +23,7 @@ type AddressImporter interface {
 
 // AddressImport type
 type AddressImport struct {
-	btc          api.Bitcoiner
+	btc          btcgrp.Bitcoiner
 	logger       *zap.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier
@@ -35,7 +35,7 @@ type AddressImport struct {
 
 // NewAddressImport returns AddressImport object
 func NewAddressImport(
-	btc api.Bitcoiner,
+	btc btcgrp.Bitcoiner,
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,

@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
 )
 
 // TxMonitorer is TxMonitor interface
@@ -20,7 +20,7 @@ type TxMonitorer interface {
 
 // TxMonitor type
 type TxMonitor struct {
-	btc         api.Bitcoiner
+	btc         btcgrp.Bitcoiner
 	logger      *zap.Logger
 	dbConn      *sql.DB
 	txRepo      watchrepo.TxRepositorier
@@ -31,7 +31,7 @@ type TxMonitor struct {
 
 // NewTxMonitor returns TxMonitor object
 func NewTxMonitor(
-	btc api.Bitcoiner,
+	btc btcgrp.Bitcoiner,
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	txRepo watchrepo.TxRepositorier,

@@ -16,7 +16,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv"
@@ -34,7 +34,7 @@ type registry struct {
 	walletType  wallet.WalletType
 	authType    account.AuthType
 	logger      *zap.Logger
-	btc         api.Bitcoiner
+	btc         btcgrp.Bitcoiner
 	rpcClient   *rpcclient.Client
 	mysqlClient *sql.DB
 }
@@ -136,7 +136,7 @@ func (r *registry) newSigner() coldsrv.Signer {
 func (r *registry) newRPCClient() *rpcclient.Client {
 	var err error
 	if r.rpcClient == nil {
-		r.rpcClient, err = api.NewRPCClient(&r.conf.Bitcoin)
+		r.rpcClient, err = btcgrp.NewRPCClient(&r.conf.Bitcoin)
 	}
 	if err != nil {
 		panic(err)
@@ -144,10 +144,10 @@ func (r *registry) newRPCClient() *rpcclient.Client {
 	return r.rpcClient
 }
 
-func (r *registry) newBTC() api.Bitcoiner {
+func (r *registry) newBTC() btcgrp.Bitcoiner {
 	if r.btc == nil {
 		var err error
-		r.btc, err = api.NewBitcoin(
+		r.btc, err = btcgrp.NewBitcoin(
 			r.newRPCClient(),
 			&r.conf.Bitcoin,
 			r.newLogger(),

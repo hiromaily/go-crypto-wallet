@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/config"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btc"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp/btc"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 

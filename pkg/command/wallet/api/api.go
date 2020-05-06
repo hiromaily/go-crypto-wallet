@@ -7,7 +7,7 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
 )
 
 // APICommand api subcommand
@@ -15,7 +15,7 @@ type APICommand struct {
 	Name    string
 	Version string
 	UI      cli.Ui
-	BTC     api.Bitcoiner
+	BTC     btcgrp.Bitcoiner
 }
 
 // Synopsis is explanation for this subcommand

@@ -6,7 +6,7 @@ import (
 
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
 )
 
 // EstimateFeeCommand estimatefee subcommand
@@ -14,7 +14,7 @@ type EstimateFeeCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
-	btc      api.Bitcoiner
+	btc      btcgrp.Bitcoiner
 }
 
 // Synopsis is explanation for this subcommand

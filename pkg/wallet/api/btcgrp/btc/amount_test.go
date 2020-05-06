@@ -5,7 +5,7 @@ import (
 
 	"github.com/btcsuite/btcutil"
 
-	. "github.com/hiromaily/go-bitcoin/pkg/wallet/api/btc"
+	. "github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp/btc"
 )
 
 // TestAmountString is test for FloatToAmount

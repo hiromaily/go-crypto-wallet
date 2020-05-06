@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
 )
 
 // TxSender is TxSender interface
@@ -20,7 +20,7 @@ type TxSender interface {
 
 // TxSend type
 type TxSend struct {
-	btc          api.Bitcoiner
+	btc          btcgrp.Bitcoiner
 	logger       *zap.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier
@@ -32,7 +32,7 @@ type TxSend struct {
 
 // NewTxSend returns TxSend object
 func NewTxSend(
-	btc api.Bitcoiner,
+	btc btcgrp.Bitcoiner,
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,

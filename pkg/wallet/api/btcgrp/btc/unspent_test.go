@@ -5,7 +5,7 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/testutil"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btc"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp/btc"
 )
 
 func findUnspentListID(unspentList []btc.ListUnspentResult, txid string) bool {

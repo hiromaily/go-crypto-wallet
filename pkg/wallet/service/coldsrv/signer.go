@@ -13,8 +13,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btc"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp/btc"
 )
 
 // Signer is Signer service
@@ -24,7 +24,7 @@ type Signer interface {
 
 // Sign type
 type Sign struct {
-	btc            api.Bitcoiner
+	btc            btcgrp.Bitcoiner
 	logger         *zap.Logger
 	accountKeyRepo coldrepo.AccountKeyRepositorier
 	authKeyRepo    coldrepo.AuthAccountKeyRepositorier
@@ -34,7 +34,7 @@ type Sign struct {
 
 // NewSign returns sign object
 func NewSign(
-	btc api.Bitcoiner,
+	btc btcgrp.Bitcoiner,
 	logger *zap.Logger,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier,

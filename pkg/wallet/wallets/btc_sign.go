@@ -6,7 +6,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv/signsrv"
@@ -22,12 +22,12 @@ type Signer interface {
 	SignTx(filePath string) (string, bool, string, error)
 
 	Done()
-	GetBTC() api.Bitcoiner
+	GetBTC() btcgrp.Bitcoiner
 }
 
 // BTCSign is sign wallet object
 type BTCSign struct {
-	btc         api.Bitcoiner
+	btc         btcgrp.Bitcoiner
 	dbConn      *sql.DB
 	authAccount account.AuthType
 	addrType    address.AddrType
@@ -41,7 +41,7 @@ type BTCSign struct {
 
 // NewBTCSign returns Sign object
 func NewBTCSign(
-	btc api.Bitcoiner,
+	btc btcgrp.Bitcoiner,
 	dbConn *sql.DB,
 	authAccount account.AuthType,
 	addrType address.AddrType,
@@ -103,6 +103,6 @@ func (s *BTCSign) Done() {
 }
 
 // GetBTC gets btc
-func (s *BTCSign) GetBTC() api.Bitcoiner {
+func (s *BTCSign) GetBTC() btcgrp.Bitcoiner {
 	return s.btc
 }

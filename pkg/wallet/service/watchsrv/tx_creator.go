@@ -17,8 +17,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btc"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp/btc"
 )
 
 // create_tx.go is for common func among create transaction fuctionalites
@@ -47,7 +47,7 @@ type TxCreator interface {
 
 // TxCreate type
 type TxCreate struct {
-	btc          api.Bitcoiner
+	btc          btcgrp.Bitcoiner
 	logger       *zap.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier
@@ -61,7 +61,7 @@ type TxCreate struct {
 
 // NewTxCreate returns TxCreate object
 func NewTxCreate(
-	btc api.Bitcoiner,
+	btc btcgrp.Bitcoiner,
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
