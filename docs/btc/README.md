@@ -1,4 +1,4 @@
-# go-bitcoin
+# Bitcoin/Bitcoin cash
 
 ## Build bitcoind on MacOS
 - [macOS Build Instructions and Notes](https://github.com/bitcoin/bitcoin/blob/master/doc/build-osx.md)
