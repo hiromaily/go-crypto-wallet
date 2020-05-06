@@ -245,7 +245,7 @@ watch send -file xxx.csv
 - [x] Tweak key generation logic for multisig address for BCH.
 - [x] Implement `encryptwallet` to keygen/sign wallets
 - [x] Lock/Unlock wallet for security reason, authorized operator is available.
-- [ ] Backup/Restore for wallet.dat. If wallt.dat is broken, it's not easy to recover.
+- [x] Backup/Restore for wallet.dat. If wallt.dat is broken, it's not easy to recover.
 - [ ] Refactoring logic for unsigned transaction creation.
 - [ ] Multisig-address is used only once because of security reason, so after tx is sent, related receiver addresses should be updated by is_allocated=true.
 - [ ] Various monitoring patterns to detect suspicious operations.
