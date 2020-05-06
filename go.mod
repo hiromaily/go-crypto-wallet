@@ -14,14 +14,15 @@ require (
 	github.com/codahale/hdrhistogram v0.0.0-20161010025455-3a0bb77429bd // indirect
 	github.com/cpacia/bchutil v0.0.0-20181003130114-b126f6a35b6c
 	github.com/ericlagergren/decimal v0.0.0-20181231230500-73749d4874d5
+	github.com/ethereum/go-ethereum v1.9.13
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/friendsofgo/errors v0.9.2
 	github.com/go-playground/validator/v10 v10.2.0
 	github.com/go-sql-driver/mysql v1.5.0
-	github.com/gofrs/uuid v3.2.0+incompatible // indirect
+	github.com/gofrs/uuid v3.3.0+incompatible // indirect
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
 	github.com/jmoiron/sqlx v1.2.0
-	github.com/lib/pq v1.4.0 // indirect
+	github.com/lib/pq v1.5.1 // indirect
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/mitchellh/cli v1.1.1
 	github.com/opentracing/opentracing-go v1.1.0

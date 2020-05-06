@@ -10,6 +10,7 @@ import (
 	"github.com/btcsuite/btcutil"
 	"github.com/btcsuite/btcutil/hdkeychain"
 	"github.com/cpacia/bchutil"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -180,42 +181,84 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 			return nil, err
 		}
 
-		// P2SH address
+		switch k.coinTypeCode {
+		case coin.BTC, coin.BCH:
+			strP2PKHAddr, strP2SHSegWitAddr, bech32Addr, redeemScript, err := k.btcAddrs(wif, privateKey)
+			if err != nil {
+				return nil, err
+			}
+			// address.String() is equal to address.EncodeAddress()
+			walletKeys[i] = WalletKey{
+				WIF:            wif.String(),
+				P2PKHAddr:      strP2PKHAddr,
+				P2SHSegWitAddr: strP2SHSegWitAddr,
+				Bech32Addr:     bech32Addr.EncodeAddress(),
+				FullPubKey:     getFullPubKey(privateKey, true),
+				RedeemScript:   redeemScript,
+			}
 
-		// get P2PKH address as string for BTC/BCH
-		// - P2PKH Address, Pay To PubKey Hash
-		// - if only BTC, this logic would be enough
-		//  address, err := child.Address(conf)
-		//  address.String()
-		strP2PKHAddr, err := k.getP2PKHAddr(privateKey)
-		if err != nil {
-			return nil, err
-		}
+		case coin.ETH:
+			ethAddr, ethPubKey, ethPrivKey, err := k.ethAddrs(child, privateKey)
+			if err != nil {
+				return nil, err
+			}
 
-		// P2SH-SegWit address
-		strP2SHSegWitAddr, redeemScript, err := k.getP2SHSegWitAddr(privateKey)
-		if err != nil {
-			return nil, err
-		}
+			walletKeys[i] = WalletKey{
+				WIF:            ethPrivKey,
+				P2PKHAddr:      ethAddr,
+				P2SHSegWitAddr: "",
+				Bech32Addr:     "",
+				FullPubKey:     ethPubKey,
+				RedeemScript:   "",
+			}
 
-		// Bech32 address
-		bech32Addr, err := k.getBech32Addr(wif)
-		if err != nil {
-			return nil, err
-		}
-
-		// address.String() is equal to address.EncodeAddress()
-		walletKeys[i] = WalletKey{
-			WIF:            wif.String(),
-			P2PKHAddr:      strP2PKHAddr,
-			P2SHSegWitAddr: strP2SHSegWitAddr,
-			Bech32Addr:     bech32Addr.EncodeAddress(),
-			FullPubKey:     getFullPubKey(privateKey, true),
-			RedeemScript:   redeemScript,
+		default:
+			return nil, errors.Errorf("coinType[%s] is not implemented yet", k.coinTypeCode.String())
 		}
 	}
 
 	return walletKeys, nil
+}
+
+func (k *HDKey) btcAddrs(wif *btcutil.WIF, privKey *btcec.PrivateKey) (string, string, *btcutil.AddressWitnessPubKeyHash, string, error) {
+	// P2SH address
+
+	// get P2PKH address as string for BTC/BCH
+	// - P2PKH Address, Pay To PubKey Hash
+	// - if only BTC, this logic would be enough
+	//  address, err := child.Address(conf)
+	//  address.String()
+	strP2PKHAddr, err := k.getP2PKHAddr(privKey)
+	if err != nil {
+		return "", "", nil, "", err
+	}
+
+	// P2SH-SegWit address
+	strP2SHSegWitAddr, redeemScript, err := k.getP2SHSegWitAddr(privKey)
+	if err != nil {
+		return "", "", nil, "", err
+	}
+
+	// Bech32 address
+	bech32Addr, err := k.getBech32Addr(wif)
+	if err != nil {
+		return "", "", nil, "", err
+	}
+	return strP2PKHAddr, strP2SHSegWitAddr, bech32Addr, redeemScript, nil
+
+}
+
+func (k *HDKey) ethAddrs(ek *hdkeychain.ExtendedKey, privKey *btcec.PrivateKey) (string, string, string, error) {
+	pubkey, err := ek.ECPubKey()
+	if err != nil {
+		return "", "", "", errors.Wrap(err, "fail to call extendedKey.ECPubKey")
+	}
+
+	ethAddr := crypto.PubkeyToAddress(*pubkey.ToECDSA())
+	ethPubKey := "0x" + hex.EncodeToString(pubkey.SerializeCompressed())
+	ethPrivKey := "0x" + hex.EncodeToString(privKey.Serialize())
+
+	return ethAddr.String(), ethPubKey, ethPrivKey, nil
 }
 
 // get Address(P2PKH) as string for BTC/BCH
