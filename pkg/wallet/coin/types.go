@@ -92,20 +92,40 @@ func (v BTCVersion) Int() int {
 const RequiredVersion = BTCVer19
 
 //----------------------------------------------------
-// NetworkType
+// NetworkTypeBTC
 //----------------------------------------------------
 
-// NetworkType network type
-type NetworkType string
+// NetworkTypeBTC network type
+type NetworkTypeBTC string
 
 // network type
 const (
-	NetworkTypeMainNet    NetworkType = "mainnet"
-	NetworkTypeTestNet3   NetworkType = "testnet3"
-	NetworkTypeRegTestNet NetworkType = "regtest"
+	NetworkTypeMainNet    NetworkTypeBTC = "mainnet"
+	NetworkTypeTestNet3   NetworkTypeBTC = "testnet3"
+	NetworkTypeRegTestNet NetworkTypeBTC = "regtest"
 )
 
 // String converter
-func (n NetworkType) String() string {
+func (n NetworkTypeBTC) String() string {
+	return string(n)
+}
+
+//----------------------------------------------------
+// NetworkTypeETH
+//----------------------------------------------------
+
+// NetworkTypeETH network type
+type NetworkTypeETH string
+
+// network type
+const (
+	NetworkTypeETHMainNet    NetworkTypeETH = "mainnet"
+	NetworkTypeETHGoerli     NetworkTypeETH = "goerli"
+	NetworkTypeETHRegRinkeby NetworkTypeETH = "rinkeby"
+	NetworkTypeETHRopsten    NetworkTypeETH = "ropsten"
+)
+
+// String converter
+func (n NetworkTypeETH) String() string {
 	return string(n)
 }

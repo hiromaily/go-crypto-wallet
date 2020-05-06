@@ -10,7 +10,7 @@
 Geth has a development mode which sets up a single node Ethereum test network with a number of options optimized for developing on local machines. You enable it with the --dev argument.
 
 - [JSON RPC](https://github.com/ethereum/wiki/wiki/JSON-RPC)
-
+- [Management APIs](https://github.com/ethereum/go-ethereum/wiki/Management-APIs)
 
 ## Install and Run
 ```

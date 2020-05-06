@@ -29,7 +29,7 @@ func New(file string, wtype wallet.WalletType, coinTypeCode coin.CoinTypeCode) (
 	conf.CoinTypeCode = coinTypeCode
 
 	//validate
-	if err = conf.validate(wtype); err != nil {
+	if err = conf.validate(wtype, coinTypeCode); err != nil {
 		return nil, err
 	}
 
@@ -53,18 +53,36 @@ func loadConfig(path string) (*Config, error) {
 }
 
 // validate config
-func (c *Config) validate(wtype wallet.WalletType) error {
+func (c *Config) validate(wtype wallet.WalletType, coinTypeCode coin.CoinTypeCode) error {
 	validate := validator.New()
-	if err := validate.Struct(c); err != nil {
-		return err
-	}
+	//if err := validate.Struct(c); err != nil {
+	//	return err
+	//}
 
-	switch wtype {
-	case wallet.WalletTypeWatchOnly:
-		if c.Bitcoin.Block.ConfirmationNum == 0 {
-			return errors.New("Block ConfirmationNum is required in toml file")
+	switch coinTypeCode {
+	case coin.BTC, coin.BCH:
+		//flds := []string{
+		//	"SubSlice[0].Test",
+		//	"Sub",
+		//	"SubIgnore",
+		//	"Anonymous.A",
+		//}
+		if err := validate.StructExcept(c, "Ethereum"); err != nil {
+			return err
+		}
+		switch wtype {
+		case wallet.WalletTypeWatchOnly:
+			if c.Bitcoin.Block.ConfirmationNum == 0 {
+				return errors.New("Block ConfirmationNum is required in toml file")
+			}
+		default:
+		}
+	case coin.ETH:
+		if err := validate.StructExcept(c, "Bitcoin"); err != nil {
+			return err
 		}
 	default:
 	}
+
 	return nil
 }

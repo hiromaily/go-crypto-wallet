@@ -13,21 +13,21 @@ type Config struct {
 	AddressType  address.AddrType  `toml:"address_type" validate:"oneof=p2sh-segwit bech32 BCH-CashAddr"`
 	CoinTypeCode coin.CoinTypeCode `toml:"coin_type"`
 	Bitcoin      Bitcoin           `toml:"bitcoin"`
-	//Ethereum     Ethereum          `toml:"ethereum"`
-	Logger   Logger   `toml:"logger"`
-	Tracer   Tracer   `toml:"tracer"`
-	MySQL    MySQL    `toml:"mysql"`
-	FilePath FilePath `toml:"file_path"`
+	Ethereum     Ethereum          `toml:"ethereum"`
+	Logger       Logger            `toml:"logger"`
+	Tracer       Tracer            `toml:"tracer"`
+	MySQL        MySQL             `toml:"mysql"`
+	FilePath     FilePath          `toml:"file_path"`
 }
 
 // Bitcoin Bitcoin information
 type Bitcoin struct {
-	Host        string           `toml:"host" validate:"required"`
-	User        string           `toml:"user" validate:"required"`
-	Pass        string           `toml:"pass" validate:"required"`
-	PostMode    bool             `toml:"http_post_mode"`
-	DisableTLS  bool             `toml:"disable_tls"`
-	NetworkType coin.NetworkType `toml:"network_type" validate:"oneof=mainnet testnet3 regtest"`
+	Host        string              `toml:"host" validate:"required"`
+	User        string              `toml:"user" validate:"required"`
+	Pass        string              `toml:"pass" validate:"required"`
+	PostMode    bool                `toml:"http_post_mode"`
+	DisableTLS  bool                `toml:"disable_tls"`
+	NetworkType coin.NetworkTypeBTC `toml:"network_type" validate:"oneof=mainnet testnet3 regtest"`
 
 	Block BitcoinBlock `toml:"block"`
 	Fee   BitcoinFee   `toml:"fee"`
@@ -44,6 +44,20 @@ type BitcoinBlock struct {
 type BitcoinFee struct {
 	AdjustmentMin float64 `toml:"adjustment_min"`
 	AdjustmentMax float64 `toml:"adjustment_max"`
+}
+
+// Ethereum Ethereum information
+type Ethereum struct {
+	Host        string              `toml:"host" validate:"required"`
+	Port        int                 `toml:"port" validate:"required"`
+	DisableTLS  bool                `toml:"disable_tls"`
+	NetworkType coin.NetworkTypeETH `toml:"network_type" validate:"oneof=mainnet goerli rinkeby ropsten"`
+	Geth        Geth                `toml:"geth"`
+}
+
+// Geth geth info
+type Geth struct {
+	DirName string `toml:"dir"`
 }
 
 // Logger logger info
