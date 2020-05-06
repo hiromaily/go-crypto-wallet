@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/volatiletech/sqlboiler/boil"
@@ -15,6 +16,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv/keygensrv"
@@ -49,19 +51,26 @@ func NewRegistry(conf *config.Config, walletType wallet.WalletType) Registry {
 // - return struct itself
 //func (r *registry) NewKeygener() *keygen.Keygen {
 func (r *registry) NewKeygener() wallets.Keygener {
-	return wallets.NewKeygen(
-		r.newBTC(),
-		r.newMySQLClient(),
-		r.conf.AddressType,
-		r.newSeeder(),
-		r.newHdWallter(),
-		r.newPrivKeyer(),
-		r.newFullPubKeyImporter(),
-		r.newMultisiger(),
-		r.newAddressExporter(),
-		r.newSigner(),
-		r.walletType,
-	)
+	switch r.conf.CoinTypeCode {
+	case coin.BTC, coin.BCH:
+		return wallets.NewBTCKeygen(
+			r.newBTC(),
+			r.newMySQLClient(),
+			r.conf.AddressType,
+			r.newSeeder(),
+			r.newHdWallter(),
+			r.newPrivKeyer(),
+			r.newFullPubKeyImporter(),
+			r.newMultisiger(),
+			r.newAddressExporter(),
+			r.newSigner(),
+			r.walletType,
+		)
+	case coin.ETH:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
+	default:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
+	}
 }
 
 func (r *registry) newSeeder() coldsrv.Seeder {

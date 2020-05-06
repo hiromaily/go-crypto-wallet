@@ -25,8 +25,8 @@ type Signer interface {
 	GetBTC() api.Bitcoiner
 }
 
-// Sign is sign wallet object
-type Sign struct {
+// BTCSign is sign wallet object
+type BTCSign struct {
 	btc         api.Bitcoiner
 	dbConn      *sql.DB
 	authAccount account.AuthType
@@ -39,8 +39,8 @@ type Sign struct {
 	coldsrv.Signer
 }
 
-// NewSign returns Sign object
-func NewSign(
+// NewBTCSign returns Sign object
+func NewBTCSign(
 	btc api.Bitcoiner,
 	dbConn *sql.DB,
 	authAccount account.AuthType,
@@ -50,9 +50,9 @@ func NewSign(
 	privKeyer signsrv.PrivKeyer,
 	fullPubkeyExporter signsrv.FullPubkeyExporter,
 	signer coldsrv.Signer,
-	wtype wallet.WalletType) *Sign {
+	wtype wallet.WalletType) *BTCSign {
 
-	return &Sign{
+	return &BTCSign{
 		btc:                btc,
 		dbConn:             dbConn,
 		authAccount:        authAccount,
@@ -67,42 +67,42 @@ func NewSign(
 }
 
 // GenerateSeed generates seed
-func (s *Sign) GenerateSeed() ([]byte, error) {
+func (s *BTCSign) GenerateSeed() ([]byte, error) {
 	return s.Seeder.Generate()
 }
 
 // StoreSeed stores seed
-func (s *Sign) StoreSeed(strSeed string) ([]byte, error) {
+func (s *BTCSign) StoreSeed(strSeed string) ([]byte, error) {
 	return s.Seeder.Store(strSeed)
 }
 
 // GenerateAuthKey generates account keys
-func (s *Sign) GenerateAuthKey(seed []byte, count uint32) ([]key.WalletKey, error) {
+func (s *BTCSign) GenerateAuthKey(seed []byte, count uint32) ([]key.WalletKey, error) {
 	return s.HDWalleter.Generate(s.authAccount.AccountType(), seed, count)
 }
 
 // ImportPrivKey imports privKey
-func (s *Sign) ImportPrivKey() error {
+func (s *BTCSign) ImportPrivKey() error {
 	return s.PrivKeyer.Import()
 }
 
 // ExportFullPubkey exports full-pubkey
-func (s *Sign) ExportFullPubkey() (string, error) {
+func (s *BTCSign) ExportFullPubkey() (string, error) {
 	return s.FullPubkeyExporter.ExportFullPubkey()
 }
 
 // SignTx signs on transaction
-func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
+func (s *BTCSign) SignTx(filePath string) (string, bool, string, error) {
 	return s.Signer.SignTx(filePath)
 }
 
 // Done should be called before exit
-func (s *Sign) Done() {
+func (s *BTCSign) Done() {
 	s.dbConn.Close()
 	s.btc.Close()
 }
 
 // GetBTC gets btc
-func (s *Sign) GetBTC() api.Bitcoiner {
+func (s *BTCSign) GetBTC() api.Bitcoiner {
 	return s.btc
 }

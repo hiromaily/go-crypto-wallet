@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/opentracing/opentracing-go"
@@ -17,6 +18,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	wtype "github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/watchsrv"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
@@ -45,19 +47,26 @@ func NewRegistry(conf *config.Config, walletType wtype.WalletType) Registry {
 
 // NewWalleter is to register for walleter interface
 func (r *registry) NewWalleter() wallets.Watcher {
-	return wallets.NewWatch(
-		r.newBTC(),
-		r.newMySQLClient(),
-		r.newLogger(),
-		r.newTracer(),
-		r.conf.AddressType,
-		r.newAddressImporter(),
-		r.newTxCreator(),
-		r.newTxSender(),
-		r.newTxMonitorer(),
-		r.newPaymentRequestCreator(),
-		r.walletType,
-	)
+	switch r.conf.CoinTypeCode {
+	case coin.BTC, coin.BCH:
+		return wallets.NewBTCWatch(
+			r.newBTC(),
+			r.newMySQLClient(),
+			r.newLogger(),
+			r.newTracer(),
+			r.conf.AddressType,
+			r.newAddressImporter(),
+			r.newTxCreator(),
+			r.newTxSender(),
+			r.newTxMonitorer(),
+			r.newPaymentRequestCreator(),
+			r.walletType,
+		)
+	case coin.ETH:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
+	default:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
+	}
 }
 
 func (r *registry) newAddressImporter() watchsrv.AddressImporter {

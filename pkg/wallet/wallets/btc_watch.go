@@ -27,8 +27,8 @@ type Watcher interface {
 	GetBTC() api.Bitcoiner
 }
 
-// Watch watch only wallet object
-type Watch struct {
+// BTCWatch watch only wallet object
+type BTCWatch struct {
 	btc      api.Bitcoiner
 	dbConn   *sql.DB
 	logger   *zap.Logger
@@ -42,8 +42,8 @@ type Watch struct {
 	watchsrv.PaymentRequestCreator
 }
 
-// NewWatch returns Watch object
-func NewWatch(
+// NewBTCWatch returns Watch object
+func NewBTCWatch(
 	btc api.Bitcoiner,
 	dbConn *sql.DB,
 	logger *zap.Logger,
@@ -54,9 +54,9 @@ func NewWatch(
 	txSender watchsrv.TxSender,
 	txMonitorer watchsrv.TxMonitorer,
 	paymentRequestCreator watchsrv.PaymentRequestCreator,
-	wtype wtype.WalletType) *Watch {
+	wtype wtype.WalletType) *BTCWatch {
 
-	return &Watch{
+	return &BTCWatch{
 		btc:                   btc,
 		logger:                logger,
 		dbConn:                dbConn,
@@ -72,47 +72,47 @@ func NewWatch(
 }
 
 // ImportAddress imports address
-func (w *Watch) ImportAddress(fileName string, isRescan bool) error {
+func (w *BTCWatch) ImportAddress(fileName string, isRescan bool) error {
 	return w.AddressImporter.ImportAddress(fileName, isRescan)
 }
 
 // CreateDepositTx creates deposit unsigned transaction
-func (w *Watch) CreateDepositTx(adjustmentFee float64) (string, string, error) {
+func (w *BTCWatch) CreateDepositTx(adjustmentFee float64) (string, string, error) {
 	return w.TxCreator.CreateDepositTx(adjustmentFee)
 }
 
 // CreatePaymentTx creates payment unsigned transaction
-func (w *Watch) CreatePaymentTx(adjustmentFee float64) (string, string, error) {
+func (w *BTCWatch) CreatePaymentTx(adjustmentFee float64) (string, string, error) {
 	return w.TxCreator.CreatePaymentTx(adjustmentFee)
 }
 
 // CreateTransferTx creates transfer unsigned transaction
-func (w *Watch) CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error) {
+func (w *BTCWatch) CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error) {
 	return w.TxCreator.CreateTransferTx(sender, receiver, floatAmount, adjustmentFee)
 }
 
 // UpdateTxStatus updates transaction status
-func (w *Watch) UpdateTxStatus() error {
+func (w *BTCWatch) UpdateTxStatus() error {
 	return w.TxMonitorer.UpdateTxStatus()
 }
 
 // SendTx sends signed transaction
-func (w *Watch) SendTx(filePath string) (string, error) {
+func (w *BTCWatch) SendTx(filePath string) (string, error) {
 	return w.TxSender.SendTx(filePath)
 }
 
 // CreatePaymentRequest creates payment_request dummy data for development
-func (w *Watch) CreatePaymentRequest() error {
+func (w *BTCWatch) CreatePaymentRequest() error {
 	return w.PaymentRequestCreator.CreatePaymentRequest()
 }
 
 // Done should be called before exit
-func (w *Watch) Done() {
+func (w *BTCWatch) Done() {
 	w.dbConn.Close()
 	w.btc.Close()
 }
 
 // GetBTC gets btc
-func (w *Watch) GetBTC() api.Bitcoiner {
+func (w *BTCWatch) GetBTC() api.Bitcoiner {
 	return w.btc
 }

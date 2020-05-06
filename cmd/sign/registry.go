@@ -17,6 +17,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv/signsrv"
@@ -55,18 +56,25 @@ func NewRegistry(conf *config.Config, walletType wallet.WalletType, authName str
 // NewSigner is to register for Signer interface
 // NewKeygener is to register for keygener interface
 func (r *registry) NewSigner() wallets.Signer {
-	return wallets.NewSign(
-		r.newBTC(),
-		r.newMySQLClient(),
-		r.authType,
-		r.conf.AddressType,
-		r.newSeeder(),
-		r.newHdWallter(),
-		r.newPrivKeyer(),
-		r.newFullPubkeyExporter(),
-		r.newSigner(),
-		r.walletType,
-	)
+	switch r.conf.CoinTypeCode {
+	case coin.BTC, coin.BCH:
+		return wallets.NewBTCSign(
+			r.newBTC(),
+			r.newMySQLClient(),
+			r.authType,
+			r.conf.AddressType,
+			r.newSeeder(),
+			r.newHdWallter(),
+			r.newPrivKeyer(),
+			r.newFullPubkeyExporter(),
+			r.newSigner(),
+			r.walletType,
+		)
+	case coin.ETH:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
+	default:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
+	}
 }
 
 func (r *registry) newSeeder() coldsrv.Seeder {

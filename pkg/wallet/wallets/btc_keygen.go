@@ -27,8 +27,8 @@ type Keygener interface {
 	GetBTC() api.Bitcoiner
 }
 
-// Keygen is keygen wallet object
-type Keygen struct {
+// BTCKeygen is keygen wallet object
+type BTCKeygen struct {
 	btc      api.Bitcoiner
 	dbConn   *sql.DB
 	addrType address.AddrType
@@ -42,8 +42,8 @@ type Keygen struct {
 	coldsrv.Signer
 }
 
-// NewKeygen returns Keygen object
-func NewKeygen(
+// NewBTCKeygen returns Keygen object
+func NewBTCKeygen(
 	btc api.Bitcoiner,
 	dbConn *sql.DB,
 	addrType address.AddrType,
@@ -54,9 +54,9 @@ func NewKeygen(
 	multisiger keygensrv.Multisiger,
 	addressExporter keygensrv.AddressExporter,
 	signer coldsrv.Signer,
-	wtype wallet.WalletType) *Keygen {
+	wtype wallet.WalletType) *BTCKeygen {
 
-	return &Keygen{
+	return &BTCKeygen{
 		btc:                btc,
 		dbConn:             dbConn,
 		addrType:           addrType,
@@ -72,52 +72,52 @@ func NewKeygen(
 }
 
 // GenerateSeed generates seed
-func (k *Keygen) GenerateSeed() ([]byte, error) {
+func (k *BTCKeygen) GenerateSeed() ([]byte, error) {
 	return k.Seeder.Generate()
 }
 
 // StoreSeed stores seed
-func (k *Keygen) StoreSeed(strSeed string) ([]byte, error) {
+func (k *BTCKeygen) StoreSeed(strSeed string) ([]byte, error) {
 	return k.Seeder.Store(strSeed)
 }
 
 // GenerateAccountKey generates account keys
-func (k *Keygen) GenerateAccountKey(accountType account.AccountType, seed []byte, count uint32) ([]key.WalletKey, error) {
+func (k *BTCKeygen) GenerateAccountKey(accountType account.AccountType, seed []byte, count uint32) ([]key.WalletKey, error) {
 	return k.HDWalleter.Generate(accountType, seed, count)
 }
 
 // ImportPrivKey imports privKey
-func (k *Keygen) ImportPrivKey(accountType account.AccountType) error {
+func (k *BTCKeygen) ImportPrivKey(accountType account.AccountType) error {
 	return k.PrivKeyer.Import(accountType)
 }
 
 // ImportFullPubKey imports full-pubkey
-func (k *Keygen) ImportFullPubKey(fileName string) error {
+func (k *BTCKeygen) ImportFullPubKey(fileName string) error {
 	return k.FullPubKeyImporter.ImportFullPubKey(fileName)
 }
 
 // CreateMultisigAddress creates multi sig address returns Multisiger interface
-func (k *Keygen) CreateMultisigAddress(accountType account.AccountType) error {
+func (k *BTCKeygen) CreateMultisigAddress(accountType account.AccountType) error {
 	return k.Multisiger.AddMultisigAddress(accountType, k.addrType)
 }
 
 // ExportAddress exports address
-func (k *Keygen) ExportAddress(accountType account.AccountType) (string, error) {
+func (k *BTCKeygen) ExportAddress(accountType account.AccountType) (string, error) {
 	return k.AddressExporter.ExportAddress(accountType)
 }
 
 // SignTx signs on transaction
-func (k *Keygen) SignTx(filePath string) (string, bool, string, error) {
+func (k *BTCKeygen) SignTx(filePath string) (string, bool, string, error) {
 	return k.Signer.SignTx(filePath)
 }
 
 // Done should be called before exit
-func (k *Keygen) Done() {
+func (k *BTCKeygen) Done() {
 	k.dbConn.Close()
 	k.btc.Close()
 }
 
 // GetBTC gets btc
-func (k *Keygen) GetBTC() api.Bitcoiner {
+func (k *BTCKeygen) GetBTC() api.Bitcoiner {
 	return k.btc
 }

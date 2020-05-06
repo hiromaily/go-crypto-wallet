@@ -47,7 +47,7 @@ func main() {
 	)
 	flags := flag.NewFlagSet("main", flag.ContinueOnError)
 	flags.StringVar(&confPath, "conf", "", "config file path")
-	flags.StringVar(&coinTypeCode, "coin", "btc", "coin type code `btc`, `bch`")
+	flags.StringVar(&coinTypeCode, "coin", "btc", "coin type code `btc`, `bch`, `eth`")
 	flags.StringVar(&btcWallet, "wallet", "", "specify wallet.dat in bitcoin core")
 	flags.BoolVar(&isVersion, "version", false, "show version")
 	flags.BoolVar(&isHelp, "help", false, "show help")
