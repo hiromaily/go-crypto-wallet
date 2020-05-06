@@ -24,13 +24,25 @@ fi
 
 # sign on keygen wallet for 1st signature
 echo 'sign on 1st '${tx_file##*\[fileName\]: }
+keygen api walletpassphrase -passphrase test
 tx_file_signed=`keygen sign -file "${tx_file##*\[fileName\]: }"`
+keygen api walletlock
 
 # sign on sign wallet for 2nd signature
+# FIXME: somehow passphrase is not required because wif is used
 echo 'sign on 2nd '${tx_file_signed##*\[fileName\]: }
+#sign -wallet sign1 api walletpassphrase -passphrase test
 tx_file_signed2=`sign -wallet sign1 sign -file "${tx_file_signed##*\[fileName\]: }"`
+#sign -wallet sign1 api walletlock
+
+# sign on sign wallet for 3rd signature
+# FIXME: somehow passphrase is not required because wif is used
+echo 'sign on 3rd '${tx_file_signed##*\[fileName\]: }
+#sign2 -wallet sign2 api walletpassphrase -passphrase test
+tx_file_signed3=`sign2 -wallet sign2 sign -file "${tx_file_signed##*\[fileName\]: }"`
+#sign -wallet sign1 api walletlock
 
 # send signed tx
-echo 'send tx '${tx_file_signed2##*\[fileName\]: }
-tx_id=`watch send -file "${tx_file_signed2##*\[fileName\]: }"`
+echo 'send tx '${tx_file_signed3##*\[fileName\]: }
+tx_id=`watch send -file "${tx_file_signed3##*\[fileName\]: }"`
 echo 'txID:'${tx_id##*txID: }

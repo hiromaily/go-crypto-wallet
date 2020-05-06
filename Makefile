@@ -313,7 +313,13 @@ dump-wallet:
 	#bitcoin-cli -rpcwallet=keygen dumpwallet "keygen"
 	#bitcoin-cli -rpcwallet=sign dumpwallet "sign"
 
-#.PHONY: import-wallet
+.PHONY: wallet-info
+wallet-info:
+	bitcoin-cli -rpcwallet=watch getwalletinfo
+	bitcoin-cli -rpcwallet=keygen getwalletinfo
+	bitcoin-cli -rpcwallet=sign1 getwalletinfo
+
+.PHONY: import-wallet
 import-wallet:
 	keygen api walletpassphrase -passphrase test
 	keygen api importwallet -file ${GOPATH}/src/github.com/hiromaily/go-bitcoin/data/dump/keygen.bk
