@@ -88,17 +88,19 @@ func (p *PaymentRequestCreate) CreatePaymentRequest() error {
 	}
 	// insert payment_request
 	payReqItems := make([]*models.PaymentRequest, 0, len(amtList))
+	var idx int
 	for _, amt := range amtList {
 		payReqItems = append(payReqItems, &models.PaymentRequest{
 			Coin:            p.btc.CoinTypeCode().String(),
 			PaymentID:       null.NewInt64(0, false),
-			SenderAddress:   pubkeyItems[0].WalletAddress,
-			SenderAccount:   pubkeyItems[0].Account,
-			ReceiverAddress: pubkeyItems[len(amtList)].WalletAddress,
+			SenderAddress:   pubkeyItems[0+idx].WalletAddress,
+			SenderAccount:   pubkeyItems[0+idx].Account,
+			ReceiverAddress: pubkeyItems[len(amtList)+idx].WalletAddress,
 			Amount:          p.btc.FloatToDecimal(amt),
 			IsDone:          false,
 			UpdatedAt:       null.TimeFrom(time.Now()),
 		})
+		idx++
 	}
 	if err = p.payReqRepo.InsertBulk(payReqItems); err != nil {
 		return errors.Wrap(err, "fail to call payReqRepo.InsertBulk()")
