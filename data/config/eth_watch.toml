@@ -1,0 +1,36 @@
+
+[ethereum]
+host = "127.0.0.1"
+port = 8545
+disable_tls = true
+network_type = "goerli" # mainnet, goerli, rinkeby, ropsten
+
+[ethereum.geth]
+dir = "${HOME}/.ethereum"
+
+[logger]
+service = "wallet"
+env = "custom" # dev, prod, custom :for only zap logger
+level = "debug" # debug, info, warn, error
+is_stacktrace = true
+
+# only available for watch only wallet
+[tracer]
+type = "none"  # none, jaeger, datadog
+
+[tracer.jaeger]
+service_name = "btc-wallet"
+collector_endpoint = "http://127.0.0.1:14268/api/traces"
+sampling_probability = 0.5  # 0.001 to 1.0
+
+[mysql]
+host = "127.0.0.1:3307"
+dbname = "watch"
+user = "hiromaily"
+pass = "hiromaily"
+debug = true
+
+[file_path]
+tx = "./data/btc/tx/"
+address = "./data/btc/address/"
+full_pubkey = "./data/btc/fullpubkey/"
