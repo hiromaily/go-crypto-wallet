@@ -37,7 +37,7 @@ func NewBitcoin(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logg
 	case coin.BTC:
 		bit, err := btc.NewBitcoin(client, coinTypeCode, conf, logger)
 		if err != nil {
-			return nil, errors.Errorf("btc.NewBitcoin() error: %s", err)
+			return nil, errors.Wrap(err, "fail to call btc.NewBitcoin()")
 		}
 
 		return bit, err
@@ -45,7 +45,7 @@ func NewBitcoin(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logg
 		//BCH
 		bitc, err := bch.NewBitcoinCash(client, coinTypeCode, conf, logger)
 		if err != nil {
-			return nil, errors.Errorf("bitc.NewBitcoinCash() error: %s", err)
+			return nil, errors.Wrap(err, "fail to call bch.NewBitcoinCash()")
 		}
 
 		return bitc, err

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/btcsuite/btcd/rpcclient"
+	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/opentracing/opentracing-go"
 	"github.com/volatiletech/sqlboiler/boil"
 	"go.uber.org/zap"
@@ -18,6 +19,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	wtype "github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/watchsrv"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
@@ -29,12 +31,14 @@ type Registry interface {
 }
 
 type registry struct {
-	conf        *config.Config
-	walletType  wtype.WalletType
-	logger      *zap.Logger
-	rpcClient   *rpcclient.Client
-	btc         btcgrp.Bitcoiner
-	mysqlClient *sql.DB
+	conf         *config.Config
+	walletType   wtype.WalletType
+	logger       *zap.Logger
+	rpcClient    *rpcclient.Client
+	rpcEthClient *ethrpc.Client
+	btc          btcgrp.Bitcoiner
+	eth          ethgrp.Ethereumer
+	mysqlClient  *sql.DB
 }
 
 // NewRegistry is to register registry interface
@@ -63,6 +67,7 @@ func (r *registry) NewWalleter() wallets.Watcher {
 			r.walletType,
 		)
 	case coin.ETH:
+		//newETH()
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
@@ -144,6 +149,17 @@ func (r *registry) newRPCClient() *rpcclient.Client {
 	return r.rpcClient
 }
 
+func (r *registry) newEthRPCClient() *ethrpc.Client {
+	if r.rpcEthClient == nil {
+		var err error
+		r.rpcEthClient, err = ethgrp.NewRPCClient(&r.conf.Ethereum)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return r.rpcEthClient
+}
+
 func (r *registry) newBTC() btcgrp.Bitcoiner {
 	if r.btc == nil {
 		var err error
@@ -158,6 +174,22 @@ func (r *registry) newBTC() btcgrp.Bitcoiner {
 		}
 	}
 	return r.btc
+}
+
+func (r *registry) newETH() ethgrp.Ethereumer {
+	if r.eth == nil {
+		var err error
+		r.eth, err = ethgrp.NewEthereum(
+			r.newEthRPCClient(),
+			&r.conf.Ethereum,
+			r.newLogger(),
+			r.conf.CoinTypeCode,
+		)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return r.eth
 }
 
 func (r *registry) newLogger() *zap.Logger {

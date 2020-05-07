@@ -90,8 +90,8 @@ func main() {
 		}
 
 		// create wallet
-		regi := NewRegistry(conf, walletType)
-		walleter = regi.NewWalleter()
+		reg := NewRegistry(conf, walletType)
+		walleter = reg.NewWalleter()
 	}
 	defer func() {
 		walleter.Done()
