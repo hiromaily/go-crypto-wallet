@@ -1,4 +1,4 @@
-package api
+package btc
 
 import (
 	"flag"
@@ -10,8 +10,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
 )
 
-// GetNetworkInfoCommand getnetworkinfo subcommand
-type GetNetworkInfoCommand struct {
+// LoggingCommand logging subcommand
+type LoggingCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
@@ -19,17 +19,17 @@ type GetNetworkInfoCommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (c *GetNetworkInfoCommand) Synopsis() string {
+func (c *LoggingCommand) Synopsis() string {
 	return c.synopsis
 }
 
 // Help returns usage for this subcommand
-func (c *GetNetworkInfoCommand) Help() string {
-	return `Usage: wallet api getnetworkinfo`
+func (c *LoggingCommand) Help() string {
+	return `Usage: wallet api logging`
 }
 
 // Run executes this subcommand
-func (c *GetNetworkInfoCommand) Run(args []string) int {
+func (c *LoggingCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
@@ -37,13 +37,13 @@ func (c *GetNetworkInfoCommand) Run(args []string) int {
 		return 1
 	}
 
-	// call getnetworkinfo
-	infoData, err := c.btc.GetNetworkInfo()
+	// logging
+	logData, err := c.btc.Logging()
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call BTC.GetNetworkInfo() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call BTC.Logging() %+v", err))
 		return 1
 	}
-	grok.Value(infoData)
+	grok.Value(logData)
 
 	return 0
 }

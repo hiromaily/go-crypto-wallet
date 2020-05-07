@@ -1,5 +1,5 @@
 #coin_type = "bch" # btc, bch
-address_type = "BCH-CashAddr" # p2sh-segwit, bech32, BCH-CashAddr
+address_type = "bch-cashaddr" # p2sh-segwit, bech32, bch-cashaddr
 
 [bitcoin]
 host = "127.0.0.1:19332"

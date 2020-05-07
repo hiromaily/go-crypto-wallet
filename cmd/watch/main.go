@@ -73,6 +73,8 @@ func main() {
 			confPath = os.Getenv("BTC_WATCH_WALLET_CONF")
 		case coin.BCH.String():
 			confPath = os.Getenv("BCH_WATCH_WALLET_CONF")
+		case coin.ETH.String():
+			confPath = os.Getenv("ETH_WATCH_WALLET_CONF")
 		}
 	}
 

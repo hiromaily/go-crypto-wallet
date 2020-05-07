@@ -59,14 +59,15 @@ func NewEthereum(
 	}
 	if !isDone {
 		logger.Warn("sync is not completed yet")
+	}else{
+		logger.Info("result_syncing",
+			zap.Int64("knownStates", res.KnownStates),
+			zap.Int64("pulledStates", res.PulledStates),
+			zap.Int64("startingBlock", res.StartingBlock),
+			zap.Int64("currentBlock", res.CurrentBlock),
+			zap.Int64("highestBlock", res.HighestBlock),
+		)
 	}
-	logger.Info("result_syncing",
-		zap.Int64("knownStates", res.KnownStates),
-		zap.Int64("pulledStates", res.PulledStates),
-		zap.Int64("startingBlock", res.StartingBlock),
-		zap.Int64("currentBlock", res.CurrentBlock),
-		zap.Int64("highestBlock", res.HighestBlock),
-	)
 
 	return eth, nil
 }

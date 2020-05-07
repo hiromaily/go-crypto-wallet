@@ -1,4 +1,4 @@
-package api
+package btc
 
 import (
 	"flag"
@@ -38,13 +38,15 @@ var (
 func (c *APICommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet api [Subcommands...]
 Subcommands:
-  unlocktx         %s
+  balance          %s
   estimatefee      %s
-  logging          %s
   getnetworkinfo   %s
-  validateaddress  %s
+  getaddressinfo   %s
   listunspent      %s
-`, unlocktxSynopsis, estimatefeeSynopsis, loggingSynopsis, getnetworkinfoSynopsis, validateaddressSynopsis, listunspentSynopsis)
+  logging          %s
+  unlocktx         %s
+  validateaddress  %s
+`, balanceSynopsis, estimatefeeSynopsis, getnetworkinfoSynopsis, getaddressinfoSynopsis, listunspentSynopsis, loggingSynopsis, unlocktxSynopsis, validateaddressSynopsis)
 }
 
 // Run executes this subcommand

@@ -10,7 +10,7 @@ import (
 
 // Config root config
 type Config struct {
-	AddressType  address.AddrType  `toml:"address_type" validate:"oneof=p2sh-segwit bech32 BCH-CashAddr"`
+	AddressType  address.AddrType  `toml:"address_type" validate:"oneof=p2sh-segwit bech32 bch-cashaddr"`
 	CoinTypeCode coin.CoinTypeCode `toml:"coin_type"`
 	Bitcoin      Bitcoin           `toml:"bitcoin"`
 	Ethereum     Ethereum          `toml:"ethereum"`

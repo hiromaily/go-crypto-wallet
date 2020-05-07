@@ -14,7 +14,7 @@ import (
 // New create config
 func New(file string, wtype wallet.WalletType, coinTypeCode coin.CoinTypeCode) (*Config, error) {
 	if file == "" {
-		return nil, errors.New("file should be passed")
+		return nil, errors.New("config file should be passed")
 	}
 
 	var err error
@@ -78,7 +78,7 @@ func (c *Config) validate(wtype wallet.WalletType, coinTypeCode coin.CoinTypeCod
 		default:
 		}
 	case coin.ETH:
-		if err := validate.StructExcept(c, "Bitcoin"); err != nil {
+		if err := validate.StructExcept(c, "AddressType", "Bitcoin"); err != nil {
 			return err
 		}
 	default:

@@ -12,7 +12,8 @@ const (
 	AddrTypeLegacy      AddrType = "legacy"
 	AddrTypeP2shSegwit  AddrType = "p2sh-segwit"
 	AddrTypeBech32      AddrType = "bech32"
-	AddrTypeBCHCashAddr AddrType = "BCH-CashAddr"
+	AddrTypeBCHCashAddr AddrType = "bch-cashaddr"
+	AddrTypeETH         AddrType = "eth-address"
 )
 
 // String converter

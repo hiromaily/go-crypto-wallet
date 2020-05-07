@@ -4,7 +4,8 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
-	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/api"
+	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/api/btc"
+	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/api/eth"
 	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/create"
 	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/db"
 	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/imports"
@@ -59,7 +60,7 @@ func WalletSubCommands(wallet wallets.Watcher, version string) map[string]cli.Co
 	switch v := wallet.(type) {
 	case *wallets.BTCWatch:
 		cmds["api"] = func() (cli.Command, error) {
-			return &api.APICommand{
+			return &btc.APICommand{
 				Name:    "api",
 				Version: version,
 				UI:      command.ClolorUI(),
@@ -67,13 +68,12 @@ func WalletSubCommands(wallet wallets.Watcher, version string) map[string]cli.Co
 			}, nil
 		}
 	case *wallets.ETHWatch:
-		//TODO: ETH
 		cmds["api"] = func() (cli.Command, error) {
-			return &api.APICommand{
+			return &eth.APICommand{
 				Name:    "api",
 				Version: version,
 				UI:      command.ClolorUI(),
-				//ETH:     v.ETH,
+				ETH:     v.ETH,
 			}, nil
 		}
 	}
