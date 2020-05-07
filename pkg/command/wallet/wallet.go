@@ -16,7 +16,7 @@ import (
 // WalletSubCommands returns subcommand for wallet
 // nolint: golint
 func WalletSubCommands(wallet wallets.Watcher, version string) map[string]cli.CommandFactory {
-	return map[string]cli.CommandFactory{
+	cmds := map[string]cli.CommandFactory{
 		"import": func() (cli.Command, error) {
 			return &imports.ImportCommand{
 				Name:    "import",
@@ -47,14 +47,6 @@ func WalletSubCommands(wallet wallets.Watcher, version string) map[string]cli.Co
 				Wallet:  wallet,
 			}, nil
 		},
-		"api": func() (cli.Command, error) {
-			return &api.APICommand{
-				Name:    "api",
-				Version: version,
-				UI:      command.ClolorUI(),
-				BTC:     wallet.GetBTC(),
-			}, nil
-		},
 		"db": func() (cli.Command, error) {
 			return &db.DBCommand{
 				Name:    "db",
@@ -64,4 +56,26 @@ func WalletSubCommands(wallet wallets.Watcher, version string) map[string]cli.Co
 			}, nil
 		},
 	}
+	switch v := wallet.(type) {
+	case *wallets.BTCWatch:
+		cmds["api"] = func() (cli.Command, error) {
+			return &api.APICommand{
+				Name:    "api",
+				Version: version,
+				UI:      command.ClolorUI(),
+				BTC:     v.BTC,
+			}, nil
+		}
+	case *wallets.ETHWatch:
+		//TODO: ETH
+		cmds["api"] = func() (cli.Command, error) {
+			return &api.APICommand{
+				Name:    "api",
+				Version: version,
+				UI:      command.ClolorUI(),
+				//ETH:     v.ETH,
+			}, nil
+		}
+	}
+	return cmds
 }

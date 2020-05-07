@@ -67,8 +67,12 @@ func (r *registry) NewWalleter() wallets.Watcher {
 			r.walletType,
 		)
 	case coin.ETH:
-		//newETH()
-		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
+		return wallets.NewETHWatch(
+			r.newETH(),
+			r.newMySQLClient(),
+			r.newLogger(),
+			r.walletType,
+		)
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
 	}

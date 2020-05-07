@@ -24,12 +24,12 @@ type Watcher interface {
 	CreatePaymentRequest() error
 
 	Done()
-	GetBTC() btcgrp.Bitcoiner
+	//GetBTC() btcgrp.Bitcoiner
 }
 
 // BTCWatch watch only wallet object
 type BTCWatch struct {
-	btc      btcgrp.Bitcoiner
+	BTC      btcgrp.Bitcoiner
 	dbConn   *sql.DB
 	logger   *zap.Logger
 	tracer   opentracing.Tracer
@@ -57,7 +57,7 @@ func NewBTCWatch(
 	wtype wtype.WalletType) *BTCWatch {
 
 	return &BTCWatch{
-		btc:                   btc,
+		BTC:                   btc,
 		logger:                logger,
 		dbConn:                dbConn,
 		tracer:                tracer,
@@ -109,10 +109,10 @@ func (w *BTCWatch) CreatePaymentRequest() error {
 // Done should be called before exit
 func (w *BTCWatch) Done() {
 	w.dbConn.Close()
-	w.btc.Close()
+	w.BTC.Close()
 }
 
 // GetBTC gets btc
-func (w *BTCWatch) GetBTC() btcgrp.Bitcoiner {
-	return w.btc
-}
+//func (w *BTCWatch) GetBTC() btcgrp.Bitcoiner {
+//	return w.BTC
+//}
