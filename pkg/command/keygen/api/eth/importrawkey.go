@@ -3,6 +3,7 @@ package eth
 import (
 	"flag"
 	"fmt"
+	"strings"
 
 	"github.com/mitchellh/cli"
 
@@ -52,6 +53,10 @@ func (c *ImportRawKeyCommand) Run(args []string) int {
 	if passPhrase == "" {
 		c.ui.Error("pass option [-pass] is invalid")
 		return 1
+	}
+
+	if strings.HasPrefix(privKey, "0x") {
+		privKey = strings.TrimLeft(privKey, "0x")
 	}
 
 	addr, err := c.eth.ImportRawKey(privKey, passPhrase)

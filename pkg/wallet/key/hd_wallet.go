@@ -1,6 +1,7 @@
 package key
 
 import (
+	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/btcsuite/btcutil"
 	"github.com/btcsuite/btcutil/hdkeychain"
 	"github.com/cpacia/bchutil"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -198,7 +200,7 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 			}
 
 		case coin.ETH:
-			ethAddr, ethPubKey, ethPrivKey, err := k.ethAddrs(child, privateKey)
+			ethAddr, ethPubKey, ethPrivKey, err := k.ethAddrs(privateKey)
 			if err != nil {
 				return nil, err
 			}
@@ -248,17 +250,25 @@ func (k *HDKey) btcAddrs(wif *btcutil.WIF, privKey *btcec.PrivateKey) (string, s
 
 }
 
-func (k *HDKey) ethAddrs(ek *hdkeychain.ExtendedKey, privKey *btcec.PrivateKey) (string, string, string, error) {
-	pubkey, err := ek.ECPubKey()
-	if err != nil {
-		return "", "", "", errors.Wrap(err, "fail to call extendedKey.ECPubKey")
+// https://goethereumbook.org/wallet-generate/
+func (k *HDKey) ethAddrs(privKey *btcec.PrivateKey) (string, string, string, error) {
+	// private key
+	ethPrivKey := privKey.ToECDSA()
+	ethHexPrivKey := hexutil.Encode(crypto.FromECDSA(ethPrivKey))
+
+	// pubkey, address
+	ethPubkey := ethPrivKey.Public()
+	pubkeyECDSA, ok := ethPubkey.(*ecdsa.PublicKey)
+	if !ok {
+		return "", "", "", errors.New("fail to call cast pubkey to ecsda pubkey")
 	}
+	// pubkey
+	ethHexPubKey := hexutil.Encode(crypto.FromECDSAPub(pubkeyECDSA))[4:]
 
-	ethAddr := crypto.PubkeyToAddress(*pubkey.ToECDSA())
-	ethPubKey := "0x" + hex.EncodeToString(pubkey.SerializeCompressed())
-	ethPrivKey := "0x" + hex.EncodeToString(privKey.Serialize())
+	// address
+	address := crypto.PubkeyToAddress(*pubkeyECDSA).Hex()
 
-	return ethAddr.String(), ethPubKey, ethPrivKey, nil
+	return address, ethHexPubKey, ethHexPrivKey, nil
 }
 
 // get Address(P2PKH) as string for BTC/BCH
