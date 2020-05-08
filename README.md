@@ -236,6 +236,14 @@ watch send -file xxx.csv
 ```
 
 ## TODO
+### Basics
+- [ ] Various monitoring patterns to detect suspicious operations.
+- [ ] High coverage of UnitTest.
+- [ ] Add CircleCI or other CI service
+- [ ] Add new coins like Ethereum.
+
+
+### For BTC/BCH
 - [x] Change ORM to sqlboiler
 - [x] Implement proper database transaction.
 - [x] Re-design procedure for creating Multisig address.
@@ -248,11 +256,18 @@ watch send -file xxx.csv
 - [x] Backup/Restore for wallet.dat. If wallt.dat is broken, it's not easy to recover.
 - [ ] Refactoring logic for unsigned transaction creation.
 - [ ] Multisig-address is used only once because of security reason, so after tx is sent, related receiver addresses should be updated by is_allocated=true.
-- [ ] Various monitoring patterns to detect suspicious operations.
 - [ ] Sent tx is not proceeded in bitcoin network if fee is not enough comparatively. So re-sending tx functionality is required adding more fee.
-- [ ] High coverage of UnitTest.
-- [ ] Add CircleCI or other CI service
-- [ ] Add new coins like Ethereum.
+
+### For ETH
+- [x] Key generating by HD Wallet
+- [ ] Add any useful APIs
+- [ ] Importing private key 
+- [ ] Exporting addresses to watch wallet
+- [ ] Creating unsigned raw transaction for deposit
+- [ ] Creating unsigned raw transaction for payment
+- [ ] Creating unsigned raw transaction for transfer
+- [ ] Signing on unsigned raw transaction
+- [ ] Sending signed transaction
 
 
 ## Project layout patterns
