@@ -6,7 +6,8 @@ disable_tls = true
 network_type = "goerli" # mainnet, goerli, rinkeby, ropsten
 
 [ethereum.geth]
-dir = "${HOME}/.ethereum"
+#dir = "${HOME}/.ethereum"
+keydir = "${HOME}/Library/Ethereum/goerli/keystore
 
 [logger]
 service = "eth-sign"
@@ -26,6 +27,6 @@ pass = "hiromaily"
 debug = true
 
 [file_path]
-tx = "./data/eth/tx/"
-address = "./data/eth/address/"
-full_pubkey = "./data/eth/fullpubkey/"
+tx = "./data/tx/eth/"
+address = "./data/address/eth/"
+full_pubkey = "./data/fullpubkey/eth/"

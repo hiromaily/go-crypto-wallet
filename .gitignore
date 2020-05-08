@@ -8,12 +8,9 @@
 #!cmd/sign
 
 data/dump/*
-data/btc/tx/*
-data/btc/fullpubkey/*
-data/btc/address/*
-data/bch/tx/*
-data/bch/fullpubkey/*
-data/bch/address/*
+data/tx/*
+data/fullpubkey/*
+data/address/*
 
 docker/grafana/*
 docker/btc/data/testnet3

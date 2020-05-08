@@ -57,7 +57,7 @@ type Ethereum struct {
 
 // Geth geth info
 type Geth struct {
-	DirName string `toml:"dir"`
+	KeyDirName string `toml:"keydir"`
 }
 
 // Logger logger info

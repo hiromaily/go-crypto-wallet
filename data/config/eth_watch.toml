@@ -6,7 +6,8 @@ disable_tls = true
 network_type = "goerli" # mainnet, goerli, rinkeby, ropsten
 
 [ethereum.geth]
-dir = "${HOME}/.ethereum"
+#dir = "${HOME}/.ethereum"
+keydir = "${HOME}/Library/Ethereum/goerli/keystore
 
 [logger]
 service = "eth-wallet"
@@ -19,7 +20,7 @@ is_stacktrace = true
 type = "none"  # none, jaeger, datadog
 
 [tracer.jaeger]
-service_name = "btc-wallet"
+service_name = "eth-wallet"
 collector_endpoint = "http://127.0.0.1:14268/api/traces"
 sampling_probability = 0.5  # 0.001 to 1.0
 

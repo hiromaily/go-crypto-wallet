@@ -29,9 +29,9 @@ pass = "hiromaily"
 debug = true
 
 [file_path]
-tx = "./data/bch/tx/"
-address = "./data/bch/address/"
-full_pubkey = "./data/bch/fullpubkey/"
+tx = "./data/tx/bch/"
+address = "./data/address/bch/"
+full_pubkey = "./data/fullpubkey/bch/"
 
 # default seed of key used when dev mode
 #[key]

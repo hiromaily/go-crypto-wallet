@@ -29,9 +29,9 @@ pass = "hiromaily"
 debug = true
 
 [file_path]
-tx = "./data/btc/tx/"
-address = "./data/btc/address/"
-full_pubkey = "./data/btc/fullpubkey/"
+tx = "./data/tx/btc/"
+address = "./data/address/btc/"
+full_pubkey = "./data/fullpubkey/btc/"
 
 #[key]
 #seed = "Hj3H3GB6KzFpy4Yt6CEuVdXIDX5VRXGrvgbVkW37xhc="
