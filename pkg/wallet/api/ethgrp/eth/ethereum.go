@@ -11,7 +11,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
-// Ethereum includes client to call Json-RPC
+// Ethereum includes client to call JSON-RPC
 type Ethereum struct {
 	client       *ethrpc.Client
 	coinTypeCode coin.CoinTypeCode //eth

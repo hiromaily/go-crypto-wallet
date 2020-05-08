@@ -16,6 +16,8 @@ type Ethereumer interface {
 	Close()
 	// net
 	NetVersion() (uint16, error)
+	// personal
+	ImportRawKey(hexKey, passPhrase string) (string, error)
 	// web3
 	ClientVersion() (string, error)
 }

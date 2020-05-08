@@ -11,6 +11,8 @@ Geth has a development mode which sets up a single node Ethereum test network wi
 
 - [JSON RPC](https://github.com/ethereum/wiki/wiki/JSON-RPC)
 - [Management APIs](https://github.com/ethereum/go-ethereum/wiki/Management-APIs)
+- [Setting up private network or local cluster](https://github.com/ethereum/go-ethereum/wiki/Setting-up-private-network-or-local-cluster)
+- [Etherscan for goerli](https://goerli.etherscan.io/)
 
 ## Install and Run
 ```
@@ -20,6 +22,9 @@ $ brew install ethereum
 
 # Run on testnet
 $ geth --goerli --rpc console
+ or 
+# available="[admin debug web3 eth txpool personal clique miner net]
+$ geth --goerli --rpc --rpcapi admin,debug,web3,eth,txpool,net,personal
 
 # Rest API using [HTTPie](https://httpie.org/)
 $ http http://127.0.0.1:8545 method=web3_clientVersion params:='[]' id=67
@@ -79,6 +84,9 @@ API AND CONSOLE OPTIONS:
   --ipcdisable                        Disable the IPC-RPC server
   --ipcpath value                     Filename for IPC socket/pipe within the datadir (explicit paths escape it)
   --rpc                               Enable the HTTP-RPC server
+  --rpcaddr value                     HTTP-RPC server listening interface (default: "localhost")
+  --rpcport value                     HTTP-RPC server listening port (default: 8545)
+  --rpcapi value                      API's offered over the HTTP-RPC interface
 ```
 
 ## geth Rest API
