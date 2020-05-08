@@ -5,11 +5,11 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/api/btc"
+	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/api/eth"
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/create"
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/export"
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/imports"
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/sign"
-	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/api/eth"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/btcwallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/ethwallet"

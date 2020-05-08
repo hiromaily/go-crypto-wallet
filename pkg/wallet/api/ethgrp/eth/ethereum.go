@@ -2,8 +2,8 @@ package eth
 
 import (
 	"context"
-	"github.com/btcsuite/btcd/chaincfg"
 
+	"github.com/btcsuite/btcd/chaincfg"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"

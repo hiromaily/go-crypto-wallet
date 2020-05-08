@@ -3,8 +3,8 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/btcsuite/btcd/chaincfg"
 
+	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/rpcclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/volatiletech/sqlboiler/boil"
@@ -94,6 +94,7 @@ func (r *registry) newETHKeygener() wallets.Keygener {
 		r.walletType,
 		r.newSeeder(),
 		r.newHdWallter(),
+		//r.newPrivKeyer(),
 	)
 }
 
