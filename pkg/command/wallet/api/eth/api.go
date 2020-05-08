@@ -26,6 +26,7 @@ func (c *APICommand) Synopsis() string {
 var (
 	nodeinfoSynopsis = "node info"
 	syncingSynopsis  = "sync info"
+	versionSynopsis  = "network version"
 )
 
 // Help returns usage for this subcommand
@@ -34,7 +35,8 @@ func (c *APICommand) Help() string {
 Subcommands:
   nodeinfo         %s
   syncing          %s
-`, nodeinfoSynopsis, syncingSynopsis)
+  netversion       %s
+`, nodeinfoSynopsis, syncingSynopsis, versionSynopsis)
 }
 
 // Run executes this subcommand
@@ -60,6 +62,14 @@ func (c *APICommand) Run(args []string) int {
 			return &SyncingCommand{
 				name:     "syncing",
 				synopsis: syncingSynopsis,
+				ui:       command.ClolorUI(),
+				eth:      c.ETH,
+			}, nil
+		},
+		"netversion": func() (cli.Command, error) {
+			return &NetVersionCommand{
+				name:     "netversion",
+				synopsis: versionSynopsis,
 				ui:       command.ClolorUI(),
 				eth:      c.ETH,
 			}, nil

@@ -9,8 +9,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp"
 )
 
-// SyncingCommand syncing subcommand
-type SyncingCommand struct {
+// NetVersionCommand syncing subcommand
+type NetVersionCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
@@ -18,18 +18,18 @@ type SyncingCommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (c *SyncingCommand) Synopsis() string {
+func (c *NetVersionCommand) Synopsis() string {
 	return c.synopsis
 }
 
 // Help returns usage for this subcommand
-func (c *SyncingCommand) Help() string {
+func (c *NetVersionCommand) Help() string {
 	return `Usage: wallet api nodeinfo
 `
 }
 
 // Run executes this subcommand
-func (c *SyncingCommand) Run(args []string) int {
+func (c *NetVersionCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
@@ -37,13 +37,13 @@ func (c *SyncingCommand) Run(args []string) int {
 		return 1
 	}
 
-	syncResult, isSyncing, err := c.eth.Syncing()
+	version, err := c.eth.NetVersion()
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call eth.Syncing() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call eth.NetVersion() %+v", err))
 		return 1
 	}
 
-	c.ui.Info(fmt.Sprintf("is syncing? : %t, %v", isSyncing, syncResult))
+	c.ui.Info(fmt.Sprintf("version: %d", version))
 
 	return 0
 }

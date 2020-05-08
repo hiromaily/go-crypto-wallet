@@ -53,14 +53,15 @@ func NewEthereum(
 	eth.version = clientVer
 
 	// check sync progress
-	res, isDone, err := eth.Syncing()
+	res, isSyncing, err := eth.Syncing()
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call eth.Syncing()")
 	}
-	if !isDone {
+	if isSyncing {
 		logger.Warn("sync is not completed yet")
-	}else{
-		logger.Info("result_syncing",
+	}
+	if res != nil{
+		logger.Info("still syncing",
 			zap.Int64("knownStates", res.KnownStates),
 			zap.Int64("pulledStates", res.PulledStates),
 			zap.Int64("startingBlock", res.StartingBlock),

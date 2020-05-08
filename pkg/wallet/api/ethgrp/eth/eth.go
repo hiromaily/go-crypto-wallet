@@ -15,6 +15,7 @@ type ResponseSyncing struct {
 }
 
 // Syncing returns sync status or bool
+//  - return false if not syncing (it means syncing is done)
 //  - there seems 2 different responses
 func (e *Ethereum) Syncing() (*ResponseSyncing, bool, error) {
 	e.logger.Info("Syncing()")
@@ -36,17 +37,16 @@ func (e *Ethereum) Syncing() (*ResponseSyncing, bool, error) {
 	//log.Println(resMap["highestBlock"])  //0x5dcc9f
 	//return nil, false, nil
 
-	//booleanにキャストできるか
+	// try to cast to bool
 	bRes, ok := resIF.(bool)
 	if !ok {
-		//map型にキャストできるか=>できないので、取得し直したほうがよさそう
+		// interface can't not be casted to type map
 		//resMap, ok = resIF.(map[string]string)
 		err := e.client.CallContext(e.ctx, &resMap, "eth_syncing")
 		if err != nil {
 			return nil, false, errors.Wrap(err, "fail to call client.CallContext(eth_syncing)")
 		}
 
-		//map型のそれぞれの値をint64に変換する
 		knownStates, err := hexutil.DecodeBig(resMap["knownStates"])
 		if err != nil {
 			return nil, false, errors.New("response is invalid")
@@ -76,7 +76,7 @@ func (e *Ethereum) Syncing() (*ResponseSyncing, bool, error) {
 			HighestBlock:  highestBlock.Int64(),
 		}
 
-		return &resSync, false, nil
+		return &resSync, true, nil
 	}
 	return nil, bRes, nil
 }

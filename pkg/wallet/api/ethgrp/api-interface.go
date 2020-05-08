@@ -9,7 +9,7 @@ import (
 // Ethereumer Ethereum Interface
 type Ethereumer interface {
 	// admin
-	NodeInfo() (*p2p.PeerInfo, error)
+	NodeInfo() (*p2p.NodeInfo, error)
 	// eth
 	Syncing() (*eth.ResponseSyncing, bool, error)
 	// ethereum
