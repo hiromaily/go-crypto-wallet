@@ -1,6 +1,7 @@
 package ethgrp
 
 import (
+	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/ethereum/go-ethereum/p2p"
 
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp/eth"
@@ -14,6 +15,7 @@ type Ethereumer interface {
 	Syncing() (*eth.ResponseSyncing, bool, error)
 	// ethereum
 	Close()
+	GetChainConf() *chaincfg.Params
 	// net
 	NetVersion() (uint16, error)
 	// personal

@@ -21,8 +21,11 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/watchsrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/btc/watchsrv"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/btcwallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/ethwallet"
 )
 
 // Registry is for registry interface
@@ -34,10 +37,10 @@ type registry struct {
 	conf         *config.Config
 	walletType   wtype.WalletType
 	logger       *zap.Logger
-	rpcClient    *rpcclient.Client
-	rpcEthClient *ethrpc.Client
 	btc          btcgrp.Bitcoiner
 	eth          ethgrp.Ethereumer
+	rpcClient    *rpcclient.Client
+	rpcEthClient *ethrpc.Client
 	mysqlClient  *sql.DB
 }
 
@@ -53,32 +56,40 @@ func NewRegistry(conf *config.Config, walletType wtype.WalletType) Registry {
 func (r *registry) NewWalleter() wallets.Watcher {
 	switch r.conf.CoinTypeCode {
 	case coin.BTC, coin.BCH:
-		return wallets.NewBTCWatch(
-			r.newBTC(),
-			r.newMySQLClient(),
-			r.newLogger(),
-			r.newTracer(),
-			r.conf.AddressType,
-			r.newAddressImporter(),
-			r.newTxCreator(),
-			r.newTxSender(),
-			r.newTxMonitorer(),
-			r.newPaymentRequestCreator(),
-			r.walletType,
-		)
+		return r.newBTCWalleter()
 	case coin.ETH:
-		return wallets.NewETHWatch(
-			r.newETH(),
-			r.newMySQLClient(),
-			r.newLogger(),
-			r.walletType,
-		)
+		return r.newETHWalleter()
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
 	}
 }
 
-func (r *registry) newAddressImporter() watchsrv.AddressImporter {
+func (r *registry) newBTCWalleter() wallets.Watcher {
+	return btcwallet.NewBTCWatch(
+		r.newBTC(),
+		r.newMySQLClient(),
+		r.newLogger(),
+		r.newTracer(),
+		r.conf.AddressType,
+		r.newAddressImporter(),
+		r.newTxCreator(),
+		r.newTxSender(),
+		r.newTxMonitorer(),
+		r.newPaymentRequestCreator(),
+		r.walletType,
+	)
+}
+
+func (r *registry) newETHWalleter() wallets.Watcher {
+	return ethwallet.NewETHWatch(
+		r.newETH(),
+		r.newMySQLClient(),
+		r.newLogger(),
+		r.walletType,
+	)
+}
+
+func (r *registry) newAddressImporter() service.AddressImporter {
 	return watchsrv.NewAddressImport(
 		r.newBTC(),
 		r.newLogger(),
@@ -91,7 +102,7 @@ func (r *registry) newAddressImporter() watchsrv.AddressImporter {
 	)
 }
 
-func (r *registry) newTxCreator() watchsrv.TxCreator {
+func (r *registry) newTxCreator() service.TxCreator {
 	return watchsrv.NewTxCreate(
 		r.newBTC(),
 		r.newLogger(),
@@ -106,7 +117,7 @@ func (r *registry) newTxCreator() watchsrv.TxCreator {
 	)
 }
 
-func (r *registry) newTxSender() watchsrv.TxSender {
+func (r *registry) newTxSender() service.TxSender {
 	return watchsrv.NewTxSend(
 		r.newBTC(),
 		r.newLogger(),
@@ -119,7 +130,7 @@ func (r *registry) newTxSender() watchsrv.TxSender {
 	)
 }
 
-func (r *registry) newTxMonitorer() watchsrv.TxMonitorer {
+func (r *registry) newTxMonitorer() service.TxMonitorer {
 	return watchsrv.NewTxMonitor(
 		r.newBTC(),
 		r.newLogger(),
@@ -131,7 +142,7 @@ func (r *registry) newTxMonitorer() watchsrv.TxMonitorer {
 	)
 }
 
-func (r *registry) newPaymentRequestCreator() watchsrv.PaymentRequestCreator {
+func (r *registry) newPaymentRequestCreator() service.PaymentRequestCreator {
 	return watchsrv.NewPaymentRequestCreate(
 		r.newBTC(),
 		r.newLogger(),

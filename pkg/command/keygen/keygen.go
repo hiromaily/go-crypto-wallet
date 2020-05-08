@@ -4,25 +4,20 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
-	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/api"
+	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/api/btc"
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/create"
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/export"
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/imports"
 	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/sign"
+	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/api/eth"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/btcwallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/ethwallet"
 )
 
 // WalletSubCommands returns subcommand for keygen wallet
 func WalletSubCommands(wallet wallets.Keygener, version string) map[string]cli.CommandFactory {
-	return map[string]cli.CommandFactory{
-		"api": func() (cli.Command, error) {
-			return &api.APICommand{
-				Name:    "api",
-				Version: version,
-				UI:      command.ClolorUI(),
-				BTC:     wallet.GetBTC(),
-			}, nil
-		},
+	cmds := map[string]cli.CommandFactory{
 		"create": func() (cli.Command, error) {
 			return &create.CreateCommand{
 				Name:    "create",
@@ -55,4 +50,25 @@ func WalletSubCommands(wallet wallets.Keygener, version string) map[string]cli.C
 			}, nil
 		},
 	}
+	switch v := wallet.(type) {
+	case *btcwallet.BTCKeygen:
+		cmds["api"] = func() (cli.Command, error) {
+			return &btc.APICommand{
+				Name:    "api",
+				Version: version,
+				UI:      command.ClolorUI(),
+				BTC:     v.BTC,
+			}, nil
+		}
+	case *ethwallet.ETHKeygen:
+		cmds["api"] = func() (cli.Command, error) {
+			return &eth.APICommand{
+				Name:    "api",
+				Version: version,
+				UI:      command.ClolorUI(),
+				ETH:     v.ETH,
+			}, nil
+		}
+	}
+	return cmds
 }

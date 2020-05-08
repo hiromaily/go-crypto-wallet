@@ -19,9 +19,12 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv/signsrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/btc/coldsrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/btc/coldsrv/signsrv"
+	commonsrv "github.com/hiromaily/go-bitcoin/pkg/wallet/service/common/coldsrv"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/btcwallet"
 )
 
 // Registry is for registry interface
@@ -58,7 +61,7 @@ func NewRegistry(conf *config.Config, walletType wallet.WalletType, authName str
 func (r *registry) NewSigner() wallets.Signer {
 	switch r.conf.CoinTypeCode {
 	case coin.BTC, coin.BCH:
-		return wallets.NewBTCSign(
+		return btcwallet.NewBTCSign(
 			r.newBTC(),
 			r.newMySQLClient(),
 			r.authType,
@@ -77,16 +80,16 @@ func (r *registry) NewSigner() wallets.Signer {
 	}
 }
 
-func (r *registry) newSeeder() coldsrv.Seeder {
-	return coldsrv.NewSeed(
+func (r *registry) newSeeder() service.Seeder {
+	return commonsrv.NewSeed(
 		r.newLogger(),
 		r.newSeedRepo(),
 		r.walletType,
 	)
 }
 
-func (r *registry) newHdWallter() coldsrv.HDWalleter {
-	return coldsrv.NewHDWallet(
+func (r *registry) newHdWallter() service.HDWalleter {
+	return commonsrv.NewHDWallet(
 		r.newLogger(),
 		r.newHdWalletRepo(),
 		r.newKeyGenerator(),
@@ -95,8 +98,8 @@ func (r *registry) newHdWallter() coldsrv.HDWalleter {
 	)
 }
 
-func (r *registry) newHdWalletRepo() coldsrv.HDWalletRepo {
-	return coldsrv.NewAuthHDWalletRepo(
+func (r *registry) newHdWalletRepo() commonsrv.HDWalletRepo {
+	return commonsrv.NewAuthHDWalletRepo(
 		r.newAuthKeyRepo(),
 		r.authType,
 	)
@@ -112,7 +115,7 @@ func (r *registry) newPrivKeyer() signsrv.PrivKeyer {
 	)
 }
 
-func (r *registry) newFullPubkeyExporter() signsrv.FullPubkeyExporter {
+func (r *registry) newFullPubkeyExporter() service.FullPubkeyExporter {
 	return signsrv.NewFullPubkeyExport(
 		r.newLogger(),
 		r.newAuthKeyRepo(),
@@ -122,7 +125,7 @@ func (r *registry) newFullPubkeyExporter() signsrv.FullPubkeyExporter {
 		r.walletType,
 	)
 }
-func (r *registry) newSigner() coldsrv.Signer {
+func (r *registry) newSigner() service.Signer {
 	return coldsrv.NewSign(
 		r.newBTC(),
 		r.newLogger(),

@@ -8,6 +8,7 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/btcwallet"
 )
 
 // KeyCommand key subcommand
@@ -39,11 +40,15 @@ func (c *KeyCommand) Run(args []string) int {
 	}
 
 	// create one key for debug use
-	wif, pubAddress, err := key.GenerateWIF(c.wallet.GetBTC().GetChainConf())
-	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call key.GenerateKey() %+v", err))
-		return 1
+	if v, ok := c.wallet.(*btcwallet.BTCKeygen); ok {
+		wif, pubAddress, err := key.GenerateWIF(v.BTC.GetChainConf())
+		if err != nil {
+			c.ui.Error(fmt.Sprintf("fail to call key.GenerateKey() %+v", err))
+			return 1
+		}
+		c.ui.Info(fmt.Sprintf("[WIF] %s - [Pub Address] %s", wif.String(), pubAddress))
+	} else {
+		c.ui.Info("for only BTC")
 	}
-	c.ui.Info(fmt.Sprintf("[WIF] %s - [Pub Address] %s", wif.String(), pubAddress))
 	return 0
 }

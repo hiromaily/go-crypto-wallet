@@ -12,6 +12,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/monitor"
 	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/send"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/btcwallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/ethwallet"
 )
 
 // WalletSubCommands returns subcommand for wallet
@@ -58,7 +60,7 @@ func WalletSubCommands(wallet wallets.Watcher, version string) map[string]cli.Co
 		},
 	}
 	switch v := wallet.(type) {
-	case *wallets.BTCWatch:
+	case *btcwallet.BTCWatch:
 		cmds["api"] = func() (cli.Command, error) {
 			return &btc.APICommand{
 				Name:    "api",
@@ -67,7 +69,7 @@ func WalletSubCommands(wallet wallets.Watcher, version string) map[string]cli.Co
 				BTC:     v.BTC,
 			}, nil
 		}
-	case *wallets.ETHWatch:
+	case *ethwallet.ETHWatch:
 		cmds["api"] = func() (cli.Command, error) {
 			return &eth.APICommand{
 				Name:    "api",

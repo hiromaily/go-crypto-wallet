@@ -9,7 +9,7 @@ network_type = "goerli" # mainnet, goerli, rinkeby, ropsten
 dir = "${HOME}/.ethereum"
 
 [logger]
-service = "eth-wallet"
+service = "eth-sign"
 env = "custom" # dev, prod, custom :for only zap logger
 level = "debug" # debug, info, warn, error
 is_stacktrace = true
@@ -18,14 +18,9 @@ is_stacktrace = true
 [tracer]
 type = "none"  # none, jaeger, datadog
 
-[tracer.jaeger]
-service_name = "btc-wallet"
-collector_endpoint = "http://127.0.0.1:14268/api/traces"
-sampling_probability = 0.5  # 0.001 to 1.0
-
 [mysql]
-host = "127.0.0.1:3307"
-dbname = "watch"
+host = "127.0.0.1:3309"
+dbname = "sign"
 user = "hiromaily"
 pass = "hiromaily"
 debug = true

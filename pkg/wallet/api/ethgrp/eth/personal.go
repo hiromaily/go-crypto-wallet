@@ -14,4 +14,3 @@ func (e *Ethereum) ImportRawKey(hexKey, passPhrase string) (string, error) {
 
 	return address, nil
 }
-

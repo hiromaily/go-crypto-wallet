@@ -19,7 +19,7 @@ adjustment_min = 0.5 # adjustable minimum fee magnification
 adjustment_max = 2.0 # adjustable maximum fee magnification
 
 [logger]
-service = "wallet"
+service = "btc-wallet"
 env = "custom" # dev, prod, custom :for only zap logger
 level = "debug" # debug, info, warn, error
 is_stacktrace = true

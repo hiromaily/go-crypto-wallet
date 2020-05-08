@@ -70,6 +70,8 @@ func main() {
 			confPath = os.Getenv("BTC_KEYGEN_WALLET_CONF")
 		case coin.BCH.String():
 			confPath = os.Getenv("BCH_KEYGEN_WALLET_CONF")
+		case coin.ETH.String():
+			confPath = os.Getenv("ETH_KEYGEN_WALLET_CONF")
 		}
 	}
 

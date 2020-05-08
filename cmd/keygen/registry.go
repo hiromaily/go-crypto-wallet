@@ -3,8 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/btcsuite/btcd/chaincfg"
 
 	"github.com/btcsuite/btcd/rpcclient"
+	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/volatiletech/sqlboiler/boil"
 	"go.uber.org/zap"
 
@@ -16,11 +18,16 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/coldsrv/keygensrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/btc/coldsrv"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/btc/coldsrv/keygensrv"
+	commonsrv "github.com/hiromaily/go-bitcoin/pkg/wallet/service/common/coldsrv"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/btcwallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/ethwallet"
 )
 
 // Registry is for registry interface
@@ -29,12 +36,14 @@ type Registry interface {
 }
 
 type registry struct {
-	conf        *config.Config
-	walletType  wallet.WalletType
-	logger      *zap.Logger
-	btc         btcgrp.Bitcoiner
-	rpcClient   *rpcclient.Client
-	mysqlClient *sql.DB
+	conf         *config.Config
+	walletType   wallet.WalletType
+	logger       *zap.Logger
+	btc          btcgrp.Bitcoiner
+	eth          ethgrp.Ethereumer
+	rpcClient    *rpcclient.Client
+	rpcEthClient *ethrpc.Client
+	mysqlClient  *sql.DB
 }
 
 // NewRegistry is to register registry interface
@@ -53,36 +62,51 @@ func NewRegistry(conf *config.Config, walletType wallet.WalletType) Registry {
 func (r *registry) NewKeygener() wallets.Keygener {
 	switch r.conf.CoinTypeCode {
 	case coin.BTC, coin.BCH:
-		return wallets.NewBTCKeygen(
-			r.newBTC(),
-			r.newMySQLClient(),
-			r.conf.AddressType,
-			r.newSeeder(),
-			r.newHdWallter(),
-			r.newPrivKeyer(),
-			r.newFullPubKeyImporter(),
-			r.newMultisiger(),
-			r.newAddressExporter(),
-			r.newSigner(),
-			r.walletType,
-		)
+		return r.newBTCKeygener()
 	case coin.ETH:
-		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
+		return r.newETHKeygener()
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
 	}
 }
 
-func (r *registry) newSeeder() coldsrv.Seeder {
-	return coldsrv.NewSeed(
+func (r *registry) newBTCKeygener() wallets.Keygener {
+	return btcwallet.NewBTCKeygen(
+		r.newBTC(),
+		r.newMySQLClient(),
+		r.conf.AddressType,
+		r.newSeeder(),
+		r.newHdWallter(),
+		r.newPrivKeyer(),
+		r.newFullPubKeyImporter(),
+		r.newMultisiger(),
+		r.newAddressExporter(),
+		r.newSigner(),
+		r.walletType,
+	)
+}
+
+func (r *registry) newETHKeygener() wallets.Keygener {
+	return ethwallet.NewETHKeygen(
+		r.newETH(),
+		r.newMySQLClient(),
+		r.newLogger(),
+		r.walletType,
+		r.newSeeder(),
+		r.newHdWallter(),
+	)
+}
+
+func (r *registry) newSeeder() service.Seeder {
+	return commonsrv.NewSeed(
 		r.newLogger(),
 		r.newSeedRepo(),
 		r.walletType,
 	)
 }
 
-func (r *registry) newHdWallter() coldsrv.HDWalleter {
-	return coldsrv.NewHDWallet(
+func (r *registry) newHdWallter() service.HDWalleter {
+	return commonsrv.NewHDWallet(
 		r.newLogger(),
 		r.newHdWalletRepo(),
 		r.newKeyGenerator(),
@@ -91,13 +115,13 @@ func (r *registry) newHdWallter() coldsrv.HDWalleter {
 	)
 }
 
-func (r *registry) newHdWalletRepo() coldsrv.HDWalletRepo {
-	return coldsrv.NewAccountHDWalletRepo(
+func (r *registry) newHdWalletRepo() commonsrv.HDWalletRepo {
+	return commonsrv.NewAccountHDWalletRepo(
 		r.newAccountKeyRepo(),
 	)
 }
 
-func (r *registry) newPrivKeyer() keygensrv.PrivKeyer {
+func (r *registry) newPrivKeyer() service.PrivKeyer {
 	return keygensrv.NewPrivKey(
 		r.newBTC(),
 		r.newLogger(),
@@ -106,7 +130,7 @@ func (r *registry) newPrivKeyer() keygensrv.PrivKeyer {
 	)
 }
 
-func (r *registry) newFullPubKeyImporter() keygensrv.FullPubKeyImporter {
+func (r *registry) newFullPubKeyImporter() service.FullPubKeyImporter {
 	return keygensrv.NewFullPubkeyImport(
 		r.newBTC(),
 		r.newLogger(),
@@ -116,7 +140,7 @@ func (r *registry) newFullPubKeyImporter() keygensrv.FullPubKeyImporter {
 	)
 }
 
-func (r *registry) newMultisiger() keygensrv.Multisiger {
+func (r *registry) newMultisiger() service.Multisiger {
 	return keygensrv.NewMultisig(
 		r.newBTC(),
 		r.newLogger(),
@@ -126,7 +150,7 @@ func (r *registry) newMultisiger() keygensrv.Multisiger {
 	)
 }
 
-func (r *registry) newAddressExporter() keygensrv.AddressExporter {
+func (r *registry) newAddressExporter() service.AddressExporter {
 	return keygensrv.NewAddressExport(
 		r.newLogger(),
 		r.newAccountKeyRepo(),
@@ -134,7 +158,7 @@ func (r *registry) newAddressExporter() keygensrv.AddressExporter {
 		r.walletType,
 	)
 }
-func (r *registry) newSigner() coldsrv.Signer {
+func (r *registry) newSigner() service.Signer {
 	return coldsrv.NewSign(
 		r.newBTC(),
 		r.newLogger(),
@@ -170,6 +194,33 @@ func (r *registry) newBTC() btcgrp.Bitcoiner {
 		}
 	}
 	return r.btc
+}
+
+func (r *registry) newEthRPCClient() *ethrpc.Client {
+	if r.rpcEthClient == nil {
+		var err error
+		r.rpcEthClient, err = ethgrp.NewRPCClient(&r.conf.Ethereum)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return r.rpcEthClient
+}
+
+func (r *registry) newETH() ethgrp.Ethereumer {
+	if r.eth == nil {
+		var err error
+		r.eth, err = ethgrp.NewEthereum(
+			r.newEthRPCClient(),
+			&r.conf.Ethereum,
+			r.newLogger(),
+			r.conf.CoinTypeCode,
+		)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return r.eth
 }
 
 func (r *registry) newLogger() *zap.Logger {
@@ -213,10 +264,20 @@ func (r *registry) newAuthKeyRepo() coldrepo.AuthAccountKeyRepositorier {
 }
 
 func (r *registry) newKeyGenerator() key.Generator {
+	var chainConf *chaincfg.Params
+	switch r.conf.CoinTypeCode {
+	case coin.BTC, coin.BCH:
+		chainConf = r.newBTC().GetChainConf()
+	case coin.ETH:
+		chainConf = r.newETH().GetChainConf()
+	default:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
+	}
+
 	return key.NewHDKey(
 		key.PurposeTypeBIP44,
 		r.conf.CoinTypeCode,
-		r.newBTC().GetChainConf(),
+		chainConf,
 		r.newLogger())
 }
 

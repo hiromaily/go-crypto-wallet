@@ -4,25 +4,20 @@ import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-bitcoin/pkg/command"
-	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/api"
+	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/api/btc"
 	"github.com/hiromaily/go-bitcoin/pkg/command/sign/create"
 	"github.com/hiromaily/go-bitcoin/pkg/command/sign/export"
 	"github.com/hiromaily/go-bitcoin/pkg/command/sign/imports"
 	"github.com/hiromaily/go-bitcoin/pkg/command/sign/sign"
+	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/api/eth"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/btcwallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/ethwallet"
 )
 
 // WalletSubCommands returns subcommand for signature
 func WalletSubCommands(wallet wallets.Signer, version string) map[string]cli.CommandFactory {
-	return map[string]cli.CommandFactory{
-		"api": func() (cli.Command, error) {
-			return &api.APICommand{
-				Name:    "add",
-				Version: version,
-				UI:      command.ClolorUI(),
-				BTC:     wallet.GetBTC(),
-			}, nil
-		},
+	cmds := map[string]cli.CommandFactory{
 		"create": func() (cli.Command, error) {
 			return &create.CreateCommand{
 				Name:    "add",
@@ -55,4 +50,25 @@ func WalletSubCommands(wallet wallets.Signer, version string) map[string]cli.Com
 			}, nil
 		},
 	}
+	switch v := wallet.(type) {
+	case *btcwallet.BTCSign:
+		cmds["api"] = func() (cli.Command, error) {
+			return &btc.APICommand{
+				Name:    "api",
+				Version: version,
+				UI:      command.ClolorUI(),
+				BTC:     v.BTC,
+			}, nil
+		}
+	case *ethwallet.ETHSign:
+		cmds["api"] = func() (cli.Command, error) {
+			return &eth.APICommand{
+				Name:    "api",
+				Version: version,
+				UI:      command.ClolorUI(),
+				ETH:     v.ETH,
+			}, nil
+		}
+	}
+	return cmds
 }
