@@ -96,6 +96,7 @@ func (r *registry) newETHKeygener() wallets.Keygener {
 		r.newSeeder(),
 		r.newHdWallter(),
 		r.newPrivKeyer(),
+		r.newAddressExporter(),
 	)
 }
 
@@ -166,10 +167,11 @@ func (r *registry) newMultisiger() service.Multisiger {
 }
 
 func (r *registry) newAddressExporter() service.AddressExporter {
-	return keygensrv.NewAddressExport(
+	return commonsrv.NewAddressExport(
 		r.newLogger(),
 		r.newAccountKeyRepo(),
 		r.newAddressFileStorager(),
+		r.conf.CoinTypeCode,
 		r.walletType,
 	)
 }

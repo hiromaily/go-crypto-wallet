@@ -1,4 +1,4 @@
-package keygensrv
+package coldsrv
 
 import (
 	"bufio"
@@ -13,6 +13,7 @@ import (
 	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
 // AddressExport type
@@ -20,6 +21,7 @@ type AddressExport struct {
 	logger         *zap.Logger
 	accountKeyRepo coldrepo.AccountKeyRepositorier
 	addrFileRepo   address.FileRepositorier
+	coinTypeCode   coin.CoinTypeCode
 	wtype          wallet.WalletType
 }
 
@@ -28,12 +30,14 @@ func NewAddressExport(
 	logger *zap.Logger,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	addrFileRepo address.FileRepositorier,
+	coinTypeCode coin.CoinTypeCode,
 	wtype wallet.WalletType) *AddressExport {
 
 	return &AddressExport{
 		logger:         logger,
 		accountKeyRepo: accountKeyRepo,
 		addrFileRepo:   addrFileRepo,
+		coinTypeCode:   coinTypeCode,
 		wtype:          wtype,
 	}
 }
@@ -42,11 +46,18 @@ func NewAddressExport(
 func (a *AddressExport) ExportAddress(accountType account.AccountType) (string, error) {
 	// get target status for account
 	var targetAddrStatus address.AddrStatus
-	if !account.IsMultisigAccount(accountType) {
-		// non-multisig account
+	switch a.coinTypeCode {
+	case coin.BTC, coin.BCH:
+		if !account.IsMultisigAccount(accountType) {
+			// non-multisig account
+			targetAddrStatus = address.AddrStatusPrivKeyImported
+		} else {
+			targetAddrStatus = address.AddrStatusMultisigAddressGenerated
+		}
+	case coin.ETH:
 		targetAddrStatus = address.AddrStatusPrivKeyImported
-	} else {
-		targetAddrStatus = address.AddrStatusMultisigAddressGenerated
+	default:
+		return "", errors.Errorf("coinType[%s] is not implemented yet.", a.coinTypeCode)
 	}
 
 	// get account key

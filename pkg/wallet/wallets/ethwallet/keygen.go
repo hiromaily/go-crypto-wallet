@@ -21,6 +21,7 @@ type ETHKeygen struct {
 	service.Seeder
 	service.HDWalleter
 	service.PrivKeyer
+	service.AddressExporter
 }
 
 // NewETHKeygen returns ETHKeygen object
@@ -32,16 +33,18 @@ func NewETHKeygen(
 	seeder service.Seeder,
 	hdWallter service.HDWalleter,
 	privKeyer service.PrivKeyer,
+	addressExporter service.AddressExporter,
 ) *ETHKeygen {
 
 	return &ETHKeygen{
-		ETH:        eth,
-		logger:     logger,
-		dbConn:     dbConn,
-		wtype:      wtype,
-		Seeder:     seeder,
-		HDWalleter: hdWallter,
-		PrivKeyer:  privKeyer,
+		ETH:             eth,
+		logger:          logger,
+		dbConn:          dbConn,
+		wtype:           wtype,
+		Seeder:          seeder,
+		HDWalleter:      hdWallter,
+		PrivKeyer:       privKeyer,
+		AddressExporter: addressExporter,
 	}
 }
 
@@ -81,9 +84,7 @@ func (k *ETHKeygen) CreateMultisigAddress(accountType account.AccountType) error
 
 // ExportAddress exports address
 func (k *ETHKeygen) ExportAddress(accountType account.AccountType) (string, error) {
-	//return k.AddressExporter.ExportAddress(accountType)
-	k.logger.Warn("not implemented yet in ETH")
-	return "", nil
+	return k.AddressExporter.ExportAddress(accountType)
 }
 
 // SignTx signs on transaction
