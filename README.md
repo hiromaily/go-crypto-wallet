@@ -73,7 +73,7 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 
 ## Requirements
 - [Bitcoin Core 0.18+ for Bitcoin node](https://bitcoin.org/en/bitcoin-core/)
-- [Bitcoin 0.21+ for Bitcoin cash node](https://www.bitcoinabc.org/)
+- [Bitcoin ABC 0.21+ for Bitcoin cash node](https://www.bitcoinabc.org/)
 - MySQL 5.7
 - Golang 1.13+
 - Docker
@@ -259,16 +259,17 @@ watch send -file xxx.csv
 - [ ] Sent tx is not proceeded in bitcoin network if fee is not enough comparatively. So re-sending tx functionality is required adding more fee.
 
 ### For ETH
-- [x] Key generating by HD Wallet
 - [ ] Add any useful APIs
-- [ ] Importing private key, how password is handled??
-- [ ] Exporting addresses to watch wallet
+- [x] Key generating by HD Wallet
+- [x] Importing private key
+- [x] Exporting addresses to watch wallet
+- [x] Importing exported address in watch wallet
 - [ ] Creating unsigned raw transaction for deposit
 - [ ] Creating unsigned raw transaction for payment
 - [ ] Creating unsigned raw transaction for transfer
 - [ ] Signing on unsigned raw transaction
 - [ ] Sending signed transaction
-
+- [ ] How to manage password for private key
 
 ## Project layout patterns
 - The `pkg` layout pattern, refer to the [linked](https://medium.com/golang-learn/go-project-layout-e5213cdcfaa2) URLs for details.
