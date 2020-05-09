@@ -8,6 +8,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	wtype "github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/eth/watchsrv"
 )
 
 // ETHWatch watch only wallet object
@@ -16,6 +17,7 @@ type ETHWatch struct {
 	dbConn *sql.DB
 	logger *zap.Logger
 	wtype  wtype.WalletType
+	watchsrv.AddressImporter
 }
 
 // NewETHWatch returns ETHWatch object
@@ -23,55 +25,62 @@ func NewETHWatch(
 	eth ethgrp.Ethereumer,
 	dbConn *sql.DB,
 	logger *zap.Logger,
+	addrImporter watchsrv.AddressImporter,
 	wtype wtype.WalletType) *ETHWatch {
 
 	return &ETHWatch{
-		ETH:    eth,
-		logger: logger,
-		dbConn: dbConn,
-		wtype:  wtype,
+		ETH:             eth,
+		logger:          logger,
+		dbConn:          dbConn,
+		wtype:           wtype,
+		AddressImporter: addrImporter,
 	}
 }
 
 // ImportAddress imports address
 func (w *ETHWatch) ImportAddress(fileName string, isRescan bool) error {
-	//return w.AddressImporter.ImportAddress(fileName, isRescan)
-	return nil
+	return w.AddressImporter.ImportAddress(fileName)
 }
 
 // CreateDepositTx creates deposit unsigned transaction
 func (w *ETHWatch) CreateDepositTx(adjustmentFee float64) (string, string, error) {
 	//return w.TxCreator.CreateDepositTx(adjustmentFee)
+	w.logger.Warn("not implemented yet in ETH")
 	return "", "", nil
 }
 
 // CreatePaymentTx creates payment unsigned transaction
 func (w *ETHWatch) CreatePaymentTx(adjustmentFee float64) (string, string, error) {
 	//return w.TxCreator.CreatePaymentTx(adjustmentFee)
+	w.logger.Warn("not implemented yet in ETH")
 	return "", "", nil
 }
 
 // CreateTransferTx creates transfer unsigned transaction
 func (w *ETHWatch) CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error) {
 	//return w.TxCreator.CreateTransferTx(sender, receiver, floatAmount, adjustmentFee)
+	w.logger.Warn("not implemented yet in ETH")
 	return "", "", nil
 }
 
 // UpdateTxStatus updates transaction status
 func (w *ETHWatch) UpdateTxStatus() error {
 	//return w.TxMonitorer.UpdateTxStatus()
+	w.logger.Warn("not implemented yet in ETH")
 	return nil
 }
 
 // SendTx sends signed transaction
 func (w *ETHWatch) SendTx(filePath string) (string, error) {
 	//return w.TxSender.SendTx(filePath)
+	w.logger.Warn("not implemented yet in ETH")
 	return "", nil
 }
 
 // CreatePaymentRequest creates payment_request dummy data for development
 func (w *ETHWatch) CreatePaymentRequest() error {
 	//return w.PaymentRequestCreator.CreatePaymentRequest()
+	w.logger.Warn("not implemented yet in ETH")
 	return nil
 }
 

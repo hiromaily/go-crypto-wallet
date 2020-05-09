@@ -23,6 +23,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/btc/watchsrv"
+	ethsrv "github.com/hiromaily/go-bitcoin/pkg/wallet/service/eth/watchsrv"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/btcwallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/ethwallet"
@@ -71,7 +72,7 @@ func (r *registry) newBTCWalleter() wallets.Watcher {
 		r.newLogger(),
 		r.newTracer(),
 		r.conf.AddressType,
-		r.newAddressImporter(),
+		r.newBTCAddressImporter(),
 		r.newTxCreator(),
 		r.newTxSender(),
 		r.newTxMonitorer(),
@@ -85,13 +86,27 @@ func (r *registry) newETHWalleter() wallets.Watcher {
 		r.newETH(),
 		r.newMySQLClient(),
 		r.newLogger(),
+		r.newETHAddressImporter(),
 		r.walletType,
 	)
 }
 
-func (r *registry) newAddressImporter() service.AddressImporter {
+func (r *registry) newBTCAddressImporter() service.AddressImporter {
 	return watchsrv.NewAddressImport(
 		r.newBTC(),
+		r.newLogger(),
+		r.newMySQLClient(),
+		r.newAddressRepo(),
+		r.newAddressFileRepo(),
+		r.conf.CoinTypeCode,
+		r.conf.AddressType,
+		r.walletType,
+	)
+}
+
+func (r *registry) newETHAddressImporter() ethsrv.AddressImporter {
+	return ethsrv.NewAddressImport(
+		r.newETH(),
 		r.newLogger(),
 		r.newMySQLClient(),
 		r.newAddressRepo(),
