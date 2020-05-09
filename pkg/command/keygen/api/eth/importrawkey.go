@@ -54,10 +54,6 @@ func (c *ImportRawKeyCommand) Run(args []string) int {
 		return 1
 	}
 
-	//if strings.HasPrefix(privKey, "0x") {
-	//	privKey = strings.TrimLeft(privKey, "0x")
-	//}
-
 	addr, err := c.eth.ImportRawKey(privKey, passPhrase)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call eth.ImportRawKey() %+v", err))

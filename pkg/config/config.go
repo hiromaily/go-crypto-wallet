@@ -46,7 +46,7 @@ func loadConfig(path string) (*Config, error) {
 	var config Config
 	_, err = toml.Decode(string(d), &config)
 	if err != nil {
-		return nil, errors.New("toml file can not be parsed")
+		return nil, errors.Wrap(err, "fail to call toml.Decode()")
 	}
 
 	return &config, nil

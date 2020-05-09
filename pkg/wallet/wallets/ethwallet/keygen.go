@@ -62,8 +62,7 @@ func (k *ETHKeygen) GenerateAccountKey(accountType account.AccountType, seed []b
 
 // ImportPrivKey imports privKey
 func (k *ETHKeygen) ImportPrivKey(accountType account.AccountType) error {
-	//return k.PrivKeyer.Import(accountType)
-	return nil
+	return k.PrivKeyer.Import(accountType)
 }
 
 // ImportFullPubKey imports full-pubkey

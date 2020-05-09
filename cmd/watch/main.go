@@ -63,7 +63,7 @@ func main() {
 
 	// validate coinTypeCode
 	if !coin.ValidateCoinTypeCode(coinTypeCode) {
-		log.Fatal("coin args is invalid. `btc`, `bch` is allowed")
+		log.Fatal("coin args is invalid. `btc`, `bch`, `eth` is allowed")
 	}
 
 	// set config path if environment variable is existing

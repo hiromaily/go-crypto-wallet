@@ -44,7 +44,7 @@ func main() {
 	)
 	flags := flag.NewFlagSet("main", flag.ContinueOnError)
 	flags.StringVar(&confPath, "conf", "", "config file path")
-	flags.StringVar(&coinTypeCode, "coin", "btc", "coin type code `btc`, `bch`")
+	flags.StringVar(&coinTypeCode, "coin", "btc", "coin type code `btc`, `bch`, `eth`")
 	flags.StringVar(&btcWallet, "wallet", "", "specify wallet.dat in bitcoin core")
 	flags.BoolVar(&isVersion, "version", false, "show version")
 	flags.BoolVar(&isHelp, "help", false, "show help")
@@ -60,7 +60,7 @@ func main() {
 
 	// validate coinTypeCode
 	if !coin.ValidateCoinTypeCode(coinTypeCode) {
-		log.Fatal("coin args is invalid. `btc`, `bch` is allowed")
+		log.Fatal("coin args is invalid. `btc`, `bch`, `eth` is allowed")
 	}
 
 	// set config path if environment variable is existing

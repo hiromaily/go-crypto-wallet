@@ -80,7 +80,7 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 		_, err = p.accountKeyRepo.UpdateAddrStatus(accountType, address.AddrStatusPrivKeyImported, []string{record.WalletImportFormat})
 		if err != nil {
 			p.logger.Error(
-				"fail to call repo.AccountKey().UpdateAddrStatus()",
+				"fail to call accountKeyRepo.UpdateAddrStatus(), but privKey import is done",
 				zap.String("target_table", "account_key_account"),
 				zap.String("account_type", accountType.String()),
 				zap.String("record.WalletImportFormat", record.WalletImportFormat),
@@ -120,7 +120,6 @@ func (p *PrivKey) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPub
 	}
 
 	// 1.call `getaccount` by target_address
-	//FIXME: error occurred in BCH
 	acnt, err := p.btc.GetAccount(targetAddr)
 	if err != nil {
 		p.logger.Warn(

@@ -7,10 +7,11 @@
 #!cmd/keygen
 #!cmd/sign
 
-data/dump/*
-data/tx/*
-data/fullpubkey/*
 data/address/*
+data/dump/*
+data/fullpubkey/*
+data/keystore/*
+data/tx/*
 
 docker/grafana/*
 docker/btc/data/testnet3
