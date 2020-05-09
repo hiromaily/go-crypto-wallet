@@ -20,6 +20,7 @@ type ETHKeygen struct {
 	wtype  wtype.WalletType
 	service.Seeder
 	service.HDWalleter
+	service.PrivKeyer
 }
 
 // NewETHKeygen returns ETHKeygen object
@@ -30,6 +31,7 @@ func NewETHKeygen(
 	wtype wtype.WalletType,
 	seeder service.Seeder,
 	hdWallter service.HDWalleter,
+	privKeyer service.PrivKeyer,
 ) *ETHKeygen {
 
 	return &ETHKeygen{
@@ -39,6 +41,7 @@ func NewETHKeygen(
 		wtype:      wtype,
 		Seeder:     seeder,
 		HDWalleter: hdWallter,
+		PrivKeyer:  privKeyer,
 	}
 }
 
@@ -66,26 +69,28 @@ func (k *ETHKeygen) ImportPrivKey(accountType account.AccountType) error {
 // ImportFullPubKey imports full-pubkey
 func (k *ETHKeygen) ImportFullPubKey(fileName string) error {
 	//return k.FullPubKeyImporter.ImportFullPubKey(fileName)
-	// no functionality in ETH
+	k.logger.Info("no functionality for ImportFullPubKey() in ETH")
 	return nil
 }
 
 // CreateMultisigAddress creates multi sig address returns Multisiger interface
 func (k *ETHKeygen) CreateMultisigAddress(accountType account.AccountType) error {
 	//return k.Multisiger.AddMultisigAddress(accountType, k.addrType)
-	// no functionality in ETH
+	k.logger.Info("no functionality for CreateMultisigAddress() in ETH")
 	return nil
 }
 
 // ExportAddress exports address
 func (k *ETHKeygen) ExportAddress(accountType account.AccountType) (string, error) {
 	//return k.AddressExporter.ExportAddress(accountType)
+	k.logger.Warn("not implemented yet in ETH")
 	return "", nil
 }
 
 // SignTx signs on transaction
 func (k *ETHKeygen) SignTx(filePath string) (string, bool, string, error) {
 	//return k.Signer.SignTx(filePath)
+	k.logger.Warn("not implemented yet in ETH")
 	return "", false, "", nil
 }
 

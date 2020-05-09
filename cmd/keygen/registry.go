@@ -25,6 +25,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/btc/coldsrv"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/btc/coldsrv/keygensrv"
 	commonsrv "github.com/hiromaily/go-bitcoin/pkg/wallet/service/common/coldsrv"
+	ethsrv "github.com/hiromaily/go-bitcoin/pkg/wallet/service/eth/keygensrv"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/btcwallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/ethwallet"
@@ -94,7 +95,7 @@ func (r *registry) newETHKeygener() wallets.Keygener {
 		r.walletType,
 		r.newSeeder(),
 		r.newHdWallter(),
-		//r.newPrivKeyer(),
+		r.newPrivKeyer(),
 	)
 }
 
@@ -123,12 +124,24 @@ func (r *registry) newHdWalletRepo() commonsrv.HDWalletRepo {
 }
 
 func (r *registry) newPrivKeyer() service.PrivKeyer {
-	return keygensrv.NewPrivKey(
-		r.newBTC(),
-		r.newLogger(),
-		r.newAccountKeyRepo(),
-		r.walletType,
-	)
+	switch r.conf.CoinTypeCode {
+	case coin.BTC, coin.BCH:
+		return keygensrv.NewPrivKey(
+			r.newBTC(),
+			r.newLogger(),
+			r.newAccountKeyRepo(),
+			r.walletType,
+		)
+	case coin.ETH:
+		return ethsrv.NewPrivKey(
+			r.newETH(),
+			r.newLogger(),
+			r.newAccountKeyRepo(),
+			r.walletType,
+		)
+	default:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
+	}
 }
 
 func (r *registry) newFullPubKeyImporter() service.FullPubKeyImporter {

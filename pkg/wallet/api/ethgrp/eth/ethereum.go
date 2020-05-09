@@ -21,7 +21,7 @@ type Ethereum struct {
 	ctx          context.Context
 	netID        uint16
 	version      string
-	keyDir      string
+	keyDir       string
 }
 
 // NewEthereum creates ethereum object
@@ -37,7 +37,7 @@ func NewEthereum(
 		coinTypeCode: coinTypeCode,
 		logger:       logger,
 		ctx:          ctx,
-		keyDir:      conf.Geth.KeyDirName,
+		keyDir:       conf.Geth.KeyDirName,
 	}
 
 	// get NetID

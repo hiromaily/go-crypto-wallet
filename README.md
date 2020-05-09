@@ -261,7 +261,7 @@ watch send -file xxx.csv
 ### For ETH
 - [x] Key generating by HD Wallet
 - [ ] Add any useful APIs
-- [ ] Importing private key 
+- [ ] Importing private key, how password is handled??
 - [ ] Exporting addresses to watch wallet
 - [ ] Creating unsigned raw transaction for deposit
 - [ ] Creating unsigned raw transaction for payment
