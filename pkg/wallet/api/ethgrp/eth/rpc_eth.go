@@ -8,11 +8,16 @@ import (
 	"go.uber.org/zap"
 )
 
-// ResponseSyncing respons of eth_syncing
+// ResponseSyncing response of eth_syncing
 type ResponseSyncing struct {
 	StartingBlock int64 `json:"startingBlock"`
 	CurrentBlock  int64 `json:"currentBlock"`
 	HighestBlock  int64 `json:"highestBlock"`
+}
+
+// BlockNumber response of eth_blockNumber
+type BlockNumber struct {
+	Number string
 }
 
 // Syncing returns sync status or bool
@@ -291,17 +296,30 @@ func (e *Ethereum) GetCode(hexAddr string, quantityTag QuantityTag) (*big.Int, e
 // eth_getBlockByHash
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbyhash
 
-// eth_getBlockByNumber
+// GetBlockByNumber returns information about a block by block number
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbynumber
+func (e *Ethereum) GetBlockByNumber(quantityTag QuantityTag) (*big.Int, error) {
+
+	var lastBlock BlockNumber
+
+	err := e.rpcClient.CallContext(e.ctx, &lastBlock, "eth_getBlockByNumber", quantityTag.String(), false)
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_getBlockByNumber)")
+	}
+
+	h, err := hexutil.DecodeBig(lastBlock.Number)
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
+	}
+
+	return h, nil
+}
 
 // eth_getTransactionByBlockHashAndIndex
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyblockhashandindex
 
 // eth_getTransactionByBlockNumberAndIndex
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyblocknumberandindex
-
-// eth_getTransactionReceipt
-// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionreceipt
 
 // eth_pendingTransactions
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_pendingtransactions
