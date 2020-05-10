@@ -12,7 +12,6 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
 )
 
 // PrivKey type
@@ -53,6 +52,7 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 		return nil
 	}
 
+	//FIXME: replace to new func
 	keyDir := fmt.Sprintf("%s/%s", p.keyDir, accountType.String())
 	ks := keystore.NewKeyStore(keyDir, keystore.StandardScryptN, keystore.StandardScryptP)
 
@@ -64,7 +64,7 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 			zap.String("private key", record.WalletImportFormat))
 
 		//generatedAddr, err := p.eth.ImportRawKey(record.WalletImportFormat, "password")
-		ecdsaKey, err := key.ToECDSA(record.WalletImportFormat)
+		ecdsaKey, err := p.eth.ToECDSA(record.WalletImportFormat)
 		if err != nil {
 			p.logger.Warn(
 				"fail to call key.ToECDSA()",

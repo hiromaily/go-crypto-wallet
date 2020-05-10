@@ -24,6 +24,7 @@ type Ethereum struct {
 	netID        uint16
 	version      string
 	keyDir       string
+	isParity     bool
 }
 
 // NewEthereum creates ethereum object
