@@ -7,6 +7,7 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.4.1 // indirect
 	github.com/DataDog/datadog-go v3.7.1+incompatible // indirect
 	github.com/VictoriaMetrics/fastcache v1.5.7 // indirect
+	github.com/apmckinlay/gsuneido v0.0.0-20190404155041-0b6cd442a18f // indirect
 	github.com/aristanetworks/goarista v0.0.0-20200429182514-19402535e24e // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/bookerzzz/grok v0.0.0
@@ -16,7 +17,7 @@ require (
 	github.com/cpacia/bchutil v0.0.0-20181003130114-b126f6a35b6c
 	github.com/deckarep/golang-set v1.7.1 // indirect
 	github.com/elastic/gosigar v0.10.5 // indirect
-	github.com/ericlagergren/decimal v0.0.0-20191206042408-88212e6cfca9
+	github.com/ericlagergren/decimal v0.0.0-20181231230500-73749d4874d5
 	github.com/ethereum/go-ethereum v1.9.13
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/friendsofgo/errors v0.9.2
