@@ -28,6 +28,17 @@ func (e *Ethereum) StopMining() error {
 	return err
 }
 
+// Mining returns true if client is actively mining new blocks
+// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_mining
+func (e *Ethereum) Mining() (bool, error) {
+	var bRet bool
+	err := e.rpcClient.CallContext(e.ctx, &bRet, "eth_mining")
+	if err != nil {
+		return false, errors.New("fail to call rpc.CallContext(eth_mining)")
+	}
+	return bRet, err
+}
+
 // HashRate returns the number of hashes per second that the node is mining with
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_hashrate
 func (e *Ethereum) HashRate() (*big.Int, error) {

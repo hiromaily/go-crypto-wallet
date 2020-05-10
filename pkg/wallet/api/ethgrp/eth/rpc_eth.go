@@ -94,25 +94,8 @@ func (e *Ethereum) Coinbase() (string, error) {
 	return resAddr, err
 }
 
-// GasPrice returns the current price per gas in wei
-// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gasprice
-func (e *Ethereum) GasPrice() (*big.Int, error) {
-
-	var gasPrice string
-	err := e.rpcClient.CallContext(e.ctx, &gasPrice, "eth_gasPrice")
-	if err != nil {
-		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_gasPrice)")
-	}
-	h, err := hexutil.DecodeBig(gasPrice)
-	if err != nil {
-		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
-	}
-
-	return h, nil
-}
-
 // Accounts returns a list of addresses owned by client
-// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gasprice
+// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_accounts
 func (e *Ethereum) Accounts() ([]string, error) {
 
 	var accounts []string
@@ -304,3 +287,29 @@ func (e *Ethereum) GetCode(hexAddr string, quantityTag QuantityTag) (*big.Int, e
 
 	return h, nil
 }
+
+// eth_getBlockByHash
+// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbyhash
+
+// eth_getBlockByNumber
+// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbynumber
+
+// eth_getTransactionByBlockHashAndIndex
+// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyblockhashandindex
+
+// eth_getTransactionByBlockNumberAndIndex
+// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyblocknumberandindex
+
+// eth_getTransactionReceipt
+// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionreceipt
+
+// eth_pendingTransactions
+// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_pendingtransactions
+
+// eth_getUncleByBlockHashAndIndex
+// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getunclebyblockhashandindex
+
+// eth_getUncleByBlockNumberAndIndex
+// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getunclebyblocknumberandindex
+
+//

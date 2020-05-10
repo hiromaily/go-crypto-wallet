@@ -58,3 +58,15 @@ func (e *Ethereum) SendRawTransactionWithTypesTx(tx *types.Transaction) (string,
 	}
 	return e.SendRawTransaction(hexutil.Encode(encodedTx))
 }
+
+// Call executes a new message call immediately without creating a transaction on the block chain
+// FIXME: check is not done yet
+func (e *Ethereum) Call(msg ethereum.CallMsg) (string, error) {
+	var txHash string
+	err := e.rpcClient.CallContext(e.ctx, &txHash, "eth_call", msg)
+	if err != nil {
+		return "", errors.Wrap(err, "fail to call rpc.CallContext(eth_call)")
+	}
+
+	return txHash, nil
+}
