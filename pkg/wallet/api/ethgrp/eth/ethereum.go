@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/btcsuite/btcd/chaincfg"
+	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -14,7 +15,8 @@ import (
 
 // Ethereum includes client to call JSON-RPC
 type Ethereum struct {
-	client       *ethrpc.Client
+	ethClient    *ethclient.Client
+	rpcClient    *ethrpc.Client
 	chainConf    *chaincfg.Params
 	coinTypeCode coin.CoinTypeCode //eth
 	logger       *zap.Logger
@@ -27,13 +29,14 @@ type Ethereum struct {
 // NewEthereum creates ethereum object
 func NewEthereum(
 	ctx context.Context,
-	client *ethrpc.Client,
+	rpcClient *ethrpc.Client,
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Ethereum,
 	logger *zap.Logger) (*Ethereum, error) {
 
 	eth := &Ethereum{
-		client:       client,
+		ethClient:    ethclient.NewClient(rpcClient),
+		rpcClient:    rpcClient,
 		coinTypeCode: coinTypeCode,
 		logger:       logger,
 		ctx:          ctx,
@@ -83,8 +86,8 @@ func NewEthereum(
 
 // Close disconnect to server
 func (e *Ethereum) Close() {
-	if e.client != nil {
-		e.client.Close()
+	if e.rpcClient != nil {
+		e.rpcClient.Close()
 	}
 }
 

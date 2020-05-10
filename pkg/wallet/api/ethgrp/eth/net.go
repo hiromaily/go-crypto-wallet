@@ -15,7 +15,7 @@ import (
 // "42": Kovan Testnet
 func (e *Ethereum) NetVersion() (uint16, error) {
 	var resNetVersion string
-	err := e.client.CallContext(e.ctx, &resNetVersion, "net_version")
+	err := e.rpcClient.CallContext(e.ctx, &resNetVersion, "net_version")
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call client.CallContext(net_version)")
 	}
@@ -31,7 +31,7 @@ func (e *Ethereum) NetVersion() (uint16, error) {
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#net_listening
 func (e *Ethereum) NetListening() (bool, error) {
 	var isConnected bool
-	err := e.client.CallContext(e.ctx, &isConnected, "net_listening")
+	err := e.rpcClient.CallContext(e.ctx, &isConnected, "net_listening")
 	if err != nil {
 		return false, errors.Errorf("rpc.CallContext(net_listening) error: %s", err)
 	}

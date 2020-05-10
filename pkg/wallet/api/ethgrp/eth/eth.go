@@ -25,7 +25,7 @@ func (e *Ethereum) Syncing() (*ResponseSyncing, bool, error) {
 		resMap map[string]string
 	)
 
-	err := e.client.CallContext(e.ctx, &resIF, "eth_syncing")
+	err := e.rpcClient.CallContext(e.ctx, &resIF, "eth_syncing")
 	if err != nil {
 		return nil, false, errors.Wrap(err, "fail to call client.CallContext(eth_syncing)")
 	}
@@ -42,7 +42,7 @@ func (e *Ethereum) Syncing() (*ResponseSyncing, bool, error) {
 	if !ok {
 		// interface can't not be casted to type map
 		//resMap, ok = resIF.(map[string]string)
-		err := e.client.CallContext(e.ctx, &resMap, "eth_syncing")
+		err := e.rpcClient.CallContext(e.ctx, &resMap, "eth_syncing")
 		if err != nil {
 			return nil, false, errors.Wrap(err, "fail to call client.CallContext(eth_syncing)")
 		}

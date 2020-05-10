@@ -8,7 +8,7 @@ import (
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#web3_clientversion
 func (e *Ethereum) ClientVersion() (string, error) {
 	var resClientVersion string
-	err := e.client.CallContext(e.ctx, &resClientVersion, "web3_clientVersion")
+	err := e.rpcClient.CallContext(e.ctx, &resClientVersion, "web3_clientVersion")
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call client.CallContext(web3_clientVersion)")
 	}
@@ -19,7 +19,7 @@ func (e *Ethereum) ClientVersion() (string, error) {
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#web3_sha3
 func (e *Ethereum) SHA3(data []string) (string, error) {
 	var res string
-	err := e.client.CallContext(e.ctx, &res, "web3_sha3", data)
+	err := e.rpcClient.CallContext(e.ctx, &res, "web3_sha3", data)
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call client.CallContext(web3_sha3)")
 	}
