@@ -74,8 +74,6 @@ func NewEthereum(
 	}
 	if res != nil {
 		logger.Info("still syncing",
-			zap.Int64("knownStates", res.KnownStates),
-			zap.Int64("pulledStates", res.PulledStates),
 			zap.Int64("startingBlock", res.StartingBlock),
 			zap.Int64("currentBlock", res.CurrentBlock),
 			zap.Int64("highestBlock", res.HighestBlock),

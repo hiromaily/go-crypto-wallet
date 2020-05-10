@@ -1,8 +1,10 @@
 package eth
 
 import (
+	"math/big"
 	"strconv"
 
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"
 )
 
@@ -33,8 +35,19 @@ func (e *Ethereum) NetListening() (bool, error) {
 	var isConnected bool
 	err := e.rpcClient.CallContext(e.ctx, &isConnected, "net_listening")
 	if err != nil {
-		return false, errors.Errorf("rpc.CallContext(net_listening) error: %s", err)
+		return false, errors.Wrap(err, "fail to call rpc.CallContext(net_listening)")
 	}
 
 	return isConnected, nil
+}
+
+// NetPeerCount returns number of peers currently connected to the client
+// https://github.com/ethereum/wiki/wiki/JSON-RPC#net_peercount
+func (e *Ethereum) NetPeerCount() (*big.Int, error) {
+	var resPeerNumber string
+	err := e.rpcClient.CallContext(e.ctx, &resPeerNumber, "net_peerCount")
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to call client.CallContext(net_peerCount)")
+	}
+	return hexutil.DecodeBig(resPeerNumber)
 }
