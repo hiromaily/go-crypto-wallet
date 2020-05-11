@@ -24,19 +24,21 @@ func (c *APICommand) Synopsis() string {
 }
 
 var (
-	nodeinfoSynopsis = "node info"
-	syncingSynopsis  = "sync info"
-	versionSynopsis  = "network version"
+	clientVersionSynopsis  = "network version"
+	nodeinfoSynopsis       = "node info"
+	syncingSynopsis        = "sync info"
+	networkVersionSynopsis = "network version"
 )
 
 // Help returns usage for this subcommand
 func (c *APICommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet api [Subcommands...]
 Subcommands:
+  clientversion    %s
   nodeinfo         %s
   syncing          %s
   netversion       %s
-`, nodeinfoSynopsis, syncingSynopsis, versionSynopsis)
+`, clientVersionSynopsis, nodeinfoSynopsis, syncingSynopsis, networkVersionSynopsis)
 }
 
 // Run executes this subcommand
@@ -50,6 +52,14 @@ func (c *APICommand) Run(args []string) int {
 
 	//farther subcommand import
 	cmds := map[string]cli.CommandFactory{
+		"clientversion": func() (cli.Command, error) {
+			return &ClientVersionCommand{
+				name:     "clientversion",
+				synopsis: clientVersionSynopsis,
+				ui:       command.ClolorUI(),
+				eth:      c.ETH,
+			}, nil
+		},
 		"nodeinfo": func() (cli.Command, error) {
 			return &NodeInfoCommand{
 				name:     "nodeinfo",
@@ -69,7 +79,7 @@ func (c *APICommand) Run(args []string) int {
 		"netversion": func() (cli.Command, error) {
 			return &NetVersionCommand{
 				name:     "netversion",
-				synopsis: versionSynopsis,
+				synopsis: networkVersionSynopsis,
 				ui:       command.ClolorUI(),
 				eth:      c.ETH,
 			}, nil

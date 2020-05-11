@@ -9,8 +9,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp"
 )
 
-// NetVersionCommand syncing subcommand
-type NetVersionCommand struct {
+// ClientVersionCommand syncing subcommand
+type ClientVersionCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
@@ -18,18 +18,18 @@ type NetVersionCommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (c *NetVersionCommand) Synopsis() string {
+func (c *ClientVersionCommand) Synopsis() string {
 	return c.synopsis
 }
 
 // Help returns usage for this subcommand
-func (c *NetVersionCommand) Help() string {
-	return `Usage: wallet api netversion
+func (c *ClientVersionCommand) Help() string {
+	return `Usage: wallet api clientversion
 `
 }
 
 // Run executes this subcommand
-func (c *NetVersionCommand) Run(args []string) int {
+func (c *ClientVersionCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
@@ -37,13 +37,13 @@ func (c *NetVersionCommand) Run(args []string) int {
 		return 1
 	}
 
-	version, err := c.eth.NetVersion()
+	version, err := c.eth.ClientVersion()
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call eth.NetVersion() %+v", err))
+		c.ui.Error(fmt.Sprintf("fail to call eth.ClientVersion() %+v", err))
 		return 1
 	}
 
-	c.ui.Info(fmt.Sprintf("net version: %d", version))
+	c.ui.Info(fmt.Sprintf("client version: %s", version))
 
 	return 0
 }

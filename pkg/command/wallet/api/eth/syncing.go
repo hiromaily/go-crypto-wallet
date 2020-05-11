@@ -24,7 +24,7 @@ func (c *SyncingCommand) Synopsis() string {
 
 // Help returns usage for this subcommand
 func (c *SyncingCommand) Help() string {
-	return `Usage: wallet api nodeinfo
+	return `Usage: wallet api syncing
 `
 }
 
