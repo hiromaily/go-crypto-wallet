@@ -22,12 +22,12 @@ type Config struct {
 
 // Bitcoin Bitcoin information
 type Bitcoin struct {
-	Host        string              `toml:"host" validate:"required"`
-	User        string              `toml:"user" validate:"required"`
-	Pass        string              `toml:"pass" validate:"required"`
-	PostMode    bool                `toml:"http_post_mode"`
-	DisableTLS  bool                `toml:"disable_tls"`
-	NetworkType coin.NetworkTypeBTC `toml:"network_type" validate:"oneof=mainnet testnet3 regtest"`
+	Host        string `toml:"host" validate:"required"`
+	User        string `toml:"user" validate:"required"`
+	Pass        string `toml:"pass" validate:"required"`
+	PostMode    bool   `toml:"http_post_mode"`
+	DisableTLS  bool   `toml:"disable_tls"`
+	NetworkType string `toml:"network_type" validate:"oneof=mainnet testnet3 regtest"`
 
 	Block BitcoinBlock `toml:"block"`
 	Fee   BitcoinFee   `toml:"fee"`
@@ -48,11 +48,11 @@ type BitcoinFee struct {
 
 // Ethereum Ethereum information
 type Ethereum struct {
-	Host        string              `toml:"host" validate:"required"`
-	Port        int                 `toml:"port" validate:"required"`
-	DisableTLS  bool                `toml:"disable_tls"`
-	NetworkType coin.NetworkTypeETH `toml:"network_type" validate:"oneof=mainnet goerli rinkeby ropsten"`
-	Geth        Geth                `toml:"geth"`
+	Host        string `toml:"host" validate:"required"`
+	Port        int    `toml:"port" validate:"required"`
+	DisableTLS  bool   `toml:"disable_tls"`
+	NetworkType string `toml:"network_type" validate:"oneof=mainnet goerli rinkeby ropsten"`
+	Geth        Geth   `toml:"geth"`
 }
 
 // Geth geth info

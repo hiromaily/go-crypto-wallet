@@ -49,7 +49,7 @@ type Bitcoiner interface {
 	ConfirmationBlock() uint64
 	FeeRangeMax() float64
 	FeeRangeMin() float64
-	Version() coin.BTCVersion
+	Version() btc.BTCVersion
 	CoinTypeCode() coin.CoinTypeCode
 
 	//fee.go

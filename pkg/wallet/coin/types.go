@@ -40,7 +40,7 @@ func (c CoinTypeCode) String() string {
 
 // CoinType returns CoinType
 func (c CoinTypeCode) CoinType(conf *chaincfg.Params) CoinType {
-	if conf.Name != NetworkTypeMainNet.String() {
+	if conf.Name != "mainnet" {
 		return CoinTypeTestnet
 	}
 	if coinType, ok := CoinTypeCodeValue[c]; ok {
@@ -65,67 +65,4 @@ func ValidateCoinTypeCode(val string) bool {
 		return true
 	}
 	return false
-}
-
-//----------------------------------------------------
-// BTCVersion
-//----------------------------------------------------
-
-// BTCVersion version
-type BTCVersion int
-
-// expected version
-const (
-	BTCVer17 BTCVersion = 170000
-	BTCVer18 BTCVersion = 180000
-	BTCVer19 BTCVersion = 190000
-	BTCVer20 BTCVersion = 200000
-	BTCVer21 BTCVersion = 210000 // for BCH version
-)
-
-// Int converter
-func (v BTCVersion) Int() int {
-	return int(v)
-}
-
-// RequiredVersion is required version for this wallet apps
-const RequiredVersion = BTCVer19
-
-//----------------------------------------------------
-// NetworkTypeBTC
-//----------------------------------------------------
-
-// NetworkTypeBTC network type
-type NetworkTypeBTC string
-
-// network type
-const (
-	NetworkTypeMainNet    NetworkTypeBTC = "mainnet"
-	NetworkTypeTestNet3   NetworkTypeBTC = "testnet3"
-	NetworkTypeRegTestNet NetworkTypeBTC = "regtest"
-)
-
-// String converter
-func (n NetworkTypeBTC) String() string {
-	return string(n)
-}
-
-//----------------------------------------------------
-// NetworkTypeETH
-//----------------------------------------------------
-
-// NetworkTypeETH network type
-type NetworkTypeETH string
-
-// network type
-const (
-	NetworkTypeETHMainNet    NetworkTypeETH = "mainnet"
-	NetworkTypeETHGoerli     NetworkTypeETH = "goerli"
-	NetworkTypeETHRegRinkeby NetworkTypeETH = "rinkeby"
-	NetworkTypeETHRopsten    NetworkTypeETH = "ropsten"
-)
-
-// String converter
-func (n NetworkTypeETH) String() string {
-	return string(n)
 }

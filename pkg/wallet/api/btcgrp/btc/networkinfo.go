@@ -4,26 +4,24 @@ import (
 	"encoding/json"
 
 	"github.com/pkg/errors"
-
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
 // GetNetworkInfoResult is response type of PRC `getnetworkinfo`
 type GetNetworkInfoResult struct {
-	Version            coin.BTCVersion `json:"version"`
-	Subversion         string          `json:"subversion"`
-	Protocolversion    uint32          `json:"protocolversion"`
-	Localservices      string          `json:"localservices"`
-	Localservicesnames []string        `json:"localservicesnames"`
-	Localrelay         bool            `json:"localrelay"`
-	Timeoffset         int64           `json:"timeoffset"`
-	Networkactive      bool            `json:"networkactive"`
-	Connections        uint32          `json:"connections"`
-	Networks           []Network       `json:"networks"`
-	Relayfee           float64         `json:"relayfee"`
-	Incrementalfee     float64         `json:"incrementalfee"`
-	Localaddresses     []LocalAddress  `json:"localaddresses"`
-	Warnings           string          `json:"warnings"`
+	Version            BTCVersion     `json:"version"`
+	Subversion         string         `json:"subversion"`
+	Protocolversion    uint32         `json:"protocolversion"`
+	Localservices      string         `json:"localservices"`
+	Localservicesnames []string       `json:"localservicesnames"`
+	Localrelay         bool           `json:"localrelay"`
+	Timeoffset         int64          `json:"timeoffset"`
+	Networkactive      bool           `json:"networkactive"`
+	Connections        uint32         `json:"connections"`
+	Networks           []Network      `json:"networks"`
+	Relayfee           float64        `json:"relayfee"`
+	Incrementalfee     float64        `json:"incrementalfee"`
+	Localaddresses     []LocalAddress `json:"localaddresses"`
+	Warnings           string         `json:"warnings"`
 }
 
 // Network network info

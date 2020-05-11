@@ -1,5 +1,9 @@
 package eth
 
+//----------------------------------------------------
+// QuantityTag
+//----------------------------------------------------
+
 // QuantityTag quantity tag
 type QuantityTag string
 
@@ -14,6 +18,30 @@ const (
 func (q QuantityTag) String() string {
 	return string(q)
 }
+
+//----------------------------------------------------
+// NetworkTypeETH
+//----------------------------------------------------
+
+// NetworkTypeETH network type
+type NetworkTypeETH string
+
+// network type
+const (
+	NetworkTypeETHMainNet    NetworkTypeETH = "mainnet"
+	NetworkTypeETHGoerli     NetworkTypeETH = "goerli"
+	NetworkTypeETHRegRinkeby NetworkTypeETH = "rinkeby"
+	NetworkTypeETHRopsten    NetworkTypeETH = "ropsten"
+)
+
+// String converter
+func (n NetworkTypeETH) String() string {
+	return string(n)
+}
+
+//----------------------------------------------------
+// ChainID
+//----------------------------------------------------
 
 // ChainID type of network ID // not net-version
 // https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md
@@ -45,6 +73,10 @@ var ChainIDMap = map[uint16]ChainID{
 func (c ChainID) String() string {
 	return string(c)
 }
+
+//----------------------------------------------------
+// ClientVersion
+//----------------------------------------------------
 
 // ClientVersion Client(Node)のバージョンを返す
 type ClientVersion string

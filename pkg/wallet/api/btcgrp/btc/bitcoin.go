@@ -16,7 +16,7 @@ type Bitcoin struct {
 	Client            *rpcclient.Client
 	chainConf         *chaincfg.Params
 	coinTypeCode      coin.CoinTypeCode //btc
-	version           coin.BTCVersion   //179900
+	version           BTCVersion        //179900
 	confirmationBlock uint64
 	feeRange          FeeAdjustmentRate
 	logger            *zap.Logger
@@ -42,12 +42,12 @@ func NewBitcoin(
 
 	bit.coinTypeCode = coinTypeCode
 
-	switch conf.NetworkType {
-	case coin.NetworkTypeMainNet:
+	switch NetworkTypeBTC(conf.NetworkType) {
+	case NetworkTypeMainNet:
 		bit.chainConf = &chaincfg.MainNetParams
-	case coin.NetworkTypeTestNet3:
+	case NetworkTypeTestNet3:
 		bit.chainConf = &chaincfg.TestNet3Params
-	case coin.NetworkTypeRegTestNet:
+	case NetworkTypeRegTestNet:
 		bit.chainConf = &chaincfg.RegressionNetParams
 	default:
 		return nil, errors.Errorf("bitcoin network type is invalid in config")
@@ -58,8 +58,8 @@ func NewBitcoin(
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call bit.GetNetworkInfo()")
 	}
-	if coin.RequiredVersion > netInfo.Version {
-		return nil, errors.Errorf("bitcoin core version should be %d +, but version %d is detected", coin.RequiredVersion, netInfo.Version)
+	if RequiredVersion > netInfo.Version {
+		return nil, errors.Errorf("bitcoin core version should be %d +, but version %d is detected", RequiredVersion, netInfo.Version)
 	}
 	bit.version = netInfo.Version
 	bit.logger.Info("bitcoin rpc server", zap.Int("version", netInfo.Version.Int()))
@@ -110,7 +110,7 @@ func (b *Bitcoin) FeeRangeMin() float64 {
 }
 
 // Version returns core version
-func (b *Bitcoin) Version() coin.BTCVersion {
+func (b *Bitcoin) Version() BTCVersion {
 	return b.version
 }
 
