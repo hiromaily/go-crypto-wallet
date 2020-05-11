@@ -2,6 +2,7 @@ package eth
 
 import (
 	"context"
+	"strings"
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -57,12 +58,14 @@ func NewEthereum(
 		eth.chainConf = &chaincfg.TestNet3Params
 	}
 
-	// get version
+	// get client version
 	clientVer, err := eth.ClientVersion()
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call eth.ClientVersion()")
 	}
 	eth.version = clientVer
+
+	eth.isParity = isParity(clientVer)
 
 	// check sync progress
 	res, isSyncing, err := eth.Syncing()
@@ -93,4 +96,11 @@ func (e *Ethereum) Close() {
 // GetChainConf returns chain conf
 func (e *Ethereum) GetChainConf() *chaincfg.Params {
 	return e.chainConf
+}
+
+func isParity(target string) bool {
+	if strings.Index(target, ClientVersionParity.String()) == -1 {
+		return false
+	}
+	return true
 }
