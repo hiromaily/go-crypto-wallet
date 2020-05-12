@@ -17,8 +17,8 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
-// TxRepositorier is TxRepository interface
-type TxRepositorier interface {
+// BTCTxRepositorier is BTCTxRepository interface
+type BTCTxRepositorier interface {
 	GetOne(id int64) (*models.BTCTX, error)
 	GetCountByUnsignedHex(actionType action.ActionType, hex string) (int64, error)
 	GetTxIDBySentHash(actionType action.ActionType, hash string) (int64, error)
@@ -31,17 +31,17 @@ type TxRepositorier interface {
 	DeleteAll() (int64, error)
 }
 
-// TxRepository is repository for tx table
-type TxRepository struct {
+// BTCTxRepository is repository for tx table
+type BTCTxRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
 	logger       *zap.Logger
 }
 
-// NewTxRepository returns TxRepository object
-func NewTxRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *TxRepository {
-	return &TxRepository{
+// NewBTCTxRepository returns BTCTxRepository object
+func NewBTCTxRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *BTCTxRepository {
+	return &BTCTxRepository{
 		dbConn:       dbConn,
 		tableName:    "btc_tx",
 		coinTypeCode: coinTypeCode,
@@ -50,7 +50,7 @@ func NewTxRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap
 }
 
 // GetOne returns one record by ID
-func (r *TxRepository) GetOne(id int64) (*models.BTCTX, error) {
+func (r *BTCTxRepository) GetOne(id int64) (*models.BTCTX, error) {
 	//sql := fmt.Sprintf(`SELECT * FROM %s WHERE id=%d`, r.tableName, id)
 	ctx := context.Background()
 
@@ -65,7 +65,7 @@ func (r *TxRepository) GetOne(id int64) (*models.BTCTX, error) {
 }
 
 // GetCountByUnsignedHex returns count by hex string
-func (r *TxRepository) GetCountByUnsignedHex(actionType action.ActionType, hex string) (int64, error) {
+func (r *BTCTxRepository) GetCountByUnsignedHex(actionType action.ActionType, hex string) (int64, error) {
 	ctx := context.Background()
 	queries := []qm.QueryMod{
 		qm.Where("coin=?", r.coinTypeCode.String()),
@@ -80,7 +80,7 @@ func (r *TxRepository) GetCountByUnsignedHex(actionType action.ActionType, hex s
 }
 
 // GetTxIDBySentHash returns txID  by sentHashTx
-func (r *TxRepository) GetTxIDBySentHash(actionType action.ActionType, hash string) (int64, error) {
+func (r *BTCTxRepository) GetTxIDBySentHash(actionType action.ActionType, hash string) (int64, error) {
 	//sql := fmt.Sprintf(`SELECT id FROM %s WHERE sent_hash_tx="%s"`, r.tableName, hash)
 	ctx := context.Background()
 
@@ -98,7 +98,7 @@ func (r *TxRepository) GetTxIDBySentHash(actionType action.ActionType, hash stri
 	return txItem.ID, nil
 }
 
-func (r *TxRepository) getTxIDByUnsignedHexTx(actionType action.ActionType, hex string) (int64, error) {
+func (r *BTCTxRepository) getTxIDByUnsignedHexTx(actionType action.ActionType, hex string) (int64, error) {
 	//sql := fmt.Sprintf(`SELECT id FROM %s WHERE unsigned_hex_tx="%s"`, r.tableName, hex)
 	ctx := context.Background()
 
@@ -117,7 +117,7 @@ func (r *TxRepository) getTxIDByUnsignedHexTx(actionType action.ActionType, hex 
 }
 
 // GetSentHashTx returns list of sent_hash_tx by txType
-func (r *TxRepository) GetSentHashTx(actionType action.ActionType, txType tx.TxType) ([]string, error) {
+func (r *BTCTxRepository) GetSentHashTx(actionType action.ActionType, txType tx.TxType) ([]string, error) {
 	//sql := fmt.Sprintf(`SELECT sent_hash_tx FROM %s WHERE current_tx_type="%s"`, r.tableName, txType.String())
 	ctx := context.Background()
 
@@ -141,7 +141,7 @@ func (r *TxRepository) GetSentHashTx(actionType action.ActionType, txType tx.TxT
 }
 
 // InsertUnsignedTx inserts records
-func (r *TxRepository) InsertUnsignedTx(actionType action.ActionType, txItem *models.BTCTX) (int64, error) {
+func (r *BTCTxRepository) InsertUnsignedTx(actionType action.ActionType, txItem *models.BTCTX) (int64, error) {
 	//set coin
 	txItem.Coin = r.coinTypeCode.String()
 
@@ -160,13 +160,13 @@ func (r *TxRepository) InsertUnsignedTx(actionType action.ActionType, txItem *mo
 }
 
 // Update updates by models.Tx (entire update)
-func (r *TxRepository) Update(txItem *models.BTCTX) (int64, error) {
+func (r *BTCTxRepository) Update(txItem *models.BTCTX) (int64, error) {
 	ctx := context.Background()
 	return txItem.Update(ctx, r.dbConn, boil.Infer())
 }
 
 // UpdateAfterTxSent updates when tx sent
-func (r *TxRepository) UpdateAfterTxSent(
+func (r *BTCTxRepository) UpdateAfterTxSent(
 	txID int64,
 	txType tx.TxType,
 	signedHex,
@@ -187,7 +187,7 @@ func (r *TxRepository) UpdateAfterTxSent(
 }
 
 // UpdateTxType updates txType
-func (r *TxRepository) UpdateTxType(id int64, txType tx.TxType) (int64, error) {
+func (r *BTCTxRepository) UpdateTxType(id int64, txType tx.TxType) (int64, error) {
 	//UPDATE %s SET current_tx_type=? WHERE id=?
 	ctx := context.Background()
 
@@ -201,7 +201,7 @@ func (r *TxRepository) UpdateTxType(id int64, txType tx.TxType) (int64, error) {
 }
 
 // UpdateTxTypeBySentHashTx updates txType
-func (r *TxRepository) UpdateTxTypeBySentHashTx(actionType action.ActionType, txType tx.TxType, sentHashTx string) (int64, error) {
+func (r *BTCTxRepository) UpdateTxTypeBySentHashTx(actionType action.ActionType, txType tx.TxType, sentHashTx string) (int64, error) {
 	//UPDATE %s SET current_tx_type=? WHERE sent_hash_tx=?
 	ctx := context.Background()
 
@@ -217,7 +217,7 @@ func (r *TxRepository) UpdateTxTypeBySentHashTx(actionType action.ActionType, tx
 }
 
 // DeleteAll deletes all records
-func (r *TxRepository) DeleteAll() (int64, error) {
+func (r *BTCTxRepository) DeleteAll() (int64, error) {
 	ctx := context.Background()
 	txItems, _ := models.BTCTxes().All(ctx, r.dbConn)
 	return txItems.DeleteAll(ctx, r.dbConn)

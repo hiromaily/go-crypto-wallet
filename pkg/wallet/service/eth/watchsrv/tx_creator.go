@@ -14,14 +14,15 @@ import (
 
 // TxCreate type
 type TxCreate struct {
-	eth        ethgrp.Ethereumer
-	logger     *zap.Logger
-	dbConn     *sql.DB
-	addrRepo   watchrepo.AddressRepositorier
-	txRepo     watchrepo.TxRepositorier
-	payReqRepo watchrepo.PaymentRequestRepositorier
-	txFileRepo tx.FileRepositorier
-	wtype      wallet.WalletType
+	eth          ethgrp.Ethereumer
+	logger       *zap.Logger
+	dbConn       *sql.DB
+	addrRepo     watchrepo.AddressRepositorier
+	txRepo       watchrepo.ETHTxRepositorier
+	txDetailRepo watchrepo.EthDetailTxRepositorier
+	payReqRepo   watchrepo.PaymentRequestRepositorier
+	txFileRepo   tx.FileRepositorier
+	wtype        wallet.WalletType
 }
 
 // NewTxCreate returns TxCreate object
@@ -30,20 +31,22 @@ func NewTxCreate(
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
-	txRepo watchrepo.TxRepositorier,
+	txRepo watchrepo.ETHTxRepositorier,
+	txDetailRepo watchrepo.EthDetailTxRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,
 	txFileRepo tx.FileRepositorier,
 	wtype wallet.WalletType) *TxCreate {
 
 	return &TxCreate{
-		eth:        eth,
-		logger:     logger,
-		dbConn:     dbConn,
-		addrRepo:   addrRepo,
-		txRepo:     txRepo,
-		payReqRepo: payReqRepo,
-		txFileRepo: txFileRepo,
-		wtype:      wtype,
+		eth:          eth,
+		logger:       logger,
+		dbConn:       dbConn,
+		addrRepo:     addrRepo,
+		txRepo:       txRepo,
+		txDetailRepo: txDetailRepo,
+		payReqRepo:   payReqRepo,
+		txFileRepo:   txFileRepo,
+		wtype:        wtype,
 	}
 }
 

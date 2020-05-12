@@ -10,6 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/p2p"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
+	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp/eth"
 )
 
@@ -74,7 +75,7 @@ type Ethereumer interface {
 	ClientVersion() (string, error)
 	SHA3(data []string) (string, error)
 	// transaction
-	CreateRawTransaction(fromAddr, toAddr string, amount uint64) (string, []byte, error)
+	CreateRawTransaction(fromAddr, toAddr string, amount uint64) (string, []byte, *models.EthDetailTX, error)
 	SignOnRawTransaction(rawTx *eth.RawTx, passphrase string, accountType account.AccountType) (*eth.RawTx, []byte, error)
 	SendSignedRawTransaction(signedTxHex string) (string, error)
 	// util

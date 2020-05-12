@@ -20,26 +20,24 @@ import (
 	"github.com/volatiletech/sqlboiler/queries/qm"
 	"github.com/volatiletech/sqlboiler/queries/qmhelper"
 	"github.com/volatiletech/sqlboiler/strmangle"
-	"github.com/volatiletech/sqlboiler/types"
 )
 
 // EthDetailTX is an object representing the database table.
 type EthDetailTX struct {
-	ID              int64         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	TXID            int64         `boil:"tx_id" json:"tx_id" toml:"tx_id" yaml:"tx_id"`
-	SenderAccount   string        `boil:"sender_account" json:"sender_account" toml:"sender_account" yaml:"sender_account"`
-	SenderAddress   string        `boil:"sender_address" json:"sender_address" toml:"sender_address" yaml:"sender_address"`
-	SenderAmount    types.Decimal `boil:"sender_amount" json:"sender_amount" toml:"sender_amount" yaml:"sender_amount"`
-	ReceiverAccount string        `boil:"receiver_account" json:"receiver_account" toml:"receiver_account" yaml:"receiver_account"`
-	ReceiverAddress string        `boil:"receiver_address" json:"receiver_address" toml:"receiver_address" yaml:"receiver_address"`
-	ReceiverAmount  types.Decimal `boil:"receiver_amount" json:"receiver_amount" toml:"receiver_amount" yaml:"receiver_amount"`
-	Fee             types.Decimal `boil:"fee" json:"fee" toml:"fee" yaml:"fee"`
-	GasLimit        uint32        `boil:"gas_limit" json:"gas_limit" toml:"gas_limit" yaml:"gas_limit"`
-	Nonce           int64         `boil:"nonce" json:"nonce" toml:"nonce" yaml:"nonce"`
-	UnsignedHexTX   string        `boil:"unsigned_hex_tx" json:"unsigned_hex_tx" toml:"unsigned_hex_tx" yaml:"unsigned_hex_tx"`
-	SignedHexTX     string        `boil:"signed_hex_tx" json:"signed_hex_tx" toml:"signed_hex_tx" yaml:"signed_hex_tx"`
-	SentHashTX      string        `boil:"sent_hash_tx" json:"sent_hash_tx" toml:"sent_hash_tx" yaml:"sent_hash_tx"`
-	UpdatedAt       null.Time     `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	ID              int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
+	TXID            int64     `boil:"tx_id" json:"tx_id" toml:"tx_id" yaml:"tx_id"`
+	SenderAccount   string    `boil:"sender_account" json:"sender_account" toml:"sender_account" yaml:"sender_account"`
+	SenderAddress   string    `boil:"sender_address" json:"sender_address" toml:"sender_address" yaml:"sender_address"`
+	ReceiverAccount string    `boil:"receiver_account" json:"receiver_account" toml:"receiver_account" yaml:"receiver_account"`
+	ReceiverAddress string    `boil:"receiver_address" json:"receiver_address" toml:"receiver_address" yaml:"receiver_address"`
+	Amount          uint64    `boil:"amount" json:"amount" toml:"amount" yaml:"amount"`
+	Fee             uint64    `boil:"fee" json:"fee" toml:"fee" yaml:"fee"`
+	GasLimit        uint32    `boil:"gas_limit" json:"gas_limit" toml:"gas_limit" yaml:"gas_limit"`
+	Nonce           uint64    `boil:"nonce" json:"nonce" toml:"nonce" yaml:"nonce"`
+	UnsignedHexTX   string    `boil:"unsigned_hex_tx" json:"unsigned_hex_tx" toml:"unsigned_hex_tx" yaml:"unsigned_hex_tx"`
+	SignedHexTX     string    `boil:"signed_hex_tx" json:"signed_hex_tx" toml:"signed_hex_tx" yaml:"signed_hex_tx"`
+	SentHashTX      string    `boil:"sent_hash_tx" json:"sent_hash_tx" toml:"sent_hash_tx" yaml:"sent_hash_tx"`
+	UpdatedAt       null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
 	R *ethDetailTXR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L ethDetailTXL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -50,10 +48,9 @@ var EthDetailTXColumns = struct {
 	TXID            string
 	SenderAccount   string
 	SenderAddress   string
-	SenderAmount    string
 	ReceiverAccount string
 	ReceiverAddress string
-	ReceiverAmount  string
+	Amount          string
 	Fee             string
 	GasLimit        string
 	Nonce           string
@@ -66,10 +63,9 @@ var EthDetailTXColumns = struct {
 	TXID:            "tx_id",
 	SenderAccount:   "sender_account",
 	SenderAddress:   "sender_address",
-	SenderAmount:    "sender_amount",
 	ReceiverAccount: "receiver_account",
 	ReceiverAddress: "receiver_address",
-	ReceiverAmount:  "receiver_amount",
+	Amount:          "amount",
 	Fee:             "fee",
 	GasLimit:        "gas_limit",
 	Nonce:           "nonce",
@@ -86,13 +82,12 @@ var EthDetailTXWhere = struct {
 	TXID            whereHelperint64
 	SenderAccount   whereHelperstring
 	SenderAddress   whereHelperstring
-	SenderAmount    whereHelpertypes_Decimal
 	ReceiverAccount whereHelperstring
 	ReceiverAddress whereHelperstring
-	ReceiverAmount  whereHelpertypes_Decimal
-	Fee             whereHelpertypes_Decimal
+	Amount          whereHelperuint64
+	Fee             whereHelperuint64
 	GasLimit        whereHelperuint32
-	Nonce           whereHelperint64
+	Nonce           whereHelperuint64
 	UnsignedHexTX   whereHelperstring
 	SignedHexTX     whereHelperstring
 	SentHashTX      whereHelperstring
@@ -102,13 +97,12 @@ var EthDetailTXWhere = struct {
 	TXID:            whereHelperint64{field: "`eth_detail_tx`.`tx_id`"},
 	SenderAccount:   whereHelperstring{field: "`eth_detail_tx`.`sender_account`"},
 	SenderAddress:   whereHelperstring{field: "`eth_detail_tx`.`sender_address`"},
-	SenderAmount:    whereHelpertypes_Decimal{field: "`eth_detail_tx`.`sender_amount`"},
 	ReceiverAccount: whereHelperstring{field: "`eth_detail_tx`.`receiver_account`"},
 	ReceiverAddress: whereHelperstring{field: "`eth_detail_tx`.`receiver_address`"},
-	ReceiverAmount:  whereHelpertypes_Decimal{field: "`eth_detail_tx`.`receiver_amount`"},
-	Fee:             whereHelpertypes_Decimal{field: "`eth_detail_tx`.`fee`"},
+	Amount:          whereHelperuint64{field: "`eth_detail_tx`.`amount`"},
+	Fee:             whereHelperuint64{field: "`eth_detail_tx`.`fee`"},
 	GasLimit:        whereHelperuint32{field: "`eth_detail_tx`.`gas_limit`"},
-	Nonce:           whereHelperint64{field: "`eth_detail_tx`.`nonce`"},
+	Nonce:           whereHelperuint64{field: "`eth_detail_tx`.`nonce`"},
 	UnsignedHexTX:   whereHelperstring{field: "`eth_detail_tx`.`unsigned_hex_tx`"},
 	SignedHexTX:     whereHelperstring{field: "`eth_detail_tx`.`signed_hex_tx`"},
 	SentHashTX:      whereHelperstring{field: "`eth_detail_tx`.`sent_hash_tx`"},
@@ -132,8 +126,8 @@ func (*ethDetailTXR) NewStruct() *ethDetailTXR {
 type ethDetailTXL struct{}
 
 var (
-	ethDetailTXAllColumns            = []string{"id", "tx_id", "sender_account", "sender_address", "sender_amount", "receiver_account", "receiver_address", "receiver_amount", "fee", "gas_limit", "nonce", "unsigned_hex_tx", "signed_hex_tx", "sent_hash_tx", "updated_at"}
-	ethDetailTXColumnsWithoutDefault = []string{"tx_id", "sender_account", "sender_address", "sender_amount", "receiver_account", "receiver_address", "receiver_amount", "fee", "gas_limit", "nonce", "unsigned_hex_tx", "signed_hex_tx", "sent_hash_tx"}
+	ethDetailTXAllColumns            = []string{"id", "tx_id", "sender_account", "sender_address", "receiver_account", "receiver_address", "amount", "fee", "gas_limit", "nonce", "unsigned_hex_tx", "signed_hex_tx", "sent_hash_tx", "updated_at"}
+	ethDetailTXColumnsWithoutDefault = []string{"tx_id", "sender_account", "sender_address", "receiver_account", "receiver_address", "amount", "fee", "gas_limit", "nonce", "unsigned_hex_tx", "signed_hex_tx", "sent_hash_tx"}
 	ethDetailTXColumnsWithDefault    = []string{"id", "updated_at"}
 	ethDetailTXPrimaryKeyColumns     = []string{"id"}
 )
@@ -799,7 +793,6 @@ func (o EthDetailTXSlice) InsertAll(ctx context.Context, exec boil.ContextExecut
 	if ln == 0 {
 		return nil
 	}
-
 	var sql string
 	vals := []interface{}{}
 	for i, row := range o {

@@ -14,6 +14,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
+	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 )
 
 // RawTx is raw transaction
@@ -70,10 +71,14 @@ func (e *Ethereum) calculateFee(fromAddr, toAddr common.Address, balance, gasPri
 	//newValue := value - txFee
 	newValue := new(big.Int)
 	if value.Uint64() == 0 {
+		// receiver pays fee (deposit, transfer(pays all) action)
 		newValue = newValue.Sub(balance, txFee)
 	} else {
-		newValue = newValue.Sub(value, txFee)
-		if balance.Cmp(value) == -1 {
+		// sender pays fee (payment, transfer(pays partially)
+		newValue = value
+		//newValue = newValue.Sub(value, txFee)
+		//if balance.Cmp(value) == -1 {
+		if balance.Cmp(new(big.Int).Add(value, txFee)) == -1 {
 			//   -1 if x <  y
 			//    0 if x == y
 			//   +1 if x >  y
@@ -88,34 +93,37 @@ func (e *Ethereum) calculateFee(fromAddr, toAddr common.Address, balance, gasPri
 // TODO: which QuantityTag should be used?
 // - Creating offline/raw transactions with Go-Ethereum
 //   https://medium.com/@akshay_111meher/creating-offline-raw-transactions-with-go-ethereum-8d6cc8174c5d
-func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64) (string, []byte, error) {
+// Note: sender acocunt takes fee
+// - if sender sends 5ETH, receiver receives 5ETH
+// - sender has to pay 5ETH + fee
+func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64) (string, []byte, *models.EthDetailTX, error) {
 	// validation check
 	if e.ValidationAddr(fromAddr) != nil || e.ValidationAddr(toAddr) != nil {
-		return "", nil, errors.New("address validation error")
+		return "", nil, nil, errors.New("address validation error")
 	}
 
 	// TODO: pending status should be included in target balance??
 	// TODO: if block is still syncing, proper balance is not returned
 	balance, err := e.GetBalance(fromAddr, QuantityTagPending)
 	if err != nil {
-		return "", nil, errors.Wrap(err, "fail to call eth.GetBalance()")
+		return "", nil, nil, errors.Wrap(err, "fail to call eth.GetBalance()")
 	}
 	e.logger.Info("balance", zap.Int64("balance", balance.Int64()))
 	if balance.Uint64() == 0 {
-		return "", nil, errors.New("balance is needed to send eth")
+		return "", nil, nil, errors.New("balance is needed to send eth")
 	}
 
 	// nonce
 	nonce, err := e.getNonce(fromAddr)
 	if err != nil {
-		return "", nil, errors.Wrap(err, "fail to call eth.GetTransactionCount()")
+		return "", nil, nil, errors.Wrap(err, "fail to call eth.GetTransactionCount()")
 	}
 
 	// gasPrice
 	//e.ethClient.SuggestGasPrice()
 	gasPrice, err := e.GasPrice()
 	if err != nil {
-		return "", nil, errors.Wrap(err, "fail to call eth.GasPrice()")
+		return "", nil, nil, errors.Wrap(err, "fail to call eth.GasPrice()")
 	}
 	e.logger.Info("gas_price", zap.Int64("gas_price", gasPrice.Int64()))
 
@@ -128,7 +136,7 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64) 
 		new(big.Int).SetUint64(amount),
 	)
 	if err != nil {
-		return "", nil, errors.Wrap(err, "fail to call eth.calculateFee()")
+		return "", nil, nil, errors.Wrap(err, "fail to call eth.calculateFee()")
 	}
 
 	//TODO: which value should be used for args of types.NewTransaction()
@@ -144,7 +152,21 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64) 
 	txHash := tx.Hash().Hex()
 	rawTxHex, err := encodeTx(tx)
 	if err != nil {
-		return "", nil, errors.Wrap(err, "fail to call encodeTx()")
+		return "", nil, nil, errors.Wrap(err, "fail to call encodeTx()")
+	}
+
+	// big.Int to types.Decimal
+	// create insert data for　eth_detail_tx
+	txDetailItem := &models.EthDetailTX{
+		SenderAccount:   "",
+		SenderAddress:   fromAddr,
+		ReceiverAccount: "",
+		ReceiverAddress: toAddr,
+		Amount:          newValue.Uint64(),
+		Fee:             txFee.Uint64(),
+		GasLimit:        uint32(estimatedGas.Uint64()),
+		Nonce:           nonce,
+		UnsignedHexTX:   *rawTxHex,
 	}
 
 	//RawTx
@@ -158,10 +180,10 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64) 
 	}
 	bTx, err := json.Marshal(rawtx)
 	if err != nil {
-		return "", nil, errors.Wrap(err, "fail to call json.Marshal(rawtx)")
+		return "", nil, nil, errors.Wrap(err, "fail to call json.Marshal(rawtx)")
 	}
 
-	return *rawTxHex, bTx, nil
+	return *rawTxHex, bTx, txDetailItem, nil
 }
 
 // SignOnRawTransaction signs on raw transaction

@@ -759,7 +759,6 @@ func (o BTCTXOutputSlice) InsertAll(ctx context.Context, exec boil.ContextExecut
 	if ln == 0 {
 		return nil
 	}
-
 	var sql string
 	vals := []interface{}{}
 	for i, row := range o {

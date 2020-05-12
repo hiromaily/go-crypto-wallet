@@ -233,8 +233,8 @@ func (r *registry) newTracer() opentracing.Tracer {
 	return tracer.NewTracer(r.conf.Tracer)
 }
 
-func (r *registry) newTxRepo() watchrepo.TxRepositorier {
-	return watchrepo.NewTxRepository(
+func (r *registry) newTxRepo() watchrepo.BTCTxRepositorier {
+	return watchrepo.NewBTCTxRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),

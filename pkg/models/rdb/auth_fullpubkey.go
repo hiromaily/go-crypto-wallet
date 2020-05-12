@@ -749,7 +749,6 @@ func (o AuthFullpubkeySlice) InsertAll(ctx context.Context, exec boil.ContextExe
 	if ln == 0 {
 		return nil
 	}
-
 	var sql string
 	vals := []interface{}{}
 	for i, row := range o {

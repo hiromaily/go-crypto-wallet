@@ -18,7 +18,7 @@ type TxMonitor struct {
 	btc         btcgrp.Bitcoiner
 	logger      *zap.Logger
 	dbConn      *sql.DB
-	txRepo      watchrepo.TxRepositorier
+	txRepo      watchrepo.BTCTxRepositorier
 	txInputRepo watchrepo.TxInputRepositorier
 	payReqRepo  watchrepo.PaymentRequestRepositorier
 	wtype       wallet.WalletType
@@ -29,7 +29,7 @@ func NewTxMonitor(
 	btc btcgrp.Bitcoiner,
 	logger *zap.Logger,
 	dbConn *sql.DB,
-	txRepo watchrepo.TxRepositorier,
+	txRepo watchrepo.BTCTxRepositorier,
 	txInputRepo watchrepo.TxInputRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,
 	wtype wallet.WalletType) *TxMonitor {

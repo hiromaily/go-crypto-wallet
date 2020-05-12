@@ -44,7 +44,7 @@ type TxCreate struct {
 	logger       *zap.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier
-	txRepo       watchrepo.TxRepositorier
+	txRepo       watchrepo.BTCTxRepositorier
 	txInputRepo  watchrepo.TxInputRepositorier
 	txOutputRepo watchrepo.TxOutputRepositorier
 	payReqRepo   watchrepo.PaymentRequestRepositorier
@@ -58,7 +58,7 @@ func NewTxCreate(
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
-	txRepo watchrepo.TxRepositorier,
+	txRepo watchrepo.BTCTxRepositorier,
 	txInputRepo watchrepo.TxInputRepositorier,
 	txOutputRepo watchrepo.TxOutputRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,

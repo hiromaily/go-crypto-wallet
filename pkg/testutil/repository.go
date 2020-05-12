@@ -15,12 +15,12 @@ import (
 )
 
 var (
-	txRepo         *watchrepo.TxRepository
+	txRepo         *watchrepo.BTCTxRepository
 	accountKeyRepo *coldrepo.AccountKeyRepository
 )
 
 // NewTxRepository returns TxRepository for test
-func NewTxRepository() watchrepo.TxRepositorier {
+func NewTxRepository() watchrepo.BTCTxRepositorier {
 	if txRepo != nil {
 		return txRepo
 	}
@@ -42,7 +42,7 @@ func NewTxRepository() watchrepo.TxRepositorier {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	txRepo = watchrepo.NewTxRepository(db, coin.BTC, logger)
+	txRepo = watchrepo.NewBTCTxRepository(db, coin.BTC, logger)
 	return txRepo
 }
 

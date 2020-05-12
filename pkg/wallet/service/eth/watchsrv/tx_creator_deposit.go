@@ -6,6 +6,7 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/action"
+	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp/eth"
 )
 
@@ -31,7 +32,7 @@ func (t *TxCreate) CreateDepositTx(adjustmentFee float64) (string, string, error
 	// target addresses
 	var userAmounts []UserAmount
 
-	//ユーザーのアドレスのリスト
+	// address list for client
 	for _, addr := range addrs {
 		//TODO: if previous tx is not done, wrong amount is returned. how to manage it??
 		balance, err := t.eth.GetBalance(addr.WalletAddress, eth.QuantityTagLatest)
@@ -60,45 +61,48 @@ func (t *TxCreate) CreateDepositTx(adjustmentFee float64) (string, string, error
 
 	// create raw transaction each address
 	bTxs := make([][]byte, 0, len(userAmounts))
+	txDetailItems := make([]*models.EthDetailTX, 0, len(userAmounts))
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
-		rawTxHex, bTx, err := t.eth.CreateRawTransaction(val.address, depositAddr.WalletAddress, val.amount)
+		rawTxHex, bTx, txDetailItem, err := t.eth.CreateRawTransaction(val.address, depositAddr.WalletAddress, val.amount)
 		if err != nil {
 			return "", "", errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), address: %s", val.address)
 		}
 		t.logger.Debug("rawTxHex", zap.String("rawTxHex", rawTxHex))
 		bTxs = append(bTxs, bTx)
+
+		txDetailItem.SenderAccount = account.AccountTypeClient.String()
+		txDetailItem.ReceiverAccount = account.AccountTypeDeposit.String()
+
+		// create insert data for　eth_detail_tx
+		txDetailItems = append(txDetailItems, txDetailItem)
 	}
-	// TODO:insert to tx_table for unsigned tx as bulk insert
-	// targetAction
-	// hex(rawTxHex)
-	// sender account
-	// sender address
-	// sender amount
-	// reciver account
-	// receiver address
-	// receiver amount
-	// fee
 
-	//From:  msg.From().Hex(),
-	//To:    msg.To().Hex(),
-	//Value: *msg.Value(),
-	//Nonce: msg.Nonce(),
-	//TxHex: *encodedTx,
-	//Hash:  signedTX.Hash().Hex(),
+	// start transaction
+	dtx, err := t.dbConn.Begin()
+	if err != nil {
+		return "", "", errors.Wrap(err, "fail to start transaction")
+	}
+	defer func() {
+		if err != nil {
+			dtx.Rollback()
+		} else {
+			dtx.Commit()
+		}
+	}()
 
-	//txID, err := t.insertTxTableForUnsigned(
-	//	targetAction,
-	//	hex,
-	//	inputTotal,
-	//	outputTotal,
-	//	fee,
-	//	txRepoTxInputs,
-	//	txRepoTxOutputs,
-	//	paymentRequestIds)
-	//if err != nil {
-	//	return "", "", errors.Wrap(err, "fail to call insertTxTableForUnsigned()")
-	//}
+	// Insert eth_tx
+	txID, err := t.txRepo.InsertUnsignedTx(action.ActionTypeDeposit)
+	if err != nil {
+		return "", "", errors.Wrap(err, "fail to call txRepo.InsertUnsignedTx()")
+	}
+	// TODO: Insert to eth_detail_tx
+	for idx := range txDetailItems {
+		txDetailItems[idx].TXID = txID
+	}
+	if err = t.txDetailRepo.InsertBulk(txDetailItems); err != nil {
+		return "", "", errors.Wrap(err, "fail to call txDetailRepo.InsertBulk()")
+	}
 
 	// save transaction result to file
 	var generatedFileName string
