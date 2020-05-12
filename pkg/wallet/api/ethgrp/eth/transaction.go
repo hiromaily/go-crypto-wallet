@@ -2,7 +2,6 @@ package eth
 
 import (
 	"bytes"
-	"encoding/json"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum"
@@ -96,34 +95,34 @@ func (e *Ethereum) calculateFee(fromAddr, toAddr common.Address, balance, gasPri
 // Note: sender acocunt takes fee
 // - if sender sends 5ETH, receiver receives 5ETH
 // - sender has to pay 5ETH + fee
-func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64) (string, []byte, *models.EthDetailTX, error) {
+func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64) (*RawTx, *models.EthDetailTX, error) {
 	// validation check
 	if e.ValidationAddr(fromAddr) != nil || e.ValidationAddr(toAddr) != nil {
-		return "", nil, nil, errors.New("address validation error")
+		return nil, nil, errors.New("address validation error")
 	}
 
 	// TODO: pending status should be included in target balance??
 	// TODO: if block is still syncing, proper balance is not returned
 	balance, err := e.GetBalance(fromAddr, QuantityTagPending)
 	if err != nil {
-		return "", nil, nil, errors.Wrap(err, "fail to call eth.GetBalance()")
+		return nil, nil, errors.Wrap(err, "fail to call eth.GetBalance()")
 	}
 	e.logger.Info("balance", zap.Int64("balance", balance.Int64()))
 	if balance.Uint64() == 0 {
-		return "", nil, nil, errors.New("balance is needed to send eth")
+		return nil, nil, errors.New("balance is needed to send eth")
 	}
 
 	// nonce
 	nonce, err := e.getNonce(fromAddr)
 	if err != nil {
-		return "", nil, nil, errors.Wrap(err, "fail to call eth.GetTransactionCount()")
+		return nil, nil, errors.Wrap(err, "fail to call eth.GetTransactionCount()")
 	}
 
 	// gasPrice
 	//e.ethClient.SuggestGasPrice()
 	gasPrice, err := e.GasPrice()
 	if err != nil {
-		return "", nil, nil, errors.Wrap(err, "fail to call eth.GasPrice()")
+		return nil, nil, errors.Wrap(err, "fail to call eth.GasPrice()")
 	}
 	e.logger.Info("gas_price", zap.Int64("gas_price", gasPrice.Int64()))
 
@@ -136,7 +135,7 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64) 
 		new(big.Int).SetUint64(amount),
 	)
 	if err != nil {
-		return "", nil, nil, errors.Wrap(err, "fail to call eth.calculateFee()")
+		return nil, nil, errors.Wrap(err, "fail to call eth.calculateFee()")
 	}
 
 	//TODO: which value should be used for args of types.NewTransaction()
@@ -152,7 +151,7 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64) 
 	txHash := tx.Hash().Hex()
 	rawTxHex, err := encodeTx(tx)
 	if err != nil {
-		return "", nil, nil, errors.Wrap(err, "fail to call encodeTx()")
+		return nil, nil, errors.Wrap(err, "fail to call encodeTx()")
 	}
 
 	// big.Int to types.Decimal
@@ -178,28 +177,23 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64) 
 		TxHex: *rawTxHex,
 		Hash:  txHash,
 	}
-	bTx, err := json.Marshal(rawtx)
-	if err != nil {
-		return "", nil, nil, errors.Wrap(err, "fail to call json.Marshal(rawtx)")
-	}
-
-	return *rawTxHex, bTx, txDetailItem, nil
+	return rawtx, txDetailItem, nil
 }
 
 // SignOnRawTransaction signs on raw transaction
 // - https://ethereum.stackexchange.com/questions/16472/signing-a-raw-transaction-in-go
-func (e *Ethereum) SignOnRawTransaction(rawTx *RawTx, passphrase string, accountType account.AccountType) (*RawTx, []byte, error) {
+func (e *Ethereum) SignOnRawTransaction(rawTx *RawTx, passphrase string, accountType account.AccountType) (*RawTx, error) {
 	txHex := rawTx.TxHex
 	fromAddr := rawTx.From
 	tx, err := decodeTx(txHex)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call decodeTx(txHex)")
+		return nil, errors.Wrap(err, "fail to call decodeTx(txHex)")
 	}
 
 	// get private key
 	key, err := e.GetPrivKey(fromAddr, passphrase, accountType)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call e.GetPrivKey()")
+		return nil, errors.Wrap(err, "fail to call e.GetPrivKey()")
 	}
 
 	// chain id
@@ -209,16 +203,16 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *RawTx, passphrase string, account
 	// sign
 	signedTX, err := types.SignTx(tx, types.NewEIP155Signer(chainID), key.PrivateKey)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call types.SignTx()")
+		return nil, errors.Wrap(err, "fail to call types.SignTx()")
 	}
 	msg, err := signedTX.AsMessage(types.NewEIP155Signer(chainID))
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to cll signedTX.AsMessage()")
+		return nil, errors.Wrap(err, "fail to cll signedTX.AsMessage()")
 	}
 
 	encodedTx, err := encodeTx(signedTX)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call encodeTx()")
+		return nil, errors.Wrap(err, "fail to call encodeTx()")
 	}
 
 	resTx := &RawTx{
@@ -230,12 +224,7 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *RawTx, passphrase string, account
 		Hash:  signedTX.Hash().Hex(),
 	}
 
-	bTx, err := json.Marshal(resTx)
-	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to all json.Marshal(resTx)")
-	}
-
-	return resTx, bTx, nil
+	return resTx, nil
 }
 
 // SendSignedRawTransaction sends signed raw transaction

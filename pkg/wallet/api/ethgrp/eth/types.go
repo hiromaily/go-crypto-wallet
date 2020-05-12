@@ -95,3 +95,6 @@ func (c ClientVersion) String() string {
 
 // GasLimit fixed GasLimit
 const GasLimit uint64 = 21000
+
+// Password this password is temporary until specification is fixed
+const Password string = "password"

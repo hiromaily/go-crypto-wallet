@@ -7,6 +7,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/action"
 	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
+	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp/eth"
 )
 
@@ -60,21 +61,27 @@ func (t *TxCreate) CreateDepositTx(adjustmentFee float64) (string, string, error
 	}
 
 	// create raw transaction each address
-	bTxs := make([][]byte, 0, len(userAmounts))
+	serializedTxs := make([]string, 0, len(userAmounts))
 	txDetailItems := make([]*models.EthDetailTX, 0, len(userAmounts))
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
-		rawTxHex, bTx, txDetailItem, err := t.eth.CreateRawTransaction(val.address, depositAddr.WalletAddress, val.amount)
+		rawTx, txDetailItem, err := t.eth.CreateRawTransaction(val.address, depositAddr.WalletAddress, val.amount)
 		if err != nil {
 			return "", "", errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), address: %s", val.address)
 		}
-		t.logger.Debug("rawTxHex", zap.String("rawTxHex", rawTxHex))
-		bTxs = append(bTxs, bTx)
 
-		txDetailItem.SenderAccount = account.AccountTypeClient.String()
-		txDetailItem.ReceiverAccount = account.AccountTypeDeposit.String()
+		rawTxHex := rawTx.TxHex
+		t.logger.Debug("rawTxHex", zap.String("rawTxHex", rawTxHex))
+
+		serializedTx, err := serial.EncodeToString(rawTx)
+		if err != nil {
+			return "", "", errors.Wrap(err, "fail to call serial.EncodeToString(rawTx)")
+		}
+		serializedTxs = append(serializedTxs, serializedTx)
 
 		// create insert data for　eth_detail_tx
+		txDetailItem.SenderAccount = account.AccountTypeClient.String()
+		txDetailItem.ReceiverAccount = account.AccountTypeDeposit.String()
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}
 
@@ -96,7 +103,7 @@ func (t *TxCreate) CreateDepositTx(adjustmentFee float64) (string, string, error
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call txRepo.InsertUnsignedTx()")
 	}
-	// TODO: Insert to eth_detail_tx
+	// Insert to eth_detail_tx
 	for idx := range txDetailItems {
 		txDetailItems[idx].TXID = txID
 	}
@@ -106,9 +113,8 @@ func (t *TxCreate) CreateDepositTx(adjustmentFee float64) (string, string, error
 
 	// save transaction result to file
 	var generatedFileName string
-	if len(bTxs) != 0 {
-		//TODO: implement generateHexFile()
-		generatedFileName, err = t.generateHexFile(targetAction, bTxs)
+	if len(serializedTxs) != 0 {
+		generatedFileName, err = t.generateHexFile(targetAction, account.AccountTypeClient, txID, serializedTxs)
 		if err != nil {
 			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
 		}

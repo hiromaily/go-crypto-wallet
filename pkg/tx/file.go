@@ -1,6 +1,7 @@
 package tx
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -20,7 +21,9 @@ type FileRepositorier interface {
 	GetFileNameType(filePath string) (*FileName, error)
 	ValidateFilePath(filePath string, expectedTxType TxType) (action.ActionType, TxType, int64, int, error)
 	ReadFile(path string) (string, error)
+	ReadFileSlice(path string) ([]string, error)
 	WriteFile(path, hexTx string) (string, error)
+	WriteFileSlice(path string, data []string) (string, error)
 }
 
 // FileRepository is to store transaction info as csv file
@@ -94,14 +97,14 @@ func (r *FileRepository) GetFileNameType(filePath string) (*FileName, error) {
 
 	//txType
 	if !ValidateTxType(s[2]) {
-		return nil, errors.Errorf("error: invalid name: %s", fileName)
+		return nil, errors.Errorf("invalid name: %s", fileName)
 	}
 	fileNameType.TxType = TxType(s[2])
 
 	//signedCount
 	signedCount, err := strconv.Atoi(s[3])
 	if err != nil {
-		return nil, errors.Errorf("error: invalid name: %s", fileName)
+		return nil, errors.Errorf("invalid name: %s", fileName)
 	}
 	fileNameType.SignedCount = signedCount
 
@@ -126,30 +129,80 @@ func (r *FileRepository) ValidateFilePath(filePath string, expectedTxType TxType
 func (r *FileRepository) ReadFile(path string) (string, error) {
 	ret, err := ioutil.ReadFile(path)
 	if err != nil {
-		return "", errors.Errorf("fail to call ioutil.ReadFile(%s) error: %v", path, err)
+		return "", errors.Wrapf(err, "fail to call ioutil.ReadFile(%s)", path)
 	}
 
 	return string(ret), nil
 }
 
+// ReadFileSlice read file for slice
+func (r *FileRepository) ReadFileSlice(path string) ([]string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, errors.Wrapf(err, "fail to open file: %s", path)
+	}
+	defer file.Close()
+	data := make([]string, 0)
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		data = append(data, scanner.Text())
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, errors.Wrapf(err, "fail to scan file")
+	}
+	return data, nil
+}
+
 // WriteFile write file
 func (r *FileRepository) WriteFile(path, hexTx string) (string, error) {
-	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
 
 	//crate directory if not exisiting
+	r.createDir(path)
+
+	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
+	fileName := path + ts
+
+	byteTx := []byte(hexTx)
+	err := ioutil.WriteFile(fileName, byteTx, 0644)
+	if err != nil {
+		return "", errors.Wrapf(err, "fail to call ioutil.WriteFile(%s)", fileName)
+	}
+
+	return fileName, nil
+}
+
+// WriteFileSlice write slice to file
+func (r *FileRepository) WriteFileSlice(path string, data []string) (string, error) {
+
+	//crate directory if not exisiting
+	r.createDir(path)
+
+	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
+	fileName := path + ts
+
+	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return "", errors.Wrapf(err, "fail to call os.OpenFile(%s)", fileName)
+	}
+	writer := bufio.NewWriter(file)
+
+	for _, d := range data {
+		_, _ = writer.WriteString(d + "\n")
+	}
+
+	writer.Flush()
+	file.Close()
+
+	return fileName, nil
+}
+
+func (r *FileRepository) createDir(path string) {
 	tmp1 := strings.Split(path, "/")
 	tmp2 := tmp1[0 : len(tmp1)-1] //cut filename
 	dir := strings.Join(tmp2, "/")
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.Mkdir(dir, 0755)
 	}
-
-	byteTx := []byte(hexTx)
-	fileName := path + ts
-	err := ioutil.WriteFile(fileName, byteTx, 0644)
-	if err != nil {
-		return "", errors.Errorf("fail to call ioutil.WriteFile(%s) error: %s", fileName, err)
-	}
-
-	return fileName, nil
 }

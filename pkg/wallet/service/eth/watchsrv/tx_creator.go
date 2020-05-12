@@ -3,8 +3,10 @@ package watchsrv
 import (
 	"database/sql"
 
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/action"
 	"github.com/hiromaily/go-bitcoin/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
@@ -51,23 +53,16 @@ func NewTxCreate(
 }
 
 // generateHexFile generate file for hex and encoded previous addresses
-func (t *TxCreate) generateHexFile(actionType action.ActionType, bTxs [][]byte) (string, error) {
-	var (
-		generatedFileName string
-		//err               error
-	)
+func (t *TxCreate) generateHexFile(actionType action.ActionType, senderAccount account.AccountType, txID int64, serializedTxs []string) (string, error) {
+	//add senderAccount to first line
+	serializedTxs = append([]string{senderAccount.String()}, serializedTxs...)
 
-	//savedata := hex
-	//if encodedAddrsPrevs != "" {
-	//	savedata = fmt.Sprintf("%s,%s", savedata, encodedAddrsPrevs)
-	//}
-	//
-	//// create file
-	//path := t.txFileRepo.CreateFilePath(actionType, tx.TxTypeUnsigned, id, 0)
-	//generatedFileName, err = t.txFileRepo.WriteFile(path, savedata)
-	//if err != nil {
-	//	return "", errors.Wrap(err, "fail to call txFileRepo.WriteFile()")
-	//}
+	// create file
+	path := t.txFileRepo.CreateFilePath(actionType, tx.TxTypeUnsigned, txID, 0)
+	generatedFileName, err := t.txFileRepo.WriteFileSlice(path, serializedTxs)
+	if err != nil {
+		return "", errors.Wrap(err, "fail to call txFileRepo.WriteFile()")
+	}
 
 	return generatedFileName, nil
 }

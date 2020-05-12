@@ -1,12 +1,16 @@
 package keygensrv
 
 import (
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
+	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp/eth"
 )
 
 // Sign type
@@ -39,7 +43,52 @@ func NewSign(
 }
 
 // SignTx sign on tx in csv file
+// - multisig equivalent functionality is not implemented yet in ETH
 // TODO: implementation
+// TODO: sender account shold be included in file
 func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
-	return "", false, "", nil
+	// get tx_deposit_id from tx file name
+	actionType, _, txID, signedCount, err := s.txFileRepo.ValidateFilePath(filePath, tx.TxTypeUnsigned)
+	if err != nil {
+		return "", false, "", err
+	}
+
+	var senderAccount account.AccountType
+
+	// get hex tx from file
+	data, err := s.txFileRepo.ReadFileSlice(filePath)
+	if err != nil {
+		return "", false, "", errors.Wrap(err, "fail to call txFileRepo.ReadFileSlice()")
+	}
+	if len(data) > 1 {
+		senderAccount = account.AccountType(data[0])
+	} else {
+		return "", false, "", errors.New("file is invalid")
+	}
+	serializedTxs := data[1:]
+
+	txHexs := make([]string, 0, len(serializedTxs))
+	for _, serializedTx := range serializedTxs {
+		var rawTx eth.RawTx
+		if err = serial.DecodeFromString(serializedTx, &rawTx); err != nil {
+			return "", false, "", errors.Wrap(err, "fail to call serial.DecodeFromString()")
+		}
+		// sign
+		signedRawTx, err := s.eth.SignOnRawTransaction(&rawTx, eth.Password, senderAccount)
+		if err != nil {
+			return "", false, "", errors.Wrap(err, "fail to call eth.SignOnRawTransaction()")
+		}
+		// signedRawTx.TxHex
+		txHexs = append(txHexs, signedRawTx.TxHex)
+	}
+
+	// write file
+	path := s.txFileRepo.CreateFilePath(actionType, tx.TxTypeSigned, txID, signedCount)
+	generatedFileName, err := s.txFileRepo.WriteFileSlice(path, txHexs)
+	if err != nil {
+		return "", false, "", errors.Wrap(err, "fail to call txFileRepo.WriteFileSlice()")
+	}
+
+	//return hexTx, isSigned, generatedFileName, nil
+	return "", false, generatedFileName, nil
 }

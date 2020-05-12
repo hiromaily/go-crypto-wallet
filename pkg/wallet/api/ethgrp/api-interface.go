@@ -75,8 +75,8 @@ type Ethereumer interface {
 	ClientVersion() (string, error)
 	SHA3(data []string) (string, error)
 	// transaction
-	CreateRawTransaction(fromAddr, toAddr string, amount uint64) (string, []byte, *models.EthDetailTX, error)
-	SignOnRawTransaction(rawTx *eth.RawTx, passphrase string, accountType account.AccountType) (*eth.RawTx, []byte, error)
+	CreateRawTransaction(fromAddr, toAddr string, amount uint64) (*eth.RawTx, *models.EthDetailTX, error)
+	SignOnRawTransaction(rawTx *eth.RawTx, passphrase string, accountType account.AccountType) (*eth.RawTx, error)
 	SendSignedRawTransaction(signedTxHex string) (string, error)
 	// util
 	DecodeBig(input string) (*big.Int, error)
