@@ -99,8 +99,5 @@ func (e *Ethereum) GetChainConf() *chaincfg.Params {
 }
 
 func isParity(target string) bool {
-	if strings.Index(target, ClientVersionParity.String()) == -1 {
-		return false
-	}
-	return true
+	return strings.Contains(target, ClientVersionParity.String())
 }

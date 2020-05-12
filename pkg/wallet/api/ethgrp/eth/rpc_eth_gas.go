@@ -27,7 +27,8 @@ func (e *Ethereum) GasPrice() (*big.Int, error) {
 
 // EstimateGas generates and returns an estimate of how much gas is necessary to allow the transaction to complete
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_estimategas
-func (e *Ethereum) EstimateGas(msg ethereum.CallMsg) (*big.Int, error) {
+//  is this value GasLimit??
+func (e *Ethereum) EstimateGas(msg *ethereum.CallMsg) (*big.Int, error) {
 
 	var estimated string
 	err := e.rpcClient.CallContext(e.ctx, &estimated, "eth_estimateGas", toCallArg(msg))

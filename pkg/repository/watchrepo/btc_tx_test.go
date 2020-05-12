@@ -33,7 +33,7 @@ func TestTx(t *testing.T) {
 
 	hex := "unsigned-hex"
 	actionType := action.ActionTypePayment
-	txItem := &models.TX{
+	txItem := &models.BTCTX{
 		Action:            actionType.String(),
 		UnsignedHexTX:     hex,
 		TotalInputAmount:  inputAmt,

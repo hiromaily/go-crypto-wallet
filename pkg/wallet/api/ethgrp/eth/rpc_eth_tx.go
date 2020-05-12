@@ -62,7 +62,7 @@ func (e *Ethereum) Sign(hexAddr, message string) (string, error) {
 // SendTransaction トランザクションを送信し、トランザクションhashを返す
 // FIXME: Invalid params: Invalid bytes format. Expected a 0x-prefixed hex string with even length
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_sendtransaction
-func (e *Ethereum) SendTransaction(msg ethereum.CallMsg) (string, error) {
+func (e *Ethereum) SendTransaction(msg *ethereum.CallMsg) (string, error) {
 
 	var txHash string
 	err := e.rpcClient.CallContext(e.ctx, &txHash, "eth_sendTransaction", toCallArg(msg))

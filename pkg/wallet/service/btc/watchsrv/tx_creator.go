@@ -81,7 +81,7 @@ func NewTxCreate(
 
 type parsedTx struct {
 	txInputs       []btcjson.TransactionInput
-	txRepoTxInputs []*models.TXInput
+	txRepoTxInputs []*models.BTCTXInput
 	prevTxs        []btc.PrevTx
 	addresses      []string //input, sender's address
 }
@@ -210,7 +210,7 @@ func (t *TxCreate) getUnspentList(accountType account.AccountType) ([]btc.ListUn
 func (t *TxCreate) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount btcutil.Amount) (*parsedTx, btcutil.Amount, bool) {
 	var inputTotal btcutil.Amount
 	txInputs := make([]btcjson.TransactionInput, 0, len(unspentList))
-	txRepoTxInputs := make([]*models.TXInput, 0, len(unspentList))
+	txRepoTxInputs := make([]*models.BTCTXInput, 0, len(unspentList))
 	prevTxs := make([]btc.PrevTx, 0, len(unspentList))
 	addresses := make([]string, 0, len(unspentList))
 
@@ -238,7 +238,7 @@ func (t *TxCreate) parseListUnspentTx(unspentList []btc.ListUnspentResult, amoun
 			Vout: tx.Vout,
 		})
 
-		txRepoTxInputs = append(txRepoTxInputs, &models.TXInput{
+		txRepoTxInputs = append(txRepoTxInputs, &models.BTCTXInput{
 			TXID:               0,
 			InputTxid:          tx.TxID,
 			InputVout:          tx.Vout,
@@ -341,7 +341,7 @@ func (t *TxCreate) createRawTx(
 	adjustmentFee float64,
 	txInputs []btcjson.TransactionInput,
 	inputTotal btcutil.Amount,
-	txRepoTxInputs []*models.TXInput,
+	txRepoTxInputs []*models.BTCTXInput,
 	txPrevOutputs map[btcutil.Address]btcutil.Amount,
 	addrsPrevs *btc.AddrsPrevTxs,
 	paymentRequestIds []int64) (string, string, error) {
@@ -434,7 +434,7 @@ func (t *TxCreate) calculateOutputTotal(
 	adjustmentFee float64,
 	inputTotal btcutil.Amount,
 	txPrevOutputs map[btcutil.Address]btcutil.Amount,
-) (btcutil.Amount, btcutil.Amount, map[btcutil.Address]btcutil.Amount, []*models.TXOutput, error) {
+) (btcutil.Amount, btcutil.Amount, map[btcutil.Address]btcutil.Amount, []*models.BTCTXOutput, error) {
 
 	// get fee
 	fee, err := t.btc.GetFee(msgTx, adjustmentFee)
@@ -442,7 +442,7 @@ func (t *TxCreate) calculateOutputTotal(
 		return 0, 0, nil, nil, errors.Wrap(err, "fail to call btc.GetFee()")
 	}
 	var outputTotal btcutil.Amount
-	txRepoOutputs := make([]*models.TXOutput, 0, len(txPrevOutputs))
+	txRepoOutputs := make([]*models.BTCTXOutput, 0, len(txPrevOutputs))
 
 	// subtract fee from output transaction for change
 	// FIXME: what if change is short, should re-run form the beginning with shortage-flag
@@ -450,7 +450,7 @@ func (t *TxCreate) calculateOutputTotal(
 		if len(txPrevOutputs) == 1 {
 			//no change
 			txPrevOutputs[addr] -= fee
-			txRepoOutputs = append(txRepoOutputs, &models.TXOutput{
+			txRepoOutputs = append(txRepoOutputs, &models.BTCTXOutput{
 				TXID:          0,
 				OutputAddress: addr.String(),
 				OutputAccount: receiver.String(),
@@ -465,7 +465,7 @@ func (t *TxCreate) calculateOutputTotal(
 			t.logger.Debug("detect sender account in calculateOutputTotal")
 			// address is used for change
 			txPrevOutputs[addr] -= fee
-			txRepoOutputs = append(txRepoOutputs, &models.TXOutput{
+			txRepoOutputs = append(txRepoOutputs, &models.BTCTXOutput{
 				TXID:          0,
 				OutputAddress: addr.String(),
 				OutputAccount: sender.String(),
@@ -473,7 +473,7 @@ func (t *TxCreate) calculateOutputTotal(
 				IsChange:      true,
 			})
 		} else {
-			txRepoOutputs = append(txRepoOutputs, &models.TXOutput{
+			txRepoOutputs = append(txRepoOutputs, &models.BTCTXOutput{
 				TXID:          0,
 				OutputAddress: addr.String(),
 				OutputAccount: receiver.String(),
@@ -511,8 +511,8 @@ func (t *TxCreate) insertTxTableForUnsigned(
 	inputTotal,
 	outputTotal,
 	fee btcutil.Amount,
-	txInputs []*models.TXInput,
-	txOutputs []*models.TXOutput,
+	txInputs []*models.BTCTXInput,
+	txOutputs []*models.BTCTXOutput,
 	paymentRequestIds []int64) (int64, error) {
 
 	// 1. skip if same hex is already stored
@@ -526,7 +526,7 @@ func (t *TxCreate) insertTxTableForUnsigned(
 	}
 
 	// 2.TxReceipt table
-	txItem := &models.TX{
+	txItem := &models.BTCTX{
 		Action:            actionType.String(),
 		UnsignedHexTX:     hex,
 		TotalInputAmount:  t.btc.AmountToDecimal(inputTotal),

@@ -15,10 +15,10 @@ import (
 
 // TxInputRepositorier is TxInputRepository interface
 type TxInputRepositorier interface {
-	GetOne(id int64) (*models.TXInput, error)
-	GetAllByTxID(id int64) ([]*models.TXInput, error)
-	Insert(txItem *models.TXInput) error
-	InsertBulk(txItems []*models.TXInput) error
+	GetOne(id int64) (*models.BTCTXInput, error)
+	GetAllByTxID(id int64) ([]*models.BTCTXInput, error)
+	Insert(txItem *models.BTCTXInput) error
+	InsertBulk(txItems []*models.BTCTXInput) error
 }
 
 // TxInputRepository is repository for tx_input table
@@ -33,17 +33,17 @@ type TxInputRepository struct {
 func NewTxInputRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *TxInputRepository {
 	return &TxInputRepository{
 		dbConn:       dbConn,
-		tableName:    "tx_input",
+		tableName:    "btc_tx_input",
 		coinTypeCode: coinTypeCode,
 		logger:       logger,
 	}
 }
 
 // GetOne get one record by ID
-func (r *TxInputRepository) GetOne(id int64) (*models.TXInput, error) {
+func (r *TxInputRepository) GetOne(id int64) (*models.BTCTXInput, error) {
 	ctx := context.Background()
 
-	txItem, err := models.FindTXInput(ctx, r.dbConn, id) //unique
+	txItem, err := models.FindBTCTXInput(ctx, r.dbConn, id) //unique
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to call models.FindTXInput()")
 	}
@@ -51,27 +51,27 @@ func (r *TxInputRepository) GetOne(id int64) (*models.TXInput, error) {
 }
 
 // GetAllByTxID returns all records searched by tx_id
-func (r *TxInputRepository) GetAllByTxID(id int64) ([]*models.TXInput, error) {
+func (r *TxInputRepository) GetAllByTxID(id int64) ([]*models.BTCTXInput, error) {
 	ctx := context.Background()
-	txItems, err := models.TXInputs(
+	txItems, err := models.BTCTXInputs(
 		qm.Where("coin=?", r.coinTypeCode.String()),
 		qm.And("tx_id=?", id),
 	).All(ctx, r.dbConn)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call models.TXInputs().All()")
+		return nil, errors.Wrap(err, "failed to call models.BTCTXInputs().All()")
 	}
 
 	return txItems, nil
 }
 
 // Insert inserts one record
-func (r *TxInputRepository) Insert(txItem *models.TXInput) error {
+func (r *TxInputRepository) Insert(txItem *models.BTCTXInput) error {
 	ctx := context.Background()
 	return txItem.Insert(ctx, r.dbConn, boil.Infer())
 }
 
 // InsertBulk inserts multiple records
-func (r *TxInputRepository) InsertBulk(txItems []*models.TXInput) error {
+func (r *TxInputRepository) InsertBulk(txItems []*models.BTCTXInput) error {
 	ctx := context.Background()
-	return models.TXInputSlice(txItems).InsertAll(ctx, r.dbConn, boil.Infer())
+	return models.BTCTXInputSlice(txItems).InsertAll(ctx, r.dbConn, boil.Infer())
 }

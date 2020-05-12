@@ -8,10 +8,11 @@ package eth
 type QuantityTag string
 
 // quantity-tag
+// https://github.com/ethereum/wiki/wiki/JSON-RPC#the-default-block-parameter
 const (
-	QuantityTagLatest   QuantityTag = "latest"
-	QuantityTagEarliest QuantityTag = "earliest"
-	//QuantityTagPending  QuantityTag = "pending" //deprecated
+	QuantityTagLatest   QuantityTag = "latest"   // for the earliest/genesis block
+	QuantityTagEarliest QuantityTag = "earliest" // for the latest mined block
+	QuantityTagPending  QuantityTag = "pending"  // for the pending state/transactions
 )
 
 // String converter

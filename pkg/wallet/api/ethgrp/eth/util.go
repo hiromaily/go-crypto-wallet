@@ -74,7 +74,7 @@ func setZeroHex(input string) string {
 	return input
 }
 
-func toCallArg(msg ethereum.CallMsg) interface{} {
+func toCallArg(msg *ethereum.CallMsg) interface{} {
 	arg := map[string]interface{}{
 		"from": msg.From,
 		"to":   msg.To,

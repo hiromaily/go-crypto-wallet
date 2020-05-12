@@ -10,9 +10,11 @@ user = "root"
 pass = "root"
 sslmode = "false"
 whitelist = [
-    "tx",
-    "tx_input",
-    "tx_output",
+    "btc_tx",
+    "btc_tx_input",
+    "btc_tx_output",
+    "eth_tx",
+    "eth_detail_tx",
     "payment_request",
     "address",
     "seed",

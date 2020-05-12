@@ -2,10 +2,10 @@ package ethgrp
 
 import (
 	"crypto/ecdsa"
-	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/ethereum/go-ethereum"
 	"math/big"
 
+	"github.com/btcsuite/btcd/chaincfg"
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/p2p"
 
@@ -47,10 +47,10 @@ type Ethereumer interface {
 	GetBlockByNumber(quantityTag eth.QuantityTag) (*big.Int, error)
 	// rpc_eth_gas
 	GasPrice() (*big.Int, error)
-	EstimateGas(msg ethereum.CallMsg) (*big.Int, error)
+	EstimateGas(msg *ethereum.CallMsg) (*big.Int, error)
 	// rpc_eth_tx
 	Sign(hexAddr, message string) (string, error)
-	SendTransaction(msg ethereum.CallMsg) (string, error)
+	SendTransaction(msg *ethereum.CallMsg) (string, error)
 	SendRawTransaction(signedTx string) (string, error)
 	SendRawTransactionWithTypesTx(tx *types.Transaction) (string, error)
 	GetTransactionByHash(hashTx string) (*eth.ResponseGetTransaction, error)
