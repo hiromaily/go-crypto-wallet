@@ -94,7 +94,6 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 		// signedRawTx.TxHex
 		//sentTxes = append(sentTxes, fmt.Sprintf("%s,%s", unsignedTx, sentTx))
 
-		// update
 		// update eth_detail_tx
 		affectedNum, err := t.txDetailRepo.UpdateAfterTxSent(txID, unsignedTx, tx.TxTypeSent, signedTx, sentTx)
 		if err != nil {

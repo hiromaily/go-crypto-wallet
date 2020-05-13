@@ -87,6 +87,8 @@ func (r *registry) newETHWalleter() wallets.Watcher {
 		r.newMySQLClient(),
 		r.newLogger(),
 		r.newETHAddressImporter(),
+		r.newETHTxCreator(),
+		r.newETHTxSender(),
 		r.walletType,
 	)
 }
@@ -132,6 +134,20 @@ func (r *registry) newTxCreator() service.TxCreator {
 	)
 }
 
+func (r *registry) newETHTxCreator() service.TxCreator {
+	return ethsrv.NewTxCreate(
+		r.newETH(),
+		r.newLogger(),
+		r.newMySQLClient(),
+		r.newAddressRepo(),
+		r.newETHTxRepo(),
+		r.newETHTxDetailRepo(),
+		r.newPaymentRequestRepo(),
+		r.newTxFileRepo(),
+		r.walletType,
+	)
+}
+
 func (r *registry) newTxSender() service.TxSender {
 	return watchsrv.NewTxSend(
 		r.newBTC(),
@@ -140,6 +156,19 @@ func (r *registry) newTxSender() service.TxSender {
 		r.newAddressRepo(),
 		r.newTxRepo(),
 		r.newTxOutputRepo(),
+		r.newTxFileRepo(),
+		r.walletType,
+	)
+}
+
+func (r *registry) newETHTxSender() service.TxSender {
+	return ethsrv.NewTxSend(
+		r.newETH(),
+		r.newLogger(),
+		r.newMySQLClient(),
+		r.newAddressRepo(),
+		r.newETHTxRepo(),
+		r.newETHTxDetailRepo(),
 		r.newTxFileRepo(),
 		r.walletType,
 	)
@@ -251,6 +280,22 @@ func (r *registry) newTxInputRepo() watchrepo.TxInputRepositorier {
 
 func (r *registry) newTxOutputRepo() watchrepo.TxOutputRepositorier {
 	return watchrepo.NewTxOutputRepository(
+		r.newMySQLClient(),
+		r.conf.CoinTypeCode,
+		r.newLogger(),
+	)
+}
+
+func (r *registry) newETHTxRepo() watchrepo.ETHTxRepositorier {
+	return watchrepo.NewETHTxRepository(
+		r.newMySQLClient(),
+		r.conf.CoinTypeCode,
+		r.newLogger(),
+	)
+}
+
+func (r *registry) newETHTxDetailRepo() watchrepo.EthDetailTxRepositorier {
+	return watchrepo.NewEthDetailTxInputRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),

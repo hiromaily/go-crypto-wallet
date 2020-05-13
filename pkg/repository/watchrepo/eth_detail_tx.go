@@ -105,7 +105,7 @@ func (r *EthDetailTxInputRepository) UpdateAfterTxSent(
 }
 
 // UpdateTxType updates txType
-func (r *ETHTxRepository) UpdateTxType(id int64, txType tx.TxType) (int64, error) {
+func (r *EthDetailTxInputRepository) UpdateTxType(id int64, txType tx.TxType) (int64, error) {
 	ctx := context.Background()
 
 	// Set updating columns

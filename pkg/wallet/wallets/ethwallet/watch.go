@@ -8,6 +8,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	wtype "github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/eth/watchsrv"
 )
 
@@ -18,6 +19,8 @@ type ETHWatch struct {
 	logger *zap.Logger
 	wtype  wtype.WalletType
 	watchsrv.AddressImporter
+	service.TxCreator
+	service.TxSender
 }
 
 // NewETHWatch returns ETHWatch object
@@ -26,6 +29,8 @@ func NewETHWatch(
 	dbConn *sql.DB,
 	logger *zap.Logger,
 	addrImporter watchsrv.AddressImporter,
+	txCreator service.TxCreator,
+	txSender service.TxSender,
 	wtype wtype.WalletType) *ETHWatch {
 
 	return &ETHWatch{
@@ -34,6 +39,8 @@ func NewETHWatch(
 		dbConn:          dbConn,
 		wtype:           wtype,
 		AddressImporter: addrImporter,
+		TxCreator:       txCreator,
+		TxSender:        txSender,
 	}
 }
 
@@ -44,9 +51,7 @@ func (w *ETHWatch) ImportAddress(fileName string, isRescan bool) error {
 
 // CreateDepositTx creates deposit unsigned transaction
 func (w *ETHWatch) CreateDepositTx(adjustmentFee float64) (string, string, error) {
-	//return w.TxCreator.CreateDepositTx(adjustmentFee)
-	w.logger.Warn("not implemented yet in ETH")
-	return "", "", nil
+	return w.TxCreator.CreateDepositTx(adjustmentFee)
 }
 
 // CreatePaymentTx creates payment unsigned transaction
@@ -72,9 +77,7 @@ func (w *ETHWatch) UpdateTxStatus() error {
 
 // SendTx sends signed transaction
 func (w *ETHWatch) SendTx(filePath string) (string, error) {
-	//return w.TxSender.SendTx(filePath)
-	w.logger.Warn("not implemented yet in ETH")
-	return "", nil
+	return w.TxSender.SendTx(filePath)
 }
 
 // CreatePaymentRequest creates payment_request dummy data for development
