@@ -1,11 +1,12 @@
 package keygensrv
 
 import (
+	"fmt"
+
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
@@ -15,30 +16,24 @@ import (
 
 // Sign type
 type Sign struct {
-	eth            ethgrp.Ethereumer
-	logger         *zap.Logger
-	accountKeyRepo coldrepo.AccountKeyRepositorier
-	authKeyRepo    coldrepo.AuthAccountKeyRepositorier
-	txFileRepo     tx.FileRepositorier
-	wtype          wallet.WalletType
+	eth        ethgrp.Ethereumer
+	logger     *zap.Logger
+	txFileRepo tx.FileRepositorier
+	wtype      wallet.WalletType
 }
 
 // NewSign returns sign object
 func NewSign(
 	eth ethgrp.Ethereumer,
 	logger *zap.Logger,
-	accountKeyRepo coldrepo.AccountKeyRepositorier,
-	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
 	txFileRepo tx.FileRepositorier,
 	wtype wallet.WalletType) *Sign {
 
 	return &Sign{
-		eth:            eth,
-		logger:         logger,
-		accountKeyRepo: accountKeyRepo,
-		authKeyRepo:    authKeyRepo,
-		txFileRepo:     txFileRepo,
-		wtype:          wtype,
+		eth:        eth,
+		logger:     logger,
+		txFileRepo: txFileRepo,
+		wtype:      wtype,
 	}
 }
 
@@ -79,7 +74,9 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 			return "", false, "", errors.Wrap(err, "fail to call eth.SignOnRawTransaction()")
 		}
 		// signedRawTx.TxHex
-		txHexs = append(txHexs, signedRawTx.TxHex)
+		//TODO: `rawTx.TxHex` should be used to trace progress to update database
+		//txHexs = append(txHexs, signedRawTx.TxHex)
+		txHexs = append(txHexs, fmt.Sprintf("%s,%s", rawTx.TxHex, signedRawTx.TxHex))
 	}
 
 	// write file

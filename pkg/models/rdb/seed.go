@@ -743,6 +743,7 @@ func (o SeedSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, col
 	if ln == 0 {
 		return nil
 	}
+
 	var sql string
 	vals := []interface{}{}
 	for i, row := range o {

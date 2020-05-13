@@ -11,7 +11,6 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/action"
 	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
-	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
@@ -21,7 +20,6 @@ type ETHTxRepositorier interface {
 	GetMaxID(actionType action.ActionType) (int64, error)
 	InsertUnsignedTx(actionType action.ActionType) (int64, error)
 	Update(txItem *models.EthTX) (int64, error)
-	UpdateTxType(id int64, txType tx.TxType) (int64, error)
 	DeleteAll() (int64, error)
 }
 
@@ -97,20 +95,6 @@ func (r *ETHTxRepository) InsertUnsignedTx(actionType action.ActionType) (int64,
 func (r *ETHTxRepository) Update(txItem *models.EthTX) (int64, error) {
 	ctx := context.Background()
 	return txItem.Update(ctx, r.dbConn, boil.Infer())
-}
-
-// UpdateTxType updates txType
-func (r *ETHTxRepository) UpdateTxType(id int64, txType tx.TxType) (int64, error) {
-	//UPDATE %s SET current_tx_type=? WHERE id=?
-	ctx := context.Background()
-
-	// Set updating columns
-	updCols := map[string]interface{}{
-		models.EthTXColumns.CurrentTXType: txType.Int8(),
-	}
-	return models.EthTxes(
-		qm.Where("id=?", id), //unique
-	).UpdateAll(ctx, r.dbConn, updCols)
 }
 
 // DeleteAll deletes all records

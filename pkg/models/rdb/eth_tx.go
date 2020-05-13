@@ -24,49 +24,39 @@ import (
 
 // EthTX is an object representing the database table.
 type EthTX struct {
-	ID                int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Coin              string    `boil:"coin" json:"coin" toml:"coin" yaml:"coin"`
-	Action            string    `boil:"action" json:"action" toml:"action" yaml:"action"`
-	CurrentTXType     int8      `boil:"current_tx_type" json:"current_tx_type" toml:"current_tx_type" yaml:"current_tx_type"`
-	UnsignedUpdatedAt null.Time `boil:"unsigned_updated_at" json:"unsigned_updated_at,omitempty" toml:"unsigned_updated_at" yaml:"unsigned_updated_at,omitempty"`
-	SentUpdatedAt     null.Time `boil:"sent_updated_at" json:"sent_updated_at,omitempty" toml:"sent_updated_at" yaml:"sent_updated_at,omitempty"`
+	ID        int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Coin      string    `boil:"coin" json:"coin" toml:"coin" yaml:"coin"`
+	Action    string    `boil:"action" json:"action" toml:"action" yaml:"action"`
+	UpdatedAt null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
 	R *ethTXR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L ethTXL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var EthTXColumns = struct {
-	ID                string
-	Coin              string
-	Action            string
-	CurrentTXType     string
-	UnsignedUpdatedAt string
-	SentUpdatedAt     string
+	ID        string
+	Coin      string
+	Action    string
+	UpdatedAt string
 }{
-	ID:                "id",
-	Coin:              "coin",
-	Action:            "action",
-	CurrentTXType:     "current_tx_type",
-	UnsignedUpdatedAt: "unsigned_updated_at",
-	SentUpdatedAt:     "sent_updated_at",
+	ID:        "id",
+	Coin:      "coin",
+	Action:    "action",
+	UpdatedAt: "updated_at",
 }
 
 // Generated where
 
 var EthTXWhere = struct {
-	ID                whereHelperint64
-	Coin              whereHelperstring
-	Action            whereHelperstring
-	CurrentTXType     whereHelperint8
-	UnsignedUpdatedAt whereHelpernull_Time
-	SentUpdatedAt     whereHelpernull_Time
+	ID        whereHelperint64
+	Coin      whereHelperstring
+	Action    whereHelperstring
+	UpdatedAt whereHelpernull_Time
 }{
-	ID:                whereHelperint64{field: "`eth_tx`.`id`"},
-	Coin:              whereHelperstring{field: "`eth_tx`.`coin`"},
-	Action:            whereHelperstring{field: "`eth_tx`.`action`"},
-	CurrentTXType:     whereHelperint8{field: "`eth_tx`.`current_tx_type`"},
-	UnsignedUpdatedAt: whereHelpernull_Time{field: "`eth_tx`.`unsigned_updated_at`"},
-	SentUpdatedAt:     whereHelpernull_Time{field: "`eth_tx`.`sent_updated_at`"},
+	ID:        whereHelperint64{field: "`eth_tx`.`id`"},
+	Coin:      whereHelperstring{field: "`eth_tx`.`coin`"},
+	Action:    whereHelperstring{field: "`eth_tx`.`action`"},
+	UpdatedAt: whereHelpernull_Time{field: "`eth_tx`.`updated_at`"},
 }
 
 // EthTXRels is where relationship names are stored.
@@ -86,9 +76,9 @@ func (*ethTXR) NewStruct() *ethTXR {
 type ethTXL struct{}
 
 var (
-	ethTXAllColumns            = []string{"id", "coin", "action", "current_tx_type", "unsigned_updated_at", "sent_updated_at"}
-	ethTXColumnsWithoutDefault = []string{"coin", "action", "sent_updated_at"}
-	ethTXColumnsWithDefault    = []string{"id", "current_tx_type", "unsigned_updated_at"}
+	ethTXAllColumns            = []string{"id", "coin", "action", "updated_at"}
+	ethTXColumnsWithoutDefault = []string{"coin", "action"}
+	ethTXColumnsWithDefault    = []string{"id", "updated_at"}
 	ethTXPrimaryKeyColumns     = []string{"id"}
 )
 
@@ -223,6 +213,13 @@ func (o *EthTX) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 	}
 
 	var err error
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		if queries.MustTime(o.UpdatedAt).IsZero() {
+			queries.SetScanner(&o.UpdatedAt, currTime)
+		}
+	}
 
 	nzDefaults := queries.NonZeroDefaultSet(ethTXColumnsWithDefault, o)
 
@@ -321,6 +318,12 @@ CacheNoHooks:
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *EthTX) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		queries.SetScanner(&o.UpdatedAt, currTime)
+	}
+
 	var err error
 	key := makeCacheKey(columns, nil)
 	ethTXUpdateCacheMut.RLock()
@@ -451,6 +454,11 @@ var mySQLEthTXUniqueColumns = []string{
 func (o *EthTX) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no eth_tx provided for upsert")
+	}
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		queries.SetScanner(&o.UpdatedAt, currTime)
 	}
 
 	nzDefaults := queries.NonZeroDefaultSet(ethTXColumnsWithDefault, o)
@@ -735,9 +743,17 @@ func (o EthTXSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, co
 	if ln == 0 {
 		return nil
 	}
+
 	var sql string
 	vals := []interface{}{}
 	for i, row := range o {
+		if !boil.TimestampsAreSkipped(ctx) {
+			currTime := time.Now().In(boil.GetLocation())
+
+			if queries.MustTime(row.UpdatedAt).IsZero() {
+				queries.SetScanner(&row.UpdatedAt, currTime)
+			}
+		}
 
 		nzDefaults := queries.NonZeroDefaultSet(ethTXColumnsWithDefault, row)
 		wl, _ := columns.InsertColumnSet(

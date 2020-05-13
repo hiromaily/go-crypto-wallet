@@ -167,6 +167,7 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64) 
 		Nonce:           nonce,
 		UnsignedHexTX:   *rawTxHex,
 	}
+	//TODO: `UnsignedHexTX`(*rawTxHex) should be used to trace progress to update database
 
 	//RawTx
 	rawtx := &RawTx{

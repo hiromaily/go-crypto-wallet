@@ -103,9 +103,7 @@ CREATE TABLE `eth_tx` (
   `id`                  BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'transaction ID',
   `coin`                ENUM('btc', 'bch') NOT NULL COMMENT'coin type code',
   `action`              ENUM('deposit', 'payment', 'transfer') NOT NULL COMMENT'action type',
-  `current_tx_type`     tinyint(2) NOT NULL DEFAULT 1 COMMENT'current transaction type',
-  `unsigned_updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date for unsigned transaction created',
-  `sent_updated_at`     datetime DEFAULT NULL COMMENT'updated date for signed transaction sent',
+  `updated_at`          datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',
   PRIMARY KEY (`id`),
   INDEX idx_coin (`coin`),
   INDEX idx_action (`action`)
@@ -123,6 +121,7 @@ DROP TABLE IF EXISTS `eth_detail_tx`;
 CREATE TABLE `eth_detail_tx` (
   `id`               BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
   `tx_id`            BIGINT(20) NOT NULL COMMENT'eth_tx table ID',
+  `current_tx_type`  tinyint(2) NOT NULL DEFAULT 1 COMMENT'current transaction type',
   `sender_account`   VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'sender account',
   `sender_address`   VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'sender address',
   `receiver_account` VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'receiver account',
@@ -134,7 +133,8 @@ CREATE TABLE `eth_detail_tx` (
   `unsigned_hex_tx`  TEXT COLLATE utf8_unicode_ci NOT NULL COMMENT'HEX string for unsigned transaction',
   `signed_hex_tx`    TEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT'HEX string for signed transaction',
   `sent_hash_tx`     TEXT COLLATE utf8_unicode_ci NOT NULL DEFAULT '' COMMENT'Hash for sent transaction',
-  `updated_at`     datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',
+  `unsigned_updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date for unsigned transaction created',
+  `sent_updated_at`     datetime DEFAULT NULL COMMENT'updated date for signed transaction sent',
   PRIMARY KEY (`id`),
   INDEX idx_txid (`tx_id`),
   INDEX idx_sender_account (`sender_account`),
