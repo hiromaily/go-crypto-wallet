@@ -259,7 +259,7 @@ watch send -file xxx.csv
 - [ ] Sent tx is not proceeded in bitcoin network if fee is not enough comparatively. So re-sending tx functionality is required adding more fee.
 
 ### For ETH
-- [ ] Add any useful APIs
+- [x] Add any useful APIs
 - [x] Key generating by HD Wallet
 - [x] Importing private key
 - [x] Exporting addresses to watch wallet
@@ -269,6 +269,8 @@ watch send -file xxx.csv
 - [ ] Creating unsigned raw transaction for transfer
 - [ ] Signing on unsigned raw transaction
 - [ ] Sending signed transaction
+- [ ] Transaction monitoring
+- [ ] Any functionalities work with both [Go Ethereum](https://github.com/ethereum/go-ethereum) and [Parity](https://www.parity.io/ethereum/)
 - [ ] How to manage password for private key
 
 ## Project layout patterns
