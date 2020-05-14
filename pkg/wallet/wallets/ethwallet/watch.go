@@ -21,6 +21,7 @@ type ETHWatch struct {
 	watchsrv.AddressImporter
 	service.TxCreator
 	service.TxSender
+	service.PaymentRequestCreator
 }
 
 // NewETHWatch returns ETHWatch object
@@ -31,16 +32,18 @@ func NewETHWatch(
 	addrImporter watchsrv.AddressImporter,
 	txCreator service.TxCreator,
 	txSender service.TxSender,
+	paymentRequestCreator service.PaymentRequestCreator,
 	wtype wtype.WalletType) *ETHWatch {
 
 	return &ETHWatch{
-		ETH:             eth,
-		logger:          logger,
-		dbConn:          dbConn,
-		wtype:           wtype,
-		AddressImporter: addrImporter,
-		TxCreator:       txCreator,
-		TxSender:        txSender,
+		ETH:                   eth,
+		logger:                logger,
+		dbConn:                dbConn,
+		wtype:                 wtype,
+		AddressImporter:       addrImporter,
+		TxCreator:             txCreator,
+		TxSender:              txSender,
+		PaymentRequestCreator: paymentRequestCreator,
 	}
 }
 
@@ -56,16 +59,12 @@ func (w *ETHWatch) CreateDepositTx(adjustmentFee float64) (string, string, error
 
 // CreatePaymentTx creates payment unsigned transaction
 func (w *ETHWatch) CreatePaymentTx(adjustmentFee float64) (string, string, error) {
-	//return w.TxCreator.CreatePaymentTx(adjustmentFee)
-	w.logger.Warn("not implemented yet in ETH")
-	return "", "", nil
+	return w.TxCreator.CreatePaymentTx(adjustmentFee)
 }
 
 // CreateTransferTx creates transfer unsigned transaction
 func (w *ETHWatch) CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error) {
-	//return w.TxCreator.CreateTransferTx(sender, receiver, floatAmount, adjustmentFee)
-	w.logger.Warn("not implemented yet in ETH")
-	return "", "", nil
+	return w.TxCreator.CreateTransferTx(sender, receiver, floatAmount, adjustmentFee)
 }
 
 // UpdateTxStatus updates transaction status
@@ -82,9 +81,7 @@ func (w *ETHWatch) SendTx(filePath string) (string, error) {
 
 // CreatePaymentRequest creates payment_request dummy data for development
 func (w *ETHWatch) CreatePaymentRequest() error {
-	//return w.PaymentRequestCreator.CreatePaymentRequest()
-	w.logger.Warn("not implemented yet in ETH")
-	return nil
+	return w.PaymentRequestCreator.CreatePaymentRequest()
 }
 
 // Done should be called before exit

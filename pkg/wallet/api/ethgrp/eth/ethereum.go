@@ -93,6 +93,11 @@ func (e *Ethereum) Close() {
 	}
 }
 
+// CoinTypeCode returns coinTypeCode
+func (e *Ethereum) CoinTypeCode() coin.CoinTypeCode {
+	return e.coinTypeCode
+}
+
 // GetChainConf returns chain conf
 func (e *Ethereum) GetChainConf() *chaincfg.Params {
 	return e.chainConf

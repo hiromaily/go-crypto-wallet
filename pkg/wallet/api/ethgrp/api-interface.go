@@ -12,6 +12,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp/eth"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
 // Ethereumer Ethereum Interface
@@ -23,6 +24,7 @@ type Ethereumer interface {
 	SendRawTx(tx *types.Transaction) error
 	// ethereum
 	Close()
+	CoinTypeCode() coin.CoinTypeCode
 	GetChainConf() *chaincfg.Params
 	// key
 	ToECDSA(privKey string) (*ecdsa.PrivateKey, error)
