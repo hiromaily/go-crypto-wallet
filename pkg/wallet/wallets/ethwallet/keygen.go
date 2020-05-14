@@ -22,6 +22,7 @@ type ETHKeygen struct {
 	service.HDWalleter
 	service.PrivKeyer
 	service.AddressExporter
+	service.Signer
 }
 
 // NewETHKeygen returns ETHKeygen object
@@ -34,6 +35,7 @@ func NewETHKeygen(
 	hdWallter service.HDWalleter,
 	privKeyer service.PrivKeyer,
 	addressExporter service.AddressExporter,
+	signer service.Signer,
 ) *ETHKeygen {
 
 	return &ETHKeygen{
@@ -45,6 +47,7 @@ func NewETHKeygen(
 		HDWalleter:      hdWallter,
 		PrivKeyer:       privKeyer,
 		AddressExporter: addressExporter,
+		Signer:          signer,
 	}
 }
 
@@ -89,9 +92,7 @@ func (k *ETHKeygen) ExportAddress(accountType account.AccountType) (string, erro
 
 // SignTx signs on transaction
 func (k *ETHKeygen) SignTx(filePath string) (string, bool, string, error) {
-	//return k.Signer.SignTx(filePath)
-	k.logger.Warn("not implemented yet in ETH")
-	return "", false, "", nil
+	return k.Signer.SignTx(filePath)
 }
 
 // Done should be called before exit

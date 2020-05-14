@@ -97,6 +97,7 @@ func (r *registry) newETHKeygener() wallets.Keygener {
 		r.newHdWallter(),
 		r.newPrivKeyer(),
 		r.newAddressExporter(),
+		r.newETHSigner(),
 	)
 }
 
@@ -175,12 +176,22 @@ func (r *registry) newAddressExporter() service.AddressExporter {
 		r.walletType,
 	)
 }
+
 func (r *registry) newSigner() service.Signer {
 	return coldsrv.NewSign(
 		r.newBTC(),
 		r.newLogger(),
 		r.newAccountKeyRepo(),
 		r.newAuthKeyRepo(),
+		r.newTxFileStorager(),
+		r.walletType,
+	)
+}
+
+func (r *registry) newETHSigner() service.Signer {
+	return ethsrv.NewSign(
+		r.newETH(),
+		r.newLogger(),
 		r.newTxFileStorager(),
 		r.walletType,
 	)

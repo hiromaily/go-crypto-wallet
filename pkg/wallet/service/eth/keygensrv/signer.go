@@ -39,8 +39,6 @@ func NewSign(
 
 // SignTx sign on tx in csv file
 // - multisig equivalent functionality is not implemented yet in ETH
-// TODO: implementation
-// TODO: sender account shold be included in file
 func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 	// get tx_deposit_id from tx file name
 	actionType, _, txID, signedCount, err := s.txFileRepo.ValidateFilePath(filePath, tx.TxTypeUnsigned)
