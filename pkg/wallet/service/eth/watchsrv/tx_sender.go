@@ -119,32 +119,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 		}
 	}
 
-	// update account_pubkey_table
-	//if actionType != action.ActionTypePayment {
-	//	//skip for that receiver address is anonymous
-	//	err = t.updateIsAllocatedAccountPubkey(txID)
-	//	if err != nil {
-	//		//TODO: even if error occurred, tx is already sent. so db should be corrected manually
-	//		return "", err
-	//	}
-	//}
+	//TODO: update is_allocated in account_pubkey_table
+	// Ethereum should use same address beucase no utxo
 	return "", nil
 }
-
-//func (t *TxSend) updateIsAllocatedAccountPubkey(txID int64) error {
-//	// get txOutputs by tx_id
-//	txOutputs, err := t.txOutputRepo.GetAllByTxID(txID)
-//	if err != nil {
-//		return errors.Wrap(err, "fail to call repo.TxOutput().GetAllByTxID()")
-//	}
-//	if len(txOutputs) == 0 {
-//		return errors.New("output tx could not be found in tx_deposit_output")
-//	}
-//
-//	_, err = t.addrRepo.UpdateIsAllocated(true, txOutputs[0].OutputAddress)
-//	if err != nil {
-//		return errors.Wrap(err, "fail to call repo.Pubkey().UpdateIsAllocated()")
-//	}
-//
-//	return nil
-//}
