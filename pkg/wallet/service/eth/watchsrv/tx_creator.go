@@ -8,6 +8,7 @@ import (
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/action"
+	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-bitcoin/pkg/tx"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
@@ -50,6 +51,51 @@ func NewTxCreate(
 		txFileRepo:   txFileRepo,
 		wtype:        wtype,
 	}
+}
+
+func (t *TxCreate) afterTxCreation(
+	targetAction action.ActionType,
+	senderAccount account.AccountType,
+	serializedTxs []string,
+	txDetailItems []*models.EthDetailTX,
+) (string, string, error) {
+
+	// start transaction
+	dtx, err := t.dbConn.Begin()
+	if err != nil {
+		return "", "", errors.Wrap(err, "fail to start transaction")
+	}
+	defer func() {
+		if err != nil {
+			dtx.Rollback()
+		} else {
+			dtx.Commit()
+		}
+	}()
+
+	// Insert eth_tx
+	txID, err := t.txRepo.InsertUnsignedTx(targetAction)
+	if err != nil {
+		return "", "", errors.Wrap(err, "fail to call txRepo.InsertUnsignedTx()")
+	}
+	// Insert to eth_detail_tx
+	for idx := range txDetailItems {
+		txDetailItems[idx].TXID = txID
+	}
+	if err = t.txDetailRepo.InsertBulk(txDetailItems); err != nil {
+		return "", "", errors.Wrap(err, "fail to call txDetailRepo.InsertBulk()")
+	}
+
+	// save transaction result to file
+	var generatedFileName string
+	if len(serializedTxs) != 0 {
+		generatedFileName, err = t.generateHexFile(targetAction, senderAccount, txID, serializedTxs)
+		if err != nil {
+			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
+		}
+	}
+
+	return "", generatedFileName, nil
 }
 
 // generateHexFile generate file for hex and encoded previous addresses

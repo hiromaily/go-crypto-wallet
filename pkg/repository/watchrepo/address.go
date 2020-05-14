@@ -19,6 +19,7 @@ import (
 // AddressRepositorier is AddressRepository interface
 type AddressRepositorier interface {
 	GetAll(accountType account.AccountType) ([]*models.Address, error)
+	GetAllAddress(accountType account.AccountType) ([]string, error)
 	GetOneUnAllocated(accountType account.AccountType) (*models.Address, error)
 	InsertBulk(items []*models.Address) error
 	UpdateIsAllocated(isAllocated bool, Address string) (int64, error)
@@ -55,6 +56,31 @@ func (r *AddressRepository) GetAll(accountType account.AccountType) ([]*models.A
 		return nil, errors.Wrap(err, "failed to call models.Addresss().All()")
 	}
 	return items, nil
+}
+
+// GetAllAddress returns all addresses by account
+func (r *AddressRepository) GetAllAddress(accountType account.AccountType) ([]string, error) {
+	ctx := context.Background()
+
+	type Response struct {
+		Address string `boil:"wallet_address"`
+	}
+	var response []*Response
+	err := models.EthTxes(
+		qm.Select("wallet_address"),
+		qm.Where("coin=?", r.coinTypeCode.String()),
+		qm.And("account=?", accountType.String()),
+	).Bind(ctx, r.dbConn, &response)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to call models.EthTxes().Bind()")
+	}
+
+	// convert
+	addrs := make([]string, 0, len(response))
+	for _, val := range response {
+		addrs = append(addrs, val.Address)
+	}
+	return addrs, nil
 }
 
 // GetOneUnAllocated returns one records by is_allocated=false

@@ -11,27 +11,23 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp/eth"
 )
 
-// UserAmount user address and amount
-type UserAmount struct {
-	address string
-	amount  uint64
-}
-
 // CreateDepositTx create unsigned tx if client accounts have coins
 // - sender: client, receiver: deposit
 // - receiver account covers fee, but is should be flexible
 func (t *TxCreate) CreateDepositTx(adjustmentFee float64) (string, string, error) {
 	targetAction := action.ActionTypeDeposit
+	senderAccount := account.AccountTypeClient
+	receiverAccount := account.AccountTypeDeposit
 
 	//1. get addresses for client account
-	addrs, err := t.addrRepo.GetAll(account.AccountTypeClient)
+	addrs, err := t.addrRepo.GetAll(senderAccount)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
 	}
 	//addresses, err := t.eth.Accounts()
 
 	// target addresses
-	var userAmounts []UserAmount
+	var userAmounts []eth.UserAmount
 
 	// address list for client
 	for _, addr := range addrs {
@@ -44,7 +40,7 @@ func (t *TxCreate) CreateDepositTx(adjustmentFee float64) (string, string, error
 			)
 		} else {
 			if balance.Uint64() != 0 {
-				userAmounts = append(userAmounts, UserAmount{address: addr.WalletAddress, amount: balance.Uint64()})
+				userAmounts = append(userAmounts, eth.UserAmount{Address: addr.WalletAddress, Amount: balance.Uint64()})
 			}
 		}
 	}
@@ -55,7 +51,7 @@ func (t *TxCreate) CreateDepositTx(adjustmentFee float64) (string, string, error
 	}
 
 	// get address for deposit account
-	depositAddr, err := t.addrRepo.GetOneUnAllocated(account.AccountTypeDeposit)
+	depositAddr, err := t.addrRepo.GetOneUnAllocated(receiverAccount)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call addrRepo.GetOneUnAllocated(account.AccountTypeDeposit)")
 	}
@@ -65,9 +61,9 @@ func (t *TxCreate) CreateDepositTx(adjustmentFee float64) (string, string, error
 	txDetailItems := make([]*models.EthDetailTX, 0, len(userAmounts))
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
-		rawTx, txDetailItem, err := t.eth.CreateRawTransaction(val.address, depositAddr.WalletAddress, val.amount)
+		rawTx, txDetailItem, err := t.eth.CreateRawTransaction(val.Address, depositAddr.WalletAddress, val.Amount)
 		if err != nil {
-			return "", "", errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), address: %s", val.address)
+			return "", "", errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s", val.Address)
 		}
 
 		rawTxHex := rawTx.TxHex
@@ -81,45 +77,10 @@ func (t *TxCreate) CreateDepositTx(adjustmentFee float64) (string, string, error
 		serializedTxs = append(serializedTxs, serializedTx)
 
 		// create insert data for　eth_detail_tx
-		txDetailItem.SenderAccount = account.AccountTypeClient.String()
-		txDetailItem.ReceiverAccount = account.AccountTypeDeposit.String()
+		txDetailItem.SenderAccount = senderAccount.String()
+		txDetailItem.ReceiverAccount = receiverAccount.String()
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}
 
-	// start transaction
-	dtx, err := t.dbConn.Begin()
-	if err != nil {
-		return "", "", errors.Wrap(err, "fail to start transaction")
-	}
-	defer func() {
-		if err != nil {
-			dtx.Rollback()
-		} else {
-			dtx.Commit()
-		}
-	}()
-
-	// Insert eth_tx
-	txID, err := t.txRepo.InsertUnsignedTx(action.ActionTypeDeposit)
-	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call txRepo.InsertUnsignedTx()")
-	}
-	// Insert to eth_detail_tx
-	for idx := range txDetailItems {
-		txDetailItems[idx].TXID = txID
-	}
-	if err = t.txDetailRepo.InsertBulk(txDetailItems); err != nil {
-		return "", "", errors.Wrap(err, "fail to call txDetailRepo.InsertBulk()")
-	}
-
-	// save transaction result to file
-	var generatedFileName string
-	if len(serializedTxs) != 0 {
-		generatedFileName, err = t.generateHexFile(targetAction, account.AccountTypeClient, txID, serializedTxs)
-		if err != nil {
-			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
-		}
-	}
-
-	return "", generatedFileName, nil
+	return t.afterTxCreation(targetAction, senderAccount, serializedTxs, txDetailItems)
 }

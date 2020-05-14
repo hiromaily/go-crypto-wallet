@@ -125,3 +125,8 @@ func (e *Ethereum) FromGWei(v int64) *big.Int {
 func (e *Ethereum) FromEther(v int64) *big.Int {
 	return big.NewInt(v * params.Ether)
 }
+
+// FromFloatEther converts Ether(float64) to Wei(*big.Int)
+func (e *Ethereum) FromFloatEther(v float64) *big.Int {
+	return big.NewInt(int64(v * float64(params.Ether)))
+}

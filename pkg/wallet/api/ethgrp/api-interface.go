@@ -16,6 +16,8 @@ import (
 
 // Ethereumer Ethereum Interface
 type Ethereumer interface {
+	// balance
+	GetTotalBalance(addrs []string) (*big.Int, []eth.UserAmount)
 	// client
 	BalanceAt(hexAddr string) (*big.Int, error)
 	SendRawTx(tx *types.Transaction) error
@@ -84,4 +86,5 @@ type Ethereumer interface {
 	FromWei(v int64) *big.Int
 	FromGWei(v int64) *big.Int
 	FromEther(v int64) *big.Int
+	FromFloatEther(v float64) *big.Int
 }
