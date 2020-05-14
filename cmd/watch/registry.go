@@ -89,6 +89,7 @@ func (r *registry) newETHWalleter() wallets.Watcher {
 		r.newETHAddressImporter(),
 		r.newETHTxCreator(),
 		r.newETHTxSender(),
+		r.newETHTxMonitorer(),
 		r.newETHPaymentRequestCreator(),
 		r.walletType,
 	)
@@ -182,6 +183,18 @@ func (r *registry) newTxMonitorer() service.TxMonitorer {
 		r.newMySQLClient(),
 		r.newTxRepo(),
 		r.newTxInputRepo(),
+		r.newPaymentRequestRepo(),
+		r.walletType,
+	)
+}
+
+func (r *registry) newETHTxMonitorer() service.TxMonitorer {
+	return ethsrv.NewTxMonitor(
+		r.newETH(),
+		r.newLogger(),
+		r.newMySQLClient(),
+		r.newETHTxRepo(),
+		r.newETHTxDetailRepo(),
 		r.newPaymentRequestRepo(),
 		r.walletType,
 	)

@@ -21,6 +21,7 @@ type ETHWatch struct {
 	watchsrv.AddressImporter
 	service.TxCreator
 	service.TxSender
+	service.TxMonitorer
 	service.PaymentRequestCreator
 }
 
@@ -32,6 +33,7 @@ func NewETHWatch(
 	addrImporter watchsrv.AddressImporter,
 	txCreator service.TxCreator,
 	txSender service.TxSender,
+	txMonitorer service.TxMonitorer,
 	paymentRequestCreator service.PaymentRequestCreator,
 	wtype wtype.WalletType) *ETHWatch {
 
@@ -43,6 +45,7 @@ func NewETHWatch(
 		AddressImporter:       addrImporter,
 		TxCreator:             txCreator,
 		TxSender:              txSender,
+		TxMonitorer:           txMonitorer,
 		PaymentRequestCreator: paymentRequestCreator,
 	}
 }
@@ -69,9 +72,8 @@ func (w *ETHWatch) CreateTransferTx(sender, receiver account.AccountType, floatA
 
 // UpdateTxStatus updates transaction status
 func (w *ETHWatch) UpdateTxStatus() error {
-	//return w.TxMonitorer.UpdateTxStatus()
 	w.logger.Warn("not implemented yet in ETH")
-	return nil
+	return w.TxMonitorer.UpdateTxStatus()
 }
 
 // SendTx sends signed transaction
