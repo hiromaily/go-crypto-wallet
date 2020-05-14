@@ -15,12 +15,12 @@ import (
 // - sender: client, receiver: deposit
 // - receiver account covers fee, but is should be flexible
 func (t *TxCreate) CreateDepositTx(adjustmentFee float64) (string, string, error) {
+	sender := account.AccountTypeClient
+	receiver := account.AccountTypeDeposit
 	targetAction := action.ActionTypeDeposit
-	senderAccount := account.AccountTypeClient
-	receiverAccount := account.AccountTypeDeposit
 
 	//1. get addresses for client account
-	addrs, err := t.addrRepo.GetAll(senderAccount)
+	addrs, err := t.addrRepo.GetAll(sender)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
 	}
@@ -51,7 +51,7 @@ func (t *TxCreate) CreateDepositTx(adjustmentFee float64) (string, string, error
 	}
 
 	// get address for deposit account
-	depositAddr, err := t.addrRepo.GetOneUnAllocated(receiverAccount)
+	depositAddr, err := t.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call addrRepo.GetOneUnAllocated(account.AccountTypeDeposit)")
 	}
@@ -77,10 +77,10 @@ func (t *TxCreate) CreateDepositTx(adjustmentFee float64) (string, string, error
 		serializedTxs = append(serializedTxs, serializedTx)
 
 		// create insert data for　eth_detail_tx
-		txDetailItem.SenderAccount = senderAccount.String()
-		txDetailItem.ReceiverAccount = receiverAccount.String()
+		txDetailItem.SenderAccount = sender.String()
+		txDetailItem.ReceiverAccount = receiver.String()
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}
 
-	return t.afterTxCreation(targetAction, senderAccount, serializedTxs, txDetailItems)
+	return t.afterTxCreation(targetAction, sender, serializedTxs, txDetailItems, nil)
 }

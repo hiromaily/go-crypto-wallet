@@ -120,6 +120,6 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 	}
 
 	//TODO: update is_allocated in account_pubkey_table
-	// Ethereum should use same address beucase no utxo
+	// Ethereum should use same address because no utxo
 	return "", nil
 }

@@ -58,6 +58,7 @@ func (t *TxCreate) afterTxCreation(
 	senderAccount account.AccountType,
 	serializedTxs []string,
 	txDetailItems []*models.EthDetailTX,
+	paymentRequestIds []int64,
 ) (string, string, error) {
 
 	// start transaction
@@ -84,6 +85,13 @@ func (t *TxCreate) afterTxCreation(
 	}
 	if err = t.txDetailRepo.InsertBulk(txDetailItems); err != nil {
 		return "", "", errors.Wrap(err, "fail to call txDetailRepo.InsertBulk()")
+	}
+
+	if targetAction == action.ActionTypePayment {
+		_, err = t.payReqRepo.UpdatePaymentID(txID, paymentRequestIds)
+		if err != nil {
+			return "", "", errors.Wrap(err, "fail to call repo.PayReq().UpdatePaymentID(txID, paymentRequestIds)")
+		}
 	}
 
 	// save transaction result to file

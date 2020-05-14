@@ -94,5 +94,5 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatA
 		}
 	}
 
-	return t.afterTxCreation(targetAction, sender, serializedTxs, txDetailItems)
+	return t.afterTxCreation(targetAction, sender, serializedTxs, txDetailItems, nil)
 }
