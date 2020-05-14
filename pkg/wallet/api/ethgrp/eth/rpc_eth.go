@@ -24,8 +24,6 @@ type BlockNumber struct {
 //  - return false if not syncing (it means syncing is done)
 //  - there seems 2 different responses
 func (e *Ethereum) Syncing() (*ResponseSyncing, bool, error) {
-	e.logger.Info("Syncing()")
-
 	var (
 		resIF  interface{}
 		resMap map[string]string

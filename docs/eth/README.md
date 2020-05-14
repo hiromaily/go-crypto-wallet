@@ -17,9 +17,9 @@ Geth has a development mode which sets up a single node Ethereum test network wi
 - [Etherscan for goerli](https://goerli.etherscan.io/)
 - [Goerli Testnet Faucet](https://goerli-faucet.slock.it/)
 
-## Install and Run
+## Install ethereum and Run
 ```
-# Install
+# Install ethereum on MacOS
 $ brew tap ethereum/ethereum
 $ brew install ethereum
 
@@ -28,6 +28,8 @@ $ geth --goerli --rpc console
  or 
 # available="[admin debug web3 eth txpool personal clique miner net]
 $ geth --goerli --rpc --rpcapi admin,debug,web3,eth,txpool,net,personal
+ or
+$ geth --goerli --rpc --rpcaddr 0.0.0.0 --rpcapi admin,debug,web3,eth,txpool,net,personal
 
 # Rest API using [HTTPie](https://httpie.org/)
 $ http http://127.0.0.1:8545 method=web3_clientVersion params:='[]' id=67
@@ -88,6 +90,16 @@ API AND CONSOLE OPTIONS:
   --rpcapi value                      API's offered over the HTTP-RPC interface
 ```
 
+## Install parity and Run
+```
+# Install parity on MacOS
+$ brew tap paritytech/paritytech
+$ brew install parity
+
+# Run on testnet
+$ parity --chain=goerli --geth
+```
+
 ## geth Rest API
 - eth_syncing
 ```
@@ -97,6 +109,7 @@ http http://127.0.0.1:8545 method=eth_syncing params:='[]' id=1
 ```
 http http://127.0.0.1:8545 method=web3_clientVersion params:='[]' id=67
 ```
+
 
 
 ## How to implement multisig on Ethereum
