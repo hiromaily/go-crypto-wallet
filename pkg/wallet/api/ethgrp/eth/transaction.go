@@ -245,6 +245,24 @@ func (e *Ethereum) SendSignedRawTransaction(signedTxHex string) (string, error) 
 	return txHash, err
 }
 
+// GetConfirmation returns confirmation number
+func (e *Ethereum) GetConfirmation(hashTx string) (uint64, error) {
+	txInfo, err := e.GetTransactionByHash(hashTx)
+	if err != nil {
+		return 0, err
+	}
+	if txInfo.BlockNumber == 0 {
+		return 0, errors.New("block number can't retrieved")
+	}
+	currentBlockNum, err := e.BlockNumber()
+	if err != nil {
+		return 0, err
+	}
+	confirmation := currentBlockNum.Int64() - txInfo.BlockNumber
+
+	return uint64(confirmation), nil
+}
+
 func encodeTx(tx *types.Transaction) (*string, error) {
 	txb, err := rlp.EncodeToBytes(tx)
 	if err != nil {
