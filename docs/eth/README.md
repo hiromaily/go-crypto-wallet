@@ -17,6 +17,11 @@ Geth has a development mode which sets up a single node Ethereum test network wi
 - [Etherscan for goerli](https://goerli.etherscan.io/)
 - [Goerli Testnet Faucet](https://goerli-faucet.slock.it/)
 
+## Parity
+- [parity](https://www.parity.io/ethereum/)
+- [goerli/testnet](https://github.com/goerli/testnet)
+- [homebrew-paritytech](https://github.com/paritytech/homebrew-paritytech)
+
 ## Install ethereum and Run
 ```
 # Install ethereum on MacOS
