@@ -98,6 +98,9 @@ $ brew install parity
 
 # Run on testnet
 $ parity --chain=goerli --geth
+ or
+$ cp ./data/config/parity/config.toml ${HOME}/Library/Application Support/io.parity.ethereum/
+$ parity
 ```
 
 ## geth Rest API
