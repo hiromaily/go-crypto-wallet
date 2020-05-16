@@ -31,3 +31,40 @@ func TestProtocolVersion(t *testing.T) {
 	t.Log("ProtocolVersion:", protocolVer)
 }
 
+// TestCoinbase is test for Coinbase
+func TestCoinbase(t *testing.T) {
+	//t.SkipNow()
+	et := testutil.GetETH()
+
+	addr, err := et.Coinbase()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log("coinbase address:", addr)
+}
+
+// TestAccounts is test for Accounts
+func TestAccounts(t *testing.T) {
+	//t.SkipNow()
+	et := testutil.GetETH()
+
+	accounts, err := et.Accounts()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, account := range accounts {
+		t.Log("address:", account)
+	}
+}
+
+// TestBlockNumber is test for BlockNumber
+func TestBlockNumber(t *testing.T) {
+	//t.SkipNow()
+	et := testutil.GetETH()
+
+	blockNum, err := et.BlockNumber()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log("blockNumber:", blockNum)
+}

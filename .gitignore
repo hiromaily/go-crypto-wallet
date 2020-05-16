@@ -16,6 +16,6 @@ data/tx/*
 docker/grafana/*
 docker/nodes/btc/data/testnet3
 docker/nodes/bch/data/testnet3
-docker/nodes/bch/data/*
+docker/nodes/eth/data/*
 
 !.gitkeep
