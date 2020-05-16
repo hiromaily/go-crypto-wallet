@@ -6,7 +6,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 // ResponseSyncing response of eth_syncing
@@ -16,11 +15,6 @@ type ResponseSyncing struct {
 	HighestBlock  int64 `json:"highestBlock"`
 	KnownStates   int64 `json:"knownStates"`
 	PulledStates  int64 `json:"pulledStates"`
-}
-
-// BlockNumber response of eth_blockNumber
-type BlockNumber struct {
-	Number string
 }
 
 // Syncing returns sync status or bool
@@ -264,10 +258,10 @@ func (e *Ethereum) GetTransactionCount(hexAddr string, quantityTag QuantityTag) 
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblocktransactioncountbynumber
 // transaction count of block, it's possible transaction is 0
 // - this number is fixed
-func (e *Ethereum) GetBlockTransactionCountByNumber(number uint64) (*big.Int, error) {
+func (e *Ethereum) GetBlockTransactionCountByNumber(blockNumber uint64) (*big.Int, error) {
 
 	//convert uint64 to hex
-	hexNum := hexutil.EncodeUint64(number)
+	hexNum := hexutil.EncodeUint64(blockNumber)
 
 	var txCount string
 	err := e.rpcClient.CallContext(e.ctx, &txCount, "eth_getBlockTransactionCountByNumber", hexNum)
@@ -311,6 +305,7 @@ func (e *Ethereum) GetBlockTransactionCountByNumber(number uint64) (*big.Int, er
 
 // GetUncleCountByBlockNumber returns the number of uncles in a block from a block matching the given block number
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getunclecountbyblocknumber
+// - this func would not be used anywhere
 func (e *Ethereum) GetUncleCountByBlockNumber(blockNumber uint64) (*big.Int, error) {
 
 	//convert int64 to hex
@@ -336,46 +331,126 @@ func (e *Ethereum) GetUncleCountByBlockNumber(blockNumber uint64) (*big.Int, err
 
 // GetCode returns code at a given address ???
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getcode
-func (e *Ethereum) GetCode(hexAddr string, quantityTag QuantityTag) (*big.Int, error) {
-
-	var code string
-	err := e.rpcClient.CallContext(e.ctx, &code, "eth_getCode", hexAddr, quantityTag.String())
-	if err != nil {
-		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_getCode)")
-	}
-	e.logger.Debug("code", zap.String("code", code))
-	if code == "0x" {
-		code = "0x0"
-	}
-
-	h, err := hexutil.DecodeBig(code)
-	if err != nil {
-		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
-	}
-
-	return h, nil
-}
+// - always returns 0
+//func (e *Ethereum) GetCode(hexAddr string, quantityTag QuantityTag) (*big.Int, error) {
+//
+//	var code string
+//	err := e.rpcClient.CallContext(e.ctx, &code, "eth_getCode", hexAddr, quantityTag.String())
+//	if err != nil {
+//		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_getCode)")
+//	}
+//	e.logger.Debug("code", zap.String("code", code))
+//	if code == "0x" {
+//		code = "0x0"
+//	}
+//
+//	h, err := hexutil.DecodeBig(code)
+//	if err != nil {
+//		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
+//	}
+//
+//	return h, nil
+//}
 
 // eth_getBlockByHash
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbyhash
+// - no need, use GetBlockByNumber()
+
+// BlockNumber response of eth_blockNumber
+type BlockNumber struct {
+	Number string
+}
+
+// BlockRawInfo is block raw info
+type BlockRawInfo struct {
+	Number           string   `json:"number"`
+	Hash             string   `json:"hash"`
+	ParentHash       string   `json:"parentHash"`
+	Nonce            string   `json:"nonce"`
+	Sha3Uncles       string   `json:"sha3Uncles"`
+	LogsBloom        string   `json:"logsBloom"`
+	TransactionsRoot string   `json:"transactionsRoot"`
+	StateRoot        string   `json:"stateRoot"`
+	Miner            string   `json:"miner"`
+	Difficulty       string   `json:"difficulty"`
+	TotalDifficulty  string   `json:"totalDifficulty"`
+	ExtraData        string   `json:"extraData"`
+	Size             string   `json:"size"`
+	GasLimit         string   `json:"gasLimit"`
+	GasUsed          string   `json:"gasUsed"`
+	Timestamp        string   `json:"timestamp"`
+	Transactions     []string `json:"transactions"`
+	Uncles           []string `json:"uncles"`
+}
+
+// BlockInfo is block info
+type BlockInfo struct {
+	Number           *big.Int `json:"number"`
+	Hash             string   `json:"hash"`
+	ParentHash       string   `json:"parentHash"`
+	Nonce            *big.Int `json:"nonce"`
+	Sha3Uncles       string   `json:"sha3Uncles"`
+	LogsBloom        string   `json:"logsBloom"`
+	TransactionsRoot string   `json:"transactionsRoot"`
+	StateRoot        string   `json:"stateRoot"`
+	Miner            string   `json:"miner"`
+	Difficulty       *big.Int `json:"difficulty"`
+	TotalDifficulty  *big.Int `json:"totalDifficulty"`
+	ExtraData        string   `json:"extraData"`
+	Size             *big.Int `json:"size"`
+	GasLimit         *big.Int `json:"gasLimit"`
+	GasUsed          *big.Int `json:"gasUsed"`
+	Timestamp        *big.Int `json:"timestamp"`
+	Transactions     []string `json:"transactions"`
+	Uncles           []string `json:"uncles"`
+}
 
 // GetBlockByNumber returns information about a block by block number
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbynumber
-func (e *Ethereum) GetBlockByNumber(quantityTag QuantityTag) (*big.Int, error) {
+func (e *Ethereum) GetBlockByNumber(blockNumber uint64) (*BlockInfo, error) {
+	//convert int64 to hex
+	blockHexNumber := hexutil.EncodeUint64(blockNumber)
 
-	var lastBlock BlockNumber
+	//var lastBlock BlockNumber
+	var blockRawInfo BlockRawInfo
 
-	err := e.rpcClient.CallContext(e.ctx, &lastBlock, "eth_getBlockByNumber", quantityTag.String(), false)
+	err := e.rpcClient.CallContext(e.ctx, &blockRawInfo, "eth_getBlockByNumber", blockHexNumber, false)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_getBlockByNumber)")
 	}
 
-	h, err := hexutil.DecodeBig(lastBlock.Number)
-	if err != nil {
-		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
-	}
+	return convertBlockRawInfo(&blockRawInfo), nil
+}
 
-	return h, nil
+func convertBlockRawInfo(raw *BlockRawInfo) *BlockInfo {
+	return &BlockInfo{
+		Number:           decodeString(raw.Number),
+		Hash:             raw.Hash,
+		ParentHash:       raw.ParentHash,
+		Nonce:            decodeString(raw.Nonce),
+		Sha3Uncles:       raw.Sha3Uncles,
+		LogsBloom:        raw.LogsBloom,
+		TransactionsRoot: raw.TransactionsRoot,
+		StateRoot:        raw.StateRoot,
+		Miner:            raw.Miner,
+		Difficulty:       decodeString(raw.Difficulty),
+		TotalDifficulty:  decodeString(raw.TotalDifficulty),
+		ExtraData:        raw.ExtraData,
+		Size:             decodeString(raw.Size),
+		GasLimit:         decodeString(raw.GasLimit),
+		GasUsed:          decodeString(raw.GasUsed),
+		Timestamp:        decodeString(raw.Timestamp),
+		Transactions:     raw.Transactions,
+		Uncles:           raw.Uncles,
+	}
+}
+
+func decodeString(val string) *big.Int {
+	decoded, err := hexutil.DecodeBig(val)
+	if err != nil {
+		return new(big.Int)
+	}
+	return decoded
 }
 
 // eth_getTransactionByBlockHashAndIndex

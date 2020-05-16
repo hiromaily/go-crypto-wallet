@@ -1,10 +1,10 @@
 package eth_test
 
 import (
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp/eth"
 	"testing"
 
 	"github.com/hiromaily/go-bitcoin/pkg/testutil"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp/eth"
 )
 
 // TestSyncing is test for Syncing
@@ -126,6 +126,15 @@ func TestGetBalance(t *testing.T) {
 				if balance != nil {
 					t.Logf("quantityTag: %s, balance: %d", tag, balance.Uint64())
 				}
+
+				// GetCode
+				//code, err := et.GetCode(tt.args.addr, tag)
+				//if err != nil{
+				//	t.Fatal(err)
+				//}
+				//if code != nil {
+				//	t.Logf("quantityTag: %s, code: %d", tag, code.Uint64())
+				//}
 			}
 		})
 	}
@@ -328,6 +337,60 @@ func TestGetBlockTransactionCountByNumber(t *testing.T) {
 			}
 			if count != nil {
 				t.Logf("transactionCount: %d", count.Uint64())
+			}
+
+			count2, err := et.GetUncleCountByBlockNumber(tt.args.txNum)
+			if (err == nil) == tt.want.isErr {
+				t.Errorf("GetUncleCountByBlockNumber() = %v, want error = %v", err, tt.want.isErr)
+				return
+			}
+			if count != nil {
+				t.Logf("uncleCount: %d", count2.Uint64())
+			}
+		})
+	}
+}
+
+// TestGetBlockByNumber is test for GetBlockByNumber
+func TestGetBlockByNumber(t *testing.T) {
+	et := testutil.GetETH()
+
+	type args struct {
+		txNum uint64
+	}
+	type want struct {
+		isErr bool
+	}
+	tests := []struct {
+		name string
+		args args
+		want want
+	}{
+		{
+			name: "happy path 2706436",
+			args: args{txNum: 2706436},
+			want: want{false},
+		},
+		{
+			name: "happy path 2706435",
+			args: args{txNum: 2706435},
+			want: want{false},
+		},
+		{
+			name: "happy path 2706434",
+			args: args{txNum: 2606434},
+			want: want{false},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			blockInfo, err := et.GetBlockByNumber(tt.args.txNum)
+			if (err == nil) == tt.want.isErr {
+				t.Errorf("GetBlockByNumber() = %v, want error = %v", err, tt.want.isErr)
+				return
+			}
+			if blockInfo != nil {
+				t.Logf("blockInfo: %v", blockInfo)
 			}
 		})
 	}
