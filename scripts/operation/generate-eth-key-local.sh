@@ -16,7 +16,8 @@ keygen -coin ${COIN} create hdkey -account deposit -keynum 1
 keygen -coin ${COIN} create hdkey -account payment -keynum 1
 keygen -coin ${COIN} create hdkey -account stored -keynum 1
 
-# import generated private key into keygen wallet
+# import generated private key into keygen wallet (this command should run on ethereum server)
+# create key files on key store directory
 keygen -coin ${COIN} import privkey -account client
 keygen -coin ${COIN} import privkey -account deposit
 keygen -coin ${COIN} import privkey -account payment

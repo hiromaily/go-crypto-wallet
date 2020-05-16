@@ -35,6 +35,8 @@ $ geth --goerli --rpc console
 $ geth --goerli --rpc --rpcapi admin,debug,web3,eth,txpool,net,personal
  or
 $ geth --goerli --rpc --rpcaddr 0.0.0.0 --rpcapi admin,debug,web3,eth,txpool,net,personal
+ or
+$ geth --goerli --rpc --rpcaddr 0.0.0.0 --rpcapi admin,debug,web3,eth,txpool,net,personal --keystore ${HOME}/work/go/src/github.com/hiromaily/go-bitcoin/data/keystore
 
 # Rest API using [HTTPie](https://httpie.org/)
 $ http http://127.0.0.1:8545 method=web3_clientVersion params:='[]' id=67

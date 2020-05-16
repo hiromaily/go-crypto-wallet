@@ -108,6 +108,10 @@ func (e *Ethereum) ProtocolVersion() (uint64, error) {
 
 // Coinbase returns the client coinbase address
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_coinbase
+// Note:
+//  - any accounts can not be retrieved if no private key in keystore.
+//  - when running geth command, keystore option should be used to specify directory
+//  - that means, this rpc can be called from cold wallet
 func (e *Ethereum) Coinbase() (string, error) {
 
 	var resAddr string
@@ -120,6 +124,11 @@ func (e *Ethereum) Coinbase() (string, error) {
 
 // Accounts returns a list of addresses owned by client
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_accounts
+// https://github.com/ethereum/go-ethereum/wiki/Managing-your-accounts
+// Note:
+//  - any accounts can not be retrieved if no private key in keystore.
+//  - when running geth command, keystore option should be used to specify directory
+//  - that means, this rpc can be called from cold wallet
 func (e *Ethereum) Accounts() ([]string, error) {
 
 	var accounts []string
@@ -133,6 +142,8 @@ func (e *Ethereum) Accounts() ([]string, error) {
 
 // BlockNumber returns the number of most recent block
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_blocknumber
+// - returns like `2706141`
+// - result may be a bit changeable, may be better to call several times.
 func (e *Ethereum) BlockNumber() (*big.Int, error) {
 
 	var resBlockNumber string

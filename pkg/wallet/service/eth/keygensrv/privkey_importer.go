@@ -1,8 +1,6 @@
 package keygensrv
 
 import (
-	"fmt"
-
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -53,9 +51,10 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 		return nil
 	}
 
-	//FIXME: replace to new func
-	keyDir := fmt.Sprintf("%s/%s", p.keyDir, accountType.String())
-	ks := keystore.NewKeyStore(keyDir, keystore.StandardScryptN, keystore.StandardScryptP)
+	// keystore directory is linked to any apis to get accounts
+	// so multiple directories are not good idea
+	//keyDir := fmt.Sprintf("%s/%s", p.keyDir, accountType.String())
+	ks := keystore.NewKeyStore(p.keyDir, keystore.StandardScryptN, keystore.StandardScryptP)
 
 	for _, record := range accountKeyTable {
 		p.logger.Debug(
