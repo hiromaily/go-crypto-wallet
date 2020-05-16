@@ -45,7 +45,7 @@ type Ethereumer interface {
 	GetBalance(hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
 	GetStoreageAt(hexAddr string, quantityTag eth.QuantityTag) (string, error)
 	GetTransactionCount(hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
-	GetBlockTransactionCountByHash(txHash string) (*big.Int, error)
+	//GetBlockTransactionCountByBlockHash(blockHash string) (*big.Int, error)
 	GetBlockTransactionCountByNumber(number uint64) (*big.Int, error)
 	GetUncleCountByBlockHash(blockHash string) (*big.Int, error)
 	GetUncleCountByBlockNumber(blockNumber uint64) (*big.Int, error)

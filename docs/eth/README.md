@@ -16,6 +16,7 @@ Geth has a development mode which sets up a single node Ethereum test network wi
 - [Setting up private network or local cluster](https://github.com/ethereum/go-ethereum/wiki/Setting-up-private-network-or-local-cluster)
 - [Etherscan for goerli](https://goerli.etherscan.io/)
 - [Goerli Testnet Faucet](https://goerli-faucet.slock.it/)
+- [Status](https://stats.goerli.net/)
 
 ## Parity
 - [parity](https://www.parity.io/ethereum/)

@@ -57,6 +57,7 @@ func TestAddPeer(t *testing.T) {
 			err := et.AddPeer(tt.args.addr)
 			if (err == nil) == tt.want.isErr {
 				t.Errorf("AddPeer() = %v, want error = %v", err, tt.want.isErr)
+				return
 			}
 			t.Log(err)
 		})

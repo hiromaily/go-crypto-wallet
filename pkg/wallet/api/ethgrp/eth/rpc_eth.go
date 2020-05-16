@@ -180,7 +180,7 @@ func (e *Ethereum) EnsureBlockNumber(loopCount int) (*big.Int, error) {
 
 // GetBalance returns the balance of the account of given address
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getbalance
-// - `QuantityTagEarliest` should NOT be used
+// - `QuantityTagEarliest` must NOT be used
 // - On goerli testnet, balance can be found just after sending coins
 // - TODO: which quantityTag should be used `QuantityTagLatest` or `QuantityTagPending`
 func (e *Ethereum) GetBalance(hexAddr string, quantityTag QuantityTag) (*big.Int, error) {
@@ -200,6 +200,7 @@ func (e *Ethereum) GetBalance(hexAddr string, quantityTag QuantityTag) (*big.Int
 
 // GetStoreageAt returns the value from a storage position at a given address
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getstorageat
+// - `QuantityTagEarliest` must NOT be used
 // - always returns `0x0000000000000000000000000000000000000000000000000000000000000000`
 // - how this function can be used??
 func (e *Ethereum) GetStoreageAt(hexAddr string, quantityTag QuantityTag) (string, error) {
@@ -214,8 +215,11 @@ func (e *Ethereum) GetStoreageAt(hexAddr string, quantityTag QuantityTag) (strin
 }
 
 // GetTransactionCount returns the number of transactions sent from an address
-// - this is used as nonce
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactioncount
+// - this is used as nonce
+// - `QuantityTagEarliest` must NOT be used
+// - after sending coin from this address, result is counted??
+// - generated new address is always 0
 func (e *Ethereum) GetTransactionCount(hexAddr string, quantityTag QuantityTag) (*big.Int, error) {
 
 	var transactionCount string
@@ -233,25 +237,28 @@ func (e *Ethereum) GetTransactionCount(hexAddr string, quantityTag QuantityTag) 
 
 // GetBlockTransactionCountByHash returns the number of transactions in a block from a block matching the given block hash
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblocktransactioncountbyhash
-func (e *Ethereum) GetBlockTransactionCountByHash(txHash string) (*big.Int, error) {
-
-	var txCount string
-	err := e.rpcClient.CallContext(e.ctx, &txCount, "eth_getBlockTransactionCountByHash", txHash)
-	if err != nil {
-		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_getBlockTransactionCountByHash)")
-	}
-	if txCount == "" {
-		e.logger.Debug("transactionCount is blank")
-		return nil, errors.New("transactionCount is blank")
-	}
-
-	h, err := hexutil.DecodeBig(txCount)
-	if err != nil {
-		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
-	}
-
-	return h, nil
-}
+// - block hash can be found from https://www.etherchain.org/block/2706436 by block number
+// - but how it is found for Goerli Testnet??
+// FIXME: this RPC doesn't return anything
+//func (e *Ethereum) GetBlockTransactionCountByBlockHash(blockHash string) (*big.Int, error) {
+//
+//	var txCount string
+//	err := e.rpcClient.CallContext(e.ctx, &txCount, "eth_getBlockTransactionCountByHash", blockHash)
+//	if err != nil {
+//		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_getBlockTransactionCountByHash)")
+//	}
+//	if txCount == "" {
+//		e.logger.Debug("transactionCount is blank")
+//		return nil, errors.New("transactionCount is blank")
+//	}
+//
+//	h, err := hexutil.DecodeBig(txCount)
+//	if err != nil {
+//		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
+//	}
+//
+//	return h, nil
+//}
 
 // GetBlockTransactionCountByNumber returns the number of transactions in a block matching the given block number
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblocktransactioncountbynumber
