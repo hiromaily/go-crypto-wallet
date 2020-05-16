@@ -448,24 +448,13 @@ func convertBlockRawInfo(raw *BlockRawInfo) *BlockInfo {
 func decodeString(val string) *big.Int {
 	decoded, err := hexutil.DecodeBig(val)
 	if err != nil {
-		return new(big.Int)
+		return new(big.Int).SetUint64(0)
 	}
 	return decoded
 }
-
-// eth_getTransactionByBlockHashAndIndex
-// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyblockhashandindex
-
-// eth_getTransactionByBlockNumberAndIndex
-// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyblocknumberandindex
-
-// eth_pendingTransactions
-// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_pendingtransactions
 
 // eth_getUncleByBlockHashAndIndex
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getunclebyblockhashandindex
 
 // eth_getUncleByBlockNumberAndIndex
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getunclebyblocknumberandindex
-
-//

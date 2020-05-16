@@ -10,6 +10,7 @@ import (
 
 // GasPrice returns the current price per gas in wei
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gasprice
+// - returns like `1000000000`
 func (e *Ethereum) GasPrice() (*big.Int, error) {
 
 	var gasPrice string
@@ -43,5 +44,4 @@ func (e *Ethereum) EstimateGas(msg *ethereum.CallMsg) (*big.Int, error) {
 	}
 
 	return h, nil
-
 }

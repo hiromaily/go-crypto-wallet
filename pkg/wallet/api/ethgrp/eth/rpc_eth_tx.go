@@ -168,6 +168,12 @@ func (e *Ethereum) GetTransactionByHash(hashTx string) (*ResponseGetTransaction,
 	}, nil
 }
 
+// eth_getTransactionByBlockHashAndIndex
+// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyblockhashandindex
+
+// eth_getTransactionByBlockNumberAndIndex
+// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyblocknumberandindex
+
 // GetTransactionReceipt returns the receipt of a transaction by transaction hash
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionreceipt
 // Note, tis is not available for pending transactions
@@ -285,3 +291,6 @@ func (e *Ethereum) GetTransactionReceipt(hashTx string) (*ResponseGetTransaction
 		Status:            status,
 	}, nil
 }
+
+// eth_pendingTransactions
+// https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_pendingtransactions
