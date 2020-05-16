@@ -2,6 +2,7 @@ package eth
 
 import (
 	"math/big"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"
@@ -109,9 +110,9 @@ func (e *Ethereum) ProtocolVersion() (uint64, error) {
 // Coinbase returns the client coinbase address
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_coinbase
 // Note:
-//  - any accounts can not be retrieved if no private key in keystore.
+//  - any accounts can not be retrieved if no private key in keystore in node server.
 //  - when running geth command, keystore option should be used to specify directory
-//  - that means, this rpc can be called from cold wallet
+//  - that means, this rpc can be called from cold wallet which has private key
 func (e *Ethereum) Coinbase() (string, error) {
 
 	var resAddr string
@@ -126,9 +127,9 @@ func (e *Ethereum) Coinbase() (string, error) {
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_accounts
 // https://github.com/ethereum/go-ethereum/wiki/Managing-your-accounts
 // Note:
-//  - any accounts can not be retrieved if no private key in keystore.
+//  - any accounts can not be retrieved if no private key in keystore in node server.
 //  - when running geth command, keystore option should be used to specify directory
-//  - that means, this rpc can be called from cold wallet
+//  - that means, this rpc can be called from cold wallet which has private key
 func (e *Ethereum) Accounts() ([]string, error) {
 
 	var accounts []string
@@ -159,8 +160,29 @@ func (e *Ethereum) BlockNumber() (*big.Int, error) {
 	return h, nil
 }
 
+// EnsureBlockNumber calls BlockNumber() several times
+func (e *Ethereum) EnsureBlockNumber(loopCount int) (*big.Int, error) {
+	latestBlockNumber := new(big.Int)
+	for i := 0; i < loopCount; i++ {
+		if i != 0 {
+			time.Sleep(500 * time.Millisecond)
+		}
+		num, err := e.BlockNumber()
+		if err != nil {
+			return nil, err
+		}
+		if latestBlockNumber.Uint64() < num.Uint64() {
+			latestBlockNumber = latestBlockNumber.SetUint64(num.Uint64())
+		}
+	}
+	return latestBlockNumber, nil
+}
+
 // GetBalance returns the balance of the account of given address
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getbalance
+// - `QuantityTagEarliest` should NOT be used
+// - On goerli testnet, balance can be found just after sending coins
+// - TODO: which quantityTag should be used `QuantityTagLatest` or `QuantityTagPending`
 func (e *Ethereum) GetBalance(hexAddr string, quantityTag QuantityTag) (*big.Int, error) {
 
 	var balance string
@@ -178,6 +200,8 @@ func (e *Ethereum) GetBalance(hexAddr string, quantityTag QuantityTag) (*big.Int
 
 // GetStoreageAt returns the value from a storage position at a given address
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getstorageat
+// - always returns `0x0000000000000000000000000000000000000000000000000000000000000000`
+// - how this function can be used??
 func (e *Ethereum) GetStoreageAt(hexAddr string, quantityTag QuantityTag) (string, error) {
 
 	var storagePosition string

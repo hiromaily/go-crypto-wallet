@@ -41,6 +41,7 @@ type Ethereumer interface {
 	Coinbase() (string, error)
 	Accounts() ([]string, error)
 	BlockNumber() (*big.Int, error)
+	EnsureBlockNumber(loopCount int) (*big.Int, error)
 	GetBalance(hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
 	GetStoreageAt(hexAddr string, quantityTag eth.QuantityTag) (string, error)
 	GetTransactionCount(hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
