@@ -84,7 +84,7 @@ func TestGetBalance(t *testing.T) {
 	tags := []eth.QuantityTag{
 		eth.QuantityTagLatest,
 		eth.QuantityTagPending,
-		eth.QuantityTagEarliest,
+		//eth.QuantityTagEarliest,
 	}
 
 	type args struct {
@@ -132,56 +132,56 @@ func TestGetBalance(t *testing.T) {
 }
 
 // TestGetStoreageAt is test for GetStoreageAt
-func TestGetStoreageAt(t *testing.T) {
-	//t.SkipNow()
-	et := testutil.GetETH()
-
-	tags := []eth.QuantityTag{
-		eth.QuantityTagLatest,
-		eth.QuantityTagPending,
-		eth.QuantityTagEarliest,
-	}
-
-	type args struct {
-		addr string
-	}
-	type want struct {
-		isErr bool
-	}
-	tests := []struct {
-		name string
-		args args
-		want want
-	}{
-		{
-			name: "happy path",
-			args: args{addr: "0xEA247646137F74C38e04f3012db483d77F3dEc59"},
-			want: want{false},
-		},
-		{
-			name: "happy path",
-			args: args{addr: "0x6B91314E559D3FB5b40f9F51582631a7b5C610ef"},
-			want: want{false},
-		},
-		{
-			name: "happy path",
-			args: args{addr: "0x0aC5c95EB979C41CFa2C6BdF8e5515F966fEc103"},
-			want: want{false},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			for _, tag := range tags {
-				position, err := et.GetStoreageAt(tt.args.addr, tag)
-				if (err == nil) == tt.want.isErr {
-					t.Errorf("GetStoreageAt() = %v, want error = %v", err, tt.want.isErr)
-					return
-				}
-				t.Logf("quantityTag: %s, position: %s", tag, position)
-			}
-		})
-	}
-}
+//func TestGetStoreageAt(t *testing.T) {
+//	//t.SkipNow()
+//	et := testutil.GetETH()
+//
+//	tags := []eth.QuantityTag{
+//		eth.QuantityTagLatest,
+//		eth.QuantityTagPending,
+//		//eth.QuantityTagEarliest,
+//	}
+//
+//	type args struct {
+//		addr string
+//	}
+//	type want struct {
+//		isErr bool
+//	}
+//	tests := []struct {
+//		name string
+//		args args
+//		want want
+//	}{
+//		{
+//			name: "happy path",
+//			args: args{addr: "0xEA247646137F74C38e04f3012db483d77F3dEc59"},
+//			want: want{false},
+//		},
+//		{
+//			name: "happy path",
+//			args: args{addr: "0x6B91314E559D3FB5b40f9F51582631a7b5C610ef"},
+//			want: want{false},
+//		},
+//		{
+//			name: "happy path",
+//			args: args{addr: "0x0aC5c95EB979C41CFa2C6BdF8e5515F966fEc103"},
+//			want: want{false},
+//		},
+//	}
+//	for _, tt := range tests {
+//		t.Run(tt.name, func(t *testing.T) {
+//			for _, tag := range tags {
+//				position, err := et.GetStoreageAt(tt.args.addr, tag)
+//				if (err == nil) == tt.want.isErr {
+//					t.Errorf("GetStoreageAt() = %v, want error = %v", err, tt.want.isErr)
+//					return
+//				}
+//				t.Logf("quantityTag: %s, position: %s", tag, position)
+//			}
+//		})
+//	}
+//}
 
 // TestGetTransactionCount is test for GetTransactionCount
 func TestGetTransactionCount(t *testing.T) {
@@ -191,7 +191,7 @@ func TestGetTransactionCount(t *testing.T) {
 	tags := []eth.QuantityTag{
 		eth.QuantityTagLatest,
 		eth.QuantityTagPending,
-		eth.QuantityTagEarliest,
+		//eth.QuantityTagEarliest,
 	}
 
 	type args struct {
@@ -278,7 +278,7 @@ func TestGetTransactionCount(t *testing.T) {
 //		t.Run(tt.name, func(t *testing.T) {
 //			count, err := et.GetBlockTransactionCountByBlockHash(tt.args.txHash)
 //			if (err == nil) == tt.want.isErr {
-//				t.Errorf("GetTransactionCount() = %v, want error = %v", err, tt.want.isErr)
+//				t.Errorf("GetBlockTransactionCountByBlockHash() = %v, want error = %v", err, tt.want.isErr)
 //				return
 //			}
 //			if count != nil {
@@ -287,3 +287,48 @@ func TestGetTransactionCount(t *testing.T) {
 //		})
 //	}
 //}
+
+// TestGetBlockTransactionCountByNumber is test for GetBlockTransactionCountByNumber
+func TestGetBlockTransactionCountByNumber(t *testing.T) {
+	et := testutil.GetETH()
+
+	type args struct {
+		txNum uint64
+	}
+	type want struct {
+		isErr bool
+	}
+	tests := []struct {
+		name string
+		args args
+		want want
+	}{
+		{
+			name: "happy path 2706436",
+			args: args{txNum: 2706436},
+			want: want{false},
+		},
+		{
+			name: "happy path 2706435",
+			args: args{txNum: 2706435},
+			want: want{false},
+		},
+		{
+			name: "happy path 2706434",
+			args: args{txNum: 2606434},
+			want: want{false},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			count, err := et.GetBlockTransactionCountByNumber(tt.args.txNum)
+			if (err == nil) == tt.want.isErr {
+				t.Errorf("GetBlockTransactionCountByNumber() = %v, want error = %v", err, tt.want.isErr)
+				return
+			}
+			if count != nil {
+				t.Logf("transactionCount: %d", count.Uint64())
+			}
+		})
+	}
+}

@@ -203,16 +203,16 @@ func (e *Ethereum) GetBalance(hexAddr string, quantityTag QuantityTag) (*big.Int
 // - `QuantityTagEarliest` must NOT be used
 // - always returns `0x0000000000000000000000000000000000000000000000000000000000000000`
 // - how this function can be used??
-func (e *Ethereum) GetStoreageAt(hexAddr string, quantityTag QuantityTag) (string, error) {
-
-	var storagePosition string
-	err := e.rpcClient.CallContext(e.ctx, &storagePosition, "eth_getStorageAt", hexAddr, "0x0", quantityTag.String())
-	if err != nil {
-		return "", errors.Wrap(err, "fail to call rpc.CallContext(eth_getStorageAt)")
-	}
-
-	return storagePosition, nil
-}
+//func (e *Ethereum) GetStoreageAt(hexAddr string, quantityTag QuantityTag) (string, error) {
+//
+//	var storagePosition string
+//	err := e.rpcClient.CallContext(e.ctx, &storagePosition, "eth_getStorageAt", hexAddr, "0x0", quantityTag.String())
+//	if err != nil {
+//		return "", errors.Wrap(err, "fail to call rpc.CallContext(eth_getStorageAt)")
+//	}
+//
+//	return storagePosition, nil
+//}
 
 // GetTransactionCount returns the number of transactions sent from an address
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactioncount
@@ -262,6 +262,8 @@ func (e *Ethereum) GetTransactionCount(hexAddr string, quantityTag QuantityTag) 
 
 // GetBlockTransactionCountByNumber returns the number of transactions in a block matching the given block number
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblocktransactioncountbynumber
+// transaction count of block, it's possible transaction is 0
+// - this number is fixed
 func (e *Ethereum) GetBlockTransactionCountByNumber(number uint64) (*big.Int, error) {
 
 	//convert uint64 to hex
@@ -287,25 +289,25 @@ func (e *Ethereum) GetBlockTransactionCountByNumber(number uint64) (*big.Int, er
 
 // GetUncleCountByBlockHash eturns the number of uncles in a block from a block matching the given block hash
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getunclecountbyblockhash
-func (e *Ethereum) GetUncleCountByBlockHash(blockHash string) (*big.Int, error) {
-
-	var uncleCount string
-	err := e.rpcClient.CallContext(e.ctx, &uncleCount, "eth_getUncleCountByBlockHash", blockHash)
-	if err != nil {
-		return nil, errors.Errorf("fail to call rpc.CallContext(eth_getUncleCountByBlockHash)")
-	}
-	if uncleCount == "" {
-		e.logger.Debug("uncleCount is blank")
-		return nil, errors.New("uncleCount is blank")
-	}
-
-	h, err := e.DecodeBig(uncleCount)
-	if err != nil {
-		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
-	}
-
-	return h, nil
-}
+//func (e *Ethereum) GetUncleCountByBlockHash(blockHash string) (*big.Int, error) {
+//
+//	var uncleCount string
+//	err := e.rpcClient.CallContext(e.ctx, &uncleCount, "eth_getUncleCountByBlockHash", blockHash)
+//	if err != nil {
+//		return nil, errors.Errorf("fail to call rpc.CallContext(eth_getUncleCountByBlockHash)")
+//	}
+//	if uncleCount == "" {
+//		e.logger.Debug("uncleCount is blank")
+//		return nil, errors.New("uncleCount is blank")
+//	}
+//
+//	h, err := e.DecodeBig(uncleCount)
+//	if err != nil {
+//		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
+//	}
+//
+//	return h, nil
+//}
 
 // GetUncleCountByBlockNumber returns the number of uncles in a block from a block matching the given block number
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getunclecountbyblocknumber
