@@ -14,7 +14,8 @@ data/keystore/*
 data/tx/*
 
 docker/grafana/*
-docker/btc/data/testnet3
-docker/bch/data/testnet3
+docker/nodes/btc/data/testnet3
+docker/nodes/bch/data/testnet3
+docker/nodes/bch/data/*
 
 !.gitkeep

@@ -1,0 +1,18 @@
+version: '3.7'
+
+services:
+  #########################################################################
+  # ethereum/client-go
+  # - https://github.com/ethereum/go-ethereum/wiki/Running-in-Docker
+  # - https://hub.docker.com/r/ethereum/client-go/
+  #########################################################################
+  eth-node:
+    image: ethereum/client-go:v1.9.14
+    volumes:
+      - ./docker/nodes/eth/data:/root/.ethereum ethereum/client-go
+    ports:
+      - "${ETH_SYNC_PORT:-30303}:30303"
+      - "${ETH_RPC_PORT:-8545}:8545"
+    stdin_open: true
+    tty: true
+    command: --goerli --rpc --rpcaddr 0.0.0.0 --rpcapi admin,debug,web3,eth,txpool,net,personal

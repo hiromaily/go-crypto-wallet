@@ -19,6 +19,7 @@ func (e *Ethereum) AddPeer(nodeURL string) error {
 }
 
 // AdminDataDir returns the absolute path the running Geth node currently uses to store all its databases
+// returns like ${HOME}/Library/Ethereum/goerli
 func (e *Ethereum) AdminDataDir() (string, error) {
 	if e.isParity {
 		return "", nil

@@ -13,6 +13,8 @@ type ResponseSyncing struct {
 	StartingBlock int64 `json:"startingBlock"`
 	CurrentBlock  int64 `json:"currentBlock"`
 	HighestBlock  int64 `json:"highestBlock"`
+	KnownStates   int64 `json:"knownStates"`
+	PulledStates  int64 `json:"pulledStates"`
 }
 
 // BlockNumber response of eth_blockNumber
@@ -43,6 +45,14 @@ func (e *Ethereum) Syncing() (*ResponseSyncing, bool, error) {
 		if err != nil {
 			return nil, false, errors.Wrap(err, "fail to call client.CallContext(eth_syncing)")
 		}
+		//grok.Value(resMap)
+		//value map[string]string = [
+		//	startingBlock string = "0x606c" 6
+		//	currentBlock string = "0x95ac" 6
+		//	highestBlock string = "0x294545" 8
+		//	knownStates string = "0x2084c" 7
+		//	pulledStates string = "0x1eb12" 7
+		//]
 
 		startingBlock, err := hexutil.DecodeBig(resMap["startingBlock"])
 		if err != nil {
@@ -56,11 +66,21 @@ func (e *Ethereum) Syncing() (*ResponseSyncing, bool, error) {
 		if err != nil {
 			return nil, false, errors.New("response is invalid")
 		}
+		knownStates, err := hexutil.DecodeBig(resMap["knownStates"])
+		if err != nil {
+			return nil, false, errors.New("response is invalid")
+		}
+		pulledStates, err := hexutil.DecodeBig(resMap["pulledStates"])
+		if err != nil {
+			return nil, false, errors.New("response is invalid")
+		}
 
 		resSync := ResponseSyncing{
 			StartingBlock: startingBlock.Int64(),
 			CurrentBlock:  currentBlock.Int64(),
 			HighestBlock:  highestBlock.Int64(),
+			KnownStates:   knownStates.Int64(),
+			PulledStates:  pulledStates.Int64(),
 		}
 
 		return &resSync, true, nil
@@ -70,6 +90,7 @@ func (e *Ethereum) Syncing() (*ResponseSyncing, bool, error) {
 
 // ProtocolVersion returns the current ethereum protocol version
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_protocolversion
+// - returns like 65
 func (e *Ethereum) ProtocolVersion() (uint64, error) {
 
 	var resProtocolVer string

@@ -26,13 +26,13 @@ services:
   #########################################################################
   btc-watch:
     build:
-      context: ./docker/btc/
+      context: docker/nodes/btc/
       dockerfile: Dockerfile
     image: btc-wallet:0.19
     volumes:
     #- btc1:/root/.bitcoin
     #- ./docs/bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
-    - ./docker/btc/data1:/root/.bitcoin
+    - ./docker/nodes/btc/data1:/root/.bitcoin
     ports:
     - "${BTC_WATCH_RPC_PORT:-19332}:18332"
     stdin_open: true
@@ -52,7 +52,7 @@ services:
     volumes:
     #- btc2:/root/.bitcoin
     #- ./docs/bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
-    - ./docker/btc/data2:/root/.bitcoin
+    - ./docker/nodes/btc/data2:/root/.bitcoin
     ports:
     - "${BTC_KEYGEN_RPC_PORT:-19333}:18332"
     stdin_open: true
@@ -71,7 +71,7 @@ services:
     volumes:
     #- btc3:/root/.bitcoin
     #- ./docs/bitcoin.example.conf:/root/.bitcoin/bitcoin.conf
-    - ./docker/btc/data3:/root/.bitcoin
+    - ./docker/nodes/btc/data3:/root/.bitcoin
     ports:
     - "${BTC_SIGN_RPC_PORT:-19334}:18332"
     stdin_open: true

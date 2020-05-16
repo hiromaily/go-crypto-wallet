@@ -8,22 +8,22 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/config"
 	"github.com/hiromaily/go-bitcoin/pkg/logger"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 )
 
-var bc btcgrp.Bitcoiner
+var et ethgrp.Ethereumer
 
-// GetBTC returns btc instance
+// GetETH returns eth instance
 //FIXME: hard coded
-func GetBTC() btcgrp.Bitcoiner {
-	if bc != nil {
-		return bc
+func GetETH() ethgrp.Ethereumer {
+	if et != nil {
+		return et
 	}
 
 	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-bitcoin", os.Getenv("GOPATH"))
-	confPath := fmt.Sprintf("%s/data/config/btc_watch.toml", projPath)
-	conf, err := config.New(confPath, wallet.WalletTypeWatchOnly, coin.BTC)
+	confPath := fmt.Sprintf("%s/data/config/eth_watch.toml", projPath)
+	conf, err := config.New(confPath, wallet.WalletTypeWatchOnly, coin.ETH)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
@@ -32,13 +32,13 @@ func GetBTC() btcgrp.Bitcoiner {
 	// logger
 	logger := logger.NewZapLogger(&conf.Logger)
 	// client
-	client, err := btcgrp.NewRPCClient(&conf.Bitcoin)
+	client, err := ethgrp.NewRPCClient(&conf.Ethereum)
 	if err != nil {
-		log.Fatalf("fail to create bitcoin core client: %v", err)
+		log.Fatalf("fail to create ethereum rpc client: %v", err)
 	}
-	bc, err = btcgrp.NewBitcoin(client, &conf.Bitcoin, logger, conf.CoinTypeCode)
+	et, err = ethgrp.NewEthereum(client, &conf.Ethereum, logger, conf.CoinTypeCode)
 	if err != nil {
-		log.Fatalf("fail to create btc instance: %v", err)
+		log.Fatalf("fail to create eth instance: %v", err)
 	}
-	return bc
+	return et
 }

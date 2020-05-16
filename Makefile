@@ -176,6 +176,11 @@ up-docker-btc:
 up-docker-bch:
 	docker-compose -f docker-compose.bch.yml up bch-watch
 
+# run ethereum node server
+.PHONY: up-docker-eth
+up-docker-eth:
+	docker-compose -f docker-compose.eth.yml up eth-node
+
 # run all databases
 .PHONY: up-docker-db
 up-docker-db:
