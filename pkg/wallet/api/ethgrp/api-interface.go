@@ -78,7 +78,7 @@ type Ethereumer interface {
 	UnlockAccount(hexAddr, passphrase string, duration uint64) (bool, error)
 	// rpc_web3
 	ClientVersion() (string, error)
-	SHA3(data []string) (string, error)
+	SHA3(data string) (string, error)
 	// transaction
 	CreateRawTransaction(fromAddr, toAddr string, amount uint64) (*eth.RawTx, *models.EthDetailTX, error)
 	SignOnRawTransaction(rawTx *eth.RawTx, passphrase string, accountType account.AccountType) (*eth.RawTx, error)

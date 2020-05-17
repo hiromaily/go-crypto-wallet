@@ -83,6 +83,15 @@ func NewEthereum(
 		)
 	}
 
+	// check network connections
+	isLitening, err := eth.NetListening()
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to call eth.NetListening()")
+	}
+	if !isLitening {
+		logger.Warn("network is not working")
+	}
+
 	return eth, nil
 }
 

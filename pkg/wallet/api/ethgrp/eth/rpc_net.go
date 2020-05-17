@@ -31,6 +31,7 @@ func (e *Ethereum) NetVersion() (uint16, error) {
 
 // NetListening returns true if client is actively listening for network connections
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#net_listening
+// - if response is false, watch wallet should not be used
 func (e *Ethereum) NetListening() (bool, error) {
 	var isConnected bool
 	err := e.rpcClient.CallContext(e.ctx, &isConnected, "net_listening")

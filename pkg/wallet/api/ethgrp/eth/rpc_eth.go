@@ -124,6 +124,8 @@ func (e *Ethereum) Coinbase() (string, error) {
 //  - any accounts can not be retrieved if no private key in keystore in node server.
 //  - when running geth command, keystore option should be used to specify directory
 //  - that means, this rpc can be called from cold wallet which has private key
+// - private key is stored and read from node server
+// - result is same as ListAccounts()
 func (e *Ethereum) Accounts() ([]string, error) {
 
 	var accounts []string

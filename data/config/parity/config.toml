@@ -49,10 +49,10 @@ no_serve_light = false
 [rpc]
 disable = false
 port = 18545
-interface = "local"
-cors = []
+interface = "all"  # local
+cors = ["all"]     # []
 apis = ["web3", "eth", "pubsub", "net", "parity", "parity_pubsub", "traces", "rpc", "shh", "shh_pubsub"]
-hosts = ["none"]
+hosts = ["all"]    # none
 
 #[websockets]
 #disable = false
