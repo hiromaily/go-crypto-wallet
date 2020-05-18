@@ -24,22 +24,34 @@ Geth has a development mode which sets up a single node Ethereum test network wi
 - [homebrew-paritytech](https://github.com/paritytech/homebrew-paritytech)
 
 ## Install ethereum and Run
+### Install ethereum on MacOS
 ```
-# Install ethereum on MacOS
 $ brew tap ethereum/ethereum
 $ brew install ethereum
+```
 
-# Run on testnet
+### Run on testnet
+- with console
+```
 $ geth --goerli --rpc console
- or 
-# available="[admin debug web3 eth txpool personal clique miner net]
+```
+- allow any rpcapi
+```
 $ geth --goerli --rpc --rpcapi admin,debug,web3,eth,txpool,net,personal
- or
+# available="[admin debug web3 eth txpool personal clique miner net]
+```
+- acccess from any hosts
+```
 $ geth --goerli --rpc --rpcaddr 0.0.0.0 --rpcapi admin,debug,web3,eth,txpool,net,personal
-
-# --keystore option is required to change keystore dir
+```
+- set keystore directory
+```
 #  --keystore ${HOME}/work/go/src/github.com/hiromaily/go-bitcoin/data/keystore
-# --allow-insecure-unlock option is required to use UnlockAccount()
+```
+- to use UnlockAccount()
+```
+# --allow-insecure-unlock
+```
 
 # Rest API using [HTTPie](https://httpie.org/)
 $ http http://127.0.0.1:8545 method=web3_clientVersion params:='[]' id=67

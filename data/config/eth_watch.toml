@@ -1,14 +1,14 @@
 
 [ethereum]
-host = "192.168.10.101"
-#host = "127.0.0.1"
+#host = "192.168.10.101"
+host = "127.0.0.1"
 port = 8545
 disable_tls = true
 network_type = "goerli" # mainnet, goerli, rinkeby, ropsten
 
 [ethereum.geth]
-#dir = "${HOME}/.ethereum"
-keydir = "./data/keystore"
+#keydir = "./data/keystore"
+keydir = "${HOME}/Library/Ethereum/goerli/keystore"
 
 [logger]
 service = "eth-wallet"

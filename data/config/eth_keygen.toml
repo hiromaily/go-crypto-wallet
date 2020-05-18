@@ -7,8 +7,8 @@ disable_tls = true
 network_type = "goerli" # mainnet, goerli, rinkeby, ropsten
 
 [ethereum.geth]
-#dir = "${HOME}/.ethereum"
-keydir = "./data/keystore"
+#keydir = "./data/keystore"
+keydir = "${HOME}/Library/Ethereum/goerli/keystore"
 
 [logger]
 service = "eth-keygen"
