@@ -90,6 +90,6 @@ type Ethereumer interface {
 	ValidationAddr(addr string) error
 	FromWei(v int64) *big.Int
 	FromGWei(v int64) *big.Int
-	FromEther(v int64) *big.Int
+	//FromEther(v int64) *big.Int
 	FromFloatEther(v float64) *big.Int
 }
