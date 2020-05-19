@@ -3,8 +3,6 @@ package eth_test
 import (
 	"testing"
 
-	"github.com/bookerzzz/grok"
-
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/testutil"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp/eth"
@@ -86,8 +84,8 @@ func TestCreateRawTransaction(t *testing.T) {
 	//et.Close()
 }
 
-// TestSignOnRawTransaction is test for SignOnRawTransaction
-func TestSignOnRawTransaction(t *testing.T) {
+// TestSignAndSendRawTransaction is test for SignOnRawTransaction and SendSignedRawTransaction
+func TestSignAndSendRawTransaction(t *testing.T) {
 	//t.SkipNow()
 	et := testutil.GetETH()
 
@@ -96,9 +94,11 @@ func TestSignOnRawTransaction(t *testing.T) {
 		receiverAddr  string
 		amount        uint64
 		senderAccount account.AccountType
+		password      string
 	}
 	type want struct {
-		isErr bool
+		isSignErr bool
+		isSendErr bool
 	}
 	tests := []struct {
 		name string
@@ -106,42 +106,55 @@ func TestSignOnRawTransaction(t *testing.T) {
 		want want
 	}{
 		{
-			name: "happy path, send all",
+			name: "wrong password",
 			args: args{
 				senderAddr:    "0xe52307Deb1a7dC3985D2873b45AE23b91D57a36d",
 				receiverAddr:  "0x72cCC7a7C3fa28C79aaC4f834168767A5762a7D0",
 				amount:        0,
 				senderAccount: account.AccountTypeClient,
+				password:      "foobar",
 			},
-			want: want{false},
+			want: want{true, false},
 		},
-		//{
-		//	name: "happy path, send specific amount",
-		//	args: args{
-		//		senderAddr:   "0xe52307Deb1a7dC3985D2873b45AE23b91D57a36d",
-		//		receiverAddr: "0x72cCC7a7C3fa28C79aaC4f834168767A5762a7D0",
-		//		amount:       40000000000000000, // 0.04 Ether
-		//		senderAccount: account.AccountTypeClient,
-		//	},
-		//	want: want{false},
-		//},
+		{
+			name: "happy path",
+			args: args{
+				senderAddr:    "0xe52307Deb1a7dC3985D2873b45AE23b91D57a36d",
+				receiverAddr:  "0x72cCC7a7C3fa28C79aaC4f834168767A5762a7D0",
+				amount:        0,
+				senderAccount: account.AccountTypeClient,
+				password:      eth.Password,
+			},
+			want: want{false, false},
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// create raw transaction
 			rawTx, _, err := et.CreateRawTransaction(tt.args.senderAddr, tt.args.receiverAddr, tt.args.amount)
 			if err != nil {
 				t.Fatal(err)
 			}
-			signedTx, err := et.SignOnRawTransaction(rawTx, eth.Password, tt.args.senderAccount)
+			// sign on raw transaction
+			signedTx, err := et.SignOnRawTransaction(rawTx, tt.args.password, tt.args.senderAccount)
+			if (err == nil) == tt.want.isSignErr {
+				t.Errorf("SignOnRawTransaction() = %v, want error = %v", err, tt.want.isSignErr)
+				return
+			}
 			if err != nil {
-				t.Errorf("fail to call SignOnRawTransaction() %v", err)
 				return
 			}
 			if signedTx != nil {
 				t.Log(signedTx)
-				grok.Value(rawTx)
 			}
+			// send signed transaction
+			txHash, err := et.SendSignedRawTransaction(signedTx.TxHex)
+			if (err == nil) == tt.want.isSendErr {
+				t.Errorf("SendSignedRawTransaction() = %v, want error = %v", err, tt.want.isSignErr)
+				return
+			}
+			t.Log(txHash)
 		})
 	}
 	//et.Close()
