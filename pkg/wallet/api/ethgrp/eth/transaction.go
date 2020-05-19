@@ -183,7 +183,8 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64) 
 
 // SignOnRawTransaction signs on raw transaction
 // - https://ethereum.stackexchange.com/questions/16472/signing-a-raw-transaction-in-go
-func (e *Ethereum) SignOnRawTransaction(rawTx *RawTx, passphrase string, accountType account.AccountType) (*RawTx, error) {
+// - Note: this requires private key on this machine, if node is working remotely, it would not work.
+func (e *Ethereum) SignOnRawTransaction(rawTx *RawTx, passphrase string, senderAccount account.AccountType) (*RawTx, error) {
 	txHex := rawTx.TxHex
 	fromAddr := rawTx.From
 	tx, err := decodeTx(txHex)
@@ -192,7 +193,7 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *RawTx, passphrase string, account
 	}
 
 	// get private key
-	key, err := e.GetPrivKey(fromAddr, passphrase, accountType)
+	key, err := e.GetPrivKey(fromAddr, passphrase, senderAccount)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call e.GetPrivKey()")
 	}
@@ -200,6 +201,15 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *RawTx, passphrase string, account
 	// chain id
 	// https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md
 	chainID := big.NewInt(int64(e.netID))
+	if chainID.Uint64() == 0 {
+		return nil, errors.Errorf("chainID can't get from netID:  %d", e.netID)
+	}
+
+	e.logger.Debug("call types.SignTx",
+		zap.Any("tx", tx),
+		zap.Uint64("chainID", chainID.Uint64()),
+		zap.Any("key.PrivateKey", key.PrivateKey),
+	)
 
 	// sign
 	signedTX, err := types.SignTx(tx, types.NewEIP155Signer(chainID), key.PrivateKey)

@@ -48,7 +48,8 @@ func (e *Ethereum) GetKeyDir(accountType account.AccountType) string {
 		//TODO: implement
 		return ""
 	}
-	return fmt.Sprintf("%s/%s", e.keyDir, accountType.String())
+	//return fmt.Sprintf("%s/%s", e.keyDir, accountType.String())
+	return e.keyDir
 }
 
 // GetPrivKey returns keystore.Key object
@@ -63,7 +64,7 @@ func (e *Ethereum) GetPrivKey(hexAddr, password string, accountType account.Acco
 	}
 	if keyJSON == nil {
 		// file is not found
-		return nil, nil
+		return nil, errors.New("private key file is not found")
 	}
 
 	key, err := keystore.DecryptKey(keyJSON, password)
@@ -74,6 +75,8 @@ func (e *Ethereum) GetPrivKey(hexAddr, password string, accountType account.Acco
 }
 
 // readPrivKey read private key file from directory
+// Note: file is found out from local directory,
+//  if node is working remotely, file is not found.
 func (e *Ethereum) readPrivKey(hexAddr, path string) ([]byte, error) {
 
 	// search file
