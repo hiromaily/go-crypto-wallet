@@ -76,7 +76,9 @@ func TestBalanceAt(t *testing.T) {
 			if (err == nil) == tt.want.isErr {
 				t.Errorf("BalanceAt() = %v, want error = %v", err, tt.want.isErr)
 			}
-			t.Log(balance)
+			if balance != nil {
+				t.Log(balance)
+			}
 		})
 	}
 	//et.Close()

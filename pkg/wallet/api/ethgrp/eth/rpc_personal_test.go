@@ -1,10 +1,11 @@
 package eth_test
 
 import (
+	"testing"
+
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/testutil"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp/eth"
-	"testing"
 )
 
 // TestImportRawKey is test for ImportRawKey

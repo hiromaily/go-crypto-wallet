@@ -344,7 +344,7 @@ func TestGetBlockTransactionCountByNumber(t *testing.T) {
 				t.Errorf("GetUncleCountByBlockNumber() = %v, want error = %v", err, tt.want.isErr)
 				return
 			}
-			if count != nil {
+			if count2 != nil {
 				t.Logf("uncleCount: %d", count2.Uint64())
 			}
 		})

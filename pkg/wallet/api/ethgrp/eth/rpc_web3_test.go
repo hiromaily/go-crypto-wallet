@@ -1,8 +1,9 @@
 package eth_test
 
 import (
-	"github.com/hiromaily/go-bitcoin/pkg/testutil"
 	"testing"
+
+	"github.com/hiromaily/go-bitcoin/pkg/testutil"
 )
 
 // TestClientVersion is test for ClientVersion
