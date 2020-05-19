@@ -1,12 +1,13 @@
 package eth_test
 
 import (
-	"github.com/bookerzzz/grok"
-	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp/eth"
 	"testing"
 
+	"github.com/bookerzzz/grok"
+
+	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/testutil"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp/eth"
 )
 
 // TestCreateRawTransaction is test for CreateRawTransaction

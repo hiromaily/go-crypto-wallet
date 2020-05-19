@@ -80,14 +80,16 @@ func (e *Ethereum) GetPrivKey(hexAddr, password string, accountType account.Acco
 func (e *Ethereum) readPrivKey(hexAddr, path string) ([]byte, error) {
 
 	// search file
-	addr := strings.TrimLeft(hexAddr, "0x")
+	// filename is like `UTC--2020-05-18T16-01-32.772616000Z--e52307deb1a7dc3985d2873b45ae23b91d57a36d`
+	// Note: all letter of address in filename is a lowercase letter
+	addr := strings.TrimLeft(strings.ToLower(hexAddr), "0x")
 	files, err := filepath.Glob(fmt.Sprintf("%s/*--%s", path, addr))
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call filepath.Glob()")
 	}
 	if len(files) == 0 {
 		// file is not found
-		return nil, nil
+		return nil, errors.New("private key file is not found")
 	}
 	if len(files) > 1 {
 		return nil, errors.Errorf("target private key files are found more than 1 by %s", addr)

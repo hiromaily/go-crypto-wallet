@@ -6,6 +6,7 @@ import (
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/p2p"
 
@@ -29,7 +30,8 @@ type Ethereumer interface {
 	// key
 	ToECDSA(privKey string) (*ecdsa.PrivateKey, error)
 	GetKeyDir(accountType account.AccountType) string
-
+	GetPrivKey(hexAddr, password string, accountType account.AccountType) (*keystore.Key, error)
+	RenameParityKeyFile(hexAddr string, accountType account.AccountType) error
 	// rpc_admin
 	AddPeer(nodeURL string) error
 	AdminDataDir() (string, error)
