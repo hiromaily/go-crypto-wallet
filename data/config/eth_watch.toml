@@ -8,7 +8,7 @@ network_type = "goerli" # mainnet, goerli, rinkeby, ropsten
 
 [ethereum.geth]
 #keydir = "./data/keystore"
-keydir = "${HOME}/Library/Ethereum/goerli/keystore"
+keydir = "/Users/hy/Library/Ethereum/goerli/keystore"
 
 [logger]
 service = "eth-wallet"

@@ -234,7 +234,7 @@ generate-bch-key-local:
 
 .PHONY: generate-eth-key-local
 generate-eth-key-local:
-	./scripts/operation/generate-eth-key-local.sh
+	./scripts/operation/generate-eth-key-local.sh eth
 
 ###############################################################################
 # payment request
