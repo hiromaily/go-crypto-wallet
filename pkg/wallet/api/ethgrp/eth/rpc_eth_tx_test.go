@@ -35,14 +35,24 @@ func TestGetTransactionByHash(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// check GetTransactionByHash()
 			res, err := et.GetTransactionByHash(tt.args.txHash)
-			if (err == nil) == tt.want.isErr {
-				t.Errorf("GetTransactionByHash() = %v, want error = %v", err, tt.want.isErr)
-				return
+			if err != nil {
+				t.Fatal(err)
 			}
 			if res != nil {
 				//t.Log(res)
 				grok.Value(res)
+			}
+
+			// check GetTransactionReceipt()
+			res2, err := et.GetTransactionReceipt(tt.args.txHash)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if res2 != nil {
+				//t.Log(res)
+				grok.Value(res2)
 			}
 		})
 	}

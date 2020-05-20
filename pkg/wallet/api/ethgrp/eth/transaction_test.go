@@ -157,8 +157,7 @@ func TestSignAndSendRawTransaction(t *testing.T) {
 			}
 			if txHash != "" {
 				t.Log(txHash)
-				//eth_getTransactionByHash
-				//0x1b3ee7f02e622b4bbfe39a3aa9b98ca4651e75a88880c53ca6e34729b452dd9d
+				// check transaction
 				time.Sleep(3 * time.Second)
 				res, err := et.GetTransactionByHash(txHash)
 				if err != nil {
@@ -166,8 +165,18 @@ func TestSignAndSendRawTransaction(t *testing.T) {
 				}
 				t.Log(res)
 
-				//TODO:check balance
+				// check balance
+				balance, err := et.GetBalance(tt.args.receiverAddr, eth.QuantityTagPending)
+				if balance.Uint64() == 0 {
+					t.Error("balance must be NOT zero")
+				}
 
+				// check confirmation
+				confirmNum, err := et.GetConfirmation(txHash)
+				if err != nil {
+					t.Fatal(err)
+				}
+				t.Logf("confirmation is %d", confirmNum)
 			}
 		})
 	}
