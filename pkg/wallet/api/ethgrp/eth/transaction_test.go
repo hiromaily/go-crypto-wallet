@@ -2,6 +2,7 @@ package eth_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	"github.com/hiromaily/go-bitcoin/pkg/testutil"
@@ -154,7 +155,20 @@ func TestSignAndSendRawTransaction(t *testing.T) {
 				t.Errorf("SendSignedRawTransaction() = %v, want error = %v", err, tt.want.isSignErr)
 				return
 			}
-			t.Log(txHash)
+			if txHash != "" {
+				t.Log(txHash)
+				//eth_getTransactionByHash
+				//0x1b3ee7f02e622b4bbfe39a3aa9b98ca4651e75a88880c53ca6e34729b452dd9d
+				time.Sleep(3 * time.Second)
+				res, err := et.GetTransactionByHash(txHash)
+				if err != nil {
+					t.Fatal(err)
+				}
+				t.Log(res)
+
+				//TODO:check balance
+
+			}
 		})
 	}
 	//et.Close()
