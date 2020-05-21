@@ -82,7 +82,13 @@ func (e *Ethereum) readPrivKey(hexAddr, path string) ([]byte, error) {
 	// search file
 	// filename is like `UTC--2020-05-18T16-01-32.772616000Z--e52307deb1a7dc3985d2873b45ae23b91d57a36d`
 	// Note: all letter of address in filename is a lowercase letter
-	addr := strings.TrimLeft(strings.ToLower(hexAddr), "0x")
+	addr := strings.TrimPrefix(strings.ToLower(hexAddr), "0x")
+	e.logger.Debug("readPrivKey",
+		zap.String("hexAddr", hexAddr),
+		zap.String("addr", addr),
+		zap.String("path", path),
+	)
+
 	files, err := filepath.Glob(fmt.Sprintf("%s/*--%s", path, addr))
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call filepath.Glob()")

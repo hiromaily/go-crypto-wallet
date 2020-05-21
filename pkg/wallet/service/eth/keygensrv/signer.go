@@ -85,5 +85,5 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 	}
 
 	//return hexTx, isSigned, generatedFileName, nil
-	return "", false, generatedFileName, nil
+	return "", true, generatedFileName, nil
 }
