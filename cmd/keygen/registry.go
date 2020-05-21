@@ -137,7 +137,6 @@ func (r *registry) newPrivKeyer() service.PrivKeyer {
 	case coin.ETH:
 		return ethsrv.NewPrivKey(
 			r.newETH(),
-			r.conf.Ethereum.Geth.KeyDirName,
 			r.newLogger(),
 			r.newAccountKeyRepo(),
 			r.walletType,

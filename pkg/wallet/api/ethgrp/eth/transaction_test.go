@@ -167,6 +167,9 @@ func TestSignAndSendRawTransaction(t *testing.T) {
 
 				// check balance
 				balance, err := et.GetBalance(tt.args.receiverAddr, eth.QuantityTagPending)
+				if err != nil {
+					t.Fatal(err)
+				}
 				if balance.Uint64() == 0 {
 					t.Error("balance must be NOT zero")
 				}

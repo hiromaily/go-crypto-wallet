@@ -2,6 +2,7 @@ package eth
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/btcsuite/btcd/chaincfg"
@@ -44,6 +45,16 @@ func NewEthereum(
 		ctx:          ctx,
 		keyDir:       conf.Geth.KeyDirName,
 	}
+
+	// key dir
+	if eth.keyDir == "" {
+		dirName, err := eth.AdminDataDir()
+		if err != nil {
+			return nil, errors.Wrap(err, "fail to call eth.AdminDataDir()")
+		}
+		eth.keyDir = fmt.Sprintf("%s/keystore", dirName)
+	}
+	logger.Debug("eth.keyDir", zap.String("eth.keyDir", eth.keyDir))
 
 	// get NetID
 	netID, err := eth.NetVersion()

@@ -16,7 +16,6 @@ import (
 // PrivKey type
 type PrivKey struct {
 	eth            ethgrp.Ethereumer
-	keyDir         string
 	logger         *zap.Logger
 	accountKeyRepo coldrepo.AccountKeyRepositorier
 	wtype          wallet.WalletType
@@ -25,14 +24,12 @@ type PrivKey struct {
 // NewPrivKey returns privKey object
 func NewPrivKey(
 	eth ethgrp.Ethereumer,
-	keyDir string,
 	logger *zap.Logger,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	wtype wallet.WalletType) *PrivKey {
 
 	return &PrivKey{
 		eth:            eth,
-		keyDir:         keyDir,
 		logger:         logger,
 		accountKeyRepo: accountKeyRepo,
 		wtype:          wtype,
@@ -53,8 +50,9 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 
 	// keystore directory is linked to any apis to get accounts
 	// so multiple directories are not good idea
+	p.logger.Debug("NewKeyStore", zap.String("key_dir", p.eth.GetKeyDir(accountType)))
 	//keyDir := fmt.Sprintf("%s/%s", p.keyDir, accountType.String())
-	ks := keystore.NewKeyStore(p.keyDir, keystore.StandardScryptN, keystore.StandardScryptP)
+	ks := keystore.NewKeyStore(p.eth.GetKeyDir(accountType), keystore.StandardScryptN, keystore.StandardScryptP)
 
 	for _, record := range accountKeyTable {
 		p.logger.Debug(
@@ -70,7 +68,8 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 				"fail to call key.ToECDSA()",
 				zap.String("private key", record.WalletImportFormat),
 				zap.Error(err))
-			continue
+			//continue
+			return errors.Wrap(err, "fail to call key.ToECDSA()")
 		}
 		// FIXME: how to link imported key to specific accountName like client, deposit (grouping)
 		// TODO: where password should come from // ImportRawKey(hexKey, passPhrase string) (string, error)
@@ -82,7 +81,8 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 				"fail to call eth.ImportECDSA()",
 				zap.String("private key", record.WalletImportFormat),
 				zap.Error(err))
-			continue
+			//continue
+			return errors.Wrap(err, "fail to call eth.ImportECDSA()")
 		}
 		p.logger.Debug("key account is generated",
 			zap.String("account.Address.Hex()", account.Address.Hex()),
