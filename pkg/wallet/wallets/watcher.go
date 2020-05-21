@@ -1,6 +1,9 @@
 package wallets
 
-import "github.com/hiromaily/go-bitcoin/pkg/account"
+import (
+	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
+)
 
 // Watcher is for watch only wallet service interface
 type Watcher interface {
@@ -12,4 +15,5 @@ type Watcher interface {
 	UpdateTxStatus() error
 	CreatePaymentRequest() error
 	Done()
+	CoinTypeCode() coin.CoinTypeCode
 }

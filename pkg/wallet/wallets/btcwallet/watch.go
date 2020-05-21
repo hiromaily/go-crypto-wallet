@@ -10,6 +10,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/address"
 	wtype "github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 )
 
@@ -96,6 +97,11 @@ func (w *BTCWatch) CreatePaymentRequest() error {
 func (w *BTCWatch) Done() {
 	w.dbConn.Close()
 	w.BTC.Close()
+}
+
+// CoinTypeCode returns coin.CoinTypeCode
+func (w *BTCWatch) CoinTypeCode() coin.CoinTypeCode {
+	return w.BTC.CoinTypeCode()
 }
 
 // GetBTC gets btc

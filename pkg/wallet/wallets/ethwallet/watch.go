@@ -8,6 +8,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/account"
 	wtype "github.com/hiromaily/go-bitcoin/pkg/wallet"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/eth/watchsrv"
 )
@@ -90,4 +91,9 @@ func (w *ETHWatch) CreatePaymentRequest() error {
 func (w *ETHWatch) Done() {
 	w.dbConn.Close()
 	w.ETH.Close()
+}
+
+// CoinTypeCode returns coin.CoinTypeCode
+func (w *ETHWatch) CoinTypeCode() coin.CoinTypeCode {
+	return w.ETH.CoinTypeCode()
 }

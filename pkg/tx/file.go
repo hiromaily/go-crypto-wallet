@@ -58,7 +58,10 @@ func NewFileRepository(filePath string, logger *zap.Logger) *FileRepository {
 func (r *FileRepository) CreateFilePath(actionType action.ActionType, txType TxType, txID int64, signedCount int) string {
 
 	// ./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209
-	baseDir := fmt.Sprintf("%s%s/", r.filePath, actionType.String())
+	//baseDir := fmt.Sprintf("%s%s/", r.filePath, actionType.String())
+
+	// ./data/tx/eth/deposit_8_unsigned_0_1534744535097796209
+	baseDir := r.filePath
 	return fmt.Sprintf("%s%s_%d_%s_%d_", baseDir, actionType.String(), txID, txType, signedCount)
 }
 

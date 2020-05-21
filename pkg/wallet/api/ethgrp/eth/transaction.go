@@ -100,6 +100,11 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64) 
 	if e.ValidationAddr(fromAddr) != nil || e.ValidationAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
 	}
+	e.logger.Debug("eth.CreateRawTransaction()",
+		zap.String("fromAddr", fromAddr),
+		zap.String("toAddr", toAddr),
+		zap.Uint64("amount", amount),
+	)
 
 	// TODO: pending status should be included in target balance??
 	// TODO: if block is still syncing, proper balance is not returned

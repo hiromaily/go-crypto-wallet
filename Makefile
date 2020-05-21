@@ -197,7 +197,11 @@ up-docker-logger:
 rm-db-volumes:
 	#docker rm -f $(docker ps -a --format "{{.Names}}")
 	#docker volume rm -f $(docker volume ls --format "{{.Name}}")
-	docker-compose down -v
+	#docker-compose down -v
+	docker-compose down
+	docker volume rm -f go-bitcoin_btc-keygen-db
+	docker volume rm -f go-bitcoin_btc-sign-db
+	docker volume rm -f go-bitcoin_btc-watch-db
 
 ###############################################################################
 # Bitcoin core on local

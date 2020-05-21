@@ -35,7 +35,7 @@ type ETHTxRepository struct {
 func NewETHTxRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *ETHTxRepository {
 	return &ETHTxRepository{
 		dbConn:       dbConn,
-		tableName:    "Eth_tx",
+		tableName:    "eth_tx",
 		coinTypeCode: coinTypeCode,
 		logger:       logger,
 	}

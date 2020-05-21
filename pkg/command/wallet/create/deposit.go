@@ -6,6 +6,7 @@ import (
 
 	"github.com/mitchellh/cli"
 
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
 )
 
@@ -54,7 +55,7 @@ func (c *DepositCommand) Run(args []string) int {
 		c.ui.Error(fmt.Sprintf("fail to call CreateDepositTx() %+v", err))
 		return 1
 	}
-	if hex == "" {
+	if c.wallet.CoinTypeCode() != coin.ETH && hex == "" {
 		c.ui.Info("No utxo")
 		return 0
 	}

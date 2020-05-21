@@ -264,7 +264,7 @@ watch send -file xxx.csv
 - [x] Importing private key
 - [x] Exporting addresses to watch wallet
 - [x] Importing exported address in watch wallet
-- [ ] Creating unsigned raw transaction for deposit
+- [x] Creating unsigned raw transaction for deposit
 - [ ] Creating unsigned raw transaction for payment
 - [ ] Creating unsigned raw transaction for transfer
 - [ ] Signing on unsigned raw transaction
