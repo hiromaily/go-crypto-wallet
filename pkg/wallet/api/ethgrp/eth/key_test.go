@@ -9,6 +9,7 @@ import (
 )
 
 // TestGetPrivKey is test for GetPrivKey
+// Note: keydir in config must be fullpath when testing
 func TestGetPrivKey(t *testing.T) {
 	et := testutil.GetETH()
 
@@ -27,7 +28,7 @@ func TestGetPrivKey(t *testing.T) {
 		{
 			name: "happy path",
 			args: args{
-				addr: "0xe52307Deb1a7dC3985D2873b45AE23b91D57a36d",
+				addr: "0xd4EC46122b3f0afc0287144Adcca5d65B22B799c",
 				acnt: account.AccountTypeClient,
 			},
 			want: want{false},
@@ -35,7 +36,7 @@ func TestGetPrivKey(t *testing.T) {
 		{
 			name: "wrong address",
 			args: args{
-				addr: "0xe52307Deb1a7dC3985D2873b45AE23b91Daaaaaa",
+				addr: "0x5357135e0D3CbBD37cFCeb9F06257Bb133548Exx",
 				acnt: account.AccountTypeClient,
 			},
 			want: want{true},

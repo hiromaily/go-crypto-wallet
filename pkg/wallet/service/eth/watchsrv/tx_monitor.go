@@ -47,8 +47,6 @@ func NewTxMonitor(
 	}
 }
 
-// TODO: implementation
-
 // UpdateTxStatus update transaction status
 // - monitor transaction whose tx_type=3(TxTypeSent) in tx_payment/tx_deposit/tx_transfer
 func (t *TxMonitor) UpdateTxStatus() error {
@@ -102,5 +100,11 @@ func (t *TxMonitor) updateStatusTxTypeSent() error {
 		// update status
 		t.txDetailRepo.UpdateTxTypeBySentHashTx(tx.TxTypeDone, sentHash)
 	}
+	return nil
+}
+
+// MonitorBalance monitors balance
+func (t *TxMonitor) MonitorBalance() error {
+	//TODO: implement
 	return nil
 }

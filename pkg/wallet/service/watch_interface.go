@@ -22,6 +22,7 @@ type TxCreator interface {
 // TxMonitorer is TxMonitor interface
 type TxMonitorer interface {
 	UpdateTxStatus() error
+	MonitorBalance() error
 }
 
 // TxSender is TxSender interface

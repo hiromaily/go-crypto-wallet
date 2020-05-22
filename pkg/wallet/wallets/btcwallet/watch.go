@@ -83,6 +83,11 @@ func (w *BTCWatch) UpdateTxStatus() error {
 	return w.TxMonitorer.UpdateTxStatus()
 }
 
+// MonitorBalance monitors balance
+func (w *BTCWatch) MonitorBalance() error {
+	return w.TxMonitorer.MonitorBalance()
+}
+
 // SendTx sends signed transaction
 func (w *BTCWatch) SendTx(filePath string) (string, error) {
 	return w.TxSender.SendTx(filePath)

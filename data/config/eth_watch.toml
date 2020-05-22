@@ -2,10 +2,11 @@
 [ethereum]
 #host = "192.168.10.101"
 host = "127.0.0.1"
-port = 18545
+port = 8545
 disable_tls = true
 network_type = "goerli" # mainnet, goerli, rinkeby, ropsten
 keydir = "./data/keystore"
+#keydir = "/Users/hy/work/go/src/github.com/hiromaily/go-crypto-wallet/data/keystore"
 #keydir = "/Users/hy/Library/Ethereum/goerli/keystore"
 #keydir = "" # docker: /root/.ethereum/goerli + /keystore
 confirmation_num = 10 #block number for required confirmation

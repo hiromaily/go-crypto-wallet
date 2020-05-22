@@ -279,3 +279,9 @@ func (t *TxMonitor) updateTxTypeNotified(id int64, actionType action.ActionType)
 
 	return nil
 }
+
+// MonitorBalance monitors balances
+func (t *TxMonitor) MonitorBalance() error {
+	//TODO: implement
+	return nil
+}

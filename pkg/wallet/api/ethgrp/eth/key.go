@@ -77,6 +77,7 @@ func (e *Ethereum) readPrivKey(hexAddr, path string) ([]byte, error) {
 
 	// search file
 	// filename is like `UTC--2020-05-18T16-01-32.772616000Z--e52307deb1a7dc3985d2873b45ae23b91d57a36d`
+	//                   UTC--2020-05-22T13-59-51.645058000Z--d4ec46122b3f0afc0287144adcca5d65b22b799c
 	// Note: all letter of address in filename is a lowercase letter
 	addr := strings.TrimPrefix(strings.ToLower(hexAddr), "0x")
 	e.logger.Debug("readPrivKey",

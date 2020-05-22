@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"flag"
+	"fmt"
 
 	"github.com/mitchellh/cli"
 
@@ -23,9 +24,7 @@ func (c *BalanceCommand) Synopsis() string {
 
 // Help returns usage for this subcommand
 func (c *BalanceCommand) Help() string {
-	return `Usage: wallet monitor balance [options...]
-Options:
-  -account  target account
+	return `Usage: wallet monitor balance
 `
 }
 
@@ -33,16 +32,15 @@ Options:
 func (c *BalanceCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
-	var (
-		acnt string
-	)
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
-	flags.StringVar(&acnt, "account", "", "account for monitoring")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
 
-	//TODO monitor balance
+	if err := c.wallet.MonitorBalance(); err != nil {
+		c.ui.Error(fmt.Sprintf("fail to call MonitorBalance() %+v", err))
+		return 1
+	}
 
 	return 0
 }
