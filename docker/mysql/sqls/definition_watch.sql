@@ -121,6 +121,7 @@ DROP TABLE IF EXISTS `eth_detail_tx`;
 CREATE TABLE `eth_detail_tx` (
   `id`               BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
   `tx_id`            BIGINT(20) NOT NULL COMMENT'eth_tx table ID',
+  `uuid`             VARCHAR(36) NOT NULL COMMENT'UUID',
   `current_tx_type`  tinyint(2) NOT NULL DEFAULT 1 COMMENT'current transaction type',
   `sender_account`   VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'sender account',
   `sender_address`   VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'sender address',
@@ -136,6 +137,7 @@ CREATE TABLE `eth_detail_tx` (
   `unsigned_updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date for unsigned transaction created',
   `sent_updated_at`     datetime DEFAULT NULL COMMENT'updated date for signed transaction sent',
   PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_uuid` (`uuid`),
   INDEX idx_txid (`tx_id`),
   INDEX idx_sender_account (`sender_account`),
   INDEX idx_receiver_account (`receiver_account`)

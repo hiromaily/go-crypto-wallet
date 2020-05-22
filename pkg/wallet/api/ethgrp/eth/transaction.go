@@ -10,6 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/pkg/errors"
+	uuid "github.com/satori/go.uuid"
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-bitcoin/pkg/account"
@@ -18,6 +19,7 @@ import (
 
 // RawTx is raw transaction
 type RawTx struct {
+	UUID  string  `json:"uuid"`
 	From  string  `json:"from"`
 	To    string  `json:"to"`
 	Value big.Int `json:"value"`
@@ -26,7 +28,7 @@ type RawTx struct {
 	Hash  string  `json:"hash"`
 }
 
-// TODO: WIP: logic is not fixed
+// TODO: WIP: logic is not fixed, it looks same
 func (e *Ethereum) getNonce(fromAddr string) (uint64, error) {
 	// by calling GetTransactionCount()
 	nonce1, err := e.GetTransactionCount(fromAddr, QuantityTagPending)
@@ -152,6 +154,7 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64) 
 	// create transaction
 	// data is required when contract transaction
 	// NewTransaction(nonce uint64, to common.Address, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte) *Transaction
+	// Note: tx may NOT be unique because fromAddr is not included and parameter is limited
 	tx := types.NewTransaction(nonce, common.HexToAddress(toAddr), newValue, GasLimit, gasPrice, nil)
 	txHash := tx.Hash().Hex()
 	rawTxHex, err := encodeTx(tx)
@@ -159,9 +162,12 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64) 
 		return nil, nil, errors.Wrap(err, "fail to call encodeTx()")
 	}
 
-	// big.Int to types.Decimal
+	// generate UUID to trace transaction because unsignedTx is not unique
+	uid := uuid.NewV4().String()
+
 	// create insert data for　eth_detail_tx
 	txDetailItem := &models.EthDetailTX{
+		UUID:            uid,
 		SenderAccount:   "",
 		SenderAddress:   fromAddr,
 		ReceiverAccount: "",
@@ -172,10 +178,10 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64) 
 		Nonce:           nonce,
 		UnsignedHexTX:   *rawTxHex,
 	}
-	//TODO: `UnsignedHexTX`(*rawTxHex) should be used to trace progress to update database
 
 	//RawTx
 	rawtx := &RawTx{
+		UUID:  uid,
 		From:  fromAddr,
 		To:    toAddr,
 		Value: *newValue,
@@ -232,6 +238,7 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *RawTx, passphrase string, senderA
 	}
 
 	resTx := &RawTx{
+		UUID:  rawTx.UUID,
 		From:  msg.From().Hex(),
 		To:    msg.To().Hex(),
 		Value: *msg.Value(),

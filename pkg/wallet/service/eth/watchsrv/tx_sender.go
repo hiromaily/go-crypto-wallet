@@ -74,7 +74,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 		if len(tmp) != 2 {
 			return "", errors.New("data format is invalid in file")
 		}
-		unsignedTx := tmp[0]
+		uuid := tmp[0]
 		signedTx := tmp[1]
 
 		// sign
@@ -91,11 +91,9 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			)
 			continue
 		}
-		// signedRawTx.TxHex
-		//sentTxes = append(sentTxes, fmt.Sprintf("%s,%s", unsignedTx, sentTx))
 
 		// update eth_detail_tx
-		affectedNum, err := t.txDetailRepo.UpdateAfterTxSent(txID, unsignedTx, tx.TxTypeSent, signedTx, sentTx)
+		affectedNum, err := t.txDetailRepo.UpdateAfterTxSent(uuid, tx.TxTypeSent, signedTx, sentTx)
 		if err != nil {
 			//TODO: even if error occurred, tx is already sent. so db should be corrected manually
 			t.logger.Warn("fail to call repo.Tx().UpdateAfterTxSent() but tx is already sent. So database should be updated manually",
@@ -105,7 +103,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 				zap.String("signed_hex_tx", signedTx),
 				zap.String("sent_hash_tx", sentTx),
 			)
-			return "", errors.Wrapf(err, "fail to call updateHexForSentTx(), but tx is sent. txID: %d", txID)
+			continue
 		}
 		if affectedNum == 0 {
 			t.logger.Info("no records to update tx_table",
@@ -115,7 +113,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 				zap.String("signed_hex_tx", signedTx),
 				zap.String("sent_hash_tx", sentTx),
 			)
-			return "", nil
+			continue
 		}
 	}
 

@@ -7,7 +7,6 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.4.1 // indirect
 	github.com/DataDog/datadog-go v3.7.1+incompatible // indirect
 	github.com/VictoriaMetrics/fastcache v1.5.7 // indirect
-	github.com/apmckinlay/gsuneido v0.0.0-20190404155041-0b6cd442a18f // indirect
 	github.com/aristanetworks/goarista v0.0.0-20200429182514-19402535e24e // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/bookerzzz/grok v0.0.0
@@ -39,7 +38,9 @@ require (
 	github.com/philhofer/fwd v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/posener/complete v1.2.3 // indirect
+	github.com/prometheus/tsdb v0.7.1 // indirect
 	github.com/rjeczalik/notify v0.9.2 // indirect
+	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/tinylib/msgp v1.1.2 // indirect
 	github.com/uber/jaeger-client-go v2.23.1+incompatible

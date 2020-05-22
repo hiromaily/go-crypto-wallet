@@ -22,7 +22,7 @@ type EthDetailTxRepositorier interface {
 	GetAllByTxID(id int64) ([]*models.EthDetailTX, error)
 	Insert(txItem *models.EthDetailTX) error
 	InsertBulk(txItems []*models.EthDetailTX) error
-	UpdateAfterTxSent(txID int64, unsignedTx string, txType tx.TxType, signedHex, sentHashTx string) (int64, error)
+	UpdateAfterTxSent(uuid string, txType tx.TxType, signedHex, sentHashTx string) (int64, error)
 	UpdateTxType(id int64, txType tx.TxType) (int64, error)
 }
 
@@ -83,8 +83,7 @@ func (r *EthDetailTxInputRepository) InsertBulk(txItems []*models.EthDetailTX) e
 
 // UpdateAfterTxSent updates when tx sent
 func (r *EthDetailTxInputRepository) UpdateAfterTxSent(
-	txID int64,
-	unsignedTx string,
+	uuid string,
 	txType tx.TxType,
 	signedHex,
 	sentHashTx string) (int64, error) {
@@ -99,8 +98,7 @@ func (r *EthDetailTxInputRepository) UpdateAfterTxSent(
 		models.EthDetailTXColumns.SentUpdatedAt: null.TimeFrom(time.Now()),
 	}
 	return models.EthDetailTxes(
-		qm.Where("id=?", txID),                  //unique
-		qm.And("unsigned_hex_tx=?", unsignedTx), //unique
+		qm.Where("uuid=?", uuid), //unique
 	).UpdateAll(ctx, r.dbConn, updCols)
 }
 

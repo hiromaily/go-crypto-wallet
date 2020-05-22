@@ -71,10 +71,7 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 		if err != nil {
 			return "", false, "", errors.Wrap(err, "fail to call eth.SignOnRawTransaction()")
 		}
-		// signedRawTx.TxHex
-		//TODO: `rawTx.TxHex` should be used to trace progress to update database
-		//txHexs = append(txHexs, signedRawTx.TxHex)
-		txHexs = append(txHexs, fmt.Sprintf("%s,%s", rawTx.TxHex, signedRawTx.TxHex))
+		txHexs = append(txHexs, fmt.Sprintf("%s,%s", rawTx.UUID, signedRawTx.TxHex))
 	}
 
 	// write file

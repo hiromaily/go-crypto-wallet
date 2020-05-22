@@ -11,7 +11,7 @@ goget:
 	go get -u -d -v ./...
 
 .PHONY: install-sqlboiler
-install-sqlboiler: SQLBOILER_VERSION=3.7
+install-sqlboiler: SQLBOILER_VERSION=3.7.1
 install-sqlboiler:
 	echo SQLBOILER_VERSION is $(SQLBOILER_VERSION)
 	go get github.com/volatiletech/sqlboiler@v$(SQLBOILER_VERSION)
@@ -20,6 +20,7 @@ install-sqlboiler:
 .PHONY: install-sqlboiler2
 install-sqlboiler2:
 	cd ${GOPATH}/src/github.com/volatiletech/sqlboiler
+	#git checkout refs/tags/v3.7.1
 	git pull
 	go get ./...
 	go build -i -v -o ${GOPATH}/bin/sqlboiler .
@@ -198,7 +199,7 @@ rm-db-volumes:
 	#docker rm -f $(docker ps -a --format "{{.Names}}")
 	#docker volume rm -f $(docker volume ls --format "{{.Name}}")
 	#docker-compose down -v
-	docker-compose down
+	#docker-compose down
 	docker volume rm -f go-bitcoin_btc-keygen-db
 	docker volume rm -f go-bitcoin_btc-sign-db
 	docker volume rm -f go-bitcoin_btc-watch-db
