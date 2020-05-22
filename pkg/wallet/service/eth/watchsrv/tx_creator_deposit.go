@@ -14,7 +14,7 @@ import (
 // CreateDepositTx create unsigned tx if client accounts have coins
 // - sender: client, receiver: deposit
 // - receiver account covers fee, but is should be flexible
-func (t *TxCreate) CreateDepositTx(adjustmentFee float64) (string, string, error) {
+func (t *TxCreate) CreateDepositTx() (string, string, error) {
 	sender := account.AccountTypeClient
 	receiver := account.AccountTypeDeposit
 	targetAction := action.ActionTypeDeposit

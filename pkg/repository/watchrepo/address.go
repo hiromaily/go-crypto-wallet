@@ -66,7 +66,7 @@ func (r *AddressRepository) GetAllAddress(accountType account.AccountType) ([]st
 		Address string `boil:"wallet_address"`
 	}
 	var response []*Response
-	err := models.EthTxes(
+	err := models.Addresses(
 		qm.Select("wallet_address"),
 		qm.Where("coin=?", r.coinTypeCode.String()),
 		qm.And("account=?", accountType.String()),

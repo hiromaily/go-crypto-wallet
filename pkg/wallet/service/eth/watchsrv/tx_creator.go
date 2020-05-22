@@ -15,6 +15,13 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp"
 )
 
+// TxCreator is TxCreator interface
+type TxCreator interface {
+	CreateDepositTx() (string, string, error)
+	CreatePaymentTx() (string, string, error)
+	CreateTransferTx(sender, receiver account.AccountType, floatAmount float64) (string, string, error)
+}
+
 // TxCreate type
 type TxCreate struct {
 	eth          ethgrp.Ethereumer

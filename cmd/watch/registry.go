@@ -136,7 +136,7 @@ func (r *registry) newTxCreator() service.TxCreator {
 	)
 }
 
-func (r *registry) newETHTxCreator() service.TxCreator {
+func (r *registry) newETHTxCreator() ethsrv.TxCreator {
 	return ethsrv.NewTxCreate(
 		r.newETH(),
 		r.newLogger(),

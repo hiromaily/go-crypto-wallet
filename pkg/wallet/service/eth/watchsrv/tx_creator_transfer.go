@@ -17,7 +17,7 @@ import (
 // TODO: implement
 // sender pays fee,
 // TODO: maybe any internal account should have only one address in Ethereum because no utxo
-func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error) {
+func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatAmount float64) (string, string, error) {
 	targetAction := action.ActionTypeTransfer
 
 	// validation account

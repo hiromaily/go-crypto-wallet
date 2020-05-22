@@ -18,7 +18,7 @@ type SendCommand struct {
 
 // Synopsis is explanation for this subcommand
 func (c *SendCommand) Synopsis() string {
-	return "send signed transaction to bitcoin blockchain network"
+	return "send signed transaction to blockchain network"
 }
 
 // Help returns usage for this subcommand

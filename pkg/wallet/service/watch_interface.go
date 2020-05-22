@@ -2,7 +2,7 @@ package service
 
 import "github.com/hiromaily/go-bitcoin/pkg/account"
 
-// AddressImporter is AddressImporter interface
+// AddressImporter is AddressImporter interface (for now btc/bch only)
 type AddressImporter interface {
 	ImportAddress(fileName string, isRescan bool) error
 }
@@ -12,7 +12,7 @@ type PaymentRequestCreator interface {
 	CreatePaymentRequest() error
 }
 
-// TxCreator is TxCreator interface
+// TxCreator is TxCreator interface (for now btc/bch only)
 type TxCreator interface {
 	CreateDepositTx(adjustmentFee float64) (string, string, error)
 	CreatePaymentTx(adjustmentFee float64) (string, string, error)

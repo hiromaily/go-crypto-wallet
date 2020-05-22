@@ -20,7 +20,7 @@ import (
 // Note
 // - to avoid complex logic to create raw transaction
 // - only one address of sender should afford to send coin to all payment request users.
-func (t *TxCreate) CreatePaymentTx(adjustmentFee float64) (string, string, error) {
+func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	sender := account.AccountTypePayment
 	receiver := account.AccountTypeAnonymous
 	targetAction := action.ActionTypePayment

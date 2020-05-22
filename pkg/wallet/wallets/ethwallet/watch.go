@@ -20,7 +20,7 @@ type ETHWatch struct {
 	logger *zap.Logger
 	wtype  wtype.WalletType
 	watchsrv.AddressImporter
-	service.TxCreator
+	watchsrv.TxCreator
 	service.TxSender
 	service.TxMonitorer
 	service.PaymentRequestCreator
@@ -32,7 +32,7 @@ func NewETHWatch(
 	dbConn *sql.DB,
 	logger *zap.Logger,
 	addrImporter watchsrv.AddressImporter,
-	txCreator service.TxCreator,
+	txCreator watchsrv.TxCreator,
 	txSender service.TxSender,
 	txMonitorer service.TxMonitorer,
 	paymentRequestCreator service.PaymentRequestCreator,
@@ -58,17 +58,17 @@ func (w *ETHWatch) ImportAddress(fileName string, isRescan bool) error {
 
 // CreateDepositTx creates deposit unsigned transaction
 func (w *ETHWatch) CreateDepositTx(adjustmentFee float64) (string, string, error) {
-	return w.TxCreator.CreateDepositTx(adjustmentFee)
+	return w.TxCreator.CreateDepositTx()
 }
 
 // CreatePaymentTx creates payment unsigned transaction
 func (w *ETHWatch) CreatePaymentTx(adjustmentFee float64) (string, string, error) {
-	return w.TxCreator.CreatePaymentTx(adjustmentFee)
+	return w.TxCreator.CreatePaymentTx()
 }
 
 // CreateTransferTx creates transfer unsigned transaction
 func (w *ETHWatch) CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error) {
-	return w.TxCreator.CreateTransferTx(sender, receiver, floatAmount, adjustmentFee)
+	return w.TxCreator.CreateTransferTx(sender, receiver, floatAmount)
 }
 
 // UpdateTxStatus updates transaction status
