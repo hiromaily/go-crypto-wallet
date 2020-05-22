@@ -2,7 +2,6 @@ package eth
 
 import (
 	"math/big"
-	"strconv"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
@@ -57,13 +56,13 @@ func (e *Ethereum) DecodeBig(input string) (*big.Int, error) {
 	if input == "" || input == "0x" {
 		input = "0x0"
 	}
-	if e.isParity {
-		i, err := strconv.ParseInt(input, 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		return big.NewInt(i), nil
-	}
+	//if e.isParity {
+	//	i, err := strconv.ParseInt(input, 10, 64)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	return big.NewInt(i), nil
+	//}
 	return hexutil.DecodeBig(input)
 }
 

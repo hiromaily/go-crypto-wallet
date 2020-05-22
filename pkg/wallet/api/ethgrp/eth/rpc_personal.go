@@ -56,13 +56,13 @@ func (e *Ethereum) NewAccount(passphrase string, accountType account.AccountType
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call rpc.CallContext(personal_newAccount)")
 	}
-	if e.isParity {
-		//TODO:parity client generates file with UUID, so add address to filename if parity client
-		err = e.RenameParityKeyFile(address, accountType)
-		if err != nil {
-			return "", errors.Wrap(err, "fail to call RenameParityKeyFile(address)")
-		}
-	}
+	//if e.isParity {
+	//	//TODO:parity client generates file with UUID, so add address to filename if parity client
+	//	err = e.RenameParityKeyFile(address, accountType)
+	//	if err != nil {
+	//		return "", errors.Wrap(err, "fail to call RenameParityKeyFile(address)")
+	//	}
+	//}
 	return address, nil
 }
 

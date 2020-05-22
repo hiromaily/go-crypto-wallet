@@ -47,7 +47,7 @@ func (e *Ethereum) getNonce(fromAddr string, additionalNonce int) (uint64, error
 		nonce = nonce.Add(nonce, new(big.Int).SetUint64(uint64(additionalNonce)))
 	}
 	e.logger.Debug("nonce",
-		zap.Uint64("GetTransactionCount(fromAddr, QuantityTagLatest)", nonce.Uint64()),
+		zap.Uint64("GetTransactionCount(fromAddr, QuantityTagPending)", nonce.Uint64()),
 		//zap.Uint64("ethClient.PendingNonceAt(e.ctx, common.HexToAddress(fromAddr))", nonce2),
 	)
 

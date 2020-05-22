@@ -44,10 +44,6 @@ func (e *Ethereum) ToECDSA(privKey string) (*ecdsa.PrivateKey, error) {
 
 // GetKeyDir returns keystore directory
 func (e *Ethereum) GetKeyDir(accountType account.AccountType) string {
-	if e.isParity {
-		//TODO: implement
-		return ""
-	}
 	//return fmt.Sprintf("%s/%s", e.keyDir, accountType.String())
 	return e.keyDir
 }
