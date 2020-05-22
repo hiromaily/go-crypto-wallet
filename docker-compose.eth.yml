@@ -21,16 +21,23 @@ services:
   #########################################################################
   # parity
   # - https://openethereum.github.io/wiki/Docker
+  # - FIXME: How to fix error `IPC error: File name too long (os error 36)`
+  #    volume section causes this error, why mounted path of local need to be short??
   #########################################################################
   eth-parity:
     # https://hub.docker.com/r/parity/parity
     image: parity/parity:v2.7.2-stable
     volumes:
-      - ./docker/nodes/eth/parity-data/:/home/parity/.local/share/io.parity.ethereum/
+      #- ./docker/nodes/eth/parity-data/:/home/parity/.local/share/io.parity.ethereum/
+      - ./parity-data/:/home/parity/.local/share/io.parity.ethereum/
     ports:
-      - "${ETH_SYNC_PORT:-30304}:30303"
-      - "${ETH_RPC_PORT:-18545}:8545"
+      - "${ETH_SYNC_PORT:-30303}:30303"
+      - "30303:30303/udp"
+      - "${ETH_RPC_PORT:-8545}:8545"
+      - "8546:8546"
     stdin_open: true
     tty: true
-    command: parity --chain=goerli --geth
+    #command: parity --chain=goerli --geth
+    command: --config .local/share/io.parity.ethereum/config.toml
+
     # docker-compose -f docker-compose.eth.yml exec eth-parity

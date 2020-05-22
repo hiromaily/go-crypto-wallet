@@ -17,5 +17,6 @@ docker/grafana/*
 docker/nodes/btc/data/testnet3
 docker/nodes/bch/data/testnet3
 docker/nodes/eth/data/*
-
+docker/nodes/eth/parity-data/*
+parity-data/*
 !.gitkeep
