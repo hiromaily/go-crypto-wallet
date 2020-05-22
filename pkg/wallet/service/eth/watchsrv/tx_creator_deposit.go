@@ -68,7 +68,6 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 
 		rawTxHex := rawTx.TxHex
 		t.logger.Debug("rawTxHex", zap.String("rawTxHex", rawTxHex))
-		//TODO: `rawTxHex` should be used to trace progress to update database
 
 		serializedTx, err := serial.EncodeToString(rawTx)
 		if err != nil {

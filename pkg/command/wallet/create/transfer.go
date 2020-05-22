@@ -3,6 +3,7 @@ package create
 import (
 	"flag"
 	"fmt"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
 
 	"github.com/mitchellh/cli"
 
@@ -85,7 +86,7 @@ func (c *TransferCommand) Run(args []string) int {
 		c.ui.Error(fmt.Sprintf("fail to call CreateTransferTx() %+v", err))
 		return 1
 	}
-	if hex == "" {
+	if c.wallet.CoinTypeCode() != coin.ETH && hex == "" {
 		c.ui.Info("No utxo")
 		return 0
 	}
