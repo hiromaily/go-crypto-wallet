@@ -9,8 +9,6 @@
 
 Wallet functionalities to create raw transaction, to sing on unsigned transaction, to send signed transaction for BTC, BCH, ETH and so on.   
 
-## Notes
-Ethereum project is ongoing right now
 
 ## Expected use cases
 ### 1.Deposit functionality
@@ -268,7 +266,7 @@ watch send -file xxx.csv
 - [x] Creating unsigned raw transaction for transfer
 - [x] Signing on unsigned raw transaction
 - [x] Sending signed transaction
-- [ ] Transaction monitoring
+- [x] Transaction monitoring
 - [ ] Any functionalities work with both [Go Ethereum](https://github.com/ethereum/go-ethereum) and [Parity](https://www.parity.io/ethereum/)
 - [ ] How to manage password for private key
 
