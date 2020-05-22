@@ -20,10 +20,12 @@ import (
 type EthDetailTxRepositorier interface {
 	GetOne(id int64) (*models.EthDetailTX, error)
 	GetAllByTxID(id int64) ([]*models.EthDetailTX, error)
+	GetSentHashTx(txType tx.TxType) ([]string, error)
 	Insert(txItem *models.EthDetailTX) error
 	InsertBulk(txItems []*models.EthDetailTX) error
 	UpdateAfterTxSent(uuid string, txType tx.TxType, signedHex, sentHashTx string) (int64, error)
 	UpdateTxType(id int64, txType tx.TxType) (int64, error)
+	UpdateTxTypeBySentHashTx(txType tx.TxType, sentHashTx string) (int64, error)
 }
 
 // EthDetailTxInputRepository is repository for eth_detail_tx table
@@ -69,6 +71,34 @@ func (r *EthDetailTxInputRepository) GetAllByTxID(id int64) ([]*models.EthDetail
 	return txItems, nil
 }
 
+// GetSentHashTx returns list of sent_hash_tx by txType
+func (r *EthDetailTxInputRepository) GetSentHashTx(txType tx.TxType) ([]string, error) {
+	//	sql := `
+	//SELECT sent_hash_tx
+	// FROM eth_tx,eth_detail_tx
+	// WHERE eth_tx.id=eth_detail_tx.tx_id
+	// AND eth_detail_tx.current_tx_type=3
+	// AND eth_tx.coin='eth'
+	//`
+	ctx := context.Background()
+
+	txItems, err := models.EthDetailTxes(
+		qm.Select("sent_hash_tx"),
+		qm.InnerJoin("eth_tx on eth_tx.id=eth_detail_tx.tx_id"),
+		qm.Where("eth_tx.coin=?", r.coinTypeCode.String()),
+		qm.And("eth_detail_tx.current_tx_type=?", txType.Int8()),
+	).All(ctx, r.dbConn)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to call models.EthDetailTxes().All()")
+	}
+
+	hashes := make([]string, 0, len(txItems))
+	for _, txItem := range txItems {
+		hashes = append(hashes, txItem.SentHashTX)
+	}
+	return hashes, nil
+}
+
 // Insert inserts one record
 func (r *EthDetailTxInputRepository) Insert(txItem *models.EthDetailTX) error {
 	ctx := context.Background()
@@ -110,7 +140,20 @@ func (r *EthDetailTxInputRepository) UpdateTxType(id int64, txType tx.TxType) (i
 	updCols := map[string]interface{}{
 		models.EthDetailTXColumns.CurrentTXType: txType.Int8(),
 	}
-	return models.EthTxes(
+	return models.EthDetailTxes(
 		qm.Where("id=?", id), //unique
+	).UpdateAll(ctx, r.dbConn, updCols)
+}
+
+// UpdateTxTypeBySentHashTx updates txType
+func (r *EthDetailTxInputRepository) UpdateTxTypeBySentHashTx(txType tx.TxType, sentHashTx string) (int64, error) {
+	ctx := context.Background()
+
+	// Set updating columns
+	updCols := map[string]interface{}{
+		models.EthDetailTXColumns.CurrentTXType: txType.Int8(),
+	}
+	return models.EthDetailTxes(
+		qm.Where("sent_hash_tx=?", sentHashTx),
 	).UpdateAll(ctx, r.dbConn, updCols)
 }

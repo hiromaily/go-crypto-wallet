@@ -48,16 +48,12 @@ type BitcoinFee struct {
 
 // Ethereum Ethereum information
 type Ethereum struct {
-	Host        string `toml:"host" validate:"required"`
-	Port        int    `toml:"port" validate:"required"`
-	DisableTLS  bool   `toml:"disable_tls"`
-	NetworkType string `toml:"network_type" validate:"oneof=mainnet goerli rinkeby ropsten"`
-	Geth        Geth   `toml:"geth"`
-}
-
-// Geth geth info
-type Geth struct {
-	KeyDirName string `toml:"keydir"`
+	Host            string `toml:"host" validate:"required"`
+	Port            int    `toml:"port" validate:"required"`
+	DisableTLS      bool   `toml:"disable_tls"`
+	NetworkType     string `toml:"network_type" validate:"oneof=mainnet goerli rinkeby ropsten"`
+	KeyDirName      string `toml:"keydir"`
+	ConfirmationNum uint64 `toml:"confirmation_num"`
 }
 
 // Logger logger info

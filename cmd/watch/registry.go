@@ -189,6 +189,10 @@ func (r *registry) newTxMonitorer() service.TxMonitorer {
 }
 
 func (r *registry) newETHTxMonitorer() service.TxMonitorer {
+	if r.conf.Ethereum.ConfirmationNum == 0 {
+		panic("confirmation_num of ethereum in config is required")
+	}
+
 	return ethsrv.NewTxMonitor(
 		r.newETH(),
 		r.newLogger(),
@@ -196,6 +200,7 @@ func (r *registry) newETHTxMonitorer() service.TxMonitorer {
 		r.newETHTxRepo(),
 		r.newETHTxDetailRepo(),
 		r.newPaymentRequestRepo(),
+		r.conf.Ethereum.ConfirmationNum,
 		r.walletType,
 	)
 }

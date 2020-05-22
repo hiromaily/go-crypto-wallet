@@ -130,7 +130,7 @@ func (r *BTCTxRepository) GetSentHashTx(actionType action.ActionType, txType tx.
 		qm.And("current_tx_type=?", txType.Int8()),
 	).All(ctx, r.dbConn)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call models.Txes().One()")
+		return nil, errors.Wrap(err, "failed to call models.BTCTxes().All()")
 	}
 
 	hashes := make([]string, 0, len(txItems))

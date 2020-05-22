@@ -5,10 +5,9 @@ host = "192.168.10.101"
 port = 8545
 disable_tls = true
 network_type = "goerli" # mainnet, goerli, rinkeby, ropsten
-
-[ethereum.geth]
-#keydir = "./data/keystore"
-keydir = "/Users/hy/Library/Ethereum/goerli/keystore"
+keydir = "./data/keystore"
+#keydir = "/Users/hy/Library/Ethereum/goerli/keystore"
+#keydir = "" # docker: /root/.ethereum/goerli + /keystore
 
 [logger]
 service = "eth-sign"

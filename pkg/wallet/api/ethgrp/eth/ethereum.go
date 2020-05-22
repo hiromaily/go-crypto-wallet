@@ -43,7 +43,7 @@ func NewEthereum(
 		coinTypeCode: coinTypeCode,
 		logger:       logger,
 		ctx:          ctx,
-		keyDir:       conf.Geth.KeyDirName,
+		keyDir:       conf.KeyDirName,
 	}
 
 	// key dir

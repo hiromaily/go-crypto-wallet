@@ -73,7 +73,7 @@ func (w *ETHWatch) CreateTransferTx(sender, receiver account.AccountType, floatA
 
 // UpdateTxStatus updates transaction status
 func (w *ETHWatch) UpdateTxStatus() error {
-	w.logger.Warn("not implemented yet in ETH")
+	//w.logger.Warn("not implemented yet in ETH")
 	return w.TxMonitorer.UpdateTxStatus()
 }
 
