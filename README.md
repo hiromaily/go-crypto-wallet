@@ -265,10 +265,10 @@ watch send -file xxx.csv
 - [x] Exporting addresses to watch wallet
 - [x] Importing exported address in watch wallet
 - [x] Creating unsigned raw transaction for deposit
-- [ ] Creating unsigned raw transaction for payment
-- [ ] Creating unsigned raw transaction for transfer
-- [ ] Signing on unsigned raw transaction
-- [ ] Sending signed transaction
+- [x] Creating unsigned raw transaction for payment
+- [x] Creating unsigned raw transaction for transfer
+- [x] Signing on unsigned raw transaction
+- [x] Sending signed transaction
 - [ ] Transaction monitoring
 - [ ] Any functionalities work with both [Go Ethereum](https://github.com/ethereum/go-ethereum) and [Parity](https://www.parity.io/ethereum/)
 - [ ] How to manage password for private key
