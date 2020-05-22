@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
+	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
@@ -282,6 +283,23 @@ func (t *TxMonitor) updateTxTypeNotified(id int64, actionType action.ActionType)
 
 // MonitorBalance monitors balances
 func (t *TxMonitor) MonitorBalance() error {
-	//TODO: implement
+	targetAccounts := []account.AccountType{
+		account.AccountTypeClient,
+		account.AccountTypeDeposit,
+		account.AccountTypePayment,
+		account.AccountTypeStored,
+	}
+
+	for _, acnt := range targetAccounts {
+		total, err := t.btc.GetBalanceByAccount(acnt)
+		if err != nil {
+			return errors.Wrap(err, "fail to call btc.GetBalanceByAccount()")
+		}
+		t.logger.Info("total balance",
+			zap.String("account", acnt.String()),
+			zap.String("balance", total.String()),
+		)
+	}
+
 	return nil
 }
