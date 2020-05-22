@@ -29,25 +29,29 @@ type RawTx struct {
 }
 
 // TODO: WIP: logic is not fixed, it looks same
-func (e *Ethereum) getNonce(fromAddr string) (uint64, error) {
+// when creating multiple transaction from same address, nonce should be increased
+func (e *Ethereum) getNonce(fromAddr string, additionalNonce int) (uint64, error) {
 	// by calling GetTransactionCount()
-	nonce1, err := e.GetTransactionCount(fromAddr, QuantityTagPending)
+	nonce, err := e.GetTransactionCount(fromAddr, QuantityTagPending)
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call eth.GetTransactionCount()")
 	}
 
-	// Or by calling
-	nonce2, err := e.ethClient.PendingNonceAt(e.ctx, common.HexToAddress(fromAddr))
-	if err != nil {
-		return 0, errors.Wrap(err, "fail to call ethClient.PendingNonceAt()")
-	}
+	// result is same
+	//nonce2, err := e.ethClient.PendingNonceAt(e.ctx, common.HexToAddress(fromAddr))
+	//if err != nil {
+	//	return 0, errors.Wrap(err, "fail to call ethClient.PendingNonceAt()")
+	//}
 
+	if additionalNonce != 0 {
+		nonce = nonce.Add(nonce, new(big.Int).SetUint64(uint64(additionalNonce)))
+	}
 	e.logger.Debug("nonce",
-		zap.Uint64("GetTransactionCount(fromAddr, QuantityTagLatest)", nonce1.Uint64()),
-		zap.Uint64("ethClient.PendingNonceAt(e.ctx, common.HexToAddress(fromAddr))", nonce2),
+		zap.Uint64("GetTransactionCount(fromAddr, QuantityTagLatest)", nonce.Uint64()),
+		//zap.Uint64("ethClient.PendingNonceAt(e.ctx, common.HexToAddress(fromAddr))", nonce2),
 	)
 
-	return nonce2, nil
+	return nonce.Uint64(), nil
 }
 
 // How to calculate transaction fee?
@@ -97,7 +101,7 @@ func (e *Ethereum) calculateFee(fromAddr, toAddr common.Address, balance, gasPri
 // Note: sender acocunt takes fee
 // - if sender sends 5ETH, receiver receives 5ETH
 // - sender has to pay 5ETH + fee
-func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64) (*RawTx, *models.EthDetailTX, error) {
+func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64, additionalNonce int) (*RawTx, *models.EthDetailTX, error) {
 	// validation check
 	if e.ValidationAddr(fromAddr) != nil || e.ValidationAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
@@ -120,7 +124,7 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64) 
 	}
 
 	// nonce
-	nonce, err := e.getNonce(fromAddr)
+	nonce, err := e.getNonce(fromAddr, additionalNonce)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "fail to call eth.GetTransactionCount()")
 	}

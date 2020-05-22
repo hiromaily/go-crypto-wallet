@@ -56,12 +56,14 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	// create raw transaction each address
 	serializedTxs := make([]string, 0, len(userPayments))
 	txDetailItems := make([]*models.EthDetailTX, 0, len(userPayments))
+	additionalNonce := 0
 	for _, userPayment := range userPayments {
 		// call CreateRawTransaction
-		rawTx, txDetailItem, err := t.eth.CreateRawTransaction(addrItem.WalletAddress, userPayment.receiverAddr, userPayment.amount.Uint64())
+		rawTx, txDetailItem, err := t.eth.CreateRawTransaction(addrItem.WalletAddress, userPayment.receiverAddr, userPayment.amount.Uint64(), additionalNonce)
 		if err != nil {
 			return "", "", errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s", addrItem.WalletAddress)
 		}
+		additionalNonce++
 
 		rawTxHex := rawTx.TxHex
 		t.logger.Debug("rawTxHex", zap.String("rawTxHex", rawTxHex))

@@ -1,7 +1,6 @@
 package watchsrv
 
 import (
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp/eth"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -9,6 +8,7 @@ import (
 	"github.com/hiromaily/go-bitcoin/pkg/action"
 	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
 	"github.com/hiromaily/go-bitcoin/pkg/serial"
+	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp/eth"
 )
 
 // CreateTransferTx create unsigned tx for transfer coin among internal account except client, authorization
@@ -59,7 +59,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	//txDetailItems := make([]*models.EthDetailTX, 0, 1)
 
 	// call CreateRawTransaction
-	rawTx, txDetailItem, err := t.eth.CreateRawTransaction(senderAddr.WalletAddress, receiverAddr.WalletAddress, requiredValue.Uint64())
+	rawTx, txDetailItem, err := t.eth.CreateRawTransaction(senderAddr.WalletAddress, receiverAddr.WalletAddress, requiredValue.Uint64(), 0)
 	if err != nil {
 		return "", "", errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s", senderAddr.WalletAddress)
 	}

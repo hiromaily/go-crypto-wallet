@@ -67,7 +67,7 @@ func TestCreateRawTransaction(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			rawTx, txDetail, err := et.CreateRawTransaction(tt.args.senderAddr, tt.args.receiverAddr, tt.args.amount)
+			rawTx, txDetail, err := et.CreateRawTransaction(tt.args.senderAddr, tt.args.receiverAddr, tt.args.amount, 0)
 			if (err == nil) == tt.want.isErr {
 				t.Errorf("CreateRawTransaction() = %v, want error = %v", err, tt.want.isErr)
 				return
@@ -133,7 +133,7 @@ func TestSignAndSendRawTransaction(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// create raw transaction
-			rawTx, _, err := et.CreateRawTransaction(tt.args.senderAddr, tt.args.receiverAddr, tt.args.amount)
+			rawTx, _, err := et.CreateRawTransaction(tt.args.senderAddr, tt.args.receiverAddr, tt.args.amount, 0)
 			if err != nil {
 				t.Fatal(err)
 			}
