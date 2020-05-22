@@ -4,11 +4,11 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
-	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/action"
-	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
-	"github.com/hiromaily/go-bitcoin/pkg/serial"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp/eth"
+	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 )
 
 // CreateTransferTx create unsigned tx for transfer coin among internal account except client, authorization

@@ -5,12 +5,12 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/hiromaily/go-bitcoin/pkg/account"
-	wtype "github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/service/eth/watchsrv"
+	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	wtype "github.com/hiromaily/go-crypto-wallet/pkg/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/watchsrv"
 )
 
 // ETHWatch watch only wallet object

@@ -3,17 +3,17 @@ package wallet
 import (
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/command"
-	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/api/btc"
-	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/api/eth"
-	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/create"
-	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/db"
-	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/imports"
-	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/monitor"
-	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/send"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/btcwallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/ethwallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/wallet/api/btc"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/wallet/api/eth"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/wallet/create"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/wallet/db"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/wallet/imports"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/wallet/monitor"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/wallet/send"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"
 )
 
 // WalletSubCommands returns subcommand for wallet

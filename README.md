@@ -1,14 +1,13 @@
-# go-bitcoin / go-ethereum
+# go-crypto-wallet
 
-<img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-bitcoin/master/images/ethereum-img.png??raw=true">
-<img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-bitcoin/master/images/bitcoin-img.svg?sanitize=true">
+<img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/images/ethereum-img.png??raw=true">
+<img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/images/bitcoin-img.svg?sanitize=true">
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/hiromaily/go-bitcoin)](https://goreportcard.com/report/github.com/hiromaily/go-bitcoin)
+[![Go Report Card](https://goreportcard.com/badge/github.com/hiromaily/go-crypto-wallet)](https://goreportcard.com/report/github.com/hiromaily/go-crypto-wallet)
 [![codebeat badge](https://codebeat.co/badges/792a7c07-2352-4b7e-8083-0a323368b26f)](https://codebeat.co/projects/github-com-hiromaily-go-bitcoin-master)
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://raw.githubusercontent.com/hiromaily/go-gin-wrapper/master/LICENSE)
 
 Wallet functionalities to create raw transaction, to sing on unsigned transaction, to send signed transaction for BTC, BCH, ETH and so on.   
-Currenc
 
 ## Notes
 Ethereum project is ongoing right now
@@ -62,13 +61,13 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 
 ## Workflow diagram
 ### 1. Generate keys
-![generate keys](https://raw.githubusercontent.com/hiromaily/go-bitcoin/master/images/0_key%20generation%20diagram.png?raw=true)
+![generate keys](https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/images/0_key%20generation%20diagram.png?raw=true)
 
 ### 2. Create unsigned transaction, Sign on unsigned tx, Send signed tx for non-multisig address.
-![create tx](https://raw.githubusercontent.com/hiromaily/go-bitcoin/master/images/1_Handle%20transactions%20for%20non-multisig%20address.png?raw=true)
+![create tx](https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/images/1_Handle%20transactions%20for%20non-multisig%20address.png?raw=true)
 
 ### 3. Create unsigned transaction, Sign on unsigned tx, Send signed tx for multisig address.
-![create tx for multisig](https://raw.githubusercontent.com/hiromaily/go-bitcoin/master/images/2_Handle%20transactions%20for%20multisig%20address.png?raw=true)
+![create tx for multisig](https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/images/2_Handle%20transactions%20for%20multisig%20address.png?raw=true)
 
 
 ## Requirements
@@ -120,16 +119,16 @@ go build -ldflags "-X main.authName=auth5" -i -v -o ${GOPATH}/bin/sign5 ./cmd/si
 ```
 
 ### Configuration
-- [watch.toml](https://github.com/hiromaily/go-bitcoin/blob/master/data/config/watch.toml)
-- [keygen.toml](https://github.com/hiromaily/go-bitcoin/blob/master/data/config/keygen.toml)
-- [sign.toml](https://github.com/hiromaily/go-bitcoin/blob/master/data/config/sign.toml)
+- [watch.toml](https://github.com/hiromaily/go-crypto-wallet/blob/master/data/config/watch.toml)
+- [keygen.toml](https://github.com/hiromaily/go-crypto-wallet/blob/master/data/config/keygen.toml)
+- [sign.toml](https://github.com/hiromaily/go-crypto-wallet/blob/master/data/config/sign.toml)
 
 ## Example
-- [see scripts](https://github.com/hiromaily/go-bitcoin/tree/master/scripts/operation)
-- [see Makefile](https://github.com/hiromaily/go-bitcoin/blob/master/Makefile)
+- [see scripts](https://github.com/hiromaily/go-crypto-wallet/tree/master/scripts/operation)
+- [see Makefile](https://github.com/hiromaily/go-crypto-wallet/blob/master/Makefile)
 
 ### Setup for any keys
-- [see scripts](https://github.com/hiromaily/go-bitcoin/blob/master/scripts/operation/generate-key-local.sh)
+- [see scripts](https://github.com/hiromaily/go-crypto-wallet/blob/master/scripts/operation/generate-key-local.sh)
 
 Keygen wallet
 ```

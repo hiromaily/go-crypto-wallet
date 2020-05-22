@@ -6,7 +6,7 @@ import (
 	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 
-	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 )
 
 // GetBalance gets balance

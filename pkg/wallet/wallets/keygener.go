@@ -1,8 +1,8 @@
 package wallets
 
 import (
-	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
+	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
 
 // Keygener is for keygen wallet service interface

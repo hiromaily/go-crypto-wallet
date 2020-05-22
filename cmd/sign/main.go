@@ -8,12 +8,12 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/hiromaily/go-bitcoin/pkg/command"
-	"github.com/hiromaily/go-bitcoin/pkg/command/sign"
-	"github.com/hiromaily/go-bitcoin/pkg/config"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/sign"
+	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
 // sign wallet as cold wallet

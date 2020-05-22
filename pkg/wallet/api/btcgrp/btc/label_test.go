@@ -3,9 +3,9 @@ package btc_test
 import (
 	"testing"
 
-	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/testutil"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
+	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
 
 // TestSetLabel is test for SetLabel

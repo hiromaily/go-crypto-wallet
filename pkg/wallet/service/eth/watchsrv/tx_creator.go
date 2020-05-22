@@ -6,13 +6,13 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
-	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/action"
-	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
-	"github.com/hiromaily/go-bitcoin/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-bitcoin/pkg/tx"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
+	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 )
 
 // TxCreator is TxCreator interface

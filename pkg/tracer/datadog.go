@@ -7,7 +7,7 @@ import (
 	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/opentracer"
 	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 
-	"github.com/hiromaily/go-bitcoin/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 
 // TraceLog includes trace_id and span_id

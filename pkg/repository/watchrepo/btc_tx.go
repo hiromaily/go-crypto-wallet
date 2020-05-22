@@ -11,10 +11,10 @@ import (
 	"github.com/volatiletech/sqlboiler/queries/qm"
 	"go.uber.org/zap"
 
-	"github.com/hiromaily/go-bitcoin/pkg/action"
-	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
-	"github.com/hiromaily/go-bitcoin/pkg/tx"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // BTCTxRepositorier is BTCTxRepository interface

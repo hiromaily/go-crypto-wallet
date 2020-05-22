@@ -7,7 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 
-	"github.com/hiromaily/go-bitcoin/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 
 //sqlx

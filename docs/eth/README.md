@@ -46,7 +46,7 @@ $ geth --goerli --rpc --rpcaddr 0.0.0.0 --rpcapi admin,debug,web3,eth,txpool,net
 ```
 - set keystore directory
 ```
-#  --keystore ${HOME}/work/go/src/github.com/hiromaily/go-bitcoin/data/keystore
+#  --keystore ${HOME}/work/go/src/github.com/hiromaily/go-crypto-wallet/data/keystore
 ```
 - to use UnlockAccount()
 ```

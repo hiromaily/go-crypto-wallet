@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
-	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 )
 
 // ListUnspentResult is response type of PRC `listunspent`

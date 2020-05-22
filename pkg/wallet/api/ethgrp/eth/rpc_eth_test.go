@@ -3,8 +3,8 @@ package eth_test
 import (
 	"testing"
 
-	"github.com/hiromaily/go-bitcoin/pkg/testutil"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp/eth"
+	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 )
 
 // TestSyncing is test for Syncing

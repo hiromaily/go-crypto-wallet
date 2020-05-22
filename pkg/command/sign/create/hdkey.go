@@ -7,7 +7,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
 // HDKeyCommand hd key subcommand

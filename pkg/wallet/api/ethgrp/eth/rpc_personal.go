@@ -5,7 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 )
 
 // ImportRawKey Imports the given unencrypted private key (hex string) into the key store, encrypting it with the passphrase

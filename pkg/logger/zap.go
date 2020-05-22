@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/hiromaily/go-bitcoin/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 
 // LogEnv dev/prod/custom

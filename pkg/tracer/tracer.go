@@ -5,7 +5,7 @@ import (
 
 	"github.com/opentracing/opentracing-go"
 
-	"github.com/hiromaily/go-bitcoin/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 
 // NewTracer starts and returns a opentracing tracer

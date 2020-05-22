@@ -5,11 +5,11 @@ import (
 	"log"
 	"os"
 
-	"github.com/hiromaily/go-bitcoin/pkg/config"
-	"github.com/hiromaily/go-bitcoin/pkg/logger"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 var bc btcgrp.Bitcoiner
@@ -21,7 +21,7 @@ func GetBTC() btcgrp.Bitcoiner {
 		return bc
 	}
 
-	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-bitcoin", os.Getenv("GOPATH"))
+	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-crypto-wallet", os.Getenv("GOPATH"))
 	confPath := fmt.Sprintf("%s/data/config/btc_watch.toml", projPath)
 	conf, err := config.New(confPath, wallet.WalletTypeWatchOnly, coin.BTC)
 	if err != nil {

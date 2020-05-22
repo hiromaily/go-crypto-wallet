@@ -1,7 +1,7 @@
 package key
 
 import (
-	"github.com/hiromaily/go-bitcoin/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 )
 
 // Generator is key generator interface

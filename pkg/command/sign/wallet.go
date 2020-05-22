@@ -3,16 +3,16 @@ package sign
 import (
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/command"
-	"github.com/hiromaily/go-bitcoin/pkg/command/keygen/api/btc"
-	"github.com/hiromaily/go-bitcoin/pkg/command/sign/create"
-	"github.com/hiromaily/go-bitcoin/pkg/command/sign/export"
-	"github.com/hiromaily/go-bitcoin/pkg/command/sign/imports"
-	"github.com/hiromaily/go-bitcoin/pkg/command/sign/sign"
-	"github.com/hiromaily/go-bitcoin/pkg/command/wallet/api/eth"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/btcwallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/wallets/ethwallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/keygen/api/btc"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/sign/create"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/sign/export"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/sign/imports"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/sign/sign"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/wallet/api/eth"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"
 )
 
 // WalletSubCommands returns subcommand for signature

@@ -1,6 +1,6 @@
 package service
 
-import "github.com/hiromaily/go-bitcoin/pkg/account"
+import "github.com/hiromaily/go-crypto-wallet/pkg/account"
 
 // AddressImporter is AddressImporter interface (for now btc/bch only)
 type AddressImporter interface {

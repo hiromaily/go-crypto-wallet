@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/testutil"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp/eth"
+	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 )
 
 // TestCreateRawTransaction is test for CreateRawTransaction

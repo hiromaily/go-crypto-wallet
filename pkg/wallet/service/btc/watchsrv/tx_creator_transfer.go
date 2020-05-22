@@ -3,8 +3,8 @@ package watchsrv
 import (
 	"github.com/pkg/errors"
 
-	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/action"
+	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 )
 
 // CreateTransferTx create unsigned tx for transfer coin among internal account except client, authorization

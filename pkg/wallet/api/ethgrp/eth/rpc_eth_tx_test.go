@@ -5,7 +5,7 @@ import (
 
 	"github.com/bookerzzz/grok"
 
-	"github.com/hiromaily/go-bitcoin/pkg/testutil"
+	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
 // TestGetTransactionByHash is test for GetTransactionByHash

@@ -10,10 +10,10 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/p2p"
 
-	"github.com/hiromaily/go-bitcoin/pkg/account"
-	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp/eth"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // Ethereumer Ethereum Interface

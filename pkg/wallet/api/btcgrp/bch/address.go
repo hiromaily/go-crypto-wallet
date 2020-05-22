@@ -5,7 +5,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/btcgrp/btc"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/btc"
 )
 
 // GetAddressInfoResult is response type of RPC `getaddressinfo`

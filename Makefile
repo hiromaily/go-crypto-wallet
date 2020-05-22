@@ -56,7 +56,7 @@ generate-db-definition:
 	sqlboiler --wipe \
 	--templates ${GOPATH}/src/github.com/volatiletech/sqlboiler/templates,\
 	${GOPATH}/src/github.com/volatiletech/sqlboiler/templates_test,\
-	${GOPATH}/src/github.com/hiromaily/go-bitcoin/templates \
+	${GOPATH}/src/github.com/hiromaily/go-crypto-wallet/templates \
 	mysql
 
 .PHONY: sqlboiler
@@ -311,17 +311,17 @@ encrypt-wallets:
 #.PHONY: dump-wallet
 dump-wallet:
 	keygen api walletpassphrase -passphrase test
-	keygen api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-bitcoin/data/dump/keygen.bk
+	keygen api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-crypto-wallet/data/dump/keygen.bk
 	sign -wallet sign1 api walletpassphrase -passphrase test
-	sign -wallet sign1 api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-bitcoin/data/dump/sign1.bk
+	sign -wallet sign1 api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-crypto-wallet/data/dump/sign1.bk
 	sign2 -wallet sign2 api walletpassphrase -passphrase test
-	sign2 -wallet sign2 api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-bitcoin/data/dump/sign2.bk
+	sign2 -wallet sign2 api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-crypto-wallet/data/dump/sign2.bk
 	sign3 -wallet sign3 api walletpassphrase -passphrase test
-	sign3 -wallet sign3 api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-bitcoin/data/dump/sign3.bk
+	sign3 -wallet sign3 api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-crypto-wallet/data/dump/sign3.bk
 	sign4 -wallet sign4 api walletpassphrase -passphrase test
-	sign4 -wallet sign4 api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-bitcoin/data/dump/sign4.bk
+	sign4 -wallet sign4 api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-crypto-wallet/data/dump/sign4.bk
 	sign5 -wallet sign4 api walletpassphrase -passphrase test
-	sign5 -wallet sign4 api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-bitcoin/data/dump/sign5.bk
+	sign5 -wallet sign4 api dumpwallet -file ${GOPATH}/src/github.com/hiromaily/go-crypto-wallet/data/dump/sign5.bk
 	#bitcoin-cli -rpcwallet=watch dumpwallet "watch"
 	#bitcoin-cli -rpcwallet=keygen dumpwallet "keygen"
 	#bitcoin-cli -rpcwallet=sign dumpwallet "sign"
@@ -335,7 +335,7 @@ wallet-info:
 .PHONY: import-wallet
 import-wallet:
 	keygen api walletpassphrase -passphrase test
-	keygen api importwallet -file ${GOPATH}/src/github.com/hiromaily/go-bitcoin/data/dump/keygen.bk
+	keygen api importwallet -file ${GOPATH}/src/github.com/hiromaily/go-crypto-wallet/data/dump/keygen.bk
 
 ###############################################################################
 # Utility

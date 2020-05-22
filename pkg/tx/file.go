@@ -12,7 +12,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
-	"github.com/hiromaily/go-bitcoin/pkg/action"
+	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 )
 
 // FileRepositorier is file storager for tx info

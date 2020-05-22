@@ -9,7 +9,7 @@ import (
 	jaegerlog "github.com/uber/jaeger-client-go/log"
 	"github.com/uber/jaeger-lib/metrics"
 
-	"github.com/hiromaily/go-bitcoin/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 
 // StartJaegerTracer returns jaeger tracer

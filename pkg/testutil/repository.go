@@ -5,13 +5,13 @@ import (
 	"log"
 	"os"
 
-	"github.com/hiromaily/go-bitcoin/pkg/config"
-	mysql "github.com/hiromaily/go-bitcoin/pkg/db/rdb"
-	"github.com/hiromaily/go-bitcoin/pkg/logger"
-	"github.com/hiromaily/go-bitcoin/pkg/repository/coldrepo"
-	"github.com/hiromaily/go-bitcoin/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
+	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 var (
@@ -25,7 +25,7 @@ func NewTxRepository() watchrepo.BTCTxRepositorier {
 		return txRepo
 	}
 
-	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-bitcoin", os.Getenv("GOPATH"))
+	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-crypto-wallet", os.Getenv("GOPATH"))
 	confPath := fmt.Sprintf("%s/data/config/btc_watch.toml", projPath)
 	conf, err := config.New(confPath, wallet.WalletTypeWatchOnly, coin.BTC)
 	if err != nil {
@@ -52,7 +52,7 @@ func NewAccountKeyRepository() coldrepo.AccountKeyRepositorier {
 		return accountKeyRepo
 	}
 
-	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-bitcoin", os.Getenv("GOPATH"))
+	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-crypto-wallet", os.Getenv("GOPATH"))
 	confPath := fmt.Sprintf("%s/data/config/btc_watch.toml", projPath)
 	conf, err := config.New(confPath, wallet.WalletTypeWatchOnly, coin.BTC)
 	if err != nil {

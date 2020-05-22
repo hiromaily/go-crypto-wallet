@@ -5,9 +5,9 @@ import (
 
 	"go.uber.org/zap"
 
-	wtype "github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/key"
+	wtype "github.com/hiromaily/go-crypto-wallet/pkg/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
 
 // ETHSign keygen wallet object

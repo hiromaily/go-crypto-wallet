@@ -5,7 +5,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/params"
 
-	"github.com/hiromaily/go-bitcoin/pkg/testutil"
+	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
 // TestAddPeer is test for AddPeer

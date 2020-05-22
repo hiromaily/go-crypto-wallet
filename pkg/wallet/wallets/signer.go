@@ -1,6 +1,6 @@
 package wallets
 
-import "github.com/hiromaily/go-bitcoin/pkg/wallet/key"
+import "github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 
 // Signer is for signature wallet service interface
 type Signer interface {

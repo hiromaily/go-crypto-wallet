@@ -3,7 +3,7 @@ package eth_test
 import (
 	"testing"
 
-	"github.com/hiromaily/go-bitcoin/pkg/testutil"
+	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
 // TestBalanceAt is test for BalanceAt

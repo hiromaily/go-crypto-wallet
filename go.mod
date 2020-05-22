@@ -1,4 +1,4 @@
-module github.com/hiromaily/go-bitcoin
+module github.com/hiromaily/go-crypto-wallet
 
 go 1.14
 

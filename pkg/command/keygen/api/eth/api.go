@@ -6,8 +6,8 @@ import (
 
 	"github.com/mitchellh/cli"
 
-	"github.com/hiromaily/go-bitcoin/pkg/command"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 )
 
 // APICommand api subcommand

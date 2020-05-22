@@ -13,8 +13,8 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"go.uber.org/zap"
 
-	"github.com/hiromaily/go-bitcoin/pkg/account"
-	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 )
 
 // RawTx is raw transaction

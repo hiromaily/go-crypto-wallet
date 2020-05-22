@@ -1,8 +1,8 @@
 package watchsrv
 
 import (
-	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/action"
+	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 )
 
 // CreateDepositTx create unsigned tx if client accounts have coins

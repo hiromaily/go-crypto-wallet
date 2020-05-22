@@ -5,11 +5,11 @@ import (
 	"log"
 	"os"
 
-	"github.com/hiromaily/go-bitcoin/pkg/config"
-	"github.com/hiromaily/go-bitcoin/pkg/logger"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/api/ethgrp"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 var et ethgrp.Ethereumer
@@ -21,7 +21,7 @@ func GetETH() ethgrp.Ethereumer {
 		return et
 	}
 
-	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-bitcoin", os.Getenv("GOPATH"))
+	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-crypto-wallet", os.Getenv("GOPATH"))
 	confPath := fmt.Sprintf("%s/data/config/eth_watch.toml", projPath)
 	conf, err := config.New(confPath, wallet.WalletTypeWatchOnly, coin.ETH)
 	if err != nil {

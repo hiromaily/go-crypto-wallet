@@ -9,8 +9,8 @@ import (
 	"github.com/volatiletech/sqlboiler/queries/qm"
 	"go.uber.org/zap"
 
-	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
-	"github.com/hiromaily/go-bitcoin/pkg/wallet/coin"
+	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // TxInputRepositorier is TxInputRepository interface

@@ -7,10 +7,10 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/volatiletech/sqlboiler/types"
 
-	"github.com/hiromaily/go-bitcoin/pkg/action"
-	models "github.com/hiromaily/go-bitcoin/pkg/models/rdb"
-	"github.com/hiromaily/go-bitcoin/pkg/testutil"
-	"github.com/hiromaily/go-bitcoin/pkg/tx"
+	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
+	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 )
 
 // TestTx is test for any data operation

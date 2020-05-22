@@ -3,7 +3,7 @@ package btc_test
 import (
 	"testing"
 
-	"github.com/hiromaily/go-bitcoin/pkg/testutil"
+	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
 //TODO: mock of bitcoin interface is required to test

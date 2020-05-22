@@ -3,8 +3,8 @@ package btc_test
 import (
 	"testing"
 
-	"github.com/hiromaily/go-bitcoin/pkg/account"
-	"github.com/hiromaily/go-bitcoin/pkg/testutil"
+	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
 // TestListAccounts is test for ListAccounts
