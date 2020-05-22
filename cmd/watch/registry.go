@@ -197,9 +197,8 @@ func (r *registry) newETHTxMonitorer() service.TxMonitorer {
 		r.newETH(),
 		r.newLogger(),
 		r.newMySQLClient(),
-		r.newETHTxRepo(),
+		r.newAddressRepo(),
 		r.newETHTxDetailRepo(),
-		r.newPaymentRequestRepo(),
 		r.conf.Ethereum.ConfirmationNum,
 		r.walletType,
 	)
