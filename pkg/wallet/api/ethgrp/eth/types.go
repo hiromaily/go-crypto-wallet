@@ -79,7 +79,7 @@ func (c ChainID) String() string {
 // ClientVersion
 //----------------------------------------------------
 
-// ClientVersion Client(Node)のバージョンを返す
+// ClientVersion returns client version
 type ClientVersion string
 
 // client-version

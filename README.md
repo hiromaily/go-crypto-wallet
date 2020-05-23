@@ -8,8 +8,10 @@
 [![GitHub release](https://img.shields.io/badge/release-v3.0.0-blue.svg)](https://github.com/hiromaily/go-crypto-wallet/releases)
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://raw.githubusercontent.com/hiromaily/go-gin-wrapper/master/LICENSE)
 
-Wallet functionalities to create raw transaction, to sing on unsigned transaction, to send signed transaction for BTC, BCH, ETH and so on.   
+Wallet functionalities to create raw transaction, to sing on unsigned transaction, to send signed transaction for BTC, BCH, ETH and so on. XRP is coming soon.  
 
+## Note
+XRP project will start
 
 ## Expected use cases
 ### 1.Deposit functionality
@@ -268,8 +270,13 @@ watch send -file xxx.csv
 - [x] Signing on unsigned raw transaction
 - [x] Sending signed transaction
 - [x] Transaction monitoring
+- [ ] Make sure that `quantity-tag` is used properly. e.g. when getting balance, which quantity-tag should be used, latest or pending.
 - [ ] Any functionalities work with both [Go Ethereum](https://github.com/ethereum/go-ethereum) and [Parity](https://www.parity.io/ethereum/)
 - [ ] How to manage password for private key
+
+### For XRP
+- [ ] Understand XRP architecture first
+
 
 ## Project layout patterns
 - The `pkg` layout pattern, refer to the [linked](https://medium.com/golang-learn/go-project-layout-e5213cdcfaa2) URLs for details.
