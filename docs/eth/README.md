@@ -53,6 +53,12 @@ $ geth --goerli --rpc --rpcaddr 0.0.0.0 --rpcapi admin,debug,web3,eth,txpool,net
 # --allow-insecure-unlock
 ```
 
+### Using IPC
+```
+$ geth --goerli --ipcapi admin,debug,web3,eth,txpool,net,personal
+```
+
+
 # Rest API using [HTTPie](https://httpie.org/)
 $ http http://127.0.0.1:8545 method=web3_clientVersion params:='[]' id=67
  or

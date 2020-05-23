@@ -49,6 +49,7 @@ type BitcoinFee struct {
 // Ethereum Ethereum information
 type Ethereum struct {
 	Host            string `toml:"host" validate:"required"`
+	IPCPath         string `toml:"ipc_path"`
 	Port            int    `toml:"port" validate:"required"`
 	DisableTLS      bool   `toml:"disable_tls"`
 	NetworkType     string `toml:"network_type" validate:"oneof=mainnet goerli rinkeby ropsten"`

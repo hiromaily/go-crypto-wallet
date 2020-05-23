@@ -16,7 +16,11 @@ services:
     stdin_open: true
     tty: true
     command: --goerli --rpc --rpcaddr 0.0.0.0 --rpcapi admin,debug,web3,eth,txpool,net,personal
-    # docker-compose -f docker-compose.eth.yml exec eth-node sh
+    # Then
+    # $ docker-compose -f docker-compose.eth.yml exec eth-node sh
+    #  # geth attach ipc://root/.ethereum/goerli/geth.ipc
+    # or $ geth attach ./docker/nodes/eth/data/geth.ipc
+    #      => Unable to attach to remote geth: dial unix ./docker/nodes/eth/data/geth.ipc: connect: connection refused
 
   #########################################################################
   # parity
