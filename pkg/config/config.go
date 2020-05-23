@@ -67,7 +67,7 @@ func (c *Config) validate(wtype wallet.WalletType, coinTypeCode coin.CoinTypeCod
 		//	"SubIgnore",
 		//	"Anonymous.A",
 		//}
-		if err := validate.StructExcept(c, "Ethereum"); err != nil {
+		if err := validate.StructExcept(c, "Ethereum", "Ripple"); err != nil {
 			return err
 		}
 		switch wtype {
@@ -78,7 +78,11 @@ func (c *Config) validate(wtype wallet.WalletType, coinTypeCode coin.CoinTypeCod
 		default:
 		}
 	case coin.ETH:
-		if err := validate.StructExcept(c, "AddressType", "Bitcoin"); err != nil {
+		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ripple"); err != nil {
+			return err
+		}
+	case coin.XRP:
+		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ethereum"); err != nil {
 			return err
 		}
 	default:

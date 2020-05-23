@@ -154,7 +154,7 @@ DROP TABLE IF EXISTS `payment_request`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `payment_request` (
   `id`                BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `coin`              ENUM('btc', 'bch', 'eth') NOT NULL COMMENT'coin type code',
+  `coin`              ENUM('btc', 'bch', 'eth', 'xrp') NOT NULL COMMENT'coin type code',
   `payment_id`        BIGINT(20) DEFAULT NULL COMMENT'tx table ID for payment action',
   `sender_address`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'sender address',
   `sender_account`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'sender account',
@@ -188,7 +188,7 @@ DROP TABLE IF EXISTS `address`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `address` (
   `id`                BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `coin`              ENUM('btc', 'bch', 'eth') NOT NULL COMMENT'coin type code',
+  `coin`              ENUM('btc', 'bch', 'eth', 'xrp') NOT NULL COMMENT'coin type code',
   `account`           ENUM('client', 'deposit', 'payment', 'stored') NOT NULL COMMENT'account type',
   `wallet_address`    VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'wallet address',
   `is_allocated`      BOOL NOT NULL DEFAULT false COMMENT'true: address is allocated(used)',

@@ -1,0 +1,31 @@
+[ripple]
+dummy = 1
+
+[logger]
+service = "xrp-wallet"
+env = "custom" # dev, prod, custom :for only zap logger
+level = "debug" # debug, info, warn, error
+is_stacktrace = true
+
+# only available for watch only wallet
+[tracer]
+type = "none"  # none, jaeger, datadog
+
+[tracer.jaeger]
+service_name = "xrp-wallet"
+collector_endpoint = "http://127.0.0.1:14268/api/traces"
+sampling_probability = 0.5  # 0.001 to 1.0
+
+[mysql]
+#host = "192.168.10.101:3307"
+host = "127.0.0.1:3307"
+dbname = "watch"
+user = "hiromaily"
+pass = "hiromaily"
+debug = true
+
+[file_path]
+tx = "./data/tx/xrp/"
+address = "./data/address/xrp/"
+full_pubkey = "./data/fullpubkey/xrp/"
+

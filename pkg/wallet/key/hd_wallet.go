@@ -199,7 +199,7 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 				RedeemScript:   redeemScript,
 			}
 
-		case coin.ETH:
+		case coin.ETH, coin.XRP:
 			ethAddr, ethPubKey, ethPrivKey, err := k.ethAddrs(privateKey)
 			if err != nil {
 				return nil, err

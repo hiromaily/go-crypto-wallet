@@ -44,7 +44,7 @@ func main() {
 	)
 	flags := flag.NewFlagSet("main", flag.ContinueOnError)
 	flags.StringVar(&confPath, "conf", "", "config file path")
-	flags.StringVar(&coinTypeCode, "coin", "btc", "coin type code `btc`, `bch`, `eth`")
+	flags.StringVar(&coinTypeCode, "coin", "btc", "coin type code `btc`, `bch`, `eth`, `xrp`")
 	flags.StringVar(&btcWallet, "wallet", "", "specify wallet.dat in bitcoin core")
 	flags.BoolVar(&isVersion, "version", false, "show version")
 	flags.BoolVar(&isHelp, "help", false, "show help")
@@ -72,6 +72,8 @@ func main() {
 			confPath = os.Getenv("BCH_KEYGEN_WALLET_CONF")
 		case coin.ETH.String():
 			confPath = os.Getenv("ETH_KEYGEN_WALLET_CONF")
+		case coin.XRP.String():
+			confPath = os.Getenv("XRP_KEYGEN_WALLET_CONF")
 		}
 	}
 

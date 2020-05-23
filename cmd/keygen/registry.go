@@ -19,6 +19,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
@@ -29,6 +30,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/xrpwallet"
 )
 
 // Registry is for registry interface
@@ -42,6 +44,7 @@ type registry struct {
 	logger       *zap.Logger
 	btc          btcgrp.Bitcoiner
 	eth          ethgrp.Ethereumer
+	xrp          xrpgrp.Rippler
 	rpcClient    *rpcclient.Client
 	rpcEthClient *ethrpc.Client
 	mysqlClient  *sql.DB
@@ -66,6 +69,8 @@ func (r *registry) NewKeygener() wallets.Keygener {
 		return r.newBTCKeygener()
 	case coin.ETH:
 		return r.newETHKeygener()
+	case coin.XRP:
+		return r.newXRPKeygener()
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
 	}
@@ -98,6 +103,18 @@ func (r *registry) newETHKeygener() wallets.Keygener {
 		r.newPrivKeyer(),
 		r.newAddressExporter(),
 		r.newETHSigner(),
+	)
+}
+
+func (r *registry) newXRPKeygener() wallets.Keygener {
+	return xrpwallet.NewXRPKeygen(
+		r.newXRP(),
+		r.newMySQLClient(),
+		r.newLogger(),
+		r.walletType,
+		r.newSeeder(),
+		r.newHdWallter(),
+		r.newAddressExporter(),
 	)
 }
 
@@ -250,6 +267,21 @@ func (r *registry) newETH() ethgrp.Ethereumer {
 	return r.eth
 }
 
+func (r *registry) newXRP() xrpgrp.Rippler {
+	if r.xrp == nil {
+		var err error
+		r.xrp, err = xrpgrp.NewRipple(
+			&r.conf.Ripple,
+			r.newLogger(),
+			r.conf.CoinTypeCode,
+		)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return r.xrp
+}
+
 func (r *registry) newLogger() *zap.Logger {
 	if r.logger == nil {
 		r.logger = logger.NewZapLogger(&r.conf.Logger)
@@ -297,6 +329,8 @@ func (r *registry) newKeyGenerator() key.Generator {
 		chainConf = r.newBTC().GetChainConf()
 	case coin.ETH:
 		chainConf = r.newETH().GetChainConf()
+	case coin.XRP:
+		chainConf = r.newXRP().GetChainConf()
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
 	}

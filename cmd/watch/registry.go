@@ -20,6 +20,7 @@ import (
 	wtype "github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/watchsrv"
@@ -27,6 +28,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/xrpwallet"
 )
 
 // Registry is for registry interface
@@ -40,6 +42,7 @@ type registry struct {
 	logger       *zap.Logger
 	btc          btcgrp.Bitcoiner
 	eth          ethgrp.Ethereumer
+	xrp          xrpgrp.Rippler
 	rpcClient    *rpcclient.Client
 	rpcEthClient *ethrpc.Client
 	mysqlClient  *sql.DB
@@ -60,6 +63,8 @@ func (r *registry) NewWalleter() wallets.Watcher {
 		return r.newBTCWalleter()
 	case coin.ETH:
 		return r.newETHWalleter()
+	case coin.XRP:
+		return r.newXRPWalleter()
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
 	}
@@ -91,6 +96,15 @@ func (r *registry) newETHWalleter() wallets.Watcher {
 		r.newETHTxSender(),
 		r.newETHTxMonitorer(),
 		r.newETHPaymentRequestCreator(),
+		r.walletType,
+	)
+}
+
+func (r *registry) newXRPWalleter() wallets.Watcher {
+	return xrpwallet.NewXRPWatch(
+		r.newXRP(),
+		r.newMySQLClient(),
+		r.newLogger(),
 		r.walletType,
 	)
 }
@@ -278,6 +292,21 @@ func (r *registry) newETH() ethgrp.Ethereumer {
 		}
 	}
 	return r.eth
+}
+
+func (r *registry) newXRP() xrpgrp.Rippler {
+	if r.xrp == nil {
+		var err error
+		r.xrp, err = xrpgrp.NewRipple(
+			&r.conf.Ripple,
+			r.newLogger(),
+			r.conf.CoinTypeCode,
+		)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return r.xrp
 }
 
 func (r *registry) newLogger() *zap.Logger {

@@ -1,0 +1,25 @@
+[ripple]
+dummy = 1
+
+[logger]
+service = "xrp-keygen"
+env = "custom" # dev, prod, custom :for only zap logger
+level = "debug" # debug, info, warn, error
+is_stacktrace = true
+
+# only available for watch only wallet
+[tracer]
+type = "none"  # none, jaeger, datadog
+
+[mysql]
+#host = "192.168.10.101:3308"
+host = "127.0.0.1:3308"
+dbname = "keygen"
+user = "hiromaily"
+pass = "hiromaily"
+debug = true
+
+[file_path]
+tx = "./data/tx/xrp/"
+address = "./data/address/xrp/"
+full_pubkey = "./data/fullpubkey/xrp/"

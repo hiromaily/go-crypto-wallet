@@ -14,6 +14,7 @@ type Config struct {
 	CoinTypeCode coin.CoinTypeCode `toml:"coin_type"`
 	Bitcoin      Bitcoin           `toml:"bitcoin"`
 	Ethereum     Ethereum          `toml:"ethereum"`
+	Ripple       Ripple            `toml:"ripple"`
 	Logger       Logger            `toml:"logger"`
 	Tracer       Tracer            `toml:"tracer"`
 	MySQL        MySQL             `toml:"mysql"`
@@ -55,6 +56,11 @@ type Ethereum struct {
 	NetworkType     string `toml:"network_type" validate:"oneof=mainnet goerli rinkeby ropsten"`
 	KeyDirName      string `toml:"keydir"`
 	ConfirmationNum uint64 `toml:"confirmation_num"`
+}
+
+// Ripple information
+type Ripple struct {
+	Dummy int `toml:"dummy"`
 }
 
 // Logger logger info
