@@ -14,7 +14,9 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/pkg/errors"
+	rcrypto "github.com/rubblelabs/ripple/crypto"
 	"go.uber.org/zap"
+	"golang.org/x/crypto/ripemd160"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -199,8 +201,22 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 				RedeemScript:   redeemScript,
 			}
 
-		case coin.ETH, coin.XRP:
+		case coin.ETH:
 			ethAddr, ethPubKey, ethPrivKey, err := k.ethAddrs(privateKey)
+			if err != nil {
+				return nil, err
+			}
+
+			walletKeys[i] = WalletKey{
+				WIF:            ethPrivKey,
+				P2PKHAddr:      ethAddr,
+				P2SHSegWitAddr: "",
+				Bech32Addr:     "",
+				FullPubKey:     ethPubKey,
+				RedeemScript:   "",
+			}
+		case coin.XRP:
+			ethAddr, ethPubKey, ethPrivKey, err := k.xrpAddrs(privateKey)
 			if err != nil {
 				return nil, err
 			}
@@ -269,6 +285,35 @@ func (k *HDKey) ethAddrs(privKey *btcec.PrivateKey) (string, string, string, err
 	address := crypto.PubkeyToAddress(*pubkeyECDSA).Hex()
 
 	return address, ethHexPubKey, ethHexPrivKey, nil
+}
+
+func (k *HDKey) xrpAddrs(privKey *btcec.PrivateKey) (string, string, string, error) {
+	// private key (same as ethereum for now)
+	xrpPrivKey := privKey.ToECDSA()
+	xrpHexPrivKey := hexutil.Encode(crypto.FromECDSA(xrpPrivKey))
+
+	serializedPubKey := privKey.PubKey().SerializeCompressed()
+	pubKeyHash := rcrypto.Sha256RipeMD160(serializedPubKey)
+	if len(pubKeyHash) != ripemd160.Size {
+		return "", "", "", errors.New("pubKeyHash must be 20 bytes")
+	}
+	// address
+	address, err := rcrypto.NewAccountId(pubKeyHash)
+	if err != nil {
+		return "", "", "", errors.Wrap(err, "fail to call rcrypto.NewAccountId()")
+	}
+	// publicKey
+	publicKey, err := rcrypto.NewAccountPublicKey(pubKeyHash)
+	if err != nil {
+		return "", "", "", errors.Wrap(err, "fail to call rcrypto.NewAccountPublicKey()")
+	}
+	// private key
+	//xPrivKey, err := rcrypto.NewAccountPrivateKey(pubKeyHash)
+	//if err != nil {
+	//	return "", "", "", errors.Wrap(err, "fail to call rcrypto.NewAccountPrivateKey()")
+	//}
+
+	return address.String(), publicKey.String(), xrpHexPrivKey, nil
 }
 
 // get Address(P2PKH) as string for BTC/BCH

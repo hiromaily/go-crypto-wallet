@@ -7,3 +7,6 @@
     - [Xpring Engineering](https://github.com/xpring-eng)
 - [XRP LEDGER](https://xrpl.org/)
     - [Tutorial](https://xrpl.org/tutorials.html)
+
+- [Awesome Ripple](https://github.com/vhpoet/awesome-ripple)
+    - [rubblelabs/ripple](https://github.com/rubblelabs/ripple)

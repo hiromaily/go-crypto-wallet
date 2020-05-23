@@ -40,6 +40,7 @@ require (
 	github.com/posener/complete v1.2.3 // indirect
 	github.com/prometheus/tsdb v0.7.1 // indirect
 	github.com/rjeczalik/notify v0.9.2 // indirect
+	github.com/rubblelabs/ripple v0.0.0-20200519102443-e15c7b29cbd7
 	github.com/satori/go.uuid v1.2.0
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/tinylib/msgp v1.1.2 // indirect
@@ -49,7 +50,7 @@ require (
 	github.com/volatiletech/null v8.0.0+incompatible
 	github.com/volatiletech/sqlboiler v3.7.1+incompatible
 	go.uber.org/zap v1.15.0
-	golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79 // indirect
+	golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
 	golang.org/x/net v0.0.0-20200506145744-7e3656a0809f // indirect
 	golang.org/x/sys v0.0.0-20200509044756-6aff5f38e54f // indirect
