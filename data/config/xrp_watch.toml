@@ -1,5 +1,8 @@
 [ripple]
-dummy = 1
+# https://xrpl.org/get-started-with-the-rippled-api.html
+websocket_url = "wss://s.altnet.rippletest.net:51233/"
+jsonrpc_url = "https://s.altnet.rippletest.net:51234/"
+network_type = "testnet" # mainnet, testnet, devnet
 
 [logger]
 service = "xrp-wallet"

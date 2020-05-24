@@ -30,6 +30,7 @@ require (
 	github.com/huin/goupnp v1.0.0 // indirect
 	github.com/jackpal/go-nat-pmp v1.0.2 // indirect
 	github.com/jmoiron/sqlx v1.2.0
+	github.com/juju/testing v0.0.0-20200510222523-6c8c298c77a0 // indirect
 	github.com/lib/pq v1.5.2 // indirect
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/mitchellh/cli v1.1.1
@@ -49,6 +50,7 @@ require (
 	github.com/volatiletech/inflect v0.0.1 // indirect
 	github.com/volatiletech/null v8.0.0+incompatible
 	github.com/volatiletech/sqlboiler v3.7.1+incompatible
+	github.com/willf/bitset v1.1.10 // indirect
 	go.uber.org/zap v1.15.0
 	golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
@@ -58,4 +60,5 @@ require (
 	golang.org/x/tools v0.0.0-20200520220537-cf2d1e09c845 // indirect
 	gopkg.in/DataDog/dd-trace-go.v1 v1.23.2
 	honnef.co/go/tools v0.0.1-2020.1.3 // indirect
+	nhooyr.io/websocket v1.8.6
 )

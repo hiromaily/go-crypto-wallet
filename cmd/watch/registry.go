@@ -7,6 +7,7 @@ import (
 	"github.com/btcsuite/btcd/rpcclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/opentracing/opentracing-go"
+	"github.com/rubblelabs/ripple/websockets"
 	"github.com/volatiletech/sqlboiler/boil"
 	"go.uber.org/zap"
 
@@ -29,6 +30,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/xrpwallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/ws"
 )
 
 // Registry is for registry interface
@@ -45,6 +47,8 @@ type registry struct {
 	xrp          xrpgrp.Rippler
 	rpcClient    *rpcclient.Client
 	rpcEthClient *ethrpc.Client
+	wsXrpClient  *ws.WS
+	wsXrpRemote  *websockets.Remote
 	mysqlClient  *sql.DB
 }
 
@@ -294,10 +298,34 @@ func (r *registry) newETH() ethgrp.Ethereumer {
 	return r.eth
 }
 
+func (r *registry) newXRPWSClient() *ws.WS {
+	if r.wsXrpClient == nil {
+		var err error
+		r.wsXrpClient, err = xrpgrp.NewWSClient(&r.conf.Ripple)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return r.wsXrpClient
+}
+
+func (r *registry) newXRPWSRemote() *websockets.Remote {
+	if r.wsXrpRemote == nil {
+		var err error
+		r.wsXrpRemote, err = xrpgrp.NewWSRemote(&r.conf.Ripple)
+		if err != nil {
+			panic(err)
+		}
+	}
+	return r.wsXrpRemote
+}
+
 func (r *registry) newXRP() xrpgrp.Rippler {
 	if r.xrp == nil {
 		var err error
 		r.xrp, err = xrpgrp.NewRipple(
+			r.newXRPWSClient(),
+			r.newXRPWSRemote(),
 			&r.conf.Ripple,
 			r.newLogger(),
 			r.conf.CoinTypeCode,
