@@ -21,7 +21,7 @@ func NewWSClient(conf *config.Ripple) (*ws.WS, error) {
 			return nil, errors.New("websocket URL is not found")
 		}
 	}
-	return ws.New(context.Background(), url), nil
+	return ws.New(context.Background(), url)
 }
 
 // NewWSRemote try to connect Ripple Server by web socket

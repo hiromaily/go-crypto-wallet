@@ -50,6 +50,9 @@ func NewRipple(
 
 // Close disconnect to server
 func (r *Ripple) Close() {
+	if r.wsClient != nil {
+		r.wsClient.Close()
+	}
 	if r.wsRemote != nil {
 		r.wsRemote.Close()
 	}

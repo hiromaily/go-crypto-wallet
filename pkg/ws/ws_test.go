@@ -33,7 +33,10 @@ type ResponseAccountChannels struct {
 
 // TestCall is test for Call
 func TestCall(t *testing.T) {
-	websoc := ws.New(context.Background(), xrp.PublicWSServerTestnet.String())
+	websoc, err := ws.New(context.Background(), xrp.PublicWSServerTestnet.String())
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	ac := AccountChannels{
 		ID:                 1,
@@ -47,4 +50,6 @@ func TestCall(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log(res)
+
+	websoc.Close()
 }

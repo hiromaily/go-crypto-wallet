@@ -64,7 +64,7 @@ func (t CoinType) Uint32() uint32 {
 // https://github.com/satoshilabs/slips/blob/master/slip-0044.md
 
 // Account
-// account come from `AccountType` in go-bitcoin/pkg/account.go
+// account come from `AccountType` in go-bitcoin/pkg/method_account.go
 
 //ChangeType  external or internal use
 type ChangeType uint32

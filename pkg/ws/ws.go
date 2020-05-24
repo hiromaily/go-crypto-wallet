@@ -10,38 +10,35 @@ import (
 
 // WS websocket object
 type WS struct {
-	ctx context.Context
-	url string
+	conn *websocket.Conn
 }
 
 // New returns WS object
-func New(ctx context.Context, url string) *WS {
-	return &WS{
-		ctx: ctx,
-		url: url,
+func New(ctx context.Context, url string) (*WS, error) {
+	conn, _, err := websocket.Dial(ctx, url, nil)
+	if err != nil {
+		return nil, errors.Wrapf(err, "fail to call websocket.Dial() %s", url)
 	}
+
+	return &WS{
+		conn: conn,
+	}, nil
 }
 
 // Call calls request
 func (w *WS) Call(ctx context.Context, req, res interface{}) error {
-	if ctx == nil {
-		ctx = w.ctx
-	}
-	conn, _, err := websocket.Dial(ctx, w.url, nil)
-	if err != nil {
-		return errors.Wrapf(err, "fail to call websocket.Dial() %s", w.url)
-	}
-	defer conn.Close(websocket.StatusNormalClosure, "")
-
-	err = wsjson.Write(ctx, conn, req)
-	if err != nil {
+	if err := wsjson.Write(ctx, w.conn, req); err != nil {
 		return errors.Wrap(err, "fail to call wsjson.Write()")
 	}
 
-	//var res ResponseAccountChannels
-	if err = wsjson.Read(ctx, conn, res); err != nil {
+	if err := wsjson.Read(ctx, w.conn, res); err != nil {
 		return errors.Wrap(err, "fail to call wsjson.Read()")
 	}
 
 	return nil
+}
+
+// Close disconnects
+func (w *WS) Close() {
+	w.conn.Close(websocket.StatusNormalClosure, "")
 }
