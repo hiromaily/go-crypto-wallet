@@ -1,5 +1,8 @@
 [ripple]
-dummy = 1
+# https://xrpl.org/get-started-with-the-rippled-api.html
+websocket_url = ""
+jsonrpc_url = ""
+network_type = "testnet" # mainnet, testnet, devnet
 
 [logger]
 service = "xrp-keygen"
