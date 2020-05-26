@@ -12,11 +12,13 @@ data/dump/*
 data/fullpubkey/*
 data/keystore/*
 data/tx/*
+data/certs/*
 
 docker/grafana/*
 docker/nodes/btc/data/testnet3
 docker/nodes/bch/data/testnet3
 docker/nodes/eth/data/*
 docker/nodes/eth/parity-data/*
+docker/nodes/xrp/db/*
 parity-data/*
 !.gitkeep

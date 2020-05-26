@@ -4,11 +4,17 @@
 ###############################################################################
 .PHONY: setup-mac
 setup-mac:
-	brew install jq
+	brew install jq mkcert
 
 .PHONY: goget
 goget:
 	go get -u -d -v ./...
+
+
+.PHONY: install-ssl
+install-ssl:
+	mkcert -install
+	mkcert localhost 127.0.0.1
 
 .PHONY: install-sqlboiler
 install-sqlboiler: SQLBOILER_VERSION=3.7.1

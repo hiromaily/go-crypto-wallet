@@ -5,6 +5,8 @@ type PublicWSServer string
 
 // public server
 // https://xrpl.org/get-started-with-the-rippled-api.html
+// downside to use public server is Admin method can not be used
+// https://xrpl.org/admin-rippled-methods.html
 const (
 	PublicWSServerMainnet1 PublicWSServer = "wss://s1.ripple.com:51234"
 	PublicWSServerMainnet2 PublicWSServer = "wss://s2.ripple.com:51234"

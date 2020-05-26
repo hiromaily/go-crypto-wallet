@@ -11,9 +11,13 @@ services:
     # https://hub.docker.com/r/xrptipbot/rippled
     image: xrptipbot/rippled:1.5.0
     volumes:
-      - ./docker/nodes/xrp/data/:/config/
+      - ./docker/nodes/xrp/config:/config
+      - ./docker/nodes/xrp/db:/var/lib/rippled/db
+      - ./data/certs:/etc/ssl/certs
     ports:
       - "${WRP_WEBSOCKET_PORT:-51233}:80"
     stdin_open: true
     tty: true
     #command:
+    #  - /opt/ripple/bin/rippled --net --conf /etc/opt/ripple/rippled.cfg
+    # $ docker-compose -f docker-compose.xrp.yml exec xrp-node sh
