@@ -1,0 +1,19 @@
+version: '3.7'
+
+services:
+  #########################################################################
+  # xrptipbot/rippled
+  # - https://github.com/ripple/rippled
+  # - https://xrpl.org/install-rippled.html
+  # - https://xrpl.org/configure-rippled.html
+  #########################################################################
+  xrp-node:
+    # https://hub.docker.com/r/xrptipbot/rippled
+    image: xrptipbot/rippled:1.5.0
+    volumes:
+      - ./docker/nodes/xrp/data/:/config/
+    ports:
+      - "${WRP_WEBSOCKET_PORT:-51233}:80"
+    stdin_open: true
+    tty: true
+    #command:

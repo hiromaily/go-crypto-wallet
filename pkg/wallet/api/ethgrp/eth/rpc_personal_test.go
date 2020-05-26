@@ -50,7 +50,7 @@ func TestImportRawKey(t *testing.T) {
 				t.Errorf("ImportRawKey() = %v, want error = %v", err, tt.want.isErr)
 				return
 			}
-			if err != nil {
+			if err == nil {
 				t.Log("address:", addr)
 			}
 		})

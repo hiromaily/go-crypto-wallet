@@ -64,7 +64,7 @@ func (t CoinType) Uint32() uint32 {
 // https://github.com/satoshilabs/slips/blob/master/slip-0044.md
 
 // Account
-// account come from `AccountType` in go-bitcoin/pkg/method_account.go
+// account come from `AccountType` in go-bitcoin/pkg/public_account.go
 
 //ChangeType  external or internal use
 type ChangeType uint32
@@ -292,7 +292,11 @@ func (k *HDKey) ethAddrs(privKey *btcec.PrivateKey) (string, string, string, err
 func (k *HDKey) xrpAddrs(privKey *btcec.PrivateKey) (string, string, string, error) {
 	// private key (same as ethereum for now)
 	xrpPrivKey := privKey.ToECDSA()
-	xrpHexPrivKey := hexutil.Encode(crypto.FromECDSA(xrpPrivKey))
+	//xrpHexPrivKey := hexutil.Encode(crypto.FromECDSA(xrpPrivKey))
+	xrpHexPrivKey, err := rcrypto.NewAccountPrivateKey(crypto.FromECDSA(xrpPrivKey))
+	if err != nil {
+		return "", "", "", errors.Wrap(err, "fail to call rcrypto.NewAccountPrivateKey()")
+	}
 
 	serializedPubKey := privKey.PubKey().SerializeCompressed()
 	pubKeyHash := rcrypto.Sha256RipeMD160(serializedPubKey)
@@ -309,13 +313,8 @@ func (k *HDKey) xrpAddrs(privKey *btcec.PrivateKey) (string, string, string, err
 	if err != nil {
 		return "", "", "", errors.Wrap(err, "fail to call rcrypto.NewAccountPublicKey()")
 	}
-	// private key
-	//xPrivKey, err := rcrypto.NewAccountPrivateKey(pubKeyHash)
-	//if err != nil {
-	//	return "", "", "", errors.Wrap(err, "fail to call rcrypto.NewAccountPrivateKey()")
-	//}
 
-	return address.String(), publicKey.String(), xrpHexPrivKey, nil
+	return address.String(), publicKey.String(), xrpHexPrivKey.String(), nil
 }
 
 // get Address(P2PKH) as string for BTC/BCH

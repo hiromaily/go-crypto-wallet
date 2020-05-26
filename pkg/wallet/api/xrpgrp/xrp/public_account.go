@@ -9,7 +9,7 @@ import (
 // https://xrpl.org/account-methods.html
 // error: https://xrpl.org/error-formatting.html#universal-errors
 
-// AccountChannels request data for account_channels method
+// AccountChannels is request data for account_channels method
 type AccountChannels struct {
 	ID                 int    `json:"id"`
 	Command            string `json:"command"`
@@ -18,7 +18,7 @@ type AccountChannels struct {
 	LedgerIndex        string `json:"ledger_index"`
 }
 
-// ResponseAccountChannels response data for ccount_channels method
+// ResponseAccountChannels is response data for account_channels method
 type ResponseAccountChannels struct {
 	ID     int    `json:"id"`
 	Status string `json:"status"`

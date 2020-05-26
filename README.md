@@ -260,7 +260,7 @@ watch send -file xxx.csv
 
 ### For ETH
 - [x] Add any useful APIs
-- [x] Key generating by HD Wallet
+- [x] Generating key by HD Wallet
 - [x] Importing private key
 - [x] Exporting addresses to watch wallet
 - [x] Importing exported address in watch wallet
@@ -271,12 +271,11 @@ watch send -file xxx.csv
 - [x] Sending signed transaction
 - [x] Transaction monitoring
 - [ ] Make sure that `quantity-tag` is used properly. e.g. when getting balance, which quantity-tag should be used, latest or pending.
-- [ ] Any functionalities work with both [Go Ethereum](https://github.com/ethereum/go-ethereum) and [Parity](https://www.parity.io/ethereum/)
+- [ ] For now it works on [Go Ethereum](https://github.com/ethereum/go-ethereum). Adapting to [Parity](https://www.parity.io/ethereum/)
 - [ ] How to manage password for private key
 
 ### For XRP
 - [ ] Understand XRP architecture first
-
 
 ## Project layout patterns
 - The `pkg` layout pattern, refer to the [linked](https://medium.com/golang-learn/go-project-layout-e5213cdcfaa2) URLs for details.

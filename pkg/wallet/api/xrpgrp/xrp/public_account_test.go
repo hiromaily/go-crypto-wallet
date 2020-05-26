@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/bookerzzz/grok"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 

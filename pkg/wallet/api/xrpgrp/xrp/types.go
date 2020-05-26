@@ -45,3 +45,17 @@ func GetPublicWSServer(networkType string) PublicWSServer {
 	}
 	return ""
 }
+
+// XRPKeyType key type
+type XRPKeyType string
+
+// network type
+const (
+	XRPKeyTypeSECP256 XRPKeyType = "secp256k1"
+	XRPKeyTypeED25519 XRPKeyType = "ed25519"
+)
+
+// String converter
+func (k XRPKeyType) String() string {
+	return string(k)
+}

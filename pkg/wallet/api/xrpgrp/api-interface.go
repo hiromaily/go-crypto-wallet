@@ -9,7 +9,12 @@ import (
 
 // Rippler Ripple Interface
 type Rippler interface {
-	// method_account
+	// admin_keygen
+	ValidationCreate(secret string) (*xrp.ResponseValidationCreate, error)
+	WalletProposeWithKey(seed string, keyType xrp.XRPKeyType) (*xrp.ResponseWalletPropose, error)
+	WalletPropose(passphrase string) (*xrp.ResponseWalletPropose, error)
+
+	// public_account
 	AccountChannels(sender, receiver string) (*xrp.ResponseAccountChannels, error)
 
 	// ripple

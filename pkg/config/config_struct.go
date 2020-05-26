@@ -61,8 +61,8 @@ type Ethereum struct {
 // Ripple information
 type Ripple struct {
 	WebsocketURL string `toml:"websocket_url"`
-	JSONRpcURL   string `toml:"jsonrpc_url"`
-	NetworkType  string `toml:"network_type" validate:"oneof=mainnet testnet devnet"`
+	//JSONRpcURL   string `toml:"jsonrpc_url"`
+	NetworkType string `toml:"network_type" validate:"oneof=mainnet testnet devnet"`
 }
 
 // Logger logger info

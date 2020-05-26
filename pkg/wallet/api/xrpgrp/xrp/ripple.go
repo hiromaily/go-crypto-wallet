@@ -16,6 +16,7 @@ import (
 type Ripple struct {
 	wsClient     *ws.WS
 	wsRemote     *websockets.Remote
+	isAdminAPI   bool
 	chainConf    *chaincfg.Params
 	coinTypeCode coin.CoinTypeCode //eth
 	logger       *zap.Logger
@@ -37,6 +38,12 @@ func NewRipple(
 		coinTypeCode: coinTypeCode,
 		logger:       logger,
 		ctx:          ctx,
+	}
+
+	// Admin method
+	// https://xrpl.org/admin-rippled-methods.html
+	if conf.WebsocketURL != "" {
+		xrp.isAdminAPI = true
 	}
 
 	if conf.NetworkType != NetworkTypeXRPMainNet.String() {
