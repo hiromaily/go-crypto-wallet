@@ -15,7 +15,9 @@ services:
       - ./docker/nodes/xrp/db:/var/lib/rippled/db
       - ./data/certs:/etc/ssl/certs
     ports:
-      - "${WRP_WEBSOCKET_PORT:-51233}:80"
+      #- "${WRP_WEBSOCKET_PORT:-51233}:80"
+      - "${WRP_PUBLIC_WEBSOCKET_PORT:-6005}:6005"
+      - "${WRP_ADMIN_WEBSOCKET_PORT:-6006}:6006"
     stdin_open: true
     tty: true
     #command:

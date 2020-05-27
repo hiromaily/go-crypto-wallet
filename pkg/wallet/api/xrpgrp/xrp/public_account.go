@@ -53,7 +53,7 @@ func (r *Ripple) AccountChannels(sender, receiver string) (*ResponseAccountChann
 		LedgerIndex:        "validated",
 	}
 	var res ResponseAccountChannels
-	if err := r.wsClient.Call(context.Background(), &ac, &res); err != nil {
+	if err := r.wsPublic.Call(context.Background(), &ac, &res); err != nil {
 		return nil, errors.Wrap(err, "fail to call wsClient.Call()")
 	}
 	return &res, nil

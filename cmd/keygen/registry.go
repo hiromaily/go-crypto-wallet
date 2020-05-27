@@ -49,7 +49,8 @@ type registry struct {
 	xrp          xrpgrp.Rippler
 	rpcClient    *rpcclient.Client
 	rpcEthClient *ethrpc.Client
-	wsXrpClient  *ws.WS
+	wsXrpPublic  *ws.WS
+	wsXrpAdmin   *ws.WS
 	wsXrpRemote  *websockets.Remote
 	mysqlClient  *sql.DB
 }
@@ -271,15 +272,15 @@ func (r *registry) newETH() ethgrp.Ethereumer {
 	return r.eth
 }
 
-func (r *registry) newXRPWSClient() *ws.WS {
-	if r.wsXrpClient == nil {
+func (r *registry) newXRPWSClient() (*ws.WS, *ws.WS) {
+	if r.wsXrpPublic == nil {
 		var err error
-		r.wsXrpClient, err = xrpgrp.NewWSClient(&r.conf.Ripple)
+		r.wsXrpPublic, r.wsXrpAdmin, err = xrpgrp.NewWSClient(&r.conf.Ripple)
 		if err != nil {
 			panic(err)
 		}
 	}
-	return r.wsXrpClient
+	return r.wsXrpPublic, r.wsXrpAdmin
 }
 
 func (r *registry) newXRPWSRemote() *websockets.Remote {
@@ -296,8 +297,10 @@ func (r *registry) newXRPWSRemote() *websockets.Remote {
 func (r *registry) newXRP() xrpgrp.Rippler {
 	if r.xrp == nil {
 		var err error
+		wsPublic, wsAdmin := r.newXRPWSClient()
 		r.xrp, err = xrpgrp.NewRipple(
-			r.newXRPWSClient(),
+			wsPublic,
+			wsAdmin,
 			r.newXRPWSRemote(),
 			&r.conf.Ripple,
 			r.newLogger(),

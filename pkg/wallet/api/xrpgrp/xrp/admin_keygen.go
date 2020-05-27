@@ -33,7 +33,7 @@ type ResponseValidationCreate struct {
 
 // ValidationCreate calls validation_create method
 func (r *Ripple) ValidationCreate(secret string) (*ResponseValidationCreate, error) {
-	if !r.isAdminAPI {
+	if r.wsAdmin == nil {
 		return nil, XRPErrorDisabledAdminAPI
 	}
 
@@ -43,7 +43,7 @@ func (r *Ripple) ValidationCreate(secret string) (*ResponseValidationCreate, err
 		Secret:  secret,
 	}
 	var res ResponseValidationCreate
-	if err := r.wsClient.Call(context.Background(), &req, &res); err != nil {
+	if err := r.wsAdmin.Call(context.Background(), &req, &res); err != nil {
 		return nil, errors.Wrap(err, "fail to call wsClient.Call()")
 	}
 	return &res, nil
@@ -80,7 +80,7 @@ type ResponseWalletPropose struct {
 
 // WalletProposeWithKey calls wallet_propose method
 func (r *Ripple) WalletProposeWithKey(seed string, keyType XRPKeyType) (*ResponseWalletPropose, error) {
-	if !r.isAdminAPI {
+	if r.wsAdmin == nil {
 		return nil, XRPErrorDisabledAdminAPI
 	}
 
@@ -90,7 +90,7 @@ func (r *Ripple) WalletProposeWithKey(seed string, keyType XRPKeyType) (*Respons
 		KeyType: keyType.String(),
 	}
 	var res ResponseWalletPropose
-	if err := r.wsClient.Call(context.Background(), &req, &res); err != nil {
+	if err := r.wsAdmin.Call(context.Background(), &req, &res); err != nil {
 		return nil, errors.Wrap(err, "fail to call wsClient.Call()")
 	}
 	return &res, nil
@@ -98,7 +98,7 @@ func (r *Ripple) WalletProposeWithKey(seed string, keyType XRPKeyType) (*Respons
 
 // WalletPropose calls wallet_propose method
 func (r *Ripple) WalletPropose(passphrase string) (*ResponseWalletPropose, error) {
-	if !r.isAdminAPI {
+	if r.wsAdmin == nil {
 		return nil, XRPErrorDisabledAdminAPI
 	}
 
@@ -107,7 +107,7 @@ func (r *Ripple) WalletPropose(passphrase string) (*ResponseWalletPropose, error
 		Passphrase: passphrase,
 	}
 	var res ResponseWalletPropose
-	if err := r.wsClient.Call(context.Background(), &req, &res); err != nil {
+	if err := r.wsAdmin.Call(context.Background(), &req, &res); err != nil {
 		return nil, errors.Wrap(err, "fail to call wsClient.Call()")
 	}
 	return &res, nil

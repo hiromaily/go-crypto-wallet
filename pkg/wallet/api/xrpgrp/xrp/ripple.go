@@ -14,9 +14,9 @@ import (
 
 // Ripple includes client to call JSON-RPC
 type Ripple struct {
-	wsClient     *ws.WS
+	wsPublic     *ws.WS
+	wsAdmin      *ws.WS
 	wsRemote     *websockets.Remote
-	isAdminAPI   bool
 	chainConf    *chaincfg.Params
 	coinTypeCode coin.CoinTypeCode //eth
 	logger       *zap.Logger
@@ -26,24 +26,20 @@ type Ripple struct {
 // NewRipple creates Ripple object
 func NewRipple(
 	ctx context.Context,
-	wsClient *ws.WS,
+	wsPublic *ws.WS,
+	wsAdmin *ws.WS,
 	wsRemote *websockets.Remote,
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Ripple,
 	logger *zap.Logger) (*Ripple, error) {
 
 	xrp := &Ripple{
-		wsClient:     wsClient,
+		wsPublic:     wsPublic,
+		wsAdmin:      wsAdmin,
 		wsRemote:     wsRemote,
 		coinTypeCode: coinTypeCode,
 		logger:       logger,
 		ctx:          ctx,
-	}
-
-	// Admin method
-	// https://xrpl.org/admin-rippled-methods.html
-	if conf.WebsocketURL != "" {
-		xrp.isAdminAPI = true
 	}
 
 	if conf.NetworkType != NetworkTypeXRPMainNet.String() {
@@ -57,8 +53,11 @@ func NewRipple(
 
 // Close disconnect to server
 func (r *Ripple) Close() {
-	if r.wsClient != nil {
-		r.wsClient.Close()
+	if r.wsPublic != nil {
+		r.wsPublic.Close()
+	}
+	if r.wsAdmin != nil {
+		r.wsAdmin.Close()
 	}
 	if r.wsRemote != nil {
 		r.wsRemote.Close()

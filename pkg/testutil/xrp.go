@@ -32,11 +32,11 @@ func GetXRP() xrpgrp.Rippler {
 	// logger
 	logger := logger.NewZapLogger(&conf.Logger)
 	// client
-	client, err := xrpgrp.NewWSClient(&conf.Ripple)
+	client, admin, err := xrpgrp.NewWSClient(&conf.Ripple)
 	if err != nil {
 		log.Fatalf("fail to create ethereum rpc client: %v", err)
 	}
-	xr, err = xrpgrp.NewRipple(client, nil, &conf.Ripple, logger, conf.CoinTypeCode)
+	xr, err = xrpgrp.NewRipple(client, admin, nil, &conf.Ripple, logger, conf.CoinTypeCode)
 	if err != nil {
 		log.Fatalf("fail to create xrp instance: %v", err)
 	}
