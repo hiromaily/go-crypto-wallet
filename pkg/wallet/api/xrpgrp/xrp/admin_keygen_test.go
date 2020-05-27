@@ -49,5 +49,47 @@ func TestValidationCreate(t *testing.T) {
 			}
 		})
 	}
+}
 
+// TestWalletPropose is test for WalletPropose
+func TestWalletPropose(t *testing.T) {
+	//t.SkipNow()
+	xr := testutil.GetXRP()
+
+	type args struct {
+		passphrase string
+	}
+	type want struct {
+		isErr bool
+	}
+	tests := []struct {
+		name string
+		args args
+		want want
+	}{
+		{
+			name: "happy path 1",
+			args: args{"password1"},
+			want: want{false},
+		},
+		{
+			name: "happy path 2",
+			args: args{"foobar"},
+			want: want{false},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			res, err := xr.WalletPropose(tt.args.passphrase)
+			if (err == nil) == tt.want.isErr {
+				t.Errorf("WalletPropose() = %v, want error = %v", err, tt.want.isErr)
+				return
+			}
+			if res != nil {
+				t.Log("response:", res)
+				grok.Value(res)
+			}
+		})
+	}
 }

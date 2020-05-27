@@ -16,7 +16,8 @@ type Rippler interface {
 
 	// public_account
 	AccountChannels(sender, receiver string) (*xrp.ResponseAccountChannels, error)
-
+	// public_server_info
+	ServerInfo() (*xrp.ResponseServerInfo, error)
 	// ripple
 	Close()
 	CoinTypeCode() coin.CoinTypeCode

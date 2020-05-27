@@ -70,7 +70,7 @@ type ResponseWalletPropose struct {
 	Result struct {
 		AccountID     string `json:"account_id"`
 		KeyType       string `json:"key_type"`
-		MasterKey     string `json:"master_key"`
+		MasterKey     string `json:"master_key"` //DEPRECATED
 		MasterSeed    string `json:"master_seed"`
 		MasterSeedHex string `json:"master_seed_hex"`
 		PublicKey     string `json:"public_key"`
@@ -97,6 +97,7 @@ func (r *Ripple) WalletProposeWithKey(seed string, keyType XRPKeyType) (*Respons
 }
 
 // WalletPropose calls wallet_propose method
+// - result is same as long as using same passphrase
 func (r *Ripple) WalletPropose(passphrase string) (*ResponseWalletPropose, error) {
 	if r.wsAdmin == nil {
 		return nil, XRPErrorDisabledAdminAPI

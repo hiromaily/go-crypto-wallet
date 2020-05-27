@@ -45,7 +45,7 @@ type ResponseAccountChannels struct {
 
 // AccountChannels calls account_channels method
 func (r *Ripple) AccountChannels(sender, receiver string) (*ResponseAccountChannels, error) {
-	ac := AccountChannels{
+	req := AccountChannels{
 		ID:                 1,
 		Command:            "account_channels",
 		Account:            sender,
@@ -53,7 +53,7 @@ func (r *Ripple) AccountChannels(sender, receiver string) (*ResponseAccountChann
 		LedgerIndex:        "validated",
 	}
 	var res ResponseAccountChannels
-	if err := r.wsPublic.Call(context.Background(), &ac, &res); err != nil {
+	if err := r.wsPublic.Call(context.Background(), &req, &res); err != nil {
 		return nil, errors.Wrap(err, "fail to call wsClient.Call()")
 	}
 	return &res, nil
