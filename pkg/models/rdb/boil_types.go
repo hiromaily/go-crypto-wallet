@@ -56,6 +56,7 @@ const (
 	AccountKeyCoinBTC = "btc"
 	AccountKeyCoinBCH = "bch"
 	AccountKeyCoinEth = "eth"
+	AccountKeyCoinXRP = "xrp"
 )
 
 // Enum values for account_key.account
@@ -71,6 +72,7 @@ const (
 	AddressCoinBTC = "btc"
 	AddressCoinBCH = "bch"
 	AddressCoinEth = "eth"
+	AddressCoinXRP = "xrp"
 )
 
 // Enum values for address.account
@@ -123,10 +125,24 @@ const (
 	PaymentRequestCoinBTC = "btc"
 	PaymentRequestCoinBCH = "bch"
 	PaymentRequestCoinEth = "eth"
+	PaymentRequestCoinXRP = "xrp"
 )
 
 // Enum values for seed.coin
 const (
 	SeedCoinBTC = "btc"
 	SeedCoinBCH = "bch"
+)
+
+// Enum values for xrp_account_key.coin
+const (
+	XRPAccountKeyCoinXRP = "xrp"
+)
+
+// Enum values for xrp_account_key.account
+const (
+	XRPAccountKeyAccountClient  = "client"
+	XRPAccountKeyAccountDeposit = "deposit"
+	XRPAccountKeyAccountPayment = "payment"
+	XRPAccountKeyAccountStored  = "stored"
 )

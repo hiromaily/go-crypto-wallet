@@ -19,6 +19,7 @@ whitelist = [
     "address",
     "seed",
     "account_key",
+    "xrp_account_key",
     "auth_fullpubkey",
     "auth_account_key"
 ]

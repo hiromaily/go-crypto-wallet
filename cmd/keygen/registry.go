@@ -28,6 +28,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/coldsrv/keygensrv"
 	commonsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/common/coldsrv"
 	ethsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/keygensrv"
+	xrpsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/xrp/keygensrv"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"
@@ -117,8 +118,7 @@ func (r *registry) newXRPKeygener() wallets.Keygener {
 		r.newMySQLClient(),
 		r.newLogger(),
 		r.walletType,
-		r.newSeeder(),
-		r.newHdWallter(),
+		r.newXRPKeyGenerator(),
 		r.newAddressExporter(),
 	)
 }
@@ -215,6 +215,16 @@ func (r *registry) newETHSigner() service.Signer {
 		r.newLogger(),
 		r.newTxFileStorager(),
 		r.walletType,
+	)
+}
+
+func (r *registry) newXRPKeyGenerator() xrpsrv.XRPKeyGenerator {
+	return xrpsrv.NewXRPKeyGenerate(
+		r.newXRP(),
+		r.newLogger(),
+		r.conf.CoinTypeCode,
+		r.walletType,
+		r.newXRPAccountKeyRepo(),
 	)
 }
 
@@ -330,6 +340,14 @@ func (r *registry) newSeedRepo() coldrepo.SeedRepositorier {
 
 func (r *registry) newAccountKeyRepo() coldrepo.AccountKeyRepositorier {
 	return coldrepo.NewAccountKeyRepository(
+		r.newMySQLClient(),
+		r.conf.CoinTypeCode,
+		r.newLogger(),
+	)
+}
+
+func (r *registry) newXRPAccountKeyRepo() coldrepo.XRPAccountKeyRepositorier {
+	return coldrepo.NewXRPAccountKeyRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),

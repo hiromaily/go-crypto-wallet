@@ -30,6 +30,7 @@ func (c *HDKeyCommand) Help() string {
 Options:
   -keynum   number of generating hd key
   -account  target account
+  -keypair  keypair for XRP
 `
 }
 
@@ -38,12 +39,14 @@ func (c *HDKeyCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
 	var (
-		keyNum uint64
-		acnt   string
+		keyNum    uint64
+		acnt      string
+		isKeyPair bool
 	)
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
 	flags.Uint64Var(&keyNum, "keynum", 0, "number of generating hd key")
 	flags.StringVar(&acnt, "account", "", "target account")
+	flags.BoolVar(&isKeyPair, "keypair", false, "keypair for XRP")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
@@ -70,7 +73,7 @@ func (c *HDKeyCommand) Run(args []string) int {
 	}
 
 	//generate key for hd wallet
-	keys, err := c.wallet.GenerateAccountKey(account.AccountType(acnt), bSeed, uint32(keyNum))
+	keys, err := c.wallet.GenerateAccountKey(account.AccountType(acnt), bSeed, uint32(keyNum), isKeyPair)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call GenerateAccountKey() %+v", err))
 		return 1
