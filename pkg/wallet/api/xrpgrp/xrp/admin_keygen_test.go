@@ -77,6 +77,11 @@ func TestWalletPropose(t *testing.T) {
 			args: args{"foobar"},
 			want: want{false},
 		},
+		{
+			name: "happy path 3",
+			args: args{"0x931D387731bBbC988B312206c74F77D004D6B84b"},
+			want: want{false},
+		},
 	}
 
 	for _, tt := range tests {

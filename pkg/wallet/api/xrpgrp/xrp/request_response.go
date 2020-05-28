@@ -14,3 +14,17 @@ type ResponseError struct {
 	Error   string      `json:"error"`
 	Request interface{} `json:"request"`
 }
+
+// StatusCode is status code of response
+type StatusCode string
+
+// status_code
+const (
+	StatusCodeError   StatusCode = "error"
+	StatusCodeSuccess StatusCode = "success"
+)
+
+// String converter
+func (s StatusCode) String() string {
+	return string(s)
+}

@@ -29,6 +29,7 @@ type ResponseValidationCreate struct {
 		ValidationPublicKey string `json:"validation_public_key"`
 		ValidationSeed      string `json:"validation_seed"`
 	} `json:"result"`
+	Error string `json:"error,omitempty"`
 }
 
 // ValidationCreate calls validation_create method
@@ -76,6 +77,7 @@ type ResponseWalletPropose struct {
 		PublicKey     string `json:"public_key"`
 		PublicKeyHex  string `json:"public_key_hex"`
 	} `json:"result"`
+	Error string `json:"error,omitempty"`
 }
 
 // WalletProposeWithKey calls wallet_propose method

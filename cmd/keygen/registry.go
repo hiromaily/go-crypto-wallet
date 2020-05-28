@@ -118,6 +118,8 @@ func (r *registry) newXRPKeygener() wallets.Keygener {
 		r.newMySQLClient(),
 		r.newLogger(),
 		r.walletType,
+		r.newSeeder(),
+		r.newHdWallter(),
 		r.newXRPKeyGenerator(),
 		r.newAddressExporter(),
 	)

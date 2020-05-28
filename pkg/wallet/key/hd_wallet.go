@@ -218,17 +218,23 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 				RedeemScript:   "",
 			}
 		case coin.XRP:
-			ethAddr, ethPubKey, ethPrivKey, err := k.xrpAddrs(privateKey)
+			xrpAddr, xrpPubKey, xrpPrivKey, err := k.xrpAddrs(privateKey)
+			if err != nil {
+				return nil, err
+			}
+
+			// eth address is used as passphrase for generating key by API `wallet_propose`
+			ethAddr, _, _, err := k.ethAddrs(privateKey)
 			if err != nil {
 				return nil, err
 			}
 
 			walletKeys[i] = WalletKey{
-				WIF:            ethPrivKey,
-				P2PKHAddr:      ethAddr,
-				P2SHSegWitAddr: "",
+				WIF:            xrpPrivKey,
+				P2PKHAddr:      xrpAddr,
+				P2SHSegWitAddr: ethAddr,
 				Bech32Addr:     "",
-				FullPubKey:     ethPubKey,
+				FullPubKey:     xrpPubKey,
 				RedeemScript:   "",
 			}
 

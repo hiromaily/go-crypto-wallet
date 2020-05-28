@@ -10,7 +10,9 @@ import (
 
 // ResponseServerInfo is response data for server_info method
 type ResponseServerInfo struct {
-	ID     int `json:"id"`
+	ID     int    `json:"id"`
+	Status string `json:"status"`
+	Type   string `json:"type"`
 	Result struct {
 		Info struct {
 			BuildVersion    string `json:"build_version"`
@@ -80,8 +82,7 @@ type ResponseServerInfo struct {
 			} `json:"validator_list"`
 		} `json:"info"`
 	} `json:"result"`
-	Status string `json:"status"`
-	Type   string `json:"type"`
+	Error string `json:"error,omitempty"`
 }
 
 // ServerInfo calls server_info method

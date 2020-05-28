@@ -3,6 +3,7 @@ package xrpwallet
 import (
 	"database/sql"
 
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
@@ -19,6 +20,8 @@ type XRPKeygen struct {
 	dbConn *sql.DB
 	logger *zap.Logger
 	wtype  wtype.WalletType
+	service.Seeder
+	service.HDWalleter
 	keygensrv.XRPKeyGenerator
 	service.AddressExporter
 }
@@ -29,6 +32,8 @@ func NewXRPKeygen(
 	dbConn *sql.DB,
 	logger *zap.Logger,
 	wtype wtype.WalletType,
+	seeder service.Seeder,
+	hdWallter service.HDWalleter,
 	keyGenerator keygensrv.XRPKeyGenerator,
 	addressExporter service.AddressExporter,
 ) *XRPKeygen {
@@ -38,6 +43,8 @@ func NewXRPKeygen(
 		logger:          logger,
 		dbConn:          dbConn,
 		wtype:           wtype,
+		Seeder:          seeder,
+		HDWalleter:      hdWallter,
 		XRPKeyGenerator: keyGenerator,
 		AddressExporter: addressExporter,
 	}
@@ -45,23 +52,24 @@ func NewXRPKeygen(
 
 // GenerateSeed generates seed
 func (k *XRPKeygen) GenerateSeed() ([]byte, error) {
-	k.logger.Info("no functionality for GenerateSeed() in XRP")
-	//return k.Seeder.Generate()
-	return nil, nil
+	//k.logger.Info("no functionality for GenerateSeed() in XRP")
+	return k.Seeder.Generate()
 }
 
 // StoreSeed stores seed
 func (k *XRPKeygen) StoreSeed(strSeed string) ([]byte, error) {
-	k.logger.Info("no functionality for StoreSeed() in XRP")
-	//return k.Seeder.Store(strSeed)
-	return nil, nil
+	//k.logger.Info("no functionality for StoreSeed() in XRP")
+	return k.Seeder.Store(strSeed)
 }
 
 // GenerateAccountKey generates account keys
 func (k *XRPKeygen) GenerateAccountKey(accountType account.AccountType, seed []byte, count uint32, isKeyPair bool) ([]key.WalletKey, error) {
-	//return k.HDWalleter.Generate(accountType, seed, count)
-	err := k.XRPKeyGenerator.Generate(accountType, isKeyPair)
-	return nil, err
+	keys, err := k.HDWalleter.Generate(accountType, seed, count)
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to call HDWalleter.Generate()")
+	}
+	err = k.XRPKeyGenerator.Generate(accountType, isKeyPair, keys)
+	return keys, err
 }
 
 // ImportPrivKey imports privKey

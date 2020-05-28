@@ -41,6 +41,7 @@ type ResponseAccountChannels struct {
 		LedgerIndex int    `json:"ledger_index"`
 		Validated   bool   `json:"validated"`
 	} `json:"result"`
+	Error string `json:"error,omitempty"`
 }
 
 // AccountChannels calls account_channels method
