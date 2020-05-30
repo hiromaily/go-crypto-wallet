@@ -17,10 +17,10 @@ func (r *RippleAPI) PrepareTransaction(senderAccount, receiverAccount string, am
 		SenderAccount:   senderAccount,
 		Amount:          amount,
 		ReceiverAccount: receiverAccount,
-		Instructions:    nil,
+		Instructions:    &pb.Instructions{MaxLedgerVersionOffset: 75},
 	}
 
-	res, err := r.client.PrepareTransaction(ctx, req, nil)
+	res, err := r.client.PrepareTransaction(ctx, req)
 	if err != nil {
 		return errors.Wrap(err, "fail to call client.PrepareTransaction()")
 	}

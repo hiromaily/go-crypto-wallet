@@ -9,20 +9,34 @@ import (
 
 // Rippler Ripple Interface
 type Rippler interface {
-	// admin_keygen
-	ValidationCreate(secret string) (*xrp.ResponseValidationCreate, error)
-	WalletProposeWithKey(seed string, keyType xrp.XRPKeyType) (*xrp.ResponseWalletPropose, error)
-	WalletPropose(passphrase string) (*xrp.ResponseWalletPropose, error)
+	RippleAdminer
+	RipplePublicer
+	RippleAPIer
 
-	// public_account
-	AccountChannels(sender, receiver string) (*xrp.ResponseAccountChannels, error)
-	// public_server_info
-	ServerInfo() (*xrp.ResponseServerInfo, error)
 	// ripple
 	Close()
 	CoinTypeCode() coin.CoinTypeCode
 	GetChainConf() *chaincfg.Params
+}
 
+// RippleAPIer is RippleAPI interface
+type RippleAPIer interface {
 	// RippleAPI
 	PrepareTransaction(senderAccount, receiverAccount string, amount float64) error
+}
+
+// RipplePublicer is RipplePublic interface
+type RipplePublicer interface {
+	// public_account
+	AccountChannels(sender, receiver string) (*xrp.ResponseAccountChannels, error)
+	// public_server_info
+	ServerInfo() (*xrp.ResponseServerInfo, error)
+}
+
+// RippleAdminer is RippleAdmin interface
+type RippleAdminer interface {
+	// admin_keygen
+	ValidationCreate(secret string) (*xrp.ResponseValidationCreate, error)
+	WalletProposeWithKey(seed string, keyType xrp.XRPKeyType) (*xrp.ResponseWalletPropose, error)
+	WalletPropose(passphrase string) (*xrp.ResponseWalletPropose, error)
 }

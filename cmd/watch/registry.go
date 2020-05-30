@@ -10,6 +10,7 @@ import (
 	"github.com/rubblelabs/ripple/websockets"
 	"github.com/volatiletech/sqlboiler/boil"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
@@ -50,6 +51,8 @@ type registry struct {
 	rpcEthClient *ethrpc.Client
 	wsXrpPublic  *ws.WS
 	wsXrpAdmin   *ws.WS
+	grpcConn     *grpc.ClientConn
+	rippleAPI    *rippleapi.RippleAPI
 	wsXrpRemote  *websockets.Remote
 	mysqlClient  *sql.DB
 }
@@ -312,14 +315,21 @@ func (r *registry) newXRPWSClient() (*ws.WS, *ws.WS) {
 }
 
 func (r *registry) newRippleAPI() *rippleapi.RippleAPI {
-	grpcConn, err := xrpgrp.NewRippleAPI(&r.conf.Ripple.API)
-	if err != nil {
-		panic(err)
+	if r.rippleAPI == nil {
+		r.rippleAPI = rippleapi.NewRippleAPI(r.newGRPCConn(), r.newLogger())
 	}
-	if grpcConn == nil {
-		return nil
+	return r.rippleAPI
+}
+
+func (r *registry) newGRPCConn() *grpc.ClientConn {
+	if r.grpcConn == nil {
+		var err error
+		r.grpcConn, err = xrpgrp.NewGRPCClient(&r.conf.Ripple.API)
+		if err != nil {
+			panic(err)
+		}
 	}
-	return rippleapi.NewRippleAPI(grpcConn, r.newLogger())
+	return r.grpcConn
 }
 
 func (r *registry) newXRPWSRemote() *websockets.Remote {

@@ -7,7 +7,7 @@ websocket_admin_url = "ws://127.0.0.1:6006"
 network_type = "testnet" # mainnet, testnet, devnet
 
 [ripple.api]
-url = "127.0.0.1:9090"
+url = "127.0.0.1:50051"
 is_secure = false
 
 [logger]

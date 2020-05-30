@@ -51,10 +51,10 @@ func NewWSRemote(conf *config.Ripple) (*websockets.Remote, error) {
 	return websockets.NewRemote(url)
 }
 
-// NewRippleAPI try to connect RippleAPI Server
-func NewRippleAPI(conf *config.RippleAPI) (*grpc.ClientConn, error) {
+// NewGRPCClient try to connect gRPC Server
+func NewGRPCClient(conf *config.RippleAPI) (*grpc.ClientConn, error) {
 	if conf.URL == "" {
-		return nil, nil
+		return nil, errors.New("url for grpc server is not defined in config")
 	}
 	var opts []grpc.DialOption
 	if !conf.IsSecure {
