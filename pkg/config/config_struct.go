@@ -63,7 +63,14 @@ type Ripple struct {
 	WebsocketPublicURL string `toml:"websocket_public_url"`
 	WebsocketAdminURL  string `toml:"websocket_admin_url"`
 	//JSONRpcURL   string `toml:"jsonrpc_url"`
-	NetworkType string `toml:"network_type" validate:"oneof=mainnet testnet devnet"`
+	NetworkType string    `toml:"network_type" validate:"oneof=mainnet testnet devnet"`
+	API         RippleAPI `toml:"api"`
+}
+
+// RippleAPI is ripple-lib server info
+type RippleAPI struct {
+	URL      string `toml:"url"`
+	IsSecure bool   `toml:"is_secure"`
 }
 
 // Logger logger info

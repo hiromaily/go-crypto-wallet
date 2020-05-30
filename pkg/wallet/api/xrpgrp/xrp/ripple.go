@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/rippleapi"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/ws"
 )
@@ -16,6 +17,7 @@ import (
 type Ripple struct {
 	wsPublic     *ws.WS
 	wsAdmin      *ws.WS
+	api          *rippleapi.RippleAPI
 	wsRemote     *websockets.Remote
 	chainConf    *chaincfg.Params
 	coinTypeCode coin.CoinTypeCode //eth
@@ -28,6 +30,7 @@ func NewRipple(
 	ctx context.Context,
 	wsPublic *ws.WS,
 	wsAdmin *ws.WS,
+	api *rippleapi.RippleAPI,
 	wsRemote *websockets.Remote,
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Ripple,
@@ -36,6 +39,7 @@ func NewRipple(
 	xrp := &Ripple{
 		wsPublic:     wsPublic,
 		wsAdmin:      wsAdmin,
+		api:          api,
 		wsRemote:     wsRemote,
 		coinTypeCode: coinTypeCode,
 		logger:       logger,
@@ -61,6 +65,9 @@ func (r *Ripple) Close() {
 	}
 	if r.wsRemote != nil {
 		r.wsRemote.Close()
+	}
+	if r.api != nil {
+		r.api.Close()
 	}
 }
 

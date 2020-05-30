@@ -6,8 +6,10 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rubblelabs/ripple/websockets"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/rippleapi"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/ws"
@@ -49,6 +51,22 @@ func NewWSRemote(conf *config.Ripple) (*websockets.Remote, error) {
 	return websockets.NewRemote(url)
 }
 
+// NewRippleAPI try to connect RippleAPI Server
+func NewRippleAPI(conf *config.RippleAPI) (*grpc.ClientConn, error) {
+	if conf.URL == "" {
+		return nil, nil
+	}
+	var opts []grpc.DialOption
+	if !conf.IsSecure {
+		opts = append(opts, grpc.WithInsecure())
+	}
+	conn, err := grpc.Dial(conf.URL, opts...)
+	if err != nil {
+		return nil, errors.Wrapf(err, "fail to call grpc.Dial: %s", conf.URL)
+	}
+	return conn, nil
+}
+
 // NewRPCClient RPCClient, maybe not used
 //func NewRPCClient(conf *config.Ripple) *jsonrpc.RPCClient {
 //	if conf.JSONRpcURL == "" {
@@ -59,14 +77,14 @@ func NewWSRemote(conf *config.Ripple) (*websockets.Remote, error) {
 //}
 
 // NewRipple creates Ripple instance according to coinType
-func NewRipple(wsPublic *ws.WS, wsAdmin *ws.WS, wsRemote *websockets.Remote, conf *config.Ripple, logger *zap.Logger, coinTypeCode coin.CoinTypeCode) (Rippler, error) {
+func NewRipple(wsPublic *ws.WS, wsAdmin *ws.WS, api *rippleapi.RippleAPI, wsRemote *websockets.Remote, conf *config.Ripple, logger *zap.Logger, coinTypeCode coin.CoinTypeCode) (Rippler, error) {
 	switch coinTypeCode {
 	case coin.XRP:
-		eth, err := xrp.NewRipple(context.Background(), wsPublic, wsAdmin, wsRemote, coinTypeCode, conf, logger)
+		ripple, err := xrp.NewRipple(context.Background(), wsPublic, wsAdmin, api, wsRemote, coinTypeCode, conf, logger)
 		if err != nil {
 			return nil, errors.Wrap(err, "fail to call xrp.NewRipple()")
 		}
-		return eth, err
+		return ripple, err
 	}
 	return nil, errors.Errorf("coinType %s is not defined", coinTypeCode.String())
 }

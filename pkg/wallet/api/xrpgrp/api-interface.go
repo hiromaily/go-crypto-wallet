@@ -22,4 +22,7 @@ type Rippler interface {
 	Close()
 	CoinTypeCode() coin.CoinTypeCode
 	GetChainConf() *chaincfg.Params
+
+	// RippleAPI
+	PrepareTransaction(senderAccount, receiverAccount string, amount float64) error
 }

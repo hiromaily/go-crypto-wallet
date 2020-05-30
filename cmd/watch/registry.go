@@ -22,6 +22,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/rippleapi"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/watchsrv"
@@ -310,6 +311,17 @@ func (r *registry) newXRPWSClient() (*ws.WS, *ws.WS) {
 	return r.wsXrpPublic, r.wsXrpAdmin
 }
 
+func (r *registry) newRippleAPI() *rippleapi.RippleAPI {
+	grpcConn, err := xrpgrp.NewRippleAPI(&r.conf.Ripple.API)
+	if err != nil {
+		panic(err)
+	}
+	if grpcConn == nil {
+		return nil
+	}
+	return rippleapi.NewRippleAPI(grpcConn, r.newLogger())
+}
+
 func (r *registry) newXRPWSRemote() *websockets.Remote {
 	if r.wsXrpRemote == nil {
 		var err error
@@ -328,6 +340,7 @@ func (r *registry) newXRP() xrpgrp.Rippler {
 		r.xrp, err = xrpgrp.NewRipple(
 			wsPublic,
 			wsAdmin,
+			r.newRippleAPI(),
 			r.newXRPWSRemote(),
 			&r.conf.Ripple,
 			r.newLogger(),
