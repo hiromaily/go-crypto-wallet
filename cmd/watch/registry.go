@@ -23,7 +23,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/rippleapi"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/watchsrv"
@@ -52,7 +52,7 @@ type registry struct {
 	wsXrpPublic  *ws.WS
 	wsXrpAdmin   *ws.WS
 	grpcConn     *grpc.ClientConn
-	rippleAPI    *rippleapi.RippleAPI
+	rippleAPI    *xrp.RippleAPI
 	wsXrpRemote  *websockets.Remote
 	mysqlClient  *sql.DB
 }
@@ -314,9 +314,9 @@ func (r *registry) newXRPWSClient() (*ws.WS, *ws.WS) {
 	return r.wsXrpPublic, r.wsXrpAdmin
 }
 
-func (r *registry) newRippleAPI() *rippleapi.RippleAPI {
+func (r *registry) newRippleAPI() *xrp.RippleAPI {
 	if r.rippleAPI == nil {
-		r.rippleAPI = rippleapi.NewRippleAPI(r.newGRPCConn(), r.newLogger())
+		r.rippleAPI = xrp.NewRippleAPI(r.newGRPCConn(), r.newLogger())
 	}
 	return r.rippleAPI
 }

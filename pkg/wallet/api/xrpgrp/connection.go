@@ -9,7 +9,6 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/rippleapi"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/ws"
@@ -77,7 +76,7 @@ func NewGRPCClient(conf *config.RippleAPI) (*grpc.ClientConn, error) {
 //}
 
 // NewRipple creates Ripple instance according to coinType
-func NewRipple(wsPublic *ws.WS, wsAdmin *ws.WS, api *rippleapi.RippleAPI, wsRemote *websockets.Remote, conf *config.Ripple, logger *zap.Logger, coinTypeCode coin.CoinTypeCode) (Rippler, error) {
+func NewRipple(wsPublic *ws.WS, wsAdmin *ws.WS, api *xrp.RippleAPI, wsRemote *websockets.Remote, conf *config.Ripple, logger *zap.Logger, coinTypeCode coin.CoinTypeCode) (Rippler, error) {
 	switch coinTypeCode {
 	case coin.XRP:
 		ripple, err := xrp.NewRipple(context.Background(), wsPublic, wsAdmin, api, wsRemote, coinTypeCode, conf, logger)

@@ -22,7 +22,7 @@ type Rippler interface {
 // RippleAPIer is RippleAPI interface
 type RippleAPIer interface {
 	// RippleAPI
-	PrepareTransaction(senderAccount, receiverAccount string, amount float64) error
+	PrepareTransaction(senderAccount, receiverAccount string, amount float64) (*xrp.TxJSON, error)
 }
 
 // RipplePublicer is RipplePublic interface
