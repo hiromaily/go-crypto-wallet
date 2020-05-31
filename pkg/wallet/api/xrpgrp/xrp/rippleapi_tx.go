@@ -37,7 +37,6 @@ func (r *Ripple) PrepareTransaction(senderAccount, receiverAccount string, amoun
 
 	//res: *pb.ResponsePrepareTransaction
 	res, err := r.API.client.PrepareTransaction(ctx, req)
-
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call client.PrepareTransaction()")
 	}
@@ -53,4 +52,24 @@ func (r *Ripple) PrepareTransaction(senderAccount, receiverAccount string, amoun
 	}
 
 	return &txJSON, nil
+}
+
+// SignTransaction calls SignTransaction API
+func (r *Ripple) SignTransaction(txJSON *TxJSON, secret string) (string, string, error) {
+	ctx := context.Background()
+	strJSON, err := json.Marshal(txJSON)
+	if err != nil {
+		return "", "", errors.Wrap(err, "fail to call json.Marshal(txJSON)")
+	}
+	req := &pb.RequestSign{
+		TxJSON: string(strJSON),
+		Secret: secret,
+	}
+
+	res, err := r.API.client.SignTransaction(ctx, req)
+	if err != nil {
+		return "", "", errors.Wrap(err, "fail to call client.SignTransaction()")
+	}
+
+	return res.TxID, res.TxBlob, nil
 }
