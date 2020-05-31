@@ -30,10 +30,10 @@ func TestTransaction(t *testing.T) {
 		{
 			name: "happy path 1",
 			args: args{
-				sernderAccount:  "rL9yQfN7s2NrYBQJ7bzgHFcPpvQnvsruvb",
-				senderSecret:    "sh5dj1ekCr6wW6DN1D16MYBTSSYmy",
+				sernderAccount:  "rE5PMFHa3fwRs2ZcC6d1psd6oLgDUxG7uJ",
+				senderSecret:    "spysas5TR89zeLnxktH4dMsU4SgkZ",
 				receiverAccount: "rss1EZUwTCPZSTyJiDKvhBfCXjTxffcArZ",
-				amount:          900,
+				amount:          50,
 			},
 			want: want{false},
 		},
@@ -57,7 +57,12 @@ func TestTransaction(t *testing.T) {
 			t.Log("txBlob: ", txBlob)
 
 			// SendTransaction
-
+			sentTx, latestLedgerVersion, err := xr.SubmitTransaction(txBlob)
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Log("latestLedgerVersion: ", latestLedgerVersion)
+			grok.Value(sentTx)
 		})
 	}
 
