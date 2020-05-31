@@ -245,6 +245,8 @@ github.com/hiromaily/ripple-lib-proto v0.0.0-20200530074814-409037ec3533 h1:yezb
 github.com/hiromaily/ripple-lib-proto v0.0.0-20200530074814-409037ec3533/go.mod h1:cPSMSAPNOd+9zBn+76uSTL5Snd3k5e2iMJ0bfhohCfI=
 github.com/hiromaily/ripple-lib-proto v0.0.0-20200531034548-36fa9e04ca18 h1:FuM/LP1RWqNSlFtGDN+4KfS7V7XF7bB/c9P70dr6svo=
 github.com/hiromaily/ripple-lib-proto v0.0.0-20200531034548-36fa9e04ca18/go.mod h1:cPSMSAPNOd+9zBn+76uSTL5Snd3k5e2iMJ0bfhohCfI=
+github.com/hiromaily/ripple-lib-proto v0.0.0-20200531051917-6330fbfb8f4b h1:PcLZoFmvto9fN40tW2aLJLPXMdPvJaL3TQJPnAnWdJ4=
+github.com/hiromaily/ripple-lib-proto v0.0.0-20200531051917-6330fbfb8f4b/go.mod h1:cPSMSAPNOd+9zBn+76uSTL5Snd3k5e2iMJ0bfhohCfI=
 github.com/hpcloud/tail v1.0.0 h1:nfCOvKYfkgYP8hkirhJocXT2+zOD8yUNjXaWfTlyFKI=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
 github.com/huin/goupnp v0.0.0-20161224104101-679507af18f3 h1:DqD8eigqlUm0+znmx7zhL0xvTW3+e1jCekJMfBUADWI=

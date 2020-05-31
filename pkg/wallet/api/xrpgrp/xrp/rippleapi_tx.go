@@ -61,7 +61,7 @@ func (r *Ripple) SignTransaction(txJSON *TxJSON, secret string) (string, string,
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call json.Marshal(txJSON)")
 	}
-	req := &pb.RequestSign{
+	req := &pb.RequestSignTransaction{
 		TxJSON: string(strJSON),
 		Secret: secret,
 	}
@@ -72,4 +72,18 @@ func (r *Ripple) SignTransaction(txJSON *TxJSON, secret string) (string, string,
 	}
 
 	return res.TxID, res.TxBlob, nil
+}
+
+// SubmitTransaction calls SubmitTransaction API
+// - signedTx is returned TxBlob by SignTransaction()
+func (r *Ripple) SubmitTransaction(signedTx string) (string, error) {
+	ctx := context.Background()
+	req := &pb.RequestSubmitTransaction{
+		TxBlob: signedTx,
+	}
+	res, err := r.API.client.SubmitTransaction(ctx, req)
+	if err != nil {
+		return "", errors.Wrap(err, "fail to call client.SubmitTransaction()")
+	}
+	return res.ResultJSONString, nil
 }
