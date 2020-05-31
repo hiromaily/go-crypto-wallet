@@ -3,10 +3,14 @@ package xrp
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"strconv"
 
+	"github.com/gogo/protobuf/types"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	pb "github.com/hiromaily/ripple-lib-proto/pb/go/rippleapi"
 )
@@ -114,4 +118,50 @@ func (r *Ripple) SubmitTransaction(signedTx string) (*SentTxJSON, uint32, error)
 	}
 
 	return &sentTxJSON, res.EarliestLedgerVersion, nil
+}
+
+// WaitValidation calls WaitValidation API
+// - handling server streaming
+func (r *Ripple) WaitValidation(targetledgerVarsion uint32) (uint32, error) {
+	ctx := context.Background()
+	req := &types.Empty{}
+	resStream, err := r.API.client.WaitValidation(ctx, req)
+	if err != nil {
+		return 0, errors.Wrap(err, "fail to call client.WaitValidation()")
+	}
+
+	defer resStream.CloseSend()
+
+	for {
+		res, err := resStream.Recv()
+		if err == io.EOF {
+			r.logger.Warn("server is closed in WaitValidation()")
+			return 0, errors.New("server is closed")
+		} else if err != nil {
+			if respErr, ok := status.FromError(err); ok {
+				switch respErr.Code() {
+				case codes.InvalidArgument:
+					r.logger.Warn("parameter is invalid in WaitValidation()")
+				case codes.DeadlineExceeded:
+					r.logger.Warn("timeout in WaitValidation()")
+				default:
+					r.logger.Warn("gRPC error in WaitValidation()",
+						zap.Uint32("code", uint32(respErr.Code())),
+						zap.String("message", respErr.Message()),
+					)
+				}
+			} else {
+				r.logger.Warn("fail to call resStream.Recv()", zap.Error(err))
+			}
+			//break
+			return 0, errors.Wrap(err, "fail to call resStream.Recv()")
+		}
+		// success
+		r.logger.Info("response in WaitValidation()", zap.Uint32("LedgerVersion", res.LedgerVersion))
+		if targetledgerVarsion <= res.LedgerVersion {
+			// done
+			return res.LedgerVersion, nil
+		}
+		// continue
+	}
 }
