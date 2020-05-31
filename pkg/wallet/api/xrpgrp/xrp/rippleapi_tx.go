@@ -113,5 +113,5 @@ func (r *Ripple) SubmitTransaction(signedTx string) (*SentTxJSON, uint32, error)
 		return nil, 0, errors.Wrap(err, "fail to call json.Unmarshal(sentTxJSON)")
 	}
 
-	return &sentTxJSON, res.LatestLedgerVersion, nil
+	return &sentTxJSON, res.EarliestLedgerVersion, nil
 }

@@ -31,7 +31,7 @@ require (
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
-	github.com/hiromaily/ripple-lib-proto v0.0.0-20200531062028-f4c001e661b4
+	github.com/hiromaily/ripple-lib-proto v0.0.0-20200531104217-9ba7a9de04f2
 	github.com/huin/goupnp v1.0.0 // indirect
 	github.com/jackpal/go-nat-pmp v1.0.2 // indirect
 	github.com/jmoiron/sqlx v1.2.0
