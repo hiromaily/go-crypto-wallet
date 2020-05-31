@@ -45,7 +45,7 @@ func (r *Ripple) ValidationCreate(secret string) (*ResponseValidationCreate, err
 	}
 	var res ResponseValidationCreate
 	if err := r.wsAdmin.Call(context.Background(), &req, &res); err != nil {
-		return nil, errors.Wrap(err, "fail to call wsClient.Call()")
+		return nil, errors.Wrap(err, "fail to call wsAdmin.Call(validation_create)")
 	}
 	return &res, nil
 }
@@ -93,7 +93,7 @@ func (r *Ripple) WalletProposeWithKey(seed string, keyType XRPKeyType) (*Respons
 	}
 	var res ResponseWalletPropose
 	if err := r.wsAdmin.Call(context.Background(), &req, &res); err != nil {
-		return nil, errors.Wrap(err, "fail to call wsClient.Call()")
+		return nil, errors.Wrap(err, "fail to call wsAdmin.Call(wallet_propose)")
 	}
 	return &res, nil
 }
@@ -111,7 +111,7 @@ func (r *Ripple) WalletPropose(passphrase string) (*ResponseWalletPropose, error
 	}
 	var res ResponseWalletPropose
 	if err := r.wsAdmin.Call(context.Background(), &req, &res); err != nil {
-		return nil, errors.Wrap(err, "fail to call wsClient.Call()")
+		return nil, errors.Wrap(err, "fail to call wsAdmin.Call(wallet_propose)")
 	}
 	return &res, nil
 }

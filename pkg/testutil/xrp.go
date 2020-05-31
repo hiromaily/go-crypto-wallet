@@ -2,7 +2,6 @@ package testutil
 
 import (
 	"fmt"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 	"log"
 	"os"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 

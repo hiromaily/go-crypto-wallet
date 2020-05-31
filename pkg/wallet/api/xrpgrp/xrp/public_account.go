@@ -55,7 +55,7 @@ func (r *Ripple) AccountChannels(sender, receiver string) (*ResponseAccountChann
 	}
 	var res ResponseAccountChannels
 	if err := r.wsPublic.Call(context.Background(), &req, &res); err != nil {
-		return nil, errors.Wrap(err, "fail to call wsClient.Call()")
+		return nil, errors.Wrap(err, "fail to call wsClient.Call(account_channels)")
 	}
 	return &res, nil
 }

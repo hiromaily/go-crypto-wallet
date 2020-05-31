@@ -93,7 +93,7 @@ func (r *Ripple) ServerInfo() (*ResponseServerInfo, error) {
 	}
 	var res ResponseServerInfo
 	if err := r.wsPublic.Call(context.Background(), &req, &res); err != nil {
-		return nil, errors.Wrap(err, "fail to call wsClient.Call()")
+		return nil, errors.Wrap(err, "fail to call wsClient.Call(server_info)")
 	}
 	return &res, nil
 }
