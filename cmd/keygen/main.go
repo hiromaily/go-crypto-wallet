@@ -29,7 +29,7 @@ import (
 var (
 	walletType = wallet.WalletTypeKeyGen
 	appName    = walletType.String()
-	appVersion = "2.3.0"
+	appVersion = "3.0.0"
 )
 
 func main() {
