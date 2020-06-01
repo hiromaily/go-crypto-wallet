@@ -8,10 +8,19 @@
 [![GitHub release](https://img.shields.io/badge/release-v3.0.0-blue.svg)](https://github.com/hiromaily/go-crypto-wallet/releases)
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://raw.githubusercontent.com/hiromaily/go-gin-wrapper/master/LICENSE)
 
-Wallet functionalities to create raw transaction, to sing on unsigned transaction, to send signed transaction for BTC, BCH, ETH and so on. XRP is coming soon.  
+Wallet functionalities to create raw transaction, to sing on unsigned transaction, to send signed transaction for BTC, BCH, ETH, XRP and so on.  
+
+## What kind of coin can be used?
+- Bitcoin
+- Bitcoin Cash
+- Ethereum
+- Ripple (ongoing)
+
 
 ## Note
-XRP project will start
+- XRP implementation is ongoing.
+- [Basic Attention Token](https://basicattentiontoken.org/) will be coming after XRP.
+- [Ethereum Classic](https://ethereumclassic.org/) will be coming after Basic Attention Token.
 
 ## Expected use cases
 ### 1.Deposit functionality
@@ -61,25 +70,29 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 
 
 ## Workflow diagram
-### 1. Generate keys
+### BTC
+#### 1. Generate keys
 ![generate keys](https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/images/0_key%20generation%20diagram.png?raw=true)
 
-### 2. Create unsigned transaction, Sign on unsigned tx, Send signed tx for non-multisig address.
+#### 2. Create unsigned transaction, Sign on unsigned tx, Send signed tx for non-multisig address.
 ![create tx](https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/images/1_Handle%20transactions%20for%20non-multisig%20address.png?raw=true)
 
-### 3. Create unsigned transaction, Sign on unsigned tx, Send signed tx for multisig address.
+#### 3. Create unsigned transaction, Sign on unsigned tx, Send signed tx for multisig address.
 ![create tx for multisig](https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/images/2_Handle%20transactions%20for%20multisig%20address.png?raw=true)
 
 
 ## Requirements
-- [Bitcoin Core 0.18+ for Bitcoin node](https://bitcoin.org/en/bitcoin-core/)
-- [Bitcoin ABC 0.21+ for Bitcoin cash node](https://www.bitcoinabc.org/)
 - MySQL 5.7
 - Golang 1.13+
 - Docker
+- Node Server
+    - BTC: [Bitcoin Core 0.18+ for Bitcoin node](https://bitcoin.org/en/bitcoin-core/)
+    - BCH: [Bitcoin ABC 0.21+ for Bitcoin cash node](https://www.bitcoinabc.org/)
+    - ETH: [go-ethereum](https://github.com/ethereum/go-ethereum)
+    - XRP: [rippled](https://xrpl.org/manage-the-rippled-server.html)
 
-
-## Install on local
+## Installation
+### BTC, BCH 
 At least, one bitcoin core server and 3 different databases are required.  
 After [bitcoin core installation](https://github.com/bitcoin/bitcoin/blob/master/doc/build-osx.md) is done
 ```
@@ -119,17 +132,17 @@ go build -ldflags "-X main.authName=auth4" -i -v -o ${GOPATH}/bin/sign4 ./cmd/si
 go build -ldflags "-X main.authName=auth5" -i -v -o ${GOPATH}/bin/sign5 ./cmd/sign/
 ```
 
-### Configuration
-- [watch.toml](https://github.com/hiromaily/go-crypto-wallet/blob/master/data/config/watch.toml)
-- [keygen.toml](https://github.com/hiromaily/go-crypto-wallet/blob/master/data/config/keygen.toml)
-- [sign.toml](https://github.com/hiromaily/go-crypto-wallet/blob/master/data/config/sign.toml)
+#### Configuration
+- [btc_watch.toml](https://github.com/hiromaily/go-crypto-wallet/blob/master/data/config/btc_watch.toml)
+- [btc_keygen.toml](https://github.com/hiromaily/go-crypto-wallet/blob/master/data/config/btc_keygen.toml)
+- [btc_sign.toml](https://github.com/hiromaily/go-crypto-wallet/blob/master/data/config/btc_sign.toml)
 
-## Example
-- [see scripts](https://github.com/hiromaily/go-crypto-wallet/tree/master/scripts/operation)
+#### Command example
 - [see Makefile](https://github.com/hiromaily/go-crypto-wallet/blob/master/Makefile)
+- [see scripts](https://github.com/hiromaily/go-crypto-wallet/tree/master/scripts/operation)
 
-### Setup for any keys
-- [see scripts](https://github.com/hiromaily/go-crypto-wallet/blob/master/scripts/operation/generate-key-local.sh)
+#### Setup for any keys
+- [see scripts](https://github.com/hiromaily/go-crypto-wallet/blob/master/scripts/operation/generate-btc-key-local.sh)
 
 Keygen wallet
 ```
@@ -206,7 +219,7 @@ watch import address -account payment -file payment-address-file
 watch import address -account stored -file stored-address-file
 ```
 
-### Operation for deposit action
+#### Operation for deposit action
 ```
 # check client addresses if it receives coin
 watch create deposit
@@ -219,7 +232,7 @@ watch send -file xxx.csv
 
 ```
 
-### Operation for payment action
+#### Operation for payment action
 ```
 # check payment_request if there are requests
 wallet create payment
@@ -275,7 +288,12 @@ watch send -file xxx.csv
 - [ ] How to manage password for private key
 
 ### For XRP
-- [ ] Understand XRP architecture first
+- [ ] APIs to call [Admin rippled Methods](https://xrpl.org/admin-rippled-methods.html)
+- [ ] APIs to call [Public rippled Methods](https://xrpl.org/public-rippled-methods.html)
+- [ ] Build [Rippled Server](https://xrpl.org/install-rippled.html)
+- [ ] Build gRPC Server as [RippleAPI](https://xrpl.org/rippleapi-reference.html) Server. Repository is [here](https://github.com/hiromaily/ripple-lib-server) 
+- [ ] gRPC Client to call RippleAPI
+- [x] Generating Keys
 
 ## Project layout patterns
 - The `pkg` layout pattern, refer to the [linked](https://medium.com/golang-learn/go-project-layout-e5213cdcfaa2) URLs for details.
