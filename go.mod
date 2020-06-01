@@ -31,12 +31,12 @@ require (
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
-	github.com/hiromaily/ripple-lib-proto v0.0.0-20200531104217-9ba7a9de04f2
+	github.com/hiromaily/ripple-lib-proto v0.0.0-20200601143740-d79e695351d6
 	github.com/huin/goupnp v1.0.0 // indirect
 	github.com/jackpal/go-nat-pmp v1.0.2 // indirect
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/juju/testing v0.0.0-20200510222523-6c8c298c77a0 // indirect
-	github.com/klauspost/compress v1.10.6 // indirect
+	github.com/klauspost/compress v1.10.7 // indirect
 	github.com/lib/pq v1.6.0 // indirect
 	github.com/mattn/go-colorable v0.1.6 // indirect
 	github.com/mitchellh/cli v1.1.1
@@ -65,7 +65,7 @@ require (
 	golang.org/x/sys v0.0.0-20200523222454-059865788121 // indirect
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1 // indirect
 	golang.org/x/tools v0.0.0-20200520220537-cf2d1e09c845 // indirect
-	google.golang.org/genproto v0.0.0-20200528191852-705c0b31589b // indirect
+	google.golang.org/genproto v0.0.0-20200601130524-0f60399e6634 // indirect
 	google.golang.org/grpc v1.29.1
 	gopkg.in/DataDog/dd-trace-go.v1 v1.24.1
 	honnef.co/go/tools v0.0.1-2020.1.3 // indirect

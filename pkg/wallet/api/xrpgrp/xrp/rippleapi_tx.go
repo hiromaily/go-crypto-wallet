@@ -130,7 +130,12 @@ func (r *Ripple) WaitValidation(targetledgerVarsion uint32) (uint32, error) {
 		return 0, errors.Wrap(err, "fail to call client.WaitValidation()")
 	}
 
-	defer resStream.CloseSend()
+	defer func() {
+		r.logger.Debug("running in defer func()")
+		if err := resStream.CloseSend(); err != nil {
+			r.logger.Warn("fail to call resStream.CloseSend()")
+		}
+	}()
 
 	for {
 		res, err := resStream.Recv()
@@ -164,4 +169,31 @@ func (r *Ripple) WaitValidation(targetledgerVarsion uint32) (uint32, error) {
 		}
 		// continue
 	}
+}
+
+// GetTransaction calls GetTransaction API
+// TODO: WIP
+func (r *Ripple) GetTransaction(txID string) (string, error) {
+	ctx := context.Background()
+	req := &pb.RequestGetTransaction{
+		TxID: txID,
+	}
+	res, err := r.API.client.GetTransaction(ctx, req)
+	if err != nil {
+		return "", errors.Wrap(err, "fail to call client.GetTransaction()")
+	}
+
+	if res.ErrorMessage != "" {
+		return "", errors.New(res.ErrorMessage)
+	}
+
+	r.logger.Debug("response of getTransaction",
+		zap.String("res.ResultJSONString", res.ResultJSONString),
+	)
+
+	//var getTxJSON SentTxJSON
+	//if err = json.Unmarshal([]byte(res.ResultJSONString), &getTxJSON); err != nil {
+	//	return "", errors.Wrap(err, "fail to call json.Unmarshal(getTxJSON)")
+	//}
+	return res.ResultJSONString, nil
 }

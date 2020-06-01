@@ -25,6 +25,8 @@ type RippleAPIer interface {
 	PrepareTransaction(senderAccount, receiverAccount string, amount float64) (*xrp.TxJSON, error)
 	SignTransaction(txJSON *xrp.TxJSON, secret string) (string, string, error)
 	SubmitTransaction(signedTx string) (*xrp.SentTxJSON, uint32, error)
+	WaitValidation(targetledgerVarsion uint32) (uint32, error)
+	GetTransaction(txID string) (string, error)
 }
 
 // RipplePublicer is RipplePublic interface

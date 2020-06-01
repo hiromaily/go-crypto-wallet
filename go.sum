@@ -251,6 +251,10 @@ github.com/hiromaily/ripple-lib-proto v0.0.0-20200531062028-f4c001e661b4 h1:IKyF
 github.com/hiromaily/ripple-lib-proto v0.0.0-20200531062028-f4c001e661b4/go.mod h1:cPSMSAPNOd+9zBn+76uSTL5Snd3k5e2iMJ0bfhohCfI=
 github.com/hiromaily/ripple-lib-proto v0.0.0-20200531104217-9ba7a9de04f2 h1:Po0/YEQnY6NYvemKgcWRt88WGj4g3IKLtH86KKYuIqk=
 github.com/hiromaily/ripple-lib-proto v0.0.0-20200531104217-9ba7a9de04f2/go.mod h1:cPSMSAPNOd+9zBn+76uSTL5Snd3k5e2iMJ0bfhohCfI=
+github.com/hiromaily/ripple-lib-proto v0.0.0-20200531154832-45c112cd8ffd h1:8ZzKIZFkacvcerF3dL49AF1KKb3luhvZxoXX5y2xn7I=
+github.com/hiromaily/ripple-lib-proto v0.0.0-20200531154832-45c112cd8ffd/go.mod h1:cPSMSAPNOd+9zBn+76uSTL5Snd3k5e2iMJ0bfhohCfI=
+github.com/hiromaily/ripple-lib-proto v0.0.0-20200601143740-d79e695351d6 h1:IsHQrwT21GfA/fddSE8auYz/MY80x0zX0zijHkpYwEw=
+github.com/hiromaily/ripple-lib-proto v0.0.0-20200601143740-d79e695351d6/go.mod h1:cPSMSAPNOd+9zBn+76uSTL5Snd3k5e2iMJ0bfhohCfI=
 github.com/hpcloud/tail v1.0.0 h1:nfCOvKYfkgYP8hkirhJocXT2+zOD8yUNjXaWfTlyFKI=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
 github.com/huin/goupnp v0.0.0-20161224104101-679507af18f3 h1:DqD8eigqlUm0+znmx7zhL0xvTW3+e1jCekJMfBUADWI=
@@ -300,6 +304,8 @@ github.com/klauspost/compress v1.10.3 h1:OP96hzwJVBIHYU52pVTI6CczrxPvrGfgqF9N5eT
 github.com/klauspost/compress v1.10.3/go.mod h1:aoV0uJVorq1K+umq18yTdKaF57EivdYsUV+/s2qKfXs=
 github.com/klauspost/compress v1.10.6 h1:SP6zavvTG3YjOosWePXFDlExpKIWMTO4SE/Y8MZB2vI=
 github.com/klauspost/compress v1.10.6/go.mod h1:aoV0uJVorq1K+umq18yTdKaF57EivdYsUV+/s2qKfXs=
+github.com/klauspost/compress v1.10.7 h1:7rix8v8GpI3ZBb0nSozFRgbtXKv+hOe+qfEpZqybrAg=
+github.com/klauspost/compress v1.10.7/go.mod h1:aoV0uJVorq1K+umq18yTdKaF57EivdYsUV+/s2qKfXs=
 github.com/klauspost/cpuid v1.2.3/go.mod h1:Pj4uuM528wm8OyEC2QMXAi2YiTZ96dNQPGgoMS4s3ek=
 github.com/klauspost/reedsolomon v1.9.3/go.mod h1:CwCi+NUr9pqSVktrkN+Ondf06rkhYZ/pcNv7fu+8Un4=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
@@ -597,6 +603,8 @@ google.golang.org/genproto v0.0.0-20200218151345-dad8c97a84f5/go.mod h1:55QSHmfG
 google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013/go.mod h1:NbSheEEYHJ7i3ixzK3sjbqSGDJWnxyFXZblF3eUsNvo=
 google.golang.org/genproto v0.0.0-20200528191852-705c0b31589b h1:nl5tymnV+50ACFZUDAP+xFCe3Zh3SWdMDx+ernZSKNA=
 google.golang.org/genproto v0.0.0-20200528191852-705c0b31589b/go.mod h1:jDfRM7FcilCzHH/e9qn6dsT145K34l5v+OpcnNgKAAA=
+google.golang.org/genproto v0.0.0-20200601130524-0f60399e6634 h1:yUEnIJPm1I2GGauN1xOkwj6gXw/3t1R+HA1r/cdnkHE=
+google.golang.org/genproto v0.0.0-20200601130524-0f60399e6634/go.mod h1:jDfRM7FcilCzHH/e9qn6dsT145K34l5v+OpcnNgKAAA=
 google.golang.org/grpc v1.19.0/go.mod h1:mqu4LbDTu4XGKhr4mRzUsmM4RtVoemTSY81AxZiDr8c=
 google.golang.org/grpc v1.23.0/go.mod h1:Y5yQAOtifL1yxbo5wqy6BxZv8vAUGQwXBOALyacEbxg=
 google.golang.org/grpc v1.25.1/go.mod h1:c3i+UQWmh7LiEpx4sFZnkU36qjEYZ0imhYfXVyQciAY=

@@ -57,12 +57,26 @@ func TestTransaction(t *testing.T) {
 			t.Log("txBlob: ", txBlob)
 
 			// SendTransaction
-			sentTx, latestLedgerVersion, err := xr.SubmitTransaction(txBlob)
+			sentTx, earlistLedgerVersion, err := xr.SubmitTransaction(txBlob)
 			if err != nil {
 				t.Fatal(err)
 			}
-			t.Log("latestLedgerVersion: ", latestLedgerVersion)
+			t.Log("latestLedgerVersion: ", earlistLedgerVersion)
 			grok.Value(sentTx)
+
+			// validate transaction
+			leggerVer, err := xr.WaitValidation(earlistLedgerVersion)
+			if err != nil {
+				t.Fatal(err)
+			}
+			t.Log("currentLedgerVersion: ", leggerVer)
+
+			// log tx info
+			txInfo, err := xr.GetTransaction(txID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			grok.Value(txInfo)
 		})
 	}
 
