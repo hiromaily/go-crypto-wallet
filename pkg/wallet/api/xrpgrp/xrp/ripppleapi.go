@@ -9,9 +9,10 @@ import (
 
 // RippleAPI it RippleAPI client
 type RippleAPI struct {
-	client pb.RippleAPIClient
-	conn   *grpc.ClientConn
-	logger *zap.Logger
+	txClient      pb.RippleTransactionAPIClient
+	accountClient pb.RippleAccountAPIClient
+	conn          *grpc.ClientConn
+	logger        *zap.Logger
 }
 
 // NewRippleAPI creates Ripple API object
@@ -20,9 +21,10 @@ func NewRippleAPI(
 	logger *zap.Logger) *RippleAPI {
 
 	return &RippleAPI{
-		client: pb.NewRippleAPIClient(conn),
-		conn:   conn,
-		logger: logger,
+		txClient:      pb.NewRippleTransactionAPIClient(conn),
+		accountClient: pb.NewRippleAccountAPIClient(conn),
+		conn:          conn,
+		logger:        logger,
 	}
 }
 

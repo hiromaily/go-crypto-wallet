@@ -27,6 +27,7 @@ func NewWSClient(conf *config.Ripple) (*ws.WS, *ws.WS, error) {
 		return nil, nil, errors.Wrapf(err, "fail to call ws.New() for public API: %s", publicURL)
 	}
 
+	// acceptable without adminClient
 	adminURL := conf.WebsocketAdminURL
 	if adminURL == "" {
 		return public, nil, nil

@@ -79,6 +79,7 @@ func TestTransaction(t *testing.T) {
 			grok.Value(txInfo)
 
 			//TODO: sender account info
+			//TODO: receiver account info
 
 		})
 	}
