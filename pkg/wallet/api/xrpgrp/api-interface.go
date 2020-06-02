@@ -22,11 +22,11 @@ type Rippler interface {
 // RippleAPIer is RippleAPI interface
 type RippleAPIer interface {
 	// RippleAPI
-	PrepareTransaction(senderAccount, receiverAccount string, amount float64) (*xrp.TxJSON, error)
-	SignTransaction(txJSON *xrp.TxJSON, secret string) (string, string, error)
-	SubmitTransaction(signedTx string) (*xrp.SentTxJSON, uint32, error)
-	WaitValidation(targetledgerVarsion uint32) (uint32, error)
-	GetTransaction(txID string) (string, error)
+	PrepareTransaction(senderAccount, receiverAccount string, amount float64) (*xrp.TxInput, error)
+	SignTransaction(txJSON *xrp.TxInput, secret string) (string, string, error)
+	SubmitTransaction(signedTx string) (*xrp.SentTx, uint64, error)
+	WaitValidation(targetledgerVarsion uint64) (uint64, error)
+	GetTransaction(txID string, targetLedgerVersion uint64) (*xrp.TxInfo, error)
 }
 
 // RipplePublicer is RipplePublic interface

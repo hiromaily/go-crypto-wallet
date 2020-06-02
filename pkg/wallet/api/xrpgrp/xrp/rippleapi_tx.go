@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"strconv"
+	"time"
 
 	"github.com/gogo/protobuf/types"
 	"github.com/pkg/errors"
@@ -18,8 +19,8 @@ import (
 // Send XRP
 // https://xrpl.org/send-xrp.html
 
-// TxJSON is transaction json type
-type TxJSON struct {
+// TxInput is transaction input json type
+type TxInput struct {
 	TransactionType    string `json:"TransactionType"`
 	Account            string `json:"Account"`
 	Amount             string `json:"Amount"`
@@ -33,19 +34,81 @@ type TxJSON struct {
 	Hash               string `json:"hash,omitempty"`
 }
 
-// SentTxJSON is result transaction json type after sending
-type SentTxJSON struct {
-	ResultCode          string `json:"resultCode"`
-	ResultMessage       string `json:"resultMessage"`
-	EngineResult        string `json:"engine_result"`
-	EngineResultCode    int    `json:"engine_result_code"`
-	EngineResultMessage string `json:"engine_result_message"`
-	TxBlob              string `json:"tx_blob"`
-	TxJSON              TxJSON `json:"tx_json"`
+// SentTx is result transaction json type after sending
+type SentTx struct {
+	ResultCode          string  `json:"resultCode"`
+	ResultMessage       string  `json:"resultMessage"`
+	EngineResult        string  `json:"engine_result"`
+	EngineResultCode    int     `json:"engine_result_code"`
+	EngineResultMessage string  `json:"engine_result_message"`
+	TxBlob              string  `json:"tx_blob"`
+	TxJSON              TxInput `json:"tx_json"`
+}
+
+// TxInfo is result transaction json type after sending
+type TxInfo struct {
+	Type          string          `json:"type"`
+	Address       string          `json:"address"`
+	Sequence      int             `json:"sequence"`
+	ID            string          `json:"id"`
+	Specification TxSpecification `json:"specification"`
+	Outcome       TxOutcome       `json:"outcome"`
+}
+
+// TxSpecification is part of TxInfo
+type TxSpecification struct {
+	Source      TxSpecSource      `json:"source"`
+	Destination TxSpecDestination `json:"destination"`
+}
+
+// TxSpecSource is part of TxInfo
+type TxSpecSource struct {
+	Address   string   `json:"address"`
+	MaxAmount TxAmount `json:"maxAmount"`
+}
+
+// TxAmount is part of TxInfo
+type TxAmount struct {
+	Currency string `json:"currency"`
+	Value    string `json:"value"`
+}
+
+// TxTotalPrice is part of TxInfo
+type TxTotalPrice struct {
+	Currency     string `json:"currency"`
+	Counterparty string `json:"counterparty"`
+	Value        string `json:"value"`
+}
+
+// TxSpecDestination is part of TxInfo
+type TxSpecDestination struct {
+	Address string `json:"address"`
+}
+
+// TxOutcome is part of TxInfo
+type TxOutcome struct {
+	Result           string                         `json:"result"`
+	Timestamp        time.Time                      `json:"timestamp"`
+	Fee              string                         `json:"fee"`
+	BalanceChanges   map[string][]TxAmount          `json:"balanceChanges"`
+	OrderbookChanges map[string][]TxOrderbookChange `json:"orderbookChanges"`
+	LedgerVersion    int                            `json:"ledgerVersion"`
+	IndexInLedger    int                            `json:"indexInLedger"`
+	DeliveredAmount  TxAmount                       `json:"deliveredAmount"`
+}
+
+// TxOrderbookChange is part of TxInfo
+type TxOrderbookChange struct {
+	Direction         string       `json:"direction"`
+	Quantity          TxAmount     `json:"quantity"`
+	TotalPrice        TxTotalPrice `json:"totalPrice"`
+	MakerExchangeRate string       `json:"makerExchangeRate"`
+	Sequence          int          `json:"sequence"`
+	Status            string       `json:"status"`
 }
 
 // PrepareTransaction calls PrepareTransaction API
-func (r *Ripple) PrepareTransaction(senderAccount, receiverAccount string, amount float64) (*TxJSON, error) {
+func (r *Ripple) PrepareTransaction(senderAccount, receiverAccount string, amount float64) (*TxInput, error) {
 
 	ctx := context.Background()
 	req := &pb.RequestPrepareTransaction{
@@ -66,20 +129,20 @@ func (r *Ripple) PrepareTransaction(senderAccount, receiverAccount string, amoun
 		zap.Any("Instructions", res.Instructions),
 	)
 
-	var txJSON TxJSON
+	var txInput TxInput
 	unquotedJSON, _ := strconv.Unquote(res.TxJSON)
-	if err = json.Unmarshal([]byte(unquotedJSON), &txJSON); err != nil {
+	if err = json.Unmarshal([]byte(unquotedJSON), &txInput); err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Unmarshal(txJSON)")
 	}
 
-	return &txJSON, nil
+	return &txInput, nil
 }
 
 // SignTransaction calls SignTransaction API
 // TODO: Is it possible to run offline?
-func (r *Ripple) SignTransaction(txJSON *TxJSON, secret string) (string, string, error) {
+func (r *Ripple) SignTransaction(txInput *TxInput, secret string) (string, string, error) {
 	ctx := context.Background()
-	strJSON, err := json.Marshal(txJSON)
+	strJSON, err := json.Marshal(txInput)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call json.Marshal(txJSON)")
 	}
@@ -98,7 +161,7 @@ func (r *Ripple) SignTransaction(txJSON *TxJSON, secret string) (string, string,
 
 // SubmitTransaction calls SubmitTransaction API
 // - signedTx is returned TxBlob by SignTransaction()
-func (r *Ripple) SubmitTransaction(signedTx string) (*SentTxJSON, uint32, error) {
+func (r *Ripple) SubmitTransaction(signedTx string) (*SentTx, uint64, error) {
 	ctx := context.Background()
 	req := &pb.RequestSubmitTransaction{
 		TxBlob: signedTx,
@@ -108,21 +171,28 @@ func (r *Ripple) SubmitTransaction(signedTx string) (*SentTxJSON, uint32, error)
 		return nil, 0, errors.Wrap(err, "fail to call client.SubmitTransaction()")
 	}
 
-	r.logger.Debug("response of submitTransaction",
-		zap.String("res.ResultJSONString", res.ResultJSONString),
-	)
-
-	var sentTxJSON SentTxJSON
+	var sentTxJSON SentTx
 	if err = json.Unmarshal([]byte(res.ResultJSONString), &sentTxJSON); err != nil {
 		return nil, 0, errors.Wrap(err, "fail to call json.Unmarshal(sentTxJSON)")
 	}
 
+	//FIXME:
+	// res.EarliestLedgerVersion may be useless because SentTxJSON includes `LastLedgerSequence` and it would be useful
+	r.logger.Debug("response of submitTransaction",
+		zap.String("res.ResultJSONString", res.ResultJSONString),
+		zap.Uint64("res.EarliestLedgerVersion", res.EarliestLedgerVersion),
+		zap.Uint64("sentTxJSON.TxJSON.LastLedgerSequence", sentTxJSON.TxJSON.LastLedgerSequence),
+	)
+	//res.EarliestLedgerVersion => for when calling GetTransaction()
+	//sentTxJSON.TxJSON.LastLedgerSequence => for when calling WaitValidation()
+
 	return &sentTxJSON, res.EarliestLedgerVersion, nil
+	//return &sentTxJSON, sentTxJSON.TxJSON.LastLedgerSequence, nil
 }
 
 // WaitValidation calls WaitValidation API
 // - handling server streaming
-func (r *Ripple) WaitValidation(targetledgerVarsion uint32) (uint32, error) {
+func (r *Ripple) WaitValidation(targetledgerVarsion uint64) (uint64, error) {
 	ctx := context.Background()
 	req := &types.Empty{}
 	resStream, err := r.API.client.WaitValidation(ctx, req)
@@ -162,7 +232,7 @@ func (r *Ripple) WaitValidation(targetledgerVarsion uint32) (uint32, error) {
 			return 0, errors.Wrap(err, "fail to call resStream.Recv()")
 		}
 		// success
-		r.logger.Info("response in WaitValidation()", zap.Uint32("LedgerVersion", res.LedgerVersion))
+		r.logger.Info("response in WaitValidation()", zap.Uint64("LedgerVersion", res.LedgerVersion))
 		if targetledgerVarsion <= res.LedgerVersion {
 			// done
 			return res.LedgerVersion, nil
@@ -172,28 +242,32 @@ func (r *Ripple) WaitValidation(targetledgerVarsion uint32) (uint32, error) {
 }
 
 // GetTransaction calls GetTransaction API
-// TODO: WIP
-func (r *Ripple) GetTransaction(txID string) (string, error) {
+func (r *Ripple) GetTransaction(txID string, targetLedgerVersion uint64) (*TxInfo, error) {
 	ctx := context.Background()
 	req := &pb.RequestGetTransaction{
-		TxID: txID,
+		TxID:             txID,
+		MinLedgerVersion: targetLedgerVersion,
 	}
 	res, err := r.API.client.GetTransaction(ctx, req)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call client.GetTransaction()")
+		return nil, errors.Wrap(err, "fail to call client.GetTransaction()")
 	}
 
 	if res.ErrorMessage != "" {
-		return "", errors.New(res.ErrorMessage)
+		return nil, errors.New(res.ErrorMessage)
+	}
+	if res.ResultJSONString == "" {
+		return nil, errors.Errorf("fail to get transaction info by %s", txID)
 	}
 
+	//nothing
 	r.logger.Debug("response of getTransaction",
 		zap.String("res.ResultJSONString", res.ResultJSONString),
 	)
 
-	//var getTxJSON SentTxJSON
-	//if err = json.Unmarshal([]byte(res.ResultJSONString), &getTxJSON); err != nil {
-	//	return "", errors.Wrap(err, "fail to call json.Unmarshal(getTxJSON)")
-	//}
-	return res.ResultJSONString, nil
+	var txInfo TxInfo
+	if err = json.Unmarshal([]byte(res.ResultJSONString), &txInfo); err != nil {
+		return nil, errors.Wrap(err, "fail to call json.Unmarshal(txInfo)")
+	}
+	return &txInfo, nil
 }

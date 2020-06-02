@@ -255,6 +255,10 @@ github.com/hiromaily/ripple-lib-proto v0.0.0-20200531154832-45c112cd8ffd h1:8ZzK
 github.com/hiromaily/ripple-lib-proto v0.0.0-20200531154832-45c112cd8ffd/go.mod h1:cPSMSAPNOd+9zBn+76uSTL5Snd3k5e2iMJ0bfhohCfI=
 github.com/hiromaily/ripple-lib-proto v0.0.0-20200601143740-d79e695351d6 h1:IsHQrwT21GfA/fddSE8auYz/MY80x0zX0zijHkpYwEw=
 github.com/hiromaily/ripple-lib-proto v0.0.0-20200601143740-d79e695351d6/go.mod h1:cPSMSAPNOd+9zBn+76uSTL5Snd3k5e2iMJ0bfhohCfI=
+github.com/hiromaily/ripple-lib-proto v0.0.0-20200602000406-ca80219381ce h1:9SZW4HC82IIStebCop5vw+zXk70pg04Wl4oMu3c6HtY=
+github.com/hiromaily/ripple-lib-proto v0.0.0-20200602000406-ca80219381ce/go.mod h1:cPSMSAPNOd+9zBn+76uSTL5Snd3k5e2iMJ0bfhohCfI=
+github.com/hiromaily/ripple-lib-proto v0.0.0-20200602021222-18f3086efa6b h1:B9t1IKI825fUCTUdE8ZeM9DsZIH5P9HQ1cQJeAqlDaw=
+github.com/hiromaily/ripple-lib-proto v0.0.0-20200602021222-18f3086efa6b/go.mod h1:cPSMSAPNOd+9zBn+76uSTL5Snd3k5e2iMJ0bfhohCfI=
 github.com/hpcloud/tail v1.0.0 h1:nfCOvKYfkgYP8hkirhJocXT2+zOD8yUNjXaWfTlyFKI=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
 github.com/huin/goupnp v0.0.0-20161224104101-679507af18f3 h1:DqD8eigqlUm0+znmx7zhL0xvTW3+e1jCekJMfBUADWI=

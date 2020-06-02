@@ -30,8 +30,8 @@ func TestTransaction(t *testing.T) {
 		{
 			name: "happy path 1",
 			args: args{
-				sernderAccount:  "rE5PMFHa3fwRs2ZcC6d1psd6oLgDUxG7uJ",
-				senderSecret:    "spysas5TR89zeLnxktH4dMsU4SgkZ",
+				sernderAccount:  "rNajCSDNXZLCioutY6xk4r3mYWMGYAorcN",
+				senderSecret:    "sn2S8Gdfr9uYsX81nsjetf2Rx66Sv",
 				receiverAccount: "rss1EZUwTCPZSTyJiDKvhBfCXjTxffcArZ",
 				amount:          50,
 			},
@@ -61,22 +61,25 @@ func TestTransaction(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			t.Log("latestLedgerVersion: ", earlistLedgerVersion)
+			t.Log("earlistLedgerVersion: ", earlistLedgerVersion)
 			grok.Value(sentTx)
 
 			// validate transaction
-			leggerVer, err := xr.WaitValidation(earlistLedgerVersion)
+			leggerVer, err := xr.WaitValidation(sentTx.TxJSON.LastLedgerSequence)
 			if err != nil {
 				t.Fatal(err)
 			}
 			t.Log("currentLedgerVersion: ", leggerVer)
 
-			// log tx info
-			txInfo, err := xr.GetTransaction(txID)
+			// get transaction info
+			txInfo, err := xr.GetTransaction(txID, earlistLedgerVersion)
 			if err != nil {
 				t.Fatal(err)
 			}
 			grok.Value(txInfo)
+
+			//TODO: sender account info
+
 		})
 	}
 

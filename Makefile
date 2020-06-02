@@ -47,6 +47,10 @@ update-decimal:
 imports:
 	./scripts/imports.sh
 
+# FIXME: just after updating package outside from this repository, `go get` doesn't update that package for a while
+#goget:
+#	go get github.com/hiromaily/ripple-lib-proto/pb/go/rippleapi@ca80219
+
 .PHONY: lint
 lint:
 	golangci-lint run
