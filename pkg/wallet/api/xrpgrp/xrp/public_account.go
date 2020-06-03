@@ -44,6 +44,42 @@ type ResponseAccountChannels struct {
 	Error string `json:"error,omitempty"`
 }
 
+// AccountInfo is request data for account_info method
+type AccountInfo struct {
+	ID          int    `json:"id"`
+	Command     string `json:"command"`
+	Account     string `json:"account"`
+	Strict      bool   `json:"strict"`
+	LedgerIndex string `json:"ledger_index"`
+	Queue       bool   `json:"queue"`
+}
+
+// ResponseAccountInfo is response data for account_info method
+type ResponseAccountInfo struct {
+	ID     int `json:"id"`
+	Result struct {
+		AccountData struct {
+			Account           string `json:"Account"`
+			Balance           string `json:"Balance"`
+			Flags             int    `json:"Flags"`
+			LedgerEntryType   string `json:"LedgerEntryType"`
+			OwnerCount        int    `json:"OwnerCount"`
+			PreviousTxnID     string `json:"PreviousTxnID"`
+			PreviousTxnLgrSeq int    `json:"PreviousTxnLgrSeq"`
+			Sequence          int    `json:"Sequence"`
+			Index             string `json:"index"`
+		} `json:"account_data"`
+		LedgerCurrentIndex int `json:"ledger_current_index"`
+		QueueData          struct {
+			TxnCount int `json:"txn_count"`
+		} `json:"queue_data"`
+		Validated bool `json:"validated"`
+	} `json:"result"`
+	Status string `json:"status"`
+	Type   string `json:"type"`
+	Error  string `json:"error,omitempty"`
+}
+
 // AccountChannels calls account_channels method
 func (r *Ripple) AccountChannels(sender, receiver string) (*ResponseAccountChannels, error) {
 	req := AccountChannels{
@@ -56,6 +92,23 @@ func (r *Ripple) AccountChannels(sender, receiver string) (*ResponseAccountChann
 	var res ResponseAccountChannels
 	if err := r.wsPublic.Call(context.Background(), &req, &res); err != nil {
 		return nil, errors.Wrap(err, "fail to call wsClient.Call(account_channels)")
+	}
+	return &res, nil
+}
+
+// AccountInfo calls account_channels method
+func (r *Ripple) AccountInfo(address string) (*ResponseAccountInfo, error) {
+	req := AccountInfo{
+		ID:          2,
+		Command:     "account_info",
+		Account:     address,
+		Strict:      true,
+		LedgerIndex: "current",
+		Queue:       true,
+	}
+	var res ResponseAccountInfo
+	if err := r.wsPublic.Call(context.Background(), &req, &res); err != nil {
+		return nil, errors.Wrap(err, "fail to call wsClient.Call(account_info)")
 	}
 	return &res, nil
 }

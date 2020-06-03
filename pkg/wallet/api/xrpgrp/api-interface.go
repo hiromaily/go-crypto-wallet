@@ -5,6 +5,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
+	pb "github.com/hiromaily/ripple-lib-proto/pb/go/rippleapi"
 )
 
 // Rippler Ripple Interface
@@ -21,7 +22,9 @@ type Rippler interface {
 
 // RippleAPIer is RippleAPI interface
 type RippleAPIer interface {
-	// RippleAPI
+	// RippleAccountAPI
+	GetAccountInfo(address string) (*pb.ResponseGetAccountInfo, error)
+	// RippleTxAPI
 	PrepareTransaction(senderAccount, receiverAccount string, amount float64) (*xrp.TxInput, error)
 	SignTransaction(txJSON *xrp.TxInput, secret string) (string, string, error)
 	SubmitTransaction(signedTx string) (*xrp.SentTx, uint64, error)
@@ -33,6 +36,7 @@ type RippleAPIer interface {
 type RipplePublicer interface {
 	// public_account
 	AccountChannels(sender, receiver string) (*xrp.ResponseAccountChannels, error)
+	AccountInfo(address string) (*xrp.ResponseAccountInfo, error)
 	// public_server_info
 	ServerInfo() (*xrp.ResponseServerInfo, error)
 }

@@ -16,8 +16,8 @@ import (
 	pb "github.com/hiromaily/ripple-lib-proto/pb/go/rippleapi"
 )
 
-// Send XRP
-// https://xrpl.org/send-xrp.html
+// - Send XRP https://xrpl.org/send-xrp.html
+// - Payment System Basics https://xrpl.org/payment-system-basics.html
 
 // TxInput is transaction input json type
 type TxInput struct {
@@ -139,7 +139,8 @@ func (r *Ripple) PrepareTransaction(senderAccount, receiverAccount string, amoun
 }
 
 // SignTransaction calls SignTransaction API
-// TODO: Is it possible to run offline?
+// Offline functionality
+// - https://xrpl.org/rippleapi-reference.html#offline-functionality
 func (r *Ripple) SignTransaction(txInput *TxInput, secret string) (string, string, error) {
 	ctx := context.Background()
 	strJSON, err := json.Marshal(txInput)

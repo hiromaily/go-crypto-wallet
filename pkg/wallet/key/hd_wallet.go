@@ -52,7 +52,7 @@ const (
 )
 
 // CoinType creates a separate subtree for every cryptocoin
-//  which come from `CoinType` in go-bitcoin/pkg/wallet/coin/types.go
+//  which come from `CoinType` in go-crypto-wallet/pkg/wallet/coin/types.go
 type CoinType uint32
 
 // Uint32 converter
@@ -64,7 +64,7 @@ func (t CoinType) Uint32() uint32 {
 // https://github.com/satoshilabs/slips/blob/master/slip-0044.md
 
 // Account
-// account come from `AccountType` in go-bitcoin/pkg/public_account.go
+// account come from `AccountType` in go-crypto-wallet/pkg/account/public_account.go
 
 //ChangeType  external or internal use
 type ChangeType uint32

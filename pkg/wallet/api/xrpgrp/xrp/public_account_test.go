@@ -20,3 +20,16 @@ func TestAccountChannels(t *testing.T) {
 	t.Log("accountChannels:", res)
 	grok.Value(res)
 }
+
+// TestAccountInfo is test for AccountInfo
+func TestAccountInfo(t *testing.T) {
+	//t.SkipNow()
+	xr := testutil.GetXRP()
+
+	res, err := xr.AccountInfo("rss1EZUwTCPZSTyJiDKvhBfCXjTxffcArZ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log("accountInfo:", res)
+	grok.Value(res)
+}
