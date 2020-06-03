@@ -24,6 +24,10 @@ type Rippler interface {
 type RippleAPIer interface {
 	// RippleAccountAPI
 	GetAccountInfo(address string) (*pb.ResponseGetAccountInfo, error)
+	// RippleAddressAPI
+	GenerateAddress() (*pb.ResponseGenerateAddress, error)
+	GenerateXAddress() (*pb.ResponseGenerateXAddress, error)
+	IsValidAddress(addr string) (bool, error)
 	// RippleTxAPI
 	PrepareTransaction(senderAccount, receiverAccount string, amount float64) (*xrp.TxInput, error)
 	SignTransaction(txJSON *xrp.TxInput, secret string) (string, string, error)

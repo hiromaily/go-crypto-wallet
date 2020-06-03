@@ -11,6 +11,7 @@ import (
 type RippleAPI struct {
 	txClient      pb.RippleTransactionAPIClient
 	accountClient pb.RippleAccountAPIClient
+	addressClient pb.RippleAddressAPIClient
 	conn          *grpc.ClientConn
 	logger        *zap.Logger
 }
@@ -23,6 +24,7 @@ func NewRippleAPI(
 	return &RippleAPI{
 		txClient:      pb.NewRippleTransactionAPIClient(conn),
 		accountClient: pb.NewRippleAccountAPIClient(conn),
+		addressClient: pb.NewRippleAddressAPIClient(conn),
 		conn:          conn,
 		logger:        logger,
 	}
