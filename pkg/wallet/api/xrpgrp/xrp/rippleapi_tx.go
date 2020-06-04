@@ -160,6 +160,22 @@ func (r *Ripple) SignTransaction(txInput *TxInput, secret string) (string, strin
 	return res.TxID, res.TxBlob, nil
 }
 
+// CombineTransaction combines signed transactions from multiple accounts for a multisignature transaction.
+// - The signed transaction must subsequently be submitted.
+func (r *Ripple) CombineTransaction(signedTxs []string) (string, string, error) {
+	ctx := context.Background()
+	req := &pb.RequestCombineTransaction{
+		SignedTransactions: signedTxs,
+	}
+
+	res, err := r.API.txClient.CombineTransaction(ctx, req)
+	if err != nil {
+		return "", "", errors.Wrap(err, "fail to call client.CombineTransaction()")
+	}
+
+	return res.TxID, res.SignedTransaction, nil
+}
+
 // SubmitTransaction calls SubmitTransaction API
 // - signedTx is returned TxBlob by SignTransaction()
 func (r *Ripple) SubmitTransaction(signedTx string) (*SentTx, uint64, error) {

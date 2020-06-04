@@ -31,6 +31,7 @@ type RippleAPIer interface {
 	// RippleTxAPI
 	PrepareTransaction(senderAccount, receiverAccount string, amount float64) (*xrp.TxInput, error)
 	SignTransaction(txJSON *xrp.TxInput, secret string) (string, string, error)
+	CombineTransaction(signedTxs []string) (string, string, error)
 	SubmitTransaction(signedTx string) (*xrp.SentTx, uint64, error)
 	WaitValidation(targetledgerVarsion uint64) (uint64, error)
 	GetTransaction(txID string, targetLedgerVersion uint64) (*xrp.TxInfo, error)
