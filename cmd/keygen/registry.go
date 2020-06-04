@@ -228,8 +228,10 @@ func (r *registry) newXRPKeyGenerator() xrpsrv.XRPKeyGenerator {
 	return xrpsrv.NewXRPKeyGenerate(
 		r.newXRP(),
 		r.newLogger(),
+		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.walletType,
+		r.newAccountKeyRepo(),
 		r.newXRPAccountKeyRepo(),
 	)
 }

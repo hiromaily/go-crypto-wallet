@@ -1,6 +1,7 @@
 package keygensrv
 
 import (
+	"database/sql"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -23,25 +24,31 @@ type XRPKeyGenerator interface {
 type XRPKeyGenerate struct {
 	xrp            xrpgrp.Rippler
 	logger         *zap.Logger
+	dbConn *sql.DB
 	coinTypeCode   coin.CoinTypeCode
 	wtype          wallet.WalletType
-	accountKeyRepo coldrepo.XRPAccountKeyRepositorier
+	accountKeyRepo coldrepo.AccountKeyRepositorier
+	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier
 }
 
 // NewXRPKeyGenerate returns XRPKeyGenerate object
 func NewXRPKeyGenerate(
 	xrp xrpgrp.Rippler,
 	logger *zap.Logger,
+	dbConn *sql.DB,
 	coinTypeCode coin.CoinTypeCode,
 	wtype wallet.WalletType,
-	accountKeyRepo coldrepo.XRPAccountKeyRepositorier) *XRPKeyGenerate {
+	accountKeyRepo coldrepo.AccountKeyRepositorier,
+	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier) *XRPKeyGenerate {
 
 	return &XRPKeyGenerate{
 		xrp:            xrp,
 		logger:         logger,
+		dbConn: dbConn,
 		coinTypeCode:   coinTypeCode,
 		wtype:          wtype,
 		accountKeyRepo: accountKeyRepo,
+		xrpAccountKeyRepo: xrpAccountKeyRepo,
 	}
 }
 
@@ -51,6 +58,19 @@ func (k *XRPKeyGenerate) Generate(accountType account.AccountType, isKeyPair boo
 		zap.String("account_type", accountType.String()),
 		zap.Int("len(keys)", len(keys)),
 	)
+
+	// transaction
+	dtx, err := k.dbConn.Begin()
+	if err != nil {
+		return errors.Wrap(err, "failed to call db.Begin()")
+	}
+	defer func() {
+		if err != nil {
+			dtx.Rollback()
+		} else {
+			dtx.Commit()
+		}
+	}()
 
 	//*xrp.ResponseWalletPropose
 	items := make([]*models.XRPAccountKey, 0, len(keys))
@@ -79,10 +99,16 @@ func (k *XRPKeyGenerate) Generate(accountType account.AccountType, isKeyPair boo
 			IsRegularKeyPair: isKeyPair,
 			AllocatedID:      0,
 		})
+
+		// update account_key table for address as ripple address
+		_, err = k.accountKeyRepo.UpdateAddr(accountType, generatedKey.Result.AccountID, v.P2SHSegWitAddr)
+		if err != nil{
+			return errors.Wrap(err, "fail to call accountKeyRepo.UpdateAddr()")
+		}
 	}
 
 	// insert keys to DB
-	if err := k.accountKeyRepo.InsertBulk(items); err != nil {
+	if err := k.xrpAccountKeyRepo.InsertBulk(items); err != nil {
 		return errors.Wrap(err, "fail to call accountKeyRepo.InsertBulk() for XRP")
 	}
 

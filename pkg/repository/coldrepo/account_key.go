@@ -24,6 +24,7 @@ type AccountKeyRepositorier interface {
 	GetAllAddrStatus(accountType account.AccountType, addrStatus address.AddrStatus) ([]*models.AccountKey, error)
 	GetAllMultiAddr(accountType account.AccountType, addrs []string) ([]*models.AccountKey, error)
 	InsertBulk(items []*models.AccountKey) error
+	UpdateAddr(accountType account.AccountType, addr, keyAddress string) (int64, error)
 	UpdateAddrStatus(accountType account.AccountType, addrStatus address.AddrStatus, strWIFs []string) (int64, error)
 	UpdateMultisigAddr(accountType account.AccountType, item *models.AccountKey) (int64, error)
 	UpdateMultisigAddrs(accountType account.AccountType, items []*models.AccountKey) (int64, error)
@@ -126,6 +127,21 @@ func (r *AccountKeyRepository) GetAllMultiAddr(accountType account.AccountType, 
 func (r *AccountKeyRepository) InsertBulk(items []*models.AccountKey) error {
 	ctx := context.Background()
 	return models.AccountKeySlice(items).InsertAll(ctx, r.dbConn, boil.Infer())
+}
+
+// UpdateAddr updates address by P2SHSegWitAddr
+func (r *AccountKeyRepository) UpdateAddr(accountType account.AccountType, addr, keyAddress string) (int64, error) {
+	ctx := context.Background()
+
+	// Set updating columns
+	updCols := map[string]interface{}{
+		models.AccountKeyColumns.P2PKHAddress: addr,
+	}
+	return models.AccountKeys(
+		qm.Where("coin=?", r.coinTypeCode.String()),
+		qm.And("account=?", accountType.String()),
+		qm.And("p2sh_segwit_address=?", keyAddress),
+	).UpdateAll(ctx, r.dbConn, updCols)
 }
 
 // UpdateAddrStatus updates addr_status
