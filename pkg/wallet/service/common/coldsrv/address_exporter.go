@@ -56,6 +56,8 @@ func (a *AddressExport) ExportAddress(accountType account.AccountType) (string, 
 		}
 	case coin.ETH:
 		targetAddrStatus = address.AddrStatusPrivKeyImported
+	case coin.XRP:
+		targetAddrStatus = address.AddrStatusHDKeyGenerated
 	default:
 		return "", errors.Errorf("coinType[%s] is not implemented yet.", a.coinTypeCode)
 	}

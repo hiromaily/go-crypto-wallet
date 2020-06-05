@@ -74,7 +74,7 @@ func (k *XRPKeygen) GenerateAccountKey(accountType account.AccountType, seed []b
 
 // ImportPrivKey imports privKey
 func (k *XRPKeygen) ImportPrivKey(accountType account.AccountType) error {
-	k.logger.Info("not implemented yet")
+	k.logger.Info("no functionality for ImportPrivKey() in XRP")
 	//return k.PrivKeyer.Import(accountType)
 	return nil
 }
