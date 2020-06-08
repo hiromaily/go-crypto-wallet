@@ -16,6 +16,8 @@ var TableNames = struct {
 	PaymentRequest string
 	Seed           string
 	XRPAccountKey  string
+	XRPDetailTX    string
+	XRPTX          string
 }{
 	AccountKey:     "account_key",
 	Address:        "address",
@@ -29,4 +31,6 @@ var TableNames = struct {
 	PaymentRequest: "payment_request",
 	Seed:           "seed",
 	XRPAccountKey:  "xrp_account_key",
+	XRPDetailTX:    "xrp_detail_tx",
+	XRPTX:          "xrp_tx",
 }

@@ -146,6 +146,63 @@ CREATE TABLE `eth_detail_tx` (
 
 
 --
+-- Table structure for table `xrp_tx`
+--
+
+DROP TABLE IF EXISTS `xrp_tx`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `xrp_tx` (
+  `id`                  BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'transaction ID',
+  `coin`                ENUM('xrp') NOT NULL COMMENT'coin type code',
+  `action`              ENUM('deposit', 'payment', 'transfer') NOT NULL COMMENT'action type',
+  `updated_at`          datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',
+  PRIMARY KEY (`id`),
+  INDEX idx_coin (`coin`),
+  INDEX idx_action (`action`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='table for eth transaction info';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
+--
+-- Table structure for table `xrp_detail_tx`
+--
+
+DROP TABLE IF EXISTS `xrp_detail_tx`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `xrp_detail_tx` (
+  `id`                   BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
+  `tx_id`                BIGINT(20) NOT NULL COMMENT'xrp_tx table ID',
+  `uuid`                 VARCHAR(36) NOT NULL COMMENT'UUID',
+  `current_tx_type`      tinyint(2) NOT NULL DEFAULT 1 COMMENT'current transaction type',
+  `sender_account`       VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'sender account',
+  `sender_address`       VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'sender address',
+  `receiver_account`     VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'receiver account',
+  `receiver_address`     VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'receiver address',
+  `amount`               VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'amount of coin to receive',
+  `xrp_tx_type`          VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'xrp tx type',
+  `fee`                  VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'tx fee',
+  `flags`                BIGINT(20) UNSIGNED NOT NULL COMMENT'tx flags',
+  `last_ledger_sequence` BIGINT(20) UNSIGNED NOT NULL COMMENT'tx LastLedgerSequence',
+  `sequence`             BIGINT(20) UNSIGNED NOT NULL COMMENT'tx Sequence',
+  `signing_pubkey`       VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'tx SigningPubKey',
+  `txn_signature`        VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'tx TxnSignature',
+  `hash`                 VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'tx Hash',
+  `earliest_ledger_version` BIGINT(20) UNSIGNED NOT NULL COMMENT'tx earliest_ledger_version after sending tx',
+  `tx_blob`              VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'tx blob',
+  `unsigned_updated_at`  datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date for unsigned transaction created',
+  `sent_updated_at`      datetime DEFAULT NULL COMMENT'updated date for signed transaction sent',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_uuid` (`uuid`),
+  INDEX idx_txid (`tx_id`),
+  INDEX idx_sender_account (`sender_account`),
+  INDEX idx_receiver_account (`receiver_account`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='table for eth transaction detail';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+
+--
 -- Table structure for table `payment_request`
 --
 

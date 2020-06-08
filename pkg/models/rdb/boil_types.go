@@ -146,3 +146,15 @@ const (
 	XRPAccountKeyAccountPayment = "payment"
 	XRPAccountKeyAccountStored  = "stored"
 )
+
+// Enum values for xrp_tx.coin
+const (
+	XRPTXCoinXRP = "xrp"
+)
+
+// Enum values for xrp_tx.action
+const (
+	XRPTXActionDeposit  = "deposit"
+	XRPTXActionPayment  = "payment"
+	XRPTXActionTransfer = "transfer"
+)
