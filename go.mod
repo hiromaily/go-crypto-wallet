@@ -18,7 +18,7 @@ require (
 	github.com/cpacia/bchutil v0.0.0-20181003130114-b126f6a35b6c
 	github.com/deckarep/golang-set v1.7.1 // indirect
 	github.com/elastic/gosigar v0.10.5 // indirect
-	github.com/ericlagergren/decimal v0.0.0-20191206042408-88212e6cfca9
+	github.com/ericlagergren/decimal v0.0.0-20181231230500-73749d4874d5
 	github.com/ethereum/go-ethereum v1.9.14
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/friendsofgo/errors v0.9.2
