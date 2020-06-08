@@ -2,6 +2,7 @@ package keygensrv
 
 import (
 	"database/sql"
+
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -22,12 +23,12 @@ type XRPKeyGenerator interface {
 
 // XRPKeyGenerate type
 type XRPKeyGenerate struct {
-	xrp            xrpgrp.Rippler
-	logger         *zap.Logger
-	dbConn *sql.DB
-	coinTypeCode   coin.CoinTypeCode
-	wtype          wallet.WalletType
-	accountKeyRepo coldrepo.AccountKeyRepositorier
+	xrp               xrpgrp.Rippler
+	logger            *zap.Logger
+	dbConn            *sql.DB
+	coinTypeCode      coin.CoinTypeCode
+	wtype             wallet.WalletType
+	accountKeyRepo    coldrepo.AccountKeyRepositorier
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier
 }
 
@@ -42,12 +43,12 @@ func NewXRPKeyGenerate(
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier) *XRPKeyGenerate {
 
 	return &XRPKeyGenerate{
-		xrp:            xrp,
-		logger:         logger,
-		dbConn: dbConn,
-		coinTypeCode:   coinTypeCode,
-		wtype:          wtype,
-		accountKeyRepo: accountKeyRepo,
+		xrp:               xrp,
+		logger:            logger,
+		dbConn:            dbConn,
+		coinTypeCode:      coinTypeCode,
+		wtype:             wtype,
+		accountKeyRepo:    accountKeyRepo,
 		xrpAccountKeyRepo: xrpAccountKeyRepo,
 	}
 }
@@ -102,7 +103,7 @@ func (k *XRPKeyGenerate) Generate(accountType account.AccountType, isKeyPair boo
 
 		// update account_key table for address as ripple address
 		_, err = k.accountKeyRepo.UpdateAddr(accountType, generatedKey.Result.AccountID, v.P2SHSegWitAddr)
-		if err != nil{
+		if err != nil {
 			return errors.Wrap(err, "fail to call accountKeyRepo.UpdateAddr()")
 		}
 	}

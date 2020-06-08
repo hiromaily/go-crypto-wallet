@@ -65,9 +65,6 @@ type Bitcoiner interface {
 	ImportAddressWithoutReScan(pubkey string) error
 	ImportAddressWithLabel(address, label string, rescan bool) error
 
-	//info.go
-	GetNetworkInfo() (*btc.GetNetworkInfoResult, error)
-
 	//label.go
 	SetLabel(addr, label string) error
 	//GetReceivedByLabelAndMinConf(accountName string, minConf int) (btcutil.Amount, error)
@@ -77,6 +74,10 @@ type Bitcoiner interface {
 
 	//multisig.go
 	AddMultisigAddress(requiredSigs int, addresses []string, accountName string, addressType address.AddrType) (*btc.AddMultisigAddressResult, error)
+
+	//network.go
+	GetNetworkInfo() (*btc.GetNetworkInfoResult, error)
+	GetBlockchainInfo() (*btc.GetBlockchainInfoResult, error)
 
 	//transaction.go
 	ToHex(tx *wire.MsgTx) (string, error)

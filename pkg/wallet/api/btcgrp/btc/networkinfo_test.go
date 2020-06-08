@@ -20,3 +20,18 @@ func TestGetNetworkInfo(t *testing.T) {
 
 	//bc.Close()
 }
+
+// TestGetBlockchainInfo is test for GetBlockchainInfo
+func TestBlockchainInfo(t *testing.T) {
+	//t.SkipNow()
+	bc := testutil.GetBTC()
+
+	// GetBlockchainInfo
+	if res, err := bc.GetBlockchainInfo(); err != nil {
+		t.Errorf("fail to call GetBlockchainInfo(): %v", err)
+	} else {
+		t.Log(res)
+	}
+
+	//bc.Close()
+}

@@ -24,6 +24,54 @@ type GetNetworkInfoResult struct {
 	Warnings           string         `json:"warnings"`
 }
 
+// BlockchainInfoChain is chain in GetBlockchainInfoResult
+type BlockchainInfoChain string
+
+// chain
+const (
+	BlockchainInfoChainMain    BlockchainInfoChain = "main"
+	BlockchainInfoChainTest    BlockchainInfoChain = "test"
+	BlockchainInfoChainRegtest BlockchainInfoChain = "regtest"
+)
+
+// String converter
+func (c BlockchainInfoChain) String() string {
+	return string(c)
+}
+
+// GetBlockchainInfoResult is response type of PRC `getblockchaininfo`
+type GetBlockchainInfoResult struct {
+	Chain                BlockchainInfoChain `json:"chain"` // main, test, regtest
+	Blocks               int                 `json:"blocks"`
+	Headers              int                 `json:"headers"`
+	Bestblockhash        string              `json:"bestblockhash"`
+	Difficulty           int                 `json:"difficulty"`
+	Mediantime           int                 `json:"mediantime"`
+	Verificationprogress float64             `json:"verificationprogress"`
+	Initialblockdownload bool                `json:"initialblockdownload"`
+	Chainwork            string              `json:"chainwork"`
+	SizeOnDisk           int64               `json:"size_on_disk"`
+	Pruned               bool                `json:"pruned"`
+	SoftForks            SoftForks           `json:"softforks"`
+	Warnings             string              `json:"warnings"`
+}
+
+// SoftForks is soft fork list
+type SoftForks struct {
+	Bip34  Fork `json:"bip34"`
+	Bip66  Fork `json:"bip66"`
+	Bip65  Fork `json:"bip65"`
+	Csv    Fork `json:"csv"`
+	Segwit Fork `json:"segwit"`
+}
+
+// Fork is fork info
+type Fork struct {
+	Type   string `json:"type"`
+	Active bool   `json:"active"`
+	Height int    `json:"height"`
+}
+
 // Network network info
 type Network struct {
 	Name                      string `json:"name"`
@@ -54,4 +102,20 @@ func (b *Bitcoin) GetNetworkInfo() (*GetNetworkInfoResult, error) {
 	}
 
 	return &networkInfoResult, nil
+}
+
+// GetBlockchainInfo call RPC `getblockchaininfo`
+func (b *Bitcoin) GetBlockchainInfo() (*GetBlockchainInfoResult, error) {
+	rawResult, err := b.Client.RawRequest("getblockchaininfo", []json.RawMessage{})
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to call json.RawRequest(getblockchaininfo)")
+	}
+
+	blockchainInfoResult := GetBlockchainInfoResult{}
+	err = json.Unmarshal([]byte(rawResult), &blockchainInfoResult)
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to call json.Unmarshal()")
+	}
+
+	return &blockchainInfoResult, nil
 }
