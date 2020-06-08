@@ -33,7 +33,7 @@ type Registry interface {
 }
 
 type registry struct {
-	conf        *config.Config
+	conf        *config.WalletRoot
 	walletType  wallet.WalletType
 	authType    account.AuthType
 	logger      *zap.Logger
@@ -43,7 +43,7 @@ type registry struct {
 }
 
 // NewRegistry is to register registry interface
-func NewRegistry(conf *config.Config, walletType wallet.WalletType, authName string) Registry {
+func NewRegistry(conf *config.WalletRoot, walletType wallet.WalletType, authName string) Registry {
 	// validate
 	if !account.ValidateAuthType(authName) {
 		panic(fmt.Sprintf("authName is invalid. this should be embedded when building: %s", authName))

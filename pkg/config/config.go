@@ -11,14 +11,14 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
-// New create config
-func New(file string, wtype wallet.WalletType, coinTypeCode coin.CoinTypeCode) (*Config, error) {
+// NewWallet creates wallet config
+func NewWallet(file string, wtype wallet.WalletType, coinTypeCode coin.CoinTypeCode) (*WalletRoot, error) {
 	if file == "" {
 		return nil, errors.New("config file should be passed")
 	}
 
 	var err error
-	conf, err := loadConfig(file)
+	conf, err := loadWallet(file)
 	if err != nil {
 		return nil, err
 	}
@@ -36,14 +36,14 @@ func New(file string, wtype wallet.WalletType, coinTypeCode coin.CoinTypeCode) (
 	return conf, nil
 }
 
-// loadConfig load config file
-func loadConfig(path string) (*Config, error) {
+// loadWallet load config file
+func loadWallet(path string) (*WalletRoot, error) {
 	d, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, errors.Wrapf(err, "can't read toml file. %s", path)
 	}
 
-	var config Config
+	var config WalletRoot
 	_, err = toml.Decode(string(d), &config)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call toml.Decode()")
@@ -53,7 +53,7 @@ func loadConfig(path string) (*Config, error) {
 }
 
 // validate config
-func (c *Config) validate(wtype wallet.WalletType, coinTypeCode coin.CoinTypeCode) error {
+func (c *WalletRoot) validate(wtype wallet.WalletType, coinTypeCode coin.CoinTypeCode) error {
 	validate := validator.New()
 	//if err := validate.Struct(c); err != nil {
 	//	return err
@@ -86,6 +86,55 @@ func (c *Config) validate(wtype wallet.WalletType, coinTypeCode coin.CoinTypeCod
 			return err
 		}
 	default:
+	}
+
+	return nil
+}
+
+// NewAccount creates account config
+func NewAccount(file string) (*AccountRoot, error) {
+	if file == "" {
+		return nil, errors.New("config file should be passed")
+	}
+
+	var err error
+	conf, err := loadAccount(file)
+	if err != nil {
+		return nil, err
+	}
+
+	//debug
+	//grok.Value(conf)
+
+	//validate
+	if err = conf.validate(); err != nil {
+		return nil, err
+	}
+
+	return conf, nil
+}
+
+// loadAccount load account config file
+func loadAccount(path string) (*AccountRoot, error) {
+	d, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, errors.Wrapf(err, "can't read toml file. %s", path)
+	}
+
+	var config AccountRoot
+	_, err = toml.Decode(string(d), &config)
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to call toml.Decode()")
+	}
+
+	return &config, nil
+}
+
+// validate config
+func (c *AccountRoot) validate() error {
+	validate := validator.New()
+	if err := validate.Struct(c); err != nil {
+		return err
 	}
 
 	return nil

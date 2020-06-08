@@ -44,7 +44,7 @@ type Registry interface {
 }
 
 type registry struct {
-	conf         *config.Config
+	conf         *config.WalletRoot
 	walletType   wallet.WalletType
 	logger       *zap.Logger
 	btc          btcgrp.Bitcoiner
@@ -61,7 +61,7 @@ type registry struct {
 }
 
 // NewRegistry is to register registry interface
-func NewRegistry(conf *config.Config, walletType wallet.WalletType) Registry {
+func NewRegistry(conf *config.WalletRoot, walletType wallet.WalletType) Registry {
 	return &registry{
 		conf:       conf,
 		walletType: walletType,

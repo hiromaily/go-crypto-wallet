@@ -8,8 +8,8 @@ import (
 //TODO:
 // - use https://github.com/spf13/viper
 
-// Config root config
-type Config struct {
+// WalletRoot wallet root config
+type WalletRoot struct {
 	AddressType  address.AddrType  `toml:"address_type" validate:"oneof=p2sh-segwit bech32 bch-cashaddr"`
 	CoinTypeCode coin.CoinTypeCode `toml:"coin_type"`
 	Bitcoin      Bitcoin           `toml:"bitcoin"`

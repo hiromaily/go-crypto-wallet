@@ -76,7 +76,7 @@ func main() {
 	// help
 	if !isHelp && len(os.Args) > 1 {
 		// config
-		conf, err := config.New(confPath, walletType, coin.CoinTypeCode(coinTypeCode))
+		conf, err := config.NewWallet(confPath, walletType, coin.CoinTypeCode(coinTypeCode))
 		if err != nil {
 			log.Fatal(err)
 		}
