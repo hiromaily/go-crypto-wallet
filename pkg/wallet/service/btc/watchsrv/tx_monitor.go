@@ -291,7 +291,7 @@ func (t *TxMonitor) MonitorBalance() error {
 	}
 
 	for _, acnt := range targetAccounts {
-		total, err := t.btc.GetBalanceByAccount(acnt)
+		total, err := t.btc.GetBalanceByAccount(acnt, t.btc.ConfirmationBlock())
 		if err != nil {
 			return errors.Wrap(err, "fail to call btc.GetBalanceByAccount()")
 		}

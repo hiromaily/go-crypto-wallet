@@ -37,7 +37,7 @@ func (t *TxCreate) CreatePaymentTx(adjustmentFee float64) (string, string, error
 	}
 
 	// get balance for payment account
-	balance, err := t.btc.GetBalanceByAccount(account.AccountTypePayment)
+	balance, err := t.btc.GetBalanceByAccount(account.AccountTypePayment, t.btc.ConfirmationBlock())
 	if err != nil {
 		return "", "", err
 	}

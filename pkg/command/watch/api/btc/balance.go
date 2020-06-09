@@ -62,7 +62,7 @@ func (c *BalanceCommand) Run(args []string) int {
 		}
 	} else {
 		//get received by account
-		balance, err = c.btc.GetBalanceByAccount(account.AccountType(acnt))
+		balance, err = c.btc.GetBalanceByAccount(account.AccountType(acnt), c.btc.ConfirmationBlock())
 		if err != nil {
 			c.ui.Error(fmt.Sprintf("fail to call btc.GetBalanceByAccount() %+v", err))
 			return 1

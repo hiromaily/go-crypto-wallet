@@ -35,8 +35,8 @@ type Bitcoiner interface {
 
 	//balance.go
 	GetBalance() (btcutil.Amount, error)
-	GetBalanceByListUnspent() (btcutil.Amount, error)
-	GetBalanceByAccount(accountType account.AccountType) (btcutil.Amount, error)
+	GetBalanceByListUnspent(confirmationNum uint64) (btcutil.Amount, error)
+	GetBalanceByAccount(accountType account.AccountType, confirmationNum uint64) (btcutil.Amount, error)
 
 	//block.go
 	GetBlockCount() (int64, error)
@@ -95,8 +95,8 @@ type Bitcoiner interface {
 	Sign(tx *wire.MsgTx, strPrivateKey string) (string, error)
 
 	//unspent.go
-	ListUnspent() ([]btc.ListUnspentResult, error)
-	ListUnspentByAccount(accountType account.AccountType) ([]btc.ListUnspentResult, error)
+	ListUnspent(confirmationNum uint64) ([]btc.ListUnspentResult, error)
+	ListUnspentByAccount(accountType account.AccountType, confirmationNum uint64) ([]btc.ListUnspentResult, error)
 	GetUnspentListAddrs(unspentList []btc.ListUnspentResult, accountType account.AccountType) []string
 	LockUnspent(tx *btc.ListUnspentResult) error
 	UnlockUnspent() error

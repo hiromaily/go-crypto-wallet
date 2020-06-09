@@ -57,7 +57,7 @@ func TestGetBalanceByAccount(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got, err := bc.GetBalanceByAccount(tt.args.account); (err != nil) != tt.want.isErr {
+			if got, err := bc.GetBalanceByAccount(tt.args.account, bc.ConfirmationBlock()); (err != nil) != tt.want.isErr {
 				t.Errorf("GetBalanceByAccount() = %v, isErr %v", err, tt.want.isErr)
 			} else {
 				t.Log(got)

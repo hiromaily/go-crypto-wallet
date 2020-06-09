@@ -38,8 +38,8 @@ func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
 }
 
 // GetBalanceByListUnspent gets balance by rpc `listunspent`
-func (b *Bitcoin) GetBalanceByListUnspent() (btcutil.Amount, error) {
-	listunspentResult, err := b.ListUnspent()
+func (b *Bitcoin) GetBalanceByListUnspent(confirmationNum uint64) (btcutil.Amount, error) {
+	listunspentResult, err := b.ListUnspent(confirmationNum)
 	if err != nil {
 		return 0, err
 	}
@@ -48,8 +48,8 @@ func (b *Bitcoin) GetBalanceByListUnspent() (btcutil.Amount, error) {
 }
 
 // GetBalanceByAccount gets balance by account
-func (b *Bitcoin) GetBalanceByAccount(accountType account.AccountType) (btcutil.Amount, error) {
-	unspentList, err := b.ListUnspentByAccount(accountType)
+func (b *Bitcoin) GetBalanceByAccount(accountType account.AccountType, confirmationNum uint64) (btcutil.Amount, error) {
+	unspentList, err := b.ListUnspentByAccount(accountType, confirmationNum)
 	if err != nil {
 		return 0, errors.Wrapf(err, "fail to call btc.ListUnspentByAccount(%s)", accountType.String())
 	}

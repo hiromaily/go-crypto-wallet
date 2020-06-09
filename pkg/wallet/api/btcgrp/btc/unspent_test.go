@@ -23,7 +23,7 @@ func TestListUnspent(t *testing.T) {
 	bc := testutil.GetBTC()
 
 	// ListUnspent
-	if res, err := bc.ListUnspent(); err != nil {
+	if res, err := bc.ListUnspent(6); err != nil {
 		t.Errorf("fail to call ListUnspent(): %v", err)
 	} else {
 		t.Log(res)
@@ -38,7 +38,7 @@ func TestListUnspentByAccount(t *testing.T) {
 	bc := testutil.GetBTC()
 
 	// ListUnspentByAccount
-	if res, err := bc.ListUnspentByAccount(account.AccountTypePayment); err != nil {
+	if res, err := bc.ListUnspentByAccount(account.AccountTypePayment, bc.ConfirmationBlock()); err != nil {
 		t.Errorf("fail to call ListUnspent(): %v", err)
 	} else {
 		t.Log(res)
@@ -53,7 +53,7 @@ func TestLockUnspent(t *testing.T) {
 	bc := testutil.GetBTC()
 
 	// get unspent list
-	listUnspent, err := bc.ListUnspent()
+	listUnspent, err := bc.ListUnspent(bc.ConfirmationBlock())
 	if err != nil {
 		t.Fatalf("fail to call ListUnspent(): %v", err)
 	}
@@ -69,7 +69,7 @@ func TestLockUnspent(t *testing.T) {
 	targetTxID := listUnspent[0].TxID
 
 	// get unspent list again
-	listUnspent, err = bc.ListUnspent()
+	listUnspent, err = bc.ListUnspent(bc.ConfirmationBlock())
 	if err != nil {
 		t.Fatalf("fail to call ListUnspent(): %v", err)
 	}
@@ -85,7 +85,7 @@ func TestLockUnspent(t *testing.T) {
 	}
 
 	// get unspent list again
-	listUnspent, err = bc.ListUnspent()
+	listUnspent, err = bc.ListUnspent(bc.ConfirmationBlock())
 	if err != nil {
 		t.Fatalf("fail to call ListUnspent(): %v", err)
 	}

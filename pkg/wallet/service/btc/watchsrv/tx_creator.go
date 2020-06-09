@@ -196,7 +196,7 @@ func (t *TxCreate) getUnspentList(accountType account.AccountType) ([]btc.ListUn
 	//}
 
 	// get listUnspent
-	unspentList, err := t.btc.ListUnspentByAccount(accountType)
+	unspentList, err := t.btc.ListUnspentByAccount(accountType, t.btc.ConfirmationBlock())
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "fail to call btc.ListUnspentByAccount()")
 	}

@@ -30,10 +30,10 @@ type ListUnspentResult struct {
 }
 
 // ListUnspent call RPC `listunspent`
-func (b *Bitcoin) ListUnspent() ([]ListUnspentResult, error) {
+func (b *Bitcoin) ListUnspent(confirmationNum uint64) ([]ListUnspentResult, error) {
 	b.logger.Debug("call ListUnspent()", zap.Uint64("confirmation", b.confirmationBlock))
 
-	input, err := json.Marshal(uint64(b.confirmationBlock))
+	input, err := json.Marshal(confirmationNum)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Marchal()")
 	}
@@ -56,7 +56,7 @@ func (b *Bitcoin) ListUnspent() ([]ListUnspentResult, error) {
 }
 
 // ListUnspentByAccount gets listunspent by account
-func (b *Bitcoin) ListUnspentByAccount(accountType account.AccountType) ([]ListUnspentResult, error) {
+func (b *Bitcoin) ListUnspentByAccount(accountType account.AccountType, confirmationNum uint64) ([]ListUnspentResult, error) {
 	addrs, err := b.GetAddressesByLabel(accountType.String())
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call btc.GetAddressesByLabel()")
@@ -67,7 +67,7 @@ func (b *Bitcoin) ListUnspentByAccount(accountType account.AccountType) ([]ListU
 
 	var unspentList []ListUnspentResult
 
-	unspentList, err = b.listUnspentByAccount(addrs)
+	unspentList, err = b.listUnspentByAccount(addrs, confirmationNum)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call btc.listUnspentByAccount()")
 	}
@@ -105,8 +105,8 @@ func (b *Bitcoin) getUnspentListAmount(unspentList []ListUnspentResult) float64 
 	return sum
 }
 
-func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address) ([]ListUnspentResult, error) {
-	input1, err := json.Marshal(uint64(b.confirmationBlock))
+func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address, confirmationNum uint64) ([]ListUnspentResult, error) {
+	input1, err := json.Marshal(confirmationNum)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Marchal(confirmationBlock)")
 	}
