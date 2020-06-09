@@ -34,25 +34,28 @@ type Registry interface {
 
 type registry struct {
 	conf        *config.WalletRoot
+	accountConf *account.AccountRoot
 	walletType  wallet.WalletType
 	authType    account.AuthType
 	logger      *zap.Logger
 	btc         btcgrp.Bitcoiner
 	rpcClient   *rpcclient.Client
 	mysqlClient *sql.DB
+	multisig    account.MultisigAccounter
 }
 
 // NewRegistry is to register registry interface
-func NewRegistry(conf *config.WalletRoot, walletType wallet.WalletType, authName string) Registry {
+func NewRegistry(conf *config.WalletRoot, accountConf *account.AccountRoot, walletType wallet.WalletType, authName string) Registry {
 	// validate
 	if !account.ValidateAuthType(authName) {
 		panic(fmt.Sprintf("authName is invalid. this should be embedded when building: %s", authName))
 	}
 
 	return &registry{
-		conf:       conf,
-		walletType: walletType,
-		authType:   account.AuthTypeMap[authName],
+		conf:        conf,
+		accountConf: accountConf,
+		walletType:  walletType,
+		authType:    account.AuthTypeMap[authName],
 	}
 }
 
@@ -132,6 +135,7 @@ func (r *registry) newSigner() service.Signer {
 		r.newAccountKeyRepo(),
 		r.newAuthKeyRepo(),
 		r.newTxFileStorager(),
+		r.newMultiAccount(),
 		r.walletType,
 	)
 }
@@ -229,4 +233,14 @@ func (r *registry) newTxFileStorager() tx.FileRepositorier {
 		r.conf.FilePath.Tx,
 		r.newLogger(),
 	)
+}
+
+func (r *registry) newMultiAccount() account.MultisigAccounter {
+	if r.multisig == nil {
+		if r.accountConf.Multisigs == nil {
+			panic("account config is required to call newMultiAccount()")
+		}
+		r.multisig = account.NewMultisigAccounts(r.accountConf.Multisigs)
+	}
+	return r.multisig
 }

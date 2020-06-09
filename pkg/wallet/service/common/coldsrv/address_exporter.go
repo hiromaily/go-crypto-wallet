@@ -21,6 +21,7 @@ type AddressExport struct {
 	logger         *zap.Logger
 	accountKeyRepo coldrepo.AccountKeyRepositorier
 	addrFileRepo   address.FileRepositorier
+	multiAccount   account.MultisigAccounter
 	coinTypeCode   coin.CoinTypeCode
 	wtype          wallet.WalletType
 }
@@ -30,6 +31,7 @@ func NewAddressExport(
 	logger *zap.Logger,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	addrFileRepo address.FileRepositorier,
+	multiAccount account.MultisigAccounter,
 	coinTypeCode coin.CoinTypeCode,
 	wtype wallet.WalletType) *AddressExport {
 
@@ -37,6 +39,7 @@ func NewAddressExport(
 		logger:         logger,
 		accountKeyRepo: accountKeyRepo,
 		addrFileRepo:   addrFileRepo,
+		multiAccount:   multiAccount,
 		coinTypeCode:   coinTypeCode,
 		wtype:          wtype,
 	}
@@ -48,7 +51,7 @@ func (a *AddressExport) ExportAddress(accountType account.AccountType) (string, 
 	var targetAddrStatus address.AddrStatus
 	switch a.coinTypeCode {
 	case coin.BTC, coin.BCH:
-		if !account.IsMultisigAccount(accountType) {
+		if !a.multiAccount.IsMultisigAccount(accountType) {
 			// non-multisig account
 			targetAddrStatus = address.AddrStatusPrivKeyImported
 		} else {

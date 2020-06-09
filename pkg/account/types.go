@@ -200,28 +200,3 @@ func (a AuthType) String() string {
 func (a AuthType) AccountType() AccountType {
 	return AccountTypeMap[a.String()]
 }
-
-//----------------------------------------------------
-// Multisig address involved accounts
-//----------------------------------------------------
-
-// MultisigAccounts proportion of multisig address M:N
-var MultisigAccounts = map[AccountType]map[int][]AuthType{
-	AccountTypeDeposit: { //2:5+1
-		2: {AuthType1, AuthType2, AuthType3, AuthType4, AuthType5},
-	},
-	AccountTypePayment: { //3:5+1
-		3: {AuthType1, AuthType2, AuthType3, AuthType4, AuthType5},
-	},
-	AccountTypeStored: { //4:5+1
-		4: {AuthType1, AuthType2, AuthType3, AuthType4, AuthType5},
-	},
-}
-
-// IsMultisigAccount validates Multisig account or not
-func IsMultisigAccount(v AccountType) bool {
-	if _, ok := MultisigAccounts[v]; ok {
-		return true
-	}
-	return false
-}

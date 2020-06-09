@@ -12,6 +12,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
+	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
@@ -45,6 +46,7 @@ type Registry interface {
 
 type registry struct {
 	conf         *config.WalletRoot
+	accountConf  *account.AccountRoot
 	walletType   wallet.WalletType
 	logger       *zap.Logger
 	btc          btcgrp.Bitcoiner
@@ -58,13 +60,15 @@ type registry struct {
 	rippleAPI    *xrp.RippleAPI
 	wsXrpRemote  *websockets.Remote
 	mysqlClient  *sql.DB
+	multisig     account.MultisigAccounter
 }
 
 // NewRegistry is to register registry interface
-func NewRegistry(conf *config.WalletRoot, walletType wallet.WalletType) Registry {
+func NewRegistry(conf *config.WalletRoot, accountConf *account.AccountRoot, walletType wallet.WalletType) Registry {
 	return &registry{
-		conf:       conf,
-		walletType: walletType,
+		conf:        conf,
+		accountConf: accountConf,
+		walletType:  walletType,
 	}
 }
 
@@ -190,6 +194,7 @@ func (r *registry) newMultisiger() service.Multisiger {
 		r.newLogger(),
 		r.newAuthFullPubKeyRepo(),
 		r.newAccountKeyRepo(),
+		r.newMultiAccount(),
 		r.walletType,
 	)
 }
@@ -199,6 +204,7 @@ func (r *registry) newAddressExporter() service.AddressExporter {
 		r.newLogger(),
 		r.newAccountKeyRepo(),
 		r.newAddressFileStorager(),
+		r.newMultiAccount(),
 		r.conf.CoinTypeCode,
 		r.walletType,
 	)
@@ -211,6 +217,7 @@ func (r *registry) newSigner() service.Signer {
 		r.newAccountKeyRepo(),
 		r.newAuthKeyRepo(),
 		r.newTxFileStorager(),
+		r.newMultiAccount(),
 		r.walletType,
 	)
 }
@@ -452,4 +459,14 @@ func (r *registry) newTxFileStorager() tx.FileRepositorier {
 		r.conf.FilePath.Tx,
 		r.newLogger(),
 	)
+}
+
+func (r *registry) newMultiAccount() account.MultisigAccounter {
+	if r.multisig == nil {
+		if r.accountConf.Multisigs == nil {
+			panic("account config is required to call newMultiAccount()")
+		}
+		r.multisig = account.NewMultisigAccounts(r.accountConf.Multisigs)
+	}
+	return r.multisig
 }

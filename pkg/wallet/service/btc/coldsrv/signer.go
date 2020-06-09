@@ -24,6 +24,7 @@ type Sign struct {
 	accountKeyRepo coldrepo.AccountKeyRepositorier
 	authKeyRepo    coldrepo.AuthAccountKeyRepositorier
 	txFileRepo     tx.FileRepositorier
+	multiAccount   account.MultisigAccounter
 	wtype          wallet.WalletType
 }
 
@@ -34,6 +35,7 @@ func NewSign(
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
 	txFileRepo tx.FileRepositorier,
+	multiAccount account.MultisigAccounter,
 	wtype wallet.WalletType) *Sign {
 
 	return &Sign{
@@ -42,6 +44,7 @@ func NewSign(
 		accountKeyRepo: accountKeyRepo,
 		authKeyRepo:    authKeyRepo,
 		txFileRepo:     txFileRepo,
+		multiAccount:   multiAccount,
 		wtype:          wtype,
 	}
 }
@@ -129,7 +132,7 @@ func (s *Sign) sign(hex, encodedPrevsAddrs string) (string, bool, string, error)
 	)
 
 	// sign
-	if !account.IsMultisigAccount(prevsAddrs.SenderAccount) {
+	if !s.multiAccount.IsMultisigAccount(prevsAddrs.SenderAccount) {
 		signedTx, isSigned, err = s.btc.SignRawTransaction(msgTx, prevsAddrs.PrevTxs)
 	} else {
 		signedTx, isSigned, newEncodedPrevsAddrs, err = s.signMultisig(msgTx, &prevsAddrs)
