@@ -9,7 +9,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/sign/export"
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/sign/imports"
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/sign/sign"
-	"github.com/hiromaily/go-crypto-wallet/pkg/command/wallet/api/eth"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/api/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"

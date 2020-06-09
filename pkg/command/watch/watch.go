@@ -1,24 +1,24 @@
-package wallet
+package watch
 
 import (
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/command"
-	"github.com/hiromaily/go-crypto-wallet/pkg/command/wallet/api/btc"
-	"github.com/hiromaily/go-crypto-wallet/pkg/command/wallet/api/eth"
-	"github.com/hiromaily/go-crypto-wallet/pkg/command/wallet/create"
-	"github.com/hiromaily/go-crypto-wallet/pkg/command/wallet/db"
-	"github.com/hiromaily/go-crypto-wallet/pkg/command/wallet/imports"
-	"github.com/hiromaily/go-crypto-wallet/pkg/command/wallet/monitor"
-	"github.com/hiromaily/go-crypto-wallet/pkg/command/wallet/send"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/api/btc"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/api/eth"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/create"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/db"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/imports"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/monitor"
+	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/send"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"
 )
 
-// WalletSubCommands returns subcommand for wallet
+// WatchSubCommands returns subcommand for wallet
 // nolint: golint
-func WalletSubCommands(wallet wallets.Watcher, version string) map[string]cli.CommandFactory {
+func WatchSubCommands(wallet wallets.Watcher, version string) map[string]cli.CommandFactory {
 	cmds := map[string]cli.CommandFactory{
 		"import": func() (cli.Command, error) {
 			return &imports.ImportCommand{

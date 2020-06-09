@@ -9,7 +9,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/command"
-	wcmd "github.com/hiromaily/go-crypto-wallet/pkg/command/wallet"
+	wcmd "github.com/hiromaily/go-crypto-wallet/pkg/command/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -103,7 +103,7 @@ func main() {
 
 	//sub command
 	args := flags.Args()
-	cmds := wcmd.WalletSubCommands(walleter, appVersion)
+	cmds := wcmd.WatchSubCommands(walleter, appVersion)
 	cl := command.CreateSubCommand(appName, appVersion, args, cmds)
 	cl.HelpFunc = command.HelpFunc(cl.Name)
 
