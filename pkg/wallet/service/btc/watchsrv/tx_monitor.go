@@ -282,7 +282,7 @@ func (t *TxMonitor) updateTxTypeNotified(id int64, actionType action.ActionType)
 }
 
 // MonitorBalance monitors balances
-func (t *TxMonitor) MonitorBalance() error {
+func (t *TxMonitor) MonitorBalance(confirmationNum uint64) error {
 	targetAccounts := []account.AccountType{
 		account.AccountTypeClient,
 		account.AccountTypeDeposit,
@@ -291,9 +291,9 @@ func (t *TxMonitor) MonitorBalance() error {
 	}
 
 	for _, acnt := range targetAccounts {
-		total, err := t.btc.GetBalanceByAccount(acnt, t.btc.ConfirmationBlock())
+		total, err := t.btc.GetBalanceByAccount(acnt, confirmationNum)
 		if err != nil {
-			return errors.Wrap(err, "fail to call btc.GetBalanceByAccount()")
+			return errors.Wrapf(err, "fail to call btc.GetBalanceByAccount() confirmation: %d", confirmationNum)
 		}
 		t.logger.Info("total balance",
 			zap.String("account", acnt.String()),

@@ -13,7 +13,7 @@ type Watcher interface {
 	CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error)
 	SendTx(filePath string) (string, error)
 	UpdateTxStatus() error
-	MonitorBalance() error
+	MonitorBalance(confirmationNum uint64) error
 	CreatePaymentRequest() error
 	Done()
 	CoinTypeCode() coin.CoinTypeCode

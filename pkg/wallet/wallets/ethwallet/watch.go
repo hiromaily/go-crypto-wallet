@@ -77,8 +77,8 @@ func (w *ETHWatch) UpdateTxStatus() error {
 }
 
 // MonitorBalance monitors balance
-func (w *ETHWatch) MonitorBalance() error {
-	return w.TxMonitorer.MonitorBalance()
+func (w *ETHWatch) MonitorBalance(confirmationNum uint64) error {
+	return w.TxMonitorer.MonitorBalance(confirmationNum)
 }
 
 // SendTx sends signed transaction

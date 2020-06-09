@@ -70,7 +70,7 @@ func (w *XRPWatch) UpdateTxStatus() error {
 }
 
 // MonitorBalance monitors balance
-func (w *XRPWatch) MonitorBalance() error {
+func (w *XRPWatch) MonitorBalance(confirmationNum uint64) error {
 	w.logger.Info("not implemented yet")
 	//return w.TxMonitorer.MonitorBalance()
 	return nil

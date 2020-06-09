@@ -24,7 +24,9 @@ func (c *BalanceCommand) Synopsis() string {
 
 // Help returns usage for this subcommand
 func (c *BalanceCommand) Help() string {
-	return `Usage: wallet monitor balance
+	return `Usage: wallet monitor balance [options...]
+Options:
+  -num      confirmation number
 `
 }
 
@@ -32,12 +34,17 @@ func (c *BalanceCommand) Help() string {
 func (c *BalanceCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
+	var (
+		confirmationNum uint64
+	)
+
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
+	flags.Uint64Var(&confirmationNum, "num", 6, "confirmation number")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
 
-	if err := c.wallet.MonitorBalance(); err != nil {
+	if err := c.wallet.MonitorBalance(confirmationNum); err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call MonitorBalance() %+v", err))
 		return 1
 	}
