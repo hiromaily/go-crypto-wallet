@@ -19,13 +19,13 @@ import (
 
 // Sign type
 type Sign struct {
-	btc            btcgrp.Bitcoiner
-	logger         *zap.Logger
-	accountKeyRepo coldrepo.AccountKeyRepositorier
-	authKeyRepo    coldrepo.AuthAccountKeyRepositorier
-	txFileRepo     tx.FileRepositorier
-	multiAccount   account.MultisigAccounter
-	wtype          wallet.WalletType
+	btc             btcgrp.Bitcoiner
+	logger          *zap.Logger
+	accountKeyRepo  coldrepo.AccountKeyRepositorier
+	authKeyRepo     coldrepo.AuthAccountKeyRepositorier
+	txFileRepo      tx.FileRepositorier
+	multisigAccount account.MultisigAccounter
+	wtype           wallet.WalletType
 }
 
 // NewSign returns sign object
@@ -35,17 +35,17 @@ func NewSign(
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
 	txFileRepo tx.FileRepositorier,
-	multiAccount account.MultisigAccounter,
+	multisigAccount account.MultisigAccounter,
 	wtype wallet.WalletType) *Sign {
 
 	return &Sign{
-		btc:            btc,
-		logger:         logger,
-		accountKeyRepo: accountKeyRepo,
-		authKeyRepo:    authKeyRepo,
-		txFileRepo:     txFileRepo,
-		multiAccount:   multiAccount,
-		wtype:          wtype,
+		btc:             btc,
+		logger:          logger,
+		accountKeyRepo:  accountKeyRepo,
+		authKeyRepo:     authKeyRepo,
+		txFileRepo:      txFileRepo,
+		multisigAccount: multisigAccount,
+		wtype:           wtype,
 	}
 }
 
@@ -132,7 +132,7 @@ func (s *Sign) sign(hex, encodedPrevsAddrs string) (string, bool, string, error)
 	)
 
 	// sign
-	if !s.multiAccount.IsMultisigAccount(prevsAddrs.SenderAccount) {
+	if !s.multisigAccount.IsMultisigAccount(prevsAddrs.SenderAccount) {
 		signedTx, isSigned, err = s.btc.SignRawTransaction(msgTx, prevsAddrs.PrevTxs)
 	} else {
 		signedTx, isSigned, newEncodedPrevsAddrs, err = s.signMultisig(msgTx, &prevsAddrs)

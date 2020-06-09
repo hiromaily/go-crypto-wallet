@@ -18,12 +18,12 @@ import (
 
 // AddressExport type
 type AddressExport struct {
-	logger         *zap.Logger
-	accountKeyRepo coldrepo.AccountKeyRepositorier
-	addrFileRepo   address.FileRepositorier
-	multiAccount   account.MultisigAccounter
-	coinTypeCode   coin.CoinTypeCode
-	wtype          wallet.WalletType
+	logger          *zap.Logger
+	accountKeyRepo  coldrepo.AccountKeyRepositorier
+	addrFileRepo    address.FileRepositorier
+	multisigAccount account.MultisigAccounter
+	coinTypeCode    coin.CoinTypeCode
+	wtype           wallet.WalletType
 }
 
 // NewAddressExport returns addressExport
@@ -31,17 +31,17 @@ func NewAddressExport(
 	logger *zap.Logger,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	addrFileRepo address.FileRepositorier,
-	multiAccount account.MultisigAccounter,
+	multisigAccount account.MultisigAccounter,
 	coinTypeCode coin.CoinTypeCode,
 	wtype wallet.WalletType) *AddressExport {
 
 	return &AddressExport{
-		logger:         logger,
-		accountKeyRepo: accountKeyRepo,
-		addrFileRepo:   addrFileRepo,
-		multiAccount:   multiAccount,
-		coinTypeCode:   coinTypeCode,
-		wtype:          wtype,
+		logger:          logger,
+		accountKeyRepo:  accountKeyRepo,
+		addrFileRepo:    addrFileRepo,
+		multisigAccount: multisigAccount,
+		coinTypeCode:    coinTypeCode,
+		wtype:           wtype,
 	}
 }
 
@@ -51,7 +51,7 @@ func (a *AddressExport) ExportAddress(accountType account.AccountType) (string, 
 	var targetAddrStatus address.AddrStatus
 	switch a.coinTypeCode {
 	case coin.BTC, coin.BCH:
-		if !a.multiAccount.IsMultisigAccount(accountType) {
+		if !a.multisigAccount.IsMultisigAccount(accountType) {
 			// non-multisig account
 			targetAddrStatus = address.AddrStatusPrivKeyImported
 		} else {

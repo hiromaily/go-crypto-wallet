@@ -19,7 +19,7 @@ type Multisig struct {
 	logger             *zap.Logger
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier
 	accountKeyRepo     coldrepo.AccountKeyRepositorier
-	multiAccount       account.MultisigAccounter
+	multisigAccount    account.MultisigAccounter
 	wtype              wallet.WalletType
 }
 
@@ -29,7 +29,7 @@ func NewMultisig(
 	logger *zap.Logger,
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
-	multiAccount account.MultisigAccounter,
+	multisigAccount account.MultisigAccounter,
 	wtype wallet.WalletType) *Multisig {
 
 	return &Multisig{
@@ -37,7 +37,7 @@ func NewMultisig(
 		logger:             logger,
 		authFullPubKeyRepo: authFullPubKeyRepo,
 		accountKeyRepo:     accountKeyRepo,
-		multiAccount:       multiAccount,
+		multisigAccount:    multisigAccount,
 		wtype:              wtype,
 	}
 }
@@ -56,7 +56,7 @@ func (m *Multisig) AddMultisigAddress(accountType account.AccountType, addressTy
 	)
 
 	// validate accountType
-	if !m.multiAccount.IsMultisigAccount(accountType) {
+	if !m.multisigAccount.IsMultisigAccount(accountType) {
 		m.logger.Info("only multisig account is allowed")
 		return nil
 	}
@@ -68,7 +68,7 @@ func (m *Multisig) AddMultisigAddress(accountType account.AccountType, addressTy
 	//AccountTypeDeposit: { //2:5+1
 	//	2: {AuthType1, AuthType2, AuthType3, AuthType4, AuthType5},
 	//},
-	for sigCount, authTypes := range m.multiAccount.MultiAccounts()[accountType] {
+	for sigCount, authTypes := range m.multisigAccount.MultiAccounts()[accountType] {
 		requiredSig = sigCount
 		for _, authType := range authTypes {
 			// get record from
