@@ -42,7 +42,9 @@ type XRPDetailTX struct {
 	TXNSignature          string    `boil:"txn_signature" json:"txn_signature" toml:"txn_signature" yaml:"txn_signature"`
 	Hash                  string    `boil:"hash" json:"hash" toml:"hash" yaml:"hash"`
 	EarliestLedgerVersion uint64    `boil:"earliest_ledger_version" json:"earliest_ledger_version" toml:"earliest_ledger_version" yaml:"earliest_ledger_version"`
-	TXBlob                string    `boil:"tx_blob" json:"tx_blob" toml:"tx_blob" yaml:"tx_blob"`
+	SignedTXID            string    `boil:"signed_tx_id" json:"signed_tx_id" toml:"signed_tx_id" yaml:"signed_tx_id"`
+	SignedTXBlob          string    `boil:"signed_tx_blob" json:"signed_tx_blob" toml:"signed_tx_blob" yaml:"signed_tx_blob"`
+	SentTXBlob            string    `boil:"sent_tx_blob" json:"sent_tx_blob" toml:"sent_tx_blob" yaml:"sent_tx_blob"`
 	UnsignedUpdatedAt     null.Time `boil:"unsigned_updated_at" json:"unsigned_updated_at,omitempty" toml:"unsigned_updated_at" yaml:"unsigned_updated_at,omitempty"`
 	SentUpdatedAt         null.Time `boil:"sent_updated_at" json:"sent_updated_at,omitempty" toml:"sent_updated_at" yaml:"sent_updated_at,omitempty"`
 
@@ -69,7 +71,9 @@ var XRPDetailTXColumns = struct {
 	TXNSignature          string
 	Hash                  string
 	EarliestLedgerVersion string
-	TXBlob                string
+	SignedTXID            string
+	SignedTXBlob          string
+	SentTXBlob            string
 	UnsignedUpdatedAt     string
 	SentUpdatedAt         string
 }{
@@ -91,7 +95,9 @@ var XRPDetailTXColumns = struct {
 	TXNSignature:          "txn_signature",
 	Hash:                  "hash",
 	EarliestLedgerVersion: "earliest_ledger_version",
-	TXBlob:                "tx_blob",
+	SignedTXID:            "signed_tx_id",
+	SignedTXBlob:          "signed_tx_blob",
+	SentTXBlob:            "sent_tx_blob",
 	UnsignedUpdatedAt:     "unsigned_updated_at",
 	SentUpdatedAt:         "sent_updated_at",
 }
@@ -117,7 +123,9 @@ var XRPDetailTXWhere = struct {
 	TXNSignature          whereHelperstring
 	Hash                  whereHelperstring
 	EarliestLedgerVersion whereHelperuint64
-	TXBlob                whereHelperstring
+	SignedTXID            whereHelperstring
+	SignedTXBlob          whereHelperstring
+	SentTXBlob            whereHelperstring
 	UnsignedUpdatedAt     whereHelpernull_Time
 	SentUpdatedAt         whereHelpernull_Time
 }{
@@ -139,7 +147,9 @@ var XRPDetailTXWhere = struct {
 	TXNSignature:          whereHelperstring{field: "`xrp_detail_tx`.`txn_signature`"},
 	Hash:                  whereHelperstring{field: "`xrp_detail_tx`.`hash`"},
 	EarliestLedgerVersion: whereHelperuint64{field: "`xrp_detail_tx`.`earliest_ledger_version`"},
-	TXBlob:                whereHelperstring{field: "`xrp_detail_tx`.`tx_blob`"},
+	SignedTXID:            whereHelperstring{field: "`xrp_detail_tx`.`signed_tx_id`"},
+	SignedTXBlob:          whereHelperstring{field: "`xrp_detail_tx`.`signed_tx_blob`"},
+	SentTXBlob:            whereHelperstring{field: "`xrp_detail_tx`.`sent_tx_blob`"},
 	UnsignedUpdatedAt:     whereHelpernull_Time{field: "`xrp_detail_tx`.`unsigned_updated_at`"},
 	SentUpdatedAt:         whereHelpernull_Time{field: "`xrp_detail_tx`.`sent_updated_at`"},
 }
@@ -161,8 +171,8 @@ func (*xrpDetailTXR) NewStruct() *xrpDetailTXR {
 type xrpDetailTXL struct{}
 
 var (
-	xrpDetailTXAllColumns            = []string{"id", "tx_id", "uuid", "current_tx_type", "sender_account", "sender_address", "receiver_account", "receiver_address", "amount", "xrp_tx_type", "fee", "flags", "last_ledger_sequence", "sequence", "signing_pubkey", "txn_signature", "hash", "earliest_ledger_version", "tx_blob", "unsigned_updated_at", "sent_updated_at"}
-	xrpDetailTXColumnsWithoutDefault = []string{"tx_id", "uuid", "sender_account", "sender_address", "receiver_account", "receiver_address", "amount", "xrp_tx_type", "fee", "flags", "last_ledger_sequence", "sequence", "signing_pubkey", "txn_signature", "hash", "earliest_ledger_version", "tx_blob", "sent_updated_at"}
+	xrpDetailTXAllColumns            = []string{"id", "tx_id", "uuid", "current_tx_type", "sender_account", "sender_address", "receiver_account", "receiver_address", "amount", "xrp_tx_type", "fee", "flags", "last_ledger_sequence", "sequence", "signing_pubkey", "txn_signature", "hash", "earliest_ledger_version", "signed_tx_id", "signed_tx_blob", "sent_tx_blob", "unsigned_updated_at", "sent_updated_at"}
+	xrpDetailTXColumnsWithoutDefault = []string{"tx_id", "uuid", "sender_account", "sender_address", "receiver_account", "receiver_address", "amount", "xrp_tx_type", "fee", "flags", "last_ledger_sequence", "sequence", "signing_pubkey", "txn_signature", "hash", "earliest_ledger_version", "signed_tx_id", "signed_tx_blob", "sent_tx_blob", "sent_updated_at"}
 	xrpDetailTXColumnsWithDefault    = []string{"id", "current_tx_type", "unsigned_updated_at"}
 	xrpDetailTXPrimaryKeyColumns     = []string{"id"}
 )

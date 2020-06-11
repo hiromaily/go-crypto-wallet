@@ -19,7 +19,7 @@ type TxSend struct {
 	logger       *zap.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier
-	txRepo       watchrepo.ETHTxRepositorier
+	txRepo       watchrepo.TxRepositorier
 	txDetailRepo watchrepo.EthDetailTxRepositorier
 	txFileRepo   tx.FileRepositorier
 	wtype        wallet.WalletType
@@ -31,7 +31,7 @@ func NewTxSend(
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
-	txRepo watchrepo.ETHTxRepositorier,
+	txRepo watchrepo.TxRepositorier,
 	txDetailRepo watchrepo.EthDetailTxRepositorier,
 	txFileRepo tx.FileRepositorier,
 	wtype wallet.WalletType) *TxSend {

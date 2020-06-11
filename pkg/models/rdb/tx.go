@@ -22,18 +22,18 @@ import (
 	"github.com/volatiletech/sqlboiler/strmangle"
 )
 
-// EthTX is an object representing the database table.
-type EthTX struct {
+// TX is an object representing the database table.
+type TX struct {
 	ID        int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Coin      string    `boil:"coin" json:"coin" toml:"coin" yaml:"coin"`
 	Action    string    `boil:"action" json:"action" toml:"action" yaml:"action"`
 	UpdatedAt null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 
-	R *ethTXR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L ethTXL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	R *txR `boil:"-" json:"-" toml:"-" yaml:"-"`
+	L txL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
-var EthTXColumns = struct {
+var TXColumns = struct {
 	ID        string
 	Coin      string
 	Action    string
@@ -47,62 +47,62 @@ var EthTXColumns = struct {
 
 // Generated where
 
-var EthTXWhere = struct {
+var TXWhere = struct {
 	ID        whereHelperint64
 	Coin      whereHelperstring
 	Action    whereHelperstring
 	UpdatedAt whereHelpernull_Time
 }{
-	ID:        whereHelperint64{field: "`eth_tx`.`id`"},
-	Coin:      whereHelperstring{field: "`eth_tx`.`coin`"},
-	Action:    whereHelperstring{field: "`eth_tx`.`action`"},
-	UpdatedAt: whereHelpernull_Time{field: "`eth_tx`.`updated_at`"},
+	ID:        whereHelperint64{field: "`tx`.`id`"},
+	Coin:      whereHelperstring{field: "`tx`.`coin`"},
+	Action:    whereHelperstring{field: "`tx`.`action`"},
+	UpdatedAt: whereHelpernull_Time{field: "`tx`.`updated_at`"},
 }
 
-// EthTXRels is where relationship names are stored.
-var EthTXRels = struct {
+// TXRels is where relationship names are stored.
+var TXRels = struct {
 }{}
 
-// ethTXR is where relationships are stored.
-type ethTXR struct {
+// txR is where relationships are stored.
+type txR struct {
 }
 
 // NewStruct creates a new relationship struct
-func (*ethTXR) NewStruct() *ethTXR {
-	return &ethTXR{}
+func (*txR) NewStruct() *txR {
+	return &txR{}
 }
 
-// ethTXL is where Load methods for each relationship are stored.
-type ethTXL struct{}
+// txL is where Load methods for each relationship are stored.
+type txL struct{}
 
 var (
-	ethTXAllColumns            = []string{"id", "coin", "action", "updated_at"}
-	ethTXColumnsWithoutDefault = []string{"coin", "action"}
-	ethTXColumnsWithDefault    = []string{"id", "updated_at"}
-	ethTXPrimaryKeyColumns     = []string{"id"}
+	txAllColumns            = []string{"id", "coin", "action", "updated_at"}
+	txColumnsWithoutDefault = []string{"coin", "action"}
+	txColumnsWithDefault    = []string{"id", "updated_at"}
+	txPrimaryKeyColumns     = []string{"id"}
 )
 
 type (
-	// EthTXSlice is an alias for a slice of pointers to EthTX.
-	// This should generally be used opposed to []EthTX.
-	EthTXSlice []*EthTX
+	// TXSlice is an alias for a slice of pointers to TX.
+	// This should generally be used opposed to []TX.
+	TXSlice []*TX
 
-	ethTXQuery struct {
+	txQuery struct {
 		*queries.Query
 	}
 )
 
 // Cache for insert, update and upsert
 var (
-	ethTXType                 = reflect.TypeOf(&EthTX{})
-	ethTXMapping              = queries.MakeStructMapping(ethTXType)
-	ethTXPrimaryKeyMapping, _ = queries.BindMapping(ethTXType, ethTXMapping, ethTXPrimaryKeyColumns)
-	ethTXInsertCacheMut       sync.RWMutex
-	ethTXInsertCache          = make(map[string]insertCache)
-	ethTXUpdateCacheMut       sync.RWMutex
-	ethTXUpdateCache          = make(map[string]updateCache)
-	ethTXUpsertCacheMut       sync.RWMutex
-	ethTXUpsertCache          = make(map[string]insertCache)
+	txType                 = reflect.TypeOf(&TX{})
+	txMapping              = queries.MakeStructMapping(txType)
+	txPrimaryKeyMapping, _ = queries.BindMapping(txType, txMapping, txPrimaryKeyColumns)
+	txInsertCacheMut       sync.RWMutex
+	txInsertCache          = make(map[string]insertCache)
+	txUpdateCacheMut       sync.RWMutex
+	txUpdateCache          = make(map[string]updateCache)
+	txUpsertCacheMut       sync.RWMutex
+	txUpsertCache          = make(map[string]insertCache)
 )
 
 var (
@@ -113,9 +113,9 @@ var (
 	_ = qmhelper.Where
 )
 
-// One returns a single ethTX record from the query.
-func (q ethTXQuery) One(ctx context.Context, exec boil.ContextExecutor) (*EthTX, error) {
-	o := &EthTX{}
+// One returns a single tx record from the query.
+func (q txQuery) One(ctx context.Context, exec boil.ContextExecutor) (*TX, error) {
+	o := &TX{}
 
 	queries.SetLimit(q.Query, 1)
 
@@ -124,26 +124,26 @@ func (q ethTXQuery) One(ctx context.Context, exec boil.ContextExecutor) (*EthTX,
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: failed to execute a one query for eth_tx")
+		return nil, errors.Wrap(err, "models: failed to execute a one query for tx")
 	}
 
 	return o, nil
 }
 
-// All returns all EthTX records from the query.
-func (q ethTXQuery) All(ctx context.Context, exec boil.ContextExecutor) (EthTXSlice, error) {
-	var o []*EthTX
+// All returns all TX records from the query.
+func (q txQuery) All(ctx context.Context, exec boil.ContextExecutor) (TXSlice, error) {
+	var o []*TX
 
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
-		return nil, errors.Wrap(err, "models: failed to assign all query results to EthTX slice")
+		return nil, errors.Wrap(err, "models: failed to assign all query results to TX slice")
 	}
 
 	return o, nil
 }
 
-// Count returns the count of all EthTX records in the query.
-func (q ethTXQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+// Count returns the count of all TX records in the query.
+func (q txQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -151,14 +151,14 @@ func (q ethTXQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to count eth_tx rows")
+		return 0, errors.Wrap(err, "models: failed to count tx rows")
 	}
 
 	return count, nil
 }
 
 // Exists checks if the row exists in the table.
-func (q ethTXQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
+func (q txQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -167,49 +167,49 @@ func (q ethTXQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return false, errors.Wrap(err, "models: failed to check if eth_tx exists")
+		return false, errors.Wrap(err, "models: failed to check if tx exists")
 	}
 
 	return count > 0, nil
 }
 
-// EthTxes retrieves all the records using an executor.
-func EthTxes(mods ...qm.QueryMod) ethTXQuery {
-	mods = append(mods, qm.From("`eth_tx`"))
-	return ethTXQuery{NewQuery(mods...)}
+// Txes retrieves all the records using an executor.
+func Txes(mods ...qm.QueryMod) txQuery {
+	mods = append(mods, qm.From("`tx`"))
+	return txQuery{NewQuery(mods...)}
 }
 
-// FindEthTX retrieves a single record by ID with an executor.
+// FindTX retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindEthTX(ctx context.Context, exec boil.ContextExecutor, iD int64, selectCols ...string) (*EthTX, error) {
-	ethTXObj := &EthTX{}
+func FindTX(ctx context.Context, exec boil.ContextExecutor, iD int64, selectCols ...string) (*TX, error) {
+	txObj := &TX{}
 
 	sel := "*"
 	if len(selectCols) > 0 {
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from `eth_tx` where `id`=?", sel,
+		"select %s from `tx` where `id`=?", sel,
 	)
 
 	q := queries.Raw(query, iD)
 
-	err := q.Bind(ctx, exec, ethTXObj)
+	err := q.Bind(ctx, exec, txObj)
 	if err != nil {
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: unable to select from eth_tx")
+		return nil, errors.Wrap(err, "models: unable to select from tx")
 	}
 
-	return ethTXObj, nil
+	return txObj, nil
 }
 
 // Insert a single record using an executor.
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
-func (o *EthTX) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+func (o *TX) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no eth_tx provided for insertion")
+		return errors.New("models: no tx provided for insertion")
 	}
 
 	var err error
@@ -221,39 +221,39 @@ func (o *EthTX) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 		}
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(ethTXColumnsWithDefault, o)
+	nzDefaults := queries.NonZeroDefaultSet(txColumnsWithDefault, o)
 
 	key := makeCacheKey(columns, nzDefaults)
-	ethTXInsertCacheMut.RLock()
-	cache, cached := ethTXInsertCache[key]
-	ethTXInsertCacheMut.RUnlock()
+	txInsertCacheMut.RLock()
+	cache, cached := txInsertCache[key]
+	txInsertCacheMut.RUnlock()
 
 	if !cached {
 		wl, returnColumns := columns.InsertColumnSet(
-			ethTXAllColumns,
-			ethTXColumnsWithDefault,
-			ethTXColumnsWithoutDefault,
+			txAllColumns,
+			txColumnsWithDefault,
+			txColumnsWithoutDefault,
 			nzDefaults,
 		)
 
-		cache.valueMapping, err = queries.BindMapping(ethTXType, ethTXMapping, wl)
+		cache.valueMapping, err = queries.BindMapping(txType, txMapping, wl)
 		if err != nil {
 			return err
 		}
-		cache.retMapping, err = queries.BindMapping(ethTXType, ethTXMapping, returnColumns)
+		cache.retMapping, err = queries.BindMapping(txType, txMapping, returnColumns)
 		if err != nil {
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO `eth_tx` (`%s`) %%sVALUES (%s)%%s", strings.Join(wl, "`,`"), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO `tx` (`%s`) %%sVALUES (%s)%%s", strings.Join(wl, "`,`"), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO `eth_tx` () VALUES ()%s%s"
+			cache.query = "INSERT INTO `tx` () VALUES ()%s%s"
 		}
 
 		var queryOutput, queryReturning string
 
 		if len(cache.retMapping) != 0 {
-			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `eth_tx` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, ethTXPrimaryKeyColumns))
+			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `tx` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, txPrimaryKeyColumns))
 		}
 
 		cache.query = fmt.Sprintf(cache.query, queryOutput, queryReturning)
@@ -270,7 +270,7 @@ func (o *EthTX) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
-		return errors.Wrap(err, "models: unable to insert into eth_tx")
+		return errors.Wrap(err, "models: unable to insert into tx")
 	}
 
 	var lastID int64
@@ -286,7 +286,7 @@ func (o *EthTX) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 	}
 
 	o.ID = int64(lastID)
-	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == ethTXMapping["id"] {
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == txMapping["id"] {
 		goto CacheNoHooks
 	}
 
@@ -301,23 +301,23 @@ func (o *EthTX) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 	}
 	err = exec.QueryRowContext(ctx, cache.retQuery, identifierCols...).Scan(queries.PtrsFromMapping(value, cache.retMapping)...)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to populate default values for eth_tx")
+		return errors.Wrap(err, "models: unable to populate default values for tx")
 	}
 
 CacheNoHooks:
 	if !cached {
-		ethTXInsertCacheMut.Lock()
-		ethTXInsertCache[key] = cache
-		ethTXInsertCacheMut.Unlock()
+		txInsertCacheMut.Lock()
+		txInsertCache[key] = cache
+		txInsertCacheMut.Unlock()
 	}
 
 	return nil
 }
 
-// Update uses an executor to update the EthTX.
+// Update uses an executor to update the TX.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
-func (o *EthTX) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+func (o *TX) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
 
@@ -326,28 +326,28 @@ func (o *EthTX) Update(ctx context.Context, exec boil.ContextExecutor, columns b
 
 	var err error
 	key := makeCacheKey(columns, nil)
-	ethTXUpdateCacheMut.RLock()
-	cache, cached := ethTXUpdateCache[key]
-	ethTXUpdateCacheMut.RUnlock()
+	txUpdateCacheMut.RLock()
+	cache, cached := txUpdateCache[key]
+	txUpdateCacheMut.RUnlock()
 
 	if !cached {
 		wl := columns.UpdateColumnSet(
-			ethTXAllColumns,
-			ethTXPrimaryKeyColumns,
+			txAllColumns,
+			txPrimaryKeyColumns,
 		)
 
 		if !columns.IsWhitelist() {
 			wl = strmangle.SetComplement(wl, []string{"created_at"})
 		}
 		if len(wl) == 0 {
-			return 0, errors.New("models: unable to update eth_tx, could not build whitelist")
+			return 0, errors.New("models: unable to update tx, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE `eth_tx` SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE `tx` SET %s WHERE %s",
 			strmangle.SetParamNames("`", "`", 0, wl),
-			strmangle.WhereClause("`", "`", 0, ethTXPrimaryKeyColumns),
+			strmangle.WhereClause("`", "`", 0, txPrimaryKeyColumns),
 		)
-		cache.valueMapping, err = queries.BindMapping(ethTXType, ethTXMapping, append(wl, ethTXPrimaryKeyColumns...))
+		cache.valueMapping, err = queries.BindMapping(txType, txMapping, append(wl, txPrimaryKeyColumns...))
 		if err != nil {
 			return 0, err
 		}
@@ -363,42 +363,42 @@ func (o *EthTX) Update(ctx context.Context, exec boil.ContextExecutor, columns b
 	var result sql.Result
 	result, err = exec.ExecContext(ctx, cache.query, values...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update eth_tx row")
+		return 0, errors.Wrap(err, "models: unable to update tx row")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by update for eth_tx")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by update for tx")
 	}
 
 	if !cached {
-		ethTXUpdateCacheMut.Lock()
-		ethTXUpdateCache[key] = cache
-		ethTXUpdateCacheMut.Unlock()
+		txUpdateCacheMut.Lock()
+		txUpdateCache[key] = cache
+		txUpdateCacheMut.Unlock()
 	}
 
 	return rowsAff, nil
 }
 
 // UpdateAll updates all rows with the specified column values.
-func (q ethTXQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (q txQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all for eth_tx")
+		return 0, errors.Wrap(err, "models: unable to update all for tx")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected for eth_tx")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected for tx")
 	}
 
 	return rowsAff, nil
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
-func (o EthTXSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (o TXSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	ln := int64(len(o))
 	if ln == 0 {
 		return 0, nil
@@ -420,13 +420,13 @@ func (o EthTXSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, co
 
 	// Append all of the primary key values for each column
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), ethTXPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), txPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE `eth_tx` SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE `tx` SET %s WHERE %s",
 		strmangle.SetParamNames("`", "`", 0, colNames),
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, ethTXPrimaryKeyColumns, len(o)))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, txPrimaryKeyColumns, len(o)))
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -435,25 +435,25 @@ func (o EthTXSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, co
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all in ethTX slice")
+		return 0, errors.Wrap(err, "models: unable to update all in tx slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all ethTX")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all tx")
 	}
 	return rowsAff, nil
 }
 
-var mySQLEthTXUniqueColumns = []string{
+var mySQLTXUniqueColumns = []string{
 	"id",
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
-func (o *EthTX) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
+func (o *TX) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no eth_tx provided for upsert")
+		return errors.New("models: no tx provided for upsert")
 	}
 	if !boil.TimestampsAreSkipped(ctx) {
 		currTime := time.Now().In(boil.GetLocation())
@@ -461,8 +461,8 @@ func (o *EthTX) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCol
 		queries.SetScanner(&o.UpdatedAt, currTime)
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(ethTXColumnsWithDefault, o)
-	nzUniques := queries.NonZeroDefaultSet(mySQLEthTXUniqueColumns, o)
+	nzDefaults := queries.NonZeroDefaultSet(txColumnsWithDefault, o)
+	nzUniques := queries.NonZeroDefaultSet(mySQLTXUniqueColumns, o)
 
 	if len(nzUniques) == 0 {
 		return errors.New("cannot upsert with a table that cannot conflict on a unique column")
@@ -490,42 +490,42 @@ func (o *EthTX) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCol
 	key := buf.String()
 	strmangle.PutBuffer(buf)
 
-	ethTXUpsertCacheMut.RLock()
-	cache, cached := ethTXUpsertCache[key]
-	ethTXUpsertCacheMut.RUnlock()
+	txUpsertCacheMut.RLock()
+	cache, cached := txUpsertCache[key]
+	txUpsertCacheMut.RUnlock()
 
 	var err error
 
 	if !cached {
 		insert, ret := insertColumns.InsertColumnSet(
-			ethTXAllColumns,
-			ethTXColumnsWithDefault,
-			ethTXColumnsWithoutDefault,
+			txAllColumns,
+			txColumnsWithDefault,
+			txColumnsWithoutDefault,
 			nzDefaults,
 		)
 		update := updateColumns.UpdateColumnSet(
-			ethTXAllColumns,
-			ethTXPrimaryKeyColumns,
+			txAllColumns,
+			txPrimaryKeyColumns,
 		)
 
 		if len(update) == 0 {
-			return errors.New("models: unable to upsert eth_tx, could not build update column list")
+			return errors.New("models: unable to upsert tx, could not build update column list")
 		}
 
 		ret = strmangle.SetComplement(ret, nzUniques)
-		cache.query = buildUpsertQueryMySQL(dialect, "eth_tx", update, insert)
+		cache.query = buildUpsertQueryMySQL(dialect, "tx", update, insert)
 		cache.retQuery = fmt.Sprintf(
-			"SELECT %s FROM `eth_tx` WHERE %s",
+			"SELECT %s FROM `tx` WHERE %s",
 			strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, ret), ","),
 			strmangle.WhereClause("`", "`", 0, nzUniques),
 		)
 
-		cache.valueMapping, err = queries.BindMapping(ethTXType, ethTXMapping, insert)
+		cache.valueMapping, err = queries.BindMapping(txType, txMapping, insert)
 		if err != nil {
 			return err
 		}
 		if len(ret) != 0 {
-			cache.retMapping, err = queries.BindMapping(ethTXType, ethTXMapping, ret)
+			cache.retMapping, err = queries.BindMapping(txType, txMapping, ret)
 			if err != nil {
 				return err
 			}
@@ -547,7 +547,7 @@ func (o *EthTX) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCol
 	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
-		return errors.Wrap(err, "models: unable to upsert for eth_tx")
+		return errors.Wrap(err, "models: unable to upsert for tx")
 	}
 
 	var lastID int64
@@ -564,13 +564,13 @@ func (o *EthTX) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCol
 	}
 
 	o.ID = int64(lastID)
-	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == ethTXMapping["id"] {
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == txMapping["id"] {
 		goto CacheNoHooks
 	}
 
-	uniqueMap, err = queries.BindMapping(ethTXType, ethTXMapping, nzUniques)
+	uniqueMap, err = queries.BindMapping(txType, txMapping, nzUniques)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to retrieve unique values for eth_tx")
+		return errors.Wrap(err, "models: unable to retrieve unique values for tx")
 	}
 	nzUniqueCols = queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), uniqueMap)
 
@@ -581,28 +581,28 @@ func (o *EthTX) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCol
 	}
 	err = exec.QueryRowContext(ctx, cache.retQuery, nzUniqueCols...).Scan(returns...)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to populate default values for eth_tx")
+		return errors.Wrap(err, "models: unable to populate default values for tx")
 	}
 
 CacheNoHooks:
 	if !cached {
-		ethTXUpsertCacheMut.Lock()
-		ethTXUpsertCache[key] = cache
-		ethTXUpsertCacheMut.Unlock()
+		txUpsertCacheMut.Lock()
+		txUpsertCache[key] = cache
+		txUpsertCacheMut.Unlock()
 	}
 
 	return nil
 }
 
-// Delete deletes a single EthTX record with an executor.
+// Delete deletes a single TX record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *EthTX) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *TX) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("models: no EthTX provided for delete")
+		return 0, errors.New("models: no TX provided for delete")
 	}
 
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), ethTXPrimaryKeyMapping)
-	sql := "DELETE FROM `eth_tx` WHERE `id`=?"
+	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), txPrimaryKeyMapping)
+	sql := "DELETE FROM `tx` WHERE `id`=?"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -611,52 +611,52 @@ func (o *EthTX) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, e
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete from eth_tx")
+		return 0, errors.Wrap(err, "models: unable to delete from tx")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for eth_tx")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for tx")
 	}
 
 	return rowsAff, nil
 }
 
 // DeleteAll deletes all matching rows.
-func (q ethTXQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q txQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if q.Query == nil {
-		return 0, errors.New("models: no ethTXQuery provided for delete all")
+		return 0, errors.New("models: no txQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from eth_tx")
+		return 0, errors.Wrap(err, "models: unable to delete all from tx")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for eth_tx")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for tx")
 	}
 
 	return rowsAff, nil
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o EthTXSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o TXSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if len(o) == 0 {
 		return 0, nil
 	}
 
 	var args []interface{}
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), ethTXPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), txPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM `eth_tx` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, ethTXPrimaryKeyColumns, len(o))
+	sql := "DELETE FROM `tx` WHERE " +
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, txPrimaryKeyColumns, len(o))
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -665,12 +665,12 @@ func (o EthTXSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 	}
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from ethTX slice")
+		return 0, errors.Wrap(err, "models: unable to delete all from tx slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for eth_tx")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for tx")
 	}
 
 	return rowsAff, nil
@@ -678,8 +678,8 @@ func (o EthTXSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 
 // Reload refetches the object from the database
 // using the primary keys with an executor.
-func (o *EthTX) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindEthTX(ctx, exec, o.ID)
+func (o *TX) Reload(ctx context.Context, exec boil.ContextExecutor) error {
+	ret, err := FindTX(ctx, exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -690,26 +690,26 @@ func (o *EthTX) Reload(ctx context.Context, exec boil.ContextExecutor) error {
 
 // ReloadAll refetches every row with matching primary key column values
 // and overwrites the original object slice with the newly updated slice.
-func (o *EthTXSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
+func (o *TXSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
 	if o == nil || len(*o) == 0 {
 		return nil
 	}
 
-	slice := EthTXSlice{}
+	slice := TXSlice{}
 	var args []interface{}
 	for _, obj := range *o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), ethTXPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), txPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT `eth_tx`.* FROM `eth_tx` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, ethTXPrimaryKeyColumns, len(*o))
+	sql := "SELECT `tx`.* FROM `tx` WHERE " +
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, txPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
 
 	err := q.Bind(ctx, exec, &slice)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to reload all in EthTXSlice")
+		return errors.Wrap(err, "models: unable to reload all in TXSlice")
 	}
 
 	*o = slice
@@ -717,10 +717,10 @@ func (o *EthTXSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) e
 	return nil
 }
 
-// EthTXExists checks if the EthTX row exists.
-func EthTXExists(ctx context.Context, exec boil.ContextExecutor, iD int64) (bool, error) {
+// TXExists checks if the TX row exists.
+func TXExists(ctx context.Context, exec boil.ContextExecutor, iD int64) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from `eth_tx` where `id`=? limit 1)"
+	sql := "select exists(select 1 from `tx` where `id`=? limit 1)"
 
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -731,14 +731,14 @@ func EthTXExists(ctx context.Context, exec boil.ContextExecutor, iD int64) (bool
 
 	err := row.Scan(&exists)
 	if err != nil {
-		return false, errors.Wrap(err, "models: unable to check if eth_tx exists")
+		return false, errors.Wrap(err, "models: unable to check if tx exists")
 	}
 
 	return exists, nil
 }
 
 // InsertAll inserts all rows with the specified column values, using an executor.
-func (o EthTXSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+func (o TXSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	ln := int64(len(o))
 	if ln == 0 {
 		return nil
@@ -755,21 +755,21 @@ func (o EthTXSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, co
 			}
 		}
 
-		nzDefaults := queries.NonZeroDefaultSet(ethTXColumnsWithDefault, row)
+		nzDefaults := queries.NonZeroDefaultSet(txColumnsWithDefault, row)
 		wl, _ := columns.InsertColumnSet(
-			ethTXAllColumns,
-			ethTXColumnsWithDefault,
-			ethTXColumnsWithoutDefault,
+			txAllColumns,
+			txColumnsWithDefault,
+			txColumnsWithoutDefault,
 			nzDefaults,
 		)
 		if i == 0 {
-			sql = "INSERT INTO `eth_tx` " + "(`" + strings.Join(wl, "`,`") + "`)" + " VALUES "
+			sql = "INSERT INTO `tx` " + "(`" + strings.Join(wl, "`,`") + "`)" + " VALUES "
 		}
 		sql += strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), len(vals)+1, len(wl))
 		if i != len(o)-1 {
 			sql += ","
 		}
-		valMapping, err := queries.BindMapping(ethTXType, ethTXMapping, wl)
+		valMapping, err := queries.BindMapping(txType, txMapping, wl)
 		if err != nil {
 			return err
 		}
@@ -783,7 +783,7 @@ func (o EthTXSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, co
 
 	_, err := exec.ExecContext(ctx, sql, vals...)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to insert into eth_tx")
+		return errors.Wrap(err, "models: unable to insert into tx")
 	}
 
 	return nil

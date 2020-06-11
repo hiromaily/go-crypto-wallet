@@ -42,7 +42,7 @@ func TestTransaction(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// PrepareTransaction
-			txJSON, err := xr.PrepareTransaction(tt.args.sernderAccount, tt.args.receiverAccount, tt.args.amount)
+			txJSON, _, err := xr.PrepareTransaction(tt.args.sernderAccount, tt.args.receiverAccount, tt.args.amount)
 			if err != nil {
 				t.Fatal(err)
 			}

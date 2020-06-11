@@ -31,6 +31,13 @@ func TestGetAccountInfo(t *testing.T) {
 			},
 			want: want{false},
 		},
+		{
+			name: "happy path 2",
+			args: args{
+				address: "rNajCSDNXZLCioutY6xk4r3mYWMGYAorcN",
+			},
+			want: want{false},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

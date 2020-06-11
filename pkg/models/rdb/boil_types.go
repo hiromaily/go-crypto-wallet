@@ -108,18 +108,6 @@ const (
 	BTCTXActionTransfer = "transfer"
 )
 
-// Enum values for eth_tx.coin
-const (
-	EthTXCoinEth = "eth"
-)
-
-// Enum values for eth_tx.action
-const (
-	EthTXActionDeposit  = "deposit"
-	EthTXActionPayment  = "payment"
-	EthTXActionTransfer = "transfer"
-)
-
 // Enum values for payment_request.coin
 const (
 	PaymentRequestCoinBTC = "btc"
@@ -134,6 +122,18 @@ const (
 	SeedCoinBCH = "bch"
 )
 
+// Enum values for tx.coin
+const (
+	TXCoinEth = "eth"
+)
+
+// Enum values for tx.action
+const (
+	TXActionDeposit  = "deposit"
+	TXActionPayment  = "payment"
+	TXActionTransfer = "transfer"
+)
+
 // Enum values for xrp_account_key.coin
 const (
 	XRPAccountKeyCoinXRP = "xrp"
@@ -145,16 +145,4 @@ const (
 	XRPAccountKeyAccountDeposit = "deposit"
 	XRPAccountKeyAccountPayment = "payment"
 	XRPAccountKeyAccountStored  = "stored"
-)
-
-// Enum values for xrp_tx.coin
-const (
-	XRPTXCoinXRP = "xrp"
-)
-
-// Enum values for xrp_tx.action
-const (
-	XRPTXActionDeposit  = "deposit"
-	XRPTXActionPayment  = "payment"
-	XRPTXActionTransfer = "transfer"
 )

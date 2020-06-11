@@ -93,13 +93,13 @@ CREATE TABLE `btc_tx_output` (
 
 
 --
--- Table structure for table `eth_tx`
+-- Table structure for table `tx`
 --
 
-DROP TABLE IF EXISTS `eth_tx`;
+DROP TABLE IF EXISTS `tx`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `eth_tx` (
+CREATE TABLE `tx` (
   `id`                  BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'transaction ID',
   `coin`                ENUM('eth') NOT NULL COMMENT'coin type code',
   `action`              ENUM('deposit', 'payment', 'transfer') NOT NULL COMMENT'action type',
@@ -146,25 +146,6 @@ CREATE TABLE `eth_detail_tx` (
 
 
 --
--- Table structure for table `xrp_tx`
---
-
-DROP TABLE IF EXISTS `xrp_tx`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `xrp_tx` (
-  `id`                  BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'transaction ID',
-  `coin`                ENUM('xrp') NOT NULL COMMENT'coin type code',
-  `action`              ENUM('deposit', 'payment', 'transfer') NOT NULL COMMENT'action type',
-  `updated_at`          datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',
-  PRIMARY KEY (`id`),
-  INDEX idx_coin (`coin`),
-  INDEX idx_action (`action`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='table for eth transaction info';
-/*!40101 SET character_set_client = @saved_cs_client */;
-
-
---
 -- Table structure for table `xrp_detail_tx`
 --
 
@@ -181,7 +162,7 @@ CREATE TABLE `xrp_detail_tx` (
   `receiver_account`     VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'receiver account',
   `receiver_address`     VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'receiver address',
   `amount`               VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'amount of coin to receive',
-  `xrp_tx_type`          VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'xrp tx type',
+  `xrp_tx_type`          VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'xrp tx type like `Payment`',
   `fee`                  VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'tx fee',
   `flags`                BIGINT(20) UNSIGNED NOT NULL COMMENT'tx flags',
   `last_ledger_sequence` BIGINT(20) UNSIGNED NOT NULL COMMENT'tx LastLedgerSequence',
@@ -190,7 +171,9 @@ CREATE TABLE `xrp_detail_tx` (
   `txn_signature`        VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'tx TxnSignature',
   `hash`                 VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'tx Hash',
   `earliest_ledger_version` BIGINT(20) UNSIGNED NOT NULL COMMENT'tx earliest_ledger_version after sending tx',
-  `tx_blob`              VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'tx blob',
+  `signed_tx_id`         VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'signed tx id',
+  `signed_tx_blob`       VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'signed tx blob',
+  `sent_tx_blob`         VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'sent tx blob',
   `unsigned_updated_at`  datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date for unsigned transaction created',
   `sent_updated_at`      datetime DEFAULT NULL COMMENT'updated date for signed transaction sent',
   PRIMARY KEY (`id`),

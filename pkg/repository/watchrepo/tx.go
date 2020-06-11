@@ -14,38 +14,38 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
-// ETHTxRepositorier is EthTxRepository interface
-type ETHTxRepositorier interface {
-	GetOne(id int64) (*models.EthTX, error)
+// TxRepositorier is TxRepository interface
+type TxRepositorier interface {
+	GetOne(id int64) (*models.TX, error)
 	GetMaxID(actionType action.ActionType) (int64, error)
 	InsertUnsignedTx(actionType action.ActionType) (int64, error)
-	Update(txItem *models.EthTX) (int64, error)
+	Update(txItem *models.TX) (int64, error)
 	DeleteAll() (int64, error)
 }
 
-// ETHTxRepository is repository for eth_tx table
-type ETHTxRepository struct {
+// TxRepository is repository for tx table
+type TxRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
 	logger       *zap.Logger
 }
 
-// NewETHTxRepository returns ETHTxRepository object
-func NewETHTxRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *ETHTxRepository {
-	return &ETHTxRepository{
+// NewTxRepository returns TxRepository object
+func NewTxRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *TxRepository {
+	return &TxRepository{
 		dbConn:       dbConn,
-		tableName:    "eth_tx",
+		tableName:    "tx",
 		coinTypeCode: coinTypeCode,
 		logger:       logger,
 	}
 }
 
 // GetOne returns one record by ID
-func (r *ETHTxRepository) GetOne(id int64) (*models.EthTX, error) {
+func (r *TxRepository) GetOne(id int64) (*models.TX, error) {
 	ctx := context.Background()
 
-	txItem, err := models.FindEthTX(ctx, r.dbConn, id) //unique
+	txItem, err := models.FindTX(ctx, r.dbConn, id) //unique
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to call models.FindEthTX()")
 	}
@@ -53,14 +53,14 @@ func (r *ETHTxRepository) GetOne(id int64) (*models.EthTX, error) {
 }
 
 // GetMaxID returns max id
-func (r *ETHTxRepository) GetMaxID(actionType action.ActionType) (int64, error) {
+func (r *TxRepository) GetMaxID(actionType action.ActionType) (int64, error) {
 	ctx := context.Background()
 
 	type Response struct {
 		MaxCount int64 `boil:"max_count"`
 	}
 	var maxCount Response
-	err := models.EthTxes(
+	err := models.Txes(
 		qm.Select("MAX(id) as max_count"),
 		qm.Where("coin=?", r.coinTypeCode.String()),
 		qm.And("action=?", actionType.String()),
@@ -72,9 +72,9 @@ func (r *ETHTxRepository) GetMaxID(actionType action.ActionType) (int64, error) 
 }
 
 // InsertUnsignedTx inserts records
-func (r *ETHTxRepository) InsertUnsignedTx(actionType action.ActionType) (int64, error) {
+func (r *TxRepository) InsertUnsignedTx(actionType action.ActionType) (int64, error) {
 	//set coin
-	txItem := &models.EthTX{
+	txItem := &models.TX{
 		Coin:   r.coinTypeCode.String(),
 		Action: actionType.String(),
 	}
@@ -92,14 +92,14 @@ func (r *ETHTxRepository) InsertUnsignedTx(actionType action.ActionType) (int64,
 }
 
 // Update updates by models.Tx (entire update)
-func (r *ETHTxRepository) Update(txItem *models.EthTX) (int64, error) {
+func (r *TxRepository) Update(txItem *models.TX) (int64, error) {
 	ctx := context.Background()
 	return txItem.Update(ctx, r.dbConn, boil.Infer())
 }
 
 // DeleteAll deletes all records
-func (r *ETHTxRepository) DeleteAll() (int64, error) {
+func (r *TxRepository) DeleteAll() (int64, error) {
 	ctx := context.Background()
-	txItems, _ := models.EthTxes().All(ctx, r.dbConn)
+	txItems, _ := models.Txes().All(ctx, r.dbConn)
 	return txItems.DeleteAll(ctx, r.dbConn)
 }

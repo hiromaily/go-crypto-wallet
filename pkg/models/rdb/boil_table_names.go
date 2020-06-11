@@ -12,12 +12,11 @@ var TableNames = struct {
 	BTCTXInput     string
 	BTCTXOutput    string
 	EthDetailTX    string
-	EthTX          string
 	PaymentRequest string
 	Seed           string
+	TX             string
 	XRPAccountKey  string
 	XRPDetailTX    string
-	XRPTX          string
 }{
 	AccountKey:     "account_key",
 	Address:        "address",
@@ -27,10 +26,9 @@ var TableNames = struct {
 	BTCTXInput:     "btc_tx_input",
 	BTCTXOutput:    "btc_tx_output",
 	EthDetailTX:    "eth_detail_tx",
-	EthTX:          "eth_tx",
 	PaymentRequest: "payment_request",
 	Seed:           "seed",
+	TX:             "tx",
 	XRPAccountKey:  "xrp_account_key",
 	XRPDetailTX:    "xrp_detail_tx",
-	XRPTX:          "xrp_tx",
 }

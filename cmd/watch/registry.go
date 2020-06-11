@@ -399,8 +399,8 @@ func (r *registry) newTxOutputRepo() watchrepo.TxOutputRepositorier {
 	)
 }
 
-func (r *registry) newETHTxRepo() watchrepo.ETHTxRepositorier {
-	return watchrepo.NewETHTxRepository(
+func (r *registry) newETHTxRepo() watchrepo.TxRepositorier {
+	return watchrepo.NewTxRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),

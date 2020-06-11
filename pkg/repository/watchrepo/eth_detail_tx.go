@@ -84,8 +84,8 @@ func (r *EthDetailTxInputRepository) GetSentHashTx(txType tx.TxType) ([]string, 
 
 	txItems, err := models.EthDetailTxes(
 		qm.Select("sent_hash_tx"),
-		qm.InnerJoin("eth_tx on eth_tx.id=eth_detail_tx.tx_id"),
-		qm.Where("eth_tx.coin=?", r.coinTypeCode.String()),
+		qm.InnerJoin("tx on eth_tx.id=eth_detail_tx.tx_id"),
+		qm.Where("tx.coin=?", r.coinTypeCode.String()),
 		qm.And("eth_detail_tx.current_tx_type=?", txType.Int8()),
 	).All(ctx, r.dbConn)
 	if err != nil {

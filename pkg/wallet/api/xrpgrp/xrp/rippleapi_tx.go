@@ -108,7 +108,7 @@ type TxOrderbookChange struct {
 }
 
 // PrepareTransaction calls PrepareTransaction API
-func (r *Ripple) PrepareTransaction(senderAccount, receiverAccount string, amount float64) (*TxInput, error) {
+func (r *Ripple) PrepareTransaction(senderAccount, receiverAccount string, amount float64) (*TxInput, string, error) {
 
 	ctx := context.Background()
 	req := &pb.RequestPrepareTransaction{
@@ -116,13 +116,13 @@ func (r *Ripple) PrepareTransaction(senderAccount, receiverAccount string, amoun
 		SenderAccount:   senderAccount,
 		Amount:          amount,
 		ReceiverAccount: receiverAccount,
-		Instructions:    &pb.Instructions{MaxLedgerVersionOffset: 75},
+		Instructions:    &pb.Instructions{MaxLedgerVersionOffset: 75}, //FIXME: what is proper value?
 	}
 
 	//res: *pb.ResponsePrepareTransaction
 	res, err := r.API.txClient.PrepareTransaction(ctx, req)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call client.PrepareTransaction()")
+		return nil, "", errors.Wrap(err, "fail to call client.PrepareTransaction()")
 	}
 	r.logger.Debug("response",
 		zap.String("TxJSON", res.TxJSON),
@@ -132,10 +132,10 @@ func (r *Ripple) PrepareTransaction(senderAccount, receiverAccount string, amoun
 	var txInput TxInput
 	unquotedJSON, _ := strconv.Unquote(res.TxJSON)
 	if err = json.Unmarshal([]byte(unquotedJSON), &txInput); err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Unmarshal(txJSON)")
+		return nil, "", errors.Wrap(err, "fail to call json.Unmarshal(txJSON)")
 	}
 
-	return &txInput, nil
+	return &txInput, unquotedJSON, nil
 }
 
 // SignTransaction calls SignTransaction API
