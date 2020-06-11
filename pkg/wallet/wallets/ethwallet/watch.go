@@ -10,7 +10,8 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/watchsrv"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/common/watchsrv"
+	ethsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/watchsrv"
 )
 
 // ETHWatch watch only wallet object
@@ -20,7 +21,7 @@ type ETHWatch struct {
 	logger *zap.Logger
 	wtype  wtype.WalletType
 	watchsrv.AddressImporter
-	watchsrv.TxCreator
+	ethsrv.TxCreator
 	service.TxSender
 	service.TxMonitorer
 	service.PaymentRequestCreator
@@ -32,7 +33,7 @@ func NewETHWatch(
 	dbConn *sql.DB,
 	logger *zap.Logger,
 	addrImporter watchsrv.AddressImporter,
-	txCreator watchsrv.TxCreator,
+	txCreator ethsrv.TxCreator,
 	txSender service.TxSender,
 	txMonitorer service.TxMonitorer,
 	paymentRequestCreator service.PaymentRequestCreator,

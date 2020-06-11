@@ -11,7 +11,6 @@ import (
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
@@ -22,7 +21,6 @@ type AddressImporter interface {
 
 // AddressImport type
 type AddressImport struct {
-	eth          ethgrp.Ethereumer
 	logger       *zap.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier
@@ -34,7 +32,6 @@ type AddressImport struct {
 
 // NewAddressImport returns AddressImport object
 func NewAddressImport(
-	eth ethgrp.Ethereumer,
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
@@ -44,7 +41,6 @@ func NewAddressImport(
 	wtype wallet.WalletType) *AddressImport {
 
 	return &AddressImport{
-		eth:          eth,
 		logger:       logger,
 		dbConn:       dbConn,
 		addrRepo:     addrRepo,

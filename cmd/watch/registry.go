@@ -26,7 +26,8 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/watchsrv"
+	btcsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/watchsrv"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/common/watchsrv"
 	ethsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/watchsrv"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
@@ -100,7 +101,7 @@ func (r *registry) newETHWalleter() wallets.Watcher {
 		r.newETH(),
 		r.newMySQLClient(),
 		r.newLogger(),
-		r.newETHAddressImporter(),
+		r.newCommonAddressImporter(),
 		r.newETHTxCreator(),
 		r.newETHTxSender(),
 		r.newETHTxMonitorer(),
@@ -114,12 +115,13 @@ func (r *registry) newXRPWalleter() wallets.Watcher {
 		r.newXRP(),
 		r.newMySQLClient(),
 		r.newLogger(),
+		r.newCommonAddressImporter(),
 		r.walletType,
 	)
 }
 
 func (r *registry) newBTCAddressImporter() service.AddressImporter {
-	return watchsrv.NewAddressImport(
+	return btcsrv.NewAddressImport(
 		r.newBTC(),
 		r.newLogger(),
 		r.newMySQLClient(),
@@ -131,9 +133,8 @@ func (r *registry) newBTCAddressImporter() service.AddressImporter {
 	)
 }
 
-func (r *registry) newETHAddressImporter() ethsrv.AddressImporter {
-	return ethsrv.NewAddressImport(
-		r.newETH(),
+func (r *registry) newCommonAddressImporter() watchsrv.AddressImporter {
+	return watchsrv.NewAddressImport(
 		r.newLogger(),
 		r.newMySQLClient(),
 		r.newAddressRepo(),
@@ -145,7 +146,7 @@ func (r *registry) newETHAddressImporter() ethsrv.AddressImporter {
 }
 
 func (r *registry) newTxCreator() service.TxCreator {
-	return watchsrv.NewTxCreate(
+	return btcsrv.NewTxCreate(
 		r.newBTC(),
 		r.newLogger(),
 		r.newMySQLClient(),
@@ -174,7 +175,7 @@ func (r *registry) newETHTxCreator() ethsrv.TxCreator {
 }
 
 func (r *registry) newTxSender() service.TxSender {
-	return watchsrv.NewTxSend(
+	return btcsrv.NewTxSend(
 		r.newBTC(),
 		r.newLogger(),
 		r.newMySQLClient(),
@@ -200,7 +201,7 @@ func (r *registry) newETHTxSender() service.TxSender {
 }
 
 func (r *registry) newTxMonitorer() service.TxMonitorer {
-	return watchsrv.NewTxMonitor(
+	return btcsrv.NewTxMonitor(
 		r.newBTC(),
 		r.newLogger(),
 		r.newMySQLClient(),
@@ -228,7 +229,7 @@ func (r *registry) newETHTxMonitorer() service.TxMonitorer {
 }
 
 func (r *registry) newPaymentRequestCreator() service.PaymentRequestCreator {
-	return watchsrv.NewPaymentRequestCreate(
+	return btcsrv.NewPaymentRequestCreate(
 		r.newBTC(),
 		r.newLogger(),
 		r.newMySQLClient(),
