@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/rubblelabs/ripple/websockets"
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
@@ -17,7 +16,6 @@ type Ripple struct {
 	wsPublic     *ws.WS
 	wsAdmin      *ws.WS
 	API          *RippleAPI
-	wsRemote     *websockets.Remote
 	chainConf    *chaincfg.Params
 	coinTypeCode coin.CoinTypeCode //eth
 	logger       *zap.Logger
@@ -30,7 +28,6 @@ func NewRipple(
 	wsPublic *ws.WS,
 	wsAdmin *ws.WS,
 	api *RippleAPI,
-	wsRemote *websockets.Remote,
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Ripple,
 	logger *zap.Logger) (*Ripple, error) {
@@ -39,7 +36,6 @@ func NewRipple(
 		wsPublic:     wsPublic,
 		wsAdmin:      wsAdmin,
 		API:          api,
-		wsRemote:     wsRemote,
 		coinTypeCode: coinTypeCode,
 		logger:       logger,
 		ctx:          ctx,
@@ -61,9 +57,6 @@ func (r *Ripple) Close() {
 	}
 	if r.wsAdmin != nil {
 		r.wsAdmin.Close()
-	}
-	if r.wsRemote != nil {
-		r.wsRemote.Close()
 	}
 	if r.API != nil {
 		r.API.Close()

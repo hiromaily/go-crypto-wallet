@@ -46,7 +46,7 @@ func GetXRP() xrpgrp.Rippler {
 	}
 	grpcAPI := xrp.NewRippleAPI(conn, logger)
 
-	xr, err = xrpgrp.NewRipple(wsClient, wsAdmin, grpcAPI, nil, &conf.Ripple, logger, conf.CoinTypeCode)
+	xr, err = xrpgrp.NewRipple(wsClient, wsAdmin, grpcAPI, &conf.Ripple, logger, conf.CoinTypeCode)
 	if err != nil {
 		log.Fatalf("fail to create xrp instance: %v", err)
 	}

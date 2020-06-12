@@ -7,7 +7,6 @@ import (
 	"github.com/btcsuite/btcd/rpcclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/opentracing/opentracing-go"
-	"github.com/rubblelabs/ripple/websockets"
 	"github.com/volatiletech/sqlboiler/boil"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -54,7 +53,6 @@ type registry struct {
 	wsXrpAdmin   *ws.WS
 	grpcConn     *grpc.ClientConn
 	rippleAPI    *xrp.RippleAPI
-	wsXrpRemote  *websockets.Remote
 	mysqlClient  *sql.DB
 }
 
@@ -333,17 +331,6 @@ func (r *registry) newGRPCConn() *grpc.ClientConn {
 	return r.grpcConn
 }
 
-func (r *registry) newXRPWSRemote() *websockets.Remote {
-	if r.wsXrpRemote == nil {
-		var err error
-		r.wsXrpRemote, err = xrpgrp.NewWSRemote(&r.conf.Ripple)
-		if err != nil {
-			panic(err)
-		}
-	}
-	return r.wsXrpRemote
-}
-
 func (r *registry) newXRP() xrpgrp.Rippler {
 	if r.xrp == nil {
 		var err error
@@ -352,7 +339,6 @@ func (r *registry) newXRP() xrpgrp.Rippler {
 			wsPublic,
 			wsAdmin,
 			r.newRippleAPI(),
-			r.newXRPWSRemote(),
 			&r.conf.Ripple,
 			r.newLogger(),
 			r.conf.CoinTypeCode,

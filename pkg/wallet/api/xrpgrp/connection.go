@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
-	"github.com/rubblelabs/ripple/websockets"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
@@ -40,17 +39,6 @@ func NewWSClient(conf *config.Ripple) (*ws.WS, *ws.WS, error) {
 	return public, admin, nil
 }
 
-// NewWSRemote try to connect Ripple Server by web socket
-func NewWSRemote(conf *config.Ripple) (*websockets.Remote, error) {
-	url := conf.WebsocketPublicURL
-	if url == "" {
-		if url = xrp.GetPublicWSServer(conf.NetworkType).String(); url == "" {
-			return nil, errors.New("websocket URL is not found")
-		}
-	}
-	return websockets.NewRemote(url)
-}
-
 // NewGRPCClient try to connect gRPC Server
 func NewGRPCClient(conf *config.RippleAPI) (*grpc.ClientConn, error) {
 	if conf.URL == "" {
@@ -77,10 +65,10 @@ func NewGRPCClient(conf *config.RippleAPI) (*grpc.ClientConn, error) {
 //}
 
 // NewRipple creates Ripple instance according to coinType
-func NewRipple(wsPublic *ws.WS, wsAdmin *ws.WS, api *xrp.RippleAPI, wsRemote *websockets.Remote, conf *config.Ripple, logger *zap.Logger, coinTypeCode coin.CoinTypeCode) (Rippler, error) {
+func NewRipple(wsPublic *ws.WS, wsAdmin *ws.WS, api *xrp.RippleAPI, conf *config.Ripple, logger *zap.Logger, coinTypeCode coin.CoinTypeCode) (Rippler, error) {
 	switch coinTypeCode {
 	case coin.XRP:
-		ripple, err := xrp.NewRipple(context.Background(), wsPublic, wsAdmin, api, wsRemote, coinTypeCode, conf, logger)
+		ripple, err := xrp.NewRipple(context.Background(), wsPublic, wsAdmin, api, coinTypeCode, conf, logger)
 		if err != nil {
 			return nil, errors.Wrap(err, "fail to call xrp.NewRipple()")
 		}
