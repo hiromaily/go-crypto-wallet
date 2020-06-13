@@ -70,11 +70,11 @@ func TestTransaction(t *testing.T) {
 			}
 
 			// validate transaction
-			leggerVer, err := xr.WaitValidation(sentTx.TxJSON.LastLedgerSequence)
+			ledgerVer, err := xr.WaitValidation(sentTx.TxJSON.LastLedgerSequence)
 			if err != nil {
 				t.Fatal(err)
 			}
-			t.Log("currentLedgerVersion: ", leggerVer)
+			t.Log("currentLedgerVersion: ", ledgerVer)
 
 			// get transaction info
 			txInfo, err := xr.GetTransaction(txID, earlistLedgerVersion)

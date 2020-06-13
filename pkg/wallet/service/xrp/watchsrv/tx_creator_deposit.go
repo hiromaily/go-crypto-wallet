@@ -65,7 +65,9 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 		// call CreateRawTransaction
 		txJSON, rawTxString, err := t.xrp.CreateRawTransaction(val.Address, depositAddr.WalletAddress, val.Amount)
 		if err != nil {
-			return "", "", errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s", val.Address)
+			t.logger.Warn("fail to call xrp.CreateRawTransaction()", zap.Error(err))
+			//return "", "", errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s", val.Address)
+			continue
 		}
 
 		t.logger.Debug("txJSON", zap.Any("txJSON", txJSON))
@@ -109,6 +111,10 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 		//SentUpdatedAt         null.Time `boil:"sent_updated_at" json:"sent_updated_at,omitempty" toml:"sent_updated_at" yaml:"sent_updated_at,omitempty"`
 
 		txDetailItems = append(txDetailItems, txDetailItem)
+	}
+	if len(txDetailItems) == 0 {
+		//TODO: what should be returned?
+		return "", "", nil
 	}
 
 	return t.afterTxCreation(targetAction, sender, serializedTxs, txDetailItems, nil)

@@ -2,6 +2,7 @@ package xrp
 
 import (
 	"github.com/pkg/errors"
+	"google.golang.org/grpc/status"
 )
 
 // CreateRawTransaction creates raw transaction
@@ -11,7 +12,8 @@ func (r *Ripple) CreateRawTransaction(senderAccount, receiverAccount string, amo
 	// get balance
 	accountInfo, err := r.GetAccountInfo(senderAccount)
 	if err != nil {
-		return nil, "", errors.Wrap(err, "fail to call GetAccountInfo()")
+		errStatus, _ := status.FromError(err)
+		return nil, "", errors.Errorf("fail to call GetAccountInfo() code: %d, message: %s", errStatus.Code(), errStatus.Message())
 	}
 	if amount != 0 && ToFloat64(accountInfo.XrpBalance) <= amount {
 		return nil, "", errors.Errorf("balance is short to send %s", accountInfo.XrpBalance)

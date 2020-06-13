@@ -192,6 +192,11 @@ up-docker-bch:
 up-docker-eth:
 	docker-compose -f docker-compose.eth.yml up eth-node
 
+# run ripple node server
+.PHONY: up-docker-xrp
+up-docker-xrp:
+	docker-compose -f docker-compose.xrp.yml up xrp-node
+
 # run all databases
 .PHONY: up-docker-db
 up-docker-db:

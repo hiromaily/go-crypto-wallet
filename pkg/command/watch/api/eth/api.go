@@ -20,7 +20,7 @@ type APICommand struct {
 
 // Synopsis is explanation for this subcommand
 func (c *APICommand) Synopsis() string {
-	return "Bitcoin API functionality"
+	return "Ethereum API functionality"
 }
 
 var (

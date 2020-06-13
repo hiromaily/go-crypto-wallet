@@ -10,6 +10,11 @@ network_type = "testnet" # mainnet, testnet, devnet
 url = "127.0.0.1:50051"
 is_secure = false
 
+[ripple.api.transaction]
+# generated from faucet https://xrpl.org/xrp-testnet-faucet.html
+sender_account = "rBdjJgDGXQc6oTjh3zRHwmzHAVb1dmEtYN"
+sender_secret = "sh5Lvq59qWVwnJGtxHwaWAfTNPnxX"
+
 [logger]
 service = "xrp-wallet"
 env = "custom" # dev, prod, custom :for only zap logger

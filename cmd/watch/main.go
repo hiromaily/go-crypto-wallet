@@ -81,9 +81,12 @@ func main() {
 	}
 
 	// help
+	var conf *config.WalletRoot
 	if !isHelp && len(os.Args) > 1 {
+		var err error
+
 		// config
-		conf, err := config.NewWallet(confPath, walletType, coin.CoinTypeCode(coinTypeCode))
+		conf, err = config.NewWallet(confPath, walletType, coin.CoinTypeCode(coinTypeCode))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -103,7 +106,7 @@ func main() {
 
 	//sub command
 	args := flags.Args()
-	cmds := wcmd.WatchSubCommands(walleter, appVersion)
+	cmds := wcmd.WatchSubCommands(walleter, appVersion, conf)
 	cl := command.CreateSubCommand(appName, appVersion, args, cmds)
 	cl.HelpFunc = command.HelpFunc(cl.Name)
 

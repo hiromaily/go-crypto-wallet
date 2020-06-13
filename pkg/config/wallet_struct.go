@@ -69,8 +69,15 @@ type Ripple struct {
 
 // RippleAPI is ripple-lib server info
 type RippleAPI struct {
-	URL      string `toml:"url"`
-	IsSecure bool   `toml:"is_secure"`
+	URL      string       `toml:"url"`
+	IsSecure bool         `toml:"is_secure"`
+	TxData   RippleTxData `toml:"transaction"`
+}
+
+// RippleTxData is used for api command to send coin
+type RippleTxData struct {
+	Account string `toml:"account"`
+	Secret  string `toml:"secret"`
 }
 
 // Logger logger info
