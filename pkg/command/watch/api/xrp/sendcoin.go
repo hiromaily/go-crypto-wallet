@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/bookerzzz/grok"
 	"github.com/mitchellh/cli"
 	"google.golang.org/grpc/status"
 
@@ -59,11 +60,13 @@ func (c *SendCoinCommand) Run(args []string) int {
 
 	// send coin
 	// PrepareTransaction
+	c.ui.Info(fmt.Sprintf("sender: %s, receiver: %s, amount: %v", c.txData.Account, receiverAddr, amount))
 	txJSON, _, err := c.xrp.CreateRawTransaction(c.txData.Account, receiverAddr, amount)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call xrp.CreateRawTransaction() %v", err))
 		return 1
 	}
+	grok.Value(txJSON)
 
 	// SingTransaction
 	txID, txBlob, err := c.xrp.SignTransaction(txJSON, c.txData.Secret)

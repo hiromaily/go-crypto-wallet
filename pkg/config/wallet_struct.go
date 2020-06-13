@@ -76,8 +76,8 @@ type RippleAPI struct {
 
 // RippleTxData is used for api command to send coin
 type RippleTxData struct {
-	Account string `toml:"account"`
-	Secret  string `toml:"secret"`
+	Account string `toml:"sender_account"`
+	Secret  string `toml:"sender_secret"`
 }
 
 // Logger logger info

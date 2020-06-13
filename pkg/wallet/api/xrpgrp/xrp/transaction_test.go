@@ -38,10 +38,20 @@ func TestCreateRawTransaction(t *testing.T) {
 			want: want{false},
 		},
 		{
-			name: "happy path 1",
+			name: "happy path 2",
 			args: args{
 				sernderAccount:  "rKXvsrd5H6MQNVpYgdeffFYjfGq4VdDogd",
 				senderSecret:    "snF5xKNGEhwudFBVPbFFXnrFe5f5Y",
+				receiverAccount: "raWG2eo1tEXwN4HtGFJCagvukC2nBuiHxC",
+				amount:          0,
+			},
+			want: want{false},
+		},
+		{
+			name: "happy path 3",
+			args: args{
+				sernderAccount:  "r4zpoGKAoKhnmrPToGMpLuLVXZaAQiBCNM",
+				senderSecret:    "ssxcbKT8Fecj3wxCihZRRqcJ2tq22",
 				receiverAccount: "raWG2eo1tEXwN4HtGFJCagvukC2nBuiHxC",
 				amount:          0,
 			},

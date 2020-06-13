@@ -11,6 +11,10 @@ import (
 
 // GetAccountInfo calls GetAccountInfo API
 func (r *Ripple) GetAccountInfo(address string) (*pb.ResponseGetAccountInfo, error) {
+	// validation
+	if address == "" {
+		return nil, errors.New("address is empty")
+	}
 
 	ctx := context.Background()
 	req := &pb.RequestGetAccountInfo{

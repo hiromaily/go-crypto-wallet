@@ -12,8 +12,8 @@ is_secure = false
 
 [ripple.api.transaction]
 # generated from faucet https://xrpl.org/xrp-testnet-faucet.html
-sender_account = "rBdjJgDGXQc6oTjh3zRHwmzHAVb1dmEtYN"
-sender_secret = "sh5Lvq59qWVwnJGtxHwaWAfTNPnxX"
+sender_account = "rNsauxk2RYvZtEEnHHsp7zHSXDpJgwVSJW"
+sender_secret = "sh7PZkFPYmSgPm25UYZ2f46PwKJZ9"
 
 [logger]
 service = "xrp-wallet"
