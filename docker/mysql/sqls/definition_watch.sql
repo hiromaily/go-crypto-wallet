@@ -101,7 +101,7 @@ DROP TABLE IF EXISTS `tx`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tx` (
   `id`                  BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'transaction ID',
-  `coin`                ENUM('eth') NOT NULL COMMENT'coin type code',
+  `coin`                ENUM('eth','xrp') NOT NULL COMMENT'coin type code',
   `action`              ENUM('deposit', 'payment', 'transfer') NOT NULL COMMENT'action type',
   `updated_at`          datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',
   PRIMARY KEY (`id`),

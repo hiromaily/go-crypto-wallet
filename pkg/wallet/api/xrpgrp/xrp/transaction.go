@@ -32,7 +32,7 @@ func (r *Ripple) CreateRawTransaction(senderAccount, receiverAccount string, amo
 	if err != nil {
 		return nil, "", errors.Wrap(err, "fail to call PrepareTransaction()")
 	}
-	calculatedAmount := ToFloat64(accountInfo.XrpBalance) - MinimumReserve - ToFloat64(txJSON.Fee)
+	calculatedAmount := ToFloat64(accountInfo.XrpBalance) - MinimumReserve - XRPToDrops(ToFloat64(txJSON.Fee))
 	if amount == 0 {
 		// send all, but fee should be calculated first
 		if calculatedAmount <= 0 {

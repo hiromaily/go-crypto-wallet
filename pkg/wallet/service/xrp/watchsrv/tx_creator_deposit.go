@@ -37,9 +37,9 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 		if err != nil {
 			t.logger.Warn("fail to call t.xrp.GetAccountInfo()",
 				zap.String("address", addr.WalletAddress),
-				zap.Error(err),
 			)
 		} else {
+			t.logger.Debug("account_info", zap.String("address", addr.WalletAddress), zap.String("balance", accountInfo.XrpBalance))
 			amt := xrp.ToFloat64(accountInfo.XrpBalance)
 			if amt != 0 {
 				userAmounts = append(userAmounts, xrp.UserAmount{Address: addr.WalletAddress, Amount: amt})
@@ -63,19 +63,13 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 	txDetailItems := make([]*models.XRPDetailTX, 0, len(userAmounts))
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
-		txJSON, rawTxString, err := t.xrp.CreateRawTransaction(val.Address, depositAddr.WalletAddress, val.Amount)
+		txJSON, rawTxString, err := t.xrp.CreateRawTransaction(val.Address, depositAddr.WalletAddress, 0)
 		if err != nil {
 			t.logger.Warn("fail to call xrp.CreateRawTransaction()", zap.Error(err))
-			//return "", "", errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s", val.Address)
 			continue
 		}
-
 		t.logger.Debug("txJSON", zap.Any("txJSON", txJSON))
 
-		//serializedTx, err := serial.EncodeToString(txJSON)
-		//if err != nil {
-		//	return "", "", errors.Wrap(err, "fail to call serial.EncodeToString(txJSON)")
-		//}
 		serializedTxs = append(serializedTxs, rawTxString)
 
 		// generate UUID to trace transaction because unsignedTx is not unique
@@ -113,7 +107,6 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}
 	if len(txDetailItems) == 0 {
-		//TODO: what should be returned?
 		return "", "", nil
 	}
 
