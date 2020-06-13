@@ -14,6 +14,9 @@ type Rippler interface {
 	RipplePublicer
 	RippleAPIer
 
+	//transaction
+	CreateRawTransaction(senderAccount, receiverAccount string, amount float64) (*xrp.TxInput, string, error)
+
 	// ripple
 	Close()
 	CoinTypeCode() coin.CoinTypeCode

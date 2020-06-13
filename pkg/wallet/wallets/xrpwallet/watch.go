@@ -10,6 +10,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/common/watchsrv"
+	xrpsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/xrp/watchsrv"
 )
 
 // XRPWatch watch only wallet object
@@ -19,6 +20,7 @@ type XRPWatch struct {
 	logger *zap.Logger
 	wtype  wtype.WalletType
 	watchsrv.AddressImporter
+	xrpsrv.TxCreator
 }
 
 // NewXRPWatch returns XRPWatch object
@@ -27,6 +29,7 @@ func NewXRPWatch(
 	dbConn *sql.DB,
 	logger *zap.Logger,
 	addrImporter watchsrv.AddressImporter,
+	txCreator xrpsrv.TxCreator,
 	wtype wtype.WalletType) *XRPWatch {
 
 	return &XRPWatch{
@@ -35,6 +38,7 @@ func NewXRPWatch(
 		dbConn:          dbConn,
 		wtype:           wtype,
 		AddressImporter: addrImporter,
+		TxCreator:       txCreator,
 	}
 }
 
@@ -45,9 +49,7 @@ func (w *XRPWatch) ImportAddress(fileName string, isRescan bool) error {
 
 // CreateDepositTx creates deposit unsigned transaction
 func (w *XRPWatch) CreateDepositTx(adjustmentFee float64) (string, string, error) {
-	w.logger.Info("not implemented yet")
-	//return w.TxCreator.CreateDepositTx()
-	return "", "", nil
+	return w.TxCreator.CreateDepositTx()
 }
 
 // CreatePaymentTx creates payment unsigned transaction

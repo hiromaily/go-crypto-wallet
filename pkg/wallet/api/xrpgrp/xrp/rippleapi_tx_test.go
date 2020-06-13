@@ -1,6 +1,7 @@
 package xrp_test
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/bookerzzz/grok"
@@ -30,10 +31,10 @@ func TestTransaction(t *testing.T) {
 		{
 			name: "happy path 1",
 			args: args{
-				sernderAccount:  "rNajCSDNXZLCioutY6xk4r3mYWMGYAorcN",
-				senderSecret:    "sn2S8Gdfr9uYsX81nsjetf2Rx66Sv",
-				receiverAccount: "rss1EZUwTCPZSTyJiDKvhBfCXjTxffcArZ",
-				amount:          50,
+				sernderAccount:  "rKXvsrd5H6MQNVpYgdeffFYjfGq4VdDogd",
+				senderSecret:    "snF5xKNGEhwudFBVPbFFXnrFe5f5Y",
+				receiverAccount: "raWG2eo1tEXwN4HtGFJCagvukC2nBuiHxC",
+				amount:          1000,
 			},
 			want: want{false},
 		},
@@ -63,6 +64,10 @@ func TestTransaction(t *testing.T) {
 			}
 			t.Log("earlistLedgerVersion: ", earlistLedgerVersion)
 			grok.Value(sentTx)
+			if strings.Contains(sentTx.ResultCode, "UNFUNDED_PAYMENT") {
+				t.Errorf("fail to call SubmitTransaction. resultCode: %s, resultMessage: %s", sentTx.ResultCode, sentTx.ResultMessage)
+				return
+			}
 
 			// validate transaction
 			leggerVer, err := xr.WaitValidation(sentTx.TxJSON.LastLedgerSequence)

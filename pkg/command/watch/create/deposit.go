@@ -55,7 +55,7 @@ func (c *DepositCommand) Run(args []string) int {
 		c.ui.Error(fmt.Sprintf("fail to call CreateDepositTx() %+v", err))
 		return 1
 	}
-	if c.wallet.CoinTypeCode() != coin.ETH && hex == "" {
+	if (c.wallet.CoinTypeCode() != coin.ETH && c.wallet.CoinTypeCode() != coin.XRP) && hex == "" {
 		c.ui.Info("No utxo")
 		return 0
 	}

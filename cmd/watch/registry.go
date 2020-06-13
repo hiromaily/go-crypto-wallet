@@ -28,6 +28,7 @@ import (
 	btcsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/watchsrv"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/common/watchsrv"
 	ethsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/watchsrv"
+	xrpsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/xrp/watchsrv"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"
@@ -86,9 +87,9 @@ func (r *registry) newBTCWalleter() wallets.Watcher {
 		r.newTracer(),
 		r.conf.AddressType,
 		r.newBTCAddressImporter(),
-		r.newTxCreator(),
-		r.newTxSender(),
-		r.newTxMonitorer(),
+		r.newBTCTxCreator(),
+		r.newBTCTxSender(),
+		r.newBTCTxMonitorer(),
 		r.newPaymentRequestCreator(),
 		r.walletType,
 	)
@@ -114,6 +115,7 @@ func (r *registry) newXRPWalleter() wallets.Watcher {
 		r.newMySQLClient(),
 		r.newLogger(),
 		r.newCommonAddressImporter(),
+		r.newXRPTxCreator(),
 		r.walletType,
 	)
 }
@@ -143,15 +145,15 @@ func (r *registry) newCommonAddressImporter() watchsrv.AddressImporter {
 	)
 }
 
-func (r *registry) newTxCreator() service.TxCreator {
+func (r *registry) newBTCTxCreator() service.TxCreator {
 	return btcsrv.NewTxCreate(
 		r.newBTC(),
 		r.newLogger(),
 		r.newMySQLClient(),
 		r.newAddressRepo(),
-		r.newTxRepo(),
-		r.newTxInputRepo(),
-		r.newTxOutputRepo(),
+		r.newBTCTxRepo(),
+		r.newBTCTxInputRepo(),
+		r.newBTCTxOutputRepo(),
 		r.newPaymentRequestRepo(),
 		r.newTxFileRepo(),
 		r.walletType,
@@ -164,7 +166,7 @@ func (r *registry) newETHTxCreator() ethsrv.TxCreator {
 		r.newLogger(),
 		r.newMySQLClient(),
 		r.newAddressRepo(),
-		r.newETHTxRepo(),
+		r.newTxRepo(),
 		r.newETHTxDetailRepo(),
 		r.newPaymentRequestRepo(),
 		r.newTxFileRepo(),
@@ -172,14 +174,28 @@ func (r *registry) newETHTxCreator() ethsrv.TxCreator {
 	)
 }
 
-func (r *registry) newTxSender() service.TxSender {
+func (r *registry) newXRPTxCreator() xrpsrv.TxCreator {
+	return xrpsrv.NewTxCreate(
+		r.newXRP(),
+		r.newLogger(),
+		r.newMySQLClient(),
+		r.newAddressRepo(),
+		r.newTxRepo(),
+		r.newXRPTxDetailRepo(),
+		r.newPaymentRequestRepo(),
+		r.newTxFileRepo(),
+		r.walletType,
+	)
+}
+
+func (r *registry) newBTCTxSender() service.TxSender {
 	return btcsrv.NewTxSend(
 		r.newBTC(),
 		r.newLogger(),
 		r.newMySQLClient(),
 		r.newAddressRepo(),
-		r.newTxRepo(),
-		r.newTxOutputRepo(),
+		r.newBTCTxRepo(),
+		r.newBTCTxOutputRepo(),
 		r.newTxFileRepo(),
 		r.walletType,
 	)
@@ -191,20 +207,20 @@ func (r *registry) newETHTxSender() service.TxSender {
 		r.newLogger(),
 		r.newMySQLClient(),
 		r.newAddressRepo(),
-		r.newETHTxRepo(),
+		r.newTxRepo(),
 		r.newETHTxDetailRepo(),
 		r.newTxFileRepo(),
 		r.walletType,
 	)
 }
 
-func (r *registry) newTxMonitorer() service.TxMonitorer {
+func (r *registry) newBTCTxMonitorer() service.TxMonitorer {
 	return btcsrv.NewTxMonitor(
 		r.newBTC(),
 		r.newLogger(),
 		r.newMySQLClient(),
-		r.newTxRepo(),
-		r.newTxInputRepo(),
+		r.newBTCTxRepo(),
+		r.newBTCTxInputRepo(),
 		r.newPaymentRequestRepo(),
 		r.walletType,
 	)
@@ -361,7 +377,7 @@ func (r *registry) newTracer() opentracing.Tracer {
 	return tracer.NewTracer(r.conf.Tracer)
 }
 
-func (r *registry) newTxRepo() watchrepo.BTCTxRepositorier {
+func (r *registry) newBTCTxRepo() watchrepo.BTCTxRepositorier {
 	return watchrepo.NewBTCTxRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
@@ -369,23 +385,23 @@ func (r *registry) newTxRepo() watchrepo.BTCTxRepositorier {
 	)
 }
 
-func (r *registry) newTxInputRepo() watchrepo.TxInputRepositorier {
-	return watchrepo.NewTxInputRepository(
+func (r *registry) newBTCTxInputRepo() watchrepo.TxInputRepositorier {
+	return watchrepo.NewBTCTxInputRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
 	)
 }
 
-func (r *registry) newTxOutputRepo() watchrepo.TxOutputRepositorier {
-	return watchrepo.NewTxOutputRepository(
+func (r *registry) newBTCTxOutputRepo() watchrepo.TxOutputRepositorier {
+	return watchrepo.NewBTCTxOutputRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
 	)
 }
 
-func (r *registry) newETHTxRepo() watchrepo.TxRepositorier {
+func (r *registry) newTxRepo() watchrepo.TxRepositorier {
 	return watchrepo.NewTxRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
@@ -395,6 +411,14 @@ func (r *registry) newETHTxRepo() watchrepo.TxRepositorier {
 
 func (r *registry) newETHTxDetailRepo() watchrepo.EthDetailTxRepositorier {
 	return watchrepo.NewEthDetailTxInputRepository(
+		r.newMySQLClient(),
+		r.conf.CoinTypeCode,
+		r.newLogger(),
+	)
+}
+
+func (r *registry) newXRPTxDetailRepo() watchrepo.XrpDetailTxRepositorier {
+	return watchrepo.NewXrpDetailTxInputRepository(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),

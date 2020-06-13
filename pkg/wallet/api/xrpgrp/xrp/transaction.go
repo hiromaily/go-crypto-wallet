@@ -1,11 +1,42 @@
 package xrp
 
-// Transaction is just sample to check how to work
-func (r *Ripple) Transaction(senderAccount, receiverAccount string, amount float64) {
-	//https://xrpl.org/ja/send-xrp.html
+import (
+	"github.com/pkg/errors"
+)
 
-	// prepare transaction
-	// transaction format: https://xrpl.org/transaction-formats.html
-	// API: https://xrpl.org/rippleapi-reference.html#preparetransaction
+// CreateRawTransaction creates raw transaction
+// - https://xrpl.org/ja/send-xrp.html
+func (r *Ripple) CreateRawTransaction(senderAccount, receiverAccount string, amount float64) (*TxInput, string, error) {
 
+	// get balance
+	accountInfo, err := r.GetAccountInfo(senderAccount)
+	if err != nil {
+		return nil, "", errors.Wrap(err, "fail to call GetAccountInfo()")
+	}
+	if amount != 0 && ToFloat64(accountInfo.XrpBalance) <= amount {
+		return nil, "", errors.Errorf("balance is short to send %s", accountInfo.XrpBalance)
+	}
+
+	// get fee
+	txJSON, stringJSON, err := r.PrepareTransaction(senderAccount, receiverAccount, amount)
+	if err != nil {
+		return nil, "", errors.Wrap(err, "fail to call PrepareTransaction()")
+	}
+	calculatedAmount := ToFloat64(accountInfo.XrpBalance) - ToFloat64(txJSON.Fee)
+	if amount == 0 {
+		// send all, but fee should be calculated first
+		if calculatedAmount <= 0 {
+			return nil, "", errors.Errorf("balance is short to send %s", accountInfo.XrpBalance)
+		}
+		// re-run
+		txJSON, stringJSON, err = r.PrepareTransaction(senderAccount, receiverAccount, calculatedAmount)
+		if err != nil {
+			return nil, "", errors.Wrap(err, "fail to call PrepareTransaction()")
+		}
+	} else {
+		if calculatedAmount < amount {
+			return nil, "", errors.Errorf("balance is short to send %s", accountInfo.XrpBalance)
+		}
+	}
+	return txJSON, stringJSON, nil
 }

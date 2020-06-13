@@ -23,7 +23,7 @@ type XrpDetailTxRepositorier interface {
 	GetSentHashTx(txType tx.TxType) ([]string, error)
 	Insert(txItem *models.XRPDetailTX) error
 	InsertBulk(txItems []*models.XRPDetailTX) error
-	UpdateAfterTxSent(uuid string, txType tx.TxType, signedHex, sentHashTx string) (int64, error)
+	UpdateAfterTxSent(uuid string, txType tx.TxType, signedTxID, signedTxBlob, sentTxBlob string) (int64, error)
 	UpdateTxType(id int64, txType tx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(txType tx.TxType, sentHashTx string) (int64, error)
 }
@@ -152,6 +152,6 @@ func (r *XrpDetailTxInputRepository) UpdateTxTypeBySentHashTx(txType tx.TxType, 
 		models.XRPDetailTXColumns.CurrentTXType: txType.Int8(),
 	}
 	return models.XRPDetailTxes(
-		qm.Where("sent_hash_tx=?", sentHashTx),
+		qm.Where("sent_tx_blob=?", sentHashTx),
 	).UpdateAll(ctx, r.dbConn, updCols)
 }

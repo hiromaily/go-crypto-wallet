@@ -29,8 +29,8 @@ type TxOutputRepository struct {
 	logger       *zap.Logger
 }
 
-// NewTxOutputRepository returns TxOutputRepository object
-func NewTxOutputRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *TxOutputRepository {
+// NewBTCTxOutputRepository returns TxOutputRepository object
+func NewBTCTxOutputRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *TxOutputRepository {
 	return &TxOutputRepository{
 		dbConn:       dbConn,
 		tableName:    "btc_tx_output",

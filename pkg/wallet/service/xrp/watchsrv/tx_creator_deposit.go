@@ -62,9 +62,8 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 	serializedTxs := make([]string, 0, len(userAmounts))
 	txDetailItems := make([]*models.XRPDetailTX, 0, len(userAmounts))
 	for _, val := range userAmounts {
-		// call PrepareTransaction like CreateRawTransaction
-		txJSON, rawTxString, err := t.xrp.PrepareTransaction(val.Address, depositAddr.WalletAddress, val.Amount)
-
+		// call CreateRawTransaction
+		txJSON, rawTxString, err := t.xrp.CreateRawTransaction(val.Address, depositAddr.WalletAddress, val.Amount)
 		if err != nil {
 			return "", "", errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s", val.Address)
 		}
