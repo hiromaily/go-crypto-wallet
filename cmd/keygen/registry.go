@@ -128,6 +128,7 @@ func (r *registry) newXRPKeygener() wallets.Keygener {
 		r.newHdWallter(),
 		r.newXRPKeyGenerator(),
 		r.newAddressExporter(),
+		r.newXRPSigner(),
 	)
 }
 
@@ -224,6 +225,16 @@ func (r *registry) newETHSigner() service.Signer {
 	return ethsrv.NewSign(
 		r.newETH(),
 		r.newLogger(),
+		r.newTxFileStorager(),
+		r.walletType,
+	)
+}
+
+func (r *registry) newXRPSigner() service.Signer {
+	return xrpsrv.NewSign(
+		r.newXRP(),
+		r.newLogger(),
+		r.newXRPAccountKeyRepo(),
 		r.newTxFileStorager(),
 		r.walletType,
 	)

@@ -18,6 +18,7 @@ import (
 // XRPAccountKeyRepositorier is XRPAccountKeyRepository interface
 type XRPAccountKeyRepositorier interface {
 	GetAllAddrStatus(accountType account.AccountType, addrStatus address.AddrStatus) ([]*models.XRPAccountKey, error)
+	GetSecret(accountType account.AccountType, addr string) (string, error)
 	InsertBulk(items []*models.XRPAccountKey) error
 	UpdateAddrStatus(accountType account.AccountType, addrStatus address.AddrStatus, strWIFs []string) (int64, error)
 }
@@ -54,6 +55,26 @@ func (r *XRPAccountKeyRepository) GetAllAddrStatus(accountType account.AccountTy
 	}
 
 	return items, nil
+}
+
+// GetSecret returns secret
+func (r *XRPAccountKeyRepository) GetSecret(accountType account.AccountType, addr string) (string, error) {
+	ctx := context.Background()
+
+	type Response struct {
+		Secret string `boil:"master_seed"`
+	}
+	var res Response
+	err := models.XRPAccountKeys(
+		qm.Select("master_seed"),
+		qm.Where("coin=?", r.coinTypeCode.String()),
+		qm.And("account=?", accountType.String()),
+		qm.And("account_id=?", addr),
+	).Bind(ctx, r.dbConn, &res)
+	if err != nil {
+		return "", errors.Wrap(err, "failed to call models.XRPAccountKeys().Bind()")
+	}
+	return res.Secret, nil
 }
 
 // InsertBulk inserts multiple records

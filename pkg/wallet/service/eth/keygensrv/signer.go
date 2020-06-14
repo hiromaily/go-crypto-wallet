@@ -75,7 +75,7 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 	}
 
 	// write file
-	path := s.txFileRepo.CreateFilePath(actionType, tx.TxTypeSigned, txID, signedCount)
+	path := s.txFileRepo.CreateFilePath(actionType, tx.TxTypeSigned, txID, signedCount+1)
 	generatedFileName, err := s.txFileRepo.WriteFileSlice(path, txHexs)
 	if err != nil {
 		return "", false, "", errors.Wrap(err, "fail to call txFileRepo.WriteFileSlice()")

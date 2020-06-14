@@ -24,6 +24,7 @@ type XRPKeygen struct {
 	service.HDWalleter
 	keygensrv.XRPKeyGenerator
 	service.AddressExporter
+	service.Signer
 }
 
 // NewXRPKeygen returns XRPKeygen object
@@ -36,6 +37,7 @@ func NewXRPKeygen(
 	hdWallter service.HDWalleter,
 	keyGenerator keygensrv.XRPKeyGenerator,
 	addressExporter service.AddressExporter,
+	signer service.Signer,
 ) *XRPKeygen {
 
 	return &XRPKeygen{
@@ -47,6 +49,7 @@ func NewXRPKeygen(
 		HDWalleter:      hdWallter,
 		XRPKeyGenerator: keyGenerator,
 		AddressExporter: addressExporter,
+		Signer:          signer,
 	}
 }
 
@@ -100,9 +103,7 @@ func (k *XRPKeygen) ExportAddress(accountType account.AccountType) (string, erro
 
 // SignTx signs on transaction
 func (k *XRPKeygen) SignTx(filePath string) (string, bool, string, error) {
-	k.logger.Info("not implemented yet")
-	//return k.Signer.SignTx(filePath)
-	return "", false, "", nil
+	return k.Signer.SignTx(filePath)
 }
 
 // Done should be called before exit

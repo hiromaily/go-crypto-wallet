@@ -1,6 +1,8 @@
 package watchsrv
 
 import (
+	"fmt"
+
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 	"go.uber.org/zap"
@@ -70,10 +72,10 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 		}
 		t.logger.Debug("txJSON", zap.Any("txJSON", txJSON))
 
-		serializedTxs = append(serializedTxs, rawTxString)
-
 		// generate UUID to trace transaction because unsignedTx is not unique
 		uid := uuid.NewV4().String()
+
+		serializedTxs = append(serializedTxs, fmt.Sprintf("%s,%s", uid, rawTxString))
 
 		// create insert data for　eth_detail_tx
 		txDetailItem := &models.XRPDetailTX{
@@ -83,7 +85,7 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 			SenderAddress:      val.Address,
 			ReceiverAccount:    receiver.String(),
 			ReceiverAddress:    depositAddr.WalletAddress,
-			Amount:             txJSON.Amount, //TODO:compare to fmt.Sprint(val.Amount)
+			Amount:             txJSON.Amount,
 			XRPTXType:          txJSON.TransactionType,
 			Fee:                txJSON.Fee,
 			Flags:              txJSON.Flags,
