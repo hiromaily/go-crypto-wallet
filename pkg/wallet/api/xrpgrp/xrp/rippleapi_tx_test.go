@@ -9,7 +9,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
-// TestTransaction is test for PrepareTransaction
+// TestTransaction is test for sequential transaction
 func TestTransaction(t *testing.T) {
 	//t.SkipNow()
 	xr := testutil.GetXRP()
@@ -77,6 +77,8 @@ func TestTransaction(t *testing.T) {
 			t.Log("currentLedgerVersion: ", ledgerVer)
 
 			// get transaction info
+			grok.Value(txID)
+			grok.Value(earlistLedgerVersion)
 			txInfo, err := xr.GetTransaction(txID, earlistLedgerVersion)
 			if err != nil {
 				t.Fatal(err)
@@ -86,6 +88,62 @@ func TestTransaction(t *testing.T) {
 			//TODO: sender account info
 			//TODO: receiver account info
 
+		})
+	}
+
+}
+
+// TestGetTransaction is test for GetTransaction
+func TestGetTransaction(t *testing.T) {
+	//t.SkipNow()
+	xr := testutil.GetXRP()
+
+	type args struct {
+		txID                 string
+		earlistLedgerVersion uint64
+	}
+	type want struct {
+		isErr bool
+	}
+	tests := []struct {
+		name string
+		args args
+		want want
+	}{
+		{
+			name: "happy path 1",
+			args: args{
+				txID:                 "AA672DB687B52DA733FDD211D435BB8632E2E4B471C282ABA912E8D799D16B6B",
+				earlistLedgerVersion: 8007165,
+			},
+			want: want{false},
+		},
+		{
+			name: "wrong txID",
+			args: args{
+				txID:                 "AA672DB687B52DA733FDD211D435BB8632E2E4B471C282ABA912E8D799D16B6Babcde",
+				earlistLedgerVersion: 8007165,
+			},
+			want: want{false},
+		},
+		{
+			name: "wrong ledger version",
+			args: args{
+				txID:                 "AA672DB687B52DA733FDD211D435BB8632E2E4B471C282ABA912E8D799D16B6B",
+				earlistLedgerVersion: 99999999999999,
+			},
+			want: want{false},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			txInfo, err := xr.GetTransaction(tt.args.txID, tt.args.earlistLedgerVersion)
+			if err != nil {
+				t.Error(err)
+			}
+			if txInfo != nil {
+				t.Log(txInfo)
+			}
 		})
 	}
 

@@ -270,9 +270,6 @@ func (r *Ripple) GetTransaction(txID string, targetLedgerVersion uint64) (*TxInf
 		return nil, errors.Wrap(err, "fail to call client.GetTransaction()")
 	}
 
-	if res.ErrorMessage != "" {
-		return nil, errors.New(res.ErrorMessage)
-	}
 	if res.ResultJSONString == "" {
 		return nil, errors.Errorf("fail to get transaction info by %s", txID)
 	}
