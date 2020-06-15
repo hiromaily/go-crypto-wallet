@@ -4,40 +4,41 @@ import (
 	"database/sql"
 	"strings"
 
+	"github.com/bookerzzz/grok"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 )
 
 // TxSend type
 type TxSend struct {
-	eth          ethgrp.Ethereumer
+	xrp          xrpgrp.Rippler
 	logger       *zap.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier //not used
 	txRepo       watchrepo.TxRepositorier      //not used
-	txDetailRepo watchrepo.EthDetailTxRepositorier
+	txDetailRepo watchrepo.XrpDetailTxRepositorier
 	txFileRepo   tx.FileRepositorier
 	wtype        wallet.WalletType
 }
 
 // NewTxSend returns TxSend object
 func NewTxSend(
-	eth ethgrp.Ethereumer,
+	xrp xrpgrp.Rippler,
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.TxRepositorier,
-	txDetailRepo watchrepo.EthDetailTxRepositorier,
+	txDetailRepo watchrepo.XrpDetailTxRepositorier,
 	txFileRepo tx.FileRepositorier,
 	wtype wallet.WalletType) *TxSend {
 
 	return &TxSend{
-		eth:          eth,
+		xrp:          xrp,
 		logger:       logger,
 		dbConn:       dbConn,
 		addrRepo:     addrRepo,
@@ -68,56 +69,92 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 
 	//sentTxes := make([]string, 0, len(data))
 	for _, txHex := range data {
-		// data is csv [rawTx.TxHex, signedRawTx.TxHex]
-		// rawTx.TxHex is used to record status by updating database
+		//TODO: goroutine may be useful
+
+		// uuid, signedTxID, txBlob
 		tmp := strings.Split(txHex, ",")
-		if len(tmp) != 2 {
+		if len(tmp) != 3 {
 			return "", errors.New("data format is invalid in file")
 		}
 		uuid := tmp[0]
-		signedTx := tmp[1]
+		signedTxID := tmp[1]
+		txBlob := tmp[2]
 
-		// sign
-		sentTx, err := t.eth.SendSignedRawTransaction(signedTx)
+		// submit
+		sentTx, earlistLedgerVersion, err := t.xrp.SubmitTransaction(txBlob)
 		if err != nil {
-			t.logger.Warn("fail to call eth.SendSignedRawTransaction()",
+			t.logger.Warn("fail to call xrp.SubmitTransaction()",
+				zap.Int64("tx_id", txID),
+				zap.String("uuid", uuid),
+				zap.String("signed_tx_id", signedTxID),
 				zap.Error(err),
 			)
 			continue
 		}
-		if sentTx == "" {
-			t.logger.Warn("no sentTx by calling eth.SendSignedRawTransaction()",
+		if strings.Contains(sentTx.ResultCode, "UNFUNDED_PAYMENT") {
+			t.logger.Warn("fail to call SubmitTransaction",
+				zap.Int64("tx_id", txID),
+				zap.String("uuid", uuid),
+				zap.String("signed_tx_id", signedTxID),
+				zap.String("result_code", sentTx.ResultCode),
+				zap.String("result_message", sentTx.ResultMessage),
+			)
+			continue
+		}
+		// validate transaction
+		ledgerVer, err := t.xrp.WaitValidation(sentTx.TxJSON.LastLedgerSequence)
+		if err != nil {
+			t.logger.Warn("fail to call xrp.WaitValidation()",
+				zap.Int64("tx_id", txID),
+				zap.String("uuid", uuid),
+				zap.String("signed_tx_id", signedTxID),
+				zap.Uint64("ledgerVer", ledgerVer),
 				zap.Error(err),
 			)
 			continue
 		}
+
+		// get transaction info
+		txInfo, err := t.xrp.GetTransaction(sentTx.TxJSON.Hash, earlistLedgerVersion)
+		if err != nil {
+			t.logger.Warn("fail to call xrp.GetTransaction()",
+				zap.Int64("tx_id", txID),
+				zap.String("uuid", uuid),
+				zap.String("signed_tx_id", signedTxID),
+				zap.String("hash", sentTx.TxJSON.Hash),
+				zap.Error(err),
+			)
+			continue
+		}
+		// for debug (should be removed later)
+		grok.Value(txInfo)
 
 		// update eth_detail_tx
-		affectedNum, err := t.txDetailRepo.UpdateAfterTxSent(uuid, tx.TxTypeSent, signedTx, sentTx)
+		affectedNum, err := t.txDetailRepo.UpdateAfterTxSent(uuid, tx.TxTypeSent, signedTxID, txBlob, sentTx.TxBlob)
 		if err != nil {
 			//TODO: even if error occurred, tx is already sent. so db should be corrected manually
-			t.logger.Warn("fail to call repo.Tx().UpdateAfterTxSent() but tx is already sent. So database should be updated manually",
+			t.logger.Warn("fail to call txDetailRepo.UpdateAfterTxSent() but tx is already sent. So database should be updated manually",
 				zap.Int64("tx_id", txID),
+				zap.String("uuid", uuid),
+				zap.String("signed_tx_id", signedTxID),
 				zap.String("tx_type", tx.TxTypeSent.String()),
 				zap.Int8("tx_type_value", tx.TxTypeSent.Int8()),
-				zap.String("signed_hex_tx", signedTx),
-				zap.String("sent_hash_tx", sentTx),
 			)
 			continue
 		}
 		if affectedNum == 0 {
 			t.logger.Info("no records to update tx_table",
 				zap.Int64("tx_id", txID),
+				zap.String("uuid", uuid),
+				zap.String("signed_tx_id", signedTxID),
 				zap.String("tx_type", tx.TxTypeSent.String()),
 				zap.Int8("tx_type_value", tx.TxTypeSent.Int8()),
-				zap.String("signed_hex_tx", signedTx),
-				zap.String("sent_hash_tx", sentTx),
 			)
 			continue
 		}
 	}
 
 	//TODO: update is_allocated in account_pubkey_table
-	// Ethereum should use same address because no utxo
+	// Not fixed yet, Ripple may use same address because no utxo
 	return "", nil
 }

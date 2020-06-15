@@ -116,6 +116,7 @@ func (r *registry) newXRPWalleter() wallets.Watcher {
 		r.newLogger(),
 		r.newCommonAddressImporter(),
 		r.newXRPTxCreator(),
+		r.newXRPTxSender(),
 		r.walletType,
 	)
 }
@@ -209,6 +210,19 @@ func (r *registry) newETHTxSender() service.TxSender {
 		r.newAddressRepo(),
 		r.newTxRepo(),
 		r.newETHTxDetailRepo(),
+		r.newTxFileRepo(),
+		r.walletType,
+	)
+}
+
+func (r *registry) newXRPTxSender() service.TxSender {
+	return xrpsrv.NewTxSend(
+		r.newXRP(),
+		r.newLogger(),
+		r.newMySQLClient(),
+		r.newAddressRepo(),
+		r.newTxRepo(),
+		r.newXRPTxDetailRepo(),
 		r.newTxFileRepo(),
 		r.walletType,
 	)

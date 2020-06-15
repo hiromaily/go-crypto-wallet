@@ -9,6 +9,7 @@ import (
 	wtype "github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/common/watchsrv"
 	xrpsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/xrp/watchsrv"
 )
@@ -21,6 +22,7 @@ type XRPWatch struct {
 	wtype  wtype.WalletType
 	watchsrv.AddressImporter
 	xrpsrv.TxCreator
+	service.TxSender
 }
 
 // NewXRPWatch returns XRPWatch object
@@ -30,6 +32,7 @@ func NewXRPWatch(
 	logger *zap.Logger,
 	addrImporter watchsrv.AddressImporter,
 	txCreator xrpsrv.TxCreator,
+	txSender service.TxSender,
 	wtype wtype.WalletType) *XRPWatch {
 
 	return &XRPWatch{
@@ -39,6 +42,7 @@ func NewXRPWatch(
 		wtype:           wtype,
 		AddressImporter: addrImporter,
 		TxCreator:       txCreator,
+		TxSender:        txSender,
 	}
 }
 
@@ -82,9 +86,7 @@ func (w *XRPWatch) MonitorBalance(confirmationNum uint64) error {
 
 // SendTx sends signed transaction
 func (w *XRPWatch) SendTx(filePath string) (string, error) {
-	w.logger.Info("not implemented yet")
-	//return w.TxSender.SendTx(filePath)
-	return "", nil
+	return w.TxSender.SendTx(filePath)
 }
 
 // CreatePaymentRequest creates payment_request dummy data for development
