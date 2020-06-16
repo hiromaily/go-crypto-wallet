@@ -8,6 +8,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
+	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/command"
 	wcmd "github.com/hiromaily/go-crypto-wallet/pkg/command/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
@@ -38,12 +39,13 @@ var (
 func main() {
 	// command line
 	var (
-		confPath     string
-		btcWallet    string
-		coinTypeCode string
-		isHelp       bool
-		isVersion    bool
-		walleter     wallets.Watcher
+		confPath        string
+		accountConfPath string
+		btcWallet       string
+		coinTypeCode    string
+		isHelp          bool
+		isVersion       bool
+		walleter        wallets.Watcher
 	)
 	flags := flag.NewFlagSet("main", flag.ContinueOnError)
 	flags.StringVar(&confPath, "conf", "", "config file path")
@@ -79,6 +81,15 @@ func main() {
 			confPath = os.Getenv("XRP_WATCH_WALLET_CONF")
 		}
 	}
+	// account conf path for account settings
+	if accountConfPath == "" {
+		switch coinTypeCode {
+		case coin.BTC.String():
+			accountConfPath = os.Getenv("BTC_ACCOUNT_CONF")
+		case coin.BCH.String():
+			accountConfPath = os.Getenv("BCH_ACCOUNT_CONF")
+		}
+	}
 
 	// help
 	var conf *config.WalletRoot
@@ -90,6 +101,14 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
+		accountConf := &account.AccountRoot{}
+		if accountConfPath != "" {
+			accountConf, err = account.NewAccount(accountConfPath)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
 		// override conf.Bitcoin.Host
 		if btcWallet != "" {
 			conf.Bitcoin.Host = fmt.Sprintf("%s/wallet/%s", conf.Bitcoin.Host, btcWallet)
@@ -97,7 +116,7 @@ func main() {
 		}
 
 		// create wallet
-		reg := NewRegistry(conf, walletType)
+		reg := NewRegistry(conf, accountConf, walletType)
 		walleter = reg.NewWalleter()
 	}
 	defer func() {

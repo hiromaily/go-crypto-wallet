@@ -78,13 +78,13 @@ func main() {
 			confPath = os.Getenv("XRP_KEYGEN_WALLET_CONF")
 		}
 	}
-	// account conf path for multisig
+	// account conf path for account settings
 	if accountConfPath == "" {
 		switch coinTypeCode {
 		case coin.BTC.String():
-			accountConfPath = os.Getenv("BTC_MULTISIG_ACCOUNT_CONF")
+			accountConfPath = os.Getenv("BTC_ACCOUNT_CONF")
 		case coin.BCH.String():
-			accountConfPath = os.Getenv("BCH_MULTISIG_ACCOUNT_CONF")
+			accountConfPath = os.Getenv("BCH_ACCOUNT_CONF")
 		}
 	}
 

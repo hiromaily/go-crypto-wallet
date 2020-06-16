@@ -40,16 +40,18 @@ import (
 
 // TxCreate type
 type TxCreate struct {
-	btc          btcgrp.Bitcoiner
-	logger       *zap.Logger
-	dbConn       *sql.DB
-	addrRepo     watchrepo.AddressRepositorier
-	txRepo       watchrepo.BTCTxRepositorier
-	txInputRepo  watchrepo.TxInputRepositorier
-	txOutputRepo watchrepo.TxOutputRepositorier
-	payReqRepo   watchrepo.PaymentRequestRepositorier
-	txFileRepo   tx.FileRepositorier
-	wtype        wallet.WalletType
+	btc             btcgrp.Bitcoiner
+	logger          *zap.Logger
+	dbConn          *sql.DB
+	addrRepo        watchrepo.AddressRepositorier
+	txRepo          watchrepo.BTCTxRepositorier
+	txInputRepo     watchrepo.TxInputRepositorier
+	txOutputRepo    watchrepo.TxOutputRepositorier
+	payReqRepo      watchrepo.PaymentRequestRepositorier
+	txFileRepo      tx.FileRepositorier
+	depositReceiver account.AccountType
+	paymentSender   account.AccountType
+	wtype           wallet.WalletType
 }
 
 // NewTxCreate returns TxCreate object
@@ -63,19 +65,23 @@ func NewTxCreate(
 	txOutputRepo watchrepo.TxOutputRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,
 	txFileRepo tx.FileRepositorier,
+	depositReceiver account.AccountType,
+	paymentSender account.AccountType,
 	wtype wallet.WalletType) *TxCreate {
 
 	return &TxCreate{
-		btc:          btc,
-		logger:       logger,
-		dbConn:       dbConn,
-		addrRepo:     addrRepo,
-		txRepo:       txRepo,
-		txInputRepo:  txInputRepo,
-		txOutputRepo: txOutputRepo,
-		payReqRepo:   payReqRepo,
-		txFileRepo:   txFileRepo,
-		wtype:        wtype,
+		btc:             btc,
+		logger:          logger,
+		dbConn:          dbConn,
+		addrRepo:        addrRepo,
+		txRepo:          txRepo,
+		txInputRepo:     txInputRepo,
+		txOutputRepo:    txOutputRepo,
+		payReqRepo:      payReqRepo,
+		txFileRepo:      txFileRepo,
+		depositReceiver: depositReceiver,
+		paymentSender:   paymentSender,
+		wtype:           wtype,
 	}
 }
 

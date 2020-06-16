@@ -15,7 +15,8 @@ import (
 // sender: payment, receiver: addresses coming from user_payment table
 // - sender account(payment) covers fee, but is should be flexible
 func (t *TxCreate) CreatePaymentTx(adjustmentFee float64) (string, string, error) {
-	sender := account.AccountTypePayment
+	//sender := account.AccountTypePayment
+	sender := t.paymentSender
 	receiver := account.AccountTypeAnonymous
 	targetAction := action.ActionTypePayment
 

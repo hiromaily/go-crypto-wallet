@@ -460,7 +460,7 @@ func (r *registry) newTxFileStorager() tx.FileRepositorier {
 
 func (r *registry) newMultiAccount() account.MultisigAccounter {
 	if r.multisig == nil {
-		if r.accountConf == nil || r.accountConf.Multisigs == nil {
+		if r.accountConf == nil && r.accountConf.Multisigs == nil {
 			return account.NewMultisigAccounts(nil)
 		}
 		r.multisig = account.NewMultisigAccounts(r.accountConf.Multisigs)

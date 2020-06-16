@@ -10,8 +10,10 @@ import (
 
 // AccountRoot account root config
 type AccountRoot struct {
-	Types     []AccountType     `toml:"types"`
-	Multisigs []AccountMultisig `toml:"multisig"`
+	Types           []AccountType     `toml:"types"`
+	DepositReceiver AccountType       `toml:"deposit_receiver"`
+	PaymentSender   AccountType       `toml:"payment_sender"`
+	Multisigs       []AccountMultisig `toml:"multisig"`
 }
 
 // AccountMultisig multisig setting

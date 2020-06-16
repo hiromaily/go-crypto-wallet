@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
+	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
@@ -43,6 +44,7 @@ type Registry interface {
 
 type registry struct {
 	conf         *config.WalletRoot
+	accountConf  *account.AccountRoot
 	walletType   wtype.WalletType
 	logger       *zap.Logger
 	btc          btcgrp.Bitcoiner
@@ -58,10 +60,11 @@ type registry struct {
 }
 
 // NewRegistry is to register registry interface
-func NewRegistry(conf *config.WalletRoot, walletType wtype.WalletType) Registry {
+func NewRegistry(conf *config.WalletRoot, accountConf *account.AccountRoot, walletType wtype.WalletType) Registry {
 	return &registry{
-		conf:       conf,
-		walletType: walletType,
+		conf:        conf,
+		accountConf: accountConf,
+		walletType:  walletType,
 	}
 }
 
@@ -157,6 +160,8 @@ func (r *registry) newBTCTxCreator() service.TxCreator {
 		r.newBTCTxOutputRepo(),
 		r.newPaymentRequestRepo(),
 		r.newTxFileRepo(),
+		r.newDepositAccount(),
+		r.newPaymentAccount(),
 		r.walletType,
 	)
 }
@@ -481,4 +486,18 @@ func (r *registry) newTxFileRepo() tx.FileRepositorier {
 		r.conf.FilePath.Tx,
 		r.newLogger(),
 	)
+}
+
+func (r *registry) newDepositAccount() account.AccountType {
+	if r.accountConf == nil && r.accountConf.DepositReceiver == "" {
+		return account.AccountTypeDeposit
+	}
+	return r.accountConf.DepositReceiver
+}
+
+func (r *registry) newPaymentAccount() account.AccountType {
+	if r.accountConf == nil && r.accountConf.PaymentSender == "" {
+		return account.AccountTypePayment
+	}
+	return r.accountConf.PaymentSender
 }
