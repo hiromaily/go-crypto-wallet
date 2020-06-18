@@ -15,7 +15,6 @@ func TestCreateRawTransaction(t *testing.T) {
 
 	type args struct {
 		sernderAccount  string
-		senderSecret    string
 		receiverAccount string
 		amount          float64
 	}
@@ -31,32 +30,20 @@ func TestCreateRawTransaction(t *testing.T) {
 			name: "happy path 1",
 			args: args{
 				sernderAccount:  "rKXvsrd5H6MQNVpYgdeffFYjfGq4VdDogd",
-				senderSecret:    "snF5xKNGEhwudFBVPbFFXnrFe5f5Y",
-				receiverAccount: "raWG2eo1tEXwN4HtGFJCagvukC2nBuiHxC",
+				receiverAccount: "rpBzBQ6aWJhuatJCkQgfE3VJT67ukBQopf",
 				amount:          50,
 			},
 			want: want{false},
 		},
-		{
-			name: "happy path 2",
-			args: args{
-				sernderAccount:  "rKXvsrd5H6MQNVpYgdeffFYjfGq4VdDogd",
-				senderSecret:    "snF5xKNGEhwudFBVPbFFXnrFe5f5Y",
-				receiverAccount: "raWG2eo1tEXwN4HtGFJCagvukC2nBuiHxC",
-				amount:          0,
-			},
-			want: want{false},
-		},
-		{
-			name: "happy path 3",
-			args: args{
-				sernderAccount:  "r4zpoGKAoKhnmrPToGMpLuLVXZaAQiBCNM",
-				senderSecret:    "ssxcbKT8Fecj3wxCihZRRqcJ2tq22",
-				receiverAccount: "raWG2eo1tEXwN4HtGFJCagvukC2nBuiHxC",
-				amount:          0,
-			},
-			want: want{false},
-		},
+		//{
+		//	name: "happy path 2",
+		//	args: args{
+		//		sernderAccount:  "rEoRcMBfg7VUryw5xSyw883bXU74T8eoYj",
+		//		receiverAccount: "raWG2eo1tEXwN4HtGFJCagvukC2nBuiHxC",
+		//		amount:          0,
+		//	},
+		//	want: want{false},
+		//},
 	}
 
 	for _, tt := range tests {

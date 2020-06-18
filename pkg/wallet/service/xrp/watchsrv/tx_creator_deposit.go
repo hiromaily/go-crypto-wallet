@@ -3,6 +3,7 @@ package watchsrv
 import (
 	"fmt"
 
+	"github.com/bookerzzz/grok"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 	"go.uber.org/zap"
@@ -71,6 +72,7 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 			continue
 		}
 		t.logger.Debug("txJSON", zap.Any("txJSON", txJSON))
+		grok.Value(txJSON)
 
 		// generate UUID to trace transaction because unsignedTx is not unique
 		uid := uuid.NewV4().String()

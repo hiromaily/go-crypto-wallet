@@ -116,7 +116,7 @@ func (r *Ripple) PrepareTransaction(senderAccount, receiverAccount string, amoun
 		SenderAccount:   senderAccount,
 		Amount:          amount,
 		ReceiverAccount: receiverAccount,
-		Instructions:    &pb.Instructions{MaxLedgerVersionOffset: 75}, //FIXME: what is proper value?
+		Instructions:    &pb.Instructions{MaxLedgerVersionOffset: MaxLedgerVersionOffset},
 	}
 
 	//res: *pb.ResponsePrepareTransaction

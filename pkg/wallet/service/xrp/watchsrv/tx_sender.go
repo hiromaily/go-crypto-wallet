@@ -88,16 +88,20 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 				zap.String("uuid", uuid),
 				zap.String("signed_tx_id", signedTxID),
 				zap.Error(err),
+				// tefMAX_LEDGER / Ledger sequence too high
+				// The error message Ledger sequence too high occurs if you've waited too long to confirm a transaction in Ledger Live.
 			)
 			continue
 		}
-		if strings.Contains(sentTx.ResultCode, "UNFUNDED_PAYMENT") {
+		if !strings.Contains(sentTx.ResultCode, "tesSUCCESS") {
 			t.logger.Warn("fail to call SubmitTransaction",
 				zap.Int64("tx_id", txID),
 				zap.String("uuid", uuid),
 				zap.String("signed_tx_id", signedTxID),
 				zap.String("result_code", sentTx.ResultCode),
 				zap.String("result_message", sentTx.ResultMessage),
+				// tefMAX_LEDGER
+				// Ledger sequence too high
 			)
 			continue
 		}
@@ -108,8 +112,10 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 				zap.Int64("tx_id", txID),
 				zap.String("uuid", uuid),
 				zap.String("signed_tx_id", signedTxID),
+				zap.Uint64("lastLedgerSequence", sentTx.TxJSON.LastLedgerSequence),
 				zap.Uint64("ledgerVer", ledgerVer),
 				zap.Error(err),
+				// Transaction has not been validated yet; try again later
 			)
 			continue
 		}
@@ -122,6 +128,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 				zap.String("uuid", uuid),
 				zap.String("signed_tx_id", signedTxID),
 				zap.String("hash", sentTx.TxJSON.Hash),
+				zap.Uint64("earlistLedgerVersion", earlistLedgerVersion),
 				zap.Error(err),
 			)
 			continue
@@ -139,7 +146,9 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 				zap.String("signed_tx_id", signedTxID),
 				zap.String("tx_type", tx.TxTypeSent.String()),
 				zap.Int8("tx_type_value", tx.TxTypeSent.Int8()),
+				zap.Error(err),
 			)
+			//"error":"models: unable to update all for xrp_detail_tx: Error 1406: Data too long for column 'signed_tx_blob' at row 1"
 			continue
 		}
 		if affectedNum == 0 {

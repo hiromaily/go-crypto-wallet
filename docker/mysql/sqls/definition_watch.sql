@@ -172,7 +172,7 @@ CREATE TABLE `xrp_detail_tx` (
   `hash`                 VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'tx Hash',
   `earliest_ledger_version` BIGINT(20) UNSIGNED NOT NULL COMMENT'tx earliest_ledger_version after sending tx',
   `signed_tx_id`         VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'signed tx id',
-  `signed_tx_blob`       VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'signed tx blob',
+  `signed_tx_blob`       TEXT COLLATE utf8_unicode_ci NOT NULL COMMENT'signed tx blob',
   `sent_tx_blob`         TEXT COLLATE utf8_unicode_ci NOT NULL COMMENT'sent tx blob',
   `unsigned_updated_at`  datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date for unsigned transaction created',
   `sent_updated_at`      datetime DEFAULT NULL COMMENT'updated date for signed transaction sent',
