@@ -2,16 +2,14 @@ package watchsrv
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
 
-	"github.com/ericlagergren/decimal"
 	"github.com/pkg/errors"
 	"github.com/volatiletech/null"
-	"github.com/volatiletech/sqlboiler/types"
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/converter"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -20,6 +18,7 @@ import (
 
 // PaymentRequestCreate type
 type PaymentRequestCreate struct {
+	converter    converter.Converter
 	logger       *zap.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier
@@ -30,6 +29,7 @@ type PaymentRequestCreate struct {
 
 // NewPaymentRequestCreate returns PaymentRequestCreate object
 func NewPaymentRequestCreate(
+	converter converter.Converter,
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
@@ -38,6 +38,7 @@ func NewPaymentRequestCreate(
 	wtype wallet.WalletType) *PaymentRequestCreate {
 
 	return &PaymentRequestCreate{
+		converter:    converter,
 		logger:       logger,
 		dbConn:       dbConn,
 		addrRepo:     addrRepo,
@@ -86,7 +87,7 @@ func (p *PaymentRequestCreate) CreatePaymentRequest(amtList []float64) error {
 			SenderAddress:   pubkeyItems[0+idx].WalletAddress,
 			SenderAccount:   pubkeyItems[0+idx].Account,
 			ReceiverAddress: pubkeyItems[len(amtList)+idx].WalletAddress,
-			Amount:          p.floatToDecimal(amt),
+			Amount:          p.converter.FloatToDecimal(amt),
 			IsDone:          false,
 			UpdatedAt:       null.TimeFrom(time.Now()),
 		})
@@ -96,12 +97,4 @@ func (p *PaymentRequestCreate) CreatePaymentRequest(amtList []float64) error {
 		return errors.Wrap(err, "fail to call payReqRepo.InsertBulk()")
 	}
 	return nil
-}
-
-// FloatToDecimal converts float to decimal
-func (p *PaymentRequestCreate) floatToDecimal(f float64) types.Decimal {
-	strAmt := fmt.Sprintf("%f", f)
-	dAmt := types.Decimal{Big: new(decimal.Big)}
-	dAmt.Big, _ = dAmt.SetString(strAmt)
-	return dAmt
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/converter"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
@@ -93,7 +94,7 @@ func (r *registry) newBTCWalleter() wallets.Watcher {
 		r.newBTCTxCreator(),
 		r.newBTCTxSender(),
 		r.newBTCTxMonitorer(),
-		r.newBTCPaymentRequestCreator(),
+		r.newPaymentRequestCreator(),
 		r.walletType,
 	)
 }
@@ -262,19 +263,9 @@ func (r *registry) newETHTxMonitorer() service.TxMonitorer {
 	)
 }
 
-func (r *registry) newBTCPaymentRequestCreator() service.PaymentRequestCreator {
-	return btcsrv.NewPaymentRequestCreate(
-		r.newBTC(),
-		r.newLogger(),
-		r.newMySQLClient(),
-		r.newAddressRepo(),
-		r.newPaymentRequestRepo(),
-		r.walletType,
-	)
-}
-
 func (r *registry) newPaymentRequestCreator() service.PaymentRequestCreator {
 	return watchsrv.NewPaymentRequestCreate(
+		r.newConverter(r.conf.CoinTypeCode),
 		r.newLogger(),
 		r.newMySQLClient(),
 		r.newAddressRepo(),
@@ -282,6 +273,15 @@ func (r *registry) newPaymentRequestCreator() service.PaymentRequestCreator {
 		r.conf.CoinTypeCode,
 		r.walletType,
 	)
+}
+
+func (r *registry) newConverter(coinTypeCode coin.CoinTypeCode) converter.Converter {
+	switch coinTypeCode {
+	case coin.BTC:
+		return r.newBTC()
+	default:
+		return converter.NewConverter()
+	}
 }
 
 func (r *registry) newRPCClient() *rpcclient.Client {
