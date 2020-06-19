@@ -24,15 +24,17 @@ type TxCreator interface {
 
 // TxCreate type
 type TxCreate struct {
-	xrp          xrpgrp.Rippler
-	logger       *zap.Logger
-	dbConn       *sql.DB
-	addrRepo     watchrepo.AddressRepositorier
-	txRepo       watchrepo.TxRepositorier
-	txDetailRepo watchrepo.XrpDetailTxRepositorier
-	payReqRepo   watchrepo.PaymentRequestRepositorier
-	txFileRepo   tx.FileRepositorier
-	wtype        wallet.WalletType
+	xrp             xrpgrp.Rippler
+	logger          *zap.Logger
+	dbConn          *sql.DB
+	addrRepo        watchrepo.AddressRepositorier
+	txRepo          watchrepo.TxRepositorier
+	txDetailRepo    watchrepo.XrpDetailTxRepositorier
+	payReqRepo      watchrepo.PaymentRequestRepositorier
+	txFileRepo      tx.FileRepositorier
+	depositReceiver account.AccountType
+	paymentSender   account.AccountType
+	wtype           wallet.WalletType
 }
 
 // NewTxCreate returns TxCreate object
@@ -45,18 +47,22 @@ func NewTxCreate(
 	txDetailRepo watchrepo.XrpDetailTxRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,
 	txFileRepo tx.FileRepositorier,
+	depositReceiver account.AccountType,
+	paymentSender account.AccountType,
 	wtype wallet.WalletType) *TxCreate {
 
 	return &TxCreate{
-		xrp:          xrp,
-		logger:       logger,
-		dbConn:       dbConn,
-		addrRepo:     addrRepo,
-		txRepo:       txRepo,
-		txDetailRepo: txDetailRepo,
-		payReqRepo:   payReqRepo,
-		txFileRepo:   txFileRepo,
-		wtype:        wtype,
+		xrp:             xrp,
+		logger:          logger,
+		dbConn:          dbConn,
+		addrRepo:        addrRepo,
+		txRepo:          txRepo,
+		txDetailRepo:    txDetailRepo,
+		payReqRepo:      payReqRepo,
+		txFileRepo:      txFileRepo,
+		depositReceiver: depositReceiver,
+		paymentSender:   paymentSender,
+		wtype:           wtype,
 	}
 }
 

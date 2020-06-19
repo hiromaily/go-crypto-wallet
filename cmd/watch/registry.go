@@ -178,6 +178,8 @@ func (r *registry) newETHTxCreator() ethsrv.TxCreator {
 		r.newETHTxDetailRepo(),
 		r.newPaymentRequestRepo(),
 		r.newTxFileRepo(),
+		r.newDepositAccount(),
+		r.newPaymentAccount(),
 		r.walletType,
 	)
 }
@@ -192,6 +194,8 @@ func (r *registry) newXRPTxCreator() xrpsrv.TxCreator {
 		r.newXRPTxDetailRepo(),
 		r.newPaymentRequestRepo(),
 		r.newTxFileRepo(),
+		r.newDepositAccount(),
+		r.newPaymentAccount(),
 		r.walletType,
 	)
 }

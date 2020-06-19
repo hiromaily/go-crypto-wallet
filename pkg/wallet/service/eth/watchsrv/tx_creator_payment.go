@@ -21,7 +21,8 @@ import (
 // - to avoid complex logic to create raw transaction
 // - only one address of sender should afford to send coin to all payment request users.
 func (t *TxCreate) CreatePaymentTx() (string, string, error) {
-	sender := account.AccountTypePayment
+	//sender := account.AccountTypePayment
+	sender := t.paymentSender
 	receiver := account.AccountTypeAnonymous
 	targetAction := action.ActionTypePayment
 
