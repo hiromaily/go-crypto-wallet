@@ -16,9 +16,12 @@ import (
 // - receiver account covers fee, but is should be flexible
 func (t *TxCreate) CreateDepositTx() (string, string, error) {
 	sender := account.AccountTypeClient
-	//receiver := account.AccountTypeDeposit
 	receiver := t.depositReceiver
 	targetAction := action.ActionTypeDeposit
+	t.logger.Debug("account",
+		zap.String("sender", sender.String()),
+		zap.String("receiver", receiver.String()),
+	)
 
 	//1. get addresses for client account
 	addrs, err := t.addrRepo.GetAll(sender)

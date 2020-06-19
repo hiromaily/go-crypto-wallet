@@ -8,7 +8,7 @@
 
 set -eu
 
-watch -coin xrp create db
+#watch -coin xrp create db
 
 # create unsigned tx
 echo 'create deposit tx'

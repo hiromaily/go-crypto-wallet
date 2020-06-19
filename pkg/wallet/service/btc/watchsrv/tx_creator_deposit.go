@@ -3,6 +3,7 @@ package watchsrv
 import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	"go.uber.org/zap"
 )
 
 // CreateDepositTx create unsigned tx if client accounts have coins
@@ -10,9 +11,13 @@ import (
 // - receiver account covers fee, but is should be flexible
 func (t *TxCreate) CreateDepositTx(adjustmentFee float64) (string, string, error) {
 	sender := account.AccountTypeClient
-	//receiver := account.AccountTypeDeposit
 	receiver := t.depositReceiver
 	targetAction := action.ActionTypeDeposit
+	t.logger.Debug("account",
+		zap.String("sender", sender.String()),
+		zap.String("receiver", receiver.String()),
+	)
+
 	requiredAmount, err := t.btc.FloatToAmount(0)
 	if err != nil {
 		return "", "", err
