@@ -78,9 +78,9 @@ func main() {
 	if accountConfPath == "" {
 		switch coinTypeCode {
 		case coin.BTC.String():
-			accountConfPath = os.Getenv("BTC_MULTISIG_ACCOUNT_CONF")
+			accountConfPath = os.Getenv("BTC_ACCOUNT_CONF")
 		case coin.BCH.String():
-			accountConfPath = os.Getenv("BCH_MULTISIG_ACCOUNT_CONF")
+			accountConfPath = os.Getenv("BCH_ACCOUNT_CONF")
 		}
 	}
 

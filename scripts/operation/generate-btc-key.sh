@@ -2,17 +2,10 @@
 
 # Prerequisite
 # create wallet
-#  $ bitcoin-cli createwallet watch
-#  $ bitcoin-cli createwallet keygen
-#  $ bitcoin-cli createwallet sign
+# $ make create-wallets
 #
 # encrypt wallet
-#  $ keygen api encryptwallet -passphrase test
-#  $ sign -wallet sign1 api encryptwallet -passphrase test
-#  $ sign2 -wallet sign2 api encryptwallet -passphrase test
-#  $ sign3 -wallet sign3 api encryptwallet -passphrase test
-#  $ sign4 -wallet sign4 api encryptwallet -passphrase test
-#  $ sign5 -wallet sign5 api encryptwallet -passphrase test
+#  $ make encrypt-wallets
 
 # reset database and wallet if you want to start from the beginning
 # $ make rm-local-wallet-dat
