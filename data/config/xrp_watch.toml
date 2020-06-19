@@ -3,7 +3,6 @@
 #websocket_public_url = "wss://127.0.0.1:6005"
 websocket_public_url = ""
 #websocket_admin_url = "ws://127.0.0.1:6006"
-jsonrpc_url = ""
 network_type = "testnet" # mainnet, testnet, devnet
 
 [ripple.api]

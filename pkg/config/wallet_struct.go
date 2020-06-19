@@ -60,11 +60,10 @@ type Ethereum struct {
 
 // Ripple information
 type Ripple struct {
-	WebsocketPublicURL string `toml:"websocket_public_url"`
-	WebsocketAdminURL  string `toml:"websocket_admin_url"`
-	//JSONRpcURL   string `toml:"jsonrpc_url"`
-	NetworkType string    `toml:"network_type" validate:"oneof=mainnet testnet devnet"`
-	API         RippleAPI `toml:"api"`
+	WebsocketPublicURL string    `toml:"websocket_public_url"`
+	WebsocketAdminURL  string    `toml:"websocket_admin_url"`
+	NetworkType        string    `toml:"network_type" validate:"oneof=mainnet testnet devnet"`
+	API                RippleAPI `toml:"api"`
 }
 
 // RippleAPI is ripple-lib server info

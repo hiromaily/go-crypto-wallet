@@ -100,11 +100,17 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 				zap.String("signed_tx_id", signedTxID),
 				zap.String("result_code", sentTx.ResultCode),
 				zap.String("result_message", sentTx.ResultMessage),
-				// tefMAX_LEDGER
-				// Ledger sequence too high
 			)
 			continue
 		}
+		// txBlob and sentTx.TxBlob is same
+
+		//debug
+		t.logger.Debug("ledger version",
+			zap.Uint64("earlistLedgerVersion", earlistLedgerVersion),                         //8123733
+			zap.Uint64("sentTx.TxJSON.LastLedgerSequence", sentTx.TxJSON.LastLedgerSequence), //8123736
+		)
+
 		// validate transaction
 		ledgerVer, err := t.xrp.WaitValidation(sentTx.TxJSON.LastLedgerSequence)
 		if err != nil {
@@ -137,7 +143,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 		grok.Value(txInfo)
 
 		// update eth_detail_tx
-		affectedNum, err := t.txDetailRepo.UpdateAfterTxSent(uuid, tx.TxTypeSent, signedTxID, txBlob, sentTx.TxBlob)
+		affectedNum, err := t.txDetailRepo.UpdateAfterTxSent(uuid, tx.TxTypeSent, signedTxID, txBlob, earlistLedgerVersion)
 		if err != nil {
 			//TODO: even if error occurred, tx is already sent. so db should be corrected manually
 			t.logger.Warn("fail to call txDetailRepo.UpdateAfterTxSent() but tx is already sent. So database should be updated manually",

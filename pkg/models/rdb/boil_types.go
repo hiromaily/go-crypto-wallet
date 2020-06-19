@@ -125,6 +125,7 @@ const (
 // Enum values for tx.coin
 const (
 	TXCoinEth = "eth"
+	TXCoinXRP = "xrp"
 )
 
 // Enum values for tx.action

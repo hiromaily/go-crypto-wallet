@@ -23,7 +23,7 @@ type XrpDetailTxRepositorier interface {
 	GetSentHashTx(txType tx.TxType) ([]string, error)
 	Insert(txItem *models.XRPDetailTX) error
 	InsertBulk(txItems []*models.XRPDetailTX) error
-	UpdateAfterTxSent(uuid string, txType tx.TxType, signedTxID, signedTxBlob, sentTxBlob string) (int64, error)
+	UpdateAfterTxSent(uuid string, txType tx.TxType, signedTxID, signedTxBlob string, earlistLedgerVersion uint64) (int64, error)
 	UpdateTxType(id int64, txType tx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(txType tx.TxType, sentHashTx string) (int64, error)
 }
@@ -88,7 +88,7 @@ func (r *XrpDetailTxInputRepository) GetSentHashTx(txType tx.TxType) ([]string, 
 
 	hashes := make([]string, 0, len(txItems))
 	for _, txItem := range txItems {
-		hashes = append(hashes, txItem.SentTXBlob)
+		hashes = append(hashes, txItem.TXBlob)
 	}
 	return hashes, nil
 }
@@ -112,18 +112,18 @@ func (r *XrpDetailTxInputRepository) UpdateAfterTxSent(
 	uuid string,
 	txType tx.TxType,
 	signedTxID,
-	signedTxBlob,
-	sentTxBlob string) (int64, error) {
+	TxBlob string,
+	earlistLedgerVersion uint64) (int64, error) {
 
 	ctx := context.Background()
 
 	// Set updating columns
 	updCols := map[string]interface{}{
-		models.XRPDetailTXColumns.CurrentTXType: txType.Int8(),
-		models.XRPDetailTXColumns.SignedTXID:    signedTxID,
-		models.XRPDetailTXColumns.SignedTXBlob:  signedTxBlob,
-		models.XRPDetailTXColumns.SentTXBlob:    sentTxBlob,
-		models.XRPDetailTXColumns.SentUpdatedAt: null.TimeFrom(time.Now()),
+		models.XRPDetailTXColumns.CurrentTXType:         txType.Int8(),
+		models.XRPDetailTXColumns.SignedTXID:            signedTxID,
+		models.XRPDetailTXColumns.TXBlob:                TxBlob,
+		models.XRPDetailTXColumns.EarliestLedgerVersion: earlistLedgerVersion,
+		models.XRPDetailTXColumns.SentUpdatedAt:         null.TimeFrom(time.Now()),
 	}
 	return models.XRPDetailTxes(
 		qm.Where("uuid=?", uuid), //unique
