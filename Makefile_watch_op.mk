@@ -76,7 +76,7 @@ monitor-balance:
 # Note: available after generated pub keys are imported on wallet
 .PHONY: create-testdata
 create-testdata:
-	watch db create
+	watch create db
 
 # reset payment testdata
 .PHONY: reset-testdata

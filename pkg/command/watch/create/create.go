@@ -27,6 +27,7 @@ var (
 	depositSynopsis  = "create a deposit unsigned transaction file for client account"
 	paymentSynopsis  = "create a payment unsigned transaction file for payment account"
 	transferSynopsis = "create a transfer unsigned transaction file between accounts"
+	dbSynopsis       = "create payment_request table with dummy data for development use"
 )
 
 // Help returns usage for this subcommand
@@ -36,7 +37,8 @@ Subcommands:
   deposit  %s
   payment  %s
   transfer %s
-`, depositSynopsis, paymentSynopsis, transferSynopsis)
+  db       %s
+`, depositSynopsis, paymentSynopsis, transferSynopsis, dbSynopsis)
 }
 
 // Run executes this subcommand
@@ -70,6 +72,14 @@ func (c *CreateCommand) Run(args []string) int {
 			return &TransferCommand{
 				name:     "transfer",
 				synopsis: transferSynopsis,
+				ui:       command.ClolorUI(),
+				wallet:   c.Wallet,
+			}, nil
+		},
+		"db": func() (cli.Command, error) {
+			return &DBCommand{
+				name:     "db",
+				synopsis: dbSynopsis,
 				ui:       command.ClolorUI(),
 				wallet:   c.Wallet,
 			}, nil

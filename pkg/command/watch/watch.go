@@ -8,7 +8,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/api/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/api/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/create"
-	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/db"
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/imports"
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/monitor"
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/send"
@@ -48,14 +47,6 @@ func WatchSubCommands(wallet wallets.Watcher, version string, conf *config.Walle
 		"monitor": func() (cli.Command, error) {
 			return &monitor.MonitorCommand{
 				Name:    "monitor",
-				Version: version,
-				UI:      command.ClolorUI(),
-				Wallet:  wallet,
-			}, nil
-		},
-		"db": func() (cli.Command, error) {
-			return &db.DBCommand{
-				Name:    "db",
 				Version: version,
 				UI:      command.ClolorUI(),
 				Wallet:  wallet,

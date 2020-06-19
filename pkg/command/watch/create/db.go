@@ -1,4 +1,4 @@
-package db
+package create
 
 import (
 	"flag"
@@ -9,8 +9,8 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
-// CreateCommand create subcommand
-type CreateCommand struct {
+// DBCommand deposit subcommand
+type DBCommand struct {
 	name     string
 	synopsis string
 	ui       cli.Ui
@@ -18,20 +18,20 @@ type CreateCommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (c *CreateCommand) Synopsis() string {
+func (c *DBCommand) Synopsis() string {
 	return c.synopsis
 }
 
 // Help returns usage for this subcommand
-func (c *CreateCommand) Help() string {
-	return `Usage: wallet db create [options...]
+func (c *DBCommand) Help() string {
+	return `Usage: wallet create db [options...]
 Options:
   -table  target table name
 `
 }
 
 // Run executes this subcommand
-func (c *CreateCommand) Run(args []string) int {
+func (c *DBCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
 	var (
