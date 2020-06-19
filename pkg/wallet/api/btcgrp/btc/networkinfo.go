@@ -69,7 +69,7 @@ type SoftForks struct {
 type Fork struct {
 	Type   string `json:"type"`
 	Active bool   `json:"active"`
-	Height int    `json:"height"`
+	Height uint32 `json:"height"`
 }
 
 // Network network info
