@@ -88,6 +88,10 @@ func main() {
 			accountConfPath = os.Getenv("BTC_ACCOUNT_CONF")
 		case coin.BCH.String():
 			accountConfPath = os.Getenv("BCH_ACCOUNT_CONF")
+		case coin.ETH.String():
+			accountConfPath = os.Getenv("ETH_ACCOUNT_CONF")
+		case coin.XRP.String():
+			accountConfPath = os.Getenv("XRP_ACCOUNT_CONF")
 		}
 	}
 

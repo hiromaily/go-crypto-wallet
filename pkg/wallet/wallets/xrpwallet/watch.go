@@ -61,9 +61,7 @@ func (w *XRPWatch) CreateDepositTx(adjustmentFee float64) (string, string, error
 
 // CreatePaymentTx creates payment unsigned transaction
 func (w *XRPWatch) CreatePaymentTx(adjustmentFee float64) (string, string, error) {
-	w.logger.Info("not implemented yet")
-	//return w.TxCreator.CreatePaymentTx()
-	return "", "", nil
+	return w.TxCreator.CreatePaymentTx()
 }
 
 // CreateTransferTx creates transfer unsigned transaction

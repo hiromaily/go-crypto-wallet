@@ -31,10 +31,10 @@ func TestTransaction(t *testing.T) {
 		{
 			name: "happy path 1",
 			args: args{
-				sernderAccount:  "rPQhV98NRivtv2FNPLLpdRz66g6cpx5egy",
-				senderSecret:    "shrCWBTsioMiPawvT6ATZEUDTw1LQ",
-				receiverAccount: "rpBzBQ6aWJhuatJCkQgfE3VJT67ukBQopf",
-				amount:          100,
+				sernderAccount:  "r9Kk7mwxXEd6Q8Sz9N9jXYakfkhAQjvQzt",
+				senderSecret:    "shi85u1ZkiDHsu2akFPctPhf9ySyK",
+				receiverAccount: "rBberR6RZbLVQ8AfBrnNmLqRA9QAQPiB6p",
+				amount:          900,
 			},
 			want: want{false},
 		},

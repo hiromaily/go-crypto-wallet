@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-
 	"github.com/btcsuite/btcd/rpcclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/opentracing/opentracing-go"
@@ -494,14 +493,14 @@ func (r *registry) newTxFileRepo() tx.FileRepositorier {
 }
 
 func (r *registry) newDepositAccount() account.AccountType {
-	if r.accountConf == nil && r.accountConf.DepositReceiver == "" {
+	if r.accountConf == nil || r.accountConf.DepositReceiver == "" {
 		return account.AccountTypeDeposit
 	}
 	return r.accountConf.DepositReceiver
 }
 
 func (r *registry) newPaymentAccount() account.AccountType {
-	if r.accountConf == nil && r.accountConf.PaymentSender == "" {
+	if r.accountConf == nil || r.accountConf.PaymentSender == "" {
 		return account.AccountTypePayment
 	}
 	return r.accountConf.PaymentSender

@@ -27,6 +27,7 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	sender := t.paymentSender
 	receiver := account.AccountTypeAnonymous
 	targetAction := action.ActionTypePayment
+	t.logger.Debug(sender.String())
 
 	// get payment data from payment_request
 	userPayments, totalAmount, paymentRequestIds, err := t.createUserPayment()
