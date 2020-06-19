@@ -42,15 +42,15 @@ func (c BlockchainInfoChain) String() string {
 // GetBlockchainInfoResult is response type of PRC `getblockchaininfo`
 type GetBlockchainInfoResult struct {
 	Chain                BlockchainInfoChain `json:"chain"` // main, test, regtest
-	Blocks               int                 `json:"blocks"`
-	Headers              int                 `json:"headers"`
+	Blocks               uint32              `json:"blocks"`
+	Headers              uint32              `json:"headers"`
 	Bestblockhash        string              `json:"bestblockhash"`
-	Difficulty           int                 `json:"difficulty"`
-	Mediantime           int                 `json:"mediantime"`
+	Difficulty           float64             `json:"difficulty"`
+	Mediantime           uint32              `json:"mediantime"`
 	Verificationprogress float64             `json:"verificationprogress"`
 	Initialblockdownload bool                `json:"initialblockdownload"`
 	Chainwork            string              `json:"chainwork"`
-	SizeOnDisk           int64               `json:"size_on_disk"`
+	SizeOnDisk           uint32              `json:"size_on_disk"`
 	Pruned               bool                `json:"pruned"`
 	SoftForks            SoftForks           `json:"softforks"`
 	Warnings             string              `json:"warnings"`
