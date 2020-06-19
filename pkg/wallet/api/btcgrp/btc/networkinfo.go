@@ -50,7 +50,7 @@ type GetBlockchainInfoResult struct {
 	Verificationprogress float64             `json:"verificationprogress"`
 	Initialblockdownload bool                `json:"initialblockdownload"`
 	Chainwork            string              `json:"chainwork"`
-	SizeOnDisk           uint32              `json:"size_on_disk"`
+	SizeOnDisk           uint64              `json:"size_on_disk"`
 	Pruned               bool                `json:"pruned"`
 	SoftForks            SoftForks           `json:"softforks"`
 	Warnings             string              `json:"warnings"`
