@@ -94,9 +94,9 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 			Flags:              txJSON.Flags,
 			LastLedgerSequence: txJSON.LastLedgerSequence,
 			Sequence:           txJSON.Sequence,
-			SigningPubkey:      txJSON.SigningPubKey,
-			TXNSignature:       txJSON.TxnSignature,
-			Hash:               txJSON.Hash,
+			//SigningPubkey:      txJSON.SigningPubKey,
+			//TXNSignature:       txJSON.TxnSignature,
+			//Hash:               txJSON.Hash,
 		}
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}

@@ -2,6 +2,8 @@ package xrp
 
 import (
 	"strconv"
+
+	"github.com/LanfordCai/ava/pkg/ripple"
 )
 
 // ToFloat64 converts string to float64
@@ -18,4 +20,10 @@ func ToFloat64(amount string) float64 {
 // nolint:golint
 func XRPToDrops(val float64) float64 {
 	return val * 0.000001
+}
+
+// ValidateAddress validates address
+func ValidateAddress(addr string) bool {
+	isValid, _ := ripple.New().ValidateAddress(addr, false)
+	return isValid
 }

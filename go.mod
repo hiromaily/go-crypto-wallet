@@ -6,6 +6,7 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/DATA-DOG/go-sqlmock v1.4.1 // indirect
 	github.com/DataDog/datadog-go v3.7.1+incompatible // indirect
+	github.com/LanfordCai/ava v0.1.3
 	github.com/OneOfOne/xxhash v1.2.5 // indirect
 	github.com/VictoriaMetrics/fastcache v1.5.7 // indirect
 	github.com/apmckinlay/gsuneido v0.0.0-20190404155041-0b6cd442a18f // indirect
