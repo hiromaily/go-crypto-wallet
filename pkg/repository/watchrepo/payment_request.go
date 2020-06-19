@@ -116,6 +116,8 @@ func (r *PaymentRequestRepository) UpdateIsDone(paymentID int64) (int64, error) 
 // DeleteAll deletes all records
 func (r *PaymentRequestRepository) DeleteAll() (int64, error) {
 	ctx := context.Background()
-	items, _ := models.PaymentRequests().All(ctx, r.dbConn)
-	return items.DeleteAll(ctx, r.dbConn)
+	return models.PaymentRequests(
+		qm.Where("coin=?", r.coinTypeCode.String()),
+	).DeleteAll(ctx, r.dbConn)
+
 }

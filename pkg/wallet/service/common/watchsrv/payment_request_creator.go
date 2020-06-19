@@ -15,48 +15,40 @@ import (
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // PaymentRequestCreate type
 type PaymentRequestCreate struct {
-	eth        ethgrp.Ethereumer
-	logger     *zap.Logger
-	dbConn     *sql.DB
-	addrRepo   watchrepo.AddressRepositorier
-	payReqRepo watchrepo.PaymentRequestRepositorier
-	wtype      wallet.WalletType
+	logger       *zap.Logger
+	dbConn       *sql.DB
+	addrRepo     watchrepo.AddressRepositorier
+	payReqRepo   watchrepo.PaymentRequestRepositorier
+	coinTypeCode coin.CoinTypeCode
+	wtype        wallet.WalletType
 }
 
 // NewPaymentRequestCreate returns PaymentRequestCreate object
 func NewPaymentRequestCreate(
-	eth ethgrp.Ethereumer,
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,
+	coinTypeCode coin.CoinTypeCode,
 	wtype wallet.WalletType) *PaymentRequestCreate {
 
 	return &PaymentRequestCreate{
-		eth:        eth,
-		logger:     logger,
-		dbConn:     dbConn,
-		addrRepo:   addrRepo,
-		payReqRepo: payReqRepo,
-		wtype:      wtype,
+		logger:       logger,
+		dbConn:       dbConn,
+		addrRepo:     addrRepo,
+		payReqRepo:   payReqRepo,
+		coinTypeCode: coinTypeCode,
+		wtype:        wtype,
 	}
 }
 
 // CreatePaymentRequest creates payment_request dummy data for development
-func (p *PaymentRequestCreate) CreatePaymentRequest() error {
-	// create payment_request table
-	amtList := []float64{
-		0.001,
-		0.002,
-		0.0025,
-		0.0015,
-		0.003,
-	}
+func (p *PaymentRequestCreate) CreatePaymentRequest(amtList []float64) error {
 
 	// get client pubkeys
 	pubkeyItems, err := p.addrRepo.GetAll(account.AccountTypeClient)
@@ -89,7 +81,7 @@ func (p *PaymentRequestCreate) CreatePaymentRequest() error {
 	var idx int
 	for _, amt := range amtList {
 		payReqItems = append(payReqItems, &models.PaymentRequest{
-			Coin:            p.eth.CoinTypeCode().String(),
+			Coin:            p.coinTypeCode.String(),
 			PaymentID:       null.NewInt64(0, false),
 			SenderAddress:   pubkeyItems[0+idx].WalletAddress,
 			SenderAccount:   pubkeyItems[0+idx].Account,

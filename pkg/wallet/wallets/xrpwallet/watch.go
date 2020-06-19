@@ -23,6 +23,7 @@ type XRPWatch struct {
 	watchsrv.AddressImporter
 	xrpsrv.TxCreator
 	service.TxSender
+	service.PaymentRequestCreator
 }
 
 // NewXRPWatch returns XRPWatch object
@@ -33,16 +34,18 @@ func NewXRPWatch(
 	addrImporter watchsrv.AddressImporter,
 	txCreator xrpsrv.TxCreator,
 	txSender service.TxSender,
+	paymentRequestCreator service.PaymentRequestCreator,
 	wtype wtype.WalletType) *XRPWatch {
 
 	return &XRPWatch{
-		XRP:             xrp,
-		logger:          logger,
-		dbConn:          dbConn,
-		wtype:           wtype,
-		AddressImporter: addrImporter,
-		TxCreator:       txCreator,
-		TxSender:        txSender,
+		XRP:                   xrp,
+		logger:                logger,
+		dbConn:                dbConn,
+		wtype:                 wtype,
+		AddressImporter:       addrImporter,
+		TxCreator:             txCreator,
+		TxSender:              txSender,
+		PaymentRequestCreator: paymentRequestCreator,
 	}
 }
 
@@ -91,9 +94,14 @@ func (w *XRPWatch) SendTx(filePath string) (string, error) {
 
 // CreatePaymentRequest creates payment_request dummy data for development
 func (w *XRPWatch) CreatePaymentRequest() error {
-	w.logger.Info("not implemented yet")
-	//return w.PaymentRequestCreator.CreatePaymentRequest()
-	return nil
+	amtList := []float64{
+		50,
+		100,
+		120,
+		130,
+		150,
+	}
+	return w.PaymentRequestCreator.CreatePaymentRequest(amtList)
 }
 
 // Done should be called before exit

@@ -79,4 +79,5 @@ func (k XRPKeyType) String() string {
 // MinimumReserve is reserved amount. see https://xrpl.org/reserves.html
 const MinimumReserve float64 = 20.0
 
+// MaxLedgerVersionOffset is used when calling PrepareTransaction()
 const MaxLedgerVersionOffset uint64 = 15 //1 takes 4 second, 75 means 300s

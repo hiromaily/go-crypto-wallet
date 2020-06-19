@@ -95,7 +95,15 @@ func (w *BTCWatch) SendTx(filePath string) (string, error) {
 
 // CreatePaymentRequest creates payment_request dummy data for development
 func (w *BTCWatch) CreatePaymentRequest() error {
-	return w.PaymentRequestCreator.CreatePaymentRequest()
+	amtList := []float64{
+		0.00001,
+		0.00002,
+		0.000025,
+		0.000015,
+		0.00003,
+	}
+
+	return w.PaymentRequestCreator.CreatePaymentRequest(amtList)
 }
 
 // Done should be called before exit

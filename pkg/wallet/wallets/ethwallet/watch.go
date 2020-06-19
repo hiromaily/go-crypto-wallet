@@ -89,7 +89,14 @@ func (w *ETHWatch) SendTx(filePath string) (string, error) {
 
 // CreatePaymentRequest creates payment_request dummy data for development
 func (w *ETHWatch) CreatePaymentRequest() error {
-	return w.PaymentRequestCreator.CreatePaymentRequest()
+	amtList := []float64{
+		0.001,
+		0.002,
+		0.0025,
+		0.0015,
+		0.003,
+	}
+	return w.PaymentRequestCreator.CreatePaymentRequest(amtList)
 }
 
 // Done should be called before exit

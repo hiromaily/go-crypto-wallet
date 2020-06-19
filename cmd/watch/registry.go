@@ -93,7 +93,7 @@ func (r *registry) newBTCWalleter() wallets.Watcher {
 		r.newBTCTxCreator(),
 		r.newBTCTxSender(),
 		r.newBTCTxMonitorer(),
-		r.newPaymentRequestCreator(),
+		r.newBTCPaymentRequestCreator(),
 		r.walletType,
 	)
 }
@@ -107,7 +107,7 @@ func (r *registry) newETHWalleter() wallets.Watcher {
 		r.newETHTxCreator(),
 		r.newETHTxSender(),
 		r.newETHTxMonitorer(),
-		r.newETHPaymentRequestCreator(),
+		r.newPaymentRequestCreator(),
 		r.walletType,
 	)
 }
@@ -120,6 +120,7 @@ func (r *registry) newXRPWalleter() wallets.Watcher {
 		r.newCommonAddressImporter(),
 		r.newXRPTxCreator(),
 		r.newXRPTxSender(),
+		r.newPaymentRequestCreator(),
 		r.walletType,
 	)
 }
@@ -261,7 +262,7 @@ func (r *registry) newETHTxMonitorer() service.TxMonitorer {
 	)
 }
 
-func (r *registry) newPaymentRequestCreator() service.PaymentRequestCreator {
+func (r *registry) newBTCPaymentRequestCreator() service.PaymentRequestCreator {
 	return btcsrv.NewPaymentRequestCreate(
 		r.newBTC(),
 		r.newLogger(),
@@ -272,13 +273,13 @@ func (r *registry) newPaymentRequestCreator() service.PaymentRequestCreator {
 	)
 }
 
-func (r *registry) newETHPaymentRequestCreator() service.PaymentRequestCreator {
-	return ethsrv.NewPaymentRequestCreate(
-		r.newETH(),
+func (r *registry) newPaymentRequestCreator() service.PaymentRequestCreator {
+	return watchsrv.NewPaymentRequestCreate(
 		r.newLogger(),
 		r.newMySQLClient(),
 		r.newAddressRepo(),
 		r.newPaymentRequestRepo(),
+		r.conf.CoinTypeCode,
 		r.walletType,
 	)
 }

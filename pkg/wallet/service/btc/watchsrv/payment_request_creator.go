@@ -45,15 +45,7 @@ func NewPaymentRequestCreate(
 }
 
 // CreatePaymentRequest creates payment_request dummy data for development
-func (p *PaymentRequestCreate) CreatePaymentRequest() error {
-	// create payment_request table
-	amtList := []float64{
-		0.00001,
-		0.00002,
-		0.000025,
-		0.000015,
-		0.00003,
-	}
+func (p *PaymentRequestCreate) CreatePaymentRequest(amtList []float64) error {
 
 	// get client pubkeys
 	pubkeyItems, err := p.addrRepo.GetAll(account.AccountTypeClient)

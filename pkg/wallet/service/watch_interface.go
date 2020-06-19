@@ -9,7 +9,7 @@ type AddressImporter interface {
 
 // PaymentRequestCreator is PaymentRequestCreate interface
 type PaymentRequestCreator interface {
-	CreatePaymentRequest() error
+	CreatePaymentRequest(amtList []float64) error
 }
 
 // TxCreator is TxCreator interface (for now btc/bch only)

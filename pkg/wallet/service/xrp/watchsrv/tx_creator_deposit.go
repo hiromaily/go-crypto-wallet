@@ -97,17 +97,6 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 			TXNSignature:       txJSON.TxnSignature,
 			Hash:               txJSON.Hash,
 		}
-
-		//ID                    int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
-		//TXID                  int64     `boil:"tx_id" json:"tx_id" toml:"tx_id" yaml:"tx_id"`
-
-		//EarliestLedgerVersion uint64    `boil:"earliest_ledger_version" json:"earliest_ledger_version" toml:"earliest_ledger_version" yaml:"earliest_ledger_version"`
-		//SignedTXID            string    `boil:"signed_tx_id" json:"signed_tx_id" toml:"signed_tx_id" yaml:"signed_tx_id"`
-		//SignedTXBlob          string    `boil:"signed_tx_blob" json:"signed_tx_blob" toml:"signed_tx_blob" yaml:"signed_tx_blob"`
-		//SentTXBlob            string    `boil:"sent_tx_blob" json:"sent_tx_blob" toml:"sent_tx_blob" yaml:"sent_tx_blob"`
-		//UnsignedUpdatedAt     null.Time `boil:"unsigned_updated_at" json:"unsigned_updated_at,omitempty" toml:"unsigned_updated_at" yaml:"unsigned_updated_at,omitempty"`
-		//SentUpdatedAt         null.Time `boil:"sent_updated_at" json:"sent_updated_at,omitempty" toml:"sent_updated_at" yaml:"sent_updated_at,omitempty"`
-
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}
 	if len(txDetailItems) == 0 {
