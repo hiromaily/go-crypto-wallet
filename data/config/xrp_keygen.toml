@@ -28,7 +28,7 @@ host = "127.0.0.1:3308"
 dbname = "keygen"
 user = "hiromaily"
 pass = "hiromaily"
-debug = true
+debug = false
 
 [file_path]
 tx = "./data/tx/xrp/"

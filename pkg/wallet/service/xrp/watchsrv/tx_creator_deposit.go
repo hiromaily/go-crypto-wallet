@@ -41,16 +41,15 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 	// address list for client
 	for _, addr := range addrs {
 		//TODO: if previous tx is not done, wrong amount is returned. how to manage it??
-		accountInfo, err := t.xrp.GetAccountInfo(addr.WalletAddress)
+		clientBalance, err := t.xrp.GetBalance(addr.WalletAddress)
 		if err != nil {
 			t.logger.Warn("fail to call t.xrp.GetAccountInfo()",
 				zap.String("address", addr.WalletAddress),
 			)
 		} else {
-			t.logger.Debug("account_info", zap.String("address", addr.WalletAddress), zap.String("balance", accountInfo.XrpBalance))
-			amt := xrp.ToFloat64(accountInfo.XrpBalance)
-			if amt != 0 {
-				userAmounts = append(userAmounts, xrp.UserAmount{Address: addr.WalletAddress, Amount: amt})
+			t.logger.Debug("account_info", zap.String("address", addr.WalletAddress), zap.Float64("balance", clientBalance))
+			if clientBalance != 0 {
+				userAmounts = append(userAmounts, xrp.UserAmount{Address: addr.WalletAddress, Amount: clientBalance})
 			}
 		}
 	}

@@ -36,20 +36,20 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call addrRepo.GetOneUnAllocated(sender)")
 	}
-	accountInfo, err := t.xrp.GetAccountInfo(senderAddr.WalletAddress)
+	senderBalance, err := t.xrp.GetBalance(senderAddr.WalletAddress)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call xrp.GetAccountInfo()")
 	}
-	if xrp.ToFloat64(accountInfo.XrpBalance) <= 20 {
+	if senderBalance <= 20 {
 		return "", "", errors.New("sender balance is insufficient to send")
 	}
-	if floatValue != 0 && xrp.ToFloat64(accountInfo.XrpBalance) <= floatValue {
+	if floatValue != 0 && senderBalance <= floatValue {
 		return "", "", errors.New("sender balance is insufficient to send")
 	}
 
 	t.logger.Debug("amount",
 		zap.Float64("floatValue", floatValue),
-		zap.Float64("senderBalance", xrp.ToFloat64(accountInfo.XrpBalance)),
+		zap.Float64("senderBalance", senderBalance),
 	)
 
 	// get receiver address

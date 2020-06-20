@@ -121,6 +121,7 @@ func (r *registry) newXRPWalleter() wallets.Watcher {
 		r.newCommonAddressImporter(),
 		r.newXRPTxCreator(),
 		r.newXRPTxSender(),
+		r.newXRPTxMonitorer(),
 		r.newPaymentRequestCreator(),
 		r.walletType,
 	)
@@ -263,6 +264,17 @@ func (r *registry) newETHTxMonitorer() service.TxMonitorer {
 		r.newAddressRepo(),
 		r.newETHTxDetailRepo(),
 		r.conf.Ethereum.ConfirmationNum,
+		r.walletType,
+	)
+}
+
+func (r *registry) newXRPTxMonitorer() service.TxMonitorer {
+	return xrpsrv.NewTxMonitor(
+		r.newXRP(),
+		r.newLogger(),
+		r.newMySQLClient(),
+		r.newAddressRepo(),
+		r.newXRPTxDetailRepo(),
 		r.walletType,
 	)
 }

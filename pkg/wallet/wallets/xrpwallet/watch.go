@@ -23,6 +23,7 @@ type XRPWatch struct {
 	watchsrv.AddressImporter
 	xrpsrv.TxCreator
 	service.TxSender
+	service.TxMonitorer
 	service.PaymentRequestCreator
 }
 
@@ -34,6 +35,7 @@ func NewXRPWatch(
 	addrImporter watchsrv.AddressImporter,
 	txCreator xrpsrv.TxCreator,
 	txSender service.TxSender,
+	txMonitorer service.TxMonitorer,
 	paymentRequestCreator service.PaymentRequestCreator,
 	wtype wtype.WalletType) *XRPWatch {
 
@@ -45,6 +47,7 @@ func NewXRPWatch(
 		AddressImporter:       addrImporter,
 		TxCreator:             txCreator,
 		TxSender:              txSender,
+		TxMonitorer:           txMonitorer,
 		PaymentRequestCreator: paymentRequestCreator,
 	}
 }
@@ -71,16 +74,14 @@ func (w *XRPWatch) CreateTransferTx(sender, receiver account.AccountType, floatA
 
 // UpdateTxStatus updates transaction status
 func (w *XRPWatch) UpdateTxStatus() error {
-	w.logger.Info("not implemented yet")
+	w.logger.Info("no functionality for XRP")
 	//return w.TxMonitorer.UpdateTxStatus()
 	return nil
 }
 
 // MonitorBalance monitors balance
 func (w *XRPWatch) MonitorBalance(confirmationNum uint64) error {
-	w.logger.Info("not implemented yet")
-	//return w.TxMonitorer.MonitorBalance()
-	return nil
+	return w.TxMonitorer.MonitorBalance(confirmationNum)
 }
 
 // SendTx sends signed transaction

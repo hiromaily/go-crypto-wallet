@@ -49,12 +49,12 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
 	}
-	accountInfo, err := t.xrp.GetAccountInfo(addrItem.WalletAddress)
+	senderBalance, err := t.xrp.GetBalance(addrItem.WalletAddress)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call xrp.GetAccountInfo()")
 	}
 
-	if xrp.ToFloat64(accountInfo.XrpBalance) <= totalAmount {
+	if senderBalance <= totalAmount {
 		return "", "", errors.New("sender balance is insufficient to send")
 	}
 
