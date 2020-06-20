@@ -1,6 +1,7 @@
 # go-crypto-wallet
 
-<img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/images/ethereum-img.png??raw=true">
+<img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/images/xrp-img.jpg?raw=true">
+<img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/images/ethereum-img.png?raw=true">
 <img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/images/bitcoin-img.svg?sanitize=true">
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/hiromaily/go-crypto-wallet)](https://goreportcard.com/report/github.com/hiromaily/go-crypto-wallet)
@@ -14,11 +15,10 @@ Wallet functionalities to create raw transaction, to sing on unsigned transactio
 - Bitcoin
 - Bitcoin Cash
 - Ethereum
-- Ripple (ongoing)
+- Ripple
 
 
 ## Note
-- XRP implementation is ongoing.
 - [Basic Attention Token](https://basicattentiontoken.org/) will be coming after XRP.
 - [Ethereum Classic](https://ethereumclassic.org/) will be coming after Basic Attention Token.
 
@@ -89,7 +89,7 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
     - BTC: [Bitcoin Core 0.18+ for Bitcoin node](https://bitcoin.org/en/bitcoin-core/)
     - BCH: [Bitcoin ABC 0.21+ for Bitcoin cash node](https://www.bitcoinabc.org/)
     - ETH: [go-ethereum](https://github.com/ethereum/go-ethereum)
-    - XRP: [rippled](https://xrpl.org/manage-the-rippled-server.html)
+    - XRP: [rippled](https://xrpl.org/manage-the-rippled-server.html), [ripple-lib-server](https://github.com/hiromaily/ripple-lib-server)
 
 ## Installation
 ### BTC, BCH 
@@ -285,7 +285,7 @@ watch send -file xxx.csv
 - [x] Transaction monitoring
 - [ ] Make sure that `quantity-tag` is used properly. e.g. when getting balance, which quantity-tag should be used, latest or pending.
 - [ ] For now it works on [Go Ethereum](https://github.com/ethereum/go-ethereum). Adapting to [Parity](https://www.parity.io/ethereum/)
-- [ ] How to manage password for private key
+- [ ] How to manage password for private key. Password would be passed from command line argument.
 
 ### For XRP
 - [x] APIs to call [Admin rippled Methods](https://xrpl.org/admin-rippled-methods.html)
@@ -301,7 +301,8 @@ watch send -file xxx.csv
 - [x] Creating unsigned raw transaction for transfer
 - [x] Signing on unsigned raw transaction
 - [x] Sending signed transaction
-- [ ] Transaction monitoring
+- [x] Transaction monitoring
+- [ ] How to manage secret for private key. Password would be passed from command line argument.
 
 ## Project layout patterns
 - The `pkg` layout pattern, refer to the [linked](https://medium.com/golang-learn/go-project-layout-e5213cdcfaa2) URLs for details.
