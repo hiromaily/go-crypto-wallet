@@ -288,12 +288,20 @@ watch send -file xxx.csv
 - [ ] How to manage password for private key
 
 ### For XRP
-- [ ] APIs to call [Admin rippled Methods](https://xrpl.org/admin-rippled-methods.html)
-- [ ] APIs to call [Public rippled Methods](https://xrpl.org/public-rippled-methods.html)
-- [ ] Build [Rippled Server](https://xrpl.org/install-rippled.html)
-- [ ] Build gRPC Server as [RippleAPI](https://xrpl.org/rippleapi-reference.html) Server. Repository is [here](https://github.com/hiromaily/ripple-lib-server) 
-- [ ] gRPC Client to call RippleAPI
+- [x] APIs to call [Admin rippled Methods](https://xrpl.org/admin-rippled-methods.html)
+- [x] APIs to call [Public rippled Methods](https://xrpl.org/public-rippled-methods.html)
+- [x] Build [Rippled Server](https://xrpl.org/install-rippled.html)
+- [x] Build gRPC Server as [RippleAPI](https://xrpl.org/rippleapi-reference.html) Server. Repository is [here](https://github.com/hiromaily/ripple-lib-server) 
+- [x] gRPC Client to call RippleAPI
 - [x] Generating Keys
+- [x] Exporting addresses to watch wallet
+- [x] Importing exported address in watch wallet
+- [x] Creating unsigned raw transaction for deposit
+- [x] Creating unsigned raw transaction for payment
+- [x] Creating unsigned raw transaction for transfer
+- [x] Signing on unsigned raw transaction
+- [x] Sending signed transaction
+- [ ] Transaction monitoring
 
 ## Project layout patterns
 - The `pkg` layout pattern, refer to the [linked](https://medium.com/golang-learn/go-project-layout-e5213cdcfaa2) URLs for details.
