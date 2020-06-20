@@ -47,7 +47,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	t.logger.Debug("amount",
 		zap.Float64("floatValue(Ether)", floatValue),
 		zap.Uint64("requiredValue(Ether)", requiredValue.Uint64()),
-		zap.Uint64("senderBalnce", senderBalnce.Uint64()),
+		zap.Uint64("senderBalance", senderBalnce.Uint64()),
 	)
 
 	// get receiver address
@@ -61,7 +61,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	// call CreateRawTransaction
 	rawTx, txDetailItem, err := t.eth.CreateRawTransaction(senderAddr.WalletAddress, receiverAddr.WalletAddress, requiredValue.Uint64(), 0)
 	if err != nil {
-		return "", "", errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s", senderAddr.WalletAddress)
+		return "", "", errors.Wrapf(err, "fail to call eth.CreateRawTransaction(), sender address: %s", senderAddr.WalletAddress)
 	}
 
 	rawTxHex := rawTx.TxHex

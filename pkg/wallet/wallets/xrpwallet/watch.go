@@ -66,9 +66,7 @@ func (w *XRPWatch) CreatePaymentTx(adjustmentFee float64) (string, string, error
 
 // CreateTransferTx creates transfer unsigned transaction
 func (w *XRPWatch) CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error) {
-	w.logger.Info("not implemented yet")
-	//return w.TxCreator.CreateTransferTx(sender, receiver, floatAmount)
-	return "", "", nil
+	return w.TxCreator.CreateTransferTx(sender, receiver, floatAmount)
 }
 
 // UpdateTxStatus updates transaction status

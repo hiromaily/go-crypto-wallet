@@ -35,7 +35,7 @@ func TestTransaction(t *testing.T) {
 			args: args{
 				sernderAccount:  "rxcip8BgcUMbMr9QEm15WMDUdG7oGEwT8",
 				senderSecret:    "sswVaSDUNnLd5pB4F9oPT9u7jLf2X",
-				receiverAccount: "rBberR6RZbLVQ8AfBrnNmLqRA9QAQPiB6p",
+				receiverAccount: "rnkZMhbXQZ8GTfSihmdTqNUtvUAAqwkLWN",
 				amount:          100,
 				instructions: &pb.Instructions{
 					MaxLedgerVersionOffset: 2,

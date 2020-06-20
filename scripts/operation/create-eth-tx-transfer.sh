@@ -6,7 +6,7 @@
 set -eu
 
 # create unsigned tx
-echo 'create deposit tx'
+echo 'create transfer tx'
 tx_file=$(watch -coin eth create transfer -account1 deposit -account2 payment)
 
 # sign on keygen wallet
