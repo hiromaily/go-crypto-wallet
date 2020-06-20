@@ -7,6 +7,7 @@ import (
 	"github.com/bookerzzz/grok"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
+	pb "github.com/hiromaily/ripple-lib-proto/pb/go/rippleapi"
 )
 
 // TestTransaction is test for sequential transaction
@@ -19,6 +20,7 @@ func TestTransaction(t *testing.T) {
 		senderSecret    string
 		receiverAccount string
 		amount          float64
+		instructions    *pb.Instructions
 	}
 	type want struct {
 		isErr bool
@@ -31,10 +33,13 @@ func TestTransaction(t *testing.T) {
 		{
 			name: "happy path 1",
 			args: args{
-				sernderAccount:  "r9Kk7mwxXEd6Q8Sz9N9jXYakfkhAQjvQzt",
-				senderSecret:    "shi85u1ZkiDHsu2akFPctPhf9ySyK",
+				sernderAccount:  "rxcip8BgcUMbMr9QEm15WMDUdG7oGEwT8",
+				senderSecret:    "sswVaSDUNnLd5pB4F9oPT9u7jLf2X",
 				receiverAccount: "rBberR6RZbLVQ8AfBrnNmLqRA9QAQPiB6p",
-				amount:          900,
+				amount:          100,
+				instructions: &pb.Instructions{
+					MaxLedgerVersionOffset: 2,
+				},
 			},
 			want: want{false},
 		},
@@ -43,11 +48,17 @@ func TestTransaction(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// PrepareTransaction
-			txJSON, _, err := xr.PrepareTransaction(tt.args.sernderAccount, tt.args.receiverAccount, tt.args.amount)
+			txJSON, _, err := xr.PrepareTransaction(tt.args.sernderAccount, tt.args.receiverAccount, tt.args.amount, tt.args.instructions)
 			if err != nil {
 				t.Fatal(err)
 			}
 			grok.Value(txJSON)
+			//- creating raw transaction
+			// LastLedgerSequence:    8153687
+			// Sequence:              8153441
+			//- after sending
+			// earlistLedgerVersion:             8153673
+			// sentTx.TxJSON.LastLedgerSequence: 8153687
 
 			// SingTransaction
 			txID, txBlob, err := xr.SignTransaction(txJSON, tt.args.senderSecret)

@@ -1,9 +1,10 @@
 package watchsrv
 
 import (
+	"go.uber.org/zap"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
-	"go.uber.org/zap"
 )
 
 // CreateDepositTx create unsigned tx if client accounts have coins

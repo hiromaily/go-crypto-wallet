@@ -13,6 +13,7 @@ import (
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
+	pb "github.com/hiromaily/ripple-lib-proto/pb/go/rippleapi"
 )
 
 // CreateDepositTx create unsigned tx if client accounts have coins
@@ -68,15 +69,26 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 	// create raw transaction each address
 	serializedTxs := make([]string, 0, len(userAmounts))
 	txDetailItems := make([]*models.XRPDetailTX, 0, len(userAmounts))
+
+	var sequence uint64
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
-		txJSON, rawTxString, err := t.xrp.CreateRawTransaction(val.Address, depositAddr.WalletAddress, 0)
+		instructions := &pb.Instructions{
+			MaxLedgerVersionOffset: xrp.MaxLedgerVersionOffset,
+		}
+		if sequence != 0 {
+			instructions.Sequence = sequence
+		}
+		txJSON, rawTxString, err := t.xrp.CreateRawTransaction(val.Address, depositAddr.WalletAddress, 0, instructions)
 		if err != nil {
 			t.logger.Warn("fail to call xrp.CreateRawTransaction()", zap.Error(err))
 			continue
 		}
 		t.logger.Debug("txJSON", zap.Any("txJSON", txJSON))
 		grok.Value(txJSON)
+
+		// sequence for next rawTransaction
+		sequence = txJSON.Sequence + 1
 
 		// generate UUID to trace transaction because unsignedTx is not unique
 		uid := uuid.NewV4().String()

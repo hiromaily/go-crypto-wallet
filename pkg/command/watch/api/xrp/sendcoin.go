@@ -11,6 +11,8 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
+	pb "github.com/hiromaily/ripple-lib-proto/pb/go/rippleapi"
 )
 
 // SendCoinCommand syncing subcommand
@@ -60,8 +62,11 @@ func (c *SendCoinCommand) Run(args []string) int {
 
 	// send coin
 	// PrepareTransaction
+	instructions := &pb.Instructions{
+		MaxLedgerVersionOffset: xrp.MaxLedgerVersionOffset,
+	}
 	c.ui.Info(fmt.Sprintf("sender: %s, receiver: %s, amount: %v", c.txData.Account, receiverAddr, amount))
-	txJSON, _, err := c.xrp.CreateRawTransaction(c.txData.Account, receiverAddr, amount)
+	txJSON, _, err := c.xrp.CreateRawTransaction(c.txData.Account, receiverAddr, amount, instructions)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call xrp.CreateRawTransaction() %v", err))
 		return 1

@@ -3,11 +3,13 @@ package xrp
 import (
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/status"
+
+	pb "github.com/hiromaily/ripple-lib-proto/pb/go/rippleapi"
 )
 
 // CreateRawTransaction creates raw transaction
 // - https://xrpl.org/ja/send-xrp.html
-func (r *Ripple) CreateRawTransaction(senderAccount, receiverAccount string, amount float64) (*TxInput, string, error) {
+func (r *Ripple) CreateRawTransaction(senderAccount, receiverAccount string, amount float64, instructions *pb.Instructions) (*TxInput, string, error) {
 	// validation
 	if senderAccount == "" {
 		return nil, "", errors.New("senderAccount is empty")
@@ -28,7 +30,7 @@ func (r *Ripple) CreateRawTransaction(senderAccount, receiverAccount string, amo
 	}
 
 	// get fee
-	txJSON, stringJSON, err := r.PrepareTransaction(senderAccount, receiverAccount, amount)
+	txJSON, stringJSON, err := r.PrepareTransaction(senderAccount, receiverAccount, amount, instructions)
 	if err != nil {
 		return nil, "", errors.Wrap(err, "fail to call PrepareTransaction()")
 	}
@@ -39,7 +41,7 @@ func (r *Ripple) CreateRawTransaction(senderAccount, receiverAccount string, amo
 			return nil, "", errors.Errorf("balance is short to send %s", accountInfo.XrpBalance)
 		}
 		// re-run
-		txJSON, stringJSON, err = r.PrepareTransaction(senderAccount, receiverAccount, calculatedAmount)
+		txJSON, stringJSON, err = r.PrepareTransaction(senderAccount, receiverAccount, calculatedAmount, instructions)
 		if err != nil {
 			return nil, "", errors.Wrap(err, "fail to call PrepareTransaction()")
 		}

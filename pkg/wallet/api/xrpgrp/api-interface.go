@@ -15,7 +15,7 @@ type Rippler interface {
 	RippleAPIer
 
 	//transaction
-	CreateRawTransaction(senderAccount, receiverAccount string, amount float64) (*xrp.TxInput, string, error)
+	CreateRawTransaction(senderAccount, receiverAccount string, amount float64, instructions *pb.Instructions) (*xrp.TxInput, string, error)
 
 	// ripple
 	Close()
@@ -32,7 +32,7 @@ type RippleAPIer interface {
 	GenerateXAddress() (*pb.ResponseGenerateXAddress, error)
 	IsValidAddress(addr string) (bool, error)
 	// RippleTxAPI
-	PrepareTransaction(senderAccount, receiverAccount string, amount float64) (*xrp.TxInput, string, error)
+	PrepareTransaction(senderAccount, receiverAccount string, amount float64, instructions *pb.Instructions) (*xrp.TxInput, string, error)
 	SignTransaction(txJSON *xrp.TxInput, secret string) (string, string, error)
 	CombineTransaction(signedTxs []string) (string, string, error)
 	SubmitTransaction(signedTx string) (*xrp.SentTx, uint64, error)

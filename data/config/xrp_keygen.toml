@@ -1,7 +1,11 @@
 [ripple]
+# on production, it should run offline
+
 # https://xrpl.org/get-started-with-the-rippled-api.html
-websocket_public_url = "wss://127.0.0.1:6005"
-websocket_admin_url = "ws://127.0.0.1:6006"
+#websocket_public_url = "wss://127.0.0.1:6005"
+#websocket_admin_url = "ws://127.0.0.1:6006"
+websocket_public_url = ""
+websocket_admin_url = ""
 network_type = "testnet" # mainnet, testnet, devnet
 
 [ripple.api]
@@ -12,7 +16,7 @@ is_secure = false
 service = "xrp-keygen"
 env = "custom" # dev, prod, custom :for only zap logger
 level = "debug" # debug, info, warn, error
-is_stacktrace = true
+is_stacktrace = false
 
 # only available for watch only wallet
 [tracer]

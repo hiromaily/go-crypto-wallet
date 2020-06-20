@@ -108,7 +108,7 @@ type TxOrderbookChange struct {
 }
 
 // PrepareTransaction calls PrepareTransaction API
-func (r *Ripple) PrepareTransaction(senderAccount, receiverAccount string, amount float64) (*TxInput, string, error) {
+func (r *Ripple) PrepareTransaction(senderAccount, receiverAccount string, amount float64, instructions *pb.Instructions) (*TxInput, string, error) {
 
 	ctx := context.Background()
 	req := &pb.RequestPrepareTransaction{
@@ -116,7 +116,8 @@ func (r *Ripple) PrepareTransaction(senderAccount, receiverAccount string, amoun
 		SenderAccount:   senderAccount,
 		Amount:          amount,
 		ReceiverAccount: receiverAccount,
-		Instructions:    &pb.Instructions{MaxLedgerVersionOffset: MaxLedgerVersionOffset},
+		Instructions:    instructions,
+		//Instructions:    &pb.Instructions{MaxLedgerVersionOffset: MaxLedgerVersionOffset},
 	}
 
 	//res: *pb.ResponsePrepareTransaction

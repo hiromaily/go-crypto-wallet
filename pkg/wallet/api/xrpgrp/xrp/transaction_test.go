@@ -6,6 +6,8 @@ import (
 	"github.com/bookerzzz/grok"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
+	pb "github.com/hiromaily/ripple-lib-proto/pb/go/rippleapi"
 )
 
 // TestCreateRawTransaction is test for CreateRawTransaction
@@ -17,6 +19,7 @@ func TestCreateRawTransaction(t *testing.T) {
 		sernderAccount  string
 		receiverAccount string
 		amount          float64
+		instructions    *pb.Instructions
 	}
 	type want struct {
 		isErr bool
@@ -32,6 +35,9 @@ func TestCreateRawTransaction(t *testing.T) {
 				sernderAccount:  "rKXvsrd5H6MQNVpYgdeffFYjfGq4VdDogd",
 				receiverAccount: "rpBzBQ6aWJhuatJCkQgfE3VJT67ukBQopf",
 				amount:          50,
+				instructions: &pb.Instructions{
+					MaxLedgerVersionOffset: xrp.MaxLedgerVersionOffset,
+				},
 			},
 			want: want{false},
 		},
@@ -49,7 +55,7 @@ func TestCreateRawTransaction(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// PrepareTransaction
-			txJSON, _, err := xr.CreateRawTransaction(tt.args.sernderAccount, tt.args.receiverAccount, tt.args.amount)
+			txJSON, _, err := xr.CreateRawTransaction(tt.args.sernderAccount, tt.args.receiverAccount, tt.args.amount, tt.args.instructions)
 			if err != nil {
 				t.Fatal(err)
 			}

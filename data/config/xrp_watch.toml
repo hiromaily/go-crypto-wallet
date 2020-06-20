@@ -18,7 +18,7 @@ sender_secret = "sh7PZkFPYmSgPm25UYZ2f46PwKJZ9"
 service = "xrp-wallet"
 env = "custom" # dev, prod, custom :for only zap logger
 level = "debug" # debug, info, warn, error
-is_stacktrace = true
+is_stacktrace = false
 
 # only available for watch only wallet
 [tracer]
