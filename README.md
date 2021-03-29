@@ -20,6 +20,7 @@ Wallet functionalities to create raw transaction, to sing on unsigned transactio
 
 ## Note
 - This project is under refactoring (March, 2021)
+  - based on `Clean Code`, `Clean Architecture`, [`Refactoring`](https://martinfowler.com/articles/refactoring-2nd-ed.html)
 - [Basic Attention Token](https://basicattentiontoken.org/) will be coming after XRP.
 - [Ethereum Classic](https://ethereumclassic.org/) will be coming after Basic Attention Token.
 
