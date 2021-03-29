@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/common/watchsrv"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watchsrv"
 	xrpsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/xrp/watchsrv"
 )
 

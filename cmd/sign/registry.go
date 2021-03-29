@@ -22,7 +22,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/coldsrv"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/coldsrv/signsrv"
-	commonsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/common/coldsrv"
+	commonsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/coldsrv"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
 )

@@ -10,8 +10,8 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/common/watchsrv"
 	ethsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/watchsrv"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watchsrv"
 )
 
 // ETHWatch watch only wallet object

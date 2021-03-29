@@ -28,7 +28,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/coldsrv"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/coldsrv/keygensrv"
-	commonsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/common/coldsrv"
+	commonsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/coldsrv"
 	ethsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/keygensrv"
 	xrpsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/xrp/keygensrv"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
