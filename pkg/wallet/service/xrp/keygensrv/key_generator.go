@@ -41,7 +41,6 @@ func NewXRPKeyGenerate(
 	wtype wallet.WalletType,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier) *XRPKeyGenerate {
-
 	return &XRPKeyGenerate{
 		xrp:               xrp,
 		logger:            logger,
@@ -76,7 +75,7 @@ func (k *XRPKeyGenerate) Generate(accountType account.AccountType, isKeyPair boo
 	//*xrp.ResponseWalletPropose
 	items := make([]*models.XRPAccountKey, 0, len(keys))
 	for _, v := range keys {
-		//TODO:
+		// TODO:
 		// - WIF => badSeed
 		// - P2PKHAddr => badSeed
 		generatedKey, err := k.xrp.WalletPropose(v.P2SHSegWitAddr)

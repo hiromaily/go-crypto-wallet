@@ -11,7 +11,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
-//NewRPCClient try to connect bitcoin core RPCserver to create client instance
+// NewRPCClient try to connect bitcoin core RPCserver to create client instance
 // using HTTP POST mode
 func NewRPCClient(conf *config.Bitcoin) (*rpcclient.Client, error) {
 	connCfg := &rpcclient.ConnConfig{
@@ -42,7 +42,7 @@ func NewBitcoin(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logg
 
 		return bit, err
 	case coin.BCH:
-		//BCH
+		// BCH
 		bitc, err := bch.NewBitcoinCash(client, coinTypeCode, conf, logger)
 		if err != nil {
 			return nil, errors.Wrap(err, "fail to call bch.NewBitcoinCash()")

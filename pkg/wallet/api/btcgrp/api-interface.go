@@ -16,16 +16,16 @@ import (
 
 // Bitcoiner Bitcoin/BitcoinCash Interface
 type Bitcoiner interface {
-	//public_account.go -> wrapper of GetAddressInfo to return account
+	// public_account.go -> wrapper of GetAddressInfo to return account
 	GetAccount(addr string) (string, error)
 
-	//address.go
+	// address.go
 	GetAddressInfo(addr string) (*btc.GetAddressInfoResult, error)
 	GetAddressesByLabel(labelName string) ([]btcutil.Address, error)
 	ValidateAddress(addr string) (*btc.ValidateAddressResult, error)
 	DecodeAddress(addr string) (btcutil.Address, error)
 
-	//amount.go
+	// amount.go
 	AmountString(amt btcutil.Amount) string
 	AmountToDecimal(amt btcutil.Amount) types.Decimal
 	FloatToDecimal(f float64) types.Decimal
@@ -33,15 +33,15 @@ type Bitcoiner interface {
 	StrToAmount(s string) (btcutil.Amount, error)
 	StrSatoshiToAmount(s string) (btcutil.Amount, error)
 
-	//balance.go
+	// balance.go
 	GetBalance() (btcutil.Amount, error)
 	GetBalanceByListUnspent(confirmationNum uint64) (btcutil.Amount, error)
 	GetBalanceByAccount(accountType account.AccountType, confirmationNum uint64) (btcutil.Amount, error)
 
-	//block.go
+	// block.go
 	GetBlockCount() (int64, error)
 
-	//bitcoin.go
+	// bitcoin.go
 	Close()
 	GetChainConf() *chaincfg.Params
 	SetChainConf(conf *chaincfg.Params)
@@ -52,12 +52,12 @@ type Bitcoiner interface {
 	Version() btc.BTCVersion
 	CoinTypeCode() coin.CoinTypeCode
 
-	//fee.go
+	// fee.go
 	EstimateSmartFee() (float64, error)
 	GetTransactionFee(tx *wire.MsgTx) (btcutil.Amount, error)
 	GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount, error)
 
-	//import.go
+	// import.go
 	ImportPrivKey(privKeyWIF *btcutil.WIF) error
 	ImportPrivKeyLabel(privKeyWIF *btcutil.WIF, label string) error
 	ImportPrivKeyWithoutReScan(privKeyWIF *btcutil.WIF, label string) error
@@ -65,21 +65,21 @@ type Bitcoiner interface {
 	ImportAddressWithoutReScan(pubkey string) error
 	ImportAddressWithLabel(address, label string, rescan bool) error
 
-	//label.go
+	// label.go
 	SetLabel(addr, label string) error
-	//GetReceivedByLabelAndMinConf(accountName string, minConf int) (btcutil.Amount, error)
+	// GetReceivedByLabelAndMinConf(accountName string, minConf int) (btcutil.Amount, error)
 
-	//logging.go
+	// logging.go
 	Logging() (*btc.LoggingResult, error)
 
-	//multisig.go
+	// multisig.go
 	AddMultisigAddress(requiredSigs int, addresses []string, accountName string, addressType address.AddrType) (*btc.AddMultisigAddressResult, error)
 
-	//network.go
+	// network.go
 	GetNetworkInfo() (*btc.GetNetworkInfoResult, error)
 	GetBlockchainInfo() (*btc.GetBlockchainInfoResult, error)
 
-	//transaction.go
+	// transaction.go
 	ToHex(tx *wire.MsgTx) (string, error)
 	ToMsgTx(txHex string) (*wire.MsgTx, error)
 	GetTransactionByTxID(txID string) (*btc.GetTransactionResult, error)
@@ -94,14 +94,14 @@ type Bitcoiner interface {
 	SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error)
 	Sign(tx *wire.MsgTx, strPrivateKey string) (string, error)
 
-	//unspent.go
+	// unspent.go
 	ListUnspent(confirmationNum uint64) ([]btc.ListUnspentResult, error)
 	ListUnspentByAccount(accountType account.AccountType, confirmationNum uint64) ([]btc.ListUnspentResult, error)
 	GetUnspentListAddrs(unspentList []btc.ListUnspentResult, accountType account.AccountType) []string
 	LockUnspent(tx *btc.ListUnspentResult) error
 	UnlockUnspent() error
 
-	//wallet.go
+	// wallet.go
 	BackupWallet(fileName string) error
 	DumpWallet(fileName string) error
 	ImportWallet(fileName string) error

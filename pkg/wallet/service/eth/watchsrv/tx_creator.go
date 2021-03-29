@@ -50,7 +50,6 @@ func NewTxCreate(
 	depositReceiver account.AccountType,
 	paymentSender account.AccountType,
 	wtype wallet.WalletType) *TxCreate {
-
 	return &TxCreate{
 		eth:             eth,
 		logger:          logger,
@@ -73,7 +72,6 @@ func (t *TxCreate) afterTxCreation(
 	txDetailItems []*models.EthDetailTX,
 	paymentRequestIds []int64,
 ) (string, string, error) {
-
 	// start transaction
 	dtx, err := t.dbConn.Begin()
 	if err != nil {
@@ -121,7 +119,7 @@ func (t *TxCreate) afterTxCreation(
 
 // generateHexFile generate file for hex and encoded previous addresses
 func (t *TxCreate) generateHexFile(actionType action.ActionType, senderAccount account.AccountType, txID int64, serializedTxs []string) (string, error) {
-	//add senderAccount to first line
+	// add senderAccount to first line
 	serializedTxs = append([]string{senderAccount.String()}, serializedTxs...)
 
 	// create file

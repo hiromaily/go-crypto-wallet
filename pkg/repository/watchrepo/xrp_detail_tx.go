@@ -50,7 +50,7 @@ func NewXrpDetailTxInputRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCod
 func (r *XrpDetailTxInputRepository) GetOne(id int64) (*models.XRPDetailTX, error) {
 	ctx := context.Background()
 
-	txItem, err := models.FindXRPDetailTX(ctx, r.dbConn, id) //unique
+	txItem, err := models.FindXRPDetailTX(ctx, r.dbConn, id) // unique
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to call models.FindTXInput()")
 	}
@@ -114,7 +114,6 @@ func (r *XrpDetailTxInputRepository) UpdateAfterTxSent(
 	signedTxID,
 	TxBlob string,
 	earlistLedgerVersion uint64) (int64, error) {
-
 	ctx := context.Background()
 
 	// Set updating columns
@@ -126,7 +125,7 @@ func (r *XrpDetailTxInputRepository) UpdateAfterTxSent(
 		models.XRPDetailTXColumns.SentUpdatedAt:         null.TimeFrom(time.Now()),
 	}
 	return models.XRPDetailTxes(
-		qm.Where("uuid=?", uuid), //unique
+		qm.Where("uuid=?", uuid), // unique
 	).UpdateAll(ctx, r.dbConn, updCols)
 }
 
@@ -139,7 +138,7 @@ func (r *XrpDetailTxInputRepository) UpdateTxType(id int64, txType tx.TxType) (i
 		models.XRPDetailTXColumns.CurrentTXType: txType.Int8(),
 	}
 	return models.XRPDetailTxes(
-		qm.Where("id=?", id), //unique
+		qm.Where("id=?", id), // unique
 	).UpdateAll(ctx, r.dbConn, updCols)
 }
 

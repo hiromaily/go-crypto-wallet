@@ -23,9 +23,9 @@ func (r *Ripple) GetAccountInfo(address string) (*pb.ResponseGetAccountInfo, err
 
 	res, err := r.API.accountClient.GetAccountInfo(ctx, req)
 	if err != nil {
-		//errStatus, _ := status.FromError(err)
-		//errStatus.Message()
-		//errStatus.Code()
+		// errStatus, _ := status.FromError(err)
+		// errStatus.Message()
+		// errStatus.Code()
 		return nil, errors.Wrap(err, "fail to call accountClient.GetAccountInfo()")
 	}
 	r.logger.Debug("response",

@@ -45,7 +45,7 @@ func NewTxRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap
 func (r *TxRepository) GetOne(id int64) (*models.TX, error) {
 	ctx := context.Background()
 
-	txItem, err := models.FindTX(ctx, r.dbConn, id) //unique
+	txItem, err := models.FindTX(ctx, r.dbConn, id) // unique
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to call models.FindEthTX()")
 	}
@@ -73,7 +73,7 @@ func (r *TxRepository) GetMaxID(actionType action.ActionType) (int64, error) {
 
 // InsertUnsignedTx inserts records
 func (r *TxRepository) InsertUnsignedTx(actionType action.ActionType) (int64, error) {
-	//set coin
+	// set coin
 	txItem := &models.TX{
 		Coin:   r.coinTypeCode.String(),
 		Action: actionType.String(),

@@ -12,7 +12,7 @@ type QuantityTag string
 const (
 	QuantityTagLatest  QuantityTag = "latest"  // for the latest mined block
 	QuantityTagPending QuantityTag = "pending" // for the pending state/transactions
-	//QuantityTagEarliest QuantityTag = "earliest" // for the earliest/genesis block
+	// QuantityTagEarliest QuantityTag = "earliest" // for the earliest/genesis block
 )
 
 // String converter

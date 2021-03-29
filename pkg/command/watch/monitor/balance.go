@@ -34,9 +34,7 @@ Options:
 func (c *BalanceCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
-	var (
-		confirmationNum uint64
-	)
+	var confirmationNum uint64
 
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
 	flags.Uint64Var(&confirmationNum, "num", 6, "confirmation number")

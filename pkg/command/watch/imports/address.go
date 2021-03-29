@@ -47,13 +47,13 @@ func (c *AddressCommand) Run(args []string) int {
 
 	c.ui.Output(fmt.Sprintf("-file: %s", filePath))
 
-	//validator
+	// validator
 	if filePath == "" {
 		c.ui.Error("file path option [-file] is required")
 		return 1
 	}
 
-	//import public address
+	// import public address
 	err := c.wallet.ImportAddress(filePath, isRescan)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call ImportAddress() %+v", err))

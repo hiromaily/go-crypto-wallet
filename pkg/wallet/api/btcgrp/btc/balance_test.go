@@ -9,7 +9,7 @@ import (
 
 // TestListAccounts is test for ListAccounts
 func TestGetBalance(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	bc := testutil.GetBTC()
 
 	// GetBalance
@@ -19,12 +19,12 @@ func TestGetBalance(t *testing.T) {
 		t.Log(res)
 	}
 
-	//bc.Close()
+	// bc.Close()
 }
 
 // TestGetBalanceByAccount is test for GetBalanceByAccount
 func TestGetBalanceByAccount(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	bc := testutil.GetBTC()
 
 	type args struct {
@@ -65,5 +65,5 @@ func TestGetBalanceByAccount(t *testing.T) {
 		})
 	}
 
-	//bc.Close()
+	// bc.Close()
 }

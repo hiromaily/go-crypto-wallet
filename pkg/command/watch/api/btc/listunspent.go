@@ -50,7 +50,7 @@ func (c *ListUnspentCommand) Run(args []string) int {
 		return 1
 	}
 
-	//validator
+	// validator
 	if acnt != "" && !account.ValidateAccountType(acnt) {
 		c.ui.Error("account option [-account] is invalid")
 		return 1

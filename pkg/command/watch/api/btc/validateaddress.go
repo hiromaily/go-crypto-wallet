@@ -34,9 +34,7 @@ Options:
 func (c *ValidateAddressCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
-	var (
-		address string
-	)
+	var address string
 
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
 	flags.StringVar(&address, "address", "", "address")

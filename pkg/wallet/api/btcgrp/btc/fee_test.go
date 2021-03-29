@@ -8,7 +8,7 @@ import (
 
 // TestEstimateSmartFee is test for EstimateSmartFee
 func TestEstimateSmartFee(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	bc := testutil.GetBTC()
 
 	// EstimateSmartFee
@@ -18,5 +18,5 @@ func TestEstimateSmartFee(t *testing.T) {
 		t.Logf("%f", res)
 	}
 
-	//bc.Close()
+	// bc.Close()
 }

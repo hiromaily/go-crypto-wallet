@@ -20,8 +20,8 @@ type TxSend struct {
 	xrp          xrpgrp.Rippler
 	logger       *zap.Logger
 	dbConn       *sql.DB
-	addrRepo     watchrepo.AddressRepositorier //not used
-	txRepo       watchrepo.TxRepositorier      //not used
+	addrRepo     watchrepo.AddressRepositorier // not used
+	txRepo       watchrepo.TxRepositorier      // not used
 	txDetailRepo watchrepo.XrpDetailTxRepositorier
 	txFileRepo   tx.FileRepositorier
 	wtype        wallet.WalletType
@@ -37,7 +37,6 @@ func NewTxSend(
 	txDetailRepo watchrepo.XrpDetailTxRepositorier,
 	txFileRepo tx.FileRepositorier,
 	wtype wallet.WalletType) *TxSend {
-
 	return &TxSend{
 		xrp:          xrp,
 		logger:       logger,
@@ -63,9 +62,8 @@ func NewTxSend(
 
 // SendTx send signed tx by keygen/sign walet
 func (t *TxSend) SendTx(filePath string) (string, error) {
-
 	// get tx_deposit_id from file name
-	//payment_5_unsigned_1_1534466246366489473
+	// payment_5_unsigned_1_1534466246366489473
 	actionType, _, txID, _, err := t.txFileRepo.ValidateFilePath(filePath, tx.TxTypeSigned)
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call txFileRepo.ValidateFilePath()")
@@ -125,10 +123,10 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			}
 			// txBlob and sentTx.TxBlob is same
 
-			//debug
+			// debug
 			t.logger.Debug("ledger version",
-				zap.Uint64("earlistLedgerVersion", earlistLedgerVersion),                         //8123733
-				zap.Uint64("sentTx.TxJSON.LastLedgerSequence", sentTx.TxJSON.LastLedgerSequence), //8123736
+				zap.Uint64("earlistLedgerVersion", earlistLedgerVersion),                         // 8123733
+				zap.Uint64("sentTx.TxJSON.LastLedgerSequence", sentTx.TxJSON.LastLedgerSequence), // 8123736
 			)
 
 			// validate transaction
@@ -165,7 +163,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			// update eth_detail_tx
 			affectedNum, err := t.txDetailRepo.UpdateAfterTxSent(uuid, tx.TxTypeSent, signedTxID, txBlob, earlistLedgerVersion)
 			if err != nil {
-				//TODO: even if error occurred, tx is already sent. so db should be corrected manually
+				// TODO: even if error occurred, tx is already sent. so db should be corrected manually
 				t.logger.Warn("fail to call txDetailRepo.UpdateAfterTxSent() but tx is already sent. So database should be updated manually",
 					zap.Int64("tx_id", txID),
 					zap.String("uuid", uuid),
@@ -191,7 +189,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 	}
 	wg.Wait()
 
-	//TODO: update is_allocated in account_pubkey_table
+	// TODO: update is_allocated in account_pubkey_table
 	// Not fixed yet, Ripple may use same address because no utxo
 	return "", nil
 }

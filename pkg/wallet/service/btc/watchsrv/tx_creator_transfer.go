@@ -20,7 +20,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatA
 		return "", "", errors.New("invalid account. sender and receiver is same")
 	}
 
-	//amount btcutil.Amount
+	// amount btcutil.Amount
 	requiredAmount, err := t.btc.FloatToAmount(floatAmount)
 	if err != nil {
 		return "", "", err
@@ -28,12 +28,12 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatA
 
 	// check balance for sender
 	balance, err := t.btc.GetBalanceByAccount(sender, t.btc.ConfirmationBlock())
-	//balance, err := w.btc.GetReceivedByLabelAndMinConf(sender.String(), w.btc.ConfirmationBlock())
+	// balance, err := w.btc.GetReceivedByLabelAndMinConf(sender.String(), w.btc.ConfirmationBlock())
 	if err != nil {
 		return "", "", err
 	}
 	if balance <= requiredAmount {
-		//balance is short
+		// balance is short
 		return "", "", errors.Errorf("account: %s balance is insufficient", sender)
 	}
 

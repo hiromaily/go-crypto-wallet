@@ -42,7 +42,7 @@ func (c *GetAddressInfoCommand) Run(args []string) int {
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
-	//validator
+	// validator
 	if addr == "" {
 		c.ui.Error("address option [-address] is required")
 		return 1

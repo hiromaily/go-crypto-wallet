@@ -74,7 +74,7 @@ func NewRegistry(conf *config.WalletRoot, accountConf *account.AccountRoot, wall
 // Which is better ?
 // - create each interface getter to difine as interface
 // - return struct itself
-//func (r *registry) NewKeygener() *keygen.Keygen {
+// func (r *registry) NewKeygener() *keygen.Keygen {
 func (r *registry) NewKeygener() wallets.Keygener {
 	switch r.conf.CoinTypeCode {
 	case coin.BTC, coin.BCH:

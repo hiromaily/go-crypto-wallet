@@ -11,7 +11,7 @@ import (
 
 // TestCreateRawTransaction is test for CreateRawTransaction
 func TestCreateRawTransaction(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	type args struct {
@@ -74,20 +74,20 @@ func TestCreateRawTransaction(t *testing.T) {
 			}
 			if rawTx != nil {
 				t.Log(rawTx)
-				//grok.Value(rawTx)
+				// grok.Value(rawTx)
 			}
 			if txDetail != nil {
 				t.Log(txDetail)
-				//grok.Value(txDetail)
+				// grok.Value(txDetail)
 			}
 		})
 	}
-	//et.Close()
+	// et.Close()
 }
 
 // TestSignAndSendRawTransaction is test for SignOnRawTransaction and SendSignedRawTransaction
 func TestSignAndSendRawTransaction(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	type args struct {
@@ -183,5 +183,5 @@ func TestSignAndSendRawTransaction(t *testing.T) {
 			}
 		})
 	}
-	//et.Close()
+	// et.Close()
 }

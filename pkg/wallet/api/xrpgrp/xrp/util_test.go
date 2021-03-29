@@ -8,7 +8,6 @@ import (
 
 // TestValidateAddress is test for ValidateAddress
 func TestValidateAddress(t *testing.T) {
-
 	type args struct {
 		addr string
 	}
@@ -51,5 +50,4 @@ func TestValidateAddress(t *testing.T) {
 			}
 		})
 	}
-
 }

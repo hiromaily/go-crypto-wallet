@@ -67,20 +67,20 @@ func (b *Bitcoin) ImportAddressWithLabel(address, label string, rescan bool) err
 		return errors.Wrap(err, "fail to call json.Marchal(address)")
 	}
 
-	//addresses
+	// addresses
 	bLabel, err := json.Marshal(label)
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.Marchal(label)")
 	}
 
-	//rescan
+	// rescan
 	bRescan, err := json.Marshal(rescan)
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.Marchal(rescan)")
 	}
 	jsonRawMsg := []json.RawMessage{bAddress, bLabel, bRescan}
 
-	//call importaddress
+	// call importaddress
 	_, err = b.Client.RawRequest("importaddress", jsonRawMsg)
 	if err != nil {
 		return errors.Wrap(err, "fail to call client.RawRequest(importaddress)")

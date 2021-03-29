@@ -34,9 +34,7 @@ Options:
 func (c *SentTxCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
-	var (
-		acnt string
-	)
+	var acnt string
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
 	flags.StringVar(&acnt, "account", "", "account for monitoring")
 	if err := flags.Parse(args); err != nil {

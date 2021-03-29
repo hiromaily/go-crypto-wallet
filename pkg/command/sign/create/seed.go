@@ -11,7 +11,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
-//TODO: this code is almost same to keygen wallet
+// TODO: this code is almost same to keygen wallet
 
 // SeedCommand seed subcommand
 type SeedCommand struct {

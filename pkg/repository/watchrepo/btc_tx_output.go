@@ -43,7 +43,7 @@ func NewBTCTxOutputRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, lo
 func (r *TxOutputRepository) GetOne(id int64) (*models.BTCTXOutput, error) {
 	ctx := context.Background()
 
-	txItem, err := models.FindBTCTXOutput(ctx, r.dbConn, id) //unique
+	txItem, err := models.FindBTCTXOutput(ctx, r.dbConn, id) // unique
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to call models.FindTXOutput()")
 	}
@@ -71,11 +71,11 @@ func (r *TxOutputRepository) Insert(txItem *models.BTCTXOutput) error {
 
 // InsertBulk inserts multiple records
 func (r *TxOutputRepository) InsertBulk(txItems []*models.BTCTXOutput) error {
-	//FIXME: when comuns includes booleans and both value is included in that comun,
+	// FIXME: when comuns includes booleans and both value is included in that comun,
 	// this func causes error
 	// Error 1136: Column count doesn't match value count at row 5
-	//ctx := context.Background()
-	//return models.BTCTXOutputSlice(txItems).InsertAll(ctx, r.dbConn, boil.Infer())
+	// ctx := context.Background()
+	// return models.BTCTXOutputSlice(txItems).InsertAll(ctx, r.dbConn, boil.Infer())
 
 	// this code is temporary
 	for _, item := range txItems {

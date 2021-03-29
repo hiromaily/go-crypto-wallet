@@ -43,7 +43,7 @@ func (b *BitcoinCash) GetAddressInfo(addr string) (*btc.GetAddressInfoResult, er
 		return nil, errors.Wrap(err, "fail to call json.Unmarshal(rawResult) in bch")
 	}
 
-	//convert bch result to btc
+	// convert bch result to btc
 	return &btc.GetAddressInfoResult{
 		Address:      infoResult.Address,
 		ScriptPubKey: infoResult.ScriptPubKey,

@@ -8,7 +8,7 @@ import (
 
 // TestBalanceAt is test for BalanceAt
 func TestBalanceAt(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	type args struct {
@@ -81,5 +81,5 @@ func TestBalanceAt(t *testing.T) {
 			}
 		})
 	}
-	//et.Close()
+	// et.Close()
 }

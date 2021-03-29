@@ -50,7 +50,7 @@ func NewEthDetailTxInputRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCod
 func (r *EthDetailTxInputRepository) GetOne(id int64) (*models.EthDetailTX, error) {
 	ctx := context.Background()
 
-	txItem, err := models.FindEthDetailTX(ctx, r.dbConn, id) //unique
+	txItem, err := models.FindEthDetailTX(ctx, r.dbConn, id) // unique
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to call models.FindTXInput()")
 	}
@@ -117,7 +117,6 @@ func (r *EthDetailTxInputRepository) UpdateAfterTxSent(
 	txType tx.TxType,
 	signedHex,
 	sentHashTx string) (int64, error) {
-
 	ctx := context.Background()
 
 	// Set updating columns
@@ -128,7 +127,7 @@ func (r *EthDetailTxInputRepository) UpdateAfterTxSent(
 		models.EthDetailTXColumns.SentUpdatedAt: null.TimeFrom(time.Now()),
 	}
 	return models.EthDetailTxes(
-		qm.Where("uuid=?", uuid), //unique
+		qm.Where("uuid=?", uuid), // unique
 	).UpdateAll(ctx, r.dbConn, updCols)
 }
 
@@ -141,7 +140,7 @@ func (r *EthDetailTxInputRepository) UpdateTxType(id int64, txType tx.TxType) (i
 		models.EthDetailTXColumns.CurrentTXType: txType.Int8(),
 	}
 	return models.EthDetailTxes(
-		qm.Where("id=?", id), //unique
+		qm.Where("id=?", id), // unique
 	).UpdateAll(ctx, r.dbConn, updCols)
 }
 

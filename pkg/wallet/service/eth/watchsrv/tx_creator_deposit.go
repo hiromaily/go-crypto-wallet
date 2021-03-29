@@ -23,19 +23,19 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 		zap.String("receiver", receiver.String()),
 	)
 
-	//1. get addresses for client account
+	// 1. get addresses for client account
 	addrs, err := t.addrRepo.GetAll(sender)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
 	}
-	//addresses, err := t.eth.Accounts()
+	// addresses, err := t.eth.Accounts()
 
 	// target addresses
 	var userAmounts []eth.UserAmount
 
 	// address list for client
 	for _, addr := range addrs {
-		//TODO: if previous tx is not done, wrong amount is returned. how to manage it??
+		// TODO: if previous tx is not done, wrong amount is returned. how to manage it??
 		balance, err := t.eth.GetBalance(addr.WalletAddress, eth.QuantityTagLatest)
 		if err != nil {
 			t.logger.Warn("fail to call t.eth.GetBalance()",

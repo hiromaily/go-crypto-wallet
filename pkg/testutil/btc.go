@@ -15,7 +15,7 @@ import (
 var bc btcgrp.Bitcoiner
 
 // GetBTC returns btc instance
-//FIXME: hard coded
+// FIXME: hard coded
 func GetBTC() btcgrp.Bitcoiner {
 	if bc != nil {
 		return bc
@@ -27,7 +27,7 @@ func GetBTC() btcgrp.Bitcoiner {
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
-	//TODO: if config should be overridden, here
+	// TODO: if config should be overridden, here
 
 	// logger
 	logger := logger.NewZapLogger(&conf.Logger)

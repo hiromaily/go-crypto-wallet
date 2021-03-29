@@ -8,7 +8,7 @@ import (
 
 // TestClientVersion is test for ClientVersion
 func TestClientVersion(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	clientVersion, err := et.ClientVersion()
@@ -20,7 +20,7 @@ func TestClientVersion(t *testing.T) {
 
 // TestSHA3 is test for SHA3
 func TestSHA3(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 	data := "0x68656c6c6f20776f726c64"
 

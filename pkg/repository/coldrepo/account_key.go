@@ -50,7 +50,7 @@ func NewAccountKeyRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, log
 
 // GetMaxIndex returns max id
 func (r *AccountKeyRepository) GetMaxIndex(accountType account.AccountType) (int64, error) {
-	//sql := "SELECT MAX(idx) from %s;"
+	// sql := "SELECT MAX(idx) from %s;"
 	ctx := context.Background()
 
 	type Response struct {
@@ -70,7 +70,7 @@ func (r *AccountKeyRepository) GetMaxIndex(accountType account.AccountType) (int
 
 // GetOneMaxID returns one records by max id
 func (r *AccountKeyRepository) GetOneMaxID(accountType account.AccountType) (*models.AccountKey, error) {
-	//sql := "SELECT * FROM %s ORDER BY ID DESC LIMIT 1;"
+	// sql := "SELECT * FROM %s ORDER BY ID DESC LIMIT 1;"
 	ctx := context.Background()
 
 	item, err := models.AccountKeys(
@@ -86,7 +86,7 @@ func (r *AccountKeyRepository) GetOneMaxID(accountType account.AccountType) (*mo
 
 // GetAllAddrStatus returns all AccountKey by addr_status
 func (r *AccountKeyRepository) GetAllAddrStatus(accountType account.AccountType, addrStatus address.AddrStatus) ([]*models.AccountKey, error) {
-	//sql := "SELECT * FROM %s WHERE addr_status=?;"
+	// sql := "SELECT * FROM %s WHERE addr_status=?;"
 	ctx := context.Background()
 
 	items, err := models.AccountKeys(
@@ -103,7 +103,7 @@ func (r *AccountKeyRepository) GetAllAddrStatus(accountType account.AccountType,
 
 // GetAllMultiAddr returns all AccountKey by multisig_address
 func (r *AccountKeyRepository) GetAllMultiAddr(accountType account.AccountType, addrs []string) ([]*models.AccountKey, error) {
-	//sql := "SELECT * FROM %s WHERE wallet_multisig_address IN (?);"
+	// sql := "SELECT * FROM %s WHERE wallet_multisig_address IN (?);"
 	ctx := context.Background()
 
 	targetAddrs := make([]interface{}, len(addrs))
@@ -146,7 +146,7 @@ func (r *AccountKeyRepository) UpdateAddr(accountType account.AccountType, addr,
 
 // UpdateAddrStatus updates addr_status
 func (r *AccountKeyRepository) UpdateAddrStatus(accountType account.AccountType, addrStatus address.AddrStatus, strWIFs []string) (int64, error) {
-	//sql := `UPDATE %s SET addr_status=? WHERE wallet_import_format=?`
+	// sql := `UPDATE %s SET addr_status=? WHERE wallet_import_format=?`
 	ctx := context.Background()
 
 	// Set updating columns
@@ -195,8 +195,8 @@ func (r *AccountKeyRepository) UpdateMultisigAddr(accountType account.AccountTyp
 // TODO: maybe this func can be deleted
 func (r *AccountKeyRepository) UpdateMultisigAddrs(accountType account.AccountType, items []*models.AccountKey) (int64, error) {
 	//	sql := `
-	//UPDATE %s SET wallet_multisig_address=:wallet_multisig_address, redeem_script=:redeem_script, addr_status=:addr_status, updated_at=:updated_at
-	//WHERE full_public_key=:full_public_key`
+	// UPDATE %s SET wallet_multisig_address=:wallet_multisig_address, redeem_script=:redeem_script, addr_status=:addr_status, updated_at=:updated_at
+	// WHERE full_public_key=:full_public_key`
 	ctx := context.Background()
 
 	// transaction

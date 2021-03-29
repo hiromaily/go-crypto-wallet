@@ -31,7 +31,6 @@ func NewMultisig(
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	multisigAccount account.MultisigAccounter,
 	wtype wallet.WalletType) *Multisig {
-
 	return &Multisig{
 		btc:                btc,
 		logger:             logger,
@@ -50,7 +49,7 @@ func NewMultisig(
 //  What is the difference between createmultisig and addmultisigaddress?
 // - https://bitcointalk.org/index.php?topic=3402541.0
 func (m *Multisig) AddMultisigAddress(accountType account.AccountType, addressType address.AddrType) error {
-	//for sign wallet
+	// for sign wallet
 	m.logger.Debug("addmultisigaddress",
 		zap.String("account_type", accountType.String()),
 	)
@@ -93,7 +92,7 @@ func (m *Multisig) AddMultisigAddress(accountType account.AccountType, addressTy
 		resAddr, err := m.btc.AddMultisigAddress(
 			requiredSig,
 			addrs,
-			fmt.Sprintf("multi_%s", accountType), //this is not important
+			fmt.Sprintf("multi_%s", accountType), // this is not important
 			addressType,
 		)
 		if err != nil {

@@ -12,7 +12,7 @@ import (
 
 // TestCreateRawTransaction is test for CreateRawTransaction
 func TestCreateRawTransaction(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	xr := testutil.GetXRP()
 
 	type args struct {
@@ -62,5 +62,4 @@ func TestCreateRawTransaction(t *testing.T) {
 			grok.Value(txJSON)
 		})
 	}
-
 }

@@ -43,7 +43,7 @@ func NewPaymentRequestRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode,
 
 // GetAll returns all records whose payment_id is null
 func (r *PaymentRequestRepository) GetAll() ([]*models.PaymentRequest, error) {
-	//sql := "SELECT * FROM payment_request WHERE payment_id IS NULL"
+	// sql := "SELECT * FROM payment_request WHERE payment_id IS NULL"
 	ctx := context.Background()
 
 	prItems, err := models.PaymentRequests(
@@ -58,7 +58,7 @@ func (r *PaymentRequestRepository) GetAll() ([]*models.PaymentRequest, error) {
 
 // GetAllByPaymentID returns all records searched by payment_id
 func (r *PaymentRequestRepository) GetAllByPaymentID(paymentID int64) ([]*models.PaymentRequest, error) {
-	//sql := "SELECT * FROM payment_request WHERE payment_id=?"
+	// sql := "SELECT * FROM payment_request WHERE payment_id=?"
 	ctx := context.Background()
 
 	prItems, err := models.PaymentRequests(
@@ -79,7 +79,7 @@ func (r *PaymentRequestRepository) InsertBulk(items []*models.PaymentRequest) er
 
 // UpdatePaymentID updates isDone
 func (r *PaymentRequestRepository) UpdatePaymentID(paymentID int64, ids []int64) (int64, error) {
-	//sql := `UPDATE payment_request SET payment_id=? WHERE id IN (?)`
+	// sql := `UPDATE payment_request SET payment_id=? WHERE id IN (?)`
 	ctx := context.Background()
 
 	// Set updating columns
@@ -94,13 +94,13 @@ func (r *PaymentRequestRepository) UpdatePaymentID(paymentID int64, ids []int64)
 	}
 
 	return models.PaymentRequests(
-		qm.WhereIn("id IN ?", targetIDs...), //unique
+		qm.WhereIn("id IN ?", targetIDs...), // unique
 	).UpdateAll(ctx, r.dbConn, updCols)
 }
 
 // UpdateIsDone updates isDone
 func (r *PaymentRequestRepository) UpdateIsDone(paymentID int64) (int64, error) {
-	//sql := `UPDATE payment_request SET is_done=true WHERE payment_id=?`
+	// sql := `UPDATE payment_request SET is_done=true WHERE payment_id=?`
 	ctx := context.Background()
 
 	// Set updating columns
@@ -119,5 +119,4 @@ func (r *PaymentRequestRepository) DeleteAll() (int64, error) {
 	return models.PaymentRequests(
 		qm.Where("coin=?", r.coinTypeCode.String()),
 	).DeleteAll(ctx, r.dbConn)
-
 }

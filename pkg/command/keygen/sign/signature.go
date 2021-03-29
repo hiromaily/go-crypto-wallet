@@ -33,16 +33,14 @@ Options:
 func (c *SignatureCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 
-	var (
-		filePath string
-	)
+	var filePath string
 	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
 	flags.StringVar(&filePath, "file", "", "import file path for signed transactions")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
 
-	//validator
+	// validator
 	if filePath == "" {
 		c.UI.Error("file path option [-file] is required")
 		return 1
@@ -54,7 +52,7 @@ func (c *SignatureCommand) Run(args []string) int {
 		c.UI.Error(fmt.Sprintf("fail to call SignTx() %+v", err))
 	}
 
-	//TODO: output should be json if json option is true
+	// TODO: output should be json if json option is true
 	c.UI.Output(fmt.Sprintf("[hex]: %s\n[isCompleted]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName))
 
 	return 0

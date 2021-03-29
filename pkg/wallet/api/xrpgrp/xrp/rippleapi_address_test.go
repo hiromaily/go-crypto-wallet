@@ -10,7 +10,7 @@ import (
 
 // TestGenerateAddress is test for GenerateAddress
 func TestGenerateAddress(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	xr := testutil.GetXRP()
 
 	addressInfo, err := xr.GenerateAddress()
@@ -22,7 +22,7 @@ func TestGenerateAddress(t *testing.T) {
 
 // TestGenerateXAddress is test for GenerateXAddress
 func TestGenerateXAddress(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	xr := testutil.GetXRP()
 
 	addressInfo, err := xr.GenerateXAddress()
@@ -34,7 +34,7 @@ func TestGenerateXAddress(t *testing.T) {
 
 // TestIsValidAddress is test for IsValidAddress
 func TestIsValidAddress(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	xr := testutil.GetXRP()
 
 	type args struct {

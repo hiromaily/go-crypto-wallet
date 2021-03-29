@@ -11,7 +11,7 @@ import (
 // TestSetLabel is test for SetLabel
 // Note: this test will contaminate wallet.dat
 func TestSetLabel(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	bc := testutil.GetBTC()
 
 	// create address
@@ -21,7 +21,7 @@ func TestSetLabel(t *testing.T) {
 	}
 	// import address
 	// this scan address
-	//err = bc.ImportAddressWithoutReScan(pubKey)
+	// err = bc.ImportAddressWithoutReScan(pubKey)
 	err = bc.ImportAddressWithoutReScan(pubKey)
 	if err != nil {
 		t.Fatalf("fail to call ImportAddress(): %v", err)

@@ -43,14 +43,12 @@ func (e *Ethereum) ListAccounts() ([]string, error) {
 	}
 
 	return accounts, nil
-
 }
 
 // NewAccount generates a new private key and stores it in the key store directory
 // https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_newaccount
 // - private key is stored and read from node server
 func (e *Ethereum) NewAccount(passphrase string, accountType account.AccountType) (string, error) {
-
 	var address string
 	err := e.rpcClient.CallContext(e.ctx, &address, "personal_newAccount", passphrase)
 	if err != nil {
@@ -69,7 +67,6 @@ func (e *Ethereum) NewAccount(passphrase string, accountType account.AccountType
 // LockAccount removes the private key with given address from memory
 // https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_lockaccount
 func (e *Ethereum) LockAccount(hexAddr string) error {
-
 	err := e.rpcClient.CallContext(e.ctx, nil, "personal_lockAccount", hexAddr)
 	if err != nil {
 		return errors.Wrap(err, "fail to call rpc.CallContext(personal_lockAccount)")
@@ -83,9 +80,8 @@ func (e *Ethereum) LockAccount(hexAddr string) error {
 // FIXME: how to fix error `account unlock with HTTP access is forbidden`
 // - --allow-insecure-unlock option is required to run geth
 func (e *Ethereum) UnlockAccount(hexAddr, passphrase string, duration uint64) (bool, error) {
-
-	//eoncode duration
-	//encodedDuration := hexutil.EncodeUint64(duration)
+	// eoncode duration
+	// encodedDuration := hexutil.EncodeUint64(duration)
 
 	var ret bool
 	err := e.rpcClient.CallContext(e.ctx, &ret, "personal_unlockAccount", hexAddr, passphrase, duration)

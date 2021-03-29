@@ -56,7 +56,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 		return "", "", errors.Wrap(err, "fail to call addrRepo.GetOneUnAllocated(receiver)")
 	}
 
-	//txDetailItems := make([]*models.EthDetailTX, 0, 1)
+	// txDetailItems := make([]*models.EthDetailTX, 0, 1)
 
 	// call CreateRawTransaction
 	rawTx, txDetailItem, err := t.eth.CreateRawTransaction(senderAddr.WalletAddress, receiverAddr.WalletAddress, requiredValue.Uint64(), 0)

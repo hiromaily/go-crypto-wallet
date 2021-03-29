@@ -34,7 +34,6 @@ func NewTxMonitor(
 	txInputRepo watchrepo.TxInputRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,
 	wtype wallet.WalletType) *TxMonitor {
-
 	return &TxMonitor{
 		btc:         btc,
 		logger:      logger,
@@ -49,7 +48,7 @@ func NewTxMonitor(
 // UpdateTxStatus update transaction status
 // - monitor transaction whose tx_type=3(TxTypeSent) in tx_payment/tx_deposit/tx_transfer
 func (t *TxMonitor) UpdateTxStatus() error {
-	//TODO: as possibility tx_type is not updated from `done`
+	// TODO: as possibility tx_type is not updated from `done`
 
 	types := []action.ActionType{
 		action.ActionTypeDeposit,
@@ -57,7 +56,7 @@ func (t *TxMonitor) UpdateTxStatus() error {
 		action.ActionTypeTransfer,
 	}
 
-	//1. update tx_type for TxTypeSent
+	// 1. update tx_type for TxTypeSent
 	for _, actionType := range types {
 		err := t.updateStatusTxTypeSent(actionType)
 		if err != nil {
@@ -65,7 +64,7 @@ func (t *TxMonitor) UpdateTxStatus() error {
 		}
 	}
 
-	//2. update tx_type for TxTypeDone
+	// 2. update tx_type for TxTypeDone
 	// - TODO: notification
 	for _, actionType := range types {
 		err := t.updateStatusTxTypeDone(actionType)
@@ -137,7 +136,7 @@ func (t *TxMonitor) updateStatusTxTypeDone(actionType action.ActionType) error {
 
 		// update tx_type to TxTypeNotified
 		err = t.updateTxTypeNotified(txID, actionType)
-		//TODO: even if update is failed, notification is done. so how to manage??
+		// TODO: even if update is failed, notification is done. so how to manage??
 		if err != nil {
 			t.logger.Error(
 				"fail to call w.updateTxTypeNotified()",
@@ -168,7 +167,7 @@ func (t *TxMonitor) checkTxConfirmation(hash string, actionType action.ActionTyp
 	}
 
 	// not completed yet
-	//TODO: what if confirmation doesn't proceed for a long time after signed tx is sent
+	// TODO: what if confirmation doesn't proceed for a long time after signed tx is sent
 	// - should it be canceled??
 	// - then raise fee and should unsigned tx be re-created again??
 	t.logger.Info("confirmation is not met yet",
@@ -180,7 +179,6 @@ func (t *TxMonitor) checkTxConfirmation(hash string, actionType action.ActionTyp
 
 // notifyTxDone notify tx is sent and met specific confirmation number
 func (t *TxMonitor) notifyTxDone(hash string, actionType action.ActionType) (int64, error) {
-
 	var (
 		txID int64
 		err  error
@@ -234,7 +232,7 @@ func (t *TxMonitor) notifyTxDone(hash string, actionType action.ActionType) (int
 			t.logger.Debug("address in paymentUsers", zap.String("user.AddressFrom", user.SenderAddress))
 		}
 	case action.ActionTypeTransfer:
-		//TODO: not implemented yet
+		// TODO: not implemented yet
 		t.logger.Warn("action.ActionTypeTransfer is not implemented yet in notifyTxDone()")
 		return 0, errors.New("action.ActionTypeTransfer is not implemented yet in notifyTxDone()")
 	}
@@ -273,7 +271,7 @@ func (t *TxMonitor) updateTxTypeNotified(id int64, actionType action.ActionType)
 			return errors.Wrapf(err, "fail to call repo.UpdateIsDoneOnPaymentRequest() ActionType: %s", actionType)
 		}
 	case action.ActionTypeTransfer:
-		//TODO: not implemented yet, it could be same to action.ActionTypeDeposit
+		// TODO: not implemented yet, it could be same to action.ActionTypeDeposit
 		t.logger.Warn("action.ActionTypeTransfer is not implemented yet in updateTxTypeNotified()")
 		return errors.New("action.ActionTypeTransfer is not implemented yet in updateTxTypeNotified()")
 	}

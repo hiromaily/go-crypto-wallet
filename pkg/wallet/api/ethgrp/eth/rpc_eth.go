@@ -35,7 +35,7 @@ func (e *Ethereum) Syncing() (*ResponseSyncing, bool, error) {
 	bRes, ok := resIF.(bool)
 	if !ok {
 		// interface can't not be casted to type map
-		//resMap, ok = resIF.(map[string]string)
+		// resMap, ok = resIF.(map[string]string)
 		err := e.rpcClient.CallContext(e.ctx, &resMap, "eth_syncing")
 		if err != nil {
 			return nil, false, errors.Wrap(err, "fail to call client.CallContext(eth_syncing)")
@@ -87,7 +87,6 @@ func (e *Ethereum) Syncing() (*ResponseSyncing, bool, error) {
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_protocolversion
 // - returns like 65
 func (e *Ethereum) ProtocolVersion() (uint64, error) {
-
 	var resProtocolVer string
 	err := e.rpcClient.CallContext(e.ctx, &resProtocolVer, "eth_protocolVersion")
 	if err != nil {
@@ -108,7 +107,6 @@ func (e *Ethereum) ProtocolVersion() (uint64, error) {
 //  - when running geth command, keystore option should be used to specify directory
 //  - that means, this rpc can be called from cold wallet which has private key
 func (e *Ethereum) Coinbase() (string, error) {
-
 	var resAddr string
 	err := e.rpcClient.CallContext(e.ctx, &resAddr, "eth_coinbase")
 	if err != nil {
@@ -127,7 +125,6 @@ func (e *Ethereum) Coinbase() (string, error) {
 // - private key is stored and read from node server
 // - result is same as ListAccounts()
 func (e *Ethereum) Accounts() ([]string, error) {
-
 	var accounts []string
 	err := e.rpcClient.CallContext(e.ctx, &accounts, "eth_accounts")
 	if err != nil {
@@ -142,7 +139,6 @@ func (e *Ethereum) Accounts() ([]string, error) {
 // - returns like `2706141`
 // - result may be a bit changeable, may be better to call several times.
 func (e *Ethereum) BlockNumber() (*big.Int, error) {
-
 	var resBlockNumber string
 	err := e.rpcClient.CallContext(e.ctx, &resBlockNumber, "eth_blockNumber")
 	if err != nil {
@@ -180,7 +176,6 @@ func (e *Ethereum) EnsureBlockNumber(loopCount int) (*big.Int, error) {
 // - On goerli testnet, balance can be found just after sending coins
 // - TODO: which quantityTag should be used `QuantityTagLatest` or `QuantityTagPending`
 func (e *Ethereum) GetBalance(hexAddr string, quantityTag QuantityTag) (*big.Int, error) {
-
 	var balance string
 	err := e.rpcClient.CallContext(e.ctx, &balance, "eth_getBalance", hexAddr, quantityTag.String())
 	if err != nil {
@@ -217,7 +212,6 @@ func (e *Ethereum) GetBalance(hexAddr string, quantityTag QuantityTag) (*big.Int
 // - after sending coin from this address, result is counted??
 // - generated new address is always 0
 func (e *Ethereum) GetTransactionCount(hexAddr string, quantityTag QuantityTag) (*big.Int, error) {
-
 	var transactionCount string
 	err := e.rpcClient.CallContext(e.ctx, &transactionCount, "eth_getTransactionCount", hexAddr, quantityTag.String())
 	if err != nil {
@@ -261,8 +255,7 @@ func (e *Ethereum) GetTransactionCount(hexAddr string, quantityTag QuantityTag) 
 // transaction count of block, it's possible transaction is 0
 // - this number is fixed
 func (e *Ethereum) GetBlockTransactionCountByNumber(blockNumber uint64) (*big.Int, error) {
-
-	//convert uint64 to hex
+	// convert uint64 to hex
 	hexNum := hexutil.EncodeUint64(blockNumber)
 
 	var txCount string
@@ -309,8 +302,7 @@ func (e *Ethereum) GetBlockTransactionCountByNumber(blockNumber uint64) (*big.In
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getunclecountbyblocknumber
 // - this func would not be used anywhere
 func (e *Ethereum) GetUncleCountByBlockNumber(blockNumber uint64) (*big.Int, error) {
-
-	//convert int64 to hex
+	// convert int64 to hex
 	blockHexNumber := hexutil.EncodeUint64(blockNumber)
 
 	var uncleCount string
@@ -410,10 +402,10 @@ type BlockInfo struct {
 // GetBlockByNumber returns information about a block by block number
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbynumber
 func (e *Ethereum) GetBlockByNumber(blockNumber uint64) (*BlockInfo, error) {
-	//convert int64 to hex
+	// convert int64 to hex
 	blockHexNumber := hexutil.EncodeUint64(blockNumber)
 
-	//var lastBlock BlockNumber
+	// var lastBlock BlockNumber
 	var blockRawInfo BlockRawInfo
 
 	err := e.rpcClient.CallContext(e.ctx, &blockRawInfo, "eth_getBlockByNumber", blockHexNumber, false)

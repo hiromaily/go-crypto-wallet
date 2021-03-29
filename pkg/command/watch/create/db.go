@@ -34,9 +34,7 @@ Options:
 func (c *DBCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
-	var (
-		tableName string
-	)
+	var tableName string
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
 	flags.StringVar(&tableName, "table", "", "table name of database")
 	if err := flags.Parse(args); err != nil {
@@ -45,7 +43,7 @@ func (c *DBCommand) Run(args []string) int {
 
 	c.ui.Output(fmt.Sprintf("-table: %s", tableName))
 
-	//validator
+	// validator
 	if tableName == "" {
 		tableName = "payment_request"
 	}

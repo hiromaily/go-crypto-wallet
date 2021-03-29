@@ -39,7 +39,6 @@ func NewBTCKeygen(
 	addressExporter service.AddressExporter,
 	signer service.Signer,
 	wtype wallet.WalletType) *BTCKeygen {
-
 	return &BTCKeygen{
 		BTC:                btc,
 		dbConn:             dbConn,

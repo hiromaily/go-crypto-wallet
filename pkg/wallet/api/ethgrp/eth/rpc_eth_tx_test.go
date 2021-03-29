@@ -10,7 +10,7 @@ import (
 
 // TestGetTransactionByHash is test for GetTransactionByHash
 func TestGetTransactionByHash(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	type args struct {
@@ -41,7 +41,7 @@ func TestGetTransactionByHash(t *testing.T) {
 				t.Fatal(err)
 			}
 			if res != nil {
-				//t.Log(res)
+				// t.Log(res)
 				grok.Value(res)
 			}
 
@@ -51,10 +51,10 @@ func TestGetTransactionByHash(t *testing.T) {
 				t.Fatal(err)
 			}
 			if res2 != nil {
-				//t.Log(res)
+				// t.Log(res)
 				grok.Value(res2)
 			}
 		})
 	}
-	//et.Close()
+	// et.Close()
 }

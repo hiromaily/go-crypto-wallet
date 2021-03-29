@@ -102,13 +102,13 @@ func (e *Ethereum) ValidationAddr(addr string) error {
 	return nil
 }
 
-//Wei   = 1
-//GWei  = 1e9  (Giga)
-//Ether = 1e18
+// Wei   = 1
+// GWei  = 1e9  (Giga)
+// Ether = 1e18
 
-//Wei :  1000000000000000000
-//GWei:  1000000000
-//Ether: 1
+// Wei :  1000000000000000000
+// GWei:  1000000000
+// Ether: 1
 
 // FromWei converts Wei(int64) to Wei(*big.Int)
 func (e *Ethereum) FromWei(v int64) *big.Int {

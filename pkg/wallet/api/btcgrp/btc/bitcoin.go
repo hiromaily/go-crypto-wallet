@@ -15,8 +15,8 @@ import (
 type Bitcoin struct {
 	Client            *rpcclient.Client
 	chainConf         *chaincfg.Params
-	coinTypeCode      coin.CoinTypeCode //btc
-	version           BTCVersion        //179900
+	coinTypeCode      coin.CoinTypeCode // btc
+	version           BTCVersion        // 179900
 	confirmationBlock uint64
 	feeRange          FeeAdjustmentRate
 	logger            *zap.Logger
@@ -34,7 +34,6 @@ func NewBitcoin(
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Bitcoin,
 	logger *zap.Logger) (*Bitcoin, error) {
-
 	bit := Bitcoin{
 		Client: client,
 		logger: logger,

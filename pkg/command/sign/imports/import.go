@@ -23,9 +23,7 @@ func (c *ImportCommand) Synopsis() string {
 	return "import resource"
 }
 
-var (
-	privkeySynopsis = "import generated private key for Authorization account to database"
-)
+var privkeySynopsis = "import generated private key for Authorization account to database"
 
 // Help returns usage for this subcommand
 func (c *ImportCommand) Help() string {
@@ -44,7 +42,7 @@ func (c *ImportCommand) Run(args []string) int {
 		return 1
 	}
 
-	//farther subcommand import
+	// farther subcommand import
 	cmds := map[string]cli.CommandFactory{
 		"privkey": func() (cli.Command, error) {
 			return &PrivKeyCommand{

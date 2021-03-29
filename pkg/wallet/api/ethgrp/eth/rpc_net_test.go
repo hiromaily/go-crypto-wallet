@@ -8,7 +8,7 @@ import (
 
 // TestNetVersion is test for NetVersion
 func TestNetVersion(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	netVersion, err := et.NetVersion()
@@ -20,7 +20,7 @@ func TestNetVersion(t *testing.T) {
 
 // TestNetListening is test for NetListening
 func TestNetListening(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	isLitening, err := et.NetListening()
@@ -32,7 +32,7 @@ func TestNetListening(t *testing.T) {
 
 // TestNetPeerCount is test for NetPeerCount
 func TestNetPeerCount(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	peerCount, err := et.NetPeerCount()

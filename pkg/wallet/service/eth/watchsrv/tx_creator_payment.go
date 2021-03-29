@@ -41,13 +41,13 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	}
 
 	// check sernder's total balance
-	//GetOneUnAllocated
-	//addrs, err := t.addrRepo.GetAllAddress(sender)
+	// GetOneUnAllocated
+	// addrs, err := t.addrRepo.GetAllAddress(sender)
 	addrItem, err := t.addrRepo.GetOneUnAllocated(sender)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
 	}
-	//senderBalance, userAmounts := t.eth.GetTotalBalance(addrs)
+	// senderBalance, userAmounts := t.eth.GetTotalBalance(addrs)
 	senderBalance, err := t.eth.GetBalance(addrItem.WalletAddress, eth.QuantityTagPending)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call eth.GetBalance()")
@@ -71,7 +71,7 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 
 		rawTxHex := rawTx.TxHex
 		t.logger.Debug("rawTxHex", zap.String("rawTxHex", rawTxHex))
-		//TODO: `rawTxHex` should be used to trace progress to update database
+		// TODO: `rawTxHex` should be used to trace progress to update database
 
 		serializedTx, err := serial.EncodeToString(rawTx)
 		if err != nil {

@@ -24,18 +24,18 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
-//TODO: except client address, same address is used only once due to security
+// TODO: except client address, same address is used only once due to security
 // - address could be traced easily
 // - so any internal addresses should be disposable
 
-//BIP44
-//https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#Purpose
+// BIP44
+// https://github.com/bitcoin/bips/blob/master/bip-0044.mediawiki#Purpose
 // m / purpose' / coin_type' / account' / change / address_index
 
-//e.g.  BIP44, Bitcoin Mainnet
-//Client account  => m/44/0/0/0/0~xxxxx
-//Receipt account => m/44/0/1/0/0~xxxxx
-//Payment account => m/44/0/2/0/0~xxxxx
+// e.g.  BIP44, Bitcoin Mainnet
+// Client account  => m/44/0/0/0/0~xxxxx
+// Receipt account => m/44/0/1/0/0~xxxxx
+// Payment account => m/44/0/2/0/0~xxxxx
 
 // PurposeType BIP44/BIP49, for now 44 is used as fixed value
 type PurposeType uint32
@@ -47,8 +47,8 @@ func (t PurposeType) Uint32() uint32 {
 
 // purpose depends on BIP, BIP44  is a constant set to `44`
 const (
-	PurposeTypeBIP44 PurposeType = 44 //BIP44
-	PurposeTypeBIP49 PurposeType = 49 //BIP49
+	PurposeTypeBIP44 PurposeType = 44 // BIP44
+	PurposeTypeBIP49 PurposeType = 49 // BIP49
 )
 
 // CoinType creates a separate subtree for every cryptocoin
@@ -66,7 +66,7 @@ func (t CoinType) Uint32() uint32 {
 // Account
 // account come from `AccountType` in go-crypto-wallet/pkg/account/public_account.go
 
-//ChangeType  external or internal use
+// ChangeType  external or internal use
 type ChangeType uint32
 
 // Uint32 converter
@@ -115,23 +115,22 @@ func (k *HDKey) CreateKey(seed []byte, accountType account.AccountType, idxFrom,
 
 // createKeyByAccount create privateKey, publicKey by account level
 func (k *HDKey) createKeyByAccount(seed []byte, accountType account.AccountType) (*hdkeychain.ExtendedKey, *hdkeychain.ExtendedKey, error) {
-
-	//Master
+	// Master
 	masterKey, err := hdkeychain.NewMaster(seed, k.conf)
 	if err != nil {
 		return nil, nil, err
 	}
-	//Purpose
+	// Purpose
 	purpose, err := masterKey.Child(hdkeychain.HardenedKeyStart + k.purpose.Uint32())
 	if err != nil {
 		return nil, nil, err
 	}
-	//CoinType
+	// CoinType
 	coinType, err := purpose.Child(hdkeychain.HardenedKeyStart + k.coinType.Uint32())
 	if err != nil {
 		return nil, nil, err
 	}
-	//Account
+	// Account
 	k.logger.Debug(
 		"create_key_by_account",
 		zap.String("account_type", accountType.String()),
@@ -141,8 +140,8 @@ func (k *HDKey) createKeyByAccount(seed []byte, accountType account.AccountType)
 	if err != nil {
 		return nil, nil, err
 	}
-	//Change
-	//Index
+	// Change
+	// Index
 
 	// get pubKey
 	publicKey, err := accountPrivKey.Neuter()
@@ -150,8 +149,8 @@ func (k *HDKey) createKeyByAccount(seed []byte, accountType account.AccountType)
 		return nil, nil, err
 	}
 
-	//strPrivateKey := account.String()
-	//strPublicKey := publicKey.String()
+	// strPrivateKey := account.String()
+	// strPublicKey := publicKey.String()
 	return accountPrivKey, publicKey, nil
 }
 
@@ -159,7 +158,7 @@ func (k *HDKey) createKeyByAccount(seed []byte, accountType account.AccountType)
 // e.g. - idxFrom:0,  count 10 => 0-9
 //      - idxFrom:10, count 10 => 10-19
 func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxFrom, count uint32) ([]WalletKey, error) {
-	//accountPrivKey, err := hdkeychain.NewKeyFromString(accountPrivKey)
+	// accountPrivKey, err := hdkeychain.NewKeyFromString(accountPrivKey)
 
 	// Change
 	change, err := accountPrivKey.Child(ChangeTypeExternal.Uint32())
@@ -271,7 +270,6 @@ func (k *HDKey) btcAddrs(wif *btcutil.WIF, privKey *btcec.PrivateKey) (string, s
 		return "", "", nil, "", err
 	}
 	return strP2PKHAddr, strP2SHSegWitAddr, bech32Addr, redeemScript, nil
-
 }
 
 // https://goethereumbook.org/wallet-generate/
@@ -298,7 +296,7 @@ func (k *HDKey) ethAddrs(privKey *btcec.PrivateKey) (string, string, string, err
 func (k *HDKey) xrpAddrs(privKey *btcec.PrivateKey) (string, string, string, error) {
 	// private key (same as ethereum for now)
 	xrpPrivKey := privKey.ToECDSA()
-	//xrpHexPrivKey := hexutil.Encode(crypto.FromECDSA(xrpPrivKey))
+	// xrpHexPrivKey := hexutil.Encode(crypto.FromECDSA(xrpPrivKey))
 	xrpHexPrivKey, err := rcrypto.NewAccountPrivateKey(crypto.FromECDSA(xrpPrivKey))
 	if err != nil {
 		return "", "", "", errors.Wrap(err, "fail to call rcrypto.NewAccountPrivateKey()")
@@ -373,7 +371,7 @@ func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, er
 		return "", "", errors.Wrap(err, "fail to call btcutil.NewAddressWitnessPubKeyHash()")
 	}
 
-	//FIXME: getting RedeemScript is not fixed yet
+	// FIXME: getting RedeemScript is not fixed yet
 	// get redeemScript
 	payToAddrScript, err := txscript.PayToAddrScript(segwitAddress)
 	if err != nil {
@@ -385,7 +383,7 @@ func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, er
 	// That's why payToAddrScript is not used as redeemScript
 	// Redeem Script => Hash of RedeemScript => p2SH ScriptPubKey
 
-	var strRedeemScript string //FIXME: not implemented yet
+	var strRedeemScript string // FIXME: not implemented yet
 	switch k.coinTypeCode {
 	case coin.BTC:
 		address, err := btcutil.NewAddressScriptHash(payToAddrScript, k.conf)
@@ -417,10 +415,10 @@ func (k *HDKey) getBech32Addr(wif *btcutil.WIF) (*btcutil.AddressWitnessPubKeyHa
 func getFullPubKey(privKey *btcec.PrivateKey, isCompressed bool) string {
 	var bPubKey []byte
 	if isCompressed {
-		//Compressed
+		// Compressed
 		bPubKey = privKey.PubKey().SerializeCompressed()
 	} else {
-		//Uncompressed
+		// Uncompressed
 		bPubKey = privKey.PubKey().SerializeUncompressed()
 	}
 	hexPubKey := hex.EncodeToString(bPubKey)

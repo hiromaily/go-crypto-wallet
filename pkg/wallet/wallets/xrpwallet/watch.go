@@ -38,7 +38,6 @@ func NewXRPWatch(
 	txMonitorer service.TxMonitorer,
 	paymentRequestCreator service.PaymentRequestCreator,
 	wtype wtype.WalletType) *XRPWatch {
-
 	return &XRPWatch{
 		XRP:                   xrp,
 		logger:                logger,
@@ -75,7 +74,7 @@ func (w *XRPWatch) CreateTransferTx(sender, receiver account.AccountType, floatA
 // UpdateTxStatus updates transaction status
 func (w *XRPWatch) UpdateTxStatus() error {
 	w.logger.Info("no functionality for XRP")
-	//return w.TxMonitorer.UpdateTxStatus()
+	// return w.TxMonitorer.UpdateTxStatus()
 	return nil
 }
 

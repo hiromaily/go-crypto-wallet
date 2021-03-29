@@ -18,7 +18,7 @@ type EstimateSmartFeeResult struct {
 }
 
 // Making Sense of Bitcoin Transaction Fees
-//https://bitzuma.com/posts/making-sense-of-bitcoin-transaction-fees/
+// https://bitzuma.com/posts/making-sense-of-bitcoin-transaction-fees/
 
 // EstimateSmartFee calls RPC `estimatesmartfee` and returns BTC/kB(float64)
 func (b *Bitcoin) EstimateSmartFee() (float64, error) {
@@ -51,7 +51,7 @@ func (b *Bitcoin) GetTransactionFee(tx *wire.MsgTx) (btcutil.Amount, error) {
 	}
 	fee := fmt.Sprintf("%f", feePerKB*float64(tx.SerializeSize())/1000)
 
-	//To Amount
+	// To Amount
 	feeAsBit, err := b.StrToAmount(fee)
 	if err != nil {
 		return 0, err
@@ -67,7 +67,7 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 	if err != nil {
 		return 0, err
 	}
-	//b.logger.Debug("called GetTransactionFee()", zap.Any("fee", fee)) //0.000208 BTC
+	// b.logger.Debug("called GetTransactionFee()", zap.Any("fee", fee)) //0.000208 BTC
 
 	// if response doesn't meet minimum fee, it should be overridden
 	relayFee, err := b.getMinRelayFee()
@@ -85,7 +85,7 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 		if err != nil {
 			b.logger.Warn("fail to call btc.calculateNewFee() but continue", zap.Error(err))
 		}
-		b.logger.Debug("called btc.calculateNewFee()", zap.Any("adjusted newFee", newFee)) //0.000208 BTC
+		b.logger.Debug("called btc.calculateNewFee()", zap.Any("adjusted newFee", newFee)) // 0.000208 BTC
 		fee = newFee
 	}
 

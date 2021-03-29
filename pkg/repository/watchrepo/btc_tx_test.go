@@ -15,7 +15,7 @@ import (
 
 // TestTx is test for any data operation
 func TestTx(t *testing.T) {
-	//boil.DebugMode = true
+	// boil.DebugMode = true
 	txRepo := testutil.NewTxRepository()
 
 	// Delete records
@@ -138,5 +138,4 @@ func TestTx(t *testing.T) {
 		t.Errorf("Update() = %d, want %d", tmpTx.CurrentTXType, tx.TxTypeNotified.Int8())
 		return
 	}
-
 }

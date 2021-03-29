@@ -10,7 +10,7 @@ import (
 
 // TestServerInfo is test for ServerInfo
 func TestServerInfo(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	xr := testutil.GetXRP()
 
 	res, err := xr.ServerInfo()

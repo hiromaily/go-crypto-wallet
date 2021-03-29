@@ -22,11 +22,11 @@ import (
 //  create unsigned transaction
 //  send signed transaction
 
-//TODO: bitcoin functionalities
+// TODO: bitcoin functionalities
 // - back up wallet data periodically and import functionality
 // - generated key must be encrypted
 // - transfer for monitoring
-//TODO:
+// TODO:
 // - logger interface: stdout(ui), log format, open tracing
 // - btc command for mock is required
 
@@ -127,7 +127,7 @@ func main() {
 		walleter.Done()
 	}()
 
-	//sub command
+	// sub command
 	args := flags.Args()
 	cmds := wcmd.WatchSubCommands(walleter, appVersion, conf)
 	cl := command.CreateSubCommand(appName, appVersion, args, cmds)

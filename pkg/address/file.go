@@ -46,7 +46,7 @@ func (r *FileRepository) CreateFilePath(accountType account.AccountType) string 
 
 // ValidateFilePath validate fileName
 func (r *FileRepository) ValidateFilePath(fileName string, accountType account.AccountType) error {
-	//e.g. ./data/pubkey/deposit/deposit_1586831083436291000.csv
+	// e.g. ./data/pubkey/deposit/deposit_1586831083436291000.csv
 	tmp := strings.Split(strings.Split(fileName, "_")[0], "/")
 	if tmp[len(tmp)-1] != accountType.String() {
 		return errors.Errorf("mismatching between accountType [%s] and file prefix [%s]", accountType, tmp[0])

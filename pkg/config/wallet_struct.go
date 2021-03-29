@@ -5,7 +5,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
-//TODO:
+// TODO:
 // - use https://github.com/spf13/viper
 
 // WalletRoot wallet root config

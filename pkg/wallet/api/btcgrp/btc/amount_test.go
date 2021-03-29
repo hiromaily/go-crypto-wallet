@@ -10,9 +10,9 @@ import (
 
 // TestAmountString is test for FloatToAmount
 func TestAmountString(t *testing.T) {
-	var btc = Bitcoin{}
+	btc := Bitcoin{}
 
-	var tests = []struct {
+	tests := []struct {
 		amt  btcutil.Amount
 		want string
 	}{
@@ -31,9 +31,9 @@ func TestAmountString(t *testing.T) {
 
 // TestAmountToDecimal is test for AmountToDecimal
 func TestAmountToDecimal(t *testing.T) {
-	var btc = Bitcoin{}
+	btc := Bitcoin{}
 
-	var tests = []struct {
+	tests := []struct {
 		amt  btcutil.Amount
 		want string
 	}{
@@ -52,9 +52,9 @@ func TestAmountToDecimal(t *testing.T) {
 
 // TestFloatToAmount is test for FloatToAmount
 func TestFloatToAmount(t *testing.T) {
-	var btc = Bitcoin{}
+	btc := Bitcoin{}
 
-	var tests = []struct {
+	tests := []struct {
 		bit  float64
 		want btcutil.Amount
 	}{
@@ -71,19 +71,19 @@ func TestFloatToAmount(t *testing.T) {
 		if amt != val.want {
 			t.Errorf("FloatToAmount() = %d, want %d", amt, val.want)
 		}
-		//amt.ToBTC() //float64
+		// amt.ToBTC() //float64
 
 		t.Logf("satoshi: %d, %v", amt, amt)
-		//satoshi: 54000000, 0.54 BTC
-		//satoshi: 195200000, 1.952 BTC
+		// satoshi: 54000000, 0.54 BTC
+		// satoshi: 195200000, 1.952 BTC
 	}
 }
 
 // TestStrSatoshiToAmount is test for StrToAmount
 func TestStrToAmount(t *testing.T) {
-	var btc = Bitcoin{}
+	btc := Bitcoin{}
 
-	var tests = []struct {
+	tests := []struct {
 		bit  string
 		want btcutil.Amount
 	}{
@@ -104,16 +104,16 @@ func TestStrToAmount(t *testing.T) {
 		}
 
 		t.Logf("satoshi: %d, %v", amt, amt)
-		//satoshi: 1000000000, 10 BTC
-		//satoshi: 50000000, 0.5 BTC
+		// satoshi: 1000000000, 10 BTC
+		// satoshi: 50000000, 0.5 BTC
 	}
 }
 
 // TestStrSatoshiToAmount is test for StrSatoshiToAmount
 func TestStrSatoshiToAmount(t *testing.T) {
-	var btc = Bitcoin{}
+	btc := Bitcoin{}
 
-	var tests = []struct {
+	tests := []struct {
 		satoshi string
 		want    float64
 	}{
@@ -132,14 +132,14 @@ func TestStrSatoshiToAmount(t *testing.T) {
 		}
 
 		t.Logf("satoshi: %d, %v", amt, amt)
-		//satoshi: 1000000000, 10 BTC
-		//satoshi: 50000000, 0.5 BTC
+		// satoshi: 1000000000, 10 BTC
+		// satoshi: 50000000, 0.5 BTC
 	}
 }
 
 // Caluculation is test for calculation of amount
 func TestCalculation(t *testing.T) {
-	var tests = []struct {
+	tests := []struct {
 		val1 float64
 		val2 float64
 		want float64

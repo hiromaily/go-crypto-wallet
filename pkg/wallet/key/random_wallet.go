@@ -25,8 +25,8 @@ func GenerateWIF(conf *chaincfg.Params) (*btcutil.WIF, string, error) {
 		return nil, "", err
 	}
 
-	//Debug
-	//log.Printf("[WIF] %s - [Pub Address] %s\n", wif.String(), pubAddress.EncodeAddress())
+	// Debug
+	// log.Printf("[WIF] %s - [Pub Address] %s\n", wif.String(), pubAddress.EncodeAddress())
 
 	return wif, pubAddress.EncodeAddress(), nil
 }

@@ -34,7 +34,6 @@ func NewPrivKey(
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
 	authType account.AuthType,
 	wtype wallet.WalletType) *PrivKey {
-
 	return &PrivKey{
 		btc:         btc,
 		logger:      logger,
@@ -48,8 +47,7 @@ func NewPrivKey(
 //  - get WIF whose `is_imported_priv_key` is false
 //  - then call ImportPrivKey(wif) without rescan
 func (p *PrivKey) Import() error {
-
-	//1. retrieve records(private key) from account_key table
+	// 1. retrieve records(private key) from account_key table
 	authKeyItem, err := p.authKeyRepo.GetOne(p.authType)
 	if err != nil {
 		return errors.Wrap(err, "fail to call authKeyRepo.GetOne()")
@@ -74,8 +72,8 @@ func (p *PrivKey) Import() error {
 	// import private key by wif without rescan
 	err = p.btc.ImportPrivKeyWithoutReScan(wif, p.authType.String())
 	if err != nil {
-		//error would be returned sometimes according to condition of bitcoin core
-		//for now, it continues even if error occurred
+		// error would be returned sometimes according to condition of bitcoin core
+		// for now, it continues even if error occurred
 		p.logger.Warn(
 			"fail to call btc.ImportPrivKeyWithoutReScan()",
 			zap.String("wif", authKeyItem.WalletImportFormat),
@@ -83,7 +81,7 @@ func (p *PrivKey) Import() error {
 		return errors.Wrapf(err, "fail to call btc.ImportPrivKeyWithoutReScan()")
 	}
 
-	//update DB
+	// update DB
 	_, err = p.authKeyRepo.UpdateAddrStatus(address.AddrStatusPrivKeyImported, authKeyItem.WalletImportFormat)
 	if err != nil {
 		p.logger.Error(
@@ -104,8 +102,8 @@ func (p *PrivKey) Import() error {
 // debug use
 // FIXME: this code is same to keygensrv/privkey_importer.go
 func (p *PrivKey) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPublicKey string) {
-	//Note,
-	//GetAccount() calls GetAddressInfo() internally
+	// Note,
+	// GetAccount() calls GetAddressInfo() internally
 
 	var (
 		targetAddr string
@@ -126,7 +124,7 @@ func (p *PrivKey) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPub
 	}
 
 	// 1.call `getaccount` by target_address
-	//FIXME: error occurred in BCH
+	// FIXME: error occurred in BCH
 	acnt, err := p.btc.GetAccount(targetAddr)
 	if err != nil {
 		p.logger.Warn(

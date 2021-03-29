@@ -9,7 +9,7 @@ import (
 
 // TestNewMultisigAccounts is test for NewMultisigAccounts
 func TestNewMultisigAccounts(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 
 	type args struct {
 		acnt AccountType
@@ -66,5 +66,4 @@ func TestNewMultisigAccounts(t *testing.T) {
 			}
 		})
 	}
-
 }

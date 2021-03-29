@@ -44,7 +44,7 @@ func (c *BalanceCommand) Run(args []string) int {
 		return 1
 	}
 
-	//validator
+	// validator
 	if acnt != "" && !account.ValidateAccountType(acnt) {
 		c.ui.Error("account option [-account] is invalid")
 		return 1
@@ -61,7 +61,7 @@ func (c *BalanceCommand) Run(args []string) int {
 			return 1
 		}
 	} else {
-		//get received by account
+		// get received by account
 		balance, err = c.btc.GetBalanceByAccount(account.AccountType(acnt), c.btc.ConfirmationBlock())
 		if err != nil {
 			c.ui.Error(fmt.Sprintf("fail to call btc.GetBalanceByAccount() %+v", err))

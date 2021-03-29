@@ -27,7 +27,6 @@ func NewPrivKey(
 	logger *zap.Logger,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	wtype wallet.WalletType) *PrivKey {
-
 	return &PrivKey{
 		btc:            btc,
 		logger:         logger,
@@ -40,9 +39,8 @@ func NewPrivKey(
 //  - get WIF whose `is_imported_priv_key` is false
 //  - then call ImportPrivKey(wif) without rescan
 func (p *PrivKey) Import(accountType account.AccountType) error {
-
-	//1. retrieve records(private key) from account_key table
-	accountKeyTable, err := p.accountKeyRepo.GetAllAddrStatus(accountType, address.AddrStatusHDKeyGenerated) //addr_status=0
+	// 1. retrieve records(private key) from account_key table
+	accountKeyTable, err := p.accountKeyRepo.GetAllAddrStatus(accountType, address.AddrStatusHDKeyGenerated) // addr_status=0
 	if err != nil {
 		return errors.Wrap(err, "fail to call repo.GetAllAccountKeyByAddrStatus()")
 	}
@@ -67,8 +65,8 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 		// import private key by wif without rescan
 		err = p.btc.ImportPrivKeyWithoutReScan(wif, accountType.String())
 		if err != nil {
-			//error would be returned sometimes according to condition of bitcoin core
-			//for now, it continues even if error occurred
+			// error would be returned sometimes according to condition of bitcoin core
+			// for now, it continues even if error occurred
 			p.logger.Warn(
 				"fail to call btc.ImportPrivKeyWithoutReScan()",
 				zap.String("wif", record.WalletImportFormat),
@@ -76,7 +74,7 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 			continue
 		}
 
-		//update DB
+		// update DB
 		_, err = p.accountKeyRepo.UpdateAddrStatus(accountType, address.AddrStatusPrivKeyImported, []string{record.WalletImportFormat})
 		if err != nil {
 			p.logger.Error(
@@ -98,8 +96,8 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 // debug usage
 // FIXME: this code is same to signsrv/privkey_importer.go
 func (p *PrivKey) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPublicKey string) {
-	//Note,
-	//GetAccount() calls GetAddressInfo() internally
+	// Note,
+	// GetAccount() calls GetAddressInfo() internally
 
 	var (
 		targetAddr string

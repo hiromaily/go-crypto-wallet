@@ -43,7 +43,7 @@ func NewBTCTxInputRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, log
 func (r *TxInputRepository) GetOne(id int64) (*models.BTCTXInput, error) {
 	ctx := context.Background()
 
-	txItem, err := models.FindBTCTXInput(ctx, r.dbConn, id) //unique
+	txItem, err := models.FindBTCTXInput(ctx, r.dbConn, id) // unique
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to call models.FindTXInput()")
 	}

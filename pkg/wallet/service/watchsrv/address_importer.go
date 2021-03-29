@@ -39,7 +39,6 @@ func NewAddressImport(
 	coinTypeCode coin.CoinTypeCode,
 	addrType address.AddrType,
 	wtype wallet.WalletType) *AddressImport {
-
 	return &AddressImport{
 		logger:       logger,
 		dbConn:       dbConn,
@@ -77,11 +76,11 @@ func (a *AddressImport) ImportAddress(fileName string) error {
 		})
 	}
 
-	//insert imported pubKey
+	// insert imported pubKey
 	err = a.addrRepo.InsertBulk(pubKeyData)
 	if err != nil {
 		return errors.Wrap(err, "fail to call repo.Pubkey().InsertBulk()")
-		//TODO:What if this inserting is failed, how it can be recovered to keep consistancy
+		// TODO:What if this inserting is failed, how it can be recovered to keep consistancy
 		// pubkey is added in wallet, but database doesn't have records
 		// try to run this func again
 	}

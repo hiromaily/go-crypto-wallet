@@ -71,12 +71,12 @@ func (b *Bitcoin) ListUnspentByAccount(accountType account.AccountType, confirma
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call btc.listUnspentByAccount()")
 	}
-	//for debug use
-	//filterdAddrs := b.getUnspentListAddrs(unspentList, accountType)
+	// for debug use
+	// filterdAddrs := b.getUnspentListAddrs(unspentList, accountType)
 
 	// sort amount by ascending (small to big)
 	sort.Slice(unspentList, func(i, j int) bool {
-		//small to big
+		// small to big
 		return unspentList[i].Amount < unspentList[j].Amount
 	})
 
@@ -116,7 +116,7 @@ func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address, confirmationNum 
 		return nil, errors.Wrap(err, "fail to call json.Marchal(9999999)")
 	}
 
-	//address
+	// address
 	strAddrs := make([]string, len(addrs))
 	for idx, addr := range addrs {
 		strAddrs[idx] = addr.String()
@@ -146,7 +146,7 @@ func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address, confirmationNum 
 }
 
 // LockUnspent lock given txID
-//1st param lock (false)
+// 1st param lock (false)
 func (b *Bitcoin) LockUnspent(tx *ListUnspentResult) error {
 	txIDHash, err := chainhash.NewHashFromStr(tx.TxID)
 	if err != nil {
@@ -161,7 +161,7 @@ func (b *Bitcoin) LockUnspent(tx *ListUnspentResult) error {
 }
 
 // UnlockUnspent unlock locked unspent tx
-//1st param unlock (true)
+// 1st param unlock (true)
 func (b *Bitcoin) UnlockUnspent() error {
 	list, err := b.Client.ListLockUnspent() //[]*wire.OutPoint
 	if err != nil {

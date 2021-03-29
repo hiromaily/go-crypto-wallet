@@ -60,7 +60,7 @@ func (c *APICommand) Run(args []string) int {
 		return 1
 	}
 
-	//farther subcommand import
+	// farther subcommand import
 	cmds := map[string]cli.CommandFactory{
 		"encryptwallet": func() (cli.Command, error) {
 			return &EncryptWalletCommand{

@@ -31,7 +31,7 @@ func NewTxRepository() watchrepo.BTCTxRepositorier {
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
-	//TODO: if config should be overridden, here
+	// TODO: if config should be overridden, here
 
 	// logger
 	logger := logger.NewZapLogger(&conf.Logger)
@@ -58,7 +58,7 @@ func NewAccountKeyRepository() coldrepo.AccountKeyRepositorier {
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
-	//TODO: if config should be overridden, here
+	// TODO: if config should be overridden, here
 
 	// logger
 	logger := logger.NewZapLogger(&conf.Logger)

@@ -8,7 +8,7 @@ import (
 
 // TestGetBlockCount is test for GetBlockCount
 func TestGetBlockCount(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	bc := testutil.GetBTC()
 
 	// GetBalance
@@ -18,5 +18,5 @@ func TestGetBlockCount(t *testing.T) {
 		t.Log(res)
 	}
 
-	//bc.Close()
+	// bc.Close()
 }

@@ -35,7 +35,6 @@ func NewTxSend(
 	txOutputRepo watchrepo.TxOutputRepositorier,
 	txFileRepo tx.FileRepositorier,
 	wtype wallet.WalletType) *TxSend {
-
 	return &TxSend{
 		btc:          btc,
 		logger:       logger,
@@ -50,9 +49,8 @@ func NewTxSend(
 
 // SendTx send signed tx by keygen/sign walet
 func (t *TxSend) SendTx(filePath string) (string, error) {
-
 	// get tx_deposit_id from file name
-	//payment_5_unsigned_1_1534466246366489473
+	// payment_5_unsigned_1_1534466246366489473
 	actionType, _, txID, _, err := t.txFileRepo.ValidateFilePath(filePath, tx.TxTypeSigned)
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call txFileRepo.ValidateFilePath()")
@@ -75,14 +73,14 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 	}
 
 	if hash == nil {
-		//tx is already sent
+		// tx is already sent
 		return "", nil
 	}
 
 	// update tx_table
 	affectedNum, err := t.txRepo.UpdateAfterTxSent(txID, tx.TxTypeSent, signedHex, hash.String())
 	if err != nil {
-		//TODO: even if error occurred, tx is already sent. so db should be corrected manually
+		// TODO: even if error occurred, tx is already sent. so db should be corrected manually
 		t.logger.Warn("fail to call repo.Tx().UpdateAfterTxSent() but tx is already sent. So database should be updated manually",
 			zap.Int64("tx_id", txID),
 			zap.String("tx_type", tx.TxTypeSent.String()),
@@ -105,10 +103,10 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 
 	// update account_pubkey_table
 	if actionType != action.ActionTypePayment {
-		//skip for that receiver address is anonymous
+		// skip for that receiver address is anonymous
 		err = t.updateIsAllocatedAccountPubkey(txID)
 		if err != nil {
-			//TODO: even if error occurred, tx is already sent. so db should be corrected manually
+			// TODO: even if error occurred, tx is already sent. so db should be corrected manually
 			return "", err
 		}
 	}

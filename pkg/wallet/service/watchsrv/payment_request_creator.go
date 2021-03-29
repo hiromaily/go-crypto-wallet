@@ -36,7 +36,6 @@ func NewPaymentRequestCreate(
 	payReqRepo watchrepo.PaymentRequestRepositorier,
 	coinTypeCode coin.CoinTypeCode,
 	wtype wallet.WalletType) *PaymentRequestCreate {
-
 	return &PaymentRequestCreate{
 		converter:    converter,
 		logger:       logger,
@@ -50,7 +49,6 @@ func NewPaymentRequestCreate(
 
 // CreatePaymentRequest creates payment_request dummy data for development
 func (p *PaymentRequestCreate) CreatePaymentRequest(amtList []float64) error {
-
 	// get client pubkeys
 	pubkeyItems, err := p.addrRepo.GetAll(account.AccountTypeClient)
 	if err != nil {

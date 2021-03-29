@@ -30,7 +30,6 @@ func NewFullPubkeyImport(
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier,
 	pubkeyFileRepo address.FileRepositorier,
 	wtype wallet.WalletType) *FullPubkeyImport {
-
 	return &FullPubkeyImport{
 		btc:                btc,
 		logger:             logger,
@@ -42,7 +41,6 @@ func NewFullPubkeyImport(
 
 // ImportFullPubKey imports auth fullpubKey from csv
 func (p *FullPubkeyImport) ImportFullPubKey(fileName string) error {
-
 	// read file for full public key
 	pubKeys, err := p.pubkeyFileRepo.ImportAddress(fileName)
 	if err != nil {
@@ -65,7 +63,7 @@ func (p *FullPubkeyImport) ImportFullPubKey(fileName string) error {
 			FullPublicKey: fpk.FullPubKey,
 		}
 	}
-	//TODO:Upsert would be better to prevent error which occur when data is already inserted
+	// TODO:Upsert would be better to prevent error which occur when data is already inserted
 	err = p.authFullPubKeyRepo.InsertBulk(fullPubKeys)
 	if err != nil {
 		if strings.Contains(err.Error(), "1062: Duplicate entry") {

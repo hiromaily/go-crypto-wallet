@@ -33,16 +33,14 @@ Options:
 func (c *SendCommand) Run(args []string) int {
 	c.UI.Info(c.Synopsis())
 
-	var (
-		filePath string
-	)
+	var filePath string
 	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
 	flags.StringVar(&filePath, "file", "", "import file path for signed transactions")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
 
-	//validator
+	// validator
 	if filePath == "" {
 		c.UI.Error("file path option [-file] is required")
 		return 1
@@ -55,7 +53,7 @@ func (c *SendCommand) Run(args []string) int {
 		return 1
 	}
 
-	//TODO: output should be json if json option is true
+	// TODO: output should be json if json option is true
 	c.UI.Output(fmt.Sprintf("tx is sent!! txID: %s", txID))
 
 	return 0

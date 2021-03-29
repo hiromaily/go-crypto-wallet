@@ -32,7 +32,6 @@ func NewSign(
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier,
 	txFileRepo tx.FileRepositorier,
 	wtype wallet.WalletType) *Sign {
-
 	return &Sign{
 		xrp:               xrp,
 		logger:            logger,
@@ -79,7 +78,7 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 		if err = json.Unmarshal([]byte(txJSON), &txInput); err != nil {
 			return "", false, "", errors.Wrap(err, "fail to call json.Unmarshal(txJSON)")
 		}
-		//TODO: get secret from database by txInput.Account
+		// TODO: get secret from database by txInput.Account
 		// master_seed from xrp_account_key table
 		secret, err := s.xrpAccountKeyRepo.GetSecret(senderAccount, txInput.Account)
 		if err != nil {
@@ -102,6 +101,6 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 		return "", false, "", errors.Wrap(err, "fail to call txFileRepo.WriteFileSlice()")
 	}
 
-	//return hexTx, isSigned, generatedFileName, nil
+	// return hexTx, isSigned, generatedFileName, nil
 	return "", true, generatedFileName, nil
 }

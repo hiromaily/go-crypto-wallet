@@ -35,16 +35,14 @@ Options:
 func (c *PrivKeyCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
-	var (
-		acnt string
-	)
+	var acnt string
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
 	flags.StringVar(&acnt, "account", "", "target account")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
 
-	//validator
+	// validator
 	if !account.ValidateAccountType(acnt) {
 		c.ui.Error("account option [-account] is invalid")
 		return 1
@@ -54,7 +52,7 @@ func (c *PrivKeyCommand) Run(args []string) int {
 		return 1
 	}
 
-	//import generated private key to keygen wallet
+	// import generated private key to keygen wallet
 	err := c.wallet.ImportPrivKey(account.AccountType(acnt))
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call ImportPrivKey() %+v", err))

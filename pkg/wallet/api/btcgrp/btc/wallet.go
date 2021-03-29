@@ -29,7 +29,7 @@ type LoadWalletResult struct {
 // BackupWallet unload wallet.dat
 //  Safely copies current wallet file to destination, which can be a directory or a path with filename
 func (b *Bitcoin) BackupWallet(fileName string) error {
-	//backupwallet
+	// backupwallet
 	bFileName, err := json.Marshal(fileName)
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.Marchal(filename)")
@@ -77,7 +77,7 @@ func (b *Bitcoin) dumpImportWallet(fileName, method string) error {
 // EncryptWallet encrypt wallet by pass phrase
 // https://bitcoincore.org/en/doc/0.19.0/rpc/wallet/encryptwallet/
 func (b *Bitcoin) EncryptWallet(passphrase string) error {
-	//backupwallet
+	// backupwallet
 	input1, err := json.Marshal(passphrase)
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.Marchal(passphrase)")
@@ -114,7 +114,7 @@ func (b *Bitcoin) LoadWallet(fileName string) error {
 	if b.Version() < BTCVer17 {
 		return errors.New("`loadwallet` is available from bitcoin version 0.17")
 	}
-	//loadwallet "filename"
+	// loadwallet "filename"
 	bFileName, err := json.Marshal(fileName)
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.Marchal(fileName)")
@@ -130,7 +130,7 @@ func (b *Bitcoin) LoadWallet(fileName string) error {
 		return errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}
 	if loadWalletResult.Warning != "" {
-		//TODO: how to handle this warning
+		// TODO: how to handle this warning
 		return errors.Errorf("detect warning: %s", loadWalletResult.Warning)
 	}
 
@@ -145,7 +145,7 @@ func (b *Bitcoin) UnLoadWallet(fileName string) error {
 	if b.Version() < BTCVer17 {
 		return errors.New("`unloadwallet` is available from bitcoin version 0.17")
 	}
-	//unloadwallet ( "wallet_name" )
+	// unloadwallet ( "wallet_name" )
 	bFileName, err := json.Marshal(fileName)
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.Marchal()")
@@ -163,7 +163,7 @@ func (b *Bitcoin) CreateWallet(fileName string, disablePrivKey bool) error {
 	if b.Version() < BTCVer17 {
 		return errors.New("`createwallet` is available from bitcoin version 0.17")
 	}
-	//createwallet "wallet_name" ( disable_private_keys )
+	// createwallet "wallet_name" ( disable_private_keys )
 	bFileName, err := json.Marshal(fileName)
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.Marchal(fileName)")
@@ -185,7 +185,7 @@ func (b *Bitcoin) CreateWallet(fileName string, disablePrivKey bool) error {
 		return errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}
 	if loadWalletResult.Warning != "" {
-		//TODO: how to handle this warning
+		// TODO: how to handle this warning
 		return errors.Errorf("detect warning: %s", loadWalletResult.Warning)
 	}
 

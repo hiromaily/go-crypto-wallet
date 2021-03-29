@@ -45,7 +45,7 @@ func NewAddressRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger
 
 // GetAll returns all records by account
 func (r *AddressRepository) GetAll(accountType account.AccountType) ([]*models.Address, error) {
-	//sql := "SELECT * FROM %s WHERE account=%s;"
+	// sql := "SELECT * FROM %s WHERE account=%s;"
 	ctx := context.Background()
 
 	items, err := models.Addresses(
@@ -85,7 +85,7 @@ func (r *AddressRepository) GetAllAddress(accountType account.AccountType) ([]st
 
 // GetOneUnAllocated returns one records by is_allocated=false
 func (r *AddressRepository) GetOneUnAllocated(accountType account.AccountType) (*models.Address, error) {
-	//sql := "SELECT * FROM %s WHERE is_allocated=false ORDER BY id LIMIT 1;"
+	// sql := "SELECT * FROM %s WHERE is_allocated=false ORDER BY id LIMIT 1;"
 	ctx := context.Background()
 
 	item, err := models.Addresses(
@@ -108,7 +108,7 @@ func (r *AddressRepository) InsertBulk(items []*models.Address) error {
 // UpdateIsAllocated updates is_allocated
 func (r *AddressRepository) UpdateIsAllocated(isAllocated bool, Address string) (int64, error) {
 	//	sql := `UPDATE %s SET is_allocated=:is_allocated, updated_at=:updated_at
-	//WHERE wallet_address=:wallet_address`
+	// WHERE wallet_address=:wallet_address`
 	ctx := context.Background()
 
 	// Set updating columns

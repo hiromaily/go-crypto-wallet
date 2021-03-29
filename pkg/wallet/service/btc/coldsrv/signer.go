@@ -37,7 +37,6 @@ func NewSign(
 	txFileRepo tx.FileRepositorier,
 	multisigAccount account.MultisigAccounter,
 	wtype wallet.WalletType) *Sign {
-
 	return &Sign{
 		btc:             btc,
 		logger:          logger,
@@ -53,7 +52,6 @@ func NewSign(
 // - logic would vary among account, addressType like multisig
 // - returns tx, isSigned, generatedFileName, error
 func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
-
 	// get tx_deposit_id from tx file name
 	//  if payment_5_unsigned_0_1534466246366489473, 5 is target
 	actionType, _, txID, signedCount, err := s.txFileRepo.ValidateFilePath(filePath, tx.TxTypeUnsigned)
@@ -69,13 +67,13 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 
 	var hex, encodedPrevsAddrs string
 	tmp := strings.Split(data, ",")
-	//file: hex, prev_address
+	// file: hex, prev_address
 	hex = tmp[0]
 	if len(tmp) > 1 {
 		encodedPrevsAddrs = tmp[1]
 	}
 	if encodedPrevsAddrs == "" {
-		//it's required data since Bitcoin core ver17
+		// it's required data since Bitcoin core ver17
 		return "", false, "", errors.New("encodedPrevsAddrs must be set in csv file")
 	}
 
@@ -160,7 +158,6 @@ func (s *Sign) sign(hex, encodedPrevsAddrs string) (string, bool, string, error)
 }
 
 func (s *Sign) signMultisig(msgTx *wire.MsgTx, prevsAddrs *btc.AddrsPrevTxs) (*wire.MsgTx, bool, string, error) {
-
 	var wips []string
 	var newEncodedPrevsAddrs string
 
@@ -205,7 +202,7 @@ func (s *Sign) signMultisig(msgTx *wire.MsgTx, prevsAddrs *btc.AddrsPrevTxs) (*w
 		return nil, false, "", errors.Errorf("WalletType is invalid: %s", s.wtype.String())
 	}
 
-	//sign
+	// sign
 	signedTx, isSigned, err := s.btc.SignRawTransactionWithKey(msgTx, wips, prevsAddrs.PrevTxs)
 	return signedTx, isSigned, newEncodedPrevsAddrs, err
 }

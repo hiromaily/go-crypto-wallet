@@ -10,7 +10,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
-//MultisigCommand  multisig subcommand
+// MultisigCommand  multisig subcommand
 type MultisigCommand struct {
 	name     string
 	synopsis string
@@ -43,7 +43,7 @@ func (c *MultisigCommand) Run(args []string) int {
 		return 1
 	}
 
-	//validator
+	// validator
 	if !account.ValidateAccountType(acnt) {
 		c.ui.Error("account option [-account] is invalid")
 		return 1

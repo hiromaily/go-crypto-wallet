@@ -49,7 +49,6 @@ type ResponseGetTransactionReceipt struct {
 //  sign(keccak256("\x19Ethereum Signed Message:\n" + len(message) + message)))
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_sign
 func (e *Ethereum) Sign(hexAddr, message string) (string, error) {
-
 	var signature string
 	err := e.rpcClient.CallContext(e.ctx, &signature, "eth_sign", hexAddr, message)
 	if err != nil {
@@ -63,11 +62,10 @@ func (e *Ethereum) Sign(hexAddr, message string) (string, error) {
 // FIXME: Invalid params: Invalid bytes format. Expected a 0x-prefixed hex string with even length
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_sendtransaction
 func (e *Ethereum) SendTransaction(msg *ethereum.CallMsg) (string, error) {
-
 	var txHash string
 	err := e.rpcClient.CallContext(e.ctx, &txHash, "eth_sendTransaction", toCallArg(msg))
 	if err != nil {
-		//FIXME: Invalid params: Invalid bytes format. Expected a 0x-prefixed hex string with even length.
+		// FIXME: Invalid params: Invalid bytes format. Expected a 0x-prefixed hex string with even length.
 		return "", errors.Wrap(err, "fail to call rpc.CallContext(eth_sendTransaction)")
 	}
 
@@ -77,7 +75,6 @@ func (e *Ethereum) SendTransaction(msg *ethereum.CallMsg) (string, error) {
 // SendRawTransaction creates new message call transaction or a contract creation for signed transactions
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_sendrawtransaction
 func (e *Ethereum) SendRawTransaction(signedTx string) (string, error) {
-
 	var txHash string
 	err := e.rpcClient.CallContext(e.ctx, &txHash, "eth_sendRawTransaction", signedTx)
 	if err != nil {
@@ -111,7 +108,6 @@ func (e *Ethereum) SendRawTransactionWithTypesTx(tx *types.Transaction) (string,
 // GetTransactionByHash returns the information about a transaction requested by transaction hash
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyhash
 func (e *Ethereum) GetTransactionByHash(hashTx string) (*ResponseGetTransaction, error) {
-
 	var resMap map[string]string
 	err := e.rpcClient.CallContext(e.ctx, &resMap, "eth_getTransactionByHash", hashTx)
 	if err != nil {
@@ -121,31 +117,31 @@ func (e *Ethereum) GetTransactionByHash(hashTx string) (*ResponseGetTransaction,
 		return nil, errors.New("response of eth_getTransactionByHash is empty")
 	}
 
-	blockNumber, err := hexutil.DecodeBig(setZeroHex(resMap["blockNumber"])) //blockNumber string = ""
+	blockNumber, err := hexutil.DecodeBig(setZeroHex(resMap["blockNumber"])) // blockNumber string = ""
 	if err != nil {
 		return nil, errors.New("response[blockNumber] is invalid")
 	}
-	gas, err := hexutil.DecodeBig(setZeroHex(resMap["gas"])) //gas string = "0x5208"
+	gas, err := hexutil.DecodeBig(setZeroHex(resMap["gas"])) // gas string = "0x5208"
 	if err != nil {
 		return nil, errors.New("response[gas] is invalid")
 	}
-	gasPrice, err := hexutil.DecodeBig(setZeroHex(resMap["gasPrice"])) //gasPrice string = "0x0"
+	gasPrice, err := hexutil.DecodeBig(setZeroHex(resMap["gasPrice"])) // gasPrice string = "0x0"
 	if err != nil {
 		return nil, errors.New("response[gasPrice] is invalid")
 	}
-	nonce, err := hexutil.DecodeBig(setZeroHex(resMap["nonce"])) //nonce string = "0x0"
+	nonce, err := hexutil.DecodeBig(setZeroHex(resMap["nonce"])) // nonce string = "0x0"
 	if err != nil {
 		return nil, errors.New("response[nonce] is invalid")
 	}
-	transactionIndex, err := hexutil.DecodeBig(setZeroHex(resMap["transactionIndex"])) //transactionIndex string = ""
+	transactionIndex, err := hexutil.DecodeBig(setZeroHex(resMap["transactionIndex"])) // transactionIndex string = ""
 	if err != nil {
 		return nil, errors.New("response[transactionIndex] is invalid")
 	}
-	value, err := hexutil.DecodeBig(setZeroHex(resMap["value"])) //value string = "0xde0b6b3a7640000"
+	value, err := hexutil.DecodeBig(setZeroHex(resMap["value"])) // value string = "0xde0b6b3a7640000"
 	if err != nil {
 		return nil, errors.New("response[value] is invalid")
 	}
-	v, err := hexutil.DecodeBig(setZeroHex(resMap["v"])) //v string = "0x2a"
+	v, err := hexutil.DecodeBig(setZeroHex(resMap["v"])) // v string = "0x2a"
 	if err != nil {
 		return nil, errors.New("response[v] is invalid")
 	}
@@ -178,7 +174,6 @@ func (e *Ethereum) GetTransactionByHash(hashTx string) (*ResponseGetTransaction,
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionreceipt
 // Note, tis is not available for pending transactions
 func (e *Ethereum) GetTransactionReceipt(hashTx string) (*ResponseGetTransactionReceipt, error) {
-
 	// timeout
 	ch := make(chan error, 1)
 	// FIXME: timeout configuration
@@ -187,7 +182,7 @@ func (e *Ethereum) GetTransactionReceipt(hashTx string) (*ResponseGetTransaction
 		cancel()
 	}()
 
-	//call
+	// call
 	var resMap map[string]interface{}
 	go func() {
 		err := e.rpcClient.CallContext(ctx, &resMap, "eth_getTransactionReceipt", hashTx)
@@ -197,7 +192,7 @@ func (e *Ethereum) GetTransactionReceipt(hashTx string) (*ResponseGetTransaction
 		ch <- nil
 	}()
 
-	//wait by timeout
+	// wait by timeout
 	select {
 	case <-ctx.Done():
 		err := ctx.Err()
@@ -251,7 +246,7 @@ func (e *Ethereum) GetTransactionReceipt(hashTx string) (*ResponseGetTransaction
 	if err != nil {
 		return nil, errors.New("response[gasUsed] is invalid")
 	}
-	//contractAddress would be nil sometimes
+	// contractAddress would be nil sometimes
 	var contractAddress string
 	if resMap["contractAddress"] == nil {
 		contractAddress = ""

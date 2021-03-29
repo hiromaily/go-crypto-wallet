@@ -56,9 +56,8 @@ func NewFileRepository(filePath string, logger *zap.Logger) *FileRepository {
 
 // CreateFilePath create file path for transaction file
 func (r *FileRepository) CreateFilePath(actionType action.ActionType, txType TxType, txID int64, signedCount int) string {
-
 	// ./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209
-	//baseDir := fmt.Sprintf("%s%s/", r.filePath, actionType.String())
+	// baseDir := fmt.Sprintf("%s%s/", r.filePath, actionType.String())
 
 	// ./data/tx/eth/deposit_8_unsigned_0_1534744535097796209
 	baseDir := r.filePath
@@ -72,12 +71,12 @@ func (r *FileRepository) GetFileNameType(filePath string) (*FileName, error) {
 	tmp := strings.Split(filePath, "/")
 	fileName := tmp[len(tmp)-1]
 
-	//deposit_5_unsigned_0_1534466246366489473
-	//s[0]: actionType
-	//s[1]: txID
-	//s[2]: txType
-	//s[3]: signedCount , first value is 0
-	//s[4]: timestamp
+	// deposit_5_unsigned_0_1534466246366489473
+	// s[0]: actionType
+	// s[1]: txID
+	// s[2]: txType
+	// s[3]: signedCount , first value is 0
+	// s[4]: timestamp
 	s := strings.Split(fileName, "_")
 	if len(s) != 5 {
 		return nil, errors.Errorf("invalid file path: %s", fileName)
@@ -85,26 +84,26 @@ func (r *FileRepository) GetFileNameType(filePath string) (*FileName, error) {
 
 	fileNameType := FileName{}
 
-	//Action
+	// Action
 	if !action.ValidateActionType(s[0]) {
 		return nil, errors.Errorf("invalid file name: %s", fileName)
 	}
 	fileNameType.ActionType = action.ActionType(s[0])
 
-	//txID
+	// txID
 	var err error
 	fileNameType.TxID, err = strconv.ParseInt(s[1], 10, 64)
 	if err != nil {
 		return nil, errors.Errorf("invalid file name: %s", fileName)
 	}
 
-	//txType
+	// txType
 	if !ValidateTxType(s[2]) {
 		return nil, errors.Errorf("invalid name: %s", fileName)
 	}
 	fileNameType.TxType = TxType(s[2])
 
-	//signedCount
+	// signedCount
 	signedCount, err := strconv.Atoi(s[3])
 	if err != nil {
 		return nil, errors.Errorf("invalid name: %s", fileName)
@@ -120,8 +119,8 @@ func (r *FileRepository) ValidateFilePath(filePath string, expectedTxType TxType
 	if err != nil {
 		return "", "", 0, 0, err
 	}
-	//txType
-	//if !(fileType.TxType).Search(expectedTxTypes) {
+	// txType
+	// if !(fileType.TxType).Search(expectedTxTypes) {
 	if fileType.TxType != expectedTxType {
 		return "", "", 0, 0, errors.Errorf("txType is invalid: %s", fileType.TxType)
 	}
@@ -160,8 +159,7 @@ func (r *FileRepository) ReadFileSlice(path string) ([]string, error) {
 
 // WriteFile write file
 func (r *FileRepository) WriteFile(path, hexTx string) (string, error) {
-
-	//crate directory if not exisiting
+	// crate directory if not exisiting
 	r.createDir(path)
 
 	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
@@ -178,8 +176,7 @@ func (r *FileRepository) WriteFile(path, hexTx string) (string, error) {
 
 // WriteFileSlice write slice to file
 func (r *FileRepository) WriteFileSlice(path string, data []string) (string, error) {
-
-	//crate directory if not exisiting
+	// crate directory if not exisiting
 	r.createDir(path)
 
 	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
@@ -203,7 +200,7 @@ func (r *FileRepository) WriteFileSlice(path string, data []string) (string, err
 
 func (r *FileRepository) createDir(path string) {
 	tmp1 := strings.Split(path, "/")
-	tmp2 := tmp1[0 : len(tmp1)-1] //cut filename
+	tmp2 := tmp1[0 : len(tmp1)-1] // cut filename
 	dir := strings.Join(tmp2, "/")
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.Mkdir(dir, 0755)

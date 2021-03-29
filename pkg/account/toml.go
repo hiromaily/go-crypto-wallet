@@ -35,10 +35,10 @@ func NewAccount(file string) (*AccountRoot, error) {
 		return nil, err
 	}
 
-	//debug
-	//grok.Value(conf)
+	// debug
+	// grok.Value(conf)
 
-	//validate
+	// validate
 	if err = conf.validate(); err != nil {
 		return nil, err
 	}

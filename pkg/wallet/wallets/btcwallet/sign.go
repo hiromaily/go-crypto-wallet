@@ -38,7 +38,6 @@ func NewBTCSign(
 	fullPubkeyExporter service.FullPubkeyExporter,
 	signer service.Signer,
 	wtype wallet.WalletType) *BTCSign {
-
 	return &BTCSign{
 		BTC:                btc,
 		dbConn:             dbConn,

@@ -17,7 +17,7 @@ type Ripple struct {
 	wsAdmin      *ws.WS
 	API          *RippleAPI
 	chainConf    *chaincfg.Params
-	coinTypeCode coin.CoinTypeCode //eth
+	coinTypeCode coin.CoinTypeCode // eth
 	logger       *zap.Logger
 	ctx          context.Context
 }
@@ -31,7 +31,6 @@ func NewRipple(
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Ripple,
 	logger *zap.Logger) (*Ripple, error) {
-
 	xrp := &Ripple{
 		wsPublic:     wsPublic,
 		wsAdmin:      wsAdmin,

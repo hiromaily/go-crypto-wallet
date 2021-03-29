@@ -18,9 +18,9 @@ type FullPubKeyFormat struct {
 
 // CreateLine creates line for csv
 func CreateLine(coinTypeCode coin.CoinTypeCode, authType account.AuthType, fullPubKey string) string {
-	//0: coinTypeCode
-	//1: authType
-	//2: fullPubKey
+	// 0: coinTypeCode
+	// 1: authType
+	// 2: fullPubKey
 	return fmt.Sprintf("%s,%s,%s\n", coinTypeCode.String(), authType.String(), fullPubKey)
 }
 

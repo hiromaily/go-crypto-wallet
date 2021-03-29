@@ -51,7 +51,7 @@ func (c *HDKeyCommand) Run(args []string) int {
 		return 1
 	}
 
-	//validator
+	// validator
 	if keyNum == 0 {
 		c.ui.Error("number of key option [-keynum] is required")
 		return 1
@@ -72,7 +72,7 @@ func (c *HDKeyCommand) Run(args []string) int {
 		return 1
 	}
 
-	//generate key for hd wallet
+	// generate key for hd wallet
 	keys, err := c.wallet.GenerateAccountKey(account.AccountType(acnt), bSeed, uint32(keyNum), isKeyPair)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call GenerateAccountKey() %+v", err))

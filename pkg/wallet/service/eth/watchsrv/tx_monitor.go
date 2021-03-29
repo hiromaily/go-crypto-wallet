@@ -33,7 +33,6 @@ func NewTxMonitor(
 	txDetailRepo watchrepo.EthDetailTxRepositorier,
 	confirmNum uint64,
 	wtype wallet.WalletType) *TxMonitor {
-
 	return &TxMonitor{
 		eth:          eth,
 		logger:       logger,
@@ -48,7 +47,7 @@ func NewTxMonitor(
 // UpdateTxStatus update transaction status
 // - monitor transaction whose tx_type=3(TxTypeSent) in tx_payment/tx_deposit/tx_transfer
 func (t *TxMonitor) UpdateTxStatus() error {
-	//TODO: as possibility tx_type is not updated from `done`
+	// TODO: as possibility tx_type is not updated from `done`
 
 	//types := []action.ActionType{
 	//	action.ActionTypeDeposit,
@@ -56,7 +55,7 @@ func (t *TxMonitor) UpdateTxStatus() error {
 	//	action.ActionTypeTransfer,
 	//}
 
-	//1. update tx_type for TxTypeSent
+	// 1. update tx_type for TxTypeSent
 	err := t.updateStatusTxTypeSent()
 	if err != nil {
 		return errors.Wrap(err, "fail to call updateStatusTxTypeSent()")

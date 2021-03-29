@@ -30,7 +30,6 @@ func NewTxMonitor(
 	addrRepo watchrepo.AddressRepositorier,
 	txDetailRepo watchrepo.XrpDetailTxRepositorier,
 	wtype wallet.WalletType) *TxMonitor {
-
 	return &TxMonitor{
 		xrp:          xrp,
 		logger:       logger,

@@ -19,7 +19,7 @@ func (r *Ripple) CreateRawTransaction(senderAccount, receiverAccount string, amo
 	}
 
 	// get balance
-	//xrp.MinimumReserve
+	// xrp.MinimumReserve
 	accountInfo, err := r.GetAccountInfo(senderAccount)
 	if err != nil {
 		errStatus, _ := status.FromError(err)

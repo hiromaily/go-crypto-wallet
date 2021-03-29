@@ -10,7 +10,7 @@ import (
 
 // TestAccountChannels is test for AccountChannels
 func TestAccountChannels(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	xr := testutil.GetXRP()
 
 	res, err := xr.AccountChannels("rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH", "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn")
@@ -23,7 +23,7 @@ func TestAccountChannels(t *testing.T) {
 
 // TestAccountInfo is test for AccountInfo
 func TestAccountInfo(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	xr := testutil.GetXRP()
 
 	res, err := xr.AccountInfo("rss1EZUwTCPZSTyJiDKvhBfCXjTxffcArZ")

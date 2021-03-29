@@ -14,11 +14,11 @@ type Rippler interface {
 	RipplePublicer
 	RippleAPIer
 
-	//balance
+	// balance
 	GetBalance(addr string) (float64, error)
 	GetTotalBalance(addrs []string) float64
 
-	//transaction
+	// transaction
 	CreateRawTransaction(senderAccount, receiverAccount string, amount float64, instructions *pb.Instructions) (*xrp.TxInput, string, error)
 
 	// ripple

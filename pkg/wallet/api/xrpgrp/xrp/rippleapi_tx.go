@@ -109,7 +109,6 @@ type TxOrderbookChange struct {
 
 // PrepareTransaction calls PrepareTransaction API
 func (r *Ripple) PrepareTransaction(senderAccount, receiverAccount string, amount float64, instructions *pb.Instructions) (*TxInput, string, error) {
-
 	ctx := context.Background()
 	req := &pb.RequestPrepareTransaction{
 		TxType:          pb.TX_PAYMENT,
@@ -117,10 +116,10 @@ func (r *Ripple) PrepareTransaction(senderAccount, receiverAccount string, amoun
 		Amount:          amount,
 		ReceiverAccount: receiverAccount,
 		Instructions:    instructions,
-		//Instructions:    &pb.Instructions{MaxLedgerVersionOffset: MaxLedgerVersionOffset},
+		// Instructions:    &pb.Instructions{MaxLedgerVersionOffset: MaxLedgerVersionOffset},
 	}
 
-	//res: *pb.ResponsePrepareTransaction
+	// res: *pb.ResponsePrepareTransaction
 	res, err := r.API.txClient.PrepareTransaction(ctx, req)
 	if err != nil {
 		return nil, "", errors.Wrap(err, "fail to call client.PrepareTransaction()")
@@ -194,18 +193,18 @@ func (r *Ripple) SubmitTransaction(signedTx string) (*SentTx, uint64, error) {
 		return nil, 0, errors.Wrap(err, "fail to call json.Unmarshal(sentTxJSON)")
 	}
 
-	//FIXME:
+	// FIXME:
 	// res.EarliestLedgerVersion may be useless because SentTxJSON includes `LastLedgerSequence` and it would be useful
 	r.logger.Debug("response of submitTransaction",
 		zap.String("res.ResultJSONString", res.ResultJSONString),
 		zap.Uint64("res.EarliestLedgerVersion", res.EarliestLedgerVersion),
 		zap.Uint64("sentTxJSON.TxJSON.LastLedgerSequence", sentTxJSON.TxJSON.LastLedgerSequence),
 	)
-	//res.EarliestLedgerVersion => for when calling GetTransaction()
-	//sentTxJSON.TxJSON.LastLedgerSequence => for when calling WaitValidation()
+	// res.EarliestLedgerVersion => for when calling GetTransaction()
+	// sentTxJSON.TxJSON.LastLedgerSequence => for when calling WaitValidation()
 
 	return &sentTxJSON, res.EarliestLedgerVersion, nil
-	//return &sentTxJSON, sentTxJSON.TxJSON.LastLedgerSequence, nil
+	// return &sentTxJSON, sentTxJSON.TxJSON.LastLedgerSequence, nil
 }
 
 // WaitValidation calls WaitValidation API
@@ -246,7 +245,7 @@ func (r *Ripple) WaitValidation(targetledgerVarsion uint64) (uint64, error) {
 			} else {
 				r.logger.Warn("fail to call resStream.Recv()", zap.Error(err))
 			}
-			//break
+			// break
 			return 0, errors.Wrap(err, "fail to call resStream.Recv()")
 		}
 		// success
@@ -283,7 +282,7 @@ func (r *Ripple) GetTransaction(txID string, targetLedgerVersion uint64) (*TxInf
 	if err = json.Unmarshal([]byte(res.ResultJSONString), &txInfo); err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Unmarshal(txInfo)")
 	}
-	//TODO: check
-	//txInfo.Outcome.Result : tesSUCCESS
+	// TODO: check
+	// txInfo.Outcome.Result : tesSUCCESS
 	return &txInfo, nil
 }

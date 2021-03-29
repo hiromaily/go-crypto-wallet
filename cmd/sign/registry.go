@@ -128,6 +128,7 @@ func (r *registry) newFullPubkeyExporter() service.FullPubkeyExporter {
 		r.walletType,
 	)
 }
+
 func (r *registry) newSigner() service.Signer {
 	return coldsrv.NewSign(
 		r.newBTC(),

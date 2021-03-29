@@ -48,7 +48,7 @@ func (e *Ethereum) getNonce(fromAddr string, additionalNonce int) (uint64, error
 	}
 	e.logger.Debug("nonce",
 		zap.Uint64("GetTransactionCount(fromAddr, QuantityTagPending)", nonce.Uint64()),
-		//zap.Uint64("ethClient.PendingNonceAt(e.ctx, common.HexToAddress(fromAddr))", nonce2),
+		// zap.Uint64("ethClient.PendingNonceAt(e.ctx, common.HexToAddress(fromAddr))", nonce2),
 	)
 
 	return nonce.Uint64(), nil
@@ -57,7 +57,6 @@ func (e *Ethereum) getNonce(fromAddr string, additionalNonce int) (uint64, error
 // How to calculate transaction fee?
 // https://ethereum.stackexchange.com/questions/19665/how-to-calculate-transaction-fee
 func (e *Ethereum) calculateFee(fromAddr, toAddr common.Address, balance, gasPrice, value *big.Int) (*big.Int, *big.Int, *big.Int, error) {
-
 	msg := &ethereum.CallMsg{
 		From:     fromAddr,
 		To:       &toAddr,
@@ -71,9 +70,9 @@ func (e *Ethereum) calculateFee(fromAddr, toAddr common.Address, balance, gasPri
 	if err != nil {
 		return nil, nil, nil, errors.Wrap(err, "fail to call EstimateGas()")
 	}
-	//txFee := gasPrice * estimatedGas
+	// txFee := gasPrice * estimatedGas
 	txFee := new(big.Int).Mul(gasPrice, estimatedGas)
-	//newValue := value - txFee
+	// newValue := value - txFee
 	newValue := new(big.Int)
 	if value.Uint64() == 0 {
 		// receiver pays fee (deposit, transfer(pays all) action)
@@ -81,8 +80,8 @@ func (e *Ethereum) calculateFee(fromAddr, toAddr common.Address, balance, gasPri
 	} else {
 		// sender pays fee (payment, transfer(pays partially)
 		newValue = value
-		//newValue = newValue.Sub(value, txFee)
-		//if balance.Cmp(value) == -1 {
+		// newValue = newValue.Sub(value, txFee)
+		// if balance.Cmp(value) == -1 {
 		if balance.Cmp(new(big.Int).Add(value, txFee)) == -1 {
 			//   -1 if x <  y
 			//    0 if x == y
@@ -130,14 +129,14 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64, 
 	}
 
 	// gasPrice
-	//e.ethClient.SuggestGasPrice()
+	// e.ethClient.SuggestGasPrice()
 	gasPrice, err := e.GasPrice()
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "fail to call eth.GasPrice()")
 	}
 	e.logger.Info("gas_price", zap.Int64("gas_price", gasPrice.Int64()))
 
-	//fromAddr, toAddr common.Address, gasPrice, value *big.Int
+	// fromAddr, toAddr common.Address, gasPrice, value *big.Int
 	newValue, txFee, estimatedGas, err := e.calculateFee(
 		common.HexToAddress(fromAddr),
 		common.HexToAddress(toAddr),
@@ -149,7 +148,7 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64, 
 		return nil, nil, errors.Wrap(err, "fail to call eth.calculateFee()")
 	}
 
-	//TODO: which value should be used for args of types.NewTransaction()
+	// TODO: which value should be used for args of types.NewTransaction()
 	e.logger.Debug("comparison",
 		zap.Uint64("GasLimit", GasLimit),
 		zap.Uint64("estimatedGas", estimatedGas.Uint64()),
@@ -183,7 +182,7 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64, 
 		UnsignedHexTX:   *rawTxHex,
 	}
 
-	//RawTx
+	// RawTx
 	rawtx := &RawTx{
 		UUID:  uid,
 		From:  fromAddr,

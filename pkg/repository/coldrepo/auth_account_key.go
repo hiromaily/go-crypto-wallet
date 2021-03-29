@@ -37,7 +37,6 @@ func NewAuthAccountKeyRepository(
 	coinTypeCode coin.CoinTypeCode,
 	authType account.AuthType,
 	logger *zap.Logger) *AuthAccountKeyRepository {
-
 	return &AuthAccountKeyRepository{
 		dbConn:       dbConn,
 		tableName:    "auth_account_key",

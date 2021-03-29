@@ -40,7 +40,7 @@ func TestValidationAddr(t *testing.T) {
 			}
 		})
 	}
-	//et.Close()
+	// et.Close()
 }
 
 // TestValidationAddr is test for ValidationAddr
@@ -82,5 +82,5 @@ func TestConvertToWei(t *testing.T) {
 			}
 		})
 	}
-	//et.Close()
+	// et.Close()
 }

@@ -46,7 +46,7 @@ func (c *ImportCommand) Run(args []string) int {
 		return 1
 	}
 
-	//farther subcommand import
+	// farther subcommand import
 	cmds := map[string]cli.CommandFactory{
 		"privkey": func() (cli.Command, error) {
 			return &PrivKeyCommand{

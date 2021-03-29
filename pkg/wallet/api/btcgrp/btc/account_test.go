@@ -8,7 +8,7 @@ import (
 
 // TestGetAccount is test for GetAccount
 func TestGetAccount(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	bc := testutil.GetBTC()
 
 	type args struct {
@@ -48,5 +48,5 @@ func TestGetAccount(t *testing.T) {
 			t.Log(res)
 		})
 	}
-	//bc.Close()
+	// bc.Close()
 }

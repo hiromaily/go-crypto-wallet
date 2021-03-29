@@ -23,9 +23,7 @@ func (c *ImportCommand) Synopsis() string {
 	return "importing functionality"
 }
 
-var (
-	addressSynopsis = "import generatd addresses by keygen wallet"
-)
+var addressSynopsis = "import generatd addresses by keygen wallet"
 
 // Help returns usage for this subcommand
 func (c *ImportCommand) Help() string {
@@ -44,7 +42,7 @@ func (c *ImportCommand) Run(args []string) int {
 		return 1
 	}
 
-	//farther subcommand import
+	// farther subcommand import
 	cmds := map[string]cli.CommandFactory{
 		"address": func() (cli.Command, error) {
 			return &AddressCommand{

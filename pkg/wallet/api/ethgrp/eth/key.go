@@ -44,13 +44,12 @@ func (e *Ethereum) ToECDSA(privKey string) (*ecdsa.PrivateKey, error) {
 
 // GetKeyDir returns keystore directory
 func (e *Ethereum) GetKeyDir(accountType account.AccountType) string {
-	//return fmt.Sprintf("%s/%s", e.keyDir, accountType.String())
+	// return fmt.Sprintf("%s/%s", e.keyDir, accountType.String())
 	return e.keyDir
 }
 
 // GetPrivKey returns keystore.Key object
 func (e *Ethereum) GetPrivKey(hexAddr, password string, accountType account.AccountType) (*keystore.Key, error) {
-
 	keyDir := e.GetKeyDir(accountType)
 	e.logger.Debug("key_dir", zap.String("key_dir", keyDir))
 
@@ -74,7 +73,6 @@ func (e *Ethereum) GetPrivKey(hexAddr, password string, accountType account.Acco
 // Note: file is found out from local directory,
 //  if node is working remotely, file is not found.
 func (e *Ethereum) readPrivKey(hexAddr, path string) ([]byte, error) {
-
 	// search file
 	// filename is like `UTC--2020-05-18T16-01-32.772616000Z--e52307deb1a7dc3985d2873b45ae23b91d57a36d`
 	//                   UTC--2020-05-22T13-59-51.645058000Z--d4ec46122b3f0afc0287144adcca5d65b22b799c
@@ -127,7 +125,7 @@ func (e *Ethereum) RenameParityKeyFile(hexAddr string, accountType account.Accou
 	// remove `0x`を from hexAddr
 	addr := strings.TrimLeft(hexAddr, "0x")
 
-	//rename xxxxx--[address]
+	// rename xxxxx--[address]
 	previousName := fmt.Sprintf("%s/%s", e.GetKeyDir(accountType), target)
 	os.Rename(previousName, fmt.Sprintf("%s--%s", previousName, addr))
 

@@ -6,11 +6,11 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
-//TODO: mock of bitcoin interface is required to test
+// TODO: mock of bitcoin interface is required to test
 
 // TestGetAddressInfo is test for GetAddressInfo
 func TestGetAddressInfo(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	bc := testutil.GetBTC()
 
 	type args struct {
@@ -50,12 +50,12 @@ func TestGetAddressInfo(t *testing.T) {
 			t.Log(res)
 		})
 	}
-	//bc.Close()()()
+	// bc.Close()()()
 }
 
 // TestGetAddressesByLabel is test for GetAddressesByLabel
 func TestGetAddressesByLabel(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	bc := testutil.GetBTC()
 	type args struct {
 		labelName string
@@ -83,7 +83,7 @@ func TestGetAddressesByLabel(t *testing.T) {
 			}
 		})
 	}
-	//bc.Close()()()
+	// bc.Close()()()
 }
 
 // TestValidateAddress is test for ValidateAddress
@@ -128,5 +128,5 @@ func TestValidateAddress(t *testing.T) {
 		})
 	}
 
-	//bc.Close()
+	// bc.Close()
 }

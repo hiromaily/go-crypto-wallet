@@ -1,6 +1,6 @@
 package wallet
 
-//WalletType wallet type
+// WalletType wallet type
 type WalletType string
 
 // wallet_type

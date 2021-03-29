@@ -10,10 +10,10 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 
-//sqlx
+// sqlx
 // http://jmoiron.github.io/sqlx/#bindvars
 
-//sqlboiler
+// sqlboiler
 // https://github.com/volatiletech/sqlboiler
 
 // NewMySQL connect to MySQL server
@@ -28,7 +28,6 @@ func NewMySQL(conf *config.MySQL) (*sql.DB, error) {
 			conf.Pass,
 			conf.Host,
 			conf.DB))
-
 	if err != nil {
 		return nil, errors.Errorf("Connection(): error: %v", err)
 	}
@@ -47,7 +46,6 @@ func NewMySQLX(conf *config.MySQL) (*sqlx.DB, error) {
 			conf.Pass,
 			conf.Host,
 			conf.DB))
-
 	if err != nil {
 		return nil, errors.Errorf("Connection(): error: %v", err)
 	}

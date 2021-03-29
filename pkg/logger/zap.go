@@ -43,7 +43,7 @@ func NewLoggerWithWriter(w io.Writer, env LogEnv, lv zapcore.LevelEnabler, isSta
 			EncodeTime:     zapcore.ISO8601TimeEncoder,
 			EncodeDuration: zapcore.StringDurationEncoder,
 		}
-	//case LogProd:
+	// case LogProd:
 	default:
 		encoderCfg = zap.NewProductionEncoderConfig()
 		encoderCfg.TimeKey = "time"

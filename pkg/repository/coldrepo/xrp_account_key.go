@@ -85,7 +85,7 @@ func (r *XRPAccountKeyRepository) InsertBulk(items []*models.XRPAccountKey) erro
 
 // UpdateAddrStatus updates addr_status
 func (r *XRPAccountKeyRepository) UpdateAddrStatus(accountType account.AccountType, addrStatus address.AddrStatus, accountIDs []string) (int64, error) {
-	//sql := `UPDATE %s SET addr_status=? WHERE wallet_import_format=?`
+	// sql := `UPDATE %s SET addr_status=? WHERE wallet_import_format=?`
 	ctx := context.Background()
 
 	// Set updating columns

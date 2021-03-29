@@ -25,24 +25,23 @@ func (b *Bitcoin) AddMultisigAddress(
 	addresses []string,
 	accountName string,
 	addressType address.AddrType) (*AddMultisigAddressResult, error) {
-
 	if requiredSigs > len(addresses) {
 		return nil, errors.Errorf("number of given address doesn't meet number of requiredSigs: requiredSigs:%d, len(addresses):%d", requiredSigs, len(addresses))
 	}
 
-	//requiredSigs
+	// requiredSigs
 	bRequiredSigs, err := json.Marshal(requiredSigs)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Marchal(requiredSigs)")
 	}
 
-	//addresses
+	// addresses
 	bAddresses, err := json.Marshal(addresses)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Marchal(addresses)")
 	}
 
-	//accountName
+	// accountName
 	bAccount, err := json.Marshal(accountName)
 	if err != nil {
 		b.logger.Warn(
@@ -52,7 +51,7 @@ func (b *Bitcoin) AddMultisigAddress(
 		bAccount = nil
 	}
 
-	//addressType for only BTC
+	// addressType for only BTC
 	var jsonRawMsg []json.RawMessage
 	switch b.coinTypeCode {
 	case coin.BTC:
@@ -72,7 +71,7 @@ func (b *Bitcoin) AddMultisigAddress(
 		return nil, errors.Errorf("not implemented for %s in AddMultisigAddress()", b.coinTypeCode.String())
 	}
 
-	//call addmultisigaddress
+	// call addmultisigaddress
 	rawResult, err := b.Client.RawRequest("addmultisigaddress", jsonRawMsg)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call client.RawRequest(addmultisigaddress)")

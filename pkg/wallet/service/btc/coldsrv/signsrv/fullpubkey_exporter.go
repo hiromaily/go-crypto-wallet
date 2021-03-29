@@ -34,7 +34,6 @@ func NewFullPubkeyExport(
 	coinTypeCode coin.CoinTypeCode,
 	authType account.AuthType,
 	wtype wallet.WalletType) *FullPubkeyExport {
-
 	return &FullPubkeyExport{
 		logger:         logger,
 		authKeyRepo:    authKeyRepo,
@@ -64,7 +63,7 @@ func (f *FullPubkeyExport) ExportFullPubkey() (string, error) {
 
 // exportAccountKey export account_key_table as csv file
 func (f *FullPubkeyExport) exportAccountKey(authKeyTable *models.AuthAccountKey, authType account.AuthType) (string, error) {
-	//create fileName
+	// create fileName
 	fileName := f.pubkeyFileRepo.CreateFilePath(f.authType.AccountType())
 
 	file, err := os.Create(fileName)
@@ -75,7 +74,7 @@ func (f *FullPubkeyExport) exportAccountKey(authKeyTable *models.AuthAccountKey,
 
 	writer := bufio.NewWriter(file)
 
-	//output: coinType, authType, fullPubkey
+	// output: coinType, authType, fullPubkey
 	_, err = writer.WriteString(fullpubkey.CreateLine(f.coinTypeCode, authType, authKeyTable.FullPublicKey))
 	if err != nil {
 		return "", errors.Wrapf(err, "fail to call writer.WriteString(%s)", fileName)

@@ -37,7 +37,6 @@ func NewETHKeygen(
 	addressExporter service.AddressExporter,
 	signer service.Signer,
 ) *ETHKeygen {
-
 	return &ETHKeygen{
 		ETH:             eth,
 		logger:          logger,
@@ -73,14 +72,14 @@ func (k *ETHKeygen) ImportPrivKey(accountType account.AccountType) error {
 
 // ImportFullPubKey imports full-pubkey
 func (k *ETHKeygen) ImportFullPubKey(fileName string) error {
-	//return k.FullPubKeyImporter.ImportFullPubKey(fileName)
+	// return k.FullPubKeyImporter.ImportFullPubKey(fileName)
 	k.logger.Info("no functionality for ImportFullPubKey() in ETH")
 	return nil
 }
 
 // CreateMultisigAddress creates multi sig address returns Multisiger interface
 func (k *ETHKeygen) CreateMultisigAddress(accountType account.AccountType) error {
-	//return k.Multisiger.AddMultisigAddress(accountType, k.addrType)
+	// return k.Multisiger.AddMultisigAddress(accountType, k.addrType)
 	k.logger.Info("no functionality for CreateMultisigAddress() in ETH")
 	return nil
 }

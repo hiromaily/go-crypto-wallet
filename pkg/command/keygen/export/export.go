@@ -23,9 +23,7 @@ func (c *ExportCommand) Synopsis() string {
 	return "export resources"
 }
 
-var (
-	addressSynopsis = "export generated PublicKey as csv file"
-)
+var addressSynopsis = "export generated PublicKey as csv file"
 
 // Help returns usage for this subcommand
 func (c *ExportCommand) Help() string {
@@ -44,7 +42,7 @@ func (c *ExportCommand) Run(args []string) int {
 		return 1
 	}
 
-	//farther subcommand import
+	// farther subcommand import
 	cmds := map[string]cli.CommandFactory{
 		"address": func() (cli.Command, error) {
 			return &AddressCommand{

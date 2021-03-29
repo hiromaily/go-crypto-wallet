@@ -23,7 +23,7 @@ import (
 //  - sing on unsigned transaction as first signature
 //   (signature would not be completed if address is multisig)
 
-//TODO: bitcoin functionalities
+// TODO: bitcoin functionalities
 // - encrypt wallet itself by `encryptwallet` command
 // - passphrase would be required when using secret key to sign unsigned transaction
 
@@ -117,7 +117,7 @@ func main() {
 		walleter.Done()
 	}()
 
-	//sub command
+	// sub command
 	args := flags.Args()
 	cmds := keygen.WalletSubCommands(walleter, appVersion)
 	cl := command.CreateSubCommand(appName, appVersion, args, cmds)

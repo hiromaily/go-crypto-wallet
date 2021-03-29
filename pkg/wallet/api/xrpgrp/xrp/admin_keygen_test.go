@@ -10,7 +10,7 @@ import (
 
 // TestValidationCreate is test for ValidationCreate
 func TestValidationCreate(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	xr := testutil.GetXRP()
 
 	type args struct {
@@ -53,7 +53,7 @@ func TestValidationCreate(t *testing.T) {
 
 // TestWalletPropose is test for WalletPropose
 func TestWalletPropose(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	xr := testutil.GetXRP()
 
 	type args struct {

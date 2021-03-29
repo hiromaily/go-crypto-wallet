@@ -8,7 +8,7 @@ import (
 
 // TestGetTotalBalance is test for GetTotalBalance
 func TestGetTotalBalance(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	type args struct {
@@ -43,5 +43,5 @@ func TestGetTotalBalance(t *testing.T) {
 			t.Log(userAmounts)
 		})
 	}
-	//et.Close()
+	// et.Close()
 }

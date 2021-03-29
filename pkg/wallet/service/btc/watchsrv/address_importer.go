@@ -38,7 +38,6 @@ func NewAddressImport(
 	coinTypeCode coin.CoinTypeCode,
 	addrType address.AddrType,
 	wtype wallet.WalletType) *AddressImport {
-
 	return &AddressImport{
 		btc:          btc,
 		logger:       logger,
@@ -78,21 +77,21 @@ func (a *AddressImport) ImportAddress(fileName string, isRescan bool) error {
 				case address.AddrTypeBech32:
 					targetAddr = addrFmt.Bech32Address
 				default:
-					targetAddr = addrFmt.P2SHSegwitAddress //p2sh_segwit_address
+					targetAddr = addrFmt.P2SHSegwitAddress // p2sh_segwit_address
 				}
 			case coin.BCH:
-				targetAddr = addrFmt.P2PKHAddress //p2pkh_address
+				targetAddr = addrFmt.P2PKHAddress // p2pkh_address
 			default:
 				return errors.Errorf("coinTypeCode is out of range: %s", a.btc.CoinTypeCode().String())
 			}
 		} else {
-			targetAddr = addrFmt.MultisigAddress //multisig_address
+			targetAddr = addrFmt.MultisigAddress // multisig_address
 		}
 
-		//call bitcoin API `importaddress` with account(label)
-		//Note: Error would occur when using only 1 bitcoin core server under development
+		// call bitcoin API `importaddress` with account(label)
+		// Note: Error would occur when using only 1 bitcoin core server under development
 		// because address is already imported
-		//isRescan would be `false` usually
+		// isRescan would be `false` usually
 		err = a.btc.ImportAddressWithLabel(targetAddr, addrFmt.AccountType.String(), isRescan)
 		if err != nil {
 			//-4: The wallet already contains the private key for this address or script
@@ -110,15 +109,15 @@ func (a *AddressImport) ImportAddress(fileName string, isRescan bool) error {
 			WalletAddress: targetAddr,
 		})
 
-		//confirm pubkey is added as watch only wallet
+		// confirm pubkey is added as watch only wallet
 		a.checkImportedPubKey(targetAddr)
 	}
 
-	//insert imported pubKey
+	// insert imported pubKey
 	err = a.addrRepo.InsertBulk(pubKeyData)
 	if err != nil {
 		return errors.Wrap(err, "fail to call repo.Pubkey().InsertBulk()")
-		//TODO:What if this inserting is failed, how it can be recovered to keep consistancy
+		// TODO:What if this inserting is failed, how it can be recovered to keep consistancy
 		// pubkey is added in wallet, but database doesn't have records
 		// try to run this func again
 	}
@@ -145,6 +144,6 @@ func (a *AddressImport) checkImportedPubKey(addr string) {
 	// result would be `iswatchonly=false`
 	if !addrInfo.Iswatchonly {
 		a.logger.Warn("this address must be watch only wallet")
-		//grok.Value(addrInfo)
+		// grok.Value(addrInfo)
 	}
 }

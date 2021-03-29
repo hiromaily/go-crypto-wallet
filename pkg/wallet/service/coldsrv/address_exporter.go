@@ -34,7 +34,6 @@ func NewAddressExport(
 	multisigAccount account.MultisigAccounter,
 	coinTypeCode coin.CoinTypeCode,
 	wtype wallet.WalletType) *AddressExport {
-
 	return &AddressExport{
 		logger:          logger,
 		accountKeyRepo:  accountKeyRepo,
@@ -96,7 +95,7 @@ func (a *AddressExport) ExportAddress(accountType account.AccountType) (string, 
 
 // exportAccountKey export account_key_table as csv file
 func (a *AddressExport) exportAccountKey(accountKeyTable []*models.AccountKey, accountType account.AccountType) (string, error) {
-	//create fileName
+	// create fileName
 	fileName := a.addrFileRepo.CreateFilePath(accountType)
 
 	file, err := os.Create(fileName)
@@ -109,7 +108,7 @@ func (a *AddressExport) exportAccountKey(accountKeyTable []*models.AccountKey, a
 
 	// export any address, wallet side chooses proper address/
 	for _, record := range accountKeyTable {
-		//each line of csv data
+		// each line of csv data
 		tmpData := address.CreateLine(record)
 		_, err = writer.WriteString(strings.Join(tmpData[:], ",") + "\n")
 		if err != nil {

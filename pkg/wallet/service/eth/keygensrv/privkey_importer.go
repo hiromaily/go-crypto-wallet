@@ -27,7 +27,6 @@ func NewPrivKey(
 	logger *zap.Logger,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	wtype wallet.WalletType) *PrivKey {
-
 	return &PrivKey{
 		eth:            eth,
 		logger:         logger,
@@ -38,8 +37,8 @@ func NewPrivKey(
 
 // Import imports privKey for accountKey for ETH
 func (p *PrivKey) Import(accountType account.AccountType) error {
-	//1. retrieve records(private key) from account_key table
-	accountKeyTable, err := p.accountKeyRepo.GetAllAddrStatus(accountType, address.AddrStatusHDKeyGenerated) //addr_status=0
+	// 1. retrieve records(private key) from account_key table
+	accountKeyTable, err := p.accountKeyRepo.GetAllAddrStatus(accountType, address.AddrStatusHDKeyGenerated) // addr_status=0
 	if err != nil {
 		return errors.Wrap(err, "fail to call repo.GetAllAccountKeyByAddrStatus()")
 	}
@@ -51,7 +50,7 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 	// keystore directory is linked to any apis to get accounts
 	// so multiple directories are not good idea
 	p.logger.Debug("NewKeyStore", zap.String("key_dir", p.eth.GetKeyDir(accountType)))
-	//keyDir := fmt.Sprintf("%s/%s", p.keyDir, accountType.String())
+	// keyDir := fmt.Sprintf("%s/%s", p.keyDir, accountType.String())
 	ks := keystore.NewKeyStore(p.eth.GetKeyDir(accountType), keystore.StandardScryptN, keystore.StandardScryptP)
 
 	for _, record := range accountKeyTable {
@@ -61,14 +60,14 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 			zap.String("address", record.P2PKHAddress),
 			zap.String("private key", record.WalletImportFormat))
 
-		//generatedAddr, err := p.eth.ImportRawKey(record.WalletImportFormat, "password")
+		// generatedAddr, err := p.eth.ImportRawKey(record.WalletImportFormat, "password")
 		ecdsaKey, err := p.eth.ToECDSA(record.WalletImportFormat)
 		if err != nil {
 			p.logger.Warn(
 				"fail to call key.ToECDSA()",
 				zap.String("private key", record.WalletImportFormat),
 				zap.Error(err))
-			//continue
+			// continue
 			return errors.Wrap(err, "fail to call key.ToECDSA()")
 		}
 		// FIXME: how to link imported key to specific accountName like client, deposit (grouping)
@@ -81,7 +80,7 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 				"fail to call eth.ImportECDSA()",
 				zap.String("private key", record.WalletImportFormat),
 				zap.Error(err))
-			//continue
+			// continue
 			return errors.Wrap(err, "fail to call eth.ImportECDSA()")
 		}
 		p.logger.Debug("key account is generated",
@@ -98,7 +97,7 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 			)
 		}
 
-		//update DB
+		// update DB
 		_, err = p.accountKeyRepo.UpdateAddrStatus(accountType, address.AddrStatusPrivKeyImported, []string{record.WalletImportFormat})
 		if err != nil {
 			p.logger.Error(

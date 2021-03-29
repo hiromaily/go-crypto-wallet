@@ -46,7 +46,7 @@ func (t *TxCreate) CreatePaymentTx(adjustmentFee float64) (string, string, error
 		return "", "", err
 	}
 	if balance <= requiredAmount {
-		//balance is short
+		// balance is short
 		t.logger.Info("balance for payment account is insufficient")
 		return "", "", nil
 	}
@@ -62,7 +62,7 @@ func (t *TxCreate) CreatePaymentTx(adjustmentFee float64) (string, string, error
 func (t *TxCreate) createPaymentTxOutputs(userPayments []UserPayment, changeAddr string, changeAmount btcutil.Amount) map[btcutil.Address]btcutil.Amount {
 	var (
 		txOutputs = map[btcutil.Address]btcutil.Amount{}
-		//if key of map is btcutil.Address which is interface type, uniqueness can't be found from map key
+		// if key of map is btcutil.Address which is interface type, uniqueness can't be found from map key
 		// so this key is string
 		tmpOutputs = map[string]btcutil.Amount{}
 	)
@@ -81,7 +81,7 @@ func (t *TxCreate) createPaymentTxOutputs(userPayments []UserPayment, changeAddr
 	}
 
 	// add txOutput as change address and amount for change
-	//TODO:
+	// TODO:
 	// - what if user register for address which is same to payment address?
 	//   Though it's impossible in real but systematically possible
 	// - BIP44, hdwallet has `ChangeType`. ideally this address should be used

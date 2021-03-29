@@ -23,9 +23,7 @@ func (c *APICommand) Synopsis() string {
 	return "Bitcoin API functionality"
 }
 
-var (
-	importrawkeySynopsis = "import raw key"
-)
+var importrawkeySynopsis = "import raw key"
 
 // Help returns usage for this subcommand
 func (c *APICommand) Help() string {
@@ -44,7 +42,7 @@ func (c *APICommand) Run(args []string) int {
 		return 1
 	}
 
-	//farther subcommand import
+	// farther subcommand import
 	cmds := map[string]cli.CommandFactory{
 		"importrawkey": func() (cli.Command, error) {
 			return &ImportRawKeyCommand{

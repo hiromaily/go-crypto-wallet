@@ -21,7 +21,6 @@ func NewSeed(
 	logger *zap.Logger,
 	seedRepo coldrepo.SeedRepositorier,
 	wtype wallet.WalletType) *Seed {
-
 	return &Seed{
 		logger:   logger,
 		seedRepo: seedRepo,
@@ -31,7 +30,6 @@ func NewSeed(
 
 // Generate generate seed and store it in database
 func (s *Seed) Generate() ([]byte, error) {
-
 	// retrieve seed from database
 	bSeed, err := s.retrieveSeed()
 	if err == nil {

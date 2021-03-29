@@ -8,7 +8,7 @@ import (
 
 // TestGetNetworkInfo is test for GetNetworkInfo
 func TestGetNetworkInfo(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	bc := testutil.GetBTC()
 
 	// GetNetworkInfo
@@ -18,12 +18,12 @@ func TestGetNetworkInfo(t *testing.T) {
 		t.Log(res)
 	}
 
-	//bc.Close()
+	// bc.Close()
 }
 
 // TestGetBlockchainInfo is test for GetBlockchainInfo
 func TestBlockchainInfo(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	bc := testutil.GetBTC()
 
 	// GetBlockchainInfo
@@ -33,5 +33,5 @@ func TestBlockchainInfo(t *testing.T) {
 		t.Log(res)
 	}
 
-	//bc.Close()
+	// bc.Close()
 }

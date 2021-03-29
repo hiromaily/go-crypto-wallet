@@ -71,7 +71,7 @@ type ResponseWalletPropose struct {
 	Result struct {
 		AccountID     string `json:"account_id"`
 		KeyType       string `json:"key_type"`
-		MasterKey     string `json:"master_key"` //DEPRECATED
+		MasterKey     string `json:"master_key"` // DEPRECATED
 		MasterSeed    string `json:"master_seed"`
 		MasterSeedHex string `json:"master_seed_hex"`
 		PublicKey     string `json:"public_key"`

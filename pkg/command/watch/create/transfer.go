@@ -54,7 +54,7 @@ func (c *TransferCommand) Run(args []string) int {
 		return 1
 	}
 
-	//validator
+	// validator
 	if !account.ValidateAccountType(account1) {
 		c.ui.Error("account option [-account1] is invalid")
 		return 1
@@ -81,7 +81,6 @@ func (c *TransferCommand) Run(args []string) int {
 		account.AccountType(account2),
 		amount,
 		fee)
-
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call CreateTransferTx() %+v", err))
 		return 1
@@ -90,7 +89,7 @@ func (c *TransferCommand) Run(args []string) int {
 		c.ui.Info("No utxo")
 		return 0
 	}
-	//TODO: output should be json if json option is true
+	// TODO: output should be json if json option is true
 	c.ui.Output(fmt.Sprintf("[hex]: %s\n[fileName]: %s", hex, fileName))
 
 	return 0

@@ -21,7 +21,7 @@ const (
 	CoinTypeBitcoinCash CoinType = 145 // Bitcoin Cash
 )
 
-//CoinTypeCode coin type code
+// CoinTypeCode coin type code
 type CoinTypeCode string
 
 // coin_type_code

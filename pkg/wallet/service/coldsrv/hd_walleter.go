@@ -28,7 +28,6 @@ func NewHDWallet(
 	keygen key.Generator,
 	coinTypeCode coin.CoinTypeCode,
 	wtype wallet.WalletType) *HDWallet {
-
 	return &HDWallet{
 		logger:       logger,
 		repo:         repo,
@@ -42,10 +41,9 @@ func NewHDWallet(
 func (h *HDWallet) Generate(
 	accountType account.AccountType,
 	seed []byte, count uint32) ([]key.WalletKey, error) {
-
 	h.logger.Debug("generate HDWallet", zap.String("account_type", accountType.String()))
 
-	//get latest index
+	// get latest index
 	idxFrom, err := h.repo.GetMaxIndex(accountType)
 	if err != nil {
 		h.logger.Info(err.Error())
@@ -76,7 +74,6 @@ func (h *HDWallet) generateHDKey(
 	seed []byte,
 	idxFrom,
 	count uint32) ([]key.WalletKey, error) {
-
 	// generate key
 	walletKeys, err := h.keygen.CreateKey(seed, accountType, idxFrom, count)
 	if err != nil {
@@ -190,5 +187,4 @@ func (w *AccountHDWalletRepo) Insert(keys []key.WalletKey, idxFrom int64, coinTy
 		idxFrom++
 	}
 	return w.accountKeyRepo.InsertBulk(accountKeyItems)
-
 }

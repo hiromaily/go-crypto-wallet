@@ -13,7 +13,7 @@ func CreateSubCommand(appName, version string, args []string, commands map[strin
 	c := cli.NewCLI(appName, version)
 	c.Args = args
 
-	//register subcommand
+	// register subcommand
 	c.Commands = commands
 	return c
 }

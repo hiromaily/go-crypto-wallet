@@ -10,7 +10,7 @@ import (
 
 // TestGetAccountInfo is test for GetAccountInfo
 func TestGetAccountInfo(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	xr := testutil.GetXRP()
 
 	type args struct {

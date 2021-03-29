@@ -8,7 +8,7 @@ import (
 
 // TestGasPrice is test for GasPrice
 func TestGasPrice(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	price, err := et.GasPrice()

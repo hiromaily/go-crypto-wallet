@@ -88,9 +88,9 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 		Flags:              txJSON.Flags,
 		LastLedgerSequence: txJSON.LastLedgerSequence,
 		Sequence:           txJSON.Sequence,
-		//SigningPubkey:      txJSON.SigningPubKey,
-		//TXNSignature:       txJSON.TxnSignature,
-		//Hash:               txJSON.Hash,
+		// SigningPubkey:      txJSON.SigningPubKey,
+		// TXNSignature:       txJSON.TxnSignature,
+		// Hash:               txJSON.Hash,
 	}
 	txDetailItems := []*models.XRPDetailTX{txDetailItem}
 

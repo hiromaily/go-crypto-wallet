@@ -34,22 +34,20 @@ Options:
 func (c *FullPubKeyCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
-	var (
-		fileName string
-	)
+	var fileName string
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
 	flags.StringVar(&fileName, "file", "", "full-pubkey file path")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
 
-	//validator
+	// validator
 	if fileName == "" {
 		c.ui.Error("file option [-file] is required")
 		return 1
 	}
 
-	//import generated private key to keygen wallet
+	// import generated private key to keygen wallet
 	err := c.wallet.ImportFullPubKey(fileName)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call ImportFullPubKey() %+v", err))

@@ -10,7 +10,7 @@ import (
 
 // TestImportRawKey is test for ImportRawKey
 func TestImportRawKey(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	pw := eth.Password
@@ -59,7 +59,7 @@ func TestImportRawKey(t *testing.T) {
 
 // TestListAccounts is test for ListAccounts
 func TestListAccounts(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	addrs, err := et.ListAccounts()
@@ -73,7 +73,7 @@ func TestListAccounts(t *testing.T) {
 
 // TestNewAccount is test for ListAccounts
 func TestNewAccount(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	addr, err := et.NewAccount(eth.Password, account.AccountTypeClient)
@@ -84,7 +84,7 @@ func TestNewAccount(t *testing.T) {
 }
 
 func TestLockAccount(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 	addr := "0x852d4ae6bfa5ae9d44d3ac03122674bcb32a0861"
 

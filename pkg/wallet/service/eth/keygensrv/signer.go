@@ -28,7 +28,6 @@ func NewSign(
 	logger *zap.Logger,
 	txFileRepo tx.FileRepositorier,
 	wtype wallet.WalletType) *Sign {
-
 	return &Sign{
 		eth:        eth,
 		logger:     logger,
@@ -81,6 +80,6 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 		return "", false, "", errors.Wrap(err, "fail to call txFileRepo.WriteFileSlice()")
 	}
 
-	//return hexTx, isSigned, generatedFileName, nil
+	// return hexTx, isSigned, generatedFileName, nil
 	return "", true, generatedFileName, nil
 }

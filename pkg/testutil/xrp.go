@@ -13,12 +13,10 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
-var (
-	xr xrpgrp.Rippler
-)
+var xr xrpgrp.Rippler
 
 // GetXRP returns xrp instance
-//FIXME: hard coded
+// FIXME: hard coded
 func GetXRP() xrpgrp.Rippler {
 	if xr != nil {
 		return xr
@@ -30,7 +28,7 @@ func GetXRP() xrpgrp.Rippler {
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
-	//TODO: if config should be overridden, here
+	// TODO: if config should be overridden, here
 
 	// logger
 	logger := logger.NewZapLogger(&conf.Logger)

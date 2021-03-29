@@ -96,7 +96,7 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 	resAddrs := make([]btcutil.Address, len(labels))
 	idx := 0
 	for key := range labels {
-		//key is address string
+		// key is address string
 		address, err := b.DecodeAddress(key)
 		if err != nil {
 			b.logger.Error(

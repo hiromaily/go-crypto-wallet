@@ -9,7 +9,7 @@ import (
 
 // TestSyncing is test for Syncing
 func TestSyncing(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	res, isSyncing, err := et.Syncing()
@@ -22,7 +22,7 @@ func TestSyncing(t *testing.T) {
 
 // TestProtocolVersion is test for ProtocolVersion
 func TestProtocolVersion(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	protocolVer, err := et.ProtocolVersion()
@@ -34,7 +34,7 @@ func TestProtocolVersion(t *testing.T) {
 
 // TestCoinbase is test for Coinbase
 func TestCoinbase(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	addr, err := et.Coinbase()
@@ -46,7 +46,7 @@ func TestCoinbase(t *testing.T) {
 
 // TestAccounts is test for Accounts
 func TestAccounts(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	accounts, err := et.Accounts()
@@ -60,7 +60,7 @@ func TestAccounts(t *testing.T) {
 
 // TestBlockNumber is test for BlockNumber
 func TestBlockNumber(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	blockNum, err := et.BlockNumber()
@@ -78,13 +78,13 @@ func TestBlockNumber(t *testing.T) {
 
 // TestGetBalance is test for GetBalance
 func TestGetBalance(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	tags := []eth.QuantityTag{
 		eth.QuantityTagLatest,
 		eth.QuantityTagPending,
-		//eth.QuantityTagEarliest,
+		// eth.QuantityTagEarliest,
 	}
 
 	type args struct {
@@ -194,13 +194,13 @@ func TestGetBalance(t *testing.T) {
 
 // TestGetTransactionCount is test for GetTransactionCount
 func TestGetTransactionCount(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	et := testutil.GetETH()
 
 	tags := []eth.QuantityTag{
 		eth.QuantityTagLatest,
 		eth.QuantityTagPending,
-		//eth.QuantityTagEarliest,
+		// eth.QuantityTagEarliest,
 	}
 
 	type args struct {

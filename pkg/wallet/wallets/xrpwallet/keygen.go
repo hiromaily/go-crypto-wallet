@@ -39,7 +39,6 @@ func NewXRPKeygen(
 	addressExporter service.AddressExporter,
 	signer service.Signer,
 ) *XRPKeygen {
-
 	return &XRPKeygen{
 		XRP:             xrp,
 		logger:          logger,
@@ -55,13 +54,13 @@ func NewXRPKeygen(
 
 // GenerateSeed generates seed
 func (k *XRPKeygen) GenerateSeed() ([]byte, error) {
-	//k.logger.Info("no functionality for GenerateSeed() in XRP")
+	// k.logger.Info("no functionality for GenerateSeed() in XRP")
 	return k.Seeder.Generate()
 }
 
 // StoreSeed stores seed
 func (k *XRPKeygen) StoreSeed(strSeed string) ([]byte, error) {
-	//k.logger.Info("no functionality for StoreSeed() in XRP")
+	// k.logger.Info("no functionality for StoreSeed() in XRP")
 	return k.Seeder.Store(strSeed)
 }
 
@@ -78,20 +77,20 @@ func (k *XRPKeygen) GenerateAccountKey(accountType account.AccountType, seed []b
 // ImportPrivKey imports privKey
 func (k *XRPKeygen) ImportPrivKey(accountType account.AccountType) error {
 	k.logger.Info("no functionality for ImportPrivKey() in XRP")
-	//return k.PrivKeyer.Import(accountType)
+	// return k.PrivKeyer.Import(accountType)
 	return nil
 }
 
 // ImportFullPubKey imports full-pubkey
 func (k *XRPKeygen) ImportFullPubKey(fileName string) error {
-	//return k.FullPubKeyImporter.ImportFullPubKey(fileName)
+	// return k.FullPubKeyImporter.ImportFullPubKey(fileName)
 	k.logger.Info("no functionality for ImportFullPubKey() in XRP")
 	return nil
 }
 
 // CreateMultisigAddress creates multi sig address returns Multisiger interface
 func (k *XRPKeygen) CreateMultisigAddress(accountType account.AccountType) error {
-	//return k.Multisiger.AddMultisigAddress(accountType, k.addrType)
+	// return k.Multisiger.AddMultisigAddress(accountType, k.addrType)
 	k.logger.Info("no functionality for CreateMultisigAddress() in XRP")
 	return nil
 }

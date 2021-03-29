@@ -11,9 +11,9 @@ import (
 	"github.com/volatiletech/sqlboiler/v4/types"
 )
 
-//0.00000001 BTC=1 Satoshi
-//btcutil.Amount => Satoshi
-//float64 => BTC
+// 0.00000001 BTC=1 Satoshi
+// btcutil.Amount => Satoshi
+// float64 => BTC
 
 // AmountString converts amount `1.0 BTC` to `1.0` as string
 func (b *Bitcoin) AmountString(amt btcutil.Amount) string {

@@ -12,7 +12,6 @@ import (
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gasprice
 // - returns like `1000000000`
 func (e *Ethereum) GasPrice() (*big.Int, error) {
-
 	var gasPrice string
 	err := e.rpcClient.CallContext(e.ctx, &gasPrice, "eth_gasPrice")
 	if err != nil {
@@ -30,11 +29,10 @@ func (e *Ethereum) GasPrice() (*big.Int, error) {
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_estimategas
 //  is this value GasLimit??
 func (e *Ethereum) EstimateGas(msg *ethereum.CallMsg) (*big.Int, error) {
-
 	var estimated string
 	err := e.rpcClient.CallContext(e.ctx, &estimated, "eth_estimateGas", toCallArg(msg))
 	if err != nil {
-		//Invalid params: Invalid bytes format. Expected a 0x-prefixed hex string with even length.
+		// Invalid params: Invalid bytes format. Expected a 0x-prefixed hex string with even length.
 		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_estimateGas)")
 	}
 

@@ -8,7 +8,7 @@ import (
 
 // TestLogging is test for GetLogging
 func TestLogging(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	bc := testutil.GetBTC()
 
 	// Logging
@@ -18,5 +18,5 @@ func TestLogging(t *testing.T) {
 		t.Log(res)
 	}
 
-	//bc.Close()()()
+	// bc.Close()()()
 }

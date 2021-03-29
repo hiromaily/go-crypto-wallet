@@ -19,7 +19,7 @@ func findUnspentListID(unspentList []btc.ListUnspentResult, txid string) bool {
 
 // TestListUnspent is test for ListUnspent
 func TestListUnspent(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	bc := testutil.GetBTC()
 
 	// ListUnspent
@@ -29,12 +29,12 @@ func TestListUnspent(t *testing.T) {
 		t.Log(res)
 	}
 
-	//bc.Close()
+	// bc.Close()
 }
 
 // TestListUnspentByAccount is test for ListUnspentByAccount
 func TestListUnspentByAccount(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	bc := testutil.GetBTC()
 
 	// ListUnspentByAccount
@@ -44,12 +44,12 @@ func TestListUnspentByAccount(t *testing.T) {
 		t.Log(res)
 	}
 
-	//bc.Close()
+	// bc.Close()
 }
 
 // TestLockUnspent is test for LockUnspent, UnlockSpent
 func TestLockUnspent(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	bc := testutil.GetBTC()
 
 	// get unspent list
@@ -57,7 +57,7 @@ func TestLockUnspent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("fail to call ListUnspent(): %v", err)
 	}
-	//use one of ListUnspentResult
+	// use one of ListUnspentResult
 	if len(listUnspent) == 0 {
 		t.Log("unspent list is required for this test")
 		return
@@ -95,5 +95,5 @@ func TestLockUnspent(t *testing.T) {
 		t.Error("UnlockUnspent() fail to unlock")
 	}
 
-	//bc.Close()
+	// bc.Close()
 }

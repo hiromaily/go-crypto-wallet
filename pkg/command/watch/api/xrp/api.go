@@ -25,9 +25,7 @@ func (c *APICommand) Synopsis() string {
 	return "Ripple API functionality"
 }
 
-var (
-	sendCoinSynopsis = "send coin from faucet coin"
-)
+var sendCoinSynopsis = "send coin from faucet coin"
 
 // Help returns usage for this subcommand
 func (c *APICommand) Help() string {
@@ -46,7 +44,7 @@ func (c *APICommand) Run(args []string) int {
 		return 1
 	}
 
-	//farther subcommand import
+	// farther subcommand import
 	cmds := map[string]cli.CommandFactory{
 		"sendcoin": func() (cli.Command, error) {
 			return &SendCoinCommand{

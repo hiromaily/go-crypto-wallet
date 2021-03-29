@@ -35,9 +35,7 @@ Options:
 func (c *PaymentCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
-	var (
-		fee float64
-	)
+	var fee float64
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
 	flags.Float64Var(&fee, "fee", 0, "adjustment fee")
 	if err := flags.Parse(args); err != nil {
@@ -54,7 +52,7 @@ func (c *PaymentCommand) Run(args []string) int {
 		c.ui.Info("No utxo")
 		return 0
 	}
-	//TODO: output should be json if json option is true
+	// TODO: output should be json if json option is true
 	c.ui.Output(fmt.Sprintf("[hex]: %s\n[fileName]: %s", hex, fileName))
 
 	return 0

@@ -12,7 +12,7 @@ import (
 
 // TestTransaction is test for sequential transaction
 func TestTransaction(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	xr := testutil.GetXRP()
 
 	type args struct {
@@ -96,17 +96,16 @@ func TestTransaction(t *testing.T) {
 			}
 			grok.Value(txInfo)
 
-			//TODO: sender account info
-			//TODO: receiver account info
+			// TODO: sender account info
+			// TODO: receiver account info
 
 		})
 	}
-
 }
 
 // TestGetTransaction is test for GetTransaction
 func TestGetTransaction(t *testing.T) {
-	//t.SkipNow()
+	// t.SkipNow()
 	xr := testutil.GetXRP()
 
 	type args struct {
@@ -157,5 +156,4 @@ func TestGetTransaction(t *testing.T) {
 			}
 		})
 	}
-
 }

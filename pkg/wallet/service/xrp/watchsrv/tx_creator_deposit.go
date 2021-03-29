@@ -28,19 +28,19 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 		zap.String("receiver", receiver.String()),
 	)
 
-	//1. get addresses for client account
+	// 1. get addresses for client account
 	addrs, err := t.addrRepo.GetAll(sender)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
 	}
-	//addresses, err := t.eth.Accounts()
+	// addresses, err := t.eth.Accounts()
 
 	// target addresses
 	var userAmounts []xrp.UserAmount
 
 	// address list for client
 	for _, addr := range addrs {
-		//TODO: if previous tx is not done, wrong amount is returned. how to manage it??
+		// TODO: if previous tx is not done, wrong amount is returned. how to manage it??
 		clientBalance, err := t.xrp.GetBalance(addr.WalletAddress)
 		if err != nil {
 			t.logger.Warn("fail to call t.xrp.GetAccountInfo()",
@@ -108,9 +108,9 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 			Flags:              txJSON.Flags,
 			LastLedgerSequence: txJSON.LastLedgerSequence,
 			Sequence:           txJSON.Sequence,
-			//SigningPubkey:      txJSON.SigningPubKey,
-			//TXNSignature:       txJSON.TxnSignature,
-			//Hash:               txJSON.Hash,
+			// SigningPubkey:      txJSON.SigningPubKey,
+			// TXNSignature:       txJSON.TxnSignature,
+			// Hash:               txJSON.Hash,
 		}
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}

@@ -15,7 +15,7 @@ import (
 var et ethgrp.Ethereumer
 
 // GetETH returns eth instance
-//FIXME: hard coded
+// FIXME: hard coded
 func GetETH() ethgrp.Ethereumer {
 	if et != nil {
 		return et
@@ -27,7 +27,7 @@ func GetETH() ethgrp.Ethereumer {
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
-	//TODO: if config should be overridden, here
+	// TODO: if config should be overridden, here
 
 	// logger
 	logger := logger.NewZapLogger(&conf.Logger)

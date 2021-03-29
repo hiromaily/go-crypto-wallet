@@ -44,7 +44,7 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	}
 
 	// check sender's total balance
-	//GetOneUnAllocated
+	// GetOneUnAllocated
 	addrItem, err := t.addrRepo.GetOneUnAllocated(sender)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
@@ -100,9 +100,9 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 			Flags:              txJSON.Flags,
 			LastLedgerSequence: txJSON.LastLedgerSequence,
 			Sequence:           txJSON.Sequence,
-			//SigningPubkey:      txJSON.SigningPubKey,
-			//TXNSignature:       txJSON.TxnSignature,
-			//Hash:               txJSON.Hash,
+			// SigningPubkey:      txJSON.SigningPubKey,
+			// TXNSignature:       txJSON.TxnSignature,
+			// Hash:               txJSON.Hash,
 		}
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}

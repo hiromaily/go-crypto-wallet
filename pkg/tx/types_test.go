@@ -5,12 +5,12 @@ import (
 )
 
 func TestCastBlank(t *testing.T) {
-	//OK
+	// OK
 	tt := TxType("")
 	ttStr := tt.String()
 	t.Log(ttStr)
 
-	//Even if no definition, it's ok
+	// Even if no definition, it's ok
 	tt2 := TxType("abc")
 	ttStr2 := tt2.String()
 	t.Log(ttStr2)

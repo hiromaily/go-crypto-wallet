@@ -20,7 +20,7 @@ type Ethereum struct {
 	ethClient    *ethclient.Client
 	rpcClient    *ethrpc.Client
 	chainConf    *chaincfg.Params
-	coinTypeCode coin.CoinTypeCode //eth
+	coinTypeCode coin.CoinTypeCode // eth
 	logger       *zap.Logger
 	ctx          context.Context
 	netID        uint16
@@ -36,7 +36,6 @@ func NewEthereum(
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Ethereum,
 	logger *zap.Logger) (*Ethereum, error) {
-
 	eth := &Ethereum{
 		ethClient:    ethclient.NewClient(rpcClient),
 		rpcClient:    rpcClient,

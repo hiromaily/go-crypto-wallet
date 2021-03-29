@@ -10,11 +10,11 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
-//NewAccountKeyRepository
+// NewAccountKeyRepository
 
 // TestTx is test for any data operation
 func TestAccountKey(t *testing.T) {
-	//boil.DebugMode = true
+	// boil.DebugMode = true
 	akRepo := testutil.NewAccountKeyRepository()
 
 	_, err := akRepo.UpdateAddrStatus(

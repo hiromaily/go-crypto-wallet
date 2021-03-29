@@ -42,7 +42,7 @@ func (c *DumpWalletCommand) Run(args []string) int {
 		return 1
 	}
 
-	//validator
+	// validator
 	if fileName == "" {
 		c.ui.Error("finename option [-file] is required")
 		return 1

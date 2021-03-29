@@ -42,7 +42,6 @@ func NewBTCWatch(
 	txMonitorer service.TxMonitorer,
 	paymentRequestCreator service.PaymentRequestCreator,
 	wtype wtype.WalletType) *BTCWatch {
-
 	return &BTCWatch{
 		BTC:                   btc,
 		logger:                logger,

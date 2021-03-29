@@ -52,7 +52,7 @@ func (r *SeedRepository) GetOne() (*models.Seed, error) {
 
 // Insert inserts record
 func (r *SeedRepository) Insert(strSeed string) error {
-	//set coin
+	// set coin
 	item := &models.Seed{
 		Coin: r.coinTypeCode.String(),
 		Seed: strSeed,

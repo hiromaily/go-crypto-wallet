@@ -23,12 +23,12 @@ func NewWallet(file string, wtype wallet.WalletType, coinTypeCode coin.CoinTypeC
 		return nil, err
 	}
 
-	//debug
-	//grok.Value(conf)
+	// debug
+	// grok.Value(conf)
 
 	conf.CoinTypeCode = coinTypeCode
 
-	//validate
+	// validate
 	if err = conf.validate(wtype, coinTypeCode); err != nil {
 		return nil, err
 	}

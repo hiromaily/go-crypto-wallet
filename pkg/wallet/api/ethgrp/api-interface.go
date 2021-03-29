@@ -45,13 +45,13 @@ type Ethereumer interface {
 	BlockNumber() (*big.Int, error)
 	EnsureBlockNumber(loopCount int) (*big.Int, error)
 	GetBalance(hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
-	//GetStoreageAt(hexAddr string, quantityTag eth.QuantityTag) (string, error)
+	// GetStoreageAt(hexAddr string, quantityTag eth.QuantityTag) (string, error)
 	GetTransactionCount(hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
-	//GetBlockTransactionCountByBlockHash(blockHash string) (*big.Int, error)
+	// GetBlockTransactionCountByBlockHash(blockHash string) (*big.Int, error)
 	GetBlockTransactionCountByNumber(blockNumber uint64) (*big.Int, error)
-	//GetUncleCountByBlockHash(blockHash string) (*big.Int, error)
+	// GetUncleCountByBlockHash(blockHash string) (*big.Int, error)
 	GetUncleCountByBlockNumber(blockNumber uint64) (*big.Int, error)
-	//GetCode(hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
+	// GetCode(hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
 	GetBlockByNumber(blockNumber uint64) (*eth.BlockInfo, error)
 	// rpc_eth_gas
 	GasPrice() (*big.Int, error)
@@ -91,6 +91,6 @@ type Ethereumer interface {
 	ValidationAddr(addr string) error
 	FromWei(v int64) *big.Int
 	FromGWei(v int64) *big.Int
-	//FromEther(v int64) *big.Int
+	// FromEther(v int64) *big.Int
 	FromFloatEther(v float64) *big.Int
 }

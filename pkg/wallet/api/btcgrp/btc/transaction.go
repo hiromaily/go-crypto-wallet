@@ -255,7 +255,6 @@ func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*TxRawResult, error) {
 // GetRawTransactionByHex get tx from hex string
 // unused for now
 func (b *Bitcoin) GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error) {
-
 	hashTx, err := chainhash.NewHashFromStr(strHashTx)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to call chainhash.NewHashFromStr(%s)", strHashTx)
@@ -265,8 +264,8 @@ func (b *Bitcoin) GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error) 
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call btc.client.GetRawTransaction(hash)")
 	}
-	//MsgTx()
-	//tx.MsgTx()
+	// MsgTx()
+	// tx.MsgTx()
 
 	return tx, nil
 }
@@ -274,7 +273,7 @@ func (b *Bitcoin) GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error) 
 // CreateRawTransaction create raw transaction
 //  - for payment action
 func (b *Bitcoin) CreateRawTransaction(inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount) (*wire.MsgTx, error) {
-	lockTime := int64(0) //TODO:Raw locktime what value is exactly required??
+	lockTime := int64(0) // TODO:Raw locktime what value is exactly required??
 
 	// CreateRawTransaction
 	msgTx, err := b.Client.CreateRawTransaction(inputs, outputs, &lockTime)
@@ -288,16 +287,16 @@ func (b *Bitcoin) CreateRawTransaction(inputs []btcjson.TransactionInput, output
 // FundRawTransaction Add inputs to a transaction until it has enough in value to meet its out value.
 // TODO: unused for now, but it looks useful
 func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, error) {
-	//fundrawtransaction
-	//https://bitcoincore.org/en/doc/0.19.0/rpc/rawtransactions/fundrawtransaction/
+	// fundrawtransaction
+	// https://bitcoincore.org/en/doc/0.19.0/rpc/rawtransactions/fundrawtransaction/
 
-	//hex
+	// hex
 	bHex, err := json.Marshal(hex)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Marchal(hex)")
 	}
 
-	//fee rate
+	// fee rate
 	feePerKb, err := b.EstimateSmartFee()
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call btc.EstimateSmartFee()")
@@ -314,7 +313,7 @@ func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, err
 
 	rawResult, err := b.Client.RawRequest("fundrawtransaction", []json.RawMessage{bHex, bFeeRate})
 	if err != nil {
-		//error: -4: Insufficient funds
+		// error: -4: Insufficient funds
 		return nil, errors.Wrap(err, "fail to call json.RawRequest(fundrawtransaction)")
 	}
 
@@ -332,7 +331,7 @@ func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, err
 // - for multisig, refer to `SignRawTransactionWithKey()`
 // - TODO: this code can be shared with SignRawTransactionWithKey() to some extend
 func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []PrevTx) (*wire.MsgTx, bool, error) {
-	//hex tx
+	// hex tx
 	hexTx, err := b.ToHex(tx)
 	if err != nil {
 		return nil, false, errors.Wrap(err, "fail to call btc.ToHex(tx)")
@@ -343,7 +342,7 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []PrevTx) (*wire.Ms
 		return nil, false, errors.Wrap(err, "fail to call json.Marchal(hexTx)")
 	}
 
-	//prevtxs
+	// prevtxs
 	input2, err := json.Marshal(prevtxs)
 	if err != nil {
 		return nil, false, errors.Wrap(err, "fail to call json.Marchal(prevtxs)")
@@ -369,7 +368,7 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []PrevTx) (*wire.Ms
 		return nil, false, errors.Wrap(err, "fail to call btc.ToMsgTx(hex)")
 	}
 
-	//Debug to compare tx before and after
+	// Debug to compare tx before and after
 	if !signRawTxResult.Complete {
 		b.logger.Debug("sign is not completed yet")
 		b.debugCompareTx(tx, msgTx)
@@ -381,7 +380,7 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []PrevTx) (*wire.Ms
 // SignRawTransactionWithKey sign on raw unsigned tx for `multisig address`
 // - for multisig
 func (b *Bitcoin) SignRawTransactionWithKey(tx *wire.MsgTx, privKeysWIF []string, prevtxs []PrevTx) (*wire.MsgTx, bool, error) {
-	//if b.Version() >= ctype.BTCVer17 {
+	// if b.Version() >= ctype.BTCVer17 {
 
 	// hex tx
 	hexTx, err := b.ToHex(tx)
@@ -417,7 +416,7 @@ func (b *Bitcoin) SignRawTransactionWithKey(tx *wire.MsgTx, privKeysWIF []string
 	if err != nil {
 		return nil, false, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}
-	//Note: if signature is not completed yet, error would occur
+	// Note: if signature is not completed yet, error would occur
 	// - ignore error if retured msgTx is not blank、and returned hex is changed from given hex as parameter
 	//	above error would be like `Signature must be zero for failed CHECK(MULTI)SIG operation`
 	if len(signRawTxResult.Errors) != 0 {
@@ -449,14 +448,13 @@ func (b *Bitcoin) SendTransactionByHex(hex string) (*chainhash.Hash, error) {
 		return nil, errors.Wrap(err, "fail to call btc.SendRawTransaction()")
 	}
 
-	//txID
-	//hash.String()
+	// txID
+	// hash.String()
 	return hash, nil
 }
 
 // SendTransactionByByte send raw transaction by byte array
 func (b *Bitcoin) SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error) {
-
 	//[]byte to wireTx
 	wireTx := new(wire.MsgTx)
 	r := bytes.NewBuffer(rawTx)
@@ -471,8 +469,8 @@ func (b *Bitcoin) SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error) {
 		return nil, errors.Wrap(err, "fail to call btc.SendRawTransaction()")
 	}
 
-	//txID
-	//hash.String()
+	// txID
+	// hash.String()
 	return hash, nil
 }
 
@@ -513,8 +511,8 @@ func (b *Bitcoin) Sign(tx *wire.MsgTx, strPrivateKey string) (string, error) {
 		}
 		tx.TxIn[idx].SignatureScript = script
 	}
-	//TODO: how to check isSigned
-	//TODO: it's difficult if each TxIn has different Key
+	// TODO: how to check isSigned
+	// TODO: it's difficult if each TxIn has different Key
 
 	// to sign
 	hexTx, err := b.ToHex(tx)

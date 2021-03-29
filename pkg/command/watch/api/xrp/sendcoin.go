@@ -54,7 +54,7 @@ func (c *SendCoinCommand) Run(args []string) int {
 		return 1
 	}
 
-	//validator
+	// validator
 	if receiverAddr == "" {
 		c.ui.Error("address option [-address] is invalid")
 		return 1
