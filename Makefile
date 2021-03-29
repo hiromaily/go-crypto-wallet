@@ -33,26 +33,6 @@ install-sqlboiler:
 	go get github.com/volatiletech/sqlboiler@v$(SQLBOILER_VERSION)
 	go get github.com/volatiletech/sqlboiler/drivers/sqlboiler-mysql@v$(SQLBOILER_VERSION)
 
-.PHONY: install-sqlboiler2
-install-sqlboiler2:
-	cd ${GOPATH}/src/github.com/volatiletech/sqlboiler
-	#git checkout refs/tags/v3.7.1
-	git pull
-	go get ./...
-	go build -i -v -o ${GOPATH}/bin/sqlboiler .
-
-# https://github.com/volatiletech/sqlboiler/issues/633
-# https://github.com/volatiletech/sqlboiler/issues/607
-# sqlboiler 3.6.1 cannot convert type: types.Decimal => named tag: v3.3.1 in github.com/ericlagergren/decimal works
-# https://github.com/golang/go/issues/35732
-# https://forum.golangbridge.org/t/solved-error-when-using-go-modules-in-existing-project/15908/9
-#.PHONY: update-decimal
-#update-decimal:
-#	#go get -u github.com/ericlagergren/decimal@v3.3.1 => error
-#	#go mod edit -require github.com/ericlagergren/decimal@v3.3.1
-#	#GONOSUMDB=github.com/ericlagergren/decimal go install github.com/volatiletech/sqlboiler
-#	go get github.com/ericlagergren/decimal@v0.0.0-20181231230500-73749d4874d5
-
 .PHONY: imports
 imports:
 	./scripts/imports.sh
@@ -83,19 +63,6 @@ generate-db-definition:
 sqlboiler:
 	sqlboiler --wipe mysql
 
-# ifacemaker is tool which makes interface from struct
-#.PHONY: generate-go-interface
-#generate-go-interface:
-#	#walletrepo
-#	ifacemaker -f pkg/model/rdb/walletrepo/account_pubkey_repo.go -s WalletRepository -i WalletStorager -p rdb
-#	ifacemaker -f pkg/model/rdb/walletrepo/payment_request_repo.go -s WalletRepository -i WalletStorager -p rdb
-#	ifacemaker -f pkg/model/rdb/walletrepo/tx_input_repo.go -s WalletRepository -i WalletStorager -p rdb
-#	ifacemaker -f pkg/model/rdb/walletrepo/tx_output_repo.go -s WalletRepository -i WalletStorager -p rdb
-#	ifacemaker -f pkg/model/rdb/walletrepo/tx_repo.go -s WalletRepository -i WalletStorager -p rdb
-#	#keygenrepo
-#	ifacemaker -f pkg/model/rdb/keygenrepo/account_key_repo.go -s KeygenRepository -i KeygenStorager -p rdb
-#	ifacemaker -f pkg/model/rdb/keygenrepo/added_pubkey_history_repo.go -s KeygenRepository -i KeygenStorager -p rdb
-#	ifacemaker -f pkg/model/rdb/keygenrepo/seed_repo.go -s KeygenRepository -i KeygenStorager -p rdb
 
 # git tag
 #git tag v2.0.0 cfeca390b781af79321fb644c056bf6e755fdc7e
