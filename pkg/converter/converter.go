@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ericlagergren/decimal"
-	"github.com/volatiletech/sqlboiler/types"
+	"github.com/volatiletech/sqlboiler/v4/types"
 )
 
 // Converter is type converter

@@ -27,7 +27,7 @@ install-ssl:
 	mkcert localhost 127.0.0.1
 
 .PHONY: install-sqlboiler
-install-sqlboiler: SQLBOILER_VERSION=3.7.1
+install-sqlboiler: SQLBOILER_VERSION=4.5
 install-sqlboiler:
 	echo SQLBOILER_VERSION is $(SQLBOILER_VERSION)
 	go get github.com/volatiletech/sqlboiler@v$(SQLBOILER_VERSION)
@@ -46,12 +46,12 @@ install-sqlboiler2:
 # sqlboiler 3.6.1 cannot convert type: types.Decimal => named tag: v3.3.1 in github.com/ericlagergren/decimal works
 # https://github.com/golang/go/issues/35732
 # https://forum.golangbridge.org/t/solved-error-when-using-go-modules-in-existing-project/15908/9
-.PHONY: update-decimal
-update-decimal:
-	#go get -u github.com/ericlagergren/decimal@v3.3.1 => error
-	#go mod edit -require github.com/ericlagergren/decimal@v3.3.1
-	#GONOSUMDB=github.com/ericlagergren/decimal go install github.com/volatiletech/sqlboiler
-	go get github.com/ericlagergren/decimal@v0.0.0-20181231230500-73749d4874d5
+#.PHONY: update-decimal
+#update-decimal:
+#	#go get -u github.com/ericlagergren/decimal@v3.3.1 => error
+#	#go mod edit -require github.com/ericlagergren/decimal@v3.3.1
+#	#GONOSUMDB=github.com/ericlagergren/decimal go install github.com/volatiletech/sqlboiler
+#	go get github.com/ericlagergren/decimal@v0.0.0-20181231230500-73749d4874d5
 
 .PHONY: imports
 imports:
@@ -105,7 +105,7 @@ sqlboiler:
 # From inside docker container
 ###############################################################################
 .PHONY: bld-linux
-bld-linux: update-decimal
+bld-linux:
 	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/watch ./cmd/watch/main.go
 	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/keygen ./cmd/keygen/main.go
 	CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.authName=auth1" -o /go/bin/sign ./cmd/sign/main.go
@@ -114,7 +114,7 @@ bld-linux: update-decimal
 # Build on local
 ###############################################################################
 .PHONY: bld
-bld: update-decimal
+bld:
 	go build -i -v -o ${GOPATH}/bin/watch ./cmd/watch/
 	go build -i -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
 	go build -ldflags "-X main.authName=auth1" -i -v -o ${GOPATH}/bin/sign ./cmd/sign/

@@ -8,7 +8,7 @@ import (
 	"github.com/btcsuite/btcutil"
 	"github.com/ericlagergren/decimal"
 	"github.com/pkg/errors"
-	"github.com/volatiletech/sqlboiler/types"
+	"github.com/volatiletech/sqlboiler/v4/types"
 )
 
 //0.00000001 BTC=1 Satoshi

@@ -7,7 +7,7 @@ import (
 	"github.com/btcsuite/btcd/rpcclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/opentracing/opentracing-go"
-	"github.com/volatiletech/sqlboiler/boil"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 

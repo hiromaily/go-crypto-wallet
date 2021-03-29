@@ -5,7 +5,7 @@ import (
 
 	"github.com/ericlagergren/decimal"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/volatiletech/sqlboiler/types"
+	"github.com/volatiletech/sqlboiler/v4/types"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
