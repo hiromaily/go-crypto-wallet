@@ -49,7 +49,7 @@ func main() {
 	)
 	flags := flag.NewFlagSet("main", flag.ContinueOnError)
 	flags.StringVar(&confPath, "conf", "", "config file path")
-	flags.StringVar(&coinTypeCode, "coin", "btc", "coin type code `btc`, `bch`, `eth`, `xrp`")
+	flags.StringVar(&coinTypeCode, "coin", "btc", "coin type code `btc`, `bch`, `eth`, `xrp`, `bat`")
 	flags.StringVar(&btcWallet, "wallet", "", "specify wallet.dat in bitcoin core")
 	flags.BoolVar(&isVersion, "version", false, "show version")
 	flags.BoolVar(&isHelp, "help", false, "show help")
@@ -64,8 +64,14 @@ func main() {
 	}
 
 	// validate coinTypeCode
-	if !coin.ValidateCoinTypeCode(coinTypeCode) {
-		log.Fatal("coin args is invalid. `btc`, `bch`, `eth` is allowed")
+	if !coin.IsCoinTypeCode(coinTypeCode) && !coin.IsERC20Token(coinTypeCode) {
+		log.Fatal("coin args is invalid. `btc`, `bch`, `eth`, `xrp`, `bat` is allowed")
+	}
+	// for ERC-20 token
+	var erc20Token string
+	if coin.IsERC20Token(coinTypeCode) {
+		erc20Token = coinTypeCode
+		coinTypeCode = coin.ETH.String()
 	}
 
 	// set config path if environment variable is existing
@@ -113,7 +119,13 @@ func main() {
 			}
 		}
 
-		// override conf.Bitcoin.Host
+		// override config
+		conf.CoinTypeCode = coin.CoinTypeCode(coinTypeCode)
+		if erc20Token != "" {
+			conf.Ethereum.ERC20Token = coin.ERC20Token(erc20Token)
+		}
+
+		// - conf.Bitcoin.Host
 		if btcWallet != "" {
 			conf.Bitcoin.Host = fmt.Sprintf("%s/wallet/%s", conf.Bitcoin.Host, btcWallet)
 			log.Println("conf.Bitcoin.Host:", conf.Bitcoin.Host)

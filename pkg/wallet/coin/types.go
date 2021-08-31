@@ -59,8 +59,8 @@ var CoinTypeCodeValue = map[CoinTypeCode]CoinType{
 	XRP: CoinTypeRipple,
 }
 
-// ValidateCoinTypeCode validate
-func ValidateCoinTypeCode(val string) bool {
+// IsCoinTypeCode validate
+func IsCoinTypeCode(val string) bool {
 	if _, ok := CoinTypeCodeValue[CoinTypeCode(val)]; ok {
 		return true
 	}

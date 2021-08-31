@@ -61,7 +61,7 @@ func main() {
 	}
 
 	// validate coinTypeCode
-	if !coin.ValidateCoinTypeCode(coinTypeCode) {
+	if !coin.IsCoinTypeCode(coinTypeCode) {
 		log.Fatal("coin args is invalid. `btc`, `bch`, `eth` is allowed")
 	}
 

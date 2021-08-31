@@ -18,8 +18,8 @@ var ERC20Address = map[ERC20Token]string{
 	BAT: "0x0D8775F648430679A709E98d2b0Cb6250d2887EF",
 }
 
-// ValidateERC20Code validate
-func ValidateERC20Code(val string) bool {
+// IsERC20Token validate
+func IsERC20Token(val string) bool {
 	if _, ok := ERC20Address[ERC20Token(val)]; ok {
 		return true
 	}
