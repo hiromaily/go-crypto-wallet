@@ -86,7 +86,8 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 
 ## Requirements
 - MySQL 5.7
-- Golang 1.13+
+- Golang 1.16+
+- golangci-lint 1.42
 - Docker
 - Node Server
     - BTC: [Bitcoin Core 0.18+ for Bitcoin node](https://bitcoin.org/en/bitcoin-core/)
