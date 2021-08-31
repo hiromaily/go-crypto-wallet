@@ -121,12 +121,12 @@ func (k *HDKey) createKeyByAccount(seed []byte, accountType account.AccountType)
 		return nil, nil, err
 	}
 	// Purpose
-	purpose, err := masterKey.Child(hdkeychain.HardenedKeyStart + k.purpose.Uint32())
+	purpose, err := masterKey.Derive(hdkeychain.HardenedKeyStart + k.purpose.Uint32())
 	if err != nil {
 		return nil, nil, err
 	}
 	// CoinType
-	coinType, err := purpose.Child(hdkeychain.HardenedKeyStart + k.coinType.Uint32())
+	coinType, err := purpose.Derive(hdkeychain.HardenedKeyStart + k.coinType.Uint32())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -136,7 +136,7 @@ func (k *HDKey) createKeyByAccount(seed []byte, accountType account.AccountType)
 		zap.String("account_type", accountType.String()),
 		zap.Uint32("account_value", accountType.Uint32()),
 	)
-	accountPrivKey, err := coinType.Child(hdkeychain.HardenedKeyStart + accountType.Uint32())
+	accountPrivKey, err := coinType.Derive(hdkeychain.HardenedKeyStart + accountType.Uint32())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -161,7 +161,7 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 	// accountPrivKey, err := hdkeychain.NewKeyFromString(accountPrivKey)
 
 	// Change
-	change, err := accountPrivKey.Child(ChangeTypeExternal.Uint32())
+	change, err := accountPrivKey.Derive(ChangeTypeExternal.Uint32())
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +169,7 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 	// Index
 	walletKeys := make([]WalletKey, count)
 	for i := uint32(0); i < count; i++ {
-		child, err := change.Child(idxFrom + i)
+		child, err := change.Derive(idxFrom + i)
 		if err != nil {
 			return nil, err
 		}

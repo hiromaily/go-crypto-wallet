@@ -230,7 +230,8 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *RawTx, passphrase string, senderA
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call types.SignTx()")
 	}
-	msg, err := signedTX.AsMessage(types.NewEIP155Signer(chainID))
+	// TODO: baseFee *big.Int param is added in AsMessage method and maybe useful
+	msg, err := signedTX.AsMessage(types.NewEIP155Signer(chainID), nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to cll signedTX.AsMessage()")
 	}
