@@ -166,7 +166,7 @@ func (r *FileRepository) WriteFile(path, hexTx string) (string, error) {
 	fileName := path + ts
 
 	byteTx := []byte(hexTx)
-	err := ioutil.WriteFile(fileName, byteTx, 0644)
+	err := ioutil.WriteFile(fileName, byteTx, 0o644)
 	if err != nil {
 		return "", errors.Wrapf(err, "fail to call ioutil.WriteFile(%s)", fileName)
 	}
@@ -182,7 +182,7 @@ func (r *FileRepository) WriteFileSlice(path string, data []string) (string, err
 	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
 	fileName := path + ts
 
-	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return "", errors.Wrapf(err, "fail to call os.OpenFile(%s)", fileName)
 	}
@@ -203,6 +203,6 @@ func (r *FileRepository) createDir(path string) {
 	tmp2 := tmp1[0 : len(tmp1)-1] // cut filename
 	dir := strings.Join(tmp2, "/")
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		os.Mkdir(dir, 0755)
+		os.Mkdir(dir, 0o755)
 	}
 }

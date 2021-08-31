@@ -98,7 +98,6 @@ func TestTransaction(t *testing.T) {
 
 			// TODO: sender account info
 			// TODO: receiver account info
-
 		})
 	}
 }

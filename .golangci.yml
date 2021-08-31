@@ -14,10 +14,17 @@ linters-settings:
     # put imports beginning with prefix after 3rd-party packages;
     # it's a comma-separated list of prefixes
     local-prefixes: github.com/hiromaily
+  revive:
+    # see https://golangci-lint.run/usage/linters/#revive
+    # see https://github.com/mgechev/revive#available-rules for details.
+    ignore-generated-header: true
+    severity: warning
+    confidence: 0.8
+    rules:
+      - name: indent-error-flow
+        severity: warning
   #unused:
   #  check-exported: true
-  golint:
-    min-confidence: 0.8
 
 issues:
   exclude:
@@ -39,7 +46,7 @@ linters:
     - varcheck
     - goimports
     - misspell
-    - golint
+    - revive
   presets:
     # only next presets exist: (bugs|complexity|format|performance|style|unused)
     - format
