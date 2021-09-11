@@ -1,0 +1,7 @@
+[erc20]
+
+[erc20.hyt]
+symbol = "hyt"
+name = "HY Token"
+contract_address = "0xa34e3D812F5eBe9B64073D8D5EeEC9029E246802"
+master_address = "0xd0446b3eD62f23815bE724C17e34C0617A186e34"

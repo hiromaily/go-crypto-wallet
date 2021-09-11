@@ -33,6 +33,12 @@ install-sqlboiler:
 	go get github.com/volatiletech/sqlboiler@v$(SQLBOILER_VERSION)
 	go get github.com/volatiletech/sqlboiler/drivers/sqlboiler-mysql@v$(SQLBOILER_VERSION)
 
+.PHONY: install-abigen
+install-abigen:
+	cd ${GOPATH}/src/github.com/ethereum/go-ethereum
+	git pull
+	go install ./cmd/abigen
+
 .PHONY: imports
 imports:
 	./scripts/imports.sh
@@ -63,6 +69,9 @@ generate-db-definition:
 sqlboiler:
 	sqlboiler --wipe mysql
 
+.PHONY: generate-abi
+generate-abi:
+	abigen --abi ./data/contract/token.abi --pkg contract --type Token --out ./pkg/contract/token.go
 
 # git tag
 #git tag v2.0.0 cfeca390b781af79321fb644c056bf6e755fdc7e

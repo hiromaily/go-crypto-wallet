@@ -141,7 +141,19 @@ http http://127.0.0.1:8545 method=eth_syncing params:='[]' id=1
 http http://127.0.0.1:8545 method=web3_clientVersion params:='[]' id=67
 ```
 
-
+## Go Contract Bindings
+- [Go Contract Bindings](https://geth.ethereum.org/docs/dapp/native-bindings)
+### install Go binding generator
+```
+cd ~/github.com/ethereum/go-ethereum
+git pull
+go install ./cmd/abigen
+```
+### generate go code
+- create abi json file from built contract json file. only abi element is required. then
+```
+abigen --abi ./data/contract/token.abi --pkg contract --type Token --out ./pkg/contract/token.go
+```
 
 ## How to implement multisig on Ethereum
 - [Shamir's Secret Sharing](https://en.wikipedia.org/wiki/Shamir%27s_Secret_Sharing)

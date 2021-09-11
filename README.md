@@ -275,6 +275,10 @@ watch send -file xxx.csv
 - [ ] Multisig-address is used only once because of security reason, so after tx is sent, related receiver addresses should be updated by is_allocated=true.
 - [ ] Sent tx is not proceeded in bitcoin network if fee is not enough comparatively. So re-sending tx functionality is required adding more fee.
 
+### For ERC20 token
+- [x] Add sample ERC20 token for development. [ERC20 Token](https://github.com/hiromaily/erc20-token)
+- [ ] Add any useful APIs using contract equivalent to ETH APIs
+
 ### For ETH
 - [x] Add any useful APIs
 - [x] Generating key by HD Wallet
