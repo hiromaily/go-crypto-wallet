@@ -145,14 +145,12 @@ http http://127.0.0.1:8545 method=web3_clientVersion params:='[]' id=67
 - [Go Contract Bindings](https://geth.ethereum.org/docs/dapp/native-bindings)
 ### install Go binding generator
 ```
-cd ~/github.com/ethereum/go-ethereum
-git pull
-go install ./cmd/abigen
+go install github.com/ethereum/go-ethereum/cmd/abigen@latest
 ```
 ### generate go code
 - create abi json file from built contract json file. only abi element is required. then
 ```
-abigen --abi ./data/contract/token.abi --pkg contract --type Token --out ./pkg/contract/token.go
+abigen --abi ./data/contract/token.abi --pkg contract --type Token --out ./pkg/contract/token-abi.go
 ```
 
 ## How to implement multisig on Ethereum

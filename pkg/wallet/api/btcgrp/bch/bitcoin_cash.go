@@ -12,7 +12,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
-// TODO: BitcoinCash特有の機能は同一func名でOverrideすること
+// TODO: BitcoinCash specific func must be overridden by same func name to Bitcoin
 
 // BitcoinCash embeds Bitcoin
 type BitcoinCash struct {

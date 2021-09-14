@@ -12,6 +12,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/contract"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
@@ -19,6 +20,7 @@ import (
 type Ethereum struct {
 	ethClient    *ethclient.Client
 	rpcClient    *ethrpc.Client
+	tokenClient  *contract.Token
 	chainConf    *chaincfg.Params
 	coinTypeCode coin.CoinTypeCode // eth
 	logger       *zap.Logger
@@ -32,13 +34,16 @@ type Ethereum struct {
 // NewEthereum creates ethereum object
 func NewEthereum(
 	ctx context.Context,
+	ethClient *ethclient.Client,
 	rpcClient *ethrpc.Client,
+	tokenClient *contract.Token,
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Ethereum,
 	logger *zap.Logger) (*Ethereum, error) {
 	eth := &Ethereum{
-		ethClient:    ethclient.NewClient(rpcClient),
+		ethClient:    ethClient,
 		rpcClient:    rpcClient,
+		tokenClient:  tokenClient,
 		coinTypeCode: coinTypeCode,
 		logger:       logger,
 		ctx:          ctx,

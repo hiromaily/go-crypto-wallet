@@ -35,9 +35,10 @@ install-sqlboiler:
 
 .PHONY: install-abigen
 install-abigen:
-	cd ${GOPATH}/src/github.com/ethereum/go-ethereum
-	git pull
-	go install ./cmd/abigen
+	#cd ${GOPATH}/src/github.com/ethereum/go-ethereum
+	#git pull
+	#go install ./cmd/abigen
+	go install github.com/ethereum/go-ethereum/cmd/abigen@latest
 
 .PHONY: imports
 imports:
@@ -71,7 +72,7 @@ sqlboiler:
 
 .PHONY: generate-abi
 generate-abi:
-	abigen --abi ./data/contract/token.abi --pkg contract --type Token --out ./pkg/contract/token.go
+	abigen --abi ./data/contract/token.abi --pkg contract --type Token --out ./pkg/contract/token-abi.go
 
 # git tag
 #git tag v2.0.0 cfeca390b781af79321fb644c056bf6e755fdc7e

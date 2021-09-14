@@ -26,11 +26,12 @@ type CoinTypeCode string
 
 // coin_type_code
 const (
-	BTC CoinTypeCode = "btc"
-	BCH CoinTypeCode = "bch"
-	LTC CoinTypeCode = "ltc"
-	ETH CoinTypeCode = "eth"
-	XRP CoinTypeCode = "xrp"
+	BTC   CoinTypeCode = "btc"
+	BCH   CoinTypeCode = "bch"
+	LTC   CoinTypeCode = "ltc"
+	ETH   CoinTypeCode = "eth"
+	XRP   CoinTypeCode = "xrp"
+	ERC20 CoinTypeCode = "erc20"
 )
 
 // String converter

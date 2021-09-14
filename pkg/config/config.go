@@ -75,7 +75,7 @@ func (c *WalletRoot) validate(wtype wallet.WalletType, coinTypeCode coin.CoinTyp
 			}
 		default:
 		}
-	case coin.ETH:
+	case coin.ETH, coin.ERC20:
 		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ripple"); err != nil {
 			return err
 		}

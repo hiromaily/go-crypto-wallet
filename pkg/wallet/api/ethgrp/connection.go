@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
-
+	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/contract"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
@@ -30,10 +31,24 @@ func NewRPCClient(conf *config.Ethereum) (*ethrpc.Client, error) {
 }
 
 // NewEthereum creates ethereum instance according to coinType
-func NewEthereum(client *ethrpc.Client, conf *config.Ethereum, logger *zap.Logger, coinTypeCode coin.CoinTypeCode) (Ethereumer, error) {
+func NewEthereum(rpcClient *ethrpc.Client, conf *config.Ethereum, logger *zap.Logger, coinTypeCode coin.CoinTypeCode) (Ethereumer, error) {
+	client := ethclient.NewClient(rpcClient)
+	tokenClient, err := contract.NewContractToken("", client)
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to call contract.NewContractToken()")
+	}
+
 	switch coinTypeCode {
-	case coin.ETH:
-		eth, err := eth.NewEthereum(context.Background(), client, coinTypeCode, conf, logger)
+	case coin.ETH, coin.ERC20:
+		eth, err := eth.NewEthereum(
+			context.Background(),
+			client,
+			rpcClient,
+			tokenClient,
+			coinTypeCode,
+			conf,
+			logger,
+		)
 		if err != nil {
 			return nil, errors.Wrap(err, "fail to call eth.NewEthereum()")
 		}

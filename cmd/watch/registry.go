@@ -74,7 +74,7 @@ func (r *registry) NewWalleter() wallets.Watcher {
 	switch r.conf.CoinTypeCode {
 	case coin.BTC, coin.BCH:
 		return r.newBTCWalleter()
-	case coin.ETH:
+	case coin.ETH, coin.ERC20:
 		return r.newETHWalleter()
 	case coin.XRP:
 		return r.newXRPWalleter()
