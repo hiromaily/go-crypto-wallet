@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+
 	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/pkg/errors"

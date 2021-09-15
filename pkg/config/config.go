@@ -24,7 +24,7 @@ func NewWallet(file string, wtype wallet.WalletType, coinTypeCode coin.CoinTypeC
 	}
 
 	// debug
-	// grok.Value(conf)
+	// debug.Debug(conf)
 
 	// validate
 	if err = conf.validate(wtype, coinTypeCode); err != nil {
@@ -53,18 +53,9 @@ func loadWallet(path string) (*WalletRoot, error) {
 // validate config
 func (c *WalletRoot) validate(wtype wallet.WalletType, coinTypeCode coin.CoinTypeCode) error {
 	validate := validator.New()
-	//if err := validate.Struct(c); err != nil {
-	//	return err
-	//}
 
 	switch coinTypeCode {
 	case coin.BTC, coin.BCH:
-		//flds := []string{
-		//	"SubSlice[0].Test",
-		//	"Sub",
-		//	"SubIgnore",
-		//	"Anonymous.A",
-		//}
 		if err := validate.StructExcept(c, "Ethereum", "Ripple"); err != nil {
 			return err
 		}

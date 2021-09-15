@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/BurntSushi/toml v0.4.1
-	github.com/DataDog/datadog-go v4.8.1+incompatible // indirect
+	github.com/DataDog/datadog-go v4.8.2+incompatible // indirect
 	github.com/DataDog/sketches-go v1.2.0 // indirect
 	github.com/HdrHistogram/hdrhistogram-go v1.1.0 // indirect
 	github.com/LanfordCai/ava v0.1.3
@@ -15,7 +15,6 @@ require (
 	github.com/bookerzzz/grok v0.0.0
 	github.com/btcsuite/btcd v0.22.0-beta
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
-	github.com/consensys/gurvy v0.3.8 // indirect
 	github.com/cpacia/bchutil v0.0.0-20181003130114-b126f6a35b6c
 	github.com/deckarep/golang-set v1.7.1 // indirect
 	github.com/ericlagergren/decimal v0.0.0-20210307182354-5f8425a47c58
@@ -23,7 +22,6 @@ require (
 	github.com/fatih/color v1.12.0 // indirect
 	github.com/friendsofgo/errors v0.9.2
 	github.com/go-kit/kit v0.10.0 // indirect
-	github.com/go-ole/go-ole v1.2.5 // indirect
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/go-stack/stack v1.8.1 // indirect
@@ -38,10 +36,9 @@ require (
 	github.com/jackpal/go-nat-pmp v1.0.2 // indirect
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/json-iterator/go v1.1.10 // indirect
-	github.com/klauspost/compress v1.13.5 // indirect
-	github.com/leodido/go-urn v1.2.1 // indirect
-	github.com/lib/pq v1.10.2 // indirect
-	github.com/mattn/go-isatty v0.0.13 // indirect
+	github.com/klauspost/compress v1.13.6 // indirect
+	github.com/lib/pq v1.10.3 // indirect
+	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mitchellh/cli v1.1.2
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/opentracing/opentracing-go v1.2.0
@@ -50,11 +47,10 @@ require (
 	github.com/rjeczalik/notify v0.9.2 // indirect
 	github.com/rubblelabs/ripple v0.0.0-20210505072502-507286b0fd28
 	github.com/satori/go.uuid v1.2.0
-	github.com/shirou/gopsutil v3.21.7+incompatible // indirect
+	github.com/shirou/gopsutil v3.21.8+incompatible // indirect
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/tinylib/msgp v1.1.6 // indirect
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
-	github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31 // indirect
 	github.com/uber/jaeger-client-go v2.29.1+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible
 	github.com/volatiletech/null v8.0.0+incompatible
@@ -64,18 +60,14 @@ require (
 	github.com/volatiletech/strmangle v0.0.1
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
-	go.uber.org/zap v1.19.0
+	go.uber.org/zap v1.19.1
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
-	golang.org/x/net v0.0.0-20210825183410-e898025ed96a // indirect
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf // indirect
+	golang.org/x/net v0.0.0-20210913180222-943fd674d43e // indirect
+	golang.org/x/sys v0.0.0-20210915083310-ed5796bab164 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20210723032227-1f47c861a9ac // indirect
-	google.golang.org/genproto v0.0.0-20210828152312-66f60bf46e71 // indirect
+	google.golang.org/genproto v0.0.0-20210909211513-a8c4777a87af // indirect
 	google.golang.org/grpc v1.40.0
-	gopkg.in/DataDog/dd-trace-go.v1 v1.32.0
-	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
+	gopkg.in/DataDog/dd-trace-go.v1 v1.33.0
 	nhooyr.io/websocket v1.8.7
 )

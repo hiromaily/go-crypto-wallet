@@ -47,16 +47,25 @@ type BitcoinFee struct {
 	AdjustmentMax float64 `toml:"adjustment_max"`
 }
 
-// Ethereum Ethereum information
+// Ethereum information
 type Ethereum struct {
-	ERC20Token      coin.ERC20Token `toml:"erc20_token"`
-	Host            string          `toml:"host" validate:"required"`
-	IPCPath         string          `toml:"ipc_path"`
-	Port            int             `toml:"port" validate:"required"`
-	DisableTLS      bool            `toml:"disable_tls"`
-	NetworkType     string          `toml:"network_type" validate:"oneof=mainnet goerli rinkeby ropsten"`
-	KeyDirName      string          `toml:"keydir"`
-	ConfirmationNum uint64          `toml:"confirmation_num"`
+	Host            string           `toml:"host" validate:"required"`
+	IPCPath         string           `toml:"ipc_path"`
+	Port            int              `toml:"port" validate:"required"`
+	DisableTLS      bool             `toml:"disable_tls"`
+	NetworkType     string           `toml:"network_type" validate:"oneof=mainnet goerli rinkeby ropsten"`
+	KeyDirName      string           `toml:"keydir"`
+	ConfirmationNum uint64           `toml:"confirmation_num"`
+	ERC20Token      coin.ERC20Token  `toml:"erc20_token"`
+	ERC20s          map[string]ERC20 `toml:"erc20s"`
+}
+
+// ERC20 information
+type ERC20 struct {
+	Symbol          string `toml:"symbol"`
+	Name            string `toml:"name"`
+	ContractAddress string `toml:"contract_address"`
+	MasterAddress   string `toml:"master_address"`
 }
 
 // Ripple information

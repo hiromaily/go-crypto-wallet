@@ -90,11 +90,12 @@ func main() {
 
 	// help
 	if !isHelp && len(os.Args) > 1 {
-		// config
+		// base config
 		conf, err := config.NewWallet(confPath, walletType, coin.CoinTypeCode(coinTypeCode))
 		if err != nil {
 			log.Fatal(err)
 		}
+		// account config
 		accountConf := &account.AccountRoot{}
 		if accountConfPath != "" {
 			accountConf, err = account.NewAccount(accountConfPath)
