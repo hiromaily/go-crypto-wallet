@@ -40,6 +40,10 @@ install-abigen:
 	#go install ./cmd/abigen
 	go install github.com/ethereum/go-ethereum/cmd/abigen@latest
 
+.PHONY: install-staticcheck
+install-staticcheck:
+	go install honnef.co/go/tools/cmd/staticcheck@latest
+
 .PHONY: imports
 imports:
 	./scripts/imports.sh
@@ -55,6 +59,10 @@ lint:
 .PHONY: lintfix
 lintfix:
 	golangci-lint run --fix
+
+.PHONY: staticcheck
+staticcheck:
+	staticcheck ./...
 
 # FIXME: file is not generated with --templates option if files are existing
 # As workaround, modify files in ./templates/..
