@@ -123,6 +123,9 @@ func main() {
 		conf.CoinTypeCode = coin.CoinTypeCode(coinTypeCode)
 		if erc20Token != "" {
 			conf.Ethereum.ERC20Token = coin.ERC20Token(erc20Token)
+			if conf.ValidateERC20(conf.Ethereum.ERC20Token) != err {
+				log.Fatal(err)
+			}
 		}
 
 		// - conf.Bitcoin.Host

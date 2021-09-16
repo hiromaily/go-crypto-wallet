@@ -79,3 +79,10 @@ func (c *WalletRoot) validate(wtype wallet.WalletType, coinTypeCode coin.CoinTyp
 
 	return nil
 }
+
+func (c *WalletRoot) ValidateERC20(token coin.ERC20Token) error {
+	if _, ok := c.Ethereum.ERC20s[token]; !ok {
+		errors.Errorf("erc20 token information for [%s] is required", token.String())
+	}
+	return nil
+}

@@ -12,6 +12,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/contract"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/erc20"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
@@ -38,22 +39,29 @@ func NewEthereum(rpcClient *ethrpc.Client, conf *config.Ethereum, logger *zap.Lo
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call contract.NewContractToken()")
 	}
-
-	switch coinTypeCode {
-	case coin.ETH, coin.ERC20:
-		eth, err := eth.NewEthereum(
-			context.Background(),
-			client,
-			rpcClient,
+	var erc20Obj *erc20.ERC20
+	if coinTypeCode == coin.ERC20 {
+		erc20Obj = erc20.NewERC20(
 			tokenClient,
-			coinTypeCode,
-			conf,
+			conf.ERC20Token,
+			conf.ERC20s[conf.ERC20Token].Name,
+			conf.ERC20s[conf.ERC20Token].ContractAddress,
+			conf.ERC20s[conf.ERC20Token].MasterAddress,
 			logger,
 		)
-		if err != nil {
-			return nil, errors.Wrap(err, "fail to call eth.NewEthereum()")
-		}
-		return eth, err
 	}
-	return nil, errors.Errorf("coinType %s is not defined", coinTypeCode.String())
+
+	eth, err := eth.NewEthereum(
+		context.Background(),
+		client,
+		rpcClient,
+		erc20Obj,
+		coinTypeCode,
+		conf,
+		logger,
+	)
+	if err != nil {
+		return nil, errors.Wrap(err, "fail to call eth.NewEthereum()")
+	}
+	return eth, err
 }
