@@ -3,7 +3,6 @@ package tx
 import (
 	"bufio"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -129,9 +128,9 @@ func (r *FileRepository) ValidateFilePath(filePath string, expectedTxType TxType
 
 // ReadFile read file
 func (r *FileRepository) ReadFile(path string) (string, error) {
-	ret, err := ioutil.ReadFile(path)
+	ret, err := os.ReadFile(path)
 	if err != nil {
-		return "", errors.Wrapf(err, "fail to call ioutil.ReadFile(%s)", path)
+		return "", errors.Wrapf(err, "fail to call os.ReadFile(%s)", path)
 	}
 
 	return string(ret), nil
@@ -166,9 +165,9 @@ func (r *FileRepository) WriteFile(path, hexTx string) (string, error) {
 	fileName := path + ts
 
 	byteTx := []byte(hexTx)
-	err := ioutil.WriteFile(fileName, byteTx, 0o644)
+	err := os.WriteFile(fileName, byteTx, 0644)
 	if err != nil {
-		return "", errors.Wrapf(err, "fail to call ioutil.WriteFile(%s)", fileName)
+		return "", errors.Wrapf(err, "fail to call os.WriteFile(%s)", fileName)
 	}
 
 	return fileName, nil
@@ -182,7 +181,7 @@ func (r *FileRepository) WriteFileSlice(path string, data []string) (string, err
 	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
 	fileName := path + ts
 
-	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return "", errors.Wrapf(err, "fail to call os.OpenFile(%s)", fileName)
 	}
@@ -203,6 +202,6 @@ func (r *FileRepository) createDir(path string) {
 	tmp2 := tmp1[0 : len(tmp1)-1] // cut filename
 	dir := strings.Join(tmp2, "/")
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		os.Mkdir(dir, 0o755)
+		os.Mkdir(dir, 0755)
 	}
 }
