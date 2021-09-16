@@ -158,7 +158,15 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64, 
 	// data is required when contract transaction
 	// NewTransaction(nonce uint64, to common.Address, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte) *Transaction
 	// Note: tx may NOT be unique because fromAddr is not included and parameter is limited
-	tx := types.NewTransaction(nonce, common.HexToAddress(toAddr), newValue, GasLimit, gasPrice, nil)
+	tmpToAddr := common.HexToAddress(toAddr)
+	tx := types.NewTx(&types.LegacyTx{
+		Nonce:    nonce,
+		To:       &tmpToAddr,
+		Value:    newValue,
+		Gas:      GasLimit,
+		GasPrice: gasPrice,
+		Data:     nil,
+	})
 	txHash := tx.Hash().Hex()
 	rawTxHex, err := encodeTx(tx)
 	if err != nil {
