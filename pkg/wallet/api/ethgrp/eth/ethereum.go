@@ -5,9 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/erc20"
-
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"

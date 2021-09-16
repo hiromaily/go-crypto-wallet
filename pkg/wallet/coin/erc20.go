@@ -5,6 +5,7 @@ type ERC20Token string
 
 // erc20_token
 const (
+	HYT ERC20Token = "hyt"
 	BAT ERC20Token = "bat"
 )
 
@@ -13,14 +14,15 @@ func (e ERC20Token) String() string {
 	return string(e)
 }
 
-// ERC20Address
-var ERC20Address = map[ERC20Token]string{
-	BAT: "0x0D8775F648430679A709E98d2b0Cb6250d2887EF",
+// ERC20Map
+var ERC20Map = map[ERC20Token]bool{
+	HYT: true,
+	BAT: true,
 }
 
 // IsERC20Token validate
 func IsERC20Token(val string) bool {
-	if _, ok := ERC20Address[ERC20Token(val)]; ok {
+	if _, ok := ERC20Map[ERC20Token(val)]; ok {
 		return true
 	}
 	return false

@@ -35,12 +35,13 @@ func NewRPCClient(conf *config.Ethereum) (*ethrpc.Client, error) {
 // NewEthereum creates ethereum instance according to coinType
 func NewEthereum(rpcClient *ethrpc.Client, conf *config.Ethereum, logger *zap.Logger, coinTypeCode coin.CoinTypeCode) (Ethereumer, error) {
 	client := ethclient.NewClient(rpcClient)
-	tokenClient, err := contract.NewContractToken("", client)
-	if err != nil {
-		return nil, errors.Wrap(err, "fail to call contract.NewContractToken()")
-	}
+
 	var erc20Obj *erc20.ERC20
 	if coinTypeCode == coin.ERC20 {
+		tokenClient, err := contract.NewContractToken(conf.ERC20s[conf.ERC20Token].ContractAddress, client)
+		if err != nil {
+			return nil, errors.Wrap(err, "fail to call contract.NewContractToken()")
+		}
 		erc20Obj = erc20.NewERC20(
 			tokenClient,
 			conf.ERC20Token,

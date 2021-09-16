@@ -8,13 +8,8 @@ import (
 
 // https://geth.ethereum.org/docs/dapp/native-bindings
 
-// TODO: only required function should be defined as interface
-// TokenContructor ABI Token Interface
-//type TokenContractor interface {
-//}
-
-func NewContractToken(masterAddr string, cliConn bind.ContractBackend) (*Token, error) {
-	token, err := NewToken(common.HexToAddress(masterAddr), cliConn)
+func NewContractToken(contractAddr string, cliConn bind.ContractBackend) (*Token, error) {
+	token, err := NewToken(common.HexToAddress(contractAddr), cliConn)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call NewToken()")
 	}
