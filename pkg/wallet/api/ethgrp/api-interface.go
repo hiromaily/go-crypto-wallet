@@ -83,7 +83,7 @@ type Ethereumer interface {
 	SHA3(data string) (string, error)
 	// transaction
 	CreateRawTransaction(fromAddr, toAddr string, amount uint64, additionalNonce int) (*eth.RawTx, *models.EthDetailTX, error)
-	SignOnRawTransaction(rawTx *eth.RawTx, passphrase string, accountType account.AccountType) (*eth.RawTx, error)
+	SignOnRawTransaction(rawTx *eth.RawTx, passphrase string) (*eth.RawTx, error)
 	SendSignedRawTransaction(signedTxHex string) (string, error)
 	GetConfirmation(hashTx string) (uint64, error)
 	// util

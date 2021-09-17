@@ -13,7 +13,6 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"go.uber.org/zap"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 )
 
@@ -206,7 +205,7 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64, 
 // SignOnRawTransaction signs on raw transaction
 // - https://ethereum.stackexchange.com/questions/16472/signing-a-raw-transaction-in-go
 // - Note: this requires private key on this machine, if node is working remotely, it would not work.
-func (e *Ethereum) SignOnRawTransaction(rawTx *RawTx, passphrase string, senderAccount account.AccountType) (*RawTx, error) {
+func (e *Ethereum) SignOnRawTransaction(rawTx *RawTx, passphrase string) (*RawTx, error) {
 	txHex := rawTx.TxHex
 	fromAddr := rawTx.From
 	tx, err := decodeTx(txHex)

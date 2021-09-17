@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 )
@@ -91,11 +90,10 @@ func TestSignAndSendRawTransaction(t *testing.T) {
 	et := testutil.GetETH()
 
 	type args struct {
-		senderAddr    string
-		receiverAddr  string
-		amount        uint64
-		senderAccount account.AccountType
-		password      string
+		senderAddr   string
+		receiverAddr string
+		amount       uint64
+		password     string
 	}
 	type want struct {
 		isSignErr bool
@@ -109,22 +107,20 @@ func TestSignAndSendRawTransaction(t *testing.T) {
 		{
 			name: "wrong password",
 			args: args{
-				senderAddr:    "0xe52307Deb1a7dC3985D2873b45AE23b91D57a36d",
-				receiverAddr:  "0x72cCC7a7C3fa28C79aaC4f834168767A5762a7D0",
-				amount:        0,
-				senderAccount: account.AccountTypeClient,
-				password:      "foobar",
+				senderAddr:   "0xe52307Deb1a7dC3985D2873b45AE23b91D57a36d",
+				receiverAddr: "0x72cCC7a7C3fa28C79aaC4f834168767A5762a7D0",
+				amount:       0,
+				password:     "foobar",
 			},
 			want: want{true, false},
 		},
 		{
 			name: "happy path",
 			args: args{
-				senderAddr:    "0xe52307Deb1a7dC3985D2873b45AE23b91D57a36d",
-				receiverAddr:  "0x72cCC7a7C3fa28C79aaC4f834168767A5762a7D0",
-				amount:        0,
-				senderAccount: account.AccountTypeClient,
-				password:      eth.Password,
+				senderAddr:   "0xe52307Deb1a7dC3985D2873b45AE23b91D57a36d",
+				receiverAddr: "0x72cCC7a7C3fa28C79aaC4f834168767A5762a7D0",
+				amount:       0,
+				password:     eth.Password,
 			},
 			want: want{false, false},
 		},
@@ -138,7 +134,7 @@ func TestSignAndSendRawTransaction(t *testing.T) {
 				t.Fatal(err)
 			}
 			// sign on raw transaction
-			signedTx, err := et.SignOnRawTransaction(rawTx, tt.args.password, tt.args.senderAccount)
+			signedTx, err := et.SignOnRawTransaction(rawTx, tt.args.password)
 			if (err == nil) == tt.want.isSignErr {
 				t.Errorf("SignOnRawTransaction() = %v, want error = %v", err, tt.want.isSignErr)
 				return

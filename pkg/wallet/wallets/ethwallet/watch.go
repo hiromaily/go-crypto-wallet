@@ -52,22 +52,22 @@ func NewETHWatch(
 }
 
 // ImportAddress imports address
-func (w *ETHWatch) ImportAddress(fileName string, isRescan bool) error {
+func (w *ETHWatch) ImportAddress(fileName string, _ bool) error {
 	return w.AddressImporter.ImportAddress(fileName)
 }
 
 // CreateDepositTx creates deposit unsigned transaction
-func (w *ETHWatch) CreateDepositTx(adjustmentFee float64) (string, string, error) {
+func (w *ETHWatch) CreateDepositTx(_ float64) (string, string, error) {
 	return w.TxCreator.CreateDepositTx()
 }
 
 // CreatePaymentTx creates payment unsigned transaction
-func (w *ETHWatch) CreatePaymentTx(adjustmentFee float64) (string, string, error) {
+func (w *ETHWatch) CreatePaymentTx(_ float64) (string, string, error) {
 	return w.TxCreator.CreatePaymentTx()
 }
 
 // CreateTransferTx creates transfer unsigned transaction
-func (w *ETHWatch) CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error) {
+func (w *ETHWatch) CreateTransferTx(sender, receiver account.AccountType, floatAmount, _ float64) (string, string, error) {
 	return w.TxCreator.CreateTransferTx(sender, receiver, floatAmount)
 }
 

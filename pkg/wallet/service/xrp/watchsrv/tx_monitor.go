@@ -47,7 +47,7 @@ func (t *TxMonitor) UpdateTxStatus() error {
 }
 
 // MonitorBalance monitors balance
-func (t *TxMonitor) MonitorBalance(confirmationNum uint64) error {
+func (t *TxMonitor) MonitorBalance(_ uint64) error {
 	targetAccounts := []account.AccountType{
 		account.AccountTypeClient,
 		account.AccountTypeDeposit,

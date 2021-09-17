@@ -6,7 +6,6 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -45,16 +44,12 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 		return "", false, "", err
 	}
 
-	var senderAccount account.AccountType
-
 	// get hex tx from file
 	data, err := s.txFileRepo.ReadFileSlice(filePath)
 	if err != nil {
 		return "", false, "", errors.Wrap(err, "fail to call txFileRepo.ReadFileSlice()")
 	}
-	if len(data) > 1 {
-		senderAccount = account.AccountType(data[0])
-	} else {
+	if len(data) <= 1 {
 		return "", false, "", errors.New("file is invalid")
 	}
 	serializedTxs := data[1:]
@@ -66,7 +61,7 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 			return "", false, "", errors.Wrap(err, "fail to call serial.DecodeFromString()")
 		}
 		// sign
-		signedRawTx, err := s.eth.SignOnRawTransaction(&rawTx, eth.Password, senderAccount)
+		signedRawTx, err := s.eth.SignOnRawTransaction(&rawTx, eth.Password)
 		if err != nil {
 			return "", false, "", errors.Wrap(err, "fail to call eth.SignOnRawTransaction()")
 		}

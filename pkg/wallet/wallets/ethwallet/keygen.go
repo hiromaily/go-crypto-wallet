@@ -61,7 +61,7 @@ func (k *ETHKeygen) StoreSeed(strSeed string) ([]byte, error) {
 }
 
 // GenerateAccountKey generates account keys
-func (k *ETHKeygen) GenerateAccountKey(accountType account.AccountType, seed []byte, count uint32, isKeyPair bool) ([]key.WalletKey, error) {
+func (k *ETHKeygen) GenerateAccountKey(accountType account.AccountType, seed []byte, count uint32, _ bool) ([]key.WalletKey, error) {
 	return k.HDWalleter.Generate(accountType, seed, count)
 }
 
@@ -71,15 +71,14 @@ func (k *ETHKeygen) ImportPrivKey(accountType account.AccountType) error {
 }
 
 // ImportFullPubKey imports full-pubkey
-func (k *ETHKeygen) ImportFullPubKey(fileName string) error {
+func (k *ETHKeygen) ImportFullPubKey(_ string) error {
 	// return k.FullPubKeyImporter.ImportFullPubKey(fileName)
 	k.logger.Info("no functionality for ImportFullPubKey() in ETH")
 	return nil
 }
 
 // CreateMultisigAddress creates multi sig address returns Multisiger interface
-func (k *ETHKeygen) CreateMultisigAddress(accountType account.AccountType) error {
-	// return k.Multisiger.AddMultisigAddress(accountType, k.addrType)
+func (k *ETHKeygen) CreateMultisigAddress(_ account.AccountType) error {
 	k.logger.Info("no functionality for CreateMultisigAddress() in ETH")
 	return nil
 }
