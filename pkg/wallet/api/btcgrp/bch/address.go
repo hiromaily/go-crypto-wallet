@@ -28,7 +28,7 @@ type GetAddressInfoResult struct {
 
 // GetAddressInfo can be used as an alternative to `getaccount`, `validateaddress`
 func (b *BitcoinCash) GetAddressInfo(addr string) (*btc.GetAddressInfoResult, error) {
-	input, err := json.Marshal(string(addr))
+	input, err := json.Marshal(addr)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Marchal() in bch")
 	}
@@ -38,7 +38,7 @@ func (b *BitcoinCash) GetAddressInfo(addr string) (*btc.GetAddressInfoResult, er
 	}
 
 	infoResult := GetAddressInfoResult{}
-	err = json.Unmarshal([]byte(rawResult), &infoResult)
+	err = json.Unmarshal(rawResult, &infoResult)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Unmarshal(rawResult) in bch")
 	}

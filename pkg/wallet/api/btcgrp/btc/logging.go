@@ -40,7 +40,7 @@ func (b *Bitcoin) Logging() (*LoggingResult, error) {
 	}
 
 	loggingResult := LoggingResult{}
-	err = json.Unmarshal([]byte(rawResult), &loggingResult)
+	err = json.Unmarshal(rawResult, &loggingResult)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}

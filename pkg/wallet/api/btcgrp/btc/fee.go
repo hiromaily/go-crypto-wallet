@@ -22,7 +22,7 @@ type EstimateSmartFeeResult struct {
 
 // EstimateSmartFee calls RPC `estimatesmartfee` and returns BTC/kB(float64)
 func (b *Bitcoin) EstimateSmartFee() (float64, error) {
-	input, err := json.Marshal(uint64(b.confirmationBlock))
+	input, err := json.Marshal(b.confirmationBlock)
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call json.Marchal(confirmationBlock)")
 	}
@@ -32,7 +32,7 @@ func (b *Bitcoin) EstimateSmartFee() (float64, error) {
 	}
 
 	estimateResult := EstimateSmartFeeResult{}
-	err = json.Unmarshal([]byte(rawResult), &estimateResult)
+	err = json.Unmarshal(rawResult, &estimateResult)
 	if err != nil {
 		return 0, errors.Errorf("fail to all json.Unmarshal(rawResult)")
 	}

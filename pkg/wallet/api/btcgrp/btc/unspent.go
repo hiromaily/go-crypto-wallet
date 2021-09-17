@@ -43,7 +43,7 @@ func (b *Bitcoin) ListUnspent(confirmationNum uint64) ([]ListUnspentResult, erro
 	}
 
 	var listunspentResult []ListUnspentResult
-	err = json.Unmarshal([]byte(rawResult), &listunspentResult)
+	err = json.Unmarshal(rawResult, &listunspentResult)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Unmarshal()")
 	}
@@ -133,7 +133,7 @@ func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address, confirmationNum 
 	}
 
 	var listunspentResult []ListUnspentResult
-	err = json.Unmarshal([]byte(rawResult), &listunspentResult)
+	err = json.Unmarshal(rawResult, &listunspentResult)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}

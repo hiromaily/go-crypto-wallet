@@ -55,7 +55,7 @@ func (b *Bitcoin) ImportWallet(fileName string) error {
 }
 
 func (b *Bitcoin) dumpImportWallet(fileName, method string) error {
-	bFileName, err := json.Marshal(string(fileName))
+	bFileName, err := json.Marshal(fileName)
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.Marchal(filename)")
 	}
@@ -66,7 +66,7 @@ func (b *Bitcoin) dumpImportWallet(fileName, method string) error {
 	}
 
 	var walletResult WalletResult
-	err = json.Unmarshal([]byte(rawResult), &walletResult)
+	err = json.Unmarshal(rawResult, &walletResult)
 	if err != nil {
 		return errors.Wrap(err, "json.Unmarshal(rawResult)")
 	}
@@ -125,7 +125,7 @@ func (b *Bitcoin) LoadWallet(fileName string) error {
 	}
 
 	loadWalletResult := LoadWalletResult{}
-	err = json.Unmarshal([]byte(rawResult), &loadWalletResult)
+	err = json.Unmarshal(rawResult, &loadWalletResult)
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}
@@ -180,7 +180,7 @@ func (b *Bitcoin) CreateWallet(fileName string, disablePrivKey bool) error {
 	}
 
 	loadWalletResult := LoadWalletResult{}
-	err = json.Unmarshal([]byte(rawResult), &loadWalletResult)
+	err = json.Unmarshal(rawResult, &loadWalletResult)
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}

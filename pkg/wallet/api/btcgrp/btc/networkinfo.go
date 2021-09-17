@@ -96,7 +96,7 @@ func (b *Bitcoin) GetNetworkInfo() (*GetNetworkInfoResult, error) {
 	}
 
 	networkInfoResult := GetNetworkInfoResult{}
-	err = json.Unmarshal([]byte(rawResult), &networkInfoResult)
+	err = json.Unmarshal(rawResult, &networkInfoResult)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Unmarshal()")
 	}
@@ -112,7 +112,7 @@ func (b *Bitcoin) GetBlockchainInfo() (*GetBlockchainInfoResult, error) {
 	}
 
 	blockchainInfoResult := GetBlockchainInfoResult{}
-	err = json.Unmarshal([]byte(rawResult), &blockchainInfoResult)
+	err = json.Unmarshal(rawResult, &blockchainInfoResult)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Unmarshal()")
 	}

@@ -15,11 +15,11 @@ func (b *Bitcoin) SetLabel(addr, label string) error {
 		return errors.Wrapf(err, "fail to call btc.DecodeAddress(%s)", addr)
 	}
 
-	input1, err := json.Marshal(string(addr))
+	input1, err := json.Marshal(addr)
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.Marchal(addr)")
 	}
-	input2, err := json.Marshal(string(label))
+	input2, err := json.Marshal(label)
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.Marchal(label)")
 	}
@@ -30,7 +30,7 @@ func (b *Bitcoin) SetLabel(addr, label string) error {
 	}
 
 	var tmp interface{}
-	err = json.Unmarshal([]byte(rawResult), &tmp)
+	err = json.Unmarshal(rawResult, &tmp)
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}

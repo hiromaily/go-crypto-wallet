@@ -78,7 +78,7 @@ func (b *Bitcoin) AddMultisigAddress(
 	}
 
 	multisigAddrResult := AddMultisigAddressResult{}
-	err = json.Unmarshal([]byte(rawResult), &multisigAddrResult)
+	err = json.Unmarshal(rawResult, &multisigAddrResult)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}

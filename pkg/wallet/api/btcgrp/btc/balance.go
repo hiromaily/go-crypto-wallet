@@ -18,7 +18,7 @@ func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
 	if err != nil {
 		return 0, errors.Wrapf(err, "fail to call json.Marchal(dummy)")
 	}
-	input2, err := json.Marshal(uint64(b.confirmationBlock))
+	input2, err := json.Marshal(b.confirmationBlock)
 	if err != nil {
 		return 0, errors.Wrapf(err, "fail to call json.Marchal(%d)", b.confirmationBlock)
 	}
@@ -29,7 +29,7 @@ func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
 	}
 
 	var amount float64
-	err = json.Unmarshal([]byte(rawResult), &amount)
+	err = json.Unmarshal(rawResult, &amount)
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to json.Unmarshal(rawResult)")
 	}

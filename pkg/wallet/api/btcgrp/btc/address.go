@@ -51,7 +51,7 @@ type Purpose struct {
 
 // GetAddressInfo can be used as an alternative to `getaccount`, `validateaddress`
 func (b *Bitcoin) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
-	input, err := json.Marshal(string(addr))
+	input, err := json.Marshal(addr)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Marchal()")
 	}
@@ -61,7 +61,7 @@ func (b *Bitcoin) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
 	}
 
 	infoResult := GetAddressInfoResult{}
-	err = json.Unmarshal([]byte(rawResult), &infoResult)
+	err = json.Unmarshal(rawResult, &infoResult)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}
@@ -75,7 +75,7 @@ func (b *Bitcoin) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
 // For now, it would be better to stop using it
 func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, error) {
 	// input for rpc api
-	input, err := json.Marshal(string(labelName))
+	input, err := json.Marshal(labelName)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Marchal()")
 	}
@@ -87,7 +87,7 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 
 	// unmarshal response
 	var labels map[string]Purpose
-	err = json.Unmarshal([]byte(rawResult), &labels)
+	err = json.Unmarshal(rawResult, &labels)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}
@@ -115,7 +115,7 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 
 // ValidateAddress validate address
 func (b *Bitcoin) ValidateAddress(addr string) (*ValidateAddressResult, error) {
-	input, err := json.Marshal(string(addr))
+	input, err := json.Marshal(addr)
 	if err != nil {
 		return nil, errors.Errorf("json.Marchal(): error: %s", err)
 	}
@@ -125,7 +125,7 @@ func (b *Bitcoin) ValidateAddress(addr string) (*ValidateAddressResult, error) {
 	}
 
 	result := ValidateAddressResult{}
-	err = json.Unmarshal([]byte(rawResult), &result)
+	err = json.Unmarshal(rawResult, &result)
 	if err != nil {
 		return nil, errors.Errorf("json.Unmarshal(): error: %s", err)
 	}

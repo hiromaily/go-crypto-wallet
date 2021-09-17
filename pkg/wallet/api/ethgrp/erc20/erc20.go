@@ -1,10 +1,8 @@
 package erc20
 
 import (
-	"context"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -45,23 +43,23 @@ func NewERC20(
 	}
 }
 
-func (e *ERC20) getOption(
-	ctx context.Context,
-	isPending bool,
-	fromAddr common.Address,
-	blockNumber *big.Int) *bind.CallOpts {
-
-	opts := bind.CallOpts{}
-	if ctx != nil {
-		opts.Context = ctx
-	}
-	opts.Pending = isPending
-	opts.From = fromAddr
-	if blockNumber != nil {
-		opts.BlockNumber = blockNumber
-	}
-	return &opts
-}
+//func (e *ERC20) getOption(
+//	ctx context.Context,
+//	isPending bool,
+//	fromAddr common.Address,
+//	blockNumber *big.Int) *bind.CallOpts {
+//
+//	opts := bind.CallOpts{}
+//	if ctx != nil {
+//		opts.Context = ctx
+//	}
+//	opts.Pending = isPending
+//	opts.From = fromAddr
+//	if blockNumber != nil {
+//		opts.BlockNumber = blockNumber
+//	}
+//	return &opts
+//}
 
 func (e *ERC20) GetBalance(hexAddr string) (*big.Int, error) {
 	balance, err := e.tokenClient.BalanceOf(nil, common.HexToAddress(hexAddr))

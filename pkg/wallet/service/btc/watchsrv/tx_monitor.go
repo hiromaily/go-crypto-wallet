@@ -161,7 +161,7 @@ func (t *TxMonitor) checkTxConfirmation(hash string, actionType action.ActionTyp
 		zap.Uint64("confirmation", tran.Confirmations))
 
 	// check current confirmation
-	if tran.Confirmations >= uint64(t.btc.ConfirmationBlock()) {
+	if tran.Confirmations >= t.btc.ConfirmationBlock() {
 		// current confirmation meets 6 or more
 		return true, nil
 	}

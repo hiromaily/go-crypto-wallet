@@ -161,7 +161,7 @@ func (b *Bitcoin) ToMsgTx(txHex string) (*wire.MsgTx, error) {
 
 // GetTransaction returns GetTransactionResult by gettransaction RPC
 func (b *Bitcoin) GetTransaction(txID string) (*GetTransactionResult, error) {
-	input, err := json.Marshal(string(txID))
+	input, err := json.Marshal(txID)
 	if err != nil {
 		return nil, errors.Errorf("json.Marchal(txID): error: %s", err)
 	}
@@ -171,7 +171,7 @@ func (b *Bitcoin) GetTransaction(txID string) (*GetTransactionResult, error) {
 	}
 
 	result := GetTransactionResult{}
-	err = json.Unmarshal([]byte(rawResult), &result)
+	err = json.Unmarshal(rawResult, &result)
 	if err != nil {
 		return nil, errors.Errorf("json.Unmarshal(rawResult): error: %s", err)
 	}
@@ -234,7 +234,7 @@ func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*TxRawResult, error) {
 	//	return nil, errors.Wrap(err, "fail to call hex.DecodeString()")
 	//}
 	//resTx, err := b.Client.DecodeRawTransaction(byteHex)
-	input, err := json.Marshal(string(hexTx))
+	input, err := json.Marshal(hexTx)
 	if err != nil {
 		return nil, errors.Errorf("json.Marchal(txID): error: %s", err)
 	}
@@ -244,7 +244,7 @@ func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*TxRawResult, error) {
 	}
 
 	result := TxRawResult{}
-	err = json.Unmarshal([]byte(rawResult), &result)
+	err = json.Unmarshal(rawResult, &result)
 	if err != nil {
 		return nil, errors.Errorf("json.Unmarshal(rawResult): error: %s", err)
 	}
@@ -318,7 +318,7 @@ func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, err
 	}
 
 	fundRawTransactionResult := FundRawTransactionResult{}
-	err = json.Unmarshal([]byte(rawResult), &fundRawTransactionResult)
+	err = json.Unmarshal(rawResult, &fundRawTransactionResult)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}
@@ -354,7 +354,7 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []PrevTx) (*wire.Ms
 		return nil, false, errors.Wrap(err, "fail to call json.RawRequest(signrawtransactionwithwallet)")
 	}
 	signRawTxResult := SignRawTransactionResult{}
-	err = json.Unmarshal([]byte(rawResult), &signRawTxResult)
+	err = json.Unmarshal(rawResult, &signRawTxResult)
 	if err != nil {
 		return nil, false, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}
@@ -412,7 +412,7 @@ func (b *Bitcoin) SignRawTransactionWithKey(tx *wire.MsgTx, privKeysWIF []string
 	}
 
 	signRawTxResult := SignRawTransactionResult{}
-	err = json.Unmarshal([]byte(rawResult), &signRawTxResult)
+	err = json.Unmarshal(rawResult, &signRawTxResult)
 	if err != nil {
 		return nil, false, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
 	}
