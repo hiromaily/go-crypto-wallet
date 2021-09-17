@@ -49,9 +49,9 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 
 	// keystore directory is linked to any apis to get accounts
 	// so multiple directories are not good idea
-	p.logger.Debug("NewKeyStore", zap.String("key_dir", p.eth.GetKeyDir(accountType)))
+	p.logger.Debug("NewKeyStore", zap.String("key_dir", p.eth.GetKeyDir()))
 	// keyDir := fmt.Sprintf("%s/%s", p.keyDir, accountType.String())
-	ks := keystore.NewKeyStore(p.eth.GetKeyDir(accountType), keystore.StandardScryptN, keystore.StandardScryptP)
+	ks := keystore.NewKeyStore(p.eth.GetKeyDir(), keystore.StandardScryptN, keystore.StandardScryptP)
 
 	for _, record := range accountKeyTable {
 		p.logger.Debug(

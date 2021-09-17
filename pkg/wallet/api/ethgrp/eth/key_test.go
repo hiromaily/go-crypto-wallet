@@ -3,7 +3,6 @@ package eth_test
 import (
 	"testing"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 )
@@ -15,7 +14,6 @@ func TestGetPrivKey(t *testing.T) {
 
 	type args struct {
 		addr string
-		acnt account.AccountType
 	}
 	type want struct {
 		isErr bool
@@ -29,7 +27,6 @@ func TestGetPrivKey(t *testing.T) {
 			name: "happy path",
 			args: args{
 				addr: "0xd4EC46122b3f0afc0287144Adcca5d65B22B799c",
-				acnt: account.AccountTypeClient,
 			},
 			want: want{false},
 		},
@@ -37,7 +34,6 @@ func TestGetPrivKey(t *testing.T) {
 			name: "wrong address",
 			args: args{
 				addr: "0x5357135e0D3CbBD37cFCeb9F06257Bb133548Exx",
-				acnt: account.AccountTypeClient,
 			},
 			want: want{true},
 		},
@@ -45,7 +41,7 @@ func TestGetPrivKey(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			prikey, err := et.GetPrivKey(tt.args.addr, eth.Password, tt.args.acnt)
+			prikey, err := et.GetPrivKey(tt.args.addr, eth.Password)
 			if (err == nil) == tt.want.isErr {
 				t.Errorf("readPrivKey() = %v, want error = %v", err, tt.want.isErr)
 				return

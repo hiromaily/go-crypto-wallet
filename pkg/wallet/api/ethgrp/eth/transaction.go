@@ -215,7 +215,7 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *RawTx, passphrase string, senderA
 	}
 
 	// get private key
-	key, err := e.GetPrivKey(fromAddr, passphrase, senderAccount)
+	key, err := e.GetPrivKey(fromAddr, passphrase)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call e.GetPrivKey()")
 	}

@@ -29,8 +29,8 @@ type Ethereumer interface {
 	GetChainConf() *chaincfg.Params
 	// key
 	ToECDSA(privKey string) (*ecdsa.PrivateKey, error)
-	GetKeyDir(accountType account.AccountType) string
-	GetPrivKey(hexAddr, password string, accountType account.AccountType) (*keystore.Key, error)
+	GetKeyDir() string
+	GetPrivKey(hexAddr, password string) (*keystore.Key, error)
 	RenameParityKeyFile(hexAddr string, accountType account.AccountType) error
 	// rpc_admin
 	AddPeer(nodeURL string) error

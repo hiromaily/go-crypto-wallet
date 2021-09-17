@@ -111,7 +111,7 @@ func NewAuthHDWalletRepo(authKeyRepo coldrepo.AuthAccountKeyRepositorier, authTy
 }
 
 // GetMaxIndex returns index
-func (w *AuthHDWalletRepo) GetMaxIndex(accountType account.AccountType) (int64, error) {
+func (w *AuthHDWalletRepo) GetMaxIndex(_ account.AccountType) (int64, error) {
 	_, err := w.authKeyRepo.GetOne(w.authType)
 	if err != nil {
 		return 0, nil
@@ -120,7 +120,7 @@ func (w *AuthHDWalletRepo) GetMaxIndex(accountType account.AccountType) (int64, 
 }
 
 // Insert inserts key to auth_account_key table
-func (w *AuthHDWalletRepo) Insert(keys []key.WalletKey, idx int64, coinTypeCode coin.CoinTypeCode, accountType account.AccountType) error {
+func (w *AuthHDWalletRepo) Insert(keys []key.WalletKey, idx int64, coinTypeCode coin.CoinTypeCode, _ account.AccountType) error {
 	if len(keys) != 1 {
 		return errors.New("only one key is allowed")
 	}
