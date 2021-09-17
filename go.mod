@@ -34,7 +34,6 @@ require (
 	github.com/hiromaily/ripple-lib-proto v0.0.0-20200615012248-6990db627c3d
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/jackpal/go-nat-pmp v1.0.2 // indirect
-	github.com/jmoiron/sqlx v1.3.4
 	github.com/json-iterator/go v1.1.10 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/lib/pq v1.10.3 // indirect
