@@ -15,15 +15,16 @@ Wallet functionalities to create raw transaction, to sing on unsigned transactio
 - Bitcoin
 - Bitcoin Cash
 - Ethereum
+- ERC-20 Token (under development)
 - Ripple
 
 
-## Note
+## Current development
 - This project is under refactoring
   - based on `Clean Code`, `Clean Architecture`, [`Refactoring`](https://martinfowler.com/articles/refactoring-2nd-ed.html)
 - ERC-20 token is under development
-  - [Basic Attention Token](https://basicattentiontoken.org/) will be coming after XRP.
-- [Ethereum Classic](https://ethereumclassic.org/) will be coming after Basic Attention Token.
+- Setup script for development of ethereum/erc20 using Ganache
+
 
 ## Expected use cases
 ### 1.Deposit functionality
@@ -92,7 +93,7 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 - Node Server
     - BTC: [Bitcoin Core 0.18+ for Bitcoin node](https://bitcoin.org/en/bitcoin-core/)
     - BCH: [Bitcoin ABC 0.21+ for Bitcoin cash node](https://www.bitcoinabc.org/)
-    - ETH: [go-ethereum](https://github.com/ethereum/go-ethereum)
+    - ETH: [go-ethereum](https://github.com/ethereum/go-ethereum), [Ganache](https://www.trufflesuite.com/ganache), [erc20-token](https://github.com/hiromaily/erc20-token)
     - XRP: [rippled](https://xrpl.org/manage-the-rippled-server.html), [ripple-lib-server](https://github.com/hiromaily/ripple-lib-server)
 
 ## Installation
