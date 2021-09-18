@@ -3,7 +3,6 @@ package watchsrv
 import (
 	"database/sql"
 
-
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 

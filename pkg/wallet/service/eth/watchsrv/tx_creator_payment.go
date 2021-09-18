@@ -127,7 +127,7 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, *big.Int, []int64, error)
 		userPayments[idx].floatAmount = amt
 
 		// validate address
-		if err = t.eth.ValidationAddr(userPayments[idx].receiverAddr); err != nil {
+		if err = t.eth.ValidateAddr(userPayments[idx].receiverAddr); err != nil {
 			// fatal error
 			t.logger.Error("fail to call ValidationAddr",
 				zap.String("address", userPayments[idx].receiverAddr),

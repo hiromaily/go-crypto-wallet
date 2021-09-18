@@ -34,7 +34,7 @@ func TestValidationAddr(t *testing.T) {
 	et := new(Ethereum)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := et.ValidationAddr(tt.args.addr)
+			err := et.ValidateAddr(tt.args.addr)
 			if (err == nil) == tt.want.isErr {
 				t.Errorf("ValidationAddr() = %v, want error = %v", err, tt.want.isErr)
 			}

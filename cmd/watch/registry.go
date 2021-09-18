@@ -6,7 +6,6 @@ import (
 
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/ethereum/go-ethereum/ethclient"
-
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/opentracing/opentracing-go"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -364,20 +363,23 @@ func (r *registry) newETH() ethgrp.Ethereumer {
 func (r *registry) newERC20() erc20.ERC20er {
 	if r.erc20 == nil && r.conf.CoinTypeCode == coin.ERC20 {
 		var err error
+		client := ethclient.NewClient(r.newEthRPCClient())
 		conf := r.conf.Ethereum
 		tokenClient, err := contract.NewContractToken(
 			conf.ERC20s[conf.ERC20Token].ContractAddress,
-			ethclient.NewClient(r.newEthRPCClient()),
+			client,
 		)
 		if err != nil {
 			panic(err)
 		}
 		r.erc20 = erc20.NewERC20(
+			client,
 			tokenClient,
 			conf.ERC20Token,
 			conf.ERC20s[conf.ERC20Token].Name,
 			conf.ERC20s[conf.ERC20Token].ContractAddress,
 			conf.ERC20s[conf.ERC20Token].MasterAddress,
+			conf.ERC20s[conf.ERC20Token].Decimals,
 			r.newLogger(),
 		)
 	}

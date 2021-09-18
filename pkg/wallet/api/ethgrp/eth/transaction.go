@@ -14,40 +14,21 @@ import (
 	"go.uber.org/zap"
 
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/ethtx"
 )
 
-// RawTx is raw transaction
-type RawTx struct {
-	UUID  string  `json:"uuid"`
-	From  string  `json:"from"`
-	To    string  `json:"to"`
-	Value big.Int `json:"value"`
-	Nonce uint64  `json:"nonce"`
-	TxHex string  `json:"txhex"`
-	Hash  string  `json:"hash"`
-}
-
-// TODO: WIP: logic is not fixed, it looks same
-// when creating multiple transaction from same address, nonce should be increased
+// when creating multiple transaction from same address, nonce should be incremented
 func (e *Ethereum) getNonce(fromAddr string, additionalNonce int) (uint64, error) {
 	// by calling GetTransactionCount()
 	nonce, err := e.GetTransactionCount(fromAddr, QuantityTagPending)
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call eth.GetTransactionCount()")
 	}
-
-	// result is same
-	//nonce2, err := e.ethClient.PendingNonceAt(e.ctx, common.HexToAddress(fromAddr))
-	//if err != nil {
-	//	return 0, errors.Wrap(err, "fail to call ethClient.PendingNonceAt()")
-	//}
-
 	if additionalNonce != 0 {
 		nonce = nonce.Add(nonce, new(big.Int).SetUint64(uint64(additionalNonce)))
 	}
 	e.logger.Debug("nonce",
 		zap.Uint64("GetTransactionCount(fromAddr, QuantityTagPending)", nonce.Uint64()),
-		// zap.Uint64("ethClient.PendingNonceAt(e.ctx, common.HexToAddress(fromAddr))", nonce2),
 	)
 
 	return nonce.Uint64(), nil
@@ -96,12 +77,12 @@ func (e *Ethereum) calculateFee(fromAddr, toAddr common.Address, balance, gasPri
 // TODO: which QuantityTag should be used?
 // - Creating offline/raw transactions with Go-Ethereum
 //   https://medium.com/@akshay_111meher/creating-offline-raw-transactions-with-go-ethereum-8d6cc8174c5d
-// Note: sender acocunt takes fee
+// Note: sender account owes fee
 // - if sender sends 5ETH, receiver receives 5ETH
 // - sender has to pay 5ETH + fee
-func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64, additionalNonce int) (*RawTx, *models.EthDetailTX, error) {
+func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64, additionalNonce int) (*ethtx.RawTx, *models.EthDetailTX, error) {
 	// validation check
-	if e.ValidationAddr(fromAddr) != nil || e.ValidationAddr(toAddr) != nil {
+	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
 	}
 	e.logger.Debug("eth.CreateRawTransaction()",
@@ -124,11 +105,10 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64, 
 	// nonce
 	nonce, err := e.getNonce(fromAddr, additionalNonce)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call eth.GetTransactionCount()")
+		return nil, nil, errors.Wrap(err, "fail to call eth.getNonce()")
 	}
 
 	// gasPrice
-	// e.ethClient.SuggestGasPrice()
 	gasPrice, err := e.GasPrice()
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "fail to call eth.GasPrice()")
@@ -147,16 +127,12 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64, 
 		return nil, nil, errors.Wrap(err, "fail to call eth.calculateFee()")
 	}
 
-	// TODO: which value should be used for args of types.NewTransaction()
-	e.logger.Debug("comparison",
+	e.logger.Debug("tx parameter",
 		zap.Uint64("GasLimit", GasLimit),
 		zap.Uint64("estimatedGas", estimatedGas.Uint64()),
 		zap.Uint64("txFee", txFee.Uint64()))
 
 	// create transaction
-	// data is required when contract transaction
-	// NewTransaction(nonce uint64, to common.Address, amount *big.Int, gasLimit uint64, gasPrice *big.Int, data []byte) *Transaction
-	// Note: tx may NOT be unique because fromAddr is not included and parameter is limited
 	tmpToAddr := common.HexToAddress(toAddr)
 	tx := types.NewTx(&types.LegacyTx{
 		Nonce:    nonce,
@@ -164,7 +140,6 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64, 
 		Value:    newValue,
 		Gas:      GasLimit,
 		GasPrice: gasPrice,
-		Data:     nil,
 	})
 	txHash := tx.Hash().Hex()
 	rawTxHex, err := encodeTx(tx)
@@ -190,7 +165,7 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64, 
 	}
 
 	// RawTx
-	rawtx := &RawTx{
+	rawtx := &ethtx.RawTx{
 		UUID:  uid,
 		From:  fromAddr,
 		To:    toAddr,
@@ -205,7 +180,7 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64, 
 // SignOnRawTransaction signs on raw transaction
 // - https://ethereum.stackexchange.com/questions/16472/signing-a-raw-transaction-in-go
 // - Note: this requires private key on this machine, if node is working remotely, it would not work.
-func (e *Ethereum) SignOnRawTransaction(rawTx *RawTx, passphrase string) (*RawTx, error) {
+func (e *Ethereum) SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (*ethtx.RawTx, error) {
 	txHex := rawTx.TxHex
 	fromAddr := rawTx.From
 	tx, err := decodeTx(txHex)
@@ -248,7 +223,7 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *RawTx, passphrase string) (*RawTx
 		return nil, errors.Wrap(err, "fail to call encodeTx()")
 	}
 
-	resTx := &RawTx{
+	resTx := &ethtx.RawTx{
 		UUID:  rawTx.UUID,
 		From:  msg.From().Hex(),
 		To:    msg.To().Hex(),
@@ -296,6 +271,7 @@ func (e *Ethereum) GetConfirmation(hashTx string) (uint64, error) {
 	return uint64(confirmation), nil
 }
 
+// FIXME: moved to pkg/tx package
 func encodeTx(tx *types.Transaction) (*string, error) {
 	txb, err := rlp.EncodeToBytes(tx)
 	if err != nil {
@@ -305,6 +281,7 @@ func encodeTx(tx *types.Transaction) (*string, error) {
 	return &txHex, nil
 }
 
+// FIXME: moved to pkg/tx package
 func decodeTx(txHex string) (*types.Transaction, error) {
 	txc, err := hexutil.Decode(txHex)
 	if err != nil {

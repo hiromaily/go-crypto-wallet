@@ -13,6 +13,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/ethtx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
@@ -82,13 +83,13 @@ type Ethereumer interface {
 	ClientVersion() (string, error)
 	SHA3(data string) (string, error)
 	// transaction
-	CreateRawTransaction(fromAddr, toAddr string, amount uint64, additionalNonce int) (*eth.RawTx, *models.EthDetailTX, error)
-	SignOnRawTransaction(rawTx *eth.RawTx, passphrase string) (*eth.RawTx, error)
+	CreateRawTransaction(fromAddr, toAddr string, amount uint64, additionalNonce int) (*ethtx.RawTx, *models.EthDetailTX, error)
+	SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (*ethtx.RawTx, error)
 	SendSignedRawTransaction(signedTxHex string) (string, error)
 	GetConfirmation(hashTx string) (uint64, error)
 	// util
 	DecodeBig(input string) (*big.Int, error)
-	ValidationAddr(addr string) error
+	ValidateAddr(addr string) error
 	FromWei(v int64) *big.Int
 	FromGWei(v int64) *big.Int
 	// FromEther(v int64) *big.Int

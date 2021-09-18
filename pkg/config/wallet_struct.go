@@ -66,6 +66,7 @@ type ERC20 struct {
 	Name            string `toml:"name"`
 	ContractAddress string `toml:"contract_address"`
 	MasterAddress   string `toml:"master_address"`
+	Decimals        int    `toml:"decimals"`
 }
 
 // Ripple information

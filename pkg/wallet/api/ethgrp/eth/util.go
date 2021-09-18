@@ -93,8 +93,8 @@ func toCallArg(msg *ethereum.CallMsg) interface{} {
 	return arg
 }
 
-// ValidationAddr validates address
-func (e *Ethereum) ValidationAddr(addr string) error {
+// ValidateAddr validates address
+func (e *Ethereum) ValidateAddr(addr string) error {
 	// validation check
 	if !common.IsHexAddress(addr) {
 		return errors.Errorf("address:%s is invalid", addr)

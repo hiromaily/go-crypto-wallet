@@ -11,6 +11,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/ethtx"
 )
 
 // Sign type
@@ -56,7 +57,7 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 
 	txHexs := make([]string, 0, len(serializedTxs))
 	for _, serializedTx := range serializedTxs {
-		var rawTx eth.RawTx
+		var rawTx ethtx.RawTx
 		if err = serial.DecodeFromString(serializedTx, &rawTx); err != nil {
 			return "", false, "", errors.Wrap(err, "fail to call serial.DecodeFromString()")
 		}
