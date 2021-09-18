@@ -16,6 +16,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/contract"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	txpkg "github.com/hiromaily/go-crypto-wallet/pkg/tx"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/ethtx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
@@ -91,7 +92,7 @@ func (e *ERC20) FloatToBigInt(v float64) *big.Int {
 	return big.NewInt(int64(v))
 }
 
-func (e *ERC20) GetBalance(hexAddr string) (*big.Int, error) {
+func (e *ERC20) GetBalance(hexAddr string, _ eth.QuantityTag) (*big.Int, error) {
 	balance, err := e.tokenClient.BalanceOf(nil, common.HexToAddress(hexAddr))
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to call e.contract.BalanceOf(%s)", hexAddr)
@@ -119,7 +120,7 @@ func (e *ERC20) CreateRawTransaction(fromAddr, toAddr string, amount uint64, add
 		zap.Uint64("amount", amount),
 	)
 
-	balance, err := e.GetBalance(fromAddr)
+	balance, err := e.GetBalance(fromAddr, "")
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "fail to call eth.GetBalance()")
 	}

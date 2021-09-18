@@ -25,8 +25,7 @@ type TxCreator interface {
 
 // TxCreate type
 type TxCreate struct {
-	eth             ethgrp.Ethereumer
-	erc20           ethgrp.ERC20er
+	eth             ethgrp.TxCreateEther
 	logger          *zap.Logger
 	dbConn          *sql.DB
 	addrRepo        watchrepo.AddressRepositorier
@@ -42,8 +41,7 @@ type TxCreate struct {
 
 // NewTxCreate returns TxCreate object
 func NewTxCreate(
-	eth ethgrp.Ethereumer,
-	erc20 ethgrp.ERC20er,
+	eth ethgrp.TxCreateEther,
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
@@ -57,7 +55,6 @@ func NewTxCreate(
 	coinTypeCode coin.CoinTypeCode) *TxCreate {
 	return &TxCreate{
 		eth:             eth,
-		erc20:           erc20,
 		logger:          logger,
 		dbConn:          dbConn,
 		addrRepo:        addrRepo,

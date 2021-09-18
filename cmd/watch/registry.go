@@ -174,9 +174,15 @@ func (r *registry) newBTCTxCreator() service.TxCreator {
 }
 
 func (r *registry) newETHTxCreator() ethsrv.TxCreator {
+	var targetEthAPI ethgrp.TxCreateEther
+	if r.conf.CoinTypeCode == coin.ERC20 {
+		targetEthAPI = r.newERC20()
+	} else {
+		targetEthAPI = r.newETH()
+	}
+
 	return ethsrv.NewTxCreate(
-		r.newETH(),
-		r.newERC20(),
+		targetEthAPI,
 		r.newLogger(),
 		r.newMySQLClient(),
 		r.newAddressRepo(),
