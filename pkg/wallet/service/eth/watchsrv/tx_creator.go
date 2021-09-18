@@ -3,6 +3,7 @@ package watchsrv
 import (
 	"database/sql"
 
+
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -13,6 +14,8 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/erc20"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // TxCreator is TxCreator interface
@@ -25,6 +28,7 @@ type TxCreator interface {
 // TxCreate type
 type TxCreate struct {
 	eth             ethgrp.Ethereumer
+	erc20           erc20.ERC20er
 	logger          *zap.Logger
 	dbConn          *sql.DB
 	addrRepo        watchrepo.AddressRepositorier
@@ -35,11 +39,13 @@ type TxCreate struct {
 	depositReceiver account.AccountType
 	paymentSender   account.AccountType
 	wtype           wallet.WalletType
+	coinTypeCode    coin.CoinTypeCode
 }
 
 // NewTxCreate returns TxCreate object
 func NewTxCreate(
 	eth ethgrp.Ethereumer,
+	erc20 erc20.ERC20er,
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
@@ -49,9 +55,11 @@ func NewTxCreate(
 	txFileRepo tx.FileRepositorier,
 	depositReceiver account.AccountType,
 	paymentSender account.AccountType,
-	wtype wallet.WalletType) *TxCreate {
+	wtype wallet.WalletType,
+	coinTypeCode coin.CoinTypeCode) *TxCreate {
 	return &TxCreate{
 		eth:             eth,
+		erc20:           erc20,
 		logger:          logger,
 		dbConn:          dbConn,
 		addrRepo:        addrRepo,
@@ -62,6 +70,7 @@ func NewTxCreate(
 		depositReceiver: depositReceiver,
 		paymentSender:   paymentSender,
 		wtype:           wtype,
+		coinTypeCode:    coinTypeCode,
 	}
 }
 

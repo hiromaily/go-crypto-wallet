@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"github.com/btcsuite/btcd/rpcclient"
+	"github.com/ethereum/go-ethereum/ethclient"
+
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/opentracing/opentracing-go"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -14,6 +16,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/contract"
 	"github.com/hiromaily/go-crypto-wallet/pkg/converter"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -23,6 +26,7 @@ import (
 	wtype "github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/erc20"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -50,6 +54,7 @@ type registry struct {
 	logger       *zap.Logger
 	btc          btcgrp.Bitcoiner
 	eth          ethgrp.Ethereumer
+	erc20        erc20.ERC20er
 	xrp          xrpgrp.Rippler
 	rpcClient    *rpcclient.Client
 	rpcEthClient *ethrpc.Client
@@ -172,6 +177,7 @@ func (r *registry) newBTCTxCreator() service.TxCreator {
 func (r *registry) newETHTxCreator() ethsrv.TxCreator {
 	return ethsrv.NewTxCreate(
 		r.newETH(),
+		r.newERC20(),
 		r.newLogger(),
 		r.newMySQLClient(),
 		r.newAddressRepo(),
@@ -182,6 +188,7 @@ func (r *registry) newETHTxCreator() ethsrv.TxCreator {
 		r.newDepositAccount(),
 		r.newPaymentAccount(),
 		r.walletType,
+		r.conf.CoinTypeCode,
 	)
 }
 
@@ -352,6 +359,29 @@ func (r *registry) newETH() ethgrp.Ethereumer {
 		}
 	}
 	return r.eth
+}
+
+func (r *registry) newERC20() erc20.ERC20er {
+	if r.erc20 == nil && r.conf.CoinTypeCode == coin.ERC20 {
+		var err error
+		conf := r.conf.Ethereum
+		tokenClient, err := contract.NewContractToken(
+			conf.ERC20s[conf.ERC20Token].ContractAddress,
+			ethclient.NewClient(r.newEthRPCClient()),
+		)
+		if err != nil {
+			panic(err)
+		}
+		r.erc20 = erc20.NewERC20(
+			tokenClient,
+			conf.ERC20Token,
+			conf.ERC20s[conf.ERC20Token].Name,
+			conf.ERC20s[conf.ERC20Token].ContractAddress,
+			conf.ERC20s[conf.ERC20Token].MasterAddress,
+			r.newLogger(),
+		)
+	}
+	return r.erc20
 }
 
 func (r *registry) newXRPWSClient() (*ws.WS, *ws.WS) {

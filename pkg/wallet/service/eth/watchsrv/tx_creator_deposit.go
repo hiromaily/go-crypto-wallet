@@ -1,6 +1,8 @@
 package watchsrv
 
 import (
+	"math/big"
+
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -9,6 +11,7 @@ import (
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // CreateDepositTx create unsigned tx if client accounts have coins
@@ -31,14 +34,21 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 	// addresses, err := t.eth.Accounts()
 
 	// target addresses
-	var userAmounts []eth.UserAmount
+	var (
+		userAmounts []eth.UserAmount
+		balance     *big.Int
+	)
 
 	// address list for client
 	for _, addr := range addrs {
-		// TODO: if previous tx is not done, wrong amount is returned. how to manage it??
-		balance, err := t.eth.GetBalance(addr.WalletAddress, eth.QuantityTagLatest)
+		if t.coinTypeCode == coin.ERC20 {
+			balance, err = t.erc20.GetBalance(addr.WalletAddress)
+		} else {
+			// TODO: if previous tx is not done, wrong amount is returned. how to manage it??
+			balance, err = t.eth.GetBalance(addr.WalletAddress, eth.QuantityTagLatest)
+		}
 		if err != nil {
-			t.logger.Warn("fail to call t.eth.GetBalance()",
+			t.logger.Warn("fail to call .GetBalance()",
 				zap.String("address", addr.WalletAddress),
 				zap.Error(err),
 			)

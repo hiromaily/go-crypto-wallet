@@ -11,8 +11,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	"github.com/hiromaily/go-crypto-wallet/pkg/contract"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/erc20"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
@@ -36,27 +34,10 @@ func NewRPCClient(conf *config.Ethereum) (*ethrpc.Client, error) {
 func NewEthereum(rpcClient *ethrpc.Client, conf *config.Ethereum, logger *zap.Logger, coinTypeCode coin.CoinTypeCode) (Ethereumer, error) {
 	client := ethclient.NewClient(rpcClient)
 
-	var erc20Obj *erc20.ERC20
-	if coinTypeCode == coin.ERC20 {
-		tokenClient, err := contract.NewContractToken(conf.ERC20s[conf.ERC20Token].ContractAddress, client)
-		if err != nil {
-			return nil, errors.Wrap(err, "fail to call contract.NewContractToken()")
-		}
-		erc20Obj = erc20.NewERC20(
-			tokenClient,
-			conf.ERC20Token,
-			conf.ERC20s[conf.ERC20Token].Name,
-			conf.ERC20s[conf.ERC20Token].ContractAddress,
-			conf.ERC20s[conf.ERC20Token].MasterAddress,
-			logger,
-		)
-	}
-
 	eth, err := eth.NewEthereum(
 		context.Background(),
 		client,
 		rpcClient,
-		erc20Obj,
 		coinTypeCode,
 		conf,
 		logger,
