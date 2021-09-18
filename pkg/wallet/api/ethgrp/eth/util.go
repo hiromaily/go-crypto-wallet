@@ -129,3 +129,8 @@ func (e *Ethereum) FromGWei(v int64) *big.Int {
 func (e *Ethereum) FromFloatEther(v float64) *big.Int {
 	return big.NewInt(int64(v * params.Ether))
 }
+
+// FloatToBigInt is alias of FromFloatEther for interface
+func (e *Ethereum) FloatToBigInt(v float64) *big.Int {
+	return e.FromFloatEther(v)
+}

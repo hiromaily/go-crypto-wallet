@@ -20,13 +20,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
-// ERC20er ABI Token Interface
-type ERC20er interface {
-	ValidateAddr(addr string) error
-	GetBalance(hexAddr string) (*big.Int, error)
-	CreateRawTransaction(fromAddr, toAddr string, amount uint64, additionalNonce int) (*ethtx.RawTx, *models.EthDetailTX, error)
-}
-
 type ERC20 struct {
 	client          *ethclient.Client
 	tokenClient     *contract.Token
@@ -86,6 +79,18 @@ func (e *ERC20) ValidateAddr(addr string) error {
 	return nil
 }
 
+// FIXME: Is it correct to handle decimal??
+func (e *ERC20) FloatToBigInt(v float64) *big.Int {
+	if e.decimals == 18 {
+		return big.NewInt(int64(v * 1e18))
+	}
+	// v * math.Pow(10, float64(e.decimals))
+	for i := 0; i < e.decimals; i++ {
+		v *= 10
+	}
+	return big.NewInt(int64(v))
+}
+
 func (e *ERC20) GetBalance(hexAddr string) (*big.Int, error) {
 	balance, err := e.tokenClient.BalanceOf(nil, common.HexToAddress(hexAddr))
 	if err != nil {
@@ -119,11 +124,12 @@ func (e *ERC20) CreateRawTransaction(fromAddr, toAddr string, amount uint64, add
 		return nil, nil, errors.Wrap(err, "fail to call eth.GetBalance()")
 	}
 	e.logger.Info("balance", zap.Int64("balance", balance.Int64()))
-	if balance.Uint64() == 0 {
-		return nil, nil, errors.New("balance is needed to send eth")
+	if balance.Uint64() < amount {
+		return nil, nil, errors.New("balance is short to send token")
 	}
+	amountToken := big.NewInt(int64(amount))
 
-	data := e.createTransferData(toAddr, balance)
+	data := e.createTransferData(toAddr, amountToken)
 	gasLimit, err := e.estimateGas(data)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "fail to call estimateGas(data)")
@@ -141,7 +147,7 @@ func (e *ERC20) CreateRawTransaction(fromAddr, toAddr string, amount uint64, add
 
 	e.logger.Debug("comparison",
 		zap.Uint64("Nonce", nonce),
-		zap.Uint64("Token", balance.Uint64()),
+		zap.Uint64("TokenAmount", amountToken.Uint64()),
 		zap.Uint64("GasLimit", gasLimit),
 		zap.Uint64("GasPrice", gasPrice.Uint64()),
 	)
@@ -173,8 +179,8 @@ func (e *ERC20) CreateRawTransaction(fromAddr, toAddr string, amount uint64, add
 		SenderAddress:   fromAddr,
 		ReceiverAccount: "",
 		ReceiverAddress: toAddr,
-		Amount:          balance.Uint64(), // or set token amount??
-		Fee:             0,                // later update is required
+		Amount:          amountToken.Uint64(),
+		Fee:             0, // later update is required
 		GasLimit:        uint32(gasLimit),
 		Nonce:           nonce,
 		UnsignedHexTX:   *rawTxHex,
@@ -185,7 +191,7 @@ func (e *ERC20) CreateRawTransaction(fromAddr, toAddr string, amount uint64, add
 		UUID:  uid,
 		From:  fromAddr,
 		To:    toAddr,
-		Value: *balance,
+		Value: *amountToken,
 		Nonce: nonce,
 		TxHex: *rawTxHex,
 		Hash:  txHash,
@@ -193,7 +199,7 @@ func (e *ERC20) CreateRawTransaction(fromAddr, toAddr string, amount uint64, add
 	return rawtx, txDetailItem, nil
 }
 
-func (e *ERC20) createTransferData(toAddr string, balance *big.Int) []byte {
+func (e *ERC20) createTransferData(toAddr string, amount *big.Int) []byte {
 	// function signature as a byte slice
 	transferFnSignature := []byte("transfer(address,uint256)")
 
@@ -206,10 +212,7 @@ func (e *ERC20) createTransferData(toAddr string, balance *big.Int) []byte {
 	paddedToAddr := common.LeftPadBytes(common.HexToAddress(toAddr).Bytes(), 32)
 
 	// set amount
-	//tokenAmount := new(big.Int)
-	////fmt.Sprintf("100" + strings.Repeat("0", e.decimals))
-	//tokenAmount.SetString("1000000000000000000000", 10)
-	paddedAmount := common.LeftPadBytes(balance.Bytes(), 32)
+	paddedAmount := common.LeftPadBytes(amount.Bytes(), 32)
 
 	// create data
 	var data []byte

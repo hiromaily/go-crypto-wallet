@@ -40,7 +40,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 		return "", "", errors.New("sender has no balance")
 	}
 
-	requiredValue := t.eth.FromFloatEther(floatValue)
+	requiredValue := t.eth.FloatToBigInt(floatValue)
 	if floatValue != 0 && (senderBalnce.Uint64() <= requiredValue.Uint64()) {
 		return "", "", errors.New("sender balance is insufficient to send")
 	}
@@ -55,8 +55,6 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call addrRepo.GetOneUnAllocated(receiver)")
 	}
-
-	// txDetailItems := make([]*models.EthDetailTX, 0, 1)
 
 	// call CreateRawTransaction
 	rawTx, txDetailItem, err := t.eth.CreateRawTransaction(senderAddr.WalletAddress, receiverAddr.WalletAddress, requiredValue.Uint64(), 0)

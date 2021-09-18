@@ -42,12 +42,10 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 
 	// check sernder's total balance
 	// GetOneUnAllocated
-	// addrs, err := t.addrRepo.GetAllAddress(sender)
 	addrItem, err := t.addrRepo.GetOneUnAllocated(sender)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
 	}
-	// senderBalance, userAmounts := t.eth.GetTotalBalance(addrs)
 	senderBalance, err := t.eth.GetBalance(addrItem.WalletAddress, eth.QuantityTagPending)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call eth.GetBalance()")
@@ -137,7 +135,7 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, *big.Int, []int64, error)
 		}
 
 		// amount
-		userPayments[idx].amount = t.eth.FromFloatEther(userPayments[idx].floatAmount)
+		userPayments[idx].amount = t.eth.FloatToBigInt(userPayments[idx].floatAmount)
 		totalAmount = new(big.Int).Add(totalAmount, userPayments[idx].amount)
 	}
 

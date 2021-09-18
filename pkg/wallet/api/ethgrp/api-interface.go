@@ -94,4 +94,17 @@ type Ethereumer interface {
 	FromGWei(v int64) *big.Int
 	// FromEther(v int64) *big.Int
 	FromFloatEther(v float64) *big.Int
+	FloatToBigInt(v float64) *big.Int
+}
+
+// ERC20er ABI Token Interface
+type ERC20er interface {
+	ValidateAddr(addr string) error
+	FloatToBigInt(v float64) *big.Int
+	GetBalance(hexAddr string) (*big.Int, error)
+	CreateRawTransaction(fromAddr, toAddr string, amount uint64, additionalNonce int) (*ethtx.RawTx, *models.EthDetailTX, error)
+}
+
+type TxCreateEther interface {
+	ERC20er
 }

@@ -53,7 +53,7 @@ type registry struct {
 	logger       *zap.Logger
 	btc          btcgrp.Bitcoiner
 	eth          ethgrp.Ethereumer
-	erc20        erc20.ERC20er
+	erc20        ethgrp.ERC20er
 	xrp          xrpgrp.Rippler
 	rpcClient    *rpcclient.Client
 	rpcEthClient *ethrpc.Client
@@ -360,7 +360,7 @@ func (r *registry) newETH() ethgrp.Ethereumer {
 	return r.eth
 }
 
-func (r *registry) newERC20() erc20.ERC20er {
+func (r *registry) newERC20() ethgrp.ERC20er {
 	if r.erc20 == nil && r.conf.CoinTypeCode == coin.ERC20 {
 		var err error
 		client := ethclient.NewClient(r.newEthRPCClient())

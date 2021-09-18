@@ -13,7 +13,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/erc20"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
@@ -27,7 +26,7 @@ type TxCreator interface {
 // TxCreate type
 type TxCreate struct {
 	eth             ethgrp.Ethereumer
-	erc20           erc20.ERC20er
+	erc20           ethgrp.ERC20er
 	logger          *zap.Logger
 	dbConn          *sql.DB
 	addrRepo        watchrepo.AddressRepositorier
@@ -44,7 +43,7 @@ type TxCreate struct {
 // NewTxCreate returns TxCreate object
 func NewTxCreate(
 	eth ethgrp.Ethereumer,
-	erc20 erc20.ERC20er,
+	erc20 ethgrp.ERC20er,
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
