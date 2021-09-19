@@ -1,36 +1,39 @@
 # Ethereum
 
-- [go-ethereum](https://github.com/ethereum/go-ethereum)
-- [Getting Started with Geth](https://geth.ethereum.org/docs/getting-started)
-- [parity](https://www.parity.io/ethereum/)
-
 ## Free ebooks
 - [Ethereum Development with Go](https://goethereumbook.org/en/)
 
 ## Development
-- [Dev mode](https://geth.ethereum.org/getting-started/dev-mode)  
-Geth has a development mode which sets up a single node Ethereum test network with a number of options optimized for developing on local machines. You enable it with the --dev argument.
-
 - [JSON RPC](https://github.com/ethereum/wiki/wiki/JSON-RPC)
 - [Management APIs](https://github.com/ethereum/go-ethereum/wiki/Management-APIs)
-- [Setting up private network or local cluster](https://github.com/ethereum/go-ethereum/wiki/Setting-up-private-network-or-local-cluster)
 - [Etherscan for goerli](https://goerli.etherscan.io/)
 - [Goerli Testnet Faucet](https://goerli-faucet.slock.it/)
-- [Status](https://stats.goerli.net/)
+- [Status for Goerli](https://stats.goerli.net/)
 
-## Parity
+### go-ethereum
+- [go-ethereum](https://github.com/ethereum/go-ethereum)
+- [Getting Started with Geth](https://geth.ethereum.org/docs/getting-started)
+- [Setting up private network or local cluster](https://github.com/ethereum/go-ethereum/wiki/Setting-up-private-network-or-local-cluster)
+- [Dev mode](https://geth.ethereum.org/getting-started/dev-mode)
+  - Geth has a development mode which sets up a single node Ethereum test network with a number of options optimized for developing on local machines. You enable it with the --dev argument.
+
+### Parity
 - [parity](https://www.parity.io/ethereum/)
 - [goerli/testnet](https://github.com/goerli/testnet)
 - [homebrew-paritytech](https://github.com/paritytech/homebrew-paritytech)
 
-## Install ethereum and Run
+### Ganache
+- [Ganache](https://www.trufflesuite.com/ganache)
+
+
+## Install ethereum
 ### Install ethereum on MacOS
 ```
 $ brew tap ethereum/ethereum
 $ brew install ethereum
 ```
 
-### Run on testnet
+## Run geth on testnet
 - with console
 ```
 $ geth --goerli --rpc console
@@ -48,9 +51,9 @@ $ geth --goerli --rpc --rpcaddr 0.0.0.0 --rpcapi admin,debug,web3,eth,txpool,net
 ```
 #  --keystore ${HOME}/work/go/src/github.com/hiromaily/go-crypto-wallet/data/keystore
 ```
-- to use UnlockAccount()
+- unlock account
 ```
-# --allow-insecure-unlock
+geth --goerli --rpc --rpcaddr 0.0.0.0 --rpcapi admin,debug,web3,eth,txpool,net,personal --unlock 0xF512F9E94c7B97916ec69cd80F3750F4410EaA63 --password pw --allow-insecure-unlock
 ```
 
 ### Using IPC
@@ -58,11 +61,20 @@ $ geth --goerli --rpc --rpcaddr 0.0.0.0 --rpcapi admin,debug,web3,eth,txpool,net
 $ geth --goerli --ipcapi admin,debug,web3,eth,txpool,net,personal
 ```
 
-
-# Rest API using [HTTPie](https://httpie.org/)
+## Rest API using [HTTPie](https://httpie.org/)
+```
 $ http http://127.0.0.1:8545 method=web3_clientVersion params:='[]' id=67
  or
 $ http --auth USERNAME:PASSWORD http://127.0.0.1:8545 method=web3_clientVersion params:='[]' id=67
+```
+
+- eth_syncing
+```
+http http://127.0.0.1:8545 method=eth_syncing params:='[]' id=1
+```
+- web3_clientVersion
+```
+http http://127.0.0.1:8545 method=web3_clientVersion params:='[]' id=67
 ```
 
 ## geth useful option
@@ -118,27 +130,17 @@ API AND CONSOLE OPTIONS:
   --rpcapi value                      API's offered over the HTTP-RPC interface
 ```
 
-## Install parity and Run
+## Install parity
 ```
 # Install parity on MacOS
 $ brew tap paritytech/paritytech
 $ brew install parity
 
-# Run on testnet
+# Run parity on testnet
 $ parity --chain=goerli --geth
  or
 $ cp ./data/config/parity/config.toml ${HOME}/Library/Application Support/io.parity.ethereum/
 $ parity
-```
-
-## geth Rest API
-- eth_syncing
-```
-http http://127.0.0.1:8545 method=eth_syncing params:='[]' id=1
-```
-- web3_clientVersion
-```
-http http://127.0.0.1:8545 method=web3_clientVersion params:='[]' id=67
 ```
 
 ## Go Contract Bindings
