@@ -149,67 +149,67 @@ addr-test:
 # build docker images
 .PHONY: bld-docker-all
 bld-docker-all:
-	docker-compose build
+	docker compose build
 
 # build golang image
 .PHONY: bld-docker-go
 bld-docker-go:
-	docker-compose build base-golang
+	docker compose build base-golang
 
 # build ubuntu image
 .PHONY: bld-docker-ubuntu
 bld-docker-ubuntu:
-	docker-compose build base-ubuntu
+	docker compose build base-ubuntu
 
 # build bitcoin core server
 .PHONY: bld-docker-btc
 bld-docker-btc:
-	docker-compose build btc-watch
+	docker compose build btc-watch
 
 # build bitcoin cash core server
 .PHONY: bld-docker-bch
 bld-docker-bch:
-	docker-compose -f docker-compose.bch.yml build bch-watch
+	docker compose -f docker-compose.bch.yml build bch-watch
 
 
 # run bitcoin core server
 .PHONY: up-docker-btc
 up-docker-btc:
-	docker-compose up btc-watch btc-keygen btc-sign
+	docker compose up btc-watch btc-keygen btc-sign
 
 # run bitcoin cash core server
 .PHONY: up-docker-bch
 up-docker-bch:
-	docker-compose -f docker-compose.bch.yml up bch-watch
+	docker compose -f docker-compose.bch.yml up bch-watch
 
 # run ethereum node server
 .PHONY: up-docker-eth
 up-docker-eth:
-	docker-compose -f docker-compose.eth.yml up eth-node
+	docker compose -f docker-compose.eth.yml up eth-node
 
 # run ripple node server
 .PHONY: up-docker-xrp
 up-docker-xrp:
-	docker-compose -f docker-compose.xrp.yml up xrp-node
+	docker compose -f docker-compose.xrp.yml up xrp-node
 
 # run all databases
 .PHONY: up-docker-db
 up-docker-db:
-	docker-compose up btc-watch-db btc-keygen-db btc-sign-db
+	docker compose up btc-watch-db btc-keygen-db btc-sign-db
 
 # run logging middleware
 # logging and monitoring
 .PHONY: up-docker-logger
 up-docker-logger:
-	docker-compose up fluentd elasticsearch grafana
+	docker compose up fluentd elasticsearch grafana
 
 # remove database volumes
 .PHONY: rm-db-volumes
 rm-db-volumes:
 	#docker rm -f $(docker ps -a --format "{{.Names}}")
 	#docker volume rm -f $(docker volume ls --format "{{.Name}}")
-	#docker-compose down -v
-	#docker-compose down
+	#docker compose down -v
+	#docker compose down
 	docker volume rm -f go-crypto-wallet_btc-keygen-db
 	docker volume rm -f go-crypto-wallet_btc-sign-db
 	docker volume rm -f go-crypto-wallet_btc-watch-db
@@ -260,7 +260,7 @@ reset-payment-request:
 
 .PHONY: reset-payment-request-docker
 reset-payment-request-docker:
-	docker-compose exec btc-watch-db mysql -u root -proot  -e "$(cat ./docker/mysql/watch/init.d/payment_request.sql)"
+	docker compose exec btc-watch-db mysql -u root -proot  -e "$(cat ./docker/mysql/watch/init.d/payment_request.sql)"
 
 ###############################################################################
 # Operation
