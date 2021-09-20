@@ -1,14 +1,11 @@
 package eth
 
 import (
-	"bytes"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 	"go.uber.org/zap"
@@ -142,7 +139,7 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64, 
 		GasPrice: gasPrice,
 	})
 	txHash := tx.Hash().Hex()
-	rawTxHex, err := encodeTx(tx)
+	rawTxHex, err := ethtx.EncodeTx(tx)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "fail to call encodeTx()")
 	}
@@ -183,7 +180,7 @@ func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64, 
 func (e *Ethereum) SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (*ethtx.RawTx, error) {
 	txHex := rawTx.TxHex
 	fromAddr := rawTx.From
-	tx, err := decodeTx(txHex)
+	tx, err := ethtx.DecodeTx(txHex)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call decodeTx(txHex)")
 	}
@@ -218,7 +215,7 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (
 		return nil, errors.Wrap(err, "fail to cll signedTX.AsMessage()")
 	}
 
-	encodedTx, err := encodeTx(signedTX)
+	encodedTx, err := ethtx.EncodeTx(signedTX)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call encodeTx()")
 	}
@@ -240,7 +237,7 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (
 // - SendRawTransaction in rpc_eth_tx.go
 // - SendRawTx in client.go
 func (e *Ethereum) SendSignedRawTransaction(signedTxHex string) (string, error) {
-	decodedTx, err := decodeTx(signedTxHex)
+	decodedTx, err := ethtx.DecodeTx(signedTxHex)
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call decodeTx(signedTxHex)")
 	}
@@ -269,30 +266,4 @@ func (e *Ethereum) GetConfirmation(hashTx string) (uint64, error) {
 	confirmation := currentBlockNum.Int64() - txInfo.BlockNumber
 
 	return uint64(confirmation), nil
-}
-
-// FIXME: moved to pkg/tx package
-func encodeTx(tx *types.Transaction) (*string, error) {
-	txb, err := rlp.EncodeToBytes(tx)
-	if err != nil {
-		return nil, err
-	}
-	txHex := hexutil.Encode(txb)
-	return &txHex, nil
-}
-
-// FIXME: moved to pkg/tx package
-func decodeTx(txHex string) (*types.Transaction, error) {
-	txc, err := hexutil.Decode(txHex)
-	if err != nil {
-		return nil, err
-	}
-
-	var txde types.Transaction
-	err = rlp.Decode(bytes.NewReader(txc), &txde)
-	if err != nil {
-		return nil, err
-	}
-
-	return &txde, nil
 }

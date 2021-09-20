@@ -15,7 +15,6 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/contract"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	txpkg "github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/ethtx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -165,7 +164,7 @@ func (e *ERC20) CreateRawTransaction(fromAddr, toAddr string, amount uint64, add
 	})
 	// From here, same as CreateRawTransaction() in ethgrop/eth/transaction.go
 	txHash := tx.Hash().Hex()
-	rawTxHex, err := txpkg.EncodeETHTx(tx)
+	rawTxHex, err := ethtx.EncodeTx(tx)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "fail to call encodeTx()")
 	}
