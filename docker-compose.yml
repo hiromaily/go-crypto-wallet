@@ -19,7 +19,7 @@ services:
     build:
       context: ./docker/golang/
       dockerfile: Dockerfile
-    image: wallet-golang:1.14.1
+    image: wallet-golang:1.17.1
 
   #########################################################################
   # Bitcoin core
@@ -146,7 +146,7 @@ services:
   # Open Tracing
   #########################################################################
   jaeger:
-    image: jaegertracing/all-in-one:1.17
+    image: jaegertracing/all-in-one:1.26
     ports:
       - 5775:5775/udp
       - 6831:6831/udp
