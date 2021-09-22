@@ -6,9 +6,11 @@
 ## Development
 - [JSON RPC](https://github.com/ethereum/wiki/wiki/JSON-RPC)
 - [Management APIs](https://github.com/ethereum/go-ethereum/wiki/Management-APIs)
-- [Etherscan for goerli](https://goerli.etherscan.io/)
+
 - [Goerli Testnet Faucet](https://goerli-faucet.slock.it/)
+- [Etherscan for goerli](https://goerli.etherscan.io/)
 - [Status for Goerli](https://stats.goerli.net/)
+- [goerli/testnet](https://github.com/goerli/testnet)
 
 ### go-ethereum
 - [go-ethereum](https://github.com/ethereum/go-ethereum)
@@ -17,10 +19,9 @@
 - [Dev mode](https://geth.ethereum.org/getting-started/dev-mode)
   - Geth has a development mode which sets up a single node Ethereum test network with a number of options optimized for developing on local machines. You enable it with the --dev argument.
 
-### Parity
-- [parity](https://www.parity.io/ethereum/)
-- [goerli/testnet](https://github.com/goerli/testnet)
-- [homebrew-paritytech](https://github.com/paritytech/homebrew-paritytech)
+### OpenEthereum
+- [github](https://github.com/openethereum/openethereum)
+- [docs](https://openethereum.github.io/)
 
 ### Ganache
 - [Ganache](https://www.trufflesuite.com/ganache)
@@ -130,17 +131,14 @@ API AND CONSOLE OPTIONS:
   --rpcapi value                      API's offered over the HTTP-RPC interface
 ```
 
-## Install parity
+## Install OpenEthereum
 ```
-# Install parity on MacOS
-$ brew tap paritytech/paritytech
-$ brew install parity
+# Install OpenEthereum on MacOS
+$ brew tap openethereum/openethereum
+$ brew install openethereum
 
-# Run parity on testnet
-$ parity --chain=goerli --geth
- or
-$ cp ./data/config/parity/config.toml ${HOME}/Library/Application Support/io.parity.ethereum/
-$ parity
+# Run OpenEthereum on testnet
+$ openethereum --chain goerli --jsonrpc-apis personal
 ```
 
 ## Go Contract Bindings

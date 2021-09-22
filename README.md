@@ -293,7 +293,7 @@ watch send -file xxx.csv
 - [x] Sending signed transaction
 - [x] Transaction monitoring
 - [ ] Make sure that `quantity-tag` is used properly. e.g. when getting balance, which quantity-tag should be used, latest or pending.
-- [ ] For now it works on [Go Ethereum](https://github.com/ethereum/go-ethereum). Adapting to [Parity](https://www.parity.io/ethereum/)
+- [ ] For now it works on [Go Ethereum](https://github.com/ethereum/go-ethereum). Adapting to [Ganache](https://www.trufflesuite.com/ganache)
 - [ ] How to manage password for private key. Password would be passed from command line argument.
 
 ### For XRP

@@ -99,6 +99,7 @@ func (e *Ethereum) readPrivKey(hexAddr, path string) ([]byte, error) {
 }
 
 // RenameParityKeyFile renames parity file format
+// Deprecated
 func (e *Ethereum) RenameParityKeyFile(hexAddr string, accountType account.AccountType) error {
 	if !e.isParity {
 		return nil

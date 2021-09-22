@@ -7,7 +7,7 @@ services:
   #########################################################################
   eth-node:
     # https://hub.docker.com/r/ethereum/client-go/
-    image: ethereum/client-go:v1.9.14
+    image: ethereum/client-go:v1.10.8
     volumes:
       - ./docker/nodes/eth/data:/root/.ethereum/goerli
     ports:
@@ -23,25 +23,49 @@ services:
     #      => Unable to attach to remote geth: dial unix ./docker/nodes/eth/data/geth.ipc: connect: connection refused
 
   #########################################################################
-  # parity
-  # - https://openethereum.github.io/wiki/Docker
-  # - FIXME: How to fix error `IPC error: File name too long (os error 36)`
-  #    volume section causes this error, why mounted path of local need to be short??
+  # openethereum (parity was replaced by)
+  # - https://github.com/openethereum/openethereum
+  # - https://openethereum.github.io/
   #########################################################################
-  eth-parity:
-    # https://hub.docker.com/r/parity/parity
-    image: parity/parity:v2.7.2-stable
+  openethereum:
+    # https://hub.docker.com/r/openethereum/openethereum
+    # https://openethereum.github.io/Docker
+    # https://github.com/xdaichain/validator-node-dockerized/blob/master/docker-compose.yml
+    image: openethereum/openethereum:v3.2.6
+    init: true
+    user: root
+    command:
+      --chain=goerli
+      #--nat="extip:$EXT_IP"
+      --base-path=/root/data
+      --max-peers=100
+      #--unlock="$ACCOUNT"
+      #--password="$PASSWORD_PATH"
+      --tx-time-limit=1000
+      --min-gas-price=1000000000
+      --gas-floor-target=17000000
+      --reseal-min-period=1000
+      #--engine-signer="$ACCOUNT"
+      --force-sealing
+      --fast-unlock
+      #--metrics
+      #--metrics-port=6060
+      --jsonrpc-port=8545
+      --jsonrpc-cors=all
+      --jsonrpc-interface=all
+      --jsonrpc-hosts=all
+      --jsonrpc-apis=web3,eth,net,parity
+      --logging="engine=trace,miner=trace"
     volumes:
-      #- ./docker/nodes/eth/parity-data/:/home/parity/.local/share/io.parity.ethereum/
-      - ./parity-data/:/home/parity/.local/share/io.parity.ethereum/
+      - ./data:/root/data
+      #- ./password:/root/password
+      #- ./key:/root/data/keys/goerli/key
     ports:
       - "${ETH_SYNC_PORT:-30303}:30303"
       - "30303:30303/udp"
       - "${ETH_RPC_PORT:-8545}:8545"
-      - "8546:8546"
+      #- "8546:8546"
     stdin_open: true
     tty: true
-    #command: parity --chain=goerli --geth
-    command: --config .local/share/io.parity.ethereum/config.toml
 
-    # docker-compose -f docker-compose.eth.yml exec eth-parity
+    # docker-compose -f docker-compose.eth.yml exec openethereum
