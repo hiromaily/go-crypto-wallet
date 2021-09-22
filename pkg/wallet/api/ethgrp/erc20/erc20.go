@@ -105,9 +105,13 @@ func (e *ERC20) GetBalance(hexAddr string, _ eth.QuantityTag) (*big.Int, error) 
 // - Transfer ERC20 Tokens Using Golang
 //   https://www.youtube.com/watch?v=-Epg5Ub-fA0
 //   https://github.com/what-the-func/golang-ethereum-transfer-tokens/blob/master/main.go
-// Note: master address takes fee
-// - if sender sends 5ETH, receiver receives 5ETH
-// - master address has to pay 5ETH + fee
+// Note:
+// - master address takes fee
+// - sender account delegates transfer to master address
+// - 1. call approve(address spender, uint256 amount) by fromA, spender is masterAddr
+// -  this task may be seperated from normal flow `create tx`
+// - => approve requires gas to call ... this pattern is impossible
+// - 1.b. Or after approve is called, this transaction may be sent
 func (e *ERC20) CreateRawTransaction(fromAddr, toAddr string, amount uint64, additionalNonce int) (*ethtx.RawTx, *models.EthDetailTX, error) {
 	// validation check
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
@@ -127,9 +131,9 @@ func (e *ERC20) CreateRawTransaction(fromAddr, toAddr string, amount uint64, add
 	if balance.Uint64() < amount {
 		return nil, nil, errors.New("balance is short to send token")
 	}
-	amountToken := big.NewInt(int64(amount))
+	tokenAmount := big.NewInt(int64(amount))
 
-	data := e.createTransferData(toAddr, amountToken)
+	data := e.createTransferData(toAddr, tokenAmount)
 	gasLimit, err := e.estimateGas(data)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "fail to call estimateGas(data)")
@@ -147,7 +151,7 @@ func (e *ERC20) CreateRawTransaction(fromAddr, toAddr string, amount uint64, add
 
 	e.logger.Debug("comparison",
 		zap.Uint64("Nonce", nonce),
-		zap.Uint64("TokenAmount", amountToken.Uint64()),
+		zap.Uint64("TokenAmount", tokenAmount.Uint64()),
 		zap.Uint64("GasLimit", gasLimit),
 		zap.Uint64("GasPrice", gasPrice.Uint64()),
 	)
@@ -179,7 +183,7 @@ func (e *ERC20) CreateRawTransaction(fromAddr, toAddr string, amount uint64, add
 		SenderAddress:   fromAddr,
 		ReceiverAccount: "",
 		ReceiverAddress: toAddr,
-		Amount:          amountToken.Uint64(),
+		Amount:          tokenAmount.Uint64(),
 		Fee:             0, // later update is required
 		GasLimit:        uint32(gasLimit),
 		Nonce:           nonce,
@@ -191,7 +195,7 @@ func (e *ERC20) CreateRawTransaction(fromAddr, toAddr string, amount uint64, add
 		UUID:  uid,
 		From:  fromAddr,
 		To:    toAddr,
-		Value: *amountToken,
+		Value: *tokenAmount,
 		Nonce: nonce,
 		TxHex: *rawTxHex,
 		Hash:  txHash,
@@ -208,10 +212,9 @@ func (e *ERC20) createTransferData(toAddr string, amount *big.Int) []byte {
 	hash.Write(transferFnSignature)
 	methodID := hash.Sum(nil)[:4]
 
-	// account to address
+	// set parameter for account: to address
 	paddedToAddr := common.LeftPadBytes(common.HexToAddress(toAddr).Bytes(), 32)
-
-	// set amount
+	// set parameter for amount
 	paddedAmount := common.LeftPadBytes(amount.Bytes(), 32)
 
 	// create data
