@@ -99,6 +99,9 @@ func main() {
 			}
 		}
 
+		// override config
+		conf.CoinTypeCode = coin.CoinTypeCode(coinTypeCode)
+
 		// override conf.Bitcoin.Host
 		if btcWallet != "" {
 			conf.Bitcoin.Host = fmt.Sprintf("%s/wallet/%s", conf.Bitcoin.Host, btcWallet)
