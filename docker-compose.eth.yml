@@ -22,6 +22,15 @@ services:
     # or $ geth attach ./docker/nodes/eth/data/geth.ipc
     #      => Unable to attach to remote geth: dial unix ./docker/nodes/eth/data/geth.ipc: connect: connection refused
 
+  ganache:
+    # https://hub.docker.com/r/trufflesuite/ganache-cli
+    image: trufflesuite/ganache-cli:v6.12.2
+    ports:
+      - "${ETH_RPC_PORT:-8545}:8545"
+    volumes:
+      - ./docker/nodes/eth/ganache-data:/ganache_data
+    # $ docker compose -f docker-compose.eth.yml up ganache
+
   #########################################################################
   # openethereum (parity was replaced by)
   # - https://github.com/openethereum/openethereum
