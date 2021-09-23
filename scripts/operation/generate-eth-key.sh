@@ -5,14 +5,14 @@ set -eu
 COIN="${1:?eth}"
 
 # 1: ganache, 2:go-ethereum, 3: something else
-CLIENT=1
+CLIENT=2
 
 ###############################################################################
 # keygen wallet
 ###############################################################################
 if [ $CLIENT -eq 1 ]; then
   echo import ganache keys
-  docker compose exec btc-keygen-db mysql -u root -proot  -e "$(cat ./sql/ganache_key.sql)"
+  docker compose exec btc-keygen-db mysql -u root -proot  -e "$(cat ./scripts/operation/sql/ganache_key.sql)"
 else
   # create seed
   keygen -coin ${COIN} create seed

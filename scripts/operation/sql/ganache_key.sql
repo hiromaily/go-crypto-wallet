@@ -1,8 +1,8 @@
 USE `keygen`;
 
 INSERT INTO `account_key` (`coin`, `account`, `p2pkh_address`, `p2sh_segwit_address`, `bech32_address`, `full_public_key`, `multisig_address`, `redeem_script`, `wallet_import_format`, `idx`, `addr_status`, `updated_at`) VALUES
-  ('eth', 'deposit', '0xF7763dFB4eDeCd5854125c8dCa3531aed8077e55', '', '', '', '', '', '0xbd37a7868fe63209d7a6d4eea5991ea222df584481fb63270848ad6f02053ffc', 0, 0, now()),
-  ('eth', 'payment', '0x207749b4Ff22aB3B2c6D7c66414977B05957eDeB', '', '', '', '', '', '0xd0c6093ed9ee7e242fb52755412b1f1ece96b3d27ce7b6d2452262e6b2ae8b0e', 0, 0, now()),
+  ('eth', 'payment', '0xF7763dFB4eDeCd5854125c8dCa3531aed8077e55', '', '', '', '', '', '0xbd37a7868fe63209d7a6d4eea5991ea222df584481fb63270848ad6f02053ffc', 0, 0, now()),
+  ('eth', 'deposit', '0x207749b4Ff22aB3B2c6D7c66414977B05957eDeB', '', '', '', '', '', '0xd0c6093ed9ee7e242fb52755412b1f1ece96b3d27ce7b6d2452262e6b2ae8b0e', 0, 0, now()),
   ('eth', 'stored', '0xa804cb16847Fb1D74677a726530F7C48cffA194E', '', '', '', '', '', '0xa5ad53b4d9a4ff2e385d6ee607b013f5bdb849d590255ffc347a7411a4d03493', 0, 0, now()),
   ('eth', 'client', '0xEd3FE4d0b757916AA435bAf6340608A98A508289', '', '', '', '', '', '0xce0b404c072a0920efc02302f674c66a0693e2d8ffa9e5cd06b71c759efc648c', 0, 0, now()),
   ('eth', 'client', '0xAB0009d07741319623681f30654369d8ce0F0961', '', '', '', '', '', '0x1a476014eb5b2bbc8736a7956eb72669a67f5b35c92683ab5057f2bae378232f', 0, 0, now()),

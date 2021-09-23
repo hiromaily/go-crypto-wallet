@@ -23,8 +23,7 @@ Wallet functionalities to create raw transaction, to sing on unsigned transactio
 - This project is under refactoring
   - based on `Clean Code`, `Clean Architecture`, [`Refactoring`](https://martinfowler.com/articles/refactoring-2nd-ed.html)
 - ERC-20 token is under development
-- Setup script for development of ethereum/erc20 using Ganache
-
+- Bitcoin Core version 22.0 is released. Must be cought up.
 
 ## Expected use cases
 ### 1.Deposit functionality
@@ -86,68 +85,30 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 
 
 ## Requirements
-- MySQL 5.7
 - Golang 1.16+
-- golangci-lint 1.42
-- Docker
-- Node Server
-    - BTC: [Bitcoin Core 0.18+ for Bitcoin node](https://bitcoin.org/en/bitcoin-core/)
-    - BCH: [Bitcoin ABC 0.21+ for Bitcoin cash node](https://www.bitcoinabc.org/)
-    - ETH: [go-ethereum](https://github.com/ethereum/go-ethereum), [Ganache](https://www.trufflesuite.com/ganache), [erc20-token](https://github.com/hiromaily/erc20-token)
-    - XRP: [rippled](https://xrpl.org/manage-the-rippled-server.html), [ripple-lib-server](https://github.com/hiromaily/ripple-lib-server)
+- [golangci-lint](https://github.com/golangci/golangci-lint) 1.42+ (for development)
+- [direnv](https://direnv.net/)
+- [Docker](https://www.docker.com/get-started)
+    - MySQL 5.7
+    - Node Server
+        - BTC: [Bitcoin Core 0.18+ for Bitcoin node](https://bitcoin.org/en/bitcoin-core/)
+        - BCH: [Bitcoin ABC 0.21+ for Bitcoin cash node](https://www.bitcoinabc.org/)
+        - ETH: [go-ethereum](https://github.com/ethereum/go-ethereum), [Ganache](https://www.trufflesuite.com/ganache), [erc20-token](https://github.com/hiromaily/erc20-token)
+        - XRP: [rippled](https://xrpl.org/manage-the-rippled-server.html), [ripple-lib-server](https://github.com/hiromaily/ripple-lib-server)
 
 ## Installation
-### BTC, BCH 
-At least, one bitcoin core server and 3 different databases are required.  
-After [bitcoin core installation](https://github.com/bitcoin/bitcoin/blob/master/doc/build-osx.md) is done
-```
-# run database on docker
-$ docker-compose up btc-watch-db btc-keygen-db btc-signature-db
+see [Installation](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/Installation.md)
 
-# run bitcoind
-$ bitcoind
-
-# create wallets separately
-$ bitcoin-cli createwallet watch
-$ bitcoin-cli createwallet keygen
-$ bitcoin-cli createwallet sign1
-$ bitcoin-cli createwallet sign2
-$ bitcoin-cli createwallet sign3
-$ bitcoin-cli createwallet sign4
-$ bitcoin-cli createwallet sign5
-$ bitcoin-cli listwallets
-[
-  "",
-  "watch",
-  "keygen",
-  "sign1",
-  "sign2",
-  "sign3",
-  "sign4",
-  "sign5"
-]
-
-# build source
-go build -i -v -o ${GOPATH}/bin/watch ./cmd/watch/
-go build -i -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
-go build -ldflags "-X main.authName=auth1" -i -v -o ${GOPATH}/bin/sign ./cmd/sign/
-go build -ldflags "-X main.authName=auth2" -i -v -o ${GOPATH}/bin/sign2 ./cmd/sign/
-go build -ldflags "-X main.authName=auth3" -i -v -o ${GOPATH}/bin/sign3 ./cmd/sign/
-go build -ldflags "-X main.authName=auth4" -i -v -o ${GOPATH}/bin/sign4 ./cmd/sign/
-go build -ldflags "-X main.authName=auth5" -i -v -o ${GOPATH}/bin/sign5 ./cmd/sign/
-```
-
-#### Configuration
-- [btc_watch.toml](https://github.com/hiromaily/go-crypto-wallet/blob/master/data/config/btc_watch.toml)
-- [btc_keygen.toml](https://github.com/hiromaily/go-crypto-wallet/blob/master/data/config/btc_keygen.toml)
-- [btc_sign.toml](https://github.com/hiromaily/go-crypto-wallet/blob/master/data/config/btc_sign.toml)
-
-#### Command example
+### Command example
 - [see Makefile](https://github.com/hiromaily/go-crypto-wallet/blob/master/Makefile)
-- [see scripts](https://github.com/hiromaily/go-crypto-wallet/tree/master/scripts/operation)
+    - [Makefile](https://github.com/hiromaily/go-crypto-wallet/blob/master/Makefile)
+    - [Makefile for watch wallet operation](https://github.com/hiromaily/go-crypto-wallet/blob/master/Makefile_watch_op.mk)
+    - [Makefile for keygen wallet operation](https://github.com/hiromaily/go-crypto-wallet/blob/master/Makefile_keygen_op.mk)
+    - [Makefile for sign wallet operation](https://github.com/hiromaily/go-crypto-wallet/blob/master/Makefile_sign_op.mk)
+- [see operation scripts](https://github.com/hiromaily/go-crypto-wallet/tree/master/scripts/operation)
 
-#### Setup for any keys
-- [see scripts](https://github.com/hiromaily/go-crypto-wallet/blob/master/scripts/operation/generate-btc-key-local.sh)
+### Setup keys for BTC
+- [see generate-btc-key.sh](https://github.com/hiromaily/go-crypto-wallet/blob/master/scripts/operation/generate-btc-key.sh)
 
 Keygen wallet
 ```
@@ -224,7 +185,7 @@ watch import address -account payment -file payment-address-file
 watch import address -account stored -file stored-address-file
 ```
 
-#### Operation for deposit action
+### Operation for deposit action
 ```
 # check client addresses if it receives coin
 watch create deposit
@@ -237,7 +198,7 @@ watch send -file xxx.csv
 
 ```
 
-#### Operation for payment action
+### Operation for payment action
 ```
 # check payment_request if there are requests
 wallet create payment
