@@ -1,13 +1,10 @@
 
 [ethereum]
-host = "192.168.10.101"
-#host = "127.0.0.1"
+host = "127.0.0.1"
 port = 8545
 disable_tls = true
 network_type = "goerli" # mainnet, goerli, rinkeby, ropsten
 keydir = "./data/keystore"
-#keydir = "/Users/hy/Library/Ethereum/goerli/keystore"
-#keydir = "" # docker: /root/.ethereum/goerli + /keystore
 
 [logger]
 service = "eth-sign"
@@ -20,8 +17,7 @@ is_stacktrace = true
 type = "none"  # none, jaeger, datadog
 
 [mysql]
-host = "192.168.10.101:3309"
-#host = "127.0.0.1:3309"
+host = "127.0.0.1:3309"
 dbname = "sign"
 user = "hiromaily"
 pass = "hiromaily"
