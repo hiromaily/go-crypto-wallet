@@ -109,7 +109,7 @@ func (e *ERC20) GetBalance(hexAddr string, _ eth.QuantityTag) (*big.Int, error) 
 // - master address takes fee
 // - sender account delegates transfer to master address
 // - 1. call approve(address spender, uint256 amount) by fromA, spender is masterAddr
-// -  this task may be seperated from normal flow `create tx`
+// -  this task may be separated from normal flow `create tx`
 // - => approve requires gas to call ... this pattern is impossible
 // - 1.b. Or after approve is called, this transaction may be sent
 func (e *ERC20) CreateRawTransaction(fromAddr, toAddr string, amount uint64, additionalNonce int) (*ethtx.RawTx, *models.EthDetailTX, error) {

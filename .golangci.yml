@@ -3,17 +3,20 @@ run:
   build-tags:
     - integration
   skip-dirs:
+    - data
+    - docker
+    - docs
+    - scripts
+    - templates
     - vendor
-    - data
-    - data
 
 linters-settings:
-  misspell:
-    locale: US
   goimports:
     # put imports beginning with prefix after 3rd-party packages;
     # it's a comma-separated list of prefixes
     local-prefixes: github.com/hiromaily
+  misspell:
+    locale: US
   revive:
     # see https://golangci-lint.run/usage/linters/#revive
     # see https://github.com/mgechev/revive#available-rules for details.
@@ -36,19 +39,22 @@ linters:
   disable-all: true
   enable:
     - deadcode
+    #- errcheck
+    - gofumpt
+    - goimports
     - gosimple
     - govet
     - ineffassign
+    - misspell
+    - revive
     - staticcheck
     - structcheck
     - typecheck
     - unused
     - varcheck
-    - goimports
-    - misspell
-    - revive
   presets:
-    # only next presets exist: (bugs|complexity|format|performance|style|unused)
+    # only next presets exist:
+    #  bugs|comment|complexity|error|format|import|metalinter|module|performance|sql|style|test|unused
     - format
     - unused
   fast: false
