@@ -14,11 +14,11 @@ check-ver:
 
 .PHONY: setup-mac
 setup-mac:
-	brew install jq mkcert
+	brew install jq mkcert go-task/tap/go-task
 
 .PHONY: goget
 goget:
-	go get -u -d -v ./...
+	go get ./...
 
 
 .PHONY: install-ssl
