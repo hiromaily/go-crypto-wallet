@@ -8,7 +8,7 @@ set -eu
 watch -coin eth create db
 
 # create unsigned tx
-echo 'create deposit tx'
+echo 'create payment tx'
 tx_file=$(watch -coin eth create payment)
 
 # sign on keygen wallet

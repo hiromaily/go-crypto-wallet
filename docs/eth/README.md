@@ -4,19 +4,18 @@
 - [Ethereum Development with Go](https://goethereumbook.org/en/)
 
 ## Development
-- [JSON RPC](https://github.com/ethereum/wiki/wiki/JSON-RPC)
-- [Management APIs](https://github.com/ethereum/go-ethereum/wiki/Management-APIs)
-
-- [Goerli Testnet Faucet](https://goerli-faucet.slock.it/)
-- [Etherscan for goerli](https://goerli.etherscan.io/)
-- [Status for Goerli](https://stats.goerli.net/)
-- [goerli/testnet](https://github.com/goerli/testnet)
+- [JSON RPC](https://eth.wiki/json-rpc/API)
+- [Ethereum Network](https://ethereum.org/en/developers/docs/networks/)
+    - [Goerli Testnet Faucet](https://goerli-faucet.slock.it/)
+    - [Etherscan for goerli](https://goerli.etherscan.io/)
+    - [Status for Goerli](https://stats.goerli.net/)
+    - [github goerli/testnet](https://github.com/goerli/testnet)
 
 ### go-ethereum
 - [go-ethereum](https://github.com/ethereum/go-ethereum)
 - [Getting Started with Geth](https://geth.ethereum.org/docs/getting-started)
-- [Setting up private network or local cluster](https://github.com/ethereum/go-ethereum/wiki/Setting-up-private-network-or-local-cluster)
-- [Dev mode](https://geth.ethereum.org/getting-started/dev-mode)
+- [Private Network Tutorial](https://geth.ethereum.org/docs/getting-started/private-net)
+- [Dev mode](https://geth.ethereum.org/docs/getting-started/dev-mode)
   - Geth has a development mode which sets up a single node Ethereum test network with a number of options optimized for developing on local machines. You enable it with the --dev argument.
 
 ### OpenEthereum
@@ -30,7 +29,6 @@
 ## Install ethereum
 ### Install ethereum on MacOS
 ```
-$ brew tap ethereum/ethereum
 $ brew install ethereum
 ```
 
@@ -78,58 +76,6 @@ http http://127.0.0.1:8545 method=eth_syncing params:='[]' id=1
 http http://127.0.0.1:8545 method=web3_clientVersion params:='[]' id=67
 ```
 
-## geth useful option
-```
-$ geth --help                                                                                                                                                         (git)-[master]
-
-USAGE:
-   geth [options] command [command options] [arguments...]
-
-VERSION:
-   1.9.13-stable
-
-COMMANDS:
-   account                            Manage accounts
-   attach                             Start an interactive JavaScript environment (connect to node)
-   console                            Start an interactive JavaScript environment
-   copydb                             Create a local chain from a target chaindata folder
-   dump                               Dump a specific block from storage
-   dumpconfig                         Show configuration values
-   dumpgenesis                        Dumps genesis block JSON configuration to stdout
-   export                             Export blockchain into file
-   export-preimages                   Export the preimage database into an RLP stream
-   import                             Import a blockchain file
-   import-preimages                   Import the preimage database from an RLP stream
-   init                               Bootstrap and initialize a new genesis block
-   inspect                            Inspect the storage size for each type of data in the database
-   js                                 Execute the specified JavaScript files
-   license                            Display license information
-   makecache                          Generate ethash verification cache (for testing)
-   makedag                            Generate ethash mining DAG (for testing)
-   removedb                           Remove blockchain and state databases
-   retesteth                          Launches geth in retesteth mode
-   version                            Print version numbers
-   wallet                             Manage Ethereum presale wallets
-   help, h                            Shows a list of commands or help for one command
-```
-```
-ETHEREUM OPTIONS:
-  --config value                      TOML configuration file
-  --datadir value                     Data directory for the databases and keystore (default: "/Users/hy/Library/Ethereum")
-  --keystore value                    Directory for the keystore (default = inside the datadir)
-  --networkid value                   Network identifier (integer, 1=Frontier, 3=Ropsten, 4=Rinkeby, 5=Görli) (default: 1)
-  --goerli                            Görli network: pre-configured proof-of-authority test network
-  --syncmode value                    Blockchain sync mode ("fast", "full", or "light") (default: fast)
-DEVELOPER CHAIN OPTIONS:
-  --dev                               Ephemeral proof-of-authority network with a pre-funded developer account, mining enabled
-API AND CONSOLE OPTIONS:
-  --ipcdisable                        Disable the IPC-RPC server
-  --ipcpath value                     Filename for IPC socket/pipe within the datadir (explicit paths escape it)
-  --rpc                               Enable the HTTP-RPC server
-  --rpcaddr value                     HTTP-RPC server listening interface (default: "localhost")
-  --rpcport value                     HTTP-RPC server listening port (default: 8545)
-  --rpcapi value                      API's offered over the HTTP-RPC interface
-```
 
 ## Install OpenEthereum
 ```

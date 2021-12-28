@@ -14,7 +14,7 @@ This installation expects macOS environment.
 ```
 make up-docker-db
  or
-docker compose up btc-watch-db btc-keygen-db btc-sign-db
+docker compose up watch-db keygen-db sign-db
 ```
 3. build `watch`, `keygen`, `auth` wallets
 ```
@@ -92,23 +92,11 @@ It depends on what node you choose
     docker compose -f docker-compose.eth.yml up ganache
     ```
 
-2. prepare sql file for Ganache if needed
-    - You would find generated address and private key from console log on terminal after running Ganache.
-    - Then modify `scripts/operation/sql/ganache_key.sql` from generated address and private key
-    - Then import key by
-    ```
-    make import-ganache-key
-     or
-    docker compose exec btc-keygen-db mysql -u root -proot  -e "$(cat ./scripts/operation/sql/ganache_key.sql)"
-    ```
-    - install `ganache-cli` on local if needed
-    ```
-    yarn global add ganache-cli
-    ```
+2. prepare sql file for Ganache. see more instruction [here](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/eth/Ganache.md)
 
 3. deploy ERC-20 token if needded
 Original ERC-20 token is [erc20-token](https://github.com/hiromaily/erc20-token])
-See `scripts/operation/deploy-token.sh`
+See [`scripts/operation/deploy-token.sh`](https://github.com/hiromaily/go-crypto-wallet/blob/master/scripts/operation/deploy-token.sh)
     - run the below
     ```
     git clone https://github.com/hiromaily/erc20-token.git

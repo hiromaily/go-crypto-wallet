@@ -2,4 +2,4 @@
 
 set -eu
 
-docker compose exec btc-keygen-db mysql -u root -proot  -e "$(cat ./sql/ganache_key.sql)"
+docker compose exec keygen-db mysql -u root -proot  -e "$(cat ./sql/ganache_key.sql)"

@@ -12,7 +12,7 @@ CLIENT=2
 ###############################################################################
 if [ $CLIENT -eq 1 ]; then
   echo import ganache keys
-  docker compose exec btc-keygen-db mysql -u root -proot  -e "$(cat ./scripts/operation/sql/ganache_key.sql)"
+  docker compose exec keygen-db mysql -u root -proot  -e "$(cat ./scripts/operation/sql/ganache_key.sql)"
 else
   # create seed
   keygen -coin ${COIN} create seed

@@ -22,9 +22,9 @@ create-hdkey:
 ###############################################################################
 # import address for ganache
 ###############################################################################
-.PHONY: import-ganache-key
-import-ganache-key:
-	docker compose exec btc-keygen-db mysql -u root -proot  -e "$(cat ./scripts/operation/sql/ganache_key.sql)"
+#.PHONY: import-ganache-key
+#import-ganache-key:
+#	docker compose exec keygen-db mysql -u root -proot  -e "$(cat ./scripts/operation/sql/ganache_key.sql)"
 
 
 ###############################################################################

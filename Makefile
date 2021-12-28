@@ -195,7 +195,7 @@ up-docker-xrp:
 # run all databases
 .PHONY: up-docker-db
 up-docker-db:
-	docker compose up btc-watch-db btc-keygen-db btc-sign-db
+	docker compose up watch-db keygen-db sign-db
 
 # run logging middleware
 # logging and monitoring
@@ -210,9 +210,9 @@ rm-db-volumes:
 	#docker volume rm -f $(docker volume ls --format "{{.Name}}")
 	#docker compose down -v
 	#docker compose down
-	docker volume rm -f go-crypto-wallet_btc-keygen-db
-	docker volume rm -f go-crypto-wallet_btc-sign-db
-	docker volume rm -f go-crypto-wallet_btc-watch-db
+	docker volume rm -f go-crypto-wallet_keygen-db
+	docker volume rm -f go-crypto-wallet_sign-db
+	docker volume rm -f go-crypto-wallet_watch-db
 
 ###############################################################################
 # Bitcoin core on local
@@ -260,7 +260,7 @@ reset-payment-request:
 
 .PHONY: reset-payment-request-docker
 reset-payment-request-docker:
-	docker compose exec btc-watch-db mysql -u root -proot  -e "$(cat ./docker/mysql/watch/init.d/payment_request.sql)"
+	docker compose exec watch-db mysql -u root -proot  -e "$(cat ./docker/mysql/watch/init.d/payment_request.sql)"
 
 ###############################################################################
 # Operation

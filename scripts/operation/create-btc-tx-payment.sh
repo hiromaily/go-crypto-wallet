@@ -11,7 +11,7 @@ set -eu
 
 # reset payment_request
 echo 'reset payment_request'
-#docker-compose exec btc-watch-db mysql -u root -proot  -e "$(cat ./docker/mysql/sqls/payment_request.sql)"
+#docker-compose exec watch-db mysql -u root -proot  -e "$(cat ./docker/mysql/sqls/payment_request.sql)"
 watch create db
 
 # create unsigned tx

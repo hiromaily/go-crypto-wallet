@@ -1,9 +1,9 @@
 version: '3.8'
 
 volumes:
-  btc-watch-db: {}
-  btc-keygen-db: {}
-  btc-sign-db: {}
+  watch-db: {}
+  keygen-db: {}
+  sign-db: {}
 
 services:
   #########################################################################
@@ -89,10 +89,10 @@ services:
   # Database
   #########################################################################
   # watch only wallet
-  btc-watch-db:
+  watch-db:
     image: mysql:5.7
     volumes:
-    - btc-watch-db:/var/lib/mysql #this volume should be outside to keep on a permanent basis
+    - watch-db:/var/lib/mysql #this volume should be outside to keep on a permanent basis
     - "./docker/mysql/sqls:/sqls"
     - "./docker/mysql/watch/conf.d:/etc/mysql/conf.d"
     - "./docker/mysql/watch/init.d:/docker-entrypoint-initdb.d"
@@ -104,13 +104,13 @@ services:
       MYSQL_PASSWORD: hiromaily
       ENV: watch
     ports:
-    - "${BTC_WATCH_MYSQL_PORT:-3307}:3306"
+    - "${WATCH_MYSQL_PORT:-3307}:3306"
 
   # keygen wallet
-  btc-keygen-db:
+  keygen-db:
     image: mysql:5.7
     volumes:
-    - btc-keygen-db:/var/lib/mysql #this volume should be outside to keep on a permanent basis
+    - keygen-db:/var/lib/mysql #this volume should be outside to keep on a permanent basis
     - "./docker/mysql/sqls:/sqls"
     - "./docker/mysql/keygen/conf.d:/etc/mysql/conf.d"
     - "./docker/mysql/keygen/init.d:/docker-entrypoint-initdb.d"
@@ -122,13 +122,13 @@ services:
       MYSQL_PASSWORD: hiromaily
       ENV: keygen
     ports:
-    - "${BTC_KEYGEN_MYSQL_PORT:-3308}:3306"
+    - "${KEYGEN_MYSQL_PORT:-3308}:3306"
 
   # sign wallet
-  btc-sign-db:
+  sign-db:
     image: mysql:5.7
     volumes:
-    - btc-sign-db:/var/lib/mysql #this volume should be outside to keep on a permanent basis
+    - sign-db:/var/lib/mysql #this volume should be outside to keep on a permanent basis
     - "./docker/mysql/sqls:/sqls"
     - "./docker/mysql/sign/conf.d:/etc/mysql/conf.d"
     - "./docker/mysql/sign/init.d:/docker-entrypoint-initdb.d"
@@ -140,7 +140,7 @@ services:
       MYSQL_PASSWORD: hiromaily
       ENV: sign
     ports:
-    - "${BTC_SIGN_MYSQL_PORT:-3309}:3306"
+    - "${SIGN_MYSQL_PORT:-3309}:3306"
 
   #########################################################################
   # Open Tracing
@@ -168,10 +168,10 @@ services:
 #    image: wallet-app:1.0
 #    links:
 #      - btc-watch:btc-core
-#      - btc-watch-db:mysql-server
+#      - watch-db:mysql-server
 #    depends_on:
 #      - btc-watch
-#      - btc-watch-db
+#      - watch-db
 #    environment:
 #      CGO_ENABLED: 0
 #      GOOS: linux
