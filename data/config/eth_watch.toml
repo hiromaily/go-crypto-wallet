@@ -14,8 +14,8 @@ confirmation_num = 10 #block number for required confirmation
 [ethereum.erc20s.hyt]
 symbol = "hyt"
 name = "HY Token"
-contract_address = "0x9bAB891D3EE061395dE9a86210000508F644D89b"
-master_address = "0xF7763dFB4eDeCd5854125c8dCa3531aed8077e55"
+contract_address = "0x0C3c4Dfc64F21bFdCc7813489b41b22FF1A7d10C"
+master_address = "0x99f32c0A4a849B807873Fb0E1Db94154943C1FAD"
 decimals = 18 # default
 
 [logger]
