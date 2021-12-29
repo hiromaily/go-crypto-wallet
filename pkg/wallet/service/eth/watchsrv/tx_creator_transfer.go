@@ -76,5 +76,19 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	txDetailItem.ReceiverAccount = receiver.String()
 	txDetailItems := []*models.EthDetailTX{txDetailItem}
 
-	return t.afterTxCreation(targetAction, sender, serializedTxs, txDetailItems, nil)
+	txID, err := t.updateDB(targetAction, txDetailItems, nil)
+	if err != nil {
+		return "", "", err
+	}
+
+	// save transaction result to file
+	var generatedFileName string
+	if len(serializedTxs) != 0 {
+		generatedFileName, err = t.generateHexFile(targetAction, sender, txID, serializedTxs)
+		if err != nil {
+			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
+		}
+	}
+
+	return "", generatedFileName, nil
 }

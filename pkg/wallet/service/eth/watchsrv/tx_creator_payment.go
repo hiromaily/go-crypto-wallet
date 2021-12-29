@@ -29,61 +29,63 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 		zap.String("receiver", receiver.String()),
 	)
 
-	// get payment data from payment_request
-	userPayments, totalAmount, paymentRequestIds, err := t.createUserPayment()
+	userPayments, paymentRequestIds, addrItem, err := t.getUserPayments(sender)
 	if err != nil {
 		return "", "", err
 	}
 	if len(userPayments) == 0 {
+		return "", "", nil
+	}
+
+	serializedTxs, txDetailItems, err := t.createPaymentRawTransactions(sender, receiver, userPayments, addrItem)
+	if err != nil {
+		return "", "", err
+	}
+
+	txID, err := t.updateDB(targetAction, txDetailItems, paymentRequestIds)
+	if err != nil {
+		return "", "", err
+	}
+
+	// save transaction result to file
+	var generatedFileName string
+	if len(serializedTxs) != 0 {
+		generatedFileName, err = t.generateHexFile(targetAction, sender, txID, serializedTxs)
+		if err != nil {
+			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
+		}
+	}
+
+	return "", generatedFileName, nil
+}
+
+func (t *TxCreate) getUserPayments(sender account.AccountType) ([]UserPayment, []int64, *models.Address, error) {
+	// get payment data from payment_request
+	userPayments, totalAmount, paymentRequestIds, err := t.createUserPayment()
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if len(userPayments) == 0 {
 		t.logger.Debug("no data in userPayments")
 		// no data
-		return "", "", nil
+		return nil, nil, nil, nil
 	}
 
 	// check sernder's total balance
 	// GetOneUnAllocated
 	addrItem, err := t.addrRepo.GetOneUnAllocated(sender)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
+		return nil, nil, nil, errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
 	}
 	senderBalance, err := t.eth.GetBalance(addrItem.WalletAddress, eth.QuantityTagPending)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call eth.GetBalance()")
+		return nil, nil, nil, errors.Wrap(err, "fail to call eth.GetBalance()")
 	}
 
 	if senderBalance.Uint64() <= totalAmount.Uint64() {
-		return "", "", errors.New("sender balance is insufficient to send")
+		return nil, nil, nil, errors.New("sender balance is insufficient to send")
 	}
-
-	// create raw transaction each address
-	serializedTxs := make([]string, 0, len(userPayments))
-	txDetailItems := make([]*models.EthDetailTX, 0, len(userPayments))
-	additionalNonce := 0
-	for _, userPayment := range userPayments {
-		// call CreateRawTransaction
-		rawTx, txDetailItem, err := t.eth.CreateRawTransaction(addrItem.WalletAddress, userPayment.receiverAddr, userPayment.amount.Uint64(), additionalNonce)
-		if err != nil {
-			return "", "", errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s", addrItem.WalletAddress)
-		}
-		additionalNonce++
-
-		rawTxHex := rawTx.TxHex
-		t.logger.Debug("rawTxHex", zap.String("rawTxHex", rawTxHex))
-		// TODO: `rawTxHex` should be used to trace progress to update database
-
-		serializedTx, err := serial.EncodeToString(rawTx)
-		if err != nil {
-			return "", "", errors.Wrap(err, "fail to call serial.EncodeToString(rawTx)")
-		}
-		serializedTxs = append(serializedTxs, serializedTx)
-
-		// create insert data for　eth_detail_tx
-		txDetailItem.SenderAccount = sender.String()
-		txDetailItem.ReceiverAccount = receiver.String()
-		txDetailItems = append(txDetailItems, txDetailItem)
-	}
-
-	return t.afterTxCreation(targetAction, sender, serializedTxs, txDetailItems, paymentRequestIds)
+	return userPayments, paymentRequestIds, addrItem, nil
 }
 
 // UserPayment user's payment address and amount
@@ -140,4 +142,35 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, *big.Int, []int64, error)
 	}
 
 	return userPayments, totalAmount, paymentRequestIds, nil
+}
+
+func (t *TxCreate) createPaymentRawTransactions(sender, receiver account.AccountType, userPayments []UserPayment, addrItem *models.Address) ([]string, []*models.EthDetailTX, error) {
+	// create raw transaction each address
+	serializedTxs := make([]string, 0, len(userPayments))
+	txDetailItems := make([]*models.EthDetailTX, 0, len(userPayments))
+	additionalNonce := 0
+	for _, userPayment := range userPayments {
+		// call CreateRawTransaction
+		rawTx, txDetailItem, err := t.eth.CreateRawTransaction(addrItem.WalletAddress, userPayment.receiverAddr, userPayment.amount.Uint64(), additionalNonce)
+		if err != nil {
+			return nil, nil, errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s", addrItem.WalletAddress)
+		}
+		additionalNonce++
+
+		rawTxHex := rawTx.TxHex
+		t.logger.Debug("rawTxHex", zap.String("rawTxHex", rawTxHex))
+		// TODO: `rawTxHex` should be used to trace progress to update database
+
+		serializedTx, err := serial.EncodeToString(rawTx)
+		if err != nil {
+			return nil, nil, errors.Wrap(err, "fail to call serial.EncodeToString(rawTx)")
+		}
+		serializedTxs = append(serializedTxs, serializedTx)
+
+		// create insert data for　eth_detail_tx
+		txDetailItem.SenderAccount = sender.String()
+		txDetailItem.ReceiverAccount = receiver.String()
+		txDetailItems = append(txDetailItems, txDetailItem)
+	}
+	return serializedTxs, txDetailItems, nil
 }

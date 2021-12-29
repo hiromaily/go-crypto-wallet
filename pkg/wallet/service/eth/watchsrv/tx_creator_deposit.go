@@ -23,12 +23,43 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 		zap.String("receiver", receiver.String()),
 	)
 
-	// 1. get addresses for client account
+	userAmounts, err := t.getUserAmounts(sender)
+	if err != nil {
+		return "", "", err
+	}
+	if len(userAmounts) == 0 {
+		t.logger.Info("no data")
+		return "", "", nil
+	}
+
+	serializedTxs, txDetailItems, err := t.createDepositRawTransactions(sender, receiver, userAmounts)
+	if err != nil {
+		return "", "", err
+	}
+
+	txID, err := t.updateDB(targetAction, txDetailItems, nil)
+	if err != nil {
+		return "", "", err
+	}
+
+	// save transaction result to file
+	var generatedFileName string
+	if len(serializedTxs) != 0 {
+		generatedFileName, err = t.generateHexFile(targetAction, sender, txID, serializedTxs)
+		if err != nil {
+			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
+		}
+	}
+
+	return "", generatedFileName, nil
+}
+
+func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]eth.UserAmount, error) {
+	// get addresses for client account
 	addrs, err := t.addrRepo.GetAll(sender)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
+		return nil, errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
 	}
-	// addresses, err := t.eth.Accounts()
 
 	// target addresses
 	var userAmounts []eth.UserAmount
@@ -49,15 +80,14 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 		}
 	}
 
-	if len(userAmounts) == 0 {
-		t.logger.Info("no data")
-		return "", "", nil
-	}
+	return userAmounts, nil
+}
 
+func (t *TxCreate) createDepositRawTransactions(sender, receiver account.AccountType, userAmounts []eth.UserAmount) ([]string, []*models.EthDetailTX, error) {
 	// get address for deposit account
 	depositAddr, err := t.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call addrRepo.GetOneUnAllocated(account.AccountTypeDeposit)")
+		return nil, nil, errors.Wrap(err, "fail to call addrRepo.GetOneUnAllocated(account.AccountTypeDeposit)")
 	}
 
 	// create raw transaction each address
@@ -67,7 +97,7 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 		// call CreateRawTransaction
 		rawTx, txDetailItem, err := t.eth.CreateRawTransaction(val.Address, depositAddr.WalletAddress, 0, 0)
 		if err != nil {
-			return "", "", errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s", val.Address)
+			return nil, nil, errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s", val.Address)
 		}
 
 		rawTxHex := rawTx.TxHex
@@ -75,7 +105,7 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 
 		serializedTx, err := serial.EncodeToString(rawTx)
 		if err != nil {
-			return "", "", errors.Wrap(err, "fail to call serial.EncodeToString(rawTx)")
+			return nil, nil, errors.Wrap(err, "fail to call serial.EncodeToString(rawTx)")
 		}
 		serializedTxs = append(serializedTxs, serializedTx)
 
@@ -84,6 +114,5 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 		txDetailItem.ReceiverAccount = receiver.String()
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}
-
-	return t.afterTxCreation(targetAction, sender, serializedTxs, txDetailItems, nil)
+	return serializedTxs, txDetailItems, nil
 }

@@ -69,17 +69,15 @@ func NewTxCreate(
 	}
 }
 
-func (t *TxCreate) afterTxCreation(
+func (t *TxCreate) updateDB(
 	targetAction action.ActionType,
-	senderAccount account.AccountType,
-	serializedTxs []string,
 	txDetailItems []*models.EthDetailTX,
 	paymentRequestIds []int64,
-) (string, string, error) {
+) (int64, error) {
 	// start transaction
 	dtx, err := t.dbConn.Begin()
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to start transaction")
+		return 0, errors.Wrap(err, "fail to start transaction")
 	}
 	defer func() {
 		if err != nil {
@@ -92,33 +90,23 @@ func (t *TxCreate) afterTxCreation(
 	// Insert eth_tx
 	txID, err := t.txRepo.InsertUnsignedTx(targetAction)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call txRepo.InsertUnsignedTx()")
+		return 0, errors.Wrap(err, "fail to call txRepo.InsertUnsignedTx()")
 	}
 	// Insert to eth_detail_tx
 	for idx := range txDetailItems {
 		txDetailItems[idx].TXID = txID
 	}
 	if err = t.txDetailRepo.InsertBulk(txDetailItems); err != nil {
-		return "", "", errors.Wrap(err, "fail to call txDetailRepo.InsertBulk()")
+		return 0, errors.Wrap(err, "fail to call txDetailRepo.InsertBulk()")
 	}
 
 	if targetAction == action.ActionTypePayment {
 		_, err = t.payReqRepo.UpdatePaymentID(txID, paymentRequestIds)
 		if err != nil {
-			return "", "", errors.Wrap(err, "fail to call repo.PayReq().UpdatePaymentID(txID, paymentRequestIds)")
+			return 0, errors.Wrap(err, "fail to call repo.PayReq().UpdatePaymentID(txID, paymentRequestIds)")
 		}
 	}
-
-	// save transaction result to file
-	var generatedFileName string
-	if len(serializedTxs) != 0 {
-		generatedFileName, err = t.generateHexFile(targetAction, senderAccount, txID, serializedTxs)
-		if err != nil {
-			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
-		}
-	}
-
-	return "", generatedFileName, nil
+	return txID, nil
 }
 
 // generateHexFile generate file for hex and encoded previous addresses

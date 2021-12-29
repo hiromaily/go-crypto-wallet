@@ -367,7 +367,7 @@ func (r *registry) newETH() ethgrp.Ethereumer {
 }
 
 func (r *registry) newERC20() ethgrp.ERC20er {
-	if r.erc20 == nil && r.conf.CoinTypeCode == coin.ERC20 {
+	if r.erc20 == nil {
 		var err error
 		client := ethclient.NewClient(r.newEthRPCClient())
 		conf := r.conf.Ethereum

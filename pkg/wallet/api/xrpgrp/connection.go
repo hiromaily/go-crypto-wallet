@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
@@ -46,7 +47,7 @@ func NewGRPCClient(conf *config.RippleAPI) (*grpc.ClientConn, error) {
 	}
 	var opts []grpc.DialOption
 	if !conf.IsSecure {
-		opts = append(opts, grpc.WithInsecure())
+		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
 	conn, err := grpc.Dial(conf.URL, opts...)
 	if err != nil {
