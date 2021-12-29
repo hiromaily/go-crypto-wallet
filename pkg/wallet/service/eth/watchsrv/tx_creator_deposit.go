@@ -36,6 +36,9 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 	if err != nil {
 		return "", "", err
 	}
+	if len(txDetailItems) == 0 {
+		return "", "", nil
+	}
 
 	txID, err := t.updateDB(targetAction, txDetailItems, nil)
 	if err != nil {

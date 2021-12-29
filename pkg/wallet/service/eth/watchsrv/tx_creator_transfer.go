@@ -26,7 +26,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 		return "", "", errors.New("invalid account. sender and receiver is same")
 	}
 
-	// check sernder's balance
+	// check sender's balance
 	senderAddr, err := t.addrRepo.GetOneUnAllocated(sender)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call addrRepo.GetOneUnAllocated(sender)")

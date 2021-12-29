@@ -31,7 +31,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 		return "", "", errors.New("invalid account. sender and receiver is same")
 	}
 
-	// check sernder's balance
+	// check sender's balance
 	senderAddr, err := t.addrRepo.GetOneUnAllocated(sender)
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call addrRepo.GetOneUnAllocated(sender)")
@@ -94,5 +94,19 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	}
 	txDetailItems := []*models.XRPDetailTX{txDetailItem}
 
-	return t.afterTxCreation(targetAction, sender, serializedTxs, txDetailItems, nil)
+	txID, err := t.updateDB(targetAction, txDetailItems, nil)
+	if err != nil {
+		return "", "", err
+	}
+
+	// save transaction result to file
+	var generatedFileName string
+	if len(serializedTxs) != 0 {
+		generatedFileName, err = t.generateHexFile(targetAction, sender, txID, serializedTxs)
+		if err != nil {
+			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
+		}
+	}
+
+	return "", generatedFileName, nil
 }

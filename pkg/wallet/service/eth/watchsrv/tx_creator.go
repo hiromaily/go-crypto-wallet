@@ -109,7 +109,7 @@ func (t *TxCreate) updateDB(
 	return txID, nil
 }
 
-// generateHexFile generate file for hex and encoded previous addresses
+// generateHexFile generate file for hex txID and encoded previous addresses
 func (t *TxCreate) generateHexFile(actionType action.ActionType, senderAccount account.AccountType, txID int64, serializedTxs []string) (string, error) {
 	// add senderAccount to first line
 	serializedTxs = append([]string{senderAccount.String()}, serializedTxs...)

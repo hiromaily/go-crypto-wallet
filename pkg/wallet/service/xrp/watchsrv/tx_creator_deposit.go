@@ -28,16 +28,50 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 		zap.String("receiver", receiver.String()),
 	)
 
-	// 1. get addresses for client account
+	userAmounts, err := t.getUserAmounts(sender)
+	if err != nil {
+		return "", "", err
+	}
+	if len(userAmounts) == 0 {
+		t.logger.Info("no data")
+		return "", "", nil
+	}
+
+	serializedTxs, txDetailItems, err := t.createDepositRawTransactions(sender, receiver, userAmounts)
+	if err != nil {
+		return "", "", err
+	}
+	if len(txDetailItems) == 0 {
+		return "", "", nil
+	}
+
+	txID, err := t.updateDB(targetAction, txDetailItems, nil)
+	if err != nil {
+		return "", "", err
+	}
+
+	// save transaction result to file
+	var generatedFileName string
+	if len(serializedTxs) != 0 {
+		generatedFileName, err = t.generateHexFile(targetAction, sender, txID, serializedTxs)
+		if err != nil {
+			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
+		}
+	}
+
+	return "", generatedFileName, nil
+}
+
+func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]xrp.UserAmount, error) {
+	// get addresses for client account
 	addrs, err := t.addrRepo.GetAll(sender)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
+		return nil, errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
 	}
 	// addresses, err := t.eth.Accounts()
 
 	// target addresses
 	var userAmounts []xrp.UserAmount
-
 	// address list for client
 	for _, addr := range addrs {
 		// TODO: if previous tx is not done, wrong amount is returned. how to manage it??
@@ -53,16 +87,14 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 			}
 		}
 	}
+	return userAmounts, nil
+}
 
-	if len(userAmounts) == 0 {
-		t.logger.Info("no data")
-		return "", "", nil
-	}
-
+func (t *TxCreate) createDepositRawTransactions(sender, receiver account.AccountType, userAmounts []xrp.UserAmount) ([]string, []*models.XRPDetailTX, error) {
 	// get address for deposit account
 	depositAddr, err := t.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call addrRepo.GetOneUnAllocated(account.AccountTypeDeposit)")
+		return nil, nil, errors.Wrap(err, "fail to call addrRepo.GetOneUnAllocated(account.AccountTypeDeposit)")
 	}
 
 	// create raw transaction each address
@@ -114,9 +146,6 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 		}
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}
-	if len(txDetailItems) == 0 {
-		return "", "", nil
-	}
 
-	return t.afterTxCreation(targetAction, sender, serializedTxs, txDetailItems, nil)
+	return serializedTxs, txDetailItems, nil
 }

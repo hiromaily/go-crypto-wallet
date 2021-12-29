@@ -29,17 +29,33 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 		zap.String("receiver", receiver.String()),
 	)
 
-	userPayments, paymentRequestIds, addrItem, err := t.getUserPayments(sender)
+	// get payment data from payment_request
+	userPayments, totalAmount, paymentRequestIds, err := t.createUserPayment()
 	if err != nil {
 		return "", "", err
 	}
 	if len(userPayments) == 0 {
+		t.logger.Debug("no data in userPayments")
+		// no data
 		return "", "", nil
 	}
 
-	serializedTxs, txDetailItems, err := t.createPaymentRawTransactions(sender, receiver, userPayments, addrItem)
+	// get sender address
+	senderAddr, err := t.addrRepo.GetOneUnAllocated(sender)
+	if err != nil {
+		return "", "", errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
+	}
+	if t.validateAmount(senderAddr, totalAmount) != nil {
+		return "", "", err
+	}
+
+	// create raw transaction each address
+	serializedTxs, txDetailItems, err := t.createPaymentRawTransactions(sender, receiver, userPayments, senderAddr)
 	if err != nil {
 		return "", "", err
+	}
+	if len(txDetailItems) == 0 {
+		return "", "", nil
 	}
 
 	txID, err := t.updateDB(targetAction, txDetailItems, paymentRequestIds)
@@ -57,35 +73,6 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	}
 
 	return "", generatedFileName, nil
-}
-
-func (t *TxCreate) getUserPayments(sender account.AccountType) ([]UserPayment, []int64, *models.Address, error) {
-	// get payment data from payment_request
-	userPayments, totalAmount, paymentRequestIds, err := t.createUserPayment()
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	if len(userPayments) == 0 {
-		t.logger.Debug("no data in userPayments")
-		// no data
-		return nil, nil, nil, nil
-	}
-
-	// check sernder's total balance
-	// GetOneUnAllocated
-	addrItem, err := t.addrRepo.GetOneUnAllocated(sender)
-	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
-	}
-	senderBalance, err := t.eth.GetBalance(addrItem.WalletAddress, eth.QuantityTagPending)
-	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "fail to call eth.GetBalance()")
-	}
-
-	if senderBalance.Uint64() <= totalAmount.Uint64() {
-		return nil, nil, nil, errors.New("sender balance is insufficient to send")
-	}
-	return userPayments, paymentRequestIds, addrItem, nil
 }
 
 // UserPayment user's payment address and amount
@@ -144,16 +131,28 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, *big.Int, []int64, error)
 	return userPayments, totalAmount, paymentRequestIds, nil
 }
 
-func (t *TxCreate) createPaymentRawTransactions(sender, receiver account.AccountType, userPayments []UserPayment, addrItem *models.Address) ([]string, []*models.EthDetailTX, error) {
-	// create raw transaction each address
+func (t *TxCreate) validateAmount(senderAddr *models.Address, totalAmount *big.Int) error {
+	// check sender's total balance
+	senderBalance, err := t.eth.GetBalance(senderAddr.WalletAddress, eth.QuantityTagPending)
+	if err != nil {
+		return errors.Wrap(err, "fail to call eth.GetBalance()")
+	}
+
+	if senderBalance.Uint64() <= totalAmount.Uint64() {
+		return errors.New("sender balance is insufficient to send")
+	}
+	return nil
+}
+
+func (t *TxCreate) createPaymentRawTransactions(sender, receiver account.AccountType, userPayments []UserPayment, senderAddr *models.Address) ([]string, []*models.EthDetailTX, error) {
 	serializedTxs := make([]string, 0, len(userPayments))
 	txDetailItems := make([]*models.EthDetailTX, 0, len(userPayments))
 	additionalNonce := 0
 	for _, userPayment := range userPayments {
 		// call CreateRawTransaction
-		rawTx, txDetailItem, err := t.eth.CreateRawTransaction(addrItem.WalletAddress, userPayment.receiverAddr, userPayment.amount.Uint64(), additionalNonce)
+		rawTx, txDetailItem, err := t.eth.CreateRawTransaction(senderAddr.WalletAddress, userPayment.receiverAddr, userPayment.amount.Uint64(), additionalNonce)
 		if err != nil {
-			return nil, nil, errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s", addrItem.WalletAddress)
+			return nil, nil, errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s", senderAddr.WalletAddress)
 		}
 		additionalNonce++
 
