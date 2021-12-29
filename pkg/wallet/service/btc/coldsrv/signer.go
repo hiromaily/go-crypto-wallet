@@ -119,7 +119,7 @@ func (s *Sign) sign(hex, encodedPrevsAddrs string) (string, bool, string, error)
 	}
 
 	// decode encodedPrevsAddrs string to btc.AddrsPrevTxs struct
-	var prevsAddrs btc.AddrsPrevTxs
+	var prevsAddrs btc.PreviousTxs
 	serial.DecodeFromString(encodedPrevsAddrs, &prevsAddrs)
 
 	// single signature address
@@ -157,7 +157,7 @@ func (s *Sign) sign(hex, encodedPrevsAddrs string) (string, bool, string, error)
 	return hexTx, isSigned, newEncodedPrevsAddrs, nil
 }
 
-func (s *Sign) signMultisig(msgTx *wire.MsgTx, prevsAddrs *btc.AddrsPrevTxs) (*wire.MsgTx, bool, string, error) {
+func (s *Sign) signMultisig(msgTx *wire.MsgTx, prevsAddrs *btc.PreviousTxs) (*wire.MsgTx, bool, string, error) {
 	var wips []string
 	var newEncodedPrevsAddrs string
 

@@ -112,11 +112,11 @@ type SignRawTransactionError struct {
 	Error     string `json:"error"`
 }
 
-// AddrsPrevTxs is used when creating tx for multisig address
-type AddrsPrevTxs struct {
-	Addrs         []string
-	PrevTxs       []PrevTx
+// PreviousTxs is used when creating tx for multisig address
+type PreviousTxs struct {
 	SenderAccount account.AccountType
+	PrevTxs       []PrevTx
+	Addrs         []string
 }
 
 // PrevTx is required parameters for api `signrawtransaction` for multisig address
