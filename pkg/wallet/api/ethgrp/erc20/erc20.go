@@ -134,13 +134,10 @@ func (e *ERC20) CreateRawTransaction(fromAddr, toAddr string, amount uint64, add
 	tokenAmount := big.NewInt(int64(amount))
 
 	data := e.createTransferData(toAddr, tokenAmount)
-	//FIXME: it doesn't work for now
-	//gasLimit, err := e.estimateGas(data)
-	//if err != nil {
-	//	return nil, nil, errors.Wrap(err, "fail to call estimateGas(data)")
-	//}
-	// this value is calculated by `yarn ts-node src/web3.ts --mode estimateGas`
-	var gasLimit uint64 = 51798
+	gasLimit, err := e.estimateGas(data)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "fail to call estimateGas(data)")
+	}
 
 	gasPrice, err := e.client.SuggestGasPrice(context.Background())
 	if err != nil {
@@ -230,12 +227,11 @@ func (e *ERC20) createTransferData(toAddr string, amount *big.Int) []byte {
 	return data
 }
 
-// FIXME: error occurred on ganache
-// eth_estimateGas
-// (node:1) UnhandledPromiseRejectionWarning: Error: The nonce generation function failed, or the private key was invalid
 func (e *ERC20) estimateGas(data []byte) (uint64, error) {
 	contractAddr := common.HexToAddress(e.contractAddress)
+	masterAddr := common.HexToAddress(e.masterAddress)
 	gasLimit, err := e.client.EstimateGas(context.Background(), ethereum.CallMsg{
+		From: masterAddr,
 		To:   &contractAddr,
 		Data: data,
 	})
