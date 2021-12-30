@@ -11,6 +11,6 @@ USE `watch`;
 source /sqls/definition_watch.sql
 source /sqls/payment_request.sql
 -- keygen table definition for sqlboiler, comment out later
-source /sqls/definition_keygen.sql
+-- source /sqls/definition_keygen.sql
 -- sign table definition for sqlboiler, comment out later
-source /sqls/definition_sign.sql
+-- source /sqls/definition_sign.sql

@@ -92,7 +92,7 @@ It depends on what node you choose
     docker compose -f docker-compose.eth.yml up ganache
     ```
 
-2. prepare sql file for Ganache. see more instruction [here](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/eth/Ganache.md)
+2. prepare sql file for Ganache. But, first account(index[0]) must not be used. See more instruction [here](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/eth/Ganache.md)
 
 3. deploy ERC-20 token contract if needed
 Original ERC-20 token is here [erc20-token](https://github.com/hiromaily/erc20-token). See [`scripts/operation/deploy-token.sh`](https://github.com/hiromaily/go-crypto-wallet/blob/master/scripts/operation/deploy-token.sh)

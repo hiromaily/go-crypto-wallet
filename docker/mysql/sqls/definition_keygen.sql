@@ -25,7 +25,7 @@ DROP TABLE IF EXISTS `seed`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `seed` (
   `id`         tinyint(2) NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `coin`       ENUM('btc', 'bch', 'eth', 'xrp') NOT NULL COMMENT'coin type code',
+  `coin`       ENUM('btc', 'bch', 'eth', 'xrp', 'hyt') NOT NULL COMMENT'coin type code',
   `seed`       VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'seed',
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT'updated date',
   PRIMARY KEY (`id`),
@@ -44,7 +44,7 @@ DROP TABLE IF EXISTS `account_key`;
 CREATE TABLE `account_key` (
   /*`id`                      BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT'ID',*/
   `id`                      BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
-  `coin`                    ENUM('btc', 'bch', 'eth', 'xrp') NOT NULL COMMENT'coin type code',
+  `coin`                    ENUM('btc', 'bch', 'eth', 'xrp', 'hyt') NOT NULL COMMENT'coin type code',
   `account`                 ENUM('client', 'deposit', 'payment', 'stored') NOT NULL COMMENT'account type',
   `p2pkh_address`           VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'address as standard pubkey script that Pays To PubKey Hash (P2PKH)',
   `p2sh_segwit_address`     VARCHAR(255) COLLATE utf8_unicode_ci NOT NULL COMMENT'p2sh-segwit address',

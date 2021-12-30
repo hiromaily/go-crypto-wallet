@@ -1,10 +1,18 @@
 # Ganache
 - [Ganache](https://www.trufflesuite.com/ganache)
 
-## Run by docker
+## Run
+### by Docker
 ```
 docker compose -f docker-compose.eth.yml up ganache
 ```
+### by local
+```
+yarn global add ganache-cli
+ganache-cli --mnemonic "toy echo orbit embrace opinion file client report history bomb regret life"
+```
+
+
 
 ## Setup ethereum environment with Ganache
 1. run ganache

@@ -29,4 +29,8 @@ services:
       - "${ETH_RPC_PORT:-8545}:8545"
     volumes:
       - ./docker/nodes/eth/ganache-data:/ganache_data
+    # command adds into default ENTRYPOINT
+    # https://hub.docker.com/r/trufflesuite/ganache-cli/dockerfile
+    command: --mnemonic "toy echo orbit embrace opinion file client report history bomb regret life"
     # $ docker compose -f docker-compose.eth.yml up ganache
+    # ganache-cli --mnemonic "toy echo orbit embrace opinion file client report history bomb regret life"

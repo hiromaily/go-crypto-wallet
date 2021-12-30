@@ -75,12 +75,12 @@ func NewRegistry(conf *config.WalletRoot, accountConf *account.AccountRoot, wall
 
 // NewWalleter is to register for walleter interface
 func (r *registry) NewWalleter() wallets.Watcher {
-	switch r.conf.CoinTypeCode {
-	case coin.BTC, coin.BCH:
+	switch {
+	case r.conf.CoinTypeCode == coin.BTC || r.conf.CoinTypeCode == coin.BCH:
 		return r.newBTCWalleter()
-	case coin.ETH, coin.ERC20:
+	case r.conf.CoinTypeCode == coin.ETH || coin.IsERC20Token(r.conf.CoinTypeCode.String()):
 		return r.newETHWalleter()
-	case coin.XRP:
+	case r.conf.CoinTypeCode == coin.XRP:
 		return r.newXRPWalleter()
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
@@ -175,7 +175,7 @@ func (r *registry) newBTCTxCreator() service.TxCreator {
 
 func (r *registry) newETHTxCreator() ethsrv.TxCreator {
 	var targetEthAPI ethgrp.TxCreateEther
-	if r.conf.CoinTypeCode == coin.ERC20 {
+	if coin.IsERC20Token(r.conf.CoinTypeCode.String()) {
 		targetEthAPI = r.newERC20()
 	} else {
 		targetEthAPI = r.newETH()

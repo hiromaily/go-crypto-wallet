@@ -67,12 +67,6 @@ func main() {
 	if !coin.IsCoinTypeCode(coinTypeCode) && !coin.IsERC20Token(coinTypeCode) {
 		log.Fatal("coin args is invalid. `btc`, `bch`, `eth`, `xrp`, `hyt` is allowed")
 	}
-	// for ERC-20 token
-	var erc20Token string
-	if coin.IsERC20Token(coinTypeCode) {
-		erc20Token = coinTypeCode
-		coinTypeCode = coin.ERC20.String()
-	}
 
 	// set config path if environment variable is existing
 	if confPath == "" {
@@ -81,10 +75,15 @@ func main() {
 			confPath = os.Getenv("BTC_WATCH_WALLET_CONF")
 		case coin.BCH.String():
 			confPath = os.Getenv("BCH_WATCH_WALLET_CONF")
-		case coin.ETH.String(), coin.ERC20.String():
+		case coin.ETH.String():
 			confPath = os.Getenv("ETH_WATCH_WALLET_CONF")
 		case coin.XRP.String():
 			confPath = os.Getenv("XRP_WATCH_WALLET_CONF")
+		default:
+			if coin.IsERC20Token(coinTypeCode) {
+				// same to ETH
+				confPath = os.Getenv("ETH_WATCH_WALLET_CONF")
+			}
 		}
 	}
 	// account conf path for account settings
@@ -94,10 +93,15 @@ func main() {
 			accountConfPath = os.Getenv("BTC_ACCOUNT_CONF")
 		case coin.BCH.String():
 			accountConfPath = os.Getenv("BCH_ACCOUNT_CONF")
-		case coin.ETH.String(), coin.ERC20.String():
+		case coin.ETH.String():
 			accountConfPath = os.Getenv("ETH_ACCOUNT_CONF")
 		case coin.XRP.String():
 			accountConfPath = os.Getenv("XRP_ACCOUNT_CONF")
+		default:
+			if coin.IsERC20Token(coinTypeCode) {
+				// same to ETH
+				accountConfPath = os.Getenv("ETH_ACCOUNT_CONF")
+			}
 		}
 	}
 
@@ -121,11 +125,11 @@ func main() {
 
 		// override config
 		conf.CoinTypeCode = coin.CoinTypeCode(coinTypeCode)
-		if erc20Token != "" {
-			conf.Ethereum.ERC20Token = coin.ERC20Token(erc20Token)
-			if conf.ValidateERC20(conf.Ethereum.ERC20Token) != err {
+		if coin.IsERC20Token(coinTypeCode) {
+			if conf.ValidateERC20(coin.ERC20Token(coinTypeCode)) != err {
 				log.Fatal(err)
 			}
+			conf.Ethereum.ERC20Token = coin.ERC20Token(coinTypeCode)
 		}
 
 		// - conf.Bitcoin.Host

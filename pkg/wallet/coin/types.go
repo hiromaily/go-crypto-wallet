@@ -19,6 +19,9 @@ const (
 	CoinTypeEther       CoinType = 60  // Ether
 	CoinTypeRipple      CoinType = 144 // Ripple
 	CoinTypeBitcoinCash CoinType = 145 // Bitcoin Cash
+	// ERC20
+	CoinTypeERC20    CoinType = 9000 // TODO: temporary
+	CoinTypeERC20HYT CoinType = 9001 // TODO: temporary
 )
 
 // CoinTypeCode coin type code
@@ -32,6 +35,7 @@ const (
 	ETH   CoinTypeCode = "eth"
 	XRP   CoinTypeCode = "xrp"
 	ERC20 CoinTypeCode = "erc20"
+	HYC   CoinTypeCode = "hyc"
 )
 
 // String converter
@@ -53,11 +57,13 @@ func (c CoinTypeCode) CoinType(conf *chaincfg.Params) CoinType {
 
 // CoinTypeCodeValue value
 var CoinTypeCodeValue = map[CoinTypeCode]CoinType{
-	BTC: CoinTypeBitcoin,
-	BCH: CoinTypeBitcoinCash,
-	LTC: CoinTypeLitecoin,
-	ETH: CoinTypeEther,
-	XRP: CoinTypeRipple,
+	BTC:   CoinTypeBitcoin,
+	BCH:   CoinTypeBitcoinCash,
+	LTC:   CoinTypeLitecoin,
+	ETH:   CoinTypeEther,
+	XRP:   CoinTypeRipple,
+	ERC20: CoinTypeERC20,
+	HYC:   CoinTypeERC20HYT,
 }
 
 // IsCoinTypeCode validate
