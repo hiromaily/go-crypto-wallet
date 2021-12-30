@@ -27,11 +27,9 @@ install-ssl:
 	mkcert localhost 127.0.0.1
 
 .PHONY: install-sqlboiler
-install-sqlboiler: SQLBOILER_VERSION=4.5
 install-sqlboiler:
-	echo SQLBOILER_VERSION is $(SQLBOILER_VERSION)
-	go get github.com/volatiletech/sqlboiler@v$(SQLBOILER_VERSION)
-	go get github.com/volatiletech/sqlboiler/drivers/sqlboiler-mysql@v$(SQLBOILER_VERSION)
+	go install github.com/volatiletech/sqlboiler/v4@latest
+	go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-mysql@latest
 
 .PHONY: install-abigen
 install-abigen:
