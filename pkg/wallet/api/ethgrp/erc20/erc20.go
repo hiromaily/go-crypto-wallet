@@ -132,6 +132,9 @@ func (e *ERC20) CreateRawTransaction(fromAddr, toAddr string, amount uint64, add
 		return nil, nil, errors.New("balance is short to send token")
 	}
 	tokenAmount := big.NewInt(int64(amount))
+	if amount == 0 {
+		tokenAmount = balance
+	}
 
 	data := e.createTransferData(toAddr, tokenAmount)
 	gasLimit, err := e.estimateGas(data)

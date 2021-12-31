@@ -100,12 +100,14 @@ func (t *TxCreate) createDepositRawTransactions(sender, receiver account.Account
 	// create raw transaction each address
 	serializedTxs := make([]string, 0, len(userAmounts))
 	txDetailItems := make([]*models.EthDetailTX, 0, len(userAmounts))
+	// additionalNonce := 0
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
 		rawTx, txDetailItem, err := t.eth.CreateRawTransaction(val.Address, depositAddr.WalletAddress, 0, 0)
 		if err != nil {
 			return nil, nil, errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s", val.Address)
 		}
+		// additionalNonce++
 
 		rawTxHex := rawTx.TxHex
 		t.logger.Debug("rawTxHex", zap.String("rawTxHex", rawTxHex))
