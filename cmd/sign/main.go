@@ -29,7 +29,7 @@ import (
 var (
 	walletType = wallet.WalletTypeSign
 	appName    = walletType.String()
-	appVersion = "3.0.0"
+	appVersion = "5.0.0"
 	authName   = "" // this value is supposed to be embedded when building
 )
 
