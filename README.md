@@ -15,14 +15,13 @@ Wallet functionalities to create raw transaction, to sing on unsigned transactio
 - Bitcoin
 - Bitcoin Cash
 - Ethereum
-- ERC-20 Token (under development)
+- ERC-20 Token
 - Ripple
 
 
 ## Current development
 - This project is under refactoring
   - based on `Clean Code`, `Clean Architecture`, [`Refactoring`](https://martinfowler.com/articles/refactoring-2nd-ed.html)
-- ERC-20 token is under development
 - Bitcoin Core version 22.0 is released. Must be cought up.
 
 ## Expected use cases
