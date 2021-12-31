@@ -95,6 +95,11 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
         - ETH: [go-ethereum](https://github.com/ethereum/go-ethereum), [Ganache](https://www.trufflesuite.com/ganache), [erc20-token](https://github.com/hiromaily/erc20-token)
         - XRP: [rippled](https://xrpl.org/manage-the-rippled-server.html), [ripple-lib-server](https://github.com/hiromaily/ripple-lib-server)
 
+## Related repositories
+- [erc20-token](https://github.com/hiromaily/erc20-token)
+- [ripple-lib-server](https://github.com/hiromaily/ripple-lib-server)
+- [ripple-lib-proto](https://github.com/hiromaily/ripple-lib-proto)
+
 ## Installation
 see [Installation](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/Installation.md)
 
