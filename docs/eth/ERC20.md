@@ -1,7 +1,7 @@
 # ERC20 Token
 ## How to try ETH20 token
 1. create eth account and register by running `generate-eth-key.sh` in ./scripts/operation/
-2. change value in `coin` column to `hyc` as example in `address` table on watch-db.
+2. change value in `coin` column to `hyt` as example in `address` table on watch-db.
 ```
 UPDATE `watch`.`address` SET `coin` = 'hyt';
 ```
@@ -22,3 +22,5 @@ yarn ts-node src/web3.ts --mode transfer --address 0x5c2415367A9558Cb95926619337
 yarn ts-node src/web3.ts --mode balance --address 0x5c2415367A9558Cb95926619337859aD64beA345
 ```
 9. run command `watch -coin hyt create deposit`
+10. run command `keygen -coin hyt sign -file ${fileName}`
+11. run command `watch -coin hyt send -file ${fileName}`

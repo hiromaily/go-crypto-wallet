@@ -12,8 +12,6 @@ yarn global add ganache-cli
 ganache-cli --mnemonic "toy echo orbit embrace opinion file client report history bomb regret life"
 ```
 
-
-
 ## Setup ethereum environment with Ganache
 1. run ganache
 2. create sql to register private key and address displayed on console by running ganache

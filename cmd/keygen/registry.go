@@ -76,12 +76,12 @@ func NewRegistry(conf *config.WalletRoot, accountConf *account.AccountRoot, wall
 // - return struct itself
 // func (r *registry) NewKeygener() *keygen.Keygen {
 func (r *registry) NewKeygener() wallets.Keygener {
-	switch r.conf.CoinTypeCode {
-	case coin.BTC, coin.BCH:
+	switch {
+	case coin.IsBTCGroup(r.conf.CoinTypeCode):
 		return r.newBTCKeygener()
-	case coin.ETH:
+	case coin.IsETHGroup(r.conf.CoinTypeCode):
 		return r.newETHKeygener()
-	case coin.XRP:
+	case r.conf.CoinTypeCode == coin.XRP:
 		return r.newXRPKeygener()
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
@@ -157,15 +157,15 @@ func (r *registry) newHdWalletRepo() commonsrv.HDWalletRepo {
 }
 
 func (r *registry) newPrivKeyer() service.PrivKeyer {
-	switch r.conf.CoinTypeCode {
-	case coin.BTC, coin.BCH:
+	switch {
+	case coin.IsBTCGroup(r.conf.CoinTypeCode):
 		return keygensrv.NewPrivKey(
 			r.newBTC(),
 			r.newLogger(),
 			r.newAccountKeyRepo(),
 			r.walletType,
 		)
-	case coin.ETH:
+	case coin.IsETHGroup(r.conf.CoinTypeCode):
 		return ethsrv.NewPrivKey(
 			r.newETH(),
 			r.newLogger(),
@@ -404,12 +404,12 @@ func (r *registry) newAuthKeyRepo() coldrepo.AuthAccountKeyRepositorier {
 
 func (r *registry) newKeyGenerator() key.Generator {
 	var chainConf *chaincfg.Params
-	switch r.conf.CoinTypeCode {
-	case coin.BTC, coin.BCH:
+	switch {
+	case coin.IsBTCGroup(r.conf.CoinTypeCode):
 		chainConf = r.newBTC().GetChainConf()
-	case coin.ETH:
+	case coin.IsETHGroup(r.conf.CoinTypeCode):
 		chainConf = r.newETH().GetChainConf()
-	case coin.XRP:
+	case r.conf.CoinTypeCode == coin.XRP:
 		chainConf = r.newXRP().GetChainConf()
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))

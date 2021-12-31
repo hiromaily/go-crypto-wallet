@@ -46,7 +46,7 @@ func main() {
 	)
 	flags := flag.NewFlagSet("main", flag.ContinueOnError)
 	flags.StringVar(&confPath, "conf", "", "config file path")
-	flags.StringVar(&coinTypeCode, "coin", "btc", "coin type code `btc`, `bch`, `eth`, `xrp`")
+	flags.StringVar(&coinTypeCode, "coin", "btc", "coin type code `btc`, `bch`, `eth`, `xrp`, `hyt`")
 	flags.StringVar(&btcWallet, "wallet", "", "specify wallet.dat in bitcoin core")
 	flags.BoolVar(&isVersion, "version", false, "show version")
 	flags.BoolVar(&isHelp, "help", false, "show help")
@@ -62,19 +62,19 @@ func main() {
 
 	// validate coinTypeCode
 	if !coin.IsCoinTypeCode(coinTypeCode) {
-		log.Fatal("coin args is invalid. `btc`, `bch`, `eth` is allowed")
+		log.Fatal("coin args is invalid. `btc`, `bch`, `eth`, `xrp`, `hyt` is allowed")
 	}
 
 	// set config path if environment variable is existing
 	if confPath == "" {
-		switch coinTypeCode {
-		case coin.BTC.String():
+		switch {
+		case coinTypeCode == coin.BTC.String():
 			confPath = os.Getenv("BTC_KEYGEN_WALLET_CONF")
-		case coin.BCH.String():
+		case coinTypeCode == coin.BCH.String():
 			confPath = os.Getenv("BCH_KEYGEN_WALLET_CONF")
-		case coin.ETH.String():
+		case coin.IsETHGroup(coin.CoinTypeCode(coinTypeCode)):
 			confPath = os.Getenv("ETH_KEYGEN_WALLET_CONF")
-		case coin.XRP.String():
+		case coinTypeCode == coin.XRP.String():
 			confPath = os.Getenv("XRP_KEYGEN_WALLET_CONF")
 		}
 	}

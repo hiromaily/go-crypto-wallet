@@ -35,7 +35,7 @@ const (
 	ETH   CoinTypeCode = "eth"
 	XRP   CoinTypeCode = "xrp"
 	ERC20 CoinTypeCode = "erc20"
-	HYC   CoinTypeCode = "hyc"
+	HYC   CoinTypeCode = "hyt"
 )
 
 // String converter
@@ -69,6 +69,22 @@ var CoinTypeCodeValue = map[CoinTypeCode]CoinType{
 // IsCoinTypeCode validate
 func IsCoinTypeCode(val string) bool {
 	if _, ok := CoinTypeCodeValue[CoinTypeCode(val)]; ok {
+		return true
+	}
+	return false
+}
+
+// IsBTCGroup validates bitcoin group
+func IsBTCGroup(val CoinTypeCode) bool {
+	if val == BTC || val == BCH {
+		return true
+	}
+	return false
+}
+
+// IsETHGroup validates ethreum, ERC20 group
+func IsETHGroup(val CoinTypeCode) bool {
+	if val == ETH || IsERC20Token(val.String()) {
 		return true
 	}
 	return false

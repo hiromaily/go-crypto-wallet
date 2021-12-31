@@ -76,9 +76,9 @@ func NewRegistry(conf *config.WalletRoot, accountConf *account.AccountRoot, wall
 // NewWalleter is to register for walleter interface
 func (r *registry) NewWalleter() wallets.Watcher {
 	switch {
-	case r.conf.CoinTypeCode == coin.BTC || r.conf.CoinTypeCode == coin.BCH:
+	case coin.IsBTCGroup(r.conf.CoinTypeCode):
 		return r.newBTCWalleter()
-	case r.conf.CoinTypeCode == coin.ETH || coin.IsERC20Token(r.conf.CoinTypeCode.String()):
+	case coin.IsETHGroup(r.conf.CoinTypeCode):
 		return r.newETHWalleter()
 	case r.conf.CoinTypeCode == coin.XRP:
 		return r.newXRPWalleter()

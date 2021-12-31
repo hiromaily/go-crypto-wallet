@@ -70,38 +70,28 @@ func main() {
 
 	// set config path if environment variable is existing
 	if confPath == "" {
-		switch coinTypeCode {
-		case coin.BTC.String():
+		switch {
+		case coinTypeCode == coin.BTC.String():
 			confPath = os.Getenv("BTC_WATCH_WALLET_CONF")
-		case coin.BCH.String():
+		case coinTypeCode == coin.BCH.String():
 			confPath = os.Getenv("BCH_WATCH_WALLET_CONF")
-		case coin.ETH.String():
+		case coin.IsETHGroup(coin.CoinTypeCode(coinTypeCode)):
 			confPath = os.Getenv("ETH_WATCH_WALLET_CONF")
-		case coin.XRP.String():
+		case coinTypeCode == coin.XRP.String():
 			confPath = os.Getenv("XRP_WATCH_WALLET_CONF")
-		default:
-			if coin.IsERC20Token(coinTypeCode) {
-				// same to ETH
-				confPath = os.Getenv("ETH_WATCH_WALLET_CONF")
-			}
 		}
 	}
 	// account conf path for account settings
 	if accountConfPath == "" {
-		switch coinTypeCode {
-		case coin.BTC.String():
+		switch {
+		case coinTypeCode == coin.BTC.String():
 			accountConfPath = os.Getenv("BTC_ACCOUNT_CONF")
-		case coin.BCH.String():
+		case coinTypeCode == coin.BCH.String():
 			accountConfPath = os.Getenv("BCH_ACCOUNT_CONF")
-		case coin.ETH.String():
+		case coin.IsETHGroup(coin.CoinTypeCode(coinTypeCode)):
 			accountConfPath = os.Getenv("ETH_ACCOUNT_CONF")
-		case coin.XRP.String():
+		case coinTypeCode == coin.XRP.String():
 			accountConfPath = os.Getenv("XRP_ACCOUNT_CONF")
-		default:
-			if coin.IsERC20Token(coinTypeCode) {
-				// same to ETH
-				accountConfPath = os.Getenv("ETH_ACCOUNT_CONF")
-			}
 		}
 	}
 

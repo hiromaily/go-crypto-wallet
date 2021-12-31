@@ -41,6 +41,10 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 	}
 
 	txID, err := t.updateDB(targetAction, txDetailItems, nil)
+	t.logger.Debug("update result",
+		zap.Int64("txID", txID),
+		zap.Error(err),
+	)
 	if err != nil {
 		return "", "", err
 	}
