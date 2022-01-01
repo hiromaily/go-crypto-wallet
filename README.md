@@ -23,6 +23,7 @@ Wallet functionalities to create raw transaction, to sing on unsigned transactio
 - This project is under refactoring
   - based on `Clean Code`, `Clean Architecture`, [`Refactoring`](https://martinfowler.com/articles/refactoring-2nd-ed.html)
 - Bitcoin Core version 22.0 is released. Must be cought up.
+- Polkadot may be added. I'm learning now :) [About polkadot](https://polkadot.network/technology/)
 
 ## Expected use cases
 ### 1.Deposit functionality
