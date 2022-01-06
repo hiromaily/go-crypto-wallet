@@ -5,15 +5,30 @@ import (
 
 	"github.com/btcsuite/btcutil/hdkeychain"
 	"github.com/pkg/errors"
+	"github.com/tyler-smith/go-bip39"
 )
 
-// GenerateSeed generate seed as []byte
+// GenerateSeed generates seed as []byte
 func GenerateSeed() ([]byte, error) {
 	seed, err := hdkeychain.GenerateSeed(hdkeychain.RecommendedSeedLen)
 	if err != nil {
 		return nil, err
 	}
 	return seed, nil
+}
+
+// GenerateMnemonic generates mnemonic
+func GenerateMnemonic(passphrase string) ([]byte, string, error) {
+	entropy, _ := bip39.NewEntropy(256)
+	mnemonic, err := bip39.NewMnemonic(entropy)
+	if err != nil {
+		return nil, "", err
+	}
+
+	// Generate a Bip32 HD wallet for the mnemonic and a user supplied password
+	// key length is 64 bytes
+	seed := bip39.NewSeed(mnemonic, passphrase)
+	return seed, mnemonic, nil
 }
 
 // SeedToString encode by base64 to string

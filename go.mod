@@ -41,6 +41,7 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/tinylib/msgp v1.1.6 // indirect
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
+	github.com/tyler-smith/go-bip39 v1.1.0 // indirect
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible
 	github.com/volatiletech/null v8.0.0+incompatible
