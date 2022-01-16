@@ -5,7 +5,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
-	pb "github.com/hiromaily/ripple-lib-proto/pb/go/rippleapi"
+	pb "github.com/hiromaily/ripple-lib-proto/v2/pb/go/rippleapi"
 )
 
 // Rippler Ripple Interface

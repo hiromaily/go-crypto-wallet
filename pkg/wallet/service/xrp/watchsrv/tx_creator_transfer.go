@@ -13,7 +13,7 @@ import (
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
-	pb "github.com/hiromaily/ripple-lib-proto/pb/go/rippleapi"
+	pb "github.com/hiromaily/ripple-lib-proto/v2/pb/go/rippleapi"
 )
 
 // CreateTransferTx create unsigned tx for transfer coin among internal account except client, authorization

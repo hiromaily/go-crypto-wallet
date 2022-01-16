@@ -4,7 +4,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
-	pb "github.com/hiromaily/ripple-lib-proto/pb/go/rippleapi"
+	pb "github.com/hiromaily/ripple-lib-proto/v2/pb/go/rippleapi"
 )
 
 // RippleAPI it RippleAPI client

@@ -12,7 +12,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
-	pb "github.com/hiromaily/ripple-lib-proto/pb/go/rippleapi"
+	pb "github.com/hiromaily/ripple-lib-proto/v2/pb/go/rippleapi"
 )
 
 // SendCoinCommand syncing subcommand

@@ -7,7 +7,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
-	pb "github.com/hiromaily/ripple-lib-proto/pb/go/rippleapi"
+	pb "github.com/hiromaily/ripple-lib-proto/v2/pb/go/rippleapi"
 )
 
 // TestCreateRawTransaction is test for CreateRawTransaction

@@ -4,7 +4,7 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/status"
 
-	pb "github.com/hiromaily/ripple-lib-proto/pb/go/rippleapi"
+	pb "github.com/hiromaily/ripple-lib-proto/v2/pb/go/rippleapi"
 )
 
 // CreateRawTransaction creates raw transaction
