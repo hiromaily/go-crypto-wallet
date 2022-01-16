@@ -25,7 +25,7 @@ type TxCreator interface {
 
 // TxCreate type
 type TxCreate struct {
-	eth             ethgrp.TxCreateEther
+	eth             ethgrp.EtherTxCreator
 	logger          *zap.Logger
 	dbConn          *sql.DB
 	addrRepo        watchrepo.AddressRepositorier
@@ -41,7 +41,7 @@ type TxCreate struct {
 
 // NewTxCreate returns TxCreate object
 func NewTxCreate(
-	eth ethgrp.TxCreateEther,
+	eth ethgrp.EtherTxCreator,
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,

@@ -101,11 +101,15 @@ type Ethereumer interface {
 type ERC20er interface {
 	ValidateAddr(addr string) error
 	FloatToBigInt(v float64) *big.Int
-	// GetBalance(hexAddr string) (*big.Int, error)
 	GetBalance(hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
 	CreateRawTransaction(fromAddr, toAddr string, amount uint64, additionalNonce int) (*ethtx.RawTx, *models.EthDetailTX, error)
 }
 
-type TxCreateEther interface {
+type EtherTxCreator interface {
 	ERC20er
+}
+
+type EtherTxMonitor interface {
+	GetTotalBalance(addrs []string) (*big.Int, []eth.UserAmount)
+	GetConfirmation(hashTx string) (uint64, error)
 }

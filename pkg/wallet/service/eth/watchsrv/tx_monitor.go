@@ -47,21 +47,13 @@ func NewTxMonitor(
 // UpdateTxStatus update transaction status
 // - monitor transaction whose tx_type=3(TxTypeSent) in tx_payment/tx_deposit/tx_transfer
 func (t *TxMonitor) UpdateTxStatus() error {
-	// TODO: as possibility tx_type is not updated from `done`
-
-	//types := []action.ActionType{
-	//	action.ActionTypeDeposit,
-	//	action.ActionTypePayment,
-	//	action.ActionTypeTransfer,
-	//}
-
-	// 1. update tx_type for TxTypeSent
+	// update tx_type for TxTypeSent
 	err := t.updateStatusTxTypeSent()
 	if err != nil {
 		return errors.Wrap(err, "fail to call updateStatusTxTypeSent()")
 	}
 
-	//2. update tx_type for TxTypeDone
+	// update tx_type for TxTypeDone
 	// - TODO: notification
 	//for _, actionType := range types {
 	//	err := t.updateStatusTxTypeDone(actionType)
@@ -69,7 +61,6 @@ func (t *TxMonitor) UpdateTxStatus() error {
 	//		return errors.Wrapf(err, "fail to call updateStatusTxTypeDone() ActionType: %s", actionType)
 	//	}
 	//}
-
 	return nil
 }
 

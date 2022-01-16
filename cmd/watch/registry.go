@@ -174,7 +174,7 @@ func (r *registry) newBTCTxCreator() service.TxCreator {
 }
 
 func (r *registry) newETHTxCreator() ethsrv.TxCreator {
-	var targetEthAPI ethgrp.TxCreateEther
+	var targetEthAPI ethgrp.EtherTxCreator
 	if coin.IsERC20Token(r.conf.CoinTypeCode.String()) {
 		targetEthAPI = r.newERC20()
 	} else {
