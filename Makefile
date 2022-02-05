@@ -1,8 +1,9 @@
 modVer=$(shell cat go.mod | head -n 3 | tail -n 1 | awk '{print $2}' | cut -d'.' -f2)
 currentVer=$(shell go version | awk '{print $3}' | sed -e "s/go//" | cut -d'.' -f2)
+GOLANGCI_VERSION=v1.43.0
 
 ###############################################################################
-# Initial
+# Initial Settings
 ###############################################################################
 .PHONY: check-ver
 check-ver:
@@ -16,52 +17,26 @@ check-ver:
 setup-mac:
 	brew install jq mkcert go-task/tap/go-task
 
-.PHONY: goget
-goget:
-	go get ./...
-
-
 .PHONY: install-ssl
 install-ssl:
 	mkcert -install
 	mkcert localhost 127.0.0.1
 
-.PHONY: install-sqlboiler
-install-sqlboiler:
+.PHONY: install-tools
+install-tools:
 	go install github.com/volatiletech/sqlboiler/v4@latest
 	go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-mysql@latest
-
-.PHONY: install-abigen
-install-abigen:
-	#cd ${GOPATH}/src/github.com/ethereum/go-ethereum
-	#git pull
-	#go install ./cmd/abigen
 	go install github.com/ethereum/go-ethereum/cmd/abigen@latest
-
-.PHONY: install-staticcheck
-install-staticcheck:
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_VERSION)
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 
-.PHONY: imports
-imports:
-	./scripts/imports.sh
+.PHONY: goget
+goget:
+	go get ./...
 
-# FIXME: just after updating package outside from this repository, `go get` doesn't update that package for a while
-#goget:
-#	go get github.com/hiromaily/ripple-lib-proto/pb/go/rippleapi@ca80219
-
-.PHONY: lint
-lint:
-	golangci-lint run
-
-.PHONY: lintfix
-lintfix:
-	golangci-lint run --fix
-
-.PHONY: staticcheck
-staticcheck:
-	staticcheck ./...
-
+###############################################################################
+# Code Generator
+###############################################################################
 # FIXME: file is not generated with --templates option if files are existing
 # As workaround, modify files in ./templates/..
 .PHONY: generate-db-definition
@@ -80,9 +55,25 @@ sqlboiler:
 generate-abi:
 	abigen --abi ./data/contract/token.abi --pkg contract --type Token --out ./pkg/contract/token-abi.go
 
-# git tag
-#git tag v2.0.0 cfeca390b781af79321fb644c056bf6e755fdc7e
-#git push origin v2.0.0
+###############################################################################
+# Linter
+###############################################################################
+.PHONY: imports
+imports:
+	./scripts/imports.sh
+
+.PHONY: lint
+lint:
+	golangci-lint run
+
+.PHONY: lintfix
+lintfix:
+	golangci-lint run --fix
+
+.PHONY: staticcheck
+staticcheck:
+	staticcheck ./...
+
 
 ###############################################################################
 # From inside docker container
@@ -122,10 +113,8 @@ blds:
 	go build -ldflags "-X main.authName=auth4" -v -o ${GOPATH}/bin/sign4 ./cmd/sign/
 	go build -ldflags "-X main.authName=auth5" -v -o ${GOPATH}/bin/sign5 ./cmd/sign/
 
-
 run:
 	go run ./cmd/watch/ -conf ./data/config/watch.toml
-
 
 ###############################################################################
 # Test on local
@@ -223,6 +212,7 @@ bitcoin-run:
 bitcoin-stop:
 	bitcoin-cli stop
 
+# MacOS only
 .PHONY: cd-btc-dir
 cd-btc-dir:
 	cd ~/Library/Application\ Support/Bitcoin
