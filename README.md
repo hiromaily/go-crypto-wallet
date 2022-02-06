@@ -6,7 +6,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/hiromaily/go-crypto-wallet)](https://goreportcard.com/report/github.com/hiromaily/go-crypto-wallet)
 [![codebeat badge](https://codebeat.co/badges/792a7c07-2352-4b7e-8083-0a323368b26f)](https://codebeat.co/projects/github-com-hiromaily-go-crypto-wallet-master)
-[![GitHub release](https://img.shields.io/badge/release-v3.0.0-blue.svg)](https://github.com/hiromaily/go-crypto-wallet/releases)
+[![GitHub release](https://img.shields.io/badge/release-v5.0.0-blue.svg)](https://github.com/hiromaily/go-crypto-wallet/releases)
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/LICENSE)
 
 Wallet functionalities to create raw transaction, to sing on unsigned transaction, to send signed transaction for BTC, BCH, ETH, XRP and so on.  
@@ -96,10 +96,12 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
         - ETH: [go-ethereum](https://github.com/ethereum/go-ethereum), [Ganache](https://www.trufflesuite.com/ganache), [erc20-token](https://github.com/hiromaily/erc20-token)
         - XRP: [rippled](https://xrpl.org/manage-the-rippled-server.html), [ripple-lib-server](https://github.com/hiromaily/ripple-lib-server)
 
+## Components inside repository
+- ripple-lib-server
+  - see web/ripple-lib-server
+
 ## Related repositories
 - [erc20-token](https://github.com/hiromaily/erc20-token)
-- [ripple-lib-server](https://github.com/hiromaily/ripple-lib-server)
-- [ripple-lib-proto](https://github.com/hiromaily/ripple-lib-proto)
 
 ## Installation
 see [Installation](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/Installation.md)
