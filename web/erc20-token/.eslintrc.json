@@ -1,0 +1,66 @@
+{
+  "parserOptions": {
+    "ecmaVersion": 2017
+  },
+  "env": {
+    "es6": true,
+    "node": true,
+    "mocha": true
+  },
+  "globals": {
+    "artifacts": false,
+    "contract": false,
+    "assert": false
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:compat/recommended",
+    "plugin:eslint-comments/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "rules": {
+    "no-extra-semi": "warn",
+    "no-undef": "warn",
+    "quotes": ["error", "single"],
+    "prefer-const": "warn",
+    "space-before-blocks": ["warn", { "functions": "always" }],
+    "semi": ["error", "always"],
+    "no-unused-vars": ["error", { "args": "none" }],
+    "no-console": "off",
+    "no-var": "error",
+    "dot-notation": "error",
+    "no-tabs": "error",
+    "no-trailing-spaces": "error",
+    "no-use-before-define": "error",
+    "no-useless-call": "error",
+    "no-with": "error",
+    "operator-linebreak": "error",
+    "quote-props": ["error", "as-needed"]
+  },
+  "overrides": [
+    {
+      "files": ["*.ts", "*.tsx"],
+      "extends": [
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking"
+      ],
+      "plugins": [
+        "@typescript-eslint"
+      ],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "project": "./tsconfig.json",
+        "ecmaVersion": 6,
+        "sourceType": "module"
+      },
+      "rules": {
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-call": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off",
+        "@typescript-eslint/no-unsafe-return": "off",
+        "@typescript-eslint/no-unused-vars": "error"    
+      }
+    }
+  ]  
+}

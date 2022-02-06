@@ -1,0 +1,6 @@
+build/
+contracts/
+dist/
+node_modules/
+sample/
+truffle-config.js

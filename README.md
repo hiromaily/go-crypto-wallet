@@ -93,15 +93,14 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
     - Node Server
         - BTC: [Bitcoin Core 0.18+ for Bitcoin node](https://bitcoin.org/en/bitcoin-core/)
         - BCH: [Bitcoin ABC 0.21+ for Bitcoin cash node](https://www.bitcoinabc.org/)
-        - ETH: [go-ethereum](https://github.com/ethereum/go-ethereum), [Ganache](https://www.trufflesuite.com/ganache), [erc20-token](https://github.com/hiromaily/erc20-token)
-        - XRP: [rippled](https://xrpl.org/manage-the-rippled-server.html), [ripple-lib-server](https://github.com/hiromaily/ripple-lib-server)
+        - ETH: [go-ethereum](https://github.com/ethereum/go-ethereum), [Ganache](https://www.trufflesuite.com/ganache), [erc20-token](https://github.com/hiromaily/go-crypto-wallet/tree/master/web/erc20-token)
+        - XRP: [rippled](https://xrpl.org/manage-the-rippled-server.html), [ripple-lib-server](https://github.com/hiromaily/go-crypto-wallet/tree/master/web/ripple-lib-server)
 
 ## Components inside repository
 - ripple-lib-server
   - see web/ripple-lib-server
-
-## Related repositories
-- [erc20-token](https://github.com/hiromaily/erc20-token)
+- erc20-token
+  - see web/erc20-token
 
 ## Installation
 see [Installation](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/Installation.md)
@@ -245,7 +244,7 @@ watch send -file xxx.csv
 - [ ] Sent tx is not proceeded in bitcoin network if fee is not enough comparatively. So re-sending tx functionality is required adding more fee.
 
 ### For ERC20 token
-- [x] Add sample ERC20 token for development. [ERC20 Token](https://github.com/hiromaily/erc20-token)
+- [x] Add sample ERC20 token for development.
 - [ ] Add any useful APIs using contract equivalent to ETH APIs
 
 ### For ETH

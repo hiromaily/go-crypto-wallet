@@ -1,0 +1,47 @@
+{
+  "name": "erc20-token",
+  "version": "1.0.0",
+  "description": "erc20 token",
+  "license": "MIT",
+  "scripts": {
+    "fmt": "prettier --write '{contracts,migrations,src,test}/**/*.{sol,ts,js}'",
+    "lint": "solhint --fix contracts/**/*.sol",
+    "lint-js": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
+    "build": "truffle compile",
+    "deploy": "truffle migrate --reset",
+    "deploy-dev2": "truffle migrate --network dev2 --reset",
+    "test-all": "truffle test --debug",
+    "test-token": "truffle test --debug test/testToken.test.js",
+    "debug": "truffle debug",
+    "all": "truffle compile; truffle migrate --reset",
+    "web3": "node src/web3.js",
+    "web3ts-balance": "ts-node src/web3.ts --mode balance --address 0xd0446b3eD62f23815bE724C17e34C0617A186e34",
+    "web3ts-transfer": "ts-node src/web3.ts --mode transfer --address 0xfbA98CA8476a8b4ee11eb7AF98E0967E9151B4A0 --amount 100",
+    "web3ts-estimate-gas": "ts-node src/web3.ts --mode estimateGas"
+  },
+  "devDependencies": {
+    "@types/node": "^16.7.10",
+    "@typescript-eslint/eslint-plugin": "^4.30.0",
+    "@typescript-eslint/parser": "^4.30.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-compat": "^3.13.0",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "prettier": "^2.3.2",
+    "prettier-plugin-solidity": "^1.0.0-beta.17",
+    "solhint": "^3.3.6",
+    "ts-node": "^10.2.1",
+    "typescript": "^4.4.2"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.3.1",
+    "@types/ethereumjs-abi": "^0.6.3",
+    "commander": "^8.3.0",
+    "ethereumjs-abi": "^0.6.8",
+    "web3": "^1.5.2",
+    "web3-core": "^1.5.2",
+    "web3-eth-contract": "^1.5.2",
+    "web3-utils": "^1.5.2"
+  }
+}
