@@ -225,6 +225,7 @@ watch send -file xxx.csv
 - [ ] Add [Polkadot](https://polkadot.network/technology/)
 - [ ] Various monitoring patterns to detect suspicious operations.
 - [ ] Add Github Action as CI
+- [ ] Generate mnemonic instead of seed. [bip-0039](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki)
 
 ### For BTC/BCH
 - [ ] Multisig-address is used only once because of security reason, so after tx is sent, related receiver addresses should be updated by is_allocated=true.
