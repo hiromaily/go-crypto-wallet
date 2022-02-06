@@ -7,13 +7,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gogo/protobuf/types"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-
-	pb "github.com/hiromaily/ripple-lib-proto/v2/pb/go/rippleapi"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // - Send XRP https://xrpl.org/send-xrp.html
@@ -108,18 +106,16 @@ type TxOrderbookChange struct {
 }
 
 // PrepareTransaction calls PrepareTransaction API
-func (r *Ripple) PrepareTransaction(senderAccount, receiverAccount string, amount float64, instructions *pb.Instructions) (*TxInput, string, error) {
+func (r *Ripple) PrepareTransaction(senderAccount, receiverAccount string, amount float64, instructions *Instructions) (*TxInput, string, error) {
 	ctx := context.Background()
-	req := &pb.RequestPrepareTransaction{
-		TxType:          pb.TX_PAYMENT,
+	req := &RequestPrepareTransaction{
+		TxType:          EnumTransactionType_TX_PAYMENT,
 		SenderAccount:   senderAccount,
 		Amount:          amount,
 		ReceiverAccount: receiverAccount,
 		Instructions:    instructions,
-		// Instructions:    &pb.Instructions{MaxLedgerVersionOffset: MaxLedgerVersionOffset},
 	}
 
-	// res: *pb.ResponsePrepareTransaction
 	res, err := r.API.txClient.PrepareTransaction(ctx, req)
 	if err != nil {
 		return nil, "", errors.Wrap(err, "fail to call client.PrepareTransaction()")
@@ -147,7 +143,7 @@ func (r *Ripple) SignTransaction(txInput *TxInput, secret string) (string, strin
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call json.Marshal(txJSON)")
 	}
-	req := &pb.RequestSignTransaction{
+	req := &RequestSignTransaction{
 		TxJSON: string(strJSON),
 		Secret: secret,
 	}
@@ -164,7 +160,7 @@ func (r *Ripple) SignTransaction(txInput *TxInput, secret string) (string, strin
 // - The signed transaction must subsequently be submitted.
 func (r *Ripple) CombineTransaction(signedTxs []string) (string, string, error) {
 	ctx := context.Background()
-	req := &pb.RequestCombineTransaction{
+	req := &RequestCombineTransaction{
 		SignedTransactions: signedTxs,
 	}
 
@@ -180,7 +176,7 @@ func (r *Ripple) CombineTransaction(signedTxs []string) (string, string, error) 
 // - signedTx is returned TxBlob by SignTransaction()
 func (r *Ripple) SubmitTransaction(signedTx string) (*SentTx, uint64, error) {
 	ctx := context.Background()
-	req := &pb.RequestSubmitTransaction{
+	req := &RequestSubmitTransaction{
 		TxBlob: signedTx,
 	}
 	res, err := r.API.txClient.SubmitTransaction(ctx, req)
@@ -211,7 +207,7 @@ func (r *Ripple) SubmitTransaction(signedTx string) (*SentTx, uint64, error) {
 // - handling server streaming
 func (r *Ripple) WaitValidation(targetledgerVarsion uint64) (uint64, error) {
 	ctx := context.Background()
-	req := &types.Empty{}
+	req := &emptypb.Empty{}
 	resStream, err := r.API.txClient.WaitValidation(ctx, req)
 	if err != nil {
 		return 0, errors.Wrap(err, "fail to call client.WaitValidation()")
@@ -261,7 +257,7 @@ func (r *Ripple) WaitValidation(targetledgerVarsion uint64) (uint64, error) {
 // GetTransaction calls GetTransaction API
 func (r *Ripple) GetTransaction(txID string, targetLedgerVersion uint64) (*TxInfo, error) {
 	ctx := context.Background()
-	req := &pb.RequestGetTransaction{
+	req := &RequestGetTransaction{
 		TxID:             txID,
 		MinLedgerVersion: targetLedgerVersion,
 	}

@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package rippleapi.transaction;
+
+option go_package = "github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp";
+
+import "google/protobuf/empty.proto";
+import "gogo/protobuf/gogoproto/gogo.proto";
+
+enum EnumTransactionType {
+  option (gogoproto.goproto_enum_prefix) = false;
+
+  TX_ACCOUNT_SET = 0;      // AccountSet
+  TX_ACCOUNT_DELETE = 1;   // AccountDelete
+  TX_CHECK_CANCEL = 2;     // CheckCancel
+  TX_CHECK_CASH = 3;       // CheckCash
+  TX_CHECK_CREATE = 4;     // CheckCreate
+  TX_DEPOSIT_PREAUTH = 5;  // DepositPreauth
+  TX_ESCROW_CANCEL = 6;    // EscrowCancel
+  TX_ESCROW_CREATE = 7;    // EscrowCreate
+  TX_ESCROW_FINISH = 8;    // EscrowFinish
+  TX_OFFER_CANCEL = 9;     // OfferCancel
+  TX_OFFER_CREATE = 10;    // OfferCreate
+  TX_PAYMENT = 11;         // Payment
+  TX_PAYMENT_CHANNEL_CLAIM = 12;   // PaymentChannelClaim
+  TX_PAYMENT_CHANNEL_CREATE = 13;  // PaymentChannelCreate
+  TX_PAYMENT_CHANNEL_FUND = 14;    // PaymentChannelFund
+  TX_SET_REGULAR_KEY = 15;         // SetRegularKey
+  TX_SINGER_LIST_SET = 16;         // SignerListSet
+  TX_TRUST_SET = 17;       // TrustSet
+}
+
+message Instructions {
+  string fee = 1;
+  string maxFee = 2;
+  uint64 maxLedgerVersion = 3;
+  uint64 maxLedgerVersionOffset = 4;
+  uint64 sequence = 5;
+  uint64 signersCount = 6;
+}
+
+message RequestPrepareTransaction {
+  EnumTransactionType tx_type = 1;
+  string senderAccount = 2;
+  double amount = 3;
+  string receiverAccount = 4;
+  Instructions instructions = 5;
+}
+
+message ResponsePrepareTransaction {
+  string txJSON = 1;
+  Instructions instructions = 2;
+}
+
+message RequestSignTransaction {
+  string txJSON = 1;
+  string secret = 2;
+}
+
+message ResponseSignTransaction {
+  string txID = 1;
+  string txBlob = 2;
+}
+
+message RequestSubmitTransaction {
+  string txBlob = 1;
+}
+
+message ResponseSubmitTransaction {
+  string resultJSONString = 1;
+  uint64 earliestLedgerVersion = 2;
+}
+
+message ResponseWaitValidation {
+  uint64 ledgerVersion = 1;
+}
+
+message RequestGetTransaction {
+  string txID = 1;
+  uint64 minLedgerVersion = 2;
+}
+
+message ResponseGetTransaction {
+  string resultJSONString = 1;
+}
+
+message RequestCombineTransaction {
+  repeated string signedTransactions = 1;
+}
+
+message ResponseCombineTransaction {
+  string signedTransaction = 1;
+  string txID = 2;
+}
+
+// RippleTransactionAPI 
+service RippleTransactionAPI {
+  // https://xrpl.org/rippleapi-reference.html#preparetransaction
+  rpc PrepareTransaction(RequestPrepareTransaction) returns (ResponsePrepareTransaction) {}
+  rpc SignTransaction(RequestSignTransaction) returns (ResponseSignTransaction) {}
+  rpc SubmitTransaction(RequestSubmitTransaction) returns (ResponseSubmitTransaction) {}
+  rpc WaitValidation(google.protobuf.Empty) returns (stream ResponseWaitValidation) {}
+  rpc GetTransaction(RequestGetTransaction) returns (ResponseGetTransaction) {}
+  rpc CombineTransaction(RequestCombineTransaction) returns (ResponseCombineTransaction) {}
+}

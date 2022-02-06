@@ -3,13 +3,11 @@ package xrp
 import (
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/status"
-
-	pb "github.com/hiromaily/ripple-lib-proto/v2/pb/go/rippleapi"
 )
 
 // CreateRawTransaction creates raw transaction
 // - https://xrpl.org/ja/send-xrp.html
-func (r *Ripple) CreateRawTransaction(senderAccount, receiverAccount string, amount float64, instructions *pb.Instructions) (*TxInput, string, error) {
+func (r *Ripple) CreateRawTransaction(senderAccount, receiverAccount string, amount float64, instructions *Instructions) (*TxInput, string, error) {
 	// validation
 	if senderAccount == "" {
 		return nil, "", errors.New("senderAccount is empty")

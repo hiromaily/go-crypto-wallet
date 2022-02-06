@@ -1,6 +1,8 @@
 modVer=$(shell cat go.mod | head -n 3 | tail -n 1 | awk '{print $2}' | cut -d'.' -f2)
 currentVer=$(shell go version | awk '{print $3}' | sed -e "s/go//" | cut -d'.' -f2)
 GOLANGCI_VERSION=v1.43.0
+#PROTOC_BIN=protoc
+PROTOC_BIN=buf protoc
 
 ###############################################################################
 # Initial Settings
@@ -13,9 +15,15 @@ check-ver:
 		echo go version ${modVer}++ is required but your go version is ${currentVer};\
 	fi
 
-.PHONY: setup-mac
-setup-mac:
+.PHONY: install-mac-tools
+install-mac-tools:
 	brew install jq mkcert go-task/tap/go-task
+
+.PHONY: install-protobuf
+install-protobuf:
+	brew install protobuf prototool
+	brew tap bufbuild/buf                                                                                                                                                                      (git)-[master]
+	brew install buf
 
 .PHONY: install-ssl
 install-ssl:
@@ -29,6 +37,20 @@ install-tools:
 	go install github.com/ethereum/go-ethereum/cmd/abigen@latest
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_VERSION)
 	go install honnef.co/go/tools/cmd/staticcheck@latest
+
+.PHONY: install-proto-plugin
+install-proto-plugin:
+	# refer to https://developers.google.com/protocol-buffers/docs/reference/go-generated
+	# provides a protoc-gen-go binary which protoc uses when invoked with the --go_out command-line flag.
+	# The --go_out flag
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	# The go-grpc_out flag
+	go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+	# gogo protobuf
+	go install github.com/gogo/protobuf/protoc-gen-gogo@latest
+	#go get github.com/gogo/protobuf/proto
+	#go get github.com/gogo/protobuf/jsonpb
+	#go get github.com/gogo/protobuf/gogoproto
 
 .PHONY: goget
 goget:
@@ -54,6 +76,32 @@ sqlboiler:
 .PHONY: generate-abi
 generate-abi:
 	abigen --abi ./data/contract/token.abi --pkg contract --type Token --out ./pkg/contract/token-abi.go
+
+###############################################################################
+# Protocol Buffer
+#------------------------------------------------------------------------------
+# run `make install-proto-plugin` in advance
+###############################################################################
+.PHONY: get-third-proto
+get-third-proto:
+	./scripts/get_third_proto.sh
+
+.PHONY: lint-proto
+lint-proto:
+	prototool lint
+
+.PHONY:protoc-go
+protoc-go: clean-pb
+	$(PROTOC_BIN) \
+	--go_out=./pkg/wallet/api/xrpgrp/xrp/ --go_opt=paths=source_relative \
+	--go-grpc_out=./pkg/wallet/api/xrpgrp/xrp/ --go-grpc_opt=paths=source_relative  \
+	--proto_path=./data/proto/rippleapi \
+	--proto_path=./data/proto/third_party \
+	data/proto/**/*.proto
+
+.PHONY: clean-pb
+clean-pb:
+	rm -rf pkg/wallet/api/xrpgrp/xrp/*.pb.go
 
 ###############################################################################
 # Linter

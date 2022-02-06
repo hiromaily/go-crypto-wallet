@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package rippleapi.address;
+
+option go_package = "github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp";
+
+import "google/protobuf/empty.proto";
+
+message ResponseGenerateAddress {
+  string xAddress = 1;
+  string classicAddress = 2;
+  string address = 3;
+  string secret = 4;
+}
+
+message ResponseGenerateXAddress {
+  string xAddress = 1;
+  string secret = 2;
+}
+
+message RequestIsValidAddress {
+  string address = 1;
+}
+
+message ResponseIsValidAddress {
+  bool isValid = 1;
+}
+
+// RippleAddressAPI 
+service RippleAddressAPI {
+  // https://xrpl.org/rippleapi-reference.html#generateaddress
+  rpc GenerateAddress(google.protobuf.Empty) returns (ResponseGenerateAddress) {}
+  // https://xrpl.org/rippleapi-reference.html#generatexaddress
+  rpc GenerateXAddress(google.protobuf.Empty) returns (ResponseGenerateXAddress) {}
+  // https://xrpl.org/rippleapi-reference.html#isvalidaddress
+  rpc IsValidAddress(RequestIsValidAddress) returns (ResponseIsValidAddress) {}
+}

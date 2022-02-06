@@ -13,7 +13,6 @@ import (
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
-	pb "github.com/hiromaily/ripple-lib-proto/v2/pb/go/rippleapi"
 )
 
 // CreateTransferTx create unsigned tx for transfer coin among internal account except client, authorization
@@ -59,7 +58,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	}
 
 	// call CreateRawTransaction
-	instructions := &pb.Instructions{
+	instructions := &xrp.Instructions{
 		MaxLedgerVersionOffset: xrp.MaxLedgerVersionOffset,
 	}
 	txJSON, rawTxString, err := t.xrp.CreateRawTransaction(senderAddr.WalletAddress, receiverAddr.WalletAddress, floatValue, instructions)

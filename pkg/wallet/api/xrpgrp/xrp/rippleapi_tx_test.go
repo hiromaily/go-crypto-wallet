@@ -7,7 +7,7 @@ import (
 	"github.com/bookerzzz/grok"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
-	pb "github.com/hiromaily/ripple-lib-proto/v2/pb/go/rippleapi"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 )
 
 // TestTransaction is test for sequential transaction
@@ -20,7 +20,7 @@ func TestTransaction(t *testing.T) {
 		senderSecret    string
 		receiverAccount string
 		amount          float64
-		instructions    *pb.Instructions
+		instructions    *xrp.Instructions
 	}
 	type want struct {
 		isErr bool
@@ -37,7 +37,7 @@ func TestTransaction(t *testing.T) {
 				senderSecret:    "sswVaSDUNnLd5pB4F9oPT9u7jLf2X",
 				receiverAccount: "rnkZMhbXQZ8GTfSihmdTqNUtvUAAqwkLWN",
 				amount:          100,
-				instructions: &pb.Instructions{
+				instructions: &xrp.Instructions{
 					MaxLedgerVersionOffset: 2,
 				},
 			},

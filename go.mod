@@ -15,11 +15,10 @@ require (
 	github.com/go-playground/validator/v10 v10.10.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gogo/protobuf v1.3.2
-	github.com/hiromaily/ripple-lib-proto/v2 v2.0.2
 	github.com/mitchellh/cli v1.1.2
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/pkg/errors v0.9.1
-	github.com/rubblelabs/ripple v0.0.0-20211211173318-6f621ddd85f6
+	github.com/rubblelabs/ripple v0.0.0-20220205053636-ac4ab739e51d
 	github.com/satori/go.uuid v1.2.0
 	github.com/stretchr/testify v1.7.0
 	github.com/tyler-smith/go-bip39 v1.1.0
@@ -27,17 +26,18 @@ require (
 	github.com/uber/jaeger-lib v2.4.1+incompatible
 	github.com/volatiletech/null v8.0.0+incompatible
 	github.com/volatiletech/null/v8 v8.1.2
-	github.com/volatiletech/sqlboiler/v4 v4.8.3
+	github.com/volatiletech/sqlboiler/v4 v4.8.6
 	github.com/volatiletech/strmangle v0.0.1
 	go.uber.org/zap v1.20.0
-	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce
-	google.golang.org/grpc v1.43.0
-	gopkg.in/DataDog/dd-trace-go.v1 v1.35.0
+	golang.org/x/crypto v0.0.0-20220131195533-30dcbda58838
+	google.golang.org/grpc v1.44.0
+	google.golang.org/protobuf v1.27.1
+	gopkg.in/DataDog/dd-trace-go.v1 v1.36.0
 	nhooyr.io/websocket v1.8.7
 )
 
 require (
-	github.com/DataDog/datadog-agent/pkg/obfuscate v0.34.0-rc.2 // indirect
+	github.com/DataDog/datadog-agent/pkg/obfuscate v0.34.0-rc.7 // indirect
 	github.com/DataDog/datadog-go v4.8.3+incompatible // indirect
 	github.com/DataDog/datadog-go/v5 v5.0.2 // indirect
 	github.com/DataDog/sketches-go v1.3.0 // indirect
@@ -75,7 +75,7 @@ require (
 	github.com/huin/goupnp v1.0.2 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/jackpal/go-nat-pmp v1.0.2 // indirect
-	github.com/klauspost/compress v1.14.1 // indirect
+	github.com/klauspost/compress v1.14.2 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lib/pq v1.10.4 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
@@ -91,21 +91,20 @@ require (
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 // indirect
 	github.com/tinylib/msgp v1.1.6 // indirect
 	github.com/tklauser/go-sysconf v0.3.9 // indirect
-	github.com/tklauser/numcpus v0.3.0 // indirect
+	github.com/tklauser/numcpus v0.4.0 // indirect
 	github.com/volatiletech/inflect v0.0.1 // indirect
 	github.com/volatiletech/randomize v0.0.1 // indirect
 	github.com/volatiletech/sqlboiler v3.7.1+incompatible // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	go.uber.org/multierr v1.7.0 // indirect
-	golang.org/x/net v0.0.0-20220114011407-0dd24b26b47d // indirect
+	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
+	golang.org/x/sys v0.0.0-20220204135822-1c1b9b1eba6a // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
-	google.golang.org/genproto v0.0.0-20220114231437-d2e6a121cae0 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
+	google.golang.org/genproto v0.0.0-20220204002441-d6cc3cc0770e // indirect
 	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )

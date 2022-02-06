@@ -1,10 +1,10 @@
 package key_test
 
 import (
-	"github.com/tyler-smith/go-bip39"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/tyler-smith/go-bip39"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )

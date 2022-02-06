@@ -3,15 +3,13 @@ package xrp
 import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
-
-	pb "github.com/hiromaily/ripple-lib-proto/v2/pb/go/rippleapi"
 )
 
 // RippleAPI it RippleAPI client
 type RippleAPI struct {
-	txClient      pb.RippleTransactionAPIClient
-	accountClient pb.RippleAccountAPIClient
-	addressClient pb.RippleAddressAPIClient
+	txClient      RippleTransactionAPIClient
+	accountClient RippleAccountAPIClient
+	addressClient RippleAddressAPIClient
 	conn          *grpc.ClientConn
 	logger        *zap.Logger
 }
@@ -21,9 +19,9 @@ func NewRippleAPI(
 	conn *grpc.ClientConn,
 	logger *zap.Logger) *RippleAPI {
 	return &RippleAPI{
-		txClient:      pb.NewRippleTransactionAPIClient(conn),
-		accountClient: pb.NewRippleAccountAPIClient(conn),
-		addressClient: pb.NewRippleAddressAPIClient(conn),
+		txClient:      NewRippleTransactionAPIClient(conn),
+		accountClient: NewRippleAccountAPIClient(conn),
+		addressClient: NewRippleAddressAPIClient(conn),
 		conn:          conn,
 		logger:        logger,
 	}

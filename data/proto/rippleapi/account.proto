@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package rippleapi.account;
+
+option go_package = "github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp";
+
+message RequestGetAccountInfo {
+  string address = 1;
+  //uint64 ledgerVersion = 2;
+}
+
+message ResponseGetAccountInfo {
+  uint64 sequence = 1;
+  string xrpBalance = 2;
+  uint64 ownerCount = 3;
+  string previousAffectingTransactionID = 4;
+  uint64 previousAffectingTransactionLedgerVersion = 5;
+}
+
+// RippleAccountAPI 
+service RippleAccountAPI {
+  // https://xrpl.org/rippleapi-reference.html#getaccountinfo
+  rpc GetAccountInfo(RequestGetAccountInfo) returns (ResponseGetAccountInfo) {}
+}

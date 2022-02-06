@@ -15,6 +15,5 @@ type Keygener interface {
 	CreateMultisigAddress(accountType account.AccountType) error
 	ExportAddress(accountType account.AccountType) (string, error)
 	SignTx(filePath string) (string, bool, string, error)
-
 	Done()
 }

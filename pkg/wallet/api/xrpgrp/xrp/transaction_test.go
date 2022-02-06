@@ -7,7 +7,6 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
-	pb "github.com/hiromaily/ripple-lib-proto/v2/pb/go/rippleapi"
 )
 
 // TestCreateRawTransaction is test for CreateRawTransaction
@@ -19,7 +18,7 @@ func TestCreateRawTransaction(t *testing.T) {
 		sernderAccount  string
 		receiverAccount string
 		amount          float64
-		instructions    *pb.Instructions
+		instructions    *xrp.Instructions
 	}
 	type want struct {
 		isErr bool
@@ -35,7 +34,7 @@ func TestCreateRawTransaction(t *testing.T) {
 				sernderAccount:  "rKXvsrd5H6MQNVpYgdeffFYjfGq4VdDogd",
 				receiverAccount: "rpBzBQ6aWJhuatJCkQgfE3VJT67ukBQopf",
 				amount:          50,
-				instructions: &pb.Instructions{
+				instructions: &xrp.Instructions{
 					MaxLedgerVersionOffset: xrp.MaxLedgerVersionOffset,
 				},
 			},

@@ -5,7 +5,6 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
-	pb "github.com/hiromaily/ripple-lib-proto/v2/pb/go/rippleapi"
 )
 
 // Rippler Ripple Interface
@@ -19,7 +18,7 @@ type Rippler interface {
 	GetTotalBalance(addrs []string) float64
 
 	// transaction
-	CreateRawTransaction(senderAccount, receiverAccount string, amount float64, instructions *pb.Instructions) (*xrp.TxInput, string, error)
+	CreateRawTransaction(senderAccount, receiverAccount string, amount float64, instructions *xrp.Instructions) (*xrp.TxInput, string, error)
 
 	// ripple
 	Close()
@@ -30,13 +29,13 @@ type Rippler interface {
 // RippleAPIer is RippleAPI interface
 type RippleAPIer interface {
 	// RippleAccountAPI
-	GetAccountInfo(address string) (*pb.ResponseGetAccountInfo, error)
+	GetAccountInfo(address string) (*xrp.ResponseGetAccountInfo, error)
 	// RippleAddressAPI
-	GenerateAddress() (*pb.ResponseGenerateAddress, error)
-	GenerateXAddress() (*pb.ResponseGenerateXAddress, error)
+	GenerateAddress() (*xrp.ResponseGenerateAddress, error)
+	GenerateXAddress() (*xrp.ResponseGenerateXAddress, error)
 	IsValidAddress(addr string) (bool, error)
 	// RippleTxAPI
-	PrepareTransaction(senderAccount, receiverAccount string, amount float64, instructions *pb.Instructions) (*xrp.TxInput, string, error)
+	PrepareTransaction(senderAccount, receiverAccount string, amount float64, instructions *xrp.Instructions) (*xrp.TxInput, string, error)
 	SignTransaction(txJSON *xrp.TxInput, secret string) (string, string, error)
 	CombineTransaction(signedTxs []string) (string, string, error)
 	SubmitTransaction(signedTx string) (*xrp.SentTx, uint64, error)

@@ -20,7 +20,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
-// TODO: Ethereum struct in pkg/wallet/api/ethgrp/eth/ethereum.go must be embeded to use common funcs
+// TODO: Ethereum struct in pkg/wallet/api/ethgrp/eth/ethereum.go must be embedded to use common funcs
 // Then proper interface limits functionalities
 type ERC20 struct {
 	client          *ethclient.Client

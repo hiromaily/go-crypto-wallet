@@ -5,19 +5,17 @@ import (
 
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-
-	pb "github.com/hiromaily/ripple-lib-proto/v2/pb/go/rippleapi"
 )
 
 // GetAccountInfo calls GetAccountInfo API
-func (r *Ripple) GetAccountInfo(address string) (*pb.ResponseGetAccountInfo, error) {
+func (r *Ripple) GetAccountInfo(address string) (*ResponseGetAccountInfo, error) {
 	// validation
 	if address == "" {
 		return nil, errors.New("address is empty")
 	}
 
 	ctx := context.Background()
-	req := &pb.RequestGetAccountInfo{
+	req := &RequestGetAccountInfo{
 		Address: address,
 	}
 

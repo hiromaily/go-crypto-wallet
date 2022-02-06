@@ -3,17 +3,15 @@ package xrp
 import (
 	"context"
 
-	"github.com/gogo/protobuf/types"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-
-	pb "github.com/hiromaily/ripple-lib-proto/v2/pb/go/rippleapi"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // GenerateAddress calls GenerateAddress API
-func (r *Ripple) GenerateAddress() (*pb.ResponseGenerateAddress, error) {
+func (r *Ripple) GenerateAddress() (*ResponseGenerateAddress, error) {
 	ctx := context.Background()
-	req := &types.Empty{}
+	req := &emptypb.Empty{}
 
 	res, err := r.API.addressClient.GenerateAddress(ctx, req)
 	if err != nil {
@@ -30,9 +28,9 @@ func (r *Ripple) GenerateAddress() (*pb.ResponseGenerateAddress, error) {
 }
 
 // GenerateXAddress calls GenerateXAddress API
-func (r *Ripple) GenerateXAddress() (*pb.ResponseGenerateXAddress, error) {
+func (r *Ripple) GenerateXAddress() (*ResponseGenerateXAddress, error) {
 	ctx := context.Background()
-	req := &types.Empty{}
+	req := &emptypb.Empty{}
 
 	res, err := r.API.addressClient.GenerateXAddress(ctx, req)
 	if err != nil {
@@ -49,7 +47,7 @@ func (r *Ripple) GenerateXAddress() (*pb.ResponseGenerateXAddress, error) {
 // IsValidAddress calls IsValidAddress API
 func (r *Ripple) IsValidAddress(addr string) (bool, error) {
 	ctx := context.Background()
-	req := &pb.RequestIsValidAddress{
+	req := &RequestIsValidAddress{
 		Address: addr,
 	}
 
