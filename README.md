@@ -23,7 +23,6 @@ Wallet functionalities to create raw transaction, to sing on unsigned transactio
 - This project is under refactoring
   - based on `Clean Code`, `Clean Architecture`, [`Refactoring`](https://martinfowler.com/articles/refactoring-2nd-ed.html)
 - Bitcoin Core version 22.0 is released. Must be cought up.
-- Polkadot may be added. I'm learning now :) [About polkadot](https://polkadot.network/technology/)
 
 ## Expected use cases
 ### 1.Deposit functionality
@@ -222,63 +221,25 @@ watch send -file xxx.csv
 
 ## TODO
 ### Basics
+- [ ] Add ATOM tokens on [Cosmos Hub](https://hub.cosmos.network/main/hub-overview/overview.html)
+- [ ] Add [Polkadot](https://polkadot.network/technology/)
 - [ ] Various monitoring patterns to detect suspicious operations.
-- [ ] High coverage of UnitTest.
-- [ ] Add CircleCI or other CI service
-- [ ] Add new coins like Ethereum.
-
+- [ ] Add Github Action as CI
 
 ### For BTC/BCH
-- [x] Change ORM to sqlboiler
-- [x] Implement proper database transaction.
-- [x] Re-design procedure for creating Multisig address.
-- [x] Flexible multisig proportion M:N. For now only 2:2 fixed proportion is available.
-- [x] Add bech32/segwit address
-- [x] Tweak for another coin like BCH
-- [x] Tweak key generation logic for multisig address for BCH.
-- [x] Implement `encryptwallet` to keygen/sign wallets
-- [x] Lock/Unlock wallet for security reason, authorized operator is available.
-- [x] Backup/Restore for wallet.dat. If wallt.dat is broken, it's not easy to recover.
-- [ ] Refactoring logic for unsigned transaction creation.
 - [ ] Multisig-address is used only once because of security reason, so after tx is sent, related receiver addresses should be updated by is_allocated=true.
 - [ ] Sent tx is not proceeded in bitcoin network if fee is not enough comparatively. So re-sending tx functionality is required adding more fee.
 
 ### For ERC20 token
-- [x] Add sample ERC20 token for development.
 - [ ] Add any useful APIs using contract equivalent to ETH APIs
+- [ ] Monitoring for ERC20 token
 
 ### For ETH
-- [x] Add any useful APIs
-- [x] Generating key by HD Wallet
-- [x] Importing private key
-- [x] Exporting addresses to watch wallet
-- [x] Importing exported address in watch wallet
-- [x] Creating unsigned raw transaction for deposit
-- [x] Creating unsigned raw transaction for payment
-- [x] Creating unsigned raw transaction for transfer
-- [x] Signing on unsigned raw transaction
-- [x] Sending signed transaction
-- [x] Transaction monitoring
 - [ ] Make sure that `quantity-tag` is used properly. e.g. when getting balance, which quantity-tag should be used, latest or pending.
-- [ ] For now it works on [Go Ethereum](https://github.com/ethereum/go-ethereum). Adapting to [Ganache](https://www.trufflesuite.com/ganache)
-- [ ] How to manage password for private key. Password would be passed from command line argument.
+- [ ] Handling secret of private key properly. Password could be passed from command line argument.
 
 ### For XRP
-- [x] APIs to call [Admin rippled Methods](https://xrpl.org/admin-rippled-methods.html)
-- [x] APIs to call [Public rippled Methods](https://xrpl.org/public-rippled-methods.html)
-- [x] Build [Rippled Server](https://xrpl.org/install-rippled.html)
-- [x] Build gRPC Server as [RippleAPI](https://xrpl.org/rippleapi-reference.html) Server. Repository is [here](https://github.com/hiromaily/ripple-lib-server) 
-- [x] gRPC Client to call RippleAPI
-- [x] Generating Keys
-- [x] Exporting addresses to watch wallet
-- [x] Importing exported address in watch wallet
-- [x] Creating unsigned raw transaction for deposit
-- [x] Creating unsigned raw transaction for payment
-- [x] Creating unsigned raw transaction for transfer
-- [x] Signing on unsigned raw transaction
-- [x] Sending signed transaction
-- [x] Transaction monitoring
-- [ ] How to manage secret for private key. Password would be passed from command line argument.
+- [ ] Handling secret of private key properly. Password could be passed from command line argument.
 
 ## Project layout patterns
 - The `pkg` layout pattern, refer to the [linked](https://medium.com/golang-learn/go-project-layout-e5213cdcfaa2) URLs for details.
