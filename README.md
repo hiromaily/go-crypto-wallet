@@ -228,6 +228,7 @@ watch send -file xxx.csv
 - [ ] Generate mnemonic instead of seed. [bip-0039](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki)
 
 ### For BTC/BCH
+- [ ] Setup [Signet](https://en.bitcoin.it/wiki/Signet) environment for development use
 - [ ] Multisig-address is used only once because of security reason, so after tx is sent, related receiver addresses should be updated by is_allocated=true.
 - [ ] Sent tx is not proceeded in bitcoin network if fee is not enough comparatively. So re-sending tx functionality is required adding more fee.
 

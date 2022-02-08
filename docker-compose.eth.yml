@@ -7,7 +7,7 @@ services:
   #########################################################################
   eth-node:
     # https://hub.docker.com/r/ethereum/client-go/
-    image: ethereum/client-go:v1.10.8
+    image: ethereum/client-go:v1.10.15
     volumes:
       - ./docker/nodes/eth/data:/root/.ethereum/goerli
     ports:

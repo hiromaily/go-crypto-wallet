@@ -19,7 +19,7 @@ services:
     build:
       context: ./docker/golang/
       dockerfile: Dockerfile
-    image: wallet-golang:1.15.1
+    image: wallet-golang:1.17.5
 
   #########################################################################
   # Bitcoin core
@@ -140,11 +140,10 @@ services:
   #########################################################################
   # Open Tracing
   #------------------------------------------------------------------------
-  # TODO: update docker image version to latest
   # https://hub.docker.com/r/jaegertracing/all-in-one/tags
   #########################################################################
   jaeger:
-    image: jaegertracing/all-in-one:1.26
+    image: jaegertracing/all-in-one:1.31
     ports:
       - 5775:5775/udp
       - 6831:6831/udp

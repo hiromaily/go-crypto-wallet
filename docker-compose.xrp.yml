@@ -3,14 +3,18 @@ version: '3.8'
 services:
   #########################################################################
   # xrptipbot/rippled
-  # - https://github.com/ripple/rippled
-  # - https://xrpl.org/install-rippled.html
-  # - https://xrpl.org/configure-rippled.html
-  # - https://xrpl.org/connect-your-rippled-to-the-xrp-test-net.html
+  # - Documentations
+  #  - https://github.com/ripple/rippled
+  #  - https://xrpl.org/install-rippled.html
+  #  - https://xrpl.org/configure-rippled.html
+  #  - https://xrpl.org/connect-your-rippled-to-the-xrp-test-net.html
+  # - Build Docker Container for rippled
+  #  - run `./scripts/build-rippled-container.sh` before running docker compose
+  #------------------------------------------------------------------------
+  # $ docker-compose -f docker-compose.xrp.yml exec xrp-node sh
   #########################################################################
   xrp-node:
-    # https://hub.docker.com/r/xrptipbot/rippled
-    image: xrptipbot/rippled:1.5.0
+    image: local-rippled:latest
     volumes:
       - ./docker/nodes/xrp/config:/config
       - ./docker/nodes/xrp/db:/var/lib/rippled/db
@@ -23,4 +27,3 @@ services:
     tty: true
     #command:
     #  - /opt/ripple/bin/rippled --net --conf /etc/opt/ripple/rippled.cfg
-    # $ docker-compose -f docker-compose.xrp.yml exec xrp-node sh
