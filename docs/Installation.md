@@ -4,7 +4,7 @@ This installation expects macOS environment.
 
 ## Requirements
 - Golang 1.16+
-- [golangci-lint](https://github.com/golangci/golangci-lint) 1.42+ (for development)
+- [golangci-lint](https://github.com/golangci/golangci-lint) 1.43+ (for development)
 - [direnv](https://direnv.net/)
 - [Docker](https://www.docker.com/get-started)
 
@@ -18,7 +18,7 @@ docker compose up watch-db keygen-db sign-db
 ```
 3. build `watch`, `keygen`, `auth` wallets
 ```
-make bld
+make build
  or
 go build -v -o ${GOPATH}/bin/watch ./cmd/watch/
 go build -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
@@ -38,18 +38,15 @@ go build -ldflags "-X main.authName=auth5" -v -o ${GOPATH}/bin/sign5 ./cmd/sign/
 ## Bitcoin Setup
 At least, one bitcoin core server and 3 different databases are required.
 
-1. run bitcoin node by docker-compose
+1. copy `bitcoin.conf` from ./docker/nodes/btc/data/bitcoin.conf to ./docker/nodes/btc/dataX directory 
+2. run bitcoin node by docker-compose
 ```
-make bld-docker-btc
- or
-docker compose build btc-watch
-
 make up-docker-btc
  or
 docker compose up btc-watch btc-keygen btc-sign
 ```
 
-2. install `bitcoind` on macOS directly if needed
+3. install `bitcoind` on macOS directly if needed
     - see [bitcoin core installation](https://github.com/bitcoin/bitcoin/blob/master/doc/build-osx.md)
     - run bitcoind
     ```
@@ -92,7 +89,7 @@ It depends on what node you choose
     docker compose -f docker-compose.eth.yml up ganache
     ```
 
-2. prepare sql file for Ganache. But, first account(index[0]) must not be used. See more instruction [here](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/eth/Ganache.md)
+2. prepare sql file if you choose Ganache. But, first account(index[0]) must not be used. See more instruction [here](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/eth/Ganache.md)
 
 3. deploy ERC-20 token contract if needed
 Original ERC-20 token is here [erc20-token](https://github.com/hiromaily/erc20-token). See [`scripts/operation/deploy-token.sh`](https://github.com/hiromaily/go-crypto-wallet/blob/master/scripts/operation/deploy-token.sh)
@@ -116,4 +113,5 @@ Original ERC-20 token is here [erc20-token](https://github.com/hiromaily/erc20-t
     # transfer to specific address
     yarn ts-node src/web3.ts --mode transfer --address 0xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX --amount 100
     ```
+   
 ## Ripple Setup
