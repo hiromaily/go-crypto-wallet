@@ -16,9 +16,11 @@ data/certs/*
 
 docker/grafana/*
 docker/nodes/btc/data/testnet3
+docker/nodes/btc/data1/*
+docker/nodes/btc/data2/*
+docker/nodes/btc/data3/*
 docker/nodes/bch/data/testnet3
 docker/nodes/eth/data/*
-docker/nodes/eth/openeth-data/*
 docker/nodes/xrp/db/*
 docker/nodes/eth/openeth-data/*
 !.gitkeep

@@ -12,6 +12,3 @@ RUN apt-get update && \
 
 #RUN mkdir /root/.bitcoin
 #COPY bitcoin.conf /root/.bitcoin/bitcoin.conf
-
-#ColdwalletはNodeへの接続が不要(8333, 18333)
-#EXPOSE 8332 8333 18332 18333

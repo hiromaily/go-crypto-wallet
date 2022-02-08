@@ -126,8 +126,8 @@ staticcheck:
 ###############################################################################
 # From inside docker container
 ###############################################################################
-.PHONY: bld-linux
-bld-linux:
+.PHONY: build-linux
+build-linux:
 	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/watch ./cmd/watch/main.go
 	CGO_ENABLED=0 GOOS=linux go build -o /go/bin/keygen ./cmd/keygen/main.go
 	CGO_ENABLED=0 GOOS=linux go build -ldflags "-X main.authName=auth1" -o /go/bin/sign ./cmd/sign/main.go
@@ -135,8 +135,8 @@ bld-linux:
 ###############################################################################
 # Build on local
 ###############################################################################
-.PHONY: bld
-bld:
+.PHONY: build
+build:
 	go build -v -o ${GOPATH}/bin/watch ./cmd/watch/
 	go build -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
 	go build -ldflags "-X main.authName=auth1" -v -o ${GOPATH}/bin/sign ./cmd/sign/
@@ -145,16 +145,16 @@ bld:
 	go build -ldflags "-X main.authName=auth4" -v -o ${GOPATH}/bin/sign4 ./cmd/sign/
 	go build -ldflags "-X main.authName=auth5" -v -o ${GOPATH}/bin/sign5 ./cmd/sign/
 
-.PHONY: bldw
-bldw:
+.PHONY: build-watch
+build-watch:
 	go build -v -o ${GOPATH}/bin/watch ./cmd/watch/
 
-.PHONY: bldk
-bldk:
+.PHONY: build-keygen
+build-keygen:
 	go build -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
 
-.PHONY: blds
-blds:
+.PHONY: build-sign
+build-sign:
 	go build -ldflags "-X main.authName=auth1" -v -o ${GOPATH}/bin/sign ./cmd/sign/
 	go build -ldflags "-X main.authName=auth2" -v -o ${GOPATH}/bin/sign2 ./cmd/sign/
 	go build -ldflags "-X main.authName=auth3" -v -o ${GOPATH}/bin/sign3 ./cmd/sign/
@@ -171,7 +171,7 @@ run:
 gotest:
 	go test -v ./...
 
-addr-test:
+gotest-addr:
 	go test -tags=integration -v -run pkg/wallets/api/btc/...
 	go test -tags=integration -v -run GetAddressInfo pkg/wallets/api/btc/...
 	go test -v pkg/wallets/api/btc/... -run GetAddressInfo
@@ -182,28 +182,28 @@ addr-test:
 # Docker and compose
 ###############################################################################
 # build docker images
-.PHONY: bld-docker-all
-bld-docker-all:
+.PHONY: build-docker-all
+build-docker-all:
 	docker compose build
 
 # build golang image
-.PHONY: bld-docker-go
-bld-docker-go:
+.PHONY: build-docker-go
+build-docker-go:
 	docker compose build base-golang
 
 # build ubuntu image
-.PHONY: bld-docker-ubuntu
-bld-docker-ubuntu:
-	docker compose build base-ubuntu
+#.PHONY: build-docker-ubuntu
+#build-docker-ubuntu:
+#	docker compose build base-ubuntu
 
 # build bitcoin core server
-.PHONY: bld-docker-btc
-bld-docker-btc:
-	docker compose build btc-watch
+#.PHONY: build-docker-btc
+#build-docker-btc:
+#	docker compose build btc-watch
 
 # build bitcoin cash core server
-.PHONY: bld-docker-bch
-bld-docker-bch:
+.PHONY: build-docker-bch
+build-docker-bch:
 	docker compose -f docker-compose.bch.yml build bch-watch
 
 
