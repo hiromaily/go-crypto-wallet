@@ -4,6 +4,12 @@ services:
   #########################################################################
   # ethereum/client-go
   # - https://github.com/ethereum/go-ethereum/wiki/Running-in-Docker
+  #------------------------------------------------------------------------
+  # Example of commands to container
+  # $ docker-compose -f docker-compose.eth.yml exec eth-node sh
+  # $ geth attach ipc://root/.ethereum/goerli/geth.ipc
+  # or
+  # $ geth attach ./docker/nodes/eth/data/geth.ipc
   #########################################################################
   eth-node:
     # https://hub.docker.com/r/ethereum/client-go/
@@ -16,11 +22,6 @@ services:
     stdin_open: true
     tty: true
     command: --goerli --rpc --rpcaddr 0.0.0.0 --rpcapi admin,debug,web3,eth,txpool,net,personal
-    # Then
-    # $ docker-compose -f docker-compose.eth.yml exec eth-node sh
-    #  # geth attach ipc://root/.ethereum/goerli/geth.ipc
-    # or $ geth attach ./docker/nodes/eth/data/geth.ipc
-    #      => Unable to attach to remote geth: dial unix ./docker/nodes/eth/data/geth.ipc: connect: connection refused
 
   ganache:
     # https://hub.docker.com/r/trufflesuite/ganache-cli
