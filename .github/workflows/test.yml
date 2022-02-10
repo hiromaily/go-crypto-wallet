@@ -7,22 +7,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: golangci-lint for cmds
+      - name: golangci-lint for root directory
         uses: golangci/golangci-lint-action@v2
         with:
           version: v1.43.0
-          working-directory: cmds/beta
+          working-directory: ./
           #skip-pkg-cache: true # added temporarily due to https://github.com/golangci/golangci-lint-action/issues/244
-      - name: golangci-lint for contract modules
-        uses: golangci/golangci-lint-action@v2
-        with:
-          version: v1.43.0
-          working-directory: contracts/lp
-      - name: golangci-lint for fabibc
-        uses: golangci/golangci-lint-action@v2
-        with:
-          version: v1.43.0
-          working-directory: demo/chains/fabric/chaincode/fabibc
   unit-test:
     name: unit-test
     runs-on: ubuntu-20.04
@@ -42,6 +32,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
       - name: Run Unit Test
-        #working-directory: ./
+        working-directory: ./
         run: |
           make gotest
