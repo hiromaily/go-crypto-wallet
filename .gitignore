@@ -13,6 +13,7 @@ data/fullpubkey/*
 data/keystore/*
 data/tx/*
 data/certs/*
+data/gaiad/*
 
 docker/grafana/*
 docker/nodes/btc/data/testnet3
