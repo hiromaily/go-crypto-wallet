@@ -11,7 +11,7 @@ services:
   #------------------------------------------------------------------------
   # Preparation
   # - bitcoin.conf need to be copied
-  #   from ./data/config/bitcoind/bitcoin.signet.conf to ./docker/nodes/btc/data1 or data2 or data3
+  #   from ./data/config/bitcoind/bitcoin.signet.conf to ./docker/nodes/btc/data1, data2, data3
   #
   # Example of commands to container
   # - docker-compose exec btc-watch bash

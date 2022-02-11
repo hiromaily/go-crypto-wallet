@@ -22,7 +22,7 @@ Wallet functionalities to create raw transaction, to sing on unsigned transactio
 ## Current development
 - This project is under refactoring
   - based on `Clean Code`, `Clean Architecture`, [`Refactoring`](https://martinfowler.com/articles/refactoring-2nd-ed.html)
-- Bitcoin Core version 22.0 is released. Must be cought up.
+- Bitcoin Core version 22.0 is released. Signet environment is ongoing.
 
 ## Expected use cases
 ### 1.Deposit functionality
