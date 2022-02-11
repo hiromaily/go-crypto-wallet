@@ -186,25 +186,6 @@ gotest-integration:
 ###############################################################################
 # Docker and compose
 ###############################################################################
-# build docker images
-.PHONY: build-docker-all
-build-docker-all:
-	docker compose build
-
-# build golang image
-.PHONY: build-docker-go
-build-docker-go:
-	docker compose build base-golang
-
-# build ubuntu image
-#.PHONY: build-docker-ubuntu
-#build-docker-ubuntu:
-#	docker compose build base-ubuntu
-
-# build bitcoin core server
-#.PHONY: build-docker-btc
-#build-docker-btc:
-#	docker compose build btc-watch
 
 # build bitcoin cash core server
 .PHONY: build-docker-bch
@@ -239,9 +220,9 @@ up-docker-db:
 
 # run logging middleware
 # logging and monitoring
-.PHONY: up-docker-logger
-up-docker-logger:
-	docker compose up fluentd elasticsearch grafana
+#.PHONY: up-docker-logger
+#up-docker-logger:
+#	docker compose up fluentd elasticsearch grafana
 
 # remove database volumes
 .PHONY: rm-db-volumes

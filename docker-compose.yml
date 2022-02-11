@@ -15,12 +15,6 @@ services:
   #    dockerfile: Dockerfile
   #  image: wallet-ubuntu:18.04
 
-  base-golang:
-    build:
-      context: ./docker/golang/
-      dockerfile: Dockerfile
-    image: wallet-golang:1.17.5
-
   #########################################################################
   # Bitcoin core
   #------------------------------------------------------------------------
@@ -142,51 +136,15 @@ services:
   #------------------------------------------------------------------------
   # https://hub.docker.com/r/jaegertracing/all-in-one/tags
   #########################################################################
-  jaeger:
-    image: jaegertracing/all-in-one:1.31
-    ports:
-      - 5775:5775/udp
-      - 6831:6831/udp
-      - 6832:6832/udp
-      - 5778:5778
-      - 16686:16686
-      - 14268:14268
-      - 9411:9411
-    environment:
-      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
-
-  #########################################################################
-  # Wallet App
-  #########################################################################
-#  watch-only-wallet:
-#    build:
-#      context: ./docker/wallet/
-#      dockerfile: Dockerfile
-#    image: wallet-app:1.0
-#    links:
-#      - btc-watch:btc-core
-#      - watch-db:mysql-server
-#    depends_on:
-#      - btc-watch
-#      - watch-db
+#  jaeger:
+#    image: jaegertracing/all-in-one:1.31
+#    ports:
+#      - 5775:5775/udp
+#      - 6831:6831/udp
+#      - 6832:6832/udp
+#      - 5778:5778
+#      - 16686:16686
+#      - 14268:14268
+#      - 9411:9411
 #    environment:
-#      CGO_ENABLED: 0
-#      GOOS: linux
-#      GO111MODULE: "on"
-#    volumes:
-#      - ./cmd:/go/src/github.com/hiromaily/go-bitcon/cmd
-#      - ./data:/go/src/github.com/hiromaily/go-bitcon/data
-#      - ./pkg:/go/src/github.com/hiromaily/go-bitcon/pkg
-#      - ./go.mod:/go/src/github.com/hiromaily/go-bitcon/go.mod
-#      - ./go.sum:/go/src/github.com/hiromaily/go-bitcon/go.sum
-#      - ./Makefile:/go/src/github.com/hiromaily/go-bitcon/Makefile
-#    stdin_open: true
-#    tty: true
-#    #    logging:
-#    #      driver: fluentd
-#    #      options:
-#    #        fluentd-address: "localhost:24224"
-#    #        tag: "docker.{{.ID}}"
-#    command: bash
-#    # docker-compose exec watch-only-wallet sh -c 'make bld-linux'
-#    # docker-compose exec watch-only-wallet sh -c 'wallet -c xxx.toml xx xx'
+#      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
