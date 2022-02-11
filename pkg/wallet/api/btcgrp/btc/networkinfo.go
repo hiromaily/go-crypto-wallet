@@ -32,6 +32,7 @@ const (
 	BlockchainInfoChainMain    BlockchainInfoChain = "main"
 	BlockchainInfoChainTest    BlockchainInfoChain = "test"
 	BlockchainInfoChainRegtest BlockchainInfoChain = "regtest"
+	BlockchainInfoChainSignet  BlockchainInfoChain = "signet"
 )
 
 // String converter
@@ -41,7 +42,7 @@ func (c BlockchainInfoChain) String() string {
 
 // GetBlockchainInfoResult is response type of PRC `getblockchaininfo`
 type GetBlockchainInfoResult struct {
-	Chain                BlockchainInfoChain `json:"chain"` // main, test, regtest
+	Chain                BlockchainInfoChain `json:"chain"` // main, test, regtest, signet
 	Blocks               uint32              `json:"blocks"`
 	Headers              uint32              `json:"headers"`
 	Bestblockhash        string              `json:"bestblockhash"`

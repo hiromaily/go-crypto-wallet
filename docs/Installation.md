@@ -1,6 +1,6 @@
 # Installation
 
-This installation expects macOS environment.
+This installation expects MacOS environment.
 
 ## Requirements
 - Golang 1.16+
@@ -10,13 +10,7 @@ This installation expects macOS environment.
 
 ## Common Setup
 1. install Golang, Docker
-2. run Database by docker compose
-```
-make up-docker-db
- or
-docker compose up watch-db keygen-db sign-db
-```
-3. build `watch`, `keygen`, `auth` wallets
+2. build `watch`, `keygen`, `auth` wallets
 ```
 make build
  or
@@ -28,25 +22,40 @@ go build -ldflags "-X main.authName=auth3" -v -o ${GOPATH}/bin/sign3 ./cmd/sign/
 go build -ldflags "-X main.authName=auth4" -v -o ${GOPATH}/bin/sign4 ./cmd/sign/
 go build -ldflags "-X main.authName=auth5" -v -o ${GOPATH}/bin/sign5 ./cmd/sign/
 ```
-4. configure config files in [./data/config/*.toml](https://github.com/hiromaily/go-crypto-wallet/tree/master/data/config) (better after node setup)
-5. set environment variables
+3. configure config files in [./data/config/*.toml](https://github.com/hiromaily/go-crypto-wallet/tree/master/data/config) (better after node setup)
+4. set environment variables
    - install [direnv](https://direnv.net/)
    - see `.envrc`
    - modify `.envrc` if needed
    - execute `direnv allow` on terminal
+5run Database by docker compose
+```
+make up-docker-db
+ or
+docker compose up watch-db keygen-db sign-db
+```
 
-## Bitcoin Setup
+## Bitcoind Setup
 At least, one bitcoin core server and 3 different databases are required.
 
-1. copy `bitcoin.conf` from ./docker/nodes/btc/data/bitcoin.conf to ./docker/nodes/btc/dataX directory 
+1. copy `bitcoin.conf` from ./data/config/bitcoind/ to ./docker/nodes/btc/data1, data2, data3 directory respectively.
+  - I recommend signet network.
 2. run bitcoin node by docker-compose
 ```
 make up-docker-btc
  or
 docker compose up btc-watch btc-keygen btc-sign
 ```
+3. setup `bitcoin-cli` using docker
+    - after running `btc-watch` container, set alias on shell
+   ```zsh
+   alias bitcoin-cli='docker exec -it btc-watch bitcoin-cli'
+   ```
+4. operation
+  - see [Operation Example](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/btc/OperationExample.md)
 
-3. install `bitcoind` on macOS directly if needed
+## Bitcoind Setup without container 
+1. install `bitcoind` on macOS directly if needed
     - see [bitcoin core installation](https://github.com/bitcoin/bitcoin/blob/master/doc/build-osx.md)
     - run bitcoind
     ```

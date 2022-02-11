@@ -187,12 +187,6 @@ gotest-integration:
 # Docker and compose
 ###############################################################################
 
-# build bitcoin cash core server
-.PHONY: build-docker-bch
-build-docker-bch:
-	docker compose -f docker-compose.bch.yml build bch-watch
-
-
 # run bitcoin core server
 .PHONY: up-docker-btc
 up-docker-btc:
@@ -422,5 +416,7 @@ clean: rm-db-volumes rm-local-wallet-dat
 #after that, run `make up-docker-db`
 
 # bitcoin-cli
-#bitcoin-cli -rpcuser=xyz -rpcpassword=xyz getnetworkinfo
-
+# - using arguments
+# $ bitcoin-cli -rpcuser=xyz -rpcpassword=xyz getnetworkinfo
+# - check sync information
+# $ bitcoin-cli getblockchaininfo

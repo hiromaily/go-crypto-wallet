@@ -7,34 +7,28 @@ volumes:
 
 services:
   #########################################################################
-  # Images based on
-  #########################################################################
-  #base-ubuntu:
-  #  build:
-  #    context: ./docker/ubuntu/
-  #    dockerfile: Dockerfile
-  #  image: wallet-ubuntu:18.04
-
-  #########################################################################
   # Bitcoin core
   #------------------------------------------------------------------------
   # Preparation
   # - bitcoin.conf need to be copied
-  #   from ./docker/nodes/btc/data/bitcoin.conf to ./docker/nodes/btc/dataX
+  #   from ./data/config/bitcoind/bitcoin.signet.conf to ./docker/nodes/btc/data1 or data2 or data3
   #
   # Example of commands to container
   # - docker-compose exec btc-watch bash
   # - docker-compose exec btc-watch bitcoin-cli getnetworkinfo
   # - wallet location
-  #   - /data/.bitcoin/testnet3/wallets
+  #   - /data/.bitcoin/signet/wallets using signet
+  #       or
+  #   - /data/.bitcoin/testnet3/wallets using testnet
   #########################################################################
   btc-watch:
     image: lncm/bitcoind:v22.0
+    container_name: btc-watch
     volumes:
       #- ./docker/nodes/btc/data/bitcoin.conf:/data/.bitcoin/bitcoin.conf
       - ./docker/nodes/btc/data1:/data/.bitcoin
     ports:
-      - "${BTC_WATCH_RPC_PORT:-19332}:18332"
+      - "${BTC_WATCH_RPC_PORT:-18332}:18332"
     stdin_open: true
     tty: true
     #    logging:
@@ -46,10 +40,11 @@ services:
 
   btc-keygen:
     image: lncm/bitcoind:v22.0
+    container_name: btc-keygen
     volumes:
       - ./docker/nodes/btc/data2:/data/.bitcoin
     ports:
-      - "${BTC_KEYGEN_RPC_PORT:-19333}:18332"
+      - "${BTC_KEYGEN_RPC_PORT:-19332}:18332"
     stdin_open: true
     tty: true
     #    logging:
@@ -61,10 +56,11 @@ services:
 
   btc-sign:
     image: lncm/bitcoind:v22.0
+    container_name: btc-sign
     volumes:
       - ./docker/nodes/btc/data3:/data/.bitcoin
     ports:
-      - "${BTC_SIGN_RPC_PORT:-19334}:18332"
+      - "${BTC_SIGN_RPC_PORT:-20332}:18332"
     stdin_open: true
     tty: true
     #    logging:

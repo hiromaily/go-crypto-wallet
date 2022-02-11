@@ -2,7 +2,16 @@ version: '3.8'
 
 services:
   #########################################################################
-  # Bitcoin core
+  # Bitcoin ABC
+  #------------------------------------------------------------------------
+  # Example of commands to container
+  # -up bch-watch
+  #  $ docker-compose -f docker-compose.bch.yml up bch-watch
+  # -login
+  #  $ docker-compose -f docker-compose.bch.yml exec bch-watch bash
+  #  - # bitcoin-cli -rpcuser=xyz -rpcpassword=xyz -rpcport=18332 getnetworkinfo
+  # - run command
+  #  $ docker-compose -f docker-compose.bch.yml exec bch-watch bitcoin-cli -rpcuser=xyz -rpcpassword=xyz -rpcport=18332 getnetworkinfo
   #########################################################################
   bch-watch:
     image: zquestz/bitcoin-cash-node:0.24.0
@@ -16,10 +25,3 @@ services:
     tty: true
     #command: /usr/local/bin/bitcoind --printtoconsole --conf=/data/bitcoind.conf
 
-# up bch-watch
-# $ docker-compose -f docker-compose.bch.yml up bch-watch
-# login
-# $ docker-compose -f docker-compose.bch.yml exec bch-watch bash
-#  - # bitcoin-cli -rpcuser=xyz -rpcpassword=xyz -rpcport=18332 getnetworkinfo
-# run command
-# $ docker-compose -f docker-compose.bch.yml exec bch-watch bitcoin-cli -rpcuser=xyz -rpcpassword=xyz -rpcport=18332 getnetworkinfo

@@ -36,6 +36,7 @@ const (
 	NetworkTypeMainNet    NetworkTypeBTC = "mainnet"
 	NetworkTypeTestNet3   NetworkTypeBTC = "testnet3"
 	NetworkTypeRegTestNet NetworkTypeBTC = "regtest"
+	NetworkTypeSigNet     NetworkTypeBTC = "signet"
 )
 
 // String converter

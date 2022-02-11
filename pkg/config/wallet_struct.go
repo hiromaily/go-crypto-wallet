@@ -28,7 +28,7 @@ type Bitcoin struct {
 	Pass        string `toml:"pass" validate:"required"`
 	PostMode    bool   `toml:"http_post_mode"`
 	DisableTLS  bool   `toml:"disable_tls"`
-	NetworkType string `toml:"network_type" validate:"oneof=mainnet testnet3 regtest"`
+	NetworkType string `toml:"network_type" validate:"oneof=mainnet testnet3 regtest signet"`
 
 	Block BitcoinBlock `toml:"block"`
 	Fee   BitcoinFee   `toml:"fee"`

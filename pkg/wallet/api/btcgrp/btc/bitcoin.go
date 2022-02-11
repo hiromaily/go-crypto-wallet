@@ -63,6 +63,11 @@ func NewBitcoin(
 		if blockInfo.Chain != BlockchainInfoChainRegtest {
 			return nil, errors.Errorf("connecting %s on bitcoind, but config file defines as %s", blockInfo.Chain, NetworkTypeRegTestNet)
 		}
+	case NetworkTypeSigNet:
+		bit.chainConf = &chaincfg.SigNetParams
+		if blockInfo.Chain != BlockchainInfoChainSignet {
+			return nil, errors.Errorf("connecting %s on bitcoind, but config file defines as %s", blockInfo.Chain, NetworkTypeSigNet)
+		}
 	default:
 		return nil, errors.Errorf("bitcoin network type is invalid in config")
 	}

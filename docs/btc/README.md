@@ -14,6 +14,7 @@
 - [Testing Applications](https://developer.bitcoin.org/examples/testing.html)
 - Testnet
 - Regtest Mode
+- Signet
 
 ## Build bitcoind on MacOS
 - [macOS Build Instructions and Notes](https://github.com/bitcoin/bitcoin/blob/master/doc/build-osx.md)
