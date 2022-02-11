@@ -6,16 +6,19 @@ package eth_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 )
 
-// TestImportRawKey is test for ImportRawKey
-func TestImportRawKey(t *testing.T) {
-	// t.SkipNow()
-	et := testutil.GetETH()
+type personalTest struct {
+	testutil.ETHTestSuite
+}
 
+// TestImportRawKey is test for ImportRawKey
+func (pt *personalTest) TestImportRawKey() {
 	pw := eth.Password
 
 	type args struct {
@@ -47,12 +50,9 @@ func TestImportRawKey(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			addr, err := et.ImportRawKey(tt.args.key, pw)
-			if (err == nil) == tt.want.isErr {
-				t.Errorf("ImportRawKey() = %v, want error = %v", err, tt.want.isErr)
-				return
-			}
+		pt.T().Run(tt.name, func(t *testing.T) {
+			addr, err := pt.ETH.ImportRawKey(tt.args.key, pw)
+			pt.Equal(tt.want.isErr, err != nil)
 			if err == nil {
 				t.Log("address:", addr)
 			}
@@ -61,49 +61,37 @@ func TestImportRawKey(t *testing.T) {
 }
 
 // TestListAccounts is test for ListAccounts
-func TestListAccounts(t *testing.T) {
-	// t.SkipNow()
-	et := testutil.GetETH()
-
-	addrs, err := et.ListAccounts()
-	if err != nil {
-		t.Fatal(err)
-	}
+func (pt *personalTest) TestListAccounts() {
+	addrs, err := pt.ETH.ListAccounts()
+	pt.NoError(err)
 	for _, addr := range addrs {
-		t.Log("address:", addr)
+		pt.T().Log("address:", addr)
 	}
 }
 
 // TestNewAccount is test for ListAccounts
-func TestNewAccount(t *testing.T) {
-	// t.SkipNow()
-	et := testutil.GetETH()
-
-	addr, err := et.NewAccount(eth.Password, account.AccountTypeClient)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log("address:", addr)
+func (pt *personalTest) TestNewAccount() {
+	addr, err := pt.ETH.NewAccount(eth.Password, account.AccountTypeClient)
+	pt.NoError(err)
+	pt.T().Log("address:", addr)
 }
 
-func TestLockAccount(t *testing.T) {
-	// t.SkipNow()
-	et := testutil.GetETH()
+func (pt *personalTest) TestLockAccount() {
 	addr := "0x852d4ae6bfa5ae9d44d3ac03122674bcb32a0861"
 
 	// unlock
-	isUnlocked, err := et.UnlockAccount(addr, eth.Password, uint64(1))
-	if err != nil {
-		t.Fatal(err)
-	}
+	isUnlocked, err := pt.ETH.UnlockAccount(addr, eth.Password, uint64(1))
+	pt.NoError(err)
 	if !isUnlocked {
-		t.Error("address is not unlocked")
+		pt.T().Error("address is not unlocked")
 		return
 	}
 
 	// lock
-	err = et.LockAccount(addr)
-	if err != nil {
-		t.Fatal(err)
-	}
+	err = pt.ETH.LockAccount(addr)
+	pt.NoError(err)
+}
+
+func TestPersonalTestSuite(t *testing.T) {
+	suite.Run(t, new(personalTest))
 }

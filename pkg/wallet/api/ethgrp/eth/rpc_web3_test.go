@@ -6,30 +6,31 @@ package eth_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
-// TestClientVersion is test for ClientVersion
-func TestClientVersion(t *testing.T) {
-	// t.SkipNow()
-	et := testutil.GetETH()
+type web3Test struct {
+	testutil.ETHTestSuite
+}
 
-	clientVersion, err := et.ClientVersion()
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log("clientVersion:", clientVersion)
+// TestClientVersion is test for ClientVersion
+func (wt *web3Test) TestClientVersion() {
+	clientVersion, err := wt.ETH.ClientVersion()
+	wt.NoError(err)
+	wt.T().Log("clientVersion:", clientVersion)
 }
 
 // TestSHA3 is test for SHA3
-func TestSHA3(t *testing.T) {
-	// t.SkipNow()
-	et := testutil.GetETH()
+func (wt *web3Test) TestSHA3() {
 	data := "0x68656c6c6f20776f726c64"
 
-	res, err := et.SHA3(data)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log("response of SHA3:", res)
+	res, err := wt.ETH.SHA3(data)
+	wt.NoError(err)
+	wt.T().Log("response of SHA3:", res)
+}
+
+func TestWeb3TestSuite(t *testing.T) {
+	suite.Run(t, new(web3Test))
 }

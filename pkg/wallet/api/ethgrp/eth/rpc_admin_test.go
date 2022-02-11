@@ -7,16 +7,18 @@ import (
 	"testing"
 
 	"github.com/ethereum/go-ethereum/params"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
+type adminTest struct {
+	testutil.ETHTestSuite
+}
+
 // TestAddPeer is test for AddPeer
 // https://github.com/ethereum/go-ethereum/blob/master/params/bootnodes.go
-func TestAddPeer(t *testing.T) {
-	// t.SkipNow()
-	et := testutil.GetETH()
-
+func (at *adminTest) TestAddPeer() {
 	type args struct {
 		addr string
 	}
@@ -56,40 +58,29 @@ func TestAddPeer(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := et.AddPeer(tt.args.addr)
-			if (err == nil) == tt.want.isErr {
+		at.T().Run(tt.name, func(t *testing.T) {
+			err := at.ETH.AddPeer(tt.args.addr)
+			if (err != nil) != tt.want.isErr {
 				t.Errorf("AddPeer() = %v, want error = %v", err, tt.want.isErr)
 				return
 			}
-			t.Log(err)
 		})
 	}
-	// et.Close()
 }
 
 // TestAdminDataDir is test for AdminDataDir
-func TestAdminDataDir(t *testing.T) {
-	// t.SkipNow()
-	et := testutil.GetETH()
-
-	dirName, err := et.AdminDataDir()
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(dirName) // /Users/hy/Library/Ethereum/goerli
+func (at *adminTest) TestAdminDataDir() {
+	dirName, err := at.ETH.AdminDataDir()
+	at.NoError(err)
+	at.T().Log(dirName) // /Users/hy/Library/Ethereum/goerli
 }
 
 // TestNodeInfo is test for NodeInfo
-func TestNodeInfo(t *testing.T) {
-	// t.SkipNow()
-	et := testutil.GetETH()
+func (at *adminTest) TestNodeInfo() {
+	nodeInfo, err := at.ETH.NodeInfo()
+	at.NoError(err)
 
-	nodeInfo, err := et.NodeInfo()
-	if err != nil {
-		t.Fatal(err)
-	}
-	// t.Log(nodeInfo)
+	t := at.T()
 	t.Log("Name:", nodeInfo.Name)             // Geth/v1.9.13-stable/darwin-amd64/go1.14.2
 	t.Log("ID:", nodeInfo.ID)                 // 2250fc365755468c831afcea6df37aca52754309060923daee832eb0d7cc49a4
 	t.Log("IP:", nodeInfo.IP)                 // xx.xx.xx.xx
@@ -101,15 +92,14 @@ func TestNodeInfo(t *testing.T) {
 }
 
 // TestAdminPeers is test for AdminPeers
-func TestAdminPeers(t *testing.T) {
-	// t.SkipNow()
-	et := testutil.GetETH()
-
-	adminPeers, err := et.AdminPeers()
-	if err != nil {
-		t.Fatal(err)
-	}
+func (at *adminTest) TestAdminPeers() {
+	adminPeers, err := at.ETH.AdminPeers()
+	at.NoError(err)
 	for _, peer := range adminPeers {
-		t.Log(peer)
+		at.T().Log(peer)
 	}
+}
+
+func TestAdminTestSuite(t *testing.T) {
+	suite.Run(t, new(adminTest))
 }

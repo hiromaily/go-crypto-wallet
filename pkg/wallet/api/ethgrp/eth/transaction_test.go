@@ -7,15 +7,18 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 )
 
-// TestCreateRawTransaction is test for CreateRawTransaction
-func TestCreateRawTransaction(t *testing.T) {
-	// t.SkipNow()
-	et := testutil.GetETH()
+type transactionTest struct {
+	testutil.ETHTestSuite
+}
 
+// TestCreateRawTransaction is test for CreateRawTransaction
+func (txt *transactionTest) TestCreateRawTransaction() {
 	type args struct {
 		senderAddr   string
 		receiverAddr string
@@ -68,30 +71,21 @@ func TestCreateRawTransaction(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			rawTx, txDetail, err := et.CreateRawTransaction(tt.args.senderAddr, tt.args.receiverAddr, tt.args.amount, 0)
-			if (err == nil) == tt.want.isErr {
-				t.Errorf("CreateRawTransaction() = %v, want error = %v", err, tt.want.isErr)
-				return
-			}
-			if rawTx != nil {
+		txt.T().Run(tt.name, func(t *testing.T) {
+			rawTx, txDetail, err := txt.ETH.CreateRawTransaction(tt.args.senderAddr, tt.args.receiverAddr, tt.args.amount, 0)
+			txt.Equal(tt.want.isErr, err != nil)
+			if err == nil {
 				t.Log(rawTx)
-				// grok.Value(rawTx)
-			}
-			if txDetail != nil {
 				t.Log(txDetail)
+				// grok.Value(rawTx)
 				// grok.Value(txDetail)
 			}
 		})
 	}
-	// et.Close()
 }
 
 // TestSignAndSendRawTransaction is test for SignOnRawTransaction and SendSignedRawTransaction
-func TestSignAndSendRawTransaction(t *testing.T) {
-	// t.SkipNow()
-	et := testutil.GetETH()
-
+func (txt *transactionTest) TestSignAndSendRawTransaction() {
 	type args struct {
 		senderAddr   string
 		receiverAddr string
@@ -130,57 +124,44 @@ func TestSignAndSendRawTransaction(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		txt.T().Run(tt.name, func(t *testing.T) {
 			// create raw transaction
-			rawTx, _, err := et.CreateRawTransaction(tt.args.senderAddr, tt.args.receiverAddr, tt.args.amount, 0)
-			if err != nil {
-				t.Fatal(err)
-			}
+			rawTx, _, err := txt.ETH.CreateRawTransaction(tt.args.senderAddr, tt.args.receiverAddr, tt.args.amount, 0)
+			txt.NoError(err)
+
 			// sign on raw transaction
-			signedTx, err := et.SignOnRawTransaction(rawTx, tt.args.password)
-			if (err == nil) == tt.want.isSignErr {
-				t.Errorf("SignOnRawTransaction() = %v, want error = %v", err, tt.want.isSignErr)
-				return
-			}
-			if err != nil {
-				return
-			}
-			if signedTx != nil {
+			signedTx, err := txt.ETH.SignOnRawTransaction(rawTx, tt.args.password)
+			txt.Equal(tt.want.isSignErr, err != nil)
+			if err == nil {
 				t.Log(signedTx)
 			}
+
 			// send signed transaction
-			txHash, err := et.SendSignedRawTransaction(signedTx.TxHex)
-			if (err == nil) == tt.want.isSendErr {
-				t.Errorf("SendSignedRawTransaction() = %v, want error = %v", err, tt.want.isSignErr)
-				return
-			}
+			txHash, err := txt.ETH.SendSignedRawTransaction(signedTx.TxHex)
+			txt.Equal(tt.want.isSendErr, err != nil)
 			if txHash != "" {
-				t.Log(txHash)
+				t.Logf("txHash: %s", txHash)
+
 				// check transaction
 				time.Sleep(3 * time.Second)
-				res, err := et.GetTransactionByHash(txHash)
-				if err != nil {
-					t.Fatal(err)
-				}
-				t.Log(res)
+				tx, err := txt.ETH.GetTransactionByHash(txHash)
+				txt.NoError(err)
+				t.Logf("tx: %v", tx)
 
 				// check balance
-				balance, err := et.GetBalance(tt.args.receiverAddr, eth.QuantityTagPending)
-				if err != nil {
-					t.Fatal(err)
-				}
-				if balance.Uint64() == 0 {
-					t.Error("balance must be NOT zero")
-				}
+				balance, err := txt.ETH.GetBalance(tt.args.receiverAddr, eth.QuantityTagPending)
+				txt.NoError(err)
+				txt.NotEqual(0, balance.Uint64())
 
 				// check confirmation
-				confirmNum, err := et.GetConfirmation(txHash)
-				if err != nil {
-					t.Fatal(err)
-				}
+				confirmNum, err := txt.ETH.GetConfirmation(txHash)
+				txt.NoError(err)
 				t.Logf("confirmation is %d", confirmNum)
 			}
 		})
 	}
-	// et.Close()
+}
+
+func TestTransactionTestSuite(t *testing.T) {
+	suite.Run(t, new(transactionTest))
 }

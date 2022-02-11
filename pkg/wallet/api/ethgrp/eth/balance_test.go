@@ -6,20 +6,22 @@ package eth_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
-// TestGetTotalBalance is test for GetTotalBalance
-func TestGetTotalBalance(t *testing.T) {
-	// t.SkipNow()
-	et := testutil.GetETH()
+type balanceTest struct {
+	testutil.ETHTestSuite
+}
 
+// TestGetTotalBalance is test for GetTotalBalance
+func (bt *balanceTest) TestGetTotalBalance() {
 	type args struct {
 		addrs []string
 	}
 	type want struct {
 		total uint64
-		isErr bool
 	}
 	tests := []struct {
 		name string
@@ -35,16 +37,19 @@ func TestGetTotalBalance(t *testing.T) {
 				"0x3727eE9FA88B21a0703946f9afEE3930f5980c15",
 				"0xe933a3318C3f5D94c2A3B2BEAEF772F67a45311c",
 			}},
-			want: want{100, false},
+			want: want{100},
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			total, userAmounts := et.GetTotalBalance(tt.args.addrs)
+		bt.T().Run(tt.name, func(t *testing.T) {
+			total, userAmounts := bt.ETH.GetTotalBalance(tt.args.addrs)
 			t.Log(total)
 			t.Log(userAmounts)
 		})
 	}
-	// et.Close()
+}
+
+func TestBalanceTestSuite(t *testing.T) {
+	suite.Run(t, new(balanceTest))
 }

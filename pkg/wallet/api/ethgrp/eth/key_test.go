@@ -6,15 +6,19 @@ package eth_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 )
 
+type keyTest struct {
+	testutil.ETHTestSuite
+}
+
 // TestGetPrivKey is test for GetPrivKey
 // Note: keydir in config must be fullpath when testing
-func TestGetPrivKey(t *testing.T) {
-	et := testutil.GetETH()
-
+func (kt *keyTest) TestGetPrivKey() {
 	type args struct {
 		addr string
 	}
@@ -43,15 +47,16 @@ func TestGetPrivKey(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			prikey, err := et.GetPrivKey(tt.args.addr, eth.Password)
-			if (err == nil) == tt.want.isErr {
-				t.Errorf("readPrivKey() = %v, want error = %v", err, tt.want.isErr)
-				return
-			}
+		kt.T().Run(tt.name, func(t *testing.T) {
+			prikey, err := kt.ETH.GetPrivKey(tt.args.addr, eth.Password)
+			kt.Equal(tt.want.isErr, err != nil)
 			if err == nil && prikey == nil {
 				t.Error("prikey is nil")
 			}
 		})
 	}
+}
+
+func TestKeyTestSuite(t *testing.T) {
+	suite.Run(t, new(keyTest))
 }

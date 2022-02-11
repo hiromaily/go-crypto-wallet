@@ -6,14 +6,17 @@ package eth_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
-// TestBalanceAt is test for BalanceAt
-func TestBalanceAt(t *testing.T) {
-	// t.SkipNow()
-	et := testutil.GetETH()
+type clientTest struct {
+	testutil.ETHTestSuite
+}
 
+// TestBalanceAt is test for BalanceAt
+func (ct *clientTest) TestBalanceAt() {
 	type args struct {
 		addr string
 	}
@@ -74,15 +77,16 @@ func TestBalanceAt(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			balance, err := et.BalanceAt(tt.args.addr)
-			if (err == nil) == tt.want.isErr {
-				t.Errorf("BalanceAt() = %v, want error = %v", err, tt.want.isErr)
-			}
-			if balance != nil {
+		ct.T().Run(tt.name, func(t *testing.T) {
+			balance, err := ct.ETH.BalanceAt(tt.args.addr)
+			ct.Equal(tt.want.isErr, err != nil)
+			if err == nil {
 				t.Log(balance)
 			}
 		})
 	}
-	// et.Close()
+}
+
+func TestClientTestSuite(t *testing.T) {
+	suite.Run(t, new(clientTest))
 }

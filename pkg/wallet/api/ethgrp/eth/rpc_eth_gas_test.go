@@ -6,22 +6,22 @@ package eth_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
-// TestGasPrice is test for GasPrice
-func TestGasPrice(t *testing.T) {
-	// t.SkipNow()
-	et := testutil.GetETH()
-
-	price, err := et.GasPrice()
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log("gasPrice:", price)
+type ethGasTest struct {
+	testutil.ETHTestSuite
 }
 
-// TestEstimateGas is test for EstimateGas
-// TODO: implement
-//func TestEstimateGas(t *testing.T) {
-//}
+// TestGasPrice is test for GasPrice
+func (egt *ethGasTest) TestGasPrice() {
+	price, err := egt.ETH.GasPrice()
+	egt.NoError(err)
+	egt.T().Log("gasPrice:", price)
+}
+
+func TestEthGasTestSuite(t *testing.T) {
+	suite.Run(t, new(ethGasTest))
+}

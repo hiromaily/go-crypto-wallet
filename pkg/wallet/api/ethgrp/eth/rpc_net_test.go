@@ -6,43 +6,38 @@ package eth_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
-// TestNetVersion is test for NetVersion
-func TestNetVersion(t *testing.T) {
-	// t.SkipNow()
-	et := testutil.GetETH()
+type netTest struct {
+	testutil.ETHTestSuite
+}
 
-	netVersion, err := et.NetVersion()
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log("netVersion:", netVersion)
+// TestNetVersion is test for NetVersion
+func (nt *netTest) TestNetVersion() {
+	netVersion, err := nt.ETH.NetVersion()
+	nt.NoError(err)
+	nt.T().Log("netVersion:", netVersion)
 }
 
 // TestNetListening is test for NetListening
-func TestNetListening(t *testing.T) {
-	// t.SkipNow()
-	et := testutil.GetETH()
-
-	isLitening, err := et.NetListening()
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log("isLitening:", isLitening)
+func (nt *netTest) TestNetListening() {
+	isListening, err := nt.ETH.NetListening()
+	nt.NoError(err)
+	nt.T().Log("isListening:", isListening)
 }
 
 // TestNetPeerCount is test for NetPeerCount
-func TestNetPeerCount(t *testing.T) {
-	// t.SkipNow()
-	et := testutil.GetETH()
+func (nt *netTest) TestNetPeerCount() {
+	peerCount, err := nt.ETH.NetPeerCount()
+	nt.NoError(err)
+	if err == nil {
+		nt.T().Log("peerCount:", peerCount.Uint64())
+	}
+}
 
-	peerCount, err := et.NetPeerCount()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if peerCount != nil {
-		t.Log("peerCount:", peerCount.Uint64())
-	}
+func TestNetTestSuite(t *testing.T) {
+	suite.Run(t, new(netTest))
 }
