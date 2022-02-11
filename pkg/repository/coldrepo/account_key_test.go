@@ -1,3 +1,6 @@
+//go:build integration
+// +build integration
+
 package coldrepo_test
 
 import (

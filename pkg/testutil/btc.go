@@ -28,6 +28,7 @@ func GetBTC() btcgrp.Bitcoiner {
 		log.Fatalf("fail to create config: %v", err)
 	}
 	// TODO: if config should be overridden, here
+	conf.CoinTypeCode = coin.BTC
 
 	// logger
 	logger := logger.NewZapLogger(&conf.Logger)

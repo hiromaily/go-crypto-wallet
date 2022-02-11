@@ -29,6 +29,7 @@ func GetXRP() xrpgrp.Rippler {
 		log.Fatalf("fail to create config: %v", err)
 	}
 	// TODO: if config should be overridden, here
+	conf.CoinTypeCode = coin.XRP
 
 	// logger
 	logger := logger.NewZapLogger(&conf.Logger)

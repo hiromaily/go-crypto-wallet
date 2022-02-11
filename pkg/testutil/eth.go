@@ -28,6 +28,7 @@ func GetETH() ethgrp.Ethereumer {
 		log.Fatalf("fail to create config: %v", err)
 	}
 	// TODO: if config should be overridden, here
+	conf.CoinTypeCode = coin.ETH
 
 	// logger
 	logger := logger.NewZapLogger(&conf.Logger)

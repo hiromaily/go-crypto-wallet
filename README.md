@@ -221,6 +221,7 @@ watch send -file xxx.csv
 
 ## TODO
 ### Basics
+- [ ] Fix UnitTest. And Separate dependent test as Integration Test using tag
 - [ ] Add ATOM tokens on [Cosmos Hub](https://hub.cosmos.network/main/hub-overview/overview.html)
 - [ ] Add [Polkadot](https://polkadot.network/technology/)
 - [ ] Various monitoring patterns to detect suspicious operations.
