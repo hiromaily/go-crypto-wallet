@@ -31,9 +31,7 @@ func (bt *balanceTest) TestGetBalanceByAccount() {
 	type args struct {
 		account account.AccountType
 	}
-	type want struct {
-		isErr bool
-	}
+	type want struct{}
 	tests := []struct {
 		name string
 		args args
@@ -42,26 +40,24 @@ func (bt *balanceTest) TestGetBalanceByAccount() {
 		{
 			name: "happy path",
 			args: args{account.AccountTypeClient},
-			want: want{false},
+			want: want{},
 		},
 		{
 			name: "happy path",
 			args: args{account.AccountTypeDeposit},
-			want: want{false},
+			want: want{},
 		},
 		{
 			name: "happy path",
 			args: args{account.AccountTypePayment},
-			want: want{false},
+			want: want{},
 		},
 	}
 
 	for _, tt := range tests {
 		bt.T().Run(tt.name, func(t *testing.T) {
 			got, err := bt.BTC.GetBalanceByAccount(tt.args.account, bt.BTC.ConfirmationBlock())
-			if (err != nil) != tt.want.isErr {
-				t.Errorf("GetBalanceByAccount() = %v, isErr %v", err, tt.want.isErr)
-			}
+			bt.NoError(err)
 			if err == nil {
 				t.Log(got)
 			}

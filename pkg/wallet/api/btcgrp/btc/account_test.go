@@ -22,7 +22,6 @@ func (at *accountTest) TestGetAccount() {
 	}
 	type want struct {
 		account string
-		err     error
 	}
 	tests := []struct {
 		name string
@@ -32,20 +31,20 @@ func (at *accountTest) TestGetAccount() {
 		{
 			name: "happy path",
 			args: args{"2N4TcHSCteXwiF2dj8SQijj3w2HieR4x6r5"},
-			want: want{"deposit", nil},
+			want: want{"deposit"},
 		},
 		{
 			name: "happy path",
 			args: args{"2N6DcSuPo8NoLrCPTSqrwjnuLYoN7xDMSzX"},
-			want: want{"payment", nil},
+			want: want{"payment"},
 		},
 	}
 
 	for _, tt := range tests {
 		at.T().Run(tt.name, func(t *testing.T) {
 			res, err := at.BTC.GetAccount(tt.args.addr)
+			at.NoError(err)
 			at.Equal(tt.want.account, res)
-			at.Equal(tt.want.err, err)
 			if err == nil {
 				t.Log(res)
 			}

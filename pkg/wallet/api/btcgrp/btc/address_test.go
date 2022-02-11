@@ -61,9 +61,7 @@ func (at *addressTest) TestGetAddressesByLabel() {
 	type args struct {
 		labelName string
 	}
-	type want struct {
-		err error
-	}
+	type want struct{}
 	tests := []struct {
 		name string
 		args args
@@ -72,13 +70,13 @@ func (at *addressTest) TestGetAddressesByLabel() {
 		{
 			name: "happy path",
 			args: args{"client"},
-			want: want{nil},
+			want: want{},
 		},
 	}
 	for _, tt := range tests {
 		at.T().Run(tt.name, func(t *testing.T) {
 			got, err := at.BTC.GetAddressesByLabel(tt.args.labelName)
-			at.Equal(tt.want.err, err)
+			at.NoError(err)
 			if err == nil {
 				t.Log(got)
 			}
@@ -119,9 +117,7 @@ func (at *addressTest) TestValidateAddress() {
 	for _, tt := range tests {
 		at.T().Run(tt.name, func(t *testing.T) {
 			got, err := at.BTC.ValidateAddress(tt.args.addr)
-			if (err != nil) != tt.want.isErr {
-				t.Errorf("ValidateAddress() = %v, isErr %v", err, tt.want.isErr)
-			}
+			at.Equal(tt.want.isErr, err != nil)
 			if err == nil {
 				t.Log(got)
 			}
