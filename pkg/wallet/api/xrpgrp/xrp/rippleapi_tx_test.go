@@ -8,16 +8,18 @@ import (
 	"testing"
 
 	"github.com/bookerzzz/grok"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 )
 
-// TestTransaction is test for sequential transaction
-func TestTransaction(t *testing.T) {
-	// t.SkipNow()
-	xr := testutil.GetXRP()
+type apiTxTest struct {
+	testutil.XRPTestSuite
+}
 
+// TestTransaction is test for sequential transaction
+func (att *apiTxTest) TestTransaction() {
 	type args struct {
 		sernderAccount  string
 		senderSecret    string
@@ -25,9 +27,7 @@ func TestTransaction(t *testing.T) {
 		amount          float64
 		instructions    *xrp.Instructions
 	}
-	type want struct {
-		isErr bool
-	}
+	type want struct{}
 	tests := []struct {
 		name string
 		args args
@@ -44,17 +44,15 @@ func TestTransaction(t *testing.T) {
 					MaxLedgerVersionOffset: 2,
 				},
 			},
-			want: want{false},
+			want: want{},
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		att.T().Run(tt.name, func(t *testing.T) {
 			// PrepareTransaction
-			txJSON, _, err := xr.PrepareTransaction(tt.args.sernderAccount, tt.args.receiverAccount, tt.args.amount, tt.args.instructions)
-			if err != nil {
-				t.Fatal(err)
-			}
+			txJSON, _, err := att.XRP.PrepareTransaction(tt.args.sernderAccount, tt.args.receiverAccount, tt.args.amount, tt.args.instructions)
+			att.NoError(err)
 			grok.Value(txJSON)
 			//- creating raw transaction
 			// LastLedgerSequence:    8153687
@@ -64,40 +62,26 @@ func TestTransaction(t *testing.T) {
 			// sentTx.TxJSON.LastLedgerSequence: 8153687
 
 			// SingTransaction
-			txID, txBlob, err := xr.SignTransaction(txJSON, tt.args.senderSecret)
-			if err != nil {
-				t.Fatal(err)
-			}
-			t.Log("txID: ", txID)
-			t.Log("txBlob: ", txBlob)
+			txID, txBlob, err := att.XRP.SignTransaction(txJSON, tt.args.senderSecret)
+			att.NoError(err)
 
 			// SendTransaction
-			sentTx, earlistLedgerVersion, err := xr.SubmitTransaction(txBlob)
-			if err != nil {
-				t.Fatal(err)
-			}
-			t.Log("earlistLedgerVersion: ", earlistLedgerVersion)
-			grok.Value(sentTx)
+			sentTx, earlistLedgerVersion, err := att.XRP.SubmitTransaction(txBlob)
+			att.NoError(err)
 			if strings.Contains(sentTx.ResultCode, "UNFUNDED_PAYMENT") {
 				t.Errorf("fail to call SubmitTransaction. resultCode: %s, resultMessage: %s", sentTx.ResultCode, sentTx.ResultMessage)
 				return
 			}
 
 			// validate transaction
-			ledgerVer, err := xr.WaitValidation(sentTx.TxJSON.LastLedgerSequence)
-			if err != nil {
-				t.Fatal(err)
-			}
+			ledgerVer, err := att.XRP.WaitValidation(sentTx.TxJSON.LastLedgerSequence)
+			att.NoError(err)
 			t.Log("currentLedgerVersion: ", ledgerVer)
 
 			// get transaction info
-			grok.Value(txID)
-			grok.Value(earlistLedgerVersion)
-			txInfo, err := xr.GetTransaction(txID, earlistLedgerVersion)
-			if err != nil {
-				t.Fatal(err)
-			}
-			grok.Value(txInfo)
+			txInfo, err := att.XRP.GetTransaction(txID, earlistLedgerVersion)
+			att.NoError(err)
+			t.Log("GetTransaction: ", txInfo)
 
 			// TODO: sender account info
 			// TODO: receiver account info
@@ -106,17 +90,12 @@ func TestTransaction(t *testing.T) {
 }
 
 // TestGetTransaction is test for GetTransaction
-func TestGetTransaction(t *testing.T) {
-	// t.SkipNow()
-	xr := testutil.GetXRP()
-
+func (att *apiTxTest) TestGetTransaction() {
 	type args struct {
 		txID                 string
 		earlistLedgerVersion uint64
 	}
-	type want struct {
-		isErr bool
-	}
+	type want struct{}
 	tests := []struct {
 		name string
 		args args
@@ -128,7 +107,7 @@ func TestGetTransaction(t *testing.T) {
 				txID:                 "AA672DB687B52DA733FDD211D435BB8632E2E4B471C282ABA912E8D799D16B6B",
 				earlistLedgerVersion: 8007165,
 			},
-			want: want{false},
+			want: want{},
 		},
 		{
 			name: "wrong txID",
@@ -136,7 +115,7 @@ func TestGetTransaction(t *testing.T) {
 				txID:                 "AA672DB687B52DA733FDD211D435BB8632E2E4B471C282ABA912E8D799D16B6Babcde",
 				earlistLedgerVersion: 8007165,
 			},
-			want: want{false},
+			want: want{},
 		},
 		{
 			name: "wrong ledger version",
@@ -144,18 +123,20 @@ func TestGetTransaction(t *testing.T) {
 				txID:                 "AA672DB687B52DA733FDD211D435BB8632E2E4B471C282ABA912E8D799D16B6B",
 				earlistLedgerVersion: 99999999999999,
 			},
-			want: want{false},
+			want: want{},
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			txInfo, err := xr.GetTransaction(tt.args.txID, tt.args.earlistLedgerVersion)
-			if err != nil {
-				t.Error(err)
-			}
-			if txInfo != nil {
+		att.T().Run(tt.name, func(t *testing.T) {
+			txInfo, err := att.XRP.GetTransaction(tt.args.txID, tt.args.earlistLedgerVersion)
+			att.NoError(err)
+			if err == nil {
 				t.Log(txInfo)
 			}
 		})
 	}
+}
+
+func TestAPITxTestSuite(t *testing.T) {
+	suite.Run(t, new(apiTxTest))
 }

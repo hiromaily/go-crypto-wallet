@@ -7,39 +7,31 @@ import (
 	"testing"
 
 	"github.com/bookerzzz/grok"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
-// TestGenerateAddress is test for GenerateAddress
-func TestGenerateAddress(t *testing.T) {
-	// t.SkipNow()
-	xr := testutil.GetXRP()
+type addressTest struct {
+	testutil.XRPTestSuite
+}
 
-	addressInfo, err := xr.GenerateAddress()
-	if err != nil {
-		t.Fatal(err)
-	}
+// TestGenerateAddress is test for GenerateAddress
+func (at *addressTest) TestGenerateAddress() {
+	addressInfo, err := at.XRP.GenerateAddress()
+	at.NoError(err)
 	grok.Value(addressInfo)
 }
 
 // TestGenerateXAddress is test for GenerateXAddress
-func TestGenerateXAddress(t *testing.T) {
-	// t.SkipNow()
-	xr := testutil.GetXRP()
-
-	addressInfo, err := xr.GenerateXAddress()
-	if err != nil {
-		t.Fatal(err)
-	}
+func (at *addressTest) TestGenerateXAddress() {
+	addressInfo, err := at.XRP.GenerateXAddress()
+	at.NoError(err)
 	grok.Value(addressInfo)
 }
 
 // TestIsValidAddress is test for IsValidAddress
-func TestIsValidAddress(t *testing.T) {
-	// t.SkipNow()
-	xr := testutil.GetXRP()
-
+func (at *addressTest) TestIsValidAddress() {
 	type args struct {
 		address string
 	}
@@ -88,13 +80,16 @@ func TestIsValidAddress(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// PrepareTransaction
-			accountInfo, err := xr.IsValidAddress(tt.args.address)
+		at.T().Run(tt.name, func(t *testing.T) {
+			accountInfo, err := at.XRP.IsValidAddress(tt.args.address)
+			at.Equal(tt.want.isErr, err != nil)
 			if err != nil {
-				t.Fatal(err)
+				grok.Value(accountInfo)
 			}
-			grok.Value(accountInfo)
 		})
 	}
+}
+
+func TestAddressTestSuite(t *testing.T) {
+	suite.Run(t, new(addressTest))
 }

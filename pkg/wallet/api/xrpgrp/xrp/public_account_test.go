@@ -7,32 +7,31 @@ import (
 	"testing"
 
 	"github.com/bookerzzz/grok"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
-// TestAccountChannels is test for AccountChannels
-func TestAccountChannels(t *testing.T) {
-	// t.SkipNow()
-	xr := testutil.GetXRP()
+type publicAccountTest struct {
+	testutil.XRPTestSuite
+}
 
-	res, err := xr.AccountChannels("rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH", "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log("accountChannels:", res)
+// TestAccountChannels is test for AccountChannels
+func (pat *publicAccountTest) TestAccountChannels() {
+	res, err := pat.XRP.AccountChannels("rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH", "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn")
+	pat.NoError(err)
+	pat.T().Log("accountChannels:", res)
 	grok.Value(res)
 }
 
 // TestAccountInfo is test for AccountInfo
-func TestAccountInfo(t *testing.T) {
-	// t.SkipNow()
-	xr := testutil.GetXRP()
-
-	res, err := xr.AccountInfo("rss1EZUwTCPZSTyJiDKvhBfCXjTxffcArZ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log("accountInfo:", res)
+func (pat *publicAccountTest) TestAccountInfo() {
+	res, err := pat.XRP.AccountInfo("rss1EZUwTCPZSTyJiDKvhBfCXjTxffcArZ")
+	pat.NoError(err)
+	pat.T().Log("accountInfo:", res)
 	grok.Value(res)
+}
+
+func TestPublicAccountTestSuite(t *testing.T) {
+	suite.Run(t, new(publicAccountTest))
 }

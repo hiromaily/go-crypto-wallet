@@ -5,6 +5,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 )
 
 type BTCTestSuite struct {
@@ -35,4 +36,19 @@ func (ets *ETHTestSuite) SetupTest() {
 
 func (ets *ETHTestSuite) TearDownTest() {
 	ets.ETH.Close()
+}
+
+type XRPTestSuite struct {
+	suite.Suite
+	XRP xrpgrp.Rippler
+}
+
+func (xts *XRPTestSuite) SetupTest() {
+	xrp, err := GetXRP()
+	xts.NoError(err)
+	xts.XRP = xrp
+}
+
+func (xts *XRPTestSuite) TearDownTest() {
+	xts.XRP.Close()
 }

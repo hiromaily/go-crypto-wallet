@@ -7,25 +7,25 @@ import (
 	"testing"
 
 	"github.com/bookerzzz/grok"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 )
 
-// TestCreateRawTransaction is test for CreateRawTransaction
-func TestCreateRawTransaction(t *testing.T) {
-	// t.SkipNow()
-	xr := testutil.GetXRP()
+type txTest struct {
+	testutil.XRPTestSuite
+}
 
+// TestCreateRawTransaction is test for CreateRawTransaction
+func (txt *txTest) TestCreateRawTransaction() {
 	type args struct {
 		sernderAccount  string
 		receiverAccount string
 		amount          float64
 		instructions    *xrp.Instructions
 	}
-	type want struct {
-		isErr bool
-	}
+	type want struct{}
 	tests := []struct {
 		name string
 		args args
@@ -41,7 +41,7 @@ func TestCreateRawTransaction(t *testing.T) {
 					MaxLedgerVersionOffset: xrp.MaxLedgerVersionOffset,
 				},
 			},
-			want: want{false},
+			want: want{},
 		},
 		//{
 		//	name: "happy path 2",
@@ -50,18 +50,20 @@ func TestCreateRawTransaction(t *testing.T) {
 		//		receiverAccount: "raWG2eo1tEXwN4HtGFJCagvukC2nBuiHxC",
 		//		amount:          0,
 		//	},
-		//	want: want{false},
+		//	want: want{},
 		//},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+		txt.T().Run(tt.name, func(t *testing.T) {
 			// PrepareTransaction
-			txJSON, _, err := xr.CreateRawTransaction(tt.args.sernderAccount, tt.args.receiverAccount, tt.args.amount, tt.args.instructions)
-			if err != nil {
-				t.Fatal(err)
-			}
+			txJSON, _, err := txt.XRP.CreateRawTransaction(tt.args.sernderAccount, tt.args.receiverAccount, tt.args.amount, tt.args.instructions)
+			txt.NoError(err)
 			grok.Value(txJSON)
 		})
 	}
+}
+
+func TestTxTestSuite(t *testing.T) {
+	suite.Run(t, new(txTest))
 }

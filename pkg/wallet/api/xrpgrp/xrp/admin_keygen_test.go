@@ -7,21 +7,21 @@ import (
 	"testing"
 
 	"github.com/bookerzzz/grok"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
-// TestValidationCreate is test for ValidationCreate
-func TestValidationCreate(t *testing.T) {
-	// t.SkipNow()
-	xr := testutil.GetXRP()
+type adminKeygenTest struct {
+	testutil.XRPTestSuite
+}
 
+// TestValidationCreate is test for ValidationCreate
+func (akt *adminKeygenTest) TestValidationCreate() {
 	type args struct {
 		secret string
 	}
-	type want struct {
-		isErr bool
-	}
+	type want struct{}
 	tests := []struct {
 		name string
 		args args
@@ -30,24 +30,21 @@ func TestValidationCreate(t *testing.T) {
 		{
 			name: "happy path 1",
 			args: args{"ssCATR7CBvn4GLd1UuU2bqqQffHki"},
-			want: want{false},
+			want: want{},
 		},
 		{
 			name: "happy path 2",
 			args: args{"BAWL MAN JADE MOON DOVE GEM SON NOW HAD ADEN GLOW TIRE"},
-			want: want{false},
+			want: want{},
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			res, err := xr.ValidationCreate(tt.args.secret)
-			if (err == nil) == tt.want.isErr {
-				t.Errorf("ValidationCreate() = %v, want error = %v", err, tt.want.isErr)
-				return
-			}
-			if res != nil {
-				t.Log("response:", res)
+		akt.T().Run(tt.name, func(t *testing.T) {
+			res, err := akt.XRP.ValidationCreate(tt.args.secret)
+			akt.NoError(err)
+			if err == nil {
+				t.Log("ValidationCreate:", res)
 				grok.Value(res)
 			}
 		})
@@ -55,16 +52,11 @@ func TestValidationCreate(t *testing.T) {
 }
 
 // TestWalletPropose is test for WalletPropose
-func TestWalletPropose(t *testing.T) {
-	// t.SkipNow()
-	xr := testutil.GetXRP()
-
+func (akt *adminKeygenTest) TestWalletPropose() {
 	type args struct {
 		passphrase string
 	}
-	type want struct {
-		isErr bool
-	}
+	type want struct{}
 	tests := []struct {
 		name string
 		args args
@@ -73,31 +65,32 @@ func TestWalletPropose(t *testing.T) {
 		{
 			name: "happy path 1",
 			args: args{"password1"},
-			want: want{false},
+			want: want{},
 		},
 		{
 			name: "happy path 2",
 			args: args{"foobar"},
-			want: want{false},
+			want: want{},
 		},
 		{
 			name: "happy path 3",
 			args: args{"0x931D387731bBbC988B312206c74F77D004D6B84b"},
-			want: want{false},
+			want: want{},
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			res, err := xr.WalletPropose(tt.args.passphrase)
-			if (err == nil) == tt.want.isErr {
-				t.Errorf("WalletPropose() = %v, want error = %v", err, tt.want.isErr)
-				return
-			}
-			if res != nil {
-				t.Log("response:", res)
+		akt.T().Run(tt.name, func(t *testing.T) {
+			res, err := akt.XRP.WalletPropose(tt.args.passphrase)
+			akt.NoError(err)
+			if err == nil {
+				t.Log("WalletPropose:", res)
 				grok.Value(res)
 			}
 		})
 	}
+}
+
+func TestAdminKeygenTestSuite(t *testing.T) {
+	suite.Run(t, new(adminKeygenTest))
 }
