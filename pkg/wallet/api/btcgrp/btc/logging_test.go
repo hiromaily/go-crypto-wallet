@@ -6,20 +6,25 @@ package btc_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
+type loggingTest struct {
+	testutil.BTCTestSuite
+}
+
 // TestLogging is test for GetLogging
-func TestLogging(t *testing.T) {
-	// t.SkipNow()
-	bc := testutil.GetBTC()
-
+func (lt *loggingTest) TestLogging() {
 	// Logging
-	if res, err := bc.Logging(); err != nil {
-		t.Errorf("fail to call Logging(): %v", err)
-	} else {
-		t.Log(res)
+	res, err := lt.BTC.Logging()
+	lt.NoError(err)
+	if err == nil {
+		lt.T().Log(res)
 	}
+}
 
-	// bc.Close()()()
+func TestLoggingTestSuite(t *testing.T) {
+	suite.Run(t, new(loggingTest))
 }

@@ -6,16 +6,17 @@ package btc_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
-// TODO: mock of bitcoin interface is required to test
+type addressTest struct {
+	testutil.BTCTestSuite
+}
 
 // TestGetAddressInfo is test for GetAddressInfo
-func TestGetAddressInfo(t *testing.T) {
-	// t.SkipNow()
-	bc := testutil.GetBTC()
-
+func (at *addressTest) TestGetAddressInfo() {
 	type args struct {
 		addr string
 	}
@@ -45,21 +46,18 @@ func TestGetAddressInfo(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			res, err := bc.GetAddressInfo(tt.args.addr)
-			if err != tt.want.err {
-				t.Errorf("GetAddressInfo() = %v, want %v", err, tt.want.err)
+		at.T().Run(tt.name, func(t *testing.T) {
+			res, err := at.BTC.GetAddressInfo(tt.args.addr)
+			at.Equal(tt.want.err, err)
+			if err == nil {
+				t.Log(res)
 			}
-			t.Log(res)
 		})
 	}
-	// bc.Close()()()
 }
 
 // TestGetAddressesByLabel is test for GetAddressesByLabel
-func TestGetAddressesByLabel(t *testing.T) {
-	// t.SkipNow()
-	bc := testutil.GetBTC()
+func (at *addressTest) TestGetAddressesByLabel() {
 	type args struct {
 		labelName string
 	}
@@ -78,21 +76,18 @@ func TestGetAddressesByLabel(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got, err := bc.GetAddressesByLabel(tt.args.labelName); err != tt.want.err {
-				t.Errorf("GetAddressesByLabel() = %v, want %v", got, tt.want)
-			} else {
+		at.T().Run(tt.name, func(t *testing.T) {
+			got, err := at.BTC.GetAddressesByLabel(tt.args.labelName)
+			at.Equal(tt.want.err, err)
+			if err == nil {
 				t.Log(got)
 			}
 		})
 	}
-	// bc.Close()()()
 }
 
 // TestValidateAddress is test for ValidateAddress
-func TestValidateAddress(t *testing.T) {
-	bc := testutil.GetBTC()
-
+func (at *addressTest) TestValidateAddress() {
 	type args struct {
 		addr string
 	}
@@ -122,14 +117,18 @@ func TestValidateAddress(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got, err := bc.ValidateAddress(tt.args.addr); (err != nil) != tt.want.isErr {
+		at.T().Run(tt.name, func(t *testing.T) {
+			got, err := at.BTC.ValidateAddress(tt.args.addr)
+			if (err != nil) != tt.want.isErr {
 				t.Errorf("ValidateAddress() = %v, isErr %v", err, tt.want.isErr)
-			} else {
+			}
+			if err == nil {
 				t.Log(got)
 			}
 		})
 	}
+}
 
-	// bc.Close()
+func TestAddressTestSuite(t *testing.T) {
+	suite.Run(t, new(addressTest))
 }

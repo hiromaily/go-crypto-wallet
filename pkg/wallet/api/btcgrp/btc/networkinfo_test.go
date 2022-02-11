@@ -6,35 +6,35 @@ package btc_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
+type networkTest struct {
+	testutil.BTCTestSuite
+}
+
 // TestGetNetworkInfo is test for GetNetworkInfo
-func TestGetNetworkInfo(t *testing.T) {
-	// t.SkipNow()
-	bc := testutil.GetBTC()
-
+func (nt *networkTest) TestGetNetworkInfo() {
 	// GetNetworkInfo
-	if res, err := bc.GetNetworkInfo(); err != nil {
-		t.Errorf("fail to call GetNetworkInfo(): %v", err)
-	} else {
-		t.Log(res)
+	res, err := nt.BTC.GetNetworkInfo()
+	nt.NoError(err)
+	if err == nil {
+		nt.T().Log(res)
 	}
-
-	// bc.Close()
 }
 
 // TestGetBlockchainInfo is test for GetBlockchainInfo
-func TestBlockchainInfo(t *testing.T) {
-	// t.SkipNow()
-	bc := testutil.GetBTC()
-
+func (nt *networkTest) TestBlockchainInfo() {
 	// GetBlockchainInfo
-	if res, err := bc.GetBlockchainInfo(); err != nil {
-		t.Errorf("fail to call GetBlockchainInfo(): %v", err)
-	} else {
-		t.Log(res)
+	res, err := nt.BTC.GetBlockchainInfo()
+	nt.NoError(err)
+	if err == nil {
+		nt.T().Log(res)
 	}
+}
 
-	// bc.Close()
+func TestNetworkTestSuite(t *testing.T) {
+	suite.Run(t, new(networkTest))
 }

@@ -6,20 +6,25 @@ package btc_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
+type feeTest struct {
+	testutil.BTCTestSuite
+}
+
 // TestEstimateSmartFee is test for EstimateSmartFee
-func TestEstimateSmartFee(t *testing.T) {
-	// t.SkipNow()
-	bc := testutil.GetBTC()
-
+func (ft *feeTest) TestEstimateSmartFee() {
 	// EstimateSmartFee
-	if res, err := bc.EstimateSmartFee(); err != nil {
-		t.Errorf("fail to call EstimateSmartFee(): %v", err)
-	} else {
-		t.Logf("%f", res)
+	res, err := ft.BTC.EstimateSmartFee()
+	ft.NoError(err)
+	if err == nil {
+		ft.T().Logf("%f", res)
 	}
+}
 
-	// bc.Close()
+func TestFeeTestSuite(t *testing.T) {
+	suite.Run(t, new(feeTest))
 }

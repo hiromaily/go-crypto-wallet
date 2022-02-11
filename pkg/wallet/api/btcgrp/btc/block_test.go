@@ -6,20 +6,25 @@ package btc_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
-// TestGetBlockCount is test for GetBlockCount
-func TestGetBlockCount(t *testing.T) {
-	// t.SkipNow()
-	bc := testutil.GetBTC()
+type blockTest struct {
+	testutil.BTCTestSuite
+}
 
+// TestGetBlockCount is test for GetBlockCount
+func (bt *blockTest) TestGetBlockCount(t *testing.T) {
 	// GetBalance
-	if res, err := bc.GetBlockCount(); err != nil {
-		t.Errorf("fail to call GetBlockCount(): %v", err)
-	} else {
+	res, err := bt.BTC.GetBlockCount()
+	bt.NoError(err)
+	if err == nil {
 		t.Log(res)
 	}
+}
 
-	// bc.Close()
+func TestBlockTestSuite(t *testing.T) {
+	suite.Run(t, new(blockTest))
 }

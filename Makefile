@@ -114,8 +114,9 @@ imports:
 lint:
 	golangci-lint run
 
-.PHONY: lintfix
-lintfix:
+# Bug: format doesn't work on files which has tags
+.PHONY: lint-fix
+lint-fix:
 	golangci-lint run --fix
 
 .PHONY: staticcheck
@@ -171,11 +172,15 @@ run:
 gotest:
 	go test -v ./...
 
+.PHONY: gotest-addr
 gotest-addr:
 	go test -tags=integration -v -run pkg/wallets/api/btc/...
 	go test -tags=integration -v -run GetAddressInfo pkg/wallets/api/btc/...
 	go test -v pkg/wallets/api/btc/... -run GetAddressInfo
-#// +build integration
+
+.PHONY: gotest-integration
+gotest-integration:
+	go test -v -tags=integration ./...
 
 
 ###############################################################################

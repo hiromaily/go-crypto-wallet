@@ -6,30 +6,28 @@ package btc_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
+type balanceTest struct {
+	testutil.BTCTestSuite
+}
+
 // TestListAccounts is test for ListAccounts
-func TestGetBalance(t *testing.T) {
-	// t.SkipNow()
-	bc := testutil.GetBTC()
-
+func (bt *balanceTest) TestGetBalance() {
 	// GetBalance
-	if res, err := bc.GetBalance(); err != nil {
-		t.Errorf("fail to call GetBalance(): %v", err)
-	} else {
-		t.Log(res)
+	res, err := bt.BTC.GetBalance()
+	bt.NoError(err)
+	if err == nil {
+		bt.T().Log(res)
 	}
-
-	// bc.Close()
 }
 
 // TestGetBalanceByAccount is test for GetBalanceByAccount
-func TestGetBalanceByAccount(t *testing.T) {
-	// t.SkipNow()
-	bc := testutil.GetBTC()
-
+func (bt *balanceTest) TestGetBalanceByAccount() {
 	type args struct {
 		account account.AccountType
 	}
@@ -59,14 +57,18 @@ func TestGetBalanceByAccount(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got, err := bc.GetBalanceByAccount(tt.args.account, bc.ConfirmationBlock()); (err != nil) != tt.want.isErr {
+		bt.T().Run(tt.name, func(t *testing.T) {
+			got, err := bt.BTC.GetBalanceByAccount(tt.args.account, bt.BTC.ConfirmationBlock())
+			if (err != nil) != tt.want.isErr {
 				t.Errorf("GetBalanceByAccount() = %v, isErr %v", err, tt.want.isErr)
-			} else {
+			}
+			if err == nil {
 				t.Log(got)
 			}
 		})
 	}
+}
 
-	// bc.Close()
+func TestBalanceTestSuite(t *testing.T) {
+	suite.Run(t, new(balanceTest))
 }

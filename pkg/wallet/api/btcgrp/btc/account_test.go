@@ -6,14 +6,17 @@ package btc_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
-// TestGetAccount is test for GetAccount
-func TestGetAccount(t *testing.T) {
-	// t.SkipNow()
-	bc := testutil.GetBTC()
+type accountTest struct {
+	testutil.BTCTestSuite
+}
 
+// TestGetAccount is test for GetAccount
+func (at *accountTest) TestGetAccount() {
 	type args struct {
 		addr string
 	}
@@ -39,17 +42,17 @@ func TestGetAccount(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			res, err := bc.GetAccount(tt.args.addr)
-			if res != tt.want.account {
-				t.Errorf("GetAddressInfo() = %v, want %v", res, tt.want.account)
+		at.T().Run(tt.name, func(t *testing.T) {
+			res, err := at.BTC.GetAccount(tt.args.addr)
+			at.Equal(tt.want.account, res)
+			at.Equal(tt.want.err, err)
+			if err == nil {
+				t.Log(res)
 			}
-			if err != tt.want.err {
-				t.Errorf("GetAddressInfo() = %v, want %v", err, tt.want.err)
-			}
-
-			t.Log(res)
 		})
 	}
-	// bc.Close()
+}
+
+func TestAccountTestSuite(t *testing.T) {
+	suite.Run(t, new(accountTest))
 }
