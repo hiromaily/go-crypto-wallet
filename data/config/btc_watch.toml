@@ -12,7 +12,7 @@ disable_tls = true
 network_type = "signet" # mainnet, testnet3, regtest, signet
 
 [bitcoin.block]
-confirmation_num = 6 #block number for required confirmation
+confirmation_num = 3 #block number for required confirmation
 
 [bitcoin.fee]
 adjustment_min = 0.5 # adjustable minimum fee magnification
