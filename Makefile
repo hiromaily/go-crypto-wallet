@@ -225,9 +225,9 @@ rm-db-volumes:
 	#docker volume rm -f $(docker volume ls --format "{{.Name}}")
 	#docker compose down -v
 	#docker compose down
-	docker volume rm -f go-crypto-wallet_keygen-db
-	docker volume rm -f go-crypto-wallet_sign-db
-	docker volume rm -f go-crypto-wallet_watch-db
+	docker volume rm -f watch-db
+	docker volume rm -f keygen-db
+	docker volume rm -f sign-db
 
 ###############################################################################
 # Bitcoin core on local
@@ -257,11 +257,11 @@ cd-btc-dir:
 ###############################################################################
 .PHONY: generate-btc-key-local
 generate-btc-key-local:
-	./scripts/operation/generate-btc-key.sh btc
+	./scripts/operation/generate-btc-key.sh btc false 5
 
 .PHONY: generate-bch-key-local
 generate-bch-key-local:
-	./scripts/operation/generate-btc-key.sh bch
+	./scripts/operation/generate-btc-key.sh bch false 5
 
 .PHONY: generate-eth-key-local
 generate-eth-key-local:
@@ -289,9 +289,20 @@ include ./Makefile_sign_op.mk
 ###############################################################################
 # wallet
 ###############################################################################
-# run only once, even if wallet.dat is removed
 .PHONY: create-wallets
 create-wallets:
+	bitcoin-cli-watch createwallet watch
+	bitcoin-cli-keygen createwallet keygen
+	bitcoin-cli-sign createwallet sign1
+	bitcoin-cli-sign createwallet sign2
+	bitcoin-cli-sign createwallet sign3
+	bitcoin-cli-sign createwallet sign4
+	bitcoin-cli-sign createwallet sign5
+	bitcoin-cli-sign listwallets
+
+# run only once, even if wallet.dat is removed
+.PHONY: create-wallets-one-bitcoind
+create-wallets-one-bitcoind:
 	bitcoin-cli createwallet watch
 	bitcoin-cli createwallet keygen
 	bitcoin-cli createwallet sign1

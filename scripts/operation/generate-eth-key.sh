@@ -5,7 +5,7 @@ set -eu
 COIN="${1:?eth}"
 
 # 1: ganache, 2:go-ethereum, 3: something else
-CLIENT=1
+CLIENT=${2:?1}
 
 ###############################################################################
 # keygen wallet

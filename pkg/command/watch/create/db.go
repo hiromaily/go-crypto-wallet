@@ -52,8 +52,8 @@ func (c *DBCommand) Run(args []string) int {
 		// create payment_request table
 		if err := c.wallet.CreatePaymentRequest(); err != nil {
 			c.ui.Error(fmt.Sprintf("fail to call CreatePaymentRequest() %+v", err))
+			return 1
 		}
-		return 1
 	}
 
 	return 0

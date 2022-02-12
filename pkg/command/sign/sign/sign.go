@@ -50,6 +50,7 @@ func (c *SignCommand) Run(args []string) int {
 	hexTx, isSigned, generatedFileName, err := c.Wallet.SignTx(filePath)
 	if err != nil {
 		c.UI.Error(fmt.Sprintf("fail to call SignTx() %+v", err))
+		return 1
 	}
 
 	// TODO: output should be json if json option is true

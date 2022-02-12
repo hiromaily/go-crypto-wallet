@@ -30,8 +30,6 @@ go build -ldflags "-X main.authName=auth5" -v -o ${GOPATH}/bin/sign5 ./cmd/sign/
    - execute `direnv allow` on terminal
 5run Database by docker compose
 ```
-make up-docker-db
- or
 docker compose up watch-db keygen-db sign-db
 ```
 
@@ -42,26 +40,47 @@ At least, one bitcoin core server and 3 different databases are required.
   - I recommend signet network.
 2. run bitcoin node by docker-compose
 ```
-make up-docker-btc
- or
 docker compose up btc-watch btc-keygen btc-sign
 ```
 3. setup `bitcoin-cli` using docker
     - after running `btc-watch` container, set alias on shell
    ```zsh
-   alias bitcoin-cli='docker exec -it btc-watch bitcoin-cli'
+   alias bitcoin-cli-watch='docker exec -it btc-watch bitcoin-cli'
+   alias bitcoin-cli-keygen='docker exec -it btc-keygen bitcoin-cli'
+   alias bitcoin-cli-sign='docker exec -it btc-sign bitcoin-cli'
    ```
-4. operation
+4. create wallets on bitcoind respectively 
+   ```
+   ./scripts/operation/create-bitcoind-wallet.sh
+     or
+   bitcoin-cli-watch createwallet watch
+   bitcoin-cli-keygen createwallet keygen
+   bitcoin-cli-sign createwallet sign1
+   bitcoin-cli-sign createwallet sign2
+   bitcoin-cli-sign createwallet sign3
+   bitcoin-cli-sign createwallet sign4
+   bitcoin-cli-sign createwallet sign5
+   ```
+5. load wallet
+   ```
+   ./scripts/operation/load-bitcoind-wallet.sh
+     or
+   bitcoin-cli-watch loadwallet watch
+   bitcoin-cli-keygen loadwallet keygen
+   bitcoin-cli-sign loadwallet sign1
+   bitcoin-cli-sign loadwallet sign2
+   bitcoin-cli-sign loadwallet sign3
+   bitcoin-cli-sign loadwallet sign4
+   bitcoin-cli-sign loadwallet sign5
+   ```
+6. operation
   - see [Operation Example](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/btc/OperationExample.md)
 
 ## Bitcoind Setup without container 
 1. install `bitcoind` on macOS directly if needed
-    - see [bitcoin core installation](https://github.com/bitcoin/bitcoin/blob/master/doc/build-osx.md)
-    - run bitcoind
-    ```
-    $ bitcoind
-    ```
-    - create wallets separately (if only one node used)
+  - see [bitcoin core installation](https://github.com/bitcoin/bitcoin/blob/master/doc/build-osx.md)
+2. run bitcoind `$ bitcoind`
+3. create wallets separately (if only one node used)
     ```
     $ bitcoin-cli createwallet watch
     $ bitcoin-cli createwallet keygen

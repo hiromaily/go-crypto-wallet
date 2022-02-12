@@ -1,6 +1,6 @@
 types = ["client", "deposit", "payment", "stored"]
 
-deposit_receiver = "payment"
+deposit_receiver = "deposit"
 payment_sender = "payment"
 
 [[multisig]]

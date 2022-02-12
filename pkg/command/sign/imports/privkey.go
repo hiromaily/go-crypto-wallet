@@ -41,6 +41,7 @@ func (c *PrivKeyCommand) Run(args []string) int {
 	err := c.wallet.ImportPrivKey()
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call ImportPrivKey() %+v", err))
+		return 1
 	}
 	c.ui.Output("Done!")
 

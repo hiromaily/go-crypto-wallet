@@ -74,6 +74,7 @@ func (c *TransferCommand) Run(args []string) int {
 	//}
 	//if amount == 0{
 	//	c.ui.Error("amount option [-amount] is invalid")
+	//	return 1
 	//}
 
 	hex, fileName, err := c.wallet.CreateTransferTx(

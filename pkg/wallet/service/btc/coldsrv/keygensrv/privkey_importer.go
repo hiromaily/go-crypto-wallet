@@ -71,7 +71,8 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 				"fail to call btc.ImportPrivKeyWithoutReScan()",
 				zap.String("wif", record.WalletImportFormat),
 				zap.Error(err))
-			continue
+			// continue
+			return err
 		}
 
 		// update DB
@@ -83,6 +84,7 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 				zap.String("account_type", accountType.String()),
 				zap.String("record.WalletImportFormat", record.WalletImportFormat),
 				zap.Error(err))
+			return err
 		}
 
 		// check address was stored in bitcoin core by importing private key
