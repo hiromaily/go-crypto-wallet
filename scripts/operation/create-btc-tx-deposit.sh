@@ -5,6 +5,8 @@
 
 set -eu
 
+CLI_WATCH="docker exec -it btc-watch bitcoin-cli"
+
 # create unsigned tx
 echo 'create deposit tx'
 tx_file=$(watch create deposit)
@@ -25,4 +27,4 @@ tx_id=`watch send -file "${tx_file_signed##*\[fileName\]: }"`
 echo 'txID:'${tx_id##*txID: }
 
 # check confirmation
-bitcoin-cli -rpcuser=xyz -rpcpassword=xyz -rpcwallet=watch gettransaction ${tx_id##*txID: } | jq .confirmations
+$CLI_WATCH -rpcuser=xyz -rpcpassword=xyz -rpcwallet=watch gettransaction ${tx_id##*txID: } | jq .confirmations
