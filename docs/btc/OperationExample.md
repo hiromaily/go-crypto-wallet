@@ -1,4 +1,4 @@
-# Operation Example
+# Operation Example Using Signet
 ## Scenario 1
 - 3 nodes are running `btc-watch`,`btc-keygen`,`btc-sign` respectively.
 - To use multisig functionality, multiple auth accounts are required.
@@ -37,7 +37,16 @@ $ ./scripts/operation/create-bitcoind-wallet.sh
 
 1. Check `client` account address from `address` table on `watch-db`
 2. Copy client's address and send coin into them by [Faucet](https://signet.bc-2.jp/)
-3. Run script
+3. Run script which includes
+  - create unsigned tx
+  - sing on unsigned tx
+  - send signed tx
 ```
-./scripts/operation/create-btc-tx-deposit.sh
+./scripts/operation/create-btc-tx-deposit.sh false
 ```
+4. txID must be displayed on console. Check it by [explorer](https://explorer.bc-2.jp/)
+
+### 4. Try Transfer Action
+
+
+### 5. Try Payment Action
