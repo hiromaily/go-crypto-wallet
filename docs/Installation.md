@@ -11,24 +11,25 @@ This installation expects MacOS environment.
 ## Common Setup
 1. install Golang, Docker
 2. build `watch`, `keygen`, `auth` wallets
+- only each sign wallet includes corresponding account name as `authName` into binary
 ```
 make build
  or
 go build -v -o ${GOPATH}/bin/watch ./cmd/watch/
 go build -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
-go build -ldflags "-X main.authName=auth1" -v -o ${GOPATH}/bin/sign ./cmd/sign/
+go build -ldflags "-X main.authName=auth1" -v -o ${GOPATH}/bin/sign1 ./cmd/sign/
 go build -ldflags "-X main.authName=auth2" -v -o ${GOPATH}/bin/sign2 ./cmd/sign/
 go build -ldflags "-X main.authName=auth3" -v -o ${GOPATH}/bin/sign3 ./cmd/sign/
 go build -ldflags "-X main.authName=auth4" -v -o ${GOPATH}/bin/sign4 ./cmd/sign/
 go build -ldflags "-X main.authName=auth5" -v -o ${GOPATH}/bin/sign5 ./cmd/sign/
 ```
-3. configure config files in [./data/config/*.toml](https://github.com/hiromaily/go-crypto-wallet/tree/master/data/config) (better after node setup)
+3. configure config files in [./data/config/*.toml](https://github.com/hiromaily/go-crypto-wallet/tree/master/data/config)
 4. set environment variables
    - install [direnv](https://direnv.net/)
    - see `.envrc`
    - modify `.envrc` if needed
    - execute `direnv allow` on terminal
-5run Database by docker compose
+5. run Database containers
 ```
 docker compose up watch-db keygen-db sign-db
 ```
@@ -38,7 +39,7 @@ At least, one bitcoin core server and 3 different databases are required.
 
 1. copy `bitcoin.conf` from ./data/config/bitcoind/ to ./docker/nodes/btc/data1, data2, data3 directory respectively.
   - I recommend signet network.
-2. run bitcoin node by docker-compose
+2. run bitcoind node containers
 ```
 docker compose up btc-watch btc-keygen btc-sign
 ```
@@ -61,7 +62,7 @@ docker compose up btc-watch btc-keygen btc-sign
    bitcoin-cli-sign createwallet sign4
    bitcoin-cli-sign createwallet sign5
    ```
-5. load wallet
+5. load wallet (required if btc containers restarted)
    ```
    ./scripts/operation/load-bitcoind-wallet.sh
      or
