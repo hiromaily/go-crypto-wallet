@@ -146,6 +146,10 @@ func (r *BTCTxRepository) InsertUnsignedTx(actionType action.ActionType, txItem 
 	txItem.Coin = r.coinTypeCode.String()
 
 	ctx := context.Background()
+	// FIXME: cannot convert type: types.Decimal
+	//  - https://github.com/volatiletech/sqlboiler/issues/803
+	// Workaround is to set the below on go.mod
+	// replace github.com/ericlagergren/decimal => github.com/ericlagergren/decimal v0.0.0-20181231230500-73749d4874d5
 	if err := txItem.Insert(ctx, r.dbConn, boil.Infer()); err != nil {
 		return 0, errors.Wrap(err, "failed to call txItem.Insert()")
 	}
