@@ -59,19 +59,31 @@ goget:
 ###############################################################################
 # Code Generator
 ###############################################################################
-# FIXME: file is not generated with --templates option if files are existing
-# As workaround, modify files in ./templates/..
-.PHONY: generate-db-definition
-generate-db-definition:
-	sqlboiler --wipe \
-	--templates ${GOPATH}/src/github.com/volatiletech/sqlboiler/templates,\
-	${GOPATH}/src/github.com/volatiletech/sqlboiler/templates_test,\
-	${GOPATH}/src/github.com/hiromaily/go-crypto-wallet/templates \
-	mysql
-
+# sqlboiler
+#------------------------------------------------------------------------------
+# To generate all schema, modify `docker/mysql/watch/init.d/watch.sql` according to comments
+# Then recreate database
+# ```
+# $ docker compose rm -f -s watch-db
+# $ docker volume rm -f go-crypto-wallet_watch-db
+# $ docker compose up watch-db
+# ```
+# Make sure `watch-db` includes tables of keygen-db/sign-db
+# Then, run `make sqlboiler`
+# Make sure `make build` works
+# Revert `docker/mysql/watch/init.d/watch.sql`
+#------------------------------------------------------------------------------
 .PHONY: sqlboiler
 sqlboiler:
 	sqlboiler --wipe mysql
+
+.PHONY: sqlboiler-with-template
+sqlboiler-with-template:
+	sqlboiler --wipe mysql \
+	--templates \
+	${GOPATH}/pkg/mod/github.com/volatiletech/sqlboiler/v4@v4.8.6/templates/main, \
+	${GOPATH}/pkg/mod/github.com/volatiletech/sqlboiler/v4@v4.8.6/templates/test, \
+	templates
 
 .PHONY: generate-abi
 generate-abi:

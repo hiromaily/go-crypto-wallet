@@ -15,7 +15,7 @@ See [Installation](https://github.com/hiromaily/go-crypto-wallet/blob/master/doc
 $ ./scripts/operation/generate-btc-key.sh btc false 5
 ```
 
-### 2. Reset Data if needed
+### 2. Reset Data if needed, when error occurred under key generating process
 - Remove data from Database, remove wallet.dat which includes account's private key
 ```
 $ ./scripts/operation/reset-data.sh
@@ -30,4 +30,14 @@ $ docker compose up btc-watch btc-keygen btc-sign
 
 # create wallets on bitcoind
 $ ./scripts/operation/create-bitcoind-wallet.sh
+```
+
+### 3. Try Deposit Action
+- There are 4 accounts and when `client` receives coin into their address, these coins are transferred into `deposit` account address.
+
+1. Check `client` account address from `address` table on `watch-db`
+2. Copy client's address and send coin into them by [Faucet](https://signet.bc-2.jp/)
+3. Run script
+```
+./scripts/operation/create-btc-tx-deposit.sh
 ```

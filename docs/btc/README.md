@@ -12,9 +12,9 @@
 
 ### Testing Applications
 - [Testing Applications](https://developer.bitcoin.org/examples/testing.html)
+- Signet
 - Testnet
 - Regtest Mode
-- Signet
 
 ## Build bitcoind on MacOS
 - [macOS Build Instructions and Notes](https://github.com/bitcoin/bitcoin/blob/master/doc/build-osx.md)
@@ -28,7 +28,12 @@ bitcoin-cli --help    # Outputs a list of command-line options.
 bitcoin-cli help      # Outputs a list of RPC commands when the daemon is running.
 ```
 
-## Development on testnet  
+## Development on Signet
+#### BTC
+- [Signet Faucet](https://signet.bc-2.jp/)
+- [Signet Explorer](https://explorer.bc-2.jp/)
+
+## Development on Testnet  
 #### BTC
 - [Bitcoin testnet3 faucet](https://coinfaucet.eu/en/btc-testnet/)
 - [BlockCypher](https://live.blockcypher.com/btc-testnet/)
@@ -41,7 +46,7 @@ bitcoin-cli help      # Outputs a list of RPC commands when the daemon is runnin
 - [Everything You Should Know About Bitcoin Address Formats](https://news.bitcoin.com/everything-you-should-know-about-bitcoin-address-formats/)
 - [What are the 3 Different Types of Bitcoin Addresses?](https://coinfunda.com/different-types-of-btc-addresses/)
 
-## Bitcoin Core 0.21.0 RPC
+## Bitcoin Core 0.21.0 RPC (0.22 is not found yet)
 [RPC 0.21.0](https://bitcoincore.org/en/doc/0.21.0/)
 
 ## Bitcoin ABC 0.24.0 RPC
