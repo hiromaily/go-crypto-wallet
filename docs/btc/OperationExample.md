@@ -47,6 +47,16 @@ $ ./scripts/operation/create-bitcoind-wallet.sh
 4. txID must be displayed on console. Check it by [explorer](https://explorer.bc-2.jp/)
 
 ### 4. Try Transfer Action
+- After running `Deposit` Action, `depoist` account would own coin.
 
+1. Run script which includes
+  - create unsigned tx
+  - sing on unsigned tx first
+  - sing on unsigned tx second
+  - send signed tx
+```
+./scripts/operation/create-btc-tx-transfer.sh false 0.0001
+```
+2. txID must be displayed on console. Check it by [explorer](https://explorer.bc-2.jp/)
 
 ### 5. Try Payment Action

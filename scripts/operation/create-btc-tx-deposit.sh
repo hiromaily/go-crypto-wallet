@@ -10,7 +10,6 @@ ENCRYPTED="${1:?false}"
 CLI_WATCH="docker exec -it btc-watch bitcoin-cli"
 
 # create unsigned tx
-echo 'create deposit tx'
 echo "------------------------------------------------"
 echo "create unsigned tx"
 echo "------------------------------------------------"
@@ -22,9 +21,8 @@ fi
 
 # sign on keygen wallet
 echo "------------------------------------------------"
-echo "sign on unsigned tx by keygen wallet"
+echo "sign on unsigned tx by keygen wallet "${tx_file##*\[fileName\]: }
 echo "------------------------------------------------"
-echo 'sign on '${tx_file##*\[fileName\]: }
 if [ "$ENCRYPTED" = "true" ]; then
   keygen api walletpassphrase -passphrase test
 fi
@@ -35,9 +33,8 @@ fi
 
 # send signed tx
 echo "------------------------------------------------"
-echo "send signed tx"
+echo "send signed tx "${tx_file_signed##*\[fileName\]: }
 echo "------------------------------------------------"
-echo 'send tx '${tx_file_signed##*\[fileName\]: }
 tx_id=`watch send -file "${tx_file_signed##*\[fileName\]: }"`
 echo 'txID:'${tx_id##*txID: }
 
