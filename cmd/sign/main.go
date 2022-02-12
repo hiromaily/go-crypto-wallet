@@ -30,7 +30,9 @@ var (
 	walletType = wallet.WalletTypeSign
 	appName    = walletType.String()
 	appVersion = "5.0.0"
-	authName   = "" // this value is supposed to be embedded when building
+	// used as account name like client, deposit, payment
+	// this value is supposed to be embedded when building
+	authName = ""
 )
 
 func main() {

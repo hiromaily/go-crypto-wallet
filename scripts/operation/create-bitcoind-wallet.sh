@@ -1,11 +1,15 @@
 #!/bin/sh
 
-set -eu
+set -u
 
-bitcoin-cli-watch createwallet watch
-bitcoin-cli-keygen createwallet keygen
-bitcoin-cli-sign createwallet sign1
-bitcoin-cli-sign createwallet sign2
-bitcoin-cli-sign createwallet sign3
-bitcoin-cli-sign createwallet sign4
-bitcoin-cli-sign createwallet sign5
+CLI_WATCH="docker exec -it btc-watch bitcoin-cli"
+CLI_KEYGEN="docker exec -it btc-keygen bitcoin-cli"
+CLI_SIGN="docker exec -it btc-sign bitcoin-cli"
+
+$CLI_WATCH createwallet watch
+$CLI_KEYGEN createwallet keygen
+$CLI_SIGN createwallet sign1
+$CLI_SIGN createwallet sign2
+$CLI_SIGN createwallet sign3
+$CLI_SIGN createwallet sign4
+$CLI_SIGN createwallet sign5

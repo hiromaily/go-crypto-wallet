@@ -12,6 +12,8 @@
 # $ make create-wallets
 
 set -eu
+# debug
+#set -eux
 
 
 COIN="${1:?btc}"
@@ -44,7 +46,7 @@ if [ "$ENCRYPTED" = "true" ]; then
   keygen api walletpassphrase -passphrase test
 fi
 for account in client deposit payment stored; do
-  # FIXME: error occurred
+  # FIXME: error occurred => done
   # fail to call ImportPrivKeyRescan(): -18: No wallet is loaded.
   # Load a wallet using loadwallet or create a new one with createwallet.
   # (Note: A default wallet is no longer automatically created)
@@ -67,8 +69,9 @@ sign create seed
 echo "------------------------------------------------"
 echo "create hdkey for authorization"
 echo "------------------------------------------------"
-for idx in {1..$SIGN_WALLET_NUM}; do
-  sign -coin ${COIN} -wallet sign${idx} create hdkey
+for i in $(seq 1 $SIGN_WALLET_NUM); do
+  echo $i
+  sign$i -coin ${COIN} -wallet sign$i create hdkey
 done
 
 # import generated private key into sign wallet
@@ -76,15 +79,13 @@ echo "------------------------------------------------"
 echo "import generated private key into sign wallet"
 echo "------------------------------------------------"
 # if wallet is encrypted, walletpassphrase is required before
-for idx in {1..$SIGN_WALLET_NUM}; do
+for i in $(seq 1 $SIGN_WALLET_NUM); do
   if [ "$ENCRYPTED" = "true" ]; then
-    sign -coin ${COIN} -wallet sign${idx} api walletpassphrase -passphrase test
+    sign$i -coin ${COIN} -wallet sign$i api walletpassphrase -passphrase test
   fi
-  # FIXME: error occurred
-  # fail to call ImportPrivKeyRescan(): -18: Requested wallet does not exist or is not loaded
-  sign -coin ${COIN} -wallet sign${idx} import privkey
+  sign$i -coin ${COIN} -wallet sign$i import privkey
   if [ "$ENCRYPTED" = "true" ]; then
-    sign -coin ${COIN} -wallet sign${idx} api walletlock
+    sign$i -coin ${COIN} -wallet sign$i api walletlock
   fi
 done
 
@@ -93,7 +94,7 @@ echo "------------------------------------------------"
 echo "export full-pubkey as csv file"
 echo "------------------------------------------------"
 # sign -wallet sign1 export fullpubkey
-file_fullpubkey_auth1=$(sign -coin "${COIN}" -wallet sign1 export fullpubkey)
+file_fullpubkey_auth1=$(sign1 -coin "${COIN}" -wallet sign1 export fullpubkey)
 file_fullpubkey_auth2=$(sign2 -coin "${COIN}" -wallet sign2 export fullpubkey)
 file_fullpubkey_auth3=$(sign3 -coin "${COIN}" -wallet sign3 export fullpubkey)
 file_fullpubkey_auth4=$(sign4 -coin "${COIN}" -wallet sign4 export fullpubkey)

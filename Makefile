@@ -135,12 +135,13 @@ build-linux:
 
 ###############################################################################
 # Build on local
+# - authName on sign works as account name
 ###############################################################################
 .PHONY: build
 build:
 	go build -v -o ${GOPATH}/bin/watch ./cmd/watch/
 	go build -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
-	go build -ldflags "-X main.authName=auth1" -v -o ${GOPATH}/bin/sign ./cmd/sign/
+	go build -ldflags "-X main.authName=auth1" -v -o ${GOPATH}/bin/sign1 ./cmd/sign/
 	go build -ldflags "-X main.authName=auth2" -v -o ${GOPATH}/bin/sign2 ./cmd/sign/
 	go build -ldflags "-X main.authName=auth3" -v -o ${GOPATH}/bin/sign3 ./cmd/sign/
 	go build -ldflags "-X main.authName=auth4" -v -o ${GOPATH}/bin/sign4 ./cmd/sign/
