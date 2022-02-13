@@ -97,16 +97,16 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 
 ## Components inside repository
 - ripple-lib-server
-  - see web/ripple-lib-server
+  - ./web/ripple-lib-server
 - erc20-token
-  - see web/erc20-token
+  - ./web/erc20-token
 
 ## Installation
-see [Installation](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/Installation.md)
+[Installation](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/Installation.md)
 
 ## Operation example
 - [For Bitcoin](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/btc/OperationExample.md)
-- [see operation scripts](https://github.com/hiromaily/go-crypto-wallet/tree/master/scripts/operation)
+- [operation scripts](https://github.com/hiromaily/go-crypto-wallet/tree/master/scripts/operation)
 
 ## Command example
 - [Makefile](https://github.com/hiromaily/go-crypto-wallet/blob/master/Makefile)
