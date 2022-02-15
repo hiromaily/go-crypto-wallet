@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# prepare coin for client address
+# [WIP] prepare coin for client address
 
 set -eu
 

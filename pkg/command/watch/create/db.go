@@ -31,6 +31,7 @@ Options:
 }
 
 // Run executes this subcommand
+// Deprecated. Use query with shell script insted of go code.
 func (c *DBCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
