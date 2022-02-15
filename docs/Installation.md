@@ -104,43 +104,45 @@ docker compose up btc-watch btc-keygen btc-sign
     ```
 
 ## Ethereum Setup
-It depends on what node you choose
+It depends on which node you choose
 
-1. run node by docker compose
-    - run go-ethereum
-    ```
-    make up-docker-eth
-     or
-    docker compose -f docker-compose.eth.yml up eth-node
-    ```
-    - run Ganache
-    ```
-    docker compose -f docker-compose.eth.yml up ganache
-    ```
+### A. go-ethereum
+- run node by docker compose
+```
+make up-docker-eth
+ or
+docker compose -f docker-compose.eth.yml up eth-node
+```
 
-2. prepare sql file if you choose Ganache. But, first account(index[0]) must not be used. See more instruction [here](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/eth/Ganache.md)
+### B. Ganache
+- run node by docker compose
+```
+docker compose -f docker-compose.eth.yml up ganache
+```
+- prepare sql file if you choose Ganache.  
+  But, first account(index[0]) must not be used. See more instruction [here](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/eth/Ganache.md)
 
-3. deploy ERC-20 token contract if needed
-Original ERC-20 token is here [erc20-token](https://github.com/hiromaily/erc20-token). See [`scripts/operation/deploy-token.sh`](https://github.com/hiromaily/go-crypto-wallet/blob/master/scripts/operation/deploy-token.sh)
-    - run the below
-    ```
-    git clone https://github.com/hiromaily/erc20-token.git
-    cd erc20-token
-    yarn install
+## ERC20 Token Setup
+- deploy ERC-20 token contract if needed
+- Original ERC-20 token is [here](https://github.com/hiromaily/go-crypto-wallet/tree/master/web/erc20-token). See [`scripts/operation/deploy-token.sh`](https://github.com/hiromaily/go-crypto-wallet/blob/master/scripts/operation/deploy-token.sh)
+```
+cd ./web/erc20-token
+yarn install
 
-    # deploy contract to current network
-    yarn run deploy-dev2  # using 8545 port
-     or
-    yarn run deploy       # using 7545 port
-    ```
-    - copy `contract address` in console and modify `contract_address` at `ethereum.erc20s.hyt` section in ./config/eth_watch.toml
-    - copy `account` in console and modify `master_address` at `ethereum.erc20s.hyt` section in ./config/eth_watch.toml
+# deploy contract to current network
+yarn run deploy       # using 7545 port
+ or
+yarn run deploy-dev2  # using 8545 port
+```
 
-    ```
-    # check balance
-    yarn ts-node src/web3.ts --mode balance --address 0xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-    # transfer to specific address
-    yarn ts-node src/web3.ts --mode transfer --address 0xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX --amount 100
-    ```
+- copy `contract address` in console and modify `contract_address` at `ethereum.erc20s.hyt` section in ./config/eth_watch.toml
+- copy `account` in console and modify `master_address` at `ethereum.erc20s.hyt` section in ./config/eth_watch.toml
+
+```
+# check balance
+yarn ts-node src/web3.ts --mode balance --address 0xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+# transfer to specific address
+yarn ts-node src/web3.ts --mode transfer --address 0xXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX --amount 100
+```
    
 ## Ripple Setup
