@@ -47,7 +47,10 @@ func (t *TxCreate) CreatePaymentTx(adjustmentFee float64) (string, string, error
 	}
 	if balance <= requiredAmount {
 		// balance is short
-		t.logger.Info("balance for payment account is insufficient")
+		t.logger.Info("balance for payment account is insufficient",
+			zap.Float64("payment_balance", balance.ToBTC()),
+			zap.Float64("required_amount", requiredAmount.ToBTC()),
+		)
 		return "", "", nil
 	}
 	t.logger.Debug("payment balane and userTotal",

@@ -14,8 +14,11 @@ ENCRYPTED="${1:?false}"
 echo "------------------------------------------------"
 echo 'reset payment_request'
 echo "------------------------------------------------"
-#docker-compose exec watch-db mysql -u root -proot  -e "$(cat ./docker/mysql/sqls/payment_request.sql)"
-watch create db
+#watch create db
+# rerun the below command to reset
+#```
+# docker compose exec watch-db mysql -u root -proot  -e "$(cat ./docker/mysql/sqls/payment_request.sql)"
+#```
 
 # create unsigned tx
 echo "------------------------------------------------"
@@ -45,7 +48,7 @@ echo 'sign on 2nd '${tx_file_signed##*\[fileName\]: }
 echo "------------------------------------------------"
 # FIXME: somehow passphrase is not required because wif is used
 #sign -wallet sign1 api walletpassphrase -passphrase test
-tx_file_signed2=`sign -wallet sign1 sign -file "${tx_file_signed##*\[fileName\]: }"`
+tx_file_signed2=`sign1 -wallet sign1 sign -file "${tx_file_signed##*\[fileName\]: }"`
 #sign -wallet sign1 api walletlock
 
 # sign on sign wallet for 3rd signature
