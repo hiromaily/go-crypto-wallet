@@ -1,7 +1,6 @@
 #!/bin/sh
 
 # prepare coin for client address
-# https://coinfaucet.eu/en/btc-testnet/
 
 set -eu
 

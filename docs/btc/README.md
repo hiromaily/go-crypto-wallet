@@ -30,8 +30,11 @@ bitcoin-cli help      # Outputs a list of RPC commands when the daemon is runnin
 
 ## Development on Signet
 #### BTC
-- [Signet Faucet](https://signet.bc-2.jp/)
-- [Signet Explorer](https://explorer.bc-2.jp/)
+- [Signet Faucet](https://alt.signetfaucet.com/)
+- [Signet Explorer](https://ex.signet.bublina.eu.org/)
+- [Signet Faucet 2](https://signet.bc-2.jp/)
+- [Signet Explorer 2](https://explorer.bc-2.jp/)
+  
 
 ## Development on Testnet  
 #### BTC
