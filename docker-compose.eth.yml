@@ -21,7 +21,7 @@ services:
       - "${ETH_RPC_PORT:-8545}:8545"
     stdin_open: true
     tty: true
-    command: --goerli --rpc --rpcaddr 0.0.0.0 --rpcapi admin,debug,web3,eth,txpool,net,personal
+    command: --goerli --http --http.addr 0.0.0.0 --http.api admin,debug,web3,eth,txpool,net,personal
 
   ganache:
     # https://hub.docker.com/r/trufflesuite/ganache-cli
