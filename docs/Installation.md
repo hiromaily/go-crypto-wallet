@@ -114,6 +114,15 @@ make up-docker-eth
 docker compose -f docker-compose.eth.yml up eth-node
 ```
 
+#### [WIP] Call API => move to operation example
+1. `watch -coin eth api clientversion`
+```
+client version: Geth/v1.10.15-stable-8be800ff/linux-amd64/go1.17.5
+```
+2. `watch -coin eth api nodeinfo`
+3. `watch -coin eth api syncing`
+4. `watch -coin eth api netversion`
+
 ### B. Ganache
 - run node by docker compose
 ```

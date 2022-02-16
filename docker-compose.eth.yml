@@ -6,10 +6,12 @@ services:
   # - https://github.com/ethereum/go-ethereum/wiki/Running-in-Docker
   #------------------------------------------------------------------------
   # Example of commands to container
-  # $ docker-compose -f docker-compose.eth.yml exec eth-node sh
-  # $ geth attach ipc://root/.ethereum/goerli/geth.ipc
-  # or
-  # $ geth attach ./docker/nodes/eth/data/geth.ipc
+  # - Use console inside container
+  # 1. $ docker compose -f docker-compose.eth.yml exec eth-node sh
+  # 2. # geth attach ipc://root/.ethereum/goerli/geth.ipc
+  # 3. > eth.syncing
+  # - Use console outside container
+  # 1. $ geth attach ./docker/nodes/eth/data/geth.ipc
   #########################################################################
   eth-node:
     # https://hub.docker.com/r/ethereum/client-go/

@@ -5,82 +5,68 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
+
+	"github.com/hiromaily/go-crypto-wallet/pkg/debug"
 )
 
 // ResponseSyncing response of eth_syncing
 type ResponseSyncing struct {
-	StartingBlock int64 `json:"startingBlock"`
-	CurrentBlock  int64 `json:"currentBlock"`
-	HighestBlock  int64 `json:"highestBlock"`
-	KnownStates   int64 `json:"knownStates"`
-	PulledStates  int64 `json:"pulledStates"`
+	StartingBlock       int64 `json:"startingBlock" mapstructure:"startingBlock"`
+	HighestBlock        int64 `json:"highestBlock" mapstructure:"highestBlock"`
+	CurrentBlock        int64 `json:"currentBlock" mapstructure:"currentBlock"`
+	SyncedAccounts      int64 `json:"syncedAccounts" mapstructure:"syncedAccounts"`
+	SyncedAccountBytes  int64 `json:"syncedAccountBytes" mapstructure:"syncedAccountBytes"`
+	SyncedBytecodes     int64 `json:"syncedBytecodes" mapstructure:"syncedBytecodes"`
+	SyncedBytecodeBytes int64 `json:"syncedBytecodeBytes" mapstructure:"syncedBytecodeBytes"`
+	SyncedStorage       int64 `json:"syncedStorage" mapstructure:"syncedStorage"`
+	SyncedStorageBytes  int64 `json:"syncedStorageBytes" mapstructure:"syncedStorageBytes"`
+
+	HealingBytecode     int64 `json:"healingBytecode" mapstructure:"healingBytecode"`
+	HealedBytecodes     int64 `json:"healedBytecodes" mapstructure:"healedBytecodes"`
+	HealedBytecodeBytes int64 `json:"healedBytecodeBytes" mapstructure:"healedBytecodeBytes"`
+
+	HealingTrienodes    int64 `json:"healingTrienodes" mapstructure:"healingTrienodes"`
+	HealedTrienodes     int64 `json:"healedTrienodes" mapstructure:"healedTrienodes"`
+	HealedTrienodeBytes int64 `json:"healedTrienodeBytes" mapstructure:"healedTrienodeBytes"`
 }
 
 // Syncing returns sync status or bool
 //  - return false if not syncing (it means syncing is done)
 //  - there seems 2 different responses
 func (e *Ethereum) Syncing() (*ResponseSyncing, bool, error) {
-	var (
-		resIF  interface{}
-		resMap map[string]string
-	)
+	var any interface{}
 
-	err := e.rpcClient.CallContext(e.ctx, &resIF, "eth_syncing")
+	err := e.rpcClient.CallContext(e.ctx, &any, "eth_syncing")
 	if err != nil {
 		return nil, false, errors.Wrap(err, "fail to call client.CallContext(eth_syncing)")
 	}
 
-	// try to cast to bool
-	bRes, ok := resIF.(bool)
-	if !ok {
-		// interface can't not be casted to type map
-		// resMap, ok = resIF.(map[string]string)
-		err := e.rpcClient.CallContext(e.ctx, &resMap, "eth_syncing")
-		if err != nil {
-			return nil, false, errors.Wrap(err, "fail to call client.CallContext(eth_syncing)")
-		}
-		//grok.Value(resMap)
-		//value map[string]string = [
-		//	startingBlock string = "0x606c" 6
-		//	currentBlock string = "0x95ac" 6
-		//	highestBlock string = "0x294545" 8
-		//	knownStates string = "0x2084c" 7
-		//	pulledStates string = "0x1eb12" 7
-		//]
-
-		startingBlock, err := hexutil.DecodeBig(resMap["startingBlock"])
-		if err != nil {
-			return nil, false, errors.New("response is invalid")
-		}
-		currentBlock, err := hexutil.DecodeBig(resMap["currentBlock"])
-		if err != nil {
-			return nil, false, errors.New("response is invalid")
-		}
-		highestBlock, err := hexutil.DecodeBig(resMap["highestBlock"])
-		if err != nil {
-			return nil, false, errors.New("response is invalid")
-		}
-		knownStates, err := hexutil.DecodeBig(resMap["knownStates"])
-		if err != nil {
-			return nil, false, errors.New("response is invalid")
-		}
-		pulledStates, err := hexutil.DecodeBig(resMap["pulledStates"])
-		if err != nil {
-			return nil, false, errors.New("response is invalid")
+	// try to cast to bool first
+	if v, ok := any.(bool); ok {
+		return nil, v, nil
+	} else if v, ok := any.(map[string]interface{}); ok {
+		anyMap := make(map[string]int64)
+		for key, val := range v {
+			if v, ok := val.(string); ok {
+				decoded, err := hexutil.DecodeBig(v)
+				if err != nil {
+					continue
+				}
+				anyMap[key] = decoded.Int64()
+			}
 		}
 
-		resSync := ResponseSyncing{
-			StartingBlock: startingBlock.Int64(),
-			CurrentBlock:  currentBlock.Int64(),
-			HighestBlock:  highestBlock.Int64(),
-			KnownStates:   knownStates.Int64(),
-			PulledStates:  pulledStates.Int64(),
+		resSyncing := ResponseSyncing{}
+		if err := mapstructure.Decode(anyMap, &resSyncing); err != nil {
+			return nil, false, err
 		}
-
-		return &resSync, true, nil
+		debug.Debug(resSyncing)
+		return &resSyncing, true, nil
 	}
-	return nil, bRes, nil
+
+	return nil, false, errors.New("unexpected response, need to be implemented")
 }
 
 // ProtocolVersion returns the current ethereum protocol version

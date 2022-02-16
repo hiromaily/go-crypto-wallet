@@ -14,12 +14,14 @@ services:
   #   from ./data/config/bitcoind/bitcoin.signet.conf to ./docker/nodes/btc/data1, data2, data3
   #
   # Example of commands to container
-  # - docker-compose exec btc-watch bash
-  # - docker-compose exec btc-watch bitcoin-cli getnetworkinfo
+  # - enter in container
+  #   - $ docker-compose exec btc-watch bash
+  # - run bitcoin-cli
+  #   - $ docker-compose exec btc-watch bitcoin-cli getnetworkinfo
   # - wallet location
-  #   - /data/.bitcoin/signet/wallets using signet
+  #   - /data/.bitcoin/signet/wallets   # using signet
   #       or
-  #   - /data/.bitcoin/testnet3/wallets using testnet
+  #   - /data/.bitcoin/testnet3/wallets # using testnet
   #########################################################################
   btc-watch:
     image: lncm/bitcoind:v22.0
