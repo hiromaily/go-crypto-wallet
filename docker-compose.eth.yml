@@ -7,11 +7,15 @@ services:
   #------------------------------------------------------------------------
   # Example of commands to container
   # - Use console inside container
-  # 1. $ docker compose -f docker-compose.eth.yml exec eth-node sh
-  # 2. # geth attach ipc://root/.ethereum/goerli/geth.ipc
-  # 3. > eth.syncing
-  # - Use console outside container
-  # 1. $ geth attach ./docker/nodes/eth/data/geth.ipc
+  #  1. $ docker compose -f docker-compose.eth.yml exec eth-node sh
+  #  2. # geth attach
+  #  3. > eth.syncing
+  # - Call JSON-RPC (https://eth.wiki/json-rpc/API)
+  #   $ curl -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}' http://localhost:8545
+  # - [WIP] Use console outside container
+  #   $ geth attach ./docker/nodes/eth/data/geth.ipc => not working yet
+  #   $ geth attach ipc:./docker/nodes/eth/data/geth.ipc => not working yet
+  #   $ docker exec -it go-crypto-wallet-eth-node-1 geth attach ipc://root/.ethereum/goerli/geth.ipc => it works
   #########################################################################
   eth-node:
     # https://hub.docker.com/r/ethereum/client-go/
@@ -25,8 +29,17 @@ services:
     tty: true
     command: --goerli --http --http.addr 0.0.0.0 --http.api admin,debug,web3,eth,txpool,net,personal
 
+  #########################################################################
+  # trufflesuite/ganache-cli
+  # - https://hub.docker.com/r/trufflesuite/ganache-cli
+  #------------------------------------------------------------------------
+  # Example of commands to container
+  # - run
+  #  $ docker compose -f docker-compose.eth.yml up ganache
+  # - cli command example
+  #  $ ganache-cli --mnemonic "toy echo orbit embrace opinion file client report history bomb regret life"
+  #
   ganache:
-    # https://hub.docker.com/r/trufflesuite/ganache-cli
     image: trufflesuite/ganache-cli:v6.12.2
     ports:
       - "${ETH_RPC_PORT:-8545}:8545"
@@ -35,5 +48,3 @@ services:
     # command adds into default ENTRYPOINT
     # https://hub.docker.com/r/trufflesuite/ganache-cli/dockerfile
     command: --mnemonic "toy echo orbit embrace opinion file client report history bomb regret life"
-    # $ docker compose -f docker-compose.eth.yml up ganache
-    # ganache-cli --mnemonic "toy echo orbit embrace opinion file client report history bomb regret life"
