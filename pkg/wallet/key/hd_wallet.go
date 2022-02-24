@@ -16,9 +16,7 @@ import (
 	"github.com/pkg/errors"
 	rcrypto "github.com/rubblelabs/ripple/crypto"
 	"go.uber.org/zap"
-
-	// nolint:staticcheck
-	"golang.org/x/crypto/ripemd160"
+	"golang.org/x/crypto/ripemd160" // nolint:staticcheck
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"

@@ -1,6 +1,6 @@
 modVer=$(shell cat go.mod | head -n 3 | tail -n 1 | awk '{print $2}' | cut -d'.' -f2)
 currentVer=$(shell go version | awk '{print $3}' | sed -e "s/go//" | cut -d'.' -f2)
-GOLANGCI_VERSION=v1.43.0
+GOLANGCI_VERSION=v1.44.2
 #PROTOC_BIN=protoc
 PROTOC_BIN=buf protoc
 

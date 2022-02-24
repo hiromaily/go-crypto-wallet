@@ -26,6 +26,11 @@ linters-settings:
     rules:
       - name: indent-error-flow
         severity: warning
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/hiromaily)
   #unused:
   #  check-exported: true
 

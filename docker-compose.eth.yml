@@ -8,7 +8,7 @@ services:
   # Example of commands to container
   # - Use console inside container
   #  1. $ docker compose -f docker-compose.eth.yml exec eth-node sh
-  #  2. # geth attach
+  #  2. # geth attach or geth attach ipc://root/.ethereum/goerli/geth.ipc
   #  3. > eth.syncing
   # - Call JSON-RPC (https://eth.wiki/json-rpc/API)
   #   $ curl -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}' http://localhost:8545

@@ -85,7 +85,7 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 
 ## Requirements
 - Golang 1.16+
-- [golangci-lint](https://github.com/golangci/golangci-lint) 1.42+ (for development)
+- [golangci-lint](https://github.com/golangci/golangci-lint) 1.44.2+ (for development)
 - [direnv](https://direnv.net/)
 - [Docker](https://www.docker.com/get-started)
     - MySQL 5.7
