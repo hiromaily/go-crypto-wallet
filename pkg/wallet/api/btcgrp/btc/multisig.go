@@ -24,7 +24,8 @@ func (b *Bitcoin) AddMultisigAddress(
 	requiredSigs int,
 	addresses []string,
 	accountName string,
-	addressType address.AddrType) (*AddMultisigAddressResult, error) {
+	addressType address.AddrType,
+) (*AddMultisigAddressResult, error) {
 	if requiredSigs > len(addresses) {
 		return nil, errors.Errorf("number of given address doesn't meet number of requiredSigs: requiredSigs:%d, len(addresses):%d", requiredSigs, len(addresses))
 	}

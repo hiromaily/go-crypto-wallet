@@ -37,7 +37,8 @@ func NewXRPWatch(
 	txSender service.TxSender,
 	txMonitorer service.TxMonitorer,
 	paymentRequestCreator service.PaymentRequestCreator,
-	wtype wtype.WalletType) *XRPWatch {
+	wtype wtype.WalletType,
+) *XRPWatch {
 	return &XRPWatch{
 		XRP:                   xrp,
 		logger:                logger,

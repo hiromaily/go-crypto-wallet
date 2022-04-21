@@ -36,7 +36,8 @@ func NewSign(
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
 	txFileRepo tx.FileRepositorier,
 	multisigAccount account.MultisigAccounter,
-	wtype wallet.WalletType) *Sign {
+	wtype wallet.WalletType,
+) *Sign {
 	return &Sign{
 		btc:             btc,
 		logger:          logger,

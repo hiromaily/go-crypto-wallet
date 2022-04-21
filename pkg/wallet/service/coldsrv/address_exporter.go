@@ -33,7 +33,8 @@ func NewAddressExport(
 	addrFileRepo address.FileRepositorier,
 	multisigAccount account.MultisigAccounter,
 	coinTypeCode coin.CoinTypeCode,
-	wtype wallet.WalletType) *AddressExport {
+	wtype wallet.WalletType,
+) *AddressExport {
 	return &AddressExport{
 		logger:          logger,
 		accountKeyRepo:  accountKeyRepo,

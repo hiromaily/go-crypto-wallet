@@ -49,7 +49,8 @@ func NewTxCreate(
 	txFileRepo tx.FileRepositorier,
 	depositReceiver account.AccountType,
 	paymentSender account.AccountType,
-	wtype wallet.WalletType) *TxCreate {
+	wtype wallet.WalletType,
+) *TxCreate {
 	return &TxCreate{
 		xrp:             xrp,
 		logger:          logger,

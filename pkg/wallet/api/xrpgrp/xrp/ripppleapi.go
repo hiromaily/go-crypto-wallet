@@ -17,7 +17,8 @@ type RippleAPI struct {
 // NewRippleAPI creates Ripple API object
 func NewRippleAPI(
 	conn *grpc.ClientConn,
-	logger *zap.Logger) *RippleAPI {
+	logger *zap.Logger,
+) *RippleAPI {
 	return &RippleAPI{
 		txClient:      NewRippleTransactionAPIClient(conn),
 		accountClient: NewRippleAccountAPIClient(conn),

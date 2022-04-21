@@ -30,7 +30,8 @@ func NewMultisig(
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	multisigAccount account.MultisigAccounter,
-	wtype wallet.WalletType) *Multisig {
+	wtype wallet.WalletType,
+) *Multisig {
 	return &Multisig{
 		btc:                btc,
 		logger:             logger,

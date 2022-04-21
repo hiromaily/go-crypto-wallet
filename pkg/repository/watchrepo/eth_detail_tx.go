@@ -116,7 +116,8 @@ func (r *EthDetailTxInputRepository) UpdateAfterTxSent(
 	uuid string,
 	txType tx.TxType,
 	signedHex,
-	sentHashTx string) (int64, error) {
+	sentHashTx string,
+) (int64, error) {
 	ctx := context.Background()
 
 	// Set updating columns

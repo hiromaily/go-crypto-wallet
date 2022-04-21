@@ -29,7 +29,8 @@ func NewTxMonitor(
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txDetailRepo watchrepo.XrpDetailTxRepositorier,
-	wtype wallet.WalletType) *TxMonitor {
+	wtype wallet.WalletType,
+) *TxMonitor {
 	return &TxMonitor{
 		xrp:          xrp,
 		logger:       logger,

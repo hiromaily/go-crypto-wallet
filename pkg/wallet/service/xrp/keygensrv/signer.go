@@ -31,7 +31,8 @@ func NewSign(
 	logger *zap.Logger,
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier,
 	txFileRepo tx.FileRepositorier,
-	wtype wallet.WalletType) *Sign {
+	wtype wallet.WalletType,
+) *Sign {
 	return &Sign{
 		xrp:               xrp,
 		logger:            logger,

@@ -32,7 +32,8 @@ func NewTxMonitor(
 	addrRepo watchrepo.AddressRepositorier,
 	txDetailRepo watchrepo.EthDetailTxRepositorier,
 	confirmNum uint64,
-	wtype wallet.WalletType) *TxMonitor {
+	wtype wallet.WalletType,
+) *TxMonitor {
 	return &TxMonitor{
 		eth:          eth,
 		logger:       logger,

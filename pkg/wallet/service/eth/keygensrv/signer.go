@@ -27,7 +27,8 @@ func NewSign(
 	eth ethgrp.Ethereumer,
 	logger *zap.Logger,
 	txFileRepo tx.FileRepositorier,
-	wtype wallet.WalletType) *Sign {
+	wtype wallet.WalletType,
+) *Sign {
 	return &Sign{
 		eth:        eth,
 		logger:     logger,

@@ -29,7 +29,8 @@ func NewFullPubkeyImport(
 	logger *zap.Logger,
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier,
 	pubkeyFileRepo address.FileRepositorier,
-	wtype wallet.WalletType) *FullPubkeyImport {
+	wtype wallet.WalletType,
+) *FullPubkeyImport {
 	return &FullPubkeyImport{
 		btc:                btc,
 		logger:             logger,

@@ -174,7 +174,8 @@ func (r *BTCTxRepository) UpdateAfterTxSent(
 	txID int64,
 	txType tx.TxType,
 	signedHex,
-	sentHashTx string) (int64, error) {
+	sentHashTx string,
+) (int64, error) {
 	ctx := context.Background()
 
 	// Set updating columns

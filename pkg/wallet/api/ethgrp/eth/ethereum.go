@@ -36,7 +36,8 @@ func NewEthereum(
 	rpcClient *ethrpc.Client,
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Ethereum,
-	logger *zap.Logger) (*Ethereum, error) {
+	logger *zap.Logger,
+) (*Ethereum, error) {
 	eth := &Ethereum{
 		ethClient:    ethClient,
 		rpcClient:    rpcClient,

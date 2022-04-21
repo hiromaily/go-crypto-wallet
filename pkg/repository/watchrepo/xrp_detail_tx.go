@@ -113,7 +113,8 @@ func (r *XrpDetailTxInputRepository) UpdateAfterTxSent(
 	txType tx.TxType,
 	signedTxID,
 	TxBlob string,
-	earlistLedgerVersion uint64) (int64, error) {
+	earlistLedgerVersion uint64,
+) (int64, error) {
 	ctx := context.Background()
 
 	// Set updating columns

@@ -30,7 +30,8 @@ func NewRipple(
 	api *RippleAPI,
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Ripple,
-	logger *zap.Logger) (*Ripple, error) {
+	logger *zap.Logger,
+) (*Ripple, error) {
 	xrp := &Ripple{
 		wsPublic:     wsPublic,
 		wsAdmin:      wsAdmin,

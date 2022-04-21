@@ -35,7 +35,8 @@ func NewPaymentRequestCreate(
 	addrRepo watchrepo.AddressRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,
 	coinTypeCode coin.CoinTypeCode,
-	wtype wallet.WalletType) *PaymentRequestCreate {
+	wtype wallet.WalletType,
+) *PaymentRequestCreate {
 	return &PaymentRequestCreate{
 		converter:    converter,
 		logger:       logger,

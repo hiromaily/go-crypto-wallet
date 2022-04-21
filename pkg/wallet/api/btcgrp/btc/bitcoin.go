@@ -33,7 +33,8 @@ func NewBitcoin(
 	client *rpcclient.Client,
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Bitcoin,
-	logger *zap.Logger) (*Bitcoin, error) {
+	logger *zap.Logger,
+) (*Bitcoin, error) {
 	bit := Bitcoin{
 		Client: client,
 		logger: logger,

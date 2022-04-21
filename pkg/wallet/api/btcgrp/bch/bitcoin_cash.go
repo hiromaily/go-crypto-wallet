@@ -24,7 +24,8 @@ func NewBitcoinCash(
 	client *rpcclient.Client,
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Bitcoin,
-	logger *zap.Logger) (*BitcoinCash, error) {
+	logger *zap.Logger,
+) (*BitcoinCash, error) {
 	// bitcoin base
 	bit, err := btc.NewBitcoin(client, coinTypeCode, conf, logger)
 	if err != nil {

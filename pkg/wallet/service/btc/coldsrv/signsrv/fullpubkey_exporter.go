@@ -33,7 +33,8 @@ func NewFullPubkeyExport(
 	pubkeyFileRepo address.FileRepositorier,
 	coinTypeCode coin.CoinTypeCode,
 	authType account.AuthType,
-	wtype wallet.WalletType) *FullPubkeyExport {
+	wtype wallet.WalletType,
+) *FullPubkeyExport {
 	return &FullPubkeyExport{
 		logger:         logger,
 		authKeyRepo:    authKeyRepo,

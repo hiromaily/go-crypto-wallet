@@ -40,7 +40,8 @@ func NewXRPKeyGenerate(
 	coinTypeCode coin.CoinTypeCode,
 	wtype wallet.WalletType,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
-	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier) *XRPKeyGenerate {
+	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier,
+) *XRPKeyGenerate {
 	return &XRPKeyGenerate{
 		xrp:               xrp,
 		logger:            logger,

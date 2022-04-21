@@ -26,7 +26,8 @@ func NewPrivKey(
 	eth ethgrp.Ethereumer,
 	logger *zap.Logger,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
-	wtype wallet.WalletType) *PrivKey {
+	wtype wallet.WalletType,
+) *PrivKey {
 	return &PrivKey{
 		eth:            eth,
 		logger:         logger,

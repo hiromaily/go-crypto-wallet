@@ -37,7 +37,8 @@ func NewAddressImport(
 	addrFileRepo address.FileRepositorier,
 	coinTypeCode coin.CoinTypeCode,
 	addrType address.AddrType,
-	wtype wallet.WalletType) *AddressImport {
+	wtype wallet.WalletType,
+) *AddressImport {
 	return &AddressImport{
 		btc:          btc,
 		logger:       logger,

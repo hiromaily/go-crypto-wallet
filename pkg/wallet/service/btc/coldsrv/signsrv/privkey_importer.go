@@ -33,7 +33,8 @@ func NewPrivKey(
 	logger *zap.Logger,
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
 	authType account.AuthType,
-	wtype wallet.WalletType) *PrivKey {
+	wtype wallet.WalletType,
+) *PrivKey {
 	return &PrivKey{
 		btc:         btc,
 		logger:      logger,

@@ -117,6 +117,7 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 
 ## TODO
 ### Basics
+- [ ] Upgrade `github.com/btcsuite/btcd/btcec` to `github.com/btcsuite/btcd/btcec/v2`
 - [ ] Fix UnitTest. And Separate dependent test as Integration Test using tag
 - [ ] Add ATOM tokens on [Cosmos Hub](https://hub.cosmos.network/main/hub-overview/overview.html)
 - [ ] Add [Polkadot](https://polkadot.network/technology/)

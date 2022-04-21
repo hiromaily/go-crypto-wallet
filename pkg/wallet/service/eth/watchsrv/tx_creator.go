@@ -52,7 +52,8 @@ func NewTxCreate(
 	depositReceiver account.AccountType,
 	paymentSender account.AccountType,
 	wtype wallet.WalletType,
-	coinTypeCode coin.CoinTypeCode) *TxCreate {
+	coinTypeCode coin.CoinTypeCode,
+) *TxCreate {
 	return &TxCreate{
 		eth:             eth,
 		logger:          logger,

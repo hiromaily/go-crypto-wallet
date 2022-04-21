@@ -33,7 +33,8 @@ func NewTxMonitor(
 	txRepo watchrepo.BTCTxRepositorier,
 	txInputRepo watchrepo.TxInputRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,
-	wtype wallet.WalletType) *TxMonitor {
+	wtype wallet.WalletType,
+) *TxMonitor {
 	return &TxMonitor{
 		btc:         btc,
 		logger:      logger,

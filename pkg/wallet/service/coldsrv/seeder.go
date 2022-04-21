@@ -20,7 +20,8 @@ type Seed struct {
 func NewSeed(
 	logger *zap.Logger,
 	seedRepo coldrepo.SeedRepositorier,
-	wtype wallet.WalletType) *Seed {
+	wtype wallet.WalletType,
+) *Seed {
 	return &Seed{
 		logger:   logger,
 		seedRepo: seedRepo,

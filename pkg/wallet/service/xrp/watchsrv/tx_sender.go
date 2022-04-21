@@ -36,7 +36,8 @@ func NewTxSend(
 	txRepo watchrepo.TxRepositorier,
 	txDetailRepo watchrepo.XrpDetailTxRepositorier,
 	txFileRepo tx.FileRepositorier,
-	wtype wallet.WalletType) *TxSend {
+	wtype wallet.WalletType,
+) *TxSend {
 	return &TxSend{
 		xrp:          xrp,
 		logger:       logger,

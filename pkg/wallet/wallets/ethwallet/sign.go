@@ -23,7 +23,8 @@ func NewETHSign(
 	eth ethgrp.Ethereumer,
 	dbConn *sql.DB,
 	logger *zap.Logger,
-	wtype wtype.WalletType) *ETHSign {
+	wtype wtype.WalletType,
+) *ETHSign {
 	return &ETHSign{
 		ETH:    eth,
 		logger: logger,

@@ -67,7 +67,8 @@ func NewTxCreate(
 	txFileRepo tx.FileRepositorier,
 	depositReceiver account.AccountType,
 	paymentSender account.AccountType,
-	wtype wallet.WalletType) *TxCreate {
+	wtype wallet.WalletType,
+) *TxCreate {
 	return &TxCreate{
 		btc:             btc,
 		logger:          logger,
@@ -100,7 +101,8 @@ func (t *TxCreate) createTx(
 	requiredAmount btcutil.Amount,
 	adjustmentFee float64,
 	paymentRequestIds []int64,
-	userPayments []UserPayment) (string, string, error) {
+	userPayments []UserPayment,
+) (string, string, error) {
 	t.logger.Debug("createTx()",
 		zap.String("sender_acount", sender.String()),
 		zap.String("receiver_acount", receiver.String()),
@@ -347,7 +349,8 @@ func (t *TxCreate) createTxOutputs(
 	requiredAmount btcutil.Amount,
 	inputTotal btcutil.Amount,
 	senderAddr string,
-	isChange bool) (map[btcutil.Address]btcutil.Amount, error) {
+	isChange bool,
+) (map[btcutil.Address]btcutil.Amount, error) {
 	// get unallocated address for receiver
 	// - deposit/transfer
 	pubkeyTable, err := t.addrRepo.GetOneUnAllocated(reciver)
@@ -476,7 +479,8 @@ func (t *TxCreate) insertTxTableForUnsigned(
 	fee btcutil.Amount,
 	txInputs []*models.BTCTXInput,
 	txOutputs []*models.BTCTXOutput,
-	paymentRequestIds []int64) (int64, error) {
+	paymentRequestIds []int64,
+) (int64, error) {
 	// skip if same hex is already stored
 	count, err := t.txRepo.GetCountByUnsignedHex(actionType, hex)
 	if err != nil {

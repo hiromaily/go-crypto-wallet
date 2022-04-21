@@ -26,7 +26,8 @@ func NewPrivKey(
 	btc btcgrp.Bitcoiner,
 	logger *zap.Logger,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
-	wtype wallet.WalletType) *PrivKey {
+	wtype wallet.WalletType,
+) *PrivKey {
 	return &PrivKey{
 		btc:            btc,
 		logger:         logger,
