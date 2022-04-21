@@ -37,6 +37,7 @@ install-tools:
 	go install github.com/ethereum/go-ethereum/cmd/abigen@latest
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_VERSION)
 	go install honnef.co/go/tools/cmd/staticcheck@latest
+	go install github.com/icholy/gomajor@latest
 
 .PHONY: install-proto-plugin
 install-proto-plugin:
@@ -135,6 +136,9 @@ lint-fix:
 staticcheck:
 	staticcheck ./...
 
+.PHONY: check-upgrade
+check-upgrade:
+	gomajor list
 
 ###############################################################################
 # From inside docker container
