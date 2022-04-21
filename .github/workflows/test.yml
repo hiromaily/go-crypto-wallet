@@ -42,6 +42,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
       - name: Run Unit Test
+        # /home/runner/work/go-crypto-wallet/go-crypto-wallet
         working-directory: ./
         run: |
           make gotest

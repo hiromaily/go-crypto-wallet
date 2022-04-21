@@ -1,20 +1,18 @@
 package account
 
 import (
-	"fmt"
 	"log"
-	"os"
 	"testing"
 
 	"github.com/bookerzzz/grok"
+
+	"github.com/hiromaily/go-crypto-wallet/pkg/config/file"
 )
 
 // TestNewAccount is test for NewAccount
 func TestNewAccount(t *testing.T) {
 	// t.SkipNow()
-
-	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-crypto-wallet", os.Getenv("GOPATH"))
-	confPath := fmt.Sprintf("%s/data/config/account.toml", projPath)
+	confPath := file.GetConfigFilePath("account.toml")
 	conf, err := NewAccount(confPath)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
