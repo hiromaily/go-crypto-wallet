@@ -20,28 +20,28 @@
     "web3ts-estimate-gas": "ts-node src/web3.ts --mode estimateGas"
   },
   "devDependencies": {
-    "@types/node": "^17.0.21",
-    "@typescript-eslint/eslint-plugin": "^5.14.0",
-    "@typescript-eslint/parser": "^5.14.0",
-    "eslint": "^8.11.0",
+    "@types/node": "^17.0.25",
+    "@typescript-eslint/eslint-plugin": "^5.20.0",
+    "@typescript-eslint/parser": "^5.20.0",
+    "eslint": "^8.13.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-compat": "^4.0.2",
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-prettier": "^4.0.0",
-    "prettier": "^2.5.1",
+    "prettier": "^2.6.2",
     "prettier-plugin-solidity": "^1.0.0-beta.19",
     "solhint": "^3.3.7",
     "ts-node": "^10.7.0",
-    "typescript": "^4.6.2"
+    "typescript": "^4.6.3"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.5.0",
     "@types/ethereumjs-abi": "^0.6.3",
-    "commander": "^9.0.0",
+    "commander": "^9.2.0",
     "ethereumjs-abi": "^0.6.8",
-    "web3": "^1.7.1",
-    "web3-core": "^1.7.1",
-    "web3-eth-contract": "^1.7.1",
-    "web3-utils": "^1.7.1"
+    "web3": "^1.7.3",
+    "web3-core": "^1.7.3",
+    "web3-eth-contract": "^1.7.3",
+    "web3-utils": "^1.7.3"
   }
 }
