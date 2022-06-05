@@ -6,8 +6,7 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/btcsuite/btcd/txscript"
-	"golang.org/x/crypto/ripemd160"
+	"golang.org/x/crypto/ripemd160" // nolint: staticcheck
 )
 
 // refer to original code [github.com/cpacia/bchutil](https://github.com/cpacia/bchutil/blob/master/cashaddr.go)
@@ -20,7 +19,7 @@ var (
 
 	// ErrUnknownAddressType describes an error where an address can not
 	// decoded as a specific address type due to the string encoding
-	// begining with an identifier byte unknown to any standard or
+	// beginning with an identifier byte unknown to any standard or
 	// registered (via chaincfg.Register) network.
 	ErrUnknownAddressType = errors.New("unknown address type")
 
@@ -336,7 +335,7 @@ func DecodeCashAddress(str string) (string, data, error) {
 func CheckEncodeCashAddress(input []byte, prefix string, t AddressType) string {
 	k, err := packAddressData(t, input)
 	if err != nil {
-		fmt.Println("%v", err)
+		fmt.Println(err)
 		return ""
 	}
 	return Encode(prefix, k)
@@ -427,7 +426,7 @@ func NewCashAddressPubKeyHash(pkHash []byte, net *chaincfg.Params) (*CashAddress
 // newAddressPubKeyHash is the internal API to create a pubkey hash address
 // with a known leading identifier byte for a network, rather than looking
 // it up through its parameters.  This is useful when creating a new address
-// structure from a string encoding where the identifer byte is already
+// structure from a string encoding where the identifier byte is already
 // known.
 func newCashAddressPubKeyHash(pkHash []byte, net *chaincfg.Params) (*CashAddressPubKeyHash, error) {
 	// Check for a valid pubkey hash length.
@@ -475,7 +474,7 @@ func (a *CashAddressPubKeyHash) String() string {
 }
 
 // Hash160 returns the underlying array of the pubkey hash.  This can be useful
-// when an array is more appropiate than a slice (for example, when used as map
+// when an array is more appropriate than a slice (for example, when used as map
 // keys).
 func (a *CashAddressPubKeyHash) Hash160() *[ripemd160.Size]byte {
 	return &a.hash
@@ -503,7 +502,7 @@ func NewCashAddressScriptHashFromHash(scriptHash []byte, net *chaincfg.Params) (
 // newAddressScriptHashFromHash is the internal API to create a script hash
 // address with a known leading identifier byte for a network, rather than
 // looking it up through its parameters.  This is useful when creating a new
-// address structure from a string encoding where the identifer byte is already
+// address structure from a string encoding where the identifier byte is already
 // known.
 func newCashAddressScriptHashFromHash(scriptHash []byte, net *chaincfg.Params) (*CashAddressScriptHash, error) {
 	// Check for a valid script hash length.
@@ -551,63 +550,10 @@ func (a *CashAddressScriptHash) String() string {
 }
 
 // Hash160 returns the underlying array of the script hash.  This can be useful
-// when an array is more appropiate than a slice (for example, when used as map
+// when an array is more appropriate than a slice (for example, when used as map
 // keys).
 func (a *CashAddressScriptHash) Hash160() *[ripemd160.Size]byte {
 	return &a.hash
-}
-
-// PayToAddrScript creates a new script to pay a transaction output to a the
-// specified address.
-func cashPayToAddrScript(addr btcutil.Address) ([]byte, error) {
-	const nilAddrErrStr = "unable to generate payment script for nil address"
-
-	switch addr := addr.(type) {
-	case *CashAddressPubKeyHash:
-		if addr == nil {
-			return nil, errors.New(nilAddrErrStr)
-		}
-		return payToPubKeyHashScript(addr.ScriptAddress())
-
-	case *CashAddressScriptHash:
-		if addr == nil {
-			return nil, errors.New(nilAddrErrStr)
-		}
-		return payToScriptHashScript(addr.ScriptAddress())
-	}
-	return nil, fmt.Errorf("unable to generate payment script for unsupported "+
-		"address type %T", addr)
-}
-
-// payToPubKeyHashScript creates a new script to pay a transaction
-// output to a 20-byte pubkey hash. It is expected that the input is a valid
-// hash.
-func payToPubKeyHashScript(pubKeyHash []byte) ([]byte, error) {
-	return txscript.NewScriptBuilder().AddOp(txscript.OP_DUP).AddOp(txscript.OP_HASH160).
-		AddData(pubKeyHash).AddOp(txscript.OP_EQUALVERIFY).AddOp(txscript.OP_CHECKSIG).
-		Script()
-}
-
-// payToScriptHashScript creates a new script to pay a transaction output to a
-// script hash. It is expected that the input is a valid hash.
-func payToScriptHashScript(scriptHash []byte) ([]byte, error) {
-	return txscript.NewScriptBuilder().AddOp(txscript.OP_HASH160).AddData(scriptHash).
-		AddOp(txscript.OP_EQUAL).Script()
-}
-
-// ExtractPkScriptAddrs returns the type of script, addresses and required
-// signatures associated with the passed PkScript.  Note that it only works for
-// 'standard' transaction script types.  Any data such as public keys which are
-// invalid are omitted from the results.
-func ExtractPkScriptAddrs(pkScript []byte, chainParams *chaincfg.Params) (btcutil.Address, error) {
-	// No valid addresses or required signatures if the script doesn't
-	// parse.
-	if len(pkScript) == 1+1+20+1 && pkScript[0] == 0xa9 && pkScript[1] == 0x14 && pkScript[22] == 0x87 {
-		return NewCashAddressScriptHashFromHash(pkScript[2:22], chainParams)
-	} else if len(pkScript) == 1+1+1+20+1+1 && pkScript[0] == 0x76 && pkScript[1] == 0xa9 && pkScript[2] == 0x14 && pkScript[23] == 0x88 && pkScript[24] == 0xac {
-		return NewCashAddressPubKeyHash(pkScript[3:23], chainParams)
-	}
-	return nil, errors.New("unknown script type")
 }
 
 // Base32 conversion contains some licensed code
@@ -655,14 +601,14 @@ func packAddressData(addrType AddressType, addrHash data) (data, error) {
 		return data{}, errors.New("invalid addrtype")
 	}
 	versionByte := uint(addrType) << 3
-	encodedSize := (uint(len(addrHash)) - 20) / 4
+	encodedSize := (int(len(addrHash)) - 20) / 4
 	if (len(addrHash)-20)%4 != 0 {
 		return data{}, errors.New("invalid addrhash size")
 	}
 	if encodedSize < 0 || encodedSize > 8 {
 		return data{}, errors.New("encoded size out of valid range")
 	}
-	versionByte |= encodedSize
+	versionByte |= uint(encodedSize)
 	var addrHashUint data
 	for _, e := range addrHash {
 		addrHashUint = append(addrHashUint, byte(e))

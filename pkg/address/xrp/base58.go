@@ -11,7 +11,6 @@ import (
 
 var (
 	bigRadix10 = big.NewInt(58 * 58 * 58 * 58 * 58 * 58 * 58 * 58 * 58 * 58) // 58^10
-	bigZero    = big.NewInt(0)
 	bigRadix   = [...]*big.Int{
 		big.NewInt(0),
 		big.NewInt(58),
