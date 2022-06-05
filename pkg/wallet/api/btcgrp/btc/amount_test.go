@@ -3,7 +3,7 @@ package btc_test
 import (
 	"testing"
 
-	"github.com/btcsuite/btcutil"
+	"github.com/btcsuite/btcd/btcutil"
 
 	. "github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/btc"
 )

@@ -3,7 +3,7 @@ package key
 import (
 	"encoding/base64"
 
-	"github.com/btcsuite/btcutil/hdkeychain"
+	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/pkg/errors"
 	"github.com/tyler-smith/go-bip39"
 )

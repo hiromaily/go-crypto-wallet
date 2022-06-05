@@ -153,8 +153,12 @@ build-linux:
 # Build on local
 # - authName on sign works as account name
 ###############################################################################
+.PHONY: tidy
+tidy:
+	go mod tidy -compat=1.17
+
 .PHONY: build
-build:
+build: tidy
 	go build -v -o ${GOPATH}/bin/watch ./cmd/watch/
 	go build -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
 	go build -ldflags "-X main.authName=auth1" -v -o ${GOPATH}/bin/sign1 ./cmd/sign/

@@ -1,9 +1,9 @@
 package key
 
 import (
-	"github.com/btcsuite/btcd/btcec"
+	"github.com/btcsuite/btcd/btcec/v2"
+	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/btcsuite/btcutil"
 	"github.com/pkg/errors"
 )
 
@@ -32,7 +32,7 @@ func GenerateWIF(conf *chaincfg.Params) (*btcutil.WIF, string, error) {
 }
 
 func createPrivateKey(conf *chaincfg.Params) (*btcutil.WIF, error) {
-	secret, err := btcec.NewPrivateKey(btcec.S256())
+	secret, err := btcec.NewPrivateKey()
 	if err != nil {
 		return nil, err
 	}

@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/btcsuite/btcutil"
+	"github.com/btcsuite/btcd/btcutil"
 	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"

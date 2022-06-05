@@ -3,7 +3,7 @@ package btc
 import (
 	"encoding/json"
 
-	"github.com/btcsuite/btcutil"
+	"github.com/btcsuite/btcd/btcutil"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )

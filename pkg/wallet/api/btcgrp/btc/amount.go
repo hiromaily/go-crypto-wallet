@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/btcsuite/btcutil"
+	"github.com/btcsuite/btcd/btcutil"
 	"github.com/ericlagergren/decimal"
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/v4/types"

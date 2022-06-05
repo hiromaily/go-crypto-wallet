@@ -4,21 +4,20 @@ import (
 	"crypto/ecdsa"
 	"encoding/hex"
 	"fmt"
-
-	"github.com/btcsuite/btcd/btcec"
+	"github.com/btcsuite/btcd/btcec/v2"
+	"github.com/btcsuite/btcd/btcutil"
+	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/txscript"
-	"github.com/btcsuite/btcutil"
-	"github.com/btcsuite/btcutil/hdkeychain"
-	"github.com/cpacia/bchutil"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/pkg/errors"
-	rcrypto "github.com/rubblelabs/ripple/crypto"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/ripemd160" // nolint:staticcheck
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	bchaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/bch"
+	xrpaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
@@ -295,23 +294,23 @@ func (k *HDKey) xrpAddrs(privKey *btcec.PrivateKey) (string, string, string, err
 	// private key (same as ethereum for now)
 	xrpPrivKey := privKey.ToECDSA()
 	// xrpHexPrivKey := hexutil.Encode(crypto.FromECDSA(xrpPrivKey))
-	xrpHexPrivKey, err := rcrypto.NewAccountPrivateKey(crypto.FromECDSA(xrpPrivKey))
+	xrpHexPrivKey, err := xrpaddr.NewAccountPrivateKey(crypto.FromECDSA(xrpPrivKey))
 	if err != nil {
-		return "", "", "", errors.Wrap(err, "fail to call rcrypto.NewAccountPrivateKey()")
+		return "", "", "", errors.Wrap(err, "fail to call xrpaddr.NewAccountPrivateKey()")
 	}
 
 	serializedPubKey := privKey.PubKey().SerializeCompressed()
-	pubKeyHash := rcrypto.Sha256RipeMD160(serializedPubKey)
+	pubKeyHash := xrpaddr.Sha256RipeMD160(serializedPubKey)
 	if len(pubKeyHash) != ripemd160.Size {
 		return "", "", "", errors.New("pubKeyHash must be 20 bytes")
 	}
 	// address
-	address, err := rcrypto.NewAccountId(pubKeyHash)
+	address, err := xrpaddr.NewAccountId(pubKeyHash)
 	if err != nil {
 		return "", "", "", errors.Wrap(err, "fail to call rcrypto.NewAccountId()")
 	}
 	// publicKey
-	publicKey, err := rcrypto.NewAccountPublicKey(pubKeyHash)
+	publicKey, err := xrpaddr.NewAccountPublicKey(pubKeyHash)
 	if err != nil {
 		return "", "", "", errors.Wrap(err, "fail to call rcrypto.NewAccountPublicKey()")
 	}
@@ -343,13 +342,13 @@ func (k *HDKey) getP2PKHAddr(privKey *btcec.PrivateKey) (string, error) {
 
 // getP2PKHAddrBCH get P2PKH Addr for BCH
 func (k *HDKey) getP2PKHAddrBCH(p2PKHAddr *btcutil.AddressPubKeyHash) (string, error) {
-	addrBCH, err := bchutil.NewCashAddressPubKeyHash(p2PKHAddr.ScriptAddress(), k.conf)
+	addrBCH, err := bchaddr.NewCashAddressPubKeyHash(p2PKHAddr.ScriptAddress(), k.conf)
 	if err != nil {
 		return "", errors.Wrap(err, "fail to call btcutil.NewAddressPubKeyHash()")
 	}
 
 	// get prefix
-	prefix, ok := bchutil.Prefixes[k.conf.Name]
+	prefix, ok := bchaddr.Prefixes[k.conf.Name]
 	if !ok {
 		return "", errors.Errorf("invalid BCH *chaincfg : %s", k.conf.Name)
 	}
@@ -390,9 +389,9 @@ func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, er
 		}
 		return address.String(), strRedeemScript, nil
 	case coin.BCH:
-		address, err := bchutil.NewCashAddressScriptHash(payToAddrScript, k.conf)
+		address, err := bchaddr.NewCashAddressScriptHash(payToAddrScript, k.conf)
 		if err != nil {
-			return "", "", errors.Wrap(err, "fail to call bchutil.NewCashAddressScriptHash()")
+			return "", "", errors.Wrap(err, "fail to call bchaddr.NewCashAddressScriptHash()")
 		}
 		return address.String(), strRedeemScript, nil
 	}
