@@ -121,11 +121,11 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
   - `ripple-lib-server` ... Ripple gRPC server
 
 ### `pkg` Directory Structure
-Note, explain only well modified pkgs  
+Note, explained only well modified packages
 
 - `wallet/api/btcgrp` ... Bitcoin RPC APIs. [API References](https://developer.bitcoin.org/reference/rpc/index.html)
 - `wallet/api/ethgrp` ... Ethereum RPC APIs. [API References](https://ethereum.org/en/developers/docs/apis/json-rpc/)
-- `wallet/api/xrpgrp` ... Ripple gRPC client to communicate with `ripple-lib-server`
+- `wallet/api/xrpgrp` ... Ripple gRPC client to communicate with [ripple-lib-server](./web/ripple-lib-server/)
 - `wallet/key` ... address/seed generation logic
 - `wallet/service/btc` ... Bitcoin business logic
 - `wallet/service/eth` ... Ethereum business logic
