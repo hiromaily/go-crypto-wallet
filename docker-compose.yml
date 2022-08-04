@@ -78,6 +78,7 @@ services:
   # watch only wallet
   watch-db:
     image: mysql:5.7
+    platform: linux/x86_64
     container_name: watch-db
     volumes:
       - watch-db:/var/lib/mysql #this volume should be outside to keep on a permanent basis
@@ -97,6 +98,7 @@ services:
   # keygen wallet
   keygen-db:
     image: mysql:5.7
+    platform: linux/x86_64
     container_name: keygen-db
     volumes:
       - keygen-db:/var/lib/mysql #this volume should be outside to keep on a permanent basis
@@ -116,6 +118,7 @@ services:
   # sign wallet
   sign-db:
     image: mysql:5.7
+    platform: linux/x86_64
     container_name: sign-db
     volumes:
       - sign-db:/var/lib/mysql #this volume should be outside to keep on a permanent basis
