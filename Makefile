@@ -1,6 +1,6 @@
 modVer=$(shell cat go.mod | head -n 3 | tail -n 1 | awk '{print $2}' | cut -d'.' -f2)
 currentVer=$(shell go version | awk '{print $3}' | sed -e "s/go//" | cut -d'.' -f2)
-GOLANGCI_VERSION=v1.46.2
+GOLANGCI_VERSION=v1.47.3
 #PROTOC_BIN=protoc
 PROTOC_BIN=buf protoc
 
@@ -55,7 +55,8 @@ install-proto-plugin:
 
 .PHONY: goget
 goget:
-	go get ./...
+	#go get ./...
+	go mod download
 
 ###############################################################################
 # Code Generator
