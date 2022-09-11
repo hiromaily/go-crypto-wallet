@@ -36,6 +36,7 @@ install-tools:
 	go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-mysql@latest
 	go install github.com/ethereum/go-ethereum/cmd/abigen@latest
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_VERSION)
+	go install golang.org/x/vuln/cmd/govulncheck@latest
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 	go install github.com/icholy/gomajor@latest
 
@@ -141,6 +142,10 @@ staticcheck:
 check-upgrade:
 	gomajor list
 
+.PHONY: check-vuln
+check-vuln:
+	govulncheck ./...
+
 ###############################################################################
 # From inside docker container
 ###############################################################################
@@ -154,9 +159,10 @@ build-linux:
 # Build on local
 # - authName on sign works as account name
 ###############################################################################
-.PHONY: tidy
+#.PHONY: tidy
 tidy:
-	go mod tidy -compat=1.17
+	#go mod tidy -compat=1.17
+	go mod tidy
 
 .PHONY: build
 build: tidy
