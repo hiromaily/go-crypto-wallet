@@ -59,6 +59,11 @@ goget:
 	#go get ./...
 	go mod download
 
+.PHONY:jwt
+jwt:
+	openssl rand -hex 32 | tr -d "\n" > "jwtsecret"
+	mv jwtsecret ./docker/nodes/eth/
+
 ###############################################################################
 # Code Generator
 ###############################################################################

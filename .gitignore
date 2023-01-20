@@ -24,7 +24,8 @@ docker/nodes/btc/data3/*
 !docker/nodes/btc/data3/bitcoin.conf
 docker/nodes/bch/data/testnet3
 !docker/nodes/bch/data/bitcoin.conf
-docker/nodes/eth/data/*
+docker/nodes/eth/goerli/*
+docker/nodes/eth/sepolia/*
 docker/nodes/eth/ganache-data/*
 docker/nodes/xrp/db/*
 !.gitkeep

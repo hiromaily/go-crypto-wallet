@@ -15,21 +15,39 @@ services:
   # - [WIP] Use console outside container
   #   $ geth attach ./docker/nodes/eth/data/geth.ipc => not working yet
   #   $ geth attach ipc:./docker/nodes/eth/data/geth.ipc => not working yet
-  #   $ docker exec -it go-crypto-wallet-eth-node-1 geth attach ipc://root/.ethereum/goerli/geth.ipc => it works
+  #   $ docker exec -it geth geth attach ipc://root/.ethereum/goerli/geth.ipc => it works
   #########################################################################
   eth-node:
     # https://hub.docker.com/r/ethereum/client-go/
-    image: ethereum/client-go:v1.10.21
+    image: ethereum/client-go:v1.10.26
+    container_name: geth
     volumes:
-      #- ./docker/nodes/eth/data:/root/.ethereum/goerli
-      - ./docker/nodes/eth/data:/root/.ethereum/sepolia
+      #- ./docker/nodes/eth/goerli:/root/.ethereum/goerli
+      - ./docker/nodes/eth/sepolia:/root/.ethereum/sepolia
+      - ./docker/nodes/eth/jwtsecret:/data/jwtsecret
     ports:
+      #- "30303:30303/tcp"
+      #- "30303:30303/udp"
       - "${ETH_SYNC_PORT:-30303}:30303"
       - "${ETH_RPC_PORT:-8545}:8545"
     stdin_open: true
     tty: true
     #command: --goerli --http --http.addr 0.0.0.0 --http.api admin,debug,web3,eth,txpool,net,personal
-    command: --sepolia --http --http.addr 0.0.0.0 --http.api admin,debug,web3,eth,txpool,net,personal
+    command:
+      - --sepolia
+      #- --goerli
+      - --http
+      - --http.addr=0.0.0.0
+      - --http.port=${ETH_RPC_PORT:-8545}
+      - --http.vhosts=*
+      - --http.corsdomain=*
+      - --http.api=admin,debug,web3,eth,txpool,net,personal
+      - --authrpc.addr=0.0.0.0
+      - --authrpc.port=8551
+      - --authrpc.vhosts=*
+      - --authrpc.jwtsecret=/data/jwtsecret
+      - --maxpeers=30
+      - --cache=4096
 
   #########################################################################
   # trufflesuite/ganache-cli
@@ -43,6 +61,7 @@ services:
   #
   ganache:
     image: trufflesuite/ganache-cli:v6.12.2
+    container_name: ganache
     ports:
       - "${ETH_RPC_PORT:-8545}:8545"
     volumes:
