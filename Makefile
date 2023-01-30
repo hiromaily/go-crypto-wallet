@@ -4,6 +4,15 @@ GOLANGCI_VERSION=v1.47.3
 #PROTOC_BIN=protoc
 PROTOC_BIN=buf protoc
 
+# ETH Variables
+GETH_HTTP_PORT=8546
+BEACON_HTTP_PORT=9596
+GETH_VERSION=v1.10.26
+LODESTAR_VERSION=v1.3.0
+TARGET_NETWORK=sepolia
+# https://eth-clients.github.io/checkpoint-sync-endpoints/
+CHECKPOINT_SYNC_URL=https://beaconstate-${TARGET_NETWORK}.chainsafe.io
+
 ###############################################################################
 # Initial Settings
 ###############################################################################
@@ -56,9 +65,9 @@ install-proto-plugin:
 
 .PHONY: goget
 goget:
-	#go get ./...
 	go mod download
 
+# For Ethereum between execution and beacon client
 .PHONY:jwt
 jwt:
 	openssl rand -hex 32 | tr -d "\n" > "jwtsecret"
@@ -232,7 +241,17 @@ up-docker-bch:
 # run ethereum node server
 .PHONY: up-docker-eth
 up-docker-eth:
-	docker compose -f docker-compose.eth.yml up eth-node
+	GETH_VERSION=$(GETH_VERSION) GETH_HTTP_PORT=$(GETH_HTTP_PORT) \
+	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
+	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
+	docker compose -f docker-compose.eth.yml up geth lodestar
+
+# run ethereum lodestar
+.PHONY: up-docker-lodestar
+up-docker-lodestar:
+	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
+	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
+	docker compose -f docker-compose.eth.yml up lodestar
 
 # run ripple node server
 .PHONY: up-docker-xrp
@@ -276,6 +295,25 @@ bitcoin-stop:
 .PHONY: cd-btc-dir
 cd-btc-dir:
 	cd ~/Library/Application\ Support/Bitcoin
+
+
+###############################################################################
+# Geth specific
+###############################################################################
+# geth image based on ethereum/client-go:v1.10.26 with curl commnad
+.PHONY:build-geth-image
+build-geth-image:
+	GETH_VERSION=$(GETH_VERSION) GETH_HTTP_PORT=$(GETH_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
+	docker compose -f docker-compose.eth.yml build --no-cache geth
+
+.PHONY:import-geth-data
+import-geth-data:
+	docker run -v $(CURDIR)/docker/nodes/eth:/data ethereum/client-go:$(GETH_VERSION) import --datadir=/data/$(TARGET_NETWORK)/geth /data/exported-file
+
+# run after geth stopped
+.PHONY:export-geth-data
+export-geth-data:
+	docker run -v $(CURDIR)/docker/nodes/eth:/data ethereum/client-go:$(GETH_VERSION) export --datadir=/data/$(TARGET_NETWORK)/geth /data/exported-file
 
 
 ###############################################################################

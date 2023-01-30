@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 
 services:
   #########################################################################
@@ -17,37 +17,85 @@ services:
   #   $ geth attach ipc:./docker/nodes/eth/data/geth.ipc => not working yet
   #   $ docker exec -it geth geth attach ipc://root/.ethereum/goerli/geth.ipc => it works
   #########################################################################
-  eth-node:
+  geth:
     # https://hub.docker.com/r/ethereum/client-go/
-    image: ethereum/client-go:v1.10.26
-    container_name: geth
+    image: built-client-go:${GETH_VERSION:-latest}
+    build:
+      context: .
+      dockerfile: ./docker/nodes/eth/Dockerfile.geth
+      args:
+        - VERSION=${GETH_VERSION:-latest}
+    container_name: ${TARGET_NETWORK}-geth
     volumes:
-      #- ./docker/nodes/eth/goerli:/root/.ethereum/goerli
-      - ./docker/nodes/eth/sepolia:/root/.ethereum/sepolia
-      - ./docker/nodes/eth/jwtsecret:/data/jwtsecret
+      - ./docker/nodes/eth/${TARGET_NETWORK}:/data
     ports:
-      #- "30303:30303/tcp"
-      #- "30303:30303/udp"
-      - "${ETH_SYNC_PORT:-30303}:30303"
-      - "${ETH_RPC_PORT:-8545}:8545"
-    stdin_open: true
-    tty: true
-    #command: --goerli --http --http.addr 0.0.0.0 --http.api admin,debug,web3,eth,txpool,net,personal
+      #- "8551:8551" # Authorization Port
+      - ${GETH_HTTP_PORT:-8545}:${GETH_HTTP_PORT:-8545} # RPC Port
+      - 0.0.0.0:30303:30303/tcp
+      - 0.0.0.0:30303:30303/udp
+    #stdin_open: true
+    #tty: true
     command:
-      - --sepolia
-      #- --goerli
+      - --${TARGET_NETWORK} # network. e.g. sepolia
+      - --networkid=11155111
+      - --datadir=/data/geth
       - --http
+      - --http.api=web3,eth,net,admin
       - --http.addr=0.0.0.0
-      - --http.port=${ETH_RPC_PORT:-8545}
+      - --http.port=${GETH_HTTP_PORT:-8545}
       - --http.vhosts=*
       - --http.corsdomain=*
-      - --http.api=admin,debug,web3,eth,txpool,net,personal
       - --authrpc.addr=0.0.0.0
       - --authrpc.port=8551
       - --authrpc.vhosts=*
       - --authrpc.jwtsecret=/data/jwtsecret
-      - --maxpeers=30
+      - --port=30303
+      - --maxpeers=100
       - --cache=4096
+      - --verbosity=4
+    networks:
+      eth:
+    healthcheck:
+      test: [ "CMD", "curl", "-X", "POST", "-H", "'Content-Type: application/json'", "--data", '{"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["0x0", false]}', "http://127.0.0.1:${GETH_HTTP_PORT:-8545}" ]
+      interval: "5s"
+      timeout: "10s"
+      retries: 10
+
+  # Apple Silicon MacOS would not be run
+  # - https://github.com/ChainSafe/lodestar/issues/4801
+  lodestar:
+    # https://hub.docker.com/r/chainsafe/lodestar
+    image: "chainsafe/lodestar:${LODESTAR_VERSION:-latest}"
+    container_name: ${TARGET_NETWORK}-lodestar
+    volumes:
+      - ./docker/nodes/eth/${TARGET_NETWORK}:/data
+    ports:
+      - ${BEACON_HTTP_PORT:-9596}:${BEACON_HTTP_PORT:-9596} # REST API port
+      - 0.0.0.0:9000:9000/tcp
+      - 0.0.0.0:9000:9000/udp
+    environment:
+      NODE_OPTIONS: --max-old-space-size=4096
+    command:
+      - beacon
+      - --checkpointSyncUrl=${CHECKPOINT_SYNC_URL}
+      - --network=${TARGET_NETWORK}
+      - --dataDir=/data/lodestar
+      - --eth1=true
+      - --eth1.providerUrls=http://${TARGET_NETWORK}-geth:${GETH_HTTP_PORT}
+      - --execution.urls=http://${TARGET_NETWORK}-geth:8551
+      - --rest.address=0.0.0.0
+      - --rest.namespace='*'
+      - --jwt-secret=/data/jwtsecret
+      - --targetPeers=50
+      - --logLevel=debug
+      - --logFile=/data/lodestar/beacon.log
+      - --logFileLevel=debug
+      - --logFileDailyRotate=5
+#    depends_on:
+#      geth:
+#        condition: service_healthy
+    networks:
+      eth:
 
   #########################################################################
   # trufflesuite/ganache-cli
@@ -69,3 +117,8 @@ services:
     # command adds into default ENTRYPOINT
     # https://hub.docker.com/r/trufflesuite/ganache-cli/dockerfile
     command: --mnemonic "toy echo orbit embrace opinion file client report history bomb regret life"
+
+networks:
+  eth:
+    name: eth
+    driver: bridge

@@ -6,7 +6,6 @@
 #!cmd/watch
 #!cmd/keygen
 #!cmd/sign
-
 data/address/*
 data/dump/*
 data/fullpubkey/*
@@ -27,5 +26,6 @@ docker/nodes/bch/data/testnet3
 docker/nodes/eth/goerli/*
 docker/nodes/eth/sepolia/*
 docker/nodes/eth/ganache-data/*
+docker/nodes/eth/exported-file
 docker/nodes/xrp/db/*
 !.gitkeep

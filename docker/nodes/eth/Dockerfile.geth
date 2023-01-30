@@ -1,0 +1,5 @@
+ARG VERSION=latest
+FROM ethereum/client-go:${VERSION}
+
+# For health check
+RUN apk add --no-cache curl
