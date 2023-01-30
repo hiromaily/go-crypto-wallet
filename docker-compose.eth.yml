@@ -63,6 +63,7 @@ services:
 
   # Apple Silicon MacOS would not be run
   # - https://github.com/ChainSafe/lodestar/issues/4801
+  # lodestar version must be v1.4.0-rc.1 or higher
   lodestar:
     # https://hub.docker.com/r/chainsafe/lodestar
     image: "chainsafe/lodestar:${LODESTAR_VERSION:-latest}"
@@ -91,9 +92,9 @@ services:
       - --logFile=/data/lodestar/beacon.log
       - --logFileLevel=debug
       - --logFileDailyRotate=5
-#    depends_on:
-#      geth:
-#        condition: service_healthy
+    depends_on:
+      geth:
+        condition: service_healthy
     networks:
       eth:
 

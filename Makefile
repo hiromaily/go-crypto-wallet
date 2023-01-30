@@ -8,7 +8,8 @@ PROTOC_BIN=buf protoc
 GETH_HTTP_PORT=8546
 BEACON_HTTP_PORT=9596
 GETH_VERSION=v1.10.26
-LODESTAR_VERSION=v1.3.0
+#LODESTAR_VERSION=v1.3.0
+LODESTAR_VERSION=v1.4.0-rc.1
 TARGET_NETWORK=sepolia
 # https://eth-clients.github.io/checkpoint-sync-endpoints/
 CHECKPOINT_SYNC_URL=https://beaconstate-${TARGET_NETWORK}.chainsafe.io
