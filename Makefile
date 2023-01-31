@@ -8,8 +8,7 @@ PROTOC_BIN=buf protoc
 GETH_HTTP_PORT=8546
 BEACON_HTTP_PORT=9596
 GETH_VERSION=v1.10.26
-#LODESTAR_VERSION=v1.3.0
-LODESTAR_VERSION=v1.4.0-rc.1
+LODESTAR_VERSION=v1.4.0
 TARGET_NETWORK=sepolia
 # https://eth-clients.github.io/checkpoint-sync-endpoints/
 CHECKPOINT_SYNC_URL=https://beaconstate-${TARGET_NETWORK}.chainsafe.io
@@ -247,6 +246,20 @@ up-docker-eth:
 	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
 	docker compose -f docker-compose.eth.yml up geth lodestar
 
+.PHONY: up-docker-eth-d
+up-docker-eth-d:
+	GETH_VERSION=$(GETH_VERSION) GETH_HTTP_PORT=$(GETH_HTTP_PORT) \
+	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
+	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
+	docker compose -f docker-compose.eth.yml up -d geth lodestar
+
+.PHONY: stop-docker-eth
+stop-docker-eth:
+	GETH_VERSION=$(GETH_VERSION) GETH_HTTP_PORT=$(GETH_HTTP_PORT) \
+	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
+	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
+	docker compose -f docker-compose.eth.yml stop
+
 # run ethereum lodestar
 .PHONY: up-docker-lodestar
 up-docker-lodestar:
@@ -316,6 +329,13 @@ import-geth-data:
 export-geth-data:
 	docker run -v $(CURDIR)/docker/nodes/eth:/data ethereum/client-go:$(GETH_VERSION) export --datadir=/data/$(TARGET_NETWORK)/geth /data/exported-file
 
+.PHONY:check-execution-block
+check-execution-block:
+	curl -X POST -H 'Content-Type: application/json' --data '{"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["latest", false],"id":1}' localhost:$(GETH_HTTP_PORT)
+
+.PHONY:check-execution-syncing
+check-execution-syncing:
+	curl -X POST -H 'Content-Type: application/json' --data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}' localhost:$(GETH_HTTP_PORT)
 
 ###############################################################################
 # Grafana

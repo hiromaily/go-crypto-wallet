@@ -52,7 +52,7 @@ services:
       - --port=30303
       - --maxpeers=100
       - --cache=4096
-      - --verbosity=4
+      #- --verbosity=4
     networks:
       eth:
     healthcheck:
@@ -88,9 +88,9 @@ services:
       - --rest.namespace='*'
       - --jwt-secret=/data/jwtsecret
       - --targetPeers=50
-      - --logLevel=debug
+      #- --logLevel=debug
       - --logFile=/data/lodestar/beacon.log
-      - --logFileLevel=debug
+      #- --logFileLevel=debug
       - --logFileDailyRotate=5
     depends_on:
       geth:
