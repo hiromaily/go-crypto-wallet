@@ -102,11 +102,12 @@ func (e *ERC20) GetBalance(hexAddr string, _ eth.QuantityTag) (*big.Int, error) 
 }
 
 // CreateRawTransaction creates raw transaction for watch only wallet
-// - Transferring Tokens (ERC-20)
-//   https://goethereumbook.org/en/transfer-tokens/
-// - Transfer ERC20 Tokens Using Golang
-//   https://www.youtube.com/watch?v=-Epg5Ub-fA0
-//   https://github.com/what-the-func/golang-ethereum-transfer-tokens/blob/master/main.go
+//   - Transferring Tokens (ERC-20)
+//     https://goethereumbook.org/en/transfer-tokens/
+//   - Transfer ERC20 Tokens Using Golang
+//     https://www.youtube.com/watch?v=-Epg5Ub-fA0
+//     https://github.com/what-the-func/golang-ethereum-transfer-tokens/blob/master/main.go
+//
 // Note:
 // - master address takes fee
 // - sender account delegates transfer to master address

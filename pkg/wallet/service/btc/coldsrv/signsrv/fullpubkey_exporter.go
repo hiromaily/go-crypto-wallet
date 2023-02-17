@@ -71,6 +71,7 @@ func (f *FullPubkeyExport) exportAccountKey(authKeyTable *models.AuthAccountKey,
 	if err != nil {
 		return "", errors.Wrapf(err, "fail to call os.Create(%s)", fileName)
 	}
+	// nolint:errcheck
 	defer file.Close()
 
 	writer := bufio.NewWriter(file)

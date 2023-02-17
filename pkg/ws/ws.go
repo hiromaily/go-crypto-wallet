@@ -39,6 +39,6 @@ func (w *WS) Call(ctx context.Context, req, res interface{}) error {
 }
 
 // Close disconnects
-func (w *WS) Close() {
-	w.conn.Close(websocket.StatusNormalClosure, "")
+func (w *WS) Close() error {
+	return w.conn.Close(websocket.StatusNormalClosure, "")
 }

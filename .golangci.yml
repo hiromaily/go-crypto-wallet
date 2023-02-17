@@ -40,26 +40,27 @@ issues:
     - "HeaderMap is deprecated: HeaderMap exists"
   exclude-use-default: false
 
-linters:
-  disable-all: true
-  enable:
-    - deadcode
-    #- errcheck
-    - gofumpt
-    - goimports
-    - gosimple
-    - govet
-    - ineffassign
-    - misspell
-    - revive
-    - staticcheck
-    - structcheck
-    - typecheck
-    - unused
-    - varcheck
-  presets:
-    # only next presets exist:
-    #  bugs|comment|complexity|error|format|import|metalinter|module|performance|sql|style|test|unused
-    - format
-    - unused
-  fast: false
+# Use default
+#linters:
+#  disable-all: true
+#  enable:
+#    - deadcode
+#    #- errcheck
+#    - gofumpt
+#    - goimports
+#    - gosimple
+#    - govet
+#    - ineffassign
+#    - misspell
+#    - revive
+#    - staticcheck
+#    - structcheck
+#    - typecheck
+#    - unused
+#    - varcheck
+#  presets:
+#    # only next presets exist:
+#    #  bugs|comment|complexity|error|format|import|metalinter|module|performance|sql|style|test|unused
+#    - format
+#    - unused
+#  fast: false

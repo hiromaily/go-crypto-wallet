@@ -195,7 +195,7 @@ func (b *Bitcoin) GetTransactionByTxID(txID string) (*GetTransactionResult, erro
 }
 
 // GetTxOutByTxID get txOut by txID and index
-//  - it's not used anywhere
+//   - it's not used anywhere
 func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutResult, error) {
 	hash, err := chainhash.NewHashFromStr(txID)
 	if err != nil {
@@ -271,7 +271,7 @@ func (b *Bitcoin) GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error) 
 }
 
 // CreateRawTransaction create raw transaction
-//  - for payment action
+//   - for payment action
 func (b *Bitcoin) CreateRawTransaction(inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount) (*wire.MsgTx, error) {
 	lockTime := int64(0) // TODO:Raw locktime what value is exactly required??
 

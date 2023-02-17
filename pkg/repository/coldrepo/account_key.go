@@ -206,8 +206,10 @@ func (r *AccountKeyRepository) UpdateMultisigAddrs(accountType account.AccountTy
 	}
 	defer func() {
 		if err != nil {
+			// nolint:errcheck
 			dtx.Rollback()
 		} else {
+			// nolint:errcheck
 			dtx.Commit()
 		}
 	}()

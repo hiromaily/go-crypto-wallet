@@ -142,7 +142,8 @@ func (a AccountType) Uint32() uint32 {
 //----------------------------------------------------
 
 // AuthType is for authorization account details
-//  this account is used for authorization of multisig address on sing wallet
+//
+//	this account is used for authorization of multisig address on sing wallet
 type AuthType string
 
 // auth_account_type, this type is used for operators with sign wallet

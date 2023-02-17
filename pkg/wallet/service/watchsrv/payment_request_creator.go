@@ -65,8 +65,10 @@ func (p *PaymentRequestCreate) CreatePaymentRequest(amtList []float64) error {
 	}
 	defer func() {
 		if err != nil {
+			// nolint:errcheck
 			dtx.Rollback()
 		} else {
+			// nolint:errcheck
 			dtx.Commit()
 		}
 	}()

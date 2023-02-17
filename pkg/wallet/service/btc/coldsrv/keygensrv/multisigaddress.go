@@ -44,11 +44,11 @@ func NewMultisig(
 
 // AddMultisigAddress add multisig address by auth account address and given account address
 // https://bitcoincore.org/en/doc/0.19.0/rpc/wallet/addmultisigaddress/
-// - if 3:5 proportion is required, at least 4 different auth accounts should be prepared in advance
-// - when sending coin from multisig address, 、related priv key is required which is related to addresses in parameters
-// - 4th parameter must be`p2sh-segwit` addressType in Bitcoin
-//  What is the difference between createmultisig and addmultisigaddress?
-// - https://bitcointalk.org/index.php?topic=3402541.0
+//   - if 3:5 proportion is required, at least 4 different auth accounts should be prepared in advance
+//   - when sending coin from multisig address, 、related priv key is required which is related to addresses in parameters
+//   - 4th parameter must be`p2sh-segwit` addressType in Bitcoin
+//     What is the difference between createmultisig and addmultisigaddress?
+//   - https://bitcointalk.org/index.php?topic=3402541.0
 func (m *Multisig) AddMultisigAddress(accountType account.AccountType, addressType address.AddrType) error {
 	// for sign wallet
 	m.logger.Debug("addmultisigaddress",

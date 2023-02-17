@@ -507,8 +507,10 @@ func (t *TxCreate) insertTxTableForUnsigned(
 	}
 	defer func() {
 		if err != nil {
+			// nolint:errcheck
 			dtx.Rollback()
 		} else {
+			// nolint:errcheck
 			dtx.Commit()
 		}
 	}()

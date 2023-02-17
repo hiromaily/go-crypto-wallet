@@ -52,7 +52,7 @@ func NewAddressImport(
 }
 
 // ImportAddress import PubKey from csv filecsv into database,
-//  - if account is client, which doesn't have account ??
+//   - if account is client, which doesn't have account ??
 func (a *AddressImport) ImportAddress(fileName string, isRescan bool) error {
 	// read file for public key
 	pubKeys, err := a.addrFileRepo.ImportAddress(fileName)

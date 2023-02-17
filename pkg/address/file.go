@@ -37,7 +37,7 @@ func NewFileRepository(filePath string, logger *zap.Logger) *FileRepository {
 
 // CreateFilePath create file path for csv file
 // Format:
-//  - ./data/pubkey/client_1534744535097796209.csv
+//   - ./data/pubkey/client_1534744535097796209.csv
 func (r *FileRepository) CreateFilePath(accountType account.AccountType) string {
 	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
 
@@ -60,6 +60,7 @@ func (r *FileRepository) ImportAddress(fileName string) ([]string, error) {
 	if err != nil {
 		return nil, errors.Errorf("os.Open(%s) error: %s", fileName, err)
 	}
+	// nolint:errcheck
 	defer file.Close()
 
 	var pubKeys []string

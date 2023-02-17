@@ -27,7 +27,8 @@ type LoadWalletResult struct {
 }
 
 // BackupWallet unload wallet.dat
-//  Safely copies current wallet file to destination, which can be a directory or a path with filename
+//
+//	Safely copies current wallet file to destination, which can be a directory or a path with filename
 func (b *Bitcoin) BackupWallet(fileName string) error {
 	// backupwallet
 	bFileName, err := json.Marshal(fileName)
@@ -43,8 +44,8 @@ func (b *Bitcoin) BackupWallet(fileName string) error {
 }
 
 // DumpWallet dump wallet.dat
-//  - fileName: full path
-//  - This does not allow overwriting existing files.
+//   - fileName: full path
+//   - This does not allow overwriting existing files.
 func (b *Bitcoin) DumpWallet(fileName string) error {
 	return b.dumpImportWallet(fileName, dumpWallet)
 }
@@ -106,10 +107,11 @@ func (b *Bitcoin) WalletPassphraseChange(old, new string) error {
 }
 
 // LoadWallet import wallet dat
-//  Loads a wallet from a wallet file or directory.
-//  Note that all wallet command-line options used when starting bitcoind will be
-//  applied to the new wallet (eg -zapwallettxes, upgradewallet, rescan, etc).
-//  e.g. bitcoin-cli loadwallet "test.dat"
+//
+//	Loads a wallet from a wallet file or directory.
+//	Note that all wallet command-line options used when starting bitcoind will be
+//	applied to the new wallet (eg -zapwallettxes, upgradewallet, rescan, etc).
+//	e.g. bitcoin-cli loadwallet "test.dat"
 func (b *Bitcoin) LoadWallet(fileName string) error {
 	if b.Version() < BTCVer17 {
 		return errors.New("`loadwallet` is available from bitcoin version 0.17")
@@ -138,9 +140,10 @@ func (b *Bitcoin) LoadWallet(fileName string) error {
 }
 
 // UnLoadWallet unload wallet dat
-//  Unloads the wallet referenced by the request endpoint otherwise unloads the wallet specified in the argument.
-//  Specifying the wallet name on a wallet endpoint is invalid.
-//  e.g. bitcoin-cli unloadwallet wallet_name
+//
+//	Unloads the wallet referenced by the request endpoint otherwise unloads the wallet specified in the argument.
+//	Specifying the wallet name on a wallet endpoint is invalid.
+//	e.g. bitcoin-cli unloadwallet wallet_name
 func (b *Bitcoin) UnLoadWallet(fileName string) error {
 	if b.Version() < BTCVer17 {
 		return errors.New("`unloadwallet` is available from bitcoin version 0.17")

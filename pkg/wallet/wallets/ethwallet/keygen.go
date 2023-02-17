@@ -95,6 +95,7 @@ func (k *ETHKeygen) SignTx(filePath string) (string, bool, string, error) {
 
 // Done should be called before exit
 func (k *ETHKeygen) Done() {
+	// nolint:errcheck
 	k.dbConn.Close()
 	k.ETH.Close()
 }

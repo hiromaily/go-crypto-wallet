@@ -45,8 +45,8 @@ func NewPrivKey(
 }
 
 // Import imports privKey for authKey
-//  - get WIF whose `is_imported_priv_key` is false
-//  - then call ImportPrivKey(wif) without rescan
+//   - get WIF whose `is_imported_priv_key` is false
+//   - then call ImportPrivKey(wif) without rescan
 func (p *PrivKey) Import() error {
 	// 1. retrieve records(private key) from account_key table
 	authKeyItem, err := p.authKeyRepo.GetOne(p.authType)

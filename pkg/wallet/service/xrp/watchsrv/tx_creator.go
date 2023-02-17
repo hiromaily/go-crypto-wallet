@@ -79,8 +79,10 @@ func (t *TxCreate) updateDB(
 	}
 	defer func() {
 		if err != nil {
+			// nolint:errcheck
 			dtx.Rollback()
 		} else {
+			// nolint:errcheck
 			dtx.Commit()
 		}
 	}()

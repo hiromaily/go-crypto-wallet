@@ -50,7 +50,8 @@ const (
 )
 
 // CoinType creates a separate subtree for every cryptocoin
-//  which come from `CoinType` in go-crypto-wallet/pkg/wallet/coin/types.go
+//
+//	which come from `CoinType` in go-crypto-wallet/pkg/wallet/coin/types.go
 type CoinType uint32
 
 // Uint32 converter
@@ -154,7 +155,7 @@ func (k *HDKey) createKeyByAccount(seed []byte, accountType account.AccountType)
 
 // createKeysWithIndex create keys by index and count
 // e.g. - idxFrom:0,  count 10 => 0-9
-//      - idxFrom:10, count 10 => 10-19
+//   - idxFrom:10, count 10 => 10-19
 func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxFrom, count uint32) ([]WalletKey, error) {
 	// accountPrivKey, err := hdkeychain.NewKeyFromString(accountPrivKey)
 
@@ -357,8 +358,9 @@ func (k *HDKey) getP2PKHAddrBCH(p2PKHAddr *btcutil.AddressPubKeyHash) (string, e
 }
 
 // getP2SHSegWitAddr get P2SH-SegWit address (P2SH nested SegWit) and redeemScript as string
-//  - it's for only BTC
-//  - Though BCH would not require it, just in case
+//   - it's for only BTC
+//   - Though BCH would not require it, just in case
+//
 // FIXME: getting RedeemScript is not fixed yet
 // nolint:unparam
 func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, error) {

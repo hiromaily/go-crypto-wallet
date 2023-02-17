@@ -87,7 +87,12 @@ func (t *TxMonitor) updateStatusTxTypeSent() error {
 			continue
 		}
 		// update status
-		t.txDetailRepo.UpdateTxTypeBySentHashTx(tx.TxTypeDone, sentHash)
+		_, err = t.txDetailRepo.UpdateTxTypeBySentHashTx(tx.TxTypeDone, sentHash)
+		if err != nil {
+			t.logger.Warn("failed to call txDetailRepo.UpdateTxTypeBySentHashTx()",
+				zap.Error(err),
+			)
+		}
 	}
 	return nil
 }

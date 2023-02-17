@@ -9,8 +9,9 @@ import (
 )
 
 // ImportRawKey Imports the given unencrypted private key (hex string) into the key store, encrypting it with the passphrase
-// - if address has 0x like 0x5d0a82e19564ae03ad3b834ac30b94c0ccce510e86d783d3e882efcb0e84b2af,
-//    error would occur `invalid hex character 'x' in private key`
+//   - if address has 0x like 0x5d0a82e19564ae03ad3b834ac30b94c0ccce510e86d783d3e882efcb0e84b2af,
+//     error would occur `invalid hex character 'x' in private key`
+//
 // https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_importrawkey
 // - private key is stored and read from node server
 func (e *Ethereum) ImportRawKey(hexKey, passPhrase string) (string, error) {
@@ -75,7 +76,9 @@ func (e *Ethereum) LockAccount(hexAddr string) error {
 }
 
 // UnlockAccount decrypts the key with the given address from the key store.
-//  duration: second
+//
+//	duration: second
+//
 // https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_unlockaccount
 // FIXME: how to fix error `account unlock with HTTP access is forbidden`
 // - --allow-insecure-unlock option is required to run geth

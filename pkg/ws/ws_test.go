@@ -51,5 +51,6 @@ func TestCall(t *testing.T) {
 	}
 	t.Log(res)
 
+	// nolint:errcheck
 	websoc.Close()
 }

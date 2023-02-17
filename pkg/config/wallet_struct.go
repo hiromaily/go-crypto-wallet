@@ -36,7 +36,8 @@ type Bitcoin struct {
 
 // BitcoinBlock block information of Bitcoin
 // FIXME: keygen/signature wallet doesn't have this value
-//  so validation can not be used
+//
+//	so validation can not be used
 type BitcoinBlock struct {
 	ConfirmationNum uint64 `toml:"confirmation_num"`
 }

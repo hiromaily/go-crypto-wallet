@@ -121,7 +121,9 @@ func (s *Sign) sign(hex, encodedPrevsAddrs string) (string, bool, string, error)
 
 	// decode encodedPrevsAddrs string to btc.AddrsPrevTxs struct
 	var prevsAddrs btc.PreviousTxs
-	serial.DecodeFromString(encodedPrevsAddrs, &prevsAddrs)
+	if err = serial.DecodeFromString(encodedPrevsAddrs, &prevsAddrs); err != nil {
+		return "", false, "", err
+	}
 
 	// single signature address
 	var (

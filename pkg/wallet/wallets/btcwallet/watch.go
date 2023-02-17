@@ -108,6 +108,7 @@ func (w *BTCWatch) CreatePaymentRequest() error {
 
 // Done should be called before exit
 func (w *BTCWatch) Done() {
+	// nolint:errcheck
 	w.dbConn.Close()
 	w.BTC.Close()
 }

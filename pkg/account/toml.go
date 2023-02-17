@@ -1,7 +1,7 @@
 package account
 
 import (
-	"io/ioutil"
+	"os"
 
 	"github.com/BurntSushi/toml"
 	"github.com/go-playground/validator/v10"
@@ -48,7 +48,7 @@ func NewAccount(file string) (*AccountRoot, error) {
 
 // loadAccount load account config file
 func loadAccount(path string) (*AccountRoot, error) {
-	d, err := ioutil.ReadFile(path)
+	d, err := os.ReadFile(path)
 	if err != nil {
 		return nil, errors.Wrapf(err, "can't read toml file. %s", path)
 	}

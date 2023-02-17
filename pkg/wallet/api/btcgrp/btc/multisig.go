@@ -17,9 +17,9 @@ type AddMultisigAddressResult struct {
 }
 
 // AddMultisigAddress create multisig address
-//  - requiredSigs: required number of signature for transaction
-//  - addresses:    list of addresses(e.g. client, auth1, auth2, auth3
-//  - [N:M] e.g. 2:5 => requiredSigs=2, addresses[addr1, addr2, addr3, addr4, addr5]
+//   - requiredSigs: required number of signature for transaction
+//   - addresses:    list of addresses(e.g. client, auth1, auth2, auth3
+//   - [N:M] e.g. 2:5 => requiredSigs=2, addresses[addr1, addr2, addr3, addr4, addr5]
 func (b *Bitcoin) AddMultisigAddress(
 	requiredSigs int,
 	addresses []string,

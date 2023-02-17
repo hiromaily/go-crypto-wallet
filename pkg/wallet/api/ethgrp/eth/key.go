@@ -3,7 +3,6 @@ package eth
 import (
 	"crypto/ecdsa"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -70,7 +69,8 @@ func (e *Ethereum) GetPrivKey(hexAddr, password string) (*keystore.Key, error) {
 
 // readPrivKey read private key file from directory
 // Note: file is found out from local directory,
-//  if node is working remotely, file is not found.
+//
+//	if node is working remotely, file is not found.
 func (e *Ethereum) readPrivKey(hexAddr, path string) ([]byte, error) {
 	// search file
 	// filename is like `UTC--2020-05-18T16-01-32.772616000Z--e52307deb1a7dc3985d2873b45ae23b91d57a36d`
@@ -95,7 +95,7 @@ func (e *Ethereum) readPrivKey(hexAddr, path string) ([]byte, error) {
 		return nil, errors.Errorf("target private key files are found more than 1 by %s", addr)
 	}
 
-	return ioutil.ReadFile(files[0])
+	return os.ReadFile(files[0])
 }
 
 // RenameParityKeyFile renames parity file format
@@ -105,7 +105,7 @@ func (e *Ethereum) RenameParityKeyFile(hexAddr string, accountType account.Accou
 		return nil
 	}
 
-	files, err := ioutil.ReadDir(e.GetKeyDir())
+	files, err := os.ReadDir(e.GetKeyDir())
 	if err != nil {
 		return err
 	}
@@ -122,12 +122,10 @@ func (e *Ethereum) RenameParityKeyFile(hexAddr string, accountType account.Accou
 	// get last one
 	target := fileNames[len(fileNames)-1]
 
-	// remove `0x`を from hexAddr
+	// remove `0x` from hexAddr
 	addr := strings.TrimLeft(hexAddr, "0x")
 
 	// rename xxxxx--[address]
 	previousName := fmt.Sprintf("%s/%s", e.GetKeyDir(), target)
-	os.Rename(previousName, fmt.Sprintf("%s--%s", previousName, addr))
-
-	return nil
+	return os.Rename(previousName, fmt.Sprintf("%s--%s", previousName, addr))
 }

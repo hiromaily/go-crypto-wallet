@@ -37,8 +37,8 @@ func NewPrivKey(
 }
 
 // Import imports privKey for accountKey
-//  - get WIF whose `is_imported_priv_key` is false
-//  - then call ImportPrivKey(wif) without rescan
+//   - get WIF whose `is_imported_priv_key` is false
+//   - then call ImportPrivKey(wif) without rescan
 func (p *PrivKey) Import(accountType account.AccountType) error {
 	// 1. retrieve records(private key) from account_key table
 	accountKeyTable, err := p.accountKeyRepo.GetAllAddrStatus(accountType, address.AddrStatusHDKeyGenerated) // addr_status=0

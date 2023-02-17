@@ -33,8 +33,8 @@ type ResponseSyncing struct {
 }
 
 // Syncing returns sync status or bool
-//  - return false if not syncing (it means syncing is done)
-//  - there seems 2 different responses
+//   - return false if not syncing (it means syncing is done)
+//   - there seems 2 different responses
 func (e *Ethereum) Syncing() (*ResponseSyncing, bool, error) {
 	var any interface{}
 
@@ -89,9 +89,9 @@ func (e *Ethereum) ProtocolVersion() (uint64, error) {
 // Coinbase returns the client coinbase address
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_coinbase
 // Note:
-//  - any accounts can not be retrieved if no private key in keystore in node server.
-//  - when running geth command, keystore option should be used to specify directory
-//  - that means, this rpc can be called from cold wallet which has private key
+//   - any accounts can not be retrieved if no private key in keystore in node server.
+//   - when running geth command, keystore option should be used to specify directory
+//   - that means, this rpc can be called from cold wallet which has private key
 func (e *Ethereum) Coinbase() (string, error) {
 	var resAddr string
 	err := e.rpcClient.CallContext(e.ctx, &resAddr, "eth_coinbase")
@@ -105,9 +105,10 @@ func (e *Ethereum) Coinbase() (string, error) {
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_accounts
 // https://github.com/ethereum/go-ethereum/wiki/Managing-your-accounts
 // Note:
-//  - any accounts can not be retrieved if no private key in keystore in node server.
-//  - when running geth command, keystore option should be used to specify directory
-//  - that means, this rpc can be called from cold wallet which has private key
+//   - any accounts can not be retrieved if no private key in keystore in node server.
+//   - when running geth command, keystore option should be used to specify directory
+//   - that means, this rpc can be called from cold wallet which has private key
+//
 // - private key is stored and read from node server
 // - result is same as ListAccounts()
 func (e *Ethereum) Accounts() ([]string, error) {

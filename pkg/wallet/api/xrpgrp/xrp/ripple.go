@@ -51,16 +51,20 @@ func NewRipple(
 }
 
 // Close disconnect to server
-func (r *Ripple) Close() {
+func (r *Ripple) Close() error {
 	if r.wsPublic != nil {
+		// nolint:errcheck
 		r.wsPublic.Close()
 	}
 	if r.wsAdmin != nil {
+		// nolint:errcheck
 		r.wsAdmin.Close()
 	}
 	if r.API != nil {
+		// nolint:errcheck
 		r.API.Close()
 	}
+	return nil
 }
 
 // CoinTypeCode returns coinTypeCode

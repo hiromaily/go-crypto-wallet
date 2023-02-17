@@ -14,8 +14,8 @@ import (
 
 // NewMySQL connect to MySQL server
 // TODO:
-//  - retry functionality and retry count should be configured in config file
-//  - change sqlx.DB to basic one because it would be replaced sqlboiler
+//   - retry functionality and retry count should be configured in config file
+//   - change sqlx.DB to basic one because it would be replaced sqlboiler
 func NewMySQL(conf *config.MySQL) (*sql.DB, error) {
 	db, err := sql.Open("mysql",
 		fmt.Sprintf(

@@ -54,7 +54,8 @@ func (s *Seed) Generate() ([]byte, error) {
 }
 
 // Store stores given seed from command line args
-//  development use
+//
+//	development use
 func (s *Seed) Store(strSeed string) ([]byte, error) {
 	bSeed, err := key.SeedToByte(strSeed)
 	if err != nil {

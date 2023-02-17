@@ -32,7 +32,8 @@ func ClolorUI() *cli.ColoredUi {
 }
 
 // HelpFunc modify default help explanation
-//  if new args are added on the top, modify this func
+//
+//	if new args are added on the top, modify this func
 func HelpFunc(appName string) func(c map[string]cli.CommandFactory) string {
 	return func(c map[string]cli.CommandFactory) string {
 		// Replace basic help header by new one

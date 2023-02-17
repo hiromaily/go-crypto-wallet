@@ -46,7 +46,9 @@ type ResponseGetTransactionReceipt struct {
 }
 
 // Sign calculates an Ethereum specific signature with:
-//  sign(keccak256("\x19Ethereum Signed Message:\n" + len(message) + message)))
+//
+//	sign(keccak256("\x19Ethereum Signed Message:\n" + len(message) + message)))
+//
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_sign
 func (e *Ethereum) Sign(hexAddr, message string) (string, error) {
 	var signature string

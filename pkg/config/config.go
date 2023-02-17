@@ -1,7 +1,7 @@
 package config
 
 import (
-	"io/ioutil"
+	"os"
 
 	"github.com/BurntSushi/toml"
 	"github.com/go-playground/validator/v10"
@@ -36,7 +36,7 @@ func NewWallet(file string, wtype wallet.WalletType, coinTypeCode coin.CoinTypeC
 
 // loadWallet load config file
 func loadWallet(path string) (*WalletRoot, error) {
-	d, err := ioutil.ReadFile(path)
+	d, err := os.ReadFile(path)
 	if err != nil {
 		return nil, errors.Wrapf(err, "can't read toml file. %s", path)
 	}
@@ -82,7 +82,7 @@ func (c *WalletRoot) validate(wtype wallet.WalletType, coinTypeCode coin.CoinTyp
 
 func (c *WalletRoot) ValidateERC20(token coin.ERC20Token) error {
 	if _, ok := c.Ethereum.ERC20s[token]; !ok {
-		errors.Errorf("erc20 token information for [%s] is required", token.String())
+		return errors.Errorf("erc20 token information for [%s] is required", token.String())
 	}
 	return nil
 }

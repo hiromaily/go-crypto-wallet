@@ -142,6 +142,7 @@ func (r *FileRepository) ReadFileSlice(path string) ([]string, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to open file: %s", path)
 	}
+	// nolint:errcheck
 	defer file.Close()
 	data := make([]string, 0)
 
@@ -191,7 +192,10 @@ func (r *FileRepository) WriteFileSlice(path string, data []string) (string, err
 		_, _ = writer.WriteString(d + "\n")
 	}
 
-	writer.Flush()
+	if err = writer.Flush(); err != nil {
+		return "", err
+	}
+	// nolint:errcheck
 	file.Close()
 
 	return fileName, nil
@@ -202,6 +206,7 @@ func (r *FileRepository) createDir(path string) {
 	tmp2 := tmp1[0 : len(tmp1)-1] // cut filename
 	dir := strings.Join(tmp2, "/")
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		// nolint:errcheck
 		os.Mkdir(dir, 0o755)
 	}
 }

@@ -11,7 +11,8 @@ import (
 // - this is not used, just for test
 
 // GenerateWIF generate one WIF, pubKey
-//  WIF(Wallet Import Format) something simple format for privKey
+//
+//	WIF(Wallet Import Format) something simple format for privKey
 func GenerateWIF(conf *chaincfg.Params) (*btcutil.WIF, string, error) {
 	// Create Private Key
 	wif, err := createPrivateKey(conf)

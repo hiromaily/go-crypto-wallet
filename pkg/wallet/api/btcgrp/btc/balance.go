@@ -11,8 +11,8 @@ import (
 
 // GetBalance gets balance
 // - It would include dirty outputs already spent tx, so it maybe useless
-//  - wallet does not have the "avoid reuse" feature enabled
-//  - `bitcoin-cli getbalance "*" 6 true true`
+//   - wallet does not have the "avoid reuse" feature enabled
+//   - `bitcoin-cli getbalance "*" 6 true true`
 func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
 	input1, err := json.Marshal("*")
 	if err != nil {

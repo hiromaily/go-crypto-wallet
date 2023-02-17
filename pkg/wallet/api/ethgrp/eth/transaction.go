@@ -72,8 +72,9 @@ func (e *Ethereum) calculateFee(fromAddr, toAddr common.Address, balance, gasPri
 
 // CreateRawTransaction creates raw transaction for watch only wallet
 // TODO: which QuantityTag should be used?
-// - Creating offline/raw transactions with Go-Ethereum
-//   https://medium.com/@akshay_111meher/creating-offline-raw-transactions-with-go-ethereum-8d6cc8174c5d
+//   - Creating offline/raw transactions with Go-Ethereum
+//     https://medium.com/@akshay_111meher/creating-offline-raw-transactions-with-go-ethereum-8d6cc8174c5d
+//
 // Note: sender account owes fee
 // - if sender sends 5ETH, receiver receives 5ETH
 // - sender has to pay 5ETH + fee

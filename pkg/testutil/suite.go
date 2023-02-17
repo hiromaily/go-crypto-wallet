@@ -50,5 +50,6 @@ func (xts *XRPTestSuite) SetupTest() {
 }
 
 func (xts *XRPTestSuite) TearDownTest() {
+	// nolint:errcheck
 	xts.XRP.Close()
 }

@@ -21,7 +21,7 @@ type Rippler interface {
 	CreateRawTransaction(senderAccount, receiverAccount string, amount float64, instructions *xrp.Instructions) (*xrp.TxInput, string, error)
 
 	// ripple
-	Close()
+	Close() error
 	CoinTypeCode() coin.CoinTypeCode
 	GetChainConf() *chaincfg.Params
 }
