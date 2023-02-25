@@ -6,6 +6,7 @@ This installation expects MacOS environment.
 - Golang 1.16+
 - [golangci-lint](https://github.com/golangci/golangci-lint) 1.43+ (for development)
 - [direnv](https://direnv.net/)
+  - Whatever just specific environment variables need to be set. Refer to [.envrc](https://github.com/hiromaily/go-crypto-wallet/blob/master/.envrc)
 - [Docker](https://www.docker.com/get-started)
 
 ## Common Setup
@@ -24,11 +25,11 @@ go build -ldflags "-X main.authName=auth4" -v -o ${GOPATH}/bin/sign4 ./cmd/sign/
 go build -ldflags "-X main.authName=auth5" -v -o ${GOPATH}/bin/sign5 ./cmd/sign/
 ```
 3. configure config files in [./data/config/*.toml](https://github.com/hiromaily/go-crypto-wallet/tree/master/data/config)
-4. set environment variables
-   - install [direnv](https://direnv.net/)
-   - see `.envrc`
-   - modify `.envrc` if needed
-   - execute `direnv allow` on terminal
+4. set environment variables. Refer to [.envrc](https://github.com/hiromaily/go-crypto-wallet/blob/master/.envrc)
+   - Using `direnv` insted of setting environment variables
+     - install [direnv](https://direnv.net/) if needed
+     - modify `.envrc` if needed
+     - execute `direnv allow` on terminal
 5. run Database containers
 ```
 docker compose up watch-db keygen-db sign-db
@@ -111,8 +112,9 @@ It depends on which node you choose
 ```
 make up-docker-eth
  or
-docker compose -f docker-compose.eth.yml up eth-node
+docker compose -f docker-compose.eth.yml up geth
 ```
+- If you have exported data, run `make import-geth-data` after tweaking parameters before running `make up-docker-eth`.
 
 #### [WIP] Call API => move to operation example
 1. `watch -coin eth api clientversion`

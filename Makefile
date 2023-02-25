@@ -8,10 +8,20 @@ PROTOC_BIN=buf protoc
 GETH_HTTP_PORT=8546
 BEACON_HTTP_PORT=9596
 GETH_VERSION=v1.10.26
-LODESTAR_VERSION=v1.4.0
+LODESTAR_VERSION=v1.4.3
+#ETH_CHAIN_ID=11155111 # used in docker-compose.eth.yml.
 TARGET_NETWORK=sepolia
 # https://eth-clients.github.io/checkpoint-sync-endpoints/
 CHECKPOINT_SYNC_URL=https://beaconstate-${TARGET_NETWORK}.chainsafe.io
+
+# timestamp
+OS=$(shell uname -s)
+timestamp=""
+ifeq ($(OS), Darwin)
+	timestamp=$(shell date -v+10S '+%s')
+else
+	timestamp=$(shell date -d'+10second' +%s)
+endif
 
 ###############################################################################
 # Initial Settings
@@ -23,6 +33,10 @@ check-ver:
 	@if [ ${currentVer} -lt ${modVer} ]; then\
 		echo go version ${modVer}++ is required but your go version is ${currentVer};\
 	fi
+
+.PHONY: timestamp
+timestamp:
+	@echo $(timestamp)
 
 .PHONY: install-mac-tools
 install-mac-tools:
@@ -71,7 +85,8 @@ goget:
 .PHONY:jwt
 jwt:
 	openssl rand -hex 32 | tr -d "\n" > "jwtsecret"
-	mv jwtsecret ./docker/nodes/eth/
+	mv jwtsecret ./docker/nodes/eth/configs/
+
 
 ###############################################################################
 # Code Generator
@@ -314,6 +329,10 @@ cd-btc-dir:
 ###############################################################################
 # Geth specific
 ###############################################################################
+.PHONY:geth-help
+geth-help:
+	docker run --rm ethereum/client-go:$(GETH_VERSION) --help
+
 # geth image based on ethereum/client-go:v1.10.26 with curl commnad
 .PHONY:build-geth-image
 build-geth-image:
@@ -322,12 +341,12 @@ build-geth-image:
 
 .PHONY:import-geth-data
 import-geth-data:
-	docker run -v $(CURDIR)/docker/nodes/eth:/data ethereum/client-go:$(GETH_VERSION) import --datadir=/data/$(TARGET_NETWORK)/geth /data/exported-file
+	docker run -v $(CURDIR)/docker/nodes/eth/backup:/backup -v $(CURDIR)/docker/nodes/eth/$(TARGET_NETWORK):/data ethereum/client-go:$(GETH_VERSION) import --datadir=/data /backup/exported-file
 
 # run after geth stopped
 .PHONY:export-geth-data
 export-geth-data:
-	docker run -v $(CURDIR)/docker/nodes/eth:/data ethereum/client-go:$(GETH_VERSION) export --datadir=/data/$(TARGET_NETWORK)/geth /data/exported-file
+	docker run -v $(CURDIR)/docker/nodes/eth/backup:/backup -v $(CURDIR)/docker/nodes/eth/$(TARGET_NETWORK):/data ethereum/client-go:$(GETH_VERSION) export --datadir=/data /backup/exported-file-$(timestamp)
 
 .PHONY:check-execution-block
 check-execution-block:

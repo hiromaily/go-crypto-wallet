@@ -7,14 +7,14 @@ services:
   #------------------------------------------------------------------------
   # Example of commands to container
   # - Use console inside container
-  #  1. $ docker compose -f docker-compose.eth.yml exec eth-node sh
+  #  1. $ docker compose -f docker-compose.eth.yml exec geth sh
   #  2. # geth attach or geth attach ipc://root/.ethereum/goerli/geth.ipc
   #  3. > eth.syncing
   # - Call JSON-RPC (https://eth.wiki/json-rpc/API)
   #   $ curl -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}' http://localhost:8545
   # - [WIP] Use console outside container
-  #   $ geth attach ./docker/nodes/eth/data/geth.ipc => not working yet
-  #   $ geth attach ipc:./docker/nodes/eth/data/geth.ipc => not working yet
+  #   $ geth attach ./docker/nodes/eth/sepolia/geth.ipc => not working yet
+  #   $ geth attach ipc:./docker/nodes/eth/sepolia/geth.ipc => not working yet
   #   $ docker exec -it geth geth attach ipc://root/.ethereum/goerli/geth.ipc => it works
   #########################################################################
   geth:
@@ -28,6 +28,7 @@ services:
     container_name: ${TARGET_NETWORK}-geth
     volumes:
       - ./docker/nodes/eth/${TARGET_NETWORK}:/data
+      - ./docker/nodes/eth/configs/jwtsecret:/secret/jwtsecret
     ports:
       #- "8551:8551" # Authorization Port
       - ${GETH_HTTP_PORT:-8545}:${GETH_HTTP_PORT:-8545} # RPC Port
@@ -38,7 +39,7 @@ services:
     command:
       - --${TARGET_NETWORK} # network. e.g. sepolia
       - --networkid=11155111
-      - --datadir=/data/geth
+      - --datadir=/data
       - --http
       - --http.api=web3,eth,net,admin
       - --http.addr=0.0.0.0
@@ -48,7 +49,7 @@ services:
       - --authrpc.addr=0.0.0.0
       - --authrpc.port=8551
       - --authrpc.vhosts=*
-      - --authrpc.jwtsecret=/data/jwtsecret
+      - --authrpc.jwtsecret=/secret/jwtsecret
       - --port=30303
       - --maxpeers=100
       - --cache=4096
@@ -70,6 +71,7 @@ services:
     container_name: ${TARGET_NETWORK}-lodestar
     volumes:
       - ./docker/nodes/eth/${TARGET_NETWORK}:/data
+      - ./docker/nodes/eth/configs/jwtsecret:/secret/jwtsecret
     ports:
       - ${BEACON_HTTP_PORT:-9596}:${BEACON_HTTP_PORT:-9596} # REST API port
       - 0.0.0.0:9000:9000/tcp
@@ -86,7 +88,7 @@ services:
       - --execution.urls=http://${TARGET_NETWORK}-geth:8551
       - --rest.address=0.0.0.0
       - --rest.namespace='*'
-      - --jwt-secret=/data/jwtsecret
+      - --jwt-secret=/secret/jwtsecret
       - --targetPeers=50
       #- --logLevel=debug
       - --logFile=/data/lodestar/beacon.log
