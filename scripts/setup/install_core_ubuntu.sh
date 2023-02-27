@@ -6,7 +6,7 @@ sudo apt-get install bitcoind
 
 mkdir ~/.bitcoin
 
-cat <<EOF >> ~/.bitcoin/bitcoin.conf
+cat <<EOF >>~/.bitcoin/bitcoin.conf
 testnet=1
 server=1
 rpcuser=hiromaily

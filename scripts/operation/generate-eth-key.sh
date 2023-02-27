@@ -12,16 +12,16 @@ CLIENT=${2:?1}
 ###############################################################################
 echo '------ create eth key -----'
 if [ $CLIENT -eq 1 ]; then
-  echo import ganache keys
-  docker compose exec keygen-db mysql -u root -proot  -e "$(cat ./docker/mysql/insert/ganache.example.sql)"
+	echo import ganache keys
+	docker compose exec keygen-db mysql -u root -proot -e "$(cat ./docker/mysql/insert/ganache.example.sql)"
 else
-  # create seed
-  keygen -coin ${COIN} create seed
-  # create hdkey for client, deposit, payment account
-  keygen -coin ${COIN} create hdkey -account client -keynum 10
-  keygen -coin ${COIN} create hdkey -account deposit -keynum 1
-  keygen -coin ${COIN} create hdkey -account payment -keynum 1
-  keygen -coin ${COIN} create hdkey -account stored -keynum 1
+	# create seed
+	keygen -coin ${COIN} create seed
+	# create hdkey for client, deposit, payment account
+	keygen -coin ${COIN} create hdkey -account client -keynum 10
+	keygen -coin ${COIN} create hdkey -account deposit -keynum 1
+	keygen -coin ${COIN} create hdkey -account payment -keynum 1
+	keygen -coin ${COIN} create hdkey -account stored -keynum 1
 fi
 
 # import generated private key into keygen wallet (this command should run on ethereum server)

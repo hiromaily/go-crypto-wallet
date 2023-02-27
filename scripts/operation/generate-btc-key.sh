@@ -15,7 +15,6 @@ set -eu
 # debug
 #set -eux
 
-
 COIN="${1:?btc}"
 ENCRYPTED="${2:?false}"
 SIGN_WALLET_NUM=${3:?5}
@@ -34,7 +33,7 @@ echo "------------------------------------------------"
 echo "create hdkey for client, deposit, payment account"
 echo "------------------------------------------------"
 for account in client deposit payment stored; do
-  keygen -coin ${COIN} create hdkey -account $account -keynum 10
+	keygen -coin ${COIN} create hdkey -account $account -keynum 10
 done
 
 # import generated private key into keygen wallet
@@ -43,17 +42,17 @@ echo "import generated private key into keygen wallet"
 echo "------------------------------------------------"
 # if wallet is encrypted, walletpassphrase is required before
 if [ "$ENCRYPTED" = "true" ]; then
-  keygen api walletpassphrase -passphrase test
+	keygen api walletpassphrase -passphrase test
 fi
 for account in client deposit payment stored; do
-  # FIXME: error occurred => done
-  # fail to call ImportPrivKeyRescan(): -18: No wallet is loaded.
-  # Load a wallet using loadwallet or create a new one with createwallet.
-  # (Note: A default wallet is no longer automatically created)
-  keygen -coin ${COIN} import privkey -account $account
+	# FIXME: error occurred => done
+	# fail to call ImportPrivKeyRescan(): -18: No wallet is loaded.
+	# Load a wallet using loadwallet or create a new one with createwallet.
+	# (Note: A default wallet is no longer automatically created)
+	keygen -coin ${COIN} import privkey -account $account
 done
 if [ "$ENCRYPTED" = "true" ]; then
-  keygen api walletlock
+	keygen api walletlock
 fi
 
 ###############################################################################
@@ -70,8 +69,8 @@ echo "------------------------------------------------"
 echo "create hdkey for authorization"
 echo "------------------------------------------------"
 for i in $(seq 1 $SIGN_WALLET_NUM); do
-  echo $i
-  sign$i -coin ${COIN} -wallet sign$i create hdkey
+	echo $i
+	sign$i -coin ${COIN} -wallet sign$i create hdkey
 done
 
 # import generated private key into sign wallet
@@ -80,13 +79,13 @@ echo "import generated private key into sign wallet"
 echo "------------------------------------------------"
 # if wallet is encrypted, walletpassphrase is required before
 for i in $(seq 1 $SIGN_WALLET_NUM); do
-  if [ "$ENCRYPTED" = "true" ]; then
-    sign$i -coin ${COIN} -wallet sign$i api walletpassphrase -passphrase test
-  fi
-  sign$i -coin ${COIN} -wallet sign$i import privkey
-  if [ "$ENCRYPTED" = "true" ]; then
-    sign$i -coin ${COIN} -wallet sign$i api walletlock
-  fi
+	if [ "$ENCRYPTED" = "true" ]; then
+		sign$i -coin ${COIN} -wallet sign$i api walletpassphrase -passphrase test
+	fi
+	sign$i -coin ${COIN} -wallet sign$i import privkey
+	if [ "$ENCRYPTED" = "true" ]; then
+		sign$i -coin ${COIN} -wallet sign$i api walletlock
+	fi
 done
 
 # export full-pubkey as csv file
@@ -99,7 +98,6 @@ file_fullpubkey_auth2=$(sign2 -coin "${COIN}" -wallet sign2 export fullpubkey)
 file_fullpubkey_auth3=$(sign3 -coin "${COIN}" -wallet sign3 export fullpubkey)
 file_fullpubkey_auth4=$(sign4 -coin "${COIN}" -wallet sign4 export fullpubkey)
 file_fullpubkey_auth5=$(sign5 -coin "${COIN}" -wallet sign5 export fullpubkey)
-
 
 ###############################################################################
 # keygen wallet
@@ -131,7 +129,6 @@ file_address_client=$(keygen -coin "${COIN}" export address -account client)
 file_address_deposit=$(keygen -coin "${COIN}" export address -account deposit)
 file_address_payment=$(keygen -coin "${COIN}" export address -account payment)
 file_address_stored=$(keygen -coin "${COIN}" export address -account stored)
-
 
 ###############################################################################
 # watch only wallet

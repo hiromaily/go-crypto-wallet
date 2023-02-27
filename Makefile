@@ -62,6 +62,8 @@ install-tools:
 	go install golang.org/x/vuln/cmd/govulncheck@latest
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 	go install github.com/icholy/gomajor@latest
+	go install mvdan.cc/sh/v3/cmd/gosh@latest
+	go install mvdan.cc/sh/v3/cmd/shfmt@latest
 
 .PHONY: install-proto-plugin
 install-proto-plugin:
@@ -174,6 +176,11 @@ check-upgrade:
 .PHONY: check-vuln
 check-vuln:
 	govulncheck ./...
+
+.PHONY: shfmt
+shfmt:
+	shfmt -l -w scripts/*.sh
+	shfmt -l -w scripts/*/**.sh
 
 ###############################################################################
 # From inside docker container

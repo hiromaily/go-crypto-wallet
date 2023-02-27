@@ -10,14 +10,14 @@ cmd="$@"
 
 count=0
 while ! mysqladmin ping -h"$host" --silent; do
-    >&2 echo "Database is unavailable - sleeping"
-    count=$((++count))
-    if [ "$count" -gt 30 ]; then
-        >&2 echo "timeout"
-        exit 1
-    fi
-    sleep 1
+	echo >&2 "Database is unavailable - sleeping"
+	count=$((++count))
+	if [ "$count" -gt 30 ]; then
+		echo >&2 "timeout"
+		exit 1
+	fi
+	sleep 1
 done
 
->&2 echo "Database is up - executing command"
+echo >&2 "Database is up - executing command"
 exec $cmd

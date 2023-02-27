@@ -7,9 +7,8 @@ git clone https://github.com/hiromaily/erc20-token.git
 cd erc20-token
 
 yarn install
-yarn run deploy       # using 7545 port
+yarn run deploy # using 7545 port
 #yarn run deploy-geth  # using 8545 port
-
 
 # then takes note
 # - contract address

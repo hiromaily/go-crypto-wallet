@@ -16,7 +16,7 @@ tx_file=$(watch -coin xrp create payment)
 
 # sign on keygen wallet
 echo 'sign on '${tx_file##*\[fileName\]: }
-tx_file_signed=`keygen -coin xrp sign -file "${tx_file##*\[fileName\]: }"`
+tx_file_signed=$(keygen -coin xrp sign -file "${tx_file##*\[fileName\]: }")
 
 # send signed tx
 echo 'send tx '${tx_file_signed##*\[fileName\]: }

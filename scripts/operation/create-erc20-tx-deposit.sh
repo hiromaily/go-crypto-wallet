@@ -12,7 +12,7 @@ tx_file=$(watch -coin hyt create deposit)
 
 # sign on keygen wallet
 echo 'sign on '${tx_file##*\[fileName\]: }
-tx_file_signed=`keygen -coin hyt sign -file "${tx_file##*\[fileName\]: }"`
+tx_file_signed=$(keygen -coin hyt sign -file "${tx_file##*\[fileName\]: }")
 
 # send signed tx
 echo 'send tx '${tx_file_signed##*\[fileName\]: }
