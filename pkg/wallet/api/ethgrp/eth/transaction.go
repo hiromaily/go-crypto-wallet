@@ -204,14 +204,17 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (
 		zap.Uint64("chainID", chainID.Uint64()),
 		zap.Any("key.PrivateKey", key.PrivateKey),
 	)
+	//var signer types.Signer = types.NewEIP155Signer(chainID)
+	var signer types.Signer = types.NewLondonSigner(chainID)
 
 	// sign
-	signedTX, err := types.SignTx(tx, types.NewEIP155Signer(chainID), key.PrivateKey)
+	signedTX, err := types.SignTx(tx, signer, key.PrivateKey)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call types.SignTx()")
 	}
+
 	// TODO: baseFee *big.Int param is added in AsMessage method and maybe useful
-	msg, err := signedTX.AsMessage(types.NewEIP155Signer(chainID), nil)
+	fromSignedAddr, err := types.Sender(signer, signedTX)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to cll signedTX.AsMessage()")
 	}
@@ -223,10 +226,10 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (
 
 	resTx := &ethtx.RawTx{
 		UUID:  rawTx.UUID,
-		From:  msg.From().Hex(),
-		To:    msg.To().Hex(),
-		Value: *msg.Value(),
-		Nonce: msg.Nonce(),
+		From:  fromSignedAddr.Hex(),
+		To:    signedTX.To().Hex(),
+		Value: *signedTX.Value(),
+		Nonce: signedTX.Nonce(),
 		TxHex: *encodedTx,
 		Hash:  signedTX.Hash().Hex(),
 	}
