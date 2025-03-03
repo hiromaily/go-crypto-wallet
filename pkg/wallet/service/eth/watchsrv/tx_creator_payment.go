@@ -46,7 +46,7 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 		return "", "", errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
 	}
 	if t.validateAmount(senderAddr, totalAmount) != nil {
-		return "", "", err
+		return "", "", nil
 	}
 
 	// create raw transaction each address
