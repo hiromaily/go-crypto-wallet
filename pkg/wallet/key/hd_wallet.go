@@ -383,7 +383,7 @@ func (k *HDKey) getP2PKHAddrBCH(p2PKHAddr *btcutil.AddressPubKeyHash) (string, e
 //
 // FIXME: getting RedeemScript is not fixed yet
 //
-//nolint:unparam
+//nolint:unparam // redeemScript (second return value) is not implemented yet, will be fixed in future
 func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, error) {
 	// []byte
 	pubKeyHash := btcutil.Hash160(privKey.PubKey().SerializeCompressed())
