@@ -14,15 +14,15 @@ type multisigAccount struct {
 
 // NewMultisigAccounts returns multisigAccount instance
 func NewMultisigAccounts(confMultisig []AccountMultisig) MultisigAccounter {
-	multisigAccount := multisigAccount{
+	ma := multisigAccount{
 		accountMap: make(map[AccountType]map[int][]AuthType, len(confMultisig)),
 	}
 	for _, val := range confMultisig {
-		multisigAccount.accountMap[val.Type] = map[int][]AuthType{
+		ma.accountMap[val.Type] = map[int][]AuthType{
 			val.Required: val.AuthUsers,
 		}
 	}
-	return &multisigAccount
+	return &ma
 }
 
 // IsMultisigAccount validates Multisig account or not

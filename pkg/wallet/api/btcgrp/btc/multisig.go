@@ -56,7 +56,8 @@ func (b *Bitcoin) AddMultisigAddress(
 	var jsonRawMsg []json.RawMessage
 	switch b.coinTypeCode {
 	case coin.BTC:
-		bAddrType, err := json.Marshal(addressType.String())
+		var bAddrType []byte
+		bAddrType, err = json.Marshal(addressType.String())
 		if err != nil {
 			b.logger.Warn(
 				"fail to json.Marchal(addressType)",

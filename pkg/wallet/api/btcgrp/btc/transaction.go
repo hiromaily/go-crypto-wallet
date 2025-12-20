@@ -152,7 +152,7 @@ func (b *Bitcoin) ToMsgTx(txHex string) (*wire.MsgTx, error) {
 	}
 
 	var msgTx wire.MsgTx
-	if err := msgTx.Deserialize(bytes.NewReader(byteHex)); err != nil {
+	if err = msgTx.Deserialize(bytes.NewReader(byteHex)); err != nil {
 		return nil, errors.Wrap(err, "fail to call hex.Deserialize()")
 	}
 
@@ -505,7 +505,8 @@ func (b *Bitcoin) Sign(tx *wire.MsgTx, strPrivateKey string) (string, error) {
 	// SignatureScript
 	for idx, val := range tx.TxIn {
 		//
-		script, err := txscript.SignatureScript(tx, idx, val.SignatureScript, txscript.SigHashAll, privKey, false)
+		var script []byte
+		script, err = txscript.SignatureScript(tx, idx, val.SignatureScript, txscript.SigHashAll, privKey, false)
 		if err != nil {
 			return "", err
 		}

@@ -151,7 +151,7 @@ func (r *FileRepository) ReadFileSlice(path string) ([]string, error) {
 		data = append(data, scanner.Text())
 	}
 
-	if err := scanner.Err(); err != nil {
+	if err = scanner.Err(); err != nil {
 		return nil, errors.Wrapf(err, "fail to scan file")
 	}
 	return data, nil
