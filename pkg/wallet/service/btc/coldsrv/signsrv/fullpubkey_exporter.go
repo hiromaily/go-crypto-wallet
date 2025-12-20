@@ -63,7 +63,9 @@ func (f *FullPubkeyExport) ExportFullPubkey() (string, error) {
 }
 
 // exportAccountKey export account_key_table as csv file
-func (f *FullPubkeyExport) exportAccountKey(authKeyTable *models.AuthAccountKey, authType account.AuthType) (string, error) {
+func (f *FullPubkeyExport) exportAccountKey(
+	authKeyTable *models.AuthAccountKey, authType account.AuthType,
+) (string, error) {
 	// create fileName
 	fileName := f.pubkeyFileRepo.CreateFilePath(f.authType.AccountType())
 

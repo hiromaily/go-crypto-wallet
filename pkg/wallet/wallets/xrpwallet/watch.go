@@ -68,7 +68,9 @@ func (w *XRPWatch) CreatePaymentTx(_ float64) (string, string, error) {
 }
 
 // CreateTransferTx creates transfer unsigned transaction
-func (w *XRPWatch) CreateTransferTx(sender, receiver account.AccountType, floatAmount, _ float64) (string, string, error) {
+func (w *XRPWatch) CreateTransferTx(
+	sender, receiver account.AccountType, floatAmount, _ float64,
+) (string, string, error) {
 	return w.TxCreator.CreateTransferTx(sender, receiver, floatAmount)
 }
 

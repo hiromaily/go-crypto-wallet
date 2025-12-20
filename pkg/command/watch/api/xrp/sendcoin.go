@@ -86,7 +86,9 @@ func (c *SendCoinCommand) Run(args []string) int {
 		return 1
 	}
 	if strings.Contains(sentTx.ResultCode, "UNFUNDED_PAYMENT") {
-		c.ui.Error(fmt.Sprintf("fail to call SubmitTransaction. resultCode: %s, resultMessage: %s", sentTx.ResultCode, sentTx.ResultMessage))
+		c.ui.Error(fmt.Sprintf(
+			"fail to call SubmitTransaction. resultCode: %s, resultMessage: %s",
+			sentTx.ResultCode, sentTx.ResultMessage))
 		return 1
 	}
 
@@ -109,7 +111,9 @@ func (c *SendCoinCommand) Run(args []string) int {
 	accountInfo, err := c.xrp.GetAccountInfo(receiverAddr)
 	if err != nil {
 		errStatus, _ := status.FromError(err)
-		c.ui.Error(fmt.Sprintf("fail to call xrp.GetAccountInfo() code: %d, message: %s", errStatus.Code(), errStatus.Message()))
+		c.ui.Error(fmt.Sprintf(
+			"fail to call xrp.GetAccountInfo() code: %d, message: %s",
+			errStatus.Code(), errStatus.Message()))
 		return 1
 	}
 	c.ui.Info(fmt.Sprintf("receiver account Info: %v", accountInfo))

@@ -88,7 +88,9 @@ func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]eth.UserAmount,
 	return userAmounts, nil
 }
 
-func (t *TxCreate) createDepositRawTransactions(sender, receiver account.AccountType, userAmounts []eth.UserAmount) ([]string, []*models.EthDetailTX, error) {
+func (t *TxCreate) createDepositRawTransactions(
+	sender, receiver account.AccountType, userAmounts []eth.UserAmount,
+) ([]string, []*models.EthDetailTX, error) {
 	// get address for deposit account
 	depositAddr, err := t.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
@@ -103,7 +105,9 @@ func (t *TxCreate) createDepositRawTransactions(sender, receiver account.Account
 		// call CreateRawTransaction
 		rawTx, txDetailItem, err := t.eth.CreateRawTransaction(val.Address, depositAddr.WalletAddress, 0, 0)
 		if err != nil {
-			return nil, nil, errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s", val.Address)
+			return nil, nil, errors.Wrapf(
+				err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s",
+				val.Address)
 		}
 		// additionalNonce++
 

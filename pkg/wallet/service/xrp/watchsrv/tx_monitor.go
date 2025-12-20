@@ -43,7 +43,7 @@ func NewTxMonitor(
 
 // UpdateTxStatus update transaction status
 // - no need for xrp
-func (_ *TxMonitor) UpdateTxStatus() error {
+func (*TxMonitor) UpdateTxStatus() error {
 	return nil
 }
 

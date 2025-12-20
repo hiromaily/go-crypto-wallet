@@ -70,7 +70,9 @@ func (w *BTCWatch) CreatePaymentTx(adjustmentFee float64) (string, string, error
 }
 
 // CreateTransferTx creates transfer unsigned transaction
-func (w *BTCWatch) CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error) {
+func (w *BTCWatch) CreateTransferTx(
+	sender, receiver account.AccountType, floatAmount, adjustmentFee float64,
+) (string, string, error) {
 	return w.TxCreator.CreateTransferTx(sender, receiver, floatAmount, adjustmentFee)
 }
 

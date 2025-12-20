@@ -123,7 +123,9 @@ func (w *AuthHDWalletRepo) GetMaxIndex(_ account.AccountType) (int64, error) {
 }
 
 // Insert inserts key to auth_account_key table
-func (w *AuthHDWalletRepo) Insert(keys []key.WalletKey, idx int64, coinTypeCode coin.CoinTypeCode, _ account.AccountType) error {
+func (w *AuthHDWalletRepo) Insert(
+	keys []key.WalletKey, idx int64, coinTypeCode coin.CoinTypeCode, _ account.AccountType,
+) error {
 	if len(keys) != 1 {
 		return errors.New("only one key is allowed")
 	}
@@ -171,7 +173,9 @@ func (w *AccountHDWalletRepo) GetMaxIndex(accountType account.AccountType) (int6
 }
 
 // Insert inserts key to account_key_table
-func (w *AccountHDWalletRepo) Insert(keys []key.WalletKey, idxFrom int64, coinTypeCode coin.CoinTypeCode, accountType account.AccountType) error {
+func (w *AccountHDWalletRepo) Insert(
+	keys []key.WalletKey, idxFrom int64, coinTypeCode coin.CoinTypeCode, accountType account.AccountType,
+) error {
 	// insert key information to account_key_table
 	accountKeyItems := make([]*models.AccountKey, len(keys))
 	for idx, keyItem := range keys {

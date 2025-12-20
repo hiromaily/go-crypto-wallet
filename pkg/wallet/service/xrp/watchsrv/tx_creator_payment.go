@@ -144,7 +144,9 @@ func (t *TxCreate) validateAmount(senderAddr *models.Address, totalAmount float6
 	return nil
 }
 
-func (t *TxCreate) createPaymentRawTransactions(sender, receiver account.AccountType, userPayments []UserPayment, senderAddr *models.Address) ([]string, []*models.XRPDetailTX) {
+func (t *TxCreate) createPaymentRawTransactions(
+	sender, receiver account.AccountType, userPayments []UserPayment, senderAddr *models.Address,
+) ([]string, []*models.XRPDetailTX) {
 	serializedTxs := make([]string, 0, len(userPayments))
 	txDetailItems := make([]*models.XRPDetailTX, 0, len(userPayments))
 	var sequence uint64
@@ -156,7 +158,8 @@ func (t *TxCreate) createPaymentRawTransactions(sender, receiver account.Account
 		if sequence != 0 {
 			instructions.Sequence = sequence
 		}
-		txJSON, rawTxString, err := t.xrp.CreateRawTransaction(senderAddr.WalletAddress, userPayment.receiverAddr, userPayment.floatAmount, instructions)
+		txJSON, rawTxString, err := t.xrp.CreateRawTransaction(
+			senderAddr.WalletAddress, userPayment.receiverAddr, userPayment.floatAmount, instructions)
 		if err != nil {
 			// TODO: which is better to return err or continue?
 			// return error in ethereum logic

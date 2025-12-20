@@ -68,7 +68,9 @@ func (w *ETHWatch) CreatePaymentTx(_ float64) (string, string, error) {
 }
 
 // CreateTransferTx creates transfer unsigned transaction
-func (w *ETHWatch) CreateTransferTx(sender, receiver account.AccountType, floatAmount, _ float64) (string, string, error) {
+func (w *ETHWatch) CreateTransferTx(
+	sender, receiver account.AccountType, floatAmount, _ float64,
+) (string, string, error) {
 	return w.TxCreator.CreateTransferTx(sender, receiver, floatAmount)
 }
 

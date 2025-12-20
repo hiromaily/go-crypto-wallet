@@ -57,9 +57,12 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	}
 
 	// call CreateRawTransaction
-	rawTx, txDetailItem, err := t.eth.CreateRawTransaction(senderAddr.WalletAddress, receiverAddr.WalletAddress, requiredValue.Uint64(), 0)
+	rawTx, txDetailItem, err := t.eth.CreateRawTransaction(
+		senderAddr.WalletAddress, receiverAddr.WalletAddress, requiredValue.Uint64(), 0)
 	if err != nil {
-		return "", "", errors.Wrapf(err, "fail to call eth.CreateRawTransaction(), sender address: %s", senderAddr.WalletAddress)
+		return "", "", errors.Wrapf(
+			err, "fail to call eth.CreateRawTransaction(), sender address: %s",
+			senderAddr.WalletAddress)
 	}
 
 	rawTxHex := rawTx.TxHex

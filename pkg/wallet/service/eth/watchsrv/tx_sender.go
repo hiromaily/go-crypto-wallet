@@ -95,7 +95,9 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 		affectedNum, err := t.txDetailRepo.UpdateAfterTxSent(uuid, tx.TxTypeSent, signedTx, sentTx)
 		if err != nil {
 			// TODO: even if error occurred, tx is already sent. so db should be corrected manually
-			t.logger.Warn("fail to call repo.Tx().UpdateAfterTxSent() but tx is already sent. So database should be updated manually",
+			t.logger.Warn(
+				"fail to call repo.Tx().UpdateAfterTxSent() but tx is already sent. " +
+					"So database should be updated manually",
 				zap.Int64("tx_id", txID),
 				zap.String("tx_type", tx.TxTypeSent.String()),
 				zap.Int8("tx_type_value", tx.TxTypeSent.Int8()),

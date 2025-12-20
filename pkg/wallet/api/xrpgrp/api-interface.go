@@ -18,7 +18,9 @@ type Rippler interface {
 	GetTotalBalance(addrs []string) float64
 
 	// transaction
-	CreateRawTransaction(senderAccount, receiverAccount string, amount float64, instructions *xrp.Instructions) (*xrp.TxInput, string, error)
+	CreateRawTransaction(
+		senderAccount, receiverAccount string, amount float64, instructions *xrp.Instructions,
+	) (*xrp.TxInput, string, error)
 
 	// ripple
 	Close() error
@@ -35,7 +37,9 @@ type RippleAPIer interface {
 	GenerateXAddress() (*xrp.ResponseGenerateXAddress, error)
 	IsValidAddress(addr string) (bool, error)
 	// RippleTxAPI
-	PrepareTransaction(senderAccount, receiverAccount string, amount float64, instructions *xrp.Instructions) (*xrp.TxInput, string, error)
+	PrepareTransaction(
+		senderAccount, receiverAccount string, amount float64, instructions *xrp.Instructions,
+	) (*xrp.TxInput, string, error)
 	SignTransaction(txJSON *xrp.TxInput, secret string) (string, string, error)
 	CombineTransaction(signedTxs []string) (string, string, error)
 	SubmitTransaction(signedTx string) (*xrp.SentTx, uint64, error)

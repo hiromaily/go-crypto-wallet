@@ -23,7 +23,9 @@ type XrpDetailTxRepositorier interface {
 	GetSentHashTx(txType tx.TxType) ([]string, error)
 	Insert(txItem *models.XRPDetailTX) error
 	InsertBulk(txItems []*models.XRPDetailTX) error
-	UpdateAfterTxSent(uuid string, txType tx.TxType, signedTxID, signedTxBlob string, earlistLedgerVersion uint64) (int64, error)
+	UpdateAfterTxSent(
+		uuid string, txType tx.TxType, signedTxID, signedTxBlob string, earlistLedgerVersion uint64,
+	) (int64, error)
 	UpdateTxType(id int64, txType tx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(txType tx.TxType, sentHashTx string) (int64, error)
 }
@@ -37,7 +39,9 @@ type XrpDetailTxInputRepository struct {
 }
 
 // NewXrpDetailTxInputRepository returns XrpDetailTxInputRepository object
-func NewXrpDetailTxInputRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *XrpDetailTxInputRepository {
+func NewXrpDetailTxInputRepository(
+	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger,
+) *XrpDetailTxInputRepository {
 	return &XrpDetailTxInputRepository{
 		dbConn:       dbConn,
 		tableName:    "xrp_detail_tx",
@@ -144,7 +148,9 @@ func (r *XrpDetailTxInputRepository) UpdateTxType(id int64, txType tx.TxType) (i
 }
 
 // UpdateTxTypeBySentHashTx updates txType
-func (r *XrpDetailTxInputRepository) UpdateTxTypeBySentHashTx(txType tx.TxType, sentHashTx string) (int64, error) {
+func (r *XrpDetailTxInputRepository) UpdateTxTypeBySentHashTx(
+	txType tx.TxType, sentHashTx string,
+) (int64, error) {
 	ctx := context.Background()
 
 	// Set updating columns

@@ -32,7 +32,9 @@ func NewRPCClient(conf *config.Bitcoin) (*rpcclient.Client, error) {
 }
 
 // NewBitcoin creates bitcoin/bitcoin cash instance according to coinType
-func NewBitcoin(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logger, coinTypeCode coin.CoinTypeCode) (Bitcoiner, error) {
+func NewBitcoin(
+	client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logger, coinTypeCode coin.CoinTypeCode,
+) (Bitcoiner, error) {
 	switch coinTypeCode {
 	case coin.BTC:
 		bit, err := btc.NewBitcoin(client, coinTypeCode, conf, logger)

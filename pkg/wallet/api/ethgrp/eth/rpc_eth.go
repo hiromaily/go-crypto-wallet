@@ -167,7 +167,9 @@ func (e *Ethereum) GetBalance(hexAddr string, quantityTag QuantityTag) (*big.Int
 	var balance string
 	err := e.rpcClient.CallContext(e.ctx, &balance, "eth_getBalance", hexAddr, quantityTag.String())
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to call rpc.CallContext(eth_getBalance) quantityTag: %s", quantityTag.String())
+		return nil, errors.Wrapf(
+			err, "fail to call rpc.CallContext(eth_getBalance) quantityTag: %s",
+			quantityTag.String())
 	}
 	h, err := hexutil.DecodeBig(balance)
 	if err != nil {
@@ -213,7 +215,8 @@ func (e *Ethereum) GetTransactionCount(hexAddr string, quantityTag QuantityTag) 
 	return h, nil
 }
 
-// GetBlockTransactionCountByHash returns the number of transactions in a block from a block matching the given block hash
+// GetBlockTransactionCountByHash returns the number of transactions in a block from a block matching
+// the given block hash
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblocktransactioncountbyhash
 // - block hash can be found from https://www.etherchain.org/block/2706436 by block number
 // - but how it is found for Goerli Testnet??

@@ -45,7 +45,12 @@ type registry struct {
 }
 
 // NewRegistry is to register registry interface
-func NewRegistry(conf *config.WalletRoot, accountConf *account.AccountRoot, walletType wallet.WalletType, authName string) Registry {
+func NewRegistry(
+	conf *config.WalletRoot,
+	accountConf *account.AccountRoot,
+	walletType wallet.WalletType,
+	authName string,
+) Registry {
 	// validate
 	if !account.ValidateAuthType(authName) {
 		panic("authName is invalid. this should be embedded when building: " + authName)

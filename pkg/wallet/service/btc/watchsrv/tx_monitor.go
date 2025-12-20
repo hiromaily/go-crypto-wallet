@@ -101,7 +101,9 @@ func (t *TxMonitor) updateStatusTxTypeSent(actionType action.ActionType) error {
 			// current confirmation meets 6 or more
 			_, err = t.txRepo.UpdateTxTypeBySentHashTx(actionType, tx.TxTypeDone, hash)
 			if err != nil {
-				return errors.Wrapf(err, "fail to call repo.Tx().UpdateTxTypeBySentHashTx(tx.TxTypeDone) ActionType: %s", actionType)
+				return errors.Wrapf(
+					err, "fail to call repo.Tx().UpdateTxTypeBySentHashTx(tx.TxTypeDone) ActionType: %s",
+					actionType)
 			}
 		}
 	}
@@ -155,7 +157,9 @@ func (t *TxMonitor) checkTxConfirmation(hash string, actionType action.ActionTyp
 	// get tx in detail by RPC `gettransaction`
 	tran, err := t.btc.GetTransactionByTxID(hash)
 	if err != nil {
-		return false, errors.Wrapf(err, "fail to call btc.GetTransactionByTxID(): ActionType: %s, txID:%s", actionType, hash)
+		return false, errors.Wrapf(
+			err, "fail to call btc.GetTransactionByTxID(): ActionType: %s, txID:%s",
+			actionType, hash)
 	}
 	t.logger.Debug("confirmation detail",
 		zap.String("actionType", actionType.String()),
@@ -219,7 +223,9 @@ func (t *TxMonitor) notifyTxDone(hash string, actionType action.ActionType) (int
 		// 2. get info from payment_request table
 		paymentUsers, err := t.payReqRepo.GetAllByPaymentID(txID)
 		if err != nil {
-			return 0, errors.Wrapf(err, "fail to call repo.GetPaymentRequestByPaymentID(%d) ActionType: %s", txID, actionType)
+			return 0, errors.Wrapf(
+				err, "fail to call repo.GetPaymentRequestByPaymentID(%d) ActionType: %s",
+				txID, actionType)
 		}
 		if len(paymentUsers) == 0 {
 			t.logger.Debug("payment user is not found",
@@ -247,7 +253,9 @@ func (t *TxMonitor) updateTxTypeNotified(id int64, actionType action.ActionType)
 	case action.ActionTypeDeposit:
 		_, err := t.txRepo.UpdateTxType(id, tx.TxTypeNotified)
 		if err != nil {
-			return errors.Wrapf(err, "fail to call repo.Tx().UpdateTxType(tx.TxTypeNotified) ActionType: %s", actionType)
+			return errors.Wrapf(
+				err, "fail to call repo.Tx().UpdateTxType(tx.TxTypeNotified) ActionType: %s",
+				actionType)
 		}
 	case action.ActionTypePayment:
 		dtx, err := t.dbConn.Begin()
@@ -265,7 +273,9 @@ func (t *TxMonitor) updateTxTypeNotified(id int64, actionType action.ActionType)
 		}()
 		_, err = t.txRepo.UpdateTxType(id, tx.TxTypeNotified)
 		if err != nil {
-			return errors.Wrapf(err, "fail to call repo.Tx().UpdateTxType(tx.TxTypeNotified) ActionType: %s", actionType)
+			return errors.Wrapf(
+				err, "fail to call repo.Tx().UpdateTxType(tx.TxTypeNotified) ActionType: %s",
+				actionType)
 		}
 
 		// update is_done=true in payment_request

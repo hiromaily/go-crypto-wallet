@@ -62,7 +62,9 @@ func (t *TxCreate) CreatePaymentTx(adjustmentFee float64) (string, string, error
 }
 
 // userPayments is given for receiverAddr
-func (t *TxCreate) createPaymentTxOutputs(userPayments []UserPayment, changeAddr string, changeAmount btcutil.Amount) map[btcutil.Address]btcutil.Amount {
+func (t *TxCreate) createPaymentTxOutputs(
+	userPayments []UserPayment, changeAddr string, changeAmount btcutil.Amount,
+) map[btcutil.Address]btcutil.Amount {
 	var (
 		txOutputs = map[btcutil.Address]btcutil.Amount{}
 		// if key of map is btcutil.Address which is interface type, uniqueness can't be found from map key
@@ -143,7 +145,8 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, []int64, error) {
 		if err != nil {
 			// fatal error
 			t.logger.Error("unexpected error occurred converting receiverAddr from string type  to address type")
-			return nil, nil, errors.New("unexpected error occurred converting receiverAddr from string type to address type")
+			return nil, nil, errors.New(
+				"unexpected error occurred converting receiverAddr from string type to address type")
 		}
 
 		// amount

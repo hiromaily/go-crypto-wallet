@@ -32,7 +32,9 @@ type XRPAccountKeyRepository struct {
 }
 
 // NewXRPAccountKeyRepository returns XRPAccountKeyRepository object
-func NewXRPAccountKeyRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *XRPAccountKeyRepository {
+func NewXRPAccountKeyRepository(
+	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger,
+) *XRPAccountKeyRepository {
 	return &XRPAccountKeyRepository{
 		dbConn:       dbConn,
 		tableName:    "xrp_account_key",
@@ -42,7 +44,9 @@ func NewXRPAccountKeyRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, 
 }
 
 // GetAllAddrStatus returns all XRPAccountKey by addr_status
-func (r *XRPAccountKeyRepository) GetAllAddrStatus(accountType account.AccountType, addrStatus address.AddrStatus) ([]*models.XRPAccountKey, error) {
+func (r *XRPAccountKeyRepository) GetAllAddrStatus(
+	accountType account.AccountType, addrStatus address.AddrStatus,
+) ([]*models.XRPAccountKey, error) {
 	ctx := context.Background()
 
 	items, err := models.XRPAccountKeys(
@@ -84,7 +88,9 @@ func (r *XRPAccountKeyRepository) InsertBulk(items []*models.XRPAccountKey) erro
 }
 
 // UpdateAddrStatus updates addr_status
-func (r *XRPAccountKeyRepository) UpdateAddrStatus(accountType account.AccountType, addrStatus address.AddrStatus, accountIDs []string) (int64, error) {
+func (r *XRPAccountKeyRepository) UpdateAddrStatus(
+	accountType account.AccountType, addrStatus address.AddrStatus, accountIDs []string,
+) (int64, error) {
 	// sql := `UPDATE %s SET addr_status=? WHERE wallet_import_format=?`
 	ctx := context.Background()
 

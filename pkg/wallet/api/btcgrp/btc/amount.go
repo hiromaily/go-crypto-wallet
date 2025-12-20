@@ -16,12 +16,12 @@ import (
 // float64 => BTC
 
 // AmountString converts amount `1.0 BTC` to `1.0` as string
-func (_ *Bitcoin) AmountString(amt btcutil.Amount) string {
+func (*Bitcoin) AmountString(amt btcutil.Amount) string {
 	return strings.TrimRight(amt.String(), " BTC")
 }
 
 // AmountToDecimal converts amount `1.0 BTC` to `1.0` as decimal
-func (_ *Bitcoin) AmountToDecimal(amt btcutil.Amount) types.Decimal {
+func (*Bitcoin) AmountToDecimal(amt btcutil.Amount) types.Decimal {
 	strAmt := strings.TrimRight(amt.String(), " BTC")
 	dAmt := types.Decimal{Big: new(decimal.Big)}
 	dAmt.Big, _ = dAmt.SetString(strAmt)
@@ -29,7 +29,7 @@ func (_ *Bitcoin) AmountToDecimal(amt btcutil.Amount) types.Decimal {
 }
 
 // FloatToDecimal converts float to decimal
-func (_ *Bitcoin) FloatToDecimal(f float64) types.Decimal {
+func (*Bitcoin) FloatToDecimal(f float64) types.Decimal {
 	strAmt := fmt.Sprintf("%f", f)
 	dAmt := types.Decimal{Big: new(decimal.Big)}
 	dAmt.Big, _ = dAmt.SetString(strAmt)
@@ -38,7 +38,7 @@ func (_ *Bitcoin) FloatToDecimal(f float64) types.Decimal {
 
 // FloatToAmount converts float to amount
 // e.g. 0.54 to 54000000
-func (_ *Bitcoin) FloatToAmount(f float64) (btcutil.Amount, error) {
+func (*Bitcoin) FloatToAmount(f float64) (btcutil.Amount, error) {
 	amt, err := btcutil.NewAmount(f)
 	if err != nil {
 		return 0, errors.Wrapf(err, "fail to call btcutil.NewAmount(%f)", f)
@@ -48,7 +48,7 @@ func (_ *Bitcoin) FloatToAmount(f float64) (btcutil.Amount, error) {
 }
 
 // StrToAmount converts string to amount
-func (_ *Bitcoin) StrToAmount(s string) (btcutil.Amount, error) {
+func (*Bitcoin) StrToAmount(s string) (btcutil.Amount, error) {
 	f, err := strconv.ParseFloat(s, 64)
 	if err != nil {
 		return 0, errors.Wrapf(err, "fail to call strconv.ParseFloat(%s)", s)
@@ -63,7 +63,7 @@ func (_ *Bitcoin) StrToAmount(s string) (btcutil.Amount, error) {
 }
 
 // StrSatoshiToAmount converts satoshi of string type to amount
-func (_ *Bitcoin) StrSatoshiToAmount(s string) (btcutil.Amount, error) {
+func (*Bitcoin) StrSatoshiToAmount(s string) (btcutil.Amount, error) {
 	f, err := strconv.ParseFloat(s, 64)
 	if err != nil {
 		return 0, errors.Wrapf(err, "fail to call strconv.ParseFloat(%s)", s)

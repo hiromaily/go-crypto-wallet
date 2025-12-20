@@ -54,7 +54,9 @@ func NewFileRepository(filePath string, logger *zap.Logger) *FileRepository {
 //  - deposit_8_unsigned_0_1534744535097796209 : {actionType}_{txID}_{txType}_{signedCount}_{timestamp}
 
 // CreateFilePath create file path for transaction file
-func (r *FileRepository) CreateFilePath(actionType action.ActionType, txType TxType, txID int64, signedCount int) string {
+func (r *FileRepository) CreateFilePath(
+	actionType action.ActionType, txType TxType, txID int64, signedCount int,
+) string {
 	// ./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209
 	// baseDir := fmt.Sprintf("%s%s/", r.filePath, actionType.String())
 
@@ -64,7 +66,7 @@ func (r *FileRepository) CreateFilePath(actionType action.ActionType, txType TxT
 }
 
 // GetFileNameType returns as FileName type
-func (_ *FileRepository) GetFileNameType(filePath string) (*FileName, error) {
+func (*FileRepository) GetFileNameType(filePath string) (*FileName, error) {
 	// just file path or full path
 	// ./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209
 	tmp := strings.Split(filePath, "/")
@@ -113,7 +115,9 @@ func (_ *FileRepository) GetFileNameType(filePath string) (*FileName, error) {
 }
 
 // ValidateFilePath validate file path which could be full path
-func (r *FileRepository) ValidateFilePath(filePath string, expectedTxType TxType) (action.ActionType, TxType, int64, int, error) {
+func (r *FileRepository) ValidateFilePath(
+	filePath string, expectedTxType TxType,
+) (action.ActionType, TxType, int64, int, error) {
 	fileType, err := r.GetFileNameType(filePath)
 	if err != nil {
 		return "", "", 0, 0, err
@@ -127,7 +131,7 @@ func (r *FileRepository) ValidateFilePath(filePath string, expectedTxType TxType
 }
 
 // ReadFile read file
-func (_ *FileRepository) ReadFile(path string) (string, error) {
+func (*FileRepository) ReadFile(path string) (string, error) {
 	ret, err := os.ReadFile(path)
 	if err != nil {
 		return "", errors.Wrapf(err, "fail to call os.ReadFile(%s)", path)
@@ -137,7 +141,7 @@ func (_ *FileRepository) ReadFile(path string) (string, error) {
 }
 
 // ReadFileSlice read file for slice
-func (_ *FileRepository) ReadFileSlice(path string) ([]string, error) {
+func (*FileRepository) ReadFileSlice(path string) ([]string, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to open file: %s", path)
@@ -201,7 +205,7 @@ func (r *FileRepository) WriteFileSlice(path string, data []string) (string, err
 	return fileName, nil
 }
 
-func (_ *FileRepository) createDir(path string) {
+func (*FileRepository) createDir(path string) {
 	tmp1 := strings.Split(path, "/")
 	tmp2 := tmp1[0 : len(tmp1)-1] // cut filename
 	dir := strings.Join(tmp2, "/")

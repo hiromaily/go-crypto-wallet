@@ -168,7 +168,8 @@ func (t *TxCreate) createTx(
 	// calculate fee and output total
 	//  - adjust outputTotal by fee and re-run CreateRawTransaction
 	//  - this logic would be different from payment
-	outputTotal, fee, txOutputs, txRepoTxOutputs, err := t.calculateOutputTotal(sender, receiver, msgTx, adjustmentFee, inputTotal, txPrevOutputs)
+	outputTotal, fee, txOutputs, txRepoTxOutputs, err := t.calculateOutputTotal(
+		sender, receiver, msgTx, adjustmentFee, inputTotal, txPrevOutputs)
 	if err != nil {
 		return "", "", err
 	}
@@ -273,7 +274,9 @@ func (t *TxCreate) getUnspentList(accountType account.AccountType) ([]btc.ListUn
 
 // parse result of listUnspent
 // retured *parsedTx could be nil
-func (t *TxCreate) parseListUnspentTx(unspentList []btc.ListUnspentResult, amount btcutil.Amount) (*parsedTx, btcutil.Amount, bool) {
+func (t *TxCreate) parseListUnspentTx(
+	unspentList []btc.ListUnspentResult, amount btcutil.Amount,
+) (*parsedTx, btcutil.Amount, bool) {
 	var inputTotal btcutil.Amount
 	txInputs := make([]btcjson.TransactionInput, 0, len(unspentList))
 	txRepoTxInputs := make([]*models.BTCTXInput, 0, len(unspentList))
@@ -552,7 +555,9 @@ func (t *TxCreate) insertTxTableForUnsigned(
 }
 
 // generateHexFile generate file for hex and encoded previous addresses
-func (t *TxCreate) generateHexFile(actionType action.ActionType, hex, encodedAddrsPrevs string, id int64) (string, error) {
+func (t *TxCreate) generateHexFile(
+	actionType action.ActionType, hex, encodedAddrsPrevs string, id int64,
+) (string, error) {
 	var (
 		generatedFileName string
 		err               error
@@ -575,7 +580,7 @@ func (t *TxCreate) generateHexFile(actionType action.ActionType, hex, encodedAdd
 
 // IsFoundTxIDAndVout finds out txID and vout from related txInputs
 // nolint: unused
-func (_ *TxCreate) IsFoundTxIDAndVout(txID string, vout uint32, inputs []btcjson.TransactionInput) bool {
+func (*TxCreate) IsFoundTxIDAndVout(txID string, vout uint32, inputs []btcjson.TransactionInput) bool {
 	for _, val := range inputs {
 		if val.Txid == txID && val.Vout == vout {
 			return true

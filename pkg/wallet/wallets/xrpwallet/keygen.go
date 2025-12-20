@@ -65,7 +65,9 @@ func (k *XRPKeygen) StoreSeed(strSeed string) ([]byte, error) {
 }
 
 // GenerateAccountKey generates account keys
-func (k *XRPKeygen) GenerateAccountKey(accountType account.AccountType, seed []byte, count uint32, isKeyPair bool) ([]key.WalletKey, error) {
+func (k *XRPKeygen) GenerateAccountKey(
+	accountType account.AccountType, seed []byte, count uint32, isKeyPair bool,
+) ([]key.WalletKey, error) {
 	keys, err := k.HDWalleter.Generate(accountType, seed, count)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call HDWalleter.Generate()")

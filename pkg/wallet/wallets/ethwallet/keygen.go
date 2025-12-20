@@ -61,7 +61,9 @@ func (k *ETHKeygen) StoreSeed(strSeed string) ([]byte, error) {
 }
 
 // GenerateAccountKey generates account keys
-func (k *ETHKeygen) GenerateAccountKey(accountType account.AccountType, seed []byte, count uint32, _ bool) ([]key.WalletKey, error) {
+func (k *ETHKeygen) GenerateAccountKey(
+	accountType account.AccountType, seed []byte, count uint32, _ bool,
+) ([]key.WalletKey, error) {
 	return k.HDWalleter.Generate(accountType, seed, count)
 }
 

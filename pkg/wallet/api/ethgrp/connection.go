@@ -31,7 +31,9 @@ func NewRPCClient(conf *config.Ethereum) (*ethrpc.Client, error) {
 }
 
 // NewEthereum creates ethereum instance according to coinType
-func NewEthereum(rpcClient *ethrpc.Client, conf *config.Ethereum, logger *zap.Logger, coinTypeCode coin.CoinTypeCode) (Ethereumer, error) {
+func NewEthereum(
+	rpcClient *ethrpc.Client, conf *config.Ethereum, logger *zap.Logger, coinTypeCode coin.CoinTypeCode,
+) (Ethereumer, error) {
 	client := ethclient.NewClient(rpcClient)
 
 	ethAPI, err := eth.NewEthereum(

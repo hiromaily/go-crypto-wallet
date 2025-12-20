@@ -144,15 +144,20 @@ func (t *TxCreate) validateAmount(senderAddr *models.Address, totalAmount *big.I
 	return nil
 }
 
-func (t *TxCreate) createPaymentRawTransactions(sender, receiver account.AccountType, userPayments []UserPayment, senderAddr *models.Address) ([]string, []*models.EthDetailTX, error) {
+func (t *TxCreate) createPaymentRawTransactions(
+	sender, receiver account.AccountType, userPayments []UserPayment, senderAddr *models.Address,
+) ([]string, []*models.EthDetailTX, error) {
 	serializedTxs := make([]string, 0, len(userPayments))
 	txDetailItems := make([]*models.EthDetailTX, 0, len(userPayments))
 	additionalNonce := 0
 	for _, userPayment := range userPayments {
 		// call CreateRawTransaction
-		rawTx, txDetailItem, err := t.eth.CreateRawTransaction(senderAddr.WalletAddress, userPayment.receiverAddr, userPayment.amount.Uint64(), additionalNonce)
+		rawTx, txDetailItem, err := t.eth.CreateRawTransaction(
+			senderAddr.WalletAddress, userPayment.receiverAddr, userPayment.amount.Uint64(), additionalNonce)
 		if err != nil {
-			return nil, nil, errors.Wrapf(err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s", senderAddr.WalletAddress)
+			return nil, nil, errors.Wrapf(
+				err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s",
+				senderAddr.WalletAddress)
 		}
 		additionalNonce++
 

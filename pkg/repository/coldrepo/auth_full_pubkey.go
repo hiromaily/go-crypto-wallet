@@ -30,7 +30,9 @@ type AuthFullPubkeyRepository struct {
 }
 
 // NewAuthFullPubkeyRepository returns AuthFullPubkeyRepository object
-func NewAuthFullPubkeyRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *AuthFullPubkeyRepository {
+func NewAuthFullPubkeyRepository(
+	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger,
+) *AuthFullPubkeyRepository {
 	return &AuthFullPubkeyRepository{
 		dbConn:       dbConn,
 		tableName:    "auth_pubkey",

@@ -91,7 +91,8 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 		if err != nil {
 			return "", false, "", errors.Wrap(err, "fail to call xrp.SignTransaction()")
 		}
-		s.logger.Debug("signed_tx", zap.String("uuid", uuid), zap.String("signed_tx_id", signedTxID), zap.String("signed_tx_blob", txBlob))
+		s.logger.Debug("signed_tx",
+		zap.String("uuid", uuid), zap.String("signed_tx_id", signedTxID), zap.String("signed_tx_blob", txBlob))
 		txHexs = append(txHexs, fmt.Sprintf("%s,%s,%s", uuid, signedTxID, txBlob))
 	}
 

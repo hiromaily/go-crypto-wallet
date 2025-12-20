@@ -61,9 +61,12 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	instructions := &xrp.Instructions{
 		MaxLedgerVersionOffset: xrp.MaxLedgerVersionOffset,
 	}
-	txJSON, rawTxString, err := t.xrp.CreateRawTransaction(senderAddr.WalletAddress, receiverAddr.WalletAddress, floatValue, instructions)
+	txJSON, rawTxString, err := t.xrp.CreateRawTransaction(
+		senderAddr.WalletAddress, receiverAddr.WalletAddress, floatValue, instructions)
 	if err != nil {
-		return "", "", errors.Wrapf(err, "fail to call xrp.CreateRawTransaction(), sender address: %s", senderAddr.WalletAddress)
+		return "", "", errors.Wrapf(
+			err, "fail to call xrp.CreateRawTransaction(), sender address: %s",
+			senderAddr.WalletAddress)
 	}
 	t.logger.Debug("txJSON", zap.Any("txJSON", txJSON))
 	grok.Value(txJSON)

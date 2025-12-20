@@ -74,7 +74,7 @@ func NewERC20(
 //	return &opts
 //}
 
-func (_ *ERC20) ValidateAddr(addr string) error {
+func (*ERC20) ValidateAddr(addr string) error {
 	// validation check
 	if !common.IsHexAddress(addr) {
 		return errors.Errorf("address:%s is invalid", addr)
@@ -117,7 +117,9 @@ func (e *ERC20) GetBalance(hexAddr string, _ eth.QuantityTag) (*big.Int, error) 
 // -  this task may be separated from normal flow `create tx`
 // - => approve requires gas to call ... this pattern is impossible
 // - 1.b. Or after approve is called, this transaction may be sent
-func (e *ERC20) CreateRawTransaction(fromAddr, toAddr string, amount uint64, additionalNonce int) (*ethtx.RawTx, *models.EthDetailTX, error) {
+func (e *ERC20) CreateRawTransaction(
+	fromAddr, toAddr string, amount uint64, additionalNonce int,
+) (*ethtx.RawTx, *models.EthDetailTX, error) {
 	// validation check
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
@@ -212,7 +214,7 @@ func (e *ERC20) CreateRawTransaction(fromAddr, toAddr string, amount uint64, add
 	return rawtx, txDetailItem, nil
 }
 
-func (_ *ERC20) createTransferData(toAddr string, amount *big.Int) []byte {
+func (*ERC20) createTransferData(toAddr string, amount *big.Int) []byte {
 	// function signature as a byte slice
 	transferFnSignature := []byte("transfer(address,uint256)")
 

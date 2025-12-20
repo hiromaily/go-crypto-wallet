@@ -113,7 +113,9 @@ func (k *HDKey) CreateKey(seed []byte, accountType account.AccountType, idxFrom,
 }
 
 // createKeyByAccount create privateKey, publicKey by account level
-func (k *HDKey) createKeyByAccount(seed []byte, accountType account.AccountType) (*hdkeychain.ExtendedKey, *hdkeychain.ExtendedKey, error) {
+func (k *HDKey) createKeyByAccount(
+	seed []byte, accountType account.AccountType,
+) (*hdkeychain.ExtendedKey, *hdkeychain.ExtendedKey, error) {
 	// Master
 	masterKey, err := hdkeychain.NewMaster(seed, k.conf)
 	if err != nil {
@@ -156,7 +158,9 @@ func (k *HDKey) createKeyByAccount(seed []byte, accountType account.AccountType)
 // createKeysWithIndex create keys by index and count
 // e.g. - idxFrom:0,  count 10 => 0-9
 //   - idxFrom:10, count 10 => 10-19
-func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxFrom, count uint32) ([]WalletKey, error) {
+func (k *HDKey) createKeysWithIndex(
+	accountPrivKey *hdkeychain.ExtendedKey, idxFrom, count uint32,
+) ([]WalletKey, error) {
 	// accountPrivKey, err := hdkeychain.NewKeyFromString(accountPrivKey)
 
 	// Change
@@ -255,7 +259,9 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 	return walletKeys, nil
 }
 
-func (k *HDKey) btcAddrs(wif *btcutil.WIF, privKey *btcec.PrivateKey) (string, string, *btcutil.AddressWitnessPubKeyHash, string, error) {
+func (k *HDKey) btcAddrs(
+	wif *btcutil.WIF, privKey *btcec.PrivateKey,
+) (string, string, *btcutil.AddressWitnessPubKeyHash, string, error) {
 	// P2SH address
 
 	// get P2PKH address as string for BTC/BCH
@@ -283,7 +289,7 @@ func (k *HDKey) btcAddrs(wif *btcutil.WIF, privKey *btcec.PrivateKey) (string, s
 }
 
 // https://goethereumbook.org/wallet-generate/
-func (_ *HDKey) ethAddrs(privKey *btcec.PrivateKey) (string, string, string, error) {
+func (*HDKey) ethAddrs(privKey *btcec.PrivateKey) (string, string, string, error) {
 	// private key
 	ethPrivKey := privKey.ToECDSA()
 	ethHexPrivKey := hexutil.Encode(crypto.FromECDSA(ethPrivKey))
@@ -303,7 +309,7 @@ func (_ *HDKey) ethAddrs(privKey *btcec.PrivateKey) (string, string, string, err
 	return address, ethHexPubKey, ethHexPrivKey, nil
 }
 
-func (_ *HDKey) xrpAddrs(privKey *btcec.PrivateKey) (string, string, string, error) {
+func (*HDKey) xrpAddrs(privKey *btcec.PrivateKey) (string, string, string, error) {
 	// private key (same as ethereum for now)
 	xrpPrivKey := privKey.ToECDSA()
 	// xrpHexPrivKey := hexutil.Encode(crypto.FromECDSA(xrpPrivKey))

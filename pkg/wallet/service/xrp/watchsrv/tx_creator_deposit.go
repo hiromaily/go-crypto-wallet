@@ -80,7 +80,8 @@ func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]xrp.UserAmount,
 				zap.String("address", addr.WalletAddress),
 			)
 		} else {
-			t.logger.Debug("account_info", zap.String("address", addr.WalletAddress), zap.Float64("balance", clientBalance))
+			t.logger.Debug("account_info",
+				zap.String("address", addr.WalletAddress), zap.Float64("balance", clientBalance))
 			if clientBalance != 0 {
 				userAmounts = append(userAmounts, xrp.UserAmount{Address: addr.WalletAddress, Amount: clientBalance})
 			}
@@ -89,7 +90,9 @@ func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]xrp.UserAmount,
 	return userAmounts, nil
 }
 
-func (t *TxCreate) createDepositRawTransactions(sender, receiver account.AccountType, userAmounts []xrp.UserAmount) ([]string, []*models.XRPDetailTX, error) {
+func (t *TxCreate) createDepositRawTransactions(
+	sender, receiver account.AccountType, userAmounts []xrp.UserAmount,
+) ([]string, []*models.XRPDetailTX, error) {
 	// get address for deposit account
 	depositAddr, err := t.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {

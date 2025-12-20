@@ -78,7 +78,8 @@ func (a *AddressImport) ImportAddress(fileName string, isRescan bool) error {
 				switch a.addrType {
 				case address.AddrTypeBech32:
 					targetAddr = addrFmt.Bech32Address
-				case address.AddrTypeLegacy, address.AddrTypeP2shSegwit, address.AddrTypeBCHCashAddr, address.AddrTypeETH:
+				case address.AddrTypeLegacy, address.AddrTypeP2shSegwit,
+					address.AddrTypeBCHCashAddr, address.AddrTypeETH:
 					targetAddr = addrFmt.P2SHSegwitAddress // p2sh_segwit_address
 				default:
 					targetAddr = addrFmt.P2SHSegwitAddress // p2sh_segwit_address

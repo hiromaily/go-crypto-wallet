@@ -97,7 +97,9 @@ func (a *AddressExport) ExportAddress(accountType account.AccountType) (string, 
 }
 
 // exportAccountKey export account_key_table as csv file
-func (a *AddressExport) exportAccountKey(accountKeyTable []*models.AccountKey, accountType account.AccountType) (string, error) {
+func (a *AddressExport) exportAccountKey(
+	accountKeyTable []*models.AccountKey, accountType account.AccountType,
+) (string, error) {
 	// create fileName
 	fileName := a.addrFileRepo.CreateFilePath(accountType)
 

@@ -52,22 +52,30 @@ func NewBitcoin(
 	case NetworkTypeMainNet:
 		bit.chainConf = &chaincfg.MainNetParams
 		if blockInfo.Chain != BlockchainInfoChainMain {
-			return nil, errors.Errorf("connecting %s on bitcoind, but config file defines as %s", blockInfo.Chain, NetworkTypeMainNet)
+			return nil, errors.Errorf(
+			"connecting %s on bitcoind, but config file defines as %s",
+			blockInfo.Chain, NetworkTypeMainNet)
 		}
 	case NetworkTypeTestNet3:
 		bit.chainConf = &chaincfg.TestNet3Params
 		if blockInfo.Chain != BlockchainInfoChainTest {
-			return nil, errors.Errorf("connecting %s on bitcoind, but config file defines as %s", blockInfo.Chain, NetworkTypeTestNet3)
+			return nil, errors.Errorf(
+			"connecting %s on bitcoind, but config file defines as %s",
+			blockInfo.Chain, NetworkTypeTestNet3)
 		}
 	case NetworkTypeRegTestNet:
 		bit.chainConf = &chaincfg.RegressionNetParams
 		if blockInfo.Chain != BlockchainInfoChainRegtest {
-			return nil, errors.Errorf("connecting %s on bitcoind, but config file defines as %s", blockInfo.Chain, NetworkTypeRegTestNet)
+			return nil, errors.Errorf(
+			"connecting %s on bitcoind, but config file defines as %s",
+			blockInfo.Chain, NetworkTypeRegTestNet)
 		}
 	case NetworkTypeSigNet:
 		bit.chainConf = &chaincfg.SigNetParams
 		if blockInfo.Chain != BlockchainInfoChainSignet {
-			return nil, errors.Errorf("connecting %s on bitcoind, but config file defines as %s", blockInfo.Chain, NetworkTypeSigNet)
+			return nil, errors.Errorf(
+			"connecting %s on bitcoind, but config file defines as %s",
+			blockInfo.Chain, NetworkTypeSigNet)
 		}
 	default:
 		return nil, errors.Errorf("bitcoin network type is invalid in config")
@@ -79,7 +87,9 @@ func NewBitcoin(
 		return nil, errors.Wrap(err, "fail to call bit.GetNetworkInfo()")
 	}
 	if RequiredVersion > netInfo.Version {
-		return nil, errors.Errorf("bitcoin core version should be %d +, but version %d is detected", RequiredVersion, netInfo.Version)
+		return nil, errors.Errorf(
+			"bitcoin core version should be %d +, but version %d is detected",
+			RequiredVersion, netInfo.Version)
 	}
 	bit.version = netInfo.Version
 	bit.logger.Info("bitcoin rpc server", zap.Int("version", netInfo.Version.Int()))

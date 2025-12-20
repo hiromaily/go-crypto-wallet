@@ -33,7 +33,7 @@ import (
 // e.g. UTC--2018-10-12T01-53-58Z--fff7e98d-b3b7-08f4-65cd-3fe82416cebf--45783b86c2aa1ce81632ac2db26a91acc3ea6226
 
 // ToECDSA converts privKey to ECDSA
-func (_ *Ethereum) ToECDSA(privKey string) (*ecdsa.PrivateKey, error) {
+func (*Ethereum) ToECDSA(privKey string) (*ecdsa.PrivateKey, error) {
 	bytePrivKey, err := hexutil.Decode(privKey)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call hexutil.Decode()")

@@ -8,7 +8,8 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 )
 
-// ImportRawKey Imports the given unencrypted private key (hex string) into the key store, encrypting it with the passphrase
+// ImportRawKey Imports the given unencrypted private key (hex string) into the key store,
+// encrypting it with the passphrase
 //   - if address has 0x like 0x5d0a82e19564ae03ad3b834ac30b94c0ccce510e86d783d3e882efcb0e84b2af,
 //     error would occur `invalid hex character 'x' in private key`
 //
