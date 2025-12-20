@@ -33,7 +33,7 @@ func NewTxRepository() watchrepo.BTCTxRepositorier {
 	// TODO: if config should be overridden, here
 
 	// logger
-	logger := logger.NewZapLogger(&conf.Logger)
+	zapLog := logger.NewZapLogger(&conf.Logger)
 
 	// db
 	db, err := mysql.NewMySQL(&conf.MySQL)
@@ -41,7 +41,7 @@ func NewTxRepository() watchrepo.BTCTxRepositorier {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	txRepo = watchrepo.NewBTCTxRepository(db, coin.BTC, logger)
+	txRepo = watchrepo.NewBTCTxRepository(db, coin.BTC, zapLog)
 	return txRepo
 }
 
@@ -60,7 +60,7 @@ func NewAccountKeyRepository() coldrepo.AccountKeyRepositorier {
 	// TODO: if config should be overridden, here
 
 	// logger
-	logger := logger.NewZapLogger(&conf.Logger)
+	zapLogger := logger.NewZapLogger(&conf.Logger)
 
 	// db
 	db, err := mysql.NewMySQL(&conf.MySQL)
@@ -68,6 +68,6 @@ func NewAccountKeyRepository() coldrepo.AccountKeyRepositorier {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	accountKeyRepo = coldrepo.NewAccountKeyRepository(db, coin.BTC, logger)
+	accountKeyRepo = coldrepo.NewAccountKeyRepository(db, coin.BTC, zapLogger)
 	return accountKeyRepo
 }

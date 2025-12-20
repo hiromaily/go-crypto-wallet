@@ -56,7 +56,7 @@ type TxCreate struct {
 
 // NewTxCreate returns TxCreate object
 func NewTxCreate(
-	btc btcgrp.Bitcoiner,
+	btcAPI btcgrp.Bitcoiner,
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
@@ -70,7 +70,7 @@ func NewTxCreate(
 	wtype wallet.WalletType,
 ) *TxCreate {
 	return &TxCreate{
-		btc:             btc,
+		btc:             btcAPI,
 		logger:          logger,
 		dbConn:          dbConn,
 		addrRepo:        addrRepo,
@@ -285,45 +285,45 @@ func (t *TxCreate) parseListUnspentTx(unspentList []btc.ListUnspentResult, amoun
 		isDone = true
 	}
 
-	for _, tx := range unspentList {
+	for _, txItem := range unspentList {
 		// Amount
-		amt, err := btcutil.NewAmount(tx.Amount)
+		amt, err := btcutil.NewAmount(txItem.Amount)
 		if err != nil {
 			// this error is not expected
 			t.logger.Error(
 				"fail to call btcutil.NewAmount() then skipped",
-				zap.String("tx_id", tx.TxID),
-				zap.Float64("tx_amount", tx.Amount),
+				zap.String("tx_id", txItem.TxID),
+				zap.Float64("tx_amount", txItem.Amount),
 				zap.Error(err))
 			continue
 		}
 		inputTotal += amt
 
 		txInputs = append(txInputs, btcjson.TransactionInput{
-			Txid: tx.TxID,
-			Vout: tx.Vout,
+			Txid: txItem.TxID,
+			Vout: txItem.Vout,
 		})
 
 		txRepoTxInputs = append(txRepoTxInputs, &models.BTCTXInput{
 			TXID:               0,
-			InputTxid:          tx.TxID,
-			InputVout:          tx.Vout,
-			InputAddress:       tx.Address,
-			InputAccount:       tx.Label,
-			InputAmount:        t.btc.FloatToDecimal(tx.Amount),
-			InputConfirmations: uint64(tx.Confirmations),
+			InputTxid:          txItem.TxID,
+			InputVout:          txItem.Vout,
+			InputAddress:       txItem.Address,
+			InputAccount:       txItem.Label,
+			InputAmount:        t.btc.FloatToDecimal(txItem.Amount),
+			InputConfirmations: uint64(txItem.Confirmations),
 		})
 
 		// TODO: if sender is client account (non-multisig address), RedeemScript is blank
 		prevTxs = append(prevTxs, btc.PrevTx{
-			Txid:         tx.TxID,
-			Vout:         tx.Vout,
-			ScriptPubKey: tx.ScriptPubKey,
-			RedeemScript: tx.RedeemScript, // required if target account is multsig address
-			Amount:       tx.Amount,
+			Txid:         txItem.TxID,
+			Vout:         txItem.Vout,
+			ScriptPubKey: txItem.ScriptPubKey,
+			RedeemScript: txItem.RedeemScript, // required if target account is multsig address
+			Amount:       txItem.Amount,
 		})
 
-		addresses = append(addresses, tx.Address)
+		addresses = append(addresses, txItem.Address)
 
 		// check total if amount is set as parameter
 		if amount == 0 {
@@ -390,7 +390,6 @@ func (t *TxCreate) createTxOutputs(
 		t.logger.Debug("change(sender) txOutput",
 			zap.String("senderAddr", senderAddr),
 			zap.Any("inputTotal - requiredAmount", inputTotal-requiredAmount))
-
 	}
 	return txPrevOutputs, nil
 }
@@ -576,7 +575,7 @@ func (t *TxCreate) generateHexFile(actionType action.ActionType, hex, encodedAdd
 
 // IsFoundTxIDAndVout finds out txID and vout from related txInputs
 // nolint: unused
-func (t *TxCreate) IsFoundTxIDAndVout(txID string, vout uint32, inputs []btcjson.TransactionInput) bool {
+func (_ *TxCreate) IsFoundTxIDAndVout(txID string, vout uint32, inputs []btcjson.TransactionInput) bool {
 	for _, val := range inputs {
 		if val.Txid == txID && val.Vout == vout {
 			return true

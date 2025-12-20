@@ -30,7 +30,7 @@ type Sign struct {
 
 // NewSign returns sign object
 func NewSign(
-	btc btcgrp.Bitcoiner,
+	btcAPI btcgrp.Bitcoiner,
 	logger *zap.Logger,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
@@ -39,7 +39,7 @@ func NewSign(
 	wtype wallet.WalletType,
 ) *Sign {
 	return &Sign{
-		btc:             btc,
+		btc:             btcAPI,
 		logger:          logger,
 		accountKeyRepo:  accountKeyRepo,
 		authKeyRepo:     authKeyRepo,

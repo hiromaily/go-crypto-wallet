@@ -97,7 +97,7 @@ func (b *Bitcoin) GetUnspentListAddrs(unspentList []ListUnspentResult, accountTy
 	return addrs
 }
 
-func (b *Bitcoin) getUnspentListAmount(unspentList []ListUnspentResult) float64 {
+func (_ *Bitcoin) getUnspentListAmount(unspentList []ListUnspentResult) float64 {
 	var sum float64
 	for _, unspent := range unspentList {
 		sum += unspent.Amount

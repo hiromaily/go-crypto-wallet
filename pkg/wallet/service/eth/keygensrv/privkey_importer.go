@@ -23,13 +23,13 @@ type PrivKey struct {
 
 // NewPrivKey returns privKey object
 func NewPrivKey(
-	eth ethgrp.Ethereumer,
+	ethAPI ethgrp.Ethereumer,
 	logger *zap.Logger,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	wtype wallet.WalletType,
 ) *PrivKey {
 	return &PrivKey{
-		eth:            eth,
+		eth:            ethAPI,
 		logger:         logger,
 		accountKeyRepo: accountKeyRepo,
 		wtype:          wtype,
@@ -73,7 +73,7 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 		}
 		// FIXME: how to link imported key to specific accountName like client, deposit (grouping)
 		// TODO: where password should come from // ImportRawKey(hexKey, passPhrase string) (string, error)
-		account, err := ks.ImportECDSA(ecdsaKey, eth.Password)
+		acct, err := ks.ImportECDSA(ecdsaKey, eth.Password)
 		if err != nil {
 			// it continues even if error occurred
 			// because database stores status, import run again by same command for this key
@@ -85,16 +85,16 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 			return errors.Wrap(err, "fail to call eth.ImportECDSA()")
 		}
 		p.logger.Debug("key account is generated",
-			zap.String("account.Address.Hex()", account.Address.Hex()),
-			zap.String("account.Address.String()", account.Address.String()),
-			zap.String("account.URL.String()", account.URL.String()),
+			zap.String("account.Address.Hex()", acct.Address.Hex()),
+			zap.String("account.Address.String()", acct.Address.String()),
+			zap.String("account.URL.String()", acct.URL.String()),
 		)
 
 		// check generated address
-		if account.Address.Hex() != record.P2PKHAddress {
+		if acct.Address.Hex() != record.P2PKHAddress {
 			p.logger.Warn("inconsistency between generated address",
 				zap.String("old_address", record.P2PKHAddress),
-				zap.String("new_address", account.Address.Hex()),
+				zap.String("new_address", acct.Address.Hex()),
 			)
 		}
 

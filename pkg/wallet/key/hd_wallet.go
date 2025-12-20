@@ -283,7 +283,7 @@ func (k *HDKey) btcAddrs(wif *btcutil.WIF, privKey *btcec.PrivateKey) (string, s
 }
 
 // https://goethereumbook.org/wallet-generate/
-func (k *HDKey) ethAddrs(privKey *btcec.PrivateKey) (string, string, string, error) {
+func (_ *HDKey) ethAddrs(privKey *btcec.PrivateKey) (string, string, string, error) {
 	// private key
 	ethPrivKey := privKey.ToECDSA()
 	ethHexPrivKey := hexutil.Encode(crypto.FromECDSA(ethPrivKey))
@@ -303,7 +303,7 @@ func (k *HDKey) ethAddrs(privKey *btcec.PrivateKey) (string, string, string, err
 	return address, ethHexPubKey, ethHexPrivKey, nil
 }
 
-func (k *HDKey) xrpAddrs(privKey *btcec.PrivateKey) (string, string, string, error) {
+func (_ *HDKey) xrpAddrs(privKey *btcec.PrivateKey) (string, string, string, error) {
 	// private key (same as ethereum for now)
 	xrpPrivKey := privKey.ToECDSA()
 	// xrpHexPrivKey := hexutil.Encode(crypto.FromECDSA(xrpPrivKey))

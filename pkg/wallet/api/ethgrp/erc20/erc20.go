@@ -74,7 +74,7 @@ func NewERC20(
 //	return &opts
 //}
 
-func (e *ERC20) ValidateAddr(addr string) error {
+func (_ *ERC20) ValidateAddr(addr string) error {
 	// validation check
 	if !common.IsHexAddress(addr) {
 		return errors.Errorf("address:%s is invalid", addr)
@@ -212,7 +212,7 @@ func (e *ERC20) CreateRawTransaction(fromAddr, toAddr string, amount uint64, add
 	return rawtx, txDetailItem, nil
 }
 
-func (e *ERC20) createTransferData(toAddr string, amount *big.Int) []byte {
+func (_ *ERC20) createTransferData(toAddr string, amount *big.Int) []byte {
 	// function signature as a byte slice
 	transferFnSignature := []byte("transfer(address,uint256)")
 

@@ -136,7 +136,7 @@ type FundRawTransactionResult struct {
 }
 
 // ToHex convert wire.MsgTx to string of Hexadecimal(16進数)
-func (b *Bitcoin) ToHex(tx *wire.MsgTx) (string, error) {
+func (_ *Bitcoin) ToHex(tx *wire.MsgTx) (string, error) {
 	buf := bytes.NewBuffer(make([]byte, 0, tx.SerializeSize()))
 	if err := tx.Serialize(buf); err != nil {
 		return "", errors.Wrap(err, "fail to call tx.Serialize()")
@@ -145,7 +145,7 @@ func (b *Bitcoin) ToHex(tx *wire.MsgTx) (string, error) {
 }
 
 // ToMsgTx convert string of Hexadecimal(16進数) to wire.MsgTx
-func (b *Bitcoin) ToMsgTx(txHex string) (*wire.MsgTx, error) {
+func (_ *Bitcoin) ToMsgTx(txHex string) (*wire.MsgTx, error) {
 	byteHex, err := hex.DecodeString(txHex)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call hex.DecodeString()")
@@ -286,12 +286,12 @@ func (b *Bitcoin) CreateRawTransaction(inputs []btcjson.TransactionInput, output
 
 // FundRawTransaction Add inputs to a transaction until it has enough in value to meet its out value.
 // TODO: unused for now, but it looks useful
-func (b *Bitcoin) FundRawTransaction(hex string) (*FundRawTransactionResult, error) {
+func (b *Bitcoin) FundRawTransaction(hexTx string) (*FundRawTransactionResult, error) {
 	// fundrawtransaction
 	// https://bitcoincore.org/en/doc/0.19.0/rpc/rawtransactions/fundrawtransaction/
 
 	// hex
-	bHex, err := json.Marshal(hex)
+	bHex, err := json.Marshal(hexTx)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call json.Marchal(hex)")
 	}
@@ -436,8 +436,8 @@ func (b *Bitcoin) SignRawTransactionWithKey(tx *wire.MsgTx, privKeysWIF []string
 }
 
 // SendTransactionByHex send raw transaction by hex string
-func (b *Bitcoin) SendTransactionByHex(hex string) (*chainhash.Hash, error) {
-	msgTx, err := b.ToMsgTx(hex)
+func (b *Bitcoin) SendTransactionByHex(hexTx string) (*chainhash.Hash, error) {
+	msgTx, err := b.ToMsgTx(hexTx)
 	if err != nil {
 		return nil, err
 	}

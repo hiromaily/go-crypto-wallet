@@ -34,7 +34,7 @@ type XRPKeyGenerate struct {
 
 // NewXRPKeyGenerate returns XRPKeyGenerate object
 func NewXRPKeyGenerate(
-	xrp xrpgrp.Rippler,
+	xrpAPI xrpgrp.Rippler,
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	coinTypeCode coin.CoinTypeCode,
@@ -43,7 +43,7 @@ func NewXRPKeyGenerate(
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier,
 ) *XRPKeyGenerate {
 	return &XRPKeyGenerate{
-		xrp:               xrp,
+		xrp:               xrpAPI,
 		logger:            logger,
 		dbConn:            dbConn,
 		coinTypeCode:      coinTypeCode,

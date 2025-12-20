@@ -26,7 +26,7 @@ type Multisig struct {
 
 // NewMultisig returns multisig
 func NewMultisig(
-	btc btcgrp.Bitcoiner,
+	btcAPI btcgrp.Bitcoiner,
 	logger *zap.Logger,
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
@@ -34,7 +34,7 @@ func NewMultisig(
 	wtype wallet.WalletType,
 ) *Multisig {
 	return &Multisig{
-		btc:                btc,
+		btc:                btcAPI,
 		logger:             logger,
 		authFullPubKeyRepo: authFullPubKeyRepo,
 		accountKeyRepo:     accountKeyRepo,

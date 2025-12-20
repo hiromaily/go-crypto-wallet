@@ -24,13 +24,13 @@ type Sign struct {
 
 // NewSign returns sign object
 func NewSign(
-	eth ethgrp.Ethereumer,
+	ethAPI ethgrp.Ethereumer,
 	logger *zap.Logger,
 	txFileRepo tx.FileRepositorier,
 	wtype wallet.WalletType,
 ) *Sign {
 	return &Sign{
-		eth:        eth,
+		eth:        ethAPI,
 		logger:     logger,
 		txFileRepo: txFileRepo,
 		wtype:      wtype,

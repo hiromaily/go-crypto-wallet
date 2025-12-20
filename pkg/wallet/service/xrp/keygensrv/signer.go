@@ -27,14 +27,14 @@ type Sign struct {
 
 // NewSign returns sign object
 func NewSign(
-	xrp xrpgrp.Rippler,
+	xrpAPI xrpgrp.Rippler,
 	logger *zap.Logger,
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier,
 	txFileRepo tx.FileRepositorier,
 	wtype wallet.WalletType,
 ) *Sign {
 	return &Sign{
-		xrp:               xrp,
+		xrp:               xrpAPI,
 		logger:            logger,
 		xrpAccountKeyRepo: xrpAccountKeyRepo,
 		txFileRepo:        txFileRepo,

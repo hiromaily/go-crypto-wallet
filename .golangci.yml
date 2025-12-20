@@ -9,9 +9,6 @@ issues:
   max-issues-per-linter: 0
   # Maximum count of issues with the same text. Set to 0 to disable. Default is 3.
   max-same-issues: 0
-  exclude-files:
-    - ".*\\.pb\\.go"
-    - ".*\\.test\\.go"
 
 formatters:
   enable:
@@ -160,6 +157,11 @@ linters:
         linters:
           - staticcheck
 
+    # Exclude files from all linters.
+    paths:
+      - ".*\\.pb\\.go"
+      #- ".*\\.test\\.go"
+    
     # Log a warning if an exclusion rule is unused.
     # Default: false
     warn-unused: true

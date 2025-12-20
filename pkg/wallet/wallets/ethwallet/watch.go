@@ -37,13 +37,13 @@ func NewETHWatch(
 	txSender service.TxSender,
 	txMonitorer service.TxMonitorer,
 	paymentRequestCreator service.PaymentRequestCreator,
-	wtype wtype.WalletType,
+	walletType wtype.WalletType,
 ) *ETHWatch {
 	return &ETHWatch{
 		ETH:                   eth,
 		logger:                logger,
 		dbConn:                dbConn,
-		wtype:                 wtype,
+		wtype:                 walletType,
 		AddressImporter:       addrImporter,
 		TxCreator:             txCreator,
 		TxSender:              txSender,

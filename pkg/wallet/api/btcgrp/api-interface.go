@@ -63,7 +63,7 @@ type Bitcoiner interface {
 	ImportPrivKeyWithoutReScan(privKeyWIF *btcutil.WIF, label string) error
 	ImportAddress(pubkey string) error
 	ImportAddressWithoutReScan(pubkey string) error
-	ImportAddressWithLabel(address, label string, rescan bool) error
+	ImportAddressWithLabel(addr, label string, rescan bool) error
 
 	// label.go
 	SetLabel(addr, label string) error
