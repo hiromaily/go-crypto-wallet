@@ -71,9 +71,24 @@ linters:
     - errcheck
   
   settings:
-    # depguard:
-    #   rules:
-    #     main:
+    depguard: 
+      rules:
+        main:
+          files:
+            - "cmd/**"
+          allow:
+            - $gostd
+            - "github.com/hiromaily/go-crypto-wallet/pkg/"
+            - "github.com/go-sql-driver/mysql"
+            - "github.com/btcsuite/btcd/chaincfg"
+            - "github.com/btcsuite/btcd/rpcclient"
+            - "github.com/ethereum/go-ethereum/rpc"
+            - "github.com/ethereum/go-ethereum/ethclient"
+            - "github.com/ethereum/go-ethereum/accounts/keystore"
+            - "github.com/volatiletech/sqlboiler/v4/boil"
+            - "go.uber.org/zap"
+            - "google.golang.org/grpc"
+            - "github.com/opentracing/opentracing-go"
     #       deny:
     #         - pkg: "github.com/containerd/containerd/errdefs"
     #           desc: The containerd errdefs package was migrated to a separate module. Use github.com/containerd/errdefs instead.
