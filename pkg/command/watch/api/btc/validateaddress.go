@@ -23,7 +23,7 @@ func (c *ValidateAddressCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (_ *ValidateAddressCommand) Help() string {
+func (*ValidateAddressCommand) Help() string {
 	return `Usage: wallet api validateaddress [options...]
 Options:
   -address  address like '2NFXSXxw8Fa6P6CSovkdjXE6UF4hupcTHtr'

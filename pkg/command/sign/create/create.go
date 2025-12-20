@@ -19,7 +19,7 @@ type CreateCommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (_ *CreateCommand) Synopsis() string {
+func (*CreateCommand) Synopsis() string {
 	return "create resources"
 }
 
@@ -29,7 +29,7 @@ var (
 )
 
 // Help returns usage for this subcommand
-func (_ *CreateCommand) Help() string {
+func (*CreateCommand) Help() string {
 	return fmt.Sprintf(`Usage: sign create [Subcommands...]
 Subcommands:
   hdkey     %s

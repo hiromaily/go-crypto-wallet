@@ -68,6 +68,8 @@ func (b *Bitcoin) AddMultisigAddress(
 		jsonRawMsg = []json.RawMessage{bRequiredSigs, bAddresses, bAccount, bAddrType}
 	case coin.BCH:
 		jsonRawMsg = []json.RawMessage{bRequiredSigs, bAddresses, bAccount}
+	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
+		return nil, errors.Errorf("not implemented for %s in AddMultisigAddress()", b.coinTypeCode.String())
 	default:
 		return nil, errors.Errorf("not implemented for %s in AddMultisigAddress()", b.coinTypeCode.String())
 	}

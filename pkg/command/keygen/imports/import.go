@@ -19,7 +19,7 @@ type ImportCommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (_ *ImportCommand) Synopsis() string {
+func (*ImportCommand) Synopsis() string {
 	return "import resources"
 }
 
@@ -29,7 +29,7 @@ var (
 )
 
 // Help returns usage for this subcommand
-func (_ *ImportCommand) Help() string {
+func (*ImportCommand) Help() string {
 	return fmt.Sprintf(`Usage: keygen import [Subcommands...]
 Subcommands:
   privkey     %s

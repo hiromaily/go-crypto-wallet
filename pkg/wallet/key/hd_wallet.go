@@ -235,7 +235,8 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 				FullPubKey:     xrpPubKey,
 				RedeemScript:   "",
 			}
-
+		case coin.LTC, coin.ERC20, coin.HYC:
+			return nil, errors.Errorf("coinType[%s] is not implemented yet", k.coinTypeCode.String())
 		default:
 			return nil, errors.Errorf("coinType[%s] is not implemented yet", k.coinTypeCode.String())
 		}
@@ -338,8 +339,11 @@ func (k *HDKey) getP2PKHAddr(privKey *btcec.PrivateKey) (string, error) {
 		return p2PKHAddr.String(), nil
 	case coin.BCH:
 		return k.getP2PKHAddrBCH(p2PKHAddr)
+	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
+		return "", errors.Errorf("getP2pkhAddr() is not implemented for %s", k.coinTypeCode)
+	default:
+		return "", errors.Errorf("getP2pkhAddr() is not implemented for %s", k.coinTypeCode)
 	}
-	return "", errors.Errorf("getP2pkhAddr() is not implemented for %s", k.coinTypeCode)
 }
 
 // getP2PKHAddrBCH get P2PKH Addr for BCH
@@ -398,8 +402,11 @@ func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, er
 			return "", "", errors.Wrap(err, "fail to call bchaddr.NewCashAddressScriptHash()")
 		}
 		return address.String(), strRedeemScript, nil
+	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
+		return "", "", errors.Errorf("getP2shSegwitAddr() is not implemented yet for %s", k.coinTypeCode)
+	default:
+		return "", "", errors.Errorf("getP2shSegwitAddr() is not implemented yet for %s", k.coinTypeCode)
 	}
-	return "", "", errors.Errorf("getP2shSegwitAddr() is not implemented yet for %s", k.coinTypeCode)
 }
 
 // getBech32Addr returns bech32 address

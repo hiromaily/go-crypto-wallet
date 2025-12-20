@@ -304,6 +304,8 @@ func (r *registry) newConverter(coinTypeCode coin.CoinTypeCode) converter.Conver
 	switch coinTypeCode {
 	case coin.BTC:
 		return r.newBTC()
+	case coin.BCH, coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
+		return converter.NewConverter()
 	default:
 		return converter.NewConverter()
 	}

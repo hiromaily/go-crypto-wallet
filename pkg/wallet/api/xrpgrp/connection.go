@@ -74,6 +74,9 @@ func NewRipple(wsPublic *ws.WS, wsAdmin *ws.WS, api *xrp.RippleAPI, conf *config
 			return nil, errors.Wrap(err, "fail to call xrp.NewRipple()")
 		}
 		return ripple, err
+	case coin.BTC, coin.BCH, coin.LTC, coin.ETH, coin.ERC20, coin.HYC:
+		return nil, errors.Errorf("coinType %s is not defined", coinTypeCode.String())
+	default:
+		return nil, errors.Errorf("coinType %s is not defined", coinTypeCode.String())
 	}
-	return nil, errors.Errorf("coinType %s is not defined", coinTypeCode.String())
 }

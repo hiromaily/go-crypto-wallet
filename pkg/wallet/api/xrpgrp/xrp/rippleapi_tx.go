@@ -232,6 +232,14 @@ func (r *Ripple) WaitValidation(targetledgerVarsion uint64) (uint64, error) {
 					r.logger.Warn("parameter is invalid in WaitValidation()")
 				case codes.DeadlineExceeded:
 					r.logger.Warn("timeout in WaitValidation()")
+				case codes.OK, codes.Canceled, codes.Unknown, codes.NotFound, codes.AlreadyExists,
+					codes.PermissionDenied, codes.ResourceExhausted, codes.FailedPrecondition,
+					codes.Aborted, codes.OutOfRange, codes.Unimplemented, codes.Internal,
+					codes.Unavailable, codes.DataLoss, codes.Unauthenticated:
+					r.logger.Warn("gRPC error in WaitValidation()",
+						zap.Uint32("code", uint32(respErr.Code())),
+						zap.String("message", respErr.Message()),
+					)
 				default:
 					r.logger.Warn("gRPC error in WaitValidation()",
 						zap.Uint32("code", uint32(respErr.Code())),

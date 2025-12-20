@@ -64,6 +64,8 @@ func (c *WalletRoot) validate(wtype wallet.WalletType, coinTypeCode coin.CoinTyp
 			if c.Bitcoin.Block.ConfirmationNum == 0 {
 				return errors.New("Block ConfirmationNum is required in toml file")
 			}
+		case wallet.WalletTypeKeyGen, wallet.WalletTypeSign:
+			// No additional validation needed
 		default:
 		}
 	case coin.ETH, coin.ERC20:
@@ -74,6 +76,8 @@ func (c *WalletRoot) validate(wtype wallet.WalletType, coinTypeCode coin.CoinTyp
 		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ethereum"); err != nil {
 			return err
 		}
+	case coin.LTC, coin.HYC:
+		// Not implemented yet
 	default:
 	}
 

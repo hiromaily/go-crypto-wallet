@@ -76,7 +76,7 @@ func (r *registry) NewSigner() wallets.Signer {
 			r.newSigner(),
 			r.walletType,
 		)
-	case coin.ETH:
+	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", r.conf.CoinTypeCode))

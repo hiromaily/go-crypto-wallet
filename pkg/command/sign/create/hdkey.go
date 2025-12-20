@@ -24,7 +24,7 @@ func (c *HDKeyCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (_ *HDKeyCommand) Help() string {
+func (*HDKeyCommand) Help() string {
 	return `Usage: sign create hdkey
 `
 }

@@ -77,11 +77,15 @@ func (a *AddressImport) ImportAddress(fileName string, isRescan bool) error {
 				switch a.addrType {
 				case address.AddrTypeBech32:
 					targetAddr = addrFmt.Bech32Address
+				case address.AddrTypeLegacy, address.AddrTypeP2shSegwit, address.AddrTypeBCHCashAddr, address.AddrTypeETH:
+					targetAddr = addrFmt.P2SHSegwitAddress // p2sh_segwit_address
 				default:
 					targetAddr = addrFmt.P2SHSegwitAddress // p2sh_segwit_address
 				}
 			case coin.BCH:
 				targetAddr = addrFmt.P2PKHAddress // p2pkh_address
+			case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
+				return errors.Errorf("coinTypeCode is out of range: %s", a.btc.CoinTypeCode().String())
 			default:
 				return errors.Errorf("coinTypeCode is out of range: %s", a.btc.CoinTypeCode().String())
 			}

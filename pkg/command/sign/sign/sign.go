@@ -17,12 +17,12 @@ type SignCommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (_ *SignCommand) Synopsis() string {
+func (*SignCommand) Synopsis() string {
 	return "sign on signed transaction for multsig address (account would be found from file name)"
 }
 
 // Help returns usage for this subcommand
-func (_ *SignCommand) Help() string {
+func (*SignCommand) Help() string {
 	return "Usage: sign [options...]\nOptions:\n  -file  signed transaction file path for multisig"
 }
 

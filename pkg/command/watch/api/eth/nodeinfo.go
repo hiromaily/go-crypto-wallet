@@ -23,7 +23,7 @@ func (c *NodeInfoCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (_ *NodeInfoCommand) Help() string {
+func (*NodeInfoCommand) Help() string {
 	return `Usage: wallet api nodeinfo
 `
 }

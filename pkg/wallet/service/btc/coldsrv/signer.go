@@ -200,7 +200,8 @@ func (s *Sign) signMultisig(msgTx *wire.MsgTx, prevsAddrs *btc.PreviousTxs) (*wi
 		}
 		// wip
 		wips = []string{authKey.WalletImportFormat}
-
+	case wallet.WalletTypeWatchOnly:
+		return nil, false, "", errors.Errorf("WalletType is invalid: %s", s.wtype.String())
 	default:
 		return nil, false, "", errors.Errorf("WalletType is invalid: %s", s.wtype.String())
 	}

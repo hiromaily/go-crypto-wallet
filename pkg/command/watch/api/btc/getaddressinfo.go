@@ -24,7 +24,7 @@ func (c *GetAddressInfoCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (_ *GetAddressInfoCommand) Help() string {
+func (*GetAddressInfoCommand) Help() string {
 	return `Usage: wallet api getaddressinfo [options...]
 Options:
 	-address  address

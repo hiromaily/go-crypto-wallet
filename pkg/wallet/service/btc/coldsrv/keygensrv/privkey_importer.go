@@ -114,6 +114,10 @@ func (p *PrivKey) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPub
 	case coin.BCH:
 		targetAddr = walletAddress
 		addrType = address.AddrTypeBCHCashAddr
+	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
+		p.logger.Warn("this coin type is not implemented in checkImportedAddress()",
+			zap.String("coin_type_code", p.btc.CoinTypeCode().String()))
+		return
 	default:
 		p.logger.Warn("this coin type is not implemented in checkImportedAddress()",
 			zap.String("coin_type_code", p.btc.CoinTypeCode().String()))
