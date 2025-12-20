@@ -17,12 +17,12 @@ type SignatureCommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (c *SignatureCommand) Synopsis() string {
+func (_ *SignatureCommand) Synopsis() string {
 	return "sign on unsigned transaction (account would be found from file name)"
 }
 
 // Help returns usage for this subcommand
-func (c *SignatureCommand) Help() string {
+func (_ *SignatureCommand) Help() string {
 	return `Usage: wallet sending [options...]
 Options:
   -file  unsigned transaction file path

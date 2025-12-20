@@ -25,7 +25,7 @@ func (c *SeedCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (c *SeedCommand) Help() string {
+func (_ *SeedCommand) Help() string {
 	return `Usage: keygen key create seed  [options...]
 Options:
   -seed  given seed is used to store in database instead of generating new seed (development use)

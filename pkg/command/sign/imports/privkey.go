@@ -23,7 +23,7 @@ func (c *PrivKeyCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (c *PrivKeyCommand) Help() string {
+func (_ *PrivKeyCommand) Help() string {
 	return `Usage: sign import privkey
 `
 }

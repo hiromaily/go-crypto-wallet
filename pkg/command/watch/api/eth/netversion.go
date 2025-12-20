@@ -23,7 +23,7 @@ func (c *NetVersionCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (c *NetVersionCommand) Help() string {
+func (_ *NetVersionCommand) Help() string {
 	return `Usage: wallet api netversion
 `
 }

@@ -19,7 +19,7 @@ type CreateCommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (c *CreateCommand) Synopsis() string {
+func (_ *CreateCommand) Synopsis() string {
 	return "creating functionality"
 }
 
@@ -31,7 +31,7 @@ var (
 )
 
 // Help returns usage for this subcommand
-func (c *CreateCommand) Help() string {
+func (_ *CreateCommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet create [Subcommands...]
 Subcommands:
   deposit  %s

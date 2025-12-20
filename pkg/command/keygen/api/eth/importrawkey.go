@@ -23,7 +23,7 @@ func (c *ImportRawKeyCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (c *ImportRawKeyCommand) Help() string {
+func (_ *ImportRawKeyCommand) Help() string {
 	return `Usage: keygen api importrawkey [options...]
 Options:
   -key   private key

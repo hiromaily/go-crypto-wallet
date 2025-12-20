@@ -23,7 +23,7 @@ func (c *EstimateFeeCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (c *EstimateFeeCommand) Help() string {
+func (_ *EstimateFeeCommand) Help() string {
 	return `Usage: wallet api estimatefee`
 }
 

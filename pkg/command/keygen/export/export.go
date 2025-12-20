@@ -19,14 +19,14 @@ type ExportCommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (c *ExportCommand) Synopsis() string {
+func (_ *ExportCommand) Synopsis() string {
 	return "export resources"
 }
 
 var addressSynopsis = "export generated PublicKey as csv file"
 
 // Help returns usage for this subcommand
-func (c *ExportCommand) Help() string {
+func (_ *ExportCommand) Help() string {
 	return fmt.Sprintf(`Usage: keygen export [Subcommands...]
 Subcommands:
   address   %s

@@ -25,7 +25,7 @@ func (c *ListUnspentCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (c *ListUnspentCommand) Help() string {
+func (_ *ListUnspentCommand) Help() string {
 	return `Usage: wallet api listunspent [options...]
 Options:
   -account  account

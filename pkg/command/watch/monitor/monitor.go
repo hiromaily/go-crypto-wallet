@@ -19,7 +19,7 @@ type MonitorCommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (c *MonitorCommand) Synopsis() string {
+func (_ *MonitorCommand) Synopsis() string {
 	return "monitoring functionality"
 }
 
@@ -29,7 +29,7 @@ var (
 )
 
 // Help returns usage for this subcommand
-func (c *MonitorCommand) Help() string {
+func (_ *MonitorCommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet monitor [Subcommands...]
 Subcommands:
   senttx   %s

@@ -25,7 +25,7 @@ func (c *BalanceCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (c *BalanceCommand) Help() string {
+func (_ *BalanceCommand) Help() string {
 	return `Usage: wallet api balance [options...]
 Options:
   -account  account

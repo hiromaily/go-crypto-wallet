@@ -24,7 +24,7 @@ func (c *PaymentCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (c *PaymentCommand) Help() string {
+func (_ *PaymentCommand) Help() string {
 	return `Usage: wallet create payment [options...]
 Options:
   -fee  adjustment fee

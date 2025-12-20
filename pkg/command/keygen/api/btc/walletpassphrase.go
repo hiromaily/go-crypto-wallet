@@ -23,7 +23,7 @@ func (c *WalletPassphraseCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (c *WalletPassphraseCommand) Help() string {
+func (_ *WalletPassphraseCommand) Help() string {
 	return `Usage: keygen api walletpassphrase [options...]
 Options:
   -passphrase  passphrase

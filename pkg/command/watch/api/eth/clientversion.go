@@ -23,7 +23,7 @@ func (c *ClientVersionCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (c *ClientVersionCommand) Help() string {
+func (_ *ClientVersionCommand) Help() string {
 	return `Usage: wallet api clientversion
 `
 }

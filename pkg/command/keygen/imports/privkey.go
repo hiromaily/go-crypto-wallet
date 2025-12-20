@@ -24,7 +24,7 @@ func (c *PrivKeyCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (c *PrivKeyCommand) Help() string {
+func (_ *PrivKeyCommand) Help() string {
 	return `Usage: keygen key import privkey [options...]
 Options:
   -account  target account

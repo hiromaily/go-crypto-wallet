@@ -23,7 +23,7 @@ func (c *ImportWalletCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (c *ImportWalletCommand) Help() string {
+func (_ *ImportWalletCommand) Help() string {
 	return `Usage: keygen api dumpwallet [options...]
 Options:
   -file  filename

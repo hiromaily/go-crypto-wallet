@@ -23,7 +23,7 @@ func (c *DBCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (c *DBCommand) Help() string {
+func (_ *DBCommand) Help() string {
 	return `Usage: wallet create db [options...]
 Options:
   -table  target table name

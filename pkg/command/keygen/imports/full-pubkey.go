@@ -23,7 +23,7 @@ func (c *FullPubKeyCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (c *FullPubKeyCommand) Help() string {
+func (_ *FullPubKeyCommand) Help() string {
 	return `Usage: keygen key import fullpubkey [options...]
 Options:
   -file  full-pubkey file path

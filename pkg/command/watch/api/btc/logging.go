@@ -24,7 +24,7 @@ func (c *LoggingCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (c *LoggingCommand) Help() string {
+func (_ *LoggingCommand) Help() string {
 	return `Usage: wallet api logging`
 }
 

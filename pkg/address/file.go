@@ -45,7 +45,7 @@ func (r *FileRepository) CreateFilePath(accountType account.AccountType) string 
 }
 
 // ValidateFilePath validate fileName
-func (r *FileRepository) ValidateFilePath(fileName string, accountType account.AccountType) error {
+func (_ *FileRepository) ValidateFilePath(fileName string, accountType account.AccountType) error {
 	// e.g. ./data/pubkey/deposit/deposit_1586831083436291000.csv
 	tmp := strings.Split(strings.Split(fileName, "_")[0], "/")
 	if tmp[len(tmp)-1] != accountType.String() {
@@ -55,7 +55,7 @@ func (r *FileRepository) ValidateFilePath(fileName string, accountType account.A
 }
 
 // ImportAddress import pubkey from csv file
-func (r *FileRepository) ImportAddress(fileName string) ([]string, error) {
+func (_ *FileRepository) ImportAddress(fileName string) ([]string, error) {
 	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, errors.Errorf("os.Open(%s) error: %s", fileName, err)

@@ -23,7 +23,7 @@ func (c *SentTxCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (c *SentTxCommand) Help() string {
+func (_ *SentTxCommand) Help() string {
 	return `Usage: wallet monitor sendtx [options...]
 Options:
   -account  target account

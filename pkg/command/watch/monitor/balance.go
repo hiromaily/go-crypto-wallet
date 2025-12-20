@@ -23,7 +23,7 @@ func (c *BalanceCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (c *BalanceCommand) Help() string {
+func (_ *BalanceCommand) Help() string {
 	return `Usage: wallet monitor balance [options...]
 Options:
   -num      confirmation number

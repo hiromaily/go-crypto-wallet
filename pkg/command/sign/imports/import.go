@@ -19,14 +19,14 @@ type ImportCommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (c *ImportCommand) Synopsis() string {
+func (_ *ImportCommand) Synopsis() string {
 	return "import resource"
 }
 
 var privkeySynopsis = "import generated private key for Authorization account to database"
 
 // Help returns usage for this subcommand
-func (c *ImportCommand) Help() string {
+func (_ *ImportCommand) Help() string {
 	return fmt.Sprintf(`Usage: sign import [Subcommands...]
 Subcommands:
   privkey   %s

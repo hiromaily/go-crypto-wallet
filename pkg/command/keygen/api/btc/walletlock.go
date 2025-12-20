@@ -23,7 +23,7 @@ func (c *WalletLockCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (c *WalletLockCommand) Help() string {
+func (_ *WalletLockCommand) Help() string {
 	return `Usage: keygen api walletlock`
 }
 

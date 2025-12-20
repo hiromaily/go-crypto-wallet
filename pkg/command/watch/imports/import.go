@@ -19,14 +19,14 @@ type ImportCommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (c *ImportCommand) Synopsis() string {
+func (_ *ImportCommand) Synopsis() string {
 	return "importing functionality"
 }
 
 var addressSynopsis = "import generatd addresses by keygen wallet"
 
 // Help returns usage for this subcommand
-func (c *ImportCommand) Help() string {
+func (_ *ImportCommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet import [Subcommands...]
 Subcommands:
   address  %s
