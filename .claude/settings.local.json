@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make lint-fix:*)",
+      "Bash(make lint:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(sed:*)",
+      "Bash(awk:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(for file in )",
+      "Bash(\"/Users/hiroki.yasui/go/src/github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/coldsrv/hd_walleter.go\" )",
+      "Bash(\"/Users/hiroki.yasui/go/src/github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/keygensrv/privkey_importer.go\" )",
+      "Bash(\"/Users/hiroki.yasui/go/src/github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/watchsrv/tx_creator.go\")",
+      "Bash(do)",
+      "Bash(echo:*)",
+      "Bash(done)"
+    ]
+  }
+}
