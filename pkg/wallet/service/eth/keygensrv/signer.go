@@ -63,7 +63,8 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 			return "", false, "", errors.Wrap(err, "fail to call serial.DecodeFromString()")
 		}
 		// sign
-		signedRawTx, err := s.eth.SignOnRawTransaction(&rawTx, eth.Password)
+		var signedRawTx *ethtx.RawTx
+		signedRawTx, err = s.eth.SignOnRawTransaction(&rawTx, eth.Password)
 		if err != nil {
 			return "", false, "", errors.Wrap(err, "fail to call eth.SignOnRawTransaction()")
 		}

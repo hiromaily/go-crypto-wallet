@@ -113,10 +113,10 @@ func main() {
 		// create wallet
 		regi := NewRegistry(conf, accountConf, walletType, authName)
 		walleter = regi.NewSigner()
+		defer func() {
+			walleter.Done()
+		}()
 	}
-	defer func() {
-		walleter.Done()
-	}()
 
 	// sub command
 	args := flags.Args()
@@ -129,6 +129,9 @@ func main() {
 	code, err := cl.Run()
 	if err != nil {
 		log.Printf("fail to call Run() %s command: %v", appName, err)
+	}
+	if walleter != nil {
+		walleter.Done()
 	}
 	os.Exit(code)
 }

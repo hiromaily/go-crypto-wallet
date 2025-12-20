@@ -60,7 +60,7 @@ func Base58Decode(b, alphabet string) ([]byte, error) {
 		for _, v := range t[:n] {
 			tmp := strings.Index(alphabet, string(v))
 			if tmp == -1 {
-				return nil, fmt.Errorf("Bad Base58 string: %s", b)
+				return nil, fmt.Errorf("bad Base58 string: %s", b)
 			}
 			total = total*58 + uint64(tmp)
 		}
@@ -88,7 +88,7 @@ func Base58Decode(b, alphabet string) ([]byte, error) {
 	checksum := DoubleSha256(val[0 : len(val)-4])
 	expected := val[len(val)-4:]
 	if !bytes.Equal(checksum[0:4], expected) {
-		return nil, fmt.Errorf("Bad Base58 checksum: %v expected %v", checksum, expected)
+		return nil, fmt.Errorf("bad Base58 checksum: %v expected %v", checksum, expected)
 	}
 	return val, nil
 }
