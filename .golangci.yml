@@ -107,15 +107,10 @@ linters:
       # Do not allow unaliased imports of aliased packages.
       no-unaliased: true
 
-      alias:
-          # Should no longer be aliased, because we no longer allow moby/docker errdefs.
-        - pkg: "github.com/docker/docker/errdefs"
-          alias: ""
-        - pkg: github.com/opencontainers/image-spec/specs-go/v1
-          alias: ocispec
-          # Enforce that gotest.tools/v3/assert/cmp is always aliased as "is"
-        - pkg: gotest.tools/v3/assert/cmp
-          alias: is
+      # set aliases for packages
+      # alias:
+      #   - pkg: gotest.tools/v3/assert/cmp
+      #     alias: is
 
     nakedret:
       # Disallow naked returns if func has more lines of code than this setting.
@@ -148,11 +143,9 @@ linters:
 
     rules:      
       # Exclude some linters from running on tests files.
-      - path: _test\.go
-        linters:
-          - errcheck
-          - gosec
-
+      # - path: _test\.go
+      #   linters:
+      #     - gosec
       - text: "ST1000: at least one file in a package should have a package comment"
         linters:
           - staticcheck
