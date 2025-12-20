@@ -53,7 +53,8 @@ func (p *FullPubkeyImport) ImportFullPubKey(fileName string) error {
 	for i, key := range pubKeys {
 		inner := strings.Split(key, ",")
 
-		fpk, err := fullpubkey.ConvertLine(p.btc.CoinTypeCode(), inner)
+		var fpk *fullpubkey.FullPubKeyFormat
+		fpk, err = fullpubkey.ConvertLine(p.btc.CoinTypeCode(), inner)
 		if err != nil {
 			return err
 		}

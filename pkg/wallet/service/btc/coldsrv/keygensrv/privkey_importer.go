@@ -58,7 +58,8 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 			zap.String("P2SH_segwit_address", record.P2SHSegwitAddress),
 			zap.String("wif", record.WalletImportFormat))
 		// decode wif
-		wif, err := btcutil.DecodeWIF(record.WalletImportFormat)
+		var wif *btcutil.WIF
+		wif, err = btcutil.DecodeWIF(record.WalletImportFormat)
 		if err != nil {
 			return errors.Wrapf(err, "fail to call btcutil.DecodeWIF(%s). WIF is invalid format", record.WalletImportFormat)
 		}
