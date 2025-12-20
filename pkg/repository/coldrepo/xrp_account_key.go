@@ -89,11 +89,11 @@ func (r *XRPAccountKeyRepository) UpdateAddrStatus(accountType account.AccountTy
 	ctx := context.Background()
 
 	// Set updating columns
-	updCols := map[string]interface{}{
+	updCols := map[string]any{
 		models.XRPAccountKeyColumns.AddrStatus: addrStatus.Int8(),
 	}
 
-	targetIDs := make([]interface{}, len(accountIDs))
+	targetIDs := make([]any, len(accountIDs))
 	for i, v := range accountIDs {
 		targetIDs[i] = v
 	}

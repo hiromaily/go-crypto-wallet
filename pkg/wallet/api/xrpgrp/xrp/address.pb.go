@@ -309,7 +309,7 @@ func file_address_proto_rawDescGZIP() []byte {
 }
 
 var file_address_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
-var file_address_proto_goTypes = []interface{}{
+var file_address_proto_goTypes = []any{
 	(*ResponseGenerateAddress)(nil),  // 0: rippleapi.address.ResponseGenerateAddress
 	(*ResponseGenerateXAddress)(nil), // 1: rippleapi.address.ResponseGenerateXAddress
 	(*RequestIsValidAddress)(nil),    // 2: rippleapi.address.RequestIsValidAddress
@@ -336,7 +336,7 @@ func file_address_proto_init() {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_address_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_address_proto_msgTypes[0].Exporter = func(v any, i int) any {
 			switch v := v.(*ResponseGenerateAddress); i {
 			case 0:
 				return &v.state
@@ -348,7 +348,7 @@ func file_address_proto_init() {
 				return nil
 			}
 		}
-		file_address_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_address_proto_msgTypes[1].Exporter = func(v any, i int) any {
 			switch v := v.(*ResponseGenerateXAddress); i {
 			case 0:
 				return &v.state
@@ -360,7 +360,7 @@ func file_address_proto_init() {
 				return nil
 			}
 		}
-		file_address_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+		file_address_proto_msgTypes[2].Exporter = func(v any, i int) any {
 			switch v := v.(*RequestIsValidAddress); i {
 			case 0:
 				return &v.state
@@ -372,7 +372,7 @@ func file_address_proto_init() {
 				return nil
 			}
 		}
-		file_address_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+		file_address_proto_msgTypes[3].Exporter = func(v any, i int) any {
 			switch v := v.(*ResponseIsValidAddress); i {
 			case 0:
 				return &v.state

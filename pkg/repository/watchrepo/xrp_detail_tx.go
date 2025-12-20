@@ -112,16 +112,16 @@ func (r *XrpDetailTxInputRepository) UpdateAfterTxSent(
 	uuid string,
 	txType tx.TxType,
 	signedTxID,
-	TxBlob string,
+	txBlob string,
 	earlistLedgerVersion uint64,
 ) (int64, error) {
 	ctx := context.Background()
 
 	// Set updating columns
-	updCols := map[string]interface{}{
+	updCols := map[string]any{
 		models.XRPDetailTXColumns.CurrentTXType:         txType.Int8(),
 		models.XRPDetailTXColumns.SignedTXID:            signedTxID,
-		models.XRPDetailTXColumns.TXBlob:                TxBlob,
+		models.XRPDetailTXColumns.TXBlob:                txBlob,
 		models.XRPDetailTXColumns.EarliestLedgerVersion: earlistLedgerVersion,
 		models.XRPDetailTXColumns.SentUpdatedAt:         null.TimeFrom(time.Now()),
 	}
@@ -135,7 +135,7 @@ func (r *XrpDetailTxInputRepository) UpdateTxType(id int64, txType tx.TxType) (i
 	ctx := context.Background()
 
 	// Set updating columns
-	updCols := map[string]interface{}{
+	updCols := map[string]any{
 		models.XRPDetailTXColumns.CurrentTXType: txType.Int8(),
 	}
 	return models.XRPDetailTxes(
@@ -148,7 +148,7 @@ func (r *XrpDetailTxInputRepository) UpdateTxTypeBySentHashTx(txType tx.TxType, 
 	ctx := context.Background()
 
 	// Set updating columns
-	updCols := map[string]interface{}{
+	updCols := map[string]any{
 		models.XRPDetailTXColumns.CurrentTXType: txType.Int8(),
 	}
 	return models.XRPDetailTxes(

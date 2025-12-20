@@ -26,7 +26,7 @@ func New(ctx context.Context, url string) (*WS, error) {
 }
 
 // Call calls request
-func (w *WS) Call(ctx context.Context, req, res interface{}) error {
+func (w *WS) Call(ctx context.Context, req, res any) error {
 	if err := wsjson.Write(ctx, w.conn, req); err != nil {
 		return errors.Wrap(err, "fail to call wsjson.Write()")
 	}

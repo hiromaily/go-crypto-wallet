@@ -201,7 +201,7 @@ func file_account_proto_rawDescGZIP() []byte {
 }
 
 var file_account_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
-var file_account_proto_goTypes = []interface{}{
+var file_account_proto_goTypes = []any{
 	(*RequestGetAccountInfo)(nil),  // 0: rippleapi.account.RequestGetAccountInfo
 	(*ResponseGetAccountInfo)(nil), // 1: rippleapi.account.ResponseGetAccountInfo
 }
@@ -221,7 +221,7 @@ func file_account_proto_init() {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_account_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_account_proto_msgTypes[0].Exporter = func(v any, i int) any {
 			switch v := v.(*RequestGetAccountInfo); i {
 			case 0:
 				return &v.state
@@ -233,7 +233,7 @@ func file_account_proto_init() {
 				return nil
 			}
 		}
-		file_account_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_account_proto_msgTypes[1].Exporter = func(v any, i int) any {
 			switch v := v.(*ResponseGetAccountInfo); i {
 			case 0:
 				return &v.state

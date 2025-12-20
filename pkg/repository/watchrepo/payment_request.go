@@ -83,12 +83,12 @@ func (r *PaymentRequestRepository) UpdatePaymentID(paymentID int64, ids []int64)
 	ctx := context.Background()
 
 	// Set updating columns
-	updCols := map[string]interface{}{
+	updCols := map[string]any{
 		models.PaymentRequestColumns.PaymentID: paymentID,
 	}
 
 	// change []int64 to []interface
-	targetIDs := make([]interface{}, len(ids))
+	targetIDs := make([]any, len(ids))
 	for i, v := range ids {
 		targetIDs[i] = v
 	}
@@ -104,7 +104,7 @@ func (r *PaymentRequestRepository) UpdateIsDone(paymentID int64) (int64, error) 
 	ctx := context.Background()
 
 	// Set updating columns
-	updCols := map[string]interface{}{
+	updCols := map[string]any{
 		models.PaymentRequestColumns.IsDone: true,
 	}
 	return models.PaymentRequests(

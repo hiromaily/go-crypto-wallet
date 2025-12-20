@@ -179,7 +179,7 @@ func (r *BTCTxRepository) UpdateAfterTxSent(
 	ctx := context.Background()
 
 	// Set updating columns
-	updCols := map[string]interface{}{
+	updCols := map[string]any{
 		models.BTCTXColumns.CurrentTXType: txType.Int8(),
 		models.BTCTXColumns.SignedHexTX:   signedHex,
 		models.BTCTXColumns.SentHashTX:    sentHashTx,
@@ -196,7 +196,7 @@ func (r *BTCTxRepository) UpdateTxType(id int64, txType tx.TxType) (int64, error
 	ctx := context.Background()
 
 	// Set updating columns
-	updCols := map[string]interface{}{
+	updCols := map[string]any{
 		models.BTCTXColumns.CurrentTXType: txType.Int8(),
 	}
 	return models.BTCTxes(
@@ -210,7 +210,7 @@ func (r *BTCTxRepository) UpdateTxTypeBySentHashTx(actionType action.ActionType,
 	ctx := context.Background()
 
 	// Set updating columns
-	updCols := map[string]interface{}{
+	updCols := map[string]any{
 		models.BTCTXColumns.CurrentTXType: txType.Int8(),
 	}
 	return models.BTCTxes(

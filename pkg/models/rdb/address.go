@@ -315,7 +315,7 @@ func (o *Address) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 	}
 
 	var lastID int64
-	var identifierCols []interface{}
+	var identifierCols []any
 
 	if len(cache.retMapping) == 0 {
 		goto CacheNoHooks
@@ -331,7 +331,7 @@ func (o *Address) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 		goto CacheNoHooks
 	}
 
-	identifierCols = []interface{}{
+	identifierCols = []any{
 		o.ID,
 	}
 
@@ -450,7 +450,7 @@ func (o AddressSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, 
 	}
 
 	colNames := make([]string, len(cols))
-	args := make([]interface{}, len(cols))
+	args := make([]any, len(cols))
 
 	i := 0
 	for name, value := range cols {
@@ -577,7 +577,7 @@ func (o *Address) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 
 	value := reflect.Indirect(reflect.ValueOf(o))
 	vals := queries.ValuesFromMapping(value, cache.valueMapping)
-	var returns []interface{}
+	var returns []any
 	if len(cache.retMapping) != 0 {
 		returns = queries.PtrsFromMapping(value, cache.retMapping)
 	}
@@ -595,7 +595,7 @@ func (o *Address) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 
 	var lastID int64
 	var uniqueMap []uint64
-	var nzUniqueCols []interface{}
+	var nzUniqueCols []any
 
 	if len(cache.retMapping) == 0 {
 		goto CacheNoHooks
@@ -692,7 +692,7 @@ func (o AddressSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 		return 0, nil
 	}
 
-	var args []interface{}
+	var args []any
 	for _, obj := range o {
 		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), addressPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
@@ -739,7 +739,7 @@ func (o *AddressSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor)
 	}
 
 	slice := AddressSlice{}
-	var args []interface{}
+	var args []any
 	for _, obj := range *o {
 		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), addressPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)

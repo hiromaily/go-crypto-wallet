@@ -31,7 +31,8 @@ Options:
 }
 
 // Run executes this subcommand
-// Deprecated. Use query with shell script insted of go code.
+//
+// Deprecated: Use query with shell script instead of go code.
 func (c *DBCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
@@ -48,8 +49,7 @@ func (c *DBCommand) Run(args []string) int {
 	if tableName == "" {
 		tableName = "payment_request"
 	}
-	switch tableName {
-	case "payment_request":
+	if tableName == "payment_request" {
 		// create payment_request table
 		if err := c.wallet.CreatePaymentRequest(); err != nil {
 			c.ui.Error(fmt.Sprintf("fail to call CreatePaymentRequest() %+v", err))

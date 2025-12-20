@@ -12,7 +12,7 @@ import (
 )
 
 // M type is for providing columns and column values to UpdateAll.
-type M map[string]interface{}
+type M map[string]any
 
 // ErrSyncFail occurs during insert when the record could not be retrieved in
 // order to populate default value information. This usually happens when LastInsertId

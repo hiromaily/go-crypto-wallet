@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func castToInt64(val interface{}) (int64, error) {
+func castToInt64(val any) (int64, error) {
 	v, err := castToString(val)
 	if err != nil {
 		return 0, err
@@ -23,7 +23,7 @@ func castToInt64(val interface{}) (int64, error) {
 	return v2.Int64(), nil
 }
 
-func castToString(val interface{}) (string, error) {
+func castToString(val any) (string, error) {
 	v, ok := val.(string)
 	if !ok {
 		return "", errors.New("fail to cast to string")
@@ -31,8 +31,8 @@ func castToString(val interface{}) (string, error) {
 	return v, nil
 }
 
-func castToSliceString(val interface{}) ([]string, error) {
-	data, ok := val.([]interface{})
+func castToSliceString(val any) ([]string, error) {
+	data, ok := val.([]any)
 	if !ok {
 		return nil, errors.New("fail to cast to []string")
 	}
@@ -73,8 +73,8 @@ func setZeroHex(input string) string {
 	return input
 }
 
-func toCallArg(msg *ethereum.CallMsg) interface{} {
-	arg := map[string]interface{}{
+func toCallArg(msg *ethereum.CallMsg) any {
+	arg := map[string]any{
 		"from": msg.From,
 		"to":   msg.To,
 	}

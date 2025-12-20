@@ -21,11 +21,11 @@ type AccountChannels struct {
 type ResponseAccountChannels struct {
 	ID     int `json:"id"`
 	Result struct {
-		Account     string        `json:"account"`
-		Channels    []interface{} `json:"channels"`
-		LedgerHash  string        `json:"ledger_hash"`
-		LedgerIndex int           `json:"ledger_index"`
-		Validated   bool          `json:"validated"`
+		Account     string `json:"account"`
+		Channels    []any  `json:"channels"`
+		LedgerHash  string `json:"ledger_hash"`
+		LedgerIndex int    `json:"ledger_index"`
+		Validated   bool   `json:"validated"`
 	} `json:"result"`
 	Status string `json:"status"`
 	Type   string `json:"type"`

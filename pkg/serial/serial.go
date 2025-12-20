@@ -7,7 +7,7 @@ import (
 )
 
 // EncodeToString is binary encoder
-func EncodeToString(data interface{}) (string, error) {
+func EncodeToString(data any) (string, error) {
 	b := bytes.Buffer{}
 	e := gob.NewEncoder(&b)
 	err := e.Encode(data)
@@ -18,7 +18,7 @@ func EncodeToString(data interface{}) (string, error) {
 }
 
 // DecodeFromString is binary decoder
-func DecodeFromString(str string, data interface{}) error {
+func DecodeFromString(str string, data any) error {
 	by, err := base64.StdEncoding.DecodeString(str)
 	if err != nil {
 		return err

@@ -4,6 +4,6 @@ import (
 	"github.com/bookerzzz/grok"
 )
 
-func Debug(value interface{}, options ...grok.Option) {
+func Debug(value any, options ...grok.Option) {
 	grok.Value(value, options...)
 }

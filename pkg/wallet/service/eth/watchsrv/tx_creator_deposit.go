@@ -80,10 +80,8 @@ func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]eth.UserAmount,
 				zap.String("address", addr.WalletAddress),
 				zap.Error(err),
 			)
-		} else {
-			if balance.Uint64() != 0 {
-				userAmounts = append(userAmounts, eth.UserAmount{Address: addr.WalletAddress, Amount: balance.Uint64()})
-			}
+		} else if balance.Uint64() != 0 {
+			userAmounts = append(userAmounts, eth.UserAmount{Address: addr.WalletAddress, Amount: balance.Uint64()})
 		}
 	}
 

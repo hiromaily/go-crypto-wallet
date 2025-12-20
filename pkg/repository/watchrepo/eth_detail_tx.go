@@ -121,7 +121,7 @@ func (r *EthDetailTxInputRepository) UpdateAfterTxSent(
 	ctx := context.Background()
 
 	// Set updating columns
-	updCols := map[string]interface{}{
+	updCols := map[string]any{
 		models.EthDetailTXColumns.CurrentTXType: txType.Int8(),
 		models.EthDetailTXColumns.SignedHexTX:   signedHex,
 		models.EthDetailTXColumns.SentHashTX:    sentHashTx,
@@ -137,7 +137,7 @@ func (r *EthDetailTxInputRepository) UpdateTxType(id int64, txType tx.TxType) (i
 	ctx := context.Background()
 
 	// Set updating columns
-	updCols := map[string]interface{}{
+	updCols := map[string]any{
 		models.EthDetailTXColumns.CurrentTXType: txType.Int8(),
 	}
 	return models.EthDetailTxes(
@@ -150,7 +150,7 @@ func (r *EthDetailTxInputRepository) UpdateTxTypeBySentHashTx(txType tx.TxType, 
 	ctx := context.Background()
 
 	// Set updating columns
-	updCols := map[string]interface{}{
+	updCols := map[string]any{
 		models.EthDetailTXColumns.CurrentTXType: txType.Int8(),
 	}
 	return models.EthDetailTxes(

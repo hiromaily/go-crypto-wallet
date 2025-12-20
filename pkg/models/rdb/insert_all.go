@@ -21,7 +21,7 @@ func (o AccountKeySlice) InsertAll(ctx context.Context, exec boil.ContextExecuto
 	}
 
 	var sql string
-	vals := []interface{}{}
+	vals := []any{}
 	for i, row := range o {
 		if !boil.TimestampsAreSkipped(ctx) {
 			currTime := time.Now().In(boil.GetLocation())
@@ -73,7 +73,7 @@ func (o AddressSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, 
 	}
 
 	var sql string
-	vals := []interface{}{}
+	vals := []any{}
 	for i, row := range o {
 		if !boil.TimestampsAreSkipped(ctx) {
 			currTime := time.Now().In(boil.GetLocation())
@@ -125,7 +125,7 @@ func (o AuthAccountKeySlice) InsertAll(ctx context.Context, exec boil.ContextExe
 	}
 
 	var sql string
-	vals := []interface{}{}
+	vals := []any{}
 	for i, row := range o {
 		if !boil.TimestampsAreSkipped(ctx) {
 			currTime := time.Now().In(boil.GetLocation())
@@ -177,7 +177,7 @@ func (o AuthFullpubkeySlice) InsertAll(ctx context.Context, exec boil.ContextExe
 	}
 
 	var sql string
-	vals := []interface{}{}
+	vals := []any{}
 	for i, row := range o {
 		if !boil.TimestampsAreSkipped(ctx) {
 			currTime := time.Now().In(boil.GetLocation())
@@ -229,7 +229,7 @@ func (o BTCTXSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, co
 	}
 
 	var sql string
-	vals := []interface{}{}
+	vals := []any{}
 	for i, row := range o {
 
 		nzDefaults := queries.NonZeroDefaultSet(btcTXColumnsWithDefault, row)
@@ -274,7 +274,7 @@ func (o BTCTXInputSlice) InsertAll(ctx context.Context, exec boil.ContextExecuto
 	}
 
 	var sql string
-	vals := []interface{}{}
+	vals := []any{}
 	for i, row := range o {
 		if !boil.TimestampsAreSkipped(ctx) {
 			currTime := time.Now().In(boil.GetLocation())
@@ -326,7 +326,7 @@ func (o BTCTXOutputSlice) InsertAll(ctx context.Context, exec boil.ContextExecut
 	}
 
 	var sql string
-	vals := []interface{}{}
+	vals := []any{}
 	for i, row := range o {
 		if !boil.TimestampsAreSkipped(ctx) {
 			currTime := time.Now().In(boil.GetLocation())
@@ -378,7 +378,7 @@ func (o EthDetailTXSlice) InsertAll(ctx context.Context, exec boil.ContextExecut
 	}
 
 	var sql string
-	vals := []interface{}{}
+	vals := []any{}
 	for i, row := range o {
 
 		nzDefaults := queries.NonZeroDefaultSet(ethDetailTXColumnsWithDefault, row)
@@ -423,7 +423,7 @@ func (o PaymentRequestSlice) InsertAll(ctx context.Context, exec boil.ContextExe
 	}
 
 	var sql string
-	vals := []interface{}{}
+	vals := []any{}
 	for i, row := range o {
 		if !boil.TimestampsAreSkipped(ctx) {
 			currTime := time.Now().In(boil.GetLocation())
@@ -475,7 +475,7 @@ func (o SeedSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, col
 	}
 
 	var sql string
-	vals := []interface{}{}
+	vals := []any{}
 	for i, row := range o {
 		if !boil.TimestampsAreSkipped(ctx) {
 			currTime := time.Now().In(boil.GetLocation())
@@ -527,7 +527,7 @@ func (o TXSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, colum
 	}
 
 	var sql string
-	vals := []interface{}{}
+	vals := []any{}
 	for i, row := range o {
 		if !boil.TimestampsAreSkipped(ctx) {
 			currTime := time.Now().In(boil.GetLocation())
@@ -579,7 +579,7 @@ func (o XRPAccountKeySlice) InsertAll(ctx context.Context, exec boil.ContextExec
 	}
 
 	var sql string
-	vals := []interface{}{}
+	vals := []any{}
 	for i, row := range o {
 		if !boil.TimestampsAreSkipped(ctx) {
 			currTime := time.Now().In(boil.GetLocation())
@@ -631,7 +631,7 @@ func (o XRPDetailTXSlice) InsertAll(ctx context.Context, exec boil.ContextExecut
 	}
 
 	var sql string
-	vals := []interface{}{}
+	vals := []any{}
 	for i, row := range o {
 
 		nzDefaults := queries.NonZeroDefaultSet(xrpDetailTXColumnsWithDefault, row)

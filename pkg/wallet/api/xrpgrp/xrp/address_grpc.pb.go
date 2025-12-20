@@ -106,7 +106,7 @@ func RegisterRippleAddressAPIServer(s grpc.ServiceRegistrar, srv RippleAddressAP
 	s.RegisterService(&RippleAddressAPI_ServiceDesc, srv)
 }
 
-func _RippleAddressAPI_GenerateAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RippleAddressAPI_GenerateAddress_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -118,13 +118,13 @@ func _RippleAddressAPI_GenerateAddress_Handler(srv interface{}, ctx context.Cont
 		Server:     srv,
 		FullMethod: "/rippleapi.address.RippleAddressAPI/GenerateAddress",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(RippleAddressAPIServer).GenerateAddress(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RippleAddressAPI_GenerateXAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RippleAddressAPI_GenerateXAddress_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -136,13 +136,13 @@ func _RippleAddressAPI_GenerateXAddress_Handler(srv interface{}, ctx context.Con
 		Server:     srv,
 		FullMethod: "/rippleapi.address.RippleAddressAPI/GenerateXAddress",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(RippleAddressAPIServer).GenerateXAddress(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RippleAddressAPI_IsValidAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RippleAddressAPI_IsValidAddress_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(RequestIsValidAddress)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -154,7 +154,7 @@ func _RippleAddressAPI_IsValidAddress_Handler(srv interface{}, ctx context.Conte
 		Server:     srv,
 		FullMethod: "/rippleapi.address.RippleAddressAPI/IsValidAddress",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(RippleAddressAPIServer).IsValidAddress(ctx, req.(*RequestIsValidAddress))
 	}
 	return interceptor(ctx, in, info, handler)

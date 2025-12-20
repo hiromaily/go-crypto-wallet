@@ -167,7 +167,7 @@ func RegisterRippleTransactionAPIServer(s grpc.ServiceRegistrar, srv RippleTrans
 	s.RegisterService(&RippleTransactionAPI_ServiceDesc, srv)
 }
 
-func _RippleTransactionAPI_PrepareTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RippleTransactionAPI_PrepareTransaction_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(RequestPrepareTransaction)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -179,13 +179,13 @@ func _RippleTransactionAPI_PrepareTransaction_Handler(srv interface{}, ctx conte
 		Server:     srv,
 		FullMethod: "/rippleapi.transaction.RippleTransactionAPI/PrepareTransaction",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(RippleTransactionAPIServer).PrepareTransaction(ctx, req.(*RequestPrepareTransaction))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RippleTransactionAPI_SignTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RippleTransactionAPI_SignTransaction_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(RequestSignTransaction)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -197,13 +197,13 @@ func _RippleTransactionAPI_SignTransaction_Handler(srv interface{}, ctx context.
 		Server:     srv,
 		FullMethod: "/rippleapi.transaction.RippleTransactionAPI/SignTransaction",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(RippleTransactionAPIServer).SignTransaction(ctx, req.(*RequestSignTransaction))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RippleTransactionAPI_SubmitTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RippleTransactionAPI_SubmitTransaction_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(RequestSubmitTransaction)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -215,13 +215,13 @@ func _RippleTransactionAPI_SubmitTransaction_Handler(srv interface{}, ctx contex
 		Server:     srv,
 		FullMethod: "/rippleapi.transaction.RippleTransactionAPI/SubmitTransaction",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(RippleTransactionAPIServer).SubmitTransaction(ctx, req.(*RequestSubmitTransaction))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RippleTransactionAPI_WaitValidation_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _RippleTransactionAPI_WaitValidation_Handler(srv any, stream grpc.ServerStream) error {
 	m := new(emptypb.Empty)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
@@ -242,7 +242,7 @@ func (x *rippleTransactionAPIWaitValidationServer) Send(m *ResponseWaitValidatio
 	return x.ServerStream.SendMsg(m)
 }
 
-func _RippleTransactionAPI_GetTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RippleTransactionAPI_GetTransaction_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(RequestGetTransaction)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -254,13 +254,13 @@ func _RippleTransactionAPI_GetTransaction_Handler(srv interface{}, ctx context.C
 		Server:     srv,
 		FullMethod: "/rippleapi.transaction.RippleTransactionAPI/GetTransaction",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(RippleTransactionAPIServer).GetTransaction(ctx, req.(*RequestGetTransaction))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _RippleTransactionAPI_CombineTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RippleTransactionAPI_CombineTransaction_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(RequestCombineTransaction)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -272,7 +272,7 @@ func _RippleTransactionAPI_CombineTransaction_Handler(srv interface{}, ctx conte
 		Server:     srv,
 		FullMethod: "/rippleapi.transaction.RippleTransactionAPI/CombineTransaction",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(RippleTransactionAPIServer).CombineTransaction(ctx, req.(*RequestCombineTransaction))
 	}
 	return interceptor(ctx, in, info, handler)

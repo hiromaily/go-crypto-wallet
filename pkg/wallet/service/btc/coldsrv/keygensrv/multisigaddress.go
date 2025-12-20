@@ -89,7 +89,9 @@ func (m *Multisig) AddMultisigAddress(accountType account.AccountType, addressTy
 
 	// call bitcoinAPI `addmultisigaddress`
 	for _, item := range accountKeyItems {
-		addrs := append(authFullPubKeys, item.FullPublicKey)
+		addrs := make([]string, len(authFullPubKeys)+1)
+		copy(addrs, authFullPubKeys)
+		addrs[len(authFullPubKeys)] = item.FullPublicKey
 		resAddr, err := m.btc.AddMultisigAddress(
 			requiredSig,
 			addrs,
