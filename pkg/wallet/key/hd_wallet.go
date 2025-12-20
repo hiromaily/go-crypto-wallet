@@ -308,9 +308,9 @@ func (k *HDKey) xrpAddrs(privKey *btcec.PrivateKey) (string, string, string, err
 		return "", "", "", errors.New("pubKeyHash must be 20 bytes")
 	}
 	// address
-	address, err := xrpaddr.NewAccountId(pubKeyHash)
+	address, err := xrpaddr.NewAccountID(pubKeyHash)
 	if err != nil {
-		return "", "", "", errors.Wrap(err, "fail to call rcrypto.NewAccountId()")
+		return "", "", "", errors.Wrap(err, "fail to call rcrypto.NewAccountID()")
 	}
 	// publicKey
 	publicKey, err := xrpaddr.NewAccountPublicKey(pubKeyHash)

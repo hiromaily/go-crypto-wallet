@@ -198,11 +198,14 @@ func (e *Ethereum) GetTransactionReceipt(hashTx string) (*ResponseGetTransaction
 	select {
 	case <-ctx.Done():
 		err := ctx.Err()
-		if err == context.Canceled {
+		switch err {
+		case context.Canceled:
 			e.logger.Debug("context.Canceled for calling eth_getTransactionReceipt")
-		} else if err == context.DeadlineExceeded {
+		case context.DeadlineExceeded:
 			e.logger.Debug("context.DeadlineExceeded for calling eth_getTransactionReceipt")
-		} else if err != nil {
+		case nil:
+			// no error
+		default:
 			e.logger.Debug(err.Error())
 			return nil, err
 		}
