@@ -377,9 +377,9 @@ func (t *TxCreate) createTxOutputs(
 	// if change is required
 	if isChange {
 		t.logger.Debug("change is required")
-		senderDecodedAddr, err := btcutil.DecodeAddress(senderAddr, t.btc.GetChainConf())
-		if err != nil {
-			return nil, errors.Wrapf(err, "fail to call btcutil.DecodeAddress(%s)", receiverAddr)
+		senderDecodedAddr, decodeErr := btcutil.DecodeAddress(senderAddr, t.btc.GetChainConf())
+		if decodeErr != nil {
+			return nil, errors.Wrapf(decodeErr, "fail to call btcutil.DecodeAddress(%s)", receiverAddr)
 		}
 
 		// for change

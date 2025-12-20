@@ -54,15 +54,11 @@ func init() {
 
 type data []byte
 
-/**
- * The cashaddr character set for encoding.
- */
+// CHARSET is the cashaddr character set for encoding.
 const CHARSET string = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
 
-/**
- * The cashaddr character set for decoding.
- */
-var CHARSET_REV = [128]int8{
+// CharsetRev is the cashaddr character set for decoding.
+var CharsetRev = [128]int8{
 	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 15, -1, 10, 17, 21, 20, 26, 30, 7,
@@ -72,18 +68,14 @@ var CHARSET_REV = [128]int8{
 	3, 16, 11, 28, 12, 14, 6, 4, 2, -1, -1, -1, -1, -1,
 }
 
-/**
- * Concatenate two byte arrays.
- */
+// Cat concatenates two byte arrays.
 func Cat(x, y data) data {
 	return append(x, y...)
 }
 
-/**
- * This function will compute what 8 5-bit values to XOR into the last 8 input
- * values, in order to make the checksum 0. These 8 values are packed together
- * in a single 40-bit integer. The higher bits correspond to earlier values.
- */
+// PolyMod computes what 8 5-bit values to XOR into the last 8 input
+// values, in order to make the checksum 0. These 8 values are packed together
+// in a single 40-bit integer. The higher bits correspond to earlier values.
 func PolyMod(v data) uint64 {
 	/**
 	 * The input is interpreted as a list of coefficients of a polynomial over F
@@ -191,19 +183,14 @@ func PolyMod(v data) uint64 {
 	return c ^ 1
 }
 
-/**
- * Convert to lower case.
- *
- * Assume the input is a character.
- */
+// LowerCase converts to lower case.
+// Assumes the input is a character.
 func LowerCase(c byte) byte {
 	// ASCII black magic.
 	return c | 0x20
 }
 
-/**
- * Expand the address prefix for the checksum computation.
- */
+// ExpandPrefix expands the address prefix for the checksum computation.
 func ExpandPrefix(prefix string) data {
 	ret := make(data, len(prefix)+1)
 	for i := 0; i < len(prefix); i++ {
@@ -214,16 +201,12 @@ func ExpandPrefix(prefix string) data {
 	return ret
 }
 
-/**
- * Verify a checksum.
- */
+// VerifyChecksum verifies a checksum.
 func VerifyChecksum(prefix string, payload data) bool {
 	return PolyMod(Cat(ExpandPrefix(prefix), payload)) == 0
 }
 
-/**
- * Create a checksum.
- */
+// CreateChecksum creates a checksum.
 func CreateChecksum(prefix string, payload data) data {
 	enc := Cat(ExpandPrefix(prefix), payload)
 	// Append 8 zeroes.
@@ -238,9 +221,7 @@ func CreateChecksum(prefix string, payload data) data {
 	return ret
 }
 
-/**
- * Encode a cashaddr string.
- */
+// Encode encodes a cashaddr string.
 func Encode(prefix string, payload data) string {
 	checksum := CreateChecksum(prefix, payload)
 	combined := Cat(payload, checksum)
@@ -255,9 +236,7 @@ func Encode(prefix string, payload data) string {
 	return ret
 }
 
-/**
- * Decode a cashaddr string.
- */
+// DecodeCashAddress decodes a cashaddr string.
 func DecodeCashAddress(str string) (string, data, error) {
 	// Go over the string and do some sanity checks.
 	lower, upper := false, false
@@ -277,7 +256,7 @@ func DecodeCashAddress(str string) (string, data, error) {
 		if c >= '0' && c <= '9' {
 			// We cannot have numbers in the prefix.
 			if prefixSize == 0 {
-				return "", data{}, errors.New("Addresses cannot have numbers in the prefix")
+				return "", data{}, errors.New("addresses cannot have numbers in the prefix")
 			}
 
 			continue
@@ -287,7 +266,7 @@ func DecodeCashAddress(str string) (string, data, error) {
 			// The separator must not be the first character, and there must not
 			// be 2 separators.
 			if i == 0 || prefixSize != 0 {
-				return "", data{}, errors.New("The separator must not be the first character")
+				return "", data{}, errors.New("the separator must not be the first character")
 			}
 
 			prefixSize = i
@@ -295,17 +274,17 @@ func DecodeCashAddress(str string) (string, data, error) {
 		}
 
 		// We have an unexpected character.
-		return "", data{}, errors.New("Unexpected character")
+		return "", data{}, errors.New("unexpected character")
 	}
 
 	// We must have a prefix and a data part and we can't have both uppercase
 	// and lowercase.
 	if prefixSize == 0 {
-		return "", data{}, errors.New("Address must have a prefix")
+		return "", data{}, errors.New("address must have a prefix")
 	}
 
 	if upper && lower {
-		return "", data{}, errors.New("Addresses cannot use both upper and lower case characters")
+		return "", data{}, errors.New("addresses cannot use both upper and lower case characters")
 	}
 
 	// Get the prefix.
@@ -322,11 +301,11 @@ func DecodeCashAddress(str string) (string, data, error) {
 	for i := 0; i < valuesSize; i++ {
 		c := str[i+prefixSize+1]
 		// We have an invalid char in there.
-		if c > 127 || CHARSET_REV[c] == -1 {
-			return "", data{}, errors.New("Invalid character")
+		if c > 127 || CharsetRev[c] == -1 {
+			return "", data{}, errors.New("invalid character")
 		}
 
-		values[i] = byte(CHARSET_REV[c])
+		values[i] = byte(CharsetRev[c])
 	}
 
 	// Verify the checksum.
@@ -346,26 +325,26 @@ func CheckEncodeCashAddress(input []byte, prefix string, t AddressType) string {
 	return Encode(prefix, k)
 }
 
-// CheckDecode decodes a string that was encoded with CheckEncode and verifies the checksum.
+// CheckDecodeCashAddress decodes a string that was encoded with CheckEncode and verifies the checksum.
 func CheckDecodeCashAddress(input string) (result []byte, prefix string, t AddressType, err error) {
-	prefix, data, err := DecodeCashAddress(input)
+	prefix, decoded, err := DecodeCashAddress(input)
 	if err != nil {
-		return data, prefix, P2PKH, err
+		return decoded, prefix, P2PKH, err
 	}
-	data, err = convertBits(data, 5, 8, false)
+	decoded, err = convertBits(decoded, 5, 8, false)
 	if err != nil {
-		return data, prefix, P2PKH, err
+		return decoded, prefix, P2PKH, err
 	}
-	if len(data) != 21 {
-		return data, prefix, P2PKH, errors.New("Incorrect data length")
+	if len(decoded) != 21 {
+		return decoded, prefix, P2PKH, errors.New("incorrect data length")
 	}
-	switch data[0] {
+	switch decoded[0] {
 	case 0x00:
 		t = P2PKH
 	case 0x08:
 		t = P2SH
 	}
-	return data[1:21], prefix, t, nil
+	return decoded[1:21], prefix, t, nil
 }
 
 // encodeAddress returns a human-readable payment address given a ripemd160 hash
@@ -415,14 +394,14 @@ func DecodeAddress(addr string, defaultNet *chaincfg.Params) (btcutil.Address, e
 	}
 }
 
-// AddressPubKeyHash is an Address for a pay-to-pubkey-hash (P2PKH)
+// CashAddressPubKeyHash is an Address for a pay-to-pubkey-hash (P2PKH)
 // transaction.
 type CashAddressPubKeyHash struct {
 	hash   [ripemd160.Size]byte
 	prefix string
 }
 
-// NewAddressPubKeyHash returns a new AddressPubKeyHash.  pkHash mustbe 20
+// NewCashAddressPubKeyHash returns a new CashAddressPubKeyHash. pkHash must be 20
 // bytes.
 func NewCashAddressPubKeyHash(pkHash []byte, net *chaincfg.Params) (*CashAddressPubKeyHash, error) {
 	return newCashAddressPubKeyHash(pkHash, net)
@@ -485,20 +464,20 @@ func (a *CashAddressPubKeyHash) Hash160() *[ripemd160.Size]byte {
 	return &a.hash
 }
 
-// AddressScriptHash is an Address for a pay-to-script-hash (P2SH)
+// CashAddressScriptHash is an Address for a pay-to-script-hash (P2SH)
 // transaction.
 type CashAddressScriptHash struct {
 	hash   [ripemd160.Size]byte
 	prefix string
 }
 
-// NewAddressScriptHash returns a new AddressScriptHash.
+// NewCashAddressScriptHash returns a new CashAddressScriptHash.
 func NewCashAddressScriptHash(serializedScript []byte, net *chaincfg.Params) (*CashAddressScriptHash, error) {
 	scriptHash := btcutil.Hash160(serializedScript)
 	return newCashAddressScriptHashFromHash(scriptHash, net)
 }
 
-// NewAddressScriptHashFromHash returns a new AddressScriptHash.  scriptHash
+// NewCashAddressScriptHashFromHash returns a new CashAddressScriptHash. scriptHash
 // must be 20 bytes.
 func NewCashAddressScriptHashFromHash(scriptHash []byte, net *chaincfg.Params) (*CashAddressScriptHash, error) {
 	return newCashAddressScriptHashFromHash(scriptHash, net)

@@ -129,8 +129,8 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, []int64, error) {
 
 		userPayments[idx].senderAddr = val.SenderAddress
 		userPayments[idx].receiverAddr = val.ReceiverAddress
-		amt, err := strconv.ParseFloat(val.Amount.String(), 64)
-		if err != nil {
+		amt, parseErr := strconv.ParseFloat(val.Amount.String(), 64)
+		if parseErr != nil {
 			// fatal error because table includes invalid data
 			t.logger.Error("payment_request table includes invalid amount field")
 			return nil, nil, errors.New("payment_request table includes invalid amount field")

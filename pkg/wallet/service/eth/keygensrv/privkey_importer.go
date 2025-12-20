@@ -62,14 +62,14 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 			zap.String("private key", record.WalletImportFormat))
 
 		// generatedAddr, err := p.eth.ImportRawKey(record.WalletImportFormat, "password")
-		ecdsaKey, err := p.eth.ToECDSA(record.WalletImportFormat)
-		if err != nil {
+		ecdsaKey, convertErr := p.eth.ToECDSA(record.WalletImportFormat)
+		if convertErr != nil {
 			p.logger.Warn(
 				"fail to call key.ToECDSA()",
 				zap.String("private key", record.WalletImportFormat),
-				zap.Error(err))
+				zap.Error(convertErr))
 			// continue
-			return errors.Wrap(err, "fail to call key.ToECDSA()")
+			return errors.Wrap(convertErr, "fail to call key.ToECDSA()")
 		}
 		// FIXME: how to link imported key to specific accountName like client, deposit (grouping)
 		// TODO: where password should come from // ImportRawKey(hexKey, passPhrase string) (string, error)

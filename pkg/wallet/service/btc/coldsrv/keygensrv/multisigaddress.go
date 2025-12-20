@@ -11,6 +11,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/btc"
 )
 
 // Multisig type
@@ -92,7 +93,8 @@ func (m *Multisig) AddMultisigAddress(accountType account.AccountType, addressTy
 		addrs := make([]string, len(authFullPubKeys)+1)
 		copy(addrs, authFullPubKeys)
 		addrs[len(authFullPubKeys)] = item.FullPublicKey
-		resAddr, err := m.btc.AddMultisigAddress(
+		var resAddr *btc.AddMultisigAddressResult
+		resAddr, err = m.btc.AddMultisigAddress(
 			requiredSig,
 			addrs,
 			fmt.Sprintf("multi_%s", accountType), // this is not important

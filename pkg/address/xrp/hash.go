@@ -14,9 +14,9 @@ func NewRippleHash(s string) (Hash, error) {
 	// Special case which will deal short addresses
 	switch s {
 	case "0":
-		return newHashFromString(ACCOUNT_ZERO)
+		return newHashFromString(AccountZero)
 	case "1":
-		return newHashFromString(ACCOUNT_ONE)
+		return newHashFromString(AccountOne)
 	default:
 		return newHashFromString(s)
 	}
@@ -37,27 +37,27 @@ func NewRippleHashCheck(s string, version HashVersion) (Hash, error) {
 }
 
 func NewAccountID(b []byte) (Hash, error) {
-	return newHash(b, RIPPLE_ACCOUNT_ID)
+	return newHash(b, RippleAccountID)
 }
 
 func NewAccountPublicKey(b []byte) (Hash, error) {
-	return newHash(b, RIPPLE_ACCOUNT_PUBLIC)
+	return newHash(b, RippleAccountPublic)
 }
 
 func NewAccountPrivateKey(b []byte) (Hash, error) {
-	return newHash(b, RIPPLE_ACCOUNT_PRIVATE)
+	return newHash(b, RippleAccountPrivate)
 }
 
 func NewNodePublicKey(b []byte) (Hash, error) {
-	return newHash(b, RIPPLE_NODE_PUBLIC)
+	return newHash(b, RippleNodePublic)
 }
 
 func NewNodePrivateKey(b []byte) (Hash, error) {
-	return newHash(b, RIPPLE_NODE_PRIVATE)
+	return newHash(b, RippleNodePrivate)
 }
 
 func NewFamilySeed(b []byte) (Hash, error) {
-	return newHash(b, RIPPLE_FAMILY_SEED)
+	return newHash(b, RippleFamilySeed)
 }
 
 func AccountID(key Key, sequence *uint32) (Hash, error) {

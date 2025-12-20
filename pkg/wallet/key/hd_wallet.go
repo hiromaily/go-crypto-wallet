@@ -168,28 +168,35 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 	// Index
 	walletKeys := make([]WalletKey, count)
 	for i := uint32(0); i < count; i++ {
-		child, err := change.Derive(idxFrom + i)
-		if err != nil {
-			return nil, err
+		var loopErr error
+		var child *hdkeychain.ExtendedKey
+		child, loopErr = change.Derive(idxFrom + i)
+		if loopErr != nil {
+			return nil, loopErr
 		}
 
 		// privateKey
-		privateKey, err := child.ECPrivKey()
-		if err != nil {
-			return nil, err
+		var privateKey *btcec.PrivateKey
+		privateKey, loopErr = child.ECPrivKey()
+		if loopErr != nil {
+			return nil, loopErr
 		}
 
 		switch k.coinTypeCode {
 		case coin.BTC, coin.BCH:
 			// WIF　(compressed: true) => bitcoin core expresses compressed address
-			wif, err := btcutil.NewWIF(privateKey, k.conf, true)
-			if err != nil {
-				return nil, err
+			var wif *btcutil.WIF
+			wif, loopErr = btcutil.NewWIF(privateKey, k.conf, true)
+			if loopErr != nil {
+				return nil, loopErr
 			}
 
-			strP2PKHAddr, strP2SHSegWitAddr, bech32Addr, redeemScript, err := k.btcAddrs(wif, privateKey)
-			if err != nil {
-				return nil, err
+			var strP2PKHAddr, strP2SHSegWitAddr string
+			var bech32Addr *btcutil.AddressWitnessPubKeyHash
+			var redeemScript string
+			strP2PKHAddr, strP2SHSegWitAddr, bech32Addr, redeemScript, loopErr = k.btcAddrs(wif, privateKey)
+			if loopErr != nil {
+				return nil, loopErr
 			}
 			// address.String() is equal to address.EncodeAddress()
 			walletKeys[i] = WalletKey{
@@ -202,9 +209,10 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 			}
 
 		case coin.ETH:
-			ethAddr, ethPubKey, ethPrivKey, err := k.ethAddrs(privateKey)
-			if err != nil {
-				return nil, err
+			var ethAddr, ethPubKey, ethPrivKey string
+			ethAddr, ethPubKey, ethPrivKey, loopErr = k.ethAddrs(privateKey)
+			if loopErr != nil {
+				return nil, loopErr
 			}
 
 			walletKeys[i] = WalletKey{
@@ -216,15 +224,17 @@ func (k *HDKey) createKeysWithIndex(accountPrivKey *hdkeychain.ExtendedKey, idxF
 				RedeemScript:   "",
 			}
 		case coin.XRP:
-			xrpAddr, xrpPubKey, xrpPrivKey, err := k.xrpAddrs(privateKey)
-			if err != nil {
-				return nil, err
+			var xrpAddr, xrpPubKey, xrpPrivKey string
+			xrpAddr, xrpPubKey, xrpPrivKey, loopErr = k.xrpAddrs(privateKey)
+			if loopErr != nil {
+				return nil, loopErr
 			}
 
 			// eth address is used as passphrase for generating key by API `wallet_propose`
-			ethAddr, _, _, err := k.ethAddrs(privateKey)
-			if err != nil {
-				return nil, err
+			var ethAddr string
+			ethAddr, _, _, loopErr = k.ethAddrs(privateKey)
+			if loopErr != nil {
+				return nil, loopErr
 			}
 
 			walletKeys[i] = WalletKey{
@@ -391,17 +401,17 @@ func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, er
 	var strRedeemScript string // FIXME: not implemented yet
 	switch k.coinTypeCode {
 	case coin.BTC:
-		address, err := btcutil.NewAddressScriptHash(payToAddrScript, k.conf)
-		if err != nil {
-			return "", "", errors.Wrap(err, "fail to call btcutil.NewAddressScriptHash()")
+		btcAddress, addrErr := btcutil.NewAddressScriptHash(payToAddrScript, k.conf)
+		if addrErr != nil {
+			return "", "", errors.Wrap(addrErr, "fail to call btcutil.NewAddressScriptHash()")
 		}
-		return address.String(), strRedeemScript, nil
+		return btcAddress.String(), strRedeemScript, nil
 	case coin.BCH:
-		address, err := bchaddr.NewCashAddressScriptHash(payToAddrScript, k.conf)
-		if err != nil {
-			return "", "", errors.Wrap(err, "fail to call bchaddr.NewCashAddressScriptHash()")
+		bchAddress, addrErr := bchaddr.NewCashAddressScriptHash(payToAddrScript, k.conf)
+		if addrErr != nil {
+			return "", "", errors.Wrap(addrErr, "fail to call bchaddr.NewCashAddressScriptHash()")
 		}
-		return address.String(), strRedeemScript, nil
+		return bchAddress.String(), strRedeemScript, nil
 	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
 		return "", "", errors.Errorf("getP2shSegwitAddr() is not implemented yet for %s", k.coinTypeCode)
 	default:

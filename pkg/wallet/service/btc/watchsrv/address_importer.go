@@ -65,7 +65,8 @@ func (a *AddressImport) ImportAddress(fileName string, isRescan bool) error {
 		// coin, account, ...
 		inner := strings.Split(key, ",")
 
-		addrFmt, err := address.ConvertLine(a.btc.CoinTypeCode(), inner)
+		var addrFmt *address.AddressFormat
+		addrFmt, err = address.ConvertLine(a.btc.CoinTypeCode(), inner)
 		if err != nil {
 			return err
 		}

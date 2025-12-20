@@ -88,13 +88,13 @@ func (t *TxMonitor) updateStatusTxTypeSent(actionType action.ActionType) error {
 	// get hash in detail and check confirmation
 	// update txType if confirmation is 6 or more (or configured number
 	for _, hash := range hashes {
-		isDone, err := t.checkTxConfirmation(hash, actionType)
-		if err != nil {
+		isDone, checkErr := t.checkTxConfirmation(hash, actionType)
+		if checkErr != nil {
 			t.logger.Error(
 				"fail to call w.checkTransaction()",
 				zap.String("actionType", actionType.String()),
 				zap.String("hash", hash),
-				zap.Error(err))
+				zap.Error(checkErr))
 			continue
 		}
 		if isDone {
@@ -121,13 +121,13 @@ func (t *TxMonitor) updateStatusTxTypeDone(actionType action.ActionType) error {
 
 	// notify tx get done
 	for _, hash := range hashes {
-		txID, err := t.notifyTxDone(hash, actionType)
-		if err != nil {
+		txID, notifyErr := t.notifyTxDone(hash, actionType)
+		if notifyErr != nil {
 			t.logger.Error(
 				"fail to call w.notifyUsers()",
 				zap.String("actionType", actionType.String()),
 				zap.String("hash", hash),
-				zap.Error(err))
+				zap.Error(notifyErr))
 			continue
 		}
 		// update is already done

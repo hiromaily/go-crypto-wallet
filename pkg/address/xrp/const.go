@@ -3,21 +3,21 @@ package xrp
 type HashVersion byte
 
 const (
-	ACCOUNT_ZERO = "rrrrrrrrrrrrrrrrrrrrrhoLvTp"
-	ACCOUNT_ONE  = "rrrrrrrrrrrrrrrrrrrrBZbvji"
-	NaN          = "rrrrrrrrrrrrrrrrrrrn5RM1rHd"
-	ROOT         = "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh"
+	AccountZero = "rrrrrrrrrrrrrrrrrrrrrhoLvTp"
+	AccountOne  = "rrrrrrrrrrrrrrrrrrrrBZbvji"
+	NaN         = "rrrrrrrrrrrrrrrrrrrn5RM1rHd"
+	ROOT        = "rHb9CJAWyB4rj91VRWn96DkukG4bwdtyTh"
 )
 
 const (
 	ALPHABET = "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz"
 
-	RIPPLE_ACCOUNT_ID      HashVersion = 0
-	RIPPLE_NODE_PUBLIC     HashVersion = 28
-	RIPPLE_NODE_PRIVATE    HashVersion = 32
-	RIPPLE_FAMILY_SEED     HashVersion = 33
-	RIPPLE_ACCOUNT_PRIVATE HashVersion = 34
-	RIPPLE_ACCOUNT_PUBLIC  HashVersion = 35
+	RippleAccountID      HashVersion = 0
+	RippleNodePublic     HashVersion = 28
+	RippleNodePrivate    HashVersion = 32
+	RippleFamilySeed     HashVersion = 33
+	RippleAccountPrivate HashVersion = 34
+	RippleAccountPublic  HashVersion = 35
 )
 
 var hashTypes = [...]struct {
@@ -26,10 +26,10 @@ var hashTypes = [...]struct {
 	Payload           int
 	MaximumCharacters int
 }{
-	RIPPLE_ACCOUNT_ID:      {"Short name for sending funds to an account.", 'r', 20, 35},
-	RIPPLE_NODE_PUBLIC:     {"Validation public key for node.", 'n', 33, 53},
-	RIPPLE_NODE_PRIVATE:    {"Validation private key for node.", 'p', 32, 52},
-	RIPPLE_FAMILY_SEED:     {"Family seed.", 's', 16, 29},
-	RIPPLE_ACCOUNT_PRIVATE: {"Account private key.", 'p', 32, 52},
-	RIPPLE_ACCOUNT_PUBLIC:  {"Account public key.", 'a', 33, 53},
+	RippleAccountID:      {"Short name for sending funds to an account.", 'r', 20, 35},
+	RippleNodePublic:     {"Validation public key for node.", 'n', 33, 53},
+	RippleNodePrivate:    {"Validation private key for node.", 'p', 32, 52},
+	RippleFamilySeed:     {"Family seed.", 's', 16, 29},
+	RippleAccountPrivate: {"Account private key.", 'p', 32, 52},
+	RippleAccountPublic:  {"Account public key.", 'a', 33, 53},
 }
