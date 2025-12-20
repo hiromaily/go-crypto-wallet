@@ -7,7 +7,6 @@ import (
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
-	"github.com/opentracing/opentracing-go"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -20,7 +19,6 @@ import (
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/tracer"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	wtype "github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
@@ -92,7 +90,6 @@ func (r *registry) newBTCWalleter() wallets.Watcher {
 		r.newBTC(),
 		r.newMySQLClient(),
 		r.newLogger(),
-		r.newTracer(),
 		r.conf.AddressType,
 		r.newBTCAddressImporter(),
 		r.newBTCTxCreator(),
@@ -445,10 +442,6 @@ func (r *registry) newLogger() *zap.Logger {
 		r.logger = logger.NewZapLogger(&r.conf.Logger)
 	}
 	return r.logger
-}
-
-func (r *registry) newTracer() opentracing.Tracer {
-	return tracer.NewTracer(r.conf.Tracer)
 }
 
 func (r *registry) newBTCTxRepo() watchrepo.BTCTxRepositorier {

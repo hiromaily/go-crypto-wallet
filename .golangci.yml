@@ -89,9 +89,9 @@ linters:
             - "go.uber.org/zap"
             - "google.golang.org/grpc"
             - "github.com/opentracing/opentracing-go"
-    #       deny:
-    #         - pkg: "github.com/containerd/containerd/errdefs"
-    #           desc: The containerd errdefs package was migrated to a separate module. Use github.com/containerd/errdefs instead.
+          deny:
+            - pkg: "nhooyr.io/websocket"
+              desc: The containerd websocket package was migrated to a separate module. Use github.com/coder/websocket instead.
     #         - pkg: "github.com/containerd/containerd/log"
     #           desc: The containerd log package was migrated to a separate module. Use github.com/containerd/log instead.
     #         - pkg: "github.com/containerd/containerd/pkg/userns"

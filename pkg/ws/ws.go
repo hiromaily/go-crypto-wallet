@@ -3,9 +3,9 @@ package ws
 import (
 	"context"
 
+	"github.com/coder/websocket"
+	"github.com/coder/websocket/wsjson"
 	"github.com/pkg/errors"
-	"nhooyr.io/websocket"
-	"nhooyr.io/websocket/wsjson"
 )
 
 // WS websocket object

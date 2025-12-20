@@ -3,7 +3,6 @@ package btcwallet
 import (
 	"database/sql"
 
-	"github.com/opentracing/opentracing-go"
 	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
@@ -19,7 +18,6 @@ type BTCWatch struct {
 	BTC      btcgrp.Bitcoiner
 	dbConn   *sql.DB
 	logger   *zap.Logger
-	tracer   opentracing.Tracer
 	addrType address.AddrType
 	wtype    wtype.WalletType
 	service.AddressImporter
@@ -34,7 +32,6 @@ func NewBTCWatch(
 	btc btcgrp.Bitcoiner,
 	dbConn *sql.DB,
 	logger *zap.Logger,
-	tracer opentracing.Tracer,
 	addrType address.AddrType,
 	addrImporter service.AddressImporter,
 	txCreator service.TxCreator,
@@ -47,7 +44,6 @@ func NewBTCWatch(
 		BTC:                   btc,
 		logger:                logger,
 		dbConn:                dbConn,
-		tracer:                tracer,
 		addrType:              addrType,
 		wtype:                 wtype,
 		AddressImporter:       addrImporter,

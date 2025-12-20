@@ -207,7 +207,7 @@ func LowerCase(c byte) byte {
 func ExpandPrefix(prefix string) data {
 	ret := make(data, len(prefix)+1)
 	for i := 0; i < len(prefix); i++ {
-		ret[i] = byte(prefix[i]) & 0x1f
+		ret[i] = prefix[i] & 0x1f
 	}
 
 	ret[len(prefix)] = 0
@@ -263,7 +263,7 @@ func DecodeCashAddress(str string) (string, data, error) {
 	lower, upper := false, false
 	prefixSize := 0
 	for i := 0; i < len(str); i++ {
-		c := byte(str[i])
+		c := str[i]
 		if c >= 'a' && c <= 'z' {
 			lower = true
 			continue
@@ -320,7 +320,7 @@ func DecodeCashAddress(str string) (string, data, error) {
 	valuesSize := len(str) - 1 - prefixSize
 	values := make(data, valuesSize)
 	for i := 0; i < valuesSize; i++ {
-		c := byte(str[i+prefixSize+1])
+		c := str[i+prefixSize+1]
 		// We have an invalid char in there.
 		if c > 127 || CHARSET_REV[c] == -1 {
 			return "", data{}, errors.New("Invalid character")
@@ -606,7 +606,7 @@ func packAddressData(addrType AddressType, addrHash data) (data, error) {
 		return data{}, errors.New("invalid addrtype")
 	}
 	versionByte := uint(addrType) << 3
-	encodedSize := (int(len(addrHash)) - 20) / 4
+	encodedSize := (len(addrHash) - 20) / 4
 	if (len(addrHash)-20)%4 != 0 {
 		return data{}, errors.New("invalid addrhash size")
 	}
@@ -615,9 +615,7 @@ func packAddressData(addrType AddressType, addrHash data) (data, error) {
 	}
 	versionByte |= uint(encodedSize)
 	var addrHashUint data
-	for _, e := range addrHash {
-		addrHashUint = append(addrHashUint, byte(e))
-	}
+	addrHashUint = append(addrHashUint, addrHash...)
 	data := append([]byte{byte(versionByte)}, addrHashUint...)
 	packedData, err := convertBits(data, 8, 5, true)
 	if err != nil {
