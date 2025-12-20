@@ -102,8 +102,8 @@ func (b *Bitcoin) WalletPassphrase(passphrase string, timeoutSecs int64) error {
 }
 
 // WalletPassphraseChange change pass phrase
-func (b *Bitcoin) WalletPassphraseChange(old, new string) error {
-	return b.Client.WalletPassphraseChange(old, new)
+func (b *Bitcoin) WalletPassphraseChange(old, newPass string) error {
+	return b.Client.WalletPassphraseChange(old, newPass)
 }
 
 // LoadWallet import wallet dat

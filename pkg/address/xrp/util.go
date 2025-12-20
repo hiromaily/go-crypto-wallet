@@ -9,21 +9,21 @@ import (
 
 // Write operations in a hash.Hash never return an error
 
-// Returns a SHA512 hash of the input bytes
+// Sha512 returns a SHA512 hash of the input bytes
 func Sha512(b []byte) []byte {
 	hasher := sha512.New()
 	hasher.Write(b)
 	return hasher.Sum(nil)
 }
 
-// Returns first 32 bytes of a SHA512 of the input bytes
+// Sha512Half returns first 32 bytes of a SHA512 of the input bytes
 func Sha512Half(b []byte) []byte {
 	hasher := sha512.New()
 	hasher.Write(b)
 	return hasher.Sum(nil)[:32]
 }
 
-// Returns first 16 bytes of a SHA512 of the input bytes
+// Sha512Quarter returns first 16 bytes of a SHA512 of the input bytes
 func Sha512Quarter(b []byte) []byte {
 	hasher := sha512.New()
 	hasher.Write(b)

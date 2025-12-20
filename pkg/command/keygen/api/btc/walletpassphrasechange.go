@@ -35,11 +35,11 @@ Options:
 func (c *WalletPassphraseChangeCommand) Run(args []string) int {
 	c.ui.Info(c.Synopsis())
 
-	var old, new string
+	var old, newPass string
 
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
 	flags.StringVar(&old, "old", "", "old passphrase")
-	flags.StringVar(&new, "new", "", "new passphrase")
+	flags.StringVar(&newPass, "new", "", "new passphrase")
 	if err := flags.Parse(args); err != nil {
 		return 1
 	}
@@ -49,12 +49,12 @@ func (c *WalletPassphraseChangeCommand) Run(args []string) int {
 		c.ui.Error("old passphrase option [-old] is required")
 		return 1
 	}
-	if new == "" {
+	if newPass == "" {
 		c.ui.Error("new passphrase option [-new] is required")
 		return 1
 	}
 
-	err := c.btc.WalletPassphraseChange(old, new)
+	err := c.btc.WalletPassphraseChange(old, newPass)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call btc.WalletPassphraseChange() %+v", err))
 		return 1

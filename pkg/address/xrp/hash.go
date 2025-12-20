@@ -22,7 +22,7 @@ func NewRippleHash(s string) (Hash, error) {
 	}
 }
 
-// Checks hash matches expected version
+// NewRippleHashCheck checks hash matches expected version
 func NewRippleHashCheck(s string, version HashVersion) (Hash, error) {
 	hash, err := NewRippleHash(s)
 	if err != nil {
@@ -31,12 +31,12 @@ func NewRippleHashCheck(s string, version HashVersion) (Hash, error) {
 	if hash.Version() != version {
 		want := hashTypes[version].Description
 		got := hashTypes[hash.Version()].Description
-		return nil, fmt.Errorf("Bad version for: %s expected: %s got: %s ", s, want, got)
+		return nil, fmt.Errorf("bad version for: %s expected: %s got: %s ", s, want, got)
 	}
 	return hash, nil
 }
 
-func NewAccountId(b []byte) (Hash, error) {
+func NewAccountID(b []byte) (Hash, error) {
 	return newHash(b, RIPPLE_ACCOUNT_ID)
 }
 
@@ -60,8 +60,8 @@ func NewFamilySeed(b []byte) (Hash, error) {
 	return newHash(b, RIPPLE_FAMILY_SEED)
 }
 
-func AccountId(key Key, sequence *uint32) (Hash, error) {
-	return NewAccountId(key.Id(sequence))
+func AccountID(key Key, sequence *uint32) (Hash, error) {
+	return NewAccountID(key.Id(sequence))
 }
 
 func AccountPublicKey(key Key, sequence *uint32) (Hash, error) {
