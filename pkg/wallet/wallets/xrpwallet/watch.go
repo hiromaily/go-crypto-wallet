@@ -37,13 +37,13 @@ func NewXRPWatch(
 	txSender service.TxSender,
 	txMonitorer service.TxMonitorer,
 	paymentRequestCreator service.PaymentRequestCreator,
-	wtype wtype.WalletType,
+	walletType wtype.WalletType,
 ) *XRPWatch {
 	return &XRPWatch{
 		XRP:                   xrp,
 		logger:                logger,
 		dbConn:                dbConn,
-		wtype:                 wtype,
+		wtype:                 walletType,
 		AddressImporter:       addrImporter,
 		TxCreator:             txCreator,
 		TxSender:              txSender,
@@ -68,7 +68,9 @@ func (w *XRPWatch) CreatePaymentTx(_ float64) (string, string, error) {
 }
 
 // CreateTransferTx creates transfer unsigned transaction
-func (w *XRPWatch) CreateTransferTx(sender, receiver account.AccountType, floatAmount, _ float64) (string, string, error) {
+func (w *XRPWatch) CreateTransferTx(
+	sender, receiver account.AccountType, floatAmount, _ float64,
+) (string, string, error) {
 	return w.TxCreator.CreateTransferTx(sender, receiver, floatAmount)
 }
 

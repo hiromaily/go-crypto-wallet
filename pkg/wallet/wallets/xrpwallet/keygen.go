@@ -32,7 +32,7 @@ func NewXRPKeygen(
 	xrp xrpgrp.Rippler,
 	dbConn *sql.DB,
 	logger *zap.Logger,
-	wtype wtype.WalletType,
+	walletType wtype.WalletType,
 	seeder service.Seeder,
 	hdWallter service.HDWalleter,
 	keyGenerator keygensrv.XRPKeyGenerator,
@@ -43,7 +43,7 @@ func NewXRPKeygen(
 		XRP:             xrp,
 		logger:          logger,
 		dbConn:          dbConn,
-		wtype:           wtype,
+		wtype:           walletType,
 		Seeder:          seeder,
 		HDWalleter:      hdWallter,
 		XRPKeyGenerator: keyGenerator,
@@ -65,7 +65,9 @@ func (k *XRPKeygen) StoreSeed(strSeed string) ([]byte, error) {
 }
 
 // GenerateAccountKey generates account keys
-func (k *XRPKeygen) GenerateAccountKey(accountType account.AccountType, seed []byte, count uint32, isKeyPair bool) ([]key.WalletKey, error) {
+func (k *XRPKeygen) GenerateAccountKey(
+	accountType account.AccountType, seed []byte, count uint32, isKeyPair bool,
+) ([]key.WalletKey, error) {
 	keys, err := k.HDWalleter.Generate(accountType, seed, count)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call HDWalleter.Generate()")

@@ -56,7 +56,9 @@ func (b *Bitcoin) ListUnspent(confirmationNum uint64) ([]ListUnspentResult, erro
 }
 
 // ListUnspentByAccount gets listunspent by account
-func (b *Bitcoin) ListUnspentByAccount(accountType account.AccountType, confirmationNum uint64) ([]ListUnspentResult, error) {
+func (b *Bitcoin) ListUnspentByAccount(
+	accountType account.AccountType, confirmationNum uint64,
+) ([]ListUnspentResult, error) {
 	addrs, err := b.GetAddressesByLabel(accountType.String())
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to call btc.GetAddressesByLabel()")
@@ -97,7 +99,7 @@ func (b *Bitcoin) GetUnspentListAddrs(unspentList []ListUnspentResult, accountTy
 	return addrs
 }
 
-func (b *Bitcoin) getUnspentListAmount(unspentList []ListUnspentResult) float64 {
+func (*Bitcoin) getUnspentListAmount(unspentList []ListUnspentResult) float64 {
 	var sum float64
 	for _, unspent := range unspentList {
 		sum += unspent.Amount

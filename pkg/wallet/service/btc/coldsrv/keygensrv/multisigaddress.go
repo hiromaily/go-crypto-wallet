@@ -26,7 +26,7 @@ type Multisig struct {
 
 // NewMultisig returns multisig
 func NewMultisig(
-	btc btcgrp.Bitcoiner,
+	btcAPI btcgrp.Bitcoiner,
 	logger *zap.Logger,
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
@@ -34,7 +34,7 @@ func NewMultisig(
 	wtype wallet.WalletType,
 ) *Multisig {
 	return &Multisig{
-		btc:                btc,
+		btc:                btcAPI,
 		logger:             logger,
 		authFullPubKeyRepo: authFullPubKeyRepo,
 		accountKeyRepo:     accountKeyRepo,
@@ -46,7 +46,8 @@ func NewMultisig(
 // AddMultisigAddress add multisig address by auth account address and given account address
 // https://bitcoincore.org/en/doc/0.19.0/rpc/wallet/addmultisigaddress/
 //   - if 3:5 proportion is required, at least 4 different auth accounts should be prepared in advance
-//   - when sending coin from multisig address, 、related priv key is required which is related to addresses in parameters
+//   - when sending coin from multisig address, 、related priv key is required which is related
+//     to addresses in parameters
 //   - 4th parameter must be`p2sh-segwit` addressType in Bitcoin
 //     What is the difference between createmultisig and addmultisigaddress?
 //   - https://bitcointalk.org/index.php?topic=3402541.0

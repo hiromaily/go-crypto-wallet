@@ -7,7 +7,9 @@ import (
 
 // CreateRawTransaction creates raw transaction
 // - https://xrpl.org/ja/send-xrp.html
-func (r *Ripple) CreateRawTransaction(senderAccount, receiverAccount string, amount float64, instructions *Instructions) (*TxInput, string, error) {
+func (r *Ripple) CreateRawTransaction(
+	senderAccount, receiverAccount string, amount float64, instructions *Instructions,
+) (*TxInput, string, error) {
 	// validation
 	if senderAccount == "" {
 		return nil, "", errors.New("senderAccount is empty")
@@ -21,7 +23,9 @@ func (r *Ripple) CreateRawTransaction(senderAccount, receiverAccount string, amo
 	accountInfo, err := r.GetAccountInfo(senderAccount)
 	if err != nil {
 		errStatus, _ := status.FromError(err)
-		return nil, "", errors.Errorf("fail to call GetAccountInfo() code: %d, message: %s", errStatus.Code(), errStatus.Message())
+		return nil, "", errors.Errorf(
+			"fail to call GetAccountInfo() code: %d, message: %s",
+			errStatus.Code(), errStatus.Message())
 	}
 	if amount != 0 && (ToFloat64(accountInfo.XrpBalance)-MinimumReserve) <= amount {
 		return nil, "", errors.Errorf("balance is short to send %s", accountInfo.XrpBalance)

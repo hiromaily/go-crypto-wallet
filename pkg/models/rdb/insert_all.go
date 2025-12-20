@@ -231,7 +231,6 @@ func (o BTCTXSlice) InsertAll(ctx context.Context, exec boil.ContextExecutor, co
 	var sql string
 	vals := []any{}
 	for i, row := range o {
-
 		nzDefaults := queries.NonZeroDefaultSet(btcTXColumnsWithDefault, row)
 		wl, _ := columns.InsertColumnSet(
 			btcTXAllColumns,
@@ -380,7 +379,6 @@ func (o EthDetailTXSlice) InsertAll(ctx context.Context, exec boil.ContextExecut
 	var sql string
 	vals := []any{}
 	for i, row := range o {
-
 		nzDefaults := queries.NonZeroDefaultSet(ethDetailTXColumnsWithDefault, row)
 		wl, _ := columns.InsertColumnSet(
 			ethDetailTXAllColumns,
@@ -633,7 +631,6 @@ func (o XRPDetailTXSlice) InsertAll(ctx context.Context, exec boil.ContextExecut
 	var sql string
 	vals := []any{}
 	for i, row := range o {
-
 		nzDefaults := queries.NonZeroDefaultSet(xrpDetailTXColumnsWithDefault, row)
 		wl, _ := columns.InsertColumnSet(
 			xrpDetailTXAllColumns,

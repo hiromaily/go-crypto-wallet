@@ -46,7 +46,9 @@ Subcommands:
   logging          %s
   unlocktx         %s
   validateaddress  %s
-`, balanceSynopsis, estimatefeeSynopsis, getnetworkinfoSynopsis, getaddressinfoSynopsis, listunspentSynopsis, loggingSynopsis, unlocktxSynopsis, validateaddressSynopsis)
+`,
+		balanceSynopsis, estimatefeeSynopsis, getnetworkinfoSynopsis, getaddressinfoSynopsis,
+		listunspentSynopsis, loggingSynopsis, unlocktxSynopsis, validateaddressSynopsis)
 }
 
 // Run executes this subcommand

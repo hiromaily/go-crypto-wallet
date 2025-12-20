@@ -30,7 +30,7 @@ func NewETHKeygen(
 	eth ethgrp.Ethereumer,
 	dbConn *sql.DB,
 	logger *zap.Logger,
-	wtype wtype.WalletType,
+	walletType wtype.WalletType,
 	seeder service.Seeder,
 	hdWallter service.HDWalleter,
 	privKeyer service.PrivKeyer,
@@ -41,7 +41,7 @@ func NewETHKeygen(
 		ETH:             eth,
 		logger:          logger,
 		dbConn:          dbConn,
-		wtype:           wtype,
+		wtype:           walletType,
 		Seeder:          seeder,
 		HDWalleter:      hdWallter,
 		PrivKeyer:       privKeyer,
@@ -61,7 +61,9 @@ func (k *ETHKeygen) StoreSeed(strSeed string) ([]byte, error) {
 }
 
 // GenerateAccountKey generates account keys
-func (k *ETHKeygen) GenerateAccountKey(accountType account.AccountType, seed []byte, count uint32, _ bool) ([]key.WalletKey, error) {
+func (k *ETHKeygen) GenerateAccountKey(
+	accountType account.AccountType, seed []byte, count uint32, _ bool,
+) ([]key.WalletKey, error) {
 	return k.HDWalleter.Generate(accountType, seed, count)
 }
 

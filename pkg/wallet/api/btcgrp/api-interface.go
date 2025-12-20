@@ -63,7 +63,7 @@ type Bitcoiner interface {
 	ImportPrivKeyWithoutReScan(privKeyWIF *btcutil.WIF, label string) error
 	ImportAddress(pubkey string) error
 	ImportAddressWithoutReScan(pubkey string) error
-	ImportAddressWithLabel(address, label string, rescan bool) error
+	ImportAddressWithLabel(addr, label string, rescan bool) error
 
 	// label.go
 	SetLabel(addr, label string) error
@@ -73,7 +73,9 @@ type Bitcoiner interface {
 	Logging() (*btc.LoggingResult, error)
 
 	// multisig.go
-	AddMultisigAddress(requiredSigs int, addresses []string, accountName string, addressType address.AddrType) (*btc.AddMultisigAddressResult, error)
+	AddMultisigAddress(
+		requiredSigs int, addresses []string, accountName string, addressType address.AddrType,
+	) (*btc.AddMultisigAddressResult, error)
 
 	// network.go
 	GetNetworkInfo() (*btc.GetNetworkInfoResult, error)
@@ -86,7 +88,9 @@ type Bitcoiner interface {
 	GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutResult, error)
 	DecodeRawTransaction(hexTx string) (*btc.TxRawResult, error)
 	GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error)
-	CreateRawTransaction(inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount) (*wire.MsgTx, error)
+	CreateRawTransaction(
+		inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount,
+	) (*wire.MsgTx, error)
 	FundRawTransaction(hex string) (*btc.FundRawTransactionResult, error)
 	SignRawTransaction(tx *wire.MsgTx, prevtxs []btc.PrevTx) (*wire.MsgTx, bool, error)
 	SignRawTransactionWithKey(tx *wire.MsgTx, privKeysWIF []string, prevtxs []btc.PrevTx) (*wire.MsgTx, bool, error)

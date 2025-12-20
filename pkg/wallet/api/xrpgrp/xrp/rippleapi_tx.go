@@ -106,7 +106,9 @@ type TxOrderbookChange struct {
 }
 
 // PrepareTransaction calls PrepareTransaction API
-func (r *Ripple) PrepareTransaction(senderAccount, receiverAccount string, amount float64, instructions *Instructions) (*TxInput, string, error) {
+func (r *Ripple) PrepareTransaction(
+	senderAccount, receiverAccount string, amount float64, instructions *Instructions,
+) (*TxInput, string, error) {
 	ctx := context.Background()
 	req := &RequestPrepareTransaction{
 		TxType:          EnumTransactionType_TX_PAYMENT,

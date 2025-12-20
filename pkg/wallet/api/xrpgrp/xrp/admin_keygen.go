@@ -6,7 +6,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Note: Admin commands are available only if you connect to rippled on a host and port that the rippled.cfg file identifies as admin
+// Note: Admin commands are available only if you connect to rippled on a host and port that
+// the rippled.cfg file identifies as admin
 
 // https://xrpl.org/key-generation-methods.html
 

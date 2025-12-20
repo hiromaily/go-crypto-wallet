@@ -31,13 +31,13 @@ func GetBTC() (btcgrp.Bitcoiner, error) {
 	conf.CoinTypeCode = coin.BTC
 
 	// logger
-	logger := logger.NewZapLogger(&conf.Logger)
+	log := logger.NewZapLogger(&conf.Logger)
 	// client
 	client, err := btcgrp.NewRPCClient(&conf.Bitcoin)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to create bitcoin core client")
 	}
-	bc, err = btcgrp.NewBitcoin(client, &conf.Bitcoin, logger, conf.CoinTypeCode)
+	bc, err = btcgrp.NewBitcoin(client, &conf.Bitcoin, log, conf.CoinTypeCode)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to create btc instance")
 	}

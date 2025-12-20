@@ -52,7 +52,7 @@ func castToSliceString(val any) ([]string, error) {
 }
 
 // DecodeBig to handle different response of API between Geth and Parity
-func (e *Ethereum) DecodeBig(input string) (*big.Int, error) {
+func (*Ethereum) DecodeBig(input string) (*big.Int, error) {
 	if input == "" || input == "0x" {
 		input = "0x0"
 	}
@@ -94,7 +94,7 @@ func toCallArg(msg *ethereum.CallMsg) any {
 }
 
 // ValidateAddr validates address
-func (e *Ethereum) ValidateAddr(addr string) error {
+func (*Ethereum) ValidateAddr(addr string) error {
 	// validation check
 	if !common.IsHexAddress(addr) {
 		return errors.Errorf("address:%s is invalid", addr)
@@ -111,12 +111,12 @@ func (e *Ethereum) ValidateAddr(addr string) error {
 // Ether: 1
 
 // FromWei converts Wei(int64) to Wei(*big.Int)
-func (e *Ethereum) FromWei(v int64) *big.Int {
+func (*Ethereum) FromWei(v int64) *big.Int {
 	return big.NewInt(v * params.Wei)
 }
 
 // FromGWei converts GWei(int64) to Wei(*big.Int)
-func (e *Ethereum) FromGWei(v int64) *big.Int {
+func (*Ethereum) FromGWei(v int64) *big.Int {
 	return big.NewInt(v * params.GWei)
 }
 
@@ -126,7 +126,7 @@ func (e *Ethereum) FromGWei(v int64) *big.Int {
 //}
 
 // FromFloatEther converts Ether(float64) to Wei(*big.Int)
-func (e *Ethereum) FromFloatEther(v float64) *big.Int {
+func (*Ethereum) FromFloatEther(v float64) *big.Int {
 	return big.NewInt(int64(v * params.Ether))
 }
 

@@ -33,7 +33,9 @@ func (e *Ethereum) getNonce(fromAddr string, additionalNonce int) (uint64, error
 
 // How to calculate transaction fee?
 // https://ethereum.stackexchange.com/questions/19665/how-to-calculate-transaction-fee
-func (e *Ethereum) calculateFee(fromAddr, toAddr common.Address, balance, gasPrice, value *big.Int) (*big.Int, *big.Int, *big.Int, error) {
+func (e *Ethereum) calculateFee(
+	fromAddr, toAddr common.Address, balance, gasPrice, value *big.Int,
+) (*big.Int, *big.Int, *big.Int, error) {
 	msg := &ethereum.CallMsg{
 		From:     fromAddr,
 		To:       &toAddr,
@@ -63,7 +65,9 @@ func (e *Ethereum) calculateFee(fromAddr, toAddr common.Address, balance, gasPri
 			//   -1 if x <  y
 			//    0 if x == y
 			//   +1 if x >  y
-			return nil, nil, nil, errors.Errorf("balance`%d` is insufficient to send `%d`", balance.Uint64(), newValue.Uint64())
+			return nil, nil, nil, errors.Errorf(
+				"balance`%d` is insufficient to send `%d`",
+				balance.Uint64(), newValue.Uint64())
 		}
 	}
 
@@ -78,7 +82,9 @@ func (e *Ethereum) calculateFee(fromAddr, toAddr common.Address, balance, gasPri
 // Note: sender account owes fee
 // - if sender sends 5ETH, receiver receives 5ETH
 // - sender has to pay 5ETH + fee
-func (e *Ethereum) CreateRawTransaction(fromAddr, toAddr string, amount uint64, additionalNonce int) (*ethtx.RawTx, *models.EthDetailTX, error) {
+func (e *Ethereum) CreateRawTransaction(
+	fromAddr, toAddr string, amount uint64, additionalNonce int,
+) (*ethtx.RawTx, *models.EthDetailTX, error) {
 	// validation check
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")

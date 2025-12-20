@@ -32,7 +32,9 @@ type PaymentRequestRepository struct {
 }
 
 // NewPaymentRequestRepository returns PaymentRequestRepository object
-func NewPaymentRequestRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *PaymentRequestRepository {
+func NewPaymentRequestRepository(
+	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger,
+) *PaymentRequestRepository {
 	return &PaymentRequestRepository{
 		dbConn:       dbConn,
 		tableName:    "payment_request",

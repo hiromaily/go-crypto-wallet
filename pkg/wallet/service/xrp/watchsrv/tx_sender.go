@@ -52,11 +52,13 @@ func NewTxSend(
 
 // How to send multiple transactions
 // - Question about the tefPAST_SEQ (https://www.xrpchat.com/topic/33003-question-about-the-tefpast_seq/)
-// - atomical multiple transaction support? (https://github.com/ripple/ripple-lib/issues/839https://github.com/ripple/ripple-lib/issues/839)
+// - atomical multiple transaction support?
+//   (https://github.com/ripple/ripple-lib/issues/839https://github.com/ripple/ripple-lib/issues/839)
 // - https://stackoverflow.com/questions/57521439/can-i-send-xrp-to-multiple-addresses
 // - increment the account sequence number
 // - AccountTxnID (https://xrpl.org/transaction-common-fields.html#accounttxnid)
-// - Execute multiple transactions atomically (https://www.xrpchat.com/topic/29175-execute-multiple-transactions-atomically/)
+// - Execute multiple transactions atomically
+//   (https://www.xrpchat.com/topic/29175-execute-multiple-transactions-atomically/)
 // - トランザクションキュー (https://xrpl.org/ja/transaction-queue.html)
 // - 結果のファイナリティー (https://xrpl.org/ja/finality-of-results.html)
 // - Escrow (https://xrpl.org/ja/escrow.html)
@@ -106,7 +108,8 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 					// https://xrpl.org/tef-codes.html
 					// https://xrpl.org/finality-of-results.html
 					// tefMAX_LEDGER / Ledger sequence too high
-					//  - The error message Ledger sequence too high occurs if you've waited too long to confirm a transaction in Ledger Live.
+					//  - The error message Ledger sequence too high occurs if you've waited too long to confirm
+					//    a transaction in Ledger Live.
 					// tefPAST_SEQ / This sequence number has already passed
 					//  -
 				)
@@ -162,10 +165,13 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			grok.Value(txInfo)
 
 			// update eth_detail_tx
-			affectedNum, err := t.txDetailRepo.UpdateAfterTxSent(uuid, tx.TxTypeSent, signedTxID, txBlob, earlistLedgerVersion)
+			affectedNum, err := t.txDetailRepo.UpdateAfterTxSent(
+				uuid, tx.TxTypeSent, signedTxID, txBlob, earlistLedgerVersion)
 			if err != nil {
 				// TODO: even if error occurred, tx is already sent. so db should be corrected manually
-				t.logger.Warn("fail to call txDetailRepo.UpdateAfterTxSent() but tx is already sent. So database should be updated manually",
+				t.logger.Warn(
+					"fail to call txDetailRepo.UpdateAfterTxSent() but tx is already sent. " +
+						"So database should be updated manually",
 					zap.Int64("tx_id", txID),
 					zap.String("uuid", uuid),
 					zap.String("signed_tx_id", signedTxID),
@@ -173,7 +179,8 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 					zap.Int8("tx_type_value", tx.TxTypeSent.Int8()),
 					zap.Error(err),
 				)
-				// "error":"models: unable to update all for xrp_detail_tx: Error 1406: Data too long for column 'signed_tx_blob' at row 1"
+				// "error":"models: unable to update all for xrp_detail_tx: Error 1406:
+				// Data too long for column 'signed_tx_blob' at row 1"
 				return
 			}
 			if affectedNum == 0 {

@@ -83,7 +83,9 @@ type Ethereumer interface {
 	ClientVersion() (string, error)
 	SHA3(data string) (string, error)
 	// transaction
-	CreateRawTransaction(fromAddr, toAddr string, amount uint64, additionalNonce int) (*ethtx.RawTx, *models.EthDetailTX, error)
+	CreateRawTransaction(
+		fromAddr, toAddr string, amount uint64, additionalNonce int,
+	) (*ethtx.RawTx, *models.EthDetailTX, error)
 	SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (*ethtx.RawTx, error)
 	SendSignedRawTransaction(signedTxHex string) (string, error)
 	GetConfirmation(hashTx string) (uint64, error)
@@ -102,7 +104,9 @@ type ERC20er interface {
 	ValidateAddr(addr string) error
 	FloatToBigInt(v float64) *big.Int
 	GetBalance(hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
-	CreateRawTransaction(fromAddr, toAddr string, amount uint64, additionalNonce int) (*ethtx.RawTx, *models.EthDetailTX, error)
+	CreateRawTransaction(
+		fromAddr, toAddr string, amount uint64, additionalNonce int,
+	) (*ethtx.RawTx, *models.EthDetailTX, error)
 }
 
 type EtherTxCreator interface {

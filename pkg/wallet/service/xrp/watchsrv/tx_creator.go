@@ -111,7 +111,9 @@ func (t *TxCreate) updateDB(
 
 // generateHexFile generate file for hex txID and encoded previous addresses
 // TODO: it can be commonized to ./pkg/wallet/service/eth/watchsrv/tx_creator.go
-func (t *TxCreate) generateHexFile(actionType action.ActionType, senderAccount account.AccountType, txID int64, serializedTxs []string) (string, error) {
+func (t *TxCreate) generateHexFile(
+	actionType action.ActionType, senderAccount account.AccountType, txID int64, serializedTxs []string,
+) (string, error) {
 	// add senderAccount to first line
 	serializedTxs = append([]string{senderAccount.String()}, serializedTxs...)
 

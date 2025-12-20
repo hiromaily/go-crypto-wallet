@@ -32,7 +32,7 @@ func GetXRP() (xrpgrp.Rippler, error) {
 	conf.CoinTypeCode = coin.XRP
 
 	// logger
-	logger := logger.NewZapLogger(&conf.Logger)
+	log := logger.NewZapLogger(&conf.Logger)
 	// ws client
 	wsClient, wsAdmin, err := xrpgrp.NewWSClient(&conf.Ripple)
 	if err != nil {
@@ -43,9 +43,9 @@ func GetXRP() (xrpgrp.Rippler, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to create api instance")
 	}
-	grpcAPI := xrp.NewRippleAPI(conn, logger)
+	grpcAPI := xrp.NewRippleAPI(conn, log)
 
-	xr, err = xrpgrp.NewRipple(wsClient, wsAdmin, grpcAPI, &conf.Ripple, logger, conf.CoinTypeCode)
+	xr, err = xrpgrp.NewRipple(wsClient, wsAdmin, grpcAPI, &conf.Ripple, log, conf.CoinTypeCode)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to create xrp instance")
 	}

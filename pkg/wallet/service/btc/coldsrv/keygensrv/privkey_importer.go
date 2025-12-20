@@ -41,7 +41,8 @@ func NewPrivKey(
 //   - then call ImportPrivKey(wif) without rescan
 func (p *PrivKey) Import(accountType account.AccountType) error {
 	// 1. retrieve records(private key) from account_key table
-	accountKeyTable, err := p.accountKeyRepo.GetAllAddrStatus(accountType, address.AddrStatusHDKeyGenerated) // addr_status=0
+	// addr_status=0
+	accountKeyTable, err := p.accountKeyRepo.GetAllAddrStatus(accountType, address.AddrStatusHDKeyGenerated)
 	if err != nil {
 		return errors.Wrap(err, "fail to call repo.GetAllAccountKeyByAddrStatus()")
 	}
@@ -61,7 +62,9 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 		var wif *btcutil.WIF
 		wif, err = btcutil.DecodeWIF(record.WalletImportFormat)
 		if err != nil {
-			return errors.Wrapf(err, "fail to call btcutil.DecodeWIF(%s). WIF is invalid format", record.WalletImportFormat)
+			return errors.Wrapf(
+				err, "fail to call btcutil.DecodeWIF(%s). WIF is invalid format",
+				record.WalletImportFormat)
 		}
 
 		// import private key by wif without rescan
@@ -78,7 +81,8 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 		}
 
 		// update DB
-		_, err = p.accountKeyRepo.UpdateAddrStatus(accountType, address.AddrStatusPrivKeyImported, []string{record.WalletImportFormat})
+		_, err = p.accountKeyRepo.UpdateAddrStatus(
+			accountType, address.AddrStatusPrivKeyImported, []string{record.WalletImportFormat})
 		if err != nil {
 			p.logger.Error(
 				"fail to call accountKeyRepo.UpdateAddrStatus(), but privKey import is done",

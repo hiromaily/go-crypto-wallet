@@ -7,9 +7,11 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 )
 
-// CreateTransferTx create unsigned tx for transfer coin among internal account except client, authorization
-// FIXME: for now, receiver account covers fee, but is should be flexible
-func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error) {
+// CreateTransferTx create unsigned tx for transfer coin among internal account except client,
+// authorization. FIXME: for now, receiver account covers fee, but is should be flexible
+func (t *TxCreate) CreateTransferTx(
+	sender, receiver account.AccountType, floatAmount, adjustmentFee float64,
+) (string, string, error) {
 	targetAction := action.ActionTypeTransfer
 
 	// validation account

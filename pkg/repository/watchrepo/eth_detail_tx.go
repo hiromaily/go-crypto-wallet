@@ -37,7 +37,9 @@ type EthDetailTxInputRepository struct {
 }
 
 // NewEthDetailTxInputRepository returns EthDetailTxInputRepository object
-func NewEthDetailTxInputRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *EthDetailTxInputRepository {
+func NewEthDetailTxInputRepository(
+	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger,
+) *EthDetailTxInputRepository {
 	return &EthDetailTxInputRepository{
 		dbConn:       dbConn,
 		tableName:    "eth_detail_tx",

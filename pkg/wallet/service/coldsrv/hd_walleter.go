@@ -123,21 +123,23 @@ func (w *AuthHDWalletRepo) GetMaxIndex(_ account.AccountType) (int64, error) {
 }
 
 // Insert inserts key to auth_account_key table
-func (w *AuthHDWalletRepo) Insert(keys []key.WalletKey, idx int64, coinTypeCode coin.CoinTypeCode, _ account.AccountType) error {
+func (w *AuthHDWalletRepo) Insert(
+	keys []key.WalletKey, idx int64, coinTypeCode coin.CoinTypeCode, _ account.AccountType,
+) error {
 	if len(keys) != 1 {
 		return errors.New("only one key is allowed")
 	}
-	key := keys[0]
+	keyItem := keys[0]
 	item := &models.AuthAccountKey{
 		Coin:               coinTypeCode.String(),
 		AuthAccount:        w.authType.String(),
-		P2PKHAddress:       key.P2PKHAddr,
-		P2SHSegwitAddress:  key.P2SHSegWitAddr,
-		Bech32Address:      key.Bech32Addr,
-		FullPublicKey:      key.FullPubKey,
+		P2PKHAddress:       keyItem.P2PKHAddr,
+		P2SHSegwitAddress:  keyItem.P2SHSegWitAddr,
+		Bech32Address:      keyItem.Bech32Addr,
+		FullPublicKey:      keyItem.FullPubKey,
 		MultisigAddress:    "",
-		RedeemScript:       key.RedeemScript,
-		WalletImportFormat: key.WIF,
+		RedeemScript:       keyItem.RedeemScript,
+		WalletImportFormat: keyItem.WIF,
 		Idx:                idx,
 	}
 
@@ -171,20 +173,22 @@ func (w *AccountHDWalletRepo) GetMaxIndex(accountType account.AccountType) (int6
 }
 
 // Insert inserts key to account_key_table
-func (w *AccountHDWalletRepo) Insert(keys []key.WalletKey, idxFrom int64, coinTypeCode coin.CoinTypeCode, accountType account.AccountType) error {
+func (w *AccountHDWalletRepo) Insert(
+	keys []key.WalletKey, idxFrom int64, coinTypeCode coin.CoinTypeCode, accountType account.AccountType,
+) error {
 	// insert key information to account_key_table
 	accountKeyItems := make([]*models.AccountKey, len(keys))
-	for idx, key := range keys {
+	for idx, keyItem := range keys {
 		accountKeyItems[idx] = &models.AccountKey{
 			Coin:               coinTypeCode.String(),
 			Account:            accountType.String(),
-			P2PKHAddress:       key.P2PKHAddr,
-			P2SHSegwitAddress:  key.P2SHSegWitAddr,
-			Bech32Address:      key.Bech32Addr,
-			FullPublicKey:      key.FullPubKey,
+			P2PKHAddress:       keyItem.P2PKHAddr,
+			P2SHSegwitAddress:  keyItem.P2SHSegWitAddr,
+			Bech32Address:      keyItem.Bech32Addr,
+			FullPublicKey:      keyItem.FullPubKey,
 			MultisigAddress:    "",
-			RedeemScript:       key.RedeemScript,
-			WalletImportFormat: key.WIF,
+			RedeemScript:       keyItem.RedeemScript,
+			WalletImportFormat: keyItem.WIF,
 			Idx:                idxFrom,
 		}
 		idxFrom++

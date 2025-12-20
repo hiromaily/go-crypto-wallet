@@ -29,7 +29,7 @@ type PaymentRequestCreate struct {
 
 // NewPaymentRequestCreate returns PaymentRequestCreate object
 func NewPaymentRequestCreate(
-	converter converter.Converter,
+	conv converter.Converter,
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
@@ -38,7 +38,7 @@ func NewPaymentRequestCreate(
 	wtype wallet.WalletType,
 ) *PaymentRequestCreate {
 	return &PaymentRequestCreate{
-		converter:    converter,
+		converter:    conv,
 		logger:       logger,
 		dbConn:       dbConn,
 		addrRepo:     addrRepo,

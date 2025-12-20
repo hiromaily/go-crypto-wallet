@@ -31,13 +31,13 @@ func GetETH() (ethgrp.Ethereumer, error) {
 	conf.CoinTypeCode = coin.ETH
 
 	// logger
-	logger := logger.NewZapLogger(&conf.Logger)
+	log := logger.NewZapLogger(&conf.Logger)
 	// client
 	client, err := ethgrp.NewRPCClient(&conf.Ethereum)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to create ethereum rpc client")
 	}
-	et, err = ethgrp.NewEthereum(client, &conf.Ethereum, logger, conf.CoinTypeCode)
+	et, err = ethgrp.NewEthereum(client, &conf.Ethereum, log, conf.CoinTypeCode)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to create eth instance")
 	}

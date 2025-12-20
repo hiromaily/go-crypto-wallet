@@ -205,7 +205,9 @@ func (r *BTCTxRepository) UpdateTxType(id int64, txType tx.TxType) (int64, error
 }
 
 // UpdateTxTypeBySentHashTx updates txType
-func (r *BTCTxRepository) UpdateTxTypeBySentHashTx(actionType action.ActionType, txType tx.TxType, sentHashTx string) (int64, error) {
+func (r *BTCTxRepository) UpdateTxTypeBySentHashTx(
+	actionType action.ActionType, txType tx.TxType, sentHashTx string,
+) (int64, error) {
 	// UPDATE %s SET current_tx_type=? WHERE sent_hash_tx=?
 	ctx := context.Background()
 

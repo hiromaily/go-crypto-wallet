@@ -67,7 +67,9 @@ func (p *PrivKey) Import() error {
 	// decode wif
 	wif, err := btcutil.DecodeWIF(authKeyItem.WalletImportFormat)
 	if err != nil {
-		return errors.Wrapf(err, "fail to call btcutil.DecodeWIF(%s). WIF is invalid format", authKeyItem.WalletImportFormat)
+		return errors.Wrapf(
+			err, "fail to call btcutil.DecodeWIF(%s). WIF is invalid format",
+			authKeyItem.WalletImportFormat)
 	}
 
 	// import private key by wif without rescan

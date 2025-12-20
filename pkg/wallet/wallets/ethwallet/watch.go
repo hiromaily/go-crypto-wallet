@@ -37,13 +37,13 @@ func NewETHWatch(
 	txSender service.TxSender,
 	txMonitorer service.TxMonitorer,
 	paymentRequestCreator service.PaymentRequestCreator,
-	wtype wtype.WalletType,
+	walletType wtype.WalletType,
 ) *ETHWatch {
 	return &ETHWatch{
 		ETH:                   eth,
 		logger:                logger,
 		dbConn:                dbConn,
-		wtype:                 wtype,
+		wtype:                 walletType,
 		AddressImporter:       addrImporter,
 		TxCreator:             txCreator,
 		TxSender:              txSender,
@@ -68,7 +68,9 @@ func (w *ETHWatch) CreatePaymentTx(_ float64) (string, string, error) {
 }
 
 // CreateTransferTx creates transfer unsigned transaction
-func (w *ETHWatch) CreateTransferTx(sender, receiver account.AccountType, floatAmount, _ float64) (string, string, error) {
+func (w *ETHWatch) CreateTransferTx(
+	sender, receiver account.AccountType, floatAmount, _ float64,
+) (string, string, error) {
 	return w.TxCreator.CreateTransferTx(sender, receiver, floatAmount)
 }
 
