@@ -79,7 +79,8 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 
 	// if adjustmentFee param is given
 	if b.validateAdjustmentFee(adjustmentFee) {
-		newFee, err := b.calculateNewFee(fee, adjustmentFee)
+		var newFee btcutil.Amount
+		newFee, err = b.calculateNewFee(fee, adjustmentFee)
 		if err != nil {
 			b.logger.Warn("fail to call btc.calculateNewFee() but continue", zap.Error(err))
 		}

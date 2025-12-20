@@ -46,11 +46,12 @@ func (e *Ethereum) Syncing() (*ResponseSyncing, bool, error) {
 	// try to cast to bool first
 	if v, ok := result.(bool); ok {
 		return nil, v, nil
-	} else if v, ok := result.(map[string]any); ok {
+	} else if v2, ok2 := result.(map[string]any); ok2 {
 		anyMap := make(map[string]int64)
-		for key, val := range v {
-			if v, ok := val.(string); ok {
-				decoded, err := hexutil.DecodeBig(v)
+		for key, val := range v2 {
+			if strVal, ok3 := val.(string); ok3 {
+				var decoded *big.Int
+				decoded, err = hexutil.DecodeBig(strVal)
 				if err != nil {
 					continue
 				}
@@ -59,7 +60,7 @@ func (e *Ethereum) Syncing() (*ResponseSyncing, bool, error) {
 		}
 
 		resSyncing := ResponseSyncing{}
-		if err := mapstructure.Decode(anyMap, &resSyncing); err != nil {
+		if err = mapstructure.Decode(anyMap, &resSyncing); err != nil {
 			return nil, false, err
 		}
 		debug.Debug(resSyncing)

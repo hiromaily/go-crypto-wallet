@@ -215,13 +215,14 @@ func (r *Ripple) WaitValidation(targetledgerVarsion uint64) (uint64, error) {
 
 	defer func() {
 		r.logger.Debug("running in defer func()")
-		if err := resStream.CloseSend(); err != nil {
+		if closeErr := resStream.CloseSend(); closeErr != nil {
 			r.logger.Warn("fail to call resStream.CloseSend()")
 		}
 	}()
 
 	for {
-		res, err := resStream.Recv()
+		var res *ResponseWaitValidation
+		res, err = resStream.Recv()
 		if err == io.EOF {
 			r.logger.Warn("server is closed in WaitValidation()")
 			return 0, errors.New("server is closed")

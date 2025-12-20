@@ -222,7 +222,7 @@ func (r *AccountKeyRepository) UpdateMultisigAddrs(accountType account.AccountTy
 			models.AccountKeyColumns.AddrStatus:      item.AddrStatus,
 			models.AccountKeyColumns.UpdatedAt:       null.TimeFrom(time.Now()),
 		}
-		_, err := models.AccountKeys(
+		_, err = models.AccountKeys(
 			qm.Where("coin=?", r.coinTypeCode.String()),
 			qm.And("account=?", accountType.String()),
 			qm.And("full_public_key=?", item.FullPublicKey),

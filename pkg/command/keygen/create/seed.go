@@ -44,7 +44,7 @@ func (c *SeedCommand) Run(args []string) int {
 
 	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
 	flags.StringVar(&seed, "seed", "", "given seed is used to store in database instead of generating new seed (development use)")
-	if err := flags.Parse(args); err != nil {
+	if err = flags.Parse(args); err != nil {
 		return 1
 	}
 
