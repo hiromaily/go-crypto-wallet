@@ -67,15 +67,15 @@ func (k *XRPKeyGenerate) Generate(accountType account.AccountType, isKeyPair boo
 	}
 	defer func() {
 		if err != nil {
-			// nolint:errcheck
+			//nolint:errcheck
 			dtx.Rollback()
 		} else {
-			// nolint:errcheck
+			//nolint:errcheck
 			dtx.Commit()
 		}
 	}()
 
-	//*xrp.ResponseWalletPropose
+	// *xrp.ResponseWalletPropose
 	items := make([]*models.XRPAccountKey, 0, len(keys))
 	for _, v := range keys {
 		// TODO:

@@ -56,7 +56,7 @@ func (e *Ethereum) DecodeBig(input string) (*big.Int, error) {
 	if input == "" || input == "0x" {
 		input = "0x0"
 	}
-	//if e.isParity {
+	// if e.isParity {
 	//	i, err := strconv.ParseInt(input, 10, 64)
 	//	if err != nil {
 	//		return nil, err
@@ -121,7 +121,7 @@ func (e *Ethereum) FromGWei(v int64) *big.Int {
 }
 
 // FromEther converts Ether(int64) to Wei(*big.Int)
-//func (e *Ethereum) FromEther(v int64) *big.Int {
+// func (e *Ethereum) FromEther(v int64) *big.Int {
 //	return big.NewInt(v * params.Ether)
 //}
 

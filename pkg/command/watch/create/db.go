@@ -42,7 +42,7 @@ func (c *DBCommand) Run(args []string) int {
 		return 1
 	}
 
-	c.ui.Output(fmt.Sprintf("-table: %s", tableName))
+	c.ui.Output("-table: " + tableName)
 
 	// validator
 	if tableName == "" {

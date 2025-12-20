@@ -103,7 +103,7 @@ func (a *AddressExport) exportAccountKey(accountKeyTable []*models.AccountKey, a
 	if err != nil {
 		return "", errors.Wrapf(err, "fail to call os.Create(%s)", fileName)
 	}
-	// nolint:errcheck
+	//nolint:errcheck
 	defer file.Close()
 
 	writer := bufio.NewWriter(file)
@@ -112,7 +112,7 @@ func (a *AddressExport) exportAccountKey(accountKeyTable []*models.AccountKey, a
 	for _, record := range accountKeyTable {
 		// each line of csv data
 		tmpData := address.CreateLine(record)
-		_, err = writer.WriteString(strings.Join(tmpData[:], ",") + "\n")
+		_, err = writer.WriteString(strings.Join(tmpData, ",") + "\n")
 		if err != nil {
 			return "", errors.Wrapf(err, "fail to call writer.WriteString(%s)", fileName)
 		}

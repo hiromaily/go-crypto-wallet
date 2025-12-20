@@ -42,7 +42,7 @@ func (c *FullPubkeyCommand) Run(args []string) int {
 		c.ui.Error(fmt.Sprintf("fail to call ExportFullPubkey() %+v", err))
 		return 1
 	}
-	c.ui.Output(fmt.Sprintf("[fileName]: %s", fileName))
+	c.ui.Output("[fileName]: " + fileName)
 
 	return 0
 }

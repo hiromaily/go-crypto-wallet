@@ -174,14 +174,14 @@ func (t *TxCreate) createTx(
 	}
 
 	// for debug
-	//for addr, amt := range txOutputs {
+	// for addr, amt := range txOutputs {
 	//	t.logger.Debug("txOutputs",
 	//		zap.String("address_string", addr.String()),
 	//		zap.String("address_encoded", addr.EncodeAddress()),
 	//		zap.String("amount", amt.String()),
 	//	)
 	//}
-	//for _, v := range txRepoTxOutputs {
+	// for _, v := range txRepoTxOutputs {
 	//	t.logger.Debug("txRepoTxOutputs",
 	//		zap.String("output_account", v.OutputAccount),
 	//		zap.String("output_address", v.OutputAddress),
@@ -257,7 +257,7 @@ func (t *TxCreate) createTx(
 // this func returns no result, no error possibly, so caller should check both returned value
 func (t *TxCreate) getUnspentList(accountType account.AccountType) ([]btc.ListUnspentResult, []string, error) {
 	// unlock locked UnspentTransaction
-	//if err := w.BTC.UnlockUnspent(); err != nil {
+	// if err := w.BTC.UnlockUnspent(); err != nil {
 	//	return "", "", err
 	//}
 

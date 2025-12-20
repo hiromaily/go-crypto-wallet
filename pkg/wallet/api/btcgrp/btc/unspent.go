@@ -163,7 +163,7 @@ func (b *Bitcoin) LockUnspent(tx *ListUnspentResult) error {
 // UnlockUnspent unlock locked unspent tx
 // 1st param unlock (true)
 func (b *Bitcoin) UnlockUnspent() error {
-	list, err := b.Client.ListLockUnspent() //[]*wire.OutPoint
+	list, err := b.Client.ListLockUnspent() // []*wire.OutPoint
 	if err != nil {
 		return errors.Wrap(err, "fail to call client.ListLockUnspent()")
 	}

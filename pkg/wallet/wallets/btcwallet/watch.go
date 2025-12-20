@@ -108,7 +108,7 @@ func (w *BTCWatch) CreatePaymentRequest() error {
 
 // Done should be called before exit
 func (w *BTCWatch) Done() {
-	// nolint:errcheck
+	//nolint:errcheck
 	w.dbConn.Close()
 	w.BTC.Close()
 }
@@ -119,6 +119,6 @@ func (w *BTCWatch) CoinTypeCode() coin.CoinTypeCode {
 }
 
 // GetBTC gets btc
-//func (w *BTCWatch) GetBTC() btcgrp.Bitcoiner {
+// func (w *BTCWatch) GetBTC() btcgrp.Bitcoiner {
 //	return w.BTC
 //}

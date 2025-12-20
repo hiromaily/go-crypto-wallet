@@ -4,9 +4,10 @@ import (
 	"crypto/ecdsa"
 	"flag"
 	"fmt"
+	"os"
+
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-	"os"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/pkg/errors"
@@ -63,7 +64,7 @@ func getAddress(privKey *ecdsa.PrivateKey) (string, error) {
 		return "", errors.New("fail to call cast pubkey to ecsda pubkey")
 	}
 	// pubkey
-	//ethHexPubKey := hexutil.Encode(crypto.FromECDSAPub(pubkeyECDSA))[4:]
+	// ethHexPubKey := hexutil.Encode(crypto.FromECDSAPub(pubkeyECDSA))[4:]
 
 	// address
 	return crypto.PubkeyToAddress(*pubkeyECDSA).Hex(), nil

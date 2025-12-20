@@ -43,7 +43,7 @@ func (c *ClientVersionCommand) Run(args []string) int {
 		return 1
 	}
 
-	c.ui.Info(fmt.Sprintf("client version: %s", version))
+	c.ui.Info("client version: " + version)
 
 	return 0
 }

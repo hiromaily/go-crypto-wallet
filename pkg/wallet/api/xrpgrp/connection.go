@@ -57,7 +57,7 @@ func NewGRPCClient(conf *config.RippleAPI) (*grpc.ClientConn, error) {
 }
 
 // NewRPCClient RPCClient, maybe not used
-//func NewRPCClient(conf *config.Ripple) *jsonrpc.RPCClient {
+// func NewRPCClient(conf *config.Ripple) *jsonrpc.RPCClient {
 //	if conf.JSONRpcURL == "" {
 //		return nil
 //	}

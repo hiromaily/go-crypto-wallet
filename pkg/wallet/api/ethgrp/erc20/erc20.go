@@ -55,7 +55,7 @@ func NewERC20(
 	}
 }
 
-//func (e *ERC20) getOption(
+// func (e *ERC20) getOption(
 //	ctx context.Context,
 //	isPending bool,
 //	fromAddr common.Address,

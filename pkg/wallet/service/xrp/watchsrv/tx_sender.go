@@ -173,7 +173,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 					zap.Int8("tx_type_value", tx.TxTypeSent.Int8()),
 					zap.Error(err),
 				)
-				//"error":"models: unable to update all for xrp_detail_tx: Error 1406: Data too long for column 'signed_tx_blob' at row 1"
+				// "error":"models: unable to update all for xrp_detail_tx: Error 1406: Data too long for column 'signed_tx_blob' at row 1"
 				return
 			}
 			if affectedNum == 0 {

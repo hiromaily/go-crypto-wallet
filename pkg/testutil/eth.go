@@ -1,7 +1,6 @@
 package testutil
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/pkg/errors"
@@ -22,8 +21,8 @@ func GetETH() (ethgrp.Ethereumer, error) {
 		return et, nil
 	}
 
-	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-crypto-wallet", os.Getenv("GOPATH"))
-	confPath := fmt.Sprintf("%s/data/config/eth_watch.toml", projPath)
+	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
+	confPath := projPath + "/data/config/eth_watch.toml"
 	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.ETH)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to create config")

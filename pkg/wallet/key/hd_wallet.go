@@ -14,7 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"golang.org/x/crypto/ripemd160" // nolint:staticcheck
+	"golang.org/x/crypto/ripemd160" //nolint:staticcheck
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	bchaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/bch"
@@ -327,7 +327,7 @@ func (k *HDKey) getP2PKHAddr(privKey *btcec.PrivateKey) (string, error) {
 	serializedPubKey := privKey.PubKey().SerializeCompressed()
 	pkHash := btcutil.Hash160(serializedPubKey)
 
-	//*btcutil.AddressPubKeyHash
+	// *btcutil.AddressPubKeyHash
 	p2PKHAddr, err := btcutil.NewAddressPubKeyHash(pkHash, k.conf)
 	if err != nil {
 		return "", errors.Wrapf(err, "fail to call btcutil.NewAddressPubKeyHash()")
@@ -362,7 +362,8 @@ func (k *HDKey) getP2PKHAddrBCH(p2PKHAddr *btcutil.AddressPubKeyHash) (string, e
 //   - Though BCH would not require it, just in case
 //
 // FIXME: getting RedeemScript is not fixed yet
-// nolint:unparam
+//
+//nolint:unparam
 func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, error) {
 	// []byte
 	pubKeyHash := btcutil.Hash160(privKey.PubKey().SerializeCompressed())

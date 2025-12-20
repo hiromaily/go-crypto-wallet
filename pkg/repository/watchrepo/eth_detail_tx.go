@@ -74,7 +74,7 @@ func (r *EthDetailTxInputRepository) GetAllByTxID(id int64) ([]*models.EthDetail
 // GetSentHashTx returns list of sent_hash_tx by txType
 func (r *EthDetailTxInputRepository) GetSentHashTx(txType tx.TxType) ([]string, error) {
 	//	sql := `
-	//SELECT sent_hash_tx
+	// SELECT sent_hash_tx
 	// FROM eth_tx,eth_detail_tx
 	// WHERE eth_tx.id=eth_detail_tx.tx_id
 	// AND eth_detail_tx.current_tx_type=3

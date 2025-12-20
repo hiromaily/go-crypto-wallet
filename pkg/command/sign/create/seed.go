@@ -70,7 +70,7 @@ func (c *SeedCommand) Run(args []string) int {
 			return 1
 		}
 	}
-	c.ui.Info(fmt.Sprintf("seed: %s", key.SeedToString(bSeed)))
+	c.ui.Info("seed: " + key.SeedToString(bSeed))
 
 	return 0
 }

@@ -26,7 +26,7 @@ func ParseHDPathLevel(path string) (*HDPathLevel, error) {
 		return nil, errors.New("invalid path level")
 	}
 	if parts[0] != "m" {
-		return nil, fmt.Errorf("prefix should be 'm'")
+		return nil, errors.New("prefix should be 'm'")
 	}
 	parts = parts[1:]
 

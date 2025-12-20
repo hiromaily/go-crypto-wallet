@@ -56,5 +56,5 @@ func ImportWIF(wifStr string, conf *chaincfg.Params) (*btcutil.WIF, error) {
 	return wif, nil
 }
 
-//func ImportPrivateKey(secretHex string) (*btcutil.WIF, error) {
+// func ImportPrivateKey(secretHex string) (*btcutil.WIF, error) {
 //}

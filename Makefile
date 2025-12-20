@@ -169,12 +169,12 @@ imports:
 
 .PHONY: lint
 lint:
-	golangci-lint run
+	go tool golangci-lint run
 
 # Bug: format doesn't work on files which has tags
 .PHONY: lint-fix
 lint-fix:
-	golangci-lint run --fix
+	go tool golangci-lint run --fix
 
 .PHONY: staticcheck
 staticcheck:

@@ -39,7 +39,7 @@ func (m *multisigAccount) MultiAccounts() map[AccountType]map[int][]AuthType {
 }
 
 // MultisigAccounts proportion of multisig address M:N
-//var MultisigAccounts = map[AccountType]map[int][]AuthType{
+// var MultisigAccounts = map[AccountType]map[int][]AuthType{
 //	AccountTypeDeposit: { //2:5+1
 //		2: {AuthType1, AuthType2, AuthType3, AuthType4, AuthType5},
 //	},
@@ -50,4 +50,4 @@ func (m *multisigAccount) MultiAccounts() map[AccountType]map[int][]AuthType {
 //		4: {AuthType1, AuthType2, AuthType3, AuthType4, AuthType5},
 //	},
 //}
-//var MultisigAccounts = map[AccountType]map[int][]AuthType{}
+// var MultisigAccounts = map[AccountType]map[int][]AuthType{}

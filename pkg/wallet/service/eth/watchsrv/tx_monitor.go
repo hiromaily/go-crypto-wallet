@@ -56,7 +56,7 @@ func (t *TxMonitor) UpdateTxStatus() error {
 
 	// update tx_type for TxTypeDone
 	// - TODO: notification
-	//for _, actionType := range types {
+	// for _, actionType := range types {
 	//	err := t.updateStatusTxTypeDone(actionType)
 	//	if err != nil {
 	//		return errors.Wrapf(err, "fail to call updateStatusTxTypeDone() ActionType: %s", actionType)

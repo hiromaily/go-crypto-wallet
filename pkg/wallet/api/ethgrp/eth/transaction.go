@@ -204,8 +204,8 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (
 		zap.Uint64("chainID", chainID.Uint64()),
 		zap.Any("key.PrivateKey", key.PrivateKey),
 	)
-	//var signer types.Signer = types.NewEIP155Signer(chainID)
-	var signer types.Signer = types.NewLondonSigner(chainID)
+	// var signer types.Signer = types.NewEIP155Signer(chainID)
+	signer := types.NewLondonSigner(chainID)
 
 	// sign
 	signedTX, err := types.SignTx(tx, signer, key.PrivateKey)

@@ -181,7 +181,7 @@ func (e *Ethereum) GetBalance(hexAddr string, quantityTag QuantityTag) (*big.Int
 // - `QuantityTagEarliest` must NOT be used
 // - always returns `0x0000000000000000000000000000000000000000000000000000000000000000`
 // - how this function can be used??
-//func (e *Ethereum) GetStoreageAt(hexAddr string, quantityTag QuantityTag) (string, error) {
+// func (e *Ethereum) GetStoreageAt(hexAddr string, quantityTag QuantityTag) (string, error) {
 //
 //	var storagePosition string
 //	err := e.rpcClient.CallContext(e.ctx, &storagePosition, "eth_getStorageAt", hexAddr, "0x0", quantityTag.String())
@@ -217,7 +217,7 @@ func (e *Ethereum) GetTransactionCount(hexAddr string, quantityTag QuantityTag) 
 // - block hash can be found from https://www.etherchain.org/block/2706436 by block number
 // - but how it is found for Goerli Testnet??
 // FIXME: this RPC doesn't return anything
-//func (e *Ethereum) GetBlockTransactionCountByBlockHash(blockHash string) (*big.Int, error) {
+// func (e *Ethereum) GetBlockTransactionCountByBlockHash(blockHash string) (*big.Int, error) {
 //
 //	var txCount string
 //	err := e.rpcClient.CallContext(e.ctx, &txCount, "eth_getBlockTransactionCountByHash", blockHash)
@@ -265,7 +265,7 @@ func (e *Ethereum) GetBlockTransactionCountByNumber(blockNumber uint64) (*big.In
 
 // GetUncleCountByBlockHash eturns the number of uncles in a block from a block matching the given block hash
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getunclecountbyblockhash
-//func (e *Ethereum) GetUncleCountByBlockHash(blockHash string) (*big.Int, error) {
+// func (e *Ethereum) GetUncleCountByBlockHash(blockHash string) (*big.Int, error) {
 //
 //	var uncleCount string
 //	err := e.rpcClient.CallContext(e.ctx, &uncleCount, "eth_getUncleCountByBlockHash", blockHash)
@@ -313,7 +313,7 @@ func (e *Ethereum) GetUncleCountByBlockNumber(blockNumber uint64) (*big.Int, err
 // GetCode returns code at a given address ???
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getcode
 // - always returns 0
-//func (e *Ethereum) GetCode(hexAddr string, quantityTag QuantityTag) (*big.Int, error) {
+// func (e *Ethereum) GetCode(hexAddr string, quantityTag QuantityTag) (*big.Int, error) {
 //
 //	var code string
 //	err := e.rpcClient.CallContext(e.ctx, &code, "eth_getCode", hexAddr, quantityTag.String())

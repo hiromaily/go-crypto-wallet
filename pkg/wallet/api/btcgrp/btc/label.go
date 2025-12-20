@@ -41,7 +41,7 @@ func (b *Bitcoin) SetLabel(addr, label string) error {
 // GetReceivedByLabelAndMinConf returns balance by label(account)
 // FIXME: even if spent utxo is left as balance
 // - please use GetBalanceByAccount()
-//func (b *Bitcoin) GetReceivedByLabelAndMinConf(accountName string, minConf int) (btcutil.Amount, error) {
+// func (b *Bitcoin) GetReceivedByLabelAndMinConf(accountName string, minConf int) (btcutil.Amount, error) {
 //	input1, err := json.Marshal(accountName)
 //	if err != nil {
 //		return 0, errors.Wrap(err, "fail to call json.Marchal(accountName)")

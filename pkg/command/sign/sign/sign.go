@@ -23,10 +23,7 @@ func (c *SignCommand) Synopsis() string {
 
 // Help returns usage for this subcommand
 func (c *SignCommand) Help() string {
-	return `Usage: sign sign [options...]
-Options:
-  -file  signed transaction file path for multisig address
-`
+	return "Usage: sign [options...]\nOptions:\n  -file  signed transaction file path for multisig"
 }
 
 // Run executes this subcommand

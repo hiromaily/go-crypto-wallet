@@ -3,10 +3,11 @@ package bchutil
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/chaincfg"
-	"golang.org/x/crypto/ripemd160" // nolint: staticcheck
+	"golang.org/x/crypto/ripemd160" //nolint: staticcheck
 )
 
 // refer to original code [github.com/cpacia/bchutil](https://github.com/cpacia/bchutil/blob/master/cashaddr.go)
@@ -245,9 +246,11 @@ func Encode(prefix string, payload data) string {
 	combined := Cat(payload, checksum)
 	ret := ""
 
+	var retSb248 strings.Builder
 	for _, c := range combined {
-		ret += string(CHARSET[c])
+		retSb248.WriteString(string(CHARSET[c]))
 	}
+	ret += retSb248.String()
 
 	return ret
 }
@@ -307,9 +310,11 @@ func DecodeCashAddress(str string) (string, data, error) {
 
 	// Get the prefix.
 	var prefix string
+	var prefixSb310 strings.Builder
 	for i := 0; i < prefixSize; i++ {
-		prefix += string(LowerCase(str[i]))
+		prefixSb310.WriteString(string(LowerCase(str[i])))
 	}
+	prefix += prefixSb310.String()
 
 	// Decode values.
 	valuesSize := len(str) - 1 - prefixSize

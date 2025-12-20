@@ -60,7 +60,7 @@ func (c *ImportRawKeyCommand) Run(args []string) int {
 		return 1
 	}
 
-	c.ui.Info(fmt.Sprintf("new address: %s", addr))
+	c.ui.Info("new address: " + addr)
 
 	return 0
 }

@@ -104,8 +104,8 @@ func (k *XRPKeygen) SignTx(filePath string) (string, bool, string, error) {
 
 // Done should be called before exit
 func (k *XRPKeygen) Done() {
-	// nolint:errcheck
+	//nolint:errcheck
 	k.dbConn.Close()
-	// nolint:errcheck
+	//nolint:errcheck
 	k.XRP.Close()
 }

@@ -72,15 +72,8 @@ func (t *TxCreate) createPaymentTxOutputs(userPayments []UserPayment, changeAddr
 
 	// create txOutput from userPayment
 	for _, userPayment := range userPayments {
-		// nolint:gosimple
-		if _, ok := tmpOutputs[userPayment.receiverAddr]; ok {
-			// if there are multiple receiver same address in user_payment,
-			//  sum these
-			tmpOutputs[userPayment.receiverAddr] += userPayment.validAmount
-		} else {
-			// new receiver address
-			tmpOutputs[userPayment.receiverAddr] = userPayment.validAmount
-		}
+		//nolint:gosimple
+		tmpOutputs[userPayment.receiverAddr] += userPayment.validAmount
 	}
 
 	// add txOutput as change address and amount for change
@@ -88,14 +81,8 @@ func (t *TxCreate) createPaymentTxOutputs(userPayments []UserPayment, changeAddr
 	// - what if user register for address which is same to payment address?
 	//   Though it's impossible in real but systematically possible
 	// - BIP44, hdwallet has `ChangeType`. ideally this address should be used
-	// nolint:gosimple
-	if _, ok := tmpOutputs[changeAddr]; ok {
-		// in real, this is impossible
-		tmpOutputs[changeAddr] += changeAmount
-	} else {
-		// of course, change address is new in txOutputs
-		tmpOutputs[changeAddr] = changeAmount
-	}
+	//nolint:gosimple
+	tmpOutputs[changeAddr] += changeAmount
 
 	// create txOutputs from tmpOutputs switching string address type to btcutil.Address
 	for strAddr, amount := range tmpOutputs {

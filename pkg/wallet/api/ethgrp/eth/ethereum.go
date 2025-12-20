@@ -2,7 +2,6 @@ package eth
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/btcsuite/btcd/chaincfg"
@@ -53,7 +52,7 @@ func NewEthereum(
 		if err != nil {
 			return nil, errors.Wrap(err, "fail to call eth.AdminDataDir()")
 		}
-		eth.keyDir = fmt.Sprintf("%s/keystore", dirName)
+		eth.keyDir = dirName + "/keystore"
 	}
 	logger.Debug("eth.keyDir", zap.String("eth.keyDir", eth.keyDir))
 

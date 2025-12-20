@@ -66,7 +66,7 @@ func (r *FileRepository) CreateFilePath(actionType action.ActionType, txType TxT
 // GetFileNameType returns as FileName type
 func (r *FileRepository) GetFileNameType(filePath string) (*FileName, error) {
 	// just file path or full path
-	//./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209
+	// ./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209
 	tmp := strings.Split(filePath, "/")
 	fileName := tmp[len(tmp)-1]
 
@@ -142,7 +142,7 @@ func (r *FileRepository) ReadFileSlice(path string) ([]string, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to open file: %s", path)
 	}
-	// nolint:errcheck
+	//nolint:errcheck
 	defer file.Close()
 	data := make([]string, 0)
 
@@ -195,7 +195,7 @@ func (r *FileRepository) WriteFileSlice(path string, data []string) (string, err
 	if err = writer.Flush(); err != nil {
 		return "", err
 	}
-	// nolint:errcheck
+	//nolint:errcheck
 	file.Close()
 
 	return fileName, nil
@@ -206,7 +206,7 @@ func (r *FileRepository) createDir(path string) {
 	tmp2 := tmp1[0 : len(tmp1)-1] // cut filename
 	dir := strings.Join(tmp2, "/")
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		// nolint:errcheck
+		//nolint:errcheck
 		os.Mkdir(dir, 0o755)
 	}
 }

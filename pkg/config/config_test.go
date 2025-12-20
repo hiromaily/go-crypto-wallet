@@ -1,7 +1,7 @@
 package config
 
 // TestNewAccount is test for NewAccount
-//func TestNewAccount(t *testing.T) {
+// func TestNewAccount(t *testing.T) {
 //	//t.SkipNow()
 //
 //	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-crypto-wallet", os.Getenv("GOPATH"))

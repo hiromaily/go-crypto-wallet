@@ -45,7 +45,7 @@ func (c *AddressCommand) Run(args []string) int {
 		return 1
 	}
 
-	c.ui.Output(fmt.Sprintf("-file: %s", filePath))
+	c.ui.Output("-file: " + filePath)
 
 	// validator
 	if filePath == "" {

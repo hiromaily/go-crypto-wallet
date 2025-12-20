@@ -36,7 +36,7 @@ func Base58Decode(b, alphabet string) ([]byte, error) {
 
 	// Calculating with big.Int is slow for each iteration.
 	//    x += b58[b[i]] * j
-	//    j *= 58
+	//    *= 58
 	//
 	// Instead we can try to do as much calculations on int64.
 	// We can represent a 10 digit base58 number using an int64.

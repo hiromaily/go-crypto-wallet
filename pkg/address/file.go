@@ -60,7 +60,7 @@ func (r *FileRepository) ImportAddress(fileName string) ([]string, error) {
 	if err != nil {
 		return nil, errors.Errorf("os.Open(%s) error: %s", fileName, err)
 	}
-	// nolint:errcheck
+	//nolint:errcheck
 	defer file.Close()
 
 	var pubKeys []string

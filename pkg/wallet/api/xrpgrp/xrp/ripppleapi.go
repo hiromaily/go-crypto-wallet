@@ -31,11 +31,11 @@ func NewRippleAPI(
 // Close disconnect to server
 func (r *RippleAPI) Close() {
 	if r.conn != nil {
-		// nolint:errcheck
+		//nolint:errcheck
 		r.conn.Close()
 	}
 }
 
-//func (r *RippleAPI) APIClient() pb.RippleAPIClient {
+// func (r *RippleAPI) APIClient() pb.RippleAPIClient {
 //	return r.client
 //}

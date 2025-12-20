@@ -181,11 +181,11 @@ func (b *Bitcoin) GetTransaction(txID string) (*GetTransactionResult, error) {
 
 // GetTransactionByTxID get transaction result by txID
 func (b *Bitcoin) GetTransactionByTxID(txID string) (*GetTransactionResult, error) {
-	//hashTx, err := chainhash.NewHashFromStr(txID)
-	//if err != nil {
+	// hashTx, err := chainhash.NewHashFromStr(txID)
+	// if err != nil {
 	//	return nil, errors.Wrapf(err, "fail to call chainhash.NewHashFromStr(%s)", txID)
 	//}
-	//resTx, err := b.Client.GetTransaction(hashTx)
+	// resTx, err := b.Client.GetTransaction(hashTx)
 	resTx, err := b.GetTransaction(txID)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to call btc.GetTransaction(%s)", txID)
@@ -210,7 +210,7 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 	}
 
 	return txOutResult, nil
-	//value *GetTxOutResult = {
+	// value *GetTxOutResult = {
 	//	BestBlock string = "00000000000000a080461b99935872934fa35bc705453f9f2ad7712b2228e849" 64
 	//	Confirmations int64 = 473
 	//	Value float64 = 0.65
@@ -229,11 +229,11 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 
 // DecodeRawTransaction returns information about a transaction given its serialized byte
 func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*TxRawResult, error) {
-	//byteHex, err := hex.DecodeString(hexTx)
-	//if err != nil {
+	// byteHex, err := hex.DecodeString(hexTx)
+	// if err != nil {
 	//	return nil, errors.Wrap(err, "fail to call hex.DecodeString()")
 	//}
-	//resTx, err := b.Client.DecodeRawTransaction(byteHex)
+	// resTx, err := b.Client.DecodeRawTransaction(byteHex)
 	input, err := json.Marshal(hexTx)
 	if err != nil {
 		return nil, errors.Errorf("json.Marchal(txID): error: %s", err)
@@ -455,7 +455,7 @@ func (b *Bitcoin) SendTransactionByHex(hex string) (*chainhash.Hash, error) {
 
 // SendTransactionByByte send raw transaction by byte array
 func (b *Bitcoin) SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error) {
-	//[]byte to wireTx
+	// []byte to wireTx
 	wireTx := new(wire.MsgTx)
 	r := bytes.NewBuffer(rawTx)
 

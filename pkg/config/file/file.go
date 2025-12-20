@@ -14,7 +14,7 @@ func GetConfigFilePath(fileName string) string {
 		}
 	}
 	if os.Getenv("GOPATH") != "" {
-		projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-crypto-wallet", os.Getenv("GOPATH"))
+		projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
 		confPath := fmt.Sprintf("%s/data/config/%s", projPath, fileName)
 		if f, err := os.Stat(confPath); err == nil && !f.IsDir() {
 			return confPath

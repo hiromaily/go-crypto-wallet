@@ -1,66 +1,220 @@
-run:
-  deadline: 10m
-  build-tags:
-    - integration
-  skip-dirs:
-    - data
-    - docker
-    - docs
-    - scripts
-    - templates
-    - vendor
+version: "2"
 
-linters-settings:
-  goimports:
-    # put imports beginning with prefix after 3rd-party packages;
-    # it's a comma-separated list of prefixes
-    local-prefixes: github.com/hiromaily
-  misspell:
-    locale: US
-  revive:
-    # see https://golangci-lint.run/usage/linters/#revive
-    # see https://github.com/mgechev/revive#available-rules for details.
-    ignore-generated-header: true
-    severity: warning
-    confidence: 0.8
-    rules:
-      - name: indent-error-flow
-        severity: warning
-  gci:
-    sections:
-      - standard
-      - default
-      - prefix(github.com/hiromaily)
-  #unused:
-  #  check-exported: true
+run:
+  go: "1.25.5"
+  timeout: 5m
 
 issues:
-  exclude:
-    - type name will be used
-    - "HeaderMap is deprecated: HeaderMap exists"
-  exclude-use-default: false
+  # Maximum issues count per one linter. Set to 0 to disable. Default is 50.
+  max-issues-per-linter: 0
+  # Maximum count of issues with the same text. Set to 0 to disable. Default is 3.
+  max-same-issues: 0
 
-# Use default
-#linters:
-#  disable-all: true
-#  enable:
-#    - deadcode
-#    #- errcheck
-#    - gofumpt
-#    - goimports
-#    - gosimple
-#    - govet
-#    - ineffassign
-#    - misspell
-#    - revive
-#    - staticcheck
-#    - structcheck
-#    - typecheck
-#    - unused
-#    - varcheck
-#  presets:
-#    # only next presets exist:
-#    #  bugs|comment|complexity|error|format|import|metalinter|module|performance|sql|style|test|unused
-#    - format
-#    - unused
-#  fast: false
+formatters:
+  enable:
+    - gofumpt       # Detects whether code was gofumpt-ed.
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/hiromaily
+  exclusions:
+    generated: strict
+
+linters:
+  enable:
+    - asasalint                 # Detects "[]any" used as argument for variadic "func(...any)".
+    - bodyclose
+    - copyloopvar               # Detects places where loop variables are copied.
+    - depguard
+    - dogsled                   # Detects assignments with too many blank identifiers.
+    - dupword                   # Detects duplicate words.
+    - durationcheck             # Detect cases where two time.Duration values are being multiplied in possibly erroneous ways.
+    - errcheck
+    - errchkjson                # Detects unsupported types passed to json encoding functions and reports if checks for the returned error can be omitted.
+    - exhaustive                # Detects missing options in enum switch statements.
+    - exptostd                  # Detects functions from golang.org/x/exp/ that can be replaced by std functions.
+    - fatcontext                # Detects nested contexts in loops and function literals.
+    - forbidigo
+    - gocheckcompilerdirectives # Detects invalid go compiler directive comments (//go:).
+    - gocritic                  # Metalinter; detects bugs, performance, and styling issues.
+    - gocyclo
+    - gosec                     # Detects security problems.
+    - govet
+    - iface                     # Detects incorrect use of interfaces. Currently only used for "identical" interfaces in the same package.
+    - importas                  # Enforces consistent import aliases.
+    - ineffassign
+    - makezero                  # Finds slice declarations with non-zero initial length.
+    - mirror                    # Detects wrong mirror patterns of bytes/strings usage.
+    - misspell                  # Detects commonly misspelled English words in comments.
+    - nakedret                  # Detects uses of naked returns.
+    - nilnesserr                # Detects returning nil errors. It combines the features of nilness and nilerr,
+    - nosprintfhostport         # Detects misuse of Sprintf to construct a host with port in a URL.
+    - nolintlint                # Detects ill-formed or insufficient nolint directives.
+    - perfsprint                # Detects fmt.Sprintf uses that can be replaced with a faster alternative.
+    - prealloc                  # Detects slice declarations that could potentially be pre-allocated.
+    - predeclared               # Detects code that shadows one of Go's predeclared identifiers
+    - reassign                  # Detects reassigning a top-level variable in another package.
+    - revive                    # Metalinter; drop-in replacement for golint.
+    - spancheck                 # Detects mistakes with OpenTelemetry/Census spans.
+    - staticcheck
+    - thelper                   # Detects test helpers without t.Helper().
+    - tparallel                 # Detects inappropriate usage of t.Parallel().
+    - unconvert                 # Detects unnecessary type conversions.
+    - unparam
+    - unused
+    - usestdlibvars             # Detects the possibility to use variables/constants from the Go standard library.
+    - usetesting                # Reports uses of functions with replacement inside the testing package.
+    - wastedassign              # Detects wasted assignment statements.
+  
+  disable:
+    - errcheck
+  
+  settings:
+    # depguard:
+    #   rules:
+    #     main:
+    #       deny:
+    #         - pkg: "github.com/containerd/containerd/errdefs"
+    #           desc: The containerd errdefs package was migrated to a separate module. Use github.com/containerd/errdefs instead.
+    #         - pkg: "github.com/containerd/containerd/log"
+    #           desc: The containerd log package was migrated to a separate module. Use github.com/containerd/log instead.
+    #         - pkg: "github.com/containerd/containerd/pkg/userns"
+    #           desc: Use github.com/moby/sys/userns instead.
+    #         - pkg: "github.com/containerd/containerd/platforms"
+    #           desc: The containerd platforms package was migrated to a separate module. Use github.com/containerd/platforms instead.
+    #         - pkg: "github.com/docker/docker/errdefs"
+    #           desc: Use github.com/containerd/errdefs instead.
+    #         - pkg: "github.com/docker/docker/pkg/system"
+    #           desc: This package should not be used unless strictly necessary.
+    #         - pkg: "github.com/docker/distribution/uuid"
+    #           desc: Use github.com/google/uuid instead.
+    #         - pkg: "io/ioutil"
+    #           desc: The io/ioutil package has been deprecated, see https://go.dev/doc/go1.16#ioutil
+    #         - pkg: "gopkg.in/yaml.v3"
+    #           desc: Use go.yaml.in/yaml/v3 instead.
+    forbidigo:
+      forbid:
+        - pkg: ^regexp$
+          pattern: ^regexp\.MustCompile
+          msg: Use internal/lazyregexp.New instead.
+
+    gocyclo:
+      min-complexity: 16
+
+    gosec:
+      excludes:
+        - G104 # G104: Errors unhandled;
+        - G115 # G115: integer overflow conversion;
+        - G306 # G306: Expect WriteFile permissions to be 0600 or less (too restrictive; also flags "0o644" permissions)
+        - G307 # G307: Deferring unsafe method 
+
+    govet:
+      enable:
+        - shadow
+      settings:
+        shadow:
+          strict: true
+
+    lll:
+      line-length: 120
+
+    importas:
+      # Do not allow unaliased imports of aliased packages.
+      no-unaliased: true
+
+      alias:
+          # Should no longer be aliased, because we no longer allow moby/docker errdefs.
+        - pkg: "github.com/docker/docker/errdefs"
+          alias: ""
+        - pkg: github.com/opencontainers/image-spec/specs-go/v1
+          alias: ocispec
+          # Enforce that gotest.tools/v3/assert/cmp is always aliased as "is"
+        - pkg: gotest.tools/v3/assert/cmp
+          alias: is
+
+    nakedret:
+      # Disallow naked returns if func has more lines of code than this setting.
+      # Default: 30
+      max-func-lines: 0
+
+    staticcheck:
+      checks:
+        - all
+        - -QF1008 # Omit embedded fields from selector expression; https://staticcheck.dev/docs/checks/#QF1008
+
+    revive:
+      rules:
+        - name: empty-block       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#empty-block
+        - name: empty-lines       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#empty-lines
+        - name: import-shadowing  # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#import-shadowing
+        - name: line-length-limit # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#line-length-limit
+          arguments: [120]
+        - name: unused-receiver   # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#unused-receiver
+        - name: use-any           # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#use-any
+        - name: use-errors-new    # https://github.com/mgechev/revive/blob/HEAD/RULES_DESCRIPTIONS.md#use-errors-new
+
+    usetesting:
+      os-chdir: false           # FIXME(thaJeztah): Disable `os.Chdir()` detections; should be automatically disabled on Go < 1.24; see https://github.com/docker/cli/pull/5835#issuecomment-2665302478
+      context-background: false # FIXME(thaJeztah): Disable `context.Background()` detections; should be automatically disabled on Go < 1.24; see https://github.com/docker/cli/pull/5835#issuecomment-2665302478
+      context-todo: false       # FIXME(thaJeztah): Disable `context.TODO()` detections; should be automatically disabled on Go < 1.24; see https://github.com/docker/cli/pull/5835#issuecomment-2665302478
+
+  exclusions:
+    generated: strict
+
+    rules:
+        # EXC0003
+      - text: "func name will be used as test\\.Test.* by other packages, and that stutters; consider calling this"
+        linters:
+          - revive
+
+        # EXC0007
+      - text: "Subprocess launch(ed with variable|ing should be audited)"
+        linters:
+          - gosec
+
+        # EXC0009
+      - text: "(Expect directory permissions to be 0750 or less|Expect file permissions to be 0600 or less)"
+        linters:
+          - gosec
+
+        # EXC0010
+      - text: "Potential file inclusion via variable"
+        linters:
+          - gosec
+
+        # TODO: make sure all packages have a description. Currently, there's 67 packages without.
+      - text: "package-comments: should have a package comment"
+        linters:
+          - revive
+
+        # Exclude some linters from running on tests files.
+      - path: _test\.go
+        linters:
+          - errcheck
+          - gosec
+
+      - text: "ST1000: at least one file in a package should have a package comment"
+        linters:
+          - staticcheck
+
+        # Allow "err" and "ok" vars to shadow existing declarations, otherwise we get too many false positives.
+      - text: '^shadow: declaration of "(err|ok)" shadows declaration'
+        linters:
+          - govet
+
+      # Ignore for cli/command/formatter/tabwriter, which is forked from go stdlib, so we want to align with it.
+      - text: '^(ST1020|ST1022): comment on exported'
+        path: "cli/command/formatter/tabwriter"
+        linters:
+          - staticcheck
+
+      # Ignore deprecation linting for cli/command/stack/*.
+      - text: '^(SA1019): '
+        path: "cli/command/stack"
+        linters:
+          - staticcheck
+
+    # Log a warning if an exclusion rule is unused.
+    # Default: false
+    warn-unused: true

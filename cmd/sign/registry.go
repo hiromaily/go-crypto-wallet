@@ -48,7 +48,7 @@ type registry struct {
 func NewRegistry(conf *config.WalletRoot, accountConf *account.AccountRoot, walletType wallet.WalletType, authName string) Registry {
 	// validate
 	if !account.ValidateAuthType(authName) {
-		panic(fmt.Sprintf("authName is invalid. this should be embedded when building: %s", authName))
+		panic("authName is invalid. this should be embedded when building: " + authName)
 	}
 
 	return &registry{

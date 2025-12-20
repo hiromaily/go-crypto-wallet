@@ -21,7 +21,7 @@ type WalletRoot struct {
 	FilePath     FilePath          `toml:"file_path"`
 }
 
-// Bitcoin Bitcoin information
+// Bitcoin information
 type Bitcoin struct {
 	Host        string `toml:"host" validate:"required"`
 	User        string `toml:"user" validate:"required"`
@@ -114,7 +114,7 @@ type TracerDetail struct {
 	IsDebug             bool    `toml:"is_debug"`
 }
 
-// MySQL MySQL info
+// MySQL info
 type MySQL struct {
 	Host  string `toml:"host" validate:"required"`
 	DB    string `toml:"dbname" validate:"required"`

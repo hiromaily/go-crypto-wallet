@@ -65,9 +65,9 @@ func (m *Multisig) AddMultisigAddress(accountType account.AccountType, addressTy
 	var authFullPubKeys []string
 	// get fullPubKey from auth_fullpubkey table
 
-	//AccountTypeDeposit: { //2:5+1
+	// AccountTypeDeposit: { //2:5+1
 	//	2: {AuthType1, AuthType2, AuthType3, AuthType4, AuthType5},
-	//},
+	// },
 	for sigCount, authTypes := range m.multisigAccount.MultiAccounts()[accountType] {
 		requiredSig = sigCount
 		for _, authType := range authTypes {
@@ -97,7 +97,7 @@ func (m *Multisig) AddMultisigAddress(accountType account.AccountType, addressTy
 			addressType,
 		)
 		if err != nil {
-			//[Error] -5: no full public key for address mkPmdpo59gpU7ZioGYwwoMTQJjh7MiqUvd
+			// [Error] -5: no full public key for address mkPmdpo59gpU7ZioGYwwoMTQJjh7MiqUvd
 			m.logger.Error(
 				"fail to call btc.CreateMultiSig()",
 				zap.Int("signature_count", requiredSig),

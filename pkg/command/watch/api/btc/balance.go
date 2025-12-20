@@ -70,8 +70,8 @@ func (c *BalanceCommand) Run(args []string) int {
 	}
 
 	// FIXME: even spent tx looks to be left, GetReceivedByLabelAndMinConf may be wrong to get balance
-	//balance, err := c.wallet.GetBTC().GetReceivedByLabelAndMinConf(acnt, c.wallet.GetBTC().ConfirmationBlock())
-	//if err != nil {
+	// balance, err := c.wallet.GetBTC().GetReceivedByLabelAndMinConf(acnt, c.wallet.GetBTC().ConfirmationBlock())
+	// if err != nil {
 	//	c.ui.Error(fmt.Sprintf("fail to call BTC.GetReceivedByAccountAndMinConf() %+v", err))
 	//	return 1
 	//}

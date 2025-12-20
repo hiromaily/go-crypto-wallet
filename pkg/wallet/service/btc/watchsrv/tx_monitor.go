@@ -256,10 +256,10 @@ func (t *TxMonitor) updateTxTypeNotified(id int64, actionType action.ActionType)
 		}
 		defer func() {
 			if err != nil {
-				// nolint:errcheck
+				//nolint:errcheck
 				dtx.Rollback()
 			} else {
-				// nolint:errcheck
+				//nolint:errcheck
 				dtx.Commit()
 			}
 		}()

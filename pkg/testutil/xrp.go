@@ -1,7 +1,6 @@
 package testutil
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/pkg/errors"
@@ -23,8 +22,8 @@ func GetXRP() (xrpgrp.Rippler, error) {
 		return xr, nil
 	}
 
-	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-crypto-wallet", os.Getenv("GOPATH"))
-	confPath := fmt.Sprintf("%s/data/config/xrp_watch.toml", projPath)
+	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
+	confPath := projPath + "/data/config/xrp_watch.toml"
 	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.XRP)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to create config")
@@ -54,7 +53,7 @@ func GetXRP() (xrpgrp.Rippler, error) {
 }
 
 // GetRippleAPI returns RippleAPIer
-//func GetRippleAPI() xrpgrp.RippleAPIer {
+// func GetRippleAPI() xrpgrp.RippleAPIer {
 //	if api != nil {
 //		return api
 //	}
