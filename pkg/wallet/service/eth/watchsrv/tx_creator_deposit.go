@@ -1,6 +1,8 @@
 package watchsrv
 
 import (
+	"math/big"
+
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
 
@@ -9,6 +11,7 @@ import (
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/ethtx"
 )
 
 // CreateDepositTx create unsigned tx if client accounts have coins
@@ -74,7 +77,8 @@ func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]eth.UserAmount,
 	// address list for client
 	for _, addr := range addrs {
 		// TODO: if previous tx is not done, wrong amount is returned. how to manage it??
-		balance, err := t.eth.GetBalance(addr.WalletAddress, eth.QuantityTagLatest)
+		var balance *big.Int
+		balance, err = t.eth.GetBalance(addr.WalletAddress, eth.QuantityTagLatest)
 		if err != nil {
 			t.logger.Warn("fail to call .GetBalance()",
 				zap.String("address", addr.WalletAddress),
@@ -103,7 +107,9 @@ func (t *TxCreate) createDepositRawTransactions(
 	// additionalNonce := 0
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
-		rawTx, txDetailItem, err := t.eth.CreateRawTransaction(val.Address, depositAddr.WalletAddress, 0, 0)
+		var rawTx *ethtx.RawTx
+		var txDetailItem *models.EthDetailTX
+		rawTx, txDetailItem, err = t.eth.CreateRawTransaction(val.Address, depositAddr.WalletAddress, 0, 0)
 		if err != nil {
 			return nil, nil, errors.Wrapf(
 				err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s",
@@ -114,7 +120,8 @@ func (t *TxCreate) createDepositRawTransactions(
 		rawTxHex := rawTx.TxHex
 		t.logger.Debug("rawTxHex", zap.String("rawTxHex", rawTxHex))
 
-		serializedTx, err := serial.EncodeToString(rawTx)
+		var serializedTx string
+		serializedTx, err = serial.EncodeToString(rawTx)
 		if err != nil {
 			return nil, nil, errors.Wrap(err, "fail to call serial.EncodeToString(rawTx)")
 		}

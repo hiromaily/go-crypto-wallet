@@ -13,11 +13,12 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 )
 
 // TxSend type
 type TxSend struct {
-	xrp          xrpgrp.Rippler
+	rippler      xrpgrp.Rippler
 	logger       *zap.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier // not used
@@ -29,7 +30,7 @@ type TxSend struct {
 
 // NewTxSend returns TxSend object
 func NewTxSend(
-	xrp xrpgrp.Rippler,
+	rippler xrpgrp.Rippler,
 	logger *zap.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
@@ -39,7 +40,7 @@ func NewTxSend(
 	wtype wallet.WalletType,
 ) *TxSend {
 	return &TxSend{
-		xrp:          xrp,
+		rippler:      rippler,
 		logger:       logger,
 		dbConn:       dbConn,
 		addrRepo:     addrRepo,
@@ -98,7 +99,9 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			txBlob := tmp[2]
 
 			// submit
-			sentTx, earlistLedgerVersion, err := t.xrp.SubmitTransaction(txBlob)
+			var sentTx *xrp.SentTx
+			var earlistLedgerVersion uint64
+			sentTx, earlistLedgerVersion, err = t.rippler.SubmitTransaction(txBlob)
 			if err != nil {
 				t.logger.Warn("fail to call xrp.SubmitTransaction()",
 					zap.Int64("tx_id", txID),
@@ -134,7 +137,8 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			)
 
 			// validate transaction
-			ledgerVer, err := t.xrp.WaitValidation(sentTx.TxJSON.LastLedgerSequence)
+			var ledgerVer uint64
+			ledgerVer, err = t.rippler.WaitValidation(sentTx.TxJSON.LastLedgerSequence)
 			if err != nil {
 				t.logger.Warn("fail to call xrp.WaitValidation()",
 					zap.Int64("tx_id", txID),
@@ -149,7 +153,8 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			}
 
 			// get transaction info
-			txInfo, err := t.xrp.GetTransaction(sentTx.TxJSON.Hash, earlistLedgerVersion)
+			var txInfo *xrp.TxInfo
+			txInfo, err = t.rippler.GetTransaction(sentTx.TxJSON.Hash, earlistLedgerVersion)
 			if err != nil {
 				t.logger.Warn("fail to call xrp.GetTransaction()",
 					zap.Int64("tx_id", txID),
@@ -165,12 +170,13 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			grok.Value(txInfo)
 
 			// update eth_detail_tx
-			affectedNum, err := t.txDetailRepo.UpdateAfterTxSent(
+			var affectedNum int64
+			affectedNum, err = t.txDetailRepo.UpdateAfterTxSent(
 				uuid, tx.TxTypeSent, signedTxID, txBlob, earlistLedgerVersion)
 			if err != nil {
 				// TODO: even if error occurred, tx is already sent. so db should be corrected manually
 				t.logger.Warn(
-					"fail to call txDetailRepo.UpdateAfterTxSent() but tx is already sent. " +
+					"fail to call txDetailRepo.UpdateAfterTxSent() but tx is already sent. "+
 						"So database should be updated manually",
 					zap.Int64("tx_id", txID),
 					zap.String("uuid", uuid),

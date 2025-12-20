@@ -46,7 +46,8 @@ func TestCall(t *testing.T) {
 		LedgerIndex:        "validated",
 	}
 	var res ResponseAccountChannels
-	if err := websoc.Call(context.Background(), &ac, &res); err != nil {
+	err = websoc.Call(context.Background(), &ac, &res)
+	if err != nil {
 		t.Fatal(err)
 	}
 	t.Log(res)

@@ -15,7 +15,9 @@
       "Bash(\"$GOPATH/src/github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/watchsrv/tx_creator.go\")",
       "Bash(do)",
       "Bash(echo:*)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(gofumpt:*)",
+      "Bash(go doc:*)"
     ]
   }
 }

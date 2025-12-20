@@ -45,7 +45,8 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	if err != nil {
 		return "", "", errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
 	}
-	if t.validateAmount(senderAddr, totalAmount) != nil {
+	err = t.validateAmount(senderAddr, totalAmount)
+	if err != nil {
 		return "", "", err
 	}
 
@@ -105,7 +106,8 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, *big.Int, []int64, error)
 
 		userPayments[idx].senderAddr = val.SenderAddress
 		userPayments[idx].receiverAddr = val.ReceiverAddress
-		amt, err := strconv.ParseFloat(val.Amount.String(), 64)
+		var amt float64
+		amt, err = strconv.ParseFloat(val.Amount.String(), 64)
 		if err != nil {
 			// fatal error because table includes invalid data
 			t.logger.Error("payment_request table includes invalid amount field")

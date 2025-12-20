@@ -2,8 +2,9 @@ package ethgrp
 
 import (
 	"context"
-	"fmt"
 	"log"
+	"net"
+	"strconv"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
@@ -17,7 +18,7 @@ import (
 
 // NewRPCClient try to connect Ethereum node RPC Server to create client instance
 func NewRPCClient(conf *config.Ethereum) (*ethrpc.Client, error) {
-	url := fmt.Sprintf("http://%s:%d", conf.Host, conf.Port)
+	url := "http://" + net.JoinHostPort(conf.Host, strconv.Itoa(conf.Port))
 	if conf.IPCPath != "" {
 		log.Println("IPC connection")
 		url = conf.IPCPath

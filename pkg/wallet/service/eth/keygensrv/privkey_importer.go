@@ -1,6 +1,7 @@
 package keygensrv
 
 import (
+	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -74,7 +75,8 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 		}
 		// FIXME: how to link imported key to specific accountName like client, deposit (grouping)
 		// TODO: where password should come from // ImportRawKey(hexKey, passPhrase string) (string, error)
-		acct, err := ks.ImportECDSA(ecdsaKey, eth.Password)
+		var acct accounts.Account
+		acct, err = ks.ImportECDSA(ecdsaKey, eth.Password)
 		if err != nil {
 			// it continues even if error occurred
 			// because database stores status, import run again by same command for this key

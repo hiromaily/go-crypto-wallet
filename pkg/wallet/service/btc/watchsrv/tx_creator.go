@@ -509,10 +509,10 @@ func (t *TxCreate) insertTxTableForUnsigned(
 	}
 	defer func() {
 		if err != nil {
-			// nolint:errcheck
+			//nolint:errcheck
 			dtx.Rollback()
 		} else {
-			// nolint:errcheck
+			//nolint:errcheck
 			dtx.Commit()
 		}
 	}()
@@ -579,7 +579,6 @@ func (t *TxCreate) generateHexFile(
 }
 
 // IsFoundTxIDAndVout finds out txID and vout from related txInputs
-// nolint: unused
 func (*TxCreate) IsFoundTxIDAndVout(txID string, vout uint32, inputs []btcjson.TransactionInput) bool {
 	for _, val := range inputs {
 		if val.Txid == txID && val.Vout == vout {
