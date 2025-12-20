@@ -74,7 +74,8 @@ func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]xrp.UserAmount,
 	// address list for client
 	for _, addr := range addrs {
 		// TODO: if previous tx is not done, wrong amount is returned. how to manage it??
-		clientBalance, err := t.xrp.GetBalance(addr.WalletAddress)
+		var clientBalance float64
+		clientBalance, err = t.xrp.GetBalance(addr.WalletAddress)
 		if err != nil {
 			t.logger.Warn("fail to call t.xrp.GetAccountInfo()",
 				zap.String("address", addr.WalletAddress),
@@ -112,7 +113,9 @@ func (t *TxCreate) createDepositRawTransactions(
 		if sequence != 0 {
 			instructions.Sequence = sequence
 		}
-		txJSON, rawTxString, err := t.xrp.CreateRawTransaction(val.Address, depositAddr.WalletAddress, 0, instructions)
+		var txJSON *xrp.TxInput
+		var rawTxString string
+		txJSON, rawTxString, err = t.xrp.CreateRawTransaction(val.Address, depositAddr.WalletAddress, 0, instructions)
 		if err != nil {
 			t.logger.Warn("fail to call xrp.CreateRawTransaction()", zap.Error(err))
 			continue

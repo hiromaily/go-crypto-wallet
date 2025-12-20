@@ -113,9 +113,6 @@ func main() {
 		// create wallet
 		regi := NewRegistry(conf, accountConf, walletType, authName)
 		walleter = regi.NewSigner()
-		defer func() {
-			walleter.Done()
-		}()
 	}
 
 	// sub command

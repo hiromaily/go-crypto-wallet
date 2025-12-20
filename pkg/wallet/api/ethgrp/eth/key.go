@@ -110,7 +110,7 @@ func (e *Ethereum) RenameParityKeyFile(hexAddr string, accountType account.Accou
 		return err
 	}
 
-	var fileNames []string
+	fileNames := make([]string, 0, len(files))
 	for _, v := range files {
 		if v.IsDir() {
 			continue

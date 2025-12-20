@@ -76,7 +76,8 @@ func (t *TxMonitor) updateStatusTxTypeSent() error {
 	// get hash in detail and check confirmation
 	for _, sentHash := range hashes {
 		// check confirmation
-		confirmNum, err := t.eth.GetConfirmation(sentHash)
+		var confirmNum uint64
+		confirmNum, err = t.eth.GetConfirmation(sentHash)
 		if err != nil {
 			return errors.Wrapf(err, "fail to call eth.GetConfirmation() sentHash: %s", sentHash)
 		}

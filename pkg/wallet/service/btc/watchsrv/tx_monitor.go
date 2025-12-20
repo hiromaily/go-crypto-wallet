@@ -8,6 +8,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -198,7 +199,8 @@ func (t *TxMonitor) notifyTxDone(hash string, actionType action.ActionType) (int
 		}
 
 		// 2. get txInputs
-		txInputs, err := t.txInputRepo.GetAllByTxID(txID)
+		var txInputs []*models.BTCTXInput
+		txInputs, err = t.txInputRepo.GetAllByTxID(txID)
 		if err != nil {
 			return 0, errors.Wrapf(err, "fail to call txInRepo.GetAllByTxID(%d) ActionType: %s", txID, actionType)
 		}
@@ -221,7 +223,8 @@ func (t *TxMonitor) notifyTxDone(hash string, actionType action.ActionType) (int
 		}
 
 		// 2. get info from payment_request table
-		paymentUsers, err := t.payReqRepo.GetAllByPaymentID(txID)
+		var paymentUsers []*models.PaymentRequest
+		paymentUsers, err = t.payReqRepo.GetAllByPaymentID(txID)
 		if err != nil {
 			return 0, errors.Wrapf(
 				err, "fail to call repo.GetPaymentRequestByPaymentID(%d) ActionType: %s",

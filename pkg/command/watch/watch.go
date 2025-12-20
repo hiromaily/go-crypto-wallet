@@ -19,7 +19,7 @@ import (
 )
 
 // WatchSubCommands returns subcommand for wallet
-// nolint: golint
+//nolint:golint
 func WatchSubCommands(wallet wallets.Watcher, version string, conf *config.WalletRoot) map[string]cli.CommandFactory {
 	cmds := map[string]cli.CommandFactory{
 		"import": func() (cli.Command, error) {

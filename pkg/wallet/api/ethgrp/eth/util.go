@@ -40,7 +40,7 @@ func castToSliceString(val any) ([]string, error) {
 		return []string{}, nil
 	}
 
-	var ret []string
+	ret := make([]string, 0, len(data))
 	for _, v := range data {
 		sRet, err := castToString(v)
 		if err != nil {

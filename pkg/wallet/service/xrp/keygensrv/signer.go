@@ -81,18 +81,21 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 		}
 		// TODO: get secret from database by txInput.Account
 		// master_seed from xrp_account_key table
-		secret, err := s.xrpAccountKeyRepo.GetSecret(senderAccount, txInput.Account)
+		var secret string
+		secret, err = s.xrpAccountKeyRepo.GetSecret(senderAccount, txInput.Account)
 		if err != nil {
 			return "", false, "", errors.Wrap(err, "fail to call xrpAccountKeyRepo.GetSecret()")
 		}
 
 		// sign
-		signedTxID, txBlob, err := s.xrp.SignTransaction(&txInput, secret)
+		var signedTxID string
+		var txBlob string
+		signedTxID, txBlob, err = s.xrp.SignTransaction(&txInput, secret)
 		if err != nil {
 			return "", false, "", errors.Wrap(err, "fail to call xrp.SignTransaction()")
 		}
 		s.logger.Debug("signed_tx",
-		zap.String("uuid", uuid), zap.String("signed_tx_id", signedTxID), zap.String("signed_tx_blob", txBlob))
+			zap.String("uuid", uuid), zap.String("signed_tx_id", signedTxID), zap.String("signed_tx_blob", txBlob))
 		txHexs = append(txHexs, fmt.Sprintf("%s,%s,%s", uuid, signedTxID, txBlob))
 	}
 

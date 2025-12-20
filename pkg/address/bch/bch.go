@@ -548,7 +548,7 @@ func (a *CashAddressScriptHash) Hash160() *[ripemd160.Size]byte {
 
 func convertBits(data data, fromBits uint, tobits uint, pad bool) (data, error) {
 	// General power-of-2 base conversion.
-	var uintArr []uint
+	uintArr := make([]uint, 0, len(data))
 	for _, i := range data {
 		uintArr = append(uintArr, uint(i))
 	}
@@ -572,7 +572,7 @@ func convertBits(data data, fromBits uint, tobits uint, pad bool) (data, error) 
 	} else if bits >= fromBits || ((acc<<(tobits-bits))&maxv) != 0 {
 		return []byte{}, errors.New("encoding padding error")
 	}
-	var dataArr []byte
+	dataArr := make([]byte, 0, len(ret))
 	for _, i := range ret {
 		dataArr = append(dataArr, byte(i))
 	}

@@ -81,7 +81,8 @@ func (k *XRPKeyGenerate) Generate(accountType account.AccountType, isKeyPair boo
 		// TODO:
 		// - WIF => badSeed
 		// - P2PKHAddr => badSeed
-		generatedKey, err := k.xrp.WalletPropose(v.P2SHSegWitAddr)
+		var generatedKey *xrp.ResponseWalletPropose
+		generatedKey, err = k.xrp.WalletPropose(v.P2SHSegWitAddr)
 		if err != nil {
 			return errors.Wrap(err, "fail to call xrp.WalletPropose()")
 		}
@@ -111,7 +112,8 @@ func (k *XRPKeyGenerate) Generate(accountType account.AccountType, isKeyPair boo
 	}
 
 	// insert keys to DB
-	if err := k.xrpAccountKeyRepo.InsertBulk(items); err != nil {
+	err = k.xrpAccountKeyRepo.InsertBulk(items)
+	if err != nil {
 		return errors.Wrap(err, "fail to call accountKeyRepo.InsertBulk() for XRP")
 	}
 

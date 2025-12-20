@@ -57,7 +57,8 @@ func ParseHDPathLevel(path string) (*HDPathLevel, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := hp.Validate(); err != nil {
+	err = hp.Validate()
+	if err != nil {
 		return nil, err
 	}
 	return hp, nil
