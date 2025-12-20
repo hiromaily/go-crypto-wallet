@@ -73,7 +73,7 @@ func (f *FullPubkeyExport) exportAccountKey(
 	if err != nil {
 		return "", errors.Wrapf(err, "fail to call os.Create(%s)", fileName)
 	}
-	//nolint:errcheck
+
 	defer file.Close()
 
 	writer := bufio.NewWriter(file)

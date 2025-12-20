@@ -67,10 +67,8 @@ func (k *XRPKeyGenerate) Generate(accountType account.AccountType, isKeyPair boo
 	}
 	defer func() {
 		if err != nil {
-			//nolint:errcheck
 			dtx.Rollback()
 		} else {
-			//nolint:errcheck
 			dtx.Commit()
 		}
 	}()
