@@ -29,7 +29,7 @@ func (c *SendCoinCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (_ *SendCoinCommand) Help() string {
+func (*SendCoinCommand) Help() string {
 	return `Usage: wallet api sendcoin [options...]
 Options:
   -address  receiver address

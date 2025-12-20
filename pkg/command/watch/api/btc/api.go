@@ -19,7 +19,7 @@ type APICommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (_ *APICommand) Synopsis() string {
+func (*APICommand) Synopsis() string {
 	return "Bitcoin API functionality"
 }
 
@@ -35,7 +35,7 @@ var (
 )
 
 // Help returns usage for this subcommand
-func (_ *APICommand) Help() string {
+func (*APICommand) Help() string {
 	return fmt.Sprintf(`Usage: wallet api [Subcommands...]
 Subcommands:
   balance          %s

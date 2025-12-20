@@ -24,7 +24,7 @@ func (c *GetNetworkInfoCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (_ *GetNetworkInfoCommand) Help() string {
+func (*GetNetworkInfoCommand) Help() string {
 	return `Usage: wallet api getnetworkinfo`
 }
 

@@ -20,12 +20,12 @@ type TransferCommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (_ *TransferCommand) Synopsis() string {
+func (*TransferCommand) Synopsis() string {
 	return "create unsigned transaction for transfer among accounts"
 }
 
 // Help returns usage for this subcommand
-func (_ *TransferCommand) Help() string {
+func (*TransferCommand) Help() string {
 	return `Usage: wallet create transfer [options...]
 Options:
   -account1  sender account

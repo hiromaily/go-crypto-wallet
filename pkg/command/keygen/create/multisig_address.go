@@ -24,7 +24,7 @@ func (c *MultisigCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (_ *MultisigCommand) Help() string {
+func (*MultisigCommand) Help() string {
 	return `Usage: keygen create multisig [options...]
 Options:
   -account  target account

@@ -23,7 +23,7 @@ func (c *UnLockTxCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (_ *UnLockTxCommand) Help() string {
+func (*UnLockTxCommand) Help() string {
 	return `Usage: wallet api unlocktx`
 }
 

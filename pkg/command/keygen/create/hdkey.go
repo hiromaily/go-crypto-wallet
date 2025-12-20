@@ -25,7 +25,7 @@ func (c *HDKeyCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (_ *HDKeyCommand) Help() string {
+func (*HDKeyCommand) Help() string {
 	return `Usage: keygen create hdkey [options...]
 Options:
   -keynum   number of generating hd key

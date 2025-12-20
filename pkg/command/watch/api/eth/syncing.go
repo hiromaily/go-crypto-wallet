@@ -23,7 +23,7 @@ func (c *SyncingCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (_ *SyncingCommand) Help() string {
+func (*SyncingCommand) Help() string {
 	return `Usage: wallet api syncing
 `
 }

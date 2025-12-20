@@ -20,7 +20,7 @@ func NewConverter() Converter {
 }
 
 // FloatToDecimal converts float to decimal
-func (c convert) FloatToDecimal(f float64) types.Decimal {
+func (convert) FloatToDecimal(f float64) types.Decimal {
 	strAmt := fmt.Sprintf("%f", f)
 	dAmt := types.Decimal{Big: new(decimal.Big)}
 	dAmt.Big, _ = dAmt.SetString(strAmt)

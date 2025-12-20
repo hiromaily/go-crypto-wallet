@@ -23,7 +23,7 @@ func (c *FullPubkeyCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (_ *FullPubkeyCommand) Help() string {
+func (*FullPubkeyCommand) Help() string {
 	return `Usage: sign export fullpubkey`
 }
 

@@ -23,7 +23,7 @@ func (c *AddressCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (_ *AddressCommand) Help() string {
+func (*AddressCommand) Help() string {
 	return `Usage: wallet import address [options...]
 Options:
   -file  import file path for generated addresses

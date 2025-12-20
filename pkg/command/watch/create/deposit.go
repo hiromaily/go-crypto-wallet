@@ -28,7 +28,7 @@ func (c *DepositCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (_ *DepositCommand) Help() string {
+func (*DepositCommand) Help() string {
 	return `Usage: wallet create deposit [options...]
 Options:
   -fee    adjustment fee

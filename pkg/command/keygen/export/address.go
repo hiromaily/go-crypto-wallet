@@ -24,7 +24,7 @@ func (c *AddressCommand) Synopsis() string {
 }
 
 // Help returns usage for this subcommand
-func (_ *AddressCommand) Help() string {
+func (*AddressCommand) Help() string {
 	return `Usage: keygen key export address [options...]
 Options:
   -account  target account

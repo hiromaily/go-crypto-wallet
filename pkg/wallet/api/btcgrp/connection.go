@@ -49,6 +49,9 @@ func NewBitcoin(client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logg
 		}
 
 		return bitc, err
+	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
+		return nil, errors.Errorf("coinType %s is not defined", coinTypeCode.String())
+	default:
+		return nil, errors.Errorf("coinType %s is not defined", coinTypeCode.String())
 	}
-	return nil, errors.Errorf("coinType %s is not defined", coinTypeCode.String())
 }
