@@ -29,7 +29,7 @@ func (b *Bitcoin) SetLabel(addr, label string) error {
 		return errors.Wrap(err, "fail to call json.RawRequest(setlabel)")
 	}
 
-	var tmp interface{}
+	var tmp any
 	err = json.Unmarshal(rawResult, &tmp)
 	if err != nil {
 		return errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")

@@ -145,12 +145,10 @@ func (p *PrivKey) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPub
 			"fail to call btc.GetAddressInfo()",
 			zap.String(addrType.String(), targetAddr),
 			zap.Error(err))
-	} else {
-		if addrInfo.Pubkey != fullPublicKey {
-			p.logger.Warn(
-				"pubkey is not matched",
-				zap.String("in_bitcoin_core", addrInfo.Pubkey),
-				zap.String("in_database", fullPublicKey))
-		}
+	} else if addrInfo.Pubkey != fullPublicKey {
+		p.logger.Warn(
+			"pubkey is not matched",
+			zap.String("in_bitcoin_core", addrInfo.Pubkey),
+			zap.String("in_database", fullPublicKey))
 	}
 }

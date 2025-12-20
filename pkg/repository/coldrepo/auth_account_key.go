@@ -80,7 +80,7 @@ func (r *AuthAccountKeyRepository) UpdateAddrStatus(addrStatus address.AddrStatu
 	ctx := context.Background()
 
 	// Set updating columns
-	updCols := map[string]interface{}{
+	updCols := map[string]any{
 		models.AuthAccountKeyColumns.AddrStatus: addrStatus.Int8(),
 	}
 

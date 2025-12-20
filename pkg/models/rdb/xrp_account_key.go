@@ -370,7 +370,7 @@ func (o *XRPAccountKey) Insert(ctx context.Context, exec boil.ContextExecutor, c
 	}
 
 	var lastID int64
-	var identifierCols []interface{}
+	var identifierCols []any
 
 	if len(cache.retMapping) == 0 {
 		goto CacheNoHooks
@@ -386,7 +386,7 @@ func (o *XRPAccountKey) Insert(ctx context.Context, exec boil.ContextExecutor, c
 		goto CacheNoHooks
 	}
 
-	identifierCols = []interface{}{
+	identifierCols = []any{
 		o.ID,
 	}
 
@@ -505,7 +505,7 @@ func (o XRPAccountKeySlice) UpdateAll(ctx context.Context, exec boil.ContextExec
 	}
 
 	colNames := make([]string, len(cols))
-	args := make([]interface{}, len(cols))
+	args := make([]any, len(cols))
 
 	i := 0
 	for name, value := range cols {
@@ -633,7 +633,7 @@ func (o *XRPAccountKey) Upsert(ctx context.Context, exec boil.ContextExecutor, u
 
 	value := reflect.Indirect(reflect.ValueOf(o))
 	vals := queries.ValuesFromMapping(value, cache.valueMapping)
-	var returns []interface{}
+	var returns []any
 	if len(cache.retMapping) != 0 {
 		returns = queries.PtrsFromMapping(value, cache.retMapping)
 	}
@@ -651,7 +651,7 @@ func (o *XRPAccountKey) Upsert(ctx context.Context, exec boil.ContextExecutor, u
 
 	var lastID int64
 	var uniqueMap []uint64
-	var nzUniqueCols []interface{}
+	var nzUniqueCols []any
 
 	if len(cache.retMapping) == 0 {
 		goto CacheNoHooks
@@ -748,7 +748,7 @@ func (o XRPAccountKeySlice) DeleteAll(ctx context.Context, exec boil.ContextExec
 		return 0, nil
 	}
 
-	var args []interface{}
+	var args []any
 	for _, obj := range o {
 		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), xrpAccountKeyPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
@@ -795,7 +795,7 @@ func (o *XRPAccountKeySlice) ReloadAll(ctx context.Context, exec boil.ContextExe
 	}
 
 	slice := XRPAccountKeySlice{}
-	var args []interface{}
+	var args []any
 	for _, obj := range *o {
 		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), xrpAccountKeyPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)

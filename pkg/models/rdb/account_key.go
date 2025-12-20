@@ -125,14 +125,14 @@ func (w whereHelperint64) LTE(x int64) qm.QueryMod { return qmhelper.Where(w.fie
 func (w whereHelperint64) GT(x int64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
 func (w whereHelperint64) GTE(x int64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 func (w whereHelperint64) IN(slice []int64) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
+	values := make([]any, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
 	}
 	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
 func (w whereHelperint64) NIN(slice []int64) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
+	values := make([]any, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
 	}
@@ -148,14 +148,14 @@ func (w whereHelperstring) LTE(x string) qm.QueryMod { return qmhelper.Where(w.f
 func (w whereHelperstring) GT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
 func (w whereHelperstring) GTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 func (w whereHelperstring) IN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
+	values := make([]any, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
 	}
 	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
 func (w whereHelperstring) NIN(slice []string) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
+	values := make([]any, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
 	}
@@ -171,14 +171,14 @@ func (w whereHelperint8) LTE(x int8) qm.QueryMod { return qmhelper.Where(w.field
 func (w whereHelperint8) GT(x int8) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
 func (w whereHelperint8) GTE(x int8) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 func (w whereHelperint8) IN(slice []int8) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
+	values := make([]any, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
 	}
 	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
 func (w whereHelperint8) NIN(slice []int8) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
+	values := make([]any, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
 	}
@@ -455,7 +455,7 @@ func (o *AccountKey) Insert(ctx context.Context, exec boil.ContextExecutor, colu
 	}
 
 	var lastID int64
-	var identifierCols []interface{}
+	var identifierCols []any
 
 	if len(cache.retMapping) == 0 {
 		goto CacheNoHooks
@@ -471,7 +471,7 @@ func (o *AccountKey) Insert(ctx context.Context, exec boil.ContextExecutor, colu
 		goto CacheNoHooks
 	}
 
-	identifierCols = []interface{}{
+	identifierCols = []any{
 		o.ID,
 	}
 
@@ -590,7 +590,7 @@ func (o AccountKeySlice) UpdateAll(ctx context.Context, exec boil.ContextExecuto
 	}
 
 	colNames := make([]string, len(cols))
-	args := make([]interface{}, len(cols))
+	args := make([]any, len(cols))
 
 	i := 0
 	for name, value := range cols {
@@ -718,7 +718,7 @@ func (o *AccountKey) Upsert(ctx context.Context, exec boil.ContextExecutor, upda
 
 	value := reflect.Indirect(reflect.ValueOf(o))
 	vals := queries.ValuesFromMapping(value, cache.valueMapping)
-	var returns []interface{}
+	var returns []any
 	if len(cache.retMapping) != 0 {
 		returns = queries.PtrsFromMapping(value, cache.retMapping)
 	}
@@ -736,7 +736,7 @@ func (o *AccountKey) Upsert(ctx context.Context, exec boil.ContextExecutor, upda
 
 	var lastID int64
 	var uniqueMap []uint64
-	var nzUniqueCols []interface{}
+	var nzUniqueCols []any
 
 	if len(cache.retMapping) == 0 {
 		goto CacheNoHooks
@@ -833,7 +833,7 @@ func (o AccountKeySlice) DeleteAll(ctx context.Context, exec boil.ContextExecuto
 		return 0, nil
 	}
 
-	var args []interface{}
+	var args []any
 	for _, obj := range o {
 		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), accountKeyPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
@@ -880,7 +880,7 @@ func (o *AccountKeySlice) ReloadAll(ctx context.Context, exec boil.ContextExecut
 	}
 
 	slice := AccountKeySlice{}
-	var args []interface{}
+	var args []any
 	for _, obj := range *o {
 		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), accountKeyPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)

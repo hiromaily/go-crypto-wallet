@@ -298,7 +298,7 @@ func (o *AuthFullpubkey) Insert(ctx context.Context, exec boil.ContextExecutor, 
 	}
 
 	var lastID int64
-	var identifierCols []interface{}
+	var identifierCols []any
 
 	if len(cache.retMapping) == 0 {
 		goto CacheNoHooks
@@ -314,7 +314,7 @@ func (o *AuthFullpubkey) Insert(ctx context.Context, exec boil.ContextExecutor, 
 		goto CacheNoHooks
 	}
 
-	identifierCols = []interface{}{
+	identifierCols = []any{
 		o.ID,
 	}
 
@@ -433,7 +433,7 @@ func (o AuthFullpubkeySlice) UpdateAll(ctx context.Context, exec boil.ContextExe
 	}
 
 	colNames := make([]string, len(cols))
-	args := make([]interface{}, len(cols))
+	args := make([]any, len(cols))
 
 	i := 0
 	for name, value := range cols {
@@ -560,7 +560,7 @@ func (o *AuthFullpubkey) Upsert(ctx context.Context, exec boil.ContextExecutor, 
 
 	value := reflect.Indirect(reflect.ValueOf(o))
 	vals := queries.ValuesFromMapping(value, cache.valueMapping)
-	var returns []interface{}
+	var returns []any
 	if len(cache.retMapping) != 0 {
 		returns = queries.PtrsFromMapping(value, cache.retMapping)
 	}
@@ -578,7 +578,7 @@ func (o *AuthFullpubkey) Upsert(ctx context.Context, exec boil.ContextExecutor, 
 
 	var lastID int64
 	var uniqueMap []uint64
-	var nzUniqueCols []interface{}
+	var nzUniqueCols []any
 
 	if len(cache.retMapping) == 0 {
 		goto CacheNoHooks
@@ -675,7 +675,7 @@ func (o AuthFullpubkeySlice) DeleteAll(ctx context.Context, exec boil.ContextExe
 		return 0, nil
 	}
 
-	var args []interface{}
+	var args []any
 	for _, obj := range o {
 		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), authFullpubkeyPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
@@ -722,7 +722,7 @@ func (o *AuthFullpubkeySlice) ReloadAll(ctx context.Context, exec boil.ContextEx
 	}
 
 	slice := AuthFullpubkeySlice{}
-	var args []interface{}
+	var args []any
 	for _, obj := range *o {
 		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), authFullpubkeyPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)

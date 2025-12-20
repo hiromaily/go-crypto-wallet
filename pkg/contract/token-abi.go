@@ -145,7 +145,7 @@ func bindToken(address common.Address, caller bind.ContractCaller, transactor bi
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_Token *TokenRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
+func (_Token *TokenRaw) Call(opts *bind.CallOpts, result *[]any, method string, params ...any) error {
 	return _Token.Contract.TokenCaller.contract.Call(opts, result, method, params...)
 }
 
@@ -156,7 +156,7 @@ func (_Token *TokenRaw) Transfer(opts *bind.TransactOpts) (*types.Transaction, e
 }
 
 // Transact invokes the (paid) contract method with params as input values.
-func (_Token *TokenRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
+func (_Token *TokenRaw) Transact(opts *bind.TransactOpts, method string, params ...any) (*types.Transaction, error) {
 	return _Token.Contract.TokenTransactor.contract.Transact(opts, method, params...)
 }
 
@@ -164,7 +164,7 @@ func (_Token *TokenRaw) Transact(opts *bind.TransactOpts, method string, params 
 // sets the output to result. The result type might be a single field for simple
 // returns, a slice of interfaces for anonymous returns and a struct for named
 // returns.
-func (_Token *TokenCallerRaw) Call(opts *bind.CallOpts, result *[]interface{}, method string, params ...interface{}) error {
+func (_Token *TokenCallerRaw) Call(opts *bind.CallOpts, result *[]any, method string, params ...any) error {
 	return _Token.Contract.contract.Call(opts, result, method, params...)
 }
 
@@ -175,7 +175,7 @@ func (_Token *TokenTransactorRaw) Transfer(opts *bind.TransactOpts) (*types.Tran
 }
 
 // Transact invokes the (paid) contract method with params as input values.
-func (_Token *TokenTransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...interface{}) (*types.Transaction, error) {
+func (_Token *TokenTransactorRaw) Transact(opts *bind.TransactOpts, method string, params ...any) (*types.Transaction, error) {
 	return _Token.Contract.contract.Transact(opts, method, params...)
 }
 
@@ -183,7 +183,7 @@ func (_Token *TokenTransactorRaw) Transact(opts *bind.TransactOpts, method strin
 //
 // Solidity: function DEFAULT_ADMIN_ROLE() view returns(bytes32)
 func (_Token *TokenCaller) DEFAULTADMINROLE(opts *bind.CallOpts) ([32]byte, error) {
-	var out []interface{}
+	var out []any
 	err := _Token.contract.Call(opts, &out, "DEFAULT_ADMIN_ROLE")
 
 	if err != nil {
@@ -214,7 +214,7 @@ func (_Token *TokenCallerSession) DEFAULTADMINROLE() ([32]byte, error) {
 //
 // Solidity: function allowance(address owner, address spender) view returns(uint256)
 func (_Token *TokenCaller) Allowance(opts *bind.CallOpts, owner common.Address, spender common.Address) (*big.Int, error) {
-	var out []interface{}
+	var out []any
 	err := _Token.contract.Call(opts, &out, "allowance", owner, spender)
 
 	if err != nil {
@@ -245,7 +245,7 @@ func (_Token *TokenCallerSession) Allowance(owner common.Address, spender common
 //
 // Solidity: function balanceOf(address account) view returns(uint256)
 func (_Token *TokenCaller) BalanceOf(opts *bind.CallOpts, account common.Address) (*big.Int, error) {
-	var out []interface{}
+	var out []any
 	err := _Token.contract.Call(opts, &out, "balanceOf", account)
 
 	if err != nil {
@@ -276,7 +276,7 @@ func (_Token *TokenCallerSession) BalanceOf(account common.Address) (*big.Int, e
 //
 // Solidity: function decimals() view returns(uint8)
 func (_Token *TokenCaller) Decimals(opts *bind.CallOpts) (uint8, error) {
-	var out []interface{}
+	var out []any
 	err := _Token.contract.Call(opts, &out, "decimals")
 
 	if err != nil {
@@ -307,7 +307,7 @@ func (_Token *TokenCallerSession) Decimals() (uint8, error) {
 //
 // Solidity: function getRoleAdmin(bytes32 role) view returns(bytes32)
 func (_Token *TokenCaller) GetRoleAdmin(opts *bind.CallOpts, role [32]byte) ([32]byte, error) {
-	var out []interface{}
+	var out []any
 	err := _Token.contract.Call(opts, &out, "getRoleAdmin", role)
 
 	if err != nil {
@@ -338,7 +338,7 @@ func (_Token *TokenCallerSession) GetRoleAdmin(role [32]byte) ([32]byte, error) 
 //
 // Solidity: function hasRole(bytes32 role, address account) view returns(bool)
 func (_Token *TokenCaller) HasRole(opts *bind.CallOpts, role [32]byte, account common.Address) (bool, error) {
-	var out []interface{}
+	var out []any
 	err := _Token.contract.Call(opts, &out, "hasRole", role, account)
 
 	if err != nil {
@@ -369,7 +369,7 @@ func (_Token *TokenCallerSession) HasRole(role [32]byte, account common.Address)
 //
 // Solidity: function name() view returns(string)
 func (_Token *TokenCaller) Name(opts *bind.CallOpts) (string, error) {
-	var out []interface{}
+	var out []any
 	err := _Token.contract.Call(opts, &out, "name")
 
 	if err != nil {
@@ -400,7 +400,7 @@ func (_Token *TokenCallerSession) Name() (string, error) {
 //
 // Solidity: function supportsInterface(bytes4 interfaceId) view returns(bool)
 func (_Token *TokenCaller) SupportsInterface(opts *bind.CallOpts, interfaceId [4]byte) (bool, error) {
-	var out []interface{}
+	var out []any
 	err := _Token.contract.Call(opts, &out, "supportsInterface", interfaceId)
 
 	if err != nil {
@@ -431,7 +431,7 @@ func (_Token *TokenCallerSession) SupportsInterface(interfaceId [4]byte) (bool, 
 //
 // Solidity: function symbol() view returns(string)
 func (_Token *TokenCaller) Symbol(opts *bind.CallOpts) (string, error) {
-	var out []interface{}
+	var out []any
 	err := _Token.contract.Call(opts, &out, "symbol")
 
 	if err != nil {
@@ -462,7 +462,7 @@ func (_Token *TokenCallerSession) Symbol() (string, error) {
 //
 // Solidity: function totalSupply() view returns(uint256)
 func (_Token *TokenCaller) TotalSupply(opts *bind.CallOpts) (*big.Int, error) {
-	var out []interface{}
+	var out []any
 	err := _Token.contract.Call(opts, &out, "totalSupply")
 
 	if err != nil {
@@ -779,11 +779,11 @@ type TokenApproval struct {
 // Solidity: event Approval(address indexed owner, address indexed spender, uint256 value)
 func (_Token *TokenFilterer) FilterApproval(opts *bind.FilterOpts, owner []common.Address, spender []common.Address) (*TokenApprovalIterator, error) {
 
-	var ownerRule []interface{}
+	var ownerRule []any
 	for _, ownerItem := range owner {
 		ownerRule = append(ownerRule, ownerItem)
 	}
-	var spenderRule []interface{}
+	var spenderRule []any
 	for _, spenderItem := range spender {
 		spenderRule = append(spenderRule, spenderItem)
 	}
@@ -800,11 +800,11 @@ func (_Token *TokenFilterer) FilterApproval(opts *bind.FilterOpts, owner []commo
 // Solidity: event Approval(address indexed owner, address indexed spender, uint256 value)
 func (_Token *TokenFilterer) WatchApproval(opts *bind.WatchOpts, sink chan<- *TokenApproval, owner []common.Address, spender []common.Address) (event.Subscription, error) {
 
-	var ownerRule []interface{}
+	var ownerRule []any
 	for _, ownerItem := range owner {
 		ownerRule = append(ownerRule, ownerItem)
 	}
-	var spenderRule []interface{}
+	var spenderRule []any
 	for _, spenderItem := range spender {
 		spenderRule = append(spenderRule, spenderItem)
 	}
@@ -933,15 +933,15 @@ type TokenRoleAdminChanged struct {
 // Solidity: event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole)
 func (_Token *TokenFilterer) FilterRoleAdminChanged(opts *bind.FilterOpts, role [][32]byte, previousAdminRole [][32]byte, newAdminRole [][32]byte) (*TokenRoleAdminChangedIterator, error) {
 
-	var roleRule []interface{}
+	var roleRule []any
 	for _, roleItem := range role {
 		roleRule = append(roleRule, roleItem)
 	}
-	var previousAdminRoleRule []interface{}
+	var previousAdminRoleRule []any
 	for _, previousAdminRoleItem := range previousAdminRole {
 		previousAdminRoleRule = append(previousAdminRoleRule, previousAdminRoleItem)
 	}
-	var newAdminRoleRule []interface{}
+	var newAdminRoleRule []any
 	for _, newAdminRoleItem := range newAdminRole {
 		newAdminRoleRule = append(newAdminRoleRule, newAdminRoleItem)
 	}
@@ -958,15 +958,15 @@ func (_Token *TokenFilterer) FilterRoleAdminChanged(opts *bind.FilterOpts, role 
 // Solidity: event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole)
 func (_Token *TokenFilterer) WatchRoleAdminChanged(opts *bind.WatchOpts, sink chan<- *TokenRoleAdminChanged, role [][32]byte, previousAdminRole [][32]byte, newAdminRole [][32]byte) (event.Subscription, error) {
 
-	var roleRule []interface{}
+	var roleRule []any
 	for _, roleItem := range role {
 		roleRule = append(roleRule, roleItem)
 	}
-	var previousAdminRoleRule []interface{}
+	var previousAdminRoleRule []any
 	for _, previousAdminRoleItem := range previousAdminRole {
 		previousAdminRoleRule = append(previousAdminRoleRule, previousAdminRoleItem)
 	}
-	var newAdminRoleRule []interface{}
+	var newAdminRoleRule []any
 	for _, newAdminRoleItem := range newAdminRole {
 		newAdminRoleRule = append(newAdminRoleRule, newAdminRoleItem)
 	}
@@ -1095,15 +1095,15 @@ type TokenRoleGranted struct {
 // Solidity: event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender)
 func (_Token *TokenFilterer) FilterRoleGranted(opts *bind.FilterOpts, role [][32]byte, account []common.Address, sender []common.Address) (*TokenRoleGrantedIterator, error) {
 
-	var roleRule []interface{}
+	var roleRule []any
 	for _, roleItem := range role {
 		roleRule = append(roleRule, roleItem)
 	}
-	var accountRule []interface{}
+	var accountRule []any
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
 	}
-	var senderRule []interface{}
+	var senderRule []any
 	for _, senderItem := range sender {
 		senderRule = append(senderRule, senderItem)
 	}
@@ -1120,15 +1120,15 @@ func (_Token *TokenFilterer) FilterRoleGranted(opts *bind.FilterOpts, role [][32
 // Solidity: event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender)
 func (_Token *TokenFilterer) WatchRoleGranted(opts *bind.WatchOpts, sink chan<- *TokenRoleGranted, role [][32]byte, account []common.Address, sender []common.Address) (event.Subscription, error) {
 
-	var roleRule []interface{}
+	var roleRule []any
 	for _, roleItem := range role {
 		roleRule = append(roleRule, roleItem)
 	}
-	var accountRule []interface{}
+	var accountRule []any
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
 	}
-	var senderRule []interface{}
+	var senderRule []any
 	for _, senderItem := range sender {
 		senderRule = append(senderRule, senderItem)
 	}
@@ -1257,15 +1257,15 @@ type TokenRoleRevoked struct {
 // Solidity: event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender)
 func (_Token *TokenFilterer) FilterRoleRevoked(opts *bind.FilterOpts, role [][32]byte, account []common.Address, sender []common.Address) (*TokenRoleRevokedIterator, error) {
 
-	var roleRule []interface{}
+	var roleRule []any
 	for _, roleItem := range role {
 		roleRule = append(roleRule, roleItem)
 	}
-	var accountRule []interface{}
+	var accountRule []any
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
 	}
-	var senderRule []interface{}
+	var senderRule []any
 	for _, senderItem := range sender {
 		senderRule = append(senderRule, senderItem)
 	}
@@ -1282,15 +1282,15 @@ func (_Token *TokenFilterer) FilterRoleRevoked(opts *bind.FilterOpts, role [][32
 // Solidity: event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender)
 func (_Token *TokenFilterer) WatchRoleRevoked(opts *bind.WatchOpts, sink chan<- *TokenRoleRevoked, role [][32]byte, account []common.Address, sender []common.Address) (event.Subscription, error) {
 
-	var roleRule []interface{}
+	var roleRule []any
 	for _, roleItem := range role {
 		roleRule = append(roleRule, roleItem)
 	}
-	var accountRule []interface{}
+	var accountRule []any
 	for _, accountItem := range account {
 		accountRule = append(accountRule, accountItem)
 	}
-	var senderRule []interface{}
+	var senderRule []any
 	for _, senderItem := range sender {
 		senderRule = append(senderRule, senderItem)
 	}
@@ -1419,11 +1419,11 @@ type TokenTransfer struct {
 // Solidity: event Transfer(address indexed from, address indexed to, uint256 value)
 func (_Token *TokenFilterer) FilterTransfer(opts *bind.FilterOpts, from []common.Address, to []common.Address) (*TokenTransferIterator, error) {
 
-	var fromRule []interface{}
+	var fromRule []any
 	for _, fromItem := range from {
 		fromRule = append(fromRule, fromItem)
 	}
-	var toRule []interface{}
+	var toRule []any
 	for _, toItem := range to {
 		toRule = append(toRule, toItem)
 	}
@@ -1440,11 +1440,11 @@ func (_Token *TokenFilterer) FilterTransfer(opts *bind.FilterOpts, from []common
 // Solidity: event Transfer(address indexed from, address indexed to, uint256 value)
 func (_Token *TokenFilterer) WatchTransfer(opts *bind.WatchOpts, sink chan<- *TokenTransfer, from []common.Address, to []common.Address) (event.Subscription, error) {
 
-	var fromRule []interface{}
+	var fromRule []any
 	for _, fromItem := range from {
 		fromRule = append(fromRule, fromItem)
 	}
-	var toRule []interface{}
+	var toRule []any
 	for _, toItem := range to {
 		toRule = append(toRule, toItem)
 	}

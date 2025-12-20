@@ -8,11 +8,11 @@ type RequestCommand struct {
 
 // ResponseError is common error
 type ResponseError struct {
-	ID      int         `json:"id"`
-	Status  string      `json:"status"`
-	Type    string      `json:"type"`
-	Error   string      `json:"error"`
-	Request interface{} `json:"request"`
+	ID      int    `json:"id"`
+	Status  string `json:"status"`
+	Type    string `json:"type"`
+	Error   string `json:"error"`
+	Request any    `json:"request"`
 }
 
 // StatusCode is status code of response

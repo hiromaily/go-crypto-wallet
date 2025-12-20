@@ -106,18 +106,18 @@ func (r *AddressRepository) InsertBulk(items []*models.Address) error {
 }
 
 // UpdateIsAllocated updates is_allocated
-func (r *AddressRepository) UpdateIsAllocated(isAllocated bool, Address string) (int64, error) {
+func (r *AddressRepository) UpdateIsAllocated(isAllocated bool, address string) (int64, error) {
 	//	sql := `UPDATE %s SET is_allocated=:is_allocated, updated_at=:updated_at
 	// WHERE wallet_address=:wallet_address`
 	ctx := context.Background()
 
 	// Set updating columns
-	updCols := map[string]interface{}{
+	updCols := map[string]any{
 		models.AddressColumns.IsAllocated: isAllocated,
 		models.AddressColumns.UpdatedAt:   null.TimeFrom(time.Now()),
 	}
 	return models.Addresses(
 		qm.Where("coin=?", r.coinTypeCode.String()),
-		qm.And("wallet_address=?", Address),
+		qm.And("wallet_address=?", address),
 	).UpdateAll(ctx, r.dbConn, updCols)
 }

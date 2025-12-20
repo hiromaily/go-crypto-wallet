@@ -102,14 +102,14 @@ func (w whereHelperuint32) LTE(x uint32) qm.QueryMod { return qmhelper.Where(w.f
 func (w whereHelperuint32) GT(x uint32) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
 func (w whereHelperuint32) GTE(x uint32) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 func (w whereHelperuint32) IN(slice []uint32) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
+	values := make([]any, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
 	}
 	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
 func (w whereHelperuint32) NIN(slice []uint32) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
+	values := make([]any, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
 	}
@@ -125,14 +125,14 @@ func (w whereHelperuint64) LTE(x uint64) qm.QueryMod { return qmhelper.Where(w.f
 func (w whereHelperuint64) GT(x uint64) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
 func (w whereHelperuint64) GTE(x uint64) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 func (w whereHelperuint64) IN(slice []uint64) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
+	values := make([]any, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
 	}
 	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
 func (w whereHelperuint64) NIN(slice []uint64) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
+	values := make([]any, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
 	}
@@ -377,7 +377,7 @@ func (o *BTCTXInput) Insert(ctx context.Context, exec boil.ContextExecutor, colu
 	}
 
 	var lastID int64
-	var identifierCols []interface{}
+	var identifierCols []any
 
 	if len(cache.retMapping) == 0 {
 		goto CacheNoHooks
@@ -393,7 +393,7 @@ func (o *BTCTXInput) Insert(ctx context.Context, exec boil.ContextExecutor, colu
 		goto CacheNoHooks
 	}
 
-	identifierCols = []interface{}{
+	identifierCols = []any{
 		o.ID,
 	}
 
@@ -512,7 +512,7 @@ func (o BTCTXInputSlice) UpdateAll(ctx context.Context, exec boil.ContextExecuto
 	}
 
 	colNames := make([]string, len(cols))
-	args := make([]interface{}, len(cols))
+	args := make([]any, len(cols))
 
 	i := 0
 	for name, value := range cols {
@@ -638,7 +638,7 @@ func (o *BTCTXInput) Upsert(ctx context.Context, exec boil.ContextExecutor, upda
 
 	value := reflect.Indirect(reflect.ValueOf(o))
 	vals := queries.ValuesFromMapping(value, cache.valueMapping)
-	var returns []interface{}
+	var returns []any
 	if len(cache.retMapping) != 0 {
 		returns = queries.PtrsFromMapping(value, cache.retMapping)
 	}
@@ -656,7 +656,7 @@ func (o *BTCTXInput) Upsert(ctx context.Context, exec boil.ContextExecutor, upda
 
 	var lastID int64
 	var uniqueMap []uint64
-	var nzUniqueCols []interface{}
+	var nzUniqueCols []any
 
 	if len(cache.retMapping) == 0 {
 		goto CacheNoHooks
@@ -753,7 +753,7 @@ func (o BTCTXInputSlice) DeleteAll(ctx context.Context, exec boil.ContextExecuto
 		return 0, nil
 	}
 
-	var args []interface{}
+	var args []any
 	for _, obj := range o {
 		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), btcTXInputPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
@@ -800,7 +800,7 @@ func (o *BTCTXInputSlice) ReloadAll(ctx context.Context, exec boil.ContextExecut
 	}
 
 	slice := BTCTXInputSlice{}
-	var args []interface{}
+	var args []any
 	for _, obj := range *o {
 		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), btcTXInputPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)

@@ -315,7 +315,7 @@ func (o *BTCTXOutput) Insert(ctx context.Context, exec boil.ContextExecutor, col
 	}
 
 	var lastID int64
-	var identifierCols []interface{}
+	var identifierCols []any
 
 	if len(cache.retMapping) == 0 {
 		goto CacheNoHooks
@@ -331,7 +331,7 @@ func (o *BTCTXOutput) Insert(ctx context.Context, exec boil.ContextExecutor, col
 		goto CacheNoHooks
 	}
 
-	identifierCols = []interface{}{
+	identifierCols = []any{
 		o.ID,
 	}
 
@@ -450,7 +450,7 @@ func (o BTCTXOutputSlice) UpdateAll(ctx context.Context, exec boil.ContextExecut
 	}
 
 	colNames := make([]string, len(cols))
-	args := make([]interface{}, len(cols))
+	args := make([]any, len(cols))
 
 	i := 0
 	for name, value := range cols {
@@ -576,7 +576,7 @@ func (o *BTCTXOutput) Upsert(ctx context.Context, exec boil.ContextExecutor, upd
 
 	value := reflect.Indirect(reflect.ValueOf(o))
 	vals := queries.ValuesFromMapping(value, cache.valueMapping)
-	var returns []interface{}
+	var returns []any
 	if len(cache.retMapping) != 0 {
 		returns = queries.PtrsFromMapping(value, cache.retMapping)
 	}
@@ -594,7 +594,7 @@ func (o *BTCTXOutput) Upsert(ctx context.Context, exec boil.ContextExecutor, upd
 
 	var lastID int64
 	var uniqueMap []uint64
-	var nzUniqueCols []interface{}
+	var nzUniqueCols []any
 
 	if len(cache.retMapping) == 0 {
 		goto CacheNoHooks
@@ -691,7 +691,7 @@ func (o BTCTXOutputSlice) DeleteAll(ctx context.Context, exec boil.ContextExecut
 		return 0, nil
 	}
 
-	var args []interface{}
+	var args []any
 	for _, obj := range o {
 		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), btcTXOutputPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
@@ -738,7 +738,7 @@ func (o *BTCTXOutputSlice) ReloadAll(ctx context.Context, exec boil.ContextExecu
 	}
 
 	slice := BTCTXOutputSlice{}
-	var args []interface{}
+	var args []any
 	for _, obj := range *o {
 		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), btcTXOutputPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)

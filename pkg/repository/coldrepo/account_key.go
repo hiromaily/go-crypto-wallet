@@ -106,7 +106,7 @@ func (r *AccountKeyRepository) GetAllMultiAddr(accountType account.AccountType, 
 	// sql := "SELECT * FROM %s WHERE wallet_multisig_address IN (?);"
 	ctx := context.Background()
 
-	targetAddrs := make([]interface{}, len(addrs))
+	targetAddrs := make([]any, len(addrs))
 	for i, v := range addrs {
 		targetAddrs[i] = v
 	}
@@ -134,7 +134,7 @@ func (r *AccountKeyRepository) UpdateAddr(accountType account.AccountType, addr,
 	ctx := context.Background()
 
 	// Set updating columns
-	updCols := map[string]interface{}{
+	updCols := map[string]any{
 		models.AccountKeyColumns.P2PKHAddress: addr,
 	}
 	return models.AccountKeys(
@@ -150,11 +150,11 @@ func (r *AccountKeyRepository) UpdateAddrStatus(accountType account.AccountType,
 	ctx := context.Background()
 
 	// Set updating columns
-	updCols := map[string]interface{}{
+	updCols := map[string]any{
 		models.AccountKeyColumns.AddrStatus: addrStatus.Int8(),
 	}
 
-	targetWIFs := make([]interface{}, len(strWIFs))
+	targetWIFs := make([]any, len(strWIFs))
 	for i, v := range strWIFs {
 		targetWIFs[i] = v
 	}
@@ -172,7 +172,7 @@ func (r *AccountKeyRepository) UpdateMultisigAddr(accountType account.AccountTyp
 	ctx := context.Background()
 
 	// Set updating columns
-	updCols := map[string]interface{}{
+	updCols := map[string]any{
 		models.AccountKeyColumns.MultisigAddress: item.MultisigAddress,
 		models.AccountKeyColumns.RedeemScript:    item.RedeemScript,
 		models.AccountKeyColumns.AddrStatus:      item.AddrStatus,
@@ -216,7 +216,7 @@ func (r *AccountKeyRepository) UpdateMultisigAddrs(accountType account.AccountTy
 
 	for _, item := range items {
 		// Set updating columns
-		updCols := map[string]interface{}{
+		updCols := map[string]any{
 			models.AccountKeyColumns.MultisigAddress: item.MultisigAddress,
 			models.AccountKeyColumns.RedeemScript:    item.RedeemScript,
 			models.AccountKeyColumns.AddrStatus:      item.AddrStatus,

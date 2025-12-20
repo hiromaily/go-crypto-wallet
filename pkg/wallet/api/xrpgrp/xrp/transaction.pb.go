@@ -988,7 +988,7 @@ func file_transaction_proto_rawDescGZIP() []byte {
 
 var file_transaction_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_transaction_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
-var file_transaction_proto_goTypes = []interface{}{
+var file_transaction_proto_goTypes = []any{
 	(EnumTransactionType)(0),           // 0: rippleapi.transaction.EnumTransactionType
 	(*Instructions)(nil),               // 1: rippleapi.transaction.Instructions
 	(*RequestPrepareTransaction)(nil),  // 2: rippleapi.transaction.RequestPrepareTransaction
@@ -1033,7 +1033,7 @@ func file_transaction_proto_init() {
 		return
 	}
 	if !protoimpl.UnsafeEnabled {
-		file_transaction_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
+		file_transaction_proto_msgTypes[0].Exporter = func(v any, i int) any {
 			switch v := v.(*Instructions); i {
 			case 0:
 				return &v.state
@@ -1045,7 +1045,7 @@ func file_transaction_proto_init() {
 				return nil
 			}
 		}
-		file_transaction_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+		file_transaction_proto_msgTypes[1].Exporter = func(v any, i int) any {
 			switch v := v.(*RequestPrepareTransaction); i {
 			case 0:
 				return &v.state
@@ -1057,7 +1057,7 @@ func file_transaction_proto_init() {
 				return nil
 			}
 		}
-		file_transaction_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+		file_transaction_proto_msgTypes[2].Exporter = func(v any, i int) any {
 			switch v := v.(*ResponsePrepareTransaction); i {
 			case 0:
 				return &v.state
@@ -1069,7 +1069,7 @@ func file_transaction_proto_init() {
 				return nil
 			}
 		}
-		file_transaction_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+		file_transaction_proto_msgTypes[3].Exporter = func(v any, i int) any {
 			switch v := v.(*RequestSignTransaction); i {
 			case 0:
 				return &v.state
@@ -1081,7 +1081,7 @@ func file_transaction_proto_init() {
 				return nil
 			}
 		}
-		file_transaction_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+		file_transaction_proto_msgTypes[4].Exporter = func(v any, i int) any {
 			switch v := v.(*ResponseSignTransaction); i {
 			case 0:
 				return &v.state
@@ -1093,7 +1093,7 @@ func file_transaction_proto_init() {
 				return nil
 			}
 		}
-		file_transaction_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+		file_transaction_proto_msgTypes[5].Exporter = func(v any, i int) any {
 			switch v := v.(*RequestSubmitTransaction); i {
 			case 0:
 				return &v.state
@@ -1105,7 +1105,7 @@ func file_transaction_proto_init() {
 				return nil
 			}
 		}
-		file_transaction_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+		file_transaction_proto_msgTypes[6].Exporter = func(v any, i int) any {
 			switch v := v.(*ResponseSubmitTransaction); i {
 			case 0:
 				return &v.state
@@ -1117,7 +1117,7 @@ func file_transaction_proto_init() {
 				return nil
 			}
 		}
-		file_transaction_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+		file_transaction_proto_msgTypes[7].Exporter = func(v any, i int) any {
 			switch v := v.(*ResponseWaitValidation); i {
 			case 0:
 				return &v.state
@@ -1129,7 +1129,7 @@ func file_transaction_proto_init() {
 				return nil
 			}
 		}
-		file_transaction_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+		file_transaction_proto_msgTypes[8].Exporter = func(v any, i int) any {
 			switch v := v.(*RequestGetTransaction); i {
 			case 0:
 				return &v.state
@@ -1141,7 +1141,7 @@ func file_transaction_proto_init() {
 				return nil
 			}
 		}
-		file_transaction_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+		file_transaction_proto_msgTypes[9].Exporter = func(v any, i int) any {
 			switch v := v.(*ResponseGetTransaction); i {
 			case 0:
 				return &v.state
@@ -1153,7 +1153,7 @@ func file_transaction_proto_init() {
 				return nil
 			}
 		}
-		file_transaction_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+		file_transaction_proto_msgTypes[10].Exporter = func(v any, i int) any {
 			switch v := v.(*RequestCombineTransaction); i {
 			case 0:
 				return &v.state
@@ -1165,7 +1165,7 @@ func file_transaction_proto_init() {
 				return nil
 			}
 		}
-		file_transaction_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+		file_transaction_proto_msgTypes[11].Exporter = func(v any, i int) any {
 			switch v := v.(*ResponseCombineTransaction); i {
 			case 0:
 				return &v.state

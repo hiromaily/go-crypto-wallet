@@ -34,7 +34,7 @@ type GetTransactionResult struct {
 	Blockindex        uint64                 `json:"blockindex"`
 	Blocktime         uint64                 `json:"blocktime"`
 	Txid              string                 `json:"txid"`
-	Walletconflicts   []interface{}          `json:"walletconflicts"`
+	Walletconflicts   []any                  `json:"walletconflicts"`
 	Time              int64                  `json:"time"`
 	Timereceived      int64                  `json:"timereceived"`
 	Bip125Replaceable string                 `json:"bip125-replaceable"`

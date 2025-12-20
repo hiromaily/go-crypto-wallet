@@ -185,7 +185,7 @@ func (e *Ethereum) GetTransactionReceipt(hashTx string) (*ResponseGetTransaction
 	}()
 
 	// call
-	var resMap map[string]interface{}
+	var resMap map[string]any
 	go func() {
 		err := e.rpcClient.CallContext(ctx, &resMap, "eth_getTransactionReceipt", hashTx)
 		if err != nil {
@@ -258,7 +258,7 @@ func (e *Ethereum) GetTransactionReceipt(hashTx string) (*ResponseGetTransaction
 			return nil, errors.New("response[contractAddress] is invalid")
 		}
 	}
-	// logs would be empty interface{} sometimes
+	// logs would be empty any sometimes
 	logs, err := castToSliceString(resMap["logs"])
 	if err != nil {
 		return nil, errors.New("response[logs] is invalid")

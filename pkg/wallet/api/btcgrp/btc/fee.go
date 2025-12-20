@@ -73,10 +73,8 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 	relayFee, err := b.getMinRelayFee()
 	if err != nil {
 		b.logger.Warn("fail to call btc.getMinRelayFee() but continue", zap.Error(err))
-	} else {
-		if fee < relayFee {
-			fee = relayFee
-		}
+	} else if fee < relayFee {
+		fee = relayFee
 	}
 
 	// if adjustmentFee param is given

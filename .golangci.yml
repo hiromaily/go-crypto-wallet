@@ -9,6 +9,9 @@ issues:
   max-issues-per-linter: 0
   # Maximum count of issues with the same text. Set to 0 to disable. Default is 3.
   max-same-issues: 0
+  exclude-files:
+    - ".*\\.pb\\.go"
+    - ".*\\.test\\.go"
 
 formatters:
   enable:
@@ -146,56 +149,14 @@ linters:
   exclusions:
     generated: strict
 
-    rules:
-        # EXC0003
-      - text: "func name will be used as test\\.Test.* by other packages, and that stutters; consider calling this"
-        linters:
-          - revive
-
-        # EXC0007
-      - text: "Subprocess launch(ed with variable|ing should be audited)"
-        linters:
-          - gosec
-
-        # EXC0009
-      - text: "(Expect directory permissions to be 0750 or less|Expect file permissions to be 0600 or less)"
-        linters:
-          - gosec
-
-        # EXC0010
-      - text: "Potential file inclusion via variable"
-        linters:
-          - gosec
-
-        # TODO: make sure all packages have a description. Currently, there's 67 packages without.
-      - text: "package-comments: should have a package comment"
-        linters:
-          - revive
-
-        # Exclude some linters from running on tests files.
+    rules:      
+      # Exclude some linters from running on tests files.
       - path: _test\.go
         linters:
           - errcheck
           - gosec
 
       - text: "ST1000: at least one file in a package should have a package comment"
-        linters:
-          - staticcheck
-
-        # Allow "err" and "ok" vars to shadow existing declarations, otherwise we get too many false positives.
-      - text: '^shadow: declaration of "(err|ok)" shadows declaration'
-        linters:
-          - govet
-
-      # Ignore for cli/command/formatter/tabwriter, which is forked from go stdlib, so we want to align with it.
-      - text: '^(ST1020|ST1022): comment on exported'
-        path: "cli/command/formatter/tabwriter"
-        linters:
-          - staticcheck
-
-      # Ignore deprecation linting for cli/command/stack/*.
-      - text: '^(SA1019): '
-        path: "cli/command/stack"
         linters:
           - staticcheck
 

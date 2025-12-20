@@ -125,14 +125,14 @@ func (w whereHelperint16) LTE(x int16) qm.QueryMod { return qmhelper.Where(w.fie
 func (w whereHelperint16) GT(x int16) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
 func (w whereHelperint16) GTE(x int16) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 func (w whereHelperint16) IN(slice []int16) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
+	values := make([]any, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
 	}
 	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
 }
 func (w whereHelperint16) NIN(slice []int16) qm.QueryMod {
-	values := make([]interface{}, 0, len(slice))
+	values := make([]any, 0, len(slice))
 	for _, value := range slice {
 		values = append(values, value)
 	}
@@ -385,7 +385,7 @@ func (o *AuthAccountKey) Insert(ctx context.Context, exec boil.ContextExecutor, 
 	}
 
 	var lastID int64
-	var identifierCols []interface{}
+	var identifierCols []any
 
 	if len(cache.retMapping) == 0 {
 		goto CacheNoHooks
@@ -401,7 +401,7 @@ func (o *AuthAccountKey) Insert(ctx context.Context, exec boil.ContextExecutor, 
 		goto CacheNoHooks
 	}
 
-	identifierCols = []interface{}{
+	identifierCols = []any{
 		o.ID,
 	}
 
@@ -520,7 +520,7 @@ func (o AuthAccountKeySlice) UpdateAll(ctx context.Context, exec boil.ContextExe
 	}
 
 	colNames := make([]string, len(cols))
-	args := make([]interface{}, len(cols))
+	args := make([]any, len(cols))
 
 	i := 0
 	for name, value := range cols {
@@ -650,7 +650,7 @@ func (o *AuthAccountKey) Upsert(ctx context.Context, exec boil.ContextExecutor, 
 
 	value := reflect.Indirect(reflect.ValueOf(o))
 	vals := queries.ValuesFromMapping(value, cache.valueMapping)
-	var returns []interface{}
+	var returns []any
 	if len(cache.retMapping) != 0 {
 		returns = queries.PtrsFromMapping(value, cache.retMapping)
 	}
@@ -668,7 +668,7 @@ func (o *AuthAccountKey) Upsert(ctx context.Context, exec boil.ContextExecutor, 
 
 	var lastID int64
 	var uniqueMap []uint64
-	var nzUniqueCols []interface{}
+	var nzUniqueCols []any
 
 	if len(cache.retMapping) == 0 {
 		goto CacheNoHooks
@@ -765,7 +765,7 @@ func (o AuthAccountKeySlice) DeleteAll(ctx context.Context, exec boil.ContextExe
 		return 0, nil
 	}
 
-	var args []interface{}
+	var args []any
 	for _, obj := range o {
 		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), authAccountKeyPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
@@ -812,7 +812,7 @@ func (o *AuthAccountKeySlice) ReloadAll(ctx context.Context, exec boil.ContextEx
 	}
 
 	slice := AuthAccountKeySlice{}
-	var args []interface{}
+	var args []any
 	for _, obj := range *o {
 		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), authAccountKeyPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)

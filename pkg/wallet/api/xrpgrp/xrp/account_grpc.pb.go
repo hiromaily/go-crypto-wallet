@@ -73,7 +73,7 @@ func RegisterRippleAccountAPIServer(s grpc.ServiceRegistrar, srv RippleAccountAP
 	s.RegisterService(&RippleAccountAPI_ServiceDesc, srv)
 }
 
-func _RippleAccountAPI_GetAccountInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RippleAccountAPI_GetAccountInfo_Handler(srv any, ctx context.Context, dec func(any) error, interceptor grpc.UnaryServerInterceptor) (any, error) {
 	in := new(RequestGetAccountInfo)
 	if err := dec(in); err != nil {
 		return nil, err
@@ -85,7 +85,7 @@ func _RippleAccountAPI_GetAccountInfo_Handler(srv interface{}, ctx context.Conte
 		Server:     srv,
 		FullMethod: "/rippleapi.account.RippleAccountAPI/GetAccountInfo",
 	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, req any) (any, error) {
 		return srv.(RippleAccountAPIServer).GetAccountInfo(ctx, req.(*RequestGetAccountInfo))
 	}
 	return interceptor(ctx, in, info, handler)

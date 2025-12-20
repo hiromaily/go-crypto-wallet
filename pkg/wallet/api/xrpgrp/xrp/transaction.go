@@ -43,10 +43,8 @@ func (r *Ripple) CreateRawTransaction(senderAccount, receiverAccount string, amo
 		if err != nil {
 			return nil, "", errors.Wrap(err, "fail to call PrepareTransaction()")
 		}
-	} else {
-		if calculatedAmount < amount {
-			return nil, "", errors.Errorf("balance is short to send %s", accountInfo.XrpBalance)
-		}
+	} else if calculatedAmount < amount {
+		return nil, "", errors.Errorf("balance is short to send %s", accountInfo.XrpBalance)
 	}
 	return txJSON, stringJSON, nil
 }

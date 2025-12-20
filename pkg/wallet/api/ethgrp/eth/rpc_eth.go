@@ -36,17 +36,17 @@ type ResponseSyncing struct {
 //   - return false if not syncing (it means syncing is done)
 //   - there seems 2 different responses
 func (e *Ethereum) Syncing() (*ResponseSyncing, bool, error) {
-	var any interface{}
+	var result any
 
-	err := e.rpcClient.CallContext(e.ctx, &any, "eth_syncing")
+	err := e.rpcClient.CallContext(e.ctx, &result, "eth_syncing")
 	if err != nil {
 		return nil, false, errors.Wrap(err, "fail to call client.CallContext(eth_syncing)")
 	}
 
 	// try to cast to bool first
-	if v, ok := any.(bool); ok {
+	if v, ok := result.(bool); ok {
 		return nil, v, nil
-	} else if v, ok := any.(map[string]interface{}); ok {
+	} else if v, ok := result.(map[string]any); ok {
 		anyMap := make(map[string]int64)
 		for key, val := range v {
 			if v, ok := val.(string); ok {
