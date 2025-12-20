@@ -73,41 +73,10 @@ linters:
   settings:
     depguard: 
       rules:
-        main:
-          files:
-            - "cmd/**"
-          allow:
-            - $gostd
-            - "github.com/hiromaily/go-crypto-wallet/pkg/"
-            - "github.com/go-sql-driver/mysql"
-            - "github.com/btcsuite/btcd/chaincfg"
-            - "github.com/btcsuite/btcd/rpcclient"
-            - "github.com/ethereum/go-ethereum/rpc"
-            - "github.com/ethereum/go-ethereum/ethclient"
-            - "github.com/ethereum/go-ethereum/accounts/keystore"
-            - "github.com/volatiletech/sqlboiler/v4/boil"
-            - "go.uber.org/zap"
-            - "google.golang.org/grpc"
-            - "github.com/opentracing/opentracing-go"
+        websocket:
           deny:
             - pkg: "nhooyr.io/websocket"
               desc: The containerd websocket package was migrated to a separate module. Use github.com/coder/websocket instead.
-    #         - pkg: "github.com/containerd/containerd/log"
-    #           desc: The containerd log package was migrated to a separate module. Use github.com/containerd/log instead.
-    #         - pkg: "github.com/containerd/containerd/pkg/userns"
-    #           desc: Use github.com/moby/sys/userns instead.
-    #         - pkg: "github.com/containerd/containerd/platforms"
-    #           desc: The containerd platforms package was migrated to a separate module. Use github.com/containerd/platforms instead.
-    #         - pkg: "github.com/docker/docker/errdefs"
-    #           desc: Use github.com/containerd/errdefs instead.
-    #         - pkg: "github.com/docker/docker/pkg/system"
-    #           desc: This package should not be used unless strictly necessary.
-    #         - pkg: "github.com/docker/distribution/uuid"
-    #           desc: Use github.com/google/uuid instead.
-    #         - pkg: "io/ioutil"
-    #           desc: The io/ioutil package has been deprecated, see https://go.dev/doc/go1.16#ioutil
-    #         - pkg: "gopkg.in/yaml.v3"
-    #           desc: Use go.yaml.in/yaml/v3 instead.
     forbidigo:
       forbid:
         - pkg: ^regexp$
