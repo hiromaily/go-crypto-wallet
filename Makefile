@@ -1,6 +1,6 @@
 modVer=$(shell cat go.mod | head -n 3 | tail -n 1 | awk '{print $2}' | cut -d'.' -f2)
 currentVer=$(shell go version | awk '{print $3}' | sed -e "s/go//" | cut -d'.' -f2)
-GOLANGCI_VERSION=v1.51.1
+GOLANGCI_VERSION=v2.7.2
 #PROTOC_BIN=protoc
 PROTOC_BIN=buf protoc
 
@@ -58,12 +58,23 @@ install-tools:
 	go install github.com/volatiletech/sqlboiler/v4@latest
 	go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-mysql@latest
 	go install github.com/ethereum/go-ethereum/cmd/abigen@latest
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(GOLANGCI_VERSION)
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_VERSION)
 	go install golang.org/x/vuln/cmd/govulncheck@latest
 	go install honnef.co/go/tools/cmd/staticcheck@latest
 	go install github.com/icholy/gomajor@latest
 	go install mvdan.cc/sh/v3/cmd/gosh@latest
 	go install mvdan.cc/sh/v3/cmd/shfmt@latest
+
+.PHONY: install-tools-by-gomod
+install-tools-by-gomod:
+	# go get -tool github.com/volatiletech/sqlboiler/v4@latest
+	# go get -tool github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-mysql@latest
+	go get -tool github.com/ethereum/go-ethereum/cmd/abigen@latest
+	go get -tool github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_VERSION)
+	go get -tool golang.org/x/vuln/cmd/govulncheck@latest
+	go get -tool honnef.co/go/tools/cmd/staticcheck@latest
+	go get -tool github.com/icholy/gomajor@latest
+	go get -tool mvdan.cc/sh/v3/cmd/gosh@latest
 
 .PHONY: install-proto-plugin
 install-proto-plugin:
