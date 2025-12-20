@@ -20,6 +20,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
+// ERC20 struct
 // TODO: Ethereum struct in pkg/wallet/api/ethgrp/eth/ethereum.go must be embedded to use common funcs
 // Then proper interface limits functionalities
 type ERC20 struct {
@@ -81,6 +82,7 @@ func (e *ERC20) ValidateAddr(addr string) error {
 	return nil
 }
 
+// FloatToBigInt converts float64 to *big.Int
 // FIXME: Is it correct to handle decimal??
 func (e *ERC20) FloatToBigInt(v float64) *big.Int {
 	if e.decimals == 18 {

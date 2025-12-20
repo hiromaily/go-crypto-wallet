@@ -14,7 +14,7 @@ func (e ERC20Token) String() string {
 	return string(e)
 }
 
-// ERC20Map
+// ERC20Map map of ERC20 tokens
 var ERC20Map = map[ERC20Token]bool{
 	HYT: true,
 	BAT: true,

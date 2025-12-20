@@ -17,12 +17,12 @@ type SendCommand struct {
 }
 
 // Synopsis is explanation for this subcommand
-func (_ *SendCommand) Synopsis() string {
+func (*SendCommand) Synopsis() string {
 	return "send signed transaction to blockchain network"
 }
 
 // Help returns usage for this subcommand
-func (_ *SendCommand) Help() string {
+func (*SendCommand) Help() string {
 	return `Usage: wallet send [options...]
 Options:
   -file  signed transaction file path

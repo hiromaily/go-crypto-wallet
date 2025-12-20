@@ -19,8 +19,8 @@ func (bts *BTCTestSuite) SetupTest() {
 	bts.BTC = btc
 }
 
-func (suite *BTCTestSuite) TearDownTest() {
-	suite.BTC.Close()
+func (bts *BTCTestSuite) TearDownTest() {
+	bts.BTC.Close()
 }
 
 type ETHTestSuite struct {

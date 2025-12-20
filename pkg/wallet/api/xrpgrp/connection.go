@@ -49,7 +49,7 @@ func NewGRPCClient(conf *config.RippleAPI) (*grpc.ClientConn, error) {
 	if !conf.IsSecure {
 		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
-	conn, err := grpc.Dial(conf.URL, opts...)
+	conn, err := grpc.NewClient(conf.URL, opts...)
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to call grpc.Dial: %s", conf.URL)
 	}
