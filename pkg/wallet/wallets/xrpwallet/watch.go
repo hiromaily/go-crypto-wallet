@@ -104,9 +104,8 @@ func (w *XRPWatch) CreatePaymentRequest() error {
 
 // Done should be called before exit
 func (w *XRPWatch) Done() {
-	//nolint:errcheck
 	w.dbConn.Close()
-	//nolint:errcheck
+
 	w.XRP.Close()
 }
 

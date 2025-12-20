@@ -74,7 +74,6 @@ func (t *TxCreate) createPaymentTxOutputs(
 
 	// create txOutput from userPayment
 	for _, userPayment := range userPayments {
-		//nolint:gosimple
 		tmpOutputs[userPayment.receiverAddr] += userPayment.validAmount
 	}
 
@@ -83,7 +82,6 @@ func (t *TxCreate) createPaymentTxOutputs(
 	// - what if user register for address which is same to payment address?
 	//   Though it's impossible in real but systematically possible
 	// - BIP44, hdwallet has `ChangeType`. ideally this address should be used
-	//nolint:gosimple
 	tmpOutputs[changeAddr] += changeAmount
 
 	// create txOutputs from tmpOutputs switching string address type to btcutil.Address

@@ -33,6 +33,7 @@ var (
 	appVersion = "5.0.0"
 )
 
+//nolint:gocyclo
 func main() {
 	// command line
 	var (

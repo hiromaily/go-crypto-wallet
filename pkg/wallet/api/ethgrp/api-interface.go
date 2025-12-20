@@ -109,9 +109,8 @@ type ERC20er interface {
 	) (*ethtx.RawTx, *models.EthDetailTX, error)
 }
 
-type EtherTxCreator interface {
-	ERC20er
-}
+// EtherTxCreator is a type alias for ERC20er used in transaction creation contexts
+type EtherTxCreator = ERC20er
 
 type EtherTxMonitor interface {
 	GetTotalBalance(addrs []string) (*big.Int, []eth.UserAmount)

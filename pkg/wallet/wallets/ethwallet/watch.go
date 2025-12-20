@@ -103,7 +103,6 @@ func (w *ETHWatch) CreatePaymentRequest() error {
 
 // Done should be called before exit
 func (w *ETHWatch) Done() {
-	//nolint:errcheck
 	w.dbConn.Close()
 	w.ETH.Close()
 }

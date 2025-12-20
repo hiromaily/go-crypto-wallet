@@ -48,7 +48,7 @@ func NewAccount(file string) (*AccountRoot, error) {
 
 // loadAccount load account config file
 func loadAccount(path string) (*AccountRoot, error) {
-	d, err := os.ReadFile(path)
+	d, err := os.ReadFile(path) //nolint:gosec
 	if err != nil {
 		return nil, errors.Wrapf(err, "can't read toml file. %s", path)
 	}

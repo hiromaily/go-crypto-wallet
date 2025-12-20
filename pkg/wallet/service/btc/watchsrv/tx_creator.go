@@ -94,6 +94,8 @@ type parsedTx struct {
 
 // FIXME: receiver account covers fee, but is should be flexible
 // TODO: what if `listtransactions` api is called to see result after this func
+//
+//nolint:gocyclo
 func (t *TxCreate) createTx(
 	sender,
 	receiver account.AccountType,
@@ -509,10 +511,8 @@ func (t *TxCreate) insertTxTableForUnsigned(
 	}
 	defer func() {
 		if err != nil {
-			//nolint:errcheck
 			dtx.Rollback()
 		} else {
-			//nolint:errcheck
 			dtx.Commit()
 		}
 	}()

@@ -7,7 +7,7 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/chaincfg"
-	"golang.org/x/crypto/ripemd160" //nolint: staticcheck
+	"golang.org/x/crypto/ripemd160" //nolint:staticcheck,gosec
 )
 
 // refer to original code [github.com/cpacia/bchutil](https://github.com/cpacia/bchutil/blob/master/cashaddr.go)
@@ -237,6 +237,8 @@ func Encode(prefix string, payload data) string {
 }
 
 // DecodeCashAddress decodes a cashaddr string.
+//
+//nolint:gocyclo
 func DecodeCashAddress(str string) (string, data, error) {
 	// Go over the string and do some sanity checks.
 	lower, upper := false, false

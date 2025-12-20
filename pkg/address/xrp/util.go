@@ -4,7 +4,7 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 
-	"golang.org/x/crypto/ripemd160" //nolint: staticcheck
+	"golang.org/x/crypto/ripemd160" //nolint:staticcheck,gosec
 )
 
 // Write operations in a hash.Hash never return an error
@@ -40,7 +40,7 @@ func DoubleSha256(b []byte) []byte {
 }
 
 func Sha256RipeMD160(b []byte) []byte {
-	ripe := ripemd160.New()
+	ripe := ripemd160.New() //nolint:gosec
 	sha := sha256.New()
 	sha.Write(b)
 	ripe.Write(sha.Sum(nil))

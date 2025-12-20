@@ -3,10 +3,14 @@
     "allow": [
       "Bash(make lint-fix:*)",
       "Bash(make lint:*)",
+      "Bash(gofumpt:*)",
+      "Bash(go doc:*)",
+      "Bash(go fmt:*)",
+      "Bash(awk:*)",
+      "Bash(cat:*)",
       "Bash(find:*)",
       "Bash(ls:*)",
       "Bash(sed:*)",
-      "Bash(awk:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(for file in )",
@@ -15,9 +19,7 @@
       "Bash(\"$GOPATH/src/github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/watchsrv/tx_creator.go\")",
       "Bash(do)",
       "Bash(echo:*)",
-      "Bash(done)",
-      "Bash(gofumpt:*)",
-      "Bash(go doc:*)"
+      "Bash(done)"
     ]
   }
 }

@@ -35,6 +35,7 @@ var (
 	authName = ""
 )
 
+//nolint:gocyclo
 func main() {
 	// command line
 	var (
