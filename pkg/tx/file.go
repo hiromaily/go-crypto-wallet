@@ -132,7 +132,7 @@ func (r *FileRepository) ValidateFilePath(
 
 // ReadFile read file
 func (*FileRepository) ReadFile(path string) (string, error) {
-	ret, err := os.ReadFile(path)
+	ret, err := os.ReadFile(path) //nolint:gosec
 	if err != nil {
 		return "", errors.Wrapf(err, "fail to call os.ReadFile(%s)", path)
 	}
@@ -142,7 +142,7 @@ func (*FileRepository) ReadFile(path string) (string, error) {
 
 // ReadFileSlice read file for slice
 func (*FileRepository) ReadFileSlice(path string) ([]string, error) {
-	file, err := os.Open(path)
+	file, err := os.Open(path) //nolint:gosec
 	if err != nil {
 		return nil, errors.Wrapf(err, "fail to open file: %s", path)
 	}
@@ -186,7 +186,7 @@ func (r *FileRepository) WriteFileSlice(path string, data []string) (string, err
 	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
 	fileName := path + ts
 
-	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600) //nolint:gosec
 	if err != nil {
 		return "", errors.Wrapf(err, "fail to call os.OpenFile(%s)", fileName)
 	}
@@ -211,6 +211,6 @@ func (*FileRepository) createDir(path string) {
 	dir := strings.Join(tmp2, "/")
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		//nolint:errcheck
-		os.Mkdir(dir, 0o755)
+		os.Mkdir(dir, 0o700)
 	}
 }

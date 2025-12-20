@@ -14,7 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/pkg/errors"
 	"go.uber.org/zap"
-	"golang.org/x/crypto/ripemd160" //nolint:staticcheck
+	"golang.org/x/crypto/ripemd160" //nolint:staticcheck,gosec
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	bchaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/bch"

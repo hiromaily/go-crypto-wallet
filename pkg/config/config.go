@@ -36,7 +36,7 @@ func NewWallet(file string, wtype wallet.WalletType, coinTypeCode coin.CoinTypeC
 
 // loadWallet load config file
 func loadWallet(path string) (*WalletRoot, error) {
-	d, err := os.ReadFile(path)
+	d, err := os.ReadFile(path) //nolint:gosec
 	if err != nil {
 		return nil, errors.Wrapf(err, "can't read toml file. %s", path)
 	}

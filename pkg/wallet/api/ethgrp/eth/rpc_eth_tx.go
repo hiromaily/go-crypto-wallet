@@ -175,6 +175,8 @@ func (e *Ethereum) GetTransactionByHash(hashTx string) (*ResponseGetTransaction,
 // GetTransactionReceipt returns the receipt of a transaction by transaction hash
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionreceipt
 // Note, tis is not available for pending transactions
+//
+//nolint:gocyclo
 func (e *Ethereum) GetTransactionReceipt(hashTx string) (*ResponseGetTransactionReceipt, error) {
 	// timeout
 	ch := make(chan error, 1)

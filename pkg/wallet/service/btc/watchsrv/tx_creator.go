@@ -94,6 +94,8 @@ type parsedTx struct {
 
 // FIXME: receiver account covers fee, but is should be flexible
 // TODO: what if `listtransactions` api is called to see result after this func
+//
+//nolint:gocyclo
 func (t *TxCreate) createTx(
 	sender,
 	receiver account.AccountType,

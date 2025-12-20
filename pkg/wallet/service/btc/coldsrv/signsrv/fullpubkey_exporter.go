@@ -69,7 +69,7 @@ func (f *FullPubkeyExport) exportAccountKey(
 	// create fileName
 	fileName := f.pubkeyFileRepo.CreateFilePath(f.authType.AccountType())
 
-	file, err := os.Create(fileName)
+	file, err := os.Create(fileName) //nolint:gosec
 	if err != nil {
 		return "", errors.Wrapf(err, "fail to call os.Create(%s)", fileName)
 	}

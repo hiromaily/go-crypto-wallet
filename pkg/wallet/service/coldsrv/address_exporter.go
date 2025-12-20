@@ -103,7 +103,7 @@ func (a *AddressExport) exportAccountKey(
 	// create fileName
 	fileName := a.addrFileRepo.CreateFilePath(accountType)
 
-	file, err := os.Create(fileName)
+	file, err := os.Create(fileName) //nolint:gosec
 	if err != nil {
 		return "", errors.Wrapf(err, "fail to call os.Create(%s)", fileName)
 	}

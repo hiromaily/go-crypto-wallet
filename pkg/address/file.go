@@ -56,7 +56,7 @@ func (*FileRepository) ValidateFilePath(fileName string, accountType account.Acc
 
 // ImportAddress import pubkey from csv file
 func (*FileRepository) ImportAddress(fileName string) ([]string, error) {
-	file, err := os.Open(fileName)
+	file, err := os.Open(fileName) //nolint:gosec
 	if err != nil {
 		return nil, errors.Errorf("os.Open(%s) error: %s", fileName, err)
 	}
