@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -19,7 +19,7 @@ import (
 // Sign type
 type Sign struct {
 	xrp               xrpgrp.Rippler
-	logger            pkglogger.Logger
+	logger            logger.Logger
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier
 	txFileRepo        tx.FileRepositorier
 	wtype             wallet.WalletType
@@ -28,7 +28,7 @@ type Sign struct {
 // NewSign returns sign object
 func NewSign(
 	xrpAPI xrpgrp.Rippler,
-	logger pkglogger.Logger,
+	logger logger.Logger,
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier,
 	txFileRepo tx.FileRepositorier,
 	wtype wallet.WalletType,

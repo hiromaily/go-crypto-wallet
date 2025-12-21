@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	wtype "github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
@@ -18,7 +18,7 @@ import (
 type XRPKeygen struct {
 	XRP    xrpgrp.Rippler
 	dbConn *sql.DB
-	logger pkglogger.Logger
+	logger logger.Logger
 	wtype  wtype.WalletType
 	service.Seeder
 	service.HDWalleter
@@ -31,7 +31,7 @@ type XRPKeygen struct {
 func NewXRPKeygen(
 	xrp xrpgrp.Rippler,
 	dbConn *sql.DB,
-	logger pkglogger.Logger,
+	logger logger.Logger,
 	walletType wtype.WalletType,
 	seeder service.Seeder,
 	hdWallter service.HDWalleter,

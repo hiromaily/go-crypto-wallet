@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -27,12 +27,12 @@ type AuthFullPubkeyRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
-	logger       pkglogger.Logger
+	logger       logger.Logger
 }
 
 // NewAuthFullPubkeyRepository returns AuthFullPubkeyRepository object
 func NewAuthFullPubkeyRepository(
-	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger pkglogger.Logger,
+	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger logger.Logger,
 ) *AuthFullPubkeyRepository {
 	return &AuthFullPubkeyRepository{
 		dbConn:       dbConn,

@@ -8,7 +8,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
@@ -20,7 +20,7 @@ import (
 // Sign type
 type Sign struct {
 	btc             btcgrp.Bitcoiner
-	logger          pkglogger.Logger
+	logger          logger.Logger
 	accountKeyRepo  coldrepo.AccountKeyRepositorier
 	authKeyRepo     coldrepo.AuthAccountKeyRepositorier
 	txFileRepo      tx.FileRepositorier
@@ -31,7 +31,7 @@ type Sign struct {
 // NewSign returns sign object
 func NewSign(
 	btcAPI btcgrp.Bitcoiner,
-	logger pkglogger.Logger,
+	logger logger.Logger,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
 	txFileRepo tx.FileRepositorier,

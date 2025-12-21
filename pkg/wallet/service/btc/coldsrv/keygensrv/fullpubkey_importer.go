@@ -7,7 +7,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/fullpubkey"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -17,7 +17,7 @@ import (
 // FullPubkeyImport type
 type FullPubkeyImport struct {
 	btc                btcgrp.Bitcoiner
-	logger             pkglogger.Logger
+	logger             logger.Logger
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier
 	pubkeyFileRepo     address.FileRepositorier
 	wtype              wallet.WalletType
@@ -26,7 +26,7 @@ type FullPubkeyImport struct {
 // NewFullPubkeyImport returns FullPubkeyImport object
 func NewFullPubkeyImport(
 	btc btcgrp.Bitcoiner,
-	logger pkglogger.Logger,
+	logger logger.Logger,
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier,
 	pubkeyFileRepo address.FileRepositorier,
 	wtype wallet.WalletType,

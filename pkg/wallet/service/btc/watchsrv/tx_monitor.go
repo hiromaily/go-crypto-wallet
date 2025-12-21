@@ -7,7 +7,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
@@ -18,7 +18,7 @@ import (
 // TxMonitor type
 type TxMonitor struct {
 	btc         btcgrp.Bitcoiner
-	logger      pkglogger.Logger
+	logger      logger.Logger
 	dbConn      *sql.DB
 	txRepo      watchrepo.BTCTxRepositorier
 	txInputRepo watchrepo.TxInputRepositorier
@@ -29,7 +29,7 @@ type TxMonitor struct {
 // NewTxMonitor returns TxMonitor object
 func NewTxMonitor(
 	btc btcgrp.Bitcoiner,
-	logger pkglogger.Logger,
+	logger logger.Logger,
 	dbConn *sql.DB,
 	txRepo watchrepo.BTCTxRepositorier,
 	txInputRepo watchrepo.TxInputRepositorier,

@@ -1,4 +1,4 @@
-package pkglogger
+package logger
 
 type Logger interface {
 	Debug(msg string, args ...any)

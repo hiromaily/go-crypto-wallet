@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
 	"github.com/pkg/errors"
 	"github.com/volatiletech/null"
@@ -34,12 +34,12 @@ type EthDetailTxInputRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
-	logger       pkglogger.Logger
+	logger       logger.Logger
 }
 
 // NewEthDetailTxInputRepository returns EthDetailTxInputRepository object
 func NewEthDetailTxInputRepository(
-	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger pkglogger.Logger,
+	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger logger.Logger,
 ) *EthDetailTxInputRepository {
 	return &EthDetailTxInputRepository{
 		dbConn:       dbConn,

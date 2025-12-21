@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
@@ -19,7 +19,7 @@ type Bitcoin struct {
 	version           BTCVersion        // 179900
 	confirmationBlock uint64
 	feeRange          FeeAdjustmentRate
-	logger            pkglogger.Logger
+	logger            logger.Logger
 }
 
 // FeeAdjustmentRate range of fee adjustment rate
@@ -33,7 +33,7 @@ func NewBitcoin(
 	client *rpcclient.Client,
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Bitcoin,
-	logger pkglogger.Logger,
+	logger logger.Logger,
 ) (*Bitcoin, error) {
 	bit := Bitcoin{
 		Client: client,

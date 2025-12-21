@@ -9,7 +9,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/converter"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -19,7 +19,7 @@ import (
 // PaymentRequestCreate type
 type PaymentRequestCreate struct {
 	converter    converter.Converter
-	logger       pkglogger.Logger
+	logger       logger.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier
 	payReqRepo   watchrepo.PaymentRequestRepositorier
@@ -30,7 +30,7 @@ type PaymentRequestCreate struct {
 // NewPaymentRequestCreate returns PaymentRequestCreate object
 func NewPaymentRequestCreate(
 	conv converter.Converter,
-	logger pkglogger.Logger,
+	logger logger.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,

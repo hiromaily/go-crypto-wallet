@@ -18,7 +18,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	bchaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/bch"
 	xrpaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/xrp"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
@@ -85,12 +85,12 @@ type HDKey struct {
 	coinType     coin.CoinType
 	coinTypeCode coin.CoinTypeCode
 	conf         *chaincfg.Params
-	logger       pkglogger.Logger
+	logger       logger.Logger
 }
 
 // NewHDKey returns Key
 func NewHDKey(
-	purpose PurposeType, coinTypeCode coin.CoinTypeCode, conf *chaincfg.Params, logger pkglogger.Logger,
+	purpose PurposeType, coinTypeCode coin.CoinTypeCode, conf *chaincfg.Params, logger logger.Logger,
 ) *HDKey {
 	keyData := HDKey{
 		purpose:      purpose,

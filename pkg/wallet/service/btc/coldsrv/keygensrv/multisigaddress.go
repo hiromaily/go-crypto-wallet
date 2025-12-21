@@ -7,7 +7,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
@@ -17,7 +17,7 @@ import (
 // Multisig type
 type Multisig struct {
 	btc                btcgrp.Bitcoiner
-	logger             pkglogger.Logger
+	logger             logger.Logger
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier
 	accountKeyRepo     coldrepo.AccountKeyRepositorier
 	multisigAccount    account.MultisigAccounter
@@ -27,7 +27,7 @@ type Multisig struct {
 // NewMultisig returns multisig
 func NewMultisig(
 	btcAPI btcgrp.Bitcoiner,
-	logger pkglogger.Logger,
+	logger logger.Logger,
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	multisigAccount account.MultisigAccounter,

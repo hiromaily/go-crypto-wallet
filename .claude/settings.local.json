@@ -6,6 +6,11 @@
       "Bash(gofumpt:*)",
       "Bash(go doc:*)",
       "Bash(go fmt:*)",
+      "Bash(go build:*)",
+      "Bash(go test:*)",
+      "Bash(go install:*)",
+      "Bash($HOME/go/bin/goimports -w pkg/)",
+      "Bash($HOME/go/bin/goimports:*)",
       "Bash(awk:*)",
       "Bash(cat:*)",
       "Bash(find:*)",
@@ -14,21 +19,12 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(for file in )",
-      "Bash(\"$GOPATH/src/github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/coldsrv/hd_walleter.go\" )",
-      "Bash(\"$GOPATH/src/github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/keygensrv/privkey_importer.go\" )",
-      "Bash(\"$GOPATH/src/github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/watchsrv/tx_creator.go\")",
       "Bash(do)",
       "Bash(echo:*)",
       "Bash(done)",
       "Bash(while read file)",
-      "Bash(if ! grep -q '\"\"github.com/hiromaily/go-crypto-wallet/pkg/logger\"\"' \"$file\")",
       "Bash(then)",
-      "Bash(fi)",
-      "Bash(go build:*)",
-      "Bash(go test:*)",
-      "Bash(go install:*)",
-      "Bash($HOME/go/bin/goimports -w pkg/)",
-      "Bash($HOME/go/bin/goimports:*)"
+      "Bash(fi)"
     ]
   }
 }

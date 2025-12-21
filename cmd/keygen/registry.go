@@ -14,7 +14,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -46,7 +46,7 @@ type registry struct {
 	conf         *config.WalletRoot
 	accountConf  *account.AccountRoot
 	walletType   wallet.WalletType
-	logger       pkglogger.Logger
+	logger       logger.Logger
 	btc          btcgrp.Bitcoiner
 	eth          ethgrp.Ethereumer
 	xrp          xrpgrp.Rippler
@@ -353,9 +353,9 @@ func (r *registry) newXRP() xrpgrp.Rippler {
 	return r.xrp
 }
 
-func (r *registry) newLogger() pkglogger.Logger {
+func (r *registry) newLogger() logger.Logger {
 	if r.logger == nil {
-		r.logger = pkglogger.NewSlogFromConfig(r.conf.Logger.Env, r.conf.Logger.Level, r.conf.Logger.Service)
+		r.logger = logger.NewSlogFromConfig(r.conf.Logger.Env, r.conf.Logger.Level, r.conf.Logger.Service)
 	}
 	return r.logger
 }

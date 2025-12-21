@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -25,11 +25,11 @@ type SeedRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
-	logger       pkglogger.Logger
+	logger       logger.Logger
 }
 
 // NewSeedRepository returns SeedRepository interface
-func NewSeedRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger pkglogger.Logger) *SeedRepository {
+func NewSeedRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger logger.Logger) *SeedRepository {
 	return &SeedRepository{
 		dbConn:       dbConn,
 		tableName:    "seed",

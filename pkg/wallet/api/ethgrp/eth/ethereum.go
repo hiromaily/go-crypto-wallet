@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
@@ -20,7 +20,7 @@ type Ethereum struct {
 	rpcClient    *ethrpc.Client
 	chainConf    *chaincfg.Params
 	coinTypeCode coin.CoinTypeCode
-	logger       pkglogger.Logger
+	logger       logger.Logger
 	ctx          context.Context
 	netID        uint16
 	version      string
@@ -35,7 +35,7 @@ func NewEthereum(
 	rpcClient *ethrpc.Client,
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Ethereum,
-	logger pkglogger.Logger,
+	logger logger.Logger,
 ) (*Ethereum, error) {
 	eth := &Ethereum{
 		ethClient:    ethClient,

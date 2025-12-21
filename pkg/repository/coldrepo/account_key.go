@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
 	"github.com/pkg/errors"
 	"github.com/volatiletech/null"
@@ -36,12 +36,12 @@ type AccountKeyRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
-	logger       pkglogger.Logger
+	logger       logger.Logger
 }
 
 // NewAccountKeyRepository returns AccountKeyRepository object
 func NewAccountKeyRepository(
-	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger pkglogger.Logger,
+	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger logger.Logger,
 ) *AccountKeyRepository {
 	return &AccountKeyRepository{
 		dbConn:       dbConn,

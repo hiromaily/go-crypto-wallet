@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -24,7 +24,7 @@ type XRPKeyGenerator interface {
 // XRPKeyGenerate type
 type XRPKeyGenerate struct {
 	xrp               xrpgrp.Rippler
-	logger            pkglogger.Logger
+	logger            logger.Logger
 	dbConn            *sql.DB
 	coinTypeCode      coin.CoinTypeCode
 	wtype             wallet.WalletType
@@ -35,7 +35,7 @@ type XRPKeyGenerate struct {
 // NewXRPKeyGenerate returns XRPKeyGenerate object
 func NewXRPKeyGenerate(
 	xrpAPI xrpgrp.Rippler,
-	logger pkglogger.Logger,
+	logger logger.Logger,
 	dbConn *sql.DB,
 	coinTypeCode coin.CoinTypeCode,
 	wtype wallet.WalletType,

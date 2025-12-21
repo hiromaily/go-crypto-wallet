@@ -5,7 +5,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	wtype "github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -16,7 +16,7 @@ import (
 type BTCWatch struct {
 	BTC      btcgrp.Bitcoiner
 	dbConn   *sql.DB
-	logger   pkglogger.Logger
+	logger   logger.Logger
 	addrType address.AddrType
 	wtype    wtype.WalletType
 	service.AddressImporter
@@ -30,7 +30,7 @@ type BTCWatch struct {
 func NewBTCWatch(
 	btc btcgrp.Bitcoiner,
 	dbConn *sql.DB,
-	logger pkglogger.Logger,
+	logger logger.Logger,
 	addrType address.AddrType,
 	addrImporter service.AddressImporter,
 	txCreator service.TxCreator,

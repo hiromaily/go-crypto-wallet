@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -29,7 +29,7 @@ type AuthAccountKeyRepository struct {
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
 	authType     account.AuthType
-	logger       pkglogger.Logger
+	logger       logger.Logger
 }
 
 // NewAuthAccountKeyRepository returns AuthAccountKeyRepository object
@@ -37,7 +37,7 @@ func NewAuthAccountKeyRepository(
 	dbConn *sql.DB,
 	coinTypeCode coin.CoinTypeCode,
 	authType account.AuthType,
-	logger pkglogger.Logger,
+	logger logger.Logger,
 ) *AuthAccountKeyRepository {
 	return &AuthAccountKeyRepository{
 		dbConn:       dbConn,

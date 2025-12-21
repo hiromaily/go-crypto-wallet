@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -29,11 +29,11 @@ type TxRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
-	logger       pkglogger.Logger
+	logger       logger.Logger
 }
 
 // NewTxRepository returns TxRepository object
-func NewTxRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger pkglogger.Logger) *TxRepository {
+func NewTxRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger logger.Logger) *TxRepository {
 	return &TxRepository{
 		dbConn:       dbConn,
 		tableName:    "tx",

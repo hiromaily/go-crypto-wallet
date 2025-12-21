@@ -6,7 +6,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
@@ -21,7 +21,7 @@ type PrivKeyer interface {
 // PrivKey type
 type PrivKey struct {
 	btc         btcgrp.Bitcoiner
-	logger      pkglogger.Logger
+	logger      logger.Logger
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier
 	authType    account.AuthType
 	wtype       wallet.WalletType
@@ -30,7 +30,7 @@ type PrivKey struct {
 // NewPrivKey returns privKey object
 func NewPrivKey(
 	btc btcgrp.Bitcoiner,
-	logger pkglogger.Logger,
+	logger logger.Logger,
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
 	authType account.AuthType,
 	wtype wallet.WalletType,

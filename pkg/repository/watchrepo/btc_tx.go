@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
 	"github.com/pkg/errors"
 	"github.com/volatiletech/null"
@@ -37,11 +37,11 @@ type BTCTxRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
-	logger       pkglogger.Logger
+	logger       logger.Logger
 }
 
 // NewBTCTxRepository returns BTCTxRepository object
-func NewBTCTxRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger pkglogger.Logger) *BTCTxRepository {
+func NewBTCTxRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger logger.Logger) *BTCTxRepository {
 	return &BTCTxRepository{
 		dbConn:       dbConn,
 		tableName:    "btc_tx",

@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
@@ -29,12 +29,12 @@ type XRPAccountKeyRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
-	logger       pkglogger.Logger
+	logger       logger.Logger
 }
 
 // NewXRPAccountKeyRepository returns XRPAccountKeyRepository object
 func NewXRPAccountKeyRepository(
-	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger pkglogger.Logger,
+	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger logger.Logger,
 ) *XRPAccountKeyRepository {
 	return &XRPAccountKeyRepository{
 		dbConn:       dbConn,

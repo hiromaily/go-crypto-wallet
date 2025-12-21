@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	wtype "github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
@@ -15,7 +15,7 @@ import (
 type ETHKeygen struct {
 	ETH    ethgrp.Ethereumer
 	dbConn *sql.DB
-	logger pkglogger.Logger
+	logger logger.Logger
 	wtype  wtype.WalletType
 	service.Seeder
 	service.HDWalleter
@@ -28,7 +28,7 @@ type ETHKeygen struct {
 func NewETHKeygen(
 	eth ethgrp.Ethereumer,
 	dbConn *sql.DB,
-	logger pkglogger.Logger,
+	logger logger.Logger,
 	walletType wtype.WalletType,
 	seeder service.Seeder,
 	hdWallter service.HDWalleter,

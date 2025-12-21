@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
@@ -37,7 +37,7 @@ func NewBitcoinCash(
 	client *rpcclient.Client,
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Bitcoin,
-	logger pkglogger.Logger,
+	logger logger.Logger,
 ) (*BitcoinCash, error) {
 	// bitcoin base
 	bit, err := btc.NewBitcoin(client, coinTypeCode, conf, logger)

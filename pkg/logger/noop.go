@@ -1,4 +1,4 @@
-package pkglogger
+package logger
 
 //
 // Noop Logger

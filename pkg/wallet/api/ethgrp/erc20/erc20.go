@@ -13,7 +13,7 @@ import (
 	"golang.org/x/crypto/sha3"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/contract"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/ethtx"
@@ -31,7 +31,7 @@ type ERC20 struct {
 	contractAddress string
 	masterAddress   string
 	decimals        int
-	logger          pkglogger.Logger
+	logger          logger.Logger
 }
 
 func NewERC20(
@@ -42,7 +42,7 @@ func NewERC20(
 	contractAddress string,
 	masterAddress string,
 	decimals int,
-	logger pkglogger.Logger,
+	logger logger.Logger,
 ) *ERC20 {
 	return &ERC20{
 		client:          client,

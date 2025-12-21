@@ -6,7 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -16,7 +16,7 @@ import (
 // TxSend type
 type TxSend struct {
 	eth          ethgrp.Ethereumer
-	logger       pkglogger.Logger
+	logger       logger.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier // not used
 	txRepo       watchrepo.TxRepositorier      // not used
@@ -28,7 +28,7 @@ type TxSend struct {
 // NewTxSend returns TxSend object
 func NewTxSend(
 	eth ethgrp.Ethereumer,
-	logger pkglogger.Logger,
+	logger logger.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.TxRepositorier,

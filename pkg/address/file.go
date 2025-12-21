@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // FileRepositorier is address storage interface
@@ -24,11 +24,11 @@ type FileRepositorier interface {
 // FileRepository is repository to store pubkey as csv file
 type FileRepository struct {
 	filePath string
-	logger   pkglogger.Logger
+	logger   logger.Logger
 }
 
 // NewFileRepository returns FileRepository
-func NewFileRepository(filePath string, logger pkglogger.Logger) *FileRepository {
+func NewFileRepository(filePath string, logger logger.Logger) *FileRepository {
 	return &FileRepository{
 		filePath: filePath,
 		logger:   logger,

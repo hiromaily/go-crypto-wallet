@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
 	"github.com/pkg/errors"
 	"github.com/volatiletech/null"
@@ -31,11 +31,11 @@ type AddressRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
-	logger       pkglogger.Logger
+	logger       logger.Logger
 }
 
 // NewAddressRepository returns AddressRepository object
-func NewAddressRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger pkglogger.Logger) *AddressRepository {
+func NewAddressRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger logger.Logger) *AddressRepository {
 	return &AddressRepository{
 		dbConn:       dbConn,
 		tableName:    "address",

@@ -3,7 +3,7 @@ package xrp
 import (
 	"google.golang.org/grpc"
 
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // RippleAPI it RippleAPI client
@@ -12,13 +12,13 @@ type RippleAPI struct {
 	accountClient RippleAccountAPIClient
 	addressClient RippleAddressAPIClient
 	conn          *grpc.ClientConn
-	logger        pkglogger.Logger
+	logger        logger.Logger
 }
 
 // NewRippleAPI creates Ripple API object
 func NewRippleAPI(
 	conn *grpc.ClientConn,
-	logger pkglogger.Logger,
+	logger logger.Logger,
 ) *RippleAPI {
 	return &RippleAPI{
 		txClient:      NewRippleTransactionAPIClient(conn),

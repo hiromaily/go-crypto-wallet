@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
@@ -32,7 +32,7 @@ func GetXRP() (xrpgrp.Rippler, error) {
 	conf.CoinTypeCode = coin.XRP
 
 	// logger
-	log := pkglogger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
+	log := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 	// ws client
 	wsClient, wsAdmin, err := xrpgrp.NewWSClient(&conf.Ripple)
 	if err != nil {
@@ -74,7 +74,7 @@ func GetXRP() (xrpgrp.Rippler, error) {
 //	if conn == nil {
 //		log.Fatal("connection is nil")
 //	}
-//	logger := pkglogger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
+//	logger := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 //	api = xrp.NewRippleAPI(conn, logger)
 //
 //	return api

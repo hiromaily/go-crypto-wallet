@@ -6,7 +6,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -33,7 +33,7 @@ func NewTxRepository() watchrepo.BTCTxRepositorier {
 	// TODO: if config should be overridden, here
 
 	// logger
-	zapLog := pkglogger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
+	zapLog := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 
 	// db
 	db, err := mysql.NewMySQL(&conf.MySQL)
@@ -60,7 +60,7 @@ func NewAccountKeyRepository() coldrepo.AccountKeyRepositorier {
 	// TODO: if config should be overridden, here
 
 	// logger
-	zapLogger := pkglogger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
+	zapLogger := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 
 	// db
 	db, err := mysql.NewMySQL(&conf.MySQL)

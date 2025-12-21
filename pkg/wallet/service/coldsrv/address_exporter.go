@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
 	"github.com/pkg/errors"
 
@@ -19,7 +19,7 @@ import (
 
 // AddressExport type
 type AddressExport struct {
-	logger          pkglogger.Logger
+	logger          logger.Logger
 	accountKeyRepo  coldrepo.AccountKeyRepositorier
 	addrFileRepo    address.FileRepositorier
 	multisigAccount account.MultisigAccounter
@@ -29,7 +29,7 @@ type AddressExport struct {
 
 // NewAddressExport returns addressExport
 func NewAddressExport(
-	logger pkglogger.Logger,
+	logger logger.Logger,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	addrFileRepo address.FileRepositorier,
 	multisigAccount account.MultisigAccounter,

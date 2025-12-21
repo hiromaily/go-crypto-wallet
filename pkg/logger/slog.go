@@ -1,4 +1,4 @@
-package pkglogger
+package logger
 
 import (
 	"log/slog"

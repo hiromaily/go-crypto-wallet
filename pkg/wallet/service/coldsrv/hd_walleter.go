@@ -3,7 +3,7 @@ package coldsrv
 import (
 	"github.com/pkg/errors"
 
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
@@ -15,7 +15,7 @@ import (
 
 // HDWallet type
 type HDWallet struct {
-	logger       pkglogger.Logger
+	logger       logger.Logger
 	repo         HDWalletRepo
 	keygen       key.Generator
 	coinTypeCode coin.CoinTypeCode
@@ -24,7 +24,7 @@ type HDWallet struct {
 
 // NewHDWallet returns hdWallet object
 func NewHDWallet(
-	logger pkglogger.Logger,
+	logger logger.Logger,
 	repo HDWalletRepo,
 	keygen key.Generator,
 	coinTypeCode coin.CoinTypeCode,

@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
 	"github.com/pkg/errors"
 	"github.com/volatiletech/null"
@@ -36,12 +36,12 @@ type XrpDetailTxInputRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
-	logger       pkglogger.Logger
+	logger       logger.Logger
 }
 
 // NewXrpDetailTxInputRepository returns XrpDetailTxInputRepository object
 func NewXrpDetailTxInputRepository(
-	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger pkglogger.Logger,
+	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger logger.Logger,
 ) *XrpDetailTxInputRepository {
 	return &XrpDetailTxInputRepository{
 		dbConn:       dbConn,
