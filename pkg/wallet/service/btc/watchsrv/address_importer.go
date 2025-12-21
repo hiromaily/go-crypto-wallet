@@ -5,10 +5,10 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -19,7 +19,7 @@ import (
 // AddressImport type
 type AddressImport struct {
 	btc          btcgrp.Bitcoiner
-	logger       *zap.Logger
+	logger       pkglogger.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier
 	addrFileRepo address.FileRepositorier
@@ -31,7 +31,7 @@ type AddressImport struct {
 // NewAddressImport returns AddressImport object
 func NewAddressImport(
 	btc btcgrp.Bitcoiner,
-	logger *zap.Logger,
+	logger pkglogger.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	addrFileRepo address.FileRepositorier,
@@ -104,9 +104,9 @@ func (a *AddressImport) ImportAddress(fileName string, isRescan bool) error {
 			//-4: The wallet already contains the private key for this address or script
 			a.logger.Warn(
 				"fail to call btc.ImportAddressWithLabel() but continue following addresses",
-				zap.String("address", targetAddr),
-				zap.String("account_type", addrFmt.AccountType.String()),
-				zap.Error(err))
+				"address", targetAddr,
+				"account_type", addrFmt.AccountType.String(),
+				"error", err)
 			continue
 		}
 
@@ -138,13 +138,13 @@ func (a *AddressImport) checkImportedPubKey(addr string) {
 	if err != nil {
 		a.logger.Error(
 			"fail to call btc.GetAddressInfo()",
-			zap.String("address", addr),
-			zap.Error(err))
+			"address", addr,
+			"error", err)
 		return
 	}
 	a.logger.Debug("account is found",
-		zap.String("account", addrInfo.GetLabelName()),
-		zap.String("address", addr))
+		"account", addrInfo.GetLabelName(),
+		"address", addr)
 
 	// `watch only wallet` is expected
 	// TODO: if wallet,keygen,sign is working on only one bitcoin core server,

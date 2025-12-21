@@ -4,9 +4,9 @@ import (
 	"database/sql"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -16,7 +16,7 @@ import (
 // TxSend type
 type TxSend struct {
 	btc          btcgrp.Bitcoiner
-	logger       *zap.Logger
+	logger       pkglogger.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier
 	txRepo       watchrepo.BTCTxRepositorier
@@ -28,7 +28,7 @@ type TxSend struct {
 // NewTxSend returns TxSend object
 func NewTxSend(
 	btc btcgrp.Bitcoiner,
-	logger *zap.Logger,
+	logger pkglogger.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.BTCTxRepositorier,
@@ -57,7 +57,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 		return "", errors.Wrap(err, "fail to call txFileRepo.ValidateFilePath()")
 	}
 
-	t.logger.Debug("send_tx", zap.String("action_type", actionType.String()))
+	t.logger.Debug("send_tx", "action_type", actionType.String())
 
 	// read hex from file
 	signedHex, err := t.txFileRepo.ReadFile(filePath)
@@ -85,21 +85,21 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 		t.logger.Warn(
 			"fail to call repo.Tx().UpdateAfterTxSent() but tx is already sent. "+
 				"So database should be updated manually",
-			zap.Int64("tx_id", txID),
-			zap.String("tx_type", tx.TxTypeSent.String()),
-			zap.Int8("tx_type_vakue", tx.TxTypeSent.Int8()),
-			zap.String("signed_hex_tx", signedHex),
-			zap.String("sent_hash_tx", hash.String()),
+			"tx_id", txID,
+			"tx_type", tx.TxTypeSent.String(),
+			"tx_type_vakue", tx.TxTypeSent.Int8(),
+			"signed_hex_tx", signedHex,
+			"sent_hash_tx", hash.String(),
 		)
 		return "", errors.Wrapf(err, "fail to call updateHexForSentTx(), but tx is sent. txID: %d", txID)
 	}
 	if affectedNum == 0 {
 		t.logger.Info("no records to update tx_table",
-			zap.Int64("tx_id", txID),
-			zap.String("tx_type", tx.TxTypeSent.String()),
-			zap.Int8("tx_type_vakue", tx.TxTypeSent.Int8()),
-			zap.String("signed_hex_tx", signedHex),
-			zap.String("sent_hash_tx", hash.String()),
+			"tx_id", txID,
+			"tx_type", tx.TxTypeSent.String(),
+			"tx_type_vakue", tx.TxTypeSent.Int8(),
+			"signed_hex_tx", signedHex,
+			"sent_hash_tx", hash.String(),
 		)
 		return "", nil
 	}

@@ -4,7 +4,6 @@ import (
 	"math/big"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -22,8 +21,8 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 	receiver := t.depositReceiver
 	targetAction := action.ActionTypeDeposit
 	t.logger.Debug("account",
-		zap.String("sender", sender.String()),
-		zap.String("receiver", receiver.String()),
+		"sender", sender.String(),
+		"receiver", receiver.String(),
 	)
 
 	userAmounts, err := t.getUserAmounts(sender)
@@ -45,8 +44,8 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 
 	txID, err := t.updateDB(targetAction, txDetailItems, nil)
 	t.logger.Debug("update result",
-		zap.Int64("txID", txID),
-		zap.Error(err),
+		"txID", txID,
+		"error", err,
 	)
 	if err != nil {
 		return "", "", err
@@ -81,8 +80,8 @@ func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]eth.UserAmount,
 		balance, err = t.eth.GetBalance(addr.WalletAddress, eth.QuantityTagLatest)
 		if err != nil {
 			t.logger.Warn("fail to call .GetBalance()",
-				zap.String("address", addr.WalletAddress),
-				zap.Error(err),
+				"address", addr.WalletAddress,
+				"error", err,
 			)
 		} else if balance.Uint64() != 0 {
 			userAmounts = append(userAmounts, eth.UserAmount{Address: addr.WalletAddress, Amount: balance.Uint64()})
@@ -118,7 +117,7 @@ func (t *TxCreate) createDepositRawTransactions(
 		// additionalNonce++
 
 		rawTxHex := rawTx.TxHex
-		t.logger.Debug("rawTxHex", zap.String("rawTxHex", rawTxHex))
+		t.logger.Debug("rawTxHex", "rawTxHex", rawTxHex)
 
 		var serializedTx string
 		serializedTx, err = serial.EncodeToString(rawTx)

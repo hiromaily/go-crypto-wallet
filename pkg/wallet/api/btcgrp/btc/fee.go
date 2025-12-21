@@ -7,7 +7,6 @@ import (
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 // EstimateSmartFeeResult is response type of PRC `estimatesmartfee`
@@ -67,12 +66,12 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 	if err != nil {
 		return 0, err
 	}
-	// b.logger.Debug("called GetTransactionFee()", zap.Any("fee", fee)) //0.000208 BTC
+	// b.logger.Debug("called GetTransactionFee()", "fee", fee) //0.000208 BTC
 
 	// if response doesn't meet minimum fee, it should be overridden
 	relayFee, err := b.getMinRelayFee()
 	if err != nil {
-		b.logger.Warn("fail to call btc.getMinRelayFee() but continue", zap.Error(err))
+		b.logger.Warn("fail to call btc.getMinRelayFee() but continue", "error", err)
 	} else if fee < relayFee {
 		fee = relayFee
 	}
@@ -82,9 +81,9 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 		var newFee btcutil.Amount
 		newFee, err = b.calculateNewFee(fee, adjustmentFee)
 		if err != nil {
-			b.logger.Warn("fail to call btc.calculateNewFee() but continue", zap.Error(err))
+			b.logger.Warn("fail to call btc.calculateNewFee() but continue", "error", err)
 		}
-		b.logger.Debug("called btc.calculateNewFee()", zap.Any("adjusted newFee", newFee)) // 0.000208 BTC
+		b.logger.Debug("called btc.calculateNewFee()", "adjusted newFee", newFee) // 0.000208 BTC
 		fee = newFee
 	}
 

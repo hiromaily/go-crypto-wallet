@@ -5,11 +5,12 @@ import (
 	"database/sql"
 	"time"
 
+	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+
 	"github.com/pkg/errors"
 	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
@@ -35,11 +36,13 @@ type AccountKeyRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
-	logger       *zap.Logger
+	logger       pkglogger.Logger
 }
 
 // NewAccountKeyRepository returns AccountKeyRepository object
-func NewAccountKeyRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *AccountKeyRepository {
+func NewAccountKeyRepository(
+	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger pkglogger.Logger,
+) *AccountKeyRepository {
 	return &AccountKeyRepository{
 		dbConn:       dbConn,
 		tableName:    "account_key",

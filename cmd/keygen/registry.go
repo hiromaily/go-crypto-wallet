@@ -8,14 +8,13 @@ import (
 	"github.com/btcsuite/btcd/rpcclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/volatiletech/sqlboiler/v4/boil"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -47,7 +46,7 @@ type registry struct {
 	conf         *config.WalletRoot
 	accountConf  *account.AccountRoot
 	walletType   wallet.WalletType
-	logger       *zap.Logger
+	logger       pkglogger.Logger
 	btc          btcgrp.Bitcoiner
 	eth          ethgrp.Ethereumer
 	xrp          xrpgrp.Rippler
@@ -354,9 +353,9 @@ func (r *registry) newXRP() xrpgrp.Rippler {
 	return r.xrp
 }
 
-func (r *registry) newLogger() *zap.Logger {
+func (r *registry) newLogger() pkglogger.Logger {
 	if r.logger == nil {
-		r.logger = logger.NewZapLogger(&r.conf.Logger)
+		r.logger = pkglogger.NewSlogFromConfig(r.conf.Logger.Env, r.conf.Logger.Level, r.conf.Logger.Service)
 	}
 	return r.logger
 }

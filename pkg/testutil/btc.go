@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -31,7 +31,7 @@ func GetBTC() (btcgrp.Bitcoiner, error) {
 	conf.CoinTypeCode = coin.BTC
 
 	// logger
-	log := logger.NewZapLogger(&conf.Logger)
+	log := pkglogger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 	// client
 	client, err := btcgrp.NewRPCClient(&conf.Bitcoin)
 	if err != nil {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
+	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -17,7 +17,7 @@ import (
 // Sign type
 type Sign struct {
 	eth        ethgrp.Ethereumer
-	logger     *zap.Logger
+	logger     pkglogger.Logger
 	txFileRepo tx.FileRepositorier
 	wtype      wallet.WalletType
 }
@@ -25,7 +25,7 @@ type Sign struct {
 // NewSign returns sign object
 func NewSign(
 	ethAPI ethgrp.Ethereumer,
-	logger *zap.Logger,
+	logger pkglogger.Logger,
 	txFileRepo tx.FileRepositorier,
 	wtype wallet.WalletType,
 ) *Sign {

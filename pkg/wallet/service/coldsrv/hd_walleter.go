@@ -2,7 +2,8 @@ package coldsrv
 
 import (
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
+
+	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
@@ -14,7 +15,7 @@ import (
 
 // HDWallet type
 type HDWallet struct {
-	logger       *zap.Logger
+	logger       pkglogger.Logger
 	repo         HDWalletRepo
 	keygen       key.Generator
 	coinTypeCode coin.CoinTypeCode
@@ -23,7 +24,7 @@ type HDWallet struct {
 
 // NewHDWallet returns hdWallet object
 func NewHDWallet(
-	logger *zap.Logger,
+	logger pkglogger.Logger,
 	repo HDWalletRepo,
 	keygen key.Generator,
 	coinTypeCode coin.CoinTypeCode,
@@ -43,7 +44,7 @@ func (h *HDWallet) Generate(
 	accountType account.AccountType,
 	seed []byte, count uint32,
 ) ([]key.WalletKey, error) {
-	h.logger.Debug("generate HDWallet", zap.String("account_type", accountType.String()))
+	h.logger.Debug("generate HDWallet", "account_type", accountType.String())
 
 	// get latest index
 	idxFrom, err := h.repo.GetMaxIndex(accountType)
@@ -52,8 +53,8 @@ func (h *HDWallet) Generate(
 		return nil, nil
 	}
 	h.logger.Debug("max_index",
-		zap.String("account_type", accountType.String()),
-		zap.Int64("current_index", idxFrom),
+		"account_type", accountType.String(),
+		"current_index", idxFrom,
 	)
 
 	// generate hd wallet key

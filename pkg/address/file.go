@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // FileRepositorier is address storage interface
@@ -24,11 +24,11 @@ type FileRepositorier interface {
 // FileRepository is repository to store pubkey as csv file
 type FileRepository struct {
 	filePath string
-	logger   *zap.Logger
+	logger   pkglogger.Logger
 }
 
 // NewFileRepository returns FileRepository
-func NewFileRepository(filePath string, logger *zap.Logger) *FileRepository {
+func NewFileRepository(filePath string, logger pkglogger.Logger) *FileRepository {
 	return &FileRepository{
 		filePath: filePath,
 		logger:   logger,

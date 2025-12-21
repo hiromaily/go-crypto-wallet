@@ -1,4 +1,4 @@
-package logger
+package pkglogger
 
 import (
 	"io"
@@ -6,8 +6,6 @@ import (
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-
-	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 
 // LogEnv dev/prod/custom
@@ -86,10 +84,10 @@ func getLogLevel(level string) zapcore.LevelEnabler {
 }
 
 // NewZapLogger returns *zap.Logger
-func NewZapLogger(conf *config.Logger) *zap.Logger {
+func NewZapLogger(env, level, service string, isLogger bool) *zap.Logger {
 	return NewLoggerWithWriter(
 		os.Stdout,
-		LogEnv(conf.Env),
-		getLogLevel(conf.Level),
-		conf.IsLogger).Named(conf.Service)
+		LogEnv(env),
+		getLogLevel(level),
+		isLogger).Named(service)
 }

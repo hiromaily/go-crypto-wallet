@@ -324,7 +324,7 @@ func (e *Ethereum) GetUncleCountByBlockNumber(blockNumber uint64) (*big.Int, err
 //	if err != nil {
 //		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_getCode)")
 //	}
-//	e.logger.Debug("code", zap.String("code", code))
+//	e.logger.Debug("code", "code", code)
 //	if code == "0x" {
 //		code = "0x0"
 //	}

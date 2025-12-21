@@ -5,8 +5,9 @@ import (
 	"os"
 	"strings"
 
+	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
@@ -18,7 +19,7 @@ import (
 
 // AddressExport type
 type AddressExport struct {
-	logger          *zap.Logger
+	logger          pkglogger.Logger
 	accountKeyRepo  coldrepo.AccountKeyRepositorier
 	addrFileRepo    address.FileRepositorier
 	multisigAccount account.MultisigAccounter
@@ -28,7 +29,7 @@ type AddressExport struct {
 
 // NewAddressExport returns addressExport
 func NewAddressExport(
-	logger *zap.Logger,
+	logger pkglogger.Logger,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	addrFileRepo address.FileRepositorier,
 	multisigAccount account.MultisigAccounter,

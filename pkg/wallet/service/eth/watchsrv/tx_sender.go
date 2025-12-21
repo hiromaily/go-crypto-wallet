@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
+	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -16,7 +16,7 @@ import (
 // TxSend type
 type TxSend struct {
 	eth          ethgrp.Ethereumer
-	logger       *zap.Logger
+	logger       pkglogger.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier // not used
 	txRepo       watchrepo.TxRepositorier      // not used
@@ -28,7 +28,7 @@ type TxSend struct {
 // NewTxSend returns TxSend object
 func NewTxSend(
 	eth ethgrp.Ethereumer,
-	logger *zap.Logger,
+	logger pkglogger.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.TxRepositorier,
@@ -57,7 +57,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 		return "", errors.Wrap(err, "fail to call txFileRepo.ValidateFilePath()")
 	}
 
-	t.logger.Debug("send_tx", zap.String("action_type", actionType.String()))
+	t.logger.Debug("send_tx", "action_type", actionType.String())
 
 	// read hex from file
 	data, err := t.txFileRepo.ReadFileSlice(filePath)
@@ -81,13 +81,13 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 		sentTx, err = t.eth.SendSignedRawTransaction(signedTx)
 		if err != nil {
 			t.logger.Warn("fail to call eth.SendSignedRawTransaction()",
-				zap.Error(err),
+				"error", err,
 			)
 			continue
 		}
 		if sentTx == "" {
 			t.logger.Warn("no sentTx by calling eth.SendSignedRawTransaction()",
-				zap.Error(err),
+				"error", err,
 			)
 			continue
 		}
@@ -100,21 +100,21 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			t.logger.Warn(
 				"fail to call repo.Tx().UpdateAfterTxSent() but tx is already sent. "+
 					"So database should be updated manually",
-				zap.Int64("tx_id", txID),
-				zap.String("tx_type", tx.TxTypeSent.String()),
-				zap.Int8("tx_type_value", tx.TxTypeSent.Int8()),
-				zap.String("signed_hex_tx", signedTx),
-				zap.String("sent_hash_tx", sentTx),
+				"tx_id", txID,
+				"tx_type", tx.TxTypeSent.String(),
+				"tx_type_value", tx.TxTypeSent.Int8(),
+				"signed_hex_tx", signedTx,
+				"sent_hash_tx", sentTx,
 			)
 			continue
 		}
 		if affectedNum == 0 {
 			t.logger.Info("no records to update tx_table",
-				zap.Int64("tx_id", txID),
-				zap.String("tx_type", tx.TxTypeSent.String()),
-				zap.Int8("tx_type_value", tx.TxTypeSent.Int8()),
-				zap.String("signed_hex_tx", signedTx),
-				zap.String("sent_hash_tx", sentTx),
+				"tx_id", txID,
+				"tx_type", tx.TxTypeSent.String(),
+				"tx_type_value", tx.TxTypeSent.Int8(),
+				"signed_hex_tx", signedTx,
+				"sent_hash_tx", sentTx,
 			)
 			continue
 		}

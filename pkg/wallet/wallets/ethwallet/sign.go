@@ -3,8 +3,7 @@ package ethwallet
 import (
 	"database/sql"
 
-	"go.uber.org/zap"
-
+	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	wtype "github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
@@ -14,7 +13,7 @@ import (
 type ETHSign struct {
 	ETH    ethgrp.Ethereumer
 	dbConn *sql.DB
-	logger *zap.Logger
+	logger pkglogger.Logger
 	wtype  wtype.WalletType
 }
 
@@ -22,7 +21,7 @@ type ETHSign struct {
 func NewETHSign(
 	eth ethgrp.Ethereumer,
 	dbConn *sql.DB,
-	logger *zap.Logger,
+	logger pkglogger.Logger,
 	walletType wtype.WalletType,
 ) *ETHSign {
 	return &ETHSign{

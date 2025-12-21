@@ -4,10 +4,11 @@ import (
 	"context"
 	"database/sql"
 
+	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
+
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
-	"go.uber.org/zap"
 
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -26,11 +27,13 @@ type TxInputRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
-	logger       *zap.Logger
+	logger       pkglogger.Logger
 }
 
 // NewBTCTxInputRepository returns TxInputRepository object
-func NewBTCTxInputRepository(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger) *TxInputRepository {
+func NewBTCTxInputRepository(
+	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger pkglogger.Logger,
+) *TxInputRepository {
 	return &TxInputRepository{
 		dbConn:       dbConn,
 		tableName:    "btc_tx_input",

@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/btcsuite/btcd/chaincfg"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/ws"
 )
@@ -18,7 +18,7 @@ type Ripple struct {
 	API          *RippleAPI
 	chainConf    *chaincfg.Params
 	coinTypeCode coin.CoinTypeCode // eth
-	logger       *zap.Logger
+	logger       pkglogger.Logger
 	ctx          context.Context
 }
 
@@ -30,7 +30,7 @@ func NewRipple(
 	api *RippleAPI,
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Ripple,
-	logger *zap.Logger,
+	logger pkglogger.Logger,
 ) (*Ripple, error) {
 	xrp := &Ripple{
 		wsPublic:     wsPublic,

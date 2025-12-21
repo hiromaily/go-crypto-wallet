@@ -6,7 +6,6 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -47,8 +46,8 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	}
 
 	t.logger.Debug("amount",
-		zap.Float64("floatValue", floatValue),
-		zap.Float64("senderBalance", senderBalance),
+		"floatValue", floatValue,
+		"senderBalance", senderBalance,
 	)
 
 	// get receiver address
@@ -68,7 +67,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 			err, "fail to call xrp.CreateRawTransaction(), sender address: %s",
 			senderAddr.WalletAddress)
 	}
-	t.logger.Debug("txJSON", zap.Any("txJSON", txJSON))
+	t.logger.Debug("txJSON", "txJSON", txJSON)
 	grok.Value(txJSON)
 
 	// generate UUID to trace transaction because unsignedTx is not unique

@@ -10,10 +10,10 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
-	"go.uber.org/zap"
 	"golang.org/x/crypto/sha3"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/contract"
+	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/ethtx"
@@ -31,7 +31,7 @@ type ERC20 struct {
 	contractAddress string
 	masterAddress   string
 	decimals        int
-	logger          *zap.Logger
+	logger          pkglogger.Logger
 }
 
 func NewERC20(
@@ -42,7 +42,7 @@ func NewERC20(
 	contractAddress string,
 	masterAddress string,
 	decimals int,
-	logger *zap.Logger,
+	logger pkglogger.Logger,
 ) *ERC20 {
 	return &ERC20{
 		client:          client,
@@ -125,16 +125,16 @@ func (e *ERC20) CreateRawTransaction(
 		return nil, nil, errors.New("address validation error")
 	}
 	e.logger.Debug("eth.CreateRawTransaction()",
-		zap.String("fromAddr", fromAddr),
-		zap.String("toAddr", toAddr),
-		zap.Uint64("amount", amount),
+		"fromAddr", fromAddr,
+		"toAddr", toAddr,
+		"amount", amount,
 	)
 
 	balance, err := e.GetBalance(fromAddr, "")
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "fail to call eth.GetBalance()")
 	}
-	e.logger.Info("balance", zap.Int64("balance", balance.Int64()))
+	e.logger.Info("balance", "balance", balance.Int64())
 	if balance.Uint64() < amount {
 		return nil, nil, errors.New("balance is short to send token")
 	}
@@ -161,10 +161,10 @@ func (e *ERC20) CreateRawTransaction(
 	}
 
 	e.logger.Debug("comparison",
-		zap.Uint64("Nonce", nonce),
-		zap.Uint64("TokenAmount", tokenAmount.Uint64()),
-		zap.Uint64("GasLimit", gasLimit),
-		zap.Uint64("GasPrice", gasPrice.Uint64()),
+		"Nonce", nonce,
+		"TokenAmount", tokenAmount.Uint64(),
+		"GasLimit", gasLimit,
+		"GasPrice", gasPrice.Uint64(),
 	)
 
 	// create transaction
@@ -260,7 +260,7 @@ func (e *ERC20) getNonce(fromAddr string, additionalNonce int) (uint64, error) {
 	nonce += uint64(additionalNonce)
 
 	e.logger.Debug("nonce",
-		zap.Uint64("client.PendingNonceAt(e.ctx, common.HexToAddress(fromAddr))", nonce),
+		"client.PendingNonceAt(e.ctx, common.HexToAddress(fromAddr))", nonce,
 	)
 	return nonce, nil
 }

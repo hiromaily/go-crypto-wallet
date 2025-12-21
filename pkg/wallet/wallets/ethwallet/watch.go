@@ -3,9 +3,8 @@ package ethwallet
 import (
 	"database/sql"
 
-	"go.uber.org/zap"
-
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	wtype "github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -18,7 +17,7 @@ import (
 type ETHWatch struct {
 	ETH    ethgrp.Ethereumer
 	dbConn *sql.DB
-	logger *zap.Logger
+	logger pkglogger.Logger
 	wtype  wtype.WalletType
 	watchsrv.AddressImporter
 	ethsrv.TxCreator
@@ -31,7 +30,7 @@ type ETHWatch struct {
 func NewETHWatch(
 	eth ethgrp.Ethereumer,
 	dbConn *sql.DB,
-	logger *zap.Logger,
+	logger pkglogger.Logger,
 	addrImporter watchsrv.AddressImporter,
 	txCreator ethsrv.TxCreator,
 	txSender service.TxSender,

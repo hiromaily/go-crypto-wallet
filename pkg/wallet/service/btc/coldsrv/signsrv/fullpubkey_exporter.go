@@ -5,11 +5,11 @@ import (
 	"os"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/fullpubkey"
+	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -18,7 +18,7 @@ import (
 
 // FullPubkeyExport type
 type FullPubkeyExport struct {
-	logger         *zap.Logger
+	logger         pkglogger.Logger
 	authKeyRepo    coldrepo.AuthAccountKeyRepositorier
 	pubkeyFileRepo address.FileRepositorier
 	coinTypeCode   coin.CoinTypeCode
@@ -28,7 +28,7 @@ type FullPubkeyExport struct {
 
 // NewFullPubkeyExport returns fullPubkeyExport
 func NewFullPubkeyExport(
-	logger *zap.Logger,
+	logger pkglogger.Logger,
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
 	pubkeyFileRepo address.FileRepositorier,
 	coinTypeCode coin.CoinTypeCode,

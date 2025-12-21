@@ -8,9 +8,9 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
@@ -20,7 +20,7 @@ type Ethereum struct {
 	rpcClient    *ethrpc.Client
 	chainConf    *chaincfg.Params
 	coinTypeCode coin.CoinTypeCode
-	logger       *zap.Logger
+	logger       pkglogger.Logger
 	ctx          context.Context
 	netID        uint16
 	version      string
@@ -35,7 +35,7 @@ func NewEthereum(
 	rpcClient *ethrpc.Client,
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Ethereum,
-	logger *zap.Logger,
+	logger pkglogger.Logger,
 ) (*Ethereum, error) {
 	eth := &Ethereum{
 		ethClient:    ethClient,
@@ -54,7 +54,7 @@ func NewEthereum(
 		}
 		eth.keyDir = dirName + "/keystore"
 	}
-	logger.Debug("eth.keyDir", zap.String("eth.keyDir", eth.keyDir))
+	logger.Debug("eth.keyDir", "eth.keyDir", eth.keyDir)
 
 	// get NetID
 	netID, err := eth.NetVersion()
@@ -88,9 +88,9 @@ func NewEthereum(
 	}
 	if res != nil {
 		logger.Info("still syncing",
-			zap.Int64("startingBlock", res.StartingBlock),
-			zap.Int64("currentBlock", res.CurrentBlock),
-			zap.Int64("highestBlock", res.HighestBlock),
+			"startingBlock", res.StartingBlock,
+			"currentBlock", res.CurrentBlock,
+			"highestBlock", res.HighestBlock,
 		)
 	}
 

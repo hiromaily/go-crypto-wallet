@@ -13,12 +13,12 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 	"golang.org/x/crypto/ripemd160" //nolint:staticcheck,gosec
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	bchaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/bch"
 	xrpaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/xrp"
+	pkglogger "github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
@@ -85,11 +85,13 @@ type HDKey struct {
 	coinType     coin.CoinType
 	coinTypeCode coin.CoinTypeCode
 	conf         *chaincfg.Params
-	logger       *zap.Logger
+	logger       pkglogger.Logger
 }
 
 // NewHDKey returns Key
-func NewHDKey(purpose PurposeType, coinTypeCode coin.CoinTypeCode, conf *chaincfg.Params, logger *zap.Logger) *HDKey {
+func NewHDKey(
+	purpose PurposeType, coinTypeCode coin.CoinTypeCode, conf *chaincfg.Params, logger pkglogger.Logger,
+) *HDKey {
 	keyData := HDKey{
 		purpose:      purpose,
 		coinType:     coinTypeCode.CoinType(conf),
@@ -134,8 +136,8 @@ func (k *HDKey) createKeyByAccount(
 	// Account
 	k.logger.Debug(
 		"create_key_by_account",
-		zap.String("account_type", accountType.String()),
-		zap.Uint32("account_value", accountType.Uint32()),
+		"account_type", accountType.String(),
+		"account_value", accountType.Uint32(),
 	)
 	accountPrivKey, err := coinType.Derive(hdkeychain.HardenedKeyStart + accountType.Uint32())
 	if err != nil {

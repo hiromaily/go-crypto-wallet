@@ -13,7 +13,6 @@ import (
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 )
@@ -434,7 +433,7 @@ func (b *Bitcoin) SignRawTransactionWithKey(
 		}
 		b.logger.Warn(
 			"result of `signrawtransactionwithwallet` includes error",
-			zap.Any("errors", signRawTxResult.Errors))
+			"errors", signRawTxResult.Errors)
 	}
 
 	msgTx, err := b.ToMsgTx(signRawTxResult.Hex)
@@ -538,11 +537,11 @@ func (b *Bitcoin) debugCompareTx(tx1, tx2 *wire.MsgTx) {
 	b.logger.Debug("compare tx before and after")
 	hexTx1, err := b.ToHex(tx1)
 	if err != nil {
-		b.logger.Debug("fail to call btc.ToHex(tx1)", zap.Error(err))
+		b.logger.Debug("fail to call btc.ToHex(tx1)", "error", err)
 	}
 	hexTx2, err := b.ToHex(tx2)
 	if err != nil {
-		b.logger.Debug("fail to call btc.ToHex(tx2)", zap.Error(err))
+		b.logger.Debug("fail to call btc.ToHex(tx2)", "error", err)
 	}
 	if hexTx1 == hexTx2 {
 		b.logger.Debug("hexTx before is same to hexTx after. Something program is wrong")

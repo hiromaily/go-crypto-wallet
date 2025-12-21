@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -18,10 +17,10 @@ func (r *Ripple) GenerateAddress() (*ResponseGenerateAddress, error) {
 		return nil, errors.Wrap(err, "fail to call addressClient.GenerateAddress()")
 	}
 	r.logger.Debug("response",
-		zap.String("XAddress", res.XAddress),
-		zap.String("ClassicAddress", res.ClassicAddress),
-		zap.String("Address", res.Address),
-		zap.String("Secret", res.Secret),
+		"XAddress", res.XAddress,
+		"ClassicAddress", res.ClassicAddress,
+		"Address", res.Address,
+		"Secret", res.Secret,
 	)
 
 	return res, nil
@@ -37,8 +36,8 @@ func (r *Ripple) GenerateXAddress() (*ResponseGenerateXAddress, error) {
 		return nil, errors.Wrap(err, "fail to call addressClient.GenerateXAddress()")
 	}
 	r.logger.Debug("response",
-		zap.String("XAddress", res.XAddress),
-		zap.String("Secret", res.Secret),
+		"XAddress", res.XAddress,
+		"Secret", res.Secret,
 	)
 
 	return res, nil
@@ -56,7 +55,7 @@ func (r *Ripple) IsValidAddress(addr string) (bool, error) {
 		return false, errors.Wrap(err, "fail to call addressClient.IsValidAddress()")
 	}
 	r.logger.Debug("response",
-		zap.Bool("IsValid", res.IsValid),
+		"IsValid", res.IsValid,
 	)
 
 	return res.IsValid, nil

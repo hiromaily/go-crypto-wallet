@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 // GetAccountInfo calls GetAccountInfo API
@@ -27,11 +26,11 @@ func (r *Ripple) GetAccountInfo(address string) (*ResponseGetAccountInfo, error)
 		return nil, errors.Wrap(err, "fail to call accountClient.GetAccountInfo()")
 	}
 	r.logger.Debug("response",
-		zap.Uint64("Sequence", res.Sequence),
-		zap.String("XrpBalance", res.XrpBalance),
-		zap.Uint64("OwnerCount", res.OwnerCount),
-		zap.String("PreviousAffectingTransactionID", res.PreviousAffectingTransactionID),
-		zap.Uint64("PreviousAffectingTransactionLedgerVersion", res.PreviousAffectingTransactionLedgerVersion),
+		"Sequence", res.Sequence,
+		"XrpBalance", res.XrpBalance,
+		"OwnerCount", res.OwnerCount,
+		"PreviousAffectingTransactionID", res.PreviousAffectingTransactionID,
+		"PreviousAffectingTransactionLedgerVersion", res.PreviousAffectingTransactionLedgerVersion,
 	)
 
 	return res, nil
