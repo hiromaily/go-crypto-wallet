@@ -37,22 +37,22 @@ func NewLogger(
 	}
 }
 
-// Debug
+// Debug logs a debug message with the provided arguments.
 func (s *SlogLogger) Debug(msg string, args ...any) {
 	s.log.Debug(msg, s.appendArgs(args...)...)
 }
 
-// Info
+// Info logs an info message with the provided arguments.
 func (s *SlogLogger) Info(msg string, args ...any) {
 	s.log.Info(msg, s.appendArgs(args...)...)
 }
 
-// Warn
+// Warn logs a warning message with the provided arguments.
 func (s *SlogLogger) Warn(msg string, args ...any) {
 	s.log.Warn(msg, s.appendArgs(args...)...)
 }
 
-// Error
+// Error logs an error message with the provided arguments.
 func (s *SlogLogger) Error(msg string, args ...any) {
 	s.log.Error(msg, s.appendArgs(args...)...)
 }
@@ -93,22 +93,22 @@ func NewConsoleLogger(
 	}
 }
 
-// Debug
+// Debug logs a debug message with the provided arguments.
 func (s *SlogConsoleLogger) Debug(msg string, args ...any) {
 	s.log.Debug(msg, args...)
 }
 
-// Info
+// Info logs an info message with the provided arguments.
 func (s *SlogConsoleLogger) Info(msg string, args ...any) {
 	s.log.Info(msg, args...)
 }
 
-// Warn
+// Warn logs a warning message with the provided arguments.
 func (s *SlogConsoleLogger) Warn(msg string, args ...any) {
 	s.log.Warn(msg, args...)
 }
 
-// Error
+// Error logs an error message with the provided arguments.
 func (s *SlogConsoleLogger) Error(msg string, args ...any) {
 	s.log.Error(msg, args...)
 }
