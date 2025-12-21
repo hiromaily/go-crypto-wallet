@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -19,7 +19,7 @@ import (
 // Sign type
 type Sign struct {
 	xrp               xrpgrp.Rippler
-	logger            *zap.Logger
+	logger            logger.Logger
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier
 	txFileRepo        tx.FileRepositorier
 	wtype             wallet.WalletType
@@ -28,7 +28,7 @@ type Sign struct {
 // NewSign returns sign object
 func NewSign(
 	xrpAPI xrpgrp.Rippler,
-	logger *zap.Logger,
+	logger logger.Logger,
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier,
 	txFileRepo tx.FileRepositorier,
 	wtype wallet.WalletType,
@@ -95,7 +95,7 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 			return "", false, "", errors.Wrap(err, "fail to call xrp.SignTransaction()")
 		}
 		s.logger.Debug("signed_tx",
-			zap.String("uuid", uuid), zap.String("signed_tx_id", signedTxID), zap.String("signed_tx_blob", txBlob))
+			"uuid", uuid, "signed_tx_id", signedTxID, "signed_tx_blob", txBlob)
 		txHexs = append(txHexs, fmt.Sprintf("%s,%s,%s", uuid, signedTxID, txBlob))
 	}
 

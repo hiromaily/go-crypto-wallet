@@ -2,7 +2,8 @@ package coldsrv
 
 import (
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
+
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -11,14 +12,14 @@ import (
 
 // Seed type
 type Seed struct {
-	logger   *zap.Logger
+	logger   logger.Logger
 	seedRepo coldrepo.SeedRepositorier
 	wtype    wallet.WalletType
 }
 
 // NewSeed returns seed object
 func NewSeed(
-	logger *zap.Logger,
+	logger logger.Logger,
 	seedRepo coldrepo.SeedRepositorier,
 	wtype wallet.WalletType,
 ) *Seed {

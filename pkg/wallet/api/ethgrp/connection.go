@@ -9,9 +9,9 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
@@ -33,7 +33,7 @@ func NewRPCClient(conf *config.Ethereum) (*ethrpc.Client, error) {
 
 // NewEthereum creates ethereum instance according to coinType
 func NewEthereum(
-	rpcClient *ethrpc.Client, conf *config.Ethereum, logger *zap.Logger, coinTypeCode coin.CoinTypeCode,
+	rpcClient *ethrpc.Client, conf *config.Ethereum, logger logger.Logger, coinTypeCode coin.CoinTypeCode,
 ) (Ethereumer, error) {
 	client := ethclient.NewClient(rpcClient)
 

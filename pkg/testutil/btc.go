@@ -31,7 +31,7 @@ func GetBTC() (btcgrp.Bitcoiner, error) {
 	conf.CoinTypeCode = coin.BTC
 
 	// logger
-	log := logger.NewZapLogger(&conf.Logger)
+	log := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 	// client
 	client, err := btcgrp.NewRPCClient(&conf.Bitcoin)
 	if err != nil {

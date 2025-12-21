@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -25,8 +24,8 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	receiver := account.AccountTypeAnonymous
 	targetAction := action.ActionTypePayment
 	t.logger.Debug("account",
-		zap.String("sender", sender.String()),
-		zap.String("receiver", receiver.String()),
+		"sender", sender.String(),
+		"receiver", receiver.String(),
 	)
 
 	// get payment data from payment_request
@@ -119,8 +118,8 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, *big.Int, []int64, error)
 		if err = t.eth.ValidateAddr(userPayments[idx].receiverAddr); err != nil {
 			// fatal error
 			t.logger.Error("fail to call ValidationAddr",
-				zap.String("address", userPayments[idx].receiverAddr),
-				zap.Error(err),
+				"address", userPayments[idx].receiverAddr,
+				"error", err,
 			)
 			return nil, nil, nil, errors.Wrap(err, "fail to call eth.ValidationAddr()")
 		}
@@ -164,7 +163,7 @@ func (t *TxCreate) createPaymentRawTransactions(
 		additionalNonce++
 
 		rawTxHex := rawTx.TxHex
-		t.logger.Debug("rawTxHex", zap.String("rawTxHex", rawTxHex))
+		t.logger.Debug("rawTxHex", "rawTxHex", rawTxHex)
 		// TODO: `rawTxHex` should be used to trace progress to update database
 
 		serializedTx, err := serial.EncodeToString(rawTx)

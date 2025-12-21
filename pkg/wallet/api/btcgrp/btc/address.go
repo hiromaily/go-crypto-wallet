@@ -5,7 +5,6 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 )
 
 // GetAddressInfoResult is response type of RPC `getaddressinfo`
@@ -104,8 +103,8 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 		if err != nil {
 			b.logger.Error(
 				"fail to call b.DecodeAddress()",
-				zap.String("address", key),
-				zap.Error(err))
+				"address", key,
+				"error", err)
 			continue
 		}
 

@@ -5,9 +5,9 @@ import (
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
@@ -19,7 +19,7 @@ type Bitcoin struct {
 	version           BTCVersion        // 179900
 	confirmationBlock uint64
 	feeRange          FeeAdjustmentRate
-	logger            *zap.Logger
+	logger            logger.Logger
 }
 
 // FeeAdjustmentRate range of fee adjustment rate
@@ -33,7 +33,7 @@ func NewBitcoin(
 	client *rpcclient.Client,
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Bitcoin,
-	logger *zap.Logger,
+	logger logger.Logger,
 ) (*Bitcoin, error) {
 	bit := Bitcoin{
 		Client: client,
@@ -92,7 +92,7 @@ func NewBitcoin(
 			RequiredVersion, netInfo.Version)
 	}
 	bit.version = netInfo.Version
-	bit.logger.Info("bitcoin rpc server", zap.Int("version", netInfo.Version.Int()))
+	bit.logger.Info("bitcoin rpc server", "version", netInfo.Version.Int())
 
 	// set other information from config
 	bit.confirmationBlock = conf.Block.ConfirmationNum

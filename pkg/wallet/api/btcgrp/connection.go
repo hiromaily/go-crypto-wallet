@@ -3,9 +3,9 @@ package btcgrp
 import (
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/bch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -33,7 +33,7 @@ func NewRPCClient(conf *config.Bitcoin) (*rpcclient.Client, error) {
 
 // NewBitcoin creates bitcoin/bitcoin cash instance according to coinType
 func NewBitcoin(
-	client *rpcclient.Client, conf *config.Bitcoin, logger *zap.Logger, coinTypeCode coin.CoinTypeCode,
+	client *rpcclient.Client, conf *config.Bitcoin, logger logger.Logger, coinTypeCode coin.CoinTypeCode,
 ) (Bitcoiner, error) {
 	switch coinTypeCode {
 	case coin.BTC:

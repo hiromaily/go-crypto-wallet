@@ -4,9 +4,9 @@ import (
 	"database/sql"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -16,7 +16,7 @@ import (
 // TxMonitor type
 type TxMonitor struct {
 	eth          ethgrp.Ethereumer
-	logger       *zap.Logger
+	logger       logger.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier
 	txDetailRepo watchrepo.EthDetailTxRepositorier
@@ -27,7 +27,7 @@ type TxMonitor struct {
 // NewTxMonitor returns TxMonitor object
 func NewTxMonitor(
 	eth ethgrp.Ethereumer,
-	logger *zap.Logger,
+	logger logger.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txDetailRepo watchrepo.EthDetailTxRepositorier,
@@ -82,8 +82,8 @@ func (t *TxMonitor) updateStatusTxTypeSent() error {
 			return errors.Wrapf(err, "fail to call eth.GetConfirmation() sentHash: %s", sentHash)
 		}
 		t.logger.Info("confirmation",
-			zap.String("sentHash", sentHash),
-			zap.Uint64("confirmation num", confirmNum))
+			"sentHash", sentHash,
+			"confirmation num", confirmNum)
 		if confirmNum < t.confirmNum {
 			continue
 		}
@@ -91,7 +91,7 @@ func (t *TxMonitor) updateStatusTxTypeSent() error {
 		_, err = t.txDetailRepo.UpdateTxTypeBySentHashTx(tx.TxTypeDone, sentHash)
 		if err != nil {
 			t.logger.Warn("failed to call txDetailRepo.UpdateTxTypeBySentHashTx()",
-				zap.Error(err),
+				"error", err,
 			)
 		}
 	}
@@ -114,8 +114,8 @@ func (t *TxMonitor) MonitorBalance(_ uint64) error {
 		}
 		total, _ := t.eth.GetTotalBalance(addrs)
 		t.logger.Info("total balance",
-			zap.String("account", acnt.String()),
-			zap.Uint64("balance", total.Uint64()))
+			"account", acnt.String(),
+			"balance", total.Uint64())
 	}
 
 	return nil

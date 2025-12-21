@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -123,8 +122,8 @@ func (r *Ripple) PrepareTransaction(
 		return nil, "", errors.Wrap(err, "fail to call client.PrepareTransaction()")
 	}
 	r.logger.Debug("response",
-		zap.String("TxJSON", res.TxJSON),
-		zap.Any("Instructions", res.Instructions),
+		"TxJSON", res.TxJSON,
+		"Instructions", res.Instructions,
 	)
 
 	var txInput TxInput
@@ -194,9 +193,9 @@ func (r *Ripple) SubmitTransaction(signedTx string) (*SentTx, uint64, error) {
 	// FIXME:
 	// res.EarliestLedgerVersion may be useless because SentTxJSON includes `LastLedgerSequence` and it would be useful
 	r.logger.Debug("response of submitTransaction",
-		zap.String("res.ResultJSONString", res.ResultJSONString),
-		zap.Uint64("res.EarliestLedgerVersion", res.EarliestLedgerVersion),
-		zap.Uint64("sentTxJSON.TxJSON.LastLedgerSequence", sentTxJSON.TxJSON.LastLedgerSequence),
+		"res.ResultJSONString", res.ResultJSONString,
+		"res.EarliestLedgerVersion", res.EarliestLedgerVersion,
+		"sentTxJSON.TxJSON.LastLedgerSequence", sentTxJSON.TxJSON.LastLedgerSequence,
 	)
 	// res.EarliestLedgerVersion => for when calling GetTransaction()
 	// sentTxJSON.TxJSON.LastLedgerSequence => for when calling WaitValidation()
@@ -240,23 +239,23 @@ func (r *Ripple) WaitValidation(targetledgerVarsion uint64) (uint64, error) {
 					codes.Aborted, codes.OutOfRange, codes.Unimplemented, codes.Internal,
 					codes.Unavailable, codes.DataLoss, codes.Unauthenticated:
 					r.logger.Warn("gRPC error in WaitValidation()",
-						zap.Uint32("code", uint32(respErr.Code())),
-						zap.String("message", respErr.Message()),
+						"code", uint32(respErr.Code()),
+						"message", respErr.Message(),
 					)
 				default:
 					r.logger.Warn("gRPC error in WaitValidation()",
-						zap.Uint32("code", uint32(respErr.Code())),
-						zap.String("message", respErr.Message()),
+						"code", uint32(respErr.Code()),
+						"message", respErr.Message(),
 					)
 				}
 			} else {
-				r.logger.Warn("fail to call resStream.Recv()", zap.Error(err))
+				r.logger.Warn("fail to call resStream.Recv()", "error", err)
 			}
 			// break
 			return 0, errors.Wrap(err, "fail to call resStream.Recv()")
 		}
 		// success
-		r.logger.Info("response in WaitValidation()", zap.Uint64("LedgerVersion", res.LedgerVersion))
+		r.logger.Info("response in WaitValidation()", "LedgerVersion", res.LedgerVersion)
 		if targetledgerVarsion <= res.LedgerVersion {
 			// done
 			return res.LedgerVersion, nil
@@ -282,7 +281,7 @@ func (r *Ripple) GetTransaction(txID string, targetLedgerVersion uint64) (*TxInf
 	}
 
 	r.logger.Debug("response of getTransaction",
-		zap.String("res.ResultJSONString", res.ResultJSONString),
+		"res.ResultJSONString", res.ResultJSONString,
 	)
 
 	var txInfo TxInfo

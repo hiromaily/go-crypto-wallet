@@ -31,7 +31,7 @@ func GetETH() (ethgrp.Ethereumer, error) {
 	conf.CoinTypeCode = coin.ETH
 
 	// logger
-	log := logger.NewZapLogger(&conf.Logger)
+	log := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 	// client
 	client, err := ethgrp.NewRPCClient(&conf.Ethereum)
 	if err != nil {

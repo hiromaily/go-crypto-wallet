@@ -7,7 +7,6 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -27,8 +26,8 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	receiver := account.AccountTypeAnonymous
 	targetAction := action.ActionTypePayment
 	t.logger.Debug("account",
-		zap.String("sender", sender.String()),
-		zap.String("receiver", receiver.String()),
+		"sender", sender.String(),
+		"receiver", receiver.String(),
 	)
 
 	// get payment data from payment_request
@@ -120,8 +119,8 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, float64, []int64, error) 
 		if !xrp.ValidateAddress(userPayments[idx].receiverAddr) {
 			// fatal error
 			t.logger.Error("address is invalid",
-				zap.String("address", userPayments[idx].receiverAddr),
-				zap.Error(err),
+				"address", userPayments[idx].receiverAddr,
+				"error", err,
 			)
 			return nil, 0, nil, errors.Wrapf(err, "address is invalid: %s", userPayments[idx].receiverAddr)
 		}
@@ -164,10 +163,10 @@ func (t *TxCreate) createPaymentRawTransactions(
 		if err != nil {
 			// TODO: which is better to return err or continue?
 			// return error in ethereum logic
-			t.logger.Warn("fail to call xrp.CreateRawTransaction()", zap.Error(err))
+			t.logger.Warn("fail to call xrp.CreateRawTransaction()", "error", err)
 			continue
 		}
-		t.logger.Debug("txJSON", zap.Any("txJSON", txJSON))
+		t.logger.Debug("txJSON", "txJSON", txJSON)
 		grok.Value(txJSON)
 
 		// sequence for next rawTransaction

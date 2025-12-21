@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -49,8 +48,8 @@ func (b *Bitcoin) AddMultisigAddress(
 	if err != nil {
 		b.logger.Warn(
 			"fail to json.Marshal(accountName)",
-			zap.String("accountName", accountName),
-			zap.Error(err))
+			"accountName", accountName,
+			"error", err)
 		bAccount = nil
 	}
 
@@ -63,8 +62,8 @@ func (b *Bitcoin) AddMultisigAddress(
 		if err != nil {
 			b.logger.Warn(
 				"fail to json.Marchal(addressType)",
-				zap.String("addressType", addressType.String()),
-				zap.Error(err))
+				"addressType", addressType.String(),
+				"error", err)
 			bAddrType = nil
 		}
 

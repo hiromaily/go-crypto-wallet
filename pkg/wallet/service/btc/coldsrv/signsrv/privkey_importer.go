@@ -3,10 +3,10 @@ package signsrv
 import (
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
@@ -21,7 +21,7 @@ type PrivKeyer interface {
 // PrivKey type
 type PrivKey struct {
 	btc         btcgrp.Bitcoiner
-	logger      *zap.Logger
+	logger      logger.Logger
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier
 	authType    account.AuthType
 	wtype       wallet.WalletType
@@ -30,7 +30,7 @@ type PrivKey struct {
 // NewPrivKey returns privKey object
 func NewPrivKey(
 	btc btcgrp.Bitcoiner,
-	logger *zap.Logger,
+	logger logger.Logger,
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
 	authType account.AuthType,
 	wtype wallet.WalletType,
@@ -60,10 +60,10 @@ func (p *PrivKey) Import() error {
 
 	p.logger.Debug(
 		"target records",
-		zap.String("auth_type", p.authType.String()),
-		zap.String("P2PKH_address", authKeyItem.P2PKHAddress),
-		zap.String("P2SH_segwit_address", authKeyItem.P2SHSegwitAddress),
-		zap.String("wif", authKeyItem.WalletImportFormat))
+		"auth_type", p.authType.String(),
+		"P2PKH_address", authKeyItem.P2PKHAddress,
+		"P2SH_segwit_address", authKeyItem.P2SHSegwitAddress,
+		"wif", authKeyItem.WalletImportFormat)
 	// decode wif
 	wif, err := btcutil.DecodeWIF(authKeyItem.WalletImportFormat)
 	if err != nil {
@@ -79,8 +79,8 @@ func (p *PrivKey) Import() error {
 		// for now, it continues even if error occurred
 		p.logger.Warn(
 			"fail to call btc.ImportPrivKeyWithoutReScan()",
-			zap.String("wif", authKeyItem.WalletImportFormat),
-			zap.Error(err))
+			"wif", authKeyItem.WalletImportFormat,
+			"error", err)
 		return errors.Wrapf(err, "fail to call btc.ImportPrivKeyWithoutReScan()")
 	}
 
@@ -89,10 +89,10 @@ func (p *PrivKey) Import() error {
 	if err != nil {
 		p.logger.Error(
 			"fail to call repo.AccountKey().UpdateAddrStatus()",
-			zap.String("target_table", "auth_account_key"),
-			zap.String("auth_type", p.authType.String()),
-			zap.String("record.WalletImportFormat", authKeyItem.WalletImportFormat),
-			zap.Error(err))
+			"target_table", "auth_account_key",
+			"auth_type", p.authType.String(),
+			"record.WalletImportFormat", authKeyItem.WalletImportFormat,
+			"error", err)
 	}
 
 	// check address was stored in bitcoin core by importing private key
@@ -122,11 +122,11 @@ func (p *PrivKey) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPub
 		addrType = address.AddrTypeBCHCashAddr
 	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
 		p.logger.Warn("this coin type is not implemented in checkImportedAddress()",
-			zap.String("coin_type_code", p.btc.CoinTypeCode().String()))
+			"coin_type_code", p.btc.CoinTypeCode().String())
 		return
 	default:
 		p.logger.Warn("this coin type is not implemented in checkImportedAddress()",
-			zap.String("coin_type_code", p.btc.CoinTypeCode().String()))
+			"coin_type_code", p.btc.CoinTypeCode().String())
 		return
 	}
 
@@ -136,26 +136,26 @@ func (p *PrivKey) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPub
 	if err != nil {
 		p.logger.Warn(
 			"fail to call btc.GetAccount()",
-			zap.String(addrType.String(), targetAddr),
-			zap.Error(err))
+			addrType.String(), targetAddr,
+			"error", err)
 		return
 	}
 	p.logger.Debug(
 		"account is found",
-		zap.String("account", acnt),
-		zap.String(addrType.String(), targetAddr))
+		"account", acnt,
+		addrType.String(), targetAddr)
 
 	// 2.call `getaddressinfo` by target_address
 	addrInfo, err := p.btc.GetAddressInfo(targetAddr)
 	if err != nil {
 		p.logger.Warn(
 			"fail to call btc.GetAddressInfo()",
-			zap.String(addrType.String(), targetAddr),
-			zap.Error(err))
+			addrType.String(), targetAddr,
+			"error", err)
 	} else if addrInfo.Pubkey != fullPublicKey {
 		p.logger.Warn(
 			"pubkey is not matched",
-			zap.String("in_bitcoin_core", addrInfo.Pubkey),
-			zap.String("in_database", fullPublicKey))
+			"in_bitcoin_core", addrInfo.Pubkey,
+			"in_database", fullPublicKey)
 	}
 }

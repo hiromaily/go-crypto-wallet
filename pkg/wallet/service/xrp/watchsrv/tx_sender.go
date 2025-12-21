@@ -7,8 +7,8 @@ import (
 
 	"github.com/bookerzzz/grok"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -19,7 +19,7 @@ import (
 // TxSend type
 type TxSend struct {
 	rippler      xrpgrp.Rippler
-	logger       *zap.Logger
+	logger       logger.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier // not used
 	txRepo       watchrepo.TxRepositorier      // not used
@@ -31,7 +31,7 @@ type TxSend struct {
 // NewTxSend returns TxSend object
 func NewTxSend(
 	rippler xrpgrp.Rippler,
-	logger *zap.Logger,
+	logger logger.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.TxRepositorier,
@@ -73,7 +73,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 		return "", errors.Wrap(err, "fail to call txFileRepo.ValidateFilePath()")
 	}
 
-	t.logger.Debug("send_tx", zap.String("action_type", actionType.String()))
+	t.logger.Debug("send_tx", "action_type", actionType.String())
 
 	// read hex from file
 	data, err := t.txFileRepo.ReadFileSlice(filePath)
@@ -104,10 +104,10 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			sentTx, earlistLedgerVersion, err = t.rippler.SubmitTransaction(txBlob)
 			if err != nil {
 				t.logger.Warn("fail to call xrp.SubmitTransaction()",
-					zap.Int64("tx_id", txID),
-					zap.String("uuid", uuid),
-					zap.String("signed_tx_id", signedTxID),
-					zap.Error(err),
+					"tx_id", txID,
+					"uuid", uuid,
+					"signed_tx_id", signedTxID,
+					"error", err,
 					// https://xrpl.org/tef-codes.html
 					// https://xrpl.org/finality-of-results.html
 					// tefMAX_LEDGER / Ledger sequence too high
@@ -120,11 +120,11 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			}
 			if !strings.Contains(sentTx.ResultCode, "tesSUCCESS") {
 				t.logger.Warn("fail to call SubmitTransaction",
-					zap.Int64("tx_id", txID),
-					zap.String("uuid", uuid),
-					zap.String("signed_tx_id", signedTxID),
-					zap.String("result_code", sentTx.ResultCode),
-					zap.String("result_message", sentTx.ResultMessage),
+					"tx_id", txID,
+					"uuid", uuid,
+					"signed_tx_id", signedTxID,
+					"result_code", sentTx.ResultCode,
+					"result_message", sentTx.ResultMessage,
 				)
 				return
 			}
@@ -132,8 +132,8 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 
 			// debug
 			t.logger.Debug("ledger version",
-				zap.Uint64("earlistLedgerVersion", earlistLedgerVersion),                         // 8123733
-				zap.Uint64("sentTx.TxJSON.LastLedgerSequence", sentTx.TxJSON.LastLedgerSequence), // 8123736
+				"earlistLedgerVersion", earlistLedgerVersion, // 8123733
+				"sentTx.TxJSON.LastLedgerSequence", sentTx.TxJSON.LastLedgerSequence, // 8123736
 			)
 
 			// validate transaction
@@ -141,12 +141,12 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			ledgerVer, err = t.rippler.WaitValidation(sentTx.TxJSON.LastLedgerSequence)
 			if err != nil {
 				t.logger.Warn("fail to call xrp.WaitValidation()",
-					zap.Int64("tx_id", txID),
-					zap.String("uuid", uuid),
-					zap.String("signed_tx_id", signedTxID),
-					zap.Uint64("lastLedgerSequence", sentTx.TxJSON.LastLedgerSequence),
-					zap.Uint64("ledgerVer", ledgerVer),
-					zap.Error(err),
+					"tx_id", txID,
+					"uuid", uuid,
+					"signed_tx_id", signedTxID,
+					"lastLedgerSequence", sentTx.TxJSON.LastLedgerSequence,
+					"ledgerVer", ledgerVer,
+					"error", err,
 					// Transaction has not been validated yet; try again later
 				)
 				return
@@ -157,12 +157,12 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			txInfo, err = t.rippler.GetTransaction(sentTx.TxJSON.Hash, earlistLedgerVersion)
 			if err != nil {
 				t.logger.Warn("fail to call xrp.GetTransaction()",
-					zap.Int64("tx_id", txID),
-					zap.String("uuid", uuid),
-					zap.String("signed_tx_id", signedTxID),
-					zap.String("hash", sentTx.TxJSON.Hash),
-					zap.Uint64("earlistLedgerVersion", earlistLedgerVersion),
-					zap.Error(err),
+					"tx_id", txID,
+					"uuid", uuid,
+					"signed_tx_id", signedTxID,
+					"hash", sentTx.TxJSON.Hash,
+					"earlistLedgerVersion", earlistLedgerVersion,
+					"error", err,
 				)
 				return
 			}
@@ -178,12 +178,12 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 				t.logger.Warn(
 					"fail to call txDetailRepo.UpdateAfterTxSent() but tx is already sent. "+
 						"So database should be updated manually",
-					zap.Int64("tx_id", txID),
-					zap.String("uuid", uuid),
-					zap.String("signed_tx_id", signedTxID),
-					zap.String("tx_type", tx.TxTypeSent.String()),
-					zap.Int8("tx_type_value", tx.TxTypeSent.Int8()),
-					zap.Error(err),
+					"tx_id", txID,
+					"uuid", uuid,
+					"signed_tx_id", signedTxID,
+					"tx_type", tx.TxTypeSent.String(),
+					"tx_type_value", tx.TxTypeSent.Int8(),
+					"error", err,
 				)
 				// "error":"models: unable to update all for xrp_detail_tx: Error 1406:
 				// Data too long for column 'signed_tx_blob' at row 1"
@@ -191,11 +191,11 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			}
 			if affectedNum == 0 {
 				t.logger.Info("no records to update tx_table",
-					zap.Int64("tx_id", txID),
-					zap.String("uuid", uuid),
-					zap.String("signed_tx_id", signedTxID),
-					zap.String("tx_type", tx.TxTypeSent.String()),
-					zap.Int8("tx_type_value", tx.TxTypeSent.Int8()),
+					"tx_id", txID,
+					"uuid", uuid,
+					"signed_tx_id", signedTxID,
+					"tx_type", tx.TxTypeSent.String(),
+					"tx_type_value", tx.TxTypeSent.Int8(),
 				)
 				return
 			}

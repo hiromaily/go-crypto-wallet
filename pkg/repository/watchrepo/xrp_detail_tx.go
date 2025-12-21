@@ -5,11 +5,12 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+
 	"github.com/pkg/errors"
 	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
-	"go.uber.org/zap"
 
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
@@ -35,12 +36,12 @@ type XrpDetailTxInputRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
-	logger       *zap.Logger
+	logger       logger.Logger
 }
 
 // NewXrpDetailTxInputRepository returns XrpDetailTxInputRepository object
 func NewXrpDetailTxInputRepository(
-	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger,
+	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger logger.Logger,
 ) *XrpDetailTxInputRepository {
 	return &XrpDetailTxInputRepository{
 		dbConn:       dbConn,

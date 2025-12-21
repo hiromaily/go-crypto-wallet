@@ -8,10 +8,10 @@ import (
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
@@ -41,7 +41,7 @@ import (
 // TxCreate type
 type TxCreate struct {
 	btc             btcgrp.Bitcoiner
-	logger          *zap.Logger
+	logger          logger.Logger
 	dbConn          *sql.DB
 	addrRepo        watchrepo.AddressRepositorier
 	txRepo          watchrepo.BTCTxRepositorier
@@ -57,7 +57,7 @@ type TxCreate struct {
 // NewTxCreate returns TxCreate object
 func NewTxCreate(
 	btcAPI btcgrp.Bitcoiner,
-	logger *zap.Logger,
+	logger logger.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.BTCTxRepositorier,
@@ -106,11 +106,11 @@ func (t *TxCreate) createTx(
 	userPayments []UserPayment,
 ) (string, string, error) {
 	t.logger.Debug("createTx()",
-		zap.String("sender_acount", sender.String()),
-		zap.String("receiver_acount", receiver.String()),
-		zap.String("target_action", targetAction.String()),
-		zap.Any("required_amount", requiredAmount),
-		zap.Float64("adjustmentFee", adjustmentFee))
+		"sender_acount", sender.String(),
+		"receiver_acount", receiver.String(),
+		"target_action", targetAction.String(),
+		"required_amount", requiredAmount,
+		"adjustmentFee", adjustmentFee)
 
 	// get listUnspent
 	unspentList, unspentAddrs, err := t.getUnspentList(sender)
@@ -132,7 +132,7 @@ func (t *TxCreate) createTx(
 		return "", "", errors.New("sender account can't meet amount to send")
 	}
 	if requiredAmount != 0 {
-		t.logger.Debug("amount", zap.Any("expected_change", inputTotal-requiredAmount))
+		t.logger.Debug("amount", "expected_change", inputTotal-requiredAmount)
 	}
 
 	// create txOutputs
@@ -152,9 +152,9 @@ func (t *TxCreate) createTx(
 		changeAmount := inputTotal - requiredAmount
 		txPrevOutputs = t.createPaymentTxOutputs(userPayments, changeAddr, changeAmount)
 		t.logger.Debug("before createPaymentOutputs()",
-			zap.Any("change_addr", changeAddr),
-			zap.Any("change_amount", changeAmount),
-			zap.Int("len(txPrevOutputs)", len(txPrevOutputs)),
+			"change_addr", changeAddr,
+			"change_amount", changeAmount,
+			"len(txPrevOutputs)", len(txPrevOutputs),
 		)
 	default:
 		return "", "", errors.Errorf("invalid actionType: %s", targetAction)
@@ -179,16 +179,16 @@ func (t *TxCreate) createTx(
 	// for debug
 	// for addr, amt := range txOutputs {
 	//	t.logger.Debug("txOutputs",
-	//		zap.String("address_string", addr.String()),
-	//		zap.String("address_encoded", addr.EncodeAddress()),
-	//		zap.String("amount", amt.String()),
+	//		"address_string", addr.String(),
+	//		"address_encoded", addr.EncodeAddress(),
+	//		"amount", amt.String(),
 	//	)
 	//}
 	// for _, v := range txRepoTxOutputs {
 	//	t.logger.Debug("txRepoTxOutputs",
-	//		zap.String("output_account", v.OutputAccount),
-	//		zap.String("output_address", v.OutputAddress),
-	//		zap.String("output_amount", v.OutputAmount.String()),
+	//		"output_account", v.OutputAccount,
+	//		"output_address", v.OutputAddress,
+	//		"output_amount", v.OutputAmount.String(),
 	//	)
 	//}
 
@@ -242,15 +242,15 @@ func (t *TxCreate) createTx(
 	}
 
 	t.logger.Debug("getUnspentList()",
-		zap.Any("unspentList", unspentList),
-		zap.Any("unspentAddrs", unspentAddrs),
-		zap.Any("requiredAmount", requiredAmount),
-		zap.Any("input_total", inputTotal),
-		zap.Int("len(inputs)", len(parsedTx.txInputs)),
-		zap.Int("len(txPrevOutputs)", len(txPrevOutputs)),
-		zap.Int("len(txOutputs)", len(txOutputs)),
-		zap.Int("len(txRepoTxOutputs)", len(txRepoTxOutputs)),
-		zap.String("encodedAddrsPrevs", encodedAddrsPrevs),
+		"unspentList", unspentList,
+		"unspentAddrs", unspentAddrs,
+		"requiredAmount", requiredAmount,
+		"input_total", inputTotal,
+		"len(inputs)", len(parsedTx.txInputs),
+		"len(txPrevOutputs)", len(txPrevOutputs),
+		"len(txOutputs)", len(txOutputs),
+		"len(txRepoTxOutputs)", len(txRepoTxOutputs),
+		"encodedAddrsPrevs", encodedAddrsPrevs,
 	)
 
 	return hex, generatedFileName, nil
@@ -297,9 +297,9 @@ func (t *TxCreate) parseListUnspentTx(
 			// this error is not expected
 			t.logger.Error(
 				"fail to call btcutil.NewAmount() then skipped",
-				zap.String("tx_id", txItem.TxID),
-				zap.Float64("tx_amount", txItem.Amount),
-				zap.Error(err))
+				"tx_id", txItem.TxID,
+				"tx_amount", txItem.Amount,
+				"error", err)
 			continue
 		}
 		inputTotal += amt
@@ -376,8 +376,8 @@ func (t *TxCreate) createTxOutputs(
 		txPrevOutputs[receiverDecodedAddr] = inputTotal // satoshi
 	}
 	t.logger.Debug("receiver txOutput",
-		zap.String("receiverAddr", receiverAddr),
-		zap.Any("receivedAmount", txPrevOutputs[receiverDecodedAddr]))
+		"receiverAddr", receiverAddr,
+		"receivedAmount", txPrevOutputs[receiverDecodedAddr])
 
 	// if change is required
 	if isChange {
@@ -393,8 +393,8 @@ func (t *TxCreate) createTxOutputs(
 		txPrevOutputs[senderDecodedAddr] = inputTotal - requiredAmount
 
 		t.logger.Debug("change(sender) txOutput",
-			zap.String("senderAddr", senderAddr),
-			zap.Any("inputTotal - requiredAmount", inputTotal-requiredAmount))
+			"senderAddr", senderAddr,
+			"inputTotal - requiredAmount", inputTotal-requiredAmount)
 	}
 	return txPrevOutputs, nil
 }
@@ -455,10 +455,10 @@ func (t *TxCreate) calculateOutputTotal(
 		outputTotal += amt
 	}
 	t.logger.Debug("calculateOutputTotal",
-		zap.Any("fee", fee),
-		zap.Any("outputTotal (before fee adjustment)", outputTotal),
-		zap.Any("outputTotal by (inputTotal - fee)", inputTotal-fee),
-		zap.Any("outputTotal by (outputTotal - fee)", outputTotal-fee),
+		"fee", fee,
+		"outputTotal (before fee adjustment)", outputTotal,
+		"outputTotal by (inputTotal - fee)", inputTotal-fee,
+		"outputTotal by (outputTotal - fee)", outputTotal-fee,
 	)
 
 	// total amount should be same
@@ -467,8 +467,8 @@ func (t *TxCreate) calculateOutputTotal(
 	if outputTotal <= 0 {
 		t.logger.Debug(
 			"inputTotal is short of coin to pay fee",
-			zap.Any("amount of inputTotal", inputTotal),
-			zap.Any("fee", fee))
+			"amount of inputTotal", inputTotal,
+			"fee", fee)
 		return 0, 0, nil, nil, errors.Wrapf(err, "inputTotal is short of coin to pay fee")
 	}
 

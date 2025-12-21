@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // FileRepositorier is file storager for tx info
@@ -28,7 +28,7 @@ type FileRepositorier interface {
 // FileRepository is to store transaction info as csv file
 type FileRepository struct {
 	filePath string
-	logger   *zap.Logger
+	logger   logger.Logger
 }
 
 // FileName is object for items in fine name
@@ -40,7 +40,7 @@ type FileName struct {
 }
 
 // NewFileRepository returns FileRepository
-func NewFileRepository(filePath string, logger *zap.Logger) *FileRepository {
+func NewFileRepository(filePath string, logger logger.Logger) *FileRepository {
 	return &FileRepository{
 		filePath: filePath,
 		logger:   logger,

@@ -4,9 +4,9 @@ import (
 	"database/sql"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
@@ -15,7 +15,7 @@ import (
 // TxMonitor type
 type TxMonitor struct {
 	xrp          xrpgrp.Rippler
-	logger       *zap.Logger
+	logger       logger.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier
 	txDetailRepo watchrepo.XrpDetailTxRepositorier
@@ -25,7 +25,7 @@ type TxMonitor struct {
 // NewTxMonitor returns TxMonitor object
 func NewTxMonitor(
 	xrp xrpgrp.Rippler,
-	logger *zap.Logger,
+	logger logger.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txDetailRepo watchrepo.XrpDetailTxRepositorier,
@@ -63,8 +63,8 @@ func (t *TxMonitor) MonitorBalance(_ uint64) error {
 		}
 		total := t.xrp.GetTotalBalance(addrs)
 		t.logger.Info("total balance",
-			zap.String("account", acnt.String()),
-			zap.Float64("balance", total))
+			"account", acnt.String(),
+			"balance", total)
 	}
 
 	return nil

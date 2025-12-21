@@ -37,6 +37,47 @@ func NewLogger(
 	}
 }
 
+// NewSlogFromConfig creates a new slog logger from config parameters.
+func NewSlogFromConfig(env, levelStr, service string) Logger {
+	level := getSlogLevel(levelStr)
+	args := []any{
+		slog.String("service", service),
+	}
+
+	// logger option
+	options := &slog.HandlerOptions{Level: level}
+
+	// Choose handler based on env
+	var handler slog.Handler
+	switch env {
+	case "dev":
+		handler = console.NewHandler(os.Stderr, &console.HandlerOptions{Level: level})
+	default:
+		handler = slog.NewJSONHandler(os.Stdout, options)
+	}
+
+	return &SlogLogger{
+		log:  slog.New(handler),
+		args: args,
+	}
+}
+
+// getSlogLevel converts string log level to slog.Level
+func getSlogLevel(level string) slog.Level {
+	switch level {
+	case "debug":
+		return slog.LevelDebug
+	case "info":
+		return slog.LevelInfo
+	case "warn":
+		return slog.LevelWarn
+	case "error":
+		return slog.LevelError
+	default:
+		return slog.LevelInfo
+	}
+}
+
 // Debug logs a debug message with the provided arguments.
 func (s *SlogLogger) Debug(msg string, args ...any) {
 	s.log.Debug(msg, s.appendArgs(args...)...)

@@ -4,10 +4,10 @@ import (
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
@@ -17,7 +17,7 @@ import (
 // PrivKey type
 type PrivKey struct {
 	eth            ethgrp.Ethereumer
-	logger         *zap.Logger
+	logger         logger.Logger
 	accountKeyRepo coldrepo.AccountKeyRepositorier
 	wtype          wallet.WalletType
 }
@@ -25,7 +25,7 @@ type PrivKey struct {
 // NewPrivKey returns privKey object
 func NewPrivKey(
 	ethAPI ethgrp.Ethereumer,
-	logger *zap.Logger,
+	logger logger.Logger,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	wtype wallet.WalletType,
 ) *PrivKey {
@@ -52,24 +52,24 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 
 	// keystore directory is linked to any apis to get accounts
 	// so multiple directories are not good idea
-	p.logger.Debug("NewKeyStore", zap.String("key_dir", p.eth.GetKeyDir()))
+	p.logger.Debug("NewKeyStore", "key_dir", p.eth.GetKeyDir())
 	// keyDir := fmt.Sprintf("%s/%s", p.keyDir, accountType.String())
 	ks := keystore.NewKeyStore(p.eth.GetKeyDir(), keystore.StandardScryptN, keystore.StandardScryptP)
 
 	for _, record := range accountKeyTable {
 		p.logger.Debug(
 			"target records",
-			zap.String("account_type", accountType.String()),
-			zap.String("address", record.P2PKHAddress),
-			zap.String("private key", record.WalletImportFormat))
+			"account_type", accountType.String(),
+			"address", record.P2PKHAddress,
+			"private key", record.WalletImportFormat)
 
 		// generatedAddr, err := p.eth.ImportRawKey(record.WalletImportFormat, "password")
 		ecdsaKey, convertErr := p.eth.ToECDSA(record.WalletImportFormat)
 		if convertErr != nil {
 			p.logger.Warn(
 				"fail to call key.ToECDSA()",
-				zap.String("private key", record.WalletImportFormat),
-				zap.Error(convertErr))
+				"private key", record.WalletImportFormat,
+				"error", convertErr)
 			// continue
 			return errors.Wrap(convertErr, "fail to call key.ToECDSA()")
 		}
@@ -82,22 +82,22 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 			// because database stores status, import run again by same command for this key
 			p.logger.Warn(
 				"fail to call eth.ImportECDSA()",
-				zap.String("private key", record.WalletImportFormat),
-				zap.Error(err))
+				"private key", record.WalletImportFormat,
+				"error", err)
 			// continue
 			return errors.Wrap(err, "fail to call eth.ImportECDSA()")
 		}
 		p.logger.Debug("key account is generated",
-			zap.String("account.Address.Hex()", acct.Address.Hex()),
-			zap.String("account.Address.String()", acct.Address.String()),
-			zap.String("account.URL.String()", acct.URL.String()),
+			"account.Address.Hex()", acct.Address.Hex(),
+			"account.Address.String()", acct.Address.String(),
+			"account.URL.String()", acct.URL.String(),
 		)
 
 		// check generated address
 		if acct.Address.Hex() != record.P2PKHAddress {
 			p.logger.Warn("inconsistency between generated address",
-				zap.String("old_address", record.P2PKHAddress),
-				zap.String("new_address", acct.Address.Hex()),
+				"old_address", record.P2PKHAddress,
+				"new_address", acct.Address.Hex(),
 			)
 		}
 
@@ -107,10 +107,10 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 		if err != nil {
 			p.logger.Error(
 				"fail to call accountKeyRepo.UpdateAddrStatus(), but privKey import is done",
-				zap.String("target_table", "account_key_account"),
-				zap.String("account_type", accountType.String()),
-				zap.String("private key", record.WalletImportFormat),
-				zap.Error(err))
+				"target_table", "account_key_account",
+				"account_type", accountType.String(),
+				"private key", record.WalletImportFormat,
+				"error", err)
 		}
 	}
 

@@ -2,7 +2,6 @@ package watchsrv
 
 import (
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -45,9 +44,9 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 		return "", "", errors.New("sender balance is insufficient to send")
 	}
 	t.logger.Debug("amount",
-		zap.Float64("floatValue(Ether)", floatValue),
-		zap.Uint64("requiredValue(Ether)", requiredValue.Uint64()),
-		zap.Uint64("senderBalance", senderBalnce.Uint64()),
+		"floatValue(Ether)", floatValue,
+		"requiredValue(Ether)", requiredValue.Uint64(),
+		"senderBalance", senderBalnce.Uint64(),
 	)
 
 	// get receiver address
@@ -66,7 +65,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	}
 
 	rawTxHex := rawTx.TxHex
-	t.logger.Debug("rawTxHex", zap.String("rawTxHex", rawTxHex))
+	t.logger.Debug("rawTxHex", "rawTxHex", rawTxHex)
 
 	serializedTx, err := serial.EncodeToString(rawTx)
 	if err != nil {

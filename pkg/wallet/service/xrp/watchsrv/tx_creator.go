@@ -4,10 +4,10 @@ import (
 	"database/sql"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
@@ -25,7 +25,7 @@ type TxCreator interface {
 // TxCreate type
 type TxCreate struct {
 	xrp             xrpgrp.Rippler
-	logger          *zap.Logger
+	logger          logger.Logger
 	dbConn          *sql.DB
 	addrRepo        watchrepo.AddressRepositorier
 	txRepo          watchrepo.TxRepositorier
@@ -40,7 +40,7 @@ type TxCreate struct {
 // NewTxCreate returns TxCreate object
 func NewTxCreate(
 	xrp xrpgrp.Rippler,
-	logger *zap.Logger,
+	logger logger.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.TxRepositorier,

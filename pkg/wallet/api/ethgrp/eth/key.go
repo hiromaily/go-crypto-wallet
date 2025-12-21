@@ -12,7 +12,6 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 )
@@ -49,7 +48,7 @@ func (e *Ethereum) GetKeyDir() string {
 // GetPrivKey returns keystore.Key object
 func (e *Ethereum) GetPrivKey(hexAddr, password string) (*keystore.Key, error) {
 	keyDir := e.GetKeyDir()
-	e.logger.Debug("key_dir", zap.String("key_dir", keyDir))
+	e.logger.Debug("key_dir", "key_dir", keyDir)
 
 	keyJSON, err := e.readPrivKey(hexAddr, keyDir)
 	if err != nil {
@@ -78,9 +77,9 @@ func (e *Ethereum) readPrivKey(hexAddr, path string) ([]byte, error) {
 	// Note: all letter of address in filename is a lowercase letter
 	addr := strings.TrimPrefix(strings.ToLower(hexAddr), "0x")
 	e.logger.Debug("readPrivKey",
-		zap.String("hexAddr", hexAddr),
-		zap.String("addr", addr),
-		zap.String("path", path),
+		"hexAddr", hexAddr,
+		"addr", addr,
+		"path", path,
 	)
 
 	files, err := filepath.Glob(fmt.Sprintf("%s/*--%s", path, addr))

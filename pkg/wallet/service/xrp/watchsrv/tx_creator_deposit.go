@@ -6,7 +6,6 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -23,8 +22,8 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 	receiver := t.depositReceiver
 	targetAction := action.ActionTypeDeposit
 	t.logger.Debug("account",
-		zap.String("sender", sender.String()),
-		zap.String("receiver", receiver.String()),
+		"sender", sender.String(),
+		"receiver", receiver.String(),
 	)
 
 	userAmounts, err := t.getUserAmounts(sender)
@@ -78,11 +77,11 @@ func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]xrp.UserAmount,
 		clientBalance, err = t.xrp.GetBalance(addr.WalletAddress)
 		if err != nil {
 			t.logger.Warn("fail to call t.xrp.GetAccountInfo()",
-				zap.String("address", addr.WalletAddress),
+				"address", addr.WalletAddress,
 			)
 		} else {
 			t.logger.Debug("account_info",
-				zap.String("address", addr.WalletAddress), zap.Float64("balance", clientBalance))
+				"address", addr.WalletAddress, "balance", clientBalance)
 			if clientBalance != 0 {
 				userAmounts = append(userAmounts, xrp.UserAmount{Address: addr.WalletAddress, Amount: clientBalance})
 			}
@@ -117,10 +116,10 @@ func (t *TxCreate) createDepositRawTransactions(
 		var rawTxString string
 		txJSON, rawTxString, err = t.xrp.CreateRawTransaction(val.Address, depositAddr.WalletAddress, 0, instructions)
 		if err != nil {
-			t.logger.Warn("fail to call xrp.CreateRawTransaction()", zap.Error(err))
+			t.logger.Warn("fail to call xrp.CreateRawTransaction()", "error", err)
 			continue
 		}
-		t.logger.Debug("txJSON", zap.Any("txJSON", txJSON))
+		t.logger.Debug("txJSON", "txJSON", txJSON)
 		grok.Value(txJSON)
 
 		// sequence for next rawTransaction

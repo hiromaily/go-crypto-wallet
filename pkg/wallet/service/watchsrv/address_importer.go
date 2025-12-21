@@ -5,9 +5,9 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -21,7 +21,7 @@ type AddressImporter interface {
 
 // AddressImport type
 type AddressImport struct {
-	logger       *zap.Logger
+	logger       logger.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier
 	addrFileRepo address.FileRepositorier
@@ -32,7 +32,7 @@ type AddressImport struct {
 
 // NewAddressImport returns AddressImport object
 func NewAddressImport(
-	logger *zap.Logger,
+	logger logger.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	addrFileRepo address.FileRepositorier,

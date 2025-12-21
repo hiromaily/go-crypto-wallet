@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
@@ -17,7 +17,7 @@ import (
 // Multisig type
 type Multisig struct {
 	btc                btcgrp.Bitcoiner
-	logger             *zap.Logger
+	logger             logger.Logger
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier
 	accountKeyRepo     coldrepo.AccountKeyRepositorier
 	multisigAccount    account.MultisigAccounter
@@ -27,7 +27,7 @@ type Multisig struct {
 // NewMultisig returns multisig
 func NewMultisig(
 	btcAPI btcgrp.Bitcoiner,
-	logger *zap.Logger,
+	logger logger.Logger,
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	multisigAccount account.MultisigAccounter,
@@ -54,7 +54,7 @@ func NewMultisig(
 func (m *Multisig) AddMultisigAddress(accountType account.AccountType, addressType address.AddrType) error {
 	// for sign wallet
 	m.logger.Debug("addmultisigaddress",
-		zap.String("account_type", accountType.String()),
+		"account_type", accountType.String(),
 	)
 
 	// validate accountType
@@ -105,10 +105,10 @@ func (m *Multisig) AddMultisigAddress(accountType account.AccountType, addressTy
 			// [Error] -5: no full public key for address mkPmdpo59gpU7ZioGYwwoMTQJjh7MiqUvd
 			m.logger.Error(
 				"fail to call btc.CreateMultiSig()",
-				zap.Int("signature_count", requiredSig),
-				zap.String("full public key for accountType", item.FullPublicKey),
-				zap.Strings("full public key for authType", authFullPubKeys),
-				zap.Error(err),
+				"signature_count", requiredSig,
+				"full public key for accountType", item.FullPublicKey,
+				"full public key for authType", authFullPubKeys,
+				"error", err,
 			)
 			continue
 		}

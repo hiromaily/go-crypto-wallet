@@ -3,9 +3,8 @@ package xrpwallet
 import (
 	"database/sql"
 
-	"go.uber.org/zap"
-
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	wtype "github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -18,7 +17,7 @@ import (
 type XRPWatch struct {
 	XRP    xrpgrp.Rippler
 	dbConn *sql.DB
-	logger *zap.Logger
+	logger logger.Logger
 	wtype  wtype.WalletType
 	watchsrv.AddressImporter
 	xrpsrv.TxCreator
@@ -31,7 +30,7 @@ type XRPWatch struct {
 func NewXRPWatch(
 	xrp xrpgrp.Rippler,
 	dbConn *sql.DB,
-	logger *zap.Logger,
+	logger logger.Logger,
 	addrImporter watchsrv.AddressImporter,
 	txCreator xrpsrv.TxCreator,
 	txSender service.TxSender,

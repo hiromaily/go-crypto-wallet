@@ -5,7 +5,6 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -19,8 +18,8 @@ func (t *TxCreate) CreatePaymentTx(adjustmentFee float64) (string, string, error
 	receiver := account.AccountTypeAnonymous
 	targetAction := action.ActionTypePayment
 	t.logger.Debug("account",
-		zap.String("sender", sender.String()),
-		zap.String("receiver", receiver.String()),
+		"sender", sender.String(),
+		"receiver", receiver.String(),
 	)
 
 	// get payment data from payment_request
@@ -48,14 +47,14 @@ func (t *TxCreate) CreatePaymentTx(adjustmentFee float64) (string, string, error
 	if balance <= requiredAmount {
 		// balance is short
 		t.logger.Info("balance for payment account is insufficient",
-			zap.Float64("payment_balance", balance.ToBTC()),
-			zap.Float64("required_amount", requiredAmount.ToBTC()),
+			"payment_balance", balance.ToBTC(),
+			"required_amount", requiredAmount.ToBTC(),
 		)
 		return "", "", nil
 	}
 	t.logger.Debug("payment balane and userTotal",
-		zap.Any("balance", balance),
-		zap.Any("userTotal", requiredAmount))
+		"balance", balance,
+		"userTotal", requiredAmount)
 
 	// create transfer transaction
 	return t.createTx(sender, receiver, targetAction, requiredAmount, adjustmentFee, paymentRequestIds, userPayments)
@@ -90,7 +89,7 @@ func (t *TxCreate) createPaymentTxOutputs(
 		if err != nil {
 			// this case is impossible because addresses are checked in advance
 			t.logger.Error("fail to call DecodeAddress",
-				zap.String("address", strAddr))
+				"address", strAddr)
 			continue
 		}
 		txOutputs[addr] = amount

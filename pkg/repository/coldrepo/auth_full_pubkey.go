@@ -4,10 +4,11 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
@@ -26,12 +27,12 @@ type AuthFullPubkeyRepository struct {
 	dbConn       *sql.DB
 	tableName    string
 	coinTypeCode coin.CoinTypeCode
-	logger       *zap.Logger
+	logger       logger.Logger
 }
 
 // NewAuthFullPubkeyRepository returns AuthFullPubkeyRepository object
 func NewAuthFullPubkeyRepository(
-	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger *zap.Logger,
+	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger logger.Logger,
 ) *AuthFullPubkeyRepository {
 	return &AuthFullPubkeyRepository{
 		dbConn:       dbConn,

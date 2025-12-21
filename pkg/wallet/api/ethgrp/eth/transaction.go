@@ -8,7 +8,6 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
-	"go.uber.org/zap"
 
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/ethtx"
@@ -25,7 +24,7 @@ func (e *Ethereum) getNonce(fromAddr string, additionalNonce int) (uint64, error
 		nonce = nonce.Add(nonce, new(big.Int).SetUint64(uint64(additionalNonce)))
 	}
 	e.logger.Debug("nonce",
-		zap.Uint64("GetTransactionCount(fromAddr, QuantityTagPending)", nonce.Uint64()),
+		"GetTransactionCount(fromAddr, QuantityTagPending)", nonce.Uint64(),
 	)
 
 	return nonce.Uint64(), nil
@@ -90,9 +89,9 @@ func (e *Ethereum) CreateRawTransaction(
 		return nil, nil, errors.New("address validation error")
 	}
 	e.logger.Debug("eth.CreateRawTransaction()",
-		zap.String("fromAddr", fromAddr),
-		zap.String("toAddr", toAddr),
-		zap.Uint64("amount", amount),
+		"fromAddr", fromAddr,
+		"toAddr", toAddr,
+		"amount", amount,
 	)
 
 	// TODO: pending status should be included in target balance??
@@ -101,7 +100,7 @@ func (e *Ethereum) CreateRawTransaction(
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "fail to call eth.GetBalance()")
 	}
-	e.logger.Info("balance", zap.Int64("balance", balance.Int64()))
+	e.logger.Info("balance", "balance", balance.Int64())
 	if balance.Uint64() == 0 {
 		return nil, nil, errors.New("balance is needed to send eth")
 	}
@@ -117,7 +116,7 @@ func (e *Ethereum) CreateRawTransaction(
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "fail to call eth.GasPrice()")
 	}
-	e.logger.Info("gas_price", zap.Int64("gas_price", gasPrice.Int64()))
+	e.logger.Info("gas_price", "gas_price", gasPrice.Int64())
 
 	// fromAddr, toAddr common.Address, gasPrice, value *big.Int
 	newValue, txFee, estimatedGas, err := e.calculateFee(
@@ -132,9 +131,9 @@ func (e *Ethereum) CreateRawTransaction(
 	}
 
 	e.logger.Debug("tx parameter",
-		zap.Uint64("GasLimit", GasLimit),
-		zap.Uint64("estimatedGas", estimatedGas.Uint64()),
-		zap.Uint64("txFee", txFee.Uint64()))
+		"GasLimit", GasLimit,
+		"estimatedGas", estimatedGas.Uint64(),
+		"txFee", txFee.Uint64())
 
 	// create transaction
 	tmpToAddr := common.HexToAddress(toAddr)
@@ -206,9 +205,9 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (
 	}
 
 	e.logger.Debug("call types.SignTx",
-		zap.Any("tx", tx),
-		zap.Uint64("chainID", chainID.Uint64()),
-		zap.Any("key.PrivateKey", key.PrivateKey),
+		"tx", tx,
+		"chainID", chainID.Uint64(),
+		"key.PrivateKey", key.PrivateKey,
 	)
 	// var signer types.Signer = types.NewEIP155Signer(chainID)
 	signer := types.NewLondonSigner(chainID)

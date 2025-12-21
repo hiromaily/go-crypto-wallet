@@ -4,9 +4,9 @@ import (
 	"database/sql"
 
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -24,7 +24,7 @@ type XRPKeyGenerator interface {
 // XRPKeyGenerate type
 type XRPKeyGenerate struct {
 	xrp               xrpgrp.Rippler
-	logger            *zap.Logger
+	logger            logger.Logger
 	dbConn            *sql.DB
 	coinTypeCode      coin.CoinTypeCode
 	wtype             wallet.WalletType
@@ -35,7 +35,7 @@ type XRPKeyGenerate struct {
 // NewXRPKeyGenerate returns XRPKeyGenerate object
 func NewXRPKeyGenerate(
 	xrpAPI xrpgrp.Rippler,
-	logger *zap.Logger,
+	logger logger.Logger,
 	dbConn *sql.DB,
 	coinTypeCode coin.CoinTypeCode,
 	wtype wallet.WalletType,
@@ -56,8 +56,8 @@ func NewXRPKeyGenerate(
 // Generate generate xrp keys for account
 func (k *XRPKeyGenerate) Generate(accountType account.AccountType, isKeyPair bool, keys []key.WalletKey) error {
 	k.logger.Debug("generate keys for XRP",
-		zap.String("account_type", accountType.String()),
-		zap.Int("len(keys)", len(keys)),
+		"account_type", accountType.String(),
+		"len(keys)", len(keys),
 	)
 
 	// transaction

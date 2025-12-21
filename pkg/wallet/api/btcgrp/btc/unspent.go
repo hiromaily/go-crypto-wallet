@@ -8,7 +8,6 @@ import (
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 )
@@ -31,7 +30,7 @@ type ListUnspentResult struct {
 
 // ListUnspent call RPC `listunspent`
 func (b *Bitcoin) ListUnspent(confirmationNum uint64) ([]ListUnspentResult, error) {
-	b.logger.Debug("call ListUnspent()", zap.Uint64("confirmation", b.confirmationBlock))
+	b.logger.Debug("call ListUnspent()", "confirmation", b.confirmationBlock)
 
 	input, err := json.Marshal(confirmationNum)
 	if err != nil {
@@ -91,8 +90,8 @@ func (b *Bitcoin) GetUnspentListAddrs(unspentList []ListUnspentResult, accountTy
 	for _, unspent := range unspentList {
 		if unspent.Label != accountType.String() {
 			b.logger.Warn("listUnspentByAccount() returns address for wrong account",
-				zap.String("got", unspent.Label),
-				zap.String("want", accountType.String()))
+				"got", unspent.Label,
+				"want", accountType.String())
 		}
 		addrs = append(addrs, unspent.Address)
 	}

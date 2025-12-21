@@ -33,7 +33,7 @@ func NewTxRepository() watchrepo.BTCTxRepositorier {
 	// TODO: if config should be overridden, here
 
 	// logger
-	zapLog := logger.NewZapLogger(&conf.Logger)
+	zapLog := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 
 	// db
 	db, err := mysql.NewMySQL(&conf.MySQL)
@@ -60,7 +60,7 @@ func NewAccountKeyRepository() coldrepo.AccountKeyRepositorier {
 	// TODO: if config should be overridden, here
 
 	// logger
-	zapLogger := logger.NewZapLogger(&conf.Logger)
+	zapLogger := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 
 	// db
 	db, err := mysql.NewMySQL(&conf.MySQL)

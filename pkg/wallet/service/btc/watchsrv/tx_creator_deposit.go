@@ -1,8 +1,6 @@
 package watchsrv
 
 import (
-	"go.uber.org/zap"
-
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 )
@@ -15,8 +13,8 @@ func (t *TxCreate) CreateDepositTx(adjustmentFee float64) (string, string, error
 	receiver := t.depositReceiver
 	targetAction := action.ActionTypeDeposit
 	t.logger.Debug("account",
-		zap.String("sender", sender.String()),
-		zap.String("receiver", receiver.String()),
+		"sender", sender.String(),
+		"receiver", receiver.String(),
 	)
 
 	requiredAmount, err := t.btc.FloatToAmount(0)

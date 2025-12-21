@@ -5,9 +5,9 @@ import (
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/btcsuite/btcd/wire"
 	"github.com/pkg/errors"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
@@ -37,7 +37,7 @@ func NewBitcoinCash(
 	client *rpcclient.Client,
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Bitcoin,
-	logger *zap.Logger,
+	logger logger.Logger,
 ) (*BitcoinCash, error) {
 	// bitcoin base
 	bit, err := btc.NewBitcoin(client, coinTypeCode, conf, logger)

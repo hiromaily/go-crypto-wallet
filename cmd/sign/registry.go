@@ -6,7 +6,6 @@ import (
 
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/volatiletech/sqlboiler/v4/boil"
-	"go.uber.org/zap"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
@@ -37,7 +36,7 @@ type registry struct {
 	accountConf *account.AccountRoot
 	walletType  wallet.WalletType
 	authType    account.AuthType
-	logger      *zap.Logger
+	logger      logger.Logger
 	btc         btcgrp.Bitcoiner
 	rpcClient   *rpcclient.Client
 	mysqlClient *sql.DB
@@ -173,9 +172,9 @@ func (r *registry) newBTC() btcgrp.Bitcoiner {
 	return r.btc
 }
 
-func (r *registry) newLogger() *zap.Logger {
+func (r *registry) newLogger() logger.Logger {
 	if r.logger == nil {
-		r.logger = logger.NewZapLogger(&r.conf.Logger)
+		r.logger = logger.NewSlogFromConfig(r.conf.Logger.Env, r.conf.Logger.Level, r.conf.Logger.Service)
 	}
 	return r.logger
 }
