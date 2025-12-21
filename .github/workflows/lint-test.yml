@@ -7,39 +7,36 @@ on:
   pull_request:
     branches:
       - master
+env:
+  GO_VERSION: "1.25"
 jobs:
   golangci:
     name: lint
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - name: Set up Go 1.25
+      - uses: actions/checkout@v6
+      - name: Set up Go ${{ env.GO_VERSION }}
         uses: actions/setup-go@v6
         with:
-          go-version: 1.25
-      - uses: actions/checkout@v6
+          go-version: ${{ env.GO_VERSION }}
+          cache: true # Go modules and build outputs (default: true)
       - name: golangci-lint for root directory
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@v8 # already has cache functionality
         with:
           version: v2.7.2
           working-directory: ./
   unit-test:
     name: unit-test
     runs-on: ubuntu-slim
+    timeout-minutes: 5
     steps:
-      - name: Set up Go 1.25
+      - uses: actions/checkout@v6
+      - name: Set up Go ${{ env.GO_VERSION }}
         uses: actions/setup-go@v6
         with:
-          go-version: 1.25
-      - uses: actions/checkout@v6
-      - name: Cache go modules
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+          go-version: ${{ env.GO_VERSION }}
+          cache: true # Go modules and build outputs (default: true)
       - name: Run Unit Test
         # /home/runner/work/go-crypto-wallet/go-crypto-wallet
         working-directory: ./
