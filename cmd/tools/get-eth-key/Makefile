@@ -2,11 +2,13 @@ mnemonic="math razor capable expose worth grape metal sunset metal sudden usage 
 
 .PHONY: build
 build:
-	go build -o ${GOPATH}/bin/get-eth-key ./get-eth-key/*.go
+	go build -o ${GOPATH}/bin/get-eth-key ./*.go
 
 # {dir}/{address} file must be existing
-run:
+.PHONY: exec1
+exec1:
 	get-eth-key --addr 0xXXXXXX --dir ./keystore
 
-run2:
+.PHONY: exec2
+exec2:
 	get-eth-key --mnemonic $(mnemonic) --hdpath "m/44'/60'/0'/0/0"
