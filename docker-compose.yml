@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 volumes:
   watch-db: {}
@@ -93,7 +93,7 @@ services:
       MYSQL_PASSWORD: hiromaily
       ENV: watch
     ports:
-    - "${WATCH_MYSQL_PORT:-3307}:3306"
+      - "${WATCH_MYSQL_PORT:-3307}:3306"
 
   # keygen wallet
   keygen-db:
@@ -134,21 +134,3 @@ services:
       ENV: sign
     ports:
       - "${SIGN_MYSQL_PORT:-3309}:3306"
-
-  #########################################################################
-  # Open Tracing
-  #------------------------------------------------------------------------
-  # https://hub.docker.com/r/jaegertracing/all-in-one/tags
-  #########################################################################
-#  jaeger:
-#    image: jaegertracing/all-in-one:1.31
-#    ports:
-#      - 5775:5775/udp
-#      - 6831:6831/udp
-#      - 6832:6832/udp
-#      - 5778:5778
-#      - 16686:16686
-#      - 14268:14268
-#      - 9411:9411
-#    environment:
-#      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
