@@ -21,5 +21,5 @@
 **Safety Rules:**
 
 - Stop immediately if working directory is not clean
-- Never proceed on main/master without creating feature branch
+- Never proceed on main/master branch without creating feature branch
 - Always verify branch and status before implementing fixes
