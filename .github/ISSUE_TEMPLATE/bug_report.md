@@ -13,8 +13,8 @@
 
 **Environment:**
 
-- OS:
-- Version:
+- OS: MacOS
+- Version: 15.5
 
 ---
 @claude Please analyze the cause of this bug and propose a fix.
