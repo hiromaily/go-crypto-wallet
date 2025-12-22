@@ -446,7 +446,7 @@ func (r *registry) newLogger() logger.Logger {
 }
 
 func (r *registry) newBTCTxRepo() watchrepo.BTCTxRepositorier {
-	return watchrepo.NewBTCTxRepository(
+	return watchrepo.NewBTCTxRepositorySqlc(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
@@ -454,7 +454,7 @@ func (r *registry) newBTCTxRepo() watchrepo.BTCTxRepositorier {
 }
 
 func (r *registry) newBTCTxInputRepo() watchrepo.TxInputRepositorier {
-	return watchrepo.NewBTCTxInputRepository(
+	return watchrepo.NewBTCTxInputRepositorySqlc(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
@@ -462,7 +462,7 @@ func (r *registry) newBTCTxInputRepo() watchrepo.TxInputRepositorier {
 }
 
 func (r *registry) newBTCTxOutputRepo() watchrepo.TxOutputRepositorier {
-	return watchrepo.NewBTCTxOutputRepository(
+	return watchrepo.NewBTCTxOutputRepositorySqlc(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
@@ -470,7 +470,7 @@ func (r *registry) newBTCTxOutputRepo() watchrepo.TxOutputRepositorier {
 }
 
 func (r *registry) newTxRepo() watchrepo.TxRepositorier {
-	return watchrepo.NewTxRepository(
+	return watchrepo.NewTxRepositorySqlc(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
@@ -478,7 +478,7 @@ func (r *registry) newTxRepo() watchrepo.TxRepositorier {
 }
 
 func (r *registry) newETHTxDetailRepo() watchrepo.EthDetailTxRepositorier {
-	return watchrepo.NewEthDetailTxInputRepository(
+	return watchrepo.NewEthDetailTxInputRepositorySqlc(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
@@ -486,7 +486,7 @@ func (r *registry) newETHTxDetailRepo() watchrepo.EthDetailTxRepositorier {
 }
 
 func (r *registry) newXRPTxDetailRepo() watchrepo.XrpDetailTxRepositorier {
-	return watchrepo.NewXrpDetailTxInputRepository(
+	return watchrepo.NewXrpDetailTxInputRepositorySqlc(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
@@ -494,7 +494,7 @@ func (r *registry) newXRPTxDetailRepo() watchrepo.XrpDetailTxRepositorier {
 }
 
 func (r *registry) newPaymentRequestRepo() watchrepo.PaymentRequestRepositorier {
-	return watchrepo.NewPaymentRequestRepository(
+	return watchrepo.NewPaymentRequestRepositorySqlc(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
@@ -502,7 +502,7 @@ func (r *registry) newPaymentRequestRepo() watchrepo.PaymentRequestRepositorier 
 }
 
 func (r *registry) newAddressRepo() watchrepo.AddressRepositorier {
-	return watchrepo.NewAddressRepository(
+	return watchrepo.NewAddressRepositorySqlc(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),

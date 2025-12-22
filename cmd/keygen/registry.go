@@ -361,7 +361,7 @@ func (r *registry) newLogger() logger.Logger {
 }
 
 func (r *registry) newSeedRepo() coldrepo.SeedRepositorier {
-	return coldrepo.NewSeedRepository(
+	return coldrepo.NewSeedRepositorySqlc(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
@@ -369,7 +369,7 @@ func (r *registry) newSeedRepo() coldrepo.SeedRepositorier {
 }
 
 func (r *registry) newAccountKeyRepo() coldrepo.AccountKeyRepositorier {
-	return coldrepo.NewAccountKeyRepository(
+	return coldrepo.NewAccountKeyRepositorySqlc(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
@@ -377,7 +377,7 @@ func (r *registry) newAccountKeyRepo() coldrepo.AccountKeyRepositorier {
 }
 
 func (r *registry) newXRPAccountKeyRepo() coldrepo.XRPAccountKeyRepositorier {
-	return coldrepo.NewXRPAccountKeyRepository(
+	return coldrepo.NewXRPAccountKeyRepositorySqlc(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
@@ -385,7 +385,7 @@ func (r *registry) newXRPAccountKeyRepo() coldrepo.XRPAccountKeyRepositorier {
 }
 
 func (r *registry) newAuthFullPubKeyRepo() coldrepo.AuthFullPubkeyRepositorier {
-	return coldrepo.NewAuthFullPubkeyRepository(
+	return coldrepo.NewAuthFullPubkeyRepositorySqlc(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
 		r.newLogger(),
@@ -393,10 +393,9 @@ func (r *registry) newAuthFullPubKeyRepo() coldrepo.AuthFullPubkeyRepositorier {
 }
 
 func (r *registry) newAuthKeyRepo() coldrepo.AuthAccountKeyRepositorier {
-	return coldrepo.NewAuthAccountKeyRepository(
+	return coldrepo.NewAuthAccountKeyRepositorySqlc(
 		r.newMySQLClient(),
 		r.conf.CoinTypeCode,
-		"",
 		r.newLogger(),
 	)
 }

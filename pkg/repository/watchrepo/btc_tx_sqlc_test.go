@@ -16,10 +16,9 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 )
 
-// TestTx is test for any data operation
-func TestTx(t *testing.T) {
-	// boil.DebugMode = true
-	txRepo := testutil.NewTxRepository()
+// TestBTCTxSqlc is integration test for BTCTxRepositorySqlc
+func TestBTCTxSqlc(t *testing.T) {
+	txRepo := testutil.NewBTCTxRepositorySqlc()
 
 	// Delete records
 	if _, err := txRepo.DeleteAll(); err != nil {
@@ -34,9 +33,10 @@ func TestTx(t *testing.T) {
 	feeAmt := types.Decimal{Big: new(decimal.Big)}
 	feeAmt.Big, _ = feeAmt.SetString("0.010")
 
-	hex := "unsigned-hex"
+	hex := "unsigned-hex-sqlc"
 	actionType := action.ActionTypePayment
 	txItem := &models.BTCTX{
+		Coin:              "btc",
 		Action:            actionType.String(),
 		UnsignedHexTX:     hex,
 		TotalInputAmount:  inputAmt,
@@ -47,6 +47,7 @@ func TestTx(t *testing.T) {
 	if err != nil {
 		t.Fatalf("fail to call InsertUnsignedTx() %v", err)
 	}
+	txItem.ID = id // Set the ID for later operations
 	// check inserted record
 	tmpTx, err := txRepo.GetOne(id)
 	if err != nil {
@@ -67,7 +68,7 @@ func TestTx(t *testing.T) {
 	}
 
 	// Update only UnsignedHexTX
-	hex2 := "unsigned-hex2"
+	hex2 := "unsigned-hex2-sqlc"
 	txItem.UnsignedHexTX = hex2
 	_, err = txRepo.Update(txItem)
 	if err != nil {
@@ -84,11 +85,8 @@ func TestTx(t *testing.T) {
 	}
 
 	// Update like after tx sent
-	// TODO: how to update partially??
-	// => object should includes all, base object should be retrieved for updating first
-	//    not good performance
-	signedHex := "signed-hex"
-	sentHashTx := "sent-hash-tx"
+	signedHex := "signed-hex-sqlc"
+	sentHashTx := "sent-hash-tx-sqlc"
 	_, err = txRepo.UpdateAfterTxSent(txItem.ID, tx.TxTypeSent, signedHex, sentHashTx)
 	if err != nil {
 		t.Fatalf("fail to call UpdateTx() %v", err)

@@ -3,7 +3,19 @@
 ###############################################################################
 
 ###############################################################################
-# sqlboiler
+# sqlc
+#------------------------------------------------------------------------------
+# Generate Go code from SQL queries using sqlc
+# Schemas: tools/sqlc/schemas/*.sql
+# Queries: tools/sqlc/queries/*.sql
+# Output: pkg/db/rdb/sqlcgen/
+#------------------------------------------------------------------------------
+.PHONY: sqlc
+sqlc:
+	cd tools/sqlc && sqlc generate
+
+###############################################################################
+# sqlboiler (DEPRECATED - Migrating to sqlc)
 #------------------------------------------------------------------------------
 # To generate all schema, modify `docker/mysql/watch/init.d/watch.sql` according to comments
 # Then recreate database
