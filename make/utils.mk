@@ -6,6 +6,10 @@
 timestamp:
 	@echo $(timestamp)
 
+.PHONY: rm-local-binaries
+rm-local-binaries:
+	rm -rf watch keygen sign
+
 .PHONY: rm-local-wallet-dat
 rm-local-wallet-dat:
 	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/wallet.dat

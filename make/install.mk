@@ -27,8 +27,6 @@ install-ssl:
 
 .PHONY: install-tools
 install-tools:
-	go install github.com/volatiletech/sqlboiler/v4@latest
-	go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-mysql@latest
 	go install github.com/ethereum/go-ethereum/cmd/abigen@latest
 	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_VERSION)
 	go install golang.org/x/vuln/cmd/govulncheck@latest
@@ -39,8 +37,6 @@ install-tools:
 
 .PHONY: install-tools-by-gomod
 install-tools-by-gomod:
-	# go get -tool github.com/volatiletech/sqlboiler/v4@latest
-	# go get -tool github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-mysql@latest
 	go get -tool github.com/ethereum/go-ethereum/cmd/abigen@latest
 	go get -tool github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_VERSION)
 	go get -tool golang.org/x/vuln/cmd/govulncheck@latest

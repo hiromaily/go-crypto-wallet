@@ -1,11 +1,15 @@
 .DS_Store
 .idea/
 
+# temporary documents
+CURRENT_ISSUES.md
+REFACTORING_CHECKLIST.md
+REFACTORING_PLAN.md
+
+# environment variables
 .envrc
 
-#!cmd/watch
-#!cmd/keygen
-#!cmd/sign
+# data directory
 data/address/*
 data/dump/*
 data/fullpubkey/*
@@ -14,7 +18,7 @@ data/tx/*
 data/certs/*
 data/gaiad/*
 
-docker/grafana/*
+# Note files
 docker/nodes/btc/data1/*
 !docker/nodes/btc/data1/bitcoin.conf
 docker/nodes/btc/data2/*
@@ -28,4 +32,5 @@ docker/nodes/eth/sepolia/*
 docker/nodes/eth/ganache-data/*
 docker/nodes/eth/backup/exported-file
 docker/nodes/xrp/db/*
+
 !.gitkeep

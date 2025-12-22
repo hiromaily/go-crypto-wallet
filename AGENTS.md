@@ -23,6 +23,16 @@ This document provides guidelines for AI agents working on this project.
 - Format code with `gofmt`/`goimports`
 - Maintain consistent naming conventions (lowercase package names, exported functions start with uppercase)
 
+## Common Commands
+
+After making code changes, use these commands to verify code correctness:
+
+- `make lint-fix`: Fix linting issues automatically
+- `make check-build`: Verify that the code builds successfully
+- `make tidy`: Organize dependencies and clean up `go.mod`
+
+**Important**: Run these commands after code changes to ensure code quality and correctness.
+
 ## Error Handling
 
 - **DO NOT** use `log.Fatal` outside of `main` function (see `REFACTORING_CHECKLIST.md`)

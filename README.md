@@ -128,7 +128,6 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 - `images` ... for only docs
 - `pkg` ... go files
 - `scripts` ... shell scripts
-- `templates` ... template file for [sqlboiler](https://github.com/volatiletech/sqlboiler) Go ORM
 - `web`
   - `erc20-token` ... erc20 token contract
   - `ripple-lib-server` ... Ripple gRPC server

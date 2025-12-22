@@ -14,33 +14,7 @@
 sqlc:
 	cd tools/sqlc && sqlc generate
 
-###############################################################################
-# sqlboiler (DEPRECATED - Migrating to sqlc)
-#------------------------------------------------------------------------------
-# To generate all schema, modify `docker/mysql/watch/init.d/watch.sql` according to comments
-# Then recreate database
-# ```
-# $ docker compose rm -f -s watch-db
-# $ docker volume rm -f go-crypto-wallet_watch-db
-# $ docker compose up watch-db
-# ```
-# Make sure `watch-db` includes tables of keygen-db/sign-db
-# Then, run `make sqlboiler`
-# Make sure `make build` works
-# Revert `docker/mysql/watch/init.d/watch.sql`
-#------------------------------------------------------------------------------
-.PHONY: sqlboiler
-sqlboiler:
-	sqlboiler --wipe mysql
-
-.PHONY: sqlboiler-with-template
-sqlboiler-with-template:
-	sqlboiler --wipe mysql \
-	--templates \
-	${GOPATH}/pkg/mod/github.com/volatiletech/sqlboiler/v4@v4.8.6/templates/main, \
-	${GOPATH}/pkg/mod/github.com/volatiletech/sqlboiler/v4@v4.8.6/templates/test, \
-	templates
-
+# ABI
 .PHONY: generate-abi
 generate-abi:
 	abigen --abi ./data/contract/token.abi --pkg contract --type Token --out ./pkg/contract/token-abi.go
