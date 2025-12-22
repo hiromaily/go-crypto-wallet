@@ -34,15 +34,17 @@ This decision was made because:
 
 ### Remaining Work
 
-⏳ **Phase 2 - Remaining Watch Repositories** (8 repositories total)
-1. ✅ tx - Pattern established
-2. ⬜ btc_tx - Complex queries needed (joins, transactions)
-3. ⬜ btc_tx_input - Bulk inserts
-4. ⬜ btc_tx_output - Bulk inserts
-5. ⬜ eth_detail_tx - UUIDs, transactions
-6. ⬜ xrp_detail_tx - Complex XRP-specific fields
-7. ⬜ payment_request - Simple CRUD
-8. ⬜ address - Address allocation logic
+✅ **Phase 2 - SQL Queries for All Watch Repositories** (COMPLETED)
+1. ✅ tx - Pattern established (6 queries)
+2. ✅ btc_tx - Complex queries (11 queries including joins, counts)
+3. ✅ btc_tx_input - Insert and query operations (3 queries)
+4. ✅ btc_tx_output - Insert and query operations (3 queries)
+5. ✅ eth_detail_tx - With JOIN to tx table (8 queries)
+6. ✅ xrp_detail_tx - XRP-specific fields with JOIN (8 queries)
+7. ✅ payment_request - CRUD operations (6 queries)
+8. ✅ address - Address allocation logic (5 queries)
+
+**Total: 50 SQL queries created and generated successfully**
 
 ⏳ **Phase 3 - Repository Migration**
 - Migrate each repository from sqlboiler to sqlc
@@ -62,14 +64,22 @@ This decision was made because:
 
 ### Files Created/Modified
 
-**Created:**
+**Created (Phase 1 & 2):**
 - `tools/sqlc/sqlc.yml` - sqlc configuration
-- `tools/sqlc/schemas/*.sql` - 6 schema files for 8 tables
-- `tools/sqlc/queries/tx.sql` - tx table queries
-- `pkg/db/rdb/sqlcgen/*.go` - Generated sqlc code
+- `tools/sqlc/schemas/*.sql` - 6 schema files defining 8 tables
+- `tools/sqlc/queries/*.sql` - 9 query files with 50 total queries:
+  - `tx.sql`, `address.sql`, `payment_request.sql`
+  - `btc_tx.sql`, `btc_tx_input.sql`, `btc_tx_output.sql`
+  - `eth_detail_tx.sql`, `xrp_detail_tx.sql`
+- `pkg/db/rdb/sqlcgen/*.go` - 10 generated Go files:
+  - `db.go` - Queries struct
+  - `models.go` - Type definitions for all 8 tables
+  - 8 query files (*.sql.go)
+- `make/codegen.mk` - Added `make sqlc` target
+- `SQLC_MIGRATION_STATUS.md` - Progress tracking document
 
 **Modified:**
-- None yet (no breaking changes)
+- None yet (no breaking changes to existing code)
 
 ### Next Steps
 
@@ -87,13 +97,13 @@ The migration requires completing the remaining work outlined above. This is a s
 
 ### Estimated Complexity
 
-- **Remaining tables to query**: 7 repositories
-- **Average queries per repository**: 6-10 queries
-- **Total estimated queries**: ~60 SQL queries to write
-- **Code migration**: ~1,500 lines to refactor
-- **Test updates**: ~200 lines
+- ✅ **SQL queries written**: 50 queries (Phase 2 complete!)
+- ⏳ **Code migration remaining**: ~1,500 lines to refactor
+- ⏳ **Test updates remaining**: ~200 lines
 
-This is a **medium-to-large refactoring task** that should be tackled systematically.
+**Progress: Phase 1 & 2 Complete (40% done)**
+
+This is a **medium-to-large refactoring task** being tackled systematically.
 
 ---
 
