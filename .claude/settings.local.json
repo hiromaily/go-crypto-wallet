@@ -1,6 +1,7 @@
 {
   "permissions": {
     "allow": [
+      "WebFetch(domain:github.com)",
       "Bash(make -n:*)",
       "Bash(make:*)",
       "Bash(make lint-fix:*)",
@@ -13,7 +14,6 @@
       "Bash(go install:*)",
       "Bash($HOME/go/bin/goimports -w pkg/)",
       "Bash($HOME/go/bin/goimports:*)",
-      "WebFetch(domain:github.com)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
@@ -21,6 +21,7 @@
       "Bash(git mv:*)",
       "Bash(gh pr create:*)",
       "Bash(gh pr view:*)",
+      "Bash(gh pr comment:*)",
       "Bash(docker volume:*)",
       "Bash(docker logs:*)",
       "Bash(docker exec:*)",
@@ -28,6 +29,8 @@
       "Bash(docker compose ps:*)",
       "Bash(docker compose up:*)",
       "Bash(docker compose rm:*)",
+      "Bash(sqlc version:*)",
+      "Bash(sqlc generate:*)",
       "Bash(awk:*)",
       "Bash(cat:*)",
       "Bash(find:*)",
@@ -35,16 +38,14 @@
       "Bash(sed:*)",
       "Bash(echo:*)",
       "Bash(mkdir:*)",
+      "Bash(wc:*)",
+      "Bash(grep:*)",
       "Bash(for file in )",
       "Bash(do)",
       "Bash(done)",
       "Bash(while read file)",
       "Bash(then)",
-      "Bash(fi)",
-      "Bash(wc:*)",
-      "Bash(grep:*)",
-      "Bash(sqlc version:*)",
-      "Bash(sqlc generate:*)"
+      "Bash(fi)"
     ]
   }
 }
