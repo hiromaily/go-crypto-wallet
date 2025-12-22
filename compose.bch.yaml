@@ -1,4 +1,7 @@
-version: '3.8'
+networks:
+  bch:
+    name: bch
+    driver: bridge
 
 services:
   #########################################################################
@@ -6,12 +9,12 @@ services:
   #------------------------------------------------------------------------
   # Example of commands to container
   # -up bch-watch
-  #  $ docker-compose -f docker-compose.bch.yml up bch-watch
+  #  $ docker compose -f compose.bch.yaml up bch-watch
   # -login
-  #  $ docker-compose -f docker-compose.bch.yml exec bch-watch bash
+  #  $ docker compose -f compose.bch.yaml exec bch-watch bash
   #  - # bitcoin-cli -rpcuser=xyz -rpcpassword=xyz -rpcport=18332 getnetworkinfo
   # - run command
-  #  $ docker-compose -f docker-compose.bch.yml exec bch-watch bitcoin-cli -rpcuser=xyz -rpcpassword=xyz -rpcport=18332 getnetworkinfo
+  #  $ docker compose -f compose.bch.yaml exec bch-watch bitcoin-cli -rpcuser=xyz -rpcpassword=xyz -rpcport=18332 getnetworkinfo
   #########################################################################
   bch-watch:
     image: zquestz/bitcoin-cash-node:0.24.0
@@ -23,5 +26,12 @@ services:
       - "${BCH_WALLET_RPC_PORT:-19332}:18332"
     stdin_open: true
     tty: true
+    networks:
+      - bch
+    healthcheck:
+      test: ["CMD", "bitcoin-cli", "-rpcuser=xyz", "-rpcpassword=xyz", "-rpcport=18332", "getblockchaininfo"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     #command: /usr/local/bin/bitcoind --printtoconsole --conf=/data/bitcoind.conf
-

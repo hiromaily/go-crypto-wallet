@@ -1,9 +1,15 @@
-version: "3.8"
-
 volumes:
   watch-db: {}
   keygen-db: {}
   sign-db: {}
+
+networks:
+  btc:
+    name: btc
+    driver: bridge
+  db:
+    name: db
+    driver: bridge
 
 services:
   #########################################################################
@@ -15,9 +21,9 @@ services:
   #
   # Example of commands to container
   # - enter in container
-  #   - $ docker-compose exec btc-watch bash
+  #   - $ docker compose exec btc-watch bash
   # - run bitcoin-cli
-  #   - $ docker-compose exec btc-watch bitcoin-cli getnetworkinfo
+  #   - $ docker compose exec btc-watch bitcoin-cli getnetworkinfo
   # - wallet location
   #   - /data/.bitcoin/signet/wallets   # using signet
   #       or
@@ -33,6 +39,14 @@ services:
       - "${BTC_WATCH_RPC_PORT:-18332}:18332"
     stdin_open: true
     tty: true
+    networks:
+      - btc
+    healthcheck:
+      test: ["CMD", "bitcoin-cli", "getblockchaininfo"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     #    logging:
     #      driver: fluentd
     #      options:
@@ -49,6 +63,14 @@ services:
       - "${BTC_KEYGEN_RPC_PORT:-19332}:18332"
     stdin_open: true
     tty: true
+    networks:
+      - btc
+    healthcheck:
+      test: ["CMD", "bitcoin-cli", "getblockchaininfo"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     #    logging:
     #      driver: fluentd
     #      options:
@@ -65,6 +87,14 @@ services:
       - "${BTC_SIGN_RPC_PORT:-20332}:18332"
     stdin_open: true
     tty: true
+    networks:
+      - btc
+    healthcheck:
+      test: ["CMD", "bitcoin-cli", "getblockchaininfo"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     #    logging:
     #      driver: fluentd
     #      options:
@@ -93,6 +123,14 @@ services:
       ENV: watch
     ports:
       - "${WATCH_MYSQL_PORT:-3307}:3306"
+    networks:
+      - db
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # keygen wallet
   keygen-db:
@@ -112,6 +150,14 @@ services:
       ENV: keygen
     ports:
       - "${KEYGEN_MYSQL_PORT:-3308}:3306"
+    networks:
+      - db
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # sign wallet
   sign-db:
@@ -131,3 +177,11 @@ services:
       ENV: sign
     ports:
       - "${SIGN_MYSQL_PORT:-3309}:3306"
+    networks:
+      - db
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s

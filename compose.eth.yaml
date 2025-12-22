@@ -1,4 +1,7 @@
-version: '3.9'
+networks:
+  eth:
+    name: eth
+    driver: bridge
 
 services:
   #########################################################################
@@ -7,7 +10,7 @@ services:
   #------------------------------------------------------------------------
   # Example of commands to container
   # - Use console inside container
-  #  1. $ docker compose -f docker-compose.eth.yml exec geth sh
+  #  1. $ docker compose -f compose.eth.yaml exec geth sh
   #  2. # geth attach or geth attach ipc://root/.ethereum/goerli/geth.ipc
   #  3. > eth.syncing
   # - Call JSON-RPC (https://eth.wiki/json-rpc/API)
@@ -55,12 +58,13 @@ services:
       - --cache=4096
       #- --verbosity=4
     networks:
-      eth:
+      - eth
     healthcheck:
-      test: [ "CMD", "curl", "-X", "POST", "-H", "'Content-Type: application/json'", "--data", '{"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["0x0", false]}', "http://127.0.0.1:${GETH_HTTP_PORT:-8545}" ]
-      interval: "5s"
-      timeout: "10s"
+      test: ["CMD", "curl", "-X", "POST", "-H", "Content-Type: application/json", "--data", '{"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["0x0", false]}', "http://127.0.0.1:${GETH_HTTP_PORT:-8545}"]
+      interval: 5s
+      timeout: 10s
       retries: 10
+      start_period: 30s
 
   # Apple Silicon MacOS would not be run
   # - https://github.com/ChainSafe/lodestar/issues/4801
@@ -98,7 +102,13 @@ services:
       geth:
         condition: service_healthy
     networks:
-      eth:
+      - eth
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${BEACON_HTTP_PORT:-9596}/eth/v1/node/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
 
   #########################################################################
   # trufflesuite/ganache-cli
@@ -106,7 +116,7 @@ services:
   #------------------------------------------------------------------------
   # Example of commands to container
   # - run
-  #  $ docker compose -f docker-compose.eth.yml up ganache
+  #  $ docker compose -f compose.eth.yaml up ganache
   # - cli command example
   #  $ ganache-cli --mnemonic "toy echo orbit embrace opinion file client report history bomb regret life"
   #
@@ -117,11 +127,14 @@ services:
       - "${ETH_RPC_PORT:-8545}:8545"
     volumes:
       - ./docker/nodes/eth/ganache-data:/ganache_data
+    networks:
+      - eth
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "--post-data={\"jsonrpc\":\"2.0\",\"method\":\"web3_clientVersion\",\"params\":[],\"id\":1}", "--header=Content-Type: application/json", "http://localhost:8545"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     # command adds into default ENTRYPOINT
     # https://hub.docker.com/r/trufflesuite/ganache-cli/dockerfile
     command: --mnemonic "toy echo orbit embrace opinion file client report history bomb regret life"
-
-networks:
-  eth:
-    name: eth
-    driver: bridge
