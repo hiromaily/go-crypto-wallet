@@ -1,10 +1,11 @@
 package watchsrv
 
 import (
+	"errors"
+	"fmt"
 	"strconv"
 
 	"github.com/btcsuite/btcd/btcutil"
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -112,7 +113,7 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, []int64, error) {
 	// get payment_request
 	paymentRequests, err := t.payReqRepo.GetAll()
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call repo.GetPaymentRequestAll()")
+		return nil, nil, fmt.Errorf("fail to call repo.GetPaymentRequestAll(): %w", err)
 	}
 	if len(paymentRequests) == 0 {
 		t.logger.Debug("no data in payment_request")
@@ -142,8 +143,7 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, []int64, error) {
 		if err != nil {
 			// fatal error
 			t.logger.Error("unexpected error occurred converting receiverAddr from string type  to address type")
-			return nil, nil, errors.New(
-				"unexpected error occurred converting receiverAddr from string type to address type")
+			return nil, nil, errors.New("unexpected error occurred converting receiverAddr from string type to address type")
 		}
 
 		// amount

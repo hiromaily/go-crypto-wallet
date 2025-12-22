@@ -2,11 +2,11 @@ package btc
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/wire"
-	"github.com/pkg/errors"
 )
 
 // EstimateSmartFeeResult is response type of PRC `estimatesmartfee`
@@ -23,20 +23,20 @@ type EstimateSmartFeeResult struct {
 func (b *Bitcoin) EstimateSmartFee() (float64, error) {
 	input, err := json.Marshal(b.confirmationBlock)
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call json.Marchal(confirmationBlock)")
+		return 0, fmt.Errorf("fail to call json.Marchal(confirmationBlock): %w", err)
 	}
 	rawResult, err := b.Client.RawRequest("estimatesmartfee", []json.RawMessage{input})
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call json.RawRequest(estimatesmartfee)")
+		return 0, fmt.Errorf("fail to call json.RawRequest(estimatesmartfee): %w", err)
 	}
 
 	estimateResult := EstimateSmartFeeResult{}
 	err = json.Unmarshal(rawResult, &estimateResult)
 	if err != nil {
-		return 0, errors.Errorf("fail to all json.Unmarshal(rawResult)")
+		return 0, errors.New("fail to all json.Unmarshal(rawResult)")
 	}
 	if len(estimateResult.Errors) != 0 {
-		return 0, errors.Errorf("response includes error: %s", estimateResult.Errors[0])
+		return 0, fmt.Errorf("response includes error: %s", estimateResult.Errors[0])
 	}
 
 	return estimateResult.FeeRate, nil
@@ -46,7 +46,7 @@ func (b *Bitcoin) EstimateSmartFee() (float64, error) {
 func (b *Bitcoin) GetTransactionFee(tx *wire.MsgTx) (btcutil.Amount, error) {
 	feePerKB, err := b.EstimateSmartFee()
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call btc.EstimateSmartFee()")
+		return 0, fmt.Errorf("fail to call btc.EstimateSmartFee(): %w", err)
 	}
 	fee := fmt.Sprintf("%f", feePerKB*float64(tx.SerializeSize())/1000)
 
@@ -110,7 +110,7 @@ func (b *Bitcoin) calculateNewFee(fee btcutil.Amount, adjustmentFee float64) (bt
 func (b *Bitcoin) getMinRelayFee() (btcutil.Amount, error) {
 	res, err := b.GetNetworkInfo()
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call btc.GetNetworkInfo()")
+		return 0, fmt.Errorf("fail to call btc.GetNetworkInfo(): %w", err)
 	}
 	if res.Relayfee == 0 {
 		return 0, errors.New("RelayFee can not be retrieved by `getnetworkinfo`")

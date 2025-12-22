@@ -2,15 +2,13 @@ package coldsrv
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strings"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-
-	"github.com/pkg/errors"
-
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -63,15 +61,15 @@ func (a *AddressExport) ExportAddress(accountType account.AccountType) (string, 
 	case coin.XRP:
 		targetAddrStatus = address.AddrStatusHDKeyGenerated
 	case coin.LTC, coin.ERC20, coin.HYC:
-		return "", errors.Errorf("coinType[%s] is not implemented yet.", a.coinTypeCode)
+		return "", fmt.Errorf("coinType[%s] is not implemented yet.", a.coinTypeCode)
 	default:
-		return "", errors.Errorf("coinType[%s] is not implemented yet.", a.coinTypeCode)
+		return "", fmt.Errorf("coinType[%s] is not implemented yet.", a.coinTypeCode)
 	}
 
 	// get account key
 	accountKeyTable, err := a.accountKeyRepo.GetAllAddrStatus(accountType, targetAddrStatus)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call accountKeyRepo.GetAllAddrStatus()")
+		return "", fmt.Errorf("fail to call accountKeyRepo.GetAllAddrStatus(): %w", err)
 	}
 	if len(accountKeyTable) == 0 {
 		a.logger.Info("no records to export in account_key table")
@@ -91,7 +89,7 @@ func (a *AddressExport) ExportAddress(accountType account.AccountType) (string, 
 	}
 	_, err = a.accountKeyRepo.UpdateAddrStatus(accountType, address.AddrStatusAddressExported, updatedItems)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call a.accountKeyRepo.UpdateAddrStatus()")
+		return "", fmt.Errorf("fail to call a.accountKeyRepo.UpdateAddrStatus(): %w", err)
 	}
 
 	return fileName, nil
@@ -106,7 +104,7 @@ func (a *AddressExport) exportAccountKey(
 
 	file, err := os.Create(fileName) //nolint:gosec
 	if err != nil {
-		return "", errors.Wrapf(err, "fail to call os.Create(%s)", fileName)
+		return "", fmt.Errorf("fail to call os.Create(%s): %w", fileName, err)
 	}
 
 	defer file.Close()
@@ -119,12 +117,12 @@ func (a *AddressExport) exportAccountKey(
 		tmpData := address.CreateLine(record)
 		_, err = writer.WriteString(strings.Join(tmpData, ",") + "\n")
 		if err != nil {
-			return "", errors.Wrapf(err, "fail to call writer.WriteString(%s)", fileName)
+			return "", fmt.Errorf("fail to call writer.WriteString(%s): %w", fileName, err)
 		}
 	}
 	err = writer.Flush()
 	if err != nil {
-		return "", errors.Wrapf(err, "fail to call writer.Flush(%s)", fileName)
+		return "", fmt.Errorf("fail to call writer.Flush(%s): %w", fileName, err)
 	}
 
 	return fileName, nil

@@ -1,9 +1,8 @@
 package testutil
 
 import (
+	"fmt"
 	"os"
-
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -26,7 +25,7 @@ func GetXRP() (xrpgrp.Rippler, error) {
 	confPath := projPath + "/data/config/xrp_watch.toml"
 	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.XRP)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to create config")
+		return nil, fmt.Errorf("fail to create config: %w", err)
 	}
 	// TODO: if config should be overridden, here
 	conf.CoinTypeCode = coin.XRP
@@ -36,18 +35,18 @@ func GetXRP() (xrpgrp.Rippler, error) {
 	// ws client
 	wsClient, wsAdmin, err := xrpgrp.NewWSClient(&conf.Ripple)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to create ethereum rpc client")
+		return nil, fmt.Errorf("fail to create ethereum rpc client: %w", err)
 	}
 	// client
 	conn, err := xrpgrp.NewGRPCClient(&conf.Ripple.API)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to create api instance")
+		return nil, fmt.Errorf("fail to create api instance: %w", err)
 	}
 	grpcAPI := xrp.NewRippleAPI(conn, log)
 
 	xr, err = xrpgrp.NewRipple(wsClient, wsAdmin, grpcAPI, &conf.Ripple, log, conf.CoinTypeCode)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to create xrp instance")
+		return nil, fmt.Errorf("fail to create xrp instance: %w", err)
 	}
 	return xr, nil
 }

@@ -1,10 +1,10 @@
 package watchsrv
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/bookerzzz/grok"
-	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
@@ -32,11 +32,11 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	// check sender's balance
 	senderAddr, err := t.addrRepo.GetOneUnAllocated(sender)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call addrRepo.GetOneUnAllocated(sender)")
+		return "", "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(sender): %w", err)
 	}
 	senderBalance, err := t.xrp.GetBalance(senderAddr.WalletAddress)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call xrp.GetAccountInfo()")
+		return "", "", fmt.Errorf("fail to call xrp.GetAccountInfo(): %w", err)
 	}
 	if senderBalance <= 20 {
 		return "", "", errors.New("sender balance is insufficient to send")
@@ -53,7 +53,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	// get receiver address
 	receiverAddr, err := t.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call addrRepo.GetOneUnAllocated(receiver)")
+		return "", "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(receiver): %w", err)
 	}
 
 	// call CreateRawTransaction
@@ -63,9 +63,9 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	txJSON, rawTxString, err := t.xrp.CreateRawTransaction(
 		senderAddr.WalletAddress, receiverAddr.WalletAddress, floatValue, instructions)
 	if err != nil {
-		return "", "", errors.Wrapf(
-			err, "fail to call xrp.CreateRawTransaction(), sender address: %s",
-			senderAddr.WalletAddress)
+		return "", "", fmt.Errorf(
+			"fail to call xrp.CreateRawTransaction(), sender address: %s: %w",
+			senderAddr.WalletAddress, err)
 	}
 	t.logger.Debug("txJSON", "txJSON", txJSON)
 	grok.Value(txJSON)
@@ -105,7 +105,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	if len(serializedTxs) != 0 {
 		generatedFileName, err = t.generateHexFile(targetAction, sender, txID, serializedTxs)
 		if err != nil {
-			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
+			return "", "", fmt.Errorf("fail to call generateHexFile(): %w", err)
 		}
 	}
 

@@ -2,8 +2,7 @@ package xrp
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
+	"fmt"
 )
 
 // https://xrpl.org/transaction-methods.html
@@ -95,7 +94,7 @@ func (r *Ripple) Sign(txJSON *PublicTxType, secret string, offline bool) (*Respo
 	}
 	var res ResponseSign
 	if err := r.wsPublic.Call(context.Background(), &req, &res); err != nil {
-		return nil, errors.Wrap(err, "fail to call wsClient.Call(sign)")
+		return nil, fmt.Errorf("fail to call wsClient.Call(sign): %w", err)
 	}
 	return &res, nil
 }

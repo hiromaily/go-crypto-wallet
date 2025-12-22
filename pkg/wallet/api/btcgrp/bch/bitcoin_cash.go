@@ -1,10 +1,11 @@
 package bch
 
 import (
+	"fmt"
+
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/btcsuite/btcd/wire"
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -42,7 +43,7 @@ func NewBitcoinCash(
 	// bitcoin base
 	bit, err := btc.NewBitcoin(client, coinTypeCode, conf, logger)
 	if err != nil {
-		return nil, errors.Errorf("btc.NewBitcoin() error: %s", err)
+		return nil, fmt.Errorf("btc.NewBitcoin() error: %s", err)
 	}
 
 	bitc := BitcoinCash{Bitcoin: *bit}

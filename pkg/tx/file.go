@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
-
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -80,14 +78,14 @@ func (*FileRepository) GetFileNameType(filePath string) (*FileName, error) {
 	// s[4]: timestamp
 	s := strings.Split(fileName, "_")
 	if len(s) != 5 {
-		return nil, errors.Errorf("invalid file path: %s", fileName)
+		return nil, fmt.Errorf("invalid file path: %s", fileName)
 	}
 
 	fileNameType := FileName{}
 
 	// Action
 	if !action.ValidateActionType(s[0]) {
-		return nil, errors.Errorf("invalid file name: %s", fileName)
+		return nil, fmt.Errorf("invalid file name: %s", fileName)
 	}
 	fileNameType.ActionType = action.ActionType(s[0])
 
@@ -95,19 +93,19 @@ func (*FileRepository) GetFileNameType(filePath string) (*FileName, error) {
 	var err error
 	fileNameType.TxID, err = strconv.ParseInt(s[1], 10, 64)
 	if err != nil {
-		return nil, errors.Errorf("invalid file name: %s", fileName)
+		return nil, fmt.Errorf("invalid file name: %s", fileName)
 	}
 
 	// txType
 	if !ValidateTxType(s[2]) {
-		return nil, errors.Errorf("invalid name: %s", fileName)
+		return nil, fmt.Errorf("invalid name: %s", fileName)
 	}
 	fileNameType.TxType = TxType(s[2])
 
 	// signedCount
 	signedCount, err := strconv.Atoi(s[3])
 	if err != nil {
-		return nil, errors.Errorf("invalid name: %s", fileName)
+		return nil, fmt.Errorf("invalid name: %s", fileName)
 	}
 	fileNameType.SignedCount = signedCount
 
@@ -125,7 +123,7 @@ func (r *FileRepository) ValidateFilePath(
 	// txType
 	// if !(fileType.TxType).Search(expectedTxTypes) {
 	if fileType.TxType != expectedTxType {
-		return "", "", 0, 0, errors.Errorf("txType is invalid: %s", fileType.TxType)
+		return "", "", 0, 0, fmt.Errorf("txType is invalid: %s", fileType.TxType)
 	}
 	return fileType.ActionType, fileType.TxType, fileType.TxID, fileType.SignedCount, nil
 }
@@ -134,7 +132,7 @@ func (r *FileRepository) ValidateFilePath(
 func (*FileRepository) ReadFile(path string) (string, error) {
 	ret, err := os.ReadFile(path) //nolint:gosec
 	if err != nil {
-		return "", errors.Wrapf(err, "fail to call os.ReadFile(%s)", path)
+		return "", fmt.Errorf("fail to call os.ReadFile(%s): %w", path, err)
 	}
 
 	return string(ret), nil
@@ -144,7 +142,7 @@ func (*FileRepository) ReadFile(path string) (string, error) {
 func (*FileRepository) ReadFileSlice(path string) ([]string, error) {
 	file, err := os.Open(path) //nolint:gosec
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to open file: %s", path)
+		return nil, fmt.Errorf("fail to open file: %s: %w", path, err)
 	}
 
 	defer file.Close()
@@ -156,7 +154,7 @@ func (*FileRepository) ReadFileSlice(path string) ([]string, error) {
 	}
 
 	if err = scanner.Err(); err != nil {
-		return nil, errors.Wrapf(err, "fail to scan file")
+		return nil, fmt.Errorf("fail to scan file: %w", err)
 	}
 	return data, nil
 }
@@ -172,7 +170,7 @@ func (r *FileRepository) WriteFile(path, hexTx string) (string, error) {
 	byteTx := []byte(hexTx)
 	err := os.WriteFile(fileName, byteTx, 0o644)
 	if err != nil {
-		return "", errors.Wrapf(err, "fail to call os.WriteFile(%s)", fileName)
+		return "", fmt.Errorf("fail to call os.WriteFile(%s): %w", fileName, err)
 	}
 
 	return fileName, nil
@@ -188,7 +186,7 @@ func (r *FileRepository) WriteFileSlice(path string, data []string) (string, err
 
 	file, err := os.OpenFile(fileName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o600) //nolint:gosec
 	if err != nil {
-		return "", errors.Wrapf(err, "fail to call os.OpenFile(%s)", fileName)
+		return "", fmt.Errorf("fail to call os.OpenFile(%s): %w", fileName, err)
 	}
 	writer := bufio.NewWriter(file)
 

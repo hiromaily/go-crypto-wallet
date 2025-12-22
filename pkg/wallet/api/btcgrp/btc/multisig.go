@@ -2,8 +2,7 @@ package btc
 
 import (
 	"encoding/json"
-
-	"github.com/pkg/errors"
+	"fmt"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -26,7 +25,7 @@ func (b *Bitcoin) AddMultisigAddress(
 	addressType address.AddrType,
 ) (*AddMultisigAddressResult, error) {
 	if requiredSigs > len(addresses) {
-		return nil, errors.Errorf(
+		return nil, fmt.Errorf(
 			"number of given address doesn't meet number of requiredSigs: requiredSigs:%d, len(addresses):%d",
 			requiredSigs, len(addresses))
 	}
@@ -34,13 +33,13 @@ func (b *Bitcoin) AddMultisigAddress(
 	// requiredSigs
 	bRequiredSigs, err := json.Marshal(requiredSigs)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Marchal(requiredSigs)")
+		return nil, fmt.Errorf("fail to call json.Marchal(requiredSigs): %w", err)
 	}
 
 	// addresses
 	bAddresses, err := json.Marshal(addresses)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Marchal(addresses)")
+		return nil, fmt.Errorf("fail to call json.Marchal(addresses): %w", err)
 	}
 
 	// accountName
@@ -71,21 +70,21 @@ func (b *Bitcoin) AddMultisigAddress(
 	case coin.BCH:
 		jsonRawMsg = []json.RawMessage{bRequiredSigs, bAddresses, bAccount}
 	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
-		return nil, errors.Errorf("not implemented for %s in AddMultisigAddress()", b.coinTypeCode.String())
+		return nil, fmt.Errorf("not implemented for %s in AddMultisigAddress()", b.coinTypeCode.String())
 	default:
-		return nil, errors.Errorf("not implemented for %s in AddMultisigAddress()", b.coinTypeCode.String())
+		return nil, fmt.Errorf("not implemented for %s in AddMultisigAddress()", b.coinTypeCode.String())
 	}
 
 	// call addmultisigaddress
 	rawResult, err := b.Client.RawRequest("addmultisigaddress", jsonRawMsg)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call client.RawRequest(addmultisigaddress)")
+		return nil, fmt.Errorf("fail to call client.RawRequest(addmultisigaddress): %w", err)
 	}
 
 	multisigAddrResult := AddMultisigAddressResult{}
 	err = json.Unmarshal(rawResult, &multisigAddrResult)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
+		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
 	}
 
 	return &multisigAddrResult, nil

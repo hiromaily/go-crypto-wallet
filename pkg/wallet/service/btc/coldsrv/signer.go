@@ -1,11 +1,11 @@
 package coldsrv
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/btcsuite/btcd/wire"
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -150,7 +150,7 @@ func (s *Sign) sign(hex, encodedPrevsAddrs string) (string, bool, string, error)
 
 	hexTx, err := s.btc.ToHex(signedTx)
 	if err != nil {
-		return "", false, "", errors.Wrap(err, "fail to call s.btc.ToHex(signedTx)")
+		return "", false, "", fmt.Errorf("fail to call s.btc.ToHex(signedTx): %w", err)
 	}
 	s.logger.Debug(
 		"call btc.SignRawTransaction()",
@@ -169,7 +169,7 @@ func (s *Sign) signMultisig(msgTx *wire.MsgTx, prevsAddrs *btc.PreviousTxs) (*wi
 	case wallet.WalletTypeKeyGen:
 		accountKeys, err := s.accountKeyRepo.GetAllMultiAddr(prevsAddrs.SenderAccount, prevsAddrs.Addrs)
 		if err != nil {
-			return nil, false, "", errors.Wrap(err, "fail to call accountKeyRepo.GetAllMultiAddr()")
+			return nil, false, "", fmt.Errorf("fail to call accountKeyRepo.GetAllMultiAddr(): %w", err)
 		}
 
 		// retrieve WIPs
@@ -190,20 +190,20 @@ func (s *Sign) signMultisig(msgTx *wire.MsgTx, prevsAddrs *btc.PreviousTxs) (*wi
 		// serialize prevsAddrs with redeemScript
 		newEncodedPrevsAddrs, err = serial.EncodeToString(prevsAddrs)
 		if err != nil {
-			return nil, false, "", errors.Wrap(err, "fail to call serial.EncodeToString()")
+			return nil, false, "", fmt.Errorf("fail to call serial.EncodeToString(): %w", err)
 		}
 
 	case wallet.WalletTypeSign:
 		authKey, err := s.authKeyRepo.GetOne("")
 		if err != nil {
-			return nil, false, "", errors.Wrap(err, "fail to call authKeyRepo.GetOne()")
+			return nil, false, "", fmt.Errorf("fail to call authKeyRepo.GetOne(): %w", err)
 		}
 		// wip
 		wips = []string{authKey.WalletImportFormat}
 	case wallet.WalletTypeWatchOnly:
-		return nil, false, "", errors.Errorf("WalletType is invalid: %s", s.wtype.String())
+		return nil, false, "", fmt.Errorf("WalletType is invalid: %s", s.wtype.String())
 	default:
-		return nil, false, "", errors.Errorf("WalletType is invalid: %s", s.wtype.String())
+		return nil, false, "", fmt.Errorf("WalletType is invalid: %s", s.wtype.String())
 	}
 
 	// sign

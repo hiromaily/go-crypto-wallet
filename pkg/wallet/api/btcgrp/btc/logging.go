@@ -2,8 +2,7 @@ package btc
 
 import (
 	"encoding/json"
-
-	"github.com/pkg/errors"
+	"fmt"
 )
 
 // LoggingResult is response type of PRC `logging`
@@ -36,13 +35,13 @@ type LoggingResult struct {
 func (b *Bitcoin) Logging() (*LoggingResult, error) {
 	rawResult, err := b.Client.RawRequest("logging", []json.RawMessage{})
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.RawRequest(logging)")
+		return nil, fmt.Errorf("fail to call json.RawRequest(logging): %w", err)
 	}
 
 	loggingResult := LoggingResult{}
 	err = json.Unmarshal(rawResult, &loggingResult)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
+		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
 	}
 
 	return &loggingResult, nil

@@ -1,11 +1,11 @@
 package watchsrv
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 
 	"github.com/bookerzzz/grok"
-	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
@@ -45,7 +45,7 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	// GetOneUnAllocated
 	senderAddr, err := t.addrRepo.GetOneUnAllocated(sender)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
+		return "", "", fmt.Errorf("fail to call addrRepo.GetAll(account.AccountTypeClient): %w", err)
 	}
 	if t.validateAmount(senderAddr, totalAmount) != nil {
 		return "", "", nil
@@ -70,7 +70,7 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	if len(serializedTxs) != 0 {
 		generatedFileName, err = t.generateHexFile(targetAction, sender, txID, serializedTxs)
 		if err != nil {
-			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
+			return "", "", fmt.Errorf("fail to call generateHexFile(): %w", err)
 		}
 	}
 
@@ -89,7 +89,7 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, float64, []int64, error) 
 	// get payment_request
 	paymentRequests, err := t.payReqRepo.GetAll()
 	if err != nil {
-		return nil, 0, nil, errors.Wrap(err, "fail to call repo.GetPaymentRequestAll()")
+		return nil, 0, nil, fmt.Errorf("fail to call repo.GetPaymentRequestAll(): %w", err)
 	}
 	if len(paymentRequests) == 0 {
 		t.logger.Debug("no data in payment_request")
@@ -122,7 +122,7 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, float64, []int64, error) 
 				"address", userPayments[idx].receiverAddr,
 				"error", err,
 			)
-			return nil, 0, nil, errors.Wrapf(err, "address is invalid: %s", userPayments[idx].receiverAddr)
+			return nil, 0, nil, fmt.Errorf("address is invalid: %s: %w", userPayments[idx].receiverAddr, err)
 		}
 
 		// total amount
@@ -135,7 +135,7 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, float64, []int64, error) 
 func (t *TxCreate) validateAmount(senderAddr *models.Address, totalAmount float64) error {
 	senderBalance, err := t.xrp.GetBalance(senderAddr.WalletAddress)
 	if err != nil {
-		return errors.Wrap(err, "fail to call xrp.GetAccountInfo()")
+		return fmt.Errorf("fail to call xrp.GetAccountInfo(): %w", err)
 	}
 
 	if senderBalance <= totalAmount {

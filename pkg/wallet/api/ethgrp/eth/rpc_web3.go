@@ -1,7 +1,7 @@
 package eth
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
 )
 
 // ClientVersion returns client version
@@ -12,7 +12,7 @@ func (e *Ethereum) ClientVersion() (string, error) {
 	var resClientVersion string
 	err := e.rpcClient.CallContext(e.ctx, &resClientVersion, "web3_clientVersion")
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call client.CallContext(web3_clientVersion)")
+		return "", fmt.Errorf("fail to call client.CallContext(web3_clientVersion): %w", err)
 	}
 	return resClientVersion, nil
 }
@@ -23,7 +23,7 @@ func (e *Ethereum) SHA3(data string) (string, error) {
 	var res string
 	err := e.rpcClient.CallContext(e.ctx, &res, "web3_sha3", data)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call client.CallContext(web3_sha3)")
+		return "", fmt.Errorf("fail to call client.CallContext(web3_sha3): %w", err)
 	}
 	return res, nil
 }

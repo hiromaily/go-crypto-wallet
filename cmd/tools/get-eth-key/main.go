@@ -2,15 +2,14 @@ package main
 
 import (
 	"crypto/ecdsa"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
 
+	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-
-	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/pkg/errors"
 )
 
 var (
@@ -82,7 +81,7 @@ func getPrivKey(hexAddr, password string) (*keystore.Key, error) {
 
 	key, err := keystore.DecryptKey(keyJSON, password)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to call keystore.DecryptKey()")
+		return nil, fmt.Errorf("fail to call keystore.DecryptKey(): %w", err)
 	}
 	return key, nil
 }

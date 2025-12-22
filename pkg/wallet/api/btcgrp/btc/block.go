@@ -1,7 +1,7 @@
 package btc
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
 )
 
 // GetBlockCount gets block count
@@ -10,7 +10,7 @@ import (
 func (b *Bitcoin) GetBlockCount() (int64, error) {
 	blockCnt, err := b.Client.GetBlockCount()
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call client.GetBlockCount()")
+		return 0, fmt.Errorf("fail to call client.GetBlockCount(): %w", err)
 	}
 
 	return blockCnt, nil

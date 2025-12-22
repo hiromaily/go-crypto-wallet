@@ -2,9 +2,9 @@ package key
 
 import (
 	"encoding/base64"
+	"fmt"
 
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
-	"github.com/pkg/errors"
 	"github.com/tyler-smith/go-bip39"
 )
 
@@ -41,7 +41,7 @@ func SeedToString(seed []byte) string {
 func SeedToByte(seed string) ([]byte, error) {
 	unbase64, err := base64.StdEncoding.DecodeString(seed)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call base64.StdEncoding.DecodeString()")
+		return nil, fmt.Errorf("fail to call base64.StdEncoding.DecodeString(): %w", err)
 	}
 	return unbase64, nil
 }

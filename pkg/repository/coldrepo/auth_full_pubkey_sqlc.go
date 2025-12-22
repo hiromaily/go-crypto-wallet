@@ -3,8 +3,7 @@ package coldrepo
 import (
 	"context"
 	"database/sql"
-
-	"github.com/pkg/errors"
+	"fmt"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
@@ -40,7 +39,7 @@ func (r *AuthFullPubkeyRepositorySqlc) GetOne(authType account.AuthType) (*model
 		AuthAccount: authType.String(),
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetAuthFullPubkey()")
+		return nil, fmt.Errorf("failed to call GetAuthFullPubkey(): %w", err)
 	}
 
 	return convertSqlcAuthFullPubkeyToModel(&authPubkey), nil
@@ -56,7 +55,7 @@ func (r *AuthFullPubkeyRepositorySqlc) Insert(authType account.AuthType, fullPub
 		FullPublicKey: fullPubKey,
 	})
 	if err != nil {
-		return errors.Wrap(err, "failed to call InsertAuthFullPubkey()")
+		return fmt.Errorf("failed to call InsertAuthFullPubkey(): %w", err)
 	}
 
 	return nil
@@ -73,7 +72,7 @@ func (r *AuthFullPubkeyRepositorySqlc) InsertBulk(items []*models.AuthFullpubkey
 			FullPublicKey: item.FullPublicKey,
 		})
 		if err != nil {
-			return errors.Wrap(err, "failed to call InsertAuthFullPubkey()")
+			return fmt.Errorf("failed to call InsertAuthFullPubkey(): %w", err)
 		}
 	}
 

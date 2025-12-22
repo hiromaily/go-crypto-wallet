@@ -1,11 +1,12 @@
 package config
 
 import (
+	"errors"
+	"fmt"
 	"os"
 
 	"github.com/BurntSushi/toml"
 	"github.com/go-playground/validator/v10"
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -38,13 +39,13 @@ func NewWallet(file string, wtype wallet.WalletType, coinTypeCode coin.CoinTypeC
 func loadWallet(path string) (*WalletRoot, error) {
 	d, err := os.ReadFile(path) //nolint:gosec
 	if err != nil {
-		return nil, errors.Wrapf(err, "can't read toml file. %s", path)
+		return nil, fmt.Errorf("can't read toml file. %s: %w", path, err)
 	}
 
 	var config WalletRoot
 	_, err = toml.Decode(string(d), &config)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call toml.Decode()")
+		return nil, fmt.Errorf("fail to call toml.Decode(): %w", err)
 	}
 
 	return &config, nil
@@ -62,7 +63,7 @@ func (c *WalletRoot) validate(wtype wallet.WalletType, coinTypeCode coin.CoinTyp
 		switch wtype {
 		case wallet.WalletTypeWatchOnly:
 			if c.Bitcoin.Block.ConfirmationNum == 0 {
-				return errors.New("Block ConfirmationNum is required in toml file")
+				return errors.New("block ConfirmationNum is required in toml file")
 			}
 		case wallet.WalletTypeKeyGen, wallet.WalletTypeSign:
 			// No additional validation needed
@@ -86,7 +87,7 @@ func (c *WalletRoot) validate(wtype wallet.WalletType, coinTypeCode coin.CoinTyp
 
 func (c *WalletRoot) ValidateERC20(token coin.ERC20Token) error {
 	if _, ok := c.Ethereum.ERC20s[token]; !ok {
-		return errors.Errorf("erc20 token information for [%s] is required", token.String())
+		return fmt.Errorf("erc20 token information for [%s] is required", token.String())
 	}
 	return nil
 }

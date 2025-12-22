@@ -2,8 +2,9 @@ package xrpgrp
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
-	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
@@ -24,7 +25,7 @@ func NewWSClient(conf *config.Ripple) (*ws.WS, *ws.WS, error) {
 	}
 	public, err := ws.New(context.Background(), publicURL)
 	if err != nil {
-		return nil, nil, errors.Wrapf(err, "fail to call ws.New() for public API: %s", publicURL)
+		return nil, nil, fmt.Errorf("fail to call ws.New() for public API: %s: %w", publicURL, err)
 	}
 
 	// acceptable without adminClient
@@ -34,7 +35,7 @@ func NewWSClient(conf *config.Ripple) (*ws.WS, *ws.WS, error) {
 	}
 	admin, err := ws.New(context.Background(), adminURL)
 	if err != nil {
-		return nil, nil, errors.Wrapf(err, "fail to call ws.New() for admin API: %s", adminURL)
+		return nil, nil, fmt.Errorf("fail to call ws.New() for admin API: %s: %w", adminURL, err)
 	}
 
 	return public, admin, nil
@@ -51,7 +52,7 @@ func NewGRPCClient(conf *config.RippleAPI) (*grpc.ClientConn, error) {
 	}
 	conn, err := grpc.NewClient(conf.URL, opts...)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to call grpc.Dial: %s", conf.URL)
+		return nil, fmt.Errorf("fail to call grpc.Dial: %s: %w", conf.URL, err)
 	}
 	return conn, nil
 }
@@ -74,12 +75,12 @@ func NewRipple(
 	case coin.XRP:
 		ripple, err := xrp.NewRipple(context.Background(), wsPublic, wsAdmin, api, coinTypeCode, conf, logger)
 		if err != nil {
-			return nil, errors.Wrap(err, "fail to call xrp.NewRipple()")
+			return nil, fmt.Errorf("fail to call xrp.NewRipple(): %w", err)
 		}
 		return ripple, err
 	case coin.BTC, coin.BCH, coin.LTC, coin.ETH, coin.ERC20, coin.HYC:
-		return nil, errors.Errorf("coinType %s is not defined", coinTypeCode.String())
+		return nil, fmt.Errorf("coinType %s is not defined", coinTypeCode.String())
 	default:
-		return nil, errors.Errorf("coinType %s is not defined", coinTypeCode.String())
+		return nil, fmt.Errorf("coinType %s is not defined", coinTypeCode.String())
 	}
 }

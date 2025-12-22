@@ -1,11 +1,12 @@
 package account
 
 import (
+	"errors"
+	"fmt"
 	"os"
 
 	"github.com/BurntSushi/toml"
 	"github.com/go-playground/validator/v10"
-	"github.com/pkg/errors"
 )
 
 // AccountRoot account root config
@@ -50,13 +51,13 @@ func NewAccount(file string) (*AccountRoot, error) {
 func loadAccount(path string) (*AccountRoot, error) {
 	d, err := os.ReadFile(path) //nolint:gosec
 	if err != nil {
-		return nil, errors.Wrapf(err, "can't read toml file. %s", path)
+		return nil, fmt.Errorf("can't read toml file. %s: %w", path, err)
 	}
 
 	var config AccountRoot
 	_, err = toml.Decode(string(d), &config)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call toml.Decode()")
+		return nil, fmt.Errorf("fail to call toml.Decode(): %w", err)
 	}
 
 	return &config, nil

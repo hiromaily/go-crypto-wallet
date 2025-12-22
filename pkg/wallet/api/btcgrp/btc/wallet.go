@@ -2,8 +2,8 @@ package btc
 
 import (
 	"encoding/json"
-
-	"github.com/pkg/errors"
+	"errors"
+	"fmt"
 )
 
 //{
@@ -33,11 +33,11 @@ func (b *Bitcoin) BackupWallet(fileName string) error {
 	// backupwallet
 	bFileName, err := json.Marshal(fileName)
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.Marchal(filename)")
+		return fmt.Errorf("fail to call json.Marchal(filename): %w", err)
 	}
 	_, err = b.Client.RawRequest("backupwallet", []json.RawMessage{bFileName})
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.RawRequest(backupwallet)")
+		return fmt.Errorf("fail to call json.RawRequest(backupwallet): %w", err)
 	}
 
 	return nil
@@ -58,18 +58,18 @@ func (b *Bitcoin) ImportWallet(fileName string) error {
 func (b *Bitcoin) dumpImportWallet(fileName, method string) error {
 	bFileName, err := json.Marshal(fileName)
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.Marchal(filename)")
+		return fmt.Errorf("fail to call json.Marchal(filename): %w", err)
 	}
 
 	rawResult, err := b.Client.RawRequest(method, []json.RawMessage{bFileName})
 	if err != nil {
-		return errors.Wrapf(err, "fail to call json.RawRequest(%s)", method)
+		return fmt.Errorf("fail to call json.RawRequest(%s): %w", method, err)
 	}
 
 	var walletResult WalletResult
 	err = json.Unmarshal(rawResult, &walletResult)
 	if err != nil {
-		return errors.Wrap(err, "json.Unmarshal(rawResult)")
+		return fmt.Errorf("json.Unmarshal(rawResult): %w", err)
 	}
 
 	return nil
@@ -81,11 +81,11 @@ func (b *Bitcoin) EncryptWallet(passphrase string) error {
 	// backupwallet
 	input1, err := json.Marshal(passphrase)
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.Marchal(passphrase)")
+		return fmt.Errorf("fail to call json.Marchal(passphrase): %w", err)
 	}
 	_, err = b.Client.RawRequest("encryptwallet", []json.RawMessage{input1})
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.RawRequest(encryptwallet)")
+		return fmt.Errorf("fail to call json.RawRequest(encryptwallet): %w", err)
 	}
 
 	return nil
@@ -119,21 +119,21 @@ func (b *Bitcoin) LoadWallet(fileName string) error {
 	// loadwallet "filename"
 	bFileName, err := json.Marshal(fileName)
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.Marchal(fileName)")
+		return fmt.Errorf("fail to call json.Marchal(fileName): %w", err)
 	}
 	rawResult, err := b.Client.RawRequest("loadwallet", []json.RawMessage{bFileName})
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.RawRequest(loadwallet)")
+		return fmt.Errorf("fail to call json.RawRequest(loadwallet): %w", err)
 	}
 
 	loadWalletResult := LoadWalletResult{}
 	err = json.Unmarshal(rawResult, &loadWalletResult)
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
+		return fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
 	}
 	if loadWalletResult.Warning != "" {
 		// TODO: how to handle this warning
-		return errors.Errorf("detect warning: %s", loadWalletResult.Warning)
+		return fmt.Errorf("detect warning: %s", loadWalletResult.Warning)
 	}
 
 	return nil
@@ -151,11 +151,11 @@ func (b *Bitcoin) UnLoadWallet(fileName string) error {
 	// unloadwallet ( "wallet_name" )
 	bFileName, err := json.Marshal(fileName)
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.Marchal()")
+		return fmt.Errorf("fail to call json.Marchal(): %w", err)
 	}
 	_, err = b.Client.RawRequest("unloadwallet", []json.RawMessage{bFileName})
 	if err != nil {
-		return errors.Errorf("fail to call json.RawRequest(unloadwallet)")
+		return errors.New("fail to call json.RawRequest(unloadwallet)")
 	}
 
 	return nil
@@ -169,27 +169,27 @@ func (b *Bitcoin) CreateWallet(fileName string, disablePrivKey bool) error {
 	// createwallet "wallet_name" ( disable_private_keys )
 	bFileName, err := json.Marshal(fileName)
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.Marchal(fileName)")
+		return fmt.Errorf("fail to call json.Marchal(fileName): %w", err)
 	}
 
 	bDisablePrivKey, err := json.Marshal(disablePrivKey)
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.Marchal(bool)")
+		return fmt.Errorf("fail to call json.Marchal(bool): %w", err)
 	}
 
 	rawResult, err := b.Client.RawRequest("createwallet", []json.RawMessage{bFileName, bDisablePrivKey})
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.RawRequest(createwallet)")
+		return fmt.Errorf("fail to call json.RawRequest(createwallet): %w", err)
 	}
 
 	loadWalletResult := LoadWalletResult{}
 	err = json.Unmarshal(rawResult, &loadWalletResult)
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
+		return fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
 	}
 	if loadWalletResult.Warning != "" {
 		// TODO: how to handle this warning
-		return errors.Errorf("detect warning: %s", loadWalletResult.Warning)
+		return fmt.Errorf("detect warning: %s", loadWalletResult.Warning)
 	}
 
 	return nil

@@ -1,9 +1,9 @@
 package address
 
 import (
+	"errors"
+	"fmt"
 	"strconv"
-
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
@@ -44,10 +44,10 @@ func ConvertLine(coinTypeCode coin.CoinTypeCode, line []string) (*AddressFormat,
 
 	// validate
 	if !coin.IsCoinTypeCode(line[0]) || coin.CoinTypeCode(line[0]) != coinTypeCode {
-		return nil, errors.Errorf("coinTypeCode is invalid. got %s, want %s", line[0], coinTypeCode.String())
+		return nil, fmt.Errorf("coinTypeCode is invalid. got %s, want %s", line[0], coinTypeCode.String())
 	}
 	if !account.ValidateAccountType(line[1]) {
-		return nil, errors.Errorf("account is invalid: %s", line[1])
+		return nil, fmt.Errorf("account is invalid: %s", line[1])
 	}
 
 	return &AddressFormat{

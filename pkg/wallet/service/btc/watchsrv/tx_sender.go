@@ -2,8 +2,8 @@ package watchsrv
 
 import (
 	"database/sql"
-
-	"github.com/pkg/errors"
+	"errors"
+	"fmt"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -54,7 +54,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 	// payment_5_unsigned_1_1534466246366489473
 	actionType, _, txID, _, err := t.txFileRepo.ValidateFilePath(filePath, tx.TxTypeSigned)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call txFileRepo.ValidateFilePath()")
+		return "", fmt.Errorf("fail to call txFileRepo.ValidateFilePath(): %w", err)
 	}
 
 	t.logger.Debug("send_tx", "action_type", actionType.String())
@@ -62,7 +62,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 	// read hex from file
 	signedHex, err := t.txFileRepo.ReadFile(filePath)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call txFileRepo.ReadFile()")
+		return "", fmt.Errorf("fail to call txFileRepo.ReadFile(): %w", err)
 	}
 
 	// send signed tx
@@ -70,7 +70,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 	if err != nil {
 		// if signature is not completed
 		//-26: 16: mandatory-script-verify-flag-failed (Operation not valid with the current stack size)
-		return "", errors.Wrap(err, "fail to call btc.SendTransactionByHex()")
+		return "", fmt.Errorf("fail to call btc.SendTransactionByHex(): %w", err)
 	}
 
 	if hash == nil {
@@ -91,7 +91,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			"signed_hex_tx", signedHex,
 			"sent_hash_tx", hash.String(),
 		)
-		return "", errors.Wrapf(err, "fail to call updateHexForSentTx(), but tx is sent. txID: %d", txID)
+		return "", fmt.Errorf("fail to call updateHexForSentTx(), but tx is sent. txID: %d: %w", txID, err)
 	}
 	if affectedNum == 0 {
 		t.logger.Info("no records to update tx_table",
@@ -120,7 +120,7 @@ func (t *TxSend) updateIsAllocatedAccountPubkey(txID int64) error {
 	// get txOutputs by tx_id
 	txOutputs, err := t.txOutputRepo.GetAllByTxID(txID)
 	if err != nil {
-		return errors.Wrap(err, "fail to call repo.TxOutput().GetAllByTxID()")
+		return fmt.Errorf("fail to call repo.TxOutput().GetAllByTxID(): %w", err)
 	}
 	if len(txOutputs) == 0 {
 		return errors.New("output tx could not be found in tx_deposit_output")
@@ -128,7 +128,7 @@ func (t *TxSend) updateIsAllocatedAccountPubkey(txID int64) error {
 
 	_, err = t.addrRepo.UpdateIsAllocated(true, txOutputs[0].OutputAddress)
 	if err != nil {
-		return errors.Wrap(err, "fail to call repo.Pubkey().UpdateIsAllocated()")
+		return fmt.Errorf("fail to call repo.Pubkey().UpdateIsAllocated(): %w", err)
 	}
 
 	return nil

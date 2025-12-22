@@ -2,6 +2,7 @@ package eth
 
 import (
 	"crypto/ecdsa"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,7 +12,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 )
@@ -35,7 +35,7 @@ import (
 func (*Ethereum) ToECDSA(privKey string) (*ecdsa.PrivateKey, error) {
 	bytePrivKey, err := hexutil.Decode(privKey)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call hexutil.Decode()")
+		return nil, fmt.Errorf("fail to call hexutil.Decode(): %w", err)
 	}
 	return crypto.ToECDSA(bytePrivKey)
 }
@@ -52,7 +52,7 @@ func (e *Ethereum) GetPrivKey(hexAddr, password string) (*keystore.Key, error) {
 
 	keyJSON, err := e.readPrivKey(hexAddr, keyDir)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to call e.readPrivKey()")
+		return nil, fmt.Errorf("fail to call e.readPrivKey(): %w", err)
 	}
 	if keyJSON == nil {
 		// file is not found
@@ -61,7 +61,7 @@ func (e *Ethereum) GetPrivKey(hexAddr, password string) (*keystore.Key, error) {
 
 	key, err := keystore.DecryptKey(keyJSON, password)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to call keystore.DecryptKey()")
+		return nil, fmt.Errorf("fail to call keystore.DecryptKey(): %w", err)
 	}
 	return key, nil
 }
@@ -84,14 +84,14 @@ func (e *Ethereum) readPrivKey(hexAddr, path string) ([]byte, error) {
 
 	files, err := filepath.Glob(fmt.Sprintf("%s/*--%s", path, addr))
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call filepath.Glob()")
+		return nil, fmt.Errorf("fail to call filepath.Glob(): %w", err)
 	}
 	if len(files) == 0 {
 		// file is not found
 		return nil, errors.New("private key file is not found")
 	}
 	if len(files) > 1 {
-		return nil, errors.Errorf("target private key files are found more than 1 by %s", addr)
+		return nil, fmt.Errorf("target private key files are found more than 1 by %s", addr)
 	}
 
 	return os.ReadFile(files[0])

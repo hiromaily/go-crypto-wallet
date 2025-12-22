@@ -127,3 +127,9 @@ After making code changes, use these commands to verify code correctness:
 - Security-related changes must be reviewed
 - Always verify that changes don't break existing functionality
 - Consider the impact on offline wallet operations (keygen, sign)
+- **DO NOT** edit files that contain `DO NOT EDIT` comments
+  (typically auto-generated files from tools like sqlc, protoc, or go generate)
+- **Git Operations**:
+  - Allowed: `git add`, `git commit`, and `git push` to GitHub
+  - **NOT allowed**: `git merge` operations
+  - **NOT allowed**: `git commit` and `git push` to `main` or `master` branches

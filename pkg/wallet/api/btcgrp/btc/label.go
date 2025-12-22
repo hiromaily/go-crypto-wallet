@@ -2,8 +2,7 @@ package btc
 
 import (
 	"encoding/json"
-
-	"github.com/pkg/errors"
+	"fmt"
 )
 
 // listlabels
@@ -12,27 +11,27 @@ import (
 func (b *Bitcoin) SetLabel(addr, label string) error {
 	_, err := b.DecodeAddress(addr)
 	if err != nil {
-		return errors.Wrapf(err, "fail to call btc.DecodeAddress(%s)", addr)
+		return fmt.Errorf("fail to call btc.DecodeAddress(%s): %w", addr, err)
 	}
 
 	input1, err := json.Marshal(addr)
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.Marchal(addr)")
+		return fmt.Errorf("fail to call json.Marchal(addr): %w", err)
 	}
 	input2, err := json.Marshal(label)
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.Marchal(label)")
+		return fmt.Errorf("fail to call json.Marchal(label): %w", err)
 	}
 
 	rawResult, err := b.Client.RawRequest("setlabel", []json.RawMessage{input1, input2})
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.RawRequest(setlabel)")
+		return fmt.Errorf("fail to call json.RawRequest(setlabel): %w", err)
 	}
 
 	var tmp any
 	err = json.Unmarshal(rawResult, &tmp)
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
+		return fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
 	}
 
 	return nil
@@ -44,22 +43,22 @@ func (b *Bitcoin) SetLabel(addr, label string) error {
 // func (b *Bitcoin) GetReceivedByLabelAndMinConf(accountName string, minConf int) (btcutil.Amount, error) {
 //	input1, err := json.Marshal(accountName)
 //	if err != nil {
-//		return 0, errors.Wrap(err, "fail to call json.Marchal(accountName)")
+//		return 0, fmt.Errorf("fail to call json.Marchal(accountName): %w", err)
 //	}
 //	input2, err := json.Marshal(minConf)
 //	if err != nil {
-//		return 0, errors.Wrap(err, "fail to call json.Marchal(minConf)")
+//		return 0, fmt.Errorf("fail to call json.Marchal(minConf): %w", err)
 //	}
 //
 //	rawResult, err := b.Client.RawRequest("getreceivedbylabel", []json.RawMessage{input1, input2})
 //	if err != nil {
-//		return 0, errors.Wrap(err, "fail to call json.RawRequest(getreceivedbylabel)")
+//		return 0, fmt.Errorf("fail to call json.RawRequest(getreceivedbylabel): %w", err)
 //	}
 //
 //	var receivedAmt float64
 //	err = json.Unmarshal([]byte(rawResult), &receivedAmt)
 //	if err != nil {
-//		return 0, errors.Wrap(err, "fail to call json.Unmarshal()")
+//		return 0, fmt.Errorf("fail to call json.Unmarshal(): %w", err)
 //	}
 //
 //	//convert float to amout

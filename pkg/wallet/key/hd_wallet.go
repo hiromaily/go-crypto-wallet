@@ -3,6 +3,7 @@ package key
 import (
 	"crypto/ecdsa"
 	"encoding/hex"
+	"errors"
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcec/v2"
@@ -12,7 +13,6 @@ import (
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/pkg/errors"
 	"golang.org/x/crypto/ripemd160" //nolint:staticcheck,gosec
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
@@ -108,7 +108,7 @@ func (k *HDKey) CreateKey(seed []byte, accountType account.AccountType, idxFrom,
 	// create privateKey, publicKey by account level
 	privKey, _, err := k.createKeyByAccount(seed, accountType)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call createKeyByAccount()")
+		return nil, fmt.Errorf("fail to call createKeyByAccount(): %w", err)
 	}
 	// create keys by index and count
 	return k.createKeysWithIndex(privKey, idxFrom, count)
@@ -252,9 +252,9 @@ func (k *HDKey) createKeysWithIndex(
 				RedeemScript:   "",
 			}
 		case coin.LTC, coin.ERC20, coin.HYC:
-			return nil, errors.Errorf("coinType[%s] is not implemented yet", k.coinTypeCode.String())
+			return nil, fmt.Errorf("coinType[%s] is not implemented yet", k.coinTypeCode.String())
 		default:
-			return nil, errors.Errorf("coinType[%s] is not implemented yet", k.coinTypeCode.String())
+			return nil, fmt.Errorf("coinType[%s] is not implemented yet", k.coinTypeCode.String())
 		}
 	}
 
@@ -317,7 +317,7 @@ func (*HDKey) xrpAddrs(privKey *btcec.PrivateKey) (string, string, string, error
 	// xrpHexPrivKey := hexutil.Encode(crypto.FromECDSA(xrpPrivKey))
 	xrpHexPrivKey, err := xrpaddr.NewAccountPrivateKey(crypto.FromECDSA(xrpPrivKey))
 	if err != nil {
-		return "", "", "", errors.Wrap(err, "fail to call xrpaddr.NewAccountPrivateKey()")
+		return "", "", "", fmt.Errorf("fail to call xrpaddr.NewAccountPrivateKey(): %w", err)
 	}
 
 	serializedPubKey := privKey.PubKey().SerializeCompressed()
@@ -328,12 +328,12 @@ func (*HDKey) xrpAddrs(privKey *btcec.PrivateKey) (string, string, string, error
 	// address
 	address, err := xrpaddr.NewAccountID(pubKeyHash)
 	if err != nil {
-		return "", "", "", errors.Wrap(err, "fail to call rcrypto.NewAccountID()")
+		return "", "", "", fmt.Errorf("fail to call rcrypto.NewAccountID(): %w", err)
 	}
 	// publicKey
 	publicKey, err := xrpaddr.NewAccountPublicKey(pubKeyHash)
 	if err != nil {
-		return "", "", "", errors.Wrap(err, "fail to call rcrypto.NewAccountPublicKey()")
+		return "", "", "", fmt.Errorf("fail to call rcrypto.NewAccountPublicKey(): %w", err)
 	}
 
 	return address.String(), publicKey.String(), xrpHexPrivKey.String(), nil
@@ -349,7 +349,7 @@ func (k *HDKey) getP2PKHAddr(privKey *btcec.PrivateKey) (string, error) {
 	// *btcutil.AddressPubKeyHash
 	p2PKHAddr, err := btcutil.NewAddressPubKeyHash(pkHash, k.conf)
 	if err != nil {
-		return "", errors.Wrapf(err, "fail to call btcutil.NewAddressPubKeyHash()")
+		return "", fmt.Errorf("fail to call btcutil.NewAddressPubKeyHash(): %w", err)
 	}
 
 	switch k.coinTypeCode {
@@ -358,9 +358,9 @@ func (k *HDKey) getP2PKHAddr(privKey *btcec.PrivateKey) (string, error) {
 	case coin.BCH:
 		return k.getP2PKHAddrBCH(p2PKHAddr)
 	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
-		return "", errors.Errorf("getP2pkhAddr() is not implemented for %s", k.coinTypeCode)
+		return "", fmt.Errorf("getP2pkhAddr() is not implemented for %s", k.coinTypeCode)
 	default:
-		return "", errors.Errorf("getP2pkhAddr() is not implemented for %s", k.coinTypeCode)
+		return "", fmt.Errorf("getP2pkhAddr() is not implemented for %s", k.coinTypeCode)
 	}
 }
 
@@ -368,13 +368,13 @@ func (k *HDKey) getP2PKHAddr(privKey *btcec.PrivateKey) (string, error) {
 func (k *HDKey) getP2PKHAddrBCH(p2PKHAddr *btcutil.AddressPubKeyHash) (string, error) {
 	addrBCH, err := bchaddr.NewCashAddressPubKeyHash(p2PKHAddr.ScriptAddress(), k.conf)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call btcutil.NewAddressPubKeyHash()")
+		return "", fmt.Errorf("fail to call btcutil.NewAddressPubKeyHash(): %w", err)
 	}
 
 	// get prefix
 	prefix, ok := bchaddr.Prefixes[k.conf.Name]
 	if !ok {
-		return "", errors.Errorf("invalid BCH *chaincfg : %s", k.conf.Name)
+		return "", fmt.Errorf("invalid BCH *chaincfg : %s", k.conf.Name)
 	}
 	return fmt.Sprintf("%s:%s", prefix, addrBCH.String()), nil
 }
@@ -391,14 +391,14 @@ func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, er
 	pubKeyHash := btcutil.Hash160(privKey.PubKey().SerializeCompressed())
 	segwitAddress, err := btcutil.NewAddressWitnessPubKeyHash(pubKeyHash, k.conf)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call btcutil.NewAddressWitnessPubKeyHash()")
+		return "", "", fmt.Errorf("fail to call btcutil.NewAddressWitnessPubKeyHash(): %w", err)
 	}
 
 	// FIXME: getting RedeemScript is not fixed yet
 	// get redeemScript
 	payToAddrScript, err := txscript.PayToAddrScript(segwitAddress)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call txscript.PayToAddrScript()")
+		return "", "", fmt.Errorf("fail to call txscript.PayToAddrScript(): %w", err)
 	}
 
 	// value of payToAddrScript is equal to scriptPubKey, but it's not redeemScript
@@ -411,19 +411,19 @@ func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, er
 	case coin.BTC:
 		btcAddress, addrErr := btcutil.NewAddressScriptHash(payToAddrScript, k.conf)
 		if addrErr != nil {
-			return "", "", errors.Wrap(addrErr, "fail to call btcutil.NewAddressScriptHash()")
+			return "", "", fmt.Errorf("fail to call btcutil.NewAddressScriptHash(): %w", addrErr)
 		}
 		return btcAddress.String(), strRedeemScript, nil
 	case coin.BCH:
 		bchAddress, addrErr := bchaddr.NewCashAddressScriptHash(payToAddrScript, k.conf)
 		if addrErr != nil {
-			return "", "", errors.Wrap(addrErr, "fail to call bchaddr.NewCashAddressScriptHash()")
+			return "", "", fmt.Errorf("fail to call bchaddr.NewCashAddressScriptHash(): %w", addrErr)
 		}
 		return bchAddress.String(), strRedeemScript, nil
 	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
-		return "", "", errors.Errorf("getP2shSegwitAddr() is not implemented yet for %s", k.coinTypeCode)
+		return "", "", fmt.Errorf("getP2shSegwitAddr() is not implemented yet for %s", k.coinTypeCode)
 	default:
-		return "", "", errors.Errorf("getP2shSegwitAddr() is not implemented yet for %s", k.coinTypeCode)
+		return "", "", fmt.Errorf("getP2shSegwitAddr() is not implemented yet for %s", k.coinTypeCode)
 	}
 }
 
@@ -432,7 +432,7 @@ func (k *HDKey) getBech32Addr(wif *btcutil.WIF) (*btcutil.AddressWitnessPubKeyHa
 	witnessProg := btcutil.Hash160(wif.SerializePubKey())
 	bech32Addr, err := btcutil.NewAddressWitnessPubKeyHash(witnessProg, k.conf)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call NewAddressWitnessPubKeyHash()")
+		return nil, fmt.Errorf("fail to call NewAddressWitnessPubKeyHash(): %w", err)
 	}
 	return bech32Addr, nil
 }

@@ -1,13 +1,14 @@
 package eth
 
 import (
+	"errors"
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/params"
-	"github.com/pkg/errors"
 )
 
 func castToInt64(val any) (int64, error) {
@@ -97,7 +98,7 @@ func toCallArg(msg *ethereum.CallMsg) any {
 func (*Ethereum) ValidateAddr(addr string) error {
 	// validation check
 	if !common.IsHexAddress(addr) {
-		return errors.Errorf("address:%s is invalid", addr)
+		return fmt.Errorf("address:%s is invalid", addr)
 	}
 	return nil
 }

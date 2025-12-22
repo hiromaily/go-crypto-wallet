@@ -1,9 +1,8 @@
 package eth
 
 import (
+	"fmt"
 	"strings"
-
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 )
@@ -26,7 +25,7 @@ func (e *Ethereum) ImportRawKey(hexKey, passPhrase string) (string, error) {
 		if strings.Contains(err.Error(), "account already exists") {
 			e.logger.Warn(err.Error())
 		} else {
-			return "", errors.Wrap(err, "fail to call client.CallContext(personal_importRawKey)")
+			return "", fmt.Errorf("fail to call client.CallContext(personal_importRawKey): %w", err)
 		}
 	}
 
@@ -41,7 +40,7 @@ func (e *Ethereum) ListAccounts() ([]string, error) {
 	var accounts []string
 	err := e.rpcClient.CallContext(e.ctx, &accounts, "personal_listAccounts")
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call rpc.CallContext(personal_listAccounts)")
+		return nil, fmt.Errorf("fail to call rpc.CallContext(personal_listAccounts): %w", err)
 	}
 
 	return accounts, nil
@@ -54,13 +53,13 @@ func (e *Ethereum) NewAccount(passphrase string, accountType account.AccountType
 	var address string
 	err := e.rpcClient.CallContext(e.ctx, &address, "personal_newAccount", passphrase)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call rpc.CallContext(personal_newAccount)")
+		return "", fmt.Errorf("fail to call rpc.CallContext(personal_newAccount): %w", err)
 	}
 	// if e.isParity {
 	//	//TODO:parity client generates file with UUID, so add address to filename if parity client
 	//	err = e.RenameParityKeyFile(address, accountType)
 	//	if err != nil {
-	//		return "", errors.Wrap(err, "fail to call RenameParityKeyFile(address)")
+	//		return "", fmt.Errorf("fail to call RenameParityKeyFile(address): %w", err)
 	//	}
 	//}
 	return address, nil
@@ -71,7 +70,7 @@ func (e *Ethereum) NewAccount(passphrase string, accountType account.AccountType
 func (e *Ethereum) LockAccount(hexAddr string) error {
 	err := e.rpcClient.CallContext(e.ctx, nil, "personal_lockAccount", hexAddr)
 	if err != nil {
-		return errors.Wrap(err, "fail to call rpc.CallContext(personal_lockAccount)")
+		return fmt.Errorf("fail to call rpc.CallContext(personal_lockAccount): %w", err)
 	}
 	return err
 }
@@ -90,7 +89,7 @@ func (e *Ethereum) UnlockAccount(hexAddr, passphrase string, duration uint64) (b
 	var ret bool
 	err := e.rpcClient.CallContext(e.ctx, &ret, "personal_unlockAccount", hexAddr, passphrase, duration)
 	if err != nil {
-		return false, errors.Wrap(err, "fail to call rpc.CallContext(personal_unlockAccount)")
+		return false, fmt.Errorf("fail to call rpc.CallContext(personal_unlockAccount): %w", err)
 	}
 	return ret, nil
 }

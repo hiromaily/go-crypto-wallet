@@ -2,13 +2,14 @@ package erc20
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/sha3"
 
@@ -77,7 +78,7 @@ func NewERC20(
 func (*ERC20) ValidateAddr(addr string) error {
 	// validation check
 	if !common.IsHexAddress(addr) {
-		return errors.Errorf("address:%s is invalid", addr)
+		return fmt.Errorf("address:%s is invalid", addr)
 	}
 	return nil
 }
@@ -98,7 +99,7 @@ func (e *ERC20) FloatToBigInt(v float64) *big.Int {
 func (e *ERC20) GetBalance(hexAddr string, _ eth.QuantityTag) (*big.Int, error) {
 	balance, err := e.tokenClient.BalanceOf(nil, common.HexToAddress(hexAddr))
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to call e.contract.BalanceOf(%s)", hexAddr)
+		return nil, fmt.Errorf("fail to call e.contract.BalanceOf(%s): %w", hexAddr, err)
 	}
 	return balance, nil
 }
@@ -132,7 +133,7 @@ func (e *ERC20) CreateRawTransaction(
 
 	balance, err := e.GetBalance(fromAddr, "")
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call eth.GetBalance()")
+		return nil, nil, fmt.Errorf("fail to call eth.GetBalance(): %w", err)
 	}
 	e.logger.Info("balance", "balance", balance.Int64())
 	if balance.Uint64() < amount {
@@ -146,18 +147,18 @@ func (e *ERC20) CreateRawTransaction(
 	data := e.createTransferData(toAddr, tokenAmount)
 	gasLimit, err := e.estimateGas(data)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call estimateGas(data)")
+		return nil, nil, fmt.Errorf("fail to call estimateGas(data): %w", err)
 	}
 
 	gasPrice, err := e.client.SuggestGasPrice(context.Background())
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call client.SuggestGasPrice()")
+		return nil, nil, fmt.Errorf("fail to call client.SuggestGasPrice(): %w", err)
 	}
 
 	// nonce
 	nonce, err := e.getNonce(fromAddr, additionalNonce)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call e.getNonce()")
+		return nil, nil, fmt.Errorf("fail to call e.getNonce(): %w", err)
 	}
 
 	e.logger.Debug("comparison",
@@ -181,7 +182,7 @@ func (e *ERC20) CreateRawTransaction(
 	txHash := tx.Hash().Hex()
 	rawTxHex, err := ethtx.EncodeTx(tx)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call encodeTx()")
+		return nil, nil, fmt.Errorf("fail to call encodeTx(): %w", err)
 	}
 
 	// generate UUID to trace transaction because unsignedTx is not unique
@@ -246,7 +247,7 @@ func (e *ERC20) estimateGas(data []byte) (uint64, error) {
 		Data: data,
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call client.EstimateGas()")
+		return 0, fmt.Errorf("fail to call client.EstimateGas(): %w", err)
 	}
 	return gasLimit, nil
 }
@@ -255,7 +256,7 @@ func (e *ERC20) estimateGas(data []byte) (uint64, error) {
 func (e *ERC20) getNonce(fromAddr string, additionalNonce int) (uint64, error) {
 	nonce, err := e.client.PendingNonceAt(context.Background(), common.HexToAddress(fromAddr))
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call ethClient.PendingNonceAt()")
+		return 0, fmt.Errorf("fail to call ethClient.PendingNonceAt(): %w", err)
 	}
 	nonce += uint64(additionalNonce)
 

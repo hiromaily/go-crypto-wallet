@@ -3,9 +3,8 @@ package watchrepo
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
-
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -38,7 +37,7 @@ func (r *EthDetailTxInputRepositorySqlc) GetOne(id int64) (*models.EthDetailTX, 
 
 	ethTx, err := r.queries.GetEthDetailTxByID(ctx, id)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetEthDetailTxByID()")
+		return nil, fmt.Errorf("failed to call GetEthDetailTxByID(): %w", err)
 	}
 
 	return convertSqlcEthDetailTxToModel(&ethTx), nil
@@ -50,7 +49,7 @@ func (r *EthDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*models.EthDe
 
 	ethTxs, err := r.queries.GetEthDetailTxsByTxID(ctx, id)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetEthDetailTxsByTxID()")
+		return nil, fmt.Errorf("failed to call GetEthDetailTxsByTxID(): %w", err)
 	}
 
 	result := make([]*models.EthDetailTX, len(ethTxs))
@@ -70,7 +69,7 @@ func (r *EthDetailTxInputRepositorySqlc) GetSentHashTx(txType tx.TxType) ([]stri
 		CurrentTxType: txType.Int8(),
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetEthDetailTxSentHashList()")
+		return nil, fmt.Errorf("failed to call GetEthDetailTxSentHashList(): %w", err)
 	}
 
 	return hashes, nil
@@ -99,7 +98,7 @@ func (r *EthDetailTxInputRepositorySqlc) Insert(txItem *models.EthDetailTX) erro
 		SentUpdatedAt:     convertNullTimeToSQLNullTime(txItem.SentUpdatedAt),
 	})
 	if err != nil {
-		return errors.Wrap(err, "failed to call InsertEthDetailTx()")
+		return fmt.Errorf("failed to call InsertEthDetailTx(): %w", err)
 	}
 
 	return nil
@@ -132,12 +131,12 @@ func (r *EthDetailTxInputRepositorySqlc) UpdateAfterTxSent(
 		Uuid:          uuid,
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call UpdateEthDetailTxAfterSent()")
+		return 0, fmt.Errorf("failed to call UpdateEthDetailTxAfterSent(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to get RowsAffected()")
+		return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 	}
 
 	return rowsAffected, nil
@@ -152,12 +151,12 @@ func (r *EthDetailTxInputRepositorySqlc) UpdateTxType(id int64, txType tx.TxType
 		ID:            id,
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call UpdateEthDetailTxType()")
+		return 0, fmt.Errorf("failed to call UpdateEthDetailTxType(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to get RowsAffected()")
+		return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 	}
 
 	return rowsAffected, nil
@@ -172,12 +171,12 @@ func (r *EthDetailTxInputRepositorySqlc) UpdateTxTypeBySentHashTx(txType tx.TxTy
 		SentHashTx:    sentHashTx,
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call UpdateEthDetailTxTypeBySentHash()")
+		return 0, fmt.Errorf("failed to call UpdateEthDetailTxTypeBySentHash(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to get RowsAffected()")
+		return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 	}
 
 	return rowsAffected, nil

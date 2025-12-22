@@ -1,9 +1,8 @@
 package keygensrv
 
 import (
+	"fmt"
 	"strings"
-
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/fullpubkey"
@@ -45,7 +44,7 @@ func (p *FullPubkeyImport) ImportFullPubKey(fileName string) error {
 	// read file for full public key
 	pubKeys, err := p.pubkeyFileRepo.ImportAddress(fileName)
 	if err != nil {
-		return errors.Wrapf(err, "fail to call fileStorager.ImportPubKey() fileName: %s", fileName)
+		return fmt.Errorf("fail to call fileStorager.ImportPubKey() fileName: %s: %w", fileName, err)
 	}
 
 	// insert full pubKey into auth_fullpubkey_table
@@ -71,7 +70,7 @@ func (p *FullPubkeyImport) ImportFullPubKey(fileName string) error {
 		if strings.Contains(err.Error(), "1062: Duplicate entry") {
 			p.logger.Info("full-pubkey is already imported")
 		} else {
-			return errors.Wrap(err, "fail to call authFullPubKeyRepo.InsertBulk()")
+			return fmt.Errorf("fail to call authFullPubKeyRepo.InsertBulk(): %w", err)
 		}
 	}
 

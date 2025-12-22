@@ -1,9 +1,9 @@
 package eth
 
 import (
+	"errors"
+	"fmt"
 	"math/big"
-
-	"github.com/pkg/errors"
 )
 
 // StartMining starts the CPU mining process with the given number of threads and generate a new DAG if need be
@@ -13,7 +13,7 @@ func (e *Ethereum) StartMining() error {
 	// TODO: Result needs to be verified
 	err := e.rpcClient.CallContext(e.ctx, &r, "miner_start")
 	if err != nil {
-		return errors.Wrap(err, "fail to call rpc.CallContext(miner_start)")
+		return fmt.Errorf("fail to call rpc.CallContext(miner_start): %w", err)
 	}
 	return err
 }
@@ -45,11 +45,11 @@ func (e *Ethereum) HashRate() (*big.Int, error) {
 	var hashCount string
 	err := e.rpcClient.CallContext(e.ctx, &hashCount, "eth_hashrate")
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_hashrate)")
+		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_hashrate): %w", err)
 	}
 	h, err := e.DecodeBig(hashCount)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
+		return nil, fmt.Errorf("fail to call hexutil.DecodeBig(): %w", err)
 	}
 
 	return h, nil

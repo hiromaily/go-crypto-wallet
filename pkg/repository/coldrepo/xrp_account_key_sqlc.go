@@ -3,9 +3,8 @@ package coldrepo
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
-
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
@@ -45,7 +44,7 @@ func (r *XRPAccountKeyRepositorySqlc) GetAllAddrStatus(
 		AddrStatus: addrStatus.Int8(),
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetXRPAccountKeysByAddrStatus()")
+		return nil, fmt.Errorf("failed to call GetXRPAccountKeysByAddrStatus(): %w", err)
 	}
 
 	result := make([]*models.XRPAccountKey, len(xrpKeys))
@@ -66,7 +65,7 @@ func (r *XRPAccountKeyRepositorySqlc) GetSecret(accountType account.AccountType,
 		AccountID: addr,
 	})
 	if err != nil {
-		return "", errors.Wrap(err, "failed to call GetXRPAccountKeySecret()")
+		return "", fmt.Errorf("failed to call GetXRPAccountKeySecret(): %w", err)
 	}
 
 	return secret, nil
@@ -92,7 +91,7 @@ func (r *XRPAccountKeyRepositorySqlc) InsertBulk(items []*models.XRPAccountKey) 
 			AddrStatus:       item.AddrStatus,
 		})
 		if err != nil {
-			return errors.Wrap(err, "failed to call InsertXRPAccountKey()")
+			return fmt.Errorf("failed to call InsertXRPAccountKey(): %w", err)
 		}
 	}
 
@@ -116,12 +115,12 @@ func (r *XRPAccountKeyRepositorySqlc) UpdateAddrStatus(
 			AccountID:  accountID,
 		})
 		if err != nil {
-			return 0, errors.Wrap(err, "failed to call UpdateXRPAccountKeyAddrStatus()")
+			return 0, fmt.Errorf("failed to call UpdateXRPAccountKeyAddrStatus(): %w", err)
 		}
 
 		affected, err := result.RowsAffected()
 		if err != nil {
-			return 0, errors.Wrap(err, "failed to get RowsAffected()")
+			return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 		}
 		totalAffected += affected
 	}
