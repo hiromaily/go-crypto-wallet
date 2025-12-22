@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/ericlagergren/decimal"
 	"github.com/pkg/errors"
-	"github.com/volatiletech/sqlboiler/v4/types"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
@@ -238,10 +238,12 @@ func (r *BTCTxRepositorySqlc) DeleteAll() (int64, error) {
 // Helper functions
 
 func convertSqlcBtcTxToModel(btcTx *sqlcgen.BtcTx) *models.BTCTX {
-	var totalInputAmount, totalOutputAmount, fee types.Decimal
-	_ = totalInputAmount.UnmarshalText([]byte(btcTx.TotalInputAmount))
-	_ = totalOutputAmount.UnmarshalText([]byte(btcTx.TotalOutputAmount))
-	_ = fee.UnmarshalText([]byte(btcTx.Fee))
+	totalInputAmount := new(decimal.Big)
+	totalOutputAmount := new(decimal.Big)
+	fee := new(decimal.Big)
+	_, _ = totalInputAmount.SetString(btcTx.TotalInputAmount)
+	_, _ = totalOutputAmount.SetString(btcTx.TotalOutputAmount)
+	_, _ = fee.SetString(btcTx.Fee)
 
 	return &models.BTCTX{
 		ID:                btcTx.ID,

@@ -8,7 +8,6 @@ import (
 
 	"github.com/ericlagergren/decimal"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/volatiletech/sqlboiler/v4/types"
 
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
@@ -24,10 +23,10 @@ func TestPaymentRequestSqlc(t *testing.T) {
 	}
 
 	// Create test payment requests
-	amount1 := types.Decimal{Big: new(decimal.Big)}
-	amount1.Big, _ = amount1.SetString("1.5")
-	amount2 := types.Decimal{Big: new(decimal.Big)}
-	amount2.Big, _ = amount2.SetString("2.5")
+	amount1 := new(decimal.Big)
+	amount1, _ = amount1.SetString("1.5")
+	amount2 := new(decimal.Big)
+	amount2, _ = amount2.SetString("2.5")
 
 	requests := []*models.PaymentRequest{
 		{

@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/ericlagergren/decimal"
 	"github.com/pkg/errors"
-	"github.com/volatiletech/sqlboiler/v4/types"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -92,8 +92,8 @@ func (r *TxOutputRepositorySqlc) InsertBulk(txItems []*models.BTCTXOutput) error
 // Helper functions
 
 func convertSqlcBtcTxOutputToModel(output *sqlcgen.BtcTxOutput) *models.BTCTXOutput {
-	var amount types.Decimal
-	_ = amount.UnmarshalText([]byte(output.OutputAmount))
+	amount := new(decimal.Big)
+	_, _ = amount.SetString(output.OutputAmount)
 
 	return &models.BTCTXOutput{
 		ID:            output.ID,

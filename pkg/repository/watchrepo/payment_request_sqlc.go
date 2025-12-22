@@ -4,9 +4,9 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/ericlagergren/decimal"
 	"github.com/pkg/errors"
 	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/types"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -161,8 +161,8 @@ func (r *PaymentRequestRepositorySqlc) DeleteAll() (int64, error) {
 // Helper functions
 
 func convertSqlcPaymentRequestToModel(req *sqlcgen.PaymentRequest) *models.PaymentRequest {
-	var amount types.Decimal
-	_ = amount.UnmarshalText([]byte(req.Amount))
+	amount := new(decimal.Big)
+	_, _ = amount.SetString(req.Amount)
 
 	return &models.PaymentRequest{
 		ID:              req.ID,

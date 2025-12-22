@@ -8,7 +8,6 @@ import (
 
 	"github.com/ericlagergren/decimal"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/volatiletech/sqlboiler/v4/types"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
@@ -26,12 +25,12 @@ func TestBTCTxSqlc(t *testing.T) {
 	}
 
 	// Insert
-	inputAmt := types.Decimal{Big: new(decimal.Big)}
-	inputAmt.Big, _ = inputAmt.SetString("0.100")
-	outputAmt := types.Decimal{Big: new(decimal.Big)}
-	outputAmt.Big, _ = outputAmt.SetString("0.090")
-	feeAmt := types.Decimal{Big: new(decimal.Big)}
-	feeAmt.Big, _ = feeAmt.SetString("0.010")
+	inputAmt := new(decimal.Big)
+	inputAmt, _ = inputAmt.SetString("0.100")
+	outputAmt := new(decimal.Big)
+	outputAmt, _ = outputAmt.SetString("0.090")
+	feeAmt := new(decimal.Big)
+	feeAmt, _ = feeAmt.SetString("0.010")
 
 	hex := "unsigned-hex-sqlc"
 	actionType := action.ActionTypePayment
