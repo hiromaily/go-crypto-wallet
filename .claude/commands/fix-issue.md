@@ -2,17 +2,24 @@
 
 **Repo: hiromaily/go-crypto-wallet**
 
-First, fetch the issue:
+## Process
+
+**Fetch Issue:**
 
 - URL: <https://github.com/hiromaily/go-crypto-wallet/issues/{issue_number}>
-- Use web_fetch to get complete issue content
+- Use web_fetch to get complete content
 
-Then resolve systematically:
+**Resolve Systematically:**
 
-1. **Analyze**: Understand the problem, root cause, and requirements
-2. **Implement**: Provide code fixes in artifacts following our coding standards
-3. **Test**: Create test cases and verify the solution
-4. **Document**: Update docs and write changelog entry
-5. **PR Draft**: Write description with "Closes #{issue_number}"
+1. **Analyze**: Understand problem, root cause, requirements
+2. **Implement**: Provide code fixes in artifacts (follow our standards)
+3. **Test**: Create test cases and verify solution
+4. **Document**: Update docs and changelog
+5. **Commit**: Suggest commit message
+6. **PR Draft**: Write description with "Closes #{issue_number}"
 
-Always fetch the issue first, then provide a comprehensive solution.
+**Safety Rules:**
+
+- Stop immediately if working directory is not clean
+- Never proceed on main/master without creating feature branch
+- Always verify branch and status before implementing fixes
