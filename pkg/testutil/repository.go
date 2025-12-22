@@ -17,14 +17,14 @@ var (
 	txRepo         *watchrepo.BTCTxRepository
 	accountKeyRepo *coldrepo.AccountKeyRepository
 	// sqlc repositories
-	btcTxRepoSqlc         *watchrepo.BTCTxRepositorySqlc
-	txRepoSqlc            *watchrepo.TxRepositorySqlc
-	addressRepoSqlc       *watchrepo.AddressRepositorySqlc
+	btcTxRepoSqlc          *watchrepo.BTCTxRepositorySqlc
+	txRepoSqlc             *watchrepo.TxRepositorySqlc
+	addressRepoSqlc        *watchrepo.AddressRepositorySqlc
 	paymentRequestRepoSqlc *watchrepo.PaymentRequestRepositorySqlc
-	btcTxInputRepoSqlc    *watchrepo.TxInputRepositorySqlc
-	btcTxOutputRepoSqlc   *watchrepo.TxOutputRepositorySqlc
-	ethDetailTxRepoSqlc   *watchrepo.EthDetailTxInputRepositorySqlc
-	xrpDetailTxRepoSqlc   *watchrepo.XrpDetailTxInputRepositorySqlc
+	btcTxInputRepoSqlc     *watchrepo.TxInputRepositorySqlc
+	btcTxOutputRepoSqlc    *watchrepo.TxOutputRepositorySqlc
+	ethDetailTxRepoSqlc    *watchrepo.EthDetailTxInputRepositorySqlc
+	xrpDetailTxRepoSqlc    *watchrepo.XrpDetailTxInputRepositorySqlc
 )
 
 // NewTxRepository returns TxRepository for test

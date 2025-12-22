@@ -5,13 +5,14 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/pkg/errors"
+	"github.com/volatiletech/null/v8"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
-	"github.com/pkg/errors"
-	"github.com/volatiletech/null/v8"
 )
 
 // AddressRepositorySqlc is repository for address table using sqlc
@@ -22,7 +23,9 @@ type AddressRepositorySqlc struct {
 }
 
 // NewAddressRepositorySqlc returns AddressRepositorySqlc object
-func NewAddressRepositorySqlc(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger logger.Logger) *AddressRepositorySqlc {
+func NewAddressRepositorySqlc(
+	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger logger.Logger,
+) *AddressRepositorySqlc {
 	return &AddressRepositorySqlc{
 		queries:      sqlcgen.New(dbConn),
 		coinTypeCode: coinTypeCode,
@@ -91,7 +94,7 @@ func (r *AddressRepositorySqlc) InsertBulk(items []*models.Address) error {
 			Account:       sqlcgen.AddressAccount(item.Account),
 			WalletAddress: item.WalletAddress,
 			IsAllocated:   item.IsAllocated,
-			UpdatedAt:     convertNullTimeToSqlNullTime(item.UpdatedAt),
+			UpdatedAt:     convertNullTimeToSQLNullTime(item.UpdatedAt),
 		})
 		if err != nil {
 			return errors.Wrap(err, "failed to call InsertAddress()")
@@ -132,18 +135,18 @@ func convertSqlcAddressToModel(addr *sqlcgen.Address) *models.Address {
 		Account:       string(addr.Account),
 		WalletAddress: addr.WalletAddress,
 		IsAllocated:   addr.IsAllocated,
-		UpdatedAt:     convertSqlNullTimeToNullTime(addr.UpdatedAt),
+		UpdatedAt:     convertSQLNullTimeToNullTime(addr.UpdatedAt),
 	}
 }
 
-func convertSqlNullTimeToNullTime(t sql.NullTime) null.Time {
+func convertSQLNullTimeToNullTime(t sql.NullTime) null.Time {
 	if !t.Valid {
 		return null.Time{}
 	}
 	return null.TimeFrom(t.Time)
 }
 
-func convertNullTimeToSqlNullTime(t null.Time) sql.NullTime {
+func convertNullTimeToSQLNullTime(t null.Time) sql.NullTime {
 	if !t.Valid {
 		return sql.NullTime{}
 	}

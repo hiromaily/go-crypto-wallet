@@ -5,12 +5,13 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
-	"github.com/pkg/errors"
 )
 
 // EthDetailTxInputRepositorySqlc is repository for eth_detail_tx table using sqlc
@@ -87,15 +88,15 @@ func (r *EthDetailTxInputRepositorySqlc) Insert(txItem *models.EthDetailTX) erro
 		SenderAddress:     txItem.SenderAddress,
 		ReceiverAccount:   txItem.ReceiverAccount,
 		ReceiverAddress:   txItem.ReceiverAddress,
-		Amount:            uint64(txItem.Amount),
-		Fee:               uint64(txItem.Fee),
+		Amount:            txItem.Amount,
+		Fee:               txItem.Fee,
 		GasLimit:          txItem.GasLimit,
-		Nonce:             uint64(txItem.Nonce),
+		Nonce:             txItem.Nonce,
 		UnsignedHexTx:     txItem.UnsignedHexTX,
 		SignedHexTx:       txItem.SignedHexTX,
 		SentHashTx:        txItem.SentHashTX,
-		UnsignedUpdatedAt: convertNullTimeToSqlNullTime(txItem.UnsignedUpdatedAt),
-		SentUpdatedAt:     convertNullTimeToSqlNullTime(txItem.SentUpdatedAt),
+		UnsignedUpdatedAt: convertNullTimeToSQLNullTime(txItem.UnsignedUpdatedAt),
+		SentUpdatedAt:     convertNullTimeToSQLNullTime(txItem.SentUpdatedAt),
 	})
 	if err != nil {
 		return errors.Wrap(err, "failed to call InsertEthDetailTx()")
@@ -201,7 +202,7 @@ func convertSqlcEthDetailTxToModel(ethTx *sqlcgen.EthDetailTx) *models.EthDetail
 		UnsignedHexTX:     ethTx.UnsignedHexTx,
 		SignedHexTX:       ethTx.SignedHexTx,
 		SentHashTX:        ethTx.SentHashTx,
-		UnsignedUpdatedAt: convertSqlNullTimeToNullTime(ethTx.UnsignedUpdatedAt),
-		SentUpdatedAt:     convertSqlNullTimeToNullTime(ethTx.SentUpdatedAt),
+		UnsignedUpdatedAt: convertSQLNullTimeToNullTime(ethTx.UnsignedUpdatedAt),
+		SentUpdatedAt:     convertSQLNullTimeToNullTime(ethTx.SentUpdatedAt),
 	}
 }

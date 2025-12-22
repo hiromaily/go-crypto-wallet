@@ -4,12 +4,13 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/pkg/errors"
+	"github.com/volatiletech/sqlboiler/v4/types"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
-	"github.com/pkg/errors"
-	"github.com/volatiletech/sqlboiler/v4/types"
 )
 
 // TxOutputRepositorySqlc is repository for btc_tx_output table using sqlc
@@ -69,7 +70,7 @@ func (r *TxOutputRepositorySqlc) Insert(txItem *models.BTCTXOutput) error {
 		OutputAccount: txItem.OutputAccount,
 		OutputAmount:  txItem.OutputAmount.String(),
 		IsChange:      txItem.IsChange,
-		UpdatedAt:     convertNullTimeToSqlNullTime(txItem.UpdatedAt),
+		UpdatedAt:     convertNullTimeToSQLNullTime(txItem.UpdatedAt),
 	})
 	if err != nil {
 		return errors.Wrap(err, "failed to call InsertBtcTxOutput()")
@@ -101,6 +102,6 @@ func convertSqlcBtcTxOutputToModel(output *sqlcgen.BtcTxOutput) *models.BTCTXOut
 		OutputAccount: output.OutputAccount,
 		OutputAmount:  amount,
 		IsChange:      output.IsChange,
-		UpdatedAt:     convertSqlNullTimeToNullTime(output.UpdatedAt),
+		UpdatedAt:     convertSQLNullTimeToNullTime(output.UpdatedAt),
 	}
 }

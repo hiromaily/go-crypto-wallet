@@ -4,12 +4,13 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/pkg/errors"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
-	"github.com/pkg/errors"
 )
 
 // TxRepositorySqlc is repository for tx table using sqlc
@@ -91,7 +92,7 @@ func (r *TxRepositorySqlc) Update(txItem *models.TX) (int64, error) {
 	err := r.queries.UpdateTx(ctx, sqlcgen.UpdateTxParams{
 		Coin:      sqlcgen.TxCoin(txItem.Coin),
 		Action:    sqlcgen.TxAction(txItem.Action),
-		UpdatedAt: convertNullTimeToSqlNullTime(txItem.UpdatedAt),
+		UpdatedAt: convertNullTimeToSQLNullTime(txItem.UpdatedAt),
 		ID:        txItem.ID,
 	})
 	if err != nil {
@@ -125,6 +126,6 @@ func convertSqlcTxToModel(tx *sqlcgen.Tx) *models.TX {
 		ID:        tx.ID,
 		Coin:      string(tx.Coin),
 		Action:    string(tx.Action),
-		UpdatedAt: convertSqlNullTimeToNullTime(tx.UpdatedAt),
+		UpdatedAt: convertSQLNullTimeToNullTime(tx.UpdatedAt),
 	}
 }

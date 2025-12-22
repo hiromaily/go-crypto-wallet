@@ -4,12 +4,13 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/pkg/errors"
+	"github.com/volatiletech/sqlboiler/v4/types"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
-	"github.com/pkg/errors"
-	"github.com/volatiletech/sqlboiler/v4/types"
 )
 
 // TxInputRepositorySqlc is repository for btc_tx_input table using sqlc
@@ -64,14 +65,14 @@ func (r *TxInputRepositorySqlc) Insert(txItem *models.BTCTXInput) error {
 	ctx := context.Background()
 
 	_, err := r.queries.InsertBtcTxInput(ctx, sqlcgen.InsertBtcTxInputParams{
-		TxID:                txItem.TXID,
-		InputTxid:           txItem.InputTxid,
-		InputVout:           uint32(txItem.InputVout),
-		InputAddress:        txItem.InputAddress,
-		InputAccount:        txItem.InputAccount,
-		InputAmount:         txItem.InputAmount.String(),
-		InputConfirmations:  uint64(txItem.InputConfirmations),
-		UpdatedAt:           convertNullTimeToSqlNullTime(txItem.UpdatedAt),
+		TxID:               txItem.TXID,
+		InputTxid:          txItem.InputTxid,
+		InputVout:          txItem.InputVout,
+		InputAddress:       txItem.InputAddress,
+		InputAccount:       txItem.InputAccount,
+		InputAmount:        txItem.InputAmount.String(),
+		InputConfirmations: txItem.InputConfirmations,
+		UpdatedAt:          convertNullTimeToSQLNullTime(txItem.UpdatedAt),
 	})
 	if err != nil {
 		return errors.Wrap(err, "failed to call InsertBtcTxInput()")
@@ -97,14 +98,14 @@ func convertSqlcBtcTxInputToModel(input *sqlcgen.BtcTxInput) *models.BTCTXInput 
 	_ = amount.UnmarshalText([]byte(input.InputAmount))
 
 	return &models.BTCTXInput{
-		ID:                  input.ID,
-		TXID:                input.TxID,
-		InputTxid:           input.InputTxid,
-		InputVout:           input.InputVout,
-		InputAddress:        input.InputAddress,
-		InputAccount:        input.InputAccount,
-		InputAmount:         amount,
-		InputConfirmations:  input.InputConfirmations,
-		UpdatedAt:           convertSqlNullTimeToNullTime(input.UpdatedAt),
+		ID:                 input.ID,
+		TXID:               input.TxID,
+		InputTxid:          input.InputTxid,
+		InputVout:          input.InputVout,
+		InputAddress:       input.InputAddress,
+		InputAccount:       input.InputAccount,
+		InputAmount:        amount,
+		InputConfirmations: input.InputConfirmations,
+		UpdatedAt:          convertSQLNullTimeToNullTime(input.UpdatedAt),
 	}
 }

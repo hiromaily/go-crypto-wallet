@@ -4,13 +4,14 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/pkg/errors"
+	"github.com/volatiletech/null/v8"
+	"github.com/volatiletech/sqlboiler/v4/types"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
-	"github.com/pkg/errors"
-	"github.com/volatiletech/null/v8"
-	"github.com/volatiletech/sqlboiler/v4/types"
 )
 
 // PaymentRequestRepositorySqlc is repository for payment_request table using sqlc
@@ -77,13 +78,13 @@ func (r *PaymentRequestRepositorySqlc) InsertBulk(items []*models.PaymentRequest
 	for _, item := range items {
 		_, err := r.queries.InsertPaymentRequest(ctx, sqlcgen.InsertPaymentRequestParams{
 			Coin:            sqlcgen.PaymentRequestCoin(item.Coin),
-			PaymentID:       convertNullInt64ToSqlNullInt64(item.PaymentID),
+			PaymentID:       convertNullInt64ToSQLNullInt64(item.PaymentID),
 			SenderAddress:   item.SenderAddress,
 			SenderAccount:   item.SenderAccount,
 			ReceiverAddress: item.ReceiverAddress,
 			Amount:          item.Amount.String(),
 			IsDone:          item.IsDone,
-			UpdatedAt:       convertNullTimeToSqlNullTime(item.UpdatedAt),
+			UpdatedAt:       convertNullTimeToSQLNullTime(item.UpdatedAt),
 		})
 		if err != nil {
 			return errors.Wrap(err, "failed to call InsertPaymentRequest()")
@@ -166,24 +167,24 @@ func convertSqlcPaymentRequestToModel(req *sqlcgen.PaymentRequest) *models.Payme
 	return &models.PaymentRequest{
 		ID:              req.ID,
 		Coin:            string(req.Coin),
-		PaymentID:       convertSqlNullInt64ToNullInt64(req.PaymentID),
+		PaymentID:       convertSQLNullInt64ToNullInt64(req.PaymentID),
 		SenderAddress:   req.SenderAddress,
 		SenderAccount:   req.SenderAccount,
 		ReceiverAddress: req.ReceiverAddress,
 		Amount:          amount,
 		IsDone:          req.IsDone,
-		UpdatedAt:       convertSqlNullTimeToNullTime(req.UpdatedAt),
+		UpdatedAt:       convertSQLNullTimeToNullTime(req.UpdatedAt),
 	}
 }
 
-func convertNullInt64ToSqlNullInt64(n null.Int64) sql.NullInt64 {
+func convertNullInt64ToSQLNullInt64(n null.Int64) sql.NullInt64 {
 	if !n.Valid {
 		return sql.NullInt64{}
 	}
 	return sql.NullInt64{Int64: n.Int64, Valid: true}
 }
 
-func convertSqlNullInt64ToNullInt64(n sql.NullInt64) null.Int64 {
+func convertSQLNullInt64ToNullInt64(n sql.NullInt64) null.Int64 {
 	if !n.Valid {
 		return null.Int64{}
 	}

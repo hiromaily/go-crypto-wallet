@@ -5,14 +5,15 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/pkg/errors"
+	"github.com/volatiletech/sqlboiler/v4/types"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
-	"github.com/pkg/errors"
-	"github.com/volatiletech/sqlboiler/v4/types"
 )
 
 // BTCTxRepositorySqlc is repository for btc_tx table using sqlc
@@ -82,7 +83,7 @@ func (r *BTCTxRepositorySqlc) GetSentHashTx(actionType action.ActionType, txType
 	hashes, err := r.queries.GetBtcTxSentHashList(ctx, sqlcgen.GetBtcTxSentHashListParams{
 		Coin:          sqlcgen.BtcTxCoin(r.coinTypeCode.String()),
 		Action:        sqlcgen.BtcTxAction(actionType.String()),
-		CurrentTxType: int8(txType.Int8()),
+		CurrentTxType: txType.Int8(),
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to call GetBtcTxSentHashList()")
@@ -105,8 +106,8 @@ func (r *BTCTxRepositorySqlc) InsertUnsignedTx(actionType action.ActionType, txI
 		TotalOutputAmount: txItem.TotalOutputAmount.String(),
 		Fee:               txItem.Fee.String(),
 		CurrentTxType:     txItem.CurrentTXType,
-		UnsignedUpdatedAt: convertNullTimeToSqlNullTime(txItem.UnsignedUpdatedAt),
-		SentUpdatedAt:     convertNullTimeToSqlNullTime(txItem.SentUpdatedAt),
+		UnsignedUpdatedAt: convertNullTimeToSQLNullTime(txItem.UnsignedUpdatedAt),
+		SentUpdatedAt:     convertNullTimeToSQLNullTime(txItem.SentUpdatedAt),
 	})
 	if err != nil {
 		return 0, errors.Wrap(err, "failed to call InsertBtcTx()")
@@ -134,8 +135,8 @@ func (r *BTCTxRepositorySqlc) Update(txItem *models.BTCTX) (int64, error) {
 		TotalOutputAmount: txItem.TotalOutputAmount.String(),
 		Fee:               txItem.Fee.String(),
 		CurrentTxType:     txItem.CurrentTXType,
-		UnsignedUpdatedAt: convertNullTimeToSqlNullTime(txItem.UnsignedUpdatedAt),
-		SentUpdatedAt:     convertNullTimeToSqlNullTime(txItem.SentUpdatedAt),
+		UnsignedUpdatedAt: convertNullTimeToSQLNullTime(txItem.UnsignedUpdatedAt),
+		SentUpdatedAt:     convertNullTimeToSQLNullTime(txItem.SentUpdatedAt),
 		ID:                txItem.ID,
 	})
 	if err != nil {
@@ -253,7 +254,7 @@ func convertSqlcBtcTxToModel(btcTx *sqlcgen.BtcTx) *models.BTCTX {
 		TotalOutputAmount: totalOutputAmount,
 		Fee:               fee,
 		CurrentTXType:     btcTx.CurrentTxType,
-		UnsignedUpdatedAt: convertSqlNullTimeToNullTime(btcTx.UnsignedUpdatedAt),
-		SentUpdatedAt:     convertSqlNullTimeToNullTime(btcTx.SentUpdatedAt),
+		UnsignedUpdatedAt: convertSQLNullTimeToNullTime(btcTx.UnsignedUpdatedAt),
+		SentUpdatedAt:     convertSQLNullTimeToNullTime(btcTx.SentUpdatedAt),
 	}
 }
