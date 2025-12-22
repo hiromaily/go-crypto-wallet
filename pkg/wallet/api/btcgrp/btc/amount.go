@@ -8,7 +8,6 @@ import (
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/ericlagergren/decimal"
 	"github.com/pkg/errors"
-	"github.com/volatiletech/sqlboiler/v4/types"
 )
 
 // 0.00000001 BTC=1 Satoshi
@@ -21,18 +20,18 @@ func (*Bitcoin) AmountString(amt btcutil.Amount) string {
 }
 
 // AmountToDecimal converts amount `1.0 BTC` to `1.0` as decimal
-func (*Bitcoin) AmountToDecimal(amt btcutil.Amount) types.Decimal {
+func (*Bitcoin) AmountToDecimal(amt btcutil.Amount) *decimal.Big {
 	strAmt := strings.TrimRight(amt.String(), " BTC")
-	dAmt := types.Decimal{Big: new(decimal.Big)}
-	dAmt.Big, _ = dAmt.SetString(strAmt)
+	dAmt := new(decimal.Big)
+	dAmt, _ = dAmt.SetString(strAmt)
 	return dAmt
 }
 
 // FloatToDecimal converts float to decimal
-func (*Bitcoin) FloatToDecimal(f float64) types.Decimal {
+func (*Bitcoin) FloatToDecimal(f float64) *decimal.Big {
 	strAmt := fmt.Sprintf("%f", f)
-	dAmt := types.Decimal{Big: new(decimal.Big)}
-	dAmt.Big, _ = dAmt.SetString(strAmt)
+	dAmt := new(decimal.Big)
+	dAmt, _ = dAmt.SetString(strAmt)
 	return dAmt
 }
 

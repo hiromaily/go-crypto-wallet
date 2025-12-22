@@ -8,7 +8,6 @@ import (
 
 	"github.com/ericlagergren/decimal"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/volatiletech/sqlboiler/v4/types"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
@@ -22,12 +21,12 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 	btcTxOutputRepo := testutil.NewBTCTxOutputRepositorySqlc()
 
 	// Create a parent tx
-	inputAmt := types.Decimal{Big: new(decimal.Big)}
-	inputAmt.Big, _ = inputAmt.SetString("0.100")
-	outputAmt := types.Decimal{Big: new(decimal.Big)}
-	outputAmt.Big, _ = outputAmt.SetString("0.090")
-	feeAmt := types.Decimal{Big: new(decimal.Big)}
-	feeAmt.Big, _ = feeAmt.SetString("0.010")
+	inputAmt := new(decimal.Big)
+	inputAmt, _ = inputAmt.SetString("0.100")
+	outputAmt := new(decimal.Big)
+	outputAmt, _ = outputAmt.SetString("0.090")
+	feeAmt := new(decimal.Big)
+	feeAmt, _ = feeAmt.SetString("0.010")
 
 	txItem := &models.BTCTX{
 		Action:            action.ActionTypePayment.String(),
@@ -42,10 +41,10 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 	}
 
 	// Create test outputs
-	amount1 := types.Decimal{Big: new(decimal.Big)}
-	amount1.Big, _ = amount1.SetString("0.08")
-	amount2 := types.Decimal{Big: new(decimal.Big)}
-	amount2.Big, _ = amount2.SetString("0.01")
+	amount1 := new(decimal.Big)
+	amount1, _ = amount1.SetString("0.08")
+	amount2 := new(decimal.Big)
+	amount2, _ = amount2.SetString("0.01")
 
 	outputs := []*models.BTCTXOutput{
 		{
@@ -105,8 +104,8 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 	}
 
 	// Insert single
-	amount3 := types.Decimal{Big: new(decimal.Big)}
-	amount3.Big, _ = amount3.SetString("0.02")
+	amount3 := new(decimal.Big)
+	amount3, _ = amount3.SetString("0.02")
 	singleOutput := &models.BTCTXOutput{
 		TXID:          txID,
 		OutputAddress: "output-address-sqlc-3",

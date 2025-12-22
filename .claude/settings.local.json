@@ -47,7 +47,8 @@
       "Bash(done)",
       "Bash(while read file)",
       "Bash(then)",
-      "Bash(fi)"
+      "Bash(fi)",
+      "Bash(goimports:*)"
     ]
   }
 }

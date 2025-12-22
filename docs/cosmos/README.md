@@ -1,18 +1,23 @@
 # Cosmos Hub
+
 token of the Cosmos Hub is the `ATOM`
 
 ## References
+
 - [Introduction](https://hub.cosmos.network/main/hub-overview/overview.html)
 - [github CosmosHub/Gaia](https://github.com/cosmos/gaia)
 - [Cosmos Hub Testnets](https://github.com/cosmos/testnets)
 - [Join the Public Testnet(github)](https://github.com/cosmos/gaia/blob/main/docs/hub-tutorials/join-testnet.md)
 - [Join the Public Testnet](https://hub.cosmos.network/main/hub-tutorials/join-testnet.html)
 - [vega-testnet](https://vega-explorer.hypha.coop/) ... testnet explorer
-- 
+-
+
 ## Install Gaiad
+
 - [Installation](https://github.com/cosmos/gaia/blob/main/docs/getting-started/installation.md)
 
 #### Install
+
 ```
 $ git clone -b v6.0.0 https://github.com/cosmos/gaia
 $ cd gaia
@@ -21,6 +26,7 @@ $ make install
 ```
 
 #### gaiad sub command list
+
 ```
 $ gaiad --help                                                                                                                                                                               (git)-[master]
 Stargate Cosmos Hub App
@@ -59,6 +65,7 @@ Use "gaiad [command] --help" for more information about a command.
 ```
 
 ## Setup node for testnet
+
 ```
 gaiad init mymoniker
 
@@ -74,6 +81,7 @@ sed -i 's/persistent_peers = ""/persistent_peers = "<persistent_peer_node_id_1@p
 ```
 
 ## Run node
+
 ```
 gaiad start --x-crisis-skip-assert-invariants
 ```
