@@ -29,9 +29,10 @@ After making code changes, use these commands to verify code correctness:
 
 - `make lint-fix`: Fix linting issues automatically
 - `make check-build`: Verify that the code builds successfully
+- `make gotest`: Run Go tests to verify functionality
 - `make tidy`: Organize dependencies and clean up `go.mod`
 
-**Important**: Run these commands after code changes to ensure code quality and correctness.
+**Important**: After modifying Go code, run these commands to ensure code quality and correctness.
 
 ## Error Handling
 

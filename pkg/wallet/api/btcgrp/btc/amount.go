@@ -16,12 +16,23 @@ import (
 
 // AmountString converts amount `1.0 BTC` to `1.0` as string
 func (*Bitcoin) AmountString(amt btcutil.Amount) string {
-	return strings.TrimRight(amt.String(), " BTC")
+	s := strings.TrimRight(amt.String(), " BTC")
+	// Remove trailing zeros after decimal point
+	if strings.Contains(s, ".") {
+		s = strings.TrimRight(s, "0")
+		s = strings.TrimRight(s, ".")
+	}
+	return s
 }
 
 // AmountToDecimal converts amount `1.0 BTC` to `1.0` as decimal
 func (*Bitcoin) AmountToDecimal(amt btcutil.Amount) *decimal.Big {
 	strAmt := strings.TrimRight(amt.String(), " BTC")
+	// Remove trailing zeros after decimal point
+	if strings.Contains(strAmt, ".") {
+		strAmt = strings.TrimRight(strAmt, "0")
+		strAmt = strings.TrimRight(strAmt, ".")
+	}
 	dAmt := new(decimal.Big)
 	dAmt, _ = dAmt.SetString(strAmt)
 	return dAmt

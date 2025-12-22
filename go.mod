@@ -6,10 +6,10 @@ require (
 	github.com/BurntSushi/toml v1.6.0
 	github.com/LanfordCai/ava v0.1.3
 	github.com/bookerzzz/grok v0.0.0
-	github.com/btcsuite/btcd v0.23.4
-	github.com/btcsuite/btcd/btcec/v2 v2.3.2
-	github.com/btcsuite/btcd/btcutil v1.1.3
-	github.com/btcsuite/btcd/chaincfg/chainhash v1.0.2
+	github.com/btcsuite/btcd v0.25.0
+	github.com/btcsuite/btcd/btcec/v2 v2.3.5
+	github.com/btcsuite/btcd/btcutil v1.1.5
+	github.com/btcsuite/btcd/chaincfg/chainhash v1.1.0
 	github.com/coder/websocket v1.8.14
 	github.com/ericlagergren/decimal v0.0.0-20221120152707-495c53812d05
 	github.com/ethereum/go-ethereum v1.16.7
@@ -340,11 +340,7 @@ require (
 	mvdan.cc/unparam v0.0.0-20251027182757-5beb8c8f8f15 // indirect
 )
 
-replace (
-	//github.com/btcsuite/btcd => github.com/btcsuite/btcd v0.22.0-beta
-	github.com/btcsuite/btcd => github.com/btcsuite/btcd v0.23.0
-	github.com/ericlagergren/decimal => github.com/ericlagergren/decimal v0.0.0-20181231230500-73749d4874d5
-)
+replace github.com/ericlagergren/decimal => github.com/ericlagergren/decimal v0.0.0-20181231230500-73749d4874d5
 
 tool (
 	github.com/ethereum/go-ethereum/cmd/abigen

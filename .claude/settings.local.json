@@ -1,17 +1,21 @@
 {
   "permissions": {
     "allow": [
+      "WebSearch",
       "WebFetch(domain:github.com)",
       "Bash(make -n:*)",
       "Bash(make:*)",
       "Bash(make lint-fix:*)",
       "Bash(make lint:*)",
       "Bash(gofumpt:*)",
+      "Bash(goimports:*)",
       "Bash(go doc:*)",
       "Bash(go fmt:*)",
       "Bash(go build:*)",
       "Bash(go test:*)",
       "Bash(go install:*)",
+      "Bash(go list:*)",
+      "Bash(go tool govulncheck:*)",
       "Bash(go mod tidy:*)",
       "Bash($HOME/go/bin/goimports -w pkg/)",
       "Bash($HOME/go/bin/goimports:*)",
@@ -47,8 +51,7 @@
       "Bash(done)",
       "Bash(while read file)",
       "Bash(then)",
-      "Bash(fi)",
-      "Bash(goimports:*)"
+      "Bash(fi)"
     ]
   }
 }
