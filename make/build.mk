@@ -13,6 +13,7 @@ build-linux:
 # - authName on sign works as account name
 #.PHONY: tidy
 tidy:
+	# go mod verify
 	go mod tidy
 
 .PHONY: build

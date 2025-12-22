@@ -1,6 +1,8 @@
 {
   "permissions": {
     "allow": [
+      "Bash(make -n:*)",
+      "Bash(make:*)",
       "Bash(make lint-fix:*)",
       "Bash(make lint:*)",
       "Bash(gofumpt:*)",
@@ -18,6 +20,7 @@
       "Bash(git checkout:*)",
       "Bash(git mv:*)",
       "Bash(gh pr create:*)",
+      "Bash(gh pr view:*)",
       "Bash(docker volume:*)",
       "Bash(docker logs:*)",
       "Bash(docker exec:*)",
@@ -31,6 +34,7 @@
       "Bash(ls:*)",
       "Bash(sed:*)",
       "Bash(echo:*)",
+      "Bash(mkdir:*)",
       "Bash(for file in )",
       "Bash(do)",
       "Bash(done)",
