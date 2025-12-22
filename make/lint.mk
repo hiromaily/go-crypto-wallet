@@ -17,15 +17,15 @@ lint-fix:
 
 .PHONY: staticcheck
 staticcheck:
-	staticcheck ./...
+	go tool staticcheck ./...
 
 .PHONY: check-upgrade
 check-upgrade:
-	gomajor list
+	go tool gomajor list
 
 .PHONY: check-vuln
 check-vuln:
-	govulncheck ./...
+	go tool govulncheck ./...
 
 .PHONY: shfmt
 shfmt:
