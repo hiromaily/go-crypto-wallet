@@ -32,6 +32,7 @@ import (
 func TestHDWalletBTCDUpgradeConsistency(t *testing.T) {
 	// Use a standard BIP39 test vector mnemonic
 	// This is the first test vector from BIP39 specification
+	//nolint:dupword // BIP39 test vector legitimately contains repeated words
 	mnemonic := "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 	passphrase := "" // Empty passphrase for simplicity
 
@@ -43,7 +44,8 @@ func TestHDWalletBTCDUpgradeConsistency(t *testing.T) {
 
 	// Expected seed (for verification)
 	// BIP39 test vector: "abandon abandon..." with empty passphrase
-	expectedSeedHex := "5eb00bbddcf069084889a8ab9155568165f5c453ccb85e70811aaed6f6da5fc19a5ac40b389cd370d086206dec8aa6c43daea6690f20ad3d8d48b2d2ce9e38e4"
+	expectedSeedHex := "5eb00bbddcf069084889a8ab9155568165f5c453ccb85e70811aaed6f6da5fc19a5ac40b389cd370d086206" +
+		"dec8aa6c43daea6690f20ad3d8d48b2d2ce9e38e4"
 	actualSeedHex := hex.EncodeToString(seed)
 	assert.Equal(t, expectedSeedHex, actualSeedHex, "Seed generation from mnemonic must be consistent")
 
@@ -67,7 +69,10 @@ func TestHDWalletBTCDUpgradeConsistency(t *testing.T) {
 }
 
 // testBitcoinConsistency tests HD wallet key derivation for Bitcoin
-func testBitcoinConsistency(t *testing.T, seed []byte, conf *chaincfg.Params, coinType coin.CoinTypeCode, log logger.Logger) {
+func testBitcoinConsistency(
+	t *testing.T, seed []byte, conf *chaincfg.Params, coinType coin.CoinTypeCode, log logger.Logger,
+) {
+	t.Helper()
 	// Create HD wallet instance
 	hdKey := key.NewHDKey(key.PurposeTypeBIP44, coinType, conf, log)
 
@@ -140,6 +145,7 @@ func testBitcoinConsistency(t *testing.T, seed []byte, conf *chaincfg.Params, co
 
 // validateAddressFormat validates address format based on network type
 func validateAddressFormat(t *testing.T, k key.WalletKey, conf *chaincfg.Params) {
+	t.Helper()
 	switch conf.Name {
 	case "mainnet":
 		// P2PKH addresses start with '1'
@@ -184,6 +190,7 @@ func validateAddressFormat(t *testing.T, k key.WalletKey, conf *chaincfg.Params)
 // change in key derivation that would prevent users from accessing their funds.
 func TestHDWalletKnownVectors(t *testing.T) {
 	// Standard BIP39 test vector
+	//nolint:dupword // BIP39 test vector legitimately contains repeated words
 	mnemonic := "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 	seed := bip39.NewSeed(mnemonic, "")
 
@@ -198,27 +205,27 @@ func TestHDWalletKnownVectors(t *testing.T) {
 		// Known vectors for BIP44 path: m/44'/0'/0'/0/x
 		// These addresses are deterministic and should never change
 		expectedAddresses := []struct {
-			p2pkh     string
+			p2pkh      string
 			p2shSegWit string
-			bech32    string
+			bech32     string
 		}{
 			{
 				// m/44'/0'/0'/0/0 - verified with btcd v0.25.0
-				p2pkh:     "1LqBGSKuX5yYUonjxT5qGfpUsXKYYWeabA",
+				p2pkh:      "1LqBGSKuX5yYUonjxT5qGfpUsXKYYWeabA",
 				p2shSegWit: "3HkzTaFbEMWeJPLyNCNhPyGfZsVLDwdD3G",
-				bech32:    "bc1qmxrw6qdh5g3ztfcwm0et5l8mvws4eva24kmp8m",
+				bech32:     "bc1qmxrw6qdh5g3ztfcwm0et5l8mvws4eva24kmp8m",
 			},
 			{
 				// m/44'/0'/0'/0/1 - verified with btcd v0.25.0
-				p2pkh:     "1Ak8PffB2meyfYnbXZR9EGfLfFZVpzJvQP",
+				p2pkh:      "1Ak8PffB2meyfYnbXZR9EGfLfFZVpzJvQP",
 				p2shSegWit: "3FYpNH4eWWmqqrvcbjWpvSJYybEaGmCwZi",
-				bech32:    "bc1qdtsnq885fjjj2agaza36cnl0ztg32wvxqg5x0c",
+				bech32:     "bc1qdtsnq885fjjj2agaza36cnl0ztg32wvxqg5x0c",
 			},
 			{
 				// m/44'/0'/0'/0/2 - verified with btcd v0.25.0
-				p2pkh:     "1MNF5RSaabFwcbtJirJwKnDytsXXEsVsNb",
+				p2pkh:      "1MNF5RSaabFwcbtJirJwKnDytsXXEsVsNb",
 				p2shSegWit: "3Qnpgq3UEaRRqXNmMBJZCDmVmCHQUmshaF",
-				bech32:    "bc1qmansqj24utny54uag2ped8censfwnszplhg27m",
+				bech32:     "bc1qmansqj24utny54uag2ped8censfwnszplhg27m",
 			},
 		}
 
@@ -236,85 +243,86 @@ func TestHDWalletKnownVectors(t *testing.T) {
 	// TODO: Add more known vector tests for other account types
 	// For now, the mainnet client account test above provides sufficient regression coverage
 	/*
-	t.Run("Mainnet_Deposit_Account", func(t *testing.T) {
-		hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.MainNetParams, log)
-		keys, err := hdKey.CreateKey(seed, account.AccountTypeDeposit, 0, 2)
-		require.NoError(t, err)
-		require.Len(t, keys, 2)
+		t.Run("Mainnet_Deposit_Account", func(t *testing.T) {
+			hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.MainNetParams, log)
+			keys, err := hdKey.CreateKey(seed, account.AccountTypeDeposit, 0, 2)
+			require.NoError(t, err)
+			require.Len(t, keys, 2)
 
-		// Known vectors for BIP44 path: m/44'/0'/1'/0/x (deposit account = 1)
-		// These addresses are verified with btcd v0.25.0
-		expectedAddresses := []struct {
-			p2pkh     string
-			p2shSegWit string
-			bech32    string
-		}{
-			{
-				// m/44'/0'/1'/0/0 - verified with btcd v0.25.0
-				p2pkh:     "1GUgymGeCTQp6Cw5TyqGZ7BFvnRJHUKJ2g",
-				p2shSegWit: "3Cv8o8iQCwDi1xc3j6z9EJ3MrpqhfGvXXW",
-				bech32:    "bc1qfuqrqajd3c90gqphm4pf3evcffk74g2hd93x8n",
-			},
-			{
-				// m/44'/0'/1'/0/1 - verified with btcd v0.25.0
-				p2pkh:     "1CFW1dDntvX1C1fgfP6nFc4CXvgRAi7Rhe",
-				p2shSegWit: "3Pd1Vp4bZvNWDbAE3uWoK7nEiHm9VqgSQS",
-				bech32:    "bc1qwhwsfcvvqsmf5kdj5akzcwxqmr7x3c9fxk0xr7",
-			},
-		}
+			// Known vectors for BIP44 path: m/44'/0'/1'/0/x (deposit account = 1)
+			// These addresses are verified with btcd v0.25.0
+			expectedAddresses := []struct {
+				p2pkh     string
+				p2shSegWit string
+				bech32    string
+			}{
+				{
+					// m/44'/0'/1'/0/0 - verified with btcd v0.25.0
+					p2pkh:     "1GUgymGeCTQp6Cw5TyqGZ7BFvnRJHUKJ2g",
+					p2shSegWit: "3Cv8o8iQCwDi1xc3j6z9EJ3MrpqhfGvXXW",
+					bech32:    "bc1qfuqrqajd3c90gqphm4pf3evcffk74g2hd93x8n",
+				},
+				{
+					// m/44'/0'/1'/0/1 - verified with btcd v0.25.0
+					p2pkh:     "1CFW1dDntvX1C1fgfP6nFc4CXvgRAi7Rhe",
+					p2shSegWit: "3Pd1Vp4bZvNWDbAE3uWoK7nEiHm9VqgSQS",
+					bech32:    "bc1qwhwsfcvvqsmf5kdj5akzcwxqmr7x3c9fxk0xr7",
+				},
+			}
 
-		for idx, expected := range expectedAddresses {
-			assert.Equal(t, expected.p2pkh, keys[idx].P2PKHAddr,
-				"Deposit P2PKH address mismatch at index %d", idx)
-			assert.Equal(t, expected.p2shSegWit, keys[idx].P2SHSegWitAddr,
-				"Deposit P2SH-SegWit address mismatch at index %d", idx)
-			assert.Equal(t, expected.bech32, keys[idx].Bech32Addr,
-				"Deposit Bech32 address mismatch at index %d", idx)
-		}
-	})
+			for idx, expected := range expectedAddresses {
+				assert.Equal(t, expected.p2pkh, keys[idx].P2PKHAddr,
+					"Deposit P2PKH address mismatch at index %d", idx)
+				assert.Equal(t, expected.p2shSegWit, keys[idx].P2SHSegWitAddr,
+					"Deposit P2SH-SegWit address mismatch at index %d", idx)
+				assert.Equal(t, expected.bech32, keys[idx].Bech32Addr,
+					"Deposit Bech32 address mismatch at index %d", idx)
+			}
+		})
 
-	t.Run("Testnet_Client_Account", func(t *testing.T) {
-		hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.TestNet3Params, log)
-		keys, err := hdKey.CreateKey(seed, account.AccountTypeClient, 0, 2)
-		require.NoError(t, err)
-		require.Len(t, keys, 2)
+		t.Run("Testnet_Client_Account", func(t *testing.T) {
+			hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.TestNet3Params, log)
+			keys, err := hdKey.CreateKey(seed, account.AccountTypeClient, 0, 2)
+			require.NoError(t, err)
+			require.Len(t, keys, 2)
 
-		// Known vectors for BIP44 path: m/44'/1'/0'/0/x (testnet coin_type = 1)
-		// These addresses are verified with btcd v0.25.0
-		expectedAddresses := []struct {
-			p2pkh     string
-			p2shSegWit string
-			bech32    string
-		}{
-			{
-				// m/44'/1'/0'/0/0 - verified with btcd v0.25.0
-				p2pkh:     "muZpTpBYhxmRFuCjLc7C6BBDF32C8XVJUi",
-				p2shSegWit: "2N6JxuBJr7FxYNB2Z1i1XMQWzM4HijW5qHW",
-				bech32:    "tb1qp7knl9gq62x0p2pv5hpyckvl6crlgz74dhqz7g",
-			},
-			{
-				// m/44'/1'/0'/0/1 - verified with btcd v0.25.0
-				p2pkh:     "mvbnrCX3bg1cDRUu8pkecrvP6vQkSLDSou",
-				p2shSegWit: "2N3zfVebQyiLWGUUBxPQM7yHq3gKjUv5VEh",
-				bech32:    "tb1qfwgeukqcw2f0y8nyz5qlp7f2tfy6p0nv82rxht",
-			},
-		}
+			// Known vectors for BIP44 path: m/44'/1'/0'/0/x (testnet coin_type = 1)
+			// These addresses are verified with btcd v0.25.0
+			expectedAddresses := []struct {
+				p2pkh     string
+				p2shSegWit string
+				bech32    string
+			}{
+				{
+					// m/44'/1'/0'/0/0 - verified with btcd v0.25.0
+					p2pkh:     "muZpTpBYhxmRFuCjLc7C6BBDF32C8XVJUi",
+					p2shSegWit: "2N6JxuBJr7FxYNB2Z1i1XMQWzM4HijW5qHW",
+					bech32:    "tb1qp7knl9gq62x0p2pv5hpyckvl6crlgz74dhqz7g",
+				},
+				{
+					// m/44'/1'/0'/0/1 - verified with btcd v0.25.0
+					p2pkh:     "mvbnrCX3bg1cDRUu8pkecrvP6vQkSLDSou",
+					p2shSegWit: "2N3zfVebQyiLWGUUBxPQM7yHq3gKjUv5VEh",
+					bech32:    "tb1qfwgeukqcw2f0y8nyz5qlp7f2tfy6p0nv82rxht",
+				},
+			}
 
-		for idx, expected := range expectedAddresses {
-			assert.Equal(t, expected.p2pkh, keys[idx].P2PKHAddr,
-				"Testnet P2PKH address mismatch at index %d", idx)
-			assert.Equal(t, expected.p2shSegWit, keys[idx].P2SHSegWitAddr,
-				"Testnet P2SH-SegWit address mismatch at index %d", idx)
-			assert.Equal(t, expected.bech32, keys[idx].Bech32Addr,
-				"Testnet Bech32 address mismatch at index %d", idx)
-		}
-	})
+			for idx, expected := range expectedAddresses {
+				assert.Equal(t, expected.p2pkh, keys[idx].P2PKHAddr,
+					"Testnet P2PKH address mismatch at index %d", idx)
+				assert.Equal(t, expected.p2shSegWit, keys[idx].P2SHSegWitAddr,
+					"Testnet P2SH-SegWit address mismatch at index %d", idx)
+				assert.Equal(t, expected.bech32, keys[idx].Bech32Addr,
+					"Testnet Bech32 address mismatch at index %d", idx)
+			}
+		})
 	*/
 }
 
 // TestHDWalletMultipleIndices tests that key derivation at different indices
 // produces consistent results
 func TestHDWalletMultipleIndices(t *testing.T) {
+	//nolint:dupword // BIP39 test vector legitimately contains repeated words
 	mnemonic := "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 	seed := bip39.NewSeed(mnemonic, "")
 
@@ -361,6 +369,7 @@ func TestHDWalletMultipleIndices(t *testing.T) {
 // TestHDWalletAuthAccounts tests authorization account key generation
 // These accounts are used for multisig functionality
 func TestHDWalletAuthAccounts(t *testing.T) {
+	//nolint:dupword // BIP39 test vector legitimately contains repeated words
 	mnemonic := "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 	seed := bip39.NewSeed(mnemonic, "")
 
