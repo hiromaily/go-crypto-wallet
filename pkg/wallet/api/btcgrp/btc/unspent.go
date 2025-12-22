@@ -2,12 +2,12 @@ package btc
 
 import (
 	"encoding/json"
+	"fmt"
 	"sort"
 
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 )
@@ -34,17 +34,17 @@ func (b *Bitcoin) ListUnspent(confirmationNum uint64) ([]ListUnspentResult, erro
 
 	input, err := json.Marshal(confirmationNum)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Marchal()")
+		return nil, fmt.Errorf("fail to call json.Marchal(): %w", err)
 	}
 	rawResult, err := b.Client.RawRequest("listunspent", []json.RawMessage{input})
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.RawRequest(listunspent)")
+		return nil, fmt.Errorf("fail to call json.RawRequest(listunspent): %w", err)
 	}
 
 	var listunspentResult []ListUnspentResult
 	err = json.Unmarshal(rawResult, &listunspentResult)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Unmarshal()")
+		return nil, fmt.Errorf("fail to call json.Unmarshal(): %w", err)
 	}
 
 	if len(listunspentResult) == 0 {
@@ -60,17 +60,17 @@ func (b *Bitcoin) ListUnspentByAccount(
 ) ([]ListUnspentResult, error) {
 	addrs, err := b.GetAddressesByLabel(accountType.String())
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call btc.GetAddressesByLabel()")
+		return nil, fmt.Errorf("fail to call btc.GetAddressesByLabel(): %w", err)
 	}
 	if len(addrs) == 0 {
-		return nil, errors.Errorf("address for %s can not be found", accountType)
+		return nil, fmt.Errorf("address for %s can not be found", accountType)
 	}
 
 	var unspentList []ListUnspentResult
 
 	unspentList, err = b.listUnspentByAccount(addrs, confirmationNum)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call btc.listUnspentByAccount()")
+		return nil, fmt.Errorf("fail to call btc.listUnspentByAccount(): %w", err)
 	}
 	// for debug use
 	// filterdAddrs := b.getUnspentListAddrs(unspentList, accountType)
@@ -109,12 +109,12 @@ func (*Bitcoin) getUnspentListAmount(unspentList []ListUnspentResult) float64 {
 func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address, confirmationNum uint64) ([]ListUnspentResult, error) {
 	input1, err := json.Marshal(confirmationNum)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Marchal(confirmationBlock)")
+		return nil, fmt.Errorf("fail to call json.Marchal(confirmationBlock): %w", err)
 	}
 
 	input2, err := json.Marshal(uint64(9999999))
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Marchal(9999999)")
+		return nil, fmt.Errorf("fail to call json.Marchal(9999999): %w", err)
 	}
 
 	// address
@@ -125,18 +125,18 @@ func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address, confirmationNum 
 
 	input3, err := json.Marshal(strAddrs)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Marchal(addresses)")
+		return nil, fmt.Errorf("fail to call json.Marchal(addresses): %w", err)
 	}
 
 	rawResult, err := b.Client.RawRequest("listunspent", []json.RawMessage{input1, input2, input3})
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.RawRequest(listunspent)")
+		return nil, fmt.Errorf("fail to call json.RawRequest(listunspent): %w", err)
 	}
 
 	var listunspentResult []ListUnspentResult
 	err = json.Unmarshal(rawResult, &listunspentResult)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
+		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
 	}
 
 	if len(listunspentResult) == 0 {
@@ -151,7 +151,7 @@ func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address, confirmationNum 
 func (b *Bitcoin) LockUnspent(tx *ListUnspentResult) error {
 	txIDHash, err := chainhash.NewHashFromStr(tx.TxID)
 	if err != nil {
-		return errors.Wrapf(err, "fail to call chainhash.NewHashFromStr(%s)", tx.TxID)
+		return fmt.Errorf("fail to call chainhash.NewHashFromStr(%s): %w", tx.TxID, err)
 	}
 	outpoint := wire.NewOutPoint(txIDHash, tx.Vout)
 	err = b.Client.LockUnspent(false, []*wire.OutPoint{outpoint})
@@ -166,13 +166,13 @@ func (b *Bitcoin) LockUnspent(tx *ListUnspentResult) error {
 func (b *Bitcoin) UnlockUnspent() error {
 	list, err := b.Client.ListLockUnspent() // []*wire.OutPoint
 	if err != nil {
-		return errors.Wrap(err, "fail to call client.ListLockUnspent()")
+		return fmt.Errorf("fail to call client.ListLockUnspent(): %w", err)
 	}
 
 	if len(list) != 0 {
 		err = b.Client.LockUnspent(true, list)
 		if err != nil {
-			return errors.Wrap(err, "fail to call client.LockUnspent()")
+			return fmt.Errorf("fail to call client.LockUnspent(): %w", err)
 		}
 	}
 

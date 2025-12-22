@@ -2,8 +2,7 @@ package keygensrv
 
 import (
 	"database/sql"
-
-	"github.com/pkg/errors"
+	"fmt"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -63,7 +62,7 @@ func (k *XRPKeyGenerate) Generate(accountType account.AccountType, isKeyPair boo
 	// transaction
 	dtx, err := k.dbConn.Begin()
 	if err != nil {
-		return errors.Wrap(err, "failed to call db.Begin()")
+		return fmt.Errorf("failed to call db.Begin(): %w", err)
 	}
 	defer func() {
 		if err != nil {
@@ -82,10 +81,10 @@ func (k *XRPKeyGenerate) Generate(accountType account.AccountType, isKeyPair boo
 		var generatedKey *xrp.ResponseWalletPropose
 		generatedKey, err = k.xrp.WalletPropose(v.P2SHSegWitAddr)
 		if err != nil {
-			return errors.Wrap(err, "fail to call xrp.WalletPropose()")
+			return fmt.Errorf("fail to call xrp.WalletPropose(): %w", err)
 		}
 		if generatedKey.Status == xrp.StatusCodeError.String() {
-			return errors.Errorf("fail to call xrp.WalletPropose() %s", generatedKey.Error)
+			return fmt.Errorf("fail to call xrp.WalletPropose() %s", generatedKey.Error)
 		}
 		// TODO: passphrase or related ID should be stored in table??
 		items = append(items, &models.XRPAccountKey{
@@ -105,14 +104,14 @@ func (k *XRPKeyGenerate) Generate(accountType account.AccountType, isKeyPair boo
 		// update account_key table for address as ripple address
 		_, err = k.accountKeyRepo.UpdateAddr(accountType, generatedKey.Result.AccountID, v.P2SHSegWitAddr)
 		if err != nil {
-			return errors.Wrap(err, "fail to call accountKeyRepo.UpdateAddr()")
+			return fmt.Errorf("fail to call accountKeyRepo.UpdateAddr(): %w", err)
 		}
 	}
 
 	// insert keys to DB
 	err = k.xrpAccountKeyRepo.InsertBulk(items)
 	if err != nil {
-		return errors.Wrap(err, "fail to call accountKeyRepo.InsertBulk() for XRP")
+		return fmt.Errorf("fail to call accountKeyRepo.InsertBulk() for XRP: %w", err)
 	}
 
 	return nil

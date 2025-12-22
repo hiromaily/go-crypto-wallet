@@ -2,13 +2,13 @@ package ethgrp
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -26,7 +26,7 @@ func NewRPCClient(conf *config.Ethereum) (*ethrpc.Client, error) {
 
 	rpcClient, err := ethrpc.Dial(url)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call rpc.Dial()")
+		return nil, fmt.Errorf("fail to call rpc.Dial(): %w", err)
 	}
 	return rpcClient, nil
 }
@@ -46,7 +46,7 @@ func NewEthereum(
 		logger,
 	)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call eth.NewEthereum()")
+		return nil, fmt.Errorf("fail to call eth.NewEthereum(): %w", err)
 	}
 	return ethAPI, err
 }

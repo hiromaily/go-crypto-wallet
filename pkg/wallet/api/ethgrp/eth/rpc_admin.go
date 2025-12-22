@@ -1,8 +1,9 @@
 package eth
 
 import (
+	"fmt"
+
 	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/pkg/errors"
 )
 
 // AddPeer requests adding a new remote node to the list of tracked static nodes
@@ -28,7 +29,7 @@ func (e *Ethereum) AdminDataDir() (string, error) {
 	var dataDir string
 	err := e.rpcClient.CallContext(e.ctx, &dataDir, "admin_datadir")
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call rpc.CallContext(admin_datadir)")
+		return "", fmt.Errorf("fail to call rpc.CallContext(admin_datadir): %w", err)
 	}
 	return dataDir, nil
 }

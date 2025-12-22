@@ -2,8 +2,7 @@ package bch
 
 import (
 	"encoding/json"
-
-	"github.com/pkg/errors"
+	"fmt"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/btc"
 )
@@ -30,17 +29,17 @@ type GetAddressInfoResult struct {
 func (b *BitcoinCash) GetAddressInfo(addr string) (*btc.GetAddressInfoResult, error) {
 	input, err := json.Marshal(addr)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Marchal() in bch")
+		return nil, fmt.Errorf("fail to call json.Marchal() in bch: %w", err)
 	}
 	rawResult, err := b.Client.RawRequest("getaddressinfo", []json.RawMessage{input})
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to call json.RawRequest(getaddressinfo) %s in bch", addr)
+		return nil, fmt.Errorf("fail to call json.RawRequest(getaddressinfo) %s in bch: %w", addr, err)
 	}
 
 	infoResult := GetAddressInfoResult{}
 	err = json.Unmarshal(rawResult, &infoResult)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Unmarshal(rawResult) in bch")
+		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult) in bch: %w", err)
 	}
 
 	// convert bch result to btc

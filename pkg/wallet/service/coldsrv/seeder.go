@@ -1,7 +1,8 @@
 package coldsrv
 
 import (
-	"github.com/pkg/errors"
+	"errors"
+	"fmt"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
@@ -41,14 +42,14 @@ func (s *Seed) Generate() ([]byte, error) {
 	// generate seed
 	bSeed, err = key.GenerateSeed()
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call key.GenerateSeed()")
+		return nil, fmt.Errorf("fail to call key.GenerateSeed(): %w", err)
 	}
 	strSeed := key.SeedToString(bSeed)
 
 	// insert seed in database
 	err = s.seedRepo.Insert(strSeed)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call repo.Seed().Insert()")
+		return nil, fmt.Errorf("fail to call repo.Seed().Insert(): %w", err)
 	}
 
 	return bSeed, nil
@@ -60,13 +61,13 @@ func (s *Seed) Generate() ([]byte, error) {
 func (s *Seed) Store(strSeed string) ([]byte, error) {
 	bSeed, err := key.SeedToByte(strSeed)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call key.SeedToByte() ")
+		return nil, fmt.Errorf("fail to call key.SeedToByte() : %w", err)
 	}
 
 	// insert seed in database
 	err = s.seedRepo.Insert(strSeed)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call repo.InsertSeed()")
+		return nil, fmt.Errorf("fail to call repo.InsertSeed(): %w", err)
 	}
 
 	return bSeed, nil
@@ -81,7 +82,7 @@ func (s *Seed) retrieveSeed() ([]byte, error) {
 		return key.SeedToByte(seed.Seed)
 	}
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call repo.GetSeedOne()")
+		return nil, fmt.Errorf("fail to call repo.GetSeedOne(): %w", err)
 	}
 	// in this case, though err didn't happen, but seed is blank
 	return nil, errors.New("somehow seed retrieved from database is blank ")

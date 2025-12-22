@@ -3,9 +3,9 @@ package watchrepo
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/volatiletech/null/v8"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
@@ -42,7 +42,7 @@ func (r *AddressRepositorySqlc) GetAll(accountType account.AccountType) ([]*mode
 		Account: sqlcgen.AddressAccount(accountType.String()),
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetAllAddresses()")
+		return nil, fmt.Errorf("failed to call GetAllAddresses(): %w", err)
 	}
 
 	// Convert sqlc types to sqlboiler types for backward compatibility
@@ -63,7 +63,7 @@ func (r *AddressRepositorySqlc) GetAllAddress(accountType account.AccountType) (
 		Account: sqlcgen.AddressAccount(accountType.String()),
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetAllAddressStrings()")
+		return nil, fmt.Errorf("failed to call GetAllAddressStrings(): %w", err)
 	}
 
 	return addresses, nil
@@ -78,7 +78,7 @@ func (r *AddressRepositorySqlc) GetOneUnAllocated(accountType account.AccountTyp
 		Account: sqlcgen.AddressAccount(accountType.String()),
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetOneUnallocatedAddress()")
+		return nil, fmt.Errorf("failed to call GetOneUnallocatedAddress(): %w", err)
 	}
 
 	return convertSqlcAddressToModel(&addr), nil
@@ -97,7 +97,7 @@ func (r *AddressRepositorySqlc) InsertBulk(items []*models.Address) error {
 			UpdatedAt:     convertNullTimeToSQLNullTime(item.UpdatedAt),
 		})
 		if err != nil {
-			return errors.Wrap(err, "failed to call InsertAddress()")
+			return fmt.Errorf("failed to call InsertAddress(): %w", err)
 		}
 	}
 
@@ -115,12 +115,12 @@ func (r *AddressRepositorySqlc) UpdateIsAllocated(isAllocated bool, address stri
 		WalletAddress: address,
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call UpdateAddressIsAllocated()")
+		return 0, fmt.Errorf("failed to call UpdateAddressIsAllocated(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to get RowsAffected()")
+		return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 	}
 
 	return rowsAffected, nil

@@ -2,8 +2,7 @@ package xrp
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
+	"fmt"
 )
 
 // Note: Admin commands are available only if you connect to rippled on a host and port that
@@ -46,7 +45,7 @@ func (r *Ripple) ValidationCreate(secret string) (*ResponseValidationCreate, err
 	}
 	var res ResponseValidationCreate
 	if err := r.wsAdmin.Call(context.Background(), &req, &res); err != nil {
-		return nil, errors.Wrap(err, "fail to call wsAdmin.Call(validation_create)")
+		return nil, fmt.Errorf("fail to call wsAdmin.Call(validation_create): %w", err)
 	}
 	return &res, nil
 }
@@ -94,7 +93,7 @@ func (r *Ripple) WalletProposeWithKey(seed string, keyType XRPKeyType) (*Respons
 	}
 	var res ResponseWalletPropose
 	if err := r.wsAdmin.Call(context.Background(), &req, &res); err != nil {
-		return nil, errors.Wrap(err, "fail to call wsAdmin.Call(wallet_propose)")
+		return nil, fmt.Errorf("fail to call wsAdmin.Call(wallet_propose): %w", err)
 	}
 	return &res, nil
 }
@@ -112,7 +111,7 @@ func (r *Ripple) WalletPropose(passphrase string) (*ResponseWalletPropose, error
 	}
 	var res ResponseWalletPropose
 	if err := r.wsAdmin.Call(context.Background(), &req, &res); err != nil {
-		return nil, errors.Wrap(err, "fail to call wsAdmin.Call(wallet_propose)")
+		return nil, fmt.Errorf("fail to call wsAdmin.Call(wallet_propose): %w", err)
 	}
 	return &res, nil
 }

@@ -4,8 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/pkg/errors"
-
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 
@@ -20,7 +18,7 @@ func NewMySQL(conf *config.MySQL) (*sql.DB, error) {
 			conf.Host,
 			conf.DB))
 	if err != nil {
-		return nil, errors.Errorf("Connection(): error: %v", err)
+		return nil, fmt.Errorf("Connection(): error: %v", err)
 	}
 	return db, nil
 }

@@ -2,8 +2,7 @@ package watchsrv
 
 import (
 	"database/sql"
-
-	"github.com/pkg/errors"
+	"fmt"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -78,7 +77,7 @@ func (t *TxCreate) updateDB(
 	// start transaction
 	dtx, err := t.dbConn.Begin()
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to start transaction")
+		return 0, fmt.Errorf("fail to start transaction: %w", err)
 	}
 	defer func() {
 		if err != nil {
@@ -91,20 +90,20 @@ func (t *TxCreate) updateDB(
 	// Insert eth_tx
 	txID, err := t.txRepo.InsertUnsignedTx(targetAction)
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call txRepo.InsertUnsignedTx()")
+		return 0, fmt.Errorf("fail to call txRepo.InsertUnsignedTx(): %w", err)
 	}
 	// Insert to eth_detail_tx
 	for idx := range txDetailItems {
 		txDetailItems[idx].TXID = txID
 	}
 	if err = t.txDetailRepo.InsertBulk(txDetailItems); err != nil {
-		return 0, errors.Wrap(err, "fail to call txDetailRepo.InsertBulk()")
+		return 0, fmt.Errorf("fail to call txDetailRepo.InsertBulk(): %w", err)
 	}
 
 	if targetAction == action.ActionTypePayment {
 		_, err = t.payReqRepo.UpdatePaymentID(txID, paymentRequestIds)
 		if err != nil {
-			return 0, errors.Wrap(err, "fail to call repo.PayReq().UpdatePaymentID(txID, paymentRequestIds)")
+			return 0, fmt.Errorf("fail to call repo.PayReq().UpdatePaymentID(txID, paymentRequestIds): %w", err)
 		}
 	}
 	return txID, nil
@@ -121,7 +120,7 @@ func (t *TxCreate) generateHexFile(
 	path := t.txFileRepo.CreateFilePath(actionType, tx.TxTypeUnsigned, txID, 0)
 	generatedFileName, err := t.txFileRepo.WriteFileSlice(path, serializedTxs)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call txFileRepo.WriteFile()")
+		return "", fmt.Errorf("fail to call txFileRepo.WriteFile(): %w", err)
 	}
 
 	return generatedFileName, nil

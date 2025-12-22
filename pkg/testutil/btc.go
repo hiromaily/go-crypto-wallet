@@ -1,9 +1,8 @@
 package testutil
 
 import (
+	"fmt"
 	"os"
-
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -25,7 +24,7 @@ func GetBTC() (btcgrp.Bitcoiner, error) {
 	confPath := projPath + "/data/config/btc_watch.toml"
 	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.BTC)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to create config")
+		return nil, fmt.Errorf("fail to create config: %w", err)
 	}
 	// TODO: if config should be overridden, here
 	conf.CoinTypeCode = coin.BTC
@@ -35,11 +34,11 @@ func GetBTC() (btcgrp.Bitcoiner, error) {
 	// client
 	client, err := btcgrp.NewRPCClient(&conf.Bitcoin)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to create bitcoin core client")
+		return nil, fmt.Errorf("fail to create bitcoin core client: %w", err)
 	}
 	bc, err = btcgrp.NewBitcoin(client, &conf.Bitcoin, log, conf.CoinTypeCode)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to create btc instance")
+		return nil, fmt.Errorf("fail to create btc instance: %w", err)
 	}
 	return bc, nil
 }

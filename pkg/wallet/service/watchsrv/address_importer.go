@@ -2,9 +2,8 @@ package watchsrv
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
-
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -57,7 +56,7 @@ func (a *AddressImport) ImportAddress(fileName string) error {
 	// read file for public key
 	pubKeys, err := a.addrFileRepo.ImportAddress(fileName)
 	if err != nil {
-		return errors.Wrap(err, "fail to call key.ImportPubKey()")
+		return fmt.Errorf("fail to call key.ImportPubKey(): %w", err)
 	}
 
 	pubKeyData := make([]*models.Address, 0, len(pubKeys))
@@ -81,7 +80,7 @@ func (a *AddressImport) ImportAddress(fileName string) error {
 	// insert imported pubKey
 	err = a.addrRepo.InsertBulk(pubKeyData)
 	if err != nil {
-		return errors.Wrap(err, "fail to call repo.Pubkey().InsertBulk()")
+		return fmt.Errorf("fail to call repo.Pubkey().InsertBulk(): %w", err)
 		// TODO:What if this inserting is failed, how it can be recovered to keep consistancy
 		// pubkey is added in wallet, but database doesn't have records
 		// try to run this func again

@@ -1,9 +1,8 @@
 package fullpubkey
 
 import (
+	"errors"
 	"fmt"
-
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -32,10 +31,10 @@ func ConvertLine(coinTypeCode coin.CoinTypeCode, line []string) (*FullPubKeyForm
 
 	// validate
 	if !coin.IsCoinTypeCode(line[0]) || coin.CoinTypeCode(line[0]) != coinTypeCode {
-		return nil, errors.Errorf("coinTypeCode is invalid. got %s, want %s", line[0], coinTypeCode.String())
+		return nil, fmt.Errorf("coinTypeCode is invalid. got %s, want %s", line[0], coinTypeCode.String())
 	}
 	if !account.ValidateAuthType(line[1]) {
-		return nil, errors.Errorf("auth account is invalid: %s", line[1])
+		return nil, fmt.Errorf("auth account is invalid: %s", line[1])
 	}
 
 	return &FullPubKeyFormat{

@@ -1,7 +1,9 @@
 package xrp
 
 import (
-	"github.com/pkg/errors"
+	"errors"
+	"fmt"
+
 	"google.golang.org/grpc/status"
 )
 
@@ -23,32 +25,32 @@ func (r *Ripple) CreateRawTransaction(
 	accountInfo, err := r.GetAccountInfo(senderAccount)
 	if err != nil {
 		errStatus, _ := status.FromError(err)
-		return nil, "", errors.Errorf(
+		return nil, "", fmt.Errorf(
 			"fail to call GetAccountInfo() code: %d, message: %s",
 			errStatus.Code(), errStatus.Message())
 	}
 	if amount != 0 && (ToFloat64(accountInfo.XrpBalance)-MinimumReserve) <= amount {
-		return nil, "", errors.Errorf("balance is short to send %s", accountInfo.XrpBalance)
+		return nil, "", fmt.Errorf("balance is short to send %s", accountInfo.XrpBalance)
 	}
 
 	// get fee
 	txJSON, stringJSON, err := r.PrepareTransaction(senderAccount, receiverAccount, amount, instructions)
 	if err != nil {
-		return nil, "", errors.Wrap(err, "fail to call PrepareTransaction()")
+		return nil, "", fmt.Errorf("fail to call PrepareTransaction(): %w", err)
 	}
 	calculatedAmount := ToFloat64(accountInfo.XrpBalance) - MinimumReserve - XRPToDrops(ToFloat64(txJSON.Fee))
 	if amount == 0 {
 		// send all, but fee should be calculated first
 		if calculatedAmount <= 0 {
-			return nil, "", errors.Errorf("balance is short to send %s", accountInfo.XrpBalance)
+			return nil, "", fmt.Errorf("balance is short to send %s", accountInfo.XrpBalance)
 		}
 		// re-run
 		txJSON, stringJSON, err = r.PrepareTransaction(senderAccount, receiverAccount, calculatedAmount, instructions)
 		if err != nil {
-			return nil, "", errors.Wrap(err, "fail to call PrepareTransaction()")
+			return nil, "", fmt.Errorf("fail to call PrepareTransaction(): %w", err)
 		}
 	} else if calculatedAmount < amount {
-		return nil, "", errors.Errorf("balance is short to send %s", accountInfo.XrpBalance)
+		return nil, "", fmt.Errorf("balance is short to send %s", accountInfo.XrpBalance)
 	}
 	return txJSON, stringJSON, nil
 }

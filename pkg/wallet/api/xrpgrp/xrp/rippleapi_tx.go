@@ -3,11 +3,12 @@ package xrp
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"strconv"
 	"time"
 
-	"github.com/pkg/errors"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -119,7 +120,7 @@ func (r *Ripple) PrepareTransaction(
 
 	res, err := r.API.txClient.PrepareTransaction(ctx, req)
 	if err != nil {
-		return nil, "", errors.Wrap(err, "fail to call client.PrepareTransaction()")
+		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction(): %w", err)
 	}
 	r.logger.Debug("response",
 		"TxJSON", res.TxJSON,
@@ -129,7 +130,7 @@ func (r *Ripple) PrepareTransaction(
 	var txInput TxInput
 	unquotedJSON, _ := strconv.Unquote(res.TxJSON)
 	if err = json.Unmarshal([]byte(unquotedJSON), &txInput); err != nil {
-		return nil, "", errors.Wrap(err, "fail to call json.Unmarshal(txJSON)")
+		return nil, "", fmt.Errorf("fail to call json.Unmarshal(txJSON): %w", err)
 	}
 
 	return &txInput, unquotedJSON, nil
@@ -142,7 +143,7 @@ func (r *Ripple) SignTransaction(txInput *TxInput, secret string) (string, strin
 	ctx := context.Background()
 	strJSON, err := json.Marshal(txInput)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call json.Marshal(txJSON)")
+		return "", "", fmt.Errorf("fail to call json.Marshal(txJSON): %w", err)
 	}
 	req := &RequestSignTransaction{
 		TxJSON: string(strJSON),
@@ -151,7 +152,7 @@ func (r *Ripple) SignTransaction(txInput *TxInput, secret string) (string, strin
 
 	res, err := r.API.txClient.SignTransaction(ctx, req)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call client.SignTransaction()")
+		return "", "", fmt.Errorf("fail to call client.SignTransaction(): %w", err)
 	}
 
 	return res.TxID, res.TxBlob, nil
@@ -167,7 +168,7 @@ func (r *Ripple) CombineTransaction(signedTxs []string) (string, string, error) 
 
 	res, err := r.API.txClient.CombineTransaction(ctx, req)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call client.CombineTransaction()")
+		return "", "", fmt.Errorf("fail to call client.CombineTransaction(): %w", err)
 	}
 
 	return res.TxID, res.SignedTransaction, nil
@@ -182,12 +183,12 @@ func (r *Ripple) SubmitTransaction(signedTx string) (*SentTx, uint64, error) {
 	}
 	res, err := r.API.txClient.SubmitTransaction(ctx, req)
 	if err != nil {
-		return nil, 0, errors.Wrap(err, "fail to call client.SubmitTransaction()")
+		return nil, 0, fmt.Errorf("fail to call client.SubmitTransaction(): %w", err)
 	}
 
 	var sentTxJSON SentTx
 	if err = json.Unmarshal([]byte(res.ResultJSONString), &sentTxJSON); err != nil {
-		return nil, 0, errors.Wrap(err, "fail to call json.Unmarshal(sentTxJSON)")
+		return nil, 0, fmt.Errorf("fail to call json.Unmarshal(sentTxJSON): %w", err)
 	}
 
 	// FIXME:
@@ -211,7 +212,7 @@ func (r *Ripple) WaitValidation(targetledgerVarsion uint64) (uint64, error) {
 	req := &emptypb.Empty{}
 	resStream, err := r.API.txClient.WaitValidation(ctx, req)
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call client.WaitValidation()")
+		return 0, fmt.Errorf("fail to call client.WaitValidation(): %w", err)
 	}
 
 	defer func() {
@@ -252,7 +253,7 @@ func (r *Ripple) WaitValidation(targetledgerVarsion uint64) (uint64, error) {
 				r.logger.Warn("fail to call resStream.Recv()", "error", err)
 			}
 			// break
-			return 0, errors.Wrap(err, "fail to call resStream.Recv()")
+			return 0, fmt.Errorf("fail to call resStream.Recv(): %w", err)
 		}
 		// success
 		r.logger.Info("response in WaitValidation()", "LedgerVersion", res.LedgerVersion)
@@ -273,11 +274,11 @@ func (r *Ripple) GetTransaction(txID string, targetLedgerVersion uint64) (*TxInf
 	}
 	res, err := r.API.txClient.GetTransaction(ctx, req)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call client.GetTransaction()")
+		return nil, fmt.Errorf("fail to call client.GetTransaction(): %w", err)
 	}
 
 	if res.ResultJSONString == "" {
-		return nil, errors.Errorf("fail to get transaction info by %s", txID)
+		return nil, fmt.Errorf("fail to get transaction info by %s", txID)
 	}
 
 	r.logger.Debug("response of getTransaction",
@@ -286,7 +287,7 @@ func (r *Ripple) GetTransaction(txID string, targetLedgerVersion uint64) (*TxInf
 
 	var txInfo TxInfo
 	if err = json.Unmarshal([]byte(res.ResultJSONString), &txInfo); err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Unmarshal(txInfo)")
+		return nil, fmt.Errorf("fail to call json.Unmarshal(txInfo): %w", err)
 	}
 	// TODO: check
 	// txInfo.Outcome.Result : tesSUCCESS

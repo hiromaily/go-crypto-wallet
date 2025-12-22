@@ -3,9 +3,9 @@ package coldrepo
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/volatiletech/null/v8"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
@@ -45,7 +45,7 @@ func (r *AccountKeyRepositorySqlc) GetMaxIndex(accountType account.AccountType) 
 		Account: sqlcgen.AccountKeyAccount(accountType.String()),
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call GetMaxAccountKeyIndex()")
+		return 0, fmt.Errorf("failed to call GetMaxAccountKeyIndex(): %w", err)
 	}
 
 	// Type assert interface{} to int64
@@ -65,7 +65,7 @@ func (r *AccountKeyRepositorySqlc) GetOneMaxID(accountType account.AccountType) 
 		Account: sqlcgen.AccountKeyAccount(accountType.String()),
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetOneAccountKeyByMaxID()")
+		return nil, fmt.Errorf("failed to call GetOneAccountKeyByMaxID(): %w", err)
 	}
 
 	return convertSqlcAccountKeyToModel(&accountKey), nil
@@ -83,7 +83,7 @@ func (r *AccountKeyRepositorySqlc) GetAllAddrStatus(
 		AddrStatus: addrStatus.Int8(),
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetAccountKeysByAddrStatus()")
+		return nil, fmt.Errorf("failed to call GetAccountKeysByAddrStatus(): %w", err)
 	}
 
 	result := make([]*models.AccountKey, len(accountKeys))
@@ -109,7 +109,7 @@ func (r *AccountKeyRepositorySqlc) GetAllMultiAddr(
 		},
 	)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetAccountKeysByMultisigAddresses()")
+		return nil, fmt.Errorf("failed to call GetAccountKeysByMultisigAddresses(): %w", err)
 	}
 
 	result := make([]*models.AccountKey, len(accountKeys))
@@ -139,7 +139,7 @@ func (r *AccountKeyRepositorySqlc) InsertBulk(items []*models.AccountKey) error 
 			AddrStatus:         item.AddrStatus,
 		})
 		if err != nil {
-			return errors.Wrap(err, "failed to call InsertAccountKey()")
+			return fmt.Errorf("failed to call InsertAccountKey(): %w", err)
 		}
 	}
 
@@ -158,12 +158,12 @@ func (r *AccountKeyRepositorySqlc) UpdateAddr(accountType account.AccountType, a
 		P2shSegwitAddress: keyAddress,
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call UpdateAccountKeyAddress()")
+		return 0, fmt.Errorf("failed to call UpdateAccountKeyAddress(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to get RowsAffected()")
+		return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 	}
 
 	return rowsAffected, nil
@@ -186,12 +186,12 @@ func (r *AccountKeyRepositorySqlc) UpdateAddrStatus(
 			WalletImportFormat: wif,
 		})
 		if err != nil {
-			return 0, errors.Wrap(err, "failed to call UpdateAccountKeyAddrStatus()")
+			return 0, fmt.Errorf("failed to call UpdateAccountKeyAddrStatus(): %w", err)
 		}
 
 		affected, err := result.RowsAffected()
 		if err != nil {
-			return 0, errors.Wrap(err, "failed to get RowsAffected()")
+			return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 		}
 		totalAffected += affected
 	}
@@ -215,12 +215,12 @@ func (r *AccountKeyRepositorySqlc) UpdateMultisigAddr(
 		FullPublicKey:   item.FullPublicKey,
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call UpdateAccountKeyMultisigAddr()")
+		return 0, fmt.Errorf("failed to call UpdateAccountKeyMultisigAddr(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to get RowsAffected()")
+		return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 	}
 
 	return rowsAffected, nil
@@ -235,7 +235,7 @@ func (r *AccountKeyRepositorySqlc) UpdateMultisigAddrs(
 	// transaction
 	dtx, err := r.dbConn.Begin()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call db.Begin()")
+		return 0, fmt.Errorf("failed to call db.Begin(): %w", err)
 	}
 	defer func() {
 		if err != nil {
@@ -259,12 +259,12 @@ func (r *AccountKeyRepositorySqlc) UpdateMultisigAddrs(
 			FullPublicKey:   item.FullPublicKey,
 		})
 		if updateErr != nil {
-			return 0, errors.Wrap(updateErr, "failed to call UpdateAccountKeyMultisigAddr()")
+			return 0, fmt.Errorf("failed to call UpdateAccountKeyMultisigAddr(): %w", updateErr)
 		}
 
 		affected, affectedErr := result.RowsAffected()
 		if affectedErr != nil {
-			return 0, errors.Wrap(affectedErr, "failed to get RowsAffected()")
+			return 0, fmt.Errorf("failed to get RowsAffected(): %w", affectedErr)
 		}
 		totalAffected += affected
 	}

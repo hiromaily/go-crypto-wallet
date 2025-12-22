@@ -7,7 +7,6 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/ericlagergren/decimal"
-	"github.com/pkg/errors"
 )
 
 // 0.00000001 BTC=1 Satoshi
@@ -51,7 +50,7 @@ func (*Bitcoin) FloatToDecimal(f float64) *decimal.Big {
 func (*Bitcoin) FloatToAmount(f float64) (btcutil.Amount, error) {
 	amt, err := btcutil.NewAmount(f)
 	if err != nil {
-		return 0, errors.Wrapf(err, "fail to call btcutil.NewAmount(%f)", f)
+		return 0, fmt.Errorf("fail to call btcutil.NewAmount(%f): %w", f, err)
 	}
 
 	return amt, nil
@@ -61,12 +60,12 @@ func (*Bitcoin) FloatToAmount(f float64) (btcutil.Amount, error) {
 func (*Bitcoin) StrToAmount(s string) (btcutil.Amount, error) {
 	f, err := strconv.ParseFloat(s, 64)
 	if err != nil {
-		return 0, errors.Wrapf(err, "fail to call strconv.ParseFloat(%s)", s)
+		return 0, fmt.Errorf("fail to call strconv.ParseFloat(%s): %w", s, err)
 	}
 
 	amt, err := btcutil.NewAmount(f)
 	if err != nil {
-		return 0, errors.Wrapf(err, "fail to call btcutil.NewAmount(%f)", f)
+		return 0, fmt.Errorf("fail to call btcutil.NewAmount(%f): %w", f, err)
 	}
 
 	return amt, nil
@@ -76,12 +75,12 @@ func (*Bitcoin) StrToAmount(s string) (btcutil.Amount, error) {
 func (*Bitcoin) StrSatoshiToAmount(s string) (btcutil.Amount, error) {
 	f, err := strconv.ParseFloat(s, 64)
 	if err != nil {
-		return 0, errors.Wrapf(err, "fail to call strconv.ParseFloat(%s)", s)
+		return 0, fmt.Errorf("fail to call strconv.ParseFloat(%s): %w", s, err)
 	}
 
 	val, err := btcutil.NewAmount(f / float64(100000000))
 	if err != nil {
-		return 0, errors.Wrapf(err, "fail to call btcutil.NewAmount(%f)", f)
+		return 0, fmt.Errorf("fail to call btcutil.NewAmount(%f): %w", f, err)
 	}
 
 	return val, nil

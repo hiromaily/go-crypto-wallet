@@ -1,7 +1,7 @@
 package bch
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
 )
 
 // GetAccount returns account name of address
@@ -10,7 +10,7 @@ func (b *BitcoinCash) GetAccount(addr string) (string, error) {
 	// actually `getaddressinfo` is called
 	res, err := b.GetAddressInfo(addr)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call btc.GetAddressInfo()in bch")
+		return "", fmt.Errorf("fail to call btc.GetAddressInfo()in bch: %w", err)
 	}
 	if len(res.Labels) == 0 {
 		return "", nil

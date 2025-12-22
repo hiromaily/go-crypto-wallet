@@ -1,8 +1,9 @@
 package signsrv
 
 import (
+	"fmt"
+
 	"github.com/btcsuite/btcd/btcutil"
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
@@ -51,7 +52,7 @@ func (p *PrivKey) Import() error {
 	// 1. retrieve records(private key) from account_key table
 	authKeyItem, err := p.authKeyRepo.GetOne(p.authType)
 	if err != nil {
-		return errors.Wrap(err, "fail to call authKeyRepo.GetOne()")
+		return fmt.Errorf("fail to call authKeyRepo.GetOne(): %w", err)
 	}
 	if authKeyItem.AddrStatus != address.AddrStatusHDKeyGenerated.Int8() {
 		p.logger.Info("no unimported private key")
@@ -67,9 +68,9 @@ func (p *PrivKey) Import() error {
 	// decode wif
 	wif, err := btcutil.DecodeWIF(authKeyItem.WalletImportFormat)
 	if err != nil {
-		return errors.Wrapf(
-			err, "fail to call btcutil.DecodeWIF(%s). WIF is invalid format",
-			authKeyItem.WalletImportFormat)
+		return fmt.Errorf(
+			"fail to call btcutil.DecodeWIF(%s). WIF is invalid format: %w",
+			authKeyItem.WalletImportFormat, err)
 	}
 
 	// import private key by wif without rescan
@@ -81,7 +82,7 @@ func (p *PrivKey) Import() error {
 			"fail to call btc.ImportPrivKeyWithoutReScan()",
 			"wif", authKeyItem.WalletImportFormat,
 			"error", err)
-		return errors.Wrapf(err, "fail to call btc.ImportPrivKeyWithoutReScan()")
+		return fmt.Errorf("fail to call btc.ImportPrivKeyWithoutReScan(): %w", err)
 	}
 
 	// update DB

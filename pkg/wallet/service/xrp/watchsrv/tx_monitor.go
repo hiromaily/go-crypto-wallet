@@ -2,8 +2,7 @@ package watchsrv
 
 import (
 	"database/sql"
-
-	"github.com/pkg/errors"
+	"fmt"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -59,7 +58,7 @@ func (t *TxMonitor) MonitorBalance(_ uint64) error {
 	for _, acnt := range targetAccounts {
 		addrs, err := t.addrRepo.GetAllAddress(acnt)
 		if err != nil {
-			return errors.Wrap(err, "fail to call addrRepo.GetAllAddress()")
+			return fmt.Errorf("fail to call addrRepo.GetAllAddress(): %w", err)
 		}
 		total := t.xrp.GetTotalBalance(addrs)
 		t.logger.Info("total balance",

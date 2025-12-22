@@ -1,10 +1,10 @@
 package watchsrv
 
 import (
+	"errors"
+	"fmt"
 	"math/big"
 	"strconv"
-
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -42,7 +42,7 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	// get sender address
 	senderAddr, err := t.addrRepo.GetOneUnAllocated(sender)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
+		return "", "", fmt.Errorf("fail to call addrRepo.GetAll(account.AccountTypeClient): %w", err)
 	}
 	err = t.validateAmount(senderAddr, totalAmount)
 	if err != nil {
@@ -68,7 +68,7 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	if len(serializedTxs) != 0 {
 		generatedFileName, err = t.generateHexFile(targetAction, sender, txID, serializedTxs)
 		if err != nil {
-			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
+			return "", "", fmt.Errorf("fail to call generateHexFile(): %w", err)
 		}
 	}
 
@@ -88,7 +88,7 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, *big.Int, []int64, error)
 	// get payment_request
 	paymentRequests, err := t.payReqRepo.GetAll()
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "fail to call repo.GetPaymentRequestAll()")
+		return nil, nil, nil, fmt.Errorf("fail to call repo.GetPaymentRequestAll(): %w", err)
 	}
 	if len(paymentRequests) == 0 {
 		t.logger.Debug("no data in payment_request")
@@ -121,7 +121,7 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, *big.Int, []int64, error)
 				"address", userPayments[idx].receiverAddr,
 				"error", err,
 			)
-			return nil, nil, nil, errors.Wrap(err, "fail to call eth.ValidationAddr()")
+			return nil, nil, nil, fmt.Errorf("fail to call eth.ValidationAddr(): %w", err)
 		}
 
 		// amount
@@ -136,7 +136,7 @@ func (t *TxCreate) validateAmount(senderAddr *models.Address, totalAmount *big.I
 	// check sender's total balance
 	senderBalance, err := t.eth.GetBalance(senderAddr.WalletAddress, eth.QuantityTagPending)
 	if err != nil {
-		return errors.Wrap(err, "fail to call eth.GetBalance()")
+		return fmt.Errorf("fail to call eth.GetBalance(): %w", err)
 	}
 
 	if senderBalance.Uint64() <= totalAmount.Uint64() {
@@ -156,9 +156,9 @@ func (t *TxCreate) createPaymentRawTransactions(
 		rawTx, txDetailItem, err := t.eth.CreateRawTransaction(
 			senderAddr.WalletAddress, userPayment.receiverAddr, userPayment.amount.Uint64(), additionalNonce)
 		if err != nil {
-			return nil, nil, errors.Wrapf(
-				err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s",
-				senderAddr.WalletAddress)
+			return nil, nil, fmt.Errorf(
+				"fail to call addrRepo.CreateRawTransaction(), sender address: %s: %w",
+				senderAddr.WalletAddress, err)
 		}
 		additionalNonce++
 
@@ -168,7 +168,7 @@ func (t *TxCreate) createPaymentRawTransactions(
 
 		serializedTx, err := serial.EncodeToString(rawTx)
 		if err != nil {
-			return nil, nil, errors.Wrap(err, "fail to call serial.EncodeToString(rawTx)")
+			return nil, nil, fmt.Errorf("fail to call serial.EncodeToString(rawTx): %w", err)
 		}
 		serializedTxs = append(serializedTxs, serializedTx)
 

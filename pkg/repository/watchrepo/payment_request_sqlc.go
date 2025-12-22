@@ -3,9 +3,9 @@ package watchrepo
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/ericlagergren/decimal"
-	"github.com/pkg/errors"
 	"github.com/volatiletech/null/v8"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
@@ -38,7 +38,7 @@ func (r *PaymentRequestRepositorySqlc) GetAll() ([]*models.PaymentRequest, error
 
 	requests, err := r.queries.GetAllPaymentRequests(ctx, sqlcgen.PaymentRequestCoin(r.coinTypeCode.String()))
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetAllPaymentRequests()")
+		return nil, fmt.Errorf("failed to call GetAllPaymentRequests(): %w", err)
 	}
 
 	// Convert sqlc types to sqlboiler types
@@ -59,7 +59,7 @@ func (r *PaymentRequestRepositorySqlc) GetAllByPaymentID(paymentID int64) ([]*mo
 		PaymentID: sql.NullInt64{Int64: paymentID, Valid: true},
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetPaymentRequestsByPaymentID()")
+		return nil, fmt.Errorf("failed to call GetPaymentRequestsByPaymentID(): %w", err)
 	}
 
 	// Convert sqlc types to sqlboiler types
@@ -87,7 +87,7 @@ func (r *PaymentRequestRepositorySqlc) InsertBulk(items []*models.PaymentRequest
 			UpdatedAt:       convertNullTimeToSQLNullTime(item.UpdatedAt),
 		})
 		if err != nil {
-			return errors.Wrap(err, "failed to call InsertPaymentRequest()")
+			return fmt.Errorf("failed to call InsertPaymentRequest(): %w", err)
 		}
 	}
 
@@ -107,12 +107,12 @@ func (r *PaymentRequestRepositorySqlc) UpdatePaymentID(paymentID int64, ids []in
 			ID:        id,
 		})
 		if err != nil {
-			return 0, errors.Wrap(err, "failed to call UpdatePaymentRequestPaymentID()")
+			return 0, fmt.Errorf("failed to call UpdatePaymentRequestPaymentID(): %w", err)
 		}
 
 		affected, err := result.RowsAffected()
 		if err != nil {
-			return 0, errors.Wrap(err, "failed to get RowsAffected()")
+			return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 		}
 		totalAffected += affected
 	}
@@ -130,12 +130,12 @@ func (r *PaymentRequestRepositorySqlc) UpdateIsDone(paymentID int64) (int64, err
 		PaymentID: sql.NullInt64{Int64: paymentID, Valid: true},
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call UpdatePaymentRequestIsDone()")
+		return 0, fmt.Errorf("failed to call UpdatePaymentRequestIsDone(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to get RowsAffected()")
+		return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 	}
 
 	return rowsAffected, nil
@@ -147,12 +147,12 @@ func (r *PaymentRequestRepositorySqlc) DeleteAll() (int64, error) {
 
 	result, err := r.queries.DeleteAllPaymentRequests(ctx, sqlcgen.PaymentRequestCoin(r.coinTypeCode.String()))
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call DeleteAllPaymentRequests()")
+		return 0, fmt.Errorf("failed to call DeleteAllPaymentRequests(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to get RowsAffected()")
+		return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 	}
 
 	return rowsAffected, nil

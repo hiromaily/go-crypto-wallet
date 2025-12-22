@@ -2,9 +2,8 @@ package signsrv
 
 import (
 	"bufio"
+	"fmt"
 	"os"
-
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
@@ -50,7 +49,7 @@ func (f *FullPubkeyExport) ExportFullPubkey() (string, error) {
 	// get account key
 	authKeyTable, err := f.authKeyRepo.GetOne(f.authType)
 	if err != nil {
-		return "", errors.Wrapf(err, "fail to call authKeyRepo.GetOne(%s)", f.authType.String())
+		return "", fmt.Errorf("fail to call authKeyRepo.GetOne(%s): %w", f.authType.String(), err)
 	}
 
 	// export csv file
@@ -71,7 +70,7 @@ func (f *FullPubkeyExport) exportAccountKey(
 
 	file, err := os.Create(fileName) //nolint:gosec
 	if err != nil {
-		return "", errors.Wrapf(err, "fail to call os.Create(%s)", fileName)
+		return "", fmt.Errorf("fail to call os.Create(%s): %w", fileName, err)
 	}
 
 	defer file.Close()
@@ -81,10 +80,10 @@ func (f *FullPubkeyExport) exportAccountKey(
 	// output: coinType, authType, fullPubkey
 	_, err = writer.WriteString(fullpubkey.CreateLine(f.coinTypeCode, authType, authKeyTable.FullPublicKey))
 	if err != nil {
-		return "", errors.Wrapf(err, "fail to call writer.WriteString(%s)", fileName)
+		return "", fmt.Errorf("fail to call writer.WriteString(%s): %w", fileName, err)
 	}
 	if err = writer.Flush(); err != nil {
-		return "", errors.Wrapf(err, "fail to call writer.Flush(%s)", fileName)
+		return "", fmt.Errorf("fail to call writer.Flush(%s): %w", fileName, err)
 	}
 	return fileName, nil
 }

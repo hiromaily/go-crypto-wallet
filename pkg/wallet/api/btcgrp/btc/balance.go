@@ -2,9 +2,9 @@ package btc
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/btcsuite/btcd/btcutil"
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 )
@@ -16,22 +16,22 @@ import (
 func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
 	input1, err := json.Marshal("*")
 	if err != nil {
-		return 0, errors.Wrapf(err, "fail to call json.Marchal(dummy)")
+		return 0, fmt.Errorf("fail to call json.Marchal(dummy): %w", err)
 	}
 	input2, err := json.Marshal(b.confirmationBlock)
 	if err != nil {
-		return 0, errors.Wrapf(err, "fail to call json.Marchal(%d)", b.confirmationBlock)
+		return 0, fmt.Errorf("fail to call json.Marchal(%d): %w", b.confirmationBlock, err)
 	}
 
 	rawResult, err := b.Client.RawRequest("getbalance", []json.RawMessage{input1, input2})
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call json.RawRequest(getbalance)")
+		return 0, fmt.Errorf("fail to call json.RawRequest(getbalance): %w", err)
 	}
 
 	var amount float64
 	err = json.Unmarshal(rawResult, &amount)
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to json.Unmarshal(rawResult)")
+		return 0, fmt.Errorf("fail to json.Unmarshal(rawResult): %w", err)
 	}
 
 	return b.FloatToAmount(amount)
@@ -51,7 +51,7 @@ func (b *Bitcoin) GetBalanceByListUnspent(confirmationNum uint64) (btcutil.Amoun
 func (b *Bitcoin) GetBalanceByAccount(accountType account.AccountType, confirmationNum uint64) (btcutil.Amount, error) {
 	unspentList, err := b.ListUnspentByAccount(accountType, confirmationNum)
 	if err != nil {
-		return 0, errors.Wrapf(err, "fail to call btc.ListUnspentByAccount(%s)", accountType.String())
+		return 0, fmt.Errorf("fail to call btc.ListUnspentByAccount(%s): %w", accountType.String(), err)
 	}
 	var totalAmout float64
 	for _, tx := range unspentList {

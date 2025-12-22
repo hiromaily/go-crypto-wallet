@@ -1,9 +1,8 @@
 package keygensrv
 
 import (
+	"errors"
 	"fmt"
-
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
@@ -49,7 +48,7 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 	// get hex tx from file
 	data, err := s.txFileRepo.ReadFileSlice(filePath)
 	if err != nil {
-		return "", false, "", errors.Wrap(err, "fail to call txFileRepo.ReadFileSlice()")
+		return "", false, "", fmt.Errorf("fail to call txFileRepo.ReadFileSlice(): %w", err)
 	}
 	if len(data) <= 1 {
 		return "", false, "", errors.New("file is invalid")
@@ -60,13 +59,13 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 	for _, serializedTx := range serializedTxs {
 		var rawTx ethtx.RawTx
 		if err = serial.DecodeFromString(serializedTx, &rawTx); err != nil {
-			return "", false, "", errors.Wrap(err, "fail to call serial.DecodeFromString()")
+			return "", false, "", fmt.Errorf("fail to call serial.DecodeFromString(): %w", err)
 		}
 		// sign
 		var signedRawTx *ethtx.RawTx
 		signedRawTx, err = s.eth.SignOnRawTransaction(&rawTx, eth.Password)
 		if err != nil {
-			return "", false, "", errors.Wrap(err, "fail to call eth.SignOnRawTransaction()")
+			return "", false, "", fmt.Errorf("fail to call eth.SignOnRawTransaction(): %w", err)
 		}
 		txHexs = append(txHexs, fmt.Sprintf("%s,%s", rawTx.UUID, signedRawTx.TxHex))
 	}
@@ -75,7 +74,7 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 	path := s.txFileRepo.CreateFilePath(actionType, tx.TxTypeSigned, txID, signedCount+1)
 	generatedFileName, err := s.txFileRepo.WriteFileSlice(path, txHexs)
 	if err != nil {
-		return "", false, "", errors.Wrap(err, "fail to call txFileRepo.WriteFileSlice()")
+		return "", false, "", fmt.Errorf("fail to call txFileRepo.WriteFileSlice(): %w", err)
 	}
 
 	// return hexTx, isSigned, generatedFileName, nil

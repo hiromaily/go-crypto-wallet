@@ -2,10 +2,10 @@ package ws
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/coder/websocket"
 	"github.com/coder/websocket/wsjson"
-	"github.com/pkg/errors"
 )
 
 // WS websocket object
@@ -17,7 +17,7 @@ type WS struct {
 func New(ctx context.Context, url string) (*WS, error) {
 	conn, _, err := websocket.Dial(ctx, url, nil)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to call websocket.Dial() %s", url)
+		return nil, fmt.Errorf("fail to call websocket.Dial() %s: %w", url, err)
 	}
 
 	return &WS{
@@ -28,11 +28,11 @@ func New(ctx context.Context, url string) (*WS, error) {
 // Call calls request
 func (w *WS) Call(ctx context.Context, req, res any) error {
 	if err := wsjson.Write(ctx, w.conn, req); err != nil {
-		return errors.Wrap(err, "fail to call wsjson.Write()")
+		return fmt.Errorf("fail to call wsjson.Write(): %w", err)
 	}
 
 	if err := wsjson.Read(ctx, w.conn, res); err != nil {
-		return errors.Wrap(err, "fail to call wsjson.Read()")
+		return fmt.Errorf("fail to call wsjson.Read(): %w", err)
 	}
 
 	return nil

@@ -2,8 +2,7 @@ package btc
 
 import (
 	"encoding/json"
-
-	"github.com/pkg/errors"
+	"fmt"
 )
 
 // GetNetworkInfoResult is response type of PRC `getnetworkinfo`
@@ -93,13 +92,13 @@ type LocalAddress struct {
 func (b *Bitcoin) GetNetworkInfo() (*GetNetworkInfoResult, error) {
 	rawResult, err := b.Client.RawRequest("getnetworkinfo", []json.RawMessage{})
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.RawRequest(getnetworkinfo)")
+		return nil, fmt.Errorf("fail to call json.RawRequest(getnetworkinfo): %w", err)
 	}
 
 	networkInfoResult := GetNetworkInfoResult{}
 	err = json.Unmarshal(rawResult, &networkInfoResult)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Unmarshal()")
+		return nil, fmt.Errorf("fail to call json.Unmarshal(): %w", err)
 	}
 
 	return &networkInfoResult, nil
@@ -109,13 +108,13 @@ func (b *Bitcoin) GetNetworkInfo() (*GetNetworkInfoResult, error) {
 func (b *Bitcoin) GetBlockchainInfo() (*GetBlockchainInfoResult, error) {
 	rawResult, err := b.Client.RawRequest("getblockchaininfo", []json.RawMessage{})
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.RawRequest(getblockchaininfo)")
+		return nil, fmt.Errorf("fail to call json.RawRequest(getblockchaininfo): %w", err)
 	}
 
 	blockchainInfoResult := GetBlockchainInfoResult{}
 	err = json.Unmarshal(rawResult, &blockchainInfoResult)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Unmarshal()")
+		return nil, fmt.Errorf("fail to call json.Unmarshal(): %w", err)
 	}
 
 	return &blockchainInfoResult, nil

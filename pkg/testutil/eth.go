@@ -1,9 +1,8 @@
 package testutil
 
 import (
+	"fmt"
 	"os"
-
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -25,7 +24,7 @@ func GetETH() (ethgrp.Ethereumer, error) {
 	confPath := projPath + "/data/config/eth_watch.toml"
 	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.ETH)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to create config")
+		return nil, fmt.Errorf("fail to create config: %w", err)
 	}
 	// TODO: if config should be overridden, here
 	conf.CoinTypeCode = coin.ETH
@@ -35,11 +34,11 @@ func GetETH() (ethgrp.Ethereumer, error) {
 	// client
 	client, err := ethgrp.NewRPCClient(&conf.Ethereum)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to create ethereum rpc client")
+		return nil, fmt.Errorf("fail to create ethereum rpc client: %w", err)
 	}
 	et, err = ethgrp.NewEthereum(client, &conf.Ethereum, log, conf.CoinTypeCode)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to create eth instance")
+		return nil, fmt.Errorf("fail to create eth instance: %w", err)
 	}
 	return et, nil
 }

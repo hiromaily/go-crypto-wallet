@@ -1,7 +1,8 @@
 package coldsrv
 
 import (
-	"github.com/pkg/errors"
+	"errors"
+	"fmt"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
@@ -60,13 +61,13 @@ func (h *HDWallet) Generate(
 	// generate hd wallet key
 	walletKeys, err := h.generateHDKey(accountType, seed, uint32(idxFrom), count)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call key.generateAccountKeyData()")
+		return nil, fmt.Errorf("fail to call key.generateAccountKeyData(): %w", err)
 	}
 
 	// insert key information to account_key_table / auth_account_key_table
 	err = h.repo.Insert(walletKeys, idxFrom, h.coinTypeCode, accountType)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call repo.Insert()")
+		return nil, fmt.Errorf("fail to call repo.Insert(): %w", err)
 	}
 
 	return walletKeys, err
@@ -81,7 +82,7 @@ func (h *HDWallet) generateHDKey(
 	// generate key
 	walletKeys, err := h.keygen.CreateKey(seed, accountType, idxFrom, count)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call keyData.CreateKey()")
+		return nil, fmt.Errorf("fail to call keyData.CreateKey(): %w", err)
 	}
 	return walletKeys, nil
 }

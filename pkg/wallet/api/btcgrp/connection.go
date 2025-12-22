@@ -1,8 +1,9 @@
 package btcgrp
 
 import (
+	"fmt"
+
 	"github.com/btcsuite/btcd/rpcclient"
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -26,7 +27,7 @@ func NewRPCClient(conf *config.Bitcoin) (*rpcclient.Client, error) {
 	// not supported in HTTP POST mode.
 	client, err := rpcclient.New(connCfg, nil)
 	if err != nil {
-		return nil, errors.Errorf("rpcclient.New() error: %s", err)
+		return nil, fmt.Errorf("rpcclient.New() error: %s", err)
 	}
 	return client, err
 }
@@ -39,7 +40,7 @@ func NewBitcoin(
 	case coin.BTC:
 		bit, err := btc.NewBitcoin(client, coinTypeCode, conf, logger)
 		if err != nil {
-			return nil, errors.Wrap(err, "fail to call btc.NewBitcoin()")
+			return nil, fmt.Errorf("fail to call btc.NewBitcoin(): %w", err)
 		}
 
 		return bit, err
@@ -47,13 +48,13 @@ func NewBitcoin(
 		// BCH
 		bitc, err := bch.NewBitcoinCash(client, coinTypeCode, conf, logger)
 		if err != nil {
-			return nil, errors.Wrap(err, "fail to call bch.NewBitcoinCash()")
+			return nil, fmt.Errorf("fail to call bch.NewBitcoinCash(): %w", err)
 		}
 
 		return bitc, err
 	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
-		return nil, errors.Errorf("coinType %s is not defined", coinTypeCode.String())
+		return nil, fmt.Errorf("coinType %s is not defined", coinTypeCode.String())
 	default:
-		return nil, errors.Errorf("coinType %s is not defined", coinTypeCode.String())
+		return nil, fmt.Errorf("coinType %s is not defined", coinTypeCode.String())
 	}
 }

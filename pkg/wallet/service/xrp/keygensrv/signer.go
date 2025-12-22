@@ -2,10 +2,9 @@ package keygensrv
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
-
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -56,7 +55,7 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 	// get hex tx from file
 	data, err := s.txFileRepo.ReadFileSlice(filePath)
 	if err != nil {
-		return "", false, "", errors.Wrap(err, "fail to call txFileRepo.ReadFileSlice()")
+		return "", false, "", fmt.Errorf("fail to call txFileRepo.ReadFileSlice(): %w", err)
 	}
 	if len(data) > 1 {
 		senderAccount = account.AccountType(data[0])
@@ -77,14 +76,14 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 
 		var txInput xrp.TxInput
 		if err = json.Unmarshal([]byte(txJSON), &txInput); err != nil {
-			return "", false, "", errors.Wrap(err, "fail to call json.Unmarshal(txJSON)")
+			return "", false, "", fmt.Errorf("fail to call json.Unmarshal(txJSON): %w", err)
 		}
 		// TODO: get secret from database by txInput.Account
 		// master_seed from xrp_account_key table
 		var secret string
 		secret, err = s.xrpAccountKeyRepo.GetSecret(senderAccount, txInput.Account)
 		if err != nil {
-			return "", false, "", errors.Wrap(err, "fail to call xrpAccountKeyRepo.GetSecret()")
+			return "", false, "", fmt.Errorf("fail to call xrpAccountKeyRepo.GetSecret(): %w", err)
 		}
 
 		// sign
@@ -92,7 +91,7 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 		var txBlob string
 		signedTxID, txBlob, err = s.xrp.SignTransaction(&txInput, secret)
 		if err != nil {
-			return "", false, "", errors.Wrap(err, "fail to call xrp.SignTransaction()")
+			return "", false, "", fmt.Errorf("fail to call xrp.SignTransaction(): %w", err)
 		}
 		s.logger.Debug("signed_tx",
 			"uuid", uuid, "signed_tx_id", signedTxID, "signed_tx_blob", txBlob)
@@ -103,7 +102,7 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 	path := s.txFileRepo.CreateFilePath(actionType, tx.TxTypeSigned, txID, signedCount+1)
 	generatedFileName, err := s.txFileRepo.WriteFileSlice(path, txHexs)
 	if err != nil {
-		return "", false, "", errors.Wrap(err, "fail to call txFileRepo.WriteFileSlice()")
+		return "", false, "", fmt.Errorf("fail to call txFileRepo.WriteFileSlice(): %w", err)
 	}
 
 	// return hexTx, isSigned, generatedFileName, nil

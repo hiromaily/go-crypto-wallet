@@ -1,10 +1,12 @@
 package btc
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/btcsuite/btcd/wire"
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -45,49 +47,49 @@ func NewBitcoin(
 	// check network consistency between config and bitcoind
 	blockInfo, err := bit.GetBlockchainInfo()
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call bit.GetBlockchainInfo()")
+		return nil, fmt.Errorf("fail to call bit.GetBlockchainInfo(): %w", err)
 	}
 
 	switch NetworkTypeBTC(conf.NetworkType) {
 	case NetworkTypeMainNet:
 		bit.chainConf = &chaincfg.MainNetParams
 		if blockInfo.Chain != BlockchainInfoChainMain {
-			return nil, errors.Errorf(
+			return nil, fmt.Errorf(
 				"connecting %s on bitcoind, but config file defines as %s",
 				blockInfo.Chain, NetworkTypeMainNet)
 		}
 	case NetworkTypeTestNet3:
 		bit.chainConf = &chaincfg.TestNet3Params
 		if blockInfo.Chain != BlockchainInfoChainTest {
-			return nil, errors.Errorf(
+			return nil, fmt.Errorf(
 				"connecting %s on bitcoind, but config file defines as %s",
 				blockInfo.Chain, NetworkTypeTestNet3)
 		}
 	case NetworkTypeRegTestNet:
 		bit.chainConf = &chaincfg.RegressionNetParams
 		if blockInfo.Chain != BlockchainInfoChainRegtest {
-			return nil, errors.Errorf(
+			return nil, fmt.Errorf(
 				"connecting %s on bitcoind, but config file defines as %s",
 				blockInfo.Chain, NetworkTypeRegTestNet)
 		}
 	case NetworkTypeSigNet:
 		bit.chainConf = &chaincfg.SigNetParams
 		if blockInfo.Chain != BlockchainInfoChainSignet {
-			return nil, errors.Errorf(
+			return nil, fmt.Errorf(
 				"connecting %s on bitcoind, but config file defines as %s",
 				blockInfo.Chain, NetworkTypeSigNet)
 		}
 	default:
-		return nil, errors.Errorf("bitcoin network type is invalid in config")
+		return nil, errors.New("bitcoin network type is invalid in config")
 	}
 
 	// set bitcoin version
 	netInfo, err := bit.GetNetworkInfo()
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call bit.GetNetworkInfo()")
+		return nil, fmt.Errorf("fail to call bit.GetNetworkInfo(): %w", err)
 	}
 	if RequiredVersion > netInfo.Version {
-		return nil, errors.Errorf(
+		return nil, fmt.Errorf(
 			"bitcoin core version should be %d +, but version %d is detected",
 			RequiredVersion, netInfo.Version)
 	}
