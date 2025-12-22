@@ -143,7 +143,9 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, []int64, error) {
 		if err != nil {
 			// fatal error
 			t.logger.Error("unexpected error occurred converting receiverAddr from string type  to address type")
-			return nil, nil, errors.New("unexpected error occurred converting receiverAddr from string type to address type")
+			return nil, nil, errors.New(
+				"unexpected error occurred converting receiverAddr from string type to address type",
+			)
 		}
 
 		// amount
