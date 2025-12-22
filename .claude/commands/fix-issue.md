@@ -15,8 +15,12 @@
 2. **Implement**: Provide code fixes in artifacts (follow our standards)
 3. **Test**: Create test cases and verify solution
 4. **Document**: Update docs and changelog
-5. **Commit**: Suggest commit message
-6. **PR Draft**: Write description with "Closes #{issue_number}"
+5. **Verify**: Before committing, if Go files were changed, run the following commands and ensure no errors
+   occur and no files are modified:
+   - `make fix-lint`
+   - `make check-build`
+6. **Commit**: Suggest commit message
+7. **PR Draft**: Write description with "Closes #{issue_number}"
 
 **Safety Rules:**
 
