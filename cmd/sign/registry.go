@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/btcsuite/btcd/rpcclient"
-	"github.com/volatiletech/sqlboiler/v4/boil"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
@@ -218,9 +217,6 @@ func (r *registry) newMySQLClient() *sql.DB {
 			panic(err)
 		}
 		r.mysqlClient = dbConn
-	}
-	if r.conf.MySQL.Debug {
-		boil.DebugMode = true
 	}
 	return r.mysqlClient
 }

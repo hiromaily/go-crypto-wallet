@@ -9,13 +9,8 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 
-// sqlboiler
-// https://github.com/volatiletech/sqlboiler
-
 // NewMySQL connect to MySQL server
-// TODO:
-//   - retry functionality and retry count should be configured in config file
-//   - change sqlx.DB to basic one because it would be replaced sqlboiler
+// TODO: retry functionality and retry count should be configured in config file
 func NewMySQL(conf *config.MySQL) (*sql.DB, error) {
 	db, err := sql.Open("mysql",
 		fmt.Sprintf(

@@ -7,7 +7,6 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/rpcclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
-	"github.com/volatiletech/sqlboiler/v4/boil"
 	"google.golang.org/grpc"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
@@ -428,10 +427,6 @@ func (r *registry) newMySQLClient() *sql.DB {
 		}
 		r.mysqlClient = dbConn
 	}
-	if r.conf.MySQL.Debug {
-		boil.DebugMode = true
-	}
-
 	return r.mysqlClient
 }
 
