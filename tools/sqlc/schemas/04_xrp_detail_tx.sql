@@ -1,0 +1,30 @@
+-- Watch database: XRP transaction details
+
+CREATE TABLE xrp_detail_tx (
+  id                       BIGINT NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  tx_id                    BIGINT NOT NULL COMMENT 'xrp_tx table ID',
+  uuid                     VARCHAR(36) NOT NULL COMMENT 'UUID',
+  current_tx_type          TINYINT NOT NULL DEFAULT 1 COMMENT 'current transaction type',
+  sender_account           VARCHAR(255) NOT NULL COMMENT 'sender account',
+  sender_address           VARCHAR(255) NOT NULL COMMENT 'sender address',
+  receiver_account         VARCHAR(255) NOT NULL COMMENT 'receiver account',
+  receiver_address         VARCHAR(255) NOT NULL COMMENT 'receiver address',
+  amount                   VARCHAR(255) NOT NULL COMMENT 'amount of coin to receive',
+  xrp_tx_type              VARCHAR(255) NOT NULL COMMENT 'xrp tx type like Payment',
+  fee                      VARCHAR(255) NOT NULL COMMENT 'tx fee',
+  flags                    BIGINT UNSIGNED NOT NULL COMMENT 'tx flags',
+  last_ledger_sequence     BIGINT UNSIGNED NOT NULL COMMENT 'tx LastLedgerSequence',
+  sequence                 BIGINT UNSIGNED NOT NULL COMMENT 'tx Sequence',
+  signing_pubkey           VARCHAR(255) NOT NULL COMMENT 'tx SigningPubKey',
+  txn_signature            VARCHAR(255) NOT NULL COMMENT 'tx TxnSignature',
+  hash                     VARCHAR(255) NOT NULL COMMENT 'tx Hash',
+  earliest_ledger_version  BIGINT UNSIGNED NOT NULL COMMENT 'tx earliest_ledger_version after sending tx',
+  signed_tx_id             VARCHAR(255) NOT NULL COMMENT 'signed tx id',
+  tx_blob                  TEXT NOT NULL COMMENT 'sent tx blob',
+  sent_updated_at          DATETIME DEFAULT NULL COMMENT 'updated date for signed transaction sent',
+  PRIMARY KEY (id),
+  UNIQUE KEY idx_uuid (uuid),
+  INDEX idx_txid (tx_id),
+  INDEX idx_sender_account (sender_account),
+  INDEX idx_receiver_account (receiver_account)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='table for xrp transaction detail';

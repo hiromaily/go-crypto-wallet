@@ -1,13 +1,9 @@
 version: "2"
-servers:
-  - engine: mysql
-    uri: "mysql://root:root@localhost:3307/watch"
 sql:
   - engine: "mysql"
     queries: "./queries/*.sql"
-    #schema: "./schemas/*/**.sql"
     schema: "./schemas/*.sql"
     gen:
       go:
         package: "sqlcgen"
-        out: "../pkg/db/rdb/sqlcgen"
+        out: "../../pkg/db/rdb/sqlcgen"

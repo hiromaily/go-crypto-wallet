@@ -40,7 +40,11 @@
       "Bash(done)",
       "Bash(while read file)",
       "Bash(then)",
-      "Bash(fi)"
+      "Bash(fi)",
+      "Bash(wc:*)",
+      "Bash(grep:*)",
+      "Bash(sqlc version:*)",
+      "Bash(sqlc generate:*)"
     ]
   }
 }
