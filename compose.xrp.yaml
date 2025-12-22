@@ -1,4 +1,7 @@
-version: '3.8'
+networks:
+  xrp:
+    name: xrp
+    driver: bridge
 
 services:
   #########################################################################
@@ -11,10 +14,11 @@ services:
   # - Build Docker Container for rippled
   #  - run `./scripts/build-rippled-container.sh` before running docker compose
   #------------------------------------------------------------------------
-  # $ docker-compose -f docker-compose.xrp.yml exec xrp-node sh
+  # $ docker compose -f compose.xrp.yaml exec xrp-node sh
   #########################################################################
   xrp-node:
     image: local-rippled:latest
+    container_name: xrp-node
     volumes:
       - ./docker/nodes/xrp/config:/config
       - ./docker/nodes/xrp/db:/var/lib/rippled/db
@@ -25,5 +29,13 @@ services:
       - "${WRP_ADMIN_WEBSOCKET_PORT:-6006}:6006"
     stdin_open: true
     tty: true
+    networks:
+      - xrp
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O-", "--post-data={\"method\":\"server_info\",\"params\":[{}]}", "--header=Content-Type: application/json", "http://localhost:6006"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     #command:
     #  - /opt/ripple/bin/rippled --net --conf /etc/opt/ripple/rippled.cfg

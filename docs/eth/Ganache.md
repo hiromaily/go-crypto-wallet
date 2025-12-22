@@ -4,7 +4,7 @@
 ## Run
 ### by Docker
 ```
-docker compose -f docker-compose.eth.yml up ganache
+docker compose -f compose.eth.yaml up ganache
 ```
 ### by local
 ```

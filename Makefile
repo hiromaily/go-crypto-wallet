@@ -269,7 +269,7 @@ up-docker-btc:
 # run bitcoin cash core server
 .PHONY: up-docker-bch
 up-docker-bch:
-	docker compose -f docker-compose.bch.yml up bch-watch
+	docker compose -f compose.bch.yaml up bch-watch
 
 # run ethereum node server
 .PHONY: up-docker-eth
@@ -277,33 +277,33 @@ up-docker-eth:
 	GETH_VERSION=$(GETH_VERSION) GETH_HTTP_PORT=$(GETH_HTTP_PORT) \
 	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
 	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
-	docker compose -f docker-compose.eth.yml up geth lodestar
+	docker compose -f compose.eth.yaml up geth lodestar
 
 .PHONY: up-docker-eth-d
 up-docker-eth-d:
 	GETH_VERSION=$(GETH_VERSION) GETH_HTTP_PORT=$(GETH_HTTP_PORT) \
 	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
 	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
-	docker compose -f docker-compose.eth.yml up -d geth lodestar
+	docker compose -f compose.eth.yaml up -d geth lodestar
 
 .PHONY: stop-docker-eth
 stop-docker-eth:
 	GETH_VERSION=$(GETH_VERSION) GETH_HTTP_PORT=$(GETH_HTTP_PORT) \
 	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
 	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
-	docker compose -f docker-compose.eth.yml stop
+	docker compose -f compose.eth.yaml stop
 
 # run ethereum lodestar
 .PHONY: up-docker-lodestar
 up-docker-lodestar:
 	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
 	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
-	docker compose -f docker-compose.eth.yml up lodestar
+	docker compose -f compose.eth.yaml up lodestar
 
 # run ripple node server
 .PHONY: up-docker-xrp
 up-docker-xrp:
-	docker compose -f docker-compose.xrp.yml up xrp-node
+	docker compose -f compose.xrp.yaml up xrp-node
 
 # run all databases
 .PHONY: up-docker-db
@@ -355,7 +355,7 @@ geth-help:
 .PHONY:build-geth-image
 build-geth-image:
 	GETH_VERSION=$(GETH_VERSION) GETH_HTTP_PORT=$(GETH_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
-	docker compose -f docker-compose.eth.yml build --no-cache geth
+	docker compose -f compose.eth.yaml build --no-cache geth
 
 .PHONY:import-geth-data
 import-geth-data:

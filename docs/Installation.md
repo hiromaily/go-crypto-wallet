@@ -137,7 +137,7 @@ It depends on which node you choose
 ```
 make up-docker-eth
  or
-docker compose -f docker-compose.eth.yml up geth
+docker compose -f compose.eth.yaml up geth
 ```
 
 - If you have exported data, run `make import-geth-data` after tweaking parameters before running `make up-docker-eth`.
@@ -159,7 +159,7 @@ client version: Geth/v1.10.15-stable-8be800ff/linux-amd64/go1.17.5
 - run node by docker compose
 
 ```
-docker compose -f docker-compose.eth.yml up ganache
+docker compose -f compose.eth.yaml up ganache
 ```
 
 - prepare sql file if you choose Ganache.  
