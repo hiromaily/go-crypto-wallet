@@ -1,11 +1,12 @@
 package eth
 
 import (
+	"errors"
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/pkg/errors"
 )
 
 // BalanceAt returns balance of address
@@ -14,7 +15,7 @@ func (e *Ethereum) BalanceAt(hexAddr string) (*big.Int, error) {
 	account := common.HexToAddress(hexAddr)
 	balance, err := e.ethClient.BalanceAt(e.ctx, account, nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call ethClient.BalanceAt()")
+		return nil, fmt.Errorf("fail to call ethClient.BalanceAt(): %w", err)
 	}
 	if balance.Uint64() == 416778046407207737 {
 		return nil, errors.New("response of balance is strange. 416778046407207737 is returned")

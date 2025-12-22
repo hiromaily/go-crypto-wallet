@@ -17,6 +17,9 @@
       "Bash(go list:*)",
       "Bash(go tool govulncheck:*)",
       "Bash(go mod tidy:*)",
+      "Bash(go mod edit:*)",
+      "Bash(go mod why:*)",
+      "Bash(go mod graph:*)",
       "Bash($HOME/go/bin/goimports -w pkg/)",
       "Bash($HOME/go/bin/goimports:*)",
       "Bash(git add:*)",
@@ -25,6 +28,7 @@
       "Bash(git push:*)",
       "Bash(git checkout:*)",
       "Bash(git mv:*)",
+      "Bash(git restore:*)",
       "Bash(gh pr create:*)",
       "Bash(gh pr view:*)",
       "Bash(gh pr comment:*)",
@@ -46,12 +50,20 @@
       "Bash(mkdir:*)",
       "Bash(wc:*)",
       "Bash(grep:*)",
+      "Bash(xargs:*)",
+      "Bash(xargs rm:*)",
+      "Bash(tee:*)",
       "Bash(for file in )",
       "Bash(do)",
+      "Bash(do sed:*)",
+      "Bash(do goimports:*)",
       "Bash(done)",
       "Bash(while read file)",
+      "Bash(while read f)",
       "Bash(then)",
-      "Bash(fi)"
+      "Bash(fi)",
+      "Bash(perl -i -pe:*)",
+      "Bash(python3:*)"
     ]
   }
 }

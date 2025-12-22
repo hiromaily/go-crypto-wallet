@@ -1,12 +1,13 @@
 package eth
 
 import (
+	"errors"
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
@@ -18,7 +19,7 @@ func (e *Ethereum) getNonce(fromAddr string, additionalNonce int) (uint64, error
 	// by calling GetTransactionCount()
 	nonce, err := e.GetTransactionCount(fromAddr, QuantityTagPending)
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call eth.GetTransactionCount()")
+		return 0, fmt.Errorf("fail to call eth.GetTransactionCount(): %w", err)
 	}
 	if additionalNonce != 0 {
 		nonce = nonce.Add(nonce, new(big.Int).SetUint64(uint64(additionalNonce)))
@@ -46,7 +47,7 @@ func (e *Ethereum) calculateFee(
 	// gasLimit
 	estimatedGas, err := e.EstimateGas(msg)
 	if err != nil {
-		return nil, nil, nil, errors.Wrap(err, "fail to call EstimateGas()")
+		return nil, nil, nil, fmt.Errorf("fail to call EstimateGas(): %w", err)
 	}
 	// txFee := gasPrice * estimatedGas
 	txFee := new(big.Int).Mul(gasPrice, estimatedGas)
@@ -64,7 +65,7 @@ func (e *Ethereum) calculateFee(
 			//   -1 if x <  y
 			//    0 if x == y
 			//   +1 if x >  y
-			return nil, nil, nil, errors.Errorf(
+			return nil, nil, nil, fmt.Errorf(
 				"balance`%d` is insufficient to send `%d`",
 				balance.Uint64(), newValue.Uint64())
 		}
@@ -98,7 +99,7 @@ func (e *Ethereum) CreateRawTransaction(
 	// TODO: if block is still syncing, proper balance is not returned
 	balance, err := e.GetBalance(fromAddr, QuantityTagPending)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call eth.GetBalance()")
+		return nil, nil, fmt.Errorf("fail to call eth.GetBalance(): %w", err)
 	}
 	e.logger.Info("balance", "balance", balance.Int64())
 	if balance.Uint64() == 0 {
@@ -108,13 +109,13 @@ func (e *Ethereum) CreateRawTransaction(
 	// nonce
 	nonce, err := e.getNonce(fromAddr, additionalNonce)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call eth.getNonce()")
+		return nil, nil, fmt.Errorf("fail to call eth.getNonce(): %w", err)
 	}
 
 	// gasPrice
 	gasPrice, err := e.GasPrice()
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call eth.GasPrice()")
+		return nil, nil, fmt.Errorf("fail to call eth.GasPrice(): %w", err)
 	}
 	e.logger.Info("gas_price", "gas_price", gasPrice.Int64())
 
@@ -127,7 +128,7 @@ func (e *Ethereum) CreateRawTransaction(
 		new(big.Int).SetUint64(amount),
 	)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call eth.calculateFee()")
+		return nil, nil, fmt.Errorf("fail to call eth.calculateFee(): %w", err)
 	}
 
 	e.logger.Debug("tx parameter",
@@ -147,7 +148,7 @@ func (e *Ethereum) CreateRawTransaction(
 	txHash := tx.Hash().Hex()
 	rawTxHex, err := ethtx.EncodeTx(tx)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call encodeTx()")
+		return nil, nil, fmt.Errorf("fail to call encodeTx(): %w", err)
 	}
 
 	// generate UUID to trace transaction because unsignedTx is not unique
@@ -188,20 +189,20 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (
 	fromAddr := rawTx.From
 	tx, err := ethtx.DecodeTx(txHex)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call decodeTx(txHex)")
+		return nil, fmt.Errorf("fail to call decodeTx(txHex): %w", err)
 	}
 
 	// get private key
 	key, err := e.GetPrivKey(fromAddr, passphrase)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call e.GetPrivKey()")
+		return nil, fmt.Errorf("fail to call e.GetPrivKey(): %w", err)
 	}
 
 	// chain id
 	// https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md
 	chainID := big.NewInt(int64(e.netID))
 	if chainID.Uint64() == 0 {
-		return nil, errors.Errorf("chainID can't get from netID:  %d", e.netID)
+		return nil, fmt.Errorf("chainID can't get from netID:  %d", e.netID)
 	}
 
 	e.logger.Debug("call types.SignTx",
@@ -215,18 +216,18 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (
 	// sign
 	signedTX, err := types.SignTx(tx, signer, key.PrivateKey)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call types.SignTx()")
+		return nil, fmt.Errorf("fail to call types.SignTx(): %w", err)
 	}
 
 	// TODO: baseFee *big.Int param is added in AsMessage method and maybe useful
 	fromSignedAddr, err := types.Sender(signer, signedTX)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to cll signedTX.AsMessage()")
+		return nil, fmt.Errorf("fail to cll signedTX.AsMessage(): %w", err)
 	}
 
 	encodedTx, err := ethtx.EncodeTx(signedTX)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call encodeTx()")
+		return nil, fmt.Errorf("fail to call encodeTx(): %w", err)
 	}
 
 	resTx := &ethtx.RawTx{
@@ -248,12 +249,12 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (
 func (e *Ethereum) SendSignedRawTransaction(signedTxHex string) (string, error) {
 	decodedTx, err := ethtx.DecodeTx(signedTxHex)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call decodeTx(signedTxHex)")
+		return "", fmt.Errorf("fail to call decodeTx(signedTxHex): %w", err)
 	}
 
 	txHash, err := e.SendRawTransactionWithTypesTx(decodedTx)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call SendRawTransactionWithTypesTx()")
+		return "", fmt.Errorf("fail to call SendRawTransactionWithTypesTx(): %w", err)
 	}
 
 	return txHash, err

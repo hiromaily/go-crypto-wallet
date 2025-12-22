@@ -2,8 +2,8 @@ package xrp
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/pkg/errors"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -14,7 +14,7 @@ func (r *Ripple) GenerateAddress() (*ResponseGenerateAddress, error) {
 
 	res, err := r.API.addressClient.GenerateAddress(ctx, req)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call addressClient.GenerateAddress()")
+		return nil, fmt.Errorf("fail to call addressClient.GenerateAddress(): %w", err)
 	}
 	r.logger.Debug("response",
 		"XAddress", res.XAddress,
@@ -33,7 +33,7 @@ func (r *Ripple) GenerateXAddress() (*ResponseGenerateXAddress, error) {
 
 	res, err := r.API.addressClient.GenerateXAddress(ctx, req)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call addressClient.GenerateXAddress()")
+		return nil, fmt.Errorf("fail to call addressClient.GenerateXAddress(): %w", err)
 	}
 	r.logger.Debug("response",
 		"XAddress", res.XAddress,
@@ -52,7 +52,7 @@ func (r *Ripple) IsValidAddress(addr string) (bool, error) {
 
 	res, err := r.API.addressClient.IsValidAddress(ctx, req)
 	if err != nil {
-		return false, errors.Wrap(err, "fail to call addressClient.IsValidAddress()")
+		return false, fmt.Errorf("fail to call addressClient.IsValidAddress(): %w", err)
 	}
 	r.logger.Debug("response",
 		"IsValid", res.IsValid,

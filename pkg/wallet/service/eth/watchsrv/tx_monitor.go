@@ -2,8 +2,7 @@ package watchsrv
 
 import (
 	"database/sql"
-
-	"github.com/pkg/errors"
+	"fmt"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -51,7 +50,7 @@ func (t *TxMonitor) UpdateTxStatus() error {
 	// update tx_type for TxTypeSent
 	err := t.updateStatusTxTypeSent()
 	if err != nil {
-		return errors.Wrap(err, "fail to call updateStatusTxTypeSent()")
+		return fmt.Errorf("fail to call updateStatusTxTypeSent(): %w", err)
 	}
 
 	// update tx_type for TxTypeDone
@@ -59,7 +58,7 @@ func (t *TxMonitor) UpdateTxStatus() error {
 	// for _, actionType := range types {
 	//	err := t.updateStatusTxTypeDone(actionType)
 	//	if err != nil {
-	//		return errors.Wrapf(err, "fail to call updateStatusTxTypeDone() ActionType: %s", actionType)
+	//		return fmt.Errorf("fail to call updateStatusTxTypeDone() ActionType: %s: %w", actionType, err)
 	//	}
 	//}
 	return nil
@@ -70,7 +69,7 @@ func (t *TxMonitor) updateStatusTxTypeSent() error {
 	// get records whose status is TxTypeSent
 	hashes, err := t.txDetailRepo.GetSentHashTx(tx.TxTypeSent)
 	if err != nil {
-		return errors.Wrap(err, "fail to call txDetailRepo.GetSentHashTx(TxTypeSent)")
+		return fmt.Errorf("fail to call txDetailRepo.GetSentHashTx(TxTypeSent): %w", err)
 	}
 
 	// get hash in detail and check confirmation
@@ -79,7 +78,7 @@ func (t *TxMonitor) updateStatusTxTypeSent() error {
 		var confirmNum uint64
 		confirmNum, err = t.eth.GetConfirmation(sentHash)
 		if err != nil {
-			return errors.Wrapf(err, "fail to call eth.GetConfirmation() sentHash: %s", sentHash)
+			return fmt.Errorf("fail to call eth.GetConfirmation() sentHash: %s: %w", sentHash, err)
 		}
 		t.logger.Info("confirmation",
 			"sentHash", sentHash,
@@ -110,7 +109,7 @@ func (t *TxMonitor) MonitorBalance(_ uint64) error {
 	for _, acnt := range targetAccounts {
 		addrs, err := t.addrRepo.GetAllAddress(acnt)
 		if err != nil {
-			return errors.Wrap(err, "fail to call addrRepo.GetAllAddress()")
+			return fmt.Errorf("fail to call addrRepo.GetAllAddress(): %w", err)
 		}
 		total, _ := t.eth.GetTotalBalance(addrs)
 		t.logger.Info("total balance",

@@ -2,8 +2,8 @@ package xrp
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
+	"errors"
+	"fmt"
 )
 
 // GetAccountInfo calls GetAccountInfo API
@@ -23,7 +23,7 @@ func (r *Ripple) GetAccountInfo(address string) (*ResponseGetAccountInfo, error)
 		// errStatus, _ := status.FromError(err)
 		// errStatus.Message()
 		// errStatus.Code()
-		return nil, errors.Wrap(err, "fail to call accountClient.GetAccountInfo()")
+		return nil, fmt.Errorf("fail to call accountClient.GetAccountInfo(): %w", err)
 	}
 	r.logger.Debug("response",
 		"Sequence", res.Sequence,

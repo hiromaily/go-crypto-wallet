@@ -2,8 +2,7 @@ package xrpwallet
 
 import (
 	"database/sql"
-
-	"github.com/pkg/errors"
+	"fmt"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -70,7 +69,7 @@ func (k *XRPKeygen) GenerateAccountKey(
 ) ([]key.WalletKey, error) {
 	keys, err := k.HDWalleter.Generate(accountType, seed, count)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call HDWalleter.Generate()")
+		return nil, fmt.Errorf("fail to call HDWalleter.Generate(): %w", err)
 	}
 	err = k.XRPKeyGenerator.Generate(accountType, isKeyPair, keys)
 	return keys, err

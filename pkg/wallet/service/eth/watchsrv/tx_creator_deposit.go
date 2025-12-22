@@ -1,9 +1,8 @@
 package watchsrv
 
 import (
+	"fmt"
 	"math/big"
-
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -56,7 +55,7 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 	if len(serializedTxs) != 0 {
 		generatedFileName, err = t.generateHexFile(targetAction, sender, txID, serializedTxs)
 		if err != nil {
-			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
+			return "", "", fmt.Errorf("fail to call generateHexFile(): %w", err)
 		}
 	}
 
@@ -67,7 +66,7 @@ func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]eth.UserAmount,
 	// get addresses for client account
 	addrs, err := t.addrRepo.GetAll(sender)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
+		return nil, fmt.Errorf("fail to call addrRepo.GetAll(account.AccountTypeClient): %w", err)
 	}
 
 	// target addresses
@@ -97,7 +96,7 @@ func (t *TxCreate) createDepositRawTransactions(
 	// get address for deposit account
 	depositAddr, err := t.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call addrRepo.GetOneUnAllocated(account.AccountTypeDeposit)")
+		return nil, nil, fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(account.AccountTypeDeposit): %w", err)
 	}
 
 	// create raw transaction each address
@@ -110,9 +109,9 @@ func (t *TxCreate) createDepositRawTransactions(
 		var txDetailItem *models.EthDetailTX
 		rawTx, txDetailItem, err = t.eth.CreateRawTransaction(val.Address, depositAddr.WalletAddress, 0, 0)
 		if err != nil {
-			return nil, nil, errors.Wrapf(
-				err, "fail to call addrRepo.CreateRawTransaction(), sender address: %s",
-				val.Address)
+			return nil, nil, fmt.Errorf(
+				"fail to call addrRepo.CreateRawTransaction(), sender address: %s: %w",
+				val.Address, err)
 		}
 		// additionalNonce++
 
@@ -122,7 +121,7 @@ func (t *TxCreate) createDepositRawTransactions(
 		var serializedTx string
 		serializedTx, err = serial.EncodeToString(rawTx)
 		if err != nil {
-			return nil, nil, errors.Wrap(err, "fail to call serial.EncodeToString(rawTx)")
+			return nil, nil, fmt.Errorf("fail to call serial.EncodeToString(rawTx): %w", err)
 		}
 		serializedTxs = append(serializedTxs, serializedTx)
 

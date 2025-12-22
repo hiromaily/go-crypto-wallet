@@ -3,8 +3,7 @@ package watchrepo
 import (
 	"context"
 	"database/sql"
-
-	"github.com/pkg/errors"
+	"fmt"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
@@ -35,7 +34,7 @@ func (r *TxRepositorySqlc) GetOne(id int64) (*models.TX, error) {
 
 	tx, err := r.queries.GetTxByID(ctx, id)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetTxByID()")
+		return nil, fmt.Errorf("failed to call GetTxByID(): %w", err)
 	}
 
 	return convertSqlcTxToModel(&tx), nil
@@ -50,7 +49,7 @@ func (r *TxRepositorySqlc) GetMaxID(actionType action.ActionType) (int64, error)
 		Action: sqlcgen.TxAction(actionType.String()),
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call GetMaxTxID()")
+		return 0, fmt.Errorf("failed to call GetMaxTxID(): %w", err)
 	}
 
 	if result == nil {
@@ -74,12 +73,12 @@ func (r *TxRepositorySqlc) InsertUnsignedTx(actionType action.ActionType) (int64
 		Action: sqlcgen.TxAction(actionType.String()),
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call InsertTx()")
+		return 0, fmt.Errorf("failed to call InsertTx(): %w", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to get LastInsertId()")
+		return 0, fmt.Errorf("failed to get LastInsertId(): %w", err)
 	}
 
 	return id, nil
@@ -96,7 +95,7 @@ func (r *TxRepositorySqlc) Update(txItem *models.TX) (int64, error) {
 		ID:        txItem.ID,
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call UpdateTx()")
+		return 0, fmt.Errorf("failed to call UpdateTx(): %w", err)
 	}
 
 	return 1, nil // sqlc Update doesn't return rows affected for :exec queries
@@ -108,12 +107,12 @@ func (r *TxRepositorySqlc) DeleteAll() (int64, error) {
 
 	result, err := r.queries.DeleteAllTx(ctx)
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call DeleteAllTx()")
+		return 0, fmt.Errorf("failed to call DeleteAllTx(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to get RowsAffected()")
+		return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 	}
 
 	return rowsAffected, nil

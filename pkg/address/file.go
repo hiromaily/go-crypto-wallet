@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
-
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -49,7 +47,7 @@ func (*FileRepository) ValidateFilePath(fileName string, accountType account.Acc
 	// e.g. ./data/pubkey/deposit/deposit_1586831083436291000.csv
 	tmp := strings.Split(strings.Split(fileName, "_")[0], "/")
 	if tmp[len(tmp)-1] != accountType.String() {
-		return errors.Errorf("mismatching between accountType [%s] and file prefix [%s]", accountType, tmp[0])
+		return fmt.Errorf("mismatching between accountType [%s] and file prefix [%s]", accountType, tmp[0])
 	}
 	return nil
 }
@@ -58,7 +56,7 @@ func (*FileRepository) ValidateFilePath(fileName string, accountType account.Acc
 func (*FileRepository) ImportAddress(fileName string) ([]string, error) {
 	file, err := os.Open(fileName) //nolint:gosec
 	if err != nil {
-		return nil, errors.Errorf("os.Open(%s) error: %s", fileName, err)
+		return nil, fmt.Errorf("os.Open(%s) error: %s", fileName, err)
 	}
 
 	defer file.Close()

@@ -2,12 +2,12 @@ package watchsrv
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcjson"
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/wire"
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -115,7 +115,7 @@ func (t *TxCreate) createTx(
 	// get listUnspent
 	unspentList, unspentAddrs, err := t.getUnspentList(sender)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call getUnspentList()")
+		return "", "", fmt.Errorf("fail to call getUnspentList(): %w", err)
 	}
 	if len(unspentList) == 0 {
 		t.logger.Info("no listunspent")
@@ -145,7 +145,7 @@ func (t *TxCreate) createTx(
 		}
 		txPrevOutputs, err = t.createTxOutputs(receiver, requiredAmount, inputTotal, unspentAddrs[0], isChange)
 		if err != nil {
-			return "", "", errors.Wrap(err, "fail to call createTxOutputs()")
+			return "", "", fmt.Errorf("fail to call createTxOutputs(): %w", err)
 		}
 	case action.ActionTypePayment:
 		changeAddr := unspentAddrs[0] // this is actually sender's address because it's for change
@@ -157,14 +157,14 @@ func (t *TxCreate) createTx(
 			"len(txPrevOutputs)", len(txPrevOutputs),
 		)
 	default:
-		return "", "", errors.Errorf("invalid actionType: %s", targetAction)
+		return "", "", fmt.Errorf("invalid actionType: %s", targetAction)
 	}
 
 	// create raw transaction as temporary use
 	//  - later calculate by tx size
 	msgTx, err := t.btc.CreateRawTransaction(parsedTx.txInputs, txPrevOutputs)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call btc.CreateRawTransaction()")
+		return "", "", fmt.Errorf("fail to call btc.CreateRawTransaction(): %w", err)
 	}
 
 	// calculate fee and output total
@@ -195,13 +195,13 @@ func (t *TxCreate) createTx(
 	// re call CreateRawTransaction
 	msgTx, err = t.btc.CreateRawTransaction(parsedTx.txInputs, txOutputs)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call btc.CreateRawTransaction()")
+		return "", "", fmt.Errorf("fail to call btc.CreateRawTransaction(): %w", err)
 	}
 
 	// convert msgTx to hex
 	hex, err := t.btc.ToHex(msgTx)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call btc.ToHex(msgTx)")
+		return "", "", fmt.Errorf("fail to call btc.ToHex(msgTx): %w", err)
 	}
 
 	// insert to tx_table for unsigned tx
@@ -216,7 +216,7 @@ func (t *TxCreate) createTx(
 		txRepoTxOutputs,
 		paymentRequestIds)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call insertTxTableForUnsigned()")
+		return "", "", fmt.Errorf("fail to call insertTxTableForUnsigned(): %w", err)
 	}
 
 	// serialize previous txs for multisig signature
@@ -227,7 +227,7 @@ func (t *TxCreate) createTx(
 	}
 	encodedAddrsPrevs, err := serial.EncodeToString(previousTxs)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call serial.EncodeToString()")
+		return "", "", fmt.Errorf("fail to call serial.EncodeToString(): %w", err)
 	}
 
 	// generate tx file
@@ -237,7 +237,7 @@ func (t *TxCreate) createTx(
 	if txID != 0 {
 		generatedFileName, err = t.generateHexFile(targetAction, hex, encodedAddrsPrevs, txID)
 		if err != nil {
-			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
+			return "", "", fmt.Errorf("fail to call generateHexFile(): %w", err)
 		}
 	}
 
@@ -267,7 +267,7 @@ func (t *TxCreate) getUnspentList(accountType account.AccountType) ([]btc.ListUn
 	// get listUnspent
 	unspentList, err := t.btc.ListUnspentByAccount(accountType, t.btc.ConfirmationBlock())
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call btc.ListUnspentByAccount()")
+		return nil, nil, fmt.Errorf("fail to call btc.ListUnspentByAccount(): %w", err)
 	}
 	unspentAddrs := t.btc.GetUnspentListAddrs(unspentList, accountType)
 
@@ -360,14 +360,14 @@ func (t *TxCreate) createTxOutputs(
 	// - deposit/transfer
 	pubkeyTable, err := t.addrRepo.GetOneUnAllocated(reciver)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call pubkeyRepo.GetOneUnAllocated()")
+		return nil, fmt.Errorf("fail to call pubkeyRepo.GetOneUnAllocated(): %w", err)
 	}
 	receiverAddr := pubkeyTable.WalletAddress
 
 	// create receiver txOutput
 	receiverDecodedAddr, err := btcutil.DecodeAddress(receiverAddr, t.btc.GetChainConf())
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to call btcutil.DecodeAddress(%s)", receiverAddr)
+		return nil, fmt.Errorf("fail to call btcutil.DecodeAddress(%s): %w", receiverAddr, err)
 	}
 	txPrevOutputs := make(map[btcutil.Address]btcutil.Amount)
 	if isChange {
@@ -384,7 +384,7 @@ func (t *TxCreate) createTxOutputs(
 		t.logger.Debug("change is required")
 		senderDecodedAddr, decodeErr := btcutil.DecodeAddress(senderAddr, t.btc.GetChainConf())
 		if decodeErr != nil {
-			return nil, errors.Wrapf(decodeErr, "fail to call btcutil.DecodeAddress(%s)", receiverAddr)
+			return nil, fmt.Errorf("fail to call btcutil.DecodeAddress(%s): %w", receiverAddr, decodeErr)
 		}
 
 		// for change
@@ -410,7 +410,7 @@ func (t *TxCreate) calculateOutputTotal(
 	// get fee
 	fee, err := t.btc.GetFee(msgTx, adjustmentFee)
 	if err != nil {
-		return 0, 0, nil, nil, errors.Wrap(err, "fail to call btc.GetFee()")
+		return 0, 0, nil, nil, fmt.Errorf("fail to call btc.GetFee(): %w", err)
 	}
 	var outputTotal btcutil.Amount
 	txRepoOutputs := make([]*models.BTCTXOutput, 0, len(txPrevOutputs))
@@ -469,7 +469,7 @@ func (t *TxCreate) calculateOutputTotal(
 			"inputTotal is short of coin to pay fee",
 			"amount of inputTotal", inputTotal,
 			"fee", fee)
-		return 0, 0, nil, nil, errors.Wrapf(err, "inputTotal is short of coin to pay fee")
+		return 0, 0, nil, nil, fmt.Errorf("inputTotal is short of coin to pay fee: %w", err)
 	}
 
 	return outputTotal, fee, txPrevOutputs, txRepoOutputs, nil
@@ -488,7 +488,7 @@ func (t *TxCreate) insertTxTableForUnsigned(
 	// skip if same hex is already stored
 	count, err := t.txRepo.GetCountByUnsignedHex(actionType, hex)
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call repo.Tx().GetCountByUnsignedHex()")
+		return 0, fmt.Errorf("fail to call repo.Tx().GetCountByUnsignedHex(): %w", err)
 	}
 	if count != 0 {
 		// skip
@@ -507,7 +507,7 @@ func (t *TxCreate) insertTxTableForUnsigned(
 	// start database transaction
 	dtx, err := t.dbConn.Begin()
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to start transaction")
+		return 0, fmt.Errorf("fail to start transaction: %w", err)
 	}
 	defer func() {
 		if err != nil {
@@ -520,7 +520,7 @@ func (t *TxCreate) insertTxTableForUnsigned(
 	// tx := w.repo.MustBegin()
 	txID, err := t.txRepo.InsertUnsignedTx(actionType, txItem)
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call repo.Tx().InsertUnsignedTx()")
+		return 0, fmt.Errorf("fail to call repo.Tx().InsertUnsignedTx(): %w", err)
 	}
 
 	// TxReceiptInput table
@@ -530,7 +530,7 @@ func (t *TxCreate) insertTxTableForUnsigned(
 	}
 	err = t.txInputRepo.InsertBulk(txInputs)
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call txInRepo.InsertBulk()")
+		return 0, fmt.Errorf("fail to call txInRepo.InsertBulk(): %w", err)
 	}
 
 	// TxReceiptOutput table
@@ -540,14 +540,14 @@ func (t *TxCreate) insertTxTableForUnsigned(
 	}
 	err = t.txOutputRepo.InsertBulk(txOutputs)
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call repo.TxOutput().InsertBulk()")
+		return 0, fmt.Errorf("fail to call repo.TxOutput().InsertBulk(): %w", err)
 	}
 
 	// update payment_id in payment_request table for only action.ActionTypePayment
 	if actionType == action.ActionTypePayment {
 		_, err = t.payReqRepo.UpdatePaymentID(txID, paymentRequestIds)
 		if err != nil {
-			return 0, errors.Wrap(err, "fail to call repo.PayReq().UpdatePaymentID(txID, paymentRequestIds)")
+			return 0, fmt.Errorf("fail to call repo.PayReq().UpdatePaymentID(txID, paymentRequestIds): %w", err)
 		}
 	}
 
@@ -572,7 +572,7 @@ func (t *TxCreate) generateHexFile(
 	path := t.txFileRepo.CreateFilePath(actionType, tx.TxTypeUnsigned, id, 0)
 	generatedFileName, err = t.txFileRepo.WriteFile(path, savedata)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call txFileRepo.WriteFile()")
+		return "", fmt.Errorf("fail to call txFileRepo.WriteFile(): %w", err)
 	}
 
 	return generatedFileName, nil

@@ -3,8 +3,6 @@ package keygensrv
 import (
 	"fmt"
 
-	"github.com/pkg/errors"
-
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -76,7 +74,7 @@ func (m *Multisig) AddMultisigAddress(accountType account.AccountType, addressTy
 			// get record from
 			fullPubKeyItem, err := m.authFullPubKeyRepo.GetOne(authType)
 			if err != nil {
-				return errors.Wrapf(err, "fail to call authFullPubKeyRepo.GetOne() %s", authType.String())
+				return fmt.Errorf("fail to call authFullPubKeyRepo.GetOne() %s: %w", authType.String(), err)
 			}
 			authFullPubKeys = append(authFullPubKeys, fullPubKeyItem.FullPublicKey)
 		}
@@ -86,7 +84,7 @@ func (m *Multisig) AddMultisigAddress(accountType account.AccountType, addressTy
 	// get target addresses from account_key table, addr_status=AddrStatusPrivKeyImported
 	accountKeyItems, err := m.accountKeyRepo.GetAllAddrStatus(accountType, address.AddrStatusPrivKeyImported)
 	if err != nil {
-		return errors.Wrapf(err, "fail to call accountKeyRepo.GetAllAddrStatus(%s)", accountType.String())
+		return fmt.Errorf("fail to call accountKeyRepo.GetAllAddrStatus(%s): %w", accountType.String(), err)
 	}
 
 	// call bitcoinAPI `addmultisigaddress`
@@ -119,7 +117,7 @@ func (m *Multisig) AddMultisigAddress(accountType account.AccountType, addressTy
 
 		_, err = m.accountKeyRepo.UpdateMultisigAddr(accountType, item)
 		if err != nil {
-			return errors.Wrapf(err, "fail to call accountKeyRepo.UpdateMultisigAddr(%s)", accountType.String())
+			return fmt.Errorf("fail to call accountKeyRepo.UpdateMultisigAddr(%s): %w", accountType.String(), err)
 		}
 	}
 

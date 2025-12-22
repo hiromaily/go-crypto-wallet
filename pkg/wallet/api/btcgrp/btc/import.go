@@ -2,9 +2,9 @@ package btc
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/btcsuite/btcd/btcutil"
-	"github.com/pkg/errors"
 )
 
 // ImportPrivKey import privKey to wallet
@@ -12,7 +12,7 @@ import (
 func (b *Bitcoin) ImportPrivKey(privKeyWIF *btcutil.WIF) error {
 	err := b.Client.ImportPrivKey(privKeyWIF)
 	if err != nil {
-		return errors.Wrap(err, "fail to call client.ImportPrivKey()")
+		return fmt.Errorf("fail to call client.ImportPrivKey(): %w", err)
 	}
 
 	return nil
@@ -23,7 +23,7 @@ func (b *Bitcoin) ImportPrivKey(privKeyWIF *btcutil.WIF) error {
 func (b *Bitcoin) ImportPrivKeyLabel(privKeyWIF *btcutil.WIF, label string) error {
 	err := b.Client.ImportPrivKeyLabel(privKeyWIF, label)
 	if err != nil {
-		return errors.Wrap(err, "fail to call client.ImportPrivKeyLabel()")
+		return fmt.Errorf("fail to call client.ImportPrivKeyLabel(): %w", err)
 	}
 
 	return nil
@@ -33,7 +33,7 @@ func (b *Bitcoin) ImportPrivKeyLabel(privKeyWIF *btcutil.WIF, label string) erro
 func (b *Bitcoin) ImportPrivKeyWithoutReScan(privKeyWIF *btcutil.WIF, label string) error {
 	err := b.Client.ImportPrivKeyRescan(privKeyWIF, label, false)
 	if err != nil {
-		return errors.Wrap(err, "fail to call ImportPrivKeyRescan()")
+		return fmt.Errorf("fail to call ImportPrivKeyRescan(): %w", err)
 	}
 
 	return nil
@@ -43,7 +43,7 @@ func (b *Bitcoin) ImportPrivKeyWithoutReScan(privKeyWIF *btcutil.WIF, label stri
 func (b *Bitcoin) ImportAddress(pubkey string) error {
 	err := b.Client.ImportAddress(pubkey)
 	if err != nil {
-		return errors.Wrap(err, "fail to call ImportAddress()")
+		return fmt.Errorf("fail to call ImportAddress(): %w", err)
 	}
 
 	return nil
@@ -53,7 +53,7 @@ func (b *Bitcoin) ImportAddress(pubkey string) error {
 func (b *Bitcoin) ImportAddressWithoutReScan(pubkey string) error {
 	err := b.ImportAddressWithLabel(pubkey, "", false)
 	if err != nil {
-		return errors.Wrap(err, "fail to call ImportAddressWithoutReScan()")
+		return fmt.Errorf("fail to call ImportAddressWithoutReScan(): %w", err)
 	}
 
 	return nil
@@ -64,26 +64,26 @@ func (b *Bitcoin) ImportAddressWithoutReScan(pubkey string) error {
 func (b *Bitcoin) ImportAddressWithLabel(address, label string, rescan bool) error {
 	bAddress, err := json.Marshal(address)
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.Marchal(address)")
+		return fmt.Errorf("fail to call json.Marchal(address): %w", err)
 	}
 
 	// addresses
 	bLabel, err := json.Marshal(label)
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.Marchal(label)")
+		return fmt.Errorf("fail to call json.Marchal(label): %w", err)
 	}
 
 	// rescan
 	bRescan, err := json.Marshal(rescan)
 	if err != nil {
-		return errors.Wrap(err, "fail to call json.Marchal(rescan)")
+		return fmt.Errorf("fail to call json.Marchal(rescan): %w", err)
 	}
 	jsonRawMsg := []json.RawMessage{bAddress, bLabel, bRescan}
 
 	// call importaddress
 	_, err = b.Client.RawRequest("importaddress", jsonRawMsg)
 	if err != nil {
-		return errors.Wrap(err, "fail to call client.RawRequest(importaddress)")
+		return fmt.Errorf("fail to call client.RawRequest(importaddress): %w", err)
 	}
 
 	return nil

@@ -2,9 +2,9 @@ package watchsrv
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
 	"strings"
-
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
@@ -54,7 +54,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 	// payment_5_unsigned_1_1534466246366489473
 	actionType, _, txID, _, err := t.txFileRepo.ValidateFilePath(filePath, tx.TxTypeSigned)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call txFileRepo.ValidateFilePath()")
+		return "", fmt.Errorf("fail to call txFileRepo.ValidateFilePath(): %w", err)
 	}
 
 	t.logger.Debug("send_tx", "action_type", actionType.String())
@@ -62,7 +62,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 	// read hex from file
 	data, err := t.txFileRepo.ReadFileSlice(filePath)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call txFileRepo.ReadFile()")
+		return "", fmt.Errorf("fail to call txFileRepo.ReadFile(): %w", err)
 	}
 
 	// sentTxes := make([]string, 0, len(data))

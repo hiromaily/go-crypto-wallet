@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/bookerzzz/grok"
-	"github.com/pkg/errors"
 	uuid "github.com/satori/go.uuid"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
@@ -53,7 +52,7 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 	if len(serializedTxs) != 0 {
 		generatedFileName, err = t.generateHexFile(targetAction, sender, txID, serializedTxs)
 		if err != nil {
-			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
+			return "", "", fmt.Errorf("fail to call generateHexFile(): %w", err)
 		}
 	}
 
@@ -64,7 +63,7 @@ func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]xrp.UserAmount,
 	// get addresses for client account
 	addrs, err := t.addrRepo.GetAll(sender)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call addrRepo.GetAll(account.AccountTypeClient)")
+		return nil, fmt.Errorf("fail to call addrRepo.GetAll(account.AccountTypeClient): %w", err)
 	}
 	// addresses, err := t.eth.Accounts()
 
@@ -96,7 +95,7 @@ func (t *TxCreate) createDepositRawTransactions(
 	// get address for deposit account
 	depositAddr, err := t.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
-		return nil, nil, errors.Wrap(err, "fail to call addrRepo.GetOneUnAllocated(account.AccountTypeDeposit)")
+		return nil, nil, fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(account.AccountTypeDeposit): %w", err)
 	}
 
 	// create raw transaction each address

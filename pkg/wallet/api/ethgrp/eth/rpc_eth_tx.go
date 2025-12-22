@@ -2,13 +2,14 @@ package eth
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/pkg/errors"
 )
 
 // ResponseGetTransaction response of eth_getTransactionByHash
@@ -54,7 +55,7 @@ func (e *Ethereum) Sign(hexAddr, message string) (string, error) {
 	var signature string
 	err := e.rpcClient.CallContext(e.ctx, &signature, "eth_sign", hexAddr, message)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call rpc.CallContext(eth_sign)")
+		return "", fmt.Errorf("fail to call rpc.CallContext(eth_sign): %w", err)
 	}
 
 	return signature, nil
@@ -68,7 +69,7 @@ func (e *Ethereum) SendTransaction(msg *ethereum.CallMsg) (string, error) {
 	err := e.rpcClient.CallContext(e.ctx, &txHash, "eth_sendTransaction", toCallArg(msg))
 	if err != nil {
 		// FIXME: Invalid params: Invalid bytes format. Expected a 0x-prefixed hex string with even length.
-		return "", errors.Wrap(err, "fail to call rpc.CallContext(eth_sendTransaction)")
+		return "", fmt.Errorf("fail to call rpc.CallContext(eth_sendTransaction): %w", err)
 	}
 
 	return txHash, nil
@@ -80,7 +81,7 @@ func (e *Ethereum) SendRawTransaction(signedTx string) (string, error) {
 	var txHash string
 	err := e.rpcClient.CallContext(e.ctx, &txHash, "eth_sendRawTransaction", signedTx)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call rpc.CallContext(eth_sendTransaction)")
+		return "", fmt.Errorf("fail to call rpc.CallContext(eth_sendTransaction): %w", err)
 	}
 
 	return txHash, nil
@@ -90,7 +91,7 @@ func (e *Ethereum) SendRawTransaction(signedTx string) (string, error) {
 func (e *Ethereum) SendRawTransactionWithTypesTx(tx *types.Transaction) (string, error) {
 	encodedTx, err := rlp.EncodeToBytes(tx)
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call rlp.EncodeToBytes(tx)")
+		return "", fmt.Errorf("fail to call rlp.EncodeToBytes(tx): %w", err)
 	}
 	return e.SendRawTransaction(hexutil.Encode(encodedTx))
 }
@@ -101,7 +102,7 @@ func (e *Ethereum) SendRawTransactionWithTypesTx(tx *types.Transaction) (string,
 //	var txHash string
 //	err := e.rpcClient.CallContext(e.ctx, &txHash, "eth_call", msg)
 //	if err != nil {
-//		return "", errors.Wrap(err, "fail to call rpc.CallContext(eth_call)")
+//		return "", fmt.Errorf("fail to call rpc.CallContext(eth_call): %w", err)
 //	}
 //
 //	return txHash, nil
@@ -113,7 +114,7 @@ func (e *Ethereum) GetTransactionByHash(hashTx string) (*ResponseGetTransaction,
 	var resMap map[string]string
 	err := e.rpcClient.CallContext(e.ctx, &resMap, "eth_getTransactionByHash", hashTx)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_getTransactionByHash)")
+		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getTransactionByHash): %w", err)
 	}
 	if len(resMap) == 0 {
 		return nil, errors.New("response of eth_getTransactionByHash is empty")
@@ -191,7 +192,7 @@ func (e *Ethereum) GetTransactionReceipt(hashTx string) (*ResponseGetTransaction
 	go func() {
 		err := e.rpcClient.CallContext(ctx, &resMap, "eth_getTransactionReceipt", hashTx)
 		if err != nil {
-			ch <- errors.Wrap(err, "fail to call rpc.CallContext(eth_getTransactionReceipt)")
+			ch <- fmt.Errorf("fail to call rpc.CallContext(eth_getTransactionReceipt): %w", err)
 		}
 		ch <- nil
 	}()

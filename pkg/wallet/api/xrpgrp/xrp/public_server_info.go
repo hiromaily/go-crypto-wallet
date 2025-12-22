@@ -2,8 +2,7 @@ package xrp
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
+	"fmt"
 )
 
 // https://xrpl.org/server-info-methods.html
@@ -93,7 +92,7 @@ func (r *Ripple) ServerInfo() (*ResponseServerInfo, error) {
 	}
 	var res ResponseServerInfo
 	if err := r.wsPublic.Call(context.Background(), &req, &res); err != nil {
-		return nil, errors.Wrap(err, "fail to call wsClient.Call(server_info)")
+		return nil, fmt.Errorf("fail to call wsClient.Call(server_info): %w", err)
 	}
 	return &res, nil
 }

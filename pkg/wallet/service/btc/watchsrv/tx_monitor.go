@@ -2,8 +2,8 @@ package watchsrv
 
 import (
 	"database/sql"
-
-	"github.com/pkg/errors"
+	"errors"
+	"fmt"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -62,7 +62,7 @@ func (t *TxMonitor) UpdateTxStatus() error {
 	for _, actionType := range types {
 		err := t.updateStatusTxTypeSent(actionType)
 		if err != nil {
-			return errors.Wrapf(err, "fail to call updateStatusTxTypeSent() ActionType: %s", actionType)
+			return fmt.Errorf("fail to call updateStatusTxTypeSent() ActionType: %s: %w", actionType, err)
 		}
 	}
 
@@ -71,7 +71,7 @@ func (t *TxMonitor) UpdateTxStatus() error {
 	for _, actionType := range types {
 		err := t.updateStatusTxTypeDone(actionType)
 		if err != nil {
-			return errors.Wrapf(err, "fail to call updateStatusTxTypeDone() ActionType: %s", actionType)
+			return fmt.Errorf("fail to call updateStatusTxTypeDone() ActionType: %s: %w", actionType, err)
 		}
 	}
 
@@ -83,7 +83,7 @@ func (t *TxMonitor) updateStatusTxTypeSent(actionType action.ActionType) error {
 	// get records whose status is TxTypeSent
 	hashes, err := t.txRepo.GetSentHashTx(actionType, tx.TxTypeSent)
 	if err != nil {
-		return errors.Wrapf(err, "fail to call txRepo.GetSentHashTx(TxTypeSent) ActionType: %s", actionType)
+		return fmt.Errorf("fail to call txRepo.GetSentHashTx(TxTypeSent) ActionType: %s: %w", actionType, err)
 	}
 
 	// get hash in detail and check confirmation
@@ -102,9 +102,9 @@ func (t *TxMonitor) updateStatusTxTypeSent(actionType action.ActionType) error {
 			// current confirmation meets 6 or more
 			_, err = t.txRepo.UpdateTxTypeBySentHashTx(actionType, tx.TxTypeDone, hash)
 			if err != nil {
-				return errors.Wrapf(
-					err, "fail to call repo.Tx().UpdateTxTypeBySentHashTx(tx.TxTypeDone) ActionType: %s",
-					actionType)
+				return fmt.Errorf(
+					"fail to call repo.Tx().UpdateTxTypeBySentHashTx(tx.TxTypeDone) ActionType: %s: %w",
+					actionType, err)
 			}
 		}
 	}
@@ -115,7 +115,7 @@ func (t *TxMonitor) updateStatusTxTypeDone(actionType action.ActionType) error {
 	// get records whose status is TxTypeDone
 	hashes, err := t.txRepo.GetSentHashTx(actionType, tx.TxTypeDone)
 	if err != nil {
-		return errors.Wrapf(err, "fail to call txRepo.GetSentHashTx(TxTypeDone) ActionType: %s", actionType)
+		return fmt.Errorf("fail to call txRepo.GetSentHashTx(TxTypeDone) ActionType: %s: %w", actionType, err)
 	}
 	t.logger.Debug(
 		"called repo.Tx().GetSentHashTx(TxTypeDone)",
@@ -158,9 +158,9 @@ func (t *TxMonitor) checkTxConfirmation(hash string, actionType action.ActionTyp
 	// get tx in detail by RPC `gettransaction`
 	tran, err := t.btc.GetTransactionByTxID(hash)
 	if err != nil {
-		return false, errors.Wrapf(
-			err, "fail to call btc.GetTransactionByTxID(): ActionType: %s, txID:%s",
-			actionType, hash)
+		return false, fmt.Errorf(
+			"fail to call btc.GetTransactionByTxID(): ActionType: %s, txID:%s: %w",
+			actionType, hash, err)
 	}
 	t.logger.Debug("confirmation detail",
 		"actionType", actionType.String(),
@@ -195,14 +195,14 @@ func (t *TxMonitor) notifyTxDone(hash string, actionType action.ActionType) (int
 		// 1. get txID from hash
 		txID, err = t.txRepo.GetTxIDBySentHash(actionType, hash)
 		if err != nil {
-			return 0, errors.Wrapf(err, "fail to call txRepo.GetTxIDBySentHash() ActionType: %s", actionType)
+			return 0, fmt.Errorf("fail to call txRepo.GetTxIDBySentHash() ActionType: %s: %w", actionType, err)
 		}
 
 		// 2. get txInputs
 		var txInputs []*models.BTCTXInput
 		txInputs, err = t.txInputRepo.GetAllByTxID(txID)
 		if err != nil {
-			return 0, errors.Wrapf(err, "fail to call txInRepo.GetAllByTxID(%d) ActionType: %s", txID, actionType)
+			return 0, fmt.Errorf("fail to call txInRepo.GetAllByTxID(%d) ActionType: %s: %w", txID, actionType, err)
 		}
 		if len(txInputs) == 0 {
 			t.logger.Debug("txInputs is not found in tx_input table",
@@ -219,16 +219,16 @@ func (t *TxMonitor) notifyTxDone(hash string, actionType action.ActionType) (int
 		// 1. get txID from hash
 		txID, err = t.txRepo.GetTxIDBySentHash(actionType, hash)
 		if err != nil {
-			return 0, errors.Wrapf(err, "fail to call txRepo.GetTxIDBySentHash() ActionType: %s", actionType)
+			return 0, fmt.Errorf("fail to call txRepo.GetTxIDBySentHash() ActionType: %s: %w", actionType, err)
 		}
 
 		// 2. get info from payment_request table
 		var paymentUsers []*models.PaymentRequest
 		paymentUsers, err = t.payReqRepo.GetAllByPaymentID(txID)
 		if err != nil {
-			return 0, errors.Wrapf(
-				err, "fail to call repo.GetPaymentRequestByPaymentID(%d) ActionType: %s",
-				txID, actionType)
+			return 0, fmt.Errorf(
+				"fail to call repo.GetPaymentRequestByPaymentID(%d) ActionType: %s: %w",
+				txID, actionType, err)
 		}
 		if len(paymentUsers) == 0 {
 			t.logger.Debug("payment user is not found",
@@ -256,14 +256,14 @@ func (t *TxMonitor) updateTxTypeNotified(id int64, actionType action.ActionType)
 	case action.ActionTypeDeposit:
 		_, err := t.txRepo.UpdateTxType(id, tx.TxTypeNotified)
 		if err != nil {
-			return errors.Wrapf(
-				err, "fail to call repo.Tx().UpdateTxType(tx.TxTypeNotified) ActionType: %s",
-				actionType)
+			return fmt.Errorf(
+				"fail to call repo.Tx().UpdateTxType(tx.TxTypeNotified) ActionType: %s: %w",
+				actionType, err)
 		}
 	case action.ActionTypePayment:
 		dtx, err := t.dbConn.Begin()
 		if err != nil {
-			return errors.Wrapf(err, "fail to start transaction")
+			return fmt.Errorf("fail to start transaction: %w", err)
 		}
 		defer func() {
 			if err != nil {
@@ -274,15 +274,15 @@ func (t *TxMonitor) updateTxTypeNotified(id int64, actionType action.ActionType)
 		}()
 		_, err = t.txRepo.UpdateTxType(id, tx.TxTypeNotified)
 		if err != nil {
-			return errors.Wrapf(
-				err, "fail to call repo.Tx().UpdateTxType(tx.TxTypeNotified) ActionType: %s",
-				actionType)
+			return fmt.Errorf(
+				"fail to call repo.Tx().UpdateTxType(tx.TxTypeNotified) ActionType: %s: %w",
+				actionType, err)
 		}
 
 		// update is_done=true in payment_request
 		_, err = t.payReqRepo.UpdateIsDone(id)
 		if err != nil {
-			return errors.Wrapf(err, "fail to call repo.UpdateIsDoneOnPaymentRequest() ActionType: %s", actionType)
+			return fmt.Errorf("fail to call repo.UpdateIsDoneOnPaymentRequest() ActionType: %s: %w", actionType, err)
 		}
 	case action.ActionTypeTransfer:
 		// TODO: not implemented yet, it could be same to action.ActionTypeDeposit
@@ -305,7 +305,7 @@ func (t *TxMonitor) MonitorBalance(confirmationNum uint64) error {
 	for _, acnt := range targetAccounts {
 		total, err := t.btc.GetBalanceByAccount(acnt, confirmationNum)
 		if err != nil {
-			return errors.Wrapf(err, "fail to call btc.GetBalanceByAccount() confirmation: %d", confirmationNum)
+			return fmt.Errorf("fail to call btc.GetBalanceByAccount() confirmation: %d: %w", confirmationNum, err)
 		}
 		t.logger.Info("total balance",
 			"account", acnt.String(),

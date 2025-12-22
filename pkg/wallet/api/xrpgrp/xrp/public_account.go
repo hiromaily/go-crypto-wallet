@@ -2,8 +2,7 @@ package xrp
 
 import (
 	"context"
-
-	"github.com/pkg/errors"
+	"fmt"
 )
 
 // https://xrpl.org/account-methods.html
@@ -91,7 +90,7 @@ func (r *Ripple) AccountChannels(sender, receiver string) (*ResponseAccountChann
 	}
 	var res ResponseAccountChannels
 	if err := r.wsPublic.Call(context.Background(), &req, &res); err != nil {
-		return nil, errors.Wrap(err, "fail to call wsClient.Call(account_channels)")
+		return nil, fmt.Errorf("fail to call wsClient.Call(account_channels): %w", err)
 	}
 	return &res, nil
 }
@@ -108,7 +107,7 @@ func (r *Ripple) AccountInfo(address string) (*ResponseAccountInfo, error) {
 	}
 	var res ResponseAccountInfo
 	if err := r.wsPublic.Call(context.Background(), &req, &res); err != nil {
-		return nil, errors.Wrap(err, "fail to call wsClient.Call(account_info)")
+		return nil, fmt.Errorf("fail to call wsClient.Call(account_info): %w", err)
 	}
 	return &res, nil
 }

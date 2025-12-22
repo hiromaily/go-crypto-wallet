@@ -3,9 +3,9 @@ package watchrepo
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/ericlagergren/decimal"
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -37,7 +37,7 @@ func (r *TxInputRepositorySqlc) GetOne(id int64) (*models.BTCTXInput, error) {
 
 	input, err := r.queries.GetBtcTxInputByID(ctx, id)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetBtcTxInputByID()")
+		return nil, fmt.Errorf("failed to call GetBtcTxInputByID(): %w", err)
 	}
 
 	return convertSqlcBtcTxInputToModel(&input), nil
@@ -49,7 +49,7 @@ func (r *TxInputRepositorySqlc) GetAllByTxID(id int64) ([]*models.BTCTXInput, er
 
 	inputs, err := r.queries.GetBtcTxInputsByTxID(ctx, id)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetBtcTxInputsByTxID()")
+		return nil, fmt.Errorf("failed to call GetBtcTxInputsByTxID(): %w", err)
 	}
 
 	result := make([]*models.BTCTXInput, len(inputs))
@@ -75,7 +75,7 @@ func (r *TxInputRepositorySqlc) Insert(txItem *models.BTCTXInput) error {
 		UpdatedAt:          convertNullTimeToSQLNullTime(txItem.UpdatedAt),
 	})
 	if err != nil {
-		return errors.Wrap(err, "failed to call InsertBtcTxInput()")
+		return fmt.Errorf("failed to call InsertBtcTxInput(): %w", err)
 	}
 
 	return nil

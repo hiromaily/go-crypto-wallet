@@ -3,9 +3,8 @@ package coldrepo
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
-
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
@@ -42,7 +41,7 @@ func (r *AuthAccountKeyRepositorySqlc) GetOne(authType account.AuthType) (*model
 		AuthAccount: authType.String(),
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetAuthAccountKey()")
+		return nil, fmt.Errorf("failed to call GetAuthAccountKey(): %w", err)
 	}
 
 	return convertSqlcAuthAccountKeyToModel(&authKey), nil
@@ -66,7 +65,7 @@ func (r *AuthAccountKeyRepositorySqlc) Insert(item *models.AuthAccountKey) error
 		AddrStatus:         item.AddrStatus,
 	})
 	if err != nil {
-		return errors.Wrap(err, "failed to call InsertAuthAccountKey()")
+		return fmt.Errorf("failed to call InsertAuthAccountKey(): %w", err)
 	}
 
 	return nil
@@ -83,12 +82,12 @@ func (r *AuthAccountKeyRepositorySqlc) UpdateAddrStatus(addrStatus address.AddrS
 		WalletImportFormat: strWIF,
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call UpdateAuthAccountKeyAddrStatus()")
+		return 0, fmt.Errorf("failed to call UpdateAuthAccountKeyAddrStatus(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to get RowsAffected()")
+		return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 	}
 
 	return rowsAffected, nil

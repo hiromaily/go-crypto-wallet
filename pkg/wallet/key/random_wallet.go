@@ -1,10 +1,11 @@
 package key
 
 import (
+	"errors"
+
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/pkg/errors"
 )
 
 // random wallet

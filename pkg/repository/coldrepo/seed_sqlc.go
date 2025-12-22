@@ -3,8 +3,7 @@ package coldrepo
 import (
 	"context"
 	"database/sql"
-
-	"github.com/pkg/errors"
+	"fmt"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -36,7 +35,7 @@ func (r *SeedRepositorySqlc) GetOne() (*models.Seed, error) {
 
 	seed, err := r.queries.GetSeed(ctx, sqlcgen.SeedCoin(r.coinTypeCode.String()))
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetSeed()")
+		return nil, fmt.Errorf("failed to call GetSeed(): %w", err)
 	}
 
 	return convertSqlcSeedToModel(&seed), nil
@@ -51,7 +50,7 @@ func (r *SeedRepositorySqlc) Insert(strSeed string) error {
 		Seed: strSeed,
 	})
 	if err != nil {
-		return errors.Wrap(err, "failed to call InsertSeed()")
+		return fmt.Errorf("failed to call InsertSeed(): %w", err)
 	}
 
 	return nil

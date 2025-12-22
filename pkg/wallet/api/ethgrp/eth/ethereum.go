@@ -2,12 +2,12 @@ package eth
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -50,7 +50,7 @@ func NewEthereum(
 	if eth.keyDir == "" {
 		dirName, err := eth.AdminDataDir()
 		if err != nil {
-			return nil, errors.Wrap(err, "fail to call eth.AdminDataDir()")
+			return nil, fmt.Errorf("fail to call eth.AdminDataDir(): %w", err)
 		}
 		eth.keyDir = dirName + "/keystore"
 	}
@@ -59,7 +59,7 @@ func NewEthereum(
 	// get NetID
 	netID, err := eth.NetVersion()
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call eth.NetVersion()")
+		return nil, fmt.Errorf("fail to call eth.NetVersion(): %w", err)
 	}
 	eth.netID = netID
 
@@ -72,7 +72,7 @@ func NewEthereum(
 	// get client version
 	clientVer, err := eth.ClientVersion()
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call eth.ClientVersion()")
+		return nil, fmt.Errorf("fail to call eth.ClientVersion(): %w", err)
 	}
 	eth.version = clientVer
 
@@ -81,7 +81,7 @@ func NewEthereum(
 	// check sync progress
 	res, isSyncing, err := eth.Syncing()
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call eth.Syncing()")
+		return nil, fmt.Errorf("fail to call eth.Syncing(): %w", err)
 	}
 	if isSyncing {
 		logger.Warn("sync is not completed yet")
@@ -97,7 +97,7 @@ func NewEthereum(
 	// check network connections
 	isListening, err := eth.NetListening()
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call eth.NetListening()")
+		return nil, fmt.Errorf("fail to call eth.NetListening(): %w", err)
 	}
 	if !isListening {
 		logger.Warn("network is not working")

@@ -1,7 +1,8 @@
 package watchsrv
 
 import (
-	"github.com/pkg/errors"
+	"errors"
+	"fmt"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -28,11 +29,11 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	// check sender's balance
 	senderAddr, err := t.addrRepo.GetOneUnAllocated(sender)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call addrRepo.GetOneUnAllocated(sender)")
+		return "", "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(sender): %w", err)
 	}
 	senderBalnce, err := t.eth.GetBalance(senderAddr.WalletAddress, eth.QuantityTagLatest)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call eth.GetBalance(sender)")
+		return "", "", fmt.Errorf("fail to call eth.GetBalance(sender): %w", err)
 	}
 
 	if senderBalnce.Uint64() == 0 {
@@ -52,16 +53,16 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	// get receiver address
 	receiverAddr, err := t.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call addrRepo.GetOneUnAllocated(receiver)")
+		return "", "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(receiver): %w", err)
 	}
 
 	// call CreateRawTransaction
 	rawTx, txDetailItem, err := t.eth.CreateRawTransaction(
 		senderAddr.WalletAddress, receiverAddr.WalletAddress, requiredValue.Uint64(), 0)
 	if err != nil {
-		return "", "", errors.Wrapf(
-			err, "fail to call eth.CreateRawTransaction(), sender address: %s",
-			senderAddr.WalletAddress)
+		return "", "", fmt.Errorf(
+			"fail to call eth.CreateRawTransaction(), sender address: %s: %w",
+			senderAddr.WalletAddress, err)
 	}
 
 	rawTxHex := rawTx.TxHex
@@ -69,7 +70,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 
 	serializedTx, err := serial.EncodeToString(rawTx)
 	if err != nil {
-		return "", "", errors.Wrap(err, "fail to call serial.EncodeToString(rawTx)")
+		return "", "", fmt.Errorf("fail to call serial.EncodeToString(rawTx): %w", err)
 	}
 	serializedTxs := []string{serializedTx}
 
@@ -88,7 +89,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	if len(serializedTxs) != 0 {
 		generatedFileName, err = t.generateHexFile(targetAction, sender, txID, serializedTxs)
 		if err != nil {
-			return "", "", errors.Wrap(err, "fail to call generateHexFile()")
+			return "", "", fmt.Errorf("fail to call generateHexFile(): %w", err)
 		}
 	}
 

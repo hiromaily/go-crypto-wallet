@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/bookerzzz/grok"
@@ -12,7 +13,6 @@ import (
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 )
@@ -138,7 +138,7 @@ type FundRawTransactionResult struct {
 func (*Bitcoin) ToHex(tx *wire.MsgTx) (string, error) {
 	buf := bytes.NewBuffer(make([]byte, 0, tx.SerializeSize()))
 	if err := tx.Serialize(buf); err != nil {
-		return "", errors.Wrap(err, "fail to call tx.Serialize()")
+		return "", fmt.Errorf("fail to call tx.Serialize(): %w", err)
 	}
 	return hex.EncodeToString(buf.Bytes()), nil
 }
@@ -147,12 +147,12 @@ func (*Bitcoin) ToHex(tx *wire.MsgTx) (string, error) {
 func (*Bitcoin) ToMsgTx(txHex string) (*wire.MsgTx, error) {
 	byteHex, err := hex.DecodeString(txHex)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call hex.DecodeString()")
+		return nil, fmt.Errorf("fail to call hex.DecodeString(): %w", err)
 	}
 
 	var msgTx wire.MsgTx
 	if err = msgTx.Deserialize(bytes.NewReader(byteHex)); err != nil {
-		return nil, errors.Wrap(err, "fail to call hex.Deserialize()")
+		return nil, fmt.Errorf("fail to call hex.Deserialize(): %w", err)
 	}
 
 	return &msgTx, nil
@@ -162,17 +162,17 @@ func (*Bitcoin) ToMsgTx(txHex string) (*wire.MsgTx, error) {
 func (b *Bitcoin) GetTransaction(txID string) (*GetTransactionResult, error) {
 	input, err := json.Marshal(txID)
 	if err != nil {
-		return nil, errors.Errorf("json.Marchal(txID): error: %s", err)
+		return nil, fmt.Errorf("json.Marchal(txID): error: %s", err)
 	}
 	rawResult, err := b.Client.RawRequest("gettransaction", []json.RawMessage{input})
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.RawRequest(gettransaction)")
+		return nil, fmt.Errorf("fail to call json.RawRequest(gettransaction): %w", err)
 	}
 
 	result := GetTransactionResult{}
 	err = json.Unmarshal(rawResult, &result)
 	if err != nil {
-		return nil, errors.Errorf("json.Unmarshal(rawResult): error: %s", err)
+		return nil, fmt.Errorf("json.Unmarshal(rawResult): error: %s", err)
 	}
 
 	return &result, nil
@@ -187,7 +187,7 @@ func (b *Bitcoin) GetTransactionByTxID(txID string) (*GetTransactionResult, erro
 	// resTx, err := b.Client.GetTransaction(hashTx)
 	resTx, err := b.GetTransaction(txID)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to call btc.GetTransaction(%s)", txID)
+		return nil, fmt.Errorf("fail to call btc.GetTransaction(%s): %w", txID, err)
 	}
 
 	return resTx, nil
@@ -198,14 +198,14 @@ func (b *Bitcoin) GetTransactionByTxID(txID string) (*GetTransactionResult, erro
 func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutResult, error) {
 	hash, err := chainhash.NewHashFromStr(txID)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to call chainhash.NewHashFromStr(%s)", txID)
+		return nil, fmt.Errorf("fail to call chainhash.NewHashFromStr(%s): %w", txID, err)
 	}
 
 	// Gettxout / txHash *chainhash.Hash, index uint32, mempool bool
 	//  client.GetTxOut is not outdated yet (at bitcoin core 0.19)
 	txOutResult, err := b.Client.GetTxOut(hash, index, false)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to call btc.client.GetTxOut(%s, %d, false)", hash, index)
+		return nil, fmt.Errorf("fail to call btc.client.GetTxOut(%s, %d, false): %w", hash, index, err)
 	}
 
 	return txOutResult, nil
@@ -230,22 +230,22 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*TxRawResult, error) {
 	// byteHex, err := hex.DecodeString(hexTx)
 	// if err != nil {
-	//	return nil, errors.Wrap(err, "fail to call hex.DecodeString()")
+	//	return nil, fmt.Errorf("fail to call hex.DecodeString(): %w", err)
 	//}
 	// resTx, err := b.Client.DecodeRawTransaction(byteHex)
 	input, err := json.Marshal(hexTx)
 	if err != nil {
-		return nil, errors.Errorf("json.Marchal(txID): error: %s", err)
+		return nil, fmt.Errorf("json.Marchal(txID): error: %s", err)
 	}
 	rawResult, err := b.Client.RawRequest("decoderawtransaction", []json.RawMessage{input})
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.RawRequest(decoderawtransaction)")
+		return nil, fmt.Errorf("fail to call json.RawRequest(decoderawtransaction): %w", err)
 	}
 
 	result := TxRawResult{}
 	err = json.Unmarshal(rawResult, &result)
 	if err != nil {
-		return nil, errors.Errorf("json.Unmarshal(rawResult): error: %s", err)
+		return nil, fmt.Errorf("json.Unmarshal(rawResult): error: %s", err)
 	}
 
 	return &result, nil
@@ -256,12 +256,12 @@ func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*TxRawResult, error) {
 func (b *Bitcoin) GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error) {
 	hashTx, err := chainhash.NewHashFromStr(strHashTx)
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to call chainhash.NewHashFromStr(%s)", strHashTx)
+		return nil, fmt.Errorf("fail to call chainhash.NewHashFromStr(%s): %w", strHashTx, err)
 	}
 
 	tx, err := b.Client.GetRawTransaction(hashTx)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call btc.client.GetRawTransaction(hash)")
+		return nil, fmt.Errorf("fail to call btc.client.GetRawTransaction(hash): %w", err)
 	}
 	// MsgTx()
 	// tx.MsgTx()
@@ -279,7 +279,7 @@ func (b *Bitcoin) CreateRawTransaction(
 	// CreateRawTransaction
 	msgTx, err := b.Client.CreateRawTransaction(inputs, outputs, &lockTime)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call btcutil.CreateRawTransaction()")
+		return nil, fmt.Errorf("fail to call btcutil.CreateRawTransaction(): %w", err)
 	}
 
 	return msgTx, nil
@@ -294,13 +294,13 @@ func (b *Bitcoin) FundRawTransaction(hexTx string) (*FundRawTransactionResult, e
 	// hex
 	bHex, err := json.Marshal(hexTx)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Marchal(hex)")
+		return nil, fmt.Errorf("fail to call json.Marchal(hex): %w", err)
 	}
 
 	// fee rate
 	feePerKb, err := b.EstimateSmartFee()
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call btc.EstimateSmartFee()")
+		return nil, fmt.Errorf("fail to call btc.EstimateSmartFee(): %w", err)
 	}
 
 	bFeeRate, err := json.Marshal(struct {
@@ -309,19 +309,19 @@ func (b *Bitcoin) FundRawTransaction(hexTx string) (*FundRawTransactionResult, e
 		FeeRate: feePerKb,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Marchal(feeRate)")
+		return nil, fmt.Errorf("fail to call json.Marchal(feeRate): %w", err)
 	}
 
 	rawResult, err := b.Client.RawRequest("fundrawtransaction", []json.RawMessage{bHex, bFeeRate})
 	if err != nil {
 		// error: -4: Insufficient funds
-		return nil, errors.Wrap(err, "fail to call json.RawRequest(fundrawtransaction)")
+		return nil, fmt.Errorf("fail to call json.RawRequest(fundrawtransaction): %w", err)
 	}
 
 	fundRawTransactionResult := FundRawTransactionResult{}
 	err = json.Unmarshal(rawResult, &fundRawTransactionResult)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
+		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
 	}
 
 	return &fundRawTransactionResult, nil
@@ -335,40 +335,40 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []PrevTx) (*wire.Ms
 	// hex tx
 	hexTx, err := b.ToHex(tx)
 	if err != nil {
-		return nil, false, errors.Wrap(err, "fail to call btc.ToHex(tx)")
+		return nil, false, fmt.Errorf("fail to call btc.ToHex(tx): %w", err)
 	}
 
 	input1, err := json.Marshal(hexTx)
 	if err != nil {
-		return nil, false, errors.Wrap(err, "fail to call json.Marchal(hexTx)")
+		return nil, false, fmt.Errorf("fail to call json.Marchal(hexTx): %w", err)
 	}
 
 	// prevtxs
 	input2, err := json.Marshal(prevtxs)
 	if err != nil {
-		return nil, false, errors.Wrap(err, "fail to call json.Marchal(prevtxs)")
+		return nil, false, fmt.Errorf("fail to call json.Marchal(prevtxs): %w", err)
 	}
 
 	// call api `signrawtransactionwithwallet`
 	rawResult, err := b.Client.RawRequest("signrawtransactionwithwallet", []json.RawMessage{input1, input2})
 	if err != nil {
-		return nil, false, errors.Wrap(err, "fail to call json.RawRequest(signrawtransactionwithwallet)")
+		return nil, false, fmt.Errorf("fail to call json.RawRequest(signrawtransactionwithwallet): %w", err)
 	}
 	signRawTxResult := SignRawTransactionResult{}
 	err = json.Unmarshal(rawResult, &signRawTxResult)
 	if err != nil {
-		return nil, false, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
+		return nil, false, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
 	}
 	if len(signRawTxResult.Errors) != 0 {
 		grok.Value(signRawTxResult)
-		return nil, false, errors.Errorf(
+		return nil, false, fmt.Errorf(
 			"result of `signrawtransactionwithwallet` includes error: %s",
 			signRawTxResult.Errors[0].Error)
 	}
 
 	msgTx, err := b.ToMsgTx(signRawTxResult.Hex)
 	if err != nil {
-		return nil, false, errors.Wrap(err, "fail to call btc.ToMsgTx(hex)")
+		return nil, false, fmt.Errorf("fail to call btc.ToMsgTx(hex): %w", err)
 	}
 
 	// Debug to compare tx before and after
@@ -390,36 +390,36 @@ func (b *Bitcoin) SignRawTransactionWithKey(
 	// hex tx
 	hexTx, err := b.ToHex(tx)
 	if err != nil {
-		return nil, false, errors.Wrap(err, "fail to call btc.ToHex(tx)")
+		return nil, false, fmt.Errorf("fail to call btc.ToHex(tx): %w", err)
 	}
 
 	input1, err := json.Marshal(hexTx)
 	if err != nil {
-		return nil, false, errors.Wrap(err, "fail to call json.Marchal(txHex)")
+		return nil, false, fmt.Errorf("fail to call json.Marchal(txHex): %w", err)
 	}
 
 	// private keys
 	input2, err := json.Marshal(privKeysWIF)
 	if err != nil {
-		return nil, false, errors.Wrap(err, "fail to call json.Marchal(privKeysWIF)")
+		return nil, false, fmt.Errorf("fail to call json.Marchal(privKeysWIF): %w", err)
 	}
 
 	// prevtxs
 	input3, err := json.Marshal(prevtxs)
 	if err != nil {
-		return nil, false, errors.Errorf("fail to call json.Marchal(prevtxs)")
+		return nil, false, fmt.Errorf("fail to call json.Marchal(prevtxs): %w", err)
 	}
 
 	// call api `signrawtransactionwithkey`
 	rawResult, err := b.Client.RawRequest("signrawtransactionwithkey", []json.RawMessage{input1, input2, input3})
 	if err != nil {
-		return nil, false, errors.Wrap(err, "fail to call json.RawRequest(signrawtransactionwithkey)")
+		return nil, false, fmt.Errorf("fail to call json.RawRequest(signrawtransactionwithkey): %w", err)
 	}
 
 	signRawTxResult := SignRawTransactionResult{}
 	err = json.Unmarshal(rawResult, &signRawTxResult)
 	if err != nil {
-		return nil, false, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
+		return nil, false, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
 	}
 	// Note: if signature is not completed yet, error would occur
 	// - ignore error if retured msgTx is not blank、and returned hex is changed from given hex as parameter
@@ -427,7 +427,7 @@ func (b *Bitcoin) SignRawTransactionWithKey(
 	if len(signRawTxResult.Errors) != 0 {
 		if signRawTxResult.Hex == "" || hexTx == signRawTxResult.Hex {
 			grok.Value(signRawTxResult)
-			return nil, false, errors.Errorf(
+			return nil, false, fmt.Errorf(
 				"result of `signrawtransactionwithwallet` includes error: %s",
 				signRawTxResult.Errors[0].Error)
 		}
@@ -438,7 +438,7 @@ func (b *Bitcoin) SignRawTransactionWithKey(
 
 	msgTx, err := b.ToMsgTx(signRawTxResult.Hex)
 	if err != nil {
-		return nil, false, errors.Wrap(err, "fail to call btc.ToMsgTx(hex)")
+		return nil, false, fmt.Errorf("fail to call btc.ToMsgTx(hex): %w", err)
 	}
 
 	return msgTx, signRawTxResult.Complete, nil
@@ -454,7 +454,7 @@ func (b *Bitcoin) SendTransactionByHex(hexTx string) (*chainhash.Hash, error) {
 	// send
 	hash, err := b.sendRawTransaction(msgTx)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call btc.SendRawTransaction()")
+		return nil, fmt.Errorf("fail to call btc.SendRawTransaction(): %w", err)
 	}
 
 	// txID
@@ -469,13 +469,13 @@ func (b *Bitcoin) SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error) {
 	r := bytes.NewBuffer(rawTx)
 
 	if err := wireTx.Deserialize(r); err != nil {
-		return nil, errors.Wrap(err, "fail to call wireTx.Deserialize()")
+		return nil, fmt.Errorf("fail to call wireTx.Deserialize(): %w", err)
 	}
 
 	// send
 	hash, err := b.sendRawTransaction(wireTx)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call btc.SendRawTransaction()")
+		return nil, fmt.Errorf("fail to call btc.SendRawTransaction(): %w", err)
 	}
 
 	// txID
@@ -494,7 +494,7 @@ func (b *Bitcoin) sendRawTransaction(tx *wire.MsgTx) (*chainhash.Hash, error) {
 			b.logger.Info("Transaction already in block chain")
 			return nil, nil
 		}
-		return nil, errors.Wrap(err, "fail to call btc.client.SendRawTransaction()")
+		return nil, fmt.Errorf("fail to call btc.client.SendRawTransaction(): %w", err)
 	}
 
 	return hash, nil

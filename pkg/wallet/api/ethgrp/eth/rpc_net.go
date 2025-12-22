@@ -1,11 +1,11 @@
 package eth
 
 import (
+	"fmt"
 	"math/big"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/pkg/errors"
 )
 
 // NetVersion returns the current network id
@@ -19,11 +19,11 @@ func (e *Ethereum) NetVersion() (uint16, error) {
 	var resNetVersion string
 	err := e.rpcClient.CallContext(e.ctx, &resNetVersion, "net_version")
 	if err != nil {
-		return 0, errors.Wrap(err, "fail to call client.CallContext(net_version)")
+		return 0, fmt.Errorf("fail to call client.CallContext(net_version): %w", err)
 	}
 	u, err := strconv.ParseUint(resNetVersion, 10, 64)
 	if err != nil {
-		return 0, errors.Wrapf(err, "fail to call strconv.ParseUint(%s)", resNetVersion)
+		return 0, fmt.Errorf("fail to call strconv.ParseUint(%s): %w", resNetVersion, err)
 	}
 
 	return uint16(u), nil
@@ -36,7 +36,7 @@ func (e *Ethereum) NetListening() (bool, error) {
 	var isConnected bool
 	err := e.rpcClient.CallContext(e.ctx, &isConnected, "net_listening")
 	if err != nil {
-		return false, errors.Wrap(err, "fail to call rpc.CallContext(net_listening)")
+		return false, fmt.Errorf("fail to call rpc.CallContext(net_listening): %w", err)
 	}
 
 	return isConnected, nil
@@ -48,7 +48,7 @@ func (e *Ethereum) NetPeerCount() (*big.Int, error) {
 	var resPeerNumber string
 	err := e.rpcClient.CallContext(e.ctx, &resPeerNumber, "net_peerCount")
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call client.CallContext(net_peerCount)")
+		return nil, fmt.Errorf("fail to call client.CallContext(net_peerCount): %w", err)
 	}
 	return hexutil.DecodeBig(resPeerNumber)
 }

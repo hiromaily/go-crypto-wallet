@@ -1,12 +1,13 @@
 package eth
 
 import (
+	"errors"
+	"fmt"
 	"math/big"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/debug"
 )
@@ -40,7 +41,7 @@ func (e *Ethereum) Syncing() (*ResponseSyncing, bool, error) {
 
 	err := e.rpcClient.CallContext(e.ctx, &result, "eth_syncing")
 	if err != nil {
-		return nil, false, errors.Wrap(err, "fail to call client.CallContext(eth_syncing)")
+		return nil, false, fmt.Errorf("fail to call client.CallContext(eth_syncing): %w", err)
 	}
 
 	// try to cast to bool first
@@ -77,7 +78,7 @@ func (e *Ethereum) ProtocolVersion() (uint64, error) {
 	var resProtocolVer string
 	err := e.rpcClient.CallContext(e.ctx, &resProtocolVer, "eth_protocolVersion")
 	if err != nil {
-		return 0, errors.Wrapf(err, "fail to call rpc.CallContext(eth_protocolVersion) error: %s", err)
+		return 0, fmt.Errorf("fail to call rpc.CallContext(eth_protocolVersion) error: %s: %w", err, err)
 	}
 	h, err := e.DecodeBig(resProtocolVer)
 	if err != nil {
@@ -97,7 +98,7 @@ func (e *Ethereum) Coinbase() (string, error) {
 	var resAddr string
 	err := e.rpcClient.CallContext(e.ctx, &resAddr, "eth_coinbase")
 	if err != nil {
-		return "", errors.Wrap(err, "fail to call rpc.CallContext(eth_coinbase)")
+		return "", fmt.Errorf("fail to call rpc.CallContext(eth_coinbase): %w", err)
 	}
 	return resAddr, err
 }
@@ -116,7 +117,7 @@ func (e *Ethereum) Accounts() ([]string, error) {
 	var accounts []string
 	err := e.rpcClient.CallContext(e.ctx, &accounts, "eth_accounts")
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_accounts)")
+		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_accounts): %w", err)
 	}
 
 	return accounts, nil
@@ -130,11 +131,11 @@ func (e *Ethereum) BlockNumber() (*big.Int, error) {
 	var resBlockNumber string
 	err := e.rpcClient.CallContext(e.ctx, &resBlockNumber, "eth_blockNumber")
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_blockNumber)")
+		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_blockNumber): %w", err)
 	}
 	h, err := hexutil.DecodeBig(resBlockNumber)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
+		return nil, fmt.Errorf("fail to call hexutil.DecodeBig(): %w", err)
 	}
 
 	return h, nil
@@ -167,13 +168,13 @@ func (e *Ethereum) GetBalance(hexAddr string, quantityTag QuantityTag) (*big.Int
 	var balance string
 	err := e.rpcClient.CallContext(e.ctx, &balance, "eth_getBalance", hexAddr, quantityTag.String())
 	if err != nil {
-		return nil, errors.Wrapf(
-			err, "fail to call rpc.CallContext(eth_getBalance) quantityTag: %s",
-			quantityTag.String())
+		return nil, fmt.Errorf(
+			"fail to call rpc.CallContext(eth_getBalance) quantityTag: %s: %w",
+			quantityTag.String(), err)
 	}
 	h, err := hexutil.DecodeBig(balance)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
+		return nil, fmt.Errorf("fail to call hexutil.DecodeBig(): %w", err)
 	}
 
 	return h, nil
@@ -189,7 +190,7 @@ func (e *Ethereum) GetBalance(hexAddr string, quantityTag QuantityTag) (*big.Int
 //	var storagePosition string
 //	err := e.rpcClient.CallContext(e.ctx, &storagePosition, "eth_getStorageAt", hexAddr, "0x0", quantityTag.String())
 //	if err != nil {
-//		return "", errors.Wrap(err, "fail to call rpc.CallContext(eth_getStorageAt)")
+//		return "", fmt.Errorf("fail to call rpc.CallContext(eth_getStorageAt): %w", err)
 //	}
 //
 //	return storagePosition, nil
@@ -205,11 +206,11 @@ func (e *Ethereum) GetTransactionCount(hexAddr string, quantityTag QuantityTag) 
 	var transactionCount string
 	err := e.rpcClient.CallContext(e.ctx, &transactionCount, "eth_getTransactionCount", hexAddr, quantityTag.String())
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_getTransactionCount)")
+		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getTransactionCount): %w", err)
 	}
 	h, err := hexutil.DecodeBig(transactionCount)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
+		return nil, fmt.Errorf("fail to call hexutil.DecodeBig(): %w", err)
 	}
 
 	return h, nil
@@ -226,7 +227,7 @@ func (e *Ethereum) GetTransactionCount(hexAddr string, quantityTag QuantityTag) 
 //	var txCount string
 //	err := e.rpcClient.CallContext(e.ctx, &txCount, "eth_getBlockTransactionCountByHash", blockHash)
 //	if err != nil {
-//		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_getBlockTransactionCountByHash)")
+//		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getBlockTransactionCountByHash): %w", err)
 //	}
 //	if txCount == "" {
 //		e.logger.Debug("transactionCount is blank")
@@ -235,7 +236,7 @@ func (e *Ethereum) GetTransactionCount(hexAddr string, quantityTag QuantityTag) 
 //
 //	h, err := hexutil.DecodeBig(txCount)
 //	if err != nil {
-//		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
+//		return nil, fmt.Errorf("fail to call hexutil.DecodeBig(): %w", err)
 //	}
 //
 //	return h, nil
@@ -252,7 +253,7 @@ func (e *Ethereum) GetBlockTransactionCountByNumber(blockNumber uint64) (*big.In
 	var txCount string
 	err := e.rpcClient.CallContext(e.ctx, &txCount, "eth_getBlockTransactionCountByNumber", hexNum)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_getBlockTransactionCountByNumber)")
+		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getBlockTransactionCountByNumber): %w", err)
 	}
 	if txCount == "" {
 		e.logger.Debug("transactionCount is blank")
@@ -261,7 +262,7 @@ func (e *Ethereum) GetBlockTransactionCountByNumber(blockNumber uint64) (*big.In
 
 	h, err := hexutil.DecodeBig(txCount)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
+		return nil, fmt.Errorf("fail to call hexutil.DecodeBig(): %w", err)
 	}
 
 	return h, nil
@@ -274,7 +275,7 @@ func (e *Ethereum) GetBlockTransactionCountByNumber(blockNumber uint64) (*big.In
 //	var uncleCount string
 //	err := e.rpcClient.CallContext(e.ctx, &uncleCount, "eth_getUncleCountByBlockHash", blockHash)
 //	if err != nil {
-//		return nil, errors.Errorf("fail to call rpc.CallContext(eth_getUncleCountByBlockHash)")
+//		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getUncleCountByBlockHash)")
 //	}
 //	if uncleCount == "" {
 //		e.logger.Debug("uncleCount is blank")
@@ -283,7 +284,7 @@ func (e *Ethereum) GetBlockTransactionCountByNumber(blockNumber uint64) (*big.In
 //
 //	h, err := e.DecodeBig(uncleCount)
 //	if err != nil {
-//		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
+//		return nil, fmt.Errorf("fail to call hexutil.DecodeBig(): %w", err)
 //	}
 //
 //	return h, nil
@@ -299,7 +300,7 @@ func (e *Ethereum) GetUncleCountByBlockNumber(blockNumber uint64) (*big.Int, err
 	var uncleCount string
 	err := e.rpcClient.CallContext(e.ctx, &uncleCount, "eth_getUncleCountByBlockNumber", blockHexNumber)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_getUncleCountByBlockNumber)")
+		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getUncleCountByBlockNumber): %w", err)
 	}
 	if uncleCount == "" {
 		e.logger.Debug("uncleCount is blank")
@@ -308,7 +309,7 @@ func (e *Ethereum) GetUncleCountByBlockNumber(blockNumber uint64) (*big.Int, err
 
 	h, err := e.DecodeBig(uncleCount)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
+		return nil, fmt.Errorf("fail to call hexutil.DecodeBig(): %w", err)
 	}
 
 	return h, nil
@@ -322,7 +323,7 @@ func (e *Ethereum) GetUncleCountByBlockNumber(blockNumber uint64) (*big.Int, err
 //	var code string
 //	err := e.rpcClient.CallContext(e.ctx, &code, "eth_getCode", hexAddr, quantityTag.String())
 //	if err != nil {
-//		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_getCode)")
+//		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getCode): %w", err)
 //	}
 //	e.logger.Debug("code", "code", code)
 //	if code == "0x" {
@@ -331,7 +332,7 @@ func (e *Ethereum) GetUncleCountByBlockNumber(blockNumber uint64) (*big.Int, err
 //
 //	h, err := hexutil.DecodeBig(code)
 //	if err != nil {
-//		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
+//		return nil, fmt.Errorf("fail to call hexutil.DecodeBig(): %w", err)
 //	}
 //
 //	return h, nil
@@ -401,7 +402,7 @@ func (e *Ethereum) GetBlockByNumber(blockNumber uint64) (*BlockInfo, error) {
 
 	err := e.rpcClient.CallContext(e.ctx, &blockRawInfo, "eth_getBlockByNumber", blockHexNumber, false)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_getBlockByNumber)")
+		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getBlockByNumber): %w", err)
 	}
 
 	return convertBlockRawInfo(&blockRawInfo), nil

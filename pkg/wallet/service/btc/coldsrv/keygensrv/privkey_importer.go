@@ -1,8 +1,9 @@
 package keygensrv
 
 import (
+	"fmt"
+
 	"github.com/btcsuite/btcd/btcutil"
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
@@ -44,7 +45,7 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 	// addr_status=0
 	accountKeyTable, err := p.accountKeyRepo.GetAllAddrStatus(accountType, address.AddrStatusHDKeyGenerated)
 	if err != nil {
-		return errors.Wrap(err, "fail to call repo.GetAllAccountKeyByAddrStatus()")
+		return fmt.Errorf("fail to call repo.GetAllAccountKeyByAddrStatus(): %w", err)
 	}
 	if len(accountKeyTable) == 0 {
 		p.logger.Info("no unimported private key")
@@ -62,9 +63,9 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 		var wif *btcutil.WIF
 		wif, err = btcutil.DecodeWIF(record.WalletImportFormat)
 		if err != nil {
-			return errors.Wrapf(
-				err, "fail to call btcutil.DecodeWIF(%s). WIF is invalid format",
-				record.WalletImportFormat)
+			return fmt.Errorf(
+				"fail to call btcutil.DecodeWIF(%s). WIF is invalid format: %w",
+				record.WalletImportFormat, err)
 		}
 
 		// import private key by wif without rescan

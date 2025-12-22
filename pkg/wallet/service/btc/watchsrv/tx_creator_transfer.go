@@ -1,7 +1,8 @@
 package watchsrv
 
 import (
-	"github.com/pkg/errors"
+	"errors"
+	"fmt"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -36,7 +37,7 @@ func (t *TxCreate) CreateTransferTx(
 	}
 	if balance <= requiredAmount {
 		// balance is short
-		return "", "", errors.Errorf("account: %s balance is insufficient", sender)
+		return "", "", fmt.Errorf("account: %s balance is insufficient", sender)
 	}
 
 	// create transfer transaction

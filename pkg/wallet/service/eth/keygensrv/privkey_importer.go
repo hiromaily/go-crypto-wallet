@@ -1,9 +1,10 @@
 package keygensrv
 
 import (
+	"fmt"
+
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
@@ -43,7 +44,7 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 	// addr_status=0
 	accountKeyTable, err := p.accountKeyRepo.GetAllAddrStatus(accountType, address.AddrStatusHDKeyGenerated)
 	if err != nil {
-		return errors.Wrap(err, "fail to call repo.GetAllAccountKeyByAddrStatus()")
+		return fmt.Errorf("fail to call repo.GetAllAccountKeyByAddrStatus(): %w", err)
 	}
 	if len(accountKeyTable) == 0 {
 		p.logger.Info("no unimported private key")
@@ -71,7 +72,7 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 				"private key", record.WalletImportFormat,
 				"error", convertErr)
 			// continue
-			return errors.Wrap(convertErr, "fail to call key.ToECDSA()")
+			return fmt.Errorf("fail to call key.ToECDSA(): %w", convertErr)
 		}
 		// FIXME: how to link imported key to specific accountName like client, deposit (grouping)
 		// TODO: where password should come from // ImportRawKey(hexKey, passPhrase string) (string, error)
@@ -85,7 +86,7 @@ func (p *PrivKey) Import(accountType account.AccountType) error {
 				"private key", record.WalletImportFormat,
 				"error", err)
 			// continue
-			return errors.Wrap(err, "fail to call eth.ImportECDSA()")
+			return fmt.Errorf("fail to call eth.ImportECDSA(): %w", err)
 		}
 		p.logger.Debug("key account is generated",
 			"account.Address.Hex()", acct.Address.Hex(),

@@ -2,9 +2,9 @@ package btc
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/btcsuite/btcd/btcutil"
-	"github.com/pkg/errors"
 )
 
 // GetAddressInfoResult is response type of RPC `getaddressinfo`
@@ -52,17 +52,17 @@ type Purpose struct {
 func (b *Bitcoin) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
 	input, err := json.Marshal(addr)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Marchal()")
+		return nil, fmt.Errorf("fail to call json.Marchal(): %w", err)
 	}
 	rawResult, err := b.Client.RawRequest("getaddressinfo", []json.RawMessage{input})
 	if err != nil {
-		return nil, errors.Wrapf(err, "fail to call json.RawRequest(getaddressinfo) %s", addr)
+		return nil, fmt.Errorf("fail to call json.RawRequest(getaddressinfo) %s: %w", addr, err)
 	}
 
 	infoResult := GetAddressInfoResult{}
 	err = json.Unmarshal(rawResult, &infoResult)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
+		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
 	}
 
 	return &infoResult, nil
@@ -78,19 +78,19 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 	// input for rpc api
 	input, err := json.Marshal(labelName)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Marchal()")
+		return nil, fmt.Errorf("fail to call json.Marchal(): %w", err)
 	}
 	// call getaddressesbylabel
 	rawResult, err := b.Client.RawRequest("getaddressesbylabel", []json.RawMessage{input})
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.RawRequest(getaddressesbylabel)")
+		return nil, fmt.Errorf("fail to call json.RawRequest(getaddressesbylabel): %w", err)
 	}
 
 	// unmarshal response
 	var labels map[string]Purpose
 	err = json.Unmarshal(rawResult, &labels)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.Unmarshal(rawResult)")
+		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
 	}
 
 	// retrieve
@@ -119,20 +119,20 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 func (b *Bitcoin) ValidateAddress(addr string) (*ValidateAddressResult, error) {
 	input, err := json.Marshal(addr)
 	if err != nil {
-		return nil, errors.Errorf("json.Marchal(): error: %s", err)
+		return nil, fmt.Errorf("json.Marchal(): error: %s", err)
 	}
 	rawResult, err := b.Client.RawRequest("validateaddress", []json.RawMessage{input})
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call json.RawRequest(validateaddress)")
+		return nil, fmt.Errorf("fail to call json.RawRequest(validateaddress): %w", err)
 	}
 
 	result := ValidateAddressResult{}
 	err = json.Unmarshal(rawResult, &result)
 	if err != nil {
-		return nil, errors.Errorf("json.Unmarshal(): error: %s", err)
+		return nil, fmt.Errorf("json.Unmarshal(): error: %s", err)
 	}
 	if !result.IsValid {
-		return nil, errors.Errorf("this address is invalid: %v", result)
+		return nil, fmt.Errorf("this address is invalid: %v", result)
 	}
 
 	return &result, nil
@@ -142,7 +142,7 @@ func (b *Bitcoin) ValidateAddress(addr string) (*ValidateAddressResult, error) {
 func (b *Bitcoin) DecodeAddress(addr string) (btcutil.Address, error) {
 	address, err := btcutil.DecodeAddress(addr, b.chainConf)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call btcutil.DecodeAddress()")
+		return nil, fmt.Errorf("fail to call btcutil.DecodeAddress(): %w", err)
 	}
 	return address, nil
 }

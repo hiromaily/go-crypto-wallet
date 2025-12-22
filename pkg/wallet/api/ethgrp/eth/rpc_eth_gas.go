@@ -1,11 +1,11 @@
 package eth
 
 import (
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	"github.com/pkg/errors"
 )
 
 // GasPrice returns the current price per gas in wei
@@ -15,11 +15,11 @@ func (e *Ethereum) GasPrice() (*big.Int, error) {
 	var gasPrice string
 	err := e.rpcClient.CallContext(e.ctx, &gasPrice, "eth_gasPrice")
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_gasPrice)")
+		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_gasPrice): %w", err)
 	}
 	h, err := hexutil.DecodeBig(gasPrice)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
+		return nil, fmt.Errorf("fail to call hexutil.DecodeBig(): %w", err)
 	}
 
 	return h, nil
@@ -34,12 +34,12 @@ func (e *Ethereum) EstimateGas(msg *ethereum.CallMsg) (*big.Int, error) {
 	err := e.rpcClient.CallContext(e.ctx, &estimated, "eth_estimateGas", toCallArg(msg))
 	if err != nil {
 		// Invalid params: Invalid bytes format. Expected a 0x-prefixed hex string with even length.
-		return nil, errors.Wrap(err, "fail to call rpc.CallContext(eth_estimateGas)")
+		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_estimateGas): %w", err)
 	}
 
 	h, err := hexutil.DecodeBig(estimated)
 	if err != nil {
-		return nil, errors.Wrap(err, "fail to call hexutil.DecodeBig()")
+		return nil, fmt.Errorf("fail to call hexutil.DecodeBig(): %w", err)
 	}
 
 	return h, nil

@@ -3,9 +3,8 @@ package watchrepo
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
-
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -38,7 +37,7 @@ func (r *XrpDetailTxInputRepositorySqlc) GetOne(id int64) (*models.XRPDetailTX, 
 
 	xrpTx, err := r.queries.GetXrpDetailTxByID(ctx, id)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetXrpDetailTxByID()")
+		return nil, fmt.Errorf("failed to call GetXrpDetailTxByID(): %w", err)
 	}
 
 	return convertSqlcXrpDetailTxToModel(&xrpTx), nil
@@ -50,7 +49,7 @@ func (r *XrpDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*models.XRPDe
 
 	xrpTxs, err := r.queries.GetXrpDetailTxsByTxID(ctx, id)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetXrpDetailTxsByTxID()")
+		return nil, fmt.Errorf("failed to call GetXrpDetailTxsByTxID(): %w", err)
 	}
 
 	result := make([]*models.XRPDetailTX, len(xrpTxs))
@@ -70,7 +69,7 @@ func (r *XrpDetailTxInputRepositorySqlc) GetSentHashTx(txType tx.TxType) ([]stri
 		CurrentTxType: txType.Int8(),
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetXrpDetailTxBlobList()")
+		return nil, fmt.Errorf("failed to call GetXrpDetailTxBlobList(): %w", err)
 	}
 
 	return blobs, nil
@@ -103,7 +102,7 @@ func (r *XrpDetailTxInputRepositorySqlc) Insert(txItem *models.XRPDetailTX) erro
 		SentUpdatedAt:         convertNullTimeToSQLNullTime(txItem.SentUpdatedAt),
 	})
 	if err != nil {
-		return errors.Wrap(err, "failed to call InsertXrpDetailTx()")
+		return fmt.Errorf("failed to call InsertXrpDetailTx(): %w", err)
 	}
 
 	return nil
@@ -138,12 +137,12 @@ func (r *XrpDetailTxInputRepositorySqlc) UpdateAfterTxSent(
 		Uuid:                  uuid,
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call UpdateXrpDetailTxAfterSent()")
+		return 0, fmt.Errorf("failed to call UpdateXrpDetailTxAfterSent(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to get RowsAffected()")
+		return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 	}
 
 	return rowsAffected, nil
@@ -158,12 +157,12 @@ func (r *XrpDetailTxInputRepositorySqlc) UpdateTxType(id int64, txType tx.TxType
 		ID:            id,
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call UpdateXrpDetailTxType()")
+		return 0, fmt.Errorf("failed to call UpdateXrpDetailTxType(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to get RowsAffected()")
+		return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 	}
 
 	return rowsAffected, nil
@@ -180,12 +179,12 @@ func (r *XrpDetailTxInputRepositorySqlc) UpdateTxTypeBySentHashTx(
 		TxBlob:        sentHashTx, // sentHashTx is actually tx_blob for XRP
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call UpdateXrpDetailTxTypeBySentHash()")
+		return 0, fmt.Errorf("failed to call UpdateXrpDetailTxTypeBySentHash(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to get RowsAffected()")
+		return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 	}
 
 	return rowsAffected, nil

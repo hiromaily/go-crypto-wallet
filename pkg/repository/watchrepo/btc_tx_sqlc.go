@@ -3,10 +3,10 @@ package watchrepo
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/ericlagergren/decimal"
-	"github.com/pkg/errors"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
@@ -38,7 +38,7 @@ func (r *BTCTxRepositorySqlc) GetOne(id int64) (*models.BTCTX, error) {
 
 	btcTx, err := r.queries.GetBtcTxByID(ctx, id)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetBtcTxByID()")
+		return nil, fmt.Errorf("failed to call GetBtcTxByID(): %w", err)
 	}
 
 	return convertSqlcBtcTxToModel(&btcTx), nil
@@ -54,7 +54,7 @@ func (r *BTCTxRepositorySqlc) GetCountByUnsignedHex(actionType action.ActionType
 		UnsignedHexTx: hex,
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call GetBtcTxCountByUnsignedHex()")
+		return 0, fmt.Errorf("failed to call GetBtcTxCountByUnsignedHex(): %w", err)
 	}
 
 	return count, nil
@@ -70,7 +70,7 @@ func (r *BTCTxRepositorySqlc) GetTxIDBySentHash(actionType action.ActionType, ha
 		SentHashTx: hash,
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call GetBtcTxIDBySentHash()")
+		return 0, fmt.Errorf("failed to call GetBtcTxIDBySentHash(): %w", err)
 	}
 
 	return id, nil
@@ -86,7 +86,7 @@ func (r *BTCTxRepositorySqlc) GetSentHashTx(actionType action.ActionType, txType
 		CurrentTxType: txType.Int8(),
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to call GetBtcTxSentHashList()")
+		return nil, fmt.Errorf("failed to call GetBtcTxSentHashList(): %w", err)
 	}
 
 	return hashes, nil
@@ -110,12 +110,12 @@ func (r *BTCTxRepositorySqlc) InsertUnsignedTx(actionType action.ActionType, txI
 		SentUpdatedAt:     convertNullTimeToSQLNullTime(txItem.SentUpdatedAt),
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call InsertBtcTx()")
+		return 0, fmt.Errorf("failed to call InsertBtcTx(): %w", err)
 	}
 
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to get LastInsertId()")
+		return 0, fmt.Errorf("failed to get LastInsertId(): %w", err)
 	}
 
 	return id, nil
@@ -140,7 +140,7 @@ func (r *BTCTxRepositorySqlc) Update(txItem *models.BTCTX) (int64, error) {
 		ID:                txItem.ID,
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call UpdateBtcTx()")
+		return 0, fmt.Errorf("failed to call UpdateBtcTx(): %w", err)
 	}
 
 	return 1, nil
@@ -163,12 +163,12 @@ func (r *BTCTxRepositorySqlc) UpdateAfterTxSent(
 		ID:            txID,
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call UpdateBtcTxAfterSent()")
+		return 0, fmt.Errorf("failed to call UpdateBtcTxAfterSent(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to get RowsAffected()")
+		return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 	}
 
 	return rowsAffected, nil
@@ -183,12 +183,12 @@ func (r *BTCTxRepositorySqlc) UpdateTxType(id int64, txType tx.TxType) (int64, e
 		ID:            id,
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call UpdateBtcTxType()")
+		return 0, fmt.Errorf("failed to call UpdateBtcTxType(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to get RowsAffected()")
+		return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 	}
 
 	return rowsAffected, nil
@@ -207,12 +207,12 @@ func (r *BTCTxRepositorySqlc) UpdateTxTypeBySentHashTx(
 		SentHashTx:    sentHashTx,
 	})
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call UpdateBtcTxTypeBySentHash()")
+		return 0, fmt.Errorf("failed to call UpdateBtcTxTypeBySentHash(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to get RowsAffected()")
+		return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 	}
 
 	return rowsAffected, nil
@@ -224,12 +224,12 @@ func (r *BTCTxRepositorySqlc) DeleteAll() (int64, error) {
 
 	result, err := r.queries.DeleteAllBtcTx(ctx)
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to call DeleteAllBtcTx()")
+		return 0, fmt.Errorf("failed to call DeleteAllBtcTx(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "failed to get RowsAffected()")
+		return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 	}
 
 	return rowsAffected, nil
