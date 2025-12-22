@@ -8,7 +8,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -16,9 +15,7 @@ import (
 
 var (
 	// shared database connection
-	dbConn         *sql.DB
-	txRepo         *watchrepo.BTCTxRepository
-	accountKeyRepo *coldrepo.AccountKeyRepository
+	dbConn *sql.DB
 	// sqlc repositories
 	btcTxRepoSqlc          *watchrepo.BTCTxRepositorySqlc
 	txRepoSqlc             *watchrepo.TxRepositorySqlc
@@ -49,60 +46,6 @@ func GetDB() *sql.DB {
 	}
 
 	return dbConn
-}
-
-// NewTxRepository returns TxRepository for test
-func NewTxRepository() watchrepo.BTCTxRepositorier {
-	if txRepo != nil {
-		return txRepo
-	}
-
-	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := projPath + "/data/config/btc_watch.toml"
-	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.BTC)
-	if err != nil {
-		log.Fatalf("fail to create config: %v", err)
-	}
-	// TODO: if config should be overridden, here
-
-	// logger
-	zapLog := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
-
-	// db
-	db, err := mysql.NewMySQL(&conf.MySQL)
-	if err != nil {
-		log.Fatalf("fail to create db: %v", err)
-	}
-
-	txRepo = watchrepo.NewBTCTxRepository(db, coin.BTC, zapLog)
-	return txRepo
-}
-
-// NewAccountKeyRepository returns AccountKeyRepository for test
-func NewAccountKeyRepository() coldrepo.AccountKeyRepositorier {
-	if accountKeyRepo != nil {
-		return accountKeyRepo
-	}
-
-	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := projPath + "/data/config/btc_watch.toml"
-	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.BTC)
-	if err != nil {
-		log.Fatalf("fail to create config: %v", err)
-	}
-	// TODO: if config should be overridden, here
-
-	// logger
-	zapLogger := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
-
-	// db
-	db, err := mysql.NewMySQL(&conf.MySQL)
-	if err != nil {
-		log.Fatalf("fail to create db: %v", err)
-	}
-
-	accountKeyRepo = coldrepo.NewAccountKeyRepository(db, coin.BTC, zapLogger)
-	return accountKeyRepo
 }
 
 // NewBTCTxRepositorySqlc returns BTCTxRepositorySqlc for test
