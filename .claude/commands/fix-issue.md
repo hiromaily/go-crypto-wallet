@@ -21,6 +21,7 @@
    - `make check-build`
 6. **Commit**: Suggest commit message
 7. **PR Draft**: Write description with "Closes #{issue_number}"
+8. **Review Request**: After creating the PR, ask Claude to review the PR for code quality, correctness, and adherence to project standards
 
 **Safety Rules:**
 
