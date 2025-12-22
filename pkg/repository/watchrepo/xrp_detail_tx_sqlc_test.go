@@ -4,23 +4,55 @@
 package watchrepo_test
 
 import (
+	"log"
+	"os"
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
 
+	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
+	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // TestXrpDetailTxSqlc is integration test for XrpDetailTxInputRepositorySqlc
 func TestXrpDetailTxSqlc(t *testing.T) {
-	xrpDetailTxRepo := testutil.NewXrpDetailTxRepositorySqlc()
+	// Create XRP repositories
+	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
+	confPath := projPath + "/data/config/xrp_watch.toml"
+	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.XRP)
+	if err != nil {
+		log.Fatalf("fail to create config: %v", err)
+	}
+	zapLog := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
+	db, err := mysql.NewMySQL(&conf.MySQL)
+	if err != nil {
+		log.Fatalf("fail to create db: %v", err)
+	}
+
+	xrpDetailTxRepo := watchrepo.NewXrpDetailTxInputRepositorySqlc(db, coin.XRP, zapLog)
+	txRepo := watchrepo.NewTxRepositorySqlc(db, coin.XRP, zapLog)
+
+	// Clean up any existing test data
+	_, _ = db.Exec("DELETE FROM xrp_detail_tx WHERE uuid LIKE 'xrp-uuid-%'")
+	_, _ = db.Exec("DELETE FROM tx WHERE coin = 'xrp'")
+
+	// Create a tx record first (xrp_detail_tx joins with tx table)
+	txID, err := txRepo.InsertUnsignedTx(action.ActionTypePayment)
+	if err != nil {
+		t.Fatalf("fail to create parent tx: %v", err)
+	}
 
 	// Create test xrp detail tx
 	uuid := "xrp-uuid-sqlc-test"
 	xrpTx := &models.XRPDetailTX{
-		TXID:                  1,
+		TXID:                  txID,
 		UUID:                  uuid,
 		CurrentTXType:         tx.TxTypeUnsigned.Int8(),
 		SenderAccount:         "deposit",
@@ -47,7 +79,7 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	}
 
 	// Get all by tx ID
-	xrpTxs, err := xrpDetailTxRepo.GetAllByTxID(1)
+	xrpTxs, err := xrpDetailTxRepo.GetAllByTxID(txID)
 	if err != nil {
 		t.Fatalf("fail to call GetAllByTxID() %v", err)
 	}
@@ -152,9 +184,15 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	}
 
 	// Test InsertBulk
+	// Create another tx record for bulk insert
+	txID2, err := txRepo.InsertUnsignedTx(action.ActionTypePayment)
+	if err != nil {
+		t.Fatalf("fail to create second parent tx: %v", err)
+	}
+
 	bulkTxs := []*models.XRPDetailTX{
 		{
-			TXID:                  2,
+			TXID:                  txID2,
 			UUID:                  "xrp-uuid-bulk-1",
 			CurrentTXType:         tx.TxTypeUnsigned.Int8(),
 			SenderAccount:         "deposit",
@@ -175,7 +213,7 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 			TXBlob:                "",
 		},
 		{
-			TXID:                  2,
+			TXID:                  txID2,
 			UUID:                  "xrp-uuid-bulk-2",
 			CurrentTXType:         tx.TxTypeUnsigned.Int8(),
 			SenderAccount:         "deposit",
@@ -202,7 +240,7 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	}
 
 	// Verify bulk insert
-	bulkRetrieved, err := xrpDetailTxRepo.GetAllByTxID(2)
+	bulkRetrieved, err := xrpDetailTxRepo.GetAllByTxID(txID2)
 	if err != nil {
 		t.Fatalf("fail to call GetAllByTxID() after InsertBulk() %v", err)
 	}

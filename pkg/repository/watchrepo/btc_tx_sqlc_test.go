@@ -36,6 +36,7 @@ func TestBTCTxSqlc(t *testing.T) {
 	hex := "unsigned-hex-sqlc"
 	actionType := action.ActionTypePayment
 	txItem := &models.BTCTX{
+		Coin:              "btc",
 		Action:            actionType.String(),
 		UnsignedHexTX:     hex,
 		TotalInputAmount:  inputAmt,
@@ -46,6 +47,7 @@ func TestBTCTxSqlc(t *testing.T) {
 	if err != nil {
 		t.Fatalf("fail to call InsertUnsignedTx() %v", err)
 	}
+	txItem.ID = id // Set the ID for later operations
 	// check inserted record
 	tmpTx, err := txRepo.GetOne(id)
 	if err != nil {

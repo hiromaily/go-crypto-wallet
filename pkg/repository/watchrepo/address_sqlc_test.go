@@ -18,19 +18,26 @@ func TestAddressSqlc(t *testing.T) {
 	addressRepo := testutil.NewAddressRepositorySqlc()
 	accountType := account.AccountTypeClient
 
+	// Clean up any existing test data (address table has unique key on wallet_address)
+	// Note: We can't access db directly from testutil, so we skip cleanup here
+	// Tests should use unique addresses or be run with clean database
+
 	// Insert bulk addresses
 	addresses := []*models.Address{
 		{
+			Coin:          "btc",
 			Account:       accountType.String(),
 			WalletAddress: "address-sqlc-1",
 			IsAllocated:   false,
 		},
 		{
+			Coin:          "btc",
 			Account:       accountType.String(),
 			WalletAddress: "address-sqlc-2",
 			IsAllocated:   false,
 		},
 		{
+			Coin:          "btc",
 			Account:       accountType.String(),
 			WalletAddress: "address-sqlc-3",
 			IsAllocated:   true,

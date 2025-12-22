@@ -4,23 +4,55 @@
 package watchrepo_test
 
 import (
+	"log"
+	"os"
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
 
+	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
+	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // TestEthDetailTxSqlc is integration test for EthDetailTxInputRepositorySqlc
 func TestEthDetailTxSqlc(t *testing.T) {
-	ethDetailTxRepo := testutil.NewEthDetailTxRepositorySqlc()
+	// Create ETH repositories
+	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
+	confPath := projPath + "/data/config/eth_watch.toml"
+	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.ETH)
+	if err != nil {
+		log.Fatalf("fail to create config: %v", err)
+	}
+	zapLog := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
+	db, err := mysql.NewMySQL(&conf.MySQL)
+	if err != nil {
+		log.Fatalf("fail to create db: %v", err)
+	}
+
+	ethDetailTxRepo := watchrepo.NewEthDetailTxInputRepositorySqlc(db, coin.ETH, zapLog)
+	txRepo := watchrepo.NewTxRepositorySqlc(db, coin.ETH, zapLog)
+
+	// Clean up any existing test data
+	_, _ = db.Exec("DELETE FROM eth_detail_tx WHERE uuid LIKE 'eth-uuid-%'")
+	_, _ = db.Exec("DELETE FROM tx WHERE coin = 'eth'")
+
+	// Create a tx record first (eth_detail_tx joins with tx table)
+	txID, err := txRepo.InsertUnsignedTx(action.ActionTypePayment)
+	if err != nil {
+		t.Fatalf("fail to create parent tx: %v", err)
+	}
 
 	// Create test eth detail tx
 	uuid := "eth-uuid-sqlc-test"
 	ethTx := &models.EthDetailTX{
-		TXID:            1,
+		TXID:            txID,
 		UUID:            uuid,
 		CurrentTXType:   tx.TxTypeUnsigned.Int8(),
 		SenderAccount:   "deposit",
@@ -40,7 +72,7 @@ func TestEthDetailTxSqlc(t *testing.T) {
 	}
 
 	// Get all by tx ID
-	ethTxs, err := ethDetailTxRepo.GetAllByTxID(1)
+	ethTxs, err := ethDetailTxRepo.GetAllByTxID(txID)
 	if err != nil {
 		t.Fatalf("fail to call GetAllByTxID() %v", err)
 	}
@@ -140,9 +172,15 @@ func TestEthDetailTxSqlc(t *testing.T) {
 	}
 
 	// Test InsertBulk
+	// Create another tx record for bulk insert
+	txID2, err := txRepo.InsertUnsignedTx(action.ActionTypePayment)
+	if err != nil {
+		t.Fatalf("fail to create second parent tx: %v", err)
+	}
+
 	bulkTxs := []*models.EthDetailTX{
 		{
-			TXID:            2,
+			TXID:            txID2,
 			UUID:            "eth-uuid-bulk-1",
 			CurrentTXType:   tx.TxTypeUnsigned.Int8(),
 			SenderAccount:   "deposit",
@@ -156,7 +194,7 @@ func TestEthDetailTxSqlc(t *testing.T) {
 			UnsignedHexTX:   "0xunsigned-bulk-1",
 		},
 		{
-			TXID:            2,
+			TXID:            txID2,
 			UUID:            "eth-uuid-bulk-2",
 			CurrentTXType:   tx.TxTypeUnsigned.Int8(),
 			SenderAccount:   "deposit",
@@ -176,7 +214,7 @@ func TestEthDetailTxSqlc(t *testing.T) {
 	}
 
 	// Verify bulk insert
-	bulkRetrieved, err := ethDetailTxRepo.GetAllByTxID(2)
+	bulkRetrieved, err := ethDetailTxRepo.GetAllByTxID(txID2)
 	if err != nil {
 		t.Fatalf("fail to call GetAllByTxID() after InsertBulk() %v", err)
 	}

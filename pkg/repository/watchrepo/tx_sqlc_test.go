@@ -4,17 +4,36 @@
 package watchrepo_test
 
 import (
+	"log"
+	"os"
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
-	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
+	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // TestTxSqlc is integration test for TxRepositorySqlc
 func TestTxSqlc(t *testing.T) {
-	txRepo := testutil.NewTxRepositorySqlc()
+	// Create ETH repository (tx table is for ETH/XRP only)
+	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
+	confPath := projPath + "/data/config/eth_watch.toml"
+	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.ETH)
+	if err != nil {
+		log.Fatalf("fail to create config: %v", err)
+	}
+	zapLog := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
+	db, err := mysql.NewMySQL(&conf.MySQL)
+	if err != nil {
+		log.Fatalf("fail to create db: %v", err)
+	}
+	txRepo := watchrepo.NewTxRepositorySqlc(db, coin.ETH, zapLog)
 
 	// Delete all records
 	if _, err := txRepo.DeleteAll(); err != nil {

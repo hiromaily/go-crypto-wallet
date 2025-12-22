@@ -31,12 +31,14 @@ func TestPaymentRequestSqlc(t *testing.T) {
 
 	requests := []*models.PaymentRequest{
 		{
+			Coin:            "btc",
 			SenderAddress:   "sender-sqlc-1",
 			ReceiverAddress: "receiver-sqlc-1",
 			Amount:          amount1,
 			IsDone:          false,
 		},
 		{
+			Coin:            "btc",
 			SenderAddress:   "sender-sqlc-2",
 			ReceiverAddress: "receiver-sqlc-2",
 			Amount:          amount2,
