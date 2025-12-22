@@ -61,7 +61,7 @@ func (r *SeedRepositorySqlc) Insert(strSeed string) error {
 
 func convertSqlcSeedToModel(seed *sqlcgen.Seed) *models.Seed {
 	return &models.Seed{
-		ID:        int8(seed.ID),
+		ID:        seed.ID,
 		Coin:      string(seed.Coin),
 		Seed:      seed.Seed,
 		UpdatedAt: convertSQLNullTimeToNullTime(seed.UpdatedAt),

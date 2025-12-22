@@ -84,7 +84,7 @@ func (r *AuthFullPubkeyRepositorySqlc) InsertBulk(items []*models.AuthFullpubkey
 
 func convertSqlcAuthFullPubkeyToModel(authPubkey *sqlcgen.AuthFullpubkey) *models.AuthFullpubkey {
 	return &models.AuthFullpubkey{
-		ID:            int16(authPubkey.ID),
+		ID:            authPubkey.ID,
 		Coin:          string(authPubkey.Coin),
 		AuthAccount:   authPubkey.AuthAccount,
 		FullPublicKey: authPubkey.FullPublicKey,

@@ -78,18 +78,18 @@ func (r *XRPAccountKeyRepositorySqlc) InsertBulk(items []*models.XRPAccountKey) 
 
 	for _, item := range items {
 		_, err := r.queries.InsertXRPAccountKey(ctx, sqlcgen.InsertXRPAccountKeyParams{
-			Coin:              sqlcgen.XrpAccountKeyCoin(item.Coin),
-			Account:           sqlcgen.XrpAccountKeyAccount(item.Account),
-			AccountID:         item.AccountID,
-			KeyType:           item.KeyType,
-			MasterKey:         item.MasterKey,
-			MasterSeed:        item.MasterSeed,
-			MasterSeedHex:     item.MasterSeedHex,
-			PublicKey:         item.PublicKey,
-			PublicKeyHex:      item.PublicKeyHex,
-			IsRegularKeyPair:  item.IsRegularKeyPair,
-			AllocatedID:       item.AllocatedID,
-			AddrStatus:        item.AddrStatus,
+			Coin:             sqlcgen.XrpAccountKeyCoin(item.Coin),
+			Account:          sqlcgen.XrpAccountKeyAccount(item.Account),
+			AccountID:        item.AccountID,
+			KeyType:          item.KeyType,
+			MasterKey:        item.MasterKey,
+			MasterSeed:       item.MasterSeed,
+			MasterSeedHex:    item.MasterSeedHex,
+			PublicKey:        item.PublicKey,
+			PublicKeyHex:     item.PublicKeyHex,
+			IsRegularKeyPair: item.IsRegularKeyPair,
+			AllocatedID:      item.AllocatedID,
+			AddrStatus:       item.AddrStatus,
 		})
 		if err != nil {
 			return errors.Wrap(err, "failed to call InsertXRPAccountKey()")

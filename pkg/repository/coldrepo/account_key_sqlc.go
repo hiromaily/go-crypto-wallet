@@ -100,11 +100,14 @@ func (r *AccountKeyRepositorySqlc) GetAllMultiAddr(
 ) ([]*models.AccountKey, error) {
 	ctx := context.Background()
 
-	accountKeys, err := r.queries.GetAccountKeysByMultisigAddresses(ctx, sqlcgen.GetAccountKeysByMultisigAddressesParams{
-		Coin:    sqlcgen.AccountKeyCoin(r.coinTypeCode.String()),
-		Account: sqlcgen.AccountKeyAccount(accountType.String()),
-		Addrs:   addrs,
-	})
+	accountKeys, err := r.queries.GetAccountKeysByMultisigAddresses(
+		ctx,
+		sqlcgen.GetAccountKeysByMultisigAddressesParams{
+			Coin:    sqlcgen.AccountKeyCoin(r.coinTypeCode.String()),
+			Account: sqlcgen.AccountKeyAccount(accountType.String()),
+			Addrs:   addrs,
+		},
+	)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to call GetAccountKeysByMultisigAddresses()")
 	}
@@ -246,7 +249,7 @@ func (r *AccountKeyRepositorySqlc) UpdateMultisigAddrs(
 	var totalAffected int64
 
 	for _, item := range items {
-		result, err := qtx.UpdateAccountKeyMultisigAddr(ctx, sqlcgen.UpdateAccountKeyMultisigAddrParams{
+		result, updateErr := qtx.UpdateAccountKeyMultisigAddr(ctx, sqlcgen.UpdateAccountKeyMultisigAddrParams{
 			MultisigAddress: item.MultisigAddress,
 			RedeemScript:    item.RedeemScript,
 			AddrStatus:      item.AddrStatus,
@@ -255,13 +258,13 @@ func (r *AccountKeyRepositorySqlc) UpdateMultisigAddrs(
 			Account:         sqlcgen.AccountKeyAccount(accountType.String()),
 			FullPublicKey:   item.FullPublicKey,
 		})
-		if err != nil {
-			return 0, errors.Wrap(err, "failed to call UpdateAccountKeyMultisigAddr()")
+		if updateErr != nil {
+			return 0, errors.Wrap(updateErr, "failed to call UpdateAccountKeyMultisigAddr()")
 		}
 
-		affected, err := result.RowsAffected()
-		if err != nil {
-			return 0, errors.Wrap(err, "failed to get RowsAffected()")
+		affected, affectedErr := result.RowsAffected()
+		if affectedErr != nil {
+			return 0, errors.Wrap(affectedErr, "failed to get RowsAffected()")
 		}
 		totalAffected += affected
 	}
@@ -273,19 +276,19 @@ func (r *AccountKeyRepositorySqlc) UpdateMultisigAddrs(
 
 func convertSqlcAccountKeyToModel(accountKey *sqlcgen.AccountKey) *models.AccountKey {
 	return &models.AccountKey{
-		ID:                accountKey.ID,
-		Coin:              string(accountKey.Coin),
-		Account:           string(accountKey.Account),
-		P2PKHAddress:      accountKey.P2pkhAddress,
-		P2SHSegwitAddress: accountKey.P2shSegwitAddress,
-		Bech32Address:     accountKey.Bech32Address,
-		FullPublicKey:     accountKey.FullPublicKey,
-		MultisigAddress:   accountKey.MultisigAddress,
-		RedeemScript:      accountKey.RedeemScript,
+		ID:                 accountKey.ID,
+		Coin:               string(accountKey.Coin),
+		Account:            string(accountKey.Account),
+		P2PKHAddress:       accountKey.P2pkhAddress,
+		P2SHSegwitAddress:  accountKey.P2shSegwitAddress,
+		Bech32Address:      accountKey.Bech32Address,
+		FullPublicKey:      accountKey.FullPublicKey,
+		MultisigAddress:    accountKey.MultisigAddress,
+		RedeemScript:       accountKey.RedeemScript,
 		WalletImportFormat: accountKey.WalletImportFormat,
-		Idx:               accountKey.Idx,
-		AddrStatus:        accountKey.AddrStatus,
-		UpdatedAt:         convertSQLNullTimeToNullTime(accountKey.UpdatedAt),
+		Idx:                accountKey.Idx,
+		AddrStatus:         accountKey.AddrStatus,
+		UpdatedAt:          convertSQLNullTimeToNullTime(accountKey.UpdatedAt),
 	}
 }
 
@@ -294,11 +297,4 @@ func convertSQLNullTimeToNullTime(t sql.NullTime) null.Time {
 		return null.Time{}
 	}
 	return null.TimeFrom(t.Time)
-}
-
-func convertNullTimeToSQLNullTime(t null.Time) sql.NullTime {
-	if !t.Valid {
-		return sql.NullTime{}
-	}
-	return sql.NullTime{Time: t.Time, Valid: true}
 }

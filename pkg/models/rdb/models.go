@@ -19,17 +19,17 @@ type AccountKey struct {
 	// address as standard pubkey script that Pays To PubKey Hash (P2PKH)
 	P2PKHAddress string `boil:"p2pkh_address" json:"p2pkh_address" toml:"p2pkh_address" yaml:"p2pkh_address"`
 	// p2sh-segwit address
-	P2SHSegwitAddress string `boil:"p2sh_segwit_address" json:"p2sh_segwit_address" toml:"p2sh_segwit_address" yaml:"p2sh_segwit_address"`
+	P2SHSegwitAddress string `boil:"p2sh_segwit_address" json:"p2sh_segwit_address" toml:"p2sh_segwit_address"`
 	// bech32 address
 	Bech32Address string `boil:"bech32_address" json:"bech32_address" toml:"bech32_address" yaml:"bech32_address"`
 	// full public key
 	FullPublicKey string `boil:"full_public_key" json:"full_public_key" toml:"full_public_key" yaml:"full_public_key"`
 	// multisig address
-	MultisigAddress string `boil:"multisig_address" json:"multisig_address" toml:"multisig_address" yaml:"multisig_address"`
+	MultisigAddress string `boil:"multisig_address" json:"multisig_address" toml:"multisig_address"`
 	// redeedScript after multisig address generated
 	RedeemScript string `boil:"redeem_script" json:"redeem_script" toml:"redeem_script" yaml:"redeem_script"`
 	// WIF
-	WalletImportFormat string `boil:"wallet_import_format" json:"wallet_import_format" toml:"wallet_import_format" yaml:"wallet_import_format"`
+	WalletImportFormat string `boil:"wallet_import_format" json:"wallet_import_format" toml:"wallet_import_format"`
 	// index for hd wallet
 	Idx int64 `boil:"idx" json:"idx" toml:"idx" yaml:"idx"`
 	// progress status for address generating
@@ -65,17 +65,17 @@ type AuthAccountKey struct {
 	// address as standard pubkey script that Pays To PubKey Hash (P2PKH)
 	P2PKHAddress string `boil:"p2pkh_address" json:"p2pkh_address" toml:"p2pkh_address" yaml:"p2pkh_address"`
 	// p2sh-segwit address
-	P2SHSegwitAddress string `boil:"p2sh_segwit_address" json:"p2sh_segwit_address" toml:"p2sh_segwit_address" yaml:"p2sh_segwit_address"`
+	P2SHSegwitAddress string `boil:"p2sh_segwit_address" json:"p2sh_segwit_address" toml:"p2sh_segwit_address"`
 	// bech32 address
 	Bech32Address string `boil:"bech32_address" json:"bech32_address" toml:"bech32_address" yaml:"bech32_address"`
 	// full public key
 	FullPublicKey string `boil:"full_public_key" json:"full_public_key" toml:"full_public_key" yaml:"full_public_key"`
 	// multisig address
-	MultisigAddress string `boil:"multisig_address" json:"multisig_address" toml:"multisig_address" yaml:"multisig_address"`
+	MultisigAddress string `boil:"multisig_address" json:"multisig_address" toml:"multisig_address"`
 	// redeedScript after multisig address generated
 	RedeemScript string `boil:"redeem_script" json:"redeem_script" toml:"redeem_script" yaml:"redeem_script"`
 	// WIF
-	WalletImportFormat string `boil:"wallet_import_format" json:"wallet_import_format" toml:"wallet_import_format" yaml:"wallet_import_format"`
+	WalletImportFormat string `boil:"wallet_import_format" json:"wallet_import_format" toml:"wallet_import_format"`
 	// index for hd wallet
 	Idx int64 `boil:"idx" json:"idx" toml:"idx" yaml:"idx"`
 	// progress status for address generating
@@ -113,17 +113,17 @@ type BTCTX struct {
 	// Hash for sent transaction
 	SentHashTX string `boil:"sent_hash_tx" json:"sent_hash_tx" toml:"sent_hash_tx" yaml:"sent_hash_tx"`
 	// total amount of coin to send
-	TotalInputAmount types.Decimal `boil:"total_input_amount" json:"total_input_amount" toml:"total_input_amount" yaml:"total_input_amount"`
+	TotalInputAmount types.Decimal `boil:"total_input_amount" json:"total_input_amount" toml:"total_input_amount"`
 	// total amount of coin to receive without fee
-	TotalOutputAmount types.Decimal `boil:"total_output_amount" json:"total_output_amount" toml:"total_output_amount" yaml:"total_output_amount"`
+	TotalOutputAmount types.Decimal `boil:"total_output_amount" json:"total_output_amount" toml:"total_output_amount"`
 	// fee
 	Fee types.Decimal `boil:"fee" json:"fee" toml:"fee" yaml:"fee"`
 	// current transaction type
 	CurrentTXType int8 `boil:"current_tx_type" json:"current_tx_type" toml:"current_tx_type" yaml:"current_tx_type"`
 	// updated date for unsigned transaction created
-	UnsignedUpdatedAt null.Time `boil:"unsigned_updated_at" json:"unsigned_updated_at,omitempty" toml:"unsigned_updated_at" yaml:"unsigned_updated_at,omitempty"`
+	UnsignedUpdatedAt null.Time `boil:"unsigned_updated_at" json:"unsigned_updated_at,omitempty"`
 	// updated date for signed transaction sent
-	SentUpdatedAt null.Time `boil:"sent_updated_at" json:"sent_updated_at,omitempty" toml:"sent_updated_at" yaml:"sent_updated_at,omitempty"`
+	SentUpdatedAt null.Time `boil:"sent_updated_at" json:"sent_updated_at,omitempty" toml:"sent_updated_at"`
 }
 
 // BTCTXInput is an object representing the database table.
@@ -143,7 +143,7 @@ type BTCTXInput struct {
 	// amount of coin to send for input
 	InputAmount types.Decimal `boil:"input_amount" json:"input_amount" toml:"input_amount" yaml:"input_amount"`
 	// block confirmations when unspent rpc returned
-	InputConfirmations uint64 `boil:"input_confirmations" json:"input_confirmations" toml:"input_confirmations" yaml:"input_confirmations"`
+	InputConfirmations uint64 `boil:"input_confirmations" json:"input_confirmations" toml:"input_confirmations"`
 	// updated date
 	UpdatedAt null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 }
@@ -181,9 +181,9 @@ type EthDetailTX struct {
 	// sender address
 	SenderAddress string `boil:"sender_address" json:"sender_address" toml:"sender_address" yaml:"sender_address"`
 	// receiver account
-	ReceiverAccount string `boil:"receiver_account" json:"receiver_account" toml:"receiver_account" yaml:"receiver_account"`
+	ReceiverAccount string `boil:"receiver_account" json:"receiver_account" toml:"receiver_account"`
 	// receiver address
-	ReceiverAddress string `boil:"receiver_address" json:"receiver_address" toml:"receiver_address" yaml:"receiver_address"`
+	ReceiverAddress string `boil:"receiver_address" json:"receiver_address" toml:"receiver_address"`
 	// amount of coin to receive
 	Amount uint64 `boil:"amount" json:"amount" toml:"amount" yaml:"amount"`
 	// fee
@@ -199,9 +199,9 @@ type EthDetailTX struct {
 	// Hash for sent transaction
 	SentHashTX string `boil:"sent_hash_tx" json:"sent_hash_tx" toml:"sent_hash_tx" yaml:"sent_hash_tx"`
 	// updated date for unsigned transaction created
-	UnsignedUpdatedAt null.Time `boil:"unsigned_updated_at" json:"unsigned_updated_at,omitempty" toml:"unsigned_updated_at" yaml:"unsigned_updated_at,omitempty"`
+	UnsignedUpdatedAt null.Time `boil:"unsigned_updated_at" json:"unsigned_updated_at,omitempty"`
 	// updated date for signed transaction sent
-	SentUpdatedAt null.Time `boil:"sent_updated_at" json:"sent_updated_at,omitempty" toml:"sent_updated_at" yaml:"sent_updated_at,omitempty"`
+	SentUpdatedAt null.Time `boil:"sent_updated_at" json:"sent_updated_at,omitempty" toml:"sent_updated_at"`
 }
 
 // PaymentRequest is an object representing the database table.
@@ -217,7 +217,7 @@ type PaymentRequest struct {
 	// sender account
 	SenderAccount string `boil:"sender_account" json:"sender_account" toml:"sender_account" yaml:"sender_account"`
 	// receiver address
-	ReceiverAddress string `boil:"receiver_address" json:"receiver_address" toml:"receiver_address" yaml:"receiver_address"`
+	ReceiverAddress string `boil:"receiver_address" json:"receiver_address" toml:"receiver_address"`
 	// amount of coin to send
 	Amount types.Decimal `boil:"amount" json:"amount" toml:"amount" yaml:"amount"`
 	// true: unsigned transaction is created
@@ -273,7 +273,7 @@ type XRPAccountKey struct {
 	// public_key_hex
 	PublicKeyHex string `boil:"public_key_hex" json:"public_key_hex" toml:"public_key_hex" yaml:"public_key_hex"`
 	// true: this key is for regular key pair
-	IsRegularKeyPair bool `boil:"is_regular_key_pair" json:"is_regular_key_pair" toml:"is_regular_key_pair" yaml:"is_regular_key_pair"`
+	IsRegularKeyPair bool `boil:"is_regular_key_pair" json:"is_regular_key_pair" toml:"is_regular_key_pair"`
 	// index for hd wallet
 	AllocatedID int64 `boil:"allocated_id" json:"allocated_id" toml:"allocated_id" yaml:"allocated_id"`
 	// progress status for address generating
@@ -297,9 +297,9 @@ type XRPDetailTX struct {
 	// sender address
 	SenderAddress string `boil:"sender_address" json:"sender_address" toml:"sender_address" yaml:"sender_address"`
 	// receiver account
-	ReceiverAccount string `boil:"receiver_account" json:"receiver_account" toml:"receiver_account" yaml:"receiver_account"`
+	ReceiverAccount string `boil:"receiver_account" json:"receiver_account" toml:"receiver_account"`
 	// receiver address
-	ReceiverAddress string `boil:"receiver_address" json:"receiver_address" toml:"receiver_address" yaml:"receiver_address"`
+	ReceiverAddress string `boil:"receiver_address" json:"receiver_address" toml:"receiver_address"`
 	// amount of coin to receive
 	Amount string `boil:"amount" json:"amount" toml:"amount" yaml:"amount"`
 	// xrp tx type like `Payment`
@@ -309,7 +309,7 @@ type XRPDetailTX struct {
 	// tx flags
 	Flags uint64 `boil:"flags" json:"flags" toml:"flags" yaml:"flags"`
 	// tx LastLedgerSequence
-	LastLedgerSequence uint64 `boil:"last_ledger_sequence" json:"last_ledger_sequence" toml:"last_ledger_sequence" yaml:"last_ledger_sequence"`
+	LastLedgerSequence uint64 `boil:"last_ledger_sequence" json:"last_ledger_sequence" toml:"last_ledger_sequence"`
 	// tx Sequence
 	Sequence uint64 `boil:"sequence" json:"sequence" toml:"sequence" yaml:"sequence"`
 	// tx SigningPubKey
@@ -319,11 +319,11 @@ type XRPDetailTX struct {
 	// tx Hash
 	Hash string `boil:"hash" json:"hash" toml:"hash" yaml:"hash"`
 	// tx earliest_ledger_version after sending tx
-	EarliestLedgerVersion uint64 `boil:"earliest_ledger_version" json:"earliest_ledger_version" toml:"earliest_ledger_version" yaml:"earliest_ledger_version"`
+	EarliestLedgerVersion uint64 `boil:"earliest_ledger_version" json:"earliest_ledger_version"`
 	// signed tx id
 	SignedTXID string `boil:"signed_tx_id" json:"signed_tx_id" toml:"signed_tx_id" yaml:"signed_tx_id"`
 	// sent tx blob
 	TXBlob string `boil:"tx_blob" json:"tx_blob" toml:"tx_blob" yaml:"tx_blob"`
 	// updated date for signed transaction sent
-	SentUpdatedAt null.Time `boil:"sent_updated_at" json:"sent_updated_at,omitempty" toml:"sent_updated_at" yaml:"sent_updated_at,omitempty"`
+	SentUpdatedAt null.Time `boil:"sent_updated_at" json:"sent_updated_at,omitempty" toml:"sent_updated_at"`
 }

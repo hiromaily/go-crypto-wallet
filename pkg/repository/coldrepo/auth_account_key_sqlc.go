@@ -98,7 +98,7 @@ func (r *AuthAccountKeyRepositorySqlc) UpdateAddrStatus(addrStatus address.AddrS
 
 func convertSqlcAuthAccountKeyToModel(authKey *sqlcgen.AuthAccountKey) *models.AuthAccountKey {
 	return &models.AuthAccountKey{
-		ID:                 int16(authKey.ID),
+		ID:                 authKey.ID,
 		Coin:               string(authKey.Coin),
 		AuthAccount:        authKey.AuthAccount,
 		P2PKHAddress:       authKey.P2pkhAddress,
