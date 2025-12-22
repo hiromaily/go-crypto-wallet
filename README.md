@@ -165,10 +165,12 @@ Note, explained only well modified packages
 
 ## Command example
 
-- [Makefile](https://github.com/hiromaily/go-crypto-wallet/blob/master/Makefile)
-- [Makefile for watch wallet operation](https://github.com/hiromaily/go-crypto-wallet/blob/master/Makefile_watch_op.mk)
-- [Makefile for keygen wallet operation](https://github.com/hiromaily/go-crypto-wallet/blob/master/Makefile_keygen_op.mk)
-- [Makefile for sign wallet operation](https://github.com/hiromaily/go-crypto-wallet/blob/master/Makefile_sign_op.mk)
+- [Makefile](https://github.com/hiromaily/go-crypto-wallet/blob/master/Makefile) - Main Makefile with modular includes
+- Makefile modules (in `make/` directory):
+  - [watch_op.mk](https://github.com/hiromaily/go-crypto-wallet/blob/master/make/watch_op.mk) - Watch wallet operations
+  - [keygen_op.mk](https://github.com/hiromaily/go-crypto-wallet/blob/master/make/keygen_op.mk) - Keygen wallet operations
+  - [sign_op.mk](https://github.com/hiromaily/go-crypto-wallet/blob/master/make/sign_op.mk) - Sign wallet operations
+  - And other specialized modules for builds, tests, Docker, etc.
 
 ## TODO
 
