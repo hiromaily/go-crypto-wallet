@@ -10,6 +10,95 @@ import (
 	"fmt"
 )
 
+type AccountKeyAccount string
+
+const (
+	AccountKeyAccountClient  AccountKeyAccount = "client"
+	AccountKeyAccountDeposit AccountKeyAccount = "deposit"
+	AccountKeyAccountPayment AccountKeyAccount = "payment"
+	AccountKeyAccountStored  AccountKeyAccount = "stored"
+)
+
+func (e *AccountKeyAccount) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AccountKeyAccount(s)
+	case string:
+		*e = AccountKeyAccount(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AccountKeyAccount: %T", src)
+	}
+	return nil
+}
+
+type NullAccountKeyAccount struct {
+	AccountKeyAccount AccountKeyAccount
+	Valid             bool // Valid is true if AccountKeyAccount is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAccountKeyAccount) Scan(value interface{}) error {
+	if value == nil {
+		ns.AccountKeyAccount, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AccountKeyAccount.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAccountKeyAccount) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AccountKeyAccount), nil
+}
+
+type AccountKeyCoin string
+
+const (
+	AccountKeyCoinBtc AccountKeyCoin = "btc"
+	AccountKeyCoinBch AccountKeyCoin = "bch"
+	AccountKeyCoinEth AccountKeyCoin = "eth"
+	AccountKeyCoinXrp AccountKeyCoin = "xrp"
+	AccountKeyCoinHyt AccountKeyCoin = "hyt"
+)
+
+func (e *AccountKeyCoin) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AccountKeyCoin(s)
+	case string:
+		*e = AccountKeyCoin(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AccountKeyCoin: %T", src)
+	}
+	return nil
+}
+
+type NullAccountKeyCoin struct {
+	AccountKeyCoin AccountKeyCoin
+	Valid          bool // Valid is true if AccountKeyCoin is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAccountKeyCoin) Scan(value interface{}) error {
+	if value == nil {
+		ns.AccountKeyCoin, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AccountKeyCoin.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAccountKeyCoin) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AccountKeyCoin), nil
+}
+
 type AddressAccount string
 
 const (
@@ -97,6 +186,90 @@ func (ns NullAddressCoin) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return string(ns.AddressCoin), nil
+}
+
+type AuthAccountKeyCoin string
+
+const (
+	AuthAccountKeyCoinBtc AuthAccountKeyCoin = "btc"
+	AuthAccountKeyCoinBch AuthAccountKeyCoin = "bch"
+)
+
+func (e *AuthAccountKeyCoin) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AuthAccountKeyCoin(s)
+	case string:
+		*e = AuthAccountKeyCoin(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AuthAccountKeyCoin: %T", src)
+	}
+	return nil
+}
+
+type NullAuthAccountKeyCoin struct {
+	AuthAccountKeyCoin AuthAccountKeyCoin
+	Valid              bool // Valid is true if AuthAccountKeyCoin is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAuthAccountKeyCoin) Scan(value interface{}) error {
+	if value == nil {
+		ns.AuthAccountKeyCoin, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AuthAccountKeyCoin.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAuthAccountKeyCoin) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AuthAccountKeyCoin), nil
+}
+
+type AuthFullpubkeyCoin string
+
+const (
+	AuthFullpubkeyCoinBtc AuthFullpubkeyCoin = "btc"
+	AuthFullpubkeyCoinBch AuthFullpubkeyCoin = "bch"
+)
+
+func (e *AuthFullpubkeyCoin) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = AuthFullpubkeyCoin(s)
+	case string:
+		*e = AuthFullpubkeyCoin(s)
+	default:
+		return fmt.Errorf("unsupported scan type for AuthFullpubkeyCoin: %T", src)
+	}
+	return nil
+}
+
+type NullAuthFullpubkeyCoin struct {
+	AuthFullpubkeyCoin AuthFullpubkeyCoin
+	Valid              bool // Valid is true if AuthFullpubkeyCoin is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullAuthFullpubkeyCoin) Scan(value interface{}) error {
+	if value == nil {
+		ns.AuthFullpubkeyCoin, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.AuthFullpubkeyCoin.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullAuthFullpubkeyCoin) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.AuthFullpubkeyCoin), nil
 }
 
 type BtcTxAction string
@@ -228,6 +401,51 @@ func (ns NullPaymentRequestCoin) Value() (driver.Value, error) {
 	return string(ns.PaymentRequestCoin), nil
 }
 
+type SeedCoin string
+
+const (
+	SeedCoinBtc SeedCoin = "btc"
+	SeedCoinBch SeedCoin = "bch"
+	SeedCoinEth SeedCoin = "eth"
+	SeedCoinXrp SeedCoin = "xrp"
+	SeedCoinHyt SeedCoin = "hyt"
+)
+
+func (e *SeedCoin) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = SeedCoin(s)
+	case string:
+		*e = SeedCoin(s)
+	default:
+		return fmt.Errorf("unsupported scan type for SeedCoin: %T", src)
+	}
+	return nil
+}
+
+type NullSeedCoin struct {
+	SeedCoin SeedCoin
+	Valid    bool // Valid is true if SeedCoin is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullSeedCoin) Scan(value interface{}) error {
+	if value == nil {
+		ns.SeedCoin, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.SeedCoin.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullSeedCoin) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.SeedCoin), nil
+}
+
 type TxAction string
 
 const (
@@ -314,6 +532,121 @@ func (ns NullTxCoin) Value() (driver.Value, error) {
 	return string(ns.TxCoin), nil
 }
 
+type XrpAccountKeyAccount string
+
+const (
+	XrpAccountKeyAccountClient  XrpAccountKeyAccount = "client"
+	XrpAccountKeyAccountDeposit XrpAccountKeyAccount = "deposit"
+	XrpAccountKeyAccountPayment XrpAccountKeyAccount = "payment"
+	XrpAccountKeyAccountStored  XrpAccountKeyAccount = "stored"
+)
+
+func (e *XrpAccountKeyAccount) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = XrpAccountKeyAccount(s)
+	case string:
+		*e = XrpAccountKeyAccount(s)
+	default:
+		return fmt.Errorf("unsupported scan type for XrpAccountKeyAccount: %T", src)
+	}
+	return nil
+}
+
+type NullXrpAccountKeyAccount struct {
+	XrpAccountKeyAccount XrpAccountKeyAccount
+	Valid                bool // Valid is true if XrpAccountKeyAccount is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullXrpAccountKeyAccount) Scan(value interface{}) error {
+	if value == nil {
+		ns.XrpAccountKeyAccount, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.XrpAccountKeyAccount.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullXrpAccountKeyAccount) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.XrpAccountKeyAccount), nil
+}
+
+type XrpAccountKeyCoin string
+
+const (
+	XrpAccountKeyCoinXrp XrpAccountKeyCoin = "xrp"
+)
+
+func (e *XrpAccountKeyCoin) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = XrpAccountKeyCoin(s)
+	case string:
+		*e = XrpAccountKeyCoin(s)
+	default:
+		return fmt.Errorf("unsupported scan type for XrpAccountKeyCoin: %T", src)
+	}
+	return nil
+}
+
+type NullXrpAccountKeyCoin struct {
+	XrpAccountKeyCoin XrpAccountKeyCoin
+	Valid             bool // Valid is true if XrpAccountKeyCoin is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullXrpAccountKeyCoin) Scan(value interface{}) error {
+	if value == nil {
+		ns.XrpAccountKeyCoin, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.XrpAccountKeyCoin.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullXrpAccountKeyCoin) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.XrpAccountKeyCoin), nil
+}
+
+// table for keys for any account
+type AccountKey struct {
+	// ID
+	ID int64
+	// coin type code
+	Coin AccountKeyCoin
+	// account type
+	Account AccountKeyAccount
+	// address as standard pubkey script that Pays To PubKey Hash (P2PKH)
+	P2pkhAddress string
+	// p2sh-segwit address
+	P2shSegwitAddress string
+	// bech32 address
+	Bech32Address string
+	// full public key
+	FullPublicKey string
+	// multisig address
+	MultisigAddress string
+	// redeedScript after multisig address generated
+	RedeemScript string
+	// WIF
+	WalletImportFormat string
+	// index for hd wallet
+	Idx int64
+	// progress status for address generating
+	AddrStatus int8
+	// updated date
+	UpdatedAt sql.NullTime
+}
+
 // table for account pubkey
 type Address struct {
 	// ID
@@ -326,6 +659,50 @@ type Address struct {
 	WalletAddress string
 	// true: address is allocated(used)
 	IsAllocated bool
+	// updated date
+	UpdatedAt sql.NullTime
+}
+
+// table for keys for auth account
+type AuthAccountKey struct {
+	// ID
+	ID int16
+	// coin type code
+	Coin AuthAccountKeyCoin
+	// auth type
+	AuthAccount string
+	// address as standard pubkey script that Pays To PubKey Hash (P2PKH)
+	P2pkhAddress string
+	// p2sh-segwit address
+	P2shSegwitAddress string
+	// bech32 address
+	Bech32Address string
+	// full public key
+	FullPublicKey string
+	// multisig address
+	MultisigAddress string
+	// redeedScript after multisig address generated
+	RedeemScript string
+	// WIF
+	WalletImportFormat string
+	// index for hd wallet
+	Idx int64
+	// progress status for address generating
+	AddrStatus int8
+	// updated date
+	UpdatedAt sql.NullTime
+}
+
+// table for auth key exported from sign db
+type AuthFullpubkey struct {
+	// ID
+	ID int16
+	// coin type code
+	Coin AuthFullpubkeyCoin
+	// auth type
+	AuthAccount string
+	// full public key
+	FullPublicKey string
 	// updated date
 	UpdatedAt sql.NullTime
 }
@@ -458,6 +835,18 @@ type PaymentRequest struct {
 	UpdatedAt sql.NullTime
 }
 
+// table for seed
+type Seed struct {
+	// ID
+	ID int8
+	// coin type code
+	Coin SeedCoin
+	// seed
+	Seed string
+	// updated date
+	UpdatedAt sql.NullTime
+}
+
 // table for eth/xrp transaction info
 type Tx struct {
 	// transaction ID
@@ -466,6 +855,38 @@ type Tx struct {
 	Coin TxCoin
 	// action type
 	Action TxAction
+	// updated date
+	UpdatedAt sql.NullTime
+}
+
+// table for xrp keys for any account
+type XrpAccountKey struct {
+	// ID
+	ID int64
+	// coin type code
+	Coin XrpAccountKeyCoin
+	// account type
+	Account XrpAccountKeyAccount
+	// account_id
+	AccountID string
+	// key_type
+	KeyType int8
+	// master_key, DEPRECATED
+	MasterKey string
+	// master_seed
+	MasterSeed string
+	// master_seed_hex
+	MasterSeedHex string
+	// public_key
+	PublicKey string
+	// public_key_hex
+	PublicKeyHex string
+	// true: this key is for regular key pair
+	IsRegularKeyPair bool
+	// index for hd wallet
+	AllocatedID int64
+	// progress status for address generating
+	AddrStatus int8
 	// updated date
 	UpdatedAt sql.NullTime
 }
