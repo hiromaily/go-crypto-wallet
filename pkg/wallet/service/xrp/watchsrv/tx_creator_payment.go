@@ -1,6 +1,7 @@
 package watchsrv
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strconv"
@@ -133,7 +134,7 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, float64, []int64, error) 
 }
 
 func (t *TxCreate) validateAmount(senderAddr *models.Address, totalAmount float64) error {
-	senderBalance, err := t.xrp.GetBalance(senderAddr.WalletAddress)
+	senderBalance, err := t.xrp.GetBalance(context.TODO(), senderAddr.WalletAddress)
 	if err != nil {
 		return fmt.Errorf("fail to call xrp.GetAccountInfo(): %w", err)
 	}
@@ -159,7 +160,7 @@ func (t *TxCreate) createPaymentRawTransactions(
 			instructions.Sequence = sequence
 		}
 		txJSON, rawTxString, err := t.xrp.CreateRawTransaction(
-			senderAddr.WalletAddress, userPayment.receiverAddr, userPayment.floatAmount, instructions)
+			context.TODO(), senderAddr.WalletAddress, userPayment.receiverAddr, userPayment.floatAmount, instructions)
 		if err != nil {
 			// TODO: which is better to return err or continue?
 			// return error in ethereum logic

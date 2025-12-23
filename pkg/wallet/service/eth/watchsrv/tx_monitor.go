@@ -1,6 +1,7 @@
 package watchsrv
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
@@ -73,7 +74,7 @@ func (t *TxMonitor) updateStatusTxTypeSent() error {
 	for _, sentHash := range hashes {
 		// check confirmation
 		var confirmNum uint64
-		confirmNum, err = t.eth.GetConfirmation(sentHash)
+		confirmNum, err = t.eth.GetConfirmation(context.TODO(), sentHash)
 		if err != nil {
 			return fmt.Errorf("fail to call eth.GetConfirmation() sentHash: %s: %w", sentHash, err)
 		}
@@ -108,7 +109,7 @@ func (t *TxMonitor) MonitorBalance(_ uint64) error {
 		if err != nil {
 			return fmt.Errorf("fail to call addrRepo.GetAllAddress(): %w", err)
 		}
-		total, _ := t.eth.GetTotalBalance(addrs)
+		total, _ := t.eth.GetTotalBalance(context.TODO(), addrs)
 		logger.Info("total balance",
 			"account", acnt.String(),
 			"balance", total.Uint64())

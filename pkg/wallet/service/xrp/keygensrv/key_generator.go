@@ -1,6 +1,7 @@
 package keygensrv
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
@@ -76,7 +77,7 @@ func (k *XRPKeyGenerate) Generate(accountType account.AccountType, isKeyPair boo
 		// - WIF => badSeed
 		// - P2PKHAddr => badSeed
 		var generatedKey *xrp.ResponseWalletPropose
-		generatedKey, err = k.xrp.WalletPropose(v.P2SHSegWitAddr)
+		generatedKey, err = k.xrp.WalletPropose(context.TODO(), v.P2SHSegWitAddr)
 		if err != nil {
 			return fmt.Errorf("fail to call xrp.WalletPropose(): %w", err)
 		}

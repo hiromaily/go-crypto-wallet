@@ -85,13 +85,13 @@ type ResponseServerInfo struct {
 }
 
 // ServerInfo calls server_info method
-func (r *Ripple) ServerInfo() (*ResponseServerInfo, error) {
+func (r *Ripple) ServerInfo(ctx context.Context) (*ResponseServerInfo, error) {
 	req := RequestCommand{
 		ID:      1,
 		Command: "server_info",
 	}
 	var res ResponseServerInfo
-	if err := r.wsPublic.Call(context.Background(), &req, &res); err != nil {
+	if err := r.wsPublic.Call(ctx, &req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsClient.Call(server_info): %w", err)
 	}
 	return &res, nil

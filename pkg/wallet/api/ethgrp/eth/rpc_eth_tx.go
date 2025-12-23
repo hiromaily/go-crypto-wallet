@@ -53,9 +53,9 @@ type ResponseGetTransactionReceipt struct {
 //	sign(keccak256("\x19Ethereum Signed Message:\n" + len(message) + message)))
 //
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_sign
-func (e *Ethereum) Sign(hexAddr, message string) (string, error) {
+func (e *Ethereum) Sign(ctx context.Context, hexAddr, message string) (string, error) {
 	var signature string
-	err := e.rpcClient.CallContext(e.ctx, &signature, "eth_sign", hexAddr, message)
+	err := e.rpcClient.CallContext(ctx, &signature, "eth_sign", hexAddr, message)
 	if err != nil {
 		return "", fmt.Errorf("fail to call rpc.CallContext(eth_sign): %w", err)
 	}
@@ -66,9 +66,9 @@ func (e *Ethereum) Sign(hexAddr, message string) (string, error) {
 // SendTransaction sends transaction and returns transaction hash
 // FIXME: Invalid params: Invalid bytes format. Expected a 0x-prefixed hex string with even length
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_sendtransaction
-func (e *Ethereum) SendTransaction(msg *ethereum.CallMsg) (string, error) {
+func (e *Ethereum) SendTransaction(ctx context.Context, msg *ethereum.CallMsg) (string, error) {
 	var txHash string
-	err := e.rpcClient.CallContext(e.ctx, &txHash, "eth_sendTransaction", toCallArg(msg))
+	err := e.rpcClient.CallContext(ctx, &txHash, "eth_sendTransaction", toCallArg(msg))
 	if err != nil {
 		// FIXME: Invalid params: Invalid bytes format. Expected a 0x-prefixed hex string with even length.
 		return "", fmt.Errorf("fail to call rpc.CallContext(eth_sendTransaction): %w", err)
@@ -79,9 +79,9 @@ func (e *Ethereum) SendTransaction(msg *ethereum.CallMsg) (string, error) {
 
 // SendRawTransaction creates new message call transaction or a contract creation for signed transactions
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_sendrawtransaction
-func (e *Ethereum) SendRawTransaction(signedTx string) (string, error) {
+func (e *Ethereum) SendRawTransaction(ctx context.Context, signedTx string) (string, error) {
 	var txHash string
-	err := e.rpcClient.CallContext(e.ctx, &txHash, "eth_sendRawTransaction", signedTx)
+	err := e.rpcClient.CallContext(ctx, &txHash, "eth_sendRawTransaction", signedTx)
 	if err != nil {
 		return "", fmt.Errorf("fail to call rpc.CallContext(eth_sendTransaction): %w", err)
 	}
@@ -90,12 +90,12 @@ func (e *Ethereum) SendRawTransaction(signedTx string) (string, error) {
 }
 
 // SendRawTransactionWithTypesTx call SendRawTransaction() by types.Transaction
-func (e *Ethereum) SendRawTransactionWithTypesTx(tx *types.Transaction) (string, error) {
+func (e *Ethereum) SendRawTransactionWithTypesTx(ctx context.Context, tx *types.Transaction) (string, error) {
 	encodedTx, err := rlp.EncodeToBytes(tx)
 	if err != nil {
 		return "", fmt.Errorf("fail to call rlp.EncodeToBytes(tx): %w", err)
 	}
-	return e.SendRawTransaction(hexutil.Encode(encodedTx))
+	return e.SendRawTransaction(ctx, hexutil.Encode(encodedTx))
 }
 
 // Call executes a new message call immediately without creating a transaction on the block chain
@@ -112,9 +112,9 @@ func (e *Ethereum) SendRawTransactionWithTypesTx(tx *types.Transaction) (string,
 
 // GetTransactionByHash returns the information about a transaction requested by transaction hash
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyhash
-func (e *Ethereum) GetTransactionByHash(hashTx string) (*ResponseGetTransaction, error) {
+func (e *Ethereum) GetTransactionByHash(ctx context.Context, hashTx string) (*ResponseGetTransaction, error) {
 	var resMap map[string]string
-	err := e.rpcClient.CallContext(e.ctx, &resMap, "eth_getTransactionByHash", hashTx)
+	err := e.rpcClient.CallContext(ctx, &resMap, "eth_getTransactionByHash", hashTx)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getTransactionByHash): %w", err)
 	}
@@ -180,11 +180,11 @@ func (e *Ethereum) GetTransactionByHash(hashTx string) (*ResponseGetTransaction,
 // Note, tis is not available for pending transactions
 //
 //nolint:gocyclo
-func (e *Ethereum) GetTransactionReceipt(hashTx string) (*ResponseGetTransactionReceipt, error) {
+func (e *Ethereum) GetTransactionReceipt(ctx context.Context, hashTx string) (*ResponseGetTransactionReceipt, error) {
 	// timeout
 	ch := make(chan error, 1)
 	// FIXME: timeout configuration
-	ctx, cancel := context.WithTimeout(e.ctx, 10*time.Second)
+	timeoutCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer func() {
 		cancel()
 	}()
@@ -192,7 +192,7 @@ func (e *Ethereum) GetTransactionReceipt(hashTx string) (*ResponseGetTransaction
 	// call
 	var resMap map[string]any
 	go func() {
-		err := e.rpcClient.CallContext(ctx, &resMap, "eth_getTransactionReceipt", hashTx)
+		err := e.rpcClient.CallContext(timeoutCtx, &resMap, "eth_getTransactionReceipt", hashTx)
 		if err != nil {
 			ch <- fmt.Errorf("fail to call rpc.CallContext(eth_getTransactionReceipt): %w", err)
 		}
@@ -201,8 +201,8 @@ func (e *Ethereum) GetTransactionReceipt(hashTx string) (*ResponseGetTransaction
 
 	// wait by timeout
 	select {
-	case <-ctx.Done():
-		err := ctx.Err()
+	case <-timeoutCtx.Done():
+		err := timeoutCtx.Err()
 		switch err {
 		case context.Canceled:
 			logger.Debug("context.Canceled for calling eth_getTransactionReceipt")

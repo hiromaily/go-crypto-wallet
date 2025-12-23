@@ -1,6 +1,7 @@
 package eth
 
 import (
+	"context"
 	"flag"
 	"fmt"
 
@@ -54,7 +55,7 @@ func (c *ImportRawKeyCommand) Run(args []string) int {
 		return 1
 	}
 
-	addr, err := c.eth.ImportRawKey(privKey, passPhrase)
+	addr, err := c.eth.ImportRawKey(context.Background(), privKey, passPhrase)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call eth.ImportRawKey() %+v", err))
 		return 1

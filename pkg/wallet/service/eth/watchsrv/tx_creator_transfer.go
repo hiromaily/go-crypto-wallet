@@ -1,6 +1,7 @@
 package watchsrv
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -32,7 +33,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	if err != nil {
 		return "", "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(sender): %w", err)
 	}
-	senderBalnce, err := t.eth.GetBalance(senderAddr.WalletAddress, eth.QuantityTagLatest)
+	senderBalnce, err := t.eth.GetBalance(context.TODO(), senderAddr.WalletAddress, eth.QuantityTagLatest)
 	if err != nil {
 		return "", "", fmt.Errorf("fail to call eth.GetBalance(sender): %w", err)
 	}
@@ -58,7 +59,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	}
 
 	// call CreateRawTransaction
-	rawTx, txDetailItem, err := t.eth.CreateRawTransaction(
+	rawTx, txDetailItem, err := t.eth.CreateRawTransaction(context.TODO(),
 		senderAddr.WalletAddress, receiverAddr.WalletAddress, requiredValue.Uint64(), 0)
 	if err != nil {
 		return "", "", fmt.Errorf(

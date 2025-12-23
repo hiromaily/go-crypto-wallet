@@ -1,6 +1,7 @@
 package eth
 
 import (
+	"context"
 	"fmt"
 	"math/big"
 
@@ -11,9 +12,9 @@ import (
 // GasPrice returns the current price per gas in wei
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gasprice
 // - returns like `1000000000`
-func (e *Ethereum) GasPrice() (*big.Int, error) {
+func (e *Ethereum) GasPrice(ctx context.Context) (*big.Int, error) {
 	var gasPrice string
-	err := e.rpcClient.CallContext(e.ctx, &gasPrice, "eth_gasPrice")
+	err := e.rpcClient.CallContext(ctx, &gasPrice, "eth_gasPrice")
 	if err != nil {
 		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_gasPrice): %w", err)
 	}
@@ -29,9 +30,9 @@ func (e *Ethereum) GasPrice() (*big.Int, error) {
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_estimategas
 //
 //	is this value GasLimit??
-func (e *Ethereum) EstimateGas(msg *ethereum.CallMsg) (*big.Int, error) {
+func (e *Ethereum) EstimateGas(ctx context.Context, msg *ethereum.CallMsg) (*big.Int, error) {
 	var estimated string
-	err := e.rpcClient.CallContext(e.ctx, &estimated, "eth_estimateGas", toCallArg(msg))
+	err := e.rpcClient.CallContext(ctx, &estimated, "eth_estimateGas", toCallArg(msg))
 	if err != nil {
 		// Invalid params: Invalid bytes format. Expected a 0x-prefixed hex string with even length.
 		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_estimateGas): %w", err)

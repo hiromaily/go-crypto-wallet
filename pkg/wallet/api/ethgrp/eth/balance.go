@@ -1,6 +1,7 @@
 package eth
 
 import (
+	"context"
 	"math/big"
 )
 
@@ -11,11 +12,11 @@ type UserAmount struct {
 }
 
 // GetTotalBalance returns total amount and addresses
-func (e *Ethereum) GetTotalBalance(addrs []string) (*big.Int, []UserAmount) {
+func (e *Ethereum) GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []UserAmount) {
 	total := new(big.Int)
 	userAmounts := make([]UserAmount, 0, len(addrs))
 	for _, addr := range addrs {
-		balance, err := e.GetBalance(addr, QuantityTagPending)
+		balance, err := e.GetBalance(ctx, addr, QuantityTagPending)
 		if err != nil {
 			continue
 		}

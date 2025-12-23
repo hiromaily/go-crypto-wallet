@@ -1,6 +1,8 @@
 package xrpgrp
 
 import (
+	"context"
+
 	"github.com/btcsuite/btcd/chaincfg"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
@@ -14,12 +16,12 @@ type Rippler interface {
 	RippleAPIer
 
 	// balance
-	GetBalance(addr string) (float64, error)
-	GetTotalBalance(addrs []string) float64
+	GetBalance(ctx context.Context, addr string) (float64, error)
+	GetTotalBalance(ctx context.Context, addrs []string) float64
 
 	// transaction
 	CreateRawTransaction(
-		senderAccount, receiverAccount string, amount float64, instructions *xrp.Instructions,
+		ctx context.Context, senderAccount, receiverAccount string, amount float64, instructions *xrp.Instructions,
 	) (*xrp.TxInput, string, error)
 
 	// ripple
@@ -31,35 +33,35 @@ type Rippler interface {
 // RippleAPIer is RippleAPI interface
 type RippleAPIer interface {
 	// RippleAccountAPI
-	GetAccountInfo(address string) (*xrp.ResponseGetAccountInfo, error)
+	GetAccountInfo(ctx context.Context, address string) (*xrp.ResponseGetAccountInfo, error)
 	// RippleAddressAPI
-	GenerateAddress() (*xrp.ResponseGenerateAddress, error)
-	GenerateXAddress() (*xrp.ResponseGenerateXAddress, error)
-	IsValidAddress(addr string) (bool, error)
+	GenerateAddress(ctx context.Context) (*xrp.ResponseGenerateAddress, error)
+	GenerateXAddress(ctx context.Context) (*xrp.ResponseGenerateXAddress, error)
+	IsValidAddress(ctx context.Context, addr string) (bool, error)
 	// RippleTxAPI
 	PrepareTransaction(
-		senderAccount, receiverAccount string, amount float64, instructions *xrp.Instructions,
+		ctx context.Context, senderAccount, receiverAccount string, amount float64, instructions *xrp.Instructions,
 	) (*xrp.TxInput, string, error)
-	SignTransaction(txJSON *xrp.TxInput, secret string) (string, string, error)
-	CombineTransaction(signedTxs []string) (string, string, error)
-	SubmitTransaction(signedTx string) (*xrp.SentTx, uint64, error)
-	WaitValidation(targetledgerVarsion uint64) (uint64, error)
-	GetTransaction(txID string, targetLedgerVersion uint64) (*xrp.TxInfo, error)
+	SignTransaction(ctx context.Context, txJSON *xrp.TxInput, secret string) (string, string, error)
+	CombineTransaction(ctx context.Context, signedTxs []string) (string, string, error)
+	SubmitTransaction(ctx context.Context, signedTx string) (*xrp.SentTx, uint64, error)
+	WaitValidation(ctx context.Context, targetledgerVarsion uint64) (uint64, error)
+	GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*xrp.TxInfo, error)
 }
 
 // RipplePublicer is RipplePublic interface
 type RipplePublicer interface {
 	// public_account
-	AccountChannels(sender, receiver string) (*xrp.ResponseAccountChannels, error)
-	AccountInfo(address string) (*xrp.ResponseAccountInfo, error)
+	AccountChannels(ctx context.Context, sender, receiver string) (*xrp.ResponseAccountChannels, error)
+	AccountInfo(ctx context.Context, address string) (*xrp.ResponseAccountInfo, error)
 	// public_server_info
-	ServerInfo() (*xrp.ResponseServerInfo, error)
+	ServerInfo(ctx context.Context) (*xrp.ResponseServerInfo, error)
 }
 
 // RippleAdminer is RippleAdmin interface
 type RippleAdminer interface {
 	// admin_keygen
-	ValidationCreate(secret string) (*xrp.ResponseValidationCreate, error)
-	WalletProposeWithKey(seed string, keyType xrp.XRPKeyType) (*xrp.ResponseWalletPropose, error)
-	WalletPropose(passphrase string) (*xrp.ResponseWalletPropose, error)
+	ValidationCreate(ctx context.Context, secret string) (*xrp.ResponseValidationCreate, error)
+	WalletProposeWithKey(ctx context.Context, seed string, keyType xrp.XRPKeyType) (*xrp.ResponseWalletPropose, error)
+	WalletPropose(ctx context.Context, passphrase string) (*xrp.ResponseWalletPropose, error)
 }

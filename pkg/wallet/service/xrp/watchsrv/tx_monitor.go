@@ -1,6 +1,7 @@
 package watchsrv
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
@@ -57,7 +58,7 @@ func (t *TxMonitor) MonitorBalance(_ uint64) error {
 		if err != nil {
 			return fmt.Errorf("fail to call addrRepo.GetAllAddress(): %w", err)
 		}
-		total := t.xrp.GetTotalBalance(addrs)
+		total := t.xrp.GetTotalBalance(context.TODO(), addrs)
 		logger.Info("total balance",
 			"account", acnt.String(),
 			"balance", total)

@@ -1,6 +1,7 @@
 package watchsrv
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/bookerzzz/grok"
@@ -73,7 +74,7 @@ func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]xrp.UserAmount,
 	for _, addr := range addrs {
 		// TODO: if previous tx is not done, wrong amount is returned. how to manage it??
 		var clientBalance float64
-		clientBalance, err = t.xrp.GetBalance(addr.WalletAddress)
+		clientBalance, err = t.xrp.GetBalance(context.TODO(), addr.WalletAddress)
 		if err != nil {
 			logger.Warn("fail to call t.xrp.GetAccountInfo()",
 				"address", addr.WalletAddress,
@@ -113,7 +114,8 @@ func (t *TxCreate) createDepositRawTransactions(
 		}
 		var txJSON *xrp.TxInput
 		var rawTxString string
-		txJSON, rawTxString, err = t.xrp.CreateRawTransaction(val.Address, depositAddr.WalletAddress, 0, instructions)
+		txJSON, rawTxString, err = t.xrp.CreateRawTransaction(
+			context.TODO(), val.Address, depositAddr.WalletAddress, 0, instructions)
 		if err != nil {
 			logger.Warn("fail to call xrp.CreateRawTransaction()", "error", err)
 			continue

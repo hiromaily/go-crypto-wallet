@@ -1,6 +1,7 @@
 package watchsrv
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -34,7 +35,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	if err != nil {
 		return "", "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(sender): %w", err)
 	}
-	senderBalance, err := t.xrp.GetBalance(senderAddr.WalletAddress)
+	senderBalance, err := t.xrp.GetBalance(context.TODO(), senderAddr.WalletAddress)
 	if err != nil {
 		return "", "", fmt.Errorf("fail to call xrp.GetAccountInfo(): %w", err)
 	}
@@ -61,7 +62,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 		MaxLedgerVersionOffset: xrp.MaxLedgerVersionOffset,
 	}
 	txJSON, rawTxString, err := t.xrp.CreateRawTransaction(
-		senderAddr.WalletAddress, receiverAddr.WalletAddress, floatValue, instructions)
+		context.TODO(), senderAddr.WalletAddress, receiverAddr.WalletAddress, floatValue, instructions)
 	if err != nil {
 		return "", "", fmt.Errorf(
 			"fail to call xrp.CreateRawTransaction(), sender address: %s: %w",
