@@ -5,6 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
@@ -103,19 +106,14 @@ func testNewWalletCase(
 	}
 
 	conf, err := NewWallet(configFile, walletType, coinTypeCode)
-	if (err != nil) != wantErr {
-		t.Errorf("NewWallet() error = %v, wantErr %v", err, wantErr)
+	if wantErr {
+		require.Error(t, err, "NewWallet() should return error")
 		return
 	}
 
-	if !wantErr && conf == nil {
-		t.Error("NewWallet() returned nil config without error")
-		return
-	}
-
-	if !wantErr && conf != nil {
-		validateConfig(t, conf, coinTypeCode)
-	}
+	require.NoError(t, err, "NewWallet() should not return error")
+	require.NotNil(t, conf, "NewWallet() returned nil config without error")
+	validateConfig(t, conf, coinTypeCode)
 }
 
 func validateConfig(t *testing.T, conf *WalletRoot, coinTypeCode coin.CoinTypeCode) {
@@ -140,36 +138,24 @@ func validateConfig(t *testing.T, conf *WalletRoot, coinTypeCode coin.CoinTypeCo
 
 func validateBitcoinConfig(t *testing.T, conf *WalletRoot) {
 	t.Helper()
-	if conf.Bitcoin.Host == "" {
-		t.Error("Bitcoin.Host should not be empty")
-	}
-	if conf.Bitcoin.User == "" {
-		t.Error("Bitcoin.User should not be empty")
-	}
+	assert.NotEmpty(t, conf.Bitcoin.Host, "Bitcoin.Host should not be empty")
+	assert.NotEmpty(t, conf.Bitcoin.User, "Bitcoin.User should not be empty")
 }
 
 func validateEthereumConfig(t *testing.T, conf *WalletRoot) {
 	t.Helper()
-	if conf.Ethereum.Host == "" {
-		t.Error("Ethereum.Host should not be empty")
-	}
+	assert.NotEmpty(t, conf.Ethereum.Host, "Ethereum.Host should not be empty")
 }
 
 func validateRippleConfig(t *testing.T, conf *WalletRoot) {
 	t.Helper()
-	if conf.Ripple.WebsocketPublicURL == "" {
-		t.Error("Ripple.WebsocketPublicURL should not be empty")
-	}
+	assert.NotEmpty(t, conf.Ripple.WebsocketPublicURL, "Ripple.WebsocketPublicURL should not be empty")
 }
 
 func validateCommonConfig(t *testing.T, conf *WalletRoot) {
 	t.Helper()
-	if conf.Logger.Service == "" {
-		t.Error("Logger.Service should not be empty")
-	}
-	if conf.MySQL.Host == "" {
-		t.Error("MySQL.Host should not be empty")
-	}
+	assert.NotEmpty(t, conf.Logger.Service, "Logger.Service should not be empty")
+	assert.NotEmpty(t, conf.MySQL.Host, "MySQL.Host should not be empty")
 }
 
 func TestLoadWallet(t *testing.T) {
@@ -188,30 +174,20 @@ func TestLoadWallet(t *testing.T) {
 	}
 
 	conf, err := loadWallet(configPath)
-	if err != nil {
-		t.Fatalf("loadWallet() error = %v", err)
-	}
-
-	if conf == nil {
-		t.Fatal("loadWallet() returned nil config")
-	}
+	require.NoError(t, err, "loadWallet() should not return error")
+	require.NotNil(t, conf, "loadWallet() returned nil config")
 
 	// Verify that viper properly loaded the TOML file
-	if conf.Bitcoin.Host == "" {
-		t.Error("Bitcoin.Host should not be empty")
-	}
+	assert.NotEmpty(t, conf.Bitcoin.Host, "Bitcoin.Host should not be empty")
 
 	// Verify nested structures are loaded correctly
-	if conf.Bitcoin.Fee.AdjustmentMin == 0 && conf.Bitcoin.Fee.AdjustmentMax == 0 {
-		t.Error("Bitcoin fee settings should be loaded")
-	}
+	assert.True(t, conf.Bitcoin.Fee.AdjustmentMin != 0 || conf.Bitcoin.Fee.AdjustmentMax != 0,
+		"Bitcoin fee settings should be loaded")
 
 	// Verify map structures (if any ERC20s configured)
 	if len(conf.Ethereum.ERC20s) > 0 {
 		for token, erc20 := range conf.Ethereum.ERC20s {
-			if erc20.Symbol == "" {
-				t.Errorf("ERC20 token %v should have symbol", token)
-			}
+			assert.NotEmpty(t, erc20.Symbol, "ERC20 token %v should have symbol", token)
 		}
 	}
 }

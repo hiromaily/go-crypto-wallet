@@ -1,6 +1,10 @@
 package eth
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 // TestValidationAddr is test for ValidationAddr
 func TestValidationAddr(t *testing.T) {
@@ -34,8 +38,10 @@ func TestValidationAddr(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := new(Ethereum).ValidateAddr(tt.args.addr)
-			if (err == nil) == tt.want.isErr {
-				t.Errorf("ValidationAddr() = %v, want error = %v", err, tt.want.isErr)
+			if tt.want.isErr {
+				assert.Error(t, err, "ValidationAddr() should return error")
+			} else {
+				assert.NoError(t, err, "ValidationAddr() should not return error")
 			}
 		})
 	}
@@ -69,15 +75,14 @@ func TestConvertToWei(t *testing.T) {
 	et := new(Ethereum)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := et.FromWei(tt.args.wei).Uint64(); got != tt.want.wei {
-				t.Errorf("called FromWei() got: %d, want: %d", got, tt.want.wei)
-			}
-			if got := et.FromGWei(tt.args.gwei).Uint64(); got != tt.want.wei {
-				t.Errorf("called FromGWei() got: %d, want: %d", got, tt.want.wei)
-			}
-			if got := et.FromFloatEther(tt.args.floatEther).Uint64(); got != tt.want.wei {
-				t.Errorf("called FromFloatEther() got: %d, want: %d", got, tt.want.wei)
-			}
+			got := et.FromWei(tt.args.wei).Uint64()
+			assert.Equal(t, tt.want.wei, got, "FromWei() result mismatch")
+
+			got = et.FromGWei(tt.args.gwei).Uint64()
+			assert.Equal(t, tt.want.wei, got, "FromGWei() result mismatch")
+
+			got = et.FromFloatEther(tt.args.floatEther).Uint64()
+			assert.Equal(t, tt.want.wei, got, "FromFloatEther() result mismatch")
 		})
 	}
 }

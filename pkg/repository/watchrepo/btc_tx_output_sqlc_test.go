@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/quagmt/udecimal"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -33,9 +35,7 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 		Fee:               feeAmt,
 	}
 	txID, err := btcTxRepo.InsertUnsignedTx(action.ActionTypePayment, txItem)
-	if err != nil {
-		t.Fatalf("fail to create parent tx: %v", err)
-	}
+	require.NoError(t, err, "fail to create parent tx")
 
 	// Create test outputs
 	amount, _ := udecimal.Parse("1.5")
@@ -61,19 +61,13 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 	}
 
 	// Insert bulk
-	if err := btcTxOutputRepo.InsertBulk(outputs); err != nil {
-		t.Fatalf("fail to call InsertBulk() %v", err)
-	}
+	err = btcTxOutputRepo.InsertBulk(outputs)
+	require.NoError(t, err, "fail to call InsertBulk()")
 
 	// Get all by tx ID
 	retrievedOutputs, err := btcTxOutputRepo.GetAllByTxID(txID)
-	if err != nil {
-		t.Fatalf("fail to call GetAllByTxID() %v", err)
-	}
-	if len(retrievedOutputs) != 2 {
-		t.Errorf("GetAllByTxID() returned %d outputs, want 2", len(retrievedOutputs))
-		return
-	}
+	require.NoError(t, err, "fail to call GetAllByTxID()")
+	require.Len(t, retrievedOutputs, 2, "GetAllByTxID() should return 2 outputs")
 
 	// Verify one is change and one is not
 	hasChange := false
@@ -85,20 +79,13 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 			hasNonChange = true
 		}
 	}
-	if !hasChange || !hasNonChange {
-		t.Errorf("GetAllByTxID() should return both change and non-change outputs")
-		return
-	}
+	require.True(t, hasChange, "GetAllByTxID() should return at least one change output")
+	require.True(t, hasNonChange, "GetAllByTxID() should return at least one non-change output")
 
 	// Get one
 	oneOutput, err := btcTxOutputRepo.GetOne(retrievedOutputs[0].ID)
-	if err != nil {
-		t.Fatalf("fail to call GetOne() %v", err)
-	}
-	if oneOutput.TXID != txID {
-		t.Errorf("GetOne() returned TXID = %d, want %d", oneOutput.TXID, txID)
-		return
-	}
+	require.NoError(t, err, "fail to call GetOne()")
+	require.Equal(t, txID, oneOutput.TXID, "GetOne() should return output with correct TXID")
 
 	// Insert single
 	amount, _ := udecimal.Parse("1.5")
@@ -110,17 +97,11 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 		OutputAmount:  amount3,
 		IsChange:      false,
 	}
-	if err := btcTxOutputRepo.Insert(singleOutput); err != nil {
-		t.Fatalf("fail to call Insert() %v", err)
-	}
+	err = btcTxOutputRepo.Insert(singleOutput)
+	require.NoError(t, err, "fail to call Insert()")
 
 	// Verify count increased
 	allOutputs, err := btcTxOutputRepo.GetAllByTxID(txID)
-	if err != nil {
-		t.Fatalf("fail to call GetAllByTxID() after Insert() %v", err)
-	}
-	if len(allOutputs) != 3 {
-		t.Errorf("GetAllByTxID() returned %d outputs, want 3", len(allOutputs))
-		return
-	}
+	require.NoError(t, err, "fail to call GetAllByTxID() after Insert()")
+	require.Len(t, allOutputs, 3, "GetAllByTxID() should return 3 outputs after Insert()")
 }

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/btcsuite/btcd/chaincfg"
+	"github.com/stretchr/testify/assert"
 )
 
 // TestCoinType is test for coinTypeCode.CoinType()
@@ -46,9 +47,8 @@ func TestCoinType(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			coinTypeCode := CoinTypeCode(tt.args.strCoinTypeCode)
-			if got := coinTypeCode.CoinType(tt.args.conf); got != tt.want {
-				t.Errorf("CoinType() = %d, want %d", got, tt.want)
-			}
+			got := coinTypeCode.CoinType(tt.args.conf)
+			assert.Equal(t, tt.want, got, "CoinType() result mismatch")
 		})
 	}
 }
