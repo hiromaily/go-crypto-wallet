@@ -47,7 +47,7 @@ func TestCoinType(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			coinTypeCode := CoinTypeCode(tt.args.strCoinTypeCode)
-			got := coinTypeCode.CoinType(tt.args.conf)
+			got := GetCoinType(coinTypeCode, tt.args.conf)
 			assert.Equal(t, tt.want, got, "CoinType() result mismatch")
 		})
 	}

@@ -1,31 +1,34 @@
 package action
 
-// ActionType operation (deposit, payment, transfer)
-type ActionType string
-
-// action_type
-const (
-	ActionTypeDeposit  ActionType = "deposit"
-	ActionTypePayment  ActionType = "payment"
-	ActionTypeTransfer ActionType = "transfer"
+import (
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 )
 
-// String converter
-func (a ActionType) String() string {
-	return string(a)
-}
+// Deprecated: Use github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction instead.
+// This package provides backward compatibility aliases.
+
+// ActionType operation (deposit, payment, transfer)
+//
+// Deprecated: Use domain/transaction.ActionType
+type ActionType = domainTx.ActionType
+
+// action_type
+//
+// Deprecated: Use constants from domain/transaction package
+const (
+	ActionTypeDeposit  = domainTx.ActionTypeDeposit
+	ActionTypePayment  = domainTx.ActionTypePayment
+	ActionTypeTransfer = domainTx.ActionTypeTransfer
+)
 
 // ActionTypeValue value
-var ActionTypeValue = map[ActionType]uint8{
-	ActionTypeDeposit:  1,
-	ActionTypePayment:  2,
-	ActionTypeTransfer: 3,
-}
+//
+// Deprecated: Use domain/transaction.ActionTypeValue
+var ActionTypeValue = domainTx.ActionTypeValue
 
 // ValidateActionType validate
+//
+// Deprecated: Use domain/transaction.ValidateActionType
 func ValidateActionType(val string) bool {
-	if _, ok := ActionTypeValue[ActionType(val)]; ok {
-		return true
-	}
-	return false
+	return domainTx.ValidateActionType(val)
 }

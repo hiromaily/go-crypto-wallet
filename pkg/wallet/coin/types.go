@@ -1,50 +1,54 @@
 package coin
 
-import "github.com/btcsuite/btcd/chaincfg"
+import (
+	"github.com/btcsuite/btcd/chaincfg"
+
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+)
+
+// Deprecated: Use github.com/hiromaily/go-crypto-wallet/pkg/domain/coin instead.
+// This package provides backward compatibility aliases.
 
 // CoinType creates a separate subtree for every cryptocoin
-type CoinType uint32
-
-// Uint32 is converter
-func (c CoinType) Uint32() uint32 {
-	return uint32(c)
-}
+//
+// Deprecated: Use domain/coin.CoinType
+type CoinType = domainCoin.CoinType
 
 // coin_type
-// https://github.com/satoshilabs/slips/blob/master/slip-0044.md
+//
+// Deprecated: Use constants from domain/coin package
 const (
-	CoinTypeBitcoin     CoinType = 0   // Bitcoin
-	CoinTypeTestnet     CoinType = 1   // Testnet (all coins)
-	CoinTypeLitecoin    CoinType = 2   // Litecoin
-	CoinTypeEther       CoinType = 60  // Ether
-	CoinTypeRipple      CoinType = 144 // Ripple
-	CoinTypeBitcoinCash CoinType = 145 // Bitcoin Cash
-	// ERC20
-	CoinTypeERC20    CoinType = 9000 // TODO: temporary
-	CoinTypeERC20HYT CoinType = 9001 // TODO: temporary
+	CoinTypeBitcoin     = domainCoin.CoinTypeBitcoin
+	CoinTypeTestnet     = domainCoin.CoinTypeTestnet
+	CoinTypeLitecoin    = domainCoin.CoinTypeLitecoin
+	CoinTypeEther       = domainCoin.CoinTypeEther
+	CoinTypeRipple      = domainCoin.CoinTypeRipple
+	CoinTypeBitcoinCash = domainCoin.CoinTypeBitcoinCash
+	CoinTypeERC20       = domainCoin.CoinTypeERC20
+	CoinTypeERC20HYT    = domainCoin.CoinTypeERC20HYT
 )
 
 // CoinTypeCode coin type code
-type CoinTypeCode string
+//
+// Deprecated: Use domain/coin.CoinTypeCode
+type CoinTypeCode = domainCoin.CoinTypeCode
 
 // coin_type_code
+//
+// Deprecated: Use constants from domain/coin package
 const (
-	BTC   CoinTypeCode = "btc"
-	BCH   CoinTypeCode = "bch"
-	LTC   CoinTypeCode = "ltc"
-	ETH   CoinTypeCode = "eth"
-	XRP   CoinTypeCode = "xrp"
-	ERC20 CoinTypeCode = "erc20"
-	HYC   CoinTypeCode = "hyt"
+	BTC   = domainCoin.BTC
+	BCH   = domainCoin.BCH
+	LTC   = domainCoin.LTC
+	ETH   = domainCoin.ETH
+	XRP   = domainCoin.XRP
+	ERC20 = domainCoin.ERC20
+	HYC   = domainCoin.HYC
 )
 
-// String converter
-func (c CoinTypeCode) String() string {
-	return string(c)
-}
-
-// CoinType returns CoinType
-func (c CoinTypeCode) CoinType(conf *chaincfg.Params) CoinType {
+// GetCoinType returns CoinType based on network configuration
+// This function has infrastructure dependency (chaincfg) and remains in this package
+func GetCoinType(c CoinTypeCode, conf *chaincfg.Params) CoinType {
 	if conf.Name != "mainnet" {
 		return CoinTypeTestnet
 	}
@@ -56,36 +60,27 @@ func (c CoinTypeCode) CoinType(conf *chaincfg.Params) CoinType {
 }
 
 // CoinTypeCodeValue value
-var CoinTypeCodeValue = map[CoinTypeCode]CoinType{
-	BTC:   CoinTypeBitcoin,
-	BCH:   CoinTypeBitcoinCash,
-	LTC:   CoinTypeLitecoin,
-	ETH:   CoinTypeEther,
-	XRP:   CoinTypeRipple,
-	ERC20: CoinTypeERC20,
-	HYC:   CoinTypeERC20HYT,
-}
+//
+// Deprecated: Use domain/coin.CoinTypeCodeValue
+var CoinTypeCodeValue = domainCoin.CoinTypeCodeValue
 
 // IsCoinTypeCode validate
+//
+// Deprecated: Use domain/coin.IsCoinTypeCode
 func IsCoinTypeCode(val string) bool {
-	if _, ok := CoinTypeCodeValue[CoinTypeCode(val)]; ok {
-		return true
-	}
-	return false
+	return domainCoin.IsCoinTypeCode(val)
 }
 
 // IsBTCGroup validates bitcoin group
+//
+// Deprecated: Use domain/coin.IsBTCGroup
 func IsBTCGroup(val CoinTypeCode) bool {
-	if val == BTC || val == BCH {
-		return true
-	}
-	return false
+	return domainCoin.IsBTCGroup(val)
 }
 
-// IsETHGroup validates ethreum, ERC20 group
+// IsETHGroup validates ethereum, ERC20 group
+//
+// Deprecated: Use domain/coin.IsETHGroup
 func IsETHGroup(val CoinTypeCode) bool {
-	if val == ETH || IsERC20Token(val.String()) {
-		return true
-	}
-	return false
+	return domainCoin.IsETHGroup(val)
 }

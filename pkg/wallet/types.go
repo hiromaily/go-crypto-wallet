@@ -1,23 +1,27 @@
 package wallet
 
-// WalletType wallet type
-type WalletType string
-
-// wallet_type
-const (
-	WalletTypeWatchOnly WalletType = "watch"
-	WalletTypeKeyGen    WalletType = "keygen"
-	WalletTypeSign      WalletType = "sign"
+import (
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 )
 
-// String converter
-func (w WalletType) String() string {
-	return string(w)
-}
+// Deprecated: Use github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet instead.
+// This package provides backward compatibility aliases.
+
+// WalletType wallet type
+//
+// Deprecated: Use domain/wallet.WalletType
+type WalletType = domainWallet.WalletType
+
+// wallet_type
+//
+// Deprecated: Use constants from domain/wallet package
+const (
+	WalletTypeWatchOnly = domainWallet.WalletTypeWatchOnly
+	WalletTypeKeyGen    = domainWallet.WalletTypeKeyGen
+	WalletTypeSign      = domainWallet.WalletTypeSign
+)
 
 // WalletTypeValue value
-var WalletTypeValue = map[WalletType]uint8{
-	WalletTypeWatchOnly: 1,
-	WalletTypeKeyGen:    2,
-	WalletTypeSign:      3,
-}
+//
+// Deprecated: Use domain/wallet.WalletTypeValue
+var WalletTypeValue = domainWallet.WalletTypeValue

@@ -1,46 +1,41 @@
 package tx
 
+import (
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
+)
+
+// Deprecated: Use github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction instead.
+// This package provides backward compatibility aliases.
+
 //----------------------------------------------------
 // TxType
 //----------------------------------------------------
 
 // TxType transaction status
-type TxType string
+//
+// Deprecated: Use domain/transaction.TxType
+type TxType = domainTx.TxType
 
 // tx_type
+//
+// Deprecated: Use constants from domain/transaction package
 const (
-	TxTypeUnsigned TxType = "unsigned"
-	TxTypeSigned   TxType = "signed"
-	TxTypeSent     TxType = "sent"
-	TxTypeDone     TxType = "done"
-	TxTypeNotified TxType = "notified"
-	TxTypeCancel   TxType = "canceled"
+	TxTypeUnsigned = domainTx.TxTypeUnsigned
+	TxTypeSigned   = domainTx.TxTypeSigned
+	TxTypeSent     = domainTx.TxTypeSent
+	TxTypeDone     = domainTx.TxTypeDone
+	TxTypeNotified = domainTx.TxTypeNotified
+	TxTypeCancel   = domainTx.TxTypeCancel
 )
 
-// String converter
-func (t TxType) String() string {
-	return string(t)
-}
-
-// Int8 converter
-func (t TxType) Int8() int8 {
-	return int8(TxTypeValue[t])
-}
-
 // TxTypeValue value
-var TxTypeValue = map[TxType]uint8{
-	TxTypeUnsigned: 1,
-	TxTypeSigned:   2,
-	TxTypeSent:     3,
-	TxTypeDone:     4,
-	TxTypeNotified: 5,
-	TxTypeCancel:   6,
-}
+//
+// Deprecated: Use domain/transaction.TxTypeValue
+var TxTypeValue = domainTx.TxTypeValue
 
 // ValidateTxType validate string
+//
+// Deprecated: Use domain/transaction.ValidateTxType
 func ValidateTxType(val string) bool {
-	if _, ok := TxTypeValue[TxType(val)]; ok {
-		return true
-	}
-	return false
+	return domainTx.ValidateTxType(val)
 }

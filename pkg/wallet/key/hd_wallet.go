@@ -13,7 +13,7 @@ import (
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
-	"golang.org/x/crypto/ripemd160" //nolint:staticcheck,gosec
+	"golang.org/x/crypto/ripemd160" //nolint:gosec
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	bchaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/bch"
@@ -93,7 +93,7 @@ func NewHDKey(
 ) *HDKey {
 	keyData := HDKey{
 		purpose:      purpose,
-		coinType:     coinTypeCode.CoinType(conf),
+		coinType:     coin.GetCoinType(coinTypeCode, conf),
 		coinTypeCode: coinTypeCode,
 		conf:         conf,
 	}

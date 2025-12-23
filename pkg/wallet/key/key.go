@@ -2,6 +2,7 @@ package key
 
 import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 )
 
 // Generator is key generator interface
@@ -12,11 +13,6 @@ type Generator interface {
 // WalletKey keys
 // - [BTC] P2PKHAddr is not used anywhere, P2SHSegWitAddr should be used.
 // - [BCH] P2SHSegWitAddr is invalid. P2PKHAddr should be used.
-type WalletKey struct {
-	WIF            string
-	P2PKHAddr      string
-	P2SHSegWitAddr string
-	Bech32Addr     string
-	FullPubKey     string
-	RedeemScript   string
-}
+//
+// Deprecated: Use domain/key.WalletKey
+type WalletKey = domainKey.WalletKey
