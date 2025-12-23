@@ -33,7 +33,6 @@ type ERC20 struct {
 	contractAddress string
 	masterAddress   string
 	decimals        int
-	logger          logger.Logger
 }
 
 func NewERC20(
@@ -45,7 +44,6 @@ func NewERC20(
 	contractAddress string,
 	masterAddress string,
 	decimals int,
-	logger logger.Logger,
 ) *ERC20 {
 	return &ERC20{
 		client:          client,
@@ -56,7 +54,6 @@ func NewERC20(
 		contractAddress: contractAddress,
 		masterAddress:   masterAddress,
 		decimals:        decimals,
-		logger:          logger,
 	}
 }
 
@@ -128,7 +125,7 @@ func (e *ERC20) CreateRawTransaction(
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
 	}
-	e.logger.Debug("eth.CreateRawTransaction()",
+	logger.Debug("eth.CreateRawTransaction()",
 		"fromAddr", fromAddr,
 		"toAddr", toAddr,
 		"amount", amount,
@@ -138,7 +135,7 @@ func (e *ERC20) CreateRawTransaction(
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call eth.GetBalance(): %w", err)
 	}
-	e.logger.Info("balance", "balance", balance.Int64())
+	logger.Info("balance", "balance", balance.Int64())
 	if balance.Uint64() < amount {
 		return nil, nil, errors.New("balance is short to send token")
 	}
@@ -164,7 +161,7 @@ func (e *ERC20) CreateRawTransaction(
 		return nil, nil, fmt.Errorf("fail to call e.getNonce(): %w", err)
 	}
 
-	e.logger.Debug("comparison",
+	logger.Debug("comparison",
 		"Nonce", nonce,
 		"TokenAmount", tokenAmount.Uint64(),
 		"GasLimit", gasLimit,
@@ -266,7 +263,7 @@ func (e *ERC20) getNonce(fromAddr string, additionalNonce int) (uint64, error) {
 	}
 	nonce += uint64(additionalNonce)
 
-	e.logger.Debug("nonce",
+	logger.Debug("nonce",
 		"client.PendingNonceAt(e.ctx, common.HexToAddress(fromAddr))", nonce,
 	)
 	return nonce, nil

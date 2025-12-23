@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/ethtx"
 )
@@ -23,7 +24,7 @@ func (e *Ethereum) getNonce(fromAddr string, additionalNonce int) (uint64, error
 	if additionalNonce != 0 {
 		nonce = nonce.Add(nonce, new(big.Int).SetUint64(uint64(additionalNonce)))
 	}
-	e.logger.Debug("nonce",
+	logger.Debug("nonce",
 		"GetTransactionCount(fromAddr, QuantityTagPending)", nonce.Uint64(),
 	)
 
@@ -88,7 +89,7 @@ func (e *Ethereum) CreateRawTransaction(
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
 	}
-	e.logger.Debug("eth.CreateRawTransaction()",
+	logger.Debug("eth.CreateRawTransaction()",
 		"fromAddr", fromAddr,
 		"toAddr", toAddr,
 		"amount", amount,
@@ -100,7 +101,7 @@ func (e *Ethereum) CreateRawTransaction(
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call eth.GetBalance(): %w", err)
 	}
-	e.logger.Info("balance", "balance", balance.Int64())
+	logger.Info("balance", "balance", balance.Int64())
 	if balance.Uint64() == 0 {
 		return nil, nil, errors.New("balance is needed to send eth")
 	}
@@ -116,7 +117,7 @@ func (e *Ethereum) CreateRawTransaction(
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call eth.GasPrice(): %w", err)
 	}
-	e.logger.Info("gas_price", "gas_price", gasPrice.Int64())
+	logger.Info("gas_price", "gas_price", gasPrice.Int64())
 
 	// fromAddr, toAddr common.Address, gasPrice, value *big.Int
 	newValue, txFee, estimatedGas, err := e.calculateFee(
@@ -130,7 +131,7 @@ func (e *Ethereum) CreateRawTransaction(
 		return nil, nil, fmt.Errorf("fail to call eth.calculateFee(): %w", err)
 	}
 
-	e.logger.Debug("tx parameter",
+	logger.Debug("tx parameter",
 		"GasLimit", GasLimit,
 		"estimatedGas", estimatedGas.Uint64(),
 		"txFee", txFee.Uint64())
@@ -207,7 +208,7 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (
 		return nil, fmt.Errorf("chainID can't get from netID:  %d", e.netID)
 	}
 
-	e.logger.Debug("call types.SignTx",
+	logger.Debug("call types.SignTx",
 		"tx", tx,
 		"chainID", chainID.Uint64(),
 		"key.PrivateKey", key.PrivateKey,

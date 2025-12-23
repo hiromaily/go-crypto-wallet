@@ -10,7 +10,6 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -20,15 +19,13 @@ import (
 type BTCTxRepositorySqlc struct {
 	queries      *sqlcgen.Queries
 	coinTypeCode coin.CoinTypeCode
-	logger       logger.Logger
 }
 
 // NewBTCTxRepositorySqlc returns BTCTxRepositorySqlc object
-func NewBTCTxRepositorySqlc(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger logger.Logger) *BTCTxRepositorySqlc {
+func NewBTCTxRepositorySqlc(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode) *BTCTxRepositorySqlc {
 	return &BTCTxRepositorySqlc{
 		queries:      sqlcgen.New(dbConn),
 		coinTypeCode: coinTypeCode,
-		logger:       logger,
 	}
 }
 

@@ -8,6 +8,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
@@ -44,7 +45,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 		return "", "", errors.New("sender balance is insufficient to send")
 	}
 
-	t.logger.Debug("amount",
+	logger.Debug("amount",
 		"floatValue", floatValue,
 		"senderBalance", senderBalance,
 	)
@@ -66,7 +67,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 			"fail to call xrp.CreateRawTransaction(), sender address: %s: %w",
 			senderAddr.WalletAddress, err)
 	}
-	t.logger.Debug("txJSON", "txJSON", txJSON)
+	logger.Debug("txJSON", "txJSON", txJSON)
 	grok.Value(txJSON)
 
 	// generate UUID to trace transaction because unsignedTx is not unique

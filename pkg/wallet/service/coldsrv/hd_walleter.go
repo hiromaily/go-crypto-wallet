@@ -16,7 +16,6 @@ import (
 
 // HDWallet type
 type HDWallet struct {
-	logger       logger.Logger
 	repo         HDWalletRepo
 	keygen       key.Generator
 	coinTypeCode coin.CoinTypeCode
@@ -25,14 +24,12 @@ type HDWallet struct {
 
 // NewHDWallet returns hdWallet object
 func NewHDWallet(
-	logger logger.Logger,
 	repo HDWalletRepo,
 	keygen key.Generator,
 	coinTypeCode coin.CoinTypeCode,
 	wtype wallet.WalletType,
 ) *HDWallet {
 	return &HDWallet{
-		logger:       logger,
 		repo:         repo,
 		keygen:       keygen,
 		coinTypeCode: coinTypeCode,
@@ -45,15 +42,15 @@ func (h *HDWallet) Generate(
 	accountType account.AccountType,
 	seed []byte, count uint32,
 ) ([]key.WalletKey, error) {
-	h.logger.Debug("generate HDWallet", "account_type", accountType.String())
+	logger.Debug("generate HDWallet", "account_type", accountType.String())
 
 	// get latest index
 	idxFrom, err := h.repo.GetMaxIndex(accountType)
 	if err != nil {
-		h.logger.Info(err.Error())
+		logger.Info(err.Error())
 		return nil, nil
 	}
-	h.logger.Debug("max_index",
+	logger.Debug("max_index",
 		"account_type", accountType.String(),
 		"current_index", idxFrom,
 	)

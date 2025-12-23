@@ -10,6 +10,8 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
+
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // ResponseGetTransaction response of eth_getTransactionByHash
@@ -203,13 +205,13 @@ func (e *Ethereum) GetTransactionReceipt(hashTx string) (*ResponseGetTransaction
 		err := ctx.Err()
 		switch err {
 		case context.Canceled:
-			e.logger.Debug("context.Canceled for calling eth_getTransactionReceipt")
+			logger.Debug("context.Canceled for calling eth_getTransactionReceipt")
 		case context.DeadlineExceeded:
-			e.logger.Debug("context.DeadlineExceeded for calling eth_getTransactionReceipt")
+			logger.Debug("context.DeadlineExceeded for calling eth_getTransactionReceipt")
 		case nil:
 			// no error
 		default:
-			e.logger.Debug(err.Error())
+			logger.Debug(err.Error())
 			return nil, err
 		}
 	case retErr := <-ch:

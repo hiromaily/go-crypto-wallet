@@ -15,7 +15,6 @@ import (
 // Multisig type
 type Multisig struct {
 	btc                btcgrp.Bitcoiner
-	logger             logger.Logger
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier
 	accountKeyRepo     coldrepo.AccountKeyRepositorier
 	multisigAccount    account.MultisigAccounter
@@ -25,7 +24,6 @@ type Multisig struct {
 // NewMultisig returns multisig
 func NewMultisig(
 	btcAPI btcgrp.Bitcoiner,
-	logger logger.Logger,
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	multisigAccount account.MultisigAccounter,
@@ -33,7 +31,6 @@ func NewMultisig(
 ) *Multisig {
 	return &Multisig{
 		btc:                btcAPI,
-		logger:             logger,
 		authFullPubKeyRepo: authFullPubKeyRepo,
 		accountKeyRepo:     accountKeyRepo,
 		multisigAccount:    multisigAccount,
@@ -51,13 +48,13 @@ func NewMultisig(
 //   - https://bitcointalk.org/index.php?topic=3402541.0
 func (m *Multisig) AddMultisigAddress(accountType account.AccountType, addressType address.AddrType) error {
 	// for sign wallet
-	m.logger.Debug("addmultisigaddress",
+	logger.Debug("addmultisigaddress",
 		"account_type", accountType.String(),
 	)
 
 	// validate accountType
 	if !m.multisigAccount.IsMultisigAccount(accountType) {
-		m.logger.Info("only multisig account is allowed")
+		logger.Info("only multisig account is allowed")
 		return nil
 	}
 
@@ -78,7 +75,7 @@ func (m *Multisig) AddMultisigAddress(accountType account.AccountType, addressTy
 			}
 			authFullPubKeys = append(authFullPubKeys, fullPubKeyItem.FullPublicKey)
 		}
-		m.logger.Debug("don't repeat again")
+		logger.Debug("don't repeat again")
 	}
 
 	// get target addresses from account_key table, addr_status=AddrStatusPrivKeyImported
@@ -101,7 +98,7 @@ func (m *Multisig) AddMultisigAddress(accountType account.AccountType, addressTy
 		)
 		if err != nil {
 			// [Error] -5: no full public key for address mkPmdpo59gpU7ZioGYwwoMTQJjh7MiqUvd
-			m.logger.Error(
+			logger.Error(
 				"fail to call btc.CreateMultiSig()",
 				"signature_count", requiredSig,
 				"full public key for accountType", item.FullPublicKey,

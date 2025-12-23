@@ -21,7 +21,6 @@ type Bitcoin struct {
 	version           BTCVersion        // 179900
 	confirmationBlock uint64
 	feeRange          FeeAdjustmentRate
-	logger            logger.Logger
 }
 
 // FeeAdjustmentRate range of fee adjustment rate
@@ -33,13 +32,11 @@ type FeeAdjustmentRate struct {
 // NewBitcoin creates bitcoin object
 func NewBitcoin(
 	client *rpcclient.Client,
-	coinTypeCode coin.CoinTypeCode,
 	conf *config.Bitcoin,
-	logger logger.Logger,
+	coinTypeCode coin.CoinTypeCode,
 ) (*Bitcoin, error) {
 	bit := Bitcoin{
 		Client: client,
-		logger: logger,
 	}
 
 	bit.coinTypeCode = coinTypeCode
@@ -94,7 +91,7 @@ func NewBitcoin(
 			RequiredVersion, netInfo.Version)
 	}
 	bit.version = netInfo.Version
-	bit.logger.Info("bitcoin rpc server", "version", netInfo.Version.Int())
+	logger.Info("bitcoin rpc server", "version", netInfo.Version.Int())
 
 	// set other information from config
 	bit.confirmationBlock = conf.Block.ConfirmationNum

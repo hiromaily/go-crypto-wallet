@@ -6,7 +6,6 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
@@ -25,7 +24,6 @@ type TxCreator interface {
 // TxCreate type
 type TxCreate struct {
 	xrp             xrpgrp.Rippler
-	logger          logger.Logger
 	dbConn          *sql.DB
 	uuidHandler     uuid.UUIDHandler
 	addrRepo        watchrepo.AddressRepositorier
@@ -41,7 +39,6 @@ type TxCreate struct {
 // NewTxCreate returns TxCreate object
 func NewTxCreate(
 	xrp xrpgrp.Rippler,
-	logger logger.Logger,
 	dbConn *sql.DB,
 	uuidHandler uuid.UUIDHandler,
 	addrRepo watchrepo.AddressRepositorier,
@@ -55,7 +52,6 @@ func NewTxCreate(
 ) *TxCreate {
 	return &TxCreate{
 		xrp:             xrp,
-		logger:          logger,
 		dbConn:          dbConn,
 		uuidHandler:     uuidHandler,
 		addrRepo:        addrRepo,

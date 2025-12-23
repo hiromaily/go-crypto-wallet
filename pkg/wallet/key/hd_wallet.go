@@ -85,19 +85,17 @@ type HDKey struct {
 	coinType     coin.CoinType
 	coinTypeCode coin.CoinTypeCode
 	conf         *chaincfg.Params
-	logger       logger.Logger
 }
 
 // NewHDKey returns Key
 func NewHDKey(
-	purpose PurposeType, coinTypeCode coin.CoinTypeCode, conf *chaincfg.Params, logger logger.Logger,
+	purpose PurposeType, coinTypeCode coin.CoinTypeCode, conf *chaincfg.Params,
 ) *HDKey {
 	keyData := HDKey{
 		purpose:      purpose,
 		coinType:     coinTypeCode.CoinType(conf),
 		coinTypeCode: coinTypeCode,
 		conf:         conf,
-		logger:       logger,
 	}
 
 	return &keyData
@@ -134,7 +132,7 @@ func (k *HDKey) createKeyByAccount(
 		return nil, nil, err
 	}
 	// Account
-	k.logger.Debug(
+	logger.Debug(
 		"create_key_by_account",
 		"account_type", accountType.String(),
 		"account_value", accountType.Uint32(),

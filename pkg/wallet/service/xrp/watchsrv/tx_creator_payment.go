@@ -9,6 +9,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
@@ -24,7 +25,7 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	sender := t.paymentSender
 	receiver := account.AccountTypeAnonymous
 	targetAction := action.ActionTypePayment
-	t.logger.Debug("account",
+	logger.Debug("account",
 		"sender", sender.String(),
 		"receiver", receiver.String(),
 	)
@@ -35,7 +36,7 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 		return "", "", err
 	}
 	if len(userPayments) == 0 {
-		t.logger.Debug("no userPayments")
+		logger.Debug("no userPayments")
 		// no data
 		return "", "", nil
 	}
@@ -91,7 +92,7 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, float64, []int64, error) 
 		return nil, 0, nil, fmt.Errorf("fail to call repo.GetPaymentRequestAll(): %w", err)
 	}
 	if len(paymentRequests) == 0 {
-		t.logger.Debug("no data in payment_request")
+		logger.Debug("no data in payment_request")
 		return nil, 0, nil, nil
 	}
 
@@ -109,7 +110,7 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, float64, []int64, error) 
 		amt, err = strconv.ParseFloat(val.Amount.String(), 64)
 		if err != nil {
 			// fatal error because table includes invalid data
-			t.logger.Error("payment_request table includes invalid amount field")
+			logger.Error("payment_request table includes invalid amount field")
 			return nil, 0, nil, errors.New("payment_request table includes invalid amount field")
 		}
 		userPayments[idx].floatAmount = amt
@@ -117,7 +118,7 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, float64, []int64, error) 
 		// validate address
 		if !xrp.ValidateAddress(userPayments[idx].receiverAddr) {
 			// fatal error
-			t.logger.Error("address is invalid",
+			logger.Error("address is invalid",
 				"address", userPayments[idx].receiverAddr,
 				"error", err,
 			)
@@ -162,10 +163,10 @@ func (t *TxCreate) createPaymentRawTransactions(
 		if err != nil {
 			// TODO: which is better to return err or continue?
 			// return error in ethereum logic
-			t.logger.Warn("fail to call xrp.CreateRawTransaction()", "error", err)
+			logger.Warn("fail to call xrp.CreateRawTransaction()", "error", err)
 			continue
 		}
-		t.logger.Debug("txJSON", "txJSON", txJSON)
+		logger.Debug("txJSON", "txJSON", txJSON)
 		grok.Value(txJSON)
 
 		// sequence for next rawTransaction
@@ -174,7 +175,7 @@ func (t *TxCreate) createPaymentRawTransactions(
 		// generate UUID to trace transaction because unsignedTx is not unique
 		uid, err := t.uuidHandler.GenerateV7()
 		if err != nil {
-			t.logger.Warn("fail to call uuidHandler.GenerateV7()", "error", err)
+			logger.Warn("fail to call uuidHandler.GenerateV7()", "error", err)
 			continue
 		}
 

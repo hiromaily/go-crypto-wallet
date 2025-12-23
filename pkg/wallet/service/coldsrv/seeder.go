@@ -13,19 +13,16 @@ import (
 
 // Seed type
 type Seed struct {
-	logger   logger.Logger
 	seedRepo coldrepo.SeedRepositorier
 	wtype    wallet.WalletType
 }
 
 // NewSeed returns seed object
 func NewSeed(
-	logger logger.Logger,
 	seedRepo coldrepo.SeedRepositorier,
 	wtype wallet.WalletType,
 ) *Seed {
 	return &Seed{
-		logger:   logger,
 		seedRepo: seedRepo,
 		wtype:    wtype,
 	}
@@ -78,7 +75,7 @@ func (s *Seed) retrieveSeed() ([]byte, error) {
 	// get seed from database, seed is expected only one record
 	seed, err := s.seedRepo.GetOne()
 	if err == nil && seed.Seed != "" {
-		s.logger.Info("seed have already been generated")
+		logger.Info("seed have already been generated")
 		return key.SeedToByte(seed.Seed)
 	}
 	if err != nil {

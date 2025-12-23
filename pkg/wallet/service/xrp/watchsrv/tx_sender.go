@@ -19,7 +19,6 @@ import (
 // TxSend type
 type TxSend struct {
 	rippler      xrpgrp.Rippler
-	logger       logger.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier // not used
 	txRepo       watchrepo.TxRepositorier      // not used
@@ -31,7 +30,6 @@ type TxSend struct {
 // NewTxSend returns TxSend object
 func NewTxSend(
 	rippler xrpgrp.Rippler,
-	logger logger.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.TxRepositorier,
@@ -41,7 +39,6 @@ func NewTxSend(
 ) *TxSend {
 	return &TxSend{
 		rippler:      rippler,
-		logger:       logger,
 		dbConn:       dbConn,
 		addrRepo:     addrRepo,
 		txRepo:       txRepo,
@@ -73,7 +70,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 		return "", fmt.Errorf("fail to call txFileRepo.ValidateFilePath(): %w", err)
 	}
 
-	t.logger.Debug("send_tx", "action_type", actionType.String())
+	logger.Debug("send_tx", "action_type", actionType.String())
 
 	// read hex from file
 	data, err := t.txFileRepo.ReadFileSlice(filePath)
@@ -91,7 +88,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			// uuid, signedTxID, txBlob
 			tmp := strings.Split(line, ",")
 			if len(tmp) != 3 {
-				t.logger.Warn("data format is invalid in file")
+				logger.Warn("data format is invalid in file")
 				return
 			}
 			uuid := tmp[0]
@@ -103,7 +100,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			var earlistLedgerVersion uint64
 			sentTx, earlistLedgerVersion, err = t.rippler.SubmitTransaction(txBlob)
 			if err != nil {
-				t.logger.Warn("fail to call xrp.SubmitTransaction()",
+				logger.Warn("fail to call xrp.SubmitTransaction()",
 					"tx_id", txID,
 					"uuid", uuid,
 					"signed_tx_id", signedTxID,
@@ -119,7 +116,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 				return
 			}
 			if !strings.Contains(sentTx.ResultCode, "tesSUCCESS") {
-				t.logger.Warn("fail to call SubmitTransaction",
+				logger.Warn("fail to call SubmitTransaction",
 					"tx_id", txID,
 					"uuid", uuid,
 					"signed_tx_id", signedTxID,
@@ -131,7 +128,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			// txBlob and sentTx.TxBlob is same
 
 			// debug
-			t.logger.Debug("ledger version",
+			logger.Debug("ledger version",
 				"earlistLedgerVersion", earlistLedgerVersion, // 8123733
 				"sentTx.TxJSON.LastLedgerSequence", sentTx.TxJSON.LastLedgerSequence, // 8123736
 			)
@@ -140,7 +137,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			var ledgerVer uint64
 			ledgerVer, err = t.rippler.WaitValidation(sentTx.TxJSON.LastLedgerSequence)
 			if err != nil {
-				t.logger.Warn("fail to call xrp.WaitValidation()",
+				logger.Warn("fail to call xrp.WaitValidation()",
 					"tx_id", txID,
 					"uuid", uuid,
 					"signed_tx_id", signedTxID,
@@ -156,7 +153,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			var txInfo *xrp.TxInfo
 			txInfo, err = t.rippler.GetTransaction(sentTx.TxJSON.Hash, earlistLedgerVersion)
 			if err != nil {
-				t.logger.Warn("fail to call xrp.GetTransaction()",
+				logger.Warn("fail to call xrp.GetTransaction()",
 					"tx_id", txID,
 					"uuid", uuid,
 					"signed_tx_id", signedTxID,
@@ -175,7 +172,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 				uuid, tx.TxTypeSent, signedTxID, txBlob, earlistLedgerVersion)
 			if err != nil {
 				// TODO: even if error occurred, tx is already sent. so db should be corrected manually
-				t.logger.Warn(
+				logger.Warn(
 					"fail to call txDetailRepo.UpdateAfterTxSent() but tx is already sent. "+
 						"So database should be updated manually",
 					"tx_id", txID,
@@ -190,7 +187,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 				return
 			}
 			if affectedNum == 0 {
-				t.logger.Info("no records to update tx_table",
+				logger.Info("no records to update tx_table",
 					"tx_id", txID,
 					"uuid", uuid,
 					"signed_tx_id", signedTxID,

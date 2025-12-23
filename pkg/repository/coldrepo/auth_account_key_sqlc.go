@@ -9,7 +9,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
@@ -18,17 +17,15 @@ import (
 type AuthAccountKeyRepositorySqlc struct {
 	queries      *sqlcgen.Queries
 	coinTypeCode coin.CoinTypeCode
-	logger       logger.Logger
 }
 
 // NewAuthAccountKeyRepositorySqlc returns AuthAccountKeyRepositorySqlc object
 func NewAuthAccountKeyRepositorySqlc(
-	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger logger.Logger,
+	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode,
 ) *AuthAccountKeyRepositorySqlc {
 	return &AuthAccountKeyRepositorySqlc{
 		queries:      sqlcgen.New(dbConn),
 		coinTypeCode: coinTypeCode,
-		logger:       logger,
 	}
 }
 

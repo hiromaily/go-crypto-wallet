@@ -14,6 +14,8 @@ import (
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
 
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 )
 
@@ -373,7 +375,7 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []PrevTx) (*wire.Ms
 
 	// Debug to compare tx before and after
 	if !signRawTxResult.Complete {
-		b.logger.Debug("sign is not completed yet")
+		logger.Debug("sign is not completed yet")
 		b.debugCompareTx(tx, msgTx)
 	}
 
@@ -431,7 +433,7 @@ func (b *Bitcoin) SignRawTransactionWithKey(
 				"result of `signrawtransactionwithwallet` includes error: %s",
 				signRawTxResult.Errors[0].Error)
 		}
-		b.logger.Warn(
+		logger.Warn(
 			"result of `signrawtransactionwithwallet` includes error",
 			"errors", signRawTxResult.Errors)
 	}
@@ -491,7 +493,7 @@ func (b *Bitcoin) sendRawTransaction(tx *wire.MsgTx) (*chainhash.Hash, error) {
 		// error occurred when trying to send tx with minimum fee(1Satoshi)
 		//  -26: 66: min relay fee not met
 		if strings.Contains(err.Error(), "-27: Transaction already in block chain") {
-			b.logger.Info("Transaction already in block chain")
+			logger.Info("Transaction already in block chain")
 			return nil, nil
 		}
 		return nil, fmt.Errorf("fail to call btc.client.SendRawTransaction(): %w", err)
@@ -534,16 +536,16 @@ func (b *Bitcoin) Sign(tx *wire.MsgTx, strPrivateKey string) (string, error) {
 }
 
 func (b *Bitcoin) debugCompareTx(tx1, tx2 *wire.MsgTx) {
-	b.logger.Debug("compare tx before and after")
+	logger.Debug("compare tx before and after")
 	hexTx1, err := b.ToHex(tx1)
 	if err != nil {
-		b.logger.Debug("fail to call btc.ToHex(tx1)", "error", err)
+		logger.Debug("fail to call btc.ToHex(tx1)", "error", err)
 	}
 	hexTx2, err := b.ToHex(tx2)
 	if err != nil {
-		b.logger.Debug("fail to call btc.ToHex(tx2)", "error", err)
+		logger.Debug("fail to call btc.ToHex(tx2)", "error", err)
 	}
 	if hexTx1 == hexTx2 {
-		b.logger.Debug("hexTx before is same to hexTx after. Something program is wrong")
+		logger.Debug("hexTx before is same to hexTx after. Something program is wrong")
 	}
 }

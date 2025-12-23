@@ -9,7 +9,6 @@ import (
 	"github.com/guregu/null/v6"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
@@ -18,17 +17,15 @@ import (
 type PaymentRequestRepositorySqlc struct {
 	queries      *sqlcgen.Queries
 	coinTypeCode coin.CoinTypeCode
-	logger       logger.Logger
 }
 
 // NewPaymentRequestRepositorySqlc returns PaymentRequestRepositorySqlc object
 func NewPaymentRequestRepositorySqlc(
-	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger logger.Logger,
+	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode,
 ) *PaymentRequestRepositorySqlc {
 	return &PaymentRequestRepositorySqlc{
 		queries:      sqlcgen.New(dbConn),
 		coinTypeCode: coinTypeCode,
-		logger:       logger,
 	}
 }
 
