@@ -10,6 +10,7 @@ import (
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
+	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 )
@@ -26,6 +27,7 @@ type TxCreate struct {
 	xrp             xrpgrp.Rippler
 	logger          logger.Logger
 	dbConn          *sql.DB
+	uuidHandler     uuid.UUIDHandler
 	addrRepo        watchrepo.AddressRepositorier
 	txRepo          watchrepo.TxRepositorier
 	txDetailRepo    watchrepo.XrpDetailTxRepositorier
@@ -41,6 +43,7 @@ func NewTxCreate(
 	xrp xrpgrp.Rippler,
 	logger logger.Logger,
 	dbConn *sql.DB,
+	uuidHandler uuid.UUIDHandler,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.TxRepositorier,
 	txDetailRepo watchrepo.XrpDetailTxRepositorier,
@@ -54,6 +57,7 @@ func NewTxCreate(
 		xrp:             xrp,
 		logger:          logger,
 		dbConn:          dbConn,
+		uuidHandler:     uuidHandler,
 		addrRepo:        addrRepo,
 		txRepo:          txRepo,
 		txDetailRepo:    txDetailRepo,

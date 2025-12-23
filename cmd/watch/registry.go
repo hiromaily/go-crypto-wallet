@@ -18,6 +18,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
+	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 	wtype "github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
@@ -58,6 +59,7 @@ type registry struct {
 	grpcConn     *grpc.ClientConn
 	rippleAPI    *xrp.RippleAPI
 	mysqlClient  *sql.DB
+	uuidHandler  uuid.UUIDHandler
 }
 
 // NewRegistry is to register registry interface
@@ -197,6 +199,7 @@ func (r *registry) newXRPTxCreator() xrpsrv.TxCreator {
 		r.newXRP(),
 		r.newLogger(),
 		r.newMySQLClient(),
+		r.newUUIDHandler(),
 		r.newAddressRepo(),
 		r.newTxRepo(),
 		r.newXRPTxDetailRepo(),
@@ -355,6 +358,7 @@ func (r *registry) newETH() ethgrp.Ethereumer {
 			&r.conf.Ethereum,
 			r.newLogger(),
 			r.conf.CoinTypeCode,
+			r.newUUIDHandler(),
 		)
 		if err != nil {
 			panic(err)
@@ -379,6 +383,7 @@ func (r *registry) newERC20() ethgrp.ERC20er {
 			client,
 			tokenClient,
 			conf.ERC20Token,
+			r.newUUIDHandler(),
 			conf.ERC20s[conf.ERC20Token].Name,
 			conf.ERC20s[conf.ERC20Token].ContractAddress,
 			conf.ERC20s[conf.ERC20Token].MasterAddress,
@@ -545,4 +550,11 @@ func (r *registry) newPaymentAccount() account.AccountType {
 		return account.AccountTypePayment
 	}
 	return r.accountConf.PaymentSender
+}
+
+func (r *registry) newUUIDHandler() uuid.UUIDHandler {
+	if r.uuidHandler == nil {
+		r.uuidHandler = uuid.NewGoogleUUIDHandler()
+	}
+	return r.uuidHandler
 }

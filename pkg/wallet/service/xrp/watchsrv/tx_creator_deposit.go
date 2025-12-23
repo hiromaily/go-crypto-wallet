@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/bookerzzz/grok"
-	uuid "github.com/satori/go.uuid"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -125,13 +124,16 @@ func (t *TxCreate) createDepositRawTransactions(
 		sequence = txJSON.Sequence + 1
 
 		// generate UUID to trace transaction because unsignedTx is not unique
-		uid := uuid.NewV4().String()
+		uid, err := t.uuidHandler.GenerateV7()
+		if err != nil {
+			return nil, nil, fmt.Errorf("fail to call uuidHandler.GenerateV7(): %w", err)
+		}
 
 		serializedTxs = append(serializedTxs, fmt.Sprintf("%s,%s", uid, rawTxString))
 
 		// create insert data for　eth_detail_tx
 		txDetailItem := &models.XRPDetailTX{
-			UUID:               uid,
+			UUID:               uid.String(),
 			CurrentTXType:      tx.TxTypeUnsigned.Int8(),
 			SenderAccount:      sender.String(),
 			SenderAddress:      val.Address,

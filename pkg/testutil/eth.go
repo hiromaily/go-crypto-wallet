@@ -6,6 +6,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -31,12 +32,14 @@ func GetETH() (ethgrp.Ethereumer, error) {
 
 	// logger
 	log := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
+	// uuid handler
+	uuidHandler := uuid.NewGoogleUUIDHandler()
 	// client
 	client, err := ethgrp.NewRPCClient(&conf.Ethereum)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create ethereum rpc client: %w", err)
 	}
-	et, err = ethgrp.NewEthereum(client, &conf.Ethereum, log, conf.CoinTypeCode)
+	et, err = ethgrp.NewEthereum(client, &conf.Ethereum, log, conf.CoinTypeCode, uuidHandler)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create eth instance: %w", err)
 	}

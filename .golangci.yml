@@ -149,6 +149,9 @@ linters:
       - text: "ST1000: at least one file in a package should have a package comment"
         linters:
           - staticcheck
+      - text: 'declaration of "err" shadows declaration'
+        linters:
+          - govet
 
     # Exclude files from all linters.
     paths:
