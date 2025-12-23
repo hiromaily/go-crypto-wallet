@@ -23,6 +23,12 @@
 7. **PR Draft**: Write description with "Closes #{issue_number}"
 8. **Review Request**: After creating the PR, ask Claude to review the PR for code quality, correctness, and adherence to project standards
 
+**Branch Naming:**
+
+- Use format: `feature/issue-{issue_number}-{brief-description}`
+- Example: `feature/issue-123-fix-logger-global-issue`
+- Keep description concise and descriptive
+
 **Safety Rules:**
 
 - Stop immediately if working directory is not clean
