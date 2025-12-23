@@ -7,7 +7,7 @@ import (
 type UUID = uuid.UUID
 
 type UUIDHandler interface {
-	GenerateV4() (uuid.UUID, error)
-	GenerateV7() (uuid.UUID, error)
+	GenerateV4() (UUID, error)
+	GenerateV7() (UUID, error)
 	Parse(s string) (UUID, error)
 }
