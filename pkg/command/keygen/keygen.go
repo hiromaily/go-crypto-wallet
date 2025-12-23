@@ -49,31 +49,25 @@ func AddCommands(rootCmd *cobra.Command, wallet *wallets.Keygener, version strin
 	sign.AddCommands(signCmd, wallet)
 
 	// API commands - wallet-type specific
-	// These will be added dynamically when the wallet is initialized
-	rootCmd.AddCommand(&cobra.Command{
-		Use:   "api",
-		Short: "api commands",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if *wallet == nil {
-				return nil
-			}
-			switch v := (*wallet).(type) {
-			case *btcwallet.BTCKeygen:
-				apiCmd := &cobra.Command{
-					Use:   "api",
-					Short: "Bitcoin API commands",
-				}
-				btc.AddCommands(apiCmd, v.BTC)
-				return apiCmd.Execute()
-			case *ethwallet.ETHKeygen:
-				apiCmd := &cobra.Command{
-					Use:   "api",
-					Short: "Ethereum API commands",
-				}
-				eth.AddCommands(apiCmd, v.ETH)
-				return apiCmd.Execute()
-			}
-			return nil
-		},
-	})
+	// Added after wallet initialization to provide wallet-specific API commands
+	if *wallet == nil {
+		return
+	}
+
+	switch v := (*wallet).(type) {
+	case *btcwallet.BTCKeygen:
+		apiCmd := &cobra.Command{
+			Use:   "api",
+			Short: "Bitcoin API commands",
+		}
+		rootCmd.AddCommand(apiCmd)
+		btc.AddCommands(apiCmd, v.BTC)
+	case *ethwallet.ETHKeygen:
+		apiCmd := &cobra.Command{
+			Use:   "api",
+			Short: "Ethereum API commands",
+		}
+		rootCmd.AddCommand(apiCmd)
+		eth.AddCommands(apiCmd, v.ETH)
+	}
 }

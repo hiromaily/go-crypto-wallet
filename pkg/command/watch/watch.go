@@ -47,7 +47,7 @@ func AddCommands(rootCmd *cobra.Command, wallet *wallets.Watcher, version string
 	monitor.AddCommands(monitorCmd, wallet)
 
 	// API commands - wallet-type specific
-	if *wallet == nil {
+	if *wallet == nil || confPtr == nil {
 		return
 	}
 

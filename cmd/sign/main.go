@@ -84,14 +84,14 @@ func main() {
 			// config
 			conf, err := config.NewWallet(confPath, walletType, coin.CoinTypeCode(coinTypeCode))
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to load wallet config: %w", err)
 			}
 
 			accountConf := &account.AccountRoot{}
 			if accountConfPath != "" {
 				accountConf, err = account.NewAccount(accountConfPath)
 				if err != nil {
-					return err
+					return fmt.Errorf("failed to load account config: %w", err)
 				}
 			}
 

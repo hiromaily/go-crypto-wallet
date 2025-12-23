@@ -62,7 +62,7 @@ func initializeWallet() error {
 	// base config
 	conf, err := config.NewWallet(confPath, walletType, coin.CoinTypeCode(coinTypeCode))
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to load wallet config: %w", err)
 	}
 
 	// account config
@@ -70,7 +70,7 @@ func initializeWallet() error {
 	if accountConfPath != "" {
 		accountConf, err = account.NewAccount(accountConfPath)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to load account config: %w", err)
 		}
 	}
 

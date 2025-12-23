@@ -68,22 +68,22 @@ func initializeWallet() error {
 	// config
 	conf, err = config.NewWallet(confPath, walletType, coin.CoinTypeCode(coinTypeCode))
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to load wallet config: %w", err)
 	}
 
 	accountConf := &account.AccountRoot{}
 	if accountConfPath != "" {
 		accountConf, err = account.NewAccount(accountConfPath)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to load account config: %w", err)
 		}
 	}
 
 	// override config
 	conf.CoinTypeCode = coin.CoinTypeCode(coinTypeCode)
 	if coin.IsERC20Token(coinTypeCode) {
-		if conf.ValidateERC20(coin.ERC20Token(coinTypeCode)) != nil {
-			return err
+		if err := conf.ValidateERC20(coin.ERC20Token(coinTypeCode)); err != nil {
+			return fmt.Errorf("failed to validate ERC20 token: %w", err)
 		}
 		conf.Ethereum.ERC20Token = coin.ERC20Token(coinTypeCode)
 	}
