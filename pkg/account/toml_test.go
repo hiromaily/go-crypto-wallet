@@ -7,13 +7,13 @@ import (
 
 	"github.com/bookerzzz/grok"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/config/file"
+	configutil "github.com/hiromaily/go-crypto-wallet/pkg/config/testutil"
 )
 
 // TestNewAccount is test for NewAccount
 func TestNewAccount(t *testing.T) {
 	// t.SkipNow()
-	confPath := file.GetConfigFilePath("account.toml")
+	confPath := configutil.GetConfigFilePath("account.toml")
 	conf, err := NewAccount(confPath)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
@@ -23,7 +23,7 @@ func TestNewAccount(t *testing.T) {
 
 // TestNewAccountWithViper tests account loading using viper
 func TestNewAccountWithViper(t *testing.T) {
-	confPath := file.GetConfigFilePath("account.toml")
+	confPath := configutil.GetConfigFilePath("account.toml")
 
 	// Skip if config file doesn't exist
 	if _, err := os.Stat(confPath); os.IsNotExist(err) {
@@ -69,7 +69,7 @@ func TestNewAccountWithViper(t *testing.T) {
 
 // TestLoadAccount tests the loadAccount function
 func TestLoadAccount(t *testing.T) {
-	confPath := file.GetConfigFilePath("account.toml")
+	confPath := configutil.GetConfigFilePath("account.toml")
 
 	// Skip if config file doesn't exist
 	if _, err := os.Stat(confPath); os.IsNotExist(err) {
