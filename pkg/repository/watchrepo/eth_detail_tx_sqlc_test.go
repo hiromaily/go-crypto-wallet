@@ -8,6 +8,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -45,9 +47,7 @@ func TestEthDetailTxSqlc(t *testing.T) {
 
 	// Create a tx record first (eth_detail_tx joins with tx table)
 	txID, err := txRepo.InsertUnsignedTx(action.ActionTypePayment)
-	if err != nil {
-		t.Fatalf("fail to create parent tx: %v", err)
-	}
+	require.NoError(t, err, "fail to create parent tx")
 
 	// Create test eth detail tx
 	uuid := "eth-uuid-sqlc-test"
@@ -67,116 +67,62 @@ func TestEthDetailTxSqlc(t *testing.T) {
 	}
 
 	// Insert
-	if err := ethDetailTxRepo.Insert(ethTx); err != nil {
-		t.Fatalf("fail to call Insert() %v", err)
-	}
+	err = ethDetailTxRepo.Insert(ethTx)
+	require.NoError(t, err, "fail to call Insert()")
 
 	// Get all by tx ID
 	ethTxs, err := ethDetailTxRepo.GetAllByTxID(txID)
-	if err != nil {
-		t.Fatalf("fail to call GetAllByTxID() %v", err)
-	}
-	if len(ethTxs) < 1 {
-		t.Errorf("GetAllByTxID() returned %d records, want at least 1", len(ethTxs))
-		return
-	}
+	require.NoError(t, err, "fail to call GetAllByTxID()")
+	require.GreaterOrEqual(t, len(ethTxs), 1, "GetAllByTxID() should return at least 1 record")
 
 	// Get one
 	retrievedTx, err := ethDetailTxRepo.GetOne(ethTxs[0].ID)
-	if err != nil {
-		t.Fatalf("fail to call GetOne() %v", err)
-	}
-	if retrievedTx.UUID != uuid {
-		t.Errorf("GetOne() returned UUID = %s, want %s", retrievedTx.UUID, uuid)
-		return
-	}
+	require.NoError(t, err, "fail to call GetOne()")
+	require.Equal(t, uuid, retrievedTx.UUID, "GetOne() should return correct UUID")
 
 	// Update after tx sent
 	signedHex := "0xsigned-hex-sqlc"
 	sentHashTx := "0xsent-hash-sqlc"
 	rowsAffected, err := ethDetailTxRepo.UpdateAfterTxSent(uuid, tx.TxTypeSent, signedHex, sentHashTx)
-	if err != nil {
-		t.Fatalf("fail to call UpdateAfterTxSent() %v", err)
-	}
-	if rowsAffected < 1 {
-		t.Errorf("UpdateAfterTxSent() affected %d rows, want at least 1", rowsAffected)
-		return
-	}
+	require.NoError(t, err, "fail to call UpdateAfterTxSent()")
+	require.GreaterOrEqual(t, rowsAffected, int64(1), "UpdateAfterTxSent() should affect at least 1 row")
 
 	// Verify update
 	updatedTx, err := ethDetailTxRepo.GetOne(retrievedTx.ID)
-	if err != nil {
-		t.Fatalf("fail to call GetOne() after update %v", err)
-	}
-	if updatedTx.SignedHexTX != signedHex {
-		t.Errorf("UpdateAfterTxSent() did not update SignedHexTX, got %s, want %s", updatedTx.SignedHexTX, signedHex)
-		return
-	}
-	if updatedTx.SentHashTX != sentHashTx {
-		t.Errorf("UpdateAfterTxSent() did not update SentHashTX, got %s, want %s", updatedTx.SentHashTX, sentHashTx)
-		return
-	}
-	if updatedTx.CurrentTXType != tx.TxTypeSent.Int8() {
-		t.Errorf("UpdateAfterTxSent() did not update CurrentTXType, got %d, want %d", updatedTx.CurrentTXType, tx.TxTypeSent.Int8())
-		return
-	}
+	require.NoError(t, err, "fail to call GetOne() after update")
+	require.Equal(t, signedHex, updatedTx.SignedHexTX, "UpdateAfterTxSent() should update SignedHexTX")
+	require.Equal(t, sentHashTx, updatedTx.SentHashTX, "UpdateAfterTxSent() should update SentHashTX")
+	require.Equal(t, tx.TxTypeSent.Int8(), updatedTx.CurrentTXType, "UpdateAfterTxSent() should update CurrentTXType")
 
 	// Get sent hash tx
 	hashes, err := ethDetailTxRepo.GetSentHashTx(tx.TxTypeSent)
-	if err != nil {
-		t.Fatalf("fail to call GetSentHashTx() %v", err)
-	}
-	if len(hashes) < 1 {
-		t.Errorf("GetSentHashTx() returned %d hashes, want at least 1", len(hashes))
-		return
-	}
+	require.NoError(t, err, "fail to call GetSentHashTx()")
+	require.GreaterOrEqual(t, len(hashes), 1, "GetSentHashTx() should return at least 1 hash")
 
 	// Update tx type by sent hash
 	rowsAffected, err = ethDetailTxRepo.UpdateTxTypeBySentHashTx(tx.TxTypeDone, sentHashTx)
-	if err != nil {
-		t.Fatalf("fail to call UpdateTxTypeBySentHashTx() %v", err)
-	}
-	if rowsAffected < 1 {
-		t.Errorf("UpdateTxTypeBySentHashTx() affected %d rows, want at least 1", rowsAffected)
-		return
-	}
+	require.NoError(t, err, "fail to call UpdateTxTypeBySentHashTx()")
+	require.GreaterOrEqual(t, rowsAffected, int64(1), "UpdateTxTypeBySentHashTx() should affect at least 1 row")
 
 	// Verify tx type update
 	verifyTx, err := ethDetailTxRepo.GetOne(retrievedTx.ID)
-	if err != nil {
-		t.Fatalf("fail to call GetOne() after UpdateTxTypeBySentHashTx() %v", err)
-	}
-	if verifyTx.CurrentTXType != tx.TxTypeDone.Int8() {
-		t.Errorf("UpdateTxTypeBySentHashTx() did not update CurrentTXType, got %d, want %d", verifyTx.CurrentTXType, tx.TxTypeDone.Int8())
-		return
-	}
+	require.NoError(t, err, "fail to call GetOne() after UpdateTxTypeBySentHashTx()")
+	require.Equal(t, tx.TxTypeDone.Int8(), verifyTx.CurrentTXType, "UpdateTxTypeBySentHashTx() should update CurrentTXType to TxTypeDone")
 
 	// Update tx type by ID
 	rowsAffected, err = ethDetailTxRepo.UpdateTxType(retrievedTx.ID, tx.TxTypeNotified)
-	if err != nil {
-		t.Fatalf("fail to call UpdateTxType() %v", err)
-	}
-	if rowsAffected != 1 {
-		t.Errorf("UpdateTxType() affected %d rows, want 1", rowsAffected)
-		return
-	}
+	require.NoError(t, err, "fail to call UpdateTxType()")
+	require.Equal(t, int64(1), rowsAffected, "UpdateTxType() should affect 1 row")
 
 	// Verify final tx type
 	finalTx, err := ethDetailTxRepo.GetOne(retrievedTx.ID)
-	if err != nil {
-		t.Fatalf("fail to call GetOne() after UpdateTxType() %v", err)
-	}
-	if finalTx.CurrentTXType != tx.TxTypeNotified.Int8() {
-		t.Errorf("UpdateTxType() did not update CurrentTXType, got %d, want %d", finalTx.CurrentTXType, tx.TxTypeNotified.Int8())
-		return
-	}
+	require.NoError(t, err, "fail to call GetOne() after UpdateTxType()")
+	require.Equal(t, tx.TxTypeNotified.Int8(), finalTx.CurrentTXType, "UpdateTxType() should update CurrentTXType to TxTypeNotified")
 
 	// Test InsertBulk
 	// Create another tx record for bulk insert
 	txID2, err := txRepo.InsertUnsignedTx(action.ActionTypePayment)
-	if err != nil {
-		t.Fatalf("fail to create second parent tx: %v", err)
-	}
+	require.NoError(t, err, "fail to create second parent tx")
 
 	bulkTxs := []*models.EthDetailTX{
 		{
@@ -209,17 +155,11 @@ func TestEthDetailTxSqlc(t *testing.T) {
 		},
 	}
 
-	if err := ethDetailTxRepo.InsertBulk(bulkTxs); err != nil {
-		t.Fatalf("fail to call InsertBulk() %v", err)
-	}
+	err = ethDetailTxRepo.InsertBulk(bulkTxs)
+	require.NoError(t, err, "fail to call InsertBulk()")
 
 	// Verify bulk insert
 	bulkRetrieved, err := ethDetailTxRepo.GetAllByTxID(txID2)
-	if err != nil {
-		t.Fatalf("fail to call GetAllByTxID() after InsertBulk() %v", err)
-	}
-	if len(bulkRetrieved) != 2 {
-		t.Errorf("InsertBulk() inserted %d records, want 2", len(bulkRetrieved))
-		return
-	}
+	require.NoError(t, err, "fail to call GetAllByTxID() after InsertBulk()")
+	assert.Len(t, bulkRetrieved, 2, "InsertBulk() should insert 2 records")
 }

@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/btcsuite/btcd/btcutil"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	. "github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/btc"
 )
@@ -23,9 +25,7 @@ func TestAmountString(t *testing.T) {
 	}
 	for _, val := range tests {
 		res := btc.AmountString(val.amt)
-		if res != val.want {
-			t.Errorf("AmountString() = %s, want %s", res, val.want)
-		}
+		assert.Equal(t, val.want, res, "AmountString() result mismatch")
 	}
 }
 
@@ -44,12 +44,8 @@ func TestAmountToDecimal(t *testing.T) {
 	}
 	for _, val := range tests {
 		res, err := btc.AmountToDecimal(val.amt)
-		if err != nil {
-			t.Fatalf("AmountToDecimal() error = %v", err)
-		}
-		if res.String() != val.want {
-			t.Errorf("AmountString() = %v, want %s", res, val.want)
-		}
+		require.NoError(t, err, "AmountToDecimal() should not return error")
+		assert.Equal(t, val.want, res.String(), "AmountString() result mismatch")
 	}
 }
 
@@ -68,12 +64,8 @@ func TestFloatToAmount(t *testing.T) {
 	}
 	for _, val := range tests {
 		amt, err := btc.FloatToAmount(val.bit)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if amt != val.want {
-			t.Errorf("FloatToAmount() = %d, want %d", amt, val.want)
-		}
+		require.NoError(t, err, "FloatToAmount() should not return error")
+		assert.Equal(t, val.want, amt, "FloatToAmount() result mismatch")
 		// amt.ToBTC() //float64
 
 		t.Logf("satoshi: %d, %v", amt, amt)
@@ -99,12 +91,8 @@ func TestStrToAmount(t *testing.T) {
 	}
 	for _, val := range tests {
 		amt, err := btc.StrToAmount(val.bit)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if amt != val.want {
-			t.Errorf("StrToAmount() = %d, want %d", amt, val.want)
-		}
+		require.NoError(t, err, "StrToAmount() should not return error")
+		assert.Equal(t, val.want, amt, "StrToAmount() result mismatch")
 
 		t.Logf("satoshi: %d, %v", amt, amt)
 		// satoshi: 1000000000, 10 BTC
@@ -127,12 +115,8 @@ func TestStrSatoshiToAmount(t *testing.T) {
 	}
 	for _, val := range tests {
 		amt, err := btc.StrSatoshiToAmount(val.satoshi)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if amt.ToBTC() != val.want {
-			t.Errorf("StrToAmount() = %d, want %f", amt, val.want)
-		}
+		require.NoError(t, err, "StrSatoshiToAmount() should not return error")
+		assert.Equal(t, val.want, amt.ToBTC(), "StrToAmount() result mismatch")
 
 		t.Logf("satoshi: %d, %v", amt, amt)
 		// satoshi: 1000000000, 10 BTC
@@ -154,9 +138,7 @@ func TestCalculation(t *testing.T) {
 		amt1, _ := btcutil.NewAmount(v.val1)
 		amt2, _ := btcutil.NewAmount(v.val2)
 		res := (amt1 + amt2).ToBTC()
-		if res != v.want {
-			t.Errorf("StrToAmount() = %f, want %f", res, v.want)
-		}
+		assert.Equal(t, v.want, res, "Calculation result mismatch")
 		t.Logf("%f + %f = %f", v.val1, v.val2, res)
 	}
 }

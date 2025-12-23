@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	"github.com/quagmt/udecimal"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	_ "github.com/go-sql-driver/mysql"
 
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
@@ -18,9 +20,8 @@ func TestPaymentRequestSqlc(t *testing.T) {
 	paymentRepo := testutil.NewPaymentRequestRepositorySqlc()
 
 	// Delete all records
-	if _, err := paymentRepo.DeleteAll(); err != nil {
-		t.Fatalf("fail to call DeleteAll() %v", err)
-	}
+	_, err := paymentRepo.DeleteAll()
+	require.NoError(t, err, "fail to call DeleteAll()")
 
 	// Create test payment requests
 	amount1, _ := udecimal.Parse("1.5")
@@ -44,61 +45,35 @@ func TestPaymentRequestSqlc(t *testing.T) {
 	}
 
 	// Insert bulk
-	if err := paymentRepo.InsertBulk(requests); err != nil {
-		t.Fatalf("fail to call InsertBulk() %v", err)
-	}
+	err = paymentRepo.InsertBulk(requests)
+	require.NoError(t, err, "fail to call InsertBulk()")
 
 	// Get all
 	allRequests, err := paymentRepo.GetAll()
-	if err != nil {
-		t.Fatalf("fail to call GetAll() %v", err)
-	}
-	if len(allRequests) < 2 {
-		t.Errorf("GetAll() returned %d requests, want at least 2", len(allRequests))
-		return
-	}
+	require.NoError(t, err, "fail to call GetAll()")
+	require.GreaterOrEqual(t, len(allRequests), 2, "GetAll() should return at least 2 requests")
 
 	// Update payment ID
 	paymentID := int64(12345)
 	ids := []int64{allRequests[0].ID, allRequests[1].ID}
 	rowsAffected, err := paymentRepo.UpdatePaymentID(paymentID, ids)
-	if err != nil {
-		t.Fatalf("fail to call UpdatePaymentID() %v", err)
-	}
-	if rowsAffected != 2 {
-		t.Errorf("UpdatePaymentID() affected %d rows, want 2", rowsAffected)
-		return
-	}
+	require.NoError(t, err, "fail to call UpdatePaymentID()")
+	require.Equal(t, int64(2), rowsAffected, "UpdatePaymentID() should affect 2 rows")
 
 	// Get all by payment ID
 	requestsByPaymentID, err := paymentRepo.GetAllByPaymentID(paymentID)
-	if err != nil {
-		t.Fatalf("fail to call GetAllByPaymentID() %v", err)
-	}
-	if len(requestsByPaymentID) != 2 {
-		t.Errorf("GetAllByPaymentID() returned %d requests, want 2", len(requestsByPaymentID))
-		return
-	}
+	require.NoError(t, err, "fail to call GetAllByPaymentID()")
+	require.Len(t, requestsByPaymentID, 2, "GetAllByPaymentID() should return 2 requests")
 
 	// Update is_done
 	rowsAffected, err = paymentRepo.UpdateIsDone(paymentID)
-	if err != nil {
-		t.Fatalf("fail to call UpdateIsDone() %v", err)
-	}
-	if rowsAffected != 2 {
-		t.Errorf("UpdateIsDone() affected %d rows, want 2", rowsAffected)
-		return
-	}
+	require.NoError(t, err, "fail to call UpdateIsDone()")
+	require.Equal(t, int64(2), rowsAffected, "UpdateIsDone() should affect 2 rows")
 
 	// Verify is_done is true
 	verifyRequests, err := paymentRepo.GetAllByPaymentID(paymentID)
-	if err != nil {
-		t.Fatalf("fail to call GetAllByPaymentID() after UpdateIsDone() %v", err)
-	}
+	require.NoError(t, err, "fail to call GetAllByPaymentID() after UpdateIsDone()")
 	for _, req := range verifyRequests {
-		if !req.IsDone {
-			t.Errorf("UpdateIsDone() did not set is_done to true for request ID %d", req.ID)
-			return
-		}
+		require.True(t, req.IsDone, "UpdateIsDone() should set is_done to true for request ID %d", req.ID)
 	}
 }

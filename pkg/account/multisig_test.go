@@ -1,10 +1,11 @@
 package account
 
 import (
-	"log"
 	"testing"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/config/file"
+	"github.com/stretchr/testify/require"
+
+	configutil "github.com/hiromaily/go-crypto-wallet/pkg/config/testutil"
 )
 
 // TestNewMultisigAccounts is test for NewMultisigAccounts
@@ -50,21 +51,18 @@ func TestNewMultisigAccounts(t *testing.T) {
 	}
 
 	// config
-	confPath := file.GetConfigFilePath("account.toml")
+	confPath := configutil.GetConfigFilePath("account.toml")
 	// projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-crypto-wallet", os.Getenv("GOPATH"))
 	// confPath := fmt.Sprintf("%s/data/config/account.toml", projPath)
 	conf, err := NewAccount(confPath)
-	if err != nil {
-		log.Fatalf("fail to create config: %v", err)
-	}
+	require.NoError(t, err, "fail to create config")
 
 	multi := NewMultisigAccounts(conf.Multisigs)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if res := multi.IsMultisigAccount(tt.args.acnt); res != tt.want.ok {
-				t.Errorf("IsMultisigAccount() = %t, want %t", res, tt.want.ok)
-			}
+			res := multi.IsMultisigAccount(tt.args.acnt)
+			require.Equal(t, tt.want.ok, res, "IsMultisigAccount() result mismatch")
 		})
 	}
 }
