@@ -16,8 +16,8 @@ type ERC20Token = domainCoin.ERC20Token
 //
 // Deprecated: Use constants from domain/coin package
 const (
-	HYT = domainCoin.HYT
-	BAT = domainCoin.BAT
+	TokenHYT = domainCoin.TokenHYT
+	TokenBAT = domainCoin.TokenBAT
 )
 
 // ERC20Map map of ERC20 tokens

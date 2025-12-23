@@ -28,7 +28,9 @@ func ValidateSenderReceiver(sender, receiver account.AccountType, actionType Act
 		if sender != account.AccountTypeClient {
 			return fmt.Errorf("deposit transactions must have client as sender, got %s", sender)
 		}
-		// Receiver should be deposit account, but this is typically configured
+		if receiver != account.AccountTypeDeposit {
+			return fmt.Errorf("deposit transactions must have deposit as receiver, got %s", receiver)
+		}
 
 	case ActionTypePayment:
 		// Payment: from payment account to external addresses
@@ -61,13 +63,8 @@ func ValidateTransactionType(txType TxType) error {
 // CanTransitionTo checks if a transaction can transition from one state to another.
 // This enforces the transaction state machine:
 // unsigned → signed → sent → done → (optional: notified)
-// Any state can transition to canceled
+// Cancellation is only allowed before the transaction is confirmed (done)
 func CanTransitionTo(from, to TxType) bool {
-	// Can always cancel
-	if to == TxTypeCancel {
-		return true
-	}
-
 	// Define valid transitions
 	validTransitions := map[TxType][]TxType{
 		TxTypeUnsigned: {TxTypeSigned, TxTypeCancel},

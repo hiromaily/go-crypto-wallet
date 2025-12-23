@@ -63,8 +63,8 @@ const (
 	// ERC20 represents generic ERC20 tokens
 	ERC20 CoinTypeCode = "erc20"
 
-	// HYC represents HYT token (custom ERC20)
-	HYC CoinTypeCode = "hyt"
+	// HYT represents HYT token (custom ERC20)
+	HYT CoinTypeCode = "hyt"
 )
 
 // String returns the string representation of the coin type code.
@@ -80,7 +80,7 @@ var CoinTypeCodeValue = map[CoinTypeCode]CoinType{
 	ETH:   CoinTypeEther,
 	XRP:   CoinTypeRipple,
 	ERC20: CoinTypeERC20,
-	HYC:   CoinTypeERC20HYT,
+	HYT:   CoinTypeERC20HYT,
 }
 
 // IsCoinTypeCode validates whether the given string is a valid coin type code.
@@ -96,7 +96,7 @@ func IsBTCGroup(val CoinTypeCode) bool {
 
 // IsETHGroup returns true if the coin is part of the Ethereum group (ETH, ERC20 tokens).
 func IsETHGroup(val CoinTypeCode) bool {
-	return val == ETH || IsERC20Token(val.String())
+	return val == ETH || val == ERC20 || IsERC20Token(val.String())
 }
 
 // ERC20Token represents ERC20 token identifiers.
@@ -104,11 +104,11 @@ type ERC20Token string
 
 // ERC20 token constants
 const (
-	// HYT represents HYT token
-	HYT ERC20Token = "hyt"
+	// TokenHYT represents HYT token
+	TokenHYT ERC20Token = "hyt"
 
-	// BAT represents Basic Attention Token
-	BAT ERC20Token = "bat"
+	// TokenBAT represents Basic Attention Token
+	TokenBAT ERC20Token = "bat"
 )
 
 // String returns the string representation of the ERC20 token.
@@ -118,8 +118,8 @@ func (e ERC20Token) String() string {
 
 // ERC20Map maps known ERC20 tokens for validation.
 var ERC20Map = map[ERC20Token]bool{
-	HYT: true,
-	BAT: true,
+	TokenHYT: true,
+	TokenBAT: true,
 }
 
 // IsERC20Token validates whether the given string is a known ERC20 token.

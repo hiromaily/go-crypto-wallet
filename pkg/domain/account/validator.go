@@ -3,6 +3,7 @@ package account
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
 // CanTransferFrom returns true if the account type can be used as a sender in transfers.
@@ -41,22 +42,7 @@ func ValidateTransferAccounts(sender, receiver AccountType) error {
 
 // IsAuthorizationAccount returns true if the account type is an authorization account.
 func IsAuthorizationAccount(accountType AccountType) bool {
-	return accountType == AccountTypeAuthorization ||
-		accountType == AccountTypeAuth1 ||
-		accountType == AccountTypeAuth2 ||
-		accountType == AccountTypeAuth3 ||
-		accountType == AccountTypeAuth4 ||
-		accountType == AccountTypeAuth5 ||
-		accountType == AccountTypeAuth6 ||
-		accountType == AccountTypeAuth7 ||
-		accountType == AccountTypeAuth8 ||
-		accountType == AccountTypeAuth9 ||
-		accountType == AccountTypeAuth10 ||
-		accountType == AccountTypeAuth11 ||
-		accountType == AccountTypeAuth12 ||
-		accountType == AccountTypeAuth13 ||
-		accountType == AccountTypeAuth14 ||
-		accountType == AccountTypeAuth15
+	return strings.HasPrefix(string(accountType), "auth")
 }
 
 // IsMultisigEligible returns true if the account type can have multisig addresses.
