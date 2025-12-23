@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/volatiletech/null/v8"
+	"github.com/guregu/null/v6"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/converter"
@@ -82,7 +82,7 @@ func (p *PaymentRequestCreate) CreatePaymentRequest(amtList []float64) error {
 	for _, amt := range amtList {
 		payReqItems = append(payReqItems, &models.PaymentRequest{
 			Coin:            p.coinTypeCode.String(),
-			PaymentID:       null.NewInt64(0, false),
+			PaymentID:       null.Int64{},
 			SenderAddress:   pubkeyItems[0+idx].WalletAddress,
 			SenderAccount:   pubkeyItems[0+idx].Account,
 			ReceiverAddress: pubkeyItems[len(amtList)+idx].WalletAddress,
