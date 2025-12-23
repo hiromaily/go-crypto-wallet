@@ -93,7 +93,7 @@ func NewHDKey(
 ) *HDKey {
 	keyData := HDKey{
 		purpose:      purpose,
-		coinType:     coinTypeCode.CoinType(conf),
+		coinType:     coin.GetCoinType(coinTypeCode, conf),
 		coinTypeCode: coinTypeCode,
 		conf:         conf,
 	}

@@ -16,6 +16,28 @@ This document provides guidelines for AI agents working on this project.
 - Use dependency injection and abstract with interfaces
 - Follow the `pkg` layout pattern
 
+### Domain Layer Guidelines
+
+The `pkg/domain/` package contains pure business logic with **ZERO infrastructure dependencies**.
+
+**Key Principles:**
+- Domain layer has NO dependencies on infrastructure (no database, no API clients, no file I/O)
+- Domain defines interfaces; infrastructure implements them (Dependency Inversion Principle)
+- All domain logic must be testable without mocks (pure functions preferred)
+- Domain is the most stable layer - changes here affect all other layers
+
+**Domain Layer Structure:**
+- **Types & Value Objects**: Immutable objects defined by values (AccountType, TxType, CoinTypeCode)
+- **Entities**: Objects with unique identity and lifecycle (not yet fully implemented)
+- **Validators**: Business rule validation functions
+- **Domain Services**: Stateless services with business logic
+
+**Important:**
+- When adding new business logic, first consider if it belongs in the domain layer
+- Use domain validators for input validation before infrastructure operations
+- Business rules should be in domain, not scattered across services
+- For backward compatibility, old packages (`pkg/wallet/types.go`, `pkg/account/types.go`, etc.) now provide type aliases to domain types
+
 ## Coding Standards
 
 - Follow `golangci-lint` configuration (`.golangci.yml`)
@@ -68,11 +90,24 @@ After making code changes, use these commands to verify code correctness:
 
 - `cmd/`: Application entry points (keygen, sign, watch)
 - `pkg/`: Package code
-  - `wallet/api/`: External API clients (btcgrp, ethgrp, xrpgrp)
-  - `wallet/service/`: Business logic (btc, eth, xrp, coldsrv, watchsrv)
-  - `wallet/key/`: Key generation logic
+  - `domain/`: **Domain layer** - Pure business logic (ZERO infrastructure dependencies)
+    - `account/`: Account types, validators, and business rules
+    - `transaction/`: Transaction types, state machine, validators
+    - `wallet/`: Wallet types and definitions
+    - `key/`: Key value objects and validators
+    - `multisig/`: Multisig validators and business rules
+    - `coin/`: Cryptocurrency type definitions
+  - `wallet/api/`: External API clients (btcgrp, ethgrp, xrpgrp) - Infrastructure layer
+  - `wallet/service/`: Application layer - Business logic orchestration (btc, eth, xrp, coldsrv, watchsrv)
+  - `wallet/key/`: Key generation logic - Infrastructure layer
+  - `repository/`: Data persistence - Infrastructure layer
 - `data/`: Generated files, configuration files
 - `scripts/`: Operation scripts
+
+**Architecture Dependency Direction:**
+```
+Application Layer (wallet/service) → Domain Layer (domain/*) ← Infrastructure Layer (wallet/api, repository)
+```
 
 ## Refactoring Status
 

@@ -1,29 +1,29 @@
 package coin
 
-// ERC20Token erc20 token
-type ERC20Token string
-
-// erc20_token
-const (
-	HYT ERC20Token = "hyt"
-	BAT ERC20Token = "bat"
+import (
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 )
 
-// String converter
-func (e ERC20Token) String() string {
-	return string(e)
-}
+// Deprecated: Use github.com/hiromaily/go-crypto-wallet/pkg/domain/coin instead.
+// This package provides backward compatibility aliases.
+
+// ERC20Token erc20 token
+// Deprecated: Use domain/coin.ERC20Token
+type ERC20Token = domainCoin.ERC20Token
+
+// erc20_token
+// Deprecated: Use constants from domain/coin package
+const (
+	HYT = domainCoin.HYT
+	BAT = domainCoin.BAT
+)
 
 // ERC20Map map of ERC20 tokens
-var ERC20Map = map[ERC20Token]bool{
-	HYT: true,
-	BAT: true,
-}
+// Deprecated: Use domain/coin.ERC20Map
+var ERC20Map = domainCoin.ERC20Map
 
 // IsERC20Token validate
+// Deprecated: Use domain/coin.IsERC20Token
 func IsERC20Token(val string) bool {
-	if _, ok := ERC20Map[ERC20Token(val)]; ok {
-		return true
-	}
-	return false
+	return domainCoin.IsERC20Token(val)
 }
