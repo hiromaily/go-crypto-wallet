@@ -47,11 +47,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    #    logging:
-    #      driver: fluentd
-    #      options:
-    #        fluentd-address: "localhost:24224"
-    #        tag: "docker.{{.ID}}"
     command: --printtoconsole #--conf=/data/.bitcoin/bitcoind.conf
 
   btc-keygen:
@@ -71,11 +66,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    #    logging:
-    #      driver: fluentd
-    #      options:
-    #        fluentd-address: "localhost:24224"
-    #        tag: "docker.{{.ID}}"
     command: -maxconnections=0 --printtoconsole #--conf=/data/.bitcoin/bitcoind.conf
 
   btc-sign:
@@ -95,11 +85,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    #    logging:
-    #      driver: fluentd
-    #      options:
-    #        fluentd-address: "localhost:24224"
-    #        tag: "docker.{{.ID}}"
     command: -maxconnections=0 --printtoconsole #--conf=/data/.bitcoin/bitcoind.conf
 
   #########################################################################
@@ -126,7 +111,8 @@ services:
     networks:
       - db
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      test:
+        ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -153,7 +139,8 @@ services:
     networks:
       - db
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      test:
+        ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -180,7 +167,8 @@ services:
     networks:
       - db
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      test:
+        ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
       interval: 10s
       timeout: 5s
       retries: 5

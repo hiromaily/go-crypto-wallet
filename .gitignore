@@ -7,7 +7,7 @@ REFACTORING_CHECKLIST.md
 REFACTORING_PLAN.md
 
 # environment variables
-.envrc
+.env
 
 # data directory
 data/address/*
