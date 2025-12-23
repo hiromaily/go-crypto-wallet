@@ -8,8 +8,7 @@ currentVer=$(shell go version | awk '{print $3}' | sed -e "s/go//" | cut -d'.' -
 
 # Tool versions
 GOLANGCI_VERSION=v2.7.2
-#PROTOC_BIN=protoc
-PROTOC_BIN=buf protoc
+# Note: PROTOC_BIN is deprecated. Use 'buf' directly for Protocol Buffer operations.
 
 # ETH Variables
 GETH_HTTP_PORT=8546

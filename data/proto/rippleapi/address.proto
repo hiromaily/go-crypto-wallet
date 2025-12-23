@@ -1,8 +1,12 @@
-syntax = "proto3";
+edition = "2023";
 
 package rippleapi.address;
 
 option go_package = "github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp";
+
+// Use proto3 semantics for field presence (implicit presence)
+// This maintains backward compatibility with existing Go code
+option features.field_presence = IMPLICIT;
 
 import "google/protobuf/empty.proto";
 

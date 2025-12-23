@@ -20,27 +20,41 @@ generate-abi:
 	abigen --abi ./data/contract/token.abi --pkg contract --type Token --out ./pkg/contract/token-abi.go
 
 ###############################################################################
-# Protocol Buffer
+# Protocol Buffer (buf-based generation)
 #------------------------------------------------------------------------------
-# run `make install-proto-plugin` in advance
-###############################################################################
-.PHONY: get-third-proto
-get-third-proto:
-	./scripts/get_third_proto.sh
+# Protocol Buffer code generation using buf
+# buf replaces direct protoc usage and provides:
+# - Linting with buf lint
+# - Breaking change detection with buf breaking
+# - Code generation with buf generate
+#------------------------------------------------------------------------------
 
+# Lint proto files with buf
 .PHONY: lint-proto
 lint-proto:
-	prototool lint
+	buf lint
 
-.PHONY:protoc-go
+# Check for breaking changes in proto files
+.PHONY: breaking-proto
+breaking-proto:
+	buf breaking --against '.git#branch=master'
+
+# Generate Go code from proto files using buf
+.PHONY: protoc-go
 protoc-go: clean-pb
-	$(PROTOC_BIN) \
-	--go_out=./pkg/wallet/api/xrpgrp/xrp/ --go_opt=paths=source_relative \
-	--go-grpc_out=./pkg/wallet/api/xrpgrp/xrp/ --go-grpc_opt=paths=source_relative  \
-	--proto_path=./data/proto/rippleapi \
-	--proto_path=./data/proto/third_party \
-	data/proto/**/*.proto
+	buf generate
 
+# Clean generated protobuf files
 .PHONY: clean-pb
 clean-pb:
 	rm -rf pkg/wallet/api/xrpgrp/xrp/*.pb.go
+
+###############################################################################
+# Legacy/Deprecated Targets
+#------------------------------------------------------------------------------
+# These targets are kept for backward compatibility but are deprecated
+#------------------------------------------------------------------------------
+.PHONY: get-third-proto
+get-third-proto:
+	@echo "Warning: get-third-proto is deprecated. Third-party proto files are now managed through buf."
+	@echo "Consider updating to use buf's dependency management instead."
