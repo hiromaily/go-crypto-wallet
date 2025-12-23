@@ -6,7 +6,7 @@ package watchrepo_test
 import (
 	"testing"
 
-	"github.com/ericlagergren/decimal"
+	"github.com/quagmt/udecimal"
 	_ "github.com/go-sql-driver/mysql"
 
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
@@ -23,10 +23,8 @@ func TestPaymentRequestSqlc(t *testing.T) {
 	}
 
 	// Create test payment requests
-	amount1 := new(decimal.Big)
-	amount1, _ = amount1.SetString("1.5")
-	amount2 := new(decimal.Big)
-	amount2, _ = amount2.SetString("2.5")
+	amount1, _ := udecimal.Parse("1.5")
+	amount2, _ := udecimal.Parse("2.5")
 
 	requests := []*models.PaymentRequest{
 		{

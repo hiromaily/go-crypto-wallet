@@ -76,13 +76,17 @@ func (p *PaymentRequestCreate) CreatePaymentRequest(amtList []float64) error {
 	payReqItems := make([]*models.PaymentRequest, 0, len(amtList))
 	var idx int
 	for _, amt := range amtList {
+		amount, err := p.converter.FloatToDecimal(amt)
+		if err != nil {
+			return fmt.Errorf("fail to convert amount %f to decimal: %w", amt, err)
+		}
 		payReqItems = append(payReqItems, &models.PaymentRequest{
 			Coin:            p.coinTypeCode.String(),
 			PaymentID:       null.Int64{},
 			SenderAddress:   pubkeyItems[0+idx].WalletAddress,
 			SenderAccount:   pubkeyItems[0+idx].Account,
 			ReceiverAddress: pubkeyItems[len(amtList)+idx].WalletAddress,
-			Amount:          p.converter.FloatToDecimal(amt),
+			Amount:          amount,
 			IsDone:          false,
 			UpdatedAt:       null.TimeFrom(time.Now()),
 		})

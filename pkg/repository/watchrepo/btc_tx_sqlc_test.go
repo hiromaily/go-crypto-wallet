@@ -6,7 +6,7 @@ package watchrepo_test
 import (
 	"testing"
 
-	"github.com/ericlagergren/decimal"
+	"github.com/quagmt/udecimal"
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -25,12 +25,9 @@ func TestBTCTxSqlc(t *testing.T) {
 	}
 
 	// Insert
-	inputAmt := new(decimal.Big)
-	inputAmt, _ = inputAmt.SetString("0.100")
-	outputAmt := new(decimal.Big)
-	outputAmt, _ = outputAmt.SetString("0.090")
-	feeAmt := new(decimal.Big)
-	feeAmt, _ = feeAmt.SetString("0.010")
+	inputAmt, _ := udecimal.Parse("0.100")
+	outputAmt, _ := udecimal.Parse("0.090")
+	feeAmt, _ := udecimal.Parse("0.010")
 
 	hex := "unsigned-hex-sqlc"
 	actionType := action.ActionTypePayment
