@@ -15,9 +15,9 @@ Repo: hiromaily/go-crypto-wallet
    - Never proceed on `main` or `master` branch
 
 2. **Fetch Issue:**
-   - URL: <https://github.com/hiromaily/go-crypto-wallet/issues/{issue_number}>
-   - Use `web_search` to fetch complete issue content
+   - Use `gh issue view {issue_number}` to fetch complete issue content
    - Verify issue exists and is not already closed/assigned
+   - Review issue description, comments, and labels
 
 3. **Create Feature Branch:**
    - Format: `feature/issue-{issue_number}-{brief-description}`
@@ -95,7 +95,7 @@ Repo: hiromaily/go-crypto-wallet
 
 8. **PR Draft:**
    - Push branch: `git push origin feature/issue-{issue_number}-{description}`
-   - Create PR with:
+   - Create PR using `gh pr create`:
      - Title: `Fix: {issue title} (Closes #{issue_number})`
      - Description template:
 
@@ -121,6 +121,15 @@ Repo: hiromaily/go-crypto-wallet
        Closes #{issue_number}
        ```
 
+     - Command example:
+
+       ```bash
+       gh pr create --title "Fix: {issue title} (Closes #{issue_number})" --body-file - <<EOF
+       {paste description template here}
+       EOF
+       ```
+
+     - Or use interactive mode: `gh pr create` (will prompt for title and body)
      - Link related issues/PRs if any
 
 9. **Review Request:**
