@@ -4,7 +4,7 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 
-	"golang.org/x/crypto/ripemd160" //nolint:staticcheck,gosec
+	"golang.org/x/crypto/ripemd160" //nolint:gosec
 )
 
 // Write operations in a hash.Hash never return an error

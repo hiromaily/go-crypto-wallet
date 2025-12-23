@@ -11,7 +11,8 @@ type Generator interface {
 }
 
 // WalletKey keys
-// Deprecated: Use domain/key.WalletKey
 // - [BTC] P2PKHAddr is not used anywhere, P2SHSegWitAddr should be used.
 // - [BCH] P2SHSegWitAddr is invalid. P2PKHAddr should be used.
+//
+// Deprecated: Use domain/key.WalletKey
 type WalletKey = domainKey.WalletKey

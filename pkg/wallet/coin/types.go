@@ -10,10 +10,12 @@ import (
 // This package provides backward compatibility aliases.
 
 // CoinType creates a separate subtree for every cryptocoin
+//
 // Deprecated: Use domain/coin.CoinType
 type CoinType = domainCoin.CoinType
 
 // coin_type
+//
 // Deprecated: Use constants from domain/coin package
 const (
 	CoinTypeBitcoin     = domainCoin.CoinTypeBitcoin
@@ -27,10 +29,12 @@ const (
 )
 
 // CoinTypeCode coin type code
+//
 // Deprecated: Use domain/coin.CoinTypeCode
 type CoinTypeCode = domainCoin.CoinTypeCode
 
 // coin_type_code
+//
 // Deprecated: Use constants from domain/coin package
 const (
 	BTC   = domainCoin.BTC
@@ -56,22 +60,26 @@ func GetCoinType(c CoinTypeCode, conf *chaincfg.Params) CoinType {
 }
 
 // CoinTypeCodeValue value
+//
 // Deprecated: Use domain/coin.CoinTypeCodeValue
 var CoinTypeCodeValue = domainCoin.CoinTypeCodeValue
 
 // IsCoinTypeCode validate
+//
 // Deprecated: Use domain/coin.IsCoinTypeCode
 func IsCoinTypeCode(val string) bool {
 	return domainCoin.IsCoinTypeCode(val)
 }
 
 // IsBTCGroup validates bitcoin group
+//
 // Deprecated: Use domain/coin.IsBTCGroup
 func IsBTCGroup(val CoinTypeCode) bool {
 	return domainCoin.IsBTCGroup(val)
 }
 
 // IsETHGroup validates ethereum, ERC20 group
+//
 // Deprecated: Use domain/coin.IsETHGroup
 func IsETHGroup(val CoinTypeCode) bool {
 	return domainCoin.IsETHGroup(val)

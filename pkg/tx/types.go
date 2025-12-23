@@ -12,10 +12,12 @@ import (
 //----------------------------------------------------
 
 // TxType transaction status
+//
 // Deprecated: Use domain/transaction.TxType
 type TxType = domainTx.TxType
 
 // tx_type
+//
 // Deprecated: Use constants from domain/transaction package
 const (
 	TxTypeUnsigned = domainTx.TxTypeUnsigned
@@ -27,10 +29,12 @@ const (
 )
 
 // TxTypeValue value
+//
 // Deprecated: Use domain/transaction.TxTypeValue
 var TxTypeValue = domainTx.TxTypeValue
 
 // ValidateTxType validate string
+//
 // Deprecated: Use domain/transaction.ValidateTxType
 func ValidateTxType(val string) bool {
 	return domainTx.ValidateTxType(val)

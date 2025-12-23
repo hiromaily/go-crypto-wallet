@@ -141,7 +141,7 @@ linters:
   exclusions:
     generated: strict
 
-    rules:      
+    rules:
       # Exclude some linters from running on tests files.
       # - path: _test\.go
       #   linters:
@@ -152,6 +152,10 @@ linters:
       - text: 'declaration of "err" shadows declaration'
         linters:
           - govet
+      # Exclude SA1019 (deprecated) warnings - these are expected for backward compatibility
+      - text: "SA1019:"
+        linters:
+          - staticcheck
 
     # Exclude files from all linters.
     paths:

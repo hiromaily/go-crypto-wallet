@@ -7,7 +7,7 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/chaincfg"
-	"golang.org/x/crypto/ripemd160" //nolint:staticcheck,gosec
+	"golang.org/x/crypto/ripemd160" //nolint:gosec
 )
 
 // refer to original code [github.com/cpacia/bchutil](https://github.com/cpacia/bchutil/blob/master/cashaddr.go)

@@ -8,10 +8,12 @@ import (
 // This package provides backward compatibility aliases.
 
 // ActionType operation (deposit, payment, transfer)
+//
 // Deprecated: Use domain/transaction.ActionType
 type ActionType = domainTx.ActionType
 
 // action_type
+//
 // Deprecated: Use constants from domain/transaction package
 const (
 	ActionTypeDeposit  = domainTx.ActionTypeDeposit
@@ -20,10 +22,12 @@ const (
 )
 
 // ActionTypeValue value
+//
 // Deprecated: Use domain/transaction.ActionTypeValue
 var ActionTypeValue = domainTx.ActionTypeValue
 
 // ValidateActionType validate
+//
 // Deprecated: Use domain/transaction.ValidateActionType
 func ValidateActionType(val string) bool {
 	return domainTx.ValidateActionType(val)
