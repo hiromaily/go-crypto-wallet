@@ -118,8 +118,8 @@ func main() {
 		Short:   "Keygen wallet for key generation and first signature",
 		Version: appVersion,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			// Skip initialization for help and version
-			if cmd.Name() == "help" || cmd.Name() == "version" {
+			// Skip initialization for help
+			if cmd.Name() == "help" {
 				return nil
 			}
 			return initializeWallet()

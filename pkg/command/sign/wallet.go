@@ -1,6 +1,8 @@
 package sign
 
 import (
+	"errors"
+
 	"github.com/spf13/cobra"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/keygen/api/btc"
@@ -48,26 +50,28 @@ func AddCommands(rootCmd *cobra.Command, wallet *wallets.Signer, version string)
 	rootCmd.AddCommand(signCmd)
 	sign.AddCommands(signCmd, wallet)
 
-	// API commands - wallet-type specific
-	// Added after wallet initialization to provide wallet-specific API commands
-	if *wallet == nil {
-		return
+	// API command - wallet-type specific, dynamically configured
+	apiCmd := &cobra.Command{
+		Use:   "api",
+		Short: "API commands for the selected coin",
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			if *wallet == nil {
+				return errors.New("wallet not initialized, check --coin flag")
+			}
+			// Clear existing subcommands to handle multiple runs in tests
+			cmd.ResetCommands()
+			switch v := (*wallet).(type) {
+			case *btcwallet.BTCSign:
+				btc.AddCommands(cmd, v.BTC)
+			case *ethwallet.ETHSign:
+				ethapi.AddCommands(cmd, v.ETH)
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// This will run if no subcommand is given, e.g., `sign api`
+			return cmd.Help()
+		},
 	}
-
-	switch v := (*wallet).(type) {
-	case *btcwallet.BTCSign:
-		apiCmd := &cobra.Command{
-			Use:   "api",
-			Short: "Bitcoin API commands",
-		}
-		rootCmd.AddCommand(apiCmd)
-		btc.AddCommands(apiCmd, v.BTC)
-	case *ethwallet.ETHSign:
-		apiCmd := &cobra.Command{
-			Use:   "api",
-			Short: "Ethereum API commands",
-		}
-		rootCmd.AddCommand(apiCmd)
-		ethapi.AddCommands(apiCmd, v.ETH)
-	}
+	rootCmd.AddCommand(apiCmd)
 }

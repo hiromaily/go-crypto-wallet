@@ -1,6 +1,8 @@
 package watch
 
 import (
+	"errors"
+
 	"github.com/spf13/cobra"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/api/btc"
@@ -36,7 +38,8 @@ func AddCommands(rootCmd *cobra.Command, wallet *wallets.Watcher, version string
 	create.AddCommands(createCmd, wallet)
 
 	// Send command
-	rootCmd.AddCommand(send.AddCommand(wallet))
+	sendCmd := send.AddCommand(wallet)
+	rootCmd.AddCommand(sendCmd)
 
 	// Monitor command
 	monitorCmd := &cobra.Command{
@@ -46,32 +49,33 @@ func AddCommands(rootCmd *cobra.Command, wallet *wallets.Watcher, version string
 	rootCmd.AddCommand(monitorCmd)
 	monitor.AddCommands(monitorCmd, wallet)
 
-	// API commands - wallet-type specific
-	if *wallet == nil || confPtr == nil {
-		return
+	// API command - wallet-type specific, dynamically configured
+	apiCmd := &cobra.Command{
+		Use:   "api",
+		Short: "API commands for the selected coin",
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			if *wallet == nil {
+				return errors.New("wallet not initialized, check --coin flag")
+			}
+			if confPtr == nil {
+				return errors.New("config not initialized")
+			}
+			// Clear existing subcommands to handle multiple runs in tests
+			cmd.ResetCommands()
+			switch v := (*wallet).(type) {
+			case *btcwallet.BTCWatch:
+				btc.AddCommands(cmd, v.BTC)
+			case *ethwallet.ETHWatch:
+				eth.AddCommands(cmd, v.ETH)
+			case *xrpwallet.XRPWatch:
+				xrp.AddCommands(cmd, v.XRP, &confPtr.Ripple.API.TxData)
+			}
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// This will run if no subcommand is given, e.g., `watch api`
+			return cmd.Help()
+		},
 	}
-
-	switch v := (*wallet).(type) {
-	case *btcwallet.BTCWatch:
-		apiCmd := &cobra.Command{
-			Use:   "api",
-			Short: "Bitcoin API commands",
-		}
-		rootCmd.AddCommand(apiCmd)
-		btc.AddCommands(apiCmd, v.BTC)
-	case *ethwallet.ETHWatch:
-		apiCmd := &cobra.Command{
-			Use:   "api",
-			Short: "Ethereum API commands",
-		}
-		rootCmd.AddCommand(apiCmd)
-		eth.AddCommands(apiCmd, v.ETH)
-	case *xrpwallet.XRPWatch:
-		apiCmd := &cobra.Command{
-			Use:   "api",
-			Short: "Ripple API commands",
-		}
-		rootCmd.AddCommand(apiCmd)
-		xrp.AddCommands(apiCmd, v.XRP, &confPtr.Ripple.API.TxData)
-	}
+	rootCmd.AddCommand(apiCmd)
 }

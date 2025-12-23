@@ -45,70 +45,81 @@ var (
 	walleter wallets.Signer
 )
 
+func initializeWallet() error {
+	// validate coinTypeCode
+	if !coin.IsCoinTypeCode(coinTypeCode) {
+		return errors.New("coin args is invalid. `btc`, `bch` is allowed")
+	}
+
+	// set config path if environment variable is existing
+	if confPath == "" {
+		setConfigPathFromEnv()
+	}
+
+	// account conf path for multisig
+	if accountConfPath == "" {
+		setAccountConfPathFromEnv()
+	}
+
+	// config
+	conf, err := config.NewWallet(confPath, walletType, coin.CoinTypeCode(coinTypeCode))
+	if err != nil {
+		return fmt.Errorf("failed to load wallet config: %w", err)
+	}
+
+	accountConf := &account.AccountRoot{}
+	if accountConfPath != "" {
+		accountConf, err = account.NewAccount(accountConfPath)
+		if err != nil {
+			return fmt.Errorf("failed to load account config: %w", err)
+		}
+	}
+
+	// override config
+	conf.CoinTypeCode = coin.CoinTypeCode(coinTypeCode)
+
+	// override conf.Bitcoin.Host
+	if btcWallet != "" {
+		conf.Bitcoin.Host = fmt.Sprintf("%s/wallet/%s", conf.Bitcoin.Host, btcWallet)
+		log.Println("conf.Bitcoin.Host:", conf.Bitcoin.Host)
+	}
+
+	// create wallet
+	container := di.NewContainer(conf, accountConf, walletType)
+	walleter = container.NewSigner(authName)
+
+	return nil
+}
+
+func setConfigPathFromEnv() {
+	switch coinTypeCode {
+	case coin.BTC.String():
+		confPath = os.Getenv("BTC_SIGN_WALLET_CONF")
+	case coin.BCH.String():
+		confPath = os.Getenv("BCH_SIGN_WALLET_CONF")
+	}
+}
+
+func setAccountConfPathFromEnv() {
+	switch coinTypeCode {
+	case coin.BTC.String():
+		accountConfPath = os.Getenv("BTC_ACCOUNT_CONF")
+	case coin.BCH.String():
+		accountConfPath = os.Getenv("BCH_ACCOUNT_CONF")
+	}
+}
+
 func main() {
 	rootCmd := &cobra.Command{
 		Use:     appName,
 		Short:   "Sign wallet for additional signatures on multisig transactions",
 		Version: appVersion,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			// Skip initialization for help and version
-			if cmd.Name() == "help" || cmd.Name() == "version" {
+			// Skip initialization for help
+			if cmd.Name() == "help" {
 				return nil
 			}
-
-			// validate coinTypeCode
-			if !coin.IsCoinTypeCode(coinTypeCode) {
-				return errors.New("coin args is invalid. `btc`, `bch` is allowed")
-			}
-
-			// set config path if environment variable is existing
-			if confPath == "" {
-				switch coinTypeCode {
-				case coin.BTC.String():
-					confPath = os.Getenv("BTC_SIGN_WALLET_CONF")
-				case coin.BCH.String():
-					confPath = os.Getenv("BCH_SIGN_WALLET_CONF")
-				}
-			}
-
-			// account conf path for multisig
-			if accountConfPath == "" {
-				switch coinTypeCode {
-				case coin.BTC.String():
-					accountConfPath = os.Getenv("BTC_ACCOUNT_CONF")
-				case coin.BCH.String():
-					accountConfPath = os.Getenv("BCH_ACCOUNT_CONF")
-				}
-			}
-
-			// config
-			conf, err := config.NewWallet(confPath, walletType, coin.CoinTypeCode(coinTypeCode))
-			if err != nil {
-				return fmt.Errorf("failed to load wallet config: %w", err)
-			}
-
-			accountConf := &account.AccountRoot{}
-			if accountConfPath != "" {
-				accountConf, err = account.NewAccount(accountConfPath)
-				if err != nil {
-					return fmt.Errorf("failed to load account config: %w", err)
-				}
-			}
-
-			// override config
-			conf.CoinTypeCode = coin.CoinTypeCode(coinTypeCode)
-
-			// override conf.Bitcoin.Host
-			if btcWallet != "" {
-				conf.Bitcoin.Host = fmt.Sprintf("%s/wallet/%s", conf.Bitcoin.Host, btcWallet)
-				log.Println("conf.Bitcoin.Host:", conf.Bitcoin.Host)
-			}
-
-			// create wallet
-			container := di.NewContainer(conf, accountConf, walletType)
-			walleter = container.NewSigner(authName)
-
-			return nil
+			return initializeWallet()
 		},
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {
 			if walleter != nil {
