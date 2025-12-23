@@ -3,10 +3,9 @@ package config
 import (
 	"errors"
 	"fmt"
-	"os"
 
-	"github.com/BurntSushi/toml"
 	"github.com/go-playground/validator/v10"
+	"github.com/spf13/viper"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -37,15 +36,17 @@ func NewWallet(file string, wtype wallet.WalletType, coinTypeCode coin.CoinTypeC
 
 // loadWallet load config file
 func loadWallet(path string) (*WalletRoot, error) {
-	d, err := os.ReadFile(path) //nolint:gosec
-	if err != nil {
-		return nil, fmt.Errorf("can't read toml file. %s: %w", path, err)
+	v := viper.New()
+	v.SetConfigFile(path)
+	v.SetConfigType("toml")
+
+	if err := v.ReadInConfig(); err != nil {
+		return nil, fmt.Errorf("can't read config file. %s: %w", path, err)
 	}
 
 	var config WalletRoot
-	_, err = toml.Decode(string(d), &config)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call toml.Decode(): %w", err)
+	if err := v.Unmarshal(&config); err != nil {
+		return nil, fmt.Errorf("fail to unmarshal config: %w", err)
 	}
 
 	return &config, nil

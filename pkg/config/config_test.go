@@ -1,14 +1,217 @@
 package config
 
-// TestNewAccount is test for NewAccount
-// func TestNewAccount(t *testing.T) {
-//	//t.SkipNow()
-//
-//	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-crypto-wallet", os.Getenv("GOPATH"))
-//	confPath := fmt.Sprintf("%s/data/config/account.toml", projPath)
-//	conf, err := NewAccount(confPath)
-//	if err != nil {
-//		log.Fatalf("fail to create config: %v", err)
-//	}
-//	grok.Value(conf)
-//}
+import (
+	"os"
+	"path/filepath"
+	"testing"
+
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
+)
+
+func TestNewWallet(t *testing.T) {
+	// Get project path
+	gopath := os.Getenv("GOPATH")
+	if gopath == "" {
+		t.Skip("GOPATH not set, skipping integration test")
+	}
+
+	projPath := filepath.Join(gopath, "src/github.com/hiromaily/go-crypto-wallet")
+
+	tests := []struct {
+		name         string
+		configFile   string
+		walletType   wallet.WalletType
+		coinTypeCode coin.CoinTypeCode
+		wantErr      bool
+	}{
+		{
+			name:         "BTC Watch Wallet",
+			configFile:   filepath.Join(projPath, "data/config/btc_watch.toml"),
+			walletType:   wallet.WalletTypeWatchOnly,
+			coinTypeCode: coin.BTC,
+			wantErr:      false,
+		},
+		{
+			name:         "BTC Keygen Wallet",
+			configFile:   filepath.Join(projPath, "data/config/btc_keygen.toml"),
+			walletType:   wallet.WalletTypeKeyGen,
+			coinTypeCode: coin.BTC,
+			wantErr:      false,
+		},
+		{
+			name:         "BTC Sign Wallet",
+			configFile:   filepath.Join(projPath, "data/config/btc_sign.toml"),
+			walletType:   wallet.WalletTypeSign,
+			coinTypeCode: coin.BTC,
+			wantErr:      false,
+		},
+		{
+			name:         "ETH Watch Wallet",
+			configFile:   filepath.Join(projPath, "data/config/eth_watch.toml"),
+			walletType:   wallet.WalletTypeWatchOnly,
+			coinTypeCode: coin.ETH,
+			wantErr:      false,
+		},
+		{
+			name:         "ETH Keygen Wallet",
+			configFile:   filepath.Join(projPath, "data/config/eth_keygen.toml"),
+			walletType:   wallet.WalletTypeKeyGen,
+			coinTypeCode: coin.ETH,
+			wantErr:      false,
+		},
+		{
+			name:         "ETH Sign Wallet",
+			configFile:   filepath.Join(projPath, "data/config/eth_sign.toml"),
+			walletType:   wallet.WalletTypeSign,
+			coinTypeCode: coin.ETH,
+			wantErr:      false,
+		},
+		{
+			name:         "Empty file path",
+			configFile:   "",
+			walletType:   wallet.WalletTypeWatchOnly,
+			coinTypeCode: coin.BTC,
+			wantErr:      true,
+		},
+		{
+			name:         "Non-existent file",
+			configFile:   "/nonexistent/path/config.toml",
+			walletType:   wallet.WalletTypeWatchOnly,
+			coinTypeCode: coin.BTC,
+			wantErr:      true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			testNewWalletCase(t, tt.configFile, tt.walletType, tt.coinTypeCode, tt.wantErr)
+		})
+	}
+}
+
+//nolint:lll
+func testNewWalletCase(
+	t *testing.T, configFile string, walletType wallet.WalletType, coinTypeCode coin.CoinTypeCode, wantErr bool,
+) {
+	t.Helper()
+	// Skip tests if config file doesn't exist (except for error cases)
+	if !wantErr && configFile != "" {
+		if _, err := os.Stat(configFile); os.IsNotExist(err) {
+			t.Skipf("Config file not found: %s", configFile)
+		}
+	}
+
+	conf, err := NewWallet(configFile, walletType, coinTypeCode)
+	if (err != nil) != wantErr {
+		t.Errorf("NewWallet() error = %v, wantErr %v", err, wantErr)
+		return
+	}
+
+	if !wantErr && conf == nil {
+		t.Error("NewWallet() returned nil config without error")
+		return
+	}
+
+	if !wantErr && conf != nil {
+		validateConfig(t, conf, coinTypeCode)
+	}
+}
+
+func validateConfig(t *testing.T, conf *WalletRoot, coinTypeCode coin.CoinTypeCode) {
+	t.Helper()
+	// Verify that nested structures are properly loaded
+	switch coinTypeCode {
+	case coin.BTC, coin.BCH:
+		validateBitcoinConfig(t, conf)
+	case coin.ETH, coin.ERC20:
+		validateEthereumConfig(t, conf)
+	case coin.XRP:
+		validateRippleConfig(t, conf)
+	case coin.LTC, coin.HYC:
+		// Not implemented yet
+	default:
+		// Other coins
+	}
+
+	// Verify common fields
+	validateCommonConfig(t, conf)
+}
+
+func validateBitcoinConfig(t *testing.T, conf *WalletRoot) {
+	t.Helper()
+	if conf.Bitcoin.Host == "" {
+		t.Error("Bitcoin.Host should not be empty")
+	}
+	if conf.Bitcoin.User == "" {
+		t.Error("Bitcoin.User should not be empty")
+	}
+}
+
+func validateEthereumConfig(t *testing.T, conf *WalletRoot) {
+	t.Helper()
+	if conf.Ethereum.Host == "" {
+		t.Error("Ethereum.Host should not be empty")
+	}
+}
+
+func validateRippleConfig(t *testing.T, conf *WalletRoot) {
+	t.Helper()
+	if conf.Ripple.WebsocketPublicURL == "" {
+		t.Error("Ripple.WebsocketPublicURL should not be empty")
+	}
+}
+
+func validateCommonConfig(t *testing.T, conf *WalletRoot) {
+	t.Helper()
+	if conf.Logger.Service == "" {
+		t.Error("Logger.Service should not be empty")
+	}
+	if conf.MySQL.Host == "" {
+		t.Error("MySQL.Host should not be empty")
+	}
+}
+
+func TestLoadWallet(t *testing.T) {
+	// Get project path
+	gopath := os.Getenv("GOPATH")
+	if gopath == "" {
+		t.Skip("GOPATH not set, skipping integration test")
+	}
+
+	projPath := filepath.Join(gopath, "src/github.com/hiromaily/go-crypto-wallet")
+	configPath := filepath.Join(projPath, "data/config/btc_watch.toml")
+
+	// Skip if config file doesn't exist
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		t.Skipf("Config file not found: %s", configPath)
+	}
+
+	conf, err := loadWallet(configPath)
+	if err != nil {
+		t.Fatalf("loadWallet() error = %v", err)
+	}
+
+	if conf == nil {
+		t.Fatal("loadWallet() returned nil config")
+	}
+
+	// Verify that viper properly loaded the TOML file
+	if conf.Bitcoin.Host == "" {
+		t.Error("Bitcoin.Host should not be empty")
+	}
+
+	// Verify nested structures are loaded correctly
+	if conf.Bitcoin.Fee.AdjustmentMin == 0 && conf.Bitcoin.Fee.AdjustmentMax == 0 {
+		t.Error("Bitcoin fee settings should be loaded")
+	}
+
+	// Verify map structures (if any ERC20s configured)
+	if len(conf.Ethereum.ERC20s) > 0 {
+		for token, erc20 := range conf.Ethereum.ERC20s {
+			if erc20.Symbol == "" {
+				t.Errorf("ERC20 token %v should have symbol", token)
+			}
+		}
+	}
+}
