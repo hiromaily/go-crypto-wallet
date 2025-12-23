@@ -1,0 +1,33 @@
+# buf.yaml - Buf configuration for go-crypto-wallet
+# https://buf.build/docs/configuration/v2/buf-yaml
+version: v2
+
+# Directories containing proto files to build
+# The root directory is data/proto
+modules:
+  - path: data/proto/rippleapi
+    name: buf.build/hiromaily/go-crypto-wallet-rippleapi
+
+# Lint configuration
+# Using BASIC ruleset to maintain backward compatibility with existing API structure
+# Specific rules are disabled to avoid breaking changes to the existing API
+lint:
+  use:
+    - BASIC
+  except:
+    # Allow existing naming patterns that don't match buf style guide
+    # These exceptions maintain backward compatibility with the existing API
+    - ENUM_VALUE_PREFIX
+    - ENUM_ZERO_VALUE_SUFFIX
+    - FIELD_LOWER_SNAKE_CASE
+    - PACKAGE_DIRECTORY_MATCH
+    - PACKAGE_SAME_DIRECTORY
+    - DIRECTORY_SAME_PACKAGE
+
+# Breaking change detection configuration
+breaking:
+  use:
+    - FILE
+  ignore:
+    # Ignore breaking changes in third_party proto files
+    - data/proto/third_party
