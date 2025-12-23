@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/volatiletech/null/v8"
+	"github.com/guregu/null/v6"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"

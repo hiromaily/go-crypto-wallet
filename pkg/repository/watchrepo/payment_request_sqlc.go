@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/ericlagergren/decimal"
-	"github.com/volatiletech/null/v8"
+	"github.com/guregu/null/v6"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -188,5 +188,5 @@ func convertSQLNullInt64ToNullInt64(n sql.NullInt64) null.Int64 {
 	if !n.Valid {
 		return null.Int64{}
 	}
-	return null.Int64From(n.Int64)
+	return null.IntFrom(n.Int64)
 }

@@ -5,7 +5,7 @@ package models
 
 import (
 	"github.com/ericlagergren/decimal"
-	"github.com/volatiletech/null/v8"
+	"github.com/guregu/null/v6"
 )
 
 // AccountKey is an object representing the database table.
