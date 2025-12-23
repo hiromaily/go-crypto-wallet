@@ -48,13 +48,3 @@ protoc-go: clean-pb
 .PHONY: clean-pb
 clean-pb:
 	rm -rf pkg/wallet/api/xrpgrp/xrp/*.pb.go
-
-###############################################################################
-# Legacy/Deprecated Targets
-#------------------------------------------------------------------------------
-# These targets are kept for backward compatibility but are deprecated
-#------------------------------------------------------------------------------
-.PHONY: get-third-proto
-get-third-proto:
-	@echo "Warning: get-third-proto is deprecated. Third-party proto files are now managed through buf."
-	@echo "Consider updating to use buf's dependency management instead."
