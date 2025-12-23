@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"context"
 	"sync"
 )
 
@@ -35,21 +34,21 @@ func getGlobalLogger() Logger {
 }
 
 // Debug logs a debug message using the global logger.
-func Debug(ctx context.Context, msg string, args ...any) {
+func Debug(msg string, args ...any) {
 	getGlobalLogger().Debug(msg, args...)
 }
 
 // Info logs an info message using the global logger.
-func Info(ctx context.Context, msg string, args ...any) {
+func Info(msg string, args ...any) {
 	getGlobalLogger().Info(msg, args...)
 }
 
 // Warn logs a warning message using the global logger.
-func Warn(ctx context.Context, msg string, args ...any) {
+func Warn(msg string, args ...any) {
 	getGlobalLogger().Warn(msg, args...)
 }
 
 // Error logs an error message using the global logger.
-func Error(ctx context.Context, msg string, args ...any) {
+func Error(msg string, args ...any) {
 	getGlobalLogger().Error(msg, args...)
 }
