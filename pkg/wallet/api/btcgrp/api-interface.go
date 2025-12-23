@@ -6,7 +6,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
-	"github.com/ericlagergren/decimal"
+	"github.com/quagmt/udecimal"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
@@ -27,8 +27,8 @@ type Bitcoiner interface {
 
 	// amount.go
 	AmountString(amt btcutil.Amount) string
-	AmountToDecimal(amt btcutil.Amount) *decimal.Big
-	FloatToDecimal(f float64) *decimal.Big
+	AmountToDecimal(amt btcutil.Amount) (udecimal.Decimal, error)
+	FloatToDecimal(f float64) (udecimal.Decimal, error)
 	FloatToAmount(f float64) (btcutil.Amount, error)
 	StrToAmount(s string) (btcutil.Amount, error)
 	StrSatoshiToAmount(s string) (btcutil.Amount, error)

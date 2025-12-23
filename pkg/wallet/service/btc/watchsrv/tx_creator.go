@@ -306,13 +306,18 @@ func (t *TxCreate) parseListUnspentTx(
 			Vout: txItem.Vout,
 		})
 
+		inputAmount, err := t.btc.FloatToDecimal(txItem.Amount)
+		if err != nil {
+			logger.Error("fail to convert input amount to decimal", "error", err)
+			continue
+		}
 		txRepoTxInputs = append(txRepoTxInputs, &models.BTCTXInput{
 			TXID:               0,
 			InputTxid:          txItem.TxID,
 			InputVout:          txItem.Vout,
 			InputAddress:       txItem.Address,
 			InputAccount:       txItem.Label,
-			InputAmount:        t.btc.FloatToDecimal(txItem.Amount),
+			InputAmount:        inputAmount,
 			InputConfirmations: uint64(txItem.Confirmations),
 		})
 
@@ -418,11 +423,15 @@ func (t *TxCreate) calculateOutputTotal(
 		if len(txPrevOutputs) == 1 {
 			// no change
 			txPrevOutputs[addr] -= fee
+			outputAmount, err := t.btc.AmountToDecimal(amt - fee)
+			if err != nil {
+				return 0, 0, nil, nil, fmt.Errorf("fail to convert output amount to decimal: %w", err)
+			}
 			txRepoOutputs = append(txRepoOutputs, &models.BTCTXOutput{
 				TXID:          0,
 				OutputAddress: addr.String(),
 				OutputAccount: receiver.String(),
-				OutputAmount:  t.btc.AmountToDecimal(amt - fee),
+				OutputAmount:  outputAmount,
 				IsChange:      false,
 			})
 			outputTotal += amt
@@ -433,19 +442,27 @@ func (t *TxCreate) calculateOutputTotal(
 			logger.Debug("detect sender account in calculateOutputTotal")
 			// address is used for change
 			txPrevOutputs[addr] -= fee
+			outputAmount, err := t.btc.AmountToDecimal(amt - fee)
+			if err != nil {
+				return 0, 0, nil, nil, fmt.Errorf("fail to convert change amount to decimal: %w", err)
+			}
 			txRepoOutputs = append(txRepoOutputs, &models.BTCTXOutput{
 				TXID:          0,
 				OutputAddress: addr.String(),
 				OutputAccount: sender.String(),
-				OutputAmount:  t.btc.AmountToDecimal(amt - fee),
+				OutputAmount:  outputAmount,
 				IsChange:      true,
 			})
 		} else {
+			outputAmount, err := t.btc.AmountToDecimal(amt)
+			if err != nil {
+				return 0, 0, nil, nil, fmt.Errorf("fail to convert output amount to decimal: %w", err)
+			}
 			txRepoOutputs = append(txRepoOutputs, &models.BTCTXOutput{
 				TXID:          0,
 				OutputAddress: addr.String(),
 				OutputAccount: receiver.String(),
-				OutputAmount:  t.btc.AmountToDecimal(amt),
+				OutputAmount:  outputAmount,
 				IsChange:      false,
 			})
 		}
@@ -493,12 +510,24 @@ func (t *TxCreate) insertTxTableForUnsigned(
 	}
 
 	// TxReceipt table
+	totalInputAmt, err := t.btc.AmountToDecimal(inputTotal)
+	if err != nil {
+		return 0, fmt.Errorf("fail to convert total input amount to decimal: %w", err)
+	}
+	totalOutputAmt, err := t.btc.AmountToDecimal(outputTotal)
+	if err != nil {
+		return 0, fmt.Errorf("fail to convert total output amount to decimal: %w", err)
+	}
+	feeAmt, err := t.btc.AmountToDecimal(fee)
+	if err != nil {
+		return 0, fmt.Errorf("fail to convert fee amount to decimal: %w", err)
+	}
 	txItem := &models.BTCTX{
 		Action:            actionType.String(),
 		UnsignedHexTX:     hex,
-		TotalInputAmount:  t.btc.AmountToDecimal(inputTotal),
-		TotalOutputAmount: t.btc.AmountToDecimal(outputTotal),
-		Fee:               t.btc.AmountToDecimal(fee),
+		TotalInputAmount:  totalInputAmt,
+		TotalOutputAmount: totalOutputAmt,
+		Fee:               feeAmt,
 	}
 
 	// start database transaction

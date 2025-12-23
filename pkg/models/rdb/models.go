@@ -4,8 +4,8 @@
 package models
 
 import (
-	"github.com/ericlagergren/decimal"
 	"github.com/guregu/null/v6"
+	"github.com/quagmt/udecimal"
 )
 
 // AccountKey is an object representing the database table.
@@ -113,11 +113,11 @@ type BTCTX struct {
 	// Hash for sent transaction
 	SentHashTX string `boil:"sent_hash_tx" json:"sent_hash_tx" toml:"sent_hash_tx" yaml:"sent_hash_tx"`
 	// total amount of coin to send
-	TotalInputAmount *decimal.Big `boil:"total_input_amount" json:"total_input_amount" toml:"total_input_amount"`
+	TotalInputAmount udecimal.Decimal `boil:"total_input_amount" json:"total_input_amount" toml:"total_input_amount"`
 	// total amount of coin to receive without fee
-	TotalOutputAmount *decimal.Big `boil:"total_output_amount" json:"total_output_amount" toml:"total_output_amount"`
+	TotalOutputAmount udecimal.Decimal `boil:"total_output_amount" json:"total_output_amount"` //nolint:lll
 	// fee
-	Fee *decimal.Big `boil:"fee" json:"fee" toml:"fee" yaml:"fee"`
+	Fee udecimal.Decimal `boil:"fee" json:"fee" toml:"fee" yaml:"fee"`
 	// current transaction type
 	CurrentTXType int8 `boil:"current_tx_type" json:"current_tx_type" toml:"current_tx_type" yaml:"current_tx_type"`
 	// updated date for unsigned transaction created
@@ -141,7 +141,7 @@ type BTCTXInput struct {
 	// sender account for input
 	InputAccount string `boil:"input_account" json:"input_account" toml:"input_account" yaml:"input_account"`
 	// amount of coin to send for input
-	InputAmount *decimal.Big `boil:"input_amount" json:"input_amount" toml:"input_amount" yaml:"input_amount"`
+	InputAmount udecimal.Decimal `boil:"input_amount" json:"input_amount" toml:"input_amount" yaml:"input_amount"`
 	// block confirmations when unspent rpc returned
 	InputConfirmations uint64 `boil:"input_confirmations" json:"input_confirmations" toml:"input_confirmations"`
 	// updated date
@@ -159,7 +159,7 @@ type BTCTXOutput struct {
 	// receiver account for output
 	OutputAccount string `boil:"output_account" json:"output_account" toml:"output_account" yaml:"output_account"`
 	// amount of coin to receive
-	OutputAmount *decimal.Big `boil:"output_amount" json:"output_amount" toml:"output_amount" yaml:"output_amount"`
+	OutputAmount udecimal.Decimal `boil:"output_amount" json:"output_amount" toml:"output_amount" yaml:"output_amount"`
 	// true: output is for fee
 	IsChange bool `boil:"is_change" json:"is_change" toml:"is_change" yaml:"is_change"`
 	// updated date
@@ -219,7 +219,7 @@ type PaymentRequest struct {
 	// receiver address
 	ReceiverAddress string `boil:"receiver_address" json:"receiver_address" toml:"receiver_address"`
 	// amount of coin to send
-	Amount *decimal.Big `boil:"amount" json:"amount" toml:"amount" yaml:"amount"`
+	Amount udecimal.Decimal `boil:"amount" json:"amount" toml:"amount" yaml:"amount"`
 	// true: unsigned transaction is created
 	IsDone bool `boil:"is_done" json:"is_done" toml:"is_done" yaml:"is_done"`
 	// updated date

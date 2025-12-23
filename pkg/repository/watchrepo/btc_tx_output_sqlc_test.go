@@ -6,7 +6,7 @@ package watchrepo_test
 import (
 	"testing"
 
-	"github.com/ericlagergren/decimal"
+	"github.com/quagmt/udecimal"
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
@@ -21,12 +21,9 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 	btcTxOutputRepo := testutil.NewBTCTxOutputRepositorySqlc()
 
 	// Create a parent tx
-	inputAmt := new(decimal.Big)
-	inputAmt, _ = inputAmt.SetString("0.100")
-	outputAmt := new(decimal.Big)
-	outputAmt, _ = outputAmt.SetString("0.090")
-	feeAmt := new(decimal.Big)
-	feeAmt, _ = feeAmt.SetString("0.010")
+	inputAmt, _ := udecimal.Parse("0.100")
+	outputAmt, _ := udecimal.Parse("0.090")
+	feeAmt, _ := udecimal.Parse("0.010")
 
 	txItem := &models.BTCTX{
 		Action:            action.ActionTypePayment.String(),
@@ -41,10 +38,10 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 	}
 
 	// Create test outputs
-	amount1 := new(decimal.Big)
-	amount1, _ = amount1.SetString("0.08")
-	amount2 := new(decimal.Big)
-	amount2, _ = amount2.SetString("0.01")
+	amount, _ := udecimal.Parse("1.5")
+	amount1, _ := udecimal.Parse("0.08")
+	amount, _ := udecimal.Parse("1.5")
+	amount2, _ := udecimal.Parse("0.01")
 
 	outputs := []*models.BTCTXOutput{
 		{
@@ -104,8 +101,8 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 	}
 
 	// Insert single
-	amount3 := new(decimal.Big)
-	amount3, _ = amount3.SetString("0.02")
+	amount, _ := udecimal.Parse("1.5")
+	amount3, _ := udecimal.Parse("0.02")
 	singleOutput := &models.BTCTXOutput{
 		TXID:          txID,
 		OutputAddress: "output-address-sqlc-3",

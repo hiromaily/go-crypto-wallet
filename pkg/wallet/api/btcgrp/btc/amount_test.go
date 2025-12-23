@@ -43,7 +43,10 @@ func TestAmountToDecimal(t *testing.T) {
 		{1000, "0.00001"},
 	}
 	for _, val := range tests {
-		res := btc.AmountToDecimal(val.amt)
+		res, err := btc.AmountToDecimal(val.amt)
+		if err != nil {
+			t.Fatalf("AmountToDecimal() error = %v", err)
+		}
 		if res.String() != val.want {
 			t.Errorf("AmountString() = %v, want %s", res, val.want)
 		}

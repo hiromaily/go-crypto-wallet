@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ericlagergren/decimal"
+	"github.com/quagmt/udecimal"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
@@ -235,12 +235,9 @@ func (r *BTCTxRepositorySqlc) DeleteAll() (int64, error) {
 // Helper functions
 
 func convertSqlcBtcTxToModel(btcTx *sqlcgen.BtcTx) *models.BTCTX {
-	totalInputAmount := new(decimal.Big)
-	totalOutputAmount := new(decimal.Big)
-	fee := new(decimal.Big)
-	_, _ = totalInputAmount.SetString(btcTx.TotalInputAmount)
-	_, _ = totalOutputAmount.SetString(btcTx.TotalOutputAmount)
-	_, _ = fee.SetString(btcTx.Fee)
+	totalInputAmount, _ := udecimal.Parse(btcTx.TotalInputAmount)
+	totalOutputAmount, _ := udecimal.Parse(btcTx.TotalOutputAmount)
+	fee, _ := udecimal.Parse(btcTx.Fee)
 
 	return &models.BTCTX{
 		ID:                btcTx.ID,

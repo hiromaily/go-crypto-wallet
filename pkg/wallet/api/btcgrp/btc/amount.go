@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/btcsuite/btcd/btcutil"
-	"github.com/ericlagergren/decimal"
+	"github.com/quagmt/udecimal"
 )
 
 // 0.00000001 BTC=1 Satoshi
@@ -25,24 +25,19 @@ func (*Bitcoin) AmountString(amt btcutil.Amount) string {
 }
 
 // AmountToDecimal converts amount `1.0 BTC` to `1.0` as decimal
-func (*Bitcoin) AmountToDecimal(amt btcutil.Amount) *decimal.Big {
+func (*Bitcoin) AmountToDecimal(amt btcutil.Amount) (udecimal.Decimal, error) {
 	strAmt := strings.TrimRight(amt.String(), " BTC")
 	// Remove trailing zeros after decimal point
 	if strings.Contains(strAmt, ".") {
 		strAmt = strings.TrimRight(strAmt, "0")
 		strAmt = strings.TrimRight(strAmt, ".")
 	}
-	dAmt := new(decimal.Big)
-	dAmt, _ = dAmt.SetString(strAmt)
-	return dAmt
+	return udecimal.Parse(strAmt)
 }
 
 // FloatToDecimal converts float to decimal
-func (*Bitcoin) FloatToDecimal(f float64) *decimal.Big {
-	strAmt := fmt.Sprintf("%f", f)
-	dAmt := new(decimal.Big)
-	dAmt, _ = dAmt.SetString(strAmt)
-	return dAmt
+func (*Bitcoin) FloatToDecimal(f float64) (udecimal.Decimal, error) {
+	return udecimal.NewFromFloat64(f)
 }
 
 // FloatToAmount converts float to amount
