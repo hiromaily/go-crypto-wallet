@@ -32,6 +32,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
 	btccoldsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/coldsrv"
 	btckeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/coldsrv/keygensrv"
+	btcsignsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/coldsrv/signsrv"
 	btcsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/watchsrv"
 	commonsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/coldsrv"
 	ethkeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/keygensrv"
@@ -50,6 +51,7 @@ import (
 type Container interface {
 	NewWalleter() wallets.Watcher
 	NewKeygener() wallets.Keygener
+	NewSigner(authName string) wallets.Signer
 }
 
 type container struct {
@@ -161,6 +163,40 @@ func (c *container) NewWalleter() wallets.Watcher {
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
 	}
+}
+
+// NewSigner is to register for Signer interface
+func (c *container) NewSigner(authName string) wallets.Signer {
+	// validate
+	if !account.ValidateAuthType(authName) {
+		panic("authName is invalid. this should be embedded when building: " + authName)
+	}
+
+	authType := account.AuthTypeMap[authName]
+
+	switch c.conf.CoinTypeCode {
+	case coin.BTC, coin.BCH:
+		return c.newBTCSigner(authType)
+	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
+	default:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
+	}
+}
+
+func (c *container) newBTCSigner(authType account.AuthType) wallets.Signer {
+	return btcwallet.NewBTCSign(
+		c.newBTC(),
+		c.newMySQLClient(),
+		authType,
+		c.conf.AddressType,
+		c.newSeeder(),
+		c.newSignHdWallter(authType),
+		c.newSignPrivKeyer(authType),
+		c.newSignFullPubkeyExporter(authType),
+		c.newSigner(),
+		c.walletType,
+	)
 }
 
 func (c *container) newBTCWalleter() wallets.Watcher {
@@ -889,5 +925,47 @@ func (c *container) newTxFileStorager() tx.FileRepositorier {
 	return tx.NewFileRepository(
 		c.conf.FilePath.Tx,
 		c.newLogger(),
+	)
+}
+
+//
+// Sign Service
+//
+
+func (c *container) newSignHdWallter(authType account.AuthType) service.HDWalleter {
+	return commonsrv.NewHDWallet(
+		c.newLogger(),
+		c.newSignHdWalletRepo(authType),
+		c.newKeyGenerator(),
+		c.conf.CoinTypeCode,
+		c.walletType,
+	)
+}
+
+func (c *container) newSignHdWalletRepo(authType account.AuthType) commonsrv.HDWalletRepo {
+	return commonsrv.NewAuthHDWalletRepo(
+		c.newAuthKeyRepo(),
+		authType,
+	)
+}
+
+func (c *container) newSignPrivKeyer(authType account.AuthType) btcsignsrv.PrivKeyer {
+	return btcsignsrv.NewPrivKey(
+		c.newBTC(),
+		c.newLogger(),
+		c.newAuthKeyRepo(),
+		authType,
+		c.walletType,
+	)
+}
+
+func (c *container) newSignFullPubkeyExporter(authType account.AuthType) service.FullPubkeyExporter {
+	return btcsignsrv.NewFullPubkeyExport(
+		c.newLogger(),
+		c.newAuthKeyRepo(),
+		c.newPubkeyFileStorager(),
+		c.conf.CoinTypeCode,
+		authType,
+		c.walletType,
 	)
 }
