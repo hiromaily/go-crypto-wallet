@@ -16,6 +16,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
+	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
@@ -57,6 +58,7 @@ type registry struct {
 	rippleAPI    *xrp.RippleAPI
 	mysqlClient  *sql.DB
 	multisig     account.MultisigAccounter
+	uuidHandler  uuid.UUIDHandler
 }
 
 // NewRegistry is to register registry interface
@@ -296,6 +298,7 @@ func (r *registry) newETH() ethgrp.Ethereumer {
 			&r.conf.Ethereum,
 			r.newLogger(),
 			r.conf.CoinTypeCode,
+			r.newUUIDHandler(),
 		)
 		if err != nil {
 			panic(err)
@@ -459,4 +462,11 @@ func (r *registry) newMultiAccount() account.MultisigAccounter {
 		r.multisig = account.NewMultisigAccounts(r.accountConf.Multisigs)
 	}
 	return r.multisig
+}
+
+func (r *registry) newUUIDHandler() uuid.UUIDHandler {
+	if r.uuidHandler == nil {
+		r.uuidHandler = uuid.NewGoogleUUIDHandler()
+	}
+	return r.uuidHandler
 }

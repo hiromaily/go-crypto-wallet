@@ -10,12 +10,12 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/sha3"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/contract"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/ethtx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -28,6 +28,7 @@ type ERC20 struct {
 	client          *ethclient.Client
 	tokenClient     *contract.Token
 	token           coin.ERC20Token
+	uuidHandler     uuid.UUIDHandler
 	name            string
 	contractAddress string
 	masterAddress   string
@@ -39,6 +40,7 @@ func NewERC20(
 	client *ethclient.Client,
 	tokenClient *contract.Token,
 	token coin.ERC20Token,
+	uuidHandler uuid.UUIDHandler,
 	name string,
 	contractAddress string,
 	masterAddress string,
@@ -49,6 +51,7 @@ func NewERC20(
 		client:          client,
 		tokenClient:     tokenClient,
 		token:           token,
+		uuidHandler:     uuidHandler,
 		name:            name,
 		contractAddress: contractAddress,
 		masterAddress:   masterAddress,
@@ -186,11 +189,14 @@ func (e *ERC20) CreateRawTransaction(
 	}
 
 	// generate UUID to trace transaction because unsignedTx is not unique
-	uid := uuid.NewV4().String()
+	uid, err := e.uuidHandler.GenerateV7()
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to call uuidHandler.GenerateV7(): %w", err)
+	}
 
 	// create insert data for　eth_detail_tx
 	txDetailItem := &models.EthDetailTX{
-		UUID:            uid,
+		UUID:            uid.String(),
 		SenderAccount:   "",
 		SenderAddress:   fromAddr,
 		ReceiverAccount: "",
@@ -204,7 +210,7 @@ func (e *ERC20) CreateRawTransaction(
 
 	// RawTx
 	rawtx := &ethtx.RawTx{
-		UUID:  uid,
+		UUID:  uid.String(),
 		From:  fromAddr,
 		To:    toAddr,
 		Value: *tokenAmount,

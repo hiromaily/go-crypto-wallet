@@ -11,6 +11,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
@@ -22,6 +23,7 @@ type Ethereum struct {
 	coinTypeCode coin.CoinTypeCode
 	logger       logger.Logger
 	ctx          context.Context
+	uuidHandler  uuid.UUIDHandler
 	netID        uint16
 	version      string
 	keyDir       string
@@ -36,11 +38,13 @@ func NewEthereum(
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Ethereum,
 	logger logger.Logger,
+	uuidHandler uuid.UUIDHandler,
 ) (*Ethereum, error) {
 	eth := &Ethereum{
 		ethClient:    ethClient,
 		rpcClient:    rpcClient,
 		coinTypeCode: coinTypeCode,
+		uuidHandler:  uuidHandler,
 		logger:       logger,
 		ctx:          ctx,
 		keyDir:       conf.KeyDirName,

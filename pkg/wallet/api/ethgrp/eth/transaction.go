@@ -8,7 +8,6 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	uuid "github.com/satori/go.uuid"
 
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/ethtx"
@@ -152,11 +151,14 @@ func (e *Ethereum) CreateRawTransaction(
 	}
 
 	// generate UUID to trace transaction because unsignedTx is not unique
-	uid := uuid.NewV4().String()
+	uid, err := e.uuidHandler.GenerateV7()
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to call uuidHandler.GenerateV7(): %w", err)
+	}
 
 	// create insert data for　eth_detail_tx
 	txDetailItem := &models.EthDetailTX{
-		UUID:            uid,
+		UUID:            uid.String(),
 		SenderAccount:   "",
 		SenderAddress:   fromAddr,
 		ReceiverAccount: "",
@@ -170,7 +172,7 @@ func (e *Ethereum) CreateRawTransaction(
 
 	// RawTx
 	rawtx := &ethtx.RawTx{
-		UUID:  uid,
+		UUID:  uid.String(),
 		From:  fromAddr,
 		To:    toAddr,
 		Value: *newValue,
