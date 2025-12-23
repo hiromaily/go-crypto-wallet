@@ -1,6 +1,7 @@
 package watchsrv
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"strings"
@@ -98,7 +99,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			// submit
 			var sentTx *xrp.SentTx
 			var earlistLedgerVersion uint64
-			sentTx, earlistLedgerVersion, err = t.rippler.SubmitTransaction(txBlob)
+			sentTx, earlistLedgerVersion, err = t.rippler.SubmitTransaction(context.TODO(), txBlob)
 			if err != nil {
 				logger.Warn("fail to call xrp.SubmitTransaction()",
 					"tx_id", txID,
@@ -135,7 +136,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 
 			// validate transaction
 			var ledgerVer uint64
-			ledgerVer, err = t.rippler.WaitValidation(sentTx.TxJSON.LastLedgerSequence)
+			ledgerVer, err = t.rippler.WaitValidation(context.TODO(), sentTx.TxJSON.LastLedgerSequence)
 			if err != nil {
 				logger.Warn("fail to call xrp.WaitValidation()",
 					"tx_id", txID,
@@ -151,7 +152,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 
 			// get transaction info
 			var txInfo *xrp.TxInfo
-			txInfo, err = t.rippler.GetTransaction(sentTx.TxJSON.Hash, earlistLedgerVersion)
+			txInfo, err = t.rippler.GetTransaction(context.TODO(), sentTx.TxJSON.Hash, earlistLedgerVersion)
 			if err != nil {
 				logger.Warn("fail to call xrp.GetTransaction()",
 					"tx_id", txID,

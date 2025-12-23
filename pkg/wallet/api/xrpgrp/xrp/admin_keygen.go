@@ -33,7 +33,7 @@ type ResponseValidationCreate struct {
 }
 
 // ValidationCreate calls validation_create method
-func (r *Ripple) ValidationCreate(secret string) (*ResponseValidationCreate, error) {
+func (r *Ripple) ValidationCreate(ctx context.Context, secret string) (*ResponseValidationCreate, error) {
 	if r.wsAdmin == nil {
 		return nil, XRPErrorDisabledAdminAPI
 	}
@@ -44,7 +44,7 @@ func (r *Ripple) ValidationCreate(secret string) (*ResponseValidationCreate, err
 		Secret:  secret,
 	}
 	var res ResponseValidationCreate
-	if err := r.wsAdmin.Call(context.Background(), &req, &res); err != nil {
+	if err := r.wsAdmin.Call(ctx, &req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsAdmin.Call(validation_create): %w", err)
 	}
 	return &res, nil
@@ -81,7 +81,9 @@ type ResponseWalletPropose struct {
 }
 
 // WalletProposeWithKey calls wallet_propose method
-func (r *Ripple) WalletProposeWithKey(seed string, keyType XRPKeyType) (*ResponseWalletPropose, error) {
+func (r *Ripple) WalletProposeWithKey(
+	ctx context.Context, seed string, keyType XRPKeyType,
+) (*ResponseWalletPropose, error) {
 	if r.wsAdmin == nil {
 		return nil, XRPErrorDisabledAdminAPI
 	}
@@ -92,7 +94,7 @@ func (r *Ripple) WalletProposeWithKey(seed string, keyType XRPKeyType) (*Respons
 		KeyType: keyType.String(),
 	}
 	var res ResponseWalletPropose
-	if err := r.wsAdmin.Call(context.Background(), &req, &res); err != nil {
+	if err := r.wsAdmin.Call(ctx, &req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsAdmin.Call(wallet_propose): %w", err)
 	}
 	return &res, nil
@@ -100,7 +102,7 @@ func (r *Ripple) WalletProposeWithKey(seed string, keyType XRPKeyType) (*Respons
 
 // WalletPropose calls wallet_propose method
 // - result is same as long as using same passphrase
-func (r *Ripple) WalletPropose(passphrase string) (*ResponseWalletPropose, error) {
+func (r *Ripple) WalletPropose(ctx context.Context, passphrase string) (*ResponseWalletPropose, error) {
 	if r.wsAdmin == nil {
 		return nil, XRPErrorDisabledAdminAPI
 	}
@@ -110,7 +112,7 @@ func (r *Ripple) WalletPropose(passphrase string) (*ResponseWalletPropose, error
 		Passphrase: passphrase,
 	}
 	var res ResponseWalletPropose
-	if err := r.wsAdmin.Call(context.Background(), &req, &res); err != nil {
+	if err := r.wsAdmin.Call(ctx, &req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsAdmin.Call(wallet_propose): %w", err)
 	}
 	return &res, nil

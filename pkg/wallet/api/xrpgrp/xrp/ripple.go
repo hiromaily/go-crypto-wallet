@@ -17,7 +17,6 @@ type Ripple struct {
 	API          *RippleAPI
 	chainConf    *chaincfg.Params
 	coinTypeCode coin.CoinTypeCode // eth
-	ctx          context.Context
 }
 
 // NewRipple creates Ripple object
@@ -34,7 +33,6 @@ func NewRipple(
 		wsAdmin:      wsAdmin,
 		API:          api,
 		coinTypeCode: coinTypeCode,
-		ctx:          ctx,
 	}
 
 	if conf.NetworkType != NetworkTypeXRPMainNet.String() {

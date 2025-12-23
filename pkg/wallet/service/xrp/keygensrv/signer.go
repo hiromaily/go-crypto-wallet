@@ -1,6 +1,7 @@
 package keygensrv
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -86,7 +87,7 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 		// sign
 		var signedTxID string
 		var txBlob string
-		signedTxID, txBlob, err = s.xrp.SignTransaction(&txInput, secret)
+		signedTxID, txBlob, err = s.xrp.SignTransaction(context.TODO(), &txInput, secret)
 		if err != nil {
 			return "", false, "", fmt.Errorf("fail to call xrp.SignTransaction(): %w", err)
 		}

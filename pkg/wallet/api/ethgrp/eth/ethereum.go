@@ -21,7 +21,6 @@ type Ethereum struct {
 	rpcClient    *ethrpc.Client
 	chainConf    *chaincfg.Params
 	coinTypeCode coin.CoinTypeCode
-	ctx          context.Context
 	uuidHandler  uuid.UUIDHandler
 	netID        uint16
 	version      string
@@ -43,13 +42,12 @@ func NewEthereum(
 		rpcClient:    rpcClient,
 		coinTypeCode: coinTypeCode,
 		uuidHandler:  uuidHandler,
-		ctx:          ctx,
 		keyDir:       conf.KeyDirName,
 	}
 
 	// key dir
 	if eth.keyDir == "" {
-		dirName, err := eth.AdminDataDir()
+		dirName, err := eth.AdminDataDir(ctx)
 		if err != nil {
 			return nil, fmt.Errorf("fail to call eth.AdminDataDir(): %w", err)
 		}
@@ -58,7 +56,7 @@ func NewEthereum(
 	logger.Debug("eth.keyDir", "eth.keyDir", eth.keyDir)
 
 	// get NetID
-	netID, err := eth.NetVersion()
+	netID, err := eth.NetVersion(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call eth.NetVersion(): %w", err)
 	}
@@ -71,7 +69,7 @@ func NewEthereum(
 	}
 
 	// get client version
-	clientVer, err := eth.ClientVersion()
+	clientVer, err := eth.ClientVersion(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call eth.ClientVersion(): %w", err)
 	}
@@ -80,7 +78,7 @@ func NewEthereum(
 	eth.isParity = isParity(clientVer)
 
 	// check sync progress
-	res, isSyncing, err := eth.Syncing()
+	res, isSyncing, err := eth.Syncing(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call eth.Syncing(): %w", err)
 	}
@@ -96,7 +94,7 @@ func NewEthereum(
 	}
 
 	// check network connections
-	isListening, err := eth.NetListening()
+	isListening, err := eth.NetListening(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call eth.NetListening(): %w", err)
 	}

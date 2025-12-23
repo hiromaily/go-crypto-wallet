@@ -1,6 +1,7 @@
 package xrp
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"strings"
@@ -65,7 +66,7 @@ func (c *SendCoinCommand) Run(args []string) int {
 		MaxLedgerVersionOffset: xrp.MaxLedgerVersionOffset,
 	}
 	c.ui.Info(fmt.Sprintf("sender: %s, receiver: %s, amount: %v", c.txData.Account, receiverAddr, amount))
-	txJSON, _, err := c.xrp.CreateRawTransaction(c.txData.Account, receiverAddr, amount, instructions)
+	txJSON, _, err := c.xrp.CreateRawTransaction(context.TODO(), c.txData.Account, receiverAddr, amount, instructions)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call xrp.CreateRawTransaction() %v", err))
 		return 1
@@ -73,14 +74,14 @@ func (c *SendCoinCommand) Run(args []string) int {
 	grok.Value(txJSON)
 
 	// SingTransaction
-	txID, txBlob, err := c.xrp.SignTransaction(txJSON, c.txData.Secret)
+	txID, txBlob, err := c.xrp.SignTransaction(context.TODO(), txJSON, c.txData.Secret)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call xrp.SignTransaction() %v", err))
 		return 1
 	}
 
 	// SendTransaction
-	sentTx, earlistLedgerVersion, err := c.xrp.SubmitTransaction(txBlob)
+	sentTx, earlistLedgerVersion, err := c.xrp.SubmitTransaction(context.TODO(), txBlob)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call xrp.SubmitTransaction() %v", err))
 		return 1
@@ -93,14 +94,14 @@ func (c *SendCoinCommand) Run(args []string) int {
 	}
 
 	// validate transaction
-	_, err = c.xrp.WaitValidation(sentTx.TxJSON.LastLedgerSequence)
+	_, err = c.xrp.WaitValidation(context.TODO(), sentTx.TxJSON.LastLedgerSequence)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call xrp.WaitValidation() %v", err))
 		return 1
 	}
 
 	// get transaction info
-	txInfo, err := c.xrp.GetTransaction(txID, earlistLedgerVersion)
+	txInfo, err := c.xrp.GetTransaction(context.TODO(), txID, earlistLedgerVersion)
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call xrp.GetTransaction() %v", err))
 		return 1
@@ -108,7 +109,7 @@ func (c *SendCoinCommand) Run(args []string) int {
 	c.ui.Info(fmt.Sprintf("transaction Info: %v", txInfo))
 
 	// get receiver info
-	accountInfo, err := c.xrp.GetAccountInfo(receiverAddr)
+	accountInfo, err := c.xrp.GetAccountInfo(context.TODO(), receiverAddr)
 	if err != nil {
 		errStatus, _ := status.FromError(err)
 		c.ui.Error(fmt.Sprintf(

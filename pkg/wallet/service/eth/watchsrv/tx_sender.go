@@ -1,6 +1,7 @@
 package watchsrv
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -75,7 +76,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 
 		// sign
 		var sentTx string
-		sentTx, err = t.eth.SendSignedRawTransaction(signedTx)
+		sentTx, err = t.eth.SendSignedRawTransaction(context.TODO(), signedTx)
 		if err != nil {
 			logger.Warn("fail to call eth.SendSignedRawTransaction()",
 				"error", err,

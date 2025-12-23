@@ -1,6 +1,7 @@
 package eth
 
 import (
+	"context"
 	"flag"
 	"fmt"
 
@@ -37,7 +38,7 @@ func (c *SyncingCommand) Run(args []string) int {
 		return 1
 	}
 
-	syncResult, isSyncing, err := c.eth.Syncing()
+	syncResult, isSyncing, err := c.eth.Syncing(context.Background())
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call eth.Syncing() %+v", err))
 		return 1

@@ -96,7 +96,7 @@ func (e *ERC20) FloatToBigInt(v float64) *big.Int {
 	return big.NewInt(int64(v))
 }
 
-func (e *ERC20) GetBalance(hexAddr string, _ eth.QuantityTag) (*big.Int, error) {
+func (e *ERC20) GetBalance(ctx context.Context, hexAddr string, _ eth.QuantityTag) (*big.Int, error) {
 	balance, err := e.tokenClient.BalanceOf(nil, common.HexToAddress(hexAddr))
 	if err != nil {
 		return nil, fmt.Errorf("fail to call e.contract.BalanceOf(%s): %w", hexAddr, err)
@@ -119,7 +119,7 @@ func (e *ERC20) GetBalance(hexAddr string, _ eth.QuantityTag) (*big.Int, error) 
 // - => approve requires gas to call ... this pattern is impossible
 // - 1.b. Or after approve is called, this transaction may be sent
 func (e *ERC20) CreateRawTransaction(
-	fromAddr, toAddr string, amount uint64, additionalNonce int,
+	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
 ) (*ethtx.RawTx, *models.EthDetailTX, error) {
 	// validation check
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
@@ -131,7 +131,7 @@ func (e *ERC20) CreateRawTransaction(
 		"amount", amount,
 	)
 
-	balance, err := e.GetBalance(fromAddr, "")
+	balance, err := e.GetBalance(ctx, fromAddr, "")
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call eth.GetBalance(): %w", err)
 	}
@@ -150,13 +150,13 @@ func (e *ERC20) CreateRawTransaction(
 		return nil, nil, fmt.Errorf("fail to call estimateGas(data): %w", err)
 	}
 
-	gasPrice, err := e.client.SuggestGasPrice(context.Background())
+	gasPrice, err := e.client.SuggestGasPrice(ctx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call client.SuggestGasPrice(): %w", err)
 	}
 
 	// nonce
-	nonce, err := e.getNonce(fromAddr, additionalNonce)
+	nonce, err := e.getNonce(ctx, fromAddr, additionalNonce)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call e.getNonce(): %w", err)
 	}
@@ -256,8 +256,8 @@ func (e *ERC20) estimateGas(data []byte) (uint64, error) {
 }
 
 // FIXME: this logic is almost same to where getNonce() in ethgrp/eth/transaction.go
-func (e *ERC20) getNonce(fromAddr string, additionalNonce int) (uint64, error) {
-	nonce, err := e.client.PendingNonceAt(context.Background(), common.HexToAddress(fromAddr))
+func (e *ERC20) getNonce(ctx context.Context, fromAddr string, additionalNonce int) (uint64, error) {
+	nonce, err := e.client.PendingNonceAt(ctx, common.HexToAddress(fromAddr))
 	if err != nil {
 		return 0, fmt.Errorf("fail to call ethClient.PendingNonceAt(): %w", err)
 	}

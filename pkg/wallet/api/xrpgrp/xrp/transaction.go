@@ -1,6 +1,7 @@
 package xrp
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -10,7 +11,7 @@ import (
 // CreateRawTransaction creates raw transaction
 // - https://xrpl.org/ja/send-xrp.html
 func (r *Ripple) CreateRawTransaction(
-	senderAccount, receiverAccount string, amount float64, instructions *Instructions,
+	ctx context.Context, senderAccount, receiverAccount string, amount float64, instructions *Instructions,
 ) (*TxInput, string, error) {
 	// validation
 	if senderAccount == "" {
@@ -22,7 +23,7 @@ func (r *Ripple) CreateRawTransaction(
 
 	// get balance
 	// xrp.MinimumReserve
-	accountInfo, err := r.GetAccountInfo(senderAccount)
+	accountInfo, err := r.GetAccountInfo(ctx, senderAccount)
 	if err != nil {
 		errStatus, _ := status.FromError(err)
 		return nil, "", fmt.Errorf(
@@ -34,7 +35,7 @@ func (r *Ripple) CreateRawTransaction(
 	}
 
 	// get fee
-	txJSON, stringJSON, err := r.PrepareTransaction(senderAccount, receiverAccount, amount, instructions)
+	txJSON, stringJSON, err := r.PrepareTransaction(ctx, senderAccount, receiverAccount, amount, instructions)
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call PrepareTransaction(): %w", err)
 	}
@@ -45,7 +46,8 @@ func (r *Ripple) CreateRawTransaction(
 			return nil, "", fmt.Errorf("balance is short to send %s", accountInfo.XrpBalance)
 		}
 		// re-run
-		txJSON, stringJSON, err = r.PrepareTransaction(senderAccount, receiverAccount, calculatedAmount, instructions)
+		txJSON, stringJSON, err = r.PrepareTransaction(
+			ctx, senderAccount, receiverAccount, calculatedAmount, instructions)
 		if err != nil {
 			return nil, "", fmt.Errorf("fail to call PrepareTransaction(): %w", err)
 		}

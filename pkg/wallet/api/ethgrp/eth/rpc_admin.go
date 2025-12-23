@@ -1,6 +1,7 @@
 package eth
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/p2p"
@@ -8,11 +9,11 @@ import (
 
 // AddPeer requests adding a new remote node to the list of tracked static nodes
 // https://github.com/ethereum/go-ethereum/wiki/Management-APIs#admin_addpeer
-func (e *Ethereum) AddPeer(nodeURL string) error {
+func (e *Ethereum) AddPeer(ctx context.Context, nodeURL string) error {
 	var bRet bool
 	// TODO: Result needs to be verified
 	// The response data type are bytes, but it cannot parse...
-	err := e.rpcClient.CallContext(e.ctx, &bRet, "admin_addPeer", nodeURL)
+	err := e.rpcClient.CallContext(ctx, &bRet, "admin_addPeer", nodeURL)
 	if err != nil {
 		return err
 	}
@@ -21,13 +22,13 @@ func (e *Ethereum) AddPeer(nodeURL string) error {
 
 // AdminDataDir returns the absolute path the running Geth node currently uses to store all its databases
 // returns like ${HOME}/Library/Ethereum/goerli
-func (e *Ethereum) AdminDataDir() (string, error) {
+func (e *Ethereum) AdminDataDir(ctx context.Context) (string, error) {
 	if e.isParity {
 		return "", nil
 	}
 
 	var dataDir string
-	err := e.rpcClient.CallContext(e.ctx, &dataDir, "admin_datadir")
+	err := e.rpcClient.CallContext(ctx, &dataDir, "admin_datadir")
 	if err != nil {
 		return "", fmt.Errorf("fail to call rpc.CallContext(admin_datadir): %w", err)
 	}
@@ -35,9 +36,9 @@ func (e *Ethereum) AdminDataDir() (string, error) {
 }
 
 // NodeInfo gathers and returns a collection of metadata known about the host.
-func (e *Ethereum) NodeInfo() (*p2p.NodeInfo, error) {
+func (e *Ethereum) NodeInfo(ctx context.Context) (*p2p.NodeInfo, error) {
 	var r *p2p.NodeInfo
-	err := e.rpcClient.CallContext(e.ctx, &r, "admin_nodeInfo")
+	err := e.rpcClient.CallContext(ctx, &r, "admin_nodeInfo")
 	if err != nil {
 		return nil, err
 	}
@@ -45,13 +46,13 @@ func (e *Ethereum) NodeInfo() (*p2p.NodeInfo, error) {
 }
 
 // AdminPeers returns all the information known about the connected remote nodes at the networking granularity.
-func (e *Ethereum) AdminPeers() ([]*p2p.PeerInfo, error) {
+func (e *Ethereum) AdminPeers(ctx context.Context) ([]*p2p.PeerInfo, error) {
 	if e.isParity {
 		return nil, nil
 	}
 
 	var peerInfo []*p2p.PeerInfo
-	err := e.rpcClient.CallContext(e.ctx, &peerInfo, "admin_peers")
+	err := e.rpcClient.CallContext(ctx, &peerInfo, "admin_peers")
 	if err != nil {
 		return nil, err
 	}

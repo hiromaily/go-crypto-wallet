@@ -80,7 +80,7 @@ type ResponseAccountInfo struct {
 }
 
 // AccountChannels calls account_channels method
-func (r *Ripple) AccountChannels(sender, receiver string) (*ResponseAccountChannels, error) {
+func (r *Ripple) AccountChannels(ctx context.Context, sender, receiver string) (*ResponseAccountChannels, error) {
 	req := AccountChannels{
 		ID:                 1,
 		Command:            "account_channels",
@@ -89,14 +89,14 @@ func (r *Ripple) AccountChannels(sender, receiver string) (*ResponseAccountChann
 		LedgerIndex:        "validated",
 	}
 	var res ResponseAccountChannels
-	if err := r.wsPublic.Call(context.Background(), &req, &res); err != nil {
+	if err := r.wsPublic.Call(ctx, &req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsClient.Call(account_channels): %w", err)
 	}
 	return &res, nil
 }
 
 // AccountInfo calls account_channels method
-func (r *Ripple) AccountInfo(address string) (*ResponseAccountInfo, error) {
+func (r *Ripple) AccountInfo(ctx context.Context, address string) (*ResponseAccountInfo, error) {
 	req := AccountInfo{
 		ID:          2,
 		Command:     "account_info",
@@ -106,7 +106,7 @@ func (r *Ripple) AccountInfo(address string) (*ResponseAccountInfo, error) {
 		Queue:       true,
 	}
 	var res ResponseAccountInfo
-	if err := r.wsPublic.Call(context.Background(), &req, &res); err != nil {
+	if err := r.wsPublic.Call(ctx, &req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsClient.Call(account_info): %w", err)
 	}
 	return &res, nil

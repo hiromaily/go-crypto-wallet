@@ -1,6 +1,7 @@
 package ethgrp
 
 import (
+	"context"
 	"crypto/ecdsa"
 	"math/big"
 
@@ -20,10 +21,10 @@ import (
 // Ethereumer Ethereum Interface
 type Ethereumer interface {
 	// balance
-	GetTotalBalance(addrs []string) (*big.Int, []eth.UserAmount)
+	GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []eth.UserAmount)
 	// client
-	BalanceAt(hexAddr string) (*big.Int, error)
-	SendRawTx(tx *types.Transaction) error
+	BalanceAt(ctx context.Context, hexAddr string) (*big.Int, error)
+	SendRawTx(ctx context.Context, tx *types.Transaction) error
 	// ethereum
 	Close()
 	CoinTypeCode() coin.CoinTypeCode
@@ -34,61 +35,61 @@ type Ethereumer interface {
 	GetPrivKey(hexAddr, password string) (*keystore.Key, error)
 	RenameParityKeyFile(hexAddr string, accountType account.AccountType) error
 	// rpc_admin
-	AddPeer(nodeURL string) error
-	AdminDataDir() (string, error)
-	NodeInfo() (*p2p.NodeInfo, error)
-	AdminPeers() ([]*p2p.PeerInfo, error)
+	AddPeer(ctx context.Context, nodeURL string) error
+	AdminDataDir(ctx context.Context) (string, error)
+	NodeInfo(ctx context.Context) (*p2p.NodeInfo, error)
+	AdminPeers(ctx context.Context) ([]*p2p.PeerInfo, error)
 	// rpc_eth
-	Syncing() (*eth.ResponseSyncing, bool, error)
-	ProtocolVersion() (uint64, error)
-	Coinbase() (string, error)
-	Accounts() ([]string, error)
-	BlockNumber() (*big.Int, error)
-	EnsureBlockNumber(loopCount int) (*big.Int, error)
-	GetBalance(hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
-	// GetStoreageAt(hexAddr string, quantityTag eth.QuantityTag) (string, error)
-	GetTransactionCount(hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
-	// GetBlockTransactionCountByBlockHash(blockHash string) (*big.Int, error)
-	GetBlockTransactionCountByNumber(blockNumber uint64) (*big.Int, error)
-	// GetUncleCountByBlockHash(blockHash string) (*big.Int, error)
-	GetUncleCountByBlockNumber(blockNumber uint64) (*big.Int, error)
-	// GetCode(hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
-	GetBlockByNumber(blockNumber uint64) (*eth.BlockInfo, error)
+	Syncing(ctx context.Context) (*eth.ResponseSyncing, bool, error)
+	ProtocolVersion(ctx context.Context) (uint64, error)
+	Coinbase(ctx context.Context) (string, error)
+	Accounts(ctx context.Context) ([]string, error)
+	BlockNumber(ctx context.Context) (*big.Int, error)
+	EnsureBlockNumber(ctx context.Context, loopCount int) (*big.Int, error)
+	GetBalance(ctx context.Context, hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
+	// GetStoreageAt(ctx context.Context, hexAddr string, quantityTag eth.QuantityTag) (string, error)
+	GetTransactionCount(ctx context.Context, hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
+	// GetBlockTransactionCountByBlockHash(ctx context.Context, blockHash string) (*big.Int, error)
+	GetBlockTransactionCountByNumber(ctx context.Context, blockNumber uint64) (*big.Int, error)
+	// GetUncleCountByBlockHash(ctx context.Context, blockHash string) (*big.Int, error)
+	GetUncleCountByBlockNumber(ctx context.Context, blockNumber uint64) (*big.Int, error)
+	// GetCode(ctx context.Context, hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
+	GetBlockByNumber(ctx context.Context, blockNumber uint64) (*eth.BlockInfo, error)
 	// rpc_eth_gas
-	GasPrice() (*big.Int, error)
-	EstimateGas(msg *ethereum.CallMsg) (*big.Int, error)
+	GasPrice(ctx context.Context) (*big.Int, error)
+	EstimateGas(ctx context.Context, msg *ethereum.CallMsg) (*big.Int, error)
 	// rpc_eth_tx
-	Sign(hexAddr, message string) (string, error)
-	SendTransaction(msg *ethereum.CallMsg) (string, error)
-	SendRawTransaction(signedTx string) (string, error)
-	SendRawTransactionWithTypesTx(tx *types.Transaction) (string, error)
-	GetTransactionByHash(hashTx string) (*eth.ResponseGetTransaction, error)
-	GetTransactionReceipt(hashTx string) (*eth.ResponseGetTransactionReceipt, error)
+	Sign(ctx context.Context, hexAddr, message string) (string, error)
+	SendTransaction(ctx context.Context, msg *ethereum.CallMsg) (string, error)
+	SendRawTransaction(ctx context.Context, signedTx string) (string, error)
+	SendRawTransactionWithTypesTx(ctx context.Context, tx *types.Transaction) (string, error)
+	GetTransactionByHash(ctx context.Context, hashTx string) (*eth.ResponseGetTransaction, error)
+	GetTransactionReceipt(ctx context.Context, hashTx string) (*eth.ResponseGetTransactionReceipt, error)
 	// rpc_miner
-	StartMining() error
-	StopMining() error
-	Mining() (bool, error)
-	HashRate() (*big.Int, error)
+	StartMining(ctx context.Context) error
+	StopMining(ctx context.Context) error
+	Mining(ctx context.Context) (bool, error)
+	HashRate(ctx context.Context) (*big.Int, error)
 	// rpc_net
-	NetVersion() (uint16, error)
-	NetListening() (bool, error)
-	NetPeerCount() (*big.Int, error)
+	NetVersion(ctx context.Context) (uint16, error)
+	NetListening(ctx context.Context) (bool, error)
+	NetPeerCount(ctx context.Context) (*big.Int, error)
 	// rpc_personal
-	ImportRawKey(hexKey, passPhrase string) (string, error)
-	ListAccounts() ([]string, error)
-	NewAccount(passphrase string, accountType account.AccountType) (string, error)
-	LockAccount(hexAddr string) error
-	UnlockAccount(hexAddr, passphrase string, duration uint64) (bool, error)
+	ImportRawKey(ctx context.Context, hexKey, passPhrase string) (string, error)
+	ListAccounts(ctx context.Context) ([]string, error)
+	NewAccount(ctx context.Context, passphrase string, accountType account.AccountType) (string, error)
+	LockAccount(ctx context.Context, hexAddr string) error
+	UnlockAccount(ctx context.Context, hexAddr, passphrase string, duration uint64) (bool, error)
 	// rpc_web3
-	ClientVersion() (string, error)
-	SHA3(data string) (string, error)
+	ClientVersion(ctx context.Context) (string, error)
+	SHA3(ctx context.Context, data string) (string, error)
 	// transaction
 	CreateRawTransaction(
-		fromAddr, toAddr string, amount uint64, additionalNonce int,
+		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
 	) (*ethtx.RawTx, *models.EthDetailTX, error)
 	SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (*ethtx.RawTx, error)
-	SendSignedRawTransaction(signedTxHex string) (string, error)
-	GetConfirmation(hashTx string) (uint64, error)
+	SendSignedRawTransaction(ctx context.Context, signedTxHex string) (string, error)
+	GetConfirmation(ctx context.Context, hashTx string) (uint64, error)
 	// util
 	DecodeBig(input string) (*big.Int, error)
 	ValidateAddr(addr string) error
@@ -103,9 +104,9 @@ type Ethereumer interface {
 type ERC20er interface {
 	ValidateAddr(addr string) error
 	FloatToBigInt(v float64) *big.Int
-	GetBalance(hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
+	GetBalance(ctx context.Context, hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
 	CreateRawTransaction(
-		fromAddr, toAddr string, amount uint64, additionalNonce int,
+		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
 	) (*ethtx.RawTx, *models.EthDetailTX, error)
 }
 
@@ -113,6 +114,6 @@ type ERC20er interface {
 type EtherTxCreator = ERC20er
 
 type EtherTxMonitor interface {
-	GetTotalBalance(addrs []string) (*big.Int, []eth.UserAmount)
-	GetConfirmation(hashTx string) (uint64, error)
+	GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []eth.UserAmount)
+	GetConfirmation(ctx context.Context, hashTx string) (uint64, error)
 }

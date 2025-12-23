@@ -1,6 +1,7 @@
 package watchsrv
 
 import (
+	"context"
 	"fmt"
 	"math/big"
 
@@ -77,7 +78,7 @@ func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]eth.UserAmount,
 	for _, addr := range addrs {
 		// TODO: if previous tx is not done, wrong amount is returned. how to manage it??
 		var balance *big.Int
-		balance, err = t.eth.GetBalance(addr.WalletAddress, eth.QuantityTagLatest)
+		balance, err = t.eth.GetBalance(context.TODO(), addr.WalletAddress, eth.QuantityTagLatest)
 		if err != nil {
 			logger.Warn("fail to call .GetBalance()",
 				"address", addr.WalletAddress,
@@ -108,7 +109,8 @@ func (t *TxCreate) createDepositRawTransactions(
 		// call CreateRawTransaction
 		var rawTx *ethtx.RawTx
 		var txDetailItem *models.EthDetailTX
-		rawTx, txDetailItem, err = t.eth.CreateRawTransaction(val.Address, depositAddr.WalletAddress, 0, 0)
+		rawTx, txDetailItem, err = t.eth.CreateRawTransaction(
+			context.TODO(), val.Address, depositAddr.WalletAddress, 0, 0)
 		if err != nil {
 			return nil, nil, fmt.Errorf(
 				"fail to call addrRepo.CreateRawTransaction(), sender address: %s: %w",

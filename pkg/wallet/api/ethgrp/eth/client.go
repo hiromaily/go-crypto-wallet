@@ -1,6 +1,7 @@
 package eth
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math/big"
@@ -11,9 +12,9 @@ import (
 
 // BalanceAt returns balance of address
 // if wrong address is given, response of balance would be strange like `416778046407207737`
-func (e *Ethereum) BalanceAt(hexAddr string) (*big.Int, error) {
+func (e *Ethereum) BalanceAt(ctx context.Context, hexAddr string) (*big.Int, error) {
 	account := common.HexToAddress(hexAddr)
-	balance, err := e.ethClient.BalanceAt(e.ctx, account, nil)
+	balance, err := e.ethClient.BalanceAt(ctx, account, nil)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call ethClient.BalanceAt(): %w", err)
 	}
@@ -24,6 +25,6 @@ func (e *Ethereum) BalanceAt(hexAddr string) (*big.Int, error) {
 }
 
 // SendRawTx sends raw transaction
-func (e *Ethereum) SendRawTx(tx *types.Transaction) error {
-	return e.ethClient.SendTransaction(e.ctx, tx)
+func (e *Ethereum) SendRawTx(ctx context.Context, tx *types.Transaction) error {
+	return e.ethClient.SendTransaction(ctx, tx)
 }

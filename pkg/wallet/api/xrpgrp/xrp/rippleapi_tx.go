@@ -109,9 +109,8 @@ type TxOrderbookChange struct {
 
 // PrepareTransaction calls PrepareTransaction API
 func (r *Ripple) PrepareTransaction(
-	senderAccount, receiverAccount string, amount float64, instructions *Instructions,
+	ctx context.Context, senderAccount, receiverAccount string, amount float64, instructions *Instructions,
 ) (*TxInput, string, error) {
-	ctx := context.Background()
 	req := &RequestPrepareTransaction{
 		TxType:          EnumTransactionType_TX_PAYMENT,
 		SenderAccount:   senderAccount,
@@ -141,8 +140,7 @@ func (r *Ripple) PrepareTransaction(
 // SignTransaction calls SignTransaction API
 // Offline functionality
 // - https://xrpl.org/rippleapi-reference.html#offline-functionality
-func (r *Ripple) SignTransaction(txInput *TxInput, secret string) (string, string, error) {
-	ctx := context.Background()
+func (r *Ripple) SignTransaction(ctx context.Context, txInput *TxInput, secret string) (string, string, error) {
 	strJSON, err := json.Marshal(txInput)
 	if err != nil {
 		return "", "", fmt.Errorf("fail to call json.Marshal(txJSON): %w", err)
@@ -162,8 +160,7 @@ func (r *Ripple) SignTransaction(txInput *TxInput, secret string) (string, strin
 
 // CombineTransaction combines signed transactions from multiple accounts for a multisignature transaction.
 // - The signed transaction must subsequently be submitted.
-func (r *Ripple) CombineTransaction(signedTxs []string) (string, string, error) {
-	ctx := context.Background()
+func (r *Ripple) CombineTransaction(ctx context.Context, signedTxs []string) (string, string, error) {
 	req := &RequestCombineTransaction{
 		SignedTransactions: signedTxs,
 	}
@@ -178,8 +175,7 @@ func (r *Ripple) CombineTransaction(signedTxs []string) (string, string, error) 
 
 // SubmitTransaction calls SubmitTransaction API
 // - signedTx is returned TxBlob by SignTransaction()
-func (r *Ripple) SubmitTransaction(signedTx string) (*SentTx, uint64, error) {
-	ctx := context.Background()
+func (r *Ripple) SubmitTransaction(ctx context.Context, signedTx string) (*SentTx, uint64, error) {
 	req := &RequestSubmitTransaction{
 		TxBlob: signedTx,
 	}
@@ -209,8 +205,7 @@ func (r *Ripple) SubmitTransaction(signedTx string) (*SentTx, uint64, error) {
 
 // WaitValidation calls WaitValidation API
 // - handling server streaming
-func (r *Ripple) WaitValidation(targetledgerVarsion uint64) (uint64, error) {
-	ctx := context.Background()
+func (r *Ripple) WaitValidation(ctx context.Context, targetledgerVarsion uint64) (uint64, error) {
 	req := &emptypb.Empty{}
 	resStream, err := r.API.txClient.WaitValidation(ctx, req)
 	if err != nil {
@@ -268,8 +263,7 @@ func (r *Ripple) WaitValidation(targetledgerVarsion uint64) (uint64, error) {
 }
 
 // GetTransaction calls GetTransaction API
-func (r *Ripple) GetTransaction(txID string, targetLedgerVersion uint64) (*TxInfo, error) {
-	ctx := context.Background()
+func (r *Ripple) GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*TxInfo, error) {
 	req := &RequestGetTransaction{
 		TxID:             txID,
 		MinLedgerVersion: targetLedgerVersion,

@@ -1,6 +1,7 @@
 package eth
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math/big"
@@ -37,10 +38,10 @@ type ResponseSyncing struct {
 // Syncing returns sync status or bool
 //   - return false if not syncing (it means syncing is done)
 //   - there seems 2 different responses
-func (e *Ethereum) Syncing() (*ResponseSyncing, bool, error) {
+func (e *Ethereum) Syncing(ctx context.Context) (*ResponseSyncing, bool, error) {
 	var result any
 
-	err := e.rpcClient.CallContext(e.ctx, &result, "eth_syncing")
+	err := e.rpcClient.CallContext(ctx, &result, "eth_syncing")
 	if err != nil {
 		return nil, false, fmt.Errorf("fail to call client.CallContext(eth_syncing): %w", err)
 	}
@@ -75,9 +76,9 @@ func (e *Ethereum) Syncing() (*ResponseSyncing, bool, error) {
 // ProtocolVersion returns the current ethereum protocol version
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_protocolversion
 // - returns like 65
-func (e *Ethereum) ProtocolVersion() (uint64, error) {
+func (e *Ethereum) ProtocolVersion(ctx context.Context) (uint64, error) {
 	var resProtocolVer string
-	err := e.rpcClient.CallContext(e.ctx, &resProtocolVer, "eth_protocolVersion")
+	err := e.rpcClient.CallContext(ctx, &resProtocolVer, "eth_protocolVersion")
 	if err != nil {
 		return 0, fmt.Errorf("fail to call rpc.CallContext(eth_protocolVersion) error: %s: %w", err, err)
 	}
@@ -95,9 +96,9 @@ func (e *Ethereum) ProtocolVersion() (uint64, error) {
 //   - any accounts can not be retrieved if no private key in keystore in node server.
 //   - when running geth command, keystore option should be used to specify directory
 //   - that means, this rpc can be called from cold wallet which has private key
-func (e *Ethereum) Coinbase() (string, error) {
+func (e *Ethereum) Coinbase(ctx context.Context) (string, error) {
 	var resAddr string
-	err := e.rpcClient.CallContext(e.ctx, &resAddr, "eth_coinbase")
+	err := e.rpcClient.CallContext(ctx, &resAddr, "eth_coinbase")
 	if err != nil {
 		return "", fmt.Errorf("fail to call rpc.CallContext(eth_coinbase): %w", err)
 	}
@@ -114,9 +115,9 @@ func (e *Ethereum) Coinbase() (string, error) {
 //
 // - private key is stored and read from node server
 // - result is same as ListAccounts()
-func (e *Ethereum) Accounts() ([]string, error) {
+func (e *Ethereum) Accounts(ctx context.Context) ([]string, error) {
 	var accounts []string
-	err := e.rpcClient.CallContext(e.ctx, &accounts, "eth_accounts")
+	err := e.rpcClient.CallContext(ctx, &accounts, "eth_accounts")
 	if err != nil {
 		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_accounts): %w", err)
 	}
@@ -128,9 +129,9 @@ func (e *Ethereum) Accounts() ([]string, error) {
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_blocknumber
 // - returns like `2706141`
 // - result may be a bit changeable, may be better to call several times.
-func (e *Ethereum) BlockNumber() (*big.Int, error) {
+func (e *Ethereum) BlockNumber(ctx context.Context) (*big.Int, error) {
 	var resBlockNumber string
-	err := e.rpcClient.CallContext(e.ctx, &resBlockNumber, "eth_blockNumber")
+	err := e.rpcClient.CallContext(ctx, &resBlockNumber, "eth_blockNumber")
 	if err != nil {
 		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_blockNumber): %w", err)
 	}
@@ -143,13 +144,13 @@ func (e *Ethereum) BlockNumber() (*big.Int, error) {
 }
 
 // EnsureBlockNumber calls BlockNumber() several times
-func (e *Ethereum) EnsureBlockNumber(loopCount int) (*big.Int, error) {
+func (e *Ethereum) EnsureBlockNumber(ctx context.Context, loopCount int) (*big.Int, error) {
 	latestBlockNumber := new(big.Int)
 	for i := 0; i < loopCount; i++ {
 		if i != 0 {
 			time.Sleep(500 * time.Millisecond)
 		}
-		num, err := e.BlockNumber()
+		num, err := e.BlockNumber(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -165,9 +166,9 @@ func (e *Ethereum) EnsureBlockNumber(loopCount int) (*big.Int, error) {
 // - `QuantityTagEarliest` must NOT be used
 // - On goerli testnet, balance can be found just after sending coins
 // - TODO: which quantityTag should be used `QuantityTagLatest` or `QuantityTagPending`
-func (e *Ethereum) GetBalance(hexAddr string, quantityTag QuantityTag) (*big.Int, error) {
+func (e *Ethereum) GetBalance(ctx context.Context, hexAddr string, quantityTag QuantityTag) (*big.Int, error) {
 	var balance string
-	err := e.rpcClient.CallContext(e.ctx, &balance, "eth_getBalance", hexAddr, quantityTag.String())
+	err := e.rpcClient.CallContext(ctx, &balance, "eth_getBalance", hexAddr, quantityTag.String())
 	if err != nil {
 		return nil, fmt.Errorf(
 			"fail to call rpc.CallContext(eth_getBalance) quantityTag: %s: %w",
@@ -203,9 +204,9 @@ func (e *Ethereum) GetBalance(hexAddr string, quantityTag QuantityTag) (*big.Int
 // - `QuantityTagEarliest` must NOT be used
 // - after sending coin from this address, result is counted??
 // - generated new address is always 0
-func (e *Ethereum) GetTransactionCount(hexAddr string, quantityTag QuantityTag) (*big.Int, error) {
+func (e *Ethereum) GetTransactionCount(ctx context.Context, hexAddr string, quantityTag QuantityTag) (*big.Int, error) {
 	var transactionCount string
-	err := e.rpcClient.CallContext(e.ctx, &transactionCount, "eth_getTransactionCount", hexAddr, quantityTag.String())
+	err := e.rpcClient.CallContext(ctx, &transactionCount, "eth_getTransactionCount", hexAddr, quantityTag.String())
 	if err != nil {
 		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getTransactionCount): %w", err)
 	}
@@ -247,12 +248,12 @@ func (e *Ethereum) GetTransactionCount(hexAddr string, quantityTag QuantityTag) 
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblocktransactioncountbynumber
 // transaction count of block, it's possible transaction is 0
 // - this number is fixed
-func (e *Ethereum) GetBlockTransactionCountByNumber(blockNumber uint64) (*big.Int, error) {
+func (e *Ethereum) GetBlockTransactionCountByNumber(ctx context.Context, blockNumber uint64) (*big.Int, error) {
 	// convert uint64 to hex
 	hexNum := hexutil.EncodeUint64(blockNumber)
 
 	var txCount string
-	err := e.rpcClient.CallContext(e.ctx, &txCount, "eth_getBlockTransactionCountByNumber", hexNum)
+	err := e.rpcClient.CallContext(ctx, &txCount, "eth_getBlockTransactionCountByNumber", hexNum)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getBlockTransactionCountByNumber): %w", err)
 	}
@@ -294,12 +295,12 @@ func (e *Ethereum) GetBlockTransactionCountByNumber(blockNumber uint64) (*big.In
 // GetUncleCountByBlockNumber returns the number of uncles in a block from a block matching the given block number
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getunclecountbyblocknumber
 // - this func would not be used anywhere
-func (e *Ethereum) GetUncleCountByBlockNumber(blockNumber uint64) (*big.Int, error) {
+func (e *Ethereum) GetUncleCountByBlockNumber(ctx context.Context, blockNumber uint64) (*big.Int, error) {
 	// convert int64 to hex
 	blockHexNumber := hexutil.EncodeUint64(blockNumber)
 
 	var uncleCount string
-	err := e.rpcClient.CallContext(e.ctx, &uncleCount, "eth_getUncleCountByBlockNumber", blockHexNumber)
+	err := e.rpcClient.CallContext(ctx, &uncleCount, "eth_getUncleCountByBlockNumber", blockHexNumber)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getUncleCountByBlockNumber): %w", err)
 	}
@@ -394,14 +395,14 @@ type BlockInfo struct {
 
 // GetBlockByNumber returns information about a block by block number
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbynumber
-func (e *Ethereum) GetBlockByNumber(blockNumber uint64) (*BlockInfo, error) {
+func (e *Ethereum) GetBlockByNumber(ctx context.Context, blockNumber uint64) (*BlockInfo, error) {
 	// convert int64 to hex
 	blockHexNumber := hexutil.EncodeUint64(blockNumber)
 
 	// var lastBlock BlockNumber
 	var blockRawInfo BlockRawInfo
 
-	err := e.rpcClient.CallContext(e.ctx, &blockRawInfo, "eth_getBlockByNumber", blockHexNumber, false)
+	err := e.rpcClient.CallContext(ctx, &blockRawInfo, "eth_getBlockByNumber", blockHexNumber, false)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getBlockByNumber): %w", err)
 	}

@@ -1,6 +1,7 @@
 package eth
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math/big"
@@ -15,9 +16,9 @@ import (
 )
 
 // when creating multiple transaction from same address, nonce should be incremented
-func (e *Ethereum) getNonce(fromAddr string, additionalNonce int) (uint64, error) {
+func (e *Ethereum) getNonce(ctx context.Context, fromAddr string, additionalNonce int) (uint64, error) {
 	// by calling GetTransactionCount()
-	nonce, err := e.GetTransactionCount(fromAddr, QuantityTagPending)
+	nonce, err := e.GetTransactionCount(ctx, fromAddr, QuantityTagPending)
 	if err != nil {
 		return 0, fmt.Errorf("fail to call eth.GetTransactionCount(): %w", err)
 	}
@@ -34,7 +35,7 @@ func (e *Ethereum) getNonce(fromAddr string, additionalNonce int) (uint64, error
 // How to calculate transaction fee?
 // https://ethereum.stackexchange.com/questions/19665/how-to-calculate-transaction-fee
 func (e *Ethereum) calculateFee(
-	fromAddr, toAddr common.Address, balance, gasPrice, value *big.Int,
+	ctx context.Context, fromAddr, toAddr common.Address, balance, gasPrice, value *big.Int,
 ) (*big.Int, *big.Int, *big.Int, error) {
 	msg := &ethereum.CallMsg{
 		From:     fromAddr,
@@ -45,7 +46,7 @@ func (e *Ethereum) calculateFee(
 		Data:     nil,
 	}
 	// gasLimit
-	estimatedGas, err := e.EstimateGas(msg)
+	estimatedGas, err := e.EstimateGas(ctx, msg)
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("fail to call EstimateGas(): %w", err)
 	}
@@ -83,7 +84,7 @@ func (e *Ethereum) calculateFee(
 // - if sender sends 5ETH, receiver receives 5ETH
 // - sender has to pay 5ETH + fee
 func (e *Ethereum) CreateRawTransaction(
-	fromAddr, toAddr string, amount uint64, additionalNonce int,
+	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
 ) (*ethtx.RawTx, *models.EthDetailTX, error) {
 	// validation check
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
@@ -97,7 +98,7 @@ func (e *Ethereum) CreateRawTransaction(
 
 	// TODO: pending status should be included in target balance??
 	// TODO: if block is still syncing, proper balance is not returned
-	balance, err := e.GetBalance(fromAddr, QuantityTagPending)
+	balance, err := e.GetBalance(ctx, fromAddr, QuantityTagPending)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call eth.GetBalance(): %w", err)
 	}
@@ -107,13 +108,13 @@ func (e *Ethereum) CreateRawTransaction(
 	}
 
 	// nonce
-	nonce, err := e.getNonce(fromAddr, additionalNonce)
+	nonce, err := e.getNonce(ctx, fromAddr, additionalNonce)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call eth.getNonce(): %w", err)
 	}
 
 	// gasPrice
-	gasPrice, err := e.GasPrice()
+	gasPrice, err := e.GasPrice(ctx)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call eth.GasPrice(): %w", err)
 	}
@@ -121,6 +122,7 @@ func (e *Ethereum) CreateRawTransaction(
 
 	// fromAddr, toAddr common.Address, gasPrice, value *big.Int
 	newValue, txFee, estimatedGas, err := e.calculateFee(
+		ctx,
 		common.HexToAddress(fromAddr),
 		common.HexToAddress(toAddr),
 		balance,
@@ -249,13 +251,13 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (
 // SendSignedRawTransaction sends signed raw transaction
 // - SendRawTransaction in rpc_eth_tx.go
 // - SendRawTx in client.go
-func (e *Ethereum) SendSignedRawTransaction(signedTxHex string) (string, error) {
+func (e *Ethereum) SendSignedRawTransaction(ctx context.Context, signedTxHex string) (string, error) {
 	decodedTx, err := ethtx.DecodeTx(signedTxHex)
 	if err != nil {
 		return "", fmt.Errorf("fail to call decodeTx(signedTxHex): %w", err)
 	}
 
-	txHash, err := e.SendRawTransactionWithTypesTx(decodedTx)
+	txHash, err := e.SendRawTransactionWithTypesTx(ctx, decodedTx)
 	if err != nil {
 		return "", fmt.Errorf("fail to call SendRawTransactionWithTypesTx(): %w", err)
 	}
@@ -264,15 +266,15 @@ func (e *Ethereum) SendSignedRawTransaction(signedTxHex string) (string, error) 
 }
 
 // GetConfirmation returns confirmation number
-func (e *Ethereum) GetConfirmation(hashTx string) (uint64, error) {
-	txInfo, err := e.GetTransactionByHash(hashTx)
+func (e *Ethereum) GetConfirmation(ctx context.Context, hashTx string) (uint64, error) {
+	txInfo, err := e.GetTransactionByHash(ctx, hashTx)
 	if err != nil {
 		return 0, err
 	}
 	if txInfo.BlockNumber == 0 {
 		return 0, errors.New("block number can't retrieved")
 	}
-	currentBlockNum, err := e.BlockNumber()
+	currentBlockNum, err := e.BlockNumber(ctx)
 	if err != nil {
 		return 0, err
 	}

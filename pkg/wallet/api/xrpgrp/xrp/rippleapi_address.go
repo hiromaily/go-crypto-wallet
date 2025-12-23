@@ -10,8 +10,7 @@ import (
 )
 
 // GenerateAddress calls GenerateAddress API
-func (r *Ripple) GenerateAddress() (*ResponseGenerateAddress, error) {
-	ctx := context.Background()
+func (r *Ripple) GenerateAddress(ctx context.Context) (*ResponseGenerateAddress, error) {
 	req := &emptypb.Empty{}
 
 	res, err := r.API.addressClient.GenerateAddress(ctx, req)
@@ -29,8 +28,7 @@ func (r *Ripple) GenerateAddress() (*ResponseGenerateAddress, error) {
 }
 
 // GenerateXAddress calls GenerateXAddress API
-func (r *Ripple) GenerateXAddress() (*ResponseGenerateXAddress, error) {
-	ctx := context.Background()
+func (r *Ripple) GenerateXAddress(ctx context.Context) (*ResponseGenerateXAddress, error) {
 	req := &emptypb.Empty{}
 
 	res, err := r.API.addressClient.GenerateXAddress(ctx, req)
@@ -46,8 +44,7 @@ func (r *Ripple) GenerateXAddress() (*ResponseGenerateXAddress, error) {
 }
 
 // IsValidAddress calls IsValidAddress API
-func (r *Ripple) IsValidAddress(addr string) (bool, error) {
-	ctx := context.Background()
+func (r *Ripple) IsValidAddress(ctx context.Context, addr string) (bool, error) {
 	req := &RequestIsValidAddress{
 		Address: addr,
 	}

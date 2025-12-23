@@ -1,6 +1,7 @@
 package eth
 
 import (
+	"context"
 	"flag"
 	"fmt"
 
@@ -37,7 +38,7 @@ func (c *NodeInfoCommand) Run(args []string) int {
 		return 1
 	}
 
-	peerInfo, err := c.eth.NodeInfo()
+	peerInfo, err := c.eth.NodeInfo(context.Background())
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call eth.NodeInfo() %+v", err))
 		return 1

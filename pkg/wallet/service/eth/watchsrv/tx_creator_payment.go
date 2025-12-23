@@ -1,6 +1,7 @@
 package watchsrv
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math/big"
@@ -135,7 +136,7 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, *big.Int, []int64, error)
 
 func (t *TxCreate) validateAmount(senderAddr *models.Address, totalAmount *big.Int) error {
 	// check sender's total balance
-	senderBalance, err := t.eth.GetBalance(senderAddr.WalletAddress, eth.QuantityTagPending)
+	senderBalance, err := t.eth.GetBalance(context.TODO(), senderAddr.WalletAddress, eth.QuantityTagPending)
 	if err != nil {
 		return fmt.Errorf("fail to call eth.GetBalance(): %w", err)
 	}
@@ -154,7 +155,7 @@ func (t *TxCreate) createPaymentRawTransactions(
 	additionalNonce := 0
 	for _, userPayment := range userPayments {
 		// call CreateRawTransaction
-		rawTx, txDetailItem, err := t.eth.CreateRawTransaction(
+		rawTx, txDetailItem, err := t.eth.CreateRawTransaction(context.TODO(),
 			senderAddr.WalletAddress, userPayment.receiverAddr, userPayment.amount.Uint64(), additionalNonce)
 		if err != nil {
 			return nil, nil, fmt.Errorf(

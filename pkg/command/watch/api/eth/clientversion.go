@@ -1,6 +1,7 @@
 package eth
 
 import (
+	"context"
 	"flag"
 	"fmt"
 
@@ -37,7 +38,7 @@ func (c *ClientVersionCommand) Run(args []string) int {
 		return 1
 	}
 
-	version, err := c.eth.ClientVersion()
+	version, err := c.eth.ClientVersion(context.Background())
 	if err != nil {
 		c.ui.Error(fmt.Sprintf("fail to call eth.ClientVersion() %+v", err))
 		return 1
