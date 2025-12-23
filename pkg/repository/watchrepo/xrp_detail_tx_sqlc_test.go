@@ -80,12 +80,12 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	// Get all by tx ID
 	xrpTxs, err := xrpDetailTxRepo.GetAllByTxID(txID)
 	require.NoError(t, err, "fail to call GetAllByTxID()")
-	assert.GreaterOrEqual(t, len(xrpTxs), 1, "GetAllByTxID() should return at least 1 record")
+	require.GreaterOrEqual(t, len(xrpTxs), 1, "GetAllByTxID() should return at least 1 record")
 
 	// Get one
 	retrievedTx, err := xrpDetailTxRepo.GetOne(xrpTxs[0].ID)
 	require.NoError(t, err, "fail to call GetOne()")
-	assert.Equal(t, uuid, retrievedTx.UUID, "GetOne() should return correct UUID")
+	require.Equal(t, uuid, retrievedTx.UUID, "GetOne() should return correct UUID")
 
 	// Update after tx sent
 	signedTxID := "signed-txid-sqlc"
@@ -93,40 +93,40 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	earliestLedgerVersion := uint64(12340)
 	rowsAffected, err := xrpDetailTxRepo.UpdateAfterTxSent(uuid, tx.TxTypeSent, signedTxID, txBlob, earliestLedgerVersion)
 	require.NoError(t, err, "fail to call UpdateAfterTxSent()")
-	assert.GreaterOrEqual(t, rowsAffected, int64(1), "UpdateAfterTxSent() should affect at least 1 row")
+	require.GreaterOrEqual(t, rowsAffected, int64(1), "UpdateAfterTxSent() should affect at least 1 row")
 
 	// Verify update
 	updatedTx, err := xrpDetailTxRepo.GetOne(retrievedTx.ID)
 	require.NoError(t, err, "fail to call GetOne() after update")
-	assert.Equal(t, signedTxID, updatedTx.SignedTXID, "UpdateAfterTxSent() should update SignedTXID")
-	assert.Equal(t, txBlob, updatedTx.TXBlob, "UpdateAfterTxSent() should update TXBlob")
-	assert.Equal(t, tx.TxTypeSent.Int8(), updatedTx.CurrentTXType, "UpdateAfterTxSent() should update CurrentTXType")
-	assert.Equal(t, earliestLedgerVersion, updatedTx.EarliestLedgerVersion, "UpdateAfterTxSent() should update EarliestLedgerVersion")
+	require.Equal(t, signedTxID, updatedTx.SignedTXID, "UpdateAfterTxSent() should update SignedTXID")
+	require.Equal(t, txBlob, updatedTx.TXBlob, "UpdateAfterTxSent() should update TXBlob")
+	require.Equal(t, tx.TxTypeSent.Int8(), updatedTx.CurrentTXType, "UpdateAfterTxSent() should update CurrentTXType")
+	require.Equal(t, earliestLedgerVersion, updatedTx.EarliestLedgerVersion, "UpdateAfterTxSent() should update EarliestLedgerVersion")
 
 	// Get sent hash tx (for XRP, this is tx_blob)
 	blobs, err := xrpDetailTxRepo.GetSentHashTx(tx.TxTypeSent)
 	require.NoError(t, err, "fail to call GetSentHashTx()")
-	assert.GreaterOrEqual(t, len(blobs), 1, "GetSentHashTx() should return at least 1 blob")
+	require.GreaterOrEqual(t, len(blobs), 1, "GetSentHashTx() should return at least 1 blob")
 
 	// Update tx type by sent hash tx (tx_blob)
 	rowsAffected, err = xrpDetailTxRepo.UpdateTxTypeBySentHashTx(tx.TxTypeDone, txBlob)
 	require.NoError(t, err, "fail to call UpdateTxTypeBySentHashTx()")
-	assert.GreaterOrEqual(t, rowsAffected, int64(1), "UpdateTxTypeBySentHashTx() should affect at least 1 row")
+	require.GreaterOrEqual(t, rowsAffected, int64(1), "UpdateTxTypeBySentHashTx() should affect at least 1 row")
 
 	// Verify tx type update
 	verifyTx, err := xrpDetailTxRepo.GetOne(retrievedTx.ID)
 	require.NoError(t, err, "fail to call GetOne() after UpdateTxTypeBySentHashTx()")
-	assert.Equal(t, tx.TxTypeDone.Int8(), verifyTx.CurrentTXType, "UpdateTxTypeBySentHashTx() should update CurrentTXType to TxTypeDone")
+	require.Equal(t, tx.TxTypeDone.Int8(), verifyTx.CurrentTXType, "UpdateTxTypeBySentHashTx() should update CurrentTXType to TxTypeDone")
 
 	// Update tx type by ID
 	rowsAffected, err = xrpDetailTxRepo.UpdateTxType(retrievedTx.ID, tx.TxTypeNotified)
 	require.NoError(t, err, "fail to call UpdateTxType()")
-	assert.Equal(t, int64(1), rowsAffected, "UpdateTxType() should affect 1 row")
+	require.Equal(t, int64(1), rowsAffected, "UpdateTxType() should affect 1 row")
 
 	// Verify final tx type
 	finalTx, err := xrpDetailTxRepo.GetOne(retrievedTx.ID)
 	require.NoError(t, err, "fail to call GetOne() after UpdateTxType()")
-	assert.Equal(t, tx.TxTypeNotified.Int8(), finalTx.CurrentTXType, "UpdateTxType() should update CurrentTXType to TxTypeNotified")
+	require.Equal(t, tx.TxTypeNotified.Int8(), finalTx.CurrentTXType, "UpdateTxType() should update CurrentTXType to TxTypeNotified")
 
 	// Test InsertBulk
 	// Create another tx record for bulk insert

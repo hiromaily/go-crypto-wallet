@@ -73,51 +73,51 @@ func TestEthDetailTxSqlc(t *testing.T) {
 	// Get all by tx ID
 	ethTxs, err := ethDetailTxRepo.GetAllByTxID(txID)
 	require.NoError(t, err, "fail to call GetAllByTxID()")
-	assert.GreaterOrEqual(t, len(ethTxs), 1, "GetAllByTxID() should return at least 1 record")
+	require.GreaterOrEqual(t, len(ethTxs), 1, "GetAllByTxID() should return at least 1 record")
 
 	// Get one
 	retrievedTx, err := ethDetailTxRepo.GetOne(ethTxs[0].ID)
 	require.NoError(t, err, "fail to call GetOne()")
-	assert.Equal(t, uuid, retrievedTx.UUID, "GetOne() should return correct UUID")
+	require.Equal(t, uuid, retrievedTx.UUID, "GetOne() should return correct UUID")
 
 	// Update after tx sent
 	signedHex := "0xsigned-hex-sqlc"
 	sentHashTx := "0xsent-hash-sqlc"
 	rowsAffected, err := ethDetailTxRepo.UpdateAfterTxSent(uuid, tx.TxTypeSent, signedHex, sentHashTx)
 	require.NoError(t, err, "fail to call UpdateAfterTxSent()")
-	assert.GreaterOrEqual(t, rowsAffected, int64(1), "UpdateAfterTxSent() should affect at least 1 row")
+	require.GreaterOrEqual(t, rowsAffected, int64(1), "UpdateAfterTxSent() should affect at least 1 row")
 
 	// Verify update
 	updatedTx, err := ethDetailTxRepo.GetOne(retrievedTx.ID)
 	require.NoError(t, err, "fail to call GetOne() after update")
-	assert.Equal(t, signedHex, updatedTx.SignedHexTX, "UpdateAfterTxSent() should update SignedHexTX")
-	assert.Equal(t, sentHashTx, updatedTx.SentHashTX, "UpdateAfterTxSent() should update SentHashTX")
-	assert.Equal(t, tx.TxTypeSent.Int8(), updatedTx.CurrentTXType, "UpdateAfterTxSent() should update CurrentTXType")
+	require.Equal(t, signedHex, updatedTx.SignedHexTX, "UpdateAfterTxSent() should update SignedHexTX")
+	require.Equal(t, sentHashTx, updatedTx.SentHashTX, "UpdateAfterTxSent() should update SentHashTX")
+	require.Equal(t, tx.TxTypeSent.Int8(), updatedTx.CurrentTXType, "UpdateAfterTxSent() should update CurrentTXType")
 
 	// Get sent hash tx
 	hashes, err := ethDetailTxRepo.GetSentHashTx(tx.TxTypeSent)
 	require.NoError(t, err, "fail to call GetSentHashTx()")
-	assert.GreaterOrEqual(t, len(hashes), 1, "GetSentHashTx() should return at least 1 hash")
+	require.GreaterOrEqual(t, len(hashes), 1, "GetSentHashTx() should return at least 1 hash")
 
 	// Update tx type by sent hash
 	rowsAffected, err = ethDetailTxRepo.UpdateTxTypeBySentHashTx(tx.TxTypeDone, sentHashTx)
 	require.NoError(t, err, "fail to call UpdateTxTypeBySentHashTx()")
-	assert.GreaterOrEqual(t, rowsAffected, int64(1), "UpdateTxTypeBySentHashTx() should affect at least 1 row")
+	require.GreaterOrEqual(t, rowsAffected, int64(1), "UpdateTxTypeBySentHashTx() should affect at least 1 row")
 
 	// Verify tx type update
 	verifyTx, err := ethDetailTxRepo.GetOne(retrievedTx.ID)
 	require.NoError(t, err, "fail to call GetOne() after UpdateTxTypeBySentHashTx()")
-	assert.Equal(t, tx.TxTypeDone.Int8(), verifyTx.CurrentTXType, "UpdateTxTypeBySentHashTx() should update CurrentTXType to TxTypeDone")
+	require.Equal(t, tx.TxTypeDone.Int8(), verifyTx.CurrentTXType, "UpdateTxTypeBySentHashTx() should update CurrentTXType to TxTypeDone")
 
 	// Update tx type by ID
 	rowsAffected, err = ethDetailTxRepo.UpdateTxType(retrievedTx.ID, tx.TxTypeNotified)
 	require.NoError(t, err, "fail to call UpdateTxType()")
-	assert.Equal(t, int64(1), rowsAffected, "UpdateTxType() should affect 1 row")
+	require.Equal(t, int64(1), rowsAffected, "UpdateTxType() should affect 1 row")
 
 	// Verify final tx type
 	finalTx, err := ethDetailTxRepo.GetOne(retrievedTx.ID)
 	require.NoError(t, err, "fail to call GetOne() after UpdateTxType()")
-	assert.Equal(t, tx.TxTypeNotified.Int8(), finalTx.CurrentTXType, "UpdateTxType() should update CurrentTXType to TxTypeNotified")
+	require.Equal(t, tx.TxTypeNotified.Int8(), finalTx.CurrentTXType, "UpdateTxType() should update CurrentTXType to TxTypeNotified")
 
 	// Test InsertBulk
 	// Create another tx record for bulk insert

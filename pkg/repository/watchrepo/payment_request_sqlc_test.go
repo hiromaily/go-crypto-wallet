@@ -51,29 +51,29 @@ func TestPaymentRequestSqlc(t *testing.T) {
 	// Get all
 	allRequests, err := paymentRepo.GetAll()
 	require.NoError(t, err, "fail to call GetAll()")
-	assert.GreaterOrEqual(t, len(allRequests), 2, "GetAll() should return at least 2 requests")
+	require.GreaterOrEqual(t, len(allRequests), 2, "GetAll() should return at least 2 requests")
 
 	// Update payment ID
 	paymentID := int64(12345)
 	ids := []int64{allRequests[0].ID, allRequests[1].ID}
 	rowsAffected, err := paymentRepo.UpdatePaymentID(paymentID, ids)
 	require.NoError(t, err, "fail to call UpdatePaymentID()")
-	assert.Equal(t, int64(2), rowsAffected, "UpdatePaymentID() should affect 2 rows")
+	require.Equal(t, int64(2), rowsAffected, "UpdatePaymentID() should affect 2 rows")
 
 	// Get all by payment ID
 	requestsByPaymentID, err := paymentRepo.GetAllByPaymentID(paymentID)
 	require.NoError(t, err, "fail to call GetAllByPaymentID()")
-	assert.Len(t, requestsByPaymentID, 2, "GetAllByPaymentID() should return 2 requests")
+	require.Len(t, requestsByPaymentID, 2, "GetAllByPaymentID() should return 2 requests")
 
 	// Update is_done
 	rowsAffected, err = paymentRepo.UpdateIsDone(paymentID)
 	require.NoError(t, err, "fail to call UpdateIsDone()")
-	assert.Equal(t, int64(2), rowsAffected, "UpdateIsDone() should affect 2 rows")
+	require.Equal(t, int64(2), rowsAffected, "UpdateIsDone() should affect 2 rows")
 
 	// Verify is_done is true
 	verifyRequests, err := paymentRepo.GetAllByPaymentID(paymentID)
 	require.NoError(t, err, "fail to call GetAllByPaymentID() after UpdateIsDone()")
 	for _, req := range verifyRequests {
-		assert.True(t, req.IsDone, "UpdateIsDone() should set is_done to true for request ID %d", req.ID)
+		require.True(t, req.IsDone, "UpdateIsDone() should set is_done to true for request ID %d", req.ID)
 	}
 }

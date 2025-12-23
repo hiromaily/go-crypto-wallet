@@ -67,7 +67,7 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 	// Get all by tx ID
 	retrievedOutputs, err := btcTxOutputRepo.GetAllByTxID(txID)
 	require.NoError(t, err, "fail to call GetAllByTxID()")
-	assert.Len(t, retrievedOutputs, 2, "GetAllByTxID() should return 2 outputs")
+	require.Len(t, retrievedOutputs, 2, "GetAllByTxID() should return 2 outputs")
 
 	// Verify one is change and one is not
 	hasChange := false
@@ -79,13 +79,13 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 			hasNonChange = true
 		}
 	}
-	assert.True(t, hasChange, "GetAllByTxID() should return at least one change output")
-	assert.True(t, hasNonChange, "GetAllByTxID() should return at least one non-change output")
+	require.True(t, hasChange, "GetAllByTxID() should return at least one change output")
+	require.True(t, hasNonChange, "GetAllByTxID() should return at least one non-change output")
 
 	// Get one
 	oneOutput, err := btcTxOutputRepo.GetOne(retrievedOutputs[0].ID)
 	require.NoError(t, err, "fail to call GetOne()")
-	assert.Equal(t, txID, oneOutput.TXID, "GetOne() should return output with correct TXID")
+	require.Equal(t, txID, oneOutput.TXID, "GetOne() should return output with correct TXID")
 
 	// Insert single
 	amount, _ := udecimal.Parse("1.5")
@@ -103,5 +103,5 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 	// Verify count increased
 	allOutputs, err := btcTxOutputRepo.GetAllByTxID(txID)
 	require.NoError(t, err, "fail to call GetAllByTxID() after Insert()")
-	assert.Len(t, allOutputs, 3, "GetAllByTxID() should return 3 outputs after Insert()")
+	require.Len(t, allOutputs, 3, "GetAllByTxID() should return 3 outputs after Insert()")
 }

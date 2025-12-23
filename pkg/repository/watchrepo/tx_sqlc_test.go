@@ -45,18 +45,18 @@ func TestTxSqlc(t *testing.T) {
 	actionType := action.ActionTypePayment
 	id, err := txRepo.InsertUnsignedTx(actionType)
 	require.NoError(t, err, "fail to call InsertUnsignedTx()")
-	assert.NotZero(t, id, "InsertUnsignedTx() should return non-zero id")
+	require.NotZero(t, id, "InsertUnsignedTx() should return non-zero id")
 
 	// Get one
 	tx, err := txRepo.GetOne(id)
 	require.NoError(t, err, "fail to call GetOne()")
-	assert.Equal(t, id, tx.ID, "GetOne() should return correct id")
-	assert.Equal(t, actionType.String(), tx.Action, "GetOne() should return correct action")
+	require.Equal(t, id, tx.ID, "GetOne() should return correct id")
+	require.Equal(t, actionType.String(), tx.Action, "GetOne() should return correct action")
 
 	// Get max ID
 	maxID, err := txRepo.GetMaxID(actionType)
 	require.NoError(t, err, "fail to call GetMaxID()")
-	assert.Equal(t, id, maxID, "GetMaxID() should return the inserted id")
+	require.Equal(t, id, maxID, "GetMaxID() should return the inserted id")
 
 	// Insert another tx to test max ID
 	id2, err := txRepo.InsertUnsignedTx(actionType)
@@ -65,17 +65,17 @@ func TestTxSqlc(t *testing.T) {
 	// Get max ID again
 	maxID2, err := txRepo.GetMaxID(actionType)
 	require.NoError(t, err, "fail to call GetMaxID() second time")
-	assert.Equal(t, id2, maxID2, "GetMaxID() should return the second inserted id")
-	assert.Greater(t, id2, id, "second InsertUnsignedTx() should return id greater than first")
+	require.Equal(t, id2, maxID2, "GetMaxID() should return the second inserted id")
+	require.Greater(t, id2, id, "second InsertUnsignedTx() should return id greater than first")
 
 	// Update tx
 	tx.Action = action.ActionTypeDeposit.String()
 	rowsAffected, err := txRepo.Update(tx)
 	require.NoError(t, err, "fail to call Update()")
-	assert.Equal(t, int64(1), rowsAffected, "Update() should affect 1 row")
+	require.Equal(t, int64(1), rowsAffected, "Update() should affect 1 row")
 
 	// Verify update
 	updatedTx, err := txRepo.GetOne(id)
 	require.NoError(t, err, "fail to call GetOne() after update")
-	assert.Equal(t, action.ActionTypeDeposit.String(), updatedTx.Action, "Update() should change action to Deposit")
+	require.Equal(t, action.ActionTypeDeposit.String(), updatedTx.Action, "Update() should change action to Deposit")
 }

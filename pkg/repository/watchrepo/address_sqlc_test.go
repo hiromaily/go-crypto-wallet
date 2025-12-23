@@ -53,23 +53,23 @@ func TestAddressSqlc(t *testing.T) {
 	// Get all addresses
 	allAddrs, err := addressRepo.GetAll(accountType)
 	require.NoError(t, err, "fail to call GetAll()")
-	assert.GreaterOrEqual(t, len(allAddrs), 3, "GetAll() should return at least 3 addresses")
+	require.GreaterOrEqual(t, len(allAddrs), 3, "GetAll() should return at least 3 addresses")
 
 	// Get all address strings
 	addrStrings, err := addressRepo.GetAllAddress(accountType)
 	require.NoError(t, err, "fail to call GetAllAddress()")
-	assert.GreaterOrEqual(t, len(addrStrings), 3, "GetAllAddress() should return at least 3 addresses")
+	require.GreaterOrEqual(t, len(addrStrings), 3, "GetAllAddress() should return at least 3 addresses")
 
 	// Get one unallocated address
 	unallocAddr, err := addressRepo.GetOneUnAllocated(accountType)
 	require.NoError(t, err, "fail to call GetOneUnAllocated()")
 	require.NotNil(t, unallocAddr, "GetOneUnAllocated() returned nil")
-	assert.False(t, unallocAddr.IsAllocated, "GetOneUnAllocated() returned allocated address")
+	require.False(t, unallocAddr.IsAllocated, "GetOneUnAllocated() returned allocated address")
 
 	// Update is_allocated
 	rowsAffected, err := addressRepo.UpdateIsAllocated(true, unallocAddr.WalletAddress)
 	require.NoError(t, err, "fail to call UpdateIsAllocated()")
-	assert.Equal(t, int64(1), rowsAffected, "UpdateIsAllocated() should affect 1 row")
+	require.Equal(t, int64(1), rowsAffected, "UpdateIsAllocated() should affect 1 row")
 
 	// Verify the address is now allocated
 	verifyAddr, err := addressRepo.GetOneUnAllocated(accountType)

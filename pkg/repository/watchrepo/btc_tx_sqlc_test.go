@@ -46,11 +46,11 @@ func TestBTCTxSqlc(t *testing.T) {
 	// check inserted record
 	tmpTx, err := txRepo.GetOne(id)
 	require.NoError(t, err, "fail to call GetOne()")
-	assert.Equal(t, hex, tmpTx.UnsignedHexTX, "InsertUnsignedTx() should insert correct hex")
+	require.Equal(t, hex, tmpTx.UnsignedHexTX, "InsertUnsignedTx() should insert correct hex")
 	// check Count
 	cnt, err := txRepo.GetCountByUnsignedHex(actionType, hex)
 	require.NoError(t, err, "fail to call GetCount()")
-	assert.Equal(t, int64(1), cnt, "GetCount() should return 1")
+	require.Equal(t, int64(1), cnt, "GetCount() should return 1")
 
 	// Update only UnsignedHexTX
 	hex2 := "unsigned-hex2-sqlc"
@@ -60,7 +60,7 @@ func TestBTCTxSqlc(t *testing.T) {
 	// check updated unsigned hex tx
 	tmpTx, err = txRepo.GetOne(txItem.ID)
 	require.NoError(t, err, "fail to call GetOne()")
-	assert.Equal(t, hex2, tmpTx.UnsignedHexTX, "Update() should update UnsignedHexTX")
+	require.Equal(t, hex2, tmpTx.UnsignedHexTX, "Update() should update UnsignedHexTX")
 
 	// Update like after tx sent
 	signedHex := "signed-hex-sqlc"
@@ -70,11 +70,11 @@ func TestBTCTxSqlc(t *testing.T) {
 	// check updated record
 	tmpTx, err = txRepo.GetOne(txItem.ID)
 	require.NoError(t, err, "fail to call GetOne()")
-	assert.Equal(t, signedHex, tmpTx.SignedHexTX, "Update() should update SignedHexTX")
+	require.Equal(t, signedHex, tmpTx.SignedHexTX, "Update() should update SignedHexTX")
 	// sent_hash_tx should be retrieved
 	hashes, err := txRepo.GetSentHashTx(actionType, tx.TxTypeSent)
 	require.NoError(t, err, "fail to call GetSentHashTx()")
-	assert.Len(t, hashes, 1, "GetSentHashTx() should return 1 hash")
+	require.Len(t, hashes, 1, "GetSentHashTx() should return 1 hash")
 
 	// update txType
 	_, err = txRepo.UpdateTxTypeBySentHashTx(actionType, tx.TxTypeDone, sentHashTx)
@@ -82,7 +82,7 @@ func TestBTCTxSqlc(t *testing.T) {
 	// check updated record
 	tmpTx, err = txRepo.GetOne(txItem.ID)
 	require.NoError(t, err, "fail to call GetOne()")
-	assert.Equal(t, tx.TxTypeDone.Int8(), tmpTx.CurrentTXType, "UpdateTxTypeBySentHashTx() should update CurrentTXType to TxTypeDone")
+	require.Equal(t, tx.TxTypeDone.Int8(), tmpTx.CurrentTXType, "UpdateTxTypeBySentHashTx() should update CurrentTXType to TxTypeDone")
 
 	// update txType
 	_, err = txRepo.UpdateTxType(txItem.ID, tx.TxTypeNotified)
@@ -90,5 +90,5 @@ func TestBTCTxSqlc(t *testing.T) {
 	// check updated record
 	tmpTx, err = txRepo.GetOne(txItem.ID)
 	require.NoError(t, err, "fail to call GetOne()")
-	assert.Equal(t, tx.TxTypeNotified.Int8(), tmpTx.CurrentTXType, "UpdateTxType() should update CurrentTXType to TxTypeNotified")
+	require.Equal(t, tx.TxTypeNotified.Int8(), tmpTx.CurrentTXType, "UpdateTxType() should update CurrentTXType to TxTypeNotified")
 }

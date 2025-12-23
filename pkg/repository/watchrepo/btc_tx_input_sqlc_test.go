@@ -71,12 +71,12 @@ func TestBTCTxInputSqlc(t *testing.T) {
 	// Get all by tx ID
 	retrievedInputs, err := btcTxInputRepo.GetAllByTxID(txID)
 	require.NoError(t, err, "fail to call GetAllByTxID()")
-	assert.Equal(t, 2, len(retrievedInputs), "GetAllByTxID() should return 2 inputs")
+	require.Equal(t, 2, len(retrievedInputs), "GetAllByTxID() should return 2 inputs")
 
 	// Get one
 	oneInput, err := btcTxInputRepo.GetOne(retrievedInputs[0].ID)
 	require.NoError(t, err, "fail to call GetOne()")
-	assert.Equal(t, "input-txid-sqlc-1", oneInput.InputTxid, "GetOne() InputTxid mismatch")
+	require.Equal(t, "input-txid-sqlc-1", oneInput.InputTxid, "GetOne() InputTxid mismatch")
 
 	// Insert single
 	amount, _ := udecimal.Parse("1.5")
@@ -96,5 +96,5 @@ func TestBTCTxInputSqlc(t *testing.T) {
 	// Verify count increased
 	allInputs, err := btcTxInputRepo.GetAllByTxID(txID)
 	require.NoError(t, err, "fail to call GetAllByTxID() after Insert()")
-	assert.Equal(t, 3, len(allInputs), "GetAllByTxID() should return 3 inputs")
+	require.Equal(t, 3, len(allInputs), "GetAllByTxID() should return 3 inputs")
 }
