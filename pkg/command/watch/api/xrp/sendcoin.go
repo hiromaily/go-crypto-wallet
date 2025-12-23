@@ -2,12 +2,11 @@ package xrp
 
 import (
 	"context"
-	"flag"
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/bookerzzz/grok"
-	"github.com/mitchellh/cli"
 	"google.golang.org/grpc/status"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
@@ -15,49 +14,10 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 )
 
-// SendCoinCommand syncing subcommand
-type SendCoinCommand struct {
-	name     string
-	synopsis string
-	ui       cli.Ui
-	xrp      xrpgrp.Rippler
-	txData   *config.RippleTxData
-}
-
-// Synopsis is explanation for this subcommand
-func (c *SendCoinCommand) Synopsis() string {
-	return c.synopsis
-}
-
-// Help returns usage for this subcommand
-func (*SendCoinCommand) Help() string {
-	return `Usage: wallet api sendcoin [options...]
-Options:
-  -address  receiver address
-  -amount   amount
-`
-}
-
-// Run executes this subcommand
-func (c *SendCoinCommand) Run(args []string) int {
-	c.ui.Info(c.Synopsis())
-
-	var (
-		receiverAddr string
-		amount       float64
-	)
-
-	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
-	flags.StringVar(&receiverAddr, "address", "", "receiver address")
-	flags.Float64Var(&amount, "amount", 0, "amount")
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
-
+func runSendCoin(xrpAPI xrpgrp.Rippler, txData *config.RippleTxData, receiverAddr string, amount float64) error {
 	// validator
 	if receiverAddr == "" {
-		c.ui.Error("address option [-address] is invalid")
-		return 1
+		return errors.New("address option [-address] is invalid")
 	}
 
 	// send coin
@@ -65,59 +25,52 @@ func (c *SendCoinCommand) Run(args []string) int {
 	instructions := &xrp.Instructions{
 		MaxLedgerVersionOffset: xrp.MaxLedgerVersionOffset,
 	}
-	c.ui.Info(fmt.Sprintf("sender: %s, receiver: %s, amount: %v", c.txData.Account, receiverAddr, amount))
-	txJSON, _, err := c.xrp.CreateRawTransaction(context.TODO(), c.txData.Account, receiverAddr, amount, instructions)
+	fmt.Printf("sender: %s, receiver: %s, amount: %v\n", txData.Account, receiverAddr, amount)
+	txJSON, _, err := xrpAPI.CreateRawTransaction(context.TODO(), txData.Account, receiverAddr, amount, instructions)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call xrp.CreateRawTransaction() %v", err))
-		return 1
+		return fmt.Errorf("fail to call xrp.CreateRawTransaction() %w", err)
 	}
 	grok.Value(txJSON)
 
 	// SingTransaction
-	txID, txBlob, err := c.xrp.SignTransaction(context.TODO(), txJSON, c.txData.Secret)
+	txID, txBlob, err := xrpAPI.SignTransaction(context.TODO(), txJSON, txData.Secret)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call xrp.SignTransaction() %v", err))
-		return 1
+		return fmt.Errorf("fail to call xrp.SignTransaction() %w", err)
 	}
 
 	// SendTransaction
-	sentTx, earlistLedgerVersion, err := c.xrp.SubmitTransaction(context.TODO(), txBlob)
+	sentTx, earlistLedgerVersion, err := xrpAPI.SubmitTransaction(context.TODO(), txBlob)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call xrp.SubmitTransaction() %v", err))
-		return 1
+		return fmt.Errorf("fail to call xrp.SubmitTransaction() %w", err)
 	}
 	if strings.Contains(sentTx.ResultCode, "UNFUNDED_PAYMENT") {
-		c.ui.Error(fmt.Sprintf(
+		return fmt.Errorf(
 			"fail to call SubmitTransaction. resultCode: %s, resultMessage: %s",
-			sentTx.ResultCode, sentTx.ResultMessage))
-		return 1
+			sentTx.ResultCode, sentTx.ResultMessage)
 	}
 
 	// validate transaction
-	_, err = c.xrp.WaitValidation(context.TODO(), sentTx.TxJSON.LastLedgerSequence)
+	_, err = xrpAPI.WaitValidation(context.TODO(), sentTx.TxJSON.LastLedgerSequence)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call xrp.WaitValidation() %v", err))
-		return 1
+		return fmt.Errorf("fail to call xrp.WaitValidation() %w", err)
 	}
 
 	// get transaction info
-	txInfo, err := c.xrp.GetTransaction(context.TODO(), txID, earlistLedgerVersion)
+	txInfo, err := xrpAPI.GetTransaction(context.TODO(), txID, earlistLedgerVersion)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call xrp.GetTransaction() %v", err))
-		return 1
+		return fmt.Errorf("fail to call xrp.GetTransaction() %w", err)
 	}
-	c.ui.Info(fmt.Sprintf("transaction Info: %v", txInfo))
+	fmt.Printf("transaction Info: %v\n", txInfo)
 
 	// get receiver info
-	accountInfo, err := c.xrp.GetAccountInfo(context.TODO(), receiverAddr)
+	accountInfo, err := xrpAPI.GetAccountInfo(context.TODO(), receiverAddr)
 	if err != nil {
 		errStatus, _ := status.FromError(err)
-		c.ui.Error(fmt.Sprintf(
+		return fmt.Errorf(
 			"fail to call xrp.GetAccountInfo() code: %d, message: %s",
-			errStatus.Code(), errStatus.Message()))
-		return 1
+			errStatus.Code(), errStatus.Message())
 	}
-	c.ui.Info(fmt.Sprintf("receiver account Info: %v", accountInfo))
+	fmt.Printf("receiver account Info: %v\n", accountInfo)
 
-	return 0
+	return nil
 }

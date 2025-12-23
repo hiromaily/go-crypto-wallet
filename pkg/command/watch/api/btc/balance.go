@@ -1,53 +1,19 @@
 package btc
 
 import (
-	"flag"
+	"errors"
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcutil"
-	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 )
 
-// BalanceCommand balance subcommand
-type BalanceCommand struct {
-	name     string
-	synopsis string
-	ui       cli.Ui
-	btc      btcgrp.Bitcoiner
-}
-
-// Synopsis is explanation for this subcommand
-func (c *BalanceCommand) Synopsis() string {
-	return c.synopsis
-}
-
-// Help returns usage for this subcommand
-func (*BalanceCommand) Help() string {
-	return `Usage: wallet api balance [options...]
-Options:
-  -account  account
-`
-}
-
-// Run executes this subcommand
-func (c *BalanceCommand) Run(args []string) int {
-	c.ui.Info(c.Synopsis())
-
-	var acnt string
-
-	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
-	flags.StringVar(&acnt, "account", "", "account")
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
-
+func runBalance(btc btcgrp.Bitcoiner, acnt string) error {
 	// validator
 	if acnt != "" && !account.ValidateAccountType(acnt) {
-		c.ui.Error("account option [-account] is invalid")
-		return 1
+		return errors.New("account option [-account] is invalid")
 	}
 
 	var (
@@ -55,28 +21,25 @@ func (c *BalanceCommand) Run(args []string) int {
 		err     error
 	)
 	if acnt == "" {
-		balance, err = c.btc.GetBalance()
+		balance, err = btc.GetBalance()
 		if err != nil {
-			c.ui.Error(fmt.Sprintf("fail to call btc.GetBalance() %+v", err))
-			return 1
+			return fmt.Errorf("fail to call btc.GetBalance() %w", err)
 		}
 	} else {
 		// get received by account
-		balance, err = c.btc.GetBalanceByAccount(account.AccountType(acnt), c.btc.ConfirmationBlock())
+		balance, err = btc.GetBalanceByAccount(account.AccountType(acnt), btc.ConfirmationBlock())
 		if err != nil {
-			c.ui.Error(fmt.Sprintf("fail to call btc.GetBalanceByAccount() %+v", err))
-			return 1
+			return fmt.Errorf("fail to call btc.GetBalanceByAccount() %w", err)
 		}
 	}
 
 	// FIXME: even spent tx looks to be left, GetReceivedByLabelAndMinConf may be wrong to get balance
-	// balance, err := c.wallet.GetBTC().GetReceivedByLabelAndMinConf(acnt, c.wallet.GetBTC().ConfirmationBlock())
+	// balance, err := wallet.GetBTC().GetReceivedByLabelAndMinConf(acnt, wallet.GetBTC().ConfirmationBlock())
 	// if err != nil {
-	//	c.ui.Error(fmt.Sprintf("fail to call BTC.GetReceivedByAccountAndMinConf() %+v", err))
-	//	return 1
+	//	return fmt.Errorf("fail to call BTC.GetReceivedByAccountAndMinConf() %w", err)
 	//}
 
-	c.ui.Info(fmt.Sprintf("balance: %v", balance))
+	fmt.Printf("balance: %v\n", balance)
 
-	return 0
+	return nil
 }

@@ -16,10 +16,10 @@ require (
 	github.com/gogo/protobuf v1.3.2
 	github.com/google/uuid v1.6.0
 	github.com/guregu/null/v6 v6.0.0
-	github.com/mitchellh/cli v1.1.5
 	github.com/mitchellh/mapstructure v1.5.1-0.20231216201459-8508981c8b6c
 	github.com/phsym/console-slog v0.3.1
 	github.com/quagmt/udecimal v1.9.0
+	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
 	github.com/tyler-smith/go-bip39 v1.1.0
@@ -32,7 +32,6 @@ require (
 	4d63.com/gocheckcompilerdirectives v1.3.0 // indirect
 	4d63.com/gochecknoglobals v0.2.2 // indirect
 	codeberg.org/chavacava/garif v0.2.0 // indirect
-	dario.cat/mergo v1.0.2 // indirect
 	dev.gaijin.team/go/exhaustruct/v4 v4.0.0 // indirect
 	dev.gaijin.team/go/golib v0.6.0 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
@@ -47,9 +46,7 @@ require (
 	github.com/DataDog/zstd v1.5.7 // indirect
 	github.com/Djarvur/go-err113 v0.1.1 // indirect
 	github.com/LanfordCai/rbase58 v0.1.0 // indirect
-	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
-	github.com/Masterminds/sprig/v3 v3.3.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/MirrexOne/unqueryvet v1.3.0 // indirect
 	github.com/OpenPeeDeeP/depguard/v2 v2.2.1 // indirect
@@ -62,12 +59,10 @@ require (
 	github.com/alfatraining/structtag v1.0.0 // indirect
 	github.com/alingse/asasalint v0.0.11 // indirect
 	github.com/alingse/nilnesserr v0.2.0 // indirect
-	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/ashanbrown/forbidigo/v2 v2.3.0 // indirect
 	github.com/ashanbrown/makezero/v2 v2.1.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bgentry/speakeasy v0.2.0 // indirect
 	github.com/bits-and-blooms/bitset v1.24.4 // indirect
 	github.com/bkielbasa/cyclop v1.2.3 // indirect
 	github.com/blizzy78/varnamelen v0.8.0 // indirect
@@ -164,17 +159,14 @@ require (
 	github.com/gostaticanalysis/forcetypeassert v0.2.0 // indirect
 	github.com/gostaticanalysis/nilerr v0.1.2 // indirect
 	github.com/graph-gophers/graphql-go v1.5.0 // indirect
-	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-bexpr v0.1.10 // indirect
 	github.com/hashicorp/go-immutable-radix/v2 v2.1.0 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-version v1.8.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
 	github.com/holiman/billy v0.0.0-20250707135307-f2f9b9aae7db // indirect
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
 	github.com/holiman/uint256 v1.3.2 // indirect
-	github.com/huandu/xstrings v1.5.0 // indirect
 	github.com/huin/goupnp v1.3.0 // indirect
 	github.com/icholy/gomajor v0.15.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -216,10 +208,8 @@ require (
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mgechev/revive v1.13.0 // indirect
 	github.com/minio/sha256-simd v1.0.0 // indirect
-	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/pointerstructure v1.2.0 // indirect
-	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/moricho/tparallel v0.3.2 // indirect
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/nakabonne/nestif v0.3.1 // indirect
@@ -237,7 +227,6 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/polyfloyd/go-errorlint v1.8.0 // indirect
-	github.com/posener/complete v1.2.3 // indirect
 	github.com/prometheus/client_golang v1.15.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.42.0 // indirect
@@ -261,7 +250,6 @@ require (
 	github.com/sashamelentyev/usestdlibvars v1.29.0 // indirect
 	github.com/securego/gosec/v2 v2.22.11-0.20251204091113-daccba6b93d7 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
-	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/sivchari/containedctx v1.0.3 // indirect
 	github.com/sonatard/noctx v0.4.0 // indirect
@@ -269,7 +257,6 @@ require (
 	github.com/sourcegraph/go-diff v0.7.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
-	github.com/spf13/cobra v1.10.2 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/ssgreg/nlreturn/v2 v2.2.1 // indirect
 	github.com/stbenjam/no-sprintf-host-port v0.3.1 // indirect

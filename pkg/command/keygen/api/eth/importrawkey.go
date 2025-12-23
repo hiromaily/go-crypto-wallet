@@ -2,66 +2,29 @@ package eth
 
 import (
 	"context"
-	"flag"
+	"errors"
 	"fmt"
-
-	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 )
 
-// ImportRawKeyCommand syncing subcommand
-type ImportRawKeyCommand struct {
-	name     string
-	synopsis string
-	ui       cli.Ui
-	eth      ethgrp.Ethereumer
-}
-
-// Synopsis is explanation for this subcommand
-func (c *ImportRawKeyCommand) Synopsis() string {
-	return c.synopsis
-}
-
-// Help returns usage for this subcommand
-func (*ImportRawKeyCommand) Help() string {
-	return `Usage: keygen api importrawkey [options...]
-Options:
-  -key   private key
-  -pass  passphrase
-`
-}
-
-// Run executes this subcommand
-func (c *ImportRawKeyCommand) Run(args []string) int {
-	c.ui.Info(c.Synopsis())
-
-	var privKey, passPhrase string
-
-	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
-	flags.StringVar(&privKey, "key", "", "private key")
-	flags.StringVar(&passPhrase, "pass", "", "passphrase")
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
+func runImportRawKey(eth ethgrp.Ethereumer, privKey, passPhrase string) error {
+	fmt.Println("import raw key")
 
 	// validation
 	if privKey == "" {
-		c.ui.Error("key option [-key] is invalid")
-		return 1
+		return errors.New("key option [-key] is invalid")
 	}
 	if passPhrase == "" {
-		c.ui.Error("pass option [-pass] is invalid")
-		return 1
+		return errors.New("pass option [-pass] is invalid")
 	}
 
-	addr, err := c.eth.ImportRawKey(context.Background(), privKey, passPhrase)
+	addr, err := eth.ImportRawKey(context.Background(), privKey, passPhrase)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call eth.ImportRawKey() %+v", err))
-		return 1
+		return fmt.Errorf("fail to call eth.ImportRawKey() %w", err)
 	}
 
-	c.ui.Info("new address: " + addr)
+	fmt.Println("new address: " + addr)
 
-	return 0
+	return nil
 }

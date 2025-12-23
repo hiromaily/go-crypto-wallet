@@ -1,63 +1,26 @@
 package imports
 
 import (
-	"flag"
-	"fmt"
+	"github.com/spf13/cobra"
 
-	"github.com/mitchellh/cli"
-
-	"github.com/hiromaily/go-crypto-wallet/pkg/command"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
-// ImportCommand import subcommand
-type ImportCommand struct {
-	Name    string
-	Version string
-	UI      cli.Ui
-	Wallet  wallets.Watcher
-}
-
-// Synopsis is explanation for this subcommand
-func (*ImportCommand) Synopsis() string {
-	return "importing functionality"
-}
-
-var addressSynopsis = "import generatd addresses by keygen wallet"
-
-// Help returns usage for this subcommand
-func (*ImportCommand) Help() string {
-	return fmt.Sprintf(`Usage: wallet import [Subcommands...]
-Subcommands:
-  address  %s
-`, addressSynopsis)
-}
-
-// Run executes this subcommand
-func (c *ImportCommand) Run(args []string) int {
-	c.UI.Info(c.Synopsis())
-
-	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
-
-	// farther subcommand import
-	cmds := map[string]cli.CommandFactory{
-		"address": func() (cli.Command, error) {
-			return &AddressCommand{
-				name:     "address",
-				synopsis: addressSynopsis,
-				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
-			}, nil
+// AddCommands adds all import subcommands
+func AddCommands(parentCmd *cobra.Command, wallet *wallets.Watcher) {
+	// address command
+	var (
+		addressFilePath string
+		addressIsRescan bool
+	)
+	addressCmd := &cobra.Command{
+		Use:   "address",
+		Short: "import generated addresses by keygen wallet",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runAddress(*wallet, addressFilePath, addressIsRescan)
 		},
 	}
-	cl := command.CreateSubCommand(c.Name, c.Version, args, cmds)
-
-	code, err := cl.Run()
-	if err != nil {
-		c.UI.Error(fmt.Sprintf("fail to call Run() subcommand of %s: %v", c.Name, err))
-	}
-	return code
+	addressCmd.Flags().StringVar(&addressFilePath, "file", "", "import file path for generated addresses")
+	addressCmd.Flags().BoolVar(&addressIsRescan, "rescan", false, "run rescan when importing addresses or not")
+	parentCmd.AddCommand(addressCmd)
 }

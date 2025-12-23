@@ -1,60 +1,44 @@
 package send
 
 import (
-	"flag"
+	"errors"
 	"fmt"
 
-	"github.com/mitchellh/cli"
+	"github.com/spf13/cobra"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
-// SendCommand send subcommand
-type SendCommand struct {
-	Name   string
-	UI     cli.Ui
-	Wallet wallets.Watcher
-}
-
-// Synopsis is explanation for this subcommand
-func (*SendCommand) Synopsis() string {
-	return "send signed transaction to blockchain network"
-}
-
-// Help returns usage for this subcommand
-func (*SendCommand) Help() string {
-	return `Usage: wallet send [options...]
-Options:
-  -file  signed transaction file path
-`
-}
-
-// Run executes this subcommand
-func (c *SendCommand) Run(args []string) int {
-	c.UI.Info(c.Synopsis())
-
+// AddCommand creates and returns the send command
+func AddCommand(wallet *wallets.Watcher) *cobra.Command {
 	var filePath string
-	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
-	flags.StringVar(&filePath, "file", "", "import file path for signed transactions")
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
 
+	cmd := &cobra.Command{
+		Use:   "send",
+		Short: "send signed transaction to blockchain network",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runSend(*wallet, filePath)
+		},
+	}
+	cmd.Flags().StringVar(&filePath, "file", "", "signed transaction file path")
+
+	return cmd
+}
+
+func runSend(wallet wallets.Watcher, filePath string) error {
 	// validator
 	if filePath == "" {
-		c.UI.Error("file path option [-file] is required")
-		return 1
+		return errors.New("file path option [-file] is required")
 	}
 
 	// send signed transactions
-	txID, err := c.Wallet.SendTx(filePath)
+	txID, err := wallet.SendTx(filePath)
 	if err != nil {
-		c.UI.Error(fmt.Sprintf("fail to call SendTx() %+v", err))
-		return 1
+		return fmt.Errorf("fail to call SendTx() %w", err)
 	}
 
 	// TODO: output should be json if json option is true
-	c.UI.Output("tx is sent!! txID: " + txID)
+	fmt.Println("tx is sent!! txID: " + txID)
 
-	return 0
+	return nil
 }

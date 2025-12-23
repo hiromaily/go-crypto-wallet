@@ -2,49 +2,18 @@ package eth
 
 import (
 	"context"
-	"flag"
 	"fmt"
-
-	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 )
 
-// ClientVersionCommand syncing subcommand
-type ClientVersionCommand struct {
-	name     string
-	synopsis string
-	ui       cli.Ui
-	eth      ethgrp.Ethereumer
-}
-
-// Synopsis is explanation for this subcommand
-func (c *ClientVersionCommand) Synopsis() string {
-	return c.synopsis
-}
-
-// Help returns usage for this subcommand
-func (*ClientVersionCommand) Help() string {
-	return `Usage: wallet api clientversion
-`
-}
-
-// Run executes this subcommand
-func (c *ClientVersionCommand) Run(args []string) int {
-	c.ui.Info(c.Synopsis())
-
-	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
-
-	version, err := c.eth.ClientVersion(context.Background())
+func runClientVersion(eth ethgrp.Ethereumer) error {
+	version, err := eth.ClientVersion(context.Background())
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call eth.ClientVersion() %+v", err))
-		return 1
+		return fmt.Errorf("fail to call eth.ClientVersion() %w", err)
 	}
 
-	c.ui.Info("client version: " + version)
+	fmt.Println("client version: " + version)
 
-	return 0
+	return nil
 }

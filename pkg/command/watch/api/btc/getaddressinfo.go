@@ -1,60 +1,26 @@
 package btc
 
 import (
-	"flag"
+	"errors"
 	"fmt"
 
 	"github.com/bookerzzz/grok"
-	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 )
 
-// GetAddressInfoCommand getaddressinfo subcommand
-type GetAddressInfoCommand struct {
-	name     string
-	synopsis string
-	ui       cli.Ui
-	btc      btcgrp.Bitcoiner
-}
-
-// Synopsis is explanation for this subcommand
-func (c *GetAddressInfoCommand) Synopsis() string {
-	return c.synopsis
-}
-
-// Help returns usage for this subcommand
-func (*GetAddressInfoCommand) Help() string {
-	return `Usage: wallet api getaddressinfo [options...]
-Options:
-	-address  address
-`
-}
-
-// Run executes this subcommand
-func (c *GetAddressInfoCommand) Run(args []string) int {
-	c.ui.Info(c.Synopsis())
-
-	var addr string
-
-	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
-	flags.StringVar(&addr, "address", "", "address")
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
+func runGetAddressInfo(btc btcgrp.Bitcoiner, addr string) error {
 	// validator
 	if addr == "" {
-		c.ui.Error("address option [-address] is required")
-		return 1
+		return errors.New("address option [-address] is required")
 	}
 
 	// call getaddressinfo
-	addrData, err := c.btc.GetAddressInfo(addr)
+	addrData, err := btc.GetAddressInfo(addr)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call BTC.GetAddressInfo() %+v", err))
-		return 1
+		return fmt.Errorf("fail to call BTC.GetAddressInfo() %w", err)
 	}
 	grok.Value(addrData)
 
-	return 0
+	return nil
 }
