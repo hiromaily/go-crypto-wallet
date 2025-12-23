@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"google.golang.org/protobuf/types/known/emptypb"
+
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // GenerateAddress calls GenerateAddress API
@@ -16,7 +18,7 @@ func (r *Ripple) GenerateAddress() (*ResponseGenerateAddress, error) {
 	if err != nil {
 		return nil, fmt.Errorf("fail to call addressClient.GenerateAddress(): %w", err)
 	}
-	r.logger.Debug("response",
+	logger.Debug("response",
 		"XAddress", res.XAddress,
 		"ClassicAddress", res.ClassicAddress,
 		"Address", res.Address,
@@ -35,7 +37,7 @@ func (r *Ripple) GenerateXAddress() (*ResponseGenerateXAddress, error) {
 	if err != nil {
 		return nil, fmt.Errorf("fail to call addressClient.GenerateXAddress(): %w", err)
 	}
-	r.logger.Debug("response",
+	logger.Debug("response",
 		"XAddress", res.XAddress,
 		"Secret", res.Secret,
 	)
@@ -54,7 +56,7 @@ func (r *Ripple) IsValidAddress(addr string) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("fail to call addressClient.IsValidAddress(): %w", err)
 	}
-	r.logger.Debug("response",
+	logger.Debug("response",
 		"IsValid", res.IsValid,
 	)
 

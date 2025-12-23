@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -17,17 +16,15 @@ import (
 type EthDetailTxInputRepositorySqlc struct {
 	queries      *sqlcgen.Queries
 	coinTypeCode coin.CoinTypeCode
-	logger       logger.Logger
 }
 
 // NewEthDetailTxInputRepositorySqlc returns EthDetailTxInputRepositorySqlc object
 func NewEthDetailTxInputRepositorySqlc(
-	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger logger.Logger,
+	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode,
 ) *EthDetailTxInputRepositorySqlc {
 	return &EthDetailTxInputRepositorySqlc{
 		queries:      sqlcgen.New(dbConn),
 		coinTypeCode: coinTypeCode,
-		logger:       logger,
 	}
 }
 

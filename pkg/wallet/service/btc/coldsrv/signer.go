@@ -20,7 +20,6 @@ import (
 // Sign type
 type Sign struct {
 	btc             btcgrp.Bitcoiner
-	logger          logger.Logger
 	accountKeyRepo  coldrepo.AccountKeyRepositorier
 	authKeyRepo     coldrepo.AuthAccountKeyRepositorier
 	txFileRepo      tx.FileRepositorier
@@ -31,7 +30,6 @@ type Sign struct {
 // NewSign returns sign object
 func NewSign(
 	btcAPI btcgrp.Bitcoiner,
-	logger logger.Logger,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
 	txFileRepo tx.FileRepositorier,
@@ -40,7 +38,6 @@ func NewSign(
 ) *Sign {
 	return &Sign{
 		btc:             btcAPI,
-		logger:          logger,
 		accountKeyRepo:  accountKeyRepo,
 		authKeyRepo:     authKeyRepo,
 		txFileRepo:      txFileRepo,
@@ -152,7 +149,7 @@ func (s *Sign) sign(hex, encodedPrevsAddrs string) (string, bool, string, error)
 	if err != nil {
 		return "", false, "", fmt.Errorf("fail to call s.btc.ToHex(signedTx): %w", err)
 	}
-	s.logger.Debug(
+	logger.Debug(
 		"call btc.SignRawTransaction()",
 		"hexTx", hexTx,
 		"isSigned", isSigned)
@@ -181,7 +178,7 @@ func (s *Sign) signMultisig(msgTx *wire.MsgTx, prevsAddrs *btc.PreviousTxs) (*wi
 		for idx, val := range prevsAddrs.Addrs {
 			rs := coldrepo.GetRedeedScriptByAddress(accountKeys, val)
 			if rs == "" {
-				s.logger.Error("redeemScript can not be found")
+				logger.Error("redeemScript can not be found")
 				continue
 			}
 			prevsAddrs.PrevTxs[idx].RedeemScript = rs

@@ -3,6 +3,7 @@ package watchsrv
 import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // CreateDepositTx create unsigned tx if client accounts have coins
@@ -12,7 +13,7 @@ func (t *TxCreate) CreateDepositTx(adjustmentFee float64) (string, string, error
 	sender := account.AccountTypeClient
 	receiver := t.depositReceiver
 	targetAction := action.ActionTypeDeposit
-	t.logger.Debug("account",
+	logger.Debug("account",
 		"sender", sender.String(),
 		"receiver", receiver.String(),
 	)

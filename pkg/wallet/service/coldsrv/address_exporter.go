@@ -17,7 +17,6 @@ import (
 
 // AddressExport type
 type AddressExport struct {
-	logger          logger.Logger
 	accountKeyRepo  coldrepo.AccountKeyRepositorier
 	addrFileRepo    address.FileRepositorier
 	multisigAccount account.MultisigAccounter
@@ -27,7 +26,6 @@ type AddressExport struct {
 
 // NewAddressExport returns addressExport
 func NewAddressExport(
-	logger logger.Logger,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	addrFileRepo address.FileRepositorier,
 	multisigAccount account.MultisigAccounter,
@@ -35,7 +33,6 @@ func NewAddressExport(
 	wtype wallet.WalletType,
 ) *AddressExport {
 	return &AddressExport{
-		logger:          logger,
 		accountKeyRepo:  accountKeyRepo,
 		addrFileRepo:    addrFileRepo,
 		multisigAccount: multisigAccount,
@@ -72,7 +69,7 @@ func (a *AddressExport) ExportAddress(accountType account.AccountType) (string, 
 		return "", fmt.Errorf("fail to call accountKeyRepo.GetAllAddrStatus(): %w", err)
 	}
 	if len(accountKeyTable) == 0 {
-		a.logger.Info("no records to export in account_key table")
+		logger.Info("no records to export in account_key table")
 		return "", nil
 	}
 

@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -29,14 +28,12 @@ func GetBTC() (btcgrp.Bitcoiner, error) {
 	// TODO: if config should be overridden, here
 	conf.CoinTypeCode = coin.BTC
 
-	// logger
-	log := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 	// client
 	client, err := btcgrp.NewRPCClient(&conf.Bitcoin)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create bitcoin core client: %w", err)
 	}
-	bc, err = btcgrp.NewBitcoin(client, &conf.Bitcoin, log, conf.CoinTypeCode)
+	bc, err = btcgrp.NewBitcoin(client, &conf.Bitcoin, conf.CoinTypeCode)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create btc instance: %w", err)
 	}

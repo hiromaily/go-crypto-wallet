@@ -17,7 +17,6 @@ import (
 type XRPWatch struct {
 	XRP    xrpgrp.Rippler
 	dbConn *sql.DB
-	logger logger.Logger
 	wtype  wtype.WalletType
 	watchsrv.AddressImporter
 	xrpsrv.TxCreator
@@ -30,7 +29,6 @@ type XRPWatch struct {
 func NewXRPWatch(
 	xrp xrpgrp.Rippler,
 	dbConn *sql.DB,
-	logger logger.Logger,
 	addrImporter watchsrv.AddressImporter,
 	txCreator xrpsrv.TxCreator,
 	txSender service.TxSender,
@@ -40,7 +38,6 @@ func NewXRPWatch(
 ) *XRPWatch {
 	return &XRPWatch{
 		XRP:                   xrp,
-		logger:                logger,
 		dbConn:                dbConn,
 		wtype:                 walletType,
 		AddressImporter:       addrImporter,
@@ -74,8 +71,8 @@ func (w *XRPWatch) CreateTransferTx(
 }
 
 // UpdateTxStatus updates transaction status
-func (w *XRPWatch) UpdateTxStatus() error {
-	w.logger.Info("no functionality for XRP")
+func (*XRPWatch) UpdateTxStatus() error {
+	logger.Info("no functionality for XRP")
 	return nil
 }
 

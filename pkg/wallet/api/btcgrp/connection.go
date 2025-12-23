@@ -6,7 +6,6 @@ import (
 	"github.com/btcsuite/btcd/rpcclient"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/bch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -34,11 +33,11 @@ func NewRPCClient(conf *config.Bitcoin) (*rpcclient.Client, error) {
 
 // NewBitcoin creates bitcoin/bitcoin cash instance according to coinType
 func NewBitcoin(
-	client *rpcclient.Client, conf *config.Bitcoin, logger logger.Logger, coinTypeCode coin.CoinTypeCode,
+	client *rpcclient.Client, conf *config.Bitcoin, coinTypeCode coin.CoinTypeCode,
 ) (Bitcoiner, error) {
 	switch coinTypeCode {
 	case coin.BTC:
-		bit, err := btc.NewBitcoin(client, coinTypeCode, conf, logger)
+		bit, err := btc.NewBitcoin(client, conf, coinTypeCode)
 		if err != nil {
 			return nil, fmt.Errorf("fail to call btc.NewBitcoin(): %w", err)
 		}
@@ -46,7 +45,7 @@ func NewBitcoin(
 		return bit, err
 	case coin.BCH:
 		// BCH
-		bitc, err := bch.NewBitcoinCash(client, coinTypeCode, conf, logger)
+		bitc, err := bch.NewBitcoinCash(client, coinTypeCode, conf)
 		if err != nil {
 			return nil, fmt.Errorf("fail to call bch.NewBitcoinCash(): %w", err)
 		}

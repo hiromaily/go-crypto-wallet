@@ -14,7 +14,6 @@ import (
 // TxMonitor type
 type TxMonitor struct {
 	xrp          xrpgrp.Rippler
-	logger       logger.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier
 	txDetailRepo watchrepo.XrpDetailTxRepositorier
@@ -24,7 +23,6 @@ type TxMonitor struct {
 // NewTxMonitor returns TxMonitor object
 func NewTxMonitor(
 	xrp xrpgrp.Rippler,
-	logger logger.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txDetailRepo watchrepo.XrpDetailTxRepositorier,
@@ -32,7 +30,6 @@ func NewTxMonitor(
 ) *TxMonitor {
 	return &TxMonitor{
 		xrp:          xrp,
-		logger:       logger,
 		dbConn:       dbConn,
 		addrRepo:     addrRepo,
 		txDetailRepo: txDetailRepo,
@@ -61,7 +58,7 @@ func (t *TxMonitor) MonitorBalance(_ uint64) error {
 			return fmt.Errorf("fail to call addrRepo.GetAllAddress(): %w", err)
 		}
 		total := t.xrp.GetTotalBalance(addrs)
-		t.logger.Info("total balance",
+		logger.Info("total balance",
 			"account", acnt.String(),
 			"balance", total)
 	}

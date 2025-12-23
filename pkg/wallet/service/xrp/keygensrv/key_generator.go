@@ -23,7 +23,6 @@ type XRPKeyGenerator interface {
 // XRPKeyGenerate type
 type XRPKeyGenerate struct {
 	xrp               xrpgrp.Rippler
-	logger            logger.Logger
 	dbConn            *sql.DB
 	coinTypeCode      coin.CoinTypeCode
 	wtype             wallet.WalletType
@@ -34,7 +33,6 @@ type XRPKeyGenerate struct {
 // NewXRPKeyGenerate returns XRPKeyGenerate object
 func NewXRPKeyGenerate(
 	xrpAPI xrpgrp.Rippler,
-	logger logger.Logger,
 	dbConn *sql.DB,
 	coinTypeCode coin.CoinTypeCode,
 	wtype wallet.WalletType,
@@ -43,7 +41,6 @@ func NewXRPKeyGenerate(
 ) *XRPKeyGenerate {
 	return &XRPKeyGenerate{
 		xrp:               xrpAPI,
-		logger:            logger,
 		dbConn:            dbConn,
 		coinTypeCode:      coinTypeCode,
 		wtype:             wtype,
@@ -54,7 +51,7 @@ func NewXRPKeyGenerate(
 
 // Generate generate xrp keys for account
 func (k *XRPKeyGenerate) Generate(accountType account.AccountType, isKeyPair bool, keys []key.WalletKey) error {
-	k.logger.Debug("generate keys for XRP",
+	logger.Debug("generate keys for XRP",
 		"account_type", accountType.String(),
 		"len(keys)", len(keys),
 	)

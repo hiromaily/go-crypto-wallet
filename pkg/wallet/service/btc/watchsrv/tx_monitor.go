@@ -18,7 +18,6 @@ import (
 // TxMonitor type
 type TxMonitor struct {
 	btc         btcgrp.Bitcoiner
-	logger      logger.Logger
 	dbConn      *sql.DB
 	txRepo      watchrepo.BTCTxRepositorier
 	txInputRepo watchrepo.TxInputRepositorier
@@ -29,7 +28,6 @@ type TxMonitor struct {
 // NewTxMonitor returns TxMonitor object
 func NewTxMonitor(
 	btc btcgrp.Bitcoiner,
-	logger logger.Logger,
 	dbConn *sql.DB,
 	txRepo watchrepo.BTCTxRepositorier,
 	txInputRepo watchrepo.TxInputRepositorier,
@@ -38,7 +36,6 @@ func NewTxMonitor(
 ) *TxMonitor {
 	return &TxMonitor{
 		btc:         btc,
-		logger:      logger,
 		dbConn:      dbConn,
 		txRepo:      txRepo,
 		txInputRepo: txInputRepo,
@@ -91,7 +88,7 @@ func (t *TxMonitor) updateStatusTxTypeSent(actionType action.ActionType) error {
 	for _, hash := range hashes {
 		isDone, checkErr := t.checkTxConfirmation(hash, actionType)
 		if checkErr != nil {
-			t.logger.Error(
+			logger.Error(
 				"fail to call w.checkTransaction()",
 				"actionType", actionType.String(),
 				"hash", hash,
@@ -117,7 +114,7 @@ func (t *TxMonitor) updateStatusTxTypeDone(actionType action.ActionType) error {
 	if err != nil {
 		return fmt.Errorf("fail to call txRepo.GetSentHashTx(TxTypeDone) ActionType: %s: %w", actionType, err)
 	}
-	t.logger.Debug(
+	logger.Debug(
 		"called repo.Tx().GetSentHashTx(TxTypeDone)",
 		"actionType", actionType.String(),
 		"hashes", hashes)
@@ -126,7 +123,7 @@ func (t *TxMonitor) updateStatusTxTypeDone(actionType action.ActionType) error {
 	for _, hash := range hashes {
 		txID, notifyErr := t.notifyTxDone(hash, actionType)
 		if notifyErr != nil {
-			t.logger.Error(
+			logger.Error(
 				"fail to call w.notifyUsers()",
 				"actionType", actionType.String(),
 				"hash", hash,
@@ -142,7 +139,7 @@ func (t *TxMonitor) updateStatusTxTypeDone(actionType action.ActionType) error {
 		err = t.updateTxTypeNotified(txID, actionType)
 		// TODO: even if update is failed, notification is done. so how to manage??
 		if err != nil {
-			t.logger.Error(
+			logger.Error(
 				"fail to call w.updateTxTypeNotified()",
 				"actionType", actionType.String(),
 				"hash", hash,
@@ -162,7 +159,7 @@ func (t *TxMonitor) checkTxConfirmation(hash string, actionType action.ActionTyp
 			"fail to call btc.GetTransactionByTxID(): ActionType: %s, txID:%s: %w",
 			actionType, hash, err)
 	}
-	t.logger.Debug("confirmation detail",
+	logger.Debug("confirmation detail",
 		"actionType", actionType.String(),
 		"confirmation", tran.Confirmations)
 
@@ -176,7 +173,7 @@ func (t *TxMonitor) checkTxConfirmation(hash string, actionType action.ActionTyp
 	// TODO: what if confirmation doesn't proceed for a long time after signed tx is sent
 	// - should it be canceled??
 	// - then raise fee and should unsigned tx be re-created again??
-	t.logger.Info("confirmation is not met yet",
+	logger.Info("confirmation is not met yet",
 		"want", t.btc.ConfirmationBlock(),
 		"got", tran.Confirmations)
 
@@ -205,7 +202,7 @@ func (t *TxMonitor) notifyTxDone(hash string, actionType action.ActionType) (int
 			return 0, fmt.Errorf("fail to call txInRepo.GetAllByTxID(%d) ActionType: %s: %w", txID, actionType, err)
 		}
 		if len(txInputs) == 0 {
-			t.logger.Debug("txInputs is not found in tx_input table",
+			logger.Debug("txInputs is not found in tx_input table",
 				"tx_id", txID)
 			return 0, nil
 		}
@@ -213,7 +210,7 @@ func (t *TxMonitor) notifyTxDone(hash string, actionType action.ActionType) (int
 		// 3. notify to given input_addresses tx is done
 		// TODO:how to notify
 		for _, input := range txInputs {
-			t.logger.Debug("address in txInputs", "input.InputAddress", input.InputAddress)
+			logger.Debug("address in txInputs", "input.InputAddress", input.InputAddress)
 		}
 	case action.ActionTypePayment:
 		// 1. get txID from hash
@@ -231,7 +228,7 @@ func (t *TxMonitor) notifyTxDone(hash string, actionType action.ActionType) (int
 				txID, actionType, err)
 		}
 		if len(paymentUsers) == 0 {
-			t.logger.Debug("payment user is not found",
+			logger.Debug("payment user is not found",
 				"tx_id", txID)
 			return 0, nil
 		}
@@ -239,11 +236,11 @@ func (t *TxMonitor) notifyTxDone(hash string, actionType action.ActionType) (int
 		// 3. notify to given input_addresses tx is done
 		// TODO:how to notify
 		for _, user := range paymentUsers {
-			t.logger.Debug("address in paymentUsers", "user.AddressFrom", user.SenderAddress)
+			logger.Debug("address in paymentUsers", "user.AddressFrom", user.SenderAddress)
 		}
 	case action.ActionTypeTransfer:
 		// TODO: not implemented yet
-		t.logger.Warn("action.ActionTypeTransfer is not implemented yet in notifyTxDone()")
+		logger.Warn("action.ActionTypeTransfer is not implemented yet in notifyTxDone()")
 		return 0, errors.New("action.ActionTypeTransfer is not implemented yet in notifyTxDone()")
 	}
 
@@ -286,7 +283,7 @@ func (t *TxMonitor) updateTxTypeNotified(id int64, actionType action.ActionType)
 		}
 	case action.ActionTypeTransfer:
 		// TODO: not implemented yet, it could be same to action.ActionTypeDeposit
-		t.logger.Warn("action.ActionTypeTransfer is not implemented yet in updateTxTypeNotified()")
+		logger.Warn("action.ActionTypeTransfer is not implemented yet in updateTxTypeNotified()")
 		return errors.New("action.ActionTypeTransfer is not implemented yet in updateTxTypeNotified()")
 	}
 
@@ -307,7 +304,7 @@ func (t *TxMonitor) MonitorBalance(confirmationNum uint64) error {
 		if err != nil {
 			return fmt.Errorf("fail to call btc.GetBalanceByAccount() confirmation: %d: %w", confirmationNum, err)
 		}
-		t.logger.Info("total balance",
+		logger.Info("total balance",
 			"account", acnt.String(),
 			"balance", total.String(),
 		)

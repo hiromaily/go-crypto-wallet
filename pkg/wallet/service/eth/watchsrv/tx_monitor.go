@@ -15,7 +15,6 @@ import (
 // TxMonitor type
 type TxMonitor struct {
 	eth          ethgrp.Ethereumer
-	logger       logger.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier
 	txDetailRepo watchrepo.EthDetailTxRepositorier
@@ -26,7 +25,6 @@ type TxMonitor struct {
 // NewTxMonitor returns TxMonitor object
 func NewTxMonitor(
 	eth ethgrp.Ethereumer,
-	logger logger.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txDetailRepo watchrepo.EthDetailTxRepositorier,
@@ -35,7 +33,6 @@ func NewTxMonitor(
 ) *TxMonitor {
 	return &TxMonitor{
 		eth:          eth,
-		logger:       logger,
 		dbConn:       dbConn,
 		addrRepo:     addrRepo,
 		txDetailRepo: txDetailRepo,
@@ -80,7 +77,7 @@ func (t *TxMonitor) updateStatusTxTypeSent() error {
 		if err != nil {
 			return fmt.Errorf("fail to call eth.GetConfirmation() sentHash: %s: %w", sentHash, err)
 		}
-		t.logger.Info("confirmation",
+		logger.Info("confirmation",
 			"sentHash", sentHash,
 			"confirmation num", confirmNum)
 		if confirmNum < t.confirmNum {
@@ -89,7 +86,7 @@ func (t *TxMonitor) updateStatusTxTypeSent() error {
 		// update status
 		_, err = t.txDetailRepo.UpdateTxTypeBySentHashTx(tx.TxTypeDone, sentHash)
 		if err != nil {
-			t.logger.Warn("failed to call txDetailRepo.UpdateTxTypeBySentHashTx()",
+			logger.Warn("failed to call txDetailRepo.UpdateTxTypeBySentHashTx()",
 				"error", err,
 			)
 		}
@@ -112,7 +109,7 @@ func (t *TxMonitor) MonitorBalance(_ uint64) error {
 			return fmt.Errorf("fail to call addrRepo.GetAllAddress(): %w", err)
 		}
 		total, _ := t.eth.GetTotalBalance(addrs)
-		t.logger.Info("total balance",
+		logger.Info("total balance",
 			"account", acnt.String(),
 			"balance", total.Uint64())
 	}

@@ -18,7 +18,6 @@ import (
 // Sign type
 type Sign struct {
 	xrp               xrpgrp.Rippler
-	logger            logger.Logger
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier
 	txFileRepo        tx.FileRepositorier
 	wtype             wallet.WalletType
@@ -27,14 +26,12 @@ type Sign struct {
 // NewSign returns sign object
 func NewSign(
 	xrpAPI xrpgrp.Rippler,
-	logger logger.Logger,
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier,
 	txFileRepo tx.FileRepositorier,
 	wtype wallet.WalletType,
 ) *Sign {
 	return &Sign{
 		xrp:               xrpAPI,
-		logger:            logger,
 		xrpAccountKeyRepo: xrpAccountKeyRepo,
 		txFileRepo:        txFileRepo,
 		wtype:             wtype,
@@ -93,7 +90,7 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 		if err != nil {
 			return "", false, "", fmt.Errorf("fail to call xrp.SignTransaction(): %w", err)
 		}
-		s.logger.Debug("signed_tx",
+		logger.Debug("signed_tx",
 			"uuid", uuid, "signed_tx_id", signedTxID, "signed_tx_blob", txBlob)
 		txHexs = append(txHexs, fmt.Sprintf("%s,%s,%s", uuid, signedTxID, txBlob))
 	}

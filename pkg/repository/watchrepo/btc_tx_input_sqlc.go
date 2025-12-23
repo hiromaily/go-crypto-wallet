@@ -8,7 +8,6 @@ import (
 	"github.com/ericlagergren/decimal"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
@@ -17,17 +16,15 @@ import (
 type TxInputRepositorySqlc struct {
 	queries      *sqlcgen.Queries
 	coinTypeCode coin.CoinTypeCode
-	logger       logger.Logger
 }
 
 // NewBTCTxInputRepositorySqlc returns TxInputRepositorySqlc object
 func NewBTCTxInputRepositorySqlc(
-	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode, logger logger.Logger,
+	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode,
 ) *TxInputRepositorySqlc {
 	return &TxInputRepositorySqlc{
 		queries:      sqlcgen.New(dbConn),
 		coinTypeCode: coinTypeCode,
-		logger:       logger,
 	}
 }
 

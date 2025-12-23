@@ -6,6 +6,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
@@ -44,7 +45,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	if floatValue != 0 && (senderBalnce.Uint64() <= requiredValue.Uint64()) {
 		return "", "", errors.New("sender balance is insufficient to send")
 	}
-	t.logger.Debug("amount",
+	logger.Debug("amount",
 		"floatValue(Ether)", floatValue,
 		"requiredValue(Ether)", requiredValue.Uint64(),
 		"senderBalance", senderBalnce.Uint64(),
@@ -66,7 +67,7 @@ func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatV
 	}
 
 	rawTxHex := rawTx.TxHex
-	t.logger.Debug("rawTxHex", "rawTxHex", rawTxHex)
+	logger.Debug("rawTxHex", "rawTxHex", rawTxHex)
 
 	serializedTx, err := serial.EncodeToString(rawTx)
 	if err != nil {

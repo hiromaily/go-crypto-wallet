@@ -7,6 +7,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
@@ -19,7 +20,7 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 	sender := account.AccountTypeClient
 	receiver := t.depositReceiver
 	targetAction := action.ActionTypeDeposit
-	t.logger.Debug("account",
+	logger.Debug("account",
 		"sender", sender.String(),
 		"receiver", receiver.String(),
 	)
@@ -29,7 +30,7 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 		return "", "", err
 	}
 	if len(userAmounts) == 0 {
-		t.logger.Info("no data")
+		logger.Info("no data")
 		return "", "", nil
 	}
 
@@ -74,11 +75,11 @@ func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]xrp.UserAmount,
 		var clientBalance float64
 		clientBalance, err = t.xrp.GetBalance(addr.WalletAddress)
 		if err != nil {
-			t.logger.Warn("fail to call t.xrp.GetAccountInfo()",
+			logger.Warn("fail to call t.xrp.GetAccountInfo()",
 				"address", addr.WalletAddress,
 			)
 		} else {
-			t.logger.Debug("account_info",
+			logger.Debug("account_info",
 				"address", addr.WalletAddress, "balance", clientBalance)
 			if clientBalance != 0 {
 				userAmounts = append(userAmounts, xrp.UserAmount{Address: addr.WalletAddress, Amount: clientBalance})
@@ -114,10 +115,10 @@ func (t *TxCreate) createDepositRawTransactions(
 		var rawTxString string
 		txJSON, rawTxString, err = t.xrp.CreateRawTransaction(val.Address, depositAddr.WalletAddress, 0, instructions)
 		if err != nil {
-			t.logger.Warn("fail to call xrp.CreateRawTransaction()", "error", err)
+			logger.Warn("fail to call xrp.CreateRawTransaction()", "error", err)
 			continue
 		}
-		t.logger.Debug("txJSON", "txJSON", txJSON)
+		logger.Debug("txJSON", "txJSON", txJSON)
 		grok.Value(txJSON)
 
 		// sequence for next rawTransaction

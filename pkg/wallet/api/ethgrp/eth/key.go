@@ -13,6 +13,8 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
 
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 )
 
@@ -48,7 +50,7 @@ func (e *Ethereum) GetKeyDir() string {
 // GetPrivKey returns keystore.Key object
 func (e *Ethereum) GetPrivKey(hexAddr, password string) (*keystore.Key, error) {
 	keyDir := e.GetKeyDir()
-	e.logger.Debug("key_dir", "key_dir", keyDir)
+	logger.Debug("key_dir", "key_dir", keyDir)
 
 	keyJSON, err := e.readPrivKey(hexAddr, keyDir)
 	if err != nil {
@@ -70,13 +72,13 @@ func (e *Ethereum) GetPrivKey(hexAddr, password string) (*keystore.Key, error) {
 // Note: file is found out from local directory,
 //
 //	if node is working remotely, file is not found.
-func (e *Ethereum) readPrivKey(hexAddr, path string) ([]byte, error) {
+func (*Ethereum) readPrivKey(hexAddr, path string) ([]byte, error) {
 	// search file
 	// filename is like `UTC--2020-05-18T16-01-32.772616000Z--e52307deb1a7dc3985d2873b45ae23b91d57a36d`
 	//                   UTC--2020-05-22T13-59-51.645058000Z--d4ec46122b3f0afc0287144adcca5d65b22b799c
 	// Note: all letter of address in filename is a lowercase letter
 	addr := strings.TrimPrefix(strings.ToLower(hexAddr), "0x")
-	e.logger.Debug("readPrivKey",
+	logger.Debug("readPrivKey",
 		"hexAddr", hexAddr,
 		"addr", addr,
 		"path", path,

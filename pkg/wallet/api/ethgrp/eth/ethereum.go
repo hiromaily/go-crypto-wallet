@@ -21,7 +21,6 @@ type Ethereum struct {
 	rpcClient    *ethrpc.Client
 	chainConf    *chaincfg.Params
 	coinTypeCode coin.CoinTypeCode
-	logger       logger.Logger
 	ctx          context.Context
 	uuidHandler  uuid.UUIDHandler
 	netID        uint16
@@ -37,7 +36,6 @@ func NewEthereum(
 	rpcClient *ethrpc.Client,
 	coinTypeCode coin.CoinTypeCode,
 	conf *config.Ethereum,
-	logger logger.Logger,
 	uuidHandler uuid.UUIDHandler,
 ) (*Ethereum, error) {
 	eth := &Ethereum{
@@ -45,7 +43,6 @@ func NewEthereum(
 		rpcClient:    rpcClient,
 		coinTypeCode: coinTypeCode,
 		uuidHandler:  uuidHandler,
-		logger:       logger,
 		ctx:          ctx,
 		keyDir:       conf.KeyDirName,
 	}

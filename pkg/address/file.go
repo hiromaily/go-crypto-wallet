@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // FileRepositorier is address storage interface
@@ -22,14 +21,12 @@ type FileRepositorier interface {
 // FileRepository is repository to store pubkey as csv file
 type FileRepository struct {
 	filePath string
-	logger   logger.Logger
 }
 
 // NewFileRepository returns FileRepository
-func NewFileRepository(filePath string, logger logger.Logger) *FileRepository {
+func NewFileRepository(filePath string) *FileRepository {
 	return &FileRepository{
 		filePath: filePath,
-		logger:   logger,
 	}
 }
 

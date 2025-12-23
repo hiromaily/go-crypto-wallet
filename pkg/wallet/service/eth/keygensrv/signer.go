@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
@@ -16,7 +15,6 @@ import (
 // Sign type
 type Sign struct {
 	eth        ethgrp.Ethereumer
-	logger     logger.Logger
 	txFileRepo tx.FileRepositorier
 	wtype      wallet.WalletType
 }
@@ -24,13 +22,11 @@ type Sign struct {
 // NewSign returns sign object
 func NewSign(
 	ethAPI ethgrp.Ethereumer,
-	logger logger.Logger,
 	txFileRepo tx.FileRepositorier,
 	wtype wallet.WalletType,
 ) *Sign {
 	return &Sign{
 		eth:        ethAPI,
-		logger:     logger,
 		txFileRepo: txFileRepo,
 		wtype:      wtype,
 	}

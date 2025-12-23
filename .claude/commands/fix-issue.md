@@ -14,7 +14,7 @@
 1. **Analyze**: Understand problem, root cause, requirements
 2. **Implement**: Provide code fixes in artifacts (follow our standards)
 3. **Test**: Create test cases and verify solution
-4. **Document**: Update docs and changelog
+4. **Document**: Update docs
 5. **Verify**: Before committing, if Go files were changed, run the following commands and ensure no errors
    occur and no files are modified:
    - `make fix-lint`

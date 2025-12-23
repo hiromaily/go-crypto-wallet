@@ -7,7 +7,6 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -61,13 +60,12 @@ func NewBTCTxRepositorySqlc() watchrepo.BTCTxRepositorier {
 		log.Fatalf("fail to create config: %v", err)
 	}
 
-	zapLog := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 	db, err := mysql.NewMySQL(&conf.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	btcTxRepoSqlc = watchrepo.NewBTCTxRepositorySqlc(db, coin.BTC, zapLog)
+	btcTxRepoSqlc = watchrepo.NewBTCTxRepositorySqlc(db, coin.BTC)
 	return btcTxRepoSqlc
 }
 
@@ -84,13 +82,12 @@ func NewTxRepositorySqlc() watchrepo.TxRepositorier {
 		log.Fatalf("fail to create config: %v", err)
 	}
 
-	zapLog := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 	db, err := mysql.NewMySQL(&conf.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	txRepoSqlc = watchrepo.NewTxRepositorySqlc(db, coin.BTC, zapLog)
+	txRepoSqlc = watchrepo.NewTxRepositorySqlc(db, coin.BTC)
 	return txRepoSqlc
 }
 
@@ -107,13 +104,12 @@ func NewAddressRepositorySqlc() watchrepo.AddressRepositorier {
 		log.Fatalf("fail to create config: %v", err)
 	}
 
-	zapLog := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 	db, err := mysql.NewMySQL(&conf.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	addressRepoSqlc = watchrepo.NewAddressRepositorySqlc(db, coin.BTC, zapLog)
+	addressRepoSqlc = watchrepo.NewAddressRepositorySqlc(db, coin.BTC)
 	return addressRepoSqlc
 }
 
@@ -130,13 +126,12 @@ func NewPaymentRequestRepositorySqlc() watchrepo.PaymentRequestRepositorier {
 		log.Fatalf("fail to create config: %v", err)
 	}
 
-	zapLog := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 	db, err := mysql.NewMySQL(&conf.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	paymentRequestRepoSqlc = watchrepo.NewPaymentRequestRepositorySqlc(db, coin.BTC, zapLog)
+	paymentRequestRepoSqlc = watchrepo.NewPaymentRequestRepositorySqlc(db, coin.BTC)
 	return paymentRequestRepoSqlc
 }
 
@@ -153,13 +148,12 @@ func NewBTCTxInputRepositorySqlc() watchrepo.TxInputRepositorier {
 		log.Fatalf("fail to create config: %v", err)
 	}
 
-	zapLog := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 	db, err := mysql.NewMySQL(&conf.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	btcTxInputRepoSqlc = watchrepo.NewBTCTxInputRepositorySqlc(db, coin.BTC, zapLog)
+	btcTxInputRepoSqlc = watchrepo.NewBTCTxInputRepositorySqlc(db, coin.BTC)
 	return btcTxInputRepoSqlc
 }
 
@@ -176,13 +170,12 @@ func NewBTCTxOutputRepositorySqlc() watchrepo.TxOutputRepositorier {
 		log.Fatalf("fail to create config: %v", err)
 	}
 
-	zapLog := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 	db, err := mysql.NewMySQL(&conf.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	btcTxOutputRepoSqlc = watchrepo.NewBTCTxOutputRepositorySqlc(db, coin.BTC, zapLog)
+	btcTxOutputRepoSqlc = watchrepo.NewBTCTxOutputRepositorySqlc(db, coin.BTC)
 	return btcTxOutputRepoSqlc
 }
 
@@ -199,13 +192,12 @@ func NewEthDetailTxRepositorySqlc() watchrepo.EthDetailTxRepositorier {
 		log.Fatalf("fail to create config: %v", err)
 	}
 
-	zapLog := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 	db, err := mysql.NewMySQL(&conf.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	ethDetailTxRepoSqlc = watchrepo.NewEthDetailTxInputRepositorySqlc(db, coin.ETH, zapLog)
+	ethDetailTxRepoSqlc = watchrepo.NewEthDetailTxInputRepositorySqlc(db, coin.ETH)
 	return ethDetailTxRepoSqlc
 }
 
@@ -222,12 +214,11 @@ func NewXrpDetailTxRepositorySqlc() watchrepo.XrpDetailTxRepositorier {
 		log.Fatalf("fail to create config: %v", err)
 	}
 
-	zapLog := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 	db, err := mysql.NewMySQL(&conf.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	xrpDetailTxRepoSqlc = watchrepo.NewXrpDetailTxInputRepositorySqlc(db, coin.XRP, zapLog)
+	xrpDetailTxRepoSqlc = watchrepo.NewXrpDetailTxInputRepositorySqlc(db, coin.XRP)
 	return xrpDetailTxRepoSqlc
 }

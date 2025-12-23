@@ -16,7 +16,6 @@ import (
 // FullPubkeyImport type
 type FullPubkeyImport struct {
 	btc                btcgrp.Bitcoiner
-	logger             logger.Logger
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier
 	pubkeyFileRepo     address.FileRepositorier
 	wtype              wallet.WalletType
@@ -25,14 +24,12 @@ type FullPubkeyImport struct {
 // NewFullPubkeyImport returns FullPubkeyImport object
 func NewFullPubkeyImport(
 	btc btcgrp.Bitcoiner,
-	logger logger.Logger,
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier,
 	pubkeyFileRepo address.FileRepositorier,
 	wtype wallet.WalletType,
 ) *FullPubkeyImport {
 	return &FullPubkeyImport{
 		btc:                btc,
-		logger:             logger,
 		authFullPubKeyRepo: authFullPubKeyRepo,
 		pubkeyFileRepo:     pubkeyFileRepo,
 		wtype:              wtype,
@@ -68,7 +65,7 @@ func (p *FullPubkeyImport) ImportFullPubKey(fileName string) error {
 	err = p.authFullPubKeyRepo.InsertBulk(fullPubKeys)
 	if err != nil {
 		if strings.Contains(err.Error(), "1062: Duplicate entry") {
-			p.logger.Info("full-pubkey is already imported")
+			logger.Info("full-pubkey is already imported")
 		} else {
 			return fmt.Errorf("fail to call authFullPubKeyRepo.InsertBulk(): %w", err)
 		}

@@ -6,6 +6,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
@@ -19,7 +20,7 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 	sender := account.AccountTypeClient
 	receiver := t.depositReceiver
 	targetAction := action.ActionTypeDeposit
-	t.logger.Debug("account",
+	logger.Debug("account",
 		"sender", sender.String(),
 		"receiver", receiver.String(),
 	)
@@ -29,7 +30,7 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 		return "", "", err
 	}
 	if len(userAmounts) == 0 {
-		t.logger.Info("no data")
+		logger.Info("no data")
 		return "", "", nil
 	}
 
@@ -42,7 +43,7 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 	}
 
 	txID, err := t.updateDB(targetAction, txDetailItems, nil)
-	t.logger.Debug("update result",
+	logger.Debug("update result",
 		"txID", txID,
 		"error", err,
 	)
@@ -78,7 +79,7 @@ func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]eth.UserAmount,
 		var balance *big.Int
 		balance, err = t.eth.GetBalance(addr.WalletAddress, eth.QuantityTagLatest)
 		if err != nil {
-			t.logger.Warn("fail to call .GetBalance()",
+			logger.Warn("fail to call .GetBalance()",
 				"address", addr.WalletAddress,
 				"error", err,
 			)
@@ -116,7 +117,7 @@ func (t *TxCreate) createDepositRawTransactions(
 		// additionalNonce++
 
 		rawTxHex := rawTx.TxHex
-		t.logger.Debug("rawTxHex", "rawTxHex", rawTxHex)
+		logger.Debug("rawTxHex", "rawTxHex", rawTxHex)
 
 		var serializedTx string
 		serializedTx, err = serial.EncodeToString(rawTx)

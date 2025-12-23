@@ -10,7 +10,6 @@ import (
 	"github.com/tyler-smith/go-bip39"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
@@ -49,32 +48,29 @@ func TestHDWalletBTCDUpgradeConsistency(t *testing.T) {
 	actualSeedHex := hex.EncodeToString(seed)
 	assert.Equal(t, expectedSeedHex, actualSeedHex, "Seed generation from mnemonic must be consistent")
 
-	// Initialize logger
-	log := logger.NewSlogFromConfig("test", "debug", "test")
-
 	// Test Bitcoin Mainnet
 	t.Run("Bitcoin_Mainnet", func(t *testing.T) {
-		testBitcoinConsistency(t, seed, &chaincfg.MainNetParams, coin.BTC, log)
+		testBitcoinConsistency(t, seed, &chaincfg.MainNetParams, coin.BTC)
 	})
 
 	// Test Bitcoin Testnet
 	t.Run("Bitcoin_Testnet", func(t *testing.T) {
-		testBitcoinConsistency(t, seed, &chaincfg.TestNet3Params, coin.BTC, log)
+		testBitcoinConsistency(t, seed, &chaincfg.TestNet3Params, coin.BTC)
 	})
 
 	// Test Bitcoin Regtest
 	t.Run("Bitcoin_Regtest", func(t *testing.T) {
-		testBitcoinConsistency(t, seed, &chaincfg.RegressionNetParams, coin.BTC, log)
+		testBitcoinConsistency(t, seed, &chaincfg.RegressionNetParams, coin.BTC)
 	})
 }
 
 // testBitcoinConsistency tests HD wallet key derivation for Bitcoin
 func testBitcoinConsistency(
-	t *testing.T, seed []byte, conf *chaincfg.Params, coinType coin.CoinTypeCode, log logger.Logger,
+	t *testing.T, seed []byte, conf *chaincfg.Params, coinType coin.CoinTypeCode,
 ) {
 	t.Helper()
 	// Create HD wallet instance
-	hdKey := key.NewHDKey(key.PurposeTypeBIP44, coinType, conf, log)
+	hdKey := key.NewHDKey(key.PurposeTypeBIP44, coinType, conf)
 
 	// Test account types that are commonly used
 	accountTypes := []struct {
@@ -194,10 +190,8 @@ func TestHDWalletKnownVectors(t *testing.T) {
 	mnemonic := "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 	seed := bip39.NewSeed(mnemonic, "")
 
-	log := logger.NewSlogFromConfig("test", "error", "test")
-
 	t.Run("Mainnet_Client_Account", func(t *testing.T) {
-		hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.MainNetParams, log)
+		hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.MainNetParams)
 		keys, err := hdKey.CreateKey(seed, account.AccountTypeClient, 0, 3)
 		require.NoError(t, err)
 		require.Len(t, keys, 3)
@@ -244,7 +238,7 @@ func TestHDWalletKnownVectors(t *testing.T) {
 	// For now, the mainnet client account test above provides sufficient regression coverage
 	/*
 		t.Run("Mainnet_Deposit_Account", func(t *testing.T) {
-			hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.MainNetParams, log)
+			hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.MainNetParams)
 			keys, err := hdKey.CreateKey(seed, account.AccountTypeDeposit, 0, 2)
 			require.NoError(t, err)
 			require.Len(t, keys, 2)
@@ -281,7 +275,7 @@ func TestHDWalletKnownVectors(t *testing.T) {
 		})
 
 		t.Run("Testnet_Client_Account", func(t *testing.T) {
-			hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.TestNet3Params, log)
+			hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.TestNet3Params)
 			keys, err := hdKey.CreateKey(seed, account.AccountTypeClient, 0, 2)
 			require.NoError(t, err)
 			require.Len(t, keys, 2)
@@ -326,9 +320,7 @@ func TestHDWalletMultipleIndices(t *testing.T) {
 	mnemonic := "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 	seed := bip39.NewSeed(mnemonic, "")
 
-	log := logger.NewSlogFromConfig("test", "error", "test")
-
-	hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.MainNetParams, log)
+	hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.MainNetParams)
 
 	// Generate keys in different batches and verify consistency
 	t.Run("Batch_Consistency", func(t *testing.T) {
@@ -373,9 +365,7 @@ func TestHDWalletAuthAccounts(t *testing.T) {
 	mnemonic := "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 	seed := bip39.NewSeed(mnemonic, "")
 
-	log := logger.NewSlogFromConfig("test", "error", "test")
-
-	hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.MainNetParams, log)
+	hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.MainNetParams)
 
 	// Test multiple auth accounts
 	authAccounts := []account.AccountType{

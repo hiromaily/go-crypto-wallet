@@ -22,7 +22,6 @@ type PrivKeyer interface {
 // PrivKey type
 type PrivKey struct {
 	btc         btcgrp.Bitcoiner
-	logger      logger.Logger
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier
 	authType    account.AuthType
 	wtype       wallet.WalletType
@@ -31,14 +30,12 @@ type PrivKey struct {
 // NewPrivKey returns privKey object
 func NewPrivKey(
 	btc btcgrp.Bitcoiner,
-	logger logger.Logger,
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
 	authType account.AuthType,
 	wtype wallet.WalletType,
 ) *PrivKey {
 	return &PrivKey{
 		btc:         btc,
-		logger:      logger,
 		authKeyRepo: authKeyRepo,
 		authType:    authType,
 		wtype:       wtype,
@@ -55,11 +52,11 @@ func (p *PrivKey) Import() error {
 		return fmt.Errorf("fail to call authKeyRepo.GetOne(): %w", err)
 	}
 	if authKeyItem.AddrStatus != address.AddrStatusHDKeyGenerated.Int8() {
-		p.logger.Info("no unimported private key")
+		logger.Info("no unimported private key")
 		return nil
 	}
 
-	p.logger.Debug(
+	logger.Debug(
 		"target records",
 		"auth_type", p.authType.String(),
 		"P2PKH_address", authKeyItem.P2PKHAddress,
@@ -78,7 +75,7 @@ func (p *PrivKey) Import() error {
 	if err != nil {
 		// error would be returned sometimes according to condition of bitcoin core
 		// for now, it continues even if error occurred
-		p.logger.Warn(
+		logger.Warn(
 			"fail to call btc.ImportPrivKeyWithoutReScan()",
 			"wif", authKeyItem.WalletImportFormat,
 			"error", err)
@@ -88,7 +85,7 @@ func (p *PrivKey) Import() error {
 	// update DB
 	_, err = p.authKeyRepo.UpdateAddrStatus(address.AddrStatusPrivKeyImported, authKeyItem.WalletImportFormat)
 	if err != nil {
-		p.logger.Error(
+		logger.Error(
 			"fail to call repo.AccountKey().UpdateAddrStatus()",
 			"target_table", "auth_account_key",
 			"auth_type", p.authType.String(),
@@ -122,11 +119,11 @@ func (p *PrivKey) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPub
 		targetAddr = walletAddress
 		addrType = address.AddrTypeBCHCashAddr
 	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
-		p.logger.Warn("this coin type is not implemented in checkImportedAddress()",
+		logger.Warn("this coin type is not implemented in checkImportedAddress()",
 			"coin_type_code", p.btc.CoinTypeCode().String())
 		return
 	default:
-		p.logger.Warn("this coin type is not implemented in checkImportedAddress()",
+		logger.Warn("this coin type is not implemented in checkImportedAddress()",
 			"coin_type_code", p.btc.CoinTypeCode().String())
 		return
 	}
@@ -135,13 +132,13 @@ func (p *PrivKey) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPub
 	// FIXME: error occurred in BCH
 	acnt, err := p.btc.GetAccount(targetAddr)
 	if err != nil {
-		p.logger.Warn(
+		logger.Warn(
 			"fail to call btc.GetAccount()",
 			addrType.String(), targetAddr,
 			"error", err)
 		return
 	}
-	p.logger.Debug(
+	logger.Debug(
 		"account is found",
 		"account", acnt,
 		addrType.String(), targetAddr)
@@ -149,12 +146,12 @@ func (p *PrivKey) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPub
 	// 2.call `getaddressinfo` by target_address
 	addrInfo, err := p.btc.GetAddressInfo(targetAddr)
 	if err != nil {
-		p.logger.Warn(
+		logger.Warn(
 			"fail to call btc.GetAddressInfo()",
 			addrType.String(), targetAddr,
 			"error", err)
 	} else if addrInfo.Pubkey != fullPublicKey {
-		p.logger.Warn(
+		logger.Warn(
 			"pubkey is not matched",
 			"in_bitcoin_core", addrInfo.Pubkey,
 			"in_database", fullPublicKey)

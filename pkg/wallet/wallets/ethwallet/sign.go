@@ -13,7 +13,6 @@ import (
 type ETHSign struct {
 	ETH    ethgrp.Ethereumer
 	dbConn *sql.DB
-	logger logger.Logger
 	wtype  wtype.WalletType
 }
 
@@ -21,50 +20,48 @@ type ETHSign struct {
 func NewETHSign(
 	eth ethgrp.Ethereumer,
 	dbConn *sql.DB,
-	logger logger.Logger,
 	walletType wtype.WalletType,
 ) *ETHSign {
 	return &ETHSign{
 		ETH:    eth,
-		logger: logger,
 		dbConn: dbConn,
 		wtype:  walletType,
 	}
 }
 
 // GenerateSeed generates seed
-func (s *ETHSign) GenerateSeed() ([]byte, error) {
-	s.logger.Info("no functionality for CreateMultisigAddress() in ETH")
+func (*ETHSign) GenerateSeed() ([]byte, error) {
+	logger.Info("no functionality for CreateMultisigAddress() in ETH")
 	return nil, nil
 }
 
 // StoreSeed stores seed
-func (s *ETHSign) StoreSeed(_ string) ([]byte, error) {
-	s.logger.Info("no functionality for CreateMultisigAddress() in ETH")
+func (*ETHSign) StoreSeed(_ string) ([]byte, error) {
+	logger.Info("no functionality for CreateMultisigAddress() in ETH")
 	return nil, nil
 }
 
 // GenerateAuthKey generates account keys
-func (s *ETHSign) GenerateAuthKey(_ []byte, _ uint32) ([]key.WalletKey, error) {
-	s.logger.Info("no functionality for CreateMultisigAddress() in ETH")
+func (*ETHSign) GenerateAuthKey(_ []byte, _ uint32) ([]key.WalletKey, error) {
+	logger.Info("no functionality for CreateMultisigAddress() in ETH")
 	return nil, nil
 }
 
 // ImportPrivKey imports privKey
-func (s *ETHSign) ImportPrivKey() error {
-	s.logger.Info("no functionality for CreateMultisigAddress() in ETH")
+func (*ETHSign) ImportPrivKey() error {
+	logger.Info("no functionality for CreateMultisigAddress() in ETH")
 	return nil
 }
 
 // ExportFullPubkey exports full-pubkey
-func (s *ETHSign) ExportFullPubkey() (string, error) {
-	s.logger.Info("no functionality for CreateMultisigAddress() in ETH")
+func (*ETHSign) ExportFullPubkey() (string, error) {
+	logger.Info("no functionality for CreateMultisigAddress() in ETH")
 	return "", nil
 }
 
 // SignTx signs on transaction
-func (s *ETHSign) SignTx(_ string) (string, bool, string, error) {
-	s.logger.Info("no functionality for CreateMultisigAddress() in ETH")
+func (*ETHSign) SignTx(_ string) (string, bool, string, error) {
+	logger.Info("no functionality for CreateMultisigAddress() in ETH")
 	return "", false, "", nil
 }
 

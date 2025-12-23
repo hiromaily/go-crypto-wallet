@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
@@ -30,8 +29,6 @@ func GetXRP() (xrpgrp.Rippler, error) {
 	// TODO: if config should be overridden, here
 	conf.CoinTypeCode = coin.XRP
 
-	// logger
-	log := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 	// ws client
 	wsClient, wsAdmin, err := xrpgrp.NewWSClient(&conf.Ripple)
 	if err != nil {
@@ -42,9 +39,9 @@ func GetXRP() (xrpgrp.Rippler, error) {
 	if err != nil {
 		return nil, fmt.Errorf("fail to create api instance: %w", err)
 	}
-	grpcAPI := xrp.NewRippleAPI(conn, log)
+	grpcAPI := xrp.NewRippleAPI(conn)
 
-	xr, err = xrpgrp.NewRipple(wsClient, wsAdmin, grpcAPI, &conf.Ripple, log, conf.CoinTypeCode)
+	xr, err = xrpgrp.NewRipple(wsClient, wsAdmin, grpcAPI, &conf.Ripple, conf.CoinTypeCode)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create xrp instance: %w", err)
 	}

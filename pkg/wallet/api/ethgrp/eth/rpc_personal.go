@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // ImportRawKey Imports the given unencrypted private key (hex string) into the key store,
@@ -23,7 +24,7 @@ func (e *Ethereum) ImportRawKey(hexKey, passPhrase string) (string, error) {
 	err := e.rpcClient.CallContext(e.ctx, &address, "personal_importRawKey", hexKey, passPhrase)
 	if err != nil {
 		if strings.Contains(err.Error(), "account already exists") {
-			e.logger.Warn(err.Error())
+			logger.Warn(err.Error())
 		} else {
 			return "", fmt.Errorf("fail to call client.CallContext(personal_importRawKey): %w", err)
 		}

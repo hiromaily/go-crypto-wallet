@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
@@ -45,7 +46,7 @@ func (b *Bitcoin) AddMultisigAddress(
 	// accountName
 	bAccount, err := json.Marshal(accountName)
 	if err != nil {
-		b.logger.Warn(
+		logger.Warn(
 			"fail to json.Marshal(accountName)",
 			"accountName", accountName,
 			"error", err)
@@ -59,7 +60,7 @@ func (b *Bitcoin) AddMultisigAddress(
 		var bAddrType []byte
 		bAddrType, err = json.Marshal(addressType.String())
 		if err != nil {
-			b.logger.Warn(
+			logger.Warn(
 				"fail to json.Marchal(addressType)",
 				"addressType", addressType.String(),
 				"error", err)

@@ -34,9 +34,13 @@ After making code changes, use these commands to verify code correctness:
 
 **Important**: After modifying Go code, run these commands to ensure code quality and correctness.
 
+**Command Constraints**:
+
+- **DO NOT** use `go build -v` directly; use `make check-build` instead
+- **DO NOT** use `go tool golangci-lint` directly; use `make lint-fix` instead
+
 ## Error Handling
 
-- **DO NOT** use `log.Fatal` outside of `main` function (see `REFACTORING_CHECKLIST.md`)
 - Wrap errors with `fmt.Errorf` + `%w`
 - Use `errors.Is`/`errors.As` for error checking
 - Include context information in error messages
@@ -100,6 +104,11 @@ After making code changes, use these commands to verify code correctness:
 - Leaving commented-out code
 - Unused imports, variables, or functions
 - Ignoring errors (detected by `errcheck`)
+- Using `go build -v` directly (use `make check-build` instead)
+- Using `go tool golangci-lint` directly (use `make lint-fix` instead)
+- For `unused-receiver` lint errors: **Remove the receiver entirely** instead of renaming it to `_`.
+  Renaming to `_` will only cause the same error to appear for other receivers,
+  so convert the method to a function from the start.
 
 ## Recommended Patterns
 

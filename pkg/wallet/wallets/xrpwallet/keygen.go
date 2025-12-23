@@ -17,7 +17,6 @@ import (
 type XRPKeygen struct {
 	XRP    xrpgrp.Rippler
 	dbConn *sql.DB
-	logger logger.Logger
 	wtype  wtype.WalletType
 	service.Seeder
 	service.HDWalleter
@@ -30,7 +29,6 @@ type XRPKeygen struct {
 func NewXRPKeygen(
 	xrp xrpgrp.Rippler,
 	dbConn *sql.DB,
-	logger logger.Logger,
 	walletType wtype.WalletType,
 	seeder service.Seeder,
 	hdWallter service.HDWalleter,
@@ -40,7 +38,6 @@ func NewXRPKeygen(
 ) *XRPKeygen {
 	return &XRPKeygen{
 		XRP:             xrp,
-		logger:          logger,
 		dbConn:          dbConn,
 		wtype:           walletType,
 		Seeder:          seeder,
@@ -76,20 +73,20 @@ func (k *XRPKeygen) GenerateAccountKey(
 }
 
 // ImportPrivKey imports privKey
-func (k *XRPKeygen) ImportPrivKey(_ account.AccountType) error {
-	k.logger.Info("no functionality for ImportPrivKey() in XRP")
+func (*XRPKeygen) ImportPrivKey(_ account.AccountType) error {
+	logger.Info("no functionality for ImportPrivKey() in XRP")
 	return nil
 }
 
 // ImportFullPubKey imports full-pubkey
-func (k *XRPKeygen) ImportFullPubKey(_ string) error {
-	k.logger.Info("no functionality for ImportFullPubKey() in XRP")
+func (*XRPKeygen) ImportFullPubKey(_ string) error {
+	logger.Info("no functionality for ImportFullPubKey() in XRP")
 	return nil
 }
 
 // CreateMultisigAddress creates multi sig address returns Multisiger interface
-func (k *XRPKeygen) CreateMultisigAddress(_ account.AccountType) error {
-	k.logger.Info("no functionality for CreateMultisigAddress() in XRP")
+func (*XRPKeygen) CreateMultisigAddress(_ account.AccountType) error {
+	logger.Info("no functionality for CreateMultisigAddress() in XRP")
 	return nil
 }
 

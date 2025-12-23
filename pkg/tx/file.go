@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // FileRepositorier is file storager for tx info
@@ -26,7 +25,6 @@ type FileRepositorier interface {
 // FileRepository is to store transaction info as csv file
 type FileRepository struct {
 	filePath string
-	logger   logger.Logger
 }
 
 // FileName is object for items in fine name
@@ -38,10 +36,9 @@ type FileName struct {
 }
 
 // NewFileRepository returns FileRepository
-func NewFileRepository(filePath string, logger logger.Logger) *FileRepository {
+func NewFileRepository(filePath string) *FileRepository {
 	return &FileRepository{
 		filePath: filePath,
-		logger:   logger,
 	}
 }
 

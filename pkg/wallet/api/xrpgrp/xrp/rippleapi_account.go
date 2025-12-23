@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // GetAccountInfo calls GetAccountInfo API
@@ -25,7 +27,7 @@ func (r *Ripple) GetAccountInfo(address string) (*ResponseGetAccountInfo, error)
 		// errStatus.Code()
 		return nil, fmt.Errorf("fail to call accountClient.GetAccountInfo(): %w", err)
 	}
-	r.logger.Debug("response",
+	logger.Debug("response",
 		"Sequence", res.Sequence,
 		"XrpBalance", res.XrpBalance,
 		"OwnerCount", res.OwnerCount,

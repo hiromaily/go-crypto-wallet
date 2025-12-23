@@ -12,6 +12,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // - Send XRP https://xrpl.org/send-xrp.html
@@ -122,7 +124,7 @@ func (r *Ripple) PrepareTransaction(
 	if err != nil {
 		return nil, "", fmt.Errorf("fail to call client.PrepareTransaction(): %w", err)
 	}
-	r.logger.Debug("response",
+	logger.Debug("response",
 		"TxJSON", res.TxJSON,
 		"Instructions", res.Instructions,
 	)
@@ -193,7 +195,7 @@ func (r *Ripple) SubmitTransaction(signedTx string) (*SentTx, uint64, error) {
 
 	// FIXME:
 	// res.EarliestLedgerVersion may be useless because SentTxJSON includes `LastLedgerSequence` and it would be useful
-	r.logger.Debug("response of submitTransaction",
+	logger.Debug("response of submitTransaction",
 		"res.ResultJSONString", res.ResultJSONString,
 		"res.EarliestLedgerVersion", res.EarliestLedgerVersion,
 		"sentTxJSON.TxJSON.LastLedgerSequence", sentTxJSON.TxJSON.LastLedgerSequence,
@@ -216,9 +218,9 @@ func (r *Ripple) WaitValidation(targetledgerVarsion uint64) (uint64, error) {
 	}
 
 	defer func() {
-		r.logger.Debug("running in defer func()")
+		logger.Debug("running in defer func()")
 		if closeErr := resStream.CloseSend(); closeErr != nil {
-			r.logger.Warn("fail to call resStream.CloseSend()")
+			logger.Warn("fail to call resStream.CloseSend()")
 		}
 	}()
 
@@ -226,37 +228,37 @@ func (r *Ripple) WaitValidation(targetledgerVarsion uint64) (uint64, error) {
 		var res *ResponseWaitValidation
 		res, err = resStream.Recv()
 		if err == io.EOF {
-			r.logger.Warn("server is closed in WaitValidation()")
+			logger.Warn("server is closed in WaitValidation()")
 			return 0, errors.New("server is closed")
 		} else if err != nil {
 			if respErr, ok := status.FromError(err); ok {
 				switch respErr.Code() {
 				case codes.InvalidArgument:
-					r.logger.Warn("parameter is invalid in WaitValidation()")
+					logger.Warn("parameter is invalid in WaitValidation()")
 				case codes.DeadlineExceeded:
-					r.logger.Warn("timeout in WaitValidation()")
+					logger.Warn("timeout in WaitValidation()")
 				case codes.OK, codes.Canceled, codes.Unknown, codes.NotFound, codes.AlreadyExists,
 					codes.PermissionDenied, codes.ResourceExhausted, codes.FailedPrecondition,
 					codes.Aborted, codes.OutOfRange, codes.Unimplemented, codes.Internal,
 					codes.Unavailable, codes.DataLoss, codes.Unauthenticated:
-					r.logger.Warn("gRPC error in WaitValidation()",
+					logger.Warn("gRPC error in WaitValidation()",
 						"code", uint32(respErr.Code()),
 						"message", respErr.Message(),
 					)
 				default:
-					r.logger.Warn("gRPC error in WaitValidation()",
+					logger.Warn("gRPC error in WaitValidation()",
 						"code", uint32(respErr.Code()),
 						"message", respErr.Message(),
 					)
 				}
 			} else {
-				r.logger.Warn("fail to call resStream.Recv()", "error", err)
+				logger.Warn("fail to call resStream.Recv()", "error", err)
 			}
 			// break
 			return 0, fmt.Errorf("fail to call resStream.Recv(): %w", err)
 		}
 		// success
-		r.logger.Info("response in WaitValidation()", "LedgerVersion", res.LedgerVersion)
+		logger.Info("response in WaitValidation()", "LedgerVersion", res.LedgerVersion)
 		if targetledgerVarsion <= res.LedgerVersion {
 			// done
 			return res.LedgerVersion, nil
@@ -281,7 +283,7 @@ func (r *Ripple) GetTransaction(txID string, targetLedgerVersion uint64) (*TxInf
 		return nil, fmt.Errorf("fail to get transaction info by %s", txID)
 	}
 
-	r.logger.Debug("response of getTransaction",
+	logger.Debug("response of getTransaction",
 		"res.ResultJSONString", res.ResultJSONString,
 	)
 

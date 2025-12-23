@@ -10,6 +10,7 @@ import (
 	"github.com/btcsuite/btcd/wire"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // ListUnspentResult is response type of PRC `listunspent`
@@ -30,7 +31,7 @@ type ListUnspentResult struct {
 
 // ListUnspent call RPC `listunspent`
 func (b *Bitcoin) ListUnspent(confirmationNum uint64) ([]ListUnspentResult, error) {
-	b.logger.Debug("call ListUnspent()", "confirmation", b.confirmationBlock)
+	logger.Debug("call ListUnspent()", "confirmation", b.confirmationBlock)
 
 	input, err := json.Marshal(confirmationNum)
 	if err != nil {
@@ -85,11 +86,11 @@ func (b *Bitcoin) ListUnspentByAccount(
 }
 
 // GetUnspentListAddrs returns address from unspentList
-func (b *Bitcoin) GetUnspentListAddrs(unspentList []ListUnspentResult, accountType account.AccountType) []string {
+func (*Bitcoin) GetUnspentListAddrs(unspentList []ListUnspentResult, accountType account.AccountType) []string {
 	addrs := make([]string, 0, len(unspentList))
 	for _, unspent := range unspentList {
 		if unspent.Label != accountType.String() {
-			b.logger.Warn("listUnspentByAccount() returns address for wrong account",
+			logger.Warn("listUnspentByAccount() returns address for wrong account",
 				"got", unspent.Label,
 				"want", accountType.String())
 		}

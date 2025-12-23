@@ -10,6 +10,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/debug"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // ResponseSyncing response of eth_syncing
@@ -230,7 +231,7 @@ func (e *Ethereum) GetTransactionCount(hexAddr string, quantityTag QuantityTag) 
 //		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getBlockTransactionCountByHash): %w", err)
 //	}
 //	if txCount == "" {
-//		e.logger.Debug("transactionCount is blank")
+//		logger.Debug("transactionCount is blank")
 //		return nil, errors.New("transactionCount is blank")
 //	}
 //
@@ -256,7 +257,7 @@ func (e *Ethereum) GetBlockTransactionCountByNumber(blockNumber uint64) (*big.In
 		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getBlockTransactionCountByNumber): %w", err)
 	}
 	if txCount == "" {
-		e.logger.Debug("transactionCount is blank")
+		logger.Debug("transactionCount is blank")
 		return nil, nil
 	}
 
@@ -278,7 +279,7 @@ func (e *Ethereum) GetBlockTransactionCountByNumber(blockNumber uint64) (*big.In
 //		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getUncleCountByBlockHash)")
 //	}
 //	if uncleCount == "" {
-//		e.logger.Debug("uncleCount is blank")
+//		logger.Debug("uncleCount is blank")
 //		return nil, errors.New("uncleCount is blank")
 //	}
 //
@@ -303,7 +304,7 @@ func (e *Ethereum) GetUncleCountByBlockNumber(blockNumber uint64) (*big.Int, err
 		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getUncleCountByBlockNumber): %w", err)
 	}
 	if uncleCount == "" {
-		e.logger.Debug("uncleCount is blank")
+		logger.Debug("uncleCount is blank")
 		return nil, errors.New("uncleCount is blank")
 	}
 
@@ -325,7 +326,7 @@ func (e *Ethereum) GetUncleCountByBlockNumber(blockNumber uint64) (*big.Int, err
 //	if err != nil {
 //		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getCode): %w", err)
 //	}
-//	e.logger.Debug("code", "code", code)
+//	logger.Debug("code", "code", code)
 //	if code == "0x" {
 //		code = "0x0"
 //	}

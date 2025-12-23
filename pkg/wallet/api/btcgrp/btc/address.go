@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcutil"
+
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // GetAddressInfoResult is response type of RPC `getaddressinfo`
@@ -101,7 +103,7 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 		var address btcutil.Address
 		address, err = b.DecodeAddress(key)
 		if err != nil {
-			b.logger.Error(
+			logger.Error(
 				"fail to call b.DecodeAddress()",
 				"address", key,
 				"error", err)
