@@ -1,75 +1,34 @@
 package create
 
 import (
-	"flag"
-	"fmt"
+	"github.com/spf13/cobra"
 
-	"github.com/mitchellh/cli"
-
-	"github.com/hiromaily/go-crypto-wallet/pkg/command"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
-// CreateCommand create subcommand
-type CreateCommand struct {
-	Name    string
-	Version string
-	UI      cli.Ui
-	Wallet  wallets.Signer
-}
-
-// Synopsis is explanation for this subcommand
-func (*CreateCommand) Synopsis() string {
-	return "create resources"
-}
-
-var (
-	hdkeySynopsis = "create key for hd wallet for Authorization account"
-	seedSynopsis  = "create seed"
-)
-
-// Help returns usage for this subcommand
-func (*CreateCommand) Help() string {
-	return fmt.Sprintf(`Usage: sign create [Subcommands...]
-Subcommands:
-  hdkey     %s
-  seed      %s
-`, hdkeySynopsis, seedSynopsis)
-}
-
-// Run executes this subcommand
-func (c *CreateCommand) Run(args []string) int {
-	c.UI.Info(c.Synopsis())
-
-	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
-
-	// farther subcommand import
-	cmds := map[string]cli.CommandFactory{
-		"hdkey": func() (cli.Command, error) {
-			return &HDKeyCommand{
-				name:     "hdkey",
-				synopsis: hdkeySynopsis,
-				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
-			}, nil
-		},
-		"seed": func() (cli.Command, error) {
-			return &SeedCommand{
-				name:     "seed",
-				synopsis: seedSynopsis,
-				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
-			}, nil
+// AddCommands adds all create subcommands
+func AddCommands(parentCmd *cobra.Command, wallet *wallets.Signer) {
+	// seed command
+	var seedValue string
+	seedCmd := &cobra.Command{
+		Use:   "seed",
+		Short: "create seed",
+		Long:  "create seed for wallet. If --seed is provided, it will be stored instead of generating a new one",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runSeed(*wallet, seedValue)
 		},
 	}
-	cl := command.CreateSubCommand(c.Name, c.Version, args, cmds)
+	seedCmd.Flags().StringVar(&seedValue, "seed", "",
+		"given seed is used to store in database instead of generating new seed (development use)")
+	parentCmd.AddCommand(seedCmd)
 
-	code, err := cl.Run()
-	if err != nil {
-		c.UI.Error(fmt.Sprintf("fail to call Run() subcommand of %s: %v", c.Name, err))
+	// hdkey command
+	hdkeyCmd := &cobra.Command{
+		Use:   "hdkey",
+		Short: "create key for hd wallet for Authorization account",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runHDKey(*wallet)
+		},
 	}
-	return code
+	parentCmd.AddCommand(hdkeyCmd)
 }

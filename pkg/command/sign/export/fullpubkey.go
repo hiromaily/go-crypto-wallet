@@ -1,48 +1,20 @@
 package export
 
 import (
-	"flag"
 	"fmt"
-
-	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
-// FullPubkeyCommand multisig subcommand
-type FullPubkeyCommand struct {
-	name     string
-	synopsis string
-	ui       cli.Ui
-	wallet   wallets.Signer
-}
-
-// Synopsis is explanation for this subcommand
-func (c *FullPubkeyCommand) Synopsis() string {
-	return c.synopsis
-}
-
-// Help returns usage for this subcommand
-func (*FullPubkeyCommand) Help() string {
-	return `Usage: sign export fullpubkey`
-}
-
-// Run executes this subcommand
-func (c *FullPubkeyCommand) Run(args []string) int {
-	c.ui.Info(c.Synopsis())
-
-	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
+func runFullPubkey(wallet wallets.Signer) error {
+	fmt.Println("export full pubkey")
 
 	// export full pubkey as csv file
-	fileName, err := c.wallet.ExportFullPubkey()
+	fileName, err := wallet.ExportFullPubkey()
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call ExportFullPubkey() %+v", err))
-		return 1
+		return fmt.Errorf("fail to call ExportFullPubkey() %w", err)
 	}
-	c.ui.Output("[fileName]: " + fileName)
+	fmt.Println("[fileName]: " + fileName)
 
-	return 0
+	return nil
 }

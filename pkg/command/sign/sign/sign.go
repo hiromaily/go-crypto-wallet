@@ -1,57 +1,45 @@
 package sign
 
 import (
-	"flag"
+	"errors"
 	"fmt"
 
-	"github.com/mitchellh/cli"
+	"github.com/spf13/cobra"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
-// SignCommand sign subcommand
-type SignCommand struct {
-	Name   string
-	UI     cli.Ui
-	Wallet wallets.Signer
-}
-
-// Synopsis is explanation for this subcommand
-func (*SignCommand) Synopsis() string {
-	return "sign on signed transaction for multsig address (account would be found from file name)"
-}
-
-// Help returns usage for this subcommand
-func (*SignCommand) Help() string {
-	return "Usage: sign [options...]\nOptions:\n  -file  signed transaction file path for multisig"
-}
-
-// Run executes this subcommand
-func (c *SignCommand) Run(args []string) int {
-	c.UI.Info(c.Synopsis())
-
-	var filePath string
-	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
-	flags.StringVar(&filePath, "file", "", "import file path for signed transactions")
-	if err := flags.Parse(args); err != nil {
-		return 1
+// AddCommands adds all sign subcommands
+func AddCommands(parentCmd *cobra.Command, wallet *wallets.Signer) {
+	// signature command
+	var signatureFile string
+	signatureCmd := &cobra.Command{
+		Use:   "signature",
+		Short: "sign on signed transaction for multsig address (account would be found from file name)",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runSignature(*wallet, signatureFile)
+		},
 	}
+	signatureCmd.Flags().StringVar(&signatureFile, "file", "", "import file path for signed transactions")
+	parentCmd.AddCommand(signatureCmd)
+}
+
+func runSignature(wallet wallets.Signer, filePath string) error {
+	fmt.Println("sign on signed transaction for multsig address")
 
 	// validator
 	if filePath == "" {
-		c.UI.Error("file path option [-file] is required")
-		return 1
+		return errors.New("file path option [-file] is required")
 	}
 
-	// sign on signed transactions for multisig, action(deposit/payment) could be found from file name
-	hexTx, isSigned, generatedFileName, err := c.Wallet.SignTx(filePath)
+	// sign on signed transactions
+	hexTx, isSigned, generatedFileName, err := wallet.SignTx(filePath)
 	if err != nil {
-		c.UI.Error(fmt.Sprintf("fail to call SignTx() %+v", err))
-		return 1
+		return fmt.Errorf("fail to call SignTx() %w", err)
 	}
 
 	// TODO: output should be json if json option is true
-	c.UI.Output(fmt.Sprintf("[hex]: %s\n[isCompleted]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName))
+	fmt.Printf("[hex]: %s\n[isCompleted]: %t\n[fileName]: %s\n", hexTx, isSigned, generatedFileName)
 
-	return 0
+	return nil
 }

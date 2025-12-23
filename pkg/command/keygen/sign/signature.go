@@ -1,60 +1,28 @@
 package sign
 
 import (
-	"flag"
+	"errors"
 	"fmt"
-
-	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
-// SignatureCommand sending subcommand
-type SignatureCommand struct {
-	Name   string
-	UI     cli.Ui
-	Wallet wallets.Keygener
-}
-
-// Synopsis is explanation for this subcommand
-func (*SignatureCommand) Synopsis() string {
-	return "sign on unsigned transaction (account would be found from file name)"
-}
-
-// Help returns usage for this subcommand
-func (*SignatureCommand) Help() string {
-	return `Usage: wallet sending [options...]
-Options:
-  -file  unsigned transaction file path
-`
-}
-
-// Run executes this subcommand
-func (c *SignatureCommand) Run(args []string) int {
-	c.UI.Info(c.Synopsis())
-
-	var filePath string
-	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
-	flags.StringVar(&filePath, "file", "", "import file path for signed transactions")
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
+func runSignature(wallet wallets.Keygener, filePath string) error {
+	fmt.Println("sign on unsigned transaction (account would be found from file name)")
 
 	// validator
 	if filePath == "" {
-		c.UI.Error("file path option [-file] is required")
-		return 1
+		return errors.New("file path option [-file] is required")
 	}
 
 	// sign on unsigned transactions, action(deposit/payment) could be found from file name
-	hexTx, isSigned, generatedFileName, err := c.Wallet.SignTx(filePath)
+	hexTx, isSigned, generatedFileName, err := wallet.SignTx(filePath)
 	if err != nil {
-		c.UI.Error(fmt.Sprintf("fail to call SignTx() %+v", err))
-		return 1
+		return fmt.Errorf("fail to call SignTx() %w", err)
 	}
 
 	// TODO: output should be json if json option is true
-	c.UI.Output(fmt.Sprintf("[hex]: %s\n[isCompleted]: %t\n[fileName]: %s", hexTx, isSigned, generatedFileName))
+	fmt.Printf("[hex]: %s\n[isCompleted]: %t\n[fileName]: %s\n", hexTx, isSigned, generatedFileName)
 
-	return 0
+	return nil
 }

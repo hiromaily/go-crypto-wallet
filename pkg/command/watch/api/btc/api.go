@@ -1,137 +1,103 @@
 package btc
 
 import (
-	"flag"
-	"fmt"
+	"github.com/spf13/cobra"
 
-	"github.com/mitchellh/cli"
-
-	"github.com/hiromaily/go-crypto-wallet/pkg/command"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 )
 
-// APICommand api subcommand
-type APICommand struct {
-	Name    string
-	Version string
-	UI      cli.Ui
-	BTC     btcgrp.Bitcoiner
-}
-
-// Synopsis is explanation for this subcommand
-func (*APICommand) Synopsis() string {
-	return "Bitcoin API functionality"
-}
-
-var (
-	balanceSynopsis         = "get balance for account"
-	estimatefeeSynopsis     = "estimate fee"
-	getnetworkinfoSynopsis  = "call getnetworkinfo"
-	getaddressinfoSynopsis  = "call getaddressinfo"
-	listunspentSynopsis     = "call listunspent"
-	loggingSynopsis         = "logging"
-	unlocktxSynopsis        = "unlock locked transaction for unspent transaction"
-	validateaddressSynopsis = "validate address"
-)
-
-// Help returns usage for this subcommand
-func (*APICommand) Help() string {
-	return fmt.Sprintf(`Usage: wallet api [Subcommands...]
-Subcommands:
-  balance          %s
-  estimatefee      %s
-  getnetworkinfo   %s
-  getaddressinfo   %s
-  listunspent      %s
-  logging          %s
-  unlocktx         %s
-  validateaddress  %s
-`,
-		balanceSynopsis, estimatefeeSynopsis, getnetworkinfoSynopsis, getaddressinfoSynopsis,
-		listunspentSynopsis, loggingSynopsis, unlocktxSynopsis, validateaddressSynopsis)
-}
-
-// Run executes this subcommand
-func (c *APICommand) Run(args []string) int {
-	c.UI.Info(c.Synopsis())
-
-	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
-
-	// farther subcommand import
-	cmds := map[string]cli.CommandFactory{
-		"balance": func() (cli.Command, error) {
-			return &BalanceCommand{
-				name:     "balance",
-				synopsis: balanceSynopsis,
-				ui:       command.ClolorUI(),
-				btc:      c.BTC,
-			}, nil
-		},
-		"estimatefee": func() (cli.Command, error) {
-			return &EstimateFeeCommand{
-				name:     "estimatefee",
-				synopsis: estimatefeeSynopsis,
-				ui:       command.ClolorUI(),
-				btc:      c.BTC,
-			}, nil
-		},
-		"getaddressinfo": func() (cli.Command, error) {
-			return &GetAddressInfoCommand{
-				name:     "getnetworkinfo",
-				synopsis: getaddressinfoSynopsis,
-				ui:       command.ClolorUI(),
-				btc:      c.BTC,
-			}, nil
-		},
-		"getnetworkinfo": func() (cli.Command, error) {
-			return &GetNetworkInfoCommand{
-				name:     "getnetworkinfo",
-				synopsis: getnetworkinfoSynopsis,
-				ui:       command.ClolorUI(),
-				btc:      c.BTC,
-			}, nil
-		},
-		"listunspent": func() (cli.Command, error) {
-			return &ListUnspentCommand{
-				name:     "listunspent",
-				synopsis: listunspentSynopsis,
-				ui:       command.ClolorUI(),
-				btc:      c.BTC,
-			}, nil
-		},
-		"logging": func() (cli.Command, error) {
-			return &LoggingCommand{
-				name:     "logging",
-				synopsis: loggingSynopsis,
-				ui:       command.ClolorUI(),
-				btc:      c.BTC,
-			}, nil
-		},
-		"unlocktx": func() (cli.Command, error) {
-			return &UnLockTxCommand{
-				name:     "unlocktx",
-				synopsis: unlocktxSynopsis,
-				ui:       command.ClolorUI(),
-				btc:      c.BTC,
-			}, nil
-		},
-		"validateaddress": func() (cli.Command, error) {
-			return &ValidateAddressCommand{
-				name:     "validateaddress",
-				synopsis: validateaddressSynopsis,
-				ui:       command.ClolorUI(),
-				btc:      c.BTC,
-			}, nil
+// AddCommands adds all Bitcoin API subcommands
+func AddCommands(parentCmd *cobra.Command, btc btcgrp.Bitcoiner) {
+	// balance command
+	var balanceAccount string
+	balanceCmd := &cobra.Command{
+		Use:   "balance",
+		Short: "get balance for account",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runBalance(btc, balanceAccount)
 		},
 	}
-	cl := command.CreateSubCommand(c.Name, c.Version, args, cmds)
+	balanceCmd.Flags().StringVar(&balanceAccount, "account", "", "account")
+	parentCmd.AddCommand(balanceCmd)
 
-	code, err := cl.Run()
-	if err != nil {
-		c.UI.Error(fmt.Sprintf("fail to call Run() subcommand of %s: %v", c.Name, err))
+	// estimatefee command
+	estimatefeeCmd := &cobra.Command{
+		Use:   "estimatefee",
+		Short: "estimate fee",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runEstimateFee(btc)
+		},
 	}
-	return code
+	parentCmd.AddCommand(estimatefeeCmd)
+
+	// getnetworkinfo command
+	getnetworkinfoCmd := &cobra.Command{
+		Use:   "getnetworkinfo",
+		Short: "call getnetworkinfo",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runGetNetworkInfo(btc)
+		},
+	}
+	parentCmd.AddCommand(getnetworkinfoCmd)
+
+	// getaddressinfo command
+	var getaddressinfoAddress string
+	getaddressinfoCmd := &cobra.Command{
+		Use:   "getaddressinfo",
+		Short: "call getaddressinfo",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runGetAddressInfo(btc, getaddressinfoAddress)
+		},
+	}
+	getaddressinfoCmd.Flags().StringVar(&getaddressinfoAddress, "address", "", "address")
+	parentCmd.AddCommand(getaddressinfoCmd)
+
+	// listunspent command
+	var (
+		listunspentAccount string
+		listunspentNum     int64
+	)
+	listunspentCmd := &cobra.Command{
+		Use:   "listunspent",
+		Short: "call listunspent",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runListUnspent(btc, listunspentAccount, listunspentNum)
+		},
+	}
+	listunspentCmd.Flags().StringVar(&listunspentAccount, "account", "", "account")
+	listunspentCmd.Flags().Int64Var(&listunspentNum, "num", -1, "confirmation number")
+	parentCmd.AddCommand(listunspentCmd)
+
+	// logging command
+	loggingCmd := &cobra.Command{
+		Use:   "logging",
+		Short: "logging",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runLogging(btc)
+		},
+	}
+	parentCmd.AddCommand(loggingCmd)
+
+	// unlocktx command
+	unlocktxCmd := &cobra.Command{
+		Use:   "unlocktx",
+		Short: "unlock locked transaction for unspent transaction",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runUnlockTx(btc)
+		},
+	}
+	parentCmd.AddCommand(unlocktxCmd)
+
+	// validateaddress command
+	var validateaddressAddress string
+	validateaddressCmd := &cobra.Command{
+		Use:   "validateaddress",
+		Short: "validate address",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runValidateAddress(btc, validateaddressAddress)
+		},
+	}
+	validateaddressCmd.Flags().StringVar(
+		&validateaddressAddress, "address", "", "address like '2NFXSXxw8Fa6P6CSovkdjXE6UF4hupcTHtr'")
+	parentCmd.AddCommand(validateaddressCmd)
 }

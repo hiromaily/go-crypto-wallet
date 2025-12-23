@@ -1,121 +1,84 @@
 package btc
 
 import (
-	"flag"
-	"fmt"
+	"github.com/spf13/cobra"
 
-	"github.com/mitchellh/cli"
-
-	"github.com/hiromaily/go-crypto-wallet/pkg/command"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 )
 
-// APICommand api subcommand
-type APICommand struct {
-	Name    string
-	Version string
-	UI      cli.Ui
-	BTC     btcgrp.Bitcoiner
-}
-
-// Synopsis is explanation for this subcommand
-func (*APICommand) Synopsis() string {
-	return "Bitcoin API functionality"
-}
-
-var (
-	encryptwalletSynopsis    = "encrypts the wallet with 'passphrase'"
-	walletpassphraseSynopsis = `stores the wallet decryption key in memory for 'timeout' seconds.\n
-this is needed prior to performing transactions related to private keys such as sending bitcoins`
-	walletpassphrasechangeSynopsis = "changes the wallet passphrase from 'oldpassphrase' to 'newpassphrase'"
-	walletlockSynopsis             = "removes the wallet encryption key from memory, locking the wallet"
-	dumpwalletSynopsis             = "dumps all wallet keys in a human-readable format to a server-side file"
-	importwalletSynopsis           = "Imports keys from a wallet dump file"
-)
-
-// Help returns usage for this subcommand
-func (*APICommand) Help() string {
-	return fmt.Sprintf(`Usage: wallet api [Subcommands...]
-Subcommands:
-  encryptwallet          %s
-  walletpassphrase       %s
-  walletpassphrasechange %s
-  walletlock             %s
-  dumpwallet             %s
-  importwallet           %s`,
-		encryptwalletSynopsis,
-		walletpassphraseSynopsis,
-		walletpassphrasechangeSynopsis,
-		walletlockSynopsis,
-		dumpwalletSynopsis,
-		importwalletSynopsis)
-}
-
-// Run executes this subcommand
-func (c *APICommand) Run(args []string) int {
-	c.UI.Info(c.Synopsis())
-
-	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
-
-	// farther subcommand import
-	cmds := map[string]cli.CommandFactory{
-		"encryptwallet": func() (cli.Command, error) {
-			return &EncryptWalletCommand{
-				name:     "encryptwallet",
-				synopsis: encryptwalletSynopsis,
-				ui:       command.ClolorUI(),
-				btc:      c.BTC,
-			}, nil
-		},
-		"walletpassphrase": func() (cli.Command, error) {
-			return &WalletPassphraseCommand{
-				name:     "walletpassphrase",
-				synopsis: walletpassphraseSynopsis,
-				ui:       command.ClolorUI(),
-				btc:      c.BTC,
-			}, nil
-		},
-		"walletpassphrasechange": func() (cli.Command, error) {
-			return &WalletPassphraseChangeCommand{
-				name:     "walletpassphrasechange",
-				synopsis: walletpassphrasechangeSynopsis,
-				ui:       command.ClolorUI(),
-				btc:      c.BTC,
-			}, nil
-		},
-		"walletlock": func() (cli.Command, error) {
-			return &WalletLockCommand{
-				name:     "walletlock",
-				synopsis: walletlockSynopsis,
-				ui:       command.ClolorUI(),
-				btc:      c.BTC,
-			}, nil
-		},
-		"dumpwallet": func() (cli.Command, error) {
-			return &DumpWalletCommand{
-				name:     "dumpwallet",
-				synopsis: dumpwalletSynopsis,
-				ui:       command.ClolorUI(),
-				btc:      c.BTC,
-			}, nil
-		},
-		"importwallet": func() (cli.Command, error) {
-			return &ImportWalletCommand{
-				name:     "importwallet",
-				synopsis: importwalletSynopsis,
-				ui:       command.ClolorUI(),
-				btc:      c.BTC,
-			}, nil
+// AddCommands adds all Bitcoin API subcommands
+func AddCommands(parentCmd *cobra.Command, btc btcgrp.Bitcoiner) {
+	// encryptwallet command
+	var encryptwalletPassphrase string
+	encryptwalletCmd := &cobra.Command{
+		Use:   "encryptwallet",
+		Short: "encrypts the wallet with 'passphrase'",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runEncryptWallet(btc, encryptwalletPassphrase)
 		},
 	}
-	cl := command.CreateSubCommand(c.Name, c.Version, args, cmds)
+	encryptwalletCmd.Flags().StringVar(&encryptwalletPassphrase, "passphrase", "", "passphrase")
+	parentCmd.AddCommand(encryptwalletCmd)
 
-	code, err := cl.Run()
-	if err != nil {
-		c.UI.Error(fmt.Sprintf("fail to call Run() subcommand of %s: %v", c.Name, err))
+	// walletpassphrase command
+	var walletpassphrasePassphrase string
+	walletpassphraseCmd := &cobra.Command{
+		Use:   "walletpassphrase",
+		Short: "stores the wallet decryption key in memory for 'timeout' seconds",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runWalletPassphrase(btc, walletpassphrasePassphrase)
+		},
 	}
-	return code
+	walletpassphraseCmd.Flags().StringVar(&walletpassphrasePassphrase, "passphrase", "", "passphrase")
+	parentCmd.AddCommand(walletpassphraseCmd)
+
+	// walletpassphrasechange command
+	var (
+		walletpassphrasechangeOld string
+		walletpassphrasechangeNew string
+	)
+	walletpassphrasechangeCmd := &cobra.Command{
+		Use:   "walletpassphrasechange",
+		Short: "changes the wallet passphrase from 'oldpassphrase' to 'newpassphrase'",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runWalletPassphraseChange(btc, walletpassphrasechangeOld, walletpassphrasechangeNew)
+		},
+	}
+	walletpassphrasechangeCmd.Flags().StringVar(&walletpassphrasechangeOld, "old", "", "old passphrase")
+	walletpassphrasechangeCmd.Flags().StringVar(&walletpassphrasechangeNew, "new", "", "new passphrase")
+	parentCmd.AddCommand(walletpassphrasechangeCmd)
+
+	// walletlock command
+	walletlockCmd := &cobra.Command{
+		Use:   "walletlock",
+		Short: "removes the wallet encryption key from memory, locking the wallet",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runWalletLock(btc)
+		},
+	}
+	parentCmd.AddCommand(walletlockCmd)
+
+	// dumpwallet command
+	var dumpwalletFile string
+	dumpwalletCmd := &cobra.Command{
+		Use:   "dumpwallet",
+		Short: "dumps all wallet keys in a human-readable format to a server-side file",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runDumpWallet(btc, dumpwalletFile)
+		},
+	}
+	dumpwalletCmd.Flags().StringVar(&dumpwalletFile, "file", "", "file name")
+	parentCmd.AddCommand(dumpwalletCmd)
+
+	// importwallet command
+	var importwalletFile string
+	importwalletCmd := &cobra.Command{
+		Use:   "importwallet",
+		Short: "Imports keys from a wallet dump file",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runImportWallet(btc, importwalletFile)
+		},
+	}
+	importwalletCmd.Flags().StringVar(&importwalletFile, "file", "", "file name")
+	parentCmd.AddCommand(importwalletCmd)
 }

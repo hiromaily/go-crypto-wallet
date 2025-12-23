@@ -1,49 +1,20 @@
 package imports
 
 import (
-	"flag"
 	"fmt"
-
-	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
-// PrivKeyCommand privkey subcommand
-type PrivKeyCommand struct {
-	name     string
-	synopsis string
-	ui       cli.Ui
-	wallet   wallets.Signer
-}
+func runPrivKey(wallet wallets.Signer) error {
+	fmt.Println("import generated private key for Authorization account to database")
 
-// Synopsis is explanation for this subcommand
-func (c *PrivKeyCommand) Synopsis() string {
-	return c.synopsis
-}
-
-// Help returns usage for this subcommand
-func (*PrivKeyCommand) Help() string {
-	return `Usage: sign import privkey
-`
-}
-
-// Run executes this subcommand
-func (c *PrivKeyCommand) Run(args []string) int {
-	c.ui.Info(c.Synopsis())
-
-	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
-
-	// import generated private key for Authorization account to database
-	err := c.wallet.ImportPrivKey()
+	// import generated private key to database
+	err := wallet.ImportPrivKey()
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call ImportPrivKey() %+v", err))
-		return 1
+		return fmt.Errorf("fail to call ImportPrivKey() %w", err)
 	}
-	c.ui.Output("Done!")
+	fmt.Println("Done!")
 
-	return 0
+	return nil
 }

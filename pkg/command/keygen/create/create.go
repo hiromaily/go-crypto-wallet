@@ -1,95 +1,64 @@
 package create
 
 import (
-	"flag"
-	"fmt"
+	"github.com/spf13/cobra"
 
-	"github.com/mitchellh/cli"
-
-	"github.com/hiromaily/go-crypto-wallet/pkg/command"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
-// CreateCommand create subcommand
-type CreateCommand struct {
-	Name    string
-	Version string
-	UI      cli.Ui
-	Wallet  wallets.Keygener
-}
-
-// Synopsis is explanation for this subcommand
-func (*CreateCommand) Synopsis() string {
-	return "create resources"
-}
-
-var (
-	keySynopsis      = "create one key for debug use"
-	hdkeySynopsis    = "create HD key"
-	seedSynopsis     = "create seed"
-	multisigSynopsis = "create multisig address"
-)
-
-// Help returns usage for this subcommand
-func (*CreateCommand) Help() string {
-	return fmt.Sprintf(`Usage: keygen create [Subcommands...]
-Subcommands:
-  key       %s
-  hdkey     %s
-  seed      %s
-  multisig  %s
-`, keySynopsis, hdkeySynopsis, seedSynopsis, multisigSynopsis)
-}
-
-// Run executes this subcommand
-func (c *CreateCommand) Run(args []string) int {
-	c.UI.Info(c.Synopsis())
-
-	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
-
-	// farther subcommand import
-	cmds := map[string]cli.CommandFactory{
-		"key": func() (cli.Command, error) {
-			return &HDKeyCommand{
-				name:     "key",
-				synopsis: keySynopsis,
-				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
-			}, nil
-		},
-		"hdkey": func() (cli.Command, error) {
-			return &HDKeyCommand{
-				name:     "hdkey",
-				synopsis: hdkeySynopsis,
-				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
-			}, nil
-		},
-		"seed": func() (cli.Command, error) {
-			return &SeedCommand{
-				name:     "seed",
-				synopsis: seedSynopsis,
-				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
-			}, nil
-		},
-		"multisig": func() (cli.Command, error) {
-			return &MultisigCommand{
-				name:     "multisig",
-				synopsis: multisigSynopsis,
-				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
-			}, nil
+// AddCommands adds all create subcommands
+func AddCommands(parentCmd *cobra.Command, wallet *wallets.Keygener) {
+	// key command
+	keyCmd := &cobra.Command{
+		Use:   "key",
+		Short: "create one key for debug use",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runKey(*wallet)
 		},
 	}
-	cl := command.CreateSubCommand(c.Name, c.Version, args, cmds)
+	parentCmd.AddCommand(keyCmd)
 
-	code, err := cl.Run()
-	if err != nil {
-		c.UI.Error(fmt.Sprintf("fail to call Run() subcommand of %s: %v", c.Name, err))
+	// hdkey command
+	var (
+		hdkeyKeyNum    uint64
+		hdkeyAccount   string
+		hdkeyIsKeyPair bool
+	)
+	hdkeyCmd := &cobra.Command{
+		Use:   "hdkey",
+		Short: "create HD key",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runHDKeyWithFlags(*wallet, hdkeyKeyNum, hdkeyAccount, hdkeyIsKeyPair)
+		},
 	}
-	return code
+	hdkeyCmd.Flags().Uint64Var(&hdkeyKeyNum, "keynum", 0, "number of generating hd key")
+	hdkeyCmd.Flags().StringVar(&hdkeyAccount, "account", "", "target account")
+	hdkeyCmd.Flags().BoolVar(&hdkeyIsKeyPair, "keypair", false, "keypair for XRP")
+	parentCmd.AddCommand(hdkeyCmd)
+
+	// seed command
+	var seedValue string
+	seedCmd := &cobra.Command{
+		Use:   "seed",
+		Short: "create seed",
+		Long:  "create seed for wallet. If --seed is provided, it will be stored instead of generating a new one",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runSeed(*wallet, seedValue)
+		},
+	}
+	seedCmd.Flags().StringVar(&seedValue, "seed", "",
+		"given seed is used to store in database instead of generating new seed (development use)")
+	parentCmd.AddCommand(seedCmd)
+
+	// multisig command
+	var multisigAccount string
+	multisigCmd := &cobra.Command{
+		Use:   "multisig",
+		Short: "create multisig address",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runMultisigWithAccount(*wallet, multisigAccount)
+		},
+	}
+	multisigCmd.Flags().StringVar(&multisigAccount, "account", "", "target account")
+	parentCmd.AddCommand(multisigCmd)
 }

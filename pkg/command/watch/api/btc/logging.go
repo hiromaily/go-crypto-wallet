@@ -1,49 +1,20 @@
 package btc
 
 import (
-	"flag"
 	"fmt"
 
 	"github.com/bookerzzz/grok"
-	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 )
 
-// LoggingCommand logging subcommand
-type LoggingCommand struct {
-	name     string
-	synopsis string
-	ui       cli.Ui
-	btc      btcgrp.Bitcoiner
-}
-
-// Synopsis is explanation for this subcommand
-func (c *LoggingCommand) Synopsis() string {
-	return c.synopsis
-}
-
-// Help returns usage for this subcommand
-func (*LoggingCommand) Help() string {
-	return `Usage: wallet api logging`
-}
-
-// Run executes this subcommand
-func (c *LoggingCommand) Run(args []string) int {
-	c.ui.Info(c.Synopsis())
-
-	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
-
+func runLogging(btc btcgrp.Bitcoiner) error {
 	// logging
-	logData, err := c.btc.Logging()
+	logData, err := btc.Logging()
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call BTC.Logging() %+v", err))
-		return 1
+		return fmt.Errorf("fail to call BTC.Logging() %w", err)
 	}
 	grok.Value(logData)
 
-	return 0
+	return nil
 }

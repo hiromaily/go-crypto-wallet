@@ -1,103 +1,53 @@
 package create
 
 import (
-	"flag"
+	"errors"
 	"fmt"
-
-	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
-// TransferCommand transfer subcommand
-type TransferCommand struct {
-	name     string
-	synopsis string
-	ui       cli.Ui
-	wallet   wallets.Watcher
-}
-
-// Synopsis is explanation for this subcommand
-func (*TransferCommand) Synopsis() string {
-	return "create unsigned transaction for transfer among accounts"
-}
-
-// Help returns usage for this subcommand
-func (*TransferCommand) Help() string {
-	return `Usage: wallet create transfer [options...]
-Options:
-  -account1  sender account
-  -account2  receiver account
-  -amount    amount to send coin. if amount=0, all coin is sent
-  -fee       adjustment fee
-`
-}
-
-// Run executes this subcommand
-func (c *TransferCommand) Run(args []string) int {
-	c.ui.Info(c.Synopsis())
-
-	var (
-		account1 string
-		account2 string
-		amount   float64
-		fee      float64
-	)
-	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
-	flags.StringVar(&account1, "account1", "", "sender account")
-	flags.StringVar(&account2, "account2", "", "receiver account")
-	flags.Float64Var(&amount, "amount", 0, "amount to send coin")
-	flags.Float64Var(&fee, "fee", 0, "adjustment fee")
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
-
+func runTransfer(wallet wallets.Watcher, account1, account2 string, amount, fee float64) error {
 	// validator
 	if !account.ValidateAccountType(account1) {
-		c.ui.Error("account option [-account1] is invalid")
-		return 1
+		return errors.New("account option [-account1] is invalid")
 	}
 	if !account.ValidateAccountType(account2) {
-		c.ui.Error("account option [-account2] is invalid")
-		return 1
+		return errors.New("account option [-account2] is invalid")
 	}
 	// This logic should be implemented in wallet.CreateTransferTx()
 	// if !account.NotAllow(account1, []account.AccountType{
 	//	account.AccountTypeAuthorization, account.AccountTypeClient}) {
-	//	c.ui.Error(fmt.Sprintf(
+	//	return fmt.Errorf(
 	//		"account1: %s/%s is not allowed",
-	//		account.AccountTypeAuthorization, account.AccountTypeClient))
-	//	return 1
+	//		account.AccountTypeAuthorization, account.AccountTypeClient)
 	//}
 	// if !account.NotAllow(account2, []account.AccountType{
 	//	account.AccountTypeAuthorization, account.AccountTypeClient}) {
-	//	c.ui.Error(fmt.Sprintf(
+	//	return fmt.Errorf(
 	//		"account2: %s/%s is not allowed",
-	//		account.AccountTypeAuthorization, account.AccountTypeClient))
-	//	return 1
+	//		account.AccountTypeAuthorization, account.AccountTypeClient)
 	//}
 	// if amount == 0{
-	//	c.ui.Error("amount option [-amount] is invalid")
-	//	return 1
+	//	return fmt.Errorf("amount option [-amount] is invalid")
 	//}
 
-	hex, fileName, err := c.wallet.CreateTransferTx(
+	hex, fileName, err := wallet.CreateTransferTx(
 		account.AccountType(account1),
 		account.AccountType(account2),
 		amount,
 		fee)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call CreateTransferTx() %+v", err))
-		return 1
+		return fmt.Errorf("fail to call CreateTransferTx() %w", err)
 	}
-	if (c.wallet.CoinTypeCode() != coin.ETH && c.wallet.CoinTypeCode() != coin.XRP) && hex == "" {
-		c.ui.Info("No utxo")
-		return 0
+	if (wallet.CoinTypeCode() != coin.ETH && wallet.CoinTypeCode() != coin.XRP) && hex == "" {
+		fmt.Println("No utxo")
+		return nil
 	}
 	// TODO: output should be json if json option is true
-	c.ui.Output(fmt.Sprintf("[hex]: %s\n[fileName]: %s", hex, fileName))
+	fmt.Printf("[hex]: %s\n[fileName]: %s\n", hex, fileName)
 
-	return 0
+	return nil
 }

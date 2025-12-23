@@ -1,95 +1,68 @@
 package create
 
 import (
-	"flag"
-	"fmt"
+	"github.com/spf13/cobra"
 
-	"github.com/mitchellh/cli"
-
-	"github.com/hiromaily/go-crypto-wallet/pkg/command"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
-// CreateCommand create subcommand
-type CreateCommand struct {
-	Name    string
-	Version string
-	UI      cli.Ui
-	Wallet  wallets.Watcher
-}
-
-// Synopsis is explanation for this subcommand
-func (*CreateCommand) Synopsis() string {
-	return "creating functionality"
-}
-
-var (
-	depositSynopsis  = "create a deposit unsigned transaction file for client account"
-	paymentSynopsis  = "create a payment unsigned transaction file for payment account"
-	transferSynopsis = "create a transfer unsigned transaction file between accounts"
-	dbSynopsis       = "create payment_request table with dummy data for development use"
-)
-
-// Help returns usage for this subcommand
-func (*CreateCommand) Help() string {
-	return fmt.Sprintf(`Usage: wallet create [Subcommands...]
-Subcommands:
-  deposit  %s
-  payment  %s
-  transfer %s
-  db       %s
-`, depositSynopsis, paymentSynopsis, transferSynopsis, dbSynopsis)
-}
-
-// Run executes this subcommand
-func (c *CreateCommand) Run(args []string) int {
-	c.UI.Info(c.Synopsis())
-
-	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
-
-	// farther subcommand import
-	cmds := map[string]cli.CommandFactory{
-		"deposit": func() (cli.Command, error) {
-			return &DepositCommand{
-				name:     "deposit",
-				synopsis: depositSynopsis,
-				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
-			}, nil
-		},
-		"payment": func() (cli.Command, error) {
-			return &PaymentCommand{
-				name:     "payment",
-				synopsis: paymentSynopsis,
-				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
-			}, nil
-		},
-		"transfer": func() (cli.Command, error) {
-			return &TransferCommand{
-				name:     "transfer",
-				synopsis: transferSynopsis,
-				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
-			}, nil
-		},
-		"db": func() (cli.Command, error) {
-			return &DBCommand{
-				name:     "db",
-				synopsis: dbSynopsis,
-				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
-			}, nil
+// AddCommands adds all create subcommands
+func AddCommands(parentCmd *cobra.Command, wallet *wallets.Watcher) {
+	// deposit command
+	var depositFee float64
+	depositCmd := &cobra.Command{
+		Use:   "deposit",
+		Short: "create a deposit unsigned transaction file for client account",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runDeposit(*wallet, depositFee)
 		},
 	}
-	cl := command.CreateSubCommand(c.Name, c.Version, args, cmds)
+	depositCmd.Flags().Float64Var(&depositFee, "fee", 0, "adjustment fee")
+	parentCmd.AddCommand(depositCmd)
 
-	code, err := cl.Run()
-	if err != nil {
-		c.UI.Error(fmt.Sprintf("fail to call Run() subcommand of %s: %v", c.Name, err))
+	// payment command
+	var paymentFee float64
+	paymentCmd := &cobra.Command{
+		Use:   "payment",
+		Short: "create a payment unsigned transaction file for payment account",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runPayment(*wallet, paymentFee)
+		},
 	}
-	return code
+	paymentCmd.Flags().Float64Var(&paymentFee, "fee", 0, "adjustment fee")
+	parentCmd.AddCommand(paymentCmd)
+
+	// transfer command
+	var (
+		transferAccount1 string
+		transferAccount2 string
+		transferAmount   float64
+		transferFee      float64
+	)
+	transferCmd := &cobra.Command{
+		Use:   "transfer",
+		Short: "create unsigned transaction for transfer among accounts",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runTransfer(*wallet, transferAccount1, transferAccount2, transferAmount, transferFee)
+		},
+	}
+	transferCmd.Flags().StringVar(&transferAccount1, "account1", "", "sender account")
+	transferCmd.Flags().StringVar(&transferAccount2, "account2", "", "receiver account")
+	transferCmd.Flags().Float64Var(
+		&transferAmount, "amount", 0, "amount to send coin. if amount=0, all coin is sent")
+	transferCmd.Flags().Float64Var(&transferFee, "fee", 0, "adjustment fee")
+	parentCmd.AddCommand(transferCmd)
+
+	// db command
+	var dbTable string
+	dbCmd := &cobra.Command{
+		Use:        "db",
+		Short:      "create payment_request table with dummy data for development use",
+		Deprecated: "Use query with shell script instead of go code",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runDB(*wallet, dbTable)
+		},
+	}
+	dbCmd.Flags().StringVar(&dbTable, "table", "", "target table name")
+	parentCmd.AddCommand(dbCmd)
 }

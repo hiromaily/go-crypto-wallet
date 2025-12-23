@@ -1,9 +1,10 @@
 package watch
 
 import (
-	"github.com/mitchellh/cli"
+	"errors"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/command"
+	"github.com/spf13/cobra"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/api/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/api/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/api/xrp"
@@ -18,69 +19,63 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/xrpwallet"
 )
 
-// WatchSubCommands returns subcommand for wallet
-func WatchSubCommands(wallet wallets.Watcher, version string, conf *config.WalletRoot) map[string]cli.CommandFactory {
-	cmds := map[string]cli.CommandFactory{
-		"import": func() (cli.Command, error) {
-			return &imports.ImportCommand{
-				Name:    "import",
-				Version: version,
-				UI:      command.ClolorUI(),
-				Wallet:  wallet,
-			}, nil
+// AddCommands adds all watch subcommands to the root command
+func AddCommands(rootCmd *cobra.Command, wallet *wallets.Watcher, version string, confPtr *config.WalletRoot) {
+	// Import command
+	importCmd := &cobra.Command{
+		Use:   "import",
+		Short: "import resources",
+	}
+	rootCmd.AddCommand(importCmd)
+	imports.AddCommands(importCmd, wallet)
+
+	// Create command
+	createCmd := &cobra.Command{
+		Use:   "create",
+		Short: "create resources",
+	}
+	rootCmd.AddCommand(createCmd)
+	create.AddCommands(createCmd, wallet)
+
+	// Send command
+	sendCmd := send.AddCommand(wallet)
+	rootCmd.AddCommand(sendCmd)
+
+	// Monitor command
+	monitorCmd := &cobra.Command{
+		Use:   "monitor",
+		Short: "monitor resources",
+	}
+	rootCmd.AddCommand(monitorCmd)
+	monitor.AddCommands(monitorCmd, wallet)
+
+	// API command - wallet-type specific, dynamically configured
+	apiCmd := &cobra.Command{
+		Use:   "api",
+		Short: "API commands for the selected coin",
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			if *wallet == nil {
+				return errors.New("wallet not initialized, check --coin flag")
+			}
+			if confPtr == nil {
+				return errors.New("config not initialized")
+			}
+			// Clear existing subcommands to handle multiple runs in tests
+			cmd.ResetCommands()
+			switch v := (*wallet).(type) {
+			case *btcwallet.BTCWatch:
+				btc.AddCommands(cmd, v.BTC)
+			case *ethwallet.ETHWatch:
+				eth.AddCommands(cmd, v.ETH)
+			case *xrpwallet.XRPWatch:
+				xrp.AddCommands(cmd, v.XRP, &confPtr.Ripple.API.TxData)
+			}
+			return nil
 		},
-		"create": func() (cli.Command, error) {
-			return &create.CreateCommand{
-				Name:   "transfer",
-				UI:     command.ClolorUI(),
-				Wallet: wallet,
-			}, nil
-		},
-		"send": func() (cli.Command, error) {
-			return &send.SendCommand{
-				Name:   "send",
-				UI:     command.ClolorUI(),
-				Wallet: wallet,
-			}, nil
-		},
-		"monitor": func() (cli.Command, error) {
-			return &monitor.MonitorCommand{
-				Name:    "monitor",
-				Version: version,
-				UI:      command.ClolorUI(),
-				Wallet:  wallet,
-			}, nil
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// This will run if no subcommand is given, e.g., `watch api`
+			return cmd.Help()
 		},
 	}
-	switch v := wallet.(type) {
-	case *btcwallet.BTCWatch:
-		cmds["api"] = func() (cli.Command, error) {
-			return &btc.APICommand{
-				Name:    "api",
-				Version: version,
-				UI:      command.ClolorUI(),
-				BTC:     v.BTC,
-			}, nil
-		}
-	case *ethwallet.ETHWatch:
-		cmds["api"] = func() (cli.Command, error) {
-			return &eth.APICommand{
-				Name:    "api",
-				Version: version,
-				UI:      command.ClolorUI(),
-				ETH:     v.ETH,
-			}, nil
-		}
-	case *xrpwallet.XRPWatch:
-		cmds["api"] = func() (cli.Command, error) {
-			return &xrp.APICommand{
-				Name:    "api",
-				Version: version,
-				UI:      command.ClolorUI(),
-				XRP:     v.XRP,
-				TxData:  &conf.Ripple.API.TxData,
-			}, nil
-		}
-	}
-	return cmds
+	rootCmd.AddCommand(apiCmd)
 }

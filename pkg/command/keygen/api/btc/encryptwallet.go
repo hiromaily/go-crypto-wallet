@@ -1,60 +1,26 @@
 package btc
 
 import (
-	"flag"
+	"errors"
 	"fmt"
-
-	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 )
 
-// EncryptWalletCommand encryptwallet subcommand
-type EncryptWalletCommand struct {
-	name     string
-	synopsis string
-	ui       cli.Ui
-	btc      btcgrp.Bitcoiner
-}
-
-// Synopsis is explanation for this subcommand
-func (c *EncryptWalletCommand) Synopsis() string {
-	return c.synopsis
-}
-
-// Help returns usage for this subcommand
-func (*EncryptWalletCommand) Help() string {
-	return `Usage: keygen api encryptwallet [options...]
-Options:
-  -passphrase  passphrase
-`
-}
-
-// Run executes this subcommand
-func (c *EncryptWalletCommand) Run(args []string) int {
-	c.ui.Info(c.Synopsis())
-
-	var passphrase string
-
-	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
-	flags.StringVar(&passphrase, "passphrase", "", "passphrase")
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
+func runEncryptWallet(btc btcgrp.Bitcoiner, passphrase string) error {
+	fmt.Println("encrypts the wallet with 'passphrase'")
 
 	// validator
 	if passphrase == "" {
-		c.ui.Error("passphrase option [-passphrase] is required")
-		return 1
+		return errors.New("passphrase option [-passphrase] is required")
 	}
 
-	err := c.btc.EncryptWallet(passphrase)
+	err := btc.EncryptWallet(passphrase)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call btc.EncryptWallet() %+v", err))
-		return 1
+		return fmt.Errorf("fail to call btc.EncryptWallet() %w", err)
 	}
 
-	c.ui.Info("wallet is encrypted!")
+	fmt.Println("wallet is encrypted!")
 
-	return 0
+	return nil
 }

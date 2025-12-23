@@ -1,66 +1,29 @@
 package btc
 
 import (
-	"flag"
+	"errors"
 	"fmt"
-
-	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 )
 
-// WalletPassphraseChangeCommand walletpassphrasechange subcommand
-type WalletPassphraseChangeCommand struct {
-	name     string
-	synopsis string
-	ui       cli.Ui
-	btc      btcgrp.Bitcoiner
-}
-
-// Synopsis is explanation for this subcommand
-func (c *WalletPassphraseChangeCommand) Synopsis() string {
-	return c.synopsis
-}
-
-// Help returns usage for this subcommand
-func (*WalletPassphraseChangeCommand) Help() string {
-	return `Usage: keygen api walletpassphrasechange [options...]
-Options:
-  -old  old passphrase
-  -new  new passphrase
-`
-}
-
-// Run executes this subcommand
-func (c *WalletPassphraseChangeCommand) Run(args []string) int {
-	c.ui.Info(c.Synopsis())
-
-	var old, newPass string
-
-	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
-	flags.StringVar(&old, "old", "", "old passphrase")
-	flags.StringVar(&newPass, "new", "", "new passphrase")
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
+func runWalletPassphraseChange(btc btcgrp.Bitcoiner, old, newPass string) error {
+	fmt.Println("changes the wallet passphrase from 'oldpassphrase' to 'newpassphrase'")
 
 	// validator
 	if old == "" {
-		c.ui.Error("old passphrase option [-old] is required")
-		return 1
+		return errors.New("old passphrase option [-old] is required")
 	}
 	if newPass == "" {
-		c.ui.Error("new passphrase option [-new] is required")
-		return 1
+		return errors.New("new passphrase option [-new] is required")
 	}
 
-	err := c.btc.WalletPassphraseChange(old, newPass)
+	err := btc.WalletPassphraseChange(old, newPass)
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call btc.WalletPassphraseChange() %+v", err))
-		return 1
+		return fmt.Errorf("fail to call btc.WalletPassphraseChange() %w", err)
 	}
 
-	c.ui.Info("wallet passphrase was changed!")
+	fmt.Println("wallet passphrase was changed!")
 
-	return 0
+	return nil
 }

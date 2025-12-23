@@ -1,47 +1,17 @@
 package btc
 
 import (
-	"flag"
 	"fmt"
-
-	"github.com/mitchellh/cli"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 )
 
-// UnLockTxCommand unlocktx subcommand
-type UnLockTxCommand struct {
-	name     string
-	synopsis string
-	ui       cli.Ui
-	btc      btcgrp.Bitcoiner
-}
-
-// Synopsis is explanation for this subcommand
-func (c *UnLockTxCommand) Synopsis() string {
-	return c.synopsis
-}
-
-// Help returns usage for this subcommand
-func (*UnLockTxCommand) Help() string {
-	return `Usage: wallet api unlocktx`
-}
-
-// Run executes this subcommand
-func (c *UnLockTxCommand) Run(args []string) int {
-	c.ui.Info(c.Synopsis())
-
-	flags := flag.NewFlagSet(c.name, flag.ContinueOnError)
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
-
+func runUnlockTx(btc btcgrp.Bitcoiner) error {
 	// unlock locked transaction for unspent transaction
-	err := c.btc.UnlockUnspent()
+	err := btc.UnlockUnspent()
 	if err != nil {
-		c.ui.Error(fmt.Sprintf("fail to call BTC.UnlockUnspent() %+v", err))
-		return 1
+		return fmt.Errorf("fail to call BTC.UnlockUnspent() %w", err)
 	}
 
-	return 0
+	return nil
 }

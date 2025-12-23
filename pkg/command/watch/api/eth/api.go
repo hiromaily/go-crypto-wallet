@@ -1,95 +1,50 @@
 package eth
 
 import (
-	"flag"
-	"fmt"
+	"github.com/spf13/cobra"
 
-	"github.com/mitchellh/cli"
-
-	"github.com/hiromaily/go-crypto-wallet/pkg/command"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 )
 
-// APICommand api subcommand
-type APICommand struct {
-	Name    string
-	Version string
-	UI      cli.Ui
-	ETH     ethgrp.Ethereumer
-}
-
-// Synopsis is explanation for this subcommand
-func (*APICommand) Synopsis() string {
-	return "Ethereum API functionality"
-}
-
-var (
-	clientVersionSynopsis  = "network version"
-	nodeinfoSynopsis       = "node info"
-	syncingSynopsis        = "sync info"
-	networkVersionSynopsis = "network version"
-)
-
-// Help returns usage for this subcommand
-func (*APICommand) Help() string {
-	return fmt.Sprintf(`Usage: wallet api [Subcommands...]
-Subcommands:
-  clientversion    %s
-  nodeinfo         %s
-  syncing          %s
-  netversion       %s
-`, clientVersionSynopsis, nodeinfoSynopsis, syncingSynopsis, networkVersionSynopsis)
-}
-
-// Run executes this subcommand
-func (c *APICommand) Run(args []string) int {
-	c.UI.Info(c.Synopsis())
-
-	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
-
-	// farther subcommand import
-	cmds := map[string]cli.CommandFactory{
-		"clientversion": func() (cli.Command, error) {
-			return &ClientVersionCommand{
-				name:     "clientversion",
-				synopsis: clientVersionSynopsis,
-				ui:       command.ClolorUI(),
-				eth:      c.ETH,
-			}, nil
-		},
-		"nodeinfo": func() (cli.Command, error) {
-			return &NodeInfoCommand{
-				name:     "nodeinfo",
-				synopsis: nodeinfoSynopsis,
-				ui:       command.ClolorUI(),
-				eth:      c.ETH,
-			}, nil
-		},
-		"syncing": func() (cli.Command, error) {
-			return &SyncingCommand{
-				name:     "syncing",
-				synopsis: syncingSynopsis,
-				ui:       command.ClolorUI(),
-				eth:      c.ETH,
-			}, nil
-		},
-		"netversion": func() (cli.Command, error) {
-			return &NetVersionCommand{
-				name:     "netversion",
-				synopsis: networkVersionSynopsis,
-				ui:       command.ClolorUI(),
-				eth:      c.ETH,
-			}, nil
+// AddCommands adds all Ethereum API subcommands
+func AddCommands(parentCmd *cobra.Command, eth ethgrp.Ethereumer) {
+	// clientversion command
+	clientversionCmd := &cobra.Command{
+		Use:   "clientversion",
+		Short: "network version",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runClientVersion(eth)
 		},
 	}
-	cl := command.CreateSubCommand(c.Name, c.Version, args, cmds)
+	parentCmd.AddCommand(clientversionCmd)
 
-	code, err := cl.Run()
-	if err != nil {
-		c.UI.Error(fmt.Sprintf("fail to call Run() subcommand of %s: %v", c.Name, err))
+	// nodeinfo command
+	nodeinfoCmd := &cobra.Command{
+		Use:   "nodeinfo",
+		Short: "node info",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runNodeInfo(eth)
+		},
 	}
-	return code
+	parentCmd.AddCommand(nodeinfoCmd)
+
+	// syncing command
+	syncingCmd := &cobra.Command{
+		Use:   "syncing",
+		Short: "sync info",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runSyncing(eth)
+		},
+	}
+	parentCmd.AddCommand(syncingCmd)
+
+	// netversion command
+	netversionCmd := &cobra.Command{
+		Use:   "netversion",
+		Short: "network version",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runNetVersion(eth)
+		},
+	}
+	parentCmd.AddCommand(netversionCmd)
 }

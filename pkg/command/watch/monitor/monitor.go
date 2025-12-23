@@ -1,75 +1,34 @@
 package monitor
 
 import (
-	"flag"
-	"fmt"
+	"github.com/spf13/cobra"
 
-	"github.com/mitchellh/cli"
-
-	"github.com/hiromaily/go-crypto-wallet/pkg/command"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
-// MonitorCommand montor subcommand
-type MonitorCommand struct {
-	Name    string
-	Version string
-	UI      cli.Ui
-	Wallet  wallets.Watcher
-}
-
-// Synopsis is explanation for this subcommand
-func (*MonitorCommand) Synopsis() string {
-	return "monitoring functionality"
-}
-
-var (
-	senttxSynopsis  = "monitor sent transactions"
-	balanceSynopsis = "monitor balance"
-)
-
-// Help returns usage for this subcommand
-func (*MonitorCommand) Help() string {
-	return fmt.Sprintf(`Usage: wallet monitor [Subcommands...]
-Subcommands:
-  senttx   %s
-  balance  %s
-`, senttxSynopsis, balanceSynopsis)
-}
-
-// Run executes this subcommand
-func (c *MonitorCommand) Run(args []string) int {
-	c.UI.Info(c.Synopsis())
-
-	flags := flag.NewFlagSet(c.Name, flag.ContinueOnError)
-	if err := flags.Parse(args); err != nil {
-		return 1
-	}
-
-	// farther subcommand import
-	cmds := map[string]cli.CommandFactory{
-		"senttx": func() (cli.Command, error) {
-			return &SentTxCommand{
-				name:     "senttx",
-				synopsis: senttxSynopsis,
-				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
-			}, nil
-		},
-		"balance": func() (cli.Command, error) {
-			return &BalanceCommand{
-				name:     "balance",
-				synopsis: balanceSynopsis,
-				ui:       command.ClolorUI(),
-				wallet:   c.Wallet,
-			}, nil
+// AddCommands adds all monitor subcommands
+func AddCommands(parentCmd *cobra.Command, wallet *wallets.Watcher) {
+	// senttx command
+	var senttxAccount string
+	senttxCmd := &cobra.Command{
+		Use:   "senttx",
+		Short: "monitor sent transactions",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runSentTx(*wallet, senttxAccount)
 		},
 	}
-	cl := command.CreateSubCommand(c.Name, c.Version, args, cmds)
+	senttxCmd.Flags().StringVar(&senttxAccount, "account", "", "account for monitoring")
+	parentCmd.AddCommand(senttxCmd)
 
-	code, err := cl.Run()
-	if err != nil {
-		c.UI.Error(fmt.Sprintf("fail to call Run() subcommand of %s: %v", c.Name, err))
+	// balance command
+	var balanceConfirmationNum uint64
+	balanceCmd := &cobra.Command{
+		Use:   "balance",
+		Short: "monitor balance",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runBalance(*wallet, balanceConfirmationNum)
+		},
 	}
-	return code
+	balanceCmd.Flags().Uint64Var(&balanceConfirmationNum, "num", 6, "confirmation number")
+	parentCmd.AddCommand(balanceCmd)
 }
