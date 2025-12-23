@@ -46,8 +46,11 @@ func ValidateKeyRange(idxFrom, count uint32) error {
 
 	// Check for overflow
 	const maxNormalIndex = 0x7FFFFFFF
-	if idxFrom+count-1 > maxNormalIndex {
-		return fmt.Errorf("key range [%d, %d] exceeds maximum index %d", idxFrom, idxFrom+count-1, maxNormalIndex)
+	if idxFrom > maxNormalIndex-(count-1) {
+		return fmt.Errorf(
+			"key range with start %d and count %d exceeds maximum index %d",
+			idxFrom, count, maxNormalIndex,
+		)
 	}
 
 	return nil

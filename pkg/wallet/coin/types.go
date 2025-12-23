@@ -43,7 +43,8 @@ const (
 	ETH   = domainCoin.ETH
 	XRP   = domainCoin.XRP
 	ERC20 = domainCoin.ERC20
-	HYC   = domainCoin.HYC
+	HYT   = domainCoin.HYT
+	HYC   = domainCoin.HYT // Deprecated: Use HYT instead
 )
 
 // GetCoinType returns CoinType based on network configuration
