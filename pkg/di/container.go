@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
@@ -16,6 +17,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/converter"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
@@ -26,10 +28,16 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
+	btccoldsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/coldsrv"
+	btckeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/coldsrv/keygensrv"
 	btcsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/watchsrv"
+	commonsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/coldsrv"
+	ethkeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/keygensrv"
 	ethsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/watchsrv"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watchsrv"
+	xrpkeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/xrp/keygensrv"
 	xrpsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/xrp/watchsrv"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
@@ -41,12 +49,18 @@ import (
 // Container is for DI container interface
 type Container interface {
 	NewWalleter() wallets.Watcher
+	NewKeygener() wallets.Keygener
 }
 
 type container struct {
 	// config
 	conf        *config.WalletRoot
 	accountConf *account.AccountRoot
+	// db
+	mysqlClient *sql.DB
+	// utility
+	logger      logger.Logger
+	uuidHandler uuid.UUIDHandler
 	// wallet
 	walletType wtype.WalletType
 	btc        btcgrp.Bitcoiner
@@ -60,11 +74,8 @@ type container struct {
 	wsXrpAdmin   *ws.WS
 	grpcConn     *grpc.ClientConn
 	rippleAPI    *xrp.RippleAPI
-	// db
-	mysqlClient *sql.DB
-	// utility
-	logger      logger.Logger
-	uuidHandler uuid.UUIDHandler
+	// keygen specific
+	multisig account.MultisigAccounter
 }
 
 // NewContainer is to create container interface
@@ -79,6 +90,64 @@ func NewContainer(conf *config.WalletRoot, accountConf *account.AccountRoot, wal
 //
 // Wallet
 //
+
+// NewKeygener is to register for keygener interface
+func (c *container) NewKeygener() wallets.Keygener {
+	switch {
+	case coin.IsBTCGroup(c.conf.CoinTypeCode):
+		return c.newBTCKeygener()
+	case coin.IsETHGroup(c.conf.CoinTypeCode):
+		return c.newETHKeygener()
+	case c.conf.CoinTypeCode == coin.XRP:
+		return c.newXRPKeygener()
+	default:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
+	}
+}
+
+func (c *container) newBTCKeygener() wallets.Keygener {
+	return btcwallet.NewBTCKeygen(
+		c.newBTC(),
+		c.newMySQLClient(),
+		c.conf.AddressType,
+		c.newSeeder(),
+		c.newHdWallter(),
+		c.newPrivKeyer(),
+		c.newFullPubKeyImporter(),
+		c.newMultisiger(),
+		c.newAddressExporter(),
+		c.newSigner(),
+		c.walletType,
+	)
+}
+
+func (c *container) newETHKeygener() wallets.Keygener {
+	return ethwallet.NewETHKeygen(
+		c.newETH(),
+		c.newMySQLClient(),
+		c.newLogger(),
+		c.walletType,
+		c.newSeeder(),
+		c.newHdWallter(),
+		c.newPrivKeyer(),
+		c.newAddressExporter(),
+		c.newETHSigner(),
+	)
+}
+
+func (c *container) newXRPKeygener() wallets.Keygener {
+	return xrpwallet.NewXRPKeygen(
+		c.newXRP(),
+		c.newMySQLClient(),
+		c.newLogger(),
+		c.walletType,
+		c.newSeeder(),
+		c.newHdWallter(),
+		c.newXRPKeyGenerator(),
+		c.newAddressExporter(),
+		c.newXRPSigner(),
+	)
+}
 
 // NewWalleter is to register for walleter interface
 func (c *container) NewWalleter() wallets.Watcher {
@@ -598,4 +667,227 @@ func (c *container) newPaymentAccount() account.AccountType {
 		return account.AccountTypePayment
 	}
 	return c.accountConf.PaymentSender
+}
+
+//
+// Keygen Service
+//
+
+func (c *container) newSeeder() service.Seeder {
+	return commonsrv.NewSeed(
+		c.newLogger(),
+		c.newSeedRepo(),
+		c.walletType,
+	)
+}
+
+func (c *container) newHdWallter() service.HDWalleter {
+	return commonsrv.NewHDWallet(
+		c.newLogger(),
+		c.newHdWalletRepo(),
+		c.newKeyGenerator(),
+		c.conf.CoinTypeCode,
+		c.walletType,
+	)
+}
+
+func (c *container) newHdWalletRepo() commonsrv.HDWalletRepo {
+	return commonsrv.NewAccountHDWalletRepo(
+		c.newAccountKeyRepo(),
+	)
+}
+
+func (c *container) newPrivKeyer() service.PrivKeyer {
+	switch {
+	case coin.IsBTCGroup(c.conf.CoinTypeCode):
+		return btckeygensrv.NewPrivKey(
+			c.newBTC(),
+			c.newLogger(),
+			c.newAccountKeyRepo(),
+			c.walletType,
+		)
+	case coin.IsETHGroup(c.conf.CoinTypeCode):
+		return ethkeygensrv.NewPrivKey(
+			c.newETH(),
+			c.newLogger(),
+			c.newAccountKeyRepo(),
+			c.walletType,
+		)
+	default:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
+	}
+}
+
+func (c *container) newFullPubKeyImporter() service.FullPubKeyImporter {
+	return btckeygensrv.NewFullPubkeyImport(
+		c.newBTC(),
+		c.newLogger(),
+		c.newAuthFullPubKeyRepo(),
+		c.newPubkeyFileStorager(),
+		c.walletType,
+	)
+}
+
+func (c *container) newMultisiger() service.Multisiger {
+	return btckeygensrv.NewMultisig(
+		c.newBTC(),
+		c.newLogger(),
+		c.newAuthFullPubKeyRepo(),
+		c.newAccountKeyRepo(),
+		c.newMultiAccount(),
+		c.walletType,
+	)
+}
+
+func (c *container) newAddressExporter() service.AddressExporter {
+	return commonsrv.NewAddressExport(
+		c.newLogger(),
+		c.newAccountKeyRepo(),
+		c.newAddressFileStorager(),
+		c.newMultiAccount(),
+		c.conf.CoinTypeCode,
+		c.walletType,
+	)
+}
+
+func (c *container) newSigner() service.Signer {
+	return btccoldsrv.NewSign(
+		c.newBTC(),
+		c.newLogger(),
+		c.newAccountKeyRepo(),
+		c.newAuthKeyRepo(),
+		c.newTxFileStorager(),
+		c.newMultiAccount(),
+		c.walletType,
+	)
+}
+
+func (c *container) newETHSigner() service.Signer {
+	return ethkeygensrv.NewSign(
+		c.newETH(),
+		c.newLogger(),
+		c.newTxFileStorager(),
+		c.walletType,
+	)
+}
+
+func (c *container) newXRPSigner() service.Signer {
+	return xrpkeygensrv.NewSign(
+		c.newXRP(),
+		c.newLogger(),
+		c.newXRPAccountKeyRepo(),
+		c.newTxFileStorager(),
+		c.walletType,
+	)
+}
+
+func (c *container) newXRPKeyGenerator() xrpkeygensrv.XRPKeyGenerator {
+	return xrpkeygensrv.NewXRPKeyGenerate(
+		c.newXRP(),
+		c.newLogger(),
+		c.newMySQLClient(),
+		c.conf.CoinTypeCode,
+		c.walletType,
+		c.newAccountKeyRepo(),
+		c.newXRPAccountKeyRepo(),
+	)
+}
+
+func (c *container) newKeyGenerator() key.Generator {
+	var chainConf *chaincfg.Params
+	switch {
+	case coin.IsBTCGroup(c.conf.CoinTypeCode):
+		chainConf = c.newBTC().GetChainConf()
+	case coin.IsETHGroup(c.conf.CoinTypeCode):
+		chainConf = c.newETH().GetChainConf()
+	case c.conf.CoinTypeCode == coin.XRP:
+		chainConf = c.newXRP().GetChainConf()
+	default:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
+	}
+
+	return key.NewHDKey(
+		key.PurposeTypeBIP44,
+		c.conf.CoinTypeCode,
+		chainConf,
+		c.newLogger())
+}
+
+func (c *container) newMultiAccount() account.MultisigAccounter {
+	if c.multisig == nil {
+		if c.accountConf == nil || c.accountConf.Multisigs == nil {
+			return account.NewMultisigAccounts(nil)
+		}
+		c.multisig = account.NewMultisigAccounts(c.accountConf.Multisigs)
+	}
+	return c.multisig
+}
+
+//
+// Keygen Repository
+//
+
+func (c *container) newSeedRepo() coldrepo.SeedRepositorier {
+	return coldrepo.NewSeedRepositorySqlc(
+		c.newMySQLClient(),
+		c.conf.CoinTypeCode,
+		c.newLogger(),
+	)
+}
+
+func (c *container) newAccountKeyRepo() coldrepo.AccountKeyRepositorier {
+	return coldrepo.NewAccountKeyRepositorySqlc(
+		c.newMySQLClient(),
+		c.conf.CoinTypeCode,
+		c.newLogger(),
+	)
+}
+
+func (c *container) newXRPAccountKeyRepo() coldrepo.XRPAccountKeyRepositorier {
+	return coldrepo.NewXRPAccountKeyRepositorySqlc(
+		c.newMySQLClient(),
+		c.conf.CoinTypeCode,
+		c.newLogger(),
+	)
+}
+
+func (c *container) newAuthFullPubKeyRepo() coldrepo.AuthFullPubkeyRepositorier {
+	return coldrepo.NewAuthFullPubkeyRepositorySqlc(
+		c.newMySQLClient(),
+		c.conf.CoinTypeCode,
+		c.newLogger(),
+	)
+}
+
+func (c *container) newAuthKeyRepo() coldrepo.AuthAccountKeyRepositorier {
+	return coldrepo.NewAuthAccountKeyRepositorySqlc(
+		c.newMySQLClient(),
+		c.conf.CoinTypeCode,
+		c.newLogger(),
+	)
+}
+
+//
+// Keygen File Storage
+//
+
+func (c *container) newAddressFileStorager() address.FileRepositorier {
+	return address.NewFileRepository(
+		c.conf.FilePath.Address,
+		c.newLogger(),
+	)
+}
+
+func (c *container) newPubkeyFileStorager() address.FileRepositorier {
+	return address.NewFileRepository(
+		c.conf.FilePath.FullPubKey,
+		c.newLogger(),
+	)
+}
+
+func (c *container) newTxFileStorager() tx.FileRepositorier {
+	return tx.NewFileRepository(
+		c.conf.FilePath.Tx,
+		c.newLogger(),
+	)
 }
