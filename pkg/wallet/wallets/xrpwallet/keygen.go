@@ -73,19 +73,19 @@ func (k *XRPKeygen) GenerateAccountKey(
 }
 
 // ImportPrivKey imports privKey
-func (k *XRPKeygen) ImportPrivKey(_ account.AccountType) error {
+func (*XRPKeygen) ImportPrivKey(_ account.AccountType) error {
 	logger.Info("no functionality for ImportPrivKey() in XRP")
 	return nil
 }
 
 // ImportFullPubKey imports full-pubkey
-func (k *XRPKeygen) ImportFullPubKey(_ string) error {
+func (*XRPKeygen) ImportFullPubKey(_ string) error {
 	logger.Info("no functionality for ImportFullPubKey() in XRP")
 	return nil
 }
 
 // CreateMultisigAddress creates multi sig address returns Multisiger interface
-func (k *XRPKeygen) CreateMultisigAddress(_ account.AccountType) error {
+func (*XRPKeygen) CreateMultisigAddress(_ account.AccountType) error {
 	logger.Info("no functionality for CreateMultisigAddress() in XRP")
 	return nil
 }

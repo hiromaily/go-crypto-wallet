@@ -69,14 +69,14 @@ func (k *ETHKeygen) ImportPrivKey(accountType account.AccountType) error {
 }
 
 // ImportFullPubKey imports full-pubkey
-func (k *ETHKeygen) ImportFullPubKey(_ string) error {
+func (*ETHKeygen) ImportFullPubKey(_ string) error {
 	// return k.FullPubKeyImporter.ImportFullPubKey(fileName)
 	logger.Info("no functionality for ImportFullPubKey() in ETH")
 	return nil
 }
 
 // CreateMultisigAddress creates multi sig address returns Multisiger interface
-func (k *ETHKeygen) CreateMultisigAddress(_ account.AccountType) error {
+func (*ETHKeygen) CreateMultisigAddress(_ account.AccountType) error {
 	logger.Info("no functionality for CreateMultisigAddress() in ETH")
 	return nil
 }

@@ -71,7 +71,7 @@ func (w *XRPWatch) CreateTransferTx(
 }
 
 // UpdateTxStatus updates transaction status
-func (w *XRPWatch) UpdateTxStatus() error {
+func (*XRPWatch) UpdateTxStatus() error {
 	logger.Info("no functionality for XRP")
 	return nil
 }
