@@ -2,6 +2,8 @@ package tx
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCastBlank(t *testing.T) {
@@ -44,9 +46,8 @@ func TestValidateTxType(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := ValidateTxType(tt.args.txType); got != tt.want {
-				t.Errorf("ValidateTxType() = %v, want %v", got, tt.want)
-			}
+			got := ValidateTxType(tt.args.txType)
+			assert.Equal(t, tt.want, got, "ValidateTxType() result mismatch")
 		})
 	}
 }

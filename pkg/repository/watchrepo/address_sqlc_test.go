@@ -7,6 +7,8 @@ import (
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
@@ -45,60 +47,35 @@ func TestAddressSqlc(t *testing.T) {
 		},
 	}
 
-	if err := addressRepo.InsertBulk(addresses); err != nil {
-		t.Fatalf("fail to call InsertBulk() %v", err)
-	}
+	err := addressRepo.InsertBulk(addresses)
+	require.NoError(t, err, "fail to call InsertBulk()")
 
 	// Get all addresses
 	allAddrs, err := addressRepo.GetAll(accountType)
-	if err != nil {
-		t.Fatalf("fail to call GetAll() %v", err)
-	}
-	if len(allAddrs) < 3 {
-		t.Errorf("GetAll() returned %d addresses, want at least 3", len(allAddrs))
-		return
-	}
+	require.NoError(t, err, "fail to call GetAll()")
+	assert.GreaterOrEqual(t, len(allAddrs), 3, "GetAll() should return at least 3 addresses")
 
 	// Get all address strings
 	addrStrings, err := addressRepo.GetAllAddress(accountType)
-	if err != nil {
-		t.Fatalf("fail to call GetAllAddress() %v", err)
-	}
-	if len(addrStrings) < 3 {
-		t.Errorf("GetAllAddress() returned %d addresses, want at least 3", len(addrStrings))
-		return
-	}
+	require.NoError(t, err, "fail to call GetAllAddress()")
+	assert.GreaterOrEqual(t, len(addrStrings), 3, "GetAllAddress() should return at least 3 addresses")
 
 	// Get one unallocated address
 	unallocAddr, err := addressRepo.GetOneUnAllocated(accountType)
-	if err != nil {
-		t.Fatalf("fail to call GetOneUnAllocated() %v", err)
-	}
-	if unallocAddr == nil {
-		t.Fatal("GetOneUnAllocated() returned nil")
-	}
-	if unallocAddr.IsAllocated {
-		t.Errorf("GetOneUnAllocated() returned allocated address")
-		return
-	}
+	require.NoError(t, err, "fail to call GetOneUnAllocated()")
+	require.NotNil(t, unallocAddr, "GetOneUnAllocated() returned nil")
+	assert.False(t, unallocAddr.IsAllocated, "GetOneUnAllocated() returned allocated address")
 
 	// Update is_allocated
 	rowsAffected, err := addressRepo.UpdateIsAllocated(true, unallocAddr.WalletAddress)
-	if err != nil {
-		t.Fatalf("fail to call UpdateIsAllocated() %v", err)
-	}
-	if rowsAffected != 1 {
-		t.Errorf("UpdateIsAllocated() affected %d rows, want 1", rowsAffected)
-		return
-	}
+	require.NoError(t, err, "fail to call UpdateIsAllocated()")
+	assert.Equal(t, int64(1), rowsAffected, "UpdateIsAllocated() should affect 1 row")
 
 	// Verify the address is now allocated
 	verifyAddr, err := addressRepo.GetOneUnAllocated(accountType)
-	if err != nil {
-		t.Fatalf("fail to call GetOneUnAllocated() after update %v", err)
-	}
-	if verifyAddr != nil && verifyAddr.WalletAddress == unallocAddr.WalletAddress {
-		t.Errorf("GetOneUnAllocated() returned the same address after allocation")
-		return
+	require.NoError(t, err, "fail to call GetOneUnAllocated() after update")
+	if verifyAddr != nil {
+		assert.NotEqual(t, unallocAddr.WalletAddress, verifyAddr.WalletAddress,
+			"GetOneUnAllocated() returned the same address after allocation")
 	}
 }

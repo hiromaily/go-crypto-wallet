@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/ws"
 )
@@ -34,9 +36,7 @@ type ResponseAccountChannels struct {
 // TestCall is test for Call
 func TestCall(t *testing.T) {
 	websoc, err := ws.New(context.Background(), xrp.PublicWSServerTestnet.String())
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err, "ws.New() should not return error")
 
 	ac := AccountChannels{
 		ID:                 1,
@@ -47,9 +47,7 @@ func TestCall(t *testing.T) {
 	}
 	var res ResponseAccountChannels
 	err = websoc.Call(context.Background(), &ac, &res)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err, "websoc.Call() should not return error")
 	t.Log(res)
 
 	websoc.Close()

@@ -6,8 +6,10 @@ package watchrepo_test
 import (
 	"testing"
 
-	"github.com/quagmt/udecimal"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/quagmt/udecimal"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
@@ -33,9 +35,7 @@ func TestBTCTxInputSqlc(t *testing.T) {
 		Fee:               feeAmt,
 	}
 	txID, err := btcTxRepo.InsertUnsignedTx(action.ActionTypePayment, txItem)
-	if err != nil {
-		t.Fatalf("fail to create parent tx: %v", err)
-	}
+	require.NoError(t, err, "fail to create parent tx")
 
 	// Create test inputs
 	amount, _ := udecimal.Parse("1.5")
@@ -65,29 +65,18 @@ func TestBTCTxInputSqlc(t *testing.T) {
 	}
 
 	// Insert bulk
-	if err := btcTxInputRepo.InsertBulk(inputs); err != nil {
-		t.Fatalf("fail to call InsertBulk() %v", err)
-	}
+	err = btcTxInputRepo.InsertBulk(inputs)
+	require.NoError(t, err, "fail to call InsertBulk()")
 
 	// Get all by tx ID
 	retrievedInputs, err := btcTxInputRepo.GetAllByTxID(txID)
-	if err != nil {
-		t.Fatalf("fail to call GetAllByTxID() %v", err)
-	}
-	if len(retrievedInputs) != 2 {
-		t.Errorf("GetAllByTxID() returned %d inputs, want 2", len(retrievedInputs))
-		return
-	}
+	require.NoError(t, err, "fail to call GetAllByTxID()")
+	assert.Equal(t, 2, len(retrievedInputs), "GetAllByTxID() should return 2 inputs")
 
 	// Get one
 	oneInput, err := btcTxInputRepo.GetOne(retrievedInputs[0].ID)
-	if err != nil {
-		t.Fatalf("fail to call GetOne() %v", err)
-	}
-	if oneInput.InputTxid != "input-txid-sqlc-1" {
-		t.Errorf("GetOne() returned InputTxid = %s, want input-txid-sqlc-1", oneInput.InputTxid)
-		return
-	}
+	require.NoError(t, err, "fail to call GetOne()")
+	assert.Equal(t, "input-txid-sqlc-1", oneInput.InputTxid, "GetOne() InputTxid mismatch")
 
 	// Insert single
 	amount, _ := udecimal.Parse("1.5")
@@ -101,17 +90,11 @@ func TestBTCTxInputSqlc(t *testing.T) {
 		InputAmount:        amount3,
 		InputConfirmations: 6,
 	}
-	if err := btcTxInputRepo.Insert(singleInput); err != nil {
-		t.Fatalf("fail to call Insert() %v", err)
-	}
+	err = btcTxInputRepo.Insert(singleInput)
+	require.NoError(t, err, "fail to call Insert()")
 
 	// Verify count increased
 	allInputs, err := btcTxInputRepo.GetAllByTxID(txID)
-	if err != nil {
-		t.Fatalf("fail to call GetAllByTxID() after Insert() %v", err)
-	}
-	if len(allInputs) != 3 {
-		t.Errorf("GetAllByTxID() returned %d inputs, want 3", len(allInputs))
-		return
-	}
+	require.NoError(t, err, "fail to call GetAllByTxID() after Insert()")
+	assert.Equal(t, 3, len(allInputs), "GetAllByTxID() should return 3 inputs")
 }
