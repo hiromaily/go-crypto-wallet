@@ -3,25 +3,24 @@ package account
 import (
 	"errors"
 	"fmt"
-	"os"
 
-	"github.com/BurntSushi/toml"
 	"github.com/go-playground/validator/v10"
+	"github.com/spf13/viper"
 )
 
 // AccountRoot account root config
 type AccountRoot struct {
-	Types           []AccountType     `toml:"types"`
-	DepositReceiver AccountType       `toml:"deposit_receiver"`
-	PaymentSender   AccountType       `toml:"payment_sender"`
-	Multisigs       []AccountMultisig `toml:"multisig"`
+	Types           []AccountType     `toml:"types" mapstructure:"types"`
+	DepositReceiver AccountType       `toml:"deposit_receiver" mapstructure:"deposit_receiver"`
+	PaymentSender   AccountType       `toml:"payment_sender" mapstructure:"payment_sender"`
+	Multisigs       []AccountMultisig `toml:"multisig" mapstructure:"multisig"`
 }
 
 // AccountMultisig multisig setting
 type AccountMultisig struct {
-	Type      AccountType `toml:"type"`
-	Required  int         `toml:"required"`
-	AuthUsers []AuthType  `toml:"auth_users"`
+	Type      AccountType `toml:"type" mapstructure:"type"`
+	Required  int         `toml:"required" mapstructure:"required"`
+	AuthUsers []AuthType  `toml:"auth_users" mapstructure:"auth_users"`
 }
 
 // NewAccount creates account config
@@ -49,15 +48,17 @@ func NewAccount(file string) (*AccountRoot, error) {
 
 // loadAccount load account config file
 func loadAccount(path string) (*AccountRoot, error) {
-	d, err := os.ReadFile(path) //nolint:gosec
-	if err != nil {
-		return nil, fmt.Errorf("can't read toml file. %s: %w", path, err)
+	v := viper.New()
+	v.SetConfigFile(path)
+	v.SetConfigType("toml")
+
+	if err := v.ReadInConfig(); err != nil {
+		return nil, fmt.Errorf("can't read config file. %s: %w", path, err)
 	}
 
 	var config AccountRoot
-	_, err = toml.Decode(string(d), &config)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call toml.Decode(): %w", err)
+	if err := v.Unmarshal(&config); err != nil {
+		return nil, fmt.Errorf("fail to unmarshal config: %w", err)
 	}
 
 	return &config, nil
