@@ -95,6 +95,9 @@ func NewContainer(conf *config.WalletRoot, accountConf *account.AccountRoot, wal
 
 // NewKeygener is to register for keygener interface
 func (c *container) NewKeygener() wallets.Keygener {
+	// set global logger
+	logger.SetGlobal(c.newLogger())
+
 	switch {
 	case coin.IsBTCGroup(c.conf.CoinTypeCode):
 		return c.newBTCKeygener()
@@ -153,6 +156,9 @@ func (c *container) newXRPKeygener() wallets.Keygener {
 
 // NewWalleter is to register for walleter interface
 func (c *container) NewWalleter() wallets.Watcher {
+	// set global logger
+	logger.SetGlobal(c.newLogger())
+
 	switch {
 	case coin.IsBTCGroup(c.conf.CoinTypeCode):
 		return c.newBTCWalleter()
@@ -171,6 +177,9 @@ func (c *container) NewSigner(authName string) wallets.Signer {
 	if !account.ValidateAuthType(authName) {
 		panic("authName is invalid. this should be embedded when building: " + authName)
 	}
+
+	// set global logger
+	logger.SetGlobal(c.newLogger())
 
 	authType := account.AuthTypeMap[authName]
 
