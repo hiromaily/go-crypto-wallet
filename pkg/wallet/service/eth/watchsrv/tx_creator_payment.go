@@ -8,6 +8,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
@@ -23,7 +24,7 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	sender := t.paymentSender
 	receiver := account.AccountTypeAnonymous
 	targetAction := action.ActionTypePayment
-	t.logger.Debug("account",
+	logger.Debug("account",
 		"sender", sender.String(),
 		"receiver", receiver.String(),
 	)
@@ -34,7 +35,7 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 		return "", "", err
 	}
 	if len(userPayments) == 0 {
-		t.logger.Debug("no data in userPayments")
+		logger.Debug("no data in userPayments")
 		// no data
 		return "", "", nil
 	}
@@ -91,7 +92,7 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, *big.Int, []int64, error)
 		return nil, nil, nil, fmt.Errorf("fail to call repo.GetPaymentRequestAll(): %w", err)
 	}
 	if len(paymentRequests) == 0 {
-		t.logger.Debug("no data in payment_request")
+		logger.Debug("no data in payment_request")
 		return nil, nil, nil, nil
 	}
 
@@ -109,7 +110,7 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, *big.Int, []int64, error)
 		amt, err = strconv.ParseFloat(val.Amount.String(), 64)
 		if err != nil {
 			// fatal error because table includes invalid data
-			t.logger.Error("payment_request table includes invalid amount field")
+			logger.Error("payment_request table includes invalid amount field")
 			return nil, nil, nil, errors.New("payment_request table includes invalid amount field")
 		}
 		userPayments[idx].floatAmount = amt
@@ -117,7 +118,7 @@ func (t *TxCreate) createUserPayment() ([]UserPayment, *big.Int, []int64, error)
 		// validate address
 		if err = t.eth.ValidateAddr(userPayments[idx].receiverAddr); err != nil {
 			// fatal error
-			t.logger.Error("fail to call ValidationAddr",
+			logger.Error("fail to call ValidationAddr",
 				"address", userPayments[idx].receiverAddr,
 				"error", err,
 			)
@@ -163,7 +164,7 @@ func (t *TxCreate) createPaymentRawTransactions(
 		additionalNonce++
 
 		rawTxHex := rawTx.TxHex
-		t.logger.Debug("rawTxHex", "rawTxHex", rawTxHex)
+		logger.Debug("rawTxHex", "rawTxHex", rawTxHex)
 		// TODO: `rawTxHex` should be used to trace progress to update database
 
 		serializedTx, err := serial.EncodeToString(rawTx)

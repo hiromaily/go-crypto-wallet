@@ -18,7 +18,6 @@ import (
 // AddressImport type
 type AddressImport struct {
 	btc          btcgrp.Bitcoiner
-	logger       logger.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier
 	addrFileRepo address.FileRepositorier
@@ -30,7 +29,6 @@ type AddressImport struct {
 // NewAddressImport returns AddressImport object
 func NewAddressImport(
 	btc btcgrp.Bitcoiner,
-	logger logger.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	addrFileRepo address.FileRepositorier,
@@ -40,7 +38,6 @@ func NewAddressImport(
 ) *AddressImport {
 	return &AddressImport{
 		btc:          btc,
-		logger:       logger,
 		dbConn:       dbConn,
 		addrRepo:     addrRepo,
 		addrFileRepo: addrFileRepo,
@@ -101,7 +98,7 @@ func (a *AddressImport) ImportAddress(fileName string, isRescan bool) error {
 		err = a.btc.ImportAddressWithLabel(targetAddr, addrFmt.AccountType.String(), isRescan)
 		if err != nil {
 			//-4: The wallet already contains the private key for this address or script
-			a.logger.Warn(
+			logger.Warn(
 				"fail to call btc.ImportAddressWithLabel() but continue following addresses",
 				"address", targetAddr,
 				"account_type", addrFmt.AccountType.String(),
@@ -135,13 +132,13 @@ func (a *AddressImport) ImportAddress(fileName string, isRescan bool) error {
 func (a *AddressImport) checkImportedPubKey(addr string) {
 	addrInfo, err := a.btc.GetAddressInfo(addr)
 	if err != nil {
-		a.logger.Error(
+		logger.Error(
 			"fail to call btc.GetAddressInfo()",
 			"address", addr,
 			"error", err)
 		return
 	}
-	a.logger.Debug("account is found",
+	logger.Debug("account is found",
 		"account", addrInfo.GetLabelName(),
 		"address", addr)
 
@@ -149,7 +146,7 @@ func (a *AddressImport) checkImportedPubKey(addr string) {
 	// TODO: if wallet,keygen,sign is working on only one bitcoin core server,
 	// result would be `iswatchonly=false`
 	if !addrInfo.Iswatchonly {
-		a.logger.Warn("this address must be watch only wallet")
+		logger.Warn("this address must be watch only wallet")
 		// grok.Value(addrInfo)
 	}
 }

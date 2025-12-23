@@ -15,7 +15,6 @@ import (
 type ETHKeygen struct {
 	ETH    ethgrp.Ethereumer
 	dbConn *sql.DB
-	logger logger.Logger
 	wtype  wtype.WalletType
 	service.Seeder
 	service.HDWalleter
@@ -28,7 +27,6 @@ type ETHKeygen struct {
 func NewETHKeygen(
 	eth ethgrp.Ethereumer,
 	dbConn *sql.DB,
-	logger logger.Logger,
 	walletType wtype.WalletType,
 	seeder service.Seeder,
 	hdWallter service.HDWalleter,
@@ -38,7 +36,6 @@ func NewETHKeygen(
 ) *ETHKeygen {
 	return &ETHKeygen{
 		ETH:             eth,
-		logger:          logger,
 		dbConn:          dbConn,
 		wtype:           walletType,
 		Seeder:          seeder,
@@ -74,13 +71,13 @@ func (k *ETHKeygen) ImportPrivKey(accountType account.AccountType) error {
 // ImportFullPubKey imports full-pubkey
 func (k *ETHKeygen) ImportFullPubKey(_ string) error {
 	// return k.FullPubKeyImporter.ImportFullPubKey(fileName)
-	k.logger.Info("no functionality for ImportFullPubKey() in ETH")
+	logger.Info("no functionality for ImportFullPubKey() in ETH")
 	return nil
 }
 
 // CreateMultisigAddress creates multi sig address returns Multisiger interface
 func (k *ETHKeygen) CreateMultisigAddress(_ account.AccountType) error {
-	k.logger.Info("no functionality for CreateMultisigAddress() in ETH")
+	logger.Info("no functionality for CreateMultisigAddress() in ETH")
 	return nil
 }
 

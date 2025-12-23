@@ -41,7 +41,6 @@ import (
 // TxCreate type
 type TxCreate struct {
 	btc             btcgrp.Bitcoiner
-	logger          logger.Logger
 	dbConn          *sql.DB
 	addrRepo        watchrepo.AddressRepositorier
 	txRepo          watchrepo.BTCTxRepositorier
@@ -57,7 +56,6 @@ type TxCreate struct {
 // NewTxCreate returns TxCreate object
 func NewTxCreate(
 	btcAPI btcgrp.Bitcoiner,
-	logger logger.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.BTCTxRepositorier,
@@ -71,7 +69,6 @@ func NewTxCreate(
 ) *TxCreate {
 	return &TxCreate{
 		btc:             btcAPI,
-		logger:          logger,
 		dbConn:          dbConn,
 		addrRepo:        addrRepo,
 		txRepo:          txRepo,
@@ -105,7 +102,7 @@ func (t *TxCreate) createTx(
 	paymentRequestIds []int64,
 	userPayments []UserPayment,
 ) (string, string, error) {
-	t.logger.Debug("createTx()",
+	logger.Debug("createTx()",
 		"sender_acount", sender.String(),
 		"receiver_acount", receiver.String(),
 		"target_action", targetAction.String(),
@@ -118,21 +115,21 @@ func (t *TxCreate) createTx(
 		return "", "", fmt.Errorf("fail to call getUnspentList(): %w", err)
 	}
 	if len(unspentList) == 0 {
-		t.logger.Info("no listunspent")
+		logger.Info("no listunspent")
 		return "", "", nil
 	}
 
 	// parse listUnspent
 	parsedTx, inputTotal, isDone := t.parseListUnspentTx(unspentList, requiredAmount)
 	if len(parsedTx.txInputs) == 0 {
-		t.logger.Info("no input tx in listUnspent")
+		logger.Info("no input tx in listUnspent")
 		return "", "", nil
 	}
 	if !isDone {
 		return "", "", errors.New("sender account can't meet amount to send")
 	}
 	if requiredAmount != 0 {
-		t.logger.Debug("amount", "expected_change", inputTotal-requiredAmount)
+		logger.Debug("amount", "expected_change", inputTotal-requiredAmount)
 	}
 
 	// create txOutputs
@@ -151,7 +148,7 @@ func (t *TxCreate) createTx(
 		changeAddr := unspentAddrs[0] // this is actually sender's address because it's for change
 		changeAmount := inputTotal - requiredAmount
 		txPrevOutputs = t.createPaymentTxOutputs(userPayments, changeAddr, changeAmount)
-		t.logger.Debug("before createPaymentOutputs()",
+		logger.Debug("before createPaymentOutputs()",
 			"change_addr", changeAddr,
 			"change_amount", changeAmount,
 			"len(txPrevOutputs)", len(txPrevOutputs),
@@ -241,7 +238,7 @@ func (t *TxCreate) createTx(
 		}
 	}
 
-	t.logger.Debug("getUnspentList()",
+	logger.Debug("getUnspentList()",
 		"unspentList", unspentList,
 		"unspentAddrs", unspentAddrs,
 		"requiredAmount", requiredAmount,
@@ -295,7 +292,7 @@ func (t *TxCreate) parseListUnspentTx(
 		amt, err := btcutil.NewAmount(txItem.Amount)
 		if err != nil {
 			// this error is not expected
-			t.logger.Error(
+			logger.Error(
 				"fail to call btcutil.NewAmount() then skipped",
 				"tx_id", txItem.TxID,
 				"tx_amount", txItem.Amount,
@@ -375,13 +372,13 @@ func (t *TxCreate) createTxOutputs(
 	} else {
 		txPrevOutputs[receiverDecodedAddr] = inputTotal // satoshi
 	}
-	t.logger.Debug("receiver txOutput",
+	logger.Debug("receiver txOutput",
 		"receiverAddr", receiverAddr,
 		"receivedAmount", txPrevOutputs[receiverDecodedAddr])
 
 	// if change is required
 	if isChange {
-		t.logger.Debug("change is required")
+		logger.Debug("change is required")
 		senderDecodedAddr, decodeErr := btcutil.DecodeAddress(senderAddr, t.btc.GetChainConf())
 		if decodeErr != nil {
 			return nil, fmt.Errorf("fail to call btcutil.DecodeAddress(%s): %w", receiverAddr, decodeErr)
@@ -392,7 +389,7 @@ func (t *TxCreate) createTxOutputs(
 		//  fee can not be paid from txOutput for change
 		txPrevOutputs[senderDecodedAddr] = inputTotal - requiredAmount
 
-		t.logger.Debug("change(sender) txOutput",
+		logger.Debug("change(sender) txOutput",
 			"senderAddr", senderAddr,
 			"inputTotal - requiredAmount", inputTotal-requiredAmount)
 	}
@@ -433,7 +430,7 @@ func (t *TxCreate) calculateOutputTotal(
 		}
 
 		if acnt, _ := t.btc.GetAccount(addr.String()); acnt == sender.String() {
-			t.logger.Debug("detect sender account in calculateOutputTotal")
+			logger.Debug("detect sender account in calculateOutputTotal")
 			// address is used for change
 			txPrevOutputs[addr] -= fee
 			txRepoOutputs = append(txRepoOutputs, &models.BTCTXOutput{
@@ -454,7 +451,7 @@ func (t *TxCreate) calculateOutputTotal(
 		}
 		outputTotal += amt
 	}
-	t.logger.Debug("calculateOutputTotal",
+	logger.Debug("calculateOutputTotal",
 		"fee", fee,
 		"outputTotal (before fee adjustment)", outputTotal,
 		"outputTotal by (inputTotal - fee)", inputTotal-fee,
@@ -465,7 +462,7 @@ func (t *TxCreate) calculateOutputTotal(
 	outputTotal = inputTotal - fee
 
 	if outputTotal <= 0 {
-		t.logger.Debug(
+		logger.Debug(
 			"inputTotal is short of coin to pay fee",
 			"amount of inputTotal", inputTotal,
 			"fee", fee)

@@ -16,7 +16,6 @@ import (
 // TxSend type
 type TxSend struct {
 	btc          btcgrp.Bitcoiner
-	logger       logger.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier
 	txRepo       watchrepo.BTCTxRepositorier
@@ -28,7 +27,6 @@ type TxSend struct {
 // NewTxSend returns TxSend object
 func NewTxSend(
 	btc btcgrp.Bitcoiner,
-	logger logger.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.BTCTxRepositorier,
@@ -38,7 +36,6 @@ func NewTxSend(
 ) *TxSend {
 	return &TxSend{
 		btc:          btc,
-		logger:       logger,
 		dbConn:       dbConn,
 		addrRepo:     addrRepo,
 		txRepo:       txRepo,
@@ -57,7 +54,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 		return "", fmt.Errorf("fail to call txFileRepo.ValidateFilePath(): %w", err)
 	}
 
-	t.logger.Debug("send_tx", "action_type", actionType.String())
+	logger.Debug("send_tx", "action_type", actionType.String())
 
 	// read hex from file
 	signedHex, err := t.txFileRepo.ReadFile(filePath)
@@ -82,7 +79,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 	affectedNum, err := t.txRepo.UpdateAfterTxSent(txID, tx.TxTypeSent, signedHex, hash.String())
 	if err != nil {
 		// TODO: even if error occurred, tx is already sent. so db should be corrected manually
-		t.logger.Warn(
+		logger.Warn(
 			"fail to call repo.Tx().UpdateAfterTxSent() but tx is already sent. "+
 				"So database should be updated manually",
 			"tx_id", txID,
@@ -94,7 +91,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 		return "", fmt.Errorf("fail to call updateHexForSentTx(), but tx is sent. txID: %d: %w", txID, err)
 	}
 	if affectedNum == 0 {
-		t.logger.Info("no records to update tx_table",
+		logger.Info("no records to update tx_table",
 			"tx_id", txID,
 			"tx_type", tx.TxTypeSent.String(),
 			"tx_type_vakue", tx.TxTypeSent.Int8(),

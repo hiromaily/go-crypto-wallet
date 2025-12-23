@@ -16,7 +16,6 @@ import (
 // TxSend type
 type TxSend struct {
 	eth          ethgrp.Ethereumer
-	logger       logger.Logger
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier // not used
 	txRepo       watchrepo.TxRepositorier      // not used
@@ -28,7 +27,6 @@ type TxSend struct {
 // NewTxSend returns TxSend object
 func NewTxSend(
 	eth ethgrp.Ethereumer,
-	logger logger.Logger,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.TxRepositorier,
@@ -38,7 +36,6 @@ func NewTxSend(
 ) *TxSend {
 	return &TxSend{
 		eth:          eth,
-		logger:       logger,
 		dbConn:       dbConn,
 		addrRepo:     addrRepo,
 		txRepo:       txRepo,
@@ -57,7 +54,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 		return "", fmt.Errorf("fail to call txFileRepo.ValidateFilePath(): %w", err)
 	}
 
-	t.logger.Debug("send_tx", "action_type", actionType.String())
+	logger.Debug("send_tx", "action_type", actionType.String())
 
 	// read hex from file
 	data, err := t.txFileRepo.ReadFileSlice(filePath)
@@ -80,13 +77,13 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 		var sentTx string
 		sentTx, err = t.eth.SendSignedRawTransaction(signedTx)
 		if err != nil {
-			t.logger.Warn("fail to call eth.SendSignedRawTransaction()",
+			logger.Warn("fail to call eth.SendSignedRawTransaction()",
 				"error", err,
 			)
 			continue
 		}
 		if sentTx == "" {
-			t.logger.Warn("no sentTx by calling eth.SendSignedRawTransaction()",
+			logger.Warn("no sentTx by calling eth.SendSignedRawTransaction()",
 				"error", err,
 			)
 			continue
@@ -97,7 +94,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 		affectedNum, err = t.txDetailRepo.UpdateAfterTxSent(uuid, tx.TxTypeSent, signedTx, sentTx)
 		if err != nil {
 			// TODO: even if error occurred, tx is already sent. so db should be corrected manually
-			t.logger.Warn(
+			logger.Warn(
 				"fail to call repo.Tx().UpdateAfterTxSent() but tx is already sent. "+
 					"So database should be updated manually",
 				"tx_id", txID,
@@ -109,7 +106,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			continue
 		}
 		if affectedNum == 0 {
-			t.logger.Info("no records to update tx_table",
+			logger.Info("no records to update tx_table",
 				"tx_id", txID,
 				"tx_type", tx.TxTypeSent.String(),
 				"tx_type_value", tx.TxTypeSent.Int8(),

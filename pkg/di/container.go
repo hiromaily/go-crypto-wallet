@@ -61,7 +61,6 @@ type container struct {
 	// db
 	mysqlClient *sql.DB
 	// utility
-	logger      logger.Logger
 	uuidHandler uuid.UUIDHandler
 	// wallet
 	walletType wtype.WalletType
@@ -96,7 +95,7 @@ func NewContainer(conf *config.WalletRoot, accountConf *account.AccountRoot, wal
 // NewKeygener is to register for keygener interface
 func (c *container) NewKeygener() wallets.Keygener {
 	// set global logger
-	logger.SetGlobal(c.newLogger())
+	logger.SetGlobal(logger.NewSlogFromConfig(c.conf.Logger.Env, c.conf.Logger.Level, c.conf.Logger.Service))
 
 	switch {
 	case coin.IsBTCGroup(c.conf.CoinTypeCode):
@@ -130,7 +129,6 @@ func (c *container) newETHKeygener() wallets.Keygener {
 	return ethwallet.NewETHKeygen(
 		c.newETH(),
 		c.newMySQLClient(),
-		c.newLogger(),
 		c.walletType,
 		c.newSeeder(),
 		c.newHdWallter(),
@@ -144,7 +142,6 @@ func (c *container) newXRPKeygener() wallets.Keygener {
 	return xrpwallet.NewXRPKeygen(
 		c.newXRP(),
 		c.newMySQLClient(),
-		c.newLogger(),
 		c.walletType,
 		c.newSeeder(),
 		c.newHdWallter(),
@@ -157,7 +154,7 @@ func (c *container) newXRPKeygener() wallets.Keygener {
 // NewWalleter is to register for walleter interface
 func (c *container) NewWalleter() wallets.Watcher {
 	// set global logger
-	logger.SetGlobal(c.newLogger())
+	logger.SetGlobal(logger.NewSlogFromConfig(c.conf.Logger.Env, c.conf.Logger.Level, c.conf.Logger.Service))
 
 	switch {
 	case coin.IsBTCGroup(c.conf.CoinTypeCode):
@@ -179,7 +176,7 @@ func (c *container) NewSigner(authName string) wallets.Signer {
 	}
 
 	// set global logger
-	logger.SetGlobal(c.newLogger())
+	logger.SetGlobal(logger.NewSlogFromConfig(c.conf.Logger.Env, c.conf.Logger.Level, c.conf.Logger.Service))
 
 	authType := account.AuthTypeMap[authName]
 
@@ -212,7 +209,6 @@ func (c *container) newBTCWalleter() wallets.Watcher {
 	return btcwallet.NewBTCWatch(
 		c.newBTC(),
 		c.newMySQLClient(),
-		c.newLogger(),
 		c.conf.AddressType,
 		c.newBTCAddressImporter(),
 		c.newBTCTxCreator(),
@@ -227,7 +223,6 @@ func (c *container) newETHWalleter() wallets.Watcher {
 	return ethwallet.NewETHWatch(
 		c.newETH(),
 		c.newMySQLClient(),
-		c.newLogger(),
 		c.newCommonAddressImporter(),
 		c.newETHTxCreator(),
 		c.newETHTxSender(),
@@ -241,7 +236,6 @@ func (c *container) newXRPWalleter() wallets.Watcher {
 	return xrpwallet.NewXRPWatch(
 		c.newXRP(),
 		c.newMySQLClient(),
-		c.newLogger(),
 		c.newCommonAddressImporter(),
 		c.newXRPTxCreator(),
 		c.newXRPTxSender(),
@@ -258,7 +252,6 @@ func (c *container) newXRPWalleter() wallets.Watcher {
 func (c *container) newBTCAddressImporter() service.AddressImporter {
 	return btcsrv.NewAddressImport(
 		c.newBTC(),
-		c.newLogger(),
 		c.newMySQLClient(),
 		c.newAddressRepo(),
 		c.newAddressFileRepo(),
@@ -270,7 +263,6 @@ func (c *container) newBTCAddressImporter() service.AddressImporter {
 
 func (c *container) newCommonAddressImporter() watchsrv.AddressImporter {
 	return watchsrv.NewAddressImport(
-		c.newLogger(),
 		c.newMySQLClient(),
 		c.newAddressRepo(),
 		c.newAddressFileRepo(),
@@ -283,7 +275,6 @@ func (c *container) newCommonAddressImporter() watchsrv.AddressImporter {
 func (c *container) newBTCTxCreator() service.TxCreator {
 	return btcsrv.NewTxCreate(
 		c.newBTC(),
-		c.newLogger(),
 		c.newMySQLClient(),
 		c.newAddressRepo(),
 		c.newBTCTxRepo(),
@@ -307,7 +298,6 @@ func (c *container) newETHTxCreator() ethsrv.TxCreator {
 
 	return ethsrv.NewTxCreate(
 		targetEthAPI,
-		c.newLogger(),
 		c.newMySQLClient(),
 		c.newAddressRepo(),
 		c.newTxRepo(),
@@ -324,7 +314,6 @@ func (c *container) newETHTxCreator() ethsrv.TxCreator {
 func (c *container) newXRPTxCreator() xrpsrv.TxCreator {
 	return xrpsrv.NewTxCreate(
 		c.newXRP(),
-		c.newLogger(),
 		c.newMySQLClient(),
 		c.newUUIDHandler(),
 		c.newAddressRepo(),
@@ -341,7 +330,6 @@ func (c *container) newXRPTxCreator() xrpsrv.TxCreator {
 func (c *container) newBTCTxSender() service.TxSender {
 	return btcsrv.NewTxSend(
 		c.newBTC(),
-		c.newLogger(),
 		c.newMySQLClient(),
 		c.newAddressRepo(),
 		c.newBTCTxRepo(),
@@ -354,7 +342,6 @@ func (c *container) newBTCTxSender() service.TxSender {
 func (c *container) newETHTxSender() service.TxSender {
 	return ethsrv.NewTxSend(
 		c.newETH(),
-		c.newLogger(),
 		c.newMySQLClient(),
 		c.newAddressRepo(),
 		c.newTxRepo(),
@@ -367,7 +354,6 @@ func (c *container) newETHTxSender() service.TxSender {
 func (c *container) newXRPTxSender() service.TxSender {
 	return xrpsrv.NewTxSend(
 		c.newXRP(),
-		c.newLogger(),
 		c.newMySQLClient(),
 		c.newAddressRepo(),
 		c.newTxRepo(),
@@ -380,7 +366,6 @@ func (c *container) newXRPTxSender() service.TxSender {
 func (c *container) newBTCTxMonitorer() service.TxMonitorer {
 	return btcsrv.NewTxMonitor(
 		c.newBTC(),
-		c.newLogger(),
 		c.newMySQLClient(),
 		c.newBTCTxRepo(),
 		c.newBTCTxInputRepo(),
@@ -396,7 +381,6 @@ func (c *container) newETHTxMonitorer() service.TxMonitorer {
 
 	return ethsrv.NewTxMonitor(
 		c.newETH(),
-		c.newLogger(),
 		c.newMySQLClient(),
 		c.newAddressRepo(),
 		c.newETHTxDetailRepo(),
@@ -408,7 +392,6 @@ func (c *container) newETHTxMonitorer() service.TxMonitorer {
 func (c *container) newXRPTxMonitorer() service.TxMonitorer {
 	return xrpsrv.NewTxMonitor(
 		c.newXRP(),
-		c.newLogger(),
 		c.newMySQLClient(),
 		c.newAddressRepo(),
 		c.newXRPTxDetailRepo(),
@@ -419,7 +402,6 @@ func (c *container) newXRPTxMonitorer() service.TxMonitorer {
 func (c *container) newPaymentRequestCreator() service.PaymentRequestCreator {
 	return watchsrv.NewPaymentRequestCreate(
 		c.newConverter(c.conf.CoinTypeCode),
-		c.newLogger(),
 		c.newMySQLClient(),
 		c.newAddressRepo(),
 		c.newPaymentRequestRepo(),
@@ -497,7 +479,6 @@ func (c *container) newBTC() btcgrp.Bitcoiner {
 		c.btc, err = btcgrp.NewBitcoin(
 			c.newRPCClient(),
 			&c.conf.Bitcoin,
-			c.newLogger(),
 			c.conf.CoinTypeCode,
 		)
 		if err != nil {
@@ -513,7 +494,6 @@ func (c *container) newETH() ethgrp.Ethereumer {
 		c.eth, err = ethgrp.NewEthereum(
 			c.newEthRPCClient(),
 			&c.conf.Ethereum,
-			c.newLogger(),
 			c.conf.CoinTypeCode,
 			c.newUUIDHandler(),
 		)
@@ -545,7 +525,6 @@ func (c *container) newERC20() ethgrp.ERC20er {
 			conf.ERC20s[conf.ERC20Token].ContractAddress,
 			conf.ERC20s[conf.ERC20Token].MasterAddress,
 			conf.ERC20s[conf.ERC20Token].Decimals,
-			c.newLogger(),
 		)
 	}
 	return c.erc20
@@ -560,7 +539,6 @@ func (c *container) newXRP() xrpgrp.Rippler {
 			wsAdmin,
 			c.newRippleAPI(),
 			&c.conf.Ripple,
-			c.newLogger(),
 			c.conf.CoinTypeCode,
 		)
 		if err != nil {
@@ -572,20 +550,9 @@ func (c *container) newXRP() xrpgrp.Rippler {
 
 func (c *container) newRippleAPI() *xrp.RippleAPI {
 	if c.rippleAPI == nil {
-		c.rippleAPI = xrp.NewRippleAPI(c.newGRPCConn(), c.newLogger())
+		c.rippleAPI = xrp.NewRippleAPI(c.newGRPCConn())
 	}
 	return c.rippleAPI
-}
-
-//
-// Logger
-//
-
-func (c *container) newLogger() logger.Logger {
-	if c.logger == nil {
-		c.logger = logger.NewSlogFromConfig(c.conf.Logger.Env, c.conf.Logger.Level, c.conf.Logger.Service)
-	}
-	return c.logger
 }
 
 //
@@ -622,7 +589,6 @@ func (c *container) newBTCTxRepo() watchrepo.BTCTxRepositorier {
 	return watchrepo.NewBTCTxRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
-		c.newLogger(),
 	)
 }
 
@@ -630,7 +596,6 @@ func (c *container) newBTCTxInputRepo() watchrepo.TxInputRepositorier {
 	return watchrepo.NewBTCTxInputRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
-		c.newLogger(),
 	)
 }
 
@@ -638,7 +603,6 @@ func (c *container) newBTCTxOutputRepo() watchrepo.TxOutputRepositorier {
 	return watchrepo.NewBTCTxOutputRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
-		c.newLogger(),
 	)
 }
 
@@ -646,7 +610,6 @@ func (c *container) newTxRepo() watchrepo.TxRepositorier {
 	return watchrepo.NewTxRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
-		c.newLogger(),
 	)
 }
 
@@ -654,7 +617,6 @@ func (c *container) newETHTxDetailRepo() watchrepo.EthDetailTxRepositorier {
 	return watchrepo.NewEthDetailTxInputRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
-		c.newLogger(),
 	)
 }
 
@@ -662,7 +624,6 @@ func (c *container) newXRPTxDetailRepo() watchrepo.XrpDetailTxRepositorier {
 	return watchrepo.NewXrpDetailTxInputRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
-		c.newLogger(),
 	)
 }
 
@@ -670,7 +631,6 @@ func (c *container) newPaymentRequestRepo() watchrepo.PaymentRequestRepositorier
 	return watchrepo.NewPaymentRequestRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
-		c.newLogger(),
 	)
 }
 
@@ -678,21 +638,18 @@ func (c *container) newAddressRepo() watchrepo.AddressRepositorier {
 	return watchrepo.NewAddressRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
-		c.newLogger(),
 	)
 }
 
 func (c *container) newAddressFileRepo() address.FileRepositorier {
 	return address.NewFileRepository(
 		c.conf.FilePath.FullPubKey,
-		c.newLogger(),
 	)
 }
 
 func (c *container) newTxFileRepo() tx.FileRepositorier {
 	return tx.NewFileRepository(
 		c.conf.FilePath.Tx,
-		c.newLogger(),
 	)
 }
 
@@ -720,7 +677,6 @@ func (c *container) newPaymentAccount() account.AccountType {
 
 func (c *container) newSeeder() service.Seeder {
 	return commonsrv.NewSeed(
-		c.newLogger(),
 		c.newSeedRepo(),
 		c.walletType,
 	)
@@ -728,7 +684,6 @@ func (c *container) newSeeder() service.Seeder {
 
 func (c *container) newHdWallter() service.HDWalleter {
 	return commonsrv.NewHDWallet(
-		c.newLogger(),
 		c.newHdWalletRepo(),
 		c.newKeyGenerator(),
 		c.conf.CoinTypeCode,
@@ -747,14 +702,12 @@ func (c *container) newPrivKeyer() service.PrivKeyer {
 	case coin.IsBTCGroup(c.conf.CoinTypeCode):
 		return btckeygensrv.NewPrivKey(
 			c.newBTC(),
-			c.newLogger(),
 			c.newAccountKeyRepo(),
 			c.walletType,
 		)
 	case coin.IsETHGroup(c.conf.CoinTypeCode):
 		return ethkeygensrv.NewPrivKey(
 			c.newETH(),
-			c.newLogger(),
 			c.newAccountKeyRepo(),
 			c.walletType,
 		)
@@ -766,7 +719,6 @@ func (c *container) newPrivKeyer() service.PrivKeyer {
 func (c *container) newFullPubKeyImporter() service.FullPubKeyImporter {
 	return btckeygensrv.NewFullPubkeyImport(
 		c.newBTC(),
-		c.newLogger(),
 		c.newAuthFullPubKeyRepo(),
 		c.newPubkeyFileStorager(),
 		c.walletType,
@@ -776,7 +728,6 @@ func (c *container) newFullPubKeyImporter() service.FullPubKeyImporter {
 func (c *container) newMultisiger() service.Multisiger {
 	return btckeygensrv.NewMultisig(
 		c.newBTC(),
-		c.newLogger(),
 		c.newAuthFullPubKeyRepo(),
 		c.newAccountKeyRepo(),
 		c.newMultiAccount(),
@@ -786,7 +737,6 @@ func (c *container) newMultisiger() service.Multisiger {
 
 func (c *container) newAddressExporter() service.AddressExporter {
 	return commonsrv.NewAddressExport(
-		c.newLogger(),
 		c.newAccountKeyRepo(),
 		c.newAddressFileStorager(),
 		c.newMultiAccount(),
@@ -798,7 +748,6 @@ func (c *container) newAddressExporter() service.AddressExporter {
 func (c *container) newSigner() service.Signer {
 	return btccoldsrv.NewSign(
 		c.newBTC(),
-		c.newLogger(),
 		c.newAccountKeyRepo(),
 		c.newAuthKeyRepo(),
 		c.newTxFileStorager(),
@@ -810,7 +759,6 @@ func (c *container) newSigner() service.Signer {
 func (c *container) newETHSigner() service.Signer {
 	return ethkeygensrv.NewSign(
 		c.newETH(),
-		c.newLogger(),
 		c.newTxFileStorager(),
 		c.walletType,
 	)
@@ -819,7 +767,6 @@ func (c *container) newETHSigner() service.Signer {
 func (c *container) newXRPSigner() service.Signer {
 	return xrpkeygensrv.NewSign(
 		c.newXRP(),
-		c.newLogger(),
 		c.newXRPAccountKeyRepo(),
 		c.newTxFileStorager(),
 		c.walletType,
@@ -829,7 +776,6 @@ func (c *container) newXRPSigner() service.Signer {
 func (c *container) newXRPKeyGenerator() xrpkeygensrv.XRPKeyGenerator {
 	return xrpkeygensrv.NewXRPKeyGenerate(
 		c.newXRP(),
-		c.newLogger(),
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
 		c.walletType,
@@ -854,8 +800,7 @@ func (c *container) newKeyGenerator() key.Generator {
 	return key.NewHDKey(
 		key.PurposeTypeBIP44,
 		c.conf.CoinTypeCode,
-		chainConf,
-		c.newLogger())
+		chainConf)
 }
 
 func (c *container) newMultiAccount() account.MultisigAccounter {
@@ -876,7 +821,6 @@ func (c *container) newSeedRepo() coldrepo.SeedRepositorier {
 	return coldrepo.NewSeedRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
-		c.newLogger(),
 	)
 }
 
@@ -884,7 +828,6 @@ func (c *container) newAccountKeyRepo() coldrepo.AccountKeyRepositorier {
 	return coldrepo.NewAccountKeyRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
-		c.newLogger(),
 	)
 }
 
@@ -892,7 +835,6 @@ func (c *container) newXRPAccountKeyRepo() coldrepo.XRPAccountKeyRepositorier {
 	return coldrepo.NewXRPAccountKeyRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
-		c.newLogger(),
 	)
 }
 
@@ -900,7 +842,6 @@ func (c *container) newAuthFullPubKeyRepo() coldrepo.AuthFullPubkeyRepositorier 
 	return coldrepo.NewAuthFullPubkeyRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
-		c.newLogger(),
 	)
 }
 
@@ -908,7 +849,6 @@ func (c *container) newAuthKeyRepo() coldrepo.AuthAccountKeyRepositorier {
 	return coldrepo.NewAuthAccountKeyRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
-		c.newLogger(),
 	)
 }
 
@@ -919,21 +859,18 @@ func (c *container) newAuthKeyRepo() coldrepo.AuthAccountKeyRepositorier {
 func (c *container) newAddressFileStorager() address.FileRepositorier {
 	return address.NewFileRepository(
 		c.conf.FilePath.Address,
-		c.newLogger(),
 	)
 }
 
 func (c *container) newPubkeyFileStorager() address.FileRepositorier {
 	return address.NewFileRepository(
 		c.conf.FilePath.FullPubKey,
-		c.newLogger(),
 	)
 }
 
 func (c *container) newTxFileStorager() tx.FileRepositorier {
 	return tx.NewFileRepository(
 		c.conf.FilePath.Tx,
-		c.newLogger(),
 	)
 }
 
@@ -943,7 +880,6 @@ func (c *container) newTxFileStorager() tx.FileRepositorier {
 
 func (c *container) newSignHdWallter(authType account.AuthType) service.HDWalleter {
 	return commonsrv.NewHDWallet(
-		c.newLogger(),
 		c.newSignHdWalletRepo(authType),
 		c.newKeyGenerator(),
 		c.conf.CoinTypeCode,
@@ -961,7 +897,6 @@ func (c *container) newSignHdWalletRepo(authType account.AuthType) commonsrv.HDW
 func (c *container) newSignPrivKeyer(authType account.AuthType) btcsignsrv.PrivKeyer {
 	return btcsignsrv.NewPrivKey(
 		c.newBTC(),
-		c.newLogger(),
 		c.newAuthKeyRepo(),
 		authType,
 		c.walletType,
@@ -970,7 +905,6 @@ func (c *container) newSignPrivKeyer(authType account.AuthType) btcsignsrv.PrivK
 
 func (c *container) newSignFullPubkeyExporter(authType account.AuthType) service.FullPubkeyExporter {
 	return btcsignsrv.NewFullPubkeyExport(
-		c.newLogger(),
 		c.newAuthKeyRepo(),
 		c.newPubkeyFileStorager(),
 		c.conf.CoinTypeCode,
