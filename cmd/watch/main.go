@@ -12,6 +12,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/command"
 	wcmd "github.com/hiromaily/go-crypto-wallet/pkg/command/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
@@ -130,8 +131,8 @@ func main() {
 		}
 
 		// create wallet
-		reg := NewRegistry(conf, accountConf, walletType)
-		walleter = reg.NewWalleter()
+		container := di.NewContainer(conf, accountConf, walletType)
+		walleter = container.NewWalleter()
 	}
 
 	// sub command
