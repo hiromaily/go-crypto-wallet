@@ -71,9 +71,9 @@ type Container interface {
 	NewSigner(authName string) wallets.Signer
 
 	// Watch Use Cases
-	NewWatchCreateTransactionUseCase() interface{}
-	NewWatchMonitorTransactionUseCase() interface{}
-	NewWatchSendTransactionUseCase() interface{}
+	NewWatchCreateTransactionUseCase() any
+	NewWatchMonitorTransactionUseCase() any
+	NewWatchSendTransactionUseCase() any
 	NewWatchImportAddressUseCase() watchusecase.ImportAddressUseCase
 	NewWatchCreatePaymentRequestUseCase() watchusecase.CreatePaymentRequestUseCase
 
@@ -961,7 +961,7 @@ func (c *container) newSignFullPubkeyExporter(authType domainAccount.AuthType) s
 
 // Watch Use Cases
 
-func (c *container) NewWatchCreateTransactionUseCase() interface{} {
+func (c *container) NewWatchCreateTransactionUseCase() any {
 	switch {
 	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
 		return c.newBTCWatchCreateTransactionUseCase()
@@ -974,7 +974,7 @@ func (c *container) NewWatchCreateTransactionUseCase() interface{} {
 	}
 }
 
-func (c *container) NewWatchMonitorTransactionUseCase() interface{} {
+func (c *container) NewWatchMonitorTransactionUseCase() any {
 	switch {
 	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
 		return c.newBTCWatchMonitorTransactionUseCase()
@@ -987,7 +987,7 @@ func (c *container) NewWatchMonitorTransactionUseCase() interface{} {
 	}
 }
 
-func (c *container) NewWatchSendTransactionUseCase() interface{} {
+func (c *container) NewWatchSendTransactionUseCase() any {
 	switch {
 	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
 		return c.newBTCWatchSendTransactionUseCase()

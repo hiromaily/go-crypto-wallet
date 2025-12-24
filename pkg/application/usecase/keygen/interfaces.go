@@ -102,5 +102,5 @@ type ImportFullPubkeyInput struct {
 type GenerateKeyInput struct {
 	AccountType domainAccount.AccountType
 	IsKeyPair   bool
-	WalletKeys  interface{} // []domainKey.WalletKey - using interface{} to avoid import cycle
+	WalletKeys  any // []domainKey.WalletKey - using any to avoid import cycle
 }

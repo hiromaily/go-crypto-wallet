@@ -50,5 +50,5 @@ func (xts *XRPTestSuite) SetupTest() {
 }
 
 func (xts *XRPTestSuite) TearDownTest() {
-	xts.XRP.Close()
+	_ = xts.XRP.Close() // Best effort cleanup
 }

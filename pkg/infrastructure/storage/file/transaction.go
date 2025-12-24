@@ -145,7 +145,11 @@ func (*TransactionFileRepository) ReadFileSlice(path string) ([]string, error) {
 		return nil, fmt.Errorf("fail to open file: %s: %w", path, err)
 	}
 
-	defer file.Close()
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			err = fmt.Errorf("failed to close file: %w", cerr)
+		}
+	}()
 	data := make([]string, 0)
 
 	scanner := bufio.NewScanner(file)
@@ -198,7 +202,9 @@ func (r *TransactionFileRepository) WriteFileSlice(path string, data []string) (
 		return "", err
 	}
 
-	file.Close()
+	if err = file.Close(); err != nil {
+		return "", fmt.Errorf("failed to close file: %w", err)
+	}
 
 	return fileName, nil
 }
@@ -208,6 +214,6 @@ func (*TransactionFileRepository) createDir(path string) {
 	tmp2 := tmp1[0 : len(tmp1)-1] // cut filename
 	dir := strings.Join(tmp2, "/")
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		os.Mkdir(dir, 0o700)
+		_ = os.Mkdir(dir, 0o700) // Ignore error as Stat check handles existence
 	}
 }

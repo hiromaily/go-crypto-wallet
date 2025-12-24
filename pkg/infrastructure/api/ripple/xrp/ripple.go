@@ -47,10 +47,10 @@ func NewRipple(
 // Close disconnect to server
 func (r *Ripple) Close() error {
 	if r.wsPublic != nil {
-		r.wsPublic.Close()
+		_ = r.wsPublic.Close() // Best effort cleanup
 	}
 	if r.wsAdmin != nil {
-		r.wsAdmin.Close()
+		_ = r.wsAdmin.Close() // Best effort cleanup
 	}
 	if r.API != nil {
 		r.API.Close()

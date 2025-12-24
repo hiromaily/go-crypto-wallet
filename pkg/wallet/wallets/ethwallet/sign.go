@@ -67,6 +67,6 @@ func (*ETHSign) SignTx(_ string) (string, bool, string, error) {
 
 // Done should be called before exit
 func (s *ETHSign) Done() {
-	s.dbConn.Close()
+	_ = s.dbConn.Close() // Best effort cleanup
 	s.ETH.Close()
 }

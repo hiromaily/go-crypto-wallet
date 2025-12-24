@@ -27,7 +27,7 @@ func NewRippleAPI(
 // Close disconnect to server
 func (r *RippleAPI) Close() {
 	if r.conn != nil {
-		r.conn.Close()
+		_ = r.conn.Close() // Best effort cleanup
 	}
 }
 

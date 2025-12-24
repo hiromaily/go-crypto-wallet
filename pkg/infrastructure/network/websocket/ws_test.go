@@ -50,5 +50,5 @@ func TestCall(t *testing.T) {
 	require.NoError(t, err, "websoc.Call() should not return error")
 	t.Log(res)
 
-	websoc.Close()
+	_ = websoc.Close() // Best effort cleanup
 }
