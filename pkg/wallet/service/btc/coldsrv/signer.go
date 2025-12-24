@@ -177,7 +177,7 @@ func (s *Sign) signMultisig(msgTx *wire.MsgTx, prevsAddrs *btc.PreviousTxs) (*wi
 
 		// mapping redeemScript to PrevTxs
 		for idx, val := range prevsAddrs.Addrs {
-			rs := cold.GetRedeedScriptByAddress(accountKeys, val)
+			rs := cold.GetRedeemScriptByAddress(accountKeys, val)
 			if rs == "" {
 				logger.Error("redeemScript can not be found")
 				continue

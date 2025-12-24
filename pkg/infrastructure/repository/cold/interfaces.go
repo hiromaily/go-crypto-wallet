@@ -55,8 +55,8 @@ type AuthAccountKeyRepositorier interface {
 	UpdateAddrStatus(addrStatus address.AddrStatus, strWIF string) (int64, error)
 }
 
-// GetRedeedScriptByAddress returns redeem script by address
-func GetRedeedScriptByAddress(accountKeys []*models.AccountKey, addr string) string {
+// GetRedeemScriptByAddress returns redeem script by address
+func GetRedeemScriptByAddress(accountKeys []*models.AccountKey, addr string) string {
 	for _, val := range accountKeys {
 		if val.MultisigAddress == addr {
 			return val.RedeemScript
