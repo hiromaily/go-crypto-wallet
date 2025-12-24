@@ -6,6 +6,10 @@
 imports:
 	./scripts/imports.sh
 
+.PHONY: format
+format:
+	go tool golangci-lint fmt
+
 .PHONY: lint
 lint:
 	go tool golangci-lint run

@@ -66,10 +66,7 @@ linters:
     - usestdlibvars             # Detects the possibility to use variables/constants from the Go standard library.
     - usetesting                # Reports uses of functions with replacement inside the testing package.
     - wastedassign              # Detects wasted assignment statements.
-  
-  disable:
-    - errcheck
-  
+    
   settings:
     depguard: 
       rules:
@@ -91,7 +88,9 @@ linters:
         - G104 # G104: Errors unhandled;
         - G115 # G115: integer overflow conversion;
         - G306 # G306: Expect WriteFile permissions to be 0600 or less (too restrictive; also flags "0o644" permissions)
-        - G307 # G307: Deferring unsafe method 
+        - G307 # G307: Deferring unsafe method
+      # G103: Use of unsafe calls should be audited (includes panic detection)
+      # Note: panic is allowed only in instance construction phase (main.go and pkg/di) 
 
     govet:
       enable:
@@ -156,6 +155,16 @@ linters:
       - text: "SA1019:"
         linters:
           - staticcheck
+      # Allow panic in instance construction phase (main.go and pkg/di package)
+      # Following separation of concerns: instance construction vs instance usage
+      - path: ^cmd/.*/main\.go$
+        linters:
+          - gosec
+        text: "G103:"
+      - path: ^pkg/di/.*\.go$
+        linters:
+          - gosec
+        text: "G103:"
 
     # Exclude files from all linters.
     paths:

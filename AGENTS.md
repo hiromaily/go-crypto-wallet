@@ -44,8 +44,9 @@ The `pkg/domain/` package contains pure business logic with **ZERO infrastructur
 ## Coding Standards
 
 - Follow `golangci-lint` configuration (`.golangci.yml`)
-- Use `goimports` to maintain import order (standard → third-party → local)
-- Format code with `gofmt`/`goimports`
+- Format code with `make format` (uses `gofumpt` and `goimports` via golangci-lint)
+  - Import order: standard → third-party → local
+- Use `make lint-fix` to run linting and formatting together (executes lint checks and format fixes)
 - Maintain consistent naming conventions (lowercase package names, exported functions start with uppercase)
 
 ## Common Commands
@@ -69,6 +70,21 @@ After making code changes, use these commands to verify code correctness:
 - Wrap errors with `fmt.Errorf` + `%w`
 - Use `errors.Is`/`errors.As` for error checking
 - Include context information in error messages
+
+## Panic Usage
+
+Following the principle of separation of concerns, the project clearly separates the instance construction phase from the instance usage phase.
+Therefore, `panic` is only allowed during instance construction.
+Specifically, `panic` is acceptable in:
+
+- `main.go` files (application entry points)
+- `pkg/di` package (dependency injection container)
+
+**Important:**
+
+- `panic` should **NOT** be used in business logic, service layers, or infrastructure layers
+- Use proper error handling with error returns in all other packages
+- The separation allows for fail-fast behavior during initialization while maintaining robust error handling during runtime
 
 ## Context Management
 
@@ -100,17 +116,38 @@ After making code changes, use these commands to verify code correctness:
     - `key/`: Key value objects and validators
     - `multisig/`: Multisig validators and business rules
     - `coin/`: Cryptocurrency type definitions
-  - `wallet/api/`: External API clients (btcgrp, ethgrp, xrpgrp) - Infrastructure layer
-  - `wallet/service/`: Application layer - Business logic orchestration (btc, eth, xrp, coldsrv, watchsrv)
+  - `infrastructure/`: **Infrastructure layer** - External dependencies and implementations
+    - `api/`: External API clients
+      - `bitcoin/`: Bitcoin/BCH Core RPC API clients (btc, bch)
+      - `ethereum/`: Ethereum JSON-RPC API clients (eth, erc20)
+      - `ripple/`: Ripple gRPC API clients (xrp)
+    - `database/`: Database connections and generated code
+      - `mysql/`: MySQL connection management
+      - `sqlc/`: SQLC generated database code
+    - `repository/`: Data persistence implementations
+      - `cold/`: Cold wallet repository (keygen, sign)
+      - `watch/`: Watch wallet repository
+    - `storage/`: File storage implementations
+      - `file/`: File-based storage (address, transaction)
+    - `network/`: Network communication
+      - `websocket/`: WebSocket client implementations
+  - `wallet/service/`: **Application layer** - Business logic orchestration
+    - `keygen/`: Key generation services (btc, eth, xrp, shared)
+    - `sign/`: Signing services (btc, eth, xrp, shared)
+    - `watch/`: Watch wallet services (btc, eth, xrp, shared)
   - `wallet/key/`: Key generation logic - Infrastructure layer
-  - `repository/`: Data persistence - Infrastructure layer
+  - `wallet/wallets/`: Wallet implementations (btcwallet, ethwallet, xrpwallet)
+  - `command/`: Command implementations (keygen, sign, watch)
+  - `di/`: Dependency injection container
+  - `config/`: Configuration management
+  - `logger/`: Logging utilities
 - `data/`: Generated files, configuration files
 - `scripts/`: Operation scripts
 
 **Architecture Dependency Direction:**
 
 ```
-Application Layer (wallet/service) → Domain Layer (domain/*) ← Infrastructure Layer (wallet/api, repository)
+Application Layer (wallet/service, command) → Domain Layer (domain/*) ← Infrastructure Layer (infrastructure/*, wallet/key)
 ```
 
 ## Refactoring Status
@@ -140,6 +177,7 @@ Application Layer (wallet/service) → Domain Layer (domain/*) ← Infrastructur
 ## Patterns to Avoid
 
 - Using `log.Fatal` (except in `main`)
+- Using `panic` outside of instance construction (i.e., outside of `main.go` and `pkg/di` package)
 - Leaving commented-out code
 - Unused imports, variables, or functions
 - Ignoring errors (detected by `errcheck`)
