@@ -418,17 +418,6 @@ func (c *container) newXRPTxSender() service.TxSender {
 	)
 }
 
-func (c *container) newBTCTxMonitorer() service.TxMonitorer {
-	return btcwatchsrv.NewTxMonitor(
-		c.newBTC(),
-		c.newMySQLClient(),
-		c.newBTCTxRepo(),
-		c.newBTCTxInputRepo(),
-		c.newPaymentRequestRepo(),
-		c.walletType,
-	)
-}
-
 func (c *container) newETHTxMonitorer() service.TxMonitorer {
 	if c.conf.Ethereum.ConfirmationNum == 0 {
 		panic("confirmation_num of ethereum in config is required")
@@ -1121,7 +1110,11 @@ func (c *container) newBTCWatchCreateTransactionUseCase() watchusecase.CreateTra
 
 func (c *container) newBTCWatchMonitorTransactionUseCase() watchusecase.MonitorTransactionUseCase {
 	return watchusecasebtc.NewMonitorTransactionUseCase(
-		c.newBTCTxMonitorer().(*btcwatchsrv.TxMonitor),
+		c.newBTC(),
+		c.newMySQLClient(),
+		c.newBTCTxRepo(),
+		c.newBTCTxInputRepo(),
+		c.newPaymentRequestRepo(),
 	)
 }
 
