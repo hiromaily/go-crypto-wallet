@@ -39,7 +39,6 @@ import (
 	btcsignsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/sign/btc"
 	ethsignsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/sign/eth"
 	xrpsignsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/sign/xrp"
-	ethwatchsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/eth"
 	watchshared "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/shared"
 	xrpwatchsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
@@ -335,29 +334,6 @@ func (c *container) newCommonAddressImporter() watchshared.AddressImporter {
 		c.conf.CoinTypeCode,
 		c.conf.AddressType,
 		c.walletType,
-	)
-}
-
-func (c *container) newETHTxCreator() ethwatchsrv.TxCreator {
-	var targetEthAPI ethereum.EtherTxCreator
-	if domainCoin.IsERC20Token(c.conf.CoinTypeCode.String()) {
-		targetEthAPI = c.newERC20()
-	} else {
-		targetEthAPI = c.newETH()
-	}
-
-	return ethwatchsrv.NewTxCreate(
-		targetEthAPI,
-		c.newMySQLClient(),
-		c.newAddressRepo(),
-		c.newTxRepo(),
-		c.newETHTxDetailRepo(),
-		c.newPaymentRequestRepo(),
-		c.newTxFileRepo(),
-		c.newDepositAccount(),
-		c.newPaymentAccount(),
-		c.walletType,
-		c.conf.CoinTypeCode,
 	)
 }
 
@@ -1107,8 +1083,24 @@ func (c *container) newBTCWatchImportAddressUseCase() watchusecase.ImportAddress
 // ETH Watch Use Cases
 
 func (c *container) newETHWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
+	// Determine which Ethereum API to use based on coin type
+	var targetEthAPI ethereum.EtherTxCreator
+	if domainCoin.IsERC20Token(c.conf.CoinTypeCode.String()) {
+		targetEthAPI = c.newERC20()
+	} else {
+		targetEthAPI = c.newETH()
+	}
+
 	return watchusecaseeth.NewCreateTransactionUseCase(
-		c.newETHTxCreator().(*ethwatchsrv.TxCreate),
+		targetEthAPI,
+		c.newMySQLClient(),
+		c.newAddressRepo(),
+		c.newTxRepo(),
+		c.newETHTxDetailRepo(),
+		c.newPaymentRequestRepo(),
+		c.newTxFileRepo(),
+		c.newDepositAccount(),
+		c.newPaymentAccount(),
 	)
 }
 
