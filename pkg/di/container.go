@@ -1161,7 +1161,8 @@ func (c *container) newKeygenExportAddressUseCase() keygenusecase.ExportAddressU
 
 func (c *container) newBTCKeygenImportPrivateKeyUseCase() keygenusecase.ImportPrivateKeyUseCase {
 	return keygenusecasebtc.NewImportPrivateKeyUseCase(
-		c.newPrivKeyer().(*btckeygensrv.PrivKey),
+		c.newBTC(),
+		c.newAccountKeyRepo(),
 	)
 }
 
