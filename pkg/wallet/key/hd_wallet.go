@@ -19,6 +19,7 @@ import (
 	xrpaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/xrp"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -106,7 +107,7 @@ func (k *HDKey) CreateKey(
 	seed []byte,
 	accountType domainAccount.AccountType,
 	idxFrom, count uint32,
-) ([]WalletKey, error) {
+) ([]domainKey.WalletKey, error) {
 	// create privateKey, publicKey by account level
 	privKey, _, err := k.createKeyByAccount(seed, accountType)
 	if err != nil {
@@ -164,7 +165,7 @@ func (k *HDKey) createKeyByAccount(
 //   - idxFrom:10, count 10 => 10-19
 func (k *HDKey) createKeysWithIndex(
 	accountPrivKey *hdkeychain.ExtendedKey, idxFrom, count uint32,
-) ([]WalletKey, error) {
+) ([]domainKey.WalletKey, error) {
 	// accountPrivKey, err := hdkeychain.NewKeyFromString(accountPrivKey)
 
 	// Change
@@ -174,7 +175,7 @@ func (k *HDKey) createKeysWithIndex(
 	}
 
 	// Index
-	walletKeys := make([]WalletKey, count)
+	walletKeys := make([]domainKey.WalletKey, count)
 	for i := uint32(0); i < count; i++ {
 		var loopErr error
 		var child *hdkeychain.ExtendedKey
@@ -207,7 +208,7 @@ func (k *HDKey) createKeysWithIndex(
 				return nil, loopErr
 			}
 			// address.String() is equal to address.EncodeAddress()
-			walletKeys[i] = WalletKey{
+			walletKeys[i] = domainKey.WalletKey{
 				WIF:            wif.String(),
 				P2PKHAddr:      strP2PKHAddr,
 				P2SHSegWitAddr: strP2SHSegWitAddr,
@@ -223,7 +224,7 @@ func (k *HDKey) createKeysWithIndex(
 				return nil, loopErr
 			}
 
-			walletKeys[i] = WalletKey{
+			walletKeys[i] = domainKey.WalletKey{
 				WIF:            ethPrivKey,
 				P2PKHAddr:      ethAddr,
 				P2SHSegWitAddr: "",
@@ -245,7 +246,7 @@ func (k *HDKey) createKeysWithIndex(
 				return nil, loopErr
 			}
 
-			walletKeys[i] = WalletKey{
+			walletKeys[i] = domainKey.WalletKey{
 				WIF:            xrpPrivKey,
 				P2PKHAddr:      xrpAddr,
 				P2SHSegWitAddr: ethAddr,

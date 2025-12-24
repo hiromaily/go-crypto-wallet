@@ -11,6 +11,7 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
 
@@ -140,7 +141,7 @@ func testBitcoinConsistency(
 }
 
 // validateAddressFormat validates address format based on network type
-func validateAddressFormat(t *testing.T, k key.WalletKey, conf *chaincfg.Params) {
+func validateAddressFormat(t *testing.T, k domainKey.WalletKey, conf *chaincfg.Params) {
 	t.Helper()
 	switch conf.Name {
 	case "mainnet":

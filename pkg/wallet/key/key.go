@@ -7,12 +7,5 @@ import (
 
 // Generator is key generator interface
 type Generator interface {
-	CreateKey(seed []byte, actType domainAccount.AccountType, idxFrom, count uint32) ([]WalletKey, error)
+	CreateKey(seed []byte, actType domainAccount.AccountType, idxFrom, count uint32) ([]domainKey.WalletKey, error)
 }
-
-// WalletKey keys
-// - [BTC] P2PKHAddr is not used anywhere, P2SHSegWitAddr should be used.
-// - [BCH] P2SHSegWitAddr is invalid. P2PKHAddr should be used.
-//
-// Deprecated: Use domain/key.WalletKey
-type WalletKey = domainKey.WalletKey

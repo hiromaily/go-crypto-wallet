@@ -12,14 +12,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 )
 
 // TestXrpDetailTxSqlc is integration test for XrpDetailTxInputRepositorySqlc
@@ -27,7 +27,7 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	// Create XRP repositories
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
 	confPath := projPath + "/data/config/xrp_watch.toml"
-	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.XRP)
+	conf, err := config.NewWallet(confPath, domainWallet.WalletTypeWatchOnly, domainCoin.XRP)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
@@ -45,7 +45,7 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	_, _ = db.Exec("DELETE FROM tx WHERE coin = 'xrp'")
 
 	// Create a tx record first (xrp_detail_tx joins with tx table)
-	txID, err := txRepo.InsertUnsignedTx(action.ActionTypePayment)
+	txID, err := txRepo.InsertUnsignedTx(domainTx.ActionTypePayment)
 	require.NoError(t, err, "fail to create parent tx")
 
 	// Create test xrp detail tx
@@ -53,7 +53,7 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	xrpTx := &models.XRPDetailTX{
 		TXID:                  txID,
 		UUID:                  uuid,
-		CurrentTXType:         tx.TxTypeUnsigned.Int8(),
+		CurrentTXType:         domainTx.TxTypeUnsigned.Int8(),
 		SenderAccount:         "deposit",
 		SenderAddress:         "rSender-sqlc",
 		ReceiverAccount:       "client",
@@ -90,7 +90,7 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	signedTxID := "signed-txid-sqlc"
 	txBlob := "tx-blob-sqlc"
 	earliestLedgerVersion := uint64(12340)
-	rowsAffected, err := xrpDetailTxRepo.UpdateAfterTxSent(uuid, tx.TxTypeSent, signedTxID, txBlob, earliestLedgerVersion)
+	rowsAffected, err := xrpDetailTxRepo.UpdateAfterTxSent(uuid, domainTx.TxTypeSent, signedTxID, txBlob, earliestLedgerVersion)
 	require.NoError(t, err, "fail to call UpdateAfterTxSent()")
 	require.GreaterOrEqual(t, rowsAffected, int64(1), "UpdateAfterTxSent() should affect at least 1 row")
 
@@ -99,44 +99,44 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	require.NoError(t, err, "fail to call GetOne() after update")
 	require.Equal(t, signedTxID, updatedTx.SignedTXID, "UpdateAfterTxSent() should update SignedTXID")
 	require.Equal(t, txBlob, updatedTx.TXBlob, "UpdateAfterTxSent() should update TXBlob")
-	require.Equal(t, tx.TxTypeSent.Int8(), updatedTx.CurrentTXType, "UpdateAfterTxSent() should update CurrentTXType")
+	require.Equal(t, domainTx.TxTypeSent.Int8(), updatedTx.CurrentTXType, "UpdateAfterTxSent() should update CurrentTXType")
 	require.Equal(t, earliestLedgerVersion, updatedTx.EarliestLedgerVersion, "UpdateAfterTxSent() should update EarliestLedgerVersion")
 
 	// Get sent hash tx (for XRP, this is tx_blob)
-	blobs, err := xrpDetailTxRepo.GetSentHashTx(tx.TxTypeSent)
+	blobs, err := xrpDetailTxRepo.GetSentHashTx(domainTx.TxTypeSent)
 	require.NoError(t, err, "fail to call GetSentHashTx()")
 	require.GreaterOrEqual(t, len(blobs), 1, "GetSentHashTx() should return at least 1 blob")
 
 	// Update tx type by sent hash tx (tx_blob)
-	rowsAffected, err = xrpDetailTxRepo.UpdateTxTypeBySentHashTx(tx.TxTypeDone, txBlob)
+	rowsAffected, err = xrpDetailTxRepo.UpdateTxTypeBySentHashTx(domainTx.TxTypeDone, txBlob)
 	require.NoError(t, err, "fail to call UpdateTxTypeBySentHashTx()")
 	require.GreaterOrEqual(t, rowsAffected, int64(1), "UpdateTxTypeBySentHashTx() should affect at least 1 row")
 
 	// Verify tx type update
 	verifyTx, err := xrpDetailTxRepo.GetOne(retrievedTx.ID)
 	require.NoError(t, err, "fail to call GetOne() after UpdateTxTypeBySentHashTx()")
-	require.Equal(t, tx.TxTypeDone.Int8(), verifyTx.CurrentTXType, "UpdateTxTypeBySentHashTx() should update CurrentTXType to TxTypeDone")
+	require.Equal(t, domainTx.TxTypeDone.Int8(), verifyTx.CurrentTXType, "UpdateTxTypeBySentHashTx() should update CurrentTXType to TxTypeDone")
 
 	// Update tx type by ID
-	rowsAffected, err = xrpDetailTxRepo.UpdateTxType(retrievedTx.ID, tx.TxTypeNotified)
+	rowsAffected, err = xrpDetailTxRepo.UpdateTxType(retrievedTx.ID, domainTx.TxTypeNotified)
 	require.NoError(t, err, "fail to call UpdateTxType()")
 	require.Equal(t, int64(1), rowsAffected, "UpdateTxType() should affect 1 row")
 
 	// Verify final tx type
 	finalTx, err := xrpDetailTxRepo.GetOne(retrievedTx.ID)
 	require.NoError(t, err, "fail to call GetOne() after UpdateTxType()")
-	require.Equal(t, tx.TxTypeNotified.Int8(), finalTx.CurrentTXType, "UpdateTxType() should update CurrentTXType to TxTypeNotified")
+	require.Equal(t, domainTx.TxTypeNotified.Int8(), finalTx.CurrentTXType, "UpdateTxType() should update CurrentTXType to TxTypeNotified")
 
 	// Test InsertBulk
 	// Create another tx record for bulk insert
-	txID2, err := txRepo.InsertUnsignedTx(action.ActionTypePayment)
+	txID2, err := txRepo.InsertUnsignedTx(domainTx.ActionTypePayment)
 	require.NoError(t, err, "fail to create second parent tx")
 
 	bulkTxs := []*models.XRPDetailTX{
 		{
 			TXID:                  txID2,
 			UUID:                  "xrp-uuid-bulk-1",
-			CurrentTXType:         tx.TxTypeUnsigned.Int8(),
+			CurrentTXType:         domainTx.TxTypeUnsigned.Int8(),
 			SenderAccount:         "deposit",
 			SenderAddress:         "rSender-bulk-1",
 			ReceiverAccount:       "client",
@@ -157,7 +157,7 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 		{
 			TXID:                  txID2,
 			UUID:                  "xrp-uuid-bulk-2",
-			CurrentTXType:         tx.TxTypeUnsigned.Int8(),
+			CurrentTXType:         domainTx.TxTypeUnsigned.Int8(),
 			SenderAccount:         "deposit",
 			SenderAddress:         "rSender-bulk-2",
 			ReceiverAccount:       "client",

@@ -8,6 +8,7 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
@@ -41,7 +42,7 @@ func NewHDWallet(
 func (h *HDWallet) Generate(
 	accountType domainAccount.AccountType,
 	seed []byte, count uint32,
-) ([]key.WalletKey, error) {
+) ([]domainKey.WalletKey, error) {
 	logger.Debug("generate HDWallet", "account_type", accountType.String())
 
 	// get latest index
@@ -75,7 +76,7 @@ func (h *HDWallet) generateHDKey(
 	seed []byte,
 	idxFrom,
 	count uint32,
-) ([]key.WalletKey, error) {
+) ([]domainKey.WalletKey, error) {
 	// generate key
 	walletKeys, err := h.keygen.CreateKey(seed, accountType, idxFrom, count)
 	if err != nil {
@@ -92,7 +93,7 @@ func (h *HDWallet) generateHDKey(
 type HDWalletRepo interface {
 	GetMaxIndex(accountType domainAccount.AccountType) (int64, error)
 	Insert(
-		keys []key.WalletKey,
+		keys []domainKey.WalletKey,
 		idx int64,
 		coinTypeCode domainCoin.CoinTypeCode,
 		accountType domainAccount.AccountType,
@@ -130,7 +131,7 @@ func (w *AuthHDWalletRepo) GetMaxIndex(_ domainAccount.AccountType) (int64, erro
 
 // Insert inserts key to auth_account_key table
 func (w *AuthHDWalletRepo) Insert(
-	keys []key.WalletKey, idx int64, coinTypeCode domainCoin.CoinTypeCode, _ domainAccount.AccountType,
+	keys []domainKey.WalletKey, idx int64, coinTypeCode domainCoin.CoinTypeCode, _ domainAccount.AccountType,
 ) error {
 	if len(keys) != 1 {
 		return errors.New("only one key is allowed")
@@ -180,7 +181,10 @@ func (w *AccountHDWalletRepo) GetMaxIndex(accountType domainAccount.AccountType)
 
 // Insert inserts key to account_key_table
 func (w *AccountHDWalletRepo) Insert(
-	keys []key.WalletKey, idxFrom int64, coinTypeCode domainCoin.CoinTypeCode, accountType domainAccount.AccountType,
+	keys []domainKey.WalletKey,
+	idxFrom int64,
+	coinTypeCode domainCoin.CoinTypeCode,
+	accountType domainAccount.AccountType,
 ) error {
 	// insert key information to account_key_table
 	accountKeyItems := make([]*models.AccountKey, len(keys))
