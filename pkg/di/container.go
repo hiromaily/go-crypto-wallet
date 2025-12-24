@@ -353,16 +353,6 @@ func (c *container) newXRPTxCreator() xrpwatchsrv.TxCreator {
 	)
 }
 
-func (c *container) newXRPTxMonitorer() service.TxMonitorer {
-	return xrpwatchsrv.NewTxMonitor(
-		c.newXRP(),
-		c.newMySQLClient(),
-		c.newAddressRepo(),
-		c.newXRPTxDetailRepo(),
-		c.walletType,
-	)
-}
-
 func (c *container) newPaymentRequestCreator() service.PaymentRequestCreator {
 	return watchshared.NewPaymentRequestCreate(
 		c.newConverter(c.conf.CoinTypeCode),
@@ -1123,7 +1113,8 @@ func (c *container) newXRPWatchCreateTransactionUseCase() watchusecase.CreateTra
 
 func (c *container) newXRPWatchMonitorTransactionUseCase() watchusecase.MonitorTransactionUseCase {
 	return watchusecasexrp.NewMonitorTransactionUseCase(
-		c.newXRPTxMonitorer().(*xrpwatchsrv.TxMonitor),
+		c.newXRP(),
+		c.newAddressRepo(),
 	)
 }
 
