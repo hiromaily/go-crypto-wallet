@@ -1142,7 +1142,7 @@ func (c *container) newKeygenGenerateHDWalletUseCase() keygenusecase.GenerateHDW
 
 func (c *container) newKeygenGenerateSeedUseCase() keygenusecase.GenerateSeedUseCase {
 	return keygenusecaseshared.NewGenerateSeedUseCase(
-		c.newSeeder().(*keygenshared.Seed),
+		c.newSeedRepo(),
 	)
 }
 
