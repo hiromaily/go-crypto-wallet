@@ -31,18 +31,26 @@ services:
   # Note: Using official bitcoin/bitcoin image with specific version tag
   #########################################################################
   btc-watch:
-    image: bitcoin/bitcoin:27.1
+    image: bitcoin/bitcoin:29.2
     container_name: btc-watch
     volumes:
       - ./docker/nodes/btc/data1:/home/bitcoin/.bitcoin
     ports:
-      - "${BTC_WATCH_RPC_PORT:-18332}:18443"  # Map to regtest RPC port 18443
+      - "${BTC_WATCH_RPC_PORT:-18332}:18443" # Map to regtest RPC port 18443
     stdin_open: true
     tty: true
     networks:
       - btc
     healthcheck:
-      test: ["CMD", "bitcoin-cli", "-regtest", "-rpcuser=xyz", "-rpcpassword=xyz", "getblockchaininfo"]
+      test:
+        [
+          "CMD",
+          "bitcoin-cli",
+          "-regtest",
+          "-rpcuser=xyz",
+          "-rpcpassword=xyz",
+          "getblockchaininfo",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -50,18 +58,26 @@ services:
     command: -printtoconsole
 
   btc-keygen:
-    image: bitcoin/bitcoin:27.1
+    image: bitcoin/bitcoin:29.2
     container_name: btc-keygen
     volumes:
       - ./docker/nodes/btc/data2:/home/bitcoin/.bitcoin
     ports:
-      - "${BTC_KEYGEN_RPC_PORT:-19332}:18443"  # Map to regtest RPC port 18443
+      - "${BTC_KEYGEN_RPC_PORT:-19332}:18443" # Map to regtest RPC port 18443
     stdin_open: true
     tty: true
     networks:
       - btc
     healthcheck:
-      test: ["CMD", "bitcoin-cli", "-regtest", "-rpcuser=xyz", "-rpcpassword=xyz", "getblockchaininfo"]
+      test:
+        [
+          "CMD",
+          "bitcoin-cli",
+          "-regtest",
+          "-rpcuser=xyz",
+          "-rpcpassword=xyz",
+          "getblockchaininfo",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -69,18 +85,26 @@ services:
     command: -maxconnections=0 -printtoconsole
 
   btc-sign:
-    image: bitcoin/bitcoin:27.1
+    image: bitcoin/bitcoin:29.2
     container_name: btc-sign
     volumes:
       - ./docker/nodes/btc/data3:/home/bitcoin/.bitcoin
     ports:
-      - "${BTC_SIGN_RPC_PORT:-20332}:18443"  # Map to regtest RPC port 18443
+      - "${BTC_SIGN_RPC_PORT:-20332}:18443" # Map to regtest RPC port 18443
     stdin_open: true
     tty: true
     networks:
       - btc
     healthcheck:
-      test: ["CMD", "bitcoin-cli", "-regtest", "-rpcuser=xyz", "-rpcpassword=xyz", "getblockchaininfo"]
+      test:
+        [
+          "CMD",
+          "bitcoin-cli",
+          "-regtest",
+          "-rpcuser=xyz",
+          "-rpcpassword=xyz",
+          "getblockchaininfo",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5

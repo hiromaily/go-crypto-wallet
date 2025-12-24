@@ -9,7 +9,8 @@
 [![GitHub release](https://img.shields.io/badge/release-v5.0.0-blue.svg)](https://github.com/hiromaily/go-crypto-wallet/releases)
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/LICENSE)
 
-Wallet functionalities to create raw transaction, to sing on unsigned transaction, to send signed transaction for BTC, BCH, ETH, XRP and so on.  
+Wallet functionalities to create raw transaction, to sign on unsigned transaction,
+to send signed transaction for BTC, BCH, ETH, XRP and so on.  
 
 ## What kind of coin can be used?
 
@@ -21,8 +22,12 @@ Wallet functionalities to create raw transaction, to sing on unsigned transactio
 
 ## Current development
 
-- This project is under refactoring
-  - based on `Clean Code`, `Clean Architecture`, [`Refactoring`](https://martinfowler.com/articles/refactoring-2nd-ed.html)
+- This project is under refactoring based on `Clean Code`, `Clean Architecture`, [`Refactoring`](https://martinfowler.com/articles/refactoring-2nd-ed.html)
+  - ✅ Domain layer separated (`pkg/domain/`) - Pure business logic with zero infrastructure dependencies
+  - ✅ Application layer (`pkg/application/usecase/`) - Use case implementations following Clean Architecture
+  - ✅ Infrastructure layer (`pkg/infrastructure/`) - External dependencies (API clients, database, repositories)
+  - 🔄 Migration from legacy `pkg/wallet/service/` to new `pkg/application/usecase/` in progress
+  - ✅ Integration tests separated using build tags (`//go:build integration`)
 - Bitcoin Core version 22.0 is released. Signet environment is ongoing.
 
 ## Expected use cases
@@ -31,7 +36,8 @@ Wallet functionalities to create raw transaction, to sing on unsigned transactio
 
 - Pubkey addresses are given to our users first.
 - Users would want to deposit coins on our system.
-- After users sent coins to their given addresses, these all amount of coins are sent to our safe addresses managed offline by cold wallet
+- After users sent coins to their given addresses, these all amount of coins are sent
+  to our safe addresses managed offline by cold wallet
 
 ### 2.Payment functionality
 
@@ -96,7 +102,7 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 
 ## Requirements
 
-- Golang 1.16+
+- Golang 1.25.5+
 - [golangci-lint](https://github.com/golangci/golangci-lint) 1.44.2+ (for development)
 - [direnv](https://direnv.net/)
 - [Docker](https://www.docker.com/get-started)
@@ -134,17 +140,59 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 
 ### `pkg` Directory Structure
 
-Note, explained only well modified packages
+The project follows Clean Architecture principles with clear layer separation:
 
-- `wallet/api/btcgrp` ... Bitcoin RPC APIs. [API References](https://developer.bitcoin.org/reference/rpc/index.html)
-- `wallet/api/ethgrp` ... Ethereum RPC APIs. [API References](https://ethereum.org/en/developers/docs/apis/json-rpc/)
-- `wallet/api/xrpgrp` ... Ripple gRPC client to communicate with [ripple-lib-server](./web/ripple-lib-server/)
-- `wallet/key` ... address/seed generation logic
-- `wallet/service/btc` ... Bitcoin business logic
-- `wallet/service/eth` ... Ethereum business logic
-- `wallet/service/xrp` ... Ripple business logic
-- `wallet/service/coldsrv` ... Cold Wallet common business logic
-- `wallet/service/watchsrv` ... Watch Wallet common business logic
+#### Domain Layer (`pkg/domain/`)
+
+Pure business logic with **zero infrastructure dependencies**:
+
+- `domain/account/` ... Account types, validators, and business rules
+- `domain/transaction/` ... Transaction types, state machine, validators
+- `domain/wallet/` ... Wallet types and definitions
+- `domain/key/` ... Key value objects and validators
+- `domain/multisig/` ... Multisig validators and business rules
+- `domain/coin/` ... Cryptocurrency type definitions
+
+#### Application Layer (`pkg/application/`)
+
+Use case layer following Clean Architecture:
+
+- `application/usecase/keygen/` ... Key generation use cases (btc, eth, xrp, shared)
+- `application/usecase/sign/` ... Signing use cases (btc, eth, xrp, shared)
+- `application/usecase/watch/` ... Watch wallet use cases (btc, eth, xrp, shared)
+
+#### Infrastructure Layer (`pkg/infrastructure/`)
+
+External dependencies and implementations:
+
+- `infrastructure/api/bitcoin/` ... Bitcoin/BCH Core RPC API clients.
+  [API References](https://developer.bitcoin.org/reference/rpc/index.html)
+- `infrastructure/api/ethereum/` ... Ethereum JSON-RPC API clients.
+  [API References](https://ethereum.org/en/developers/docs/apis/json-rpc/)
+- `infrastructure/api/ripple/` ... Ripple gRPC API clients to communicate with
+  [ripple-lib-server](./web/ripple-lib-server/)
+- `infrastructure/database/` ... Database connections and generated code (MySQL, sqlc)
+- `infrastructure/repository/` ... Data persistence implementations (cold wallet, watch wallet)
+- `infrastructure/storage/` ... File storage implementations (address, transaction)
+- `infrastructure/network/` ... Network communication (WebSocket, gRPC)
+
+#### Legacy/Transitional Packages
+
+- `wallet/service/` ... Legacy business logic orchestration (being migrated to `application/usecase/`)
+- `wallet/key/` ... Key generation logic (HD wallet, seeds)
+- `wallet/wallets/` ... Wallet implementations (btcwallet, ethwallet, xrpwallet)
+
+#### Shared Utilities
+
+- `command/` ... Command implementations (keygen, sign, watch)
+- `config/` ... Configuration management
+- `logger/` ... Logging utilities
+- `di/` ... Dependency injection container
+- `address/` ... Address formatting and utilities
+- `account/` ... Account-related utilities (backward compatibility type aliases)
+- `contract/` ... Smart contract utilities (ERC-20 token ABI)
+- `converter/` ... Data conversion utilities
+- `testutil/` ... Test utilities
 
 ## Components inside repository
 
@@ -176,7 +224,8 @@ Note, explained only well modified packages
 ### Basics
 
 - [ ] Remove [github.com/cpacia/bchutil](https://github.com/cpacia/bchutil) due to outdated code. Try to replace to [github.com/gcash/bchd](https://github.com/gcash/bchd)
-- [ ] Fix UnitTest. And Separate dependent test as Integration Test using tag
+- [x] Separate dependent test as Integration Test using tag (`//go:build integration`)
+- [ ] Complete migration from `pkg/wallet/service/` to `pkg/application/usecase/`
 - [ ] Add ATOM tokens on [Cosmos Hub](https://hub.cosmos.network/main/hub-overview/overview.html)
 - [ ] Add [Polkadot](https://polkadot.network/technology/)
 - [ ] Various monitoring patterns to detect suspicious operations.
@@ -188,8 +237,10 @@ Note, explained only well modified packages
 - [ ] Setup [Signet](https://en.bitcoin.it/wiki/Signet) environment for development use
 - [ ] Fix `overpaying fee issue` on Signet. It says 725% overpaying.
 - [ ] native SegWit-Bech32
-- [ ] Multisig-address is used only once because of security reason, so after tx is sent, related receiver addresses should be updated by is_allocated=true.
-- [ ] Sent tx is not proceeded in bitcoin network if fee is not enough comparatively. So re-sending tx functionality is required adding more fee.
+- [ ] Multisig-address is used only once because of security reason, so after tx is sent,
+  related receiver addresses should be updated by is_allocated=true.
+- [ ] Sent tx is not proceeded in bitcoin network if fee is not enough comparatively.
+  So re-sending tx functionality is required adding more fee.
 
 ### For ERC20 token
 
@@ -198,13 +249,37 @@ Note, explained only well modified packages
 
 ### For ETH
 
-- [ ] Make sure that `quantity-tag` is used properly. e.g. when getting balance, which quantity-tag should be used, latest or pending.
+- [ ] Make sure that `quantity-tag` is used properly. e.g. when getting balance,
+  which quantity-tag should be used, latest or pending.
 - [ ] Handling secret of private key properly. Password could be passed from command line argument.
 
 ### For XRP
 
 - [ ] Handling secret of private key properly. Password could be passed from command line argument.
 
+## Architecture
+
+This project follows **Clean Architecture** principles with clear layer separation:
+
+```text
+Application Layer (application/usecase, wallet/service, command)
+    ↓ depends on
+Domain Layer (domain/*)
+    ↑ implements interfaces defined by
+Infrastructure Layer (infrastructure/*, wallet/key)
+```
+
+### Key Principles
+
+- **Domain Layer**: Pure business logic with zero infrastructure dependencies
+- **Application Layer**: Use cases orchestrate business logic by coordinating domain objects and infrastructure services
+- **Infrastructure Layer**: Implements interfaces defined by domain layer
+  (Dependency Inversion Principle)
+- **Dependency Direction**: Outer layers depend on inner layers, never the reverse
+
+For detailed architecture guidelines, see [AGENTS.md](./AGENTS.md).
+
 ## Project layout patterns
 
-- The `pkg` layout pattern, refer to the [linked](https://medium.com/golang-learn/go-project-layout-e5213cdcfaa2) URLs for details.
+- The `pkg` layout pattern, refer to the
+  [linked](https://medium.com/golang-learn/go-project-layout-e5213cdcfaa2) URLs for details.
