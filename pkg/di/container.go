@@ -40,7 +40,6 @@ import (
 	ethsignsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/sign/eth"
 	xrpsignsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/sign/xrp"
 	watchshared "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/shared"
-	xrpwatchsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"
@@ -333,22 +332,6 @@ func (c *container) newCommonAddressImporter() watchshared.AddressImporter {
 		c.newAddressFileRepo(),
 		c.conf.CoinTypeCode,
 		c.conf.AddressType,
-		c.walletType,
-	)
-}
-
-func (c *container) newXRPTxCreator() xrpwatchsrv.TxCreator {
-	return xrpwatchsrv.NewTxCreate(
-		c.newXRP(),
-		c.newMySQLClient(),
-		c.newUUIDHandler(),
-		c.newAddressRepo(),
-		c.newTxRepo(),
-		c.newXRPTxDetailRepo(),
-		c.newPaymentRequestRepo(),
-		c.newTxFileRepo(),
-		c.newDepositAccount(),
-		c.newPaymentAccount(),
 		c.walletType,
 	)
 }
@@ -1107,7 +1090,16 @@ func (c *container) newETHWatchSendTransactionUseCase() watchusecase.SendTransac
 
 func (c *container) newXRPWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
 	return watchusecasexrp.NewCreateTransactionUseCase(
-		c.newXRPTxCreator().(*xrpwatchsrv.TxCreate),
+		c.newXRP(),
+		c.newMySQLClient(),
+		c.newUUIDHandler(),
+		c.newAddressRepo(),
+		c.newTxRepo(),
+		c.newXRPTxDetailRepo(),
+		c.newPaymentRequestRepo(),
+		c.newTxFileRepo(),
+		c.newDepositAccount(),
+		c.newPaymentAccount(),
 	)
 }
 
