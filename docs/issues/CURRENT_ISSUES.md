@@ -2,7 +2,8 @@
 
 ## Overview
 
-This document summarizes issues and technical debt found in the current codebase. Use it as a reference when determining refactoring priorities.
+This document summarizes issues and technical debt found in the current codebase.
+Use it as a reference when determining refactoring priorities.
 
 ---
 
@@ -33,45 +34,46 @@ This document summarizes issues and technical debt found in the current codebase
 **Location**: Multiple files
 **Current State**:
 
-- `pkg/di/container.go` (17 occurrences)
-  - Lines: 108, 167, 175, 187, 189, 379, 433, 444, 455, 466, 485, 501, 517, 545, 577, 715, 797
+- `pkg/di/container.go` (22 occurrences)
+  - Lines: 150, 209, 217, 229, 231, 421, 475, 486, 497, 508, 527, 543, 559, 587, 619, 757, 839, 973, 986, 999, 1032, 1059
+  - **Note**: According to AGENTS.md, `panic` is acceptable in `pkg/di` package during instance construction phase
 - `cmd/tools/get-eth-key/main.go` (3 occurrences)
   - Lines: 35, 45, 50
+  - **Note**: `panic` in `main.go` files is acceptable, but graceful shutdown should be implemented
 
 **Problem**: Runtime errors cause program crashes
 **Impact**: Application stops unexpectedly on invalid coin types or configuration errors
-**Priority**: High
-**Action**: Replace `panic` with error returns
+**Priority**: Medium (for `pkg/di` - acceptable per project guidelines),
+  High (for `main.go` - should implement graceful shutdown)
+**Action**:
 
-**Example**:
-
-```go
-// Before
-panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
-
-// After
-return nil, fmt.Errorf("coinType[%s] is not implemented yet", c.conf.CoinTypeCode)
-```
+- `pkg/di`: Acceptable per project guidelines (instance construction phase)
+- `main.go` files: Implement graceful shutdown instead of `panic`
 
 ### 3. Inappropriate `log.Fatal` Usage
 
 **Location**: Multiple files
 **Current State**:
 
-- `cmd/keygen/main.go` (multiple occurrences)
-- `cmd/sign/main.go` (multiple occurrences)
-- `cmd/watch/main.go` (multiple occurrences)
-- `cmd/tools/eth-key/main.go` (multiple occurrences)
-- `pkg/testutil/repository.go` (multiple occurrences)
-- Test files in `pkg/repository/watchrepo/` (multiple files)
-- Test files in `pkg/account/` (multiple files)
+- `cmd/tools/eth-key/main.go` (5 occurrences)
+  - Lines: 23, 26, 29, 38, 44
+- `pkg/testutil/repository.go` (18 occurrences)
+  - Multiple test helper functions using `log.Fatalf`
+- `pkg/testutil/xrp.go` (3 commented occurrences)
+  - Lines: 61, 68, 71 (commented out)
 
-**Note**: `log.Fatal` in `main` functions is acceptable, but should be replaced with proper error handling and graceful shutdown.
+**Note**: `log.Fatal` in `main` functions is acceptable,
+  but should be replaced with proper error handling and graceful shutdown.
 
-**Problem**: Using `log.Fatal` in non-main packages prevents cleanup processing
-**Impact**: Resource leaks, potential data inconsistency
+**Problem**: Using `log.Fatal` in non-main packages (especially `pkg/testutil/`)
+  prevents cleanup processing
+**Impact**: Resource leaks, potential data inconsistency,
+  test failures don't provide proper cleanup
 **Priority**: High
-**Action**: Replace with error returns (except in `main` functions where graceful shutdown should be implemented)
+**Action**:
+
+- Replace `log.Fatal` in `pkg/testutil/` with error returns
+- Implement graceful shutdown in `main` functions instead of `log.Fatal`
 
 ---
 
@@ -101,24 +103,25 @@ return nil, fmt.Errorf("coinType[%s] is not implemented yet", c.conf.CoinTypeCod
 **Location**: API calls
 **Current State**:
 
-- ✅ `pkg/wallet/api/ethgrp` uses `context.Context`
-- ⚠️ `pkg/wallet/api/btcgrp` - needs verification
-- ⚠️ `pkg/wallet/api/xrpgrp` - needs verification
-- ⚠️ Timeout and cancellation not implemented
+- ✅ `pkg/infrastructure/api/ethereum/` - Most methods use `context.Context`
+- ✅ `pkg/infrastructure/api/ripple/` - All gRPC methods use `context.Context`
+- ✅ `pkg/infrastructure/api/bitcoin/` - Needs verification
+- ✅ `pkg/infrastructure/network/websocket/` - Uses `context.Context`
+- ⚠️ Timeout and cancellation not consistently implemented
 - ⚠️ Tracing information propagation insufficient
 
 **Impact**:
 
-- Cannot control request timeouts
+- Cannot control request timeouts consistently
 - Distributed tracing doesn't work properly
 - Potential resource leaks
 
-**Priority**: High
+**Priority**: Medium (most APIs already use context)
 **Action**:
 
-- [ ] Add `context.Context` to all API calls
-- [ ] Implement timeout settings
-- [ ] Implement cancellation
+- [ ] Verify all `pkg/infrastructure/api/bitcoin/` methods use `context.Context`
+- [ ] Implement consistent timeout settings across all API calls
+- [ ] Implement cancellation handling
 - [ ] Propagate tracing information
 
 ### 6. Logging Inconsistency
@@ -151,29 +154,36 @@ return nil, fmt.Errorf("coinType[%s] is not implemented yet", c.conf.CoinTypeCod
 **Current State**:
 
 - ✅ Integration tests use build tags (`//go:build integration`)
-- ✅ 35+ test files properly tagged
+- ✅ 35 test files properly tagged with integration build tag
 - ⚠️ Test data management could be improved
 - ⚠️ Test helpers could be better organized
+- ⚠️ `pkg/testutil/repository.go` uses `log.Fatal` which prevents proper test cleanup
 
-**Impact**: Long test execution time, difficult test maintenance
+**Impact**: Long test execution time, difficult test maintenance, improper test failure handling
 **Priority**: Medium
 **Action**:
 
 - [x] Test separation with build tags (completed)
+- [ ] Replace `log.Fatal` in `pkg/testutil/` with error returns
 - [ ] Improve test data management
 - [ ] Organize test helpers
 
 ### 8. Interface Overuse
 
-**Location**: `pkg/wallet/service/`
+**Location**: `pkg/wallet/service/` and `pkg/application/usecase/`
 **Problem**:
 
 - Many small interfaces defined
 - Interface usage is inconsistent
+- Both `pkg/wallet/service/` (legacy) and `pkg/application/usecase/` (new) exist in parallel
 
-**Impact**: Increased code complexity
+**Impact**: Increased code complexity, unclear which layer to use
 **Priority**: Medium
-**Action**: Review and consolidate interfaces
+**Action**:
+
+- Review and consolidate interfaces
+- Complete migration from `pkg/wallet/service/` to `pkg/application/usecase/`
+- Document migration strategy
 
 ### 9. Type Safety Issues
 
@@ -206,8 +216,7 @@ return nil, fmt.Errorf("coinType[%s] is not implemented yet", c.conf.CoinTypeCod
 
 **Examples found**:
 
-- `pkg/testutil/xrp.go` (commented `log.Fatalf`)
-- `pkg/config/config_test.go` (commented `log.Fatalf`)
+- `pkg/testutil/xrp.go` (3 commented `log.Fatalf` at lines 61, 68, 71)
 - `pkg/wallet/key/random_wallet.go:31` (commented `log.Printf`)
 
 ---
@@ -280,16 +289,24 @@ return nil, fmt.Errorf("coinType[%s] is not implemented yet", c.conf.CoinTypeCod
 **Current State**:
 
 - ✅ Container-based DI pattern exists (`pkg/di/container.go`)
-- ⚠️ Container implementation has many `panic` calls
-- ⚠️ Layer separation could be improved
+- ✅ Domain layer separated (`pkg/domain/`)
+- ✅ Infrastructure layer separated (`pkg/infrastructure/`)
+- ✅ New application layer (`pkg/application/usecase/`) being introduced
+- ⚠️ Container implementation has many `panic` calls (acceptable per project guidelines)
+- ⚠️ Legacy application layer (`pkg/wallet/service/`) and new layer (`pkg/application/usecase/`) coexist
+- ⚠️ Migration strategy unclear
 
 **Problem**:
 
 - Container pattern implementation is complex
 - Dependency injection may be overly complex
-- Layer separation insufficient
+- Two application layer implementations exist in parallel
 
-**Action**: Review and simplify architecture
+**Action**:
+
+- Complete migration from `pkg/wallet/service/` to `pkg/application/usecase/`
+- Document architecture migration strategy
+- Review and simplify architecture where possible
 
 ### 16. Insufficient Test Coverage
 
@@ -341,14 +358,14 @@ return nil, fmt.Errorf("coinType[%s] is not implemented yet", c.conf.CoinTypeCod
 ## Priority Matrix
 
 | Issue | Priority | Impact | Effort | Priority Order |
-|-------|----------|--------|--------|----------------|
+| ----- | -------- | ------ | ------ | -------------- |
 | Security vulnerabilities | Critical | High | Medium | 1 |
-| `panic` usage | High | High | Low | 2 |
-| `log.Fatal` usage | High | High | Low | 3 |
-| Error handling | High | Medium | High | 4 |
-| Context management | High | Medium | High | 5 |
-| Logging unification | High | Medium | Medium | 6 |
-| Test separation | Medium | Low | Medium | 7 ✅ |
+| `log.Fatal` usage in testutil | High | High | Low | 2 |
+| Error handling | High | Medium | High | 3 |
+| Context management | Medium | Medium | Medium | 4 |
+| Logging unification | High | Medium | Medium | 5 |
+| Test separation | Medium | Low | Medium | 6 ✅ |
+| Architecture migration | Medium | Medium | High | 7 |
 | Interface organization | Medium | Low | Medium | 8 |
 | Documentation | Low | Low | High | 9 |
 
@@ -361,21 +378,23 @@ return nil, fmt.Errorf("coinType[%s] is not implemented yet", c.conf.CoinTypeCod
 1. ✅ Security vulnerability scanning setup (govulncheck available)
    - [ ] Add to CI pipeline
    - [ ] Set up Dependabot
-2. [ ] Remove `panic` usage (replace with error returns)
-3. [ ] Remove `log.Fatal` from non-main packages
-4. [ ] Implement graceful shutdown in `main` functions
+2. [ ] Remove `log.Fatal` from `pkg/testutil/` (replace with error returns)
+3. [ ] Implement graceful shutdown in `main` functions
+4. [ ] Remove commented-out code
 
 ### Phase 2 (Within 1-2 weeks)
 
 1. [ ] Standardize error handling
-2. [ ] Complete context management implementation
+2. [ ] Complete context management implementation (verify bitcoin API, add timeouts)
 3. [ ] Unify logging
+4. [ ] Document architecture migration strategy
 
 ### Phase 3 (Within 1-2 months)
 
-1. [ ] Improve test data management
-2. [ ] Organize interfaces
-3. [ ] Improve documentation
+1. [ ] Complete migration from `pkg/wallet/service/` to `pkg/application/usecase/`
+2. [ ] Improve test data management
+3. [ ] Organize interfaces
+4. [ ] Improve documentation
 
 ---
 
@@ -392,6 +411,9 @@ return nil, fmt.Errorf("coinType[%s] is not implemented yet", c.conf.CoinTypeCod
 
 - 2024-XX-XX: Initial version created
 - 2025-01-XX: Updated to reflect current state (Go 1.25.5, updated dependencies, current architecture)
+- 2025-01-XX: Updated panic usage status (acceptable in pkg/di per project guidelines),
+  updated context management status (most APIs already use context),
+  added architecture migration note
 
 ## Additional Notes
 

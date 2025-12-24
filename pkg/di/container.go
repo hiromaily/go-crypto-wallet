@@ -11,6 +11,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/contract"
 	"github.com/hiromaily/go-crypto-wallet/pkg/converter"
@@ -56,6 +57,7 @@ import (
 	signusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/sign"
 	signusecasebtc "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/sign/btc"
 	signusecaseeth "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/sign/eth"
+	signusecaseshared "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/sign/shared"
 	signusecasexrp "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/sign/xrp"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/watch"
 	watchusecasebtc "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/watch/btc"
@@ -85,11 +87,22 @@ type Container interface {
 	NewKeygenCreateMultisigAddressUseCase() keygenusecase.CreateMultisigAddressUseCase
 	NewKeygenImportFullPubkeyUseCase() keygenusecase.ImportFullPubkeyUseCase
 	NewKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUseCase
+	NewKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase
 
 	// Sign Use Cases
 	NewSignTransactionUseCase() signusecase.SignTransactionUseCase
 	NewSignImportPrivateKeyUseCase(authType domainAccount.AuthType) signusecase.ImportPrivateKeyUseCase
 	NewSignExportFullPubkeyUseCase(authType domainAccount.AuthType) signusecase.ExportFullPubkeyUseCase
+	NewSignGenerateSeedUseCase() signusecase.GenerateSeedUseCase
+	NewSignStoreSeedUseCase() signusecase.StoreSeedUseCase
+	NewSignGenerateAuthKeyUseCase() signusecase.GenerateAuthKeyUseCase
+
+	// Auth accessors
+	AuthName() string
+	AuthType() domainAccount.AuthType
+
+	// Config accessors
+	AddressType() address.AddrType
 }
 
 type container struct {
@@ -115,6 +128,8 @@ type container struct {
 	rippleAPI    *xrp.RippleAPI
 	// keygen specific
 	multisig account.MultisigAccounter
+	// sign specific
+	authName string
 }
 
 // NewContainer is to create container interface
@@ -217,6 +232,9 @@ func (c *container) NewSigner(authName string) wallets.Signer {
 		panic("authName is invalid. this should be embedded when building: " + authName)
 	}
 
+	// store authName for accessor methods
+	c.authName = authName
+
 	// set global logger
 	logger.SetGlobal(logger.NewSlogFromConfig(c.conf.Logger.Env, c.conf.Logger.Level, c.conf.Logger.Service))
 
@@ -230,6 +248,24 @@ func (c *container) NewSigner(authName string) wallets.Signer {
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
 	}
+}
+
+// AuthName returns the authentication account name for sign wallet
+func (c *container) AuthName() string {
+	return c.authName
+}
+
+// AuthType returns the authentication account type for sign wallet
+func (c *container) AuthType() domainAccount.AuthType {
+	if c.authName == "" {
+		return domainAccount.AuthType("")
+	}
+	return domainAccount.AuthTypeMap[c.authName]
+}
+
+// AddressType returns the address type from configuration
+func (c *container) AddressType() address.AddrType {
+	return c.conf.AddressType
 }
 
 func (c *container) newBTCSigner(authType domainAccount.AuthType) wallets.Signer {
@@ -1045,6 +1081,19 @@ func (c *container) NewKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUseCa
 	return c.newXRPKeygenGenerateKeyUseCase()
 }
 
+func (c *container) NewKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase {
+	switch {
+	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
+		return c.newBTCKeygenSignTransactionUseCase()
+	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
+		return c.newETHKeygenSignTransactionUseCase()
+	case c.conf.CoinTypeCode == domainCoin.XRP:
+		return c.newXRPKeygenSignTransactionUseCase()
+	default:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
+	}
+}
+
 // Sign Use Cases
 
 func (c *container) NewSignTransactionUseCase() signusecase.SignTransactionUseCase {
@@ -1070,6 +1119,19 @@ func (c *container) NewSignExportFullPubkeyUseCase(
 	authType domainAccount.AuthType,
 ) signusecase.ExportFullPubkeyUseCase {
 	return c.newBTCSignExportFullPubkeyUseCase(authType)
+}
+
+func (c *container) NewSignGenerateSeedUseCase() signusecase.GenerateSeedUseCase {
+	return signusecaseshared.NewGenerateSeedUseCase(c.newSeeder())
+}
+
+func (c *container) NewSignStoreSeedUseCase() signusecase.StoreSeedUseCase {
+	return signusecaseshared.NewStoreSeedUseCase(c.newSeeder())
+}
+
+func (c *container) NewSignGenerateAuthKeyUseCase() signusecase.GenerateAuthKeyUseCase {
+	authType := c.AuthType()
+	return signusecaseshared.NewGenerateAuthKeyUseCase(c.newSignHdWallter(authType))
 }
 
 // BTC Watch Use Cases
@@ -1199,6 +1261,26 @@ func (c *container) newETHKeygenImportPrivateKeyUseCase() keygenusecase.ImportPr
 func (c *container) newXRPKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUseCase {
 	return keygenusecasexrp.NewGenerateKeyUseCase(
 		c.newXRPKeyGenerator().(*xrpkeygensrv.XRPKeyGenerate),
+	)
+}
+
+// Keygen Sign Transaction Use Cases
+
+func (c *container) newBTCKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase {
+	return keygenusecasebtc.NewSignTransactionUseCase(
+		c.newSigner().(*btcsignsrv.Sign),
+	)
+}
+
+func (c *container) newETHKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase {
+	return keygenusecaseeth.NewSignTransactionUseCase(
+		c.newSigner().(*ethsignsrv.Sign),
+	)
+}
+
+func (c *container) newXRPKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase {
+	return keygenusecasexrp.NewSignTransactionUseCase(
+		c.newXRPSigner().(*xrpsignsrv.Sign),
 	)
 }
 

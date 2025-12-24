@@ -1,14 +1,16 @@
 package imports
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
+	keygenusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/keygen"
+	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
-func runPrivKey(wallet wallets.Keygener, acnt string) error {
+func runPrivKey(container di.Container, acnt string) error {
 	fmt.Println("import generated private key in database to keygen wallet")
 
 	// validator
@@ -20,9 +22,12 @@ func runPrivKey(wallet wallets.Keygener, acnt string) error {
 	}
 
 	// import generated private key to keygen wallet
-	err := wallet.ImportPrivKey(domainAccount.AccountType(acnt))
+	useCase := container.NewKeygenImportPrivateKeyUseCase()
+	err := useCase.Import(context.Background(), keygenusecase.ImportPrivateKeyInput{
+		AccountType: domainAccount.AccountType(acnt),
+	})
 	if err != nil {
-		return fmt.Errorf("fail to call ImportPrivKey() %w", err)
+		return fmt.Errorf("fail to import private key: %w", err)
 	}
 	fmt.Println("Done!")
 

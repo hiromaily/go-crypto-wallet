@@ -16,7 +16,7 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Signer, container di.
 		Short: "create seed",
 		Long:  "create seed for wallet. If --seed is provided, it will be stored instead of generating a new one",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runSeed(*wallet, seedValue)
+			return runSeed(container, seedValue)
 		},
 	}
 	seedCmd.Flags().StringVar(&seedValue, "seed", "",
@@ -28,7 +28,7 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Signer, container di.
 		Use:   "hdkey",
 		Short: "create key for hd wallet for Authorization account",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runHDKey(*wallet)
+			return runHDKey(container)
 		},
 	}
 	parentCmd.AddCommand(hdkeyCmd)

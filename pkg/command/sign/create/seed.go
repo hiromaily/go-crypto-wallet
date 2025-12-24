@@ -1,20 +1,19 @@
 package create
 
 import (
+	"context"
 	"fmt"
 	"os"
 
+	signusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/sign"
+	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
-func runSeed(wallet wallets.Signer, seed string) error {
+func runSeed(container di.Container, seed string) error {
 	fmt.Println("create seed")
 
-	var (
-		bSeed []byte
-		err   error
-	)
+	var bSeed []byte
 
 	if seed == "" {
 		seed = os.Getenv("SIGN_SEED")
@@ -25,16 +24,22 @@ func runSeed(wallet wallets.Signer, seed string) error {
 
 	if seed != "" {
 		// store seed into database, not generate seed
-		bSeed, err = wallet.StoreSeed(seed)
+		storeSeedUseCase := container.NewSignStoreSeedUseCase()
+		output, err := storeSeedUseCase.Store(context.Background(), signusecase.StoreSeedInput{
+			Seed: seed,
+		})
 		if err != nil {
-			return fmt.Errorf("fail to call StoreSeed() %w", err)
+			return fmt.Errorf("fail to store seed: %w", err)
 		}
+		bSeed = output.Seed
 	} else {
 		// create seed
-		bSeed, err = wallet.GenerateSeed()
+		generateSeedUseCase := container.NewSignGenerateSeedUseCase()
+		output, err := generateSeedUseCase.Generate(context.Background())
 		if err != nil {
-			return fmt.Errorf("fail to call GenerateSeed() %w", err)
+			return fmt.Errorf("fail to generate seed: %w", err)
 		}
+		bSeed = output.Seed
 	}
 	fmt.Println("seed: " + key.SeedToString(bSeed))
 

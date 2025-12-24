@@ -1,17 +1,19 @@
 package create
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
 	"github.com/bookerzzz/grok"
 
+	keygenusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/keygen"
+	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
 // runHDKeyWithFlags is the actual implementation that accepts parsed flags
-func runHDKeyWithFlags(wallet wallets.Keygener, keyNum uint64, acnt string, isKeyPair bool) error {
+func runHDKeyWithFlags(container di.Container, keyNum uint64, acnt string, _ bool) error {
 	fmt.Println("create HD key")
 
 	// validator
@@ -26,17 +28,23 @@ func runHDKeyWithFlags(wallet wallets.Keygener, keyNum uint64, acnt string, isKe
 	}
 
 	// create seed
-	bSeed, err := wallet.GenerateSeed()
+	seedUseCase := container.NewKeygenGenerateSeedUseCase()
+	seedOutput, err := seedUseCase.Generate(context.Background())
 	if err != nil {
-		return fmt.Errorf("fail to call GenerateSeed() %w", err)
+		return fmt.Errorf("fail to generate seed: %w", err)
 	}
 
 	// generate key for hd wallet
-	keys, err := wallet.GenerateAccountKey(domainAccount.AccountType(acnt), bSeed, uint32(keyNum), isKeyPair)
+	hdWalletUseCase := container.NewKeygenGenerateHDWalletUseCase()
+	hdWalletOutput, err := hdWalletUseCase.Generate(context.Background(), keygenusecase.GenerateHDWalletInput{
+		AccountType: domainAccount.AccountType(acnt),
+		Seed:        seedOutput.Seed,
+		Count:       uint32(keyNum),
+	})
 	if err != nil {
-		return fmt.Errorf("fail to call GenerateAccountKey() %w", err)
+		return fmt.Errorf("fail to generate HD wallet keys: %w", err)
 	}
-	grok.Value(keys)
+	grok.Value(hdWalletOutput)
 
 	return nil
 }
