@@ -4,31 +4,81 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/keygen"
-	sharedkeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/keygen/shared"
+	keygenusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/keygen"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/keygen/shared"
 )
 
 type generateHDWalletUseCase struct {
-	hdWallet *sharedkeygensrv.HDWallet
+	repo         shared.HDWalletRepo
+	keygen       key.Generator
+	coinTypeCode domainCoin.CoinTypeCode
 }
 
 // NewGenerateHDWalletUseCase creates a new GenerateHDWalletUseCase
-func NewGenerateHDWalletUseCase(hdWallet *sharedkeygensrv.HDWallet) keygen.GenerateHDWalletUseCase {
+func NewGenerateHDWalletUseCase(
+	repo shared.HDWalletRepo,
+	keygen key.Generator,
+	coinTypeCode domainCoin.CoinTypeCode,
+) keygenusecase.GenerateHDWalletUseCase {
 	return &generateHDWalletUseCase{
-		hdWallet: hdWallet,
+		repo:         repo,
+		keygen:       keygen,
+		coinTypeCode: coinTypeCode,
 	}
 }
 
 func (u *generateHDWalletUseCase) Generate(
 	ctx context.Context,
-	input keygen.GenerateHDWalletInput,
-) (keygen.GenerateHDWalletOutput, error) {
-	walletKeys, err := u.hdWallet.Generate(input.AccountType, input.Seed, input.Count)
+	input keygenusecase.GenerateHDWalletInput,
+) (keygenusecase.GenerateHDWalletOutput, error) {
+	logger.Debug("generate HDWallet", "account_type", input.AccountType.String())
+
+	// Get latest index
+	idxFrom, err := u.repo.GetMaxIndex(input.AccountType)
 	if err != nil {
-		return keygen.GenerateHDWalletOutput{}, fmt.Errorf("failed to generate HD wallet keys: %w", err)
+		logger.Info(err.Error())
+		return keygenusecase.GenerateHDWalletOutput{
+			GeneratedCount: 0,
+		}, nil
+	}
+	logger.Debug("max_index",
+		"account_type", input.AccountType.String(),
+		"current_index", idxFrom,
+	)
+
+	// Generate HD wallet keys
+	walletKeys, err := u.generateHDKey(input.AccountType, input.Seed, uint32(idxFrom), input.Count)
+	if err != nil {
+		return keygenusecase.GenerateHDWalletOutput{}, fmt.Errorf("fail to generate HD key: %w", err)
 	}
 
-	return keygen.GenerateHDWalletOutput{
+	// Insert key information to account_key_table / auth_account_key_table
+	err = u.repo.Insert(walletKeys, idxFrom, u.coinTypeCode, input.AccountType)
+	if err != nil {
+		return keygenusecase.GenerateHDWalletOutput{}, fmt.Errorf("fail to call repo.Insert(): %w", err)
+	}
+
+	return keygenusecase.GenerateHDWalletOutput{
 		GeneratedCount: len(walletKeys),
 	}, nil
+}
+
+// generateHDKey generates HD wallet keys
+func (u *generateHDWalletUseCase) generateHDKey(
+	accountType domainAccount.AccountType,
+	seed []byte,
+	idxFrom,
+	count uint32,
+) ([]domainKey.WalletKey, error) {
+	// Generate key
+	walletKeys, err := u.keygen.CreateKey(seed, accountType, idxFrom, count)
+	if err != nil {
+		return nil, fmt.Errorf("fail to call keygen.CreateKey(): %w", err)
+	}
+	return walletKeys, nil
 }

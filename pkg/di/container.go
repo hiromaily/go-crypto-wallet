@@ -1136,7 +1136,9 @@ func (c *container) newWatchCreatePaymentRequestUseCase() watchusecase.CreatePay
 
 func (c *container) newKeygenGenerateHDWalletUseCase() keygenusecase.GenerateHDWalletUseCase {
 	return keygenusecaseshared.NewGenerateHDWalletUseCase(
-		c.newHdWallter().(*keygenshared.HDWallet),
+		c.newHdWalletRepo(),
+		c.newKeyGenerator(),
+		c.conf.CoinTypeCode,
 	)
 }
 
@@ -1148,7 +1150,10 @@ func (c *container) newKeygenGenerateSeedUseCase() keygenusecase.GenerateSeedUse
 
 func (c *container) newKeygenExportAddressUseCase() keygenusecase.ExportAddressUseCase {
 	return keygenusecaseshared.NewExportAddressUseCase(
-		c.newAddressExporter().(*keygenshared.AddressExport),
+		c.newAccountKeyRepo(),
+		c.newAddressFileRepo(),
+		c.newMultiAccount(),
+		c.conf.CoinTypeCode,
 	)
 }
 
