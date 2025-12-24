@@ -1145,15 +1145,11 @@ func (c *container) newBTCWatchSendTransactionUseCase() watchusecase.SendTransac
 
 func (c *container) newBTCWatchImportAddressUseCase() watchusecase.ImportAddressUseCase {
 	return watchusecasebtc.NewImportAddressUseCase(
-		btcwatchsrv.NewAddressImport(
-			c.newBTC(),
-			c.newMySQLClient(),
-			c.newAddressRepo(),
-			c.newAddressFileRepo(),
-			c.conf.CoinTypeCode,
-			c.conf.AddressType,
-			c.walletType,
-		),
+		c.newBTC(),
+		c.newAddressRepo(),
+		c.newAddressFileRepo(),
+		c.conf.CoinTypeCode,
+		c.conf.AddressType,
 	)
 }
 
