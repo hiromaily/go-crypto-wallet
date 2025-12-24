@@ -4,10 +4,7 @@ This installation expects MacOS environment.
 
 ## Requirements
 
-- Golang 1.16+
-- [golangci-lint](https://github.com/golangci/golangci-lint) 1.43+ (for development)
-- [direnv](https://direnv.net/)
-  - Whatever just specific environment variables need to be set. Refer to [.envrc](https://github.com/hiromaily/go-crypto-wallet/blob/master/.envrc)
+- Golang 1.25+
 - [Docker](https://www.docker.com/get-started)
 
 ## Common Setup
@@ -29,13 +26,8 @@ go build -ldflags "-X main.authName=auth4" -v -o ${GOPATH}/bin/sign4 ./cmd/sign/
 go build -ldflags "-X main.authName=auth5" -v -o ${GOPATH}/bin/sign5 ./cmd/sign/
 ```
 
-3. configure config files in [./data/config/*.toml](https://github.com/hiromaily/go-crypto-wallet/tree/master/data/config)
-4. set environment variables. Refer to [.envrc](https://github.com/hiromaily/go-crypto-wallet/blob/master/.envrc)
-   - Using `direnv` insted of setting environment variables
-     - install [direnv](https://direnv.net/) if needed
-     - modify `.envrc` if needed
-     - execute `direnv allow` on terminal
-5. run Database containers
+1. configure config files in [./data/config/*.toml](https://github.com/hiromaily/go-crypto-wallet/tree/master/data/config)
+2. run Database containers
 
 ```
 docker compose up watch-db keygen-db sign-db
@@ -49,13 +41,13 @@ At least, one bitcoin core server and 3 different databases are required.
 
 - I recommend signet network.
 
-2. run bitcoind node containers
+1. run bitcoind node containers
 
 ```
 docker compose up btc-watch btc-keygen btc-sign
 ```
 
-3. setup `bitcoin-cli` using docker
+1. setup `bitcoin-cli` using docker
     - after running `btc-watch` container, set alias on shell
 
    ```zsh
@@ -64,7 +56,7 @@ docker compose up btc-watch btc-keygen btc-sign
    alias bitcoin-cli-sign='docker exec -it btc-sign bitcoin-cli'
    ```
 
-4. create wallets on bitcoind respectively
+2. create wallets on bitcoind respectively
 
    ```
    ./scripts/operation/create-bitcoind-wallet.sh
@@ -78,7 +70,7 @@ docker compose up btc-watch btc-keygen btc-sign
    bitcoin-cli-sign createwallet sign5
    ```
 
-5. load wallet (required if btc containers restarted)
+3. load wallet (required if btc containers restarted)
 
    ```
    ./scripts/operation/load-bitcoind-wallet.sh
@@ -92,7 +84,7 @@ docker compose up btc-watch btc-keygen btc-sign
    bitcoin-cli-sign loadwallet sign5
    ```
 
-6. operation
+4. operation
 
 - see [Operation Example](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/btc/OperationExample.md)
 
@@ -102,8 +94,8 @@ docker compose up btc-watch btc-keygen btc-sign
 
 - see [bitcoin core installation](https://github.com/bitcoin/bitcoin/blob/master/doc/build-osx.md)
 
-2. run bitcoind `$ bitcoind`
-3. create wallets separately (if only one node used)
+1. run bitcoind `$ bitcoind`
+2. create wallets separately (if only one node used)
 
     ```
     $ bitcoin-cli createwallet watch
@@ -150,9 +142,9 @@ docker compose -f compose.eth.yaml up geth
 client version: Geth/v1.10.15-stable-8be800ff/linux-amd64/go1.17.5
 ```
 
-2. `watch -coin eth api nodeinfo`
-3. `watch -coin eth api syncing`
-4. `watch -coin eth api netversion`
+1. `watch -coin eth api nodeinfo`
+2. `watch -coin eth api syncing`
+3. `watch -coin eth api netversion`
 
 ### B. Ganache
 
