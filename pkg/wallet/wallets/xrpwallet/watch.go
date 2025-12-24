@@ -56,42 +56,39 @@ func (w *XRPWatch) ImportAddress(fileName string, _ bool) error {
 	})
 }
 
-// CreateDepositTx creates deposit unsigned transaction
-func (w *XRPWatch) CreateDepositTx(_ float64) (string, string, error) {
-	output, err := w.createTxUseCase.Execute(context.Background(), watchusecase.CreateTransactionInput{
-		ActionType: domainTx.ActionTypeDeposit.String(),
-	})
+// createTx is a helper method to reduce code duplication across transaction creation methods
+func (w *XRPWatch) createTx(input watchusecase.CreateTransactionInput) (string, string, error) {
+	output, err := w.createTxUseCase.Execute(context.Background(), input)
 	if err != nil {
 		return "", "", err
 	}
 	return output.TransactionHex, output.FileName, nil
 }
 
+// CreateDepositTx creates deposit unsigned transaction
+func (w *XRPWatch) CreateDepositTx(_ float64) (string, string, error) {
+	return w.createTx(watchusecase.CreateTransactionInput{
+		ActionType: domainTx.ActionTypeDeposit.String(),
+	})
+}
+
 // CreatePaymentTx creates payment unsigned transaction
 func (w *XRPWatch) CreatePaymentTx(_ float64) (string, string, error) {
-	output, err := w.createTxUseCase.Execute(context.Background(), watchusecase.CreateTransactionInput{
+	return w.createTx(watchusecase.CreateTransactionInput{
 		ActionType: domainTx.ActionTypePayment.String(),
 	})
-	if err != nil {
-		return "", "", err
-	}
-	return output.TransactionHex, output.FileName, nil
 }
 
 // CreateTransferTx creates transfer unsigned transaction
 func (w *XRPWatch) CreateTransferTx(
 	sender, receiver domainAccount.AccountType, floatAmount, _ float64,
 ) (string, string, error) {
-	output, err := w.createTxUseCase.Execute(context.Background(), watchusecase.CreateTransactionInput{
+	return w.createTx(watchusecase.CreateTransactionInput{
 		ActionType:      domainTx.ActionTypeTransfer.String(),
 		SenderAccount:   sender,
 		ReceiverAccount: receiver,
 		Amount:          floatAmount,
 	})
-	if err != nil {
-		return "", "", err
-	}
-	return output.TransactionHex, output.FileName, nil
 }
 
 // UpdateTxStatus updates transaction status

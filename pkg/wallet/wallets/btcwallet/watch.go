@@ -59,45 +59,42 @@ func (w *BTCWatch) ImportAddress(fileName string, isRescan bool) error {
 	})
 }
 
-// CreateDepositTx creates deposit unsigned transaction
-func (w *BTCWatch) CreateDepositTx(adjustmentFee float64) (string, string, error) {
-	output, err := w.createTxUseCase.Execute(context.Background(), watchusecase.CreateTransactionInput{
-		ActionType:    domainTx.ActionTypeDeposit.String(),
-		AdjustmentFee: adjustmentFee,
-	})
+// createTx is a helper method to reduce code duplication across transaction creation methods
+func (w *BTCWatch) createTx(input watchusecase.CreateTransactionInput) (string, string, error) {
+	output, err := w.createTxUseCase.Execute(context.Background(), input)
 	if err != nil {
 		return "", "", err
 	}
 	return output.TransactionHex, output.FileName, nil
 }
 
+// CreateDepositTx creates deposit unsigned transaction
+func (w *BTCWatch) CreateDepositTx(adjustmentFee float64) (string, string, error) {
+	return w.createTx(watchusecase.CreateTransactionInput{
+		ActionType:    domainTx.ActionTypeDeposit.String(),
+		AdjustmentFee: adjustmentFee,
+	})
+}
+
 // CreatePaymentTx creates payment unsigned transaction
 func (w *BTCWatch) CreatePaymentTx(adjustmentFee float64) (string, string, error) {
-	output, err := w.createTxUseCase.Execute(context.Background(), watchusecase.CreateTransactionInput{
+	return w.createTx(watchusecase.CreateTransactionInput{
 		ActionType:    domainTx.ActionTypePayment.String(),
 		AdjustmentFee: adjustmentFee,
 	})
-	if err != nil {
-		return "", "", err
-	}
-	return output.TransactionHex, output.FileName, nil
 }
 
 // CreateTransferTx creates transfer unsigned transaction
 func (w *BTCWatch) CreateTransferTx(
 	sender, receiver domainAccount.AccountType, floatAmount, adjustmentFee float64,
 ) (string, string, error) {
-	output, err := w.createTxUseCase.Execute(context.Background(), watchusecase.CreateTransactionInput{
+	return w.createTx(watchusecase.CreateTransactionInput{
 		ActionType:      domainTx.ActionTypeTransfer.String(),
 		SenderAccount:   sender,
 		ReceiverAccount: receiver,
 		Amount:          floatAmount,
 		AdjustmentFee:   adjustmentFee,
 	})
-	if err != nil {
-		return "", "", err
-	}
-	return output.TransactionHex, output.FileName, nil
 }
 
 // UpdateTxStatus updates transaction status
