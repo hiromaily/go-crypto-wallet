@@ -19,7 +19,10 @@ func NewSendTransactionUseCase(txSender *xrpwatchsrv.TxSend) watch.SendTransacti
 	}
 }
 
-func (u *sendTransactionUseCase) Execute(ctx context.Context, input watch.SendTransactionInput) (watch.SendTransactionOutput, error) {
+func (u *sendTransactionUseCase) Execute(
+	ctx context.Context,
+	input watch.SendTransactionInput,
+) (watch.SendTransactionOutput, error) {
 	txID, err := u.txSender.SendTx(input.FilePath)
 	if err != nil {
 		return watch.SendTransactionOutput{}, fmt.Errorf("failed to send transaction: %w", err)

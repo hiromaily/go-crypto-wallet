@@ -2,10 +2,11 @@ package xrp
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/keygen"
+	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 	xrpkeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/keygen/xrp"
 )
 
@@ -24,7 +25,7 @@ func (u *generateKeyUseCase) Generate(ctx context.Context, input keygen.Generate
 	// Convert interface{} to []domainKey.WalletKey
 	walletKeys, ok := input.WalletKeys.([]domainKey.WalletKey)
 	if !ok {
-		return fmt.Errorf("invalid wallet keys type")
+		return errors.New("invalid wallet keys type")
 	}
 
 	if err := u.keyGenerator.Generate(input.AccountType, input.IsKeyPair, walletKeys); err != nil {

@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/watch"
 	btcwatchsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/btc"
 )
 
@@ -14,7 +14,10 @@ import (
 type TxCreator interface {
 	CreateDepositTx(adjustmentFee float64) (string, string, error)
 	CreatePaymentTx(adjustmentFee float64) (string, string, error)
-	CreateTransferTx(sender, receiver domainAccount.AccountType, floatAmount, adjustmentFee float64) (string, string, error)
+	CreateTransferTx(
+		sender, receiver domainAccount.AccountType,
+		floatAmount, adjustmentFee float64,
+	) (string, string, error)
 }
 
 type createTransactionUseCase struct {
@@ -33,9 +36,9 @@ func (u *createTransactionUseCase) Execute(
 	input watch.CreateTransactionInput,
 ) (watch.CreateTransactionOutput, error) {
 	// Convert action type string to domain type
-	actionType, err := domainTx.ParseActionType(input.ActionType)
-	if err != nil {
-		return watch.CreateTransactionOutput{}, fmt.Errorf("invalid action type: %w", err)
+	actionType := domainTx.ActionType(input.ActionType)
+	if !domainTx.ValidateActionType(input.ActionType) {
+		return watch.CreateTransactionOutput{}, fmt.Errorf("invalid action type: %s", input.ActionType)
 	}
 
 	var hex, fileName string

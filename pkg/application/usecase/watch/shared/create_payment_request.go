@@ -13,7 +13,9 @@ type createPaymentRequestUseCase struct {
 }
 
 // NewCreatePaymentRequestUseCase creates a new CreatePaymentRequestUseCase
-func NewCreatePaymentRequestUseCase(paymentRequestCreator *sharedwatchsrv.PaymentRequestCreate) watch.CreatePaymentRequestUseCase {
+func NewCreatePaymentRequestUseCase(
+	paymentRequestCreator *sharedwatchsrv.PaymentRequestCreate,
+) watch.CreatePaymentRequestUseCase {
 	return &createPaymentRequestUseCase{
 		paymentRequestCreator: paymentRequestCreator,
 	}

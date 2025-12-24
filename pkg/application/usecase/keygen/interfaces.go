@@ -3,8 +3,8 @@ package keygen
 import (
 	"context"
 
-	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 )
 
 // GenerateHDWalletUseCase generates HD wallet keys
