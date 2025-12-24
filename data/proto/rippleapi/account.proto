@@ -2,7 +2,7 @@ edition = "2023";
 
 package rippleapi.account;
 
-option go_package = "github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp";
+option go_package = "github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple/xrp";
 
 // Use proto3 semantics for field presence (implicit presence)
 // This maintains backward compatibility with existing Go code

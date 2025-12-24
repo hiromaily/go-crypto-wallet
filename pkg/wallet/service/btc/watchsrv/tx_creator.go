@@ -12,13 +12,13 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin/btc"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/watch"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
-	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/btc"
 )
 
 // create_tx.go is for common func among create transaction functionalities
@@ -40,14 +40,14 @@ import (
 
 // TxCreate type
 type TxCreate struct {
-	btc             btcgrp.Bitcoiner
+	btc             bitcoin.Bitcoiner
 	dbConn          *sql.DB
-	addrRepo        watchrepo.AddressRepositorier
-	txRepo          watchrepo.BTCTxRepositorier
-	txInputRepo     watchrepo.TxInputRepositorier
-	txOutputRepo    watchrepo.TxOutputRepositorier
-	payReqRepo      watchrepo.PaymentRequestRepositorier
-	txFileRepo      tx.FileRepositorier
+	addrRepo        watch.AddressRepositorier
+	txRepo          watch.BTCTxRepositorier
+	txInputRepo     watch.TxInputRepositorier
+	txOutputRepo    watch.TxOutputRepositorier
+	payReqRepo      watch.PaymentRequestRepositorier
+	txFileRepo      file.TransactionFileRepositorier
 	depositReceiver domainAccount.AccountType
 	paymentSender   domainAccount.AccountType
 	wtype           domainWallet.WalletType
@@ -55,14 +55,14 @@ type TxCreate struct {
 
 // NewTxCreate returns TxCreate object
 func NewTxCreate(
-	btcAPI btcgrp.Bitcoiner,
+	btcAPI bitcoin.Bitcoiner,
 	dbConn *sql.DB,
-	addrRepo watchrepo.AddressRepositorier,
-	txRepo watchrepo.BTCTxRepositorier,
-	txInputRepo watchrepo.TxInputRepositorier,
-	txOutputRepo watchrepo.TxOutputRepositorier,
-	payReqRepo watchrepo.PaymentRequestRepositorier,
-	txFileRepo tx.FileRepositorier,
+	addrRepo watch.AddressRepositorier,
+	txRepo watch.BTCTxRepositorier,
+	txInputRepo watch.TxInputRepositorier,
+	txOutputRepo watch.TxOutputRepositorier,
+	payReqRepo watch.PaymentRequestRepositorier,
+	txFileRepo file.TransactionFileRepositorier,
 	depositReceiver domainAccount.AccountType,
 	paymentSender domainAccount.AccountType,
 	wtype domainWallet.WalletType,

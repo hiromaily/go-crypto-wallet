@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
 )
 
-func runImportWallet(btc btcgrp.Bitcoiner, fileName string) error {
+func runImportWallet(btc bitcoin.Bitcoiner, fileName string) error {
 	fmt.Println("Imports keys from a wallet dump file")
 
 	// validator

@@ -10,9 +10,9 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 )
 
 // CreatePaymentTx create unsigned tx for user(anonymous addresses)

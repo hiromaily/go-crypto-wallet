@@ -6,10 +6,10 @@ import (
 
 	"github.com/bookerzzz/grok"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
 )
 
-func runGetAddressInfo(btc btcgrp.Bitcoiner, addr string) error {
+func runGetAddressInfo(btc bitcoin.Bitcoiner, addr string) error {
 	// validator
 	if addr == "" {
 		return errors.New("address option [-address] is required")

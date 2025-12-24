@@ -9,11 +9,11 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple/xrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 )
 
 // XRPKeyGenerator is XRP key generation service
@@ -23,22 +23,22 @@ type XRPKeyGenerator interface {
 
 // XRPKeyGenerate type
 type XRPKeyGenerate struct {
-	xrp               xrpgrp.Rippler
+	xrp               ripple.Rippler
 	dbConn            *sql.DB
 	coinTypeCode      domainCoin.CoinTypeCode
 	wtype             domainWallet.WalletType
-	accountKeyRepo    coldrepo.AccountKeyRepositorier
-	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier
+	accountKeyRepo    cold.AccountKeyRepositorier
+	xrpAccountKeyRepo cold.XRPAccountKeyRepositorier
 }
 
 // NewXRPKeyGenerate returns XRPKeyGenerate object
 func NewXRPKeyGenerate(
-	xrpAPI xrpgrp.Rippler,
+	xrpAPI ripple.Rippler,
 	dbConn *sql.DB,
 	coinTypeCode domainCoin.CoinTypeCode,
 	wtype domainWallet.WalletType,
-	accountKeyRepo coldrepo.AccountKeyRepositorier,
-	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier,
+	accountKeyRepo cold.AccountKeyRepositorier,
+	xrpAccountKeyRepo cold.XRPAccountKeyRepositorier,
 ) *XRPKeyGenerate {
 	return &XRPKeyGenerate{
 		xrp:               xrpAPI,

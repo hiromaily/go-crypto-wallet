@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum"
 )
 
-func runNetVersion(eth ethgrp.Ethereumer) error {
+func runNetVersion(eth ethereum.Ethereumer) error {
 	version, err := eth.NetVersion(context.Background())
 	if err != nil {
 		return fmt.Errorf("fail to call eth.NetVersion() %w", err)

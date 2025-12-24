@@ -9,23 +9,23 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum/eth"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 )
 
 // PrivKey type
 type PrivKey struct {
-	eth            ethgrp.Ethereumer
-	accountKeyRepo coldrepo.AccountKeyRepositorier
+	eth            ethereum.Ethereumer
+	accountKeyRepo cold.AccountKeyRepositorier
 	wtype          domainWallet.WalletType
 }
 
 // NewPrivKey returns privKey object
 func NewPrivKey(
-	ethAPI ethgrp.Ethereumer,
-	accountKeyRepo coldrepo.AccountKeyRepositorier,
+	ethAPI ethereum.Ethereumer,
+	accountKeyRepo cold.AccountKeyRepositorier,
 	wtype domainWallet.WalletType,
 ) *PrivKey {
 	return &PrivKey{

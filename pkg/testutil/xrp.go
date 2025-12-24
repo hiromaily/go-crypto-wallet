@@ -7,15 +7,15 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple/xrp"
 )
 
-var xr xrpgrp.Rippler
+var xr ripple.Rippler
 
 // GetXRP returns xrp instance
 // FIXME: hard coded
-func GetXRP() (xrpgrp.Rippler, error) {
+func GetXRP() (ripple.Rippler, error) {
 	if xr != nil {
 		return xr, nil
 	}
@@ -30,18 +30,18 @@ func GetXRP() (xrpgrp.Rippler, error) {
 	conf.CoinTypeCode = domainCoin.XRP
 
 	// ws client
-	wsClient, wsAdmin, err := xrpgrp.NewWSClient(&conf.Ripple)
+	wsClient, wsAdmin, err := ripple.NewWSClient(&conf.Ripple)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create ethereum rpc client: %w", err)
 	}
 	// client
-	conn, err := xrpgrp.NewGRPCClient(&conf.Ripple.API)
+	conn, err := ripple.NewGRPCClient(&conf.Ripple.API)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create api instance: %w", err)
 	}
 	grpcAPI := xrp.NewRippleAPI(conn)
 
-	xr, err = xrpgrp.NewRipple(wsClient, wsAdmin, grpcAPI, &conf.Ripple, conf.CoinTypeCode)
+	xr, err = ripple.NewRipple(wsClient, wsAdmin, grpcAPI, &conf.Ripple, conf.CoinTypeCode)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create xrp instance: %w", err)
 	}
@@ -49,7 +49,7 @@ func GetXRP() (xrpgrp.Rippler, error) {
 }
 
 // GetRippleAPI returns RippleAPIer
-// func GetRippleAPI() xrpgrp.RippleAPIer {
+// func GetRippleAPI() ripple.RippleAPIer {
 //	if api != nil {
 //		return api
 //	}
@@ -63,7 +63,7 @@ func GetXRP() (xrpgrp.Rippler, error) {
 //	//TODO: if config should be overridden, here
 //
 //	// client
-//	conn, err := xrpgrp.NewGRPCClient(&conf.Ripple.API)
+//	conn, err := ripple.NewGRPCClient(&conf.Ripple.API)
 //	if err != nil {
 //		log.Fatalf("fail to create api instance: %v", err)
 //	}

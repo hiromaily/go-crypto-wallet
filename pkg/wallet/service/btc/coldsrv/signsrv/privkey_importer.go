@@ -9,9 +9,9 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 )
 
 // PrivKeyer is PrivKeyer service
@@ -21,16 +21,16 @@ type PrivKeyer interface {
 
 // PrivKey type
 type PrivKey struct {
-	btc         btcgrp.Bitcoiner
-	authKeyRepo coldrepo.AuthAccountKeyRepositorier
+	btc         bitcoin.Bitcoiner
+	authKeyRepo cold.AuthAccountKeyRepositorier
 	authType    domainAccount.AuthType
 	wtype       domainWallet.WalletType
 }
 
 // NewPrivKey returns privKey object
 func NewPrivKey(
-	btc btcgrp.Bitcoiner,
-	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
+	btc bitcoin.Bitcoiner,
+	authKeyRepo cold.AuthAccountKeyRepositorier,
 	authType domainAccount.AuthType,
 	wtype domainWallet.WalletType,
 ) *PrivKey {

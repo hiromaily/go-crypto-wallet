@@ -6,24 +6,24 @@ import (
 
 	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum/eth"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum/ethtx"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
-	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/ethtx"
 )
 
 // Sign type
 type Sign struct {
-	eth        ethgrp.Ethereumer
-	txFileRepo tx.FileRepositorier
+	eth        ethereum.Ethereumer
+	txFileRepo file.TransactionFileRepositorier
 	wtype      domainWallet.WalletType
 }
 
 // NewSign returns sign object
 func NewSign(
-	ethAPI ethgrp.Ethereumer,
-	txFileRepo tx.FileRepositorier,
+	ethAPI ethereum.Ethereumer,
+	txFileRepo file.TransactionFileRepositorier,
 	wtype domainWallet.WalletType,
 ) *Sign {
 	return &Sign{
