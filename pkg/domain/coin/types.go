@@ -1,5 +1,7 @@
 package coin
 
+import "github.com/btcsuite/btcd/chaincfg"
+
 // CoinType creates a separate subtree for every cryptocurrency.
 // This follows SLIP-0044 standard for HD wallet derivation paths.
 // See: https://github.com/satoshilabs/slips/blob/master/slip-0044.md
@@ -126,4 +128,17 @@ var ERC20Map = map[ERC20Token]bool{
 func IsERC20Token(val string) bool {
 	_, ok := ERC20Map[ERC20Token(val)]
 	return ok
+}
+
+// GetCoinType returns CoinType based on network configuration
+// This function has infrastructure dependency (chaincfg) and remains in this package
+func GetCoinType(c CoinTypeCode, conf *chaincfg.Params) CoinType {
+	if conf.Name != "mainnet" {
+		return CoinTypeTestnet
+	}
+	if coinType, ok := CoinTypeCodeValue[c]; ok {
+		return coinType
+	}
+	// coinType could not found
+	return CoinTypeTestnet
 }

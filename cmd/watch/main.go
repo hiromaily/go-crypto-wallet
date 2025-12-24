@@ -15,7 +15,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
@@ -50,7 +49,7 @@ var (
 
 func initializeWallet() error {
 	// validate coinTypeCode
-	if !coin.IsCoinTypeCode(coinTypeCode) && !coin.IsERC20Token(coinTypeCode) {
+	if !domainCoin.IsCoinTypeCode(coinTypeCode) && !domainCoin.IsERC20Token(coinTypeCode) {
 		return errors.New("coin args is invalid. `btc`, `bch`, `eth`, `xrp`, `hyt` is allowed")
 	}
 
@@ -82,7 +81,7 @@ func initializeWallet() error {
 
 	// override config
 	conf.CoinTypeCode = domainCoin.CoinTypeCode(coinTypeCode)
-	if coin.IsERC20Token(coinTypeCode) {
+	if domainCoin.IsERC20Token(coinTypeCode) {
 		if err := conf.ValidateERC20(domainCoin.ERC20Token(coinTypeCode)); err != nil {
 			return fmt.Errorf("failed to validate ERC20 token: %w", err)
 		}
@@ -108,7 +107,7 @@ func setConfigPathFromEnv() {
 		confPath = os.Getenv("BTC_WATCH_WALLET_CONF")
 	case coinTypeCode == domainCoin.BCH.String():
 		confPath = os.Getenv("BCH_WATCH_WALLET_CONF")
-	case coin.IsETHGroup(domainCoin.CoinTypeCode(coinTypeCode)):
+	case domainCoin.IsETHGroup(domainCoin.CoinTypeCode(coinTypeCode)):
 		confPath = os.Getenv("ETH_WATCH_WALLET_CONF")
 	case coinTypeCode == domainCoin.XRP.String():
 		confPath = os.Getenv("XRP_WATCH_WALLET_CONF")
@@ -121,7 +120,7 @@ func setAccountConfPathFromEnv() {
 		accountConfPath = os.Getenv("BTC_ACCOUNT_CONF")
 	case coinTypeCode == domainCoin.BCH.String():
 		accountConfPath = os.Getenv("BCH_ACCOUNT_CONF")
-	case coin.IsETHGroup(domainCoin.CoinTypeCode(coinTypeCode)):
+	case domainCoin.IsETHGroup(domainCoin.CoinTypeCode(coinTypeCode)):
 		accountConfPath = os.Getenv("ETH_ACCOUNT_CONF")
 	case coinTypeCode == domainCoin.XRP.String():
 		accountConfPath = os.Getenv("XRP_ACCOUNT_CONF")

@@ -15,7 +15,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
@@ -48,7 +47,7 @@ var (
 
 func initializeWallet() error {
 	// validate coinTypeCode
-	if !coin.IsCoinTypeCode(coinTypeCode) {
+	if !domainCoin.IsCoinTypeCode(coinTypeCode) {
 		return errors.New("coin args is invalid. `btc`, `bch` is allowed")
 	}
 

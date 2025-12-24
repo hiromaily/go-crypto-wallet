@@ -18,8 +18,8 @@ import (
 	bchaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/bch"
 	xrpaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/xrp"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // TODO: except client address, same address is used only once due to security
@@ -82,18 +82,18 @@ const (
 // HDKey HD Wallet Key object
 type HDKey struct {
 	purpose      PurposeType
-	coinType     coin.CoinType
-	coinTypeCode coin.CoinTypeCode
+	coinType     domainCoin.CoinType
+	coinTypeCode domainCoin.CoinTypeCode
 	conf         *chaincfg.Params
 }
 
 // NewHDKey returns Key
 func NewHDKey(
-	purpose PurposeType, coinTypeCode coin.CoinTypeCode, conf *chaincfg.Params,
+	purpose PurposeType, coinTypeCode domainCoin.CoinTypeCode, conf *chaincfg.Params,
 ) *HDKey {
 	keyData := HDKey{
 		purpose:      purpose,
-		coinType:     coin.GetCoinType(coinTypeCode, conf),
+		coinType:     domainCoin.GetCoinType(coinTypeCode, conf),
 		coinTypeCode: coinTypeCode,
 		conf:         conf,
 	}
@@ -191,7 +191,7 @@ func (k *HDKey) createKeysWithIndex(
 		}
 
 		switch k.coinTypeCode {
-		case coin.BTC, coin.BCH:
+		case domainCoin.BTC, domainCoin.BCH:
 			// WIF　(compressed: true) => bitcoin core expresses compressed address
 			var wif *btcutil.WIF
 			wif, loopErr = btcutil.NewWIF(privateKey, k.conf, true)
@@ -216,7 +216,7 @@ func (k *HDKey) createKeysWithIndex(
 				RedeemScript:   redeemScript,
 			}
 
-		case coin.ETH:
+		case domainCoin.ETH:
 			var ethAddr, ethPubKey, ethPrivKey string
 			ethAddr, ethPubKey, ethPrivKey, loopErr = k.ethAddrs(privateKey)
 			if loopErr != nil {
@@ -231,7 +231,7 @@ func (k *HDKey) createKeysWithIndex(
 				FullPubKey:     ethPubKey,
 				RedeemScript:   "",
 			}
-		case coin.XRP:
+		case domainCoin.XRP:
 			var xrpAddr, xrpPubKey, xrpPrivKey string
 			xrpAddr, xrpPubKey, xrpPrivKey, loopErr = k.xrpAddrs(privateKey)
 			if loopErr != nil {
@@ -253,7 +253,7 @@ func (k *HDKey) createKeysWithIndex(
 				FullPubKey:     xrpPubKey,
 				RedeemScript:   "",
 			}
-		case coin.LTC, coin.ERC20, coin.HYC:
+		case domainCoin.LTC, domainCoin.ERC20, domainCoin.HYT:
 			return nil, fmt.Errorf("coinType[%s] is not implemented yet", k.coinTypeCode.String())
 		default:
 			return nil, fmt.Errorf("coinType[%s] is not implemented yet", k.coinTypeCode.String())
@@ -355,11 +355,11 @@ func (k *HDKey) getP2PKHAddr(privKey *btcec.PrivateKey) (string, error) {
 	}
 
 	switch k.coinTypeCode {
-	case coin.BTC:
+	case domainCoin.BTC:
 		return p2PKHAddr.String(), nil
-	case coin.BCH:
+	case domainCoin.BCH:
 		return k.getP2PKHAddrBCH(p2PKHAddr)
-	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
+	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
 		return "", fmt.Errorf("getP2pkhAddr() is not implemented for %s", k.coinTypeCode)
 	default:
 		return "", fmt.Errorf("getP2pkhAddr() is not implemented for %s", k.coinTypeCode)
@@ -410,19 +410,19 @@ func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, er
 
 	var strRedeemScript string // FIXME: not implemented yet
 	switch k.coinTypeCode {
-	case coin.BTC:
+	case domainCoin.BTC:
 		btcAddress, addrErr := btcutil.NewAddressScriptHash(payToAddrScript, k.conf)
 		if addrErr != nil {
 			return "", "", fmt.Errorf("fail to call btcutil.NewAddressScriptHash(): %w", addrErr)
 		}
 		return btcAddress.String(), strRedeemScript, nil
-	case coin.BCH:
+	case domainCoin.BCH:
 		bchAddress, addrErr := bchaddr.NewCashAddressScriptHash(payToAddrScript, k.conf)
 		if addrErr != nil {
 			return "", "", fmt.Errorf("fail to call bchaddr.NewCashAddressScriptHash(): %w", addrErr)
 		}
 		return bchAddress.String(), strRedeemScript, nil
-	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
+	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
 		return "", "", fmt.Errorf("getP2shSegwitAddr() is not implemented yet for %s", k.coinTypeCode)
 	default:
 		return "", "", fmt.Errorf("getP2shSegwitAddr() is not implemented yet for %s", k.coinTypeCode)

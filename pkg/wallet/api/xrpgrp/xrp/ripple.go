@@ -6,7 +6,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/ws"
 )
 
@@ -16,7 +16,7 @@ type Ripple struct {
 	wsAdmin      *ws.WS
 	API          *RippleAPI
 	chainConf    *chaincfg.Params
-	coinTypeCode coin.CoinTypeCode // eth
+	coinTypeCode domainCoin.CoinTypeCode // eth
 }
 
 // NewRipple creates Ripple object
@@ -25,7 +25,7 @@ func NewRipple(
 	wsPublic *ws.WS,
 	wsAdmin *ws.WS,
 	api *RippleAPI,
-	coinTypeCode coin.CoinTypeCode,
+	coinTypeCode domainCoin.CoinTypeCode,
 	conf *config.Ripple,
 ) (*Ripple, error) {
 	xrp := &Ripple{
@@ -59,7 +59,7 @@ func (r *Ripple) Close() error {
 }
 
 // CoinTypeCode returns coinTypeCode
-func (r *Ripple) CoinTypeCode() coin.CoinTypeCode {
+func (r *Ripple) CoinTypeCode() domainCoin.CoinTypeCode {
 	return r.coinTypeCode
 }
 

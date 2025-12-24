@@ -27,7 +27,7 @@ var ERC20Map = domainCoin.ERC20Map
 
 // IsERC20Token validate
 //
-// Deprecated: Use domain/coin.IsERC20Token
+// Deprecated: Use domain/domainCoin.IsERC20Token
 func IsERC20Token(val string) bool {
 	return domainCoin.IsERC20Token(val)
 }

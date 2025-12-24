@@ -10,7 +10,7 @@ import (
 	"github.com/tyler-smith/go-bip39"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
 
@@ -50,23 +50,23 @@ func TestHDWalletBTCDUpgradeConsistency(t *testing.T) {
 
 	// Test Bitcoin Mainnet
 	t.Run("Bitcoin_Mainnet", func(t *testing.T) {
-		testBitcoinConsistency(t, seed, &chaincfg.MainNetParams, coin.BTC)
+		testBitcoinConsistency(t, seed, &chaincfg.MainNetParams, domainCoin.BTC)
 	})
 
 	// Test Bitcoin Testnet
 	t.Run("Bitcoin_Testnet", func(t *testing.T) {
-		testBitcoinConsistency(t, seed, &chaincfg.TestNet3Params, coin.BTC)
+		testBitcoinConsistency(t, seed, &chaincfg.TestNet3Params, domainCoin.BTC)
 	})
 
 	// Test Bitcoin Regtest
 	t.Run("Bitcoin_Regtest", func(t *testing.T) {
-		testBitcoinConsistency(t, seed, &chaincfg.RegressionNetParams, coin.BTC)
+		testBitcoinConsistency(t, seed, &chaincfg.RegressionNetParams, domainCoin.BTC)
 	})
 }
 
 // testBitcoinConsistency tests HD wallet key derivation for Bitcoin
 func testBitcoinConsistency(
-	t *testing.T, seed []byte, conf *chaincfg.Params, coinType coin.CoinTypeCode,
+	t *testing.T, seed []byte, conf *chaincfg.Params, coinType domainCoin.CoinTypeCode,
 ) {
 	t.Helper()
 	// Create HD wallet instance
@@ -191,7 +191,7 @@ func TestHDWalletKnownVectors(t *testing.T) {
 	seed := bip39.NewSeed(mnemonic, "")
 
 	t.Run("Mainnet_Client_Account", func(t *testing.T) {
-		hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.MainNetParams)
+		hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.MainNetParams)
 		keys, err := hdKey.CreateKey(seed, domainAccount.AccountTypeClient, 0, 3)
 		require.NoError(t, err)
 		require.Len(t, keys, 3)
@@ -238,7 +238,7 @@ func TestHDWalletKnownVectors(t *testing.T) {
 	// For now, the mainnet client account test above provides sufficient regression coverage
 	/*
 		t.Run("Mainnet_Deposit_Account", func(t *testing.T) {
-			hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.MainNetParams)
+			hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.MainNetParams)
 			keys, err := hdKey.CreateKey(seed, account.AccountTypeDeposit, 0, 2)
 			require.NoError(t, err)
 			require.Len(t, keys, 2)
@@ -275,7 +275,7 @@ func TestHDWalletKnownVectors(t *testing.T) {
 		})
 
 		t.Run("Testnet_Client_Account", func(t *testing.T) {
-			hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.TestNet3Params)
+			hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.TestNet3Params)
 			keys, err := hdKey.CreateKey(seed, account.AccountTypeClient, 0, 2)
 			require.NoError(t, err)
 			require.Len(t, keys, 2)
@@ -320,7 +320,7 @@ func TestHDWalletMultipleIndices(t *testing.T) {
 	mnemonic := "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 	seed := bip39.NewSeed(mnemonic, "")
 
-	hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.MainNetParams)
+	hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.MainNetParams)
 
 	// Generate keys in different batches and verify consistency
 	t.Run("Batch_Consistency", func(t *testing.T) {
@@ -365,7 +365,7 @@ func TestHDWalletAuthAccounts(t *testing.T) {
 	mnemonic := "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 	seed := bip39.NewSeed(mnemonic, "")
 
-	hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.MainNetParams)
+	hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.MainNetParams)
 
 	// Test multiple auth accounts
 	authAccounts := []domainAccount.AccountType{

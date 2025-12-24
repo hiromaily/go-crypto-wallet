@@ -6,13 +6,13 @@ import (
 	"fmt"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
 
@@ -25,7 +25,7 @@ type XRPKeyGenerator interface {
 type XRPKeyGenerate struct {
 	xrp               xrpgrp.Rippler
 	dbConn            *sql.DB
-	coinTypeCode      coin.CoinTypeCode
+	coinTypeCode      domainCoin.CoinTypeCode
 	wtype             domainWallet.WalletType
 	accountKeyRepo    coldrepo.AccountKeyRepositorier
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier
@@ -35,7 +35,7 @@ type XRPKeyGenerate struct {
 func NewXRPKeyGenerate(
 	xrpAPI xrpgrp.Rippler,
 	dbConn *sql.DB,
-	coinTypeCode coin.CoinTypeCode,
+	coinTypeCode domainCoin.CoinTypeCode,
 	wtype domainWallet.WalletType,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier,

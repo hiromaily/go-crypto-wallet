@@ -8,17 +8,15 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/stretchr/testify/require"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 )
 
 // TestTxSqlc is integration test for TxRepositorySqlc
@@ -26,7 +24,7 @@ func TestTxSqlc(t *testing.T) {
 	// Create ETH repository (tx table is for ETH/XRP only)
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
 	confPath := projPath + "/data/config/eth_watch.toml"
-	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.ETH)
+	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.ETH)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
@@ -35,7 +33,7 @@ func TestTxSqlc(t *testing.T) {
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
-	txRepo := watchrepo.NewTxRepositorySqlc(db, coin.ETH, zapLog)
+	txRepo := watchrepo.NewTxRepositorySqlc(db, domainCoin.ETH, zapLog)
 
 	// Delete all records
 	_, err := txRepo.DeleteAll()

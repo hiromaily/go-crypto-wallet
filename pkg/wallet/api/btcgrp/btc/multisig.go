@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // AddMultisigAddressResult is response type of PRC `addmultisigaddress`
@@ -56,7 +56,7 @@ func (b *Bitcoin) AddMultisigAddress(
 	// addressType for only BTC
 	var jsonRawMsg []json.RawMessage
 	switch b.coinTypeCode {
-	case coin.BTC:
+	case domainCoin.BTC:
 		var bAddrType []byte
 		bAddrType, err = json.Marshal(addressType.String())
 		if err != nil {
@@ -68,9 +68,9 @@ func (b *Bitcoin) AddMultisigAddress(
 		}
 
 		jsonRawMsg = []json.RawMessage{bRequiredSigs, bAddresses, bAccount, bAddrType}
-	case coin.BCH:
+	case domainCoin.BCH:
 		jsonRawMsg = []json.RawMessage{bRequiredSigs, bAddresses, bAccount}
-	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
+	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
 		return nil, fmt.Errorf("not implemented for %s in AddMultisigAddress()", b.coinTypeCode.String())
 	default:
 		return nil, fmt.Errorf("not implemented for %s in AddMultisigAddress()", b.coinTypeCode.String())

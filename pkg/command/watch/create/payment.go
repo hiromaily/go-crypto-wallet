@@ -3,7 +3,7 @@ package create
 import (
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
@@ -13,7 +13,7 @@ func runPayment(wallet wallets.Watcher, fee float64) error {
 	if err != nil {
 		return fmt.Errorf("fail to call CreatePaymentTx() %w", err)
 	}
-	if (wallet.CoinTypeCode() != coin.ETH && wallet.CoinTypeCode() != coin.XRP) && hex == "" {
+	if (wallet.CoinTypeCode() != domainCoin.ETH && wallet.CoinTypeCode() != domainCoin.XRP) && hex == "" {
 		fmt.Println("No utxo")
 		return nil
 	}

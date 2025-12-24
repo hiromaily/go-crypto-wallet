@@ -10,9 +10,9 @@ import (
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // Ethereum includes client to call JSON-RPC
@@ -20,7 +20,7 @@ type Ethereum struct {
 	ethClient    *ethclient.Client
 	rpcClient    *ethrpc.Client
 	chainConf    *chaincfg.Params
-	coinTypeCode coin.CoinTypeCode
+	coinTypeCode domainCoin.CoinTypeCode
 	uuidHandler  uuid.UUIDHandler
 	netID        uint16
 	version      string
@@ -33,7 +33,7 @@ func NewEthereum(
 	ctx context.Context,
 	ethClient *ethclient.Client,
 	rpcClient *ethrpc.Client,
-	coinTypeCode coin.CoinTypeCode,
+	coinTypeCode domainCoin.CoinTypeCode,
 	conf *config.Ethereum,
 	uuidHandler uuid.UUIDHandler,
 ) (*Ethereum, error) {
@@ -113,7 +113,7 @@ func (e *Ethereum) Close() {
 }
 
 // CoinTypeCode returns coinTypeCode
-func (e *Ethereum) CoinTypeCode() coin.CoinTypeCode {
+func (e *Ethereum) CoinTypeCode() domainCoin.CoinTypeCode {
 	return e.coinTypeCode
 }
 

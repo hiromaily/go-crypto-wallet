@@ -9,11 +9,11 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // AddressExport type
@@ -21,7 +21,7 @@ type AddressExport struct {
 	accountKeyRepo  coldrepo.AccountKeyRepositorier
 	addrFileRepo    address.FileRepositorier
 	multisigAccount account.MultisigAccounter
-	coinTypeCode    coin.CoinTypeCode
+	coinTypeCode    domainCoin.CoinTypeCode
 	wtype           domainWallet.WalletType
 }
 
@@ -30,7 +30,7 @@ func NewAddressExport(
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	addrFileRepo address.FileRepositorier,
 	multisigAccount account.MultisigAccounter,
-	coinTypeCode coin.CoinTypeCode,
+	coinTypeCode domainCoin.CoinTypeCode,
 	wtype domainWallet.WalletType,
 ) *AddressExport {
 	return &AddressExport{
@@ -47,18 +47,18 @@ func (a *AddressExport) ExportAddress(accountType domainAccount.AccountType) (st
 	// get target status for account
 	var targetAddrStatus address.AddrStatus
 	switch a.coinTypeCode {
-	case coin.BTC, coin.BCH:
+	case domainCoin.BTC, domainCoin.BCH:
 		if !a.multisigAccount.IsMultisigAccount(accountType) {
 			// non-multisig account
 			targetAddrStatus = address.AddrStatusPrivKeyImported
 		} else {
 			targetAddrStatus = address.AddrStatusMultisigAddressGenerated
 		}
-	case coin.ETH:
+	case domainCoin.ETH:
 		targetAddrStatus = address.AddrStatusPrivKeyImported
-	case coin.XRP:
+	case domainCoin.XRP:
 		targetAddrStatus = address.AddrStatusHDKeyGenerated
-	case coin.LTC, coin.ERC20, coin.HYC:
+	case domainCoin.LTC, domainCoin.ERC20, domainCoin.HYT:
 		return "", fmt.Errorf("coinType[%s] is not implemented yet", a.coinTypeCode)
 	default:
 		return "", fmt.Errorf("coinType[%s] is not implemented yet", a.coinTypeCode)

@@ -8,9 +8,9 @@ import (
 	"os"
 	"testing"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
@@ -19,8 +19,7 @@ import (
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 )
 
 // TestXrpDetailTxSqlc is integration test for XrpDetailTxInputRepositorySqlc
@@ -28,7 +27,7 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	// Create XRP repositories
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
 	confPath := projPath + "/data/config/xrp_watch.toml"
-	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.XRP)
+	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.XRP)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
@@ -38,8 +37,8 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	xrpDetailTxRepo := watchrepo.NewXrpDetailTxInputRepositorySqlc(db, coin.XRP, zapLog)
-	txRepo := watchrepo.NewTxRepositorySqlc(db, coin.XRP, zapLog)
+	xrpDetailTxRepo := watchrepo.NewXrpDetailTxInputRepositorySqlc(db, domainCoin.XRP, zapLog)
+	txRepo := watchrepo.NewTxRepositorySqlc(db, domainCoin.XRP, zapLog)
 
 	// Clean up any existing test data
 	_, _ = db.Exec("DELETE FROM xrp_detail_tx WHERE uuid LIKE 'xrp-uuid-%'")

@@ -5,13 +5,13 @@ import (
 	"fmt"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // TxCreator is TxCreator interface
@@ -33,7 +33,7 @@ type TxCreate struct {
 	depositReceiver domainAccount.AccountType
 	paymentSender   domainAccount.AccountType
 	wtype           domainWallet.WalletType
-	coinTypeCode    coin.CoinTypeCode
+	coinTypeCode    domainCoin.CoinTypeCode
 }
 
 // NewTxCreate returns TxCreate object
@@ -48,7 +48,7 @@ func NewTxCreate(
 	depositReceiver domainAccount.AccountType,
 	paymentSender domainAccount.AccountType,
 	wtype domainWallet.WalletType,
-	coinTypeCode coin.CoinTypeCode,
+	coinTypeCode domainCoin.CoinTypeCode,
 ) *TxCreate {
 	return &TxCreate{
 		eth:             eth,

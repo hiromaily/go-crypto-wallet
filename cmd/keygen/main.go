@@ -15,7 +15,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
@@ -46,7 +45,7 @@ var (
 
 func initializeWallet() error {
 	// validate coinTypeCode
-	if !coin.IsCoinTypeCode(coinTypeCode) {
+	if !domainCoin.IsCoinTypeCode(coinTypeCode) {
 		return errors.New("coin args is invalid. `btc`, `bch`, `eth`, `xrp`, `hyt` is allowed")
 	}
 
@@ -97,7 +96,7 @@ func setConfigPathFromEnv() {
 		confPath = os.Getenv("BTC_KEYGEN_WALLET_CONF")
 	case coinTypeCode == domainCoin.BCH.String():
 		confPath = os.Getenv("BCH_KEYGEN_WALLET_CONF")
-	case coin.IsETHGroup(domainCoin.CoinTypeCode(coinTypeCode)):
+	case domainCoin.IsETHGroup(domainCoin.CoinTypeCode(coinTypeCode)):
 		confPath = os.Getenv("ETH_KEYGEN_WALLET_CONF")
 	case coinTypeCode == domainCoin.XRP.String():
 		confPath = os.Getenv("XRP_KEYGEN_WALLET_CONF")

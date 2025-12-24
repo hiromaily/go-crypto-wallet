@@ -6,10 +6,9 @@ package watchrepo_test
 import (
 	"testing"
 
-	"github.com/quagmt/udecimal"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/quagmt/udecimal"
+	"github.com/stretchr/testify/require"
 
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"

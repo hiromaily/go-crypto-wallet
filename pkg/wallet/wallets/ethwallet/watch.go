@@ -4,9 +4,9 @@ import (
 	"database/sql"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
 	ethsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/watchsrv"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watchsrv"
@@ -102,7 +102,7 @@ func (w *ETHWatch) Done() {
 	w.ETH.Close()
 }
 
-// CoinTypeCode returns coin.CoinTypeCode
-func (w *ETHWatch) CoinTypeCode() coin.CoinTypeCode {
+// CoinTypeCode returns domainCoin.CoinTypeCode
+func (w *ETHWatch) CoinTypeCode() domainCoin.CoinTypeCode {
 	return w.ETH.CoinTypeCode()
 }

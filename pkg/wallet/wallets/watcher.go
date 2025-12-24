@@ -2,7 +2,7 @@ package wallets
 
 import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 )
 
 // Watcher is for watch only wallet service interface
@@ -18,5 +18,5 @@ type Watcher interface {
 	MonitorBalance(confirmationNum uint64) error
 	CreatePaymentRequest() error
 	Done()
-	CoinTypeCode() coin.CoinTypeCode
+	CoinTypeCode() domainCoin.CoinTypeCode
 }

@@ -10,8 +10,8 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/btc"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // Bitcoiner Bitcoin/BitcoinCash Interface
@@ -50,7 +50,7 @@ type Bitcoiner interface {
 	FeeRangeMax() float64
 	FeeRangeMin() float64
 	Version() btc.BTCVersion
-	CoinTypeCode() coin.CoinTypeCode
+	CoinTypeCode() domainCoin.CoinTypeCode
 
 	// fee.go
 	EstimateSmartFee() (float64, error)
