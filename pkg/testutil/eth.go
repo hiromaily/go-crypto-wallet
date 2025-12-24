@@ -5,10 +5,10 @@ import (
 	"os"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 var et ethgrp.Ethereumer
@@ -22,12 +22,12 @@ func GetETH() (ethgrp.Ethereumer, error) {
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
 	confPath := projPath + "/data/config/eth_watch.toml"
-	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.ETH)
+	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.ETH)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create config: %w", err)
 	}
 	// TODO: if config should be overridden, here
-	conf.CoinTypeCode = coin.ETH
+	conf.CoinTypeCode = domainCoin.ETH
 
 	// uuid handler
 	uuidHandler := uuid.NewGoogleUUIDHandler()

@@ -3,7 +3,7 @@ package service
 import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
+	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 )
 
 //-----------------------------------------------------------------------------
@@ -12,7 +12,7 @@ import (
 
 // HDWalleter is HD wallet key generation service
 type HDWalleter interface {
-	Generate(accountType domainAccount.AccountType, seed []byte, count uint32) ([]key.WalletKey, error)
+	Generate(accountType domainAccount.AccountType, seed []byte, count uint32) ([]domainKey.WalletKey, error)
 }
 
 // Seeder is Seeder service

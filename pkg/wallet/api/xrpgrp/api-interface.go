@@ -5,8 +5,8 @@ import (
 
 	"github.com/btcsuite/btcd/chaincfg"
 
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // Rippler Ripple Interface
@@ -26,7 +26,7 @@ type Rippler interface {
 
 	// ripple
 	Close() error
-	CoinTypeCode() coin.CoinTypeCode
+	CoinTypeCode() domainCoin.CoinTypeCode
 	GetChainConf() *chaincfg.Params
 }
 

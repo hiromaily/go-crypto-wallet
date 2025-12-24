@@ -6,21 +6,23 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
+
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 )
 
 // AccountRoot account root config
 type AccountRoot struct {
-	Types           []AccountType     `toml:"types" mapstructure:"types"`
-	DepositReceiver AccountType       `toml:"deposit_receiver" mapstructure:"deposit_receiver"`
-	PaymentSender   AccountType       `toml:"payment_sender" mapstructure:"payment_sender"`
-	Multisigs       []AccountMultisig `toml:"multisig" mapstructure:"multisig"`
+	Types           []domainAccount.AccountType `toml:"types" mapstructure:"types"`
+	DepositReceiver domainAccount.AccountType   `toml:"deposit_receiver" mapstructure:"deposit_receiver"`
+	PaymentSender   domainAccount.AccountType   `toml:"payment_sender" mapstructure:"payment_sender"`
+	Multisigs       []AccountMultisig           `toml:"multisig" mapstructure:"multisig"`
 }
 
 // AccountMultisig multisig setting
 type AccountMultisig struct {
-	Type      AccountType `toml:"type" mapstructure:"type"`
-	Required  int         `toml:"required" mapstructure:"required"`
-	AuthUsers []AuthType  `toml:"auth_users" mapstructure:"auth_users"`
+	Type      domainAccount.AccountType `toml:"type" mapstructure:"type"`
+	Required  int                       `toml:"required" mapstructure:"required"`
+	AuthUsers []domainAccount.AuthType  `toml:"auth_users" mapstructure:"auth_users"`
 }
 
 // NewAccount creates account config

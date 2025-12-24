@@ -78,7 +78,7 @@ func (c *WalletRoot) validate(wtype domainWallet.WalletType, coinTypeCode domain
 		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ethereum"); err != nil {
 			return err
 		}
-	case domainCoin.LTC, domainCoin.HYC:
+	case domainCoin.LTC, domainCoin.HYT:
 		// Not implemented yet
 	default:
 	}

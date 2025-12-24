@@ -8,17 +8,16 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/stretchr/testify/require"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // TestTxSqlc is integration test for TxRepositorySqlc
@@ -26,7 +25,7 @@ func TestTxSqlc(t *testing.T) {
 	// Create ETH repository (tx table is for ETH/XRP only)
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
 	confPath := projPath + "/data/config/eth_watch.toml"
-	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.ETH)
+	conf, err := config.NewWallet(confPath, domainWallet.WalletTypeWatchOnly, domainCoin.ETH)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
@@ -35,14 +34,14 @@ func TestTxSqlc(t *testing.T) {
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
-	txRepo := watchrepo.NewTxRepositorySqlc(db, coin.ETH, zapLog)
+	txRepo := watchrepo.NewTxRepositorySqlc(db, domainCoin.ETH, zapLog)
 
 	// Delete all records
 	_, err := txRepo.DeleteAll()
 	require.NoError(t, err, "fail to call DeleteAll()")
 
 	// Insert unsigned tx
-	actionType := action.ActionTypePayment
+	actionType := domainTx.ActionTypePayment
 	id, err := txRepo.InsertUnsignedTx(actionType)
 	require.NoError(t, err, "fail to call InsertUnsignedTx()")
 	require.NotZero(t, id, "InsertUnsignedTx() should return non-zero id")
@@ -69,7 +68,7 @@ func TestTxSqlc(t *testing.T) {
 	require.Greater(t, id2, id, "second InsertUnsignedTx() should return id greater than first")
 
 	// Update tx
-	tx.Action = action.ActionTypeDeposit.String()
+	tx.Action = domainTx.ActionTypeDeposit.String()
 	rowsAffected, err := txRepo.Update(tx)
 	require.NoError(t, err, "fail to call Update()")
 	require.Equal(t, int64(1), rowsAffected, "Update() should affect 1 row")
@@ -77,5 +76,5 @@ func TestTxSqlc(t *testing.T) {
 	// Verify update
 	updatedTx, err := txRepo.GetOne(id)
 	require.NoError(t, err, "fail to call GetOne() after update")
-	require.Equal(t, action.ActionTypeDeposit.String(), updatedTx.Action, "Update() should change action to Deposit")
+	require.Equal(t, domainTx.ActionTypeDeposit.String(), updatedTx.Action, "Update() should change action to Deposit")
 }

@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 )
 
 func TestNewWallet(t *testing.T) {
@@ -24,64 +24,64 @@ func TestNewWallet(t *testing.T) {
 	tests := []struct {
 		name         string
 		configFile   string
-		walletType   wallet.WalletType
-		coinTypeCode coin.CoinTypeCode
+		walletType   domainWallet.WalletType
+		coinTypeCode domainCoin.CoinTypeCode
 		wantErr      bool
 	}{
 		{
 			name:         "BTC Watch Wallet",
 			configFile:   filepath.Join(projPath, "data/config/btc_watch.toml"),
-			walletType:   wallet.WalletTypeWatchOnly,
-			coinTypeCode: coin.BTC,
+			walletType:   domainWallet.WalletTypeWatchOnly,
+			coinTypeCode: domainCoin.BTC,
 			wantErr:      false,
 		},
 		{
 			name:         "BTC Keygen Wallet",
 			configFile:   filepath.Join(projPath, "data/config/btc_keygen.toml"),
-			walletType:   wallet.WalletTypeKeyGen,
-			coinTypeCode: coin.BTC,
+			walletType:   domainWallet.WalletTypeKeyGen,
+			coinTypeCode: domainCoin.BTC,
 			wantErr:      false,
 		},
 		{
 			name:         "BTC Sign Wallet",
 			configFile:   filepath.Join(projPath, "data/config/btc_sign.toml"),
-			walletType:   wallet.WalletTypeSign,
-			coinTypeCode: coin.BTC,
+			walletType:   domainWallet.WalletTypeSign,
+			coinTypeCode: domainCoin.BTC,
 			wantErr:      false,
 		},
 		{
 			name:         "ETH Watch Wallet",
 			configFile:   filepath.Join(projPath, "data/config/eth_watch.toml"),
-			walletType:   wallet.WalletTypeWatchOnly,
-			coinTypeCode: coin.ETH,
+			walletType:   domainWallet.WalletTypeWatchOnly,
+			coinTypeCode: domainCoin.ETH,
 			wantErr:      false,
 		},
 		{
 			name:         "ETH Keygen Wallet",
 			configFile:   filepath.Join(projPath, "data/config/eth_keygen.toml"),
-			walletType:   wallet.WalletTypeKeyGen,
-			coinTypeCode: coin.ETH,
+			walletType:   domainWallet.WalletTypeKeyGen,
+			coinTypeCode: domainCoin.ETH,
 			wantErr:      false,
 		},
 		{
 			name:         "ETH Sign Wallet",
 			configFile:   filepath.Join(projPath, "data/config/eth_sign.toml"),
-			walletType:   wallet.WalletTypeSign,
-			coinTypeCode: coin.ETH,
+			walletType:   domainWallet.WalletTypeSign,
+			coinTypeCode: domainCoin.ETH,
 			wantErr:      false,
 		},
 		{
 			name:         "Empty file path",
 			configFile:   "",
-			walletType:   wallet.WalletTypeWatchOnly,
-			coinTypeCode: coin.BTC,
+			walletType:   domainWallet.WalletTypeWatchOnly,
+			coinTypeCode: domainCoin.BTC,
 			wantErr:      true,
 		},
 		{
 			name:         "Non-existent file",
 			configFile:   "/nonexistent/path/config.toml",
-			walletType:   wallet.WalletTypeWatchOnly,
-			coinTypeCode: coin.BTC,
+			walletType:   domainWallet.WalletTypeWatchOnly,
+			coinTypeCode: domainCoin.BTC,
 			wantErr:      true,
 		},
 	}
@@ -95,7 +95,11 @@ func TestNewWallet(t *testing.T) {
 
 //nolint:lll
 func testNewWalletCase(
-	t *testing.T, configFile string, walletType wallet.WalletType, coinTypeCode coin.CoinTypeCode, wantErr bool,
+	t *testing.T,
+	configFile string,
+	walletType domainWallet.WalletType,
+	coinTypeCode domainCoin.CoinTypeCode,
+	wantErr bool,
 ) {
 	t.Helper()
 	// Skip tests if config file doesn't exist (except for error cases)
@@ -116,17 +120,17 @@ func testNewWalletCase(
 	validateConfig(t, conf, coinTypeCode)
 }
 
-func validateConfig(t *testing.T, conf *WalletRoot, coinTypeCode coin.CoinTypeCode) {
+func validateConfig(t *testing.T, conf *WalletRoot, coinTypeCode domainCoin.CoinTypeCode) {
 	t.Helper()
 	// Verify that nested structures are properly loaded
 	switch coinTypeCode {
-	case coin.BTC, coin.BCH:
+	case domainCoin.BTC, domainCoin.BCH:
 		validateBitcoinConfig(t, conf)
-	case coin.ETH, coin.ERC20:
+	case domainCoin.ETH, domainCoin.ERC20:
 		validateEthereumConfig(t, conf)
-	case coin.XRP:
+	case domainCoin.XRP:
 		validateRippleConfig(t, conf)
-	case coin.LTC, coin.HYC:
+	case domainCoin.LTC, domainCoin.HYT:
 		// Not implemented yet
 	default:
 		// Other coins

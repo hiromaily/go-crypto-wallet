@@ -9,8 +9,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/ws"
 )
 
@@ -68,16 +68,16 @@ func NewGRPCClient(conf *config.RippleAPI) (*grpc.ClientConn, error) {
 // NewRipple creates Ripple instance according to coinType
 func NewRipple(
 	wsPublic *ws.WS, wsAdmin *ws.WS, api *xrp.RippleAPI, conf *config.Ripple,
-	coinTypeCode coin.CoinTypeCode,
+	coinTypeCode domainCoin.CoinTypeCode,
 ) (Rippler, error) {
 	switch coinTypeCode {
-	case coin.XRP:
+	case domainCoin.XRP:
 		ripple, err := xrp.NewRipple(context.Background(), wsPublic, wsAdmin, api, coinTypeCode, conf)
 		if err != nil {
 			return nil, fmt.Errorf("fail to call xrp.NewRipple(): %w", err)
 		}
 		return ripple, err
-	case coin.BTC, coin.BCH, coin.LTC, coin.ETH, coin.ERC20, coin.HYC:
+	case domainCoin.BTC, domainCoin.BCH, domainCoin.LTC, domainCoin.ETH, domainCoin.ERC20, domainCoin.HYT:
 		return nil, fmt.Errorf("coinType %s is not defined", coinTypeCode.String())
 	default:
 		return nil, fmt.Errorf("coinType %s is not defined", coinTypeCode.String())

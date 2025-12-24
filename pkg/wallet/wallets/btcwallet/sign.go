@@ -5,9 +5,9 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/coldsrv/signsrv"
 )
@@ -64,7 +64,7 @@ func (s *BTCSign) StoreSeed(strSeed string) ([]byte, error) {
 }
 
 // GenerateAuthKey generates account keys
-func (s *BTCSign) GenerateAuthKey(seed []byte, count uint32) ([]key.WalletKey, error) {
+func (s *BTCSign) GenerateAuthKey(seed []byte, count uint32) ([]domainKey.WalletKey, error) {
 	return s.HDWalleter.Generate(s.authAccount.AccountType(), seed, count)
 }
 

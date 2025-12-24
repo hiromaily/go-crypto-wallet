@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/xrp/keygensrv"
 )
@@ -63,7 +63,7 @@ func (k *XRPKeygen) StoreSeed(strSeed string) ([]byte, error) {
 // GenerateAccountKey generates account keys
 func (k *XRPKeygen) GenerateAccountKey(
 	accountType domainAccount.AccountType, seed []byte, count uint32, isKeyPair bool,
-) ([]key.WalletKey, error) {
+) ([]domainKey.WalletKey, error) {
 	keys, err := k.HDWalleter.Generate(accountType, seed, count)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call HDWalleter.Generate(): %w", err)

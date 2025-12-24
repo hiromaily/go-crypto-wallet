@@ -13,12 +13,12 @@ import (
 	"golang.org/x/crypto/sha3"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/contract"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/ethtx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // ERC20 struct
@@ -27,7 +27,7 @@ import (
 type ERC20 struct {
 	client          *ethclient.Client
 	tokenClient     *contract.Token
-	token           coin.ERC20Token
+	token           domainCoin.ERC20Token
 	uuidHandler     uuid.UUIDHandler
 	name            string
 	contractAddress string
@@ -38,7 +38,7 @@ type ERC20 struct {
 func NewERC20(
 	client *ethclient.Client,
 	tokenClient *contract.Token,
-	token coin.ERC20Token,
+	token domainCoin.ERC20Token,
 	uuidHandler uuid.UUIDHandler,
 	name string,
 	contractAddress string,

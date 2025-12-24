@@ -6,15 +6,13 @@ package watchrepo_test
 import (
 	"testing"
 
-	"github.com/quagmt/udecimal"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/quagmt/udecimal"
+	"github.com/stretchr/testify/require"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
-	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 )
 
 // TestBTCTxSqlc is integration test for BTCTxRepositorySqlc
@@ -31,7 +29,7 @@ func TestBTCTxSqlc(t *testing.T) {
 	feeAmt, _ := udecimal.Parse("0.010")
 
 	hex := "unsigned-hex-sqlc"
-	actionType := action.ActionTypePayment
+	actionType := domainTx.ActionTypePayment
 	txItem := &models.BTCTX{
 		Coin:              "btc",
 		Action:            actionType.String(),
@@ -65,30 +63,30 @@ func TestBTCTxSqlc(t *testing.T) {
 	// Update like after tx sent
 	signedHex := "signed-hex-sqlc"
 	sentHashTx := "sent-hash-tx-sqlc"
-	_, err = txRepo.UpdateAfterTxSent(txItem.ID, tx.TxTypeSent, signedHex, sentHashTx)
+	_, err = txRepo.UpdateAfterTxSent(txItem.ID, domainTx.TxTypeSent, signedHex, sentHashTx)
 	require.NoError(t, err, "fail to call UpdateTx()")
 	// check updated record
 	tmpTx, err = txRepo.GetOne(txItem.ID)
 	require.NoError(t, err, "fail to call GetOne()")
 	require.Equal(t, signedHex, tmpTx.SignedHexTX, "Update() should update SignedHexTX")
 	// sent_hash_tx should be retrieved
-	hashes, err := txRepo.GetSentHashTx(actionType, tx.TxTypeSent)
+	hashes, err := txRepo.GetSentHashTx(actionType, domainTx.TxTypeSent)
 	require.NoError(t, err, "fail to call GetSentHashTx()")
 	require.Len(t, hashes, 1, "GetSentHashTx() should return 1 hash")
 
 	// update txType
-	_, err = txRepo.UpdateTxTypeBySentHashTx(actionType, tx.TxTypeDone, sentHashTx)
+	_, err = txRepo.UpdateTxTypeBySentHashTx(actionType, domainTx.TxTypeDone, sentHashTx)
 	require.NoError(t, err, "fail to call UpdateTxTypeBySentHashTx()")
 	// check updated record
 	tmpTx, err = txRepo.GetOne(txItem.ID)
 	require.NoError(t, err, "fail to call GetOne()")
-	require.Equal(t, tx.TxTypeDone.Int8(), tmpTx.CurrentTXType, "UpdateTxTypeBySentHashTx() should update CurrentTXType to TxTypeDone")
+	require.Equal(t, domainTx.TxTypeDone.Int8(), tmpTx.CurrentTXType, "UpdateTxTypeBySentHashTx() should update CurrentTXType to TxTypeDone")
 
 	// update txType
-	_, err = txRepo.UpdateTxType(txItem.ID, tx.TxTypeNotified)
+	_, err = txRepo.UpdateTxType(txItem.ID, domainTx.TxTypeNotified)
 	require.NoError(t, err, "fail to call UpdateTxType()")
 	// check updated record
 	tmpTx, err = txRepo.GetOne(txItem.ID)
 	require.NoError(t, err, "fail to call GetOne()")
-	require.Equal(t, tx.TxTypeNotified.Int8(), tmpTx.CurrentTXType, "UpdateTxType() should update CurrentTXType to TxTypeNotified")
+	require.Equal(t, domainTx.TxTypeNotified.Int8(), tmpTx.CurrentTXType, "UpdateTxType() should update CurrentTXType to TxTypeNotified")
 }

@@ -4,10 +4,10 @@ import (
 	"database/sql"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watchsrv"
 	xrpsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/xrp/watchsrv"
@@ -105,7 +105,7 @@ func (w *XRPWatch) Done() {
 	w.XRP.Close()
 }
 
-// CoinTypeCode returns coin.CoinTypeCode
-func (w *XRPWatch) CoinTypeCode() coin.CoinTypeCode {
+// CoinTypeCode returns domainCoin.CoinTypeCode
+func (w *XRPWatch) CoinTypeCode() domainCoin.CoinTypeCode {
 	return w.XRP.CoinTypeCode()
 }

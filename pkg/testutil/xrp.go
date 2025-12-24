@@ -5,10 +5,10 @@ import (
 	"os"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 var xr xrpgrp.Rippler
@@ -22,12 +22,12 @@ func GetXRP() (xrpgrp.Rippler, error) {
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
 	confPath := projPath + "/data/config/xrp_watch.toml"
-	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.XRP)
+	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.XRP)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create config: %w", err)
 	}
 	// TODO: if config should be overridden, here
-	conf.CoinTypeCode = coin.XRP
+	conf.CoinTypeCode = domainCoin.XRP
 
 	// ws client
 	wsClient, wsAdmin, err := xrpgrp.NewWSClient(&conf.Ripple)
@@ -56,7 +56,7 @@ func GetXRP() (xrpgrp.Rippler, error) {
 //
 //	projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-crypto-wallet", os.Getenv("GOPATH"))
 //	confPath := fmt.Sprintf("%s/data/config/xrp_watch.toml", projPath)
-//	conf, err := config.New(confPath, wallet.WalletTypeWatchOnly, coin.XRP)
+//	conf, err := config.New(confPath, wallet.WalletTypeWatchOnly, domainCoin.XRP)
 //	if err != nil {
 //		log.Fatalf("fail to create config: %v", err)
 //	}

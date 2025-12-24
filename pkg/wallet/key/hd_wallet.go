@@ -15,11 +15,12 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"golang.org/x/crypto/ripemd160" //nolint:gosec
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	bchaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/bch"
 	xrpaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/xrp"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // TODO: except client address, same address is used only once due to security
@@ -82,18 +83,18 @@ const (
 // HDKey HD Wallet Key object
 type HDKey struct {
 	purpose      PurposeType
-	coinType     coin.CoinType
-	coinTypeCode coin.CoinTypeCode
+	coinType     domainCoin.CoinType
+	coinTypeCode domainCoin.CoinTypeCode
 	conf         *chaincfg.Params
 }
 
 // NewHDKey returns Key
 func NewHDKey(
-	purpose PurposeType, coinTypeCode coin.CoinTypeCode, conf *chaincfg.Params,
+	purpose PurposeType, coinTypeCode domainCoin.CoinTypeCode, conf *chaincfg.Params,
 ) *HDKey {
 	keyData := HDKey{
 		purpose:      purpose,
-		coinType:     coin.GetCoinType(coinTypeCode, conf),
+		coinType:     domainCoin.GetCoinType(coinTypeCode, conf),
 		coinTypeCode: coinTypeCode,
 		conf:         conf,
 	}
@@ -102,7 +103,11 @@ func NewHDKey(
 }
 
 // CreateKey create hd key
-func (k *HDKey) CreateKey(seed []byte, accountType account.AccountType, idxFrom, count uint32) ([]WalletKey, error) {
+func (k *HDKey) CreateKey(
+	seed []byte,
+	accountType domainAccount.AccountType,
+	idxFrom, count uint32,
+) ([]domainKey.WalletKey, error) {
 	// create privateKey, publicKey by account level
 	privKey, _, err := k.createKeyByAccount(seed, accountType)
 	if err != nil {
@@ -114,7 +119,7 @@ func (k *HDKey) CreateKey(seed []byte, accountType account.AccountType, idxFrom,
 
 // createKeyByAccount create privateKey, publicKey by account level
 func (k *HDKey) createKeyByAccount(
-	seed []byte, accountType account.AccountType,
+	seed []byte, accountType domainAccount.AccountType,
 ) (*hdkeychain.ExtendedKey, *hdkeychain.ExtendedKey, error) {
 	// Master
 	masterKey, err := hdkeychain.NewMaster(seed, k.conf)
@@ -160,7 +165,7 @@ func (k *HDKey) createKeyByAccount(
 //   - idxFrom:10, count 10 => 10-19
 func (k *HDKey) createKeysWithIndex(
 	accountPrivKey *hdkeychain.ExtendedKey, idxFrom, count uint32,
-) ([]WalletKey, error) {
+) ([]domainKey.WalletKey, error) {
 	// accountPrivKey, err := hdkeychain.NewKeyFromString(accountPrivKey)
 
 	// Change
@@ -170,7 +175,7 @@ func (k *HDKey) createKeysWithIndex(
 	}
 
 	// Index
-	walletKeys := make([]WalletKey, count)
+	walletKeys := make([]domainKey.WalletKey, count)
 	for i := uint32(0); i < count; i++ {
 		var loopErr error
 		var child *hdkeychain.ExtendedKey
@@ -187,7 +192,7 @@ func (k *HDKey) createKeysWithIndex(
 		}
 
 		switch k.coinTypeCode {
-		case coin.BTC, coin.BCH:
+		case domainCoin.BTC, domainCoin.BCH:
 			// WIF　(compressed: true) => bitcoin core expresses compressed address
 			var wif *btcutil.WIF
 			wif, loopErr = btcutil.NewWIF(privateKey, k.conf, true)
@@ -203,7 +208,7 @@ func (k *HDKey) createKeysWithIndex(
 				return nil, loopErr
 			}
 			// address.String() is equal to address.EncodeAddress()
-			walletKeys[i] = WalletKey{
+			walletKeys[i] = domainKey.WalletKey{
 				WIF:            wif.String(),
 				P2PKHAddr:      strP2PKHAddr,
 				P2SHSegWitAddr: strP2SHSegWitAddr,
@@ -212,14 +217,14 @@ func (k *HDKey) createKeysWithIndex(
 				RedeemScript:   redeemScript,
 			}
 
-		case coin.ETH:
+		case domainCoin.ETH:
 			var ethAddr, ethPubKey, ethPrivKey string
 			ethAddr, ethPubKey, ethPrivKey, loopErr = k.ethAddrs(privateKey)
 			if loopErr != nil {
 				return nil, loopErr
 			}
 
-			walletKeys[i] = WalletKey{
+			walletKeys[i] = domainKey.WalletKey{
 				WIF:            ethPrivKey,
 				P2PKHAddr:      ethAddr,
 				P2SHSegWitAddr: "",
@@ -227,7 +232,7 @@ func (k *HDKey) createKeysWithIndex(
 				FullPubKey:     ethPubKey,
 				RedeemScript:   "",
 			}
-		case coin.XRP:
+		case domainCoin.XRP:
 			var xrpAddr, xrpPubKey, xrpPrivKey string
 			xrpAddr, xrpPubKey, xrpPrivKey, loopErr = k.xrpAddrs(privateKey)
 			if loopErr != nil {
@@ -241,7 +246,7 @@ func (k *HDKey) createKeysWithIndex(
 				return nil, loopErr
 			}
 
-			walletKeys[i] = WalletKey{
+			walletKeys[i] = domainKey.WalletKey{
 				WIF:            xrpPrivKey,
 				P2PKHAddr:      xrpAddr,
 				P2SHSegWitAddr: ethAddr,
@@ -249,7 +254,7 @@ func (k *HDKey) createKeysWithIndex(
 				FullPubKey:     xrpPubKey,
 				RedeemScript:   "",
 			}
-		case coin.LTC, coin.ERC20, coin.HYC:
+		case domainCoin.LTC, domainCoin.ERC20, domainCoin.HYT:
 			return nil, fmt.Errorf("coinType[%s] is not implemented yet", k.coinTypeCode.String())
 		default:
 			return nil, fmt.Errorf("coinType[%s] is not implemented yet", k.coinTypeCode.String())
@@ -351,11 +356,11 @@ func (k *HDKey) getP2PKHAddr(privKey *btcec.PrivateKey) (string, error) {
 	}
 
 	switch k.coinTypeCode {
-	case coin.BTC:
+	case domainCoin.BTC:
 		return p2PKHAddr.String(), nil
-	case coin.BCH:
+	case domainCoin.BCH:
 		return k.getP2PKHAddrBCH(p2PKHAddr)
-	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
+	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
 		return "", fmt.Errorf("getP2pkhAddr() is not implemented for %s", k.coinTypeCode)
 	default:
 		return "", fmt.Errorf("getP2pkhAddr() is not implemented for %s", k.coinTypeCode)
@@ -406,19 +411,19 @@ func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, er
 
 	var strRedeemScript string // FIXME: not implemented yet
 	switch k.coinTypeCode {
-	case coin.BTC:
+	case domainCoin.BTC:
 		btcAddress, addrErr := btcutil.NewAddressScriptHash(payToAddrScript, k.conf)
 		if addrErr != nil {
 			return "", "", fmt.Errorf("fail to call btcutil.NewAddressScriptHash(): %w", addrErr)
 		}
 		return btcAddress.String(), strRedeemScript, nil
-	case coin.BCH:
+	case domainCoin.BCH:
 		bchAddress, addrErr := bchaddr.NewCashAddressScriptHash(payToAddrScript, k.conf)
 		if addrErr != nil {
 			return "", "", fmt.Errorf("fail to call bchaddr.NewCashAddressScriptHash(): %w", addrErr)
 		}
 		return bchAddress.String(), strRedeemScript, nil
-	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
+	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
 		return "", "", fmt.Errorf("getP2shSegwitAddr() is not implemented yet for %s", k.coinTypeCode)
 	default:
 		return "", "", fmt.Errorf("getP2shSegwitAddr() is not implemented yet for %s", k.coinTypeCode)

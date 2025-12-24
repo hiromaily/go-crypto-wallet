@@ -12,10 +12,10 @@ import (
 	"github.com/ethereum/go-ethereum/p2p"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/ethtx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // Ethereumer Ethereum Interface
@@ -27,7 +27,7 @@ type Ethereumer interface {
 	SendRawTx(ctx context.Context, tx *types.Transaction) error
 	// ethereum
 	Close()
-	CoinTypeCode() coin.CoinTypeCode
+	CoinTypeCode() domainCoin.CoinTypeCode
 	GetChainConf() *chaincfg.Params
 	// key
 	ToECDSA(privKey string) (*ecdsa.PrivateKey, error)

@@ -29,7 +29,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/erc20"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
 	btccoldsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/coldsrv"
@@ -104,9 +103,9 @@ func (c *container) NewKeygener() wallets.Keygener {
 	logger.SetGlobal(logger.NewSlogFromConfig(c.conf.Logger.Env, c.conf.Logger.Level, c.conf.Logger.Service))
 
 	switch {
-	case coin.IsBTCGroup(c.conf.CoinTypeCode):
+	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
 		return c.newBTCKeygener()
-	case coin.IsETHGroup(c.conf.CoinTypeCode):
+	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
 		return c.newETHKeygener()
 	case c.conf.CoinTypeCode == domainCoin.XRP:
 		return c.newXRPKeygener()
@@ -163,9 +162,9 @@ func (c *container) NewWalleter() wallets.Watcher {
 	logger.SetGlobal(logger.NewSlogFromConfig(c.conf.Logger.Env, c.conf.Logger.Level, c.conf.Logger.Service))
 
 	switch {
-	case coin.IsBTCGroup(c.conf.CoinTypeCode):
+	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
 		return c.newBTCWalleter()
-	case coin.IsETHGroup(c.conf.CoinTypeCode):
+	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
 		return c.newETHWalleter()
 	case c.conf.CoinTypeCode == domainCoin.XRP:
 		return c.newXRPWalleter()
@@ -189,7 +188,7 @@ func (c *container) NewSigner(authName string) wallets.Signer {
 	switch c.conf.CoinTypeCode {
 	case domainCoin.BTC, domainCoin.BCH:
 		return c.newBTCSigner(authType)
-	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYC:
+	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
@@ -296,7 +295,7 @@ func (c *container) newBTCTxCreator() service.TxCreator {
 
 func (c *container) newETHTxCreator() ethsrv.TxCreator {
 	var targetEthAPI ethgrp.EtherTxCreator
-	if coin.IsERC20Token(c.conf.CoinTypeCode.String()) {
+	if domainCoin.IsERC20Token(c.conf.CoinTypeCode.String()) {
 		targetEthAPI = c.newERC20()
 	} else {
 		targetEthAPI = c.newETH()
@@ -416,11 +415,11 @@ func (c *container) newPaymentRequestCreator() service.PaymentRequestCreator {
 	)
 }
 
-func (c *container) newConverter(coinTypeCode coin.CoinTypeCode) converter.Converter {
+func (c *container) newConverter(coinTypeCode domainCoin.CoinTypeCode) converter.Converter {
 	switch coinTypeCode {
-	case coin.BTC:
+	case domainCoin.BTC:
 		return c.newBTC()
-	case coin.BCH, coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
+	case domainCoin.BCH, domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
 		return converter.NewConverter()
 	default:
 		return converter.NewConverter()
@@ -663,16 +662,16 @@ func (c *container) newTxFileRepo() tx.FileRepositorier {
 // Account
 //
 
-func (c *container) newDepositAccount() account.AccountType {
+func (c *container) newDepositAccount() domainAccount.AccountType {
 	if c.accountConf == nil || c.accountConf.DepositReceiver == "" {
-		return account.AccountTypeDeposit
+		return domainAccount.AccountTypeDeposit
 	}
 	return c.accountConf.DepositReceiver
 }
 
-func (c *container) newPaymentAccount() account.AccountType {
+func (c *container) newPaymentAccount() domainAccount.AccountType {
 	if c.accountConf == nil || c.accountConf.PaymentSender == "" {
-		return account.AccountTypePayment
+		return domainAccount.AccountTypePayment
 	}
 	return c.accountConf.PaymentSender
 }
@@ -705,13 +704,13 @@ func (c *container) newHdWalletRepo() commonsrv.HDWalletRepo {
 
 func (c *container) newPrivKeyer() service.PrivKeyer {
 	switch {
-	case coin.IsBTCGroup(c.conf.CoinTypeCode):
+	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
 		return btckeygensrv.NewPrivKey(
 			c.newBTC(),
 			c.newAccountKeyRepo(),
 			c.walletType,
 		)
-	case coin.IsETHGroup(c.conf.CoinTypeCode):
+	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
 		return ethkeygensrv.NewPrivKey(
 			c.newETH(),
 			c.newAccountKeyRepo(),
@@ -793,11 +792,11 @@ func (c *container) newXRPKeyGenerator() xrpkeygensrv.XRPKeyGenerator {
 func (c *container) newKeyGenerator() key.Generator {
 	var chainConf *chaincfg.Params
 	switch {
-	case coin.IsBTCGroup(c.conf.CoinTypeCode):
+	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
 		chainConf = c.newBTC().GetChainConf()
-	case coin.IsETHGroup(c.conf.CoinTypeCode):
+	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
 		chainConf = c.newETH().GetChainConf()
-	case c.conf.CoinTypeCode == coin.XRP:
+	case c.conf.CoinTypeCode == domainCoin.XRP:
 		chainConf = c.newXRP().GetChainConf()
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
@@ -884,7 +883,7 @@ func (c *container) newTxFileStorager() tx.FileRepositorier {
 // Sign Service
 //
 
-func (c *container) newSignHdWallter(authType account.AuthType) service.HDWalleter {
+func (c *container) newSignHdWallter(authType domainAccount.AuthType) service.HDWalleter {
 	return commonsrv.NewHDWallet(
 		c.newSignHdWalletRepo(authType),
 		c.newKeyGenerator(),
@@ -893,14 +892,14 @@ func (c *container) newSignHdWallter(authType account.AuthType) service.HDWallet
 	)
 }
 
-func (c *container) newSignHdWalletRepo(authType account.AuthType) commonsrv.HDWalletRepo {
+func (c *container) newSignHdWalletRepo(authType domainAccount.AuthType) commonsrv.HDWalletRepo {
 	return commonsrv.NewAuthHDWalletRepo(
 		c.newAuthKeyRepo(),
 		authType,
 	)
 }
 
-func (c *container) newSignPrivKeyer(authType account.AuthType) btcsignsrv.PrivKeyer {
+func (c *container) newSignPrivKeyer(authType domainAccount.AuthType) btcsignsrv.PrivKeyer {
 	return btcsignsrv.NewPrivKey(
 		c.newBTC(),
 		c.newAuthKeyRepo(),
@@ -909,7 +908,7 @@ func (c *container) newSignPrivKeyer(authType account.AuthType) btcsignsrv.PrivK
 	)
 }
 
-func (c *container) newSignFullPubkeyExporter(authType account.AuthType) service.FullPubkeyExporter {
+func (c *container) newSignFullPubkeyExporter(authType domainAccount.AuthType) service.FullPubkeyExporter {
 	return btcsignsrv.NewFullPubkeyExport(
 		c.newAuthKeyRepo(),
 		c.newPubkeyFileStorager(),

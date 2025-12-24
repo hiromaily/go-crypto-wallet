@@ -6,12 +6,11 @@ package watchrepo_test
 import (
 	"testing"
 
-	"github.com/quagmt/udecimal"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/quagmt/udecimal"
+	"github.com/stretchr/testify/require"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
@@ -28,13 +27,13 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 	feeAmt, _ := udecimal.Parse("0.010")
 
 	txItem := &models.BTCTX{
-		Action:            action.ActionTypePayment.String(),
+		Action:            domainTx.ActionTypePayment.String(),
 		UnsignedHexTX:     "output-test-hex",
 		TotalInputAmount:  inputAmt,
 		TotalOutputAmount: outputAmt,
 		Fee:               feeAmt,
 	}
-	txID, err := btcTxRepo.InsertUnsignedTx(action.ActionTypePayment, txItem)
+	txID, err := btcTxRepo.InsertUnsignedTx(domainTx.ActionTypePayment, txItem)
 	require.NoError(t, err, "fail to create parent tx")
 
 	// Create test outputs

@@ -5,9 +5,9 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
 )
 
@@ -105,8 +105,8 @@ func (w *BTCWatch) Done() {
 	w.BTC.Close()
 }
 
-// CoinTypeCode returns coin.CoinTypeCode
-func (w *BTCWatch) CoinTypeCode() coin.CoinTypeCode {
+// CoinTypeCode returns domainCoin.CoinTypeCode
+func (w *BTCWatch) CoinTypeCode() domainCoin.CoinTypeCode {
 	return w.BTC.CoinTypeCode()
 }
 

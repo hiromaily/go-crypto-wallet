@@ -9,16 +9,16 @@ import (
 	"github.com/btcsuite/btcd/wire"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // Bitcoin includes client to call Json-RPC
 type Bitcoin struct {
 	Client            *rpcclient.Client
 	chainConf         *chaincfg.Params
-	coinTypeCode      coin.CoinTypeCode // btc
-	version           BTCVersion        // 179900
+	coinTypeCode      domainCoin.CoinTypeCode // btc
+	version           BTCVersion              // 179900
 	confirmationBlock uint64
 	feeRange          FeeAdjustmentRate
 }
@@ -33,7 +33,7 @@ type FeeAdjustmentRate struct {
 func NewBitcoin(
 	client *rpcclient.Client,
 	conf *config.Bitcoin,
-	coinTypeCode coin.CoinTypeCode,
+	coinTypeCode domainCoin.CoinTypeCode,
 ) (*Bitcoin, error) {
 	bit := Bitcoin{
 		Client: client,
@@ -144,6 +144,6 @@ func (b *Bitcoin) Version() BTCVersion {
 }
 
 // CoinTypeCode returns CoinTypeCode
-func (b *Bitcoin) CoinTypeCode() coin.CoinTypeCode {
+func (b *Bitcoin) CoinTypeCode() domainCoin.CoinTypeCode {
 	return b.coinTypeCode
 }

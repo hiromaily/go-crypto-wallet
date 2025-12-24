@@ -11,9 +11,9 @@ import (
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // NewRPCClient try to connect Ethereum node RPC Server to create client instance
@@ -34,7 +34,7 @@ func NewRPCClient(conf *config.Ethereum) (*ethrpc.Client, error) {
 // NewEthereum creates ethereum instance according to coinType
 func NewEthereum(
 	rpcClient *ethrpc.Client, conf *config.Ethereum,
-	coinTypeCode coin.CoinTypeCode, uuidHandler uuid.UUIDHandler,
+	coinTypeCode domainCoin.CoinTypeCode, uuidHandler uuid.UUIDHandler,
 ) (Ethereumer, error) {
 	client := ethclient.NewClient(rpcClient)
 

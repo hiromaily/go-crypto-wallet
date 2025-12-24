@@ -7,12 +7,12 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // AddressImport type
@@ -21,7 +21,7 @@ type AddressImport struct {
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier
 	addrFileRepo address.FileRepositorier
-	coinTypeCode coin.CoinTypeCode
+	coinTypeCode domainCoin.CoinTypeCode
 	addrType     address.AddrType
 	wtype        domainWallet.WalletType
 }
@@ -32,7 +32,7 @@ func NewAddressImport(
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	addrFileRepo address.FileRepositorier,
-	coinTypeCode coin.CoinTypeCode,
+	coinTypeCode domainCoin.CoinTypeCode,
 	addrType address.AddrType,
 	wtype domainWallet.WalletType,
 ) *AddressImport {
@@ -70,7 +70,7 @@ func (a *AddressImport) ImportAddress(fileName string, isRescan bool) error {
 		var targetAddr string
 		if addrFmt.AccountType == domainAccount.AccountTypeClient {
 			switch a.btc.CoinTypeCode() {
-			case coin.BTC:
+			case domainCoin.BTC:
 				switch a.addrType {
 				case address.AddrTypeBech32:
 					targetAddr = addrFmt.Bech32Address
@@ -80,9 +80,9 @@ func (a *AddressImport) ImportAddress(fileName string, isRescan bool) error {
 				default:
 					targetAddr = addrFmt.P2SHSegwitAddress // p2sh_segwit_address
 				}
-			case coin.BCH:
+			case domainCoin.BCH:
 				targetAddr = addrFmt.P2PKHAddress // p2pkh_address
-			case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
+			case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
 				return fmt.Errorf("coinTypeCode is out of range: %s", a.btc.CoinTypeCode().String())
 			default:
 				return fmt.Errorf("coinTypeCode is out of range: %s", a.btc.CoinTypeCode().String())

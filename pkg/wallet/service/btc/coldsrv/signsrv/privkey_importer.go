@@ -7,11 +7,11 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // PrivKeyer is PrivKeyer service
@@ -112,13 +112,13 @@ func (p *PrivKey) checkImportedAddress(walletAddress, p2shSegwitAddress, fullPub
 	)
 
 	switch p.btc.CoinTypeCode() {
-	case coin.BTC:
+	case domainCoin.BTC:
 		targetAddr = p2shSegwitAddress
 		addrType = address.AddrTypeP2shSegwit
-	case coin.BCH:
+	case domainCoin.BCH:
 		targetAddr = walletAddress
 		addrType = address.AddrTypeBCHCashAddr
-	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
+	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
 		logger.Warn("this coin type is not implemented in checkImportedAddress()",
 			"coin_type_code", p.btc.CoinTypeCode().String())
 		return

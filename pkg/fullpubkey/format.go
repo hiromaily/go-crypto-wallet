@@ -6,7 +6,6 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // FullPubKeyFormat is fullpubkey csv format
@@ -31,7 +30,7 @@ func ConvertLine(coinTypeCode domainCoin.CoinTypeCode, line []string) (*FullPubK
 	}
 
 	// validate
-	if !coin.IsCoinTypeCode(line[0]) || domainCoin.CoinTypeCode(line[0]) != coinTypeCode {
+	if !domainCoin.IsCoinTypeCode(line[0]) || domainCoin.CoinTypeCode(line[0]) != coinTypeCode {
 		return nil, fmt.Errorf("coinTypeCode is invalid. got %s, want %s", line[0], coinTypeCode.String())
 	}
 	if !domainAccount.ValidateAuthType(line[1]) {

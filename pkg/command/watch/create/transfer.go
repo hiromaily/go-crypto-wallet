@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
@@ -42,7 +42,7 @@ func runTransfer(wallet wallets.Watcher, account1, account2 string, amount, fee 
 	if err != nil {
 		return fmt.Errorf("fail to call CreateTransferTx() %w", err)
 	}
-	if (wallet.CoinTypeCode() != coin.ETH && wallet.CoinTypeCode() != coin.XRP) && hex == "" {
+	if (wallet.CoinTypeCode() != domainCoin.ETH && wallet.CoinTypeCode() != domainCoin.XRP) && hex == "" {
 		fmt.Println("No utxo")
 		return nil
 	}

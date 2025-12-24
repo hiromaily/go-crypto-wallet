@@ -3,10 +3,10 @@ package ethwallet
 import (
 	"database/sql"
 
+	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
 
 // ETHSign keygen wallet object
@@ -42,7 +42,7 @@ func (*ETHSign) StoreSeed(_ string) ([]byte, error) {
 }
 
 // GenerateAuthKey generates account keys
-func (*ETHSign) GenerateAuthKey(_ []byte, _ uint32) ([]key.WalletKey, error) {
+func (*ETHSign) GenerateAuthKey(_ []byte, _ uint32) ([]domainKey.WalletKey, error) {
 	logger.Info("no functionality for CreateMultisigAddress() in ETH")
 	return nil, nil
 }

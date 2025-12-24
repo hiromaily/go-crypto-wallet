@@ -6,26 +6,26 @@ import (
 	"fmt"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
 
 // XRPKeyGenerator is XRP key generation service
 type XRPKeyGenerator interface {
-	Generate(accountType domainAccount.AccountType, isKeyPair bool, keys []key.WalletKey) error
+	Generate(accountType domainAccount.AccountType, isKeyPair bool, keys []domainKey.WalletKey) error
 }
 
 // XRPKeyGenerate type
 type XRPKeyGenerate struct {
 	xrp               xrpgrp.Rippler
 	dbConn            *sql.DB
-	coinTypeCode      coin.CoinTypeCode
+	coinTypeCode      domainCoin.CoinTypeCode
 	wtype             domainWallet.WalletType
 	accountKeyRepo    coldrepo.AccountKeyRepositorier
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier
@@ -35,7 +35,7 @@ type XRPKeyGenerate struct {
 func NewXRPKeyGenerate(
 	xrpAPI xrpgrp.Rippler,
 	dbConn *sql.DB,
-	coinTypeCode coin.CoinTypeCode,
+	coinTypeCode domainCoin.CoinTypeCode,
 	wtype domainWallet.WalletType,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier,
@@ -51,7 +51,11 @@ func NewXRPKeyGenerate(
 }
 
 // Generate generate xrp keys for account
-func (k *XRPKeyGenerate) Generate(accountType domainAccount.AccountType, isKeyPair bool, keys []key.WalletKey) error {
+func (k *XRPKeyGenerate) Generate(
+	accountType domainAccount.AccountType,
+	isKeyPair bool,
+	keys []domainKey.WalletKey,
+) error {
 	logger.Debug("generate keys for XRP",
 		"account_type", accountType.String(),
 		"len(keys)", len(keys),

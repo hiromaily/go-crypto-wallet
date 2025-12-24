@@ -8,8 +8,8 @@ import (
 	"github.com/btcsuite/btcd/wire"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/btc"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // TODO: BitcoinCash specific func must be overridden by same func name to Bitcoin
@@ -35,7 +35,7 @@ type BitcoinCash struct {
 // NewBitcoinCash bitcoin cash instance based on Bitcoin
 func NewBitcoinCash(
 	client *rpcclient.Client,
-	coinTypeCode coin.CoinTypeCode,
+	coinTypeCode domainCoin.CoinTypeCode,
 	conf *config.Bitcoin,
 ) (*BitcoinCash, error) {
 	// bitcoin base

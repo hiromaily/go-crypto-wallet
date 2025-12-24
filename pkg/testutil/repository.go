@@ -7,9 +7,9 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 var (
@@ -34,7 +34,7 @@ func GetDB() *sql.DB {
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
 	confPath := projPath + "/data/config/btc_watch.toml"
-	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.BTC)
+	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.BTC)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
@@ -55,7 +55,7 @@ func NewBTCTxRepositorySqlc() watchrepo.BTCTxRepositorier {
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
 	confPath := projPath + "/data/config/btc_watch.toml"
-	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.BTC)
+	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.BTC)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
@@ -65,7 +65,7 @@ func NewBTCTxRepositorySqlc() watchrepo.BTCTxRepositorier {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	btcTxRepoSqlc = watchrepo.NewBTCTxRepositorySqlc(db, coin.BTC)
+	btcTxRepoSqlc = watchrepo.NewBTCTxRepositorySqlc(db, domainCoin.BTC)
 	return btcTxRepoSqlc
 }
 
@@ -77,7 +77,7 @@ func NewTxRepositorySqlc() watchrepo.TxRepositorier {
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
 	confPath := projPath + "/data/config/btc_watch.toml"
-	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.BTC)
+	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.BTC)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
@@ -87,7 +87,7 @@ func NewTxRepositorySqlc() watchrepo.TxRepositorier {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	txRepoSqlc = watchrepo.NewTxRepositorySqlc(db, coin.BTC)
+	txRepoSqlc = watchrepo.NewTxRepositorySqlc(db, domainCoin.BTC)
 	return txRepoSqlc
 }
 
@@ -99,7 +99,7 @@ func NewAddressRepositorySqlc() watchrepo.AddressRepositorier {
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
 	confPath := projPath + "/data/config/btc_watch.toml"
-	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.BTC)
+	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.BTC)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
@@ -109,7 +109,7 @@ func NewAddressRepositorySqlc() watchrepo.AddressRepositorier {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	addressRepoSqlc = watchrepo.NewAddressRepositorySqlc(db, coin.BTC)
+	addressRepoSqlc = watchrepo.NewAddressRepositorySqlc(db, domainCoin.BTC)
 	return addressRepoSqlc
 }
 
@@ -121,7 +121,7 @@ func NewPaymentRequestRepositorySqlc() watchrepo.PaymentRequestRepositorier {
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
 	confPath := projPath + "/data/config/btc_watch.toml"
-	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.BTC)
+	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.BTC)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
@@ -131,7 +131,7 @@ func NewPaymentRequestRepositorySqlc() watchrepo.PaymentRequestRepositorier {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	paymentRequestRepoSqlc = watchrepo.NewPaymentRequestRepositorySqlc(db, coin.BTC)
+	paymentRequestRepoSqlc = watchrepo.NewPaymentRequestRepositorySqlc(db, domainCoin.BTC)
 	return paymentRequestRepoSqlc
 }
 
@@ -143,7 +143,7 @@ func NewBTCTxInputRepositorySqlc() watchrepo.TxInputRepositorier {
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
 	confPath := projPath + "/data/config/btc_watch.toml"
-	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.BTC)
+	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.BTC)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
@@ -153,7 +153,7 @@ func NewBTCTxInputRepositorySqlc() watchrepo.TxInputRepositorier {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	btcTxInputRepoSqlc = watchrepo.NewBTCTxInputRepositorySqlc(db, coin.BTC)
+	btcTxInputRepoSqlc = watchrepo.NewBTCTxInputRepositorySqlc(db, domainCoin.BTC)
 	return btcTxInputRepoSqlc
 }
 
@@ -165,7 +165,7 @@ func NewBTCTxOutputRepositorySqlc() watchrepo.TxOutputRepositorier {
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
 	confPath := projPath + "/data/config/btc_watch.toml"
-	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.BTC)
+	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.BTC)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
@@ -175,7 +175,7 @@ func NewBTCTxOutputRepositorySqlc() watchrepo.TxOutputRepositorier {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	btcTxOutputRepoSqlc = watchrepo.NewBTCTxOutputRepositorySqlc(db, coin.BTC)
+	btcTxOutputRepoSqlc = watchrepo.NewBTCTxOutputRepositorySqlc(db, domainCoin.BTC)
 	return btcTxOutputRepoSqlc
 }
 
@@ -187,7 +187,7 @@ func NewEthDetailTxRepositorySqlc() watchrepo.EthDetailTxRepositorier {
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
 	confPath := projPath + "/data/config/eth_watch.toml"
-	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.ETH)
+	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.ETH)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
@@ -197,7 +197,7 @@ func NewEthDetailTxRepositorySqlc() watchrepo.EthDetailTxRepositorier {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	ethDetailTxRepoSqlc = watchrepo.NewEthDetailTxInputRepositorySqlc(db, coin.ETH)
+	ethDetailTxRepoSqlc = watchrepo.NewEthDetailTxInputRepositorySqlc(db, domainCoin.ETH)
 	return ethDetailTxRepoSqlc
 }
 
@@ -209,7 +209,7 @@ func NewXrpDetailTxRepositorySqlc() watchrepo.XrpDetailTxRepositorier {
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
 	confPath := projPath + "/data/config/xrp_watch.toml"
-	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, coin.XRP)
+	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.XRP)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
@@ -219,6 +219,6 @@ func NewXrpDetailTxRepositorySqlc() watchrepo.XrpDetailTxRepositorier {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	xrpDetailTxRepoSqlc = watchrepo.NewXrpDetailTxInputRepositorySqlc(db, coin.XRP)
+	xrpDetailTxRepoSqlc = watchrepo.NewXrpDetailTxInputRepositorySqlc(db, domainCoin.XRP)
 	return xrpDetailTxRepoSqlc
 }

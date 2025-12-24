@@ -9,8 +9,9 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tyler-smith/go-bip39"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
 
@@ -50,23 +51,23 @@ func TestHDWalletBTCDUpgradeConsistency(t *testing.T) {
 
 	// Test Bitcoin Mainnet
 	t.Run("Bitcoin_Mainnet", func(t *testing.T) {
-		testBitcoinConsistency(t, seed, &chaincfg.MainNetParams, coin.BTC)
+		testBitcoinConsistency(t, seed, &chaincfg.MainNetParams, domainCoin.BTC)
 	})
 
 	// Test Bitcoin Testnet
 	t.Run("Bitcoin_Testnet", func(t *testing.T) {
-		testBitcoinConsistency(t, seed, &chaincfg.TestNet3Params, coin.BTC)
+		testBitcoinConsistency(t, seed, &chaincfg.TestNet3Params, domainCoin.BTC)
 	})
 
 	// Test Bitcoin Regtest
 	t.Run("Bitcoin_Regtest", func(t *testing.T) {
-		testBitcoinConsistency(t, seed, &chaincfg.RegressionNetParams, coin.BTC)
+		testBitcoinConsistency(t, seed, &chaincfg.RegressionNetParams, domainCoin.BTC)
 	})
 }
 
 // testBitcoinConsistency tests HD wallet key derivation for Bitcoin
 func testBitcoinConsistency(
-	t *testing.T, seed []byte, conf *chaincfg.Params, coinType coin.CoinTypeCode,
+	t *testing.T, seed []byte, conf *chaincfg.Params, coinType domainCoin.CoinTypeCode,
 ) {
 	t.Helper()
 	// Create HD wallet instance
@@ -75,12 +76,12 @@ func testBitcoinConsistency(
 	// Test account types that are commonly used
 	accountTypes := []struct {
 		name        string
-		accountType account.AccountType
+		accountType domainAccount.AccountType
 	}{
-		{"client", account.AccountTypeClient},
-		{"deposit", account.AccountTypeDeposit},
-		{"payment", account.AccountTypePayment},
-		{"stored", account.AccountTypeStored},
+		{"client", domainAccount.AccountTypeClient},
+		{"deposit", domainAccount.AccountTypeDeposit},
+		{"payment", domainAccount.AccountTypePayment},
+		{"stored", domainAccount.AccountTypeStored},
 	}
 
 	for _, at := range accountTypes {
@@ -140,7 +141,7 @@ func testBitcoinConsistency(
 }
 
 // validateAddressFormat validates address format based on network type
-func validateAddressFormat(t *testing.T, k key.WalletKey, conf *chaincfg.Params) {
+func validateAddressFormat(t *testing.T, k domainKey.WalletKey, conf *chaincfg.Params) {
 	t.Helper()
 	switch conf.Name {
 	case "mainnet":
@@ -191,8 +192,8 @@ func TestHDWalletKnownVectors(t *testing.T) {
 	seed := bip39.NewSeed(mnemonic, "")
 
 	t.Run("Mainnet_Client_Account", func(t *testing.T) {
-		hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.MainNetParams)
-		keys, err := hdKey.CreateKey(seed, account.AccountTypeClient, 0, 3)
+		hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.MainNetParams)
+		keys, err := hdKey.CreateKey(seed, domainAccount.AccountTypeClient, 0, 3)
 		require.NoError(t, err)
 		require.Len(t, keys, 3)
 
@@ -238,7 +239,7 @@ func TestHDWalletKnownVectors(t *testing.T) {
 	// For now, the mainnet client account test above provides sufficient regression coverage
 	/*
 		t.Run("Mainnet_Deposit_Account", func(t *testing.T) {
-			hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.MainNetParams)
+			hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.MainNetParams)
 			keys, err := hdKey.CreateKey(seed, account.AccountTypeDeposit, 0, 2)
 			require.NoError(t, err)
 			require.Len(t, keys, 2)
@@ -275,7 +276,7 @@ func TestHDWalletKnownVectors(t *testing.T) {
 		})
 
 		t.Run("Testnet_Client_Account", func(t *testing.T) {
-			hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.TestNet3Params)
+			hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.TestNet3Params)
 			keys, err := hdKey.CreateKey(seed, account.AccountTypeClient, 0, 2)
 			require.NoError(t, err)
 			require.Len(t, keys, 2)
@@ -320,16 +321,16 @@ func TestHDWalletMultipleIndices(t *testing.T) {
 	mnemonic := "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 	seed := bip39.NewSeed(mnemonic, "")
 
-	hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.MainNetParams)
+	hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.MainNetParams)
 
 	// Generate keys in different batches and verify consistency
 	t.Run("Batch_Consistency", func(t *testing.T) {
 		// Generate first 10 keys
-		keys1, err := hdKey.CreateKey(seed, account.AccountTypeClient, 0, 10)
+		keys1, err := hdKey.CreateKey(seed, domainAccount.AccountTypeClient, 0, 10)
 		require.NoError(t, err)
 
 		// Generate indices 5-9 separately
-		keys2, err := hdKey.CreateKey(seed, account.AccountTypeClient, 5, 5)
+		keys2, err := hdKey.CreateKey(seed, domainAccount.AccountTypeClient, 5, 5)
 		require.NoError(t, err)
 
 		// Verify that keys at indices 5-9 match
@@ -346,12 +347,12 @@ func TestHDWalletMultipleIndices(t *testing.T) {
 	// Test high index values to ensure no overflow issues
 	t.Run("High_Index", func(t *testing.T) {
 		highIndex := uint32(1000000)
-		keys, err := hdKey.CreateKey(seed, account.AccountTypeClient, highIndex, 1)
+		keys, err := hdKey.CreateKey(seed, domainAccount.AccountTypeClient, highIndex, 1)
 		require.NoError(t, err)
 		require.Len(t, keys, 1)
 
 		// Should be able to regenerate the same key
-		keys2, err := hdKey.CreateKey(seed, account.AccountTypeClient, highIndex, 1)
+		keys2, err := hdKey.CreateKey(seed, domainAccount.AccountTypeClient, highIndex, 1)
 		require.NoError(t, err)
 		assert.Equal(t, keys[0].P2PKHAddr, keys2[0].P2PKHAddr,
 			"High index derivation must be deterministic")
@@ -365,13 +366,13 @@ func TestHDWalletAuthAccounts(t *testing.T) {
 	mnemonic := "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
 	seed := bip39.NewSeed(mnemonic, "")
 
-	hdKey := key.NewHDKey(key.PurposeTypeBIP44, coin.BTC, &chaincfg.MainNetParams)
+	hdKey := key.NewHDKey(key.PurposeTypeBIP44, domainCoin.BTC, &chaincfg.MainNetParams)
 
 	// Test multiple auth accounts
-	authAccounts := []account.AccountType{
-		account.AccountTypeAuth1,
-		account.AccountTypeAuth2,
-		account.AccountTypeAuth3,
+	authAccounts := []domainAccount.AccountType{
+		domainAccount.AccountTypeAuth1,
+		domainAccount.AccountTypeAuth2,
+		domainAccount.AccountTypeAuth3,
 	}
 
 	for _, authAcc := range authAccounts {

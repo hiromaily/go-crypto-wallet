@@ -6,9 +6,9 @@ import (
 	"github.com/btcsuite/btcd/rpcclient"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/bch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/btc"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // NewRPCClient try to connect bitcoin core RPCserver to create client instance
@@ -33,17 +33,17 @@ func NewRPCClient(conf *config.Bitcoin) (*rpcclient.Client, error) {
 
 // NewBitcoin creates bitcoin/bitcoin cash instance according to coinType
 func NewBitcoin(
-	client *rpcclient.Client, conf *config.Bitcoin, coinTypeCode coin.CoinTypeCode,
+	client *rpcclient.Client, conf *config.Bitcoin, coinTypeCode domainCoin.CoinTypeCode,
 ) (Bitcoiner, error) {
 	switch coinTypeCode {
-	case coin.BTC:
+	case domainCoin.BTC:
 		bit, err := btc.NewBitcoin(client, conf, coinTypeCode)
 		if err != nil {
 			return nil, fmt.Errorf("fail to call btc.NewBitcoin(): %w", err)
 		}
 
 		return bit, err
-	case coin.BCH:
+	case domainCoin.BCH:
 		// BCH
 		bitc, err := bch.NewBitcoinCash(client, coinTypeCode, conf)
 		if err != nil {
@@ -51,7 +51,7 @@ func NewBitcoin(
 		}
 
 		return bitc, err
-	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
+	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
 		return nil, fmt.Errorf("coinType %s is not defined", coinTypeCode.String())
 	default:
 		return nil, fmt.Errorf("coinType %s is not defined", coinTypeCode.String())
