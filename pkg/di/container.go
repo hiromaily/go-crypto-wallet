@@ -1286,6 +1286,9 @@ func (c *container) newETHSignTransactionUseCase() signusecase.SignTransactionUs
 
 func (c *container) newXRPSignTransactionUseCase() signusecase.SignTransactionUseCase {
 	return signusecasexrp.NewSignTransactionUseCase(
-		c.newXRPSigner().(*xrpsignsrv.Sign),
+		c.newXRP(),
+		c.newXRPAccountKeyRepo(),
+		c.newTxFileStorager(),
+		c.walletType,
 	)
 }
