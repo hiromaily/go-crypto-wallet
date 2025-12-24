@@ -394,18 +394,6 @@ func (c *container) newXRPTxCreator() xrpwatchsrv.TxCreator {
 	)
 }
 
-func (c *container) newBTCTxSender() service.TxSender {
-	return btcwatchsrv.NewTxSend(
-		c.newBTC(),
-		c.newMySQLClient(),
-		c.newAddressRepo(),
-		c.newBTCTxRepo(),
-		c.newBTCTxOutputRepo(),
-		c.newTxFileRepo(),
-		c.walletType,
-	)
-}
-
 func (c *container) newETHTxSender() service.TxSender {
 	return ethwatchsrv.NewTxSend(
 		c.newETH(),
@@ -1139,7 +1127,11 @@ func (c *container) newBTCWatchMonitorTransactionUseCase() watchusecase.MonitorT
 
 func (c *container) newBTCWatchSendTransactionUseCase() watchusecase.SendTransactionUseCase {
 	return watchusecasebtc.NewSendTransactionUseCase(
-		c.newBTCTxSender().(*btcwatchsrv.TxSend),
+		c.newBTC(),
+		c.newAddressRepo(),
+		c.newBTCTxRepo(),
+		c.newBTCTxOutputRepo(),
+		c.newTxFileRepo(),
 	)
 }
 
