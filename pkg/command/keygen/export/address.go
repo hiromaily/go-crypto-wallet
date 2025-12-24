@@ -1,14 +1,16 @@
 package export
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
+	keygenusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/keygen"
+	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
-func runAddress(wallet wallets.Keygener, acnt string) error {
+func runAddress(container di.Container, acnt string) error {
 	fmt.Println("export generated PublicKey as csv file")
 
 	// validator
@@ -20,11 +22,14 @@ func runAddress(wallet wallets.Keygener, acnt string) error {
 	}
 
 	// export generated PublicKey as csv file
-	fileName, err := wallet.ExportAddress(domainAccount.AccountType(acnt))
+	useCase := container.NewKeygenExportAddressUseCase()
+	output, err := useCase.Export(context.Background(), keygenusecase.ExportAddressInput{
+		AccountType: domainAccount.AccountType(acnt),
+	})
 	if err != nil {
-		return fmt.Errorf("fail to call ExportAddress() %w", err)
+		return fmt.Errorf("fail to export address: %w", err)
 	}
-	fmt.Println("[fileName]: " + fileName)
+	fmt.Println("[fileName]: " + output.FileName)
 
 	return nil
 }

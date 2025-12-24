@@ -14,7 +14,7 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Signer, container di.
 		Use:   "fullpubkey",
 		Short: "export full pubkey",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runFullPubkey(*wallet)
+			return runFullPubkey(container)
 		},
 	}
 	parentCmd.AddCommand(fullpubkeyCmd)

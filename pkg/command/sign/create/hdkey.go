@@ -1,28 +1,36 @@
 package create
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/bookerzzz/grok"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
+	signusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/sign"
+	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 )
 
-func runHDKey(wallet wallets.Signer) error {
+func runHDKey(container di.Container) error {
 	fmt.Println("create key for hd wallet for Authorization account")
 
 	// create seed
-	bSeed, err := wallet.GenerateSeed()
+	generateSeedUseCase := container.NewSignGenerateSeedUseCase()
+	seedOutput, err := generateSeedUseCase.Generate(context.Background())
 	if err != nil {
-		return fmt.Errorf("fail to call GenerateSeed() %w", err)
+		return fmt.Errorf("fail to generate seed: %w", err)
 	}
 
 	// create key for hd wallet for Authorization account
-	keys, err := wallet.GenerateAuthKey(bSeed, 1)
+	generateAuthKeyUseCase := container.NewSignGenerateAuthKeyUseCase()
+	output, err := generateAuthKeyUseCase.Generate(context.Background(), signusecase.GenerateAuthKeyInput{
+		AuthType: container.AuthType(),
+		Seed:     seedOutput.Seed,
+		Count:    1,
+	})
 	if err != nil {
-		return fmt.Errorf("fail to call GenerateAuthKey() %w", err)
+		return fmt.Errorf("fail to generate auth key: %w", err)
 	}
-	grok.Value(keys)
+	grok.Value(output)
 
 	return nil
 }

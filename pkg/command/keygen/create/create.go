@@ -29,7 +29,7 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Keygener, container d
 		Use:   "hdkey",
 		Short: "create HD key",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runHDKeyWithFlags(*wallet, hdkeyKeyNum, hdkeyAccount, hdkeyIsKeyPair)
+			return runHDKeyWithFlags(container, hdkeyKeyNum, hdkeyAccount, hdkeyIsKeyPair)
 		},
 	}
 	hdkeyCmd.Flags().Uint64Var(&hdkeyKeyNum, "keynum", 0, "number of generating hd key")
@@ -44,7 +44,7 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Keygener, container d
 		Short: "create seed",
 		Long:  "create seed for wallet. If --seed is provided, it will be stored instead of generating a new one",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runSeed(*wallet, seedValue)
+			return runSeed(container, seedValue)
 		},
 	}
 	seedCmd.Flags().StringVar(&seedValue, "seed", "",
@@ -57,7 +57,7 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Keygener, container d
 		Use:   "multisig",
 		Short: "create multisig address",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runMultisigWithAccount(*wallet, multisigAccount)
+			return runMultisigWithAccount(container, multisigAccount)
 		},
 	}
 	multisigCmd.Flags().StringVar(&multisigAccount, "account", "", "target account")

@@ -43,6 +43,11 @@ type GenerateKeyUseCase interface {
 	Generate(ctx context.Context, input GenerateKeyInput) error
 }
 
+// SignTransactionUseCase signs unsigned transactions (first signature for multisig)
+type SignTransactionUseCase interface {
+	Sign(ctx context.Context, input SignTransactionInput) (SignTransactionOutput, error)
+}
+
 // Input/Output DTOs
 
 // GenerateHDWalletInput represents input for generating HD wallet keys
@@ -103,4 +108,17 @@ type GenerateKeyInput struct {
 	AccountType domainAccount.AccountType
 	IsKeyPair   bool
 	WalletKeys  any // []domainKey.WalletKey - using any to avoid import cycle
+}
+
+// SignTransactionInput represents input for signing transactions
+type SignTransactionInput struct {
+	FilePath string
+}
+
+// SignTransactionOutput represents output from signing transactions
+type SignTransactionOutput struct {
+	FilePath      string
+	IsDone        bool
+	SignedCount   int
+	UnsignedCount int
 }

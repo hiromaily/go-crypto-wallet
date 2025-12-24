@@ -15,7 +15,7 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Keygener, container d
 		Use:   "address",
 		Short: "export generated PublicKey as csv file",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runAddress(*wallet, addressAccount)
+			return runAddress(container, addressAccount)
 		},
 	}
 	addressCmd.Flags().StringVar(&addressAccount, "account", "", "target account")

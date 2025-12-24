@@ -15,7 +15,7 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Keygener, container d
 		Use:   "signature",
 		Short: "sign on unsigned transaction (account would be found from file name)",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runSignature(*wallet, signatureFile)
+			return runSignature(container, signatureFile)
 		},
 	}
 	signatureCmd.Flags().StringVar(&signatureFile, "file", "", "import file path for signed transactions")

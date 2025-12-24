@@ -1,15 +1,17 @@
 package create
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
+	keygenusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/keygen"
+	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
 // runMultisigWithAccount is the actual implementation that accepts parsed flags
-func runMultisigWithAccount(wallet wallets.Keygener, acnt string) error {
+func runMultisigWithAccount(container di.Container, acnt string) error {
 	fmt.Println("create multisig address")
 
 	// validator
@@ -18,9 +20,13 @@ func runMultisigWithAccount(wallet wallets.Keygener, acnt string) error {
 	}
 
 	// create multisig address
-	err := wallet.CreateMultisigAddress(domainAccount.AccountType(acnt))
+	useCase := container.NewKeygenCreateMultisigAddressUseCase()
+	err := useCase.Create(context.Background(), keygenusecase.CreateMultisigAddressInput{
+		AccountType: domainAccount.AccountType(acnt),
+		AddressType: container.AddressType(),
+	})
 	if err != nil {
-		return fmt.Errorf("fail to call CreateMultisigAddress() %w", err)
+		return fmt.Errorf("fail to create multisig address: %w", err)
 	}
 
 	return nil

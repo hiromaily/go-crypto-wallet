@@ -14,7 +14,7 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Signer, container di.
 		Use:   "privkey",
 		Short: "import generated private key for Authorization account to database",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runPrivKey(*wallet)
+			return runPrivKey(container)
 		},
 	}
 	parentCmd.AddCommand(privkeyCmd)
