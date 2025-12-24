@@ -1276,7 +1276,9 @@ func (c *container) newBTCSignExportFullPubkeyUseCase(
 
 func (c *container) newETHSignTransactionUseCase() signusecase.SignTransactionUseCase {
 	return signusecaseeth.NewSignTransactionUseCase(
-		c.newETHSigner().(*ethsignsrv.Sign),
+		c.newETH(),
+		c.newTxFileStorager(),
+		c.walletType,
 	)
 }
 
