@@ -51,8 +51,9 @@ type SignTransactionOutput struct {
 }
 
 // ImportPrivateKeyInput represents input for importing private keys
+// Note: AuthType is not needed here as it's already configured in the use case during construction
 type ImportPrivateKeyInput struct {
-	AuthType domainAccount.AuthType // For BTC, this is authType instead of accountType
+	// Empty struct - AuthType is handled by the use case factory
 }
 
 // ExportFullPubkeyOutput represents output from exporting full public keys
