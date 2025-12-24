@@ -1259,7 +1259,11 @@ func (c *container) newBTCSignExportFullPubkeyUseCase(
 	authType domainAccount.AuthType,
 ) signusecase.ExportFullPubkeyUseCase {
 	return signusecasebtc.NewExportFullPubkeyUseCase(
-		c.newSignFullPubkeyExporter(authType).(*btcsignsrv.FullPubkeyExport),
+		c.newAuthKeyRepo(),
+		c.newPubkeyFileStorager(),
+		c.conf.CoinTypeCode,
+		authType,
+		c.walletType,
 	)
 }
 
