@@ -7,8 +7,8 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple/xrp"
 )
 
 var xr ripple.Rippler

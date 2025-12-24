@@ -7,9 +7,9 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
 )
 
 // TxMonitor type

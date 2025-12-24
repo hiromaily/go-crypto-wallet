@@ -11,11 +11,11 @@ import (
 
 	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
 )
 
 // TxSend type

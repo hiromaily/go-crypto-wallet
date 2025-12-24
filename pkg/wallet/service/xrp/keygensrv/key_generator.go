@@ -9,11 +9,11 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
 )
 
 // XRPKeyGenerator is XRP key generation service
