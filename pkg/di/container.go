@@ -274,11 +274,12 @@ func (c *container) newBTCSigner(authType domainAccount.AuthType) wallets.Signer
 		c.newMySQLClient(),
 		authType,
 		c.conf.AddressType,
-		c.newSeeder(),
-		c.newSignHdWallter(authType),
-		c.newSignPrivKeyer(authType),
-		c.newSignFullPubkeyExporter(authType),
-		c.newSigner(),
+		c.NewSignGenerateSeedUseCase(),
+		c.NewSignStoreSeedUseCase(),
+		c.NewSignGenerateAuthKeyUseCase(),
+		c.newBTCSignImportPrivateKeyUseCase(authType),
+		c.newBTCSignExportFullPubkeyUseCase(authType),
+		c.newBTCSignTransactionUseCase(),
 		c.walletType,
 	)
 }
