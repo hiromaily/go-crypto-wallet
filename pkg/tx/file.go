@@ -13,9 +13,12 @@ import (
 
 // FileRepositorier is file storager for tx info
 type FileRepositorier interface {
-	CreateFilePath(actionType domainTx.ActionType, txType TxType, txID int64, signedCount int) string
+	CreateFilePath(actionType domainTx.ActionType, txType domainTx.TxType, txID int64, signedCount int) string
 	GetFileNameType(filePath string) (*FileName, error)
-	ValidateFilePath(filePath string, expectedTxType TxType) (domainTx.ActionType, TxType, int64, int, error)
+	ValidateFilePath(
+		filePath string,
+		expectedTxType domainTx.TxType,
+	) (domainTx.ActionType, domainTx.TxType, int64, int, error)
 	ReadFile(path string) (string, error)
 	ReadFileSlice(path string) ([]string, error)
 	WriteFile(path, hexTx string) (string, error)
@@ -30,7 +33,7 @@ type FileRepository struct {
 // FileName is object for items in fine name
 type FileName struct {
 	ActionType  domainTx.ActionType
-	TxType      TxType
+	TxType      domainTx.TxType
 	TxID        int64
 	SignedCount int
 }
@@ -50,7 +53,7 @@ func NewFileRepository(filePath string) *FileRepository {
 
 // CreateFilePath create file path for transaction file
 func (r *FileRepository) CreateFilePath(
-	actionType domainTx.ActionType, txType TxType, txID int64, signedCount int,
+	actionType domainTx.ActionType, txType domainTx.TxType, txID int64, signedCount int,
 ) string {
 	// ./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209
 	// baseDir := fmt.Sprintf("%s%s/", r.filePath, actionType.String())
@@ -94,10 +97,10 @@ func (*FileRepository) GetFileNameType(filePath string) (*FileName, error) {
 	}
 
 	// txType
-	if !ValidateTxType(s[2]) {
+	if !domainTx.ValidateTxType(s[2]) {
 		return nil, fmt.Errorf("invalid name: %s", fileName)
 	}
-	fileNameType.TxType = TxType(s[2])
+	fileNameType.TxType = domainTx.TxType(s[2])
 
 	// signedCount
 	signedCount, err := strconv.Atoi(s[3])
@@ -111,8 +114,8 @@ func (*FileRepository) GetFileNameType(filePath string) (*FileName, error) {
 
 // ValidateFilePath validate file path which could be full path
 func (r *FileRepository) ValidateFilePath(
-	filePath string, expectedTxType TxType,
-) (domainTx.ActionType, TxType, int64, int, error) {
+	filePath string, expectedTxType domainTx.TxType,
+) (domainTx.ActionType, domainTx.TxType, int64, int, error) {
 	fileType, err := r.GetFileNameType(filePath)
 	if err != nil {
 		return "", "", 0, 0, err

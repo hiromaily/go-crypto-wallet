@@ -15,9 +15,9 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"golang.org/x/crypto/ripemd160" //nolint:gosec
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	bchaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/bch"
 	xrpaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/xrp"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
@@ -102,7 +102,11 @@ func NewHDKey(
 }
 
 // CreateKey create hd key
-func (k *HDKey) CreateKey(seed []byte, accountType account.AccountType, idxFrom, count uint32) ([]WalletKey, error) {
+func (k *HDKey) CreateKey(
+	seed []byte,
+	accountType domainAccount.AccountType,
+	idxFrom, count uint32,
+) ([]WalletKey, error) {
 	// create privateKey, publicKey by account level
 	privKey, _, err := k.createKeyByAccount(seed, accountType)
 	if err != nil {
@@ -114,7 +118,7 @@ func (k *HDKey) CreateKey(seed []byte, accountType account.AccountType, idxFrom,
 
 // createKeyByAccount create privateKey, publicKey by account level
 func (k *HDKey) createKeyByAccount(
-	seed []byte, accountType account.AccountType,
+	seed []byte, accountType domainAccount.AccountType,
 ) (*hdkeychain.ExtendedKey, *hdkeychain.ExtendedKey, error) {
 	// Master
 	masterKey, err := hdkeychain.NewMaster(seed, k.conf)

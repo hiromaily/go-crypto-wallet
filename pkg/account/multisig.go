@@ -1,24 +1,28 @@
 package account
 
+import (
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+)
+
 // Multisig address involved accounts
 
 // MultisigAccounter is AddressRepository interface
 type MultisigAccounter interface {
-	IsMultisigAccount(accountType AccountType) bool
-	MultiAccounts() map[AccountType]map[int][]AuthType
+	IsMultisigAccount(accountType domainAccount.AccountType) bool
+	MultiAccounts() map[domainAccount.AccountType]map[int][]domainAccount.AuthType
 }
 
 type multisigAccount struct {
-	accountMap map[AccountType]map[int][]AuthType
+	accountMap map[domainAccount.AccountType]map[int][]domainAccount.AuthType
 }
 
 // NewMultisigAccounts returns multisigAccount instance
 func NewMultisigAccounts(confMultisig []AccountMultisig) MultisigAccounter {
 	ma := multisigAccount{
-		accountMap: make(map[AccountType]map[int][]AuthType, len(confMultisig)),
+		accountMap: make(map[domainAccount.AccountType]map[int][]domainAccount.AuthType, len(confMultisig)),
 	}
 	for _, val := range confMultisig {
-		ma.accountMap[val.Type] = map[int][]AuthType{
+		ma.accountMap[val.Type] = map[int][]domainAccount.AuthType{
 			val.Required: val.AuthUsers,
 		}
 	}
@@ -26,7 +30,7 @@ func NewMultisigAccounts(confMultisig []AccountMultisig) MultisigAccounter {
 }
 
 // IsMultisigAccount validates Multisig account or not
-func (m *multisigAccount) IsMultisigAccount(v AccountType) bool {
+func (m *multisigAccount) IsMultisigAccount(v domainAccount.AccountType) bool {
 	if _, ok := m.accountMap[v]; ok {
 		return true
 	}
@@ -34,7 +38,7 @@ func (m *multisigAccount) IsMultisigAccount(v AccountType) bool {
 }
 
 // MultiAccounts returns accountMap
-func (m *multisigAccount) MultiAccounts() map[AccountType]map[int][]AuthType {
+func (m *multisigAccount) MultiAccounts() map[domainAccount.AccountType]map[int][]domainAccount.AuthType {
 	return m.accountMap
 }
 

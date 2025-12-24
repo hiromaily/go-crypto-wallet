@@ -189,7 +189,7 @@ func (c *container) NewSigner(authName string) wallets.Signer {
 	switch c.conf.CoinTypeCode {
 	case domainCoin.BTC, domainCoin.BCH:
 		return c.newBTCSigner(authType)
-	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYC:
+	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
@@ -663,16 +663,16 @@ func (c *container) newTxFileRepo() tx.FileRepositorier {
 // Account
 //
 
-func (c *container) newDepositAccount() account.AccountType {
+func (c *container) newDepositAccount() domainAccount.AccountType {
 	if c.accountConf == nil || c.accountConf.DepositReceiver == "" {
-		return account.AccountTypeDeposit
+		return domainAccount.AccountTypeDeposit
 	}
 	return c.accountConf.DepositReceiver
 }
 
-func (c *container) newPaymentAccount() account.AccountType {
+func (c *container) newPaymentAccount() domainAccount.AccountType {
 	if c.accountConf == nil || c.accountConf.PaymentSender == "" {
-		return account.AccountTypePayment
+		return domainAccount.AccountTypePayment
 	}
 	return c.accountConf.PaymentSender
 }
@@ -884,7 +884,7 @@ func (c *container) newTxFileStorager() tx.FileRepositorier {
 // Sign Service
 //
 
-func (c *container) newSignHdWallter(authType account.AuthType) service.HDWalleter {
+func (c *container) newSignHdWallter(authType domainAccount.AuthType) service.HDWalleter {
 	return commonsrv.NewHDWallet(
 		c.newSignHdWalletRepo(authType),
 		c.newKeyGenerator(),
@@ -893,14 +893,14 @@ func (c *container) newSignHdWallter(authType account.AuthType) service.HDWallet
 	)
 }
 
-func (c *container) newSignHdWalletRepo(authType account.AuthType) commonsrv.HDWalletRepo {
+func (c *container) newSignHdWalletRepo(authType domainAccount.AuthType) commonsrv.HDWalletRepo {
 	return commonsrv.NewAuthHDWalletRepo(
 		c.newAuthKeyRepo(),
 		authType,
 	)
 }
 
-func (c *container) newSignPrivKeyer(authType account.AuthType) btcsignsrv.PrivKeyer {
+func (c *container) newSignPrivKeyer(authType domainAccount.AuthType) btcsignsrv.PrivKeyer {
 	return btcsignsrv.NewPrivKey(
 		c.newBTC(),
 		c.newAuthKeyRepo(),
@@ -909,7 +909,7 @@ func (c *container) newSignPrivKeyer(authType account.AuthType) btcsignsrv.PrivK
 	)
 }
 
-func (c *container) newSignFullPubkeyExporter(authType account.AuthType) service.FullPubkeyExporter {
+func (c *container) newSignFullPubkeyExporter(authType domainAccount.AuthType) service.FullPubkeyExporter {
 	return btcsignsrv.NewFullPubkeyExport(
 		c.newAuthKeyRepo(),
 		c.newPubkeyFileStorager(),

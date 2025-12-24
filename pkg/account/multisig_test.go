@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	configutil "github.com/hiromaily/go-crypto-wallet/pkg/config/testutil"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 )
 
 // TestNewMultisigAccounts is test for NewMultisigAccounts
@@ -13,7 +14,7 @@ func TestNewMultisigAccounts(t *testing.T) {
 	// t.SkipNow()
 
 	type args struct {
-		acnt AccountType
+		acnt domainAccount.AccountType
 	}
 	type want struct {
 		ok bool
@@ -25,22 +26,22 @@ func TestNewMultisigAccounts(t *testing.T) {
 	}{
 		{
 			name: "happy path client",
-			args: args{AccountTypeClient},
+			args: args{domainAccount.AccountTypeClient},
 			want: want{false},
 		},
 		{
 			name: "happy path deposit",
-			args: args{AccountTypeDeposit},
+			args: args{domainAccount.AccountTypeDeposit},
 			want: want{true},
 		},
 		{
 			name: "happy path payment",
-			args: args{AccountTypePayment},
+			args: args{domainAccount.AccountTypePayment},
 			want: want{true},
 		},
 		{
 			name: "happy path stored",
-			args: args{AccountTypeStored},
+			args: args{domainAccount.AccountTypeStored},
 			want: want{true},
 		},
 		{
