@@ -9,7 +9,7 @@ import (
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/coldsrv/signsrv"
+	btcsignsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/sign/btc"
 )
 
 // BTCSign is sign wallet object
@@ -21,7 +21,7 @@ type BTCSign struct {
 	wtype       domainWallet.WalletType
 	service.Seeder
 	service.HDWalleter
-	signsrv.PrivKeyer
+	btcsignsrv.PrivKeyer
 	service.FullPubkeyExporter
 	service.Signer
 }
@@ -34,7 +34,7 @@ func NewBTCSign(
 	addrType address.AddrType,
 	seeder service.Seeder,
 	hdWallter service.HDWalleter,
-	privKeyer signsrv.PrivKeyer,
+	privKeyer btcsignsrv.PrivKeyer,
 	fullPubkeyExporter service.FullPubkeyExporter,
 	signer service.Signer,
 	wtype domainWallet.WalletType,

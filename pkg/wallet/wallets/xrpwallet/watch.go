@@ -9,8 +9,8 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watchsrv"
-	xrpsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/xrp/watchsrv"
+	watchshared "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/shared"
+	xrpwatchsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/xrp"
 )
 
 // XRPWatch watch only wallet object
@@ -18,8 +18,8 @@ type XRPWatch struct {
 	XRP    ripple.Rippler
 	dbConn *sql.DB
 	wtype  domainWallet.WalletType
-	watchsrv.AddressImporter
-	xrpsrv.TxCreator
+	watchshared.AddressImporter
+	xrpwatchsrv.TxCreator
 	service.TxSender
 	service.TxMonitorer
 	service.PaymentRequestCreator
@@ -29,8 +29,8 @@ type XRPWatch struct {
 func NewXRPWatch(
 	xrp ripple.Rippler,
 	dbConn *sql.DB,
-	addrImporter watchsrv.AddressImporter,
-	txCreator xrpsrv.TxCreator,
+	addrImporter watchshared.AddressImporter,
+	txCreator xrpwatchsrv.TxCreator,
 	txSender service.TxSender,
 	txMonitorer service.TxMonitorer,
 	paymentRequestCreator service.PaymentRequestCreator,

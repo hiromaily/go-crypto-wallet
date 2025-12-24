@@ -31,16 +31,17 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
-	btccoldsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/coldsrv"
-	btckeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/coldsrv/keygensrv"
-	btcsignsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/coldsrv/signsrv"
-	btcsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/watchsrv"
-	commonsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/coldsrv"
-	ethkeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/keygensrv"
-	ethsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/watchsrv"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watchsrv"
-	xrpkeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/xrp/keygensrv"
-	xrpsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/xrp/watchsrv"
+	btckeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/keygen/btc"
+	ethkeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/keygen/eth"
+	keygenshared "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/keygen/shared"
+	xrpkeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/keygen/xrp"
+	btcsignsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/sign/btc"
+	ethsignsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/sign/eth"
+	xrpsignsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/sign/xrp"
+	btcwatchsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/btc"
+	ethwatchsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/eth"
+	watchshared "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/shared"
+	xrpwatchsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"
@@ -254,7 +255,7 @@ func (c *container) newXRPWalleter() wallets.Watcher {
 //
 
 func (c *container) newBTCAddressImporter() service.AddressImporter {
-	return btcsrv.NewAddressImport(
+	return btcwatchsrv.NewAddressImport(
 		c.newBTC(),
 		c.newMySQLClient(),
 		c.newAddressRepo(),
@@ -265,8 +266,8 @@ func (c *container) newBTCAddressImporter() service.AddressImporter {
 	)
 }
 
-func (c *container) newCommonAddressImporter() watchsrv.AddressImporter {
-	return watchsrv.NewAddressImport(
+func (c *container) newCommonAddressImporter() watchshared.AddressImporter {
+	return watchshared.NewAddressImport(
 		c.newMySQLClient(),
 		c.newAddressRepo(),
 		c.newAddressFileRepo(),
@@ -277,7 +278,7 @@ func (c *container) newCommonAddressImporter() watchsrv.AddressImporter {
 }
 
 func (c *container) newBTCTxCreator() service.TxCreator {
-	return btcsrv.NewTxCreate(
+	return btcwatchsrv.NewTxCreate(
 		c.newBTC(),
 		c.newMySQLClient(),
 		c.newAddressRepo(),
@@ -292,7 +293,7 @@ func (c *container) newBTCTxCreator() service.TxCreator {
 	)
 }
 
-func (c *container) newETHTxCreator() ethsrv.TxCreator {
+func (c *container) newETHTxCreator() ethwatchsrv.TxCreator {
 	var targetEthAPI ethereum.EtherTxCreator
 	if domainCoin.IsERC20Token(c.conf.CoinTypeCode.String()) {
 		targetEthAPI = c.newERC20()
@@ -300,7 +301,7 @@ func (c *container) newETHTxCreator() ethsrv.TxCreator {
 		targetEthAPI = c.newETH()
 	}
 
-	return ethsrv.NewTxCreate(
+	return ethwatchsrv.NewTxCreate(
 		targetEthAPI,
 		c.newMySQLClient(),
 		c.newAddressRepo(),
@@ -315,8 +316,8 @@ func (c *container) newETHTxCreator() ethsrv.TxCreator {
 	)
 }
 
-func (c *container) newXRPTxCreator() xrpsrv.TxCreator {
-	return xrpsrv.NewTxCreate(
+func (c *container) newXRPTxCreator() xrpwatchsrv.TxCreator {
+	return xrpwatchsrv.NewTxCreate(
 		c.newXRP(),
 		c.newMySQLClient(),
 		c.newUUIDHandler(),
@@ -332,7 +333,7 @@ func (c *container) newXRPTxCreator() xrpsrv.TxCreator {
 }
 
 func (c *container) newBTCTxSender() service.TxSender {
-	return btcsrv.NewTxSend(
+	return btcwatchsrv.NewTxSend(
 		c.newBTC(),
 		c.newMySQLClient(),
 		c.newAddressRepo(),
@@ -344,7 +345,7 @@ func (c *container) newBTCTxSender() service.TxSender {
 }
 
 func (c *container) newETHTxSender() service.TxSender {
-	return ethsrv.NewTxSend(
+	return ethwatchsrv.NewTxSend(
 		c.newETH(),
 		c.newMySQLClient(),
 		c.newAddressRepo(),
@@ -356,7 +357,7 @@ func (c *container) newETHTxSender() service.TxSender {
 }
 
 func (c *container) newXRPTxSender() service.TxSender {
-	return xrpsrv.NewTxSend(
+	return xrpwatchsrv.NewTxSend(
 		c.newXRP(),
 		c.newMySQLClient(),
 		c.newAddressRepo(),
@@ -368,7 +369,7 @@ func (c *container) newXRPTxSender() service.TxSender {
 }
 
 func (c *container) newBTCTxMonitorer() service.TxMonitorer {
-	return btcsrv.NewTxMonitor(
+	return btcwatchsrv.NewTxMonitor(
 		c.newBTC(),
 		c.newMySQLClient(),
 		c.newBTCTxRepo(),
@@ -383,7 +384,7 @@ func (c *container) newETHTxMonitorer() service.TxMonitorer {
 		panic("confirmation_num of ethereum in config is required")
 	}
 
-	return ethsrv.NewTxMonitor(
+	return ethwatchsrv.NewTxMonitor(
 		c.newETH(),
 		c.newMySQLClient(),
 		c.newAddressRepo(),
@@ -394,7 +395,7 @@ func (c *container) newETHTxMonitorer() service.TxMonitorer {
 }
 
 func (c *container) newXRPTxMonitorer() service.TxMonitorer {
-	return xrpsrv.NewTxMonitor(
+	return xrpwatchsrv.NewTxMonitor(
 		c.newXRP(),
 		c.newMySQLClient(),
 		c.newAddressRepo(),
@@ -404,7 +405,7 @@ func (c *container) newXRPTxMonitorer() service.TxMonitorer {
 }
 
 func (c *container) newPaymentRequestCreator() service.PaymentRequestCreator {
-	return watchsrv.NewPaymentRequestCreate(
+	return watchshared.NewPaymentRequestCreate(
 		c.newConverter(c.conf.CoinTypeCode),
 		c.newMySQLClient(),
 		c.newAddressRepo(),
@@ -680,14 +681,14 @@ func (c *container) newPaymentAccount() domainAccount.AccountType {
 //
 
 func (c *container) newSeeder() service.Seeder {
-	return commonsrv.NewSeed(
+	return keygenshared.NewSeed(
 		c.newSeedRepo(),
 		c.walletType,
 	)
 }
 
 func (c *container) newHdWallter() service.HDWalleter {
-	return commonsrv.NewHDWallet(
+	return keygenshared.NewHDWallet(
 		c.newHdWalletRepo(),
 		c.newKeyGenerator(),
 		c.conf.CoinTypeCode,
@@ -695,8 +696,8 @@ func (c *container) newHdWallter() service.HDWalleter {
 	)
 }
 
-func (c *container) newHdWalletRepo() commonsrv.HDWalletRepo {
-	return commonsrv.NewAccountHDWalletRepo(
+func (c *container) newHdWalletRepo() keygenshared.HDWalletRepo {
+	return keygenshared.NewAccountHDWalletRepo(
 		c.newAccountKeyRepo(),
 	)
 }
@@ -740,7 +741,7 @@ func (c *container) newMultisiger() service.Multisiger {
 }
 
 func (c *container) newAddressExporter() service.AddressExporter {
-	return commonsrv.NewAddressExport(
+	return keygenshared.NewAddressExport(
 		c.newAccountKeyRepo(),
 		c.newAddressFileStorager(),
 		c.newMultiAccount(),
@@ -750,7 +751,7 @@ func (c *container) newAddressExporter() service.AddressExporter {
 }
 
 func (c *container) newSigner() service.Signer {
-	return btccoldsrv.NewSign(
+	return btcsignsrv.NewSign(
 		c.newBTC(),
 		c.newAccountKeyRepo(),
 		c.newAuthKeyRepo(),
@@ -761,7 +762,7 @@ func (c *container) newSigner() service.Signer {
 }
 
 func (c *container) newETHSigner() service.Signer {
-	return ethkeygensrv.NewSign(
+	return ethsignsrv.NewSign(
 		c.newETH(),
 		c.newTxFileStorager(),
 		c.walletType,
@@ -769,7 +770,7 @@ func (c *container) newETHSigner() service.Signer {
 }
 
 func (c *container) newXRPSigner() service.Signer {
-	return xrpkeygensrv.NewSign(
+	return xrpsignsrv.NewSign(
 		c.newXRP(),
 		c.newXRPAccountKeyRepo(),
 		c.newTxFileStorager(),
@@ -883,7 +884,7 @@ func (c *container) newTxFileStorager() file.TransactionFileRepositorier {
 //
 
 func (c *container) newSignHdWallter(authType domainAccount.AuthType) service.HDWalleter {
-	return commonsrv.NewHDWallet(
+	return keygenshared.NewHDWallet(
 		c.newSignHdWalletRepo(authType),
 		c.newKeyGenerator(),
 		c.conf.CoinTypeCode,
@@ -891,8 +892,8 @@ func (c *container) newSignHdWallter(authType domainAccount.AuthType) service.HD
 	)
 }
 
-func (c *container) newSignHdWalletRepo(authType domainAccount.AuthType) commonsrv.HDWalletRepo {
-	return commonsrv.NewAuthHDWalletRepo(
+func (c *container) newSignHdWalletRepo(authType domainAccount.AuthType) keygenshared.HDWalletRepo {
+	return keygenshared.NewAuthHDWalletRepo(
 		c.newAuthKeyRepo(),
 		authType,
 	)
