@@ -9,10 +9,11 @@ import (
 
 	"github.com/bookerzzz/grok"
 
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 )
@@ -25,7 +26,7 @@ type TxSend struct {
 	txRepo       watchrepo.TxRepositorier      // not used
 	txDetailRepo watchrepo.XrpDetailTxRepositorier
 	txFileRepo   tx.FileRepositorier
-	wtype        wallet.WalletType
+	wtype        domainWallet.WalletType
 }
 
 // NewTxSend returns TxSend object
@@ -36,7 +37,7 @@ func NewTxSend(
 	txRepo watchrepo.TxRepositorier,
 	txDetailRepo watchrepo.XrpDetailTxRepositorier,
 	txFileRepo tx.FileRepositorier,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 ) *TxSend {
 	return &TxSend{
 		rippler:      rippler,
@@ -66,7 +67,7 @@ func NewTxSend(
 func (t *TxSend) SendTx(filePath string) (string, error) {
 	// get tx_deposit_id from file name
 	// payment_5_unsigned_1_1534466246366489473
-	actionType, _, txID, _, err := t.txFileRepo.ValidateFilePath(filePath, tx.TxTypeSigned)
+	actionType, _, txID, _, err := t.txFileRepo.ValidateFilePath(filePath, domainTx.TxTypeSigned)
 	if err != nil {
 		return "", fmt.Errorf("fail to call txFileRepo.ValidateFilePath(): %w", err)
 	}
@@ -170,7 +171,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 			// update eth_detail_tx
 			var affectedNum int64
 			affectedNum, err = t.txDetailRepo.UpdateAfterTxSent(
-				uuid, tx.TxTypeSent, signedTxID, txBlob, earlistLedgerVersion)
+				uuid, domainTx.TxTypeSent, signedTxID, txBlob, earlistLedgerVersion)
 			if err != nil {
 				// TODO: even if error occurred, tx is already sent. so db should be corrected manually
 				logger.Warn(
@@ -179,8 +180,8 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 					"tx_id", txID,
 					"uuid", uuid,
 					"signed_tx_id", signedTxID,
-					"tx_type", tx.TxTypeSent.String(),
-					"tx_type_value", tx.TxTypeSent.Int8(),
+					"tx_type", domainTx.TxTypeSent.String(),
+					"tx_type_value", domainTx.TxTypeSent.Int8(),
 					"error", err,
 				)
 				// "error":"models: unable to update all for xrp_detail_tx: Error 1406:
@@ -192,8 +193,8 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 					"tx_id", txID,
 					"uuid", uuid,
 					"signed_tx_id", signedTxID,
-					"tx_type", tx.TxTypeSent.String(),
-					"tx_type_value", tx.TxTypeSent.Int8(),
+					"tx_type", domainTx.TxTypeSent.String(),
+					"tx_type_value", domainTx.TxTypeSent.Int8(),
 				)
 				return
 			}

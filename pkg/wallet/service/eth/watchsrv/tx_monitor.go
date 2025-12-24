@@ -5,11 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 )
 
@@ -20,7 +20,7 @@ type TxMonitor struct {
 	addrRepo     watchrepo.AddressRepositorier
 	txDetailRepo watchrepo.EthDetailTxRepositorier
 	confirmNum   uint64
-	wtype        wallet.WalletType
+	wtype        domainWallet.WalletType
 }
 
 // NewTxMonitor returns TxMonitor object
@@ -30,7 +30,7 @@ func NewTxMonitor(
 	addrRepo watchrepo.AddressRepositorier,
 	txDetailRepo watchrepo.EthDetailTxRepositorier,
 	confirmNum uint64,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 ) *TxMonitor {
 	return &TxMonitor{
 		eth:          eth,
@@ -65,7 +65,7 @@ func (t *TxMonitor) UpdateTxStatus() error {
 // update TxTypeSent to TxTypeDone if confirmation is 6 or more
 func (t *TxMonitor) updateStatusTxTypeSent() error {
 	// get records whose status is TxTypeSent
-	hashes, err := t.txDetailRepo.GetSentHashTx(tx.TxTypeSent)
+	hashes, err := t.txDetailRepo.GetSentHashTx(domainTx.TxTypeSent)
 	if err != nil {
 		return fmt.Errorf("fail to call txDetailRepo.GetSentHashTx(TxTypeSent): %w", err)
 	}
@@ -85,7 +85,7 @@ func (t *TxMonitor) updateStatusTxTypeSent() error {
 			continue
 		}
 		// update status
-		_, err = t.txDetailRepo.UpdateTxTypeBySentHashTx(tx.TxTypeDone, sentHash)
+		_, err = t.txDetailRepo.UpdateTxTypeBySentHashTx(domainTx.TxTypeDone, sentHash)
 		if err != nil {
 			logger.Warn("failed to call txDetailRepo.UpdateTxTypeBySentHashTx()",
 				"error", err,
@@ -97,11 +97,11 @@ func (t *TxMonitor) updateStatusTxTypeSent() error {
 
 // MonitorBalance monitors balance
 func (t *TxMonitor) MonitorBalance(_ uint64) error {
-	targetAccounts := []account.AccountType{
-		account.AccountTypeClient,
-		account.AccountTypeDeposit,
-		account.AccountTypePayment,
-		account.AccountTypeStored,
+	targetAccounts := []domainAccount.AccountType{
+		domainAccount.AccountTypeClient,
+		domainAccount.AccountTypeDeposit,
+		domainAccount.AccountTypePayment,
+		domainAccount.AccountTypeStored,
 	}
 
 	for _, acnt := range targetAccounts {

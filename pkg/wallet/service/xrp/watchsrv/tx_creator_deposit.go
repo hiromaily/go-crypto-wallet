@@ -6,11 +6,10 @@ import (
 
 	"github.com/bookerzzz/grok"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 )
 
@@ -18,9 +17,9 @@ import (
 // - sender: client, receiver: deposit
 // - receiver account covers fee, but is should be flexible
 func (t *TxCreate) CreateDepositTx() (string, string, error) {
-	sender := account.AccountTypeClient
+	sender := domainAccount.AccountTypeClient
 	receiver := t.depositReceiver
-	targetAction := action.ActionTypeDeposit
+	targetAction := domainTx.ActionTypeDeposit
 	logger.Debug("account",
 		"sender", sender.String(),
 		"receiver", receiver.String(),
@@ -60,11 +59,11 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 	return "", generatedFileName, nil
 }
 
-func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]xrp.UserAmount, error) {
+func (t *TxCreate) getUserAmounts(sender domainAccount.AccountType) ([]xrp.UserAmount, error) {
 	// get addresses for client account
 	addrs, err := t.addrRepo.GetAll(sender)
 	if err != nil {
-		return nil, fmt.Errorf("fail to call addrRepo.GetAll(account.AccountTypeClient): %w", err)
+		return nil, fmt.Errorf("fail to call addrRepo.GetAll(domainAccount.AccountTypeClient): %w", err)
 	}
 	// addresses, err := t.eth.Accounts()
 
@@ -91,12 +90,14 @@ func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]xrp.UserAmount,
 }
 
 func (t *TxCreate) createDepositRawTransactions(
-	sender, receiver account.AccountType, userAmounts []xrp.UserAmount,
+	sender, receiver domainAccount.AccountType, userAmounts []xrp.UserAmount,
 ) ([]string, []*models.XRPDetailTX, error) {
 	// get address for deposit account
 	depositAddr, err := t.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
-		return nil, nil, fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(account.AccountTypeDeposit): %w", err)
+		return nil, nil, fmt.Errorf(
+			"fail to call addrRepo.GetOneUnAllocated(domainAccount.AccountTypeDeposit): %w", err,
+		)
 	}
 
 	// create raw transaction each address
@@ -137,7 +138,7 @@ func (t *TxCreate) createDepositRawTransactions(
 		// create insert data for　eth_detail_tx
 		txDetailItem := &models.XRPDetailTX{
 			UUID:               uid.String(),
-			CurrentTXType:      tx.TxTypeUnsigned.Int8(),
+			CurrentTXType:      domainTx.TxTypeUnsigned.Int8(),
 			SenderAccount:      sender.String(),
 			SenderAddress:      val.Address,
 			ReceiverAccount:    receiver.String(),

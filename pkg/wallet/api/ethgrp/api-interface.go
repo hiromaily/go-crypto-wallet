@@ -11,7 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/p2p"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/ethtx"
@@ -33,7 +33,6 @@ type Ethereumer interface {
 	ToECDSA(privKey string) (*ecdsa.PrivateKey, error)
 	GetKeyDir() string
 	GetPrivKey(hexAddr, password string) (*keystore.Key, error)
-	RenameParityKeyFile(hexAddr string, accountType account.AccountType) error
 	// rpc_admin
 	AddPeer(ctx context.Context, nodeURL string) error
 	AdminDataDir(ctx context.Context) (string, error)
@@ -77,7 +76,7 @@ type Ethereumer interface {
 	// rpc_personal
 	ImportRawKey(ctx context.Context, hexKey, passPhrase string) (string, error)
 	ListAccounts(ctx context.Context) ([]string, error)
-	NewAccount(ctx context.Context, passphrase string, accountType account.AccountType) (string, error)
+	NewAccount(ctx context.Context, passphrase string, accountType domainAccount.AccountType) (string, error)
 	LockAccount(ctx context.Context, hexAddr string) error
 	UnlockAccount(ctx context.Context, hexAddr, passphrase string, duration uint64) (bool, error)
 	// rpc_web3

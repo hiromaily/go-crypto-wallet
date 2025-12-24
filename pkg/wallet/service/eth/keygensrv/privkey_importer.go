@@ -6,11 +6,11 @@ import (
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 )
@@ -19,14 +19,14 @@ import (
 type PrivKey struct {
 	eth            ethgrp.Ethereumer
 	accountKeyRepo coldrepo.AccountKeyRepositorier
-	wtype          wallet.WalletType
+	wtype          domainWallet.WalletType
 }
 
 // NewPrivKey returns privKey object
 func NewPrivKey(
 	ethAPI ethgrp.Ethereumer,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 ) *PrivKey {
 	return &PrivKey{
 		eth:            ethAPI,
@@ -36,7 +36,7 @@ func NewPrivKey(
 }
 
 // Import imports privKey for accountKey for ETH
-func (p *PrivKey) Import(accountType account.AccountType) error {
+func (p *PrivKey) Import(accountType domainAccount.AccountType) error {
 	// 1. retrieve records(private key) from account_key table
 	// addr_status=0
 	accountKeyTable, err := p.accountKeyRepo.GetAllAddrStatus(accountType, address.AddrStatusHDKeyGenerated)

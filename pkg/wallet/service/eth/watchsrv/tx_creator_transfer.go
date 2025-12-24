@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
@@ -17,11 +17,13 @@ import (
 // FIXME: for now, receiver account covers fee, but is should be flexible
 // - sender pays fee,
 // - any internal account should have only one address in Ethereum because no utxo
-func (t *TxCreate) CreateTransferTx(sender, receiver account.AccountType, floatValue float64) (string, string, error) {
-	targetAction := action.ActionTypeTransfer
+func (t *TxCreate) CreateTransferTx(
+	sender, receiver domainAccount.AccountType, floatValue float64,
+) (string, string, error) {
+	targetAction := domainTx.ActionTypeTransfer
 
 	// validation account
-	if receiver == account.AccountTypeClient || receiver == account.AccountTypeAuthorization {
+	if receiver == domainAccount.AccountTypeClient || receiver == domainAccount.AccountTypeAuthorization {
 		return "", "", errors.New("invalid receiver account. client, authorization account is not allowed as receiver")
 	}
 	if sender == receiver {

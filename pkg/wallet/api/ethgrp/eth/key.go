@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
@@ -14,8 +13,6 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 )
 
 // Note: key filename is different between Geth and Parity
@@ -97,36 +94,4 @@ func (*Ethereum) readPrivKey(hexAddr, path string) ([]byte, error) {
 	}
 
 	return os.ReadFile(files[0])
-}
-
-// RenameParityKeyFile renames parity file format
-// Deprecated
-func (e *Ethereum) RenameParityKeyFile(hexAddr string, accountType account.AccountType) error {
-	if !e.isParity {
-		return nil
-	}
-
-	files, err := os.ReadDir(e.GetKeyDir())
-	if err != nil {
-		return err
-	}
-
-	fileNames := make([]string, 0, len(files))
-	for _, v := range files {
-		if v.IsDir() {
-			continue
-		}
-		fileNames = append(fileNames, v.Name())
-	}
-	sort.Strings(fileNames)
-
-	// get last one
-	target := fileNames[len(fileNames)-1]
-
-	// remove `0x` from hexAddr
-	addr := strings.TrimLeft(hexAddr, "0x")
-
-	// rename xxxxx--[address]
-	previousName := fmt.Sprintf("%s/%s", e.GetKeyDir(), target)
-	return os.Rename(previousName, fmt.Sprintf("%s--%s", previousName, addr))
 }

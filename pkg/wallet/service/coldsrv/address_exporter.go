@@ -8,10 +8,11 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
@@ -21,7 +22,7 @@ type AddressExport struct {
 	addrFileRepo    address.FileRepositorier
 	multisigAccount account.MultisigAccounter
 	coinTypeCode    coin.CoinTypeCode
-	wtype           wallet.WalletType
+	wtype           domainWallet.WalletType
 }
 
 // NewAddressExport returns addressExport
@@ -30,7 +31,7 @@ func NewAddressExport(
 	addrFileRepo address.FileRepositorier,
 	multisigAccount account.MultisigAccounter,
 	coinTypeCode coin.CoinTypeCode,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 ) *AddressExport {
 	return &AddressExport{
 		accountKeyRepo:  accountKeyRepo,
@@ -42,7 +43,7 @@ func NewAddressExport(
 }
 
 // ExportAddress exports addresses in account_key_table as csv file
-func (a *AddressExport) ExportAddress(accountType account.AccountType) (string, error) {
+func (a *AddressExport) ExportAddress(accountType domainAccount.AccountType) (string, error) {
 	// get target status for account
 	var targetAddrStatus address.AddrStatus
 	switch a.coinTypeCode {
@@ -94,7 +95,7 @@ func (a *AddressExport) ExportAddress(accountType account.AccountType) (string, 
 
 // exportAccountKey export account_key_table as csv file
 func (a *AddressExport) exportAccountKey(
-	accountKeyTable []*models.AccountKey, accountType account.AccountType,
+	accountKeyTable []*models.AccountKey, accountType domainAccount.AccountType,
 ) (string, error) {
 	// create fileName
 	fileName := a.addrFileRepo.CreateFilePath(accountType)

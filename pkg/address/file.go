@@ -8,13 +8,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 )
 
 // FileRepositorier is address storage interface
 type FileRepositorier interface {
-	CreateFilePath(accountType account.AccountType) string
-	ValidateFilePath(fileName string, accountType account.AccountType) error
+	CreateFilePath(accountType domainAccount.AccountType) string
+	ValidateFilePath(fileName string, accountType domainAccount.AccountType) error
 	ImportAddress(fileName string) ([]string, error)
 }
 
@@ -33,14 +33,14 @@ func NewFileRepository(filePath string) *FileRepository {
 // CreateFilePath create file path for csv file
 // Format:
 //   - ./data/pubkey/client_1534744535097796209.csv
-func (r *FileRepository) CreateFilePath(accountType account.AccountType) string {
+func (r *FileRepository) CreateFilePath(accountType domainAccount.AccountType) string {
 	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
 
 	return fmt.Sprintf("%s%s_%s.csv", r.filePath, accountType.String(), ts)
 }
 
 // ValidateFilePath validate fileName
-func (*FileRepository) ValidateFilePath(fileName string, accountType account.AccountType) error {
+func (*FileRepository) ValidateFilePath(fileName string, accountType domainAccount.AccountType) error {
 	// e.g. ./data/pubkey/deposit/deposit_1586831083436291000.csv
 	tmp := strings.Split(strings.Split(fileName, "_")[0], "/")
 	if tmp[len(tmp)-1] != accountType.String() {

@@ -5,11 +5,11 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
@@ -18,14 +18,14 @@ import (
 type PrivKey struct {
 	btc            btcgrp.Bitcoiner
 	accountKeyRepo coldrepo.AccountKeyRepositorier
-	wtype          wallet.WalletType
+	wtype          domainWallet.WalletType
 }
 
 // NewPrivKey returns privKey object
 func NewPrivKey(
 	btc btcgrp.Bitcoiner,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 ) *PrivKey {
 	return &PrivKey{
 		btc:            btc,
@@ -37,7 +37,7 @@ func NewPrivKey(
 // Import imports privKey for accountKey
 //   - get WIF whose `is_imported_priv_key` is false
 //   - then call ImportPrivKey(wif) without rescan
-func (p *PrivKey) Import(accountType account.AccountType) error {
+func (p *PrivKey) Import(accountType domainAccount.AccountType) error {
 	// 1. retrieve records(private key) from account_key table
 	// addr_status=0
 	accountKeyTable, err := p.accountKeyRepo.GetAllAddrStatus(accountType, address.AddrStatusHDKeyGenerated)

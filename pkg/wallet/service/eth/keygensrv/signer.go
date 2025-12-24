@@ -4,9 +4,10 @@ import (
 	"errors"
 	"fmt"
 
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/ethtx"
@@ -16,14 +17,14 @@ import (
 type Sign struct {
 	eth        ethgrp.Ethereumer
 	txFileRepo tx.FileRepositorier
-	wtype      wallet.WalletType
+	wtype      domainWallet.WalletType
 }
 
 // NewSign returns sign object
 func NewSign(
 	ethAPI ethgrp.Ethereumer,
 	txFileRepo tx.FileRepositorier,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 ) *Sign {
 	return &Sign{
 		eth:        ethAPI,
@@ -36,7 +37,7 @@ func NewSign(
 // - multisig equivalent functionality is not implemented yet in ETH
 func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 	// get tx_deposit_id from tx file name
-	actionType, _, txID, signedCount, err := s.txFileRepo.ValidateFilePath(filePath, tx.TxTypeUnsigned)
+	actionType, _, txID, signedCount, err := s.txFileRepo.ValidateFilePath(filePath, domainTx.TxTypeUnsigned)
 	if err != nil {
 		return "", false, "", err
 	}
@@ -67,7 +68,7 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 	}
 
 	// write file
-	path := s.txFileRepo.CreateFilePath(actionType, tx.TxTypeSigned, txID, signedCount+1)
+	path := s.txFileRepo.CreateFilePath(actionType, domainTx.TxTypeSigned, txID, signedCount+1)
 	generatedFileName, err := s.txFileRepo.WriteFileSlice(path, txHexs)
 	if err != nil {
 		return "", false, "", fmt.Errorf("fail to call txFileRepo.WriteFileSlice(): %w", err)

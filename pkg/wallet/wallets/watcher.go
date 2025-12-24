@@ -1,7 +1,7 @@
 package wallets
 
 import (
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
@@ -10,7 +10,9 @@ type Watcher interface {
 	ImportAddress(fileName string, isRescan bool) error
 	CreateDepositTx(adjustmentFee float64) (string, string, error)
 	CreatePaymentTx(adjustmentFee float64) (string, string, error)
-	CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error)
+	CreateTransferTx(
+		sender, receiver domainAccount.AccountType, floatAmount, adjustmentFee float64,
+	) (string, string, error)
 	SendTx(filePath string) (string, error)
 	UpdateTxStatus() error
 	MonitorBalance(confirmationNum uint64) error

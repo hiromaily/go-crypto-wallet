@@ -5,11 +5,11 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
@@ -23,16 +23,16 @@ type PrivKeyer interface {
 type PrivKey struct {
 	btc         btcgrp.Bitcoiner
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier
-	authType    account.AuthType
-	wtype       wallet.WalletType
+	authType    domainAccount.AuthType
+	wtype       domainWallet.WalletType
 }
 
 // NewPrivKey returns privKey object
 func NewPrivKey(
 	btc btcgrp.Bitcoiner,
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
-	authType account.AuthType,
-	wtype wallet.WalletType,
+	authType domainAccount.AuthType,
+	wtype domainWallet.WalletType,
 ) *PrivKey {
 	return &PrivKey{
 		btc:         btc,

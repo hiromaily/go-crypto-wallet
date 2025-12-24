@@ -5,13 +5,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 )
 
@@ -22,7 +21,7 @@ type TxMonitor struct {
 	txRepo      watchrepo.BTCTxRepositorier
 	txInputRepo watchrepo.TxInputRepositorier
 	payReqRepo  watchrepo.PaymentRequestRepositorier
-	wtype       wallet.WalletType
+	wtype       domainWallet.WalletType
 }
 
 // NewTxMonitor returns TxMonitor object
@@ -32,7 +31,7 @@ func NewTxMonitor(
 	txRepo watchrepo.BTCTxRepositorier,
 	txInputRepo watchrepo.TxInputRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 ) *TxMonitor {
 	return &TxMonitor{
 		btc:         btc,
@@ -49,10 +48,10 @@ func NewTxMonitor(
 func (t *TxMonitor) UpdateTxStatus() error {
 	// TODO: as possibility tx_type is not updated from `done`
 
-	types := []action.ActionType{
-		action.ActionTypeDeposit,
-		action.ActionTypePayment,
-		action.ActionTypeTransfer,
+	types := []domainTx.ActionType{
+		domainTx.ActionTypeDeposit,
+		domainTx.ActionTypePayment,
+		domainTx.ActionTypeTransfer,
 	}
 
 	// 1. update tx_type for TxTypeSent
@@ -76,9 +75,9 @@ func (t *TxMonitor) UpdateTxStatus() error {
 }
 
 // update TxTypeSent to TxTypeDone if confirmation is 6 or more
-func (t *TxMonitor) updateStatusTxTypeSent(actionType action.ActionType) error {
+func (t *TxMonitor) updateStatusTxTypeSent(actionType domainTx.ActionType) error {
 	// get records whose status is TxTypeSent
-	hashes, err := t.txRepo.GetSentHashTx(actionType, tx.TxTypeSent)
+	hashes, err := t.txRepo.GetSentHashTx(actionType, domainTx.TxTypeSent)
 	if err != nil {
 		return fmt.Errorf("fail to call txRepo.GetSentHashTx(TxTypeSent) ActionType: %s: %w", actionType, err)
 	}
@@ -97,10 +96,10 @@ func (t *TxMonitor) updateStatusTxTypeSent(actionType action.ActionType) error {
 		}
 		if isDone {
 			// current confirmation meets 6 or more
-			_, err = t.txRepo.UpdateTxTypeBySentHashTx(actionType, tx.TxTypeDone, hash)
+			_, err = t.txRepo.UpdateTxTypeBySentHashTx(actionType, domainTx.TxTypeDone, hash)
 			if err != nil {
 				return fmt.Errorf(
-					"fail to call repo.Tx().UpdateTxTypeBySentHashTx(tx.TxTypeDone) ActionType: %s: %w",
+					"fail to call repo.Tx().UpdateTxTypeBySentHashTx(domainTx.TxTypeDone) ActionType: %s: %w",
 					actionType, err)
 			}
 		}
@@ -108,9 +107,9 @@ func (t *TxMonitor) updateStatusTxTypeSent(actionType action.ActionType) error {
 	return nil
 }
 
-func (t *TxMonitor) updateStatusTxTypeDone(actionType action.ActionType) error {
+func (t *TxMonitor) updateStatusTxTypeDone(actionType domainTx.ActionType) error {
 	// get records whose status is TxTypeDone
-	hashes, err := t.txRepo.GetSentHashTx(actionType, tx.TxTypeDone)
+	hashes, err := t.txRepo.GetSentHashTx(actionType, domainTx.TxTypeDone)
 	if err != nil {
 		return fmt.Errorf("fail to call txRepo.GetSentHashTx(TxTypeDone) ActionType: %s: %w", actionType, err)
 	}
@@ -151,7 +150,7 @@ func (t *TxMonitor) updateStatusTxTypeDone(actionType action.ActionType) error {
 }
 
 // checkTxConfirmation check confirmation for hash tx
-func (t *TxMonitor) checkTxConfirmation(hash string, actionType action.ActionType) (bool, error) {
+func (t *TxMonitor) checkTxConfirmation(hash string, actionType domainTx.ActionType) (bool, error) {
 	// get tx in detail by RPC `gettransaction`
 	tran, err := t.btc.GetTransactionByTxID(hash)
 	if err != nil {
@@ -181,14 +180,14 @@ func (t *TxMonitor) checkTxConfirmation(hash string, actionType action.ActionTyp
 }
 
 // notifyTxDone notify tx is sent and met specific confirmation number
-func (t *TxMonitor) notifyTxDone(hash string, actionType action.ActionType) (int64, error) {
+func (t *TxMonitor) notifyTxDone(hash string, actionType domainTx.ActionType) (int64, error) {
 	var (
 		txID int64
 		err  error
 	)
 
 	switch actionType {
-	case action.ActionTypeDeposit:
+	case domainTx.ActionTypeDeposit:
 		// 1. get txID from hash
 		txID, err = t.txRepo.GetTxIDBySentHash(actionType, hash)
 		if err != nil {
@@ -212,7 +211,7 @@ func (t *TxMonitor) notifyTxDone(hash string, actionType action.ActionType) (int
 		for _, input := range txInputs {
 			logger.Debug("address in txInputs", "input.InputAddress", input.InputAddress)
 		}
-	case action.ActionTypePayment:
+	case domainTx.ActionTypePayment:
 		// 1. get txID from hash
 		txID, err = t.txRepo.GetTxIDBySentHash(actionType, hash)
 		if err != nil {
@@ -238,26 +237,26 @@ func (t *TxMonitor) notifyTxDone(hash string, actionType action.ActionType) (int
 		for _, user := range paymentUsers {
 			logger.Debug("address in paymentUsers", "user.AddressFrom", user.SenderAddress)
 		}
-	case action.ActionTypeTransfer:
+	case domainTx.ActionTypeTransfer:
 		// TODO: not implemented yet
-		logger.Warn("action.ActionTypeTransfer is not implemented yet in notifyTxDone()")
-		return 0, errors.New("action.ActionTypeTransfer is not implemented yet in notifyTxDone()")
+		logger.Warn("domainTx.ActionTypeTransfer is not implemented yet in notifyTxDone()")
+		return 0, errors.New("domainTx.ActionTypeTransfer is not implemented yet in notifyTxDone()")
 	}
 
 	return txID, nil
 }
 
 // update tx_type TxTypeNotified
-func (t *TxMonitor) updateTxTypeNotified(id int64, actionType action.ActionType) error {
+func (t *TxMonitor) updateTxTypeNotified(id int64, actionType domainTx.ActionType) error {
 	switch actionType {
-	case action.ActionTypeDeposit:
-		_, err := t.txRepo.UpdateTxType(id, tx.TxTypeNotified)
+	case domainTx.ActionTypeDeposit:
+		_, err := t.txRepo.UpdateTxType(id, domainTx.TxTypeNotified)
 		if err != nil {
 			return fmt.Errorf(
-				"fail to call repo.Tx().UpdateTxType(tx.TxTypeNotified) ActionType: %s: %w",
+				"fail to call repo.Tx().UpdateTxType(domainTx.TxTypeNotified) ActionType: %s: %w",
 				actionType, err)
 		}
-	case action.ActionTypePayment:
+	case domainTx.ActionTypePayment:
 		dtx, err := t.dbConn.Begin()
 		if err != nil {
 			return fmt.Errorf("fail to start transaction: %w", err)
@@ -269,10 +268,10 @@ func (t *TxMonitor) updateTxTypeNotified(id int64, actionType action.ActionType)
 				dtx.Commit()
 			}
 		}()
-		_, err = t.txRepo.UpdateTxType(id, tx.TxTypeNotified)
+		_, err = t.txRepo.UpdateTxType(id, domainTx.TxTypeNotified)
 		if err != nil {
 			return fmt.Errorf(
-				"fail to call repo.Tx().UpdateTxType(tx.TxTypeNotified) ActionType: %s: %w",
+				"fail to call repo.Tx().UpdateTxType(domainTx.TxTypeNotified) ActionType: %s: %w",
 				actionType, err)
 		}
 
@@ -281,10 +280,10 @@ func (t *TxMonitor) updateTxTypeNotified(id int64, actionType action.ActionType)
 		if err != nil {
 			return fmt.Errorf("fail to call repo.UpdateIsDoneOnPaymentRequest() ActionType: %s: %w", actionType, err)
 		}
-	case action.ActionTypeTransfer:
-		// TODO: not implemented yet, it could be same to action.ActionTypeDeposit
-		logger.Warn("action.ActionTypeTransfer is not implemented yet in updateTxTypeNotified()")
-		return errors.New("action.ActionTypeTransfer is not implemented yet in updateTxTypeNotified()")
+	case domainTx.ActionTypeTransfer:
+		// TODO: not implemented yet, it could be same to domainTx.ActionTypeDeposit
+		logger.Warn("domainTx.ActionTypeTransfer is not implemented yet in updateTxTypeNotified()")
+		return errors.New("domainTx.ActionTypeTransfer is not implemented yet in updateTxTypeNotified()")
 	}
 
 	return nil
@@ -292,11 +291,11 @@ func (t *TxMonitor) updateTxTypeNotified(id int64, actionType action.ActionType)
 
 // MonitorBalance monitors balances
 func (t *TxMonitor) MonitorBalance(confirmationNum uint64) error {
-	targetAccounts := []account.AccountType{
-		account.AccountTypeClient,
-		account.AccountTypeDeposit,
-		account.AccountTypePayment,
-		account.AccountTypeStored,
+	targetAccounts := []domainAccount.AccountType{
+		domainAccount.AccountTypeClient,
+		domainAccount.AccountTypeDeposit,
+		domainAccount.AccountTypePayment,
+		domainAccount.AccountTypeStored,
 	}
 
 	for _, acnt := range targetAccounts {

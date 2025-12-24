@@ -4,12 +4,12 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
@@ -18,7 +18,7 @@ import (
 type TxCreator interface {
 	CreateDepositTx() (string, string, error)
 	CreatePaymentTx() (string, string, error)
-	CreateTransferTx(sender, receiver account.AccountType, floatAmount float64) (string, string, error)
+	CreateTransferTx(sender, receiver domainAccount.AccountType, floatAmount float64) (string, string, error)
 }
 
 // TxCreate type
@@ -30,9 +30,9 @@ type TxCreate struct {
 	txDetailRepo    watchrepo.EthDetailTxRepositorier
 	payReqRepo      watchrepo.PaymentRequestRepositorier
 	txFileRepo      tx.FileRepositorier
-	depositReceiver account.AccountType
-	paymentSender   account.AccountType
-	wtype           wallet.WalletType
+	depositReceiver domainAccount.AccountType
+	paymentSender   domainAccount.AccountType
+	wtype           domainWallet.WalletType
 	coinTypeCode    coin.CoinTypeCode
 }
 
@@ -45,9 +45,9 @@ func NewTxCreate(
 	txDetailRepo watchrepo.EthDetailTxRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,
 	txFileRepo tx.FileRepositorier,
-	depositReceiver account.AccountType,
-	paymentSender account.AccountType,
-	wtype wallet.WalletType,
+	depositReceiver domainAccount.AccountType,
+	paymentSender domainAccount.AccountType,
+	wtype domainWallet.WalletType,
 	coinTypeCode coin.CoinTypeCode,
 ) *TxCreate {
 	return &TxCreate{
@@ -66,7 +66,7 @@ func NewTxCreate(
 }
 
 func (t *TxCreate) updateDB(
-	targetAction action.ActionType,
+	targetAction domainTx.ActionType,
 	txDetailItems []*models.EthDetailTX,
 	paymentRequestIds []int64,
 ) (int64, error) {
@@ -96,7 +96,7 @@ func (t *TxCreate) updateDB(
 		return 0, fmt.Errorf("fail to call txDetailRepo.InsertBulk(): %w", err)
 	}
 
-	if targetAction == action.ActionTypePayment {
+	if targetAction == domainTx.ActionTypePayment {
 		_, err = t.payReqRepo.UpdatePaymentID(txID, paymentRequestIds)
 		if err != nil {
 			return 0, fmt.Errorf("fail to call repo.PayReq().UpdatePaymentID(txID, paymentRequestIds): %w", err)
@@ -107,13 +107,13 @@ func (t *TxCreate) updateDB(
 
 // generateHexFile generate file for hex txID and encoded previous addresses
 func (t *TxCreate) generateHexFile(
-	actionType action.ActionType, senderAccount account.AccountType, txID int64, serializedTxs []string,
+	actionType domainTx.ActionType, senderAccount domainAccount.AccountType, txID int64, serializedTxs []string,
 ) (string, error) {
 	// add senderAccount to first line
 	serializedTxs = append([]string{senderAccount.String()}, serializedTxs...)
 
 	// create file
-	path := t.txFileRepo.CreateFilePath(actionType, tx.TxTypeUnsigned, txID, 0)
+	path := t.txFileRepo.CreateFilePath(actionType, domainTx.TxTypeUnsigned, txID, 0)
 	generatedFileName, err := t.txFileRepo.WriteFileSlice(path, serializedTxs)
 	if err != nil {
 		return "", fmt.Errorf("fail to call txFileRepo.WriteFile(): %w", err)

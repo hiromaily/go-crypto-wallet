@@ -6,7 +6,7 @@ import (
 
 	"github.com/bookerzzz/grok"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
@@ -18,11 +18,11 @@ func runHDKeyWithFlags(wallet wallets.Keygener, keyNum uint64, acnt string, isKe
 	if keyNum == 0 {
 		return errors.New("number of key option [-keynum] is required")
 	}
-	if !account.ValidateAccountType(acnt) {
+	if !domainAccount.ValidateAccountType(acnt) {
 		return errors.New("account option [-account] is invalid")
 	}
-	if !account.NotAllow(acnt, []account.AccountType{account.AccountTypeAuthorization}) {
-		return fmt.Errorf("account: %s is not allowed", account.AccountTypeAuthorization)
+	if !domainAccount.NotAllow(acnt, []domainAccount.AccountType{domainAccount.AccountTypeAuthorization}) {
+		return fmt.Errorf("account: %s is not allowed", domainAccount.AccountTypeAuthorization)
 	}
 
 	// create seed
@@ -32,7 +32,7 @@ func runHDKeyWithFlags(wallet wallets.Keygener, keyNum uint64, acnt string, isKe
 	}
 
 	// generate key for hd wallet
-	keys, err := wallet.GenerateAccountKey(account.AccountType(acnt), bSeed, uint32(keyNum), isKeyPair)
+	keys, err := wallet.GenerateAccountKey(domainAccount.AccountType(acnt), bSeed, uint32(keyNum), isKeyPair)
 	if err != nil {
 		return fmt.Errorf("fail to call GenerateAccountKey() %w", err)
 	}

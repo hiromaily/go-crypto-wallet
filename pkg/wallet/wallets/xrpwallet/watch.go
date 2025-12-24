@@ -3,9 +3,9 @@ package xrpwallet
 import (
 	"database/sql"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	wtype "github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
@@ -17,7 +17,7 @@ import (
 type XRPWatch struct {
 	XRP    xrpgrp.Rippler
 	dbConn *sql.DB
-	wtype  wtype.WalletType
+	wtype  domainWallet.WalletType
 	watchsrv.AddressImporter
 	xrpsrv.TxCreator
 	service.TxSender
@@ -34,7 +34,7 @@ func NewXRPWatch(
 	txSender service.TxSender,
 	txMonitorer service.TxMonitorer,
 	paymentRequestCreator service.PaymentRequestCreator,
-	walletType wtype.WalletType,
+	walletType domainWallet.WalletType,
 ) *XRPWatch {
 	return &XRPWatch{
 		XRP:                   xrp,
@@ -65,7 +65,7 @@ func (w *XRPWatch) CreatePaymentTx(_ float64) (string, string, error) {
 
 // CreateTransferTx creates transfer unsigned transaction
 func (w *XRPWatch) CreateTransferTx(
-	sender, receiver account.AccountType, floatAmount, _ float64,
+	sender, receiver domainAccount.AccountType, floatAmount, _ float64,
 ) (string, string, error) {
 	return w.TxCreator.CreateTransferTx(sender, receiver, floatAmount)
 }

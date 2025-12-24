@@ -5,20 +5,20 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // TxRepositorySqlc is repository for tx table using sqlc
 type TxRepositorySqlc struct {
 	queries      *sqlcgen.Queries
-	coinTypeCode coin.CoinTypeCode
+	coinTypeCode domainCoin.CoinTypeCode
 }
 
 // NewTxRepositorySqlc returns TxRepositorySqlc object
-func NewTxRepositorySqlc(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode) *TxRepositorySqlc {
+func NewTxRepositorySqlc(dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode) *TxRepositorySqlc {
 	return &TxRepositorySqlc{
 		queries:      sqlcgen.New(dbConn),
 		coinTypeCode: coinTypeCode,
@@ -38,7 +38,7 @@ func (r *TxRepositorySqlc) GetOne(id int64) (*models.TX, error) {
 }
 
 // GetMaxID returns max id
-func (r *TxRepositorySqlc) GetMaxID(actionType action.ActionType) (int64, error) {
+func (r *TxRepositorySqlc) GetMaxID(actionType domainTx.ActionType) (int64, error) {
 	ctx := context.Background()
 
 	result, err := r.queries.GetMaxTxID(ctx, sqlcgen.GetMaxTxIDParams{
@@ -62,7 +62,7 @@ func (r *TxRepositorySqlc) GetMaxID(actionType action.ActionType) (int64, error)
 }
 
 // InsertUnsignedTx inserts records
-func (r *TxRepositorySqlc) InsertUnsignedTx(actionType action.ActionType) (int64, error) {
+func (r *TxRepositorySqlc) InsertUnsignedTx(actionType domainTx.ActionType) (int64, error) {
 	ctx := context.Background()
 
 	result, err := r.queries.InsertTx(ctx, sqlcgen.InsertTxParams{

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -51,19 +51,14 @@ func (e *Ethereum) ListAccounts(ctx context.Context) ([]string, error) {
 // NewAccount generates a new private key and stores it in the key store directory
 // https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_newaccount
 // - private key is stored and read from node server
-func (e *Ethereum) NewAccount(ctx context.Context, passphrase string, accountType account.AccountType) (string, error) {
+func (e *Ethereum) NewAccount(
+	ctx context.Context, passphrase string, accountType domainAccount.AccountType,
+) (string, error) {
 	var address string
 	err := e.rpcClient.CallContext(ctx, &address, "personal_newAccount", passphrase)
 	if err != nil {
 		return "", fmt.Errorf("fail to call rpc.CallContext(personal_newAccount): %w", err)
 	}
-	// if e.isParity {
-	//	//TODO:parity client generates file with UUID, so add address to filename if parity client
-	//	err = e.RenameParityKeyFile(address, accountType)
-	//	if err != nil {
-	//		return "", fmt.Errorf("fail to call RenameParityKeyFile(address): %w", err)
-	//	}
-	//}
 	return address, nil
 }
 

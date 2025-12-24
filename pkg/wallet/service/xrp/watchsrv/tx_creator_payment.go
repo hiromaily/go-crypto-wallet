@@ -8,11 +8,10 @@ import (
 
 	"github.com/bookerzzz/grok"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 )
 
@@ -24,8 +23,8 @@ import (
 // - only one address of sender should afford to send coin to all payment request users.
 func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	sender := t.paymentSender
-	receiver := account.AccountTypeAnonymous
-	targetAction := action.ActionTypePayment
+	receiver := domainAccount.AccountTypeAnonymous
+	targetAction := domainTx.ActionTypePayment
 	logger.Debug("account",
 		"sender", sender.String(),
 		"receiver", receiver.String(),
@@ -46,7 +45,7 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	// GetOneUnAllocated
 	senderAddr, err := t.addrRepo.GetOneUnAllocated(sender)
 	if err != nil {
-		return "", "", fmt.Errorf("fail to call addrRepo.GetAll(account.AccountTypeClient): %w", err)
+		return "", "", fmt.Errorf("fail to call addrRepo.GetAll(domainAccount.AccountTypeClient): %w", err)
 	}
 	if t.validateAmount(senderAddr, totalAmount) != nil {
 		return "", "", nil
@@ -146,7 +145,7 @@ func (t *TxCreate) validateAmount(senderAddr *models.Address, totalAmount float6
 }
 
 func (t *TxCreate) createPaymentRawTransactions(
-	sender, receiver account.AccountType, userPayments []UserPayment, senderAddr *models.Address,
+	sender, receiver domainAccount.AccountType, userPayments []UserPayment, senderAddr *models.Address,
 ) ([]string, []*models.XRPDetailTX) {
 	serializedTxs := make([]string, 0, len(userPayments))
 	txDetailItems := make([]*models.XRPDetailTX, 0, len(userPayments))
@@ -185,7 +184,7 @@ func (t *TxCreate) createPaymentRawTransactions(
 		// create insert data for　eth_detail_tx
 		txDetailItem := &models.XRPDetailTX{
 			UUID:               uid.String(),
-			CurrentTXType:      tx.TxTypeUnsigned.Int8(),
+			CurrentTXType:      domainTx.TxTypeUnsigned.Int8(),
 			SenderAccount:      sender.String(),
 			SenderAddress:      senderAddr.WalletAddress,
 			ReceiverAccount:    receiver.String(),

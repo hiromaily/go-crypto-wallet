@@ -5,9 +5,10 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/btc"
 )
@@ -18,7 +19,7 @@ type Multisig struct {
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier
 	accountKeyRepo     coldrepo.AccountKeyRepositorier
 	multisigAccount    account.MultisigAccounter
-	wtype              wallet.WalletType
+	wtype              domainWallet.WalletType
 }
 
 // NewMultisig returns multisig
@@ -27,7 +28,7 @@ func NewMultisig(
 	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	multisigAccount account.MultisigAccounter,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 ) *Multisig {
 	return &Multisig{
 		btc:                btcAPI,
@@ -46,7 +47,7 @@ func NewMultisig(
 //   - 4th parameter must be`p2sh-segwit` addressType in Bitcoin
 //     What is the difference between createmultisig and addmultisigaddress?
 //   - https://bitcointalk.org/index.php?topic=3402541.0
-func (m *Multisig) AddMultisigAddress(accountType account.AccountType, addressType address.AddrType) error {
+func (m *Multisig) AddMultisigAddress(accountType domainAccount.AccountType, addressType address.AddrType) error {
 	// for sign wallet
 	logger.Debug("addmultisigaddress",
 		"account_type", accountType.String(),

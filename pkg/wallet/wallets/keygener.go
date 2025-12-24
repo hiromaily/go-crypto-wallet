@@ -1,7 +1,7 @@
 package wallets
 
 import (
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
 
@@ -10,12 +10,12 @@ type Keygener interface {
 	GenerateSeed() ([]byte, error)
 	StoreSeed(strSeed string) ([]byte, error)
 	GenerateAccountKey(
-		accountType account.AccountType, seed []byte, count uint32, isKeyPair bool,
+		accountType domainAccount.AccountType, seed []byte, count uint32, isKeyPair bool,
 	) ([]key.WalletKey, error)
-	ImportPrivKey(accountType account.AccountType) error
+	ImportPrivKey(accountType domainAccount.AccountType) error
 	ImportFullPubKey(fileName string) error
-	CreateMultisigAddress(accountType account.AccountType) error
-	ExportAddress(accountType account.AccountType) (string, error)
+	CreateMultisigAddress(accountType domainAccount.AccountType) error
+	ExportAddress(accountType domainAccount.AccountType) (string, error)
 	SignTx(filePath string) (string, bool, string, error)
 	Done()
 }

@@ -4,19 +4,20 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // FullPubKeyFormat is fullpubkey csv format
 type FullPubKeyFormat struct {
-	CoinTypeCode coin.CoinTypeCode
-	AuthType     account.AuthType
+	CoinTypeCode domainCoin.CoinTypeCode
+	AuthType     domainAccount.AuthType
 	FullPubKey   string
 }
 
 // CreateLine creates line for csv
-func CreateLine(coinTypeCode coin.CoinTypeCode, authType account.AuthType, fullPubKey string) string {
+func CreateLine(coinTypeCode domainCoin.CoinTypeCode, authType domainAccount.AuthType, fullPubKey string) string {
 	// 0: coinTypeCode
 	// 1: authType
 	// 2: fullPubKey
@@ -24,22 +25,22 @@ func CreateLine(coinTypeCode coin.CoinTypeCode, authType account.AuthType, fullP
 }
 
 // ConvertLine converts line to FullPubKeyFormat
-func ConvertLine(coinTypeCode coin.CoinTypeCode, line []string) (*FullPubKeyFormat, error) {
+func ConvertLine(coinTypeCode domainCoin.CoinTypeCode, line []string) (*FullPubKeyFormat, error) {
 	if len(line) != 3 {
 		return nil, errors.New("csv format is invalid")
 	}
 
 	// validate
-	if !coin.IsCoinTypeCode(line[0]) || coin.CoinTypeCode(line[0]) != coinTypeCode {
+	if !coin.IsCoinTypeCode(line[0]) || domainCoin.CoinTypeCode(line[0]) != coinTypeCode {
 		return nil, fmt.Errorf("coinTypeCode is invalid. got %s, want %s", line[0], coinTypeCode.String())
 	}
-	if !account.ValidateAuthType(line[1]) {
+	if !domainAccount.ValidateAuthType(line[1]) {
 		return nil, fmt.Errorf("auth account is invalid: %s", line[1])
 	}
 
 	return &FullPubKeyFormat{
-		CoinTypeCode: coin.CoinTypeCode(line[0]),
-		AuthType:     account.AuthType(line[1]),
+		CoinTypeCode: domainCoin.CoinTypeCode(line[0]),
+		AuthType:     domainAccount.AuthType(line[1]),
 		FullPubKey:   line[2],
 	}, nil
 }

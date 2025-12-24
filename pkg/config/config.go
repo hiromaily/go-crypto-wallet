@@ -7,12 +7,12 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 )
 
 // NewWallet creates wallet config
-func NewWallet(file string, wtype wallet.WalletType, coinTypeCode coin.CoinTypeCode) (*WalletRoot, error) {
+func NewWallet(file string, wtype domainWallet.WalletType, coinTypeCode domainCoin.CoinTypeCode) (*WalletRoot, error) {
 	if file == "" {
 		return nil, errors.New("config file should be passed")
 	}
@@ -53,32 +53,32 @@ func loadWallet(path string) (*WalletRoot, error) {
 }
 
 // validate config
-func (c *WalletRoot) validate(wtype wallet.WalletType, coinTypeCode coin.CoinTypeCode) error {
+func (c *WalletRoot) validate(wtype domainWallet.WalletType, coinTypeCode domainCoin.CoinTypeCode) error {
 	validate := validator.New()
 
 	switch coinTypeCode {
-	case coin.BTC, coin.BCH:
+	case domainCoin.BTC, domainCoin.BCH:
 		if err := validate.StructExcept(c, "Ethereum", "Ripple"); err != nil {
 			return err
 		}
 		switch wtype {
-		case wallet.WalletTypeWatchOnly:
+		case domainWallet.WalletTypeWatchOnly:
 			if c.Bitcoin.Block.ConfirmationNum == 0 {
 				return errors.New("block ConfirmationNum is required in toml file")
 			}
-		case wallet.WalletTypeKeyGen, wallet.WalletTypeSign:
+		case domainWallet.WalletTypeKeyGen, domainWallet.WalletTypeSign:
 			// No additional validation needed
 		default:
 		}
-	case coin.ETH, coin.ERC20:
+	case domainCoin.ETH, domainCoin.ERC20:
 		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ripple"); err != nil {
 			return err
 		}
-	case coin.XRP:
+	case domainCoin.XRP:
 		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ethereum"); err != nil {
 			return err
 		}
-	case coin.LTC, coin.HYC:
+	case domainCoin.LTC, domainCoin.HYC:
 		// Not implemented yet
 	default:
 	}
@@ -86,7 +86,7 @@ func (c *WalletRoot) validate(wtype wallet.WalletType, coinTypeCode coin.CoinTyp
 	return nil
 }
 
-func (c *WalletRoot) ValidateERC20(token coin.ERC20Token) error {
+func (c *WalletRoot) ValidateERC20(token domainCoin.ERC20Token) error {
 	if _, ok := c.Ethereum.ERC20s[token]; !ok {
 		return fmt.Errorf("erc20 token information for [%s] is required", token.String())
 	}

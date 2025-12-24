@@ -8,8 +8,8 @@ import (
 	"github.com/btcsuite/btcd/wire"
 	"github.com/quagmt/udecimal"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
@@ -36,7 +36,7 @@ type Bitcoiner interface {
 	// balance.go
 	GetBalance() (btcutil.Amount, error)
 	GetBalanceByListUnspent(confirmationNum uint64) (btcutil.Amount, error)
-	GetBalanceByAccount(accountType account.AccountType, confirmationNum uint64) (btcutil.Amount, error)
+	GetBalanceByAccount(accountType domainAccount.AccountType, confirmationNum uint64) (btcutil.Amount, error)
 
 	// block.go
 	GetBlockCount() (int64, error)
@@ -100,8 +100,8 @@ type Bitcoiner interface {
 
 	// unspent.go
 	ListUnspent(confirmationNum uint64) ([]btc.ListUnspentResult, error)
-	ListUnspentByAccount(accountType account.AccountType, confirmationNum uint64) ([]btc.ListUnspentResult, error)
-	GetUnspentListAddrs(unspentList []btc.ListUnspentResult, accountType account.AccountType) []string
+	ListUnspentByAccount(accountType domainAccount.AccountType, confirmationNum uint64) ([]btc.ListUnspentResult, error)
+	GetUnspentListAddrs(unspentList []btc.ListUnspentResult, accountType domainAccount.AccountType) []string
 	LockUnspent(tx *btc.ListUnspentResult) error
 	UnlockUnspent() error
 

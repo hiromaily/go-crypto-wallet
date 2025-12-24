@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/fullpubkey"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
@@ -19,8 +19,8 @@ type FullPubkeyExport struct {
 	authKeyRepo    coldrepo.AuthAccountKeyRepositorier
 	pubkeyFileRepo address.FileRepositorier
 	coinTypeCode   coin.CoinTypeCode
-	authType       account.AuthType
-	wtype          wallet.WalletType
+	authType       domainAccount.AuthType
+	wtype          domainWallet.WalletType
 }
 
 // NewFullPubkeyExport returns fullPubkeyExport
@@ -28,8 +28,8 @@ func NewFullPubkeyExport(
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
 	pubkeyFileRepo address.FileRepositorier,
 	coinTypeCode coin.CoinTypeCode,
-	authType account.AuthType,
-	wtype wallet.WalletType,
+	authType domainAccount.AuthType,
+	wtype domainWallet.WalletType,
 ) *FullPubkeyExport {
 	return &FullPubkeyExport{
 		authKeyRepo:    authKeyRepo,
@@ -59,7 +59,7 @@ func (f *FullPubkeyExport) ExportFullPubkey() (string, error) {
 
 // exportAccountKey export account_key_table as csv file
 func (f *FullPubkeyExport) exportAccountKey(
-	authKeyTable *models.AuthAccountKey, authType account.AuthType,
+	authKeyTable *models.AuthAccountKey, authType domainAccount.AuthType,
 ) (string, error) {
 	// create fileName
 	fileName := f.pubkeyFileRepo.CreateFilePath(f.authType.AccountType())

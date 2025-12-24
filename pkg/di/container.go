@@ -16,12 +16,14 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/contract"
 	"github.com/hiromaily/go-crypto-wallet/pkg/converter"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
-	wtype "github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/erc20"
@@ -63,7 +65,7 @@ type container struct {
 	// utility
 	uuidHandler uuid.UUIDHandler
 	// wallet
-	walletType wtype.WalletType
+	walletType domainWallet.WalletType
 	btc        btcgrp.Bitcoiner
 	eth        ethgrp.Ethereumer
 	erc20      ethgrp.ERC20er
@@ -80,7 +82,11 @@ type container struct {
 }
 
 // NewContainer is to create container interface
-func NewContainer(conf *config.WalletRoot, accountConf *account.AccountRoot, walletType wtype.WalletType) Container {
+func NewContainer(
+	conf *config.WalletRoot,
+	accountConf *account.AccountRoot,
+	walletType domainWallet.WalletType,
+) Container {
 	return &container{
 		conf:        conf,
 		accountConf: accountConf,
@@ -102,7 +108,7 @@ func (c *container) NewKeygener() wallets.Keygener {
 		return c.newBTCKeygener()
 	case coin.IsETHGroup(c.conf.CoinTypeCode):
 		return c.newETHKeygener()
-	case c.conf.CoinTypeCode == coin.XRP:
+	case c.conf.CoinTypeCode == domainCoin.XRP:
 		return c.newXRPKeygener()
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
@@ -161,7 +167,7 @@ func (c *container) NewWalleter() wallets.Watcher {
 		return c.newBTCWalleter()
 	case coin.IsETHGroup(c.conf.CoinTypeCode):
 		return c.newETHWalleter()
-	case c.conf.CoinTypeCode == coin.XRP:
+	case c.conf.CoinTypeCode == domainCoin.XRP:
 		return c.newXRPWalleter()
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
@@ -171,26 +177,26 @@ func (c *container) NewWalleter() wallets.Watcher {
 // NewSigner is to register for Signer interface
 func (c *container) NewSigner(authName string) wallets.Signer {
 	// validate
-	if !account.ValidateAuthType(authName) {
+	if !domainAccount.ValidateAuthType(authName) {
 		panic("authName is invalid. this should be embedded when building: " + authName)
 	}
 
 	// set global logger
 	logger.SetGlobal(logger.NewSlogFromConfig(c.conf.Logger.Env, c.conf.Logger.Level, c.conf.Logger.Service))
 
-	authType := account.AuthTypeMap[authName]
+	authType := domainAccount.AuthTypeMap[authName]
 
 	switch c.conf.CoinTypeCode {
-	case coin.BTC, coin.BCH:
+	case domainCoin.BTC, domainCoin.BCH:
 		return c.newBTCSigner(authType)
-	case coin.LTC, coin.ETH, coin.XRP, coin.ERC20, coin.HYC:
+	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYC:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
 	}
 }
 
-func (c *container) newBTCSigner(authType account.AuthType) wallets.Signer {
+func (c *container) newBTCSigner(authType domainAccount.AuthType) wallets.Signer {
 	return btcwallet.NewBTCSign(
 		c.newBTC(),
 		c.newMySQLClient(),

@@ -16,7 +16,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 )
 
 // refer to https://www.haowuliaoa.com/article/info/11350.html (Chinese site)
@@ -115,7 +115,7 @@ type SignRawTransactionError struct {
 
 // PreviousTxs is used when creating tx for multisig address
 type PreviousTxs struct {
-	SenderAccount account.AccountType
+	SenderAccount domainAccount.AccountType
 	PrevTxs       []PrevTx
 	Addrs         []string
 }

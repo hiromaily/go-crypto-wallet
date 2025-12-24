@@ -8,21 +8,21 @@ import (
 
 	"github.com/guregu/null/v6"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // AddressRepositorySqlc is repository for address table using sqlc
 type AddressRepositorySqlc struct {
 	queries      *sqlcgen.Queries
-	coinTypeCode coin.CoinTypeCode
+	coinTypeCode domainCoin.CoinTypeCode
 }
 
 // NewAddressRepositorySqlc returns AddressRepositorySqlc object
 func NewAddressRepositorySqlc(
-	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode,
+	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
 ) *AddressRepositorySqlc {
 	return &AddressRepositorySqlc{
 		queries:      sqlcgen.New(dbConn),
@@ -31,7 +31,7 @@ func NewAddressRepositorySqlc(
 }
 
 // GetAll returns all records by account
-func (r *AddressRepositorySqlc) GetAll(accountType account.AccountType) ([]*models.Address, error) {
+func (r *AddressRepositorySqlc) GetAll(accountType domainAccount.AccountType) ([]*models.Address, error) {
 	ctx := context.Background()
 
 	addresses, err := r.queries.GetAllAddresses(ctx, sqlcgen.GetAllAddressesParams{
@@ -52,7 +52,7 @@ func (r *AddressRepositorySqlc) GetAll(accountType account.AccountType) ([]*mode
 }
 
 // GetAllAddress returns all addresses by account
-func (r *AddressRepositorySqlc) GetAllAddress(accountType account.AccountType) ([]string, error) {
+func (r *AddressRepositorySqlc) GetAllAddress(accountType domainAccount.AccountType) ([]string, error) {
 	ctx := context.Background()
 
 	addresses, err := r.queries.GetAllAddressStrings(ctx, sqlcgen.GetAllAddressStringsParams{
@@ -67,7 +67,7 @@ func (r *AddressRepositorySqlc) GetAllAddress(accountType account.AccountType) (
 }
 
 // GetOneUnAllocated returns one records by is_allocated=false
-func (r *AddressRepositorySqlc) GetOneUnAllocated(accountType account.AccountType) (*models.Address, error) {
+func (r *AddressRepositorySqlc) GetOneUnAllocated(accountType domainAccount.AccountType) (*models.Address, error) {
 	ctx := context.Background()
 
 	addr, err := r.queries.GetOneUnallocatedAddress(ctx, sqlcgen.GetOneUnallocatedAddressParams{

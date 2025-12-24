@@ -6,22 +6,22 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // AuthAccountKeyRepositorySqlc is repository for auth_account_key table using sqlc
 type AuthAccountKeyRepositorySqlc struct {
 	queries      *sqlcgen.Queries
-	coinTypeCode coin.CoinTypeCode
+	coinTypeCode domainCoin.CoinTypeCode
 }
 
 // NewAuthAccountKeyRepositorySqlc returns AuthAccountKeyRepositorySqlc object
 func NewAuthAccountKeyRepositorySqlc(
-	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode,
+	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
 ) *AuthAccountKeyRepositorySqlc {
 	return &AuthAccountKeyRepositorySqlc{
 		queries:      sqlcgen.New(dbConn),
@@ -30,7 +30,7 @@ func NewAuthAccountKeyRepositorySqlc(
 }
 
 // GetOne returns one record by authType
-func (r *AuthAccountKeyRepositorySqlc) GetOne(authType account.AuthType) (*models.AuthAccountKey, error) {
+func (r *AuthAccountKeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (*models.AuthAccountKey, error) {
 	ctx := context.Background()
 
 	authKey, err := r.queries.GetAuthAccountKey(ctx, sqlcgen.GetAuthAccountKeyParams{

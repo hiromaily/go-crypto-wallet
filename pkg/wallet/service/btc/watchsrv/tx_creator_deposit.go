@@ -1,8 +1,8 @@
 package watchsrv
 
 import (
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -10,9 +10,9 @@ import (
 // - sender: client, receiver: deposit
 // - receiver account covers fee, but is should be flexible
 func (t *TxCreate) CreateDepositTx(adjustmentFee float64) (string, string, error) {
-	sender := account.AccountTypeClient
+	sender := domainAccount.AccountTypeClient
 	receiver := t.depositReceiver
-	targetAction := action.ActionTypeDeposit
+	targetAction := domainTx.ActionTypeDeposit
 	logger.Debug("account",
 		"sender", sender.String(),
 		"receiver", receiver.String(),

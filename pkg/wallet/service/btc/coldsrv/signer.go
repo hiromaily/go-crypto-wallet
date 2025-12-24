@@ -8,11 +8,12 @@ import (
 	"github.com/btcsuite/btcd/wire"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/btc"
 )
@@ -24,7 +25,7 @@ type Sign struct {
 	authKeyRepo     coldrepo.AuthAccountKeyRepositorier
 	txFileRepo      tx.FileRepositorier
 	multisigAccount account.MultisigAccounter
-	wtype           wallet.WalletType
+	wtype           domainWallet.WalletType
 }
 
 // NewSign returns sign object
@@ -34,7 +35,7 @@ func NewSign(
 	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
 	txFileRepo tx.FileRepositorier,
 	multisigAccount account.MultisigAccounter,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 ) *Sign {
 	return &Sign{
 		btc:             btcAPI,
@@ -52,7 +53,7 @@ func NewSign(
 func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 	// get tx_deposit_id from tx file name
 	//  if payment_5_unsigned_0_1534466246366489473, 5 is target
-	actionType, _, txID, signedCount, err := s.txFileRepo.ValidateFilePath(filePath, tx.TxTypeUnsigned)
+	actionType, _, txID, signedCount, err := s.txFileRepo.ValidateFilePath(filePath, domainTx.TxTypeUnsigned)
 	if err != nil {
 		return "", false, "", err
 	}
@@ -85,9 +86,9 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 	saveData := hexTx
 
 	// if sign is not finished because of multisig, signedCount should be increment
-	txType := tx.TxTypeSigned
+	txType := domainTx.TxTypeSigned
 	if !isSigned {
-		txType = tx.TxTypeUnsigned
+		txType = domainTx.TxTypeUnsigned
 		signedCount++
 		if newEncodedPrevsAddrs != "" {
 			saveData = fmt.Sprintf("%s,%s", saveData, newEncodedPrevsAddrs)
@@ -163,7 +164,7 @@ func (s *Sign) signMultisig(msgTx *wire.MsgTx, prevsAddrs *btc.PreviousTxs) (*wi
 
 	// get WIPs, RedeedScript
 	switch s.wtype {
-	case wallet.WalletTypeKeyGen:
+	case domainWallet.WalletTypeKeyGen:
 		accountKeys, err := s.accountKeyRepo.GetAllMultiAddr(prevsAddrs.SenderAccount, prevsAddrs.Addrs)
 		if err != nil {
 			return nil, false, "", fmt.Errorf("fail to call accountKeyRepo.GetAllMultiAddr(): %w", err)
@@ -190,14 +191,14 @@ func (s *Sign) signMultisig(msgTx *wire.MsgTx, prevsAddrs *btc.PreviousTxs) (*wi
 			return nil, false, "", fmt.Errorf("fail to call serial.EncodeToString(): %w", err)
 		}
 
-	case wallet.WalletTypeSign:
+	case domainWallet.WalletTypeSign:
 		authKey, err := s.authKeyRepo.GetOne("")
 		if err != nil {
 			return nil, false, "", fmt.Errorf("fail to call authKeyRepo.GetOne(): %w", err)
 		}
 		// wip
 		wips = []string{authKey.WalletImportFormat}
-	case wallet.WalletTypeWatchOnly:
+	case domainWallet.WalletTypeWatchOnly:
 		return nil, false, "", fmt.Errorf("WalletType is invalid: %s", s.wtype.String())
 	default:
 		return nil, false, "", fmt.Errorf("WalletType is invalid: %s", s.wtype.String())

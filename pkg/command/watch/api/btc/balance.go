@@ -6,13 +6,13 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 )
 
 func runBalance(btc btcgrp.Bitcoiner, acnt string) error {
 	// validator
-	if acnt != "" && !account.ValidateAccountType(acnt) {
+	if acnt != "" && !domainAccount.ValidateAccountType(acnt) {
 		return errors.New("account option [-account] is invalid")
 	}
 
@@ -27,7 +27,7 @@ func runBalance(btc btcgrp.Bitcoiner, acnt string) error {
 		}
 	} else {
 		// get received by account
-		balance, err = btc.GetBalanceByAccount(account.AccountType(acnt), btc.ConfirmationBlock())
+		balance, err = btc.GetBalanceByAccount(domainAccount.AccountType(acnt), btc.ConfirmationBlock())
 		if err != nil {
 			return fmt.Errorf("fail to call btc.GetBalanceByAccount() %w", err)
 		}

@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
@@ -23,7 +23,7 @@ type AddressImport struct {
 	addrFileRepo address.FileRepositorier
 	coinTypeCode coin.CoinTypeCode
 	addrType     address.AddrType
-	wtype        wallet.WalletType
+	wtype        domainWallet.WalletType
 }
 
 // NewAddressImport returns AddressImport object
@@ -34,7 +34,7 @@ func NewAddressImport(
 	addrFileRepo address.FileRepositorier,
 	coinTypeCode coin.CoinTypeCode,
 	addrType address.AddrType,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 ) *AddressImport {
 	return &AddressImport{
 		btc:          btc,
@@ -68,7 +68,7 @@ func (a *AddressImport) ImportAddress(fileName string, isRescan bool) error {
 		}
 
 		var targetAddr string
-		if addrFmt.AccountType == account.AccountTypeClient {
+		if addrFmt.AccountType == domainAccount.AccountTypeClient {
 			switch a.btc.CoinTypeCode() {
 			case coin.BTC:
 				switch a.addrType {

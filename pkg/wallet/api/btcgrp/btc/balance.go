@@ -6,7 +6,7 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 )
 
 // GetBalance gets balance
@@ -48,7 +48,9 @@ func (b *Bitcoin) GetBalanceByListUnspent(confirmationNum uint64) (btcutil.Amoun
 }
 
 // GetBalanceByAccount gets balance by account
-func (b *Bitcoin) GetBalanceByAccount(accountType account.AccountType, confirmationNum uint64) (btcutil.Amount, error) {
+func (b *Bitcoin) GetBalanceByAccount(
+	accountType domainAccount.AccountType, confirmationNum uint64,
+) (btcutil.Amount, error) {
 	unspentList, err := b.ListUnspentByAccount(accountType, confirmationNum)
 	if err != nil {
 		return 0, fmt.Errorf("fail to call btc.ListUnspentByAccount(%s): %w", accountType.String(), err)
