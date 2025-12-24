@@ -11,24 +11,24 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/contract"
 	"github.com/hiromaily/go-crypto-wallet/pkg/converter"
-	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/rdb"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum/erc20"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple/xrp"
+	mysql "github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/database/mysql"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/network/websocket"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/cold"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/watch"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/erc20"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
 	btccoldsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/btc/coldsrv"
@@ -45,7 +45,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/xrpwallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/ws"
 )
 
 // Container is for DI container interface
@@ -65,15 +64,15 @@ type container struct {
 	uuidHandler uuid.UUIDHandler
 	// wallet
 	walletType domainWallet.WalletType
-	btc        btcgrp.Bitcoiner
-	eth        ethgrp.Ethereumer
-	erc20      ethgrp.ERC20er
-	xrp        xrpgrp.Rippler
+	btc        bitcoin.Bitcoiner
+	eth        ethereum.Ethereumer
+	erc20      ethereum.ERC20er
+	xrp        ripple.Rippler
 	// client
 	rpcClient    *rpcclient.Client
 	rpcEthClient *ethrpc.Client
-	wsXrpPublic  *ws.WS
-	wsXrpAdmin   *ws.WS
+	wsXrpPublic  *websocket.WS
+	wsXrpAdmin   *websocket.WS
 	grpcConn     *grpc.ClientConn
 	rippleAPI    *xrp.RippleAPI
 	// keygen specific
@@ -294,7 +293,7 @@ func (c *container) newBTCTxCreator() service.TxCreator {
 }
 
 func (c *container) newETHTxCreator() ethsrv.TxCreator {
-	var targetEthAPI ethgrp.EtherTxCreator
+	var targetEthAPI ethereum.EtherTxCreator
 	if domainCoin.IsERC20Token(c.conf.CoinTypeCode.String()) {
 		targetEthAPI = c.newERC20()
 	} else {
@@ -433,7 +432,7 @@ func (c *container) newConverter(coinTypeCode domainCoin.CoinTypeCode) converter
 func (c *container) newRPCClient() *rpcclient.Client {
 	if c.rpcClient == nil {
 		var err error
-		c.rpcClient, err = btcgrp.NewRPCClient(&c.conf.Bitcoin)
+		c.rpcClient, err = bitcoin.NewRPCClient(&c.conf.Bitcoin)
 		if err != nil {
 			panic(err)
 		}
@@ -444,7 +443,7 @@ func (c *container) newRPCClient() *rpcclient.Client {
 func (c *container) newEthRPCClient() *ethrpc.Client {
 	if c.rpcEthClient == nil {
 		var err error
-		c.rpcEthClient, err = ethgrp.NewRPCClient(&c.conf.Ethereum)
+		c.rpcEthClient, err = ethereum.NewRPCClient(&c.conf.Ethereum)
 		if err != nil {
 			panic(err)
 		}
@@ -452,10 +451,10 @@ func (c *container) newEthRPCClient() *ethrpc.Client {
 	return c.rpcEthClient
 }
 
-func (c *container) newXRPWSClient() (*ws.WS, *ws.WS) {
+func (c *container) newXRPWSClient() (*websocket.WS, *websocket.WS) {
 	if c.wsXrpPublic == nil {
 		var err error
-		c.wsXrpPublic, c.wsXrpAdmin, err = xrpgrp.NewWSClient(&c.conf.Ripple)
+		c.wsXrpPublic, c.wsXrpAdmin, err = ripple.NewWSClient(&c.conf.Ripple)
 		if err != nil {
 			panic(err)
 		}
@@ -466,7 +465,7 @@ func (c *container) newXRPWSClient() (*ws.WS, *ws.WS) {
 func (c *container) newGRPCConn() *grpc.ClientConn {
 	if c.grpcConn == nil {
 		var err error
-		c.grpcConn, err = xrpgrp.NewGRPCClient(&c.conf.Ripple.API)
+		c.grpcConn, err = ripple.NewGRPCClient(&c.conf.Ripple.API)
 		if err != nil {
 			panic(err)
 		}
@@ -478,10 +477,10 @@ func (c *container) newGRPCConn() *grpc.ClientConn {
 // Wallet API
 //
 
-func (c *container) newBTC() btcgrp.Bitcoiner {
+func (c *container) newBTC() bitcoin.Bitcoiner {
 	if c.btc == nil {
 		var err error
-		c.btc, err = btcgrp.NewBitcoin(
+		c.btc, err = bitcoin.NewBitcoin(
 			c.newRPCClient(),
 			&c.conf.Bitcoin,
 			c.conf.CoinTypeCode,
@@ -493,10 +492,10 @@ func (c *container) newBTC() btcgrp.Bitcoiner {
 	return c.btc
 }
 
-func (c *container) newETH() ethgrp.Ethereumer {
+func (c *container) newETH() ethereum.Ethereumer {
 	if c.eth == nil {
 		var err error
-		c.eth, err = ethgrp.NewEthereum(
+		c.eth, err = ethereum.NewEthereum(
 			c.newEthRPCClient(),
 			&c.conf.Ethereum,
 			c.conf.CoinTypeCode,
@@ -509,7 +508,7 @@ func (c *container) newETH() ethgrp.Ethereumer {
 	return c.eth
 }
 
-func (c *container) newERC20() ethgrp.ERC20er {
+func (c *container) newERC20() ethereum.ERC20er {
 	if c.erc20 == nil {
 		var err error
 		client := ethclient.NewClient(c.newEthRPCClient())
@@ -535,11 +534,11 @@ func (c *container) newERC20() ethgrp.ERC20er {
 	return c.erc20
 }
 
-func (c *container) newXRP() xrpgrp.Rippler {
+func (c *container) newXRP() ripple.Rippler {
 	if c.xrp == nil {
 		var err error
 		wsPublic, wsAdmin := c.newXRPWSClient()
-		c.xrp, err = xrpgrp.NewRipple(
+		c.xrp, err = ripple.NewRipple(
 			wsPublic,
 			wsAdmin,
 			c.newRippleAPI(),
@@ -590,70 +589,70 @@ func (c *container) newMySQLClient() *sql.DB {
 // Repository
 //
 
-func (c *container) newBTCTxRepo() watchrepo.BTCTxRepositorier {
-	return watchrepo.NewBTCTxRepositorySqlc(
+func (c *container) newBTCTxRepo() watch.BTCTxRepositorier {
+	return watch.NewBTCTxRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newBTCTxInputRepo() watchrepo.TxInputRepositorier {
-	return watchrepo.NewBTCTxInputRepositorySqlc(
+func (c *container) newBTCTxInputRepo() watch.TxInputRepositorier {
+	return watch.NewBTCTxInputRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newBTCTxOutputRepo() watchrepo.TxOutputRepositorier {
-	return watchrepo.NewBTCTxOutputRepositorySqlc(
+func (c *container) newBTCTxOutputRepo() watch.TxOutputRepositorier {
+	return watch.NewBTCTxOutputRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newTxRepo() watchrepo.TxRepositorier {
-	return watchrepo.NewTxRepositorySqlc(
+func (c *container) newTxRepo() watch.TxRepositorier {
+	return watch.NewTxRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newETHTxDetailRepo() watchrepo.EthDetailTxRepositorier {
-	return watchrepo.NewEthDetailTxInputRepositorySqlc(
+func (c *container) newETHTxDetailRepo() watch.EthDetailTxRepositorier {
+	return watch.NewEthDetailTxInputRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newXRPTxDetailRepo() watchrepo.XrpDetailTxRepositorier {
-	return watchrepo.NewXrpDetailTxInputRepositorySqlc(
+func (c *container) newXRPTxDetailRepo() watch.XrpDetailTxRepositorier {
+	return watch.NewXrpDetailTxInputRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newPaymentRequestRepo() watchrepo.PaymentRequestRepositorier {
-	return watchrepo.NewPaymentRequestRepositorySqlc(
+func (c *container) newPaymentRequestRepo() watch.PaymentRequestRepositorier {
+	return watch.NewPaymentRequestRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newAddressRepo() watchrepo.AddressRepositorier {
-	return watchrepo.NewAddressRepositorySqlc(
+func (c *container) newAddressRepo() watch.AddressRepositorier {
+	return watch.NewAddressRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newAddressFileRepo() address.FileRepositorier {
-	return address.NewFileRepository(
+func (c *container) newAddressFileRepo() file.AddressFileRepositorier {
+	return file.NewAddressFileRepository(
 		c.conf.FilePath.FullPubKey,
 	)
 }
 
-func (c *container) newTxFileRepo() tx.FileRepositorier {
-	return tx.NewFileRepository(
+func (c *container) newTxFileRepo() file.TransactionFileRepositorier {
+	return file.NewTransactionFileRepository(
 		c.conf.FilePath.Tx,
 	)
 }
@@ -822,36 +821,36 @@ func (c *container) newMultiAccount() account.MultisigAccounter {
 // Keygen Repository
 //
 
-func (c *container) newSeedRepo() coldrepo.SeedRepositorier {
-	return coldrepo.NewSeedRepositorySqlc(
+func (c *container) newSeedRepo() cold.SeedRepositorier {
+	return cold.NewSeedRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newAccountKeyRepo() coldrepo.AccountKeyRepositorier {
-	return coldrepo.NewAccountKeyRepositorySqlc(
+func (c *container) newAccountKeyRepo() cold.AccountKeyRepositorier {
+	return cold.NewAccountKeyRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newXRPAccountKeyRepo() coldrepo.XRPAccountKeyRepositorier {
-	return coldrepo.NewXRPAccountKeyRepositorySqlc(
+func (c *container) newXRPAccountKeyRepo() cold.XRPAccountKeyRepositorier {
+	return cold.NewXRPAccountKeyRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newAuthFullPubKeyRepo() coldrepo.AuthFullPubkeyRepositorier {
-	return coldrepo.NewAuthFullPubkeyRepositorySqlc(
+func (c *container) newAuthFullPubKeyRepo() cold.AuthFullPubkeyRepositorier {
+	return cold.NewAuthFullPubkeyRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newAuthKeyRepo() coldrepo.AuthAccountKeyRepositorier {
-	return coldrepo.NewAuthAccountKeyRepositorySqlc(
+func (c *container) newAuthKeyRepo() cold.AuthAccountKeyRepositorier {
+	return cold.NewAuthAccountKeyRepositorySqlc(
 		c.newMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
@@ -861,20 +860,20 @@ func (c *container) newAuthKeyRepo() coldrepo.AuthAccountKeyRepositorier {
 // Keygen File Storage
 //
 
-func (c *container) newAddressFileStorager() address.FileRepositorier {
-	return address.NewFileRepository(
+func (c *container) newAddressFileStorager() file.AddressFileRepositorier {
+	return file.NewAddressFileRepository(
 		c.conf.FilePath.Address,
 	)
 }
 
-func (c *container) newPubkeyFileStorager() address.FileRepositorier {
-	return address.NewFileRepository(
+func (c *container) newPubkeyFileStorager() file.AddressFileRepositorier {
+	return file.NewAddressFileRepository(
 		c.conf.FilePath.FullPubKey,
 	)
 }
 
-func (c *container) newTxFileStorager() tx.FileRepositorier {
-	return tx.NewFileRepository(
+func (c *container) newTxFileStorager() file.TransactionFileRepositorier {
+	return file.NewTransactionFileRepository(
 		c.conf.FilePath.Tx,
 	)
 }

@@ -9,31 +9,31 @@ import (
 
 	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/watch"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 )
 
 // TxSend type
 type TxSend struct {
-	eth          ethgrp.Ethereumer
+	eth          ethereum.Ethereumer
 	dbConn       *sql.DB
-	addrRepo     watchrepo.AddressRepositorier // not used
-	txRepo       watchrepo.TxRepositorier      // not used
-	txDetailRepo watchrepo.EthDetailTxRepositorier
-	txFileRepo   tx.FileRepositorier
+	addrRepo     watch.AddressRepositorier // not used
+	txRepo       watch.TxRepositorier      // not used
+	txDetailRepo watch.EthDetailTxRepositorier
+	txFileRepo   file.TransactionFileRepositorier
 	wtype        domainWallet.WalletType
 }
 
 // NewTxSend returns TxSend object
 func NewTxSend(
-	eth ethgrp.Ethereumer,
+	eth ethereum.Ethereumer,
 	dbConn *sql.DB,
-	addrRepo watchrepo.AddressRepositorier,
-	txRepo watchrepo.TxRepositorier,
-	txDetailRepo watchrepo.EthDetailTxRepositorier,
-	txFileRepo tx.FileRepositorier,
+	addrRepo watch.AddressRepositorier,
+	txRepo watch.TxRepositorier,
+	txDetailRepo watch.EthDetailTxRepositorier,
+	txFileRepo file.TransactionFileRepositorier,
 	wtype domainWallet.WalletType,
 ) *TxSend {
 	return &TxSend{

@@ -7,26 +7,26 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 )
 
 // TxMonitor type
 type TxMonitor struct {
-	xrp          xrpgrp.Rippler
+	xrp          ripple.Rippler
 	dbConn       *sql.DB
-	addrRepo     watchrepo.AddressRepositorier
-	txDetailRepo watchrepo.XrpDetailTxRepositorier
+	addrRepo     watch.AddressRepositorier
+	txDetailRepo watch.XrpDetailTxRepositorier
 	wtype        domainWallet.WalletType
 }
 
 // NewTxMonitor returns TxMonitor object
 func NewTxMonitor(
-	xrp xrpgrp.Rippler,
+	xrp ripple.Rippler,
 	dbConn *sql.DB,
-	addrRepo watchrepo.AddressRepositorier,
-	txDetailRepo watchrepo.XrpDetailTxRepositorier,
+	addrRepo watch.AddressRepositorier,
+	txDetailRepo watch.XrpDetailTxRepositorier,
 	wtype domainWallet.WalletType,
 ) *TxMonitor {
 	return &TxMonitor{

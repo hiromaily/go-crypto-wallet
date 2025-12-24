@@ -4,11 +4,11 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
 )
 
 // AddCommands adds all Ripple API subcommands
-func AddCommands(parentCmd *cobra.Command, xrp xrpgrp.Rippler, txData *config.RippleTxData) {
+func AddCommands(parentCmd *cobra.Command, xrp ripple.Rippler, txData *config.RippleTxData) {
 	// sendcoin command
 	var (
 		sendcoinAddress string

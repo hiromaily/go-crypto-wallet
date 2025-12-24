@@ -4,28 +4,28 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/fullpubkey"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/cold"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 )
 
 // FullPubkeyImport type
 type FullPubkeyImport struct {
-	btc                btcgrp.Bitcoiner
-	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier
-	pubkeyFileRepo     address.FileRepositorier
+	btc                bitcoin.Bitcoiner
+	authFullPubKeyRepo cold.AuthFullPubkeyRepositorier
+	pubkeyFileRepo     file.AddressFileRepositorier
 	wtype              domainWallet.WalletType
 }
 
 // NewFullPubkeyImport returns FullPubkeyImport object
 func NewFullPubkeyImport(
-	btc btcgrp.Bitcoiner,
-	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier,
-	pubkeyFileRepo address.FileRepositorier,
+	btc bitcoin.Bitcoiner,
+	authFullPubKeyRepo cold.AuthFullPubkeyRepositorier,
+	pubkeyFileRepo file.AddressFileRepositorier,
 	wtype domainWallet.WalletType,
 ) *FullPubkeyImport {
 	return &FullPubkeyImport{

@@ -8,27 +8,27 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 )
 
 // TxMonitor type
 type TxMonitor struct {
-	eth          ethgrp.Ethereumer
+	eth          ethereum.Ethereumer
 	dbConn       *sql.DB
-	addrRepo     watchrepo.AddressRepositorier
-	txDetailRepo watchrepo.EthDetailTxRepositorier
+	addrRepo     watch.AddressRepositorier
+	txDetailRepo watch.EthDetailTxRepositorier
 	confirmNum   uint64
 	wtype        domainWallet.WalletType
 }
 
 // NewTxMonitor returns TxMonitor object
 func NewTxMonitor(
-	eth ethgrp.Ethereumer,
+	eth ethereum.Ethereumer,
 	dbConn *sql.DB,
-	addrRepo watchrepo.AddressRepositorier,
-	txDetailRepo watchrepo.EthDetailTxRepositorier,
+	addrRepo watch.AddressRepositorier,
+	txDetailRepo watch.EthDetailTxRepositorier,
 	confirmNum uint64,
 	wtype domainWallet.WalletType,
 ) *TxMonitor {

@@ -7,26 +7,26 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin/btc"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/btc"
 )
 
 // Multisig type
 type Multisig struct {
-	btc                btcgrp.Bitcoiner
-	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier
-	accountKeyRepo     coldrepo.AccountKeyRepositorier
+	btc                bitcoin.Bitcoiner
+	authFullPubKeyRepo cold.AuthFullPubkeyRepositorier
+	accountKeyRepo     cold.AccountKeyRepositorier
 	multisigAccount    account.MultisigAccounter
 	wtype              domainWallet.WalletType
 }
 
 // NewMultisig returns multisig
 func NewMultisig(
-	btcAPI btcgrp.Bitcoiner,
-	authFullPubKeyRepo coldrepo.AuthFullPubkeyRepositorier,
-	accountKeyRepo coldrepo.AccountKeyRepositorier,
+	btcAPI bitcoin.Bitcoiner,
+	authFullPubKeyRepo cold.AuthFullPubkeyRepositorier,
+	accountKeyRepo cold.AccountKeyRepositorier,
 	multisigAccount account.MultisigAccounter,
 	wtype domainWallet.WalletType,
 ) *Multisig {

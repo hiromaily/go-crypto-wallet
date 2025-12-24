@@ -3,14 +3,14 @@ package testutil
 import (
 	"github.com/stretchr/testify/suite"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
 )
 
 type BTCTestSuite struct {
 	suite.Suite
-	BTC btcgrp.Bitcoiner
+	BTC bitcoin.Bitcoiner
 }
 
 func (bts *BTCTestSuite) SetupTest() {
@@ -25,7 +25,7 @@ func (bts *BTCTestSuite) TearDownTest() {
 
 type ETHTestSuite struct {
 	suite.Suite
-	ETH ethgrp.Ethereumer
+	ETH ethereum.Ethereumer
 }
 
 func (ets *ETHTestSuite) SetupTest() {
@@ -40,7 +40,7 @@ func (ets *ETHTestSuite) TearDownTest() {
 
 type XRPTestSuite struct {
 	suite.Suite
-	XRP xrpgrp.Rippler
+	XRP ripple.Rippler
 }
 
 func (xts *XRPTestSuite) SetupTest() {

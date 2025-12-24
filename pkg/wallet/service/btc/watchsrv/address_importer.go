@@ -9,18 +9,19 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/watch"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 )
 
 // AddressImport type
 type AddressImport struct {
-	btc          btcgrp.Bitcoiner
+	btc          bitcoin.Bitcoiner
 	dbConn       *sql.DB
-	addrRepo     watchrepo.AddressRepositorier
-	addrFileRepo address.FileRepositorier
+	addrRepo     watch.AddressRepositorier
+	addrFileRepo file.AddressFileRepositorier
 	coinTypeCode domainCoin.CoinTypeCode
 	addrType     address.AddrType
 	wtype        domainWallet.WalletType
@@ -28,10 +29,10 @@ type AddressImport struct {
 
 // NewAddressImport returns AddressImport object
 func NewAddressImport(
-	btc btcgrp.Bitcoiner,
+	btc bitcoin.Bitcoiner,
 	dbConn *sql.DB,
-	addrRepo watchrepo.AddressRepositorier,
-	addrFileRepo address.FileRepositorier,
+	addrRepo watch.AddressRepositorier,
+	addrFileRepo file.AddressFileRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,
 	addrType address.AddrType,
 	wtype domainWallet.WalletType,

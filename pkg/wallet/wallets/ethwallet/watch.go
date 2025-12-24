@@ -6,7 +6,7 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
 	ethsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/watchsrv"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watchsrv"
@@ -14,7 +14,7 @@ import (
 
 // ETHWatch watch only wallet object
 type ETHWatch struct {
-	ETH    ethgrp.Ethereumer
+	ETH    ethereum.Ethereumer
 	dbConn *sql.DB
 	wtype  domainWallet.WalletType
 	watchsrv.AddressImporter
@@ -26,7 +26,7 @@ type ETHWatch struct {
 
 // NewETHWatch returns ETHWatch object
 func NewETHWatch(
-	eth ethgrp.Ethereumer,
+	eth ethereum.Ethereumer,
 	dbConn *sql.DB,
 	addrImporter watchsrv.AddressImporter,
 	txCreator ethsrv.TxCreator,

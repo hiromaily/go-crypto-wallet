@@ -3,11 +3,11 @@ package eth
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum"
 )
 
 // AddCommands adds all Ethereum API subcommands
-func AddCommands(parentCmd *cobra.Command, eth ethgrp.Ethereumer) {
+func AddCommands(parentCmd *cobra.Command, eth ethereum.Ethereumer) {
 	// clientversion command
 	clientversionCmd := &cobra.Command{
 		Use:   "clientversion",

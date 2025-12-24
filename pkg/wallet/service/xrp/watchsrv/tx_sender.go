@@ -11,32 +11,32 @@ import (
 
 	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple/xrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/watch"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 )
 
 // TxSend type
 type TxSend struct {
-	rippler      xrpgrp.Rippler
+	rippler      ripple.Rippler
 	dbConn       *sql.DB
-	addrRepo     watchrepo.AddressRepositorier // not used
-	txRepo       watchrepo.TxRepositorier      // not used
-	txDetailRepo watchrepo.XrpDetailTxRepositorier
-	txFileRepo   tx.FileRepositorier
+	addrRepo     watch.AddressRepositorier // not used
+	txRepo       watch.TxRepositorier      // not used
+	txDetailRepo watch.XrpDetailTxRepositorier
+	txFileRepo   file.TransactionFileRepositorier
 	wtype        domainWallet.WalletType
 }
 
 // NewTxSend returns TxSend object
 func NewTxSend(
-	rippler xrpgrp.Rippler,
+	rippler ripple.Rippler,
 	dbConn *sql.DB,
-	addrRepo watchrepo.AddressRepositorier,
-	txRepo watchrepo.TxRepositorier,
-	txDetailRepo watchrepo.XrpDetailTxRepositorier,
-	txFileRepo tx.FileRepositorier,
+	addrRepo watch.AddressRepositorier,
+	txRepo watch.TxRepositorier,
+	txDetailRepo watch.XrpDetailTxRepositorier,
+	txFileRepo file.TransactionFileRepositorier,
 	wtype domainWallet.WalletType,
 ) *TxSend {
 	return &TxSend{

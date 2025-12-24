@@ -7,10 +7,10 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp/eth"
 )
 
 // CreateTransferTx create unsigned tx for transfer coin among internal account except client, authorization

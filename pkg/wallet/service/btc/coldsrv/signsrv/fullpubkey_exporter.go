@@ -5,19 +5,19 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/fullpubkey"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/cold"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/storage/file"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 )
 
 // FullPubkeyExport type
 type FullPubkeyExport struct {
-	authKeyRepo    coldrepo.AuthAccountKeyRepositorier
-	pubkeyFileRepo address.FileRepositorier
+	authKeyRepo    cold.AuthAccountKeyRepositorier
+	pubkeyFileRepo file.AddressFileRepositorier
 	coinTypeCode   domainCoin.CoinTypeCode
 	authType       domainAccount.AuthType
 	wtype          domainWallet.WalletType
@@ -25,8 +25,8 @@ type FullPubkeyExport struct {
 
 // NewFullPubkeyExport returns fullPubkeyExport
 func NewFullPubkeyExport(
-	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
-	pubkeyFileRepo address.FileRepositorier,
+	authKeyRepo cold.AuthAccountKeyRepositorier,
+	pubkeyFileRepo file.AddressFileRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,
 	authType domainAccount.AuthType,
 	wtype domainWallet.WalletType,

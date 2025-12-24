@@ -7,14 +7,14 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
 )
 
-var bc btcgrp.Bitcoiner
+var bc bitcoin.Bitcoiner
 
 // GetBTC returns btc instance
 // FIXME: hard coded config path
-func GetBTC() (btcgrp.Bitcoiner, error) {
+func GetBTC() (bitcoin.Bitcoiner, error) {
 	if bc != nil {
 		return bc, nil
 	}
@@ -29,11 +29,11 @@ func GetBTC() (btcgrp.Bitcoiner, error) {
 	conf.CoinTypeCode = domainCoin.BTC
 
 	// client
-	client, err := btcgrp.NewRPCClient(&conf.Bitcoin)
+	client, err := bitcoin.NewRPCClient(&conf.Bitcoin)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create bitcoin core client: %w", err)
 	}
-	bc, err = btcgrp.NewBitcoin(client, &conf.Bitcoin, conf.CoinTypeCode)
+	bc, err = bitcoin.NewBitcoin(client, &conf.Bitcoin, conf.CoinTypeCode)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create btc instance: %w", err)
 	}

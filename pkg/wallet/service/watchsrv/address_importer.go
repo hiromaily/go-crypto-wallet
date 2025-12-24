@@ -8,8 +8,9 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/watch"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/storage/file"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 )
 
 // AddressImporter is AddressImporter interface
@@ -20,8 +21,8 @@ type AddressImporter interface {
 // AddressImport type
 type AddressImport struct {
 	dbConn       *sql.DB
-	addrRepo     watchrepo.AddressRepositorier
-	addrFileRepo address.FileRepositorier
+	addrRepo     watch.AddressRepositorier
+	addrFileRepo file.AddressFileRepositorier
 	coinTypeCode domainCoin.CoinTypeCode
 	addrType     address.AddrType
 	wtype        domainWallet.WalletType
@@ -30,8 +31,8 @@ type AddressImport struct {
 // NewAddressImport returns AddressImport object
 func NewAddressImport(
 	dbConn *sql.DB,
-	addrRepo watchrepo.AddressRepositorier,
-	addrFileRepo address.FileRepositorier,
+	addrRepo watch.AddressRepositorier,
+	addrFileRepo file.AddressFileRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,
 	addrType address.AddrType,
 	wtype domainWallet.WalletType,
