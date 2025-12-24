@@ -1174,7 +1174,9 @@ func (c *container) newBTCKeygenCreateMultisigAddressUseCase() keygenusecase.Cre
 
 func (c *container) newBTCKeygenImportFullPubkeyUseCase() keygenusecase.ImportFullPubkeyUseCase {
 	return keygenusecasebtc.NewImportFullPubkeyUseCase(
-		c.newFullPubKeyImporter().(*btckeygensrv.FullPubkeyImport),
+		c.newBTC(),
+		c.newAuthFullPubKeyRepo(),
+		c.newAddressFileRepo(),
 	)
 }
 
