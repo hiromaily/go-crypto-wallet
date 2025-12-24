@@ -1,33 +1,25 @@
 package service
 
-import domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+import (
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch"
+)
+
+//-----------------------------------------------------------------------------
+// Watch Wallet Services - Type aliases for backward compatibility
+// These interfaces have been moved to pkg/wallet/service/watch/interfaces.go
+//-----------------------------------------------------------------------------
 
 // AddressImporter is AddressImporter interface (for now btc/bch only)
-type AddressImporter interface {
-	ImportAddress(fileName string, isRescan bool) error
-}
+type AddressImporter = watch.AddressImporter
 
 // PaymentRequestCreator is PaymentRequestCreate interface
-type PaymentRequestCreator interface {
-	CreatePaymentRequest(amtList []float64) error
-}
+type PaymentRequestCreator = watch.PaymentRequestCreator
 
 // TxCreator is TxCreator interface (for now btc/bch only)
-type TxCreator interface {
-	CreateDepositTx(adjustmentFee float64) (string, string, error)
-	CreatePaymentTx(adjustmentFee float64) (string, string, error)
-	CreateTransferTx(
-		sender, receiver domainAccount.AccountType, floatAmount, adjustmentFee float64,
-	) (string, string, error)
-}
+type TxCreator = watch.TxCreator
 
 // TxMonitorer is TxMonitor interface
-type TxMonitorer interface {
-	UpdateTxStatus() error
-	MonitorBalance(confirmationNum uint64) error
-}
+type TxMonitorer = watch.TxMonitorer
 
 // TxSender is TxSender interface
-type TxSender interface {
-	SendTx(filePath string) (string, error)
-}
+type TxSender = watch.TxSender

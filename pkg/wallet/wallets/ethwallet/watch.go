@@ -8,8 +8,8 @@ import (
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
-	ethsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/eth/watchsrv"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watchsrv"
+	ethwatchsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/eth"
+	watchshared "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/shared"
 )
 
 // ETHWatch watch only wallet object
@@ -17,8 +17,8 @@ type ETHWatch struct {
 	ETH    ethereum.Ethereumer
 	dbConn *sql.DB
 	wtype  domainWallet.WalletType
-	watchsrv.AddressImporter
-	ethsrv.TxCreator
+	watchshared.AddressImporter
+	ethwatchsrv.TxCreator
 	service.TxSender
 	service.TxMonitorer
 	service.PaymentRequestCreator
@@ -28,8 +28,8 @@ type ETHWatch struct {
 func NewETHWatch(
 	eth ethereum.Ethereumer,
 	dbConn *sql.DB,
-	addrImporter watchsrv.AddressImporter,
-	txCreator ethsrv.TxCreator,
+	addrImporter watchshared.AddressImporter,
+	txCreator ethwatchsrv.TxCreator,
 	txSender service.TxSender,
 	txMonitorer service.TxMonitorer,
 	paymentRequestCreator service.PaymentRequestCreator,

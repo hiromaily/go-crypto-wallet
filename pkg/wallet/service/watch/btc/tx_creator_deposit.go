@@ -1,0 +1,28 @@
+package btc
+
+import (
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+)
+
+// CreateDepositTx create unsigned tx if client accounts have coins
+// - sender: client, receiver: deposit
+// - receiver account covers fee, but is should be flexible
+func (t *TxCreate) CreateDepositTx(adjustmentFee float64) (string, string, error) {
+	sender := domainAccount.AccountTypeClient
+	receiver := t.depositReceiver
+	targetAction := domainTx.ActionTypeDeposit
+	logger.Debug("account",
+		"sender", sender.String(),
+		"receiver", receiver.String(),
+	)
+
+	requiredAmount, err := t.btc.FloatToAmount(0)
+	if err != nil {
+		return "", "", err
+	}
+
+	// create deposit transaction
+	return t.createTx(sender, receiver, targetAction, requiredAmount, adjustmentFee, nil, nil)
+}
