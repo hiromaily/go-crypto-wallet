@@ -4,19 +4,19 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 )
 
 // CreateTransferTx create unsigned tx for transfer coin among internal account except client,
 // authorization. FIXME: for now, receiver account covers fee, but is should be flexible
 func (t *TxCreate) CreateTransferTx(
-	sender, receiver account.AccountType, floatAmount, adjustmentFee float64,
+	sender, receiver domainAccount.AccountType, floatAmount, adjustmentFee float64,
 ) (string, string, error) {
-	targetAction := action.ActionTypeTransfer
+	targetAction := domainTx.ActionTypeTransfer
 
 	// validation account
-	if receiver == account.AccountTypeClient || receiver == account.AccountTypeAuthorization {
+	if receiver == domainAccount.AccountTypeClient || receiver == domainAccount.AccountTypeAuthorization {
 		return "", "", errors.New("invalid receiver account. client, authorization account is not allowed as receiver")
 	}
 	if sender == receiver {

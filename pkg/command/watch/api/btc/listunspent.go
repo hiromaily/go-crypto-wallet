@@ -6,13 +6,13 @@ import (
 
 	"github.com/bookerzzz/grok"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 )
 
 func runListUnspent(btc btcgrp.Bitcoiner, acnt string, argsNum int64) error {
 	// validator
-	if acnt != "" && !account.ValidateAccountType(acnt) {
+	if acnt != "" && !domainAccount.ValidateAccountType(acnt) {
 		return errors.New("account option [-account] is invalid")
 	}
 
@@ -25,13 +25,13 @@ func runListUnspent(btc btcgrp.Bitcoiner, acnt string, argsNum int64) error {
 
 	if acnt != "" {
 		// call listunspent
-		unspentList, err := btc.ListUnspentByAccount(account.AccountType(acnt), confirmationNum)
+		unspentList, err := btc.ListUnspentByAccount(domainAccount.AccountType(acnt), confirmationNum)
 		if err != nil {
 			return fmt.Errorf("fail to call btc.ListUnspentByAccount() %w", err)
 		}
 		grok.Value(unspentList)
 
-		unspentAddrs := btc.GetUnspentListAddrs(unspentList, account.AccountType(acnt))
+		unspentAddrs := btc.GetUnspentListAddrs(unspentList, domainAccount.AccountType(acnt))
 		for _, addr := range unspentAddrs {
 			grok.Value(addr)
 		}

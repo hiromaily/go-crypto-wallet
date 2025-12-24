@@ -8,21 +8,20 @@ import (
 
 	"github.com/quagmt/udecimal"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/action"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // BTCTxRepositorySqlc is repository for btc_tx table using sqlc
 type BTCTxRepositorySqlc struct {
 	queries      *sqlcgen.Queries
-	coinTypeCode coin.CoinTypeCode
+	coinTypeCode domainCoin.CoinTypeCode
 }
 
 // NewBTCTxRepositorySqlc returns BTCTxRepositorySqlc object
-func NewBTCTxRepositorySqlc(dbConn *sql.DB, coinTypeCode coin.CoinTypeCode) *BTCTxRepositorySqlc {
+func NewBTCTxRepositorySqlc(dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode) *BTCTxRepositorySqlc {
 	return &BTCTxRepositorySqlc{
 		queries:      sqlcgen.New(dbConn),
 		coinTypeCode: coinTypeCode,
@@ -42,7 +41,7 @@ func (r *BTCTxRepositorySqlc) GetOne(id int64) (*models.BTCTX, error) {
 }
 
 // GetCountByUnsignedHex returns count by hex string
-func (r *BTCTxRepositorySqlc) GetCountByUnsignedHex(actionType action.ActionType, hex string) (int64, error) {
+func (r *BTCTxRepositorySqlc) GetCountByUnsignedHex(actionType domainTx.ActionType, hex string) (int64, error) {
 	ctx := context.Background()
 
 	count, err := r.queries.GetBtcTxCountByUnsignedHex(ctx, sqlcgen.GetBtcTxCountByUnsignedHexParams{
@@ -58,7 +57,7 @@ func (r *BTCTxRepositorySqlc) GetCountByUnsignedHex(actionType action.ActionType
 }
 
 // GetTxIDBySentHash returns txID by sentHashTx
-func (r *BTCTxRepositorySqlc) GetTxIDBySentHash(actionType action.ActionType, hash string) (int64, error) {
+func (r *BTCTxRepositorySqlc) GetTxIDBySentHash(actionType domainTx.ActionType, hash string) (int64, error) {
 	ctx := context.Background()
 
 	id, err := r.queries.GetBtcTxIDBySentHash(ctx, sqlcgen.GetBtcTxIDBySentHashParams{
@@ -74,7 +73,7 @@ func (r *BTCTxRepositorySqlc) GetTxIDBySentHash(actionType action.ActionType, ha
 }
 
 // GetSentHashTx returns list of sent_hash_tx by txType
-func (r *BTCTxRepositorySqlc) GetSentHashTx(actionType action.ActionType, txType tx.TxType) ([]string, error) {
+func (r *BTCTxRepositorySqlc) GetSentHashTx(actionType domainTx.ActionType, txType domainTx.TxType) ([]string, error) {
 	ctx := context.Background()
 
 	hashes, err := r.queries.GetBtcTxSentHashList(ctx, sqlcgen.GetBtcTxSentHashListParams{
@@ -90,7 +89,7 @@ func (r *BTCTxRepositorySqlc) GetSentHashTx(actionType action.ActionType, txType
 }
 
 // InsertUnsignedTx inserts records
-func (r *BTCTxRepositorySqlc) InsertUnsignedTx(actionType action.ActionType, txItem *models.BTCTX) (int64, error) {
+func (r *BTCTxRepositorySqlc) InsertUnsignedTx(actionType domainTx.ActionType, txItem *models.BTCTX) (int64, error) {
 	ctx := context.Background()
 
 	result, err := r.queries.InsertBtcTx(ctx, sqlcgen.InsertBtcTxParams{
@@ -146,7 +145,7 @@ func (r *BTCTxRepositorySqlc) Update(txItem *models.BTCTX) (int64, error) {
 // UpdateAfterTxSent updates when tx sent
 func (r *BTCTxRepositorySqlc) UpdateAfterTxSent(
 	txID int64,
-	txType tx.TxType,
+	txType domainTx.TxType,
 	signedHex,
 	sentHashTx string,
 ) (int64, error) {
@@ -172,7 +171,7 @@ func (r *BTCTxRepositorySqlc) UpdateAfterTxSent(
 }
 
 // UpdateTxType updates txType
-func (r *BTCTxRepositorySqlc) UpdateTxType(id int64, txType tx.TxType) (int64, error) {
+func (r *BTCTxRepositorySqlc) UpdateTxType(id int64, txType domainTx.TxType) (int64, error) {
 	ctx := context.Background()
 
 	result, err := r.queries.UpdateBtcTxType(ctx, sqlcgen.UpdateBtcTxTypeParams{
@@ -193,7 +192,7 @@ func (r *BTCTxRepositorySqlc) UpdateTxType(id int64, txType tx.TxType) (int64, e
 
 // UpdateTxTypeBySentHashTx updates txType
 func (r *BTCTxRepositorySqlc) UpdateTxTypeBySentHashTx(
-	actionType action.ActionType, txType tx.TxType, sentHashTx string,
+	actionType domainTx.ActionType, txType domainTx.TxType, sentHashTx string,
 ) (int64, error) {
 	ctx := context.Background()
 

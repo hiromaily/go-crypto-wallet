@@ -2,21 +2,21 @@ package config
 
 import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 )
 
 // WalletRoot wallet root config
 type WalletRoot struct {
 	//nolint:lll,revive
-	AddressType  address.AddrType  `toml:"address_type" mapstructure:"address_type" validate:"oneof=p2sh-segwit bech32 bch-cashaddr"`
-	CoinTypeCode coin.CoinTypeCode `toml:"coin_type" mapstructure:"coin_type"`
-	Bitcoin      Bitcoin           `toml:"bitcoin" mapstructure:"bitcoin"`
-	Ethereum     Ethereum          `toml:"ethereum" mapstructure:"ethereum"`
-	Ripple       Ripple            `toml:"ripple" mapstructure:"ripple"`
-	Logger       Logger            `toml:"logger" mapstructure:"logger"`
-	Tracer       Tracer            `toml:"tracer" mapstructure:"tracer"`
-	MySQL        MySQL             `toml:"mysql" mapstructure:"mysql"`
-	FilePath     FilePath          `toml:"file_path" mapstructure:"file_path"`
+	AddressType  address.AddrType        `toml:"address_type" mapstructure:"address_type" validate:"oneof=p2sh-segwit bech32 bch-cashaddr"`
+	CoinTypeCode domainCoin.CoinTypeCode `toml:"coin_type" mapstructure:"coin_type"`
+	Bitcoin      Bitcoin                 `toml:"bitcoin" mapstructure:"bitcoin"`
+	Ethereum     Ethereum                `toml:"ethereum" mapstructure:"ethereum"`
+	Ripple       Ripple                  `toml:"ripple" mapstructure:"ripple"`
+	Logger       Logger                  `toml:"logger" mapstructure:"logger"`
+	Tracer       Tracer                  `toml:"tracer" mapstructure:"tracer"`
+	MySQL        MySQL                   `toml:"mysql" mapstructure:"mysql"`
+	FilePath     FilePath                `toml:"file_path" mapstructure:"file_path"`
 }
 
 // Bitcoin information
@@ -54,11 +54,11 @@ type Ethereum struct {
 	Port       int    `toml:"port" mapstructure:"port" validate:"required"`
 	DisableTLS bool   `toml:"disable_tls" mapstructure:"disable_tls"`
 	//nolint:lll,revive
-	NetworkType     string                    `toml:"network_type" mapstructure:"network_type" validate:"oneof=mainnet goerli rinkeby ropsten"`
-	KeyDirName      string                    `toml:"keydir" mapstructure:"keydir"`
-	ConfirmationNum uint64                    `toml:"confirmation_num" mapstructure:"confirmation_num"`
-	ERC20Token      coin.ERC20Token           `toml:"erc20_token" mapstructure:"erc20_token"`
-	ERC20s          map[coin.ERC20Token]ERC20 `toml:"erc20s" mapstructure:"erc20s"`
+	NetworkType     string                          `toml:"network_type" mapstructure:"network_type" validate:"oneof=mainnet goerli rinkeby ropsten"`
+	KeyDirName      string                          `toml:"keydir" mapstructure:"keydir"`
+	ConfirmationNum uint64                          `toml:"confirmation_num" mapstructure:"confirmation_num"`
+	ERC20Token      domainCoin.ERC20Token           `toml:"erc20_token" mapstructure:"erc20_token"`
+	ERC20s          map[domainCoin.ERC20Token]ERC20 `toml:"erc20s" mapstructure:"erc20s"`
 }
 
 // ERC20 information

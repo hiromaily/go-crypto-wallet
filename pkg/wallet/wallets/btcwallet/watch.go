@@ -3,9 +3,9 @@ package btcwallet
 import (
 	"database/sql"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
-	wtype "github.com/hiromaily/go-crypto-wallet/pkg/wallet"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
@@ -16,7 +16,7 @@ type BTCWatch struct {
 	BTC      btcgrp.Bitcoiner
 	dbConn   *sql.DB
 	addrType address.AddrType
-	wtype    wtype.WalletType
+	wtype    domainWallet.WalletType
 	service.AddressImporter
 	service.TxCreator
 	service.TxSender
@@ -34,7 +34,7 @@ func NewBTCWatch(
 	txSender service.TxSender,
 	txMonitorer service.TxMonitorer,
 	paymentRequestCreator service.PaymentRequestCreator,
-	walletType wtype.WalletType,
+	walletType domainWallet.WalletType,
 ) *BTCWatch {
 	return &BTCWatch{
 		BTC:                   btc,
@@ -66,7 +66,7 @@ func (w *BTCWatch) CreatePaymentTx(adjustmentFee float64) (string, string, error
 
 // CreateTransferTx creates transfer unsigned transaction
 func (w *BTCWatch) CreateTransferTx(
-	sender, receiver account.AccountType, floatAmount, adjustmentFee float64,
+	sender, receiver domainAccount.AccountType, floatAmount, adjustmentFee float64,
 ) (string, string, error) {
 	return w.TxCreator.CreateTransferTx(sender, receiver, floatAmount, adjustmentFee)
 }

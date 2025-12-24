@@ -8,19 +8,19 @@ import (
 	"github.com/quagmt/udecimal"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // TxOutputRepositorySqlc is repository for btc_tx_output table using sqlc
 type TxOutputRepositorySqlc struct {
 	queries      *sqlcgen.Queries
-	coinTypeCode coin.CoinTypeCode
+	coinTypeCode domainCoin.CoinTypeCode
 }
 
 // NewBTCTxOutputRepositorySqlc returns TxOutputRepositorySqlc object
 func NewBTCTxOutputRepositorySqlc(
-	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode,
+	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
 ) *TxOutputRepositorySqlc {
 	return &TxOutputRepositorySqlc{
 		queries:      sqlcgen.New(dbConn),

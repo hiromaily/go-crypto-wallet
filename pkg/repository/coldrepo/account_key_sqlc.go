@@ -8,23 +8,23 @@ import (
 
 	"github.com/guregu/null/v6"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // AccountKeyRepositorySqlc is repository for account_key table using sqlc
 type AccountKeyRepositorySqlc struct {
 	queries      *sqlcgen.Queries
 	dbConn       *sql.DB
-	coinTypeCode coin.CoinTypeCode
+	coinTypeCode domainCoin.CoinTypeCode
 }
 
 // NewAccountKeyRepositorySqlc returns AccountKeyRepositorySqlc object
 func NewAccountKeyRepositorySqlc(
-	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode,
+	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
 ) *AccountKeyRepositorySqlc {
 	return &AccountKeyRepositorySqlc{
 		queries:      sqlcgen.New(dbConn),
@@ -34,7 +34,7 @@ func NewAccountKeyRepositorySqlc(
 }
 
 // GetMaxIndex returns max idx
-func (r *AccountKeyRepositorySqlc) GetMaxIndex(accountType account.AccountType) (int64, error) {
+func (r *AccountKeyRepositorySqlc) GetMaxIndex(accountType domainAccount.AccountType) (int64, error) {
 	ctx := context.Background()
 
 	result, err := r.queries.GetMaxAccountKeyIndex(ctx, sqlcgen.GetMaxAccountKeyIndexParams{
@@ -54,7 +54,7 @@ func (r *AccountKeyRepositorySqlc) GetMaxIndex(accountType account.AccountType) 
 }
 
 // GetOneMaxID returns one record by max id
-func (r *AccountKeyRepositorySqlc) GetOneMaxID(accountType account.AccountType) (*models.AccountKey, error) {
+func (r *AccountKeyRepositorySqlc) GetOneMaxID(accountType domainAccount.AccountType) (*models.AccountKey, error) {
 	ctx := context.Background()
 
 	accountKey, err := r.queries.GetOneAccountKeyByMaxID(ctx, sqlcgen.GetOneAccountKeyByMaxIDParams{
@@ -70,7 +70,7 @@ func (r *AccountKeyRepositorySqlc) GetOneMaxID(accountType account.AccountType) 
 
 // GetAllAddrStatus returns all AccountKey by addr_status
 func (r *AccountKeyRepositorySqlc) GetAllAddrStatus(
-	accountType account.AccountType, addrStatus address.AddrStatus,
+	accountType domainAccount.AccountType, addrStatus address.AddrStatus,
 ) ([]*models.AccountKey, error) {
 	ctx := context.Background()
 
@@ -93,7 +93,7 @@ func (r *AccountKeyRepositorySqlc) GetAllAddrStatus(
 
 // GetAllMultiAddr returns all AccountKey by multisig_address
 func (r *AccountKeyRepositorySqlc) GetAllMultiAddr(
-	accountType account.AccountType, addrs []string,
+	accountType domainAccount.AccountType, addrs []string,
 ) ([]*models.AccountKey, error) {
 	ctx := context.Background()
 
@@ -144,7 +144,9 @@ func (r *AccountKeyRepositorySqlc) InsertBulk(items []*models.AccountKey) error 
 }
 
 // UpdateAddr updates address by P2SHSegWitAddr
-func (r *AccountKeyRepositorySqlc) UpdateAddr(accountType account.AccountType, addr, keyAddress string) (int64, error) {
+func (r *AccountKeyRepositorySqlc) UpdateAddr(
+	accountType domainAccount.AccountType, addr, keyAddress string,
+) (int64, error) {
 	ctx := context.Background()
 
 	result, err := r.queries.UpdateAccountKeyAddress(ctx, sqlcgen.UpdateAccountKeyAddressParams{
@@ -168,7 +170,7 @@ func (r *AccountKeyRepositorySqlc) UpdateAddr(accountType account.AccountType, a
 
 // UpdateAddrStatus updates addr_status
 func (r *AccountKeyRepositorySqlc) UpdateAddrStatus(
-	accountType account.AccountType, addrStatus address.AddrStatus, strWIFs []string,
+	accountType domainAccount.AccountType, addrStatus address.AddrStatus, strWIFs []string,
 ) (int64, error) {
 	ctx := context.Background()
 	var totalAffected int64
@@ -198,7 +200,7 @@ func (r *AccountKeyRepositorySqlc) UpdateAddrStatus(
 
 // UpdateMultisigAddr updates multisig_address
 func (r *AccountKeyRepositorySqlc) UpdateMultisigAddr(
-	accountType account.AccountType, item *models.AccountKey,
+	accountType domainAccount.AccountType, item *models.AccountKey,
 ) (int64, error) {
 	ctx := context.Background()
 
@@ -225,7 +227,7 @@ func (r *AccountKeyRepositorySqlc) UpdateMultisigAddr(
 
 // UpdateMultisigAddrs updates all multisig_address with transaction
 func (r *AccountKeyRepositorySqlc) UpdateMultisigAddrs(
-	accountType account.AccountType, items []*models.AccountKey,
+	accountType domainAccount.AccountType, items []*models.AccountKey,
 ) (int64, error) {
 	ctx := context.Background()
 

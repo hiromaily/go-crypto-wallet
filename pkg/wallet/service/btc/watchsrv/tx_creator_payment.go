@@ -7,8 +7,8 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -17,8 +17,8 @@ import (
 // - sender account(payment) covers fee, but is should be flexible
 func (t *TxCreate) CreatePaymentTx(adjustmentFee float64) (string, string, error) {
 	sender := t.paymentSender
-	receiver := account.AccountTypeAnonymous
-	targetAction := action.ActionTypePayment
+	receiver := domainAccount.AccountTypeAnonymous
+	targetAction := domainTx.ActionTypePayment
 	logger.Debug("account",
 		"sender", sender.String(),
 		"receiver", receiver.String(),
@@ -42,7 +42,7 @@ func (t *TxCreate) CreatePaymentTx(adjustmentFee float64) (string, string, error
 	}
 
 	// get balance for payment account
-	balance, err := t.btc.GetBalanceByAccount(account.AccountTypePayment, t.btc.ConfirmationBlock())
+	balance, err := t.btc.GetBalanceByAccount(domainAccount.AccountTypePayment, t.btc.ConfirmationBlock())
 	if err != nil {
 		return "", "", err
 	}

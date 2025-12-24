@@ -13,7 +13,8 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/sign"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/di"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
@@ -28,7 +29,7 @@ import (
 // - passphrase would be required when using secret key to sign unsigned transaction
 
 var (
-	walletType = wallet.WalletTypeSign
+	walletType = domainWallet.WalletTypeSign
 	appName    = walletType.String()
 	appVersion = "5.0.0"
 	// used as account name like client, deposit, payment
@@ -62,7 +63,7 @@ func initializeWallet() error {
 	}
 
 	// config
-	conf, err := config.NewWallet(confPath, walletType, coin.CoinTypeCode(coinTypeCode))
+	conf, err := config.NewWallet(confPath, walletType, domainCoin.CoinTypeCode(coinTypeCode))
 	if err != nil {
 		return fmt.Errorf("failed to load wallet config: %w", err)
 	}
@@ -76,7 +77,7 @@ func initializeWallet() error {
 	}
 
 	// override config
-	conf.CoinTypeCode = coin.CoinTypeCode(coinTypeCode)
+	conf.CoinTypeCode = domainCoin.CoinTypeCode(coinTypeCode)
 
 	// override conf.Bitcoin.Host
 	if btcWallet != "" {
@@ -93,18 +94,18 @@ func initializeWallet() error {
 
 func setConfigPathFromEnv() {
 	switch coinTypeCode {
-	case coin.BTC.String():
+	case domainCoin.BTC.String():
 		confPath = os.Getenv("BTC_SIGN_WALLET_CONF")
-	case coin.BCH.String():
+	case domainCoin.BCH.String():
 		confPath = os.Getenv("BCH_SIGN_WALLET_CONF")
 	}
 }
 
 func setAccountConfPathFromEnv() {
 	switch coinTypeCode {
-	case coin.BTC.String():
+	case domainCoin.BTC.String():
 		accountConfPath = os.Getenv("BTC_ACCOUNT_CONF")
-	case coin.BCH.String():
+	case domainCoin.BCH.String():
 		accountConfPath = os.Getenv("BCH_ACCOUNT_CONF")
 	}
 }

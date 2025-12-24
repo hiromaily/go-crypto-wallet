@@ -7,8 +7,8 @@ import (
 	"math/big"
 	"strconv"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
@@ -23,8 +23,8 @@ import (
 // - only one address of sender should afford to send coin to all payment request users.
 func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	sender := t.paymentSender
-	receiver := account.AccountTypeAnonymous
-	targetAction := action.ActionTypePayment
+	receiver := domainAccount.AccountTypeAnonymous
+	targetAction := domainTx.ActionTypePayment
 	logger.Debug("account",
 		"sender", sender.String(),
 		"receiver", receiver.String(),
@@ -44,7 +44,7 @@ func (t *TxCreate) CreatePaymentTx() (string, string, error) {
 	// get sender address
 	senderAddr, err := t.addrRepo.GetOneUnAllocated(sender)
 	if err != nil {
-		return "", "", fmt.Errorf("fail to call addrRepo.GetAll(account.AccountTypeClient): %w", err)
+		return "", "", fmt.Errorf("fail to call addrRepo.GetAll(domainAccount.AccountTypeClient): %w", err)
 	}
 	err = t.validateAmount(senderAddr, totalAmount)
 	if err != nil {
@@ -148,7 +148,7 @@ func (t *TxCreate) validateAmount(senderAddr *models.Address, totalAmount *big.I
 }
 
 func (t *TxCreate) createPaymentRawTransactions(
-	sender, receiver account.AccountType, userPayments []UserPayment, senderAddr *models.Address,
+	sender, receiver domainAccount.AccountType, userPayments []UserPayment, senderAddr *models.Address,
 ) ([]string, []*models.EthDetailTX, error) {
 	serializedTxs := make([]string, 0, len(userPayments))
 	txDetailItems := make([]*models.EthDetailTX, 0, len(userPayments))

@@ -3,9 +3,9 @@ package btcwallet
 import (
 	"database/sql"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
@@ -16,7 +16,7 @@ type BTCKeygen struct {
 	BTC      btcgrp.Bitcoiner
 	dbConn   *sql.DB
 	addrType address.AddrType
-	wtype    wallet.WalletType
+	wtype    domainWallet.WalletType
 	service.Seeder
 	service.HDWalleter
 	service.PrivKeyer
@@ -38,7 +38,7 @@ func NewBTCKeygen(
 	multisiger service.Multisiger,
 	addressExporter service.AddressExporter,
 	signer service.Signer,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 ) *BTCKeygen {
 	return &BTCKeygen{
 		BTC:                btc,
@@ -67,13 +67,13 @@ func (k *BTCKeygen) StoreSeed(strSeed string) ([]byte, error) {
 
 // GenerateAccountKey generates account keys
 func (k *BTCKeygen) GenerateAccountKey(
-	accountType account.AccountType, seed []byte, count uint32, _ bool,
+	accountType domainAccount.AccountType, seed []byte, count uint32, _ bool,
 ) ([]key.WalletKey, error) {
 	return k.HDWalleter.Generate(accountType, seed, count)
 }
 
 // ImportPrivKey imports privKey
-func (k *BTCKeygen) ImportPrivKey(accountType account.AccountType) error {
+func (k *BTCKeygen) ImportPrivKey(accountType domainAccount.AccountType) error {
 	return k.PrivKeyer.Import(accountType)
 }
 
@@ -83,12 +83,12 @@ func (k *BTCKeygen) ImportFullPubKey(fileName string) error {
 }
 
 // CreateMultisigAddress creates multi sig address returns Multisiger interface
-func (k *BTCKeygen) CreateMultisigAddress(accountType account.AccountType) error {
+func (k *BTCKeygen) CreateMultisigAddress(accountType domainAccount.AccountType) error {
 	return k.Multisiger.AddMultisigAddress(accountType, k.addrType)
 }
 
 // ExportAddress exports address
-func (k *BTCKeygen) ExportAddress(accountType account.AccountType) (string, error) {
+func (k *BTCKeygen) ExportAddress(accountType domainAccount.AccountType) (string, error) {
 	return k.AddressExporter.ExportAddress(accountType)
 }
 

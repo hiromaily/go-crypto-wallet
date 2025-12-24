@@ -5,11 +5,11 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
@@ -18,7 +18,7 @@ import (
 
 // XRPKeyGenerator is XRP key generation service
 type XRPKeyGenerator interface {
-	Generate(accountType account.AccountType, isKeyPair bool, keys []key.WalletKey) error
+	Generate(accountType domainAccount.AccountType, isKeyPair bool, keys []key.WalletKey) error
 }
 
 // XRPKeyGenerate type
@@ -26,7 +26,7 @@ type XRPKeyGenerate struct {
 	xrp               xrpgrp.Rippler
 	dbConn            *sql.DB
 	coinTypeCode      coin.CoinTypeCode
-	wtype             wallet.WalletType
+	wtype             domainWallet.WalletType
 	accountKeyRepo    coldrepo.AccountKeyRepositorier
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier
 }
@@ -36,7 +36,7 @@ func NewXRPKeyGenerate(
 	xrpAPI xrpgrp.Rippler,
 	dbConn *sql.DB,
 	coinTypeCode coin.CoinTypeCode,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 	accountKeyRepo coldrepo.AccountKeyRepositorier,
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier,
 ) *XRPKeyGenerate {
@@ -51,7 +51,7 @@ func NewXRPKeyGenerate(
 }
 
 // Generate generate xrp keys for account
-func (k *XRPKeyGenerate) Generate(accountType account.AccountType, isKeyPair bool, keys []key.WalletKey) error {
+func (k *XRPKeyGenerate) Generate(accountType domainAccount.AccountType, isKeyPair bool, keys []key.WalletKey) error {
 	logger.Debug("generate keys for XRP",
 		"account_type", accountType.String(),
 		"len(keys)", len(keys),

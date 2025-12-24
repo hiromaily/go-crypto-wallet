@@ -15,7 +15,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 )
 
 // Note: key filename is different between Geth and Parity
@@ -101,7 +101,7 @@ func (*Ethereum) readPrivKey(hexAddr, path string) ([]byte, error) {
 
 // RenameParityKeyFile renames parity file format
 // Deprecated
-func (e *Ethereum) RenameParityKeyFile(hexAddr string, accountType account.AccountType) error {
+func (e *Ethereum) RenameParityKeyFile(hexAddr string, accountType domainAccount.AccountType) error {
 	if !e.isParity {
 		return nil
 	}

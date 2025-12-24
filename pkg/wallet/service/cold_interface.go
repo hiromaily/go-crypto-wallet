@@ -1,8 +1,8 @@
 package service
 
 import (
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
 
@@ -12,7 +12,7 @@ import (
 
 // HDWalleter is HD wallet key generation service
 type HDWalleter interface {
-	Generate(accountType account.AccountType, seed []byte, count uint32) ([]key.WalletKey, error)
+	Generate(accountType domainAccount.AccountType, seed []byte, count uint32) ([]key.WalletKey, error)
 }
 
 // Seeder is Seeder service
@@ -32,12 +32,12 @@ type Signer interface {
 
 // AddressExporter is AddressExporter service
 type AddressExporter interface {
-	ExportAddress(accountType account.AccountType) (string, error)
+	ExportAddress(accountType domainAccount.AccountType) (string, error)
 }
 
 // PrivKeyer is PrivKeyer service
 type PrivKeyer interface {
-	Import(accountType account.AccountType) error
+	Import(accountType domainAccount.AccountType) error
 }
 
 // FullPubKeyImporter is FullPubkeyImport service
@@ -47,7 +47,7 @@ type FullPubKeyImporter interface {
 
 // Multisiger is Multisiger service
 type Multisiger interface {
-	AddMultisigAddress(accountType account.AccountType, addressType address.AddrType) error
+	AddMultisigAddress(accountType domainAccount.AccountType, addressType address.AddrType) error
 }
 
 //-----------------------------------------------------------------------------

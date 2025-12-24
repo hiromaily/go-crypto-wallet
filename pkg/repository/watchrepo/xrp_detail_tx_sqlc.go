@@ -7,20 +7,20 @@ import (
 	"time"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // XrpDetailTxInputRepositorySqlc is repository for xrp_detail_tx table using sqlc
 type XrpDetailTxInputRepositorySqlc struct {
 	queries      *sqlcgen.Queries
-	coinTypeCode coin.CoinTypeCode
+	coinTypeCode domainCoin.CoinTypeCode
 }
 
 // NewXrpDetailTxInputRepositorySqlc returns XrpDetailTxInputRepositorySqlc object
 func NewXrpDetailTxInputRepositorySqlc(
-	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode,
+	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
 ) *XrpDetailTxInputRepositorySqlc {
 	return &XrpDetailTxInputRepositorySqlc{
 		queries:      sqlcgen.New(dbConn),
@@ -58,7 +58,7 @@ func (r *XrpDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*models.XRPDe
 }
 
 // GetSentHashTx returns list of tx_blob by txType
-func (r *XrpDetailTxInputRepositorySqlc) GetSentHashTx(txType tx.TxType) ([]string, error) {
+func (r *XrpDetailTxInputRepositorySqlc) GetSentHashTx(txType domainTx.TxType) ([]string, error) {
 	ctx := context.Background()
 
 	blobs, err := r.queries.GetXrpDetailTxBlobList(ctx, sqlcgen.GetXrpDetailTxBlobListParams{
@@ -118,7 +118,7 @@ func (r *XrpDetailTxInputRepositorySqlc) InsertBulk(txItems []*models.XRPDetailT
 // UpdateAfterTxSent updates when tx sent
 func (r *XrpDetailTxInputRepositorySqlc) UpdateAfterTxSent(
 	uuid string,
-	txType tx.TxType,
+	txType domainTx.TxType,
 	signedTxID,
 	txBlob string,
 	earlistLedgerVersion uint64,
@@ -146,7 +146,7 @@ func (r *XrpDetailTxInputRepositorySqlc) UpdateAfterTxSent(
 }
 
 // UpdateTxType updates txType
-func (r *XrpDetailTxInputRepositorySqlc) UpdateTxType(id int64, txType tx.TxType) (int64, error) {
+func (r *XrpDetailTxInputRepositorySqlc) UpdateTxType(id int64, txType domainTx.TxType) (int64, error) {
 	ctx := context.Background()
 
 	result, err := r.queries.UpdateXrpDetailTxType(ctx, sqlcgen.UpdateXrpDetailTxTypeParams{
@@ -167,7 +167,7 @@ func (r *XrpDetailTxInputRepositorySqlc) UpdateTxType(id int64, txType tx.TxType
 
 // UpdateTxTypeBySentHashTx updates txType by tx_blob
 func (r *XrpDetailTxInputRepositorySqlc) UpdateTxTypeBySentHashTx(
-	txType tx.TxType, sentHashTx string,
+	txType domainTx.TxType, sentHashTx string,
 ) (int64, error) {
 	ctx := context.Background()
 

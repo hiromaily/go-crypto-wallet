@@ -7,11 +7,11 @@ import (
 
 	"github.com/guregu/null/v6"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/converter"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
@@ -22,7 +22,7 @@ type PaymentRequestCreate struct {
 	addrRepo     watchrepo.AddressRepositorier
 	payReqRepo   watchrepo.PaymentRequestRepositorier
 	coinTypeCode coin.CoinTypeCode
-	wtype        wallet.WalletType
+	wtype        domainWallet.WalletType
 }
 
 // NewPaymentRequestCreate returns PaymentRequestCreate object
@@ -32,7 +32,7 @@ func NewPaymentRequestCreate(
 	addrRepo watchrepo.AddressRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,
 	coinTypeCode coin.CoinTypeCode,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 ) *PaymentRequestCreate {
 	return &PaymentRequestCreate{
 		converter:    conv,
@@ -47,7 +47,7 @@ func NewPaymentRequestCreate(
 // CreatePaymentRequest creates payment_request dummy data for development
 func (p *PaymentRequestCreate) CreatePaymentRequest(amtList []float64) error {
 	// get client pubkeys
-	pubkeyItems, err := p.addrRepo.GetAll(account.AccountTypeClient)
+	pubkeyItems, err := p.addrRepo.GetAll(domainAccount.AccountTypeClient)
 	if err != nil {
 		return fmt.Errorf("fail to call addrRepo.GetAll(): %w", err)
 	}

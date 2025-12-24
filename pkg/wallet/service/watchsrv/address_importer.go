@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
@@ -24,7 +24,7 @@ type AddressImport struct {
 	addrFileRepo address.FileRepositorier
 	coinTypeCode coin.CoinTypeCode
 	addrType     address.AddrType
-	wtype        wallet.WalletType
+	wtype        domainWallet.WalletType
 }
 
 // NewAddressImport returns AddressImport object
@@ -34,7 +34,7 @@ func NewAddressImport(
 	addrFileRepo address.FileRepositorier,
 	coinTypeCode coin.CoinTypeCode,
 	addrType address.AddrType,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 ) *AddressImport {
 	return &AddressImport{
 		dbConn:       dbConn,

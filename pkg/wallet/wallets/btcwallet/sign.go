@@ -3,9 +3,9 @@ package btcwallet
 import (
 	"database/sql"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
@@ -16,9 +16,9 @@ import (
 type BTCSign struct {
 	BTC         btcgrp.Bitcoiner
 	dbConn      *sql.DB
-	authAccount account.AuthType
+	authAccount domainAccount.AuthType
 	addrType    address.AddrType
-	wtype       wallet.WalletType
+	wtype       domainWallet.WalletType
 	service.Seeder
 	service.HDWalleter
 	signsrv.PrivKeyer
@@ -30,14 +30,14 @@ type BTCSign struct {
 func NewBTCSign(
 	btc btcgrp.Bitcoiner,
 	dbConn *sql.DB,
-	authAccount account.AuthType,
+	authAccount domainAccount.AuthType,
 	addrType address.AddrType,
 	seeder service.Seeder,
 	hdWallter service.HDWalleter,
 	privKeyer signsrv.PrivKeyer,
 	fullPubkeyExporter service.FullPubkeyExporter,
 	signer service.Signer,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 ) *BTCSign {
 	return &BTCSign{
 		BTC:                btc,

@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 )
 
@@ -21,7 +21,7 @@ type TxSend struct {
 	txRepo       watchrepo.BTCTxRepositorier
 	txOutputRepo watchrepo.TxOutputRepositorier
 	txFileRepo   tx.FileRepositorier
-	wtype        wallet.WalletType
+	wtype        domainWallet.WalletType
 }
 
 // NewTxSend returns TxSend object
@@ -32,7 +32,7 @@ func NewTxSend(
 	txRepo watchrepo.BTCTxRepositorier,
 	txOutputRepo watchrepo.TxOutputRepositorier,
 	txFileRepo tx.FileRepositorier,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 ) *TxSend {
 	return &TxSend{
 		btc:          btc,
@@ -49,7 +49,7 @@ func NewTxSend(
 func (t *TxSend) SendTx(filePath string) (string, error) {
 	// get tx_deposit_id from file name
 	// payment_5_unsigned_1_1534466246366489473
-	actionType, _, txID, _, err := t.txFileRepo.ValidateFilePath(filePath, tx.TxTypeSigned)
+	actionType, _, txID, _, err := t.txFileRepo.ValidateFilePath(filePath, domainTx.TxTypeSigned)
 	if err != nil {
 		return "", fmt.Errorf("fail to call txFileRepo.ValidateFilePath(): %w", err)
 	}
@@ -76,15 +76,15 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 	}
 
 	// update tx_table
-	affectedNum, err := t.txRepo.UpdateAfterTxSent(txID, tx.TxTypeSent, signedHex, hash.String())
+	affectedNum, err := t.txRepo.UpdateAfterTxSent(txID, domainTx.TxTypeSent, signedHex, hash.String())
 	if err != nil {
 		// TODO: even if error occurred, tx is already sent. so db should be corrected manually
 		logger.Warn(
 			"fail to call repo.Tx().UpdateAfterTxSent() but tx is already sent. "+
 				"So database should be updated manually",
 			"tx_id", txID,
-			"tx_type", tx.TxTypeSent.String(),
-			"tx_type_vakue", tx.TxTypeSent.Int8(),
+			"tx_type", domainTx.TxTypeSent.String(),
+			"tx_type_vakue", domainTx.TxTypeSent.Int8(),
 			"signed_hex_tx", signedHex,
 			"sent_hash_tx", hash.String(),
 		)
@@ -93,8 +93,8 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 	if affectedNum == 0 {
 		logger.Info("no records to update tx_table",
 			"tx_id", txID,
-			"tx_type", tx.TxTypeSent.String(),
-			"tx_type_vakue", tx.TxTypeSent.Int8(),
+			"tx_type", domainTx.TxTypeSent.String(),
+			"tx_type_vakue", domainTx.TxTypeSent.Int8(),
 			"signed_hex_tx", signedHex,
 			"sent_hash_tx", hash.String(),
 		)
@@ -102,7 +102,7 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 	}
 
 	// update account_pubkey_table
-	if actionType != action.ActionTypePayment {
+	if actionType != domainTx.ActionTypePayment {
 		// skip for that receiver address is anonymous
 		err = t.updateIsAllocatedAccountPubkey(txID)
 		if err != nil {

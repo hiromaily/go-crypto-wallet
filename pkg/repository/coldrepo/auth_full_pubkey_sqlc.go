@@ -5,21 +5,21 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // AuthFullPubkeyRepositorySqlc is repository for auth_fullpubkey table using sqlc
 type AuthFullPubkeyRepositorySqlc struct {
 	queries      *sqlcgen.Queries
-	coinTypeCode coin.CoinTypeCode
+	coinTypeCode domainCoin.CoinTypeCode
 }
 
 // NewAuthFullPubkeyRepositorySqlc returns AuthFullPubkeyRepositorySqlc object
 func NewAuthFullPubkeyRepositorySqlc(
-	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode,
+	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
 ) *AuthFullPubkeyRepositorySqlc {
 	return &AuthFullPubkeyRepositorySqlc{
 		queries:      sqlcgen.New(dbConn),
@@ -28,7 +28,7 @@ func NewAuthFullPubkeyRepositorySqlc(
 }
 
 // GetOne returns one record by authType
-func (r *AuthFullPubkeyRepositorySqlc) GetOne(authType account.AuthType) (*models.AuthFullpubkey, error) {
+func (r *AuthFullPubkeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (*models.AuthFullpubkey, error) {
 	ctx := context.Background()
 
 	authPubkey, err := r.queries.GetAuthFullPubkey(ctx, sqlcgen.GetAuthFullPubkeyParams{
@@ -43,7 +43,7 @@ func (r *AuthFullPubkeyRepositorySqlc) GetOne(authType account.AuthType) (*model
 }
 
 // Insert inserts record
-func (r *AuthFullPubkeyRepositorySqlc) Insert(authType account.AuthType, fullPubKey string) error {
+func (r *AuthFullPubkeyRepositorySqlc) Insert(authType domainAccount.AuthType, fullPubKey string) error {
 	ctx := context.Background()
 
 	_, err := r.queries.InsertAuthFullPubkey(ctx, sqlcgen.InsertAuthFullPubkeyParams{

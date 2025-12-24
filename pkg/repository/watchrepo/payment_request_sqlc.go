@@ -9,19 +9,19 @@ import (
 	"github.com/quagmt/udecimal"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // PaymentRequestRepositorySqlc is repository for payment_request table using sqlc
 type PaymentRequestRepositorySqlc struct {
 	queries      *sqlcgen.Queries
-	coinTypeCode coin.CoinTypeCode
+	coinTypeCode domainCoin.CoinTypeCode
 }
 
 // NewPaymentRequestRepositorySqlc returns PaymentRequestRepositorySqlc object
 func NewPaymentRequestRepositorySqlc(
-	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode,
+	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
 ) *PaymentRequestRepositorySqlc {
 	return &PaymentRequestRepositorySqlc{
 		queries:      sqlcgen.New(dbConn),

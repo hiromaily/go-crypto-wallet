@@ -9,14 +9,14 @@ import (
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/wire"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/btc"
 )
@@ -48,9 +48,9 @@ type TxCreate struct {
 	txOutputRepo    watchrepo.TxOutputRepositorier
 	payReqRepo      watchrepo.PaymentRequestRepositorier
 	txFileRepo      tx.FileRepositorier
-	depositReceiver account.AccountType
-	paymentSender   account.AccountType
-	wtype           wallet.WalletType
+	depositReceiver domainAccount.AccountType
+	paymentSender   domainAccount.AccountType
+	wtype           domainWallet.WalletType
 }
 
 // NewTxCreate returns TxCreate object
@@ -63,9 +63,9 @@ func NewTxCreate(
 	txOutputRepo watchrepo.TxOutputRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,
 	txFileRepo tx.FileRepositorier,
-	depositReceiver account.AccountType,
-	paymentSender account.AccountType,
-	wtype wallet.WalletType,
+	depositReceiver domainAccount.AccountType,
+	paymentSender domainAccount.AccountType,
+	wtype domainWallet.WalletType,
 ) *TxCreate {
 	return &TxCreate{
 		btc:             btcAPI,
@@ -95,8 +95,8 @@ type parsedTx struct {
 //nolint:gocyclo
 func (t *TxCreate) createTx(
 	sender,
-	receiver account.AccountType,
-	targetAction action.ActionType,
+	receiver domainAccount.AccountType,
+	targetAction domainTx.ActionType,
 	requiredAmount btcutil.Amount,
 	adjustmentFee float64,
 	paymentRequestIds []int64,
@@ -135,7 +135,7 @@ func (t *TxCreate) createTx(
 	// create txOutputs
 	var txPrevOutputs map[btcutil.Address]btcutil.Amount
 	switch targetAction {
-	case action.ActionTypeDeposit, action.ActionTypeTransfer:
+	case domainTx.ActionTypeDeposit, domainTx.ActionTypeTransfer:
 		var isChange bool
 		if requiredAmount != 0 {
 			isChange = true
@@ -144,7 +144,7 @@ func (t *TxCreate) createTx(
 		if err != nil {
 			return "", "", fmt.Errorf("fail to call createTxOutputs(): %w", err)
 		}
-	case action.ActionTypePayment:
+	case domainTx.ActionTypePayment:
 		changeAddr := unspentAddrs[0] // this is actually sender's address because it's for change
 		changeAmount := inputTotal - requiredAmount
 		txPrevOutputs = t.createPaymentTxOutputs(userPayments, changeAddr, changeAmount)
@@ -255,7 +255,7 @@ func (t *TxCreate) createTx(
 
 // call API `unspentlist`
 // this func returns no result, no error possibly, so caller should check both returned value
-func (t *TxCreate) getUnspentList(accountType account.AccountType) ([]btc.ListUnspentResult, []string, error) {
+func (t *TxCreate) getUnspentList(accountType domainAccount.AccountType) ([]btc.ListUnspentResult, []string, error) {
 	// unlock locked UnspentTransaction
 	// if err := w.BTC.UnlockUnspent(); err != nil {
 	//	return "", "", err
@@ -352,7 +352,7 @@ func (t *TxCreate) parseListUnspentTx(
 
 // for ActionTypeDeposit, ActionTypeTransfer
 func (t *TxCreate) createTxOutputs(
-	reciver account.AccountType,
+	reciver domainAccount.AccountType,
 	requiredAmount btcutil.Amount,
 	inputTotal btcutil.Amount,
 	senderAddr string,
@@ -402,8 +402,8 @@ func (t *TxCreate) createTxOutputs(
 }
 
 func (t *TxCreate) calculateOutputTotal(
-	sender account.AccountType,
-	receiver account.AccountType,
+	sender domainAccount.AccountType,
+	receiver domainAccount.AccountType,
 	msgTx *wire.MsgTx,
 	adjustmentFee float64,
 	inputTotal btcutil.Amount,
@@ -490,7 +490,7 @@ func (t *TxCreate) calculateOutputTotal(
 }
 
 func (t *TxCreate) insertTxTableForUnsigned(
-	actionType action.ActionType,
+	actionType domainTx.ActionType,
 	hex string,
 	inputTotal,
 	outputTotal,
@@ -569,8 +569,8 @@ func (t *TxCreate) insertTxTableForUnsigned(
 		return 0, fmt.Errorf("fail to call repo.TxOutput().InsertBulk(): %w", err)
 	}
 
-	// update payment_id in payment_request table for only action.ActionTypePayment
-	if actionType == action.ActionTypePayment {
+	// update payment_id in payment_request table for only domainTx.ActionTypePayment
+	if actionType == domainTx.ActionTypePayment {
 		_, err = t.payReqRepo.UpdatePaymentID(txID, paymentRequestIds)
 		if err != nil {
 			return 0, fmt.Errorf("fail to call repo.PayReq().UpdatePaymentID(txID, paymentRequestIds): %w", err)
@@ -582,7 +582,7 @@ func (t *TxCreate) insertTxTableForUnsigned(
 
 // generateHexFile generate file for hex and encoded previous addresses
 func (t *TxCreate) generateHexFile(
-	actionType action.ActionType, hex, encodedAddrsPrevs string, id int64,
+	actionType domainTx.ActionType, hex, encodedAddrsPrevs string, id int64,
 ) (string, error) {
 	var (
 		generatedFileName string
@@ -595,7 +595,7 @@ func (t *TxCreate) generateHexFile(
 	}
 
 	// create file
-	path := t.txFileRepo.CreateFilePath(actionType, tx.TxTypeUnsigned, id, 0)
+	path := t.txFileRepo.CreateFilePath(actionType, domainTx.TxTypeUnsigned, id, 0)
 	generatedFileName, err = t.txFileRepo.WriteFile(path, savedata)
 	if err != nil {
 		return "", fmt.Errorf("fail to call txFileRepo.WriteFile(): %w", err)

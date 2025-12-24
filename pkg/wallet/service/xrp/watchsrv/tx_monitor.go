@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 )
 
@@ -18,7 +18,7 @@ type TxMonitor struct {
 	dbConn       *sql.DB
 	addrRepo     watchrepo.AddressRepositorier
 	txDetailRepo watchrepo.XrpDetailTxRepositorier
-	wtype        wallet.WalletType
+	wtype        domainWallet.WalletType
 }
 
 // NewTxMonitor returns TxMonitor object
@@ -27,7 +27,7 @@ func NewTxMonitor(
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txDetailRepo watchrepo.XrpDetailTxRepositorier,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 ) *TxMonitor {
 	return &TxMonitor{
 		xrp:          xrp,
@@ -46,11 +46,11 @@ func (*TxMonitor) UpdateTxStatus() error {
 
 // MonitorBalance monitors balance
 func (t *TxMonitor) MonitorBalance(_ uint64) error {
-	targetAccounts := []account.AccountType{
-		account.AccountTypeClient,
-		account.AccountTypeDeposit,
-		account.AccountTypePayment,
-		account.AccountTypeStored,
+	targetAccounts := []domainAccount.AccountType{
+		domainAccount.AccountTypeClient,
+		domainAccount.AccountTypeDeposit,
+		domainAccount.AccountTypePayment,
+		domainAccount.AccountTypeStored,
 	}
 
 	for _, acnt := range targetAccounts {

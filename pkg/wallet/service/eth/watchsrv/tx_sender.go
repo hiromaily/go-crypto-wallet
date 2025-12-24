@@ -7,10 +7,11 @@ import (
 	"fmt"
 	"strings"
 
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 )
 
@@ -22,7 +23,7 @@ type TxSend struct {
 	txRepo       watchrepo.TxRepositorier      // not used
 	txDetailRepo watchrepo.EthDetailTxRepositorier
 	txFileRepo   tx.FileRepositorier
-	wtype        wallet.WalletType
+	wtype        domainWallet.WalletType
 }
 
 // NewTxSend returns TxSend object
@@ -33,7 +34,7 @@ func NewTxSend(
 	txRepo watchrepo.TxRepositorier,
 	txDetailRepo watchrepo.EthDetailTxRepositorier,
 	txFileRepo tx.FileRepositorier,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 ) *TxSend {
 	return &TxSend{
 		eth:          eth,
@@ -50,7 +51,7 @@ func NewTxSend(
 func (t *TxSend) SendTx(filePath string) (string, error) {
 	// get tx_deposit_id from file name
 	// payment_5_unsigned_1_1534466246366489473
-	actionType, _, txID, _, err := t.txFileRepo.ValidateFilePath(filePath, tx.TxTypeSigned)
+	actionType, _, txID, _, err := t.txFileRepo.ValidateFilePath(filePath, domainTx.TxTypeSigned)
 	if err != nil {
 		return "", fmt.Errorf("fail to call txFileRepo.ValidateFilePath(): %w", err)
 	}
@@ -92,15 +93,15 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 
 		// update eth_detail_tx
 		var affectedNum int64
-		affectedNum, err = t.txDetailRepo.UpdateAfterTxSent(uuid, tx.TxTypeSent, signedTx, sentTx)
+		affectedNum, err = t.txDetailRepo.UpdateAfterTxSent(uuid, domainTx.TxTypeSent, signedTx, sentTx)
 		if err != nil {
 			// TODO: even if error occurred, tx is already sent. so db should be corrected manually
 			logger.Warn(
 				"fail to call repo.Tx().UpdateAfterTxSent() but tx is already sent. "+
 					"So database should be updated manually",
 				"tx_id", txID,
-				"tx_type", tx.TxTypeSent.String(),
-				"tx_type_value", tx.TxTypeSent.Int8(),
+				"tx_type", domainTx.TxTypeSent.String(),
+				"tx_type_value", domainTx.TxTypeSent.Int8(),
 				"signed_hex_tx", signedTx,
 				"sent_hash_tx", sentTx,
 			)
@@ -109,8 +110,8 @@ func (t *TxSend) SendTx(filePath string) (string, error) {
 		if affectedNum == 0 {
 			logger.Info("no records to update tx_table",
 				"tx_id", txID,
-				"tx_type", tx.TxTypeSent.String(),
-				"tx_type_value", tx.TxTypeSent.Int8(),
+				"tx_type", domainTx.TxTypeSent.String(),
+				"tx_type_value", domainTx.TxTypeSent.Int8(),
 				"signed_hex_tx", signedTx,
 				"sent_hash_tx", sentTx,
 			)

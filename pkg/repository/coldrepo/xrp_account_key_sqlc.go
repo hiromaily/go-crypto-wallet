@@ -6,22 +6,22 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/rdb/sqlcgen"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 )
 
 // XRPAccountKeyRepositorySqlc is repository for xrp_account_key table using sqlc
 type XRPAccountKeyRepositorySqlc struct {
 	queries      *sqlcgen.Queries
-	coinTypeCode coin.CoinTypeCode
+	coinTypeCode domainCoin.CoinTypeCode
 }
 
 // NewXRPAccountKeyRepositorySqlc returns XRPAccountKeyRepositorySqlc object
 func NewXRPAccountKeyRepositorySqlc(
-	dbConn *sql.DB, coinTypeCode coin.CoinTypeCode,
+	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
 ) *XRPAccountKeyRepositorySqlc {
 	return &XRPAccountKeyRepositorySqlc{
 		queries:      sqlcgen.New(dbConn),
@@ -31,7 +31,7 @@ func NewXRPAccountKeyRepositorySqlc(
 
 // GetAllAddrStatus returns all XRPAccountKey by addr_status
 func (r *XRPAccountKeyRepositorySqlc) GetAllAddrStatus(
-	accountType account.AccountType, addrStatus address.AddrStatus,
+	accountType domainAccount.AccountType, addrStatus address.AddrStatus,
 ) ([]*models.XRPAccountKey, error) {
 	ctx := context.Background()
 
@@ -53,7 +53,7 @@ func (r *XRPAccountKeyRepositorySqlc) GetAllAddrStatus(
 }
 
 // GetSecret returns secret (master_seed)
-func (r *XRPAccountKeyRepositorySqlc) GetSecret(accountType account.AccountType, addr string) (string, error) {
+func (r *XRPAccountKeyRepositorySqlc) GetSecret(accountType domainAccount.AccountType, addr string) (string, error) {
 	ctx := context.Background()
 
 	secret, err := r.queries.GetXRPAccountKeySecret(ctx, sqlcgen.GetXRPAccountKeySecretParams{
@@ -97,7 +97,7 @@ func (r *XRPAccountKeyRepositorySqlc) InsertBulk(items []*models.XRPAccountKey) 
 
 // UpdateAddrStatus updates addr_status
 func (r *XRPAccountKeyRepositorySqlc) UpdateAddrStatus(
-	accountType account.AccountType, addrStatus address.AddrStatus, accountIDs []string,
+	accountType domainAccount.AccountType, addrStatus address.AddrStatus, accountIDs []string,
 ) (int64, error) {
 	ctx := context.Background()
 	var totalAffected int64

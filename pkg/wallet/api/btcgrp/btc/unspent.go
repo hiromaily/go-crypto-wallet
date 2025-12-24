@@ -9,7 +9,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -57,7 +57,7 @@ func (b *Bitcoin) ListUnspent(confirmationNum uint64) ([]ListUnspentResult, erro
 
 // ListUnspentByAccount gets listunspent by account
 func (b *Bitcoin) ListUnspentByAccount(
-	accountType account.AccountType, confirmationNum uint64,
+	accountType domainAccount.AccountType, confirmationNum uint64,
 ) ([]ListUnspentResult, error) {
 	addrs, err := b.GetAddressesByLabel(accountType.String())
 	if err != nil {
@@ -86,7 +86,7 @@ func (b *Bitcoin) ListUnspentByAccount(
 }
 
 // GetUnspentListAddrs returns address from unspentList
-func (*Bitcoin) GetUnspentListAddrs(unspentList []ListUnspentResult, accountType account.AccountType) []string {
+func (*Bitcoin) GetUnspentListAddrs(unspentList []ListUnspentResult, accountType domainAccount.AccountType) []string {
 	addrs := make([]string, 0, len(unspentList))
 	for _, unspent := range unspentList {
 		if unspent.Label != accountType.String() {

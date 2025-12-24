@@ -8,14 +8,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 )
 
 // FileRepositorier is file storager for tx info
 type FileRepositorier interface {
-	CreateFilePath(actionType action.ActionType, txType TxType, txID int64, signedCount int) string
+	CreateFilePath(actionType domainTx.ActionType, txType TxType, txID int64, signedCount int) string
 	GetFileNameType(filePath string) (*FileName, error)
-	ValidateFilePath(filePath string, expectedTxType TxType) (action.ActionType, TxType, int64, int, error)
+	ValidateFilePath(filePath string, expectedTxType TxType) (domainTx.ActionType, TxType, int64, int, error)
 	ReadFile(path string) (string, error)
 	ReadFileSlice(path string) ([]string, error)
 	WriteFile(path, hexTx string) (string, error)
@@ -29,7 +29,7 @@ type FileRepository struct {
 
 // FileName is object for items in fine name
 type FileName struct {
-	ActionType  action.ActionType
+	ActionType  domainTx.ActionType
 	TxType      TxType
 	TxID        int64
 	SignedCount int
@@ -50,7 +50,7 @@ func NewFileRepository(filePath string) *FileRepository {
 
 // CreateFilePath create file path for transaction file
 func (r *FileRepository) CreateFilePath(
-	actionType action.ActionType, txType TxType, txID int64, signedCount int,
+	actionType domainTx.ActionType, txType TxType, txID int64, signedCount int,
 ) string {
 	// ./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209
 	// baseDir := fmt.Sprintf("%s%s/", r.filePath, actionType.String())
@@ -81,10 +81,10 @@ func (*FileRepository) GetFileNameType(filePath string) (*FileName, error) {
 	fileNameType := FileName{}
 
 	// Action
-	if !action.ValidateActionType(s[0]) {
+	if !domainTx.ValidateActionType(s[0]) {
 		return nil, fmt.Errorf("invalid file name: %s", fileName)
 	}
-	fileNameType.ActionType = action.ActionType(s[0])
+	fileNameType.ActionType = domainTx.ActionType(s[0])
 
 	// txID
 	var err error
@@ -112,7 +112,7 @@ func (*FileRepository) GetFileNameType(filePath string) (*FileName, error) {
 // ValidateFilePath validate file path which could be full path
 func (r *FileRepository) ValidateFilePath(
 	filePath string, expectedTxType TxType,
-) (action.ActionType, TxType, int64, int, error) {
+) (domainTx.ActionType, TxType, int64, int, error) {
 	fileType, err := r.GetFileNameType(filePath)
 	if err != nil {
 		return "", "", 0, 0, err

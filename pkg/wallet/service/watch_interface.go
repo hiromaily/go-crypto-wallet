@@ -1,6 +1,6 @@
 package service
 
-import "github.com/hiromaily/go-crypto-wallet/pkg/account"
+import domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 
 // AddressImporter is AddressImporter interface (for now btc/bch only)
 type AddressImporter interface {
@@ -16,7 +16,9 @@ type PaymentRequestCreator interface {
 type TxCreator interface {
 	CreateDepositTx(adjustmentFee float64) (string, string, error)
 	CreatePaymentTx(adjustmentFee float64) (string, string, error)
-	CreateTransferTx(sender, receiver account.AccountType, floatAmount, adjustmentFee float64) (string, string, error)
+	CreateTransferTx(
+		sender, receiver domainAccount.AccountType, floatAmount, adjustmentFee float64,
+	) (string, string, error)
 }
 
 // TxMonitorer is TxMonitor interface

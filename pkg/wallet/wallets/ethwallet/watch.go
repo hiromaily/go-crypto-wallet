@@ -3,8 +3,8 @@ package ethwallet
 import (
 	"database/sql"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	wtype "github.com/hiromaily/go-crypto-wallet/pkg/wallet"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
@@ -16,7 +16,7 @@ import (
 type ETHWatch struct {
 	ETH    ethgrp.Ethereumer
 	dbConn *sql.DB
-	wtype  wtype.WalletType
+	wtype  domainWallet.WalletType
 	watchsrv.AddressImporter
 	ethsrv.TxCreator
 	service.TxSender
@@ -33,7 +33,7 @@ func NewETHWatch(
 	txSender service.TxSender,
 	txMonitorer service.TxMonitorer,
 	paymentRequestCreator service.PaymentRequestCreator,
-	walletType wtype.WalletType,
+	walletType domainWallet.WalletType,
 ) *ETHWatch {
 	return &ETHWatch{
 		ETH:                   eth,
@@ -64,7 +64,7 @@ func (w *ETHWatch) CreatePaymentTx(_ float64) (string, string, error) {
 
 // CreateTransferTx creates transfer unsigned transaction
 func (w *ETHWatch) CreateTransferTx(
-	sender, receiver account.AccountType, floatAmount, _ float64,
+	sender, receiver domainAccount.AccountType, floatAmount, _ float64,
 ) (string, string, error) {
 	return w.TxCreator.CreateTransferTx(sender, receiver, floatAmount)
 }

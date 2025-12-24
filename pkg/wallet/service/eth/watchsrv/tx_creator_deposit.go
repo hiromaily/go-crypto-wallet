@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/action"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
@@ -18,9 +18,9 @@ import (
 // - sender: client, receiver: deposit
 // - receiver account covers fee, but is should be flexible
 func (t *TxCreate) CreateDepositTx() (string, string, error) {
-	sender := account.AccountTypeClient
+	sender := domainAccount.AccountTypeClient
 	receiver := t.depositReceiver
-	targetAction := action.ActionTypeDeposit
+	targetAction := domainTx.ActionTypeDeposit
 	logger.Debug("account",
 		"sender", sender.String(),
 		"receiver", receiver.String(),
@@ -64,11 +64,11 @@ func (t *TxCreate) CreateDepositTx() (string, string, error) {
 	return "", generatedFileName, nil
 }
 
-func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]eth.UserAmount, error) {
+func (t *TxCreate) getUserAmounts(sender domainAccount.AccountType) ([]eth.UserAmount, error) {
 	// get addresses for client account
 	addrs, err := t.addrRepo.GetAll(sender)
 	if err != nil {
-		return nil, fmt.Errorf("fail to call addrRepo.GetAll(account.AccountTypeClient): %w", err)
+		return nil, fmt.Errorf("fail to call addrRepo.GetAll(domainAccount.AccountTypeClient): %w", err)
 	}
 
 	// target addresses
@@ -93,12 +93,14 @@ func (t *TxCreate) getUserAmounts(sender account.AccountType) ([]eth.UserAmount,
 }
 
 func (t *TxCreate) createDepositRawTransactions(
-	sender, receiver account.AccountType, userAmounts []eth.UserAmount,
+	sender, receiver domainAccount.AccountType, userAmounts []eth.UserAmount,
 ) ([]string, []*models.EthDetailTX, error) {
 	// get address for deposit account
 	depositAddr, err := t.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
-		return nil, nil, fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(account.AccountTypeDeposit): %w", err)
+		return nil, nil, fmt.Errorf(
+			"fail to call addrRepo.GetOneUnAllocated(domainAccount.AccountTypeDeposit): %w", err,
+		)
 	}
 
 	// create raw transaction each address

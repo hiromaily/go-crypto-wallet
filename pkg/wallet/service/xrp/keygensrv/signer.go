@@ -7,11 +7,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
 )
@@ -21,7 +22,7 @@ type Sign struct {
 	xrp               xrpgrp.Rippler
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier
 	txFileRepo        tx.FileRepositorier
-	wtype             wallet.WalletType
+	wtype             domainWallet.WalletType
 }
 
 // NewSign returns sign object
@@ -29,7 +30,7 @@ func NewSign(
 	xrpAPI xrpgrp.Rippler,
 	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier,
 	txFileRepo tx.FileRepositorier,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 ) *Sign {
 	return &Sign{
 		xrp:               xrpAPI,
@@ -43,12 +44,12 @@ func NewSign(
 // - multisig equivalent functionality is not implemented yet in ETH
 func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 	// get tx_deposit_id from tx file name
-	actionType, _, txID, signedCount, err := s.txFileRepo.ValidateFilePath(filePath, tx.TxTypeUnsigned)
+	actionType, _, txID, signedCount, err := s.txFileRepo.ValidateFilePath(filePath, domainTx.TxTypeUnsigned)
 	if err != nil {
 		return "", false, "", err
 	}
 
-	var senderAccount account.AccountType
+	var senderAccount domainAccount.AccountType
 
 	// get hex tx from file
 	data, err := s.txFileRepo.ReadFileSlice(filePath)
@@ -56,7 +57,7 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 		return "", false, "", fmt.Errorf("fail to call txFileRepo.ReadFileSlice(): %w", err)
 	}
 	if len(data) > 1 {
-		senderAccount = account.AccountType(data[0])
+		senderAccount = domainAccount.AccountType(data[0])
 	} else {
 		return "", false, "", errors.New("file is invalid")
 	}
@@ -97,7 +98,7 @@ func (s *Sign) SignTx(filePath string) (string, bool, string, error) {
 	}
 
 	// write file
-	path := s.txFileRepo.CreateFilePath(actionType, tx.TxTypeSigned, txID, signedCount+1)
+	path := s.txFileRepo.CreateFilePath(actionType, domainTx.TxTypeSigned, txID, signedCount+1)
 	generatedFileName, err := s.txFileRepo.WriteFileSlice(path, txHexs)
 	if err != nil {
 		return "", false, "", fmt.Errorf("fail to call txFileRepo.WriteFileSlice(): %w", err)

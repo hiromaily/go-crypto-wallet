@@ -6,21 +6,21 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
 
 // Seed type
 type Seed struct {
 	seedRepo coldrepo.SeedRepositorier
-	wtype    wallet.WalletType
+	wtype    domainWallet.WalletType
 }
 
 // NewSeed returns seed object
 func NewSeed(
 	seedRepo coldrepo.SeedRepositorier,
-	wtype wallet.WalletType,
+	wtype domainWallet.WalletType,
 ) *Seed {
 	return &Seed{
 		seedRepo: seedRepo,

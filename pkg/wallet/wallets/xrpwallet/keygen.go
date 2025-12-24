@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	wtype "github.com/hiromaily/go-crypto-wallet/pkg/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
@@ -17,7 +17,7 @@ import (
 type XRPKeygen struct {
 	XRP    xrpgrp.Rippler
 	dbConn *sql.DB
-	wtype  wtype.WalletType
+	wtype  domainWallet.WalletType
 	service.Seeder
 	service.HDWalleter
 	keygensrv.XRPKeyGenerator
@@ -29,7 +29,7 @@ type XRPKeygen struct {
 func NewXRPKeygen(
 	xrp xrpgrp.Rippler,
 	dbConn *sql.DB,
-	walletType wtype.WalletType,
+	walletType domainWallet.WalletType,
 	seeder service.Seeder,
 	hdWallter service.HDWalleter,
 	keyGenerator keygensrv.XRPKeyGenerator,
@@ -62,7 +62,7 @@ func (k *XRPKeygen) StoreSeed(strSeed string) ([]byte, error) {
 
 // GenerateAccountKey generates account keys
 func (k *XRPKeygen) GenerateAccountKey(
-	accountType account.AccountType, seed []byte, count uint32, isKeyPair bool,
+	accountType domainAccount.AccountType, seed []byte, count uint32, isKeyPair bool,
 ) ([]key.WalletKey, error) {
 	keys, err := k.HDWalleter.Generate(accountType, seed, count)
 	if err != nil {
@@ -73,7 +73,7 @@ func (k *XRPKeygen) GenerateAccountKey(
 }
 
 // ImportPrivKey imports privKey
-func (*XRPKeygen) ImportPrivKey(_ account.AccountType) error {
+func (*XRPKeygen) ImportPrivKey(_ domainAccount.AccountType) error {
 	logger.Info("no functionality for ImportPrivKey() in XRP")
 	return nil
 }
@@ -85,13 +85,13 @@ func (*XRPKeygen) ImportFullPubKey(_ string) error {
 }
 
 // CreateMultisigAddress creates multi sig address returns Multisiger interface
-func (*XRPKeygen) CreateMultisigAddress(_ account.AccountType) error {
+func (*XRPKeygen) CreateMultisigAddress(_ domainAccount.AccountType) error {
 	logger.Info("no functionality for CreateMultisigAddress() in XRP")
 	return nil
 }
 
 // ExportAddress exports address
-func (k *XRPKeygen) ExportAddress(accountType account.AccountType) (string, error) {
+func (k *XRPKeygen) ExportAddress(accountType domainAccount.AccountType) (string, error) {
 	return k.AddressExporter.ExportAddress(accountType)
 }
 
