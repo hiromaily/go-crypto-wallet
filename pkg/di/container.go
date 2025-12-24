@@ -1196,7 +1196,11 @@ func (c *container) newETHKeygenImportPrivateKeyUseCase() keygenusecase.ImportPr
 
 func (c *container) newXRPKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUseCase {
 	return keygenusecasexrp.NewGenerateKeyUseCase(
-		c.newXRPKeyGenerator().(*xrpkeygensrv.XRPKeyGenerate),
+		c.newXRP(),
+		c.newMySQLClient(),
+		c.conf.CoinTypeCode,
+		c.newAccountKeyRepo(),
+		c.newXRPAccountKeyRepo(),
 	)
 }
 
