@@ -1187,7 +1187,8 @@ func (c *container) newBTCKeygenImportFullPubkeyUseCase() keygenusecase.ImportFu
 
 func (c *container) newETHKeygenImportPrivateKeyUseCase() keygenusecase.ImportPrivateKeyUseCase {
 	return keygenusecaseeth.NewImportPrivateKeyUseCase(
-		c.newPrivKeyer().(*ethkeygensrv.PrivKey),
+		c.newETH(),
+		c.newAccountKeyRepo(),
 	)
 }
 
