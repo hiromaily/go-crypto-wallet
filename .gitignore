@@ -2,9 +2,10 @@
 .idea/
 
 # temporary documents
-CURRENT_ISSUES.md
-REFACTORING_CHECKLIST.md
-REFACTORING_PLAN.md
+docs/issues/*
+!docs/issues/CURRENT_ISSUES.md
+!docs/issues/REFACTORING_CHECKLIST.md
+!docs/issues/REFACTORING_PLAN.md
 
 # environment variables
 .env
