@@ -11,16 +11,16 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/watch"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
 )
 
 // PaymentRequestCreate type
 type PaymentRequestCreate struct {
 	converter    converter.Converter
 	dbConn       *sql.DB
-	addrRepo     watchrepo.AddressRepositorier
-	payReqRepo   watchrepo.PaymentRequestRepositorier
+	addrRepo     watch.AddressRepositorier
+	payReqRepo   watch.PaymentRequestRepositorier
 	coinTypeCode domainCoin.CoinTypeCode
 	wtype        domainWallet.WalletType
 }
@@ -29,8 +29,8 @@ type PaymentRequestCreate struct {
 func NewPaymentRequestCreate(
 	conv converter.Converter,
 	dbConn *sql.DB,
-	addrRepo watchrepo.AddressRepositorier,
-	payReqRepo watchrepo.PaymentRequestRepositorier,
+	addrRepo watch.AddressRepositorier,
+	payReqRepo watch.PaymentRequestRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,
 	wtype domainWallet.WalletType,
 ) *PaymentRequestCreate {

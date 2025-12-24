@@ -8,29 +8,29 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
 )
 
 // TxMonitor type
 type TxMonitor struct {
-	btc         btcgrp.Bitcoiner
+	btc         bitcoin.Bitcoiner
 	dbConn      *sql.DB
-	txRepo      watchrepo.BTCTxRepositorier
-	txInputRepo watchrepo.TxInputRepositorier
-	payReqRepo  watchrepo.PaymentRequestRepositorier
+	txRepo      watch.BTCTxRepositorier
+	txInputRepo watch.TxInputRepositorier
+	payReqRepo  watch.PaymentRequestRepositorier
 	wtype       domainWallet.WalletType
 }
 
 // NewTxMonitor returns TxMonitor object
 func NewTxMonitor(
-	btc btcgrp.Bitcoiner,
+	btc bitcoin.Bitcoiner,
 	dbConn *sql.DB,
-	txRepo watchrepo.BTCTxRepositorier,
-	txInputRepo watchrepo.TxInputRepositorier,
-	payReqRepo watchrepo.PaymentRequestRepositorier,
+	txRepo watch.BTCTxRepositorier,
+	txInputRepo watch.TxInputRepositorier,
+	payReqRepo watch.PaymentRequestRepositorier,
 	wtype domainWallet.WalletType,
 ) *TxMonitor {
 	return &TxMonitor{

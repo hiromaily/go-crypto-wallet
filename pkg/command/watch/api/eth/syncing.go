@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum"
 )
 
-func runSyncing(eth ethgrp.Ethereumer) error {
+func runSyncing(eth ethereum.Ethereumer) error {
 	syncResult, isSyncing, err := eth.Syncing(context.Background())
 	if err != nil {
 		return fmt.Errorf("fail to call eth.Syncing() %w", err)

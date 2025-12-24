@@ -7,10 +7,10 @@ import (
 	"github.com/btcsuite/btcd/btcutil"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
 )
 
-func runBalance(btc btcgrp.Bitcoiner, acnt string) error {
+func runBalance(btc bitcoin.Bitcoiner, acnt string) error {
 	// validator
 	if acnt != "" && !domainAccount.ValidateAccountType(acnt) {
 		return errors.New("account option [-account] is invalid")

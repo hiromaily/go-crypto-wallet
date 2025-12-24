@@ -10,26 +10,26 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple/xrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/cold"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/xrpgrp/xrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
 )
 
 // Sign type
 type Sign struct {
-	xrp               xrpgrp.Rippler
-	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier
-	txFileRepo        tx.FileRepositorier
+	xrp               ripple.Rippler
+	xrpAccountKeyRepo cold.XRPAccountKeyRepositorier
+	txFileRepo        file.TransactionFileRepositorier
 	wtype             domainWallet.WalletType
 }
 
 // NewSign returns sign object
 func NewSign(
-	xrpAPI xrpgrp.Rippler,
-	xrpAccountKeyRepo coldrepo.XRPAccountKeyRepositorier,
-	txFileRepo tx.FileRepositorier,
+	xrpAPI ripple.Rippler,
+	xrpAccountKeyRepo cold.XRPAccountKeyRepositorier,
+	txFileRepo file.TransactionFileRepositorier,
 	wtype domainWallet.WalletType,
 ) *Sign {
 	return &Sign{

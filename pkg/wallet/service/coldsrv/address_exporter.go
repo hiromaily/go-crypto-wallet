@@ -11,15 +11,16 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/cold"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 )
 
 // AddressExport type
 type AddressExport struct {
-	accountKeyRepo  coldrepo.AccountKeyRepositorier
-	addrFileRepo    address.FileRepositorier
+	accountKeyRepo  cold.AccountKeyRepositorier
+	addrFileRepo    file.AddressFileRepositorier
 	multisigAccount account.MultisigAccounter
 	coinTypeCode    domainCoin.CoinTypeCode
 	wtype           domainWallet.WalletType
@@ -27,8 +28,8 @@ type AddressExport struct {
 
 // NewAddressExport returns addressExport
 func NewAddressExport(
-	accountKeyRepo coldrepo.AccountKeyRepositorier,
-	addrFileRepo address.FileRepositorier,
+	accountKeyRepo cold.AccountKeyRepositorier,
+	addrFileRepo file.AddressFileRepositorier,
 	multisigAccount account.MultisigAccounter,
 	coinTypeCode domainCoin.CoinTypeCode,
 	wtype domainWallet.WalletType,

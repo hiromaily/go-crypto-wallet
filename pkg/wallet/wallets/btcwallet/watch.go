@@ -7,13 +7,13 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
 )
 
 // BTCWatch watch only wallet object
 type BTCWatch struct {
-	BTC      btcgrp.Bitcoiner
+	BTC      bitcoin.Bitcoiner
 	dbConn   *sql.DB
 	addrType address.AddrType
 	wtype    domainWallet.WalletType
@@ -26,7 +26,7 @@ type BTCWatch struct {
 
 // NewBTCWatch returns Watch object
 func NewBTCWatch(
-	btc btcgrp.Bitcoiner,
+	btc bitcoin.Bitcoiner,
 	dbConn *sql.DB,
 	addrType address.AddrType,
 	addrImporter service.AddressImporter,
@@ -111,6 +111,6 @@ func (w *BTCWatch) CoinTypeCode() domainCoin.CoinTypeCode {
 }
 
 // GetBTC gets btc
-// func (w *BTCWatch) GetBTC() btcgrp.Bitcoiner {
+// func (w *BTCWatch) GetBTC() bitcoin.Bitcoiner {
 //	return w.BTC
 //}

@@ -3,10 +3,10 @@ package btc
 import (
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
 )
 
-func runEstimateFee(btc btcgrp.Bitcoiner) error {
+func runEstimateFee(btc bitcoin.Bitcoiner) error {
 	// estimate fee
 	feePerKb, err := btc.EstimateSmartFee()
 	if err != nil {

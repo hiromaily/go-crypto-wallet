@@ -6,14 +6,14 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
 )
 
 // ETHKeygen keygen wallet object
 type ETHKeygen struct {
-	ETH    ethgrp.Ethereumer
+	ETH    ethereum.Ethereumer
 	dbConn *sql.DB
 	wtype  domainWallet.WalletType
 	service.Seeder
@@ -25,7 +25,7 @@ type ETHKeygen struct {
 
 // NewETHKeygen returns ETHKeygen object
 func NewETHKeygen(
-	eth ethgrp.Ethereumer,
+	eth ethereum.Ethereumer,
 	dbConn *sql.DB,
 	walletType domainWallet.WalletType,
 	seeder service.Seeder,

@@ -10,30 +10,30 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin/btc"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/cold"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
-	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp/btc"
 )
 
 // Sign type
 type Sign struct {
-	btc             btcgrp.Bitcoiner
-	accountKeyRepo  coldrepo.AccountKeyRepositorier
-	authKeyRepo     coldrepo.AuthAccountKeyRepositorier
-	txFileRepo      tx.FileRepositorier
+	btc             bitcoin.Bitcoiner
+	accountKeyRepo  cold.AccountKeyRepositorier
+	authKeyRepo     cold.AuthAccountKeyRepositorier
+	txFileRepo      file.TransactionFileRepositorier
 	multisigAccount account.MultisigAccounter
 	wtype           domainWallet.WalletType
 }
 
 // NewSign returns sign object
 func NewSign(
-	btcAPI btcgrp.Bitcoiner,
-	accountKeyRepo coldrepo.AccountKeyRepositorier,
-	authKeyRepo coldrepo.AuthAccountKeyRepositorier,
-	txFileRepo tx.FileRepositorier,
+	btcAPI bitcoin.Bitcoiner,
+	accountKeyRepo cold.AccountKeyRepositorier,
+	authKeyRepo cold.AuthAccountKeyRepositorier,
+	txFileRepo file.TransactionFileRepositorier,
 	multisigAccount account.MultisigAccounter,
 	wtype domainWallet.WalletType,
 ) *Sign {
@@ -177,7 +177,7 @@ func (s *Sign) signMultisig(msgTx *wire.MsgTx, prevsAddrs *btc.PreviousTxs) (*wi
 
 		// mapping redeemScript to PrevTxs
 		for idx, val := range prevsAddrs.Addrs {
-			rs := coldrepo.GetRedeedScriptByAddress(accountKeys, val)
+			rs := cold.GetRedeedScriptByAddress(accountKeys, val)
 			if rs == "" {
 				logger.Error("redeemScript can not be found")
 				continue

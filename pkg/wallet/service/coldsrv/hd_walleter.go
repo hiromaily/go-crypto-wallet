@@ -10,8 +10,8 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/cold"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/coldrepo"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
 
@@ -106,13 +106,13 @@ type HDWalletRepo interface {
 
 // AuthHDWalletRepo is AuthHDWalletRepo object
 type AuthHDWalletRepo struct {
-	authKeyRepo coldrepo.AuthAccountKeyRepositorier
+	authKeyRepo cold.AuthAccountKeyRepositorier
 	authType    domainAccount.AuthType
 }
 
 // NewAuthHDWalletRepo returns AuthHDWalletRepo
 func NewAuthHDWalletRepo(
-	authKeyRepo coldrepo.AuthAccountKeyRepositorier, authType domainAccount.AuthType,
+	authKeyRepo cold.AuthAccountKeyRepositorier, authType domainAccount.AuthType,
 ) HDWalletRepo {
 	return &AuthHDWalletRepo{
 		authKeyRepo: authKeyRepo,
@@ -159,11 +159,11 @@ func (w *AuthHDWalletRepo) Insert(
 
 // AccountHDWalletRepo is AccountHDWalletRepo interface
 type AccountHDWalletRepo struct {
-	accountKeyRepo coldrepo.AccountKeyRepositorier
+	accountKeyRepo cold.AccountKeyRepositorier
 }
 
 // NewAccountHDWalletRepo returns HDWalletRepo
-func NewAccountHDWalletRepo(accountKeyRepo coldrepo.AccountKeyRepositorier) HDWalletRepo {
+func NewAccountHDWalletRepo(accountKeyRepo cold.AccountKeyRepositorier) HDWalletRepo {
 	return &AccountHDWalletRepo{
 		accountKeyRepo: accountKeyRepo,
 	}

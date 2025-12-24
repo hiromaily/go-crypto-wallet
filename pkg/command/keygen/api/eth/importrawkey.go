@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum"
 )
 
-func runImportRawKey(eth ethgrp.Ethereumer, privKey, passPhrase string) error {
+func runImportRawKey(eth ethereum.Ethereumer, privKey, passPhrase string) error {
 	fmt.Println("import raw key")
 
 	// validation

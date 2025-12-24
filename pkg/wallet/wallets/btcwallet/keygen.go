@@ -7,13 +7,13 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/btcgrp"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
 )
 
 // BTCKeygen is keygen wallet object
 type BTCKeygen struct {
-	BTC      btcgrp.Bitcoiner
+	BTC      bitcoin.Bitcoiner
 	dbConn   *sql.DB
 	addrType address.AddrType
 	wtype    domainWallet.WalletType
@@ -28,7 +28,7 @@ type BTCKeygen struct {
 
 // NewBTCKeygen returns Keygen object
 func NewBTCKeygen(
-	btc btcgrp.Bitcoiner,
+	btc bitcoin.Bitcoiner,
 	dbConn *sql.DB,
 	addrType address.AddrType,
 	seeder service.Seeder,

@@ -8,10 +8,10 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/watch"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/storage/file"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/repository/watchrepo"
-	"github.com/hiromaily/go-crypto-wallet/pkg/tx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 )
 
 // TxCreator is TxCreator interface
@@ -23,13 +23,13 @@ type TxCreator interface {
 
 // TxCreate type
 type TxCreate struct {
-	eth             ethgrp.EtherTxCreator
+	eth             ethereum.EtherTxCreator
 	dbConn          *sql.DB
-	addrRepo        watchrepo.AddressRepositorier
-	txRepo          watchrepo.TxRepositorier
-	txDetailRepo    watchrepo.EthDetailTxRepositorier
-	payReqRepo      watchrepo.PaymentRequestRepositorier
-	txFileRepo      tx.FileRepositorier
+	addrRepo        watch.AddressRepositorier
+	txRepo          watch.TxRepositorier
+	txDetailRepo    watch.EthDetailTxRepositorier
+	payReqRepo      watch.PaymentRequestRepositorier
+	txFileRepo      file.TransactionFileRepositorier
 	depositReceiver domainAccount.AccountType
 	paymentSender   domainAccount.AccountType
 	wtype           domainWallet.WalletType
@@ -38,13 +38,13 @@ type TxCreate struct {
 
 // NewTxCreate returns TxCreate object
 func NewTxCreate(
-	eth ethgrp.EtherTxCreator,
+	eth ethereum.EtherTxCreator,
 	dbConn *sql.DB,
-	addrRepo watchrepo.AddressRepositorier,
-	txRepo watchrepo.TxRepositorier,
-	txDetailRepo watchrepo.EthDetailTxRepositorier,
-	payReqRepo watchrepo.PaymentRequestRepositorier,
-	txFileRepo tx.FileRepositorier,
+	addrRepo watch.AddressRepositorier,
+	txRepo watch.TxRepositorier,
+	txDetailRepo watch.EthDetailTxRepositorier,
+	payReqRepo watch.PaymentRequestRepositorier,
+	txFileRepo file.TransactionFileRepositorier,
 	depositReceiver domainAccount.AccountType,
 	paymentSender domainAccount.AccountType,
 	wtype domainWallet.WalletType,

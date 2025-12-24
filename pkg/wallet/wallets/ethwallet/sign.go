@@ -5,20 +5,20 @@ import (
 
 	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/api/ethgrp"
 )
 
 // ETHSign keygen wallet object
 type ETHSign struct {
-	ETH    ethgrp.Ethereumer
+	ETH    ethereum.Ethereumer
 	dbConn *sql.DB
 	wtype  domainWallet.WalletType
 }
 
 // NewETHSign returns ETHSign object
 func NewETHSign(
-	eth ethgrp.Ethereumer,
+	eth ethereum.Ethereumer,
 	dbConn *sql.DB,
 	walletType domainWallet.WalletType,
 ) *ETHSign {
