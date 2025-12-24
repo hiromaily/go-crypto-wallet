@@ -1224,7 +1224,9 @@ func (c *container) newETHKeygenSignTransactionUseCase() keygenusecase.SignTrans
 
 func (c *container) newXRPKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase {
 	return keygenusecasexrp.NewSignTransactionUseCase(
-		c.newXRPSigner().(*xrpsignsrv.Sign),
+		c.newXRP(),
+		c.newXRPAccountKeyRepo(),
+		c.newTxFileRepo(),
 	)
 }
 
