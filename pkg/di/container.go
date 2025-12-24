@@ -292,7 +292,7 @@ func (c *container) newBTCWalleter() wallets.Watcher {
 		c.newBTCWatchCreateTransactionUseCase(),
 		c.newBTCWatchMonitorTransactionUseCase(),
 		c.newBTCWatchSendTransactionUseCase(),
-		c.newWatchImportAddressUseCase(),
+		c.newBTCWatchImportAddressUseCase(),
 		c.newWatchCreatePaymentRequestUseCase(),
 		c.walletType,
 	)
@@ -1140,6 +1140,20 @@ func (c *container) newBTCWatchMonitorTransactionUseCase() watchusecase.MonitorT
 func (c *container) newBTCWatchSendTransactionUseCase() watchusecase.SendTransactionUseCase {
 	return watchusecasebtc.NewSendTransactionUseCase(
 		c.newBTCTxSender().(*btcwatchsrv.TxSend),
+	)
+}
+
+func (c *container) newBTCWatchImportAddressUseCase() watchusecase.ImportAddressUseCase {
+	return watchusecasebtc.NewImportAddressUseCase(
+		btcwatchsrv.NewAddressImport(
+			c.newBTC(),
+			c.newMySQLClient(),
+			c.newAddressRepo(),
+			c.newAddressFileRepo(),
+			c.conf.CoinTypeCode,
+			c.conf.AddressType,
+			c.walletType,
+		),
 	)
 }
 
