@@ -85,6 +85,6 @@ func (s *BTCSign) SignTx(filePath string) (string, bool, string, error) {
 
 // Done should be called before exit
 func (s *BTCSign) Done() {
-	s.dbConn.Close()
+	_ = s.dbConn.Close() // Best effort cleanup
 	s.BTC.Close()
 }

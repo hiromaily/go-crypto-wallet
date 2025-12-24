@@ -1,15 +1,17 @@
 package create
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
+	watchusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/watch"
+	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
-	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 )
 
-func runTransfer(wallet wallets.Watcher, account1, account2 string, amount, fee float64) error {
+func runTransfer(container di.Container, account1, account2 string, amount, fee float64) error {
 	// validator
 	if !domainAccount.ValidateAccountType(account1) {
 		return errors.New("account option [-account1] is invalid")
@@ -34,20 +36,27 @@ func runTransfer(wallet wallets.Watcher, account1, account2 string, amount, fee 
 	//	return fmt.Errorf("amount option [-amount] is invalid")
 	//}
 
-	hex, fileName, err := wallet.CreateTransferTx(
-		domainAccount.AccountType(account1),
-		domainAccount.AccountType(account2),
-		amount,
-		fee)
+	// Get use case from container
+	useCase := container.NewWatchCreateTransactionUseCase().(watchusecase.CreateTransactionUseCase)
+
+	output, err := useCase.Execute(context.Background(), watchusecase.CreateTransactionInput{
+		ActionType:      domainTx.ActionTypeTransfer.String(),
+		SenderAccount:   domainAccount.AccountType(account1),
+		ReceiverAccount: domainAccount.AccountType(account2),
+		Amount:          amount,
+		AdjustmentFee:   fee,
+	})
 	if err != nil {
-		return fmt.Errorf("fail to call CreateTransferTx() %w", err)
+		return fmt.Errorf("fail to create transfer transaction: %w", err)
 	}
-	if (wallet.CoinTypeCode() != domainCoin.ETH && wallet.CoinTypeCode() != domainCoin.XRP) && hex == "" {
+
+	if output.TransactionHex == "" {
 		fmt.Println("No utxo")
 		return nil
 	}
+
 	// TODO: output should be json if json option is true
-	fmt.Printf("[hex]: %s\n[fileName]: %s\n", hex, fileName)
+	fmt.Printf("[hex]: %s\n[fileName]: %s\n", output.TransactionHex, output.FileName)
 
 	return nil
 }

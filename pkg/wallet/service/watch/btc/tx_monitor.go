@@ -263,9 +263,9 @@ func (t *TxMonitor) updateTxTypeNotified(id int64, actionType domainTx.ActionTyp
 		}
 		defer func() {
 			if err != nil {
-				dtx.Rollback()
+				_ = dtx.Rollback() // Error already being handled
 			} else {
-				dtx.Commit()
+				_ = dtx.Commit() // Error already being handled
 			}
 		}()
 		_, err = t.txRepo.UpdateTxType(id, domainTx.TxTypeNotified)

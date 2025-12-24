@@ -56,7 +56,11 @@ func (*AddressFileRepository) ImportAddress(fileName string) ([]string, error) {
 		return nil, fmt.Errorf("os.Open(%s) error: %s", fileName, err)
 	}
 
-	defer file.Close()
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			err = fmt.Errorf("failed to close file: %w", cerr)
+		}
+	}()
 
 	var pubKeys []string
 

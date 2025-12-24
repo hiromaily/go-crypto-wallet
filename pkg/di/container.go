@@ -46,6 +46,22 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/xrpwallet"
+
+	// Use case imports
+	keygenusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/keygen"
+	keygenusecasebtc "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/keygen/btc"
+	keygenusecaseeth "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/keygen/eth"
+	keygenusecaseshared "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/keygen/shared"
+	keygenusecasexrp "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/keygen/xrp"
+	signusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/sign"
+	signusecasebtc "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/sign/btc"
+	signusecaseeth "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/sign/eth"
+	signusecasexrp "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/sign/xrp"
+	watchusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/watch"
+	watchusecasebtc "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/watch/btc"
+	watchusecaseeth "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/watch/eth"
+	watchusecaseshared "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/watch/shared"
+	watchusecasexrp "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/watch/xrp"
 )
 
 // Container is for DI container interface
@@ -53,6 +69,27 @@ type Container interface {
 	NewWalleter() wallets.Watcher
 	NewKeygener() wallets.Keygener
 	NewSigner(authName string) wallets.Signer
+
+	// Watch Use Cases
+	NewWatchCreateTransactionUseCase() any
+	NewWatchMonitorTransactionUseCase() any
+	NewWatchSendTransactionUseCase() any
+	NewWatchImportAddressUseCase() watchusecase.ImportAddressUseCase
+	NewWatchCreatePaymentRequestUseCase() watchusecase.CreatePaymentRequestUseCase
+
+	// Keygen Use Cases
+	NewKeygenGenerateHDWalletUseCase() keygenusecase.GenerateHDWalletUseCase
+	NewKeygenGenerateSeedUseCase() keygenusecase.GenerateSeedUseCase
+	NewKeygenExportAddressUseCase() keygenusecase.ExportAddressUseCase
+	NewKeygenImportPrivateKeyUseCase() keygenusecase.ImportPrivateKeyUseCase
+	NewKeygenCreateMultisigAddressUseCase() keygenusecase.CreateMultisigAddressUseCase
+	NewKeygenImportFullPubkeyUseCase() keygenusecase.ImportFullPubkeyUseCase
+	NewKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUseCase
+
+	// Sign Use Cases
+	NewSignTransactionUseCase() signusecase.SignTransactionUseCase
+	NewSignImportPrivateKeyUseCase(authType domainAccount.AuthType) signusecase.ImportPrivateKeyUseCase
+	NewSignExportFullPubkeyUseCase(authType domainAccount.AuthType) signusecase.ExportFullPubkeyUseCase
 }
 
 type container struct {
@@ -915,5 +952,294 @@ func (c *container) newSignFullPubkeyExporter(authType domainAccount.AuthType) s
 		c.conf.CoinTypeCode,
 		authType,
 		c.walletType,
+	)
+}
+
+//
+// Use Case Factory Methods
+//
+
+// Watch Use Cases
+
+func (c *container) NewWatchCreateTransactionUseCase() any {
+	switch {
+	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
+		return c.newBTCWatchCreateTransactionUseCase()
+	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
+		return c.newETHWatchCreateTransactionUseCase()
+	case c.conf.CoinTypeCode == domainCoin.XRP:
+		return c.newXRPWatchCreateTransactionUseCase()
+	default:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
+	}
+}
+
+func (c *container) NewWatchMonitorTransactionUseCase() any {
+	switch {
+	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
+		return c.newBTCWatchMonitorTransactionUseCase()
+	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
+		return c.newETHWatchMonitorTransactionUseCase()
+	case c.conf.CoinTypeCode == domainCoin.XRP:
+		return c.newXRPWatchMonitorTransactionUseCase()
+	default:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
+	}
+}
+
+func (c *container) NewWatchSendTransactionUseCase() any {
+	switch {
+	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
+		return c.newBTCWatchSendTransactionUseCase()
+	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
+		return c.newETHWatchSendTransactionUseCase()
+	case c.conf.CoinTypeCode == domainCoin.XRP:
+		return c.newXRPWatchSendTransactionUseCase()
+	default:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
+	}
+}
+
+func (c *container) NewWatchImportAddressUseCase() watchusecase.ImportAddressUseCase {
+	return c.newWatchImportAddressUseCase()
+}
+
+func (c *container) NewWatchCreatePaymentRequestUseCase() watchusecase.CreatePaymentRequestUseCase {
+	return c.newWatchCreatePaymentRequestUseCase()
+}
+
+// Keygen Use Cases
+
+func (c *container) NewKeygenGenerateHDWalletUseCase() keygenusecase.GenerateHDWalletUseCase {
+	return c.newKeygenGenerateHDWalletUseCase()
+}
+
+func (c *container) NewKeygenGenerateSeedUseCase() keygenusecase.GenerateSeedUseCase {
+	return c.newKeygenGenerateSeedUseCase()
+}
+
+func (c *container) NewKeygenExportAddressUseCase() keygenusecase.ExportAddressUseCase {
+	return c.newKeygenExportAddressUseCase()
+}
+
+func (c *container) NewKeygenImportPrivateKeyUseCase() keygenusecase.ImportPrivateKeyUseCase {
+	switch {
+	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
+		return c.newBTCKeygenImportPrivateKeyUseCase()
+	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
+		return c.newETHKeygenImportPrivateKeyUseCase()
+	default:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
+	}
+}
+
+func (c *container) NewKeygenCreateMultisigAddressUseCase() keygenusecase.CreateMultisigAddressUseCase {
+	return c.newBTCKeygenCreateMultisigAddressUseCase()
+}
+
+func (c *container) NewKeygenImportFullPubkeyUseCase() keygenusecase.ImportFullPubkeyUseCase {
+	return c.newBTCKeygenImportFullPubkeyUseCase()
+}
+
+func (c *container) NewKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUseCase {
+	return c.newXRPKeygenGenerateKeyUseCase()
+}
+
+// Sign Use Cases
+
+func (c *container) NewSignTransactionUseCase() signusecase.SignTransactionUseCase {
+	switch {
+	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
+		return c.newBTCSignTransactionUseCase()
+	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
+		return c.newETHSignTransactionUseCase()
+	case c.conf.CoinTypeCode == domainCoin.XRP:
+		return c.newXRPSignTransactionUseCase()
+	default:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
+	}
+}
+
+func (c *container) NewSignImportPrivateKeyUseCase(
+	authType domainAccount.AuthType,
+) signusecase.ImportPrivateKeyUseCase {
+	return c.newBTCSignImportPrivateKeyUseCase(authType)
+}
+
+func (c *container) NewSignExportFullPubkeyUseCase(
+	authType domainAccount.AuthType,
+) signusecase.ExportFullPubkeyUseCase {
+	return c.newBTCSignExportFullPubkeyUseCase(authType)
+}
+
+// BTC Watch Use Cases
+
+func (c *container) newBTCWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
+	return watchusecasebtc.NewCreateTransactionUseCase(
+		c.newBTCTxCreator().(*btcwatchsrv.TxCreate),
+	)
+}
+
+func (c *container) newBTCWatchMonitorTransactionUseCase() watchusecase.MonitorTransactionUseCase {
+	return watchusecasebtc.NewMonitorTransactionUseCase(
+		c.newBTCTxMonitorer().(*btcwatchsrv.TxMonitor),
+	)
+}
+
+func (c *container) newBTCWatchSendTransactionUseCase() watchusecase.SendTransactionUseCase {
+	return watchusecasebtc.NewSendTransactionUseCase(
+		c.newBTCTxSender().(*btcwatchsrv.TxSend),
+	)
+}
+
+// ETH Watch Use Cases
+
+func (c *container) newETHWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
+	return watchusecaseeth.NewCreateTransactionUseCase(
+		c.newETHTxCreator().(*ethwatchsrv.TxCreate),
+	)
+}
+
+func (c *container) newETHWatchMonitorTransactionUseCase() watchusecase.MonitorTransactionUseCase {
+	return watchusecaseeth.NewMonitorTransactionUseCase(
+		c.newETHTxMonitorer().(*ethwatchsrv.TxMonitor),
+	)
+}
+
+func (c *container) newETHWatchSendTransactionUseCase() watchusecase.SendTransactionUseCase {
+	return watchusecaseeth.NewSendTransactionUseCase(
+		c.newETHTxSender().(*ethwatchsrv.TxSend),
+	)
+}
+
+// XRP Watch Use Cases
+
+func (c *container) newXRPWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
+	return watchusecasexrp.NewCreateTransactionUseCase(
+		c.newXRPTxCreator().(*xrpwatchsrv.TxCreate),
+	)
+}
+
+func (c *container) newXRPWatchMonitorTransactionUseCase() watchusecase.MonitorTransactionUseCase {
+	return watchusecasexrp.NewMonitorTransactionUseCase(
+		c.newXRPTxMonitorer().(*xrpwatchsrv.TxMonitor),
+	)
+}
+
+func (c *container) newXRPWatchSendTransactionUseCase() watchusecase.SendTransactionUseCase {
+	return watchusecasexrp.NewSendTransactionUseCase(
+		c.newXRPTxSender().(*xrpwatchsrv.TxSend),
+	)
+}
+
+// Shared Watch Use Cases
+
+func (c *container) newWatchImportAddressUseCase() watchusecase.ImportAddressUseCase {
+	return watchusecaseshared.NewImportAddressUseCase(
+		c.newCommonAddressImporter().(*watchshared.AddressImport),
+	)
+}
+
+func (c *container) newWatchCreatePaymentRequestUseCase() watchusecase.CreatePaymentRequestUseCase {
+	return watchusecaseshared.NewCreatePaymentRequestUseCase(
+		c.newPaymentRequestCreator().(*watchshared.PaymentRequestCreate),
+	)
+}
+
+// Keygen Use Cases
+
+func (c *container) newKeygenGenerateHDWalletUseCase() keygenusecase.GenerateHDWalletUseCase {
+	return keygenusecaseshared.NewGenerateHDWalletUseCase(
+		c.newHdWallter().(*keygenshared.HDWallet),
+	)
+}
+
+func (c *container) newKeygenGenerateSeedUseCase() keygenusecase.GenerateSeedUseCase {
+	return keygenusecaseshared.NewGenerateSeedUseCase(
+		c.newSeeder().(*keygenshared.Seed),
+	)
+}
+
+func (c *container) newKeygenExportAddressUseCase() keygenusecase.ExportAddressUseCase {
+	return keygenusecaseshared.NewExportAddressUseCase(
+		c.newAddressExporter().(*keygenshared.AddressExport),
+	)
+}
+
+// BTC Keygen Use Cases
+
+func (c *container) newBTCKeygenImportPrivateKeyUseCase() keygenusecase.ImportPrivateKeyUseCase {
+	return keygenusecasebtc.NewImportPrivateKeyUseCase(
+		c.newPrivKeyer().(*btckeygensrv.PrivKey),
+	)
+}
+
+func (c *container) newBTCKeygenCreateMultisigAddressUseCase() keygenusecase.CreateMultisigAddressUseCase {
+	return keygenusecasebtc.NewCreateMultisigAddressUseCase(
+		c.newMultisiger().(*btckeygensrv.Multisig),
+	)
+}
+
+func (c *container) newBTCKeygenImportFullPubkeyUseCase() keygenusecase.ImportFullPubkeyUseCase {
+	return keygenusecasebtc.NewImportFullPubkeyUseCase(
+		c.newFullPubKeyImporter().(*btckeygensrv.FullPubkeyImport),
+	)
+}
+
+// ETH Keygen Use Cases
+
+func (c *container) newETHKeygenImportPrivateKeyUseCase() keygenusecase.ImportPrivateKeyUseCase {
+	return keygenusecaseeth.NewImportPrivateKeyUseCase(
+		c.newPrivKeyer().(*ethkeygensrv.PrivKey),
+	)
+}
+
+// XRP Keygen Use Cases
+
+func (c *container) newXRPKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUseCase {
+	return keygenusecasexrp.NewGenerateKeyUseCase(
+		c.newXRPKeyGenerator().(*xrpkeygensrv.XRPKeyGenerate),
+	)
+}
+
+// Sign Use Cases
+
+// BTC Sign Use Cases
+
+func (c *container) newBTCSignTransactionUseCase() signusecase.SignTransactionUseCase {
+	return signusecasebtc.NewSignTransactionUseCase(
+		c.newSigner().(*btcsignsrv.Sign),
+	)
+}
+
+func (c *container) newBTCSignImportPrivateKeyUseCase(
+	authType domainAccount.AuthType,
+) signusecase.ImportPrivateKeyUseCase {
+	return signusecasebtc.NewImportPrivateKeyUseCase(
+		c.newSignPrivKeyer(authType).(*btcsignsrv.PrivKey),
+	)
+}
+
+func (c *container) newBTCSignExportFullPubkeyUseCase(
+	authType domainAccount.AuthType,
+) signusecase.ExportFullPubkeyUseCase {
+	return signusecasebtc.NewExportFullPubkeyUseCase(
+		c.newSignFullPubkeyExporter(authType).(*btcsignsrv.FullPubkeyExport),
+	)
+}
+
+// ETH Sign Use Cases
+
+func (c *container) newETHSignTransactionUseCase() signusecase.SignTransactionUseCase {
+	return signusecaseeth.NewSignTransactionUseCase(
+		c.newETHSigner().(*ethsignsrv.Sign),
+	)
+}
+
+// XRP Sign Use Cases
+
+func (c *container) newXRPSignTransactionUseCase() signusecase.SignTransactionUseCase {
+	return signusecasexrp.NewSignTransactionUseCase(
+		c.newXRPSigner().(*xrpsignsrv.Sign),
 	)
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/monitor"
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/watch/send"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"
@@ -20,14 +21,20 @@ import (
 )
 
 // AddCommands adds all watch subcommands to the root command
-func AddCommands(rootCmd *cobra.Command, wallet *wallets.Watcher, version string, confPtr *config.WalletRoot) {
+func AddCommands(
+	rootCmd *cobra.Command,
+	wallet *wallets.Watcher,
+	container di.Container,
+	version string,
+	confPtr *config.WalletRoot,
+) {
 	// Import command
 	importCmd := &cobra.Command{
 		Use:   "import",
 		Short: "import resources",
 	}
 	rootCmd.AddCommand(importCmd)
-	imports.AddCommands(importCmd, wallet)
+	imports.AddCommands(importCmd, wallet, container)
 
 	// Create command
 	createCmd := &cobra.Command{
@@ -35,10 +42,10 @@ func AddCommands(rootCmd *cobra.Command, wallet *wallets.Watcher, version string
 		Short: "create resources",
 	}
 	rootCmd.AddCommand(createCmd)
-	create.AddCommands(createCmd, wallet)
+	create.AddCommands(createCmd, wallet, container)
 
 	// Send command
-	sendCmd := send.AddCommand(wallet)
+	sendCmd := send.AddCommand(wallet, container)
 	rootCmd.AddCommand(sendCmd)
 
 	// Monitor command
@@ -47,7 +54,7 @@ func AddCommands(rootCmd *cobra.Command, wallet *wallets.Watcher, version string
 		Short: "monitor resources",
 	}
 	rootCmd.AddCommand(monitorCmd)
-	monitor.AddCommands(monitorCmd, wallet)
+	monitor.AddCommands(monitorCmd, wallet, container)
 
 	// API command - wallet-type specific, dynamically configured
 	apiCmd := &cobra.Command{

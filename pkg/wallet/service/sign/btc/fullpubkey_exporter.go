@@ -69,7 +69,11 @@ func (f *FullPubkeyExport) exportAccountKey(
 		return "", fmt.Errorf("fail to call os.Create(%s): %w", fileName, err)
 	}
 
-	defer file.Close()
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			err = fmt.Errorf("failed to close file: %w", cerr)
+		}
+	}()
 
 	writer := bufio.NewWriter(file)
 

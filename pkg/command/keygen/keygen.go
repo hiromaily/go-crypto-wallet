@@ -11,20 +11,21 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/keygen/export"
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/keygen/imports"
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/keygen/sign"
+	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"
 )
 
 // AddCommands adds all keygen subcommands to the root command
-func AddCommands(rootCmd *cobra.Command, wallet *wallets.Keygener, version string) {
+func AddCommands(rootCmd *cobra.Command, wallet *wallets.Keygener, container di.Container, version string) {
 	// Create command
 	createCmd := &cobra.Command{
 		Use:   "create",
 		Short: "create resources",
 	}
 	rootCmd.AddCommand(createCmd)
-	create.AddCommands(createCmd, wallet)
+	create.AddCommands(createCmd, wallet, container)
 
 	// Export command
 	exportCmd := &cobra.Command{
@@ -32,7 +33,7 @@ func AddCommands(rootCmd *cobra.Command, wallet *wallets.Keygener, version strin
 		Short: "export resources",
 	}
 	rootCmd.AddCommand(exportCmd)
-	export.AddCommands(exportCmd, wallet)
+	export.AddCommands(exportCmd, wallet, container)
 
 	// Import command
 	importCmd := &cobra.Command{
@@ -40,7 +41,7 @@ func AddCommands(rootCmd *cobra.Command, wallet *wallets.Keygener, version strin
 		Short: "import resources",
 	}
 	rootCmd.AddCommand(importCmd)
-	imports.AddCommands(importCmd, wallet)
+	imports.AddCommands(importCmd, wallet, container)
 
 	// Sign command
 	signCmd := &cobra.Command{
@@ -48,7 +49,7 @@ func AddCommands(rootCmd *cobra.Command, wallet *wallets.Keygener, version strin
 		Short: "sign unsigned transaction",
 	}
 	rootCmd.AddCommand(signCmd)
-	sign.AddCommands(signCmd, wallet)
+	sign.AddCommands(signCmd, wallet, container)
 
 	// API command - wallet-type specific, dynamically configured
 	apiCmd := &cobra.Command{

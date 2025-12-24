@@ -1,13 +1,15 @@
 package imports
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
+	watchusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/watch"
+	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 )
 
-func runAddress(wallet wallets.Watcher, filePath string, isRescan bool) error {
+func runAddress(container di.Container, filePath string, isRescan bool) error {
 	fmt.Println("-file: " + filePath)
 
 	// validator
@@ -15,10 +17,16 @@ func runAddress(wallet wallets.Watcher, filePath string, isRescan bool) error {
 		return errors.New("file path option [-file] is required")
 	}
 
+	// Get use case from container
+	useCase := container.NewWatchImportAddressUseCase()
+
 	// import public address
-	err := wallet.ImportAddress(filePath, isRescan)
+	err := useCase.Execute(context.Background(), watchusecase.ImportAddressInput{
+		FileName: filePath,
+		Rescan:   isRescan,
+	})
 	if err != nil {
-		return fmt.Errorf("fail to call ImportAddress() %w", err)
+		return fmt.Errorf("fail to import address: %w", err)
 	}
 	fmt.Println("Done!")
 

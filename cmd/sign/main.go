@@ -42,7 +42,8 @@ var (
 	coinTypeCode    string
 
 	// Wallet instance
-	walleter wallets.Signer
+	walleter  wallets.Signer
+	container di.Container
 )
 
 func initializeWallet() error {
@@ -85,7 +86,7 @@ func initializeWallet() error {
 	}
 
 	// create wallet
-	container := di.NewContainer(conf, accountConf, walletType)
+	container = di.NewContainer(conf, accountConf, walletType)
 	walleter = container.NewSigner(authName)
 
 	return nil
@@ -134,7 +135,7 @@ func main() {
 	rootCmd.PersistentFlags().StringVarP(&btcWallet, "wallet", "w", "", "specify wallet.dat in bitcoin core")
 
 	// Add subcommands
-	sign.AddCommands(rootCmd, &walleter, appVersion)
+	sign.AddCommands(rootCmd, &walleter, container, appVersion)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

@@ -99,6 +99,6 @@ func (k *BTCKeygen) SignTx(filePath string) (string, bool, string, error) {
 
 // Done should be called before exit
 func (k *BTCKeygen) Done() {
-	k.dbConn.Close()
+	_ = k.dbConn.Close() // Best effort cleanup
 	k.BTC.Close()
 }

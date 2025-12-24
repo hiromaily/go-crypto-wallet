@@ -1,25 +1,36 @@
 package create
 
 import (
+	"context"
 	"fmt"
 
-	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
+	watchusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/watch"
+	"github.com/hiromaily/go-crypto-wallet/pkg/di"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 )
 
-func runDeposit(wallet wallets.Watcher, fee float64) error {
+func runDeposit(container di.Container, fee float64) error {
 	// Detect transaction for clients from blockchain network and create deposit unsigned transaction
 	// It would be run manually on the daily basis because signature is manual task
-	hex, fileName, err := wallet.CreateDepositTx(fee)
+
+	// Get use case from container
+	useCase := container.NewWatchCreateTransactionUseCase().(watchusecase.CreateTransactionUseCase)
+
+	output, err := useCase.Execute(context.Background(), watchusecase.CreateTransactionInput{
+		ActionType:    domainTx.ActionTypeDeposit.String(),
+		AdjustmentFee: fee,
+	})
 	if err != nil {
-		return fmt.Errorf("fail to call CreateDepositTx() %w", err)
+		return fmt.Errorf("fail to create deposit transaction: %w", err)
 	}
-	if domainCoin.IsBTCGroup(wallet.CoinTypeCode()) && hex == "" {
+
+	if output.TransactionHex == "" {
 		fmt.Println("No utxo")
 		return nil
 	}
+
 	// TODO: output should be json if json option is true
-	fmt.Printf("[hex]: %s\n[fileName]: %s\n", hex, fileName)
+	fmt.Printf("[hex]: %s\n[fileName]: %s\n", output.TransactionHex, output.FileName)
 
 	return nil
 }

@@ -78,9 +78,9 @@ func (t *TxCreate) updateDB(
 	}
 	defer func() {
 		if err != nil {
-			dtx.Rollback()
+			_ = dtx.Rollback() // Error already being handled
 		} else {
-			dtx.Commit()
+			_ = dtx.Commit() // Error already being handled
 		}
 	}()
 
