@@ -59,13 +59,6 @@ func (e *Ethereum) NewAccount(
 	if err != nil {
 		return "", fmt.Errorf("fail to call rpc.CallContext(personal_newAccount): %w", err)
 	}
-	// if e.isParity {
-	//	//TODO:parity client generates file with UUID, so add address to filename if parity client
-	//	err = e.RenameParityKeyFile(address, accountType)
-	//	if err != nil {
-	//		return "", fmt.Errorf("fail to call RenameParityKeyFile(address): %w", err)
-	//	}
-	//}
 	return address, nil
 }
 

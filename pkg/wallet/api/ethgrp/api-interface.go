@@ -33,7 +33,6 @@ type Ethereumer interface {
 	ToECDSA(privKey string) (*ecdsa.PrivateKey, error)
 	GetKeyDir() string
 	GetPrivKey(hexAddr, password string) (*keystore.Key, error)
-	RenameParityKeyFile(hexAddr string, accountType domainAccount.AccountType) error
 	// rpc_admin
 	AddPeer(ctx context.Context, nodeURL string) error
 	AdminDataDir(ctx context.Context) (string, error)
