@@ -1217,7 +1217,8 @@ func (c *container) newBTCKeygenSignTransactionUseCase() keygenusecase.SignTrans
 
 func (c *container) newETHKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase {
 	return keygenusecaseeth.NewSignTransactionUseCase(
-		c.newETHSigner().(*ethsignsrv.Sign),
+		c.newETH(),
+		c.newTxFileRepo(),
 	)
 }
 
