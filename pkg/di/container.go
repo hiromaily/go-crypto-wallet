@@ -1208,7 +1208,10 @@ func (c *container) newXRPKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUs
 
 func (c *container) newBTCKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase {
 	return keygenusecasebtc.NewSignTransactionUseCase(
-		c.newSigner().(*btcsignsrv.Sign),
+		c.newBTC(),
+		c.newAccountKeyRepo(),
+		c.newTxFileRepo(),
+		c.newMultiAccount(),
 	)
 }
 
