@@ -69,6 +69,27 @@ type Container interface {
 	NewWalleter() wallets.Watcher
 	NewKeygener() wallets.Keygener
 	NewSigner(authName string) wallets.Signer
+
+	// Watch Use Cases
+	NewWatchCreateTransactionUseCase() interface{}
+	NewWatchMonitorTransactionUseCase() interface{}
+	NewWatchSendTransactionUseCase() interface{}
+	NewWatchImportAddressUseCase() watchusecase.ImportAddressUseCase
+	NewWatchCreatePaymentRequestUseCase() watchusecase.CreatePaymentRequestUseCase
+
+	// Keygen Use Cases
+	NewKeygenGenerateHDWalletUseCase() keygenusecase.GenerateHDWalletUseCase
+	NewKeygenGenerateSeedUseCase() keygenusecase.GenerateSeedUseCase
+	NewKeygenExportAddressUseCase() keygenusecase.ExportAddressUseCase
+	NewKeygenImportPrivateKeyUseCase() keygenusecase.ImportPrivateKeyUseCase
+	NewKeygenCreateMultisigAddressUseCase() keygenusecase.CreateMultisigAddressUseCase
+	NewKeygenImportFullPubkeyUseCase() keygenusecase.ImportFullPubkeyUseCase
+	NewKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUseCase
+
+	// Sign Use Cases
+	NewSignTransactionUseCase() signusecase.SignTransactionUseCase
+	NewSignImportPrivateKeyUseCase(authType domainAccount.AuthType) signusecase.ImportPrivateKeyUseCase
+	NewSignExportFullPubkeyUseCase(authType domainAccount.AuthType) signusecase.ExportFullPubkeyUseCase
 }
 
 type container struct {
@@ -940,7 +961,7 @@ func (c *container) newSignFullPubkeyExporter(authType domainAccount.AuthType) s
 
 // Watch Use Cases
 
-func (c *container) newWatchCreateTransactionUseCase() interface{} {
+func (c *container) NewWatchCreateTransactionUseCase() interface{} {
 	switch {
 	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
 		return c.newBTCWatchCreateTransactionUseCase()
@@ -953,7 +974,7 @@ func (c *container) newWatchCreateTransactionUseCase() interface{} {
 	}
 }
 
-func (c *container) newWatchMonitorTransactionUseCase() interface{} {
+func (c *container) NewWatchMonitorTransactionUseCase() interface{} {
 	switch {
 	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
 		return c.newBTCWatchMonitorTransactionUseCase()
@@ -966,7 +987,7 @@ func (c *container) newWatchMonitorTransactionUseCase() interface{} {
 	}
 }
 
-func (c *container) newWatchSendTransactionUseCase() interface{} {
+func (c *container) NewWatchSendTransactionUseCase() interface{} {
 	switch {
 	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
 		return c.newBTCWatchSendTransactionUseCase()
@@ -977,6 +998,78 @@ func (c *container) newWatchSendTransactionUseCase() interface{} {
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
 	}
+}
+
+func (c *container) NewWatchImportAddressUseCase() watchusecase.ImportAddressUseCase {
+	return c.newWatchImportAddressUseCase()
+}
+
+func (c *container) NewWatchCreatePaymentRequestUseCase() watchusecase.CreatePaymentRequestUseCase {
+	return c.newWatchCreatePaymentRequestUseCase()
+}
+
+// Keygen Use Cases
+
+func (c *container) NewKeygenGenerateHDWalletUseCase() keygenusecase.GenerateHDWalletUseCase {
+	return c.newKeygenGenerateHDWalletUseCase()
+}
+
+func (c *container) NewKeygenGenerateSeedUseCase() keygenusecase.GenerateSeedUseCase {
+	return c.newKeygenGenerateSeedUseCase()
+}
+
+func (c *container) NewKeygenExportAddressUseCase() keygenusecase.ExportAddressUseCase {
+	return c.newKeygenExportAddressUseCase()
+}
+
+func (c *container) NewKeygenImportPrivateKeyUseCase() keygenusecase.ImportPrivateKeyUseCase {
+	switch {
+	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
+		return c.newBTCKeygenImportPrivateKeyUseCase()
+	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
+		return c.newETHKeygenImportPrivateKeyUseCase()
+	default:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
+	}
+}
+
+func (c *container) NewKeygenCreateMultisigAddressUseCase() keygenusecase.CreateMultisigAddressUseCase {
+	return c.newBTCKeygenCreateMultisigAddressUseCase()
+}
+
+func (c *container) NewKeygenImportFullPubkeyUseCase() keygenusecase.ImportFullPubkeyUseCase {
+	return c.newBTCKeygenImportFullPubkeyUseCase()
+}
+
+func (c *container) NewKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUseCase {
+	return c.newXRPKeygenGenerateKeyUseCase()
+}
+
+// Sign Use Cases
+
+func (c *container) NewSignTransactionUseCase() signusecase.SignTransactionUseCase {
+	switch {
+	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
+		return c.newBTCSignTransactionUseCase()
+	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
+		return c.newETHSignTransactionUseCase()
+	case c.conf.CoinTypeCode == domainCoin.XRP:
+		return c.newXRPSignTransactionUseCase()
+	default:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
+	}
+}
+
+func (c *container) NewSignImportPrivateKeyUseCase(
+	authType domainAccount.AuthType,
+) signusecase.ImportPrivateKeyUseCase {
+	return c.newBTCSignImportPrivateKeyUseCase(authType)
+}
+
+func (c *container) NewSignExportFullPubkeyUseCase(
+	authType domainAccount.AuthType,
+) signusecase.ExportFullPubkeyUseCase {
+	return c.newBTCSignExportFullPubkeyUseCase(authType)
 }
 
 // BTC Watch Use Cases

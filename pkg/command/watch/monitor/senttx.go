@@ -1,16 +1,21 @@
 package monitor
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
+	watchusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/watch"
+	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 )
 
-func runSentTx(wallet wallets.Watcher, _ string) error {
+func runSentTx(container di.Container, _ string) error {
+	// Get use case from container
+	useCase := container.NewWatchMonitorTransactionUseCase().(watchusecase.MonitorTransactionUseCase)
+
 	// monitor sent transactions
-	err := wallet.UpdateTxStatus()
+	err := useCase.UpdateTxStatus(context.Background())
 	if err != nil {
-		return fmt.Errorf("fail to call UpdateTxStatus() %w", err)
+		return fmt.Errorf("fail to update transaction status: %w", err)
 	}
 
 	return nil

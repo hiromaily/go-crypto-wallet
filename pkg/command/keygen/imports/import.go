@@ -3,11 +3,12 @@ package imports
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
 // AddCommands adds all import subcommands
-func AddCommands(parentCmd *cobra.Command, wallet *wallets.Keygener) {
+func AddCommands(parentCmd *cobra.Command, wallet *wallets.Keygener, container di.Container) {
 	// privkey command
 	var privkeyAccount string
 	privkeyCmd := &cobra.Command{

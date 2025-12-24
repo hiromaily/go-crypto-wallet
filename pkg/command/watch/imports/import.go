@@ -3,11 +3,12 @@ package imports
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
 // AddCommands adds all import subcommands
-func AddCommands(parentCmd *cobra.Command, wallet *wallets.Watcher) {
+func AddCommands(parentCmd *cobra.Command, wallet *wallets.Watcher, container di.Container) {
 	// address command
 	var (
 		addressFilePath string
@@ -17,7 +18,7 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Watcher) {
 		Use:   "address",
 		Short: "import generated addresses by keygen wallet",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runAddress(*wallet, addressFilePath, addressIsRescan)
+			return runAddress(container, addressFilePath, addressIsRescan)
 		},
 	}
 	addressCmd.Flags().StringVar(&addressFilePath, "file", "", "import file path for generated addresses")
