@@ -981,16 +981,20 @@ func (c *container) NewSignExportFullPubkeyUseCase(
 }
 
 func (c *container) NewSignGenerateSeedUseCase() signusecase.GenerateSeedUseCase {
-	return signusecaseshared.NewGenerateSeedUseCase(c.newSeeder())
+	return signusecaseshared.NewGenerateSeedUseCase(c.newSeedRepo())
 }
 
 func (c *container) NewSignStoreSeedUseCase() signusecase.StoreSeedUseCase {
-	return signusecaseshared.NewStoreSeedUseCase(c.newSeeder())
+	return signusecaseshared.NewStoreSeedUseCase(c.newSeedRepo())
 }
 
 func (c *container) NewSignGenerateAuthKeyUseCase() signusecase.GenerateAuthKeyUseCase {
 	authType := c.AuthType()
-	return signusecaseshared.NewGenerateAuthKeyUseCase(c.newSignHdWallter(authType))
+	return signusecaseshared.NewGenerateAuthKeyUseCase(
+		c.newSignHdWalletRepo(authType),
+		c.newKeyGenerator(),
+		c.conf.CoinTypeCode,
+	)
 }
 
 // BTC Watch Use Cases
