@@ -288,11 +288,11 @@ func (c *container) newBTCWalleter() wallets.Watcher {
 		c.newBTC(),
 		c.newMySQLClient(),
 		c.conf.AddressType,
-		c.newBTCAddressImporter(),
-		c.newBTCTxCreator(),
-		c.newBTCTxSender(),
-		c.newBTCTxMonitorer(),
-		c.newPaymentRequestCreator(),
+		c.newBTCWatchCreateTransactionUseCase(),
+		c.newBTCWatchMonitorTransactionUseCase(),
+		c.newBTCWatchSendTransactionUseCase(),
+		c.newWatchImportAddressUseCase(),
+		c.newWatchCreatePaymentRequestUseCase(),
 		c.walletType,
 	)
 }
@@ -301,11 +301,11 @@ func (c *container) newETHWalleter() wallets.Watcher {
 	return ethwallet.NewETHWatch(
 		c.newETH(),
 		c.newMySQLClient(),
-		c.newCommonAddressImporter(),
-		c.newETHTxCreator(),
-		c.newETHTxSender(),
-		c.newETHTxMonitorer(),
-		c.newPaymentRequestCreator(),
+		c.newETHWatchCreateTransactionUseCase(),
+		c.newETHWatchMonitorTransactionUseCase(),
+		c.newETHWatchSendTransactionUseCase(),
+		c.newWatchImportAddressUseCase(),
+		c.newWatchCreatePaymentRequestUseCase(),
 		c.walletType,
 	)
 }
@@ -314,11 +314,11 @@ func (c *container) newXRPWalleter() wallets.Watcher {
 	return xrpwallet.NewXRPWatch(
 		c.newXRP(),
 		c.newMySQLClient(),
-		c.newCommonAddressImporter(),
-		c.newXRPTxCreator(),
-		c.newXRPTxSender(),
-		c.newXRPTxMonitorer(),
-		c.newPaymentRequestCreator(),
+		c.newXRPWatchCreateTransactionUseCase(),
+		c.newXRPWatchMonitorTransactionUseCase(),
+		c.newXRPWatchSendTransactionUseCase(),
+		c.newWatchImportAddressUseCase(),
+		c.newWatchCreatePaymentRequestUseCase(),
 		c.walletType,
 	)
 }
@@ -326,18 +326,6 @@ func (c *container) newXRPWalleter() wallets.Watcher {
 //
 // Wallet Service
 //
-
-func (c *container) newBTCAddressImporter() service.AddressImporter {
-	return btcwatchsrv.NewAddressImport(
-		c.newBTC(),
-		c.newMySQLClient(),
-		c.newAddressRepo(),
-		c.newAddressFileRepo(),
-		c.conf.CoinTypeCode,
-		c.conf.AddressType,
-		c.walletType,
-	)
-}
 
 func (c *container) newCommonAddressImporter() watchshared.AddressImporter {
 	return watchshared.NewAddressImport(

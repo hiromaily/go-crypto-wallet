@@ -1,27 +1,29 @@
 package btcwallet
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	watchusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
 )
 
 // BTCWatch watch only wallet object
 type BTCWatch struct {
-	BTC      bitcoin.Bitcoiner
-	dbConn   *sql.DB
-	addrType address.AddrType
-	wtype    domainWallet.WalletType
-	service.AddressImporter
-	service.TxCreator
-	service.TxSender
-	service.TxMonitorer
-	service.PaymentRequestCreator
+	BTC                     bitcoin.Bitcoiner
+	dbConn                  *sql.DB
+	addrType                address.AddrType
+	wtype                   domainWallet.WalletType
+	createTxUseCase         watchusecase.CreateTransactionUseCase
+	monitorTxUseCase        watchusecase.MonitorTransactionUseCase
+	sendTxUseCase           watchusecase.SendTransactionUseCase
+	importAddrUseCase       watchusecase.ImportAddressUseCase
+	createPaymentReqUseCase watchusecase.CreatePaymentRequestUseCase
 }
 
 // NewBTCWatch returns Watch object
@@ -29,61 +31,96 @@ func NewBTCWatch(
 	btc bitcoin.Bitcoiner,
 	dbConn *sql.DB,
 	addrType address.AddrType,
-	addrImporter service.AddressImporter,
-	txCreator service.TxCreator,
-	txSender service.TxSender,
-	txMonitorer service.TxMonitorer,
-	paymentRequestCreator service.PaymentRequestCreator,
+	createTxUseCase watchusecase.CreateTransactionUseCase,
+	monitorTxUseCase watchusecase.MonitorTransactionUseCase,
+	sendTxUseCase watchusecase.SendTransactionUseCase,
+	importAddrUseCase watchusecase.ImportAddressUseCase,
+	createPaymentReqUseCase watchusecase.CreatePaymentRequestUseCase,
 	walletType domainWallet.WalletType,
 ) *BTCWatch {
 	return &BTCWatch{
-		BTC:                   btc,
-		dbConn:                dbConn,
-		addrType:              addrType,
-		wtype:                 walletType,
-		AddressImporter:       addrImporter,
-		TxCreator:             txCreator,
-		TxSender:              txSender,
-		TxMonitorer:           txMonitorer,
-		PaymentRequestCreator: paymentRequestCreator,
+		BTC:                     btc,
+		dbConn:                  dbConn,
+		addrType:                addrType,
+		wtype:                   walletType,
+		createTxUseCase:         createTxUseCase,
+		monitorTxUseCase:        monitorTxUseCase,
+		sendTxUseCase:           sendTxUseCase,
+		importAddrUseCase:       importAddrUseCase,
+		createPaymentReqUseCase: createPaymentReqUseCase,
 	}
 }
 
 // ImportAddress imports address
 func (w *BTCWatch) ImportAddress(fileName string, isRescan bool) error {
-	return w.AddressImporter.ImportAddress(fileName, isRescan)
+	return w.importAddrUseCase.Execute(context.Background(), watchusecase.ImportAddressInput{
+		FileName: fileName,
+		Rescan:   isRescan,
+	})
 }
 
 // CreateDepositTx creates deposit unsigned transaction
 func (w *BTCWatch) CreateDepositTx(adjustmentFee float64) (string, string, error) {
-	return w.TxCreator.CreateDepositTx(adjustmentFee)
+	output, err := w.createTxUseCase.Execute(context.Background(), watchusecase.CreateTransactionInput{
+		ActionType:    domainTx.ActionTypeDeposit.String(),
+		AdjustmentFee: adjustmentFee,
+	})
+	if err != nil {
+		return "", "", err
+	}
+	return output.TransactionHex, output.FileName, nil
 }
 
 // CreatePaymentTx creates payment unsigned transaction
 func (w *BTCWatch) CreatePaymentTx(adjustmentFee float64) (string, string, error) {
-	return w.TxCreator.CreatePaymentTx(adjustmentFee)
+	output, err := w.createTxUseCase.Execute(context.Background(), watchusecase.CreateTransactionInput{
+		ActionType:    domainTx.ActionTypePayment.String(),
+		AdjustmentFee: adjustmentFee,
+	})
+	if err != nil {
+		return "", "", err
+	}
+	return output.TransactionHex, output.FileName, nil
 }
 
 // CreateTransferTx creates transfer unsigned transaction
 func (w *BTCWatch) CreateTransferTx(
 	sender, receiver domainAccount.AccountType, floatAmount, adjustmentFee float64,
 ) (string, string, error) {
-	return w.TxCreator.CreateTransferTx(sender, receiver, floatAmount, adjustmentFee)
+	output, err := w.createTxUseCase.Execute(context.Background(), watchusecase.CreateTransactionInput{
+		ActionType:      domainTx.ActionTypeTransfer.String(),
+		SenderAccount:   sender,
+		ReceiverAccount: receiver,
+		Amount:          floatAmount,
+		AdjustmentFee:   adjustmentFee,
+	})
+	if err != nil {
+		return "", "", err
+	}
+	return output.TransactionHex, output.FileName, nil
 }
 
 // UpdateTxStatus updates transaction status
 func (w *BTCWatch) UpdateTxStatus() error {
-	return w.TxMonitorer.UpdateTxStatus()
+	return w.monitorTxUseCase.UpdateTxStatus(context.Background())
 }
 
 // MonitorBalance monitors balance
 func (w *BTCWatch) MonitorBalance(confirmationNum uint64) error {
-	return w.TxMonitorer.MonitorBalance(confirmationNum)
+	return w.monitorTxUseCase.MonitorBalance(context.Background(), watchusecase.MonitorBalanceInput{
+		ConfirmationNum: confirmationNum,
+	})
 }
 
 // SendTx sends signed transaction
 func (w *BTCWatch) SendTx(filePath string) (string, error) {
-	return w.TxSender.SendTx(filePath)
+	output, err := w.sendTxUseCase.Execute(context.Background(), watchusecase.SendTransactionInput{
+		FilePath: filePath,
+	})
+	if err != nil {
+		return "", err
+	}
+	return output.TxID, nil
 }
 
 // CreatePaymentRequest creates payment_request dummy data for development
@@ -96,7 +133,9 @@ func (w *BTCWatch) CreatePaymentRequest() error {
 		0.00003,
 	}
 
-	return w.PaymentRequestCreator.CreatePaymentRequest(amtList)
+	return w.createPaymentReqUseCase.Execute(context.Background(), watchusecase.CreatePaymentRequestInput{
+		AmountList: amtList,
+	})
 }
 
 // Done should be called before exit
