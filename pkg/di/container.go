@@ -1248,7 +1248,10 @@ func (c *container) newBTCSignImportPrivateKeyUseCase(
 	authType domainAccount.AuthType,
 ) signusecase.ImportPrivateKeyUseCase {
 	return signusecasebtc.NewImportPrivateKeyUseCase(
-		c.newSignPrivKeyer(authType).(*btcsignsrv.PrivKey),
+		c.newBTC(),
+		c.newAuthKeyRepo(),
+		authType,
+		c.walletType,
 	)
 }
 
