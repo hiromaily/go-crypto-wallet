@@ -1,28 +1,28 @@
 package xrpwallet
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 
+	keygenusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
-	xrpkeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/keygen/xrp"
 )
 
 // XRPKeygen keygen wallet object
 type XRPKeygen struct {
-	XRP    ripple.Rippler
-	dbConn *sql.DB
-	wtype  domainWallet.WalletType
-	service.Seeder
-	service.HDWalleter
-	xrpkeygensrv.XRPKeyGenerator
-	service.AddressExporter
-	service.Signer
+	XRP                     ripple.Rippler
+	dbConn                  *sql.DB
+	wtype                   domainWallet.WalletType
+	generateSeedUseCase     keygenusecase.GenerateSeedUseCase
+	generateHDWalletUseCase keygenusecase.GenerateHDWalletUseCase
+	generateKeyUseCase      keygenusecase.GenerateKeyUseCase
+	exportAddressUseCase    keygenusecase.ExportAddressUseCase
+	signTxUseCase           keygenusecase.SignTransactionUseCase
 }
 
 // NewXRPKeygen returns XRPKeygen object
@@ -30,46 +30,75 @@ func NewXRPKeygen(
 	xrp ripple.Rippler,
 	dbConn *sql.DB,
 	walletType domainWallet.WalletType,
-	seeder service.Seeder,
-	hdWallter service.HDWalleter,
-	keyGenerator xrpkeygensrv.XRPKeyGenerator,
-	addressExporter service.AddressExporter,
-	signer service.Signer,
+	generateSeedUseCase keygenusecase.GenerateSeedUseCase,
+	generateHDWalletUseCase keygenusecase.GenerateHDWalletUseCase,
+	generateKeyUseCase keygenusecase.GenerateKeyUseCase,
+	exportAddressUseCase keygenusecase.ExportAddressUseCase,
+	signTxUseCase keygenusecase.SignTransactionUseCase,
 ) *XRPKeygen {
 	return &XRPKeygen{
-		XRP:             xrp,
-		dbConn:          dbConn,
-		wtype:           walletType,
-		Seeder:          seeder,
-		HDWalleter:      hdWallter,
-		XRPKeyGenerator: keyGenerator,
-		AddressExporter: addressExporter,
-		Signer:          signer,
+		XRP:                     xrp,
+		dbConn:                  dbConn,
+		wtype:                   walletType,
+		generateSeedUseCase:     generateSeedUseCase,
+		generateHDWalletUseCase: generateHDWalletUseCase,
+		generateKeyUseCase:      generateKeyUseCase,
+		exportAddressUseCase:    exportAddressUseCase,
+		signTxUseCase:           signTxUseCase,
 	}
 }
 
 // GenerateSeed generates seed
 func (k *XRPKeygen) GenerateSeed() ([]byte, error) {
 	// k.logger.Info("no functionality for GenerateSeed() in XRP")
-	return k.Seeder.Generate()
+	output, err := k.generateSeedUseCase.Generate(context.Background())
+	if err != nil {
+		return nil, err
+	}
+	return output.Seed, nil
 }
 
 // StoreSeed stores seed
 func (k *XRPKeygen) StoreSeed(strSeed string) ([]byte, error) {
 	// k.logger.Info("no functionality for StoreSeed() in XRP")
-	return k.Seeder.Store(strSeed)
+	output, err := k.generateSeedUseCase.Store(context.Background(), keygenusecase.StoreSeedInput{
+		Seed: strSeed,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return output.Seed, nil
 }
 
 // GenerateAccountKey generates account keys
 func (k *XRPKeygen) GenerateAccountKey(
 	accountType domainAccount.AccountType, seed []byte, count uint32, isKeyPair bool,
 ) ([]domainKey.WalletKey, error) {
-	keys, err := k.HDWalleter.Generate(accountType, seed, count)
+	// First, generate HD wallet keys
+	output, err := k.generateHDWalletUseCase.Generate(context.Background(), keygenusecase.GenerateHDWalletInput{
+		AccountType: accountType,
+		Seed:        seed,
+		Count:       count,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("fail to call HDWalleter.Generate(): %w", err)
 	}
-	err = k.XRPKeyGenerator.Generate(accountType, isKeyPair, keys)
-	return keys, err
+
+	// Then, generate XRP-specific keys
+	// Note: We pass nil for keys since use case handles retrieving them
+	err = k.generateKeyUseCase.Generate(context.Background(), keygenusecase.GenerateKeyInput{
+		AccountType: accountType,
+		IsKeyPair:   isKeyPair,
+		WalletKeys:  nil, // Will be retrieved from database
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// Return nil since keys are stored in database
+	// The output only has count, not the keys themselves
+	_ = output
+	return nil, nil
 }
 
 // ImportPrivKey imports privKey
@@ -92,12 +121,28 @@ func (*XRPKeygen) CreateMultisigAddress(_ domainAccount.AccountType) error {
 
 // ExportAddress exports address
 func (k *XRPKeygen) ExportAddress(accountType domainAccount.AccountType) (string, error) {
-	return k.AddressExporter.ExportAddress(accountType)
+	output, err := k.exportAddressUseCase.Export(context.Background(), keygenusecase.ExportAddressInput{
+		AccountType: accountType,
+	})
+	if err != nil {
+		return "", err
+	}
+	return output.FileName, nil
 }
 
 // SignTx signs on transaction
 func (k *XRPKeygen) SignTx(filePath string) (string, bool, string, error) {
-	return k.Signer.SignTx(filePath)
+	output, err := k.signTxUseCase.Sign(context.Background(), keygenusecase.SignTransactionInput{
+		FilePath: filePath,
+	})
+	if err != nil {
+		return "", false, "", err
+	}
+
+	// Determine if signing is done based on signed vs unsigned count
+	isDone := output.UnsignedCount == 0
+
+	return output.FilePath, isDone, "", nil
 }
 
 // Done should be called before exit

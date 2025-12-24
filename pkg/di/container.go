@@ -171,13 +171,13 @@ func (c *container) newBTCKeygener() wallets.Keygener {
 		c.newBTC(),
 		c.newMySQLClient(),
 		c.conf.AddressType,
-		c.newSeeder(),
-		c.newHdWallter(),
-		c.newPrivKeyer(),
-		c.newFullPubKeyImporter(),
-		c.newMultisiger(),
-		c.newAddressExporter(),
-		c.newSigner(),
+		c.newKeygenGenerateSeedUseCase(),
+		c.newKeygenGenerateHDWalletUseCase(),
+		c.newBTCKeygenImportPrivateKeyUseCase(),
+		c.newBTCKeygenImportFullPubkeyUseCase(),
+		c.newBTCKeygenCreateMultisigAddressUseCase(),
+		c.newKeygenExportAddressUseCase(),
+		c.newBTCKeygenSignTransactionUseCase(),
 		c.walletType,
 	)
 }
@@ -187,11 +187,11 @@ func (c *container) newETHKeygener() wallets.Keygener {
 		c.newETH(),
 		c.newMySQLClient(),
 		c.walletType,
-		c.newSeeder(),
-		c.newHdWallter(),
-		c.newPrivKeyer(),
-		c.newAddressExporter(),
-		c.newETHSigner(),
+		c.newKeygenGenerateSeedUseCase(),
+		c.newKeygenGenerateHDWalletUseCase(),
+		c.newETHKeygenImportPrivateKeyUseCase(),
+		c.newKeygenExportAddressUseCase(),
+		c.newETHKeygenSignTransactionUseCase(),
 	)
 }
 
@@ -200,11 +200,11 @@ func (c *container) newXRPKeygener() wallets.Keygener {
 		c.newXRP(),
 		c.newMySQLClient(),
 		c.walletType,
-		c.newSeeder(),
-		c.newHdWallter(),
-		c.newXRPKeyGenerator(),
-		c.newAddressExporter(),
-		c.newXRPSigner(),
+		c.newKeygenGenerateSeedUseCase(),
+		c.newKeygenGenerateHDWalletUseCase(),
+		c.newXRPKeygenGenerateKeyUseCase(),
+		c.newKeygenExportAddressUseCase(),
+		c.newXRPKeygenSignTransactionUseCase(),
 	)
 }
 
