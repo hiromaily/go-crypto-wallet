@@ -1,4 +1,4 @@
-package btcwallet
+package btc
 
 import (
 	"context"

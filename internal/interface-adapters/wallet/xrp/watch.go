@@ -1,4 +1,4 @@
-package ethwallet
+package xrp
 
 import (
 	"context"
@@ -9,12 +9,13 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// ETHWatch watch only wallet object
-type ETHWatch struct {
-	ETH                     ethereum.Ethereumer
+// XRPWatch watch only wallet object
+type XRPWatch struct {
+	XRP                     ripple.Rippler
 	dbConn                  *sql.DB
 	wtype                   domainWallet.WalletType
 	createTxUseCase         watchusecase.CreateTransactionUseCase
@@ -24,9 +25,9 @@ type ETHWatch struct {
 	createPaymentReqUseCase watchusecase.CreatePaymentRequestUseCase
 }
 
-// NewETHWatch returns ETHWatch object
-func NewETHWatch(
-	eth ethereum.Ethereumer,
+// NewXRPWatch returns XRPWatch object
+func NewXRPWatch(
+	xrp ripple.Rippler,
 	dbConn *sql.DB,
 	createTxUseCase watchusecase.CreateTransactionUseCase,
 	monitorTxUseCase watchusecase.MonitorTransactionUseCase,
@@ -34,9 +35,9 @@ func NewETHWatch(
 	importAddrUseCase watchusecase.ImportAddressUseCase,
 	createPaymentReqUseCase watchusecase.CreatePaymentRequestUseCase,
 	walletType domainWallet.WalletType,
-) *ETHWatch {
-	return &ETHWatch{
-		ETH:                     eth,
+) *XRPWatch {
+	return &XRPWatch{
+		XRP:                     xrp,
 		dbConn:                  dbConn,
 		wtype:                   walletType,
 		createTxUseCase:         createTxUseCase,
@@ -48,15 +49,15 @@ func NewETHWatch(
 }
 
 // ImportAddress imports address
-func (w *ETHWatch) ImportAddress(fileName string, _ bool) error {
+func (w *XRPWatch) ImportAddress(fileName string, _ bool) error {
 	return w.importAddrUseCase.Execute(context.Background(), watchusecase.ImportAddressInput{
 		FileName: fileName,
-		Rescan:   false, // ETH doesn't support rescan
+		Rescan:   false, // XRP doesn't support rescan
 	})
 }
 
 // createTx is a helper method to reduce code duplication across transaction creation methods
-func (w *ETHWatch) createTx(input watchusecase.CreateTransactionInput) (string, string, error) {
+func (w *XRPWatch) createTx(input watchusecase.CreateTransactionInput) (string, string, error) {
 	output, err := w.createTxUseCase.Execute(context.Background(), input)
 	if err != nil {
 		return "", "", err
@@ -65,21 +66,21 @@ func (w *ETHWatch) createTx(input watchusecase.CreateTransactionInput) (string, 
 }
 
 // CreateDepositTx creates deposit unsigned transaction
-func (w *ETHWatch) CreateDepositTx(_ float64) (string, string, error) {
+func (w *XRPWatch) CreateDepositTx(_ float64) (string, string, error) {
 	return w.createTx(watchusecase.CreateTransactionInput{
 		ActionType: domainTx.ActionTypeDeposit.String(),
 	})
 }
 
 // CreatePaymentTx creates payment unsigned transaction
-func (w *ETHWatch) CreatePaymentTx(_ float64) (string, string, error) {
+func (w *XRPWatch) CreatePaymentTx(_ float64) (string, string, error) {
 	return w.createTx(watchusecase.CreateTransactionInput{
 		ActionType: domainTx.ActionTypePayment.String(),
 	})
 }
 
 // CreateTransferTx creates transfer unsigned transaction
-func (w *ETHWatch) CreateTransferTx(
+func (w *XRPWatch) CreateTransferTx(
 	sender, receiver domainAccount.AccountType, floatAmount, _ float64,
 ) (string, string, error) {
 	return w.createTx(watchusecase.CreateTransactionInput{
@@ -91,19 +92,20 @@ func (w *ETHWatch) CreateTransferTx(
 }
 
 // UpdateTxStatus updates transaction status
-func (w *ETHWatch) UpdateTxStatus() error {
-	return w.monitorTxUseCase.UpdateTxStatus(context.Background())
+func (*XRPWatch) UpdateTxStatus() error {
+	logger.Info("no functionality for XRP")
+	return nil
 }
 
 // MonitorBalance monitors balance
-func (w *ETHWatch) MonitorBalance(confirmationNum uint64) error {
+func (w *XRPWatch) MonitorBalance(confirmationNum uint64) error {
 	return w.monitorTxUseCase.MonitorBalance(context.Background(), watchusecase.MonitorBalanceInput{
 		ConfirmationNum: confirmationNum,
 	})
 }
 
 // SendTx sends signed transaction
-func (w *ETHWatch) SendTx(filePath string) (string, error) {
+func (w *XRPWatch) SendTx(filePath string) (string, error) {
 	output, err := w.sendTxUseCase.Execute(context.Background(), watchusecase.SendTransactionInput{
 		FilePath: filePath,
 	})
@@ -114,13 +116,13 @@ func (w *ETHWatch) SendTx(filePath string) (string, error) {
 }
 
 // CreatePaymentRequest creates payment_request dummy data for development
-func (w *ETHWatch) CreatePaymentRequest() error {
+func (w *XRPWatch) CreatePaymentRequest() error {
 	amtList := []float64{
-		0.001,
-		0.002,
-		0.0025,
-		0.0015,
-		0.003,
+		50,
+		100,
+		120,
+		130,
+		150,
 	}
 	return w.createPaymentReqUseCase.Execute(context.Background(), watchusecase.CreatePaymentRequestInput{
 		AmountList: amtList,
@@ -128,12 +130,13 @@ func (w *ETHWatch) CreatePaymentRequest() error {
 }
 
 // Done should be called before exit
-func (w *ETHWatch) Done() {
+func (w *XRPWatch) Done() {
 	_ = w.dbConn.Close() // Best effort cleanup
-	w.ETH.Close()
+
+	_ = w.XRP.Close() // Best effort cleanup
 }
 
 // CoinTypeCode returns domainCoin.CoinTypeCode
-func (w *ETHWatch) CoinTypeCode() domainCoin.CoinTypeCode {
-	return w.ETH.CoinTypeCode()
+func (w *XRPWatch) CoinTypeCode() domainCoin.CoinTypeCode {
+	return w.XRP.CoinTypeCode()
 }

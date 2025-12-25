@@ -79,15 +79,17 @@ internal/
 │   │   ├── keygen/         # Keygen commands (api, create, export, imports, sign)
 │   │   ├── sign/           # Sign commands (create, export, imports, sign)
 │   │   └── watch/          # Watch commands (api, create, imports, monitor, send)
-│   └── http/               # HTTP handlers and middleware
+│   ├── http/               # HTTP handlers and middleware
+│   └── wallet/             # Wallet adapter interfaces and implementations
+│       ├── interfaces.go   # Wallet interfaces (Keygener, Signer, Watcher)
+│       ├── btc/            # Bitcoin wallet implementations
+│       ├── eth/            # Ethereum wallet implementations
+│       └── xrp/            # XRP wallet implementations
 │
-├── wallet/                 # Wallet implementations
-│   ├── btcwallet/          # Bitcoin wallet implementations
-│   ├── ethwallet/          # Ethereum wallet implementations
-│   ├── xrpwallet/          # XRP wallet implementations
-│   ├── keygener.go         # Key generation interface
-│   ├── signer.go           # Signing interface
-│   └── watcher.go          # Watch wallet interface
+├── wallet/                 # Deprecated - Backward compatibility aliases
+│   ├── keygener.go         # Type alias to interface-adapters/wallet.Keygener
+│   ├── signer.go           # Type alias to interface-adapters/wallet.Signer
+│   └── watcher.go          # Type alias to interface-adapters/wallet.Watcher
 │
 └── di/                     # Dependency injection container
     └── container.go        # DI container implementation
@@ -283,7 +285,7 @@ The project is currently in a transition phase:
 
 - **New Architecture**: `internal/` directory with Clean Architecture
 - **Legacy Code**: `pkg/` directory with old structure (being migrated)
-- **Backward Compatibility**: Type aliases in `pkg/account/`, `pkg/wallet/` for compatibility
+- **Backward Compatibility**: Type aliases in `internal/wallet/` for compatibility (temporary, will be removed)
 
 For detailed refactoring status, see `docs/issues/REFACTORING_CHECKLIST.md`.
 

@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/di"
-	wallets "github.com/hiromaily/go-crypto-wallet/internal/wallet"
+	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
 )
 
 // AddCommands adds all export subcommands

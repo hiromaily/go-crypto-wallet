@@ -1,4 +1,4 @@
-package xrpwallet
+package xrp
 
 import (
 	"context"

@@ -214,7 +214,7 @@ Specifically, `panic` is acceptable in:
 ## Directory Structure
 
 - `cmd/`: Application entry points (keygen, sign, watch)
-- `pkg/`: Package code
+- `internal/`: Internal packages (application-specific, not for external use)
   - `domain/`: **Domain layer** - Pure business logic (ZERO infrastructure dependencies)
     - `account/`: Account types, validators, and business rules
     - `transaction/`: Transaction types, state machine, validators
@@ -242,26 +242,32 @@ Specifically, `panic` is acceptable in:
       - `file/`: File-based storage (address, transaction)
     - `network/`: Network communication
       - `websocket/`: WebSocket client implementations
+    - `wallet/key/`: Key generation logic - Infrastructure layer
+  - `interface-adapters/`: **Interface Adapters layer** - Adapters between use cases and external interfaces
+    - `cli/`: CLI command adapters (keygen, sign, watch)
+      - `keygen/`: Keygen command implementations (api, create, export, imports, sign)
+      - `sign/`: Sign command implementations (create, export, imports, sign)
+      - `watch/`: Watch command implementations (api, create, imports, monitor, send)
+    - `wallet/`: Wallet adapter interfaces and implementations
+      - `interfaces.go`: Wallet interfaces (Keygener, Signer, Watcher)
+      - `btc/`: Bitcoin wallet implementations
+      - `eth/`: Ethereum wallet implementations
+      - `xrp/`: XRP wallet implementations
+  - `wallet/`: **Deprecated** - Backward compatibility aliases (will be removed)
+    - Type aliases pointing to `interface-adapters/wallet`
   - `wallet/service/`: **Application layer** - Business logic orchestration (legacy/transitional)
     - `keygen/`: Key generation services (btc, eth, xrp, shared)
     - `sign/`: Signing services (btc, eth, xrp, shared)
     - `watch/`: Watch wallet services (btc, eth, xrp, shared)
-  - `wallet/key/`: Key generation logic - Infrastructure layer
-  - `wallet/wallets/`: Wallet implementations (btcwallet, ethwallet, xrpwallet)
-  - `command/`: Command implementations (keygen, sign, watch)
-    - `keygen/`: Keygen command implementations (api, create, export, imports, sign)
-    - `sign/`: Sign command implementations (create, export, imports, sign)
-    - `watch/`: Watch command implementations (api, create, imports, monitor, send)
   - `di/`: Dependency injection container
+- `pkg/`: Shared packages (reusable, for external use)
   - `config/`: Configuration management
   - `logger/`: Logging utilities
   - `address/`: Address formatting and utilities (bch, xrp)
-  - `account/`: Account-related utilities (backward compatibility type aliases)
   - `contract/`: Smart contract utilities (ERC-20 token ABI)
   - `converter/`: Data conversion utilities
   - `debug/`: Debug utilities
   - `fullpubkey/`: Full public key formatting utilities
-  - `models/`: Data models (rdb)
   - `serial/`: Serialization utilities
   - `testutil/`: Test utilities (btc, eth, xrp, repository, suite)
   - `uuid/`: UUID generation utilities
@@ -279,7 +285,7 @@ Specifically, `panic` is acceptable in:
 **Architecture Dependency Direction:**
 
 ```text
-Application Layer (application/usecase, wallet/service, command) → Domain Layer (domain/*) ← Infrastructure Layer (infrastructure/*, wallet/key)
+Interface Adapters (interface-adapters/*) → Application Layer (application/usecase, wallet/service) → Domain Layer (domain/*) ← Infrastructure Layer (infrastructure/*)
 ```
 
 ## Refactoring Status

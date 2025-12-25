@@ -9,7 +9,7 @@ import (
 
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/di"
-	wallets "github.com/hiromaily/go-crypto-wallet/internal/wallet"
+	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
 )
 
 // AddCommand creates and returns the send command
