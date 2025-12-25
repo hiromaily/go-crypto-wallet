@@ -8,20 +8,20 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/keygen/shared"
 )
 
 type generateHDWalletUseCase struct {
-	repo         shared.HDWalletRepo
+	repo         cold.HDWalletRepo
 	keygen       key.Generator
 	coinTypeCode domainCoin.CoinTypeCode
 }
 
 // NewGenerateHDWalletUseCase creates a new GenerateHDWalletUseCase
 func NewGenerateHDWalletUseCase(
-	repo shared.HDWalletRepo,
+	repo cold.HDWalletRepo,
 	keygen key.Generator,
 	coinTypeCode domainCoin.CoinTypeCode,
 ) keygenusecase.GenerateHDWalletUseCase {

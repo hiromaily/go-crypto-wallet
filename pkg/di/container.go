@@ -31,15 +31,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
-	btckeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/keygen/btc"
-	ethkeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/keygen/eth"
-	keygenshared "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/keygen/shared"
-	xrpkeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/keygen/xrp"
-	btcsignsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/sign/btc"
-	ethsignsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/sign/eth"
-	xrpsignsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/sign/xrp"
-	watchshared "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/shared"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"
@@ -321,32 +312,6 @@ func (c *container) newXRPWalleter() wallets.Watcher {
 	)
 }
 
-//
-// Wallet Service
-//
-
-func (c *container) newCommonAddressImporter() watchshared.AddressImporter {
-	return watchshared.NewAddressImport(
-		c.newMySQLClient(),
-		c.newAddressRepo(),
-		c.newAddressFileRepo(),
-		c.conf.CoinTypeCode,
-		c.conf.AddressType,
-		c.walletType,
-	)
-}
-
-func (c *container) newPaymentRequestCreator() service.PaymentRequestCreator {
-	return watchshared.NewPaymentRequestCreate(
-		c.newConverter(c.conf.CoinTypeCode),
-		c.newMySQLClient(),
-		c.newAddressRepo(),
-		c.newPaymentRequestRepo(),
-		c.conf.CoinTypeCode,
-		c.walletType,
-	)
-}
-
 func (c *container) newConverter(coinTypeCode domainCoin.CoinTypeCode) converter.Converter {
 	switch coinTypeCode {
 	case domainCoin.BTC:
@@ -608,116 +573,9 @@ func (c *container) newPaymentAccount() domainAccount.AccountType {
 	return c.accountConf.PaymentSender
 }
 
-//
-// Keygen Service
-//
-
-func (c *container) newSeeder() service.Seeder {
-	return keygenshared.NewSeed(
-		c.newSeedRepo(),
-		c.walletType,
-	)
-}
-
-func (c *container) newHdWallter() service.HDWalleter {
-	return keygenshared.NewHDWallet(
-		c.newHdWalletRepo(),
-		c.newKeyGenerator(),
-		c.conf.CoinTypeCode,
-		c.walletType,
-	)
-}
-
-func (c *container) newHdWalletRepo() keygenshared.HDWalletRepo {
-	return keygenshared.NewAccountHDWalletRepo(
+func (c *container) newHdWalletRepo() cold.HDWalletRepo {
+	return cold.NewAccountHDWalletRepo(
 		c.newAccountKeyRepo(),
-	)
-}
-
-func (c *container) newPrivKeyer() service.PrivKeyer {
-	switch {
-	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
-		return btckeygensrv.NewPrivKey(
-			c.newBTC(),
-			c.newAccountKeyRepo(),
-			c.walletType,
-		)
-	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
-		return ethkeygensrv.NewPrivKey(
-			c.newETH(),
-			c.newAccountKeyRepo(),
-			c.walletType,
-		)
-	default:
-		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
-	}
-}
-
-func (c *container) newFullPubKeyImporter() service.FullPubKeyImporter {
-	return btckeygensrv.NewFullPubkeyImport(
-		c.newBTC(),
-		c.newAuthFullPubKeyRepo(),
-		c.newPubkeyFileStorager(),
-		c.walletType,
-	)
-}
-
-func (c *container) newMultisiger() service.Multisiger {
-	return btckeygensrv.NewMultisig(
-		c.newBTC(),
-		c.newAuthFullPubKeyRepo(),
-		c.newAccountKeyRepo(),
-		c.newMultiAccount(),
-		c.walletType,
-	)
-}
-
-func (c *container) newAddressExporter() service.AddressExporter {
-	return keygenshared.NewAddressExport(
-		c.newAccountKeyRepo(),
-		c.newAddressFileStorager(),
-		c.newMultiAccount(),
-		c.conf.CoinTypeCode,
-		c.walletType,
-	)
-}
-
-func (c *container) newSigner() service.Signer {
-	return btcsignsrv.NewSign(
-		c.newBTC(),
-		c.newAccountKeyRepo(),
-		c.newAuthKeyRepo(),
-		c.newTxFileStorager(),
-		c.newMultiAccount(),
-		c.walletType,
-	)
-}
-
-func (c *container) newETHSigner() service.Signer {
-	return ethsignsrv.NewSign(
-		c.newETH(),
-		c.newTxFileStorager(),
-		c.walletType,
-	)
-}
-
-func (c *container) newXRPSigner() service.Signer {
-	return xrpsignsrv.NewSign(
-		c.newXRP(),
-		c.newXRPAccountKeyRepo(),
-		c.newTxFileStorager(),
-		c.walletType,
-	)
-}
-
-func (c *container) newXRPKeyGenerator() xrpkeygensrv.XRPKeyGenerator {
-	return xrpkeygensrv.NewXRPKeyGenerate(
-		c.newXRP(),
-		c.newMySQLClient(),
-		c.conf.CoinTypeCode,
-		c.walletType,
-		c.newAccountKeyRepo(),
-		c.newXRPAccountKeyRepo(),
 	)
 }
 
@@ -815,38 +673,10 @@ func (c *container) newTxFileStorager() file.TransactionFileRepositorier {
 // Sign Service
 //
 
-func (c *container) newSignHdWallter(authType domainAccount.AuthType) service.HDWalleter {
-	return keygenshared.NewHDWallet(
-		c.newSignHdWalletRepo(authType),
-		c.newKeyGenerator(),
-		c.conf.CoinTypeCode,
-		c.walletType,
-	)
-}
-
-func (c *container) newSignHdWalletRepo(authType domainAccount.AuthType) keygenshared.HDWalletRepo {
-	return keygenshared.NewAuthHDWalletRepo(
+func (c *container) newSignHdWalletRepo(authType domainAccount.AuthType) cold.HDWalletRepo {
+	return cold.NewAuthHDWalletRepo(
 		c.newAuthKeyRepo(),
 		authType,
-	)
-}
-
-func (c *container) newSignPrivKeyer(authType domainAccount.AuthType) btcsignsrv.PrivKeyer {
-	return btcsignsrv.NewPrivKey(
-		c.newBTC(),
-		c.newAuthKeyRepo(),
-		authType,
-		c.walletType,
-	)
-}
-
-func (c *container) newSignFullPubkeyExporter(authType domainAccount.AuthType) service.FullPubkeyExporter {
-	return btcsignsrv.NewFullPubkeyExport(
-		c.newAuthKeyRepo(),
-		c.newPubkeyFileStorager(),
-		c.conf.CoinTypeCode,
-		authType,
-		c.walletType,
 	)
 }
 
@@ -1126,13 +956,22 @@ func (c *container) newXRPWatchSendTransactionUseCase() watchusecase.SendTransac
 
 func (c *container) newWatchImportAddressUseCase() watchusecase.ImportAddressUseCase {
 	return watchusecaseshared.NewImportAddressUseCase(
-		c.newCommonAddressImporter().(*watchshared.AddressImport),
+		c.newAddressRepo(),
+		c.newAddressFileRepo(),
+		c.conf.CoinTypeCode,
+		c.conf.AddressType,
+		c.walletType,
 	)
 }
 
 func (c *container) newWatchCreatePaymentRequestUseCase() watchusecase.CreatePaymentRequestUseCase {
 	return watchusecaseshared.NewCreatePaymentRequestUseCase(
-		c.newPaymentRequestCreator().(*watchshared.PaymentRequestCreate),
+		c.newConverter(c.conf.CoinTypeCode),
+		c.newMySQLClient(),
+		c.newAddressRepo(),
+		c.newPaymentRequestRepo(),
+		c.conf.CoinTypeCode,
+		c.walletType,
 	)
 }
 
