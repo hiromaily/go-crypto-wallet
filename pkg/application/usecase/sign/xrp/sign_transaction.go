@@ -83,7 +83,8 @@ func (u *signTransactionUseCase) Sign(
 		var secret string
 		secret, err = u.xrpAccountKeyRepo.GetSecret(senderAccount, txInput.Account)
 		if err != nil {
-			return signusecase.SignTransactionOutput{}, fmt.Errorf("fail to call xrpAccountKeyRepo.GetSecret(): %w", err)
+			return signusecase.SignTransactionOutput{},
+				fmt.Errorf("fail to call xrpAccountKeyRepo.GetSecret(): %w", err)
 		}
 
 		// sign

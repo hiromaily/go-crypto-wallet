@@ -71,16 +71,16 @@ func (u *createTransactionUseCase) Execute(
 		return watchusecase.CreateTransactionOutput{}, fmt.Errorf("invalid action type: %s", input.ActionType)
 	}
 
-	var hex, fileName string
+	var fileName string
 	var execErr error
 
 	switch actionType {
 	case domainTx.ActionTypeDeposit:
-		hex, fileName, execErr = u.createDepositTx(ctx)
+		fileName, execErr = u.createDepositTx(ctx)
 	case domainTx.ActionTypePayment:
-		hex, fileName, execErr = u.createPaymentTx(ctx)
+		fileName, execErr = u.createPaymentTx(ctx)
 	case domainTx.ActionTypeTransfer:
-		hex, fileName, execErr = u.createTransferTx(ctx, input.SenderAccount, input.ReceiverAccount, input.Amount)
+		fileName, execErr = u.createTransferTx(ctx, input.SenderAccount, input.ReceiverAccount, input.Amount)
 	default:
 		return watchusecase.CreateTransactionOutput{}, fmt.Errorf("unsupported action type: %s", input.ActionType)
 	}
@@ -90,7 +90,7 @@ func (u *createTransactionUseCase) Execute(
 	}
 
 	return watchusecase.CreateTransactionOutput{
-		TransactionHex: hex,
+		TransactionHex: "",
 		FileName:       fileName,
 	}, nil
 }
@@ -98,7 +98,7 @@ func (u *createTransactionUseCase) Execute(
 // createDepositTx creates unsigned tx if client accounts have coins
 // - sender: client, receiver: deposit
 // - receiver account covers fee, but this should be flexible
-func (u *createTransactionUseCase) createDepositTx(ctx context.Context) (string, string, error) {
+func (u *createTransactionUseCase) createDepositTx(ctx context.Context) (string, error) {
 	sender := domainAccount.AccountTypeClient
 	receiver := u.depositReceiver
 	targetAction := domainTx.ActionTypeDeposit
@@ -109,24 +109,24 @@ func (u *createTransactionUseCase) createDepositTx(ctx context.Context) (string,
 
 	userAmounts, err := u.getUserAmounts(ctx, sender)
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 	if len(userAmounts) == 0 {
 		logger.Info("no data")
-		return "", "", nil
+		return "", nil
 	}
 
 	serializedTxs, txDetailItems, err := u.createDepositRawTransactions(ctx, sender, receiver, userAmounts)
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 	if len(txDetailItems) == 0 {
-		return "", "", nil
+		return "", nil
 	}
 
 	txID, err := u.updateDB(targetAction, txDetailItems, nil)
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 
 	// save transaction result to file
@@ -134,11 +134,11 @@ func (u *createTransactionUseCase) createDepositTx(ctx context.Context) (string,
 	if len(serializedTxs) != 0 {
 		generatedFileName, err = u.generateHexFile(targetAction, sender, txID, serializedTxs)
 		if err != nil {
-			return "", "", fmt.Errorf("fail to call generateHexFile(): %w", err)
+			return "", fmt.Errorf("fail to call generateHexFile(): %w", err)
 		}
 	}
 
-	return "", generatedFileName, nil
+	return generatedFileName, nil
 }
 
 // createPaymentTx creates unsigned tx for user (anonymous addresses)
@@ -147,7 +147,7 @@ func (u *createTransactionUseCase) createDepositTx(ctx context.Context) (string,
 // Note:
 // - to avoid complex logic to create raw transaction
 // - only one address of sender should afford to send coin to all payment request users.
-func (u *createTransactionUseCase) createPaymentTx(ctx context.Context) (string, string, error) {
+func (u *createTransactionUseCase) createPaymentTx(ctx context.Context) (string, error) {
 	sender := u.paymentSender
 	receiver := domainAccount.AccountTypeAnonymous
 	targetAction := domainTx.ActionTypePayment
@@ -159,32 +159,32 @@ func (u *createTransactionUseCase) createPaymentTx(ctx context.Context) (string,
 	// get payment data from payment_request
 	userPayments, totalAmount, paymentRequestIds, err := u.createUserPayment()
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 	if len(userPayments) == 0 {
 		logger.Debug("no userPayments")
 		// no data
-		return "", "", nil
+		return "", nil
 	}
 
 	// check sender's total balance
 	senderAddr, err := u.addrRepo.GetOneUnAllocated(sender)
 	if err != nil {
-		return "", "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(): %w", err)
+		return "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(): %w", err)
 	}
 	if err = u.validateAmount(ctx, senderAddr, totalAmount); err != nil {
-		return "", "", nil
+		return "", nil
 	}
 
 	// create raw transaction for each address
 	serializedTxs, txDetailItems := u.createPaymentRawTransactions(ctx, sender, receiver, userPayments, senderAddr)
 	if len(txDetailItems) == 0 {
-		return "", "", nil
+		return "", nil
 	}
 
 	txID, err := u.updateDB(targetAction, txDetailItems, paymentRequestIds)
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 
 	// save transaction result to file
@@ -192,11 +192,11 @@ func (u *createTransactionUseCase) createPaymentTx(ctx context.Context) (string,
 	if len(serializedTxs) != 0 {
 		generatedFileName, err = u.generateHexFile(targetAction, sender, txID, serializedTxs)
 		if err != nil {
-			return "", "", fmt.Errorf("fail to call generateHexFile(): %w", err)
+			return "", fmt.Errorf("fail to call generateHexFile(): %w", err)
 		}
 	}
 
-	return "", generatedFileName, nil
+	return generatedFileName, nil
 }
 
 // createTransferTx creates unsigned tx for transfer coin among internal accounts except client, authorization
@@ -207,31 +207,31 @@ func (u *createTransactionUseCase) createTransferTx(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	floatValue float64,
-) (string, string, error) {
+) (string, error) {
 	targetAction := domainTx.ActionTypeTransfer
 
 	// validation account
 	if receiver == domainAccount.AccountTypeClient || receiver == domainAccount.AccountTypeAuthorization {
-		return "", "", errors.New("invalid receiver account. client, authorization account is not allowed as receiver")
+		return "", errors.New("invalid receiver account. client, authorization account is not allowed as receiver")
 	}
 	if sender == receiver {
-		return "", "", errors.New("invalid account. sender and receiver is same")
+		return "", errors.New("invalid account. sender and receiver is same")
 	}
 
 	// check sender's balance
 	senderAddr, err := u.addrRepo.GetOneUnAllocated(sender)
 	if err != nil {
-		return "", "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(sender): %w", err)
+		return "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(sender): %w", err)
 	}
 	senderBalance, err := u.rippler.GetBalance(ctx, senderAddr.WalletAddress)
 	if err != nil {
-		return "", "", fmt.Errorf("fail to call rippler.GetBalance(): %w", err)
+		return "", fmt.Errorf("fail to call rippler.GetBalance(): %w", err)
 	}
 	if senderBalance <= 20 {
-		return "", "", errors.New("sender balance is insufficient to send")
+		return "", errors.New("sender balance is insufficient to send")
 	}
 	if floatValue != 0 && senderBalance <= floatValue {
-		return "", "", errors.New("sender balance is insufficient to send")
+		return "", errors.New("sender balance is insufficient to send")
 	}
 
 	logger.Debug("amount",
@@ -242,7 +242,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	// get receiver address
 	receiverAddr, err := u.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
-		return "", "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(receiver): %w", err)
+		return "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(receiver): %w", err)
 	}
 
 	// call CreateRawTransaction
@@ -252,7 +252,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	txJSON, rawTxString, err := u.rippler.CreateRawTransaction(
 		ctx, senderAddr.WalletAddress, receiverAddr.WalletAddress, floatValue, instructions)
 	if err != nil {
-		return "", "", fmt.Errorf(
+		return "", fmt.Errorf(
 			"fail to call rippler.CreateRawTransaction(), sender address: %s: %w",
 			senderAddr.WalletAddress, err)
 	}
@@ -262,7 +262,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	// generate UUID to trace transaction because unsignedTx is not unique
 	uid, err := u.uuidHandler.GenerateV7()
 	if err != nil {
-		return "", "", fmt.Errorf("fail to call uuidHandler.GenerateV7(): %w", err)
+		return "", fmt.Errorf("fail to call uuidHandler.GenerateV7(): %w", err)
 	}
 
 	serializedTxs := []string{fmt.Sprintf("%s,%s", uid, rawTxString)}
@@ -286,7 +286,7 @@ func (u *createTransactionUseCase) createTransferTx(
 
 	txID, err := u.updateDB(targetAction, txDetailItems, nil)
 	if err != nil {
-		return "", "", err
+		return "", err
 	}
 
 	// save transaction result to file
@@ -294,11 +294,11 @@ func (u *createTransactionUseCase) createTransferTx(
 	if len(serializedTxs) != 0 {
 		generatedFileName, err = u.generateHexFile(targetAction, sender, txID, serializedTxs)
 		if err != nil {
-			return "", "", fmt.Errorf("fail to call generateHexFile(): %w", err)
+			return "", fmt.Errorf("fail to call generateHexFile(): %w", err)
 		}
 	}
 
-	return "", generatedFileName, nil
+	return generatedFileName, nil
 }
 
 // getUserAmounts gets user amounts from addresses with balances

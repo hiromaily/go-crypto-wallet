@@ -651,12 +651,6 @@ func (c *container) newAuthKeyRepo() cold.AuthAccountKeyRepositorier {
 // Keygen File Storage
 //
 
-func (c *container) newAddressFileStorager() file.AddressFileRepositorier {
-	return file.NewAddressFileRepository(
-		c.conf.FilePath.Address,
-	)
-}
-
 func (c *container) newPubkeyFileStorager() file.AddressFileRepositorier {
 	return file.NewAddressFileRepository(
 		c.conf.FilePath.FullPubKey,

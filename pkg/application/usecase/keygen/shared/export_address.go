@@ -67,7 +67,8 @@ func (u *exportAddressUseCase) Export(
 	// Get account key
 	accountKeyTable, err := u.accountKeyRepo.GetAllAddrStatus(input.AccountType, targetAddrStatus)
 	if err != nil {
-		return keygenusecase.ExportAddressOutput{}, fmt.Errorf("fail to call accountKeyRepo.GetAllAddrStatus(): %w", err)
+		return keygenusecase.ExportAddressOutput{},
+			fmt.Errorf("fail to call accountKeyRepo.GetAllAddrStatus(): %w", err)
 	}
 	if len(accountKeyTable) == 0 {
 		logger.Info("no records to export in account_key table")
@@ -89,7 +90,8 @@ func (u *exportAddressUseCase) Export(
 	}
 	_, err = u.accountKeyRepo.UpdateAddrStatus(input.AccountType, address.AddrStatusAddressExported, updatedItems)
 	if err != nil {
-		return keygenusecase.ExportAddressOutput{}, fmt.Errorf("fail to call accountKeyRepo.UpdateAddrStatus(): %w", err)
+		return keygenusecase.ExportAddressOutput{},
+			fmt.Errorf("fail to call accountKeyRepo.UpdateAddrStatus(): %w", err)
 	}
 
 	return keygenusecase.ExportAddressOutput{

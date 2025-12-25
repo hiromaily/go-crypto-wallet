@@ -45,7 +45,8 @@ func (u *exportFullPubkeyUseCase) Export(ctx context.Context) (signusecase.Expor
 	// get account key
 	authKeyTable, err := u.authKeyRepo.GetOne(u.authType)
 	if err != nil {
-		return signusecase.ExportFullPubkeyOutput{}, fmt.Errorf("fail to call authKeyRepo.GetOne(%s): %w", u.authType.String(), err)
+		return signusecase.ExportFullPubkeyOutput{},
+			fmt.Errorf("fail to call authKeyRepo.GetOne(%s): %w", u.authType.String(), err)
 	}
 
 	// export csv file

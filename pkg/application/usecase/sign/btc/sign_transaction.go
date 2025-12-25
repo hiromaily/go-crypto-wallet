@@ -163,7 +163,10 @@ func (u *signTransactionUseCase) sign(hex, encodedPrevsAddrs string) (string, bo
 	return hexTx, isSigned, newEncodedPrevsAddrs, nil
 }
 
-func (u *signTransactionUseCase) signMultisig(msgTx *wire.MsgTx, prevsAddrs *btc.PreviousTxs) (*wire.MsgTx, bool, string, error) {
+func (u *signTransactionUseCase) signMultisig(
+	msgTx *wire.MsgTx,
+	prevsAddrs *btc.PreviousTxs,
+) (*wire.MsgTx, bool, string, error) {
 	var wips []string
 	var newEncodedPrevsAddrs string
 

@@ -29,7 +29,7 @@ func NewMonitorTransactionUseCase(
 
 // UpdateTxStatus updates transaction status
 // Note: For XRP, UpdateTxStatus is a no-op (returns nil)
-func (u *monitorTransactionUseCase) UpdateTxStatus(ctx context.Context) error {
+func (*monitorTransactionUseCase) UpdateTxStatus(ctx context.Context) error {
 	// No need for XRP - transactions are validated immediately upon submission
 	return nil
 }

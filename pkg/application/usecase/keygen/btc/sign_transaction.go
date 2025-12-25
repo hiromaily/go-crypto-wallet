@@ -157,8 +157,10 @@ func (u *signTransactionUseCase) sign(hex, encodedPrevsAddrs string) (string, bo
 	return hexTx, isSigned, newEncodedPrevsAddrs, nil
 }
 
-func (u *signTransactionUseCase) signMultisig(msgTx *wire.MsgTx, prevsAddrs *btc.PreviousTxs) (*wire.MsgTx, bool, string, error) {
-	var wips []string
+func (u *signTransactionUseCase) signMultisig(
+	msgTx *wire.MsgTx,
+	prevsAddrs *btc.PreviousTxs,
+) (*wire.MsgTx, bool, string, error) {
 	var newEncodedPrevsAddrs string
 
 	// Get WIPs and RedeemScript for keygen wallet
@@ -167,7 +169,8 @@ func (u *signTransactionUseCase) signMultisig(msgTx *wire.MsgTx, prevsAddrs *btc
 		return nil, false, "", fmt.Errorf("fail to call accountKeyRepo.GetAllMultiAddr(): %w", err)
 	}
 
-	// Retrieve WIPs
+	// Retrieve WIPs - pre-allocate slice
+	wips := make([]string, 0, len(accountKeys))
 	for _, val := range accountKeys {
 		wips = append(wips, val.WalletImportFormat)
 	}
