@@ -31,18 +31,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
-	btckeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/keygen/btc"
-	ethkeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/keygen/eth"
-	keygenshared "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/keygen/shared"
-	xrpkeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/keygen/xrp"
-	btcsignsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/sign/btc"
-	ethsignsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/sign/eth"
-	xrpsignsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/sign/xrp"
-	btcwatchsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/btc"
-	ethwatchsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/eth"
-	watchshared "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/shared"
-	xrpwatchsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"
@@ -171,13 +159,13 @@ func (c *container) newBTCKeygener() wallets.Keygener {
 		c.newBTC(),
 		c.newMySQLClient(),
 		c.conf.AddressType,
-		c.newSeeder(),
-		c.newHdWallter(),
-		c.newPrivKeyer(),
-		c.newFullPubKeyImporter(),
-		c.newMultisiger(),
-		c.newAddressExporter(),
-		c.newSigner(),
+		c.newKeygenGenerateSeedUseCase(),
+		c.newKeygenGenerateHDWalletUseCase(),
+		c.newBTCKeygenImportPrivateKeyUseCase(),
+		c.newBTCKeygenImportFullPubkeyUseCase(),
+		c.newBTCKeygenCreateMultisigAddressUseCase(),
+		c.newKeygenExportAddressUseCase(),
+		c.newBTCKeygenSignTransactionUseCase(),
 		c.walletType,
 	)
 }
@@ -187,11 +175,11 @@ func (c *container) newETHKeygener() wallets.Keygener {
 		c.newETH(),
 		c.newMySQLClient(),
 		c.walletType,
-		c.newSeeder(),
-		c.newHdWallter(),
-		c.newPrivKeyer(),
-		c.newAddressExporter(),
-		c.newETHSigner(),
+		c.newKeygenGenerateSeedUseCase(),
+		c.newKeygenGenerateHDWalletUseCase(),
+		c.newETHKeygenImportPrivateKeyUseCase(),
+		c.newKeygenExportAddressUseCase(),
+		c.newETHKeygenSignTransactionUseCase(),
 	)
 }
 
@@ -200,11 +188,11 @@ func (c *container) newXRPKeygener() wallets.Keygener {
 		c.newXRP(),
 		c.newMySQLClient(),
 		c.walletType,
-		c.newSeeder(),
-		c.newHdWallter(),
-		c.newXRPKeyGenerator(),
-		c.newAddressExporter(),
-		c.newXRPSigner(),
+		c.newKeygenGenerateSeedUseCase(),
+		c.newKeygenGenerateHDWalletUseCase(),
+		c.newXRPKeygenGenerateKeyUseCase(),
+		c.newKeygenExportAddressUseCase(),
+		c.newXRPKeygenSignTransactionUseCase(),
 	)
 }
 
@@ -274,11 +262,12 @@ func (c *container) newBTCSigner(authType domainAccount.AuthType) wallets.Signer
 		c.newMySQLClient(),
 		authType,
 		c.conf.AddressType,
-		c.newSeeder(),
-		c.newSignHdWallter(authType),
-		c.newSignPrivKeyer(authType),
-		c.newSignFullPubkeyExporter(authType),
-		c.newSigner(),
+		c.NewSignGenerateSeedUseCase(),
+		c.NewSignStoreSeedUseCase(),
+		c.NewSignGenerateAuthKeyUseCase(),
+		c.newBTCSignImportPrivateKeyUseCase(authType),
+		c.newBTCSignExportFullPubkeyUseCase(authType),
+		c.newBTCSignTransactionUseCase(),
 		c.walletType,
 	)
 }
@@ -288,11 +277,11 @@ func (c *container) newBTCWalleter() wallets.Watcher {
 		c.newBTC(),
 		c.newMySQLClient(),
 		c.conf.AddressType,
-		c.newBTCAddressImporter(),
-		c.newBTCTxCreator(),
-		c.newBTCTxSender(),
-		c.newBTCTxMonitorer(),
-		c.newPaymentRequestCreator(),
+		c.newBTCWatchCreateTransactionUseCase(),
+		c.newBTCWatchMonitorTransactionUseCase(),
+		c.newBTCWatchSendTransactionUseCase(),
+		c.newBTCWatchImportAddressUseCase(),
+		c.newWatchCreatePaymentRequestUseCase(),
 		c.walletType,
 	)
 }
@@ -301,11 +290,11 @@ func (c *container) newETHWalleter() wallets.Watcher {
 	return ethwallet.NewETHWatch(
 		c.newETH(),
 		c.newMySQLClient(),
-		c.newCommonAddressImporter(),
-		c.newETHTxCreator(),
-		c.newETHTxSender(),
-		c.newETHTxMonitorer(),
-		c.newPaymentRequestCreator(),
+		c.newETHWatchCreateTransactionUseCase(),
+		c.newETHWatchMonitorTransactionUseCase(),
+		c.newETHWatchSendTransactionUseCase(),
+		c.newWatchImportAddressUseCase(),
+		c.newWatchCreatePaymentRequestUseCase(),
 		c.walletType,
 	)
 }
@@ -314,176 +303,11 @@ func (c *container) newXRPWalleter() wallets.Watcher {
 	return xrpwallet.NewXRPWatch(
 		c.newXRP(),
 		c.newMySQLClient(),
-		c.newCommonAddressImporter(),
-		c.newXRPTxCreator(),
-		c.newXRPTxSender(),
-		c.newXRPTxMonitorer(),
-		c.newPaymentRequestCreator(),
-		c.walletType,
-	)
-}
-
-//
-// Wallet Service
-//
-
-func (c *container) newBTCAddressImporter() service.AddressImporter {
-	return btcwatchsrv.NewAddressImport(
-		c.newBTC(),
-		c.newMySQLClient(),
-		c.newAddressRepo(),
-		c.newAddressFileRepo(),
-		c.conf.CoinTypeCode,
-		c.conf.AddressType,
-		c.walletType,
-	)
-}
-
-func (c *container) newCommonAddressImporter() watchshared.AddressImporter {
-	return watchshared.NewAddressImport(
-		c.newMySQLClient(),
-		c.newAddressRepo(),
-		c.newAddressFileRepo(),
-		c.conf.CoinTypeCode,
-		c.conf.AddressType,
-		c.walletType,
-	)
-}
-
-func (c *container) newBTCTxCreator() service.TxCreator {
-	return btcwatchsrv.NewTxCreate(
-		c.newBTC(),
-		c.newMySQLClient(),
-		c.newAddressRepo(),
-		c.newBTCTxRepo(),
-		c.newBTCTxInputRepo(),
-		c.newBTCTxOutputRepo(),
-		c.newPaymentRequestRepo(),
-		c.newTxFileRepo(),
-		c.newDepositAccount(),
-		c.newPaymentAccount(),
-		c.walletType,
-	)
-}
-
-func (c *container) newETHTxCreator() ethwatchsrv.TxCreator {
-	var targetEthAPI ethereum.EtherTxCreator
-	if domainCoin.IsERC20Token(c.conf.CoinTypeCode.String()) {
-		targetEthAPI = c.newERC20()
-	} else {
-		targetEthAPI = c.newETH()
-	}
-
-	return ethwatchsrv.NewTxCreate(
-		targetEthAPI,
-		c.newMySQLClient(),
-		c.newAddressRepo(),
-		c.newTxRepo(),
-		c.newETHTxDetailRepo(),
-		c.newPaymentRequestRepo(),
-		c.newTxFileRepo(),
-		c.newDepositAccount(),
-		c.newPaymentAccount(),
-		c.walletType,
-		c.conf.CoinTypeCode,
-	)
-}
-
-func (c *container) newXRPTxCreator() xrpwatchsrv.TxCreator {
-	return xrpwatchsrv.NewTxCreate(
-		c.newXRP(),
-		c.newMySQLClient(),
-		c.newUUIDHandler(),
-		c.newAddressRepo(),
-		c.newTxRepo(),
-		c.newXRPTxDetailRepo(),
-		c.newPaymentRequestRepo(),
-		c.newTxFileRepo(),
-		c.newDepositAccount(),
-		c.newPaymentAccount(),
-		c.walletType,
-	)
-}
-
-func (c *container) newBTCTxSender() service.TxSender {
-	return btcwatchsrv.NewTxSend(
-		c.newBTC(),
-		c.newMySQLClient(),
-		c.newAddressRepo(),
-		c.newBTCTxRepo(),
-		c.newBTCTxOutputRepo(),
-		c.newTxFileRepo(),
-		c.walletType,
-	)
-}
-
-func (c *container) newETHTxSender() service.TxSender {
-	return ethwatchsrv.NewTxSend(
-		c.newETH(),
-		c.newMySQLClient(),
-		c.newAddressRepo(),
-		c.newTxRepo(),
-		c.newETHTxDetailRepo(),
-		c.newTxFileRepo(),
-		c.walletType,
-	)
-}
-
-func (c *container) newXRPTxSender() service.TxSender {
-	return xrpwatchsrv.NewTxSend(
-		c.newXRP(),
-		c.newMySQLClient(),
-		c.newAddressRepo(),
-		c.newTxRepo(),
-		c.newXRPTxDetailRepo(),
-		c.newTxFileRepo(),
-		c.walletType,
-	)
-}
-
-func (c *container) newBTCTxMonitorer() service.TxMonitorer {
-	return btcwatchsrv.NewTxMonitor(
-		c.newBTC(),
-		c.newMySQLClient(),
-		c.newBTCTxRepo(),
-		c.newBTCTxInputRepo(),
-		c.newPaymentRequestRepo(),
-		c.walletType,
-	)
-}
-
-func (c *container) newETHTxMonitorer() service.TxMonitorer {
-	if c.conf.Ethereum.ConfirmationNum == 0 {
-		panic("confirmation_num of ethereum in config is required")
-	}
-
-	return ethwatchsrv.NewTxMonitor(
-		c.newETH(),
-		c.newMySQLClient(),
-		c.newAddressRepo(),
-		c.newETHTxDetailRepo(),
-		c.conf.Ethereum.ConfirmationNum,
-		c.walletType,
-	)
-}
-
-func (c *container) newXRPTxMonitorer() service.TxMonitorer {
-	return xrpwatchsrv.NewTxMonitor(
-		c.newXRP(),
-		c.newMySQLClient(),
-		c.newAddressRepo(),
-		c.newXRPTxDetailRepo(),
-		c.walletType,
-	)
-}
-
-func (c *container) newPaymentRequestCreator() service.PaymentRequestCreator {
-	return watchshared.NewPaymentRequestCreate(
-		c.newConverter(c.conf.CoinTypeCode),
-		c.newMySQLClient(),
-		c.newAddressRepo(),
-		c.newPaymentRequestRepo(),
-		c.conf.CoinTypeCode,
+		c.newXRPWatchCreateTransactionUseCase(),
+		c.newXRPWatchMonitorTransactionUseCase(),
+		c.newXRPWatchSendTransactionUseCase(),
+		c.newWatchImportAddressUseCase(),
+		c.newWatchCreatePaymentRequestUseCase(),
 		c.walletType,
 	)
 }
@@ -749,116 +573,9 @@ func (c *container) newPaymentAccount() domainAccount.AccountType {
 	return c.accountConf.PaymentSender
 }
 
-//
-// Keygen Service
-//
-
-func (c *container) newSeeder() service.Seeder {
-	return keygenshared.NewSeed(
-		c.newSeedRepo(),
-		c.walletType,
-	)
-}
-
-func (c *container) newHdWallter() service.HDWalleter {
-	return keygenshared.NewHDWallet(
-		c.newHdWalletRepo(),
-		c.newKeyGenerator(),
-		c.conf.CoinTypeCode,
-		c.walletType,
-	)
-}
-
-func (c *container) newHdWalletRepo() keygenshared.HDWalletRepo {
-	return keygenshared.NewAccountHDWalletRepo(
+func (c *container) newHdWalletRepo() cold.HDWalletRepo {
+	return cold.NewAccountHDWalletRepo(
 		c.newAccountKeyRepo(),
-	)
-}
-
-func (c *container) newPrivKeyer() service.PrivKeyer {
-	switch {
-	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
-		return btckeygensrv.NewPrivKey(
-			c.newBTC(),
-			c.newAccountKeyRepo(),
-			c.walletType,
-		)
-	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
-		return ethkeygensrv.NewPrivKey(
-			c.newETH(),
-			c.newAccountKeyRepo(),
-			c.walletType,
-		)
-	default:
-		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
-	}
-}
-
-func (c *container) newFullPubKeyImporter() service.FullPubKeyImporter {
-	return btckeygensrv.NewFullPubkeyImport(
-		c.newBTC(),
-		c.newAuthFullPubKeyRepo(),
-		c.newPubkeyFileStorager(),
-		c.walletType,
-	)
-}
-
-func (c *container) newMultisiger() service.Multisiger {
-	return btckeygensrv.NewMultisig(
-		c.newBTC(),
-		c.newAuthFullPubKeyRepo(),
-		c.newAccountKeyRepo(),
-		c.newMultiAccount(),
-		c.walletType,
-	)
-}
-
-func (c *container) newAddressExporter() service.AddressExporter {
-	return keygenshared.NewAddressExport(
-		c.newAccountKeyRepo(),
-		c.newAddressFileStorager(),
-		c.newMultiAccount(),
-		c.conf.CoinTypeCode,
-		c.walletType,
-	)
-}
-
-func (c *container) newSigner() service.Signer {
-	return btcsignsrv.NewSign(
-		c.newBTC(),
-		c.newAccountKeyRepo(),
-		c.newAuthKeyRepo(),
-		c.newTxFileStorager(),
-		c.newMultiAccount(),
-		c.walletType,
-	)
-}
-
-func (c *container) newETHSigner() service.Signer {
-	return ethsignsrv.NewSign(
-		c.newETH(),
-		c.newTxFileStorager(),
-		c.walletType,
-	)
-}
-
-func (c *container) newXRPSigner() service.Signer {
-	return xrpsignsrv.NewSign(
-		c.newXRP(),
-		c.newXRPAccountKeyRepo(),
-		c.newTxFileStorager(),
-		c.walletType,
-	)
-}
-
-func (c *container) newXRPKeyGenerator() xrpkeygensrv.XRPKeyGenerator {
-	return xrpkeygensrv.NewXRPKeyGenerate(
-		c.newXRP(),
-		c.newMySQLClient(),
-		c.conf.CoinTypeCode,
-		c.walletType,
-		c.newAccountKeyRepo(),
-		c.newXRPAccountKeyRepo(),
 	)
 }
 
@@ -934,12 +651,6 @@ func (c *container) newAuthKeyRepo() cold.AuthAccountKeyRepositorier {
 // Keygen File Storage
 //
 
-func (c *container) newAddressFileStorager() file.AddressFileRepositorier {
-	return file.NewAddressFileRepository(
-		c.conf.FilePath.Address,
-	)
-}
-
 func (c *container) newPubkeyFileStorager() file.AddressFileRepositorier {
 	return file.NewAddressFileRepository(
 		c.conf.FilePath.FullPubKey,
@@ -956,38 +667,10 @@ func (c *container) newTxFileStorager() file.TransactionFileRepositorier {
 // Sign Service
 //
 
-func (c *container) newSignHdWallter(authType domainAccount.AuthType) service.HDWalleter {
-	return keygenshared.NewHDWallet(
-		c.newSignHdWalletRepo(authType),
-		c.newKeyGenerator(),
-		c.conf.CoinTypeCode,
-		c.walletType,
-	)
-}
-
-func (c *container) newSignHdWalletRepo(authType domainAccount.AuthType) keygenshared.HDWalletRepo {
-	return keygenshared.NewAuthHDWalletRepo(
+func (c *container) newSignHdWalletRepo(authType domainAccount.AuthType) cold.HDWalletRepo {
+	return cold.NewAuthHDWalletRepo(
 		c.newAuthKeyRepo(),
 		authType,
-	)
-}
-
-func (c *container) newSignPrivKeyer(authType domainAccount.AuthType) btcsignsrv.PrivKeyer {
-	return btcsignsrv.NewPrivKey(
-		c.newBTC(),
-		c.newAuthKeyRepo(),
-		authType,
-		c.walletType,
-	)
-}
-
-func (c *container) newSignFullPubkeyExporter(authType domainAccount.AuthType) service.FullPubkeyExporter {
-	return btcsignsrv.NewFullPubkeyExport(
-		c.newAuthKeyRepo(),
-		c.newPubkeyFileStorager(),
-		c.conf.CoinTypeCode,
-		authType,
-		c.walletType,
 	)
 }
 
@@ -1122,55 +805,112 @@ func (c *container) NewSignExportFullPubkeyUseCase(
 }
 
 func (c *container) NewSignGenerateSeedUseCase() signusecase.GenerateSeedUseCase {
-	return signusecaseshared.NewGenerateSeedUseCase(c.newSeeder())
+	return signusecaseshared.NewGenerateSeedUseCase(c.newSeedRepo())
 }
 
 func (c *container) NewSignStoreSeedUseCase() signusecase.StoreSeedUseCase {
-	return signusecaseshared.NewStoreSeedUseCase(c.newSeeder())
+	return signusecaseshared.NewStoreSeedUseCase(c.newSeedRepo())
 }
 
 func (c *container) NewSignGenerateAuthKeyUseCase() signusecase.GenerateAuthKeyUseCase {
 	authType := c.AuthType()
-	return signusecaseshared.NewGenerateAuthKeyUseCase(c.newSignHdWallter(authType))
+	return signusecaseshared.NewGenerateAuthKeyUseCase(
+		c.newSignHdWalletRepo(authType),
+		c.newKeyGenerator(),
+		c.conf.CoinTypeCode,
+	)
 }
 
 // BTC Watch Use Cases
 
 func (c *container) newBTCWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
 	return watchusecasebtc.NewCreateTransactionUseCase(
-		c.newBTCTxCreator().(*btcwatchsrv.TxCreate),
+		c.newBTC(),
+		c.newMySQLClient(),
+		c.newAddressRepo(),
+		c.newBTCTxRepo(),
+		c.newBTCTxInputRepo(),
+		c.newBTCTxOutputRepo(),
+		c.newPaymentRequestRepo(),
+		c.newTxFileRepo(),
+		c.newDepositAccount(),
+		c.newPaymentAccount(),
+		c.walletType,
 	)
 }
 
 func (c *container) newBTCWatchMonitorTransactionUseCase() watchusecase.MonitorTransactionUseCase {
 	return watchusecasebtc.NewMonitorTransactionUseCase(
-		c.newBTCTxMonitorer().(*btcwatchsrv.TxMonitor),
+		c.newBTC(),
+		c.newMySQLClient(),
+		c.newBTCTxRepo(),
+		c.newBTCTxInputRepo(),
+		c.newPaymentRequestRepo(),
 	)
 }
 
 func (c *container) newBTCWatchSendTransactionUseCase() watchusecase.SendTransactionUseCase {
 	return watchusecasebtc.NewSendTransactionUseCase(
-		c.newBTCTxSender().(*btcwatchsrv.TxSend),
+		c.newBTC(),
+		c.newAddressRepo(),
+		c.newBTCTxRepo(),
+		c.newBTCTxOutputRepo(),
+		c.newTxFileRepo(),
+	)
+}
+
+func (c *container) newBTCWatchImportAddressUseCase() watchusecase.ImportAddressUseCase {
+	return watchusecasebtc.NewImportAddressUseCase(
+		c.newBTC(),
+		c.newAddressRepo(),
+		c.newAddressFileRepo(),
+		c.conf.CoinTypeCode,
+		c.conf.AddressType,
 	)
 }
 
 // ETH Watch Use Cases
 
 func (c *container) newETHWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
+	// Determine which Ethereum API to use based on coin type
+	var targetEthAPI ethereum.EtherTxCreator
+	if domainCoin.IsERC20Token(c.conf.CoinTypeCode.String()) {
+		targetEthAPI = c.newERC20()
+	} else {
+		targetEthAPI = c.newETH()
+	}
+
 	return watchusecaseeth.NewCreateTransactionUseCase(
-		c.newETHTxCreator().(*ethwatchsrv.TxCreate),
+		targetEthAPI,
+		c.newMySQLClient(),
+		c.newAddressRepo(),
+		c.newTxRepo(),
+		c.newETHTxDetailRepo(),
+		c.newPaymentRequestRepo(),
+		c.newTxFileRepo(),
+		c.newDepositAccount(),
+		c.newPaymentAccount(),
 	)
 }
 
 func (c *container) newETHWatchMonitorTransactionUseCase() watchusecase.MonitorTransactionUseCase {
+	if c.conf.Ethereum.ConfirmationNum == 0 {
+		panic("confirmation_num of ethereum in config is required")
+	}
+
 	return watchusecaseeth.NewMonitorTransactionUseCase(
-		c.newETHTxMonitorer().(*ethwatchsrv.TxMonitor),
+		c.newETH(),
+		c.newAddressRepo(),
+		c.newETHTxDetailRepo(),
+		c.conf.Ethereum.ConfirmationNum,
 	)
 }
 
 func (c *container) newETHWatchSendTransactionUseCase() watchusecase.SendTransactionUseCase {
 	return watchusecaseeth.NewSendTransactionUseCase(
-		c.newETHTxSender().(*ethwatchsrv.TxSend),
+		c.newETH(),
+		c.newETHTxDetailRepo(),
+		c.newTxFileRepo(),
 	)
 }
 
@@ -1178,19 +918,31 @@ func (c *container) newETHWatchSendTransactionUseCase() watchusecase.SendTransac
 
 func (c *container) newXRPWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
 	return watchusecasexrp.NewCreateTransactionUseCase(
-		c.newXRPTxCreator().(*xrpwatchsrv.TxCreate),
+		c.newXRP(),
+		c.newMySQLClient(),
+		c.newUUIDHandler(),
+		c.newAddressRepo(),
+		c.newTxRepo(),
+		c.newXRPTxDetailRepo(),
+		c.newPaymentRequestRepo(),
+		c.newTxFileRepo(),
+		c.newDepositAccount(),
+		c.newPaymentAccount(),
 	)
 }
 
 func (c *container) newXRPWatchMonitorTransactionUseCase() watchusecase.MonitorTransactionUseCase {
 	return watchusecasexrp.NewMonitorTransactionUseCase(
-		c.newXRPTxMonitorer().(*xrpwatchsrv.TxMonitor),
+		c.newXRP(),
+		c.newAddressRepo(),
 	)
 }
 
 func (c *container) newXRPWatchSendTransactionUseCase() watchusecase.SendTransactionUseCase {
 	return watchusecasexrp.NewSendTransactionUseCase(
-		c.newXRPTxSender().(*xrpwatchsrv.TxSend),
+		c.newXRP(),
+		c.newXRPTxDetailRepo(),
+		c.newTxFileRepo(),
 	)
 }
 
@@ -1198,13 +950,22 @@ func (c *container) newXRPWatchSendTransactionUseCase() watchusecase.SendTransac
 
 func (c *container) newWatchImportAddressUseCase() watchusecase.ImportAddressUseCase {
 	return watchusecaseshared.NewImportAddressUseCase(
-		c.newCommonAddressImporter().(*watchshared.AddressImport),
+		c.newAddressRepo(),
+		c.newAddressFileRepo(),
+		c.conf.CoinTypeCode,
+		c.conf.AddressType,
+		c.walletType,
 	)
 }
 
 func (c *container) newWatchCreatePaymentRequestUseCase() watchusecase.CreatePaymentRequestUseCase {
 	return watchusecaseshared.NewCreatePaymentRequestUseCase(
-		c.newPaymentRequestCreator().(*watchshared.PaymentRequestCreate),
+		c.newConverter(c.conf.CoinTypeCode),
+		c.newMySQLClient(),
+		c.newAddressRepo(),
+		c.newPaymentRequestRepo(),
+		c.conf.CoinTypeCode,
+		c.walletType,
 	)
 }
 
@@ -1212,19 +973,24 @@ func (c *container) newWatchCreatePaymentRequestUseCase() watchusecase.CreatePay
 
 func (c *container) newKeygenGenerateHDWalletUseCase() keygenusecase.GenerateHDWalletUseCase {
 	return keygenusecaseshared.NewGenerateHDWalletUseCase(
-		c.newHdWallter().(*keygenshared.HDWallet),
+		c.newHdWalletRepo(),
+		c.newKeyGenerator(),
+		c.conf.CoinTypeCode,
 	)
 }
 
 func (c *container) newKeygenGenerateSeedUseCase() keygenusecase.GenerateSeedUseCase {
 	return keygenusecaseshared.NewGenerateSeedUseCase(
-		c.newSeeder().(*keygenshared.Seed),
+		c.newSeedRepo(),
 	)
 }
 
 func (c *container) newKeygenExportAddressUseCase() keygenusecase.ExportAddressUseCase {
 	return keygenusecaseshared.NewExportAddressUseCase(
-		c.newAddressExporter().(*keygenshared.AddressExport),
+		c.newAccountKeyRepo(),
+		c.newAddressFileRepo(),
+		c.newMultiAccount(),
+		c.conf.CoinTypeCode,
 	)
 }
 
@@ -1232,19 +998,25 @@ func (c *container) newKeygenExportAddressUseCase() keygenusecase.ExportAddressU
 
 func (c *container) newBTCKeygenImportPrivateKeyUseCase() keygenusecase.ImportPrivateKeyUseCase {
 	return keygenusecasebtc.NewImportPrivateKeyUseCase(
-		c.newPrivKeyer().(*btckeygensrv.PrivKey),
+		c.newBTC(),
+		c.newAccountKeyRepo(),
 	)
 }
 
 func (c *container) newBTCKeygenCreateMultisigAddressUseCase() keygenusecase.CreateMultisigAddressUseCase {
 	return keygenusecasebtc.NewCreateMultisigAddressUseCase(
-		c.newMultisiger().(*btckeygensrv.Multisig),
+		c.newBTC(),
+		c.newAuthFullPubKeyRepo(),
+		c.newAccountKeyRepo(),
+		c.newMultiAccount(),
 	)
 }
 
 func (c *container) newBTCKeygenImportFullPubkeyUseCase() keygenusecase.ImportFullPubkeyUseCase {
 	return keygenusecasebtc.NewImportFullPubkeyUseCase(
-		c.newFullPubKeyImporter().(*btckeygensrv.FullPubkeyImport),
+		c.newBTC(),
+		c.newAuthFullPubKeyRepo(),
+		c.newAddressFileRepo(),
 	)
 }
 
@@ -1252,7 +1024,8 @@ func (c *container) newBTCKeygenImportFullPubkeyUseCase() keygenusecase.ImportFu
 
 func (c *container) newETHKeygenImportPrivateKeyUseCase() keygenusecase.ImportPrivateKeyUseCase {
 	return keygenusecaseeth.NewImportPrivateKeyUseCase(
-		c.newPrivKeyer().(*ethkeygensrv.PrivKey),
+		c.newETH(),
+		c.newAccountKeyRepo(),
 	)
 }
 
@@ -1260,7 +1033,11 @@ func (c *container) newETHKeygenImportPrivateKeyUseCase() keygenusecase.ImportPr
 
 func (c *container) newXRPKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUseCase {
 	return keygenusecasexrp.NewGenerateKeyUseCase(
-		c.newXRPKeyGenerator().(*xrpkeygensrv.XRPKeyGenerate),
+		c.newXRP(),
+		c.newMySQLClient(),
+		c.conf.CoinTypeCode,
+		c.newAccountKeyRepo(),
+		c.newXRPAccountKeyRepo(),
 	)
 }
 
@@ -1268,19 +1045,25 @@ func (c *container) newXRPKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUs
 
 func (c *container) newBTCKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase {
 	return keygenusecasebtc.NewSignTransactionUseCase(
-		c.newSigner().(*btcsignsrv.Sign),
+		c.newBTC(),
+		c.newAccountKeyRepo(),
+		c.newTxFileRepo(),
+		c.newMultiAccount(),
 	)
 }
 
 func (c *container) newETHKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase {
 	return keygenusecaseeth.NewSignTransactionUseCase(
-		c.newETHSigner().(*ethsignsrv.Sign),
+		c.newETH(),
+		c.newTxFileRepo(),
 	)
 }
 
 func (c *container) newXRPKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase {
 	return keygenusecasexrp.NewSignTransactionUseCase(
-		c.newXRPSigner().(*xrpsignsrv.Sign),
+		c.newXRP(),
+		c.newXRPAccountKeyRepo(),
+		c.newTxFileRepo(),
 	)
 }
 
@@ -1290,7 +1073,12 @@ func (c *container) newXRPKeygenSignTransactionUseCase() keygenusecase.SignTrans
 
 func (c *container) newBTCSignTransactionUseCase() signusecase.SignTransactionUseCase {
 	return signusecasebtc.NewSignTransactionUseCase(
-		c.newSigner().(*btcsignsrv.Sign),
+		c.newBTC(),
+		c.newAccountKeyRepo(),
+		c.newAuthKeyRepo(),
+		c.newTxFileStorager(),
+		c.newMultiAccount(),
+		c.walletType,
 	)
 }
 
@@ -1298,7 +1086,10 @@ func (c *container) newBTCSignImportPrivateKeyUseCase(
 	authType domainAccount.AuthType,
 ) signusecase.ImportPrivateKeyUseCase {
 	return signusecasebtc.NewImportPrivateKeyUseCase(
-		c.newSignPrivKeyer(authType).(*btcsignsrv.PrivKey),
+		c.newBTC(),
+		c.newAuthKeyRepo(),
+		authType,
+		c.walletType,
 	)
 }
 
@@ -1306,7 +1097,11 @@ func (c *container) newBTCSignExportFullPubkeyUseCase(
 	authType domainAccount.AuthType,
 ) signusecase.ExportFullPubkeyUseCase {
 	return signusecasebtc.NewExportFullPubkeyUseCase(
-		c.newSignFullPubkeyExporter(authType).(*btcsignsrv.FullPubkeyExport),
+		c.newAuthKeyRepo(),
+		c.newPubkeyFileStorager(),
+		c.conf.CoinTypeCode,
+		authType,
+		c.walletType,
 	)
 }
 
@@ -1314,7 +1109,9 @@ func (c *container) newBTCSignExportFullPubkeyUseCase(
 
 func (c *container) newETHSignTransactionUseCase() signusecase.SignTransactionUseCase {
 	return signusecaseeth.NewSignTransactionUseCase(
-		c.newETHSigner().(*ethsignsrv.Sign),
+		c.newETH(),
+		c.newTxFileStorager(),
+		c.walletType,
 	)
 }
 
@@ -1322,6 +1119,9 @@ func (c *container) newETHSignTransactionUseCase() signusecase.SignTransactionUs
 
 func (c *container) newXRPSignTransactionUseCase() signusecase.SignTransactionUseCase {
 	return signusecasexrp.NewSignTransactionUseCase(
-		c.newXRPSigner().(*xrpsignsrv.Sign),
+		c.newXRP(),
+		c.newXRPAccountKeyRepo(),
+		c.newTxFileStorager(),
+		c.walletType,
 	)
 }

@@ -5,29 +5,38 @@ import (
 	"fmt"
 
 	signusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/sign"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/service"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/cold"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
 
 type storeSeedUseCase struct {
-	seeder service.Seeder
+	seedRepo cold.SeedRepositorier
 }
 
 // NewStoreSeedUseCase creates a new StoreSeedUseCase for sign wallet
-func NewStoreSeedUseCase(seeder service.Seeder) signusecase.StoreSeedUseCase {
+func NewStoreSeedUseCase(seedRepo cold.SeedRepositorier) signusecase.StoreSeedUseCase {
 	return &storeSeedUseCase{
-		seeder: seeder,
+		seedRepo: seedRepo,
 	}
 }
 
 func (u *storeSeedUseCase) Store(
-	ctx context.Context, input signusecase.StoreSeedInput,
+	ctx context.Context,
+	input signusecase.StoreSeedInput,
 ) (signusecase.StoreSeedOutput, error) {
-	seed, err := u.seeder.Store(input.Seed)
+	// Convert seed string to bytes
+	bSeed, err := key.SeedToByte(input.Seed)
 	if err != nil {
-		return signusecase.StoreSeedOutput{}, fmt.Errorf("failed to store seed: %w", err)
+		return signusecase.StoreSeedOutput{}, fmt.Errorf("fail to call key.SeedToByte(): %w", err)
+	}
+
+	// Insert seed in database
+	err = u.seedRepo.Insert(input.Seed)
+	if err != nil {
+		return signusecase.StoreSeedOutput{}, fmt.Errorf("fail to call seedRepo.Insert(): %w", err)
 	}
 
 	return signusecase.StoreSeedOutput{
-		Seed: seed,
+		Seed: bSeed,
 	}, nil
 }

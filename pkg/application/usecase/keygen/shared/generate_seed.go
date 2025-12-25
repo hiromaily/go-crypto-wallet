@@ -2,41 +2,85 @@ package shared
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/keygen"
-	sharedkeygensrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/keygen/shared"
+	keygenusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/keygen"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/cold"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
 
 type generateSeedUseCase struct {
-	seed *sharedkeygensrv.Seed
+	seedRepo cold.SeedRepositorier
 }
 
 // NewGenerateSeedUseCase creates a new GenerateSeedUseCase
-func NewGenerateSeedUseCase(seed *sharedkeygensrv.Seed) keygen.GenerateSeedUseCase {
+func NewGenerateSeedUseCase(seedRepo cold.SeedRepositorier) keygenusecase.GenerateSeedUseCase {
 	return &generateSeedUseCase{
-		seed: seed,
+		seedRepo: seedRepo,
 	}
 }
 
-func (u *generateSeedUseCase) Generate(ctx context.Context) (keygen.GenerateSeedOutput, error) {
-	seed, err := u.seed.Generate()
-	if err != nil {
-		return keygen.GenerateSeedOutput{}, fmt.Errorf("failed to generate seed: %w", err)
+func (u *generateSeedUseCase) Generate(ctx context.Context) (keygenusecase.GenerateSeedOutput, error) {
+	// Try to retrieve existing seed from database
+	bSeed, err := u.retrieveSeed()
+	if err == nil {
+		return keygenusecase.GenerateSeedOutput{
+			Seed: bSeed,
+		}, nil
 	}
 
-	return keygen.GenerateSeedOutput{
-		Seed: seed,
+	// Generate new seed if not found
+	bSeed, err = key.GenerateSeed()
+	if err != nil {
+		return keygenusecase.GenerateSeedOutput{}, fmt.Errorf("fail to call key.GenerateSeed(): %w", err)
+	}
+	strSeed := key.SeedToString(bSeed)
+
+	// Insert seed in database
+	err = u.seedRepo.Insert(strSeed)
+	if err != nil {
+		return keygenusecase.GenerateSeedOutput{}, fmt.Errorf("fail to call seedRepo.Insert(): %w", err)
+	}
+
+	return keygenusecase.GenerateSeedOutput{
+		Seed: bSeed,
 	}, nil
 }
 
-func (u *generateSeedUseCase) Store(ctx context.Context, input keygen.StoreSeedInput) (keygen.StoreSeedOutput, error) {
-	seed, err := u.seed.Store(input.Seed)
+func (u *generateSeedUseCase) Store(
+	ctx context.Context,
+	input keygenusecase.StoreSeedInput,
+) (keygenusecase.StoreSeedOutput, error) {
+	// Convert seed string to bytes
+	bSeed, err := key.SeedToByte(input.Seed)
 	if err != nil {
-		return keygen.StoreSeedOutput{}, fmt.Errorf("failed to store seed: %w", err)
+		return keygenusecase.StoreSeedOutput{}, fmt.Errorf("fail to call key.SeedToByte(): %w", err)
 	}
 
-	return keygen.StoreSeedOutput{
-		Seed: seed,
+	// Insert seed in database
+	err = u.seedRepo.Insert(input.Seed)
+	if err != nil {
+		return keygenusecase.StoreSeedOutput{}, fmt.Errorf("fail to call seedRepo.Insert(): %w", err)
+	}
+
+	return keygenusecase.StoreSeedOutput{
+		Seed: bSeed,
 	}, nil
+}
+
+// retrieveSeed retrieves seed from database
+func (u *generateSeedUseCase) retrieveSeed() ([]byte, error) {
+	// Get seed from database, seed is expected to have only one record
+	seed, err := u.seedRepo.GetOne()
+	if err == nil && seed.Seed != "" {
+		logger.Info("seed have already been generated")
+		return key.SeedToByte(seed.Seed)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("fail to call seedRepo.GetOne(): %w", err)
+	}
+	// In this case, though err didn't happen, but seed is blank
+	return nil, errors.New("somehow seed retrieved from database is blank")
 }

@@ -1,95 +1,21 @@
-package shared
+package cold
 
 import (
 	"errors"
-	"fmt"
-
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
-	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/cold"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
-
-// HDWallet type
-type HDWallet struct {
-	repo         HDWalletRepo
-	keygen       key.Generator
-	coinTypeCode domainCoin.CoinTypeCode
-	wtype        domainWallet.WalletType
-}
-
-// NewHDWallet returns hdWallet object
-func NewHDWallet(
-	repo HDWalletRepo,
-	keygen key.Generator,
-	coinTypeCode domainCoin.CoinTypeCode,
-	wtype domainWallet.WalletType,
-) *HDWallet {
-	return &HDWallet{
-		repo:         repo,
-		keygen:       keygen,
-		coinTypeCode: coinTypeCode,
-		wtype:        wtype,
-	}
-}
-
-// Generate generate hd wallet keys for account
-func (h *HDWallet) Generate(
-	accountType domainAccount.AccountType,
-	seed []byte, count uint32,
-) ([]domainKey.WalletKey, error) {
-	logger.Debug("generate HDWallet", "account_type", accountType.String())
-
-	// get latest index
-	idxFrom, err := h.repo.GetMaxIndex(accountType)
-	if err != nil {
-		logger.Info(err.Error())
-		return nil, nil
-	}
-	logger.Debug("max_index",
-		"account_type", accountType.String(),
-		"current_index", idxFrom,
-	)
-
-	// generate hd wallet key
-	walletKeys, err := h.generateHDKey(accountType, seed, uint32(idxFrom), count)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call key.generateAccountKeyData(): %w", err)
-	}
-
-	// insert key information to account_key_table / auth_account_key_table
-	err = h.repo.Insert(walletKeys, idxFrom, h.coinTypeCode, accountType)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call repo.Insert(): %w", err)
-	}
-
-	return walletKeys, err
-}
-
-func (h *HDWallet) generateHDKey(
-	accountType domainAccount.AccountType,
-	seed []byte,
-	idxFrom,
-	count uint32,
-) ([]domainKey.WalletKey, error) {
-	// generate key
-	walletKeys, err := h.keygen.CreateKey(seed, accountType, idxFrom, count)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call keyData.CreateKey(): %w", err)
-	}
-	return walletKeys, nil
-}
 
 //-----------------------------------------------------------------------------
 // HDWalletRepo interface
 //-----------------------------------------------------------------------------
 
-// HDWalletRepo is HDWalletRepo interface
+// HDWalletRepo is an interface for HD wallet key storage operations.
+// It abstracts over both AccountKeyRepository and AuthAccountKeyRepository
+// to allow the same use case code to work with either account or auth keys.
 type HDWalletRepo interface {
 	GetMaxIndex(accountType domainAccount.AccountType) (int64, error)
 	Insert(
@@ -104,15 +30,16 @@ type HDWalletRepo interface {
 // AuthHDWalletRepo
 //-----------------------------------------------------------------------------
 
-// AuthHDWalletRepo is AuthHDWalletRepo object
+// AuthHDWalletRepo implements HDWalletRepo for auth account keys
 type AuthHDWalletRepo struct {
-	authKeyRepo cold.AuthAccountKeyRepositorier
+	authKeyRepo AuthAccountKeyRepositorier
 	authType    domainAccount.AuthType
 }
 
-// NewAuthHDWalletRepo returns AuthHDWalletRepo
+// NewAuthHDWalletRepo creates a new AuthHDWalletRepo
 func NewAuthHDWalletRepo(
-	authKeyRepo cold.AuthAccountKeyRepositorier, authType domainAccount.AuthType,
+	authKeyRepo AuthAccountKeyRepositorier,
+	authType domainAccount.AuthType,
 ) HDWalletRepo {
 	return &AuthHDWalletRepo{
 		authKeyRepo: authKeyRepo,
@@ -120,7 +47,7 @@ func NewAuthHDWalletRepo(
 	}
 }
 
-// GetMaxIndex returns index
+// GetMaxIndex returns index for auth keys (always 0 since only one auth key is allowed)
 func (w *AuthHDWalletRepo) GetMaxIndex(_ domainAccount.AccountType) (int64, error) {
 	_, err := w.authKeyRepo.GetOne(w.authType)
 	if err != nil {
@@ -131,7 +58,10 @@ func (w *AuthHDWalletRepo) GetMaxIndex(_ domainAccount.AccountType) (int64, erro
 
 // Insert inserts key to auth_account_key table
 func (w *AuthHDWalletRepo) Insert(
-	keys []domainKey.WalletKey, idx int64, coinTypeCode domainCoin.CoinTypeCode, _ domainAccount.AccountType,
+	keys []domainKey.WalletKey,
+	idx int64,
+	coinTypeCode domainCoin.CoinTypeCode,
+	_ domainAccount.AccountType,
 ) error {
 	if len(keys) != 1 {
 		return errors.New("only one key is allowed")
@@ -157,19 +87,19 @@ func (w *AuthHDWalletRepo) Insert(
 // AccountHDWalletRepo
 //-----------------------------------------------------------------------------
 
-// AccountHDWalletRepo is AccountHDWalletRepo interface
+// AccountHDWalletRepo implements HDWalletRepo for account keys
 type AccountHDWalletRepo struct {
-	accountKeyRepo cold.AccountKeyRepositorier
+	accountKeyRepo AccountKeyRepositorier
 }
 
-// NewAccountHDWalletRepo returns HDWalletRepo
-func NewAccountHDWalletRepo(accountKeyRepo cold.AccountKeyRepositorier) HDWalletRepo {
+// NewAccountHDWalletRepo creates a new AccountHDWalletRepo
+func NewAccountHDWalletRepo(accountKeyRepo AccountKeyRepositorier) HDWalletRepo {
 	return &AccountHDWalletRepo{
 		accountKeyRepo: accountKeyRepo,
 	}
 }
 
-// GetMaxIndex returns index
+// GetMaxIndex returns the next available index for account keys
 func (w *AccountHDWalletRepo) GetMaxIndex(accountType domainAccount.AccountType) (int64, error) {
 	idx, err := w.accountKeyRepo.GetMaxIndex(accountType)
 	if err != nil {
@@ -179,7 +109,7 @@ func (w *AccountHDWalletRepo) GetMaxIndex(accountType domainAccount.AccountType)
 	return idx, nil
 }
 
-// Insert inserts key to account_key_table
+// Insert inserts keys to account_key_table
 func (w *AccountHDWalletRepo) Insert(
 	keys []domainKey.WalletKey,
 	idxFrom int64,

@@ -4,32 +4,58 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/watch"
-	xrpwatchsrv "github.com/hiromaily/go-crypto-wallet/pkg/wallet/service/watch/xrp"
+	watchusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/watch"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
+	watchrepo "github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/repository/watch"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type monitorTransactionUseCase struct {
-	txMonitor *xrpwatchsrv.TxMonitor
+	rippler  ripple.Rippler
+	addrRepo watchrepo.AddressRepositorier
 }
 
 // NewMonitorTransactionUseCase creates a new MonitorTransactionUseCase
-func NewMonitorTransactionUseCase(txMonitor *xrpwatchsrv.TxMonitor) watch.MonitorTransactionUseCase {
+func NewMonitorTransactionUseCase(
+	rippler ripple.Rippler,
+	addrRepo watchrepo.AddressRepositorier,
+) watchusecase.MonitorTransactionUseCase {
 	return &monitorTransactionUseCase{
-		txMonitor: txMonitor,
+		rippler:  rippler,
+		addrRepo: addrRepo,
 	}
 }
 
-func (u *monitorTransactionUseCase) UpdateTxStatus(ctx context.Context) error {
-	// Note: For XRP, UpdateTxStatus is a no-op (returns nil)
-	if err := u.txMonitor.UpdateTxStatus(); err != nil {
-		return fmt.Errorf("failed to update tx status: %w", err)
-	}
+// UpdateTxStatus updates transaction status
+// Note: For XRP, UpdateTxStatus is a no-op (returns nil)
+func (*monitorTransactionUseCase) UpdateTxStatus(ctx context.Context) error {
+	// No need for XRP - transactions are validated immediately upon submission
 	return nil
 }
 
-func (u *monitorTransactionUseCase) MonitorBalance(ctx context.Context, input watch.MonitorBalanceInput) error {
-	if err := u.txMonitor.MonitorBalance(input.ConfirmationNum); err != nil {
-		return fmt.Errorf("failed to monitor balance: %w", err)
+// MonitorBalance monitors balance across all account types
+func (u *monitorTransactionUseCase) MonitorBalance(
+	ctx context.Context,
+	input watchusecase.MonitorBalanceInput,
+) error {
+	targetAccounts := []domainAccount.AccountType{
+		domainAccount.AccountTypeClient,
+		domainAccount.AccountTypeDeposit,
+		domainAccount.AccountTypePayment,
+		domainAccount.AccountTypeStored,
 	}
+
+	for _, acnt := range targetAccounts {
+		addrs, err := u.addrRepo.GetAllAddress(acnt)
+		if err != nil {
+			return fmt.Errorf("fail to call addrRepo.GetAllAddress(): %w", err)
+		}
+		total := u.rippler.GetTotalBalance(ctx, addrs)
+		logger.Info("total balance",
+			"account", acnt.String(),
+			"balance", total)
+	}
+
 	return nil
 }
