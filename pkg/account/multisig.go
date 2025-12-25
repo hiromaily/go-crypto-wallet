@@ -1,7 +1,7 @@
 package account
 
 import (
-	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 )
 
 // Multisig address involved accounts

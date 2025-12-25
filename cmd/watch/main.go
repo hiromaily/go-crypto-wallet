@@ -9,13 +9,13 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/spf13/cobra"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/di"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
+	wcmd "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/watch"
+	wallets "github.com/hiromaily/go-crypto-wallet/internal/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	wcmd "github.com/hiromaily/go-crypto-wallet/pkg/command/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	"github.com/hiromaily/go-crypto-wallet/pkg/di"
-	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
-	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
 // watch as watch only wallet

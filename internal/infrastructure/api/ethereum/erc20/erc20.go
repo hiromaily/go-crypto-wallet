@@ -1,0 +1,270 @@
+package erc20
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"math/big"
+
+	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"golang.org/x/crypto/sha3"
+
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/eth"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/ethtx"
+	"github.com/hiromaily/go-crypto-wallet/pkg/contract"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
+)
+
+// ERC20 struct
+// TODO: Ethereum struct in pkg/wallet/api/ethgrp/eth/ethereum.go must be embedded to use common funcs
+// Then proper interface limits functionalities
+type ERC20 struct {
+	client          *ethclient.Client
+	tokenClient     *contract.Token
+	token           domainCoin.ERC20Token
+	uuidHandler     uuid.UUIDHandler
+	name            string
+	contractAddress string
+	masterAddress   string
+	decimals        int
+}
+
+func NewERC20(
+	client *ethclient.Client,
+	tokenClient *contract.Token,
+	token domainCoin.ERC20Token,
+	uuidHandler uuid.UUIDHandler,
+	name string,
+	contractAddress string,
+	masterAddress string,
+	decimals int,
+) *ERC20 {
+	return &ERC20{
+		client:          client,
+		tokenClient:     tokenClient,
+		token:           token,
+		uuidHandler:     uuidHandler,
+		name:            name,
+		contractAddress: contractAddress,
+		masterAddress:   masterAddress,
+		decimals:        decimals,
+	}
+}
+
+// func (e *ERC20) getOption(
+//	ctx context.Context,
+//	isPending bool,
+//	fromAddr common.Address,
+//	blockNumber *big.Int) *bind.CallOpts {
+//
+//	opts := bind.CallOpts{}
+//	if ctx != nil {
+//		opts.Context = ctx
+//	}
+//	opts.Pending = isPending
+//	opts.From = fromAddr
+//	if blockNumber != nil {
+//		opts.BlockNumber = blockNumber
+//	}
+//	return &opts
+//}
+
+func (*ERC20) ValidateAddr(addr string) error {
+	// validation check
+	if !common.IsHexAddress(addr) {
+		return fmt.Errorf("address:%s is invalid", addr)
+	}
+	return nil
+}
+
+// FloatToBigInt converts float64 to *big.Int
+// FIXME: Is it correct to handle decimal??
+func (e *ERC20) FloatToBigInt(v float64) *big.Int {
+	if e.decimals == 18 {
+		return big.NewInt(int64(v * 1e18))
+	}
+	// v * math.Pow(10, float64(e.decimals))
+	for i := 0; i < e.decimals; i++ {
+		v *= 10
+	}
+	return big.NewInt(int64(v))
+}
+
+func (e *ERC20) GetBalance(ctx context.Context, hexAddr string, _ eth.QuantityTag) (*big.Int, error) {
+	balance, err := e.tokenClient.BalanceOf(nil, common.HexToAddress(hexAddr))
+	if err != nil {
+		return nil, fmt.Errorf("fail to call e.contract.BalanceOf(%s): %w", hexAddr, err)
+	}
+	return balance, nil
+}
+
+// CreateRawTransaction creates raw transaction for watch only wallet
+//   - Transferring Tokens (ERC-20)
+//     https://goethereumbook.org/en/transfer-tokens/
+//   - Transfer ERC20 Tokens Using Golang
+//     https://www.youtube.com/watch?v=-Epg5Ub-fA0
+//     https://github.com/what-the-func/golang-ethereum-transfer-tokens/blob/master/main.go
+//
+// Note:
+// - master address takes fee
+// - sender account delegates transfer to master address
+// - 1. call approve(address spender, uint256 amount) by fromA, spender is masterAddr
+// -  this task may be separated from normal flow `create tx`
+// - => approve requires gas to call ... this pattern is impossible
+// - 1.b. Or after approve is called, this transaction may be sent
+func (e *ERC20) CreateRawTransaction(
+	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
+) (*ethtx.RawTx, *models.EthDetailTX, error) {
+	// validation check
+	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
+		return nil, nil, errors.New("address validation error")
+	}
+	logger.Debug("eth.CreateRawTransaction()",
+		"fromAddr", fromAddr,
+		"toAddr", toAddr,
+		"amount", amount,
+	)
+
+	balance, err := e.GetBalance(ctx, fromAddr, "")
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to call eth.GetBalance(): %w", err)
+	}
+	logger.Info("balance", "balance", balance.Int64())
+	if balance.Uint64() < amount {
+		return nil, nil, errors.New("balance is short to send token")
+	}
+	tokenAmount := big.NewInt(int64(amount))
+	if amount == 0 {
+		tokenAmount = balance
+	}
+
+	data := e.createTransferData(toAddr, tokenAmount)
+	gasLimit, err := e.estimateGas(data)
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to call estimateGas(data): %w", err)
+	}
+
+	gasPrice, err := e.client.SuggestGasPrice(ctx)
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to call client.SuggestGasPrice(): %w", err)
+	}
+
+	// nonce
+	nonce, err := e.getNonce(ctx, fromAddr, additionalNonce)
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to call e.getNonce(): %w", err)
+	}
+
+	logger.Debug("comparison",
+		"Nonce", nonce,
+		"TokenAmount", tokenAmount.Uint64(),
+		"GasLimit", gasLimit,
+		"GasPrice", gasPrice.Uint64(),
+	)
+
+	// create transaction
+	contractAddr := common.HexToAddress(e.contractAddress)
+	tx := types.NewTx(&types.LegacyTx{
+		Nonce:    nonce,
+		To:       &contractAddr,
+		Value:    new(big.Int), // value must be 0 for ERC-20
+		Gas:      gasLimit,
+		GasPrice: gasPrice,
+		Data:     data,
+	})
+	// From here, same as CreateRawTransaction() in ethgrop/eth/transaction.go
+	txHash := tx.Hash().Hex()
+	rawTxHex, err := ethtx.EncodeTx(tx)
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to call encodeTx(): %w", err)
+	}
+
+	// generate UUID to trace transaction because unsignedTx is not unique
+	uid, err := e.uuidHandler.GenerateV7()
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to call uuidHandler.GenerateV7(): %w", err)
+	}
+
+	// create insert data for　eth_detail_tx
+	txDetailItem := &models.EthDetailTX{
+		UUID:            uid.String(),
+		SenderAccount:   "",
+		SenderAddress:   fromAddr,
+		ReceiverAccount: "",
+		ReceiverAddress: toAddr,
+		Amount:          tokenAmount.Uint64(),
+		Fee:             0, // later update is required
+		GasLimit:        uint32(gasLimit),
+		Nonce:           nonce,
+		UnsignedHexTX:   *rawTxHex,
+	}
+
+	// RawTx
+	rawtx := &ethtx.RawTx{
+		UUID:  uid.String(),
+		From:  fromAddr,
+		To:    toAddr,
+		Value: *tokenAmount,
+		Nonce: nonce,
+		TxHex: *rawTxHex,
+		Hash:  txHash,
+	}
+	return rawtx, txDetailItem, nil
+}
+
+func (*ERC20) createTransferData(toAddr string, amount *big.Int) []byte {
+	// function signature as a byte slice
+	transferFnSignature := []byte("transfer(address,uint256)")
+
+	// methodID of function
+	hash := sha3.NewLegacyKeccak256()
+	hash.Write(transferFnSignature)
+	methodID := hash.Sum(nil)[:4]
+
+	// set parameter for account: to address
+	paddedToAddr := common.LeftPadBytes(common.HexToAddress(toAddr).Bytes(), 32)
+	// set parameter for amount
+	paddedAmount := common.LeftPadBytes(amount.Bytes(), 32)
+
+	// create data
+	var data []byte
+	data = append(data, methodID...)
+	data = append(data, paddedToAddr...)
+	data = append(data, paddedAmount...)
+
+	return data
+}
+
+func (e *ERC20) estimateGas(data []byte) (uint64, error) {
+	contractAddr := common.HexToAddress(e.contractAddress)
+	masterAddr := common.HexToAddress(e.masterAddress)
+	gasLimit, err := e.client.EstimateGas(context.Background(), ethereum.CallMsg{
+		From: masterAddr,
+		To:   &contractAddr,
+		Data: data,
+	})
+	if err != nil {
+		return 0, fmt.Errorf("fail to call client.EstimateGas(): %w", err)
+	}
+	return gasLimit, nil
+}
+
+// FIXME: this logic is almost same to where getNonce() in ethgrp/eth/transaction.go
+func (e *ERC20) getNonce(ctx context.Context, fromAddr string, additionalNonce int) (uint64, error) {
+	nonce, err := e.client.PendingNonceAt(ctx, common.HexToAddress(fromAddr))
+	if err != nil {
+		return 0, fmt.Errorf("fail to call ethClient.PendingNonceAt(): %w", err)
+	}
+	nonce += uint64(additionalNonce)
+
+	logger.Debug("nonce",
+		"client.PendingNonceAt(e.ctx, common.HexToAddress(fromAddr))", nonce,
+	)
+	return nonce, nil
+}

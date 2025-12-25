@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
-	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 )
 
 func TestNewWallet(t *testing.T) {

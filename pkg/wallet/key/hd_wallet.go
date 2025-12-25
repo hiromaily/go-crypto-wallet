@@ -15,11 +15,11 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"golang.org/x/crypto/ripemd160" //nolint:gosec
 
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	bchaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/bch"
 	xrpaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/xrp"
-	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
-	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
-	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 

@@ -7,8 +7,8 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 
-	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
-	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 )
 
 // NewWallet creates wallet config

@@ -5,8 +5,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	configutil "github.com/hiromaily/go-crypto-wallet/pkg/config/testutil"
-	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 )
 
 // TestNewMultisigAccounts is test for NewMultisigAccounts

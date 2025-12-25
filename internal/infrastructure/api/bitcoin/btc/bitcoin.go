@@ -1,0 +1,149 @@
+package btc
+
+import (
+	"errors"
+	"fmt"
+
+	"github.com/btcsuite/btcd/chaincfg"
+	"github.com/btcsuite/btcd/rpcclient"
+	"github.com/btcsuite/btcd/wire"
+
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+)
+
+// Bitcoin includes client to call Json-RPC
+type Bitcoin struct {
+	Client            *rpcclient.Client
+	chainConf         *chaincfg.Params
+	coinTypeCode      domainCoin.CoinTypeCode // btc
+	version           BTCVersion              // 179900
+	confirmationBlock uint64
+	feeRange          FeeAdjustmentRate
+}
+
+// FeeAdjustmentRate range of fee adjustment rate
+type FeeAdjustmentRate struct {
+	min float64
+	max float64
+}
+
+// NewBitcoin creates bitcoin object
+func NewBitcoin(
+	client *rpcclient.Client,
+	conf *config.Bitcoin,
+	coinTypeCode domainCoin.CoinTypeCode,
+) (*Bitcoin, error) {
+	bit := Bitcoin{
+		Client: client,
+	}
+
+	bit.coinTypeCode = coinTypeCode
+
+	// check network consistency between config and bitcoind
+	blockInfo, err := bit.GetBlockchainInfo()
+	if err != nil {
+		return nil, fmt.Errorf("fail to call bit.GetBlockchainInfo(): %w", err)
+	}
+
+	switch NetworkTypeBTC(conf.NetworkType) {
+	case NetworkTypeMainNet:
+		bit.chainConf = &chaincfg.MainNetParams
+		if blockInfo.Chain != BlockchainInfoChainMain {
+			return nil, fmt.Errorf(
+				"connecting %s on bitcoind, but config file defines as %s",
+				blockInfo.Chain, NetworkTypeMainNet)
+		}
+	case NetworkTypeTestNet3:
+		bit.chainConf = &chaincfg.TestNet3Params
+		if blockInfo.Chain != BlockchainInfoChainTest {
+			return nil, fmt.Errorf(
+				"connecting %s on bitcoind, but config file defines as %s",
+				blockInfo.Chain, NetworkTypeTestNet3)
+		}
+	case NetworkTypeRegTestNet:
+		bit.chainConf = &chaincfg.RegressionNetParams
+		if blockInfo.Chain != BlockchainInfoChainRegtest {
+			return nil, fmt.Errorf(
+				"connecting %s on bitcoind, but config file defines as %s",
+				blockInfo.Chain, NetworkTypeRegTestNet)
+		}
+	case NetworkTypeSigNet:
+		bit.chainConf = &chaincfg.SigNetParams
+		if blockInfo.Chain != BlockchainInfoChainSignet {
+			return nil, fmt.Errorf(
+				"connecting %s on bitcoind, but config file defines as %s",
+				blockInfo.Chain, NetworkTypeSigNet)
+		}
+	default:
+		return nil, errors.New("bitcoin network type is invalid in config")
+	}
+
+	// set bitcoin version
+	netInfo, err := bit.GetNetworkInfo()
+	if err != nil {
+		return nil, fmt.Errorf("fail to call bit.GetNetworkInfo(): %w", err)
+	}
+	if RequiredVersion > netInfo.Version {
+		return nil, fmt.Errorf(
+			"bitcoin core version should be %d +, but version %d is detected",
+			RequiredVersion, netInfo.Version)
+	}
+	bit.version = netInfo.Version
+	logger.Info("bitcoin rpc server", "version", netInfo.Version.Int())
+
+	// set other information from config
+	bit.confirmationBlock = conf.Block.ConfirmationNum
+	bit.feeRange.max = conf.Fee.AdjustmentMax
+	bit.feeRange.min = conf.Fee.AdjustmentMin
+
+	return &bit, nil
+}
+
+// Close disconnect from bitcoin core server
+func (b *Bitcoin) Close() {
+	if b.Client != nil {
+		b.Client.Shutdown()
+	}
+}
+
+// GetChainConf returns chain conf
+func (b *Bitcoin) GetChainConf() *chaincfg.Params {
+	return b.chainConf
+}
+
+// SetChainConf sets chain conf
+func (b *Bitcoin) SetChainConf(conf *chaincfg.Params) {
+	b.chainConf = conf
+}
+
+// SetChainConfNet sets conf.Net
+func (b *Bitcoin) SetChainConfNet(btcNet wire.BitcoinNet) {
+	b.chainConf.Net = btcNet
+}
+
+// ConfirmationBlock returns confirmation block count
+func (b *Bitcoin) ConfirmationBlock() uint64 {
+	return b.confirmationBlock
+}
+
+// FeeRangeMax return maximum fee rate for adjustment
+func (b *Bitcoin) FeeRangeMax() float64 {
+	return b.feeRange.max
+}
+
+// FeeRangeMin returns minimum fee rate for adjustment
+func (b *Bitcoin) FeeRangeMin() float64 {
+	return b.feeRange.min
+}
+
+// Version returns core version
+func (b *Bitcoin) Version() BTCVersion {
+	return b.version
+}
+
+// CoinTypeCode returns CoinTypeCode
+func (b *Bitcoin) CoinTypeCode() domainCoin.CoinTypeCode {
+	return b.coinTypeCode
+}

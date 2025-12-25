@@ -7,7 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
 
-	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 )
 
 // AccountRoot account root config

@@ -9,13 +9,13 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/spf13/cobra"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/di"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/sign"
+	wallets "github.com/hiromaily/go-crypto-wallet/internal/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/command/sign"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	"github.com/hiromaily/go-crypto-wallet/pkg/di"
-	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
-	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 
 // sign wallet as cold wallet
