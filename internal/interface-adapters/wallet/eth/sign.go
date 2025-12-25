@@ -1,4 +1,4 @@
-package ethwallet
+package eth
 
 import (
 	"database/sql"

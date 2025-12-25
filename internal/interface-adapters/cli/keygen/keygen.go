@@ -12,9 +12,9 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/export"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/imports"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/sign"
-	wallets "github.com/hiromaily/go-crypto-wallet/internal/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/wallet/btcwallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/wallet/ethwallet"
+	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
+	btcwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/btc"
+	ethwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/eth"
 )
 
 // AddCommands adds all keygen subcommands to the root command

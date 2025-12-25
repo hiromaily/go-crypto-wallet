@@ -9,7 +9,7 @@ import (
 
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	"github.com/hiromaily/go-crypto-wallet/internal/di"
-	wallets "github.com/hiromaily/go-crypto-wallet/internal/wallet"
+	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
 )
 
 // AddCommands adds all sign subcommands

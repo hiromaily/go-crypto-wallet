@@ -14,7 +14,7 @@ import (
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/sign"
-	wallets "github.com/hiromaily/go-crypto-wallet/internal/wallet"
+	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 
