@@ -8,7 +8,9 @@ This project follows **Clean Architecture** principles with clear layer separati
 The project uses both `pkg/` and `internal/` directories:
 
 - **`internal/`**: New architecture following Clean Architecture (domain, application, infrastructure, interface-adapters)
-- **`pkg/`**: Shared utilities and legacy/transitional code for backward compatibility
+- **`pkg/`**: Shared utilities that can be imported by external code (public APIs)
+  - These packages must NOT depend on `internal/` directory
+  - Contains configuration, logging, test utilities, and other common functionality
 
 ## Root Directory Structure
 
@@ -41,6 +43,8 @@ internal/
 │
 ├── application/            # Application Layer - Use case layer
 │   ├── ports/              # Port interfaces (API, persistence)
+│   │   ├── api/            # API port interfaces (for future use)
+│   │   └── persistence/    # Persistence port interfaces
 │   └── usecase/            # Use case implementations
 │       ├── keygen/         # Key generation use cases
 │       │   ├── btc/        # Bitcoin-specific use cases
@@ -61,16 +65,35 @@ internal/
 ├── infrastructure/         # Infrastructure Layer - External dependencies
 │   ├── api/                # External API clients
 │   │   ├── bitcoin/        # Bitcoin/BCH Core RPC API clients
+│   │   │   ├── bch/        # Bitcoin Cash API clients
+│   │   │   └── btc/        # Bitcoin API clients
 │   │   ├── ethereum/       # Ethereum JSON-RPC API clients
+│   │   │   ├── erc20/      # ERC-20 token API clients
+│   │   │   ├── eth/        # Ethereum API clients
+│   │   │   └── ethtx/      # Ethereum transaction utilities
 │   │   └── ripple/         # Ripple gRPC API clients
+│   │       └── xrp/        # XRP API clients
+│   ├── config/             # Configuration implementations
+│   │   └── account/        # Account configuration
+│   ├── contract/           # Smart contract utilities
+│   │   └── token-abi.go    # ERC-20 token ABI
 │   ├── database/           # Database connections and generated code
+│   │   ├── models/         # Database models
+│   │   │   └── rdb/        # RDB models
 │   │   ├── mysql/          # MySQL connection management
 │   │   └── sqlc/           # SQLC generated database code
 │   ├── repository/         # Data persistence implementations
 │   │   ├── cold/           # Cold wallet repository (keygen, sign)
 │   │   └── watch/          # Watch wallet repository
 │   ├── storage/            # File storage implementations
-│   │   └── file/           # File-based storage (address, transaction)
+│   │   └── file/           # File-based storage
+│   │       ├── address/    # Address file storage
+│   │       │   ├── bch/    # Bitcoin Cash address utilities
+│   │       │   └── xrp/    # XRP address utilities
+│   │       ├── fullpubkey/ # Full public key file storage
+│   │       └── transaction.go  # Transaction file storage
+│   ├── wallet/             # Wallet infrastructure implementations
+│   │   └── key/            # Key generation logic (HD wallet, seeds)
 │   └── network/            # Network communication
 │       └── websocket/      # WebSocket client implementations
 │
@@ -95,55 +118,35 @@ internal/
     └── container.go        # DI container implementation
 ```
 
-## Package Directory Structure (Legacy and Utilities)
+## Package Directory Structure (Shared Utilities)
 
-The `pkg/` directory contains shared utilities and legacy/transitional code:
+The `pkg/` directory contains shared utilities that can be imported by external code.
+These packages are public APIs and must NOT depend on `internal/` directory:
 
 ```text
 pkg/
-├── domain/                 # Domain layer (legacy/transitional)
-│   ├── account/            # Account types and validators
-│   ├── coin/               # Cryptocurrency type definitions
-│   ├── key/                # Key value objects and validators
-│   ├── multisig/           # Multisig validators
-│   ├── transaction/       # Transaction types and validators
-│   └── wallet/             # Wallet types
-│
-├── application/            # Application layer (legacy/transitional)
-│   └── usecase/            # Use case implementations (legacy)
-│
-├── infrastructure/         # Infrastructure layer (legacy/transitional)
-│   ├── api/                # External API clients (legacy)
-│   ├── database/           # Database connections (legacy)
-│   ├── repository/         # Repository implementations (legacy)
-│   ├── storage/            # File storage (legacy)
-│   └── network/            # Network communication (legacy)
-│
-├── wallet/                 # Wallet-related utilities
-│   ├── key/                # Key generation logic (HD wallet, seeds)
-│   └── service/            # Legacy service layer (transitional)
-│       ├── keygen/         # Key generation services
-│       ├── sign/           # Signing services
-│       └── watch/          # Watch wallet services
-│
-├── command/                # Command implementations (legacy)
-│   ├── keygen/             # Keygen commands
-│   ├── sign/               # Sign commands
-│   └── watch/              # Watch commands
-│
-├── di/                     # Dependency injection (legacy)
+├── AGENTS.md               # Guidelines for pkg/ directory
 ├── config/                 # Configuration management
-├── logger/                 # Logging utilities
-├── address/                # Address formatting and utilities
-├── account/                # Account utilities (backward compatibility)
-├── contract/               # Smart contract utilities (ERC-20 token ABI)
+│   └── testutil/           # Test utilities for config
 ├── converter/              # Data conversion utilities
 ├── debug/                  # Debug utilities
-├── fullpubkey/             # Full public key formatting utilities
-├── models/                 # Data models (RDB)
+├── di/                     # Dependency injection utilities
+│   └── infrastructure.go   # Infrastructure DI setup
+├── logger/                 # Logging utilities
+│   ├── global.go           # Global logger
+│   ├── logger.go           # Logger implementation
+│   ├── noop.go             # No-op logger
+│   └── slog.go             # Structured logging
 ├── serial/                 # Serialization utilities
 ├── testutil/               # Test utilities
+│   ├── btc.go              # Bitcoin test utilities
+│   ├── eth.go              # Ethereum test utilities
+│   ├── repository.go       # Repository test utilities
+│   ├── suite.go            # Test suite utilities
+│   └── xrp.go              # XRP test utilities
 └── uuid/                   # UUID generation utilities
+    ├── google.go           # Google UUID implementation
+    └── types.go            # UUID types
 ```
 
 ## Command Entry Points
@@ -281,10 +284,12 @@ The project supports three wallet types:
 
 ## Migration Status
 
-The project is currently in a transition phase:
+The project follows Clean Architecture with clear separation:
 
-- **New Architecture**: `internal/` directory with Clean Architecture
-- **Legacy Code**: `pkg/` directory with old structure (being migrated)
+- **New Architecture**: `internal/` directory with Clean Architecture (domain, application, infrastructure, interface-adapters)
+- **Shared Utilities**: `pkg/` directory contains shared utilities that can be imported by external code
+  - These packages are public APIs and must NOT depend on `internal/` directory
+  - Contains configuration, logging, test utilities, and other common functionality
 - **Backward Compatibility**: Type aliases in `internal/wallet/` for compatibility (temporary, will be removed)
 
 For detailed refactoring status, see `docs/issues/REFACTORING_CHECKLIST.md`.
