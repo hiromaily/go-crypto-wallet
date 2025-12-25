@@ -12,9 +12,9 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/sign/imports"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/sign/sign"
 	ethapi "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/watch/api/eth"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"
+	wallets "github.com/hiromaily/go-crypto-wallet/internal/wallet"
+	"github.com/hiromaily/go-crypto-wallet/internal/wallet/btcwallet"
+	"github.com/hiromaily/go-crypto-wallet/internal/wallet/ethwallet"
 )
 
 // AddCommands adds all sign subcommands to the root command

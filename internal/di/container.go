@@ -29,6 +29,10 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
+	wallets "github.com/hiromaily/go-crypto-wallet/internal/wallet"
+	"github.com/hiromaily/go-crypto-wallet/internal/wallet/btcwallet"
+	"github.com/hiromaily/go-crypto-wallet/internal/wallet/ethwallet"
+	"github.com/hiromaily/go-crypto-wallet/internal/wallet/xrpwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
@@ -37,10 +41,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/xrpwallet"
 
 	// Use case imports
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"

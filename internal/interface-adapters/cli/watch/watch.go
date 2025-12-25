@@ -13,11 +13,11 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/watch/imports"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/watch/monitor"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/watch/send"
+	wallets "github.com/hiromaily/go-crypto-wallet/internal/wallet"
+	"github.com/hiromaily/go-crypto-wallet/internal/wallet/btcwallet"
+	"github.com/hiromaily/go-crypto-wallet/internal/wallet/ethwallet"
+	"github.com/hiromaily/go-crypto-wallet/internal/wallet/xrpwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/xrpwallet"
 )
 
 // AddCommands adds all watch subcommands to the root command
