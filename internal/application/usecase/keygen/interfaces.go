@@ -4,7 +4,7 @@ import (
 	"context"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 // GenerateHDWalletUseCase generates HD wallet keys

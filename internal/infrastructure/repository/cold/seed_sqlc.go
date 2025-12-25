@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
-	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 )
 
 // SeedRepositorySqlc is repository for seed table using sqlc

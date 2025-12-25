@@ -19,7 +19,7 @@ import (
 	mysql "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
+	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 )
 
 // TestEthDetailTxSqlc is integration test for EthDetailTxInputRepositorySqlc

@@ -1,7 +1,7 @@
 package di
 
 import (
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/converter"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"

@@ -10,8 +10,8 @@ import (
 
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
+	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
-	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 )
 
 // BTCTxRepositorySqlc is repository for btc_tx table using sqlc
