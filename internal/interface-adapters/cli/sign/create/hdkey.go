@@ -7,7 +7,7 @@ import (
 	"github.com/bookerzzz/grok"
 
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
-	"github.com/hiromaily/go-crypto-wallet/pkg/di"
+	"github.com/hiromaily/go-crypto-wallet/internal/di"
 )
 
 func runHDKey(container di.Container) error {

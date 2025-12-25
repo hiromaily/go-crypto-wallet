@@ -6,7 +6,7 @@ import (
 	"os"
 
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
-	"github.com/hiromaily/go-crypto-wallet/pkg/di"
+	"github.com/hiromaily/go-crypto-wallet/internal/di"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
 

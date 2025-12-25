@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
-	"github.com/hiromaily/go-crypto-wallet/pkg/di"
+	"github.com/hiromaily/go-crypto-wallet/internal/di"
 )
 
 func runPrivKey(container di.Container) error {

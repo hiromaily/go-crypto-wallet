@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
+	"github.com/hiromaily/go-crypto-wallet/internal/di"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 )
 
 func runPayment(container di.Container, fee float64) error {

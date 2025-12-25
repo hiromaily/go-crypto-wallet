@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
+	"github.com/hiromaily/go-crypto-wallet/internal/di"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 )
 
 func runTransfer(container di.Container, account1, account2 string, amount, fee float64) error {

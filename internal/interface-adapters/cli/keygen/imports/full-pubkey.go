@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
-	"github.com/hiromaily/go-crypto-wallet/pkg/di"
+	"github.com/hiromaily/go-crypto-wallet/internal/di"
 )
 
 func runFullPubKey(container di.Container, fileName string) error {

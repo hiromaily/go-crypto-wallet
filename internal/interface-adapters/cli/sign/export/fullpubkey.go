@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/di"
+	"github.com/hiromaily/go-crypto-wallet/internal/di"
 )
 
 func runFullPubkey(container di.Container) error {

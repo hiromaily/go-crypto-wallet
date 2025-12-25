@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
-	"github.com/hiromaily/go-crypto-wallet/pkg/di"
+	"github.com/hiromaily/go-crypto-wallet/internal/di"
 )
 
 func runSentTx(container di.Container, _ string) error {

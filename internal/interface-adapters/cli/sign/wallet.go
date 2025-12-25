@@ -5,13 +5,13 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/di"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/api/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/sign/create"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/sign/export"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/sign/imports"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/sign/sign"
 	ethapi "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/watch/api/eth"
-	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/btcwallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets/ethwallet"

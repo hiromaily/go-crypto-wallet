@@ -3,7 +3,7 @@ package sign
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/di"
+	"github.com/hiromaily/go-crypto-wallet/internal/di"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 

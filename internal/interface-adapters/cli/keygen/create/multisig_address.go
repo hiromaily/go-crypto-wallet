@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
+	"github.com/hiromaily/go-crypto-wallet/internal/di"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 )
 
 // runMultisigWithAccount is the actual implementation that accepts parsed flags
