@@ -1,7 +1,7 @@
 package wallets
 
 import (
-	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
+	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 )
 
 // Signer is for signature wallet service interface

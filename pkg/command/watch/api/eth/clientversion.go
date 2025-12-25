@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
 )
 
 func runClientVersion(eth ethereum.Ethereumer) error {

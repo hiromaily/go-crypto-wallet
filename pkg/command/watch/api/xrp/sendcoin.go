@@ -9,9 +9,9 @@ import (
 	"github.com/bookerzzz/grok"
 	"google.golang.org/grpc/status"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
-	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple/xrp"
 )
 
 func runSendCoin(xrpAPI ripple.Rippler, txData *config.RippleTxData, receiverAddr string, amount float64) error {

@@ -6,8 +6,8 @@ import (
 
 	"github.com/bookerzzz/grok"
 
-	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
 )
 
 func runListUnspent(btc bitcoin.Bitcoiner, acnt string, argsNum int64) error {

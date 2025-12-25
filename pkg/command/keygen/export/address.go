@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	keygenusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/keygen"
+	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/di"
-	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 )
 
 func runAddress(container di.Container, acnt string) error {

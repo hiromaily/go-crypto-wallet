@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
 )
 
 var bc bitcoin.Bitcoiner

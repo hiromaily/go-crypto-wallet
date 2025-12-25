@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strconv"
 
-	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
-	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 )
 

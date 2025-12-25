@@ -3,8 +3,8 @@ package xrp
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
 )
 
 // AddCommands adds all Ripple API subcommands

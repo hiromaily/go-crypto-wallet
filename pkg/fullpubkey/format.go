@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
-	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 )
 
 // FullPubKeyFormat is fullpubkey csv format

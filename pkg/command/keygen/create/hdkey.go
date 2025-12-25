@@ -7,9 +7,9 @@ import (
 
 	"github.com/bookerzzz/grok"
 
-	keygenusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/keygen"
+	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/di"
-	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
 )
 
 // runHDKeyWithFlags is the actual implementation that accepts parsed flags

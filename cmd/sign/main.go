@@ -9,12 +9,12 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/spf13/cobra"
 
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/command/sign"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/di"
-	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
-	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )
 

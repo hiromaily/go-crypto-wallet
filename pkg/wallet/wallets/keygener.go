@@ -1,8 +1,8 @@
 package wallets
 
 import (
-	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
-	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 )
 
 // Keygener is for keygen wallet service interface

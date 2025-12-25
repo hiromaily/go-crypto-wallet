@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	watchusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/watch"
+	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/wallets"
 )

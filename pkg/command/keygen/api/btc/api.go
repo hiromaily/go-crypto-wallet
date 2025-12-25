@@ -3,7 +3,7 @@ package btc
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
 )
 
 // AddCommands adds all Bitcoin API subcommands

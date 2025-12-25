@@ -4,12 +4,12 @@ import (
 	"context"
 	"database/sql"
 
-	watchusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/watch"
-	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
-	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
-	domainTx "github.com/hiromaily/go-crypto-wallet/pkg/domain/transaction"
-	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
+	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 

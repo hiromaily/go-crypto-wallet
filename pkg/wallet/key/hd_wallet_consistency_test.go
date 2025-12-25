@@ -9,9 +9,9 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tyler-smith/go-bip39"
 
-	domainAccount "github.com/hiromaily/go-crypto-wallet/pkg/domain/account"
-	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
-	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
 

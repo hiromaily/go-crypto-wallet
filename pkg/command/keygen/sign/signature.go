@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	keygenusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/keygen"
+	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 )
 

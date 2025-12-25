@@ -1,8 +1,8 @@
 package config
 
 import (
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/address"
-	domainCoin "github.com/hiromaily/go-crypto-wallet/pkg/domain/coin"
 )
 
 // WalletRoot wallet root config

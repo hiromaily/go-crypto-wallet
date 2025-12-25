@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	signusecase "github.com/hiromaily/go-crypto-wallet/pkg/application/usecase/sign"
+	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	"github.com/hiromaily/go-crypto-wallet/pkg/di"
 )
 

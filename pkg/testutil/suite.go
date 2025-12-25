@@ -3,9 +3,9 @@ package testutil
 import (
 	"github.com/stretchr/testify/suite"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
-	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum"
-	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 )
 
 type BTCTestSuite struct {

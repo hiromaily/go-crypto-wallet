@@ -3,9 +3,9 @@ package ethwallet
 import (
 	"database/sql"
 
-	domainKey "github.com/hiromaily/go-crypto-wallet/pkg/domain/key"
-	domainWallet "github.com/hiromaily/go-crypto-wallet/pkg/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ethereum"
+	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 

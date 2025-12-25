@@ -5,7 +5,7 @@ import (
 
 	"github.com/bookerzzz/grok"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
 )
 
 func runGetNetworkInfo(btc bitcoin.Bitcoiner) error {

@@ -3,7 +3,7 @@ package btc
 import (
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/bitcoin"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
 )
 
 func runUnlockTx(btc bitcoin.Bitcoiner) error {
