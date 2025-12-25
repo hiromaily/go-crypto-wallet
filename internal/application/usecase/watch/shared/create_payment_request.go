@@ -12,9 +12,9 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
+	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/converter"
-	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 )
 
 type createPaymentRequestUseCase struct {

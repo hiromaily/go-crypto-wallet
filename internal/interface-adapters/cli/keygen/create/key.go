@@ -3,9 +3,9 @@ package create
 import (
 	"fmt"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 	wallets "github.com/hiromaily/go-crypto-wallet/internal/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/wallet/btcwallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
 )
 
 func runKey(wallet wallets.Keygener) error {

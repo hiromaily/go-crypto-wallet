@@ -12,7 +12,7 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 )
 
 // TestHDWalletBTCDUpgradeConsistency verifies that HD wallet key derivation

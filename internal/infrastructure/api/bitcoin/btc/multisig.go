@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 

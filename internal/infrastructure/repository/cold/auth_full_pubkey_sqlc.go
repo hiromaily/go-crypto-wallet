@@ -7,8 +7,8 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
-	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 )
 
 // AuthFullPubkeyRepositorySqlc is repository for auth_fullpubkey table using sqlc

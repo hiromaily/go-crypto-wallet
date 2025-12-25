@@ -8,8 +8,8 @@ import (
 	"github.com/quagmt/udecimal"
 
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
-	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 )
 
 // TxInputRepositorySqlc is repository for btc_tx_input table using sqlc

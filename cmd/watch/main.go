@@ -12,9 +12,9 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/di"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
 	wcmd "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/watch"
 	wallets "github.com/hiromaily/go-crypto-wallet/internal/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 

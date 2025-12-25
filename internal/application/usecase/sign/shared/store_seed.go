@@ -6,7 +6,7 @@ import (
 
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 )
 
 type storeSeedUseCase struct {

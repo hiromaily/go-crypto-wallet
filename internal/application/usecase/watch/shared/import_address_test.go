@@ -9,7 +9,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/shared"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 // TestNewImportAddressUseCase tests the constructor

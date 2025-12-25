@@ -12,7 +12,7 @@ import (
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
-	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 

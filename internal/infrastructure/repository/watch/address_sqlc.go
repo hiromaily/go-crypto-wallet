@@ -10,8 +10,8 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
-	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 )
 
 // AddressRepositorySqlc is repository for address table using sqlc

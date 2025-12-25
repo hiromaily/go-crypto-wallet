@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/tyler-smith/go-bip39"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/wallet/key"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 )
 
 func TestGenerateSeed(t *testing.T) {

@@ -15,9 +15,9 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/eth"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/ethtx"
-	"github.com/hiromaily/go-crypto-wallet/pkg/contract"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/contract"
+	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
 

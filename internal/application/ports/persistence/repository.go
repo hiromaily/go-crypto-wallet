@@ -8,8 +8,8 @@ package persistence
 import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/pkg/address"
-	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
+	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 // Repository interfaces for cold wallet (keygen and sign wallets)

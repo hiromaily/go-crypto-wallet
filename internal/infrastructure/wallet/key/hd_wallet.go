@@ -18,8 +18,8 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
-	bchaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/bch"
-	xrpaddr "github.com/hiromaily/go-crypto-wallet/pkg/address/xrp"
+	bchaddr "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address/bch"
+	xrpaddr "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 

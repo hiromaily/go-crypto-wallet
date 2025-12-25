@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
+	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 

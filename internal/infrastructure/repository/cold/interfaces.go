@@ -2,7 +2,7 @@ package cold
 
 import (
 	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
-	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
+	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 )
 
 // Type aliases for backward compatibility.

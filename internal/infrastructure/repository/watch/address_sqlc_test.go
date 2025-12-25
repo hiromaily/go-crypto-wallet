@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
+	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 

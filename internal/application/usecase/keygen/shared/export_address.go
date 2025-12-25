@@ -10,12 +10,12 @@ import (
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
+	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
-	"github.com/hiromaily/go-crypto-wallet/pkg/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/address"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	models "github.com/hiromaily/go-crypto-wallet/pkg/models/rdb"
 )
 
 type exportAddressUseCase struct {
