@@ -49,6 +49,7 @@ func (t PurposeType) Uint32() uint32 {
 const (
 	PurposeTypeBIP44 PurposeType = 44 // BIP44
 	PurposeTypeBIP49 PurposeType = 49 // BIP49
+	PurposeTypeBIP84 PurposeType = 84 // BIP84
 )
 
 // CoinType creates a separate subtree for every cryptocoin
@@ -125,6 +126,8 @@ func (k *HDKey) KeyType() domainKey.KeyType {
 		return domainKey.KeyTypeBIP44
 	case PurposeTypeBIP49:
 		return domainKey.KeyTypeBIP49
+	case PurposeTypeBIP84:
+		return domainKey.KeyTypeBIP84
 	default:
 		return domainKey.KeyTypeBIP44
 	}
@@ -137,6 +140,8 @@ func (k *HDKey) SupportsAddressType(addrType address.AddrType) bool {
 		return addrType == address.AddrTypeLegacy
 	case PurposeTypeBIP49:
 		return addrType == address.AddrTypeP2shSegwit
+	case PurposeTypeBIP84:
+		return addrType == address.AddrTypeBech32
 	default:
 		return false
 	}

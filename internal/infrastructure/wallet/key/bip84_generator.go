@@ -1,9 +1,6 @@
 package key
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/btcsuite/btcd/chaincfg"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -14,17 +11,13 @@ import (
 
 // BIP84Generator implements Generator interface for BIP84 (Native SegWit Bech32 addresses)
 type BIP84Generator struct {
-	coinType     domainCoin.CoinType
-	coinTypeCode domainCoin.CoinTypeCode
-	conf         *chaincfg.Params
+	hdKey *HDKey
 }
 
 // NewBIP84Generator returns BIP84Generator
 func NewBIP84Generator(coinTypeCode domainCoin.CoinTypeCode, conf *chaincfg.Params) *BIP84Generator {
 	return &BIP84Generator{
-		coinType:     domainCoin.GetCoinType(coinTypeCode, conf),
-		coinTypeCode: coinTypeCode,
-		conf:         conf,
+		hdKey: NewHDKey(PurposeTypeBIP84, coinTypeCode, conf),
 	}
 }
 
@@ -34,13 +27,12 @@ func (*BIP84Generator) KeyType() domainKey.KeyType {
 }
 
 // CreateKey creates keys based on BIP84 standard
-// TODO: Implement BIP84 key generation for Native SegWit (Bech32) addresses
-func (*BIP84Generator) CreateKey(
-	_ []byte,
-	_ domainAccount.AccountType,
-	_, _ uint32,
+func (g *BIP84Generator) CreateKey(
+	seed []byte,
+	accountType domainAccount.AccountType,
+	idxFrom, count uint32,
 ) ([]domainKey.WalletKey, error) {
-	return nil, errors.New("BIP84 key generation not yet implemented")
+	return g.hdKey.CreateKey(seed, accountType, idxFrom, count)
 }
 
 // SupportsAddressType checks if this generator supports the given address type
@@ -50,8 +42,5 @@ func (*BIP84Generator) SupportsAddressType(addrType address.AddrType) bool {
 
 // GetDerivationPath returns the BIP84 derivation path
 func (g *BIP84Generator) GetDerivationPath(accountType domainAccount.AccountType, index uint32) string {
-	return fmt.Sprintf("m/84'/%d'/%d'/0/%d",
-		g.coinType.Uint32(),
-		accountType.Uint32(),
-		index)
+	return g.hdKey.GetDerivationPath(accountType, index)
 }
