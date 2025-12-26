@@ -20,60 +20,52 @@ Use it as a reference when determining refactoring priorities.
   - `ethereum/go-ethereum`: v1.16.7 (updated from v1.12.0)
   - `btcsuite/btcd`: v0.25.0 (updated from v0.23.4)
 - ⚠️ Regular vulnerability scanning not automated in CI
+- ⚠️ CI pipeline not configured (no `.github/workflows/` found)
 
 **Impact**: Potential for known security vulnerabilities
 **Priority**: Highest
 **Action**:
 
+- [ ] Set up CI pipeline (GitHub Actions)
 - [ ] Add `govulncheck` to CI pipeline
 - [ ] Set up Dependabot for automated dependency updates
 - [ ] Run regular security scans
 
-### 2. `panic` Usage
+### 2. Inappropriate `log.Fatal` Usage in Test Utilities
 
-**Location**: Multiple files
+**Location**: `pkg/testutil/repository.go`
 **Current State**:
 
-- `pkg/di/container.go` (22 occurrences)
-  - Lines: 150, 209, 217, 229, 231, 421, 475, 486, 497, 508, 527, 543, 559, 587, 619, 757, 839, 973, 986, 999, 1032, 1059
-  - **Note**: According to AGENTS.md, `panic` is acceptable in `pkg/di` package during instance construction phase
-- `cmd/tools/get-eth-key/main.go` (3 occurrences)
-  - Lines: 35, 45, 50
-  - **Note**: `panic` in `main.go` files is acceptable, but graceful shutdown should be implemented
-
-**Problem**: Runtime errors cause program crashes
-**Impact**: Application stops unexpectedly on invalid coin types or configuration errors
-**Priority**: Medium (for `pkg/di` - acceptable per project guidelines),
-  High (for `main.go` - should implement graceful shutdown)
-**Action**:
-
-- `pkg/di`: Acceptable per project guidelines (instance construction phase)
-- `main.go` files: Implement graceful shutdown instead of `panic`
-
-### 3. Inappropriate `log.Fatal` Usage
-
-**Location**: Multiple files
-**Current State**:
-
-- `cmd/tools/eth-key/main.go` (5 occurrences)
-  - Lines: 23, 26, 29, 38, 44
 - `pkg/testutil/repository.go` (18 occurrences)
   - Multiple test helper functions using `log.Fatalf`
-- `pkg/testutil/xrp.go` (3 commented occurrences)
-  - Lines: 61, 68, 71 (commented out)
+  - Prevents proper test cleanup on failure
 
-**Note**: `log.Fatal` in `main` functions is acceptable,
-  but should be replaced with proper error handling and graceful shutdown.
-
-**Problem**: Using `log.Fatal` in non-main packages (especially `pkg/testutil/`)
-  prevents cleanup processing
-**Impact**: Resource leaks, potential data inconsistency,
-  test failures don't provide proper cleanup
+**Problem**: Using `log.Fatal` in test utilities prevents cleanup processing
+**Impact**: Resource leaks, potential data inconsistency, test failures don't provide proper cleanup
 **Priority**: High
 **Action**:
 
-- Replace `log.Fatal` in `pkg/testutil/` with error returns
-- Implement graceful shutdown in `main` functions instead of `log.Fatal`
+- [ ] Replace `log.Fatal` in `pkg/testutil/repository.go` with error returns
+- [ ] Update all test helper functions to return errors instead of calling `log.Fatal`
+
+### 3. `panic` and `log.Fatal` Usage in Main Functions
+
+**Location**: Command tools
+**Current State**:
+
+- `cmd/tools/get-eth-key/main.go` (3 `panic` occurrences at lines 35, 45, 50)
+- `cmd/tools/eth-key/main.go` (5 `log.Fatal` occurrences at lines 23, 26, 29, 38, 44)
+
+**Note**: `panic` and `log.Fatal` in `main` functions are technically acceptable,
+  but graceful shutdown should be implemented for better error handling.
+
+**Problem**: Runtime errors cause program crashes without cleanup
+**Impact**: Application stops unexpectedly, no graceful shutdown
+**Priority**: Medium
+**Action**:
+
+- [ ] Implement graceful shutdown in `main` functions instead of `panic`/`log.Fatal`
+- [ ] Add proper error handling and cleanup before exit
 
 ---
 
@@ -103,10 +95,10 @@ Use it as a reference when determining refactoring priorities.
 **Location**: API calls
 **Current State**:
 
-- ✅ `pkg/infrastructure/api/ethereum/` - Most methods use `context.Context`
-- ✅ `pkg/infrastructure/api/ripple/` - All gRPC methods use `context.Context`
-- ✅ `pkg/infrastructure/api/bitcoin/` - Needs verification
-- ✅ `pkg/infrastructure/network/websocket/` - Uses `context.Context`
+- ✅ `internal/infrastructure/api/ethereum/` - Most methods use `context.Context`
+- ✅ `internal/infrastructure/api/ripple/` - All gRPC methods use `context.Context`
+- ⚠️ `internal/infrastructure/api/bitcoin/` - Methods do NOT use `context.Context`
+- ✅ `internal/infrastructure/network/websocket/` - Uses `context.Context`
 - ⚠️ Timeout and cancellation not consistently implemented
 - ⚠️ Tracing information propagation insufficient
 
@@ -116,10 +108,10 @@ Use it as a reference when determining refactoring priorities.
 - Distributed tracing doesn't work properly
 - Potential resource leaks
 
-**Priority**: Medium (most APIs already use context)
+**Priority**: Medium
 **Action**:
 
-- [ ] Verify all `pkg/infrastructure/api/bitcoin/` methods use `context.Context`
+- [ ] Add `context.Context` parameter to all `internal/infrastructure/api/bitcoin/` methods
 - [ ] Implement consistent timeout settings across all API calls
 - [ ] Implement cancellation handling
 - [ ] Propagate tracing information
@@ -131,7 +123,7 @@ Use it as a reference when determining refactoring priorities.
 
 - ✅ Structured logging package exists (`pkg/logger/`)
 - ✅ Logger interface defined
-- ⚠️ One commented `log.Printf` found in `pkg/wallet/key/random_wallet.go:31`
+- ⚠️ One commented `log.Printf` found in `internal/infrastructure/wallet/key/random_wallet.go:31`
 - ⚠️ Log levels may not be unified
 - ⚠️ Potential for sensitive information in logs
 
@@ -139,7 +131,7 @@ Use it as a reference when determining refactoring priorities.
 **Priority**: High
 **Action**:
 
-- [ ] Remove commented `log.Printf` usage
+- [ ] Remove commented `log.Printf` usage in `internal/infrastructure/wallet/key/random_wallet.go:31`
 - [ ] Unify log levels
 - [ ] Ensure sensitive information is masked
 - [ ] Standardize log format
@@ -148,7 +140,7 @@ Use it as a reference when determining refactoring priorities.
 
 ## Medium Priority Issues
 
-### 7. Test Separation
+### 7. Test Infrastructure Improvements
 
 **Location**: Test files
 **Current State**:
@@ -157,50 +149,51 @@ Use it as a reference when determining refactoring priorities.
 - ✅ 35 test files properly tagged with integration build tag
 - ⚠️ Test data management could be improved
 - ⚠️ Test helpers could be better organized
-- ⚠️ `pkg/testutil/repository.go` uses `log.Fatal` which prevents proper test cleanup
+- ⚠️ `pkg/testutil/repository.go` uses `log.Fatal` which prevents proper test cleanup (see Issue #2)
 
 **Impact**: Long test execution time, difficult test maintenance, improper test failure handling
 **Priority**: Medium
 **Action**:
 
 - [x] Test separation with build tags (completed)
-- [ ] Replace `log.Fatal` in `pkg/testutil/` with error returns
 - [ ] Improve test data management
 - [ ] Organize test helpers
 
-### 8. Interface Overuse
+### 8. Architecture Migration
 
-**Location**: `pkg/wallet/service/` and `pkg/application/usecase/`
-**Problem**:
+**Location**: Application layer
+**Current State**:
 
-- Many small interfaces defined
-- Interface usage is inconsistent
-- Both `pkg/wallet/service/` (legacy) and `pkg/application/usecase/` (new) exist in parallel
+- ✅ New application layer (`internal/application/usecase/`) exists and is being used
+- ✅ DI container (`internal/di/container.go`) uses new use case layer
+- ⚠️ Legacy application layer (`internal/wallet/service/`) may still exist in parallel
+- ⚠️ Migration strategy unclear
 
 **Impact**: Increased code complexity, unclear which layer to use
 **Priority**: Medium
 **Action**:
 
-- Review and consolidate interfaces
-- Complete migration from `pkg/wallet/service/` to `pkg/application/usecase/`
-- Document migration strategy
+- [ ] Verify if legacy `internal/wallet/service/` is still in use
+- [ ] Complete migration from legacy layer to `internal/application/usecase/` if needed
+- [ ] Document architecture migration strategy
+- [ ] Review and consolidate interfaces
 
 ### 9. Type Safety Issues
 
-**Location**:
-
-- `pkg/repository/watchrepo/` (sqlc is used, not sqlboiler)
-- Various places using `map[string]interface{}`
-
+**Location**: Codebase-wide
 **Current State**:
 
-- ✅ Using `sqlc` for type-safe database queries (not sqlboiler)
+- ✅ Using `sqlc` for type-safe database queries in `internal/infrastructure/repository/`
 - ⚠️ Some `interface{}` usage remains
 - ⚠️ Type assertions exist in multiple places
 
 **Impact**: Runtime error risk, lack of type safety
 **Priority**: Medium
-**Action**: Change to type-safe implementation where possible
+**Action**:
+
+- [ ] Identify remaining `interface{}` usage
+- [ ] Change to type-safe implementation where possible
+- [ ] Reduce type assertions where feasible
 
 ### 10. Commented-Out Code
 
@@ -216,8 +209,8 @@ Use it as a reference when determining refactoring priorities.
 
 **Examples found**:
 
-- `pkg/testutil/xrp.go` (3 commented `log.Fatalf` at lines 61, 68, 71)
-- `pkg/wallet/key/random_wallet.go:31` (commented `log.Printf`)
+- `pkg/testutil/xrp.go` (3 commented `log.Fatalf` at lines 61, 68, 71 - entire function is commented out)
+- `internal/infrastructure/wallet/key/random_wallet.go:31` (commented `log.Printf`)
 
 ---
 
@@ -269,9 +262,9 @@ Use it as a reference when determining refactoring priorities.
 
 **Current State**:
 
-- ✅ Major dependencies updated to recent versions
+- ✅ Major dependencies updated to recent versions (Go 1.25.5, btcsuite/btcd v0.25.0, ethereum/go-ethereum v1.16.7)
 - ⚠️ Regular update process not automated
-- ⚠️ Security scanning not in CI
+- ⚠️ Security scanning not in CI (see Issue #1)
 
 **Problem**:
 
@@ -280,33 +273,31 @@ Use it as a reference when determining refactoring priorities.
 
 **Action**:
 
-- [ ] Set up Dependabot
-- [ ] Add security scanning to CI
+- [ ] Set up Dependabot (see Issue #1)
+- [ ] Add security scanning to CI (see Issue #1)
 - [ ] Establish regular update schedule
 
 ### 15. Architecture Complexity
 
 **Current State**:
 
-- ✅ Container-based DI pattern exists (`pkg/di/container.go`)
-- ✅ Domain layer separated (`pkg/domain/`)
-- ✅ Infrastructure layer separated (`pkg/infrastructure/`)
-- ✅ New application layer (`pkg/application/usecase/`) being introduced
-- ⚠️ Container implementation has many `panic` calls (acceptable per project guidelines)
-- ⚠️ Legacy application layer (`pkg/wallet/service/`) and new layer (`pkg/application/usecase/`) coexist
-- ⚠️ Migration strategy unclear
+- ✅ Container-based DI pattern exists (`internal/di/container.go`)
+- ✅ Domain layer separated (`internal/domain/`)
+- ✅ Infrastructure layer separated (`internal/infrastructure/`)
+- ✅ New application layer (`internal/application/usecase/`) exists and is being used
+- ✅ Container implementation uses `panic` during instance construction (acceptable per project guidelines)
+- ⚠️ Legacy application layer may still exist (see Issue #8)
 
 **Problem**:
 
 - Container pattern implementation is complex
 - Dependency injection may be overly complex
-- Two application layer implementations exist in parallel
 
 **Action**:
 
-- Complete migration from `pkg/wallet/service/` to `pkg/application/usecase/`
-- Document architecture migration strategy
-- Review and simplify architecture where possible
+- [ ] Complete architecture migration (see Issue #8)
+- [ ] Document architecture migration strategy
+- [ ] Review and simplify architecture where possible
 
 ### 16. Insufficient Test Coverage
 
@@ -331,13 +322,7 @@ Use it as a reference when determining refactoring priorities.
 **Problem**: `github.com/cpacia/bchutil` is outdated
 **Action**: Replace with `github.com/gcash/bchd`
 
-### 18. Test Separation
-
-**Status**: ✅ Completed
-
-- Integration tests now use build tags
-
-### 19. Private Key Management
+### 18. Private Key Management
 
 **Location**: README.md
 **Problem**: Private key handling is inappropriate
@@ -347,7 +332,7 @@ Use it as a reference when determining refactoring priorities.
 - [ ] Implement encrypted storage
 - [ ] Implement memory protection
 
-### 20. Fee Issue
+### 19. Fee Issue
 
 **Location**: README.md
 **Problem**: Overpaying fees on Signet
@@ -363,10 +348,10 @@ Use it as a reference when determining refactoring priorities.
 | `log.Fatal` usage in testutil | High | High | Low | 2 |
 | Error handling | High | Medium | High | 3 |
 | Context management | Medium | Medium | Medium | 4 |
-| Logging unification | High | Medium | Medium | 5 |
-| Test separation | Medium | Low | Medium | 6 ✅ |
+| Logging unification | High | Medium | Low | 5 |
+| Test infrastructure | Medium | Low | Medium | 6 |
 | Architecture migration | Medium | Medium | High | 7 |
-| Interface organization | Medium | Low | Medium | 8 |
+| Commented-out code | Medium | Low | Low | 8 |
 | Documentation | Low | Low | High | 9 |
 
 ---
@@ -375,25 +360,26 @@ Use it as a reference when determining refactoring priorities.
 
 ### Phase 1 (Immediate)
 
-1. ✅ Security vulnerability scanning setup (govulncheck available)
-   - [ ] Add to CI pipeline
-   - [ ] Set up Dependabot
-2. [ ] Remove `log.Fatal` from `pkg/testutil/` (replace with error returns)
-3. [ ] Implement graceful shutdown in `main` functions
-4. [ ] Remove commented-out code
+1. [ ] Set up CI pipeline (GitHub Actions)
+2. [ ] Add `govulncheck` to CI pipeline
+3. [ ] Set up Dependabot for automated dependency updates
+4. [ ] Remove `log.Fatal` from `pkg/testutil/repository.go` (replace with error returns)
+5. [ ] Remove commented-out code
 
 ### Phase 2 (Within 1-2 weeks)
 
-1. [ ] Standardize error handling
-2. [ ] Complete context management implementation (verify bitcoin API, add timeouts)
-3. [ ] Unify logging
-4. [ ] Document architecture migration strategy
+1. [ ] Implement graceful shutdown in `main` functions
+2. [ ] Standardize error handling
+3. [ ] Add `context.Context` to all `internal/infrastructure/api/bitcoin/` methods
+4. [ ] Implement consistent timeout settings across all API calls
+5. [ ] Remove commented `log.Printf` in `internal/infrastructure/wallet/key/random_wallet.go`
+6. [ ] Unify logging levels and format
 
 ### Phase 3 (Within 1-2 months)
 
-1. [ ] Complete migration from `pkg/wallet/service/` to `pkg/application/usecase/`
-2. [ ] Improve test data management
-3. [ ] Organize interfaces
+1. [ ] Verify and complete migration from legacy layer to `internal/application/usecase/`
+2. [ ] Document architecture migration strategy
+3. [ ] Improve test data management
 4. [ ] Improve documentation
 
 ---
@@ -414,6 +400,8 @@ Use it as a reference when determining refactoring priorities.
 - 2025-01-XX: Updated panic usage status (acceptable in pkg/di per project guidelines),
   updated context management status (most APIs already use context),
   added architecture migration note
+- 2025-01-XX: Reorganized issues, removed completed items, updated file paths to reflect actual structure,
+  consolidated duplicate issues, updated priority matrix
 
 ## Additional Notes
 
