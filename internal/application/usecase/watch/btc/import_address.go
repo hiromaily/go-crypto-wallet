@@ -117,7 +117,9 @@ func (u *importAddressUseCase) selectTargetAddress(addrFmt *address.AddressForma
 			case address.AddrTypeTaproot:
 				// TODO: Implement Taproot address support
 				return "", errors.New("taproot address type not yet supported")
-			case address.AddrTypeLegacy, address.AddrTypeP2shSegwit,
+			case address.AddrTypeLegacy:
+				return addrFmt.P2PKHAddress, nil
+			case address.AddrTypeP2shSegwit,
 				address.AddrTypeBCHCashAddr, address.AddrTypeETH:
 				return addrFmt.P2SHSegwitAddress, nil
 			default:
