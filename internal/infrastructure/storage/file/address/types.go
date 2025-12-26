@@ -27,8 +27,8 @@ var AddrTypeValue = map[AddrType]uint8{
 	AddrTypeLegacy:      0,
 	AddrTypeP2shSegwit:  1,
 	AddrTypeBech32:      2,
-	AddrTypeTaproot:     3,
-	AddrTypeBCHCashAddr: 4,
+	AddrTypeBCHCashAddr: 3,
+	AddrTypeTaproot:     4,
 }
 
 //----------------------------------------------------

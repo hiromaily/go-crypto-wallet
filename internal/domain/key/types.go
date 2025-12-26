@@ -28,6 +28,8 @@ func (k KeyType) String() string {
 }
 
 // Purpose returns the BIP purpose number for the key type
+// Panics if called on key types that don't have a BIP purpose number (e.g., MuSig2)
+// or on unhandled key types (programming error)
 func (k KeyType) Purpose() uint32 {
 	switch k {
 	case KeyTypeBIP44:
@@ -39,9 +41,11 @@ func (k KeyType) Purpose() uint32 {
 	case KeyTypeBIP86:
 		return 86
 	case KeyTypeMuSig2:
-		return 44 // MuSig2 doesn't have a BIP purpose number, default to BIP44
+		// MuSig2 is a signing scheme, not a derivation path standard, and has no purpose number.
+		panic(fmt.Sprintf("key type %q does not have a BIP purpose number", k))
 	default:
-		return 44 // Default to BIP44
+		// This case should be unreachable if Validate() is called, but as a safeguard:
+		panic(fmt.Sprintf("unhandled key type: %s", k))
 	}
 }
 
