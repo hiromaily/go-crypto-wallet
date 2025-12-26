@@ -253,8 +253,6 @@ Specifically, `panic` is acceptable in:
       - `btc/`: Bitcoin wallet implementations
       - `eth/`: Ethereum wallet implementations
       - `xrp/`: XRP wallet implementations
-  - `wallet/`: **Deprecated** - Backward compatibility aliases (will be removed)
-    - Type aliases pointing to `interface-adapters/wallet`
   - `wallet/service/`: **Application layer** - Business logic orchestration (legacy/transitional)
     - `keygen/`: Key generation services (btc, eth, xrp, shared)
     - `sign/`: Signing services (btc, eth, xrp, shared)
