@@ -152,13 +152,21 @@ func (k *HDKey) SupportsAddressType(addrType address.AddrType) bool {
 	}
 }
 
+// buildDerivationPath builds a BIP32 derivation path string
+// Format: m/purpose'/coinType'/account'/0/index
+// This helper function ensures consistency across all BIP generators
+func buildDerivationPath(purpose, coinType, account, index uint32) string {
+	return fmt.Sprintf("m/%d'/%d'/%d'/0/%d", purpose, coinType, account, index)
+}
+
 // GetDerivationPath returns the derivation path for the given account and index (implements Generator interface)
 func (k *HDKey) GetDerivationPath(accountType domainAccount.AccountType, index uint32) string {
-	return fmt.Sprintf("m/%d'/%d'/%d'/0/%d",
+	return buildDerivationPath(
 		k.purpose.Uint32(),
 		k.coinType.Uint32(),
 		accountType.Uint32(),
-		index)
+		index,
+	)
 }
 
 // createKeyByAccount create privateKey, publicKey by account level
