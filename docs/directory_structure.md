@@ -285,7 +285,6 @@ The project is currently in a transition phase:
 
 - **New Architecture**: `internal/` directory with Clean Architecture
 - **Legacy Code**: `pkg/` directory with old structure (being migrated)
-- **Backward Compatibility**: Type aliases in `internal/wallet/` for compatibility (temporary, will be removed)
 
 For detailed refactoring status, see `docs/issues/REFACTORING_CHECKLIST.md`.
 
