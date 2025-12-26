@@ -23,27 +23,27 @@ func TestBIP86IntegrationRealWalletScenario(t *testing.T) {
 	copy(testSeed, []byte("test seed for bip86 integration testing with real wallet scenario"))
 
 	scenarios := []struct {
-		name         string
-		network      *chaincfg.Params
-		accountType  domainAccount.AccountType
+		name           string
+		network        *chaincfg.Params
+		accountType    domainAccount.AccountType
 		expectedPrefix string
 	}{
 		{
-			name:         "Mainnet Client Account",
-			network:      &chaincfg.MainNetParams,
-			accountType:  domainAccount.AccountTypeClient,
+			name:           "Mainnet Client Account",
+			network:        &chaincfg.MainNetParams,
+			accountType:    domainAccount.AccountTypeClient,
 			expectedPrefix: "bc1p",
 		},
 		{
-			name:         "Testnet3 Deposit Account",
-			network:      &chaincfg.TestNet3Params,
-			accountType:  domainAccount.AccountTypeDeposit,
+			name:           "Testnet3 Deposit Account",
+			network:        &chaincfg.TestNet3Params,
+			accountType:    domainAccount.AccountTypeDeposit,
 			expectedPrefix: "tb1p",
 		},
 		{
-			name:         "Signet Payment Account",
-			network:      &chaincfg.SigNetParams,
-			accountType:  domainAccount.AccountTypePayment,
+			name:           "Signet Payment Account",
+			network:        &chaincfg.SigNetParams,
+			accountType:    domainAccount.AccountTypePayment,
 			expectedPrefix: "tb1p",
 		},
 	}
@@ -156,9 +156,8 @@ func TestBIP86IntegrationKeyConsistency(t *testing.T) {
 
 // TestBIP86IntegrationMultipleAccounts tests BIP86 with different account types
 // as would be used in a multi-account wallet
+// Note: Cannot use t.Parallel() here because subtests share allAddresses map
 func TestBIP86IntegrationMultipleAccounts(t *testing.T) {
-	t.Parallel()
-
 	seed := make([]byte, 32)
 	copy(seed, []byte("multi-account test seed for bip86"))
 	network := &chaincfg.MainNetParams
@@ -241,6 +240,7 @@ func TestBIP86IntegrationAddressValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			generator := NewBIP86Generator(domainCoin.BTC, tt.network)
 			keys, err := generator.CreateKey(seed, domainAccount.AccountTypeClient, 0, 1)
 			require.NoError(t, err)

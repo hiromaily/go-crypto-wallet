@@ -48,10 +48,10 @@ func TestBIP86Generator(t *testing.T) {
 
 			// Verify generator properties
 			assert.Equal(t, domainKey.KeyTypeBIP86, generator.KeyType(), "should return BIP86 key type")
-			assert.True(t, generator.SupportsAddressType(address.AddrTypeTaproot), "should support Taproot addresses")
-			assert.False(t, generator.SupportsAddressType(address.AddrTypeLegacy), "should not support Legacy addresses")
-			assert.False(t, generator.SupportsAddressType(address.AddrTypeP2shSegwit), "should not support P2SH-SegWit addresses")
-			assert.False(t, generator.SupportsAddressType(address.AddrTypeBech32), "should not support Bech32 addresses")
+			assert.True(t, generator.SupportsAddressType(address.AddrTypeTaproot), "should support Taproot")
+			assert.False(t, generator.SupportsAddressType(address.AddrTypeLegacy), "should not support Legacy")
+			assert.False(t, generator.SupportsAddressType(address.AddrTypeP2shSegwit), "should not support P2SH-SegWit")
+			assert.False(t, generator.SupportsAddressType(address.AddrTypeBech32), "should not support Bech32")
 
 			// Generate keys
 			keys, err := generator.CreateKey(seed, tt.accountType, 0, 5)
@@ -66,9 +66,9 @@ func TestBIP86Generator(t *testing.T) {
 
 				// Verify Taproot address format (bech32m)
 				if tt.conf == &chaincfg.MainNetParams {
-					assert.Contains(t, key.TaprootAddr, "bc1p", "Mainnet Taproot address should start with bc1p for key %d", i)
+					assert.Contains(t, key.TaprootAddr, "bc1p", "Mainnet address should start with bc1p, key %d", i)
 				} else if tt.conf == &chaincfg.TestNet3Params {
-					assert.Contains(t, key.TaprootAddr, "tb1p", "Testnet Taproot address should start with tb1p for key %d", i)
+					assert.Contains(t, key.TaprootAddr, "tb1p", "Testnet address should start with tb1p, key %d", i)
 				}
 			}
 
@@ -98,9 +98,9 @@ func TestBIP86GeneratorConsistency(t *testing.T) {
 	require.Equal(t, len(keys1), len(keys2), "should generate same number of keys")
 
 	for i := range keys1 {
-		assert.Equal(t, keys1[i].WIF, keys2[i].WIF, "WIF should be consistent for key %d", i)
-		assert.Equal(t, keys1[i].TaprootAddr, keys2[i].TaprootAddr, "Taproot address should be consistent for key %d", i)
-		assert.Equal(t, keys1[i].FullPubKey, keys2[i].FullPubKey, "Full public key should be consistent for key %d", i)
+		assert.Equal(t, keys1[i].WIF, keys2[i].WIF, "WIF should be consistent, key %d", i)
+		assert.Equal(t, keys1[i].TaprootAddr, keys2[i].TaprootAddr, "Taproot address should match, key %d", i)
+		assert.Equal(t, keys1[i].FullPubKey, keys2[i].FullPubKey, "Full public key should match, key %d", i)
 	}
 }
 

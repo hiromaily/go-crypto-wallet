@@ -48,9 +48,9 @@ func TestBIP84Generator(t *testing.T) {
 
 			// Verify generator properties
 			assert.Equal(t, domainKey.KeyTypeBIP84, generator.KeyType(), "should return BIP84 key type")
-			assert.True(t, generator.SupportsAddressType(address.AddrTypeBech32), "should support Bech32 addresses")
-			assert.False(t, generator.SupportsAddressType(address.AddrTypeLegacy), "should not support Legacy addresses")
-			assert.False(t, generator.SupportsAddressType(address.AddrTypeP2shSegwit), "should not support P2SH-SegWit addresses")
+			assert.True(t, generator.SupportsAddressType(address.AddrTypeBech32), "should support Bech32")
+			assert.False(t, generator.SupportsAddressType(address.AddrTypeLegacy), "should not support Legacy")
+			assert.False(t, generator.SupportsAddressType(address.AddrTypeP2shSegwit), "should not support P2SH-SegWit")
 
 			// Generate keys
 			keys, err := generator.CreateKey(seed, tt.accountType, 0, 5)
@@ -65,9 +65,9 @@ func TestBIP84Generator(t *testing.T) {
 
 				// Verify Bech32 address format
 				if tt.conf == &chaincfg.MainNetParams {
-					assert.Contains(t, key.Bech32Addr, "bc1", "Mainnet Bech32 address should start with bc1 for key %d", i)
+					assert.Contains(t, key.Bech32Addr, "bc1", "Mainnet address should start with bc1, key %d", i)
 				} else if tt.conf == &chaincfg.TestNet3Params {
-					assert.Contains(t, key.Bech32Addr, "tb1", "Testnet Bech32 address should start with tb1 for key %d", i)
+					assert.Contains(t, key.Bech32Addr, "tb1", "Testnet address should start with tb1, key %d", i)
 				}
 			}
 
