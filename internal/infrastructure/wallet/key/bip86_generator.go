@@ -1,9 +1,6 @@
 package key
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/btcsuite/btcd/chaincfg"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -14,17 +11,13 @@ import (
 
 // BIP86Generator implements Generator interface for BIP86 (Taproot addresses)
 type BIP86Generator struct {
-	coinType     domainCoin.CoinType
-	coinTypeCode domainCoin.CoinTypeCode
-	conf         *chaincfg.Params
+	hdKey *HDKey
 }
 
 // NewBIP86Generator returns BIP86Generator
 func NewBIP86Generator(coinTypeCode domainCoin.CoinTypeCode, conf *chaincfg.Params) *BIP86Generator {
 	return &BIP86Generator{
-		coinType:     domainCoin.GetCoinType(coinTypeCode, conf),
-		coinTypeCode: coinTypeCode,
-		conf:         conf,
+		hdKey: NewHDKey(PurposeTypeBIP86, coinTypeCode, conf),
 	}
 }
 
@@ -34,13 +27,12 @@ func (*BIP86Generator) KeyType() domainKey.KeyType {
 }
 
 // CreateKey creates keys based on BIP86 standard
-// TODO: Implement BIP86 key generation for Taproot addresses
-func (*BIP86Generator) CreateKey(
-	_ []byte,
-	_ domainAccount.AccountType,
-	_, _ uint32,
+func (g *BIP86Generator) CreateKey(
+	seed []byte,
+	accountType domainAccount.AccountType,
+	idxFrom, count uint32,
 ) ([]domainKey.WalletKey, error) {
-	return nil, errors.New("BIP86 (Taproot) key generation not yet implemented")
+	return g.hdKey.CreateKey(seed, accountType, idxFrom, count)
 }
 
 // SupportsAddressType checks if this generator supports the given address type
@@ -50,8 +42,5 @@ func (*BIP86Generator) SupportsAddressType(addrType address.AddrType) bool {
 
 // GetDerivationPath returns the BIP86 derivation path
 func (g *BIP86Generator) GetDerivationPath(accountType domainAccount.AccountType, index uint32) string {
-	return fmt.Sprintf("m/86'/%d'/%d'/0/%d",
-		g.coinType.Uint32(),
-		accountType.Uint32(),
-		index)
+	return g.hdKey.GetDerivationPath(accountType, index)
 }

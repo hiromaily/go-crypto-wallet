@@ -7,6 +7,7 @@ package key
 //   - P2PKHAddr: Pay-to-Public-Key-Hash address (legacy)
 //   - P2SHSegWitAddr: Pay-to-Script-Hash SegWit address
 //   - Bech32Addr: Native SegWit address
+//   - TaprootAddr: Taproot address (BIP86)
 //   - FullPubKey: Full public key
 //   - RedeemScript: Redeem script for multisig
 //
@@ -18,6 +19,7 @@ type WalletKey struct {
 	P2PKHAddr      string
 	P2SHSegWitAddr string
 	Bech32Addr     string
+	TaprootAddr    string
 	FullPubKey     string
 	RedeemScript   string
 }
