@@ -53,18 +53,31 @@ Repo: hiromaily/go-crypto-wallet
    - Add godoc comments to exported functions/methods
    - Ensure import order: standard → third-party → local
 
-4. **Test:**
+4. **Self-Review:**
+   - Review your own implementation for:
+     - Code quality and correctness
+     - Adherence to Clean Architecture principles
+     - Compliance with coding standards from `AGENTS.md`
+     - Proper error handling and context wrapping
+     - Security considerations (especially for wallet/key operations)
+     - Import order and formatting
+     - Unused code, variables, or functions
+     - Proper use of interfaces and dependency injection
+   - Fix any issues found during self-review
+   - Ensure all changes align with project guidelines
+
+5. **Test:**
    - Run existing tests: `make gotest`
    - Create new test cases for the fix
    - Run integration tests if applicable: `make gotest-integration`
    - Verify test coverage for new code
    - Test edge cases and error scenarios
 
-5. **Document:**
+6. **Document:**
    - Update relevant documentation (README, API docs, etc.)
    - Add/update code comments as needed
 
-6. **Verify:**
+7. **Verify:**
    Before committing, if Go files were changed, run these commands in order and ensure:
    - No errors occur
    - No files are modified (all changes should be committed)
@@ -78,7 +91,7 @@ Repo: hiromaily/go-crypto-wallet
      make check-vuln    # Security vulnerability scan (if security-related)
      ```
 
-7. **Commit:**
+8. **Commit:**
    - Stage changes: `git add <files>`
    - Create commit with descriptive message:
 
@@ -93,7 +106,7 @@ Repo: hiromaily/go-crypto-wallet
 
    - Follow conventional commit format when appropriate
 
-8. **PR Draft:**
+9. **PR Draft:**
    - Push branch: `git push origin feature/issue-{issue_number}-{description}`
    - Create PR using `gh pr create`:
      - Title: `Fix: {issue title} (Closes #{issue_number})`
@@ -132,13 +145,14 @@ Repo: hiromaily/go-crypto-wallet
      - Or use interactive mode: `gh pr create` (will prompt for title and body)
      - Link related issues/PRs if any
 
-9. **Review Request:**
-   - After creating PR, ask Claude to review:
-     - Code quality and correctness
-     - Adherence to project standards (`AGENTS.md`)
-     - Security implications (especially for wallet/key operations)
-     - Test coverage adequacy
-     - Documentation completeness
+10. **Review Request:**
+
+- After creating PR, ask Claude to review the following:
+- Code quality and correctness
+- Adherence to project standards (`AGENTS.md`)
+- Security implications (especially for wallet/key operations)
+- Test coverage adequacy
+- Documentation completeness
 
 ### Safety Rules
 
