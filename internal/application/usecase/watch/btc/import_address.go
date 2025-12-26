@@ -2,6 +2,7 @@ package btc
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -113,6 +114,9 @@ func (u *importAddressUseCase) selectTargetAddress(addrFmt *address.AddressForma
 			switch u.addrType {
 			case address.AddrTypeBech32:
 				return addrFmt.Bech32Address, nil
+			case address.AddrTypeTaproot:
+				// TODO: Implement Taproot address support
+				return "", errors.New("taproot address type not yet supported")
 			case address.AddrTypeLegacy, address.AddrTypeP2shSegwit,
 				address.AddrTypeBCHCashAddr, address.AddrTypeETH:
 				return addrFmt.P2SHSegwitAddress, nil

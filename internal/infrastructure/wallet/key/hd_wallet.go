@@ -18,6 +18,7 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	bchaddr "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address/bch"
 	xrpaddr "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -115,6 +116,39 @@ func (k *HDKey) CreateKey(
 	}
 	// create keys by index and count
 	return k.createKeysWithIndex(privKey, idxFrom, count)
+}
+
+// KeyType returns the key type this generator supports (implements Generator interface)
+func (k *HDKey) KeyType() domainKey.KeyType {
+	switch k.purpose {
+	case PurposeTypeBIP44:
+		return domainKey.KeyTypeBIP44
+	case PurposeTypeBIP49:
+		return domainKey.KeyTypeBIP49
+	default:
+		return domainKey.KeyTypeBIP44
+	}
+}
+
+// SupportsAddressType checks if this generator supports the given address type (implements Generator interface)
+func (k *HDKey) SupportsAddressType(addrType address.AddrType) bool {
+	switch k.purpose {
+	case PurposeTypeBIP44:
+		return addrType == address.AddrTypeLegacy
+	case PurposeTypeBIP49:
+		return addrType == address.AddrTypeP2shSegwit
+	default:
+		return false
+	}
+}
+
+// GetDerivationPath returns the derivation path for the given account and index (implements Generator interface)
+func (k *HDKey) GetDerivationPath(accountType domainAccount.AccountType, index uint32) string {
+	return fmt.Sprintf("m/%d'/%d'/%d'/0/%d",
+		k.purpose.Uint32(),
+		k.coinType.Uint32(),
+		accountType.Uint32(),
+		index)
 }
 
 // createKeyByAccount create privateKey, publicKey by account level

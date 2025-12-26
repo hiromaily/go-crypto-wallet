@@ -3,6 +3,7 @@
 CREATE TABLE `account_key` (
   `id`                      BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT'ID',
   `coin`                    ENUM('btc', 'bch', 'eth', 'xrp', 'hyt') NOT NULL COMMENT'coin type code',
+  `key_type`                VARCHAR(20) DEFAULT 'bip44' NOT NULL COMMENT 'key type (bip44, bip49, bip84, bip86, musig2)',
   `account`                 ENUM('client', 'deposit', 'payment', 'stored') NOT NULL COMMENT'account type',
   `p2pkh_address`           VARCHAR(255) NOT NULL COMMENT'address as standard pubkey script that Pays To PubKey Hash (P2PKH)',
   `p2sh_segwit_address`     VARCHAR(255) NOT NULL COMMENT'p2sh-segwit address',
@@ -18,5 +19,6 @@ CREATE TABLE `account_key` (
   UNIQUE KEY `idx_p2pkh_address` (`p2pkh_address`),
   UNIQUE KEY `idx_wallet_import_format` (`wallet_import_format`),
   INDEX idx_coin (`coin`),
+  INDEX idx_key_type (`key_type`),
   INDEX idx_account (`account`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='table for keys for any account';

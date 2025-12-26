@@ -18,6 +18,7 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
@@ -598,10 +599,23 @@ func (c *container) newKeyGenerator() key.Generator {
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
 	}
 
-	return key.NewHDKey(
-		key.PurposeTypeBIP44,
-		c.conf.CoinTypeCode,
-		chainConf)
+	// Use factory to create generator based on key type
+	factory := key.NewFactory()
+	keyType := c.getKeyType() // Get from config or default to BIP44
+	generator, err := factory.CreateGenerator(keyType, c.conf.CoinTypeCode, chainConf)
+	if err != nil {
+		panic(fmt.Sprintf("failed to create key generator: %v", err))
+	}
+
+	return generator
+}
+
+func (c *container) getKeyType() domainKey.KeyType {
+	// Get from config if available, otherwise default to BIP44
+	if c.conf.KeyType != "" {
+		return c.conf.KeyType
+	}
+	return domainKey.KeyTypeBIP44
 }
 
 func (c *container) newMultiAccount() account.MultisigAccounter {

@@ -12,9 +12,9 @@ SELECT * FROM account_key WHERE coin = ? AND account = ? AND multisig_address IN
 
 -- name: InsertAccountKey :execresult
 INSERT INTO account_key (
-  coin, account, p2pkh_address, p2sh_segwit_address, bech32_address,
+  coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address,
   full_public_key, multisig_address, redeem_script, wallet_import_format, idx, addr_status
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdateAccountKeyAddress :execresult
 UPDATE account_key SET p2pkh_address = ?, updated_at = ?
