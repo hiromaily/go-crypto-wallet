@@ -471,7 +471,16 @@ func (u *createTransactionUseCase) parseListUnspentTx(
 	}, inputTotal, isDone
 }
 
-// for ActionTypeDeposit, ActionTypeTransfer
+// createTxOutputs creates transaction outputs for ActionTypeDeposit and ActionTypeTransfer.
+// This function supports all Bitcoin address types including:
+//   - P2PKH (Legacy, 1...)
+//   - P2SH-SegWit (3...)
+//   - P2WPKH (Bech32, bc1q...)
+//   - P2TR (Taproot, bc1p...) - BIP86
+//
+// The address type is automatically detected by btcutil.DecodeAddress() based on the
+// address format stored in the database. The underlying btcsuite library and Bitcoin Core
+// RPC handle creating the appropriate scriptPubKey for each address type.
 func (u *createTransactionUseCase) createTxOutputs(
 	receiver domainAccount.AccountType,
 	requiredAmount btcutil.Amount,
@@ -488,6 +497,7 @@ func (u *createTransactionUseCase) createTxOutputs(
 	receiverAddr := pubkeyTable.WalletAddress
 
 	// create receiver txOutput
+	// DecodeAddress automatically recognizes all address types including Taproot (bc1p...)
 	receiverDecodedAddr, err := btcutil.DecodeAddress(receiverAddr, u.btcClient.GetChainConf())
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btcutil.DecodeAddress(%s): %w", receiverAddr, err)
@@ -522,7 +532,15 @@ func (u *createTransactionUseCase) createTxOutputs(
 	return txPrevOutputs, nil
 }
 
-// userPayments is given for receiverAddr
+// createPaymentTxOutputs creates transaction outputs for ActionTypePayment.
+// This function supports all Bitcoin address types for payment receivers including:
+//   - P2PKH (Legacy, 1...)
+//   - P2SH-SegWit (3...)
+//   - P2WPKH (Bech32, bc1q...)
+//   - P2TR (Taproot, bc1p...) - BIP86
+//
+// The address type is automatically detected by btcutil.DecodeAddress() when processing
+// user payment addresses from the payment_request table.
 func (u *createTransactionUseCase) createPaymentTxOutputs(
 	userPayments []userPayment, changeAddr string, changeAmount btcutil.Amount,
 ) map[btcutil.Address]btcutil.Amount {
