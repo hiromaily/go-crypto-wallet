@@ -45,7 +45,7 @@ type SignTransactionInput struct {
 
 // SignTransactionOutput represents output from signing a transaction
 type SignTransactionOutput struct {
-	SignedHex    string
+	SignedData   string // Signed transaction data (hex for legacy, base64 PSBT for BTC)
 	IsComplete   bool
 	NextFilePath string
 }

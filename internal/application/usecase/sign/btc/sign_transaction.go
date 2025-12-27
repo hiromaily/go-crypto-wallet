@@ -2,22 +2,17 @@ package btc
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"strings"
-
-	"github.com/btcsuite/btcd/wire"
 
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
 )
 
 type signTransactionUseCase struct {
@@ -27,6 +22,7 @@ type signTransactionUseCase struct {
 	txFileRepo      file.TransactionFileRepositorier
 	multisigAccount account.MultisigAccounter
 	wtype           domainWallet.WalletType
+	authType        domainAccount.AuthType
 }
 
 // NewSignTransactionUseCase creates a new SignTransactionUseCase for sign wallet
@@ -37,6 +33,7 @@ func NewSignTransactionUseCase(
 	txFileRepo file.TransactionFileRepositorier,
 	multisigAccount account.MultisigAccounter,
 	wtype domainWallet.WalletType,
+	authType domainAccount.AuthType,
 ) signusecase.SignTransactionUseCase {
 	return &signTransactionUseCase{
 		btc:             btcAPI,
@@ -45,6 +42,7 @@ func NewSignTransactionUseCase(
 		txFileRepo:      txFileRepo,
 		multisigAccount: multisigAccount,
 		wtype:           wtype,
+		authType:        authType,
 	}
 }
 
@@ -52,187 +50,122 @@ func (u *signTransactionUseCase) Sign(
 	ctx context.Context,
 	input signusecase.SignTransactionInput,
 ) (signusecase.SignTransactionOutput, error) {
-	// get tx_deposit_id from tx file name
-	//  if payment_5_unsigned_0_1534466246366489473, 5 is target
+	// Get tx_deposit_id from tx file name
+	//  if payment_5_unsigned_1_1534466246366489473.psbt, 5 is target
 	actionType, _, txID, signedCount, err := u.txFileRepo.ValidateFilePath(input.FilePath, domainTx.TxTypeUnsigned)
 	if err != nil {
 		return signusecase.SignTransactionOutput{}, err
 	}
 
-	// get hex tx from file
-	data, err := u.txFileRepo.ReadFile(input.FilePath)
+	// Read PSBT from file
+	psbtBase64, err := u.txFileRepo.ReadPSBTFile(input.FilePath)
+	if err != nil {
+		return signusecase.SignTransactionOutput{}, fmt.Errorf("fail to read PSBT file: %w", err)
+	}
+
+	// Sign PSBT (add second signature for multisig)
+	signedPSBT, isSigned, err := u.sign(psbtBase64, actionType)
 	if err != nil {
 		return signusecase.SignTransactionOutput{}, err
 	}
 
-	var hex, encodedPrevsAddrs string
-	tmp := strings.Split(data, ",")
-	// file: hex, prev_address
-	hex = tmp[0]
-	if len(tmp) > 1 {
-		encodedPrevsAddrs = tmp[1]
-	}
-	if encodedPrevsAddrs == "" {
-		// it's required data since Bitcoin core ver17
-		return signusecase.SignTransactionOutput{}, errors.New("encodedPrevsAddrs must be set in csv file")
-	}
-
-	// sing
-	hexTx, isSigned, newEncodedPrevsAddrs, err := u.sign(hex, encodedPrevsAddrs)
-	if err != nil {
-		return signusecase.SignTransactionOutput{}, err
-	}
-
-	// hexTx for save data as file
-	saveData := hexTx
-
-	// if sign is not finished because of multisig, signedCount should be increment
+	// If sign is not finished because of multisig, signedCount should be increment
 	txType := domainTx.TxTypeSigned
 	if !isSigned {
 		txType = domainTx.TxTypeUnsigned
-		signedCount++
-		if newEncodedPrevsAddrs != "" {
-			saveData = fmt.Sprintf("%s,%s", saveData, newEncodedPrevsAddrs)
-		}
+		signedCount++ // Increment for additional signatures needed
 	}
 
-	// write file
+	// Write signed PSBT file
 	path := u.txFileRepo.CreateFilePath(actionType, txType, txID, signedCount)
-	generatedFileName, err := u.txFileRepo.WriteFile(path, saveData)
+	generatedFileName, err := u.txFileRepo.WritePSBTFile(path, signedPSBT)
 	if err != nil {
-		return signusecase.SignTransactionOutput{}, err
+		return signusecase.SignTransactionOutput{}, fmt.Errorf("fail to write signed PSBT file: %w", err)
 	}
+
+	logger.Debug("signed PSBT",
+		"action", actionType.String(),
+		"txID", txID,
+		"signedCount", signedCount,
+		"isSigned", isSigned,
+		"fileName", generatedFileName,
+	)
 
 	return signusecase.SignTransactionOutput{
-		SignedHex:    hexTx,
+		SignedData:   signedPSBT, // PSBT base64
 		IsComplete:   isSigned,
 		NextFilePath: generatedFileName,
 	}, nil
 }
 
-// sign signs a transaction using Bitcoin Core RPC with automatic signature type selection.
+// sign signs a PSBT using offline signing with btcd library (no Bitcoin Core RPC).
 // This function supports all Bitcoin address types including Taproot:
 //   - Legacy (P2PKH): ECDSA signature
 //   - SegWit (P2WPKH, P2SH-SegWit): ECDSA signature with witness data
 //   - Taproot (P2TR): Schnorr signature (BIP340) with witness data
 //
-// The signature algorithm is automatically selected by Bitcoin Core based on the input's scriptPubKey type.
-// Bitcoin Core v22.0+ is required for Taproot/Schnorr signature support.
+// The signature algorithm is automatically selected based on the PSBT input's scriptPubKey type.
+// For Taproot addresses, Schnorr signatures (BIP340) are used.
 //
 // The Sign wallet acts as the second (or subsequent) signer in a multisig setup, using keys from
-// the auth_account_key table. The signing process is identical to the Keygen wallet, but uses
-// different key sources based on wallet type.
+// the auth_account_key table. This adds signatures to a partially signed PSBT from Keygen wallet.
 //
 // Transaction flow:
 //   - [actionType:deposit]  [from] client [to] deposit (not multisig addr)
 //   - [actionType:payment]  [from] payment [to] unknown (multisig addr)
 //   - [actionType:transfer] [from] account [to] account (multisig addr)
-func (u *signTransactionUseCase) sign(hex, encodedPrevsAddrs string) (string, bool, string, error) {
-	// get tx from hex
-	msgTx, err := u.btc.ToMsgTx(hex)
+//
+// Note: This operates OFFLINE - no Bitcoin Core RPC required.
+func (u *signTransactionUseCase) sign(
+	psbtBase64 string,
+	actionType domainTx.ActionType,
+) (string, bool, error) {
+	// Sign wallet always signs multisig transactions
+	// Add second signature to PSBT using auth key
+	signedPSBT, isSigned, err := u.signMultisigPSBT(psbtBase64)
 	if err != nil {
-		return "", false, "", err
+		return "", false, err
 	}
 
-	// decode encodedPrevsAddrs string to btc.AddrsPrevTxs struct
-	var prevsAddrs btc.PreviousTxs
-	if err = serial.DecodeFromString(encodedPrevsAddrs, &prevsAddrs); err != nil {
-		return "", false, "", err
-	}
-
-	// single signature address
-	var (
-		signedTx             *wire.MsgTx
-		isSigned             bool
-		newEncodedPrevsAddrs string
+	logger.Debug("PSBT signing completed",
+		"action", actionType.String(),
+		"wallet_type", u.wtype.String(),
+		"isSigned", isSigned,
 	)
 
-	// sign
-	if !u.multisigAccount.IsMultisigAccount(prevsAddrs.SenderAccount) {
-		signedTx, isSigned, err = u.btc.SignRawTransaction(msgTx, prevsAddrs.PrevTxs)
-	} else {
-		signedTx, isSigned, newEncodedPrevsAddrs, err = u.signMultisig(msgTx, &prevsAddrs)
-	}
-
-	if newEncodedPrevsAddrs == "" {
-		newEncodedPrevsAddrs = encodedPrevsAddrs
-	}
-
-	// after sign
-	if err != nil {
-		return "", false, "", err
-	}
-
-	hexTx, err := u.btc.ToHex(signedTx)
-	if err != nil {
-		return "", false, "", fmt.Errorf("fail to call u.btc.ToHex(signedTx): %w", err)
-	}
-	logger.Debug(
-		"call btc.SignRawTransaction()",
-		"hexTx", hexTx,
-		"isSigned", isSigned)
-
-	return hexTx, isSigned, newEncodedPrevsAddrs, nil
+	return signedPSBT, isSigned, nil
 }
 
-// signMultisig signs a multisig transaction with automatic Taproot/Schnorr support.
-// For traditional multisig (P2SH, P2WSH), multiple separate signatures are collected.
-// For Taproot, note that native Taproot multisig would use MuSig2 (key path aggregation)
-// or script path spending, which differs from traditional multisig.
+// signMultisigPSBT adds the second signature to a partially signed PSBT for multisig transactions.
+// The Sign wallet uses the auth key from auth_account_key table to add its signature.
+// This function works offline using btcd library, supporting all address types:
+//   - P2SH (Legacy multisig): ECDSA signature
+//   - P2SH-SegWit: ECDSA signature with witness
+//   - P2WSH (Native SegWit multisig): ECDSA signature with witness
+//   - P2TR (Taproot): Schnorr signature (BIP340) or script path
 //
-// The wallet type determines the key source:
-//   - WalletTypeKeyGen: Uses account_key table (first signer)
-//   - WalletTypeSign: Uses auth_account_key table (subsequent signers)
-func (u *signTransactionUseCase) signMultisig(
-	msgTx *wire.MsgTx,
-	prevsAddrs *btc.PreviousTxs,
-) (*wire.MsgTx, bool, string, error) {
-	var wips []string
-	var newEncodedPrevsAddrs string
-
-	// get WIPs, RedeemScript
-	switch u.wtype {
-	case domainWallet.WalletTypeKeyGen:
-		accountKeys, err := u.accountKeyRepo.GetAllMultiAddr(prevsAddrs.SenderAccount, prevsAddrs.Addrs)
-		if err != nil {
-			return nil, false, "", fmt.Errorf("fail to call accountKeyRepo.GetAllMultiAddr(): %w", err)
-		}
-
-		// retrieve WIPs
-		for _, val := range accountKeys {
-			wips = append(wips, val.WalletImportFormat)
-		}
-
-		// mapping redeemScript to PrevTxs
-		for idx, val := range prevsAddrs.Addrs {
-			rs := cold.GetRedeemScriptByAddress(accountKeys, val)
-			if rs == "" {
-				logger.Error("redeemScript can not be found")
-				continue
-			}
-			prevsAddrs.PrevTxs[idx].RedeemScript = rs
-		}
-
-		// serialize prevsAddrs with redeemScript
-		newEncodedPrevsAddrs, err = serial.EncodeToString(prevsAddrs)
-		if err != nil {
-			return nil, false, "", fmt.Errorf("fail to call serial.EncodeToString(): %w", err)
-		}
-
-	case domainWallet.WalletTypeSign:
-		authKey, err := u.authKeyRepo.GetOne("")
-		if err != nil {
-			return nil, false, "", fmt.Errorf("fail to call authKeyRepo.GetOne(): %w", err)
-		}
-		// wip
-		wips = []string{authKey.WalletImportFormat}
-	case domainWallet.WalletTypeWatchOnly:
-		return nil, false, "", fmt.Errorf("WalletType is invalid: %s", u.wtype.String())
-	default:
-		return nil, false, "", fmt.Errorf("WalletType is invalid: %s", u.wtype.String())
+// For 2-of-2 multisig, this signature typically completes the transaction.
+// For 2-of-N multisig (N>2), the transaction is complete once 2 signatures are present.
+func (u *signTransactionUseCase) signMultisigPSBT(
+	psbtBase64 string,
+) (string, bool, error) {
+	// Get auth key from auth_account_key table (Sign wallet's key)
+	// Using explicit authType from configuration for robust key selection
+	authKey, err := u.authKeyRepo.GetOne(u.authType)
+	if err != nil {
+		return "", false, fmt.Errorf("fail to get auth key for authType %s: %w", u.authType, err)
 	}
 
-	// sign
-	signedTx, isSigned, err := u.btc.SignRawTransactionWithKey(msgTx, wips, prevsAddrs.PrevTxs)
-	return signedTx, isSigned, newEncodedPrevsAddrs, err
+	logger.Debug("signing PSBT with auth key",
+		"wallet_type", u.wtype.String(),
+	)
+
+	// Sign PSBT with Sign wallet's private key (offline, using btcd)
+	// This adds the second signature to the partially signed PSBT
+	signedPSBT, isSigned, err := u.btc.SignPSBTWithKey(psbtBase64, []string{authKey.WalletImportFormat})
+	if err != nil {
+		return "", false, fmt.Errorf("fail to sign PSBT with auth key: %w", err)
+	}
+
+	return signedPSBT, isSigned, nil
 }

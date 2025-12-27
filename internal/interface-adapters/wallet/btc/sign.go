@@ -113,7 +113,7 @@ func (s *BTCSign) SignTx(filePath string) (string, bool, string, error) {
 		return "", false, "", err
 	}
 
-	return output.SignedHex, output.IsComplete, output.NextFilePath, nil
+	return output.SignedData, output.IsComplete, output.NextFilePath, nil
 }
 
 // Done should be called before exit

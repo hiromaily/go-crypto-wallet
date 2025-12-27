@@ -45,8 +45,8 @@ func runSignature(container di.Container, filePath string) error {
 	}
 
 	// TODO: output should be json if json option is true
-	fmt.Printf("[hex]: %s\n[isCompleted]: %t\n[fileName]: %s\n",
-		output.SignedHex, output.IsComplete, output.NextFilePath)
+	fmt.Printf("[signedData]: %s\n[isCompleted]: %t\n[fileName]: %s\n",
+		output.SignedData, output.IsComplete, output.NextFilePath)
 
 	return nil
 }
