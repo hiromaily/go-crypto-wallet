@@ -18,6 +18,7 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	bchaddr "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address/bch"
 	xrpaddr "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -48,6 +49,8 @@ func (t PurposeType) Uint32() uint32 {
 const (
 	PurposeTypeBIP44 PurposeType = 44 // BIP44
 	PurposeTypeBIP49 PurposeType = 49 // BIP49
+	PurposeTypeBIP84 PurposeType = 84 // BIP84
+	PurposeTypeBIP86 PurposeType = 86 // BIP86
 )
 
 // CoinType creates a separate subtree for every cryptocoin
@@ -115,6 +118,55 @@ func (k *HDKey) CreateKey(
 	}
 	// create keys by index and count
 	return k.createKeysWithIndex(privKey, idxFrom, count)
+}
+
+// KeyType returns the key type this generator supports (implements Generator interface)
+func (k *HDKey) KeyType() domainKey.KeyType {
+	switch k.purpose {
+	case PurposeTypeBIP44:
+		return domainKey.KeyTypeBIP44
+	case PurposeTypeBIP49:
+		return domainKey.KeyTypeBIP49
+	case PurposeTypeBIP84:
+		return domainKey.KeyTypeBIP84
+	case PurposeTypeBIP86:
+		return domainKey.KeyTypeBIP86
+	default:
+		return domainKey.KeyTypeBIP44
+	}
+}
+
+// SupportsAddressType checks if this generator supports the given address type (implements Generator interface)
+func (k *HDKey) SupportsAddressType(addrType address.AddrType) bool {
+	switch k.purpose {
+	case PurposeTypeBIP44:
+		return addrType == address.AddrTypeLegacy
+	case PurposeTypeBIP49:
+		return addrType == address.AddrTypeP2shSegwit
+	case PurposeTypeBIP84:
+		return addrType == address.AddrTypeBech32
+	case PurposeTypeBIP86:
+		return addrType == address.AddrTypeTaproot
+	default:
+		return false
+	}
+}
+
+// buildDerivationPath builds a BIP32 derivation path string
+// Format: m/purpose'/coinType'/account'/0/index
+// This helper function ensures consistency across all BIP generators
+func buildDerivationPath(purpose, coinType, account, index uint32) string {
+	return fmt.Sprintf("m/%d'/%d'/%d'/0/%d", purpose, coinType, account, index)
+}
+
+// GetDerivationPath returns the derivation path for the given account and index (implements Generator interface)
+func (k *HDKey) GetDerivationPath(accountType domainAccount.AccountType, index uint32) string {
+	return buildDerivationPath(
+		k.purpose.Uint32(),
+		k.coinType.Uint32(),
+		accountType.Uint32(),
+		index,
+	)
 }
 
 // createKeyByAccount create privateKey, publicKey by account level
@@ -207,12 +259,21 @@ func (k *HDKey) createKeysWithIndex(
 			if loopErr != nil {
 				return nil, loopErr
 			}
+
+			// Generate Taproot address
+			var taprootAddr *btcutil.AddressTaproot
+			taprootAddr, loopErr = k.getTaprootAddr(privateKey)
+			if loopErr != nil {
+				return nil, loopErr
+			}
+
 			// address.String() is equal to address.EncodeAddress()
 			walletKeys[i] = domainKey.WalletKey{
 				WIF:            wif.String(),
 				P2PKHAddr:      strP2PKHAddr,
 				P2SHSegWitAddr: strP2SHSegWitAddr,
 				Bech32Addr:     bech32Addr.EncodeAddress(),
+				TaprootAddr:    taprootAddr.EncodeAddress(),
 				FullPubKey:     getFullPubKey(privateKey, true),
 				RedeemScript:   redeemScript,
 			}
@@ -229,6 +290,7 @@ func (k *HDKey) createKeysWithIndex(
 				P2PKHAddr:      ethAddr,
 				P2SHSegWitAddr: "",
 				Bech32Addr:     "",
+				TaprootAddr:    "",
 				FullPubKey:     ethPubKey,
 				RedeemScript:   "",
 			}
@@ -251,6 +313,7 @@ func (k *HDKey) createKeysWithIndex(
 				P2PKHAddr:      xrpAddr,
 				P2SHSegWitAddr: ethAddr,
 				Bech32Addr:     "",
+				TaprootAddr:    "",
 				FullPubKey:     xrpPubKey,
 				RedeemScript:   "",
 			}
@@ -438,6 +501,27 @@ func (k *HDKey) getBech32Addr(wif *btcutil.WIF) (*btcutil.AddressWitnessPubKeyHa
 		return nil, fmt.Errorf("fail to call NewAddressWitnessPubKeyHash(): %w", err)
 	}
 	return bech32Addr, nil
+}
+
+// getTaprootAddr returns a Taproot address (BIP86) for the given private key
+// BIP86 uses key path spending without script path (no merkle root)
+func (k *HDKey) getTaprootAddr(privKey *btcec.PrivateKey) (*btcutil.AddressTaproot, error) {
+	// Get the internal public key
+	internalPubKey := privKey.PubKey()
+
+	// Compute the tweaked Taproot output key (BIP341) without script path
+	taprootKey := txscript.ComputeTaprootKeyNoScript(internalPubKey)
+
+	// Get the 32-byte x-only public key (Schnorr public key)
+	witnessProg := taprootKey.SerializeCompressed()[1:] // Remove the parity byte
+
+	// Create Taproot address
+	taprootAddr, err := btcutil.NewAddressTaproot(witnessProg, k.conf)
+	if err != nil {
+		return nil, fmt.Errorf("fail to call NewAddressTaproot(): %w", err)
+	}
+
+	return taprootAddr, nil
 }
 
 // getFullPubKey returns full Public Key

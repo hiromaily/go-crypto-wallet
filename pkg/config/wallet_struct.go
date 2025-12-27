@@ -2,13 +2,16 @@ package config
 
 import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 // WalletRoot wallet root config
 type WalletRoot struct {
 	//nolint:lll,revive
-	AddressType  address.AddrType        `toml:"address_type" mapstructure:"address_type" validate:"oneof=p2sh-segwit bech32 bch-cashaddr"`
+	KeyType domainKey.KeyType `toml:"key_type" mapstructure:"key_type" validate:"omitempty,oneof=bip44 bip49 bip84 bip86 musig2"`
+	//nolint:lll,revive
+	AddressType  address.AddrType        `toml:"address_type" mapstructure:"address_type" validate:"oneof=legacy p2sh-segwit bech32 bch-cashaddr taproot"`
 	CoinTypeCode domainCoin.CoinTypeCode `toml:"coin_type" mapstructure:"coin_type"`
 	Bitcoin      Bitcoin                 `toml:"bitcoin" mapstructure:"bitcoin"`
 	Ethereum     Ethereum                `toml:"ethereum" mapstructure:"ethereum"`

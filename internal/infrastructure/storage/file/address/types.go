@@ -12,6 +12,7 @@ const (
 	AddrTypeLegacy      AddrType = "legacy"
 	AddrTypeP2shSegwit  AddrType = "p2sh-segwit"
 	AddrTypeBech32      AddrType = "bech32"
+	AddrTypeTaproot     AddrType = "taproot"
 	AddrTypeBCHCashAddr AddrType = "bch-cashaddr"
 	AddrTypeETH         AddrType = "eth-address"
 )
@@ -27,6 +28,7 @@ var AddrTypeValue = map[AddrType]uint8{
 	AddrTypeP2shSegwit:  1,
 	AddrTypeBech32:      2,
 	AddrTypeBCHCashAddr: 3,
+	AddrTypeTaproot:     4,
 }
 
 //----------------------------------------------------
