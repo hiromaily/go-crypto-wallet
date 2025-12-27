@@ -1,7 +1,96 @@
-# Flow
+# Flow for BTC
 
 This document describes the setup procedures and transaction flow for the three wallet types: Watch Wallet,
 Keygen Wallet, and Sign Wallet.
+
+## Architecture Overview
+
+**Important**: Each wallet type runs on a **separate machine** with its **own independent database**:
+
+- **Keygen Wallet (Machine 1)**: Offline machine with Keygen DB
+- **Sign Wallet 1 (Machine 2)**: Offline machine with Sign DB 1
+- **Sign Wallet 2 (Machine 3)**: Offline machine with Sign DB 2 (if required)
+- **Watch Wallet (Machine 4)**: Online machine with Watch DB
+
+**Key Points**:
+
+- Each wallet maintains its own database independently
+- Keygen and Sign Wallets operate **offline** (air-gapped) for security
+- Only Watch Wallet is connected to the network
+- Data transfer between machines uses **secure offline methods** (USB drives, etc.)
+- Transaction files (PSBT) are transferred via USB between machines
+
+## Overview
+
+This document is organized into three main categories:
+
+1. **Setup Flow**: Initial wallet setup procedures
+2. **Transaction Operation Flow**: Creating, signing, and sending transactions
+3. **Monitoring Flow**: Monitoring transaction confirmations and updating database
+
+Each flow is described with detailed procedures and Mermaid sequence diagrams showing the interaction between
+Watch Wallet, Keygen Wallet, and Sign Wallet across separate machines.
+
+## 1. Setup Flow
+
+### Setup Flow Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Keygen as Keygen Wallet<br/>(Machine 1)
+    participant KeygenDB as Keygen DB<br/>(Machine 1)
+    participant SignWallet1 as Sign Wallet 1<br/>(Machine 2)
+    participant SignWallet1DB as Sign DB 1<br/>(Machine 2)
+    participant SignWallet2 as Sign Wallet 2<br/>(Machine 3)
+    participant SignWallet2DB as Sign DB 2<br/>(Machine 3)
+    participant Watch as Watch Wallet<br/>(Machine 4)
+    participant WatchDB as Watch DB<br/>(Machine 4)
+    participant File as File Transfer<br/>(USB, etc.)
+
+    Note over User,File: Step 1: Keygen Wallet Setup (Machine 1)
+    User->>Keygen: create seed
+    Keygen->>KeygenDB: Store seed
+    User->>Keygen: create hdkey --account deposit
+    Keygen->>KeygenDB: Store HD keys
+
+    Note over User,File: Step 2: Sign Wallet Setup (Machine 2 & 3)
+    User->>SignWallet1: create seed
+    SignWallet1->>SignWallet1DB: Store seed
+    User->>SignWallet1: create hdkey
+    SignWallet1->>SignWallet1DB: Store HD keys
+    User->>SignWallet1: export fullpubkey
+    SignWallet1->>File: Write fullpubkey CSV<br/>(Machine 2 → USB)
+
+    User->>SignWallet2: create seed
+    SignWallet2->>SignWallet2DB: Store seed
+    User->>SignWallet2: create hdkey
+    SignWallet2->>SignWallet2DB: Store HD keys
+    User->>SignWallet2: export fullpubkey
+    SignWallet2->>File: Write fullpubkey CSV<br/>(Machine 3 → USB)
+
+    Note over User,File: Step 3: Create Multisig Address (Machine 1)
+    User->>File: Transfer fullpubkey CSV<br/>(USB → Machine 1)
+    User->>Keygen: import fullpubkey (from Sign Wallet 1)
+    Keygen->>File: Read fullpubkey CSV
+    Keygen->>KeygenDB: Store fullpubkey
+    User->>File: Transfer fullpubkey CSV<br/>(USB → Machine 1)
+    User->>Keygen: import fullpubkey (from Sign Wallet 2)
+    Keygen->>File: Read fullpubkey CSV
+    Keygen->>KeygenDB: Store fullpubkey
+    User->>Keygen: create multisig --account deposit
+    Keygen->>KeygenDB: Store multisig address
+
+    Note over User,File: Step 4: Export and Import Addresses
+    User->>Keygen: export address --account deposit
+    Keygen->>KeygenDB: Read addresses
+    Keygen->>File: Write address CSV<br/>(Machine 1 → USB)
+    User->>File: Transfer address CSV<br/>(USB → Machine 4)
+    User->>Watch: import address --file <address.csv> --rescan
+    Watch->>File: Read address CSV
+    Watch->>WatchDB: Store addresses
+    Watch->>Watch: Rescan blockchain
+```
 
 ## Wallet Setup Procedures
 
@@ -150,7 +239,117 @@ watch --coin btc import address --file data/address/btc/address_deposit_YYYYMMDD
 - `--file <path>` - Path to the CSV file containing addresses
 - `--rescan` - Run blockchain rescan when importing addresses (recommended for first-time import)
 
-## Transaction Flow
+## 2. Transaction Operation Flow
+
+### Transaction Operation Flow Sequence Diagrams
+
+#### Single-Signature Address Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Watch as Watch Wallet<br/>(Machine 4)
+    participant WatchDB as Watch DB<br/>(Machine 4)
+    participant Keygen as Keygen Wallet<br/>(Machine 1)
+    participant KeygenDB as Keygen DB<br/>(Machine 1)
+    participant Blockchain as Bitcoin Network
+    participant File as File Transfer<br/>(USB, etc.)
+
+    Note over User,File: Step 1: Create Unsigned Transaction (Machine 4)
+    User->>Watch: create deposit/payment/transfer
+    Watch->>WatchDB: Query UTXOs
+    Watch->>Watch: Create unsigned transaction (PSBT)
+    Watch->>File: Write tx_unsigned_*.psbt<br/>(Machine 4 → USB)
+    Watch-->>User: Return: [hex], [fileName]
+
+    Note over User,File: Step 2: Sign Transaction (Offline, Machine 1)
+    User->>File: Transfer tx_unsigned_*.psbt<br/>(USB → Machine 1)
+    User->>Keygen: api walletpassphrase (if encrypted)
+    Keygen->>Keygen: Unlock wallet
+    User->>Keygen: sign signature --file tx_unsigned_*.psbt
+    Keygen->>File: Read tx_unsigned_*.psbt
+    Keygen->>KeygenDB: Query private key
+    Keygen->>Keygen: Sign PSBT with private key
+    Keygen->>File: Write tx_signed_*.psbt<br/>(Machine 1 → USB)
+    Keygen-->>User: Return: [hex], [isCompleted: true], [fileName]
+    User->>Keygen: api walletlock (if was encrypted)
+    Keygen->>Keygen: Lock wallet
+
+    Note over User,File: Step 3: Send Transaction (Machine 4)
+    User->>File: Transfer tx_signed_*.psbt<br/>(USB → Machine 4)
+    User->>Watch: send --file tx_signed_*.psbt
+    Watch->>File: Read tx_signed_*.psbt
+    Watch->>Watch: Extract signed transaction from PSBT
+    Watch->>Blockchain: Broadcast transaction
+    Blockchain-->>Watch: Return: txID
+    Watch->>WatchDB: Store transaction (TxTypeSent)
+    Watch-->>User: Return: txID
+```
+
+#### Multisig Address Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Watch as Watch Wallet<br/>(Machine 4)
+    participant WatchDB as Watch DB<br/>(Machine 4)
+    participant Keygen as Keygen Wallet<br/>(Machine 1)
+    participant KeygenDB as Keygen DB<br/>(Machine 1)
+    participant SignWallet1 as Sign Wallet 1<br/>(Machine 2)
+    participant SignWallet1DB as Sign DB 1<br/>(Machine 2)
+    participant SignWallet2 as Sign Wallet 2<br/>(Machine 3)
+    participant SignWallet2DB as Sign DB 2<br/>(Machine 3)
+    participant Blockchain as Bitcoin Network
+    participant File as File Transfer<br/>(USB, etc.)
+
+    Note over User,File: Step 1: Create Unsigned Transaction (Machine 4)
+    User->>Watch: create deposit/payment/transfer
+    Watch->>WatchDB: Query UTXOs
+    Watch->>Watch: Create unsigned transaction (PSBT)
+    Watch->>File: Write tx_unsigned_*.psbt<br/>(Machine 4 → USB)
+    Watch-->>User: Return: [hex], [fileName]
+
+    Note over User,File: Step 2: First Signature (Offline, Machine 1)
+    User->>File: Transfer tx_unsigned_*.psbt<br/>(USB → Machine 1)
+    User->>Keygen: api walletpassphrase (if encrypted)
+    Keygen->>Keygen: Unlock wallet
+    User->>Keygen: sign signature --file tx_unsigned_*.psbt
+    Keygen->>File: Read tx_unsigned_*.psbt
+    Keygen->>KeygenDB: Query private key
+    Keygen->>Keygen: Sign PSBT (1st signature)
+    Keygen->>File: Write tx_signed1_*.psbt<br/>(Machine 1 → USB)
+    Keygen-->>User: Return: [hex], [isCompleted: false], [fileName]
+    User->>Keygen: api walletlock (if was encrypted)
+    Keygen->>Keygen: Lock wallet
+
+    Note over User,File: Step 3: Second Signature (Offline, Machine 2)
+    User->>File: Transfer tx_signed1_*.psbt<br/>(USB → Machine 2)
+    User->>SignWallet1: sign signature --file tx_signed1_*.psbt
+    SignWallet1->>File: Read tx_signed1_*.psbt
+    SignWallet1->>SignWallet1DB: Query private key
+    SignWallet1->>SignWallet1: Sign PSBT (2nd signature)
+    SignWallet1->>File: Write tx_signed2_*.psbt<br/>(Machine 2 → USB)
+    SignWallet1-->>User: Return: [hex], [isCompleted: false], [fileName]
+
+    Note over User,File: Step 4: Third Signature (if required, Offline, Machine 3)
+    User->>File: Transfer tx_signed2_*.psbt<br/>(USB → Machine 3)
+    User->>SignWallet2: sign signature --file tx_signed2_*.psbt
+    SignWallet2->>File: Read tx_signed2_*.psbt
+    SignWallet2->>SignWallet2DB: Query private key
+    SignWallet2->>SignWallet2: Sign PSBT (3rd signature)
+    SignWallet2->>File: Write tx_signed3_*.psbt<br/>(Machine 3 → USB)
+    SignWallet2-->>User: Return: [hex], [isCompleted: true], [fileName]
+
+    Note over User,File: Step 5: Send Transaction (Machine 4)
+    User->>File: Transfer tx_signed3_*.psbt<br/>(USB → Machine 4)
+    User->>Watch: send --file tx_signed3_*.psbt
+    Watch->>File: Read tx_signed3_*.psbt
+    Watch->>Watch: Extract fully signed transaction from PSBT
+    Watch->>Blockchain: Broadcast transaction
+    Blockchain-->>Watch: Return: txID
+    Watch->>WatchDB: Store transaction (TxTypeSent)
+    Watch-->>User: Return: txID
+```
 
 ### Overview
 
@@ -472,7 +671,50 @@ sign --coin btc --wallet sign1 api encryptwallet --passphrase <strong-passphrase
 - Verify transaction details before signing
 - Use secure channels when transferring transaction files between wallets
 
-## Monitoring Transactions
+## 3. Monitoring Flow
+
+### Monitoring Flow Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Watch as Watch Wallet<br/>(Machine 4)
+    participant WatchDB as Watch DB<br/>(Machine 4)
+    participant Blockchain as Bitcoin Network
+
+    Note over User,Blockchain: Step 1: Monitor Sent Transactions
+    User->>Watch: monitor senttx --account deposit
+    Watch->>WatchDB: Query transactions (TxTypeSent)
+    WatchDB-->>Watch: Return: transaction list
+    Watch-->>User: Display transaction status
+
+    Note over User,Blockchain: Step 2: Monitor Balance
+    User->>Watch: monitor balance --num 6
+    Watch->>Blockchain: Query balance for each account
+    Blockchain-->>Watch: Return: balance, confirmations
+    Watch-->>User: Display account balances
+
+    Note over User,Blockchain: Step 3: Update Transaction Status (Automatic)
+    loop Periodically
+        Watch->>WatchDB: Get transactions (TxTypeSent)
+        WatchDB-->>Watch: Return: transaction hashes
+        
+        loop For each transaction
+            Watch->>Blockchain: Get transaction details (txID)
+            Blockchain-->>Watch: Return: confirmations, status
+            
+            alt Confirmations >= threshold (e.g., 6)
+                Watch->>WatchDB: Update status (TxTypeSent → TxTypeDone)
+                Watch->>Watch: Notify transaction done
+                Watch->>WatchDB: Update status (TxTypeDone → TxTypeNotified)
+            else Confirmations < threshold
+                Watch->>Watch: Continue monitoring
+            end
+        end
+    end
+```
+
+### Monitoring Transactions
 
 After sending a transaction, you can monitor its status:
 
@@ -483,6 +725,20 @@ watch --coin btc monitor senttx --account deposit
 # Monitor balance
 watch --coin btc monitor balance --num 6
 ```
+
+### Transaction Status Lifecycle
+
+The transaction status follows this lifecycle:
+
+1. **TxTypeSent**: Transaction has been broadcast to the blockchain
+2. **TxTypeDone**: Transaction has received sufficient confirmations (default: 6 blocks)
+3. **TxTypeNotified**: Transaction has been confirmed and notifications have been sent
+
+The Watch Wallet automatically updates transaction status by:
+
+- Periodically checking confirmation count for transactions with `TxTypeSent` status
+- Updating to `TxTypeDone` when confirmations meet the threshold
+- Sending notifications and updating to `TxTypeNotified` when appropriate
 
 ## Troubleshooting
 
