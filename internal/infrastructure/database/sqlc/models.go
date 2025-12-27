@@ -623,6 +623,8 @@ type AccountKey struct {
 	ID int64
 	// coin type code
 	Coin AccountKeyCoin
+	// key type (bip44, bip49, bip84, bip86, musig2)
+	KeyType string
 	// account type
 	Account AccountKeyAccount
 	// address as standard pubkey script that Pays To PubKey Hash (P2PKH)
@@ -631,6 +633,8 @@ type AccountKey struct {
 	P2shSegwitAddress string
 	// bech32 address
 	Bech32Address string
+	// taproot address (BIP86)
+	TaprootAddress sql.NullString
 	// full public key
 	FullPublicKey string
 	// multisig address
@@ -669,6 +673,8 @@ type AuthAccountKey struct {
 	ID int16
 	// coin type code
 	Coin AuthAccountKeyCoin
+	// key type (bip44, bip49, bip84, bip86, musig2)
+	KeyType string
 	// auth type
 	AuthAccount string
 	// address as standard pubkey script that Pays To PubKey Hash (P2PKH)
@@ -677,6 +683,8 @@ type AuthAccountKey struct {
 	P2shSegwitAddress string
 	// bech32 address
 	Bech32Address string
+	// taproot address (BIP86)
+	TaprootAddress sql.NullString
 	// full public key
 	FullPublicKey string
 	// multisig address

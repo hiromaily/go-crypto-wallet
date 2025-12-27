@@ -12,7 +12,7 @@ import (
 )
 
 const getAccountKeysByAddrStatus = `-- name: GetAccountKeysByAddrStatus :many
-SELECT id, coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address, full_public_key, multisig_address, redeem_script, wallet_import_format, idx, addr_status, updated_at FROM account_key WHERE coin = ? AND account = ? AND addr_status = ?
+SELECT id, coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, idx, addr_status, updated_at FROM account_key WHERE coin = ? AND account = ? AND addr_status = ?
 `
 
 type GetAccountKeysByAddrStatusParams struct {
@@ -38,6 +38,7 @@ func (q *Queries) GetAccountKeysByAddrStatus(ctx context.Context, arg GetAccount
 			&i.P2pkhAddress,
 			&i.P2shSegwitAddress,
 			&i.Bech32Address,
+			&i.TaprootAddress,
 			&i.FullPublicKey,
 			&i.MultisigAddress,
 			&i.RedeemScript,
@@ -60,7 +61,7 @@ func (q *Queries) GetAccountKeysByAddrStatus(ctx context.Context, arg GetAccount
 }
 
 const getAccountKeysByMultisigAddresses = `-- name: GetAccountKeysByMultisigAddresses :many
-SELECT id, coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address, full_public_key, multisig_address, redeem_script, wallet_import_format, idx, addr_status, updated_at FROM account_key WHERE coin = ? AND account = ? AND multisig_address IN (/*SLICE:addrs*/?)
+SELECT id, coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, idx, addr_status, updated_at FROM account_key WHERE coin = ? AND account = ? AND multisig_address IN (/*SLICE:addrs*/?)
 `
 
 type GetAccountKeysByMultisigAddressesParams struct {
@@ -98,6 +99,7 @@ func (q *Queries) GetAccountKeysByMultisigAddresses(ctx context.Context, arg Get
 			&i.P2pkhAddress,
 			&i.P2shSegwitAddress,
 			&i.Bech32Address,
+			&i.TaprootAddress,
 			&i.FullPublicKey,
 			&i.MultisigAddress,
 			&i.RedeemScript,
@@ -136,7 +138,7 @@ func (q *Queries) GetMaxAccountKeyIndex(ctx context.Context, arg GetMaxAccountKe
 }
 
 const getOneAccountKeyByMaxID = `-- name: GetOneAccountKeyByMaxID :one
-SELECT id, coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address, full_public_key, multisig_address, redeem_script, wallet_import_format, idx, addr_status, updated_at FROM account_key WHERE coin = ? AND account = ? ORDER BY id DESC LIMIT 1
+SELECT id, coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, idx, addr_status, updated_at FROM account_key WHERE coin = ? AND account = ? ORDER BY id DESC LIMIT 1
 `
 
 type GetOneAccountKeyByMaxIDParams struct {
@@ -155,6 +157,7 @@ func (q *Queries) GetOneAccountKeyByMaxID(ctx context.Context, arg GetOneAccount
 		&i.P2pkhAddress,
 		&i.P2shSegwitAddress,
 		&i.Bech32Address,
+		&i.TaprootAddress,
 		&i.FullPublicKey,
 		&i.MultisigAddress,
 		&i.RedeemScript,
@@ -168,9 +171,9 @@ func (q *Queries) GetOneAccountKeyByMaxID(ctx context.Context, arg GetOneAccount
 
 const insertAccountKey = `-- name: InsertAccountKey :execresult
 INSERT INTO account_key (
-  coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address,
+  coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address,
   full_public_key, multisig_address, redeem_script, wallet_import_format, idx, addr_status
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type InsertAccountKeyParams struct {
@@ -180,6 +183,7 @@ type InsertAccountKeyParams struct {
 	P2pkhAddress       string
 	P2shSegwitAddress  string
 	Bech32Address      string
+	TaprootAddress     string
 	FullPublicKey      string
 	MultisigAddress    string
 	RedeemScript       string
@@ -196,6 +200,7 @@ func (q *Queries) InsertAccountKey(ctx context.Context, arg InsertAccountKeyPara
 		arg.P2pkhAddress,
 		arg.P2shSegwitAddress,
 		arg.Bech32Address,
+		arg.TaprootAddress,
 		arg.FullPublicKey,
 		arg.MultisigAddress,
 		arg.RedeemScript,

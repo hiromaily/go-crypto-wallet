@@ -23,6 +23,7 @@ type HDWalletRepo interface {
 		idx int64,
 		coinTypeCode domainCoin.CoinTypeCode,
 		accountType domainAccount.AccountType,
+		keyType domainKey.KeyType,
 	) error
 }
 
@@ -62,6 +63,7 @@ func (w *AuthHDWalletRepo) Insert(
 	idx int64,
 	coinTypeCode domainCoin.CoinTypeCode,
 	_ domainAccount.AccountType,
+	keyType domainKey.KeyType,
 ) error {
 	if len(keys) != 1 {
 		return errors.New("only one key is allowed")
@@ -69,10 +71,12 @@ func (w *AuthHDWalletRepo) Insert(
 	keyItem := keys[0]
 	item := &models.AuthAccountKey{
 		Coin:               coinTypeCode.String(),
+		KeyType:            keyType.String(),
 		AuthAccount:        w.authType.String(),
 		P2PKHAddress:       keyItem.P2PKHAddr,
 		P2SHSegwitAddress:  keyItem.P2SHSegWitAddr,
 		Bech32Address:      keyItem.Bech32Addr,
+		TaprootAddress:     keyItem.TaprootAddr,
 		FullPublicKey:      keyItem.FullPubKey,
 		MultisigAddress:    "",
 		RedeemScript:       keyItem.RedeemScript,
@@ -115,16 +119,19 @@ func (w *AccountHDWalletRepo) Insert(
 	idxFrom int64,
 	coinTypeCode domainCoin.CoinTypeCode,
 	accountType domainAccount.AccountType,
+	keyType domainKey.KeyType,
 ) error {
 	// insert key information to account_key_table
 	accountKeyItems := make([]*models.AccountKey, len(keys))
 	for idx, keyItem := range keys {
 		accountKeyItems[idx] = &models.AccountKey{
 			Coin:               coinTypeCode.String(),
+			KeyType:            keyType.String(),
 			Account:            accountType.String(),
 			P2PKHAddress:       keyItem.P2PKHAddr,
 			P2SHSegwitAddress:  keyItem.P2SHSegWitAddr,
 			Bech32Address:      keyItem.Bech32Addr,
+			TaprootAddress:     keyItem.TaprootAddr,
 			FullPublicKey:      keyItem.FullPubKey,
 			MultisigAddress:    "",
 			RedeemScript:       keyItem.RedeemScript,

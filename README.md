@@ -31,7 +31,10 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
   - ✅ Integration tests separated using build tags (`//go:build integration`)
   - ✅ Go 1.25.5 with updated major dependencies (btcsuite/btcd v0.25.0, ethereum/go-ethereum v1.16.7)
   - ✅ golangci-lint v2.7.2 for code quality checks
-- Bitcoin Core version 22.0 is released. Signet environment is ongoing.
+- ✅ **Taproot (BIP341/BIP86) Support** - Full support for P2TR addresses with Schnorr signatures (requires Bitcoin Core v22.0+)
+  - 30-50% transaction size/fee reduction compared to legacy multisig
+  - Enhanced privacy with indistinguishable spend patterns
+  - See [Taproot User Guide](./docs/TAPROOT_GUIDE.md) for setup and usage
 
 ## Expected use cases
 
@@ -287,9 +290,12 @@ The `pkg/` directory contains shared utilities and legacy/transitional code:
 
 ### For BTC/BCH
 
+- ✅ **Taproot (BIP341/BIP86) Support** - P2TR addresses with Schnorr signatures (See [Taproot Guide](./docs/TAPROOT_GUIDE.md))
+- ✅ Native SegWit-Bech32 (P2WPKH) addresses supported
+- ✅ P2SH-SegWit addresses supported
+- ✅ Legacy P2PKH addresses supported
 - [ ] Setup [Signet](https://en.bitcoin.it/wiki/Signet) environment for development use
 - [ ] Fix `overpaying fee issue` on Signet. It says 725% overpaying.
-- [ ] native SegWit-Bech32
 - [ ] Multisig-address is used only once because of security reason, so after tx is sent,
   related receiver addresses should be updated by is_allocated=true.
 - [ ] Sent tx is not proceeded in bitcoin network if fee is not enough comparatively.

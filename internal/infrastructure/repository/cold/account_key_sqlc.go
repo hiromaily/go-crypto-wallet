@@ -124,10 +124,12 @@ func (r *AccountKeyRepositorySqlc) InsertBulk(items []*models.AccountKey) error 
 	for _, item := range items {
 		_, err := r.queries.InsertAccountKey(ctx, sqlc.InsertAccountKeyParams{
 			Coin:               sqlc.AccountKeyCoin(item.Coin),
+			KeyType:            item.KeyType,
 			Account:            sqlc.AccountKeyAccount(item.Account),
 			P2pkhAddress:       item.P2PKHAddress,
 			P2shSegwitAddress:  item.P2SHSegwitAddress,
 			Bech32Address:      item.Bech32Address,
+			TaprootAddress:     sql.NullString{String: item.TaprootAddress, Valid: item.TaprootAddress != ""},
 			FullPublicKey:      item.FullPublicKey,
 			MultisigAddress:    item.MultisigAddress,
 			RedeemScript:       item.RedeemScript,
@@ -277,10 +279,12 @@ func convertSqlcAccountKeyToModel(accountKey *sqlc.AccountKey) *models.AccountKe
 	return &models.AccountKey{
 		ID:                 accountKey.ID,
 		Coin:               string(accountKey.Coin),
+		KeyType:            accountKey.KeyType,
 		Account:            string(accountKey.Account),
 		P2PKHAddress:       accountKey.P2pkhAddress,
 		P2SHSegwitAddress:  accountKey.P2shSegwitAddress,
 		Bech32Address:      accountKey.Bech32Address,
+		TaprootAddress:     accountKey.TaprootAddress.String,
 		FullPublicKey:      accountKey.FullPublicKey,
 		MultisigAddress:    accountKey.MultisigAddress,
 		RedeemScript:       accountKey.RedeemScript,

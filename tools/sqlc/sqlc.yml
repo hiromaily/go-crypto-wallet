@@ -5,5 +5,5 @@ sql:
     schema: "./schemas/*.sql"
     gen:
       go:
-        package: "sqlcgen"
-        out: "../../pkg/db/rdb/sqlcgen"
+        package: "sqlc"
+        out: "../../internal/infrastructure/database/sqlc"

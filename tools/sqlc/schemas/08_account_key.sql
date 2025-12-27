@@ -8,6 +8,7 @@ CREATE TABLE `account_key` (
   `p2pkh_address`           VARCHAR(255) NOT NULL COMMENT'address as standard pubkey script that Pays To PubKey Hash (P2PKH)',
   `p2sh_segwit_address`     VARCHAR(255) NOT NULL COMMENT'p2sh-segwit address',
   `bech32_address`          VARCHAR(255) NOT NULL COMMENT'bech32 address',
+  `taproot_address`         VARCHAR(255) NULL DEFAULT NULL COMMENT 'taproot address (BIP86)',
   `full_public_key`         VARCHAR(255) NOT NULL COMMENT'full public key',
   `multisig_address`        VARCHAR(255) DEFAULT '' NOT NULL COMMENT'multisig address',
   `redeem_script`           VARCHAR(1000) DEFAULT '' NOT NULL COMMENT'redeedScript after multisig address generated',

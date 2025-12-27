@@ -633,6 +633,8 @@ type AccountKey struct {
 	P2shSegwitAddress string
 	// bech32 address
 	Bech32Address string
+	// taproot address (BIP86)
+	TaprootAddress string
 	// full public key
 	FullPublicKey string
 	// multisig address
@@ -681,6 +683,8 @@ type AuthAccountKey struct {
 	P2shSegwitAddress string
 	// bech32 address
 	Bech32Address string
+	// taproot address (BIP86)
+	TaprootAddress string
 	// full public key
 	FullPublicKey string
 	// multisig address

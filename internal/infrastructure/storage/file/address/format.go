@@ -1,7 +1,6 @@
 package address
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
 
@@ -17,6 +16,7 @@ type AddressFormat struct {
 	P2PKHAddress      string
 	P2SHSegwitAddress string
 	Bech32Address     string
+	TaprootAddress    string
 	FullPublicKey     string
 	MultisigAddress   string
 	Idx               string
@@ -30,6 +30,7 @@ func CreateLine(accountKeyItem *models.AccountKey) []string {
 		accountKeyItem.P2PKHAddress,
 		accountKeyItem.P2SHSegwitAddress,
 		accountKeyItem.Bech32Address,
+		accountKeyItem.TaprootAddress,
 		accountKeyItem.FullPublicKey,
 		accountKeyItem.MultisigAddress,
 		strconv.Itoa(int(accountKeyItem.Idx)),
@@ -38,8 +39,9 @@ func CreateLine(accountKeyItem *models.AccountKey) []string {
 
 // ConvertLine converts line to AddressFormat
 func ConvertLine(coinTypeCode domainCoin.CoinTypeCode, line []string) (*AddressFormat, error) {
-	if len(line) != 8 {
-		return nil, errors.New("csv format is invalid")
+	// Support both old format (8 fields) and new format (9 fields with Taproot)
+	if len(line) != 8 && len(line) != 9 {
+		return nil, fmt.Errorf("csv format is invalid: expected 8 or 9 fields, got %d", len(line))
 	}
 
 	// validate
@@ -50,14 +52,29 @@ func ConvertLine(coinTypeCode domainCoin.CoinTypeCode, line []string) (*AddressF
 		return nil, fmt.Errorf("account is invalid: %s", line[1])
 	}
 
+	// For backward compatibility with old CSV format (without Taproot)
+	taprootAddress := ""
+	fullPublicKeyIdx := 5
+	multisigAddressIdx := 6
+	idxIdx := 7
+
+	if len(line) == 9 {
+		// New format with Taproot address
+		taprootAddress = line[5]
+		fullPublicKeyIdx = 6
+		multisigAddressIdx = 7
+		idxIdx = 8
+	}
+
 	return &AddressFormat{
 		CoinTypeCode:      domainCoin.CoinTypeCode(line[0]),
 		AccountType:       domainAccount.AccountType(line[1]),
 		P2PKHAddress:      line[2],
 		P2SHSegwitAddress: line[3],
 		Bech32Address:     line[4],
-		FullPublicKey:     line[5],
-		MultisigAddress:   line[6],
-		Idx:               line[7],
+		TaprootAddress:    taprootAddress,
+		FullPublicKey:     line[fullPublicKeyIdx],
+		MultisigAddress:   line[multisigAddressIdx],
+		Idx:               line[idxIdx],
 	}, nil
 }
