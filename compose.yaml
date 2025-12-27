@@ -119,6 +119,7 @@ services:
     volumes:
       - wallet-db:/var/lib/mysql
       - "./docker/mysql/sqls:/sqls"
+      - "./docker/mysql/conf.d:/etc/mysql/conf.d"
       - "./docker/mysql/init.d:/docker-entrypoint-initdb.d"
     environment:
       MYSQL_ROOT_PASSWORD: root
