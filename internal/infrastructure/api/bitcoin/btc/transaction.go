@@ -329,10 +329,20 @@ func (b *Bitcoin) FundRawTransaction(hexTx string) (*FundRawTransactionResult, e
 	return &fundRawTransactionResult, nil
 }
 
-// SignRawTransaction sign on raw unsigned tx for `not multisig address` like client account
-// - this would be used for deposit action
-// - for multisig, refer to `SignRawTransactionWithKey()`
-// - TODO: this code can be shared with SignRawTransactionWithKey() to some extend
+// SignRawTransaction signs a raw unsigned transaction for non-multisig addresses (e.g., client account).
+// This function supports all Bitcoin address types including Taproot with automatic signature type selection:
+//   - P2PKH (Legacy): ECDSA signature
+//   - P2SH-SegWit: ECDSA signature with witness data
+//   - P2WPKH (Bech32): ECDSA signature with witness data
+//   - P2TR (Taproot): Schnorr signature (BIP340) with witness data
+//
+// The signature type is automatically determined by Bitcoin Core based on the scriptPubKey type
+// of the input being spent. Bitcoin Core v22.0+ is required for Taproot/Schnorr support.
+//
+// This would be used for deposit action (client -> deposit).
+// For multisig addresses, refer to SignRawTransactionWithKey().
+//
+// TODO: this code can be shared with SignRawTransactionWithKey() to some extent
 func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []PrevTx) (*wire.MsgTx, bool, error) {
 	// hex tx
 	hexTx, err := b.ToHex(tx)
@@ -382,8 +392,20 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []PrevTx) (*wire.Ms
 	return msgTx, signRawTxResult.Complete, nil
 }
 
-// SignRawTransactionWithKey sign on raw unsigned tx for `multisig address`
-// - for multisig
+// SignRawTransactionWithKey signs a raw unsigned transaction for multisig addresses.
+// This function supports all Bitcoin address types including Taproot with automatic signature type selection:
+//   - P2SH (Legacy multisig): ECDSA signatures
+//   - P2SH-SegWit: ECDSA signatures with witness data
+//   - P2WSH (Bech32 multisig): ECDSA signatures with witness data
+//   - P2TR (Taproot): Schnorr signatures (BIP340) - Note: Taproot multisig uses MuSig2 or script path
+//
+// The signature type is automatically determined by Bitcoin Core based on the scriptPubKey type
+// of the input being spent. Bitcoin Core v22.0+ is required for Taproot/Schnorr support.
+//
+// For Taproot, note that native Taproot multisig would use MuSig2 (key path) or script path spending,
+// which is different from traditional multisig and may require additional implementation.
+//
+// This would be used for payment and transfer actions from multisig accounts.
 func (b *Bitcoin) SignRawTransactionWithKey(
 	tx *wire.MsgTx, privKeysWIF []string, prevtxs []PrevTx,
 ) (*wire.MsgTx, bool, error) {

@@ -104,11 +104,19 @@ func (u *signTransactionUseCase) Sign(
 	}, nil
 }
 
-// sign
-// - coin is sent from sender account to receiver account. Sender's privKey(sender account) is required
-// - [actionType:deposit]  [from] client [to] deposit, (not multisig addr)
-// - [actionType:payment]  [from] payment [to] unknown, (multisig addr)
-// - [actionType:transfer] [from] from [to] to, (multisig addr)
+// sign signs a transaction using Bitcoin Core RPC with automatic signature type selection.
+// This function supports all Bitcoin address types including Taproot:
+//   - Legacy (P2PKH): ECDSA signature
+//   - SegWit (P2WPKH, P2SH-SegWit): ECDSA signature with witness data
+//   - Taproot (P2TR): Schnorr signature (BIP340) with witness data
+//
+// The signature algorithm is automatically selected by Bitcoin Core based on the input's scriptPubKey type.
+// Bitcoin Core v22.0+ is required for Taproot/Schnorr signature support.
+//
+// Transaction flow:
+//   - [actionType:deposit]  [from] client [to] deposit (not multisig addr)
+//   - [actionType:payment]  [from] payment [to] unknown (multisig addr)
+//   - [actionType:transfer] [from] account [to] account (multisig addr)
 func (u *signTransactionUseCase) sign(hex, encodedPrevsAddrs string) (string, bool, string, error) {
 	// Get tx from hex
 	msgTx, err := u.btc.ToMsgTx(hex)
