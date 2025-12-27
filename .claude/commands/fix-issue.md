@@ -181,3 +181,52 @@ Repo: hiromaily/go-crypto-wallet
 <!-- - **Multi-Chain Support:**
   - Verify changes work for all supported chains (BTC, BCH, ETH, XRP)
   - Test ERC-20 token operations if ETH-related -->
+
+## Completion Checklist
+
+After completing all steps, report the completion status to the user using the following checklist format:
+
+### Issue Resolution Status
+
+- [ ] **Step 1 - Analyze**: Issue content analyzed, problem understood, affected files identified
+- [ ] **Step 2 - Plan**: Solution broken down into steps, test cases identified
+- [ ] **Step 3 - Implement**: Code changes implemented following Clean Architecture principles
+- [ ] **Step 4 - Self-Review**: Code reviewed for quality, architecture compliance, and security
+- [ ] **Step 5 - Test**: Tests run and passed, new test cases created
+- [ ] **Step 6 - Document**: Documentation updated as needed
+- [ ] **Step 7 - Verify**: All verification commands passed (`make lint-fix`, `make tidy`, `make check-build`, `make gotest`)
+- [ ] **Step 8 - Commit**: Changes committed with appropriate commit message
+- [ ] **Step 9 - PR Draft**: Pull request created with complete description
+- [ ] **Step 10 - Review Request**: PR ready for review
+
+### Summary
+
+Provide a brief summary including:
+
+- Issue number and title
+- Branch name created
+- PR number (if created)
+- Key changes made
+- Any special considerations or notes
+
+**Example completion message:**
+
+```text
+✅ Issue #123 has been resolved
+
+All steps completed:
+✓ Analyzed issue and identified affected components
+✓ Planned solution and test cases
+✓ Implemented fixes following Clean Architecture
+✓ Self-reviewed code for quality and security
+✓ Tests created and passing
+✓ Documentation updated
+✓ All verification commands passed
+✓ Changes committed
+✓ Pull request #456 created
+✓ Ready for review
+
+Branch: feature/issue-123-fix-logger-global-issue
+PR: #456
+Key changes: Fixed logger initialization issue in domain layer
+```
