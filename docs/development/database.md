@@ -10,6 +10,7 @@ This document describes the database architecture and operations for the go-cryp
 - [Setup and Configuration](#setup-and-configuration)
 - [Common Operations](#common-operations)
 - [Database Management](#database-management)
+- [Schema Migrations with Atlas](#schema-migrations-with-atlas)
 - [Troubleshooting](#troubleshooting)
 - [Migration Guide](#migration-guide)
 
@@ -391,6 +392,190 @@ docker compose logs -f wallet-db
 # View last 100 lines
 docker compose logs --tail=100 wallet-db
 ```
+
+## Schema Migrations with Atlas
+
+The project uses [Atlas](https://atlasgo.io/) for managing database schema migrations. Atlas provides version-controlled migrations, migration history tracking, and rollback capabilities.
+
+### Installation
+
+Install Atlas CLI using Homebrew (macOS):
+
+```bash
+brew install arigaio/tap/atlas
+```
+
+Alternatively, you can install using Go:
+
+```bash
+go install ariga.io/atlas/cmd/atlas@latest
+```
+
+Verify installation:
+
+```bash
+atlas version
+```
+
+### Migration Structure
+
+Atlas supports both HCL schema definitions and SQL migrations:
+
+```
+tools/atlas/
+├── atlas.hcl              # Atlas configuration
+├── schemas/               # HCL schema definitions (declarative)
+│   ├── watch.hcl          # Watch schema definition
+│   ├── keygen.hcl         # Keygen schema definition
+│   └── sign.hcl           # Sign schema definition
+├── migrations/            # SQL migration files (versioned)
+│   ├── watch/             # Watch schema migrations
+│   ├── keygen/            # Keygen schema migrations
+│   └── sign/              # Sign schema migrations
+└── README.md              # Detailed Atlas documentation
+```
+
+### HCL Schema Management
+
+The project uses HCL (HashiCorp Configuration Language) files for declarative schema management. HCL files define the desired state of the database schema.
+
+#### Apply HCL Schema
+
+Apply HCL schema definitions directly to the database:
+
+```bash
+make atlas-schema-apply
+```
+
+#### Show Schema Diff
+
+Compare the current database state with HCL schema definition:
+
+```bash
+make atlas-schema-diff SCHEMA=watch
+```
+
+#### Generate Migration from HCL Diff
+
+Generate a migration file based on the difference between database and HCL schema:
+
+```bash
+make atlas-schema-diff-migration SCHEMA=watch
+```
+
+### Common Operations
+
+#### Apply Migrations
+
+Apply all pending migrations for all schemas:
+
+```bash
+# Local environment
+make atlas-migrate
+
+# Docker environment
+make atlas-migrate-docker
+```
+
+#### Check Migration Status
+
+View migration status for all schemas:
+
+```bash
+make atlas-status
+```
+
+This shows:
+- Applied migrations
+- Pending migrations
+- Migration history
+
+#### Rollback Migrations
+
+Rollback the last migration for a specific schema:
+
+```bash
+make atlas-rollback SCHEMA=watch
+make atlas-rollback SCHEMA=keygen
+make atlas-rollback SCHEMA=sign
+```
+
+#### Validate Migrations
+
+Validate all migration files before applying:
+
+```bash
+make atlas-validate
+```
+
+#### Create New Migration
+
+Create a new migration file:
+
+```bash
+make atlas-new SCHEMA=watch NAME=add_new_table
+make atlas-new SCHEMA=keygen NAME=update_account_key
+make atlas-new SCHEMA=sign NAME=add_index
+```
+
+### Migration History
+
+Atlas automatically creates a migration history table (`atlas_schema_migrations`) in each schema to track applied migrations. This table should not be modified manually.
+
+### Integration with Existing Setup
+
+Atlas migrations work alongside the existing SQL files:
+
+- **Legacy SQL files** (`docker/mysql/sqls/`): Preserved for reference and backward compatibility
+- **Atlas migrations** (`tools/atlas/migrations/`): Used for version-controlled schema changes
+
+For new schema changes:
+1. Create an Atlas migration instead of modifying SQL files directly
+2. Apply migrations using `make atlas-migrate`
+3. Update sqlc schema files if needed for code generation
+
+### Best Practices
+
+1. **Always validate** migrations before applying:
+   ```bash
+   make atlas-validate
+   ```
+
+2. **Check status** before applying:
+   ```bash
+   make atlas-status
+   ```
+
+3. **Test migrations** on development database first
+
+4. **Never modify existing migration files** - create new migrations instead
+
+5. **Keep migrations small and focused** - one logical change per migration
+
+6. **Document complex migrations** with comments in SQL files
+
+### Troubleshooting Atlas
+
+#### Migration Fails
+
+1. Check error message for details
+2. Verify database connection
+3. Ensure schema exists
+4. Review migration file syntax
+
+#### Connection Issues
+
+1. Verify MySQL is running: `docker compose ps wallet-db`
+2. Check connection string in Makefile targets
+3. Verify credentials are correct
+
+#### Rollback Issues
+
+1. Check migration history: `make atlas-status`
+2. Verify migration file exists
+3. Check database connection
+
+For more detailed information, see [Atlas README](../../tools/atlas/README.md).
 
 ## Troubleshooting
 

@@ -12,7 +12,7 @@ check-ver:
 
 .PHONY: install-mac-tools
 install-mac-tools:
-	brew install jq mkcert go-task/tap/go-task
+	brew install jq mkcert brew install ariga/tap/atlas
 
 .PHONY: install-protobuf
 install-protobuf:
