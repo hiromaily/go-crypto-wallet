@@ -41,6 +41,12 @@ Repo: hiromaily/go-crypto-wallet
    - Check for auto-generated files (sqlc, protoc, go generate) - **DO NOT EDIT** these
    - Consider backward compatibility
    - Plan rollback strategy if breaking changes
+   - **If the issue is too large or complex**: Stop processing and propose creating sub-issues
+     - Assess if the issue requires multiple PRs or spans multiple components
+     - If too large, interrupt processing and suggest breaking it down into smaller sub-issues
+     - Use `gh issue create` to create sub-issues with appropriate scope
+     - Link sub-issues to the parent issue
+     - Proceed with fixing only after the issue is broken down into manageable pieces
 
 3. **Implement:**
    - Follow Clean Architecture principles
