@@ -23,6 +23,10 @@ type TransactionFileRepositorier interface {
 	ReadFileSlice(path string) ([]string, error)
 	WriteFile(path, hexTx string) (string, error)
 	WriteFileSlice(path string, data []string) (string, error)
+
+	// PSBT-specific methods (BIP174)
+	ReadPSBTFile(path string) (string, error)
+	WritePSBTFile(path, psbtBase64 string) (string, error)
 }
 
 // TransactionFileRepository is to store transaction info as csv file
@@ -46,19 +50,19 @@ func NewTransactionFileRepository(filePath string) *TransactionFileRepository {
 }
 
 // about file structure
-// e.g. ./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209
+// e.g. ./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209.psbt
 //  - ./data/tx/ dir : file path
 //  - deposit/   dir : actionType
-//  - deposit_8_unsigned_0_1534744535097796209 : {actionType}_{txID}_{txType}_{signedCount}_{timestamp}
+//  - deposit_8_unsigned_0_1534744535097796209.psbt : {actionType}_{txID}_{txType}_{signedCount}_{timestamp}.psbt
 
-// CreateFilePath create file path for transaction file
+// CreateFilePath create file path for transaction file (PSBT format with .psbt extension)
 func (r *TransactionFileRepository) CreateFilePath(
 	actionType domainTx.ActionType, txType domainTx.TxType, txID int64, signedCount int,
 ) string {
-	// ./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209
+	// ./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209.psbt
 	// baseDir := fmt.Sprintf("%s%s/", r.filePath, actionType.String())
 
-	// ./data/tx/eth/deposit_8_unsigned_0_1534744535097796209
+	// ./data/tx/eth/deposit_8_unsigned_0_1534744535097796209.psbt
 	baseDir := r.filePath
 	return fmt.Sprintf("%s%s_%d_%s_%d_", baseDir, actionType.String(), txID, txType, signedCount)
 }
@@ -66,9 +70,12 @@ func (r *TransactionFileRepository) CreateFilePath(
 // GetFileNameType returns as FileName type
 func (*TransactionFileRepository) GetFileNameType(filePath string) (*FileName, error) {
 	// just file path or full path
-	// ./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209
+	// ./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209.psbt
 	tmp := strings.Split(filePath, "/")
 	fileName := tmp[len(tmp)-1]
+
+	// Strip .psbt extension if present
+	fileName = strings.TrimSuffix(fileName, ".psbt")
 
 	// deposit_5_unsigned_0_1534466246366489473
 	// s[0]: actionType
@@ -204,6 +211,41 @@ func (r *TransactionFileRepository) WriteFileSlice(path string, data []string) (
 
 	if err = file.Close(); err != nil {
 		return "", fmt.Errorf("failed to close file: %w", err)
+	}
+
+	return fileName, nil
+}
+
+// ReadPSBTFile reads a base64-encoded PSBT from file
+func (*TransactionFileRepository) ReadPSBTFile(path string) (string, error) {
+	// Validate extension
+	if !strings.HasSuffix(path, ".psbt") {
+		return "", fmt.Errorf("invalid PSBT file extension: %s (expected .psbt)", path)
+	}
+
+	// Read file
+	data, err := os.ReadFile(path) //nolint:gosec
+	if err != nil {
+		return "", fmt.Errorf("fail to read PSBT file %s: %w", path, err)
+	}
+
+	return string(data), nil
+}
+
+// WritePSBTFile writes a base64-encoded PSBT to file with .psbt extension
+func (r *TransactionFileRepository) WritePSBTFile(path, psbtBase64 string) (string, error) {
+	// Create directory if not existing
+	r.createDir(path)
+
+	// Add timestamp and .psbt extension
+	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
+	fileName := path + ts + ".psbt"
+
+	// Write base64 PSBT
+	bytePSBT := []byte(psbtBase64)
+	err := os.WriteFile(fileName, bytePSBT, 0o644)
+	if err != nil {
+		return "", fmt.Errorf("fail to write PSBT file %s: %w", fileName, err)
 	}
 
 	return fileName, nil
