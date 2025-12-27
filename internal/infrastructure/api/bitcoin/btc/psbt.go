@@ -18,18 +18,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// PSBTInput represents input metadata for PSBT
-type PSBTInput struct {
-	WitnessUTXO  *wire.TxOut
-	RedeemScript []byte
-	SighashType  txscript.SigHashType
-}
-
-// PSBTOutput represents output metadata for PSBT
-type PSBTOutput struct {
-	RedeemScript []byte
-}
-
 // ParsedPSBT represents a parsed PSBT with metadata
 type ParsedPSBT struct {
 	Packet       *psbt.Packet
