@@ -108,7 +108,7 @@ func (u *signTransactionUseCase) Sign(
 
 	// return hexTx, isSigned, generatedFileName, nil
 	return signusecase.SignTransactionOutput{
-		SignedHex:    "",
+		SignedData:   "",
 		IsComplete:   true,
 		NextFilePath: generatedFileName,
 	}, nil

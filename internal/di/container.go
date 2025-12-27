@@ -1099,6 +1099,7 @@ func (c *container) newBTCSignTransactionUseCase() signusecase.SignTransactionUs
 		c.newTxFileStorager(),
 		c.newMultiAccount(),
 		c.walletType,
+		c.AuthType(),
 	)
 }
 

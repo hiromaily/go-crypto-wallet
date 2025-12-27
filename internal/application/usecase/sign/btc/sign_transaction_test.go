@@ -20,6 +20,7 @@ func TestNewSignTransactionUseCase(t *testing.T) {
 			nil, // txFileRepo
 			nil, // multisigAccount
 			domainWallet.WalletTypeSign,
+			"auth1", // authType
 		)
 
 		assert.NotNil(t, useCase, "use case should not be nil")
@@ -33,6 +34,7 @@ func TestNewSignTransactionUseCase(t *testing.T) {
 			nil,
 			nil,
 			domainWallet.WalletTypeSign,
+			"auth1", // authType
 		)
 
 		// Verify it implements the interface

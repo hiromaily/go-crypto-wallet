@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
@@ -21,6 +22,7 @@ type signTransactionUseCase struct {
 	txFileRepo      file.TransactionFileRepositorier
 	multisigAccount account.MultisigAccounter
 	wtype           domainWallet.WalletType
+	authType        domainAccount.AuthType
 }
 
 // NewSignTransactionUseCase creates a new SignTransactionUseCase for sign wallet
@@ -31,6 +33,7 @@ func NewSignTransactionUseCase(
 	txFileRepo file.TransactionFileRepositorier,
 	multisigAccount account.MultisigAccounter,
 	wtype domainWallet.WalletType,
+	authType domainAccount.AuthType,
 ) signusecase.SignTransactionUseCase {
 	return &signTransactionUseCase{
 		btc:             btcAPI,
@@ -39,6 +42,7 @@ func NewSignTransactionUseCase(
 		txFileRepo:      txFileRepo,
 		multisigAccount: multisigAccount,
 		wtype:           wtype,
+		authType:        authType,
 	}
 }
 
@@ -88,7 +92,7 @@ func (u *signTransactionUseCase) Sign(
 	)
 
 	return signusecase.SignTransactionOutput{
-		SignedHex:    signedPSBT, // PSBT base64 (not hex anymore)
+		SignedData:   signedPSBT, // PSBT base64
 		IsComplete:   isSigned,
 		NextFilePath: generatedFileName,
 	}, nil
@@ -146,9 +150,10 @@ func (u *signTransactionUseCase) signMultisigPSBT(
 	psbtBase64 string,
 ) (string, bool, error) {
 	// Get auth key from auth_account_key table (Sign wallet's key)
-	authKey, err := u.authKeyRepo.GetOne("")
+	// Using explicit authType from configuration for robust key selection
+	authKey, err := u.authKeyRepo.GetOne(u.authType)
 	if err != nil {
-		return "", false, fmt.Errorf("fail to get auth key: %w", err)
+		return "", false, fmt.Errorf("fail to get auth key for authType %s: %w", u.authType, err)
 	}
 
 	logger.Debug("signing PSBT with auth key",
