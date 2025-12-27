@@ -1,5 +1,5 @@
 #coin_type = "btc" # btc, bch
-address_type = "bech32" # p2sh-segwit, bech32, BCH-CashAddr
+address_type = "bech32" # legacy, p2sh-segwit, bech32, taproot
 
 [bitcoin]
 host = "127.0.0.1:18332"

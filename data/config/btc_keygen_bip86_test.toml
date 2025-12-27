@@ -1,6 +1,6 @@
 #coin_type = "btc" # btc, bch
 key_type = "bip86" # bip44, bip49, bip84, bip86, musig2
-address_type = "taproot" # p2sh-segwit, bech32, taproot, BCH-CashAddr
+address_type = "taproot" # legacy, p2sh-segwit, bech32, taproot
 
 [bitcoin]
 host = "127.0.0.1:19332"
