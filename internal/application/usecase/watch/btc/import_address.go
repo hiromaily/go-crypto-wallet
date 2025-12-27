@@ -115,8 +115,10 @@ func (u *importAddressUseCase) selectTargetAddress(addrFmt *address.AddressForma
 			case address.AddrTypeBech32:
 				return addrFmt.Bech32Address, nil
 			case address.AddrTypeTaproot:
-				// TODO: Implement Taproot address support
-				return "", errors.New("taproot address type not yet supported")
+				if addrFmt.TaprootAddress == "" {
+					return "", errors.New("taproot address is empty in the imported data")
+				}
+				return addrFmt.TaprootAddress, nil
 			case address.AddrTypeLegacy:
 				return addrFmt.P2PKHAddress, nil
 			case address.AddrTypeP2shSegwit,

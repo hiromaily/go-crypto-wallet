@@ -79,7 +79,7 @@ func ValidateWalletKey(wk WalletKey) error {
 	}
 
 	// At least one address format should be present
-	if wk.P2PKHAddr == "" && wk.P2SHSegWitAddr == "" && wk.Bech32Addr == "" {
+	if wk.P2PKHAddr == "" && wk.P2SHSegWitAddr == "" && wk.Bech32Addr == "" && wk.TaprootAddr == "" {
 		return errors.New("wallet key must have at least one address format")
 	}
 
