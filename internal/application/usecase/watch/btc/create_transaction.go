@@ -351,14 +351,14 @@ func (u *createTransactionUseCase) createTx(
 		return "", "", fmt.Errorf("fail to call serial.EncodeToString(): %w", err)
 	}
 
-	// generate tx file
+	// generate PSBT file
 	// TODO: how to recover when error occurred here
-	// - inserted data in database must be deleted to generate hex file
+	// - inserted data in database must be deleted to generate PSBT file
 	var generatedFileName string
 	if txID != 0 {
-		generatedFileName, err = u.generateHexFile(targetAction, hex, encodedAddrsPrevs, txID)
+		generatedFileName, err = u.generatePSBTFile(targetAction, msgTx, previousTxs, txID)
 		if err != nil {
-			return "", "", fmt.Errorf("fail to call generateHexFile(): %w", err)
+			return "", "", fmt.Errorf("fail to call generatePSBTFile(): %w", err)
 		}
 	}
 
@@ -756,21 +756,49 @@ func (u *createTransactionUseCase) insertTxTableForUnsigned(
 	return txID, nil
 }
 
-// generateHexFile generates file for hex and encoded previous addresses
-func (u *createTransactionUseCase) generateHexFile(
-	actionType domainTx.ActionType, hex, encodedAddrsPrevs string, id int64,
+// generatePSBTFile creates PSBT file for unsigned transaction with all required metadata.
+// This replaces the legacy CSV-based generateHexFile method.
+//
+// The PSBT includes:
+//   - All transaction inputs and outputs
+//   - Previous output metadata (amounts, scriptPubKeys)
+//   - Redeem scripts (for P2SH multisig)
+//   - Witness scripts (for P2WSH multisig)
+//   - Taproot metadata (for P2TR addresses)
+//
+// The generated PSBT file follows BIP174 format and is compatible with:
+//   - Keygen wallet (offline signing)
+//   - Sign wallet (multisig second signature)
+//   - Hardware wallets (via BIP32 derivation paths)
+func (u *createTransactionUseCase) generatePSBTFile(
+	actionType domainTx.ActionType,
+	msgTx *wire.MsgTx,
+	previousTxs btc.PreviousTxs,
+	id int64,
 ) (string, error) {
-	savedata := hex
-	if encodedAddrsPrevs != "" {
-		savedata = fmt.Sprintf("%s,%s", savedata, encodedAddrsPrevs)
+	// Create PSBT from msgTx and previous outputs
+	// This includes all necessary metadata for offline signing
+	psbtBase64, err := u.btcClient.CreatePSBT(msgTx, previousTxs.PrevTxs)
+	if err != nil {
+		return "", fmt.Errorf("fail to create PSBT: %w", err)
 	}
 
-	// create file
+	// Create file path with .psbt extension
 	path := u.txFileRepo.CreateFilePath(actionType, domainTx.TxTypeUnsigned, id, 0)
-	generatedFileName, err := u.txFileRepo.WriteFile(path, savedata)
+
+	// Write PSBT file
+	generatedFileName, err := u.txFileRepo.WritePSBTFile(path, psbtBase64)
 	if err != nil {
-		return "", fmt.Errorf("fail to call txFileRepo.WriteFile(): %w", err)
+		return "", fmt.Errorf("fail to write PSBT file: %w", err)
 	}
+
+	logger.Debug("generated PSBT file",
+		"action", actionType.String(),
+		"txID", id,
+		"fileName", generatedFileName,
+		"inputs", len(previousTxs.PrevTxs),
+		"sender", previousTxs.SenderAccount.String(),
+	)
 
 	return generatedFileName, nil
 }
