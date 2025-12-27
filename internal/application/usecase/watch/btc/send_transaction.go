@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
@@ -50,10 +51,20 @@ func (u *sendTransactionUseCase) Execute(
 
 	logger.Debug("sending transaction", "action_type", actionType.String(), "tx_id", txID)
 
-	// Read signed transaction hex from file
-	signedHex, err := u.txFileRepo.ReadFile(input.FilePath)
-	if err != nil {
-		return watchusecase.SendTransactionOutput{}, fmt.Errorf("failed to read transaction file: %w", err)
+	// Determine file format based on extension and read accordingly
+	var signedHex string
+	if isPSBTFile(input.FilePath) {
+		// PSBT flow: finalize → extract → convert to hex
+		signedHex, err = u.processPSBTFile(input.FilePath)
+		if err != nil {
+			return watchusecase.SendTransactionOutput{}, fmt.Errorf("failed to process PSBT file: %w", err)
+		}
+	} else {
+		// Legacy flow: read hex directly from file
+		signedHex, err = u.txFileRepo.ReadFile(input.FilePath)
+		if err != nil {
+			return watchusecase.SendTransactionOutput{}, fmt.Errorf("failed to read transaction file: %w", err)
+		}
 	}
 
 	// Broadcast transaction to Bitcoin network
@@ -105,6 +116,55 @@ func (u *sendTransactionUseCase) Execute(
 	return watchusecase.SendTransactionOutput{
 		TxID: hash.String(),
 	}, nil
+}
+
+// processPSBTFile processes a PSBT file: validates, finalizes, extracts, and converts to hex
+func (u *sendTransactionUseCase) processPSBTFile(filePath string) (string, error) {
+	// Read PSBT from file
+	psbtBase64, err := u.txFileRepo.ReadPSBTFile(filePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to read PSBT file: %w", err)
+	}
+
+	// Validate PSBT is fully signed
+	isComplete, err := u.btcClient.IsPSBTComplete(psbtBase64)
+	if err != nil {
+		return "", fmt.Errorf("failed to validate PSBT: %w", err)
+	}
+	if !isComplete {
+		return "", errors.New("PSBT is not fully signed - cannot finalize incomplete PSBT")
+	}
+
+	logger.Debug("PSBT validation passed", "is_complete", isComplete)
+
+	// Finalize PSBT (combine signatures into final scriptSig/witness)
+	finalizedPSBT, err := u.btcClient.FinalizePSBT(psbtBase64)
+	if err != nil {
+		return "", fmt.Errorf("failed to finalize PSBT: %w", err)
+	}
+
+	logger.Debug("PSBT finalized successfully")
+
+	// Extract final transaction from PSBT
+	msgTx, err := u.btcClient.ExtractTransaction(finalizedPSBT)
+	if err != nil {
+		return "", fmt.Errorf("failed to extract transaction from PSBT: %w", err)
+	}
+
+	// Convert transaction to hex for broadcasting
+	hexTx, err := u.btcClient.ToHex(msgTx)
+	if err != nil {
+		return "", fmt.Errorf("failed to convert transaction to hex: %w", err)
+	}
+
+	logger.Debug("transaction extracted from PSBT", "hex_length", len(hexTx))
+
+	return hexTx, nil
+}
+
+// isPSBTFile checks if the file path indicates a PSBT file (by extension)
+func isPSBTFile(filePath string) bool {
+	return strings.HasSuffix(strings.ToLower(filePath), ".psbt")
 }
 
 // updateAddressAllocation marks the receiver address as allocated
