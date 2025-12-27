@@ -241,8 +241,14 @@ func (w *WatchWallet) FinalizePSBT(psbtBase64 string) (*wire.MsgTx, error) {
 ```go
 // PSBT Signing (First Signature)
 func (k *KeygenWallet) SignPSBT(psbtBase64 string, wifs []string) (string, bool, error) {
+    // Decode base64 to bytes
+    psbtBytes, err := base64.StdEncoding.DecodeString(psbtBase64)
+    if err != nil {
+        return "", false, fmt.Errorf("failed to decode base64: %w", err)
+    }
+
     // Parse PSBT using btcd package
-    packet, err := psbt.NewFromRawBytes(bytes.NewReader([]byte(psbtBase64)), true)
+    packet, err := psbt.NewFromRawBytes(bytes.NewReader(psbtBytes), false)
     if err != nil {
         return "", false, fmt.Errorf("invalid PSBT: %w", err)
     }
@@ -293,16 +299,33 @@ func (k *KeygenWallet) SignPSBT(psbtBase64 string, wifs []string) (string, bool,
 ```go
 // PSBT Signing (Second Signature)
 func (s *SignWallet) SignPSBT(psbtBase64 string, authWIF string) (string, bool, error) {
+    // Decode base64 to bytes
+    psbtBytes, err := base64.StdEncoding.DecodeString(psbtBase64)
+    if err != nil {
+        return "", false, fmt.Errorf("failed to decode base64: %w", err)
+    }
+
     // Parse PSBT using btcd package
-    packet, err := psbt.NewFromRawBytes(bytes.NewReader([]byte(psbtBase64)), true)
+    packet, err := psbt.NewFromRawBytes(bytes.NewReader(psbtBytes), false)
     if err != nil {
         return "", false, fmt.Errorf("invalid PSBT: %w", err)
     }
 
     // Verify PSBT already has partial signatures
     if !hasPartialSignatures(packet) {
-        return "", false, errors.New("PSBT must have at least one signature")
+        return "", false, errors.New("PSBT must have at least one signature from Keygen wallet")
     }
+}
+
+// hasPartialSignatures checks if PSBT has at least one partial signature
+func hasPartialSignatures(packet *psbt.Packet) bool {
+    for _, input := range packet.Inputs {
+        if len(input.PartialSigs) > 0 {
+            return true
+        }
+    }
+    return false
+}
 
     // Create updater
     updater, err := psbt.NewUpdater(packet)
@@ -359,7 +382,7 @@ import (
 
 // PSBTOperator defines PSBT operations interface
 type PSBTOperator interface {
-    // Creation
+    // Creation (Watch Wallet)
     CreatePSBTFromTx(msgTx *wire.MsgTx, prevTxs []PrevTx) (string, error)
 
     // Parsing
@@ -368,13 +391,13 @@ type PSBTOperator interface {
     // Validation
     ValidatePSBT(psbtBase64 string) error
 
-    // Signing (offline)
-    SignPSBTWithKey(psbtBase64 string, wifs []string, prevTxs []PrevTx) (string, bool, error)
+    // Signing (offline) - all metadata in PSBT per BIP174
+    SignPSBTWithKey(psbtBase64 string, wifs []string) (string, bool, error)
 
-    // Finalization
+    // Finalization (Watch Wallet)
     FinalizePSBT(psbtBase64 string) error
 
-    // Extraction
+    // Extraction (Watch Wallet)
     ExtractTransaction(psbtBase64 string) (*wire.MsgTx, error)
 
     // Utility
