@@ -634,7 +634,7 @@ type AccountKey struct {
 	// bech32 address
 	Bech32Address string
 	// taproot address (BIP86)
-	TaprootAddress string
+	TaprootAddress sql.NullString
 	// full public key
 	FullPublicKey string
 	// multisig address
@@ -684,7 +684,7 @@ type AuthAccountKey struct {
 	// bech32 address
 	Bech32Address string
 	// taproot address (BIP86)
-	TaprootAddress string
+	TaprootAddress sql.NullString
 	// full public key
 	FullPublicKey string
 	// multisig address

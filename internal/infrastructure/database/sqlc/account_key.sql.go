@@ -183,7 +183,7 @@ type InsertAccountKeyParams struct {
 	P2pkhAddress       string
 	P2shSegwitAddress  string
 	Bech32Address      string
-	TaprootAddress     string
+	TaprootAddress     sql.NullString
 	FullPublicKey      string
 	MultisigAddress    string
 	RedeemScript       string
