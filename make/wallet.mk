@@ -92,8 +92,8 @@ import-wallet:
 ###############################################################################
 .PHONY: reset-payment-request
 reset-payment-request:
-	mysql -h 127.0.0.1 -u root -p${MYSQL_ROOT_PASSWORD} -P 3307 < ./docker/mysql/watch/init.d/payment_request.sql
+	mysql -h 127.0.0.1 -u root -p${MYSQL_ROOT_PASSWORD} -P 3306 watch < ./docker/mysql/sqls/payment_request.sql
 
 .PHONY: reset-payment-request-docker
 reset-payment-request-docker:
-	docker compose exec watch-db mysql -u root -proot  -e "$(cat ./docker/mysql/watch/init.d/payment_request.sql)"
+	docker compose exec wallet-db mysql -u root -proot watch -e "$(cat ./docker/mysql/sqls/payment_request.sql)"

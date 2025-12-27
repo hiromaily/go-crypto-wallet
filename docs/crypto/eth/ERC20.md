@@ -3,7 +3,7 @@
 ## How to try ETH20 token
 
 1. create eth account and register by running `generate-eth-key.sh` in ./scripts/operation/
-2. change value in `coin` column to `hyt` as example in `address` table on watch-db.
+2. change value in `coin` column to `hyt` as example in `address` table on wallet-db (watch schema).
 
 ```
 UPDATE `watch`.`address` SET `coin` = 'hyt';

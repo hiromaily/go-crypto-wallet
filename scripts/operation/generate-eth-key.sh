@@ -13,7 +13,7 @@ CLIENT=${2:?1}
 echo '------ create eth key -----'
 if [ $CLIENT -eq 1 ]; then
 	echo import ganache keys
-	docker compose exec keygen-db mysql -u root -proot -e "$(cat ./docker/mysql/insert/ganache.example.sql)"
+	docker compose exec wallet-db mysql -u root -proot keygen -e "$(cat ./docker/mysql/insert/ganache.example.sql)"
 else
 	# create seed
 	keygen -coin ${COIN} create seed
