@@ -3,12 +3,15 @@ package btc
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcec/v2/ecdsa"
+	"github.com/btcsuite/btcd/btcec/v2/schnorr"
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/btcutil/psbt"
+	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
 
@@ -56,6 +59,25 @@ func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []PrevTx) (string, error
 	for i, prevTx := range prevTxs {
 		if i >= len(packet.UnsignedTx.TxIn) {
 			return "", fmt.Errorf("prevTxs index %d exceeds number of inputs %d", i, len(packet.UnsignedTx.TxIn))
+		}
+
+		// Validate that prevTx matches the transaction input
+		txIn := packet.UnsignedTx.TxIn[i]
+
+		// Parse and validate txid
+		prevTxHash, err := chainhash.NewHashFromStr(prevTx.Txid)
+		if err != nil {
+			return "", fmt.Errorf("failed to parse txid for input %d: %w", i, err)
+		}
+		if !prevTxHash.IsEqual(&txIn.PreviousOutPoint.Hash) {
+			return "", fmt.Errorf("input %d: prevTx txid %s does not match transaction input %s",
+				i, prevTxHash.String(), txIn.PreviousOutPoint.Hash.String())
+		}
+
+		// Validate vout index
+		if prevTx.Vout != txIn.PreviousOutPoint.Index {
+			return "", fmt.Errorf("input %d: prevTx vout %d does not match transaction input vout %d",
+				i, prevTx.Vout, txIn.PreviousOutPoint.Index)
 		}
 
 		// Add witness UTXO (required for SegWit/Taproot signing)
@@ -174,10 +196,10 @@ func (b *Bitcoin) ValidatePSBT(psbtBase64 string) error {
 			len(parsed.Packet.Outputs), len(parsed.Packet.UnsignedTx.TxOut))
 	}
 
-	// Validate each input has witness UTXO for SegWit/Taproot
+	// Validate each input has either WitnessUtxo (SegWit/Taproot) or NonWitnessUtxo (Legacy)
 	for i, input := range parsed.Packet.Inputs {
-		if input.WitnessUtxo == nil {
-			return fmt.Errorf("input %d missing witness UTXO (required for SegWit/Taproot)", i)
+		if input.WitnessUtxo == nil && input.NonWitnessUtxo == nil {
+			return fmt.Errorf("input %d missing both WitnessUtxo and NonWitnessUtxo", i)
 		}
 	}
 
@@ -219,6 +241,15 @@ func (b *Bitcoin) SignPSBTWithKey(psbtBase64 string, wifs []string) (string, boo
 		return "", false, fmt.Errorf("failed to create updater for signing: %w", err)
 	}
 
+	// Create PrevOutputFetcher for Taproot signing
+	prevOutputFetcher := txscript.NewMultiPrevOutFetcher(nil)
+	for i, input := range parsed.Packet.Inputs {
+		if input.WitnessUtxo != nil {
+			prevOut := parsed.Packet.UnsignedTx.TxIn[i].PreviousOutPoint
+			prevOutputFetcher.AddPrevOut(prevOut, input.WitnessUtxo)
+		}
+	}
+
 	// Sign each input with each provided key
 	signedCount := 0
 	for i := range parsed.Packet.UnsignedTx.TxIn {
@@ -231,42 +262,8 @@ func (b *Bitcoin) SignPSBTWithKey(psbtBase64 string, wifs []string) (string, boo
 
 		// Try signing with each private key
 		for _, privKey := range privKeys {
-			// Create signature hash
-			sigHashes := txscript.NewTxSigHashes(parsed.Packet.UnsignedTx, nil)
-			hash, err := txscript.CalcWitnessSigHash(
-				witnessUtxo.PkScript,
-				sigHashes,
-				txscript.SigHashAll,
-				parsed.Packet.UnsignedTx,
-				i,
-				witnessUtxo.Value,
-			)
-			if err != nil {
-				logger.Warn("Failed to calculate signature hash", "input", i, "error", err)
-				continue
-			}
-
-			// Sign the hash
-			signature := ecdsa.Sign(privKey.PrivKey, hash)
-
-			// Serialize signature with sighash type
-			sigBytes := append(signature.Serialize(), byte(txscript.SigHashAll))
-
-			// Add partial signature to PSBT
-			pubKey := privKey.PrivKey.PubKey().SerializeCompressed()
-			outcome, err := updater.Sign(i, sigBytes, pubKey, nil, nil)
-			if err != nil {
-				// This may fail if the key doesn't match this input, which is normal
-				logger.Debug("Signature not applicable for this input", "input", i, "error", err)
-				continue
-			}
-
-			// Check outcome: 0 = success, 1 = already finalized, -1 = invalid
-			if outcome == psbt.SignSuccesful {
+			if b.signInputWithKey(updater, parsed.Packet.UnsignedTx, i, witnessUtxo, privKey, prevOutputFetcher) {
 				signedCount++
-				logger.Debug("Added signature to input", "input", i)
-			} else {
-				logger.Debug("Signature not added", "input", i, "outcome", outcome)
 			}
 		}
 	}
@@ -369,9 +366,21 @@ func (b *Bitcoin) GetPSBTFee(psbtBase64 string) (int64, error) {
 
 	// Calculate total input value
 	var totalInput int64
-	for _, input := range parsed.Packet.Inputs {
-		if input.WitnessUtxo != nil {
+	for i, input := range parsed.Packet.Inputs {
+		switch {
+		case input.WitnessUtxo != nil:
+			// SegWit/Taproot: Use WitnessUtxo
 			totalInput += input.WitnessUtxo.Value
+		case input.NonWitnessUtxo != nil:
+			// Legacy: Use NonWitnessUtxo
+			txIn := parsed.Packet.UnsignedTx.TxIn[i]
+			if txIn.PreviousOutPoint.Index >= uint32(len(input.NonWitnessUtxo.TxOut)) {
+				return 0, fmt.Errorf("input %d: previous output index %d out of range",
+					i, txIn.PreviousOutPoint.Index)
+			}
+			totalInput += input.NonWitnessUtxo.TxOut[txIn.PreviousOutPoint.Index].Value
+		default:
+			return 0, fmt.Errorf("input %d: missing both WitnessUtxo and NonWitnessUtxo", i)
 		}
 	}
 
@@ -411,6 +420,88 @@ func (*Bitcoin) hasPartialSignatures(packet *psbt.Packet) bool {
 	return false
 }
 
+// signInputWithKey signs a single PSBT input with a private key.
+// Returns true if signature was successfully added, false otherwise.
+func (*Bitcoin) signInputWithKey(
+	updater *psbt.Updater,
+	msgTx *wire.MsgTx,
+	inputIndex int,
+	witnessUtxo *wire.TxOut,
+	privKey *btcutil.WIF,
+	prevOutputFetcher *txscript.MultiPrevOutFetcher,
+) bool {
+	// Detect script type to determine signing method
+	isTaproot := txscript.IsPayToTaproot(witnessUtxo.PkScript)
+
+	var sigBytes []byte
+	var err error
+
+	if isTaproot {
+		// Taproot (P2TR): Use Schnorr signature
+		sigHashes := txscript.NewTxSigHashes(msgTx, prevOutputFetcher)
+		hash, err := txscript.CalcTaprootSignatureHash(
+			sigHashes,
+			txscript.SigHashDefault,
+			msgTx,
+			inputIndex,
+			prevOutputFetcher,
+		)
+		if err != nil {
+			logger.Warn("Failed to calculate Taproot signature hash", "input", inputIndex, "error", err)
+			return false
+		}
+
+		// Sign with Schnorr
+		signature, err := schnorr.Sign(privKey.PrivKey, hash)
+		if err != nil {
+			logger.Warn("Failed to create Schnorr signature", "input", inputIndex, "error", err)
+			return false
+		}
+
+		// For Taproot, signature is just the Schnorr signature (no sighash type appended for SIGHASH_DEFAULT)
+		sigBytes = signature.Serialize()
+	} else {
+		// SegWit v0 (P2WPKH/P2WSH): Use ECDSA signature
+		sigHashes := txscript.NewTxSigHashes(msgTx, prevOutputFetcher)
+		hash, err := txscript.CalcWitnessSigHash(
+			witnessUtxo.PkScript,
+			sigHashes,
+			txscript.SigHashAll,
+			msgTx,
+			inputIndex,
+			witnessUtxo.Value,
+		)
+		if err != nil {
+			logger.Warn("Failed to calculate witness signature hash", "input", inputIndex, "error", err)
+			return false
+		}
+
+		// Sign with ECDSA
+		signature := ecdsa.Sign(privKey.PrivKey, hash)
+
+		// Serialize signature with sighash type
+		sigBytes = append(signature.Serialize(), byte(txscript.SigHashAll))
+	}
+
+	// Add partial signature to PSBT
+	pubKey := privKey.PrivKey.PubKey().SerializeCompressed()
+	outcome, err := updater.Sign(inputIndex, sigBytes, pubKey, nil, nil)
+	if err != nil {
+		// This may fail if the key doesn't match this input, which is normal
+		logger.Debug("Signature not applicable for this input", "input", inputIndex, "error", err)
+		return false
+	}
+
+	// Check outcome: 0 = success, 1 = already finalized, -1 = invalid
+	if outcome == psbt.SignSuccesful {
+		logger.Debug("Added signature to input", "input", inputIndex, "isTaproot", isTaproot)
+		return true
+	}
+
+	logger.Debug("Signature not added", "input", inputIndex, "outcome", outcome)
+	return false
+}
+
 // decodeHexScript decodes a hex-encoded script to bytes
 func (*Bitcoin) decodeHexScript(hexScript string) ([]byte, error) {
 	if hexScript == "" {
@@ -421,8 +512,7 @@ func (*Bitcoin) decodeHexScript(hexScript string) ([]byte, error) {
 		hexScript = hexScript[2:]
 	}
 
-	script := make([]byte, len(hexScript)/2)
-	_, err := fmt.Sscanf(hexScript, "%x", &script)
+	script, err := hex.DecodeString(hexScript)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode hex script: %w", err)
 	}
