@@ -16,6 +16,20 @@ cd-btc-dir:
 	cd ~/Library/Application\ Support/Bitcoin
 
 ###############################################################################
+# Docker Compose Targets
+###############################################################################
+
+# run bitcoin core server
+.PHONY: up-docker-btc
+up-docker-btc:
+	docker compose up btc-watch btc-keygen btc-sign
+
+# run bitcoin cash core server
+.PHONY: up-docker-bch
+up-docker-bch:
+	docker compose -f compose.bch.yaml up bch-watch
+
+###############################################################################
 # auto key generator
 ###############################################################################
 .PHONY: generate-btc-key-local

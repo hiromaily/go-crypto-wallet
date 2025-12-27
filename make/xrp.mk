@@ -2,5 +2,11 @@
 # XRP/Ripple Targets
 ###############################################################################
 
-# Note: XRP-specific targets can be added here as needed
-# Currently XRP operations are handled through docker compose (see docker.mk)
+###############################################################################
+# Docker Compose Targets
+###############################################################################
+
+# run ripple node server
+.PHONY: up-docker-xrp
+up-docker-xrp:
+	docker compose -f compose.xrp.yaml up xrp-node

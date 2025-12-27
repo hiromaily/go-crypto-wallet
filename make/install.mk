@@ -34,6 +34,12 @@ install-tools-by-gomod:
 	go get -tool github.com/icholy/gomajor@latest
 	go get -tool mvdan.cc/sh/v3/cmd/gosh@latest
 	go get -tool mvdan.cc/sh/v3/cmd/shfmt@latest
+	go get -tool github.com/mrtazz/checkmake/cmd/checkmake@latest
+
+# Note: somehow checkmake couldn't manage by go get -tool, so use go install instead.
+.PHONY: install-tools
+install-tools:
+	go install github.com/mrtazz/checkmake/cmd/checkmake@latest
 
 .PHONY: goget
 goget:

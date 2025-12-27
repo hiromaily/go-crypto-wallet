@@ -10,6 +10,8 @@ docs/issues/*
 # environment variables
 .env
 
+bin/
+
 # data directory
 data/address/*
 data/dump/*

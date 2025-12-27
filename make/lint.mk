@@ -2,13 +2,13 @@
 # Linter and Code Quality Targets
 ###############################################################################
 
-.PHONY: imports
-imports:
-	./scripts/imports.sh
-
 .PHONY: format
 format:
 	go tool golangci-lint fmt
+
+.PHONY: imports
+imports:
+	./scripts/imports.sh
 
 .PHONY: lint
 lint:
@@ -35,3 +35,7 @@ check-vuln:
 shfmt:
 	shfmt -l -w scripts/*.sh
 	shfmt -l -w scripts/*/**.sh
+
+.PHONY: lint-makefile
+lint-makefile:
+	checkmake Makefile make/*.mk 

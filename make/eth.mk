@@ -3,6 +3,39 @@
 ###############################################################################
 
 ###############################################################################
+# Docker Compose Targets
+###############################################################################
+
+# run ethereum node server
+.PHONY: up-docker-eth
+up-docker-eth:
+	GETH_VERSION=$(GETH_VERSION) GETH_HTTP_PORT=$(GETH_HTTP_PORT) \
+	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
+	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
+	docker compose -f compose.eth.yaml up geth lodestar
+
+.PHONY: up-docker-eth-d
+up-docker-eth-d:
+	GETH_VERSION=$(GETH_VERSION) GETH_HTTP_PORT=$(GETH_HTTP_PORT) \
+	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
+	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
+	docker compose -f compose.eth.yaml up -d geth lodestar
+
+.PHONY: stop-docker-eth
+stop-docker-eth:
+	GETH_VERSION=$(GETH_VERSION) GETH_HTTP_PORT=$(GETH_HTTP_PORT) \
+	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
+	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
+	docker compose -f compose.eth.yaml stop
+
+# run ethereum lodestar
+.PHONY: up-docker-lodestar
+up-docker-lodestar:
+	LODESTAR_VERSION=$(LODESTAR_VERSION) BEACON_HTTP_PORT=$(BEACON_HTTP_PORT) TARGET_NETWORK=$(TARGET_NETWORK) \
+	CHECKPOINT_SYNC_URL=$(CHECKPOINT_SYNC_URL) \
+	docker compose -f compose.eth.yaml up lodestar
+
+###############################################################################
 # Geth specific
 ###############################################################################
 .PHONY:geth-help
