@@ -251,16 +251,22 @@ func TestWritePSBTFile(t *testing.T) {
 		{
 			name:        "write valid PSBT",
 			path:        filepath.Join(tempDir, "deposit_8_unsigned_0_"),
-			psbtBase64:  "cHNidP8BAHECAAAAAe3o6gAHAAc0+4ywFkHaE8nzN/example+base64+data==",
+			psbtBase64:  "cHNidP8BAAAAAAAAAA==", // Valid base64 PSBT magic header
 			wantErr:     false,
 			checkSuffix: ".psbt",
 		},
 		{
-			name:        "write empty PSBT",
+			name:        "write empty PSBT (valid base64)",
 			path:        filepath.Join(tempDir, "payment_42_signed_2_"),
-			psbtBase64:  "",
+			psbtBase64:  "cHNidP8=", // Valid base64 (minimal PSBT magic)
 			wantErr:     false,
 			checkSuffix: ".psbt",
+		},
+		{
+			name:       "write invalid base64",
+			path:       filepath.Join(tempDir, "transfer_123_unsigned_0_"),
+			psbtBase64: "not-valid-base64!!!",
+			wantErr:    true,
 		},
 	}
 
@@ -307,8 +313,20 @@ func TestReadPSBTFile(t *testing.T) {
 
 	// Create test files
 	validPSBTPath := filepath.Join(tempDir, "test_valid.psbt")
-	validPSBTContent := "cHNidP8BAHECAAAAAe3o6gAHAAc0+4ywFkHaE8nzN/example+base64+data=="
+	validPSBTContent := "cHNidP8BAAAAAAAAAA==" // Valid base64 PSBT magic header
 	if err := os.WriteFile(validPSBTPath, []byte(validPSBTContent), 0o644); err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+
+	// Create file with uppercase extension
+	upperExtPath := filepath.Join(tempDir, "test_upper.PSBT")
+	if err := os.WriteFile(upperExtPath, []byte(validPSBTContent), 0o644); err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+
+	// Create file with invalid base64 content
+	invalidBase64Path := filepath.Join(tempDir, "test_invalid_base64.psbt")
+	if err := os.WriteFile(invalidBase64Path, []byte("not-valid-base64!!!"), 0o644); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 
@@ -328,6 +346,18 @@ func TestReadPSBTFile(t *testing.T) {
 			path:    validPSBTPath,
 			want:    validPSBTContent,
 			wantErr: false,
+		},
+		{
+			name:    "read file with uppercase extension",
+			path:    upperExtPath,
+			want:    validPSBTContent,
+			wantErr: false,
+		},
+		{
+			name:    "read file with invalid base64 content",
+			path:    invalidBase64Path,
+			want:    "",
+			wantErr: true,
 		},
 		{
 			name:    "read non-existent file",
@@ -365,7 +395,7 @@ func TestPSBTRoundTrip(t *testing.T) {
 	tempDir := t.TempDir()
 
 	repo := NewTransactionFileRepository(tempDir + "/")
-	psbtData := "cHNidP8BAHECAAAAAe3o6gAHAAc0+4ywFkHaE8nzN/example+base64+data=="
+	psbtData := "cHNidP8BAAAAAAAAAA==" // Valid base64 PSBT magic header
 
 	// Create file path
 	path := repo.CreateFilePath(domainTx.ActionTypeDeposit, domainTx.TxTypeUnsigned, 8, 0)

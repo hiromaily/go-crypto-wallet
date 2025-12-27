@@ -2,6 +2,7 @@ package file
 
 import (
 	"bufio"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"strconv"
@@ -218,22 +219,34 @@ func (r *TransactionFileRepository) WriteFileSlice(path string, data []string) (
 
 // ReadPSBTFile reads a base64-encoded PSBT from file
 func (*TransactionFileRepository) ReadPSBTFile(path string) (string, error) {
-	// Validate extension
-	if !strings.HasSuffix(path, ".psbt") {
+	// Validate extension (case-insensitive)
+	if !strings.HasSuffix(strings.ToLower(path), ".psbt") {
 		return "", fmt.Errorf("invalid PSBT file extension: %s (expected .psbt)", path)
 	}
 
 	// Read file
 	data, err := os.ReadFile(path) //nolint:gosec
 	if err != nil {
-		return "", fmt.Errorf("fail to read PSBT file %s: %w", path, err)
+		return "", fmt.Errorf("failed to read PSBT file %s: %w", path, err)
 	}
 
-	return string(data), nil
+	psbtBase64 := string(data)
+
+	// Validate base64 format
+	if _, err := base64.StdEncoding.DecodeString(psbtBase64); err != nil {
+		return "", fmt.Errorf("invalid base64 content in PSBT file %s: %w", path, err)
+	}
+
+	return psbtBase64, nil
 }
 
 // WritePSBTFile writes a base64-encoded PSBT to file with .psbt extension
 func (r *TransactionFileRepository) WritePSBTFile(path, psbtBase64 string) (string, error) {
+	// Validate base64 format
+	if _, err := base64.StdEncoding.DecodeString(psbtBase64); err != nil {
+		return "", fmt.Errorf("invalid base64 PSBT data: %w", err)
+	}
+
 	// Create directory if not existing
 	r.createDir(path)
 
@@ -245,7 +258,7 @@ func (r *TransactionFileRepository) WritePSBTFile(path, psbtBase64 string) (stri
 	bytePSBT := []byte(psbtBase64)
 	err := os.WriteFile(fileName, bytePSBT, 0o644)
 	if err != nil {
-		return "", fmt.Errorf("fail to write PSBT file %s: %w", fileName, err)
+		return "", fmt.Errorf("failed to write PSBT file %s: %w", fileName, err)
 	}
 
 	return fileName, nil
@@ -256,6 +269,6 @@ func (*TransactionFileRepository) createDir(path string) {
 	tmp2 := tmp1[0 : len(tmp1)-1] // cut filename
 	dir := strings.Join(tmp2, "/")
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		_ = os.Mkdir(dir, 0o700) // Ignore error as Stat check handles existence
+		_ = os.MkdirAll(dir, 0o700) // Create all parent directories
 	}
 }
