@@ -59,7 +59,7 @@ func (u *generateAuthKeyUseCase) Generate(
 	}
 
 	// Insert key information to auth_account_key_table
-	err = u.repo.Insert(walletKeys, idxFrom, u.coinTypeCode, accountType)
+	err = u.repo.Insert(walletKeys, idxFrom, u.coinTypeCode, accountType, u.keygen.KeyType())
 	if err != nil {
 		return signusecase.GenerateAuthKeyOutput{}, fmt.Errorf("fail to call repo.Insert(): %w", err)
 	}

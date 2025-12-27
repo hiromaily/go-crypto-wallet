@@ -50,10 +50,12 @@ func (r *AuthAccountKeyRepositorySqlc) Insert(item *models.AuthAccountKey) error
 
 	_, err := r.queries.InsertAuthAccountKey(ctx, sqlc.InsertAuthAccountKeyParams{
 		Coin:               sqlc.AuthAccountKeyCoin(item.Coin),
+		KeyType:            item.KeyType,
 		AuthAccount:        item.AuthAccount,
 		P2pkhAddress:       item.P2PKHAddress,
 		P2shSegwitAddress:  item.P2SHSegwitAddress,
 		Bech32Address:      item.Bech32Address,
+		TaprootAddress:     item.TaprootAddress,
 		FullPublicKey:      item.FullPublicKey,
 		MultisigAddress:    item.MultisigAddress,
 		RedeemScript:       item.RedeemScript,
@@ -96,10 +98,12 @@ func convertSqlcAuthAccountKeyToModel(authKey *sqlc.AuthAccountKey) *models.Auth
 	return &models.AuthAccountKey{
 		ID:                 authKey.ID,
 		Coin:               string(authKey.Coin),
+		KeyType:            authKey.KeyType,
 		AuthAccount:        authKey.AuthAccount,
 		P2PKHAddress:       authKey.P2pkhAddress,
 		P2SHSegwitAddress:  authKey.P2shSegwitAddress,
 		Bech32Address:      authKey.Bech32Address,
+		TaprootAddress:     authKey.TaprootAddress,
 		FullPublicKey:      authKey.FullPublicKey,
 		MultisigAddress:    authKey.MultisigAddress,
 		RedeemScript:       authKey.RedeemScript,

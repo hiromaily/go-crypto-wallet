@@ -14,6 +14,8 @@ type AccountKey struct {
 	ID int64 `boil:"id" json:"id" toml:"id" yaml:"id"`
 	// coin type code
 	Coin string `boil:"coin" json:"coin" toml:"coin" yaml:"coin"`
+	// key type (bip44, bip49, bip84, bip86, musig2)
+	KeyType string `boil:"key_type" json:"key_type" toml:"key_type" yaml:"key_type"`
 	// account type
 	Account string `boil:"account" json:"account" toml:"account" yaml:"account"`
 	// address as standard pubkey script that Pays To PubKey Hash (P2PKH)
@@ -22,6 +24,8 @@ type AccountKey struct {
 	P2SHSegwitAddress string `boil:"p2sh_segwit_address" json:"p2sh_segwit_address" toml:"p2sh_segwit_address"`
 	// bech32 address
 	Bech32Address string `boil:"bech32_address" json:"bech32_address" toml:"bech32_address" yaml:"bech32_address"`
+	// taproot address (BIP86)
+	TaprootAddress string `boil:"taproot_address" json:"taproot_address" toml:"taproot_address" yaml:"taproot_address"`
 	// full public key
 	FullPublicKey string `boil:"full_public_key" json:"full_public_key" toml:"full_public_key" yaml:"full_public_key"`
 	// multisig address
@@ -60,6 +64,8 @@ type AuthAccountKey struct {
 	ID int16 `boil:"id" json:"id" toml:"id" yaml:"id"`
 	// coin type code
 	Coin string `boil:"coin" json:"coin" toml:"coin" yaml:"coin"`
+	// key type (bip44, bip49, bip84, bip86, musig2)
+	KeyType string `boil:"key_type" json:"key_type" toml:"key_type" yaml:"key_type"`
 	// auth type
 	AuthAccount string `boil:"auth_account" json:"auth_account" toml:"auth_account" yaml:"auth_account"`
 	// address as standard pubkey script that Pays To PubKey Hash (P2PKH)
@@ -68,6 +74,8 @@ type AuthAccountKey struct {
 	P2SHSegwitAddress string `boil:"p2sh_segwit_address" json:"p2sh_segwit_address" toml:"p2sh_segwit_address"`
 	// bech32 address
 	Bech32Address string `boil:"bech32_address" json:"bech32_address" toml:"bech32_address" yaml:"bech32_address"`
+	// taproot address (BIP86)
+	TaprootAddress string `boil:"taproot_address" json:"taproot_address" toml:"taproot_address" yaml:"taproot_address"`
 	// full public key
 	FullPublicKey string `boil:"full_public_key" json:"full_public_key" toml:"full_public_key" yaml:"full_public_key"`
 	// multisig address

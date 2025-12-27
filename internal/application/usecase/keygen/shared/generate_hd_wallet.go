@@ -58,7 +58,7 @@ func (u *generateHDWalletUseCase) Generate(
 	}
 
 	// Insert key information to account_key_table / auth_account_key_table
-	err = u.repo.Insert(walletKeys, idxFrom, u.coinTypeCode, input.AccountType)
+	err = u.repo.Insert(walletKeys, idxFrom, u.coinTypeCode, input.AccountType, u.keygen.KeyType())
 	if err != nil {
 		return keygenusecase.GenerateHDWalletOutput{}, fmt.Errorf("fail to call repo.Insert(): %w", err)
 	}
