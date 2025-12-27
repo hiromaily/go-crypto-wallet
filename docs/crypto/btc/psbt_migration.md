@@ -126,8 +126,8 @@ cd /path/to/go-crypto-wallet
 # Check for unsigned CSV files
 ls -la data/tx/btc/*unsigned*
 
-# Check for partially signed CSV files
-ls -la data/tx/btc/ | grep -v "\.psbt$"
+# Check for partially signed CSV files (non-PSBT files)
+find data/tx/btc/ -type f ! -name "*.psbt"
 
 # Query database for pending transactions
 sqlite3 data/db/btc_watch.db "SELECT id, tx_type, action FROM btc_tx WHERE tx_type != 'sent';"

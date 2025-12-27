@@ -121,8 +121,17 @@ func (b *Bitcoin) SignPSBTWithKey(
 
 **Implementation:**
 ```go
+// Decode base64 PSBT
+psbtBytes, err := base64.StdEncoding.DecodeString(psbtBase64)
+if err != nil {
+    return "", false, fmt.Errorf("failed to decode PSBT: %w", err)
+}
+
 // Parse PSBT
-packet, err := psbt.NewFromRawBytes(base64Data)
+packet, err := psbt.NewFromRawBytes(bytes.NewReader(psbtBytes), false)
+if err != nil {
+    return "", false, fmt.Errorf("failed to parse PSBT: %w", err)
+}
 
 // Parse private keys
 privKeys := parseWIFs(wifs)
@@ -162,8 +171,17 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error)
 
 **Implementation:**
 ```go
+// Decode base64 PSBT
+psbtBytes, err := base64.StdEncoding.DecodeString(psbtBase64)
+if err != nil {
+    return "", fmt.Errorf("failed to decode PSBT: %w", err)
+}
+
 // Parse PSBT
-packet, err := psbt.NewFromRawBytes(base64Data)
+packet, err := psbt.NewFromRawBytes(bytes.NewReader(psbtBytes), false)
+if err != nil {
+    return "", fmt.Errorf("failed to parse PSBT: %w", err)
+}
 
 // Finalize each input
 for i := range packet.Inputs {
@@ -187,11 +205,23 @@ func (b *Bitcoin) ExtractTransaction(psbtBase64 string) (*wire.MsgTx, error)
 
 **Implementation:**
 ```go
+// Decode base64 PSBT
+psbtBytes, err := base64.StdEncoding.DecodeString(psbtBase64)
+if err != nil {
+    return nil, fmt.Errorf("failed to decode PSBT: %w", err)
+}
+
 // Parse PSBT
-packet, err := psbt.NewFromRawBytes(base64Data)
+packet, err := psbt.NewFromRawBytes(bytes.NewReader(psbtBytes), false)
+if err != nil {
+    return nil, fmt.Errorf("failed to parse PSBT: %w", err)
+}
 
 // Extract transaction
 tx, err := psbt.Extract(packet)
+if err != nil {
+    return nil, fmt.Errorf("failed to extract transaction: %w", err)
+}
 
 return tx, nil
 ```
@@ -627,7 +657,17 @@ Location: `internal/infrastructure/api/bitcoin/btc/psbt.go`
 ```go
 // Update SignPSBTWithKey for Taproot script path
 func (b *Bitcoin) SignPSBTWithKey(psbtBase64 string, wifs []string) (string, bool, error) {
-    packet, err := psbt.NewFromRawBytes(base64Data)
+    // Decode base64 PSBT
+    psbtBytes, err := base64.StdEncoding.DecodeString(psbtBase64)
+    if err != nil {
+        return "", false, fmt.Errorf("failed to decode PSBT: %w", err)
+    }
+
+    // Parse PSBT
+    packet, err := psbt.NewFromRawBytes(bytes.NewReader(psbtBytes), false)
+    if err != nil {
+        return "", false, fmt.Errorf("failed to parse PSBT: %w", err)
+    }
 
     for i := range packet.Inputs {
         if isTaprootScriptPath(packet.Inputs[i]) {
