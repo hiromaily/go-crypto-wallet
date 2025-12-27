@@ -21,7 +21,6 @@ import (
 	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
 )
 
 type createTransactionUseCase struct {
@@ -340,15 +339,11 @@ func (u *createTransactionUseCase) createTx(
 		return "", "", fmt.Errorf("fail to call insertTxTableForUnsigned(): %w", err)
 	}
 
-	// serialize previous txs for multisig signature
+	// prepare previous txs metadata for PSBT creation
 	previousTxs := btc.PreviousTxs{
 		SenderAccount: sender,
 		PrevTxs:       parsedTx.prevTxs,
 		Addrs:         parsedTx.addresses,
-	}
-	encodedAddrsPrevs, err := serial.EncodeToString(previousTxs)
-	if err != nil {
-		return "", "", fmt.Errorf("fail to call serial.EncodeToString(): %w", err)
 	}
 
 	// generate PSBT file
@@ -362,16 +357,18 @@ func (u *createTransactionUseCase) createTx(
 		}
 	}
 
-	logger.Debug("getUnspentList()",
+	logger.Debug("createTx completed",
 		"unspentList", unspentList,
 		"unspentAddrs", unspentAddrs,
 		"requiredAmount", requiredAmount,
 		"input_total", inputTotal,
 		"len(inputs)", len(parsedTx.txInputs),
+		"len(prevTxs)", len(previousTxs.PrevTxs),
 		"len(txPrevOutputs)", len(txPrevOutputs),
 		"len(txOutputs)", len(txOutputs),
 		"len(txRepoTxOutputs)", len(txRepoTxOutputs),
-		"encodedAddrsPrevs", encodedAddrsPrevs,
+		"sender_account", previousTxs.SenderAccount.String(),
+		"generated_file", generatedFileName,
 	)
 
 	return hex, generatedFileName, nil
