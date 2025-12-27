@@ -2,21 +2,17 @@ package btc
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"strings"
-
-	"github.com/btcsuite/btcd/wire"
 
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
 )
 
 type signTransactionUseCase struct {
@@ -46,55 +42,45 @@ func (u *signTransactionUseCase) Sign(
 	input keygenusecase.SignTransactionInput,
 ) (keygenusecase.SignTransactionOutput, error) {
 	// Get tx_deposit_id from tx file name
-	//  if payment_5_unsigned_0_1534466246366489473, 5 is target
+	//  if payment_5_unsigned_0_1534466246366489473.psbt, 5 is target
 	actionType, _, txID, signedCount, err := u.txFileRepo.ValidateFilePath(input.FilePath, domainTx.TxTypeUnsigned)
 	if err != nil {
 		return keygenusecase.SignTransactionOutput{}, err
 	}
 
-	// Get hex tx from file
-	data, err := u.txFileRepo.ReadFile(input.FilePath)
+	// Read PSBT from file
+	psbtBase64, err := u.txFileRepo.ReadPSBTFile(input.FilePath)
+	if err != nil {
+		return keygenusecase.SignTransactionOutput{}, fmt.Errorf("fail to read PSBT file: %w", err)
+	}
+
+	// Sign PSBT (passing actionType to infer sender account)
+	signedPSBT, isSigned, err := u.sign(psbtBase64, actionType)
 	if err != nil {
 		return keygenusecase.SignTransactionOutput{}, err
 	}
-
-	var hex, encodedPrevsAddrs string
-	tmp := strings.Split(data, ",")
-	// file: hex, prev_address
-	hex = tmp[0]
-	if len(tmp) > 1 {
-		encodedPrevsAddrs = tmp[1]
-	}
-	if encodedPrevsAddrs == "" {
-		// It's required data since Bitcoin core ver17
-		return keygenusecase.SignTransactionOutput{}, errors.New("encodedPrevsAddrs must be set in csv file")
-	}
-
-	// Sign
-	hexTx, isSigned, newEncodedPrevsAddrs, err := u.sign(hex, encodedPrevsAddrs)
-	if err != nil {
-		return keygenusecase.SignTransactionOutput{}, err
-	}
-
-	// hexTx for save data as file
-	saveData := hexTx
 
 	// If sign is not finished because of multisig, signedCount should be increment
 	txType := domainTx.TxTypeSigned
 	if !isSigned {
 		txType = domainTx.TxTypeUnsigned
-		signedCount++
-		if newEncodedPrevsAddrs != "" {
-			saveData = fmt.Sprintf("%s,%s", saveData, newEncodedPrevsAddrs)
-		}
+		signedCount++ // Increment for multisig partial signature
 	}
 
-	// Write file
+	// Write signed PSBT file
 	path := u.txFileRepo.CreateFilePath(actionType, txType, txID, signedCount)
-	generatedFileName, err := u.txFileRepo.WriteFile(path, saveData)
+	generatedFileName, err := u.txFileRepo.WritePSBTFile(path, signedPSBT)
 	if err != nil {
-		return keygenusecase.SignTransactionOutput{}, err
+		return keygenusecase.SignTransactionOutput{}, fmt.Errorf("fail to write signed PSBT file: %w", err)
 	}
+
+	logger.Debug("signed PSBT",
+		"action", actionType.String(),
+		"txID", txID,
+		"signedCount", signedCount,
+		"isSigned", isSigned,
+		"fileName", generatedFileName,
+	)
 
 	return keygenusecase.SignTransactionOutput{
 		FilePath:      generatedFileName,
@@ -104,102 +90,117 @@ func (u *signTransactionUseCase) Sign(
 	}, nil
 }
 
-// sign signs a transaction using Bitcoin Core RPC with automatic signature type selection.
+// sign signs a PSBT using offline signing with btcd library (no Bitcoin Core RPC).
 // This function supports all Bitcoin address types including Taproot:
 //   - Legacy (P2PKH): ECDSA signature
 //   - SegWit (P2WPKH, P2SH-SegWit): ECDSA signature with witness data
 //   - Taproot (P2TR): Schnorr signature (BIP340) with witness data
 //
-// The signature algorithm is automatically selected by Bitcoin Core based on the input's scriptPubKey type.
-// Bitcoin Core v22.0+ is required for Taproot/Schnorr signature support.
+// The signature algorithm is automatically selected based on the PSBT input's scriptPubKey type.
+// For Taproot addresses, Schnorr signatures (BIP340) are used.
 //
 // Transaction flow:
 //   - [actionType:deposit]  [from] client [to] deposit (not multisig addr)
 //   - [actionType:payment]  [from] payment [to] unknown (multisig addr)
 //   - [actionType:transfer] [from] account [to] account (multisig addr)
-func (u *signTransactionUseCase) sign(hex, encodedPrevsAddrs string) (string, bool, string, error) {
-	// Get tx from hex
-	msgTx, err := u.btc.ToMsgTx(hex)
+//
+// Note: This operates OFFLINE - no Bitcoin Core RPC required.
+func (u *signTransactionUseCase) sign(
+	psbtBase64 string,
+	actionType domainTx.ActionType,
+) (string, bool, error) {
+	// Infer sender account from action type
+	// This is a simplified approach since PSBT doesn't store the account concept
+	senderAccount, err := inferSenderAccount(actionType)
 	if err != nil {
-		return "", false, "", err
+		return "", false, err
 	}
 
-	// Decode encodedPrevsAddrs string to btc.PreviousTxs struct
-	var prevsAddrs btc.PreviousTxs
-	if err = serial.DecodeFromString(encodedPrevsAddrs, &prevsAddrs); err != nil {
-		return "", false, "", err
+	// Sign PSBT with keys from sender account
+	signedPSBT, isSigned, err := u.signWithAccount(psbtBase64, senderAccount)
+	if err != nil {
+		return "", false, err
 	}
 
-	// Single signature address or multisig
-	var (
-		signedTx             *wire.MsgTx
-		isSigned             bool
-		newEncodedPrevsAddrs string
+	logger.Debug("PSBT signing completed",
+		"action", actionType.String(),
+		"sender_account", senderAccount.String(),
+		"isSigned", isSigned,
 	)
 
-	// Sign
-	if !u.multisigAccount.IsMultisigAccount(prevsAddrs.SenderAccount) {
-		signedTx, isSigned, err = u.btc.SignRawTransaction(msgTx, prevsAddrs.PrevTxs)
-	} else {
-		signedTx, isSigned, newEncodedPrevsAddrs, err = u.signMultisig(msgTx, &prevsAddrs)
-	}
-
-	if newEncodedPrevsAddrs == "" {
-		newEncodedPrevsAddrs = encodedPrevsAddrs
-	}
-
-	// After sign
-	if err != nil {
-		return "", false, "", err
-	}
-
-	hexTx, err := u.btc.ToHex(signedTx)
-	if err != nil {
-		return "", false, "", fmt.Errorf("fail to call btc.ToHex(signedTx): %w", err)
-	}
-	logger.Debug(
-		"call btc.SignRawTransaction()",
-		"hexTx", hexTx,
-		"isSigned", isSigned)
-
-	return hexTx, isSigned, newEncodedPrevsAddrs, nil
+	return signedPSBT, isSigned, nil
 }
 
-func (u *signTransactionUseCase) signMultisig(
-	msgTx *wire.MsgTx,
-	prevsAddrs *btc.PreviousTxs,
-) (*wire.MsgTx, bool, string, error) {
-	var newEncodedPrevsAddrs string
+// inferSenderAccount infers the sender account from the transaction action type.
+// This is a pragmatic approach since PSBT doesn't encode the account concept.
+func inferSenderAccount(actionType domainTx.ActionType) (domainAccount.AccountType, error) {
+	switch actionType {
+	case domainTx.ActionTypeDeposit:
+		return domainAccount.AccountTypeClient, nil
+	case domainTx.ActionTypePayment:
+		return domainAccount.AccountTypePayment, nil
+	case domainTx.ActionTypeTransfer:
+		// Transfer could be from various accounts
+		// Default to payment for now
+		return domainAccount.AccountTypePayment, nil
+	default:
+		return "", fmt.Errorf("unsupported action type: %s", actionType)
+	}
+}
 
-	// Get WIPs and RedeemScript for keygen wallet
-	accountKeys, err := u.accountKeyRepo.GetAllMultiAddr(prevsAddrs.SenderAccount, prevsAddrs.Addrs)
+// signWithAccount signs a PSBT with keys from the specified account.
+// This is a simplified MVP approach that works for both single-sig and multisig:
+// - For single-sig: Signs completely if the key matches
+// - For multisig: Adds first signature (Keygen wallet signature)
+//
+// The PSBT signing operation will only apply signatures where keys match input requirements.
+// This approach works offline without needing to extract addresses from PSBT scriptPubKeys.
+//
+// Implementation:
+// 1. Get all exported keys for the sender account
+// 2. Extract WIFs from retrieved keys
+// 3. Pass all WIFs to SignPSBTWithKey - btcd will use only matching keys
+func (u *signTransactionUseCase) signWithAccount(
+	psbtBase64 string,
+	senderAccount domainAccount.AccountType,
+) (string, bool, error) {
+	// Get all exported keys for this account
+	// Using AddrStatusAddressExported ensures keys are ready and have been exported to watch wallet
+	accountKeys, err := u.accountKeyRepo.GetAllAddrStatus(
+		senderAccount,
+		address.AddrStatusAddressExported,
+	)
 	if err != nil {
-		return nil, false, "", fmt.Errorf("fail to call accountKeyRepo.GetAllMultiAddr(): %w", err)
+		return "", false, fmt.Errorf("fail to get account keys for %s: %w", senderAccount.String(), err)
 	}
 
-	// Retrieve WIPs - pre-allocate slice
-	wips := make([]string, 0, len(accountKeys))
-	for _, val := range accountKeys {
-		wips = append(wips, val.WalletImportFormat)
+	if len(accountKeys) == 0 {
+		return "", false, fmt.Errorf("no exported keys found for account %s", senderAccount.String())
 	}
 
-	// Mapping redeemScript to PrevTxs
-	for idx, val := range prevsAddrs.Addrs {
-		rs := cold.GetRedeemScriptByAddress(accountKeys, val)
-		if rs == "" {
-			logger.Error("redeemScript can not be found")
-			continue
+	// Extract WIFs from account keys
+	wifs := make([]string, 0, len(accountKeys))
+	for _, key := range accountKeys {
+		if key.WalletImportFormat != "" {
+			wifs = append(wifs, key.WalletImportFormat)
 		}
-		prevsAddrs.PrevTxs[idx].RedeemScript = rs
 	}
 
-	// Serialize prevsAddrs with redeemScript
-	newEncodedPrevsAddrs, err = serial.EncodeToString(prevsAddrs)
+	if len(wifs) == 0 {
+		return "", false, fmt.Errorf("no valid WIFs found for account %s", senderAccount.String())
+	}
+
+	logger.Debug("signing PSBT with account keys",
+		"account", senderAccount.String(),
+		"key_count", len(accountKeys),
+		"wif_count", len(wifs),
+	)
+
+	// Sign PSBT with all WIFs - btcd will automatically use only matching keys
+	signedPSBT, isSigned, err := u.btc.SignPSBTWithKey(psbtBase64, wifs)
 	if err != nil {
-		return nil, false, "", fmt.Errorf("fail to call serial.EncodeToString(): %w", err)
+		return "", false, fmt.Errorf("fail to sign PSBT with account keys: %w", err)
 	}
 
-	// Sign
-	signedTx, isSigned, err := u.btc.SignRawTransactionWithKey(msgTx, wips, prevsAddrs.PrevTxs)
-	return signedTx, isSigned, newEncodedPrevsAddrs, err
+	return signedPSBT, isSigned, nil
 }
