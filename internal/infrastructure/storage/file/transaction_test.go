@@ -390,6 +390,81 @@ func TestReadPSBTFile(t *testing.T) {
 	}
 }
 
+func TestReadPSBTFilePathTraversal(t *testing.T) {
+	// Create temp directory structure
+	tempDir := t.TempDir()
+	psbtDir := filepath.Join(tempDir, "psbt")
+	if err := os.MkdirAll(psbtDir, 0o700); err != nil {
+		t.Fatalf("Failed to create test directory: %v", err)
+	}
+
+	// Create a valid PSBT file in the allowed directory
+	validPSBTPath := filepath.Join(psbtDir, "test_valid.psbt")
+	validPSBTContent := "cHNidP8BAAAAAAAAAA==" // Valid base64 PSBT magic header
+	if err := os.WriteFile(validPSBTPath, []byte(validPSBTContent), 0o644); err != nil {
+		t.Fatalf("Failed to create test file: %v", err)
+	}
+
+	tests := []struct {
+		name       string
+		basePath   string
+		readPath   string
+		wantErr    bool
+		errContain string
+	}{
+		{
+			name:     "read file within allowed directory",
+			basePath: psbtDir + "/",
+			readPath: validPSBTPath,
+			wantErr:  false,
+		},
+		{
+			name:       "reject path traversal with ../",
+			basePath:   psbtDir + "/",
+			readPath:   filepath.Join(psbtDir, "../../../etc/passwd.psbt"),
+			wantErr:    true,
+			errContain: "path traversal attempt detected",
+		},
+		{
+			name:       "reject absolute path outside base",
+			basePath:   psbtDir + "/",
+			readPath:   "/etc/passwd.psbt",
+			wantErr:    true,
+			errContain: "path traversal attempt detected",
+		},
+		{
+			name:     "allow read when basePath is empty (test mode)",
+			basePath: "",
+			readPath: validPSBTPath,
+			wantErr:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := NewTransactionFileRepository(tt.basePath)
+			got, err := repo.ReadPSBTFile(tt.readPath)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ReadPSBTFile() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if tt.wantErr && tt.errContain != "" {
+				if err == nil || !strings.Contains(err.Error(), tt.errContain) {
+					t.Errorf("ReadPSBTFile() error = %v, want error containing %q", err, tt.errContain)
+				}
+			}
+
+			if !tt.wantErr {
+				if got != validPSBTContent {
+					t.Errorf("ReadPSBTFile() = %v, want %v", got, validPSBTContent)
+				}
+			}
+		})
+	}
+}
+
 func TestPSBTRoundTrip(t *testing.T) {
 	// Create temp directory for tests
 	tempDir := t.TempDir()

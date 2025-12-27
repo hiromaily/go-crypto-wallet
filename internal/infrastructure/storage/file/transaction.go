@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -218,41 +219,51 @@ func (r *TransactionFileRepository) WriteFileSlice(path string, data []string) (
 }
 
 // ReadPSBTFile reads a base64-encoded PSBT from file
-func (*TransactionFileRepository) ReadPSBTFile(path string) (string, error) {
+func (r *TransactionFileRepository) ReadPSBTFile(path string) (string, error) {
 	// Validate extension (case-insensitive)
 	if !strings.HasSuffix(strings.ToLower(path), ".psbt") {
 		return "", fmt.Errorf("invalid PSBT file extension: %s (expected .psbt)", path)
 	}
 
+	// Security: Clean path and prevent path traversal
+	cleanPath := filepath.Clean(path)
+	// Note: r.filePath can be empty in tests
+	if r.filePath != "" && !strings.HasPrefix(cleanPath, filepath.Clean(r.filePath)) {
+		return "", fmt.Errorf("path traversal attempt detected: %s", path)
+	}
+
 	// Read file
-	data, err := os.ReadFile(path) //nolint:gosec
+	data, err := os.ReadFile(cleanPath)
 	if err != nil {
-		return "", fmt.Errorf("failed to read PSBT file %s: %w", path, err)
+		return "", fmt.Errorf("failed to read PSBT file %s: %w", cleanPath, err)
 	}
 
 	psbtBase64 := string(data)
 
 	// Validate base64 format
 	if _, err := base64.StdEncoding.DecodeString(psbtBase64); err != nil {
-		return "", fmt.Errorf("invalid base64 content in PSBT file %s: %w", path, err)
+		return "", fmt.Errorf("invalid base64 content in PSBT file %s: %w", cleanPath, err)
 	}
 
 	return psbtBase64, nil
 }
 
 // WritePSBTFile writes a base64-encoded PSBT to file with .psbt extension
-func (r *TransactionFileRepository) WritePSBTFile(path, psbtBase64 string) (string, error) {
+func (*TransactionFileRepository) WritePSBTFile(path, psbtBase64 string) (string, error) {
 	// Validate base64 format
 	if _, err := base64.StdEncoding.DecodeString(psbtBase64); err != nil {
 		return "", fmt.Errorf("invalid base64 PSBT data: %w", err)
 	}
 
-	// Create directory if not existing
-	r.createDir(path)
-
 	// Add timestamp and .psbt extension
 	ts := strconv.FormatInt(time.Now().UnixNano(), 10)
 	fileName := path + ts + ".psbt"
+
+	// Create directory if not existing (using os.MkdirAll for robustness)
+	dir := filepath.Dir(fileName)
+	if err := os.MkdirAll(dir, 0o700); err != nil {
+		return "", fmt.Errorf("failed to create directory %s: %w", dir, err)
+	}
 
 	// Write base64 PSBT
 	bytePSBT := []byte(psbtBase64)
