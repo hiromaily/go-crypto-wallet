@@ -1,7 +1,5 @@
 volumes:
-  watch-db: {}
-  keygen-db: {}
-  sign-db: {}
+  wallet-db: {}
 
 networks:
   btc:
@@ -114,80 +112,21 @@ services:
   #########################################################################
   # Database
   #########################################################################
-  # watch only wallet
-  watch-db:
+  # Consolidated wallet database with schema separation
+  wallet-db:
     image: mysql:8.4
-    container_name: watch-db
+    container_name: wallet-db
     volumes:
-      - watch-db:/var/lib/mysql #this volume should be outside to keep on a permanent basis
+      - wallet-db:/var/lib/mysql
       - "./docker/mysql/sqls:/sqls"
-      - "./docker/mysql/watch/conf.d:/etc/mysql/conf.d"
-      - "./docker/mysql/watch/init.d:/docker-entrypoint-initdb.d"
-      #- "./docker/mysql/scripts:/docker-entrypoint-initdb.d"
+      - "./docker/mysql/conf.d:/etc/mysql/conf.d"
+      - "./docker/mysql/init.d:/docker-entrypoint-initdb.d"
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: watch
       MYSQL_USER: hiromaily
       MYSQL_PASSWORD: hiromaily
-      ENV: watch
     ports:
-      - "${WATCH_MYSQL_PORT:-3307}:3306"
-    networks:
-      - db
-    healthcheck:
-      test:
-        ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-  # keygen wallet
-  keygen-db:
-    image: mysql:8.4
-    container_name: keygen-db
-    volumes:
-      - keygen-db:/var/lib/mysql #this volume should be outside to keep on a permanent basis
-      - "./docker/mysql/sqls:/sqls"
-      - "./docker/mysql/keygen/conf.d:/etc/mysql/conf.d"
-      - "./docker/mysql/keygen/init.d:/docker-entrypoint-initdb.d"
-      #- "./docker/mysql/scripts:/docker-entrypoint-initdb.d"
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: keygen
-      MYSQL_USER: hiromaily
-      MYSQL_PASSWORD: hiromaily
-      ENV: keygen
-    ports:
-      - "${KEYGEN_MYSQL_PORT:-3308}:3306"
-    networks:
-      - db
-    healthcheck:
-      test:
-        ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
-  # sign wallet
-  sign-db:
-    image: mysql:8.4
-    container_name: sign-db
-    volumes:
-      - sign-db:/var/lib/mysql #this volume should be outside to keep on a permanent basis
-      - "./docker/mysql/sqls:/sqls"
-      - "./docker/mysql/sign/conf.d:/etc/mysql/conf.d"
-      - "./docker/mysql/sign/init.d:/docker-entrypoint-initdb.d"
-      #- "./docker/mysql/scripts:/docker-entrypoint-initdb.d"
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: sign
-      MYSQL_USER: hiromaily
-      MYSQL_PASSWORD: hiromaily
-      ENV: sign
-    ports:
-      - "${SIGN_MYSQL_PORT:-3309}:3306"
+      - "${MYSQL_PORT:-3306}:3306"
     networks:
       - db
     healthcheck:

@@ -32,7 +32,7 @@ See [Installation](https://github.com/hiromaily/go-crypto-wallet/blob/master/doc
 
 ```
 # run database containers
-$ docker compose up watch-db keygen-db sign-db
+$ docker compose up wallet-db
 
 # run bitcoind nodes
 $ docker compose up btc-watch btc-keygen btc-sign
@@ -45,7 +45,7 @@ $ ./scripts/operation/create-bitcoind-wallet.sh
 
 - There are 4 accounts and when `client` receives coin into their address, these coins are transferred into `deposit` account address.
 
-1. Check `client` account address from `address` table on `watch-db`
+1. Check `client` account address from `address` table on `wallet-db` (watch schema)
 2. Copy client's address and send coin into them by [Faucet](https://alt.signetfaucet.com/) or [Faucet2](https://signet.bc-2.jp/)
 3. Run script which includes
 
@@ -89,7 +89,7 @@ $ ./scripts/operation/create-bitcoind-wallet.sh
 - As default, receiver adderesses are for Signet. If network is different, address must be changed.
 
 ``` sh
-docker-compose exec watch-db mysql -u root -proot  -e "$(cat ./docker/mysql/sqls/payment_request.sql)"
+docker compose exec wallet-db mysql -u root -proot watch -e "$(cat ./docker/mysql/sqls/payment_request.sql)"
 ```
 
 2. Run script which includes

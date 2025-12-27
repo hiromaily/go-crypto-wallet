@@ -21,7 +21,7 @@ ganache-cli --mnemonic "toy echo orbit embrace opinion file client report histor
 
 1. run ganache
 2. create sql to register private key and address displayed on console by running ganache
-    - run db by `docker compose up watch-db keygen-db sign-db`
+    - run db by `docker compose up wallet-db`
 3. run sql to insert data into database. [./docker/mysql/insert/ganache.example.sql](https://github.com/hiromaily/go-crypto-wallet/blob/master/docker/mysql/insert/ganache.example.sql)
 4. import private key from database
     - run `direnv allow` to set environment variable to run cli. please install [direnv](https://direnv.net/) if not.

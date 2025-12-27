@@ -30,12 +30,12 @@ go build -ldflags "-X main.authName=auth5" -v -o ${GOPATH}/bin/sign5 ./cmd/sign/
 2. run Database containers
 
 ```
-docker compose up watch-db keygen-db sign-db
+docker compose up wallet-db
 ```
 
 ## Bitcoind Setup
 
-At least, one bitcoin core server and 3 different databases are required.
+At least, one bitcoin core server and 1 database (with 3 schemas: watch, keygen, sign) are required.
 
 1. copy `bitcoin.conf` from ./data/config/bitcoind/ to ./docker/nodes/btc/data1, data2, data3 directory respectively.
 

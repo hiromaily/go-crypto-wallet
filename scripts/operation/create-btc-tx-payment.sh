@@ -17,7 +17,7 @@ echo "------------------------------------------------"
 #watch create db
 # rerun the below command to reset
 #```
-# docker compose exec watch-db mysql -u root -proot  -e "$(cat ./docker/mysql/sqls/payment_request.sql)"
+# docker compose exec wallet-db mysql -u root -proot watch -e "$(cat ./docker/mysql/sqls/payment_request.sql)"
 #```
 
 # create unsigned tx

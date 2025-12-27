@@ -6,40 +6,38 @@
 # Docker Compose Targets
 ###############################################################################
 
-# run all databases
+# run consolidated database
 .PHONY: up-docker-db
 up-docker-db:
-	docker compose up watch-db keygen-db sign-db
+	docker compose up wallet-db
 
-# remove database volumes
+# remove database volume
 .PHONY: rm-db-volumes
 rm-db-volumes:
-	docker volume rm -f watch-db
-	docker volume rm -f keygen-db
-	docker volume rm -f sign-db
+	docker volume rm -f go-crypto-wallet_wallet-db
 
 ###############################################################################
 # Schema Export Targets
 ###############################################################################
 
-# Export schema from watch-db container
+# Export watch schema from wallet-db container
 .PHONY: dump-schema-watch
 dump-schema-watch:
 	mkdir -p data/dump/sql
-	docker exec watch-db mysqldump -u root -proot --no-data --skip-triggers watch > data/dump/sql/dump_watch.sql
+	docker exec wallet-db mysqldump -u root -proot --no-data --skip-triggers watch > data/dump/sql/dump_watch.sql
 
-# Export schema from keygen-db container
+# Export keygen schema from wallet-db container
 .PHONY: dump-schema-keygen
 dump-schema-keygen:
 	mkdir -p data/dump/sql
-	docker exec keygen-db mysqldump -u root -proot --no-data --skip-triggers keygen > data/dump/sql/dump_keygen.sql
+	docker exec wallet-db mysqldump -u root -proot --no-data --skip-triggers keygen > data/dump/sql/dump_keygen.sql
 
-# Export schema from sign-db container
+# Export sign schema from wallet-db container
 .PHONY: dump-schema-sign
 dump-schema-sign:
 	mkdir -p data/dump/sql
-	docker exec sign-db mysqldump -u root -proot --no-data --skip-triggers sign > data/dump/sql/dump_sign.sql
+	docker exec wallet-db mysqldump -u root -proot --no-data --skip-triggers sign > data/dump/sql/dump_sign.sql
 
-# Export all schemas from all database containers
+# Export all schemas from wallet-db container
 .PHONY: dump-schema-all
 dump-schema-all: dump-schema-watch dump-schema-keygen dump-schema-sign

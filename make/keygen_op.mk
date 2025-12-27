@@ -24,7 +24,7 @@ create-hdkey:
 ###############################################################################
 #.PHONY: import-ganache-key
 #import-ganache-key:
-#	docker compose exec keygen-db mysql -u root -proot  -e "$(cat ./scripts/operation/sql/ganache_key.sql)"
+#	docker compose exec wallet-db mysql -u root -proot keygen -e "$(cat ./scripts/operation/sql/ganache_key.sql)"
 
 
 ###############################################################################
