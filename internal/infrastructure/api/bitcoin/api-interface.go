@@ -98,6 +98,16 @@ type Bitcoiner interface {
 	SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error)
 	Sign(tx *wire.MsgTx, strPrivateKey string) (string, error)
 
+	// psbt.go (BIP174 Partially Signed Bitcoin Transaction support)
+	CreatePSBT(msgTx *wire.MsgTx, prevTxs []btc.PrevTx) (string, error)
+	ParsePSBT(psbtBase64 string) (*btc.ParsedPSBT, error)
+	ValidatePSBT(psbtBase64 string) error
+	SignPSBTWithKey(psbtBase64 string, wifs []string) (string, bool, error)
+	FinalizePSBT(psbtBase64 string) (string, error)
+	ExtractTransaction(psbtBase64 string) (*wire.MsgTx, error)
+	IsPSBTComplete(psbtBase64 string) (bool, error)
+	GetPSBTFee(psbtBase64 string) (int64, error)
+
 	// unspent.go
 	ListUnspent(confirmationNum uint64) ([]btc.ListUnspentResult, error)
 	ListUnspentByAccount(accountType domainAccount.AccountType, confirmationNum uint64) ([]btc.ListUnspentResult, error)
