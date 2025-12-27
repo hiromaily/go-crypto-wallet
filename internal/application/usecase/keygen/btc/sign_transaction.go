@@ -8,7 +8,6 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
@@ -55,14 +54,8 @@ func (u *signTransactionUseCase) Sign(
 		return keygenusecase.SignTransactionOutput{}, fmt.Errorf("fail to read PSBT file: %w", err)
 	}
 
-	// Parse PSBT to extract metadata
-	parsedPSBT, err := u.btc.ParsePSBT(psbtBase64)
-	if err != nil {
-		return keygenusecase.SignTransactionOutput{}, fmt.Errorf("fail to parse PSBT: %w", err)
-	}
-
 	// Sign PSBT (passing actionType to infer sender account)
-	signedPSBT, isSigned, err := u.sign(psbtBase64, parsedPSBT, actionType)
+	signedPSBT, isSigned, err := u.sign(psbtBase64, actionType)
 	if err != nil {
 		return keygenusecase.SignTransactionOutput{}, err
 	}
@@ -114,12 +107,14 @@ func (u *signTransactionUseCase) Sign(
 // Note: This operates OFFLINE - no Bitcoin Core RPC required.
 func (u *signTransactionUseCase) sign(
 	psbtBase64 string,
-	parsedPSBT *btc.ParsedPSBT,
 	actionType domainTx.ActionType,
 ) (string, bool, error) {
 	// Infer sender account from action type
 	// This is a simplified approach since PSBT doesn't store the account concept
-	senderAccount := inferSenderAccount(actionType)
+	senderAccount, err := inferSenderAccount(actionType)
+	if err != nil {
+		return "", false, err
+	}
 
 	// Sign PSBT with keys from sender account
 	signedPSBT, isSigned, err := u.signWithAccount(psbtBase64, senderAccount)
@@ -131,7 +126,6 @@ func (u *signTransactionUseCase) sign(
 		"action", actionType.String(),
 		"sender_account", senderAccount.String(),
 		"isSigned", isSigned,
-		"inputs", len(parsedPSBT.Packet.Inputs),
 	)
 
 	return signedPSBT, isSigned, nil
@@ -139,18 +133,18 @@ func (u *signTransactionUseCase) sign(
 
 // inferSenderAccount infers the sender account from the transaction action type.
 // This is a pragmatic approach since PSBT doesn't encode the account concept.
-func inferSenderAccount(actionType domainTx.ActionType) domainAccount.AccountType {
+func inferSenderAccount(actionType domainTx.ActionType) (domainAccount.AccountType, error) {
 	switch actionType {
 	case domainTx.ActionTypeDeposit:
-		return domainAccount.AccountTypeClient
+		return domainAccount.AccountTypeClient, nil
 	case domainTx.ActionTypePayment:
-		return domainAccount.AccountTypePayment
+		return domainAccount.AccountTypePayment, nil
 	case domainTx.ActionTypeTransfer:
 		// Transfer could be from various accounts
 		// Default to payment for now
-		return domainAccount.AccountTypePayment
+		return domainAccount.AccountTypePayment, nil
 	default:
-		return domainAccount.AccountTypeClient
+		return "", fmt.Errorf("unsupported action type: %s", actionType)
 	}
 }
 
