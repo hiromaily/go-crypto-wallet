@@ -34,6 +34,24 @@ atlas-lint:
 # Atlas Schema Management Targets
 ###############################################################################
 
+# Check that SCHEMA parameter is provided
+.PHONY: check-schema
+check-schema:
+ifndef SCHEMA
+	@echo "Error: SCHEMA parameter is required"
+	@echo "Usage: make <target> SCHEMA=watch|keygen|sign"
+	@exit 1
+endif
+
+# Check that NAME parameter is provided
+.PHONY: check-name
+check-name:
+ifndef NAME
+	@echo "Error: NAME parameter is required"
+	@echo "Usage: make <target> NAME=<migration_name>"
+	@exit 1
+endif
+
 # Apply HCL schema directly to database (all schemas)
 .PHONY: atlas-schema-apply
 atlas-schema-apply:
@@ -47,12 +65,7 @@ atlas-schema-apply:
 # Apply HCL schema for a specific schema
 # Usage: make atlas-schema-apply-one SCHEMA=watch
 .PHONY: atlas-schema-apply-one
-atlas-schema-apply-one:
-ifndef SCHEMA
-	@echo "Error: SCHEMA parameter is required"
-	@echo "Usage: make atlas-schema-apply-one SCHEMA=watch|keygen|sign"
-	@exit 1
-endif
+atlas-schema-apply-one: check-schema
 	@echo "=== Applying $(SCHEMA) schema ==="
 	@cd tools/atlas && atlas schema apply --config file://atlas.hcl --env local_$(SCHEMA) --auto-approve
 
@@ -81,17 +94,7 @@ atlas-migrate-apply:
 # Generate new migration from HCL schema diff
 # Usage: make atlas-migrate-diff SCHEMA=watch NAME=add_new_column
 .PHONY: atlas-migrate-diff
-atlas-migrate-diff:
-ifndef SCHEMA
-	@echo "Error: SCHEMA parameter is required"
-	@echo "Usage: make atlas-migrate-diff SCHEMA=watch|keygen|sign NAME=migration_name"
-	@exit 1
-endif
-ifndef NAME
-	@echo "Error: NAME parameter is required"
-	@echo "Usage: make atlas-migrate-diff SCHEMA=watch|keygen|sign NAME=migration_name"
-	@exit 1
-endif
+atlas-migrate-diff: check-schema check-name
 	@echo "=== Generating migration for $(SCHEMA) schema ==="
 	@cd tools/atlas && atlas migrate diff $(NAME) --config file://atlas.hcl --env local_$(SCHEMA)
 	@echo "✓ Migration generated: tools/atlas/migrations/$(SCHEMA)/"
