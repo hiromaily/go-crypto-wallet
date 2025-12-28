@@ -14,11 +14,10 @@ import (
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
-	"github.com/hiromaily/go-crypto-wallet/pkg/converter"
+	"github.com/hiromaily/go-crypto-wallet/pkg/decimal"
 )
 
 type createPaymentRequestUseCase struct {
-	converter    converter.Converter
 	dbConn       *sql.DB
 	addrRepo     watch.AddressRepositorier
 	payReqRepo   watch.PaymentRequestRepositorier
@@ -28,7 +27,6 @@ type createPaymentRequestUseCase struct {
 
 // NewCreatePaymentRequestUseCase creates a new CreatePaymentRequestUseCase for watch wallet
 func NewCreatePaymentRequestUseCase(
-	conv converter.Converter,
 	dbConn *sql.DB,
 	addrRepo watch.AddressRepositorier,
 	payReqRepo watch.PaymentRequestRepositorier,
@@ -36,7 +34,6 @@ func NewCreatePaymentRequestUseCase(
 	wtype domainWallet.WalletType,
 ) watchusecase.CreatePaymentRequestUseCase {
 	return &createPaymentRequestUseCase{
-		converter:    conv,
 		dbConn:       dbConn,
 		addrRepo:     addrRepo,
 		payReqRepo:   payReqRepo,
@@ -78,7 +75,7 @@ func (u *createPaymentRequestUseCase) Execute(ctx context.Context, input watchus
 	payReqItems := make([]*models.PaymentRequest, 0, len(input.AmountList))
 	var idx int
 	for _, amt := range input.AmountList {
-		amount, err := u.converter.FloatToDecimal(amt)
+		amount, err := decimal.FloatToDecimal(amt)
 		if err != nil {
 			return fmt.Errorf("fail to convert amount %f to decimal: %w", amt, err)
 		}

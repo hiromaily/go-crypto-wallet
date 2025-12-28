@@ -7,7 +7,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 
-// NewMySQL connect to MySQL server
+// NewMySQL connects to MySQL server and returns a database connection.
 // TODO: retry functionality and retry count should be configured in config file
 func NewMySQL(conf *config.MySQL) (*sql.DB, error) {
 	db, err := sql.Open("mysql",
@@ -22,3 +22,4 @@ func NewMySQL(conf *config.MySQL) (*sql.DB, error) {
 	}
 	return db, nil
 }
+
