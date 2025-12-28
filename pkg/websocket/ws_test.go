@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/network/websocket"
+	"github.com/hiromaily/go-crypto-wallet/pkg/websocket"
 )
 
 // AccountChannels account_channels request
@@ -52,3 +52,4 @@ func TestCall(t *testing.T) {
 
 	_ = websoc.Close() // Best effort cleanup
 }
+

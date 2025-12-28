@@ -13,7 +13,6 @@ import (
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
-	"google.golang.org/grpc"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
@@ -26,7 +25,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/contract"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/network/websocket"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
@@ -39,6 +37,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	pkgdi "github.com/hiromaily/go-crypto-wallet/pkg/di"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/websocket"
 
 	// Use case imports
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
@@ -116,7 +115,6 @@ type container struct {
 	rpcEthClient *ethrpc.Client
 	wsXrpPublic  *websocket.WS
 	wsXrpAdmin   *websocket.WS
-	grpcConn     *grpc.ClientConn
 	rippleAPI    *xrp.RippleAPI
 	// keygen specific
 	multisig account.MultisigAccounter
@@ -354,17 +352,6 @@ func (c *container) newXRPWSClient() (*websocket.WS, *websocket.WS) {
 	return c.wsXrpPublic, c.wsXrpAdmin
 }
 
-func (c *container) newGRPCConn() *grpc.ClientConn {
-	if c.grpcConn == nil {
-		var err error
-		c.grpcConn, err = ripple.NewGRPCClient(&c.conf.Ripple.API)
-		if err != nil {
-			panic(err)
-		}
-	}
-	return c.grpcConn
-}
-
 //
 // Wallet API
 //
@@ -446,7 +433,7 @@ func (c *container) newXRP() ripple.Rippler {
 
 func (c *container) newRippleAPI() *xrp.RippleAPI {
 	if c.rippleAPI == nil {
-		c.rippleAPI = xrp.NewRippleAPI(c.newGRPCConn())
+		c.rippleAPI = xrp.NewRippleAPI(c.pkgContainer.NewGRPCClient())
 	}
 	return c.rippleAPI
 }

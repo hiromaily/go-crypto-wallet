@@ -10,6 +10,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/mysql"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
+	"google.golang.org/grpc"
 )
 
 // PkgContainer is the interface for the package container
