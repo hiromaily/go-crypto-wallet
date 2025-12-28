@@ -21,7 +21,7 @@ diff {
 
 # Lint configuration for schema validation
 lint {
-  # Ensure all tables have primary keys
+  # Error on destructive changes (e.g., dropping tables/columns)
   destructive {
     error = true
   }

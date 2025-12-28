@@ -7,6 +7,7 @@ ATLAS_CONFIG := file://tools/atlas/atlas.hcl
 ATLAS_ENV_WATCH := local_watch
 ATLAS_ENV_KEYGEN := local_keygen
 ATLAS_ENV_SIGN := local_sign
+ATLAS_SCHEMAS := watch keygen sign
 
 ###############################################################################
 # Atlas Format and Lint Targets
@@ -23,12 +24,10 @@ atlas-fmt:
 .PHONY: atlas-lint
 atlas-lint:
 	@echo "Linting Atlas HCL schema files..."
-	@echo "=== Linting watch schema ==="
-	@cd tools/atlas && atlas schema lint --config file://atlas.hcl --env $(ATLAS_ENV_WATCH)
-	@echo "\n=== Linting keygen schema ==="
-	@cd tools/atlas && atlas schema lint --config file://atlas.hcl --env $(ATLAS_ENV_KEYGEN)
-	@echo "\n=== Linting sign schema ==="
-	@cd tools/atlas && atlas schema lint --config file://atlas.hcl --env $(ATLAS_ENV_SIGN)
+	@for schema in $(ATLAS_SCHEMAS); do \
+		echo "=== Linting $$schema schema ==="; \
+		(cd tools/atlas && atlas schema lint --config file://atlas.hcl --env local_$$schema) || exit 1; \
+	done
 	@echo "✓ All schemas passed linting"
 
 ###############################################################################
@@ -39,12 +38,10 @@ atlas-lint:
 .PHONY: atlas-schema-apply
 atlas-schema-apply:
 	@echo "Applying HCL schemas directly to databases..."
-	@echo "=== Applying watch schema ==="
-	@cd tools/atlas && atlas schema apply --config file://atlas.hcl --env $(ATLAS_ENV_WATCH) --auto-approve
-	@echo "=== Applying keygen schema ==="
-	@cd tools/atlas && atlas schema apply --config file://atlas.hcl --env $(ATLAS_ENV_KEYGEN) --auto-approve
-	@echo "=== Applying sign schema ==="
-	@cd tools/atlas && atlas schema apply --config file://atlas.hcl --env $(ATLAS_ENV_SIGN) --auto-approve
+	@for schema in $(ATLAS_SCHEMAS); do \
+		echo "=== Applying $$schema schema ==="; \
+		(cd tools/atlas && atlas schema apply --config file://atlas.hcl --env local_$$schema --auto-approve) || exit 1; \
+	done
 	@echo "✓ All schemas applied successfully"
 
 # Apply HCL schema for a specific schema
@@ -66,23 +63,19 @@ endif
 # Show migration status for all schemas
 .PHONY: atlas-migrate-status
 atlas-migrate-status:
-	@echo "=== Watch Schema Migration Status ==="
-	@cd tools/atlas && atlas migrate status --config file://atlas.hcl --env $(ATLAS_ENV_WATCH) || true
-	@echo "\n=== Keygen Schema Migration Status ==="
-	@cd tools/atlas && atlas migrate status --config file://atlas.hcl --env $(ATLAS_ENV_KEYGEN) || true
-	@echo "\n=== Sign Schema Migration Status ==="
-	@cd tools/atlas && atlas migrate status --config file://atlas.hcl --env $(ATLAS_ENV_SIGN) || true
+	@for schema in $(ATLAS_SCHEMAS); do \
+		echo "=== $$schema Schema Migration Status ==="; \
+		(cd tools/atlas && atlas migrate status --config file://atlas.hcl --env local_$$schema) || true; \
+	done
 
 # Apply all pending migrations for all schemas
 .PHONY: atlas-migrate-apply
 atlas-migrate-apply:
 	@echo "Applying migrations for all schemas..."
-	@echo "=== Applying watch migrations ==="
-	@cd tools/atlas && atlas migrate apply --config file://atlas.hcl --env $(ATLAS_ENV_WATCH)
-	@echo "=== Applying keygen migrations ==="
-	@cd tools/atlas && atlas migrate apply --config file://atlas.hcl --env $(ATLAS_ENV_KEYGEN)
-	@echo "=== Applying sign migrations ==="
-	@cd tools/atlas && atlas migrate apply --config file://atlas.hcl --env $(ATLAS_ENV_SIGN)
+	@for schema in $(ATLAS_SCHEMAS); do \
+		echo "=== Applying $$schema migrations ==="; \
+		(cd tools/atlas && atlas migrate apply --config file://atlas.hcl --env local_$$schema) || exit 1; \
+	done
 	@echo "✓ All migrations applied successfully"
 
 # Generate new migration from HCL schema diff
@@ -107,9 +100,9 @@ endif
 .PHONY: atlas-migrate-hash
 atlas-migrate-hash:
 	@echo "Hashing migration directories..."
-	@cd tools/atlas && atlas migrate hash --config file://atlas.hcl --env $(ATLAS_ENV_WATCH)
-	@cd tools/atlas && atlas migrate hash --config file://atlas.hcl --env $(ATLAS_ENV_KEYGEN)
-	@cd tools/atlas && atlas migrate hash --config file://atlas.hcl --env $(ATLAS_ENV_SIGN)
+	@for schema in $(ATLAS_SCHEMAS); do \
+		(cd tools/atlas && atlas migrate hash --config file://atlas.hcl --env local_$$schema) || exit 1; \
+	done
 	@echo "✓ Migration directories hashed"
 
 ###############################################################################
@@ -149,9 +142,9 @@ atlas-dev-clean:
 	echo; \
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
 		echo "Cleaning and recreating databases..."; \
-		cd tools/atlas && atlas schema clean --config file://atlas.hcl --env $(ATLAS_ENV_WATCH) --auto-approve; \
-		cd tools/atlas && atlas schema clean --config file://atlas.hcl --env $(ATLAS_ENV_KEYGEN) --auto-approve; \
-		cd tools/atlas && atlas schema clean --config file://atlas.hcl --env $(ATLAS_ENV_SIGN) --auto-approve; \
+		for schema in $(ATLAS_SCHEMAS); do \
+			(cd tools/atlas && atlas schema clean --config file://atlas.hcl --env local_$$schema --auto-approve) || exit 1; \
+		done; \
 		echo "Applying HCL schemas..."; \
 		$(MAKE) atlas-schema-apply; \
 		echo "✓ Databases cleaned and recreated"; \
@@ -168,12 +161,10 @@ atlas-dev-clean:
 .PHONY: atlas-prod-init
 atlas-prod-init:
 	@echo "Initializing production migration history..."
-	@echo "=== Hashing watch migrations ==="
-	@cd tools/atlas && atlas migrate hash --config file://atlas.hcl --env $(ATLAS_ENV_WATCH)
-	@echo "=== Hashing keygen migrations ==="
-	@cd tools/atlas && atlas migrate hash --config file://atlas.hcl --env $(ATLAS_ENV_KEYGEN)
-	@echo "=== Hashing sign migrations ==="
-	@cd tools/atlas && atlas migrate hash --config file://atlas.hcl --env $(ATLAS_ENV_SIGN)
+	@for schema in $(ATLAS_SCHEMAS); do \
+		echo "=== Hashing $$schema migrations ==="; \
+		(cd tools/atlas && atlas migrate hash --config file://atlas.hcl --env local_$$schema) || exit 1; \
+	done
 	@echo "✓ Production migration history initialized"
 	@echo "You can now create incremental migrations using: make atlas-migrate-diff SCHEMA=<schema> NAME=<name>"
 
@@ -185,9 +176,9 @@ atlas-prod-init:
 .PHONY: atlas-validate
 atlas-validate:
 	@echo "Validating Atlas configuration..."
-	@cd tools/atlas && atlas migrate validate --config file://atlas.hcl --env $(ATLAS_ENV_WATCH)
-	@cd tools/atlas && atlas migrate validate --config file://atlas.hcl --env $(ATLAS_ENV_KEYGEN)
-	@cd tools/atlas && atlas migrate validate --config file://atlas.hcl --env $(ATLAS_ENV_SIGN)
+	@for schema in $(ATLAS_SCHEMAS); do \
+		(cd tools/atlas && atlas migrate validate --config file://atlas.hcl --env local_$$schema) || exit 1; \
+	done
 	@echo "✓ Atlas configuration is valid"
 
 # Show Atlas help
