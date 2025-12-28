@@ -260,15 +260,22 @@ Specifically, `panic` is acceptable in:
     - `watch/`: Watch wallet services (btc, eth, xrp, shared)
   - `di/`: Dependency injection container
 - `pkg/`: Shared packages (reusable, for external use)
-  - `config/`: Configuration management
-  - `logger/`: Logging utilities
+  - `config/`: Configuration management utilities
+    - `testutil/`: Test utilities for configuration
+  - `logger/`: Logging utilities (structured logging, noop logger, slog support)
   - `converter/`: Data conversion utilities
   - `debug/`: Debug utilities
   - `serial/`: Serialization utilities
-  - `testutil/`: Test utilities (btc, eth, xrp, repository, suite)
+  - `testutil/`: Test utilities for various components (btc, eth, xrp, repository, suite)
   - `uuid/`: UUID generation utilities
-  - `db/`: Database generated code (SQLC)
+  - `db/mysql/`: MySQL database connection utilities
+  - `decimal/`: Decimal number utilities
+  - `grpc/`: gRPC client utilities
+  - `websocket/`: WebSocket client utilities
   - `di/`: Legacy dependency injection container (for backward compatibility)
+  
+  **Important**: See `pkg/AGENTS.md` for detailed guidelines on working with `pkg/` packages.
+  **Critical Rule**: Packages in `pkg/` MUST NOT import or depend on any packages in `internal/` directory.
 - `data/`: Generated files, configuration files
   - `address/`: Address data files (bch, btc, eth, xrp)
   - `config/`: Configuration files (account, wallet configs, node configs)

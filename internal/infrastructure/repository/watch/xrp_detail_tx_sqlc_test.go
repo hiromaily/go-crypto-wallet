@@ -16,7 +16,7 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	mysql "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql"
+	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/mysql"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"

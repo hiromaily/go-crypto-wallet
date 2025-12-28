@@ -5,13 +5,10 @@ import (
 	"errors"
 	"fmt"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/network/websocket"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/websocket"
 )
 
 // NewWSClient try to connect Ripple Server by web socket
@@ -39,31 +36,6 @@ func NewWSClient(conf *config.Ripple) (*websocket.WS, *websocket.WS, error) {
 
 	return public, admin, nil
 }
-
-// NewGRPCClient try to connect gRPC Server
-func NewGRPCClient(conf *config.RippleAPI) (*grpc.ClientConn, error) {
-	if conf.URL == "" {
-		return nil, errors.New("url for grpc server is not defined in config")
-	}
-	var opts []grpc.DialOption
-	if !conf.IsSecure {
-		opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	}
-	conn, err := grpc.NewClient(conf.URL, opts...)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call grpc.Dial: %s: %w", conf.URL, err)
-	}
-	return conn, nil
-}
-
-// NewRPCClient RPCClient, maybe not used
-// func NewRPCClient(conf *config.Ripple) *jsonrpc.RPCClient {
-//	if conf.JSONRpcURL == "" {
-//		return nil
-//	}
-//	rpcClient := jsonrpc.NewClient(conf.JSONRpcURL)
-//	return &rpcClient
-//}
 
 // NewRipple creates Ripple instance according to coinType
 func NewRipple(

@@ -7,14 +7,12 @@
 package di
 
 import (
-	"database/sql"
 	"fmt"
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
-	"google.golang.org/grpc"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
@@ -27,8 +25,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/contract"
-	mysql "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/network/websocket"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
@@ -39,9 +35,9 @@ import (
 	ethwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/eth"
 	xrpwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	"github.com/hiromaily/go-crypto-wallet/pkg/converter"
+	pkgdi "github.com/hiromaily/go-crypto-wallet/pkg/di"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
+	"github.com/hiromaily/go-crypto-wallet/pkg/websocket"
 
 	// Use case imports
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
@@ -100,14 +96,14 @@ type Container interface {
 	AddressType() address.AddrType
 }
 
+var _ Container = (*container)(nil)
+
 type container struct {
+	// pkg DI
+	pkgContainer pkgdi.PkgContainer
 	// config
 	conf        *config.WalletRoot
 	accountConf *account.AccountRoot
-	// db
-	mysqlClient *sql.DB
-	// utility
-	uuidHandler uuid.UUIDHandler
 	// wallet
 	walletType domainWallet.WalletType
 	btc        bitcoin.Bitcoiner
@@ -119,7 +115,6 @@ type container struct {
 	rpcEthClient *ethrpc.Client
 	wsXrpPublic  *websocket.WS
 	wsXrpAdmin   *websocket.WS
-	grpcConn     *grpc.ClientConn
 	rippleAPI    *xrp.RippleAPI
 	// keygen specific
 	multisig account.MultisigAccounter
@@ -134,9 +129,10 @@ func NewContainer(
 	walletType domainWallet.WalletType,
 ) Container {
 	return &container{
-		conf:        conf,
-		accountConf: accountConf,
-		walletType:  walletType,
+		pkgContainer: pkgdi.NewPkgContainer(conf, accountConf),
+		conf:         conf,
+		accountConf:  accountConf,
+		walletType:   walletType,
 	}
 }
 
@@ -164,7 +160,7 @@ func (c *container) NewKeygener() wallets.Keygener {
 func (c *container) newBTCKeygener() wallets.Keygener {
 	return btcwallet.NewBTCKeygen(
 		c.newBTC(),
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.conf.AddressType,
 		c.newKeygenGenerateSeedUseCase(),
 		c.newKeygenGenerateHDWalletUseCase(),
@@ -180,7 +176,7 @@ func (c *container) newBTCKeygener() wallets.Keygener {
 func (c *container) newETHKeygener() wallets.Keygener {
 	return ethwallet.NewETHKeygen(
 		c.newETH(),
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.walletType,
 		c.newKeygenGenerateSeedUseCase(),
 		c.newKeygenGenerateHDWalletUseCase(),
@@ -193,7 +189,7 @@ func (c *container) newETHKeygener() wallets.Keygener {
 func (c *container) newXRPKeygener() wallets.Keygener {
 	return xrpwallet.NewXRPKeygen(
 		c.newXRP(),
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.walletType,
 		c.newKeygenGenerateSeedUseCase(),
 		c.newKeygenGenerateHDWalletUseCase(),
@@ -266,7 +262,7 @@ func (c *container) AddressType() address.AddrType {
 func (c *container) newBTCSigner(authType domainAccount.AuthType) wallets.Signer {
 	return btcwallet.NewBTCSign(
 		c.newBTC(),
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		authType,
 		c.conf.AddressType,
 		c.NewSignGenerateSeedUseCase(),
@@ -282,7 +278,7 @@ func (c *container) newBTCSigner(authType domainAccount.AuthType) wallets.Signer
 func (c *container) newBTCWalleter() wallets.Watcher {
 	return btcwallet.NewBTCWatch(
 		c.newBTC(),
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.conf.AddressType,
 		c.newBTCWatchCreateTransactionUseCase(),
 		c.newBTCWatchMonitorTransactionUseCase(),
@@ -296,7 +292,7 @@ func (c *container) newBTCWalleter() wallets.Watcher {
 func (c *container) newETHWalleter() wallets.Watcher {
 	return ethwallet.NewETHWatch(
 		c.newETH(),
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.newETHWatchCreateTransactionUseCase(),
 		c.newETHWatchMonitorTransactionUseCase(),
 		c.newETHWatchSendTransactionUseCase(),
@@ -309,7 +305,7 @@ func (c *container) newETHWalleter() wallets.Watcher {
 func (c *container) newXRPWalleter() wallets.Watcher {
 	return xrpwallet.NewXRPWatch(
 		c.newXRP(),
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.newXRPWatchCreateTransactionUseCase(),
 		c.newXRPWatchMonitorTransactionUseCase(),
 		c.newXRPWatchSendTransactionUseCase(),
@@ -317,17 +313,6 @@ func (c *container) newXRPWalleter() wallets.Watcher {
 		c.newWatchCreatePaymentRequestUseCase(),
 		c.walletType,
 	)
-}
-
-func (c *container) newConverter(coinTypeCode domainCoin.CoinTypeCode) converter.Converter {
-	switch coinTypeCode {
-	case domainCoin.BTC:
-		return c.newBTC()
-	case domainCoin.BCH, domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
-		return converter.NewConverter()
-	default:
-		return converter.NewConverter()
-	}
 }
 
 //
@@ -367,17 +352,6 @@ func (c *container) newXRPWSClient() (*websocket.WS, *websocket.WS) {
 	return c.wsXrpPublic, c.wsXrpAdmin
 }
 
-func (c *container) newGRPCConn() *grpc.ClientConn {
-	if c.grpcConn == nil {
-		var err error
-		c.grpcConn, err = ripple.NewGRPCClient(&c.conf.Ripple.API)
-		if err != nil {
-			panic(err)
-		}
-	}
-	return c.grpcConn
-}
-
 //
 // Wallet API
 //
@@ -404,7 +378,7 @@ func (c *container) newETH() ethereum.Ethereumer {
 			c.newEthRPCClient(),
 			&c.conf.Ethereum,
 			c.conf.CoinTypeCode,
-			c.newUUIDHandler(),
+			c.pkgContainer.NewUUIDHandler(),
 		)
 		if err != nil {
 			panic(err)
@@ -429,7 +403,7 @@ func (c *container) newERC20() ethereum.ERC20er {
 			client,
 			tokenClient,
 			conf.ERC20Token,
-			c.newUUIDHandler(),
+			c.pkgContainer.NewUUIDHandler(),
 			conf.ERC20s[conf.ERC20Token].Name,
 			conf.ERC20s[conf.ERC20Token].ContractAddress,
 			conf.ERC20s[conf.ERC20Token].MasterAddress,
@@ -459,35 +433,9 @@ func (c *container) newXRP() ripple.Rippler {
 
 func (c *container) newRippleAPI() *xrp.RippleAPI {
 	if c.rippleAPI == nil {
-		c.rippleAPI = xrp.NewRippleAPI(c.newGRPCConn())
+		c.rippleAPI = xrp.NewRippleAPI(c.pkgContainer.NewGRPCClient())
 	}
 	return c.rippleAPI
-}
-
-//
-// UUID
-//
-
-func (c *container) newUUIDHandler() uuid.UUIDHandler {
-	if c.uuidHandler == nil {
-		c.uuidHandler = uuid.NewGoogleUUIDHandler()
-	}
-	return c.uuidHandler
-}
-
-//
-// DB
-//
-
-func (c *container) newMySQLClient() *sql.DB {
-	if c.mysqlClient == nil {
-		dbConn, err := mysql.NewMySQL(&c.conf.MySQL)
-		if err != nil {
-			panic(err)
-		}
-		c.mysqlClient = dbConn
-	}
-	return c.mysqlClient
 }
 
 //
@@ -496,56 +444,56 @@ func (c *container) newMySQLClient() *sql.DB {
 
 func (c *container) newBTCTxRepo() watch.BTCTxRepositorier {
 	return watch.NewBTCTxRepositorySqlc(
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
 func (c *container) newBTCTxInputRepo() watch.TxInputRepositorier {
 	return watch.NewBTCTxInputRepositorySqlc(
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
 func (c *container) newBTCTxOutputRepo() watch.TxOutputRepositorier {
 	return watch.NewBTCTxOutputRepositorySqlc(
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
 func (c *container) newTxRepo() watch.TxRepositorier {
 	return watch.NewTxRepositorySqlc(
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
 func (c *container) newETHTxDetailRepo() watch.EthDetailTxRepositorier {
 	return watch.NewEthDetailTxInputRepositorySqlc(
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
 func (c *container) newXRPTxDetailRepo() watch.XrpDetailTxRepositorier {
 	return watch.NewXrpDetailTxInputRepositorySqlc(
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
 func (c *container) newPaymentRequestRepo() watch.PaymentRequestRepositorier {
 	return watch.NewPaymentRequestRepositorySqlc(
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
 func (c *container) newAddressRepo() watch.AddressRepositorier {
 	return watch.NewAddressRepositorySqlc(
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
@@ -634,35 +582,35 @@ func (c *container) newMultiAccount() account.MultisigAccounter {
 
 func (c *container) newSeedRepo() cold.SeedRepositorier {
 	return cold.NewSeedRepositorySqlc(
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
 func (c *container) newAccountKeyRepo() cold.AccountKeyRepositorier {
 	return cold.NewAccountKeyRepositorySqlc(
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
 func (c *container) newXRPAccountKeyRepo() cold.XRPAccountKeyRepositorier {
 	return cold.NewXRPAccountKeyRepositorySqlc(
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
 func (c *container) newAuthFullPubKeyRepo() cold.AuthFullPubkeyRepositorier {
 	return cold.NewAuthFullPubkeyRepositorySqlc(
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
 func (c *container) newAuthKeyRepo() cold.AuthAccountKeyRepositorier {
 	return cold.NewAuthAccountKeyRepositorySqlc(
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
@@ -846,7 +794,7 @@ func (c *container) NewSignGenerateAuthKeyUseCase() signusecase.GenerateAuthKeyU
 func (c *container) newBTCWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
 	return watchusecasebtc.NewCreateTransactionUseCase(
 		c.newBTC(),
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.newAddressRepo(),
 		c.newBTCTxRepo(),
 		c.newBTCTxInputRepo(),
@@ -862,7 +810,7 @@ func (c *container) newBTCWatchCreateTransactionUseCase() watchusecase.CreateTra
 func (c *container) newBTCWatchMonitorTransactionUseCase() watchusecase.MonitorTransactionUseCase {
 	return watchusecasebtc.NewMonitorTransactionUseCase(
 		c.newBTC(),
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.newBTCTxRepo(),
 		c.newBTCTxInputRepo(),
 		c.newPaymentRequestRepo(),
@@ -902,7 +850,7 @@ func (c *container) newETHWatchCreateTransactionUseCase() watchusecase.CreateTra
 
 	return watchusecaseeth.NewCreateTransactionUseCase(
 		targetEthAPI,
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.newAddressRepo(),
 		c.newTxRepo(),
 		c.newETHTxDetailRepo(),
@@ -939,8 +887,8 @@ func (c *container) newETHWatchSendTransactionUseCase() watchusecase.SendTransac
 func (c *container) newXRPWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
 	return watchusecasexrp.NewCreateTransactionUseCase(
 		c.newXRP(),
-		c.newMySQLClient(),
-		c.newUUIDHandler(),
+		c.pkgContainer.NewMySQLClient(),
+		c.pkgContainer.NewUUIDHandler(),
 		c.newAddressRepo(),
 		c.newTxRepo(),
 		c.newXRPTxDetailRepo(),
@@ -980,8 +928,7 @@ func (c *container) newWatchImportAddressUseCase() watchusecase.ImportAddressUse
 
 func (c *container) newWatchCreatePaymentRequestUseCase() watchusecase.CreatePaymentRequestUseCase {
 	return watchusecaseshared.NewCreatePaymentRequestUseCase(
-		c.newConverter(c.conf.CoinTypeCode),
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.newAddressRepo(),
 		c.newPaymentRequestRepo(),
 		c.conf.CoinTypeCode,
@@ -1054,7 +1001,7 @@ func (c *container) newETHKeygenImportPrivateKeyUseCase() keygenusecase.ImportPr
 func (c *container) newXRPKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUseCase {
 	return keygenusecasexrp.NewGenerateKeyUseCase(
 		c.newXRP(),
-		c.newMySQLClient(),
+		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 		c.newAccountKeyRepo(),
 		c.newXRPAccountKeyRepo(),

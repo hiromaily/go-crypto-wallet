@@ -7,6 +7,29 @@ This document provides guidelines for AI agents working on packages in the `pkg/
 The `pkg/` directory contains **public packages** that can be imported by external code.
 These packages provide shared utilities, configuration management, logging, and other common functionality.
 
+## Directory Structure
+
+The `pkg/` directory is organized as follows:
+
+- `config/`: Configuration management utilities
+  - `testutil/`: Test utilities for configuration
+- `converter/`: Data conversion utilities
+- `db/mysql/`: MySQL database connection utilities
+- `debug/`: Debug utilities
+- `decimal/`: Decimal number utilities
+- `di/`: Legacy dependency injection container (for backward compatibility)
+- `grpc/`: gRPC client utilities
+- `logger/`: Logging utilities (structured logging, noop logger, slog support)
+- `serial/`: Serialization utilities
+- `testutil/`: Test utilities for various components
+  - `btc.go`: Bitcoin test utilities
+  - `eth.go`: Ethereum test utilities
+  - `xrp.go`: XRP test utilities
+  - `repository.go`: Repository test utilities
+  - `suite.go`: Test suite utilities
+- `uuid/`: UUID generation utilities
+- `websocket/`: WebSocket client utilities
+
 ## Critical Rule: No Dependencies on `internal/`
 
 **⚠️ THE MOST IMPORTANT RULE:**

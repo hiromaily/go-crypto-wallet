@@ -9,6 +9,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/grpc"
 )
 
 var xr ripple.Rippler
@@ -35,7 +36,7 @@ func GetXRP() (ripple.Rippler, error) {
 		return nil, fmt.Errorf("fail to create ethereum rpc client: %w", err)
 	}
 	// client
-	conn, err := ripple.NewGRPCClient(&conf.Ripple.API)
+	conn, err := grpc.NewClient(conf.Ripple.API.URL)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create api instance: %w", err)
 	}
