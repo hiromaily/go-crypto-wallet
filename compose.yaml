@@ -74,6 +74,8 @@ services:
         condition: service_healthy
     networks:
       - db
+    environment:
+      - ATLAS_NO_UPDATE_NOTIFIER=true
     command:
       - migrate
       - apply
@@ -94,6 +96,8 @@ services:
         condition: service_healthy
     networks:
       - db
+    environment:
+      - ATLAS_NO_UPDATE_NOTIFIER=true
     command:
       - migrate
       - apply
@@ -114,6 +118,8 @@ services:
         condition: service_healthy
     networks:
       - db
+    environment:
+      - ATLAS_NO_UPDATE_NOTIFIER=true
     command:
       - migrate
       - apply

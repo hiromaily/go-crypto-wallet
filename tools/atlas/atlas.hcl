@@ -19,10 +19,19 @@ diff {
   }
 }
 
-# TODO: Add proper lint configuration for schema validation
 # Lint configuration for schema validation
-// lint {
-// }
+lint {
+  # Ensure all tables have primary keys
+  destructive {
+    error = true
+  }
+
+  # Naming conventions
+  naming {
+    match   = "^[a-z][a-z0-9_]*$"
+    message = "Table and column names must be lowercase with underscores"
+  }
+}
 
 # Local development environment - Watch schema
 env "local_watch" {
@@ -31,8 +40,8 @@ env "local_watch" {
   migration {
     dir = "file://migrations/watch"
   }
-  # Optional: Use a dev database for testing schema changes
-  # dev = "docker://mysql/8/dev"
+  # Dev database for linting and schema analysis
+  dev = "docker://mysql/8/dev"
 }
 
 # Local development environment - Keygen schema
@@ -42,6 +51,8 @@ env "local_keygen" {
   migration {
     dir = "file://migrations/keygen"
   }
+  # Dev database for linting and schema analysis
+  dev = "docker://mysql/8/dev"
 }
 
 # Local development environment - Sign schema
@@ -51,6 +62,8 @@ env "local_sign" {
   migration {
     dir = "file://migrations/sign"
   }
+  # Dev database for linting and schema analysis
+  dev = "docker://mysql/8/dev"
 }
 
 # Usage examples:
