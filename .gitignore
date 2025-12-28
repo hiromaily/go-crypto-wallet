@@ -22,12 +22,12 @@ data/certs/*
 data/gaiad/*
 
 # Note files
-docker/nodes/btc/data1/*
-!docker/nodes/btc/data1/bitcoin.conf
-docker/nodes/btc/data2/*
-!docker/nodes/btc/data2/bitcoin.conf
-docker/nodes/btc/data3/*
-!docker/nodes/btc/data3/bitcoin.conf
+docker/nodes/btc/watch/*
+!docker/nodes/btc/watch/bitcoin.conf
+docker/nodes/btc/keygen/*
+!docker/nodes/btc/keygen/bitcoin.conf
+docker/nodes/btc/sign1/*
+!docker/nodes/btc/sign1/bitcoin.conf
 docker/nodes/bch/data/testnet3
 !docker/nodes/bch/data/bitcoin.conf
 docker/nodes/eth/goerli/*

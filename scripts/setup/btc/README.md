@@ -110,8 +110,8 @@ Block generation is optional and failure doesn't stop the setup. If you need blo
 
 This setup supports multiple sign wallets (btc-sign1 and btc-sign2) for multisig operations:
 
-- **btc-sign1**: Uses `data3` directory, RPC port 20332
-- **btc-sign2**: Uses `data4` directory, RPC port 21332
+- **btc-sign1**: Uses `sign1` directory, RPC port 20332
+- **btc-sign2**: Uses `sign2` directory, RPC port 21332
 
 Both sign nodes run in offline mode (`-maxconnections=0`) for security.
 

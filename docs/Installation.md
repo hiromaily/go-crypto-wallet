@@ -37,7 +37,7 @@ docker compose up wallet-db
 
 At least, one bitcoin core server and 1 database (with 3 schemas: watch, keygen, sign) are required.
 
-1. copy `bitcoin.conf` from ./data/config/bitcoind/ to ./docker/nodes/btc/data1, data2, data3 directory respectively.
+1. copy `bitcoin.conf` from ./data/config/bitcoind/ to ./docker/nodes/btc/watch, keygen, sign1 directory respectively.
 
 - I recommend signet network.
 

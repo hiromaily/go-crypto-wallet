@@ -26,7 +26,7 @@ services:
     image: bitcoin/bitcoin:29.2
     container_name: btc-watch
     volumes:
-      - ./docker/nodes/btc/data1:/home/bitcoin/.bitcoin
+      - ./docker/nodes/btc/watch:/home/bitcoin/.bitcoin
     ports:
       - "${BTC_WATCH_RPC_PORT:-18332}:18443" # Map to regtest RPC port 18443
     stdin_open: true
@@ -53,7 +53,7 @@ services:
     image: bitcoin/bitcoin:29.2
     container_name: btc-keygen
     volumes:
-      - ./docker/nodes/btc/data2:/home/bitcoin/.bitcoin
+      - ./docker/nodes/btc/keygen:/home/bitcoin/.bitcoin
     ports:
       - "${BTC_KEYGEN_RPC_PORT:-19332}:18443" # Map to regtest RPC port 18443
     stdin_open: true
@@ -80,7 +80,7 @@ services:
     image: bitcoin/bitcoin:29.2
     container_name: btc-sign1
     volumes:
-      - ./docker/nodes/btc/data3:/home/bitcoin/.bitcoin
+      - ./docker/nodes/btc/sign1:/home/bitcoin/.bitcoin
     ports:
       - "${BTC_SIGN1_RPC_PORT:-20332}:18443" # Map to regtest RPC port 18443
     stdin_open: true
@@ -107,7 +107,7 @@ services:
     image: bitcoin/bitcoin:29.2
     container_name: btc-sign2
     volumes:
-      - ./docker/nodes/btc/data4:/home/bitcoin/.bitcoin
+      - ./docker/nodes/btc/sign2:/home/bitcoin/.bitcoin
     ports:
       - "${BTC_SIGN2_RPC_PORT:-21332}:18443" # Map to regtest RPC port 18443
     stdin_open: true
@@ -129,4 +129,3 @@ services:
       retries: 5
       start_period: 30s
     command: -maxconnections=0 -printtoconsole
-
