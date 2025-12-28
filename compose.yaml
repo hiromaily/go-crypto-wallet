@@ -63,9 +63,18 @@ services:
   #   - Create new migration: make atlas-new-docker SCHEMA=watch NAME=add_table
   #
   # Refer to https://hub.docker.com/r/arigaio/atlas/tags
-  wallet-db-migrate-watch:
+  #
+  # Note: The migration services below use YAML anchors (&migration-base) and aliases
+  #       (<<: *migration-base) to share common configuration. This reduces duplication
+  #       and makes maintenance easier. The `x-migration-base` is an extension field
+  #       (ignored by Docker Compose) that defines the common template, and each service
+  #       inherits from it using the merge key (<<:) and only overrides schema-specific
+  #       values (container_name, command parameters).
+  #
+  # Common migration service configuration template
+  # Using YAML anchor (&migration-base) to define reusable configuration
+  x-migration-base: &migration-base
     image: arigaio/atlas:1.0.0
-    container_name: wallet-db-migrate-watch
     volumes:
       - "./tools/atlas:/app/atlas"
     working_dir: /app/atlas
@@ -76,6 +85,13 @@ services:
       - db
     environment:
       - ATLAS_NO_UPDATE_NOTIFIER=true
+    restart: "no"
+
+  # Watch schema migration service
+  # Inherits common configuration from &migration-base using <<: *migration-base
+  wallet-db-migrate-watch:
+    <<: *migration-base
+    container_name: wallet-db-migrate-watch
     command:
       - migrate
       - apply
@@ -83,21 +99,12 @@ services:
       - file://migrations/watch
       - --url
       - "mysql://root:root@wallet-db:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
-    restart: "no"
 
+  # Keygen schema migration service
+  # Inherits common configuration from &migration-base using <<: *migration-base
   wallet-db-migrate-keygen:
-    image: arigaio/atlas:1.0.0
+    <<: *migration-base
     container_name: wallet-db-migrate-keygen
-    volumes:
-      - "./tools/atlas:/app/atlas"
-    working_dir: /app/atlas
-    depends_on:
-      wallet-db:
-        condition: service_healthy
-    networks:
-      - db
-    environment:
-      - ATLAS_NO_UPDATE_NOTIFIER=true
     command:
       - migrate
       - apply
@@ -105,21 +112,12 @@ services:
       - file://migrations/keygen
       - --url
       - "mysql://root:root@wallet-db:3306/keygen?charset=utf8mb4&parseTime=True&loc=Local"
-    restart: "no"
 
+  # Sign schema migration service
+  # Inherits common configuration from &migration-base using <<: *migration-base
   wallet-db-migrate-sign:
-    image: arigaio/atlas:1.0.0
+    <<: *migration-base
     container_name: wallet-db-migrate-sign
-    volumes:
-      - "./tools/atlas:/app/atlas"
-    working_dir: /app/atlas
-    depends_on:
-      wallet-db:
-        condition: service_healthy
-    networks:
-      - db
-    environment:
-      - ATLAS_NO_UPDATE_NOTIFIER=true
     command:
       - migrate
       - apply
@@ -127,4 +125,3 @@ services:
       - file://migrations/sign
       - --url
       - "mysql://root:root@wallet-db:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"
-    restart: "no"
