@@ -5,6 +5,7 @@ This directory contains Atlas configuration and migration files for managing dat
 ## Overview
 
 Atlas is a modern database schema migration tool written in Go. It provides:
+
 - Version-controlled migrations
 - Migration history tracking
 - Rollback capabilities
@@ -92,34 +93,46 @@ This creates a new migration file that will bring the database in line with the 
 
 ### Apply Migrations
 
-Apply all pending migrations for all schemas:
+**Docker environment (Automatic)**:
 
-**Local environment** (requires Atlas CLI installed):
-```bash
-make atlas-migrate
-```
+Migrations are **automatically applied** when you run `docker compose up`. The `compose.yaml` file defines three migration services:
 
-**Docker environment** (uses dedicated migration service):
+- `wallet-db-migrate-watch`: Applies migrations for the watch schema
+- `wallet-db-migrate-keygen`: Applies migrations for the keygen schema
+- `wallet-db-migrate-sign`: Applies migrations for the sign schema
+
+These services:
+
+- Automatically wait for the database to be ready (using `depends_on` with `service_healthy` condition)
+- Run in the same network as the database
+- Have access to the `tools/atlas` directory via volume mount
+- Use the official `arigaio/atlas:1.0.0` Docker image
+- Exit after completion (restart: "no")
+
+**Manual execution** (if needed):
+
 ```bash
 make atlas-migrate-docker
 ```
 
-The Docker environment uses a dedicated `wallet-db-migrate` service defined in `compose.yaml`. This service:
-- Automatically waits for the database to be ready (health check)
-- Runs in the same network as the database
-- Has access to the `tools/atlas` directory via volume mount
-- Uses the official `arigaio/atlas` Docker image
+**Local environment** (requires Atlas CLI installed):
+
+```bash
+make atlas-migrate
+```
 
 ### Check Migration Status
 
 View migration status for all schemas:
 
 **Local environment**:
+
 ```bash
 make atlas-status
 ```
 
 **Docker environment**:
+
 ```bash
 make atlas-status-docker
 ```
@@ -129,6 +142,7 @@ make atlas-status-docker
 Rollback the last migration for a specific schema:
 
 **Local environment**:
+
 ```bash
 make atlas-rollback SCHEMA=watch
 make atlas-rollback SCHEMA=keygen
@@ -136,6 +150,7 @@ make atlas-rollback SCHEMA=sign
 ```
 
 **Docker environment**:
+
 ```bash
 make atlas-rollback-docker SCHEMA=watch
 make atlas-rollback-docker SCHEMA=keygen
@@ -147,11 +162,13 @@ make atlas-rollback-docker SCHEMA=sign
 Validate all migration files:
 
 **Local environment**:
+
 ```bash
 make atlas-validate
 ```
 
 **Docker environment**:
+
 ```bash
 make atlas-validate-docker
 ```
@@ -161,6 +178,7 @@ make atlas-validate-docker
 Create a new migration file:
 
 **Local environment**:
+
 ```bash
 make atlas-new SCHEMA=watch NAME=add_new_table
 make atlas-new SCHEMA=keygen NAME=update_account_key
@@ -168,6 +186,7 @@ make atlas-new SCHEMA=sign NAME=add_index
 ```
 
 **Docker environment**:
+
 ```bash
 make atlas-new-docker SCHEMA=watch NAME=add_new_table
 make atlas-new-docker SCHEMA=keygen NAME=update_account_key
@@ -188,6 +207,7 @@ If you need to run Atlas commands directly (without Makefile):
 ### Local Environment
 
 **Watch Schema**:
+
 ```bash
 # Apply migrations
 atlas migrate apply \
@@ -201,6 +221,7 @@ atlas migrate status \
 ```
 
 **Keygen Schema**:
+
 ```bash
 atlas migrate apply \
   --dir file://tools/atlas/migrations/keygen \
@@ -208,6 +229,7 @@ atlas migrate apply \
 ```
 
 **Sign Schema**:
+
 ```bash
 atlas migrate apply \
   --dir file://tools/atlas/migrations/sign \
@@ -216,36 +238,53 @@ atlas migrate apply \
 
 ### Docker Environment
 
-Using the `wallet-db-migrate` service:
+**Note**: Migrations are automatically applied when you run `docker compose up`. The following commands are for manual execution if needed.
+
+Using the migration services:
 
 **Watch Schema**:
+
 ```bash
-# Apply migrations
-docker compose run --rm wallet-db-migrate migrate apply \
+# Apply migrations manually
+docker compose run --rm wallet-db-migrate-watch migrate apply \
   --dir file://migrations/watch \
   --url "mysql://root:root@wallet-db:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
 
 # Check status
-docker compose run --rm wallet-db-migrate migrate status \
+docker compose run --rm wallet-db-migrate-watch migrate status \
   --dir file://migrations/watch \
   --url "mysql://root:root@wallet-db:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
 ```
 
 **Keygen Schema**:
+
 ```bash
-docker compose run --rm wallet-db-migrate migrate apply \
+# Apply migrations manually
+docker compose run --rm wallet-db-migrate-keygen migrate apply \
+  --dir file://migrations/keygen \
+  --url "mysql://root:root@wallet-db:3306/keygen?charset=utf8mb4&parseTime=True&loc=Local"
+
+# Check status
+docker compose run --rm wallet-db-migrate-keygen migrate status \
   --dir file://migrations/keygen \
   --url "mysql://root:root@wallet-db:3306/keygen?charset=utf8mb4&parseTime=True&loc=Local"
 ```
 
 **Sign Schema**:
+
 ```bash
-docker compose run --rm wallet-db-migrate migrate apply \
+# Apply migrations manually
+docker compose run --rm wallet-db-migrate-sign migrate apply \
+  --dir file://migrations/sign \
+  --url "mysql://root:root@wallet-db:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"
+
+# Check status
+docker compose run --rm wallet-db-migrate-sign migrate status \
   --dir file://migrations/sign \
   --url "mysql://root:root@wallet-db:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"
 ```
 
-**Note**: In Docker environment, the working directory is `/atlas` (mounted from `./tools/atlas`), so paths are relative to that directory (e.g., `file://migrations/watch` instead of `file://tools/atlas/migrations/watch`).
+**Note**: In Docker environment, the working directory is `/app/atlas` (mounted from `./tools/atlas`), so paths are relative to that directory (e.g., `file://migrations/watch` instead of `file://tools/atlas/migrations/watch`).
 
 ## Migration History
 
@@ -254,11 +293,13 @@ Atlas automatically creates a migration history table (`atlas_schema_migrations`
 ## Best Practices
 
 1. **Always validate migrations** before applying:
+
    ```bash
    make atlas-validate
    ```
 
 2. **Check migration status** before applying:
+
    ```bash
    make atlas-status
    ```
@@ -276,15 +317,17 @@ Atlas automatically creates a migration history table (`atlas_schema_migrations`
 The project supports both approaches:
 
 ### HCL Schema (Declarative)
+
 - **Location**: `tools/atlas/schemas/*.hcl`
 - **Purpose**: Define the desired state of the database schema
 - **Usage**: Use `atlas schema apply` to apply directly, or generate migrations from diffs
-- **Benefits**: 
+- **Benefits**:
   - Single source of truth for schema definition
   - Easy to see the complete schema structure
   - Can generate migrations automatically from diffs
 
 ### SQL Migrations (Versioned)
+
 - **Location**: `tools/atlas/migrations/*/`
 - **Purpose**: Version-controlled, incremental schema changes
 - **Usage**: Use `atlas migrate apply` to apply migrations in order
@@ -299,14 +342,15 @@ The project supports both approaches:
 
 1. **Update HCL schema file** (`schemas/*.hcl`) with desired changes
 2. **Generate migration** from diff:
+
    ```bash
    make atlas-schema-diff-migration SCHEMA=watch
    ```
+
 3. **Review the generated migration** file
 4. **Apply the migration**:
-   ```bash
-   make atlas-migrate
-   ```
+   - **Docker environment**: Run `docker compose up` (migrations are applied automatically)
+   - **Local environment**: Run `make atlas-migrate`
 5. **Update sqlc schema files** if needed for code generation
 6. **Run sqlc generate** to update generated code
 
@@ -319,9 +363,12 @@ Atlas migrations and HCL schemas work alongside sqlc schema files:
 - **sqlc schemas**: Used for code generation (`tools/sqlc/schemas/`)
 
 When creating new tables or modifying existing ones:
+
 1. Update the HCL schema file (`schemas/*.hcl`)
 2. Generate a migration from the diff (or apply directly)
-3. Apply the migration
+3. Apply the migration:
+   - **Docker environment**: Run `docker compose up` (migrations are applied automatically)
+   - **Local environment**: Run `make atlas-migrate`
 4. Update sqlc schema files if needed for code generation
 5. Run `sqlc generate` to update generated code
 
@@ -330,6 +377,7 @@ When creating new tables or modifying existing ones:
 ### Migration Fails
 
 If a migration fails:
+
 1. Check the error message
 2. Verify the database connection
 3. Check if the schema exists
@@ -338,6 +386,7 @@ If a migration fails:
 ### Rollback Issues
 
 If rollback fails:
+
 1. Check migration history: `make atlas-status`
 2. Verify the migration file exists
 3. Check database connection
@@ -345,6 +394,7 @@ If rollback fails:
 ### Connection Issues
 
 If you can't connect to the database:
+
 1. Verify MySQL is running: `docker compose ps wallet-db`
 2. Check connection string in Makefile targets
 3. Verify credentials are correct
@@ -354,4 +404,3 @@ If you can't connect to the database:
 - [Database Architecture Documentation](../../docs/development/database.md)
 - [Atlas Official Documentation](https://atlasgo.io/)
 - [Atlas MySQL Guide](https://atlasgo.io/guides/mysql)
-

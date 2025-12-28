@@ -1,6 +1,7 @@
 # Atlas Configuration for go-crypto-wallet
 # Manages three separate schemas: watch, keygen, sign
 # Uses HCL schema files for declarative schema management
+# Atlas version: 1.0.0
 
 # Variable to control destructive changes (drop schema/table/column)
 variable "destructive" {
@@ -17,6 +18,11 @@ diff {
     drop_column = !var.destructive
   }
 }
+
+# TODO: Add proper lint configuration for schema validation
+# Lint configuration for schema validation
+// lint {
+// }
 
 # Local development environment - Watch schema
 env "local_watch" {

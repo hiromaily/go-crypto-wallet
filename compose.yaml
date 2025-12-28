@@ -11,6 +11,16 @@ services:
   # Database
   #########################################################################
   # Consolidated wallet database with schema separation
+  #
+  # Note: MySQL 8.4 uses caching_sha2_password authentication plugin by default,
+  # which requires SSL connection. If you encounter the error:
+  #   "Authentication plugin 'caching_sha2_password' reported error: Authentication requires secure connection."
+  #
+  # To connect from local machine, enable SSL in your connection:
+  #   - MySQL CLI: mysql -h localhost -u hiromaily -p --ssl-mode=REQUIRED
+  #   - Connection string: mysql://user:pass@localhost:3306/db?tls=true
+  #   - Go DSN: user:pass@tcp(localhost:3306)/db?tls=true
+  #
   wallet-db:
     image: mysql:8.4
     container_name: wallet-db
