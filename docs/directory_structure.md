@@ -8,7 +8,9 @@ This project follows **Clean Architecture** principles with clear layer separati
 The project uses both `pkg/` and `internal/` directories:
 
 - **`internal/`**: New architecture following Clean Architecture (domain, application, infrastructure, interface-adapters)
-- **`pkg/`**: Shared utilities and legacy/transitional code for backward compatibility
+- **`pkg/`**: Public packages containing shared utilities (configuration, logging, database, etc.)
+  - **Critical Rule**: Packages in `pkg/` MUST NOT import or depend on `internal/` directory
+  - See [`pkg/AGENTS.md`](../pkg/AGENTS.md) for detailed guidelines
 
 ## Root Directory Structure
 
@@ -40,7 +42,9 @@ internal/
 │   └── wallet/             # Wallet types and definitions
 │
 ├── application/            # Application Layer - Use case layer
-│   ├── ports/              # Port interfaces (API, persistence)
+│   ├── ports/              # Port interfaces
+│   │   ├── api/            # API port interfaces
+│   │   └── persistence/    # Persistence port interfaces
 │   └── usecase/            # Use case implementations
 │       ├── keygen/         # Key generation use cases
 │       │   ├── btc/        # Bitcoin-specific use cases
@@ -61,18 +65,32 @@ internal/
 ├── infrastructure/         # Infrastructure Layer - External dependencies
 │   ├── api/                # External API clients
 │   │   ├── bitcoin/        # Bitcoin/BCH Core RPC API clients
+│   │   │   ├── btc/        # Bitcoin-specific API clients
+│   │   │   └── bch/        # Bitcoin Cash-specific API clients
 │   │   ├── ethereum/       # Ethereum JSON-RPC API clients
+│   │   │   ├── eth/        # Ethereum-specific API clients
+│   │   │   ├── erc20/      # ERC-20 token API clients
+│   │   │   └── ethtx/      # Ethereum transaction utilities
 │   │   └── ripple/         # Ripple gRPC API clients
+│   │       └── xrp/        # XRP-specific API clients
+│   ├── config/             # Configuration management
+│   │   └── account/        # Account configuration (multisig, TOML)
+│   ├── contract/           # Smart contract utilities
+│   │   └── token-abi.go    # ERC-20 token ABI generated code
 │   ├── database/           # Database connections and generated code
-│   │   ├── mysql/          # MySQL connection management
+│   │   ├── models/         # Database models
+│   │   │   └── rdb/        # RDB models
 │   │   └── sqlc/           # SQLC generated database code
 │   ├── repository/         # Data persistence implementations
 │   │   ├── cold/           # Cold wallet repository (keygen, sign)
 │   │   └── watch/          # Watch wallet repository
 │   ├── storage/            # File storage implementations
-│   │   └── file/           # File-based storage (address, transaction)
-│   └── network/            # Network communication
-│       └── websocket/      # WebSocket client implementations
+│   │   └── file/           # File-based storage
+│   │       ├── address/    # Address file storage (bch, xrp subdirs)
+│   │       ├── fullpubkey/ # Full public key file storage
+│   │       └── transaction.go # Transaction file storage
+│   └── wallet/             # Wallet infrastructure
+│       └── key/            # Key generation logic (HD wallet, seeds, BIP generators)
 │
 ├── interface-adapters/     # Interface Adapters Layer
 │   ├── cli/                # CLI command implementations
@@ -86,64 +104,39 @@ internal/
 │       ├── eth/            # Ethereum wallet implementations
 │       └── xrp/            # XRP wallet implementations
 │
-├── wallet/                 # Deprecated - Backward compatibility aliases
-│   ├── keygener.go         # Type alias to interface-adapters/wallet.Keygener
-│   ├── signer.go           # Type alias to interface-adapters/wallet.Signer
-│   └── watcher.go          # Type alias to interface-adapters/wallet.Watcher
-│
 └── di/                     # Dependency injection container
     └── container.go        # DI container implementation
 ```
 
-## Package Directory Structure (Legacy and Utilities)
+## Package Directory Structure (Shared Utilities)
 
-The `pkg/` directory contains shared utilities and legacy/transitional code:
+The `pkg/` directory contains **public packages** that can be imported by external code.
+These packages provide shared utilities, configuration management, logging, and other common functionality.
+
+**⚠️ Critical Rule**: Packages in `pkg/` MUST NOT import or depend on any packages in `internal/` directory.
+
+For detailed guidelines, see [`pkg/AGENTS.md`](../pkg/AGENTS.md).
 
 ```text
 pkg/
-├── domain/                 # Domain layer (legacy/transitional)
-│   ├── account/            # Account types and validators
-│   ├── coin/               # Cryptocurrency type definitions
-│   ├── key/                # Key value objects and validators
-│   ├── multisig/           # Multisig validators
-│   ├── transaction/       # Transaction types and validators
-│   └── wallet/             # Wallet types
-│
-├── application/            # Application layer (legacy/transitional)
-│   └── usecase/            # Use case implementations (legacy)
-│
-├── infrastructure/         # Infrastructure layer (legacy/transitional)
-│   ├── api/                # External API clients (legacy)
-│   ├── database/           # Database connections (legacy)
-│   ├── repository/         # Repository implementations (legacy)
-│   ├── storage/            # File storage (legacy)
-│   └── network/            # Network communication (legacy)
-│
-├── wallet/                 # Wallet-related utilities
-│   ├── key/                # Key generation logic (HD wallet, seeds)
-│   └── service/            # Legacy service layer (transitional)
-│       ├── keygen/         # Key generation services
-│       ├── sign/           # Signing services
-│       └── watch/          # Watch wallet services
-│
-├── command/                # Command implementations (legacy)
-│   ├── keygen/             # Keygen commands
-│   ├── sign/               # Sign commands
-│   └── watch/              # Watch commands
-│
-├── di/                     # Dependency injection (legacy)
-├── config/                 # Configuration management
-├── logger/                 # Logging utilities
-├── address/                # Address formatting and utilities
-├── account/                # Account utilities (backward compatibility)
-├── contract/               # Smart contract utilities (ERC-20 token ABI)
+├── AGENTS.md               # Guidelines for working with pkg/ packages
+├── config/                 # Configuration management utilities
+│   └── testutil/           # Test utilities for configuration
 ├── converter/              # Data conversion utilities
+├── db/                     # Database utilities
+│   └── mysql/              # MySQL database connection utilities
 ├── debug/                  # Debug utilities
-├── fullpubkey/             # Full public key formatting utilities
-├── models/                 # Data models (RDB)
+├── decimal/                # Decimal number utilities
+├── di/                     # Legacy dependency injection container
+│                           # (for backward compatibility)
+├── grpc/                   # gRPC client utilities
+├── logger/                 # Logging utilities
+│                           # (structured logging, noop logger, slog support)
 ├── serial/                 # Serialization utilities
-├── testutil/               # Test utilities
-└── uuid/                   # UUID generation utilities
+├── testutil/               # Test utilities for various components
+│                           # (btc, eth, xrp, repository, suite)
+├── uuid/                   # UUID generation utilities
+└── websocket/              # WebSocket client utilities
 ```
 
 ## Command Entry Points
@@ -281,15 +274,18 @@ The project supports three wallet types:
 
 ## Migration Status
 
-The project is currently in a transition phase:
+The project follows Clean Architecture principles:
 
-- **New Architecture**: `internal/` directory with Clean Architecture
-- **Legacy Code**: `pkg/` directory with old structure (being migrated)
+- **New Architecture**: `internal/` directory with Clean Architecture (domain, application, infrastructure, interface-adapters)
+- **Shared Utilities**: `pkg/` directory contains public packages for external use (configuration, logging, utilities)
+  - **Critical Rule**: Packages in `pkg/` MUST NOT import or depend on `internal/` directory
+  - See [`pkg/AGENTS.md`](../pkg/AGENTS.md) for detailed guidelines
 
 For detailed refactoring status, see `docs/issues/REFACTORING_CHECKLIST.md`.
 
 ## References
 
 - [AGENTS.md](../AGENTS.md) - Detailed architecture guidelines
+- [pkg/AGENTS.md](../pkg/AGENTS.md) - Guidelines for working with `pkg/` packages
 - [README.md](../README.md) - Project overview
 - [docs/issues/REFACTORING_PLAN.md](issues/REFACTORING_PLAN.md) - Refactoring plan
