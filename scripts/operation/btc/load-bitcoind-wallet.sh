@@ -2,14 +2,12 @@
 
 set -u
 
-CLI_WATCH="docker exec -it btc-watch bitcoin-cli"
-CLI_KEYGEN="docker exec -it btc-keygen bitcoin-cli"
-CLI_SIGN="docker exec -it btc-sign bitcoin-cli"
+CLI_WATCH="docker exec btc-watch bitcoin-cli"
+CLI_KEYGEN="docker exec btc-keygen bitcoin-cli"
+CLI_SIGN1="docker exec btc-sign1 bitcoin-cli"
+CLI_SIGN2="docker exec btc-sign2 bitcoin-cli"
 
 $CLI_WATCH loadwallet watch
 $CLI_KEYGEN loadwallet keygen
-$CLI_SIGN loadwallet sign1
-$CLI_SIGN loadwallet sign2
-$CLI_SIGN loadwallet sign3
-$CLI_SIGN loadwallet sign4
-$CLI_SIGN loadwallet sign5
+$CLI_SIGN1 loadwallet sign1
+$CLI_SIGN2 loadwallet sign2

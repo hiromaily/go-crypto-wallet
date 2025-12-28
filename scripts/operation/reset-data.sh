@@ -8,11 +8,12 @@ docker compose rm -f -s wallet-db
 docker volume rm -f go-crypto-wallet_wallet-db
 
 # reset bitcoind dat
-docker compose -f compose.btc.yaml stop btc-watch btc-keygen btc-sign
-rm -rf ./docker/nodes/btc/data1/signet/wallets/watch
-rm -rf ./docker/nodes/btc/data2/signet/wallets/keygen
-rm -rf ./docker/nodes/btc/data3/signet/wallets/sign1
-rm -rf ./docker/nodes/btc/data3/signet/wallets/sign2
-rm -rf ./docker/nodes/btc/data3/signet/wallets/sign3
-rm -rf ./docker/nodes/btc/data3/signet/wallets/sign4
-rm -rf ./docker/nodes/btc/data3/signet/wallets/sign5
+docker compose -f compose.btc.yaml stop btc-watch btc-keygen btc-sign1 btc-sign2
+rm -rf ./docker/nodes/btc/watch/signet/wallets/*
+rm -rf ./docker/nodes/btc/keygen/signet/wallets/*
+rm -rf ./docker/nodes/btc/sign1/signet/wallets/*
+rm -rf ./docker/nodes/btc/sign2/signet/wallets/*
+rm -rf ./docker/nodes/btc/watch/regtest/wallets/*
+rm -rf ./docker/nodes/btc/keygen/regtest/wallets/*
+rm -rf ./docker/nodes/btc/sign1/regtest/wallets/*
+rm -rf ./docker/nodes/btc/sign2/regtest/wallets/*
