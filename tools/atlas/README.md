@@ -109,11 +109,9 @@ make atlas-schema-apply
 
 # Apply specific schema
 make atlas-schema-apply-one SCHEMA=watch
-
-# Show diff before applying
-make atlas-schema-diff SCHEMA=watch
-make atlas-schema-diff-all
 ```
+
+**Note**: To see what changes will be applied, use `atlas-migrate-diff` to generate a migration file which shows the SQL changes.
 
 ### Production Workflow (Migration History Approach)
 
@@ -179,8 +177,8 @@ make atlas-help
 
 **Quick Reference**:
 
-- **Format & Lint**: `make atlas-fmt`, `make atlas-lint`
-- **Schema Management**: `make atlas-schema-diff`, `make atlas-schema-apply`
+- **Format & Lint**: `make atlas-fmt`, `make atlas-lint` (requires Docker)
+- **Schema Management**: `make atlas-schema-apply`, `make atlas-schema-apply-one`
 - **Migration Management**: `make atlas-migrate-status`, `make atlas-migrate-apply`, `make atlas-migrate-diff`
 - **Development**: `make atlas-dev-reset`, `make atlas-dev-clean`
 - **Production**: `make atlas-prod-init`

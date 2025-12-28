@@ -24,49 +24,27 @@ atlas-fmt:
 atlas-lint:
 	@echo "Linting Atlas HCL schema files..."
 	@echo "=== Linting watch schema ==="
-	@atlas schema lint --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_WATCH)
+	@cd tools/atlas && atlas schema lint --config file://atlas.hcl --env $(ATLAS_ENV_WATCH)
 	@echo "\n=== Linting keygen schema ==="
-	@atlas schema lint --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_KEYGEN)
+	@cd tools/atlas && atlas schema lint --config file://atlas.hcl --env $(ATLAS_ENV_KEYGEN)
 	@echo "\n=== Linting sign schema ==="
-	@atlas schema lint --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_SIGN)
+	@cd tools/atlas && atlas schema lint --config file://atlas.hcl --env $(ATLAS_ENV_SIGN)
 	@echo "✓ All schemas passed linting"
 
 ###############################################################################
 # Atlas Schema Management Targets
 ###############################################################################
 
-# Show diff between database and HCL schema for a specific schema
-# Usage: make atlas-schema-diff SCHEMA=watch
-.PHONY: atlas-schema-diff
-atlas-schema-diff:
-ifndef SCHEMA
-	@echo "Error: SCHEMA parameter is required"
-	@echo "Usage: make atlas-schema-diff SCHEMA=watch|keygen|sign"
-	@exit 1
-endif
-	@echo "=== Schema diff for $(SCHEMA) ==="
-	@atlas schema diff --config $(ATLAS_CONFIG) --env local_$(SCHEMA)
-
-# Show diff for all schemas
-.PHONY: atlas-schema-diff-all
-atlas-schema-diff-all:
-	@echo "=== Watch Schema Diff ==="
-	@atlas schema diff --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_WATCH) || true
-	@echo "\n=== Keygen Schema Diff ==="
-	@atlas schema diff --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_KEYGEN) || true
-	@echo "\n=== Sign Schema Diff ==="
-	@atlas schema diff --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_SIGN) || true
-
 # Apply HCL schema directly to database (all schemas)
 .PHONY: atlas-schema-apply
 atlas-schema-apply:
 	@echo "Applying HCL schemas directly to databases..."
 	@echo "=== Applying watch schema ==="
-	@atlas schema apply --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_WATCH) --auto-approve
+	@cd tools/atlas && atlas schema apply --config file://atlas.hcl --env $(ATLAS_ENV_WATCH) --auto-approve
 	@echo "=== Applying keygen schema ==="
-	@atlas schema apply --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_KEYGEN) --auto-approve
+	@cd tools/atlas && atlas schema apply --config file://atlas.hcl --env $(ATLAS_ENV_KEYGEN) --auto-approve
 	@echo "=== Applying sign schema ==="
-	@atlas schema apply --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_SIGN) --auto-approve
+	@cd tools/atlas && atlas schema apply --config file://atlas.hcl --env $(ATLAS_ENV_SIGN) --auto-approve
 	@echo "✓ All schemas applied successfully"
 
 # Apply HCL schema for a specific schema
@@ -79,7 +57,7 @@ ifndef SCHEMA
 	@exit 1
 endif
 	@echo "=== Applying $(SCHEMA) schema ==="
-	@atlas schema apply --config $(ATLAS_CONFIG) --env local_$(SCHEMA) --auto-approve
+	@cd tools/atlas && atlas schema apply --config file://atlas.hcl --env local_$(SCHEMA) --auto-approve
 
 ###############################################################################
 # Atlas Migration Targets
@@ -89,22 +67,22 @@ endif
 .PHONY: atlas-migrate-status
 atlas-migrate-status:
 	@echo "=== Watch Schema Migration Status ==="
-	@atlas migrate status --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_WATCH) || true
+	@cd tools/atlas && atlas migrate status --config file://atlas.hcl --env $(ATLAS_ENV_WATCH) || true
 	@echo "\n=== Keygen Schema Migration Status ==="
-	@atlas migrate status --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_KEYGEN) || true
+	@cd tools/atlas && atlas migrate status --config file://atlas.hcl --env $(ATLAS_ENV_KEYGEN) || true
 	@echo "\n=== Sign Schema Migration Status ==="
-	@atlas migrate status --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_SIGN) || true
+	@cd tools/atlas && atlas migrate status --config file://atlas.hcl --env $(ATLAS_ENV_SIGN) || true
 
 # Apply all pending migrations for all schemas
 .PHONY: atlas-migrate-apply
 atlas-migrate-apply:
 	@echo "Applying migrations for all schemas..."
 	@echo "=== Applying watch migrations ==="
-	@atlas migrate apply --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_WATCH)
+	@cd tools/atlas && atlas migrate apply --config file://atlas.hcl --env $(ATLAS_ENV_WATCH)
 	@echo "=== Applying keygen migrations ==="
-	@atlas migrate apply --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_KEYGEN)
+	@cd tools/atlas && atlas migrate apply --config file://atlas.hcl --env $(ATLAS_ENV_KEYGEN)
 	@echo "=== Applying sign migrations ==="
-	@atlas migrate apply --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_SIGN)
+	@cd tools/atlas && atlas migrate apply --config file://atlas.hcl --env $(ATLAS_ENV_SIGN)
 	@echo "✓ All migrations applied successfully"
 
 # Generate new migration from HCL schema diff
@@ -122,16 +100,16 @@ ifndef NAME
 	@exit 1
 endif
 	@echo "=== Generating migration for $(SCHEMA) schema ==="
-	@atlas migrate diff $(NAME) --config $(ATLAS_CONFIG) --env local_$(SCHEMA)
+	@cd tools/atlas && atlas migrate diff $(NAME) --config file://atlas.hcl --env local_$(SCHEMA)
 	@echo "✓ Migration generated: tools/atlas/migrations/$(SCHEMA)/"
 
 # Hash migration directory for production readiness
 .PHONY: atlas-migrate-hash
 atlas-migrate-hash:
 	@echo "Hashing migration directories..."
-	@atlas migrate hash --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_WATCH)
-	@atlas migrate hash --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_KEYGEN)
-	@atlas migrate hash --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_SIGN)
+	@cd tools/atlas && atlas migrate hash --config file://atlas.hcl --env $(ATLAS_ENV_WATCH)
+	@cd tools/atlas && atlas migrate hash --config file://atlas.hcl --env $(ATLAS_ENV_KEYGEN)
+	@cd tools/atlas && atlas migrate hash --config file://atlas.hcl --env $(ATLAS_ENV_SIGN)
 	@echo "✓ Migration directories hashed"
 
 ###############################################################################
@@ -152,11 +130,11 @@ atlas-dev-reset:
 		rm -rf tools/atlas/migrations/keygen/*.sql; \
 		rm -rf tools/atlas/migrations/sign/*.sql; \
 		echo "=== Generating watch migration ==="; \
-		atlas migrate diff initial_schema --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_WATCH); \
+		cd tools/atlas && atlas migrate diff initial_schema --config file://atlas.hcl --env $(ATLAS_ENV_WATCH); \
 		echo "=== Generating keygen migration ==="; \
-		atlas migrate diff initial_schema --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_KEYGEN); \
+		cd tools/atlas && atlas migrate diff initial_schema --config file://atlas.hcl --env $(ATLAS_ENV_KEYGEN); \
 		echo "=== Generating sign migration ==="; \
-		atlas migrate diff initial_schema --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_SIGN); \
+		cd tools/atlas && atlas migrate diff initial_schema --config file://atlas.hcl --env $(ATLAS_ENV_SIGN); \
 		echo "✓ Migrations regenerated. Run 'docker compose up' or 'make atlas-migrate-apply' to apply."; \
 	else \
 		echo "Cancelled."; \
@@ -171,9 +149,9 @@ atlas-dev-clean:
 	echo; \
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
 		echo "Cleaning and recreating databases..."; \
-		atlas schema clean --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_WATCH) --auto-approve; \
-		atlas schema clean --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_KEYGEN) --auto-approve; \
-		atlas schema clean --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_SIGN) --auto-approve; \
+		cd tools/atlas && atlas schema clean --config file://atlas.hcl --env $(ATLAS_ENV_WATCH) --auto-approve; \
+		cd tools/atlas && atlas schema clean --config file://atlas.hcl --env $(ATLAS_ENV_KEYGEN) --auto-approve; \
+		cd tools/atlas && atlas schema clean --config file://atlas.hcl --env $(ATLAS_ENV_SIGN) --auto-approve; \
 		echo "Applying HCL schemas..."; \
 		$(MAKE) atlas-schema-apply; \
 		echo "✓ Databases cleaned and recreated"; \
@@ -219,11 +197,9 @@ atlas-help:
 	@echo ""
 	@echo "Format and Lint:"
 	@echo "  atlas-fmt                Format HCL schema files"
-	@echo "  atlas-lint               Lint HCL schema files"
+	@echo "  atlas-lint               Lint HCL schema files (requires Docker)"
 	@echo ""
 	@echo "Schema Management:"
-	@echo "  atlas-schema-diff SCHEMA=<name>    Show diff for specific schema"
-	@echo "  atlas-schema-diff-all              Show diff for all schemas"
 	@echo "  atlas-schema-apply                 Apply HCL schemas to all databases"
 	@echo "  atlas-schema-apply-one SCHEMA=<name>  Apply HCL schema to specific database"
 	@echo ""
