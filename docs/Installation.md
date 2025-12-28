@@ -14,16 +14,13 @@ This installation expects MacOS environment.
 
 - only each sign wallet includes corresponding account name as `authName` into binary
 
-```
+```sh
 make build
  or
 go build -v -o ${GOPATH}/bin/watch ./cmd/watch/
 go build -v -o ${GOPATH}/bin/keygen ./cmd/keygen/
 go build -ldflags "-X main.authName=auth1" -v -o ${GOPATH}/bin/sign1 ./cmd/sign/
 go build -ldflags "-X main.authName=auth2" -v -o ${GOPATH}/bin/sign2 ./cmd/sign/
-go build -ldflags "-X main.authName=auth3" -v -o ${GOPATH}/bin/sign3 ./cmd/sign/
-go build -ldflags "-X main.authName=auth4" -v -o ${GOPATH}/bin/sign4 ./cmd/sign/
-go build -ldflags "-X main.authName=auth5" -v -o ${GOPATH}/bin/sign5 ./cmd/sign/
 ```
 
 1. configure config files in [./data/config/*.toml](https://github.com/hiromaily/go-crypto-wallet/tree/master/data/config)

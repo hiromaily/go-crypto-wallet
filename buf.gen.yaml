@@ -11,13 +11,13 @@ managed:
 plugins:
   # Generate Go protocol buffer code
   - remote: buf.build/protocolbuffers/go
-    out: pkg/wallet/api/xrpgrp/xrp
+    out: internal/infrastructure/api/ripple/xrp
     opt:
       - paths=source_relative
 
   # Generate Go gRPC service code
   - remote: buf.build/grpc/go
-    out: pkg/wallet/api/xrpgrp/xrp
+    out: internal/infrastructure/api/ripple/xrp
     opt:
       - paths=source_relative
 

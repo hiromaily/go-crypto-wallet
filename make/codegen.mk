@@ -8,7 +8,7 @@
 # Generate Go code from SQL queries using sqlc
 # Schemas: tools/sqlc/schemas/*.sql
 # Queries: tools/sqlc/queries/*.sql
-# Output: pkg/db/rdb/sqlcgen/
+# Output: internal/infrastructure/database/sqlc/
 #------------------------------------------------------------------------------
 .PHONY: sqlc
 sqlc:
@@ -17,7 +17,7 @@ sqlc:
 # ABI
 .PHONY: generate-abi
 generate-abi:
-	abigen --abi ./data/contract/token.abi --pkg contract --type Token --out ./pkg/contract/token-abi.go
+	abigen --abi ./data/contract/token.abi --pkg contract --type Token --out ./internal/infrastructure/contract/token-abi.go
 
 ###############################################################################
 # Protocol Buffer (buf-based generation)
@@ -47,4 +47,4 @@ protoc-go: clean-pb
 # Clean generated protobuf files
 .PHONY: clean-pb
 clean-pb:
-	rm -rf pkg/wallet/api/xrpgrp/xrp/*.pb.go
+	rm -rf internal/infrastructure/api/ripple/xrp/*.pb.go

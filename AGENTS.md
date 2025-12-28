@@ -18,7 +18,7 @@ This document provides guidelines for AI agents working on this project.
 
 ### Domain Layer Guidelines
 
-The `pkg/domain/` package contains pure business logic with **ZERO infrastructure dependencies**.
+The `internal/domain/` package contains pure business logic with **ZERO infrastructure dependencies**.
 
 **Key Principles:**
 
@@ -39,12 +39,10 @@ The `pkg/domain/` package contains pure business logic with **ZERO infrastructur
 - When adding new business logic, first consider if it belongs in the domain layer
 - Use domain validators for input validation before infrastructure operations
 - Business rules should be in domain, not scattered across services
-- For backward compatibility, old packages (`pkg/wallet/types.go`, `pkg/account/types.go`, etc.)
-  now provide type aliases to domain types
 
 ### Application Layer (Use Case) Guidelines
 
-The `pkg/application/usecase/` package implements the use case layer following Clean Architecture principles.
+The `internal/application/usecase/` package implements the use case layer following Clean Architecture principles.
 
 **Key Principles:**
 
@@ -102,8 +100,8 @@ func (u *xxxUseCase) Execute(ctx context.Context, input XxxInput) (*XxxOutput, e
 
 **Organization Structure:**
 
-```
-pkg/application/usecase/
+```text
+internal/application/usecase/
 ├── keygen/
 │   ├── interfaces.go              # Use case interfaces
 │   ├── btc/                       # Bitcoin-specific use cases
@@ -127,6 +125,7 @@ pkg/application/usecase/
 **Testing Approach:**
 
 Use cases currently have constructor tests that verify:
+
 - Use case can be instantiated with dependencies
 - Correct interface implementation
 
@@ -141,7 +140,7 @@ For comprehensive testing strategy, see `docs/TESTING_STRATEGY.md`.
 
 **Important:**
 
-- Commands in `pkg/command/` should ONLY depend on use cases, NOT services directly
+- Commands in `internal/interface-adapters/cli/` should ONLY depend on use cases, NOT services directly
 - Use cases should be small and focused on a single operation
 - Avoid business logic in use cases; delegate to domain or services
 - Use cases are the entry point to application logic from command layer
@@ -184,7 +183,8 @@ Therefore, `panic` is only allowed during instance construction.
 Specifically, `panic` is acceptable in:
 
 - `main.go` files (application entry points)
-- `pkg/di` package (dependency injection container)
+- `internal/di` package (dependency injection container)
+- `pkg/di` package (legacy dependency injection container - for backward compatibility)
 
 **Important:**
 
@@ -232,6 +232,7 @@ Specifically, `panic` is acceptable in:
       - `bitcoin/`: Bitcoin/BCH Core RPC API clients (btc, bch)
       - `ethereum/`: Ethereum JSON-RPC API clients (eth, erc20)
       - `ripple/`: Ripple gRPC API clients (xrp)
+    - `contract/`: Smart contract utilities (ERC-20 token ABI generated code)
     - `database/`: Database connections and generated code
       - `mysql/`: MySQL connection management
       - `sqlc/`: SQLC generated database code
@@ -261,14 +262,13 @@ Specifically, `panic` is acceptable in:
 - `pkg/`: Shared packages (reusable, for external use)
   - `config/`: Configuration management
   - `logger/`: Logging utilities
-  - `address/`: Address formatting and utilities (bch, xrp)
-  - `contract/`: Smart contract utilities (ERC-20 token ABI)
   - `converter/`: Data conversion utilities
   - `debug/`: Debug utilities
-  - `fullpubkey/`: Full public key formatting utilities
   - `serial/`: Serialization utilities
   - `testutil/`: Test utilities (btc, eth, xrp, repository, suite)
   - `uuid/`: UUID generation utilities
+  - `db/`: Database generated code (SQLC)
+  - `di/`: Legacy dependency injection container (for backward compatibility)
 - `data/`: Generated files, configuration files
   - `address/`: Address data files (bch, btc, eth, xrp)
   - `config/`: Configuration files (account, wallet configs, node configs)
@@ -342,6 +342,106 @@ Interface Adapters (interface-adapters/*) → Application Layer (application/use
 - **ETH**: Ethereum JSON-RPC API, ERC-20 token support
 - **XRP**: Communication via gRPC with ripple-lib-server
 
+## Auto-Generated Files
+
+This project uses several code generation tools.
+**All auto-generated files contain `DO NOT EDIT` comments and must never be manually modified.**
+
+### Database Code (SQLC)
+
+**Tool**: [sqlc](https://sqlc.dev/)  
+**Source**: `tools/sqlc/schemas/*.sql` and `tools/sqlc/queries/*.sql`  
+**Command**: `make sqlc` (or `cd tools/sqlc && sqlc generate`)
+
+**Generated Files**:
+
+- `internal/infrastructure/database/sqlc/*.go` (15 files)
+  - `models.go` - Database models
+  - `db.go` - Database connection code
+  - `*.sql.go` - Query functions (account_key, address, auth_account_key,
+    auth_fullpubkey, btc_tx, btc_tx_input, btc_tx_output, eth_detail_tx,
+    payment_request, seed, tx, xrp_account_key, xrp_detail_tx)
+
+**Note**: The legacy location `pkg/db/rdb/sqlcgen/*.go` is no longer generated and can be safely deleted.
+
+**Note**: SQLC generates type-safe Go code from SQL queries and schemas.
+
+### Protocol Buffer Code (Go)
+
+**Tool**: [buf](https://buf.build/) with protoc-gen-go and protoc-gen-go-grpc  
+**Source**: `data/proto/rippleapi/*.proto`  
+**Command**: `make protoc-go` (or `buf generate`)
+
+**Generated Files**:
+
+- `internal/infrastructure/api/ripple/xrp/*.pb.go` (6 files)
+  - `account.pb.go` - Account message types
+  - `account_grpc.pb.go` - Account gRPC service code
+  - `address.pb.go` - Address message types
+  - `address_grpc.pb.go` - Address gRPC service code
+  - `transaction.pb.go` - Transaction message types
+  - `transaction_grpc.pb.go` - Transaction gRPC service code
+
+**Note**: Protocol buffers are used for XRP (Ripple) gRPC communication.
+
+### Smart Contract ABI Code
+
+**Tool**: [abigen](https://geth.ethereum.org/docs/tools/abigen) (from go-ethereum)  
+**Source**: `data/contract/token.abi`  
+**Command**: `make generate-abi` (or `abigen --abi ./data/contract/token.abi --pkg contract --type Token --out ./internal/infrastructure/contract/token-abi.go`)
+
+**Generated Files**:
+
+- `internal/infrastructure/contract/token-abi.go` - ERC-20 token contract bindings
+
+**Note**: ABI code is generated from Ethereum smart contract ABI JSON files.
+
+### Protocol Buffer Code (JavaScript/TypeScript)
+
+**Tool**: protoc with JavaScript/TypeScript plugins  
+**Source**: `data/proto/rippleapi/*.proto`  
+**Command**: `web/ripple-lib-server/scripts/protoc-ts.sh`
+
+**Generated Files**:
+
+- `web/ripple-lib-server/src/pb/*.js` - JavaScript/TypeScript protocol buffer code
+  - `account_pb.js`, `account_grpc_pb.js`
+  - `address_pb.js`, `address_grpc_pb.js`
+  - `transaction_pb.js`, `transaction_grpc_pb.js`
+  - `gogo/protobuf/gogoproto/gogo_pb.js`
+
+**Note**: Used by the ripple-lib-server web project.
+
+### Web Project Build Artifacts
+
+**Tool**: Various build tools (Truffle, webpack, etc.)  
+**Generated Files**:
+
+- `web/erc20-token/build/` - Compiled smart contracts and frontend assets
+
+**Note**: These are build outputs from the ERC-20 token web project.
+
+### Dependency Lock Files
+
+**Tool**: Go modules, npm/yarn  
+**Generated Files**:
+
+- `go.sum` - Go module checksums
+- `web/*/yarn.lock` - Yarn package lock files
+- `web/*/package-lock.json` - npm package lock files
+
+**Note**: These files track exact dependency versions and should be committed to version control.
+
+### Important Rules
+
+1. **Never manually edit auto-generated files** - Changes will be overwritten on next generation
+2. **Edit source files instead**:
+   - SQLC: Edit `tools/sqlc/schemas/*.sql` and `tools/sqlc/queries/*.sql`
+   - Protocol Buffers: Edit `data/proto/rippleapi/*.proto`
+   - ABI: Edit `data/contract/token.abi` (or regenerate from Solidity source)
+3. **Regenerate after source changes** - Run the appropriate make command after modifying source files
+4. **Verify generation** - Run `make check-build` after regenerating to ensure code compiles
+
 ## Important Notes
 
 - This is a financial-related project; make changes carefully
@@ -351,6 +451,7 @@ Interface Adapters (interface-adapters/*) → Application Layer (application/use
 - Consider the impact on offline wallet operations (keygen, sign)
 - **DO NOT** edit files that contain `DO NOT EDIT` comments
   (typically auto-generated files from tools like sqlc, protoc, or go generate)
+- See [Auto-Generated Files](#auto-generated-files) section for complete list
 - **Git Operations**:
   - Allowed: `git add`, `git commit`, and `git push` to GitHub
   - **NOT allowed**: `git merge` operations

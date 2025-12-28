@@ -151,9 +151,9 @@ if err != nil {
 
 Target packages:
 
-- [x] `pkg/wallet/api/ethgrp` (already uses `context.Context`)
-- [ ] `pkg/wallet/api/btcgrp` (verify all methods use context)
-- [ ] `pkg/wallet/api/xrpgrp` (verify all methods use context)
+- [x] `internal/infrastructure/api/ethereum` (already uses `context.Context`)
+- [ ] `internal/infrastructure/api/bitcoin` (verify all methods use context)
+- [ ] `internal/infrastructure/api/ripple` (verify all methods use context)
 
 Implementation example:
 
