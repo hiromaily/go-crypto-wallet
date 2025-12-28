@@ -41,3 +41,9 @@ dump-schema-sign:
 # Export all schemas from wallet-db container
 .PHONY: dump-schema-all
 dump-schema-all: dump-schema-watch dump-schema-keygen dump-schema-sign
+
+###############################################################################
+# Atlas Migration Targets
+###############################################################################
+# Atlas-related targets are defined in make/db_atlas.mk
+include make/db_atlas.mk

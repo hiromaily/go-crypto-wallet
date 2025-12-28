@@ -5,9 +5,8 @@
 <img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/images/bitcoin-img.svg?sanitize=true">
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/hiromaily/go-crypto-wallet)](https://goreportcard.com/report/github.com/hiromaily/go-crypto-wallet)
-[![codebeat badge](https://codebeat.co/badges/792a7c07-2352-4b7e-8083-0a323368b26f)](https://codebeat.co/projects/github-com-hiromaily-go-crypto-wallet-master)
 [![GitHub release](https://img.shields.io/badge/release-v5.0.0-blue.svg)](https://github.com/hiromaily/go-crypto-wallet/releases)
-[![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat)](https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/LICENSE)
+[![MIT License](./LICENSE)
 
 Wallet functionalities to create raw transaction, to sign on unsigned transaction,
 to send signed transaction for BTC, BCH, ETH, XRP and so on.  
@@ -31,7 +30,7 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
   - ✅ Integration tests separated using build tags (`//go:build integration`)
   - ✅ Go 1.25.5 with updated major dependencies (btcsuite/btcd v0.25.0, ethereum/go-ethereum v1.16.7)
   - ✅ golangci-lint v2.7.2 for code quality checks
-- ✅ **Taproot (BIP341/BIP86) Support** - Full support for P2TR addresses with Schnorr signatures (requires Bitcoin Core v22.0+)
+- ✅ **Taproot (BIP341/BIP86) Support** - Full support for P2TR addresses with Schnorr signatures (requires Bitcoin Core v29.2+)
   - 30-50% transaction size/fee reduction compared to legacy multisig
   - Enhanced privacy with indistinguishable spend patterns
   - See [Taproot User Guide](./docs/TAPROOT_GUIDE.md) for setup and usage
@@ -111,13 +110,14 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 ### Core Dependencies
 
 - **Go**: 1.25.5
-- **golangci-lint**: v2.7.2+ (for development)
-- **direnv**: For environment variable management
+- **[golangci-lint](https://github.com/golangci/golangci-lint)**: v2.7.2+ (for development)
+- **[atras](https://atlasgo.io/)**: v1.0.0, For DB migration
+- **[buf](https://buf.build/)**: For protocol buffer management
 - **Docker**: For running blockchain nodes and databases
 
 ### Blockchain Nodes
 
-- **BTC**: [Bitcoin Core](https://bitcoin.org/en/bitcoin-core/) 0.18+ (Bitcoin node)
+- **BTC**: [Bitcoin Core](https://bitcoin.org/en/bitcoin-core/), [Bitcoin node docker image](https://hub.docker.com/r/bitcoin/bitcoin) 29.2+
 - **BCH**: [Bitcoin ABC](https://www.bitcoinabc.org/) 0.21+ (Bitcoin Cash node)
 - **ETH**:
   - [go-ethereum](https://github.com/ethereum/go-ethereum) (Geth client)
@@ -129,7 +129,7 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 
 ### Database
 
-- **MySQL**: 5.7+ (for wallet data persistence)
+- **MySQL**: 8.4+ (for wallet data persistence)
 
 ### Major Go Dependencies
 
@@ -378,8 +378,3 @@ Infrastructure Layer (internal/infrastructure/*)
 ```
 
 For detailed architecture guidelines, see [AGENTS.md](./AGENTS.md).
-
-## Project layout patterns
-
-- The `pkg` layout pattern, refer to the
-  [linked](https://medium.com/golang-learn/go-project-layout-e5213cdcfaa2) URLs for details.

@@ -12,13 +12,11 @@ check-ver:
 
 .PHONY: install-mac-tools
 install-mac-tools:
-	brew install jq mkcert go-task/tap/go-task
-
-.PHONY: install-protobuf
-install-protobuf:
-	brew install protobuf
-	brew tap bufbuild/buf                                                                                                                                                                      (git)-[master]
-	brew install buf
+	brew install jq \
+		mkcert \
+		ariga/tap/atlas \
+		protobuf \
+		buf
 
 .PHONY: install-ssl
 install-ssl:

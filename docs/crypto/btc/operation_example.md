@@ -35,7 +35,7 @@ See [Installation](https://github.com/hiromaily/go-crypto-wallet/blob/master/doc
 $ docker compose up wallet-db
 
 # run bitcoind nodes
-$ docker compose up btc-watch btc-keygen btc-sign
+$ docker compose -f compose.btc.yaml up btc-watch btc-keygen btc-sign
 
 # create wallets on bitcoind
 $ ./scripts/operation/create-bitcoind-wallet.sh
