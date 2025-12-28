@@ -42,4 +42,3 @@ func (w *WS) Call(ctx context.Context, req, res any) error {
 func (w *WS) Close() error {
 	return w.conn.Close(websocket.StatusNormalClosure, "")
 }
-

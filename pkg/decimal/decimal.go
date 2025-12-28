@@ -10,4 +10,3 @@ import (
 func FloatToDecimal(f float64) (udecimal.Decimal, error) {
 	return udecimal.NewFromFloat64(f)
 }
-

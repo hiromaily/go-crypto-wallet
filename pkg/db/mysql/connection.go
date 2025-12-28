@@ -22,4 +22,3 @@ func NewMySQL(conf *config.MySQL) (*sql.DB, error) {
 	}
 	return db, nil
 }
-

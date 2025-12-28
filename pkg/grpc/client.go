@@ -36,4 +36,3 @@ func isSecureURL(url string) bool {
 	urlLower := strings.ToLower(url)
 	return strings.HasPrefix(urlLower, "https://") || strings.HasPrefix(urlLower, "grpcs://")
 }
-

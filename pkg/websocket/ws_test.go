@@ -52,4 +52,3 @@ func TestCall(t *testing.T) {
 
 	_ = websoc.Close() // Best effort cleanup
 }
-
