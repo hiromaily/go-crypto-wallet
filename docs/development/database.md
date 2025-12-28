@@ -55,20 +55,22 @@ services:
 
 ```
 docker/mysql/
+├── archive/                     # Archived SQL schema files (reference only)
+│   ├── definition_watch.sql     # Original watch schema (archived)
+│   ├── definition_keygen.sql    # Original keygen schema (archived)
+│   ├── definition_sign.sql     # Original sign schema (archived)
+│   └── payment_request.sql     # Original payment request table (archived)
 ├── conf.d/
 │   └── custom.cnf              # Server-level configuration
 ├── init.d/
-│   └── 01_init_all_schemas.sql # Schema initialization
-├── sqls/
-│   ├── definition_watch.sql    # Watch schema tables
-│   ├── definition_keygen.sql   # Keygen schema tables
-│   ├── definition_sign.sql     # Sign schema tables
-│   └── payment_request.sql     # Payment request table (watch)
+│   └── 01_init_all_schemas.sql # Schema initialization (creates empty schemas)
 ├── insert/
 │   └── ganache.example.sql     # Test data for Ganache
 └── scripts/
     └── (utility scripts)
 ```
+
+**Note:** Schema definitions are now managed by Atlas migrations in `tools/atlas/migrations/`. The archived SQL files are kept for reference only.
 
 ### Initialization Process
 
@@ -78,23 +80,16 @@ When the container starts for the first time:
    - `root@'%'` with password `root`
    - `hiromaily@'%'` with password `hiromaily`
 
-2. **Schema Initialization**: Executes `01_init_all_schemas.sql`
+2. **Schema Creation**: Executes `01_init_all_schemas.sql` to create empty schemas
    ```sql
-   -- Create watch schema
-   CREATE DATABASE `watch`;
-   USE `watch`;
-   source /sqls/definition_watch.sql;
-   source /sqls/payment_request.sql;
+   -- Create watch schema (empty)
+   CREATE DATABASE `watch` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-   -- Create keygen schema
-   CREATE DATABASE `keygen`;
-   USE `keygen`;
-   source /sqls/definition_keygen.sql;
+   -- Create keygen schema (empty)
+   CREATE DATABASE `keygen` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-   -- Create sign schema
-   CREATE DATABASE `sign`;
-   USE `sign`;
-   source /sqls/definition_sign.sql;
+   -- Create sign schema (empty)
+   CREATE DATABASE `sign` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
    ```
 
 3. **Configuration**: Applies server settings from `custom.cnf`
@@ -103,6 +98,13 @@ When the container starts for the first time:
    character-set-server=utf8mb4
    collation-server=utf8mb4_unicode_ci
    ```
+
+4. **Schema Migration**: After the container starts, apply Atlas migrations
+   ```bash
+   make atlas-migrate-docker
+   ```
+   
+   This will create all tables and apply schema definitions using Atlas migrations.
 
 ## Schema Design
 
@@ -157,9 +159,22 @@ When the container starts for the first time:
    docker compose up -d wallet-db
    ```
 
-2. **Verify schemas created**:
+2. **Wait for database to be ready** (about 30 seconds):
+   ```bash
+   docker compose exec wallet-db mysqladmin ping -uroot -proot --silent
+   ```
+
+3. **Apply Atlas migrations**:
+   ```bash
+   make atlas-migrate-docker
+   ```
+   
+   This will create all tables and schema definitions.
+
+4. **Verify schemas and tables created**:
    ```bash
    docker compose exec wallet-db mysql -uroot -proot -e "SHOW DATABASES;"
+   docker compose exec wallet-db mysql -uroot -proot watch -e "SHOW TABLES;"
    ```
 
    Expected output:
@@ -313,27 +328,29 @@ Reset specific schema while keeping others:
 ```bash
 # Reset watch schema
 docker compose exec wallet-db mysql -uroot -proot -e "DROP DATABASE watch; CREATE DATABASE watch CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-docker compose exec wallet-db mysql -uroot -proot watch < docker/mysql/sqls/definition_watch.sql
-docker compose exec wallet-db mysql -uroot -proot watch < docker/mysql/sqls/payment_request.sql
+make atlas-migrate-docker  # This will apply migrations for all schemas
 
 # Reset keygen schema
 docker compose exec wallet-db mysql -uroot -proot -e "DROP DATABASE keygen; CREATE DATABASE keygen CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-docker compose exec wallet-db mysql -uroot -proot keygen < docker/mysql/sqls/definition_keygen.sql
+make atlas-migrate-docker
 
 # Reset sign schema
 docker compose exec wallet-db mysql -uroot -proot -e "DROP DATABASE sign; CREATE DATABASE sign CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-docker compose exec wallet-db mysql -uroot -proot sign < docker/mysql/sqls/definition_sign.sql
+make atlas-migrate-docker
 ```
+
+**Note:** After dropping and recreating a schema, run `make atlas-migrate-docker` to apply migrations. This will only apply migrations to schemas that need them.
 
 ### Reset Payment Request Table
 
 ```bash
-# Using make
-make reset-payment-request-docker
-
-# Direct command
-docker compose exec wallet-db mysql -uroot -proot watch -e "$(cat ./docker/mysql/sqls/payment_request.sql)"
+# Drop and recreate the table using Atlas migration
+# Or manually:
+docker compose exec wallet-db mysql -uroot -proot watch -e "DROP TABLE IF EXISTS payment_request;"
+make atlas-migrate-docker
 ```
+
+**Note:** The payment request table is now managed by Atlas migrations. See `tools/atlas/migrations/watch/` for the current schema definition.
 
 ## Database Management
 
@@ -470,19 +487,29 @@ make atlas-schema-diff-migration SCHEMA=watch
 Apply all pending migrations for all schemas:
 
 ```bash
-# Local environment
+# Local environment (requires Atlas CLI installed)
 make atlas-migrate
 
-# Docker environment
+# Docker environment (uses wallet-db-migrate service)
 make atlas-migrate-docker
 ```
+
+The Docker environment uses a dedicated migration service (`wallet-db-migrate`) that runs Atlas in a container. This service:
+- Automatically waits for the database to be ready (health check)
+- Runs in the same network as the database
+- Has access to the `tools/atlas` directory via volume mount
+- Can be run manually: `docker compose run --rm wallet-db-migrate migrate apply --dir file://migrations/watch --url "mysql://root:root@wallet-db:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"`
 
 #### Check Migration Status
 
 View migration status for all schemas:
 
 ```bash
+# Local environment
 make atlas-status
+
+# Docker environment
+make atlas-status-docker
 ```
 
 This shows:
@@ -495,9 +522,15 @@ This shows:
 Rollback the last migration for a specific schema:
 
 ```bash
+# Local environment
 make atlas-rollback SCHEMA=watch
 make atlas-rollback SCHEMA=keygen
 make atlas-rollback SCHEMA=sign
+
+# Docker environment
+make atlas-rollback-docker SCHEMA=watch
+make atlas-rollback-docker SCHEMA=keygen
+make atlas-rollback-docker SCHEMA=sign
 ```
 
 #### Validate Migrations
@@ -505,7 +538,11 @@ make atlas-rollback SCHEMA=sign
 Validate all migration files before applying:
 
 ```bash
+# Local environment
 make atlas-validate
+
+# Docker environment
+make atlas-validate-docker
 ```
 
 #### Create New Migration
@@ -513,9 +550,15 @@ make atlas-validate
 Create a new migration file:
 
 ```bash
+# Local environment
 make atlas-new SCHEMA=watch NAME=add_new_table
 make atlas-new SCHEMA=keygen NAME=update_account_key
 make atlas-new SCHEMA=sign NAME=add_index
+
+# Docker environment
+make atlas-new-docker SCHEMA=watch NAME=add_new_table
+make atlas-new-docker SCHEMA=keygen NAME=update_account_key
+make atlas-new-docker SCHEMA=sign NAME=add_index
 ```
 
 ### Migration History

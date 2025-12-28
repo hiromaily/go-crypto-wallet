@@ -2,113 +2,11 @@ volumes:
   wallet-db: {}
 
 networks:
-  btc:
-    name: btc
-    driver: bridge
   db:
     name: db
     driver: bridge
 
 services:
-  #########################################################################
-  # Bitcoin core
-  #------------------------------------------------------------------------
-  # Configuration: Regtest Mode
-  # - All nodes run in regtest mode for local development and testing
-  # - Watch node: Online node with network connectivity
-  # - Keygen/Sign nodes: Offline nodes with -maxconnections=0
-  #
-  # Example of commands to container
-  # - enter in container
-  #   - $ docker compose exec btc-watch bash
-  # - run bitcoin-cli (regtest mode)
-  #   - $ docker compose exec btc-watch bitcoin-cli -regtest -rpcuser=xyz -rpcpassword=xyz getnetworkinfo
-  # - wallet location (regtest mode)
-  #   - /home/bitcoin/.bitcoin/regtest/wallets
-  #
-  # Note: Using official bitcoin/bitcoin image with specific version tag
-  #########################################################################
-  btc-watch:
-    image: bitcoin/bitcoin:29.2
-    container_name: btc-watch
-    volumes:
-      - ./docker/nodes/btc/data1:/home/bitcoin/.bitcoin
-    ports:
-      - "${BTC_WATCH_RPC_PORT:-18332}:18443" # Map to regtest RPC port 18443
-    stdin_open: true
-    tty: true
-    networks:
-      - btc
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "bitcoin-cli",
-          "-regtest",
-          "-rpcuser=xyz",
-          "-rpcpassword=xyz",
-          "getblockchaininfo",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-    command: -printtoconsole
-
-  btc-keygen:
-    image: bitcoin/bitcoin:29.2
-    container_name: btc-keygen
-    volumes:
-      - ./docker/nodes/btc/data2:/home/bitcoin/.bitcoin
-    ports:
-      - "${BTC_KEYGEN_RPC_PORT:-19332}:18443" # Map to regtest RPC port 18443
-    stdin_open: true
-    tty: true
-    networks:
-      - btc
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "bitcoin-cli",
-          "-regtest",
-          "-rpcuser=xyz",
-          "-rpcpassword=xyz",
-          "getblockchaininfo",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-    command: -maxconnections=0 -printtoconsole
-
-  btc-sign:
-    image: bitcoin/bitcoin:29.2
-    container_name: btc-sign
-    volumes:
-      - ./docker/nodes/btc/data3:/home/bitcoin/.bitcoin
-    ports:
-      - "${BTC_SIGN_RPC_PORT:-20332}:18443" # Map to regtest RPC port 18443
-    stdin_open: true
-    tty: true
-    networks:
-      - btc
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "bitcoin-cli",
-          "-regtest",
-          "-rpcuser=xyz",
-          "-rpcpassword=xyz",
-          "getblockchaininfo",
-        ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-    command: -maxconnections=0 -printtoconsole
-
   #########################################################################
   # Database
   #########################################################################
@@ -118,7 +16,6 @@ services:
     container_name: wallet-db
     volumes:
       - wallet-db:/var/lib/mysql
-      - "./docker/mysql/sqls:/sqls"
       - "./docker/mysql/conf.d:/etc/mysql/conf.d"
       - "./docker/mysql/init.d:/docker-entrypoint-initdb.d"
     environment:
@@ -136,3 +33,82 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+
+  #########################################################################
+  # Database Migration (Atlas)
+  #########################################################################
+  # Atlas migration services for database schema management
+  # These services automatically run migrations when the database is ready.
+  # Each service applies migrations for one schema and exits.
+  #
+  # When you run `docker compose up`, these services will:
+  #   1. Wait for wallet-db to be healthy (depends_on with condition: service_healthy)
+  #   2. Automatically apply migrations for each schema
+  #   3. Exit after completion (restart: "no")
+  #
+  # Manual usage via Makefile:
+  #   - Check status: make atlas-status-docker
+  #   - Rollback: make atlas-rollback-docker SCHEMA=watch
+  #   - Validate: make atlas-validate-docker
+  #   - Create new migration: make atlas-new-docker SCHEMA=watch NAME=add_table
+  #
+  # Refer to https://hub.docker.com/r/arigaio/atlas/tags
+  wallet-db-migrate-watch:
+    image: arigaio/atlas:1.0.0
+    container_name: wallet-db-migrate-watch
+    volumes:
+      - "./tools/atlas:/app/atlas"
+    working_dir: /app/atlas
+    depends_on:
+      wallet-db:
+        condition: service_healthy
+    networks:
+      - db
+    command:
+      - migrate
+      - apply
+      - --dir
+      - file://migrations/watch
+      - --url
+      - "mysql://root:root@wallet-db:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
+    restart: "no"
+
+  wallet-db-migrate-keygen:
+    image: arigaio/atlas:1.0.0
+    container_name: wallet-db-migrate-keygen
+    volumes:
+      - "./tools/atlas:/app/atlas"
+    working_dir: /app/atlas
+    depends_on:
+      wallet-db:
+        condition: service_healthy
+    networks:
+      - db
+    command:
+      - migrate
+      - apply
+      - --dir
+      - file://migrations/keygen
+      - --url
+      - "mysql://root:root@wallet-db:3306/keygen?charset=utf8mb4&parseTime=True&loc=Local"
+    restart: "no"
+
+  wallet-db-migrate-sign:
+    image: arigaio/atlas:1.0.0
+    container_name: wallet-db-migrate-sign
+    volumes:
+      - "./tools/atlas:/app/atlas"
+    working_dir: /app/atlas
+    depends_on:
+      wallet-db:
+        condition: service_healthy
+    networks:
+      - db
+    command:
+      - migrate
+      - apply
+      - --dir
+      - file://migrations/sign
+      - --url
+      - "mysql://root:root@wallet-db:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"
+    restart: "no"

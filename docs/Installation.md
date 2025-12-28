@@ -44,7 +44,7 @@ At least, one bitcoin core server and 1 database (with 3 schemas: watch, keygen,
 1. run bitcoind node containers
 
 ```
-docker compose up btc-watch btc-keygen btc-sign
+docker compose -f compose.btc.yaml up btc-watch btc-keygen btc-sign
 ```
 
 1. setup `bitcoin-cli` using docker

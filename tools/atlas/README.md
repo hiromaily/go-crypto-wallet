@@ -94,50 +94,84 @@ This creates a new migration file that will bring the database in line with the 
 
 Apply all pending migrations for all schemas:
 
+**Local environment** (requires Atlas CLI installed):
 ```bash
 make atlas-migrate
 ```
 
-Apply migrations in Docker environment:
-
+**Docker environment** (uses dedicated migration service):
 ```bash
 make atlas-migrate-docker
 ```
+
+The Docker environment uses a dedicated `wallet-db-migrate` service defined in `compose.yaml`. This service:
+- Automatically waits for the database to be ready (health check)
+- Runs in the same network as the database
+- Has access to the `tools/atlas` directory via volume mount
+- Uses the official `arigaio/atlas` Docker image
 
 ### Check Migration Status
 
 View migration status for all schemas:
 
+**Local environment**:
 ```bash
 make atlas-status
+```
+
+**Docker environment**:
+```bash
+make atlas-status-docker
 ```
 
 ### Rollback Migrations
 
 Rollback the last migration for a specific schema:
 
+**Local environment**:
 ```bash
 make atlas-rollback SCHEMA=watch
 make atlas-rollback SCHEMA=keygen
 make atlas-rollback SCHEMA=sign
 ```
 
+**Docker environment**:
+```bash
+make atlas-rollback-docker SCHEMA=watch
+make atlas-rollback-docker SCHEMA=keygen
+make atlas-rollback-docker SCHEMA=sign
+```
+
 ### Validate Migrations
 
 Validate all migration files:
 
+**Local environment**:
 ```bash
 make atlas-validate
+```
+
+**Docker environment**:
+```bash
+make atlas-validate-docker
 ```
 
 ### Create New Migration
 
 Create a new migration file:
 
+**Local environment**:
 ```bash
 make atlas-new SCHEMA=watch NAME=add_new_table
 make atlas-new SCHEMA=keygen NAME=update_account_key
 make atlas-new SCHEMA=sign NAME=add_index
+```
+
+**Docker environment**:
+```bash
+make atlas-new-docker SCHEMA=watch NAME=add_new_table
+make atlas-new-docker SCHEMA=keygen NAME=update_account_key
+make atlas-new-docker SCHEMA=sign NAME=add_index
 ```
 
 ## Migration File Naming
@@ -149,10 +183,11 @@ Atlas uses timestamp-based naming for migration files:
 
 ## Manual Atlas Commands
 
-If you need to run Atlas commands directly:
+If you need to run Atlas commands directly (without Makefile):
 
-### Watch Schema
+### Local Environment
 
+**Watch Schema**:
 ```bash
 # Apply migrations
 atlas migrate apply \
@@ -165,21 +200,52 @@ atlas migrate status \
   --url "mysql://root:root@127.0.0.1:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
 ```
 
-### Keygen Schema
-
+**Keygen Schema**:
 ```bash
 atlas migrate apply \
   --dir file://tools/atlas/migrations/keygen \
   --url "mysql://root:root@127.0.0.1:3306/keygen?charset=utf8mb4&parseTime=True&loc=Local"
 ```
 
-### Sign Schema
-
+**Sign Schema**:
 ```bash
 atlas migrate apply \
   --dir file://tools/atlas/migrations/sign \
   --url "mysql://root:root@127.0.0.1:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"
 ```
+
+### Docker Environment
+
+Using the `wallet-db-migrate` service:
+
+**Watch Schema**:
+```bash
+# Apply migrations
+docker compose run --rm wallet-db-migrate migrate apply \
+  --dir file://migrations/watch \
+  --url "mysql://root:root@wallet-db:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
+
+# Check status
+docker compose run --rm wallet-db-migrate migrate status \
+  --dir file://migrations/watch \
+  --url "mysql://root:root@wallet-db:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
+```
+
+**Keygen Schema**:
+```bash
+docker compose run --rm wallet-db-migrate migrate apply \
+  --dir file://migrations/keygen \
+  --url "mysql://root:root@wallet-db:3306/keygen?charset=utf8mb4&parseTime=True&loc=Local"
+```
+
+**Sign Schema**:
+```bash
+docker compose run --rm wallet-db-migrate migrate apply \
+  --dir file://migrations/sign \
+  --url "mysql://root:root@wallet-db:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"
+```
+
+**Note**: In Docker environment, the working directory is `/atlas` (mounted from `./tools/atlas`), so paths are relative to that directory (e.g., `file://migrations/watch` instead of `file://tools/atlas/migrations/watch`).
 
 ## Migration History
 

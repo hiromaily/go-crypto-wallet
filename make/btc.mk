@@ -22,7 +22,7 @@ cd-btc-dir:
 # run bitcoin core server
 .PHONY: up-docker-btc
 up-docker-btc:
-	docker compose up btc-watch btc-keygen btc-sign
+	docker compose -f compose.btc.yaml up btc-watch btc-keygen btc-sign
 
 # run bitcoin cash core server
 .PHONY: up-docker-bch

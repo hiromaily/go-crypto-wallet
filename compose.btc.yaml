@@ -1,0 +1,105 @@
+networks:
+  btc:
+    name: btc
+    driver: bridge
+
+services:
+  #########################################################################
+  # Bitcoin core
+  #------------------------------------------------------------------------
+  # Configuration: Regtest Mode
+  # - All nodes run in regtest mode for local development and testing
+  # - Watch node: Online node with network connectivity
+  # - Keygen/Sign nodes: Offline nodes with -maxconnections=0
+  #
+  # Example of commands to container
+  # - enter in container
+  #   - $ docker compose -f compose.btc.yaml exec btc-watch bash
+  # - run bitcoin-cli (regtest mode)
+  #   - $ docker compose -f compose.btc.yaml exec btc-watch bitcoin-cli -regtest -rpcuser=xyz -rpcpassword=xyz getnetworkinfo
+  # - wallet location (regtest mode)
+  #   - /home/bitcoin/.bitcoin/regtest/wallets
+  #
+  # Note: Using official bitcoin/bitcoin image with specific version tag
+  #########################################################################
+  btc-watch:
+    image: bitcoin/bitcoin:29.2
+    container_name: btc-watch
+    volumes:
+      - ./docker/nodes/btc/data1:/home/bitcoin/.bitcoin
+    ports:
+      - "${BTC_WATCH_RPC_PORT:-18332}:18443" # Map to regtest RPC port 18443
+    stdin_open: true
+    tty: true
+    networks:
+      - btc
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bitcoin-cli",
+          "-regtest",
+          "-rpcuser=xyz",
+          "-rpcpassword=xyz",
+          "getblockchaininfo",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    command: -printtoconsole
+
+  btc-keygen:
+    image: bitcoin/bitcoin:29.2
+    container_name: btc-keygen
+    volumes:
+      - ./docker/nodes/btc/data2:/home/bitcoin/.bitcoin
+    ports:
+      - "${BTC_KEYGEN_RPC_PORT:-19332}:18443" # Map to regtest RPC port 18443
+    stdin_open: true
+    tty: true
+    networks:
+      - btc
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bitcoin-cli",
+          "-regtest",
+          "-rpcuser=xyz",
+          "-rpcpassword=xyz",
+          "getblockchaininfo",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    command: -maxconnections=0 -printtoconsole
+
+  btc-sign:
+    image: bitcoin/bitcoin:29.2
+    container_name: btc-sign
+    volumes:
+      - ./docker/nodes/btc/data3:/home/bitcoin/.bitcoin
+    ports:
+      - "${BTC_SIGN_RPC_PORT:-20332}:18443" # Map to regtest RPC port 18443
+    stdin_open: true
+    tty: true
+    networks:
+      - btc
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bitcoin-cli",
+          "-regtest",
+          "-rpcuser=xyz",
+          "-rpcpassword=xyz",
+          "getblockchaininfo",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    command: -maxconnections=0 -printtoconsole
+
