@@ -63,13 +63,26 @@ docker compose -f compose.btc.yaml exec btc-watch bitcoin-cli -regtest -rpcuser=
 
 The script uses the following default configuration:
 
-- **RPC User**: `xyz`
-- **RPC Password**: `xyz`
+- **RPC User**: `xyz` (default, can be overridden with `BTC_RPC_USER` environment variable)
+- **RPC Password**: `xyz` (default, can be overridden with `BTC_RPC_PASSWORD` environment variable)
 - **Max Retries**: 30 attempts
 - **Retry Interval**: 2 seconds
 - **Initial Blocks**: 101 blocks (for regtest mode)
 
-These can be modified by editing the script's configuration section.
+### Using Environment Variables
+
+You can override the default RPC credentials using environment variables:
+
+```bash
+# Set custom credentials
+export BTC_RPC_USER="myuser"
+export BTC_RPC_PASSWORD="mypassword"
+
+# Run setup script with custom credentials
+./scripts/setup/btc/setup_btc.sh
+```
+
+This is more secure than hardcoding credentials and allows for different configurations in different environments.
 
 ## Error Handling
 

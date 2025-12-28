@@ -10,19 +10,26 @@ set -u
 
 # Configuration
 COMPOSE_FILE="compose.btc.yaml"
-RPC_USER="xyz"
-RPC_PASSWORD="xyz"
+RPC_USER="${BTC_RPC_USER:-xyz}"
+RPC_PASSWORD="${BTC_RPC_PASSWORD:-xyz}"
 MAX_RETRIES=30
 RETRY_INTERVAL=2
 
 # Node names
 NODES="btc-watch btc-keygen btc-sign1 btc-sign2"
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+# Colors for output (only use if output is a TTY)
+if [ -t 1 ]; then
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    YELLOW='\033[1;33m'
+    NC='\033[0m' # No Color
+else
+    RED=''
+    GREEN=''
+    YELLOW=''
+    NC=''
+fi
 
 # Logging functions
 log_info() {
@@ -70,23 +77,23 @@ create_wallet() {
 
     log_info "Creating wallet '$wallet_name' on $node_name..."
 
-    # Try to create the wallet
-    if docker compose -f "$COMPOSE_FILE" exec -T "$node_name" \
+    # Try to create the wallet and capture output
+    local output
+    output=$(docker compose -f "$COMPOSE_FILE" exec -T "$node_name" \
         bitcoin-cli -regtest -rpcuser="$RPC_USER" -rpcpassword="$RPC_PASSWORD" \
-        createwallet "$wallet_name" > /dev/null 2>&1; then
+        createwallet "$wallet_name" 2>&1)
+    local exit_code=$?
+
+    if [ $exit_code -eq 0 ]; then
         log_info "Wallet '$wallet_name' created successfully on $node_name"
         return 0
+    # Check if the error is because the wallet already exists
+    elif echo "$output" | grep -q "already exists"; then
+        log_warn "Wallet '$wallet_name' already exists on $node_name (skipping)"
+        return 0
     else
-        # Check if the error is because the wallet already exists
-        if docker compose -f "$COMPOSE_FILE" exec -T "$node_name" \
-            bitcoin-cli -regtest -rpcuser="$RPC_USER" -rpcpassword="$RPC_PASSWORD" \
-            listwallets 2>/dev/null | grep -q "\"$wallet_name\""; then
-            log_warn "Wallet '$wallet_name' already exists on $node_name (skipping)"
-            return 0
-        else
-            log_error "Failed to create wallet '$wallet_name' on $node_name"
-            return 1
-        fi
+        log_error "Failed to create wallet '$wallet_name' on $node_name. Error: $output"
+        return 1
     fi
 }
 
@@ -148,29 +155,16 @@ main() {
     # Step 2: Create wallets
     log_info "Step 2: Creating wallets..."
 
-    # Create watch wallet on btc-watch
-    if ! create_wallet "btc-watch" "watch"; then
-        log_error "Setup failed: could not create watch wallet"
-        exit 1
-    fi
-
-    # Create keygen wallet on btc-keygen
-    if ! create_wallet "btc-keygen" "keygen"; then
-        log_error "Setup failed: could not create keygen wallet"
-        exit 1
-    fi
-
-    # Create sign1 wallet on btc-sign1
-    if ! create_wallet "btc-sign1" "sign1"; then
-        log_error "Setup failed: could not create sign1 wallet"
-        exit 1
-    fi
-
-    # Create sign2 wallet on btc-sign2
-    if ! create_wallet "btc-sign2" "sign2"; then
-        log_error "Setup failed: could not create sign2 wallet"
-        exit 1
-    fi
+    # Create wallets for each node
+    local wallets="btc-watch:watch btc-keygen:keygen btc-sign1:sign1 btc-sign2:sign2"
+    for item in $wallets; do
+        local node_name=${item%%:*}
+        local wallet_name=${item##*:}
+        if ! create_wallet "$node_name" "$wallet_name"; then
+            log_error "Setup failed: could not create '$wallet_name' wallet on $node_name"
+            exit 1
+        fi
+    done
 
     log_info "All wallets created successfully"
 
