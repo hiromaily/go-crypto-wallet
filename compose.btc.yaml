@@ -76,13 +76,40 @@ services:
       start_period: 30s
     command: -maxconnections=0 -printtoconsole
 
-  btc-sign:
+  btc-sign1:
     image: bitcoin/bitcoin:29.2
-    container_name: btc-sign
+    container_name: btc-sign1
     volumes:
       - ./docker/nodes/btc/data3:/home/bitcoin/.bitcoin
     ports:
-      - "${BTC_SIGN_RPC_PORT:-20332}:18443" # Map to regtest RPC port 18443
+      - "${BTC_SIGN1_RPC_PORT:-20332}:18443" # Map to regtest RPC port 18443
+    stdin_open: true
+    tty: true
+    networks:
+      - btc
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bitcoin-cli",
+          "-regtest",
+          "-rpcuser=xyz",
+          "-rpcpassword=xyz",
+          "getblockchaininfo",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    command: -maxconnections=0 -printtoconsole
+
+  btc-sign2:
+    image: bitcoin/bitcoin:29.2
+    container_name: btc-sign2
+    volumes:
+      - ./docker/nodes/btc/data4:/home/bitcoin/.bitcoin
+    ports:
+      - "${BTC_SIGN2_RPC_PORT:-21332}:18443" # Map to regtest RPC port 18443
     stdin_open: true
     tty: true
     networks:
