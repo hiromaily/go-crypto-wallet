@@ -169,11 +169,11 @@ atlas-dev-clean:
 atlas-prod-init:
 	@echo "Initializing production migration history..."
 	@echo "=== Hashing watch migrations ==="
-	@atlas migrate hash --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_WATCH)
+	@cd tools/atlas && atlas migrate hash --config file://atlas.hcl --env $(ATLAS_ENV_WATCH)
 	@echo "=== Hashing keygen migrations ==="
-	@atlas migrate hash --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_KEYGEN)
+	@cd tools/atlas && atlas migrate hash --config file://atlas.hcl --env $(ATLAS_ENV_KEYGEN)
 	@echo "=== Hashing sign migrations ==="
-	@atlas migrate hash --config $(ATLAS_CONFIG) --env $(ATLAS_ENV_SIGN)
+	@cd tools/atlas && atlas migrate hash --config file://atlas.hcl --env $(ATLAS_ENV_SIGN)
 	@echo "✓ Production migration history initialized"
 	@echo "You can now create incremental migrations using: make atlas-migrate-diff SCHEMA=<schema> NAME=<name>"
 
