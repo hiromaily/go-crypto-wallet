@@ -35,7 +35,7 @@ atlas version
 
 ```
 tools/atlas/
-├── atlas.hcl              # Atlas configuration file
+├── atlas.hcl              # Atlas configuration file (with lint rules)
 ├── schemas/                # HCL schema definitions (declarative)
 │   ├── watch.hcl          # Watch schema definition
 │   ├── keygen.hcl         # Keygen schema definition
@@ -47,6 +47,16 @@ tools/atlas/
 └── README.md              # This file
 ```
 
+## Atlas Configuration
+
+The `atlas.hcl` file contains:
+
+- **Three environments**: `local_watch`, `local_keygen`, `local_sign`
+- **Diff configuration**: Protects against destructive changes (drop schema/table/column)
+- **Lint configuration**: Validates schema for:
+  - Destructive operations (errors on dangerous changes)
+  - Naming conventions (lowercase with underscores)
+
 ## Schemas
 
 The project uses three separate MySQL schemas:
@@ -54,6 +64,125 @@ The project uses three separate MySQL schemas:
 - **watch**: Online wallet data (addresses, transactions, payment requests)
 - **keygen**: Key generation data (seeds, account keys, full public keys)
 - **sign**: Signing wallet data (auth account keys, seeds)
+
+## Development Workflows
+
+Atlas supports two distinct workflows depending on your development phase:
+
+### Development Workflow (Schema-First Approach)
+
+**When to use**: Active development phase with frequent schema changes.
+
+**Characteristics**:
+- Modify HCL schema files (`schemas/*.hcl`) directly
+- Regenerate migrations from scratch using `make atlas-dev-reset`
+- Single migration file represents the current complete schema state
+- Fast iteration on schema design
+- `docker compose up` automatically applies the latest migration
+
+**Workflow**:
+
+1. Modify HCL schema files in `schemas/` directory
+2. Format and lint schemas:
+   ```bash
+   make atlas-fmt
+   make atlas-lint
+   ```
+3. Regenerate migrations from scratch (WARNING: deletes existing migrations):
+   ```bash
+   make atlas-dev-reset
+   ```
+4. Apply migrations:
+   ```bash
+   docker compose up
+   # or
+   make atlas-migrate-apply
+   ```
+
+**Alternative: Direct Schema Apply** (bypasses migrations):
+
+For rapid prototyping, you can apply HCL schemas directly to the database:
+
+```bash
+# Apply all schemas
+make atlas-schema-apply
+
+# Apply specific schema
+make atlas-schema-apply-one SCHEMA=watch
+```
+
+**Note**: To see what changes will be applied, use `atlas-migrate-diff` to generate a migration file which shows the SQL changes.
+
+### Production Workflow (Migration History Approach)
+
+**When to use**: Production or stable development phase where migration history matters.
+
+**Characteristics**:
+- Incremental migrations with version control
+- Each migration represents a specific change
+- Migration history is preserved
+- Supports rollback capabilities
+- Safe for production deployments
+
+**Workflow**:
+
+1. Initialize production migration history (one-time):
+   ```bash
+   make atlas-prod-init
+   ```
+2. Modify HCL schema files in `schemas/` directory
+3. Format and lint schemas:
+   ```bash
+   make atlas-fmt
+   make atlas-lint
+   ```
+4. Generate incremental migration:
+   ```bash
+   make atlas-migrate-diff SCHEMA=watch NAME=add_new_column
+   ```
+5. Review generated migration in `migrations/<schema>/`
+6. Apply migration:
+   ```bash
+   make atlas-migrate-apply
+   ```
+7. Check migration status:
+   ```bash
+   make atlas-migrate-status
+   ```
+
+### Switching Between Workflows
+
+**Development → Production**:
+
+```bash
+# Initialize migration history from current state
+make atlas-prod-init
+```
+
+**Production → Development** (for prototyping):
+
+```bash
+# WARNING: This deletes all migrations and databases!
+# Only use in non-production environments
+make atlas-dev-clean
+```
+
+## Available Make Targets
+
+Run `make atlas-help` to see all available targets:
+
+```bash
+make atlas-help
+```
+
+**Quick Reference**:
+
+- **Format & Lint**: `make atlas-fmt`, `make atlas-lint` (requires Docker)
+- **Schema Management**: `make atlas-schema-apply`, `make atlas-schema-apply-one`
+- **Migration Management**: `make atlas-migrate-status`, `make atlas-migrate-apply`, `make atlas-migrate-diff`
+- **Development**: `make atlas-dev-reset`, `make atlas-dev-clean`
+- **Production**: `make atlas-prod-init`
+- **Utilities**: `make atlas-validate`, `make atlas-help`
 
 ## Usage
 
