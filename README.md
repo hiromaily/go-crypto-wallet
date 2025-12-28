@@ -26,7 +26,6 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
   - ✅ Application layer (`internal/application/usecase/`) - Use case implementations following Clean Architecture
   - ✅ Infrastructure layer (`internal/infrastructure/`) - External dependencies (API clients, database, repositories)
   - ✅ Interface adapters layer (`internal/interface-adapters/`) - CLI commands and wallet adapters
-  - 🔄 Migration from legacy `pkg/wallet/service/` to new `internal/application/usecase/` in progress
   - ✅ Integration tests separated using build tags (`//go:build integration`)
   - ✅ Go 1.25.5 with updated major dependencies (btcsuite/btcd v0.25.0, ethereum/go-ethereum v1.16.7)
   - ✅ golangci-lint v2.7.2 for code quality checks
