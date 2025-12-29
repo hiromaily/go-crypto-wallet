@@ -6,6 +6,8 @@
 package persistence
 
 import (
+	"database/sql"
+
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
@@ -112,6 +114,7 @@ type TxRepositorier interface {
 	InsertUnsignedTx(actionType domainTx.ActionType) (int64, error)
 	Update(txItem *models.TX) (int64, error)
 	DeleteAll() (int64, error)
+	WithTx(tx *sql.Tx) TxRepositorier
 }
 
 // PaymentRequestRepositorier is PaymentRequestRepository interface
@@ -122,6 +125,7 @@ type PaymentRequestRepositorier interface {
 	UpdatePaymentID(paymentID int64, ids []int64) (int64, error)
 	UpdateIsDone(paymentID int64) (int64, error)
 	DeleteAll() (int64, error)
+	WithTx(tx *sql.Tx) PaymentRequestRepositorier
 }
 
 // EthDetailTxRepositorier is EthDetailTxRepository interface
@@ -134,6 +138,7 @@ type EthDetailTxRepositorier interface {
 	UpdateAfterTxSent(uuid string, txType domainTx.TxType, signedHex, sentHashTx string) (int64, error)
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(txType domainTx.TxType, sentHashTx string) (int64, error)
+	WithTx(tx *sql.Tx) EthDetailTxRepositorier
 }
 
 // XrpDetailTxRepositorier is XrpDetailTxRepository interface
@@ -148,4 +153,5 @@ type XrpDetailTxRepositorier interface {
 	) (int64, error)
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(txType domainTx.TxType, sentHashTx string) (int64, error)
+	WithTx(tx *sql.Tx) XrpDetailTxRepositorier
 }

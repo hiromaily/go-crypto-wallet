@@ -503,8 +503,13 @@ func (u *createTransactionUseCase) updateDB(
 		}
 	}()
 
+	// Create transactional repositories that use the transaction
+	txRepoWithTx := u.txRepo.WithTx(dtx)
+	txDetailRepoWithTx := u.txDetailRepo.WithTx(dtx)
+	payReqRepoWithTx := u.payReqRepo.WithTx(dtx)
+
 	// Insert eth_tx
-	txID, err := u.txRepo.InsertUnsignedTx(targetAction)
+	txID, err := txRepoWithTx.InsertUnsignedTx(targetAction)
 	if err != nil {
 		return 0, fmt.Errorf("fail to call txRepo.InsertUnsignedTx(): %w", err)
 	}
@@ -512,12 +517,12 @@ func (u *createTransactionUseCase) updateDB(
 	for idx := range txDetailItems {
 		txDetailItems[idx].TxID = txID
 	}
-	if err = u.txDetailRepo.InsertBulk(txDetailItems); err != nil {
+	if err = txDetailRepoWithTx.InsertBulk(txDetailItems); err != nil {
 		return 0, fmt.Errorf("fail to call txDetailRepo.InsertBulk(): %w", err)
 	}
 
 	if targetAction == domainTx.ActionTypePayment {
-		_, err = u.payReqRepo.UpdatePaymentID(txID, paymentRequestIds)
+		_, err = payReqRepoWithTx.UpdatePaymentID(txID, paymentRequestIds)
 		if err != nil {
 			return 0, fmt.Errorf("fail to call repo.PayReq().UpdatePaymentID(txID, paymentRequestIds): %w", err)
 		}

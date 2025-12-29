@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	portsPersistence "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
@@ -178,4 +179,12 @@ func (r *EthDetailTxInputRepositorySqlc) UpdateTxTypeBySentHashTx(
 	}
 
 	return rowsAffected, nil
+}
+
+// WithTx returns a new repository instance that uses the provided transaction
+func (r *EthDetailTxInputRepositorySqlc) WithTx(tx *sql.Tx) portsPersistence.EthDetailTxRepositorier {
+	return &EthDetailTxInputRepositorySqlc{
+		queries:      r.queries.WithTx(tx),
+		coinTypeCode: r.coinTypeCode,
+	}
 }
