@@ -43,12 +43,12 @@ type AccountKeyRepositorier interface {
 // XRPAccountKeyRepositorier is XRPAccountKeyRepository interface
 type XRPAccountKeyRepositorier interface {
 	GetAllAddrStatus(
-		accountType domainAccount.AccountType, addrStatus address.AddrStatus,
-	) ([]*models.XRPAccountKey, error)
-	GetSecret(accountType domainAccount.AccountType, addr string) (string, error)
-	InsertBulk(items []*models.XRPAccountKey) error
+		ctx context.Context, accountType domainAccount.AccountType, addrStatus address.AddrStatus,
+	) ([]*sqlc.XrpAccountKey, error)
+	GetSecret(ctx context.Context, accountType domainAccount.AccountType, addr string) (string, error)
+	InsertBulk(ctx context.Context, items []*sqlc.XrpAccountKey) error
 	UpdateAddrStatus(
-		accountType domainAccount.AccountType, addrStatus address.AddrStatus, strWIFs []string,
+		ctx context.Context, accountType domainAccount.AccountType, addrStatus address.AddrStatus, strWIFs []string,
 	) (int64, error)
 }
 
