@@ -6,6 +6,8 @@
 package persistence
 
 import (
+	"context"
+
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
@@ -17,8 +19,8 @@ import (
 
 // SeedRepositorier is SeedRepository interface
 type SeedRepositorier interface {
-	GetOne() (*sqlc.Seed, error)
-	Insert(strSeed string) error
+	GetOne(ctx context.Context) (*sqlc.Seed, error)
+	Insert(ctx context.Context, strSeed string) error
 }
 
 // AccountKeyRepositorier is AccountKeyRepository interface

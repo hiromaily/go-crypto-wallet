@@ -31,7 +31,7 @@ func (u *storeSeedUseCase) Store(
 	}
 
 	// Insert seed in database
-	err = u.seedRepo.Insert(input.Seed)
+	err = u.seedRepo.Insert(ctx, input.Seed)
 	if err != nil {
 		return signusecase.StoreSeedOutput{}, fmt.Errorf("fail to call seedRepo.Insert(): %w", err)
 	}
