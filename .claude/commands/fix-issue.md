@@ -160,6 +160,45 @@ Repo: hiromaily/go-crypto-wallet
 - Test coverage adequacy
 - Documentation completeness
 
+### Sub-Issue Resolution Workflow
+
+When a parent issue has multiple sub-issues, resolve them sequentially following this workflow:
+
+1. **First Sub-Issue:**
+   - Create feature branch: `git checkout -b feature/issue-{sub_issue_number}-{description}`
+   - Follow steps 3-10 from "Resolve Systematically" section:
+     - Implement the fix
+     - Self-review
+     - Test
+     - Document
+     - Verify (run `make lint-fix`, `make tidy`, `make check-build`, `make gotest`)
+     - Commit changes
+     - Create PR with description referencing the sub-issue
+     - Request review
+   - **Stop here and wait for user confirmation and merge**
+
+2. **Wait for User Action:**
+   - User will review the PR
+   - User will merge if approved
+   - **Do not proceed to next sub-issue until user confirms merge is complete**
+
+3. **Next Sub-Issue:**
+   - Ensure working directory is clean (`git status`)
+   - Ensure you're on `main` or `master` branch (or switch to it: `git checkout main`)
+   - Pull latest changes: `git pull origin main` (or `master`)
+   - Create **new** feature branch for the next sub-issue: `git checkout -b feature/issue-{next_sub_issue_number}-{description}`
+   - Follow steps 3-10 again for the next sub-issue
+   - **Repeat steps 2-3 for each remaining sub-issue**
+
+**Important Rules for Sub-Issue Workflow:**
+
+- **CRITICAL**: Always create a new branch for each sub-issue (do not reuse branches)
+- **CRITICAL**: Always start from clean state (clean working directory, latest main/master)
+- **CRITICAL**: Wait for user confirmation before proceeding to next sub-issue
+- Each sub-issue should be independent and mergeable separately
+- PR title should reference the sub-issue: `Fix: {sub-issue title} (Closes #{sub_issue_number})`
+- Link sub-issue PR to parent issue in PR description
+
 ### Safety Rules
 
 - **CRITICAL**: Stop immediately if working directory is not clean
