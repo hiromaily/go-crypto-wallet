@@ -53,8 +53,8 @@ for sharing with other signers.`,
 
 	cmd.Flags().StringVar(&file, "file", "", "PSBT file path (required)")
 	cmd.Flags().StringVar(&output, "output", "", "Output nonce file path (required)")
-	_ = cmd.MarkFlagRequired("file")
-	_ = cmd.MarkFlagRequired("output")
+	cobra.CheckErr(cmd.MarkFlagRequired("file"))
+	cobra.CheckErr(cmd.MarkFlagRequired("output"))
 
 	return cmd
 }
@@ -81,8 +81,8 @@ and saves the signed PSBT to a file for aggregation.`,
 
 	cmd.Flags().StringVar(&file, "file", "", "PSBT file with aggregated nonces (required)")
 	cmd.Flags().StringVar(&output, "output", "", "Output signed PSBT file path (required)")
-	_ = cmd.MarkFlagRequired("file")
-	_ = cmd.MarkFlagRequired("output")
+	cobra.CheckErr(cmd.MarkFlagRequired("file"))
+	cobra.CheckErr(cmd.MarkFlagRequired("output"))
 
 	return cmd
 }
@@ -204,10 +204,24 @@ type NonceData struct {
 // extractTransactionID extracts a transaction ID from the file path
 // In a real implementation, this would parse the PSBT and extract the actual transaction ID
 func extractTransactionID(filePath string) string {
-	// Simple implementation: use the filename without extension
-	// Real implementation would parse PSBT and extract the transaction hash
+	// Simple implementation: use the filename without extension.
+	// This is a placeholder and will be replaced by proper PSBT parsing.
 	fileName := filepath.Base(filePath)
-	return strings.TrimSuffix(fileName, filepath.Ext(fileName))
+	baseName := strings.TrimSuffix(fileName, filepath.Ext(fileName))
+
+	// This is a placeholder implementation to make the examples work.
+	// It assumes a transaction ID is followed by suffixes like `_unsigned` or `_with_nonces`.
+	if strings.Contains(baseName, "_unsigned") {
+		return strings.Split(baseName, "_unsigned")[0]
+	}
+	if strings.Contains(baseName, "_with_nonces") {
+		return strings.Split(baseName, "_with_nonces")[0]
+	}
+	if strings.Contains(baseName, "_signed") {
+		return strings.Split(baseName, "_signed")[0]
+	}
+
+	return baseName
 }
 
 // saveJSON saves data to a JSON file
