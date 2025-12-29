@@ -56,6 +56,9 @@ func AddCommands(
 	rootCmd.AddCommand(monitorCmd)
 	monitor.AddCommands(monitorCmd, wallet, container)
 
+	// MuSig2 command (BTC only)
+	AddMuSig2Commands(rootCmd, container)
+
 	// API command - wallet-type specific, dynamically configured
 	apiCmd := &cobra.Command{
 		Use:   "api",

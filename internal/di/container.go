@@ -70,6 +70,7 @@ type Container interface {
 	NewWatchSendTransactionUseCase() any
 	NewWatchImportAddressUseCase() watchusecase.ImportAddressUseCase
 	NewWatchCreatePaymentRequestUseCase() watchusecase.CreatePaymentRequestUseCase
+	NewWatchAggregateMuSig2SignaturesUseCase() watchusecase.AggregateMuSig2SignaturesUseCase
 
 	// Keygen Use Cases
 	NewKeygenGenerateHDWalletUseCase() keygenusecase.GenerateHDWalletUseCase
@@ -710,6 +711,10 @@ func (c *container) NewWatchCreatePaymentRequestUseCase() watchusecase.CreatePay
 	return c.newWatchCreatePaymentRequestUseCase()
 }
 
+func (c *container) NewWatchAggregateMuSig2SignaturesUseCase() watchusecase.AggregateMuSig2SignaturesUseCase {
+	return c.newBTCWatchAggregateMuSig2SignaturesUseCase()
+}
+
 // Keygen Use Cases
 
 func (c *container) NewKeygenGenerateHDWalletUseCase() keygenusecase.GenerateHDWalletUseCase {
@@ -865,6 +870,13 @@ func (c *container) newBTCWatchImportAddressUseCase() watchusecase.ImportAddress
 		c.newAddressFileRepo(),
 		c.conf.CoinTypeCode,
 		c.conf.AddressType,
+	)
+}
+
+func (c *container) newBTCWatchAggregateMuSig2SignaturesUseCase() watchusecase.AggregateMuSig2SignaturesUseCase {
+	return watchusecasebtc.NewAggregateMuSig2SignaturesUseCase(
+		c.newMuSig2Service(),
+		c.newBTC(),
 	)
 }
 
