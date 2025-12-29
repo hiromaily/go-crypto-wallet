@@ -32,6 +32,11 @@ type CreatePaymentRequestUseCase interface {
 	Execute(ctx context.Context, input CreatePaymentRequestInput) error
 }
 
+// AggregateMuSig2SignaturesUseCase aggregates MuSig2 partial signatures (BTC only)
+type AggregateMuSig2SignaturesUseCase interface {
+	Execute(ctx context.Context, input AggregateMuSig2SignaturesInput) (AggregateMuSig2SignaturesOutput, error)
+}
+
 // Input/Output DTOs
 
 // CreateTransactionInput represents input for creating a transaction
@@ -74,4 +79,26 @@ type ImportAddressInput struct {
 // CreatePaymentRequestInput represents input for creating payment requests
 type CreatePaymentRequestInput struct {
 	AmountList []float64
+}
+
+// PartialSignatureData represents a partial signature from a signer
+type PartialSignatureData struct {
+	SignerID  string
+	Signature [32]byte // Partial signature scalar
+}
+
+// AggregateMuSig2SignaturesInput represents input for aggregating MuSig2 signatures
+type AggregateMuSig2SignaturesInput struct {
+	PSBTBase64          string
+	PartialSignatures   []PartialSignatureData
+	AggregatedPublicKey [33]byte // Compressed public key
+	MessageHash         [32]byte
+}
+
+// AggregateMuSig2SignaturesOutput represents output from aggregating MuSig2 signatures
+type AggregateMuSig2SignaturesOutput struct {
+	FinalPSBT  string
+	FinalTxHex string
+	IsComplete bool
+	TxID       string
 }
