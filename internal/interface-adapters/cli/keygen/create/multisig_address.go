@@ -12,6 +12,11 @@ import (
 
 // runMultisigWithFlags is the actual implementation that accepts parsed flags
 func runMultisigWithFlags(container di.Container, acnt, multisigType string) error {
+	// Validate account type
+	if !domainAccount.ValidateAccountType(acnt) {
+		return errors.New("account option [--account] is invalid")
+	}
+
 	// Validate multisig type
 	switch multisigType {
 	case "traditional":
@@ -26,11 +31,6 @@ func runMultisigWithFlags(container di.Container, acnt, multisigType string) err
 // runTraditionalMultisig creates traditional P2SH/P2WSH multisig addresses
 func runTraditionalMultisig(container di.Container, acnt string) error {
 	fmt.Println("create traditional multisig address")
-
-	// validator
-	if !domainAccount.ValidateAccountType(acnt) {
-		return errors.New("account option [--account] is invalid")
-	}
 
 	// create multisig address
 	useCase := container.NewKeygenCreateMultisigAddressUseCase()
@@ -49,11 +49,6 @@ func runTraditionalMultisig(container di.Container, acnt string) error {
 // runMuSig2Address creates MuSig2 Taproot addresses
 func runMuSig2Address(container di.Container, acnt string) error {
 	fmt.Println("create MuSig2 Taproot address")
-
-	// validator
-	if !domainAccount.ValidateAccountType(acnt) {
-		return errors.New("account option [--account] is invalid")
-	}
 
 	// create MuSig2 address
 	useCase := container.NewKeygenCreateMuSig2AddressUseCase()

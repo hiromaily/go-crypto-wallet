@@ -52,8 +52,7 @@ func (u *createMuSig2AddressUseCase) Create(
 
 	// Validate accountType
 	if !u.multisigAccount.IsMultisigAccount(input.AccountType) {
-		logger.Info("only multisig account is allowed")
-		return nil
+		return fmt.Errorf("account '%s' is not a multisig account", input.AccountType.String())
 	}
 
 	// Get all signer public keys from auth_fullpubkey table
@@ -74,7 +73,6 @@ func (u *createMuSig2AddressUseCase) Create(
 			authFullPubKeys = append(authFullPubKeys, pubKey)
 		}
 		logger.Debug("collected auth public keys", "count", len(authFullPubKeys))
-		break // Only process first signature requirement
 	}
 
 	// Get target addresses from account_key table, addr_status=AddrStatusPrivKeyImported
@@ -115,7 +113,7 @@ func (u *createMuSig2AddressUseCase) Create(
 
 		// Create MuSig2 context with Taproot tweaking
 		// Use the account's private key for context creation
-		ctx, err := u.musig2Service.CreateContextWithTaproot(accountPrivKey, allPubKeys, true)
+		musig2Ctx, err := u.musig2Service.CreateContextWithTaproot(accountPrivKey, allPubKeys, true)
 		if err != nil {
 			logger.Error(
 				"fail to create MuSig2 context",
@@ -126,7 +124,7 @@ func (u *createMuSig2AddressUseCase) Create(
 		}
 
 		// Get aggregated public key
-		aggregatedPubKey, err := u.musig2Service.GetCombinedKey(ctx)
+		aggregatedPubKey, err := u.musig2Service.GetCombinedKey(musig2Ctx)
 		if err != nil {
 			logger.Error(
 				"fail to get combined key",
