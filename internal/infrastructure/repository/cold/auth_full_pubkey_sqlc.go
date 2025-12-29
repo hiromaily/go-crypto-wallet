@@ -7,7 +7,6 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 )
 
@@ -28,7 +27,7 @@ func NewAuthFullPubkeyRepositorySqlc(
 }
 
 // GetOne returns one record by authType
-func (r *AuthFullPubkeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (*models.AuthFullpubkey, error) {
+func (r *AuthFullPubkeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (*sqlc.AuthFullpubkey, error) {
 	ctx := context.Background()
 
 	authPubkey, err := r.queries.GetAuthFullPubkey(ctx, sqlc.GetAuthFullPubkeyParams{
@@ -39,7 +38,7 @@ func (r *AuthFullPubkeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (
 		return nil, fmt.Errorf("failed to call GetAuthFullPubkey(): %w", err)
 	}
 
-	return convertSqlcAuthFullPubkeyToModel(&authPubkey), nil
+	return &authPubkey, nil
 }
 
 // Insert inserts record
@@ -59,12 +58,12 @@ func (r *AuthFullPubkeyRepositorySqlc) Insert(authType domainAccount.AuthType, f
 }
 
 // InsertBulk inserts multiple records
-func (r *AuthFullPubkeyRepositorySqlc) InsertBulk(items []*models.AuthFullpubkey) error {
+func (r *AuthFullPubkeyRepositorySqlc) InsertBulk(items []*sqlc.AuthFullpubkey) error {
 	ctx := context.Background()
 
 	for _, item := range items {
 		_, err := r.queries.InsertAuthFullPubkey(ctx, sqlc.InsertAuthFullPubkeyParams{
-			Coin:          sqlc.AuthFullpubkeyCoin(item.Coin),
+			Coin:          item.Coin,
 			AuthAccount:   item.AuthAccount,
 			FullPublicKey: item.FullPublicKey,
 		})
@@ -74,16 +73,4 @@ func (r *AuthFullPubkeyRepositorySqlc) InsertBulk(items []*models.AuthFullpubkey
 	}
 
 	return nil
-}
-
-// Helper functions
-
-func convertSqlcAuthFullPubkeyToModel(authPubkey *sqlc.AuthFullpubkey) *models.AuthFullpubkey {
-	return &models.AuthFullpubkey{
-		ID:            authPubkey.ID,
-		Coin:          string(authPubkey.Coin),
-		AuthAccount:   authPubkey.AuthAccount,
-		FullPublicKey: authPubkey.FullPublicKey,
-		UpdatedAt:     convertSQLNullTimeToNullTime(authPubkey.UpdatedAt),
-	}
 }

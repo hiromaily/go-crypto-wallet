@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/guregu/null/v6"
+
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
@@ -144,4 +146,11 @@ func convertSqlcXRPAccountKeyToModel(xrpKey *sqlc.XrpAccountKey) *models.XRPAcco
 		AddrStatus:       xrpKey.AddrStatus,
 		UpdatedAt:        convertSQLNullTimeToNullTime(xrpKey.UpdatedAt),
 	}
+}
+
+func convertSQLNullTimeToNullTime(t sql.NullTime) null.Time {
+	if !t.Valid {
+		return null.Time{}
+	}
+	return null.TimeFrom(t.Time)
 }
