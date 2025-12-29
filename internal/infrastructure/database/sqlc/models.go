@@ -821,6 +821,24 @@ type EthDetailTx struct {
 	SentUpdatedAt sql.NullTime
 }
 
+// MuSig2 nonce commitments for secure storage
+type Musig2Nonce struct {
+	// ID
+	ID int64
+	// Signer identifier
+	SignerID string
+	// Transaction identifier
+	TransactionID string
+	// Public nonce (66 bytes: two 33-byte compressed EC points R1||R2)
+	PublicNonce []byte
+	// true: nonce has been used in signing
+	IsUsed bool
+	// creation date
+	CreatedAt sql.NullTime
+	// date when nonce was marked as used
+	UsedAt sql.NullTime
+}
+
 // table for payment request
 type PaymentRequest struct {
 	// ID
