@@ -11,7 +11,6 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
@@ -120,9 +119,9 @@ type TxRepositorier interface {
 
 // PaymentRequestRepositorier is PaymentRequestRepository interface
 type PaymentRequestRepositorier interface {
-	GetAll() ([]*models.PaymentRequest, error)
-	GetAllByPaymentID(paymentID int64) ([]*models.PaymentRequest, error)
-	InsertBulk(items []*models.PaymentRequest) error
+	GetAll() ([]*sqlc.PaymentRequest, error)
+	GetAllByPaymentID(paymentID int64) ([]*sqlc.PaymentRequest, error)
+	InsertBulk(items []*sqlc.PaymentRequest) error
 	UpdatePaymentID(paymentID int64, ids []int64) (int64, error)
 	UpdateIsDone(paymentID int64) (int64, error)
 	DeleteAll() (int64, error)

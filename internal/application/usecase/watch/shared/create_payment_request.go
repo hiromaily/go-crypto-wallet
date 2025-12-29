@@ -6,15 +6,14 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/guregu/null/v6"
+	"github.com/quagmt/udecimal"
 
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
-	"github.com/hiromaily/go-crypto-wallet/pkg/decimal"
 )
 
 type createPaymentRequestUseCase struct {
@@ -72,22 +71,23 @@ func (u *createPaymentRequestUseCase) Execute(ctx context.Context, input watchus
 	}
 
 	// insert payment_request
-	payReqItems := make([]*models.PaymentRequest, 0, len(input.AmountList))
+	payReqItems := make([]*sqlc.PaymentRequest, 0, len(input.AmountList))
 	var idx int
 	for _, amt := range input.AmountList {
-		amount, err := decimal.FloatToDecimal(amt)
+		// Convert float amount to string using decimal library for financial precision
+		amount, err := udecimal.NewFromFloat64(amt)
 		if err != nil {
 			return fmt.Errorf("fail to convert amount %f to decimal: %w", amt, err)
 		}
-		payReqItems = append(payReqItems, &models.PaymentRequest{
-			Coin:            u.coinTypeCode.String(),
-			PaymentID:       null.Int64{},
+		payReqItems = append(payReqItems, &sqlc.PaymentRequest{
+			Coin:            sqlc.PaymentRequestCoin(u.coinTypeCode.String()),
+			PaymentID:       sql.NullInt64{},
 			SenderAddress:   pubkeyItems[0+idx].WalletAddress,
 			SenderAccount:   string(pubkeyItems[0+idx].Account),
 			ReceiverAddress: pubkeyItems[len(input.AmountList)+idx].WalletAddress,
-			Amount:          amount,
+			Amount:          amount.String(),
 			IsDone:          false,
-			UpdatedAt:       null.TimeFrom(time.Now()),
+			UpdatedAt:       sql.NullTime{Time: time.Now(), Valid: true},
 		})
 		idx++
 	}

@@ -434,7 +434,7 @@ func (u *createTransactionUseCase) createUserPayment() ([]userPayment, float64, 
 		userPayments[idx].senderAddr = val.SenderAddress
 		userPayments[idx].receiverAddr = val.ReceiverAddress
 		var amt float64
-		amt, err = strconv.ParseFloat(val.Amount.String(), 64)
+		amt, err = strconv.ParseFloat(val.Amount, 64)
 		if err != nil {
 			// fatal error because table includes invalid data
 			logger.Error("payment_request table includes invalid amount field")
