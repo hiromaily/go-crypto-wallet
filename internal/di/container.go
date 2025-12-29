@@ -90,6 +90,8 @@ type Container interface {
 	NewSignGenerateSeedUseCase() signusecase.GenerateSeedUseCase
 	NewSignStoreSeedUseCase() signusecase.StoreSeedUseCase
 	NewSignGenerateAuthKeyUseCase() signusecase.GenerateAuthKeyUseCase
+	NewSignGenerateMuSig2NonceUseCase() signusecase.GenerateMuSig2NonceUseCase
+	NewSignMuSig2SignUseCase() signusecase.MuSig2SignUseCase
 
 	// Auth accessors
 	AuthName() string
@@ -810,6 +812,14 @@ func (c *container) NewSignGenerateAuthKeyUseCase() signusecase.GenerateAuthKeyU
 	)
 }
 
+func (c *container) NewSignGenerateMuSig2NonceUseCase() signusecase.GenerateMuSig2NonceUseCase {
+	return c.newBTCSignGenerateMuSig2NonceUseCase()
+}
+
+func (c *container) NewSignMuSig2SignUseCase() signusecase.MuSig2SignUseCase {
+	return c.newBTCSignMuSig2SignUseCase()
+}
+
 // BTC Watch Use Cases
 
 func (c *container) newBTCWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
@@ -1107,6 +1117,22 @@ func (c *container) newBTCSignExportFullPubkeyUseCase(
 		c.conf.CoinTypeCode,
 		authType,
 		c.walletType,
+	)
+}
+
+func (c *container) newBTCSignGenerateMuSig2NonceUseCase() signusecase.GenerateMuSig2NonceUseCase {
+	return signusecasebtc.NewGenerateMuSig2NonceUseCase(
+		c.newMuSig2Service(),
+		c.newNonceRepo(),
+		c.newAuthKeyRepo(),
+	)
+}
+
+func (c *container) newBTCSignMuSig2SignUseCase() signusecase.MuSig2SignUseCase {
+	return signusecasebtc.NewMuSig2SignUseCase(
+		c.newMuSig2Service(),
+		c.newNonceRepo(),
+		c.newAuthKeyRepo(),
 	)
 }
 
