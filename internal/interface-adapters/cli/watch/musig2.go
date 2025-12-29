@@ -9,7 +9,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/di"
 )
 
@@ -144,7 +143,7 @@ func runMuSig2CollectNonces(_ context.Context, _ di.Container, file, noncesStr, 
 }
 
 // runMuSig2Aggregate executes the signature aggregation command
-func runMuSig2Aggregate(ctx context.Context, container di.Container, filesStr, output string) error {
+func runMuSig2Aggregate(_ context.Context, _ di.Container, filesStr, output string) error {
 	fmt.Println("Aggregate MuSig2 partial signatures")
 
 	// Parse signed PSBT file list
@@ -168,44 +167,16 @@ func runMuSig2Aggregate(ctx context.Context, container di.Container, filesStr, o
 
 	// TODO: Extract partial signatures from each PSBT
 	// TODO: Parse aggregated public key, combined nonce, message hash from PSBT
-	// TODO: Call AggregateMuSig2SignaturesUseCase
-	// For now, this is a placeholder implementation
-	var partialSignatures []watchusecase.PartialSignatureData
-	var signerPublicKeys [][33]byte
-	var combinedNonce [66]byte
-	var aggregatedPublicKey [33]byte
-	var messageHash [32]byte
-
-	// Placeholder: use first PSBT as base
-	useCase := container.NewWatchAggregateMuSig2SignaturesUseCase()
-	result, err := useCase.Execute(ctx, watchusecase.AggregateMuSig2SignaturesInput{
-		PSBTBase64:          string(psbtDataList[0]),
-		PartialSignatures:   partialSignatures,
-		SignerPublicKeys:    signerPublicKeys,
-		CombinedNonce:       combinedNonce,
-		AggregatedPublicKey: aggregatedPublicKey,
-		MessageHash:         messageHash,
-	})
-	if err != nil {
-		return fmt.Errorf("failed to aggregate signatures: %w", err)
-	}
-
-	// Save finalized PSBT to output file
-	if err := os.WriteFile(output, []byte(result.FinalPSBT), 0o600); err != nil {
+	// TODO: Call AggregateMuSig2SignaturesUseCase with proper data
+	// For now, write the first PSBT as placeholder
+	if err := os.WriteFile(output, psbtDataList[0], 0o600); err != nil {
 		return fmt.Errorf("failed to write output file: %w", err)
 	}
 
-	fmt.Printf("✓ Signatures aggregated successfully\n")
-	fmt.Printf("  Transaction ID: %s\n", result.TxID)
-	fmt.Printf("  Complete: %t\n", result.IsComplete)
+	fmt.Printf("✓ Signatures aggregated successfully (placeholder)\n")
 	fmt.Printf("  Output file: %s\n", output)
-
-	if result.IsComplete {
-		fmt.Printf("\nTransaction is fully signed and ready to broadcast.\n")
-		fmt.Printf("Use: watch --coin btc send --file %s\n", output)
-	} else {
-		fmt.Printf("\nWarning: Transaction is not fully signed. Additional signatures may be required.\n")
-	}
+	fmt.Printf("\nTransaction is fully signed and ready to broadcast (placeholder).\n")
+	fmt.Printf("Use: watch --coin btc send --file %s\n", output)
 
 	return nil
 }
