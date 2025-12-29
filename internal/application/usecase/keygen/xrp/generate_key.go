@@ -104,7 +104,7 @@ func (u *generateKeyUseCase) Generate(ctx context.Context, input keygenusecase.G
 	}
 
 	// Insert keys to DB
-	err = u.xrpAccountKeyRepo.InsertBulk(items)
+	err = u.xrpAccountKeyRepo.InsertBulk(ctx, items)
 	if err != nil {
 		return fmt.Errorf("fail to call xrpAccountKeyRepo.InsertBulk() for XRP: %w", err)
 	}

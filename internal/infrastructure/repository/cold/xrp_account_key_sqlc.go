@@ -30,10 +30,8 @@ func NewXRPAccountKeyRepositorySqlc(
 
 // GetAllAddrStatus returns all XRPAccountKey by addr_status
 func (r *XRPAccountKeyRepositorySqlc) GetAllAddrStatus(
-	accountType domainAccount.AccountType, addrStatus address.AddrStatus,
+	ctx context.Context, accountType domainAccount.AccountType, addrStatus address.AddrStatus,
 ) ([]*sqlc.XrpAccountKey, error) {
-	ctx := context.Background()
-
 	xrpKeys, err := r.queries.GetXRPAccountKeysByAddrStatus(ctx, sqlc.GetXRPAccountKeysByAddrStatusParams{
 		Coin:       sqlc.XrpAccountKeyCoin(r.coinTypeCode.String()),
 		Account:    sqlc.XrpAccountKeyAccount(accountType.String()),
@@ -52,9 +50,9 @@ func (r *XRPAccountKeyRepositorySqlc) GetAllAddrStatus(
 }
 
 // GetSecret returns secret (master_seed)
-func (r *XRPAccountKeyRepositorySqlc) GetSecret(accountType domainAccount.AccountType, addr string) (string, error) {
-	ctx := context.Background()
-
+func (r *XRPAccountKeyRepositorySqlc) GetSecret(
+	ctx context.Context, accountType domainAccount.AccountType, addr string,
+) (string, error) {
 	secret, err := r.queries.GetXRPAccountKeySecret(ctx, sqlc.GetXRPAccountKeySecretParams{
 		Coin:      sqlc.XrpAccountKeyCoin(r.coinTypeCode.String()),
 		Account:   sqlc.XrpAccountKeyAccount(accountType.String()),
@@ -68,9 +66,7 @@ func (r *XRPAccountKeyRepositorySqlc) GetSecret(accountType domainAccount.Accoun
 }
 
 // InsertBulk inserts multiple records
-func (r *XRPAccountKeyRepositorySqlc) InsertBulk(items []*sqlc.XrpAccountKey) error {
-	ctx := context.Background()
-
+func (r *XRPAccountKeyRepositorySqlc) InsertBulk(ctx context.Context, items []*sqlc.XrpAccountKey) error {
 	for _, item := range items {
 		_, err := r.queries.InsertXRPAccountKey(ctx, sqlc.InsertXRPAccountKeyParams{
 			Coin:             item.Coin,
@@ -96,9 +92,8 @@ func (r *XRPAccountKeyRepositorySqlc) InsertBulk(items []*sqlc.XrpAccountKey) er
 
 // UpdateAddrStatus updates addr_status
 func (r *XRPAccountKeyRepositorySqlc) UpdateAddrStatus(
-	accountType domainAccount.AccountType, addrStatus address.AddrStatus, accountIDs []string,
+	ctx context.Context, accountType domainAccount.AccountType, addrStatus address.AddrStatus, accountIDs []string,
 ) (int64, error) {
-	ctx := context.Background()
 	var totalAffected int64
 
 	// Update one at a time since IN clause not supported for multiple updates
