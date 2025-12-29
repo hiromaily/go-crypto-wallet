@@ -51,6 +51,9 @@ func AddCommands(rootCmd *cobra.Command, wallet *wallets.Keygener, container di.
 	rootCmd.AddCommand(signCmd)
 	sign.AddCommands(signCmd, wallet, container)
 
+	// MuSig2 command (BTC only)
+	AddMuSig2Commands(rootCmd, container)
+
 	// API command - wallet-type specific, dynamically configured
 	apiCmd := &cobra.Command{
 		Use:   "api",
