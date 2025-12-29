@@ -276,6 +276,96 @@ func TestMuSig2Service_CreateSession(t *testing.T) {
 	}
 }
 
+// testSetupSigner creates a context and session for a signer.
+func testSetupSigner(
+	t *testing.T,
+	service *MuSig2Service,
+	privKey *btcec.PrivateKey,
+	allPubKeys []*btcec.PublicKey,
+	signerNum int,
+) (*musig2.Context, *musig2.Session) {
+	t.Helper()
+
+	ctx, err := service.CreateContext(privKey, allPubKeys, true)
+	if err != nil {
+		t.Fatalf("Failed to create context for signer %d: %v", signerNum, err)
+	}
+
+	session, err := service.CreateSession(ctx)
+	if err != nil {
+		t.Fatalf("Failed to create session for signer %d: %v", signerNum, err)
+	}
+
+	return ctx, session
+}
+
+// testExchangeNonces performs Round 1: nonce generation and exchange between two sessions.
+func testExchangeNonces(t *testing.T, service *MuSig2Service, session1, session2 *musig2.Session) {
+	t.Helper()
+
+	nonce1 := service.GetPublicNonce(session1)
+	nonce2 := service.GetPublicNonce(session2)
+
+	// Session 1 registers session 2's nonce
+	haveAll, err := service.RegisterPubNonce(session1, nonce2)
+	if err != nil {
+		t.Fatalf("Failed to register nonce in session 1: %v", err)
+	}
+	if !haveAll {
+		t.Errorf("Session 1 should have all nonces after registration")
+	}
+
+	// Session 2 registers session 1's nonce
+	haveAll, err = service.RegisterPubNonce(session2, nonce1)
+	if err != nil {
+		t.Fatalf("Failed to register nonce in session 2: %v", err)
+	}
+	if !haveAll {
+		t.Errorf("Session 2 should have all nonces after registration")
+	}
+}
+
+// testSignAndAggregate performs Round 2: signing and aggregation.
+func testSignAndAggregate(
+	t *testing.T,
+	service *MuSig2Service,
+	session1, session2 *musig2.Session,
+	message [32]byte,
+) *schnorr.Signature {
+	t.Helper()
+
+	// Both signers create partial signatures
+	_, err := service.Sign(session1, message)
+	if err != nil {
+		t.Fatalf("Failed to sign with session 1: %v", err)
+	}
+
+	partialSig2, err := service.Sign(session2, message)
+	if err != nil {
+		t.Fatalf("Failed to sign with session 2: %v", err)
+	}
+
+	// Aggregate in session 1
+	haveAll, err := service.CombineSig(session1, partialSig2)
+	if err != nil {
+		t.Fatalf("Failed to combine signature: %v", err)
+	}
+	if !haveAll {
+		t.Errorf("Session 1 should have all signatures after combination")
+	}
+
+	// Get final signature
+	finalSig, err := service.FinalSig(session1)
+	if err != nil {
+		t.Fatalf("Failed to get final signature: %v", err)
+	}
+	if finalSig == nil {
+		t.Fatalf("Final signature is nil")
+	}
+
+	return finalSig
+}
+
 func TestMuSig2Service_CompleteTwoRoundProtocol(t *testing.T) {
 	t.Parallel()
 
@@ -291,81 +381,15 @@ func TestMuSig2Service_CompleteTwoRoundProtocol(t *testing.T) {
 	// Message to sign
 	message := sha256.Sum256([]byte("test transaction"))
 
-	// Signer 1: Create context and session
-	ctx1, err := service.CreateContext(privKey1, allPubKeys, true)
-	if err != nil {
-		t.Fatalf("Failed to create context for signer 1: %v", err)
-	}
-
-	session1, err := service.CreateSession(ctx1)
-	if err != nil {
-		t.Fatalf("Failed to create session for signer 1: %v", err)
-	}
-
-	// Signer 2: Create context and session
-	ctx2, err := service.CreateContext(privKey2, allPubKeys, true)
-	if err != nil {
-		t.Fatalf("Failed to create context for signer 2: %v", err)
-	}
-
-	session2, err := service.CreateSession(ctx2)
-	if err != nil {
-		t.Fatalf("Failed to create session for signer 2: %v", err)
-	}
+	// Setup signers
+	ctx1, session1 := testSetupSigner(t, service, privKey1, allPubKeys, 1)
+	_, session2 := testSetupSigner(t, service, privKey2, allPubKeys, 2)
 
 	// Round 1: Nonce generation and exchange
-	nonce1 := service.GetPublicNonce(session1)
-	nonce2 := service.GetPublicNonce(session2)
+	testExchangeNonces(t, service, session1, session2)
 
-	// Signer 1 registers signer 2's nonce
-	haveAll, err := service.RegisterPubNonce(session1, nonce2)
-	if err != nil {
-		t.Fatalf("Failed to register nonce in session 1: %v", err)
-	}
-	if !haveAll {
-		t.Errorf("Session 1 should have all nonces after registration")
-	}
-
-	// Signer 2 registers signer 1's nonce
-	haveAll, err = service.RegisterPubNonce(session2, nonce1)
-	if err != nil {
-		t.Fatalf("Failed to register nonce in session 2: %v", err)
-	}
-	if !haveAll {
-		t.Errorf("Session 2 should have all nonces after registration")
-	}
-
-	// Round 2: Signing
-	_, err = service.Sign(session1, message)
-	if err != nil {
-		t.Fatalf("Failed to sign with session 1: %v", err)
-	}
-
-	partialSig2, err := service.Sign(session2, message)
-	if err != nil {
-		t.Fatalf("Failed to sign with session 2: %v", err)
-	}
-
-	// Aggregation: Signer 1 combines partial signatures from OTHER signers
-	// Note: Each signer's own partial signature is already in their session automatically,
-	// so we only combine OTHER signers' partial signatures
-	haveAll, err = service.CombineSig(session1, partialSig2)
-	if err != nil {
-		t.Fatalf("Failed to combine signature in session 1: %v", err)
-	}
-	if !haveAll {
-		t.Errorf("Session 1 should have all signatures after combination")
-	}
-
-	// Get final signature
-	finalSig, err := service.FinalSig(session1)
-	if err != nil {
-		t.Fatalf("Failed to get final signature: %v", err)
-	}
-
-	if finalSig == nil {
-		t.Fatalf("Final signature is nil")
-	}
+	// Round 2: Signing and aggregation
+	finalSig := testSignAndAggregate(t, service, session1, session2, message)
 
 	// Verify signature
 	aggregatedKey, err := service.GetCombinedKey(ctx1)
