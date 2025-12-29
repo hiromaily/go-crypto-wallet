@@ -24,7 +24,7 @@ func NewGenerateSeedUseCase(seedRepo cold.SeedRepositorier) signusecase.Generate
 
 func (u *generateSeedUseCase) Generate(ctx context.Context) (signusecase.GenerateSeedOutput, error) {
 	// Try to retrieve existing seed from database
-	bSeed, err := u.retrieveSeed()
+	bSeed, err := u.retrieveSeed(ctx)
 	if err == nil {
 		return signusecase.GenerateSeedOutput{
 			Seed: bSeed,
@@ -39,7 +39,7 @@ func (u *generateSeedUseCase) Generate(ctx context.Context) (signusecase.Generat
 	strSeed := key.SeedToString(bSeed)
 
 	// Insert seed in database
-	err = u.seedRepo.Insert(strSeed)
+	err = u.seedRepo.Insert(ctx, strSeed)
 	if err != nil {
 		return signusecase.GenerateSeedOutput{}, fmt.Errorf("fail to call seedRepo.Insert(): %w", err)
 	}
@@ -50,9 +50,9 @@ func (u *generateSeedUseCase) Generate(ctx context.Context) (signusecase.Generat
 }
 
 // retrieveSeed retrieves seed from database
-func (u *generateSeedUseCase) retrieveSeed() ([]byte, error) {
+func (u *generateSeedUseCase) retrieveSeed(ctx context.Context) ([]byte, error) {
 	// Get seed from database, seed is expected to have only one record
-	seed, err := u.seedRepo.GetOne()
+	seed, err := u.seedRepo.GetOne(ctx)
 	if err == nil && seed.Seed != "" {
 		logger.Info("seed have already been generated")
 		return key.SeedToByte(seed.Seed)

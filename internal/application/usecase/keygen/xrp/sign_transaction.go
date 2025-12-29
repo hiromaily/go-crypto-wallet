@@ -78,7 +78,7 @@ func (u *signTransactionUseCase) Sign(
 		// TODO: get secret from database by txInput.Account
 		// master_seed from xrp_account_key table
 		var secret string
-		secret, err = u.xrpAccountKeyRepo.GetSecret(senderAccount, txInput.Account)
+		secret, err = u.xrpAccountKeyRepo.GetSecret(ctx, senderAccount, txInput.Account)
 		if err != nil {
 			return keygenusecase.SignTransactionOutput{},
 				fmt.Errorf("fail to call xrpAccountKeyRepo.GetSecret(): %w", err)

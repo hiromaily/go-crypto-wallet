@@ -83,7 +83,7 @@ func (u *createPaymentRequestUseCase) Execute(ctx context.Context, input watchus
 			Coin:            u.coinTypeCode.String(),
 			PaymentID:       null.Int64{},
 			SenderAddress:   pubkeyItems[0+idx].WalletAddress,
-			SenderAccount:   pubkeyItems[0+idx].Account,
+			SenderAccount:   string(pubkeyItems[0+idx].Account),
 			ReceiverAddress: pubkeyItems[len(input.AmountList)+idx].WalletAddress,
 			Amount:          amount,
 			IsDone:          false,

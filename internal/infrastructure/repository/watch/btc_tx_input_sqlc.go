@@ -5,10 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/quagmt/udecimal"
-
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 )
 
@@ -29,7 +26,7 @@ func NewBTCTxInputRepositorySqlc(
 }
 
 // GetOne get one record by ID
-func (r *TxInputRepositorySqlc) GetOne(id int64) (*models.BTCTXInput, error) {
+func (r *TxInputRepositorySqlc) GetOne(id int64) (*sqlc.BtcTxInput, error) {
 	ctx := context.Background()
 
 	input, err := r.queries.GetBtcTxInputByID(ctx, id)
@@ -37,11 +34,11 @@ func (r *TxInputRepositorySqlc) GetOne(id int64) (*models.BTCTXInput, error) {
 		return nil, fmt.Errorf("failed to call GetBtcTxInputByID(): %w", err)
 	}
 
-	return convertSqlcBtcTxInputToModel(&input), nil
+	return &input, nil
 }
 
 // GetAllByTxID returns all records searched by tx_id
-func (r *TxInputRepositorySqlc) GetAllByTxID(id int64) ([]*models.BTCTXInput, error) {
+func (r *TxInputRepositorySqlc) GetAllByTxID(id int64) ([]*sqlc.BtcTxInput, error) {
 	ctx := context.Background()
 
 	inputs, err := r.queries.GetBtcTxInputsByTxID(ctx, id)
@@ -49,27 +46,27 @@ func (r *TxInputRepositorySqlc) GetAllByTxID(id int64) ([]*models.BTCTXInput, er
 		return nil, fmt.Errorf("failed to call GetBtcTxInputsByTxID(): %w", err)
 	}
 
-	result := make([]*models.BTCTXInput, len(inputs))
-	for i, input := range inputs {
-		result[i] = convertSqlcBtcTxInputToModel(&input)
+	result := make([]*sqlc.BtcTxInput, len(inputs))
+	for i := range inputs {
+		result[i] = &inputs[i]
 	}
 
 	return result, nil
 }
 
 // Insert inserts one record
-func (r *TxInputRepositorySqlc) Insert(txItem *models.BTCTXInput) error {
+func (r *TxInputRepositorySqlc) Insert(txItem *sqlc.BtcTxInput) error {
 	ctx := context.Background()
 
 	_, err := r.queries.InsertBtcTxInput(ctx, sqlc.InsertBtcTxInputParams{
-		TxID:               txItem.TXID,
+		TxID:               txItem.TxID,
 		InputTxid:          txItem.InputTxid,
 		InputVout:          txItem.InputVout,
 		InputAddress:       txItem.InputAddress,
 		InputAccount:       txItem.InputAccount,
-		InputAmount:        txItem.InputAmount.String(),
+		InputAmount:        txItem.InputAmount,
 		InputConfirmations: txItem.InputConfirmations,
-		UpdatedAt:          convertNullTimeToSQLNullTime(txItem.UpdatedAt),
+		UpdatedAt:          txItem.UpdatedAt,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to call InsertBtcTxInput(): %w", err)
@@ -79,29 +76,11 @@ func (r *TxInputRepositorySqlc) Insert(txItem *models.BTCTXInput) error {
 }
 
 // InsertBulk inserts multiple records
-func (r *TxInputRepositorySqlc) InsertBulk(txItems []*models.BTCTXInput) error {
+func (r *TxInputRepositorySqlc) InsertBulk(txItems []*sqlc.BtcTxInput) error {
 	for _, item := range txItems {
 		if err := r.Insert(item); err != nil {
 			return err
 		}
 	}
 	return nil
-}
-
-// Helper functions
-
-func convertSqlcBtcTxInputToModel(input *sqlc.BtcTxInput) *models.BTCTXInput {
-	amount, _ := udecimal.Parse(input.InputAmount)
-
-	return &models.BTCTXInput{
-		ID:                 input.ID,
-		TXID:               input.TxID,
-		InputTxid:          input.InputTxid,
-		InputVout:          input.InputVout,
-		InputAddress:       input.InputAddress,
-		InputAccount:       input.InputAccount,
-		InputAmount:        amount,
-		InputConfirmations: input.InputConfirmations,
-		UpdatedAt:          convertSQLNullTimeToNullTime(input.UpdatedAt),
-	}
 }

@@ -431,7 +431,7 @@ func (u *createTransactionUseCase) createUserPayment() ([]userPayment, *big.Int,
 
 func (u *createTransactionUseCase) validateAmount(
 	ctx context.Context,
-	senderAddr *models.Address,
+	senderAddr *sqlc.Address,
 	totalAmount *big.Int,
 ) error {
 	// check sender's total balance
@@ -450,7 +450,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	userPayments []userPayment,
-	senderAddr *models.Address,
+	senderAddr *sqlc.Address,
 ) ([]string, []*sqlc.EthDetailTx, error) {
 	serializedTxs := make([]string, 0, len(userPayments))
 	txDetailItems := make([]*sqlc.EthDetailTx, 0, len(userPayments))

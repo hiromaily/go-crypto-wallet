@@ -8,7 +8,6 @@ import (
 	portsPersistence "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 )
 
@@ -27,7 +26,7 @@ func NewTxRepositorySqlc(dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode) *
 }
 
 // GetOne returns one record by ID
-func (r *TxRepositorySqlc) GetOne(id int64) (*models.TX, error) {
+func (r *TxRepositorySqlc) GetOne(id int64) (*sqlc.Tx, error) {
 	ctx := context.Background()
 
 	tx, err := r.queries.GetTxByID(ctx, id)
@@ -35,7 +34,7 @@ func (r *TxRepositorySqlc) GetOne(id int64) (*models.TX, error) {
 		return nil, fmt.Errorf("failed to call GetTxByID(): %w", err)
 	}
 
-	return convertSqlcTxToModel(&tx), nil
+	return &tx, nil
 }
 
 // GetMaxID returns max id
@@ -82,14 +81,14 @@ func (r *TxRepositorySqlc) InsertUnsignedTx(actionType domainTx.ActionType) (int
 	return id, nil
 }
 
-// Update updates by models.Tx (entire update)
-func (r *TxRepositorySqlc) Update(txItem *models.TX) (int64, error) {
+// Update updates by sqlc.Tx (entire update)
+func (r *TxRepositorySqlc) Update(txItem *sqlc.Tx) (int64, error) {
 	ctx := context.Background()
 
 	err := r.queries.UpdateTx(ctx, sqlc.UpdateTxParams{
-		Coin:      sqlc.TxCoin(txItem.Coin),
-		Action:    sqlc.TxAction(txItem.Action),
-		UpdatedAt: convertNullTimeToSQLNullTime(txItem.UpdatedAt),
+		Coin:      txItem.Coin,
+		Action:    txItem.Action,
+		UpdatedAt: txItem.UpdatedAt,
 		ID:        txItem.ID,
 	})
 	if err != nil {
@@ -121,16 +120,5 @@ func (r *TxRepositorySqlc) WithTx(tx *sql.Tx) portsPersistence.TxRepositorier {
 	return &TxRepositorySqlc{
 		queries:      r.queries.WithTx(tx),
 		coinTypeCode: r.coinTypeCode,
-	}
-}
-
-// Helper functions
-
-func convertSqlcTxToModel(tx *sqlc.Tx) *models.TX {
-	return &models.TX{
-		ID:        tx.ID,
-		Coin:      string(tx.Coin),
-		Action:    string(tx.Action),
-		UpdatedAt: convertSQLNullTimeToNullTime(tx.UpdatedAt),
 	}
 }

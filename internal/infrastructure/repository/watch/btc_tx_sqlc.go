@@ -6,11 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/quagmt/udecimal"
-
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 )
 
@@ -29,7 +26,7 @@ func NewBTCTxRepositorySqlc(dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode
 }
 
 // GetOne returns one record by ID
-func (r *BTCTxRepositorySqlc) GetOne(id int64) (*models.BTCTX, error) {
+func (r *BTCTxRepositorySqlc) GetOne(id int64) (*sqlc.BtcTx, error) {
 	ctx := context.Background()
 
 	btcTx, err := r.queries.GetBtcTxByID(ctx, id)
@@ -37,7 +34,7 @@ func (r *BTCTxRepositorySqlc) GetOne(id int64) (*models.BTCTX, error) {
 		return nil, fmt.Errorf("failed to call GetBtcTxByID(): %w", err)
 	}
 
-	return convertSqlcBtcTxToModel(&btcTx), nil
+	return &btcTx, nil
 }
 
 // GetCountByUnsignedHex returns count by hex string
@@ -89,21 +86,21 @@ func (r *BTCTxRepositorySqlc) GetSentHashTx(actionType domainTx.ActionType, txTy
 }
 
 // InsertUnsignedTx inserts records
-func (r *BTCTxRepositorySqlc) InsertUnsignedTx(actionType domainTx.ActionType, txItem *models.BTCTX) (int64, error) {
+func (r *BTCTxRepositorySqlc) InsertUnsignedTx(actionType domainTx.ActionType, txItem *sqlc.BtcTx) (int64, error) {
 	ctx := context.Background()
 
 	result, err := r.queries.InsertBtcTx(ctx, sqlc.InsertBtcTxParams{
 		Coin:              sqlc.BtcTxCoin(r.coinTypeCode.String()),
 		Action:            sqlc.BtcTxAction(actionType.String()),
-		UnsignedHexTx:     txItem.UnsignedHexTX,
-		SignedHexTx:       txItem.SignedHexTX,
-		SentHashTx:        txItem.SentHashTX,
-		TotalInputAmount:  txItem.TotalInputAmount.String(),
-		TotalOutputAmount: txItem.TotalOutputAmount.String(),
-		Fee:               txItem.Fee.String(),
-		CurrentTxType:     txItem.CurrentTXType,
-		UnsignedUpdatedAt: convertNullTimeToSQLNullTime(txItem.UnsignedUpdatedAt),
-		SentUpdatedAt:     convertNullTimeToSQLNullTime(txItem.SentUpdatedAt),
+		UnsignedHexTx:     txItem.UnsignedHexTx,
+		SignedHexTx:       txItem.SignedHexTx,
+		SentHashTx:        txItem.SentHashTx,
+		TotalInputAmount:  txItem.TotalInputAmount,
+		TotalOutputAmount: txItem.TotalOutputAmount,
+		Fee:               txItem.Fee,
+		CurrentTxType:     txItem.CurrentTxType,
+		UnsignedUpdatedAt: txItem.UnsignedUpdatedAt,
+		SentUpdatedAt:     txItem.SentUpdatedAt,
 	})
 	if err != nil {
 		return 0, fmt.Errorf("failed to call InsertBtcTx(): %w", err)
@@ -117,22 +114,22 @@ func (r *BTCTxRepositorySqlc) InsertUnsignedTx(actionType domainTx.ActionType, t
 	return id, nil
 }
 
-// Update updates by models.BTCTX (entire update)
-func (r *BTCTxRepositorySqlc) Update(txItem *models.BTCTX) (int64, error) {
+// Update updates by sqlc.BtcTx (entire update)
+func (r *BTCTxRepositorySqlc) Update(txItem *sqlc.BtcTx) (int64, error) {
 	ctx := context.Background()
 
 	err := r.queries.UpdateBtcTx(ctx, sqlc.UpdateBtcTxParams{
-		Coin:              sqlc.BtcTxCoin(txItem.Coin),
-		Action:            sqlc.BtcTxAction(txItem.Action),
-		UnsignedHexTx:     txItem.UnsignedHexTX,
-		SignedHexTx:       txItem.SignedHexTX,
-		SentHashTx:        txItem.SentHashTX,
-		TotalInputAmount:  txItem.TotalInputAmount.String(),
-		TotalOutputAmount: txItem.TotalOutputAmount.String(),
-		Fee:               txItem.Fee.String(),
-		CurrentTxType:     txItem.CurrentTXType,
-		UnsignedUpdatedAt: convertNullTimeToSQLNullTime(txItem.UnsignedUpdatedAt),
-		SentUpdatedAt:     convertNullTimeToSQLNullTime(txItem.SentUpdatedAt),
+		Coin:              txItem.Coin,
+		Action:            txItem.Action,
+		UnsignedHexTx:     txItem.UnsignedHexTx,
+		SignedHexTx:       txItem.SignedHexTx,
+		SentHashTx:        txItem.SentHashTx,
+		TotalInputAmount:  txItem.TotalInputAmount,
+		TotalOutputAmount: txItem.TotalOutputAmount,
+		Fee:               txItem.Fee,
+		CurrentTxType:     txItem.CurrentTxType,
+		UnsignedUpdatedAt: txItem.UnsignedUpdatedAt,
+		SentUpdatedAt:     txItem.SentUpdatedAt,
 		ID:                txItem.ID,
 	})
 	if err != nil {
@@ -229,27 +226,4 @@ func (r *BTCTxRepositorySqlc) DeleteAll() (int64, error) {
 	}
 
 	return rowsAffected, nil
-}
-
-// Helper functions
-
-func convertSqlcBtcTxToModel(btcTx *sqlc.BtcTx) *models.BTCTX {
-	totalInputAmount, _ := udecimal.Parse(btcTx.TotalInputAmount)
-	totalOutputAmount, _ := udecimal.Parse(btcTx.TotalOutputAmount)
-	fee, _ := udecimal.Parse(btcTx.Fee)
-
-	return &models.BTCTX{
-		ID:                btcTx.ID,
-		Coin:              string(btcTx.Coin),
-		Action:            string(btcTx.Action),
-		UnsignedHexTX:     btcTx.UnsignedHexTx,
-		SignedHexTX:       btcTx.SignedHexTx,
-		SentHashTX:        btcTx.SentHashTx,
-		TotalInputAmount:  totalInputAmount,
-		TotalOutputAmount: totalOutputAmount,
-		Fee:               fee,
-		CurrentTXType:     btcTx.CurrentTxType,
-		UnsignedUpdatedAt: convertSQLNullTimeToNullTime(btcTx.UnsignedUpdatedAt),
-		SentUpdatedAt:     convertSQLNullTimeToNullTime(btcTx.SentUpdatedAt),
-	}
 }

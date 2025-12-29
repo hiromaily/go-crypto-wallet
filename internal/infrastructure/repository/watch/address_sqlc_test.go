@@ -4,6 +4,7 @@
 package watchrepo_test
 
 import (
+	"context"
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -47,7 +48,7 @@ func TestAddressSqlc(t *testing.T) {
 		},
 	}
 
-	err := addressRepo.InsertBulk(addresses)
+	err := addressRepo.InsertBulk(context.Background(), addresses)
 	require.NoError(t, err, "fail to call InsertBulk()")
 
 	// Get all addresses

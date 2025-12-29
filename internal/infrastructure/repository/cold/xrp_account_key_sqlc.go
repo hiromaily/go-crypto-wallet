@@ -8,7 +8,6 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
@@ -31,10 +30,8 @@ func NewXRPAccountKeyRepositorySqlc(
 
 // GetAllAddrStatus returns all XRPAccountKey by addr_status
 func (r *XRPAccountKeyRepositorySqlc) GetAllAddrStatus(
-	accountType domainAccount.AccountType, addrStatus address.AddrStatus,
-) ([]*models.XRPAccountKey, error) {
-	ctx := context.Background()
-
+	ctx context.Context, accountType domainAccount.AccountType, addrStatus address.AddrStatus,
+) ([]*sqlc.XrpAccountKey, error) {
 	xrpKeys, err := r.queries.GetXRPAccountKeysByAddrStatus(ctx, sqlc.GetXRPAccountKeysByAddrStatusParams{
 		Coin:       sqlc.XrpAccountKeyCoin(r.coinTypeCode.String()),
 		Account:    sqlc.XrpAccountKeyAccount(accountType.String()),
@@ -44,18 +41,18 @@ func (r *XRPAccountKeyRepositorySqlc) GetAllAddrStatus(
 		return nil, fmt.Errorf("failed to call GetXRPAccountKeysByAddrStatus(): %w", err)
 	}
 
-	result := make([]*models.XRPAccountKey, len(xrpKeys))
-	for i, xrpKey := range xrpKeys {
-		result[i] = convertSqlcXRPAccountKeyToModel(&xrpKey)
+	result := make([]*sqlc.XrpAccountKey, len(xrpKeys))
+	for i := range xrpKeys {
+		result[i] = &xrpKeys[i]
 	}
 
 	return result, nil
 }
 
 // GetSecret returns secret (master_seed)
-func (r *XRPAccountKeyRepositorySqlc) GetSecret(accountType domainAccount.AccountType, addr string) (string, error) {
-	ctx := context.Background()
-
+func (r *XRPAccountKeyRepositorySqlc) GetSecret(
+	ctx context.Context, accountType domainAccount.AccountType, addr string,
+) (string, error) {
 	secret, err := r.queries.GetXRPAccountKeySecret(ctx, sqlc.GetXRPAccountKeySecretParams{
 		Coin:      sqlc.XrpAccountKeyCoin(r.coinTypeCode.String()),
 		Account:   sqlc.XrpAccountKeyAccount(accountType.String()),
@@ -69,13 +66,11 @@ func (r *XRPAccountKeyRepositorySqlc) GetSecret(accountType domainAccount.Accoun
 }
 
 // InsertBulk inserts multiple records
-func (r *XRPAccountKeyRepositorySqlc) InsertBulk(items []*models.XRPAccountKey) error {
-	ctx := context.Background()
-
+func (r *XRPAccountKeyRepositorySqlc) InsertBulk(ctx context.Context, items []*sqlc.XrpAccountKey) error {
 	for _, item := range items {
 		_, err := r.queries.InsertXRPAccountKey(ctx, sqlc.InsertXRPAccountKeyParams{
-			Coin:             sqlc.XrpAccountKeyCoin(item.Coin),
-			Account:          sqlc.XrpAccountKeyAccount(item.Account),
+			Coin:             item.Coin,
+			Account:          item.Account,
 			AccountID:        item.AccountID,
 			KeyType:          item.KeyType,
 			MasterKey:        item.MasterKey,
@@ -97,9 +92,8 @@ func (r *XRPAccountKeyRepositorySqlc) InsertBulk(items []*models.XRPAccountKey) 
 
 // UpdateAddrStatus updates addr_status
 func (r *XRPAccountKeyRepositorySqlc) UpdateAddrStatus(
-	accountType domainAccount.AccountType, addrStatus address.AddrStatus, accountIDs []string,
+	ctx context.Context, accountType domainAccount.AccountType, addrStatus address.AddrStatus, accountIDs []string,
 ) (int64, error) {
-	ctx := context.Background()
 	var totalAffected int64
 
 	// Update one at a time since IN clause not supported for multiple updates
@@ -123,25 +117,4 @@ func (r *XRPAccountKeyRepositorySqlc) UpdateAddrStatus(
 	}
 
 	return totalAffected, nil
-}
-
-// Helper functions
-
-func convertSqlcXRPAccountKeyToModel(xrpKey *sqlc.XrpAccountKey) *models.XRPAccountKey {
-	return &models.XRPAccountKey{
-		ID:               xrpKey.ID,
-		Coin:             string(xrpKey.Coin),
-		Account:          string(xrpKey.Account),
-		AccountID:        xrpKey.AccountID,
-		KeyType:          xrpKey.KeyType,
-		MasterKey:        xrpKey.MasterKey,
-		MasterSeed:       xrpKey.MasterSeed,
-		MasterSeedHex:    xrpKey.MasterSeedHex,
-		PublicKey:        xrpKey.PublicKey,
-		PublicKeyHex:     xrpKey.PublicKeyHex,
-		IsRegularKeyPair: xrpKey.IsRegularKeyPair,
-		AllocatedID:      xrpKey.AllocatedID,
-		AddrStatus:       xrpKey.AddrStatus,
-		UpdatedAt:        convertSQLNullTimeToNullTime(xrpKey.UpdatedAt),
-	}
 }

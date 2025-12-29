@@ -8,7 +8,7 @@ import (
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
@@ -46,7 +46,7 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 		return fmt.Errorf("fail to call addrFileRepo.ImportAddress(): %w", err)
 	}
 
-	pubKeyData := make([]*models.Address, 0, len(pubKeys))
+	pubKeyData := make([]*sqlc.Address, 0, len(pubKeys))
 	for _, key := range pubKeys {
 		// coin, account, ...
 		inner := strings.Split(key, ",")
@@ -57,15 +57,15 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 			return err
 		}
 
-		pubKeyData = append(pubKeyData, &models.Address{
-			Coin:          u.coinTypeCode.String(),
-			Account:       addrFmt.AccountType.String(),
+		pubKeyData = append(pubKeyData, &sqlc.Address{
+			Coin:          sqlc.AddressCoin(u.coinTypeCode.String()),
+			Account:       sqlc.AddressAccount(addrFmt.AccountType.String()),
 			WalletAddress: addrFmt.P2PKHAddress,
 		})
 	}
 
 	// insert imported pubKey
-	err = u.addrRepo.InsertBulk(pubKeyData)
+	err = u.addrRepo.InsertBulk(ctx, pubKeyData)
 	if err != nil {
 		return fmt.Errorf("fail to call addrRepo.InsertBulk(): %w", err)
 		// TODO:What if this inserting is failed, how it can be recovered to keep consistancy
