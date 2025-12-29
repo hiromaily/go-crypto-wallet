@@ -26,9 +26,7 @@ func NewSeedRepositorySqlc(
 }
 
 // GetOne returns one record
-func (r *SeedRepositorySqlc) GetOne() (*sqlc.Seed, error) {
-	ctx := context.Background()
-
+func (r *SeedRepositorySqlc) GetOne(ctx context.Context) (*sqlc.Seed, error) {
 	seed, err := r.queries.GetSeed(ctx, sqlc.SeedCoin(r.coinTypeCode.String()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to call GetSeed(): %w", err)
@@ -38,9 +36,7 @@ func (r *SeedRepositorySqlc) GetOne() (*sqlc.Seed, error) {
 }
 
 // Insert inserts record
-func (r *SeedRepositorySqlc) Insert(strSeed string) error {
-	ctx := context.Background()
-
+func (r *SeedRepositorySqlc) Insert(ctx context.Context, strSeed string) error {
 	_, err := r.queries.InsertSeed(ctx, sqlc.InsertSeedParams{
 		Coin: sqlc.SeedCoin(r.coinTypeCode.String()),
 		Seed: strSeed,
