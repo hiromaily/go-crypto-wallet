@@ -19,6 +19,7 @@ import (
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
+	btcapi "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/erc20"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
@@ -79,6 +80,8 @@ type Container interface {
 	NewKeygenImportFullPubkeyUseCase() keygenusecase.ImportFullPubkeyUseCase
 	NewKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUseCase
 	NewKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase
+	NewKeygenGenerateMuSig2NonceUseCase() keygenusecase.GenerateMuSig2NonceUseCase
+	NewKeygenMuSig2SignUseCase() keygenusecase.MuSig2SignUseCase
 
 	// Sign Use Cases
 	NewSignTransactionUseCase() signusecase.SignTransactionUseCase
@@ -371,6 +374,10 @@ func (c *container) newBTC() bitcoin.Bitcoiner {
 	return c.btc
 }
 
+func (c *container) newMuSig2Service() *btcapi.MuSig2Service {
+	return btcapi.NewMuSig2Service(c.pkgContainer.NewLogger())
+}
+
 func (c *container) newETH() ethereum.Ethereumer {
 	if c.eth == nil {
 		var err error
@@ -615,6 +622,12 @@ func (c *container) newAuthKeyRepo() cold.AuthAccountKeyRepositorier {
 	)
 }
 
+func (c *container) newNonceRepo() *cold.NonceRepositorySqlc {
+	return cold.NewNonceRepositorySqlc(
+		c.pkgContainer.NewMySQLClient(),
+	)
+}
+
 //
 // Keygen File Storage
 //
@@ -743,6 +756,14 @@ func (c *container) NewKeygenSignTransactionUseCase() keygenusecase.SignTransact
 	default:
 		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
 	}
+}
+
+func (c *container) NewKeygenGenerateMuSig2NonceUseCase() keygenusecase.GenerateMuSig2NonceUseCase {
+	return c.newBTCKeygenGenerateMuSig2NonceUseCase()
+}
+
+func (c *container) NewKeygenMuSig2SignUseCase() keygenusecase.MuSig2SignUseCase {
+	return c.newBTCKeygenMuSig2SignUseCase()
 }
 
 // Sign Use Cases
@@ -1031,6 +1052,22 @@ func (c *container) newXRPKeygenSignTransactionUseCase() keygenusecase.SignTrans
 		c.newXRP(),
 		c.newXRPAccountKeyRepo(),
 		c.newTxFileRepo(),
+	)
+}
+
+// Keygen MuSig2 Use Cases
+
+func (c *container) newBTCKeygenGenerateMuSig2NonceUseCase() keygenusecase.GenerateMuSig2NonceUseCase {
+	return keygenusecasebtc.NewGenerateMuSig2NonceUseCase(
+		c.newMuSig2Service(),
+		c.newNonceRepo(),
+	)
+}
+
+func (c *container) newBTCKeygenMuSig2SignUseCase() keygenusecase.MuSig2SignUseCase {
+	return keygenusecasebtc.NewMuSig2SignUseCase(
+		c.newMuSig2Service(),
+		c.newNonceRepo(),
 	)
 }
 
