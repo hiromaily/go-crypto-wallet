@@ -7,6 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -89,14 +91,6 @@ and saves the signed PSBT to a file for aggregation.`,
 func runMuSig2Nonce(ctx context.Context, container di.Container, file, output string) error {
 	fmt.Println("Generate MuSig2 nonce for Round 1")
 
-	// Validate inputs
-	if file == "" {
-		return errors.New("file path is required (--file)")
-	}
-	if output == "" {
-		return errors.New("output path is required (--output)")
-	}
-
 	// Read PSBT file
 	psbtData, err := os.ReadFile(file) // #nosec G304 - file path is from CLI flag
 	if err != nil {
@@ -112,7 +106,7 @@ func runMuSig2Nonce(ctx context.Context, container di.Container, file, output st
 	}
 
 	// Get signer ID (for keygen, this would be based on account configuration)
-	// For now, use a placeholder
+	// TODO: Derive signerID from wallet configuration instead of hardcoding
 	signerID := "keygen"
 
 	// Execute use case
@@ -150,14 +144,6 @@ func runMuSig2Nonce(ctx context.Context, container di.Container, file, output st
 func runMuSig2Sign(ctx context.Context, container di.Container, file, output string) error {
 	fmt.Println("Create MuSig2 partial signature for Round 2")
 
-	// Validate inputs
-	if file == "" {
-		return errors.New("file path is required (--file)")
-	}
-	if output == "" {
-		return errors.New("output path is required (--output)")
-	}
-
 	// Read PSBT file with aggregated nonces
 	psbtData, err := os.ReadFile(file) // #nosec G304 - file path is from CLI flag
 	if err != nil {
@@ -171,12 +157,15 @@ func runMuSig2Sign(ctx context.Context, container di.Container, file, output str
 	}
 
 	// Get signer ID
+	// TODO: Derive signerID from wallet configuration instead of hardcoding
 	signerID := "keygen"
 
 	// Parse aggregated nonces from PSBT or separate file
-	// In a real implementation, this would extract nonces from PSBT custom fields
-	// For now, this is a placeholder
+	// TODO: Extract nonces from PSBT custom fields instead of using zero values
+	// The current implementation uses zero values which will cause invalid signatures
 	var aggregatedNonces [][66]byte
+	// TODO: Extract message hash from PSBT transaction data
+	// Signing a zero hash means signing a non-existent transaction
 	var messageHash [32]byte
 
 	// Execute use case
@@ -192,7 +181,9 @@ func runMuSig2Sign(ctx context.Context, container di.Container, file, output str
 	}
 
 	// Save signed PSBT to output file
-	// In a real implementation, this would embed the partial signature into the PSBT
+	// TODO: Embed the partial signature into the PSBT before writing
+	// Currently, the partial signature is only printed and not added to the PSBT
+	// The output file will contain the original PSBT without the signature
 	if err := os.WriteFile(output, psbtData, 0o600); err != nil {
 		return fmt.Errorf("failed to write output file: %w", err)
 	}
@@ -217,7 +208,8 @@ type NonceData struct {
 func extractTransactionID(filePath string) string {
 	// Simple implementation: use the filename without extension
 	// Real implementation would parse PSBT and extract the transaction hash
-	return filePath // Placeholder
+	fileName := filepath.Base(filePath)
+	return strings.TrimSuffix(fileName, filepath.Ext(fileName))
 }
 
 // saveJSON saves data to a JSON file
