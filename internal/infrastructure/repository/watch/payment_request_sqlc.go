@@ -8,6 +8,7 @@ import (
 	"github.com/guregu/null/v6"
 	"github.com/quagmt/udecimal"
 
+	portsPersistence "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
@@ -81,7 +82,7 @@ func (r *PaymentRequestRepositorySqlc) InsertBulk(items []*models.PaymentRequest
 			ReceiverAddress: item.ReceiverAddress,
 			Amount:          item.Amount.String(),
 			IsDone:          item.IsDone,
-			UpdatedAt:       convertNullTimeToSQLNullTime(item.UpdatedAt),
+			UpdatedAt:       ConvertNullTimeToSQLNullTime(item.UpdatedAt),
 		})
 		if err != nil {
 			return fmt.Errorf("failed to call InsertPaymentRequest(): %w", err)
@@ -155,6 +156,14 @@ func (r *PaymentRequestRepositorySqlc) DeleteAll() (int64, error) {
 	return rowsAffected, nil
 }
 
+// WithTx returns a new repository instance that uses the provided transaction
+func (r *PaymentRequestRepositorySqlc) WithTx(tx *sql.Tx) portsPersistence.PaymentRequestRepositorier {
+	return &PaymentRequestRepositorySqlc{
+		queries:      r.queries.WithTx(tx),
+		coinTypeCode: r.coinTypeCode,
+	}
+}
+
 // Helper functions
 
 func convertSqlcPaymentRequestToModel(req *sqlc.PaymentRequest) *models.PaymentRequest {
@@ -169,7 +178,7 @@ func convertSqlcPaymentRequestToModel(req *sqlc.PaymentRequest) *models.PaymentR
 		ReceiverAddress: req.ReceiverAddress,
 		Amount:          amount,
 		IsDone:          req.IsDone,
-		UpdatedAt:       convertSQLNullTimeToNullTime(req.UpdatedAt),
+		UpdatedAt:       ConvertSQLNullTimeToNullTime(req.UpdatedAt),
 	}
 }
 

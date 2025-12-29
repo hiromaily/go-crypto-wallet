@@ -251,7 +251,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	}
 
 	// call CreateRawTransaction
-	rawTx, txDetailItem, err := u.ethClient.CreateRawTransaction(ctx,
+	rawTx, txDetailModel, err := u.ethClient.CreateRawTransaction(ctx,
 		senderAddr.WalletAddress, receiverAddr.WalletAddress, requiredValue.Uint64(), 0)
 	if err != nil {
 		return "", fmt.Errorf(
@@ -269,9 +269,11 @@ func (u *createTransactionUseCase) createTransferTx(
 	serializedTxs := []string{serializedTx}
 
 	// create insert data for　eth_detail_tx
+	// Convert from models to sqlc type
+	txDetailItem := convertModelsToSqlcEthDetailTx(txDetailModel)
 	txDetailItem.SenderAccount = sender.String()
 	txDetailItem.ReceiverAccount = receiver.String()
-	txDetailItems := []*models.EthDetailTX{txDetailItem}
+	txDetailItems := []*sqlc.EthDetailTx{txDetailItem}
 
 	txID, err := u.updateDB(targetAction, txDetailItems, nil)
 	if err != nil {
@@ -333,7 +335,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	userAmounts []eth.UserAmount,
-) ([]string, []*models.EthDetailTX, error) {
+) ([]string, []*sqlc.EthDetailTx, error) {
 	// get address for deposit account
 	depositAddr, err := u.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
@@ -344,12 +346,12 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 
 	// create raw transaction each address
 	serializedTxs := make([]string, 0, len(userAmounts))
-	txDetailItems := make([]*models.EthDetailTX, 0, len(userAmounts))
+	txDetailItems := make([]*sqlc.EthDetailTx, 0, len(userAmounts))
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
 		var rawTx *ethtx.RawTx
-		var txDetailItem *models.EthDetailTX
-		rawTx, txDetailItem, err = u.ethClient.CreateRawTransaction(
+		var txDetailModel *models.EthDetailTX
+		rawTx, txDetailModel, err = u.ethClient.CreateRawTransaction(
 			ctx, val.Address, depositAddr.WalletAddress, 0, 0)
 		if err != nil {
 			return nil, nil, fmt.Errorf(
@@ -368,6 +370,8 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 		serializedTxs = append(serializedTxs, serializedTx)
 
 		// create insert data for　eth_detail_tx
+		// Convert from models to sqlc type
+		txDetailItem := convertModelsToSqlcEthDetailTx(txDetailModel)
 		txDetailItem.SenderAccount = sender.String()
 		txDetailItem.ReceiverAccount = receiver.String()
 		txDetailItems = append(txDetailItems, txDetailItem)
@@ -445,13 +449,13 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	sender, receiver domainAccount.AccountType,
 	userPayments []userPayment,
 	senderAddr *sqlc.Address,
-) ([]string, []*models.EthDetailTX, error) {
+) ([]string, []*sqlc.EthDetailTx, error) {
 	serializedTxs := make([]string, 0, len(userPayments))
-	txDetailItems := make([]*models.EthDetailTX, 0, len(userPayments))
+	txDetailItems := make([]*sqlc.EthDetailTx, 0, len(userPayments))
 	additionalNonce := 0
 	for _, userPayment := range userPayments {
 		// call CreateRawTransaction
-		rawTx, txDetailItem, err := u.ethClient.CreateRawTransaction(ctx,
+		rawTx, txDetailModel, err := u.ethClient.CreateRawTransaction(ctx,
 			senderAddr.WalletAddress, userPayment.receiverAddr, userPayment.amount.Uint64(), additionalNonce)
 		if err != nil {
 			return nil, nil, fmt.Errorf(
@@ -470,6 +474,8 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 		serializedTxs = append(serializedTxs, serializedTx)
 
 		// create insert data for　eth_detail_tx
+		// Convert from models to sqlc type
+		txDetailItem := convertModelsToSqlcEthDetailTx(txDetailModel)
 		txDetailItem.SenderAccount = sender.String()
 		txDetailItem.ReceiverAccount = receiver.String()
 		txDetailItems = append(txDetailItems, txDetailItem)
@@ -479,7 +485,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 
 func (u *createTransactionUseCase) updateDB(
 	targetAction domainTx.ActionType,
-	txDetailItems []*models.EthDetailTX,
+	txDetailItems []*sqlc.EthDetailTx,
 	paymentRequestIds []int64,
 ) (int64, error) {
 	// start transaction
@@ -495,21 +501,26 @@ func (u *createTransactionUseCase) updateDB(
 		}
 	}()
 
+	// Create transactional repositories that use the transaction
+	txRepoWithTx := u.txRepo.WithTx(dtx)
+	txDetailRepoWithTx := u.txDetailRepo.WithTx(dtx)
+	payReqRepoWithTx := u.payReqRepo.WithTx(dtx)
+
 	// Insert eth_tx
-	txID, err := u.txRepo.InsertUnsignedTx(targetAction)
+	txID, err := txRepoWithTx.InsertUnsignedTx(targetAction)
 	if err != nil {
 		return 0, fmt.Errorf("fail to call txRepo.InsertUnsignedTx(): %w", err)
 	}
 	// Insert to eth_detail_tx
 	for idx := range txDetailItems {
-		txDetailItems[idx].TXID = txID
+		txDetailItems[idx].TxID = txID
 	}
-	if err = u.txDetailRepo.InsertBulk(txDetailItems); err != nil {
+	if err = txDetailRepoWithTx.InsertBulk(txDetailItems); err != nil {
 		return 0, fmt.Errorf("fail to call txDetailRepo.InsertBulk(): %w", err)
 	}
 
 	if targetAction == domainTx.ActionTypePayment {
-		_, err = u.payReqRepo.UpdatePaymentID(txID, paymentRequestIds)
+		_, err = payReqRepoWithTx.UpdatePaymentID(txID, paymentRequestIds)
 		if err != nil {
 			return 0, fmt.Errorf("fail to call repo.PayReq().UpdatePaymentID(txID, paymentRequestIds): %w", err)
 		}
@@ -532,4 +543,27 @@ func (u *createTransactionUseCase) generateHexFile(
 	}
 
 	return generatedFileName, nil
+}
+
+// Helper function to convert models.EthDetailTX to sqlc.EthDetailTx
+func convertModelsToSqlcEthDetailTx(m *models.EthDetailTX) *sqlc.EthDetailTx {
+	return &sqlc.EthDetailTx{
+		ID:                m.ID,
+		TxID:              m.TXID,
+		Uuid:              m.UUID,
+		CurrentTxType:     m.CurrentTXType,
+		SenderAccount:     m.SenderAccount,
+		SenderAddress:     m.SenderAddress,
+		ReceiverAccount:   m.ReceiverAccount,
+		ReceiverAddress:   m.ReceiverAddress,
+		Amount:            m.Amount,
+		Fee:               m.Fee,
+		GasLimit:          m.GasLimit,
+		Nonce:             m.Nonce,
+		UnsignedHexTx:     m.UnsignedHexTX,
+		SignedHexTx:       m.SignedHexTX,
+		SentHashTx:        m.SentHashTX,
+		UnsignedUpdatedAt: watchrepo.ConvertNullTimeToSQLNullTime(m.UnsignedUpdatedAt),
+		SentUpdatedAt:     watchrepo.ConvertNullTimeToSQLNullTime(m.SentUpdatedAt),
+	}
 }

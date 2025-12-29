@@ -7,6 +7,7 @@ package persistence
 
 import (
 	"context"
+	"database/sql"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
@@ -114,6 +115,7 @@ type TxRepositorier interface {
 	InsertUnsignedTx(actionType domainTx.ActionType) (int64, error)
 	Update(txItem *sqlc.Tx) (int64, error)
 	DeleteAll() (int64, error)
+	WithTx(tx *sql.Tx) TxRepositorier
 }
 
 // PaymentRequestRepositorier is PaymentRequestRepository interface
@@ -124,30 +126,33 @@ type PaymentRequestRepositorier interface {
 	UpdatePaymentID(paymentID int64, ids []int64) (int64, error)
 	UpdateIsDone(paymentID int64) (int64, error)
 	DeleteAll() (int64, error)
+	WithTx(tx *sql.Tx) PaymentRequestRepositorier
 }
 
 // EthDetailTxRepositorier is EthDetailTxRepository interface
 type EthDetailTxRepositorier interface {
-	GetOne(id int64) (*models.EthDetailTX, error)
-	GetAllByTxID(id int64) ([]*models.EthDetailTX, error)
+	GetOne(id int64) (*sqlc.EthDetailTx, error)
+	GetAllByTxID(id int64) ([]*sqlc.EthDetailTx, error)
 	GetSentHashTx(txType domainTx.TxType) ([]string, error)
-	Insert(txItem *models.EthDetailTX) error
-	InsertBulk(txItems []*models.EthDetailTX) error
+	Insert(txItem *sqlc.EthDetailTx) error
+	InsertBulk(txItems []*sqlc.EthDetailTx) error
 	UpdateAfterTxSent(uuid string, txType domainTx.TxType, signedHex, sentHashTx string) (int64, error)
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(txType domainTx.TxType, sentHashTx string) (int64, error)
+	WithTx(tx *sql.Tx) EthDetailTxRepositorier
 }
 
 // XrpDetailTxRepositorier is XrpDetailTxRepository interface
 type XrpDetailTxRepositorier interface {
-	GetOne(id int64) (*models.XRPDetailTX, error)
-	GetAllByTxID(id int64) ([]*models.XRPDetailTX, error)
+	GetOne(id int64) (*sqlc.XrpDetailTx, error)
+	GetAllByTxID(id int64) ([]*sqlc.XrpDetailTx, error)
 	GetSentHashTx(txType domainTx.TxType) ([]string, error)
-	Insert(txItem *models.XRPDetailTX) error
-	InsertBulk(txItems []*models.XRPDetailTX) error
+	Insert(txItem *sqlc.XrpDetailTx) error
+	InsertBulk(txItems []*sqlc.XrpDetailTx) error
 	UpdateAfterTxSent(
 		uuid string, txType domainTx.TxType, signedTxID, signedTxBlob string, earlistLedgerVersion uint64,
 	) (int64, error)
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(txType domainTx.TxType, sentHashTx string) (int64, error)
+	WithTx(tx *sql.Tx) XrpDetailTxRepositorier
 }
