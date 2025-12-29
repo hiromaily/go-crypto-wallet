@@ -2,12 +2,12 @@ package btc
 
 import (
 	"crypto/sha256"
+	"strings"
 	"testing"
 
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcec/v2/schnorr"
 	"github.com/btcsuite/btcd/btcec/v2/schnorr/musig2"
-	"github.com/btcsuite/btcd/chaincfg"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -17,19 +17,16 @@ func TestNewMuSig2Service(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		network *chaincfg.Params
 		logger  logger.Logger
 		wantNil bool
 	}{
 		{
 			name:    "with logger",
-			network: &chaincfg.TestNet3Params,
 			logger:  logger.NewNoopLogger(),
 			wantNil: false,
 		},
 		{
 			name:    "without logger (should use noop)",
-			network: &chaincfg.TestNet3Params,
 			logger:  nil,
 			wantNil: false,
 		},
@@ -39,13 +36,9 @@ func TestNewMuSig2Service(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			service := NewMuSig2Service(tt.network, tt.logger)
+			service := NewMuSig2Service(tt.logger)
 			if (service == nil) != tt.wantNil {
 				t.Errorf("NewMuSig2Service() = %v, wantNil %v", service, tt.wantNil)
-			}
-
-			if service != nil && service.network != tt.network {
-				t.Errorf("NewMuSig2Service() network = %v, want %v", service.network, tt.network)
 			}
 		})
 	}
@@ -54,7 +47,7 @@ func TestNewMuSig2Service(t *testing.T) {
 func TestMuSig2Service_CreateContext(t *testing.T) {
 	t.Parallel()
 
-	service := NewMuSig2Service(&chaincfg.TestNet3Params, logger.NewNoopLogger())
+	service := NewMuSig2Service(logger.NewNoopLogger())
 
 	// Generate test keys
 	privKey1, err := btcec.NewPrivateKey()
@@ -128,7 +121,7 @@ func TestMuSig2Service_CreateContext(t *testing.T) {
 					t.Errorf("CreateContext() expected error but got none")
 					return
 				}
-				if tt.errContains != "" && !contains(err.Error(), tt.errContains) {
+				if tt.errContains != "" && !strings.Contains(err.Error(), tt.errContains) {
 					t.Errorf("CreateContext() error = %v, want error containing %v", err, tt.errContains)
 				}
 				return
@@ -149,7 +142,7 @@ func TestMuSig2Service_CreateContext(t *testing.T) {
 func TestMuSig2Service_CreateContextWithTaproot(t *testing.T) {
 	t.Parallel()
 
-	service := NewMuSig2Service(&chaincfg.TestNet3Params, logger.NewNoopLogger())
+	service := NewMuSig2Service(logger.NewNoopLogger())
 
 	// Generate test keys
 	privKey1, err := btcec.NewPrivateKey()
@@ -200,7 +193,7 @@ func TestMuSig2Service_CreateContextWithTaproot(t *testing.T) {
 					t.Errorf("CreateContextWithTaproot() expected error but got none")
 					return
 				}
-				if tt.errContains != "" && !contains(err.Error(), tt.errContains) {
+				if tt.errContains != "" && !strings.Contains(err.Error(), tt.errContains) {
 					t.Errorf("CreateContextWithTaproot() error = %v, want error containing %v",
 						err, tt.errContains)
 				}
@@ -222,7 +215,7 @@ func TestMuSig2Service_CreateContextWithTaproot(t *testing.T) {
 func TestMuSig2Service_CreateSession(t *testing.T) {
 	t.Parallel()
 
-	service := NewMuSig2Service(&chaincfg.TestNet3Params, logger.NewNoopLogger())
+	service := NewMuSig2Service(logger.NewNoopLogger())
 
 	// Generate test keys
 	privKey1, _ := btcec.NewPrivateKey()
@@ -265,7 +258,7 @@ func TestMuSig2Service_CreateSession(t *testing.T) {
 					t.Errorf("CreateSession() expected error but got none")
 					return
 				}
-				if tt.errContains != "" && !contains(err.Error(), tt.errContains) {
+				if tt.errContains != "" && !strings.Contains(err.Error(), tt.errContains) {
 					t.Errorf("CreateSession() error = %v, want error containing %v", err, tt.errContains)
 				}
 				return
@@ -286,7 +279,7 @@ func TestMuSig2Service_CreateSession(t *testing.T) {
 func TestMuSig2Service_CompleteTwoRoundProtocol(t *testing.T) {
 	t.Parallel()
 
-	service := NewMuSig2Service(&chaincfg.TestNet3Params, logger.NewNoopLogger())
+	service := NewMuSig2Service(logger.NewNoopLogger())
 
 	// Generate test keys for 2-of-2 multisig
 	privKey1, _ := btcec.NewPrivateKey()
@@ -321,8 +314,8 @@ func TestMuSig2Service_CompleteTwoRoundProtocol(t *testing.T) {
 	}
 
 	// Round 1: Nonce generation and exchange
-	nonce1 := GetPublicNonce(session1)
-	nonce2 := GetPublicNonce(session2)
+	nonce1 := service.GetPublicNonce(session1)
+	nonce2 := service.GetPublicNonce(session2)
 
 	// Signer 1 registers signer 2's nonce
 	haveAll, err := service.RegisterPubNonce(session1, nonce2)
@@ -395,7 +388,7 @@ func TestMuSig2Service_CompleteTwoRoundProtocol(t *testing.T) {
 func TestMuSig2Service_RegisterPubNonce(t *testing.T) {
 	// Note: Cannot use t.Parallel() because tests mutate session state
 
-	service := NewMuSig2Service(&chaincfg.TestNet3Params, logger.NewNoopLogger())
+	service := NewMuSig2Service(logger.NewNoopLogger())
 
 	// Generate test keys
 	privKey1, _ := btcec.NewPrivateKey()
@@ -410,7 +403,7 @@ func TestMuSig2Service_RegisterPubNonce(t *testing.T) {
 	// Get a valid nonce from another session
 	ctx2, _ := service.CreateContext(privKey2, []*btcec.PublicKey{pubKey1, pubKey2}, true)
 	session2, _ := service.CreateSession(ctx2)
-	validNonce := GetPublicNonce(session2)
+	validNonce := service.GetPublicNonce(session2)
 
 	tests := []struct {
 		name        string
@@ -451,7 +444,7 @@ func TestMuSig2Service_RegisterPubNonce(t *testing.T) {
 					t.Errorf("RegisterPubNonce() expected error but got none")
 					return
 				}
-				if tt.errContains != "" && !contains(err.Error(), tt.errContains) {
+				if tt.errContains != "" && !strings.Contains(err.Error(), tt.errContains) {
 					t.Errorf("RegisterPubNonce() error = %v, want error containing %v",
 						err, tt.errContains)
 				}
@@ -468,7 +461,7 @@ func TestMuSig2Service_RegisterPubNonce(t *testing.T) {
 func TestMuSig2Service_Sign(t *testing.T) {
 	// Note: Cannot use t.Parallel() because tests mutate session state
 
-	service := NewMuSig2Service(&chaincfg.TestNet3Params, logger.NewNoopLogger())
+	service := NewMuSig2Service(logger.NewNoopLogger())
 
 	// Generate test keys
 	privKey1, _ := btcec.NewPrivateKey()
@@ -484,8 +477,8 @@ func TestMuSig2Service_Sign(t *testing.T) {
 	session2, _ := service.CreateSession(ctx2)
 
 	// Exchange nonces
-	nonce1 := GetPublicNonce(session1)
-	nonce2 := GetPublicNonce(session2)
+	nonce1 := service.GetPublicNonce(session1)
+	nonce2 := service.GetPublicNonce(session2)
 	_, _ = service.RegisterPubNonce(session1, nonce2)
 	_, _ = service.RegisterPubNonce(session2, nonce1)
 
@@ -523,7 +516,7 @@ func TestMuSig2Service_Sign(t *testing.T) {
 					t.Errorf("Sign() expected error but got none")
 					return
 				}
-				if tt.errContains != "" && !contains(err.Error(), tt.errContains) {
+				if tt.errContains != "" && !strings.Contains(err.Error(), tt.errContains) {
 					t.Errorf("Sign() error = %v, want error containing %v", err, tt.errContains)
 				}
 				return
@@ -544,7 +537,7 @@ func TestMuSig2Service_Sign(t *testing.T) {
 func TestMuSig2Service_GetCombinedKey(t *testing.T) {
 	t.Parallel()
 
-	service := NewMuSig2Service(&chaincfg.TestNet3Params, logger.NewNoopLogger())
+	service := NewMuSig2Service(logger.NewNoopLogger())
 
 	// Generate test keys
 	privKey1, _ := btcec.NewPrivateKey()
@@ -583,7 +576,7 @@ func TestMuSig2Service_GetCombinedKey(t *testing.T) {
 					t.Errorf("GetCombinedKey() expected error but got none")
 					return
 				}
-				if tt.errContains != "" && !contains(err.Error(), tt.errContains) {
+				if tt.errContains != "" && !strings.Contains(err.Error(), tt.errContains) {
 					t.Errorf("GetCombinedKey() error = %v, want error containing %v",
 						err, tt.errContains)
 				}
@@ -605,7 +598,7 @@ func TestMuSig2Service_GetCombinedKey(t *testing.T) {
 func TestMuSig2Service_VerifySignature(t *testing.T) {
 	t.Parallel()
 
-	service := NewMuSig2Service(&chaincfg.TestNet3Params, logger.NewNoopLogger())
+	service := NewMuSig2Service(logger.NewNoopLogger())
 
 	// Create a complete signature for testing
 	privKey1, _ := btcec.NewPrivateKey()
@@ -623,8 +616,8 @@ func TestMuSig2Service_VerifySignature(t *testing.T) {
 	ctx2, _ := service.CreateContext(privKey2, allPubKeys, true)
 	session2, _ := service.CreateSession(ctx2)
 
-	nonce1 := GetPublicNonce(session1)
-	nonce2 := GetPublicNonce(session2)
+	nonce1 := service.GetPublicNonce(session1)
+	nonce2 := service.GetPublicNonce(session2)
 	_, _ = service.RegisterPubNonce(session1, nonce2)
 	_, _ = service.RegisterPubNonce(session2, nonce1)
 
@@ -686,18 +679,4 @@ func TestMuSig2Service_VerifySignature(t *testing.T) {
 			}
 		})
 	}
-}
-
-// Helper function to check if a string contains a substring
-func contains(s, substr string) bool {
-	return len(substr) > 0 && len(s) >= len(substr) && findSubstring(s, substr)
-}
-
-func findSubstring(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
 }

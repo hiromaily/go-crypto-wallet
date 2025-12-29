@@ -7,7 +7,6 @@ import (
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcec/v2/schnorr"
 	"github.com/btcsuite/btcd/btcec/v2/schnorr/musig2"
-	"github.com/btcsuite/btcd/chaincfg"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/multisig"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -21,19 +20,39 @@ import (
 // The service uses the high-level Session API from btcd which provides built-in
 // protection against nonce reuse and other common pitfalls.
 type MuSig2Service struct {
-	network *chaincfg.Params
-	logger  logger.Logger
+	logger logger.Logger
 }
 
 // NewMuSig2Service creates a new MuSig2 service instance.
-func NewMuSig2Service(network *chaincfg.Params, log logger.Logger) *MuSig2Service {
+func NewMuSig2Service(log logger.Logger) *MuSig2Service {
 	if log == nil {
 		log = logger.NewNoopLogger()
 	}
 	return &MuSig2Service{
-		network: network,
-		logger:  log,
+		logger: log,
 	}
+}
+
+// validateContextInputs validates common inputs for context creation.
+func validateContextInputs(privKey *btcec.PrivateKey, allPubKeys []*btcec.PublicKey) error {
+	if privKey == nil {
+		return errors.New("private key cannot be nil")
+	}
+
+	if len(allPubKeys) < 2 {
+		return fmt.Errorf("at least 2 public keys required for MuSig2: got %d", len(allPubKeys))
+	}
+
+	// Validate using domain layer
+	pubKeysBytes := make([][]byte, len(allPubKeys))
+	for i, pk := range allPubKeys {
+		pubKeysBytes[i] = pk.SerializeCompressed()
+	}
+	if err := multisig.ValidatePublicKeysForMuSig2(pubKeysBytes); err != nil {
+		return fmt.Errorf("invalid public keys: %w", err)
+	}
+
+	return nil
 }
 
 // CreateContext creates a new MuSig2 context for a signer.
@@ -52,21 +71,8 @@ func (m *MuSig2Service) CreateContext(
 	allPubKeys []*btcec.PublicKey,
 	sortKeys bool,
 ) (*musig2.Context, error) {
-	if privKey == nil {
-		return nil, errors.New("private key cannot be nil")
-	}
-
-	if len(allPubKeys) < 2 {
-		return nil, fmt.Errorf("at least 2 public keys required for MuSig2: got %d", len(allPubKeys))
-	}
-
-	// Validate using domain layer
-	pubKeysBytes := make([][]byte, len(allPubKeys))
-	for i, pk := range allPubKeys {
-		pubKeysBytes[i] = pk.SerializeCompressed()
-	}
-	if err := multisig.ValidatePublicKeysForMuSig2(pubKeysBytes); err != nil {
-		return nil, fmt.Errorf("invalid public keys: %w", err)
+	if err := validateContextInputs(privKey, allPubKeys); err != nil {
+		return nil, err
 	}
 
 	// Create context with known signers
@@ -103,21 +109,8 @@ func (m *MuSig2Service) CreateContextWithTaproot(
 	allPubKeys []*btcec.PublicKey,
 	sortKeys bool,
 ) (*musig2.Context, error) {
-	if privKey == nil {
-		return nil, errors.New("private key cannot be nil")
-	}
-
-	if len(allPubKeys) < 2 {
-		return nil, fmt.Errorf("at least 2 public keys required for MuSig2: got %d", len(allPubKeys))
-	}
-
-	// Validate using domain layer
-	pubKeysBytes := make([][]byte, len(allPubKeys))
-	for i, pk := range allPubKeys {
-		pubKeysBytes[i] = pk.SerializeCompressed()
-	}
-	if err := multisig.ValidatePublicKeysForMuSig2(pubKeysBytes); err != nil {
-		return nil, fmt.Errorf("invalid public keys: %w", err)
+	if err := validateContextInputs(privKey, allPubKeys); err != nil {
+		return nil, err
 	}
 
 	// Create context with Taproot BIP 86 tweak (key-path spending only)
@@ -176,7 +169,7 @@ func (m *MuSig2Service) CreateSession(ctx *musig2.Context) (*musig2.Session, err
 //
 // Returns:
 //   - [66]byte: The public nonce (two 33-byte compressed EC points)
-func GetPublicNonce(session *musig2.Session) [66]byte {
+func (*MuSig2Service) GetPublicNonce(session *musig2.Session) [66]byte {
 	return session.PublicNonce()
 }
 
