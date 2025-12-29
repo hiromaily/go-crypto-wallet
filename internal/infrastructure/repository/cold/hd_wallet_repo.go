@@ -1,12 +1,13 @@
 package cold
 
 import (
+	"database/sql"
 	"errors"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 )
 
 //-----------------------------------------------------------------------------
@@ -69,14 +70,14 @@ func (w *AuthHDWalletRepo) Insert(
 		return errors.New("only one key is allowed")
 	}
 	keyItem := keys[0]
-	item := &models.AuthAccountKey{
-		Coin:               coinTypeCode.String(),
+	item := &sqlc.AuthAccountKey{
+		Coin:               sqlc.AuthAccountKeyCoin(coinTypeCode.String()),
 		KeyType:            keyType.String(),
 		AuthAccount:        w.authType.String(),
-		P2PKHAddress:       keyItem.P2PKHAddr,
-		P2SHSegwitAddress:  keyItem.P2SHSegWitAddr,
+		P2pkhAddress:       keyItem.P2PKHAddr,
+		P2shSegwitAddress:  keyItem.P2SHSegWitAddr,
 		Bech32Address:      keyItem.Bech32Addr,
-		TaprootAddress:     keyItem.TaprootAddr,
+		TaprootAddress:     sql.NullString{String: keyItem.TaprootAddr, Valid: keyItem.TaprootAddr != ""},
 		FullPublicKey:      keyItem.FullPubKey,
 		MultisigAddress:    "",
 		RedeemScript:       keyItem.RedeemScript,
@@ -122,16 +123,16 @@ func (w *AccountHDWalletRepo) Insert(
 	keyType domainKey.KeyType,
 ) error {
 	// insert key information to account_key_table
-	accountKeyItems := make([]*models.AccountKey, len(keys))
+	accountKeyItems := make([]*sqlc.AccountKey, len(keys))
 	for idx, keyItem := range keys {
-		accountKeyItems[idx] = &models.AccountKey{
-			Coin:               coinTypeCode.String(),
+		accountKeyItems[idx] = &sqlc.AccountKey{
+			Coin:               sqlc.AccountKeyCoin(coinTypeCode.String()),
 			KeyType:            keyType.String(),
-			Account:            accountType.String(),
-			P2PKHAddress:       keyItem.P2PKHAddr,
-			P2SHSegwitAddress:  keyItem.P2SHSegWitAddr,
+			Account:            sqlc.AccountKeyAccount(accountType.String()),
+			P2pkhAddress:       keyItem.P2PKHAddr,
+			P2shSegwitAddress:  keyItem.P2SHSegWitAddr,
 			Bech32Address:      keyItem.Bech32Addr,
-			TaprootAddress:     keyItem.TaprootAddr,
+			TaprootAddress:     sql.NullString{String: keyItem.TaprootAddr, Valid: keyItem.TaprootAddr != ""},
 			FullPublicKey:      keyItem.FullPubKey,
 			MultisigAddress:    "",
 			RedeemScript:       keyItem.RedeemScript,

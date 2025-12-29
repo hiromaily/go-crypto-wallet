@@ -17,7 +17,7 @@ import (
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -214,7 +214,7 @@ func (u *createTransactionUseCase) createTransferTx(
 
 type parsedTx struct {
 	txInputs       []btcjson.TransactionInput
-	txRepoTxInputs []*models.BTCTXInput
+	txRepoTxInputs []*sqlc.BtcTxInput
 	prevTxs        []btc.PrevTx
 	addresses      []string // input, sender's address
 }
@@ -396,7 +396,7 @@ func (u *createTransactionUseCase) parseListUnspentTx(
 ) (*parsedTx, btcutil.Amount, bool) {
 	var inputTotal btcutil.Amount
 	txInputs := make([]btcjson.TransactionInput, 0, len(unspentList))
-	txRepoTxInputs := make([]*models.BTCTXInput, 0, len(unspentList))
+	txRepoTxInputs := make([]*sqlc.BtcTxInput, 0, len(unspentList))
 	prevTxs := make([]btc.PrevTx, 0, len(unspentList))
 	addresses := make([]string, 0, len(unspentList))
 
@@ -429,13 +429,13 @@ func (u *createTransactionUseCase) parseListUnspentTx(
 			logger.Error("fail to convert input amount to decimal", "error", err)
 			continue
 		}
-		txRepoTxInputs = append(txRepoTxInputs, &models.BTCTXInput{
-			TXID:               0,
+		txRepoTxInputs = append(txRepoTxInputs, &sqlc.BtcTxInput{
+			TxID:               0,
 			InputTxid:          txItem.TxID,
 			InputVout:          txItem.Vout,
 			InputAddress:       txItem.Address,
 			InputAccount:       txItem.Label,
-			InputAmount:        inputAmount,
+			InputAmount:        inputAmount.String(),
 			InputConfirmations: uint64(txItem.Confirmations),
 		})
 
@@ -582,14 +582,14 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 	adjustmentFee float64,
 	inputTotal btcutil.Amount,
 	txPrevOutputs map[btcutil.Address]btcutil.Amount,
-) (btcutil.Amount, btcutil.Amount, map[btcutil.Address]btcutil.Amount, []*models.BTCTXOutput, error) {
+) (btcutil.Amount, btcutil.Amount, map[btcutil.Address]btcutil.Amount, []*sqlc.BtcTxOutput, error) {
 	// get fee
 	fee, err := u.btcClient.GetFee(msgTx, adjustmentFee)
 	if err != nil {
 		return 0, 0, nil, nil, fmt.Errorf("fail to call btc.GetFee(): %w", err)
 	}
 	var outputTotal btcutil.Amount
-	txRepoOutputs := make([]*models.BTCTXOutput, 0, len(txPrevOutputs))
+	txRepoOutputs := make([]*sqlc.BtcTxOutput, 0, len(txPrevOutputs))
 
 	// subtract fee from output transaction for change
 	// FIXME: what if change is short, should re-run from the beginning with shortage-flag
@@ -601,11 +601,11 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 			if err != nil {
 				return 0, 0, nil, nil, fmt.Errorf("fail to convert output amount to decimal: %w", err)
 			}
-			txRepoOutputs = append(txRepoOutputs, &models.BTCTXOutput{
-				TXID:          0,
+			txRepoOutputs = append(txRepoOutputs, &sqlc.BtcTxOutput{
+				TxID:          0,
 				OutputAddress: addr.String(),
 				OutputAccount: receiver.String(),
-				OutputAmount:  outputAmount,
+				OutputAmount:  outputAmount.String(),
 				IsChange:      false,
 			})
 			outputTotal += amt
@@ -620,11 +620,11 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 			if err != nil {
 				return 0, 0, nil, nil, fmt.Errorf("fail to convert change amount to decimal: %w", err)
 			}
-			txRepoOutputs = append(txRepoOutputs, &models.BTCTXOutput{
-				TXID:          0,
+			txRepoOutputs = append(txRepoOutputs, &sqlc.BtcTxOutput{
+				TxID:          0,
 				OutputAddress: addr.String(),
 				OutputAccount: sender.String(),
-				OutputAmount:  outputAmount,
+				OutputAmount:  outputAmount.String(),
 				IsChange:      true,
 			})
 		} else {
@@ -632,11 +632,11 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 			if err != nil {
 				return 0, 0, nil, nil, fmt.Errorf("fail to convert output amount to decimal: %w", err)
 			}
-			txRepoOutputs = append(txRepoOutputs, &models.BTCTXOutput{
-				TXID:          0,
+			txRepoOutputs = append(txRepoOutputs, &sqlc.BtcTxOutput{
+				TxID:          0,
 				OutputAddress: addr.String(),
 				OutputAccount: receiver.String(),
-				OutputAmount:  outputAmount,
+				OutputAmount:  outputAmount.String(),
 				IsChange:      false,
 			})
 		}
@@ -669,8 +669,8 @@ func (u *createTransactionUseCase) insertTxTableForUnsigned(
 	inputTotal,
 	outputTotal,
 	fee btcutil.Amount,
-	txInputs []*models.BTCTXInput,
-	txOutputs []*models.BTCTXOutput,
+	txInputs []*sqlc.BtcTxInput,
+	txOutputs []*sqlc.BtcTxOutput,
 	paymentRequestIds []int64,
 ) (int64, error) {
 	// skip if same hex is already stored
@@ -696,12 +696,12 @@ func (u *createTransactionUseCase) insertTxTableForUnsigned(
 	if err != nil {
 		return 0, fmt.Errorf("fail to convert fee amount to decimal: %w", err)
 	}
-	txItem := &models.BTCTX{
-		Action:            actionType.String(),
-		UnsignedHexTX:     hex,
-		TotalInputAmount:  totalInputAmt,
-		TotalOutputAmount: totalOutputAmt,
-		Fee:               feeAmt,
+	txItem := &sqlc.BtcTx{
+		Action:            sqlc.BtcTxAction(actionType.String()),
+		UnsignedHexTx:     hex,
+		TotalInputAmount:  totalInputAmt.String(),
+		TotalOutputAmount: totalOutputAmt.String(),
+		Fee:               feeAmt.String(),
 	}
 
 	// start database transaction
@@ -725,7 +725,7 @@ func (u *createTransactionUseCase) insertTxTableForUnsigned(
 	// TxReceiptInput table
 	//  update txID
 	for idx := range txInputs {
-		txInputs[idx].TXID = txID
+		txInputs[idx].TxID = txID
 	}
 	err = u.txInputRepo.InsertBulk(txInputs)
 	if err != nil {
@@ -735,7 +735,7 @@ func (u *createTransactionUseCase) insertTxTableForUnsigned(
 	// TxReceiptOutput table
 	//  update txID
 	for idx := range txOutputs {
-		txOutputs[idx].TXID = txID
+		txOutputs[idx].TxID = txID
 	}
 	err = u.txOutputRepo.InsertBulk(txOutputs)
 	if err != nil {

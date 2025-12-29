@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	portsPersistence "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 )
@@ -147,4 +148,12 @@ func (r *PaymentRequestRepositorySqlc) DeleteAll() (int64, error) {
 	}
 
 	return rowsAffected, nil
+}
+
+// WithTx returns a new repository instance that uses the provided transaction
+func (r *PaymentRequestRepositorySqlc) WithTx(tx *sql.Tx) portsPersistence.PaymentRequestRepositorier {
+	return &PaymentRequestRepositorySqlc{
+		queries:      r.queries.WithTx(tx),
+		coinTypeCode: r.coinTypeCode,
+	}
 }

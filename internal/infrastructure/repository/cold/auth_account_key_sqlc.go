@@ -8,7 +8,6 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
@@ -30,7 +29,7 @@ func NewAuthAccountKeyRepositorySqlc(
 }
 
 // GetOne returns one record by authType
-func (r *AuthAccountKeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (*models.AuthAccountKey, error) {
+func (r *AuthAccountKeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (*sqlc.AuthAccountKey, error) {
 	ctx := context.Background()
 
 	authKey, err := r.queries.GetAuthAccountKey(ctx, sqlc.GetAuthAccountKeyParams{
@@ -41,21 +40,21 @@ func (r *AuthAccountKeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (
 		return nil, fmt.Errorf("failed to call GetAuthAccountKey(): %w", err)
 	}
 
-	return convertSqlcAuthAccountKeyToModel(&authKey), nil
+	return &authKey, nil
 }
 
 // Insert inserts record
-func (r *AuthAccountKeyRepositorySqlc) Insert(item *models.AuthAccountKey) error {
+func (r *AuthAccountKeyRepositorySqlc) Insert(item *sqlc.AuthAccountKey) error {
 	ctx := context.Background()
 
 	_, err := r.queries.InsertAuthAccountKey(ctx, sqlc.InsertAuthAccountKeyParams{
-		Coin:               sqlc.AuthAccountKeyCoin(item.Coin),
+		Coin:               item.Coin,
 		KeyType:            item.KeyType,
 		AuthAccount:        item.AuthAccount,
-		P2pkhAddress:       item.P2PKHAddress,
-		P2shSegwitAddress:  item.P2SHSegwitAddress,
+		P2pkhAddress:       item.P2pkhAddress,
+		P2shSegwitAddress:  item.P2shSegwitAddress,
 		Bech32Address:      item.Bech32Address,
-		TaprootAddress:     sql.NullString{String: item.TaprootAddress, Valid: item.TaprootAddress != ""},
+		TaprootAddress:     item.TaprootAddress,
 		FullPublicKey:      item.FullPublicKey,
 		MultisigAddress:    item.MultisigAddress,
 		RedeemScript:       item.RedeemScript,
@@ -90,26 +89,4 @@ func (r *AuthAccountKeyRepositorySqlc) UpdateAddrStatus(addrStatus address.AddrS
 	}
 
 	return rowsAffected, nil
-}
-
-// Helper functions
-
-func convertSqlcAuthAccountKeyToModel(authKey *sqlc.AuthAccountKey) *models.AuthAccountKey {
-	return &models.AuthAccountKey{
-		ID:                 authKey.ID,
-		Coin:               string(authKey.Coin),
-		KeyType:            authKey.KeyType,
-		AuthAccount:        authKey.AuthAccount,
-		P2PKHAddress:       authKey.P2pkhAddress,
-		P2SHSegwitAddress:  authKey.P2shSegwitAddress,
-		Bech32Address:      authKey.Bech32Address,
-		TaprootAddress:     authKey.TaprootAddress.String,
-		FullPublicKey:      authKey.FullPublicKey,
-		MultisigAddress:    authKey.MultisigAddress,
-		RedeemScript:       authKey.RedeemScript,
-		WalletImportFormat: authKey.WalletImportFormat,
-		Idx:                authKey.Idx,
-		AddrStatus:         authKey.AddrStatus,
-		UpdatedAt:          convertSQLNullTimeToNullTime(authKey.UpdatedAt),
-	}
 }

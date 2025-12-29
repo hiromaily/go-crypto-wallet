@@ -14,7 +14,7 @@ import (
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -268,21 +268,21 @@ func (u *createTransactionUseCase) createTransferTx(
 	serializedTxs := []string{fmt.Sprintf("%s,%s", uid, rawTxString)}
 
 	// create insert data for xrp_detail_tx
-	txDetailItem := &models.XRPDetailTX{
-		UUID:               uid.String(),
-		CurrentTXType:      domainTx.TxTypeUnsigned.Int8(),
+	txDetailItem := &sqlc.XrpDetailTx{
+		Uuid:               uid.String(),
+		CurrentTxType:      domainTx.TxTypeUnsigned.Int8(),
 		SenderAccount:      sender.String(),
 		SenderAddress:      senderAddr.WalletAddress,
 		ReceiverAccount:    receiver.String(),
 		ReceiverAddress:    receiverAddr.WalletAddress,
 		Amount:             txJSON.Amount,
-		XRPTXType:          txJSON.TransactionType,
+		XrpTxType:          txJSON.TransactionType,
 		Fee:                txJSON.Fee,
 		Flags:              txJSON.Flags,
 		LastLedgerSequence: txJSON.LastLedgerSequence,
 		Sequence:           txJSON.Sequence,
 	}
-	txDetailItems := []*models.XRPDetailTX{txDetailItem}
+	txDetailItems := []*sqlc.XrpDetailTx{txDetailItem}
 
 	txID, err := u.updateDB(targetAction, txDetailItems, nil)
 	if err != nil {
@@ -339,7 +339,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	userAmounts []xrp.UserAmount,
-) ([]string, []*models.XRPDetailTX, error) {
+) ([]string, []*sqlc.XrpDetailTx, error) {
 	// get address for deposit account
 	depositAddr, err := u.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
@@ -350,7 +350,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 
 	// create raw transaction for each address
 	serializedTxs := make([]string, 0, len(userAmounts))
-	txDetailItems := make([]*models.XRPDetailTX, 0, len(userAmounts))
+	txDetailItems := make([]*sqlc.XrpDetailTx, 0, len(userAmounts))
 
 	var sequence uint64
 	for _, val := range userAmounts {
@@ -384,15 +384,15 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 		serializedTxs = append(serializedTxs, fmt.Sprintf("%s,%s", uid, rawTxString))
 
 		// create insert data for xrp_detail_tx
-		txDetailItem := &models.XRPDetailTX{
-			UUID:               uid.String(),
-			CurrentTXType:      domainTx.TxTypeUnsigned.Int8(),
+		txDetailItem := &sqlc.XrpDetailTx{
+			Uuid:               uid.String(),
+			CurrentTxType:      domainTx.TxTypeUnsigned.Int8(),
 			SenderAccount:      sender.String(),
 			SenderAddress:      val.Address,
 			ReceiverAccount:    receiver.String(),
 			ReceiverAddress:    depositAddr.WalletAddress,
 			Amount:             txJSON.Amount,
-			XRPTXType:          txJSON.TransactionType,
+			XrpTxType:          txJSON.TransactionType,
 			Fee:                txJSON.Fee,
 			Flags:              txJSON.Flags,
 			LastLedgerSequence: txJSON.LastLedgerSequence,
@@ -462,7 +462,7 @@ func (u *createTransactionUseCase) createUserPayment() ([]userPayment, float64, 
 // validateAmount validates that sender has sufficient balance
 func (u *createTransactionUseCase) validateAmount(
 	ctx context.Context,
-	senderAddr *models.Address,
+	senderAddr *sqlc.Address,
 	totalAmount float64,
 ) error {
 	senderBalance, err := u.rippler.GetBalance(ctx, senderAddr.WalletAddress)
@@ -481,10 +481,10 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	userPayments []userPayment,
-	senderAddr *models.Address,
-) ([]string, []*models.XRPDetailTX) {
+	senderAddr *sqlc.Address,
+) ([]string, []*sqlc.XrpDetailTx) {
 	serializedTxs := make([]string, 0, len(userPayments))
-	txDetailItems := make([]*models.XRPDetailTX, 0, len(userPayments))
+	txDetailItems := make([]*sqlc.XrpDetailTx, 0, len(userPayments))
 	var sequence uint64
 	for _, userPayment := range userPayments {
 		// call CreateRawTransaction
@@ -518,15 +518,15 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 		serializedTxs = append(serializedTxs, fmt.Sprintf("%s,%s", uid, rawTxString))
 
 		// create insert data for xrp_detail_tx
-		txDetailItem := &models.XRPDetailTX{
-			UUID:               uid.String(),
-			CurrentTXType:      domainTx.TxTypeUnsigned.Int8(),
+		txDetailItem := &sqlc.XrpDetailTx{
+			Uuid:               uid.String(),
+			CurrentTxType:      domainTx.TxTypeUnsigned.Int8(),
 			SenderAccount:      sender.String(),
 			SenderAddress:      senderAddr.WalletAddress,
 			ReceiverAccount:    receiver.String(),
 			ReceiverAddress:    userPayment.receiverAddr,
 			Amount:             txJSON.Amount,
-			XRPTXType:          txJSON.TransactionType,
+			XrpTxType:          txJSON.TransactionType,
 			Fee:                txJSON.Fee,
 			Flags:              txJSON.Flags,
 			LastLedgerSequence: txJSON.LastLedgerSequence,
@@ -540,7 +540,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 // updateDB updates database in a transaction
 func (u *createTransactionUseCase) updateDB(
 	targetAction domainTx.ActionType,
-	txDetailItems []*models.XRPDetailTX,
+	txDetailItems []*sqlc.XrpDetailTx,
 	paymentRequestIds []int64,
 ) (int64, error) {
 	// start transaction
@@ -556,21 +556,26 @@ func (u *createTransactionUseCase) updateDB(
 		}
 	}()
 
+	// Create transactional repositories that use the transaction
+	txRepoWithTx := u.txRepo.WithTx(dtx)
+	txDetailRepoWithTx := u.txDetailRepo.WithTx(dtx)
+	payReqRepoWithTx := u.payReqRepo.WithTx(dtx)
+
 	// Insert tx
-	txID, err := u.txRepo.InsertUnsignedTx(targetAction)
+	txID, err := txRepoWithTx.InsertUnsignedTx(targetAction)
 	if err != nil {
 		return 0, fmt.Errorf("fail to call txRepo.InsertUnsignedTx(): %w", err)
 	}
 	// Insert to xrp_detail_tx
 	for idx := range txDetailItems {
-		txDetailItems[idx].TXID = txID
+		txDetailItems[idx].TxID = txID
 	}
-	if err = u.txDetailRepo.InsertBulk(txDetailItems); err != nil {
+	if err = txDetailRepoWithTx.InsertBulk(txDetailItems); err != nil {
 		return 0, fmt.Errorf("fail to call txDetailRepo.InsertBulk(): %w", err)
 	}
 
 	if targetAction == domainTx.ActionTypePayment {
-		_, err = u.payReqRepo.UpdatePaymentID(txID, paymentRequestIds)
+		_, err = payReqRepoWithTx.UpdatePaymentID(txID, paymentRequestIds)
 		if err != nil {
 			return 0, fmt.Errorf("fail to call payReqRepo.UpdatePaymentID(): %w", err)
 		}

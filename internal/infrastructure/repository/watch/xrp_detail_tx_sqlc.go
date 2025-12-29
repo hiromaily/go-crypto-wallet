@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"time"
 
+	portsPersistence "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 )
 
@@ -29,7 +29,7 @@ func NewXrpDetailTxInputRepositorySqlc(
 }
 
 // GetOne get one record by ID
-func (r *XrpDetailTxInputRepositorySqlc) GetOne(id int64) (*models.XRPDetailTX, error) {
+func (r *XrpDetailTxInputRepositorySqlc) GetOne(id int64) (*sqlc.XrpDetailTx, error) {
 	ctx := context.Background()
 
 	xrpTx, err := r.queries.GetXrpDetailTxByID(ctx, id)
@@ -37,11 +37,11 @@ func (r *XrpDetailTxInputRepositorySqlc) GetOne(id int64) (*models.XRPDetailTX, 
 		return nil, fmt.Errorf("failed to call GetXrpDetailTxByID(): %w", err)
 	}
 
-	return convertSqlcXrpDetailTxToModel(&xrpTx), nil
+	return &xrpTx, nil
 }
 
 // GetAllByTxID returns all records searched by tx_id
-func (r *XrpDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*models.XRPDetailTX, error) {
+func (r *XrpDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*sqlc.XrpDetailTx, error) {
 	ctx := context.Background()
 
 	xrpTxs, err := r.queries.GetXrpDetailTxsByTxID(ctx, id)
@@ -49,9 +49,9 @@ func (r *XrpDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*models.XRPDe
 		return nil, fmt.Errorf("failed to call GetXrpDetailTxsByTxID(): %w", err)
 	}
 
-	result := make([]*models.XRPDetailTX, len(xrpTxs))
-	for i, xrpTx := range xrpTxs {
-		result[i] = convertSqlcXrpDetailTxToModel(&xrpTx)
+	result := make([]*sqlc.XrpDetailTx, len(xrpTxs))
+	for i := range xrpTxs {
+		result[i] = &xrpTxs[i]
 	}
 
 	return result, nil
@@ -73,30 +73,30 @@ func (r *XrpDetailTxInputRepositorySqlc) GetSentHashTx(txType domainTx.TxType) (
 }
 
 // Insert inserts one record
-func (r *XrpDetailTxInputRepositorySqlc) Insert(txItem *models.XRPDetailTX) error {
+func (r *XrpDetailTxInputRepositorySqlc) Insert(txItem *sqlc.XrpDetailTx) error {
 	ctx := context.Background()
 
 	_, err := r.queries.InsertXrpDetailTx(ctx, sqlc.InsertXrpDetailTxParams{
-		TxID:                  txItem.TXID,
-		Uuid:                  txItem.UUID,
-		CurrentTxType:         txItem.CurrentTXType,
+		TxID:                  txItem.TxID,
+		Uuid:                  txItem.Uuid,
+		CurrentTxType:         txItem.CurrentTxType,
 		SenderAccount:         txItem.SenderAccount,
 		SenderAddress:         txItem.SenderAddress,
 		ReceiverAccount:       txItem.ReceiverAccount,
 		ReceiverAddress:       txItem.ReceiverAddress,
 		Amount:                txItem.Amount,
-		XrpTxType:             txItem.XRPTXType,
+		XrpTxType:             txItem.XrpTxType,
 		Fee:                   txItem.Fee,
 		Flags:                 txItem.Flags,
 		LastLedgerSequence:    txItem.LastLedgerSequence,
 		Sequence:              txItem.Sequence,
 		SigningPubkey:         txItem.SigningPubkey,
-		TxnSignature:          txItem.TXNSignature,
+		TxnSignature:          txItem.TxnSignature,
 		Hash:                  txItem.Hash,
 		EarliestLedgerVersion: txItem.EarliestLedgerVersion,
-		SignedTxID:            txItem.SignedTXID,
-		TxBlob:                txItem.TXBlob,
-		SentUpdatedAt:         convertNullTimeToSQLNullTime(txItem.SentUpdatedAt),
+		SignedTxID:            txItem.SignedTxID,
+		TxBlob:                txItem.TxBlob,
+		SentUpdatedAt:         txItem.SentUpdatedAt,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to call InsertXrpDetailTx(): %w", err)
@@ -106,7 +106,7 @@ func (r *XrpDetailTxInputRepositorySqlc) Insert(txItem *models.XRPDetailTX) erro
 }
 
 // InsertBulk inserts multiple records
-func (r *XrpDetailTxInputRepositorySqlc) InsertBulk(txItems []*models.XRPDetailTX) error {
+func (r *XrpDetailTxInputRepositorySqlc) InsertBulk(txItems []*sqlc.XrpDetailTx) error {
 	for _, item := range txItems {
 		if err := r.Insert(item); err != nil {
 			return err
@@ -187,30 +187,10 @@ func (r *XrpDetailTxInputRepositorySqlc) UpdateTxTypeBySentHashTx(
 	return rowsAffected, nil
 }
 
-// Helper functions
-
-func convertSqlcXrpDetailTxToModel(xrpTx *sqlc.XrpDetailTx) *models.XRPDetailTX {
-	return &models.XRPDetailTX{
-		ID:                    xrpTx.ID,
-		TXID:                  xrpTx.TxID,
-		UUID:                  xrpTx.Uuid,
-		CurrentTXType:         xrpTx.CurrentTxType,
-		SenderAccount:         xrpTx.SenderAccount,
-		SenderAddress:         xrpTx.SenderAddress,
-		ReceiverAccount:       xrpTx.ReceiverAccount,
-		ReceiverAddress:       xrpTx.ReceiverAddress,
-		Amount:                xrpTx.Amount,
-		XRPTXType:             xrpTx.XrpTxType,
-		Fee:                   xrpTx.Fee,
-		Flags:                 xrpTx.Flags,
-		LastLedgerSequence:    xrpTx.LastLedgerSequence,
-		Sequence:              xrpTx.Sequence,
-		SigningPubkey:         xrpTx.SigningPubkey,
-		TXNSignature:          xrpTx.TxnSignature,
-		Hash:                  xrpTx.Hash,
-		EarliestLedgerVersion: xrpTx.EarliestLedgerVersion,
-		SignedTXID:            xrpTx.SignedTxID,
-		TXBlob:                xrpTx.TxBlob,
-		SentUpdatedAt:         convertSQLNullTimeToNullTime(xrpTx.SentUpdatedAt),
+// WithTx returns a new repository instance that uses the provided transaction
+func (r *XrpDetailTxInputRepositorySqlc) WithTx(tx *sql.Tx) portsPersistence.XrpDetailTxRepositorier {
+	return &XrpDetailTxInputRepositorySqlc{
+		queries:      r.queries.WithTx(tx),
+		coinTypeCode: r.coinTypeCode,
 	}
 }
