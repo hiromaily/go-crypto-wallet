@@ -6,7 +6,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/hiromaily/go-crypto-wallet)](https://goreportcard.com/report/github.com/hiromaily/go-crypto-wallet)
 [![GitHub release](https://img.shields.io/badge/release-v5.0.0-blue.svg)](https://github.com/hiromaily/go-crypto-wallet/releases)
-[![MIT License](./LICENSE)
+[![MIT License](./LICENSE)]
 
 Wallet functionalities to create raw transaction, to sign on unsigned transaction,
 to send signed transaction for BTC, BCH, ETH, XRP and so on.  
