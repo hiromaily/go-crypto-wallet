@@ -46,10 +46,24 @@ func NewMuSig2SignUseCase(
 // SECURITY: After creating the partial signature, the nonce MUST be marked as used
 // to prevent accidental reuse, which would leak the private key.
 //
-// KNOWN ISSUE: This implementation creates a NEW session in Round 2, which generates
-// a different secret nonce than what was stored in Round 1. This will result in INVALID
-// signatures. The session object from Round 1 must be reused in Round 2 for valid signing.
-// This requires session state persistence, which is not yet implemented.
+// CRITICAL ISSUE - Session Reuse Required:
+// This implementation creates a NEW session in Round 2, which generates a different secret
+// nonce than what was stored in Round 1. This is a FUNDAMENTAL CORRECTNESS BUG that will
+// result in INVALID signatures when aggregated.
+//
+// Why this is critical:
+//   - MuSig2 protocol requires using the SAME session object from Round 1 for signing
+//   - Each session generates a unique secret nonce internally
+//   - The public nonce stored in Round 1 corresponds to Round 1's secret nonce
+//   - Using a different session in Round 2 means a different secret nonce
+//   - This nonce mismatch causes signature verification to fail
+//
+// Required fix:
+//   - Implement session state persistence (in-memory or serialized storage)
+//   - Store the entire session object after Round 1 nonce generation
+//   - Retrieve and reuse the same session object in Round 2 for signing
+//   - This is a prerequisite for valid MuSig2 signatures
+//
 // See: https://github.com/hiromaily/go-crypto-wallet/issues/137#issuecomment
 //
 // Sign Wallet Specifics:
@@ -102,10 +116,10 @@ func (u *muSig2SignUseCase) Sign(
 	// In real implementation, this would come from authKey.WalletImportFormat
 	// Using SHA256 to create a deterministic, full-length key for the placeholder.
 	privKeyBytes := sha256.Sum256([]byte(authKey.WalletImportFormat))
-	privKey, _ := btcec.PrivKeyFromBytes(privKeyBytes[:])
+	privKey, pubKey := btcec.PrivKeyFromBytes(privKeyBytes[:])
 
 	// Placeholder: For demo, we'll use just this signer's public key
-	allPubKeys := []*btcec.PublicKey{privKey.PubKey(), privKey.PubKey()}
+	allPubKeys := []*btcec.PublicKey{pubKey, pubKey}
 
 	// Create MuSig2 context
 	musig2Ctx, err := u.musig2Service.CreateContext(privKey, allPubKeys, true)
@@ -131,7 +145,7 @@ func (u *muSig2SignUseCase) Sign(
 	}
 
 	// Create partial signature
-	_, err = u.musig2Service.Sign(session, input.MessageHash)
+	partialSig, err := u.musig2Service.Sign(session, input.MessageHash)
 	if err != nil {
 		return signusecase.MuSig2SignOutput{}, fmt.Errorf("failed to create partial signature: %w", err)
 	}
@@ -142,11 +156,20 @@ func (u *muSig2SignUseCase) Sign(
 		return signusecase.MuSig2SignOutput{}, fmt.Errorf("failed to mark nonce as used: %w", err)
 	}
 
-	// Note: The actual partial signature would need to be extracted from the session
-	// or stored in a domain object. For this MVP, we return a placeholder.
-	// In a real implementation, the signature would be serialized and stored.
+	// LIMITATION - Partial Signature Serialization:
+	// The btcd musig2.PartialSignature type does not expose a Serialize() method or any way
+	// to extract the underlying scalar value. The signature data is encapsulated within the
+	// type with no public accessor methods.
+	//
+	// Current workaround: Return a placeholder until we either:
+	//   1. Contribute a Serialize() method to the btcd library
+	//   2. Use reflection to extract the internal field (not recommended)
+	//   3. Find an alternative way to represent partial signatures
+	//
+	// Note: The partialSig is captured above but cannot be serialized yet.
+	// This prevents the use case from producing a valid partial signature for aggregation.
+	_ = partialSig // Captured but cannot serialize yet
 	var sigScalar [32]byte
-	// Placeholder - in real implementation, extract from partialSig
 	copy(sigScalar[:], []byte("placeholder_partial_signature"))
 
 	return signusecase.MuSig2SignOutput{

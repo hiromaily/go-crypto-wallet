@@ -76,11 +76,11 @@ func (u *generateMuSig2NonceUseCase) Generate(
 	// In real implementation, this would come from authKey.WalletImportFormat
 	// Using SHA256 to create a deterministic, full-length key for the placeholder.
 	privKeyBytes := sha256.Sum256([]byte(authKey.WalletImportFormat))
-	privKey, _ := btcec.PrivKeyFromBytes(privKeyBytes[:])
+	privKey, pubKey := btcec.PrivKeyFromBytes(privKeyBytes[:])
 
 	// Placeholder: For demo, we'll use just this signer's public key
 	// In real implementation, we need all signers' public keys
-	allPubKeys := []*btcec.PublicKey{privKey.PubKey(), privKey.PubKey()} // Simplified
+	allPubKeys := []*btcec.PublicKey{pubKey, pubKey} // Simplified
 
 	// Create MuSig2 context
 	musig2Ctx, err := u.musig2Service.CreateContext(privKey, allPubKeys, true)
