@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 )
 
@@ -27,7 +26,7 @@ func NewSeedRepositorySqlc(
 }
 
 // GetOne returns one record
-func (r *SeedRepositorySqlc) GetOne() (*models.Seed, error) {
+func (r *SeedRepositorySqlc) GetOne() (*sqlc.Seed, error) {
 	ctx := context.Background()
 
 	seed, err := r.queries.GetSeed(ctx, sqlc.SeedCoin(r.coinTypeCode.String()))
@@ -35,7 +34,7 @@ func (r *SeedRepositorySqlc) GetOne() (*models.Seed, error) {
 		return nil, fmt.Errorf("failed to call GetSeed(): %w", err)
 	}
 
-	return convertSqlcSeedToModel(&seed), nil
+	return &seed, nil
 }
 
 // Insert inserts record
@@ -51,15 +50,4 @@ func (r *SeedRepositorySqlc) Insert(strSeed string) error {
 	}
 
 	return nil
-}
-
-// Helper functions
-
-func convertSqlcSeedToModel(seed *sqlc.Seed) *models.Seed {
-	return &models.Seed{
-		ID:        seed.ID,
-		Coin:      string(seed.Coin),
-		Seed:      seed.Seed,
-		UpdatedAt: convertSQLNullTimeToNullTime(seed.UpdatedAt),
-	}
 }

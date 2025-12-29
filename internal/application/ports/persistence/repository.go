@@ -9,6 +9,7 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
@@ -16,7 +17,7 @@ import (
 
 // SeedRepositorier is SeedRepository interface
 type SeedRepositorier interface {
-	GetOne() (*models.Seed, error)
+	GetOne() (*sqlc.Seed, error)
 	Insert(strSeed string) error
 }
 
