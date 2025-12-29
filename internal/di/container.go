@@ -78,6 +78,7 @@ type Container interface {
 	NewKeygenExportAddressUseCase() keygenusecase.ExportAddressUseCase
 	NewKeygenImportPrivateKeyUseCase() keygenusecase.ImportPrivateKeyUseCase
 	NewKeygenCreateMultisigAddressUseCase() keygenusecase.CreateMultisigAddressUseCase
+	NewKeygenCreateMuSig2AddressUseCase() keygenusecase.CreateMuSig2AddressUseCase
 	NewKeygenImportFullPubkeyUseCase() keygenusecase.ImportFullPubkeyUseCase
 	NewKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUseCase
 	NewKeygenSignTransactionUseCase() keygenusecase.SignTransactionUseCase
@@ -744,6 +745,10 @@ func (c *container) NewKeygenCreateMultisigAddressUseCase() keygenusecase.Create
 	return c.newBTCKeygenCreateMultisigAddressUseCase()
 }
 
+func (c *container) NewKeygenCreateMuSig2AddressUseCase() keygenusecase.CreateMuSig2AddressUseCase {
+	return c.newBTCKeygenCreateMuSig2AddressUseCase()
+}
+
 func (c *container) NewKeygenImportFullPubkeyUseCase() keygenusecase.ImportFullPubkeyUseCase {
 	return c.newBTCKeygenImportFullPubkeyUseCase()
 }
@@ -1016,6 +1021,16 @@ func (c *container) newBTCKeygenImportPrivateKeyUseCase() keygenusecase.ImportPr
 func (c *container) newBTCKeygenCreateMultisigAddressUseCase() keygenusecase.CreateMultisigAddressUseCase {
 	return keygenusecasebtc.NewCreateMultisigAddressUseCase(
 		c.newBTC(),
+		c.newAuthFullPubKeyRepo(),
+		c.newAccountKeyRepo(),
+		c.newMultiAccount(),
+	)
+}
+
+func (c *container) newBTCKeygenCreateMuSig2AddressUseCase() keygenusecase.CreateMuSig2AddressUseCase {
+	return keygenusecasebtc.NewCreateMuSig2AddressUseCase(
+		c.newMuSig2Service(),
+		c.newBTC().GetChainConf(),
 		c.newAuthFullPubKeyRepo(),
 		c.newAccountKeyRepo(),
 		c.newMultiAccount(),
