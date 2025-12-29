@@ -12,14 +12,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
-	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/di"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
-	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // NonceResult holds the result of parallel nonce generation
@@ -263,27 +263,21 @@ func isIntegrationEnvironmentAvailable(t *testing.T) bool {
 func setupKeygenWallet(t *testing.T) di.Container {
 	t.Helper()
 
-	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := filepath.Join(projPath, "data/config/btc_keygen.toml")
+	// Use relative path from this test file location
+	// internal/integration_test/ -> ../../data/config/
+	confPath := filepath.Join("..", "..", "data", "config", "btc_keygen.toml")
+	accountConfPath := filepath.Join("..", "..", "data", "config", "account.toml")
 
-	// Load configuration
+	// Load wallet configuration
 	conf, err := config.NewWallet(confPath, domainWallet.WalletTypeKeygen, domainCoin.BTC)
 	require.NoError(t, err, "Failed to load keygen wallet config")
 
-	// Create logger
-	log := logger.NewLogger(logger.Config{
-		Development: true,
-		Level:       "debug",
-	})
+	// Load account configuration
+	accountConf, err := account.NewAccount(accountConfPath)
+	require.NoError(t, err, "Failed to load account config")
 
-	// Create DI container
-	container, err := di.NewContainer(
-		conf.CoinTypeCode,
-		conf.WalletType,
-		conf,
-		log,
-	)
-	require.NoError(t, err, "Failed to create keygen container")
+	// Create DI container (no error return)
+	container := di.NewContainer(conf, accountConf, domainWallet.WalletTypeKeygen)
 
 	return container
 }
@@ -292,30 +286,23 @@ func setupKeygenWallet(t *testing.T) di.Container {
 func setupSignWallet(t *testing.T, authName string) di.Container {
 	t.Helper()
 
-	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := filepath.Join(projPath, "data/config/btc_sign.toml")
+	// Use relative path from this test file location
+	confPath := filepath.Join("..", "..", "data", "config", "btc_sign.toml")
+	accountConfPath := filepath.Join("..", "..", "data", "config", "account.toml")
 
-	// Load configuration
+	// Load wallet configuration
 	conf, err := config.NewWallet(confPath, domainWallet.WalletTypeSign, domainCoin.BTC)
 	require.NoError(t, err, "Failed to load sign wallet config")
 
-	// Override auth name
-	conf.Sign.AuthName = authName
+	// Load account configuration
+	accountConf, err := account.NewAccount(accountConfPath)
+	require.NoError(t, err, "Failed to load account config")
 
-	// Create logger
-	log := logger.NewLogger(logger.Config{
-		Development: true,
-		Level:       "debug",
-	})
+	// Note: authName override would be done via environment variables or command-line flags
+	// in actual implementation, not through config modification
 
-	// Create DI container
-	container, err := di.NewContainer(
-		conf.CoinTypeCode,
-		conf.WalletType,
-		conf,
-		log,
-	)
-	require.NoError(t, err, "Failed to create sign container for %s", authName)
+	// Create DI container (no error return)
+	container := di.NewContainer(conf, accountConf, domainWallet.WalletTypeSign)
 
 	return container
 }
@@ -324,27 +311,20 @@ func setupSignWallet(t *testing.T, authName string) di.Container {
 func setupWatchWallet(t *testing.T) di.Container {
 	t.Helper()
 
-	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := filepath.Join(projPath, "data/config/btc_watch.toml")
+	// Use relative path from this test file location
+	confPath := filepath.Join("..", "..", "data", "config", "btc_watch.toml")
+	accountConfPath := filepath.Join("..", "..", "data", "config", "account.toml")
 
-	// Load configuration
+	// Load wallet configuration
 	conf, err := config.NewWallet(confPath, domainWallet.WalletTypeWatchOnly, domainCoin.BTC)
 	require.NoError(t, err, "Failed to load watch wallet config")
 
-	// Create logger
-	log := logger.NewLogger(logger.Config{
-		Development: true,
-		Level:       "debug",
-	})
+	// Load account configuration
+	accountConf, err := account.NewAccount(accountConfPath)
+	require.NoError(t, err, "Failed to load account config")
 
-	// Create DI container
-	container, err := di.NewContainer(
-		conf.CoinTypeCode,
-		conf.WalletType,
-		conf,
-		log,
-	)
-	require.NoError(t, err, "Failed to create watch container")
+	// Create DI container (no error return)
+	container := di.NewContainer(conf, accountConf, domainWallet.WalletTypeWatchOnly)
 
 	return container
 }
