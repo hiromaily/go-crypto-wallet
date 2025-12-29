@@ -6,11 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/guregu/null/v6"
-
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
@@ -54,7 +51,7 @@ func (r *AccountKeyRepositorySqlc) GetMaxIndex(accountType domainAccount.Account
 }
 
 // GetOneMaxID returns one record by max id
-func (r *AccountKeyRepositorySqlc) GetOneMaxID(accountType domainAccount.AccountType) (*models.AccountKey, error) {
+func (r *AccountKeyRepositorySqlc) GetOneMaxID(accountType domainAccount.AccountType) (*sqlc.AccountKey, error) {
 	ctx := context.Background()
 
 	accountKey, err := r.queries.GetOneAccountKeyByMaxID(ctx, sqlc.GetOneAccountKeyByMaxIDParams{
@@ -65,13 +62,13 @@ func (r *AccountKeyRepositorySqlc) GetOneMaxID(accountType domainAccount.Account
 		return nil, fmt.Errorf("failed to call GetOneAccountKeyByMaxID(): %w", err)
 	}
 
-	return convertSqlcAccountKeyToModel(&accountKey), nil
+	return &accountKey, nil
 }
 
 // GetAllAddrStatus returns all AccountKey by addr_status
 func (r *AccountKeyRepositorySqlc) GetAllAddrStatus(
 	accountType domainAccount.AccountType, addrStatus address.AddrStatus,
-) ([]*models.AccountKey, error) {
+) ([]*sqlc.AccountKey, error) {
 	ctx := context.Background()
 
 	accountKeys, err := r.queries.GetAccountKeysByAddrStatus(ctx, sqlc.GetAccountKeysByAddrStatusParams{
@@ -83,9 +80,9 @@ func (r *AccountKeyRepositorySqlc) GetAllAddrStatus(
 		return nil, fmt.Errorf("failed to call GetAccountKeysByAddrStatus(): %w", err)
 	}
 
-	result := make([]*models.AccountKey, len(accountKeys))
-	for i, accountKey := range accountKeys {
-		result[i] = convertSqlcAccountKeyToModel(&accountKey)
+	result := make([]*sqlc.AccountKey, len(accountKeys))
+	for i := range accountKeys {
+		result[i] = &accountKeys[i]
 	}
 
 	return result, nil
@@ -94,7 +91,7 @@ func (r *AccountKeyRepositorySqlc) GetAllAddrStatus(
 // GetAllMultiAddr returns all AccountKey by multisig_address
 func (r *AccountKeyRepositorySqlc) GetAllMultiAddr(
 	accountType domainAccount.AccountType, addrs []string,
-) ([]*models.AccountKey, error) {
+) ([]*sqlc.AccountKey, error) {
 	ctx := context.Background()
 
 	accountKeys, err := r.queries.GetAccountKeysByMultisigAddresses(
@@ -109,27 +106,27 @@ func (r *AccountKeyRepositorySqlc) GetAllMultiAddr(
 		return nil, fmt.Errorf("failed to call GetAccountKeysByMultisigAddresses(): %w", err)
 	}
 
-	result := make([]*models.AccountKey, len(accountKeys))
-	for i, accountKey := range accountKeys {
-		result[i] = convertSqlcAccountKeyToModel(&accountKey)
+	result := make([]*sqlc.AccountKey, len(accountKeys))
+	for i := range accountKeys {
+		result[i] = &accountKeys[i]
 	}
 
 	return result, nil
 }
 
 // InsertBulk inserts multiple records
-func (r *AccountKeyRepositorySqlc) InsertBulk(items []*models.AccountKey) error {
+func (r *AccountKeyRepositorySqlc) InsertBulk(items []*sqlc.AccountKey) error {
 	ctx := context.Background()
 
 	for _, item := range items {
 		_, err := r.queries.InsertAccountKey(ctx, sqlc.InsertAccountKeyParams{
-			Coin:               sqlc.AccountKeyCoin(item.Coin),
+			Coin:               item.Coin,
 			KeyType:            item.KeyType,
-			Account:            sqlc.AccountKeyAccount(item.Account),
-			P2pkhAddress:       item.P2PKHAddress,
-			P2shSegwitAddress:  item.P2SHSegwitAddress,
+			Account:            item.Account,
+			P2pkhAddress:       item.P2pkhAddress,
+			P2shSegwitAddress:  item.P2shSegwitAddress,
 			Bech32Address:      item.Bech32Address,
-			TaprootAddress:     sql.NullString{String: item.TaprootAddress, Valid: item.TaprootAddress != ""},
+			TaprootAddress:     item.TaprootAddress,
 			FullPublicKey:      item.FullPublicKey,
 			MultisigAddress:    item.MultisigAddress,
 			RedeemScript:       item.RedeemScript,
@@ -202,7 +199,7 @@ func (r *AccountKeyRepositorySqlc) UpdateAddrStatus(
 
 // UpdateMultisigAddr updates multisig_address
 func (r *AccountKeyRepositorySqlc) UpdateMultisigAddr(
-	accountType domainAccount.AccountType, item *models.AccountKey,
+	accountType domainAccount.AccountType, item *sqlc.AccountKey,
 ) (int64, error) {
 	ctx := context.Background()
 
@@ -229,7 +226,7 @@ func (r *AccountKeyRepositorySqlc) UpdateMultisigAddr(
 
 // UpdateMultisigAddrs updates all multisig_address with transaction
 func (r *AccountKeyRepositorySqlc) UpdateMultisigAddrs(
-	accountType domainAccount.AccountType, items []*models.AccountKey,
+	accountType domainAccount.AccountType, items []*sqlc.AccountKey,
 ) (int64, error) {
 	ctx := context.Background()
 
@@ -271,33 +268,4 @@ func (r *AccountKeyRepositorySqlc) UpdateMultisigAddrs(
 	}
 
 	return totalAffected, nil
-}
-
-// Helper functions
-
-func convertSqlcAccountKeyToModel(accountKey *sqlc.AccountKey) *models.AccountKey {
-	return &models.AccountKey{
-		ID:                 accountKey.ID,
-		Coin:               string(accountKey.Coin),
-		KeyType:            accountKey.KeyType,
-		Account:            string(accountKey.Account),
-		P2PKHAddress:       accountKey.P2pkhAddress,
-		P2SHSegwitAddress:  accountKey.P2shSegwitAddress,
-		Bech32Address:      accountKey.Bech32Address,
-		TaprootAddress:     accountKey.TaprootAddress.String,
-		FullPublicKey:      accountKey.FullPublicKey,
-		MultisigAddress:    accountKey.MultisigAddress,
-		RedeemScript:       accountKey.RedeemScript,
-		WalletImportFormat: accountKey.WalletImportFormat,
-		Idx:                accountKey.Idx,
-		AddrStatus:         accountKey.AddrStatus,
-		UpdatedAt:          convertSQLNullTimeToNullTime(accountKey.UpdatedAt),
-	}
-}
-
-func convertSQLNullTimeToNullTime(t sql.NullTime) null.Time {
-	if !t.Valid {
-		return null.Time{}
-	}
-	return null.TimeFrom(t.Time)
 }

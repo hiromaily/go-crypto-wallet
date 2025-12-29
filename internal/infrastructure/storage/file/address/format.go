@@ -6,7 +6,7 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 )
 
 // AddressFormat is address csv format
@@ -23,14 +23,18 @@ type AddressFormat struct {
 }
 
 // CreateLine creates line for csv
-func CreateLine(accountKeyItem *models.AccountKey) []string {
+func CreateLine(accountKeyItem *sqlc.AccountKey) []string {
+	taprootAddr := ""
+	if accountKeyItem.TaprootAddress.Valid {
+		taprootAddr = accountKeyItem.TaprootAddress.String
+	}
 	return []string{
-		accountKeyItem.Coin,
-		accountKeyItem.Account,
-		accountKeyItem.P2PKHAddress,
-		accountKeyItem.P2SHSegwitAddress,
+		string(accountKeyItem.Coin),
+		string(accountKeyItem.Account),
+		accountKeyItem.P2pkhAddress,
+		accountKeyItem.P2shSegwitAddress,
 		accountKeyItem.Bech32Address,
-		accountKeyItem.TaprootAddress,
+		taprootAddr,
 		accountKeyItem.FullPublicKey,
 		accountKeyItem.MultisigAddress,
 		strconv.Itoa(int(accountKeyItem.Idx)),

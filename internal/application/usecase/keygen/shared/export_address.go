@@ -11,7 +11,7 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
@@ -101,7 +101,7 @@ func (u *exportAddressUseCase) Export(
 
 // exportAccountKey exports account_key_table as csv file
 func (u *exportAddressUseCase) exportAccountKey(
-	accountKeyTable []*models.AccountKey, accountType domainAccount.AccountType,
+	accountKeyTable []*sqlc.AccountKey, accountType domainAccount.AccountType,
 ) (string, error) {
 	// Create fileName
 	fileName := u.addrFileRepo.CreateFilePath(accountType)
