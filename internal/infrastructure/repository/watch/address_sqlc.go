@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/guregu/null/v6"
-
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
@@ -117,22 +115,4 @@ func (r *AddressRepositorySqlc) UpdateIsAllocated(isAllocated bool, address stri
 	}
 
 	return rowsAffected, nil
-}
-
-// Helper functions for null.Time <-> sql.NullTime conversion
-// These are shared utilities used by other repository files in this package
-// TODO: Remove these when all repositories are migrated to SQLC models
-
-func convertSQLNullTimeToNullTime(t sql.NullTime) null.Time {
-	if !t.Valid {
-		return null.Time{}
-	}
-	return null.TimeFrom(t.Time)
-}
-
-func convertNullTimeToSQLNullTime(t null.Time) sql.NullTime {
-	if !t.Valid {
-		return sql.NullTime{}
-	}
-	return sql.NullTime{Time: t.Time, Valid: true}
 }

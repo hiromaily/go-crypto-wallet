@@ -82,7 +82,7 @@ func (r *PaymentRequestRepositorySqlc) InsertBulk(items []*models.PaymentRequest
 			ReceiverAddress: item.ReceiverAddress,
 			Amount:          item.Amount.String(),
 			IsDone:          item.IsDone,
-			UpdatedAt:       convertNullTimeToSQLNullTime(item.UpdatedAt),
+			UpdatedAt:       ConvertNullTimeToSQLNullTime(item.UpdatedAt),
 		})
 		if err != nil {
 			return fmt.Errorf("failed to call InsertPaymentRequest(): %w", err)
@@ -178,7 +178,7 @@ func convertSqlcPaymentRequestToModel(req *sqlc.PaymentRequest) *models.PaymentR
 		ReceiverAddress: req.ReceiverAddress,
 		Amount:          amount,
 		IsDone:          req.IsDone,
-		UpdatedAt:       convertSQLNullTimeToNullTime(req.UpdatedAt),
+		UpdatedAt:       ConvertSQLNullTimeToNullTime(req.UpdatedAt),
 	}
 }
 

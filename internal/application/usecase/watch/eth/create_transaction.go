@@ -8,8 +8,6 @@ import (
 	"math/big"
 	"strconv"
 
-	"github.com/guregu/null/v6"
-
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
@@ -565,15 +563,7 @@ func convertModelsToSqlcEthDetailTx(m *models.EthDetailTX) *sqlc.EthDetailTx {
 		UnsignedHexTx:     m.UnsignedHexTX,
 		SignedHexTx:       m.SignedHexTX,
 		SentHashTx:        m.SentHashTX,
-		UnsignedUpdatedAt: convertNullTimeToSQLNullTime(m.UnsignedUpdatedAt),
-		SentUpdatedAt:     convertNullTimeToSQLNullTime(m.SentUpdatedAt),
-	}
-}
-
-// Helper function to convert null.Time to sql.NullTime
-func convertNullTimeToSQLNullTime(t null.Time) sql.NullTime {
-	return sql.NullTime{
-		Time:  t.Time,
-		Valid: t.Valid,
+		UnsignedUpdatedAt: watchrepo.ConvertNullTimeToSQLNullTime(m.UnsignedUpdatedAt),
+		SentUpdatedAt:     watchrepo.ConvertNullTimeToSQLNullTime(m.SentUpdatedAt),
 	}
 }
