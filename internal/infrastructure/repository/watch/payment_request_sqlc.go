@@ -5,11 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/guregu/null/v6"
-	"github.com/quagmt/udecimal"
-
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 )
 
@@ -30,7 +26,7 @@ func NewPaymentRequestRepositorySqlc(
 }
 
 // GetAll returns all records whose payment_id is null
-func (r *PaymentRequestRepositorySqlc) GetAll() ([]*models.PaymentRequest, error) {
+func (r *PaymentRequestRepositorySqlc) GetAll() ([]*sqlc.PaymentRequest, error) {
 	ctx := context.Background()
 
 	requests, err := r.queries.GetAllPaymentRequests(ctx, sqlc.PaymentRequestCoin(r.coinTypeCode.String()))
@@ -38,17 +34,16 @@ func (r *PaymentRequestRepositorySqlc) GetAll() ([]*models.PaymentRequest, error
 		return nil, fmt.Errorf("failed to call GetAllPaymentRequests(): %w", err)
 	}
 
-	// Convert sqlc types to sqlboiler types
-	result := make([]*models.PaymentRequest, len(requests))
-	for i, req := range requests {
-		result[i] = convertSqlcPaymentRequestToModel(&req)
+	result := make([]*sqlc.PaymentRequest, len(requests))
+	for i := range requests {
+		result[i] = &requests[i]
 	}
 
 	return result, nil
 }
 
 // GetAllByPaymentID returns all records searched by payment_id
-func (r *PaymentRequestRepositorySqlc) GetAllByPaymentID(paymentID int64) ([]*models.PaymentRequest, error) {
+func (r *PaymentRequestRepositorySqlc) GetAllByPaymentID(paymentID int64) ([]*sqlc.PaymentRequest, error) {
 	ctx := context.Background()
 
 	requests, err := r.queries.GetPaymentRequestsByPaymentID(ctx, sqlc.GetPaymentRequestsByPaymentIDParams{
@@ -59,29 +54,28 @@ func (r *PaymentRequestRepositorySqlc) GetAllByPaymentID(paymentID int64) ([]*mo
 		return nil, fmt.Errorf("failed to call GetPaymentRequestsByPaymentID(): %w", err)
 	}
 
-	// Convert sqlc types to sqlboiler types
-	result := make([]*models.PaymentRequest, len(requests))
-	for i, req := range requests {
-		result[i] = convertSqlcPaymentRequestToModel(&req)
+	result := make([]*sqlc.PaymentRequest, len(requests))
+	for i := range requests {
+		result[i] = &requests[i]
 	}
 
 	return result, nil
 }
 
 // InsertBulk inserts multiple records
-func (r *PaymentRequestRepositorySqlc) InsertBulk(items []*models.PaymentRequest) error {
+func (r *PaymentRequestRepositorySqlc) InsertBulk(items []*sqlc.PaymentRequest) error {
 	ctx := context.Background()
 
 	for _, item := range items {
 		_, err := r.queries.InsertPaymentRequest(ctx, sqlc.InsertPaymentRequestParams{
-			Coin:            sqlc.PaymentRequestCoin(item.Coin),
-			PaymentID:       convertNullInt64ToSQLNullInt64(item.PaymentID),
+			Coin:            item.Coin,
+			PaymentID:       item.PaymentID,
 			SenderAddress:   item.SenderAddress,
 			SenderAccount:   item.SenderAccount,
 			ReceiverAddress: item.ReceiverAddress,
-			Amount:          item.Amount.String(),
+			Amount:          item.Amount,
 			IsDone:          item.IsDone,
-			UpdatedAt:       convertNullTimeToSQLNullTime(item.UpdatedAt),
+			UpdatedAt:       item.UpdatedAt,
 		})
 		if err != nil {
 			return fmt.Errorf("failed to call InsertPaymentRequest(): %w", err)
@@ -153,36 +147,4 @@ func (r *PaymentRequestRepositorySqlc) DeleteAll() (int64, error) {
 	}
 
 	return rowsAffected, nil
-}
-
-// Helper functions
-
-func convertSqlcPaymentRequestToModel(req *sqlc.PaymentRequest) *models.PaymentRequest {
-	amount, _ := udecimal.Parse(req.Amount)
-
-	return &models.PaymentRequest{
-		ID:              req.ID,
-		Coin:            string(req.Coin),
-		PaymentID:       convertSQLNullInt64ToNullInt64(req.PaymentID),
-		SenderAddress:   req.SenderAddress,
-		SenderAccount:   req.SenderAccount,
-		ReceiverAddress: req.ReceiverAddress,
-		Amount:          amount,
-		IsDone:          req.IsDone,
-		UpdatedAt:       convertSQLNullTimeToNullTime(req.UpdatedAt),
-	}
-}
-
-func convertNullInt64ToSQLNullInt64(n null.Int64) sql.NullInt64 {
-	if !n.Valid {
-		return sql.NullInt64{}
-	}
-	return sql.NullInt64{Int64: n.Int64, Valid: true}
-}
-
-func convertSQLNullInt64ToNullInt64(n sql.NullInt64) null.Int64 {
-	if !n.Valid {
-		return null.Int64{}
-	}
-	return null.IntFrom(n.Int64)
 }
