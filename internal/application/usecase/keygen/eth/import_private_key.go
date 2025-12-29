@@ -54,7 +54,7 @@ func (u *importPrivateKeyUseCase) Import(
 		logger.Debug(
 			"target records",
 			"account_type", input.AccountType.String(),
-			"address", record.P2PKHAddress,
+			"address", record.P2pkhAddress,
 			"private key", record.WalletImportFormat)
 
 		// Convert private key to ECDSA
@@ -89,9 +89,9 @@ func (u *importPrivateKeyUseCase) Import(
 		)
 
 		// Check generated address
-		if acct.Address.Hex() != record.P2PKHAddress {
+		if acct.Address.Hex() != record.P2pkhAddress {
 			logger.Warn("inconsistency between generated address",
-				"old_address", record.P2PKHAddress,
+				"old_address", record.P2pkhAddress,
 				"new_address", acct.Address.Hex(),
 			)
 		}

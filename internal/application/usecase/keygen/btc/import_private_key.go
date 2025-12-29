@@ -48,8 +48,8 @@ func (u *importPrivateKeyUseCase) Import(
 		logger.Debug(
 			"target records",
 			"account_type", input.AccountType.String(),
-			"P2PKH_address", record.P2PKHAddress,
-			"P2SH_segwit_address", record.P2SHSegwitAddress,
+			"P2PKH_address", record.P2pkhAddress,
+			"P2SH_segwit_address", record.P2shSegwitAddress,
 			"wif", record.WalletImportFormat)
 
 		// Decode WIF
@@ -86,7 +86,7 @@ func (u *importPrivateKeyUseCase) Import(
 		}
 
 		// Check address was stored in bitcoin core by importing private key
-		u.checkImportedAddress(record.P2PKHAddress, record.P2SHSegwitAddress, record.FullPublicKey)
+		u.checkImportedAddress(record.P2pkhAddress, record.P2shSegwitAddress, record.FullPublicKey)
 	}
 
 	return nil
