@@ -52,14 +52,36 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Keygener, container d
 	parentCmd.AddCommand(seedCmd)
 
 	// multisig command
-	var multisigAccount string
+	var (
+		multisigAccount string
+		multisigType    string
+	)
 	multisigCmd := &cobra.Command{
 		Use:   "multisig",
-		Short: "create multisig address",
+		Short: "create multisig address (traditional or MuSig2)",
+		Long: `Create multisig addresses using either traditional P2SH/P2WSH multisig or MuSig2 Taproot.
+
+Traditional multisig (default):
+  - Uses Bitcoin Core's addmultisigaddress RPC
+  - Creates P2SH or P2WSH addresses depending on --address-type flag
+  - Compatible with all Bitcoin address types
+
+MuSig2 multisig:
+  - Creates Taproot (P2TR) addresses with aggregated public keys
+  - Uses MuSig2 Schnorr signature aggregation protocol
+  - More efficient and private than traditional multisig
+  - Requires BIP86 Taproot support`,
+		Example: `  # Create traditional multisig address (default)
+  keygen --coin btc create multisig --account payment
+
+  # Create MuSig2 Taproot address
+  keygen --coin btc create multisig --account payment --multisig-type musig2`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runMultisigWithAccount(container, multisigAccount)
+			return runMultisigWithFlags(container, multisigAccount, multisigType)
 		},
 	}
 	multisigCmd.Flags().StringVar(&multisigAccount, "account", "", "target account")
+	multisigCmd.Flags().StringVar(&multisigType, "multisig-type", "traditional",
+		"multisig type: 'traditional' (P2SH/P2WSH) or 'musig2' (Taproot)")
 	parentCmd.AddCommand(multisigCmd)
 }

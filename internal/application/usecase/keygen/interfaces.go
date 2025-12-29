@@ -33,6 +33,11 @@ type CreateMultisigAddressUseCase interface {
 	Create(ctx context.Context, input CreateMultisigAddressInput) error
 }
 
+// CreateMuSig2AddressUseCase creates MuSig2 Taproot addresses (BTC only)
+type CreateMuSig2AddressUseCase interface {
+	Create(ctx context.Context, input CreateMuSig2AddressInput) error
+}
+
 // ImportFullPubkeyUseCase imports full public keys from other signers (BTC only)
 type ImportFullPubkeyUseCase interface {
 	Import(ctx context.Context, input ImportFullPubkeyInput) error
@@ -106,6 +111,11 @@ type ImportPrivateKeyInput struct {
 type CreateMultisigAddressInput struct {
 	AccountType domainAccount.AccountType
 	AddressType address.AddrType
+}
+
+// CreateMuSig2AddressInput represents input for creating MuSig2 Taproot addresses
+type CreateMuSig2AddressInput struct {
+	AccountType domainAccount.AccountType
 }
 
 // ImportFullPubkeyInput represents input for importing full public keys
