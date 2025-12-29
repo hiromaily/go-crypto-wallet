@@ -8,7 +8,6 @@ import (
 
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 )
 
@@ -29,7 +28,7 @@ func NewEthDetailTxInputRepositorySqlc(
 }
 
 // GetOne get one record by ID
-func (r *EthDetailTxInputRepositorySqlc) GetOne(id int64) (*models.EthDetailTX, error) {
+func (r *EthDetailTxInputRepositorySqlc) GetOne(id int64) (*sqlc.EthDetailTx, error) {
 	ctx := context.Background()
 
 	ethTx, err := r.queries.GetEthDetailTxByID(ctx, id)
@@ -37,11 +36,11 @@ func (r *EthDetailTxInputRepositorySqlc) GetOne(id int64) (*models.EthDetailTX, 
 		return nil, fmt.Errorf("failed to call GetEthDetailTxByID(): %w", err)
 	}
 
-	return convertSqlcEthDetailTxToModel(&ethTx), nil
+	return &ethTx, nil
 }
 
 // GetAllByTxID returns all records searched by tx_id
-func (r *EthDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*models.EthDetailTX, error) {
+func (r *EthDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*sqlc.EthDetailTx, error) {
 	ctx := context.Background()
 
 	ethTxs, err := r.queries.GetEthDetailTxsByTxID(ctx, id)
@@ -49,9 +48,9 @@ func (r *EthDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*models.EthDe
 		return nil, fmt.Errorf("failed to call GetEthDetailTxsByTxID(): %w", err)
 	}
 
-	result := make([]*models.EthDetailTX, len(ethTxs))
-	for i, ethTx := range ethTxs {
-		result[i] = convertSqlcEthDetailTxToModel(&ethTx)
+	result := make([]*sqlc.EthDetailTx, len(ethTxs))
+	for i := range ethTxs {
+		result[i] = &ethTxs[i]
 	}
 
 	return result, nil
@@ -73,13 +72,13 @@ func (r *EthDetailTxInputRepositorySqlc) GetSentHashTx(txType domainTx.TxType) (
 }
 
 // Insert inserts one record
-func (r *EthDetailTxInputRepositorySqlc) Insert(txItem *models.EthDetailTX) error {
+func (r *EthDetailTxInputRepositorySqlc) Insert(txItem *sqlc.EthDetailTx) error {
 	ctx := context.Background()
 
 	_, err := r.queries.InsertEthDetailTx(ctx, sqlc.InsertEthDetailTxParams{
-		TxID:              txItem.TXID,
-		Uuid:              txItem.UUID,
-		CurrentTxType:     txItem.CurrentTXType,
+		TxID:              txItem.TxID,
+		Uuid:              txItem.Uuid,
+		CurrentTxType:     txItem.CurrentTxType,
 		SenderAccount:     txItem.SenderAccount,
 		SenderAddress:     txItem.SenderAddress,
 		ReceiverAccount:   txItem.ReceiverAccount,
@@ -88,11 +87,11 @@ func (r *EthDetailTxInputRepositorySqlc) Insert(txItem *models.EthDetailTX) erro
 		Fee:               txItem.Fee,
 		GasLimit:          txItem.GasLimit,
 		Nonce:             txItem.Nonce,
-		UnsignedHexTx:     txItem.UnsignedHexTX,
-		SignedHexTx:       txItem.SignedHexTX,
-		SentHashTx:        txItem.SentHashTX,
-		UnsignedUpdatedAt: convertNullTimeToSQLNullTime(txItem.UnsignedUpdatedAt),
-		SentUpdatedAt:     convertNullTimeToSQLNullTime(txItem.SentUpdatedAt),
+		UnsignedHexTx:     txItem.UnsignedHexTx,
+		SignedHexTx:       txItem.SignedHexTx,
+		SentHashTx:        txItem.SentHashTx,
+		UnsignedUpdatedAt: txItem.UnsignedUpdatedAt,
+		SentUpdatedAt:     txItem.SentUpdatedAt,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to call InsertEthDetailTx(): %w", err)
@@ -102,7 +101,7 @@ func (r *EthDetailTxInputRepositorySqlc) Insert(txItem *models.EthDetailTX) erro
 }
 
 // InsertBulk inserts multiple records
-func (r *EthDetailTxInputRepositorySqlc) InsertBulk(txItems []*models.EthDetailTX) error {
+func (r *EthDetailTxInputRepositorySqlc) InsertBulk(txItems []*sqlc.EthDetailTx) error {
 	for _, item := range txItems {
 		if err := r.Insert(item); err != nil {
 			return err
@@ -179,28 +178,4 @@ func (r *EthDetailTxInputRepositorySqlc) UpdateTxTypeBySentHashTx(
 	}
 
 	return rowsAffected, nil
-}
-
-// Helper functions
-
-func convertSqlcEthDetailTxToModel(ethTx *sqlc.EthDetailTx) *models.EthDetailTX {
-	return &models.EthDetailTX{
-		ID:                ethTx.ID,
-		TXID:              ethTx.TxID,
-		UUID:              ethTx.Uuid,
-		CurrentTXType:     ethTx.CurrentTxType,
-		SenderAccount:     ethTx.SenderAccount,
-		SenderAddress:     ethTx.SenderAddress,
-		ReceiverAccount:   ethTx.ReceiverAccount,
-		ReceiverAddress:   ethTx.ReceiverAddress,
-		Amount:            ethTx.Amount,
-		Fee:               ethTx.Fee,
-		GasLimit:          ethTx.GasLimit,
-		Nonce:             ethTx.Nonce,
-		UnsignedHexTX:     ethTx.UnsignedHexTx,
-		SignedHexTX:       ethTx.SignedHexTx,
-		SentHashTX:        ethTx.SentHashTx,
-		UnsignedUpdatedAt: convertSQLNullTimeToNullTime(ethTx.UnsignedUpdatedAt),
-		SentUpdatedAt:     convertSQLNullTimeToNullTime(ethTx.SentUpdatedAt),
-	}
 }

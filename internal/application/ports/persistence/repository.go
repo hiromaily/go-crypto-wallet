@@ -9,6 +9,7 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
@@ -125,11 +126,11 @@ type PaymentRequestRepositorier interface {
 
 // EthDetailTxRepositorier is EthDetailTxRepository interface
 type EthDetailTxRepositorier interface {
-	GetOne(id int64) (*models.EthDetailTX, error)
-	GetAllByTxID(id int64) ([]*models.EthDetailTX, error)
+	GetOne(id int64) (*sqlc.EthDetailTx, error)
+	GetAllByTxID(id int64) ([]*sqlc.EthDetailTx, error)
 	GetSentHashTx(txType domainTx.TxType) ([]string, error)
-	Insert(txItem *models.EthDetailTX) error
-	InsertBulk(txItems []*models.EthDetailTX) error
+	Insert(txItem *sqlc.EthDetailTx) error
+	InsertBulk(txItems []*sqlc.EthDetailTx) error
 	UpdateAfterTxSent(uuid string, txType domainTx.TxType, signedHex, sentHashTx string) (int64, error)
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(txType domainTx.TxType, sentHashTx string) (int64, error)
@@ -137,11 +138,11 @@ type EthDetailTxRepositorier interface {
 
 // XrpDetailTxRepositorier is XrpDetailTxRepository interface
 type XrpDetailTxRepositorier interface {
-	GetOne(id int64) (*models.XRPDetailTX, error)
-	GetAllByTxID(id int64) ([]*models.XRPDetailTX, error)
+	GetOne(id int64) (*sqlc.XrpDetailTx, error)
+	GetAllByTxID(id int64) ([]*sqlc.XrpDetailTx, error)
 	GetSentHashTx(txType domainTx.TxType) ([]string, error)
-	Insert(txItem *models.XRPDetailTX) error
-	InsertBulk(txItems []*models.XRPDetailTX) error
+	Insert(txItem *sqlc.XrpDetailTx) error
+	InsertBulk(txItems []*sqlc.XrpDetailTx) error
 	UpdateAfterTxSent(
 		uuid string, txType domainTx.TxType, signedTxID, signedTxBlob string, earlistLedgerVersion uint64,
 	) (int64, error)
