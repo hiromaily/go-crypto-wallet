@@ -80,9 +80,7 @@ func (r *AddressRepositorySqlc) GetOneUnAllocated(accountType domainAccount.Acco
 }
 
 // InsertBulk inserts multiple records
-func (r *AddressRepositorySqlc) InsertBulk(items []*sqlc.Address) error {
-	ctx := context.Background()
-
+func (r *AddressRepositorySqlc) InsertBulk(ctx context.Context, items []*sqlc.Address) error {
 	for _, item := range items {
 		_, err := r.queries.InsertAddress(ctx, sqlc.InsertAddressParams{
 			Coin:          item.Coin,

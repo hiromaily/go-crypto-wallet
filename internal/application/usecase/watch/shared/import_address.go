@@ -65,7 +65,7 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 	}
 
 	// insert imported pubKey
-	err = u.addrRepo.InsertBulk(pubKeyData)
+	err = u.addrRepo.InsertBulk(ctx, pubKeyData)
 	if err != nil {
 		return fmt.Errorf("fail to call addrRepo.InsertBulk(): %w", err)
 		// TODO:What if this inserting is failed, how it can be recovered to keep consistancy

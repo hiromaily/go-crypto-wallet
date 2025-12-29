@@ -73,7 +73,7 @@ type AddressRepositorier interface {
 	GetAll(accountType domainAccount.AccountType) ([]*sqlc.Address, error)
 	GetAllAddress(accountType domainAccount.AccountType) ([]string, error)
 	GetOneUnAllocated(accountType domainAccount.AccountType) (*sqlc.Address, error)
-	InsertBulk(items []*sqlc.Address) error
+	InsertBulk(ctx context.Context, items []*sqlc.Address) error
 	UpdateIsAllocated(isAllocated bool, Address string) (int64, error)
 }
 

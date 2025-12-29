@@ -97,7 +97,7 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 
 	// Insert all addresses into database
 	if len(pubKeyData) > 0 {
-		if err := u.addrRepo.InsertBulk(pubKeyData); err != nil {
+		if err := u.addrRepo.InsertBulk(ctx, pubKeyData); err != nil {
 			return fmt.Errorf("failed to insert addresses into database: %w", err)
 		}
 	}
