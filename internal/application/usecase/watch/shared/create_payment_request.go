@@ -4,8 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"strconv"
 	"time"
+
+	"github.com/quagmt/udecimal"
 
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -73,15 +74,18 @@ func (u *createPaymentRequestUseCase) Execute(ctx context.Context, input watchus
 	payReqItems := make([]*sqlc.PaymentRequest, 0, len(input.AmountList))
 	var idx int
 	for _, amt := range input.AmountList {
-		// Convert float amount to string
-		amountStr := strconv.FormatFloat(amt, 'f', -1, 64)
+		// Convert float amount to string using decimal library for financial precision
+		amount, err := udecimal.NewFromFloat64(amt)
+		if err != nil {
+			return fmt.Errorf("fail to convert amount %f to decimal: %w", amt, err)
+		}
 		payReqItems = append(payReqItems, &sqlc.PaymentRequest{
 			Coin:            sqlc.PaymentRequestCoin(u.coinTypeCode.String()),
 			PaymentID:       sql.NullInt64{},
 			SenderAddress:   pubkeyItems[0+idx].WalletAddress,
 			SenderAccount:   pubkeyItems[0+idx].Account,
 			ReceiverAddress: pubkeyItems[len(input.AmountList)+idx].WalletAddress,
-			Amount:          amountStr,
+			Amount:          amount.String(),
 			IsDone:          false,
 			UpdatedAt:       sql.NullTime{Time: time.Now(), Valid: true},
 		})
