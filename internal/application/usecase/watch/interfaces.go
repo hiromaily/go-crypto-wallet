@@ -83,15 +83,18 @@ type CreatePaymentRequestInput struct {
 
 // PartialSignatureData represents a partial signature from a signer
 type PartialSignatureData struct {
-	SignerID  string
-	Signature [32]byte // Partial signature scalar
+	SignerID        string
+	Signature       [32]byte // Partial signature scalar (S)
+	NonceCommitment [33]byte // Public nonce commitment (R), compressed
 }
 
 // AggregateMuSig2SignaturesInput represents input for aggregating MuSig2 signatures
 type AggregateMuSig2SignaturesInput struct {
 	PSBTBase64          string
 	PartialSignatures   []PartialSignatureData
-	AggregatedPublicKey [33]byte // Compressed public key
+	SignerPublicKeys    [][33]byte // Public keys of all participating signers
+	CombinedNonce       [66]byte   // Combined public nonce from all signers
+	AggregatedPublicKey [33]byte   // Compressed aggregated public key
 	MessageHash         [32]byte
 }
 
