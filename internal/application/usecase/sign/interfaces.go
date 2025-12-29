@@ -36,6 +36,16 @@ type GenerateAuthKeyUseCase interface {
 	Generate(ctx context.Context, input GenerateAuthKeyInput) (GenerateAuthKeyOutput, error)
 }
 
+// GenerateMuSig2NonceUseCase generates MuSig2 nonces for Round 1 (BTC only)
+type GenerateMuSig2NonceUseCase interface {
+	Generate(ctx context.Context, input GenerateMuSig2NonceInput) (GenerateMuSig2NonceOutput, error)
+}
+
+// MuSig2SignUseCase creates MuSig2 partial signatures for Round 2 (BTC only)
+type MuSig2SignUseCase interface {
+	Sign(ctx context.Context, input MuSig2SignInput) (MuSig2SignOutput, error)
+}
+
 // Input/Output DTOs
 
 // SignTransactionInput represents input for signing a transaction
@@ -86,4 +96,30 @@ type GenerateAuthKeyInput struct {
 // GenerateAuthKeyOutput represents output from generating auth keys
 type GenerateAuthKeyOutput struct {
 	GeneratedCount int
+}
+
+// GenerateMuSig2NonceInput represents input for generating MuSig2 nonces
+type GenerateMuSig2NonceInput struct {
+	TransactionID string
+	AuthType      domainAccount.AuthType
+}
+
+// GenerateMuSig2NonceOutput represents output from generating MuSig2 nonces
+type GenerateMuSig2NonceOutput struct {
+	PublicNonce [66]byte
+	SignerID    string
+}
+
+// MuSig2SignInput represents input for MuSig2 partial signature creation
+type MuSig2SignInput struct {
+	TransactionID    string
+	AuthType         domainAccount.AuthType
+	MessageHash      [32]byte
+	AggregatedNonces [][66]byte // Public nonces from all signers
+}
+
+// MuSig2SignOutput represents output from MuSig2 partial signature creation
+type MuSig2SignOutput struct {
+	PartialSignature [32]byte
+	SignerID         string
 }
