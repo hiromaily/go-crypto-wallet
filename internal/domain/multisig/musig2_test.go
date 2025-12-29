@@ -1,6 +1,7 @@
 package multisig
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -426,20 +427,5 @@ func TestSigningSession_GetNoncesAndSignatures(t *testing.T) {
 
 // Helper function to check if a string contains a substring
 func contains(s, substr string) bool {
-	if s == substr || len(substr) == 0 {
-		return len(s) >= len(substr)
-	}
-	if len(s) > 0 && len(substr) > 0 {
-		return containsHelper(s, substr)
-	}
-	return false
-}
-
-func containsHelper(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
+	return strings.Contains(s, substr)
 }

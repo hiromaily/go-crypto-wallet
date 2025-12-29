@@ -6,6 +6,31 @@ import (
 	"fmt"
 )
 
+// Sentinel errors for MuSig2 operations.
+// These can be checked with errors.Is for programmatic error handling.
+var (
+	// ErrSignerIDEmpty indicates that a signer ID is empty or missing.
+	ErrSignerIDEmpty = errors.New("signer ID cannot be empty")
+
+	// ErrPublicNonceZero indicates that a public nonce is all zeros.
+	ErrPublicNonceZero = errors.New("public nonce cannot be zero")
+
+	// ErrSignatureScalarZero indicates that a signature scalar is all zeros.
+	ErrSignatureScalarZero = errors.New("signature scalar cannot be zero")
+
+	// ErrAggregatedKeyZero indicates that an aggregated public key is all zeros.
+	ErrAggregatedKeyZero = errors.New("aggregated public key cannot be zero")
+
+	// ErrSessionIDEmpty indicates that a session ID is empty or missing.
+	ErrSessionIDEmpty = errors.New("session ID cannot be empty")
+
+	// ErrNonceNil indicates that a nonce commitment is nil.
+	ErrNonceNil = errors.New("nonce commitment cannot be nil")
+
+	// ErrPartialSignatureNil indicates that a partial signature is nil.
+	ErrPartialSignatureNil = errors.New("partial signature cannot be nil")
+)
+
 // NonceCommitment represents a MuSig2 public nonce commitment from a signer.
 // This is safe to share with all participants in the signing protocol.
 //
@@ -19,13 +44,13 @@ type NonceCommitment struct {
 // NewNonceCommitment creates a new nonce commitment with validation.
 func NewNonceCommitment(publicNonce [66]byte, signerID string) (*NonceCommitment, error) {
 	if signerID == "" {
-		return nil, errors.New("signer ID cannot be empty")
+		return nil, ErrSignerIDEmpty
 	}
 
 	// Validate that nonce is not all zeros
 	var zero [66]byte
 	if bytes.Equal(publicNonce[:], zero[:]) {
-		return nil, errors.New("public nonce cannot be zero")
+		return nil, ErrPublicNonceZero
 	}
 
 	return &NonceCommitment{
@@ -57,13 +82,13 @@ type PartialSignature struct {
 // NewPartialSignature creates a new partial signature with validation.
 func NewPartialSignature(signatureScalar [32]byte, signerID string) (*PartialSignature, error) {
 	if signerID == "" {
-		return nil, errors.New("signer ID cannot be empty")
+		return nil, ErrSignerIDEmpty
 	}
 
 	// Validate that signature scalar is not all zeros
 	var zero [32]byte
 	if bytes.Equal(signatureScalar[:], zero[:]) {
-		return nil, errors.New("signature scalar cannot be zero")
+		return nil, ErrSignatureScalarZero
 	}
 
 	return &PartialSignature{
@@ -94,7 +119,7 @@ func NewAggregatedKey(publicKey [33]byte, tweaked bool) (*AggregatedKey, error) 
 	// Validate that public key is not all zeros
 	var zero [33]byte
 	if bytes.Equal(publicKey[:], zero[:]) {
-		return nil, errors.New("aggregated public key cannot be zero")
+		return nil, ErrAggregatedKeyZero
 	}
 
 	return &AggregatedKey{
@@ -126,7 +151,7 @@ type SigningSession struct {
 // NewSigningSession creates a new signing session with validation.
 func NewSigningSession(sessionID string, participantCount int) (*SigningSession, error) {
 	if sessionID == "" {
-		return nil, errors.New("session ID cannot be empty")
+		return nil, ErrSessionIDEmpty
 	}
 
 	if err := ValidateSignerCount(participantCount); err != nil {
@@ -154,7 +179,7 @@ func (s *SigningSession) ParticipantCount() int {
 // AddNonceCommitment adds a nonce commitment to the session.
 func (s *SigningSession) AddNonceCommitment(nonce *NonceCommitment) error {
 	if nonce == nil {
-		return errors.New("nonce commitment cannot be nil")
+		return ErrNonceNil
 	}
 
 	signerID := nonce.SignerID()
@@ -169,7 +194,7 @@ func (s *SigningSession) AddNonceCommitment(nonce *NonceCommitment) error {
 // AddPartialSignature adds a partial signature to the session.
 func (s *SigningSession) AddPartialSignature(sig *PartialSignature) error {
 	if sig == nil {
-		return errors.New("partial signature cannot be nil")
+		return ErrPartialSignatureNil
 	}
 
 	signerID := sig.SignerID()

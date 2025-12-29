@@ -6,6 +6,16 @@ import (
 	"fmt"
 )
 
+// isAllZeros checks if a byte slice contains only zero values.
+func isAllZeros(b []byte) bool {
+	for _, v := range b {
+		if v != 0 {
+			return false
+		}
+	}
+	return true
+}
+
 // ValidateSignerCount validates the number of signers for MuSig2.
 // MuSig2 requires at least 2 signers.
 func ValidateSignerCount(count int) error {
@@ -127,14 +137,7 @@ func ValidatePublicKeysForMuSig2(publicKeys [][]byte) error {
 		seen[pkStr] = true
 
 		// Validate that public key is not all zeros
-		allZero := true
-		for _, b := range pk {
-			if b != 0 {
-				allZero = false
-				break
-			}
-		}
-		if allZero {
+		if isAllZeros(pk) {
 			return fmt.Errorf("public key at index %d is all zeros", i)
 		}
 	}
@@ -154,14 +157,7 @@ func ValidateAggregatedPublicKey(publicKey []byte) error {
 	}
 
 	// Validate that public key is not all zeros
-	allZero := true
-	for _, b := range publicKey {
-		if b != 0 {
-			allZero = false
-			break
-		}
-	}
-	if allZero {
+	if isAllZeros(publicKey) {
 		return errors.New("aggregated public key is all zeros")
 	}
 
