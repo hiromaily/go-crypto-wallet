@@ -107,13 +107,15 @@ import (
 )
 
 // Round 1: Setup and Nonce Generation
-ctx, err := musig2.NewContext(privateKey, true)  // true = sort keys
-session, err := ctx.NewSession(
+ctx, err := musig2.NewContext(
+    privateKey,
+    true, // true = sort keys
     musig2.WithKnownSigners(allPublicKeys),
 )
+session, err := ctx.NewSession()
 
 // Generate and share public nonce
-ourNonce, err := session.PublicNonce()
+ourNonce := session.PublicNonce()
 
 // Register nonces from other signers
 for _, otherNonce := range otherSignersNonces {
@@ -124,7 +126,12 @@ for _, otherNonce := range otherSignersNonces {
 partialSig, err := session.Sign(messageHash)
 
 // Aggregate (on coordinator/watch wallet)
-finalSig, err := session.CombineSig(partialSig)
+// This example shows combining one of multiple partial signatures.
+haveAllSigs, err := session.CombineSig(partialSig)
+if err == nil && haveAllSigs {
+    finalSig := session.FinalSig()
+    // ... verify and use final signature
+}
 ```
 
 ## Integration Plan

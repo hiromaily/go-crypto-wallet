@@ -120,18 +120,38 @@ if !finalSig.Verify(messageHash[:], aggregatedKey) {
 
 ```go
 // Round 1: Generate nonce
-ctx, _ := musig2.NewContext(keygenPrivKey, true,
+ctx, err := musig2.NewContext(keygenPrivKey, true,
     musig2.WithKnownSigners(allPubKeys))
-session, _ := ctx.NewSession()
+if err != nil {
+    return fmt.Errorf("failed to create context: %w", err)
+}
+
+session, err := ctx.NewSession()
+if err != nil {
+    return fmt.Errorf("failed to create session: %w", err)
+}
+
 keygenNonce := session.PublicNonce()
 
 // Save nonce to file (transfer to Watch wallet)
 SaveNonceToFile("keygen_nonce.json", keygenNonce)
 
-// Round 2: Sign after receiving aggregated nonces
-LoadNoncesFromFile("aggregated_nonces.json")
-// ... register nonces ...
-partialSig, _ := session.Sign(txHash)
+// Round 2: Sign after receiving all individual nonces
+allNonces := LoadAllNoncesFromFile("all_nonces.json")
+// Register each other signer's nonce
+for _, otherNonce := range allNonces {
+    if otherNonce != keygenNonce { // Skip own nonce
+        _, err := session.RegisterPubNonce(otherNonce)
+        if err != nil {
+            // Handle error
+        }
+    }
+}
+
+partialSig, err := session.Sign(txHash)
+if err != nil {
+    return fmt.Errorf("failed to sign: %w", err)
+}
 
 // Save partial signature to file (transfer to Watch wallet)
 SavePartialSigToFile("keygen_partialsig.json", partialSig)
@@ -141,18 +161,38 @@ SavePartialSigToFile("keygen_partialsig.json", partialSig)
 
 ```go
 // Round 1: Generate nonce
-ctx, _ := musig2.NewContext(signPrivKey, true,
+ctx, err := musig2.NewContext(signPrivKey, true,
     musig2.WithKnownSigners(allPubKeys))
-session, _ := ctx.NewSession()
+if err != nil {
+    return fmt.Errorf("failed to create context: %w", err)
+}
+
+session, err := ctx.NewSession()
+if err != nil {
+    return fmt.Errorf("failed to create session: %w", err)
+}
+
 signNonce := session.PublicNonce()
 
 // Save nonce to file
 SaveNonceToFile("sign_nonce.json", signNonce)
 
-// Round 2: Sign after receiving aggregated nonces
-LoadNoncesFromFile("aggregated_nonces.json")
-// ... register nonces ...
-partialSig, _ := session.Sign(txHash)
+// Round 2: Sign after receiving all individual nonces
+allNonces := LoadAllNoncesFromFile("all_nonces.json")
+// Register each other signer's nonce
+for _, otherNonce := range allNonces {
+    if otherNonce != signNonce { // Skip own nonce
+        _, err := session.RegisterPubNonce(otherNonce)
+        if err != nil {
+            // Handle error
+        }
+    }
+}
+
+partialSig, err := session.Sign(txHash)
+if err != nil {
+    return fmt.Errorf("failed to sign: %w", err)
+}
 
 // Save partial signature to file
 SavePartialSigToFile("sign_partialsig.json", partialSig)
@@ -165,13 +205,13 @@ SavePartialSigToFile("sign_partialsig.json", partialSig)
 keygenNonce := LoadNonceFromFile("keygen_nonce.json")
 signNonce := LoadNonceFromFile("sign_nonce.json")
 
-// Create context (no private key needed for aggregation)
-// Use dummy context or low-level API
+// Bundle all individual nonces (Watch wallet acts as coordinator)
+// DO NOT aggregate nonces - each signer needs to register individual nonces
 allNonces := [][66]byte{keygenNonce, signNonce}
-combinedNonce, _ := musig2.AggregateNonces(allNonces)
 
-// Save combined nonce (transfer to offline wallets for Round 2)
-SaveNonceToFile("aggregated_nonces.json", combinedNonce)
+// Save the bundle of individual nonces for transfer to offline wallets
+// Each offline wallet will register all other signers' individual nonces
+SaveAllNoncesToFile("all_nonces.json", allNonces)
 
 // Round 2: Aggregate partial signatures
 keygenPartialSig := LoadPartialSigFromFile("keygen_partialsig.json")

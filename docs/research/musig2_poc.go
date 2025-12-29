@@ -47,12 +47,12 @@ func main() {
 		musig2.WithKnownSigners([]*btcec.PublicKey{keygenPubKey, signPubKey}),
 	)
 	if err != nil {
-		panic(fmt.Sprintf("failed to create keygen context: %v", err))
+		panic(fmt.Errorf("failed to create keygen context: %w", err))
 	}
 
 	keygenSession, err := keygenCtx.NewSession()
 	if err != nil {
-		panic(fmt.Sprintf("failed to create keygen session: %v", err))
+		panic(fmt.Errorf("failed to create keygen session: %w", err))
 	}
 
 	keygenPubNonce := keygenSession.PublicNonce()
@@ -66,12 +66,12 @@ func main() {
 		musig2.WithKnownSigners([]*btcec.PublicKey{keygenPubKey, signPubKey}),
 	)
 	if err != nil {
-		panic(fmt.Sprintf("failed to create sign context: %v", err))
+		panic(fmt.Errorf("failed to create sign context: %w", err))
 	}
 
 	signSession, err := signCtx.NewSession()
 	if err != nil {
-		panic(fmt.Sprintf("failed to create sign session: %v", err))
+		panic(fmt.Errorf("failed to create sign session: %w", err))
 	}
 
 	signPubNonce := signSession.PublicNonce()
@@ -87,14 +87,14 @@ func main() {
 	// Keygen wallet registers Sign wallet's nonce
 	haveAllNonces, err := keygenSession.RegisterPubNonce(signPubNonce)
 	if err != nil {
-		panic(fmt.Sprintf("failed to register sign nonce in keygen: %v", err))
+		panic(fmt.Errorf("failed to register sign nonce in keygen: %w", err))
 	}
 	fmt.Printf("Keygen has all nonces: %v\n", haveAllNonces)
 
 	// Sign wallet registers Keygen wallet's nonce
 	haveAllNonces, err = signSession.RegisterPubNonce(keygenPubNonce)
 	if err != nil {
-		panic(fmt.Sprintf("failed to register keygen nonce in sign: %v", err))
+		panic(fmt.Errorf("failed to register keygen nonce in sign: %w", err))
 	}
 	fmt.Printf("Sign has all nonces: %v\n", haveAllNonces)
 	fmt.Println()
@@ -107,14 +107,14 @@ func main() {
 	// Keygen wallet creates partial signature
 	keygenPartialSig, err := keygenSession.Sign(message)
 	if err != nil {
-		panic(fmt.Sprintf("failed to create keygen partial signature: %v", err))
+		panic(fmt.Errorf("failed to create keygen partial signature: %w", err))
 	}
 	fmt.Printf("Keygen Partial Signature: S=%x\n", keygenPartialSig.S.Bytes())
 
 	// Sign wallet creates partial signature
 	signPartialSig, err := signSession.Sign(message)
 	if err != nil {
-		panic(fmt.Sprintf("failed to create sign partial signature: %v", err))
+		panic(fmt.Errorf("failed to create sign partial signature: %w", err))
 	}
 	fmt.Printf("Sign Partial Signature:   S=%x\n", signPartialSig.S.Bytes())
 	fmt.Println()
@@ -127,7 +127,7 @@ func main() {
 	// Keygen wallet combines signatures (could be done on any wallet or watch wallet)
 	haveAllSigs, err := keygenSession.CombineSig(signPartialSig)
 	if err != nil {
-		panic(fmt.Sprintf("failed to combine signature: %v", err))
+		panic(fmt.Errorf("failed to combine signature: %w", err))
 	}
 	if !haveAllSigs {
 		panic("not all signatures received")
@@ -150,7 +150,7 @@ func main() {
 	// Get aggregated public key
 	aggregatedKey, err := keygenCtx.CombinedKey()
 	if err != nil {
-		panic(fmt.Sprintf("failed to get combined key: %v", err))
+		panic(fmt.Errorf("failed to get combined key: %w", err))
 	}
 
 	// Verify the aggregated signature
@@ -194,7 +194,7 @@ func main() {
 func generateKeyPair() (*btcec.PrivateKey, *btcec.PublicKey) {
 	privKey, err := btcec.NewPrivateKey()
 	if err != nil {
-		panic(fmt.Sprintf("failed to generate key pair: %v", err))
+		panic(fmt.Errorf("failed to generate key pair: %w", err))
 	}
 	return privKey, privKey.PubKey()
 }
