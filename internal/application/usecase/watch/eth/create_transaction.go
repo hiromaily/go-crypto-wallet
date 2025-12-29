@@ -15,6 +15,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/eth"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/ethtx"
 	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -424,7 +425,7 @@ func (u *createTransactionUseCase) createUserPayment() ([]userPayment, *big.Int,
 
 func (u *createTransactionUseCase) validateAmount(
 	ctx context.Context,
-	senderAddr *models.Address,
+	senderAddr *sqlc.Address,
 	totalAmount *big.Int,
 ) error {
 	// check sender's total balance
@@ -443,7 +444,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	userPayments []userPayment,
-	senderAddr *models.Address,
+	senderAddr *sqlc.Address,
 ) ([]string, []*models.EthDetailTX, error) {
 	serializedTxs := make([]string, 0, len(userPayments))
 	txDetailItems := make([]*models.EthDetailTX, 0, len(userPayments))

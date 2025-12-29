@@ -70,10 +70,10 @@ type AuthAccountKeyRepositorier interface {
 
 // AddressRepositorier is AddressRepository interface
 type AddressRepositorier interface {
-	GetAll(accountType domainAccount.AccountType) ([]*models.Address, error)
+	GetAll(accountType domainAccount.AccountType) ([]*sqlc.Address, error)
 	GetAllAddress(accountType domainAccount.AccountType) ([]string, error)
-	GetOneUnAllocated(accountType domainAccount.AccountType) (*models.Address, error)
-	InsertBulk(items []*models.Address) error
+	GetOneUnAllocated(accountType domainAccount.AccountType) (*sqlc.Address, error)
+	InsertBulk(ctx context.Context, items []*sqlc.Address) error
 	UpdateIsAllocated(isAllocated bool, Address string) (int64, error)
 }
 

@@ -15,6 +15,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -462,7 +463,7 @@ func (u *createTransactionUseCase) createUserPayment() ([]userPayment, float64, 
 // validateAmount validates that sender has sufficient balance
 func (u *createTransactionUseCase) validateAmount(
 	ctx context.Context,
-	senderAddr *models.Address,
+	senderAddr *sqlc.Address,
 	totalAmount float64,
 ) error {
 	senderBalance, err := u.rippler.GetBalance(ctx, senderAddr.WalletAddress)
@@ -481,7 +482,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	userPayments []userPayment,
-	senderAddr *models.Address,
+	senderAddr *sqlc.Address,
 ) ([]string, []*models.XRPDetailTX) {
 	serializedTxs := make([]string, 0, len(userPayments))
 	txDetailItems := make([]*models.XRPDetailTX, 0, len(userPayments))
