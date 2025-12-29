@@ -10,7 +10,7 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
@@ -55,7 +55,7 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 		return fmt.Errorf("failed to import addresses from file: %w", err)
 	}
 
-	pubKeyData := make([]*models.Address, 0, len(pubKeys))
+	pubKeyData := make([]*sqlc.Address, 0, len(pubKeys))
 	for _, key := range pubKeys {
 		// Parse CSV line
 		inner := strings.Split(key, ",")
@@ -85,9 +85,9 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 		}
 
 		// Add to batch for database insertion
-		pubKeyData = append(pubKeyData, &models.Address{
-			Coin:          u.coinTypeCode.String(),
-			Account:       addrFmt.AccountType.String(),
+		pubKeyData = append(pubKeyData, &sqlc.Address{
+			Coin:          sqlc.AddressCoin(u.coinTypeCode.String()),
+			Account:       sqlc.AddressAccount(addrFmt.AccountType.String()),
 			WalletAddress: targetAddr,
 		})
 

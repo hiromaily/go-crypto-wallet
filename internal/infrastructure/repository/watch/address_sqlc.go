@@ -10,7 +10,6 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 )
 
@@ -31,7 +30,7 @@ func NewAddressRepositorySqlc(
 }
 
 // GetAll returns all records by account
-func (r *AddressRepositorySqlc) GetAll(accountType domainAccount.AccountType) ([]*models.Address, error) {
+func (r *AddressRepositorySqlc) GetAll(accountType domainAccount.AccountType) ([]*sqlc.Address, error) {
 	ctx := context.Background()
 
 	addresses, err := r.queries.GetAllAddresses(ctx, sqlc.GetAllAddressesParams{
@@ -42,10 +41,9 @@ func (r *AddressRepositorySqlc) GetAll(accountType domainAccount.AccountType) ([
 		return nil, fmt.Errorf("failed to call GetAllAddresses(): %w", err)
 	}
 
-	// Convert sqlc types to sqlboiler types for backward compatibility
-	result := make([]*models.Address, len(addresses))
-	for i, addr := range addresses {
-		result[i] = convertSqlcAddressToModel(&addr)
+	result := make([]*sqlc.Address, len(addresses))
+	for i := range addresses {
+		result[i] = &addresses[i]
 	}
 
 	return result, nil
@@ -67,7 +65,7 @@ func (r *AddressRepositorySqlc) GetAllAddress(accountType domainAccount.AccountT
 }
 
 // GetOneUnAllocated returns one records by is_allocated=false
-func (r *AddressRepositorySqlc) GetOneUnAllocated(accountType domainAccount.AccountType) (*models.Address, error) {
+func (r *AddressRepositorySqlc) GetOneUnAllocated(accountType domainAccount.AccountType) (*sqlc.Address, error) {
 	ctx := context.Background()
 
 	addr, err := r.queries.GetOneUnallocatedAddress(ctx, sqlc.GetOneUnallocatedAddressParams{
@@ -78,20 +76,20 @@ func (r *AddressRepositorySqlc) GetOneUnAllocated(accountType domainAccount.Acco
 		return nil, fmt.Errorf("failed to call GetOneUnallocatedAddress(): %w", err)
 	}
 
-	return convertSqlcAddressToModel(&addr), nil
+	return &addr, nil
 }
 
 // InsertBulk inserts multiple records
-func (r *AddressRepositorySqlc) InsertBulk(items []*models.Address) error {
+func (r *AddressRepositorySqlc) InsertBulk(items []*sqlc.Address) error {
 	ctx := context.Background()
 
 	for _, item := range items {
 		_, err := r.queries.InsertAddress(ctx, sqlc.InsertAddressParams{
-			Coin:          sqlc.AddressCoin(item.Coin),
-			Account:       sqlc.AddressAccount(item.Account),
+			Coin:          item.Coin,
+			Account:       item.Account,
 			WalletAddress: item.WalletAddress,
 			IsAllocated:   item.IsAllocated,
-			UpdatedAt:     convertNullTimeToSQLNullTime(item.UpdatedAt),
+			UpdatedAt:     item.UpdatedAt,
 		})
 		if err != nil {
 			return fmt.Errorf("failed to call InsertAddress(): %w", err)
@@ -123,18 +121,9 @@ func (r *AddressRepositorySqlc) UpdateIsAllocated(isAllocated bool, address stri
 	return rowsAffected, nil
 }
 
-// Helper functions for type conversion
-
-func convertSqlcAddressToModel(addr *sqlc.Address) *models.Address {
-	return &models.Address{
-		ID:            addr.ID,
-		Coin:          string(addr.Coin),
-		Account:       string(addr.Account),
-		WalletAddress: addr.WalletAddress,
-		IsAllocated:   addr.IsAllocated,
-		UpdatedAt:     convertSQLNullTimeToNullTime(addr.UpdatedAt),
-	}
-}
+// Helper functions for null.Time <-> sql.NullTime conversion
+// These are shared utilities used by other repository files in this package
+// TODO: Remove these when all repositories are migrated to SQLC models
 
 func convertSQLNullTimeToNullTime(t sql.NullTime) null.Time {
 	if !t.Valid {
