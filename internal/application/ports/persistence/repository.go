@@ -9,6 +9,7 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
@@ -41,9 +42,9 @@ type AccountKeyRepositorier interface {
 type XRPAccountKeyRepositorier interface {
 	GetAllAddrStatus(
 		accountType domainAccount.AccountType, addrStatus address.AddrStatus,
-	) ([]*models.XRPAccountKey, error)
+	) ([]*sqlc.XrpAccountKey, error)
 	GetSecret(accountType domainAccount.AccountType, addr string) (string, error)
-	InsertBulk(items []*models.XRPAccountKey) error
+	InsertBulk(items []*sqlc.XrpAccountKey) error
 	UpdateAddrStatus(
 		accountType domainAccount.AccountType, addrStatus address.AddrStatus, strWIFs []string,
 	) (int64, error)
