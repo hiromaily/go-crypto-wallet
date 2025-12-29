@@ -7,7 +7,7 @@ import (
 
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/fullpubkey"
@@ -44,7 +44,7 @@ func (u *importFullPubkeyUseCase) Import(
 	}
 
 	// Insert full pubKey into auth_fullpubkey_table
-	fullPubKeys := make([]*models.AuthFullpubkey, len(pubKeys))
+	fullPubKeys := make([]*sqlc.AuthFullpubkey, len(pubKeys))
 	for i, key := range pubKeys {
 		inner := strings.Split(key, ",")
 
@@ -53,8 +53,8 @@ func (u *importFullPubkeyUseCase) Import(
 			return err
 		}
 
-		fullPubKeys[i] = &models.AuthFullpubkey{
-			Coin:          fpk.CoinTypeCode.String(),
+		fullPubKeys[i] = &sqlc.AuthFullpubkey{
+			Coin:          sqlc.AuthFullpubkeyCoin(fpk.CoinTypeCode.String()),
 			AuthAccount:   fpk.AuthType.String(),
 			FullPublicKey: fpk.FullPubKey,
 		}
