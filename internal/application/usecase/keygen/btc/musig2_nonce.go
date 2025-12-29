@@ -2,6 +2,7 @@ package btc
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcec/v2"
@@ -53,9 +54,9 @@ func (u *generateMuSig2NonceUseCase) Generate(
 
 	// Placeholder: Create a dummy private key for demonstration
 	// In real implementation, this would come from the account key repository
-	privKeyBytes := make([]byte, 32)
-	copy(privKeyBytes, []byte(input.SignerID)) // Simplified for demo
-	privKey, _ := btcec.PrivKeyFromBytes(privKeyBytes)
+	// Using SHA256 to create a deterministic, full-length key for the placeholder.
+	privKeyBytes := sha256.Sum256([]byte(input.SignerID))
+	privKey, _ := btcec.PrivKeyFromBytes(privKeyBytes[:])
 
 	// Placeholder: For demo, we'll use just this signer's public key
 	// In real implementation, we need all signers' public keys

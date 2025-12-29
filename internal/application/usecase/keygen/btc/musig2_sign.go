@@ -2,6 +2,7 @@ package btc
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcec/v2"
@@ -39,6 +40,12 @@ func NewMuSig2SignUseCase(
 //
 // SECURITY: After creating the partial signature, the nonce MUST be marked as used
 // to prevent accidental reuse, which would leak the private key.
+//
+// KNOWN ISSUE: This implementation creates a NEW session in Round 2, which generates
+// a different secret nonce than what was stored in Round 1. This will result in INVALID
+// signatures. The session object from Round 1 must be reused in Round 2 for valid signing.
+// This requires session state persistence, which is not yet implemented.
+// See: https://github.com/hiromaily/go-crypto-wallet/issues/136#issuecomment
 func (u *muSig2SignUseCase) Sign(
 	ctx context.Context,
 	input keygenusecase.MuSig2SignInput,
@@ -69,9 +76,9 @@ func (u *muSig2SignUseCase) Sign(
 	// For now, this is a simplified implementation
 
 	// Placeholder: Create a dummy private key for demonstration
-	privKeyBytes := make([]byte, 32)
-	copy(privKeyBytes, []byte(input.SignerID))
-	privKey, _ := btcec.PrivKeyFromBytes(privKeyBytes)
+	// Using SHA256 to create a deterministic, full-length key for the placeholder.
+	privKeyBytes := sha256.Sum256([]byte(input.SignerID))
+	privKey, _ := btcec.PrivKeyFromBytes(privKeyBytes[:])
 
 	// Placeholder: For demo, we'll use just this signer's public key
 	allPubKeys := []*btcec.PublicKey{privKey.PubKey(), privKey.PubKey()}
