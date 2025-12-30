@@ -385,11 +385,11 @@ Privacy: Maximum (indistinguishable from single-sig)
 
 ---
 
-### Workflow 2: Deposit Transaction with MuSig2 (Single-Signature)
+### Workflow 2: Deposit Transaction (Single-Signature Taproot Spend)
 
-**Scenario**: Receiving funds from users (client → deposit account)
+**Scenario**: Receiving funds from users (client → deposit account) using a single-signature Taproot address.
 
-For deposit transactions using single-signature MuSig2 addresses:
+For deposit transactions using single-signature Taproot addresses:
 
 #### Step 1: Create Unsigned Transaction
 
@@ -442,30 +442,30 @@ data/tx/btc/
 
 ```
 data/tx/btc/
-├── payment_15_unsigned_0_*.psbt     # Receives from Watch
-├── payment_15_unsigned_0_*.psbt     # Creates after nonce gen
-├── payment_15_nonce_0_*.psbt        # Receives from Sign wallets
-└── payment_15_unsigned_1_*.psbt     # Creates after signing
+├── payment_15_unsigned_0_...0.psbt     # Receives from Watch
+├── payment_15_unsigned_0_...1.psbt     # Creates after nonce gen
+├── payment_15_nonce_0_*.psbt           # Receives from Sign wallets
+└── payment_15_unsigned_1_*.psbt        # Creates after signing
 ```
 
 #### Sign Wallet 1
 
 ```
 data/tx/btc/
-├── payment_15_unsigned_0_*.psbt     # Receives from Keygen
-├── payment_15_unsigned_0_*.psbt     # Creates after nonce gen
-├── payment_15_unsigned_1_*.psbt     # Receives from Keygen
-└── payment_15_unsigned_2_*.psbt     # Creates after signing
+├── payment_15_unsigned_0_...1.psbt     # Receives from Keygen
+├── payment_15_unsigned_0_...2.psbt     # Creates after nonce gen
+├── payment_15_unsigned_1_*.psbt        # Receives from Keygen
+└── payment_15_unsigned_2_*.psbt        # Creates after signing
 ```
 
 #### Sign Wallet 2
 
 ```
 data/tx/btc/
-├── payment_15_unsigned_0_*.psbt     # Receives from Sign 1
-├── payment_15_unsigned_0_*.psbt     # Creates after nonce gen
-├── payment_15_unsigned_2_*.psbt     # Receives from Sign 1
-└── payment_15_unsigned_3_*.psbt     # Creates after signing
+├── payment_15_unsigned_0_...2.psbt     # Receives from Sign 1
+├── payment_15_unsigned_0_...3.psbt     # Creates after nonce gen
+├── payment_15_unsigned_2_*.psbt        # Receives from Sign 1
+└── payment_15_unsigned_3_*.psbt        # Creates after signing
 ```
 
 ### File Transfer Best Practices
