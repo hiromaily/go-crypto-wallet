@@ -4,6 +4,7 @@ package integration_test
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -11,7 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/di"
 )
 
@@ -94,9 +94,11 @@ func TestMuSig2ParallelNonceGeneration(t *testing.T) {
 	}
 
 	// Verify all nonces are unique (no two signers generated same nonce)
-	assert.NotEqual(t, nonces[0], nonces[1], "Nonce 0 and 1 should be different")
-	assert.NotEqual(t, nonces[1], nonces[2], "Nonce 1 and 2 should be different")
-	assert.NotEqual(t, nonces[0], nonces[2], "Nonce 0 and 2 should be different")
+	for i := 0; i < len(nonces); i++ {
+		for j := i + 1; j < len(nonces); j++ {
+			assert.NotEqual(t, nonces[i], nonces[j], "Nonce %d and %d should be different", i, j)
+		}
+	}
 
 	// Verify nonces have correct format (66 bytes for MuSig2)
 	for i, nonce := range nonces {
@@ -142,14 +144,14 @@ func TestMuSig2NonceIndependence(t *testing.T) {
 		// TODO: Implement actual nonce generation
 		// keygenNonces[i], err = keygenNonceUseCase.Generate(ctx, psbt)
 		// require.NoError(t, err, "Iteration %d: keygen nonce generation failed", i)
-		keygenNonces[i] = append([]byte("keygen_"), []byte{byte(i)}...) // Placeholder with variation
+		keygenNonces[i] = []byte(fmt.Sprintf("keygen_nonce_%-53d", i)) // Placeholder with variation
 
 		// Generate nonce from sign1 wallet
 		sign1NonceUseCase := sign1.NewSignGenerateMuSig2NonceUseCase()
 		// TODO: Implement actual nonce generation
 		// sign1Nonces[i], err = sign1NonceUseCase.Generate(ctx, psbt)
 		// require.NoError(t, err, "Iteration %d: sign1 nonce generation failed", i)
-		sign1Nonces[i] = append([]byte("sign1_"), []byte{byte(i)}...) // Placeholder with variation
+		sign1Nonces[i] = []byte(fmt.Sprintf("sign1_nonce__%-53d", i)) // Placeholder with variation
 	}
 
 	// Verify all keygen nonces are unique
@@ -229,11 +231,14 @@ func TestMuSig2NonceCollectionValidation(t *testing.T) {
 		// Verify collection is complete
 		require.Len(t, nonces, 3, "Should have collected 3 nonces")
 
-		// Verify all nonces are valid
+		// Verify all nonces are valid and unique
+		nonceSet := make(map[string]struct{})
 		for i, nonce := range nonces {
 			assert.NotNil(t, nonce, "Nonce %d should not be nil", i)
 			assert.Len(t, nonce, 66, "Nonce %d should be 66 bytes", i)
+			nonceSet[string(nonce)] = struct{}{}
 		}
+		assert.Len(t, nonceSet, len(nonces), "All collected nonces should be unique")
 
 		t.Log("✓ Valid nonce collection successful")
 	})
@@ -449,8 +454,8 @@ func TestMuSig2NonceRaceConditions(t *testing.T) {
 	t.Logf("Generated %d unique nonces from %d total operations", actualNonces, expectedNonces)
 
 	// In actual implementation, all nonces should be unique
-	// For now, just verify no obvious race conditions
-	assert.Greater(t, actualNonces, 0, "Should have generated nonces")
+	// Verify each operation generated a unique nonce
+	assert.Equal(t, expectedNonces, actualNonces, "Should have generated a unique nonce for each operation")
 
 	t.Log("✓ No race conditions detected (run with -race flag to verify)")
 }
