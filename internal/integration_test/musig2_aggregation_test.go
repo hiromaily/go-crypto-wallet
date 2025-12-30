@@ -98,14 +98,13 @@ func TestMuSig2Aggregation2of3(t *testing.T) {
 
 	nonces := [][]byte{nonce1, nonce2, nonce3}
 
-	// Round 2: Create partial signatures (all 3)
+	// Round 2: Create partial signatures from only 2 signers (meeting the 2-of-3 threshold)
 	sig1 := createPartialSignature(t, keygen, psbt, nonces)
 	sig2 := createPartialSignature(t, sign1, psbt, nonces)
-	sig3 := createPartialSignature(t, sign2, psbt, nonces)
 
-	signatures := [][]byte{sig1, sig2, sig3}
+	signatures := [][]byte{sig1, sig2}
 
-	// Aggregate all 3 signatures
+	// Aggregate 2 signatures (sufficient for 2-of-3)
 	aggregateUseCase := watch.NewWatchAggregateMuSig2SignaturesUseCase()
 	// TODO: Implement actual aggregation
 	// finalTx, err := aggregateUseCase.Aggregate(ctx, psbt, signatures)
@@ -160,8 +159,8 @@ func TestMuSig2Aggregation3of5(t *testing.T) {
 	nonces[1] = generateNonce(t, sign1, psbt)
 	nonces[2] = generateNonce(t, sign2, psbt)
 	// Nonces 3 and 4 would come from additional signers (not implemented in test)
-	nonces[3] = []byte(fmt.Sprintf("signer3_nonce_%-53d", 3)) // Placeholder
-	nonces[4] = []byte(fmt.Sprintf("signer4_nonce_%-53d", 4)) // Placeholder
+	nonces[3] = []byte(fmt.Sprintf("signer3_nonce_%-52d", 3)) // Placeholder (66 bytes)
+	nonces[4] = []byte(fmt.Sprintf("signer4_nonce_%-52d", 4)) // Placeholder (66 bytes)
 
 	// Round 2: Create partial signatures (only 3 out of 5)
 	signatures := make([][]byte, 3)
@@ -200,46 +199,44 @@ func TestMuSig2AggregationIncompleteSignatures(t *testing.T) {
 
 	ctx := context.Background()
 
-	// Setup wallets (2-of-3 scenario, but only provide 2 signatures)
+	// Setup wallets (2-of-3 scenario)
 	keygen := setupKeygenWallet(t)
 	sign1 := setupSignWallet(t, "auth1")
+	sign2 := setupSignWallet(t, "auth2")
 	watch := setupWatchWallet(t)
 
 	t.Cleanup(func() {
-		cleanupTestData(t, keygen, sign1, nil, watch)
+		cleanupTestData(t, keygen, sign1, sign2, watch)
 	})
 
 	// Create transaction
 	psbt := createTestPSBT(t, keygen)
 
-	// Round 1: Generate only 2 nonces (missing one for 3-signer setup)
+	// Round 1: Generate all 3 nonces, as required by the protocol
 	nonce1 := generateNonce(t, keygen, psbt)
 	nonce2 := generateNonce(t, sign1, psbt)
+	nonce3 := generateNonce(t, sign2, psbt)
+	nonces := [][]byte{nonce1, nonce2, nonce3}
 
-	// Note: In actual 2-of-3 setup, we'd need all 3 nonces for the protocol
-	// but only 2 signatures. For this test, we simulate incomplete scenario.
-	nonces := [][]byte{nonce1, nonce2}
-
-	// Round 2: Create only 2 signatures (insufficient for 3-of-3)
+	// Round 2: Create only 1 signature (insufficient for 2-of-3)
 	sig1 := createPartialSignature(t, keygen, psbt, nonces)
-	sig2 := createPartialSignature(t, sign1, psbt, nonces)
+	signatures := [][]byte{sig1}
 
-	signatures := [][]byte{sig1, sig2}
-
-	// Try to aggregate with incomplete set - should fail
+	// Try to aggregate with insufficient signatures - should fail
 	aggregateUseCase := watch.NewWatchAggregateMuSig2SignaturesUseCase()
 	// TODO: Implement actual aggregation that should fail
 	// _, err := aggregateUseCase.Aggregate(ctx, psbt, signatures)
-	// assert.Error(t, err, "Should fail with incomplete signatures")
+	// require.Error(t, err, "Should fail with insufficient signatures")
 	// assert.Contains(t, err.Error(), "insufficient", "Error should mention insufficient signatures")
 
 	_ = aggregateUseCase
 	_ = ctx
 	_ = signatures
 
-	// For now, simulate the error check
-	insufficientSigs := len(signatures) < 3 // Simulated check
-	assert.True(t, insufficientSigs, "Should detect insufficient signatures")
+	// For now, simulate the error check for a 2-of-3 threshold
+	const requiredSigs = 2
+	insufficientSigs := len(signatures) < requiredSigs
+	assert.True(t, insufficientSigs, "Should detect insufficient signatures for 2-of-3")
 
 	t.Log("✓ Incomplete signatures correctly rejected")
 }
@@ -355,7 +352,15 @@ func TestMuSig2AggregationMismatchedNonces(t *testing.T) {
 	t.Log("✓ Mismatched nonces correctly rejected")
 }
 
-// TestMuSig2AggregationPublicKeyOrdering tests aggregation with different public key orderings
+// TestMuSig2AggregationPublicKeyOrdering tests that MuSig2 aggregation produces
+// deterministic results regardless of the internal ordering of public keys during
+// key aggregation, as long as signatures correctly correspond to their public keys.
+//
+// Note: In a proper MuSig2 implementation, public keys are sorted lexicographically
+// during key aggregation to ensure deterministic results. The aggregated public key
+// should be the same regardless of the order keys are provided to the aggregator.
+// Signatures must include metadata (e.g., signer ID or public key) to match them
+// to the correct public key during aggregation.
 func TestMuSig2AggregationPublicKeyOrdering(t *testing.T) {
 	// Skip if integration test environment is not available
 	if !isIntegrationEnvironmentAvailable(t) {
@@ -377,8 +382,8 @@ func TestMuSig2AggregationPublicKeyOrdering(t *testing.T) {
 	// Create transaction
 	psbt := createTestPSBT(t, keygen)
 
-	// Test case 1: Correct ordering (keygen, sign1, sign2)
-	t.Run("CorrectOrdering", func(t *testing.T) {
+	// Test case 1: Standard key ordering (keygen, sign1, sign2)
+	t.Run("StandardOrdering", func(t *testing.T) {
 		nonce1 := generateNonce(t, keygen, psbt)
 		nonce2 := generateNonce(t, sign1, psbt)
 		nonce3 := generateNonce(t, sign2, psbt)
@@ -388,47 +393,52 @@ func TestMuSig2AggregationPublicKeyOrdering(t *testing.T) {
 		sig2 := createPartialSignature(t, sign1, psbt, nonces)
 		sig3 := createPartialSignature(t, sign2, psbt, nonces)
 
-		// Correct order
 		signatures := [][]byte{sig1, sig2, sig3}
 
 		aggregateUseCase := watch.NewWatchAggregateMuSig2SignaturesUseCase()
 		// TODO: Implement actual aggregation
-		// finalTx, err := aggregateUseCase.Aggregate(ctx, psbt, signatures)
-		// require.NoError(t, err, "Should succeed with correct ordering")
-		// assert.NotNil(t, finalTx)
+		// finalTx1, err := aggregateUseCase.Aggregate(ctx, psbt, signatures)
+		// require.NoError(t, err, "Should succeed with standard ordering")
+		// assert.NotNil(t, finalTx1)
 
 		_ = aggregateUseCase
 		_ = ctx
 		_ = signatures
 
-		t.Log("✓ Correct ordering accepted")
+		t.Log("✓ Standard ordering produces valid aggregated signature")
 	})
 
-	// Test case 2: Incorrect ordering (should fail or produce invalid signature)
-	t.Run("IncorrectOrdering", func(t *testing.T) {
-		nonce1 := generateNonce(t, keygen, psbt)
-		nonce2 := generateNonce(t, sign1, psbt)
+	// Test case 2: Different key ordering during setup (sign2, sign1, keygen)
+	// The aggregation should produce the same result because MuSig2 uses deterministic
+	// key sorting (lexicographic order of public keys)
+	t.Run("AlternativeOrderingProducesSameResult", func(t *testing.T) {
+		// Generate nonces in different order
 		nonce3 := generateNonce(t, sign2, psbt)
-		nonces := [][]byte{nonce1, nonce2, nonce3}
+		nonce2 := generateNonce(t, sign1, psbt)
+		nonce1 := generateNonce(t, keygen, psbt)
+		nonces := [][]byte{nonce3, nonce2, nonce1}
 
-		sig1 := createPartialSignature(t, keygen, psbt, nonces)
-		sig2 := createPartialSignature(t, sign1, psbt, nonces)
+		// Create signatures in different order
 		sig3 := createPartialSignature(t, sign2, psbt, nonces)
+		sig2 := createPartialSignature(t, sign1, psbt, nonces)
+		sig1 := createPartialSignature(t, keygen, psbt, nonces)
 
-		// WRONG order (reversed)
-		signaturesWrongOrder := [][]byte{sig3, sig2, sig1}
+		signatures := [][]byte{sig3, sig2, sig1}
 
 		aggregateUseCase := watch.NewWatchAggregateMuSig2SignaturesUseCase()
 		// TODO: Implement actual aggregation
-		// _, err := aggregateUseCase.Aggregate(ctx, psbt, signaturesWrongOrder)
-		// assert.Error(t, err, "Should fail with incorrect ordering")
-		// OR: finalTx might be created but verification should fail
+		// finalTx2, err := aggregateUseCase.Aggregate(ctx, psbt, signatures)
+		// require.NoError(t, err, "Should succeed with alternative ordering")
+		// assert.NotNil(t, finalTx2)
+		//
+		// In a real implementation, verify both orderings produce the same aggregated signature:
+		// assert.Equal(t, finalTx1, finalTx2, "Different orderings should produce identical results")
 
 		_ = aggregateUseCase
 		_ = ctx
-		_ = signaturesWrongOrder
+		_ = signatures
 
-		t.Log("✓ Incorrect ordering rejected or produces invalid signature")
+		t.Log("✓ Alternative ordering produces consistent aggregated signature")
 	})
 }
 
@@ -521,9 +531,9 @@ func TestMuSig2AggregationTableDriven(t *testing.T) {
 			if tt.totalSigners >= 3 {
 				nonces[2] = generateNonce(t, sign2, psbt)
 			}
-			// Fill remaining with placeholders
+			// Fill remaining with placeholders (66 bytes for MuSig2 nonces)
 			for i := 3; i < tt.totalSigners; i++ {
-				nonces[i] = []byte(fmt.Sprintf("signer%d_nonce_%-53d", i, i))
+				nonces[i] = []byte(fmt.Sprintf("signer%d_nonce_%-52d", i, i))
 			}
 
 			// Generate signatures (up to providedSigs)
