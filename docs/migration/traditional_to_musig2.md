@@ -1772,8 +1772,9 @@ watch btc api testmempoolaccept '["<tx_hex>"]'
 SETUP_TIME=40        # hours (team time)
 HOURLY_RATE=100      # USD (team hourly cost)
 SWEEP_FEES=50000     # sats (estimated fees to sweep old UTXOs)
+BTC_PRICE_USD=40000  # Example BTC price in USD
 
-TOTAL_COST=$(echo "$SETUP_TIME * $HOURLY_RATE + $SWEEP_FEES / 100000000 * BTC_PRICE_USD" | bc)
+TOTAL_COST=$(echo "scale=2; $SETUP_TIME * $HOURLY_RATE + ($SWEEP_FEES / 100000000) * $BTC_PRICE_USD" | bc -l)
 
 # Monthly savings:
 TX_PER_MONTH=100
@@ -1781,10 +1782,14 @@ FEE_RATE=50          # sat/vB
 P2WSH_SIZE=385       # bytes
 MUSIG2_SIZE=225      # bytes
 SAVINGS_PER_TX=$(echo "($P2WSH_SIZE - $MUSIG2_SIZE) * $FEE_RATE" | bc)
-MONTHLY_SAVINGS=$(echo "$SAVINGS_PER_TX * $TX_PER_MONTH / 100000000 * BTC_PRICE_USD" | bc)
+MONTHLY_SAVINGS=$(echo "scale=2; ($SAVINGS_PER_TX * $TX_PER_MONTH / 100000000) * $BTC_PRICE_USD" | bc -l)
 
 # Break-even time:
-BREAK_EVEN_MONTHS=$(echo "$TOTAL_COST / $MONTHLY_SAVINGS" | bc)
+if [ "$(echo "$MONTHLY_SAVINGS > 0" | bc -l)" -eq 1 ]; then
+    BREAK_EVEN_MONTHS=$(echo "scale=2; $TOTAL_COST / $MONTHLY_SAVINGS" | bc -l)
+else
+    BREAK_EVEN_MONTHS="N/A"
+fi
 
 echo "Break-even in $BREAK_EVEN_MONTHS months"
 

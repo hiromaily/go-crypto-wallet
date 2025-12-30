@@ -904,22 +904,22 @@ Result varies:
 **Prevention**:
 1. Strict file naming convention:
    ```
-   payment_{request_id}_unsigned_{step}_{timestamp}.psbt
+   payment_{request_id}_{stage}_{step}_{timestamp}.psbt
 
    Example:
-   payment_15_unsigned_0_1704067200.psbt   (initial PSBT)
-   payment_15_unsigned_0_1704067201.psbt   (after keygen nonce)
-   payment_15_unsigned_0_1704067202.psbt   (after sign1 nonce)
-   payment_15_nonce_0_1704067203.psbt      (all nonces collected)
-   payment_15_unsigned_0_1704067204.psbt   (after keygen signature)
-   payment_15_unsigned_1_1704067205.psbt   (after sign1 signature)
-   payment_15_unsigned_2_1704067206.psbt   (after sign2 signature)
-   payment_15_signed_3_1704067207.psbt     (final, ready to broadcast)
+   payment_15_unsigned_0_{timestamp}.psbt   (initial PSBT)
+   payment_15_nonce_1_{timestamp}.psbt      (after keygen nonce)
+   payment_15_nonce_2_{timestamp}.psbt      (after sign1 nonce)
+   payment_15_nonce_3_{timestamp}.psbt      (all nonces collected)
+   payment_15_signed_1_{timestamp}.psbt     (after keygen signature)
+   payment_15_signed_2_{timestamp}.psbt     (after sign1 signature)
+   payment_15_signed_3_{timestamp}.psbt     (all partial signatures)
+   payment_15_final_{timestamp}.psbt        (final, ready to broadcast)
    ```
 
 2. File checksums (detect corruption)
    ```bash
-   sha256sum payment_15_unsigned_0.psbt > payment_15_unsigned_0.psbt.sha256
+   sha256sum payment_15_unsigned_0_1704067200.psbt > payment_15_unsigned_0_1704067200.psbt.sha256
    ```
 
 3. Automated file management (scripts handle naming)
@@ -1030,15 +1030,19 @@ sign import-keys --input keys_v5.json --verify
 Fields:
 - tx_type: "payment", "deposit", "sweep", etc.
 - request_id: Numeric ID from database
-- stage: "unsigned", "nonce", "signed"
+- stage: "unsigned", "nonce", "signed", "final"
 - step: Numeric counter (0, 1, 2, 3)
 - timestamp: Unix timestamp (for uniqueness)
 
 Examples:
 payment_42_unsigned_0_1704067200.psbt    # Initial unsigned PSBT
-payment_42_unsigned_0_1704067201.psbt    # After keygen adds nonce
-payment_42_nonce_0_1704067205.psbt       # All nonces collected
-payment_42_signed_3_1704067230.psbt      # Final signed PSBT
+payment_42_nonce_1_1704067201.psbt       # After keygen adds nonce
+payment_42_nonce_2_1704067202.psbt       # After sign1 adds nonce
+payment_42_nonce_3_1704067203.psbt       # All nonces collected
+payment_42_signed_1_1704067204.psbt      # After keygen signature
+payment_42_signed_2_1704067205.psbt      # After sign1 signature
+payment_42_signed_3_1704067206.psbt      # All partial signatures
+payment_42_final_1704067230.psbt         # Final signed PSBT
 ```
 
 **File Organization**:
@@ -1047,10 +1051,14 @@ payment_42_signed_3_1704067230.psbt      # Final signed PSBT
 data/tx/btc/
 ├── pending/              # Active transactions being signed
 │   ├── payment_42_unsigned_0_1704067200.psbt
-│   ├── payment_42_unsigned_0_1704067201.psbt
-│   └── ...
+│   ├── payment_42_nonce_1_1704067201.psbt
+│   ├── payment_42_nonce_2_1704067202.psbt
+│   ├── payment_42_nonce_3_1704067203.psbt
+│   ├── payment_42_signed_1_1704067204.psbt
+│   ├── payment_42_signed_2_1704067205.psbt
+│   └── payment_42_signed_3_1704067206.psbt
 ├── completed/            # Successfully broadcast transactions
-│   └── payment_42_signed_3_1704067230.psbt
+│   └── payment_42_final_1704067230.psbt
 └── failed/               # Failed transactions (for investigation)
     └── payment_15_failed_reason.txt
 ```
