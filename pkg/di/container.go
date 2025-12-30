@@ -9,6 +9,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/mysql"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/serializer"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
 
@@ -18,6 +19,7 @@ type PkgContainer interface {
 	NewMySQLClient() *sql.DB
 	NewLogger() logger.Logger
 	NewGRPCClient() *grpc.ClientConn
+	NewSerializer() serializer.Serializer
 }
 
 var _ PkgContainer = (*pkgContainer)(nil)
@@ -35,6 +37,8 @@ type pkgContainer struct {
 	mysqlClient *sql.DB
 	// grpc
 	grpcConn *grpc.ClientConn
+	// serial
+	serializer serializer.Serializer
 }
 
 // NewPkgContainer creates a new package container with pkg/ components
@@ -90,4 +94,13 @@ func (c *pkgContainer) NewGRPCClient() *grpc.ClientConn {
 		c.grpcConn = grpcConn
 	}
 	return c.grpcConn
+}
+
+// NewSerializer creates a new serializer
+// Default is gob serializer for backward compatibility
+func (c *pkgContainer) NewSerializer() serializer.Serializer {
+	if c.serializer == nil {
+		c.serializer = serializer.NewGobSerializer()
+	}
+	return c.serializer
 }

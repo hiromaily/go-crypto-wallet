@@ -11,7 +11,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/eth"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/ethtx"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
-	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
+	"github.com/hiromaily/go-crypto-wallet/pkg/serializer"
 )
 
 type signTransactionUseCase struct {
@@ -53,7 +53,7 @@ func (u *signTransactionUseCase) Sign(
 	txHexs := make([]string, 0, len(serializedTxs))
 	for _, serializedTx := range serializedTxs {
 		var rawTx ethtx.RawTx
-		if err = serial.DecodeFromString(serializedTx, &rawTx); err != nil {
+		if err = serializer.GetDefaultSerializer().DecodeFromString(serializedTx, &rawTx); err != nil {
 			return keygenusecase.SignTransactionOutput{}, fmt.Errorf("fail to call serial.DecodeFromString(): %w", err)
 		}
 

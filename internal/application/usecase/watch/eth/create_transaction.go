@@ -19,7 +19,7 @@ import (
 	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
-	"github.com/hiromaily/go-crypto-wallet/pkg/serial"
+	"github.com/hiromaily/go-crypto-wallet/pkg/serializer"
 )
 
 type createTransactionUseCase struct {
@@ -262,7 +262,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	rawTxHex := rawTx.TxHex
 	logger.Debug("rawTxHex", "rawTxHex", rawTxHex)
 
-	serializedTx, err := serial.EncodeToString(rawTx)
+	serializedTx, err := serializer.GetDefaultSerializer().EncodeToString(rawTx)
 	if err != nil {
 		return "", fmt.Errorf("fail to call serial.EncodeToString(rawTx): %w", err)
 	}
@@ -363,7 +363,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 		logger.Debug("rawTxHex", "rawTxHex", rawTxHex)
 
 		var serializedTx string
-		serializedTx, err = serial.EncodeToString(rawTx)
+		serializedTx, err = serializer.GetDefaultSerializer().EncodeToString(rawTx)
 		if err != nil {
 			return nil, nil, fmt.Errorf("fail to call serial.EncodeToString(rawTx): %w", err)
 		}
@@ -467,7 +467,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 		rawTxHex := rawTx.TxHex
 		logger.Debug("rawTxHex", "rawTxHex", rawTxHex)
 
-		serializedTx, err := serial.EncodeToString(rawTx)
+		serializedTx, err := serializer.GetDefaultSerializer().EncodeToString(rawTx)
 		if err != nil {
 			return nil, nil, fmt.Errorf("fail to call serial.EncodeToString(rawTx): %w", err)
 		}
