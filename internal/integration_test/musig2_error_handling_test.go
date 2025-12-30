@@ -13,6 +13,7 @@ import (
 
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
+	"github.com/hiromaily/go-crypto-wallet/internal/di"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 )
 
@@ -132,6 +133,14 @@ func TestMuSig2NonceReuse(t *testing.T) {
 		require.NoError(t, err, "Failed to create MuSig2 address")
 
 		// Create two different payment requests
+		// NOTE: createPaymentRequestUseCase requires 'client' account addresses to be
+		// present in the database. In actual implementation, these addresses should be
+		// created via ImportAddressUseCase or similar setup before creating payment requests.
+		// TODO: Add client address setup:
+		// importUseCase := watch.NewWatchImportAddressUseCase()
+		// err = importUseCase.Execute(ctx, watchusecase.ImportAddressInput{...})
+		// require.NoError(t, err, "Failed to import client addresses")
+
 		createPaymentUseCase := watch.NewWatchCreatePaymentRequestUseCase()
 
 		err = createPaymentUseCase.Execute(ctx, watchusecase.CreatePaymentRequestInput{
@@ -537,12 +546,12 @@ func TestMuSig2InvalidTransactionData(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		setupTest   func(t *testing.T)
+		setupTest   func(t *testing.T, expectedErr string)
 		expectedErr string
 	}{
 		{
 			name: "EmptyPSBT",
-			setupTest: func(t *testing.T) {
+			setupTest: func(t *testing.T, expectedErr string) {
 				// Try to generate nonce with empty PSBT
 				nonceUseCase := keygen.NewKeygenGenerateMuSig2NonceUseCase()
 
@@ -550,15 +559,16 @@ func TestMuSig2InvalidTransactionData(t *testing.T) {
 				// emptyPSBT := []byte{}
 				// _, err := nonceUseCase.Generate(ctx, emptyPSBT)
 				// assert.Error(t, err, "Should fail with empty PSBT")
-				// assert.Contains(t, err.Error(), "empty")
+				// assert.Contains(t, err.Error(), expectedErr)
 
 				_ = nonceUseCase
+				_ = expectedErr
 			},
 			expectedErr: "empty",
 		},
 		{
 			name: "CorruptedPSBT",
-			setupTest: func(t *testing.T) {
+			setupTest: func(t *testing.T, expectedErr string) {
 				// Create valid PSBT then corrupt it
 				psbt := createTestPSBT(t, keygen)
 				if len(psbt) > 10 {
@@ -570,15 +580,20 @@ func TestMuSig2InvalidTransactionData(t *testing.T) {
 				// TODO: Implement nonce generation with corrupted PSBT
 				// _, err := nonceUseCase.Generate(ctx, psbt)
 				// assert.Error(t, err, "Should fail with corrupted PSBT")
-				// assert.Contains(t, err.Error(), "invalid")
+				// assert.Contains(t, err.Error(), expectedErr)
 
 				_ = nonceUseCase
+				_ = expectedErr
 			},
 			expectedErr: "invalid",
 		},
 		{
 			name: "InvalidAmount",
-			setupTest: func(t *testing.T) {
+			setupTest: func(t *testing.T, expectedErr string) {
+				// NOTE: createPaymentRequestUseCase requires 'client' account addresses
+				// to be present in the database. See TestMuSig2NonceReuse for setup pattern.
+				// TODO: Add client address setup before creating payment request
+
 				// Try to create payment request with invalid amount
 				createPaymentUseCase := watch.NewWatchCreatePaymentRequestUseCase()
 				err := createPaymentUseCase.Execute(ctx, watchusecase.CreatePaymentRequestInput{
@@ -587,15 +602,20 @@ func TestMuSig2InvalidTransactionData(t *testing.T) {
 
 				// TODO: Verify validation catches zero amount
 				// assert.Error(t, err, "Should fail with zero amount")
-				// assert.Contains(t, err.Error(), "invalid amount")
+				// assert.Contains(t, err.Error(), expectedErr)
 
 				_ = err
+				_ = expectedErr
 			},
 			expectedErr: "invalid amount",
 		},
 		{
 			name: "NegativeAmount",
-			setupTest: func(t *testing.T) {
+			setupTest: func(t *testing.T, expectedErr string) {
+				// NOTE: createPaymentRequestUseCase requires 'client' account addresses
+				// to be present in the database. See TestMuSig2NonceReuse for setup pattern.
+				// TODO: Add client address setup before creating payment request
+
 				// Try to create payment request with negative amount
 				createPaymentUseCase := watch.NewWatchCreatePaymentRequestUseCase()
 				err := createPaymentUseCase.Execute(ctx, watchusecase.CreatePaymentRequestInput{
@@ -604,9 +624,10 @@ func TestMuSig2InvalidTransactionData(t *testing.T) {
 
 				// TODO: Verify validation catches negative amount
 				// assert.Error(t, err, "Should fail with negative amount")
-				// assert.Contains(t, err.Error(), "invalid amount")
+				// assert.Contains(t, err.Error(), expectedErr)
 
 				_ = err
+				_ = expectedErr
 			},
 			expectedErr: "invalid amount",
 		},
@@ -621,8 +642,8 @@ func TestMuSig2InvalidTransactionData(t *testing.T) {
 			})
 			require.NoError(t, err, "Failed to create MuSig2 address")
 
-			// Run test-specific setup
-			tt.setupTest(t)
+			// Run test-specific setup with expectedErr parameter
+			tt.setupTest(t, tt.expectedErr)
 
 			t.Logf("✓ %s validation (implementation pending)", tt.name)
 		})
@@ -639,10 +660,12 @@ func TestMuSig2ContextCancellation(t *testing.T) {
 
 	// Setup wallets
 	keygen := setupKeygenWallet(t)
+	sign1 := setupSignWallet(t, "auth1")
+	sign2 := setupSignWallet(t, "auth2")
 	watch := setupWatchWallet(t)
 
 	t.Cleanup(func() {
-		cleanupTestData(t, keygen, nil, nil, watch)
+		cleanupTestData(t, keygen, sign1, sign2, watch)
 	})
 
 	t.Run("CancelledContextDuringAddressCreation", func(t *testing.T) {
@@ -789,14 +812,14 @@ func TestMuSig2ContextCancellation(t *testing.T) {
 }
 
 // Helper function to generate all nonces (placeholder implementation)
-func generateAllNonces(ctx context.Context, keygen, sign1, sign2 interface{}, psbt []byte) ([][]byte, error) {
+func generateAllNonces(ctx context.Context, keygen, sign1, sign2 di.Container, psbt []byte) ([][]byte, error) {
 	// TODO: Implement actual nonce generation from all wallets
 	// This is a placeholder for when the actual implementation is ready
 	return nil, errors.New("not implemented")
 }
 
 // Helper function to generate all signatures (placeholder implementation)
-func generateAllSignatures(ctx context.Context, keygen, sign1, sign2 interface{}, psbt []byte, nonces [][]byte) ([][]byte, error) {
+func generateAllSignatures(ctx context.Context, keygen, sign1, sign2 di.Container, psbt []byte, nonces [][]byte) ([][]byte, error) {
 	// TODO: Implement actual signature generation from all wallets
 	// This is a placeholder for when the actual implementation is ready
 	return nil, errors.New("not implemented")
