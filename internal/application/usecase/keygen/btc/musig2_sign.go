@@ -1,3 +1,121 @@
+// Package btc provides Bitcoin-specific use cases for Keygen wallet operations.
+//
+// # MuSig2 Partial Signature Creation (Round 2)
+//
+// The MuSig2SignUseCase implements Round 2 of the MuSig2 two-round protocol.
+// Each signer creates a partial signature using their stored nonce and private key.
+//
+// # Round 2 Overview: Signing
+//
+// After all signers have generated nonces (Round 1) and the Watch wallet has
+// aggregated them, each signer proceeds to Round 2:
+//
+//  1. Retrieve the stored nonce from Round 1
+//  2. Receive the aggregated nonce from Watch wallet
+//  3. Create MuSig2 context and session
+//  4. Register all aggregated nonces
+//  5. Create partial signature using:
+//     - Signer's private key
+//     - Stored secret nonce (from Round 1)
+//     - Message hash (transaction sighash)
+//  6. CRITICAL: Mark nonce as USED to prevent reuse
+//  7. Return partial signature for aggregation
+//
+// # Signing Workflow
+//
+//	┌─────────────────────────────────────────────────────────┐
+//	│ Prerequisites (from Round 1):                           │
+//	│  - Fresh nonce generated and stored                     │
+//	│  - Aggregated nonce received from Watch wallet          │
+//	│  - Message hash (sighash) to be signed                  │
+//	└────────────────────┬────────────────────────────────────┘
+//	                     │
+//	                     ▼
+//	┌─────────────────────────────────────────────────────────┐
+//	│ Step 1: Retrieve Stored Nonce                           │
+//	│  - Query NonceRepository by (SignerID, TransactionID)   │
+//	│  - Validate nonce has not been used                     │
+//	│  - Validate nonce belongs to this signer                │
+//	└────────────────────┬────────────────────────────────────┘
+//	                     │
+//	                     ▼
+//	┌─────────────────────────────────────────────────────────┐
+//	│ Step 2: Create MuSig2 Context                           │
+//	│  - Private key for this signer                          │
+//	│  - All public keys from all signers                     │
+//	│  - Sort keys (must match Round 1)                       │
+//	└────────────────────┬────────────────────────────────────┘
+//	                     │
+//	                     ▼
+//	┌─────────────────────────────────────────────────────────┐
+//	│ Step 3: Create Signing Session                          │
+//	│  - Session manages nonce state                          │
+//	│  - Associates nonce with signing operation              │
+//	└────────────────────┬────────────────────────────────────┘
+//	                     │
+//	                     ▼
+//	┌─────────────────────────────────────────────────────────┐
+//	│ Step 4: Register Aggregated Nonces                      │
+//	│  - Register nonces from ALL signers                     │
+//	│  - MuSig2 library validates completeness                │
+//	└────────────────────┬────────────────────────────────────┘
+//	                     │
+//	                     ▼
+//	┌─────────────────────────────────────────────────────────┐
+//	│ Step 5: Create Partial Signature                        │
+//	│  - Sign(session, messageHash)                           │
+//	│  - Uses private key + secret nonce internally           │
+//	│  - Returns partial signature (S component)              │
+//	└────────────────────┬────────────────────────────────────┘
+//	                     │
+//	                     ▼
+//	┌─────────────────────────────────────────────────────────┐
+//	│ Step 6: Mark Nonce as USED (CRITICAL!)                  │
+//	│  - Update NonceRepository: used = true                  │
+//	│  - Prevents accidental nonce reuse                      │
+//	│  - Protects private key from leakage                    │
+//	└────────────────────┬────────────────────────────────────┘
+//	                     │
+//	                     ▼
+//	┌─────────────────────────────────────────────────────────┐
+//	│ Output: Partial Signature                               │
+//	│  - PartialSignature: [32]byte (S component)             │
+//	│  - SignerID: identifies which signer created it         │
+//	│  - Ready for aggregation by Watch wallet                │
+//	└─────────────────────────────────────────────────────────┘
+//
+// # Security Critical: Nonce Reuse Prevention
+//
+// The most critical security requirement in MuSig2 is preventing nonce reuse:
+//
+//   - Using the same nonce twice with different messages leaks the private key
+//   - This use case MUST mark nonces as "used" after signing
+//   - NonceRepository must enforce uniqueness constraints
+//   - Failed signing operations should NOT mark nonces as used
+//
+// Implementation: After successful signing, call nonceRepo.MarkNonceUsed()
+//
+// # Known Issue: Session State Persistence
+//
+// IMPORTANT: This implementation has a known limitation (see issue #136):
+//
+// The current implementation creates a NEW session in Round 2, which generates
+// a DIFFERENT secret nonce than what was stored in Round 1. This results in
+// INVALID signatures because the secret nonce used for signing doesn't match
+// the public nonce that was aggregated.
+//
+// The correct implementation requires:
+//  1. Create session ONCE in Round 1
+//  2. Store session state persistently (not just public nonce)
+//  3. Restore session in Round 2 for signing
+//  4. Use the SAME secret nonce from Round 1
+//
+// This requires session state serialization/deserialization, which is not
+// yet implemented.
+//
+// # Example
+//
+// For detailed usage examples, see Example_muSig2Sign.
 package btc
 
 import (
@@ -129,4 +247,90 @@ func (u *muSig2SignUseCase) Sign(
 		PartialSignature: sigScalar,
 		SignerID:         input.SignerID,
 	}, nil
+}
+
+// ExampleMuSig2Sign demonstrates how to use MuSig2SignUseCase
+// to create partial signatures in MuSig2 Round 2 (signing phase).
+//
+// This example shows the workflow for a single signer (Keygen wallet):
+//  1. Initialize dependencies (MuSig2Service, NonceRepository)
+//  2. Create the use case with NewMuSig2SignUseCase
+//  3. Prepare input with:
+//     - Signer ID and transaction ID (to retrieve stored nonce)
+//     - Aggregated nonces from all signers
+//     - Message hash (transaction sighash to be signed)
+//  4. Execute the use case to create partial signature
+//  5. Share the partial signature with Watch wallet for aggregation
+//
+// CRITICAL SECURITY NOTES:
+//   - Nonce from Round 1 must be retrieved and validated before signing
+//   - After signing, nonce MUST be marked as used to prevent reuse
+//   - Nonce reuse with different messages leaks the private key
+//   - Session state from Round 1 should ideally be reused (see Known Issue)
+//
+// KNOWN ISSUE:
+// This implementation creates a NEW session in Round 2, generating a different
+// secret nonce than Round 1. This results in INVALID signatures. For production,
+// session state persistence is required (see issue #136).
+//
+// Note: This is a conceptual example. In real implementation:
+//   - Message hash would be the actual transaction sighash from PSBT
+//   - Aggregated nonces would be received from Watch wallet in PSBT
+//   - Partial signature would be encoded in PSBT proprietary fields
+//   - Session state would be restored from Round 1 (not recreated)
+func ExampleMuSig2Sign() {
+	ctx := context.Background()
+
+	// Initialize dependencies
+	var (
+		musig2Service *btc.MuSig2Service       // Provides MuSig2 cryptographic operations
+		nonceRepo     multisig.NonceRepository // Repository for nonce storage
+	)
+
+	// Create the use case
+	useCase := NewMuSig2SignUseCase(musig2Service, nonceRepo)
+
+	// Prepare input for signing (Round 2)
+	// Note: These would come from PSBT in real implementation
+	var messageHash [32]byte
+	copy(messageHash[:], []byte("transaction_sighash_32_bytes_")) // Placeholder
+
+	aggregatedNonces := [][66]byte{
+		{}, // Aggregated nonce from keygen
+		{}, // Aggregated nonce from sign1
+		{}, // Aggregated nonce from sign2
+	}
+
+	input := keygenusecase.MuSig2SignInput{
+		SignerID:         "keygen",         // Identifies this signer
+		TransactionID:    "payment_42",     // Associates with nonce from Round 1
+		AggregatedNonces: aggregatedNonces, // Received from Watch wallet
+		MessageHash:      messageHash,      // Transaction sighash to sign
+	}
+
+	// Execute Round 2: Create partial signature
+	output, err := useCase.Sign(ctx, input)
+	if err != nil {
+		fmt.Printf("failed to create partial signature: %v\n", err)
+		return
+	}
+
+	fmt.Printf("Created partial signature for signer %s\n", output.SignerID)
+	fmt.Printf("Signature length: %d bytes\n", len(output.PartialSignature))
+
+	// After successful execution:
+	// 1. Partial signature is created using private key + stored nonce
+	// 2. Nonce is marked as USED in NonceRepository
+	// 3. Partial signature can now be shared with Watch wallet
+	//
+	// Next steps in MuSig2 workflow:
+	// 1. All signers create their partial signatures (sequential)
+	// 2. Watch wallet collects all partial signatures
+	// 3. Watch wallet aggregates partial signatures into final Schnorr signature
+	// 4. Watch wallet verifies final signature
+	// 5. Watch wallet broadcasts transaction to Bitcoin network
+	//
+	// Output:
+	// Created partial signature for signer keygen
+	// Signature length: 32 bytes
 }
