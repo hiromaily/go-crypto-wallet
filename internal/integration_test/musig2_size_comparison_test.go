@@ -65,7 +65,7 @@ func TestMuSig2TransactionSizeComparison(t *testing.T) {
 			// traditionalVSize := traditionalTx.GetVirtualSize()
 
 			// For now, use theoretical sizes based on Bitcoin transaction structure
-			traditionalSize, traditionalVSize := calculateTraditionalTxSize(tt.signers, tt.requiredSigs)
+			traditionalSize, traditionalVSize := calculateTraditionalTxSize(tt.requiredSigs, tt.signers)
 
 			// Create identical MuSig2 transaction
 			// TODO: Implement actual MuSig2 transaction creation
@@ -254,7 +254,7 @@ func TestMuSig2ComprehensiveSizeReport(t *testing.T) {
 	}
 
 	for _, cfg := range configs {
-		tradSize, tradVSize := calculateTraditionalTxSize(cfg.n, cfg.m)
+		tradSize, tradVSize := calculateTraditionalTxSize(cfg.m, cfg.n)
 		musig2Size, musig2VSize := calculateMuSig2TxSize()
 
 		_ = tradSize
@@ -276,7 +276,7 @@ func TestMuSig2ComprehensiveSizeReport(t *testing.T) {
 	t.Log("│ (sat/vB)   │ (sat)       │ (sat)        │ (sat)    │ (%)        │")
 	t.Log("├────────────┼─────────────┼──────────────┼──────────┼────────────┤")
 
-	_, tradVSize := calculateTraditionalTxSize(3, 2)
+	_, tradVSize := calculateTraditionalTxSize(2, 3)
 	_, musig2VSize := calculateMuSig2TxSize()
 
 	feeRates := []int{1, 5, 10, 50, 100, 200}
@@ -357,7 +357,7 @@ func calculateTaprootInputSize() int {
 }
 
 // calculateTraditionalTxSize calculates the size of a traditional P2WSH multisig transaction
-func calculateTraditionalTxSize(n, m int) (int, int) {
+func calculateTraditionalTxSize(m, n int) (int, int) {
 	// Transaction structure:
 	// - Version: 4 bytes
 	// - Marker + Flag: 2 bytes (SegWit)
@@ -382,14 +382,14 @@ func calculateTraditionalTxSize(n, m int) (int, int) {
 
 	// Witness data
 	redeemScriptSize := 3 + (n * 34)
-	witnessSize := 1 + (m * (1 + 72)) + (1 + redeemScriptSize)
+	witnessStackSize := 1 + (m * (1 + 72)) + (1 + redeemScriptSize)
 
-	// Total size = base + witness
-	totalSize := baseSize + witnessSize
+	// Total size = base + marker + flag + witness stack
+	totalSize := baseSize + 2 + witnessStackSize
 
 	// Virtual size (weight / 4)
-	// Weight = (base_size * 4) + witness_size
-	weight := (baseSize * 4) + witnessSize
+	// Weight = (base_size * 4) + marker + flag + witness_stack
+	weight := (baseSize * 4) + 2 + witnessStackSize
 	vsize := (weight + 3) / 4
 
 	return totalSize, vsize
@@ -409,13 +409,14 @@ func calculateMuSig2TxSize() (int, int) {
 	baseSize += outputSize
 
 	// Witness data (MuSig2 Schnorr signature)
-	witnessSize := 1 + 1 + 64 // stack_count + length + signature = 66 bytes
+	witnessStackSize := 1 + 1 + 64 // stack_count + length + signature = 66 bytes
 
-	// Total size
-	totalSize := baseSize + witnessSize
+	// Total size = base + marker + flag + witness stack
+	totalSize := baseSize + 2 + witnessStackSize
 
 	// Virtual size
-	weight := (baseSize * 4) + witnessSize
+	// Weight = (base_size * 4) + marker + flag + witness_stack
+	weight := (baseSize * 4) + 2 + witnessStackSize
 	vsize := (weight + 3) / 4
 
 	return totalSize, vsize
@@ -440,10 +441,11 @@ func calculateMultiInputTraditionalTxVSize(inputCount, m, n int) int {
 	// Witness data for all inputs
 	redeemScriptSize := 3 + (n * 34)
 	witnessPerInput := 1 + (m * (1 + 72)) + (1 + redeemScriptSize)
-	totalWitnessSize := inputCount * witnessPerInput
+	totalWitnessStackSize := inputCount * witnessPerInput
 
 	// Calculate vsize
-	weight := (baseSize * 4) + totalWitnessSize
+	// Weight = (base_size * 4) + marker + flag + witness_stack
+	weight := (baseSize * 4) + 2 + totalWitnessStackSize
 	vsize := (weight + 3) / 4
 
 	return vsize
@@ -462,10 +464,11 @@ func calculateMultiInputMuSig2TxVSize(inputCount int) int {
 
 	// Witness data for all inputs (Schnorr signatures)
 	witnessPerInput := 1 + 1 + 64
-	totalWitnessSize := inputCount * witnessPerInput
+	totalWitnessStackSize := inputCount * witnessPerInput
 
 	// Calculate vsize
-	weight := (baseSize * 4) + totalWitnessSize
+	// Weight = (base_size * 4) + marker + flag + witness_stack
+	weight := (baseSize * 4) + 2 + totalWitnessStackSize
 	vsize := (weight + 3) / 4
 
 	return vsize
