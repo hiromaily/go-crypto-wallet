@@ -33,6 +33,12 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
   - 30-50% transaction size/fee reduction compared to legacy multisig
   - Enhanced privacy with indistinguishable spend patterns
   - See [Taproot User Guide](./docs/TAPROOT_GUIDE.md) for setup and usage
+- ✅ **MuSig2 (BIP327) Support** - Simple Two-Round Schnorr multisignatures for efficient multisig transactions
+  - Single aggregated signature on-chain (looks like single-sig)
+  - 30-50% smaller transactions compared to traditional P2WSH multisig
+  - Parallel nonce generation (Round 1) for faster workflow
+  - Maximum privacy - indistinguishable from single-signature transactions
+  - See [MuSig2 User Guide](./docs/crypto/btc/musig2_guide.md) for setup and usage
 
 ## Expected use cases
 
@@ -290,6 +296,7 @@ The `pkg/` directory contains shared utilities and legacy/transitional code:
 ### For BTC/BCH
 
 - ✅ **Taproot (BIP341/BIP86) Support** - P2TR addresses with Schnorr signatures (See [Taproot Guide](./docs/TAPROOT_GUIDE.md))
+- ✅ **MuSig2 (BIP327) Support** - Two-round Schnorr multisignatures (See [MuSig2 Guide](./docs/crypto/btc/musig2_guide.md))
 - ✅ Native SegWit-Bech32 (P2WPKH) addresses supported
 - ✅ P2SH-SegWit addresses supported
 - ✅ Legacy P2PKH addresses supported
