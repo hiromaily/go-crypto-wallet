@@ -361,8 +361,10 @@ func ExampleAggregateMuSig2Signatures() {
 	}
 
 	// Aggregated data from Round 1
-	var aggregatedPublicKey [33]byte // From address creation
-	var combinedNonce [66]byte       // From nonce aggregation
+	var aggregatedPublicKey [33]byte // From address creation (compressed point)
+	var combinedNonce [66]byte       // Combined/aggregated nonce from all signers
+	// Note: MuSig2 nonces consist of two points (R1, R2), so combined nonce is 66 bytes
+	// This is the result of aggregating all signers' [66]byte public nonces
 
 	// PSBT with unsigned transaction
 	psbtBase64 := "cHNidP8BA..." // Base64-encoded PSBT

@@ -75,7 +75,7 @@
 //	┌───────────────────────────────────────────────────────┐
 //	│ 7. Update Database                                    │
 //	│    - Store Taproot address                           │
-//	│    - Update status: AddrStatusMultisigAddressGen     │
+//	│    - Update status: AddrStatusMultisigAddressGenerated│
 //	└───────────────────────────────────────────────────────┘
 //
 // # Security Considerations

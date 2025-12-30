@@ -295,17 +295,17 @@ func ExampleMuSig2Sign() {
 	var messageHash [32]byte
 	copy(messageHash[:], []byte("transaction_sighash_32_bytes_")) // Placeholder
 
-	aggregatedNonces := [][66]byte{
-		{}, // Aggregated nonce from keygen
-		{}, // Aggregated nonce from sign1
-		{}, // Aggregated nonce from sign2
+	publicNonces := [][66]byte{
+		{}, // Public nonce from keygen
+		{}, // Public nonce from sign1
+		{}, // Public nonce from sign2
 	}
 
 	input := keygenusecase.MuSig2SignInput{
-		SignerID:         "keygen",         // Identifies this signer
-		TransactionID:    "payment_42",     // Associates with nonce from Round 1
-		AggregatedNonces: aggregatedNonces, // Received from Watch wallet
-		MessageHash:      messageHash,      // Transaction sighash to sign
+		SignerID:         "keygen",     // Identifies this signer
+		TransactionID:    "payment_42", // Associates with nonce from Round 1
+		AggregatedNonces: publicNonces, // All public nonces from all signers
+		MessageHash:      messageHash,  // Transaction sighash to sign
 	}
 
 	// Execute Round 2: Create partial signature

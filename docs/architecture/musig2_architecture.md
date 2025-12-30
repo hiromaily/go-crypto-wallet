@@ -1379,7 +1379,7 @@ type ProprietaryData struct {
 }
 
 // Example: Store nonce
-func AddMuSig2NonceToPS BT(p *psbt.Packet, signerID string, nonce [66]byte) error {
+func AddMuSig2NonceToPSBT(p *psbt.Packet, signerID string, nonce [66]byte) error {
     prop := psbt.ProprietaryData{
         Identifier: []byte("musig2"),
         Subtype:    []byte("nonce"),
