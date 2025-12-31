@@ -1,7 +1,21 @@
--- Create "account_key" table
-CREATE TABLE `account_key` (
+-- Create "auth_fullpubkey" table
+CREATE TABLE `auth_fullpubkey` (
+  `id` smallint NOT NULL AUTO_INCREMENT COMMENT "ID",
+  `coin` enum('btc','bch') NOT NULL COMMENT "coin type code",
+  `auth_account` varchar(20) NOT NULL COMMENT "auth type",
+  `full_public_key` varchar(255) NOT NULL COMMENT "full public key",
+  `fingerprint` varchar(8) NULL COMMENT "BIP32 master key fingerprint (8 hex chars)",
+  `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT "updated date",
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `idex_coin_auth_account` (`coin`, `auth_account`),
+  INDEX `idx_coin` (`coin`),
+  INDEX `idx_fingerprint` (`fingerprint`),
+  UNIQUE INDEX `idx_full_public_key` (`full_public_key`)
+) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT "table for auth key exported from sign db";
+-- Create "btc_account_key" table
+CREATE TABLE `btc_account_key` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT "ID",
-  `coin` enum('btc','bch','eth','xrp','hyt') NOT NULL COMMENT "coin type code",
+  `coin` enum('btc','bch') NOT NULL COMMENT "coin type code",
   `key_type` varchar(20) NOT NULL DEFAULT "bip44" COMMENT "key type (bip44, bip49, bip84, bip86, musig2)",
   `account` enum('client','deposit','payment','stored') NOT NULL COMMENT "account type",
   `p2pkh_address` varchar(255) NOT NULL COMMENT "address as standard pubkey script that Pays To PubKey Hash (P2PKH)",
@@ -21,21 +35,22 @@ CREATE TABLE `account_key` (
   INDEX `idx_key_type` (`key_type`),
   UNIQUE INDEX `idx_p2pkh_address` (`p2pkh_address`),
   UNIQUE INDEX `idx_wallet_import_format` (`wallet_import_format`)
-) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT "table for keys for any account";
--- Create "auth_fullpubkey" table
-CREATE TABLE `auth_fullpubkey` (
-  `id` smallint NOT NULL AUTO_INCREMENT COMMENT "ID",
-  `coin` enum('btc','bch') NOT NULL COMMENT "coin type code",
-  `auth_account` varchar(20) NOT NULL COMMENT "auth type",
-  `full_public_key` varchar(255) NOT NULL COMMENT "full public key",
-  `fingerprint` varchar(8) NULL COMMENT "BIP32 master key fingerprint (8 hex chars)",
+) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT "table for BTC/BCH keys for any account";
+-- Create "eth_account_key" table
+CREATE TABLE `eth_account_key` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT "ID",
+  `account` enum('client','deposit','payment','stored') NOT NULL COMMENT "account type",
+  `address` varchar(42) NOT NULL COMMENT "Ethereum address (0x...)",
+  `full_public_key` varchar(130) NOT NULL COMMENT "full public key (uncompressed, 65 bytes hex)",
+  `private_key` varchar(64) NOT NULL COMMENT "private key (hex encoded)",
+  `idx` bigint NOT NULL COMMENT "index for hd wallet",
+  `addr_status` tinyint NOT NULL DEFAULT 0 COMMENT "progress status for address generating",
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT "updated date",
   PRIMARY KEY (`id`),
-  UNIQUE INDEX `idex_coin_auth_account` (`coin`, `auth_account`),
-  INDEX `idx_coin` (`coin`),
-  INDEX `idx_fingerprint` (`fingerprint`),
-  UNIQUE INDEX `idx_full_public_key` (`full_public_key`)
-) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT "table for auth key exported from sign db";
+  INDEX `idx_account` (`account`),
+  UNIQUE INDEX `idx_address` (`address`),
+  UNIQUE INDEX `idx_private_key` (`private_key`)
+) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT "table for ETH keys for any account";
 -- Create "musig2_nonces" table
 CREATE TABLE `musig2_nonces` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT "ID",

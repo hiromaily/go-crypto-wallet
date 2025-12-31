@@ -99,9 +99,9 @@ func (u *exportAddressUseCase) Export(
 	}, nil
 }
 
-// exportAccountKey exports account_key_table as csv file
+// exportAccountKey exports btc_account_key table as csv file
 func (u *exportAddressUseCase) exportAccountKey(
-	accountKeyTable []*sqlc.AccountKey, accountType domainAccount.AccountType,
+	accountKeyTable []*sqlc.BtcAccountKey, accountType domainAccount.AccountType,
 ) (string, error) {
 	// Create fileName
 	fileName := u.addrFileRepo.CreateFilePath(accountType)
