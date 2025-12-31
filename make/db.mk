@@ -44,13 +44,15 @@ regenerate-all-from-atlas:
 	docker compose down -v
 	docker compose up -d
 	@echo ""
-	@echo "=== Step 3/5: Waiting for DB to be ready ==="
-	@echo "Waiting for MySQL to be healthy..."
-	@until docker exec wallet-db mysqladmin ping -u root -proot --silent 2>/dev/null; do \
-		echo "  Waiting for database..."; \
-		sleep 2; \
-	done
-	@echo "✓ Database is ready"
+	@echo "=== Step 3/5: Waiting for DB and migrations to be ready ==="
+	@# Use 'docker compose wait' to wait for all migration services to complete.
+	@# Migration services depend on wallet-db with 'condition: service_healthy',
+	@# so MySQL is guaranteed to be ready when migrations complete.
+	@# This command blocks until each specified service exits and returns their exit codes.
+	@# If any migration fails (non-zero exit), the command will fail and stop the workflow.
+	@# Requires Docker Compose v2.21 or later.
+	docker compose wait wallet-db-migrate-watch wallet-db-migrate-keygen wallet-db-migrate-sign
+	@echo "✓ Database is ready and all migrations completed"
 	@echo ""
 	@echo "=== Step 4/5: Extracting sqlc schemas from DB ==="
 	@$(MAKE) extract-sqlc-schema-all
