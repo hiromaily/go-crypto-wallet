@@ -1,11 +1,9 @@
 # Sign Schema Definition
 # Signing wallet data (auth account keys, seeds)
 
-schema "sign" {
-  charset   = "utf8mb4"
-  collation = "utf8mb4_unicode_ci"
-  comment   = "Sign schema for signing wallet operations"
-}
+# Schema declaration (empty to avoid CREATE SCHEMA in migrations)
+# Note: detailed attributes (charset, collation, comment) would generate CREATE SCHEMA statement
+schema "sign" {}
 
 # Table: seed
 table "seed" {

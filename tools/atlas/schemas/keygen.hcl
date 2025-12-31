@@ -1,11 +1,9 @@
 # Keygen Schema Definition
 # Key generation data (seeds, account keys, full public keys)
 
-schema "keygen" {
-  charset   = "utf8mb4"
-  collation = "utf8mb4_unicode_ci"
-  comment   = "Keygen schema for key generation operations"
-}
+# Schema declaration (empty to avoid CREATE SCHEMA in migrations)
+# Note: detailed attributes (charset, collation, comment) would generate CREATE SCHEMA statement
+schema "keygen" {}
 
 # Table: seed
 table "seed" {

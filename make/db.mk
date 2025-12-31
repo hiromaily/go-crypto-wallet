@@ -7,14 +7,11 @@
 ###############################################################################
 
 # run consolidated database
-.PHONY: up-docker-db
-up-docker-db:
-	docker compose up wallet-db
+.PHONY: reset-docker-db
+reset-docker-db:
+	docker compose down -v
+	docker compose up
 
-# remove database volume
-.PHONY: rm-db-volumes
-rm-db-volumes:
-	docker volume rm -f go-crypto-wallet_wallet-db
 
 ###############################################################################
 # Schema Export Targets

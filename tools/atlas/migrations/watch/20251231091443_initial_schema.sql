@@ -10,7 +10,7 @@ CREATE TABLE `address` (
   INDEX `idx_account` (`account`),
   INDEX `idx_coin` (`coin`),
   UNIQUE INDEX `idx_wallet_address` (`wallet_address`)
-) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT "table for account pubkey";
+) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT "table for account pubkey";
 -- Create "btc_tx" table
 CREATE TABLE `btc_tx` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT "transaction ID",
@@ -28,7 +28,7 @@ CREATE TABLE `btc_tx` (
   PRIMARY KEY (`id`),
   INDEX `idx_action` (`action`),
   INDEX `idx_coin` (`coin`)
-) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT "table for btc transaction info";
+) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT "table for btc transaction info";
 -- Create "btc_tx_input" table
 CREATE TABLE `btc_tx_input` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT "ID",
@@ -42,7 +42,7 @@ CREATE TABLE `btc_tx_input` (
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT "updated date",
   PRIMARY KEY (`id`),
   INDEX `idx_tx_id` (`tx_id`)
-) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT "table for input transaction";
+) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT "table for input transaction";
 -- Create "btc_tx_output" table
 CREATE TABLE `btc_tx_output` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT "ID",
@@ -54,7 +54,7 @@ CREATE TABLE `btc_tx_output` (
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT "updated date",
   PRIMARY KEY (`id`),
   INDEX `idx_tx_id` (`tx_id`)
-) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT "table for output transaction";
+) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT "table for output transaction";
 -- Create "eth_detail_tx" table
 CREATE TABLE `eth_detail_tx` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT "ID",
@@ -79,7 +79,7 @@ CREATE TABLE `eth_detail_tx` (
   INDEX `idx_sender_account` (`sender_account`),
   INDEX `idx_txid` (`tx_id`),
   UNIQUE INDEX `idx_uuid` (`uuid`)
-) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT "table for eth transaction detail";
+) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT "table for eth transaction detail";
 -- Create "payment_request" table
 CREATE TABLE `payment_request` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT "ID",
@@ -93,7 +93,7 @@ CREATE TABLE `payment_request` (
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT "updated date",
   PRIMARY KEY (`id`),
   INDEX `idx_coin` (`coin`)
-) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT "table for payment request";
+) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT "table for payment request";
 -- Create "tx" table
 CREATE TABLE `tx` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT "transaction ID",
@@ -103,7 +103,7 @@ CREATE TABLE `tx` (
   PRIMARY KEY (`id`),
   INDEX `idx_action` (`action`),
   INDEX `idx_coin` (`coin`)
-) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT "table for eth transaction info";
+) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT "table for eth transaction info";
 -- Create "xrp_detail_tx" table
 CREATE TABLE `xrp_detail_tx` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT "ID",
@@ -132,4 +132,4 @@ CREATE TABLE `xrp_detail_tx` (
   INDEX `idx_sender_account` (`sender_account`),
   INDEX `idx_txid` (`tx_id`),
   UNIQUE INDEX `idx_uuid` (`uuid`)
-) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT "table for xrp transaction detail";
+) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT "table for xrp transaction detail";

@@ -1,11 +1,9 @@
 # Watch Schema Definition
 # Online wallet data (addresses, transactions, payment requests)
 
-schema "watch" {
-  charset   = "utf8mb4"
-  collation = "utf8mb4_unicode_ci"
-  comment   = "Watch schema for online wallet operations"
-}
+# Schema declaration (empty to avoid CREATE SCHEMA in migrations)
+# Note: detailed attributes (charset, collation, comment) would generate CREATE SCHEMA statement
+schema "watch" {}
 
 # Table: btc_tx
 table "btc_tx" {

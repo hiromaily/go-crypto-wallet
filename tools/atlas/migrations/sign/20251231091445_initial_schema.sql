@@ -22,7 +22,7 @@ CREATE TABLE `auth_account_key` (
   UNIQUE INDEX `idx_p2pkh_address` (`p2pkh_address`),
   UNIQUE INDEX `idx_p2sh_segwit_address` (`p2sh_segwit_address`),
   UNIQUE INDEX `idx_wallet_import_format` (`wallet_import_format`)
-) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT "table for keys for auth account";
+) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT "table for keys for auth account";
 -- Create "seed" table
 CREATE TABLE `seed` (
   `id` tinyint NOT NULL AUTO_INCREMENT COMMENT "ID",
@@ -31,4 +31,4 @@ CREATE TABLE `seed` (
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT "updated date",
   PRIMARY KEY (`id`),
   INDEX `idx_coin` (`coin`)
-) CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT "table for seed";
+) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT "table for seed";
