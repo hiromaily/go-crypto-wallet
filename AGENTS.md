@@ -451,10 +451,24 @@ This project uses several code generation tools.
 
 **Note**: See [Database Schema Changes](#database-schema-changes) section for detailed workflow.
 
+### SQLC Schema Files (from Database Dumps)
+
+**Tool**: Custom shell script (`scripts/db/extract-sqlc-schema.sh`)  
+**Source**: MySQL database dumps (`data/dump/sql/dump_*.sql`)  
+**Command**: `make extract-sqlc-schema-all` (or individual: `make extract-sqlc-schema-watch`, `make extract-sqlc-schema-keygen`, `make extract-sqlc-schema-sign`)
+
+**Generated Files**:
+
+- `tools/sqlc/schemas/01_watch.sql` - Watch schema for SQLC
+- `tools/sqlc/schemas/02_keygen.sql` - Keygen schema for SQLC
+- `tools/sqlc/schemas/03_sign.sql` - Sign schema for SQLC
+
+**Note**: These schema files are extracted from MySQL database dumps. The source of truth is the Atlas HCL files (`tools/atlas/schemas/*.hcl`). To update schemas, modify the HCL files and run the database migration flow.
+
 ### Database Code (SQLC)
 
 **Tool**: [sqlc](https://sqlc.dev/)  
-**Source**: `tools/sqlc/schemas/*.sql` and `tools/sqlc/queries/*.sql`  
+**Source**: `tools/sqlc/schemas/*.sql` (auto-generated) and `tools/sqlc/queries/*.sql` (manually edited)  
 **Command**: `make sqlc` (or `cd tools/sqlc && sqlc generate`)
 
 **Generated Files**:
@@ -541,7 +555,8 @@ This project uses several code generation tools.
 1. **Never manually edit auto-generated files** - Changes will be overwritten on next generation
 2. **Edit source files instead**:
    - Atlas: Edit `tools/atlas/schemas/*.hcl` (HCL schema files)
-   - SQLC: Edit `tools/sqlc/schemas/*.sql` and `tools/sqlc/queries/*.sql`
+   - SQLC Schemas: **DO NOT EDIT** `tools/sqlc/schemas/*.sql` - these are auto-generated from database dumps. Edit `tools/atlas/schemas/*.hcl` instead.
+   - SQLC Queries: Edit `tools/sqlc/queries/*.sql` (manually edited)
    - Protocol Buffers: Edit `data/proto/rippleapi/*.proto`
    - ABI: Edit `data/contract/token.abi` (or regenerate from Solidity source)
 3. **Regenerate after source changes** - Run the appropriate make command after modifying source files
