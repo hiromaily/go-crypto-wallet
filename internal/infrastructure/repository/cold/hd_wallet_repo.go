@@ -114,7 +114,7 @@ func (w *AccountHDWalletRepo) GetMaxIndex(accountType domainAccount.AccountType)
 	return idx, nil
 }
 
-// Insert inserts keys to account_key_table
+// Insert inserts keys to btc_account_key table
 func (w *AccountHDWalletRepo) Insert(
 	keys []domainKey.WalletKey,
 	idxFrom int64,
@@ -122,13 +122,13 @@ func (w *AccountHDWalletRepo) Insert(
 	accountType domainAccount.AccountType,
 	keyType domainKey.KeyType,
 ) error {
-	// insert key information to account_key_table
-	accountKeyItems := make([]*sqlc.AccountKey, len(keys))
+	// insert key information to btc_account_key table
+	accountKeyItems := make([]*sqlc.BtcAccountKey, len(keys))
 	for idx, keyItem := range keys {
-		accountKeyItems[idx] = &sqlc.AccountKey{
-			Coin:               sqlc.AccountKeyCoin(coinTypeCode.String()),
+		accountKeyItems[idx] = &sqlc.BtcAccountKey{
+			Coin:               sqlc.BtcAccountKeyCoin(coinTypeCode.String()),
 			KeyType:            keyType.String(),
-			Account:            sqlc.AccountKeyAccount(accountType.String()),
+			Account:            sqlc.BtcAccountKeyAccount(accountType.String()),
 			P2pkhAddress:       keyItem.P2PKHAddr,
 			P2shSegwitAddress:  keyItem.P2SHSegWitAddr,
 			Bech32Address:      keyItem.Bech32Addr,

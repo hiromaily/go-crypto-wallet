@@ -22,8 +22,8 @@ type AddressFormat struct {
 	Idx               string
 }
 
-// CreateLine creates line for csv
-func CreateLine(accountKeyItem *sqlc.AccountKey) []string {
+// CreateLine creates line for csv from BtcAccountKey
+func CreateLine(accountKeyItem *sqlc.BtcAccountKey) []string {
 	taprootAddr := ""
 	if accountKeyItem.TaprootAddress.Valid {
 		taprootAddr = accountKeyItem.TaprootAddress.String
@@ -37,6 +37,17 @@ func CreateLine(accountKeyItem *sqlc.AccountKey) []string {
 		taprootAddr,
 		accountKeyItem.FullPublicKey,
 		accountKeyItem.MultisigAddress,
+		strconv.Itoa(int(accountKeyItem.Idx)),
+	}
+}
+
+// CreateEthLine creates line for csv from EthAccountKey
+func CreateEthLine(accountKeyItem *sqlc.EthAccountKey) []string {
+	return []string{
+		"eth",
+		string(accountKeyItem.Account),
+		accountKeyItem.Address,
+		accountKeyItem.FullPublicKey,
 		strconv.Itoa(int(accountKeyItem.Idx)),
 	}
 }

@@ -23,22 +23,43 @@ type SeedRepositorier interface {
 	Insert(ctx context.Context, strSeed string) error
 }
 
-// AccountKeyRepositorier is AccountKeyRepository interface
-type AccountKeyRepositorier interface {
+// BtcAccountKeyRepositorier is BtcAccountKeyRepository interface for BTC/BCH
+type BtcAccountKeyRepositorier interface {
 	GetMaxIndex(accountType domainAccount.AccountType) (int64, error)
-	GetOneMaxID(accountType domainAccount.AccountType) (*sqlc.AccountKey, error)
-	GetAllAddrStatus(accountType domainAccount.AccountType, addrStatus address.AddrStatus) ([]*sqlc.AccountKey, error)
-	GetAllMultiAddr(accountType domainAccount.AccountType, addrs []string) ([]*sqlc.AccountKey, error)
-	InsertBulk(items []*sqlc.AccountKey) error
+	GetOneMaxID(accountType domainAccount.AccountType) (*sqlc.BtcAccountKey, error)
+	GetAllAddrStatus(
+		accountType domainAccount.AccountType, addrStatus address.AddrStatus,
+	) ([]*sqlc.BtcAccountKey, error)
+	GetAllMultiAddr(accountType domainAccount.AccountType, addrs []string) ([]*sqlc.BtcAccountKey, error)
+	InsertBulk(items []*sqlc.BtcAccountKey) error
 	UpdateAddr(
 		accountType domainAccount.AccountType, addr, keyAddress string,
 	) (int64, error)
 	UpdateAddrStatus(
 		accountType domainAccount.AccountType, addrStatus address.AddrStatus, strWIFs []string,
 	) (int64, error)
-	UpdateMultisigAddr(accountType domainAccount.AccountType, item *sqlc.AccountKey) (int64, error)
-	UpdateMultisigAddrs(accountType domainAccount.AccountType, items []*sqlc.AccountKey) (int64, error)
+	UpdateMultisigAddr(accountType domainAccount.AccountType, item *sqlc.BtcAccountKey) (int64, error)
+	UpdateMultisigAddrs(accountType domainAccount.AccountType, items []*sqlc.BtcAccountKey) (int64, error)
 }
+
+// EthAccountKeyRepositorier is EthAccountKeyRepository interface for ETH
+type EthAccountKeyRepositorier interface {
+	GetMaxIndex(accountType domainAccount.AccountType) (int64, error)
+	GetOneMaxID(accountType domainAccount.AccountType) (*sqlc.EthAccountKey, error)
+	GetAllAddrStatus(
+		accountType domainAccount.AccountType, addrStatus address.AddrStatus,
+	) ([]*sqlc.EthAccountKey, error)
+	GetByAddress(address string) (*sqlc.EthAccountKey, error)
+	InsertBulk(items []*sqlc.EthAccountKey) error
+	UpdateAddrStatus(
+		accountType domainAccount.AccountType, addrStatus address.AddrStatus, privateKeys []string,
+	) (int64, error)
+}
+
+// AccountKeyRepositorier is kept for backward compatibility.
+//
+// Deprecated: Use BtcAccountKeyRepositorier instead.
+type AccountKeyRepositorier = BtcAccountKeyRepositorier
 
 // XRPAccountKeyRepositorier is XRPAccountKeyRepository interface
 type XRPAccountKeyRepositorier interface {

@@ -45,10 +45,11 @@ table "seed" {
   }
 }
 
-# Table: account_key
-table "account_key" {
+# Table: btc_account_key
+# Bitcoin and Bitcoin Cash account keys with multiple address formats
+table "btc_account_key" {
   schema  = schema.keygen
-  comment = "table for keys for any account"
+  comment = "table for BTC/BCH keys for any account"
 
   column "id" {
     type           = bigint
@@ -58,7 +59,7 @@ table "account_key" {
   }
 
   column "coin" {
-    type    = enum("btc", "bch", "eth", "xrp", "hyt")
+    type    = enum("btc", "bch")
     null    = false
     comment = "coin type code"
   }
@@ -166,6 +167,82 @@ table "account_key" {
 
   index "idx_key_type" {
     columns = [column.key_type]
+  }
+
+  index "idx_account" {
+    columns = [column.account]
+  }
+}
+
+# Table: eth_account_key
+# Ethereum account keys (simplified structure)
+table "eth_account_key" {
+  schema  = schema.keygen
+  comment = "table for ETH keys for any account"
+
+  column "id" {
+    type           = bigint
+    null           = false
+    auto_increment = true
+    comment        = "ID"
+  }
+
+  column "account" {
+    type    = enum("client", "deposit", "payment", "stored")
+    null    = false
+    comment = "account type"
+  }
+
+  column "address" {
+    type    = varchar(42)
+    null    = false
+    comment = "Ethereum address (0x...)"
+  }
+
+  column "full_public_key" {
+    type    = varchar(130)
+    null    = false
+    comment = "full public key (uncompressed, 65 bytes hex)"
+  }
+
+  column "private_key" {
+    type    = varchar(64)
+    null    = false
+    comment = "private key (hex encoded)"
+  }
+
+  column "idx" {
+    type    = bigint
+    null    = false
+    comment = "index for hd wallet"
+  }
+
+  column "addr_status" {
+    type    = tinyint
+    null    = false
+    default = 0
+    comment = "progress status for address generating"
+  }
+
+  column "updated_at" {
+    type    = datetime
+    null    = true
+    default = sql("CURRENT_TIMESTAMP")
+    comment = "updated date"
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  index "idx_address" {
+    unique  = true
+    columns = [column.address]
+  }
+
+  index "idx_private_key" {
+    unique  = true
+    columns = [column.private_key]
   }
 
   index "idx_account" {

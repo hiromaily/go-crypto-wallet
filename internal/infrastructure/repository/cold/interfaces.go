@@ -11,7 +11,15 @@ import (
 // SeedRepositorier is SeedRepository interface
 type SeedRepositorier = persistence.SeedRepositorier
 
-// AccountKeyRepositorier is AccountKeyRepository interface
+// BtcAccountKeyRepositorier is BtcAccountKeyRepository interface for BTC/BCH
+type BtcAccountKeyRepositorier = persistence.BtcAccountKeyRepositorier
+
+// EthAccountKeyRepositorier is EthAccountKeyRepository interface for ETH
+type EthAccountKeyRepositorier = persistence.EthAccountKeyRepositorier
+
+// AccountKeyRepositorier is kept for backward compatibility.
+//
+// Deprecated: Use BtcAccountKeyRepositorier instead.
 type AccountKeyRepositorier = persistence.AccountKeyRepositorier
 
 // XRPAccountKeyRepositorier is XRPAccountKeyRepository interface
@@ -23,8 +31,8 @@ type AuthFullPubkeyRepositorier = persistence.AuthFullPubkeyRepositorier
 // AuthAccountKeyRepositorier is AuthAccountKeyRepository interface
 type AuthAccountKeyRepositorier = persistence.AuthAccountKeyRepositorier
 
-// GetRedeemScriptByAddress returns redeem script by address
-func GetRedeemScriptByAddress(accountKeys []*sqlc.AccountKey, addr string) string {
+// GetRedeemScriptByAddress returns redeem script by address for BTC
+func GetRedeemScriptByAddress(accountKeys []*sqlc.BtcAccountKey, addr string) string {
 	for _, val := range accountKeys {
 		if val.MultisigAddress == addr {
 			return val.RedeemScript
