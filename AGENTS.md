@@ -349,10 +349,107 @@ Interface Adapters (interface-adapters/*) → Application Layer (application/use
 - **ETH**: Ethereum JSON-RPC API, ERC-20 token support
 - **XRP**: Communication via gRPC with ripple-lib-server
 
+## Database Schema Changes
+
+This project uses [Atlas](https://atlasgo.io/) for database schema management with HCL (HashiCorp Configuration Language) as the source of truth.
+
+### Schema Files
+
+There are 3 schema files corresponding to each wallet type:
+
+- `tools/atlas/schemas/watch.hcl` - Watch wallet schema (online wallet)
+- `tools/atlas/schemas/keygen.hcl` - Keygen wallet schema (offline, key generation)
+- `tools/atlas/schemas/sign.hcl` - Sign wallet schema (offline, signing)
+
+### How to Change Database Schema
+
+**Step 1: Modify the HCL schema file**
+
+Edit the appropriate `.hcl` file in `tools/atlas/schemas/` directory. These files are the single source of truth for database schema.
+
+**Step 2: Format and lint the schema files**
+
+Run the following commands to format and validate the HCL schema files:
+
+```bash
+make atlas-fmt
+make atlas-lint
+```
+
+This will:
+
+- Format all HCL schema files for consistency
+- Validate the schema syntax and structure
+- Ensure no errors exist before generating migrations
+
+**Step 3: Regenerate migration files**
+
+Run the following command to regenerate migration files from scratch:
+
+```bash
+make atlas-dev-reset
+```
+
+This command will:
+
+- Delete all existing migration files
+- Generate new migration files from the HCL schemas
+- Prompt for confirmation before proceeding
+
+**Step 4: Verify the migration**
+
+Test the migration by recreating the database:
+
+```bash
+docker compose down -v
+docker compose up
+```
+
+This will:
+
+- Remove existing database volumes (`-v` flag)
+- Start fresh containers and apply migrations
+- Verify that no errors occur during migration
+
+**Step 5: Regenerate SQLC code (if needed)**
+
+If the schema changes affect queries, regenerate SQLC code:
+
+```bash
+make sqlc
+```
+
+**Step 6: Verify the build**
+
+```bash
+make check-build
+```
+
+### Important Notes
+
+- **Always modify HCL files first** - Never edit migration SQL files directly
+- **HCL files are the source of truth** - Migration files are auto-generated from HCL
+- **Test locally before committing** - Always run the full `docker compose down -v && docker compose up` cycle
+
 ## Auto-Generated Files
 
 This project uses several code generation tools.
 **All auto-generated files contain `DO NOT EDIT` comments and must never be manually modified.**
+
+### Database Migrations (Atlas)
+
+**Tool**: [Atlas](https://atlasgo.io/)  
+**Source**: `tools/atlas/schemas/*.hcl` (HCL schema files)  
+**Command**: `make atlas-dev-reset` (regenerate from scratch)
+
+**Generated Files**:
+
+- `tools/atlas/migrations/watch/*.sql` - Watch schema migrations
+- `tools/atlas/migrations/keygen/*.sql` - Keygen schema migrations
+- `tools/atlas/migrations/sign/*.sql` - Sign schema migrations
+- `tools/atlas/migrations/*/atlas.sum` - Migration checksums
+
+**Note**: See [Database Schema Changes](#database-schema-changes) section for detailed workflow.
 
 ### Database Code (SQLC)
 
@@ -443,6 +540,7 @@ This project uses several code generation tools.
 
 1. **Never manually edit auto-generated files** - Changes will be overwritten on next generation
 2. **Edit source files instead**:
+   - Atlas: Edit `tools/atlas/schemas/*.hcl` (HCL schema files)
    - SQLC: Edit `tools/sqlc/schemas/*.sql` and `tools/sqlc/queries/*.sql`
    - Protocol Buffers: Edit `data/proto/rippleapi/*.proto`
    - ABI: Edit `data/contract/token.abi` (or regenerate from Solidity source)
