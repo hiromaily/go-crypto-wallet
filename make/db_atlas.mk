@@ -70,29 +70,14 @@ atlas-validate:
 # Regenerate migrations from HCL schemas (from scratch)
 # This target must run after atlas schema files `watch.hcl`, `keygen.hcl`, `sign.hcl` are changed
 # WARNING: This deletes all existing migrations and creates new ones
+# If no actual content changes are detected, original files are restored
 # `atlas migrate diff initial_schema`
 .PHONY: atlas-dev-reset
 atlas-dev-reset:
-	@echo "⚠️  WARNING: This will delete all existing migrations!"
-	@echo "⚠️  This is intended for development only."
-	@read -p "Are you sure you want to continue? [y/N] " -n 1 -r; \
-	echo; \
-	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
-		echo "Regenerating migrations from HCL schemas..."; \
-		rm -f tools/atlas/migrations/watch/*.sql tools/atlas/migrations/watch/atlas.sum; \
-		rm -f tools/atlas/migrations/keygen/*.sql tools/atlas/migrations/keygen/atlas.sum; \
-		rm -f tools/atlas/migrations/sign/*.sql tools/atlas/migrations/sign/atlas.sum; \
-		echo "=== Generating watch migration ==="; \
-		(cd tools/atlas && atlas migrate diff initial_schema --config file://atlas.hcl --env $(ATLAS_ENV_WATCH)) || exit 1; \
-		echo "=== Generating keygen migration ==="; \
-		(cd tools/atlas && atlas migrate diff initial_schema --config file://atlas.hcl --env $(ATLAS_ENV_KEYGEN)) || exit 1; \
-		echo "=== Generating sign migration ==="; \
-		(cd tools/atlas && atlas migrate diff initial_schema --config file://atlas.hcl --env $(ATLAS_ENV_SIGN)) || exit 1; \
-		echo "✓ Migrations regenerated. Run 'make reset-docker-db' to apply."; \
-	else \
-		echo "Cancelled."; \
-		exit 1; \
-	fi
+	@ATLAS_ENV_WATCH=$(ATLAS_ENV_WATCH) \
+	ATLAS_ENV_KEYGEN=$(ATLAS_ENV_KEYGEN) \
+	ATLAS_ENV_SIGN=$(ATLAS_ENV_SIGN) \
+	./scripts/db/atlas-dev-reset.sh
 
 # Clean databases and reapply from HCL schemas
 # Uses admin_* environments which allow schema-level operations (drop/create schema)
