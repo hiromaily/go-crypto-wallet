@@ -312,6 +312,12 @@ table "auth_fullpubkey" {
     comment = "full public key"
   }
 
+  column "fingerprint" {
+    type    = varchar(8)
+    null    = true
+    comment = "BIP32 master key fingerprint (8 hex chars)"
+  }
+
   column "updated_at" {
     type    = datetime
     null    = true
@@ -335,6 +341,10 @@ table "auth_fullpubkey" {
 
   index "idx_coin" {
     columns = [column.coin]
+  }
+
+  index "idx_fingerprint" {
+    columns = [column.fingerprint]
   }
 }
 
