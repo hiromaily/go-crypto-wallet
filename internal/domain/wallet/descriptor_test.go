@@ -1,7 +1,14 @@
 package wallet
 
 import (
+	"strings"
 	"testing"
+)
+
+const (
+	// Test xpub keys - shortened for readability in tests
+	testXpub1 = "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL"
+	testTpub1 = "tpubD6NzVbkrYhZ4XgiXtGrdW5XDAPFCL9h7we1vwNCpn8tGbBcgfVYjXyhWo4E1xkh56hjod1RhGjxbaTLV3X4FyWuejifB9jusQ46QzG87VKp"
 )
 
 func TestDescriptorType_String(t *testing.T) {
@@ -106,7 +113,7 @@ func TestValidateDescriptor(t *testing.T) {
 			}
 			if err != nil && tt.errMsg != "" {
 				if err.Error() != tt.errMsg {
-					if !contains(err.Error(), tt.errMsg) {
+					if !strings.Contains(err.Error(), tt.errMsg) {
 						t.Errorf("ValidateDescriptor() error = %v, want error containing %v", err.Error(), tt.errMsg)
 					}
 				}
@@ -196,7 +203,7 @@ func TestValidateDescriptorKey(t *testing.T) {
 				return
 			}
 			if err != nil && tt.errMsg != "" {
-				if !contains(err.Error(), tt.errMsg) {
+				if !strings.Contains(err.Error(), tt.errMsg) {
 					t.Errorf("ValidateDescriptorKey() error = %v, want error containing %v", err.Error(), tt.errMsg)
 				}
 			}
@@ -290,18 +297,4 @@ func TestValidateExtendedPubKey(t *testing.T) {
 			}
 		})
 	}
-}
-
-// Helper function to check if a string contains a substring
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(substr) == 0 || (len(s) > 0 && len(substr) > 0 && findSubstring(s, substr)))
-}
-
-func findSubstring(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
 }

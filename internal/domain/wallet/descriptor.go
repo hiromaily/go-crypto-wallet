@@ -5,6 +5,14 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/btcsuite/btcd/btcutil/hdkeychain"
+)
+
+var (
+	// Package-level compiled regexes for performance
+	fingerprintRegex       = regexp.MustCompile(`^[0-9a-fA-F]{8}$`)
+	derivationSegmentRegex = regexp.MustCompile(`^(\d+['h]?|\*)$`)
 )
 
 // Descriptor represents a Bitcoin output descriptor as defined in BIP380.
@@ -133,8 +141,8 @@ func ValidateDescriptor(desc *Descriptor) error {
 		return errors.New("descriptor must have at least one key")
 	}
 
-	for i, key := range desc.Keys {
-		if err := ValidateDescriptorKey(&key); err != nil {
+	for i := range desc.Keys {
+		if err := ValidateDescriptorKey(&desc.Keys[i]); err != nil {
 			return fmt.Errorf("invalid key at index %d: %w", i, err)
 		}
 	}
@@ -183,7 +191,6 @@ func ValidateFingerprint(fingerprint string) error {
 		return fmt.Errorf("fingerprint must be exactly 8 characters, got %d", len(fingerprint))
 	}
 
-	fingerprintRegex := regexp.MustCompile(`^[0-9a-fA-F]{8}$`)
 	if !fingerprintRegex.MatchString(fingerprint) {
 		return errors.New("fingerprint must be 8 hexadecimal characters")
 	}
@@ -222,11 +229,9 @@ func ValidateDerivationPath(path string) error {
 		return errors.New("derivation path has no segments")
 	}
 
-	// Regex for valid segment: number optionally followed by ' or h, or *
-	segmentRegex := regexp.MustCompile(`^(\d+['h]?|\*)$`)
-
+	// Validate each segment using package-level regex
 	for i, segment := range segments {
-		if !segmentRegex.MatchString(segment) {
+		if !derivationSegmentRegex.MatchString(segment) {
 			return fmt.Errorf("invalid derivation path segment at position %d: %s", i, segment)
 		}
 
@@ -241,38 +246,21 @@ func ValidateDerivationPath(path string) error {
 
 // ValidateExtendedPubKey validates a BIP32 extended public key.
 //
+// Uses btcd library to properly validate the key including Base58 checksum.
 // Valid extended public keys:
 //   - Start with xpub, tpub, ypub, zpub, Ypub, or Zpub
-//   - Are base58-encoded
-//   - Have correct length (111 characters for standard xpub)
+//   - Are base58-encoded with valid checksum
+//   - Have correct structure and length
 func ValidateExtendedPubKey(xpub string) error {
 	if xpub == "" {
 		return errors.New("extended public key is empty")
 	}
 
-	// Check prefix
-	validPrefixes := []string{"xpub", "tpub", "ypub", "zpub", "Ypub", "Zpub"}
-	hasValidPrefix := false
-	for _, prefix := range validPrefixes {
-		if strings.HasPrefix(xpub, prefix) {
-			hasValidPrefix = true
-			break
-		}
-	}
-
-	if !hasValidPrefix {
-		return errors.New("extended public key must start with xpub, tpub, ypub, zpub, Ypub, or Zpub")
-	}
-
-	// Check length (extended keys are typically 111 characters)
-	if len(xpub) < 100 || len(xpub) > 120 {
-		return fmt.Errorf("extended public key has invalid length: %d", len(xpub))
-	}
-
-	// Check base58 characters (alphanumeric, no 0, O, I, l)
-	base58Regex := regexp.MustCompile(`^[1-9A-HJ-NP-Za-km-z]+$`)
-	if !base58Regex.MatchString(xpub) {
-		return errors.New("extended public key contains invalid base58 characters")
+	// Use btcd library to decode and validate the extended public key
+	// This properly validates the Base58 checksum and structure
+	_, err := hdkeychain.NewKeyFromString(xpub)
+	if err != nil {
+		return fmt.Errorf("invalid extended public key: %w", err)
 	}
 
 	return nil

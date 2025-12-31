@@ -21,22 +21,30 @@ import (
 //   - Bech32: wpkh([a1b2c3d4/84'/0'/0']xpub.../0/*)
 //   - Taproot: tr([a1b2c3d4/86'/0'/0']xpub.../0/*)
 type DescriptorParser struct {
-	// keyRegex matches key patterns in descriptors
+	// keyRegex matches key patterns in descriptors with full metadata
 	// Format: [fingerprint/derivation/path]xpub.../path/*
 	keyRegex *regexp.Regexp
+
+	// simpleKeyRegex matches keys without fingerprint/path metadata
+	// Format: xpub... or xpub.../path
+	simpleKeyRegex *regexp.Regexp
 }
 
 // NewDescriptorParser creates a new descriptor parser.
 func NewDescriptorParser() *DescriptorParser {
-	// Regex to match descriptor keys
+	// Regex to match descriptor keys with full metadata
 	// Captures:
 	// 1. Optional [fingerprint/path]
 	// 2. Extended public key (xpub/tpub/etc.)
 	// 3. Optional /remaining/path
 	keyRegex := regexp.MustCompile(`\[([0-9a-fA-F]{8})((?:/\d+['h]?)*)\]([xyztYZ]pub[1-9A-HJ-NP-Za-km-z]+)((?:/\d+['h]?|/\*)*)`)
 
+	// Regex to match simple keys without metadata
+	simpleKeyRegex := regexp.MustCompile(`([xyztYZ]pub[1-9A-HJ-NP-Za-km-z]+)`)
+
 	return &DescriptorParser{
-		keyRegex: keyRegex,
+		keyRegex:       keyRegex,
+		simpleKeyRegex: simpleKeyRegex,
 	}
 }
 
@@ -129,8 +137,7 @@ func (p *DescriptorParser) extractKeys(descriptorStr string) ([]domainWallet.Des
 	if len(matches) == 0 {
 		// Try to find keys without fingerprint/path metadata
 		// Format: just xpub... or xpub.../path
-		simpleKeyRegex := regexp.MustCompile(`([xyztYZ]pub[1-9A-HJ-NP-Za-km-z]+)`)
-		simpleMatches := simpleKeyRegex.FindAllString(descriptorStr, -1)
+		simpleMatches := p.simpleKeyRegex.FindAllString(descriptorStr, -1)
 
 		if len(simpleMatches) == 0 {
 			return nil, errors.New("no keys found")
