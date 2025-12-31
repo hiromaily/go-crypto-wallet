@@ -190,6 +190,8 @@ table "auth_account_key" {
 
 # Table: musig2_nonces
 # MuSig2 nonce commitments for secure storage
+# [SHARED] This table is also defined in: keygen.hcl
+# When modifying, update all schemas for consistency!
 table "musig2_nonces" {
   schema  = schema.sign
   comment = "MuSig2 nonce commitments for secure storage"

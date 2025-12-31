@@ -359,6 +359,8 @@ table "auth_fullpubkey" {
 
 # Table: musig2_nonces
 # MuSig2 nonce commitments for secure storage
+# [SHARED] This table is also defined in: sign.hcl
+# When modifying, update all schemas for consistency!
 table "musig2_nonces" {
   schema  = schema.keygen
   comment = "MuSig2 nonce commitments for secure storage"
