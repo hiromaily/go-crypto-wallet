@@ -172,7 +172,7 @@ atlas-migrate-apply-all:
 # Usage: make atlas-migrate-diff SCHEMA=watch NAME=add_new_column
 # `atlas migrate diff`
 .PHONY: atlas-migrate-diff
-atlas-migrate-diff: check-schema check-name
+atlas-migrate-diff: _check-schema _check-name
 	@echo "=== Generating migration for $(SCHEMA) schema ==="
 	@cd tools/atlas && atlas migrate diff $(NAME) --config file://atlas.hcl --env local_$(SCHEMA)
 	@echo "✓ Migration generated: tools/atlas/migrations/$(SCHEMA)/"
