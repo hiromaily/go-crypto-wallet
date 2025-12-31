@@ -1,6 +1,7 @@
 package key
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"regexp"
@@ -39,14 +40,11 @@ func (f Fingerprint) Bytes() ([]byte, error) {
 		return nil, errors.New("fingerprint must be 8 hex characters")
 	}
 
-	bytes := make([]byte, 4)
-	for i := 0; i < 4; i++ {
-		var b byte
-		_, err := fmt.Sscanf(string(f[i*2:i*2+2]), "%02x", &b)
-		if err != nil {
-			return nil, fmt.Errorf("invalid hex character at position %d: %w", i*2, err)
-		}
-		bytes[i] = b
+	bytes, err := hex.DecodeString(string(f))
+	if err != nil {
+		// This should not happen if the fingerprint was created via NewFingerprint,
+		// but it's a good safeguard against direct casting.
+		return nil, fmt.Errorf("invalid hex string in fingerprint: %w", err)
 	}
 	return bytes, nil
 }

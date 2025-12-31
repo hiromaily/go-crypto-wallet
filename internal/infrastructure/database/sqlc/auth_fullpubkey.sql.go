@@ -11,7 +11,8 @@ import (
 )
 
 const getAuthFullPubkey = `-- name: GetAuthFullPubkey :one
-SELECT id, coin, auth_account, full_public_key, fingerprint, updated_at FROM auth_fullpubkey WHERE coin = ? AND auth_account = ? LIMIT 1
+SELECT id, coin, auth_account, full_public_key, fingerprint, updated_at
+FROM auth_fullpubkey WHERE coin = ? AND auth_account = ? LIMIT 1
 `
 
 type GetAuthFullPubkeyParams struct {
@@ -34,7 +35,8 @@ func (q *Queries) GetAuthFullPubkey(ctx context.Context, arg GetAuthFullPubkeyPa
 }
 
 const getAuthFullPubkeyByFingerprint = `-- name: GetAuthFullPubkeyByFingerprint :one
-SELECT id, coin, auth_account, full_public_key, fingerprint, updated_at FROM auth_fullpubkey WHERE fingerprint = ? LIMIT 1
+SELECT id, coin, auth_account, full_public_key, fingerprint, updated_at
+FROM auth_fullpubkey WHERE fingerprint = ? LIMIT 1
 `
 
 func (q *Queries) GetAuthFullPubkeyByFingerprint(ctx context.Context, fingerprint sql.NullString) (AuthFullpubkey, error) {
