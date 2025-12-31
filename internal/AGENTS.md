@@ -345,8 +345,20 @@ After making code changes in `internal/`, use these commands:
 
 ## References
 
-- Root `AGENTS.md`: Overall project guidelines and coding standards
-- `pkg/AGENTS.md`: Guidelines for `pkg/` directory
+### Root Documentation
+
+- **[Root AGENTS.md](../AGENTS.md)**: Overall project guidelines, navigation, and quick reference
+- **[Core Principles](../agents/core.md)**: Security, error handling, panic usage, and core patterns
+- **[Architecture Guidelines](../agents/architecture.md)**: Clean Architecture principles and layer guidelines
+- **[Coding Standards](../agents/coding-standards.md)**: Linting, formatting, and code style
+- **[Database Management](../agents/database.md)**: Database schema changes and SQLC workflow
+- **[Code Generation](../agents/code-generation.md)**: Auto-generated files and code generation tools
+- **[Workflow Guidelines](../agents/workflow.md)**: Git operations and dependency management
+- **[Testing Guidelines](../agents/testing.md)**: Testing strategy and requirements
+
+### Directory Documentation
+
+- **[Pkg Guidelines](../pkg/AGENTS.md)**: Guidelines for `pkg/` directory
 - `internal/domain/doc.go`: Domain layer documentation
 - `internal/infrastructure/doc.go`: Infrastructure layer documentation
 - `internal/application/doc.go`: Application layer documentation
