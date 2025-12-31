@@ -598,7 +598,7 @@ func (c *container) newSeedRepo() cold.SeedRepositorier {
 	)
 }
 
-func (c *container) newAccountKeyRepo() cold.AccountKeyRepositorier {
+func (c *container) newAccountKeyRepo() cold.BtcAccountKeyRepositorier {
 	return cold.NewAccountKeyRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,

@@ -111,7 +111,7 @@ type createMuSig2AddressUseCase struct {
 	musig2Service      *btc.MuSig2Service
 	chainConfig        *chaincfg.Params
 	authFullPubKeyRepo cold.AuthFullPubkeyRepositorier
-	accountKeyRepo     cold.AccountKeyRepositorier
+	accountKeyRepo     cold.BtcAccountKeyRepositorier
 	multisigAccount    account.MultisigAccounter
 }
 
@@ -120,7 +120,7 @@ func NewCreateMuSig2AddressUseCase(
 	musig2Service *btc.MuSig2Service,
 	chainConfig *chaincfg.Params,
 	authFullPubKeyRepo cold.AuthFullPubkeyRepositorier,
-	accountKeyRepo cold.AccountKeyRepositorier,
+	accountKeyRepo cold.BtcAccountKeyRepositorier,
 	multisigAccount account.MultisigAccounter,
 ) keygenusecase.CreateMuSig2AddressUseCase {
 	return &createMuSig2AddressUseCase{
@@ -280,7 +280,7 @@ func ExampleCreateMuSig2Address() {
 		musig2Service      *btc.MuSig2Service              // Provides MuSig2 cryptographic operations
 		chainConfig        = &chaincfg.TestNet3Params      // Bitcoin network configuration
 		authFullPubKeyRepo cold.AuthFullPubkeyRepositorier // Repository for auth public keys
-		accountKeyRepo     cold.AccountKeyRepositorier     // Repository for account keys
+		accountKeyRepo     cold.BtcAccountKeyRepositorier  // Repository for account keys
 		multisigAccount    account.MultisigAccounter       // Multisig account configuration
 	)
 

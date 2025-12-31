@@ -56,11 +56,6 @@ type EthAccountKeyRepositorier interface {
 	) (int64, error)
 }
 
-// AccountKeyRepositorier is kept for backward compatibility.
-//
-// Deprecated: Use BtcAccountKeyRepositorier instead.
-type AccountKeyRepositorier = BtcAccountKeyRepositorier
-
 // XRPAccountKeyRepositorier is XRPAccountKeyRepository interface
 type XRPAccountKeyRepositorier interface {
 	GetAllAddrStatus(

@@ -20,7 +20,7 @@ type generateKeyUseCase struct {
 	xrp               ripple.Rippler
 	dbConn            *sql.DB
 	coinTypeCode      domainCoin.CoinTypeCode
-	accountKeyRepo    cold.AccountKeyRepositorier
+	accountKeyRepo    cold.BtcAccountKeyRepositorier
 	xrpAccountKeyRepo cold.XRPAccountKeyRepositorier
 }
 
@@ -29,7 +29,7 @@ func NewGenerateKeyUseCase(
 	xrp ripple.Rippler,
 	dbConn *sql.DB,
 	coinTypeCode domainCoin.CoinTypeCode,
-	accountKeyRepo cold.AccountKeyRepositorier,
+	accountKeyRepo cold.BtcAccountKeyRepositorier,
 	xrpAccountKeyRepo cold.XRPAccountKeyRepositorier,
 ) keygenusecase.GenerateKeyUseCase {
 	return &generateKeyUseCase{
