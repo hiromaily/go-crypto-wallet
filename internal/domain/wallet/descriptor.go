@@ -1,6 +1,7 @@
 package wallet
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -76,6 +77,8 @@ func (d DescriptorType) String() string {
 		return "tr"
 	case DescriptorTypeWSH:
 		return "wsh"
+	case DescriptorTypeUnknown:
+		return "unknown"
 	default:
 		return "unknown"
 	}
@@ -97,7 +100,7 @@ type DescriptorKey struct {
 	DerivationPath string
 
 	// ExtendedPubKey is the BIP32 extended public key.
-	// Example: "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL"
+	// Example: "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4..."
 	ExtendedPubKey string
 }
 
@@ -112,22 +115,22 @@ type DescriptorKey struct {
 //   - Checksum is valid (if present)
 func ValidateDescriptor(desc *Descriptor) error {
 	if desc == nil {
-		return fmt.Errorf("descriptor is nil")
+		return errors.New("descriptor is nil")
 	}
 
 	// Validate descriptor type
 	if desc.Type == DescriptorTypeUnknown {
-		return fmt.Errorf("unknown descriptor type")
+		return errors.New("unknown descriptor type")
 	}
 
 	// Validate script is not empty
 	if strings.TrimSpace(desc.Script) == "" {
-		return fmt.Errorf("descriptor script is empty")
+		return errors.New("descriptor script is empty")
 	}
 
 	// Validate keys
 	if len(desc.Keys) == 0 {
-		return fmt.Errorf("descriptor must have at least one key")
+		return errors.New("descriptor must have at least one key")
 	}
 
 	for i, key := range desc.Keys {
@@ -142,7 +145,7 @@ func ValidateDescriptor(desc *Descriptor) error {
 // ValidateDescriptorKey validates a descriptor key.
 func ValidateDescriptorKey(key *DescriptorKey) error {
 	if key == nil {
-		return fmt.Errorf("descriptor key is nil")
+		return errors.New("descriptor key is nil")
 	}
 
 	// Validate fingerprint (8 hex characters)
@@ -161,7 +164,7 @@ func ValidateDescriptorKey(key *DescriptorKey) error {
 
 	// Validate extended public key
 	if key.ExtendedPubKey == "" {
-		return fmt.Errorf("extended public key is empty")
+		return errors.New("extended public key is empty")
 	}
 
 	if err := ValidateExtendedPubKey(key.ExtendedPubKey); err != nil {
@@ -182,7 +185,7 @@ func ValidateFingerprint(fingerprint string) error {
 
 	fingerprintRegex := regexp.MustCompile(`^[0-9a-fA-F]{8}$`)
 	if !fingerprintRegex.MatchString(fingerprint) {
-		return fmt.Errorf("fingerprint must be 8 hexadecimal characters")
+		return errors.New("fingerprint must be 8 hexadecimal characters")
 	}
 
 	return nil
@@ -201,7 +204,7 @@ func ValidateFingerprint(fingerprint string) error {
 //   - "m/86'/0'/0'"
 func ValidateDerivationPath(path string) error {
 	if path == "" {
-		return fmt.Errorf("derivation path is empty")
+		return errors.New("derivation path is empty")
 	}
 
 	// Remove leading "m/" if present
@@ -209,14 +212,14 @@ func ValidateDerivationPath(path string) error {
 
 	// Path must start with /
 	if !strings.HasPrefix(path, "/") {
-		return fmt.Errorf("derivation path must start with /")
+		return errors.New("derivation path must start with /")
 	}
 
 	// Split into segments
 	segments := strings.Split(path, "/")[1:] // Skip empty first element
 
 	if len(segments) == 0 {
-		return fmt.Errorf("derivation path has no segments")
+		return errors.New("derivation path has no segments")
 	}
 
 	// Regex for valid segment: number optionally followed by ' or h, or *
@@ -229,7 +232,7 @@ func ValidateDerivationPath(path string) error {
 
 		// Wildcard can only be in the last segment
 		if segment == "*" && i != len(segments)-1 {
-			return fmt.Errorf("wildcard * can only be in the last segment")
+			return errors.New("wildcard * can only be in the last segment")
 		}
 	}
 
@@ -244,7 +247,7 @@ func ValidateDerivationPath(path string) error {
 //   - Have correct length (111 characters for standard xpub)
 func ValidateExtendedPubKey(xpub string) error {
 	if xpub == "" {
-		return fmt.Errorf("extended public key is empty")
+		return errors.New("extended public key is empty")
 	}
 
 	// Check prefix
@@ -258,7 +261,7 @@ func ValidateExtendedPubKey(xpub string) error {
 	}
 
 	if !hasValidPrefix {
-		return fmt.Errorf("extended public key must start with xpub, tpub, ypub, zpub, Ypub, or Zpub")
+		return errors.New("extended public key must start with xpub, tpub, ypub, zpub, Ypub, or Zpub")
 	}
 
 	// Check length (extended keys are typically 111 characters)
@@ -269,7 +272,7 @@ func ValidateExtendedPubKey(xpub string) error {
 	// Check base58 characters (alphanumeric, no 0, O, I, l)
 	base58Regex := regexp.MustCompile(`^[1-9A-HJ-NP-Za-km-z]+$`)
 	if !base58Regex.MatchString(xpub) {
-		return fmt.Errorf("extended public key contains invalid base58 characters")
+		return errors.New("extended public key contains invalid base58 characters")
 	}
 
 	return nil

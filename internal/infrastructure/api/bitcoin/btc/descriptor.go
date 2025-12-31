@@ -1,6 +1,7 @@
 package btc
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -50,7 +51,7 @@ func NewDescriptorParser() *DescriptorParser {
 // Returns an error if the descriptor is malformed or unsupported.
 func (p *DescriptorParser) Parse(descriptorStr string) (*domainWallet.Descriptor, error) {
 	if strings.TrimSpace(descriptorStr) == "" {
-		return nil, fmt.Errorf("descriptor string is empty")
+		return nil, errors.New("descriptor string is empty")
 	}
 
 	// Strip whitespace
@@ -64,7 +65,7 @@ func (p *DescriptorParser) Parse(descriptorStr string) (*domainWallet.Descriptor
 	}
 
 	// Determine descriptor type
-	descType, err := p.determineType(descriptorStr)
+	descType, err := determineType(descriptorStr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to determine descriptor type: %w", err)
 	}
@@ -76,7 +77,7 @@ func (p *DescriptorParser) Parse(descriptorStr string) (*domainWallet.Descriptor
 	}
 
 	if len(keys) == 0 {
-		return nil, fmt.Errorf("no keys found in descriptor")
+		return nil, errors.New("no keys found in descriptor")
 	}
 
 	descriptor := &domainWallet.Descriptor{
@@ -95,7 +96,7 @@ func (p *DescriptorParser) Parse(descriptorStr string) (*domainWallet.Descriptor
 }
 
 // determineType determines the descriptor type from the descriptor string.
-func (p *DescriptorParser) determineType(descriptorStr string) (domainWallet.DescriptorType, error) {
+func determineType(descriptorStr string) (domainWallet.DescriptorType, error) {
 	// Check for different descriptor types based on prefix
 	switch {
 	case strings.HasPrefix(descriptorStr, "pkh("):
@@ -132,7 +133,7 @@ func (p *DescriptorParser) extractKeys(descriptorStr string) ([]domainWallet.Des
 		simpleMatches := simpleKeyRegex.FindAllString(descriptorStr, -1)
 
 		if len(simpleMatches) == 0 {
-			return nil, fmt.Errorf("no keys found")
+			return nil, errors.New("no keys found")
 		}
 
 		// Create keys without fingerprint/path metadata
@@ -147,16 +148,16 @@ func (p *DescriptorParser) extractKeys(descriptorStr string) ([]domainWallet.Des
 		return keys, nil
 	}
 
-	var keys []domainWallet.DescriptorKey
+	keys := make([]domainWallet.DescriptorKey, 0, len(matches))
 	for _, match := range matches {
 		if len(match) < 5 {
 			continue
 		}
 
 		fingerprint := match[1]
-		accountPath := match[2]      // Path before xpub
-		xpub := match[3]             // Extended public key
-		remainingPath := match[4]    // Path after xpub
+		accountPath := match[2]   // Path before xpub
+		xpub := match[3]          // Extended public key
+		remainingPath := match[4] // Path after xpub
 
 		// Combine paths
 		fullPath := accountPath + remainingPath
@@ -176,7 +177,7 @@ func (p *DescriptorParser) extractKeys(descriptorStr string) ([]domainWallet.Des
 // FormatDescriptor formats a Descriptor object into a descriptor string.
 //
 // This is the inverse operation of Parse().
-func (p *DescriptorParser) FormatDescriptor(desc *domainWallet.Descriptor) (string, error) {
+func FormatDescriptor(desc *domainWallet.Descriptor) (string, error) {
 	if err := domainWallet.ValidateDescriptor(desc); err != nil {
 		return "", fmt.Errorf("invalid descriptor: %w", err)
 	}

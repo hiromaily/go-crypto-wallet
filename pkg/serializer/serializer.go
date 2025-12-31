@@ -82,3 +82,15 @@ func SetDefaultSerializer(s Serializer) {
 func GetDefaultSerializer() Serializer {
 	return defaultSerializer
 }
+
+// EncodeToString encodes data to string using the default serializer.
+// This function provides backward compatibility for existing code.
+func EncodeToString(data any) (string, error) {
+	return defaultSerializer.EncodeToString(data)
+}
+
+// DecodeFromString decodes string to data using the default serializer.
+// This function provides backward compatibility for existing code.
+func DecodeFromString(str string, data any) error {
+	return defaultSerializer.DecodeFromString(str, data)
+}

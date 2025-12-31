@@ -20,11 +20,11 @@ func TestDescriptorParser_Parse(t *testing.T) {
 	parser := NewDescriptorParser()
 
 	tests := []struct {
-		name        string
-		descriptor  string
-		wantType    domainWallet.DescriptorType
+		name         string
+		descriptor   string
+		wantType     domainWallet.DescriptorType
 		wantKeyCount int
-		wantErr     bool
+		wantErr      bool
 	}{
 		{
 			name:         "empty descriptor",
@@ -122,8 +122,6 @@ func TestDescriptorParser_Parse(t *testing.T) {
 }
 
 func TestDescriptorParser_DetermineType(t *testing.T) {
-	parser := NewDescriptorParser()
-
 	tests := []struct {
 		name       string
 		descriptor string
@@ -141,7 +139,7 @@ func TestDescriptorParser_DetermineType(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotType, err := parser.determineType(tt.descriptor)
+			gotType, err := determineType(tt.descriptor)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("determineType() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -157,36 +155,36 @@ func TestDescriptorParser_ExtractKeys(t *testing.T) {
 	parser := NewDescriptorParser()
 
 	tests := []struct {
-		name           string
-		descriptor     string
-		wantKeyCount   int
+		name            string
+		descriptor      string
+		wantKeyCount    int
 		wantFingerprint string
-		wantPath       string
-		wantErr        bool
+		wantPath        string
+		wantErr         bool
 	}{
 		{
-			name:           "key with full metadata",
-			descriptor:     "pkh([a1b2c3d4/44'/0'/0']xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL/0/*)",
-			wantKeyCount:   1,
+			name:            "key with full metadata",
+			descriptor:      "pkh([a1b2c3d4/44'/0'/0']xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL/0/*)",
+			wantKeyCount:    1,
 			wantFingerprint: "a1b2c3d4",
-			wantPath:       "/44'/0'/0'/0/*",
-			wantErr:        false,
+			wantPath:        "/44'/0'/0'/0/*",
+			wantErr:         false,
 		},
 		{
-			name:           "key without path after xpub",
-			descriptor:     "pkh([a1b2c3d4/44'/0'/0']xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL)",
-			wantKeyCount:   1,
+			name:            "key without path after xpub",
+			descriptor:      "pkh([a1b2c3d4/44'/0'/0']xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL)",
+			wantKeyCount:    1,
 			wantFingerprint: "a1b2c3d4",
-			wantPath:       "/44'/0'/0'",
-			wantErr:        false,
+			wantPath:        "/44'/0'/0'",
+			wantErr:         false,
 		},
 		{
-			name:           "multiple keys (multisig)",
-			descriptor:     "wsh(sortedmulti(2,[a1b2c3d4/48'/0'/0'/2']xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL,[b2c3d4e5/48'/0'/0'/2']xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW5/0/*))",
-			wantKeyCount:   2,
+			name:            "multiple keys (multisig)",
+			descriptor:      "wsh(sortedmulti(2,[a1b2c3d4/48'/0'/0'/2']xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL,[b2c3d4e5/48'/0'/0'/2']xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW5/0/*))",
+			wantKeyCount:    2,
 			wantFingerprint: "a1b2c3d4",
-			wantPath:       "/48'/0'/0'/2'",
-			wantErr:        false,
+			wantPath:        "/48'/0'/0'/2'",
+			wantErr:         false,
 		},
 		{
 			name:         "no keys",
@@ -229,8 +227,6 @@ func TestDescriptorParser_ExtractKeys(t *testing.T) {
 }
 
 func TestDescriptorParser_FormatDescriptor(t *testing.T) {
-	parser := NewDescriptorParser()
-
 	tests := []struct {
 		name       string
 		descriptor *domainWallet.Descriptor
@@ -281,7 +277,7 @@ func TestDescriptorParser_FormatDescriptor(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotScript, err := parser.FormatDescriptor(tt.descriptor)
+			gotScript, err := FormatDescriptor(tt.descriptor)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("FormatDescriptor() error = %v, wantErr %v", err, tt.wantErr)
 				return
