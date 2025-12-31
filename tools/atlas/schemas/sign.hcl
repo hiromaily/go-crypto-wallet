@@ -63,6 +63,13 @@ table "auth_account_key" {
     comment = "coin type code"
   }
 
+  column "key_type" {
+    type    = varchar(20)
+    null    = false
+    default = "bip44"
+    comment = "key type (bip44, bip49, bip84, bip86, musig2)"
+  }
+
   column "auth_account" {
     type    = varchar(20)
     null    = false
@@ -172,8 +179,86 @@ table "auth_account_key" {
     columns = [column.coin]
   }
 
+  index "idx_key_type" {
+    columns = [column.key_type]
+  }
+
   index "idx_auth_account" {
     columns = [column.auth_account]
+  }
+}
+
+# Table: musig2_nonces
+# MuSig2 nonce commitments for secure storage
+table "musig2_nonces" {
+  schema  = schema.sign
+  comment = "MuSig2 nonce commitments for secure storage"
+
+  column "id" {
+    type           = bigint
+    null           = false
+    auto_increment = true
+    comment        = "ID"
+  }
+
+  column "signer_id" {
+    type    = varchar(255)
+    null    = false
+    comment = "Signer identifier"
+  }
+
+  column "transaction_id" {
+    type    = varchar(255)
+    null    = false
+    comment = "Transaction identifier"
+  }
+
+  column "public_nonce" {
+    type    = binary(66)
+    null    = false
+    comment = "Public nonce (66 bytes: two 33-byte compressed EC points R1||R2)"
+  }
+
+  column "is_used" {
+    type    = boolean
+    null    = false
+    default = false
+    comment = "true: nonce has been used in signing"
+  }
+
+  column "created_at" {
+    type    = datetime
+    null    = true
+    default = sql("CURRENT_TIMESTAMP")
+    comment = "creation date"
+  }
+
+  column "used_at" {
+    type    = datetime
+    null    = true
+    comment = "date when nonce was marked as used"
+  }
+
+  primary_key {
+    columns = [column.id]
+  }
+
+  index "idx_signer_transaction" {
+    unique  = true
+    columns = [column.signer_id, column.transaction_id]
+    comment = "Prevent duplicate nonces per signer-tx pair (CRITICAL for security)"
+  }
+
+  index "idx_transaction_id" {
+    columns = [column.transaction_id]
+  }
+
+  index "idx_is_used" {
+    columns = [column.is_used]
+  }
+
+  index "idx_created_at" {
+    columns = [column.created_at]
   }
 }
 
