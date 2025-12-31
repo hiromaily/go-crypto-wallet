@@ -65,6 +65,18 @@ atlas-validate:
 
 ###############################################################################
 # Development Workflow Targets
+#
+# Typical workflow after modifying HCL schema files:
+#   1. make atlas-dev-reset     # Regenerate migration SQL files from HCL
+#   2. make reset-docker-db     # Reset Docker volumes and apply migrations
+#      OR
+#      make atlas-dev-clean     # Reset DB only (keep Docker running)
+#
+# Target comparison:
+#   - atlas-dev-reset: Operates on FILES (.sql, atlas.sum)
+#   - atlas-dev-clean: Operates on DATABASE (drop and recreate from HCL)
+#   - reset-docker-db: Operates on DOCKER (recreate volumes and apply migrations)
+#
 ###############################################################################
 
 # Regenerate migrations from HCL schemas (from scratch)
