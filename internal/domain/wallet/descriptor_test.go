@@ -6,9 +6,17 @@ import (
 )
 
 const (
-	// Test xpub keys - shortened for readability in tests
+	// Test xpub keys for descriptor validation tests
+	//nolint:revive // Bitcoin xpub keys are necessarily long (111 chars)
 	testXpub1 = "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL"
+	//nolint:revive // Bitcoin tpub keys are necessarily long (111 chars)
 	testTpub1 = "tpubD6NzVbkrYhZ4XgiXtGrdW5XDAPFCL9h7we1vwNCpn8tGbBcgfVYjXyhWo4E1xkh56hjod1RhGjxbaTLV3X4FyWuejifB9jusQ46QzG87VKp"
+
+	// Invalid xpub keys for testing validation
+	//nolint:revive // Test data must match real xpub format
+	testInvalidPrefixXpub = "apub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL"
+	//nolint:revive // Test data must match real xpub format with invalid checksum
+	testInvalidBase58Xpub = "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcE0"
 )
 
 func TestDescriptorType_String(t *testing.T) {
@@ -52,7 +60,7 @@ func TestValidateDescriptor(t *testing.T) {
 			desc: &Descriptor{
 				Type:   DescriptorTypeUnknown,
 				Script: "unknown(xpub...)",
-				Keys:   []DescriptorKey{{ExtendedPubKey: "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL"}},
+				Keys:   []DescriptorKey{{ExtendedPubKey: testXpub1}},
 			},
 			wantErr: true,
 			errMsg:  "unknown descriptor type",
@@ -62,7 +70,7 @@ func TestValidateDescriptor(t *testing.T) {
 			desc: &Descriptor{
 				Type:   DescriptorTypePKH,
 				Script: "",
-				Keys:   []DescriptorKey{{ExtendedPubKey: "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL"}},
+				Keys:   []DescriptorKey{{ExtendedPubKey: testXpub1}},
 			},
 			wantErr: true,
 			errMsg:  "descriptor script is empty",
@@ -90,13 +98,14 @@ func TestValidateDescriptor(t *testing.T) {
 		{
 			name: "valid descriptor",
 			desc: &Descriptor{
-				Type:   DescriptorTypePKH,
+				Type: DescriptorTypePKH,
+				//nolint:revive // Descriptor string with xpub is necessarily long
 				Script: "pkh([a1b2c3d4/44'/0'/0']xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL/0/*)",
 				Keys: []DescriptorKey{
 					{
 						Fingerprint:    "a1b2c3d4",
 						DerivationPath: "/44'/0'/0'",
-						ExtendedPubKey: "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL",
+						ExtendedPubKey: testXpub1,
 					},
 				},
 			},
@@ -150,7 +159,7 @@ func TestValidateDescriptorKey(t *testing.T) {
 			key: &DescriptorKey{
 				Fingerprint:    "invalid",
 				DerivationPath: "/44'/0'/0'",
-				ExtendedPubKey: "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL",
+				ExtendedPubKey: testXpub1,
 			},
 			wantErr: true,
 			errMsg:  "invalid fingerprint",
@@ -160,7 +169,7 @@ func TestValidateDescriptorKey(t *testing.T) {
 			key: &DescriptorKey{
 				Fingerprint:    "a1b2c3d4",
 				DerivationPath: "44'/0'/0'", // Missing leading /
-				ExtendedPubKey: "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL",
+				ExtendedPubKey: testXpub1,
 			},
 			wantErr: true,
 			errMsg:  "invalid derivation path",
@@ -180,7 +189,7 @@ func TestValidateDescriptorKey(t *testing.T) {
 			key: &DescriptorKey{
 				Fingerprint:    "a1b2c3d4",
 				DerivationPath: "/44'/0'/0'",
-				ExtendedPubKey: "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL",
+				ExtendedPubKey: testXpub1,
 			},
 			wantErr: false,
 		},
@@ -189,7 +198,7 @@ func TestValidateDescriptorKey(t *testing.T) {
 			key: &DescriptorKey{
 				Fingerprint:    "",
 				DerivationPath: "",
-				ExtendedPubKey: "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL",
+				ExtendedPubKey: testXpub1,
 			},
 			wantErr: false,
 		},
@@ -273,20 +282,12 @@ func TestValidateExtendedPubKey(t *testing.T) {
 		xpub    string
 		wantErr bool
 	}{
-		{
-			"valid xpub",
-			"xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL",
-			false,
-		},
-		{
-			"valid tpub",
-			"tpubD6NzVbkrYhZ4XgiXtGrdW5XDAPFCL9h7we1vwNCpn8tGbBcgfVYjXyhWo4E1xkh56hjod1RhGjxbaTLV3X4FyWuejifB9jusQ46QzG87VKp",
-			false,
-		},
+		{"valid xpub", testXpub1, false},
+		{"valid tpub", testTpub1, false},
 		{"empty xpub", "", true},
-		{"invalid prefix", "apub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL", true},
+		{"invalid prefix", testInvalidPrefixXpub, true},
 		{"too short", "xpub123", true},
-		{"invalid base58 chars", "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcE0", true}, // Contains 0
+		{"invalid base58 chars", testInvalidBase58Xpub, true}, // Contains 0 in checksum
 	}
 
 	for _, tt := range tests {

@@ -37,6 +37,7 @@ func NewDescriptorParser() *DescriptorParser {
 	// 1. Optional [fingerprint/path]
 	// 2. Extended public key (xpub/tpub/etc.)
 	// 3. Optional /remaining/path
+	//nolint:revive // Regex pattern necessarily long for descriptor parsing
 	keyRegex := regexp.MustCompile(`\[([0-9a-fA-F]{8})((?:/\d+['h]?)*)\]([xyztYZ]pub[1-9A-HJ-NP-Za-km-z]+)((?:/\d+['h]?|/\*)*)`)
 
 	// Regex to match simple keys without metadata

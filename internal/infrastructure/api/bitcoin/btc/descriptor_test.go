@@ -1,3 +1,4 @@
+//nolint:revive // Bitcoin descriptors and xpub keys are necessarily long test data
 package btc
 
 import (
