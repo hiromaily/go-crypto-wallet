@@ -1,0 +1,130 @@
+#!/bin/bash
+# Extract CREATE TABLE statements from MySQL dump files for sqlc schema files
+#
+# Usage:
+#   ./scripts/db/extract-sqlc-schema.sh <schema_name> <dump_file> <output_file>
+#
+# Example:
+#   ./scripts/db/extract-sqlc-schema.sh watch data/dump/sql/dump_watch.sql tools/sqlc/schemas/extracted_watch.sql
+
+set -euo pipefail
+
+if [ $# -ne 3 ]; then
+    echo "Usage: $0 <schema_name> <dump_file> <output_file>" >&2
+    echo "" >&2
+    echo "Extracts CREATE TABLE statements from MySQL dump file and formats them for sqlc." >&2
+    echo "" >&2
+    echo "Arguments:" >&2
+    echo "  schema_name  Schema name (watch, keygen, or sign)" >&2
+    echo "  dump_file    Path to MySQL dump file" >&2
+    echo "  output_file  Path to output sqlc schema file" >&2
+    exit 1
+fi
+
+SCHEMA_NAME="$1"
+DUMP_FILE="$2"
+OUTPUT_FILE="$3"
+
+if [ ! -f "$DUMP_FILE" ]; then
+    echo "Error: Dump file not found: $DUMP_FILE" >&2
+    exit 1
+fi
+
+# Create output directory if it doesn't exist
+mkdir -p "$(dirname "$OUTPUT_FILE")"
+
+# Write header
+echo "-- Extracted from $(basename "$DUMP_FILE")" > "$OUTPUT_FILE"
+echo "" >> "$OUTPUT_FILE"
+
+# Determine which tables to exclude based on schema
+# - atlas_schema_revisions: excluded from all schemas (not needed for sqlc)
+# - seed: excluded from sign schema (exists in keygen, avoid duplication)
+EXCLUDE_PATTERNS="atlas_schema_revisions"
+if [ "$SCHEMA_NAME" = "sign" ]; then
+    EXCLUDE_PATTERNS="$EXCLUDE_PATTERNS|seed"
+fi
+
+# Extract CREATE TABLE statements, excluding specified tables
+# This awk script:
+# 1. Tracks state with skip flag (for excluded tables) and in_create flag (for CREATE TABLE blocks)
+# 2. Sets skip=1 when encountering excluded table patterns
+# 3. Skips all lines until the CREATE TABLE block ends with ';'
+# 4. Extracts and prints only non-excluded CREATE TABLE statements
+# 5. Adds blank line after each CREATE TABLE statement
+awk -v exclude_patterns="$EXCLUDE_PATTERNS" '
+BEGIN {
+    skip = 0
+    in_block = 0
+    # Split exclude patterns by | and create array
+    split(exclude_patterns, patterns, "|")
+}
+{
+    # Handle CREATE TABLE start
+    if (/^CREATE TABLE/) {
+        # Check if this CREATE TABLE matches any exclude pattern
+        matched = 0
+        for (i in patterns) {
+            if ($0 ~ patterns[i]) {
+                matched = 1
+                break
+            }
+        }
+        
+        if (matched) {
+            skip = 1
+            in_block = 1
+            next
+        } else {
+            skip = 0
+            in_block = 1
+            print
+            next
+        }
+    }
+    
+    # Handle end of CREATE TABLE block (when skip is set)
+    if (skip && /;$$/) {
+        skip = 0
+        in_block = 0
+        next
+    }
+    
+    # Skip lines when skip flag is set
+    if (skip) {
+        next
+    }
+    
+    # Print lines within CREATE TABLE block
+    if (in_block) {
+        print
+        if (/;$$/) {
+            print ""
+            in_block = 0
+        }
+    }
+}
+' "$DUMP_FILE" | \
+# Clean up formatting for sqlc:
+# - Remove DROP TABLE statements
+# - Remove MySQL conditional comments
+# - Remove backticks (sqlc prefers without them)
+# - Remove comment-only lines
+sed -E \
+    -e '/^DROP TABLE/d' \
+    -e '/^\/\*![0-9]+ SET/d' \
+    -e '/^\/\*!40101 SET/d' \
+    -e '/^\/\*!40103 SET/d' \
+    -e '/^\/\*!40014 SET/d' \
+    -e '/^\/\*!40111 SET/d' \
+    -e '/^\/\*!50503 SET/d' \
+    -e 's/\/\*![0-9]+\s+//g' \
+    -e 's/\s+\*\///g' \
+    -e 's/`([^`]+)`/\1/g' \
+    -e '/^--$/d' \
+    -e '/^-- Table structure for table/d' \
+    -e '/^-- Dump completed/d' \
+    >> "$OUTPUT_FILE"
+
+echo "Extracted schema written to: $OUTPUT_FILE" >&2
+

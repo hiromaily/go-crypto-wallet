@@ -373,6 +373,154 @@ This project uses several code generation tools.
 
 **Note**: SQLC generates type-safe Go code from SQL queries and schemas.
 
+## Database Schema Management
+
+When modifying database schemas, follow this workflow to ensure sqlc schema files stay in sync with the actual database:
+
+### Workflow for Database Schema Changes
+
+1. **Update Atlas HCL Schema Files**
+   - Modify schema definitions in `tools/atlas/schemas/*.hcl` (watch.hcl, keygen.hcl, sign.hcl)
+   - Format and lint schemas:
+     ```bash
+     make atlas-fmt
+     make atlas-lint
+     ```
+
+2. **Clean Database State and Start Services**
+   - **CRITICAL**: Start from a clean state by removing all database volumes:
+     ```bash
+     docker compose down -v
+     docker volume rm -f go-crypto-wallet_wallet-db 2>/dev/null || true
+     ```
+   - Start all database-related services (database and migration services):
+     ```bash
+     docker compose up -d wallet-db wallet-db-migrate-watch wallet-db-migrate-keygen wallet-db-migrate-sign
+     ```
+   - Wait for all services to complete (migration services will exit after applying migrations)
+   - Verify database is ready:
+     ```bash
+     docker compose ps wallet-db
+     ```
+     Ensure the database shows as "healthy"
+
+3. **Export Schema Dumps**
+   - Generate MySQL dump files for all schemas:
+     ```bash
+     make dump-schema-all
+     ```
+     This creates:
+     - `data/dump/sql/dump_watch.sql`
+     - `data/dump/sql/dump_keygen.sql`
+     - `data/dump/sql/dump_sign.sql`
+
+4. **Backup Existing sqlc Schema Files**
+   - Before replacing, backup existing schema files:
+     ```bash
+     mkdir -p tools/sqlc/schemas_backup
+     cp tools/sqlc/schemas/0[1-9]_*.sql tools/sqlc/schemas/1[0-2]_*.sql tools/sqlc/schemas_backup/ 2>/dev/null || true
+     ```
+
+5. **Extract sqlc Schema Files**
+   - Remove existing extracted files (if any):
+     ```bash
+     rm -f tools/sqlc/schemas/extracted_*.sql
+     ```
+   - Extract CREATE TABLE statements from dump files:
+     ```bash
+     make extract-sqlc-schema-all
+     ```
+     This generates:
+     - `tools/sqlc/schemas/extracted_watch.sql`
+     - `tools/sqlc/schemas/extracted_keygen.sql`
+     - `tools/sqlc/schemas/extracted_sign.sql`
+   
+   **Note**: The extraction process automatically:
+   - Removes SET statements and other metadata
+   - Removes MySQL conditional comments
+   - Removes backticks (sqlc prefers without them)
+   - Adds blank lines between CREATE TABLE statements
+   - Handles duplicate tables (e.g., `atlas_schema_revisions`, `seed`) by keeping only one instance
+
+6. **Remove Old Schema Files and Verify**
+   - Remove old numbered schema files (01_*.sql through 12_*.sql):
+     ```bash
+     rm -f tools/sqlc/schemas/0[1-9]_*.sql tools/sqlc/schemas/1[0-2]_*.sql
+     ```
+   - Verify only extracted files remain:
+     ```bash
+     ls -1 tools/sqlc/schemas/*.sql
+     ```
+     Should show only `extracted_*.sql` files
+
+7. **Generate sqlc Code and Verify**
+   - Run sqlc to generate Go code:
+     ```bash
+     make sqlc
+     ```
+     **CRITICAL**: This must complete without errors. If errors occur, the extraction process may have missed required tables or columns.
+   
+   - Verify code compiles:
+     ```bash
+     make check-build
+     ```
+     **CRITICAL**: The code must compile successfully.
+   
+   - Run tests to ensure existing functionality still works:
+     ```bash
+     make gotest
+     ```
+     **CRITICAL**: All existing tests must pass. This verifies that no required information was lost during extraction.
+
+8. **Verify No Information Loss**
+   - Compare extracted schemas with backup to ensure all tables are present:
+     ```bash
+     # Count CREATE TABLE statements in backup vs extracted
+     grep -c "^CREATE TABLE" tools/sqlc/schemas_backup/*.sql
+     grep -c "^CREATE TABLE" tools/sqlc/schemas/extracted_*.sql
+     ```
+   - Verify critical tables exist (e.g., `account_key`, `auth_account_key`, `musig2_nonces`, `seed`, etc.)
+   - Verify critical columns exist (e.g., `key_type` in `account_key` and `auth_account_key`)
+
+### Complete Verification Workflow
+
+```bash
+# 1. Clean state
+docker compose down -v
+docker volume rm -f go-crypto-wallet_wallet-db 2>/dev/null || true
+
+# 2. Start all database services
+docker compose up -d wallet-db wallet-db-migrate-watch wallet-db-migrate-keygen wallet-db-migrate-sign
+
+# 3. Wait for services to complete and verify
+docker compose ps wallet-db
+
+# 4. Export and extract schemas
+make dump-schema-all
+rm -f tools/sqlc/schemas/extracted_*.sql
+make extract-sqlc-schema-all
+
+# 5. Backup and remove old schema files
+mkdir -p tools/sqlc/schemas_backup
+cp tools/sqlc/schemas/0[1-9]_*.sql tools/sqlc/schemas/1[0-2]_*.sql tools/sqlc/schemas_backup/ 2>/dev/null || true
+rm -f tools/sqlc/schemas/0[1-9]_*.sql tools/sqlc/schemas/1[0-2]_*.sql
+
+# 6. Generate and verify
+make sqlc                    # Must succeed without errors
+make check-build            # Must succeed
+make gotest                 # All tests must pass
+```
+
+### Important Notes
+
+- **Always start from clean state**: Remove volumes before testing to ensure no stale data affects results
+- **Start all migration services**: Use `docker compose up` with all migration services to ensure schemas are fully applied
+- **Verify extraction completeness**: The `make sqlc` command must succeed. If it fails, required tables or columns may be missing
+- **Test existing functionality**: Always run `make gotest` to ensure no information was lost
+- **Atlas schemas are source of truth**: The HCL schema files (`tools/atlas/schemas/*.hcl`) define the database structure
+- **Never manually edit extracted schema files**: They are generated from database dumps
+- **Handle duplicate tables**: If a table exists in multiple schemas (e.g., `seed` in both keygen and sign), keep only one instance in the extracted files
+
 ### Protocol Buffer Code (Go)
 
 **Tool**: [buf](https://buf.build/) with protoc-gen-go and protoc-gen-go-grpc  

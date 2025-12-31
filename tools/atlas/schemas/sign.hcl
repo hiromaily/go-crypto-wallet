@@ -65,6 +65,13 @@ table "auth_account_key" {
     comment = "coin type code"
   }
 
+  column "key_type" {
+    type    = varchar(20)
+    null    = false
+    default = "bip44"
+    comment = "key type (bip44, bip49, bip84, bip86, musig2)"
+  }
+
   column "auth_account" {
     type    = varchar(20)
     null    = false
@@ -176,6 +183,10 @@ table "auth_account_key" {
 
   index "idx_auth_account" {
     columns = [column.auth_account]
+  }
+
+  index "idx_key_type" {
+    columns = [column.key_type]
   }
 }
 
