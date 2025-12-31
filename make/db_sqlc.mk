@@ -28,6 +28,14 @@ dump-schema-all: dump-schema-watch dump-schema-keygen dump-schema-sign
 # Schema Extraction Targets (for sqlc)
 ###############################################################################
 
+# Clean old sqlc schema files before extracting new ones
+# This removes manually created schema files to prevent duplication errors
+.PHONY: clean-sqlc-schemas
+clean-sqlc-schemas:
+	@echo "Cleaning old sqlc schema files..."
+	@rm -f tools/sqlc/schemas/*.sql
+	@echo "Done."
+
 # Extract sqlc schema from watch dump file
 # This extracts CREATE TABLE statements from MySQL dump and formats them for sqlc:
 # - Excludes atlas_schema_revisions table (not needed for sqlc)
@@ -40,7 +48,7 @@ extract-sqlc-schema-watch: dump-schema-watch
 	@scripts/db/extract-sqlc-schema.sh \
 		watch \
 		data/dump/sql/dump_watch.sql \
-		tools/sqlc/schemas/extracted_watch.sql
+		tools/sqlc/schemas/01_watch.sql
 
 # Extract sqlc schema from keygen dump file
 # This extracts CREATE TABLE statements from MySQL dump and formats them for sqlc:
@@ -54,12 +62,13 @@ extract-sqlc-schema-keygen: dump-schema-keygen
 	@scripts/db/extract-sqlc-schema.sh \
 		keygen \
 		data/dump/sql/dump_keygen.sql \
-		tools/sqlc/schemas/extracted_keygen.sql
+		tools/sqlc/schemas/02_keygen.sql
 
 # Extract sqlc schema from sign dump file
 # This extracts CREATE TABLE statements from MySQL dump and formats them for sqlc:
 # - Excludes atlas_schema_revisions table (not needed for sqlc)
 # - Excludes seed table (exists in keygen schema, avoid duplication)
+# - Excludes musig2_nonces table (exists in keygen schema, avoid duplication)
 # - Extracts CREATE TABLE statements from dump file
 # - Removes backticks (sqlc prefers without them)
 # - Removes MySQL conditional comments
@@ -69,11 +78,15 @@ extract-sqlc-schema-sign: dump-schema-sign
 	@scripts/db/extract-sqlc-schema.sh \
 		sign \
 		data/dump/sql/dump_sign.sql \
-		tools/sqlc/schemas/extracted_sign.sql
+		tools/sqlc/schemas/03_sign.sql
 
 # Extract sqlc schemas from all dump files
+# This cleans old schema files first, then extracts new ones from database dumps
 .PHONY: extract-sqlc-schema-all
-extract-sqlc-schema-all: extract-sqlc-schema-watch extract-sqlc-schema-keygen extract-sqlc-schema-sign
+extract-sqlc-schema-all: clean-sqlc-schemas
+	@$(MAKE) extract-sqlc-schema-watch
+	@$(MAKE) extract-sqlc-schema-keygen
+	@$(MAKE) extract-sqlc-schema-sign
 
 ###############################################################################
 # Generate sqlc code

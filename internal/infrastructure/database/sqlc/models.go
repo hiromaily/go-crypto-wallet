@@ -875,7 +875,7 @@ type Seed struct {
 	UpdatedAt sql.NullTime
 }
 
-// table for eth/xrp transaction info
+// table for eth transaction info
 type Tx struct {
 	// transaction ID
 	ID int64

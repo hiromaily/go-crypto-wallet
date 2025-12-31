@@ -40,9 +40,10 @@ echo "" >> "$OUTPUT_FILE"
 # Determine which tables to exclude based on schema
 # - atlas_schema_revisions: excluded from all schemas (not needed for sqlc)
 # - seed: excluded from sign schema (exists in keygen, avoid duplication)
+# - musig2_nonces: excluded from sign schema (exists in keygen, avoid duplication)
 EXCLUDE_PATTERNS="atlas_schema_revisions"
 if [ "$SCHEMA_NAME" = "sign" ]; then
-    EXCLUDE_PATTERNS="$EXCLUDE_PATTERNS|seed"
+    EXCLUDE_PATTERNS="$EXCLUDE_PATTERNS|seed|musig2_nonces"
 fi
 
 # Extract CREATE TABLE statements, excluding specified tables
