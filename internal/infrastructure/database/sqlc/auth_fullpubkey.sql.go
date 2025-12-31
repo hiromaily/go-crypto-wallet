@@ -11,7 +11,7 @@ import (
 )
 
 const getAuthFullPubkey = `-- name: GetAuthFullPubkey :one
-SELECT id, coin, auth_account, full_public_key, updated_at FROM auth_fullpubkey WHERE coin = ? AND auth_account = ? LIMIT 1
+SELECT id, coin, auth_account, full_public_key, fingerprint, updated_at FROM auth_fullpubkey WHERE coin = ? AND auth_account = ? LIMIT 1
 `
 
 type GetAuthFullPubkeyParams struct {
@@ -27,21 +27,61 @@ func (q *Queries) GetAuthFullPubkey(ctx context.Context, arg GetAuthFullPubkeyPa
 		&i.Coin,
 		&i.AuthAccount,
 		&i.FullPublicKey,
+		&i.Fingerprint,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getAuthFullPubkeyByFingerprint = `-- name: GetAuthFullPubkeyByFingerprint :one
+SELECT id, coin, auth_account, full_public_key, fingerprint, updated_at FROM auth_fullpubkey WHERE fingerprint = ? LIMIT 1
+`
+
+func (q *Queries) GetAuthFullPubkeyByFingerprint(ctx context.Context, fingerprint sql.NullString) (AuthFullpubkey, error) {
+	row := q.db.QueryRowContext(ctx, getAuthFullPubkeyByFingerprint, fingerprint)
+	var i AuthFullpubkey
+	err := row.Scan(
+		&i.ID,
+		&i.Coin,
+		&i.AuthAccount,
+		&i.FullPublicKey,
+		&i.Fingerprint,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const insertAuthFullPubkey = `-- name: InsertAuthFullPubkey :execresult
-INSERT INTO auth_fullpubkey (coin, auth_account, full_public_key) VALUES (?, ?, ?)
+INSERT INTO auth_fullpubkey (coin, auth_account, full_public_key, fingerprint) VALUES (?, ?, ?, ?)
 `
 
 type InsertAuthFullPubkeyParams struct {
 	Coin          AuthFullpubkeyCoin
 	AuthAccount   string
 	FullPublicKey string
+	Fingerprint   sql.NullString
 }
 
 func (q *Queries) InsertAuthFullPubkey(ctx context.Context, arg InsertAuthFullPubkeyParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertAuthFullPubkey, arg.Coin, arg.AuthAccount, arg.FullPublicKey)
+	return q.db.ExecContext(ctx, insertAuthFullPubkey,
+		arg.Coin,
+		arg.AuthAccount,
+		arg.FullPublicKey,
+		arg.Fingerprint,
+	)
+}
+
+const updateAuthFullPubkeyFingerprint = `-- name: UpdateAuthFullPubkeyFingerprint :exec
+UPDATE auth_fullpubkey SET fingerprint = ?, updated_at = CURRENT_TIMESTAMP WHERE coin = ? AND auth_account = ?
+`
+
+type UpdateAuthFullPubkeyFingerprintParams struct {
+	Fingerprint sql.NullString
+	Coin        AuthFullpubkeyCoin
+	AuthAccount string
+}
+
+func (q *Queries) UpdateAuthFullPubkeyFingerprint(ctx context.Context, arg UpdateAuthFullPubkeyFingerprintParams) error {
+	_, err := q.db.ExecContext(ctx, updateAuthFullPubkeyFingerprint, arg.Fingerprint, arg.Coin, arg.AuthAccount)
+	return err
 }
