@@ -16,13 +16,13 @@ import (
 
 type importPrivateKeyUseCase struct {
 	btc            bitcoin.Bitcoiner
-	accountKeyRepo cold.AccountKeyRepositorier
+	accountKeyRepo cold.BtcAccountKeyRepositorier
 }
 
 // NewImportPrivateKeyUseCase creates a new ImportPrivateKeyUseCase
 func NewImportPrivateKeyUseCase(
 	btc bitcoin.Bitcoiner,
-	accountKeyRepo cold.AccountKeyRepositorier,
+	accountKeyRepo cold.BtcAccountKeyRepositorier,
 ) keygenusecase.ImportPrivateKeyUseCase {
 	return &importPrivateKeyUseCase{
 		btc:            btc,

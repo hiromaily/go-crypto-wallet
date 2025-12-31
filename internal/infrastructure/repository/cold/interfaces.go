@@ -17,11 +17,6 @@ type BtcAccountKeyRepositorier = persistence.BtcAccountKeyRepositorier
 // EthAccountKeyRepositorier is EthAccountKeyRepository interface for ETH
 type EthAccountKeyRepositorier = persistence.EthAccountKeyRepositorier
 
-// AccountKeyRepositorier is kept for backward compatibility.
-//
-// Deprecated: Use BtcAccountKeyRepositorier instead.
-type AccountKeyRepositorier = persistence.AccountKeyRepositorier
-
 // XRPAccountKeyRepositorier is XRPAccountKeyRepository interface
 type XRPAccountKeyRepositorier = persistence.XRPAccountKeyRepositorier
 

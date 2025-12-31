@@ -17,13 +17,13 @@ import (
 
 type importPrivateKeyUseCase struct {
 	eth            ethereum.Ethereumer
-	accountKeyRepo cold.AccountKeyRepositorier
+	accountKeyRepo cold.EthAccountKeyRepositorier
 }
 
 // NewImportPrivateKeyUseCase creates a new ImportPrivateKeyUseCase
 func NewImportPrivateKeyUseCase(
 	eth ethereum.Ethereumer,
-	accountKeyRepo cold.AccountKeyRepositorier,
+	accountKeyRepo cold.EthAccountKeyRepositorier,
 ) keygenusecase.ImportPrivateKeyUseCase {
 	return &importPrivateKeyUseCase{
 		eth:            eth,
@@ -54,15 +54,15 @@ func (u *importPrivateKeyUseCase) Import(
 		logger.Debug(
 			"target records",
 			"account_type", input.AccountType.String(),
-			"address", record.P2pkhAddress,
-			"private key", record.WalletImportFormat)
+			"address", record.Address,
+			"private key", record.PrivateKey)
 
 		// Convert private key to ECDSA
-		ecdsaKey, convertErr := u.eth.ToECDSA(record.WalletImportFormat)
+		ecdsaKey, convertErr := u.eth.ToECDSA(record.PrivateKey)
 		if convertErr != nil {
 			logger.Warn(
 				"fail to call eth.ToECDSA()",
-				"private key", record.WalletImportFormat,
+				"private key", record.PrivateKey,
 				"error", convertErr)
 			return fmt.Errorf("fail to call eth.ToECDSA(): %w", convertErr)
 		}
@@ -77,7 +77,7 @@ func (u *importPrivateKeyUseCase) Import(
 			// Because database stores status, import run again by same command for this key
 			logger.Warn(
 				"fail to call ks.ImportECDSA()",
-				"private key", record.WalletImportFormat,
+				"private key", record.PrivateKey,
 				"error", err)
 			return fmt.Errorf("fail to call ks.ImportECDSA(): %w", err)
 		}
@@ -89,22 +89,22 @@ func (u *importPrivateKeyUseCase) Import(
 		)
 
 		// Check generated address
-		if acct.Address.Hex() != record.P2pkhAddress {
+		if acct.Address.Hex() != record.Address {
 			logger.Warn("inconsistency between generated address",
-				"old_address", record.P2pkhAddress,
+				"old_address", record.Address,
 				"new_address", acct.Address.Hex(),
 			)
 		}
 
 		// Update DB
 		_, err = u.accountKeyRepo.UpdateAddrStatus(
-			input.AccountType, address.AddrStatusPrivKeyImported, []string{record.WalletImportFormat})
+			input.AccountType, address.AddrStatusPrivKeyImported, []string{record.PrivateKey})
 		if err != nil {
 			logger.Error(
 				"fail to call accountKeyRepo.UpdateAddrStatus(), but privKey import is done",
-				"target_table", "account_key_account",
+				"target_table", "eth_account_key",
 				"account_type", input.AccountType.String(),
-				"private key", record.WalletImportFormat,
+				"private key", record.PrivateKey,
 				"error", err)
 		}
 	}

@@ -20,7 +20,6 @@ type generateKeyUseCase struct {
 	xrp               ripple.Rippler
 	dbConn            *sql.DB
 	coinTypeCode      domainCoin.CoinTypeCode
-	accountKeyRepo    cold.AccountKeyRepositorier
 	xrpAccountKeyRepo cold.XRPAccountKeyRepositorier
 }
 
@@ -29,14 +28,12 @@ func NewGenerateKeyUseCase(
 	xrp ripple.Rippler,
 	dbConn *sql.DB,
 	coinTypeCode domainCoin.CoinTypeCode,
-	accountKeyRepo cold.AccountKeyRepositorier,
 	xrpAccountKeyRepo cold.XRPAccountKeyRepositorier,
 ) keygenusecase.GenerateKeyUseCase {
 	return &generateKeyUseCase{
 		xrp:               xrp,
 		dbConn:            dbConn,
 		coinTypeCode:      coinTypeCode,
-		accountKeyRepo:    accountKeyRepo,
 		xrpAccountKeyRepo: xrpAccountKeyRepo,
 	}
 }
@@ -96,11 +93,9 @@ func (u *generateKeyUseCase) Generate(ctx context.Context, input keygenusecase.G
 			AllocatedID:      0,
 		})
 
-		// Update account_key table for address as ripple address
-		_, err = u.accountKeyRepo.UpdateAddr(input.AccountType, generatedKey.Result.AccountID, v.P2SHSegWitAddr)
-		if err != nil {
-			return fmt.Errorf("fail to call accountKeyRepo.UpdateAddr(): %w", err)
-		}
+		// TODO: Legacy cross-coin table update - removed as XRP should only use XRP repository
+		// Previously this was updating the BTC account_key table with XRP address
+		// This functionality may need to be reimplemented if it was intentional
 	}
 
 	// Insert keys to DB

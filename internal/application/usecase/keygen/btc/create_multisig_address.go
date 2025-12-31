@@ -16,7 +16,7 @@ import (
 type createMultisigAddressUseCase struct {
 	btc                bitcoin.Bitcoiner
 	authFullPubKeyRepo cold.AuthFullPubkeyRepositorier
-	accountKeyRepo     cold.AccountKeyRepositorier
+	accountKeyRepo     cold.BtcAccountKeyRepositorier
 	multisigAccount    account.MultisigAccounter
 }
 
@@ -24,7 +24,7 @@ type createMultisigAddressUseCase struct {
 func NewCreateMultisigAddressUseCase(
 	btc bitcoin.Bitcoiner,
 	authFullPubKeyRepo cold.AuthFullPubkeyRepositorier,
-	accountKeyRepo cold.AccountKeyRepositorier,
+	accountKeyRepo cold.BtcAccountKeyRepositorier,
 	multisigAccount account.MultisigAccounter,
 ) keygenusecase.CreateMultisigAddressUseCase {
 	return &createMultisigAddressUseCase{
