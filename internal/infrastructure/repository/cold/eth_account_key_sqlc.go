@@ -92,8 +92,14 @@ func (r *EthAccountKeyRepositorySqlc) GetByAddress(addr string) (*sqlc.EthAccoun
 func (r *EthAccountKeyRepositorySqlc) InsertBulk(items []*sqlc.EthAccountKey) error {
 	ctx := context.Background()
 
+	tx, err := r.dbConn.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	qtx := r.queries.WithTx(tx)
+
 	for _, item := range items {
-		_, err := r.queries.InsertEthAccountKey(ctx, sqlc.InsertEthAccountKeyParams{
+		_, err := qtx.InsertEthAccountKey(ctx, sqlc.InsertEthAccountKeyParams{
 			Account:       item.Account,
 			Address:       item.Address,
 			FullPublicKey: item.FullPublicKey,
@@ -102,8 +108,13 @@ func (r *EthAccountKeyRepositorySqlc) InsertBulk(items []*sqlc.EthAccountKey) er
 			AddrStatus:    item.AddrStatus,
 		})
 		if err != nil {
+			_ = tx.Rollback()
 			return fmt.Errorf("failed to call InsertEthAccountKey(): %w", err)
 		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil
@@ -114,25 +125,37 @@ func (r *EthAccountKeyRepositorySqlc) UpdateAddrStatus(
 	accountType domainAccount.AccountType, addrStatus address.AddrStatus, privateKeys []string,
 ) (int64, error) {
 	ctx := context.Background()
-	var totalAffected int64
 
+	tx, err := r.dbConn.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	qtx := r.queries.WithTx(tx)
+
+	var totalAffected int64
 	// sqlc doesn't support IN clauses with variable arguments, so update one at a time
 	for _, privateKey := range privateKeys {
-		result, err := r.queries.UpdateEthAccountKeyAddrStatus(ctx, sqlc.UpdateEthAccountKeyAddrStatusParams{
+		result, err := qtx.UpdateEthAccountKeyAddrStatus(ctx, sqlc.UpdateEthAccountKeyAddrStatusParams{
 			AddrStatus: addrStatus.Int8(),
 			UpdatedAt:  sql.NullTime{Time: time.Now(), Valid: true},
 			Account:    sqlc.EthAccountKeyAccount(accountType.String()),
 			PrivateKey: privateKey,
 		})
 		if err != nil {
+			_ = tx.Rollback()
 			return 0, fmt.Errorf("failed to call UpdateEthAccountKeyAddrStatus(): %w", err)
 		}
 
 		affected, err := result.RowsAffected()
 		if err != nil {
+			_ = tx.Rollback()
 			return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
 		}
 		totalAffected += affected
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return totalAffected, nil
