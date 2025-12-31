@@ -612,6 +612,12 @@ func (c *container) newXRPAccountKeyRepo() cold.XRPAccountKeyRepositorier {
 	)
 }
 
+func (c *container) newEthAccountKeyRepo() cold.EthAccountKeyRepositorier {
+	return cold.NewEthAccountKeyRepositorySqlc(
+		c.pkgContainer.NewMySQLClient(),
+	)
+}
+
 func (c *container) newAuthFullPubKeyRepo() cold.AuthFullPubkeyRepositorier {
 	return cold.NewAuthFullPubkeyRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
@@ -1050,7 +1056,7 @@ func (c *container) newBTCKeygenImportFullPubkeyUseCase() keygenusecase.ImportFu
 func (c *container) newETHKeygenImportPrivateKeyUseCase() keygenusecase.ImportPrivateKeyUseCase {
 	return keygenusecaseeth.NewImportPrivateKeyUseCase(
 		c.newETH(),
-		c.newAccountKeyRepo(),
+		c.newEthAccountKeyRepo(),
 	)
 }
 
@@ -1061,7 +1067,6 @@ func (c *container) newXRPKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUs
 		c.newXRP(),
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
-		c.newAccountKeyRepo(),
 		c.newXRPAccountKeyRepo(),
 	)
 }
