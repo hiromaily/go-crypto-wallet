@@ -1,0 +1,30 @@
+-- Extracted from dump_sign.sql
+
+CREATE TABLE auth_account_key (
+  id smallint NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  coin enum('btc','bch') NOT NULL COMMENT 'coin type code',
+  key_type varchar(20) NOT NULL DEFAULT 'bip44' COMMENT 'key type (bip44, bip49, bip84, bip86, musig2)',
+  auth_account varchar(20) NOT NULL COMMENT 'auth type',
+  p2pkh_address varchar(255) NOT NULL COMMENT 'address as standard pubkey script that Pays To PubKey Hash (P2PKH)',
+  p2sh_segwit_address varchar(255) NOT NULL COMMENT 'p2sh-segwit address',
+  bech32_address varchar(255) NOT NULL COMMENT 'bech32 address',
+  taproot_address varchar(255) DEFAULT NULL COMMENT 'taproot address (BIP86)',
+  full_public_key varchar(255) NOT NULL COMMENT 'full public key',
+  multisig_address varchar(255) NOT NULL DEFAULT '' COMMENT 'multisig address',
+  redeem_script varchar(255) NOT NULL DEFAULT '' COMMENT 'redeedScript after multisig address generated',
+  wallet_import_format varchar(255) NOT NULL COMMENT 'WIF',
+  idx bigint NOT NULL COMMENT 'index for hd wallet',
+  addr_status tinyint NOT NULL DEFAULT '0' COMMENT 'progress status for address generating',
+  updated_at datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'updated date',
+  PRIMARY KEY (id),
+  UNIQUE KEY idex_coin_auth_account (coin,auth_account),
+  UNIQUE KEY idx_bech32_address (bech32_address),
+  UNIQUE KEY idx_p2pkh_address (p2pkh_address),
+  UNIQUE KEY idx_p2sh_segwit_address (p2sh_segwit_address),
+  UNIQUE KEY idx_wallet_import_format (wallet_import_format),
+  KEY idx_auth_account (auth_account),
+  KEY idx_coin (coin),
+  KEY idx_key_type (key_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='table for keys for auth account';
+
+
