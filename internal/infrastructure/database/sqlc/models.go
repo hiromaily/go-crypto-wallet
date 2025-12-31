@@ -711,6 +711,8 @@ type AuthFullpubkey struct {
 	AuthAccount string
 	// full public key
 	FullPublicKey string
+	// BIP32 master key fingerprint (8 hex chars)
+	Fingerprint sql.NullString
 	// updated date
 	UpdatedAt sql.NullTime
 }
