@@ -95,6 +95,7 @@ atlas-dev-reset:
 	fi
 
 # Clean databases and reapply from HCL schemas
+# Uses admin_* environments which allow schema-level operations (drop/create schema)
 # `atlas schema clean`
 .PHONY: atlas-dev-clean
 atlas-dev-clean:
@@ -104,10 +105,11 @@ atlas-dev-clean:
 	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
 		echo "Cleaning and recreating databases..."; \
 		for schema in $(ATLAS_SCHEMAS); do \
-			(cd tools/atlas && atlas schema clean --config file://atlas.hcl --env local_$$schema --auto-approve) || exit 1; \
+			echo "=== Cleaning $$schema schema ==="; \
+			(cd tools/atlas && atlas schema clean --config file://atlas.hcl --env admin_$$schema --auto-approve) || exit 1; \
 		done; \
 		echo "Applying HCL schemas..."; \
-		$(MAKE) atlas-schema-apply; \
+		$(MAKE) atlas-schema-apply-all; \
 		echo "✓ Databases cleaned and recreated"; \
 	else \
 		echo "Cancelled."; \

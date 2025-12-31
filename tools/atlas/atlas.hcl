@@ -34,42 +34,68 @@ lint {
 }
 
 # Local development environment - Watch schema
+# Used for migrations and schema apply (schema-scoped operations)
 env "local_watch" {
-  url = "mysql://root:root@127.0.0.1:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
-  # Each schema file contains its own schema declaration (empty to avoid CREATE SCHEMA)
+  url     = "mysql://root:root@127.0.0.1:3306/watch?charset=utf8mb4&parseTime=True&loc=Local"
   src     = "file://schemas/watch.hcl"
   schemas = ["watch"]
   migration {
     dir = "file://migrations/watch"
   }
-  # Dev database with schema name - schema already exists, so CREATE SCHEMA is not generated
+  # Dev database with schema name - prevents CREATE DATABASE in migrations
   dev = "docker://mysql/8/watch"
 }
 
 # Local development environment - Keygen schema
+# Used for migrations and schema apply (schema-scoped operations)
 env "local_keygen" {
-  url = "mysql://root:root@127.0.0.1:3306/keygen?charset=utf8mb4&parseTime=True&loc=Local"
-  # Each schema file contains its own schema declaration (empty to avoid CREATE SCHEMA)
+  url     = "mysql://root:root@127.0.0.1:3306/keygen?charset=utf8mb4&parseTime=True&loc=Local"
   src     = "file://schemas/keygen.hcl"
   schemas = ["keygen"]
   migration {
     dir = "file://migrations/keygen"
   }
-  # Dev database with schema name - schema already exists, so CREATE SCHEMA is not generated
+  # Dev database with schema name - prevents CREATE DATABASE in migrations
   dev = "docker://mysql/8/keygen"
 }
 
 # Local development environment - Sign schema
+# Used for migrations and schema apply (schema-scoped operations)
 env "local_sign" {
-  url = "mysql://root:root@127.0.0.1:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"
-  # Each schema file contains its own schema declaration (empty to avoid CREATE SCHEMA)
+  url     = "mysql://root:root@127.0.0.1:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"
   src     = "file://schemas/sign.hcl"
   schemas = ["sign"]
   migration {
     dir = "file://migrations/sign"
   }
-  # Dev database with schema name - schema already exists, so CREATE SCHEMA is not generated
+  # Dev database with schema name - prevents CREATE DATABASE in migrations
   dev = "docker://mysql/8/sign"
+}
+
+###############################################################################
+# Admin environments for schema-level operations (clean, drop schema, etc.)
+# These environments use URLs without schema name to allow ModifySchema operations
+###############################################################################
+
+# Admin environment - Watch schema (for atlas schema clean)
+env "admin_watch" {
+  url     = "mysql://root:root@127.0.0.1:3306/?charset=utf8mb4&parseTime=True&loc=Local"
+  src     = "file://schemas/watch.hcl"
+  schemas = ["watch"]
+}
+
+# Admin environment - Keygen schema (for atlas schema clean)
+env "admin_keygen" {
+  url     = "mysql://root:root@127.0.0.1:3306/?charset=utf8mb4&parseTime=True&loc=Local"
+  src     = "file://schemas/keygen.hcl"
+  schemas = ["keygen"]
+}
+
+# Admin environment - Sign schema (for atlas schema clean)
+env "admin_sign" {
+  url     = "mysql://root:root@127.0.0.1:3306/?charset=utf8mb4&parseTime=True&loc=Local"
+  src     = "file://schemas/sign.hcl"
+  schemas = ["sign"]
 }
 
 # Usage examples:
