@@ -11,27 +11,27 @@ import (
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/wire"
 
+	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin"
+	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type createTransactionUseCase struct {
-	btcClient       bitcoin.Bitcoiner
+	btcClient       portsBitcoin.Bitcoiner
 	dbConn          *sql.DB
 	addrRepo        watchrepo.AddressRepositorier
 	txRepo          watchrepo.BTCTxRepositorier
 	txInputRepo     watchrepo.TxInputRepositorier
 	txOutputRepo    watchrepo.TxOutputRepositorier
 	payReqRepo      watchrepo.PaymentRequestRepositorier
-	txFileRepo      file.TransactionFileRepositorier
+	txFileRepo      portsStorage.TransactionFileRepositorier
 	depositReceiver domainAccount.AccountType
 	paymentSender   domainAccount.AccountType
 	walletType      domainWallet.WalletType
@@ -39,14 +39,14 @@ type createTransactionUseCase struct {
 
 // NewCreateTransactionUseCase creates a new CreateTransactionUseCase
 func NewCreateTransactionUseCase(
-	btcClient bitcoin.Bitcoiner,
+	btcClient portsBitcoin.Bitcoiner,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.BTCTxRepositorier,
 	txInputRepo watchrepo.TxInputRepositorier,
 	txOutputRepo watchrepo.TxOutputRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,
-	txFileRepo file.TransactionFileRepositorier,
+	txFileRepo portsStorage.TransactionFileRepositorier,
 	depositReceiver domainAccount.AccountType,
 	paymentSender domainAccount.AccountType,
 	walletType domainWallet.WalletType,

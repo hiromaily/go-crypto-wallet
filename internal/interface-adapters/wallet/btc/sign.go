@@ -4,17 +4,17 @@ import (
 	"context"
 	"database/sql"
 
+	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 // BTCSign is sign wallet object
 type BTCSign struct {
-	BTC                     bitcoin.Bitcoiner
+	BTC                     portsBitcoin.Bitcoiner
 	dbConn                  *sql.DB
 	authAccount             domainAccount.AuthType
 	addrType                address.AddrType
@@ -29,7 +29,7 @@ type BTCSign struct {
 
 // NewBTCSign returns Sign object
 func NewBTCSign(
-	btc bitcoin.Bitcoiner,
+	btc portsBitcoin.Bitcoiner,
 	dbConn *sql.DB,
 	authAccount domainAccount.AuthType,
 	addrType address.AddrType,

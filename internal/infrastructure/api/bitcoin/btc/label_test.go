@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
-	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
+	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
 type labelTest struct {

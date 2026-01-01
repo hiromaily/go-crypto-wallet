@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
@@ -14,7 +14,7 @@ import (
 )
 
 type createMultisigAddressUseCase struct {
-	btc                bitcoin.Bitcoiner
+	btc                portsBitcoin.Bitcoiner
 	authFullPubKeyRepo cold.AuthFullPubkeyRepositorier
 	accountKeyRepo     cold.BtcAccountKeyRepositorier
 	multisigAccount    account.MultisigAccounter
@@ -22,7 +22,7 @@ type createMultisigAddressUseCase struct {
 
 // NewCreateMultisigAddressUseCase creates a new CreateMultisigAddressUseCase
 func NewCreateMultisigAddressUseCase(
-	btc bitcoin.Bitcoiner,
+	btc portsBitcoin.Bitcoiner,
 	authFullPubKeyRepo cold.AuthFullPubkeyRepositorier,
 	accountKeyRepo cold.BtcAccountKeyRepositorier,
 	multisigAccount account.MultisigAccounter,

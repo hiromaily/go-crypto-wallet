@@ -14,16 +14,16 @@ formatter: goimports
 log-level: info
 
 packages:
-  # Bitcoin API - interface and implementation in same package
-  github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin:
+  # Bitcoin API - interface in application/ports, implementation in infrastructure
+  github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin:
     config:
       dir: "internal/infrastructure/api/bitcoin/mocks"
       pkgname: "mocks"
     interfaces:
       Bitcoiner:
 
-  # File storage - interface and implementation in same package
-  github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file:
+  # File storage - interface in application/ports, implementation in infrastructure
+  github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
     config:
       dir: "internal/infrastructure/storage/file/mocks"
       pkgname: "mocks"

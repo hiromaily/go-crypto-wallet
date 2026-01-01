@@ -5,8 +5,8 @@
 package mocks
 
 import (
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -107,23 +107,23 @@ func (_c *MockTransactionFileRepositorier_CreateFilePath_Call) RunAndReturn(run 
 }
 
 // GetFileNameType provides a mock function for the type MockTransactionFileRepositorier
-func (_mock *MockTransactionFileRepositorier) GetFileNameType(filePath string) (*file.FileName, error) {
+func (_mock *MockTransactionFileRepositorier) GetFileNameType(filePath string) (*storage.FileName, error) {
 	ret := _mock.Called(filePath)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetFileNameType")
 	}
 
-	var r0 *file.FileName
+	var r0 *storage.FileName
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*file.FileName, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) (*storage.FileName, error)); ok {
 		return returnFunc(filePath)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *file.FileName); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) *storage.FileName); ok {
 		r0 = returnFunc(filePath)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*file.FileName)
+			r0 = ret.Get(0).(*storage.FileName)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
@@ -158,12 +158,12 @@ func (_c *MockTransactionFileRepositorier_GetFileNameType_Call) Run(run func(fil
 	return _c
 }
 
-func (_c *MockTransactionFileRepositorier_GetFileNameType_Call) Return(fileName *file.FileName, err error) *MockTransactionFileRepositorier_GetFileNameType_Call {
+func (_c *MockTransactionFileRepositorier_GetFileNameType_Call) Return(fileName *storage.FileName, err error) *MockTransactionFileRepositorier_GetFileNameType_Call {
 	_c.Call.Return(fileName, err)
 	return _c
 }
 
-func (_c *MockTransactionFileRepositorier_GetFileNameType_Call) RunAndReturn(run func(filePath string) (*file.FileName, error)) *MockTransactionFileRepositorier_GetFileNameType_Call {
+func (_c *MockTransactionFileRepositorier_GetFileNameType_Call) RunAndReturn(run func(filePath string) (*storage.FileName, error)) *MockTransactionFileRepositorier_GetFileNameType_Call {
 	_c.Call.Return(run)
 	return _c
 }

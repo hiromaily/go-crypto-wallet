@@ -3,10 +3,10 @@ package btc
 import (
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
+	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin"
 )
 
-func runUnlockTx(btc bitcoin.Bitcoiner) error {
+func runUnlockTx(btc portsBitcoin.Bitcoiner) error {
 	// unlock locked transaction for unspent transaction
 	err := btc.UnlockUnspent()
 	if err != nil {
