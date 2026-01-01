@@ -22,7 +22,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// TestXrpDetailTxSqlc is integration test for XrpDetailTxInputRepositorySqlc
+// TestXrpDetailTxSqlc is integration test for XRPDetailTxInputRepositorySqlc
 func TestXrpDetailTxSqlc(t *testing.T) {
 	// Create XRP repositories
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
@@ -37,7 +37,7 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	xrpDetailTxRepo := watch.NewXrpDetailTxInputRepositorySqlc(db, domainCoin.XRP)
+	xrpDetailTxRepo := watch.NewXRPDetailTxInputRepositorySqlc(db, domainCoin.XRP)
 	txRepo := watch.NewTxRepositorySqlc(db, domainCoin.XRP)
 
 	// Clean up any existing test data

@@ -11,11 +11,11 @@ import (
 // SeedRepositorier is SeedRepository interface
 type SeedRepositorier = persistence.SeedRepositorier
 
-// BtcAccountKeyRepositorier is BtcAccountKeyRepository interface for BTC/BCH
-type BtcAccountKeyRepositorier = persistence.BtcAccountKeyRepositorier
+// BTCAccountKeyRepositorier is BtcAccountKeyRepository interface for BTC/BCH
+type BTCAccountKeyRepositorier = persistence.BTCAccountKeyRepositorier
 
-// EthAccountKeyRepositorier is EthAccountKeyRepository interface for ETH
-type EthAccountKeyRepositorier = persistence.EthAccountKeyRepositorier
+// ETHAccountKeyRepositorier is EthAccountKeyRepository interface for ETH
+type ETHAccountKeyRepositorier = persistence.ETHAccountKeyRepositorier
 
 // XRPAccountKeyRepositorier is XRPAccountKeyRepository interface
 type XRPAccountKeyRepositorier = persistence.XRPAccountKeyRepositorier

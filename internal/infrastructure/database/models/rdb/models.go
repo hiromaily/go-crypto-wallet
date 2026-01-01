@@ -174,8 +174,8 @@ type BTCTXOutput struct {
 	UpdatedAt null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 }
 
-// EthDetailTX is an object representing the database table.
-type EthDetailTX struct {
+// ETHDetailTX is an object representing the database table.
+type ETHDetailTX struct {
 	// ID
 	ID int64 `boil:"id" json:"id" toml:"id" yaml:"id"`
 	// eth_tx table ID

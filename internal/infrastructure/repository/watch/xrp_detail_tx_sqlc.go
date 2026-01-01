@@ -12,24 +12,24 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 )
 
-// XrpDetailTxInputRepositorySqlc is repository for xrp_detail_tx table using sqlc
-type XrpDetailTxInputRepositorySqlc struct {
+// XRPDetailTxInputRepositorySqlc is repository for xrp_detail_tx table using sqlc
+type XRPDetailTxInputRepositorySqlc struct {
 	queries      *sqlc.Queries
 	coinTypeCode domainCoin.CoinTypeCode
 }
 
-// NewXrpDetailTxInputRepositorySqlc returns XrpDetailTxInputRepositorySqlc object
-func NewXrpDetailTxInputRepositorySqlc(
+// NewXRPDetailTxInputRepositorySqlc returns XRPDetailTxInputRepositorySqlc object
+func NewXRPDetailTxInputRepositorySqlc(
 	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
-) *XrpDetailTxInputRepositorySqlc {
-	return &XrpDetailTxInputRepositorySqlc{
+) *XRPDetailTxInputRepositorySqlc {
+	return &XRPDetailTxInputRepositorySqlc{
 		queries:      sqlc.New(dbConn),
 		coinTypeCode: coinTypeCode,
 	}
 }
 
 // GetOne get one record by ID
-func (r *XrpDetailTxInputRepositorySqlc) GetOne(id int64) (*sqlc.XrpDetailTx, error) {
+func (r *XRPDetailTxInputRepositorySqlc) GetOne(id int64) (*sqlc.XrpDetailTx, error) {
 	ctx := context.Background()
 
 	xrpTx, err := r.queries.GetXrpDetailTxByID(ctx, id)
@@ -41,7 +41,7 @@ func (r *XrpDetailTxInputRepositorySqlc) GetOne(id int64) (*sqlc.XrpDetailTx, er
 }
 
 // GetAllByTxID returns all records searched by tx_id
-func (r *XrpDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*sqlc.XrpDetailTx, error) {
+func (r *XRPDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*sqlc.XrpDetailTx, error) {
 	ctx := context.Background()
 
 	xrpTxs, err := r.queries.GetXrpDetailTxsByTxID(ctx, id)
@@ -58,7 +58,7 @@ func (r *XrpDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*sqlc.XrpDeta
 }
 
 // GetSentHashTx returns list of tx_blob by txType
-func (r *XrpDetailTxInputRepositorySqlc) GetSentHashTx(txType domainTx.TxType) ([]string, error) {
+func (r *XRPDetailTxInputRepositorySqlc) GetSentHashTx(txType domainTx.TxType) ([]string, error) {
 	ctx := context.Background()
 
 	blobs, err := r.queries.GetXrpDetailTxBlobList(ctx, sqlc.GetXrpDetailTxBlobListParams{
@@ -73,7 +73,7 @@ func (r *XrpDetailTxInputRepositorySqlc) GetSentHashTx(txType domainTx.TxType) (
 }
 
 // Insert inserts one record
-func (r *XrpDetailTxInputRepositorySqlc) Insert(txItem *sqlc.XrpDetailTx) error {
+func (r *XRPDetailTxInputRepositorySqlc) Insert(txItem *sqlc.XrpDetailTx) error {
 	ctx := context.Background()
 
 	_, err := r.queries.InsertXrpDetailTx(ctx, sqlc.InsertXrpDetailTxParams{
@@ -106,7 +106,7 @@ func (r *XrpDetailTxInputRepositorySqlc) Insert(txItem *sqlc.XrpDetailTx) error 
 }
 
 // InsertBulk inserts multiple records
-func (r *XrpDetailTxInputRepositorySqlc) InsertBulk(txItems []*sqlc.XrpDetailTx) error {
+func (r *XRPDetailTxInputRepositorySqlc) InsertBulk(txItems []*sqlc.XrpDetailTx) error {
 	for _, item := range txItems {
 		if err := r.Insert(item); err != nil {
 			return err
@@ -116,7 +116,7 @@ func (r *XrpDetailTxInputRepositorySqlc) InsertBulk(txItems []*sqlc.XrpDetailTx)
 }
 
 // UpdateAfterTxSent updates when tx sent
-func (r *XrpDetailTxInputRepositorySqlc) UpdateAfterTxSent(
+func (r *XRPDetailTxInputRepositorySqlc) UpdateAfterTxSent(
 	uuid string,
 	txType domainTx.TxType,
 	signedTxID,
@@ -146,7 +146,7 @@ func (r *XrpDetailTxInputRepositorySqlc) UpdateAfterTxSent(
 }
 
 // UpdateTxType updates txType
-func (r *XrpDetailTxInputRepositorySqlc) UpdateTxType(id int64, txType domainTx.TxType) (int64, error) {
+func (r *XRPDetailTxInputRepositorySqlc) UpdateTxType(id int64, txType domainTx.TxType) (int64, error) {
 	ctx := context.Background()
 
 	result, err := r.queries.UpdateXrpDetailTxType(ctx, sqlc.UpdateXrpDetailTxTypeParams{
@@ -166,7 +166,7 @@ func (r *XrpDetailTxInputRepositorySqlc) UpdateTxType(id int64, txType domainTx.
 }
 
 // UpdateTxTypeBySentHashTx updates txType by tx_blob
-func (r *XrpDetailTxInputRepositorySqlc) UpdateTxTypeBySentHashTx(
+func (r *XRPDetailTxInputRepositorySqlc) UpdateTxTypeBySentHashTx(
 	txType domainTx.TxType, sentHashTx string,
 ) (int64, error) {
 	ctx := context.Background()
@@ -188,8 +188,8 @@ func (r *XrpDetailTxInputRepositorySqlc) UpdateTxTypeBySentHashTx(
 }
 
 // WithTx returns a new repository instance that uses the provided transaction
-func (r *XrpDetailTxInputRepositorySqlc) WithTx(tx *sql.Tx) portsPersistence.XrpDetailTxRepositorier {
-	return &XrpDetailTxInputRepositorySqlc{
+func (r *XRPDetailTxInputRepositorySqlc) WithTx(tx *sql.Tx) portsPersistence.XRPDetailTXRepositorier {
+	return &XRPDetailTxInputRepositorySqlc{
 		queries:      r.queries.WithTx(tx),
 		coinTypeCode: r.coinTypeCode,
 	}

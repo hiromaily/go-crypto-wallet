@@ -45,11 +45,11 @@ packages:
       TxOutputRepositorier:
       PaymentRequestRepositorier:
       TxRepositorier:
-      EthDetailTxRepositorier:
-      XrpDetailTxRepositorier:
+      ETHDetailTXRepositorier:
+      XRPDetailTXRepositorier:
       SeedRepositorier:
-      BtcAccountKeyRepositorier:
-      EthAccountKeyRepositorier:
+      BTCAccountKeyRepositorier:
+      ETHAccountKeyRepositorier:
       XRPAccountKeyRepositorier:
       AuthFullPubkeyRepositorier:
       AuthAccountKeyRepositorier:

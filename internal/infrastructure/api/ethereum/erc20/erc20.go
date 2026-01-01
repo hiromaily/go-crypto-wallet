@@ -120,7 +120,7 @@ func (e *ERC20) GetBalance(ctx context.Context, hexAddr string, _ eth.QuantityTa
 // - 1.b. Or after approve is called, this transaction may be sent
 func (e *ERC20) CreateRawTransaction(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-) (*ethtx.RawTx, *models.EthDetailTX, error) {
+) (*ethtx.RawTx, *models.ETHDetailTX, error) {
 	// validation check
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
@@ -192,7 +192,7 @@ func (e *ERC20) CreateRawTransaction(
 	}
 
 	// create insert data for　eth_detail_tx
-	txDetailItem := &models.EthDetailTX{
+	txDetailItem := &models.ETHDetailTX{
 		UUID:            uid.String(),
 		SenderAccount:   "",
 		SenderAddress:   fromAddr,

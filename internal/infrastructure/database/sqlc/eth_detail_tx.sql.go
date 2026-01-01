@@ -10,14 +10,14 @@ import (
 	"database/sql"
 )
 
-const getEthDetailTxByID = `-- name: GetEthDetailTxByID :one
+const getETHDetailTXByID = `-- name: GetETHDetailTXByID :one
 SELECT id, tx_id, uuid, current_tx_type, sender_account, sender_address, receiver_account, receiver_address, amount, fee, gas_limit, nonce, unsigned_hex_tx, signed_hex_tx, sent_hash_tx, unsigned_updated_at, sent_updated_at FROM eth_detail_tx
 WHERE id = ?
 `
 
-func (q *Queries) GetEthDetailTxByID(ctx context.Context, id int64) (EthDetailTx, error) {
-	row := q.db.QueryRowContext(ctx, getEthDetailTxByID, id)
-	var i EthDetailTx
+func (q *Queries) GetETHDetailTXByID(ctx context.Context, id int64) (ETHDetailTX, error) {
+	row := q.db.QueryRowContext(ctx, getETHDetailTXByID, id)
+	var i ETHDetailTX
 	err := row.Scan(
 		&i.ID,
 		&i.TxID,
@@ -40,20 +40,20 @@ func (q *Queries) GetEthDetailTxByID(ctx context.Context, id int64) (EthDetailTx
 	return i, err
 }
 
-const getEthDetailTxSentHashList = `-- name: GetEthDetailTxSentHashList :many
+const getETHDetailTXSentHashList = `-- name: GetETHDetailTXSentHashList :many
 SELECT eth_detail_tx.sent_hash_tx
 FROM eth_detail_tx
 INNER JOIN tx ON tx.id = eth_detail_tx.tx_id
 WHERE tx.coin = ? AND eth_detail_tx.current_tx_type = ?
 `
 
-type GetEthDetailTxSentHashListParams struct {
+type GetETHDetailTXSentHashListParams struct {
 	Coin          TxCoin
 	CurrentTxType int8
 }
 
-func (q *Queries) GetEthDetailTxSentHashList(ctx context.Context, arg GetEthDetailTxSentHashListParams) ([]string, error) {
-	rows, err := q.db.QueryContext(ctx, getEthDetailTxSentHashList, arg.Coin, arg.CurrentTxType)
+func (q *Queries) GetETHDetailTXSentHashList(ctx context.Context, arg GetETHDetailTXSentHashListParams) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, getETHDetailTXSentHashList, arg.Coin, arg.CurrentTxType)
 	if err != nil {
 		return nil, err
 	}
@@ -75,20 +75,20 @@ func (q *Queries) GetEthDetailTxSentHashList(ctx context.Context, arg GetEthDeta
 	return items, nil
 }
 
-const getEthDetailTxsByTxID = `-- name: GetEthDetailTxsByTxID :many
+const getETHDetailTXsByTxID = `-- name: GetETHDetailTXsByTxID :many
 SELECT id, tx_id, uuid, current_tx_type, sender_account, sender_address, receiver_account, receiver_address, amount, fee, gas_limit, nonce, unsigned_hex_tx, signed_hex_tx, sent_hash_tx, unsigned_updated_at, sent_updated_at FROM eth_detail_tx
 WHERE tx_id = ?
 `
 
-func (q *Queries) GetEthDetailTxsByTxID(ctx context.Context, txID int64) ([]EthDetailTx, error) {
-	rows, err := q.db.QueryContext(ctx, getEthDetailTxsByTxID, txID)
+func (q *Queries) GetETHDetailTXsByTxID(ctx context.Context, txID int64) ([]ETHDetailTX, error) {
+	rows, err := q.db.QueryContext(ctx, getETHDetailTXsByTxID, txID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []EthDetailTx
+	var items []ETHDetailTX
 	for rows.Next() {
-		var i EthDetailTx
+		var i ETHDetailTX
 		if err := rows.Scan(
 			&i.ID,
 			&i.TxID,
@@ -121,7 +121,7 @@ func (q *Queries) GetEthDetailTxsByTxID(ctx context.Context, txID int64) ([]EthD
 	return items, nil
 }
 
-const insertEthDetailTx = `-- name: InsertEthDetailTx :execresult
+const insertETHDetailTX = `-- name: InsertETHDetailTX :execresult
 INSERT INTO eth_detail_tx (
   tx_id, uuid, current_tx_type, sender_account, sender_address,
   receiver_account, receiver_address, amount, fee, gas_limit, nonce,
@@ -129,7 +129,7 @@ INSERT INTO eth_detail_tx (
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
-type InsertEthDetailTxParams struct {
+type InsertETHDetailTXParams struct {
 	TxID              int64
 	Uuid              string
 	CurrentTxType     int8
@@ -148,8 +148,8 @@ type InsertEthDetailTxParams struct {
 	SentUpdatedAt     sql.NullTime
 }
 
-func (q *Queries) InsertEthDetailTx(ctx context.Context, arg InsertEthDetailTxParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, insertEthDetailTx,
+func (q *Queries) InsertETHDetailTX(ctx context.Context, arg InsertETHDetailTXParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, insertETHDetailTX,
 		arg.TxID,
 		arg.Uuid,
 		arg.CurrentTxType,
@@ -169,13 +169,13 @@ func (q *Queries) InsertEthDetailTx(ctx context.Context, arg InsertEthDetailTxPa
 	)
 }
 
-const updateEthDetailTxAfterSent = `-- name: UpdateEthDetailTxAfterSent :execresult
+const updateETHDetailTXAfterSent = `-- name: UpdateETHDetailTXAfterSent :execresult
 UPDATE eth_detail_tx
 SET current_tx_type = ?, signed_hex_tx = ?, sent_hash_tx = ?, sent_updated_at = ?
 WHERE uuid = ?
 `
 
-type UpdateEthDetailTxAfterSentParams struct {
+type UpdateETHDetailTXAfterSentParams struct {
 	CurrentTxType int8
 	SignedHexTx   string
 	SentHashTx    string
@@ -183,8 +183,8 @@ type UpdateEthDetailTxAfterSentParams struct {
 	Uuid          string
 }
 
-func (q *Queries) UpdateEthDetailTxAfterSent(ctx context.Context, arg UpdateEthDetailTxAfterSentParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, updateEthDetailTxAfterSent,
+func (q *Queries) UpdateETHDetailTXAfterSent(ctx context.Context, arg UpdateETHDetailTXAfterSentParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, updateETHDetailTXAfterSent,
 		arg.CurrentTxType,
 		arg.SignedHexTx,
 		arg.SentHashTx,
@@ -193,32 +193,32 @@ func (q *Queries) UpdateEthDetailTxAfterSent(ctx context.Context, arg UpdateEthD
 	)
 }
 
-const updateEthDetailTxType = `-- name: UpdateEthDetailTxType :execresult
+const updateETHDetailTXType = `-- name: UpdateETHDetailTXType :execresult
 UPDATE eth_detail_tx
 SET current_tx_type = ?
 WHERE id = ?
 `
 
-type UpdateEthDetailTxTypeParams struct {
+type UpdateETHDetailTXTypeParams struct {
 	CurrentTxType int8
 	ID            int64
 }
 
-func (q *Queries) UpdateEthDetailTxType(ctx context.Context, arg UpdateEthDetailTxTypeParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, updateEthDetailTxType, arg.CurrentTxType, arg.ID)
+func (q *Queries) UpdateETHDetailTXType(ctx context.Context, arg UpdateETHDetailTXTypeParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, updateETHDetailTXType, arg.CurrentTxType, arg.ID)
 }
 
-const updateEthDetailTxTypeBySentHash = `-- name: UpdateEthDetailTxTypeBySentHash :execresult
+const updateETHDetailTXTypeBySentHash = `-- name: UpdateETHDetailTXTypeBySentHash :execresult
 UPDATE eth_detail_tx
 SET current_tx_type = ?
 WHERE sent_hash_tx = ?
 `
 
-type UpdateEthDetailTxTypeBySentHashParams struct {
+type UpdateETHDetailTXTypeBySentHashParams struct {
 	CurrentTxType int8
 	SentHashTx    string
 }
 
-func (q *Queries) UpdateEthDetailTxTypeBySentHash(ctx context.Context, arg UpdateEthDetailTxTypeBySentHashParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, updateEthDetailTxTypeBySentHash, arg.CurrentTxType, arg.SentHashTx)
+func (q *Queries) UpdateETHDetailTXTypeBySentHash(ctx context.Context, arg UpdateETHDetailTXTypeBySentHashParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, updateETHDetailTXTypeBySentHash, arg.CurrentTxType, arg.SentHashTx)
 }

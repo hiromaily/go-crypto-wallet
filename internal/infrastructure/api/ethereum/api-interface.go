@@ -85,7 +85,7 @@ type Ethereumer interface {
 	// transaction
 	CreateRawTransaction(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*ethtx.RawTx, *models.EthDetailTX, error)
+	) (*ethtx.RawTx, *models.ETHDetailTX, error)
 	SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (*ethtx.RawTx, error)
 	SendSignedRawTransaction(ctx context.Context, signedTxHex string) (string, error)
 	GetConfirmation(ctx context.Context, hashTx string) (uint64, error)
@@ -106,7 +106,7 @@ type ERC20er interface {
 	GetBalance(ctx context.Context, hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
 	CreateRawTransaction(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*ethtx.RawTx, *models.EthDetailTX, error)
+	) (*ethtx.RawTx, *models.ETHDetailTX, error)
 }
 
 // EtherTxCreator is a type alias for ERC20er used in transaction creation contexts

@@ -483,15 +483,15 @@ func (c *container) newTxRepo() watch.TxRepositorier {
 	)
 }
 
-func (c *container) newETHTxDetailRepo() watch.EthDetailTxRepositorier {
-	return watch.NewEthDetailTxInputRepositorySqlc(
+func (c *container) newETHTxDetailRepo() watch.ETHDetailTXRepositorier {
+	return watch.NewETHDetailTXInputRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newXRPTxDetailRepo() watch.XrpDetailTxRepositorier {
-	return watch.NewXrpDetailTxInputRepositorySqlc(
+func (c *container) newXRPTxDetailRepo() watch.XRPDetailTXRepositorier {
+	return watch.NewXRPDetailTxInputRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
@@ -600,7 +600,7 @@ func (c *container) newSeedRepo() cold.SeedRepositorier {
 	)
 }
 
-func (c *container) newAccountKeyRepo() cold.BtcAccountKeyRepositorier {
+func (c *container) newAccountKeyRepo() cold.BTCAccountKeyRepositorier {
 	return cold.NewAccountKeyRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
@@ -614,8 +614,8 @@ func (c *container) newXRPAccountKeyRepo() cold.XRPAccountKeyRepositorier {
 	)
 }
 
-func (c *container) newEthAccountKeyRepo() cold.EthAccountKeyRepositorier {
-	return cold.NewEthAccountKeyRepositorySqlc(
+func (c *container) newEthAccountKeyRepo() cold.ETHAccountKeyRepositorier {
+	return cold.NewETHAccountKeyRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 	)
 }

@@ -94,11 +94,11 @@ func (w *AuthHDWalletRepo) Insert(
 
 // AccountHDWalletRepo implements HDWalletRepo for account keys
 type AccountHDWalletRepo struct {
-	accountKeyRepo BtcAccountKeyRepositorier
+	accountKeyRepo BTCAccountKeyRepositorier
 }
 
 // NewAccountHDWalletRepo creates a new AccountHDWalletRepo
-func NewAccountHDWalletRepo(accountKeyRepo BtcAccountKeyRepositorier) HDWalletRepo {
+func NewAccountHDWalletRepo(accountKeyRepo BTCAccountKeyRepositorier) HDWalletRepo {
 	return &AccountHDWalletRepo{
 		accountKeyRepo: accountKeyRepo,
 	}

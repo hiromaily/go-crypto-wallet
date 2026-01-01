@@ -17,13 +17,13 @@ import (
 
 type importPrivateKeyUseCase struct {
 	eth            ethereum.Ethereumer
-	accountKeyRepo cold.EthAccountKeyRepositorier
+	accountKeyRepo cold.ETHAccountKeyRepositorier
 }
 
 // NewImportPrivateKeyUseCase creates a new ImportPrivateKeyUseCase
 func NewImportPrivateKeyUseCase(
 	eth ethereum.Ethereumer,
-	accountKeyRepo cold.EthAccountKeyRepositorier,
+	accountKeyRepo cold.ETHAccountKeyRepositorier,
 ) keygenusecase.ImportPrivateKeyUseCase {
 	return &importPrivateKeyUseCase{
 		eth:            eth,

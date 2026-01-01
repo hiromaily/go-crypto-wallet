@@ -22,8 +22,8 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
-// TestEthDetailTxSqlc is integration test for EthDetailTxInputRepositorySqlc
-func TestEthDetailTxSqlc(t *testing.T) {
+// TestETHDetailTXSqlc is integration test for ETHDetailTXInputRepositorySqlc
+func TestETHDetailTXSqlc(t *testing.T) {
 	// Create ETH repositories
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
 	confPath := projPath + "/data/config/eth_watch.toml"
@@ -37,7 +37,7 @@ func TestEthDetailTxSqlc(t *testing.T) {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	ethDetailTxRepo := watch.NewEthDetailTxInputRepositorySqlc(db, domainCoin.ETH)
+	ETHDetailTXRepo := watch.NewETHDetailTXInputRepositorySqlc(db, domainCoin.ETH)
 	txRepo := watch.NewTxRepositorySqlc(db, domainCoin.ETH)
 
 	// Clean up any existing test data
@@ -50,7 +50,7 @@ func TestEthDetailTxSqlc(t *testing.T) {
 
 	// Create test eth detail tx
 	uuid := "eth-uuid-sqlc-test"
-	ethTx := &sqlc.EthDetailTx{
+	ethTx := &sqlc.ETHDetailTX{
 		TxID:            txID,
 		Uuid:            uuid,
 		CurrentTxType:   domainTx.TxTypeUnsigned.Int8(),
@@ -66,28 +66,28 @@ func TestEthDetailTxSqlc(t *testing.T) {
 	}
 
 	// Insert
-	err = ethDetailTxRepo.Insert(ethTx)
+	err = ETHDetailTXRepo.Insert(ethTx)
 	require.NoError(t, err, "fail to call Insert()")
 
 	// Get all by tx ID
-	ethTxs, err := ethDetailTxRepo.GetAllByTxID(txID)
+	ethTxs, err := ETHDetailTXRepo.GetAllByTxID(txID)
 	require.NoError(t, err, "fail to call GetAllByTxID()")
 	require.GreaterOrEqual(t, len(ethTxs), 1, "GetAllByTxID() should return at least 1 record")
 
 	// Get one
-	retrievedTx, err := ethDetailTxRepo.GetOne(ethTxs[0].ID)
+	retrievedTx, err := ETHDetailTXRepo.GetOne(ethTxs[0].ID)
 	require.NoError(t, err, "fail to call GetOne()")
 	require.Equal(t, uuid, retrievedTx.Uuid, "GetOne() should return correct Uuid")
 
 	// Update after tx sent
 	signedHex := "0xsigned-hex-sqlc"
 	sentHashTx := "0xsent-hash-sqlc"
-	rowsAffected, err := ethDetailTxRepo.UpdateAfterTxSent(uuid, domainTx.TxTypeSent, signedHex, sentHashTx)
+	rowsAffected, err := ETHDetailTXRepo.UpdateAfterTxSent(uuid, domainTx.TxTypeSent, signedHex, sentHashTx)
 	require.NoError(t, err, "fail to call UpdateAfterTxSent()")
 	require.GreaterOrEqual(t, rowsAffected, int64(1), "UpdateAfterTxSent() should affect at least 1 row")
 
 	// Verify update
-	updatedTx, err := ethDetailTxRepo.GetOne(retrievedTx.ID)
+	updatedTx, err := ETHDetailTXRepo.GetOne(retrievedTx.ID)
 	require.NoError(t, err, "fail to call GetOne() after update")
 	require.Equal(t, signedHex, updatedTx.SignedHexTx, "UpdateAfterTxSent() should update SignedHexTx")
 	require.Equal(t, sentHashTx, updatedTx.SentHashTx, "UpdateAfterTxSent() should update SentHashTx")
@@ -96,17 +96,17 @@ func TestEthDetailTxSqlc(t *testing.T) {
 	)
 
 	// Get sent hash tx
-	hashes, err := ethDetailTxRepo.GetSentHashTx(domainTx.TxTypeSent)
+	hashes, err := ETHDetailTXRepo.GetSentHashTx(domainTx.TxTypeSent)
 	require.NoError(t, err, "fail to call GetSentHashTx()")
 	require.GreaterOrEqual(t, len(hashes), 1, "GetSentHashTx() should return at least 1 hash")
 
 	// Update tx type by sent hash
-	rowsAffected, err = ethDetailTxRepo.UpdateTxTypeBySentHashTx(domainTx.TxTypeDone, sentHashTx)
+	rowsAffected, err = ETHDetailTXRepo.UpdateTxTypeBySentHashTx(domainTx.TxTypeDone, sentHashTx)
 	require.NoError(t, err, "fail to call UpdateTxTypeBySentHashTx()")
 	require.GreaterOrEqual(t, rowsAffected, int64(1), "UpdateTxTypeBySentHashTx() should affect at least 1 row")
 
 	// Verify tx type update
-	verifyTx, err := ethDetailTxRepo.GetOne(retrievedTx.ID)
+	verifyTx, err := ETHDetailTXRepo.GetOne(retrievedTx.ID)
 	require.NoError(t, err, "fail to call GetOne() after UpdateTxTypeBySentHashTx()")
 	require.Equal(
 		t,
@@ -116,12 +116,12 @@ func TestEthDetailTxSqlc(t *testing.T) {
 	)
 
 	// Update tx type by ID
-	rowsAffected, err = ethDetailTxRepo.UpdateTxType(retrievedTx.ID, domainTx.TxTypeNotified)
+	rowsAffected, err = ETHDetailTXRepo.UpdateTxType(retrievedTx.ID, domainTx.TxTypeNotified)
 	require.NoError(t, err, "fail to call UpdateTxType()")
 	require.Equal(t, int64(1), rowsAffected, "UpdateTxType() should affect 1 row")
 
 	// Verify final tx type
-	finalTx, err := ethDetailTxRepo.GetOne(retrievedTx.ID)
+	finalTx, err := ETHDetailTXRepo.GetOne(retrievedTx.ID)
 	require.NoError(t, err, "fail to call GetOne() after UpdateTxType()")
 	require.Equal(
 		t,
@@ -135,7 +135,7 @@ func TestEthDetailTxSqlc(t *testing.T) {
 	txID2, err := txRepo.InsertUnsignedTx(domainTx.ActionTypePayment)
 	require.NoError(t, err, "fail to create second parent tx")
 
-	bulkTxs := []*sqlc.EthDetailTx{
+	bulkTxs := []*sqlc.ETHDetailTX{
 		{
 			TxID:            txID2,
 			Uuid:            "eth-uuid-bulk-1",
@@ -166,11 +166,11 @@ func TestEthDetailTxSqlc(t *testing.T) {
 		},
 	}
 
-	err = ethDetailTxRepo.InsertBulk(bulkTxs)
+	err = ETHDetailTXRepo.InsertBulk(bulkTxs)
 	require.NoError(t, err, "fail to call InsertBulk()")
 
 	// Verify bulk insert
-	bulkRetrieved, err := ethDetailTxRepo.GetAllByTxID(txID2)
+	bulkRetrieved, err := ETHDetailTXRepo.GetAllByTxID(txID2)
 	require.NoError(t, err, "fail to call GetAllByTxID() after InsertBulk()")
 	assert.Len(t, bulkRetrieved, 2, "InsertBulk() should insert 2 records")
 }

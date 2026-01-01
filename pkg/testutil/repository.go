@@ -22,8 +22,8 @@ var (
 	paymentRequestRepoSqlc *watch.PaymentRequestRepositorySqlc
 	btcTxInputRepoSqlc     *watch.TxInputRepositorySqlc
 	btcTxOutputRepoSqlc    *watch.TxOutputRepositorySqlc
-	ethDetailTxRepoSqlc    *watch.EthDetailTxInputRepositorySqlc
-	xrpDetailTxRepoSqlc    *watch.XrpDetailTxInputRepositorySqlc
+	ethDetailTXRepoSqlc    *watch.ETHDetailTXInputRepositorySqlc
+	xrpDetailTXRepoSqlc    *watch.XRPDetailTxInputRepositorySqlc
 )
 
 // GetDB returns shared database connection for tests
@@ -179,10 +179,10 @@ func NewBTCTxOutputRepositorySqlc() watch.TxOutputRepositorier {
 	return btcTxOutputRepoSqlc
 }
 
-// NewEthDetailTxRepositorySqlc returns EthDetailTxInputRepositorySqlc for test
-func NewEthDetailTxRepositorySqlc() watch.EthDetailTxRepositorier {
-	if ethDetailTxRepoSqlc != nil {
-		return ethDetailTxRepoSqlc
+// NewETHDetailTXRepositorySqlc returns ETHDetailTXInputRepositorySqlc for test
+func NewETHDetailTXRepositorySqlc() watch.ETHDetailTXRepositorier {
+	if ethDetailTXRepoSqlc != nil {
+		return ethDetailTXRepoSqlc
 	}
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
@@ -197,14 +197,14 @@ func NewEthDetailTxRepositorySqlc() watch.EthDetailTxRepositorier {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	ethDetailTxRepoSqlc = watch.NewEthDetailTxInputRepositorySqlc(db, domainCoin.ETH)
-	return ethDetailTxRepoSqlc
+	ethDetailTXRepoSqlc = watch.NewETHDetailTXInputRepositorySqlc(db, domainCoin.ETH)
+	return ethDetailTXRepoSqlc
 }
 
-// NewXrpDetailTxRepositorySqlc returns XrpDetailTxInputRepositorySqlc for test
-func NewXrpDetailTxRepositorySqlc() watch.XrpDetailTxRepositorier {
-	if xrpDetailTxRepoSqlc != nil {
-		return xrpDetailTxRepoSqlc
+// NewXrpDetailTxRepositorySqlc returns XRPDetailTxInputRepositorySqlc for test
+func NewXrpDetailTxRepositorySqlc() watch.XRPDetailTXRepositorier {
+	if xrpDetailTXRepoSqlc != nil {
+		return xrpDetailTXRepoSqlc
 	}
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
@@ -219,6 +219,6 @@ func NewXrpDetailTxRepositorySqlc() watch.XrpDetailTxRepositorier {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	xrpDetailTxRepoSqlc = watch.NewXrpDetailTxInputRepositorySqlc(db, domainCoin.XRP)
-	return xrpDetailTxRepoSqlc
+	xrpDetailTXRepoSqlc = watch.NewXRPDetailTxInputRepositorySqlc(db, domainCoin.XRP)
+	return xrpDetailTXRepoSqlc
 }

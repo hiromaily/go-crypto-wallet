@@ -84,6 +84,13 @@ linters:
           pattern: ^regexp\.MustCompile
           msg: Use internal/lazyregexp.New instead.
 
+    gocritic:
+      enabled-checks:
+        - ruleguard
+      settings:
+        ruleguard:
+          rules: "tools/lint/rules.go"
+
     gocyclo:
       min-complexity: 16
 
@@ -169,6 +176,16 @@ linters:
         linters:
           - gosec
         text: "G103:"
+      # Exclude Ethereum-related words from crypto naming rule (valid English words)
+      - text: "Ethereumer should use BTC, ETH, or XRP"
+        linters:
+          - gocritic
+      - text: "Ethereum should use BTC, ETH, or XRP"
+        linters:
+          - gocritic
+      - text: "EtherTxMonitor should use BTC, ETH, or XRP"
+        linters:
+          - gocritic
 
     # Exclude files from all linters.
     paths:

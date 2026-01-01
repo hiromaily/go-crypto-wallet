@@ -847,7 +847,7 @@ type EthAccountKey struct {
 }
 
 // table for eth transaction detail
-type EthDetailTx struct {
+type ETHDetailTX struct {
 	// ID
 	ID int64
 	// eth_tx table ID
