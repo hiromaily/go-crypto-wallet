@@ -10,6 +10,9 @@ import (
 	"github.com/btcsuite/btcd/wire"
 
 	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
+	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // ToAddressInfo converts infrastructure GetAddressInfoResult to application AddressInfo
@@ -667,4 +670,91 @@ func parseWitnessStack(witnessData []byte) ([]string, error) {
 	}
 
 	return result, nil
+}
+
+// ToLoggingResult converts infrastructure LoggingResult to application DTO
+func ToLoggingResult(result *LoggingResult) *bitcoindto.LoggingResult {
+	if result == nil {
+		return nil
+	}
+
+	return &bitcoindto.LoggingResult{
+		Net:         result.Net,
+		TorControl:  result.Tor,
+		MemPool:     result.Mempool,
+		RPC:         result.RPC,
+		EstimateFee: result.Estimatefee,
+		Bench:       result.Bench,
+		// Map Zmq to ZMQPubRawBlock and ZMQPubRawTx (both set to same value)
+		ZMQPubRawBlock: result.Zmq,
+		ZMQPubRawTx:    result.Zmq,
+		Coindb:         result.Coindb,
+		SelectCoins:    result.Selectcoins,
+	}
+}
+
+// ToMultisigAddress converts infrastructure AddMultisigAddressResult to application DTO
+func ToMultisigAddress(result *AddMultisigAddressResult) *bitcoindto.MultisigAddress {
+	if result == nil {
+		return nil
+	}
+
+	return &bitcoindto.MultisigAddress{
+		Address:      result.Address,
+		RedeemScript: result.RedeemScript,
+		Descriptor:   "", // Not provided by infrastructure result
+	}
+}
+
+// FromAddressType converts domain AddressType to infrastructure AddrType
+func FromAddressType(addrType domainBitcoin.AddressType) address.AddrType {
+	switch addrType {
+	case domainBitcoin.AddressTypeLegacy:
+		return address.AddrTypeLegacy
+	case domainBitcoin.AddressTypeP2SHSegwit:
+		return address.AddrTypeP2shSegwit
+	case domainBitcoin.AddressTypeBech32:
+		return address.AddrTypeBech32
+	case domainBitcoin.AddressTypeBech32m:
+		return address.AddrTypeTaproot
+	default:
+		// This indicates a programming error (unhandled domain type).
+		// Panicking helps to catch this issue during development.
+		panic(fmt.Sprintf("unhandled domain address type: %s", addrType))
+	}
+}
+
+// ToAddressType converts infrastructure AddrType to domain AddressType
+func ToAddressType(addrType address.AddrType) domainBitcoin.AddressType {
+	switch addrType {
+	case address.AddrTypeLegacy:
+		return domainBitcoin.AddressTypeLegacy
+	case address.AddrTypeP2shSegwit:
+		return domainBitcoin.AddressTypeP2SHSegwit
+	case address.AddrTypeBech32:
+		return domainBitcoin.AddressTypeBech32
+	case address.AddrTypeTaproot:
+		return domainBitcoin.AddressTypeBech32m
+	case address.AddrTypeBCHCashAddr:
+		// BCH uses legacy address format in domain model
+		return domainBitcoin.AddressTypeLegacy
+	case address.AddrTypeETH:
+		// ETH not supported in Bitcoin domain
+		return domainBitcoin.AddressTypeLegacy
+	default:
+		// Log warning for unknown infrastructure types to improve observability
+		logger.Warn("unknown infrastructure address type, defaulting to legacy",
+			"address_type", addrType)
+		return domainBitcoin.AddressTypeLegacy
+	}
+}
+
+// ToBTCVersion converts infrastructure BTCVersion to domain Version
+func ToBTCVersion(ver BTCVersion) domainBitcoin.Version {
+	return domainBitcoin.Version(ver)
+}
+
+// FromBTCVersion converts domain Version to infrastructure BTCVersion
+func FromBTCVersion(ver domainBitcoin.Version) BTCVersion {
+	return BTCVersion(ver)
 }

@@ -10,9 +10,8 @@ import (
 
 	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 // Bitcoiner Bitcoin/BitcoinCash Interface
@@ -50,7 +49,7 @@ type Bitcoiner interface {
 	ConfirmationBlock() uint64
 	FeeRangeMax() float64
 	FeeRangeMin() float64
-	Version() btc.BTCVersion
+	Version() domainBitcoin.Version
 	CoinTypeCode() domainCoin.CoinTypeCode
 
 	// fee.go
@@ -71,12 +70,12 @@ type Bitcoiner interface {
 	// GetReceivedByLabelAndMinConf(accountName string, minConf int) (btcutil.Amount, error)
 
 	// logging.go
-	Logging() (*btc.LoggingResult, error)
+	Logging() (*bitcoindto.LoggingResult, error)
 
 	// multisig.go
 	AddMultisigAddress(
-		requiredSigs int, addresses []string, accountName string, addressType address.AddrType,
-	) (*btc.AddMultisigAddressResult, error)
+		requiredSigs int, addresses []string, accountName string, addressType domainBitcoin.AddressType,
+	) (*bitcoindto.MultisigAddress, error)
 
 	// network.go
 	GetNetworkInfo() (*bitcoindto.NetworkInfo, error)
