@@ -4,22 +4,27 @@
 
 Repo: hiromaily/go-crypto-wallet
 
+## Common Workflow Steps
+
+This command follows the common workflow steps defined in [Workflow Guidelines](../../agents/workflow.md):
+- **Required Tools and Versions**: See [Required Tools and Versions](../../agents/requirements.md)
+- **Pre-Flight Checks**: See [Pre-Flight Checks](../../agents/workflow.md#pre-flight-checks)
+- **Safety Rules**: See [Safety Rules](../../agents/workflow.md#safety-rules)
+- **Verification Steps**: See [Verification Steps](../../agents/workflow.md#verification-steps)
+- **Special Considerations**: See [Special Considerations](../../agents/workflow.md#special-considerations)
+
 ## Process
 
 ### Pre-Flight Checks
 
-1. **Check Git Status:**
-   - Verify working directory is clean (`git status`)
-   - Stop immediately if there are uncommitted changes
-   - Check current branch (`git branch --show-current`)
-   - Never proceed on `main` or `master` branch
+Follow the [Pre-Flight Checks](../../agents/workflow.md#pre-flight-checks) from Workflow Guidelines, with these additional issue-specific checks:
 
-2. **Fetch Issue:**
+1. **Fetch Issue:**
    - Use `gh issue view {issue_number}` to fetch complete issue content
    - Verify issue exists and is not already closed/assigned
    - Review issue description, comments, and labels
 
-3. **Create Feature Branch:**
+2. **Create Feature Branch:**
    - Format: `feature/issue-{issue_number}-{brief-description}`
    - Example: `feature/issue-123-fix-logger-global-issue`
    - Keep description concise and descriptive
@@ -38,7 +43,7 @@ Repo: hiromaily/go-crypto-wallet
 2. **Plan:**
    - Break down solution into steps
    - Identify test cases needed
-   - Check for auto-generated files (sqlc, protoc, go generate) - **DO NOT EDIT** these
+   - Check for auto-generated files - see [Auto-Generated Files](../../agents/workflow.md#auto-generated-files) in Workflow Guidelines
    - Consider backward compatibility
    - Plan rollback strategy if breaking changes
    - **If the issue is too large or complex**: Stop processing and propose creating sub-issues
@@ -60,17 +65,7 @@ Repo: hiromaily/go-crypto-wallet
    - Ensure import order: standard → third-party → local
 
 4. **Self-Review:**
-   - Review your own implementation for:
-     - Code quality and correctness
-     - Adherence to Clean Architecture principles
-     - Compliance with coding standards from `AGENTS.md`
-     - Proper error handling and context wrapping
-     - Security considerations (especially for wallet/key operations)
-     - Import order and formatting
-     - Unused code, variables, or functions
-     - Proper use of interfaces and dependency injection
-   - Fix any issues found during self-review
-   - Ensure all changes align with project guidelines
+   Follow the [Self-Review](../../agents/workflow.md#self-review) checklist from Workflow Guidelines.
 
 5. **Test:**
    - Run existing tests: `make gotest`
@@ -84,18 +79,8 @@ Repo: hiromaily/go-crypto-wallet
    - Add/update code comments as needed
 
 7. **Verify:**
-   Before committing, if Go files were changed, run these commands in order and ensure:
-   - No errors occur
-   - No files are modified (all changes should be committed)
-   - All commands pass successfully:
-
-     ```bash
-     make lint-fix      # Fix linting issues (not 'fix-lint')
-     make tidy          # Organize dependencies
-     make check-build   # Verify builds successfully
-     make gotest        # Run all tests
-     make check-vuln    # Security vulnerability scan (if security-related)
-     ```
+   Follow the [Verification Steps](../../agents/workflow.md#verification-steps) from Workflow Guidelines.
+   - For security-related changes, also run: `make check-vuln`
 
 8. **Commit:**
    - Stage changes: `git add <files>`
@@ -201,27 +186,15 @@ When a parent issue has multiple sub-issues, resolve them sequentially following
 
 ### Safety Rules
 
-- **CRITICAL**: Stop immediately if working directory is not clean
-- **CRITICAL**: Never proceed on `main`/`master` branch without creating feature branch
-- **CRITICAL**: Always verify branch and status before implementing fixes
-- **CRITICAL**: Never edit files with `DO NOT EDIT` comments (auto-generated files)
-- **CRITICAL**: Never log private keys or sensitive information
-- **CRITICAL**: For security-related changes, run `make check-vuln` and conduct security review
-- Never use `git merge` operations
-- Never commit/push directly to `main`/`master` branches
+Follow the [Safety Rules](../../agents/workflow.md#safety-rules) from Workflow Guidelines.
 
 ### Special Considerations
 
 - **Security-Sensitive Changes:**
-  - Extra caution for private key management, wallet operations
-  - Run security scan: `make check-vuln`
-  - Consider impact on offline wallets (keygen, sign)
-  - Review encryption/decryption logic carefully
+  See [Security-Sensitive Changes](../../agents/workflow.md#security-sensitive-changes) in Workflow Guidelines.
 
 - **Breaking Changes:**
-  - Document breaking changes clearly
-  - Consider migration path
-  - Update version numbers if applicable
+  See [Breaking Changes](../../agents/workflow.md#breaking-changes) in Workflow Guidelines.
 
 <!-- - **Multi-Chain Support:**
   - Verify changes work for all supported chains (BTC, BCH, ETH, XRP)

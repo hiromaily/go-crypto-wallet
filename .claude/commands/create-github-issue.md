@@ -1,6 +1,7 @@
 # Create GitHub Issue
 
-You are tasked with creating a GitHub issue using the `gh` command-line tool. This command helps create well-structured GitHub issues that are suitable for tracking features, bugs, refactoring tasks, and technical debt.
+You are tasked with creating a GitHub issue using the `gh` command-line tool.
+This command helps create well-structured GitHub issues for tracking features, bugs, refactoring tasks, and technical debt.
 
 ## Repository
 
@@ -8,19 +9,44 @@ Repo: hiromaily/go-crypto-wallet
 
 ## Prerequisites Check
 
-Before starting, verify all required tools are installed:
+Before starting, verify all required tools are installed with the correct versions.
 
-1. **GitHub CLI (gh)**: Check with `gh --version`
-   - Required for creating issues via CLI
-   - If missing: Install from <https://cli.github.com/>
-   - Verify authentication: `gh auth status`
-   - If not authenticated: Run `gh auth login`
+See [Required Tools and Versions](../../agents/requirements.md) for:
 
-2. **Git**: Check with `git --version`
-   - Required for repository operations
-   - If missing: Install from <https://git-scm.com/>
+- Complete list of required tools
+- Version requirements (Go 1.25.5, Atlas v1.0.0, golangci-lint v2.7.2, etc.)
+- Installation instructions
+- Version verification commands
 
-**If any required tool is missing, stop and display an error message with installation instructions. Do not proceed with the workflow.**
+**For this command specifically:**
+
+- **GitHub CLI (gh)**: Required - Check with `gh --version`
+  - Verify authentication: `gh auth status`
+  - If not authenticated: Run `gh auth login`
+- **Git**: Required - Check with `git --version`
+
+**If any required tool is missing or at an incorrect version, stop and display an error message with installation instructions.
+Do not proceed with the workflow.**
+
+### Label Management
+
+Before creating issues, ensure all required labels exist in the repository.
+
+**Check existing labels:**
+
+```bash
+gh label list
+```
+
+**Sync labels from `.github/labels.yml`:**
+
+```bash
+# Apply labels from the labels.yml file
+gh label create --from-file .github/labels.yml
+```
+
+**Note**: If labels are missing, run the sync command above to create them from `.github/labels.yml`.
+The repository uses `.github/labels.yml` as the source of truth for label definitions.
 
 ## Context Understanding
 
@@ -42,9 +68,13 @@ Before creating an issue, understand the project context by reviewing relevant d
 
 ## Issue Creation Process
 
-### 1. Gather Information
+### Step 1: Analyze and Propose Issue
 
-Before creating the issue, gather the following information from the user or conversation context:
+Before creating the issue, analyze the user's request and create a comprehensive issue proposal.
+
+#### 1.1 Gather Information
+
+From the user's request or conversation context, gather:
 
 - **Issue Type**: Feature request, bug report, refactoring task, documentation, security, technical debt
 - **Title**: Clear, concise description (50-72 characters recommended)
@@ -53,7 +83,7 @@ Before creating the issue, gather the following information from the user or con
 - **Affected Components**: Which layers/components are affected (domain, application, infrastructure, interface-adapters)
 - **Related Context**: Related issues, PRs, or documentation references
 
-### 2. Determine Issue Category
+#### 1.2 Determine Issue Category
 
 Based on the issue type, determine appropriate labels and structure:
 
@@ -64,9 +94,9 @@ Based on the issue type, determine appropriate labels and structure:
 - **Security**: Security-related issues or improvements
 - **Technical Debt**: Code quality improvements, cleanup tasks
 
-### 3. Structure the Issue Body
+#### 1.3 Create Issue Proposal
 
-Create a well-structured issue body following this template:
+Create a well-structured issue proposal following this template:
 
 ```markdown
 ## Description
@@ -119,18 +149,63 @@ Create a well-structured issue body following this template:
 [Any additional context, considerations, or constraints]
 ```
 
-### 4. Determine Labels
+#### 1.4 Determine Labels
 
-Based on the issue type and content, suggest appropriate labels:
+Based on the issue type and content, suggest appropriate labels from `.github/labels.yml`:
+
+**Available labels (from `.github/labels.yml`):**
 
 - **Type labels**: `bug`, `enhancement`, `refactoring`, `documentation`, `security`, `technical-debt`
-- **Priority labels**: `priority:critical`, `priority:high`, `priority:medium`, `priority:low`
+- **Status labels**: `duplicate`, `invalid`, `question`, `wontfix`, `help wanted`, `good first issue`
+- **Dependency labels**: `dependencies`
+
+**Additional labels that may exist:**
+
+- **Priority labels**: `priority:critical`, `priority:high`, `priority:medium`, `priority:low` (if defined)
 - **Component labels**: `domain`, `application`, `infrastructure`, `interface-adapters`, `btc`, `eth`, `xrp`, `bch`
-- **Status labels**: `help-wanted`, `good-first-issue`, `blocked`, `in-progress`
+  (if defined)
 
-**Note**: Labels may vary by repository. Use `gh label list` to see available labels before creating the issue.
+#### 1.5 Present Issue Proposal
 
-### 5. Create the Issue
+Present the complete issue proposal to the user in the following format:
+
+```markdown
+## Proposed Issue
+
+**Title**: [Issue title]
+
+**Labels**: [Comma-separated list of labels]
+
+**Issue Body**:
+[Complete issue body following the template below]
+
+**Affected Components**: [List of affected components/layers]
+
+**Priority**: [Priority level]
+
+**Related Context**: [Related issues, PRs, or documentation]
+```
+
+**Wait for user approval before proceeding to Step 2.**
+
+### Step 2: Submit Issue (After User Approval)
+
+After the user approves the issue proposal, proceed with creating the issue.
+
+#### 2.1 Verify Labels
+
+Before creating the issue:
+
+1. Check available labels: `gh label list`
+2. If labels are missing, sync from `.github/labels.yml`:
+
+   ```bash
+   gh label create --from-file .github/labels.yml
+   ```
+
+3. Verify the labels you plan to use exist in the repository
+
+#### 2.2 Create the Issue
 
 Use the `gh issue create` command with appropriate flags:
 
@@ -156,7 +231,7 @@ gh issue create
 - Projects (optional)
 - Milestone (optional)
 
-### 6. Alternative: Create Issue from File
+#### 2.3 Alternative: Create Issue from File
 
 If the issue body is long, create a temporary markdown file:
 
@@ -175,6 +250,15 @@ gh issue create \
 # Clean up
 rm /tmp/issue_body.md
 ```
+
+#### 2.4 Verify Issue Creation
+
+After creating the issue:
+
+1. Verify the issue was created: `gh issue view {issue_number}`
+2. Check that all labels are applied correctly
+3. Verify the issue body is formatted correctly
+4. Share the issue URL with the user
 
 ## Issue Title Guidelines
 
@@ -228,6 +312,7 @@ rm /tmp/issue_body.md
 - Specify affected components
 - Consider impact on offline wallet operations
 - Reference security best practices
+- See [Security-Sensitive Changes](../../agents/workflow.md#security-sensitive-changes) in Workflow Guidelines
 
 ## Special Considerations
 
@@ -268,41 +353,76 @@ For issues affecting multiple cryptocurrencies:
 
 ### Auto-Generated Files
 
-**CRITICAL**: Never create issues to edit files with `DO NOT EDIT` comments:
+**CRITICAL**: Never create issues to edit files with `DO NOT EDIT` comments.
 
-- SQLC generated files (`internal/infrastructure/database/sqlc/`)
-- Protocol buffer generated files
-- Files generated by `go generate`
+See [Auto-Generated Files](../../agents/workflow.md#auto-generated-files) in Workflow Guidelines for details.
 
 ## Output Format
 
-Before creating the issue, show the plan:
+### Step 1 Output: Issue Proposal
 
-1. **Proposed issue title**
-2. **Proposed labels**
-3. **Issue body preview** (first 10-15 lines)
-4. **Affected components**
-5. **Priority level**
+When analyzing and proposing an issue, present it in this format:
 
-Ask for confirmation before proceeding with the actual `gh issue create` command.
+```markdown
+## Proposed Issue
+
+**Title**: [Issue title - 50-72 characters]
+
+**Labels**: [Comma-separated list of labels from .github/labels.yml]
+
+**Issue Body**:
+[Complete issue body following the template structure]
+
+**Affected Components**: 
+- [Component 1]
+- [Component 2]
+
+**Priority**: [Critical/High/Medium/Low]
+
+**Related Context**: 
+- Related issues: #[number]
+- Related PRs: #[number]
+- Documentation: [links]
+
+---
+
+**Ready to submit?** Please review the proposal above and confirm if you'd like me to create this issue.
+```
+
+**Important**: Do NOT proceed to Step 2 (creating the issue) until the user explicitly approves the proposal.
+
+### Step 2 Output: Issue Creation
+
+After user approval, show the creation process:
+
+```markdown
+Creating issue...
+
+✓ Labels verified
+✓ Issue created: #{issue_number}
+✓ URL: https://github.com/hiromaily/go-crypto-wallet/issues/{issue_number}
+```
 
 ## Example Workflow
 
+### Step 1: Analyze and Propose
+
 ```bash
-# 1. Check prerequisites
-gh --version
-gh auth status
+# User provides context about the issue they want to create
+# AI analyzes and creates a proposal
+```
 
-# 2. Review existing issues (optional, to avoid duplicates)
-gh issue list --limit 10
+**AI presents proposal:**
 
-# 3. Create issue interactively
-gh issue create
+```markdown
+## Proposed Issue
 
-# Or create with flags
-gh issue create \
-  --title "[BTC] Add native SegWit-Bech32 address support" \
-  --body "## Description
+**Title**: [BTC] Add native SegWit-Bech32 address support
+
+**Labels**: enhancement,btc
+
+**Issue Body**:
+## Description
 Add support for native SegWit-Bech32 addresses (bc1...) in Bitcoin wallet operations.
 
 ## Context
@@ -327,8 +447,34 @@ Currently, the wallet only supports legacy addresses. Native SegWit addresses pr
 ## Related Context
 - Related to: #123 (Address format improvements)
 - Documentation: AGENTS.md (Architecture guidelines)
-" \
-  --label "enhancement,btc,priority:medium"
+
+**Affected Components**: 
+- Infrastructure layer (Bitcoin API client)
+
+**Priority**: Medium
+
+---
+
+**Ready to submit?** Please review the proposal above and confirm if you'd like me to create this issue.
+```
+
+### Step 2: Submit (After User Approval)
+
+```bash
+# 1. Verify labels exist
+gh label list
+
+# 2. Sync labels if needed
+gh label create --from-file .github/labels.yml
+
+# 3. Create the issue
+gh issue create \
+  --title "[BTC] Add native SegWit-Bech32 address support" \
+  --body-file /tmp/issue_body.md \
+  --label "enhancement,btc"
+
+# 4. Verify creation
+gh issue view {issue_number}
 ```
 
 ## Error Handling
@@ -348,14 +494,23 @@ If any step fails:
 - Use appropriate labels to help with issue triage
 - Consider impact on offline wallet operations (keygen, sign)
 
-## Verification
+See also [Safety Rules](../../agents/workflow.md#safety-rules) in Workflow Guidelines for general safety rules.
 
-After creating the issue:
+## Process Summary
 
-1. Verify the issue was created: `gh issue view {issue_number}`
-2. Check that all labels are applied correctly
-3. Verify the issue body is formatted correctly
-4. Share the issue URL with the user
+1. **Step 1: Analyze and Propose**
+   - Gather information from user request
+   - Analyze issue type and requirements
+   - Create comprehensive issue proposal
+   - Present proposal to user for review
+   - **Wait for user approval**
+
+2. **Step 2: Submit Issue (After Approval)**
+   - Verify labels exist in repository
+   - Sync labels from `.github/labels.yml` if needed
+   - Create issue using `gh issue create`
+   - Verify issue was created correctly
+   - Share issue URL with user
 
 ## Notes
 

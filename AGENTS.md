@@ -19,6 +19,7 @@ Use this navigation guide to find relevant documentation for specific tasks:
 - **[Database Management](agents/database.md)** - Database schema changes, Atlas migrations, and SQLC code generation
 - **[Code Generation](agents/code-generation.md)** - Auto-generated files, code generation tools (Atlas, SQLC, protobuf, ABI)
 - **[Workflow Guidelines](agents/workflow.md)** - Git operations, dependency management, refactoring status, and verification commands
+- **[Required Tools and Versions](agents/requirements.md)** - Tool requirements and version information
 - **[Testing Guidelines](agents/testing.md)** - Testing strategy, test organization, and coverage goals by layer
 - **[Multi-Chain Support](agents/multi-chain.md)** - Cryptocurrency support (BTC, ETH, XRP), wallet types, and blockchain communication
 
@@ -26,6 +27,10 @@ Use this navigation guide to find relevant documentation for specific tasks:
 
 - **[`internal/` Directory Guidelines](internal/AGENTS.md)** - Clean Architecture layers, dependency rules, and internal package guidelines
 - **[`pkg/` Directory Guidelines](pkg/AGENTS.md)** - Public package guidelines and critical rule about `internal/` dependencies
+
+### Custom Commands
+
+- **[Custom Slash Commands](.claude/commands/README.md)** - Custom commands for Claude Desktop (fix-issue, fix-pr-review, fix-linter, create-github-issue)
 
 ## Core Priorities
 

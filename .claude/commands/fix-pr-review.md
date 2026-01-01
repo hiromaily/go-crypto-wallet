@@ -4,18 +4,22 @@
 
 Repo: hiromaily/go-crypto-wallet
 
+## Common Workflow Steps
+
+This command follows the common workflow steps defined in [Workflow Guidelines](../../agents/workflow.md):
+- **Required Tools and Versions**: See [Required Tools and Versions](../../agents/requirements.md)
+- **Pre-Flight Checks**: See [Pre-Flight Checks](../../agents/workflow.md#pre-flight-checks)
+- **Safety Rules**: See [Safety Rules](../../agents/workflow.md#safety-rules)
+- **Verification Steps**: See [Verification Steps](../../agents/workflow.md#verification-steps)
+- **Special Considerations**: See [Special Considerations](../../agents/workflow.md#special-considerations)
+
 ## Process
 
 ### Pre-Flight Checks
 
-1. **Check Git Status:**
-   - Verify working directory is clean (`git status`)
-   - Stop immediately if there are uncommitted changes
-   - Check current branch (`git branch --show-current`)
-   - Verify we're on the PR branch (should match the PR's source branch)
-   - Never proceed on `main` or `master` branch
+Follow the [Pre-Flight Checks](../../agents/workflow.md#pre-flight-checks) from Workflow Guidelines, with these additional PR-specific checks:
 
-2. **Fetch PR Information:**
+1. **Fetch PR Information:**
    - URL: <https://github.com/hiromaily/go-crypto-wallet/pull/{pr_number}>
    - Use `web_search` to fetch complete PR content including:
      - PR title and description
@@ -25,7 +29,7 @@ Repo: hiromaily/go-crypto-wallet
    - Verify PR exists and is not already merged/closed
    - Identify the PR's source branch name
 
-3. **Verify Branch:**
+2. **Verify Branch:**
    - Check if current branch matches PR source branch
    - If not on the PR branch, checkout the correct branch: `git checkout {pr_branch_name}`
    - If PR branch doesn't exist locally, fetch and checkout: `git fetch origin {pr_branch_name} && git checkout {pr_branch_name}`
@@ -53,7 +57,7 @@ Repo: hiromaily/go-crypto-wallet
    - Group related comments together
    - Break down fixes into logical steps
    - Identify test cases needed for functionality fixes
-   - Check for auto-generated files (sqlc, protoc, go generate) - **DO NOT EDIT** these
+   - Check for auto-generated files - see [Auto-Generated Files](../../agents/workflow.md#auto-generated-files) in Workflow Guidelines
    - Consider impact on offline wallet operations (keygen, sign)
    - Plan rollback strategy if breaking changes
 
@@ -65,32 +69,25 @@ Repo: hiromaily/go-crypto-wallet
    - Ensure import order: standard → third-party → local
    - For each fix, explain what was changed and why
 
-4. **Test:**
+4. **Self-Review:**
+   Follow the [Self-Review](../../agents/workflow.md#self-review) checklist from Workflow Guidelines.
+
+5. **Test:**
    - Run existing tests: `make gotest`
    - Create new test cases for functionality fixes
    - Run integration tests if applicable: `make gotest-integration`
    - Verify test coverage for new code
    - Test edge cases and error scenarios mentioned in reviews
 
-5. **Document:**
+6. **Document:**
    - Update relevant documentation if requested in reviews
    - Add/update code comments as needed
    - Ensure all exported functions have godoc comments
 
-6. **Verify:**
-   Before committing, if Go files were changed, run these commands in order and ensure:
-   - No errors occur
-   - No files are modified (all changes should be committed)
-   - All commands pass successfully:
+7. **Verify:**
+   Follow the [Verification Steps](../../agents/workflow.md#verification-steps) from Workflow Guidelines.
 
-     ```bash
-     make lint-fix      # Fix linting issues (not 'fix-lint')
-     make tidy          # Organize dependencies
-     make check-build   # Verify builds successfully
-     make gotest        # Run all tests
-     ```
-
-7. **Commit:**
+8. **Commit:**
    - Stage changes: `git add <files>`
    - Create commit with descriptive message:
 
@@ -107,38 +104,27 @@ Repo: hiromaily/go-crypto-wallet
    - Follow conventional commit format
    - If fixes are extensive, consider multiple atomic commits grouped by category
 
-8. **Push Changes:**
+9. **Push Changes:**
    - Push to PR branch: `git push origin {pr_branch_name}`
    - This will automatically update the existing PR
 
-9. **Update PR (Optional):**
+10. **Update PR (Optional):**
    - Add a comment to the PR summarizing the fixes made
    - Reference specific review comments that were addressed
    - Mark resolved comments if using GitHub's "Resolve conversation" feature
 
 ### Safety Rules
 
-- **CRITICAL**: Stop immediately if working directory is not clean
-- **CRITICAL**: Never proceed on `main`/`master` branch without verifying PR branch
-- **CRITICAL**: Always verify branch matches PR source branch before implementing fixes
-- **CRITICAL**: Never edit files with `DO NOT EDIT` comments (auto-generated files)
-- **CRITICAL**: Never log private keys or sensitive information
-- **CRITICAL**: For security-related changes, run `make check-vuln` and conduct security review
-- Never use `git merge` operations
-- Never commit/push directly to `main`/`master` branches
+Follow the [Safety Rules](../../agents/workflow.md#safety-rules) from Workflow Guidelines.
 
 ### Special Considerations
 
 - **Security-Sensitive Changes:**
-  - Extra caution for private key management, wallet operations
-  - Run security scan: `make check-vuln`
-  - Consider impact on offline wallets (keygen, sign)
-  - Review encryption/decryption logic carefully
+  See [Security-Sensitive Changes](../../agents/workflow.md#security-sensitive-changes) in Workflow Guidelines.
 
 - **Breaking Changes:**
+  See [Breaking Changes](../../agents/workflow.md#breaking-changes) in Workflow Guidelines.
   - If review suggests breaking changes, discuss with reviewer first
-  - Document breaking changes clearly
-  - Consider migration path
 
 - **Conflicting Comments:**
   - If reviewers have conflicting opinions, prioritize security and functionality concerns
