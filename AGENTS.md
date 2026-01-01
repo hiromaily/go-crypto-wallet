@@ -27,6 +27,10 @@ Use this navigation guide to find relevant documentation for specific tasks:
 - **[`internal/` Directory Guidelines](internal/AGENTS.md)** - Clean Architecture layers, dependency rules, and internal package guidelines
 - **[`pkg/` Directory Guidelines](pkg/AGENTS.md)** - Public package guidelines and critical rule about `internal/` dependencies
 
+### Custom Commands
+
+- **[Custom Slash Commands](.claude/commands/README.md)** - Custom commands for Claude Desktop (fix-issue, fix-pr-review, fix-linter, create-github-issue)
+
 ## Core Priorities
 
 1. **Security First**: This is a financial-related project handling private keys and cryptocurrency transactions. Security is non-negotiable.
