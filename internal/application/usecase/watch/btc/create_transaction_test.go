@@ -46,10 +46,14 @@ func newTestDependencies(t *testing.T) *testDependencies {
 }
 
 // createUseCase creates a new CreateTransactionUseCase with the test dependencies
+// Note: dbConn is set to nil because current tests focus on validation and error paths
+// that don't reach the database transaction code. For tests that cover successful
+// transaction creation and persistence, a mock database connection (e.g., sqlmock)
+// would be required. See test comments below for more details.
 func createUseCase(deps *testDependencies) watchusecase.CreateTransactionUseCase {
 	return btc.NewCreateTransactionUseCase(
 		deps.btcClient,
-		nil, // dbConn - using nil for unit tests as DB operations are mocked
+		nil, // dbConn - nil is safe for current tests that don't reach DB operations
 		deps.addrRepo,
 		deps.txRepo,
 		deps.txInputRepo,
@@ -418,18 +422,33 @@ func TestMockExpectations(t *testing.T) {
 	})
 }
 
-// Note: Full integration tests for CreateTransactionUseCase would require:
-// 1. Mock Bitcoin client with realistic address decoding
-// 2. Test database setup for transaction storage
-// 3. Mock file repository for PSBT file writing
-// 4. Proper cleanup after tests
+// Test Coverage Notes:
 //
-// These would be better suited for integration tests rather than unit tests.
-// The current test coverage focuses on:
-// - Constructor validation
-// - Interface compliance
-// - Error handling paths
-// - Input validation
+// Current test coverage focuses on:
+// - Constructor validation and interface compliance
+// - Error handling paths (validation errors, RPC errors, insufficient balance)
+// - Input validation (invalid action types, invalid accounts)
+// - Early return paths (no unspent transactions, no payment requests)
+//
+// Note on dbConn being nil:
+// The dbConn parameter is set to nil in these tests because the current test cases
+// focus on validation and error paths that return before reaching the database
+// transaction code (insertTransaction method). The dbConn is only used in the
+// success path when a transaction is successfully created and needs to be persisted.
+// For tests that cover the successful transaction creation and persistence path,
+// a mock database connection (e.g., using sqlmock) would be required.
+//
+// Success path testing (future work):
+// To test the full success path including database persistence, the following
+// would be needed:
+// 1. Mock database connection using sqlmock (github.com/DATA-DOG/go-sqlmock)
+// 2. Mock Bitcoin client with realistic address decoding (btcutil.DecodeAddress)
+// 3. Mock file repository for PSBT file writing
+// 4. Complete mock setup for all repository operations (InsertUnsignedTx,
+//    InsertBulk for inputs/outputs, UpdatePaymentID, etc.)
+//
+// These comprehensive tests would be better suited for integration tests rather
+// than unit tests, as they require extensive mocking of external systems.
 //
 // PSBT-specific functionality testing:
 // The generatePSBTFile method creates PSBT files instead of CSV files.
