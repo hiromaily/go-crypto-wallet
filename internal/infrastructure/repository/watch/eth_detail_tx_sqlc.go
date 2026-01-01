@@ -12,44 +12,44 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 )
 
-// EthDetailTxInputRepositorySqlc is repository for eth_detail_tx table using sqlc
-type EthDetailTxInputRepositorySqlc struct {
+// ETHDetailTXInputRepositorySqlc is repository for eth_detail_tx table using sqlc
+type ETHDetailTXInputRepositorySqlc struct {
 	queries      *sqlc.Queries
 	coinTypeCode domainCoin.CoinTypeCode
 }
 
-// NewEthDetailTxInputRepositorySqlc returns EthDetailTxInputRepositorySqlc object
-func NewEthDetailTxInputRepositorySqlc(
+// NewETHDetailTXInputRepositorySqlc returns ETHDetailTXInputRepositorySqlc object
+func NewETHDetailTXInputRepositorySqlc(
 	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
-) *EthDetailTxInputRepositorySqlc {
-	return &EthDetailTxInputRepositorySqlc{
+) *ETHDetailTXInputRepositorySqlc {
+	return &ETHDetailTXInputRepositorySqlc{
 		queries:      sqlc.New(dbConn),
 		coinTypeCode: coinTypeCode,
 	}
 }
 
 // GetOne get one record by ID
-func (r *EthDetailTxInputRepositorySqlc) GetOne(id int64) (*sqlc.EthDetailTx, error) {
+func (r *ETHDetailTXInputRepositorySqlc) GetOne(id int64) (*sqlc.ETHDetailTX, error) {
 	ctx := context.Background()
 
-	ethTx, err := r.queries.GetEthDetailTxByID(ctx, id)
+	ethTx, err := r.queries.GetETHDetailTXByID(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call GetEthDetailTxByID(): %w", err)
+		return nil, fmt.Errorf("failed to call GetETHDetailTXByID(): %w", err)
 	}
 
 	return &ethTx, nil
 }
 
 // GetAllByTxID returns all records searched by tx_id
-func (r *EthDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*sqlc.EthDetailTx, error) {
+func (r *ETHDetailTXInputRepositorySqlc) GetAllByTxID(id int64) ([]*sqlc.ETHDetailTX, error) {
 	ctx := context.Background()
 
-	ethTxs, err := r.queries.GetEthDetailTxsByTxID(ctx, id)
+	ethTxs, err := r.queries.GetETHDetailTXsByTxID(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("failed to call GetEthDetailTxsByTxID(): %w", err)
+		return nil, fmt.Errorf("failed to call GetETHDetailTXsByTxID(): %w", err)
 	}
 
-	result := make([]*sqlc.EthDetailTx, len(ethTxs))
+	result := make([]*sqlc.ETHDetailTX, len(ethTxs))
 	for i := range ethTxs {
 		result[i] = &ethTxs[i]
 	}
@@ -58,25 +58,25 @@ func (r *EthDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*sqlc.EthDeta
 }
 
 // GetSentHashTx returns list of sent_hash_tx by txType
-func (r *EthDetailTxInputRepositorySqlc) GetSentHashTx(txType domainTx.TxType) ([]string, error) {
+func (r *ETHDetailTXInputRepositorySqlc) GetSentHashTx(txType domainTx.TxType) ([]string, error) {
 	ctx := context.Background()
 
-	hashes, err := r.queries.GetEthDetailTxSentHashList(ctx, sqlc.GetEthDetailTxSentHashListParams{
+	hashes, err := r.queries.GetETHDetailTXSentHashList(ctx, sqlc.GetETHDetailTXSentHashListParams{
 		Coin:          sqlc.TxCoin(r.coinTypeCode.String()),
 		CurrentTxType: txType.Int8(),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to call GetEthDetailTxSentHashList(): %w", err)
+		return nil, fmt.Errorf("failed to call GetETHDetailTXSentHashList(): %w", err)
 	}
 
 	return hashes, nil
 }
 
 // Insert inserts one record
-func (r *EthDetailTxInputRepositorySqlc) Insert(txItem *sqlc.EthDetailTx) error {
+func (r *ETHDetailTXInputRepositorySqlc) Insert(txItem *sqlc.ETHDetailTX) error {
 	ctx := context.Background()
 
-	_, err := r.queries.InsertEthDetailTx(ctx, sqlc.InsertEthDetailTxParams{
+	_, err := r.queries.InsertETHDetailTX(ctx, sqlc.InsertETHDetailTXParams{
 		TxID:              txItem.TxID,
 		Uuid:              txItem.Uuid,
 		CurrentTxType:     txItem.CurrentTxType,
@@ -95,14 +95,14 @@ func (r *EthDetailTxInputRepositorySqlc) Insert(txItem *sqlc.EthDetailTx) error 
 		SentUpdatedAt:     txItem.SentUpdatedAt,
 	})
 	if err != nil {
-		return fmt.Errorf("failed to call InsertEthDetailTx(): %w", err)
+		return fmt.Errorf("failed to call InsertETHDetailTX(): %w", err)
 	}
 
 	return nil
 }
 
 // InsertBulk inserts multiple records
-func (r *EthDetailTxInputRepositorySqlc) InsertBulk(txItems []*sqlc.EthDetailTx) error {
+func (r *ETHDetailTXInputRepositorySqlc) InsertBulk(txItems []*sqlc.ETHDetailTX) error {
 	for _, item := range txItems {
 		if err := r.Insert(item); err != nil {
 			return err
@@ -112,7 +112,7 @@ func (r *EthDetailTxInputRepositorySqlc) InsertBulk(txItems []*sqlc.EthDetailTx)
 }
 
 // UpdateAfterTxSent updates when tx sent
-func (r *EthDetailTxInputRepositorySqlc) UpdateAfterTxSent(
+func (r *ETHDetailTXInputRepositorySqlc) UpdateAfterTxSent(
 	uuid string,
 	txType domainTx.TxType,
 	signedHex,
@@ -120,7 +120,7 @@ func (r *EthDetailTxInputRepositorySqlc) UpdateAfterTxSent(
 ) (int64, error) {
 	ctx := context.Background()
 
-	result, err := r.queries.UpdateEthDetailTxAfterSent(ctx, sqlc.UpdateEthDetailTxAfterSentParams{
+	result, err := r.queries.UpdateETHDetailTXAfterSent(ctx, sqlc.UpdateETHDetailTXAfterSentParams{
 		CurrentTxType: txType.Int8(),
 		SignedHexTx:   signedHex,
 		SentHashTx:    sentHashTx,
@@ -128,7 +128,7 @@ func (r *EthDetailTxInputRepositorySqlc) UpdateAfterTxSent(
 		Uuid:          uuid,
 	})
 	if err != nil {
-		return 0, fmt.Errorf("failed to call UpdateEthDetailTxAfterSent(): %w", err)
+		return 0, fmt.Errorf("failed to call UpdateETHDetailTXAfterSent(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
@@ -140,15 +140,15 @@ func (r *EthDetailTxInputRepositorySqlc) UpdateAfterTxSent(
 }
 
 // UpdateTxType updates txType
-func (r *EthDetailTxInputRepositorySqlc) UpdateTxType(id int64, txType domainTx.TxType) (int64, error) {
+func (r *ETHDetailTXInputRepositorySqlc) UpdateTxType(id int64, txType domainTx.TxType) (int64, error) {
 	ctx := context.Background()
 
-	result, err := r.queries.UpdateEthDetailTxType(ctx, sqlc.UpdateEthDetailTxTypeParams{
+	result, err := r.queries.UpdateETHDetailTXType(ctx, sqlc.UpdateETHDetailTXTypeParams{
 		CurrentTxType: txType.Int8(),
 		ID:            id,
 	})
 	if err != nil {
-		return 0, fmt.Errorf("failed to call UpdateEthDetailTxType(): %w", err)
+		return 0, fmt.Errorf("failed to call UpdateETHDetailTXType(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
@@ -160,17 +160,17 @@ func (r *EthDetailTxInputRepositorySqlc) UpdateTxType(id int64, txType domainTx.
 }
 
 // UpdateTxTypeBySentHashTx updates txType
-func (r *EthDetailTxInputRepositorySqlc) UpdateTxTypeBySentHashTx(
+func (r *ETHDetailTXInputRepositorySqlc) UpdateTxTypeBySentHashTx(
 	txType domainTx.TxType, sentHashTx string,
 ) (int64, error) {
 	ctx := context.Background()
 
-	result, err := r.queries.UpdateEthDetailTxTypeBySentHash(ctx, sqlc.UpdateEthDetailTxTypeBySentHashParams{
+	result, err := r.queries.UpdateETHDetailTXTypeBySentHash(ctx, sqlc.UpdateETHDetailTXTypeBySentHashParams{
 		CurrentTxType: txType.Int8(),
 		SentHashTx:    sentHashTx,
 	})
 	if err != nil {
-		return 0, fmt.Errorf("failed to call UpdateEthDetailTxTypeBySentHash(): %w", err)
+		return 0, fmt.Errorf("failed to call UpdateETHDetailTXTypeBySentHash(): %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected()
@@ -182,8 +182,8 @@ func (r *EthDetailTxInputRepositorySqlc) UpdateTxTypeBySentHashTx(
 }
 
 // WithTx returns a new repository instance that uses the provided transaction
-func (r *EthDetailTxInputRepositorySqlc) WithTx(tx *sql.Tx) portsPersistence.EthDetailTxRepositorier {
-	return &EthDetailTxInputRepositorySqlc{
+func (r *ETHDetailTXInputRepositorySqlc) WithTx(tx *sql.Tx) portsPersistence.ETHDetailTXRepositorier {
+	return &ETHDetailTXInputRepositorySqlc{
 		queries:      r.queries.WithTx(tx),
 		coinTypeCode: r.coinTypeCode,
 	}

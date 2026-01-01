@@ -19,7 +19,7 @@ import (
 )
 
 type exportAddressUseCase struct {
-	accountKeyRepo  cold.BtcAccountKeyRepositorier
+	accountKeyRepo  cold.BTCAccountKeyRepositorier
 	addrFileRepo    file.AddressFileRepositorier
 	multisigAccount account.MultisigAccounter
 	coinTypeCode    domainCoin.CoinTypeCode
@@ -27,7 +27,7 @@ type exportAddressUseCase struct {
 
 // NewExportAddressUseCase creates a new ExportAddressUseCase
 func NewExportAddressUseCase(
-	accountKeyRepo cold.BtcAccountKeyRepositorier,
+	accountKeyRepo cold.BTCAccountKeyRepositorier,
 	addrFileRepo file.AddressFileRepositorier,
 	multisigAccount account.MultisigAccounter,
 	coinTypeCode domainCoin.CoinTypeCode,

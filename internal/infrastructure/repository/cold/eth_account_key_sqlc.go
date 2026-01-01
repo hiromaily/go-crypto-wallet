@@ -11,22 +11,22 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
-// EthAccountKeyRepositorySqlc is repository for eth_account_key table using sqlc
-type EthAccountKeyRepositorySqlc struct {
+// ETHAccountKeyRepositorySqlc is repository for eth_account_key table using sqlc
+type ETHAccountKeyRepositorySqlc struct {
 	queries *sqlc.Queries
 	dbConn  *sql.DB
 }
 
-// NewEthAccountKeyRepositorySqlc returns EthAccountKeyRepositorySqlc object
-func NewEthAccountKeyRepositorySqlc(dbConn *sql.DB) *EthAccountKeyRepositorySqlc {
-	return &EthAccountKeyRepositorySqlc{
+// NewETHAccountKeyRepositorySqlc returns ETHAccountKeyRepositorySqlc object
+func NewETHAccountKeyRepositorySqlc(dbConn *sql.DB) *ETHAccountKeyRepositorySqlc {
+	return &ETHAccountKeyRepositorySqlc{
 		queries: sqlc.New(dbConn),
 		dbConn:  dbConn,
 	}
 }
 
 // GetMaxIndex returns max idx
-func (r *EthAccountKeyRepositorySqlc) GetMaxIndex(accountType domainAccount.AccountType) (int64, error) {
+func (r *ETHAccountKeyRepositorySqlc) GetMaxIndex(accountType domainAccount.AccountType) (int64, error) {
 	ctx := context.Background()
 
 	result, err := r.queries.GetMaxEthAccountKeyIndex(ctx, sqlc.EthAccountKeyAccount(accountType.String()))
@@ -43,7 +43,7 @@ func (r *EthAccountKeyRepositorySqlc) GetMaxIndex(accountType domainAccount.Acco
 }
 
 // GetOneMaxID returns one record by max id
-func (r *EthAccountKeyRepositorySqlc) GetOneMaxID(accountType domainAccount.AccountType) (*sqlc.EthAccountKey, error) {
+func (r *ETHAccountKeyRepositorySqlc) GetOneMaxID(accountType domainAccount.AccountType) (*sqlc.EthAccountKey, error) {
 	ctx := context.Background()
 
 	accountKey, err := r.queries.GetOneEthAccountKeyByMaxID(ctx, sqlc.EthAccountKeyAccount(accountType.String()))
@@ -55,7 +55,7 @@ func (r *EthAccountKeyRepositorySqlc) GetOneMaxID(accountType domainAccount.Acco
 }
 
 // GetAllAddrStatus returns all EthAccountKey by addr_status
-func (r *EthAccountKeyRepositorySqlc) GetAllAddrStatus(
+func (r *ETHAccountKeyRepositorySqlc) GetAllAddrStatus(
 	accountType domainAccount.AccountType, addrStatus address.AddrStatus,
 ) ([]*sqlc.EthAccountKey, error) {
 	ctx := context.Background()
@@ -77,7 +77,7 @@ func (r *EthAccountKeyRepositorySqlc) GetAllAddrStatus(
 }
 
 // GetByAddress returns EthAccountKey by address
-func (r *EthAccountKeyRepositorySqlc) GetByAddress(addr string) (*sqlc.EthAccountKey, error) {
+func (r *ETHAccountKeyRepositorySqlc) GetByAddress(addr string) (*sqlc.EthAccountKey, error) {
 	ctx := context.Background()
 
 	accountKey, err := r.queries.GetEthAccountKeyByAddress(ctx, addr)
@@ -89,7 +89,7 @@ func (r *EthAccountKeyRepositorySqlc) GetByAddress(addr string) (*sqlc.EthAccoun
 }
 
 // InsertBulk inserts multiple records
-func (r *EthAccountKeyRepositorySqlc) InsertBulk(items []*sqlc.EthAccountKey) error {
+func (r *ETHAccountKeyRepositorySqlc) InsertBulk(items []*sqlc.EthAccountKey) error {
 	ctx := context.Background()
 
 	tx, err := r.dbConn.BeginTx(ctx, nil)
@@ -121,7 +121,7 @@ func (r *EthAccountKeyRepositorySqlc) InsertBulk(items []*sqlc.EthAccountKey) er
 }
 
 // UpdateAddrStatus updates addr_status
-func (r *EthAccountKeyRepositorySqlc) UpdateAddrStatus(
+func (r *ETHAccountKeyRepositorySqlc) UpdateAddrStatus(
 	accountType domainAccount.AccountType, addrStatus address.AddrStatus, privateKeys []string,
 ) (int64, error) {
 	ctx := context.Background()

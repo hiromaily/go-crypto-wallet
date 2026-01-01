@@ -85,7 +85,7 @@ func (e *Ethereum) calculateFee(
 // - sender has to pay 5ETH + fee
 func (e *Ethereum) CreateRawTransaction(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-) (*ethtx.RawTx, *models.EthDetailTX, error) {
+) (*ethtx.RawTx, *models.ETHDetailTX, error) {
 	// validation check
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
@@ -160,7 +160,7 @@ func (e *Ethereum) CreateRawTransaction(
 	}
 
 	// create insert data for　eth_detail_tx
-	txDetailItem := &models.EthDetailTX{
+	txDetailItem := &models.ETHDetailTX{
 		UUID:            uid.String(),
 		SenderAccount:   "",
 		SenderAddress:   fromAddr,

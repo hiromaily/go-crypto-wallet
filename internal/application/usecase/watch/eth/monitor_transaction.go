@@ -15,7 +15,7 @@ import (
 type monitorTransactionUseCase struct {
 	ethClient    ethereum.Ethereumer
 	addrRepo     watchrepo.AddressRepositorier
-	txDetailRepo watchrepo.EthDetailTxRepositorier
+	txDetailRepo watchrepo.ETHDetailTXRepositorier
 	confirmNum   uint64
 }
 
@@ -23,7 +23,7 @@ type monitorTransactionUseCase struct {
 func NewMonitorTransactionUseCase(
 	ethClient ethereum.Ethereumer,
 	addrRepo watchrepo.AddressRepositorier,
-	txDetailRepo watchrepo.EthDetailTxRepositorier,
+	txDetailRepo watchrepo.ETHDetailTXRepositorier,
 	confirmNum uint64,
 ) watchusecase.MonitorTransactionUseCase {
 	return &monitorTransactionUseCase{

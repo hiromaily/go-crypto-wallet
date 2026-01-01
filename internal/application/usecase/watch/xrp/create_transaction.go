@@ -27,7 +27,7 @@ type createTransactionUseCase struct {
 	uuidHandler     uuid.UUIDHandler
 	addrRepo        watchrepo.AddressRepositorier
 	txRepo          watchrepo.TxRepositorier
-	txDetailRepo    watchrepo.XrpDetailTxRepositorier
+	txDetailRepo    watchrepo.XRPDetailTxRepositorier
 	payReqRepo      watchrepo.PaymentRequestRepositorier
 	txFileRepo      portsStorage.TransactionFileRepositorier
 	depositReceiver domainAccount.AccountType
@@ -41,7 +41,7 @@ func NewCreateTransactionUseCase(
 	uuidHandler uuid.UUIDHandler,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.TxRepositorier,
-	txDetailRepo watchrepo.XrpDetailTxRepositorier,
+	txDetailRepo watchrepo.XRPDetailTxRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,
 	txFileRepo portsStorage.TransactionFileRepositorier,
 	depositReceiver domainAccount.AccountType,

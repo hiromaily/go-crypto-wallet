@@ -23,8 +23,8 @@ type SeedRepositorier interface {
 	Insert(ctx context.Context, strSeed string) error
 }
 
-// BtcAccountKeyRepositorier is BtcAccountKeyRepository interface for BTC/BCH
-type BtcAccountKeyRepositorier interface {
+// BTCAccountKeyRepositorier is BtcAccountKeyRepository interface for BTC/BCH
+type BTCAccountKeyRepositorier interface {
 	GetMaxIndex(accountType domainAccount.AccountType) (int64, error)
 	GetOneMaxID(accountType domainAccount.AccountType) (*sqlc.BtcAccountKey, error)
 	GetAllAddrStatus(
@@ -42,8 +42,8 @@ type BtcAccountKeyRepositorier interface {
 	UpdateMultisigAddrs(accountType domainAccount.AccountType, items []*sqlc.BtcAccountKey) (int64, error)
 }
 
-// EthAccountKeyRepositorier is EthAccountKeyRepository interface for ETH
-type EthAccountKeyRepositorier interface {
+// ETHAccountKeyRepositorier is EthAccountKeyRepository interface for ETH
+type ETHAccountKeyRepositorier interface {
 	GetMaxIndex(accountType domainAccount.AccountType) (int64, error)
 	GetOneMaxID(accountType domainAccount.AccountType) (*sqlc.EthAccountKey, error)
 	GetAllAddrStatus(
@@ -144,21 +144,21 @@ type PaymentRequestRepositorier interface {
 	WithTx(tx *sql.Tx) PaymentRequestRepositorier
 }
 
-// EthDetailTxRepositorier is EthDetailTxRepository interface
-type EthDetailTxRepositorier interface {
-	GetOne(id int64) (*sqlc.EthDetailTx, error)
-	GetAllByTxID(id int64) ([]*sqlc.EthDetailTx, error)
+// ETHDetailTXRepositorier is ETHDetailTXRepository interface
+type ETHDetailTXRepositorier interface {
+	GetOne(id int64) (*sqlc.ETHDetailTX, error)
+	GetAllByTxID(id int64) ([]*sqlc.ETHDetailTX, error)
 	GetSentHashTx(txType domainTx.TxType) ([]string, error)
-	Insert(txItem *sqlc.EthDetailTx) error
-	InsertBulk(txItems []*sqlc.EthDetailTx) error
+	Insert(txItem *sqlc.ETHDetailTX) error
+	InsertBulk(txItems []*sqlc.ETHDetailTX) error
 	UpdateAfterTxSent(uuid string, txType domainTx.TxType, signedHex, sentHashTx string) (int64, error)
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(txType domainTx.TxType, sentHashTx string) (int64, error)
-	WithTx(tx *sql.Tx) EthDetailTxRepositorier
+	WithTx(tx *sql.Tx) ETHDetailTXRepositorier
 }
 
-// XrpDetailTxRepositorier is XrpDetailTxRepository interface
-type XrpDetailTxRepositorier interface {
+// XRPDetailTxRepositorier is XrpDetailTxRepository interface
+type XRPDetailTxRepositorier interface {
 	GetOne(id int64) (*sqlc.XrpDetailTx, error)
 	GetAllByTxID(id int64) ([]*sqlc.XrpDetailTx, error)
 	GetSentHashTx(txType domainTx.TxType) ([]string, error)
@@ -169,5 +169,5 @@ type XrpDetailTxRepositorier interface {
 	) (int64, error)
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(txType domainTx.TxType, sentHashTx string) (int64, error)
-	WithTx(tx *sql.Tx) XrpDetailTxRepositorier
+	WithTx(tx *sql.Tx) XRPDetailTxRepositorier
 }

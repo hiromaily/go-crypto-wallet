@@ -19,14 +19,14 @@ import (
 
 type sendTransactionUseCase struct {
 	rippler      ripple.Rippler
-	txDetailRepo watchrepo.XrpDetailTxRepositorier
+	txDetailRepo watchrepo.XRPDetailTxRepositorier
 	txFileRepo   portsStorage.TransactionFileRepositorier
 }
 
 // NewSendTransactionUseCase creates a new SendTransactionUseCase
 func NewSendTransactionUseCase(
 	rippler ripple.Rippler,
-	txDetailRepo watchrepo.XrpDetailTxRepositorier,
+	txDetailRepo watchrepo.XRPDetailTxRepositorier,
 	txFileRepo portsStorage.TransactionFileRepositorier,
 ) watchusecase.SendTransactionUseCase {
 	return &sendTransactionUseCase{

@@ -17,7 +17,7 @@ import (
 
 type signTransactionUseCase struct {
 	btc             portsBitcoin.Bitcoiner
-	accountKeyRepo  cold.BtcAccountKeyRepositorier
+	accountKeyRepo  cold.BTCAccountKeyRepositorier
 	authKeyRepo     cold.AuthAccountKeyRepositorier
 	txFileRepo      portsStorage.TransactionFileRepositorier
 	multisigAccount account.MultisigAccounter
@@ -28,7 +28,7 @@ type signTransactionUseCase struct {
 // NewSignTransactionUseCase creates a new SignTransactionUseCase for sign wallet
 func NewSignTransactionUseCase(
 	btcAPI portsBitcoin.Bitcoiner,
-	accountKeyRepo cold.BtcAccountKeyRepositorier,
+	accountKeyRepo cold.BTCAccountKeyRepositorier,
 	authKeyRepo cold.AuthAccountKeyRepositorier,
 	txFileRepo portsStorage.TransactionFileRepositorier,
 	multisigAccount account.MultisigAccounter,

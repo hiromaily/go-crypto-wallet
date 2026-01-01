@@ -27,7 +27,7 @@ type createTransactionUseCase struct {
 	dbConn          *sql.DB
 	addrRepo        watchrepo.AddressRepositorier
 	txRepo          watchrepo.TxRepositorier
-	txDetailRepo    watchrepo.EthDetailTxRepositorier
+	txDetailRepo    watchrepo.ETHDetailTXRepositorier
 	payReqRepo      watchrepo.PaymentRequestRepositorier
 	txFileRepo      portsStorage.TransactionFileRepositorier
 	depositReceiver domainAccount.AccountType
@@ -40,7 +40,7 @@ func NewCreateTransactionUseCase(
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.TxRepositorier,
-	txDetailRepo watchrepo.EthDetailTxRepositorier,
+	txDetailRepo watchrepo.ETHDetailTXRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,
 	txFileRepo portsStorage.TransactionFileRepositorier,
 	depositReceiver domainAccount.AccountType,
@@ -270,10 +270,10 @@ func (u *createTransactionUseCase) createTransferTx(
 
 	// create insert data for　eth_detail_tx
 	// Convert from models to sqlc type
-	txDetailItem := convertModelsToSqlcEthDetailTx(txDetailModel)
+	txDetailItem := convertModelsToSqlcETHDetailTX(txDetailModel)
 	txDetailItem.SenderAccount = sender.String()
 	txDetailItem.ReceiverAccount = receiver.String()
-	txDetailItems := []*sqlc.EthDetailTx{txDetailItem}
+	txDetailItems := []*sqlc.ETHDetailTX{txDetailItem}
 
 	txID, err := u.updateDB(targetAction, txDetailItems, nil)
 	if err != nil {
@@ -335,7 +335,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	userAmounts []eth.UserAmount,
-) ([]string, []*sqlc.EthDetailTx, error) {
+) ([]string, []*sqlc.ETHDetailTX, error) {
 	// get address for deposit account
 	depositAddr, err := u.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
@@ -346,11 +346,11 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 
 	// create raw transaction each address
 	serializedTxs := make([]string, 0, len(userAmounts))
-	txDetailItems := make([]*sqlc.EthDetailTx, 0, len(userAmounts))
+	txDetailItems := make([]*sqlc.ETHDetailTX, 0, len(userAmounts))
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
 		var rawTx *ethtx.RawTx
-		var txDetailModel *models.EthDetailTX
+		var txDetailModel *models.ETHDetailTX
 		rawTx, txDetailModel, err = u.ethClient.CreateRawTransaction(
 			ctx, val.Address, depositAddr.WalletAddress, 0, 0)
 		if err != nil {
@@ -371,7 +371,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 
 		// create insert data for　eth_detail_tx
 		// Convert from models to sqlc type
-		txDetailItem := convertModelsToSqlcEthDetailTx(txDetailModel)
+		txDetailItem := convertModelsToSqlcETHDetailTX(txDetailModel)
 		txDetailItem.SenderAccount = sender.String()
 		txDetailItem.ReceiverAccount = receiver.String()
 		txDetailItems = append(txDetailItems, txDetailItem)
@@ -449,9 +449,9 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	sender, receiver domainAccount.AccountType,
 	userPayments []userPayment,
 	senderAddr *sqlc.Address,
-) ([]string, []*sqlc.EthDetailTx, error) {
+) ([]string, []*sqlc.ETHDetailTX, error) {
 	serializedTxs := make([]string, 0, len(userPayments))
-	txDetailItems := make([]*sqlc.EthDetailTx, 0, len(userPayments))
+	txDetailItems := make([]*sqlc.ETHDetailTX, 0, len(userPayments))
 	additionalNonce := 0
 	for _, userPayment := range userPayments {
 		// call CreateRawTransaction
@@ -475,7 +475,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 
 		// create insert data for　eth_detail_tx
 		// Convert from models to sqlc type
-		txDetailItem := convertModelsToSqlcEthDetailTx(txDetailModel)
+		txDetailItem := convertModelsToSqlcETHDetailTX(txDetailModel)
 		txDetailItem.SenderAccount = sender.String()
 		txDetailItem.ReceiverAccount = receiver.String()
 		txDetailItems = append(txDetailItems, txDetailItem)
@@ -485,7 +485,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 
 func (u *createTransactionUseCase) updateDB(
 	targetAction domainTx.ActionType,
-	txDetailItems []*sqlc.EthDetailTx,
+	txDetailItems []*sqlc.ETHDetailTX,
 	paymentRequestIds []int64,
 ) (int64, error) {
 	// start transaction
@@ -545,9 +545,9 @@ func (u *createTransactionUseCase) generateHexFile(
 	return generatedFileName, nil
 }
 
-// Helper function to convert models.EthDetailTX to sqlc.EthDetailTx
-func convertModelsToSqlcEthDetailTx(m *models.EthDetailTX) *sqlc.EthDetailTx {
-	return &sqlc.EthDetailTx{
+// Helper function to convert models.ETHDetailTX to sqlc.ETHDetailTX
+func convertModelsToSqlcETHDetailTX(m *models.ETHDetailTX) *sqlc.ETHDetailTX {
+	return &sqlc.ETHDetailTX{
 		ID:                m.ID,
 		TxID:              m.TXID,
 		Uuid:              m.UUID,
