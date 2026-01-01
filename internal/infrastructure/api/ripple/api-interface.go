@@ -10,6 +10,7 @@ import (
 )
 
 // Rippler Ripple Interface
+// FIXIME: infrastructure layer should not have interface dependency from usecase layer
 type Rippler interface {
 	RippleAdminer
 	RipplePublicer

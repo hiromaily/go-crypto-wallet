@@ -19,6 +19,7 @@ import (
 )
 
 // Ethereumer Ethereum Interface
+// FIXIME: infrastructure layer should not have interface dependency from usecase layer
 type Ethereumer interface {
 	// balance
 	GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []eth.UserAmount)
