@@ -10,7 +10,6 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -20,7 +19,7 @@ type signTransactionUseCase struct {
 	accountKeyRepo  cold.BTCAccountKeyRepositorier
 	authKeyRepo     cold.AuthAccountKeyRepositorier
 	txFileRepo      portsStorage.TransactionFileRepositorier
-	multisigAccount account.MultisigAccounter
+	multisigAccount *domainAccount.MultisigConfig
 	wtype           domainWallet.WalletType
 	authType        domainAccount.AuthType
 }
@@ -31,7 +30,7 @@ func NewSignTransactionUseCase(
 	accountKeyRepo cold.BTCAccountKeyRepositorier,
 	authKeyRepo cold.AuthAccountKeyRepositorier,
 	txFileRepo portsStorage.TransactionFileRepositorier,
-	multisigAccount account.MultisigAccounter,
+	multisigAccount *domainAccount.MultisigConfig,
 	wtype domainWallet.WalletType,
 	authType domainAccount.AuthType,
 ) signusecase.SignTransactionUseCase {

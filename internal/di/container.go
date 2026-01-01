@@ -129,7 +129,7 @@ type container struct {
 	wsXrpAdmin   *websocket.WS
 	rippleAPI    *xrp.RippleAPI
 	// keygen specific
-	multisig account.MultisigAccounter
+	multisig *domainAccount.MultisigConfig
 	// sign specific
 	authName string
 }
@@ -599,12 +599,13 @@ func (c *container) getKeyType() domainKey.KeyType {
 	return domainKey.KeyTypeBIP44
 }
 
-func (c *container) newMultiAccount() account.MultisigAccounter {
+func (c *container) newMultiAccount() *domainAccount.MultisigConfig {
 	if c.multisig == nil {
 		if c.accountConf == nil || c.accountConf.Multisigs == nil {
-			return account.NewMultisigAccounts(nil)
+			c.multisig = account.NewMultisigConfig(nil)
+		} else {
+			c.multisig = account.NewMultisigConfig(c.accountConf.Multisigs)
 		}
-		c.multisig = account.NewMultisigAccounts(c.accountConf.Multisigs)
 	}
 	return c.multisig
 }
