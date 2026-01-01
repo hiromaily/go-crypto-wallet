@@ -53,7 +53,9 @@ func (att *apiTxTest) TestTransaction() {
 		att.T().Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
 			// PrepareTransaction
-			txJSON, _, err := att.XRP.PrepareTransaction(ctx, tt.args.sernderAccount, tt.args.receiverAccount, tt.args.amount, tt.args.instructions)
+			txJSON, _, err := att.XRP.PrepareTransaction(
+				ctx, tt.args.sernderAccount, tt.args.receiverAccount, tt.args.amount, tt.args.instructions,
+			)
 			att.NoError(err)
 			grok.Value(txJSON)
 			//- creating raw transaction
@@ -71,7 +73,10 @@ func (att *apiTxTest) TestTransaction() {
 			sentTx, earlistLedgerVersion, err := att.XRP.SubmitTransaction(ctx, txBlob)
 			att.NoError(err)
 			if strings.Contains(sentTx.ResultCode, "UNFUNDED_PAYMENT") {
-				t.Errorf("fail to call SubmitTransaction. resultCode: %s, resultMessage: %s", sentTx.ResultCode, sentTx.ResultMessage)
+				t.Errorf(
+					"fail to call SubmitTransaction. resultCode: %s, resultMessage: %s",
+					sentTx.ResultCode, sentTx.ResultMessage,
+				)
 				return
 			}
 

@@ -576,6 +576,9 @@ func generateNonce(t *testing.T, container di.Container, psbt []byte) []byte {
 	t.Helper()
 
 	// TODO: Implement actual nonce generation based on wallet type
+	_ = container // Will be used when TODO is implemented
+	_ = psbt      // Will be used when TODO is implemented
+
 	// For now, return placeholder
 	nonce := make([]byte, 66)
 	for i := range nonce {
@@ -589,6 +592,10 @@ func createPartialSignature(t *testing.T, container di.Container, psbt []byte, n
 	t.Helper()
 
 	// TODO: Implement actual signing based on wallet type
+	_ = container // Will be used when TODO is implemented
+	_ = psbt      // Will be used when TODO is implemented
+	_ = nonces    // Will be used when TODO is implemented
+
 	// For now, return placeholder
 	signature := make([]byte, 64)
 	for i := range signature {

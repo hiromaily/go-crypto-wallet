@@ -24,6 +24,7 @@ func TestMuSig2ParallelNonceGeneration(t *testing.T) {
 	}
 
 	ctx := context.Background()
+	_ = ctx // Will be used when TODO is implemented
 
 	// Setup wallets
 	keygen := setupKeygenWallet(t)
@@ -36,6 +37,7 @@ func TestMuSig2ParallelNonceGeneration(t *testing.T) {
 
 	// Create test PSBT for nonce generation
 	psbt := createTestPSBT(t, keygen)
+	_ = psbt // Will be used when TODO is implemented
 
 	// Generate nonces in parallel
 	var wg sync.WaitGroup
@@ -50,28 +52,31 @@ func TestMuSig2ParallelNonceGeneration(t *testing.T) {
 
 	go func() {
 		defer wg.Done()
-		nonceUseCase := keygen.NewKeygenGenerateMuSig2NonceUseCase()
+		_ = keygen.NewKeygenGenerateMuSig2NonceUseCase()
 		// TODO: Implement actual nonce generation
 		// nonces[0], errors[0] = nonceUseCase.Generate(ctx, psbt)
-		nonces[0] = []byte("keygen_nonce_0123456789012345678901234567890123456789012345678901234") // 66 bytes placeholder
+		// 66 bytes placeholder
+		nonces[0] = []byte("keygen_nonce_0123456789012345678901234567890123456789012345678901234")
 		errors[0] = nil
 	}()
 
 	go func() {
 		defer wg.Done()
-		nonceUseCase := sign1.NewSignGenerateMuSig2NonceUseCase()
+		_ = sign1.NewSignGenerateMuSig2NonceUseCase()
 		// TODO: Implement actual nonce generation
 		// nonces[1], errors[1] = nonceUseCase.Generate(ctx, psbt)
-		nonces[1] = []byte("sign1_nonce_0123456789012345678901234567890123456789012345678901234") // 66 bytes placeholder
+		// 66 bytes placeholder
+		nonces[1] = []byte("sign1_nonce_0123456789012345678901234567890123456789012345678901234")
 		errors[1] = nil
 	}()
 
 	go func() {
 		defer wg.Done()
-		nonceUseCase := sign2.NewSignGenerateMuSig2NonceUseCase()
+		_ = sign2.NewSignGenerateMuSig2NonceUseCase()
 		// TODO: Implement actual nonce generation
 		// nonces[2], errors[2] = nonceUseCase.Generate(ctx, psbt)
-		nonces[2] = []byte("sign2_nonce_0123456789012345678901234567890123456789012345678901234") // 66 bytes placeholder
+		// 66 bytes placeholder
+		nonces[2] = []byte("sign2_nonce_0123456789012345678901234567890123456789012345678901234")
 		errors[2] = nil
 	}()
 
@@ -120,6 +125,7 @@ func TestMuSig2NonceIndependence(t *testing.T) {
 	}
 
 	ctx := context.Background()
+	_ = ctx // Will be used when TODO is implemented
 
 	// Setup wallets
 	keygen := setupKeygenWallet(t)
@@ -131,6 +137,7 @@ func TestMuSig2NonceIndependence(t *testing.T) {
 
 	// Create test PSBT
 	psbt := createTestPSBT(t, keygen)
+	_ = psbt // Will be used when TODO is implemented
 
 	const iterations = 10
 
@@ -140,14 +147,14 @@ func TestMuSig2NonceIndependence(t *testing.T) {
 
 	for i := 0; i < iterations; i++ {
 		// Generate nonce from keygen wallet
-		keygenNonceUseCase := keygen.NewKeygenGenerateMuSig2NonceUseCase()
+		_ = keygen.NewKeygenGenerateMuSig2NonceUseCase()
 		// TODO: Implement actual nonce generation
 		// keygenNonces[i], err = keygenNonceUseCase.Generate(ctx, psbt)
 		// require.NoError(t, err, "Iteration %d: keygen nonce generation failed", i)
 		keygenNonces[i] = []byte(fmt.Sprintf("keygen_nonce_%-53d", i)) // Placeholder with variation
 
 		// Generate nonce from sign1 wallet
-		sign1NonceUseCase := sign1.NewSignGenerateMuSig2NonceUseCase()
+		_ = sign1.NewSignGenerateMuSig2NonceUseCase()
 		// TODO: Implement actual nonce generation
 		// sign1Nonces[i], err = sign1NonceUseCase.Generate(ctx, psbt)
 		// require.NoError(t, err, "Iteration %d: sign1 nonce generation failed", i)
@@ -189,6 +196,7 @@ func TestMuSig2NonceCollectionValidation(t *testing.T) {
 	}
 
 	ctx := context.Background()
+	_ = ctx // Will be used when TODO is implemented
 
 	// Setup wallets
 	keygen := setupKeygenWallet(t)
@@ -201,6 +209,7 @@ func TestMuSig2NonceCollectionValidation(t *testing.T) {
 
 	// Create test PSBT
 	psbt := createTestPSBT(t, keygen)
+	_ = psbt // Will be used when TODO is implemented
 
 	t.Run("ValidNonceCollection", func(t *testing.T) {
 		// Collect nonces from all signers

@@ -129,7 +129,7 @@ func TestMixedTraditionalAndMuSig2Wallets(t *testing.T) {
 		// Test both address types for different account types
 		accountTypes := []domainAccount.AccountType{
 			domainAccount.AccountTypePayment,
-			domainAccount.AccountTypeReceipt,
+			domainAccount.AccountTypeClient,
 		}
 
 		for _, accountType := range accountTypes {

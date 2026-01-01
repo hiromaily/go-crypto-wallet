@@ -74,7 +74,9 @@ func (txt *transactionTest) TestCreateRawTransaction() {
 	for _, tt := range tests {
 		txt.T().Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
-			rawTx, txDetail, err := txt.ETH.CreateRawTransaction(ctx, tt.args.senderAddr, tt.args.receiverAddr, tt.args.amount, 0)
+			rawTx, txDetail, err := txt.ETH.CreateRawTransaction(
+				ctx, tt.args.senderAddr, tt.args.receiverAddr, tt.args.amount, 0,
+			)
 			txt.Equal(tt.want.isErr, err != nil)
 			if err == nil {
 				t.Log(rawTx)
@@ -129,7 +131,9 @@ func (txt *transactionTest) TestSignAndSendRawTransaction() {
 		txt.T().Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
 			// create raw transaction
-			rawTx, _, err := txt.ETH.CreateRawTransaction(ctx, tt.args.senderAddr, tt.args.receiverAddr, tt.args.amount, 0)
+			rawTx, _, err := txt.ETH.CreateRawTransaction(
+				ctx, tt.args.senderAddr, tt.args.receiverAddr, tt.args.amount, 0,
+			)
 			txt.NoError(err)
 
 			// sign on raw transaction
