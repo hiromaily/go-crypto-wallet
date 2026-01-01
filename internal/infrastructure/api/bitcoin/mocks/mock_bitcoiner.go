@@ -663,23 +663,23 @@ func (_c *MockBitcoiner_DecodeAddress_Call) RunAndReturn(run func(addr string) (
 }
 
 // DecodeRawTransaction provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) DecodeRawTransaction(hexTx string) (*btc.TxRawResult, error) {
+func (_mock *MockBitcoiner) DecodeRawTransaction(hexTx string) (*bitcoindto.RawTransaction, error) {
 	ret := _mock.Called(hexTx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DecodeRawTransaction")
 	}
 
-	var r0 *btc.TxRawResult
+	var r0 *bitcoindto.RawTransaction
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*btc.TxRawResult, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) (*bitcoindto.RawTransaction, error)); ok {
 		return returnFunc(hexTx)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *btc.TxRawResult); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) *bitcoindto.RawTransaction); ok {
 		r0 = returnFunc(hexTx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.TxRawResult)
+			r0 = ret.Get(0).(*bitcoindto.RawTransaction)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
@@ -714,12 +714,12 @@ func (_c *MockBitcoiner_DecodeRawTransaction_Call) Run(run func(hexTx string)) *
 	return _c
 }
 
-func (_c *MockBitcoiner_DecodeRawTransaction_Call) Return(txRawResult *btc.TxRawResult, err error) *MockBitcoiner_DecodeRawTransaction_Call {
-	_c.Call.Return(txRawResult, err)
+func (_c *MockBitcoiner_DecodeRawTransaction_Call) Return(rawTransaction *bitcoindto.RawTransaction, err error) *MockBitcoiner_DecodeRawTransaction_Call {
+	_c.Call.Return(rawTransaction, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_DecodeRawTransaction_Call) RunAndReturn(run func(hexTx string) (*btc.TxRawResult, error)) *MockBitcoiner_DecodeRawTransaction_Call {
+func (_c *MockBitcoiner_DecodeRawTransaction_Call) RunAndReturn(run func(hexTx string) (*bitcoindto.RawTransaction, error)) *MockBitcoiner_DecodeRawTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1210,23 +1210,23 @@ func (_c *MockBitcoiner_FloatToDecimal_Call) RunAndReturn(run func(f float64) (u
 }
 
 // FundRawTransaction provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) FundRawTransaction(hex string) (*btc.FundRawTransactionResult, error) {
+func (_mock *MockBitcoiner) FundRawTransaction(hex string) (*bitcoindto.FundRawTransactionResult, error) {
 	ret := _mock.Called(hex)
 
 	if len(ret) == 0 {
 		panic("no return value specified for FundRawTransaction")
 	}
 
-	var r0 *btc.FundRawTransactionResult
+	var r0 *bitcoindto.FundRawTransactionResult
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*btc.FundRawTransactionResult, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) (*bitcoindto.FundRawTransactionResult, error)); ok {
 		return returnFunc(hex)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *btc.FundRawTransactionResult); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) *bitcoindto.FundRawTransactionResult); ok {
 		r0 = returnFunc(hex)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.FundRawTransactionResult)
+			r0 = ret.Get(0).(*bitcoindto.FundRawTransactionResult)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
@@ -1261,12 +1261,12 @@ func (_c *MockBitcoiner_FundRawTransaction_Call) Run(run func(hex string)) *Mock
 	return _c
 }
 
-func (_c *MockBitcoiner_FundRawTransaction_Call) Return(fundRawTransactionResult *btc.FundRawTransactionResult, err error) *MockBitcoiner_FundRawTransaction_Call {
+func (_c *MockBitcoiner_FundRawTransaction_Call) Return(fundRawTransactionResult *bitcoindto.FundRawTransactionResult, err error) *MockBitcoiner_FundRawTransaction_Call {
 	_c.Call.Return(fundRawTransactionResult, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_FundRawTransaction_Call) RunAndReturn(run func(hex string) (*btc.FundRawTransactionResult, error)) *MockBitcoiner_FundRawTransaction_Call {
+func (_c *MockBitcoiner_FundRawTransaction_Call) RunAndReturn(run func(hex string) (*bitcoindto.FundRawTransactionResult, error)) *MockBitcoiner_FundRawTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2032,23 +2032,23 @@ func (_c *MockBitcoiner_GetRawTransactionByHex_Call) RunAndReturn(run func(strHa
 }
 
 // GetTransactionByTxID provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) GetTransactionByTxID(txID string) (*btc.GetTransactionResult, error) {
+func (_mock *MockBitcoiner) GetTransactionByTxID(txID string) (*bitcoindto.TransactionResult, error) {
 	ret := _mock.Called(txID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetTransactionByTxID")
 	}
 
-	var r0 *btc.GetTransactionResult
+	var r0 *bitcoindto.TransactionResult
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*btc.GetTransactionResult, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) (*bitcoindto.TransactionResult, error)); ok {
 		return returnFunc(txID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *btc.GetTransactionResult); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) *bitcoindto.TransactionResult); ok {
 		r0 = returnFunc(txID)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.GetTransactionResult)
+			r0 = ret.Get(0).(*bitcoindto.TransactionResult)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
@@ -2083,12 +2083,12 @@ func (_c *MockBitcoiner_GetTransactionByTxID_Call) Run(run func(txID string)) *M
 	return _c
 }
 
-func (_c *MockBitcoiner_GetTransactionByTxID_Call) Return(getTransactionResult *btc.GetTransactionResult, err error) *MockBitcoiner_GetTransactionByTxID_Call {
-	_c.Call.Return(getTransactionResult, err)
+func (_c *MockBitcoiner_GetTransactionByTxID_Call) Return(transactionResult *bitcoindto.TransactionResult, err error) *MockBitcoiner_GetTransactionByTxID_Call {
+	_c.Call.Return(transactionResult, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_GetTransactionByTxID_Call) RunAndReturn(run func(txID string) (*btc.GetTransactionResult, error)) *MockBitcoiner_GetTransactionByTxID_Call {
+func (_c *MockBitcoiner_GetTransactionByTxID_Call) RunAndReturn(run func(txID string) (*bitcoindto.TransactionResult, error)) *MockBitcoiner_GetTransactionByTxID_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -3470,7 +3470,7 @@ func (_c *MockBitcoiner_SignPSBTWithKey_Call) RunAndReturn(run func(psbtBase64 s
 }
 
 // SignRawTransaction provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) SignRawTransaction(tx *wire.MsgTx, prevtxs []btc.PrevTx) (*wire.MsgTx, bool, error) {
+func (_mock *MockBitcoiner) SignRawTransaction(tx *wire.MsgTx, prevtxs []bitcoindto.PreviousTx) (*wire.MsgTx, bool, error) {
 	ret := _mock.Called(tx, prevtxs)
 
 	if len(ret) == 0 {
@@ -3480,22 +3480,22 @@ func (_mock *MockBitcoiner) SignRawTransaction(tx *wire.MsgTx, prevtxs []btc.Pre
 	var r0 *wire.MsgTx
 	var r1 bool
 	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []btc.PrevTx) (*wire.MsgTx, bool, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []bitcoindto.PreviousTx) (*wire.MsgTx, bool, error)); ok {
 		return returnFunc(tx, prevtxs)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []btc.PrevTx) *wire.MsgTx); ok {
+	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []bitcoindto.PreviousTx) *wire.MsgTx); ok {
 		r0 = returnFunc(tx, prevtxs)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*wire.MsgTx)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*wire.MsgTx, []btc.PrevTx) bool); ok {
+	if returnFunc, ok := ret.Get(1).(func(*wire.MsgTx, []bitcoindto.PreviousTx) bool); ok {
 		r1 = returnFunc(tx, prevtxs)
 	} else {
 		r1 = ret.Get(1).(bool)
 	}
-	if returnFunc, ok := ret.Get(2).(func(*wire.MsgTx, []btc.PrevTx) error); ok {
+	if returnFunc, ok := ret.Get(2).(func(*wire.MsgTx, []bitcoindto.PreviousTx) error); ok {
 		r2 = returnFunc(tx, prevtxs)
 	} else {
 		r2 = ret.Error(2)
@@ -3510,20 +3510,20 @@ type MockBitcoiner_SignRawTransaction_Call struct {
 
 // SignRawTransaction is a helper method to define mock.On call
 //   - tx *wire.MsgTx
-//   - prevtxs []btc.PrevTx
+//   - prevtxs []bitcoindto.PreviousTx
 func (_e *MockBitcoiner_Expecter) SignRawTransaction(tx interface{}, prevtxs interface{}) *MockBitcoiner_SignRawTransaction_Call {
 	return &MockBitcoiner_SignRawTransaction_Call{Call: _e.mock.On("SignRawTransaction", tx, prevtxs)}
 }
 
-func (_c *MockBitcoiner_SignRawTransaction_Call) Run(run func(tx *wire.MsgTx, prevtxs []btc.PrevTx)) *MockBitcoiner_SignRawTransaction_Call {
+func (_c *MockBitcoiner_SignRawTransaction_Call) Run(run func(tx *wire.MsgTx, prevtxs []bitcoindto.PreviousTx)) *MockBitcoiner_SignRawTransaction_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 *wire.MsgTx
 		if args[0] != nil {
 			arg0 = args[0].(*wire.MsgTx)
 		}
-		var arg1 []btc.PrevTx
+		var arg1 []bitcoindto.PreviousTx
 		if args[1] != nil {
-			arg1 = args[1].([]btc.PrevTx)
+			arg1 = args[1].([]bitcoindto.PreviousTx)
 		}
 		run(
 			arg0,
@@ -3538,13 +3538,13 @@ func (_c *MockBitcoiner_SignRawTransaction_Call) Return(msgTx *wire.MsgTx, b boo
 	return _c
 }
 
-func (_c *MockBitcoiner_SignRawTransaction_Call) RunAndReturn(run func(tx *wire.MsgTx, prevtxs []btc.PrevTx) (*wire.MsgTx, bool, error)) *MockBitcoiner_SignRawTransaction_Call {
+func (_c *MockBitcoiner_SignRawTransaction_Call) RunAndReturn(run func(tx *wire.MsgTx, prevtxs []bitcoindto.PreviousTx) (*wire.MsgTx, bool, error)) *MockBitcoiner_SignRawTransaction_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // SignRawTransactionWithKey provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) SignRawTransactionWithKey(tx *wire.MsgTx, privKeysWIF []string, prevtxs []btc.PrevTx) (*wire.MsgTx, bool, error) {
+func (_mock *MockBitcoiner) SignRawTransactionWithKey(tx *wire.MsgTx, privKeysWIF []string, prevtxs []bitcoindto.PreviousTx) (*wire.MsgTx, bool, error) {
 	ret := _mock.Called(tx, privKeysWIF, prevtxs)
 
 	if len(ret) == 0 {
@@ -3554,22 +3554,22 @@ func (_mock *MockBitcoiner) SignRawTransactionWithKey(tx *wire.MsgTx, privKeysWI
 	var r0 *wire.MsgTx
 	var r1 bool
 	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []string, []btc.PrevTx) (*wire.MsgTx, bool, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []string, []bitcoindto.PreviousTx) (*wire.MsgTx, bool, error)); ok {
 		return returnFunc(tx, privKeysWIF, prevtxs)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []string, []btc.PrevTx) *wire.MsgTx); ok {
+	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []string, []bitcoindto.PreviousTx) *wire.MsgTx); ok {
 		r0 = returnFunc(tx, privKeysWIF, prevtxs)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*wire.MsgTx)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(*wire.MsgTx, []string, []btc.PrevTx) bool); ok {
+	if returnFunc, ok := ret.Get(1).(func(*wire.MsgTx, []string, []bitcoindto.PreviousTx) bool); ok {
 		r1 = returnFunc(tx, privKeysWIF, prevtxs)
 	} else {
 		r1 = ret.Get(1).(bool)
 	}
-	if returnFunc, ok := ret.Get(2).(func(*wire.MsgTx, []string, []btc.PrevTx) error); ok {
+	if returnFunc, ok := ret.Get(2).(func(*wire.MsgTx, []string, []bitcoindto.PreviousTx) error); ok {
 		r2 = returnFunc(tx, privKeysWIF, prevtxs)
 	} else {
 		r2 = ret.Error(2)
@@ -3585,12 +3585,12 @@ type MockBitcoiner_SignRawTransactionWithKey_Call struct {
 // SignRawTransactionWithKey is a helper method to define mock.On call
 //   - tx *wire.MsgTx
 //   - privKeysWIF []string
-//   - prevtxs []btc.PrevTx
+//   - prevtxs []bitcoindto.PreviousTx
 func (_e *MockBitcoiner_Expecter) SignRawTransactionWithKey(tx interface{}, privKeysWIF interface{}, prevtxs interface{}) *MockBitcoiner_SignRawTransactionWithKey_Call {
 	return &MockBitcoiner_SignRawTransactionWithKey_Call{Call: _e.mock.On("SignRawTransactionWithKey", tx, privKeysWIF, prevtxs)}
 }
 
-func (_c *MockBitcoiner_SignRawTransactionWithKey_Call) Run(run func(tx *wire.MsgTx, privKeysWIF []string, prevtxs []btc.PrevTx)) *MockBitcoiner_SignRawTransactionWithKey_Call {
+func (_c *MockBitcoiner_SignRawTransactionWithKey_Call) Run(run func(tx *wire.MsgTx, privKeysWIF []string, prevtxs []bitcoindto.PreviousTx)) *MockBitcoiner_SignRawTransactionWithKey_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 *wire.MsgTx
 		if args[0] != nil {
@@ -3600,9 +3600,9 @@ func (_c *MockBitcoiner_SignRawTransactionWithKey_Call) Run(run func(tx *wire.Ms
 		if args[1] != nil {
 			arg1 = args[1].([]string)
 		}
-		var arg2 []btc.PrevTx
+		var arg2 []bitcoindto.PreviousTx
 		if args[2] != nil {
-			arg2 = args[2].([]btc.PrevTx)
+			arg2 = args[2].([]bitcoindto.PreviousTx)
 		}
 		run(
 			arg0,
@@ -3618,7 +3618,7 @@ func (_c *MockBitcoiner_SignRawTransactionWithKey_Call) Return(msgTx *wire.MsgTx
 	return _c
 }
 
-func (_c *MockBitcoiner_SignRawTransactionWithKey_Call) RunAndReturn(run func(tx *wire.MsgTx, privKeysWIF []string, prevtxs []btc.PrevTx) (*wire.MsgTx, bool, error)) *MockBitcoiner_SignRawTransactionWithKey_Call {
+func (_c *MockBitcoiner_SignRawTransactionWithKey_Call) RunAndReturn(run func(tx *wire.MsgTx, privKeysWIF []string, prevtxs []bitcoindto.PreviousTx) (*wire.MsgTx, bool, error)) *MockBitcoiner_SignRawTransactionWithKey_Call {
 	_c.Call.Return(run)
 	return _c
 }
