@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"strings"
 
+	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
+
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
@@ -14,14 +16,13 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type signTransactionUseCase struct {
 	xrp               ripple.Rippler
 	xrpAccountKeyRepo cold.XRPAccountKeyRepositorier
-	txFileRepo        file.TransactionFileRepositorier
+	txFileRepo        portsStorage.TransactionFileRepositorier
 	wtype             domainWallet.WalletType
 }
 
@@ -29,7 +30,7 @@ type signTransactionUseCase struct {
 func NewSignTransactionUseCase(
 	xrpAPI ripple.Rippler,
 	xrpAccountKeyRepo cold.XRPAccountKeyRepositorier,
-	txFileRepo file.TransactionFileRepositorier,
+	txFileRepo portsStorage.TransactionFileRepositorier,
 	wtype domainWallet.WalletType,
 ) signusecase.SignTransactionUseCase {
 	return &signTransactionUseCase{

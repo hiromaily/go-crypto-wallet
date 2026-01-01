@@ -33,6 +33,70 @@ The `internal/domain/` package contains pure business logic with **ZERO infrastr
 - Use domain validators for input validation before infrastructure operations
 - Business rules should be in domain, not scattered across services
 
+## Application Ports Layer (Interface Definitions)
+
+The `internal/application/ports/` package contains **interface definitions** (abstractions) for infrastructure dependencies, following the Dependency Inversion Principle.
+
+**Key Principles:**
+
+- **Interfaces are defined in the layer that uses them** (application layer), NOT in the infrastructure layer
+- **Infrastructure layer contains only implementations**, never interface definitions
+- This inverts the dependency direction: Infrastructure depends on Application, not vice versa
+- Ports define contracts that infrastructure implementations must fulfill
+
+**Current Port Packages:**
+
+```text
+internal/application/ports/
+├── bitcoin/
+│   └── interface.go              # Bitcoiner interface (Bitcoin/BCH API abstraction)
+├── persistence/
+│   └── repository.go             # Repository interfaces (database abstractions)
+└── storage/
+    └── interface.go              # TransactionFileRepositorier interface (file storage abstraction)
+```
+
+**Example: Bitcoin API Abstraction**
+
+```go
+// Interface definition in application/ports/bitcoin/interface.go
+package bitcoin
+
+type Bitcoiner interface {
+    GetBalance() (btcutil.Amount, error)
+    SendTransaction(tx *wire.MsgTx) error
+    // ... other methods
+}
+
+// Implementation in infrastructure/api/bitcoin/btc/bitcoin.go
+package btc
+
+import portsBitcoin "internal/application/ports/bitcoin"
+
+type Bitcoin struct {
+    client *rpcclient.Client
+}
+
+// Bitcoin implements portsBitcoin.Bitcoiner interface
+func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
+    // Implementation details...
+}
+```
+
+**Why Interfaces Belong in Application Layer:**
+
+1. **Dependency Inversion Principle**: High-level modules (application) should not depend on low-level modules (infrastructure). Both should depend on abstractions.
+2. **Stable Abstractions**: The application defines what it needs; infrastructure provides implementations.
+3. **Testability**: Application layer can be tested with mock implementations without infrastructure dependencies.
+4. **Clean Architecture**: Core business logic (application) is independent of external frameworks and libraries (infrastructure).
+
+**Important:**
+
+- **NEVER** define interfaces in the infrastructure layer
+- **ALWAYS** define interfaces in `application/ports/` when infrastructure needs abstraction
+- Infrastructure packages import and implement these port interfaces
+- Use cases depend on port interfaces, not concrete implementations
+
 ## Application Layer (Use Case) Guidelines
 
 The `internal/application/usecase/` package implements the use case layer following Clean Architecture principles.
@@ -42,7 +106,7 @@ The `internal/application/usecase/` package implements the use case layer follow
 - Use cases orchestrate business logic by coordinating domain objects and infrastructure services
 - Each use case represents a single business operation with clear input and output
 - Use cases act as thin wrappers that transform DTOs, delegate to services, and wrap errors with context
-- Use cases depend on domain layer and infrastructure layer through interfaces (Dependency Inversion)
+- **Use cases depend on interfaces defined in `application/ports/`** (Dependency Inversion)
 - Organized by wallet type (watch, keygen, sign) and cryptocurrency (btc, eth, xrp, shared)
 
 **Use Case Structure:**
@@ -150,11 +214,15 @@ For comprehensive testing strategy, see [Testing Guidelines](testing.md).
     - `multisig/`: Multisig validators and business rules
     - `coin/`: Cryptocurrency type definitions
   - `application/`: **Application layer** - Use case layer (Clean Architecture)
+    - `ports/`: **Interface definitions (abstractions)** - Contracts for infrastructure implementations
+      - `bitcoin/`: Bitcoiner interface (Bitcoin/BCH API abstraction)
+      - `persistence/`: Repository interfaces (database abstractions)
+      - `storage/`: File storage interfaces (TransactionFileRepositorier)
     - `usecase/`: Use case implementations organized by wallet type
       - `keygen/`: Key generation use cases (btc, eth, xrp, shared)
       - `sign/`: Signing use cases (btc, eth, xrp, shared)
       - `watch/`: Watch wallet use cases (btc, eth, xrp, shared)
-  - `infrastructure/`: **Infrastructure layer** - External dependencies and implementations
+  - `infrastructure/`: **Infrastructure layer** - **Implementation only** (NO interface definitions)
     - `api/`: External API clients
       - `bitcoin/`: Bitcoin/BCH Core RPC API clients (btc, bch)
       - `ethereum/`: Ethereum JSON-RPC API clients (eth, erc20)
@@ -217,7 +285,26 @@ For comprehensive testing strategy, see [Testing Guidelines](testing.md).
 **Architecture Dependency Direction:**
 
 ```text
-Interface Adapters (interface-adapters/*) → Application Layer (application/usecase, wallet/service) → Domain Layer (domain/*) ← Infrastructure Layer (infrastructure/*)
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Clean Architecture Layers                         │
+│                                                                      │
+│  Interface Adapters (interface-adapters/*)                          │
+│           ↓                                                          │
+│  Application Layer (application/usecase/) ← depends on              │
+│           ↓                                  ↓                       │
+│  Application Ports (application/ports/) ← implemented by            │
+│           ↓                                  ↓                       │
+│  Domain Layer (domain/*)              Infrastructure Layer          │
+│                                        (infrastructure/*)            │
+│                                        - Implementations ONLY        │
+│                                        - NO interface definitions    │
+└─────────────────────────────────────────────────────────────────────┘
+
+Key Principles:
+1. Infrastructure implements interfaces defined in application/ports/
+2. Application layer depends on application/ports/ (abstractions), not infrastructure (concrete)
+3. This follows Dependency Inversion Principle (DIP)
+4. Dependency flow: Interface Adapters → Application (Use Cases + Ports) ← Infrastructure
 ```
 
 ## See Also

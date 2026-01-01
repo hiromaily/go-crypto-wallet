@@ -11,12 +11,12 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/mysql"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
+	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/mysql"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 

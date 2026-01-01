@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
+	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin"
 )
 
-func runDumpWallet(btc bitcoin.Bitcoiner, fileName string) error {
+func runDumpWallet(btc portsBitcoin.Bitcoiner, fileName string) error {
 	fmt.Println("dumps all wallet keys in a human-readable format to a server-side file")
 
 	// validator

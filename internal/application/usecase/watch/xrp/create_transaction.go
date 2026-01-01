@@ -9,6 +9,7 @@ import (
 
 	"github.com/bookerzzz/grok"
 
+	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
@@ -16,7 +17,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
@@ -29,7 +29,7 @@ type createTransactionUseCase struct {
 	txRepo          watchrepo.TxRepositorier
 	txDetailRepo    watchrepo.XrpDetailTxRepositorier
 	payReqRepo      watchrepo.PaymentRequestRepositorier
-	txFileRepo      file.TransactionFileRepositorier
+	txFileRepo      portsStorage.TransactionFileRepositorier
 	depositReceiver domainAccount.AccountType
 	paymentSender   domainAccount.AccountType
 }
@@ -43,7 +43,7 @@ func NewCreateTransactionUseCase(
 	txRepo watchrepo.TxRepositorier,
 	txDetailRepo watchrepo.XrpDetailTxRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,
-	txFileRepo file.TransactionFileRepositorier,
+	txFileRepo portsStorage.TransactionFileRepositorier,
 	depositReceiver domainAccount.AccountType,
 	paymentSender domainAccount.AccountType,
 ) watchusecase.CreateTransactionUseCase {

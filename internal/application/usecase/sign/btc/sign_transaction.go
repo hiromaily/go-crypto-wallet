@@ -4,22 +4,22 @@ import (
 	"context"
 	"fmt"
 
+	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin"
+	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type signTransactionUseCase struct {
-	btc             bitcoin.Bitcoiner
+	btc             portsBitcoin.Bitcoiner
 	accountKeyRepo  cold.BtcAccountKeyRepositorier
 	authKeyRepo     cold.AuthAccountKeyRepositorier
-	txFileRepo      file.TransactionFileRepositorier
+	txFileRepo      portsStorage.TransactionFileRepositorier
 	multisigAccount account.MultisigAccounter
 	wtype           domainWallet.WalletType
 	authType        domainAccount.AuthType
@@ -27,10 +27,10 @@ type signTransactionUseCase struct {
 
 // NewSignTransactionUseCase creates a new SignTransactionUseCase for sign wallet
 func NewSignTransactionUseCase(
-	btcAPI bitcoin.Bitcoiner,
+	btcAPI portsBitcoin.Bitcoiner,
 	accountKeyRepo cold.BtcAccountKeyRepositorier,
 	authKeyRepo cold.AuthAccountKeyRepositorier,
-	txFileRepo file.TransactionFileRepositorier,
+	txFileRepo portsStorage.TransactionFileRepositorier,
 	multisigAccount account.MultisigAccounter,
 	wtype domainWallet.WalletType,
 	authType domainAccount.AuthType,

@@ -4,18 +4,18 @@ import (
 	"context"
 	"database/sql"
 
+	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 // BTCWatch watch only wallet object
 type BTCWatch struct {
-	BTC                     bitcoin.Bitcoiner
+	BTC                     portsBitcoin.Bitcoiner
 	dbConn                  *sql.DB
 	addrType                address.AddrType
 	wtype                   domainWallet.WalletType
@@ -28,7 +28,7 @@ type BTCWatch struct {
 
 // NewBTCWatch returns Watch object
 func NewBTCWatch(
-	btc bitcoin.Bitcoiner,
+	btc portsBitcoin.Bitcoiner,
 	dbConn *sql.DB,
 	addrType address.AddrType,
 	createTxUseCase watchusecase.CreateTransactionUseCase,
@@ -147,6 +147,6 @@ func (w *BTCWatch) CoinTypeCode() domainCoin.CoinTypeCode {
 }
 
 // GetBTC gets btc
-// func (w *BTCWatch) GetBTC() bitcoin.Bitcoiner {
+// func (w *BTCWatch) GetBTC() portsBitcoin.Bitcoiner {
 //	return w.BTC
 //}

@@ -3,14 +3,14 @@ package testutil
 import (
 	"github.com/stretchr/testify/suite"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
+	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 )
 
 type BTCTestSuite struct {
 	suite.Suite
-	BTC bitcoin.Bitcoiner
+	BTC portsBitcoin.Bitcoiner
 }
 
 func (bts *BTCTestSuite) SetupTest() {

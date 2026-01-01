@@ -14,6 +14,8 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 
+	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin"
+	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
@@ -113,7 +115,7 @@ type container struct {
 	accountConf *account.AccountRoot
 	// wallet
 	walletType domainWallet.WalletType
-	btc        bitcoin.Bitcoiner
+	btc        portsBitcoin.Bitcoiner
 	eth        ethereum.Ethereumer
 	erc20      ethereum.ERC20er
 	xrp        ripple.Rippler
@@ -363,7 +365,7 @@ func (c *container) newXRPWSClient() (*websocket.WS, *websocket.WS) {
 // Wallet API
 //
 
-func (c *container) newBTC() bitcoin.Bitcoiner {
+func (c *container) newBTC() portsBitcoin.Bitcoiner {
 	if c.btc == nil {
 		var err error
 		c.btc, err = bitcoin.NewBitcoin(
@@ -515,7 +517,7 @@ func (c *container) newAddressFileRepo() file.AddressFileRepositorier {
 	)
 }
 
-func (c *container) newTxFileRepo() file.TransactionFileRepositorier {
+func (c *container) newTxFileRepo() portsStorage.TransactionFileRepositorier {
 	return file.NewTransactionFileRepository(
 		c.conf.FilePath.Tx,
 	)
@@ -648,7 +650,7 @@ func (c *container) newPubkeyFileStorager() file.AddressFileRepositorier {
 	)
 }
 
-func (c *container) newTxFileStorager() file.TransactionFileRepositorier {
+func (c *container) newTxFileStorager() portsStorage.TransactionFileRepositorier {
 	return file.NewTransactionFileRepository(
 		c.conf.FilePath.Tx,
 	)

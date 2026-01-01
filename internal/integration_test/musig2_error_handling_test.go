@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
@@ -366,8 +365,8 @@ func TestMuSig2InvalidAggregatedSignatures(t *testing.T) {
 
 		// Create signatures with invalid format
 		invalidSigs := [][]byte{
-			{}, // Empty signature
-			{0x00}, // Too short
+			{},                // Empty signature
+			{0x00},            // Too short
 			make([]byte, 100), // Too long
 		}
 
