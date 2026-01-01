@@ -7,10 +7,9 @@ import (
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/quagmt/udecimal"
 	"github.com/stretchr/testify/require"
 
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
@@ -23,22 +22,19 @@ func TestPaymentRequestSqlc(t *testing.T) {
 	require.NoError(t, err, "fail to call DeleteAll()")
 
 	// Create test payment requests
-	amount1, _ := udecimal.Parse("1.5")
-	amount2, _ := udecimal.Parse("2.5")
-
-	requests := []*models.PaymentRequest{
+	requests := []*sqlc.PaymentRequest{
 		{
-			Coin:            "btc",
+			Coin:            sqlc.PaymentRequestCoinBtc,
 			SenderAddress:   "sender-sqlc-1",
 			ReceiverAddress: "receiver-sqlc-1",
-			Amount:          amount1,
+			Amount:          "1.5",
 			IsDone:          false,
 		},
 		{
-			Coin:            "btc",
+			Coin:            sqlc.PaymentRequestCoinBtc,
 			SenderAddress:   "sender-sqlc-2",
 			ReceiverAddress: "receiver-sqlc-2",
-			Amount:          amount2,
+			Amount:          "2.5",
 			IsDone:          false,
 		},
 	}

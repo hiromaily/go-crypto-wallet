@@ -11,8 +11,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
@@ -27,22 +27,22 @@ func TestAddressSqlc(t *testing.T) {
 	accountType := account.AccountTypeClient
 
 	// Insert bulk addresses
-	addresses := []*models.Address{
+	addresses := []*sqlc.Address{
 		{
-			Coin:          "btc",
-			Account:       accountType.String(),
+			Coin:          sqlc.AddressCoinBtc,
+			Account:       sqlc.AddressAccountClient,
 			WalletAddress: "address-sqlc-1",
 			IsAllocated:   false,
 		},
 		{
-			Coin:          "btc",
-			Account:       accountType.String(),
+			Coin:          sqlc.AddressCoinBtc,
+			Account:       sqlc.AddressAccountClient,
 			WalletAddress: "address-sqlc-2",
 			IsAllocated:   false,
 		},
 		{
-			Coin:          "btc",
-			Account:       accountType.String(),
+			Coin:          sqlc.AddressCoinBtc,
+			Account:       sqlc.AddressAccountClient,
 			WalletAddress: "address-sqlc-3",
 			IsAllocated:   true,
 		},

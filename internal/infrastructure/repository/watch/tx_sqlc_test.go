@@ -14,6 +14,7 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/mysql"
@@ -29,15 +30,15 @@ func TestTxSqlc(t *testing.T) {
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
-	zapLog := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
+	_ = logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 	db, err := mysql.NewMySQL(&conf.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
-	txRepo := watch.NewTxRepositorySqlc(db, domainCoin.ETH, zapLog)
+	txRepo := watch.NewTxRepositorySqlc(db, domainCoin.ETH)
 
 	// Delete all records
-	_, err := txRepo.DeleteAll()
+	_, err = txRepo.DeleteAll()
 	require.NoError(t, err, "fail to call DeleteAll()")
 
 	// Insert unsigned tx
@@ -50,7 +51,7 @@ func TestTxSqlc(t *testing.T) {
 	tx, err := txRepo.GetOne(id)
 	require.NoError(t, err, "fail to call GetOne()")
 	require.Equal(t, id, tx.ID, "GetOne() should return correct id")
-	require.Equal(t, actionType.String(), tx.Action, "GetOne() should return correct action")
+	require.Equal(t, sqlc.TxActionPayment, tx.Action, "GetOne() should return correct action")
 
 	// Get max ID
 	maxID, err := txRepo.GetMaxID(actionType)
@@ -68,7 +69,7 @@ func TestTxSqlc(t *testing.T) {
 	require.Greater(t, id2, id, "second InsertUnsignedTx() should return id greater than first")
 
 	// Update tx
-	tx.Action = domainTx.ActionTypeDeposit.String()
+	tx.Action = sqlc.TxActionDeposit
 	rowsAffected, err := txRepo.Update(tx)
 	require.NoError(t, err, "fail to call Update()")
 	require.Equal(t, int64(1), rowsAffected, "Update() should affect 1 row")
@@ -76,5 +77,5 @@ func TestTxSqlc(t *testing.T) {
 	// Verify update
 	updatedTx, err := txRepo.GetOne(id)
 	require.NoError(t, err, "fail to call GetOne() after update")
-	require.Equal(t, domainTx.ActionTypeDeposit.String(), updatedTx.Action, "Update() should change action to Deposit")
+	require.Equal(t, sqlc.TxActionDeposit, updatedTx.Action, "Update() should change action to Deposit")
 }
