@@ -1,7 +1,6 @@
 package testutil
 
 import (
-	"database/sql"
 	"log"
 	"os"
 
@@ -13,8 +12,6 @@ import (
 )
 
 var (
-	// shared database connection
-	dbConn *sql.DB
 	// sqlc repositories
 	btcTxRepoSqlc          *watch.BTCTxRepositorySqlc
 	txRepoSqlc             *watch.TxRepositorySqlc
@@ -25,27 +22,6 @@ var (
 	ethDetailTXRepoSqlc    *watch.ETHDetailTXInputRepositorySqlc
 	xrpDetailTXRepoSqlc    *watch.XRPDetailTxInputRepositorySqlc
 )
-
-// GetDB returns shared database connection for tests
-func GetDB() *sql.DB {
-	if dbConn != nil {
-		return dbConn
-	}
-
-	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := projPath + "/data/config/btc_watch.toml"
-	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.BTC)
-	if err != nil {
-		log.Fatalf("fail to create config: %v", err)
-	}
-
-	dbConn, err = mysql.NewMySQL(&conf.MySQL)
-	if err != nil {
-		log.Fatalf("fail to create db: %v", err)
-	}
-
-	return dbConn
-}
 
 // NewBTCTxRepositorySqlc returns BTCTxRepositorySqlc for test
 func NewBTCTxRepositorySqlc() watch.BTCTxRepositorier {

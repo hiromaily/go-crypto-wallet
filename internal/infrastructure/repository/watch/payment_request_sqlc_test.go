@@ -10,12 +10,12 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
-	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
+	watchTestutil "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/testutil"
 )
 
 // TestPaymentRequestSqlc is integration test for PaymentRequestRepositorySqlc
 func TestPaymentRequestSqlc(t *testing.T) {
-	paymentRepo := testutil.NewPaymentRequestRepositorySqlc()
+	paymentRepo := watchTestutil.NewPaymentRequestRepositorySqlc()
 
 	// Delete all records
 	_, err := paymentRepo.DeleteAll()

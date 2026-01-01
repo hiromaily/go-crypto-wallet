@@ -11,12 +11,12 @@ import (
 
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
-	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
+	watchTestutil "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/testutil"
 )
 
 // TestBTCTxSqlc is integration test for BTCTxRepositorySqlc
 func TestBTCTxSqlc(t *testing.T) {
-	txRepo := testutil.NewBTCTxRepositorySqlc()
+	txRepo := watchTestutil.NewBTCTxRepositorySqlc()
 
 	// Delete records
 	_, err := txRepo.DeleteAll()
