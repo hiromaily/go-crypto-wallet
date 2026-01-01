@@ -10,7 +10,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/testutil"
 )
 
 type publicAccountTest struct {

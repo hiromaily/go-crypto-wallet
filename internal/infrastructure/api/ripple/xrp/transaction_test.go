@@ -10,8 +10,8 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/stretchr/testify/suite"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/testutil"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
-	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
 type txTest struct {

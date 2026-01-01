@@ -11,14 +11,14 @@ import (
 
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
-	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
+	watchTestutil "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/testutil"
 )
 
 // TestBTCTxInputSqlc is integration test for TxInputRepositorySqlc
 func TestBTCTxInputSqlc(t *testing.T) {
 	// Need to create a btc_tx first
-	btcTxRepo := testutil.NewBTCTxRepositorySqlc()
-	btcTxInputRepo := testutil.NewBTCTxInputRepositorySqlc()
+	btcTxRepo := watchTestutil.NewBTCTxRepositorySqlc()
+	btcTxInputRepo := watchTestutil.NewBTCTxInputRepositorySqlc()
 
 	// Create a parent tx
 	txItem := &sqlc.BtcTx{

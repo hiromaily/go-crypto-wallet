@@ -13,17 +13,18 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
-	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
+	watchTestutil "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/testutil"
+	dbTestutil "github.com/hiromaily/go-crypto-wallet/pkg/db/mysql/testutil"
 )
 
 // TestAddressSqlc is integration test for AddressRepositorySqlc
 func TestAddressSqlc(t *testing.T) {
 	// Get db connection for cleanup
-	db := testutil.GetDB()
+	db := dbTestutil.GetDB()
 	// Clean up any existing test data
 	_, _ = db.Exec("DELETE FROM address WHERE wallet_address LIKE 'address-sqlc-%'")
 
-	addressRepo := testutil.NewAddressRepositorySqlc()
+	addressRepo := watchTestutil.NewAddressRepositorySqlc()
 	accountType := account.AccountTypeClient
 
 	// Insert bulk addresses

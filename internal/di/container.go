@@ -7,6 +7,8 @@
 package di
 
 import (
+	"context"
+	"errors"
 	"fmt"
 
 	"github.com/btcsuite/btcd/chaincfg"
@@ -38,6 +40,7 @@ import (
 	ethwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/eth"
 	xrpwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency"
 	pkgdi "github.com/hiromaily/go-crypto-wallet/pkg/di"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/websocket"
@@ -331,7 +334,7 @@ func (c *container) newXRPWalleter() wallets.Watcher {
 func (c *container) newRPCClient() *rpcclient.Client {
 	if c.rpcClient == nil {
 		var err error
-		c.rpcClient, err = bitcoin.NewRPCClient(&c.conf.Bitcoin)
+		c.rpcClient, err = cryptocurrency.NewBitcoinRPCClient(&c.conf.Bitcoin)
 		if err != nil {
 			panic(err)
 		}
@@ -342,7 +345,7 @@ func (c *container) newRPCClient() *rpcclient.Client {
 func (c *container) newEthRPCClient() *ethrpc.Client {
 	if c.rpcEthClient == nil {
 		var err error
-		c.rpcEthClient, err = ethereum.NewRPCClient(&c.conf.Ethereum)
+		c.rpcEthClient, err = cryptocurrency.NewEthereumRPCClient(&c.conf.Ethereum)
 		if err != nil {
 			panic(err)
 		}
@@ -353,9 +356,26 @@ func (c *container) newEthRPCClient() *ethrpc.Client {
 func (c *container) newXRPWSClient() (*websocket.WS, *websocket.WS) {
 	if c.wsXrpPublic == nil {
 		var err error
-		c.wsXrpPublic, c.wsXrpAdmin, err = ripple.NewWSClient(&c.conf.Ripple)
+		// public client
+		publicURL := c.conf.Ripple.WebsocketPublicURL
+		if publicURL == "" {
+			if publicURL = xrp.GetPublicWSServer(c.conf.Ripple.NetworkType).String(); publicURL == "" {
+				panic(errors.New("websocket URL is not found"))
+			}
+		}
+		c.wsXrpPublic, err = websocket.New(context.Background(), publicURL)
 		if err != nil {
 			panic(err)
+		}
+
+		// admin client
+		c.wsXrpAdmin, err = websocket.New(context.Background(), c.conf.Ripple.WebsocketAdminURL)
+		if err != nil {
+			panic(
+				fmt.Errorf(
+					"fail to call websocket.New() for admin API: %s: %w",
+					c.conf.Ripple.WebsocketAdminURL, err),
+			)
 		}
 	}
 	return c.wsXrpPublic, c.wsXrpAdmin

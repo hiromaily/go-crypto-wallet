@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
-	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/testutil"
 )
 
 // testValidPSBT is a valid PSBT from Bitcoin Core testnet (simplified for testing)
