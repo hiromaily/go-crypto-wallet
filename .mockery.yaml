@@ -1,0 +1,42 @@
+# mockery v3 configuration
+# https://vektra.github.io/mockery/latest/configuration/
+#
+# To generate mocks, run: make mockery
+
+all: false
+dir: "{{.InterfaceDir}}/mocks"
+filename: "mock_{{.InterfaceName | snakecase}}.go"
+structname: "Mock{{.InterfaceName}}"
+pkgname: "mocks"
+template: testify
+formatter: goimports
+log-level: info
+
+packages:
+  # Infrastructure API interfaces
+  github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin:
+    interfaces:
+      Bitcoiner:
+
+  # Storage interfaces
+  github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file:
+    interfaces:
+      TransactionFileRepositorier:
+
+  # Persistence interfaces (application ports)
+  github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence:
+    interfaces:
+      AddressRepositorier:
+      BTCTxRepositorier:
+      TxInputRepositorier:
+      TxOutputRepositorier:
+      PaymentRequestRepositorier:
+      TxRepositorier:
+      EthDetailTxRepositorier:
+      XrpDetailTxRepositorier:
+      SeedRepositorier:
+      BtcAccountKeyRepositorier:
+      EthAccountKeyRepositorier:
+      XRPAccountKeyRepositorier:
+      AuthFullPubkeyRepositorier:
+      AuthAccountKeyRepositorier:

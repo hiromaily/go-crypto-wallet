@@ -20,6 +20,25 @@ generate-abi:
 	abigen --abi ./data/contract/token.abi --pkg contract --type Token --out ./internal/infrastructure/contract/token-abi.go
 
 ###############################################################################
+# mockery
+#------------------------------------------------------------------------------
+# Generate mock implementations from Go interfaces using mockery
+# Configuration: .mockery.yaml
+# Output: Internal mocks directories (next to interfaces)
+#
+# Usage:
+#   make mockery        - Generate all mocks defined in .mockery.yaml
+#   make clean-mocks    - Remove all generated mock files
+#------------------------------------------------------------------------------
+.PHONY: mockery
+mockery:
+	go tool github.com/vektra/mockery/v3
+
+.PHONY: clean-mocks
+clean-mocks:
+	find . -type d -name "mocks" -exec rm -rf {} + 2>/dev/null || true
+
+###############################################################################
 # Protocol Buffer (buf-based generation)
 #------------------------------------------------------------------------------
 # Protocol Buffer code generation using buf
