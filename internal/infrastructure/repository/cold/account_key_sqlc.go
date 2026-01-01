@@ -8,13 +8,13 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	sqlc "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 // BTCAccountKeyRepositorySqlc is repository for btc_account_key table using sqlc
 type BTCAccountKeyRepositorySqlc struct {
-	queries      *sqlc.Queries
+	queries      *sqlcgen.Queries
 	dbConn       *sql.DB
 	coinTypeCode domainCoin.CoinTypeCode
 }
@@ -24,7 +24,7 @@ func NewBTCAccountKeyRepositorySqlc(
 	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
 ) *BTCAccountKeyRepositorySqlc {
 	return &BTCAccountKeyRepositorySqlc{
-		queries:      sqlc.New(dbConn),
+		queries:      sqlcgen.New(dbConn),
 		dbConn:       dbConn,
 		coinTypeCode: coinTypeCode,
 	}
@@ -34,9 +34,9 @@ func NewBTCAccountKeyRepositorySqlc(
 func (r *BTCAccountKeyRepositorySqlc) GetMaxIndex(accountType domainAccount.AccountType) (int64, error) {
 	ctx := context.Background()
 
-	result, err := r.queries.GetMaxBtcAccountKeyIndex(ctx, sqlc.GetMaxBtcAccountKeyIndexParams{
-		Coin:    sqlc.BtcAccountKeyCoin(r.coinTypeCode.String()),
-		Account: sqlc.BtcAccountKeyAccount(accountType.String()),
+	result, err := r.queries.GetMaxBtcAccountKeyIndex(ctx, sqlcgen.GetMaxBtcAccountKeyIndexParams{
+		Coin:    sqlcgen.BtcAccountKeyCoin(r.coinTypeCode.String()),
+		Account: sqlcgen.BtcAccountKeyAccount(accountType.String()),
 	})
 	if err != nil {
 		return 0, fmt.Errorf("failed to call GetMaxBtcAccountKeyIndex(): %w", err)
@@ -51,12 +51,13 @@ func (r *BTCAccountKeyRepositorySqlc) GetMaxIndex(accountType domainAccount.Acco
 }
 
 // GetOneMaxID returns one record by max id
-func (r *BTCAccountKeyRepositorySqlc) GetOneMaxID(accountType domainAccount.AccountType) (*sqlc.BtcAccountKey, error) {
+func (r *BTCAccountKeyRepositorySqlc) GetOneMaxID(accountType domainAccount.AccountType,
+) (*sqlcgen.BtcAccountKey, error) {
 	ctx := context.Background()
 
-	accountKey, err := r.queries.GetOneBtcAccountKeyByMaxID(ctx, sqlc.GetOneBtcAccountKeyByMaxIDParams{
-		Coin:    sqlc.BtcAccountKeyCoin(r.coinTypeCode.String()),
-		Account: sqlc.BtcAccountKeyAccount(accountType.String()),
+	accountKey, err := r.queries.GetOneBtcAccountKeyByMaxID(ctx, sqlcgen.GetOneBtcAccountKeyByMaxIDParams{
+		Coin:    sqlcgen.BtcAccountKeyCoin(r.coinTypeCode.String()),
+		Account: sqlcgen.BtcAccountKeyAccount(accountType.String()),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to call GetOneBtcAccountKeyByMaxID(): %w", err)
@@ -68,19 +69,19 @@ func (r *BTCAccountKeyRepositorySqlc) GetOneMaxID(accountType domainAccount.Acco
 // GetAllAddrStatus returns all BtcAccountKey by addr_status
 func (r *BTCAccountKeyRepositorySqlc) GetAllAddrStatus(
 	accountType domainAccount.AccountType, addrStatus address.AddrStatus,
-) ([]*sqlc.BtcAccountKey, error) {
+) ([]*sqlcgen.BtcAccountKey, error) {
 	ctx := context.Background()
 
-	accountKeys, err := r.queries.GetBtcAccountKeysByAddrStatus(ctx, sqlc.GetBtcAccountKeysByAddrStatusParams{
-		Coin:       sqlc.BtcAccountKeyCoin(r.coinTypeCode.String()),
-		Account:    sqlc.BtcAccountKeyAccount(accountType.String()),
+	accountKeys, err := r.queries.GetBtcAccountKeysByAddrStatus(ctx, sqlcgen.GetBtcAccountKeysByAddrStatusParams{
+		Coin:       sqlcgen.BtcAccountKeyCoin(r.coinTypeCode.String()),
+		Account:    sqlcgen.BtcAccountKeyAccount(accountType.String()),
 		AddrStatus: addrStatus.Int8(),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to call GetBtcAccountKeysByAddrStatus(): %w", err)
 	}
 
-	result := make([]*sqlc.BtcAccountKey, len(accountKeys))
+	result := make([]*sqlcgen.BtcAccountKey, len(accountKeys))
 	for i := range accountKeys {
 		result[i] = &accountKeys[i]
 	}
@@ -91,14 +92,14 @@ func (r *BTCAccountKeyRepositorySqlc) GetAllAddrStatus(
 // GetAllMultiAddr returns all BtcAccountKey by multisig_address
 func (r *BTCAccountKeyRepositorySqlc) GetAllMultiAddr(
 	accountType domainAccount.AccountType, addrs []string,
-) ([]*sqlc.BtcAccountKey, error) {
+) ([]*sqlcgen.BtcAccountKey, error) {
 	ctx := context.Background()
 
 	accountKeys, err := r.queries.GetBtcAccountKeysByMultisigAddresses(
 		ctx,
-		sqlc.GetBtcAccountKeysByMultisigAddressesParams{
-			Coin:    sqlc.BtcAccountKeyCoin(r.coinTypeCode.String()),
-			Account: sqlc.BtcAccountKeyAccount(accountType.String()),
+		sqlcgen.GetBtcAccountKeysByMultisigAddressesParams{
+			Coin:    sqlcgen.BtcAccountKeyCoin(r.coinTypeCode.String()),
+			Account: sqlcgen.BtcAccountKeyAccount(accountType.String()),
 			Addrs:   addrs,
 		},
 	)
@@ -106,7 +107,7 @@ func (r *BTCAccountKeyRepositorySqlc) GetAllMultiAddr(
 		return nil, fmt.Errorf("failed to call GetBtcAccountKeysByMultisigAddresses(): %w", err)
 	}
 
-	result := make([]*sqlc.BtcAccountKey, len(accountKeys))
+	result := make([]*sqlcgen.BtcAccountKey, len(accountKeys))
 	for i := range accountKeys {
 		result[i] = &accountKeys[i]
 	}
@@ -115,11 +116,11 @@ func (r *BTCAccountKeyRepositorySqlc) GetAllMultiAddr(
 }
 
 // InsertBulk inserts multiple records
-func (r *BTCAccountKeyRepositorySqlc) InsertBulk(items []*sqlc.BtcAccountKey) error {
+func (r *BTCAccountKeyRepositorySqlc) InsertBulk(items []*sqlcgen.BtcAccountKey) error {
 	ctx := context.Background()
 
 	for _, item := range items {
-		_, err := r.queries.InsertBtcAccountKey(ctx, sqlc.InsertBtcAccountKeyParams{
+		_, err := r.queries.InsertBtcAccountKey(ctx, sqlcgen.InsertBtcAccountKeyParams{
 			Coin:               item.Coin,
 			KeyType:            item.KeyType,
 			Account:            item.Account,
@@ -148,11 +149,11 @@ func (r *BTCAccountKeyRepositorySqlc) UpdateAddr(
 ) (int64, error) {
 	ctx := context.Background()
 
-	result, err := r.queries.UpdateBtcAccountKeyAddress(ctx, sqlc.UpdateBtcAccountKeyAddressParams{
+	result, err := r.queries.UpdateBtcAccountKeyAddress(ctx, sqlcgen.UpdateBtcAccountKeyAddressParams{
 		P2pkhAddress:      addr,
 		UpdatedAt:         sql.NullTime{Time: time.Now(), Valid: true},
-		Coin:              sqlc.BtcAccountKeyCoin(r.coinTypeCode.String()),
-		Account:           sqlc.BtcAccountKeyAccount(accountType.String()),
+		Coin:              sqlcgen.BtcAccountKeyCoin(r.coinTypeCode.String()),
+		Account:           sqlcgen.BtcAccountKeyAccount(accountType.String()),
 		P2shSegwitAddress: keyAddress,
 	})
 	if err != nil {
@@ -176,11 +177,11 @@ func (r *BTCAccountKeyRepositorySqlc) UpdateAddrStatus(
 
 	// sqlc doesn't support IN clauses with variable arguments, so update one at a time
 	for _, wif := range strWIFs {
-		result, err := r.queries.UpdateBtcAccountKeyAddrStatus(ctx, sqlc.UpdateBtcAccountKeyAddrStatusParams{
+		result, err := r.queries.UpdateBtcAccountKeyAddrStatus(ctx, sqlcgen.UpdateBtcAccountKeyAddrStatusParams{
 			AddrStatus:         addrStatus.Int8(),
 			UpdatedAt:          sql.NullTime{Time: time.Now(), Valid: true},
-			Coin:               sqlc.BtcAccountKeyCoin(r.coinTypeCode.String()),
-			Account:            sqlc.BtcAccountKeyAccount(accountType.String()),
+			Coin:               sqlcgen.BtcAccountKeyCoin(r.coinTypeCode.String()),
+			Account:            sqlcgen.BtcAccountKeyAccount(accountType.String()),
 			WalletImportFormat: wif,
 		})
 		if err != nil {
@@ -199,17 +200,17 @@ func (r *BTCAccountKeyRepositorySqlc) UpdateAddrStatus(
 
 // UpdateMultisigAddr updates multisig_address
 func (r *BTCAccountKeyRepositorySqlc) UpdateMultisigAddr(
-	accountType domainAccount.AccountType, item *sqlc.BtcAccountKey,
+	accountType domainAccount.AccountType, item *sqlcgen.BtcAccountKey,
 ) (int64, error) {
 	ctx := context.Background()
 
-	result, err := r.queries.UpdateBtcAccountKeyMultisigAddr(ctx, sqlc.UpdateBtcAccountKeyMultisigAddrParams{
+	result, err := r.queries.UpdateBtcAccountKeyMultisigAddr(ctx, sqlcgen.UpdateBtcAccountKeyMultisigAddrParams{
 		MultisigAddress: item.MultisigAddress,
 		RedeemScript:    item.RedeemScript,
 		AddrStatus:      item.AddrStatus,
 		UpdatedAt:       sql.NullTime{Time: time.Now(), Valid: true},
-		Coin:            sqlc.BtcAccountKeyCoin(r.coinTypeCode.String()),
-		Account:         sqlc.BtcAccountKeyAccount(accountType.String()),
+		Coin:            sqlcgen.BtcAccountKeyCoin(r.coinTypeCode.String()),
+		Account:         sqlcgen.BtcAccountKeyAccount(accountType.String()),
 		FullPublicKey:   item.FullPublicKey,
 	})
 	if err != nil {
@@ -226,7 +227,7 @@ func (r *BTCAccountKeyRepositorySqlc) UpdateMultisigAddr(
 
 // UpdateMultisigAddrs updates all multisig_address with transaction
 func (r *BTCAccountKeyRepositorySqlc) UpdateMultisigAddrs(
-	accountType domainAccount.AccountType, items []*sqlc.BtcAccountKey,
+	accountType domainAccount.AccountType, items []*sqlcgen.BtcAccountKey,
 ) (int64, error) {
 	ctx := context.Background()
 
@@ -247,13 +248,13 @@ func (r *BTCAccountKeyRepositorySqlc) UpdateMultisigAddrs(
 	var totalAffected int64
 
 	for _, item := range items {
-		result, updateErr := qtx.UpdateBtcAccountKeyMultisigAddr(ctx, sqlc.UpdateBtcAccountKeyMultisigAddrParams{
+		result, updateErr := qtx.UpdateBtcAccountKeyMultisigAddr(ctx, sqlcgen.UpdateBtcAccountKeyMultisigAddrParams{
 			MultisigAddress: item.MultisigAddress,
 			RedeemScript:    item.RedeemScript,
 			AddrStatus:      item.AddrStatus,
 			UpdatedAt:       sql.NullTime{Time: time.Now(), Valid: true},
-			Coin:            sqlc.BtcAccountKeyCoin(r.coinTypeCode.String()),
-			Account:         sqlc.BtcAccountKeyAccount(accountType.String()),
+			Coin:            sqlcgen.BtcAccountKeyCoin(r.coinTypeCode.String()),
+			Account:         sqlcgen.BtcAccountKeyAccount(accountType.String()),
 			FullPublicKey:   item.FullPublicKey,
 		})
 		if updateErr != nil {

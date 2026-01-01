@@ -11,7 +11,7 @@ import (
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
-	sqlc "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -64,7 +64,7 @@ func (u *generateKeyUseCase) Generate(ctx context.Context, input keygenusecase.G
 	}()
 
 	// Generate XRP keys
-	items := make([]*sqlc.XrpAccountKey, 0, len(walletKeys))
+	items := make([]*sqlcgen.XrpAccountKey, 0, len(walletKeys))
 	for _, v := range walletKeys {
 		// TODO:
 		// - WIF => badSeed
@@ -79,9 +79,9 @@ func (u *generateKeyUseCase) Generate(ctx context.Context, input keygenusecase.G
 		}
 
 		// TODO: passphrase or related ID should be stored in table??
-		items = append(items, &sqlc.XrpAccountKey{
-			Coin:             sqlc.XrpAccountKeyCoin(u.coinTypeCode.String()),
-			Account:          sqlc.XrpAccountKeyAccount(input.AccountType.String()),
+		items = append(items, &sqlcgen.XrpAccountKey{
+			Coin:             sqlcgen.XrpAccountKeyCoin(u.coinTypeCode.String()),
+			Account:          sqlcgen.XrpAccountKeyAccount(input.AccountType.String()),
 			AccountID:        generatedKey.Result.AccountID,
 			KeyType:          xrp.GetXRPKeyTypeValue(generatedKey.Result.KeyType),
 			MasterKey:        generatedKey.Result.MasterKey,

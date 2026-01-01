@@ -8,12 +8,12 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	sqlc "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
 // AddressRepositorySqlc is repository for address table using sqlc
 type AddressRepositorySqlc struct {
-	queries      *sqlc.Queries
+	queries      *sqlcgen.Queries
 	coinTypeCode domainCoin.CoinTypeCode
 }
 
@@ -22,24 +22,24 @@ func NewAddressRepositorySqlc(
 	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
 ) *AddressRepositorySqlc {
 	return &AddressRepositorySqlc{
-		queries:      sqlc.New(dbConn),
+		queries:      sqlcgen.New(dbConn),
 		coinTypeCode: coinTypeCode,
 	}
 }
 
 // GetAll returns all records by account
-func (r *AddressRepositorySqlc) GetAll(accountType domainAccount.AccountType) ([]*sqlc.Address, error) {
+func (r *AddressRepositorySqlc) GetAll(accountType domainAccount.AccountType) ([]*sqlcgen.Address, error) {
 	ctx := context.Background()
 
-	addresses, err := r.queries.GetAllAddresses(ctx, sqlc.GetAllAddressesParams{
-		Coin:    sqlc.AddressCoin(r.coinTypeCode.String()),
-		Account: sqlc.AddressAccount(accountType.String()),
+	addresses, err := r.queries.GetAllAddresses(ctx, sqlcgen.GetAllAddressesParams{
+		Coin:    sqlcgen.AddressCoin(r.coinTypeCode.String()),
+		Account: sqlcgen.AddressAccount(accountType.String()),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to call GetAllAddresses(): %w", err)
 	}
 
-	result := make([]*sqlc.Address, len(addresses))
+	result := make([]*sqlcgen.Address, len(addresses))
 	for i := range addresses {
 		result[i] = &addresses[i]
 	}
@@ -51,9 +51,9 @@ func (r *AddressRepositorySqlc) GetAll(accountType domainAccount.AccountType) ([
 func (r *AddressRepositorySqlc) GetAllAddress(accountType domainAccount.AccountType) ([]string, error) {
 	ctx := context.Background()
 
-	addresses, err := r.queries.GetAllAddressStrings(ctx, sqlc.GetAllAddressStringsParams{
-		Coin:    sqlc.AddressCoin(r.coinTypeCode.String()),
-		Account: sqlc.AddressAccount(accountType.String()),
+	addresses, err := r.queries.GetAllAddressStrings(ctx, sqlcgen.GetAllAddressStringsParams{
+		Coin:    sqlcgen.AddressCoin(r.coinTypeCode.String()),
+		Account: sqlcgen.AddressAccount(accountType.String()),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to call GetAllAddressStrings(): %w", err)
@@ -63,12 +63,12 @@ func (r *AddressRepositorySqlc) GetAllAddress(accountType domainAccount.AccountT
 }
 
 // GetOneUnAllocated returns one records by is_allocated=false
-func (r *AddressRepositorySqlc) GetOneUnAllocated(accountType domainAccount.AccountType) (*sqlc.Address, error) {
+func (r *AddressRepositorySqlc) GetOneUnAllocated(accountType domainAccount.AccountType) (*sqlcgen.Address, error) {
 	ctx := context.Background()
 
-	addr, err := r.queries.GetOneUnallocatedAddress(ctx, sqlc.GetOneUnallocatedAddressParams{
-		Coin:    sqlc.AddressCoin(r.coinTypeCode.String()),
-		Account: sqlc.AddressAccount(accountType.String()),
+	addr, err := r.queries.GetOneUnallocatedAddress(ctx, sqlcgen.GetOneUnallocatedAddressParams{
+		Coin:    sqlcgen.AddressCoin(r.coinTypeCode.String()),
+		Account: sqlcgen.AddressAccount(accountType.String()),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to call GetOneUnallocatedAddress(): %w", err)
@@ -78,9 +78,9 @@ func (r *AddressRepositorySqlc) GetOneUnAllocated(accountType domainAccount.Acco
 }
 
 // InsertBulk inserts multiple records
-func (r *AddressRepositorySqlc) InsertBulk(ctx context.Context, items []*sqlc.Address) error {
+func (r *AddressRepositorySqlc) InsertBulk(ctx context.Context, items []*sqlcgen.Address) error {
 	for _, item := range items {
-		_, err := r.queries.InsertAddress(ctx, sqlc.InsertAddressParams{
+		_, err := r.queries.InsertAddress(ctx, sqlcgen.InsertAddressParams{
 			Coin:          item.Coin,
 			Account:       item.Account,
 			WalletAddress: item.WalletAddress,
@@ -99,10 +99,10 @@ func (r *AddressRepositorySqlc) InsertBulk(ctx context.Context, items []*sqlc.Ad
 func (r *AddressRepositorySqlc) UpdateIsAllocated(isAllocated bool, address string) (int64, error) {
 	ctx := context.Background()
 
-	result, err := r.queries.UpdateAddressIsAllocated(ctx, sqlc.UpdateAddressIsAllocatedParams{
+	result, err := r.queries.UpdateAddressIsAllocated(ctx, sqlcgen.UpdateAddressIsAllocatedParams{
 		IsAllocated:   isAllocated,
 		UpdatedAt:     sql.NullTime{Time: time.Now(), Valid: true},
-		Coin:          sqlc.AddressCoin(r.coinTypeCode.String()),
+		Coin:          sqlcgen.AddressCoin(r.coinTypeCode.String()),
 		WalletAddress: address,
 	})
 	if err != nil {

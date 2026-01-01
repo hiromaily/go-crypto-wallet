@@ -8,13 +8,13 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	sqlc "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 // XRPAccountKeyRepositorySqlc is repository for xrp_account_key table using sqlc
 type XRPAccountKeyRepositorySqlc struct {
-	queries      *sqlc.Queries
+	queries      *sqlcgen.Queries
 	coinTypeCode domainCoin.CoinTypeCode
 }
 
@@ -23,7 +23,7 @@ func NewXRPAccountKeyRepositorySqlc(
 	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
 ) *XRPAccountKeyRepositorySqlc {
 	return &XRPAccountKeyRepositorySqlc{
-		queries:      sqlc.New(dbConn),
+		queries:      sqlcgen.New(dbConn),
 		coinTypeCode: coinTypeCode,
 	}
 }
@@ -31,17 +31,17 @@ func NewXRPAccountKeyRepositorySqlc(
 // GetAllAddrStatus returns all XRPAccountKey by addr_status
 func (r *XRPAccountKeyRepositorySqlc) GetAllAddrStatus(
 	ctx context.Context, accountType domainAccount.AccountType, addrStatus address.AddrStatus,
-) ([]*sqlc.XrpAccountKey, error) {
-	xrpKeys, err := r.queries.GetXRPAccountKeysByAddrStatus(ctx, sqlc.GetXRPAccountKeysByAddrStatusParams{
-		Coin:       sqlc.XrpAccountKeyCoin(r.coinTypeCode.String()),
-		Account:    sqlc.XrpAccountKeyAccount(accountType.String()),
+) ([]*sqlcgen.XrpAccountKey, error) {
+	xrpKeys, err := r.queries.GetXRPAccountKeysByAddrStatus(ctx, sqlcgen.GetXRPAccountKeysByAddrStatusParams{
+		Coin:       sqlcgen.XrpAccountKeyCoin(r.coinTypeCode.String()),
+		Account:    sqlcgen.XrpAccountKeyAccount(accountType.String()),
 		AddrStatus: addrStatus.Int8(),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to call GetXRPAccountKeysByAddrStatus(): %w", err)
 	}
 
-	result := make([]*sqlc.XrpAccountKey, len(xrpKeys))
+	result := make([]*sqlcgen.XrpAccountKey, len(xrpKeys))
 	for i := range xrpKeys {
 		result[i] = &xrpKeys[i]
 	}
@@ -53,9 +53,9 @@ func (r *XRPAccountKeyRepositorySqlc) GetAllAddrStatus(
 func (r *XRPAccountKeyRepositorySqlc) GetSecret(
 	ctx context.Context, accountType domainAccount.AccountType, addr string,
 ) (string, error) {
-	secret, err := r.queries.GetXRPAccountKeySecret(ctx, sqlc.GetXRPAccountKeySecretParams{
-		Coin:      sqlc.XrpAccountKeyCoin(r.coinTypeCode.String()),
-		Account:   sqlc.XrpAccountKeyAccount(accountType.String()),
+	secret, err := r.queries.GetXRPAccountKeySecret(ctx, sqlcgen.GetXRPAccountKeySecretParams{
+		Coin:      sqlcgen.XrpAccountKeyCoin(r.coinTypeCode.String()),
+		Account:   sqlcgen.XrpAccountKeyAccount(accountType.String()),
 		AccountID: addr,
 	})
 	if err != nil {
@@ -66,9 +66,9 @@ func (r *XRPAccountKeyRepositorySqlc) GetSecret(
 }
 
 // InsertBulk inserts multiple records
-func (r *XRPAccountKeyRepositorySqlc) InsertBulk(ctx context.Context, items []*sqlc.XrpAccountKey) error {
+func (r *XRPAccountKeyRepositorySqlc) InsertBulk(ctx context.Context, items []*sqlcgen.XrpAccountKey) error {
 	for _, item := range items {
-		_, err := r.queries.InsertXRPAccountKey(ctx, sqlc.InsertXRPAccountKeyParams{
+		_, err := r.queries.InsertXRPAccountKey(ctx, sqlcgen.InsertXRPAccountKeyParams{
 			Coin:             item.Coin,
 			Account:          item.Account,
 			AccountID:        item.AccountID,
@@ -98,11 +98,11 @@ func (r *XRPAccountKeyRepositorySqlc) UpdateAddrStatus(
 
 	// Update one at a time since IN clause not supported for multiple updates
 	for _, accountID := range accountIDs {
-		result, err := r.queries.UpdateXRPAccountKeyAddrStatus(ctx, sqlc.UpdateXRPAccountKeyAddrStatusParams{
+		result, err := r.queries.UpdateXRPAccountKeyAddrStatus(ctx, sqlcgen.UpdateXRPAccountKeyAddrStatusParams{
 			AddrStatus: addrStatus.Int8(),
 			UpdatedAt:  sql.NullTime{Time: time.Now(), Valid: true},
-			Coin:       sqlc.XrpAccountKeyCoin(r.coinTypeCode.String()),
-			Account:    sqlc.XrpAccountKeyAccount(accountType.String()),
+			Coin:       sqlcgen.XrpAccountKeyCoin(r.coinTypeCode.String()),
+			Account:    sqlcgen.XrpAccountKeyAccount(accountType.String()),
 			AccountID:  accountID,
 		})
 		if err != nil {

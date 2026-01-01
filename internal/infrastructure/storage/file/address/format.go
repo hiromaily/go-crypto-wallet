@@ -6,7 +6,7 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	sqlc "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
 // AddressFormat is address csv format
@@ -23,7 +23,7 @@ type AddressFormat struct {
 }
 
 // CreateLine creates line for csv from BtcAccountKey
-func CreateLine(accountKeyItem *sqlc.BtcAccountKey) []string {
+func CreateLine(accountKeyItem *sqlcgen.BtcAccountKey) []string {
 	taprootAddr := ""
 	if accountKeyItem.TaprootAddress.Valid {
 		taprootAddr = accountKeyItem.TaprootAddress.String
@@ -42,7 +42,7 @@ func CreateLine(accountKeyItem *sqlc.BtcAccountKey) []string {
 }
 
 // CreateEthLine creates line for csv from EthAccountKey
-func CreateEthLine(accountKeyItem *sqlc.EthAccountKey) []string {
+func CreateEthLine(accountKeyItem *sqlcgen.EthAccountKey) []string {
 	return []string{
 		"eth",
 		string(accountKeyItem.Account),

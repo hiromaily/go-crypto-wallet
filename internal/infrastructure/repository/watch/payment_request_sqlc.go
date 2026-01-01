@@ -7,12 +7,12 @@ import (
 
 	portsPersistence "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	sqlc "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
 // PaymentRequestRepositorySqlc is repository for payment_request table using sqlc
 type PaymentRequestRepositorySqlc struct {
-	queries      *sqlc.Queries
+	queries      *sqlcgen.Queries
 	coinTypeCode domainCoin.CoinTypeCode
 }
 
@@ -21,21 +21,21 @@ func NewPaymentRequestRepositorySqlc(
 	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
 ) *PaymentRequestRepositorySqlc {
 	return &PaymentRequestRepositorySqlc{
-		queries:      sqlc.New(dbConn),
+		queries:      sqlcgen.New(dbConn),
 		coinTypeCode: coinTypeCode,
 	}
 }
 
 // GetAll returns all records whose payment_id is null
-func (r *PaymentRequestRepositorySqlc) GetAll() ([]*sqlc.PaymentRequest, error) {
+func (r *PaymentRequestRepositorySqlc) GetAll() ([]*sqlcgen.PaymentRequest, error) {
 	ctx := context.Background()
 
-	requests, err := r.queries.GetAllPaymentRequests(ctx, sqlc.PaymentRequestCoin(r.coinTypeCode.String()))
+	requests, err := r.queries.GetAllPaymentRequests(ctx, sqlcgen.PaymentRequestCoin(r.coinTypeCode.String()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to call GetAllPaymentRequests(): %w", err)
 	}
 
-	result := make([]*sqlc.PaymentRequest, len(requests))
+	result := make([]*sqlcgen.PaymentRequest, len(requests))
 	for i := range requests {
 		result[i] = &requests[i]
 	}
@@ -44,18 +44,18 @@ func (r *PaymentRequestRepositorySqlc) GetAll() ([]*sqlc.PaymentRequest, error) 
 }
 
 // GetAllByPaymentID returns all records searched by payment_id
-func (r *PaymentRequestRepositorySqlc) GetAllByPaymentID(paymentID int64) ([]*sqlc.PaymentRequest, error) {
+func (r *PaymentRequestRepositorySqlc) GetAllByPaymentID(paymentID int64) ([]*sqlcgen.PaymentRequest, error) {
 	ctx := context.Background()
 
-	requests, err := r.queries.GetPaymentRequestsByPaymentID(ctx, sqlc.GetPaymentRequestsByPaymentIDParams{
-		Coin:      sqlc.PaymentRequestCoin(r.coinTypeCode.String()),
+	requests, err := r.queries.GetPaymentRequestsByPaymentID(ctx, sqlcgen.GetPaymentRequestsByPaymentIDParams{
+		Coin:      sqlcgen.PaymentRequestCoin(r.coinTypeCode.String()),
 		PaymentID: sql.NullInt64{Int64: paymentID, Valid: true},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to call GetPaymentRequestsByPaymentID(): %w", err)
 	}
 
-	result := make([]*sqlc.PaymentRequest, len(requests))
+	result := make([]*sqlcgen.PaymentRequest, len(requests))
 	for i := range requests {
 		result[i] = &requests[i]
 	}
@@ -64,11 +64,11 @@ func (r *PaymentRequestRepositorySqlc) GetAllByPaymentID(paymentID int64) ([]*sq
 }
 
 // InsertBulk inserts multiple records
-func (r *PaymentRequestRepositorySqlc) InsertBulk(items []*sqlc.PaymentRequest) error {
+func (r *PaymentRequestRepositorySqlc) InsertBulk(items []*sqlcgen.PaymentRequest) error {
 	ctx := context.Background()
 
 	for _, item := range items {
-		_, err := r.queries.InsertPaymentRequest(ctx, sqlc.InsertPaymentRequestParams{
+		_, err := r.queries.InsertPaymentRequest(ctx, sqlcgen.InsertPaymentRequestParams{
 			Coin:            item.Coin,
 			PaymentID:       item.PaymentID,
 			SenderAddress:   item.SenderAddress,
@@ -94,7 +94,7 @@ func (r *PaymentRequestRepositorySqlc) UpdatePaymentID(paymentID int64, ids []in
 	// sqlc doesn't support IN clauses with variable arguments,
 	// so we update one at a time
 	for _, id := range ids {
-		result, err := r.queries.UpdatePaymentRequestPaymentID(ctx, sqlc.UpdatePaymentRequestPaymentIDParams{
+		result, err := r.queries.UpdatePaymentRequestPaymentID(ctx, sqlcgen.UpdatePaymentRequestPaymentIDParams{
 			PaymentID: sql.NullInt64{Int64: paymentID, Valid: true},
 			ID:        id,
 		})
@@ -116,9 +116,9 @@ func (r *PaymentRequestRepositorySqlc) UpdatePaymentID(paymentID int64, ids []in
 func (r *PaymentRequestRepositorySqlc) UpdateIsDone(paymentID int64) (int64, error) {
 	ctx := context.Background()
 
-	result, err := r.queries.UpdatePaymentRequestIsDone(ctx, sqlc.UpdatePaymentRequestIsDoneParams{
+	result, err := r.queries.UpdatePaymentRequestIsDone(ctx, sqlcgen.UpdatePaymentRequestIsDoneParams{
 		IsDone:    true,
-		Coin:      sqlc.PaymentRequestCoin(r.coinTypeCode.String()),
+		Coin:      sqlcgen.PaymentRequestCoin(r.coinTypeCode.String()),
 		PaymentID: sql.NullInt64{Int64: paymentID, Valid: true},
 	})
 	if err != nil {
@@ -137,7 +137,7 @@ func (r *PaymentRequestRepositorySqlc) UpdateIsDone(paymentID int64) (int64, err
 func (r *PaymentRequestRepositorySqlc) DeleteAll() (int64, error) {
 	ctx := context.Background()
 
-	result, err := r.queries.DeleteAllPaymentRequests(ctx, sqlc.PaymentRequestCoin(r.coinTypeCode.String()))
+	result, err := r.queries.DeleteAllPaymentRequests(ctx, sqlcgen.PaymentRequestCoin(r.coinTypeCode.String()))
 	if err != nil {
 		return 0, fmt.Errorf("failed to call DeleteAllPaymentRequests(): %w", err)
 	}

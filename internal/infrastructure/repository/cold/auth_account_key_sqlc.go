@@ -8,13 +8,13 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	sqlc "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 // AuthAccountKeyRepositorySqlc is repository for auth_account_key table using sqlc
 type AuthAccountKeyRepositorySqlc struct {
-	queries      *sqlc.Queries
+	queries      *sqlcgen.Queries
 	coinTypeCode domainCoin.CoinTypeCode
 }
 
@@ -23,17 +23,17 @@ func NewAuthAccountKeyRepositorySqlc(
 	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
 ) *AuthAccountKeyRepositorySqlc {
 	return &AuthAccountKeyRepositorySqlc{
-		queries:      sqlc.New(dbConn),
+		queries:      sqlcgen.New(dbConn),
 		coinTypeCode: coinTypeCode,
 	}
 }
 
 // GetOne returns one record by authType
-func (r *AuthAccountKeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (*sqlc.AuthAccountKey, error) {
+func (r *AuthAccountKeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (*sqlcgen.AuthAccountKey, error) {
 	ctx := context.Background()
 
-	authKey, err := r.queries.GetAuthAccountKey(ctx, sqlc.GetAuthAccountKeyParams{
-		Coin:        sqlc.AuthAccountKeyCoin(r.coinTypeCode.String()),
+	authKey, err := r.queries.GetAuthAccountKey(ctx, sqlcgen.GetAuthAccountKeyParams{
+		Coin:        sqlcgen.AuthAccountKeyCoin(r.coinTypeCode.String()),
 		AuthAccount: authType.String(),
 	})
 	if err != nil {
@@ -44,10 +44,10 @@ func (r *AuthAccountKeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (
 }
 
 // Insert inserts record
-func (r *AuthAccountKeyRepositorySqlc) Insert(item *sqlc.AuthAccountKey) error {
+func (r *AuthAccountKeyRepositorySqlc) Insert(item *sqlcgen.AuthAccountKey) error {
 	ctx := context.Background()
 
-	_, err := r.queries.InsertAuthAccountKey(ctx, sqlc.InsertAuthAccountKeyParams{
+	_, err := r.queries.InsertAuthAccountKey(ctx, sqlcgen.InsertAuthAccountKeyParams{
 		Coin:               item.Coin,
 		KeyType:            item.KeyType,
 		AuthAccount:        item.AuthAccount,
@@ -73,10 +73,10 @@ func (r *AuthAccountKeyRepositorySqlc) Insert(item *sqlc.AuthAccountKey) error {
 func (r *AuthAccountKeyRepositorySqlc) UpdateAddrStatus(addrStatus address.AddrStatus, strWIF string) (int64, error) {
 	ctx := context.Background()
 
-	result, err := r.queries.UpdateAuthAccountKeyAddrStatus(ctx, sqlc.UpdateAuthAccountKeyAddrStatusParams{
+	result, err := r.queries.UpdateAuthAccountKeyAddrStatus(ctx, sqlcgen.UpdateAuthAccountKeyAddrStatusParams{
 		AddrStatus:         addrStatus.Int8(),
 		UpdatedAt:          sql.NullTime{Time: time.Now(), Valid: true},
-		Coin:               sqlc.AuthAccountKeyCoin(r.coinTypeCode.String()),
+		Coin:               sqlcgen.AuthAccountKeyCoin(r.coinTypeCode.String()),
 		WalletImportFormat: strWIF,
 	})
 	if err != nil {

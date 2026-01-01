@@ -6,12 +6,12 @@ import (
 	"fmt"
 
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	sqlc "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
 // SeedRepositorySqlc is repository for seed table using sqlc
 type SeedRepositorySqlc struct {
-	queries      *sqlc.Queries
+	queries      *sqlcgen.Queries
 	coinTypeCode domainCoin.CoinTypeCode
 }
 
@@ -20,14 +20,14 @@ func NewSeedRepositorySqlc(
 	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
 ) *SeedRepositorySqlc {
 	return &SeedRepositorySqlc{
-		queries:      sqlc.New(dbConn),
+		queries:      sqlcgen.New(dbConn),
 		coinTypeCode: coinTypeCode,
 	}
 }
 
 // GetOne returns one record
-func (r *SeedRepositorySqlc) GetOne(ctx context.Context) (*sqlc.Seed, error) {
-	seed, err := r.queries.GetSeed(ctx, sqlc.SeedCoin(r.coinTypeCode.String()))
+func (r *SeedRepositorySqlc) GetOne(ctx context.Context) (*sqlcgen.Seed, error) {
+	seed, err := r.queries.GetSeed(ctx, sqlcgen.SeedCoin(r.coinTypeCode.String()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to call GetSeed(): %w", err)
 	}
@@ -37,8 +37,8 @@ func (r *SeedRepositorySqlc) GetOne(ctx context.Context) (*sqlc.Seed, error) {
 
 // Insert inserts record
 func (r *SeedRepositorySqlc) Insert(ctx context.Context, strSeed string) error {
-	_, err := r.queries.InsertSeed(ctx, sqlc.InsertSeedParams{
-		Coin: sqlc.SeedCoin(r.coinTypeCode.String()),
+	_, err := r.queries.InsertSeed(ctx, sqlcgen.InsertSeedParams{
+		Coin: sqlcgen.SeedCoin(r.coinTypeCode.String()),
 		Seed: strSeed,
 	})
 	if err != nil {

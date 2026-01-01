@@ -8,25 +8,25 @@ import (
 
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	sqlc "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
 // BTCTxRepositorySqlc is repository for btc_tx table using sqlc
 type BTCTxRepositorySqlc struct {
-	queries      *sqlc.Queries
+	queries      *sqlcgen.Queries
 	coinTypeCode domainCoin.CoinTypeCode
 }
 
 // NewBTCTxRepositorySqlc returns BTCTxRepositorySqlc object
 func NewBTCTxRepositorySqlc(dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode) *BTCTxRepositorySqlc {
 	return &BTCTxRepositorySqlc{
-		queries:      sqlc.New(dbConn),
+		queries:      sqlcgen.New(dbConn),
 		coinTypeCode: coinTypeCode,
 	}
 }
 
 // GetOne returns one record by ID
-func (r *BTCTxRepositorySqlc) GetOne(id int64) (*sqlc.BtcTx, error) {
+func (r *BTCTxRepositorySqlc) GetOne(id int64) (*sqlcgen.BtcTx, error) {
 	ctx := context.Background()
 
 	btcTx, err := r.queries.GetBtcTxByID(ctx, id)
@@ -41,9 +41,9 @@ func (r *BTCTxRepositorySqlc) GetOne(id int64) (*sqlc.BtcTx, error) {
 func (r *BTCTxRepositorySqlc) GetCountByUnsignedHex(actionType domainTx.ActionType, hex string) (int64, error) {
 	ctx := context.Background()
 
-	count, err := r.queries.GetBtcTxCountByUnsignedHex(ctx, sqlc.GetBtcTxCountByUnsignedHexParams{
-		Coin:          sqlc.BtcTxCoin(r.coinTypeCode.String()),
-		Action:        sqlc.BtcTxAction(actionType.String()),
+	count, err := r.queries.GetBtcTxCountByUnsignedHex(ctx, sqlcgen.GetBtcTxCountByUnsignedHexParams{
+		Coin:          sqlcgen.BtcTxCoin(r.coinTypeCode.String()),
+		Action:        sqlcgen.BtcTxAction(actionType.String()),
 		UnsignedHexTx: hex,
 	})
 	if err != nil {
@@ -57,9 +57,9 @@ func (r *BTCTxRepositorySqlc) GetCountByUnsignedHex(actionType domainTx.ActionTy
 func (r *BTCTxRepositorySqlc) GetTxIDBySentHash(actionType domainTx.ActionType, hash string) (int64, error) {
 	ctx := context.Background()
 
-	id, err := r.queries.GetBtcTxIDBySentHash(ctx, sqlc.GetBtcTxIDBySentHashParams{
-		Coin:       sqlc.BtcTxCoin(r.coinTypeCode.String()),
-		Action:     sqlc.BtcTxAction(actionType.String()),
+	id, err := r.queries.GetBtcTxIDBySentHash(ctx, sqlcgen.GetBtcTxIDBySentHashParams{
+		Coin:       sqlcgen.BtcTxCoin(r.coinTypeCode.String()),
+		Action:     sqlcgen.BtcTxAction(actionType.String()),
 		SentHashTx: hash,
 	})
 	if err != nil {
@@ -73,9 +73,9 @@ func (r *BTCTxRepositorySqlc) GetTxIDBySentHash(actionType domainTx.ActionType, 
 func (r *BTCTxRepositorySqlc) GetSentHashTx(actionType domainTx.ActionType, txType domainTx.TxType) ([]string, error) {
 	ctx := context.Background()
 
-	hashes, err := r.queries.GetBtcTxSentHashList(ctx, sqlc.GetBtcTxSentHashListParams{
-		Coin:          sqlc.BtcTxCoin(r.coinTypeCode.String()),
-		Action:        sqlc.BtcTxAction(actionType.String()),
+	hashes, err := r.queries.GetBtcTxSentHashList(ctx, sqlcgen.GetBtcTxSentHashListParams{
+		Coin:          sqlcgen.BtcTxCoin(r.coinTypeCode.String()),
+		Action:        sqlcgen.BtcTxAction(actionType.String()),
 		CurrentTxType: txType.Int8(),
 	})
 	if err != nil {
@@ -86,12 +86,12 @@ func (r *BTCTxRepositorySqlc) GetSentHashTx(actionType domainTx.ActionType, txTy
 }
 
 // InsertUnsignedTx inserts records
-func (r *BTCTxRepositorySqlc) InsertUnsignedTx(actionType domainTx.ActionType, txItem *sqlc.BtcTx) (int64, error) {
+func (r *BTCTxRepositorySqlc) InsertUnsignedTx(actionType domainTx.ActionType, txItem *sqlcgen.BtcTx) (int64, error) {
 	ctx := context.Background()
 
-	result, err := r.queries.InsertBtcTx(ctx, sqlc.InsertBtcTxParams{
-		Coin:              sqlc.BtcTxCoin(r.coinTypeCode.String()),
-		Action:            sqlc.BtcTxAction(actionType.String()),
+	result, err := r.queries.InsertBtcTx(ctx, sqlcgen.InsertBtcTxParams{
+		Coin:              sqlcgen.BtcTxCoin(r.coinTypeCode.String()),
+		Action:            sqlcgen.BtcTxAction(actionType.String()),
 		UnsignedHexTx:     txItem.UnsignedHexTx,
 		SignedHexTx:       txItem.SignedHexTx,
 		SentHashTx:        txItem.SentHashTx,
@@ -115,10 +115,10 @@ func (r *BTCTxRepositorySqlc) InsertUnsignedTx(actionType domainTx.ActionType, t
 }
 
 // Update updates by sqlc.BtcTx (entire update)
-func (r *BTCTxRepositorySqlc) Update(txItem *sqlc.BtcTx) (int64, error) {
+func (r *BTCTxRepositorySqlc) Update(txItem *sqlcgen.BtcTx) (int64, error) {
 	ctx := context.Background()
 
-	err := r.queries.UpdateBtcTx(ctx, sqlc.UpdateBtcTxParams{
+	err := r.queries.UpdateBtcTx(ctx, sqlcgen.UpdateBtcTxParams{
 		Coin:              txItem.Coin,
 		Action:            txItem.Action,
 		UnsignedHexTx:     txItem.UnsignedHexTx,
@@ -148,7 +148,7 @@ func (r *BTCTxRepositorySqlc) UpdateAfterTxSent(
 ) (int64, error) {
 	ctx := context.Background()
 
-	result, err := r.queries.UpdateBtcTxAfterSent(ctx, sqlc.UpdateBtcTxAfterSentParams{
+	result, err := r.queries.UpdateBtcTxAfterSent(ctx, sqlcgen.UpdateBtcTxAfterSentParams{
 		CurrentTxType: txType.Int8(),
 		SignedHexTx:   signedHex,
 		SentHashTx:    sentHashTx,
@@ -171,7 +171,7 @@ func (r *BTCTxRepositorySqlc) UpdateAfterTxSent(
 func (r *BTCTxRepositorySqlc) UpdateTxType(id int64, txType domainTx.TxType) (int64, error) {
 	ctx := context.Background()
 
-	result, err := r.queries.UpdateBtcTxType(ctx, sqlc.UpdateBtcTxTypeParams{
+	result, err := r.queries.UpdateBtcTxType(ctx, sqlcgen.UpdateBtcTxTypeParams{
 		CurrentTxType: txType.Int8(),
 		ID:            id,
 	})
@@ -193,10 +193,10 @@ func (r *BTCTxRepositorySqlc) UpdateTxTypeBySentHashTx(
 ) (int64, error) {
 	ctx := context.Background()
 
-	result, err := r.queries.UpdateBtcTxTypeBySentHash(ctx, sqlc.UpdateBtcTxTypeBySentHashParams{
+	result, err := r.queries.UpdateBtcTxTypeBySentHash(ctx, sqlcgen.UpdateBtcTxTypeBySentHashParams{
 		CurrentTxType: txType.Int8(),
-		Coin:          sqlc.BtcTxCoin(r.coinTypeCode.String()),
-		Action:        sqlc.BtcTxAction(actionType.String()),
+		Coin:          sqlcgen.BtcTxCoin(r.coinTypeCode.String()),
+		Action:        sqlcgen.BtcTxAction(actionType.String()),
 		SentHashTx:    sentHashTx,
 	})
 	if err != nil {
