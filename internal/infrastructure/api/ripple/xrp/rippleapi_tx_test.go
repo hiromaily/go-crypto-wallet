@@ -4,6 +4,7 @@
 package xrp_test
 
 import (
+	"context"
 	"strings"
 	"testing"
 
@@ -50,8 +51,9 @@ func (att *apiTxTest) TestTransaction() {
 
 	for _, tt := range tests {
 		att.T().Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
 			// PrepareTransaction
-			txJSON, _, err := att.XRP.PrepareTransaction(tt.args.sernderAccount, tt.args.receiverAccount, tt.args.amount, tt.args.instructions)
+			txJSON, _, err := att.XRP.PrepareTransaction(ctx, tt.args.sernderAccount, tt.args.receiverAccount, tt.args.amount, tt.args.instructions)
 			att.NoError(err)
 			grok.Value(txJSON)
 			//- creating raw transaction
@@ -62,11 +64,11 @@ func (att *apiTxTest) TestTransaction() {
 			// sentTx.TxJSON.LastLedgerSequence: 8153687
 
 			// SingTransaction
-			txID, txBlob, err := att.XRP.SignTransaction(txJSON, tt.args.senderSecret)
+			txID, txBlob, err := att.XRP.SignTransaction(ctx, txJSON, tt.args.senderSecret)
 			att.NoError(err)
 
 			// SendTransaction
-			sentTx, earlistLedgerVersion, err := att.XRP.SubmitTransaction(txBlob)
+			sentTx, earlistLedgerVersion, err := att.XRP.SubmitTransaction(ctx, txBlob)
 			att.NoError(err)
 			if strings.Contains(sentTx.ResultCode, "UNFUNDED_PAYMENT") {
 				t.Errorf("fail to call SubmitTransaction. resultCode: %s, resultMessage: %s", sentTx.ResultCode, sentTx.ResultMessage)
@@ -74,12 +76,12 @@ func (att *apiTxTest) TestTransaction() {
 			}
 
 			// validate transaction
-			ledgerVer, err := att.XRP.WaitValidation(sentTx.TxJSON.LastLedgerSequence)
+			ledgerVer, err := att.XRP.WaitValidation(ctx, sentTx.TxJSON.LastLedgerSequence)
 			att.NoError(err)
 			t.Log("currentLedgerVersion: ", ledgerVer)
 
 			// get transaction info
-			txInfo, err := att.XRP.GetTransaction(txID, earlistLedgerVersion)
+			txInfo, err := att.XRP.GetTransaction(ctx, txID, earlistLedgerVersion)
 			att.NoError(err)
 			t.Log("GetTransaction: ", txInfo)
 
@@ -128,7 +130,8 @@ func (att *apiTxTest) TestGetTransaction() {
 	}
 	for _, tt := range tests {
 		att.T().Run(tt.name, func(t *testing.T) {
-			txInfo, err := att.XRP.GetTransaction(tt.args.txID, tt.args.earlistLedgerVersion)
+			ctx := context.Background()
+			txInfo, err := att.XRP.GetTransaction(ctx, tt.args.txID, tt.args.earlistLedgerVersion)
 			att.NoError(err)
 			if err == nil {
 				t.Log(txInfo)

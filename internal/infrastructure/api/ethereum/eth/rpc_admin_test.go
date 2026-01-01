@@ -4,6 +4,7 @@
 package eth_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/ethereum/go-ethereum/params"
@@ -32,17 +33,17 @@ func (at *adminTest) TestAddPeer() {
 	}{
 		{
 			name: "happy path",
-			args: args{params.GoerliBootnodes[0]},
+			args: args{params.SepoliaBootnodes[0]},
 			want: want{false},
 		},
 		{
 			name: "happy path",
-			args: args{params.GoerliBootnodes[1]},
+			args: args{params.SepoliaBootnodes[1]},
 			want: want{false},
 		},
 		{
 			name: "happy path",
-			args: args{params.GoerliBootnodes[2]},
+			args: args{params.SepoliaBootnodes[2]},
 			want: want{false},
 		},
 		{
@@ -59,7 +60,8 @@ func (at *adminTest) TestAddPeer() {
 
 	for _, tt := range tests {
 		at.T().Run(tt.name, func(t *testing.T) {
-			err := at.ETH.AddPeer(tt.args.addr)
+			ctx := context.Background()
+			err := at.ETH.AddPeer(ctx, tt.args.addr)
 			if (err != nil) != tt.want.isErr {
 				t.Errorf("AddPeer() = %v, want error = %v", err, tt.want.isErr)
 				return
@@ -70,14 +72,16 @@ func (at *adminTest) TestAddPeer() {
 
 // TestAdminDataDir is test for AdminDataDir
 func (at *adminTest) TestAdminDataDir() {
-	dirName, err := at.ETH.AdminDataDir()
+	ctx := context.Background()
+	dirName, err := at.ETH.AdminDataDir(ctx)
 	at.NoError(err)
 	at.T().Log(dirName) // /Users/hy/Library/Ethereum/goerli
 }
 
 // TestNodeInfo is test for NodeInfo
 func (at *adminTest) TestNodeInfo() {
-	nodeInfo, err := at.ETH.NodeInfo()
+	ctx := context.Background()
+	nodeInfo, err := at.ETH.NodeInfo(ctx)
 	at.NoError(err)
 
 	t := at.T()
@@ -93,7 +97,8 @@ func (at *adminTest) TestNodeInfo() {
 
 // TestAdminPeers is test for AdminPeers
 func (at *adminTest) TestAdminPeers() {
-	adminPeers, err := at.ETH.AdminPeers()
+	ctx := context.Background()
+	adminPeers, err := at.ETH.AdminPeers(ctx)
 	at.NoError(err)
 	for _, peer := range adminPeers {
 		at.T().Log(peer)

@@ -4,6 +4,7 @@
 package eth_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -78,7 +79,8 @@ func (ct *clientTest) TestBalanceAt() {
 
 	for _, tt := range tests {
 		ct.T().Run(tt.name, func(t *testing.T) {
-			balance, err := ct.ETH.BalanceAt(tt.args.addr)
+			ctx := context.Background()
+			balance, err := ct.ETH.BalanceAt(ctx, tt.args.addr)
 			ct.Equal(tt.want.isErr, err != nil)
 			if err == nil {
 				t.Log(balance)

@@ -4,6 +4,7 @@
 package xrp_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/bookerzzz/grok"
@@ -18,7 +19,8 @@ type publicAccountTest struct {
 
 // TestAccountChannels is test for AccountChannels
 func (pat *publicAccountTest) TestAccountChannels() {
-	res, err := pat.XRP.AccountChannels("rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH", "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn")
+	ctx := context.Background()
+	res, err := pat.XRP.AccountChannels(ctx, "rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH", "rf1BiGeXwwQoi8Z2ueFYTEXSwuJYfV2Jpn")
 	pat.NoError(err)
 	pat.T().Log("accountChannels:", res)
 	grok.Value(res)
@@ -26,7 +28,8 @@ func (pat *publicAccountTest) TestAccountChannels() {
 
 // TestAccountInfo is test for AccountInfo
 func (pat *publicAccountTest) TestAccountInfo() {
-	res, err := pat.XRP.AccountInfo("rss1EZUwTCPZSTyJiDKvhBfCXjTxffcArZ")
+	ctx := context.Background()
+	res, err := pat.XRP.AccountInfo(ctx, "rss1EZUwTCPZSTyJiDKvhBfCXjTxffcArZ")
 	pat.NoError(err)
 	pat.T().Log("accountInfo:", res)
 	grok.Value(res)

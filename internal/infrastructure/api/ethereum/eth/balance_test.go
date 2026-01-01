@@ -4,6 +4,7 @@
 package eth_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -43,7 +44,8 @@ func (bt *balanceTest) TestGetTotalBalance() {
 
 	for _, tt := range tests {
 		bt.T().Run(tt.name, func(t *testing.T) {
-			total, userAmounts := bt.ETH.GetTotalBalance(tt.args.addrs)
+			ctx := context.Background()
+			total, userAmounts := bt.ETH.GetTotalBalance(ctx, tt.args.addrs)
 			t.Log(total)
 			t.Log(userAmounts)
 		})

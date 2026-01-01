@@ -4,6 +4,7 @@
 package eth_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -18,7 +19,8 @@ type ethTest struct {
 
 // TestSyncing is test for Syncing
 func (et *ethTest) TestSyncing() {
-	res, isSyncing, err := et.ETH.Syncing()
+	ctx := context.Background()
+	res, isSyncing, err := et.ETH.Syncing(ctx)
 	et.NoError(err)
 	et.T().Log("resMap:", res)
 	et.T().Log("isSyncing:", isSyncing)
@@ -26,21 +28,24 @@ func (et *ethTest) TestSyncing() {
 
 // TestProtocolVersion is test for ProtocolVersion
 func (et *ethTest) TestProtocolVersion() {
-	protocolVer, err := et.ETH.ProtocolVersion()
+	ctx := context.Background()
+	protocolVer, err := et.ETH.ProtocolVersion(ctx)
 	et.NoError(err)
 	et.T().Log("ProtocolVersion:", protocolVer)
 }
 
 // TestCoinbase is test for Coinbase
 func (et *ethTest) TestCoinbase() {
-	addr, err := et.ETH.Coinbase()
+	ctx := context.Background()
+	addr, err := et.ETH.Coinbase(ctx)
 	et.NoError(err)
 	et.T().Log("coinbase address:", addr)
 }
 
 // TestAccounts is test for Accounts
 func (et *ethTest) TestAccounts() {
-	accounts, err := et.ETH.Accounts()
+	ctx := context.Background()
+	accounts, err := et.ETH.Accounts(ctx)
 	et.NoError(err)
 	for _, account := range accounts {
 		et.T().Log("address:", account)
@@ -49,11 +54,12 @@ func (et *ethTest) TestAccounts() {
 
 // TestBlockNumber is test for BlockNumber
 func (et *ethTest) TestBlockNumber() {
-	blockNum, err := et.ETH.BlockNumber()
+	ctx := context.Background()
+	blockNum, err := et.ETH.BlockNumber(ctx)
 	et.NoError(err)
 	et.T().Log("BlockNumber:", blockNum)
 
-	blockNum, err = et.ETH.EnsureBlockNumber(100)
+	blockNum, err = et.ETH.EnsureBlockNumber(ctx, 100)
 	et.NoError(err)
 	et.T().Log("EnsureBlockNumber:", blockNum)
 }
@@ -95,8 +101,9 @@ func (et *ethTest) TestGetBalance() {
 	}
 	for _, tt := range tests {
 		et.T().Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
 			for _, tag := range tags {
-				balance, err := et.ETH.GetBalance(tt.args.addr, tag)
+				balance, err := et.ETH.GetBalance(ctx, tt.args.addr, tag)
 				et.NoError(err)
 				if err == nil {
 					t.Logf("quantityTag: %s, balance: %d", tag, balance.Uint64())
@@ -146,8 +153,9 @@ func (et *ethTest) TestGetTransactionCount() {
 	}
 	for _, tt := range tests {
 		et.T().Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
 			for _, tag := range tags {
-				count, err := et.ETH.GetTransactionCount(tt.args.addr, tag)
+				count, err := et.ETH.GetTransactionCount(ctx, tt.args.addr, tag)
 				et.NoError(err)
 				if err == nil {
 					t.Logf("quantityTag: %s, count: %d", tag, count.Uint64())
@@ -186,13 +194,14 @@ func (et *ethTest) TestGetBlockTransactionCountByNumber() {
 	}
 	for _, tt := range tests {
 		et.T().Run(tt.name, func(t *testing.T) {
-			count, err := et.ETH.GetBlockTransactionCountByNumber(tt.args.txNum)
+			ctx := context.Background()
+			count, err := et.ETH.GetBlockTransactionCountByNumber(ctx, tt.args.txNum)
 			et.NoError(err)
 			if err == nil {
 				t.Logf("GetBlockTransactionCountByNumber: %d", count.Uint64())
 			}
 
-			count, err = et.ETH.GetUncleCountByBlockNumber(tt.args.txNum)
+			count, err = et.ETH.GetUncleCountByBlockNumber(ctx, tt.args.txNum)
 			et.NoError(err)
 			if err == nil {
 				t.Logf("GetUncleCountByBlockNumber: %d", count.Uint64())
@@ -230,7 +239,8 @@ func (et *ethTest) TestGetBlockByNumber() {
 	}
 	for _, tt := range tests {
 		et.T().Run(tt.name, func(t *testing.T) {
-			blockInfo, err := et.ETH.GetBlockByNumber(tt.args.txNum)
+			ctx := context.Background()
+			blockInfo, err := et.ETH.GetBlockByNumber(ctx, tt.args.txNum)
 			et.NoError(err)
 			if err == nil {
 				t.Logf("blockInfo: %v", blockInfo)

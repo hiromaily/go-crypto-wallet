@@ -4,6 +4,7 @@
 package eth_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -17,21 +18,24 @@ type netTest struct {
 
 // TestNetVersion is test for NetVersion
 func (nt *netTest) TestNetVersion() {
-	netVersion, err := nt.ETH.NetVersion()
+	ctx := context.Background()
+	netVersion, err := nt.ETH.NetVersion(ctx)
 	nt.NoError(err)
 	nt.T().Log("netVersion:", netVersion)
 }
 
 // TestNetListening is test for NetListening
 func (nt *netTest) TestNetListening() {
-	isListening, err := nt.ETH.NetListening()
+	ctx := context.Background()
+	isListening, err := nt.ETH.NetListening(ctx)
 	nt.NoError(err)
 	nt.T().Log("isListening:", isListening)
 }
 
 // TestNetPeerCount is test for NetPeerCount
 func (nt *netTest) TestNetPeerCount() {
-	peerCount, err := nt.ETH.NetPeerCount()
+	ctx := context.Background()
+	peerCount, err := nt.ETH.NetPeerCount(ctx)
 	nt.NoError(err)
 	if err == nil {
 		nt.T().Log("peerCount:", peerCount.Uint64())

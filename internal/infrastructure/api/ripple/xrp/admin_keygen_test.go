@@ -4,6 +4,7 @@
 package xrp_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/bookerzzz/grok"
@@ -41,7 +42,8 @@ func (akt *adminKeygenTest) TestValidationCreate() {
 
 	for _, tt := range tests {
 		akt.T().Run(tt.name, func(t *testing.T) {
-			res, err := akt.XRP.ValidationCreate(tt.args.secret)
+			ctx := context.Background()
+			res, err := akt.XRP.ValidationCreate(ctx, tt.args.secret)
 			akt.NoError(err)
 			if err == nil {
 				t.Log("ValidationCreate:", res)
@@ -81,7 +83,8 @@ func (akt *adminKeygenTest) TestWalletPropose() {
 
 	for _, tt := range tests {
 		akt.T().Run(tt.name, func(t *testing.T) {
-			res, err := akt.XRP.WalletPropose(tt.args.passphrase)
+			ctx := context.Background()
+			res, err := akt.XRP.WalletPropose(ctx, tt.args.passphrase)
 			akt.NoError(err)
 			if err == nil {
 				t.Log("WalletPropose:", res)

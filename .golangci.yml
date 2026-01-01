@@ -3,6 +3,10 @@ version: "2"
 run:
   go: "1.25.5"
   timeout: 5m
+  # Build tags to include when linting.
+  # This ensures files with build tags (e.g., //go:build integration) are also linted.
+  build-tags:
+    - integration
 
 issues:
   # Maximum issues count per one linter. Set to 0 to disable. Default is 50.

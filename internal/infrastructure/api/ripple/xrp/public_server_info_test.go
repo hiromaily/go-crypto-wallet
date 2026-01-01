@@ -4,6 +4,7 @@
 package xrp_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/bookerzzz/grok"
@@ -18,7 +19,8 @@ type publicServerInfoTest struct {
 
 // TestServerInfo is test for ServerInfo
 func (pst *publicServerInfoTest) TestServerInfo() {
-	res, err := pst.XRP.ServerInfo()
+	ctx := context.Background()
+	res, err := pst.XRP.ServerInfo(ctx)
 	pst.NoError(err)
 	pst.T().Log("ServerInfo:", res)
 	grok.Value(res)

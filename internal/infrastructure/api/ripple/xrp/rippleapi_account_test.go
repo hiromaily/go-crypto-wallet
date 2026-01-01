@@ -4,6 +4,7 @@
 package xrp_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/bookerzzz/grok"
@@ -44,8 +45,9 @@ func (at *accountTest) TestGetAccountInfo() {
 	}
 	for _, tt := range tests {
 		at.T().Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
 			// PrepareTransaction
-			accountInfo, err := at.XRP.GetAccountInfo(tt.args.address)
+			accountInfo, err := at.XRP.GetAccountInfo(ctx, tt.args.address)
 			at.NoError(err)
 			grok.Value(accountInfo)
 		})

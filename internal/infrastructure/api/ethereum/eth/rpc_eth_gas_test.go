@@ -4,6 +4,7 @@
 package eth_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -17,7 +18,8 @@ type ethGasTest struct {
 
 // TestGasPrice is test for GasPrice
 func (egt *ethGasTest) TestGasPrice() {
-	price, err := egt.ETH.GasPrice()
+	ctx := context.Background()
+	price, err := egt.ETH.GasPrice(ctx)
 	egt.NoError(err)
 	egt.T().Log("gasPrice:", price)
 }

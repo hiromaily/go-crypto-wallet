@@ -4,6 +4,7 @@
 package eth_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -17,16 +18,18 @@ type web3Test struct {
 
 // TestClientVersion is test for ClientVersion
 func (wt *web3Test) TestClientVersion() {
-	clientVersion, err := wt.ETH.ClientVersion()
+	ctx := context.Background()
+	clientVersion, err := wt.ETH.ClientVersion(ctx)
 	wt.NoError(err)
 	wt.T().Log("clientVersion:", clientVersion)
 }
 
 // TestSHA3 is test for SHA3
 func (wt *web3Test) TestSHA3() {
+	ctx := context.Background()
 	data := "0x68656c6c6f20776f726c64"
 
-	res, err := wt.ETH.SHA3(data)
+	res, err := wt.ETH.SHA3(ctx, data)
 	wt.NoError(err)
 	wt.T().Log("response of SHA3:", res)
 }
