@@ -15,7 +15,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/eth"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/ethtx"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -251,7 +250,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	}
 
 	// call CreateRawTransaction
-	rawTx, txDetailModel, err := u.ethClient.CreateRawTransaction(ctx,
+	rawTx, txDetailItem, err := u.ethClient.CreateRawTransaction(ctx,
 		senderAddr.WalletAddress, receiverAddr.WalletAddress, requiredValue.Uint64(), 0)
 	if err != nil {
 		return "", fmt.Errorf(
@@ -269,8 +268,6 @@ func (u *createTransactionUseCase) createTransferTx(
 	serializedTxs := []string{serializedTx}
 
 	// create insert data for　eth_detail_tx
-	// Convert from models to sqlc type
-	txDetailItem := convertModelsToSqlcETHDetailTX(txDetailModel)
 	txDetailItem.SenderAccount = sender.String()
 	txDetailItem.ReceiverAccount = receiver.String()
 	txDetailItems := []*sqlc.ETHDetailTX{txDetailItem}
@@ -350,8 +347,8 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
 		var rawTx *ethtx.RawTx
-		var txDetailModel *models.ETHDetailTX
-		rawTx, txDetailModel, err = u.ethClient.CreateRawTransaction(
+		var txDetailItem *sqlc.ETHDetailTX
+		rawTx, txDetailItem, err = u.ethClient.CreateRawTransaction(
 			ctx, val.Address, depositAddr.WalletAddress, 0, 0)
 		if err != nil {
 			return nil, nil, fmt.Errorf(
@@ -370,8 +367,6 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 		serializedTxs = append(serializedTxs, serializedTx)
 
 		// create insert data for　eth_detail_tx
-		// Convert from models to sqlc type
-		txDetailItem := convertModelsToSqlcETHDetailTX(txDetailModel)
 		txDetailItem.SenderAccount = sender.String()
 		txDetailItem.ReceiverAccount = receiver.String()
 		txDetailItems = append(txDetailItems, txDetailItem)
@@ -455,7 +450,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	additionalNonce := 0
 	for _, userPayment := range userPayments {
 		// call CreateRawTransaction
-		rawTx, txDetailModel, err := u.ethClient.CreateRawTransaction(ctx,
+		rawTx, txDetailItem, err := u.ethClient.CreateRawTransaction(ctx,
 			senderAddr.WalletAddress, userPayment.receiverAddr, userPayment.amount.Uint64(), additionalNonce)
 		if err != nil {
 			return nil, nil, fmt.Errorf(
@@ -474,8 +469,6 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 		serializedTxs = append(serializedTxs, serializedTx)
 
 		// create insert data for　eth_detail_tx
-		// Convert from models to sqlc type
-		txDetailItem := convertModelsToSqlcETHDetailTX(txDetailModel)
 		txDetailItem.SenderAccount = sender.String()
 		txDetailItem.ReceiverAccount = receiver.String()
 		txDetailItems = append(txDetailItems, txDetailItem)
@@ -543,27 +536,4 @@ func (u *createTransactionUseCase) generateHexFile(
 	}
 
 	return generatedFileName, nil
-}
-
-// Helper function to convert models.ETHDetailTX to sqlc.ETHDetailTX
-func convertModelsToSqlcETHDetailTX(m *models.ETHDetailTX) *sqlc.ETHDetailTX {
-	return &sqlc.ETHDetailTX{
-		ID:                m.ID,
-		TxID:              m.TXID,
-		Uuid:              m.UUID,
-		CurrentTxType:     m.CurrentTXType,
-		SenderAccount:     m.SenderAccount,
-		SenderAddress:     m.SenderAddress,
-		ReceiverAccount:   m.ReceiverAccount,
-		ReceiverAddress:   m.ReceiverAddress,
-		Amount:            m.Amount,
-		Fee:               m.Fee,
-		GasLimit:          m.GasLimit,
-		Nonce:             m.Nonce,
-		UnsignedHexTx:     m.UnsignedHexTX,
-		SignedHexTx:       m.SignedHexTX,
-		SentHashTx:        m.SentHashTX,
-		UnsignedUpdatedAt: watchrepo.ConvertNullTimeToSQLNullTime(m.UnsignedUpdatedAt),
-		SentUpdatedAt:     watchrepo.ConvertNullTimeToSQLNullTime(m.SentUpdatedAt),
-	}
 }

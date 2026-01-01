@@ -11,7 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/ethtx"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -85,7 +85,7 @@ func (e *Ethereum) calculateFee(
 // - sender has to pay 5ETH + fee
 func (e *Ethereum) CreateRawTransaction(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-) (*ethtx.RawTx, *models.ETHDetailTX, error) {
+) (*ethtx.RawTx, *sqlc.ETHDetailTX, error) {
 	// validation check
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
@@ -160,8 +160,8 @@ func (e *Ethereum) CreateRawTransaction(
 	}
 
 	// create insert data for　eth_detail_tx
-	txDetailItem := &models.ETHDetailTX{
-		UUID:            uid.String(),
+	txDetailItem := &sqlc.ETHDetailTX{
+		Uuid:            uid.String(),
 		SenderAccount:   "",
 		SenderAddress:   fromAddr,
 		ReceiverAccount: "",
@@ -170,7 +170,7 @@ func (e *Ethereum) CreateRawTransaction(
 		Fee:             txFee.Uint64(),
 		GasLimit:        uint32(estimatedGas.Uint64()),
 		Nonce:           nonce,
-		UnsignedHexTX:   *rawTxHex,
+		UnsignedHexTx:   *rawTxHex,
 	}
 
 	// RawTx
