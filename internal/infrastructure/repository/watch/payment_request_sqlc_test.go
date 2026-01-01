@@ -1,7 +1,7 @@
 //go:build integration
 // +build integration
 
-package watchrepo_test
+package watch_test
 
 import (
 	"testing"
