@@ -1,11 +1,13 @@
 package btc
 
 import (
+	"bytes"
 	"encoding/hex"
 	"fmt"
 	"strings"
 
 	"github.com/btcsuite/btcd/btcutil"
+	"github.com/btcsuite/btcd/wire"
 
 	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
 )
@@ -458,13 +460,12 @@ func ToParsedPSBT(infraPSBT *ParsedPSBT, btc *Bitcoin) (*bitcoindto.ParsedPSBT, 
 			parsedInput.PartialSignatures[pubkeyHex] = sigHex
 		}
 
-		// Map final witness - FinalScriptWitness is a single byte slice
-		if len(input.FinalScriptWitness) > 0 {
-			// Parse as witness stack (needs proper deserialization)
-			parsedInput.FinalScriptWitness = []string{hex.EncodeToString(input.FinalScriptWitness)}
-		} else {
-			parsedInput.FinalScriptWitness = []string{}
+		// Map final witness - deserialize witness stack
+		witnessStack, err := parseWitnessStack(input.FinalScriptWitness)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse witness stack for input %d: %w", i, err)
 		}
+		parsedInput.FinalScriptWitness = witnessStack
 
 		// Map witness UTXO
 		if input.WitnessUtxo != nil {
@@ -567,9 +568,28 @@ func ToParsedPSBT(infraPSBT *ParsedPSBT, btc *Bitcoin) (*bitcoindto.ParsedPSBT, 
 		outputs[i] = parsedOutput
 	}
 
-	// Calculate fee (sum of inputs - sum of outputs)
-	var fee btcutil.Amount
-	// Note: Fee calculation requires input amounts, which come from witness/non-witness UTXO
+	// Calculate fee: total input amount - total output amount
+	var totalInput btcutil.Amount
+	for idx, input := range packet.Inputs {
+		if input.WitnessUtxo != nil {
+			// SegWit transactions use WitnessUtxo
+			totalInput += btcutil.Amount(input.WitnessUtxo.Value)
+		} else if input.NonWitnessUtxo != nil && idx < len(unsignedTx.TxIn) {
+			// Legacy transactions use NonWitnessUtxo
+			// Get the amount from the corresponding output in the previous transaction
+			vout := unsignedTx.TxIn[idx].PreviousOutPoint.Index
+			if int(vout) < len(input.NonWitnessUtxo.TxOut) {
+				totalInput += btcutil.Amount(input.NonWitnessUtxo.TxOut[vout].Value)
+			}
+		}
+	}
+
+	var totalOutput btcutil.Amount
+	for _, txOut := range unsignedTx.TxOut {
+		totalOutput += btcutil.Amount(txOut.Value)
+	}
+
+	fee := totalInput - totalOutput
 
 	// Map unknown global fields
 	unknownGlobal := make(map[string]string)
@@ -593,16 +613,58 @@ func derivationPathToString(path []uint32) string {
 		return ""
 	}
 
-	result := "m"
-	var resultSb594 strings.Builder
+	var sb strings.Builder
+	sb.WriteString("m")
 	for _, component := range path {
 		hardened := component >= 0x80000000
 		if hardened {
-			resultSb594.WriteString(fmt.Sprintf("/%d'", component-0x80000000))
+			sb.WriteString(fmt.Sprintf("/%d'", component-0x80000000))
 		} else {
-			resultSb594.WriteString(fmt.Sprintf("/%d", component))
+			sb.WriteString(fmt.Sprintf("/%d", component))
 		}
 	}
-	result += resultSb594.String()
-	return result
+	return sb.String()
+}
+
+// parseWitnessStack deserializes a witness stack from its byte representation.
+// The witness stack format is:
+//   - VarInt: number of witness items
+//   - For each item:
+//   - VarInt: length of the witness item
+//   - []byte: the witness item data
+func parseWitnessStack(witnessData []byte) ([]string, error) {
+	if len(witnessData) == 0 {
+		return []string{}, nil
+	}
+
+	reader := bytes.NewReader(witnessData)
+
+	// Read number of witness items
+	count, err := wire.ReadVarInt(reader, 0)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read witness count: %w", err)
+	}
+
+	result := make([]string, 0, count)
+	for i := uint64(0); i < count; i++ {
+		// Read length of this witness item
+		length, err := wire.ReadVarInt(reader, 0)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read witness item %d length: %w", i, err)
+		}
+
+		// Read the witness item data
+		item := make([]byte, length)
+		n, err := reader.Read(item)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read witness item %d: %w", i, err)
+		}
+		if uint64(n) != length {
+			return nil, fmt.Errorf("witness item %d: expected %d bytes, read %d", i, length, n)
+		}
+
+		result = append(result, hex.EncodeToString(item))
+	}
+
+	return result, nil
 }

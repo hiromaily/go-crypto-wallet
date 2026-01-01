@@ -18,7 +18,6 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -216,7 +215,7 @@ func (u *createTransactionUseCase) createTransferTx(
 type parsedTx struct {
 	txInputs       []btcjson.TransactionInput
 	txRepoTxInputs []*sqlc.BtcTxInput
-	prevTxs        []btc.PrevTx
+	prevTxs        []bitcoindto.PreviousTx
 	addresses      []string // input, sender's address
 }
 
@@ -340,19 +339,12 @@ func (u *createTransactionUseCase) createTx(
 		return "", "", fmt.Errorf("fail to call insertTxTableForUnsigned(): %w", err)
 	}
 
-	// prepare previous txs metadata for PSBT creation
-	previousTxs := btc.PreviousTxs{
-		SenderAccount: sender,
-		PrevTxs:       parsedTx.prevTxs,
-		Addrs:         parsedTx.addresses,
-	}
-
 	// generate PSBT file
 	// TODO: how to recover when error occurred here
 	// - inserted data in database must be deleted to generate PSBT file
 	var generatedFileName string
 	if txID != 0 {
-		generatedFileName, err = u.generatePSBTFile(targetAction, msgTx, previousTxs, txID)
+		generatedFileName, err = u.generatePSBTFile(targetAction, msgTx, parsedTx.prevTxs, sender, txID)
 		if err != nil {
 			return "", "", fmt.Errorf("fail to call generatePSBTFile(): %w", err)
 		}
@@ -364,11 +356,11 @@ func (u *createTransactionUseCase) createTx(
 		"requiredAmount", requiredAmount,
 		"input_total", inputTotal,
 		"len(inputs)", len(parsedTx.txInputs),
-		"len(prevTxs)", len(previousTxs.PrevTxs),
+		"len(prevTxs)", len(parsedTx.prevTxs),
 		"len(txPrevOutputs)", len(txPrevOutputs),
 		"len(txOutputs)", len(txOutputs),
 		"len(txRepoTxOutputs)", len(txRepoTxOutputs),
-		"sender_account", previousTxs.SenderAccount.String(),
+		"sender_account", sender.String(),
 		"generated_file", generatedFileName,
 	)
 
@@ -398,7 +390,7 @@ func (u *createTransactionUseCase) parseListUnspentTx(
 	var inputTotal btcutil.Amount
 	txInputs := make([]btcjson.TransactionInput, 0, len(unspentList))
 	txRepoTxInputs := make([]*sqlc.BtcTxInput, 0, len(unspentList))
-	prevTxs := make([]btc.PrevTx, 0, len(unspentList))
+	prevTxs := make([]bitcoindto.PreviousTx, 0, len(unspentList))
 	addresses := make([]string, 0, len(unspentList))
 
 	var isDone bool // if isDone is false, sender can't meet amount
@@ -432,12 +424,13 @@ func (u *createTransactionUseCase) parseListUnspentTx(
 		})
 
 		// TODO: if sender is client account (non-multisig address), RedeemScript is blank
-		prevTxs = append(prevTxs, btc.PrevTx{
-			Txid:         txItem.TxID,
-			Vout:         txItem.Vout,
-			ScriptPubKey: txItem.ScriptPubKey,
-			RedeemScript: txItem.RedeemScript,   // required if target account is multisig address
-			Amount:       txItem.Amount.ToBTC(), // Convert to float64
+		prevTxs = append(prevTxs, bitcoindto.PreviousTx{
+			TxID:          txItem.TxID,
+			Vout:          txItem.Vout,
+			ScriptPubKey:  txItem.ScriptPubKey,
+			RedeemScript:  txItem.RedeemScript,  // required if target account is multisig address
+			WitnessScript: txItem.WitnessScript, // for SegWit addresses
+			Amount:        txItem.Amount,        // Keep as btcutil.Amount
 		})
 
 		addresses = append(addresses, txItem.Address)
@@ -762,18 +755,13 @@ func (u *createTransactionUseCase) insertTxTableForUnsigned(
 func (u *createTransactionUseCase) generatePSBTFile(
 	actionType domainTx.ActionType,
 	msgTx *wire.MsgTx,
-	previousTxs btc.PreviousTxs,
+	prevTxs []bitcoindto.PreviousTx,
+	senderAccount domainAccount.AccountType,
 	id int64,
 ) (string, error) {
-	// Convert infrastructure PrevTxs to application DTOs
-	prevTxsDTO, err := btc.ToPreviousTxList(previousTxs.PrevTxs, u.btcClient.(*btc.Bitcoin))
-	if err != nil {
-		return "", fmt.Errorf("fail to convert previousTxs: %w", err)
-	}
-
 	// Create PSBT from msgTx and previous outputs
 	// This includes all necessary metadata for offline signing
-	psbtBase64, err := u.btcClient.CreatePSBT(msgTx, prevTxsDTO)
+	psbtBase64, err := u.btcClient.CreatePSBT(msgTx, prevTxs)
 	if err != nil {
 		return "", fmt.Errorf("fail to create PSBT: %w", err)
 	}
@@ -791,8 +779,8 @@ func (u *createTransactionUseCase) generatePSBTFile(
 		"action", actionType.String(),
 		"txID", id,
 		"fileName", generatedFileName,
-		"inputs", len(previousTxs.PrevTxs),
-		"sender", previousTxs.SenderAccount.String(),
+		"inputs", len(prevTxs),
+		"sender", senderAccount.String(),
 	)
 
 	return generatedFileName, nil
