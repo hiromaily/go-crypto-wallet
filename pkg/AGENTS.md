@@ -82,3 +82,17 @@ After making code changes, use these commands to verify code correctness:
 - Consider backward compatibility when making changes
 - **DO NOT** edit files that contain `DO NOT EDIT` comments
   (typically auto-generated files from tools like sqlc, protoc, or go generate)
+
+## References
+
+### Root Documentation
+
+- **[Root AGENTS.md](../AGENTS.md)**: Overall project guidelines, navigation, and quick reference
+- **[Core Principles](../agents/core.md)**: Security, error handling, panic usage, and core patterns
+- **[Coding Standards](../agents/coding-standards.md)**: Linting, formatting, and code style
+- **[Testing Guidelines](../agents/testing.md)**: Testing strategy and requirements
+- **[Workflow Guidelines](../agents/workflow.md)**: Git operations and dependency management
+
+### Directory Documentation
+
+- **[Internal Guidelines](../internal/AGENTS.md)**: Guidelines for `internal/` directory
