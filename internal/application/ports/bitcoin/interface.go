@@ -102,8 +102,8 @@ type Bitcoiner interface {
 	Sign(tx *wire.MsgTx, strPrivateKey string) (string, error)
 
 	// psbt.go (BIP174 Partially Signed Bitcoin Transaction support)
-	CreatePSBT(msgTx *wire.MsgTx, prevTxs []btc.PrevTx) (string, error)
-	ParsePSBT(psbtBase64 string) (*btc.ParsedPSBT, error)
+	CreatePSBT(msgTx *wire.MsgTx, prevTxs []bitcoindto.PreviousTx) (string, error)
+	ParsePSBT(psbtBase64 string) (*bitcoindto.ParsedPSBT, error)
 	ValidatePSBT(psbtBase64 string) error
 	SignPSBTWithKey(psbtBase64 string, wifs []string) (string, bool, error)
 	FinalizePSBT(psbtBase64 string) (string, error)
@@ -112,10 +112,14 @@ type Bitcoiner interface {
 	GetPSBTFee(psbtBase64 string) (int64, error)
 
 	// unspent.go
-	ListUnspent(confirmationNum uint64) ([]btc.ListUnspentResult, error)
-	ListUnspentByAccount(accountType domainAccount.AccountType, confirmationNum uint64) ([]btc.ListUnspentResult, error)
-	GetUnspentListAddrs(unspentList []btc.ListUnspentResult, accountType domainAccount.AccountType) []string
-	LockUnspent(tx *btc.ListUnspentResult) error
+	ListUnspent(confirmationNum uint64) ([]bitcoindto.UnspentOutput, error)
+	ListUnspentByAccount(
+		accountType domainAccount.AccountType, confirmationNum uint64,
+	) ([]bitcoindto.UnspentOutput, error)
+	GetUnspentListAddrs(
+		unspentList []bitcoindto.UnspentOutput, accountType domainAccount.AccountType,
+	) []string
+	LockUnspent(tx *bitcoindto.UnspentOutput) error
 	UnlockUnspent() error
 
 	// wallet.go

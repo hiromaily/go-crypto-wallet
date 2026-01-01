@@ -60,8 +60,12 @@ func TestCreatePSBT(t *testing.T) {
 		},
 	}
 
+	// Convert to DTO
+	prevTxsDTO, err := btc.ToPreviousTxList(prevTxs, bitcoin.(*btc.Bitcoin))
+	require.NoError(t, err)
+
 	// Create PSBT
-	psbtBase64, err := bitcoin.CreatePSBT(msgTx, prevTxs)
+	psbtBase64, err := bitcoin.CreatePSBT(msgTx, prevTxsDTO)
 	require.NoError(t, err)
 	assert.NotEmpty(t, psbtBase64)
 
@@ -77,14 +81,22 @@ func TestParsePSBT(t *testing.T) {
 	parsed, err := bitcoin.ParsePSBT(testValidPSBT)
 	require.NoError(t, err)
 	assert.NotNil(t, parsed)
-	assert.NotNil(t, parsed.Packet)
-	assert.Equal(t, 1, parsed.InputCount)
-	assert.Equal(t, 2, parsed.OutputCount)
+	assert.Equal(t, 1, len(parsed.Inputs))
+	assert.Equal(t, 2, len(parsed.Outputs))
 	assert.False(t, parsed.IsComplete) // Unsigned PSBT should not be complete
-	assert.False(t, parsed.HasSignature)
+
+	// Check if any input has signatures
+	hasSignature := false
+	for _, input := range parsed.Inputs {
+		if len(input.PartialSignatures) > 0 {
+			hasSignature = true
+			break
+		}
+	}
+	assert.False(t, hasSignature)
 
 	t.Logf("Parsed PSBT: inputs=%d, outputs=%d, complete=%t",
-		parsed.InputCount, parsed.OutputCount, parsed.IsComplete)
+		len(parsed.Inputs), len(parsed.Outputs), parsed.IsComplete)
 }
 
 // TestParsePSBT_InvalidBase64 tests error handling for invalid base64
@@ -357,7 +369,11 @@ func TestPSBTWorkflow_Integration(t *testing.T) {
 		},
 	}
 
-	psbtBase64, err := bitcoin.CreatePSBT(msgTx, prevTxs)
+	// Convert to DTO
+	prevTxsDTO, err := btc.ToPreviousTxList(prevTxs, bitcoin.(*btc.Bitcoin))
+	require.NoError(t, err)
+
+	psbtBase64, err := bitcoin.CreatePSBT(msgTx, prevTxsDTO)
 	require.NoError(t, err)
 	t.Logf("Step 1: Created PSBT")
 
@@ -439,7 +455,16 @@ func TestCreatePSBT_ErrorCases(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := bitcoin.CreatePSBT(msgTx, tt.prevTxs)
+			// Convert to DTO
+			prevTxsDTO, convErr := btc.ToPreviousTxList(tt.prevTxs, bitcoin.(*btc.Bitcoin))
+			if convErr != nil && tt.wantErr {
+				// Conversion error is expected for invalid test cases
+				t.Logf("Conversion error (expected): %v", convErr)
+				return
+			}
+			require.NoError(t, convErr)
+
+			_, err := bitcoin.CreatePSBT(msgTx, prevTxsDTO)
 			if tt.wantErr {
 				assert.Error(t, err)
 				if tt.errMsg != "" {

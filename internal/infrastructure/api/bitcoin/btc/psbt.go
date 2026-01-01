@@ -15,6 +15,7 @@ import (
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
 
+	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -30,7 +31,14 @@ type ParsedPSBT struct {
 // CreatePSBT creates a PSBT from an unsigned transaction with metadata.
 // This function adds all necessary metadata (witness UTXO, redeem scripts) for offline signing.
 // Used by Watch wallet to create unsigned PSBTs.
-func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []PrevTx) (string, error) {
+//
+//nolint:gocyclo // Complex function handling PSBT creation with metadata
+func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []bitcoindto.PreviousTx) (string, error) {
+	// Convert application DTOs to infrastructure types
+	infraPrevTxs, err := FromPreviousTx(prevTxs, b)
+	if err != nil {
+		return "", fmt.Errorf("failed to convert PreviousTx: %w", err)
+	}
 	// Create PSBT from unsigned transaction
 	packet, err := psbt.NewFromUnsignedTx(msgTx)
 	if err != nil {
@@ -44,7 +52,7 @@ func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []PrevTx) (string, error
 	}
 
 	// Add metadata for each input from prevTxs
-	for i, prevTx := range prevTxs {
+	for i, prevTx := range infraPrevTxs {
 		if i >= len(packet.UnsignedTx.TxIn) {
 			return "", fmt.Errorf("prevTxs index %d exceeds number of inputs %d", i, len(packet.UnsignedTx.TxIn))
 		}
@@ -119,9 +127,9 @@ func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []PrevTx) (string, error
 	return psbtBase64, nil
 }
 
-// ParsePSBT parses a base64-encoded PSBT and returns metadata.
-// Used by all wallets to read PSBT files.
-func (b *Bitcoin) ParsePSBT(psbtBase64 string) (*ParsedPSBT, error) {
+// parsePSBTInternal parses a base64-encoded PSBT and returns infrastructure type.
+// Internal helper for methods that need access to the underlying packet.
+func (b *Bitcoin) parsePSBTInternal(psbtBase64 string) (*ParsedPSBT, error) {
 	// Decode base64 to bytes
 	psbtBytes, err := base64.StdEncoding.DecodeString(psbtBase64)
 	if err != nil {
@@ -137,7 +145,7 @@ func (b *Bitcoin) ParsePSBT(psbtBase64 string) (*ParsedPSBT, error) {
 	// Check if PSBT has any signatures
 	hasSignature := b.hasPartialSignatures(packet)
 
-	parsed := &ParsedPSBT{
+	infraParsed := &ParsedPSBT{
 		Packet:       packet,
 		InputCount:   len(packet.Inputs),
 		OutputCount:  len(packet.Outputs),
@@ -146,18 +154,29 @@ func (b *Bitcoin) ParsePSBT(psbtBase64 string) (*ParsedPSBT, error) {
 	}
 
 	logger.Debug("Parsed PSBT",
-		"inputs", parsed.InputCount,
-		"outputs", parsed.OutputCount,
-		"complete", parsed.IsComplete,
-		"hasSignature", parsed.HasSignature)
+		"inputs", infraParsed.InputCount,
+		"outputs", infraParsed.OutputCount,
+		"complete", infraParsed.IsComplete,
+		"hasSignature", infraParsed.HasSignature)
 
-	return parsed, nil
+	return infraParsed, nil
+}
+
+// ParsePSBT parses a base64-encoded PSBT and returns metadata as application DTO.
+// Used by all wallets to read PSBT files.
+func (b *Bitcoin) ParsePSBT(psbtBase64 string) (*bitcoindto.ParsedPSBT, error) {
+	infraParsed, err := b.parsePSBTInternal(psbtBase64)
+	if err != nil {
+		return nil, err
+	}
+
+	return ToParsedPSBT(infraParsed, b)
 }
 
 // ValidatePSBT validates a PSBT structure and checks BIP174 compliance.
 // Used by all wallets to verify PSBT before processing.
 func (b *Bitcoin) ValidatePSBT(psbtBase64 string) error {
-	parsed, err := b.ParsePSBT(psbtBase64)
+	parsed, err := b.parsePSBTInternal(psbtBase64)
 	if err != nil {
 		return fmt.Errorf("failed to parse PSBT for validation: %w", err)
 	}
@@ -208,7 +227,7 @@ func (b *Bitcoin) ValidatePSBT(psbtBase64 string) error {
 //   - error: any error that occurred
 func (b *Bitcoin) SignPSBTWithKey(psbtBase64 string, wifs []string) (string, bool, error) {
 	// Parse PSBT
-	parsed, err := b.ParsePSBT(psbtBase64)
+	parsed, err := b.parsePSBTInternal(psbtBase64)
 	if err != nil {
 		return "", false, fmt.Errorf("failed to parse PSBT for signing: %w", err)
 	}
@@ -281,7 +300,7 @@ func (b *Bitcoin) SignPSBTWithKey(psbtBase64 string, wifs []string) (string, boo
 // Used by Watch wallet before extracting the final transaction.
 func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
 	// Parse PSBT
-	parsed, err := b.ParsePSBT(psbtBase64)
+	parsed, err := b.parsePSBTInternal(psbtBase64)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse PSBT for finalization: %w", err)
 	}
@@ -315,7 +334,7 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
 // Used by Watch wallet to get the transaction ready for broadcasting.
 func (b *Bitcoin) ExtractTransaction(psbtBase64 string) (*wire.MsgTx, error) {
 	// Parse PSBT
-	parsed, err := b.ParsePSBT(psbtBase64)
+	parsed, err := b.parsePSBTInternal(psbtBase64)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse PSBT for extraction: %w", err)
 	}
@@ -336,7 +355,7 @@ func (b *Bitcoin) ExtractTransaction(psbtBase64 string) (*wire.MsgTx, error) {
 // IsPSBTComplete checks if a PSBT has all required signatures.
 // Used to determine if PSBT is ready for finalization.
 func (b *Bitcoin) IsPSBTComplete(psbtBase64 string) (bool, error) {
-	parsed, err := b.ParsePSBT(psbtBase64)
+	parsed, err := b.parsePSBTInternal(psbtBase64)
 	if err != nil {
 		return false, fmt.Errorf("failed to parse PSBT: %w", err)
 	}
@@ -347,7 +366,7 @@ func (b *Bitcoin) IsPSBTComplete(psbtBase64 string) (bool, error) {
 // GetPSBTFee calculates the transaction fee from a PSBT.
 // Used by Watch wallet to verify fee before broadcasting.
 func (b *Bitcoin) GetPSBTFee(psbtBase64 string) (int64, error) {
-	parsed, err := b.ParsePSBT(psbtBase64)
+	parsed, err := b.parsePSBTInternal(psbtBase64)
 	if err != nil {
 		return 0, fmt.Errorf("failed to parse PSBT: %w", err)
 	}

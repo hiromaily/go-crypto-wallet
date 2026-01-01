@@ -1,9 +1,13 @@
 package btc
 
 import (
+	"bytes"
+	"encoding/hex"
 	"fmt"
+	"strings"
 
 	"github.com/btcsuite/btcd/btcutil"
+	"github.com/btcsuite/btcd/wire"
 
 	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
 )
@@ -297,5 +301,370 @@ func FromPreviousTx(prevTxs []bitcoindto.PreviousTx, btc *Bitcoin) ([]PrevTx, er
 			Amount:       amount,
 		}
 	}
+	return result, nil
+}
+
+// ToPreviousTxList converts infrastructure PrevTx slice to application PreviousTx slice
+func ToPreviousTxList(prevTxs []PrevTx, btc *Bitcoin) ([]bitcoindto.PreviousTx, error) {
+	if prevTxs == nil {
+		return nil, nil
+	}
+
+	result := make([]bitcoindto.PreviousTx, len(prevTxs))
+	for i, tx := range prevTxs {
+		amount, err := btc.FloatToAmount(tx.Amount)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert amount for prevTx %d: %w", i, err)
+		}
+
+		result[i] = bitcoindto.PreviousTx{
+			TxID:          tx.Txid,
+			Vout:          tx.Vout,
+			ScriptPubKey:  tx.ScriptPubKey,
+			RedeemScript:  tx.RedeemScript,
+			WitnessScript: "", // Not available in PrevTx
+			Amount:        amount,
+		}
+	}
+	return result, nil
+}
+
+// ToUnspentOutput converts infrastructure ListUnspentResult to application DTO
+func ToUnspentOutput(result *ListUnspentResult, btc *Bitcoin) (*bitcoindto.UnspentOutput, error) {
+	if result == nil {
+		return nil, nil
+	}
+
+	// Convert float64 amount to btcutil.Amount
+	amount, err := btc.FloatToAmount(result.Amount)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert amount: %w", err)
+	}
+
+	return &bitcoindto.UnspentOutput{
+		TxID:          result.TxID,
+		Vout:          result.Vout,
+		Address:       result.Address,
+		Account:       "", // Not provided by Bitcoin Core RPC
+		ScriptPubKey:  result.ScriptPubKey,
+		Amount:        amount,
+		Confirmations: result.Confirmations,
+		RedeemScript:  result.RedeemScript,
+		WitnessScript: "", // Not provided by Bitcoin Core RPC
+		Spendable:     result.Spendable,
+		Solvable:      result.Solvable,
+		Safe:          result.Safe,
+		Label:         result.Label,
+	}, nil
+}
+
+// ToUnspentOutputList converts slice of infrastructure results to DTOs
+func ToUnspentOutputList(results []ListUnspentResult, btc *Bitcoin) ([]bitcoindto.UnspentOutput, error) {
+	if results == nil {
+		return nil, nil
+	}
+
+	outputs := make([]bitcoindto.UnspentOutput, 0, len(results))
+	for _, result := range results {
+		dto, err := ToUnspentOutput(&result, btc)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert unspent output: %w", err)
+		}
+		if dto != nil {
+			outputs = append(outputs, *dto)
+		}
+	}
+	return outputs, nil
+}
+
+// FromUnspentOutput converts application UnspentOutput to infrastructure type
+func FromUnspentOutput(output *bitcoindto.UnspentOutput) *ListUnspentResult {
+	if output == nil {
+		return nil
+	}
+
+	// Convert btcutil.Amount to float64 BTC
+	amount := output.Amount.ToBTC()
+
+	return &ListUnspentResult{
+		TxID:          output.TxID,
+		Vout:          output.Vout,
+		Address:       output.Address,
+		Label:         output.Label,
+		RedeemScript:  output.RedeemScript,
+		ScriptPubKey:  output.ScriptPubKey,
+		Amount:        amount,
+		Confirmations: output.Confirmations,
+		Spendable:     output.Spendable,
+		Solvable:      output.Solvable,
+		Safe:          output.Safe,
+	}
+}
+
+// ToParsedPSBT converts infrastructure ParsedPSBT to application DTO
+//
+//nolint:gocyclo // Complex mapping function with many fields
+func ToParsedPSBT(infraPSBT *ParsedPSBT, btc *Bitcoin) (*bitcoindto.ParsedPSBT, error) {
+	if infraPSBT == nil || infraPSBT.Packet == nil {
+		return nil, nil
+	}
+
+	packet := infraPSBT.Packet
+	unsignedTx := packet.UnsignedTx
+
+	// Map transaction
+	tx := bitcoindto.ParsedPSBTTx{
+		TxID:     unsignedTx.TxHash().String(),
+		Hash:     unsignedTx.WitnessHash().String(),
+		Version:  unsignedTx.Version,
+		LockTime: unsignedTx.LockTime,
+		Vin:      make([]bitcoindto.ParsedPSBTVin, len(unsignedTx.TxIn)),
+		Vout:     make([]bitcoindto.ParsedPSBTVout, len(unsignedTx.TxOut)),
+	}
+
+	// Map inputs (from unsigned tx)
+	for i, txIn := range unsignedTx.TxIn {
+		tx.Vin[i] = bitcoindto.ParsedPSBTVin{
+			TxID:     txIn.PreviousOutPoint.Hash.String(),
+			Vout:     txIn.PreviousOutPoint.Index,
+			Sequence: txIn.Sequence,
+		}
+	}
+
+	// Map outputs (from unsigned tx)
+	for i, txOut := range unsignedTx.TxOut {
+		amount := btcutil.Amount(txOut.Value)
+		tx.Vout[i] = bitcoindto.ParsedPSBTVout{
+			Value:        amount,
+			ScriptPubKey: hex.EncodeToString(txOut.PkScript),
+		}
+	}
+
+	// Map PSBT inputs (metadata)
+	inputs := make([]bitcoindto.ParsedPSBTInput, len(packet.Inputs))
+	for i, input := range packet.Inputs {
+		parsedInput := bitcoindto.ParsedPSBTInput{
+			PartialSignatures: make(map[string]string),
+			SigHashType:       uint32(input.SighashType),
+			RedeemScript:      hex.EncodeToString(input.RedeemScript),
+			WitnessScript:     hex.EncodeToString(input.WitnessScript),
+			FinalScriptSig:    hex.EncodeToString(input.FinalScriptSig),
+			Unknown:           make(map[string]string),
+			BIP32Derivation:   make([]bitcoindto.BIP32Derivation, 0),
+		}
+
+		// Map partial signatures
+		for _, partialSig := range input.PartialSigs {
+			pubkeyHex := hex.EncodeToString(partialSig.PubKey)
+			sigHex := hex.EncodeToString(partialSig.Signature)
+			parsedInput.PartialSignatures[pubkeyHex] = sigHex
+		}
+
+		// Map final witness - deserialize witness stack
+		witnessStack, err := parseWitnessStack(input.FinalScriptWitness)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse witness stack for input %d: %w", i, err)
+		}
+		parsedInput.FinalScriptWitness = witnessStack
+
+		// Map witness UTXO
+		if input.WitnessUtxo != nil {
+			amount := btcutil.Amount(input.WitnessUtxo.Value)
+			parsedInput.WitnessUTXO = &bitcoindto.ParsedPSBTUTXO{
+				Amount:       amount,
+				ScriptPubKey: hex.EncodeToString(input.WitnessUtxo.PkScript),
+			}
+		}
+
+		// Map non-witness UTXO
+		if input.NonWitnessUtxo != nil {
+			rawTx := &TxRawResult{
+				Txid:     input.NonWitnessUtxo.TxHash().String(),
+				Hash:     input.NonWitnessUtxo.WitnessHash().String(),
+				Size:     int32(input.NonWitnessUtxo.SerializeSize()),
+				Vsize:    int32(input.NonWitnessUtxo.SerializeSize()),
+				Weight:   int32(input.NonWitnessUtxo.SerializeSize() * 4),
+				Version:  uint32(input.NonWitnessUtxo.Version),
+				Locktime: input.NonWitnessUtxo.LockTime,
+				Vin:      make([]TxRawVin, len(input.NonWitnessUtxo.TxIn)),
+				Vout:     make([]TxRawVout, len(input.NonWitnessUtxo.TxOut)),
+			}
+
+			// Map vin
+			for j, txIn := range input.NonWitnessUtxo.TxIn {
+				rawTx.Vin[j] = TxRawVin{
+					Txid: txIn.PreviousOutPoint.Hash.String(),
+					Vout: txIn.PreviousOutPoint.Index,
+					ScriptSig: ScriptSig{
+						Hex: hex.EncodeToString(txIn.SignatureScript),
+					},
+					Sequence: txIn.Sequence,
+				}
+			}
+
+			// Map vout
+			for j, txOut := range input.NonWitnessUtxo.TxOut {
+				rawTx.Vout[j] = TxRawVout{
+					Value: float64(txOut.Value) / 1e8,
+					N:     uint32(j),
+					ScriptPubKey: ScriptPubKey{
+						Hex: hex.EncodeToString(txOut.PkScript),
+					},
+				}
+			}
+
+			nonWitnessTx, err := ToRawTransaction(rawTx, btc)
+			if err != nil {
+				return nil, fmt.Errorf("failed to convert non-witness UTXO: %w", err)
+			}
+			parsedInput.NonWitnessUTXO = nonWitnessTx
+		}
+
+		// Map BIP32 derivation
+		for _, deriv := range input.Bip32Derivation {
+			// Convert MasterKeyFingerprint (uint32) to 4-byte hex string
+			fingerprint := fmt.Sprintf("%08x", deriv.MasterKeyFingerprint)
+			parsedInput.BIP32Derivation = append(parsedInput.BIP32Derivation, bitcoindto.BIP32Derivation{
+				PubKey:      hex.EncodeToString(deriv.PubKey),
+				MasterKeyID: fingerprint,
+				Path:        derivationPathToString(deriv.Bip32Path),
+			})
+		}
+
+		// Map unknown fields
+		for _, unknown := range input.Unknowns {
+			parsedInput.Unknown[hex.EncodeToString(unknown.Key)] = hex.EncodeToString(unknown.Value)
+		}
+
+		inputs[i] = parsedInput
+	}
+
+	// Map PSBT outputs (metadata)
+	outputs := make([]bitcoindto.ParsedPSBTOutput, len(packet.Outputs))
+	for i, output := range packet.Outputs {
+		parsedOutput := bitcoindto.ParsedPSBTOutput{
+			RedeemScript:    hex.EncodeToString(output.RedeemScript),
+			WitnessScript:   hex.EncodeToString(output.WitnessScript),
+			Unknown:         make(map[string]string),
+			BIP32Derivation: make([]bitcoindto.BIP32Derivation, 0),
+		}
+
+		// Map BIP32 derivation
+		for _, deriv := range output.Bip32Derivation {
+			// Convert MasterKeyFingerprint (uint32) to 4-byte hex string
+			fingerprint := fmt.Sprintf("%08x", deriv.MasterKeyFingerprint)
+			parsedOutput.BIP32Derivation = append(parsedOutput.BIP32Derivation, bitcoindto.BIP32Derivation{
+				PubKey:      hex.EncodeToString(deriv.PubKey),
+				MasterKeyID: fingerprint,
+				Path:        derivationPathToString(deriv.Bip32Path),
+			})
+		}
+
+		// Map unknown fields
+		for _, unknown := range output.Unknowns {
+			parsedOutput.Unknown[hex.EncodeToString(unknown.Key)] = hex.EncodeToString(unknown.Value)
+		}
+
+		outputs[i] = parsedOutput
+	}
+
+	// Calculate fee: total input amount - total output amount
+	var totalInput btcutil.Amount
+	for idx, input := range packet.Inputs {
+		if input.WitnessUtxo != nil {
+			// SegWit transactions use WitnessUtxo
+			totalInput += btcutil.Amount(input.WitnessUtxo.Value)
+		} else if input.NonWitnessUtxo != nil && idx < len(unsignedTx.TxIn) {
+			// Legacy transactions use NonWitnessUtxo
+			// Get the amount from the corresponding output in the previous transaction
+			vout := unsignedTx.TxIn[idx].PreviousOutPoint.Index
+			if int(vout) < len(input.NonWitnessUtxo.TxOut) {
+				totalInput += btcutil.Amount(input.NonWitnessUtxo.TxOut[vout].Value)
+			}
+		}
+	}
+
+	var totalOutput btcutil.Amount
+	for _, txOut := range unsignedTx.TxOut {
+		totalOutput += btcutil.Amount(txOut.Value)
+	}
+
+	fee := totalInput - totalOutput
+
+	// Map unknown global fields
+	unknownGlobal := make(map[string]string)
+	for _, unknown := range packet.Unknowns {
+		unknownGlobal[hex.EncodeToString(unknown.Key)] = hex.EncodeToString(unknown.Value)
+	}
+
+	return &bitcoindto.ParsedPSBT{
+		Tx:         tx,
+		Unknown:    unknownGlobal,
+		Inputs:     inputs,
+		Outputs:    outputs,
+		Fee:        fee,
+		IsComplete: infraPSBT.IsComplete,
+	}, nil
+}
+
+// derivationPathToString converts BIP32 path to string format
+func derivationPathToString(path []uint32) string {
+	if len(path) == 0 {
+		return ""
+	}
+
+	var sb strings.Builder
+	sb.WriteString("m")
+	for _, component := range path {
+		hardened := component >= 0x80000000
+		if hardened {
+			sb.WriteString(fmt.Sprintf("/%d'", component-0x80000000))
+		} else {
+			sb.WriteString(fmt.Sprintf("/%d", component))
+		}
+	}
+	return sb.String()
+}
+
+// parseWitnessStack deserializes a witness stack from its byte representation.
+// The witness stack format is:
+//   - VarInt: number of witness items
+//   - For each item:
+//   - VarInt: length of the witness item
+//   - []byte: the witness item data
+func parseWitnessStack(witnessData []byte) ([]string, error) {
+	if len(witnessData) == 0 {
+		return []string{}, nil
+	}
+
+	reader := bytes.NewReader(witnessData)
+
+	// Read number of witness items
+	count, err := wire.ReadVarInt(reader, 0)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read witness count: %w", err)
+	}
+
+	result := make([]string, 0, count)
+	for i := uint64(0); i < count; i++ {
+		// Read length of this witness item
+		length, err := wire.ReadVarInt(reader, 0)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read witness item %d length: %w", i, err)
+		}
+
+		// Read the witness item data
+		item := make([]byte, length)
+		n, err := reader.Read(item)
+		if err != nil {
+			return nil, fmt.Errorf("failed to read witness item %d: %w", i, err)
+		}
+		if uint64(n) != length {
+			return nil, fmt.Errorf("witness item %d: expected %d bytes, read %d", i, length, n)
+		}
+
+		result = append(result, hex.EncodeToString(item))
+	}
+
 	return result, nil
 }
