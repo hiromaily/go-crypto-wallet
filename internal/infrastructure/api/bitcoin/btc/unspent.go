@@ -9,6 +9,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
 
+	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -30,7 +31,7 @@ type ListUnspentResult struct {
 }
 
 // ListUnspent call RPC `listunspent`
-func (b *Bitcoin) ListUnspent(confirmationNum uint64) ([]ListUnspentResult, error) {
+func (b *Bitcoin) ListUnspent(confirmationNum uint64) ([]bitcoindto.UnspentOutput, error) {
 	logger.Debug("call ListUnspent()", "confirmation", b.confirmationBlock)
 
 	input, err := json.Marshal(confirmationNum)
@@ -52,13 +53,13 @@ func (b *Bitcoin) ListUnspent(confirmationNum uint64) ([]ListUnspentResult, erro
 		return nil, nil
 	}
 
-	return listunspentResult, nil
+	return ToUnspentOutputList(listunspentResult, b)
 }
 
 // ListUnspentByAccount gets listunspent by account
 func (b *Bitcoin) ListUnspentByAccount(
 	accountType domainAccount.AccountType, confirmationNum uint64,
-) ([]ListUnspentResult, error) {
+) ([]bitcoindto.UnspentOutput, error) {
 	addrs, err := b.GetAddressesByLabel(accountType.String())
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btc.GetAddressesByLabel(): %w", err)
@@ -82,11 +83,13 @@ func (b *Bitcoin) ListUnspentByAccount(
 		return unspentList[i].Amount < unspentList[j].Amount
 	})
 
-	return unspentList, nil
+	return ToUnspentOutputList(unspentList, b)
 }
 
 // GetUnspentListAddrs returns address from unspentList
-func (*Bitcoin) GetUnspentListAddrs(unspentList []ListUnspentResult, accountType domainAccount.AccountType) []string {
+func (*Bitcoin) GetUnspentListAddrs(
+	unspentList []bitcoindto.UnspentOutput, accountType domainAccount.AccountType,
+) []string {
 	addrs := make([]string, 0, len(unspentList))
 	for _, unspent := range unspentList {
 		if unspent.Label != accountType.String() {
@@ -97,14 +100,6 @@ func (*Bitcoin) GetUnspentListAddrs(unspentList []ListUnspentResult, accountType
 		addrs = append(addrs, unspent.Address)
 	}
 	return addrs
-}
-
-func (*Bitcoin) getUnspentListAmount(unspentList []ListUnspentResult) float64 {
-	var sum float64
-	for _, unspent := range unspentList {
-		sum += unspent.Amount
-	}
-	return sum
 }
 
 func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address, confirmationNum uint64) ([]ListUnspentResult, error) {
@@ -149,7 +144,7 @@ func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address, confirmationNum 
 
 // LockUnspent lock given txID
 // 1st param lock (false)
-func (b *Bitcoin) LockUnspent(tx *ListUnspentResult) error {
+func (b *Bitcoin) LockUnspent(tx *bitcoindto.UnspentOutput) error {
 	txIDHash, err := chainhash.NewHashFromStr(tx.TxID)
 	if err != nil {
 		return fmt.Errorf("fail to call chainhash.NewHashFromStr(%s): %w", tx.TxID, err)

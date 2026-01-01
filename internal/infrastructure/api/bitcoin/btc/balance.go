@@ -43,8 +43,13 @@ func (b *Bitcoin) GetBalanceByListUnspent(confirmationNum uint64) (btcutil.Amoun
 	if err != nil {
 		return 0, err
 	}
-	sum := b.getUnspentListAmount(listunspentResult)
-	return b.FloatToAmount(sum)
+
+	// Sum up all amounts (already in btcutil.Amount)
+	var sum btcutil.Amount
+	for _, unspent := range listunspentResult {
+		sum += unspent.Amount
+	}
+	return sum, nil
 }
 
 // GetBalanceByAccount gets balance by account
@@ -55,9 +60,11 @@ func (b *Bitcoin) GetBalanceByAccount(
 	if err != nil {
 		return 0, fmt.Errorf("fail to call btc.ListUnspentByAccount(%s): %w", accountType.String(), err)
 	}
-	var totalAmout float64
+
+	// Sum up all amounts (already in btcutil.Amount)
+	var totalAmount btcutil.Amount
 	for _, tx := range unspentList {
-		totalAmout += tx.Amount
+		totalAmount += tx.Amount
 	}
-	return b.FloatToAmount(totalAmout)
+	return totalAmount, nil
 }

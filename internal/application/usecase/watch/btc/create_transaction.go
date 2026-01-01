@@ -11,6 +11,7 @@ import (
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/wire"
 
+	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
 	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
@@ -378,7 +379,7 @@ func (u *createTransactionUseCase) createTx(
 // this func returns no result, no error possibly, so caller should check both returned value
 func (u *createTransactionUseCase) getUnspentList(
 	accountType domainAccount.AccountType,
-) ([]btc.ListUnspentResult, []string, error) {
+) ([]bitcoindto.UnspentOutput, []string, error) {
 	// get listUnspent
 	unspentList, err := u.btcClient.ListUnspentByAccount(accountType, u.btcClient.ConfirmationBlock())
 	if err != nil {
@@ -392,7 +393,7 @@ func (u *createTransactionUseCase) getUnspentList(
 // parse result of listUnspent
 // returned *parsedTx could be nil
 func (u *createTransactionUseCase) parseListUnspentTx(
-	unspentList []btc.ListUnspentResult, amount btcutil.Amount,
+	unspentList []bitcoindto.UnspentOutput, amount btcutil.Amount,
 ) (*parsedTx, btcutil.Amount, bool) {
 	var inputTotal btcutil.Amount
 	txInputs := make([]btcjson.TransactionInput, 0, len(unspentList))
@@ -406,25 +407,16 @@ func (u *createTransactionUseCase) parseListUnspentTx(
 	}
 
 	for _, txItem := range unspentList {
-		// Amount
-		amt, err := btcutil.NewAmount(txItem.Amount)
-		if err != nil {
-			// this error is not expected
-			logger.Error(
-				"fail to call btcutil.NewAmount() then skipped",
-				"tx_id", txItem.TxID,
-				"tx_amount", txItem.Amount,
-				"error", err)
-			continue
-		}
-		inputTotal += amt
+		// Amount (already btcutil.Amount, no conversion needed)
+		inputTotal += txItem.Amount
 
 		txInputs = append(txInputs, btcjson.TransactionInput{
 			Txid: txItem.TxID,
 			Vout: txItem.Vout,
 		})
 
-		inputAmount, err := u.btcClient.FloatToDecimal(txItem.Amount)
+		// Convert btcutil.Amount to float64 for decimal conversion
+		inputAmount, err := u.btcClient.FloatToDecimal(txItem.Amount.ToBTC())
 		if err != nil {
 			logger.Error("fail to convert input amount to decimal", "error", err)
 			continue
@@ -444,8 +436,8 @@ func (u *createTransactionUseCase) parseListUnspentTx(
 			Txid:         txItem.TxID,
 			Vout:         txItem.Vout,
 			ScriptPubKey: txItem.ScriptPubKey,
-			RedeemScript: txItem.RedeemScript, // required if target account is multisig address
-			Amount:       txItem.Amount,
+			RedeemScript: txItem.RedeemScript,   // required if target account is multisig address
+			Amount:       txItem.Amount.ToBTC(), // Convert to float64
 		})
 
 		addresses = append(addresses, txItem.Address)
@@ -773,9 +765,15 @@ func (u *createTransactionUseCase) generatePSBTFile(
 	previousTxs btc.PreviousTxs,
 	id int64,
 ) (string, error) {
+	// Convert infrastructure PrevTxs to application DTOs
+	prevTxsDTO, err := btc.ToPreviousTxList(previousTxs.PrevTxs, u.btcClient.(*btc.Bitcoin))
+	if err != nil {
+		return "", fmt.Errorf("fail to convert previousTxs: %w", err)
+	}
+
 	// Create PSBT from msgTx and previous outputs
 	// This includes all necessary metadata for offline signing
-	psbtBase64, err := u.btcClient.CreatePSBT(msgTx, previousTxs.PrevTxs)
+	psbtBase64, err := u.btcClient.CreatePSBT(msgTx, prevTxsDTO)
 	if err != nil {
 		return "", fmt.Errorf("fail to create PSBT: %w", err)
 	}
