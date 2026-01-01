@@ -6,18 +6,18 @@ Repo: hiromaily/go-crypto-wallet
 
 ## Common Workflow Steps
 
-This command follows the common workflow steps defined in [Workflow Guidelines](../agents/workflow.md):
-- **Required Tools and Versions**: See [Required Tools and Versions](../agents/requirements.md)
-- **Pre-Flight Checks**: See [Pre-Flight Checks](../agents/workflow.md#pre-flight-checks)
-- **Safety Rules**: See [Safety Rules](../agents/workflow.md#safety-rules)
-- **Verification Steps**: See [Verification Steps](../agents/workflow.md#verification-steps)
-- **Special Considerations**: See [Special Considerations](../agents/workflow.md#special-considerations)
+This command follows the common workflow steps defined in [Workflow Guidelines](../../agents/workflow.md):
+- **Required Tools and Versions**: See [Required Tools and Versions](../../agents/requirements.md)
+- **Pre-Flight Checks**: See [Pre-Flight Checks](../../agents/workflow.md#pre-flight-checks)
+- **Safety Rules**: See [Safety Rules](../../agents/workflow.md#safety-rules)
+- **Verification Steps**: See [Verification Steps](../../agents/workflow.md#verification-steps)
+- **Special Considerations**: See [Special Considerations](../../agents/workflow.md#special-considerations)
 
 ## Process
 
 ### Pre-Flight Checks
 
-Follow the [Pre-Flight Checks](../agents/workflow.md#pre-flight-checks) from Workflow Guidelines, with these additional PR-specific checks:
+Follow the [Pre-Flight Checks](../../agents/workflow.md#pre-flight-checks) from Workflow Guidelines, with these additional PR-specific checks:
 
 1. **Fetch PR Information:**
    - URL: <https://github.com/hiromaily/go-crypto-wallet/pull/{pr_number}>
@@ -57,7 +57,7 @@ Follow the [Pre-Flight Checks](../agents/workflow.md#pre-flight-checks) from Wor
    - Group related comments together
    - Break down fixes into logical steps
    - Identify test cases needed for functionality fixes
-   - Check for auto-generated files - see [Auto-Generated Files](../agents/workflow.md#auto-generated-files) in Workflow Guidelines
+   - Check for auto-generated files - see [Auto-Generated Files](../../agents/workflow.md#auto-generated-files) in Workflow Guidelines
    - Consider impact on offline wallet operations (keygen, sign)
    - Plan rollback strategy if breaking changes
 
@@ -70,7 +70,7 @@ Follow the [Pre-Flight Checks](../agents/workflow.md#pre-flight-checks) from Wor
    - For each fix, explain what was changed and why
 
 4. **Self-Review:**
-   Follow the [Self-Review](../agents/workflow.md#self-review) checklist from Workflow Guidelines.
+   Follow the [Self-Review](../../agents/workflow.md#self-review) checklist from Workflow Guidelines.
 
 5. **Test:**
    - Run existing tests: `make gotest`
@@ -85,7 +85,7 @@ Follow the [Pre-Flight Checks](../agents/workflow.md#pre-flight-checks) from Wor
    - Ensure all exported functions have godoc comments
 
 7. **Verify:**
-   Follow the [Verification Steps](../agents/workflow.md#verification-steps) from Workflow Guidelines.
+   Follow the [Verification Steps](../../agents/workflow.md#verification-steps) from Workflow Guidelines.
 
 8. **Commit:**
    - Stage changes: `git add <files>`
@@ -115,15 +115,15 @@ Follow the [Pre-Flight Checks](../agents/workflow.md#pre-flight-checks) from Wor
 
 ### Safety Rules
 
-Follow the [Safety Rules](../agents/workflow.md#safety-rules) from Workflow Guidelines.
+Follow the [Safety Rules](../../agents/workflow.md#safety-rules) from Workflow Guidelines.
 
 ### Special Considerations
 
 - **Security-Sensitive Changes:**
-  See [Security-Sensitive Changes](../agents/workflow.md#security-sensitive-changes) in Workflow Guidelines.
+  See [Security-Sensitive Changes](../../agents/workflow.md#security-sensitive-changes) in Workflow Guidelines.
 
 - **Breaking Changes:**
-  See [Breaking Changes](../agents/workflow.md#breaking-changes) in Workflow Guidelines.
+  See [Breaking Changes](../../agents/workflow.md#breaking-changes) in Workflow Guidelines.
   - If review suggests breaking changes, discuss with reviewer first
 
 - **Conflicting Comments:**

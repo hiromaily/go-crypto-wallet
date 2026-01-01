@@ -5,7 +5,7 @@ This directory contains definition files for custom slash commands that can be u
 ## Architecture
 
 These commands follow a modular structure where:
-- **Common workflow steps** are defined in [Workflow Guidelines](../agents/workflow.md)
+- **Common workflow steps** are defined in [Workflow Guidelines](../../agents/workflow.md)
 - **Command-specific logic** is defined in each command file
 - This reduces duplication and makes maintenance easier
 
@@ -61,9 +61,9 @@ In Claude Desktop, you can use these commands as slash commands. For example:
 
 ## Common Workflow Steps
 
-All commands follow common workflow steps defined in [Workflow Guidelines](../agents/workflow.md):
+All commands follow common workflow steps defined in [Workflow Guidelines](../../agents/workflow.md):
 
-- **Required Tools and Versions**: See [Required Tools and Versions](../agents/requirements.md) - Essential tools (Git, GitHub CLI, Go 1.25.5) and development tools (Atlas v1.0.0, golangci-lint v2.7.2) with version requirements
+- **Required Tools and Versions**: See [Required Tools and Versions](../../agents/requirements.md) - Essential tools (Git, GitHub CLI, Go 1.25.5) and development tools (Atlas v1.0.0, golangci-lint v2.7.2) with version requirements
 - **Pre-Flight Checks**: Git status, branch verification, project guidelines review
 - **Safety Rules**: Critical rules for security and code quality
 - **Verification Steps**: Commands to run before committing (`make lint-fix`, `make tidy`, `make check-build`, `make gotest`)
@@ -75,7 +75,7 @@ Each command file links to these common steps to avoid duplication and ensure co
 
 ## Project Guidelines
 
-Each command operates in accordance with the project guidelines ([AGENTS.md](../AGENTS.md)), following:
+Each command operates in accordance with the project guidelines ([AGENTS.md](../../AGENTS.md)), following:
 - Clean Architecture principles
 - Security best practices
 - Code quality standards

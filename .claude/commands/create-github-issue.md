@@ -11,7 +11,7 @@ Repo: hiromaily/go-crypto-wallet
 
 Before starting, verify all required tools are installed with the correct versions.
 
-See [Required Tools and Versions](../agents/requirements.md) for:
+See [Required Tools and Versions](../../agents/requirements.md) for:
 
 - Complete list of required tools
 - Version requirements (Go 1.25.5, Atlas v1.0.0, golangci-lint v2.7.2, etc.)
@@ -312,7 +312,7 @@ After creating the issue:
 - Specify affected components
 - Consider impact on offline wallet operations
 - Reference security best practices
-- See [Security-Sensitive Changes](../agents/workflow.md#security-sensitive-changes) in Workflow Guidelines
+- See [Security-Sensitive Changes](../../agents/workflow.md#security-sensitive-changes) in Workflow Guidelines
 
 ## Special Considerations
 
@@ -355,7 +355,7 @@ For issues affecting multiple cryptocurrencies:
 
 **CRITICAL**: Never create issues to edit files with `DO NOT EDIT` comments.
 
-See [Auto-Generated Files](../agents/workflow.md#auto-generated-files) in Workflow Guidelines for details.
+See [Auto-Generated Files](../../agents/workflow.md#auto-generated-files) in Workflow Guidelines for details.
 
 ## Output Format
 
@@ -494,7 +494,7 @@ If any step fails:
 - Use appropriate labels to help with issue triage
 - Consider impact on offline wallet operations (keygen, sign)
 
-See also [Safety Rules](../agents/workflow.md#safety-rules) in Workflow Guidelines for general safety rules.
+See also [Safety Rules](../../agents/workflow.md#safety-rules) in Workflow Guidelines for general safety rules.
 
 ## Process Summary
 

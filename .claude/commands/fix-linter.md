@@ -4,10 +4,10 @@ You are tasked with fixing lint errors that occurred when running the `make lint
 
 ## Common Workflow Steps
 
-This command follows the common workflow steps defined in [Workflow Guidelines](../agents/workflow.md):
-- **Safety Rules**: See [Safety Rules](../agents/workflow.md#safety-rules)
-- **Verification Steps**: See [Verification Steps](../agents/workflow.md#verification-steps)
-- **Auto-Generated Files**: See [Auto-Generated Files](../agents/workflow.md#auto-generated-files)
+This command follows the common workflow steps defined in [Workflow Guidelines](../../agents/workflow.md):
+- **Safety Rules**: See [Safety Rules](../../agents/workflow.md#safety-rules)
+- **Verification Steps**: See [Verification Steps](../../agents/workflow.md#verification-steps)
+- **Auto-Generated Files**: See [Auto-Generated Files](../../agents/workflow.md#auto-generated-files)
 
 ## Guidelines
 
@@ -21,7 +21,7 @@ This command follows the common workflow steps defined in [Workflow Guidelines](
 4. **Batch similar errors**: Group and fix similar error types together for efficiency
 5. **Preserve functionality**: Ensure all fixes maintain the original code behavior
 6. **Use auto-fix when possible**: Leverage linter's automatic fixing capabilities where appropriate
-7. **Check for auto-generated files**: Never edit files with `DO NOT EDIT` comments - see [Auto-Generated Files](../agents/workflow.md#auto-generated-files)
+7. **Check for auto-generated files**: Never edit files with `DO NOT EDIT` comments - see [Auto-Generated Files](../../agents/workflow.md#auto-generated-files)
 
 ## Process
 
