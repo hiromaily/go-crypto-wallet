@@ -83,8 +83,8 @@ type BlockchainInfo struct {
 
 // TransactionResult contains transaction information
 type TransactionResult struct {
-	Amount          float64
-	Fee             float64
+	Amount          btcutil.Amount
+	Fee             btcutil.Amount
 	Confirmations   int64
 	BlockHash       string
 	BlockIndex      int64
@@ -101,10 +101,10 @@ type TransactionResult struct {
 type TransactionDetail struct {
 	Address   string
 	Category  string
-	Amount    float64
+	Amount    btcutil.Amount
 	Label     string
 	Vout      uint32
-	Fee       float64
+	Fee       *btcutil.Amount
 	Abandoned bool
 }
 
@@ -143,7 +143,7 @@ type ScriptSig struct {
 
 // RawTransactionOutput contains raw transaction output information
 type RawTransactionOutput struct {
-	Value        float64
+	Value        btcutil.Amount
 	Index        uint32
 	ScriptPubKey ScriptPubKey
 }
@@ -160,7 +160,7 @@ type ScriptPubKey struct {
 // FundRawTransactionResult contains fund raw transaction result
 type FundRawTransactionResult struct {
 	Hex       string
-	Fee       float64
+	Fee       btcutil.Amount
 	ChangePos int32
 }
 
