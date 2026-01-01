@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/eth"
-	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/testutil"
 )
 
 type transactionTest struct {

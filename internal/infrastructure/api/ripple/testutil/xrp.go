@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/stretchr/testify/suite"
+
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency"
 	"github.com/hiromaily/go-crypto-wallet/pkg/grpc"
 )
 
@@ -31,9 +34,13 @@ func GetXRP() (ripple.Rippler, error) {
 	conf.CoinTypeCode = domainCoin.XRP
 
 	// ws client
-	wsClient, wsAdmin, err := ripple.NewWSClient(&conf.Ripple)
+	wsPublicClient, err := cryptocurrency.NewWebSocketClient(conf.Ripple.WebsocketPublicURL)
 	if err != nil {
-		return nil, fmt.Errorf("fail to create ethereum rpc client: %w", err)
+		return nil, fmt.Errorf("fail to create xrp public websocket client: %w", err)
+	}
+	wsAdminClient, err := cryptocurrency.NewWebSocketClient(conf.Ripple.WebsocketAdminURL)
+	if err != nil {
+		return nil, fmt.Errorf("fail to create xrp admin websocket client: %w", err)
 	}
 	// client
 	conn, err := grpc.NewClient(conf.Ripple.API.URL)
@@ -42,11 +49,27 @@ func GetXRP() (ripple.Rippler, error) {
 	}
 	grpcAPI := xrp.NewRippleAPI(conn)
 
-	xr, err = ripple.NewRipple(wsClient, wsAdmin, grpcAPI, &conf.Ripple, conf.CoinTypeCode)
+	xr, err = ripple.NewRipple(wsPublicClient, wsAdminClient, grpcAPI, &conf.Ripple, conf.CoinTypeCode)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create xrp instance: %w", err)
 	}
 	return xr, nil
+}
+
+// XRPTestSuite is a test suite for XRP
+type XRPTestSuite struct {
+	suite.Suite
+	XRP ripple.Rippler
+}
+
+func (xts *XRPTestSuite) SetupTest() {
+	xrp, err := GetXRP()
+	xts.NoError(err)
+	xts.XRP = xrp
+}
+
+func (xts *XRPTestSuite) TearDownTest() {
+	_ = xts.XRP.Close() // Best effort cleanup
 }
 
 // GetRippleAPI returns RippleAPIer

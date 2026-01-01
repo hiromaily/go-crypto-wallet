@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/stretchr/testify/suite"
+
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
+	"github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
 
@@ -32,7 +35,7 @@ func GetETH() (ethereum.Ethereumer, error) {
 	// uuid handler
 	uuidHandler := uuid.NewGoogleUUIDHandler()
 	// client
-	client, err := ethereum.NewRPCClient(&conf.Ethereum)
+	client, err := cryptocurrency.NewEthereumRPCClient(&conf.Ethereum)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create ethereum rpc client: %w", err)
 	}
@@ -41,4 +44,20 @@ func GetETH() (ethereum.Ethereumer, error) {
 		return nil, fmt.Errorf("fail to create eth instance: %w", err)
 	}
 	return et, nil
+}
+
+// ETHTestSuite is a test suite for ETH
+type ETHTestSuite struct {
+	suite.Suite
+	ETH ethereum.Ethereumer
+}
+
+func (ets *ETHTestSuite) SetupTest() {
+	eth, err := GetETH()
+	ets.NoError(err)
+	ets.ETH = eth
+}
+
+func (ets *ETHTestSuite) TearDownTest() {
+	ets.ETH.Close()
 }

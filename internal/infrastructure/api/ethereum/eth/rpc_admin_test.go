@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/testutil"
 )
 
 type adminTest struct {
