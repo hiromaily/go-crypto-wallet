@@ -157,8 +157,8 @@ type ETHDetailTXRepositorier interface {
 	WithTx(tx *sql.Tx) ETHDetailTXRepositorier
 }
 
-// XRPDetailTxRepositorier is XrpDetailTxRepository interface
-type XRPDetailTxRepositorier interface {
+// XRPDetailTXRepositorier is XrpDetailTxRepository interface
+type XRPDetailTXRepositorier interface {
 	GetOne(id int64) (*sqlc.XrpDetailTx, error)
 	GetAllByTxID(id int64) ([]*sqlc.XrpDetailTx, error)
 	GetSentHashTx(txType domainTx.TxType) ([]string, error)
@@ -169,5 +169,5 @@ type XRPDetailTxRepositorier interface {
 	) (int64, error)
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(txType domainTx.TxType, sentHashTx string) (int64, error)
-	WithTx(tx *sql.Tx) XRPDetailTxRepositorier
+	WithTx(tx *sql.Tx) XRPDetailTXRepositorier
 }

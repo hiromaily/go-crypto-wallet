@@ -188,7 +188,7 @@ func (r *XRPDetailTxInputRepositorySqlc) UpdateTxTypeBySentHashTx(
 }
 
 // WithTx returns a new repository instance that uses the provided transaction
-func (r *XRPDetailTxInputRepositorySqlc) WithTx(tx *sql.Tx) portsPersistence.XRPDetailTxRepositorier {
+func (r *XRPDetailTxInputRepositorySqlc) WithTx(tx *sql.Tx) portsPersistence.XRPDetailTXRepositorier {
 	return &XRPDetailTxInputRepositorySqlc{
 		queries:      r.queries.WithTx(tx),
 		coinTypeCode: r.coinTypeCode,

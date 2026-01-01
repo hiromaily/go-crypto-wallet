@@ -176,11 +176,14 @@ linters:
         linters:
           - gosec
         text: "G103:"
-      # Exclude Ethereum and Ether from crypto naming rule (valid English words)
+      # Exclude Ethereum-related words from crypto naming rule (valid English words)
+      - text: "Ethereumer should use BTC, ETH, or XRP"
+        linters:
+          - gocritic
       - text: "Ethereum should use BTC, ETH, or XRP"
         linters:
           - gocritic
-      - text: "Ether.* should use BTC, ETH, or XRP"
+      - text: "EtherTxMonitor should use BTC, ETH, or XRP"
         linters:
           - gocritic
 

@@ -490,7 +490,7 @@ func (c *container) newETHTxDetailRepo() watch.ETHDetailTXRepositorier {
 	)
 }
 
-func (c *container) newXRPTxDetailRepo() watch.XRPDetailTxRepositorier {
+func (c *container) newXRPTxDetailRepo() watch.XRPDetailTXRepositorier {
 	return watch.NewXRPDetailTxInputRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,

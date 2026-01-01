@@ -28,5 +28,5 @@ type PaymentRequestRepositorier = persistence.PaymentRequestRepositorier
 // ETHDetailTXRepositorier is ETHDetailTXRepository interface
 type ETHDetailTXRepositorier = persistence.ETHDetailTXRepositorier
 
-// XRPDetailTxRepositorier is XrpDetailTxRepository interface
-type XRPDetailTxRepositorier = persistence.XRPDetailTxRepositorier
+// XRPDetailTXRepositorier is XrpDetailTxRepository interface
+type XRPDetailTXRepositorier = persistence.XRPDetailTXRepositorier

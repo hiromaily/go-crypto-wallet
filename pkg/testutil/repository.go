@@ -22,8 +22,8 @@ var (
 	paymentRequestRepoSqlc *watch.PaymentRequestRepositorySqlc
 	btcTxInputRepoSqlc     *watch.TxInputRepositorySqlc
 	btcTxOutputRepoSqlc    *watch.TxOutputRepositorySqlc
-	ETHDetailTXRepoSqlc    *watch.ETHDetailTXInputRepositorySqlc
-	xrpDetailTxRepoSqlc    *watch.XRPDetailTxInputRepositorySqlc
+	ethDetailTXRepoSqlc    *watch.ETHDetailTXInputRepositorySqlc
+	xrpDetailTXRepoSqlc    *watch.XRPDetailTxInputRepositorySqlc
 )
 
 // GetDB returns shared database connection for tests
@@ -181,8 +181,8 @@ func NewBTCTxOutputRepositorySqlc() watch.TxOutputRepositorier {
 
 // NewETHDetailTXRepositorySqlc returns ETHDetailTXInputRepositorySqlc for test
 func NewETHDetailTXRepositorySqlc() watch.ETHDetailTXRepositorier {
-	if ETHDetailTXRepoSqlc != nil {
-		return ETHDetailTXRepoSqlc
+	if ethDetailTXRepoSqlc != nil {
+		return ethDetailTXRepoSqlc
 	}
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
@@ -197,14 +197,14 @@ func NewETHDetailTXRepositorySqlc() watch.ETHDetailTXRepositorier {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	ETHDetailTXRepoSqlc = watch.NewETHDetailTXInputRepositorySqlc(db, domainCoin.ETH)
-	return ETHDetailTXRepoSqlc
+	ethDetailTXRepoSqlc = watch.NewETHDetailTXInputRepositorySqlc(db, domainCoin.ETH)
+	return ethDetailTXRepoSqlc
 }
 
 // NewXrpDetailTxRepositorySqlc returns XRPDetailTxInputRepositorySqlc for test
-func NewXrpDetailTxRepositorySqlc() watch.XRPDetailTxRepositorier {
-	if xrpDetailTxRepoSqlc != nil {
-		return xrpDetailTxRepoSqlc
+func NewXrpDetailTxRepositorySqlc() watch.XRPDetailTXRepositorier {
+	if xrpDetailTXRepoSqlc != nil {
+		return xrpDetailTXRepoSqlc
 	}
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
@@ -219,6 +219,6 @@ func NewXrpDetailTxRepositorySqlc() watch.XRPDetailTxRepositorier {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	xrpDetailTxRepoSqlc = watch.NewXRPDetailTxInputRepositorySqlc(db, domainCoin.XRP)
-	return xrpDetailTxRepoSqlc
+	xrpDetailTXRepoSqlc = watch.NewXRPDetailTxInputRepositorySqlc(db, domainCoin.XRP)
+	return xrpDetailTXRepoSqlc
 }

@@ -46,7 +46,7 @@ packages:
       PaymentRequestRepositorier:
       TxRepositorier:
       ETHDetailTXRepositorier:
-      XRPDetailTxRepositorier:
+      XRPDetailTXRepositorier:
       SeedRepositorier:
       BTCAccountKeyRepositorier:
       ETHAccountKeyRepositorier:
