@@ -91,43 +91,22 @@ func ToBlockchainInfo(result *GetBlockchainInfoResult) *bitcoindto.BlockchainInf
 		return nil
 	}
 
-	// Convert SoftForks struct to map[string]any
 	softForks := make(map[string]any)
-	if result.SoftForks.Bip34.Type != "" {
-		softForks["bip34"] = map[string]any{
-			"type":   result.SoftForks.Bip34.Type,
-			"active": result.SoftForks.Bip34.Active,
-			"height": result.SoftForks.Bip34.Height,
+	addFork := func(name string, fork Fork) {
+		if fork.Type != "" {
+			softForks[name] = map[string]any{
+				"type":   fork.Type,
+				"active": fork.Active,
+				"height": fork.Height,
+			}
 		}
 	}
-	if result.SoftForks.Bip66.Type != "" {
-		softForks["bip66"] = map[string]any{
-			"type":   result.SoftForks.Bip66.Type,
-			"active": result.SoftForks.Bip66.Active,
-			"height": result.SoftForks.Bip66.Height,
-		}
-	}
-	if result.SoftForks.Bip65.Type != "" {
-		softForks["bip65"] = map[string]any{
-			"type":   result.SoftForks.Bip65.Type,
-			"active": result.SoftForks.Bip65.Active,
-			"height": result.SoftForks.Bip65.Height,
-		}
-	}
-	if result.SoftForks.Csv.Type != "" {
-		softForks["csv"] = map[string]any{
-			"type":   result.SoftForks.Csv.Type,
-			"active": result.SoftForks.Csv.Active,
-			"height": result.SoftForks.Csv.Height,
-		}
-	}
-	if result.SoftForks.Segwit.Type != "" {
-		softForks["segwit"] = map[string]any{
-			"type":   result.SoftForks.Segwit.Type,
-			"active": result.SoftForks.Segwit.Active,
-			"height": result.SoftForks.Segwit.Height,
-		}
-	}
+
+	addFork("bip34", result.SoftForks.Bip34)
+	addFork("bip66", result.SoftForks.Bip66)
+	addFork("bip65", result.SoftForks.Bip65)
+	addFork("csv", result.SoftForks.Csv)
+	addFork("segwit", result.SoftForks.Segwit)
 
 	return &bitcoindto.BlockchainInfo{
 		Chain:                result.Chain.String(),
