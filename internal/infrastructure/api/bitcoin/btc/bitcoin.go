@@ -8,6 +8,7 @@ import (
 	"github.com/btcsuite/btcd/rpcclient"
 	"github.com/btcsuite/btcd/wire"
 
+	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -139,8 +140,8 @@ func (b *Bitcoin) FeeRangeMin() float64 {
 }
 
 // Version returns core version
-func (b *Bitcoin) Version() BTCVersion {
-	return b.version
+func (b *Bitcoin) Version() domainBitcoin.Version {
+	return ToBTCVersion(b.version)
 }
 
 // CoinTypeCode returns CoinTypeCode

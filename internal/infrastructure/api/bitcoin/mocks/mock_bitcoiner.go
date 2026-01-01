@@ -12,9 +12,8 @@ import (
 	"github.com/btcsuite/btcd/wire"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/quagmt/udecimal"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -47,26 +46,26 @@ func (_m *MockBitcoiner) EXPECT() *MockBitcoiner_Expecter {
 }
 
 // AddMultisigAddress provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) AddMultisigAddress(requiredSigs int, addresses []string, accountName string, addressType address.AddrType) (*btc.AddMultisigAddressResult, error) {
+func (_mock *MockBitcoiner) AddMultisigAddress(requiredSigs int, addresses []string, accountName string, addressType bitcoin.AddressType) (*bitcoindto.MultisigAddress, error) {
 	ret := _mock.Called(requiredSigs, addresses, accountName, addressType)
 
 	if len(ret) == 0 {
 		panic("no return value specified for AddMultisigAddress")
 	}
 
-	var r0 *btc.AddMultisigAddressResult
+	var r0 *bitcoindto.MultisigAddress
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int, []string, string, address.AddrType) (*btc.AddMultisigAddressResult, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(int, []string, string, bitcoin.AddressType) (*bitcoindto.MultisigAddress, error)); ok {
 		return returnFunc(requiredSigs, addresses, accountName, addressType)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int, []string, string, address.AddrType) *btc.AddMultisigAddressResult); ok {
+	if returnFunc, ok := ret.Get(0).(func(int, []string, string, bitcoin.AddressType) *bitcoindto.MultisigAddress); ok {
 		r0 = returnFunc(requiredSigs, addresses, accountName, addressType)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.AddMultisigAddressResult)
+			r0 = ret.Get(0).(*bitcoindto.MultisigAddress)
 		}
 	}
-	if returnFunc, ok := ret.Get(1).(func(int, []string, string, address.AddrType) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(int, []string, string, bitcoin.AddressType) error); ok {
 		r1 = returnFunc(requiredSigs, addresses, accountName, addressType)
 	} else {
 		r1 = ret.Error(1)
@@ -83,12 +82,12 @@ type MockBitcoiner_AddMultisigAddress_Call struct {
 //   - requiredSigs int
 //   - addresses []string
 //   - accountName string
-//   - addressType address.AddrType
+//   - addressType bitcoin.AddressType
 func (_e *MockBitcoiner_Expecter) AddMultisigAddress(requiredSigs interface{}, addresses interface{}, accountName interface{}, addressType interface{}) *MockBitcoiner_AddMultisigAddress_Call {
 	return &MockBitcoiner_AddMultisigAddress_Call{Call: _e.mock.On("AddMultisigAddress", requiredSigs, addresses, accountName, addressType)}
 }
 
-func (_c *MockBitcoiner_AddMultisigAddress_Call) Run(run func(requiredSigs int, addresses []string, accountName string, addressType address.AddrType)) *MockBitcoiner_AddMultisigAddress_Call {
+func (_c *MockBitcoiner_AddMultisigAddress_Call) Run(run func(requiredSigs int, addresses []string, accountName string, addressType bitcoin.AddressType)) *MockBitcoiner_AddMultisigAddress_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 int
 		if args[0] != nil {
@@ -102,9 +101,9 @@ func (_c *MockBitcoiner_AddMultisigAddress_Call) Run(run func(requiredSigs int, 
 		if args[2] != nil {
 			arg2 = args[2].(string)
 		}
-		var arg3 address.AddrType
+		var arg3 bitcoin.AddressType
 		if args[3] != nil {
-			arg3 = args[3].(address.AddrType)
+			arg3 = args[3].(bitcoin.AddressType)
 		}
 		run(
 			arg0,
@@ -116,12 +115,12 @@ func (_c *MockBitcoiner_AddMultisigAddress_Call) Run(run func(requiredSigs int, 
 	return _c
 }
 
-func (_c *MockBitcoiner_AddMultisigAddress_Call) Return(addMultisigAddressResult *btc.AddMultisigAddressResult, err error) *MockBitcoiner_AddMultisigAddress_Call {
-	_c.Call.Return(addMultisigAddressResult, err)
+func (_c *MockBitcoiner_AddMultisigAddress_Call) Return(multisigAddress *bitcoindto.MultisigAddress, err error) *MockBitcoiner_AddMultisigAddress_Call {
+	_c.Call.Return(multisigAddress, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_AddMultisigAddress_Call) RunAndReturn(run func(requiredSigs int, addresses []string, accountName string, addressType address.AddrType) (*btc.AddMultisigAddressResult, error)) *MockBitcoiner_AddMultisigAddress_Call {
+func (_c *MockBitcoiner_AddMultisigAddress_Call) RunAndReturn(run func(requiredSigs int, addresses []string, accountName string, addressType bitcoin.AddressType) (*bitcoindto.MultisigAddress, error)) *MockBitcoiner_AddMultisigAddress_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -652,8 +651,8 @@ func (_c *MockBitcoiner_DecodeAddress_Call) Run(run func(addr string)) *MockBitc
 	return _c
 }
 
-func (_c *MockBitcoiner_DecodeAddress_Call) Return(address1 btcutil.Address, err error) *MockBitcoiner_DecodeAddress_Call {
-	_c.Call.Return(address1, err)
+func (_c *MockBitcoiner_DecodeAddress_Call) Return(address btcutil.Address, err error) *MockBitcoiner_DecodeAddress_Call {
+	_c.Call.Return(address, err)
 	return _c
 }
 
@@ -2954,23 +2953,23 @@ func (_c *MockBitcoiner_LockUnspent_Call) RunAndReturn(run func(tx *bitcoindto.U
 }
 
 // Logging provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) Logging() (*btc.LoggingResult, error) {
+func (_mock *MockBitcoiner) Logging() (*bitcoindto.LoggingResult, error) {
 	ret := _mock.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for Logging")
 	}
 
-	var r0 *btc.LoggingResult
+	var r0 *bitcoindto.LoggingResult
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func() (*btc.LoggingResult, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func() (*bitcoindto.LoggingResult, error)); ok {
 		return returnFunc()
 	}
-	if returnFunc, ok := ret.Get(0).(func() *btc.LoggingResult); ok {
+	if returnFunc, ok := ret.Get(0).(func() *bitcoindto.LoggingResult); ok {
 		r0 = returnFunc()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.LoggingResult)
+			r0 = ret.Get(0).(*bitcoindto.LoggingResult)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func() error); ok {
@@ -2998,12 +2997,12 @@ func (_c *MockBitcoiner_Logging_Call) Run(run func()) *MockBitcoiner_Logging_Cal
 	return _c
 }
 
-func (_c *MockBitcoiner_Logging_Call) Return(loggingResult *btc.LoggingResult, err error) *MockBitcoiner_Logging_Call {
+func (_c *MockBitcoiner_Logging_Call) Return(loggingResult *bitcoindto.LoggingResult, err error) *MockBitcoiner_Logging_Call {
 	_c.Call.Return(loggingResult, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_Logging_Call) RunAndReturn(run func() (*btc.LoggingResult, error)) *MockBitcoiner_Logging_Call {
+func (_c *MockBitcoiner_Logging_Call) RunAndReturn(run func() (*bitcoindto.LoggingResult, error)) *MockBitcoiner_Logging_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -4074,18 +4073,18 @@ func (_c *MockBitcoiner_ValidatePSBT_Call) RunAndReturn(run func(psbtBase64 stri
 }
 
 // Version provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) Version() btc.BTCVersion {
+func (_mock *MockBitcoiner) Version() bitcoin.Version {
 	ret := _mock.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for Version")
 	}
 
-	var r0 btc.BTCVersion
-	if returnFunc, ok := ret.Get(0).(func() btc.BTCVersion); ok {
+	var r0 bitcoin.Version
+	if returnFunc, ok := ret.Get(0).(func() bitcoin.Version); ok {
 		r0 = returnFunc()
 	} else {
-		r0 = ret.Get(0).(btc.BTCVersion)
+		r0 = ret.Get(0).(bitcoin.Version)
 	}
 	return r0
 }
@@ -4107,12 +4106,12 @@ func (_c *MockBitcoiner_Version_Call) Run(run func()) *MockBitcoiner_Version_Cal
 	return _c
 }
 
-func (_c *MockBitcoiner_Version_Call) Return(bTCVersion btc.BTCVersion) *MockBitcoiner_Version_Call {
-	_c.Call.Return(bTCVersion)
+func (_c *MockBitcoiner_Version_Call) Return(version bitcoin.Version) *MockBitcoiner_Version_Call {
+	_c.Call.Return(version)
 	return _c
 }
 
-func (_c *MockBitcoiner_Version_Call) RunAndReturn(run func() btc.BTCVersion) *MockBitcoiner_Version_Call {
+func (_c *MockBitcoiner_Version_Call) RunAndReturn(run func() bitcoin.Version) *MockBitcoiner_Version_Call {
 	_c.Call.Return(run)
 	return _c
 }

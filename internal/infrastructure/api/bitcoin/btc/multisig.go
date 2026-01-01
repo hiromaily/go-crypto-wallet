@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
+	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -23,8 +24,8 @@ func (b *Bitcoin) AddMultisigAddress(
 	requiredSigs int,
 	addresses []string,
 	accountName string,
-	addressType address.AddrType,
-) (*AddMultisigAddressResult, error) {
+	addressType domainBitcoin.AddressType,
+) (*bitcoindto.MultisigAddress, error) {
 	if requiredSigs > len(addresses) {
 		return nil, fmt.Errorf(
 			"number of given address doesn't meet number of requiredSigs: requiredSigs:%d, len(addresses):%d",
@@ -57,12 +58,14 @@ func (b *Bitcoin) AddMultisigAddress(
 	var jsonRawMsg []json.RawMessage
 	switch b.coinTypeCode {
 	case domainCoin.BTC:
+		// Convert domain AddressType to infrastructure AddrType
+		infraAddrType := FromAddressType(addressType)
 		var bAddrType []byte
-		bAddrType, err = json.Marshal(addressType.String())
+		bAddrType, err = json.Marshal(infraAddrType.String())
 		if err != nil {
 			logger.Warn(
 				"fail to json.Marchal(addressType)",
-				"addressType", addressType.String(),
+				"addressType", infraAddrType.String(),
 				"error", err)
 			bAddrType = nil
 		}
@@ -88,5 +91,5 @@ func (b *Bitcoin) AddMultisigAddress(
 		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
 	}
 
-	return &multisigAddrResult, nil
+	return ToMultisigAddress(&multisigAddrResult), nil
 }

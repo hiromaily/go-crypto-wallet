@@ -3,6 +3,8 @@ package btc
 import (
 	"encoding/json"
 	"fmt"
+
+	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
 )
 
 // LoggingResult is response type of PRC `logging`
@@ -32,7 +34,7 @@ type LoggingResult struct {
 }
 
 // Logging calls RPC `logging`
-func (b *Bitcoin) Logging() (*LoggingResult, error) {
+func (b *Bitcoin) Logging() (*bitcoindto.LoggingResult, error) {
 	rawResult, err := b.Client.RawRequest("logging", []json.RawMessage{})
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.RawRequest(logging): %w", err)
@@ -44,5 +46,5 @@ func (b *Bitcoin) Logging() (*LoggingResult, error) {
 		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
 	}
 
-	return &loggingResult, nil
+	return ToLoggingResult(&loggingResult), nil
 }
