@@ -63,12 +63,15 @@ In Claude Desktop, you can use these commands as slash commands. For example:
 
 All commands follow common workflow steps defined in [Workflow Guidelines](../agents/workflow.md):
 
+- **Required Tools and Versions**: See [Required Tools and Versions](../agents/requirements.md) - Essential tools (Git, GitHub CLI, Go 1.25.5) and development tools (Atlas v1.0.0, golangci-lint v2.7.2) with version requirements
 - **Pre-Flight Checks**: Git status, branch verification, project guidelines review
 - **Safety Rules**: Critical rules for security and code quality
 - **Verification Steps**: Commands to run before committing (`make lint-fix`, `make tidy`, `make check-build`, `make gotest`)
 - **Special Considerations**: Security-sensitive changes, auto-generated files, breaking changes
 
 Each command file links to these common steps to avoid duplication and ensure consistency.
+
+**Important**: Always verify tool versions before starting work. Using incorrect versions (especially Atlas v1.0.0) may cause compatibility issues.
 
 ## Project Guidelines
 

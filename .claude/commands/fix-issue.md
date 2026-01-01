@@ -7,6 +7,7 @@ Repo: hiromaily/go-crypto-wallet
 ## Common Workflow Steps
 
 This command follows the common workflow steps defined in [Workflow Guidelines](../agents/workflow.md):
+- **Required Tools and Versions**: See [Required Tools and Versions](../agents/requirements.md)
 - **Pre-Flight Checks**: See [Pre-Flight Checks](../agents/workflow.md#pre-flight-checks)
 - **Safety Rules**: See [Safety Rules](../agents/workflow.md#safety-rules)
 - **Verification Steps**: See [Verification Steps](../agents/workflow.md#verification-steps)
@@ -64,17 +65,7 @@ Follow the [Pre-Flight Checks](../agents/workflow.md#pre-flight-checks) from Wor
    - Ensure import order: standard → third-party → local
 
 4. **Self-Review:**
-   - Review your own implementation for:
-     - Code quality and correctness
-     - Adherence to Clean Architecture principles
-     - Compliance with coding standards from `AGENTS.md`
-     - Proper error handling and context wrapping
-     - Security considerations (especially for wallet/key operations)
-     - Import order and formatting
-     - Unused code, variables, or functions
-     - Proper use of interfaces and dependency injection
-   - Fix any issues found during self-review
-   - Ensure all changes align with project guidelines
+   Follow the [Self-Review](../agents/workflow.md#self-review) checklist from Workflow Guidelines.
 
 5. **Test:**
    - Run existing tests: `make gotest`

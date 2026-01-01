@@ -7,6 +7,7 @@ Repo: hiromaily/go-crypto-wallet
 ## Common Workflow Steps
 
 This command follows the common workflow steps defined in [Workflow Guidelines](../agents/workflow.md):
+- **Required Tools and Versions**: See [Required Tools and Versions](../agents/requirements.md)
 - **Pre-Flight Checks**: See [Pre-Flight Checks](../agents/workflow.md#pre-flight-checks)
 - **Safety Rules**: See [Safety Rules](../agents/workflow.md#safety-rules)
 - **Verification Steps**: See [Verification Steps](../agents/workflow.md#verification-steps)
@@ -68,22 +69,25 @@ Follow the [Pre-Flight Checks](../agents/workflow.md#pre-flight-checks) from Wor
    - Ensure import order: standard → third-party → local
    - For each fix, explain what was changed and why
 
-4. **Test:**
+4. **Self-Review:**
+   Follow the [Self-Review](../agents/workflow.md#self-review) checklist from Workflow Guidelines.
+
+5. **Test:**
    - Run existing tests: `make gotest`
    - Create new test cases for functionality fixes
    - Run integration tests if applicable: `make gotest-integration`
    - Verify test coverage for new code
    - Test edge cases and error scenarios mentioned in reviews
 
-5. **Document:**
+6. **Document:**
    - Update relevant documentation if requested in reviews
    - Add/update code comments as needed
    - Ensure all exported functions have godoc comments
 
-6. **Verify:**
+7. **Verify:**
    Follow the [Verification Steps](../agents/workflow.md#verification-steps) from Workflow Guidelines.
 
-7. **Commit:**
+8. **Commit:**
    - Stage changes: `git add <files>`
    - Create commit with descriptive message:
 
@@ -100,11 +104,11 @@ Follow the [Pre-Flight Checks](../agents/workflow.md#pre-flight-checks) from Wor
    - Follow conventional commit format
    - If fixes are extensive, consider multiple atomic commits grouped by category
 
-8. **Push Changes:**
+9. **Push Changes:**
    - Push to PR branch: `git push origin {pr_branch_name}`
    - This will automatically update the existing PR
 
-9. **Update PR (Optional):**
+10. **Update PR (Optional):**
    - Add a comment to the PR summarizing the fixes made
    - Reference specific review comments that were addressed
    - Mark resolved comments if using GitHub's "Resolve conversation" feature

@@ -8,19 +8,21 @@ Repo: hiromaily/go-crypto-wallet
 
 ## Prerequisites Check
 
-Before starting, verify all required tools are installed:
+Before starting, verify all required tools are installed with the correct versions.
 
-1. **GitHub CLI (gh)**: Check with `gh --version`
-   - Required for creating issues via CLI
-   - If missing: Install from <https://cli.github.com/>
-   - Verify authentication: `gh auth status`
-   - If not authenticated: Run `gh auth login`
+See [Required Tools and Versions](../agents/requirements.md) for:
+- Complete list of required tools
+- Version requirements (Go 1.25.5, Atlas v1.0.0, golangci-lint v2.7.2, etc.)
+- Installation instructions
+- Version verification commands
 
-2. **Git**: Check with `git --version`
-   - Required for repository operations
-   - If missing: Install from <https://git-scm.com/>
+**For this command specifically:**
+- **GitHub CLI (gh)**: Required - Check with `gh --version`
+  - Verify authentication: `gh auth status`
+  - If not authenticated: Run `gh auth login`
+- **Git**: Required - Check with `git --version`
 
-**If any required tool is missing, stop and display an error message with installation instructions. Do not proceed with the workflow.**
+**If any required tool is missing or at an incorrect version, stop and display an error message with installation instructions. Do not proceed with the workflow.**
 
 ## Context Understanding
 
