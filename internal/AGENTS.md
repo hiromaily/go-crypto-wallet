@@ -56,31 +56,78 @@ The `internal/` directory is organized into four main layers following Clean Arc
 
 ### 2. Application Layer (`internal/application/`)
 
-**Purpose**: Use case orchestration and business logic coordination
+**Purpose**: Use case orchestration, interface definitions (ports), and business logic coordination
 
 **Key Principles:**
 
 - Orchestrates business logic by coordinating domain objects and infrastructure services
+- **Defines interfaces (ports) for infrastructure dependencies** (Dependency Inversion Principle)
 - Each use case represents a single business operation
-- Depends on domain layer and infrastructure layer through interfaces
 - Organized by wallet type (watch, keygen, sign) and cryptocurrency (btc, eth, xrp, shared)
 
 **Structure:**
 
+- `ports/`: **Interface definitions (abstractions)** - Contracts that infrastructure must implement
+  - `bitcoin/`: Bitcoiner interface (Bitcoin/BCH API abstraction)
+  - `persistence/`: Repository interfaces (database abstractions)
+  - `storage/`: File storage interfaces (TransactionFileRepositorier)
 - `usecase/`: Use case implementations
   - `keygen/`: Key generation use cases
   - `sign/`: Signing use cases
   - `watch/`: Watch wallet use cases
 
+**Application Ports (`application/ports/`):**
+
+**CRITICAL PRINCIPLE**: **Interfaces are defined in the layer that uses them, NOT in the infrastructure layer.**
+
+- ✅ Define interfaces in `application/ports/` when infrastructure needs abstraction
+- ✅ Infrastructure packages import and implement these port interfaces
+- ✅ Use cases depend on port interfaces, not concrete implementations
+- ❌ **NEVER** define interfaces in the infrastructure layer
+- ❌ **NEVER** import concrete infrastructure types in use cases
+
+**Example:**
+
+```go
+// Interface definition in application/ports/bitcoin/interface.go
+package bitcoin
+
+type Bitcoiner interface {
+    GetBalance() (btcutil.Amount, error)
+    SendTransaction(tx *wire.MsgTx) error
+}
+
+// Implementation in infrastructure/api/bitcoin/btc/bitcoin.go
+package btc
+
+import portsBitcoin "github.com/.../internal/application/ports/bitcoin"
+
+type Bitcoin struct {
+    client *rpcclient.Client
+}
+
+// Bitcoin implements portsBitcoin.Bitcoiner
+func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
+    // Implementation...
+}
+
+// Use case depends on interface, not implementation
+type xxxUseCase struct {
+    btcClient portsBitcoin.Bitcoiner  // Interface from ports
+}
+```
+
 **When Working in Application Layer:**
 
 - ✅ Create use cases that orchestrate domain and infrastructure
+- ✅ Define interfaces in `application/ports/` for infrastructure abstractions
 - ✅ Transform DTOs between layers
 - ✅ Wrap errors with context
-- ✅ Depend on domain layer and infrastructure interfaces
+- ✅ Depend on domain layer and `application/ports/` interfaces
 - ❌ **NEVER** import from `interface-adapters/` (dependency direction violation)
 - ❌ **NEVER** contain business logic (delegate to domain)
-- ❌ **NEVER** directly access infrastructure implementations (use interfaces)
+- ❌ **NEVER** directly access infrastructure implementations (use port interfaces)
+- ❌ **NEVER** define interfaces in infrastructure layer
 
 **Use Case Pattern:**
 
@@ -111,21 +158,24 @@ func (u *xxxUseCase) Execute(ctx context.Context, input XxxInput) (*XxxOutput, e
 
 ### 3. Infrastructure Layer (`internal/infrastructure/`)
 
-**Purpose**: External dependencies and technical implementations
+**Purpose**: External dependencies and technical implementations - **IMPLEMENTATIONS ONLY, NO INTERFACE DEFINITIONS**
 
 **Key Principles:**
 
-- Implements interfaces defined by domain layer (Dependency Inversion Principle)
+- **Implements interfaces defined in `application/ports/`** (Dependency Inversion Principle)
+- **Contains ONLY concrete implementations, NEVER interface definitions**
 - Contains NO business logic (only technical implementation)
 - Easily replaceable and mockable for testing
 - Organized by technical concern (database, api, repository, storage, network)
 
+**CRITICAL PRINCIPLE**: **Infrastructure layer contains NO abstraction layer. All interfaces are defined in `application/ports/`.**
+
 **Structure:**
 
-- `api/`: External API clients (Bitcoin, Ethereum, Ripple)
+- `api/`: External API clients (Bitcoin, Ethereum, Ripple) - **implementations only**
 - `database/`: Database connections and generated code (MySQL, sqlc)
-- `repository/`: Data persistence implementations
-- `storage/`: File storage implementations
+- `repository/`: Data persistence implementations - **implements `application/ports/persistence` interfaces**
+- `storage/`: File storage implementations - **implements `application/ports/storage` interfaces**
 - `network/`: Network communication (WebSocket, gRPC)
 - `contract/`: Smart contract utilities
 - `wallet/key/`: Key generation logic (infrastructure concern)
@@ -133,14 +183,16 @@ func (u *xxxUseCase) Execute(ctx context.Context, input XxxInput) (*XxxOutput, e
 
 **When Working in Infrastructure Layer:**
 
-- ✅ Implement domain interfaces
+- ✅ Implement interfaces from `application/ports/`
+- ✅ Import from `application/ports/` to implement port interfaces
 - ✅ Handle external system communication
 - ✅ Convert between domain entities and external formats
 - ✅ Manage technical concerns (database, network, file I/O)
 - ❌ **NEVER** contain business logic (delegate to domain)
 - ❌ **NEVER** validate business rules (use domain validators)
-- ❌ **NEVER** import from `application/` or `interface-adapters/`
+- ❌ **NEVER** import from `application/usecase/` or `interface-adapters/`
 - ❌ **NEVER** make domain decisions
+- ❌ **NEVER** define interfaces in infrastructure (define them in `application/ports/` instead)
 
 **Infrastructure Component Guidelines:**
 
