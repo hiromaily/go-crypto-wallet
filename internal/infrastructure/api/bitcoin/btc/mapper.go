@@ -12,6 +12,7 @@ import (
 	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // ToAddressInfo converts infrastructure GetAddressInfoResult to application AddressInfo
@@ -687,9 +688,8 @@ func ToLoggingResult(result *LoggingResult) *bitcoindto.LoggingResult {
 		// Map Zmq to ZMQPubRawBlock and ZMQPubRawTx (both set to same value)
 		ZMQPubRawBlock: result.Zmq,
 		ZMQPubRawTx:    result.Zmq,
-		// Fields not present in infrastructure result are left as zero values
-		Coindb:      false,
-		SelectCoins: false,
+		Coindb:         result.Coindb,
+		SelectCoins:    result.Selectcoins,
 	}
 }
 
@@ -718,7 +718,9 @@ func FromAddressType(addrType domainBitcoin.AddressType) address.AddrType {
 	case domainBitcoin.AddressTypeBech32m:
 		return address.AddrTypeTaproot
 	default:
-		return address.AddrTypeLegacy // Default to legacy for unknown types
+		// This indicates a programming error (unhandled domain type).
+		// Panicking helps to catch this issue during development.
+		panic(fmt.Sprintf("unhandled domain address type: %s", addrType))
 	}
 }
 
@@ -740,7 +742,10 @@ func ToAddressType(addrType address.AddrType) domainBitcoin.AddressType {
 		// ETH not supported in Bitcoin domain
 		return domainBitcoin.AddressTypeLegacy
 	default:
-		return domainBitcoin.AddressTypeLegacy // Default to legacy for unknown types
+		// Log warning for unknown infrastructure types to improve observability
+		logger.Warn("unknown infrastructure address type, defaulting to legacy",
+			"address_type", addrType)
+		return domainBitcoin.AddressTypeLegacy
 	}
 }
 
