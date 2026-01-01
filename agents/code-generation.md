@@ -84,6 +84,42 @@ This project uses several code generation tools. **All auto-generated files cont
 
 **Note**: ABI code is generated from Ethereum smart contract ABI JSON files.
 
+## Mock Code (Mockery)
+
+**Tool**: [mockery v3](https://github.com/vektra/mockery)
+**Source**: Interface definitions in Go files
+**Configuration**: `.mockery.yaml`
+**Command**: `make mockery` (or `go tool github.com/vektra/mockery/v3`)
+
+**Generated Files**:
+
+- `internal/infrastructure/api/bitcoin/mocks/mock_bitcoiner.go` - Bitcoin API mock
+- `internal/infrastructure/repository/mocks/mock_*.go` - Repository interface mocks
+- `internal/infrastructure/storage/file/mocks/mock_transaction_file_repositorier.go` - File storage mock
+
+**Mock Directory Structure**:
+
+Mocks are placed in `mocks/` subdirectories alongside their implementations:
+
+```text
+internal/infrastructure/
+├── api/bitcoin/
+│   ├── btc/bitcoin.go          # Implementation
+│   └── mocks/mock_bitcoiner.go # Generated mock
+├── repository/
+│   └── mocks/mock_*.go         # Persistence interface mocks
+└── storage/file/
+    └── mocks/mock_*.go         # Storage interface mocks
+```
+
+**Adding New Mocks**:
+
+1. Edit `.mockery.yaml`
+2. Add the interface under the appropriate package section
+3. Run `make mockery`
+
+**Note**: See [Testing Guidelines](testing.md) for mock usage examples and best practices.
+
 ## Protocol Buffer Code (JavaScript/TypeScript)
 
 **Tool**: protoc with JavaScript/TypeScript plugins
@@ -129,6 +165,7 @@ This project uses several code generation tools. **All auto-generated files cont
    - Atlas: Edit `tools/atlas/schemas/*.hcl` (HCL schema files)
    - SQLC Schemas: **DO NOT EDIT** `tools/sqlc/schemas/*.sql` - these are auto-generated from database dumps. Edit `tools/atlas/schemas/*.hcl` instead.
    - SQLC Queries: Edit `tools/sqlc/queries/*.sql` (manually edited)
+   - Mockery: Edit `.mockery.yaml` to add new interfaces, then run `make mockery`
    - Protocol Buffers: Edit `data/proto/rippleapi/*.proto`
    - ABI: Edit `data/contract/token.abi` (or regenerate from Solidity source)
 3. **Regenerate after source changes** - Run the appropriate make command after modifying source files
@@ -141,6 +178,7 @@ This project uses several code generation tools. **All auto-generated files cont
 | Atlas | `tools/atlas/schemas/*.hcl` | `make atlas-dev-reset` | `tools/atlas/migrations/*/*.sql` |
 | SQLC Schema Extract | `data/dump/sql/dump_*.sql` | `make extract-sqlc-schema-all` | `tools/sqlc/schemas/*.sql` |
 | SQLC | `tools/sqlc/schemas/*.sql` + `tools/sqlc/queries/*.sql` | `make sqlc` | `internal/infrastructure/database/sqlc/*.go` |
+| Mockery | `.mockery.yaml` + interface definitions | `make mockery` | `internal/infrastructure/*/mocks/*.go` |
 | Protocol Buffers (Go) | `data/proto/rippleapi/*.proto` | `make protoc-go` | `internal/infrastructure/api/ripple/xrp/*.pb.go` |
 | Smart Contract ABI | `data/contract/token.abi` | `make generate-abi` | `internal/infrastructure/contract/token-abi.go` |
 | Protocol Buffers (JS/TS) | `data/proto/rippleapi/*.proto` | `web/ripple-lib-server/scripts/protoc-ts.sh` | `web/ripple-lib-server/src/pb/*.js` |
@@ -148,5 +186,6 @@ This project uses several code generation tools. **All auto-generated files cont
 ## See Also
 
 - [Database Management Guidelines](database.md) - Detailed database schema workflow
+- [Testing Guidelines](testing.md) - Mock usage and unit testing patterns
 - [Coding Standards](coding-standards.md) - Verification commands
 - [Core Principles](core.md) - Rules about editing auto-generated files

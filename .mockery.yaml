@@ -1,0 +1,55 @@
+# mockery v3 configuration
+# https://vektra.github.io/mockery/latest/configuration/
+#
+# To generate mocks, run: make mockery
+#
+# Mocks are placed in a `mocks/` subdirectory alongside the implementation code.
+# This makes it easy to find mocks when working with the related code.
+
+all: false
+filename: "mock_{{.InterfaceName | snakecase}}.go"
+structname: "Mock{{.InterfaceName}}"
+template: testify
+formatter: goimports
+log-level: info
+
+packages:
+  # Bitcoin API - interface and implementation in same package
+  github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin:
+    config:
+      dir: "internal/infrastructure/api/bitcoin/mocks"
+      pkgname: "mocks"
+    interfaces:
+      Bitcoiner:
+
+  # File storage - interface and implementation in same package
+  github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file:
+    config:
+      dir: "internal/infrastructure/storage/file/mocks"
+      pkgname: "mocks"
+    interfaces:
+      TransactionFileRepositorier:
+
+  # Persistence interfaces (application ports)
+  # NOTE: Interfaces are in application/ports, implementations are in infrastructure/repository
+  # Mocks are placed with implementations (infrastructure layer)
+  # TODO: Consider architectural refactoring to better separate abstraction and implementation
+  github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence:
+    config:
+      dir: "internal/infrastructure/repository/mocks"
+      pkgname: "mocks"
+    interfaces:
+      AddressRepositorier:
+      BTCTxRepositorier:
+      TxInputRepositorier:
+      TxOutputRepositorier:
+      PaymentRequestRepositorier:
+      TxRepositorier:
+      EthDetailTxRepositorier:
+      XrpDetailTxRepositorier:
+      SeedRepositorier:
+      BtcAccountKeyRepositorier:
+      EthAccountKeyRepositorier:
+      XRPAccountKeyRepositorier:
+      AuthFullPubkeyRepositorier:
+      AuthAccountKeyRepositorier:
