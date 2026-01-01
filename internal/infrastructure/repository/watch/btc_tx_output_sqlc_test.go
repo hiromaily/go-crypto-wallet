@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	watchTestutil "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/testutil"
 )
 
@@ -21,9 +21,9 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 	btcTxOutputRepo := watchTestutil.NewBTCTxOutputRepositorySqlc()
 
 	// Create a parent tx
-	txItem := &sqlc.BtcTx{
-		Coin:              sqlc.BtcTxCoinBtc,
-		Action:            sqlc.BtcTxActionPayment,
+	txItem := &sqlcgen.BtcTx{
+		Coin:              sqlcgen.BtcTxCoinBtc,
+		Action:            sqlcgen.BtcTxActionPayment,
 		UnsignedHexTx:     "output-test-hex",
 		TotalInputAmount:  "0.100",
 		TotalOutputAmount: "0.090",
@@ -33,7 +33,7 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 	require.NoError(t, err, "fail to create parent tx")
 
 	// Create test outputs
-	outputs := []*sqlc.BtcTxOutput{
+	outputs := []*sqlcgen.BtcTxOutput{
 		{
 			TxID:          txID,
 			OutputAddress: "output-address-sqlc-1",
@@ -78,7 +78,7 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 	require.Equal(t, txID, oneOutput.TxID, "GetOne() should return output with correct TxID")
 
 	// Insert single
-	singleOutput := &sqlc.BtcTxOutput{
+	singleOutput := &sqlcgen.BtcTxOutput{
 		TxID:          txID,
 		OutputAddress: "output-address-sqlc-3",
 		OutputAccount: "receipt",

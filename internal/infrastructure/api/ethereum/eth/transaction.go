@@ -11,7 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/ethtx"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -85,7 +85,7 @@ func (e *Ethereum) calculateFee(
 // - sender has to pay 5ETH + fee
 func (e *Ethereum) CreateRawTransaction(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-) (*ethtx.RawTx, *sqlc.ETHDetailTX, error) {
+) (*ethtx.RawTx, *sqlcgen.EthDetailTx, error) {
 	// validation check
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
@@ -160,7 +160,7 @@ func (e *Ethereum) CreateRawTransaction(
 	}
 
 	// create insert data for　eth_detail_tx
-	txDetailItem := &sqlc.ETHDetailTX{
+	txDetailItem := &sqlcgen.EthDetailTx{
 		Uuid:            uid.String(),
 		SenderAccount:   "",
 		SenderAddress:   fromAddr,

@@ -6,7 +6,7 @@ package mocks
 
 import (
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -39,23 +39,23 @@ func (_m *MockETHAccountKeyRepositorier) EXPECT() *MockETHAccountKeyRepositorier
 }
 
 // GetAllAddrStatus provides a mock function for the type MockETHAccountKeyRepositorier
-func (_mock *MockETHAccountKeyRepositorier) GetAllAddrStatus(accountType account.AccountType, addrStatus address.AddrStatus) ([]*sqlc.EthAccountKey, error) {
+func (_mock *MockETHAccountKeyRepositorier) GetAllAddrStatus(accountType account.AccountType, addrStatus address.AddrStatus) ([]*sqlcgen.EthAccountKey, error) {
 	ret := _mock.Called(accountType, addrStatus)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAllAddrStatus")
 	}
 
-	var r0 []*sqlc.EthAccountKey
+	var r0 []*sqlcgen.EthAccountKey
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType, address.AddrStatus) ([]*sqlc.EthAccountKey, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType, address.AddrStatus) ([]*sqlcgen.EthAccountKey, error)); ok {
 		return returnFunc(accountType, addrStatus)
 	}
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType, address.AddrStatus) []*sqlc.EthAccountKey); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType, address.AddrStatus) []*sqlcgen.EthAccountKey); ok {
 		r0 = returnFunc(accountType, addrStatus)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*sqlc.EthAccountKey)
+			r0 = ret.Get(0).([]*sqlcgen.EthAccountKey)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(account.AccountType, address.AddrStatus) error); ok {
@@ -96,34 +96,34 @@ func (_c *MockETHAccountKeyRepositorier_GetAllAddrStatus_Call) Run(run func(acco
 	return _c
 }
 
-func (_c *MockETHAccountKeyRepositorier_GetAllAddrStatus_Call) Return(ethAccountKeys []*sqlc.EthAccountKey, err error) *MockETHAccountKeyRepositorier_GetAllAddrStatus_Call {
+func (_c *MockETHAccountKeyRepositorier_GetAllAddrStatus_Call) Return(ethAccountKeys []*sqlcgen.EthAccountKey, err error) *MockETHAccountKeyRepositorier_GetAllAddrStatus_Call {
 	_c.Call.Return(ethAccountKeys, err)
 	return _c
 }
 
-func (_c *MockETHAccountKeyRepositorier_GetAllAddrStatus_Call) RunAndReturn(run func(accountType account.AccountType, addrStatus address.AddrStatus) ([]*sqlc.EthAccountKey, error)) *MockETHAccountKeyRepositorier_GetAllAddrStatus_Call {
+func (_c *MockETHAccountKeyRepositorier_GetAllAddrStatus_Call) RunAndReturn(run func(accountType account.AccountType, addrStatus address.AddrStatus) ([]*sqlcgen.EthAccountKey, error)) *MockETHAccountKeyRepositorier_GetAllAddrStatus_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GetByAddress provides a mock function for the type MockETHAccountKeyRepositorier
-func (_mock *MockETHAccountKeyRepositorier) GetByAddress(address1 string) (*sqlc.EthAccountKey, error) {
+func (_mock *MockETHAccountKeyRepositorier) GetByAddress(address1 string) (*sqlcgen.EthAccountKey, error) {
 	ret := _mock.Called(address1)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetByAddress")
 	}
 
-	var r0 *sqlc.EthAccountKey
+	var r0 *sqlcgen.EthAccountKey
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*sqlc.EthAccountKey, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) (*sqlcgen.EthAccountKey, error)); ok {
 		return returnFunc(address1)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *sqlc.EthAccountKey); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) *sqlcgen.EthAccountKey); ok {
 		r0 = returnFunc(address1)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*sqlc.EthAccountKey)
+			r0 = ret.Get(0).(*sqlcgen.EthAccountKey)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
@@ -158,12 +158,12 @@ func (_c *MockETHAccountKeyRepositorier_GetByAddress_Call) Run(run func(address1
 	return _c
 }
 
-func (_c *MockETHAccountKeyRepositorier_GetByAddress_Call) Return(ethAccountKey *sqlc.EthAccountKey, err error) *MockETHAccountKeyRepositorier_GetByAddress_Call {
+func (_c *MockETHAccountKeyRepositorier_GetByAddress_Call) Return(ethAccountKey *sqlcgen.EthAccountKey, err error) *MockETHAccountKeyRepositorier_GetByAddress_Call {
 	_c.Call.Return(ethAccountKey, err)
 	return _c
 }
 
-func (_c *MockETHAccountKeyRepositorier_GetByAddress_Call) RunAndReturn(run func(address1 string) (*sqlc.EthAccountKey, error)) *MockETHAccountKeyRepositorier_GetByAddress_Call {
+func (_c *MockETHAccountKeyRepositorier_GetByAddress_Call) RunAndReturn(run func(address1 string) (*sqlcgen.EthAccountKey, error)) *MockETHAccountKeyRepositorier_GetByAddress_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -229,23 +229,23 @@ func (_c *MockETHAccountKeyRepositorier_GetMaxIndex_Call) RunAndReturn(run func(
 }
 
 // GetOneMaxID provides a mock function for the type MockETHAccountKeyRepositorier
-func (_mock *MockETHAccountKeyRepositorier) GetOneMaxID(accountType account.AccountType) (*sqlc.EthAccountKey, error) {
+func (_mock *MockETHAccountKeyRepositorier) GetOneMaxID(accountType account.AccountType) (*sqlcgen.EthAccountKey, error) {
 	ret := _mock.Called(accountType)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetOneMaxID")
 	}
 
-	var r0 *sqlc.EthAccountKey
+	var r0 *sqlcgen.EthAccountKey
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType) (*sqlc.EthAccountKey, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType) (*sqlcgen.EthAccountKey, error)); ok {
 		return returnFunc(accountType)
 	}
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType) *sqlc.EthAccountKey); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType) *sqlcgen.EthAccountKey); ok {
 		r0 = returnFunc(accountType)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*sqlc.EthAccountKey)
+			r0 = ret.Get(0).(*sqlcgen.EthAccountKey)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(account.AccountType) error); ok {
@@ -280,18 +280,18 @@ func (_c *MockETHAccountKeyRepositorier_GetOneMaxID_Call) Run(run func(accountTy
 	return _c
 }
 
-func (_c *MockETHAccountKeyRepositorier_GetOneMaxID_Call) Return(ethAccountKey *sqlc.EthAccountKey, err error) *MockETHAccountKeyRepositorier_GetOneMaxID_Call {
+func (_c *MockETHAccountKeyRepositorier_GetOneMaxID_Call) Return(ethAccountKey *sqlcgen.EthAccountKey, err error) *MockETHAccountKeyRepositorier_GetOneMaxID_Call {
 	_c.Call.Return(ethAccountKey, err)
 	return _c
 }
 
-func (_c *MockETHAccountKeyRepositorier_GetOneMaxID_Call) RunAndReturn(run func(accountType account.AccountType) (*sqlc.EthAccountKey, error)) *MockETHAccountKeyRepositorier_GetOneMaxID_Call {
+func (_c *MockETHAccountKeyRepositorier_GetOneMaxID_Call) RunAndReturn(run func(accountType account.AccountType) (*sqlcgen.EthAccountKey, error)) *MockETHAccountKeyRepositorier_GetOneMaxID_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // InsertBulk provides a mock function for the type MockETHAccountKeyRepositorier
-func (_mock *MockETHAccountKeyRepositorier) InsertBulk(items []*sqlc.EthAccountKey) error {
+func (_mock *MockETHAccountKeyRepositorier) InsertBulk(items []*sqlcgen.EthAccountKey) error {
 	ret := _mock.Called(items)
 
 	if len(ret) == 0 {
@@ -299,7 +299,7 @@ func (_mock *MockETHAccountKeyRepositorier) InsertBulk(items []*sqlc.EthAccountK
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func([]*sqlc.EthAccountKey) error); ok {
+	if returnFunc, ok := ret.Get(0).(func([]*sqlcgen.EthAccountKey) error); ok {
 		r0 = returnFunc(items)
 	} else {
 		r0 = ret.Error(0)
@@ -313,16 +313,16 @@ type MockETHAccountKeyRepositorier_InsertBulk_Call struct {
 }
 
 // InsertBulk is a helper method to define mock.On call
-//   - items []*sqlc.EthAccountKey
+//   - items []*sqlcgen.EthAccountKey
 func (_e *MockETHAccountKeyRepositorier_Expecter) InsertBulk(items interface{}) *MockETHAccountKeyRepositorier_InsertBulk_Call {
 	return &MockETHAccountKeyRepositorier_InsertBulk_Call{Call: _e.mock.On("InsertBulk", items)}
 }
 
-func (_c *MockETHAccountKeyRepositorier_InsertBulk_Call) Run(run func(items []*sqlc.EthAccountKey)) *MockETHAccountKeyRepositorier_InsertBulk_Call {
+func (_c *MockETHAccountKeyRepositorier_InsertBulk_Call) Run(run func(items []*sqlcgen.EthAccountKey)) *MockETHAccountKeyRepositorier_InsertBulk_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 []*sqlc.EthAccountKey
+		var arg0 []*sqlcgen.EthAccountKey
 		if args[0] != nil {
-			arg0 = args[0].([]*sqlc.EthAccountKey)
+			arg0 = args[0].([]*sqlcgen.EthAccountKey)
 		}
 		run(
 			arg0,
@@ -336,7 +336,7 @@ func (_c *MockETHAccountKeyRepositorier_InsertBulk_Call) Return(err error) *Mock
 	return _c
 }
 
-func (_c *MockETHAccountKeyRepositorier_InsertBulk_Call) RunAndReturn(run func(items []*sqlc.EthAccountKey) error) *MockETHAccountKeyRepositorier_InsertBulk_Call {
+func (_c *MockETHAccountKeyRepositorier_InsertBulk_Call) RunAndReturn(run func(items []*sqlcgen.EthAccountKey) error) *MockETHAccountKeyRepositorier_InsertBulk_Call {
 	_c.Call.Return(run)
 	return _c
 }

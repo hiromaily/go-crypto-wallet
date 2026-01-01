@@ -16,7 +16,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/eth"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/ethtx"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/contract"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
@@ -120,7 +120,7 @@ func (e *ERC20) GetBalance(ctx context.Context, hexAddr string, _ eth.QuantityTa
 // - 1.b. Or after approve is called, this transaction may be sent
 func (e *ERC20) CreateRawTransaction(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-) (*ethtx.RawTx, *sqlc.ETHDetailTX, error) {
+) (*ethtx.RawTx, *sqlcgen.EthDetailTx, error) {
 	// validation check
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
@@ -192,7 +192,7 @@ func (e *ERC20) CreateRawTransaction(
 	}
 
 	// create insert data for　eth_detail_tx
-	txDetailItem := &sqlc.ETHDetailTX{
+	txDetailItem := &sqlcgen.EthDetailTx{
 		Uuid:            uid.String(),
 		SenderAccount:   "",
 		SenderAddress:   fromAddr,

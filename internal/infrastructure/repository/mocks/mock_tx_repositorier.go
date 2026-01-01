@@ -9,7 +9,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -154,23 +154,23 @@ func (_c *MockTxRepositorier_GetMaxID_Call) RunAndReturn(run func(actionType tra
 }
 
 // GetOne provides a mock function for the type MockTxRepositorier
-func (_mock *MockTxRepositorier) GetOne(id int64) (*sqlc.Tx, error) {
+func (_mock *MockTxRepositorier) GetOne(id int64) (*sqlcgen.Tx, error) {
 	ret := _mock.Called(id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetOne")
 	}
 
-	var r0 *sqlc.Tx
+	var r0 *sqlcgen.Tx
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64) (*sqlc.Tx, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) (*sqlcgen.Tx, error)); ok {
 		return returnFunc(id)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64) *sqlc.Tx); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) *sqlcgen.Tx); ok {
 		r0 = returnFunc(id)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*sqlc.Tx)
+			r0 = ret.Get(0).(*sqlcgen.Tx)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
@@ -205,12 +205,12 @@ func (_c *MockTxRepositorier_GetOne_Call) Run(run func(id int64)) *MockTxReposit
 	return _c
 }
 
-func (_c *MockTxRepositorier_GetOne_Call) Return(tx *sqlc.Tx, err error) *MockTxRepositorier_GetOne_Call {
+func (_c *MockTxRepositorier_GetOne_Call) Return(tx *sqlcgen.Tx, err error) *MockTxRepositorier_GetOne_Call {
 	_c.Call.Return(tx, err)
 	return _c
 }
 
-func (_c *MockTxRepositorier_GetOne_Call) RunAndReturn(run func(id int64) (*sqlc.Tx, error)) *MockTxRepositorier_GetOne_Call {
+func (_c *MockTxRepositorier_GetOne_Call) RunAndReturn(run func(id int64) (*sqlcgen.Tx, error)) *MockTxRepositorier_GetOne_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -276,7 +276,7 @@ func (_c *MockTxRepositorier_InsertUnsignedTx_Call) RunAndReturn(run func(action
 }
 
 // Update provides a mock function for the type MockTxRepositorier
-func (_mock *MockTxRepositorier) Update(txItem *sqlc.Tx) (int64, error) {
+func (_mock *MockTxRepositorier) Update(txItem *sqlcgen.Tx) (int64, error) {
 	ret := _mock.Called(txItem)
 
 	if len(ret) == 0 {
@@ -285,15 +285,15 @@ func (_mock *MockTxRepositorier) Update(txItem *sqlc.Tx) (int64, error) {
 
 	var r0 int64
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*sqlc.Tx) (int64, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(*sqlcgen.Tx) (int64, error)); ok {
 		return returnFunc(txItem)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*sqlc.Tx) int64); ok {
+	if returnFunc, ok := ret.Get(0).(func(*sqlcgen.Tx) int64); ok {
 		r0 = returnFunc(txItem)
 	} else {
 		r0 = ret.Get(0).(int64)
 	}
-	if returnFunc, ok := ret.Get(1).(func(*sqlc.Tx) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(*sqlcgen.Tx) error); ok {
 		r1 = returnFunc(txItem)
 	} else {
 		r1 = ret.Error(1)
@@ -307,16 +307,16 @@ type MockTxRepositorier_Update_Call struct {
 }
 
 // Update is a helper method to define mock.On call
-//   - txItem *sqlc.Tx
+//   - txItem *sqlcgen.Tx
 func (_e *MockTxRepositorier_Expecter) Update(txItem interface{}) *MockTxRepositorier_Update_Call {
 	return &MockTxRepositorier_Update_Call{Call: _e.mock.On("Update", txItem)}
 }
 
-func (_c *MockTxRepositorier_Update_Call) Run(run func(txItem *sqlc.Tx)) *MockTxRepositorier_Update_Call {
+func (_c *MockTxRepositorier_Update_Call) Run(run func(txItem *sqlcgen.Tx)) *MockTxRepositorier_Update_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *sqlc.Tx
+		var arg0 *sqlcgen.Tx
 		if args[0] != nil {
-			arg0 = args[0].(*sqlc.Tx)
+			arg0 = args[0].(*sqlcgen.Tx)
 		}
 		run(
 			arg0,
@@ -330,7 +330,7 @@ func (_c *MockTxRepositorier_Update_Call) Return(n int64, err error) *MockTxRepo
 	return _c
 }
 
-func (_c *MockTxRepositorier_Update_Call) RunAndReturn(run func(txItem *sqlc.Tx) (int64, error)) *MockTxRepositorier_Update_Call {
+func (_c *MockTxRepositorier_Update_Call) RunAndReturn(run func(txItem *sqlcgen.Tx) (int64, error)) *MockTxRepositorier_Update_Call {
 	_c.Call.Return(run)
 	return _c
 }

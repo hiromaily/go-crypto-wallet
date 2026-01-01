@@ -11,7 +11,7 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
@@ -19,38 +19,38 @@ import (
 
 // SeedRepositorier is SeedRepository interface
 type SeedRepositorier interface {
-	GetOne(ctx context.Context) (*sqlc.Seed, error)
+	GetOne(ctx context.Context) (*sqlcgen.Seed, error)
 	Insert(ctx context.Context, strSeed string) error
 }
 
 // BTCAccountKeyRepositorier is BtcAccountKeyRepository interface for BTC/BCH
 type BTCAccountKeyRepositorier interface {
 	GetMaxIndex(accountType domainAccount.AccountType) (int64, error)
-	GetOneMaxID(accountType domainAccount.AccountType) (*sqlc.BtcAccountKey, error)
+	GetOneMaxID(accountType domainAccount.AccountType) (*sqlcgen.BtcAccountKey, error)
 	GetAllAddrStatus(
 		accountType domainAccount.AccountType, addrStatus address.AddrStatus,
-	) ([]*sqlc.BtcAccountKey, error)
-	GetAllMultiAddr(accountType domainAccount.AccountType, addrs []string) ([]*sqlc.BtcAccountKey, error)
-	InsertBulk(items []*sqlc.BtcAccountKey) error
+	) ([]*sqlcgen.BtcAccountKey, error)
+	GetAllMultiAddr(accountType domainAccount.AccountType, addrs []string) ([]*sqlcgen.BtcAccountKey, error)
+	InsertBulk(items []*sqlcgen.BtcAccountKey) error
 	UpdateAddr(
 		accountType domainAccount.AccountType, addr, keyAddress string,
 	) (int64, error)
 	UpdateAddrStatus(
 		accountType domainAccount.AccountType, addrStatus address.AddrStatus, strWIFs []string,
 	) (int64, error)
-	UpdateMultisigAddr(accountType domainAccount.AccountType, item *sqlc.BtcAccountKey) (int64, error)
-	UpdateMultisigAddrs(accountType domainAccount.AccountType, items []*sqlc.BtcAccountKey) (int64, error)
+	UpdateMultisigAddr(accountType domainAccount.AccountType, item *sqlcgen.BtcAccountKey) (int64, error)
+	UpdateMultisigAddrs(accountType domainAccount.AccountType, items []*sqlcgen.BtcAccountKey) (int64, error)
 }
 
 // ETHAccountKeyRepositorier is EthAccountKeyRepository interface for ETH
 type ETHAccountKeyRepositorier interface {
 	GetMaxIndex(accountType domainAccount.AccountType) (int64, error)
-	GetOneMaxID(accountType domainAccount.AccountType) (*sqlc.EthAccountKey, error)
+	GetOneMaxID(accountType domainAccount.AccountType) (*sqlcgen.EthAccountKey, error)
 	GetAllAddrStatus(
 		accountType domainAccount.AccountType, addrStatus address.AddrStatus,
-	) ([]*sqlc.EthAccountKey, error)
-	GetByAddress(address string) (*sqlc.EthAccountKey, error)
-	InsertBulk(items []*sqlc.EthAccountKey) error
+	) ([]*sqlcgen.EthAccountKey, error)
+	GetByAddress(address string) (*sqlcgen.EthAccountKey, error)
+	InsertBulk(items []*sqlcgen.EthAccountKey) error
 	UpdateAddrStatus(
 		accountType domainAccount.AccountType, addrStatus address.AddrStatus, privateKeys []string,
 	) (int64, error)
@@ -60,9 +60,9 @@ type ETHAccountKeyRepositorier interface {
 type XRPAccountKeyRepositorier interface {
 	GetAllAddrStatus(
 		ctx context.Context, accountType domainAccount.AccountType, addrStatus address.AddrStatus,
-	) ([]*sqlc.XrpAccountKey, error)
+	) ([]*sqlcgen.XrpAccountKey, error)
 	GetSecret(ctx context.Context, accountType domainAccount.AccountType, addr string) (string, error)
-	InsertBulk(ctx context.Context, items []*sqlc.XrpAccountKey) error
+	InsertBulk(ctx context.Context, items []*sqlcgen.XrpAccountKey) error
 	UpdateAddrStatus(
 		ctx context.Context, accountType domainAccount.AccountType, addrStatus address.AddrStatus, strWIFs []string,
 	) (int64, error)
@@ -70,15 +70,15 @@ type XRPAccountKeyRepositorier interface {
 
 // AuthFullPubkeyRepositorier is AuthFullPubkeyRepository interface
 type AuthFullPubkeyRepositorier interface {
-	GetOne(authType domainAccount.AuthType) (*sqlc.AuthFullpubkey, error)
+	GetOne(authType domainAccount.AuthType) (*sqlcgen.AuthFullpubkey, error)
 	Insert(authType domainAccount.AuthType, fullPubKey string) error
-	InsertBulk(items []*sqlc.AuthFullpubkey) error
+	InsertBulk(items []*sqlcgen.AuthFullpubkey) error
 }
 
 // AuthAccountKeyRepositorier is AuthAccountKeyRepository interface
 type AuthAccountKeyRepositorier interface {
-	GetOne(authType domainAccount.AuthType) (*sqlc.AuthAccountKey, error)
-	Insert(item *sqlc.AuthAccountKey) error
+	GetOne(authType domainAccount.AuthType) (*sqlcgen.AuthAccountKey, error)
+	Insert(item *sqlcgen.AuthAccountKey) error
 	UpdateAddrStatus(addrStatus address.AddrStatus, strWIF string) (int64, error)
 }
 
@@ -86,21 +86,21 @@ type AuthAccountKeyRepositorier interface {
 
 // AddressRepositorier is AddressRepository interface
 type AddressRepositorier interface {
-	GetAll(accountType domainAccount.AccountType) ([]*sqlc.Address, error)
+	GetAll(accountType domainAccount.AccountType) ([]*sqlcgen.Address, error)
 	GetAllAddress(accountType domainAccount.AccountType) ([]string, error)
-	GetOneUnAllocated(accountType domainAccount.AccountType) (*sqlc.Address, error)
-	InsertBulk(ctx context.Context, items []*sqlc.Address) error
+	GetOneUnAllocated(accountType domainAccount.AccountType) (*sqlcgen.Address, error)
+	InsertBulk(ctx context.Context, items []*sqlcgen.Address) error
 	UpdateIsAllocated(isAllocated bool, Address string) (int64, error)
 }
 
 // BTCTxRepositorier is BTCTxRepository interface
 type BTCTxRepositorier interface {
-	GetOne(id int64) (*sqlc.BtcTx, error)
+	GetOne(id int64) (*sqlcgen.BtcTx, error)
 	GetCountByUnsignedHex(actionType domainTx.ActionType, hex string) (int64, error)
 	GetTxIDBySentHash(actionType domainTx.ActionType, hash string) (int64, error)
 	GetSentHashTx(actionType domainTx.ActionType, txType domainTx.TxType) ([]string, error)
-	InsertUnsignedTx(actionType domainTx.ActionType, txItem *sqlc.BtcTx) (int64, error)
-	Update(txItem *sqlc.BtcTx) (int64, error)
+	InsertUnsignedTx(actionType domainTx.ActionType, txItem *sqlcgen.BtcTx) (int64, error)
+	Update(txItem *sqlcgen.BtcTx) (int64, error)
 	UpdateAfterTxSent(txID int64, txType domainTx.TxType, signedHex, sentHashTx string) (int64, error)
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(actionType domainTx.ActionType, txType domainTx.TxType, sentHashTx string) (int64, error)
@@ -109,35 +109,35 @@ type BTCTxRepositorier interface {
 
 // TxInputRepositorier is TxInputRepository interface
 type TxInputRepositorier interface {
-	GetOne(id int64) (*sqlc.BtcTxInput, error)
-	GetAllByTxID(id int64) ([]*sqlc.BtcTxInput, error)
-	Insert(txItem *sqlc.BtcTxInput) error
-	InsertBulk(txItems []*sqlc.BtcTxInput) error
+	GetOne(id int64) (*sqlcgen.BtcTxInput, error)
+	GetAllByTxID(id int64) ([]*sqlcgen.BtcTxInput, error)
+	Insert(txItem *sqlcgen.BtcTxInput) error
+	InsertBulk(txItems []*sqlcgen.BtcTxInput) error
 }
 
 // TxOutputRepositorier is TxOutputRepository interface
 type TxOutputRepositorier interface {
-	GetOne(id int64) (*sqlc.BtcTxOutput, error)
-	GetAllByTxID(id int64) ([]*sqlc.BtcTxOutput, error)
-	Insert(txItem *sqlc.BtcTxOutput) error
-	InsertBulk(txItems []*sqlc.BtcTxOutput) error
+	GetOne(id int64) (*sqlcgen.BtcTxOutput, error)
+	GetAllByTxID(id int64) ([]*sqlcgen.BtcTxOutput, error)
+	Insert(txItem *sqlcgen.BtcTxOutput) error
+	InsertBulk(txItems []*sqlcgen.BtcTxOutput) error
 }
 
 // TxRepositorier is TxRepository interface
 type TxRepositorier interface {
-	GetOne(id int64) (*sqlc.Tx, error)
+	GetOne(id int64) (*sqlcgen.Tx, error)
 	GetMaxID(actionType domainTx.ActionType) (int64, error)
 	InsertUnsignedTx(actionType domainTx.ActionType) (int64, error)
-	Update(txItem *sqlc.Tx) (int64, error)
+	Update(txItem *sqlcgen.Tx) (int64, error)
 	DeleteAll() (int64, error)
 	WithTx(tx *sql.Tx) TxRepositorier
 }
 
 // PaymentRequestRepositorier is PaymentRequestRepository interface
 type PaymentRequestRepositorier interface {
-	GetAll() ([]*sqlc.PaymentRequest, error)
-	GetAllByPaymentID(paymentID int64) ([]*sqlc.PaymentRequest, error)
-	InsertBulk(items []*sqlc.PaymentRequest) error
+	GetAll() ([]*sqlcgen.PaymentRequest, error)
+	GetAllByPaymentID(paymentID int64) ([]*sqlcgen.PaymentRequest, error)
+	InsertBulk(items []*sqlcgen.PaymentRequest) error
 	UpdatePaymentID(paymentID int64, ids []int64) (int64, error)
 	UpdateIsDone(paymentID int64) (int64, error)
 	DeleteAll() (int64, error)
@@ -146,11 +146,11 @@ type PaymentRequestRepositorier interface {
 
 // ETHDetailTXRepositorier is ETHDetailTXRepository interface
 type ETHDetailTXRepositorier interface {
-	GetOne(id int64) (*sqlc.ETHDetailTX, error)
-	GetAllByTxID(id int64) ([]*sqlc.ETHDetailTX, error)
+	GetOne(id int64) (*sqlcgen.EthDetailTx, error)
+	GetAllByTxID(id int64) ([]*sqlcgen.EthDetailTx, error)
 	GetSentHashTx(txType domainTx.TxType) ([]string, error)
-	Insert(txItem *sqlc.ETHDetailTX) error
-	InsertBulk(txItems []*sqlc.ETHDetailTX) error
+	Insert(txItem *sqlcgen.EthDetailTx) error
+	InsertBulk(txItems []*sqlcgen.EthDetailTx) error
 	UpdateAfterTxSent(uuid string, txType domainTx.TxType, signedHex, sentHashTx string) (int64, error)
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(txType domainTx.TxType, sentHashTx string) (int64, error)
@@ -159,11 +159,11 @@ type ETHDetailTXRepositorier interface {
 
 // XRPDetailTXRepositorier is XrpDetailTxRepository interface
 type XRPDetailTXRepositorier interface {
-	GetOne(id int64) (*sqlc.XrpDetailTx, error)
-	GetAllByTxID(id int64) ([]*sqlc.XrpDetailTx, error)
+	GetOne(id int64) (*sqlcgen.XrpDetailTx, error)
+	GetAllByTxID(id int64) ([]*sqlcgen.XrpDetailTx, error)
 	GetSentHashTx(txType domainTx.TxType) ([]string, error)
-	Insert(txItem *sqlc.XrpDetailTx) error
-	InsertBulk(txItems []*sqlc.XrpDetailTx) error
+	Insert(txItem *sqlcgen.XrpDetailTx) error
+	InsertBulk(txItems []*sqlcgen.XrpDetailTx) error
 	UpdateAfterTxSent(
 		uuid string, txType domainTx.TxType, signedTxID, signedTxBlob string, earlistLedgerVersion uint64,
 	) (int64, error)

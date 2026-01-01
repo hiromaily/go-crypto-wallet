@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	watchTestutil "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/testutil"
 )
 
@@ -25,9 +25,9 @@ func TestBTCTxSqlc(t *testing.T) {
 	// Insert
 	hex := "unsigned-hex-sqlc"
 	actionType := domainTx.ActionTypePayment
-	txItem := &sqlc.BtcTx{
-		Coin:              sqlc.BtcTxCoinBtc,
-		Action:            sqlc.BtcTxActionPayment,
+	txItem := &sqlcgen.BtcTx{
+		Coin:              sqlcgen.BtcTxCoinBtc,
+		Action:            sqlcgen.BtcTxActionPayment,
 		UnsignedHexTx:     hex,
 		TotalInputAmount:  "0.100",
 		TotalOutputAmount: "0.090",

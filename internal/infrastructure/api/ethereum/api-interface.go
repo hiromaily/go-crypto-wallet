@@ -15,7 +15,7 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/eth"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/ethtx"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
 // Ethereumer Ethereum Interface
@@ -85,7 +85,7 @@ type Ethereumer interface {
 	// transaction
 	CreateRawTransaction(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*ethtx.RawTx, *sqlc.ETHDetailTX, error)
+	) (*ethtx.RawTx, *sqlcgen.EthDetailTx, error)
 	SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (*ethtx.RawTx, error)
 	SendSignedRawTransaction(ctx context.Context, signedTxHex string) (string, error)
 	GetConfirmation(ctx context.Context, hashTx string) (uint64, error)
@@ -106,7 +106,7 @@ type ERC20er interface {
 	GetBalance(ctx context.Context, hexAddr string, quantityTag eth.QuantityTag) (*big.Int, error)
 	CreateRawTransaction(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*ethtx.RawTx, *sqlc.ETHDetailTX, error)
+	) (*ethtx.RawTx, *sqlcgen.EthDetailTx, error)
 }
 
 // EtherTxCreator is a type alias for ERC20er used in transaction creation contexts

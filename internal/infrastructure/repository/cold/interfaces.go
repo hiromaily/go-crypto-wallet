@@ -2,7 +2,7 @@ package cold
 
 import (
 	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
 // Type aliases for backward compatibility.
@@ -27,7 +27,7 @@ type AuthFullPubkeyRepositorier = persistence.AuthFullPubkeyRepositorier
 type AuthAccountKeyRepositorier = persistence.AuthAccountKeyRepositorier
 
 // GetRedeemScriptByAddress returns redeem script by address for BTC
-func GetRedeemScriptByAddress(accountKeys []*sqlc.BtcAccountKey, addr string) string {
+func GetRedeemScriptByAddress(accountKeys []*sqlcgen.BtcAccountKey, addr string) string {
 	for _, val := range accountKeys {
 		if val.MultisigAddress == addr {
 			return val.RedeemScript

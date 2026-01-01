@@ -125,7 +125,8 @@ linters:
           alias: dtoeth
         - pkg: github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp
           alias: dtoxrp
-
+        # - pkg: github.com/hiromaily/go-crypto-wallet/internal/infrastructure/db/mysql/sqlcgen
+        #   alias: sqlcgen
     nakedret:
       # Disallow naked returns if func has more lines of code than this setting.
       # Default: 30

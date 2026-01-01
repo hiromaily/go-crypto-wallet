@@ -8,7 +8,7 @@ import (
 	"context"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -41,23 +41,23 @@ func (_m *MockXRPAccountKeyRepositorier) EXPECT() *MockXRPAccountKeyRepositorier
 }
 
 // GetAllAddrStatus provides a mock function for the type MockXRPAccountKeyRepositorier
-func (_mock *MockXRPAccountKeyRepositorier) GetAllAddrStatus(ctx context.Context, accountType account.AccountType, addrStatus address.AddrStatus) ([]*sqlc.XrpAccountKey, error) {
+func (_mock *MockXRPAccountKeyRepositorier) GetAllAddrStatus(ctx context.Context, accountType account.AccountType, addrStatus address.AddrStatus) ([]*sqlcgen.XrpAccountKey, error) {
 	ret := _mock.Called(ctx, accountType, addrStatus)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAllAddrStatus")
 	}
 
-	var r0 []*sqlc.XrpAccountKey
+	var r0 []*sqlcgen.XrpAccountKey
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, account.AccountType, address.AddrStatus) ([]*sqlc.XrpAccountKey, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, account.AccountType, address.AddrStatus) ([]*sqlcgen.XrpAccountKey, error)); ok {
 		return returnFunc(ctx, accountType, addrStatus)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, account.AccountType, address.AddrStatus) []*sqlc.XrpAccountKey); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, account.AccountType, address.AddrStatus) []*sqlcgen.XrpAccountKey); ok {
 		r0 = returnFunc(ctx, accountType, addrStatus)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*sqlc.XrpAccountKey)
+			r0 = ret.Get(0).([]*sqlcgen.XrpAccountKey)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context, account.AccountType, address.AddrStatus) error); ok {
@@ -104,12 +104,12 @@ func (_c *MockXRPAccountKeyRepositorier_GetAllAddrStatus_Call) Run(run func(ctx 
 	return _c
 }
 
-func (_c *MockXRPAccountKeyRepositorier_GetAllAddrStatus_Call) Return(xrpAccountKeys []*sqlc.XrpAccountKey, err error) *MockXRPAccountKeyRepositorier_GetAllAddrStatus_Call {
+func (_c *MockXRPAccountKeyRepositorier_GetAllAddrStatus_Call) Return(xrpAccountKeys []*sqlcgen.XrpAccountKey, err error) *MockXRPAccountKeyRepositorier_GetAllAddrStatus_Call {
 	_c.Call.Return(xrpAccountKeys, err)
 	return _c
 }
 
-func (_c *MockXRPAccountKeyRepositorier_GetAllAddrStatus_Call) RunAndReturn(run func(ctx context.Context, accountType account.AccountType, addrStatus address.AddrStatus) ([]*sqlc.XrpAccountKey, error)) *MockXRPAccountKeyRepositorier_GetAllAddrStatus_Call {
+func (_c *MockXRPAccountKeyRepositorier_GetAllAddrStatus_Call) RunAndReturn(run func(ctx context.Context, accountType account.AccountType, addrStatus address.AddrStatus) ([]*sqlcgen.XrpAccountKey, error)) *MockXRPAccountKeyRepositorier_GetAllAddrStatus_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -187,7 +187,7 @@ func (_c *MockXRPAccountKeyRepositorier_GetSecret_Call) RunAndReturn(run func(ct
 }
 
 // InsertBulk provides a mock function for the type MockXRPAccountKeyRepositorier
-func (_mock *MockXRPAccountKeyRepositorier) InsertBulk(ctx context.Context, items []*sqlc.XrpAccountKey) error {
+func (_mock *MockXRPAccountKeyRepositorier) InsertBulk(ctx context.Context, items []*sqlcgen.XrpAccountKey) error {
 	ret := _mock.Called(ctx, items)
 
 	if len(ret) == 0 {
@@ -195,7 +195,7 @@ func (_mock *MockXRPAccountKeyRepositorier) InsertBulk(ctx context.Context, item
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, []*sqlc.XrpAccountKey) error); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, []*sqlcgen.XrpAccountKey) error); ok {
 		r0 = returnFunc(ctx, items)
 	} else {
 		r0 = ret.Error(0)
@@ -210,20 +210,20 @@ type MockXRPAccountKeyRepositorier_InsertBulk_Call struct {
 
 // InsertBulk is a helper method to define mock.On call
 //   - ctx context.Context
-//   - items []*sqlc.XrpAccountKey
+//   - items []*sqlcgen.XrpAccountKey
 func (_e *MockXRPAccountKeyRepositorier_Expecter) InsertBulk(ctx interface{}, items interface{}) *MockXRPAccountKeyRepositorier_InsertBulk_Call {
 	return &MockXRPAccountKeyRepositorier_InsertBulk_Call{Call: _e.mock.On("InsertBulk", ctx, items)}
 }
 
-func (_c *MockXRPAccountKeyRepositorier_InsertBulk_Call) Run(run func(ctx context.Context, items []*sqlc.XrpAccountKey)) *MockXRPAccountKeyRepositorier_InsertBulk_Call {
+func (_c *MockXRPAccountKeyRepositorier_InsertBulk_Call) Run(run func(ctx context.Context, items []*sqlcgen.XrpAccountKey)) *MockXRPAccountKeyRepositorier_InsertBulk_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 []*sqlc.XrpAccountKey
+		var arg1 []*sqlcgen.XrpAccountKey
 		if args[1] != nil {
-			arg1 = args[1].([]*sqlc.XrpAccountKey)
+			arg1 = args[1].([]*sqlcgen.XrpAccountKey)
 		}
 		run(
 			arg0,
@@ -238,7 +238,7 @@ func (_c *MockXRPAccountKeyRepositorier_InsertBulk_Call) Return(err error) *Mock
 	return _c
 }
 
-func (_c *MockXRPAccountKeyRepositorier_InsertBulk_Call) RunAndReturn(run func(ctx context.Context, items []*sqlc.XrpAccountKey) error) *MockXRPAccountKeyRepositorier_InsertBulk_Call {
+func (_c *MockXRPAccountKeyRepositorier_InsertBulk_Call) RunAndReturn(run func(ctx context.Context, items []*sqlcgen.XrpAccountKey) error) *MockXRPAccountKeyRepositorier_InsertBulk_Call {
 	_c.Call.Return(run)
 	return _c
 }

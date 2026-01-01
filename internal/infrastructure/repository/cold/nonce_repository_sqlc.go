@@ -10,7 +10,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/multisig"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	sqlc "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
 // NonceRepositorySqlc implements NonceRepository using SQLC-generated code.

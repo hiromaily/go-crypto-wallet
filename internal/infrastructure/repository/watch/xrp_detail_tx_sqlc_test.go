@@ -15,7 +15,7 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/mysql"
@@ -50,7 +50,7 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 
 	// Create test xrp detail tx
 	uuid := "xrp-uuid-sqlc-test"
-	xrpTx := &sqlc.XrpDetailTx{
+	xrpTx := &sqlcgen.XrpDetailTx{
 		TxID:                  txID,
 		Uuid:                  uuid,
 		CurrentTxType:         domainTx.TxTypeUnsigned.Int8(),
@@ -154,7 +154,7 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	txID2, err := txRepo.InsertUnsignedTx(domainTx.ActionTypePayment)
 	require.NoError(t, err, "fail to create second parent tx")
 
-	bulkTxs := []*sqlc.XrpDetailTx{
+	bulkTxs := []*sqlcgen.XrpDetailTx{
 		{
 			TxID:                  txID2,
 			Uuid:                  "xrp-uuid-bulk-1",

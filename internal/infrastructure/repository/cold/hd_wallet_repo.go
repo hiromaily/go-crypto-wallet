@@ -7,7 +7,7 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
 //-----------------------------------------------------------------------------
@@ -70,8 +70,8 @@ func (w *AuthHDWalletRepo) Insert(
 		return errors.New("only one key is allowed")
 	}
 	keyItem := keys[0]
-	item := &sqlc.AuthAccountKey{
-		Coin:               sqlc.AuthAccountKeyCoin(coinTypeCode.String()),
+	item := &sqlcgen.AuthAccountKey{
+		Coin:               sqlcgen.AuthAccountKeyCoin(coinTypeCode.String()),
 		KeyType:            keyType.String(),
 		AuthAccount:        w.authType.String(),
 		P2pkhAddress:       keyItem.P2PKHAddr,
@@ -123,12 +123,12 @@ func (w *AccountHDWalletRepo) Insert(
 	keyType domainKey.KeyType,
 ) error {
 	// insert key information to btc_account_key table
-	accountKeyItems := make([]*sqlc.BtcAccountKey, len(keys))
+	accountKeyItems := make([]*sqlcgen.BtcAccountKey, len(keys))
 	for idx, keyItem := range keys {
-		accountKeyItems[idx] = &sqlc.BtcAccountKey{
-			Coin:               sqlc.BtcAccountKeyCoin(coinTypeCode.String()),
+		accountKeyItems[idx] = &sqlcgen.BtcAccountKey{
+			Coin:               sqlcgen.BtcAccountKeyCoin(coinTypeCode.String()),
 			KeyType:            keyType.String(),
-			Account:            sqlc.BtcAccountKeyAccount(accountType.String()),
+			Account:            sqlcgen.BtcAccountKeyAccount(accountType.String()),
 			P2pkhAddress:       keyItem.P2PKHAddr,
 			P2shSegwitAddress:  keyItem.P2SHSegWitAddr,
 			Bech32Address:      keyItem.Bech32Addr,
