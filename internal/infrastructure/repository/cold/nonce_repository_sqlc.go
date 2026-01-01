@@ -10,19 +10,19 @@ import (
 	"github.com/go-sql-driver/mysql"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/multisig"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
 // NonceRepositorySqlc implements NonceRepository using SQLC-generated code.
 // This repository is used by cold wallets (keygen and sign) for secure nonce storage.
 type NonceRepositorySqlc struct {
-	queries *sqlc.Queries
+	queries *sqlcgen.Queries
 }
 
 // NewNonceRepositorySqlc creates a new SQLC-based nonce repository.
 func NewNonceRepositorySqlc(dbConn *sql.DB) *NonceRepositorySqlc {
 	return &NonceRepositorySqlc{
-		queries: sqlc.New(dbConn),
+		queries: sqlcgen.New(dbConn),
 	}
 }
 
@@ -32,7 +32,7 @@ func (r *NonceRepositorySqlc) SaveNonce(
 	signerID, transactionID string,
 	publicNonce [66]byte,
 ) error {
-	_, err := r.queries.SaveNonce(ctx, sqlc.SaveNonceParams{
+	_, err := r.queries.SaveNonce(ctx, sqlcgen.SaveNonceParams{
 		SignerID:      signerID,
 		TransactionID: transactionID,
 		PublicNonce:   publicNonce[:],
@@ -56,7 +56,7 @@ func (r *NonceRepositorySqlc) GetNonce(
 	ctx context.Context,
 	signerID, transactionID string,
 ) (*multisig.NonceCommitment, error) {
-	nonce, err := r.queries.GetNonceBySignerAndTx(ctx, sqlc.GetNonceBySignerAndTxParams{
+	nonce, err := r.queries.GetNonceBySignerAndTx(ctx, sqlcgen.GetNonceBySignerAndTxParams{
 		SignerID:      signerID,
 		TransactionID: transactionID,
 	})
@@ -119,7 +119,7 @@ func (r *NonceRepositorySqlc) MarkNonceUsed(
 	ctx context.Context,
 	signerID, transactionID string,
 ) error {
-	result, err := r.queries.MarkNonceUsed(ctx, sqlc.MarkNonceUsedParams{
+	result, err := r.queries.MarkNonceUsed(ctx, sqlcgen.MarkNonceUsedParams{
 		IsUsed:        true,
 		UsedAt:        sql.NullTime{Time: time.Now(), Valid: true},
 		SignerID:      signerID,
@@ -168,7 +168,7 @@ func (r *NonceRepositorySqlc) CleanupOldUnusedNonces(
 }
 
 // convertToNonceCommitment converts a SQLC model to a domain NonceCommitment.
-func convertToNonceCommitment(nonce *sqlc.Musig2Nonce) (*multisig.NonceCommitment, error) {
+func convertToNonceCommitment(nonce *sqlcgen.Musig2Nonce) (*multisig.NonceCommitment, error) {
 	if len(nonce.PublicNonce) != 66 {
 		return nil, fmt.Errorf("invalid public nonce length: expected 66 bytes, got %d", len(nonce.PublicNonce))
 	}

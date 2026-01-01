@@ -6,7 +6,7 @@ package mocks
 
 import (
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -39,23 +39,23 @@ func (_m *MockAuthAccountKeyRepositorier) EXPECT() *MockAuthAccountKeyRepositori
 }
 
 // GetOne provides a mock function for the type MockAuthAccountKeyRepositorier
-func (_mock *MockAuthAccountKeyRepositorier) GetOne(authType account.AuthType) (*sqlc.AuthAccountKey, error) {
+func (_mock *MockAuthAccountKeyRepositorier) GetOne(authType account.AuthType) (*sqlcgen.AuthAccountKey, error) {
 	ret := _mock.Called(authType)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetOne")
 	}
 
-	var r0 *sqlc.AuthAccountKey
+	var r0 *sqlcgen.AuthAccountKey
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(account.AuthType) (*sqlc.AuthAccountKey, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AuthType) (*sqlcgen.AuthAccountKey, error)); ok {
 		return returnFunc(authType)
 	}
-	if returnFunc, ok := ret.Get(0).(func(account.AuthType) *sqlc.AuthAccountKey); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AuthType) *sqlcgen.AuthAccountKey); ok {
 		r0 = returnFunc(authType)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*sqlc.AuthAccountKey)
+			r0 = ret.Get(0).(*sqlcgen.AuthAccountKey)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(account.AuthType) error); ok {
@@ -90,18 +90,18 @@ func (_c *MockAuthAccountKeyRepositorier_GetOne_Call) Run(run func(authType acco
 	return _c
 }
 
-func (_c *MockAuthAccountKeyRepositorier_GetOne_Call) Return(authAccountKey *sqlc.AuthAccountKey, err error) *MockAuthAccountKeyRepositorier_GetOne_Call {
+func (_c *MockAuthAccountKeyRepositorier_GetOne_Call) Return(authAccountKey *sqlcgen.AuthAccountKey, err error) *MockAuthAccountKeyRepositorier_GetOne_Call {
 	_c.Call.Return(authAccountKey, err)
 	return _c
 }
 
-func (_c *MockAuthAccountKeyRepositorier_GetOne_Call) RunAndReturn(run func(authType account.AuthType) (*sqlc.AuthAccountKey, error)) *MockAuthAccountKeyRepositorier_GetOne_Call {
+func (_c *MockAuthAccountKeyRepositorier_GetOne_Call) RunAndReturn(run func(authType account.AuthType) (*sqlcgen.AuthAccountKey, error)) *MockAuthAccountKeyRepositorier_GetOne_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Insert provides a mock function for the type MockAuthAccountKeyRepositorier
-func (_mock *MockAuthAccountKeyRepositorier) Insert(item *sqlc.AuthAccountKey) error {
+func (_mock *MockAuthAccountKeyRepositorier) Insert(item *sqlcgen.AuthAccountKey) error {
 	ret := _mock.Called(item)
 
 	if len(ret) == 0 {
@@ -109,7 +109,7 @@ func (_mock *MockAuthAccountKeyRepositorier) Insert(item *sqlc.AuthAccountKey) e
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(*sqlc.AuthAccountKey) error); ok {
+	if returnFunc, ok := ret.Get(0).(func(*sqlcgen.AuthAccountKey) error); ok {
 		r0 = returnFunc(item)
 	} else {
 		r0 = ret.Error(0)
@@ -123,16 +123,16 @@ type MockAuthAccountKeyRepositorier_Insert_Call struct {
 }
 
 // Insert is a helper method to define mock.On call
-//   - item *sqlc.AuthAccountKey
+//   - item *sqlcgen.AuthAccountKey
 func (_e *MockAuthAccountKeyRepositorier_Expecter) Insert(item interface{}) *MockAuthAccountKeyRepositorier_Insert_Call {
 	return &MockAuthAccountKeyRepositorier_Insert_Call{Call: _e.mock.On("Insert", item)}
 }
 
-func (_c *MockAuthAccountKeyRepositorier_Insert_Call) Run(run func(item *sqlc.AuthAccountKey)) *MockAuthAccountKeyRepositorier_Insert_Call {
+func (_c *MockAuthAccountKeyRepositorier_Insert_Call) Run(run func(item *sqlcgen.AuthAccountKey)) *MockAuthAccountKeyRepositorier_Insert_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *sqlc.AuthAccountKey
+		var arg0 *sqlcgen.AuthAccountKey
 		if args[0] != nil {
-			arg0 = args[0].(*sqlc.AuthAccountKey)
+			arg0 = args[0].(*sqlcgen.AuthAccountKey)
 		}
 		run(
 			arg0,
@@ -146,7 +146,7 @@ func (_c *MockAuthAccountKeyRepositorier_Insert_Call) Return(err error) *MockAut
 	return _c
 }
 
-func (_c *MockAuthAccountKeyRepositorier_Insert_Call) RunAndReturn(run func(item *sqlc.AuthAccountKey) error) *MockAuthAccountKeyRepositorier_Insert_Call {
+func (_c *MockAuthAccountKeyRepositorier_Insert_Call) RunAndReturn(run func(item *sqlcgen.AuthAccountKey) error) *MockAuthAccountKeyRepositorier_Insert_Call {
 	_c.Call.Return(run)
 	return _c
 }

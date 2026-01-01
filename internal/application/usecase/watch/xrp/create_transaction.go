@@ -15,7 +15,7 @@ import (
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
@@ -268,7 +268,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	serializedTxs := []string{fmt.Sprintf("%s,%s", uid, rawTxString)}
 
 	// create insert data for xrp_detail_tx
-	txDetailItem := &sqlc.XrpDetailTx{
+	txDetailItem := &sqlcgen.XrpDetailTx{
 		Uuid:               uid.String(),
 		CurrentTxType:      domainTx.TxTypeUnsigned.Int8(),
 		SenderAccount:      sender.String(),
@@ -282,7 +282,7 @@ func (u *createTransactionUseCase) createTransferTx(
 		LastLedgerSequence: txJSON.LastLedgerSequence,
 		Sequence:           txJSON.Sequence,
 	}
-	txDetailItems := []*sqlc.XrpDetailTx{txDetailItem}
+	txDetailItems := []*sqlcgen.XrpDetailTx{txDetailItem}
 
 	txID, err := u.updateDB(targetAction, txDetailItems, nil)
 	if err != nil {
@@ -339,7 +339,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	userAmounts []xrp.UserAmount,
-) ([]string, []*sqlc.XrpDetailTx, error) {
+) ([]string, []*sqlcgen.XrpDetailTx, error) {
 	// get address for deposit account
 	depositAddr, err := u.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
@@ -350,7 +350,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 
 	// create raw transaction for each address
 	serializedTxs := make([]string, 0, len(userAmounts))
-	txDetailItems := make([]*sqlc.XrpDetailTx, 0, len(userAmounts))
+	txDetailItems := make([]*sqlcgen.XrpDetailTx, 0, len(userAmounts))
 
 	var sequence uint64
 	for _, val := range userAmounts {
@@ -384,7 +384,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 		serializedTxs = append(serializedTxs, fmt.Sprintf("%s,%s", uid, rawTxString))
 
 		// create insert data for xrp_detail_tx
-		txDetailItem := &sqlc.XrpDetailTx{
+		txDetailItem := &sqlcgen.XrpDetailTx{
 			Uuid:               uid.String(),
 			CurrentTxType:      domainTx.TxTypeUnsigned.Int8(),
 			SenderAccount:      sender.String(),
@@ -462,7 +462,7 @@ func (u *createTransactionUseCase) createUserPayment() ([]userPayment, float64, 
 // validateAmount validates that sender has sufficient balance
 func (u *createTransactionUseCase) validateAmount(
 	ctx context.Context,
-	senderAddr *sqlc.Address,
+	senderAddr *sqlcgen.Address,
 	totalAmount float64,
 ) error {
 	senderBalance, err := u.rippler.GetBalance(ctx, senderAddr.WalletAddress)
@@ -481,10 +481,10 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	userPayments []userPayment,
-	senderAddr *sqlc.Address,
-) ([]string, []*sqlc.XrpDetailTx) {
+	senderAddr *sqlcgen.Address,
+) ([]string, []*sqlcgen.XrpDetailTx) {
 	serializedTxs := make([]string, 0, len(userPayments))
-	txDetailItems := make([]*sqlc.XrpDetailTx, 0, len(userPayments))
+	txDetailItems := make([]*sqlcgen.XrpDetailTx, 0, len(userPayments))
 	var sequence uint64
 	for _, userPayment := range userPayments {
 		// call CreateRawTransaction
@@ -518,7 +518,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 		serializedTxs = append(serializedTxs, fmt.Sprintf("%s,%s", uid, rawTxString))
 
 		// create insert data for xrp_detail_tx
-		txDetailItem := &sqlc.XrpDetailTx{
+		txDetailItem := &sqlcgen.XrpDetailTx{
 			Uuid:               uid.String(),
 			CurrentTxType:      domainTx.TxTypeUnsigned.Int8(),
 			SenderAccount:      sender.String(),
@@ -540,7 +540,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 // updateDB updates database in a transaction
 func (u *createTransactionUseCase) updateDB(
 	targetAction domainTx.ActionType,
-	txDetailItems []*sqlc.XrpDetailTx,
+	txDetailItems []*sqlcgen.XrpDetailTx,
 	paymentRequestIds []int64,
 ) (int64, error) {
 	// start transaction

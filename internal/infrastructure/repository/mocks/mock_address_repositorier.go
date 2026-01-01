@@ -8,7 +8,7 @@ import (
 	"context"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -40,23 +40,23 @@ func (_m *MockAddressRepositorier) EXPECT() *MockAddressRepositorier_Expecter {
 }
 
 // GetAll provides a mock function for the type MockAddressRepositorier
-func (_mock *MockAddressRepositorier) GetAll(accountType account.AccountType) ([]*sqlc.Address, error) {
+func (_mock *MockAddressRepositorier) GetAll(accountType account.AccountType) ([]*sqlcgen.Address, error) {
 	ret := _mock.Called(accountType)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAll")
 	}
 
-	var r0 []*sqlc.Address
+	var r0 []*sqlcgen.Address
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType) ([]*sqlc.Address, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType) ([]*sqlcgen.Address, error)); ok {
 		return returnFunc(accountType)
 	}
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType) []*sqlc.Address); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType) []*sqlcgen.Address); ok {
 		r0 = returnFunc(accountType)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*sqlc.Address)
+			r0 = ret.Get(0).([]*sqlcgen.Address)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(account.AccountType) error); ok {
@@ -91,12 +91,12 @@ func (_c *MockAddressRepositorier_GetAll_Call) Run(run func(accountType account.
 	return _c
 }
 
-func (_c *MockAddressRepositorier_GetAll_Call) Return(addresss []*sqlc.Address, err error) *MockAddressRepositorier_GetAll_Call {
+func (_c *MockAddressRepositorier_GetAll_Call) Return(addresss []*sqlcgen.Address, err error) *MockAddressRepositorier_GetAll_Call {
 	_c.Call.Return(addresss, err)
 	return _c
 }
 
-func (_c *MockAddressRepositorier_GetAll_Call) RunAndReturn(run func(accountType account.AccountType) ([]*sqlc.Address, error)) *MockAddressRepositorier_GetAll_Call {
+func (_c *MockAddressRepositorier_GetAll_Call) RunAndReturn(run func(accountType account.AccountType) ([]*sqlcgen.Address, error)) *MockAddressRepositorier_GetAll_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -164,23 +164,23 @@ func (_c *MockAddressRepositorier_GetAllAddress_Call) RunAndReturn(run func(acco
 }
 
 // GetOneUnAllocated provides a mock function for the type MockAddressRepositorier
-func (_mock *MockAddressRepositorier) GetOneUnAllocated(accountType account.AccountType) (*sqlc.Address, error) {
+func (_mock *MockAddressRepositorier) GetOneUnAllocated(accountType account.AccountType) (*sqlcgen.Address, error) {
 	ret := _mock.Called(accountType)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetOneUnAllocated")
 	}
 
-	var r0 *sqlc.Address
+	var r0 *sqlcgen.Address
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType) (*sqlc.Address, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType) (*sqlcgen.Address, error)); ok {
 		return returnFunc(accountType)
 	}
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType) *sqlc.Address); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType) *sqlcgen.Address); ok {
 		r0 = returnFunc(accountType)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*sqlc.Address)
+			r0 = ret.Get(0).(*sqlcgen.Address)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(account.AccountType) error); ok {
@@ -215,18 +215,18 @@ func (_c *MockAddressRepositorier_GetOneUnAllocated_Call) Run(run func(accountTy
 	return _c
 }
 
-func (_c *MockAddressRepositorier_GetOneUnAllocated_Call) Return(address *sqlc.Address, err error) *MockAddressRepositorier_GetOneUnAllocated_Call {
+func (_c *MockAddressRepositorier_GetOneUnAllocated_Call) Return(address *sqlcgen.Address, err error) *MockAddressRepositorier_GetOneUnAllocated_Call {
 	_c.Call.Return(address, err)
 	return _c
 }
 
-func (_c *MockAddressRepositorier_GetOneUnAllocated_Call) RunAndReturn(run func(accountType account.AccountType) (*sqlc.Address, error)) *MockAddressRepositorier_GetOneUnAllocated_Call {
+func (_c *MockAddressRepositorier_GetOneUnAllocated_Call) RunAndReturn(run func(accountType account.AccountType) (*sqlcgen.Address, error)) *MockAddressRepositorier_GetOneUnAllocated_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // InsertBulk provides a mock function for the type MockAddressRepositorier
-func (_mock *MockAddressRepositorier) InsertBulk(ctx context.Context, items []*sqlc.Address) error {
+func (_mock *MockAddressRepositorier) InsertBulk(ctx context.Context, items []*sqlcgen.Address) error {
 	ret := _mock.Called(ctx, items)
 
 	if len(ret) == 0 {
@@ -234,7 +234,7 @@ func (_mock *MockAddressRepositorier) InsertBulk(ctx context.Context, items []*s
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, []*sqlc.Address) error); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context, []*sqlcgen.Address) error); ok {
 		r0 = returnFunc(ctx, items)
 	} else {
 		r0 = ret.Error(0)
@@ -249,20 +249,20 @@ type MockAddressRepositorier_InsertBulk_Call struct {
 
 // InsertBulk is a helper method to define mock.On call
 //   - ctx context.Context
-//   - items []*sqlc.Address
+//   - items []*sqlcgen.Address
 func (_e *MockAddressRepositorier_Expecter) InsertBulk(ctx interface{}, items interface{}) *MockAddressRepositorier_InsertBulk_Call {
 	return &MockAddressRepositorier_InsertBulk_Call{Call: _e.mock.On("InsertBulk", ctx, items)}
 }
 
-func (_c *MockAddressRepositorier_InsertBulk_Call) Run(run func(ctx context.Context, items []*sqlc.Address)) *MockAddressRepositorier_InsertBulk_Call {
+func (_c *MockAddressRepositorier_InsertBulk_Call) Run(run func(ctx context.Context, items []*sqlcgen.Address)) *MockAddressRepositorier_InsertBulk_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
 			arg0 = args[0].(context.Context)
 		}
-		var arg1 []*sqlc.Address
+		var arg1 []*sqlcgen.Address
 		if args[1] != nil {
-			arg1 = args[1].([]*sqlc.Address)
+			arg1 = args[1].([]*sqlcgen.Address)
 		}
 		run(
 			arg0,
@@ -277,7 +277,7 @@ func (_c *MockAddressRepositorier_InsertBulk_Call) Return(err error) *MockAddres
 	return _c
 }
 
-func (_c *MockAddressRepositorier_InsertBulk_Call) RunAndReturn(run func(ctx context.Context, items []*sqlc.Address) error) *MockAddressRepositorier_InsertBulk_Call {
+func (_c *MockAddressRepositorier_InsertBulk_Call) RunAndReturn(run func(ctx context.Context, items []*sqlcgen.Address) error) *MockAddressRepositorier_InsertBulk_Call {
 	_c.Call.Return(run)
 	return _c
 }

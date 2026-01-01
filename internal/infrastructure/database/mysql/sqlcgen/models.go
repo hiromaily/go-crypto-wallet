@@ -2,7 +2,7 @@
 // versions:
 //   sqlc v1.30.0
 
-package sqlc
+package sqlcgen
 
 import (
 	"database/sql"
@@ -847,7 +847,7 @@ type EthAccountKey struct {
 }
 
 // table for eth transaction detail
-type ETHDetailTX struct {
+type EthDetailTx struct {
 	// ID
 	ID int64
 	// eth_tx table ID

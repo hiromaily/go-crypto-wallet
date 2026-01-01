@@ -3,7 +3,7 @@
 //   sqlc v1.30.0
 // source: musig2_nonces.sql
 
-package sqlc
+package sqlcgen
 
 import (
 	"context"

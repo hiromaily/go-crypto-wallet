@@ -6,12 +6,12 @@ import (
 	"fmt"
 
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
 // TxInputRepositorySqlc is repository for btc_tx_input table using sqlc
 type TxInputRepositorySqlc struct {
-	queries      *sqlc.Queries
+	queries      *sqlcgen.Queries
 	coinTypeCode domainCoin.CoinTypeCode
 }
 
@@ -20,13 +20,13 @@ func NewBTCTxInputRepositorySqlc(
 	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
 ) *TxInputRepositorySqlc {
 	return &TxInputRepositorySqlc{
-		queries:      sqlc.New(dbConn),
+		queries:      sqlcgen.New(dbConn),
 		coinTypeCode: coinTypeCode,
 	}
 }
 
 // GetOne get one record by ID
-func (r *TxInputRepositorySqlc) GetOne(id int64) (*sqlc.BtcTxInput, error) {
+func (r *TxInputRepositorySqlc) GetOne(id int64) (*sqlcgen.BtcTxInput, error) {
 	ctx := context.Background()
 
 	input, err := r.queries.GetBtcTxInputByID(ctx, id)
@@ -38,7 +38,7 @@ func (r *TxInputRepositorySqlc) GetOne(id int64) (*sqlc.BtcTxInput, error) {
 }
 
 // GetAllByTxID returns all records searched by tx_id
-func (r *TxInputRepositorySqlc) GetAllByTxID(id int64) ([]*sqlc.BtcTxInput, error) {
+func (r *TxInputRepositorySqlc) GetAllByTxID(id int64) ([]*sqlcgen.BtcTxInput, error) {
 	ctx := context.Background()
 
 	inputs, err := r.queries.GetBtcTxInputsByTxID(ctx, id)
@@ -46,7 +46,7 @@ func (r *TxInputRepositorySqlc) GetAllByTxID(id int64) ([]*sqlc.BtcTxInput, erro
 		return nil, fmt.Errorf("failed to call GetBtcTxInputsByTxID(): %w", err)
 	}
 
-	result := make([]*sqlc.BtcTxInput, len(inputs))
+	result := make([]*sqlcgen.BtcTxInput, len(inputs))
 	for i := range inputs {
 		result[i] = &inputs[i]
 	}
@@ -55,10 +55,10 @@ func (r *TxInputRepositorySqlc) GetAllByTxID(id int64) ([]*sqlc.BtcTxInput, erro
 }
 
 // Insert inserts one record
-func (r *TxInputRepositorySqlc) Insert(txItem *sqlc.BtcTxInput) error {
+func (r *TxInputRepositorySqlc) Insert(txItem *sqlcgen.BtcTxInput) error {
 	ctx := context.Background()
 
-	_, err := r.queries.InsertBtcTxInput(ctx, sqlc.InsertBtcTxInputParams{
+	_, err := r.queries.InsertBtcTxInput(ctx, sqlcgen.InsertBtcTxInputParams{
 		TxID:               txItem.TxID,
 		InputTxid:          txItem.InputTxid,
 		InputVout:          txItem.InputVout,
@@ -76,7 +76,7 @@ func (r *TxInputRepositorySqlc) Insert(txItem *sqlc.BtcTxInput) error {
 }
 
 // InsertBulk inserts multiple records
-func (r *TxInputRepositorySqlc) InsertBulk(txItems []*sqlc.BtcTxInput) error {
+func (r *TxInputRepositorySqlc) InsertBulk(txItems []*sqlcgen.BtcTxInput) error {
 	for _, item := range txItems {
 		if err := r.Insert(item); err != nil {
 			return err

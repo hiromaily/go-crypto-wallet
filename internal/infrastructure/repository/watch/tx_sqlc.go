@@ -8,25 +8,25 @@ import (
 	portsPersistence "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
 // TxRepositorySqlc is repository for tx table using sqlc
 type TxRepositorySqlc struct {
-	queries      *sqlc.Queries
+	queries      *sqlcgen.Queries
 	coinTypeCode domainCoin.CoinTypeCode
 }
 
 // NewTxRepositorySqlc returns TxRepositorySqlc object
 func NewTxRepositorySqlc(dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode) *TxRepositorySqlc {
 	return &TxRepositorySqlc{
-		queries:      sqlc.New(dbConn),
+		queries:      sqlcgen.New(dbConn),
 		coinTypeCode: coinTypeCode,
 	}
 }
 
 // GetOne returns one record by ID
-func (r *TxRepositorySqlc) GetOne(id int64) (*sqlc.Tx, error) {
+func (r *TxRepositorySqlc) GetOne(id int64) (*sqlcgen.Tx, error) {
 	ctx := context.Background()
 
 	tx, err := r.queries.GetTxByID(ctx, id)
@@ -41,9 +41,9 @@ func (r *TxRepositorySqlc) GetOne(id int64) (*sqlc.Tx, error) {
 func (r *TxRepositorySqlc) GetMaxID(actionType domainTx.ActionType) (int64, error) {
 	ctx := context.Background()
 
-	result, err := r.queries.GetMaxTxID(ctx, sqlc.GetMaxTxIDParams{
-		Coin:   sqlc.TxCoin(r.coinTypeCode.String()),
-		Action: sqlc.TxAction(actionType.String()),
+	result, err := r.queries.GetMaxTxID(ctx, sqlcgen.GetMaxTxIDParams{
+		Coin:   sqlcgen.TxCoin(r.coinTypeCode.String()),
+		Action: sqlcgen.TxAction(actionType.String()),
 	})
 	if err != nil {
 		return 0, fmt.Errorf("failed to call GetMaxTxID(): %w", err)
@@ -65,9 +65,9 @@ func (r *TxRepositorySqlc) GetMaxID(actionType domainTx.ActionType) (int64, erro
 func (r *TxRepositorySqlc) InsertUnsignedTx(actionType domainTx.ActionType) (int64, error) {
 	ctx := context.Background()
 
-	result, err := r.queries.InsertTx(ctx, sqlc.InsertTxParams{
-		Coin:   sqlc.TxCoin(r.coinTypeCode.String()),
-		Action: sqlc.TxAction(actionType.String()),
+	result, err := r.queries.InsertTx(ctx, sqlcgen.InsertTxParams{
+		Coin:   sqlcgen.TxCoin(r.coinTypeCode.String()),
+		Action: sqlcgen.TxAction(actionType.String()),
 	})
 	if err != nil {
 		return 0, fmt.Errorf("failed to call InsertTx(): %w", err)
@@ -81,11 +81,11 @@ func (r *TxRepositorySqlc) InsertUnsignedTx(actionType domainTx.ActionType) (int
 	return id, nil
 }
 
-// Update updates by sqlc.Tx (entire update)
-func (r *TxRepositorySqlc) Update(txItem *sqlc.Tx) (int64, error) {
+// Update updates by sqlcgen.Tx (entire update)
+func (r *TxRepositorySqlc) Update(txItem *sqlcgen.Tx) (int64, error) {
 	ctx := context.Background()
 
-	err := r.queries.UpdateTx(ctx, sqlc.UpdateTxParams{
+	err := r.queries.UpdateTx(ctx, sqlcgen.UpdateTxParams{
 		Coin:      txItem.Coin,
 		Action:    txItem.Action,
 		UpdatedAt: txItem.UpdatedAt,

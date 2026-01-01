@@ -12,7 +12,7 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 )
 
@@ -71,7 +71,7 @@ func (u *createPaymentRequestUseCase) Execute(ctx context.Context, input watchus
 	}
 
 	// insert payment_request
-	payReqItems := make([]*sqlc.PaymentRequest, 0, len(input.AmountList))
+	payReqItems := make([]*sqlcgen.PaymentRequest, 0, len(input.AmountList))
 	var idx int
 	for _, amt := range input.AmountList {
 		// Convert float amount to string using decimal library for financial precision
@@ -79,8 +79,8 @@ func (u *createPaymentRequestUseCase) Execute(ctx context.Context, input watchus
 		if err != nil {
 			return fmt.Errorf("fail to convert amount %f to decimal: %w", amt, err)
 		}
-		payReqItems = append(payReqItems, &sqlc.PaymentRequest{
-			Coin:            sqlc.PaymentRequestCoin(u.coinTypeCode.String()),
+		payReqItems = append(payReqItems, &sqlcgen.PaymentRequest{
+			Coin:            sqlcgen.PaymentRequestCoin(u.coinTypeCode.String()),
 			PaymentID:       sql.NullInt64{},
 			SenderAddress:   pubkeyItems[0+idx].WalletAddress,
 			SenderAccount:   string(pubkeyItems[0+idx].Account),

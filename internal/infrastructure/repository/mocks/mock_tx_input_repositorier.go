@@ -5,7 +5,7 @@
 package mocks
 
 import (
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -37,23 +37,23 @@ func (_m *MockTxInputRepositorier) EXPECT() *MockTxInputRepositorier_Expecter {
 }
 
 // GetAllByTxID provides a mock function for the type MockTxInputRepositorier
-func (_mock *MockTxInputRepositorier) GetAllByTxID(id int64) ([]*sqlc.BtcTxInput, error) {
+func (_mock *MockTxInputRepositorier) GetAllByTxID(id int64) ([]*sqlcgen.BtcTxInput, error) {
 	ret := _mock.Called(id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAllByTxID")
 	}
 
-	var r0 []*sqlc.BtcTxInput
+	var r0 []*sqlcgen.BtcTxInput
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64) ([]*sqlc.BtcTxInput, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) ([]*sqlcgen.BtcTxInput, error)); ok {
 		return returnFunc(id)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64) []*sqlc.BtcTxInput); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) []*sqlcgen.BtcTxInput); ok {
 		r0 = returnFunc(id)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*sqlc.BtcTxInput)
+			r0 = ret.Get(0).([]*sqlcgen.BtcTxInput)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
@@ -88,34 +88,34 @@ func (_c *MockTxInputRepositorier_GetAllByTxID_Call) Run(run func(id int64)) *Mo
 	return _c
 }
 
-func (_c *MockTxInputRepositorier_GetAllByTxID_Call) Return(btcTxInputs []*sqlc.BtcTxInput, err error) *MockTxInputRepositorier_GetAllByTxID_Call {
+func (_c *MockTxInputRepositorier_GetAllByTxID_Call) Return(btcTxInputs []*sqlcgen.BtcTxInput, err error) *MockTxInputRepositorier_GetAllByTxID_Call {
 	_c.Call.Return(btcTxInputs, err)
 	return _c
 }
 
-func (_c *MockTxInputRepositorier_GetAllByTxID_Call) RunAndReturn(run func(id int64) ([]*sqlc.BtcTxInput, error)) *MockTxInputRepositorier_GetAllByTxID_Call {
+func (_c *MockTxInputRepositorier_GetAllByTxID_Call) RunAndReturn(run func(id int64) ([]*sqlcgen.BtcTxInput, error)) *MockTxInputRepositorier_GetAllByTxID_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GetOne provides a mock function for the type MockTxInputRepositorier
-func (_mock *MockTxInputRepositorier) GetOne(id int64) (*sqlc.BtcTxInput, error) {
+func (_mock *MockTxInputRepositorier) GetOne(id int64) (*sqlcgen.BtcTxInput, error) {
 	ret := _mock.Called(id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetOne")
 	}
 
-	var r0 *sqlc.BtcTxInput
+	var r0 *sqlcgen.BtcTxInput
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64) (*sqlc.BtcTxInput, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) (*sqlcgen.BtcTxInput, error)); ok {
 		return returnFunc(id)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64) *sqlc.BtcTxInput); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) *sqlcgen.BtcTxInput); ok {
 		r0 = returnFunc(id)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*sqlc.BtcTxInput)
+			r0 = ret.Get(0).(*sqlcgen.BtcTxInput)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
@@ -150,18 +150,18 @@ func (_c *MockTxInputRepositorier_GetOne_Call) Run(run func(id int64)) *MockTxIn
 	return _c
 }
 
-func (_c *MockTxInputRepositorier_GetOne_Call) Return(btcTxInput *sqlc.BtcTxInput, err error) *MockTxInputRepositorier_GetOne_Call {
+func (_c *MockTxInputRepositorier_GetOne_Call) Return(btcTxInput *sqlcgen.BtcTxInput, err error) *MockTxInputRepositorier_GetOne_Call {
 	_c.Call.Return(btcTxInput, err)
 	return _c
 }
 
-func (_c *MockTxInputRepositorier_GetOne_Call) RunAndReturn(run func(id int64) (*sqlc.BtcTxInput, error)) *MockTxInputRepositorier_GetOne_Call {
+func (_c *MockTxInputRepositorier_GetOne_Call) RunAndReturn(run func(id int64) (*sqlcgen.BtcTxInput, error)) *MockTxInputRepositorier_GetOne_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // Insert provides a mock function for the type MockTxInputRepositorier
-func (_mock *MockTxInputRepositorier) Insert(txItem *sqlc.BtcTxInput) error {
+func (_mock *MockTxInputRepositorier) Insert(txItem *sqlcgen.BtcTxInput) error {
 	ret := _mock.Called(txItem)
 
 	if len(ret) == 0 {
@@ -169,7 +169,7 @@ func (_mock *MockTxInputRepositorier) Insert(txItem *sqlc.BtcTxInput) error {
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func(*sqlc.BtcTxInput) error); ok {
+	if returnFunc, ok := ret.Get(0).(func(*sqlcgen.BtcTxInput) error); ok {
 		r0 = returnFunc(txItem)
 	} else {
 		r0 = ret.Error(0)
@@ -183,16 +183,16 @@ type MockTxInputRepositorier_Insert_Call struct {
 }
 
 // Insert is a helper method to define mock.On call
-//   - txItem *sqlc.BtcTxInput
+//   - txItem *sqlcgen.BtcTxInput
 func (_e *MockTxInputRepositorier_Expecter) Insert(txItem interface{}) *MockTxInputRepositorier_Insert_Call {
 	return &MockTxInputRepositorier_Insert_Call{Call: _e.mock.On("Insert", txItem)}
 }
 
-func (_c *MockTxInputRepositorier_Insert_Call) Run(run func(txItem *sqlc.BtcTxInput)) *MockTxInputRepositorier_Insert_Call {
+func (_c *MockTxInputRepositorier_Insert_Call) Run(run func(txItem *sqlcgen.BtcTxInput)) *MockTxInputRepositorier_Insert_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 *sqlc.BtcTxInput
+		var arg0 *sqlcgen.BtcTxInput
 		if args[0] != nil {
-			arg0 = args[0].(*sqlc.BtcTxInput)
+			arg0 = args[0].(*sqlcgen.BtcTxInput)
 		}
 		run(
 			arg0,
@@ -206,13 +206,13 @@ func (_c *MockTxInputRepositorier_Insert_Call) Return(err error) *MockTxInputRep
 	return _c
 }
 
-func (_c *MockTxInputRepositorier_Insert_Call) RunAndReturn(run func(txItem *sqlc.BtcTxInput) error) *MockTxInputRepositorier_Insert_Call {
+func (_c *MockTxInputRepositorier_Insert_Call) RunAndReturn(run func(txItem *sqlcgen.BtcTxInput) error) *MockTxInputRepositorier_Insert_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // InsertBulk provides a mock function for the type MockTxInputRepositorier
-func (_mock *MockTxInputRepositorier) InsertBulk(txItems []*sqlc.BtcTxInput) error {
+func (_mock *MockTxInputRepositorier) InsertBulk(txItems []*sqlcgen.BtcTxInput) error {
 	ret := _mock.Called(txItems)
 
 	if len(ret) == 0 {
@@ -220,7 +220,7 @@ func (_mock *MockTxInputRepositorier) InsertBulk(txItems []*sqlc.BtcTxInput) err
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func([]*sqlc.BtcTxInput) error); ok {
+	if returnFunc, ok := ret.Get(0).(func([]*sqlcgen.BtcTxInput) error); ok {
 		r0 = returnFunc(txItems)
 	} else {
 		r0 = ret.Error(0)
@@ -234,16 +234,16 @@ type MockTxInputRepositorier_InsertBulk_Call struct {
 }
 
 // InsertBulk is a helper method to define mock.On call
-//   - txItems []*sqlc.BtcTxInput
+//   - txItems []*sqlcgen.BtcTxInput
 func (_e *MockTxInputRepositorier_Expecter) InsertBulk(txItems interface{}) *MockTxInputRepositorier_InsertBulk_Call {
 	return &MockTxInputRepositorier_InsertBulk_Call{Call: _e.mock.On("InsertBulk", txItems)}
 }
 
-func (_c *MockTxInputRepositorier_InsertBulk_Call) Run(run func(txItems []*sqlc.BtcTxInput)) *MockTxInputRepositorier_InsertBulk_Call {
+func (_c *MockTxInputRepositorier_InsertBulk_Call) Run(run func(txItems []*sqlcgen.BtcTxInput)) *MockTxInputRepositorier_InsertBulk_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 []*sqlc.BtcTxInput
+		var arg0 []*sqlcgen.BtcTxInput
 		if args[0] != nil {
-			arg0 = args[0].([]*sqlc.BtcTxInput)
+			arg0 = args[0].([]*sqlcgen.BtcTxInput)
 		}
 		run(
 			arg0,
@@ -257,7 +257,7 @@ func (_c *MockTxInputRepositorier_InsertBulk_Call) Return(err error) *MockTxInpu
 	return _c
 }
 
-func (_c *MockTxInputRepositorier_InsertBulk_Call) RunAndReturn(run func(txItems []*sqlc.BtcTxInput) error) *MockTxInputRepositorier_InsertBulk_Call {
+func (_c *MockTxInputRepositorier_InsertBulk_Call) RunAndReturn(run func(txItems []*sqlcgen.BtcTxInput) error) *MockTxInputRepositorier_InsertBulk_Call {
 	_c.Call.Return(run)
 	return _c
 }

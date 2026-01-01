@@ -3,7 +3,7 @@
 //   sqlc v1.30.0
 // source: xrp_detail_tx.sql
 
-package sqlc
+package sqlcgen
 
 import (
 	"context"

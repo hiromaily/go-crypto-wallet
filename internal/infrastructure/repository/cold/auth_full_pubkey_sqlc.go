@@ -7,12 +7,12 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
 // AuthFullPubkeyRepositorySqlc is repository for auth_fullpubkey table using sqlc
 type AuthFullPubkeyRepositorySqlc struct {
-	queries      *sqlc.Queries
+	queries      *sqlcgen.Queries
 	coinTypeCode domainCoin.CoinTypeCode
 }
 
@@ -21,17 +21,17 @@ func NewAuthFullPubkeyRepositorySqlc(
 	dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode,
 ) *AuthFullPubkeyRepositorySqlc {
 	return &AuthFullPubkeyRepositorySqlc{
-		queries:      sqlc.New(dbConn),
+		queries:      sqlcgen.New(dbConn),
 		coinTypeCode: coinTypeCode,
 	}
 }
 
 // GetOne returns one record by authType
-func (r *AuthFullPubkeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (*sqlc.AuthFullpubkey, error) {
+func (r *AuthFullPubkeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (*sqlcgen.AuthFullpubkey, error) {
 	ctx := context.Background()
 
-	authPubkey, err := r.queries.GetAuthFullPubkey(ctx, sqlc.GetAuthFullPubkeyParams{
-		Coin:        sqlc.AuthFullpubkeyCoin(r.coinTypeCode.String()),
+	authPubkey, err := r.queries.GetAuthFullPubkey(ctx, sqlcgen.GetAuthFullPubkeyParams{
+		Coin:        sqlcgen.AuthFullpubkeyCoin(r.coinTypeCode.String()),
 		AuthAccount: authType.String(),
 	})
 	if err != nil {
@@ -45,8 +45,8 @@ func (r *AuthFullPubkeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (
 func (r *AuthFullPubkeyRepositorySqlc) Insert(authType domainAccount.AuthType, fullPubKey string) error {
 	ctx := context.Background()
 
-	_, err := r.queries.InsertAuthFullPubkey(ctx, sqlc.InsertAuthFullPubkeyParams{
-		Coin:          sqlc.AuthFullpubkeyCoin(r.coinTypeCode.String()),
+	_, err := r.queries.InsertAuthFullPubkey(ctx, sqlcgen.InsertAuthFullPubkeyParams{
+		Coin:          sqlcgen.AuthFullpubkeyCoin(r.coinTypeCode.String()),
 		AuthAccount:   authType.String(),
 		FullPublicKey: fullPubKey,
 	})
@@ -58,11 +58,11 @@ func (r *AuthFullPubkeyRepositorySqlc) Insert(authType domainAccount.AuthType, f
 }
 
 // InsertBulk inserts multiple records
-func (r *AuthFullPubkeyRepositorySqlc) InsertBulk(items []*sqlc.AuthFullpubkey) error {
+func (r *AuthFullPubkeyRepositorySqlc) InsertBulk(items []*sqlcgen.AuthFullpubkey) error {
 	ctx := context.Background()
 
 	for _, item := range items {
-		_, err := r.queries.InsertAuthFullPubkey(ctx, sqlc.InsertAuthFullPubkeyParams{
+		_, err := r.queries.InsertAuthFullPubkey(ctx, sqlcgen.InsertAuthFullPubkeyParams{
 			Coin:          item.Coin,
 			AuthAccount:   item.AuthAccount,
 			FullPublicKey: item.FullPublicKey,

@@ -15,7 +15,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/eth"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/ethtx"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serializer"
@@ -270,7 +270,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	// create insert data for　eth_detail_tx
 	txDetailItem.SenderAccount = sender.String()
 	txDetailItem.ReceiverAccount = receiver.String()
-	txDetailItems := []*sqlc.ETHDetailTX{txDetailItem}
+	txDetailItems := []*sqlcgen.EthDetailTx{txDetailItem}
 
 	txID, err := u.updateDB(targetAction, txDetailItems, nil)
 	if err != nil {
@@ -332,7 +332,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	userAmounts []eth.UserAmount,
-) ([]string, []*sqlc.ETHDetailTX, error) {
+) ([]string, []*sqlcgen.EthDetailTx, error) {
 	// get address for deposit account
 	depositAddr, err := u.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
@@ -343,11 +343,11 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 
 	// create raw transaction each address
 	serializedTxs := make([]string, 0, len(userAmounts))
-	txDetailItems := make([]*sqlc.ETHDetailTX, 0, len(userAmounts))
+	txDetailItems := make([]*sqlcgen.EthDetailTx, 0, len(userAmounts))
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
 		var rawTx *ethtx.RawTx
-		var txDetailItem *sqlc.ETHDetailTX
+		var txDetailItem *sqlcgen.EthDetailTx
 		rawTx, txDetailItem, err = u.ethClient.CreateRawTransaction(
 			ctx, val.Address, depositAddr.WalletAddress, 0, 0)
 		if err != nil {
@@ -424,7 +424,7 @@ func (u *createTransactionUseCase) createUserPayment() ([]userPayment, *big.Int,
 
 func (u *createTransactionUseCase) validateAmount(
 	ctx context.Context,
-	senderAddr *sqlc.Address,
+	senderAddr *sqlcgen.Address,
 	totalAmount *big.Int,
 ) error {
 	// check sender's total balance
@@ -443,10 +443,10 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	userPayments []userPayment,
-	senderAddr *sqlc.Address,
-) ([]string, []*sqlc.ETHDetailTX, error) {
+	senderAddr *sqlcgen.Address,
+) ([]string, []*sqlcgen.EthDetailTx, error) {
 	serializedTxs := make([]string, 0, len(userPayments))
-	txDetailItems := make([]*sqlc.ETHDetailTX, 0, len(userPayments))
+	txDetailItems := make([]*sqlcgen.EthDetailTx, 0, len(userPayments))
 	additionalNonce := 0
 	for _, userPayment := range userPayments {
 		// call CreateRawTransaction
@@ -478,7 +478,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 
 func (u *createTransactionUseCase) updateDB(
 	targetAction domainTx.ActionType,
-	txDetailItems []*sqlc.ETHDetailTX,
+	txDetailItems []*sqlcgen.EthDetailTx,
 	paymentRequestIds []int64,
 ) (int64, error) {
 	// start transaction

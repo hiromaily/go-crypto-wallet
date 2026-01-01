@@ -6,7 +6,7 @@ package mocks
 
 import (
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -39,23 +39,23 @@ func (_m *MockBTCAccountKeyRepositorier) EXPECT() *MockBTCAccountKeyRepositorier
 }
 
 // GetAllAddrStatus provides a mock function for the type MockBTCAccountKeyRepositorier
-func (_mock *MockBTCAccountKeyRepositorier) GetAllAddrStatus(accountType account.AccountType, addrStatus address.AddrStatus) ([]*sqlc.BtcAccountKey, error) {
+func (_mock *MockBTCAccountKeyRepositorier) GetAllAddrStatus(accountType account.AccountType, addrStatus address.AddrStatus) ([]*sqlcgen.BtcAccountKey, error) {
 	ret := _mock.Called(accountType, addrStatus)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAllAddrStatus")
 	}
 
-	var r0 []*sqlc.BtcAccountKey
+	var r0 []*sqlcgen.BtcAccountKey
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType, address.AddrStatus) ([]*sqlc.BtcAccountKey, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType, address.AddrStatus) ([]*sqlcgen.BtcAccountKey, error)); ok {
 		return returnFunc(accountType, addrStatus)
 	}
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType, address.AddrStatus) []*sqlc.BtcAccountKey); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType, address.AddrStatus) []*sqlcgen.BtcAccountKey); ok {
 		r0 = returnFunc(accountType, addrStatus)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*sqlc.BtcAccountKey)
+			r0 = ret.Get(0).([]*sqlcgen.BtcAccountKey)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(account.AccountType, address.AddrStatus) error); ok {
@@ -96,34 +96,34 @@ func (_c *MockBTCAccountKeyRepositorier_GetAllAddrStatus_Call) Run(run func(acco
 	return _c
 }
 
-func (_c *MockBTCAccountKeyRepositorier_GetAllAddrStatus_Call) Return(btcAccountKeys []*sqlc.BtcAccountKey, err error) *MockBTCAccountKeyRepositorier_GetAllAddrStatus_Call {
+func (_c *MockBTCAccountKeyRepositorier_GetAllAddrStatus_Call) Return(btcAccountKeys []*sqlcgen.BtcAccountKey, err error) *MockBTCAccountKeyRepositorier_GetAllAddrStatus_Call {
 	_c.Call.Return(btcAccountKeys, err)
 	return _c
 }
 
-func (_c *MockBTCAccountKeyRepositorier_GetAllAddrStatus_Call) RunAndReturn(run func(accountType account.AccountType, addrStatus address.AddrStatus) ([]*sqlc.BtcAccountKey, error)) *MockBTCAccountKeyRepositorier_GetAllAddrStatus_Call {
+func (_c *MockBTCAccountKeyRepositorier_GetAllAddrStatus_Call) RunAndReturn(run func(accountType account.AccountType, addrStatus address.AddrStatus) ([]*sqlcgen.BtcAccountKey, error)) *MockBTCAccountKeyRepositorier_GetAllAddrStatus_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GetAllMultiAddr provides a mock function for the type MockBTCAccountKeyRepositorier
-func (_mock *MockBTCAccountKeyRepositorier) GetAllMultiAddr(accountType account.AccountType, addrs []string) ([]*sqlc.BtcAccountKey, error) {
+func (_mock *MockBTCAccountKeyRepositorier) GetAllMultiAddr(accountType account.AccountType, addrs []string) ([]*sqlcgen.BtcAccountKey, error) {
 	ret := _mock.Called(accountType, addrs)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAllMultiAddr")
 	}
 
-	var r0 []*sqlc.BtcAccountKey
+	var r0 []*sqlcgen.BtcAccountKey
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType, []string) ([]*sqlc.BtcAccountKey, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType, []string) ([]*sqlcgen.BtcAccountKey, error)); ok {
 		return returnFunc(accountType, addrs)
 	}
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType, []string) []*sqlc.BtcAccountKey); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType, []string) []*sqlcgen.BtcAccountKey); ok {
 		r0 = returnFunc(accountType, addrs)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*sqlc.BtcAccountKey)
+			r0 = ret.Get(0).([]*sqlcgen.BtcAccountKey)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(account.AccountType, []string) error); ok {
@@ -164,12 +164,12 @@ func (_c *MockBTCAccountKeyRepositorier_GetAllMultiAddr_Call) Run(run func(accou
 	return _c
 }
 
-func (_c *MockBTCAccountKeyRepositorier_GetAllMultiAddr_Call) Return(btcAccountKeys []*sqlc.BtcAccountKey, err error) *MockBTCAccountKeyRepositorier_GetAllMultiAddr_Call {
+func (_c *MockBTCAccountKeyRepositorier_GetAllMultiAddr_Call) Return(btcAccountKeys []*sqlcgen.BtcAccountKey, err error) *MockBTCAccountKeyRepositorier_GetAllMultiAddr_Call {
 	_c.Call.Return(btcAccountKeys, err)
 	return _c
 }
 
-func (_c *MockBTCAccountKeyRepositorier_GetAllMultiAddr_Call) RunAndReturn(run func(accountType account.AccountType, addrs []string) ([]*sqlc.BtcAccountKey, error)) *MockBTCAccountKeyRepositorier_GetAllMultiAddr_Call {
+func (_c *MockBTCAccountKeyRepositorier_GetAllMultiAddr_Call) RunAndReturn(run func(accountType account.AccountType, addrs []string) ([]*sqlcgen.BtcAccountKey, error)) *MockBTCAccountKeyRepositorier_GetAllMultiAddr_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -235,23 +235,23 @@ func (_c *MockBTCAccountKeyRepositorier_GetMaxIndex_Call) RunAndReturn(run func(
 }
 
 // GetOneMaxID provides a mock function for the type MockBTCAccountKeyRepositorier
-func (_mock *MockBTCAccountKeyRepositorier) GetOneMaxID(accountType account.AccountType) (*sqlc.BtcAccountKey, error) {
+func (_mock *MockBTCAccountKeyRepositorier) GetOneMaxID(accountType account.AccountType) (*sqlcgen.BtcAccountKey, error) {
 	ret := _mock.Called(accountType)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetOneMaxID")
 	}
 
-	var r0 *sqlc.BtcAccountKey
+	var r0 *sqlcgen.BtcAccountKey
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType) (*sqlc.BtcAccountKey, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType) (*sqlcgen.BtcAccountKey, error)); ok {
 		return returnFunc(accountType)
 	}
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType) *sqlc.BtcAccountKey); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType) *sqlcgen.BtcAccountKey); ok {
 		r0 = returnFunc(accountType)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*sqlc.BtcAccountKey)
+			r0 = ret.Get(0).(*sqlcgen.BtcAccountKey)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(account.AccountType) error); ok {
@@ -286,18 +286,18 @@ func (_c *MockBTCAccountKeyRepositorier_GetOneMaxID_Call) Run(run func(accountTy
 	return _c
 }
 
-func (_c *MockBTCAccountKeyRepositorier_GetOneMaxID_Call) Return(btcAccountKey *sqlc.BtcAccountKey, err error) *MockBTCAccountKeyRepositorier_GetOneMaxID_Call {
+func (_c *MockBTCAccountKeyRepositorier_GetOneMaxID_Call) Return(btcAccountKey *sqlcgen.BtcAccountKey, err error) *MockBTCAccountKeyRepositorier_GetOneMaxID_Call {
 	_c.Call.Return(btcAccountKey, err)
 	return _c
 }
 
-func (_c *MockBTCAccountKeyRepositorier_GetOneMaxID_Call) RunAndReturn(run func(accountType account.AccountType) (*sqlc.BtcAccountKey, error)) *MockBTCAccountKeyRepositorier_GetOneMaxID_Call {
+func (_c *MockBTCAccountKeyRepositorier_GetOneMaxID_Call) RunAndReturn(run func(accountType account.AccountType) (*sqlcgen.BtcAccountKey, error)) *MockBTCAccountKeyRepositorier_GetOneMaxID_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // InsertBulk provides a mock function for the type MockBTCAccountKeyRepositorier
-func (_mock *MockBTCAccountKeyRepositorier) InsertBulk(items []*sqlc.BtcAccountKey) error {
+func (_mock *MockBTCAccountKeyRepositorier) InsertBulk(items []*sqlcgen.BtcAccountKey) error {
 	ret := _mock.Called(items)
 
 	if len(ret) == 0 {
@@ -305,7 +305,7 @@ func (_mock *MockBTCAccountKeyRepositorier) InsertBulk(items []*sqlc.BtcAccountK
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func([]*sqlc.BtcAccountKey) error); ok {
+	if returnFunc, ok := ret.Get(0).(func([]*sqlcgen.BtcAccountKey) error); ok {
 		r0 = returnFunc(items)
 	} else {
 		r0 = ret.Error(0)
@@ -319,16 +319,16 @@ type MockBTCAccountKeyRepositorier_InsertBulk_Call struct {
 }
 
 // InsertBulk is a helper method to define mock.On call
-//   - items []*sqlc.BtcAccountKey
+//   - items []*sqlcgen.BtcAccountKey
 func (_e *MockBTCAccountKeyRepositorier_Expecter) InsertBulk(items interface{}) *MockBTCAccountKeyRepositorier_InsertBulk_Call {
 	return &MockBTCAccountKeyRepositorier_InsertBulk_Call{Call: _e.mock.On("InsertBulk", items)}
 }
 
-func (_c *MockBTCAccountKeyRepositorier_InsertBulk_Call) Run(run func(items []*sqlc.BtcAccountKey)) *MockBTCAccountKeyRepositorier_InsertBulk_Call {
+func (_c *MockBTCAccountKeyRepositorier_InsertBulk_Call) Run(run func(items []*sqlcgen.BtcAccountKey)) *MockBTCAccountKeyRepositorier_InsertBulk_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 []*sqlc.BtcAccountKey
+		var arg0 []*sqlcgen.BtcAccountKey
 		if args[0] != nil {
-			arg0 = args[0].([]*sqlc.BtcAccountKey)
+			arg0 = args[0].([]*sqlcgen.BtcAccountKey)
 		}
 		run(
 			arg0,
@@ -342,7 +342,7 @@ func (_c *MockBTCAccountKeyRepositorier_InsertBulk_Call) Return(err error) *Mock
 	return _c
 }
 
-func (_c *MockBTCAccountKeyRepositorier_InsertBulk_Call) RunAndReturn(run func(items []*sqlc.BtcAccountKey) error) *MockBTCAccountKeyRepositorier_InsertBulk_Call {
+func (_c *MockBTCAccountKeyRepositorier_InsertBulk_Call) RunAndReturn(run func(items []*sqlcgen.BtcAccountKey) error) *MockBTCAccountKeyRepositorier_InsertBulk_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -492,7 +492,7 @@ func (_c *MockBTCAccountKeyRepositorier_UpdateAddrStatus_Call) RunAndReturn(run 
 }
 
 // UpdateMultisigAddr provides a mock function for the type MockBTCAccountKeyRepositorier
-func (_mock *MockBTCAccountKeyRepositorier) UpdateMultisigAddr(accountType account.AccountType, item *sqlc.BtcAccountKey) (int64, error) {
+func (_mock *MockBTCAccountKeyRepositorier) UpdateMultisigAddr(accountType account.AccountType, item *sqlcgen.BtcAccountKey) (int64, error) {
 	ret := _mock.Called(accountType, item)
 
 	if len(ret) == 0 {
@@ -501,15 +501,15 @@ func (_mock *MockBTCAccountKeyRepositorier) UpdateMultisigAddr(accountType accou
 
 	var r0 int64
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType, *sqlc.BtcAccountKey) (int64, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType, *sqlcgen.BtcAccountKey) (int64, error)); ok {
 		return returnFunc(accountType, item)
 	}
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType, *sqlc.BtcAccountKey) int64); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType, *sqlcgen.BtcAccountKey) int64); ok {
 		r0 = returnFunc(accountType, item)
 	} else {
 		r0 = ret.Get(0).(int64)
 	}
-	if returnFunc, ok := ret.Get(1).(func(account.AccountType, *sqlc.BtcAccountKey) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(account.AccountType, *sqlcgen.BtcAccountKey) error); ok {
 		r1 = returnFunc(accountType, item)
 	} else {
 		r1 = ret.Error(1)
@@ -524,20 +524,20 @@ type MockBTCAccountKeyRepositorier_UpdateMultisigAddr_Call struct {
 
 // UpdateMultisigAddr is a helper method to define mock.On call
 //   - accountType account.AccountType
-//   - item *sqlc.BtcAccountKey
+//   - item *sqlcgen.BtcAccountKey
 func (_e *MockBTCAccountKeyRepositorier_Expecter) UpdateMultisigAddr(accountType interface{}, item interface{}) *MockBTCAccountKeyRepositorier_UpdateMultisigAddr_Call {
 	return &MockBTCAccountKeyRepositorier_UpdateMultisigAddr_Call{Call: _e.mock.On("UpdateMultisigAddr", accountType, item)}
 }
 
-func (_c *MockBTCAccountKeyRepositorier_UpdateMultisigAddr_Call) Run(run func(accountType account.AccountType, item *sqlc.BtcAccountKey)) *MockBTCAccountKeyRepositorier_UpdateMultisigAddr_Call {
+func (_c *MockBTCAccountKeyRepositorier_UpdateMultisigAddr_Call) Run(run func(accountType account.AccountType, item *sqlcgen.BtcAccountKey)) *MockBTCAccountKeyRepositorier_UpdateMultisigAddr_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 account.AccountType
 		if args[0] != nil {
 			arg0 = args[0].(account.AccountType)
 		}
-		var arg1 *sqlc.BtcAccountKey
+		var arg1 *sqlcgen.BtcAccountKey
 		if args[1] != nil {
-			arg1 = args[1].(*sqlc.BtcAccountKey)
+			arg1 = args[1].(*sqlcgen.BtcAccountKey)
 		}
 		run(
 			arg0,
@@ -552,13 +552,13 @@ func (_c *MockBTCAccountKeyRepositorier_UpdateMultisigAddr_Call) Return(n int64,
 	return _c
 }
 
-func (_c *MockBTCAccountKeyRepositorier_UpdateMultisigAddr_Call) RunAndReturn(run func(accountType account.AccountType, item *sqlc.BtcAccountKey) (int64, error)) *MockBTCAccountKeyRepositorier_UpdateMultisigAddr_Call {
+func (_c *MockBTCAccountKeyRepositorier_UpdateMultisigAddr_Call) RunAndReturn(run func(accountType account.AccountType, item *sqlcgen.BtcAccountKey) (int64, error)) *MockBTCAccountKeyRepositorier_UpdateMultisigAddr_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // UpdateMultisigAddrs provides a mock function for the type MockBTCAccountKeyRepositorier
-func (_mock *MockBTCAccountKeyRepositorier) UpdateMultisigAddrs(accountType account.AccountType, items []*sqlc.BtcAccountKey) (int64, error) {
+func (_mock *MockBTCAccountKeyRepositorier) UpdateMultisigAddrs(accountType account.AccountType, items []*sqlcgen.BtcAccountKey) (int64, error) {
 	ret := _mock.Called(accountType, items)
 
 	if len(ret) == 0 {
@@ -567,15 +567,15 @@ func (_mock *MockBTCAccountKeyRepositorier) UpdateMultisigAddrs(accountType acco
 
 	var r0 int64
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType, []*sqlc.BtcAccountKey) (int64, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType, []*sqlcgen.BtcAccountKey) (int64, error)); ok {
 		return returnFunc(accountType, items)
 	}
-	if returnFunc, ok := ret.Get(0).(func(account.AccountType, []*sqlc.BtcAccountKey) int64); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AccountType, []*sqlcgen.BtcAccountKey) int64); ok {
 		r0 = returnFunc(accountType, items)
 	} else {
 		r0 = ret.Get(0).(int64)
 	}
-	if returnFunc, ok := ret.Get(1).(func(account.AccountType, []*sqlc.BtcAccountKey) error); ok {
+	if returnFunc, ok := ret.Get(1).(func(account.AccountType, []*sqlcgen.BtcAccountKey) error); ok {
 		r1 = returnFunc(accountType, items)
 	} else {
 		r1 = ret.Error(1)
@@ -590,20 +590,20 @@ type MockBTCAccountKeyRepositorier_UpdateMultisigAddrs_Call struct {
 
 // UpdateMultisigAddrs is a helper method to define mock.On call
 //   - accountType account.AccountType
-//   - items []*sqlc.BtcAccountKey
+//   - items []*sqlcgen.BtcAccountKey
 func (_e *MockBTCAccountKeyRepositorier_Expecter) UpdateMultisigAddrs(accountType interface{}, items interface{}) *MockBTCAccountKeyRepositorier_UpdateMultisigAddrs_Call {
 	return &MockBTCAccountKeyRepositorier_UpdateMultisigAddrs_Call{Call: _e.mock.On("UpdateMultisigAddrs", accountType, items)}
 }
 
-func (_c *MockBTCAccountKeyRepositorier_UpdateMultisigAddrs_Call) Run(run func(accountType account.AccountType, items []*sqlc.BtcAccountKey)) *MockBTCAccountKeyRepositorier_UpdateMultisigAddrs_Call {
+func (_c *MockBTCAccountKeyRepositorier_UpdateMultisigAddrs_Call) Run(run func(accountType account.AccountType, items []*sqlcgen.BtcAccountKey)) *MockBTCAccountKeyRepositorier_UpdateMultisigAddrs_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 account.AccountType
 		if args[0] != nil {
 			arg0 = args[0].(account.AccountType)
 		}
-		var arg1 []*sqlc.BtcAccountKey
+		var arg1 []*sqlcgen.BtcAccountKey
 		if args[1] != nil {
-			arg1 = args[1].([]*sqlc.BtcAccountKey)
+			arg1 = args[1].([]*sqlcgen.BtcAccountKey)
 		}
 		run(
 			arg0,
@@ -618,7 +618,7 @@ func (_c *MockBTCAccountKeyRepositorier_UpdateMultisigAddrs_Call) Return(n int64
 	return _c
 }
 
-func (_c *MockBTCAccountKeyRepositorier_UpdateMultisigAddrs_Call) RunAndReturn(run func(accountType account.AccountType, items []*sqlc.BtcAccountKey) (int64, error)) *MockBTCAccountKeyRepositorier_UpdateMultisigAddrs_Call {
+func (_c *MockBTCAccountKeyRepositorier_UpdateMultisigAddrs_Call) RunAndReturn(run func(accountType account.AccountType, items []*sqlcgen.BtcAccountKey) (int64, error)) *MockBTCAccountKeyRepositorier_UpdateMultisigAddrs_Call {
 	_c.Call.Return(run)
 	return _c
 }
