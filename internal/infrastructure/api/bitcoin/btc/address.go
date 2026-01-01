@@ -6,6 +6,7 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 
+	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -51,7 +52,7 @@ type Purpose struct {
 }
 
 // GetAddressInfo can be used as an alternative to `getaccount`, `validateaddress`
-func (b *Bitcoin) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
+func (b *Bitcoin) GetAddressInfo(addr string) (*bitcoindto.AddressInfo, error) {
 	input, err := json.Marshal(addr)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marchal(): %w", err)
@@ -67,7 +68,7 @@ func (b *Bitcoin) GetAddressInfo(addr string) (*GetAddressInfoResult, error) {
 		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
 	}
 
-	return &infoResult, nil
+	return ToAddressInfo(&infoResult), nil
 }
 
 // GetAddressesByLabel returns addresses of account(label)
@@ -118,7 +119,7 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 }
 
 // ValidateAddress validate address
-func (b *Bitcoin) ValidateAddress(addr string) (*ValidateAddressResult, error) {
+func (b *Bitcoin) ValidateAddress(addr string) (*bitcoindto.ValidateAddressResult, error) {
 	input, err := json.Marshal(addr)
 	if err != nil {
 		return nil, fmt.Errorf("json.Marchal(): error: %s", err)
@@ -137,7 +138,7 @@ func (b *Bitcoin) ValidateAddress(addr string) (*ValidateAddressResult, error) {
 		return nil, fmt.Errorf("this address is invalid: %v", result)
 	}
 
-	return &result, nil
+	return ToValidateAddressResult(&result), nil
 }
 
 // DecodeAddress decode string address to type Address

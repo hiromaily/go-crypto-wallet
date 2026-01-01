@@ -50,28 +50,28 @@ func NewBitcoin(
 	switch NetworkTypeBTC(conf.NetworkType) {
 	case NetworkTypeMainNet:
 		bit.chainConf = &chaincfg.MainNetParams
-		if blockInfo.Chain != BlockchainInfoChainMain {
+		if blockInfo.Chain != BlockchainInfoChainMain.String() {
 			return nil, fmt.Errorf(
 				"connecting %s on bitcoind, but config file defines as %s",
 				blockInfo.Chain, NetworkTypeMainNet)
 		}
 	case NetworkTypeTestNet3:
 		bit.chainConf = &chaincfg.TestNet3Params
-		if blockInfo.Chain != BlockchainInfoChainTest {
+		if blockInfo.Chain != BlockchainInfoChainTest.String() {
 			return nil, fmt.Errorf(
 				"connecting %s on bitcoind, but config file defines as %s",
 				blockInfo.Chain, NetworkTypeTestNet3)
 		}
 	case NetworkTypeRegTestNet:
 		bit.chainConf = &chaincfg.RegressionNetParams
-		if blockInfo.Chain != BlockchainInfoChainRegtest {
+		if blockInfo.Chain != BlockchainInfoChainRegtest.String() {
 			return nil, fmt.Errorf(
 				"connecting %s on bitcoind, but config file defines as %s",
 				blockInfo.Chain, NetworkTypeRegTestNet)
 		}
 	case NetworkTypeSigNet:
 		bit.chainConf = &chaincfg.SigNetParams
-		if blockInfo.Chain != BlockchainInfoChainSignet {
+		if blockInfo.Chain != BlockchainInfoChainSignet.String() {
 			return nil, fmt.Errorf(
 				"connecting %s on bitcoind, but config file defines as %s",
 				blockInfo.Chain, NetworkTypeSigNet)
@@ -85,13 +85,13 @@ func NewBitcoin(
 	if err != nil {
 		return nil, fmt.Errorf("fail to call bit.GetNetworkInfo(): %w", err)
 	}
-	if RequiredVersion > netInfo.Version {
+	if RequiredVersion > BTCVersion(netInfo.Version) {
 		return nil, fmt.Errorf(
 			"bitcoin core version should be %d +, but version %d is detected",
 			RequiredVersion, netInfo.Version)
 	}
-	bit.version = netInfo.Version
-	logger.Info("bitcoin rpc server", "version", netInfo.Version.Int())
+	bit.version = BTCVersion(netInfo.Version)
+	logger.Info("bitcoin rpc server", "version", netInfo.Version)
 
 	// set other information from config
 	bit.confirmationBlock = conf.Block.ConfirmationNum

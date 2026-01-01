@@ -10,6 +10,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
@@ -1331,23 +1332,23 @@ func (_c *MockBitcoiner_GetAccount_Call) RunAndReturn(run func(addr string) (str
 }
 
 // GetAddressInfo provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) GetAddressInfo(addr string) (*btc.GetAddressInfoResult, error) {
+func (_mock *MockBitcoiner) GetAddressInfo(addr string) (*bitcoindto.AddressInfo, error) {
 	ret := _mock.Called(addr)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAddressInfo")
 	}
 
-	var r0 *btc.GetAddressInfoResult
+	var r0 *bitcoindto.AddressInfo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*btc.GetAddressInfoResult, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) (*bitcoindto.AddressInfo, error)); ok {
 		return returnFunc(addr)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *btc.GetAddressInfoResult); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) *bitcoindto.AddressInfo); ok {
 		r0 = returnFunc(addr)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.GetAddressInfoResult)
+			r0 = ret.Get(0).(*bitcoindto.AddressInfo)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
@@ -1382,12 +1383,12 @@ func (_c *MockBitcoiner_GetAddressInfo_Call) Run(run func(addr string)) *MockBit
 	return _c
 }
 
-func (_c *MockBitcoiner_GetAddressInfo_Call) Return(getAddressInfoResult *btc.GetAddressInfoResult, err error) *MockBitcoiner_GetAddressInfo_Call {
-	_c.Call.Return(getAddressInfoResult, err)
+func (_c *MockBitcoiner_GetAddressInfo_Call) Return(addressInfo *bitcoindto.AddressInfo, err error) *MockBitcoiner_GetAddressInfo_Call {
+	_c.Call.Return(addressInfo, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_GetAddressInfo_Call) RunAndReturn(run func(addr string) (*btc.GetAddressInfoResult, error)) *MockBitcoiner_GetAddressInfo_Call {
+func (_c *MockBitcoiner_GetAddressInfo_Call) RunAndReturn(run func(addr string) (*bitcoindto.AddressInfo, error)) *MockBitcoiner_GetAddressInfo_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1687,23 +1688,23 @@ func (_c *MockBitcoiner_GetBlockCount_Call) RunAndReturn(run func() (int64, erro
 }
 
 // GetBlockchainInfo provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) GetBlockchainInfo() (*btc.GetBlockchainInfoResult, error) {
+func (_mock *MockBitcoiner) GetBlockchainInfo() (*bitcoindto.BlockchainInfo, error) {
 	ret := _mock.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetBlockchainInfo")
 	}
 
-	var r0 *btc.GetBlockchainInfoResult
+	var r0 *bitcoindto.BlockchainInfo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func() (*btc.GetBlockchainInfoResult, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func() (*bitcoindto.BlockchainInfo, error)); ok {
 		return returnFunc()
 	}
-	if returnFunc, ok := ret.Get(0).(func() *btc.GetBlockchainInfoResult); ok {
+	if returnFunc, ok := ret.Get(0).(func() *bitcoindto.BlockchainInfo); ok {
 		r0 = returnFunc()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.GetBlockchainInfoResult)
+			r0 = ret.Get(0).(*bitcoindto.BlockchainInfo)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func() error); ok {
@@ -1731,12 +1732,12 @@ func (_c *MockBitcoiner_GetBlockchainInfo_Call) Run(run func()) *MockBitcoiner_G
 	return _c
 }
 
-func (_c *MockBitcoiner_GetBlockchainInfo_Call) Return(getBlockchainInfoResult *btc.GetBlockchainInfoResult, err error) *MockBitcoiner_GetBlockchainInfo_Call {
-	_c.Call.Return(getBlockchainInfoResult, err)
+func (_c *MockBitcoiner_GetBlockchainInfo_Call) Return(blockchainInfo *bitcoindto.BlockchainInfo, err error) *MockBitcoiner_GetBlockchainInfo_Call {
+	_c.Call.Return(blockchainInfo, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_GetBlockchainInfo_Call) RunAndReturn(run func() (*btc.GetBlockchainInfoResult, error)) *MockBitcoiner_GetBlockchainInfo_Call {
+func (_c *MockBitcoiner_GetBlockchainInfo_Call) RunAndReturn(run func() (*bitcoindto.BlockchainInfo, error)) *MockBitcoiner_GetBlockchainInfo_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1854,23 +1855,23 @@ func (_c *MockBitcoiner_GetFee_Call) RunAndReturn(run func(tx *wire.MsgTx, adjus
 }
 
 // GetNetworkInfo provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) GetNetworkInfo() (*btc.GetNetworkInfoResult, error) {
+func (_mock *MockBitcoiner) GetNetworkInfo() (*bitcoindto.NetworkInfo, error) {
 	ret := _mock.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetNetworkInfo")
 	}
 
-	var r0 *btc.GetNetworkInfoResult
+	var r0 *bitcoindto.NetworkInfo
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func() (*btc.GetNetworkInfoResult, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func() (*bitcoindto.NetworkInfo, error)); ok {
 		return returnFunc()
 	}
-	if returnFunc, ok := ret.Get(0).(func() *btc.GetNetworkInfoResult); ok {
+	if returnFunc, ok := ret.Get(0).(func() *bitcoindto.NetworkInfo); ok {
 		r0 = returnFunc()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.GetNetworkInfoResult)
+			r0 = ret.Get(0).(*bitcoindto.NetworkInfo)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func() error); ok {
@@ -1898,12 +1899,12 @@ func (_c *MockBitcoiner_GetNetworkInfo_Call) Run(run func()) *MockBitcoiner_GetN
 	return _c
 }
 
-func (_c *MockBitcoiner_GetNetworkInfo_Call) Return(getNetworkInfoResult *btc.GetNetworkInfoResult, err error) *MockBitcoiner_GetNetworkInfo_Call {
-	_c.Call.Return(getNetworkInfoResult, err)
+func (_c *MockBitcoiner_GetNetworkInfo_Call) Return(networkInfo *bitcoindto.NetworkInfo, err error) *MockBitcoiner_GetNetworkInfo_Call {
+	_c.Call.Return(networkInfo, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_GetNetworkInfo_Call) RunAndReturn(run func() (*btc.GetNetworkInfoResult, error)) *MockBitcoiner_GetNetworkInfo_Call {
+func (_c *MockBitcoiner_GetNetworkInfo_Call) RunAndReturn(run func() (*bitcoindto.NetworkInfo, error)) *MockBitcoiner_GetNetworkInfo_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -3960,23 +3961,23 @@ func (_c *MockBitcoiner_UnlockUnspent_Call) RunAndReturn(run func() error) *Mock
 }
 
 // ValidateAddress provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) ValidateAddress(addr string) (*btc.ValidateAddressResult, error) {
+func (_mock *MockBitcoiner) ValidateAddress(addr string) (*bitcoindto.ValidateAddressResult, error) {
 	ret := _mock.Called(addr)
 
 	if len(ret) == 0 {
 		panic("no return value specified for ValidateAddress")
 	}
 
-	var r0 *btc.ValidateAddressResult
+	var r0 *bitcoindto.ValidateAddressResult
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(string) (*btc.ValidateAddressResult, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) (*bitcoindto.ValidateAddressResult, error)); ok {
 		return returnFunc(addr)
 	}
-	if returnFunc, ok := ret.Get(0).(func(string) *btc.ValidateAddressResult); ok {
+	if returnFunc, ok := ret.Get(0).(func(string) *bitcoindto.ValidateAddressResult); ok {
 		r0 = returnFunc(addr)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*btc.ValidateAddressResult)
+			r0 = ret.Get(0).(*bitcoindto.ValidateAddressResult)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
@@ -4011,12 +4012,12 @@ func (_c *MockBitcoiner_ValidateAddress_Call) Run(run func(addr string)) *MockBi
 	return _c
 }
 
-func (_c *MockBitcoiner_ValidateAddress_Call) Return(validateAddressResult *btc.ValidateAddressResult, err error) *MockBitcoiner_ValidateAddress_Call {
+func (_c *MockBitcoiner_ValidateAddress_Call) Return(validateAddressResult *bitcoindto.ValidateAddressResult, err error) *MockBitcoiner_ValidateAddress_Call {
 	_c.Call.Return(validateAddressResult, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_ValidateAddress_Call) RunAndReturn(run func(addr string) (*btc.ValidateAddressResult, error)) *MockBitcoiner_ValidateAddress_Call {
+func (_c *MockBitcoiner_ValidateAddress_Call) RunAndReturn(run func(addr string) (*bitcoindto.ValidateAddressResult, error)) *MockBitcoiner_ValidateAddress_Call {
 	_c.Call.Return(run)
 	return _c
 }
