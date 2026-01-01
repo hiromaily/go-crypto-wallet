@@ -75,3 +75,22 @@ func (c *AccountRoot) validate() error {
 
 	return nil
 }
+
+// NewMultisigConfig converts AccountMultisig config to domain MultisigConfig.
+func NewMultisigConfig(confMultisig []AccountMultisig) *domainAccount.MultisigConfig {
+	if confMultisig == nil {
+		return &domainAccount.MultisigConfig{
+			AccountMap: make(map[domainAccount.AccountType]map[int][]domainAccount.AuthType),
+		}
+	}
+
+	accountMap := make(map[domainAccount.AccountType]map[int][]domainAccount.AuthType, len(confMultisig))
+	for _, val := range confMultisig {
+		accountMap[val.Type] = map[int][]domainAccount.AuthType{
+			val.Required: val.AuthUsers,
+		}
+	}
+	return &domainAccount.MultisigConfig{
+		AccountMap: accountMap,
+	}
+}

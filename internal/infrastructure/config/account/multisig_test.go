@@ -9,61 +9,83 @@ import (
 	configutil "github.com/hiromaily/go-crypto-wallet/pkg/config/testutil"
 )
 
-// TestNewMultisigAccounts is test for NewMultisigAccounts
-func TestNewMultisigAccounts(t *testing.T) {
-	// t.SkipNow()
-
-	type args struct {
-		acnt domainAccount.AccountType
-	}
-	type want struct {
-		ok bool
-	}
+// TestNewMultisigConfig tests the conversion from AccountMultisig config to domain MultisigConfig.
+// This is an integration test that verifies the conversion logic works correctly.
+func TestNewMultisigConfig(t *testing.T) {
 	tests := []struct {
-		name string
-		args args
-		want want
+		name         string
+		confMultisig []AccountMultisig
+		wantCount    int
 	}{
 		{
-			name: "happy path client",
-			args: args{domainAccount.AccountTypeClient},
-			want: want{false},
+			name:         "nil config returns empty map",
+			confMultisig: nil,
+			wantCount:    0,
 		},
 		{
-			name: "happy path deposit",
-			args: args{domainAccount.AccountTypeDeposit},
-			want: want{true},
+			name: "single multisig config",
+			confMultisig: []AccountMultisig{
+				{
+					Type:     domainAccount.AccountTypeDeposit,
+					Required: 2,
+					AuthUsers: []domainAccount.AuthType{
+						domainAccount.AuthType1,
+						domainAccount.AuthType2,
+					},
+				},
+			},
+			wantCount: 1,
 		},
 		{
-			name: "happy path payment",
-			args: args{domainAccount.AccountTypePayment},
-			want: want{true},
-		},
-		{
-			name: "happy path stored",
-			args: args{domainAccount.AccountTypeStored},
-			want: want{true},
-		},
-		{
-			name: "happy path blanc",
-			args: args{""},
-			want: want{false},
+			name: "multiple multisig configs",
+			confMultisig: []AccountMultisig{
+				{
+					Type:     domainAccount.AccountTypeDeposit,
+					Required: 2,
+					AuthUsers: []domainAccount.AuthType{
+						domainAccount.AuthType1,
+						domainAccount.AuthType2,
+					},
+				},
+				{
+					Type:     domainAccount.AccountTypePayment,
+					Required: 3,
+					AuthUsers: []domainAccount.AuthType{
+						domainAccount.AuthType1,
+						domainAccount.AuthType2,
+						domainAccount.AuthType3,
+					},
+				},
+			},
+			wantCount: 2,
 		},
 	}
-
-	// config
-	confPath := configutil.GetConfigFilePath("account.toml")
-	// projPath := fmt.Sprintf("%s/src/github.com/hiromaily/go-crypto-wallet", os.Getenv("GOPATH"))
-	// confPath := fmt.Sprintf("%s/data/config/account.toml", projPath)
-	conf, err := NewAccount(confPath)
-	require.NoError(t, err, "fail to create config")
-
-	multi := NewMultisigAccounts(conf.Multisigs)
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			res := multi.IsMultisigAccount(tt.args.acnt)
-			require.Equal(t, tt.want.ok, res, "IsMultisigAccount() result mismatch")
+			multi := NewMultisigConfig(tt.confMultisig)
+			require.NotNil(t, multi, "MultisigConfig should not be nil")
+			require.Equal(t, tt.wantCount, len(multi.AccountMap), "AccountMap count mismatch")
 		})
 	}
+}
+
+// TestNewMultisigConfig_Integration tests NewMultisigConfig with real config file.
+// This verifies that the conversion from TOML config to domain entity works correctly.
+func TestNewMultisigConfig_Integration(t *testing.T) {
+	// config
+	confPath := configutil.GetConfigFilePath("account.toml")
+	conf, err := NewAccount(confPath)
+	require.NoError(t, err, "fail to create config")
+
+	multi := NewMultisigConfig(conf.Multisigs)
+	require.NotNil(t, multi, "MultisigConfig should not be nil")
+
+	// Verify that deposit, payment, and stored accounts are multisig
+	require.True(t, multi.IsMultisigAccount(domainAccount.AccountTypeDeposit), "deposit should be multisig")
+	require.True(t, multi.IsMultisigAccount(domainAccount.AccountTypePayment), "payment should be multisig")
+	require.True(t, multi.IsMultisigAccount(domainAccount.AccountTypeStored), "stored should be multisig")
+
+	// Verify that client account is not multisig
+	require.False(t, multi.IsMultisigAccount(domainAccount.AccountTypeClient), "client should not be multisig")
 }

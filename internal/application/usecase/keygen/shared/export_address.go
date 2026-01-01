@@ -10,7 +10,6 @@ import (
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
@@ -21,7 +20,7 @@ import (
 type exportAddressUseCase struct {
 	accountKeyRepo  cold.BTCAccountKeyRepositorier
 	addrFileRepo    file.AddressFileRepositorier
-	multisigAccount account.MultisigAccounter
+	multisigAccount *domainAccount.MultisigConfig
 	coinTypeCode    domainCoin.CoinTypeCode
 }
 
@@ -29,7 +28,7 @@ type exportAddressUseCase struct {
 func NewExportAddressUseCase(
 	accountKeyRepo cold.BTCAccountKeyRepositorier,
 	addrFileRepo file.AddressFileRepositorier,
-	multisigAccount account.MultisigAccounter,
+	multisigAccount *domainAccount.MultisigConfig,
 	coinTypeCode domainCoin.CoinTypeCode,
 ) keygenusecase.ExportAddressUseCase {
 	return &exportAddressUseCase{
