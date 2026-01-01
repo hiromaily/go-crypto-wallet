@@ -14,7 +14,7 @@ import (
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
 
-	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -181,7 +181,7 @@ func (b *Bitcoin) GetTransaction(txID string) (*GetTransactionResult, error) {
 }
 
 // GetTransactionByTxID get transaction result by txID
-func (b *Bitcoin) GetTransactionByTxID(txID string) (*bitcoindto.TransactionResult, error) {
+func (b *Bitcoin) GetTransactionByTxID(txID string) (*dtobtc.TransactionResult, error) {
 	// hashTx, err := chainhash.NewHashFromStr(txID)
 	// if err != nil {
 	//	return nil, errors.Wrapf(err, "fail to call chainhash.NewHashFromStr(%s)", txID)
@@ -229,7 +229,7 @@ func (b *Bitcoin) GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutRe
 }
 
 // DecodeRawTransaction returns information about a transaction given its serialized byte
-func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*bitcoindto.RawTransaction, error) {
+func (b *Bitcoin) DecodeRawTransaction(hexTx string) (*dtobtc.RawTransaction, error) {
 	// byteHex, err := hex.DecodeString(hexTx)
 	// if err != nil {
 	//	return nil, fmt.Errorf("fail to call hex.DecodeString(): %w", err)
@@ -294,7 +294,7 @@ func (b *Bitcoin) CreateRawTransaction(
 
 // FundRawTransaction Add inputs to a transaction until it has enough in value to meet its out value.
 // TODO: unused for now, but it looks useful
-func (b *Bitcoin) FundRawTransaction(hexTx string) (*bitcoindto.FundRawTransactionResult, error) {
+func (b *Bitcoin) FundRawTransaction(hexTx string) (*dtobtc.FundRawTransactionResult, error) {
 	// fundrawtransaction
 	// https://bitcoincore.org/en/doc/0.19.0/rpc/rawtransactions/fundrawtransaction/
 
@@ -336,7 +336,7 @@ func (b *Bitcoin) FundRawTransaction(hexTx string) (*bitcoindto.FundRawTransacti
 
 // prepareSignRawTransactionInputs prepares common inputs for sign raw transaction operations
 func (b *Bitcoin) prepareSignRawTransactionInputs(
-	tx *wire.MsgTx, prevtxs []bitcoindto.PreviousTx,
+	tx *wire.MsgTx, prevtxs []dtobtc.PreviousTx,
 ) (hexTx string, marshaledHex json.RawMessage, marshaledPrevTxs json.RawMessage, err error) {
 	// Convert application DTOs to infrastructure types
 	infraPrevTxs, err := FromPreviousTx(prevtxs, b)
@@ -413,7 +413,7 @@ func (b *Bitcoin) processSignRawTransactionResult(
 //
 // This would be used for deposit action (client -> deposit).
 // For multisig addresses, refer to SignRawTransactionWithKey().
-func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []bitcoindto.PreviousTx) (*wire.MsgTx, bool, error) {
+func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []dtobtc.PreviousTx) (*wire.MsgTx, bool, error) {
 	hexTx, marshaledHex, marshaledPrevTxs, err := b.prepareSignRawTransactionInputs(tx, prevtxs)
 	if err != nil {
 		return nil, false, err
@@ -452,7 +452,7 @@ func (b *Bitcoin) SignRawTransaction(tx *wire.MsgTx, prevtxs []bitcoindto.Previo
 //
 // This would be used for payment and transfer actions from multisig accounts.
 func (b *Bitcoin) SignRawTransactionWithKey(
-	tx *wire.MsgTx, privKeysWIF []string, prevtxs []bitcoindto.PreviousTx,
+	tx *wire.MsgTx, privKeysWIF []string, prevtxs []dtobtc.PreviousTx,
 ) (*wire.MsgTx, bool, error) {
 	hexTx, marshaledHex, marshaledPrevTxs, err := b.prepareSignRawTransactionInputs(tx, prevtxs)
 	if err != nil {

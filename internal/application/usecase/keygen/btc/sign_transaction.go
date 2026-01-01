@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin"
+	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -16,7 +16,7 @@ import (
 )
 
 type signTransactionUseCase struct {
-	btc             portsBitcoin.Bitcoiner
+	btc             portsBtc.Bitcoiner
 	accountKeyRepo  cold.BTCAccountKeyRepositorier
 	txFileRepo      portsStorage.TransactionFileRepositorier
 	multisigAccount account.MultisigAccounter
@@ -24,7 +24,7 @@ type signTransactionUseCase struct {
 
 // NewSignTransactionUseCase creates a new SignTransactionUseCase for BTC keygen
 func NewSignTransactionUseCase(
-	btc portsBitcoin.Bitcoiner,
+	btc portsBtc.Bitcoiner,
 	accountKeyRepo cold.BTCAccountKeyRepositorier,
 	txFileRepo portsStorage.TransactionFileRepositorier,
 	multisigAccount account.MultisigAccounter,

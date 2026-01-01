@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -143,9 +143,9 @@ func TestExecute_DepositTransaction(t *testing.T) {
 		deps.btcClient.EXPECT().ListUnspentByAccount(
 			domainAccount.AccountTypeClient,
 			uint64(6),
-		).Return([]bitcoindto.UnspentOutput{}, nil)
+		).Return([]dtobtc.UnspentOutput{}, nil)
 		deps.btcClient.EXPECT().GetUnspentListAddrs(
-			[]bitcoindto.UnspentOutput{},
+			[]dtobtc.UnspentOutput{},
 			domainAccount.AccountTypeClient,
 		).Return([]string{})
 
@@ -404,9 +404,9 @@ func TestMockExpectations(t *testing.T) {
 		deps.btcClient.EXPECT().ListUnspentByAccount(
 			domainAccount.AccountTypeClient,
 			uint64(6),
-		).Return([]bitcoindto.UnspentOutput{}, nil)
+		).Return([]dtobtc.UnspentOutput{}, nil)
 		deps.btcClient.EXPECT().GetUnspentListAddrs(
-			[]bitcoindto.UnspentOutput{},
+			[]dtobtc.UnspentOutput{},
 			domainAccount.AccountTypeClient,
 		).Return([]string{})
 

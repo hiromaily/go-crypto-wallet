@@ -11,8 +11,8 @@ import (
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/wire"
 
-	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
-	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin"
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
+	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -24,7 +24,7 @@ import (
 )
 
 type createTransactionUseCase struct {
-	btcClient       portsBitcoin.Bitcoiner
+	btcClient       portsBtc.Bitcoiner
 	dbConn          *sql.DB
 	addrRepo        watchrepo.AddressRepositorier
 	txRepo          watchrepo.BTCTxRepositorier
@@ -39,7 +39,7 @@ type createTransactionUseCase struct {
 
 // NewCreateTransactionUseCase creates a new CreateTransactionUseCase
 func NewCreateTransactionUseCase(
-	btcClient portsBitcoin.Bitcoiner,
+	btcClient portsBtc.Bitcoiner,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.BTCTxRepositorier,
@@ -215,7 +215,7 @@ func (u *createTransactionUseCase) createTransferTx(
 type parsedTx struct {
 	txInputs       []btcjson.TransactionInput
 	txRepoTxInputs []*sqlc.BtcTxInput
-	prevTxs        []bitcoindto.PreviousTx
+	prevTxs        []dtobtc.PreviousTx
 	addresses      []string // input, sender's address
 }
 
@@ -371,7 +371,7 @@ func (u *createTransactionUseCase) createTx(
 // this func returns no result, no error possibly, so caller should check both returned value
 func (u *createTransactionUseCase) getUnspentList(
 	accountType domainAccount.AccountType,
-) ([]bitcoindto.UnspentOutput, []string, error) {
+) ([]dtobtc.UnspentOutput, []string, error) {
 	// get listUnspent
 	unspentList, err := u.btcClient.ListUnspentByAccount(accountType, u.btcClient.ConfirmationBlock())
 	if err != nil {
@@ -385,12 +385,12 @@ func (u *createTransactionUseCase) getUnspentList(
 // parse result of listUnspent
 // returned *parsedTx could be nil
 func (u *createTransactionUseCase) parseListUnspentTx(
-	unspentList []bitcoindto.UnspentOutput, amount btcutil.Amount,
+	unspentList []dtobtc.UnspentOutput, amount btcutil.Amount,
 ) (*parsedTx, btcutil.Amount, bool) {
 	var inputTotal btcutil.Amount
 	txInputs := make([]btcjson.TransactionInput, 0, len(unspentList))
 	txRepoTxInputs := make([]*sqlc.BtcTxInput, 0, len(unspentList))
-	prevTxs := make([]bitcoindto.PreviousTx, 0, len(unspentList))
+	prevTxs := make([]dtobtc.PreviousTx, 0, len(unspentList))
 	addresses := make([]string, 0, len(unspentList))
 
 	var isDone bool // if isDone is false, sender can't meet amount
@@ -424,7 +424,7 @@ func (u *createTransactionUseCase) parseListUnspentTx(
 		})
 
 		// TODO: if sender is client account (non-multisig address), RedeemScript is blank
-		prevTxs = append(prevTxs, bitcoindto.PreviousTx{
+		prevTxs = append(prevTxs, dtobtc.PreviousTx{
 			TxID:          txItem.TxID,
 			Vout:          txItem.Vout,
 			ScriptPubKey:  txItem.ScriptPubKey,
@@ -755,7 +755,7 @@ func (u *createTransactionUseCase) insertTxTableForUnsigned(
 func (u *createTransactionUseCase) generatePSBTFile(
 	actionType domainTx.ActionType,
 	msgTx *wire.MsgTx,
-	prevTxs []bitcoindto.PreviousTx,
+	prevTxs []dtobtc.PreviousTx,
 	senderAccount domainAccount.AccountType,
 	id int64,
 ) (string, error) {

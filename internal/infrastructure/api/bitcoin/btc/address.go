@@ -6,7 +6,7 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 
-	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -52,7 +52,7 @@ type Purpose struct {
 }
 
 // GetAddressInfo can be used as an alternative to `getaccount`, `validateaddress`
-func (b *Bitcoin) GetAddressInfo(addr string) (*bitcoindto.AddressInfo, error) {
+func (b *Bitcoin) GetAddressInfo(addr string) (*dtobtc.AddressInfo, error) {
 	input, err := json.Marshal(addr)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marchal(): %w", err)
@@ -119,7 +119,7 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 }
 
 // ValidateAddress validate address
-func (b *Bitcoin) ValidateAddress(addr string) (*bitcoindto.ValidateAddressResult, error) {
+func (b *Bitcoin) ValidateAddress(addr string) (*dtobtc.ValidateAddressResult, error) {
 	input, err := json.Marshal(addr)
 	if err != nil {
 		return nil, fmt.Errorf("json.Marchal(): error: %s", err)

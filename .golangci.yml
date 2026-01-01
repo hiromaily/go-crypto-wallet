@@ -118,9 +118,13 @@ linters:
       no-unaliased: true
 
       # set aliases for packages
-      # alias:
-      #   - pkg: gotest.tools/v3/assert/cmp
-      #     alias: is
+      alias:
+        - pkg: github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc
+          alias: dtobtc
+        - pkg: github.com/hiromaily/go-crypto-wallet/internal/application/dto/eth
+          alias: dtoeth
+        - pkg: github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp
+          alias: dtoxrp
 
     nakedret:
       # Disallow naked returns if func has more lines of code than this setting.

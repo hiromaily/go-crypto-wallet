@@ -5,10 +5,10 @@ import (
 
 	"github.com/bookerzzz/grok"
 
-	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin"
+	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
 )
 
-func runLogging(btc portsBitcoin.Bitcoiner) error {
+func runLogging(btc portsBtc.Bitcoiner) error {
 	// logging
 	logData, err := btc.Logging()
 	if err != nil {

@@ -43,6 +43,7 @@ The `internal/application/ports/` package contains **interface definitions** (ab
 - **Infrastructure layer contains only implementations**, never interface definitions
 - This inverts the dependency direction: Infrastructure depends on Application, not vice versa
 - Ports define contracts that infrastructure implementations must fulfill
+- **Interfaces MUST use application-layer DTOs**, NOT infrastructure types (Clean Architecture Dependency Rule)
 
 **Current Port Packages:**
 
@@ -56,30 +57,81 @@ internal/application/ports/
     └── interface.go              # TransactionFileRepositorier interface (file storage abstraction)
 ```
 
-**Example: Bitcoin API Abstraction**
+**DTOs for Port Interfaces:**
+
+Port interfaces must use **application-layer DTOs** (defined in `internal/application/dto/`) instead of infrastructure types. This ensures the application layer has zero dependencies on infrastructure.
+
+**DTO Location:**
+- DTOs are defined in `internal/application/dto/{coin}/` (e.g., `internal/application/dto/btc/dto.go`)
+- DTOs contain only domain types, standard library types, or external library types (e.g., `btcutil.Amount`)
+- DTOs MUST NOT import infrastructure packages
+
+**Example: Bitcoin API Abstraction with DTOs**
 
 ```go
-// Interface definition in application/ports/bitcoin/interface.go
-package bitcoin
+// DTOs in internal/application/dto/btc/dto.go
+package btc
+
+import "github.com/btcsuite/btcd/btcutil"
+
+type AddressInfo struct {
+    Address      string
+    ScriptPubKey string
+    IsWitness    bool
+    Labels       []string
+    // ... other fields
+}
+
+type UnspentOutput struct {
+    TxID          string
+    Vout          uint32
+    Address       string
+    Amount        btcutil.Amount
+    Confirmations int64
+    // ... other fields
+}
+
+// Interface definition in application/ports/btc/interface.go
+package btc
+
+import btcdto "internal/application/dto/btc"
 
 type Bitcoiner interface {
     GetBalance() (btcutil.Amount, error)
-    SendTransaction(tx *wire.MsgTx) error
-    // ... other methods
+    GetAddressInfo(addr string) (*btcdto.AddressInfo, error)
+    ListUnspent(confirmationNum uint64) ([]btcdto.UnspentOutput, error)
+    // ... other methods using DTOs
 }
 
 // Implementation in infrastructure/api/bitcoin/btc/bitcoin.go
 package btc
 
-import portsBitcoin "internal/application/ports/bitcoin"
+import (
+    portsBtc "internal/application/ports/btc"
+    btcdto "internal/application/dto/btc"
+)
 
 type Bitcoin struct {
     client *rpcclient.Client
 }
 
-// Bitcoin implements portsBitcoin.Bitcoiner interface
-func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
-    // Implementation details...
+// Bitcoin implements portsBtc.Bitcoiner interface
+// Maps infrastructure types to application DTOs
+func (b *Bitcoin) GetAddressInfo(addr string) (*btcdto.AddressInfo, error) {
+    // Call Bitcoin Core RPC (returns infrastructure type)
+    result, err := b.client.GetAddressInfo(addr)
+    if err != nil {
+        return nil, err
+    }
+    
+    // Map infrastructure type to application DTO
+    return &btcdto.AddressInfo{
+        Address:      result.Address,
+        ScriptPubKey: result.ScriptPubKey,
+        IsWitness:    result.IsWitness,
+        Labels:       result.Labels,
+        // ... map all fields
+    }, nil
 }
 ```
 
@@ -94,8 +146,35 @@ func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
 
 - **NEVER** define interfaces in the infrastructure layer
 - **ALWAYS** define interfaces in `application/ports/` when infrastructure needs abstraction
+- **NEVER** use infrastructure types in port interface method signatures (use application DTOs instead)
+- **ALWAYS** create DTOs in `internal/application/dto/` for data structures returned by infrastructure
 - Infrastructure packages import and implement these port interfaces
+- Infrastructure implementations map between infrastructure types and application DTOs
 - Use cases depend on port interfaces, not concrete implementations
+
+**DTO Creation Guidelines:**
+
+When creating port interfaces that return data from infrastructure:
+
+1. **Identify infrastructure types** used in interface methods
+2. **Create corresponding DTOs** in `internal/application/dto/{coin}/dto.go` (e.g., `internal/application/dto/btc/dto.go`)
+3. **Update interface methods** to use DTOs instead of infrastructure types
+4. **Update infrastructure implementations** to map infrastructure types → DTOs
+5. **Update use cases** to work with new DTOs
+
+**Example Pattern:**
+
+```go
+// ❌ WRONG: Interface depends on infrastructure type
+type Bitcoiner interface {
+    GetAddressInfo(addr string) (*btc.GetAddressInfoResult, error)  // btc is infrastructure
+}
+
+// ✅ CORRECT: Interface uses application DTO
+type Bitcoiner interface {
+    GetAddressInfo(addr string) (*btcdto.AddressInfo, error)  // btcdto is application DTO
+}
+```
 
 ## Application Layer (Use Case) Guidelines
 
@@ -214,8 +293,11 @@ For comprehensive testing strategy, see [Testing Guidelines](testing.md).
     - `multisig/`: Multisig validators and business rules
     - `coin/`: Cryptocurrency type definitions
   - `application/`: **Application layer** - Use case layer (Clean Architecture)
+    - `dto/`: **Data Transfer Objects** - Application-layer DTOs for port interfaces
+      - `btc/`: Bitcoin DTOs (AddressInfo, UnspentOutput, TransactionResult, etc.)
+      - Other coin DTOs (eth, xrp) as needed
     - `ports/`: **Interface definitions (abstractions)** - Contracts for infrastructure implementations
-      - `bitcoin/`: Bitcoiner interface (Bitcoin/BCH API abstraction)
+      - `btc/`: Bitcoiner interface (Bitcoin/BCH API abstraction)
       - `persistence/`: Repository interfaces (database abstractions)
       - `storage/`: File storage interfaces (TransactionFileRepositorier)
     - `usecase/`: Use case implementations organized by wallet type

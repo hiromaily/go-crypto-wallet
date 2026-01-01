@@ -15,7 +15,7 @@ log-level: info
 
 packages:
   # Bitcoin API - interface in application/ports, implementation in infrastructure
-  github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin:
+  github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc:
     config:
       dir: "internal/infrastructure/api/bitcoin/mocks"
       pkgname: "mocks"

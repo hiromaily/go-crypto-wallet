@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin"
+	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
@@ -23,7 +23,7 @@ type ImportAddressUseCase interface {
 }
 
 type importAddressUseCase struct {
-	btcClient    portsBitcoin.Bitcoiner
+	btcClient    portsBtc.Bitcoiner
 	addrRepo     watch.AddressRepositorier
 	addrFileRepo file.AddressFileRepositorier
 	coinTypeCode domainCoin.CoinTypeCode
@@ -32,7 +32,7 @@ type importAddressUseCase struct {
 
 // NewImportAddressUseCase creates a new BTC-specific ImportAddressUseCase
 func NewImportAddressUseCase(
-	btcClient portsBitcoin.Bitcoiner,
+	btcClient portsBtc.Bitcoiner,
 	addrRepo watch.AddressRepositorier,
 	addrFileRepo file.AddressFileRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,

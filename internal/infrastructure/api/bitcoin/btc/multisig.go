@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -25,7 +25,7 @@ func (b *Bitcoin) AddMultisigAddress(
 	addresses []string,
 	accountName string,
 	addressType domainBitcoin.AddressType,
-) (*bitcoindto.MultisigAddress, error) {
+) (*dtobtc.MultisigAddress, error) {
 	if requiredSigs > len(addresses) {
 		return nil, fmt.Errorf(
 			"number of given address doesn't meet number of requiredSigs: requiredSigs:%d, len(addresses):%d",

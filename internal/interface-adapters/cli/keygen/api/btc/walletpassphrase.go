@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 
-	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin"
+	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
 )
 
-func runWalletPassphrase(btc portsBitcoin.Bitcoiner, passphrase string) error {
+func runWalletPassphrase(btc portsBtc.Bitcoiner, passphrase string) error {
 	fmt.Println("stores the wallet decryption key in memory for 'timeout' seconds")
 
 	// validator

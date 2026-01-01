@@ -4,18 +4,18 @@ import (
 	"fmt"
 	"os"
 
-	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin"
+	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 
-var bc portsBitcoin.Bitcoiner
+var bc portsBtc.Bitcoiner
 
 // GetBTC returns btc instance
 // FIXME: hard coded config path
-func GetBTC() (portsBitcoin.Bitcoiner, error) {
+func GetBTC() (portsBtc.Bitcoiner, error) {
 	if bc != nil {
 		return bc, nil
 	}

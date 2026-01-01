@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
 )
 
@@ -27,7 +27,7 @@ type GetAddressInfoResult struct {
 }
 
 // GetAddressInfo can be used as an alternative to `getaccount`, `validateaddress`
-func (b *BitcoinCash) GetAddressInfo(addr string) (*bitcoindto.AddressInfo, error) {
+func (b *BitcoinCash) GetAddressInfo(addr string) (*dtobtc.AddressInfo, error) {
 	input, err := json.Marshal(addr)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marchal() in bch: %w", err)

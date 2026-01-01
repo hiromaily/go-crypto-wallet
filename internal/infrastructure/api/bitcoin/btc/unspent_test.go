@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
@@ -17,7 +17,7 @@ type unspentTest struct {
 	testutil.BTCTestSuite
 }
 
-func findUnspentListID(unspentList []bitcoindto.UnspentOutput, txid string) bool {
+func findUnspentListID(unspentList []dtobtc.UnspentOutput, txid string) bool {
 	for _, unspent := range unspentList {
 		if unspent.TxID == txid {
 			return true

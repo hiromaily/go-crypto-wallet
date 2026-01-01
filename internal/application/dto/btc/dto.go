@@ -1,4 +1,4 @@
-package bitcoindto
+package btc
 
 import (
 	"github.com/btcsuite/btcd/btcutil"

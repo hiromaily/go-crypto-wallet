@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
-	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin"
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
+	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
@@ -14,7 +14,7 @@ import (
 )
 
 type createMultisigAddressUseCase struct {
-	btc                portsBitcoin.Bitcoiner
+	btc                portsBtc.Bitcoiner
 	authFullPubKeyRepo cold.AuthFullPubkeyRepositorier
 	accountKeyRepo     cold.BTCAccountKeyRepositorier
 	multisigAccount    account.MultisigAccounter
@@ -22,7 +22,7 @@ type createMultisigAddressUseCase struct {
 
 // NewCreateMultisigAddressUseCase creates a new CreateMultisigAddressUseCase
 func NewCreateMultisigAddressUseCase(
-	btc portsBitcoin.Bitcoiner,
+	btc portsBtc.Bitcoiner,
 	authFullPubKeyRepo cold.AuthFullPubkeyRepositorier,
 	accountKeyRepo cold.BTCAccountKeyRepositorier,
 	multisigAccount account.MultisigAccounter,
@@ -81,7 +81,7 @@ func (u *createMultisigAddressUseCase) Create(
 		copy(addrs, authFullPubKeys)
 		addrs[len(authFullPubKeys)] = item.FullPublicKey
 
-		var resAddr *bitcoindto.MultisigAddress
+		var resAddr *dtobtc.MultisigAddress
 		resAddr, err = u.btc.AddMultisigAddress(
 			requiredSig,
 			addrs,

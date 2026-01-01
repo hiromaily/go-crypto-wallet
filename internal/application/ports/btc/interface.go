@@ -1,4 +1,4 @@
-package bitcoin
+package btc
 
 import (
 	"github.com/btcsuite/btcd/btcjson"
@@ -8,7 +8,7 @@ import (
 	"github.com/btcsuite/btcd/wire"
 	"github.com/quagmt/udecimal"
 
-	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
@@ -20,9 +20,9 @@ type Bitcoiner interface {
 	GetAccount(addr string) (string, error)
 
 	// address.go
-	GetAddressInfo(addr string) (*bitcoindto.AddressInfo, error)
+	GetAddressInfo(addr string) (*dtobtc.AddressInfo, error)
 	GetAddressesByLabel(labelName string) ([]btcutil.Address, error)
-	ValidateAddress(addr string) (*bitcoindto.ValidateAddressResult, error)
+	ValidateAddress(addr string) (*dtobtc.ValidateAddressResult, error)
 	DecodeAddress(addr string) (btcutil.Address, error)
 
 	// amount.go
@@ -70,39 +70,39 @@ type Bitcoiner interface {
 	// GetReceivedByLabelAndMinConf(accountName string, minConf int) (btcutil.Amount, error)
 
 	// logging.go
-	Logging() (*bitcoindto.LoggingResult, error)
+	Logging() (*dtobtc.LoggingResult, error)
 
 	// multisig.go
 	AddMultisigAddress(
 		requiredSigs int, addresses []string, accountName string, addressType domainBitcoin.AddressType,
-	) (*bitcoindto.MultisigAddress, error)
+	) (*dtobtc.MultisigAddress, error)
 
 	// network.go
-	GetNetworkInfo() (*bitcoindto.NetworkInfo, error)
-	GetBlockchainInfo() (*bitcoindto.BlockchainInfo, error)
+	GetNetworkInfo() (*dtobtc.NetworkInfo, error)
+	GetBlockchainInfo() (*dtobtc.BlockchainInfo, error)
 
 	// transaction.go
 	ToHex(tx *wire.MsgTx) (string, error)
 	ToMsgTx(txHex string) (*wire.MsgTx, error)
-	GetTransactionByTxID(txID string) (*bitcoindto.TransactionResult, error)
+	GetTransactionByTxID(txID string) (*dtobtc.TransactionResult, error)
 	GetTxOutByTxID(txID string, index uint32) (*btcjson.GetTxOutResult, error)
-	DecodeRawTransaction(hexTx string) (*bitcoindto.RawTransaction, error)
+	DecodeRawTransaction(hexTx string) (*dtobtc.RawTransaction, error)
 	GetRawTransactionByHex(strHashTx string) (*btcutil.Tx, error)
 	CreateRawTransaction(
 		inputs []btcjson.TransactionInput, outputs map[btcutil.Address]btcutil.Amount,
 	) (*wire.MsgTx, error)
-	FundRawTransaction(hex string) (*bitcoindto.FundRawTransactionResult, error)
-	SignRawTransaction(tx *wire.MsgTx, prevtxs []bitcoindto.PreviousTx) (*wire.MsgTx, bool, error)
+	FundRawTransaction(hex string) (*dtobtc.FundRawTransactionResult, error)
+	SignRawTransaction(tx *wire.MsgTx, prevtxs []dtobtc.PreviousTx) (*wire.MsgTx, bool, error)
 	SignRawTransactionWithKey(
-		tx *wire.MsgTx, privKeysWIF []string, prevtxs []bitcoindto.PreviousTx,
+		tx *wire.MsgTx, privKeysWIF []string, prevtxs []dtobtc.PreviousTx,
 	) (*wire.MsgTx, bool, error)
 	SendTransactionByHex(hex string) (*chainhash.Hash, error)
 	SendTransactionByByte(rawTx []byte) (*chainhash.Hash, error)
 	Sign(tx *wire.MsgTx, strPrivateKey string) (string, error)
 
 	// psbt.go (BIP174 Partially Signed Bitcoin Transaction support)
-	CreatePSBT(msgTx *wire.MsgTx, prevTxs []bitcoindto.PreviousTx) (string, error)
-	ParsePSBT(psbtBase64 string) (*bitcoindto.ParsedPSBT, error)
+	CreatePSBT(msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx) (string, error)
+	ParsePSBT(psbtBase64 string) (*dtobtc.ParsedPSBT, error)
 	ValidatePSBT(psbtBase64 string) error
 	SignPSBTWithKey(psbtBase64 string, wifs []string) (string, bool, error)
 	FinalizePSBT(psbtBase64 string) (string, error)
@@ -111,14 +111,14 @@ type Bitcoiner interface {
 	GetPSBTFee(psbtBase64 string) (int64, error)
 
 	// unspent.go
-	ListUnspent(confirmationNum uint64) ([]bitcoindto.UnspentOutput, error)
+	ListUnspent(confirmationNum uint64) ([]dtobtc.UnspentOutput, error)
 	ListUnspentByAccount(
 		accountType domainAccount.AccountType, confirmationNum uint64,
-	) ([]bitcoindto.UnspentOutput, error)
+	) ([]dtobtc.UnspentOutput, error)
 	GetUnspentListAddrs(
-		unspentList []bitcoindto.UnspentOutput, accountType domainAccount.AccountType,
+		unspentList []dtobtc.UnspentOutput, accountType domainAccount.AccountType,
 	) []string
-	LockUnspent(tx *bitcoindto.UnspentOutput) error
+	LockUnspent(tx *dtobtc.UnspentOutput) error
 	UnlockUnspent() error
 
 	// wallet.go

@@ -15,7 +15,7 @@ import (
 	"github.com/btcsuite/btcd/txscript"
 	"github.com/btcsuite/btcd/wire"
 
-	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -33,7 +33,7 @@ type ParsedPSBT struct {
 // Used by Watch wallet to create unsigned PSBTs.
 //
 //nolint:gocyclo // Complex function handling PSBT creation with metadata
-func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []bitcoindto.PreviousTx) (string, error) {
+func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx) (string, error) {
 	// Convert application DTOs to infrastructure types
 	infraPrevTxs, err := FromPreviousTx(prevTxs, b)
 	if err != nil {
@@ -164,7 +164,7 @@ func (b *Bitcoin) parsePSBTInternal(psbtBase64 string) (*ParsedPSBT, error) {
 
 // ParsePSBT parses a base64-encoded PSBT and returns metadata as application DTO.
 // Used by all wallets to read PSBT files.
-func (b *Bitcoin) ParsePSBT(psbtBase64 string) (*bitcoindto.ParsedPSBT, error) {
+func (b *Bitcoin) ParsePSBT(psbtBase64 string) (*dtobtc.ParsedPSBT, error) {
 	infraParsed, err := b.parsePSBTInternal(psbtBase64)
 	if err != nil {
 		return nil, err

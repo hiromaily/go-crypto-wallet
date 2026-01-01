@@ -67,8 +67,11 @@ The `internal/` directory is organized into four main layers following Clean Arc
 
 **Structure:**
 
+  - `dto/`: **Data Transfer Objects** - Application-layer DTOs for port interfaces
+  - `btc/`: Bitcoin DTOs (AddressInfo, UnspentOutput, TransactionResult, etc.)
+  - Other coin DTOs (eth, xrp) as needed
 - `ports/`: **Interface definitions (abstractions)** - Contracts that infrastructure must implement
-  - `bitcoin/`: Bitcoiner interface (Bitcoin/BCH API abstraction)
+  - `btc/`: Bitcoiner interface (Bitcoin/BCH API abstraction)
   - `persistence/`: Repository interfaces (database abstractions)
   - `storage/`: File storage interfaces (TransactionFileRepositorier)
 - `usecase/`: Use case implementations
@@ -83,37 +86,69 @@ The `internal/` directory is organized into four main layers following Clean Arc
 - ✅ Define interfaces in `application/ports/` when infrastructure needs abstraction
 - ✅ Infrastructure packages import and implement these port interfaces
 - ✅ Use cases depend on port interfaces, not concrete implementations
+- ✅ **ALWAYS** use application-layer DTOs in interface method signatures (NOT infrastructure types)
 - ❌ **NEVER** define interfaces in the infrastructure layer
 - ❌ **NEVER** import concrete infrastructure types in use cases
+- ❌ **NEVER** use infrastructure types in port interface method signatures
 
 **Example:**
 
 ```go
-// Interface definition in application/ports/bitcoin/interface.go
-package bitcoin
+// DTOs in internal/application/dto/btc/dto.go
+package btc
+
+import "github.com/btcsuite/btcd/btcutil"
+
+type AddressInfo struct {
+    Address      string
+    ScriptPubKey string
+    IsWitness    bool
+    Labels       []string
+}
+
+// Interface definition in application/ports/btc/interface.go
+package btc
+
+import btcdto "internal/application/dto/btc"
 
 type Bitcoiner interface {
     GetBalance() (btcutil.Amount, error)
-    SendTransaction(tx *wire.MsgTx) error
+    GetAddressInfo(addr string) (*btcdto.AddressInfo, error)  // Uses DTO, not infrastructure type
 }
 
 // Implementation in infrastructure/api/bitcoin/btc/bitcoin.go
 package btc
 
-import portsBitcoin "github.com/.../internal/application/ports/bitcoin"
+import (
+    portsBtc "internal/application/ports/btc"
+    btcdto "internal/application/dto/btc"
+)
 
 type Bitcoin struct {
     client *rpcclient.Client
 }
 
-// Bitcoin implements portsBitcoin.Bitcoiner
-func (b *Bitcoin) GetBalance() (btcutil.Amount, error) {
-    // Implementation...
+// Bitcoin implements portsBtc.Bitcoiner
+// Maps infrastructure type to application DTO
+func (b *Bitcoin) GetAddressInfo(addr string) (*btcdto.AddressInfo, error) {
+    // Call infrastructure API (returns infrastructure type)
+    result, err := b.client.GetAddressInfo(addr)
+    if err != nil {
+        return nil, err
+    }
+    
+    // Map to application DTO
+    return &btcdto.AddressInfo{
+        Address:      result.Address,
+        ScriptPubKey: result.ScriptPubKey,
+        IsWitness:    result.IsWitness,
+        Labels:       result.Labels,
+    }, nil
 }
 
 // Use case depends on interface, not implementation
 type xxxUseCase struct {
-    btcClient portsBitcoin.Bitcoiner  // Interface from ports
+    btcClient portsBtc.Bitcoiner  // Interface from ports
 }
 ```
 
@@ -121,6 +156,8 @@ type xxxUseCase struct {
 
 - ✅ Create use cases that orchestrate domain and infrastructure
 - ✅ Define interfaces in `application/ports/` for infrastructure abstractions
+- ✅ Create DTOs in `internal/application/dto/` for data structures returned by infrastructure
+- ✅ Use application DTOs in port interface method signatures (NOT infrastructure types)
 - ✅ Transform DTOs between layers
 - ✅ Wrap errors with context
 - ✅ Depend on domain layer and `application/ports/` interfaces
@@ -128,6 +165,7 @@ type xxxUseCase struct {
 - ❌ **NEVER** contain business logic (delegate to domain)
 - ❌ **NEVER** directly access infrastructure implementations (use port interfaces)
 - ❌ **NEVER** define interfaces in infrastructure layer
+- ❌ **NEVER** use infrastructure types in port interface method signatures
 
 **Use Case Pattern:**
 
@@ -185,6 +223,8 @@ func (u *xxxUseCase) Execute(ctx context.Context, input XxxInput) (*XxxOutput, e
 
 - ✅ Implement interfaces from `application/ports/`
 - ✅ Import from `application/ports/` to implement port interfaces
+- ✅ Import from `application/dto/` to map infrastructure types to DTOs
+- ✅ Map infrastructure types to application DTOs in interface implementations
 - ✅ Handle external system communication
 - ✅ Convert between domain entities and external formats
 - ✅ Manage technical concerns (database, network, file I/O)

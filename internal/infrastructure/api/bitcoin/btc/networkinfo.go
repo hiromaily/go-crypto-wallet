@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 )
 
 // GetNetworkInfoResult is response type of PRC `getnetworkinfo`
@@ -91,7 +91,7 @@ type LocalAddress struct {
 }
 
 // GetNetworkInfo call RPC `getnetworkinfo`
-func (b *Bitcoin) GetNetworkInfo() (*bitcoindto.NetworkInfo, error) {
+func (b *Bitcoin) GetNetworkInfo() (*dtobtc.NetworkInfo, error) {
 	rawResult, err := b.Client.RawRequest("getnetworkinfo", []json.RawMessage{})
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.RawRequest(getnetworkinfo): %w", err)
@@ -107,7 +107,7 @@ func (b *Bitcoin) GetNetworkInfo() (*bitcoindto.NetworkInfo, error) {
 }
 
 // GetBlockchainInfo call RPC `getblockchaininfo`
-func (b *Bitcoin) GetBlockchainInfo() (*bitcoindto.BlockchainInfo, error) {
+func (b *Bitcoin) GetBlockchainInfo() (*dtobtc.BlockchainInfo, error) {
 	rawResult, err := b.Client.RawRequest("getblockchaininfo", []json.RawMessage{})
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.RawRequest(getblockchaininfo): %w", err)

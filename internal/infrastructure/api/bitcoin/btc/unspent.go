@@ -9,7 +9,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg/chainhash"
 	"github.com/btcsuite/btcd/wire"
 
-	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -31,7 +31,7 @@ type ListUnspentResult struct {
 }
 
 // ListUnspent call RPC `listunspent`
-func (b *Bitcoin) ListUnspent(confirmationNum uint64) ([]bitcoindto.UnspentOutput, error) {
+func (b *Bitcoin) ListUnspent(confirmationNum uint64) ([]dtobtc.UnspentOutput, error) {
 	logger.Debug("call ListUnspent()", "confirmation", b.confirmationBlock)
 
 	input, err := json.Marshal(confirmationNum)
@@ -59,7 +59,7 @@ func (b *Bitcoin) ListUnspent(confirmationNum uint64) ([]bitcoindto.UnspentOutpu
 // ListUnspentByAccount gets listunspent by account
 func (b *Bitcoin) ListUnspentByAccount(
 	accountType domainAccount.AccountType, confirmationNum uint64,
-) ([]bitcoindto.UnspentOutput, error) {
+) ([]dtobtc.UnspentOutput, error) {
 	addrs, err := b.GetAddressesByLabel(accountType.String())
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btc.GetAddressesByLabel(): %w", err)
@@ -88,7 +88,7 @@ func (b *Bitcoin) ListUnspentByAccount(
 
 // GetUnspentListAddrs returns address from unspentList
 func (*Bitcoin) GetUnspentListAddrs(
-	unspentList []bitcoindto.UnspentOutput, accountType domainAccount.AccountType,
+	unspentList []dtobtc.UnspentOutput, accountType domainAccount.AccountType,
 ) []string {
 	addrs := make([]string, 0, len(unspentList))
 	for _, unspent := range unspentList {
@@ -144,7 +144,7 @@ func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address, confirmationNum 
 
 // LockUnspent lock given txID
 // 1st param lock (false)
-func (b *Bitcoin) LockUnspent(tx *bitcoindto.UnspentOutput) error {
+func (b *Bitcoin) LockUnspent(tx *dtobtc.UnspentOutput) error {
 	txIDHash, err := chainhash.NewHashFromStr(tx.TxID)
 	if err != nil {
 		return fmt.Errorf("fail to call chainhash.NewHashFromStr(%s): %w", tx.TxID, err)

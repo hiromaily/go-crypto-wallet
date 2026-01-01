@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/bitcoin"
+	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
@@ -15,7 +15,7 @@ import (
 )
 
 type sendTransactionUseCase struct {
-	btcClient    portsBitcoin.Bitcoiner
+	btcClient    portsBtc.Bitcoiner
 	addrRepo     watchrepo.AddressRepositorier
 	txRepo       watchrepo.BTCTxRepositorier
 	txOutputRepo watchrepo.TxOutputRepositorier
@@ -24,7 +24,7 @@ type sendTransactionUseCase struct {
 
 // NewSendTransactionUseCase creates a new SendTransactionUseCase
 func NewSendTransactionUseCase(
-	btcClient portsBitcoin.Bitcoiner,
+	btcClient portsBtc.Bitcoiner,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.BTCTxRepositorier,
 	txOutputRepo watchrepo.TxOutputRepositorier,

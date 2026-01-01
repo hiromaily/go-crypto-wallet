@@ -9,19 +9,19 @@ import (
 	"github.com/btcsuite/btcd/btcutil"
 	"github.com/btcsuite/btcd/wire"
 
-	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // ToAddressInfo converts infrastructure GetAddressInfoResult to application AddressInfo
-func ToAddressInfo(result *GetAddressInfoResult) *bitcoindto.AddressInfo {
+func ToAddressInfo(result *GetAddressInfoResult) *dtobtc.AddressInfo {
 	if result == nil {
 		return nil
 	}
 
-	dto := &bitcoindto.AddressInfo{
+	dto := &dtobtc.AddressInfo{
 		Address:      result.Address,
 		ScriptPubKey: result.ScriptPubKey,
 		IsWitness:    result.Iswitness,
@@ -39,12 +39,12 @@ func ToAddressInfo(result *GetAddressInfoResult) *bitcoindto.AddressInfo {
 }
 
 // ToValidateAddressResult converts infrastructure to application DTO
-func ToValidateAddressResult(result *ValidateAddressResult) *bitcoindto.ValidateAddressResult {
+func ToValidateAddressResult(result *ValidateAddressResult) *dtobtc.ValidateAddressResult {
 	if result == nil {
 		return nil
 	}
 
-	return &bitcoindto.ValidateAddressResult{
+	return &dtobtc.ValidateAddressResult{
 		IsValid:      result.IsValid,
 		Address:      result.Address,
 		ScriptPubKey: result.ScriptPubKey,
@@ -54,14 +54,14 @@ func ToValidateAddressResult(result *ValidateAddressResult) *bitcoindto.Validate
 }
 
 // ToNetworkInfo converts infrastructure to application DTO
-func ToNetworkInfo(result *GetNetworkInfoResult) *bitcoindto.NetworkInfo {
+func ToNetworkInfo(result *GetNetworkInfoResult) *dtobtc.NetworkInfo {
 	if result == nil {
 		return nil
 	}
 
-	networks := make([]bitcoindto.NetworkAddress, len(result.Networks))
+	networks := make([]dtobtc.NetworkAddress, len(result.Networks))
 	for i, net := range result.Networks {
-		networks[i] = bitcoindto.NetworkAddress{
+		networks[i] = dtobtc.NetworkAddress{
 			Name:                      net.Name,
 			Limited:                   net.Limited,
 			Reachable:                 net.Reachable,
@@ -70,16 +70,16 @@ func ToNetworkInfo(result *GetNetworkInfoResult) *bitcoindto.NetworkInfo {
 		}
 	}
 
-	localAddrs := make([]bitcoindto.LocalAddress, len(result.Localaddresses))
+	localAddrs := make([]dtobtc.LocalAddress, len(result.Localaddresses))
 	for i, addr := range result.Localaddresses {
-		localAddrs[i] = bitcoindto.LocalAddress{
+		localAddrs[i] = dtobtc.LocalAddress{
 			Address: addr.Address,
 			Port:    uint16(addr.Port),
 			Score:   int32(addr.Score),
 		}
 	}
 
-	return &bitcoindto.NetworkInfo{
+	return &dtobtc.NetworkInfo{
 		Version:         int32(result.Version),
 		SubVersion:      result.Subversion,
 		ProtocolVersion: int32(result.Protocolversion),
@@ -97,7 +97,7 @@ func ToNetworkInfo(result *GetNetworkInfoResult) *bitcoindto.NetworkInfo {
 }
 
 // ToBlockchainInfo converts infrastructure to application DTO
-func ToBlockchainInfo(result *GetBlockchainInfoResult) *bitcoindto.BlockchainInfo {
+func ToBlockchainInfo(result *GetBlockchainInfoResult) *dtobtc.BlockchainInfo {
 	if result == nil {
 		return nil
 	}
@@ -119,7 +119,7 @@ func ToBlockchainInfo(result *GetBlockchainInfoResult) *bitcoindto.BlockchainInf
 	addFork("csv", result.SoftForks.Csv)
 	addFork("segwit", result.SoftForks.Segwit)
 
-	return &bitcoindto.BlockchainInfo{
+	return &dtobtc.BlockchainInfo{
 		Chain:                result.Chain.String(),
 		Blocks:               int64(result.Blocks),
 		Headers:              int64(result.Headers),
@@ -135,7 +135,7 @@ func ToBlockchainInfo(result *GetBlockchainInfoResult) *bitcoindto.BlockchainInf
 }
 
 // ToTransactionResult converts infrastructure GetTransactionResult to application DTO
-func ToTransactionResult(result *GetTransactionResult, btc *Bitcoin) (*bitcoindto.TransactionResult, error) {
+func ToTransactionResult(result *GetTransactionResult, btc *Bitcoin) (*dtobtc.TransactionResult, error) {
 	if result == nil {
 		return nil, nil
 	}
@@ -150,7 +150,7 @@ func ToTransactionResult(result *GetTransactionResult, btc *Bitcoin) (*bitcoindt
 		return nil, err
 	}
 
-	details := make([]bitcoindto.TransactionDetail, len(result.Details))
+	details := make([]dtobtc.TransactionDetail, len(result.Details))
 	for i, detail := range result.Details {
 		detailAmount, err := btc.FloatToAmount(detail.Amount)
 		if err != nil {
@@ -166,7 +166,7 @@ func ToTransactionResult(result *GetTransactionResult, btc *Bitcoin) (*bitcoindt
 			detailFee = &feeAmt
 		}
 
-		details[i] = bitcoindto.TransactionDetail{
+		details[i] = dtobtc.TransactionDetail{
 			Address:   detail.Address,
 			Category:  detail.Category,
 			Amount:    detailAmount,
@@ -189,7 +189,7 @@ func ToTransactionResult(result *GetTransactionResult, btc *Bitcoin) (*bitcoindt
 		walletConflicts[i] = str
 	}
 
-	return &bitcoindto.TransactionResult{
+	return &dtobtc.TransactionResult{
 		Amount:          amount,
 		Fee:             fee,
 		Confirmations:   int64(result.Confirmations),
@@ -206,17 +206,17 @@ func ToTransactionResult(result *GetTransactionResult, btc *Bitcoin) (*bitcoindt
 }
 
 // ToRawTransaction converts infrastructure TxRawResult to application DTO
-func ToRawTransaction(result *TxRawResult, btc *Bitcoin) (*bitcoindto.RawTransaction, error) {
+func ToRawTransaction(result *TxRawResult, btc *Bitcoin) (*dtobtc.RawTransaction, error) {
 	if result == nil {
 		return nil, nil
 	}
 
-	vin := make([]bitcoindto.RawTransactionInput, len(result.Vin))
+	vin := make([]dtobtc.RawTransactionInput, len(result.Vin))
 	for i, input := range result.Vin {
-		vin[i] = bitcoindto.RawTransactionInput{
+		vin[i] = dtobtc.RawTransactionInput{
 			TxID: input.Txid,
 			Vout: input.Vout,
-			ScriptSig: bitcoindto.ScriptSig{
+			ScriptSig: dtobtc.ScriptSig{
 				Asm: input.ScriptSig.Asm,
 				Hex: input.ScriptSig.Hex,
 			},
@@ -225,7 +225,7 @@ func ToRawTransaction(result *TxRawResult, btc *Bitcoin) (*bitcoindto.RawTransac
 		}
 	}
 
-	vout := make([]bitcoindto.RawTransactionOutput, len(result.Vout))
+	vout := make([]dtobtc.RawTransactionOutput, len(result.Vout))
 	for i, output := range result.Vout {
 		value, err := btc.FloatToAmount(output.Value)
 		if err != nil {
@@ -237,10 +237,10 @@ func ToRawTransaction(result *TxRawResult, btc *Bitcoin) (*bitcoindto.RawTransac
 			address = output.ScriptPubKey.Addresses[0]
 		}
 
-		vout[i] = bitcoindto.RawTransactionOutput{
+		vout[i] = dtobtc.RawTransactionOutput{
 			Value: value,
 			Index: output.N,
-			ScriptPubKey: bitcoindto.ScriptPubKey{
+			ScriptPubKey: dtobtc.ScriptPubKey{
 				Asm:     output.ScriptPubKey.Asm,
 				Hex:     output.ScriptPubKey.Hex,
 				ReqSigs: int32(output.ScriptPubKey.ReqSigs),
@@ -250,7 +250,7 @@ func ToRawTransaction(result *TxRawResult, btc *Bitcoin) (*bitcoindto.RawTransac
 		}
 	}
 
-	return &bitcoindto.RawTransaction{
+	return &dtobtc.RawTransaction{
 		Hex:           "", // Need to be set by caller
 		TxID:          result.Txid,
 		Hash:          result.Hash,
@@ -271,7 +271,7 @@ func ToRawTransaction(result *TxRawResult, btc *Bitcoin) (*bitcoindto.RawTransac
 // ToFundRawTransactionResult converts infrastructure to application DTO
 func ToFundRawTransactionResult(
 	result *FundRawTransactionResult,
-) *bitcoindto.FundRawTransactionResult {
+) *dtobtc.FundRawTransactionResult {
 	if result == nil {
 		return nil
 	}
@@ -279,7 +279,7 @@ func ToFundRawTransactionResult(
 	// Fee is already in satoshis, convert directly to btcutil.Amount
 	fee := btcutil.Amount(result.Fee)
 
-	return &bitcoindto.FundRawTransactionResult{
+	return &dtobtc.FundRawTransactionResult{
 		Hex:       result.Hex,
 		Fee:       fee,
 		ChangePos: int32(result.Changepos),
@@ -287,7 +287,7 @@ func ToFundRawTransactionResult(
 }
 
 // FromPreviousTx converts application PreviousTx to infrastructure PrevTx
-func FromPreviousTx(prevTxs []bitcoindto.PreviousTx, btc *Bitcoin) ([]PrevTx, error) {
+func FromPreviousTx(prevTxs []dtobtc.PreviousTx, btc *Bitcoin) ([]PrevTx, error) {
 	if prevTxs == nil {
 		return nil, nil
 	}
@@ -308,19 +308,19 @@ func FromPreviousTx(prevTxs []bitcoindto.PreviousTx, btc *Bitcoin) ([]PrevTx, er
 }
 
 // ToPreviousTxList converts infrastructure PrevTx slice to application PreviousTx slice
-func ToPreviousTxList(prevTxs []PrevTx, btc *Bitcoin) ([]bitcoindto.PreviousTx, error) {
+func ToPreviousTxList(prevTxs []PrevTx, btc *Bitcoin) ([]dtobtc.PreviousTx, error) {
 	if prevTxs == nil {
 		return nil, nil
 	}
 
-	result := make([]bitcoindto.PreviousTx, len(prevTxs))
+	result := make([]dtobtc.PreviousTx, len(prevTxs))
 	for i, tx := range prevTxs {
 		amount, err := btc.FloatToAmount(tx.Amount)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert amount for prevTx %d: %w", i, err)
 		}
 
-		result[i] = bitcoindto.PreviousTx{
+		result[i] = dtobtc.PreviousTx{
 			TxID:          tx.Txid,
 			Vout:          tx.Vout,
 			ScriptPubKey:  tx.ScriptPubKey,
@@ -333,7 +333,7 @@ func ToPreviousTxList(prevTxs []PrevTx, btc *Bitcoin) ([]bitcoindto.PreviousTx, 
 }
 
 // ToUnspentOutput converts infrastructure ListUnspentResult to application DTO
-func ToUnspentOutput(result *ListUnspentResult, btc *Bitcoin) (*bitcoindto.UnspentOutput, error) {
+func ToUnspentOutput(result *ListUnspentResult, btc *Bitcoin) (*dtobtc.UnspentOutput, error) {
 	if result == nil {
 		return nil, nil
 	}
@@ -344,7 +344,7 @@ func ToUnspentOutput(result *ListUnspentResult, btc *Bitcoin) (*bitcoindto.Unspe
 		return nil, fmt.Errorf("failed to convert amount: %w", err)
 	}
 
-	return &bitcoindto.UnspentOutput{
+	return &dtobtc.UnspentOutput{
 		TxID:          result.TxID,
 		Vout:          result.Vout,
 		Address:       result.Address,
@@ -362,12 +362,12 @@ func ToUnspentOutput(result *ListUnspentResult, btc *Bitcoin) (*bitcoindto.Unspe
 }
 
 // ToUnspentOutputList converts slice of infrastructure results to DTOs
-func ToUnspentOutputList(results []ListUnspentResult, btc *Bitcoin) ([]bitcoindto.UnspentOutput, error) {
+func ToUnspentOutputList(results []ListUnspentResult, btc *Bitcoin) ([]dtobtc.UnspentOutput, error) {
 	if results == nil {
 		return nil, nil
 	}
 
-	outputs := make([]bitcoindto.UnspentOutput, 0, len(results))
+	outputs := make([]dtobtc.UnspentOutput, 0, len(results))
 	for _, result := range results {
 		dto, err := ToUnspentOutput(&result, btc)
 		if err != nil {
@@ -381,7 +381,7 @@ func ToUnspentOutputList(results []ListUnspentResult, btc *Bitcoin) ([]bitcoindt
 }
 
 // FromUnspentOutput converts application UnspentOutput to infrastructure type
-func FromUnspentOutput(output *bitcoindto.UnspentOutput) *ListUnspentResult {
+func FromUnspentOutput(output *dtobtc.UnspentOutput) *ListUnspentResult {
 	if output == nil {
 		return nil
 	}
@@ -407,7 +407,7 @@ func FromUnspentOutput(output *bitcoindto.UnspentOutput) *ListUnspentResult {
 // ToParsedPSBT converts infrastructure ParsedPSBT to application DTO
 //
 //nolint:gocyclo // Complex mapping function with many fields
-func ToParsedPSBT(infraPSBT *ParsedPSBT, btc *Bitcoin) (*bitcoindto.ParsedPSBT, error) {
+func ToParsedPSBT(infraPSBT *ParsedPSBT, btc *Bitcoin) (*dtobtc.ParsedPSBT, error) {
 	if infraPSBT == nil || infraPSBT.Packet == nil {
 		return nil, nil
 	}
@@ -416,18 +416,18 @@ func ToParsedPSBT(infraPSBT *ParsedPSBT, btc *Bitcoin) (*bitcoindto.ParsedPSBT, 
 	unsignedTx := packet.UnsignedTx
 
 	// Map transaction
-	tx := bitcoindto.ParsedPSBTTx{
+	tx := dtobtc.ParsedPSBTTx{
 		TxID:     unsignedTx.TxHash().String(),
 		Hash:     unsignedTx.WitnessHash().String(),
 		Version:  unsignedTx.Version,
 		LockTime: unsignedTx.LockTime,
-		Vin:      make([]bitcoindto.ParsedPSBTVin, len(unsignedTx.TxIn)),
-		Vout:     make([]bitcoindto.ParsedPSBTVout, len(unsignedTx.TxOut)),
+		Vin:      make([]dtobtc.ParsedPSBTVin, len(unsignedTx.TxIn)),
+		Vout:     make([]dtobtc.ParsedPSBTVout, len(unsignedTx.TxOut)),
 	}
 
 	// Map inputs (from unsigned tx)
 	for i, txIn := range unsignedTx.TxIn {
-		tx.Vin[i] = bitcoindto.ParsedPSBTVin{
+		tx.Vin[i] = dtobtc.ParsedPSBTVin{
 			TxID:     txIn.PreviousOutPoint.Hash.String(),
 			Vout:     txIn.PreviousOutPoint.Index,
 			Sequence: txIn.Sequence,
@@ -437,23 +437,23 @@ func ToParsedPSBT(infraPSBT *ParsedPSBT, btc *Bitcoin) (*bitcoindto.ParsedPSBT, 
 	// Map outputs (from unsigned tx)
 	for i, txOut := range unsignedTx.TxOut {
 		amount := btcutil.Amount(txOut.Value)
-		tx.Vout[i] = bitcoindto.ParsedPSBTVout{
+		tx.Vout[i] = dtobtc.ParsedPSBTVout{
 			Value:        amount,
 			ScriptPubKey: hex.EncodeToString(txOut.PkScript),
 		}
 	}
 
 	// Map PSBT inputs (metadata)
-	inputs := make([]bitcoindto.ParsedPSBTInput, len(packet.Inputs))
+	inputs := make([]dtobtc.ParsedPSBTInput, len(packet.Inputs))
 	for i, input := range packet.Inputs {
-		parsedInput := bitcoindto.ParsedPSBTInput{
+		parsedInput := dtobtc.ParsedPSBTInput{
 			PartialSignatures: make(map[string]string),
 			SigHashType:       uint32(input.SighashType),
 			RedeemScript:      hex.EncodeToString(input.RedeemScript),
 			WitnessScript:     hex.EncodeToString(input.WitnessScript),
 			FinalScriptSig:    hex.EncodeToString(input.FinalScriptSig),
 			Unknown:           make(map[string]string),
-			BIP32Derivation:   make([]bitcoindto.BIP32Derivation, 0),
+			BIP32Derivation:   make([]dtobtc.BIP32Derivation, 0),
 		}
 
 		// Map partial signatures
@@ -473,7 +473,7 @@ func ToParsedPSBT(infraPSBT *ParsedPSBT, btc *Bitcoin) (*bitcoindto.ParsedPSBT, 
 		// Map witness UTXO
 		if input.WitnessUtxo != nil {
 			amount := btcutil.Amount(input.WitnessUtxo.Value)
-			parsedInput.WitnessUTXO = &bitcoindto.ParsedPSBTUTXO{
+			parsedInput.WitnessUTXO = &dtobtc.ParsedPSBTUTXO{
 				Amount:       amount,
 				ScriptPubKey: hex.EncodeToString(input.WitnessUtxo.PkScript),
 			}
@@ -527,7 +527,7 @@ func ToParsedPSBT(infraPSBT *ParsedPSBT, btc *Bitcoin) (*bitcoindto.ParsedPSBT, 
 		for _, deriv := range input.Bip32Derivation {
 			// Convert MasterKeyFingerprint (uint32) to 4-byte hex string
 			fingerprint := fmt.Sprintf("%08x", deriv.MasterKeyFingerprint)
-			parsedInput.BIP32Derivation = append(parsedInput.BIP32Derivation, bitcoindto.BIP32Derivation{
+			parsedInput.BIP32Derivation = append(parsedInput.BIP32Derivation, dtobtc.BIP32Derivation{
 				PubKey:      hex.EncodeToString(deriv.PubKey),
 				MasterKeyID: fingerprint,
 				Path:        derivationPathToString(deriv.Bip32Path),
@@ -543,20 +543,20 @@ func ToParsedPSBT(infraPSBT *ParsedPSBT, btc *Bitcoin) (*bitcoindto.ParsedPSBT, 
 	}
 
 	// Map PSBT outputs (metadata)
-	outputs := make([]bitcoindto.ParsedPSBTOutput, len(packet.Outputs))
+	outputs := make([]dtobtc.ParsedPSBTOutput, len(packet.Outputs))
 	for i, output := range packet.Outputs {
-		parsedOutput := bitcoindto.ParsedPSBTOutput{
+		parsedOutput := dtobtc.ParsedPSBTOutput{
 			RedeemScript:    hex.EncodeToString(output.RedeemScript),
 			WitnessScript:   hex.EncodeToString(output.WitnessScript),
 			Unknown:         make(map[string]string),
-			BIP32Derivation: make([]bitcoindto.BIP32Derivation, 0),
+			BIP32Derivation: make([]dtobtc.BIP32Derivation, 0),
 		}
 
 		// Map BIP32 derivation
 		for _, deriv := range output.Bip32Derivation {
 			// Convert MasterKeyFingerprint (uint32) to 4-byte hex string
 			fingerprint := fmt.Sprintf("%08x", deriv.MasterKeyFingerprint)
-			parsedOutput.BIP32Derivation = append(parsedOutput.BIP32Derivation, bitcoindto.BIP32Derivation{
+			parsedOutput.BIP32Derivation = append(parsedOutput.BIP32Derivation, dtobtc.BIP32Derivation{
 				PubKey:      hex.EncodeToString(deriv.PubKey),
 				MasterKeyID: fingerprint,
 				Path:        derivationPathToString(deriv.Bip32Path),
@@ -600,7 +600,7 @@ func ToParsedPSBT(infraPSBT *ParsedPSBT, btc *Bitcoin) (*bitcoindto.ParsedPSBT, 
 		unknownGlobal[hex.EncodeToString(unknown.Key)] = hex.EncodeToString(unknown.Value)
 	}
 
-	return &bitcoindto.ParsedPSBT{
+	return &dtobtc.ParsedPSBT{
 		Tx:         tx,
 		Unknown:    unknownGlobal,
 		Inputs:     inputs,
@@ -673,12 +673,12 @@ func parseWitnessStack(witnessData []byte) ([]string, error) {
 }
 
 // ToLoggingResult converts infrastructure LoggingResult to application DTO
-func ToLoggingResult(result *LoggingResult) *bitcoindto.LoggingResult {
+func ToLoggingResult(result *LoggingResult) *dtobtc.LoggingResult {
 	if result == nil {
 		return nil
 	}
 
-	return &bitcoindto.LoggingResult{
+	return &dtobtc.LoggingResult{
 		Net:         result.Net,
 		TorControl:  result.Tor,
 		MemPool:     result.Mempool,
@@ -694,12 +694,12 @@ func ToLoggingResult(result *LoggingResult) *bitcoindto.LoggingResult {
 }
 
 // ToMultisigAddress converts infrastructure AddMultisigAddressResult to application DTO
-func ToMultisigAddress(result *AddMultisigAddressResult) *bitcoindto.MultisigAddress {
+func ToMultisigAddress(result *AddMultisigAddressResult) *dtobtc.MultisigAddress {
 	if result == nil {
 		return nil
 	}
 
-	return &bitcoindto.MultisigAddress{
+	return &dtobtc.MultisigAddress{
 		Address:      result.Address,
 		RedeemScript: result.RedeemScript,
 		Descriptor:   "", // Not provided by infrastructure result
