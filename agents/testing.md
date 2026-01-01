@@ -66,7 +66,7 @@ func TestAccountType_Validate(t *testing.T) {
 - Use case can be instantiated with dependencies
 - Correct interface implementation
 
-**Future Testing Strategy** (see `docs/TESTING_STRATEGY.md`):
+**Future Testing Strategy:**
 
 - Test use case orchestration logic
 - Mock infrastructure services
@@ -277,4 +277,3 @@ func TestFunction(t *testing.T) {
 - [Architecture Guidelines](architecture.md) - Layer structure and responsibilities
 - [Coding Standards](coding-standards.md) - Code quality and verification commands
 - [Workflow Guidelines](workflow.md) - Running tests in CI/CD workflow
-- `docs/TESTING_STRATEGY.md` - Comprehensive testing strategy document

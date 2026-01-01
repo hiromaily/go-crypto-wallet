@@ -4,7 +4,6 @@ This document describes development workflow, dependency management, and git ope
 
 ## Refactoring Status
 
-- Refer to `REFACTORING_CHECKLIST.md` for current refactoring tasks
 - Make changes incrementally without breaking existing functionality
 - Run tests before and after refactoring
 - Follow the phased approach outlined in refactoring documents
@@ -21,7 +20,6 @@ This document describes development workflow, dependency management, and git ope
 **Go Modules:**
 
 - Use `go mod tidy` to organize dependencies
-- Follow procedures in `REFACTORING_CHECKLIST.md` when updating dependencies
 - Run security scans (`govulncheck`)
 - Keep dependencies up-to-date while maintaining stability
 
