@@ -4,6 +4,7 @@
 package xrp_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/bookerzzz/grok"
@@ -51,13 +52,16 @@ func (txt *txTest) TestCreateRawTransaction() {
 		//		amount:          0,
 		//	},
 		//	want: want{},
-		//},
+		// },
 	}
 
 	for _, tt := range tests {
 		txt.T().Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
 			// PrepareTransaction
-			txJSON, _, err := txt.XRP.CreateRawTransaction(tt.args.sernderAccount, tt.args.receiverAccount, tt.args.amount, tt.args.instructions)
+			txJSON, _, err := txt.XRP.CreateRawTransaction(
+				ctx, tt.args.sernderAccount, tt.args.receiverAccount, tt.args.amount, tt.args.instructions,
+			)
 			txt.NoError(err)
 			grok.Value(txJSON)
 		})

@@ -4,6 +4,7 @@
 package xrp_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/bookerzzz/grok"
@@ -18,14 +19,16 @@ type addressTest struct {
 
 // TestGenerateAddress is test for GenerateAddress
 func (at *addressTest) TestGenerateAddress() {
-	addressInfo, err := at.XRP.GenerateAddress()
+	ctx := context.Background()
+	addressInfo, err := at.XRP.GenerateAddress(ctx)
 	at.NoError(err)
 	grok.Value(addressInfo)
 }
 
 // TestGenerateXAddress is test for GenerateXAddress
 func (at *addressTest) TestGenerateXAddress() {
-	addressInfo, err := at.XRP.GenerateXAddress()
+	ctx := context.Background()
+	addressInfo, err := at.XRP.GenerateXAddress(ctx)
 	at.NoError(err)
 	grok.Value(addressInfo)
 }
@@ -81,7 +84,8 @@ func (at *addressTest) TestIsValidAddress() {
 	}
 	for _, tt := range tests {
 		at.T().Run(tt.name, func(t *testing.T) {
-			accountInfo, err := at.XRP.IsValidAddress(tt.args.address)
+			ctx := context.Background()
+			accountInfo, err := at.XRP.IsValidAddress(ctx, tt.args.address)
 			at.Equal(tt.want.isErr, err != nil)
 			if err != nil {
 				grok.Value(accountInfo)

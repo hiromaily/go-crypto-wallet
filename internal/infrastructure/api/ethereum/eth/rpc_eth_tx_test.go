@@ -4,6 +4,7 @@
 package eth_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/bookerzzz/grok"
@@ -38,14 +39,15 @@ func (ett *ethTxTest) TestGetTransactionByHash() {
 
 	for _, tt := range tests {
 		ett.T().Run(tt.name, func(t *testing.T) {
-			txHash, err := ett.ETH.GetTransactionByHash(tt.args.txHash)
+			ctx := context.Background()
+			txHash, err := ett.ETH.GetTransactionByHash(ctx, tt.args.txHash)
 			ett.NoError(err)
 			if err == nil {
 				// t.Log(res)
 				grok.Value(txHash)
 			}
 
-			txReceipt, err := ett.ETH.GetTransactionReceipt(tt.args.txHash)
+			txReceipt, err := ett.ETH.GetTransactionReceipt(ctx, tt.args.txHash)
 			ett.NoError(err)
 			if err == nil {
 				// t.Log(txReceipt)

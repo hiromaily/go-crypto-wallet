@@ -19,6 +19,11 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
+// testValidPSBT is a valid PSBT from Bitcoin Core testnet (simplified for testing)
+// This PSBT has 1 input and 2 outputs, unsigned
+const testValidPSBT = "cHNidP8BAHECAAAAAeWU5KQnIgL9xnm9wWKHxWDcY7D6IlQFKkGVBQKmJm+CAAAAAAD/////" +
+	"AoA4AQAAAAAAFgAUkh7tjzD5WbwzQe6iL6Cg9UGMKy/waSYBAAAAABYAFM8dV5vxr5vdPJJ8uiDGfKsAO5qCAAAAAAA="
+
 // TestCreatePSBT tests PSBT creation from unsigned transaction
 func TestCreatePSBT(t *testing.T) {
 	// Create Bitcoin instance for testing
@@ -65,15 +70,11 @@ func TestCreatePSBT(t *testing.T) {
 
 // TestParsePSBT tests PSBT parsing functionality
 func TestParsePSBT(t *testing.T) {
-	// This is a valid PSBT from Bitcoin Core testnet (simplified for testing)
-	// This PSBT has 1 input and 1 output, unsigned
-	validPSBT := "cHNidP8BAHECAAAAAeWU5KQnIgL9xnm9wWKHxWDcY7D6IlQFKkGVBQKmJm+CAAAAAAD/////AoA4AQAAAAAAFgAUkh7tjzD5WbwzQe6iL6Cg9UGMKy/waSYBAAAAABYAFM8dV5vxr5vdPJJ8uiDGfKsAO5qCAAAAAAA="
-
 	bitcoin, err := testutil.GetBTC()
 	require.NoError(t, err)
 
 	// Parse PSBT
-	parsed, err := bitcoin.ParsePSBT(validPSBT)
+	parsed, err := bitcoin.ParsePSBT(testValidPSBT)
 	require.NoError(t, err)
 	assert.NotNil(t, parsed)
 	assert.NotNil(t, parsed.Packet)
@@ -124,7 +125,7 @@ func TestValidatePSBT(t *testing.T) {
 	}{
 		{
 			name:    "valid PSBT",
-			psbt:    "cHNidP8BAHECAAAAAeWU5KQnIgL9xnm9wWKHxWDcY7D6IlQFKkGVBQKmJm+CAAAAAAD/////AoA4AQAAAAAAFgAUkh7tjzD5WbwzQe6iL6Cg9UGMKy/waSYBAAAAABYAFM8dV5vxr5vdPJJ8uiDGfKsAO5qCAAAAAAA=",
+			psbt:    testValidPSBT,
 			wantErr: false,
 		},
 		{
@@ -164,9 +165,7 @@ func TestIsPSBTComplete(t *testing.T) {
 	require.NoError(t, err)
 
 	// Unsigned PSBT (not complete)
-	unsignedPSBT := "cHNidP8BAHECAAAAAeWU5KQnIgL9xnm9wWKHxWDcY7D6IlQFKkGVBQKmJm+CAAAAAAD/////AoA4AQAAAAAAFgAUkh7tjzD5WbwzQe6iL6Cg9UGMKy/waSYBAAAAABYAFM8dV5vxr5vdPJJ8uiDGfKsAO5qCAAAAAAA="
-
-	isComplete, err := bitcoin.IsPSBTComplete(unsignedPSBT)
+	isComplete, err := bitcoin.IsPSBTComplete(testValidPSBT)
 	require.NoError(t, err)
 	assert.False(t, isComplete)
 }
@@ -178,9 +177,7 @@ func TestGetPSBTFee(t *testing.T) {
 
 	// This test requires a properly constructed PSBT with witness UTXOs
 	// For now, we test the error case
-	validPSBT := "cHNidP8BAHECAAAAAeWU5KQnIgL9xnm9wWKHxWDcY7D6IlQFKkGVBQKmJm+CAAAAAAD/////AoA4AQAAAAAAFgAUkh7tjzD5WbwzQe6iL6Cg9UGMKy/waSYBAAAAABYAFM8dV5vxr5vdPJJ8uiDGfKsAO5qCAAAAAAA="
-
-	fee, err := bitcoin.GetPSBTFee(validPSBT)
+	fee, err := bitcoin.GetPSBTFee(testValidPSBT)
 	// Fee calculation will fail without proper witness UTXO, but parsing should work
 	if err == nil {
 		assert.GreaterOrEqual(t, fee, int64(0))
@@ -211,14 +208,14 @@ func TestSignPSBTWithKey_ErrorCases(t *testing.T) {
 		},
 		{
 			name:    "invalid WIF",
-			psbt:    "cHNidP8BAHECAAAAAeWU5KQnIgL9xnm9wWKHxWDcY7D6IlQFKkGVBQKmJm+CAAAAAAD/////AoA4AQAAAAAAFgAUkh7tjzD5WbwzQe6iL6Cg9UGMKy/waSYBAAAAABYAFM8dV5vxr5vdPJJ8uiDGfKsAO5qCAAAAAAA=",
+			psbt:    testValidPSBT,
 			wifs:    []string{"invalid-wif"},
 			wantErr: true,
 			errMsg:  "failed to decode WIF",
 		},
 		{
 			name:    "empty WIF list",
-			psbt:    "cHNidP8BAHECAAAAAeWU5KQnIgL9xnm9wWKHxWDcY7D6IlQFKkGVBQKmJm+CAAAAAAD/////AoA4AQAAAAAAFgAUkh7tjzD5WbwzQe6iL6Cg9UGMKy/waSYBAAAAABYAFM8dV5vxr5vdPJJ8uiDGfKsAO5qCAAAAAAA=",
+			psbt:    testValidPSBT,
 			wifs:    []string{},
 			wantErr: true,
 			errMsg:  "no signatures were added",
@@ -259,7 +256,7 @@ func TestFinalizePSBT_ErrorCases(t *testing.T) {
 		},
 		{
 			name:    "unsigned PSBT (not complete)",
-			psbt:    "cHNidP8BAHECAAAAAeWU5KQnIgL9xnm9wWKHxWDcY7D6IlQFKkGVBQKmJm+CAAAAAAD/////AoA4AQAAAAAAFgAUkh7tjzD5WbwzQe6iL6Cg9UGMKy/waSYBAAAAABYAFM8dV5vxr5vdPJJ8uiDGfKsAO5qCAAAAAAA=",
+			psbt:    testValidPSBT,
 			wantErr: true,
 			errMsg:  "cannot finalize incomplete PSBT",
 		},
@@ -299,7 +296,7 @@ func TestExtractTransaction_ErrorCases(t *testing.T) {
 		},
 		{
 			name:    "unfinalized PSBT",
-			psbt:    "cHNidP8BAHECAAAAAeWU5KQnIgL9xnm9wWKHxWDcY7D6IlQFKkGVBQKmJm+CAAAAAAD/////AoA4AQAAAAAAFgAUkh7tjzD5WbwzQe6iL6Cg9UGMKy/waSYBAAAAABYAFM8dV5vxr5vdPJJ8uiDGfKsAO5qCAAAAAAA=",
+			psbt:    testValidPSBT,
 			wantErr: true,
 			errMsg:  "failed to extract transaction",
 		},

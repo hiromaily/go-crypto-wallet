@@ -1,7 +1,7 @@
 //go:build integration
 // +build integration
 
-package watchrepo_test
+package watch_test
 
 import (
 	"log"
@@ -15,7 +15,7 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/mysql"
@@ -31,14 +31,14 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
-	zapLog := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
+	_ = logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 	db, err := mysql.NewMySQL(&conf.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	xrpDetailTxRepo := watch.NewXrpDetailTxInputRepositorySqlc(db, domainCoin.XRP, zapLog)
-	txRepo := watch.NewTxRepositorySqlc(db, domainCoin.XRP, zapLog)
+	xrpDetailTxRepo := watch.NewXrpDetailTxInputRepositorySqlc(db, domainCoin.XRP)
+	txRepo := watch.NewTxRepositorySqlc(db, domainCoin.XRP)
 
 	// Clean up any existing test data
 	_, _ = db.Exec("DELETE FROM xrp_detail_tx WHERE uuid LIKE 'xrp-uuid-%'")
@@ -50,26 +50,26 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 
 	// Create test xrp detail tx
 	uuid := "xrp-uuid-sqlc-test"
-	xrpTx := &models.XRPDetailTX{
-		TXID:                  txID,
-		UUID:                  uuid,
-		CurrentTXType:         domainTx.TxTypeUnsigned.Int8(),
+	xrpTx := &sqlc.XrpDetailTx{
+		TxID:                  txID,
+		Uuid:                  uuid,
+		CurrentTxType:         domainTx.TxTypeUnsigned.Int8(),
 		SenderAccount:         "deposit",
 		SenderAddress:         "rSender-sqlc",
 		ReceiverAccount:       "client",
 		ReceiverAddress:       "rReceiver-sqlc",
 		Amount:                "1000000",
-		XRPTXType:             "Payment",
+		XrpTxType:             "Payment",
 		Fee:                   "12",
 		Flags:                 0,
 		LastLedgerSequence:    12345,
 		Sequence:              1,
 		SigningPubkey:         "pubkey-sqlc",
-		TXNSignature:          "",
+		TxnSignature:          "",
 		Hash:                  "",
 		EarliestLedgerVersion: 0,
-		SignedTXID:            "",
-		TXBlob:                "",
+		SignedTxID:            "",
+		TxBlob:                "",
 	}
 
 	// Insert
@@ -84,23 +84,35 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	// Get one
 	retrievedTx, err := xrpDetailTxRepo.GetOne(xrpTxs[0].ID)
 	require.NoError(t, err, "fail to call GetOne()")
-	require.Equal(t, uuid, retrievedTx.UUID, "GetOne() should return correct UUID")
+	require.Equal(t, uuid, retrievedTx.Uuid, "GetOne() should return correct Uuid")
 
 	// Update after tx sent
 	signedTxID := "signed-txid-sqlc"
 	txBlob := "tx-blob-sqlc"
 	earliestLedgerVersion := uint64(12340)
-	rowsAffected, err := xrpDetailTxRepo.UpdateAfterTxSent(uuid, domainTx.TxTypeSent, signedTxID, txBlob, earliestLedgerVersion)
+	rowsAffected, err := xrpDetailTxRepo.UpdateAfterTxSent(
+		uuid, domainTx.TxTypeSent, signedTxID, txBlob, earliestLedgerVersion,
+	)
 	require.NoError(t, err, "fail to call UpdateAfterTxSent()")
 	require.GreaterOrEqual(t, rowsAffected, int64(1), "UpdateAfterTxSent() should affect at least 1 row")
 
 	// Verify update
 	updatedTx, err := xrpDetailTxRepo.GetOne(retrievedTx.ID)
 	require.NoError(t, err, "fail to call GetOne() after update")
-	require.Equal(t, signedTxID, updatedTx.SignedTXID, "UpdateAfterTxSent() should update SignedTXID")
-	require.Equal(t, txBlob, updatedTx.TXBlob, "UpdateAfterTxSent() should update TXBlob")
-	require.Equal(t, domainTx.TxTypeSent.Int8(), updatedTx.CurrentTXType, "UpdateAfterTxSent() should update CurrentTXType")
-	require.Equal(t, earliestLedgerVersion, updatedTx.EarliestLedgerVersion, "UpdateAfterTxSent() should update EarliestLedgerVersion")
+	require.Equal(t, signedTxID, updatedTx.SignedTxID, "UpdateAfterTxSent() should update SignedTxID")
+	require.Equal(t, txBlob, updatedTx.TxBlob, "UpdateAfterTxSent() should update TxBlob")
+	require.Equal(
+		t,
+		domainTx.TxTypeSent.Int8(),
+		updatedTx.CurrentTxType,
+		"UpdateAfterTxSent() should update CurrentTxType",
+	)
+	require.Equal(
+		t,
+		earliestLedgerVersion,
+		updatedTx.EarliestLedgerVersion,
+		"UpdateAfterTxSent() should update EarliestLedgerVersion",
+	)
 
 	// Get sent hash tx (for XRP, this is tx_blob)
 	blobs, err := xrpDetailTxRepo.GetSentHashTx(domainTx.TxTypeSent)
@@ -115,7 +127,12 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	// Verify tx type update
 	verifyTx, err := xrpDetailTxRepo.GetOne(retrievedTx.ID)
 	require.NoError(t, err, "fail to call GetOne() after UpdateTxTypeBySentHashTx()")
-	require.Equal(t, domainTx.TxTypeDone.Int8(), verifyTx.CurrentTXType, "UpdateTxTypeBySentHashTx() should update CurrentTXType to TxTypeDone")
+	require.Equal(
+		t,
+		domainTx.TxTypeDone.Int8(),
+		verifyTx.CurrentTxType,
+		"UpdateTxTypeBySentHashTx() should update CurrentTxType to TxTypeDone",
+	)
 
 	// Update tx type by ID
 	rowsAffected, err = xrpDetailTxRepo.UpdateTxType(retrievedTx.ID, domainTx.TxTypeNotified)
@@ -125,55 +142,60 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	// Verify final tx type
 	finalTx, err := xrpDetailTxRepo.GetOne(retrievedTx.ID)
 	require.NoError(t, err, "fail to call GetOne() after UpdateTxType()")
-	require.Equal(t, domainTx.TxTypeNotified.Int8(), finalTx.CurrentTXType, "UpdateTxType() should update CurrentTXType to TxTypeNotified")
+	require.Equal(
+		t,
+		domainTx.TxTypeNotified.Int8(),
+		finalTx.CurrentTxType,
+		"UpdateTxType() should update CurrentTxType to TxTypeNotified",
+	)
 
 	// Test InsertBulk
 	// Create another tx record for bulk insert
 	txID2, err := txRepo.InsertUnsignedTx(domainTx.ActionTypePayment)
 	require.NoError(t, err, "fail to create second parent tx")
 
-	bulkTxs := []*models.XRPDetailTX{
+	bulkTxs := []*sqlc.XrpDetailTx{
 		{
-			TXID:                  txID2,
-			UUID:                  "xrp-uuid-bulk-1",
-			CurrentTXType:         domainTx.TxTypeUnsigned.Int8(),
+			TxID:                  txID2,
+			Uuid:                  "xrp-uuid-bulk-1",
+			CurrentTxType:         domainTx.TxTypeUnsigned.Int8(),
 			SenderAccount:         "deposit",
 			SenderAddress:         "rSender-bulk-1",
 			ReceiverAccount:       "client",
 			ReceiverAddress:       "rReceiver-bulk-1",
 			Amount:                "2000000",
-			XRPTXType:             "Payment",
+			XrpTxType:             "Payment",
 			Fee:                   "12",
 			Flags:                 0,
 			LastLedgerSequence:    12346,
 			Sequence:              2,
 			SigningPubkey:         "pubkey-bulk-1",
-			TXNSignature:          "",
+			TxnSignature:          "",
 			Hash:                  "",
 			EarliestLedgerVersion: 0,
-			SignedTXID:            "",
-			TXBlob:                "",
+			SignedTxID:            "",
+			TxBlob:                "",
 		},
 		{
-			TXID:                  txID2,
-			UUID:                  "xrp-uuid-bulk-2",
-			CurrentTXType:         domainTx.TxTypeUnsigned.Int8(),
+			TxID:                  txID2,
+			Uuid:                  "xrp-uuid-bulk-2",
+			CurrentTxType:         domainTx.TxTypeUnsigned.Int8(),
 			SenderAccount:         "deposit",
 			SenderAddress:         "rSender-bulk-2",
 			ReceiverAccount:       "client",
 			ReceiverAddress:       "rReceiver-bulk-2",
 			Amount:                "3000000",
-			XRPTXType:             "Payment",
+			XrpTxType:             "Payment",
 			Fee:                   "12",
 			Flags:                 0,
 			LastLedgerSequence:    12347,
 			Sequence:              3,
 			SigningPubkey:         "pubkey-bulk-2",
-			TXNSignature:          "",
+			TxnSignature:          "",
 			Hash:                  "",
 			EarliestLedgerVersion: 0,
-			SignedTXID:            "",
-			TXBlob:                "",
+			SignedTxID:            "",
+			TxBlob:                "",
 		},
 	}
 

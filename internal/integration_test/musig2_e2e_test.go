@@ -75,26 +75,23 @@ func TestMuSig2EndToEndFlow(t *testing.T) {
 
 	// Get the created address for use in subsequent steps
 	// TODO: Implement address retrieval from database
-	address := "tb1p..." // Placeholder
+	_ = "tb1p..." // Placeholder address
 
 	// Step 2: Create unsigned transaction (PSBT)
 	var psbtData []byte
+	_ = psbtData // Will be used when TODO is implemented
 	t.Run("Step2_CreateUnsignedTransaction", func(t *testing.T) {
 		// Create payment request
 		createPaymentUseCase := watch.NewWatchCreatePaymentRequestUseCase()
-		err := createPaymentUseCase.Create(ctx, watchusecase.CreatePaymentRequestInput{
-			AccountType:   domainAccount.AccountTypePayment,
-			ToAddress:     "tb1q...", // Test recipient address
-			Amount:        10000,     // 0.0001 BTC (10000 satoshis)
-			Description:   "MuSig2 E2E Test Transaction",
-			PaymentMethod: "musig2",
+		err := createPaymentUseCase.Execute(ctx, watchusecase.CreatePaymentRequestInput{
+			AmountList: []float64{0.0001}, // 0.0001 BTC
 		})
 		require.NoError(t, err, "Failed to create payment request")
 
 		// Create unsigned transaction
-		createTxUseCase := watch.NewWatchCreateTransactionUseCase()
+		_ = watch.NewWatchCreateTransactionUseCase()
 		// TODO: Implement actual transaction creation
-		// psbtData, err = createTxUseCase.CreateUnsigned(ctx, ...)
+		// psbtData, err = createTxUseCase.Execute(ctx, ...)
 		// require.NoError(t, err, "Failed to create unsigned transaction")
 
 		t.Log("✓ Unsigned transaction (PSBT) created")
@@ -111,7 +108,7 @@ func TestMuSig2EndToEndFlow(t *testing.T) {
 
 		// Generate nonces in parallel from all three wallets
 		go func() {
-			useCase := keygen.NewKeygenGenerateMuSig2NonceUseCase()
+			_ = keygen.NewKeygenGenerateMuSig2NonceUseCase()
 			// TODO: Implement actual nonce generation
 			// nonce, err := useCase.Generate(ctx, psbtData)
 			nonceResults <- NonceResult{
@@ -121,7 +118,7 @@ func TestMuSig2EndToEndFlow(t *testing.T) {
 		}()
 
 		go func() {
-			useCase := sign1.NewSignGenerateMuSig2NonceUseCase()
+			_ = sign1.NewSignGenerateMuSig2NonceUseCase()
 			// TODO: Implement actual nonce generation
 			// nonce, err := useCase.Generate(ctx, psbtData)
 			nonceResults <- NonceResult{
@@ -131,7 +128,7 @@ func TestMuSig2EndToEndFlow(t *testing.T) {
 		}()
 
 		go func() {
-			useCase := sign2.NewSignGenerateMuSig2NonceUseCase()
+			_ = sign2.NewSignGenerateMuSig2NonceUseCase()
 			// TODO: Implement actual nonce generation
 			// nonce, err := useCase.Generate(ctx, psbtData)
 			nonceResults <- NonceResult{
@@ -166,7 +163,7 @@ func TestMuSig2EndToEndFlow(t *testing.T) {
 	var signatures [][]byte
 	t.Run("Step4_CreatePartialSignatures", func(t *testing.T) {
 		// Sign with keygen wallet
-		keygenSignUseCase := keygen.NewKeygenMuSig2SignUseCase()
+		_ = keygen.NewKeygenMuSig2SignUseCase()
 		// TODO: Implement actual signing
 		// sig1, err := keygenSignUseCase.Sign(ctx, psbtData, nonces)
 		// require.NoError(t, err, "Failed to create signature from keygen wallet")
@@ -174,7 +171,7 @@ func TestMuSig2EndToEndFlow(t *testing.T) {
 		signatures = append(signatures, sig1)
 
 		// Sign with sign1 wallet
-		sign1SignUseCase := sign1.NewSignMuSig2SignUseCase()
+		_ = sign1.NewSignMuSig2SignUseCase()
 		// TODO: Implement actual signing
 		// sig2, err := sign1SignUseCase.Sign(ctx, psbtData, nonces)
 		// require.NoError(t, err, "Failed to create signature from sign1 wallet")
@@ -182,7 +179,7 @@ func TestMuSig2EndToEndFlow(t *testing.T) {
 		signatures = append(signatures, sig2)
 
 		// Sign with sign2 wallet
-		sign2SignUseCase := sign2.NewSignMuSig2SignUseCase()
+		_ = sign2.NewSignMuSig2SignUseCase()
 		// TODO: Implement actual signing
 		// sig3, err := sign2SignUseCase.Sign(ctx, psbtData, nonces)
 		// require.NoError(t, err, "Failed to create signature from sign2 wallet")
@@ -197,7 +194,7 @@ func TestMuSig2EndToEndFlow(t *testing.T) {
 	// Step 5: Aggregate signatures in Watch wallet
 	var finalTx []byte
 	t.Run("Step5_AggregateSignatures", func(t *testing.T) {
-		aggregateUseCase := watch.NewWatchAggregateMuSig2SignaturesUseCase()
+		_ = watch.NewWatchAggregateMuSig2SignaturesUseCase()
 		// TODO: Implement actual aggregation
 		// finalTx, err := aggregateUseCase.Aggregate(ctx, psbtData, signatures)
 		// require.NoError(t, err, "Failed to aggregate signatures")
@@ -246,6 +243,8 @@ func TestMuSig2EndToEndFlow(t *testing.T) {
 // isIntegrationEnvironmentAvailable checks if the required integration test
 // environment is available
 func isIntegrationEnvironmentAvailable(t *testing.T) bool {
+	t.Helper()
+
 	// Check if Bitcoin Core regtest node is available
 	// Check if MySQL database is available
 	// Check if config files exist
@@ -269,7 +268,7 @@ func setupKeygenWallet(t *testing.T) di.Container {
 	accountConfPath := filepath.Join("..", "..", "data", "config", "account.toml")
 
 	// Load wallet configuration
-	conf, err := config.NewWallet(confPath, domainWallet.WalletTypeKeygen, domainCoin.BTC)
+	conf, err := config.NewWallet(confPath, domainWallet.WalletTypeKeyGen, domainCoin.BTC)
 	require.NoError(t, err, "Failed to load keygen wallet config")
 
 	// Load account configuration
@@ -277,7 +276,7 @@ func setupKeygenWallet(t *testing.T) di.Container {
 	require.NoError(t, err, "Failed to load account config")
 
 	// Create DI container (no error return)
-	container := di.NewContainer(conf, accountConf, domainWallet.WalletTypeKeygen)
+	container := di.NewContainer(conf, accountConf, domainWallet.WalletTypeKeyGen)
 
 	return container
 }
@@ -300,6 +299,7 @@ func setupSignWallet(t *testing.T, authName string) di.Container {
 
 	// Note: authName override would be done via environment variables or command-line flags
 	// in actual implementation, not through config modification
+	_ = authName // Will be used when auth name configuration is implemented
 
 	// Create DI container (no error return)
 	container := di.NewContainer(conf, accountConf, domainWallet.WalletTypeSign)
@@ -334,6 +334,11 @@ func cleanupTestData(t *testing.T, keygen, sign1, sign2, watch di.Container) {
 	t.Helper()
 
 	// TODO: Implement cleanup logic
+	_ = keygen // Will be used when TODO is implemented
+	_ = sign1  // Will be used when TODO is implemented
+	_ = sign2  // Will be used when TODO is implemented
+	_ = watch  // Will be used when TODO is implemented
+
 	// - Remove test addresses from database
 	// - Remove test nonces from database
 	// - Remove test payment requests

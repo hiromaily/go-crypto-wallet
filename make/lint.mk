@@ -2,6 +2,7 @@
 # Linter and Code Quality Targets
 ###############################################################################
 
+# Note: Build tags (e.g., //go:build integration) are supported via .golangci.yml run.build-tags setting
 .PHONY: format
 format:
 	go tool golangci-lint fmt
@@ -14,7 +15,7 @@ imports:
 lint:
 	go tool golangci-lint run
 
-# Bug: format doesn't work on files which has tags
+# Note: Build tags (e.g., //go:build integration) are now supported via .golangci.yml run.build-tags setting
 .PHONY: lint-fix
 lint-fix:
 	go tool golangci-lint run --fix

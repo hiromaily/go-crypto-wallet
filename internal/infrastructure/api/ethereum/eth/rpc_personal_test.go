@@ -4,12 +4,13 @@
 package eth_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/eth"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
@@ -51,7 +52,8 @@ func (pt *personalTest) TestImportRawKey() {
 	}
 	for _, tt := range tests {
 		pt.T().Run(tt.name, func(t *testing.T) {
-			addr, err := pt.ETH.ImportRawKey(tt.args.key, pw)
+			ctx := context.Background()
+			addr, err := pt.ETH.ImportRawKey(ctx, tt.args.key, pw)
 			pt.Equal(tt.want.isErr, err != nil)
 			if err == nil {
 				t.Log("address:", addr)
@@ -62,7 +64,8 @@ func (pt *personalTest) TestImportRawKey() {
 
 // TestListAccounts is test for ListAccounts
 func (pt *personalTest) TestListAccounts() {
-	addrs, err := pt.ETH.ListAccounts()
+	ctx := context.Background()
+	addrs, err := pt.ETH.ListAccounts(ctx)
 	pt.NoError(err)
 	for _, addr := range addrs {
 		pt.T().Log("address:", addr)
@@ -71,16 +74,18 @@ func (pt *personalTest) TestListAccounts() {
 
 // TestNewAccount is test for ListAccounts
 func (pt *personalTest) TestNewAccount() {
-	addr, err := pt.ETH.NewAccount(eth.Password, account.AccountTypeClient)
+	ctx := context.Background()
+	addr, err := pt.ETH.NewAccount(ctx, eth.Password, account.AccountTypeClient)
 	pt.NoError(err)
 	pt.T().Log("address:", addr)
 }
 
 func (pt *personalTest) TestLockAccount() {
+	ctx := context.Background()
 	addr := "0x852d4ae6bfa5ae9d44d3ac03122674bcb32a0861"
 
 	// unlock
-	isUnlocked, err := pt.ETH.UnlockAccount(addr, eth.Password, uint64(1))
+	isUnlocked, err := pt.ETH.UnlockAccount(ctx, addr, eth.Password, uint64(1))
 	pt.NoError(err)
 	if !isUnlocked {
 		pt.T().Error("address is not unlocked")
@@ -88,7 +93,7 @@ func (pt *personalTest) TestLockAccount() {
 	}
 
 	// lock
-	err = pt.ETH.LockAccount(addr)
+	err = pt.ETH.LockAccount(ctx, addr)
 	pt.NoError(err)
 }
 

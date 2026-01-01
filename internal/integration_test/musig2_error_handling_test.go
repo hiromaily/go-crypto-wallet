@@ -4,7 +4,6 @@ package integration_test
 
 import (
 	"context"
-	"errors"
 	"testing"
 	"time"
 
@@ -12,9 +11,12 @@ import (
 
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
-	"github.com/hiromaily/go-crypto-wallet/internal/di"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 )
+
+// Note: When implementing TODOs, will need to uncomment these imports:
+// "errors"
+// "github.com/hiromaily/go-crypto-wallet/internal/di"
 
 // TestMuSig2MissingNonces verifies that signing operations properly detect
 // and reject missing or incomplete nonce sets
@@ -551,6 +553,7 @@ func TestMuSig2InvalidTransactionData(t *testing.T) {
 		{
 			name: "EmptyPSBT",
 			setupTest: func(t *testing.T, expectedErr string) {
+				t.Helper()
 				// Try to generate nonce with empty PSBT
 				nonceUseCase := keygen.NewKeygenGenerateMuSig2NonceUseCase()
 
@@ -568,6 +571,7 @@ func TestMuSig2InvalidTransactionData(t *testing.T) {
 		{
 			name: "CorruptedPSBT",
 			setupTest: func(t *testing.T, expectedErr string) {
+				t.Helper()
 				// Create valid PSBT then corrupt it
 				psbt := createTestPSBT(t, keygen)
 				if len(psbt) > 10 {
@@ -589,6 +593,7 @@ func TestMuSig2InvalidTransactionData(t *testing.T) {
 		{
 			name: "InvalidAmount",
 			setupTest: func(t *testing.T, expectedErr string) {
+				t.Helper()
 				// NOTE: createPaymentRequestUseCase requires 'client' account addresses
 				// to be present in the database. See TestMuSig2NonceReuse for setup pattern.
 				// TODO: Add client address setup before creating payment request
@@ -611,6 +616,7 @@ func TestMuSig2InvalidTransactionData(t *testing.T) {
 		{
 			name: "NegativeAmount",
 			setupTest: func(t *testing.T, expectedErr string) {
+				t.Helper()
 				// NOTE: createPaymentRequestUseCase requires 'client' account addresses
 				// to be present in the database. See TestMuSig2NonceReuse for setup pattern.
 				// TODO: Add client address setup before creating payment request
@@ -716,6 +722,7 @@ func TestMuSig2ContextCancellation(t *testing.T) {
 
 		_ = nonceUseCase
 		_ = psbt
+		_ = ctx
 
 		t.Log("✓ Timeout during nonce generation (implementation pending)")
 	})
@@ -742,6 +749,7 @@ func TestMuSig2ContextCancellation(t *testing.T) {
 		signUseCase := keygen.NewKeygenMuSig2SignUseCase()
 
 		// TODO: Implement signing with cancelled context
+		_ = ctx
 		// _, err = signUseCase.Sign(ctx, psbt, nonces)
 		// assert.Error(t, err, "Should fail with cancelled context")
 		// assert.True(t, errors.Is(err, context.Canceled),
@@ -767,6 +775,7 @@ func TestMuSig2ContextCancellation(t *testing.T) {
 		aggregateUseCase := watch.NewWatchAggregateMuSig2SignaturesUseCase()
 
 		// TODO: Implement aggregation with timeout
+		_ = ctx
 		// _, err := aggregateUseCase.Aggregate(ctx, psbt, signatures)
 		// assert.Error(t, err, "Should fail with timed-out context")
 		// assert.True(t, errors.Is(err, context.DeadlineExceeded),
@@ -811,15 +820,22 @@ func TestMuSig2ContextCancellation(t *testing.T) {
 }
 
 // Helper function to generate all nonces (placeholder implementation)
-func generateAllNonces(ctx context.Context, keygen, sign1, sign2 di.Container, psbt []byte) ([][]byte, error) {
-	// TODO: Implement actual nonce generation from all wallets
-	// This is a placeholder for when the actual implementation is ready
-	return nil, errors.New("not implemented")
-}
+// Commented out until TODO implementation is ready
+// func generateAllNonces(ctx context.Context, keygen, sign1, sign2 di.Container, psbt []byte) ([][]byte, error) {
+// 	// TODO: Implement actual nonce generation from all wallets
+// 	// This is a placeholder for when the actual implementation is ready
+// 	return nil, errors.New("not implemented")
+// }
 
 // Helper function to generate all signatures (placeholder implementation)
-func generateAllSignatures(ctx context.Context, keygen, sign1, sign2 di.Container, psbt []byte, nonces [][]byte) ([][]byte, error) {
-	// TODO: Implement actual signature generation from all wallets
-	// This is a placeholder for when the actual implementation is ready
-	return nil, errors.New("not implemented")
-}
+// Commented out until TODO implementation is ready
+// func generateAllSignatures(
+// 	ctx context.Context,
+// 	keygen, sign1, sign2 di.Container,
+// 	psbt []byte,
+// 	nonces [][]byte,
+// ) ([][]byte, error) {
+// 	// TODO: Implement actual signature generation from all wallets
+// 	// This is a placeholder for when the actual implementation is ready
+// 	return nil, errors.New("not implemented")
+// }

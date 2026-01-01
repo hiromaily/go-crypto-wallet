@@ -1,17 +1,16 @@
 //go:build integration
 // +build integration
 
-package watchrepo_test
+package watch_test
 
 import (
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/quagmt/udecimal"
 	"github.com/stretchr/testify/require"
 
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
@@ -22,43 +21,35 @@ func TestBTCTxInputSqlc(t *testing.T) {
 	btcTxInputRepo := testutil.NewBTCTxInputRepositorySqlc()
 
 	// Create a parent tx
-	inputAmt, _ := udecimal.Parse("0.100")
-	outputAmt, _ := udecimal.Parse("0.090")
-	feeAmt, _ := udecimal.Parse("0.010")
-
-	txItem := &models.BTCTX{
-		Action:            domainTx.ActionTypePayment.String(),
-		UnsignedHexTX:     "input-test-hex",
-		TotalInputAmount:  inputAmt,
-		TotalOutputAmount: outputAmt,
-		Fee:               feeAmt,
+	txItem := &sqlc.BtcTx{
+		Coin:              sqlc.BtcTxCoinBtc,
+		Action:            sqlc.BtcTxActionPayment,
+		UnsignedHexTx:     "input-test-hex",
+		TotalInputAmount:  "0.100",
+		TotalOutputAmount: "0.090",
+		Fee:               "0.010",
 	}
 	txID, err := btcTxRepo.InsertUnsignedTx(domainTx.ActionTypePayment, txItem)
 	require.NoError(t, err, "fail to create parent tx")
 
 	// Create test inputs
-	amount, _ := udecimal.Parse("1.5")
-	amount1, _ := udecimal.Parse("0.05")
-	amount, _ := udecimal.Parse("1.5")
-	amount2, _ := udecimal.Parse("0.05")
-
-	inputs := []*models.BTCTXInput{
+	inputs := []*sqlc.BtcTxInput{
 		{
-			TXID:               txID,
+			TxID:               txID,
 			InputTxid:          "input-txid-sqlc-1",
 			InputVout:          0,
 			InputAddress:       "input-address-sqlc-1",
 			InputAccount:       "client",
-			InputAmount:        amount1,
+			InputAmount:        "0.05",
 			InputConfirmations: 6,
 		},
 		{
-			TXID:               txID,
+			TxID:               txID,
 			InputTxid:          "input-txid-sqlc-2",
 			InputVout:          1,
 			InputAddress:       "input-address-sqlc-2",
 			InputAccount:       "client",
-			InputAmount:        amount2,
+			InputAmount:        "0.05",
 			InputConfirmations: 6,
 		},
 	}
@@ -78,15 +69,13 @@ func TestBTCTxInputSqlc(t *testing.T) {
 	require.Equal(t, "input-txid-sqlc-1", oneInput.InputTxid, "GetOne() InputTxid mismatch")
 
 	// Insert single
-	amount, _ := udecimal.Parse("1.5")
-	amount3, _ := udecimal.Parse("0.03")
-	singleInput := &models.BTCTXInput{
-		TXID:               txID,
+	singleInput := &sqlc.BtcTxInput{
+		TxID:               txID,
 		InputTxid:          "input-txid-sqlc-3",
 		InputVout:          2,
 		InputAddress:       "input-address-sqlc-3",
 		InputAccount:       "client",
-		InputAmount:        amount3,
+		InputAmount:        "0.03",
 		InputConfirmations: 6,
 	}
 	err = btcTxInputRepo.Insert(singleInput)

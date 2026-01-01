@@ -1,17 +1,16 @@
 //go:build integration
 // +build integration
 
-package watchrepo_test
+package watch_test
 
 import (
 	"testing"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/quagmt/udecimal"
 	"github.com/stretchr/testify/require"
 
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/testutil"
 )
 
@@ -22,39 +21,31 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 	btcTxOutputRepo := testutil.NewBTCTxOutputRepositorySqlc()
 
 	// Create a parent tx
-	inputAmt, _ := udecimal.Parse("0.100")
-	outputAmt, _ := udecimal.Parse("0.090")
-	feeAmt, _ := udecimal.Parse("0.010")
-
-	txItem := &models.BTCTX{
-		Action:            domainTx.ActionTypePayment.String(),
-		UnsignedHexTX:     "output-test-hex",
-		TotalInputAmount:  inputAmt,
-		TotalOutputAmount: outputAmt,
-		Fee:               feeAmt,
+	txItem := &sqlc.BtcTx{
+		Coin:              sqlc.BtcTxCoinBtc,
+		Action:            sqlc.BtcTxActionPayment,
+		UnsignedHexTx:     "output-test-hex",
+		TotalInputAmount:  "0.100",
+		TotalOutputAmount: "0.090",
+		Fee:               "0.010",
 	}
 	txID, err := btcTxRepo.InsertUnsignedTx(domainTx.ActionTypePayment, txItem)
 	require.NoError(t, err, "fail to create parent tx")
 
 	// Create test outputs
-	amount, _ := udecimal.Parse("1.5")
-	amount1, _ := udecimal.Parse("0.08")
-	amount, _ := udecimal.Parse("1.5")
-	amount2, _ := udecimal.Parse("0.01")
-
-	outputs := []*models.BTCTXOutput{
+	outputs := []*sqlc.BtcTxOutput{
 		{
-			TXID:          txID,
+			TxID:          txID,
 			OutputAddress: "output-address-sqlc-1",
 			OutputAccount: "receipt",
-			OutputAmount:  amount1,
+			OutputAmount:  "0.08",
 			IsChange:      false,
 		},
 		{
-			TXID:          txID,
+			TxID:          txID,
 			OutputAddress: "output-address-sqlc-2",
 			OutputAccount: "change",
-			OutputAmount:  amount2,
+			OutputAmount:  "0.01",
 			IsChange:      true,
 		},
 	}
@@ -84,16 +75,14 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 	// Get one
 	oneOutput, err := btcTxOutputRepo.GetOne(retrievedOutputs[0].ID)
 	require.NoError(t, err, "fail to call GetOne()")
-	require.Equal(t, txID, oneOutput.TXID, "GetOne() should return output with correct TXID")
+	require.Equal(t, txID, oneOutput.TxID, "GetOne() should return output with correct TxID")
 
 	// Insert single
-	amount, _ := udecimal.Parse("1.5")
-	amount3, _ := udecimal.Parse("0.02")
-	singleOutput := &models.BTCTXOutput{
-		TXID:          txID,
+	singleOutput := &sqlc.BtcTxOutput{
+		TxID:          txID,
 		OutputAddress: "output-address-sqlc-3",
 		OutputAccount: "receipt",
-		OutputAmount:  amount3,
+		OutputAmount:  "0.02",
 		IsChange:      false,
 	}
 	err = btcTxOutputRepo.Insert(singleOutput)

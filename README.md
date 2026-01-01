@@ -280,48 +280,6 @@ The `pkg/` directory contains shared utilities and legacy/transitional code:
   - [sign_op.mk](https://github.com/hiromaily/go-crypto-wallet/blob/master/make/sign_op.mk) - Sign wallet operations
   - And other specialized modules for builds, tests, Docker, etc.
 
-## TODO
-
-### Basics
-
-- [ ] Remove [github.com/cpacia/bchutil](https://github.com/cpacia/bchutil) due to outdated code. Try to replace to [github.com/gcash/bchd](https://github.com/gcash/bchd)
-- [x] Separate dependent test as Integration Test using tag (`//go:build integration`)
-- [ ] Complete migration from `pkg/wallet/service/` to `pkg/application/usecase/`
-- [ ] Add ATOM tokens on [Cosmos Hub](https://hub.cosmos.network/main/hub-overview/overview.html)
-- [ ] Add [Polkadot](https://polkadot.network/technology/)
-- [ ] Various monitoring patterns to detect suspicious operations.
-- [ ] Add Github Action as CI
-- [ ] Generate mnemonic instead of seed. [bip-0039](https://github.com/bitcoin/bips/blob/master/bip-0039.mediawiki)
-
-### For BTC/BCH
-
-- ✅ **Taproot (BIP341/BIP86) Support** - P2TR addresses with Schnorr signatures (See [Taproot Guide](./docs/TAPROOT_GUIDE.md))
-- ✅ **MuSig2 (BIP327) Support** - Two-round Schnorr multisignatures (See [MuSig2 Guide](./docs/crypto/btc/musig2_guide.md))
-- ✅ Native SegWit-Bech32 (P2WPKH) addresses supported
-- ✅ P2SH-SegWit addresses supported
-- ✅ Legacy P2PKH addresses supported
-- [ ] Setup [Signet](https://en.bitcoin.it/wiki/Signet) environment for development use
-- [ ] Fix `overpaying fee issue` on Signet. It says 725% overpaying.
-- [ ] Multisig-address is used only once because of security reason, so after tx is sent,
-  related receiver addresses should be updated by is_allocated=true.
-- [ ] Sent tx is not proceeded in bitcoin network if fee is not enough comparatively.
-  So re-sending tx functionality is required adding more fee.
-
-### For ERC20 token
-
-- [ ] Add any useful APIs using contract equivalent to ETH APIs
-- [ ] Monitoring for ERC20 token
-
-### For ETH
-
-- [ ] Make sure that `quantity-tag` is used properly. e.g. when getting balance,
-  which quantity-tag should be used, latest or pending.
-- [ ] Handling secret of private key properly. Password could be passed from command line argument.
-
-### For XRP
-
-- [ ] Handling secret of private key properly. Password could be passed from command line argument.
-
 ## Architecture
 
 This project follows **Clean Architecture** principles with clear layer separation:

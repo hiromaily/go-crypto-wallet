@@ -6,6 +6,7 @@ This document describes the testing strategy and requirements for the go-crypto-
 
 - Use `//go:build integration` tag for integration tests
 - Separate unit tests and integration tests
+- Use [testify](https://github.com/stretchr/testify) package for assertions (`assert` and `require`)
 - Measure and improve test coverage
 - Write tests for all exported functions and methods
 - Keep tests maintainable and readable
@@ -34,6 +35,13 @@ This document describes the testing strategy and requirements for the go-crypto-
 **Example:**
 
 ```go
+import (
+    "testing"
+
+    "github.com/stretchr/testify/assert"
+    "github.com/stretchr/testify/require"
+)
+
 func TestAccountType_Validate(t *testing.T) {
     tests := []struct {
         name    string
@@ -49,8 +57,10 @@ func TestAccountType_Validate(t *testing.T) {
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
             err := tt.input.Validate()
-            if (err != nil) != tt.wantErr {
-                t.Errorf("Validate() error = %v, wantErr %v", err, tt.wantErr)
+            if tt.wantErr {
+                require.Error(t, err, "Validate() should return error for %v", tt.input)
+            } else {
+                assert.NoError(t, err, "Validate() should not return error for %v", tt.input)
             }
         })
     }
@@ -242,7 +252,7 @@ packages:
       YourInterface:
 ```
 
-3. Run `make mockery`
+1. Run `make mockery`
 
 ### Using Generated Mocks
 
@@ -333,11 +343,95 @@ func TestSomething(t *testing.T) {
 }
 ```
 
-## Table-Driven Tests
+## Test Assertions with Testify
 
-Use table-driven tests for multiple test cases:
+This project uses [testify](https://github.com/stretchr/testify) for all test assertions.
+Testify provides two main assertion packages:
+
+### `assert` Package
+
+Use `assert` when you want to continue executing the test even if an assertion fails.
+This is useful when you want to check multiple conditions in a single test.
 
 ```go
+import "github.com/stretchr/testify/assert"
+
+func TestMultipleAssertions(t *testing.T) {
+    result := SomeFunction()
+    
+    assert.NotNil(t, result)
+    assert.Equal(t, expectedValue, result.Value)
+    assert.Contains(t, result.Message, "expected text")
+    // All assertions will be checked even if one fails
+}
+```
+
+### `require` Package
+
+Use `require` when you want to stop the test immediately if an assertion fails.
+This is useful when subsequent code depends on the assertion passing.
+
+```go
+import "github.com/stretchr/testify/require"
+
+func TestWithDependency(t *testing.T) {
+    result, err := SomeFunction()
+    require.NoError(t, err)  // Test stops here if error occurs
+    
+    // This code only runs if the above assertion passes
+    require.Equal(t, expectedValue, result.Value)
+}
+```
+
+### Common Assertions
+
+**Equality:**
+
+- `assert.Equal(t, expected, actual)` / `require.Equal(t, expected, actual)`
+- `assert.NotEqual(t, expected, actual)` / `require.NotEqual(t, expected, actual)`
+
+**Nil Checks:**
+
+- `assert.Nil(t, value)` / `require.Nil(t, value)`
+- `assert.NotNil(t, value)` / `require.NotNil(t, value)`
+
+**Error Checks:**
+
+- `assert.NoError(t, err)` / `require.NoError(t, err)`
+- `assert.Error(t, err)` / `require.Error(t, err)`
+- `assert.ErrorIs(t, err, target)` / `require.ErrorIs(t, err, target)`
+- `assert.ErrorAs(t, err, target)` / `require.ErrorAs(t, err, target)`
+
+**Boolean:**
+
+- `assert.True(t, condition)` / `require.True(t, condition)`
+- `assert.False(t, condition)` / `require.False(t, condition)`
+
+**Contains/Subset:**
+
+- `assert.Contains(t, container, item)` / `require.Contains(t, container, item)`
+- `assert.Subset(t, subset, list)` / `require.Subset(t, subset, list)`
+
+**Length/Count:**
+
+- `assert.Len(t, object, length)` / `require.Len(t, object, length)`
+- `assert.Empty(t, object)` / `require.Empty(t, object)`
+- `assert.NotEmpty(t, object)` / `require.NotEmpty(t, object)`
+
+For a complete list of assertions, see the [testify documentation](https://github.com/stretchr/testify).
+
+## Table-Driven Tests
+
+Use table-driven tests for multiple test cases with testify assertions:
+
+```go
+import (
+    "testing"
+
+    "github.com/stretchr/testify/assert"
+    "github.com/stretchr/testify/require"
+)
+
 func TestFunction(t *testing.T) {
     tests := []struct {
         name    string
@@ -362,12 +456,12 @@ func TestFunction(t *testing.T) {
     for _, tt := range tests {
         t.Run(tt.name, func(t *testing.T) {
             got, err := Function(tt.input)
-            if (err != nil) != tt.wantErr {
-                t.Errorf("Function() error = %v, wantErr %v", err, tt.wantErr)
-                return
-            }
-            if !reflect.DeepEqual(got, tt.want) {
-                t.Errorf("Function() = %v, want %v", got, tt.want)
+            if tt.wantErr {
+                require.Error(t, err, "Function() should return error for input %v", tt.input)
+                assert.Nil(t, got, "Function() should return nil result on error")
+            } else {
+                require.NoError(t, err, "Function() should not return error for input %v", tt.input)
+                assert.Equal(t, tt.want, got, "Function() should return expected result")
             }
         })
     }
@@ -379,6 +473,9 @@ func TestFunction(t *testing.T) {
 **Do:**
 
 - Write tests for all exported functions
+- Use [testify](https://github.com/stretchr/testify) for all assertions (`assert` and `require`)
+- Use `require` for critical assertions that must pass for the test to continue
+- Use `assert` for non-critical assertions where you want to check multiple conditions
 - Use table-driven tests for multiple cases
 - Test both success and error paths
 - Use descriptive test names
@@ -390,6 +487,8 @@ func TestFunction(t *testing.T) {
 
 **Don't:**
 
+- Don't use standard library `t.Errorf` or `t.Fatalf` for assertions (use testify instead)
+- Don't use `reflect.DeepEqual` directly (use `assert.Equal` or `require.Equal` instead)
 - Don't test implementation details
 - Don't write flaky tests
 - Don't skip error handling in tests

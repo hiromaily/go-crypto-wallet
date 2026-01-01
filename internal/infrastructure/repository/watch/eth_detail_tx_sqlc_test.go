@@ -1,7 +1,7 @@
 //go:build integration
 // +build integration
 
-package watchrepo_test
+package watch_test
 
 import (
 	"log"
@@ -15,7 +15,7 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	models "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/models/rdb"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/mysql"
@@ -31,14 +31,14 @@ func TestEthDetailTxSqlc(t *testing.T) {
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
-	zapLog := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
+	_ = logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 	db, err := mysql.NewMySQL(&conf.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)
 	}
 
-	ethDetailTxRepo := watch.NewEthDetailTxInputRepositorySqlc(db, domainCoin.ETH, zapLog)
-	txRepo := watch.NewTxRepositorySqlc(db, domainCoin.ETH, zapLog)
+	ethDetailTxRepo := watch.NewEthDetailTxInputRepositorySqlc(db, domainCoin.ETH)
+	txRepo := watch.NewTxRepositorySqlc(db, domainCoin.ETH)
 
 	// Clean up any existing test data
 	_, _ = db.Exec("DELETE FROM eth_detail_tx WHERE uuid LIKE 'eth-uuid-%'")
@@ -50,10 +50,10 @@ func TestEthDetailTxSqlc(t *testing.T) {
 
 	// Create test eth detail tx
 	uuid := "eth-uuid-sqlc-test"
-	ethTx := &models.EthDetailTX{
-		TXID:            txID,
-		UUID:            uuid,
-		CurrentTXType:   domainTx.TxTypeUnsigned.Int8(),
+	ethTx := &sqlc.EthDetailTx{
+		TxID:            txID,
+		Uuid:            uuid,
+		CurrentTxType:   domainTx.TxTypeUnsigned.Int8(),
 		SenderAccount:   "deposit",
 		SenderAddress:   "0xsender-sqlc",
 		ReceiverAccount: "client",
@@ -62,7 +62,7 @@ func TestEthDetailTxSqlc(t *testing.T) {
 		Fee:             21000,
 		GasLimit:        21000,
 		Nonce:           1,
-		UnsignedHexTX:   "0xunsigned-hex-sqlc",
+		UnsignedHexTx:   "0xunsigned-hex-sqlc",
 	}
 
 	// Insert
@@ -77,7 +77,7 @@ func TestEthDetailTxSqlc(t *testing.T) {
 	// Get one
 	retrievedTx, err := ethDetailTxRepo.GetOne(ethTxs[0].ID)
 	require.NoError(t, err, "fail to call GetOne()")
-	require.Equal(t, uuid, retrievedTx.UUID, "GetOne() should return correct UUID")
+	require.Equal(t, uuid, retrievedTx.Uuid, "GetOne() should return correct Uuid")
 
 	// Update after tx sent
 	signedHex := "0xsigned-hex-sqlc"
@@ -89,9 +89,11 @@ func TestEthDetailTxSqlc(t *testing.T) {
 	// Verify update
 	updatedTx, err := ethDetailTxRepo.GetOne(retrievedTx.ID)
 	require.NoError(t, err, "fail to call GetOne() after update")
-	require.Equal(t, signedHex, updatedTx.SignedHexTX, "UpdateAfterTxSent() should update SignedHexTX")
-	require.Equal(t, sentHashTx, updatedTx.SentHashTX, "UpdateAfterTxSent() should update SentHashTX")
-	require.Equal(t, domainTx.TxTypeSent.Int8(), updatedTx.CurrentTXType, "UpdateAfterTxSent() should update CurrentTXType")
+	require.Equal(t, signedHex, updatedTx.SignedHexTx, "UpdateAfterTxSent() should update SignedHexTx")
+	require.Equal(t, sentHashTx, updatedTx.SentHashTx, "UpdateAfterTxSent() should update SentHashTx")
+	require.Equal(
+		t, domainTx.TxTypeSent.Int8(), updatedTx.CurrentTxType, "UpdateAfterTxSent() should update CurrentTxType",
+	)
 
 	// Get sent hash tx
 	hashes, err := ethDetailTxRepo.GetSentHashTx(domainTx.TxTypeSent)
@@ -106,7 +108,12 @@ func TestEthDetailTxSqlc(t *testing.T) {
 	// Verify tx type update
 	verifyTx, err := ethDetailTxRepo.GetOne(retrievedTx.ID)
 	require.NoError(t, err, "fail to call GetOne() after UpdateTxTypeBySentHashTx()")
-	require.Equal(t, domainTx.TxTypeDone.Int8(), verifyTx.CurrentTXType, "UpdateTxTypeBySentHashTx() should update CurrentTXType to TxTypeDone")
+	require.Equal(
+		t,
+		domainTx.TxTypeDone.Int8(),
+		verifyTx.CurrentTxType,
+		"UpdateTxTypeBySentHashTx() should update CurrentTxType to TxTypeDone",
+	)
 
 	// Update tx type by ID
 	rowsAffected, err = ethDetailTxRepo.UpdateTxType(retrievedTx.ID, domainTx.TxTypeNotified)
@@ -116,18 +123,23 @@ func TestEthDetailTxSqlc(t *testing.T) {
 	// Verify final tx type
 	finalTx, err := ethDetailTxRepo.GetOne(retrievedTx.ID)
 	require.NoError(t, err, "fail to call GetOne() after UpdateTxType()")
-	require.Equal(t, domainTx.TxTypeNotified.Int8(), finalTx.CurrentTXType, "UpdateTxType() should update CurrentTXType to TxTypeNotified")
+	require.Equal(
+		t,
+		domainTx.TxTypeNotified.Int8(),
+		finalTx.CurrentTxType,
+		"UpdateTxType() should update CurrentTxType to TxTypeNotified",
+	)
 
 	// Test InsertBulk
 	// Create another tx record for bulk insert
 	txID2, err := txRepo.InsertUnsignedTx(domainTx.ActionTypePayment)
 	require.NoError(t, err, "fail to create second parent tx")
 
-	bulkTxs := []*models.EthDetailTX{
+	bulkTxs := []*sqlc.EthDetailTx{
 		{
-			TXID:            txID2,
-			UUID:            "eth-uuid-bulk-1",
-			CurrentTXType:   domainTx.TxTypeUnsigned.Int8(),
+			TxID:            txID2,
+			Uuid:            "eth-uuid-bulk-1",
+			CurrentTxType:   domainTx.TxTypeUnsigned.Int8(),
 			SenderAccount:   "deposit",
 			SenderAddress:   "0xsender-bulk-1",
 			ReceiverAccount: "client",
@@ -136,12 +148,12 @@ func TestEthDetailTxSqlc(t *testing.T) {
 			Fee:             21000,
 			GasLimit:        21000,
 			Nonce:           2,
-			UnsignedHexTX:   "0xunsigned-bulk-1",
+			UnsignedHexTx:   "0xunsigned-bulk-1",
 		},
 		{
-			TXID:            txID2,
-			UUID:            "eth-uuid-bulk-2",
-			CurrentTXType:   domainTx.TxTypeUnsigned.Int8(),
+			TxID:            txID2,
+			Uuid:            "eth-uuid-bulk-2",
+			CurrentTxType:   domainTx.TxTypeUnsigned.Int8(),
 			SenderAccount:   "deposit",
 			SenderAddress:   "0xsender-bulk-2",
 			ReceiverAccount: "client",
@@ -150,7 +162,7 @@ func TestEthDetailTxSqlc(t *testing.T) {
 			Fee:             21000,
 			GasLimit:        21000,
 			Nonce:           3,
-			UnsignedHexTX:   "0xunsigned-bulk-2",
+			UnsignedHexTx:   "0xunsigned-bulk-2",
 		},
 	}
 

@@ -4,6 +4,7 @@
 package eth_test
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -72,7 +73,10 @@ func (txt *transactionTest) TestCreateRawTransaction() {
 
 	for _, tt := range tests {
 		txt.T().Run(tt.name, func(t *testing.T) {
-			rawTx, txDetail, err := txt.ETH.CreateRawTransaction(tt.args.senderAddr, tt.args.receiverAddr, tt.args.amount, 0)
+			ctx := context.Background()
+			rawTx, txDetail, err := txt.ETH.CreateRawTransaction(
+				ctx, tt.args.senderAddr, tt.args.receiverAddr, tt.args.amount, 0,
+			)
 			txt.Equal(tt.want.isErr, err != nil)
 			if err == nil {
 				t.Log(rawTx)
@@ -125,8 +129,11 @@ func (txt *transactionTest) TestSignAndSendRawTransaction() {
 
 	for _, tt := range tests {
 		txt.T().Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
 			// create raw transaction
-			rawTx, _, err := txt.ETH.CreateRawTransaction(tt.args.senderAddr, tt.args.receiverAddr, tt.args.amount, 0)
+			rawTx, _, err := txt.ETH.CreateRawTransaction(
+				ctx, tt.args.senderAddr, tt.args.receiverAddr, tt.args.amount, 0,
+			)
 			txt.NoError(err)
 
 			// sign on raw transaction
@@ -137,24 +144,24 @@ func (txt *transactionTest) TestSignAndSendRawTransaction() {
 			}
 
 			// send signed transaction
-			txHash, err := txt.ETH.SendSignedRawTransaction(signedTx.TxHex)
+			txHash, err := txt.ETH.SendSignedRawTransaction(ctx, signedTx.TxHex)
 			txt.Equal(tt.want.isSendErr, err != nil)
 			if txHash != "" {
 				t.Logf("txHash: %s", txHash)
 
 				// check transaction
 				time.Sleep(3 * time.Second)
-				tx, err := txt.ETH.GetTransactionByHash(txHash)
+				tx, err := txt.ETH.GetTransactionByHash(ctx, txHash)
 				txt.NoError(err)
 				t.Logf("tx: %v", tx)
 
 				// check balance
-				balance, err := txt.ETH.GetBalance(tt.args.receiverAddr, eth.QuantityTagPending)
+				balance, err := txt.ETH.GetBalance(ctx, tt.args.receiverAddr, eth.QuantityTagPending)
 				txt.NoError(err)
 				txt.NotEqual(0, balance.Uint64())
 
 				// check confirmation
-				confirmNum, err := txt.ETH.GetConfirmation(txHash)
+				confirmNum, err := txt.ETH.GetConfirmation(ctx, txHash)
 				txt.NoError(err)
 				t.Logf("confirmation is %d", confirmNum)
 			}
