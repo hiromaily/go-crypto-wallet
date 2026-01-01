@@ -59,27 +59,54 @@ func TestAccountType_Validate(t *testing.T) {
 
 ### Application Layer Testing (Use Cases)
 
-**Approach**: Test with mocked infrastructure
-
-**Current Status**: Use cases have constructor tests that verify:
-
-- Use case can be instantiated with dependencies
-- Correct interface implementation
-
-**Future Testing Strategy:**
-
-- Test use case orchestration logic
-- Mock infrastructure services
-- Verify DTO transformation
-- Test error handling and wrapping
+**Approach**: Test with mocked infrastructure using [mockery](https://github.com/vektra/mockery)
 
 **What to Test:**
 
 - Use case input validation
-- Service coordination
+- Service coordination and orchestration
 - Error wrapping with context
 - DTO transformation
 - Business flow orchestration
+
+**Example with Mocks:**
+
+```go
+package btc_test
+
+import (
+    "testing"
+
+    "github.com/stretchr/testify/require"
+
+    "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/btc"
+    bitcoinmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/mocks"
+    repomocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/mocks"
+)
+
+func TestCreateTransactionUseCase_Execute(t *testing.T) {
+    // Create mocks
+    mockBtcClient := bitcoinmocks.NewMockBitcoiner(t)
+    mockAddrRepo := repomocks.NewMockAddressRepositorier(t)
+
+    // Set up expectations
+    mockBtcClient.EXPECT().
+        ListUnspentByAccount("deposit").
+        Return(nil, nil)
+
+    // Create use case with mocks
+    useCase := btc.NewCreateTransactionUseCase(
+        mockBtcClient,
+        mockAddrRepo,
+        // ... other dependencies
+    )
+
+    // Execute and verify
+    result, err := useCase.Execute(ctx, params)
+    require.NoError(t, err)
+    // ... assertions
+}
+```
 
 ### Infrastructure Layer Testing
 
@@ -152,6 +179,111 @@ func TestRepository_Integration(t *testing.T) {
     // Integration test with real database
 }
 ```
+
+## Mock Generation with Mockery
+
+This project uses [mockery v3](https://github.com/vektra/mockery) to generate mock implementations from Go interfaces.
+
+### Configuration
+
+Mock generation is configured in `.mockery.yaml` at the project root.
+
+**Key Settings:**
+
+- `all: false` - Only generate mocks for explicitly listed interfaces
+- `template: testify` - Generate testify-compatible mocks with `EXPECT()` support
+- Mocks are placed in `mocks/` subdirectories alongside implementations
+
+### Mock Directory Structure
+
+```text
+internal/infrastructure/
+├── api/bitcoin/
+│   ├── btc/bitcoin.go              # Implementation
+│   └── mocks/
+│       └── mock_bitcoiner.go       # Generated mock
+├── repository/
+│   ├── watch/repository.go         # Implementation
+│   └── mocks/
+│       └── mock_*.go               # Generated mocks for persistence interfaces
+└── storage/file/
+    ├── transaction.go              # Implementation
+    └── mocks/
+        └── mock_transaction_file_repositorier.go
+```
+
+### Commands
+
+```bash
+# Generate all mocks
+make mockery
+
+# Clean all generated mocks
+make clean-mocks
+
+# Regenerate mocks (clean + generate)
+make clean-mocks && make mockery
+```
+
+### Adding New Mock Interfaces
+
+To add a new interface for mock generation:
+
+1. Edit `.mockery.yaml`
+2. Add the interface under the appropriate package:
+
+```yaml
+packages:
+  github.com/hiromaily/go-crypto-wallet/internal/your/package:
+    config:
+      dir: "internal/your/package/mocks"
+      pkgname: "mocks"
+    interfaces:
+      YourInterface:
+```
+
+3. Run `make mockery`
+
+### Using Generated Mocks
+
+```go
+import (
+    "testing"
+
+    bitcoinmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/mocks"
+    repomocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/mocks"
+    storagemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/mocks"
+)
+
+func TestWithMocks(t *testing.T) {
+    // Create mock (automatically registers cleanup with t.Cleanup)
+    mockClient := bitcoinmocks.NewMockBitcoiner(t)
+
+    // Set expectations with EXPECT()
+    mockClient.EXPECT().
+        GetBlockCount().
+        Return(int64(100), nil)
+
+    // Use mock in test
+    result, err := mockClient.GetBlockCount()
+    // Expectations are automatically verified at test end
+}
+```
+
+### Mock Best Practices
+
+**Do:**
+
+- Pass `t *testing.T` to mock constructors for automatic cleanup
+- Use `EXPECT()` for type-safe expectation setting
+- Set expectations before calling the code under test
+- Keep mock setups minimal and focused
+
+**Don't:**
+
+- Don't manually verify expectations (automatic with `t`)
+- Don't create mocks without passing `t`
+- Don't over-mock (mock only direct dependencies)
 
 ## Running Tests
 
@@ -251,7 +383,9 @@ func TestFunction(t *testing.T) {
 - Test both success and error paths
 - Use descriptive test names
 - Keep tests simple and focused
-- Mock external dependencies in unit tests
+- Use mockery-generated mocks for infrastructure dependencies
+- Use `EXPECT()` for type-safe mock expectations
+- Pass `t *testing.T` to mock constructors
 - Use integration tests for end-to-end verification
 
 **Don't:**
@@ -262,6 +396,8 @@ func TestFunction(t *testing.T) {
 - Don't use sleeps for timing (use channels or mocks)
 - Don't test private functions directly (test through public API)
 - Don't write tests that depend on external state
+- Don't manually verify mock expectations (automatic with testify)
+- Don't over-mock (only mock direct dependencies of the code under test)
 
 ## Test Coverage Goals
 
@@ -276,4 +412,5 @@ func TestFunction(t *testing.T) {
 
 - [Architecture Guidelines](architecture.md) - Layer structure and responsibilities
 - [Coding Standards](coding-standards.md) - Code quality and verification commands
+- [Code Generation](code-generation.md) - Mock generation and other code generation tools
 - [Workflow Guidelines](workflow.md) - Running tests in CI/CD workflow

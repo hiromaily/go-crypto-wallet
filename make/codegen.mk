@@ -14,11 +14,6 @@
 sqlc:
 	cd tools/sqlc && sqlc generate
 
-# ABI
-.PHONY: generate-abi
-generate-abi:
-	abigen --abi ./data/contract/token.abi --pkg contract --type Token --out ./internal/infrastructure/contract/token-abi.go
-
 ###############################################################################
 # mockery
 #------------------------------------------------------------------------------
@@ -67,3 +62,17 @@ protoc-go: clean-pb
 .PHONY: clean-pb
 clean-pb:
 	rm -rf internal/infrastructure/api/ripple/xrp/*.pb.go
+
+###############################################################################
+# ABI
+#------------------------------------------------------------------------------
+# ABI code generation using abigen
+# abigen is a tool for generating Go code from Ethereum smart contract ABIs
+#------------------------------------------------------------------------------
+# Generate ABI code from token.abi file using abigen
+# Source: data/contract/token.abi
+# Output: internal/infrastructure/contract/token-abi.go
+#------------------------------------------------------------------------------
+.PHONY: generate-abi
+generate-abi:
+	abigen --abi ./data/contract/token.abi --pkg contract --type Token --out ./internal/infrastructure/contract/token-abi.go

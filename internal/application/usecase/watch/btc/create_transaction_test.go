@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	persistencemocks "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence/mocks"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -17,18 +16,19 @@ import (
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	btcapi "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
 	bitcoinmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/mocks"
-	filemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/mocks"
+	repomocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/mocks"
+	storagemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/mocks"
 )
 
 // testDependencies holds all mock dependencies for testing
 type testDependencies struct {
 	btcClient    *bitcoinmocks.MockBitcoiner
-	addrRepo     *persistencemocks.MockAddressRepositorier
-	txRepo       *persistencemocks.MockBTCTxRepositorier
-	txInputRepo  *persistencemocks.MockTxInputRepositorier
-	txOutputRepo *persistencemocks.MockTxOutputRepositorier
-	payReqRepo   *persistencemocks.MockPaymentRequestRepositorier
-	txFileRepo   *filemocks.MockTransactionFileRepositorier
+	addrRepo     *repomocks.MockAddressRepositorier
+	txRepo       *repomocks.MockBTCTxRepositorier
+	txInputRepo  *repomocks.MockTxInputRepositorier
+	txOutputRepo *repomocks.MockTxOutputRepositorier
+	payReqRepo   *repomocks.MockPaymentRequestRepositorier
+	txFileRepo   *storagemocks.MockTransactionFileRepositorier
 }
 
 // newTestDependencies creates all mock dependencies
@@ -36,12 +36,12 @@ func newTestDependencies(t *testing.T) *testDependencies {
 	t.Helper()
 	return &testDependencies{
 		btcClient:    bitcoinmocks.NewMockBitcoiner(t),
-		addrRepo:     persistencemocks.NewMockAddressRepositorier(t),
-		txRepo:       persistencemocks.NewMockBTCTxRepositorier(t),
-		txInputRepo:  persistencemocks.NewMockTxInputRepositorier(t),
-		txOutputRepo: persistencemocks.NewMockTxOutputRepositorier(t),
-		payReqRepo:   persistencemocks.NewMockPaymentRequestRepositorier(t),
-		txFileRepo:   filemocks.NewMockTransactionFileRepositorier(t),
+		addrRepo:     repomocks.NewMockAddressRepositorier(t),
+		txRepo:       repomocks.NewMockBTCTxRepositorier(t),
+		txInputRepo:  repomocks.NewMockTxInputRepositorier(t),
+		txOutputRepo: repomocks.NewMockTxOutputRepositorier(t),
+		payReqRepo:   repomocks.NewMockPaymentRequestRepositorier(t),
+		txFileRepo:   storagemocks.NewMockTransactionFileRepositorier(t),
 	}
 }
 
