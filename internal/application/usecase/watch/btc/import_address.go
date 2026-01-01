@@ -151,12 +151,16 @@ func (u *importAddressUseCase) verifyImportedAddress(addr string) {
 		return
 	}
 
+	labelName := ""
+	if len(addrInfo.Labels) != 0 {
+		labelName = addrInfo.Labels[0]
+	}
 	logger.Debug("address verified",
-		"account", addrInfo.GetLabelName(),
+		"account", labelName,
 		"address", addr)
 
 	// Warn if not watch-only (should always be watch-only for watch wallets)
-	if !addrInfo.Iswatchonly {
+	if !addrInfo.IsWatchOnly {
 		logger.Warn("address should be watch-only",
 			"address", addr)
 	}

@@ -8,6 +8,7 @@ import (
 	"github.com/btcsuite/btcd/wire"
 	"github.com/quagmt/udecimal"
 
+	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
@@ -20,9 +21,9 @@ type Bitcoiner interface {
 	GetAccount(addr string) (string, error)
 
 	// address.go
-	GetAddressInfo(addr string) (*btc.GetAddressInfoResult, error)
+	GetAddressInfo(addr string) (*bitcoindto.AddressInfo, error)
 	GetAddressesByLabel(labelName string) ([]btcutil.Address, error)
-	ValidateAddress(addr string) (*btc.ValidateAddressResult, error)
+	ValidateAddress(addr string) (*bitcoindto.ValidateAddressResult, error)
 	DecodeAddress(addr string) (btcutil.Address, error)
 
 	// amount.go
@@ -78,8 +79,8 @@ type Bitcoiner interface {
 	) (*btc.AddMultisigAddressResult, error)
 
 	// network.go
-	GetNetworkInfo() (*btc.GetNetworkInfoResult, error)
-	GetBlockchainInfo() (*btc.GetBlockchainInfoResult, error)
+	GetNetworkInfo() (*bitcoindto.NetworkInfo, error)
+	GetBlockchainInfo() (*bitcoindto.BlockchainInfo, error)
 
 	// transaction.go
 	ToHex(tx *wire.MsgTx) (string, error)
