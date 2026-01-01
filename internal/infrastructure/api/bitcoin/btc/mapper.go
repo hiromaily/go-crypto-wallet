@@ -1,6 +1,8 @@
 package btc
 
 import (
+	"fmt"
+
 	"github.com/btcsuite/btcd/btcutil"
 
 	bitcoindto "github.com/hiromaily/go-crypto-wallet/internal/application/dto/bitcoin"
@@ -170,9 +172,14 @@ func ToTransactionResult(result *GetTransactionResult, btc *Bitcoin) (*bitcoindt
 
 	walletConflicts := make([]string, len(result.Walletconflicts))
 	for i, conflict := range result.Walletconflicts {
-		if str, ok := conflict.(string); ok {
-			walletConflicts[i] = str
+		str, ok := conflict.(string)
+		if !ok {
+			return nil, fmt.Errorf(
+				"unexpected type for wallet conflict at index %d: got %T, want string",
+				i, conflict,
+			)
 		}
+		walletConflicts[i] = str
 	}
 
 	return &bitcoindto.TransactionResult{
@@ -256,22 +263,20 @@ func ToRawTransaction(result *TxRawResult, btc *Bitcoin) (*bitcoindto.RawTransac
 
 // ToFundRawTransactionResult converts infrastructure to application DTO
 func ToFundRawTransactionResult(
-	result *FundRawTransactionResult, btc *Bitcoin,
-) (*bitcoindto.FundRawTransactionResult, error) {
+	result *FundRawTransactionResult,
+) *bitcoindto.FundRawTransactionResult {
 	if result == nil {
-		return nil, nil
+		return nil
 	}
 
-	fee, err := btc.FloatToAmount(float64(result.Fee) / 1e8) // Fee is in satoshis
-	if err != nil {
-		return nil, err
-	}
+	// Fee is already in satoshis, convert directly to btcutil.Amount
+	fee := btcutil.Amount(result.Fee)
 
 	return &bitcoindto.FundRawTransactionResult{
 		Hex:       result.Hex,
 		Fee:       fee,
 		ChangePos: int32(result.Changepos),
-	}, nil
+	}
 }
 
 // FromPreviousTx converts application PreviousTx to infrastructure PrevTx
