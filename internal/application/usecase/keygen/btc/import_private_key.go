@@ -8,9 +8,9 @@ import (
 
 	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -35,7 +35,7 @@ func (u *importPrivateKeyUseCase) Import(
 	input keygenusecase.ImportPrivateKeyInput,
 ) error {
 	// Retrieve records (private key) from account_key table with addr_status=0
-	accountKeyTable, err := u.accountKeyRepo.GetAllAddrStatus(input.AccountType, address.AddrStatusHDKeyGenerated)
+	accountKeyTable, err := u.accountKeyRepo.GetAllAddrStatus(input.AccountType, domainAddress.AddrStatusHDKeyGenerated)
 	if err != nil {
 		return fmt.Errorf("fail to call accountKeyRepo.GetAllAddrStatus(): %w", err)
 	}
@@ -74,7 +74,7 @@ func (u *importPrivateKeyUseCase) Import(
 
 		// Update DB
 		_, err = u.accountKeyRepo.UpdateAddrStatus(
-			input.AccountType, address.AddrStatusPrivKeyImported, []string{record.WalletImportFormat})
+			input.AccountType, domainAddress.AddrStatusPrivKeyImported, []string{record.WalletImportFormat})
 		if err != nil {
 			logger.Error(
 				"fail to call accountKeyRepo.UpdateAddrStatus(), but privKey import is done",
@@ -99,16 +99,16 @@ func (u *importPrivateKeyUseCase) checkImportedAddress(walletAddress, p2shSegwit
 
 	var (
 		targetAddr string
-		addrType   address.AddrType
+		addrType   domainAddress.AddrType
 	)
 
 	switch u.btc.CoinTypeCode() {
 	case domainCoin.BTC:
 		targetAddr = p2shSegwitAddress
-		addrType = address.AddrTypeP2shSegwit
+		addrType = domainAddress.AddrTypeP2shSegwit
 	case domainCoin.BCH:
 		targetAddr = walletAddress
-		addrType = address.AddrTypeBCHCashAddr
+		addrType = domainAddress.AddrTypeBCHCashAddr
 	case domainCoin.LTC, domainCoin.ETH, domainCoin.XRP, domainCoin.ERC20, domainCoin.HYT:
 		logger.Warn("this coin type is not implemented in checkImportedAddress()",
 			"coin_type_code", u.btc.CoinTypeCode().String())

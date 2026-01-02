@@ -6,8 +6,8 @@ package mocks
 
 import (
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	mock "github.com/stretchr/testify/mock"
 )
 

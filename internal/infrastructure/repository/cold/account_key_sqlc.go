@@ -7,9 +7,9 @@ import (
 	"time"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 // BTCAccountKeyRepositorySqlc is repository for btc_account_key table using sqlc
@@ -68,7 +68,7 @@ func (r *BTCAccountKeyRepositorySqlc) GetOneMaxID(accountType domainAccount.Acco
 
 // GetAllAddrStatus returns all BtcAccountKey by addr_status
 func (r *BTCAccountKeyRepositorySqlc) GetAllAddrStatus(
-	accountType domainAccount.AccountType, addrStatus address.AddrStatus,
+	accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus,
 ) ([]*sqlcgen.BtcAccountKey, error) {
 	ctx := context.Background()
 
@@ -170,7 +170,7 @@ func (r *BTCAccountKeyRepositorySqlc) UpdateAddr(
 
 // UpdateAddrStatus updates addr_status
 func (r *BTCAccountKeyRepositorySqlc) UpdateAddrStatus(
-	accountType domainAccount.AccountType, addrStatus address.AddrStatus, strWIFs []string,
+	accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus, strWIFs []string,
 ) (int64, error) {
 	ctx := context.Background()
 	var totalAffected int64

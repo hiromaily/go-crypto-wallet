@@ -8,9 +8,9 @@ import (
 	"github.com/stretchr/testify/require"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 func TestBIP86Generator(t *testing.T) {
@@ -48,10 +48,11 @@ func TestBIP86Generator(t *testing.T) {
 
 			// Verify generator properties
 			assert.Equal(t, domainKey.KeyTypeBIP86, generator.KeyType(), "should return BIP86 key type")
-			assert.True(t, generator.SupportsAddressType(address.AddrTypeTaproot), "should support Taproot")
-			assert.False(t, generator.SupportsAddressType(address.AddrTypeLegacy), "should not support Legacy")
-			assert.False(t, generator.SupportsAddressType(address.AddrTypeP2shSegwit), "should not support P2SH-SegWit")
-			assert.False(t, generator.SupportsAddressType(address.AddrTypeBech32), "should not support Bech32")
+			assert.True(t, generator.SupportsAddressType(domainAddress.AddrTypeTaproot), "should support Taproot")
+			assert.False(t, generator.SupportsAddressType(domainAddress.AddrTypeLegacy), "should not support Legacy")
+			assert.False(t, generator.SupportsAddressType(domainAddress.AddrTypeP2shSegwit),
+				"should not support P2SH-SegWit")
+			assert.False(t, generator.SupportsAddressType(domainAddress.AddrTypeBech32), "should not support Bech32")
 
 			// Generate keys
 			keys, err := generator.CreateKey(seed, tt.accountType, 0, 5)

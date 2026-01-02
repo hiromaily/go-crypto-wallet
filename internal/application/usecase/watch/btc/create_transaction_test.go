@@ -17,7 +17,7 @@ import (
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	bitcoinmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/mocks"
 	repomocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/mocks"
-	storagemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/mocks"
+	storagemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction/mocks"
 )
 
 // testDependencies holds all mock dependencies for testing

@@ -16,11 +16,11 @@ import (
 	"golang.org/x/crypto/ripemd160" //nolint:gosec
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
-	bchaddr "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address/bch"
-	xrpaddr "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address/xrp"
+	bchutil "github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency/bch"
+	xrpaddr "github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -137,16 +137,16 @@ func (k *HDKey) KeyType() domainKey.KeyType {
 }
 
 // SupportsAddressType checks if this generator supports the given address type (implements Generator interface)
-func (k *HDKey) SupportsAddressType(addrType address.AddrType) bool {
+func (k *HDKey) SupportsAddressType(addrType domainAddress.AddrType) bool {
 	switch k.purpose {
 	case PurposeTypeBIP44:
-		return addrType == address.AddrTypeLegacy
+		return addrType == domainAddress.AddrTypeLegacy
 	case PurposeTypeBIP49:
-		return addrType == address.AddrTypeP2shSegwit
+		return addrType == domainAddress.AddrTypeP2shSegwit
 	case PurposeTypeBIP84:
-		return addrType == address.AddrTypeBech32
+		return addrType == domainAddress.AddrTypeBech32
 	case PurposeTypeBIP86:
-		return addrType == address.AddrTypeTaproot
+		return addrType == domainAddress.AddrTypeTaproot
 	default:
 		return false
 	}
@@ -432,13 +432,13 @@ func (k *HDKey) getP2PKHAddr(privKey *btcec.PrivateKey) (string, error) {
 
 // getP2PKHAddrBCH get P2PKH Addr for BCH
 func (k *HDKey) getP2PKHAddrBCH(p2PKHAddr *btcutil.AddressPubKeyHash) (string, error) {
-	addrBCH, err := bchaddr.NewCashAddressPubKeyHash(p2PKHAddr.ScriptAddress(), k.conf)
+	addrBCH, err := bchutil.NewCashAddressPubKeyHash(p2PKHAddr.ScriptAddress(), k.conf)
 	if err != nil {
 		return "", fmt.Errorf("fail to call btcutil.NewAddressPubKeyHash(): %w", err)
 	}
 
 	// get prefix
-	prefix, ok := bchaddr.Prefixes[k.conf.Name]
+	prefix, ok := bchutil.Prefixes[k.conf.Name]
 	if !ok {
 		return "", fmt.Errorf("invalid BCH *chaincfg : %s", k.conf.Name)
 	}
@@ -481,7 +481,7 @@ func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, er
 		}
 		return btcAddress.String(), strRedeemScript, nil
 	case domainCoin.BCH:
-		bchAddress, addrErr := bchaddr.NewCashAddressScriptHash(payToAddrScript, k.conf)
+		bchAddress, addrErr := bchutil.NewCashAddressScriptHash(payToAddrScript, k.conf)
 		if addrErr != nil {
 			return "", "", fmt.Errorf("fail to call bchaddr.NewCashAddressScriptHash(): %w", addrErr)
 		}

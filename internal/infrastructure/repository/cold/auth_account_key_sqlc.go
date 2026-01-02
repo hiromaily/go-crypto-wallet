@@ -7,9 +7,9 @@ import (
 	"time"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 // AuthAccountKeyRepositorySqlc is repository for auth_account_key table using sqlc
@@ -70,7 +70,9 @@ func (r *AuthAccountKeyRepositorySqlc) Insert(item *sqlcgen.AuthAccountKey) erro
 }
 
 // UpdateAddrStatus updates addr_status
-func (r *AuthAccountKeyRepositorySqlc) UpdateAddrStatus(addrStatus address.AddrStatus, strWIF string) (int64, error) {
+func (r *AuthAccountKeyRepositorySqlc) UpdateAddrStatus(
+	addrStatus domainAddress.AddrStatus, strWIF string,
+) (int64, error) {
 	ctx := context.Background()
 
 	result, err := r.queries.UpdateAuthAccountKeyAddrStatus(ctx, sqlcgen.UpdateAuthAccountKeyAddrStatusParams{

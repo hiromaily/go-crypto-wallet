@@ -5,29 +5,31 @@ import (
 	"fmt"
 	"strings"
 
+	appdto "github.com/hiromaily/go-crypto-wallet/internal/application/dto"
+	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 type importAddressUseCase struct {
 	addrRepo     watch.AddressRepositorier
-	addrFileRepo file.AddressFileRepositorier
+	addrFileRepo portsStorage.AddressFileRepositorier
 	coinTypeCode domainCoin.CoinTypeCode
-	addrType     address.AddrType
+	addrType     domainAddress.AddrType
 	wtype        domainWallet.WalletType
 }
 
 // NewImportAddressUseCase creates a new ImportAddressUseCase for watch wallet
 func NewImportAddressUseCase(
 	addrRepo watch.AddressRepositorier,
-	addrFileRepo file.AddressFileRepositorier,
+	addrFileRepo portsStorage.AddressFileRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,
-	addrType address.AddrType,
+	addrType domainAddress.AddrType,
 	wtype domainWallet.WalletType,
 ) watchusecase.ImportAddressUseCase {
 	return &importAddressUseCase{
@@ -51,7 +53,7 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 		// coin, account, ...
 		inner := strings.Split(key, ",")
 
-		var addrFmt *address.AddressFormat
+		var addrFmt *appdto.AddressFormat
 		addrFmt, err = address.ConvertLine(u.coinTypeCode, inner)
 		if err != nil {
 			return err

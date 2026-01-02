@@ -7,8 +7,8 @@ import (
 	"time"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 // ETHAccountKeyRepositorySqlc is repository for eth_account_key table using sqlc
@@ -57,7 +57,7 @@ func (r *ETHAccountKeyRepositorySqlc) GetOneMaxID(accountType domainAccount.Acco
 
 // GetAllAddrStatus returns all EthAccountKey by addr_status
 func (r *ETHAccountKeyRepositorySqlc) GetAllAddrStatus(
-	accountType domainAccount.AccountType, addrStatus address.AddrStatus,
+	accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus,
 ) ([]*sqlcgen.EthAccountKey, error) {
 	ctx := context.Background()
 
@@ -123,7 +123,7 @@ func (r *ETHAccountKeyRepositorySqlc) InsertBulk(items []*sqlcgen.EthAccountKey)
 
 // UpdateAddrStatus updates addr_status
 func (r *ETHAccountKeyRepositorySqlc) UpdateAddrStatus(
-	accountType domainAccount.AccountType, addrStatus address.AddrStatus, privateKeys []string,
+	accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus, privateKeys []string,
 ) (int64, error) {
 	ctx := context.Background()
 

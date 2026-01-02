@@ -258,4 +258,3 @@ func (*TransactionFileRepository) createDir(path string) {
 		_ = os.MkdirAll(dir, 0o700) // Create all parent directories
 	}
 }
-

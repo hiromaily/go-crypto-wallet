@@ -4,23 +4,11 @@ import (
 	"fmt"
 	"strconv"
 
+	appdto "github.com/hiromaily/go-crypto-wallet/internal/application/dto"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
-
-// AddressFormat is address csv format
-type AddressFormat struct {
-	CoinTypeCode      domainCoin.CoinTypeCode
-	AccountType       domainAccount.AccountType
-	P2PKHAddress      string
-	P2SHSegwitAddress string
-	Bech32Address     string
-	TaprootAddress    string
-	FullPublicKey     string
-	MultisigAddress   string
-	Idx               string
-}
 
 // CreateLine creates line for csv from BtcAccountKey
 func CreateLine(accountKeyItem *sqlcgen.BtcAccountKey) []string {
@@ -53,7 +41,7 @@ func CreateEthLine(accountKeyItem *sqlcgen.EthAccountKey) []string {
 }
 
 // ConvertLine converts line to AddressFormat
-func ConvertLine(coinTypeCode domainCoin.CoinTypeCode, line []string) (*AddressFormat, error) {
+func ConvertLine(coinTypeCode domainCoin.CoinTypeCode, line []string) (*appdto.AddressFormat, error) {
 	// Support both old format (8 fields) and new format (9 fields with Taproot)
 	if len(line) != 8 && len(line) != 9 {
 		return nil, fmt.Errorf("csv format is invalid: expected 8 or 9 fields, got %d", len(line))
@@ -81,7 +69,7 @@ func ConvertLine(coinTypeCode domainCoin.CoinTypeCode, line []string) (*AddressF
 		idxIdx = 8
 	}
 
-	return &AddressFormat{
+	return &appdto.AddressFormat{
 		CoinTypeCode:      domainCoin.CoinTypeCode(line[0]),
 		AccountType:       domainAccount.AccountType(line[1]),
 		P2PKHAddress:      line[2],

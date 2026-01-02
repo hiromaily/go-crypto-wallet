@@ -1,6 +1,7 @@
 package storage
 
 import (
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 )
 
@@ -28,4 +29,11 @@ type FileName struct {
 	TxType      domainTx.TxType
 	TxID        int64
 	SignedCount int
+}
+
+// AddressFileRepositorier is address file storage interface
+type AddressFileRepositorier interface {
+	CreateFilePath(accountType domainAccount.AccountType) string
+	ValidateFilePath(fileName string, accountType domainAccount.AccountType) error
+	ImportAddress(fileName string) ([]string, error)
 }

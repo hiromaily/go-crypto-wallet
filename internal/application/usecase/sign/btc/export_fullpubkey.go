@@ -6,19 +6,19 @@ import (
 	"fmt"
 	"os"
 
+	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/fullpubkey"
 )
 
 type exportFullPubkeyUseCase struct {
 	authKeyRepo    cold.AuthAccountKeyRepositorier
-	pubkeyFileRepo file.AddressFileRepositorier
+	pubkeyFileRepo portsStorage.AddressFileRepositorier
 	coinTypeCode   domainCoin.CoinTypeCode
 	authType       domainAccount.AuthType
 	wtype          domainWallet.WalletType
@@ -27,7 +27,7 @@ type exportFullPubkeyUseCase struct {
 // NewExportFullPubkeyUseCase creates a new ExportFullPubkeyUseCase for sign wallet
 func NewExportFullPubkeyUseCase(
 	authKeyRepo cold.AuthAccountKeyRepositorier,
-	pubkeyFileRepo file.AddressFileRepositorier,
+	pubkeyFileRepo portsStorage.AddressFileRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,
 	authType domainAccount.AuthType,
 	wtype domainWallet.WalletType,

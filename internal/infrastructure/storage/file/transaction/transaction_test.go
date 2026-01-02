@@ -511,4 +511,3 @@ func TestPSBTRoundTrip(t *testing.T) {
 		t.Errorf("ValidateFilePath() signedCount = %v, want %v", signedCount, 0)
 	}
 }
-

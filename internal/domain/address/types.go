@@ -4,7 +4,7 @@ package address
 // AddrType
 //----------------------------------------------------
 
-// AddrType address type for bitcoin
+// AddrType address type for cryptocurrency addresses
 type AddrType string
 
 // address type
