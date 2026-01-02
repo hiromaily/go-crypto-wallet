@@ -7,20 +7,19 @@ import (
 	"fmt"
 	"strings"
 
+	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
-
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type signTransactionUseCase struct {
-	xrp               ripple.Rippler
+	xrp               portsRipple.Rippler
 	xrpAccountKeyRepo cold.XRPAccountKeyRepositorier
 	txFileRepo        portsStorage.TransactionFileRepositorier
 	wtype             domainWallet.WalletType
@@ -28,7 +27,7 @@ type signTransactionUseCase struct {
 
 // NewSignTransactionUseCase creates a new SignTransactionUseCase for sign wallet
 func NewSignTransactionUseCase(
-	xrpAPI ripple.Rippler,
+	xrpAPI portsRipple.Rippler,
 	xrpAccountKeyRepo cold.XRPAccountKeyRepositorier,
 	txFileRepo portsStorage.TransactionFileRepositorier,
 	wtype domainWallet.WalletType,

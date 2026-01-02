@@ -6,20 +6,21 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
+	rippleimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency"
 	"github.com/hiromaily/go-crypto-wallet/pkg/grpc"
 )
 
-var xr ripple.Rippler
+var xr portsRipple.Rippler
 
 // GetXRP returns xrp instance
 // FIXME: hard coded
-func GetXRP() (ripple.Rippler, error) {
+func GetXRP() (portsRipple.Rippler, error) {
 	if xr != nil {
 		return xr, nil
 	}
@@ -49,7 +50,7 @@ func GetXRP() (ripple.Rippler, error) {
 	}
 	grpcAPI := xrp.NewRippleAPI(conn)
 
-	xr, err = ripple.NewRipple(wsPublicClient, wsAdminClient, grpcAPI, &conf.Ripple, conf.CoinTypeCode)
+	xr, err = rippleimpl.NewRipple(wsPublicClient, wsAdminClient, grpcAPI, &conf.Ripple, conf.CoinTypeCode)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create xrp instance: %w", err)
 	}
@@ -59,7 +60,7 @@ func GetXRP() (ripple.Rippler, error) {
 // XRPTestSuite is a test suite for XRP
 type XRPTestSuite struct {
 	suite.Suite
-	XRP ripple.Rippler
+	XRP portsRipple.Rippler
 }
 
 func (xts *XRPTestSuite) SetupTest() {

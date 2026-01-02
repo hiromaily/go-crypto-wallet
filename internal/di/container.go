@@ -18,6 +18,7 @@ import (
 
 	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
 	portsEth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
+	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -29,7 +30,7 @@ import (
 	btcapi "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
 	ethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/erc20"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
+	rippleimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/contract"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
@@ -123,7 +124,7 @@ type container struct {
 	btc        portsBtc.Bitcoiner
 	eth        portsEth.Ethereumer
 	erc20      portsEth.ERC20er
-	xrp        ripple.Rippler
+	xrp        portsRipple.Rippler
 	// client
 	rpcClient    *rpcclient.Client
 	rpcEthClient *ethrpc.Client
@@ -448,11 +449,11 @@ func (c *container) newERC20() portsEth.ERC20er {
 	return c.erc20
 }
 
-func (c *container) newXRP() ripple.Rippler {
+func (c *container) newXRP() portsRipple.Rippler {
 	if c.xrp == nil {
 		var err error
 		wsPublic, wsAdmin := c.newXRPWSClient()
-		c.xrp, err = ripple.NewRipple(
+		c.xrp, err = rippleimpl.NewRipple(
 			wsPublic,
 			wsAdmin,
 			c.newRippleAPI(),
