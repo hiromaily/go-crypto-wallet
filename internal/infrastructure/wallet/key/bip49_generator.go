@@ -4,9 +4,9 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 // BIP49Generator implements Generator interface for BIP49 (P2SH-SegWit addresses)
@@ -36,8 +36,8 @@ func (g *BIP49Generator) CreateKey(
 }
 
 // SupportsAddressType checks if this generator supports the given address type
-func (*BIP49Generator) SupportsAddressType(addrType address.AddrType) bool {
-	return addrType == address.AddrTypeP2shSegwit
+func (*BIP49Generator) SupportsAddressType(addrType domainAddress.AddrType) bool {
+	return addrType == domainAddress.AddrTypeP2shSegwit
 }
 
 // GetDerivationPath returns the BIP49 derivation path

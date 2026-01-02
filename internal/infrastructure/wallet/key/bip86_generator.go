@@ -4,9 +4,9 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 // BIP86Generator implements Generator interface for BIP86 (Taproot addresses)
@@ -36,8 +36,8 @@ func (g *BIP86Generator) CreateKey(
 }
 
 // SupportsAddressType checks if this generator supports the given address type
-func (*BIP86Generator) SupportsAddressType(addrType address.AddrType) bool {
-	return addrType == address.AddrTypeTaproot
+func (*BIP86Generator) SupportsAddressType(addrType domainAddress.AddrType) bool {
+	return addrType == domainAddress.AddrTypeTaproot
 }
 
 // GetDerivationPath returns the BIP86 derivation path

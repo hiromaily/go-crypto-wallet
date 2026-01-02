@@ -6,13 +6,15 @@ import (
 	"fmt"
 	"strings"
 
+	appdto "github.com/hiromaily/go-crypto-wallet/internal/application/dto"
 	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
+	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -25,18 +27,18 @@ type ImportAddressUseCase interface {
 type importAddressUseCase struct {
 	btcClient    portsBtc.Bitcoiner
 	addrRepo     watch.AddressRepositorier
-	addrFileRepo file.AddressFileRepositorier
+	addrFileRepo portsStorage.AddressFileRepositorier
 	coinTypeCode domainCoin.CoinTypeCode
-	addrType     address.AddrType
+	addrType     domainAddress.AddrType
 }
 
 // NewImportAddressUseCase creates a new BTC-specific ImportAddressUseCase
 func NewImportAddressUseCase(
 	btcClient portsBtc.Bitcoiner,
 	addrRepo watch.AddressRepositorier,
-	addrFileRepo file.AddressFileRepositorier,
+	addrFileRepo portsStorage.AddressFileRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,
-	addrType address.AddrType,
+	addrType domainAddress.AddrType,
 ) ImportAddressUseCase {
 	return &importAddressUseCase{
 		btcClient:    btcClient,
@@ -106,23 +108,23 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 }
 
 // selectTargetAddress determines which address format to use based on account type and address type
-func (u *importAddressUseCase) selectTargetAddress(addrFmt *address.AddressFormat) (string, error) {
+func (u *importAddressUseCase) selectTargetAddress(addrFmt *appdto.AddressFormat) (string, error) {
 	// For client accounts, use specific address format
 	if addrFmt.AccountType == domainAccount.AccountTypeClient {
 		switch u.btcClient.CoinTypeCode() {
 		case domainCoin.BTC:
 			switch u.addrType {
-			case address.AddrTypeBech32:
+			case domainAddress.AddrTypeBech32:
 				return addrFmt.Bech32Address, nil
-			case address.AddrTypeTaproot:
+			case domainAddress.AddrTypeTaproot:
 				if addrFmt.TaprootAddress == "" {
 					return "", errors.New("taproot address is empty in the imported data")
 				}
 				return addrFmt.TaprootAddress, nil
-			case address.AddrTypeLegacy:
+			case domainAddress.AddrTypeLegacy:
 				return addrFmt.P2PKHAddress, nil
-			case address.AddrTypeP2shSegwit,
-				address.AddrTypeBCHCashAddr, address.AddrTypeETH:
+			case domainAddress.AddrTypeP2shSegwit,
+				domainAddress.AddrTypeBCHCashAddr, domainAddress.AddrTypeETH:
 				return addrFmt.P2SHSegwitAddress, nil
 			default:
 				return addrFmt.P2SHSegwitAddress, nil

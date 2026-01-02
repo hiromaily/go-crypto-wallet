@@ -7,19 +7,20 @@ import (
 	"os"
 	"strings"
 
+	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type exportAddressUseCase struct {
 	accountKeyRepo  cold.BTCAccountKeyRepositorier
-	addrFileRepo    file.AddressFileRepositorier
+	addrFileRepo    portsStorage.AddressFileRepositorier
 	multisigAccount *domainAccount.MultisigConfig
 	coinTypeCode    domainCoin.CoinTypeCode
 }
@@ -27,7 +28,7 @@ type exportAddressUseCase struct {
 // NewExportAddressUseCase creates a new ExportAddressUseCase
 func NewExportAddressUseCase(
 	accountKeyRepo cold.BTCAccountKeyRepositorier,
-	addrFileRepo file.AddressFileRepositorier,
+	addrFileRepo portsStorage.AddressFileRepositorier,
 	multisigAccount *domainAccount.MultisigConfig,
 	coinTypeCode domainCoin.CoinTypeCode,
 ) keygenusecase.ExportAddressUseCase {
@@ -44,19 +45,19 @@ func (u *exportAddressUseCase) Export(
 	input keygenusecase.ExportAddressInput,
 ) (keygenusecase.ExportAddressOutput, error) {
 	// Get target status for account based on coin type
-	var targetAddrStatus address.AddrStatus
+	var targetAddrStatus domainAddress.AddrStatus
 	switch u.coinTypeCode {
 	case domainCoin.BTC, domainCoin.BCH:
 		if !u.multisigAccount.IsMultisigAccount(input.AccountType) {
 			// non-multisig account
-			targetAddrStatus = address.AddrStatusPrivKeyImported
+			targetAddrStatus = domainAddress.AddrStatusPrivKeyImported
 		} else {
-			targetAddrStatus = address.AddrStatusMultisigAddressGenerated
+			targetAddrStatus = domainAddress.AddrStatusMultisigAddressGenerated
 		}
 	case domainCoin.ETH:
-		targetAddrStatus = address.AddrStatusPrivKeyImported
+		targetAddrStatus = domainAddress.AddrStatusPrivKeyImported
 	case domainCoin.XRP:
-		targetAddrStatus = address.AddrStatusHDKeyGenerated
+		targetAddrStatus = domainAddress.AddrStatusHDKeyGenerated
 	case domainCoin.LTC, domainCoin.ERC20, domainCoin.HYT:
 		return keygenusecase.ExportAddressOutput{}, fmt.Errorf("coinType[%s] is not implemented yet", u.coinTypeCode)
 	default:
@@ -87,7 +88,7 @@ func (u *exportAddressUseCase) Export(
 	for idx, record := range accountKeyTable {
 		updatedItems[idx] = record.WalletImportFormat
 	}
-	_, err = u.accountKeyRepo.UpdateAddrStatus(input.AccountType, address.AddrStatusAddressExported, updatedItems)
+	_, err = u.accountKeyRepo.UpdateAddrStatus(input.AccountType, domainAddress.AddrStatusAddressExported, updatedItems)
 	if err != nil {
 		return keygenusecase.ExportAddressOutput{},
 			fmt.Errorf("fail to call accountKeyRepo.UpdateAddrStatus(): %w", err)

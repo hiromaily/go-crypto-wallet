@@ -8,9 +8,9 @@ import (
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -167,7 +167,7 @@ func (u *signTransactionUseCase) signWithAccount(
 	// Using AddrStatusAddressExported ensures keys are ready and have been exported to watch wallet
 	accountKeys, err := u.accountKeyRepo.GetAllAddrStatus(
 		senderAccount,
-		address.AddrStatusAddressExported,
+		domainAddress.AddrStatusAddressExported,
 	)
 	if err != nil {
 		return "", false, fmt.Errorf("fail to get account keys for %s: %w", senderAccount.String(), err)

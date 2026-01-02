@@ -17,7 +17,7 @@ Use this navigation guide to find relevant documentation for specific tasks:
 - **[Architecture Guidelines](agents/architecture.md)** - Clean Architecture principles, layer separation, directory structure, and dependency direction
 - **[Coding Standards](agents/coding-standards.md)** - Linting, formatting, naming conventions, import organization, and code style
 - **[Database Management](agents/database.md)** - Database schema changes, Atlas migrations, and SQLC code generation
-- **[Code Generation](agents/code-generation.md)** - Auto-generated files, code generation tools (Atlas, SQLC, protobuf, ABI)
+- **[Code Generation](agents/code-generation.md)** - Auto-generated files, code generation tools (Atlas, SQLC, protobuf, ABI, mocks). **Important**: When moving code with mocks, update `.mockery.yaml` configuration.
 - **[Workflow Guidelines](agents/workflow.md)** - Git operations, dependency management, refactoring status, and verification commands
 - **[Required Tools and Versions](agents/requirements.md)** - Tool requirements and version information
 - **[Testing Guidelines](agents/testing.md)** - Testing strategy, test organization, and coverage goals by layer

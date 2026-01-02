@@ -4,9 +4,9 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 // BIP84Generator implements Generator interface for BIP84 (Native SegWit Bech32 addresses)
@@ -36,8 +36,8 @@ func (g *BIP84Generator) CreateKey(
 }
 
 // SupportsAddressType checks if this generator supports the given address type
-func (*BIP84Generator) SupportsAddressType(addrType address.AddrType) bool {
-	return addrType == address.AddrTypeBech32
+func (*BIP84Generator) SupportsAddressType(addrType domainAddress.AddrType) bool {
+	return addrType == domainAddress.AddrTypeBech32
 }
 
 // GetDerivationPath returns the BIP84 derivation path

@@ -4,9 +4,9 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 // BIP44Generator implements Generator interface for BIP44 (Legacy P2PKH addresses)
@@ -36,8 +36,8 @@ func (g *BIP44Generator) CreateKey(
 }
 
 // SupportsAddressType checks if this generator supports the given address type
-func (*BIP44Generator) SupportsAddressType(addrType address.AddrType) bool {
-	return addrType == address.AddrTypeLegacy
+func (*BIP44Generator) SupportsAddressType(addrType domainAddress.AddrType) bool {
+	return addrType == domainAddress.AddrTypeLegacy
 }
 
 // GetDerivationPath returns the BIP44 derivation path

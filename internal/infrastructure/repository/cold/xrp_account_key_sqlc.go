@@ -7,9 +7,9 @@ import (
 	"time"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 // XRPAccountKeyRepositorySqlc is repository for xrp_account_key table using sqlc
@@ -30,7 +30,7 @@ func NewXRPAccountKeyRepositorySqlc(
 
 // GetAllAddrStatus returns all XRPAccountKey by addr_status
 func (r *XRPAccountKeyRepositorySqlc) GetAllAddrStatus(
-	ctx context.Context, accountType domainAccount.AccountType, addrStatus address.AddrStatus,
+	ctx context.Context, accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus,
 ) ([]*sqlcgen.XrpAccountKey, error) {
 	xrpKeys, err := r.queries.GetXRPAccountKeysByAddrStatus(ctx, sqlcgen.GetXRPAccountKeysByAddrStatusParams{
 		Coin:       sqlcgen.XrpAccountKeyCoin(r.coinTypeCode.String()),
@@ -92,7 +92,10 @@ func (r *XRPAccountKeyRepositorySqlc) InsertBulk(ctx context.Context, items []*s
 
 // UpdateAddrStatus updates addr_status
 func (r *XRPAccountKeyRepositorySqlc) UpdateAddrStatus(
-	ctx context.Context, accountType domainAccount.AccountType, addrStatus address.AddrStatus, accountIDs []string,
+	ctx context.Context,
+	accountType domainAccount.AccountType,
+	addrStatus domainAddress.AddrStatus,
+	accountIDs []string,
 ) (int64, error) {
 	var totalAffected int64
 

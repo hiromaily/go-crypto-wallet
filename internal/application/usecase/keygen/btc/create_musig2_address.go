@@ -101,9 +101,9 @@ import (
 
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -166,7 +166,8 @@ func (u *createMuSig2AddressUseCase) Create(
 	}
 
 	// Get target addresses from account_key table, addr_status=AddrStatusPrivKeyImported
-	accountKeyItems, err := u.accountKeyRepo.GetAllAddrStatus(input.AccountType, address.AddrStatusPrivKeyImported)
+	accountKeyItems, err := u.accountKeyRepo.GetAllAddrStatus(
+		input.AccountType, domainAddress.AddrStatusPrivKeyImported)
 	if err != nil {
 		return fmt.Errorf("fail to call accountKeyRepo.GetAllAddrStatus(%s): %w", input.AccountType.String(), err)
 	}
@@ -242,7 +243,7 @@ func (u *createMuSig2AddressUseCase) Create(
 		item.TaprootAddress.String = taprootAddr.EncodeAddress()
 		item.TaprootAddress.Valid = true
 		item.MultisigAddress = taprootAddr.EncodeAddress() // Store in multisig_address for compatibility
-		item.AddrStatus = address.AddrStatusMultisigAddressGenerated.Int8()
+		item.AddrStatus = domainAddress.AddrStatusMultisigAddressGenerated.Int8()
 
 		_, err = u.accountKeyRepo.UpdateMultisigAddr(input.AccountType, item)
 		if err != nil {

@@ -19,6 +19,7 @@ import (
 	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
@@ -31,8 +32,8 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/contract"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
 	btcwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/btc"
@@ -104,7 +105,7 @@ type Container interface {
 	AuthType() domainAccount.AuthType
 
 	// Config accessors
-	AddressType() address.AddrType
+	AddressType() domainAddress.AddrType
 }
 
 var _ Container = (*container)(nil)
@@ -266,7 +267,7 @@ func (c *container) AuthType() domainAccount.AuthType {
 }
 
 // AddressType returns the address type from configuration
-func (c *container) AddressType() address.AddrType {
+func (c *container) AddressType() domainAddress.AddrType {
 	return c.conf.AddressType
 }
 
@@ -530,14 +531,14 @@ func (c *container) newAddressRepo() watch.AddressRepositorier {
 	)
 }
 
-func (c *container) newAddressFileRepo() file.AddressFileRepositorier {
-	return file.NewAddressFileRepository(
+func (c *container) newAddressFileRepo() portsStorage.AddressFileRepositorier {
+	return address.NewAddressFileRepository(
 		c.conf.FilePath.FullPubKey,
 	)
 }
 
 func (c *container) newTxFileRepo() portsStorage.TransactionFileRepositorier {
-	return file.NewTransactionFileRepository(
+	return transaction.NewTransactionFileRepository(
 		c.conf.FilePath.Tx,
 	)
 }
@@ -664,15 +665,9 @@ func (c *container) newNonceRepo() *cold.NonceRepositorySqlc {
 // Keygen File Storage
 //
 
-func (c *container) newPubkeyFileStorager() file.AddressFileRepositorier {
-	return file.NewAddressFileRepository(
+func (c *container) newPubkeyFileStorager() portsStorage.AddressFileRepositorier {
+	return address.NewAddressFileRepository(
 		c.conf.FilePath.FullPubKey,
-	)
-}
-
-func (c *container) newTxFileStorager() portsStorage.TransactionFileRepositorier {
-	return file.NewTransactionFileRepository(
-		c.conf.FilePath.Tx,
 	)
 }
 
@@ -1144,7 +1139,7 @@ func (c *container) newBTCSignTransactionUseCase() signusecase.SignTransactionUs
 		c.newBTC(),
 		c.newAccountKeyRepo(),
 		c.newAuthKeyRepo(),
-		c.newTxFileStorager(),
+		c.newTxFileRepo(),
 		c.newMultiAccount(),
 		c.walletType,
 		c.AuthType(),
@@ -1195,7 +1190,7 @@ func (c *container) newBTCSignMuSig2SignUseCase() signusecase.MuSig2SignUseCase 
 func (c *container) newETHSignTransactionUseCase() signusecase.SignTransactionUseCase {
 	return signusecaseeth.NewSignTransactionUseCase(
 		c.newETH(),
-		c.newTxFileStorager(),
+		c.newTxFileRepo(),
 		c.walletType,
 	)
 }
@@ -1206,7 +1201,7 @@ func (c *container) newXRPSignTransactionUseCase() signusecase.SignTransactionUs
 	return signusecasexrp.NewSignTransactionUseCase(
 		c.newXRP(),
 		c.newXRPAccountKeyRepo(),
-		c.newTxFileStorager(),
+		c.newTxFileRepo(),
 		c.walletType,
 	)
 }

@@ -7,9 +7,9 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/shared"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 // TestNewImportAddressUseCase tests the constructor
@@ -19,7 +19,7 @@ func TestNewImportAddressUseCase(t *testing.T) {
 			nil, // addrRepo
 			nil, // addrFileRepo
 			domainCoin.BTC,
-			address.AddrTypeLegacy,
+			domainAddress.AddrTypeLegacy,
 			domainWallet.WalletTypeWatchOnly,
 		)
 
@@ -31,7 +31,7 @@ func TestNewImportAddressUseCase(t *testing.T) {
 			nil,
 			nil,
 			domainCoin.BTC,
-			address.AddrTypeLegacy,
+			domainAddress.AddrTypeLegacy,
 			domainWallet.WalletTypeWatchOnly,
 		)
 

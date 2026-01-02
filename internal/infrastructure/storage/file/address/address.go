@@ -1,4 +1,4 @@
-package file
+package address
 
 import (
 	"bufio"
@@ -11,14 +11,9 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 )
 
-// AddressFileRepositorier is address storage interface
-type AddressFileRepositorier interface {
-	CreateFilePath(accountType domainAccount.AccountType) string
-	ValidateFilePath(fileName string, accountType domainAccount.AccountType) error
-	ImportAddress(fileName string) ([]string, error)
-}
-
-// AddressFileRepository is repository to store pubkey as csv file
+// AddressFileRepository is repository to store pubkey as csv file.
+// It implements portsStorage.AddressFileRepositorier interface defined in
+// internal/application/ports/storage.
 type AddressFileRepository struct {
 	filePath string
 }

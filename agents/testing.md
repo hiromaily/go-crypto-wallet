@@ -217,9 +217,10 @@ internal/infrastructure/
 │   └── mocks/
 │       └── mock_*.go               # Generated mocks for persistence interfaces
 └── storage/file/
-    ├── transaction.go              # Implementation
-    └── mocks/
-        └── mock_transaction_file_repositorier.go
+    └── transaction/
+        ├── transaction.go          # Implementation
+        └── mocks/
+            └── mock_transaction_file_repositorier.go
 ```
 
 ### Commands
@@ -252,7 +253,46 @@ packages:
       YourInterface:
 ```
 
-1. Run `make mockery`
+3. Run `make mockery`
+
+### Moving Mocks Directories
+
+⚠️ **IMPORTANT**: When refactoring code and moving implementation files that have associated mocks, you **MUST** update `.mockery.yaml` to reflect the new directory structure.
+
+**Why this matters**:
+
+- Mockery generates mocks based on the `dir` path specified in `.mockery.yaml`
+- If you move implementation code but don't update the configuration, mocks will be generated in the wrong location
+- The `make mockery` target automatically cleans all mocks before generating, so old mocks will be removed, but new ones won't be created in the correct location if the config is wrong
+
+**Steps when moving mocks directories**:
+
+1. Move the implementation code to the new location
+2. **Update `.mockery.yaml`** - Change the `dir` path for the affected interface(s)
+3. Update any import paths in code that reference the old mock location
+4. Run `make mockery` to regenerate mocks in the new location
+
+**Example**: Moving transaction file repository:
+
+```yaml
+# .mockery.yaml - Before
+github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
+  config:
+    dir: "internal/infrastructure/storage/file/mocks"
+    pkgname: "mocks"
+  interfaces:
+    TransactionFileRepositorier:
+
+# .mockery.yaml - After (code moved to transaction/ subdirectory)
+github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
+  config:
+    dir: "internal/infrastructure/storage/file/transaction/mocks"  # Updated!
+    pkgname: "mocks"
+  interfaces:
+    TransactionFileRepositorier:
+```
+
+**Note**: The `make mockery` target has `clean-mocks` as a dependency, so it will automatically remove all existing mocks before generating new ones. This ensures no stale mocks remain when paths change.
 
 ### Using Generated Mocks
 
@@ -262,7 +302,7 @@ import (
 
     bitcoinmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/mocks"
     repomocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/mocks"
-    storagemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/mocks"
+    storagemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction/mocks"
 )
 
 func TestWithMocks(t *testing.T) {
