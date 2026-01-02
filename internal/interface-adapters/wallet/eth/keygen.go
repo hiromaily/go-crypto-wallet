@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 

@@ -11,6 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 
+	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -112,7 +113,9 @@ func (e *Ethereum) SendRawTransactionWithTypesTx(ctx context.Context, tx *types.
 
 // GetTransactionByHash returns the information about a transaction requested by transaction hash
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_gettransactionbyhash
-func (e *Ethereum) GetTransactionByHash(ctx context.Context, hashTx string) (*ResponseGetTransaction, error) {
+func (e *Ethereum) GetTransactionByHash(
+	ctx context.Context, hashTx string,
+) (*domainEthereum.ResponseGetTransaction, error) {
 	var resMap map[string]string
 	err := e.rpcClient.CallContext(ctx, &resMap, "eth_getTransactionByHash", hashTx)
 	if err != nil {
@@ -151,7 +154,7 @@ func (e *Ethereum) GetTransactionByHash(ctx context.Context, hashTx string) (*Re
 		return nil, errors.New("response[v] is invalid")
 	}
 
-	return &ResponseGetTransaction{
+	infraResponse := &ResponseGetTransaction{
 		BlockHash:        resMap["blockHash"],
 		BlockNumber:      blockNumber.Int64(),
 		From:             resMap["from"],
@@ -166,7 +169,9 @@ func (e *Ethereum) GetTransactionByHash(ctx context.Context, hashTx string) (*Re
 		V:                v.Int64(),
 		R:                resMap["r"],
 		S:                resMap["s"],
-	}, nil
+	}
+
+	return ToDomainResponseGetTransaction(infraResponse), nil
 }
 
 // eth_getTransactionByBlockHashAndIndex
@@ -180,7 +185,9 @@ func (e *Ethereum) GetTransactionByHash(ctx context.Context, hashTx string) (*Re
 // Note, tis is not available for pending transactions
 //
 //nolint:gocyclo
-func (e *Ethereum) GetTransactionReceipt(ctx context.Context, hashTx string) (*ResponseGetTransactionReceipt, error) {
+func (e *Ethereum) GetTransactionReceipt(
+	ctx context.Context, hashTx string,
+) (*domainEthereum.ResponseGetTransactionReceipt, error) {
 	// timeout
 	ch := make(chan error, 1)
 	// FIXME: timeout configuration
@@ -281,7 +288,7 @@ func (e *Ethereum) GetTransactionReceipt(ctx context.Context, hashTx string) (*R
 		return nil, errors.New("response[status] is invalid")
 	}
 
-	return &ResponseGetTransactionReceipt{
+	infraResponse := &ResponseGetTransactionReceipt{
 		TransactionHash:   transactionHash,
 		TransactionIndex:  transactionIndex,
 		BlockHash:         blockHash,
@@ -294,7 +301,9 @@ func (e *Ethereum) GetTransactionReceipt(ctx context.Context, hashTx string) (*R
 		Logs:              logs,
 		LogsBloom:         logsBloom,
 		Status:            status,
-	}, nil
+	}
+
+	return ToDomainResponseGetTransactionReceipt(infraResponse), nil
 }
 
 // eth_pendingTransactions

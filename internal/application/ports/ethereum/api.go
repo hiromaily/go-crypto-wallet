@@ -1,13 +1,9 @@
-// Package ethereum provides Ethereum blockchain API implementations.
+// Package ethereum defines interfaces for Ethereum blockchain operations.
 //
-// Deprecated: The interfaces in this package have been moved to
-// internal/application/ports/ethereum following Clean Architecture principles.
-// Import from there instead:
-//
-//	import portsEthereum "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
-//
-// The implementations remain in this package but now implement the interfaces
-// defined in the application/ports layer.
+// This package follows the Dependency Inversion Principle of Clean Architecture
+// by defining interfaces in the application layer that are implemented by the
+// infrastructure layer. All types used in these interfaces are domain types,
+// avoiding circular dependencies with the infrastructure layer.
 package ethereum
 
 import (
@@ -21,16 +17,27 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/p2p"
 
-	portsEthereum "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 )
 
+// TxCreateParams contains the parameters returned from transaction creation
+// that are needed by the use case layer to construct the domain entity.
+// This DTO allows the use case to maintain full responsibility for domain entity creation.
+type TxCreateParams struct {
+	UUID        string // Transaction UUID for tracing
+	FromAddress string // Sender's wallet address
+	ToAddress   string // Receiver's wallet address
+	Amount      uint64 // Final amount being sent (Wei)
+	Fee         uint64 // Transaction fee (Wei)
+	GasLimit    uint32 // Gas limit for transaction
+	Nonce       uint64 // Transaction nonce
+}
+
 // Ethereumer defines the interface for Ethereum blockchain operations.
-//
-// Deprecated: This interface has been moved to internal/application/ports/ethereum.
-// Use portsEthereum.Ethereumer instead.
+// Implementations handle Ethereum RPC communication, transaction management,
+// and wallet operations.
 type Ethereumer interface {
 	// balance
 	GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []domainEthereum.UserAmount)
@@ -58,13 +65,9 @@ type Ethereumer interface {
 	BlockNumber(ctx context.Context) (*big.Int, error)
 	EnsureBlockNumber(ctx context.Context, loopCount int) (*big.Int, error)
 	GetBalance(ctx context.Context, hexAddr string, quantityTag domainEthereum.QuantityTag) (*big.Int, error)
-	// GetStoreageAt(ctx context.Context, hexAddr string, quantityTag domainEthereum.QuantityTag) (string, error)
 	GetTransactionCount(ctx context.Context, hexAddr string, quantityTag domainEthereum.QuantityTag) (*big.Int, error)
-	// GetBlockTransactionCountByBlockHash(ctx context.Context, blockHash string) (*big.Int, error)
 	GetBlockTransactionCountByNumber(ctx context.Context, blockNumber uint64) (*big.Int, error)
-	// GetUncleCountByBlockHash(ctx context.Context, blockHash string) (*big.Int, error)
 	GetUncleCountByBlockNumber(ctx context.Context, blockNumber uint64) (*big.Int, error)
-	// GetCode(ctx context.Context, hexAddr string, quantityTag domainEthereum.QuantityTag) (*big.Int, error)
 	GetBlockByNumber(ctx context.Context, blockNumber uint64) (*domainEthereum.BlockInfo, error)
 	// rpc_eth_gas
 	GasPrice(ctx context.Context) (*big.Int, error)
@@ -97,7 +100,7 @@ type Ethereumer interface {
 	// transaction
 	CreateRawTransaction(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*domainEthereum.RawTx, *portsEthereum.TxCreateParams, error)
+	) (*domainEthereum.RawTx, *TxCreateParams, error)
 	SignOnRawTransaction(rawTx *domainEthereum.RawTx, passphrase string) (*domainEthereum.RawTx, error)
 	SendSignedRawTransaction(ctx context.Context, signedTxHex string) (string, error)
 	GetConfirmation(ctx context.Context, hashTx string) (uint64, error)
@@ -106,34 +109,26 @@ type Ethereumer interface {
 	ValidateAddr(addr string) error
 	FromWei(v int64) *big.Int
 	FromGWei(v int64) *big.Int
-	// FromEther(v int64) *big.Int
 	FromFloatEther(v float64) *big.Int
 	FloatToBigInt(v float64) *big.Int
 }
 
 // ERC20er defines the interface for ERC-20 token operations.
-//
-// Deprecated: This interface has been moved to internal/application/ports/ethereum.
-// Use portsEthereum.ERC20er instead.
+// Implementations handle token contract interactions and balance queries.
 type ERC20er interface {
 	ValidateAddr(addr string) error
 	FloatToBigInt(v float64) *big.Int
 	GetBalance(ctx context.Context, hexAddr string, quantityTag domainEthereum.QuantityTag) (*big.Int, error)
 	CreateRawTransaction(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*domainEthereum.RawTx, *portsEthereum.TxCreateParams, error)
+	) (*domainEthereum.RawTx, *TxCreateParams, error)
 }
 
 // EtherTxCreator is a type alias for ERC20er used in transaction creation contexts.
-//
-// Deprecated: This type alias has been moved to internal/application/ports/ethereum.
-// Use portsEthereum.EtherTxCreator instead.
 type EtherTxCreator = ERC20er
 
 // EtherTxMonitor defines the interface for monitoring Ethereum transactions.
-//
-// Deprecated: This interface has been moved to internal/application/ports/ethereum.
-// Use portsEthereum.EtherTxMonitor instead.
+// Implementations track transaction confirmations and balance updates.
 type EtherTxMonitor interface {
 	GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []domainEthereum.UserAmount)
 	GetConfirmation(ctx context.Context, hashTx string) (uint64, error)

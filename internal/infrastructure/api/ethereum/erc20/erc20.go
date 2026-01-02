@@ -12,14 +12,17 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"golang.org/x/crypto/sha3"
 
+	portsEthereum "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/eth"
+	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/ethtx"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/contract"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
+
+// Compile-time check to ensure ERC20 implements the ERC20er interface
+var _ portsEthereum.ERC20er = (*ERC20)(nil)
 
 // ERC20 struct
 // TODO: Ethereum struct in internal/infrastructure/api/ethereum/eth/ethereum.go must be embedded to use common funcs
@@ -96,7 +99,7 @@ func (e *ERC20) FloatToBigInt(v float64) *big.Int {
 	return big.NewInt(int64(v))
 }
 
-func (e *ERC20) GetBalance(ctx context.Context, hexAddr string, _ eth.QuantityTag) (*big.Int, error) {
+func (e *ERC20) GetBalance(ctx context.Context, hexAddr string, _ domainEthereum.QuantityTag) (*big.Int, error) {
 	balance, err := e.tokenClient.BalanceOf(nil, common.HexToAddress(hexAddr))
 	if err != nil {
 		return nil, fmt.Errorf("fail to call e.contract.BalanceOf(%s): %w", hexAddr, err)
@@ -120,7 +123,7 @@ func (e *ERC20) GetBalance(ctx context.Context, hexAddr string, _ eth.QuantityTa
 // - 1.b. Or after approve is called, this transaction may be sent
 func (e *ERC20) CreateRawTransaction(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-) (*ethtx.RawTx, *sqlcgen.EthDetailTx, error) {
+) (*domainEthereum.RawTx, *portsEthereum.TxCreateParams, error) {
 	// validation check
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
@@ -191,22 +194,8 @@ func (e *ERC20) CreateRawTransaction(
 		return nil, nil, fmt.Errorf("fail to call uuidHandler.GenerateV7(): %w", err)
 	}
 
-	// create insert data for　eth_detail_tx
-	txDetailItem := &sqlcgen.EthDetailTx{
-		Uuid:            uid.String(),
-		SenderAccount:   "",
-		SenderAddress:   fromAddr,
-		ReceiverAccount: "",
-		ReceiverAddress: toAddr,
-		Amount:          tokenAmount.Uint64(),
-		Fee:             0, // later update is required
-		GasLimit:        uint32(gasLimit),
-		Nonce:           nonce,
-		UnsignedHexTx:   *rawTxHex,
-	}
-
-	// RawTx
-	rawtx := &ethtx.RawTx{
+	// create domain RawTx (infrastructure type)
+	infraRawTx := &ethtx.RawTx{
 		UUID:  uid.String(),
 		From:  fromAddr,
 		To:    toAddr,
@@ -215,7 +204,23 @@ func (e *ERC20) CreateRawTransaction(
 		TxHex: *rawTxHex,
 		Hash:  txHash,
 	}
-	return rawtx, txDetailItem, nil
+
+	// Calculate transaction fee (gasPrice * gasLimit)
+	txFee := new(big.Int).Mul(gasPrice, new(big.Int).SetUint64(gasLimit))
+
+	// create TxCreateParams DTO for use case layer
+	txParams := &portsEthereum.TxCreateParams{
+		UUID:        uid.String(),
+		FromAddress: fromAddr,
+		ToAddress:   toAddr,
+		Amount:      tokenAmount.Uint64(),
+		Fee:         txFee.Uint64(),
+		GasLimit:    uint32(gasLimit),
+		Nonce:       nonce,
+	}
+
+	// Convert infrastructure RawTx to domain RawTx
+	return ethtx.ToDomainRawTx(infraRawTx), txParams, nil
 }
 
 func (*ERC20) createTransferData(toAddr string, amount *big.Int) []byte {

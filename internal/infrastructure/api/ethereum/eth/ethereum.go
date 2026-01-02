@@ -9,11 +9,18 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 
+	portsEthereum "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
+
+// Compile-time check that Ethereum implements Ethereumer interface
+var _ portsEthereum.Ethereumer = (*Ethereum)(nil)
+
+// Compile-time check that Ethereum implements EtherTxMonitor interface
+var _ portsEthereum.EtherTxMonitor = (*Ethereum)(nil)
 
 // Ethereum includes client to call JSON-RPC
 type Ethereum struct {

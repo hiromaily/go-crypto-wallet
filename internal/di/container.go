@@ -17,6 +17,7 @@ import (
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 
 	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
+	portsEth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -26,7 +27,7 @@ import (
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
 	btcapi "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
+	ethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/erc20"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
@@ -120,8 +121,8 @@ type container struct {
 	// wallet
 	walletType domainWallet.WalletType
 	btc        portsBtc.Bitcoiner
-	eth        ethereum.Ethereumer
-	erc20      ethereum.ERC20er
+	eth        portsEth.Ethereumer
+	erc20      portsEth.ERC20er
 	xrp        ripple.Rippler
 	// client
 	rpcClient    *rpcclient.Client
@@ -405,10 +406,10 @@ func (c *container) newMuSig2Service() *btcapi.MuSig2Service {
 	return btcapi.NewMuSig2Service(c.pkgContainer.NewLogger())
 }
 
-func (c *container) newETH() ethereum.Ethereumer {
+func (c *container) newETH() portsEth.Ethereumer {
 	if c.eth == nil {
 		var err error
-		c.eth, err = ethereum.NewEthereum(
+		c.eth, err = ethimpl.NewEthereum(
 			c.newEthRPCClient(),
 			&c.conf.Ethereum,
 			c.conf.CoinTypeCode,
@@ -421,7 +422,7 @@ func (c *container) newETH() ethereum.Ethereumer {
 	return c.eth
 }
 
-func (c *container) newERC20() ethereum.ERC20er {
+func (c *container) newERC20() portsEth.ERC20er {
 	if c.erc20 == nil {
 		var err error
 		client := ethclient.NewClient(c.newEthRPCClient())
@@ -913,7 +914,7 @@ func (c *container) newBTCWatchAggregateMuSig2SignaturesUseCase() watchusecase.A
 
 func (c *container) newETHWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
 	// Determine which Ethereum API to use based on coin type
-	var targetEthAPI ethereum.EtherTxCreator
+	var targetEthAPI portsEth.EtherTxCreator
 	if domainCoin.IsERC20Token(c.conf.CoinTypeCode.String()) {
 		targetEthAPI = c.newERC20()
 	} else {

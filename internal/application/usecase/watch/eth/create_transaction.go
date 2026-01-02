@@ -8,23 +8,20 @@ import (
 	"math/big"
 	"strconv"
 
+	portsEth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
-	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/eth"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/ethtx"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serializer"
 )
 
 type createTransactionUseCase struct {
-	ethClient       ethereum.EtherTxCreator
+	ethClient       portsEth.EtherTxCreator
 	dbConn          *sql.DB
 	addrRepo        watchrepo.AddressRepositorier
 	txRepo          watchrepo.TxRepositorier
@@ -35,31 +32,9 @@ type createTransactionUseCase struct {
 	paymentSender   domainAccount.AccountType
 }
 
-// convertSqlcToEthDetailTx converts sqlcgen.EthDetailTx to domain entity
-func convertSqlcToEthDetailTx(sqlcTx *sqlcgen.EthDetailTx) (*domainEth.EthDetailTx, error) {
-	currentTxType, err := domainTx.TxTypeFromInt8(sqlcTx.CurrentTxType)
-	if err != nil {
-		return nil, fmt.Errorf("invalid tx type in database: %w", err)
-	}
-
-	return domainEth.NewEthDetailTx(
-		sqlcTx.TxID,
-		sqlcTx.Uuid,
-		currentTxType,
-		sqlcTx.SenderAccount,
-		sqlcTx.SenderAddress,
-		sqlcTx.ReceiverAccount,
-		sqlcTx.ReceiverAddress,
-		sqlcTx.Amount,
-		sqlcTx.Fee,
-		sqlcTx.GasLimit,
-		sqlcTx.Nonce,
-	)
-}
-
 // NewCreateTransactionUseCase creates a new CreateTransactionUseCase
 func NewCreateTransactionUseCase(
-	ethClient ethereum.EtherTxCreator,
+	ethClient portsEth.EtherTxCreator,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.TxRepositorier,
@@ -248,7 +223,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	if err != nil {
 		return "", fmt.Errorf("fail to call addrRepo.GetOneUnAllocated(sender): %w", err)
 	}
-	senderBalance, err := u.ethClient.GetBalance(ctx, senderAddr.WalletAddress, eth.QuantityTagLatest)
+	senderBalance, err := u.ethClient.GetBalance(ctx, senderAddr.WalletAddress, domainEthereum.QuantityTagLatest)
 	if err != nil {
 		return "", fmt.Errorf("fail to call eth.GetBalance(sender): %w", err)
 	}
@@ -274,18 +249,12 @@ func (u *createTransactionUseCase) createTransferTx(
 	}
 
 	// call CreateRawTransaction
-	rawTx, sqlcTxDetailItem, err := u.ethClient.CreateRawTransaction(ctx,
+	rawTx, txParams, err := u.ethClient.CreateRawTransaction(ctx,
 		senderAddr.WalletAddress, receiverAddr.WalletAddress, requiredValue.Uint64(), 0)
 	if err != nil {
 		return "", fmt.Errorf(
 			"fail to call eth.CreateRawTransaction(), sender address: %s: %w",
 			senderAddr.WalletAddress, err)
-	}
-
-	// Convert sqlcgen type to domain entity
-	txDetailItem, err := convertSqlcToEthDetailTx(sqlcTxDetailItem)
-	if err != nil {
-		return "", fmt.Errorf("fail to convert sqlc to domain entity: %w", err)
 	}
 
 	rawTxHex := rawTx.TxHex
@@ -297,10 +266,12 @@ func (u *createTransactionUseCase) createTransferTx(
 	}
 	serializedTxs := []string{serializedTx}
 
-	// create insert data for　eth_detail_tx
-	txDetailItem.SenderAccount = sender.String()
-	txDetailItem.ReceiverAccount = receiver.String()
-	txDetailItems := []*domainEth.EthDetailTx{txDetailItem}
+	// create domain entity EthDetailTx from DTO
+	txDetailItem, err := u.createEthDetailTx(txParams, sender, receiver, rawTxHex, domainTx.ActionTypeTransfer)
+	if err != nil {
+		return "", fmt.Errorf("fail to create EthDetailTx: %w", err)
+	}
+	txDetailItems := []*domainEthereum.EthDetailTx{txDetailItem}
 
 	txID, err := u.updateDB(targetAction, txDetailItems, nil)
 	if err != nil {
@@ -330,7 +301,7 @@ type userPayment struct {
 func (u *createTransactionUseCase) getUserAmounts(
 	ctx context.Context,
 	sender domainAccount.AccountType,
-) ([]eth.UserAmount, error) {
+) ([]domainEthereum.UserAmount, error) {
 	// get addresses for client account
 	addrs, err := u.addrRepo.GetAll(sender)
 	if err != nil {
@@ -338,20 +309,23 @@ func (u *createTransactionUseCase) getUserAmounts(
 	}
 
 	// target addresses
-	var userAmounts []eth.UserAmount
+	var userAmounts []domainEthereum.UserAmount
 
 	// address list for client
 	for _, addr := range addrs {
 		// TODO: if previous tx is not done, wrong amount is returned. how to manage it??
 		var balance *big.Int
-		balance, err = u.ethClient.GetBalance(ctx, addr.WalletAddress, eth.QuantityTagLatest)
+		balance, err = u.ethClient.GetBalance(ctx, addr.WalletAddress, domainEthereum.QuantityTagLatest)
 		if err != nil {
 			logger.Warn("fail to call .GetBalance()",
 				"address", addr.WalletAddress,
 				"error", err,
 			)
 		} else if balance.Uint64() != 0 {
-			userAmounts = append(userAmounts, eth.UserAmount{Address: addr.WalletAddress, Amount: balance.Uint64()})
+			userAmounts = append(userAmounts, domainEthereum.UserAmount{
+				Address: addr.WalletAddress,
+				Amount:  balance.Uint64(),
+			})
 		}
 	}
 
@@ -361,8 +335,8 @@ func (u *createTransactionUseCase) getUserAmounts(
 func (u *createTransactionUseCase) createDepositRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
-	userAmounts []eth.UserAmount,
-) ([]string, []*domainEth.EthDetailTx, error) {
+	userAmounts []domainEthereum.UserAmount,
+) ([]string, []*domainEthereum.EthDetailTx, error) {
 	// get address for deposit account
 	depositAddr, err := u.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
@@ -373,23 +347,17 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 
 	// create raw transaction each address
 	serializedTxs := make([]string, 0, len(userAmounts))
-	txDetailItems := make([]*domainEth.EthDetailTx, 0, len(userAmounts))
+	txDetailItems := make([]*domainEthereum.EthDetailTx, 0, len(userAmounts))
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
-		var rawTx *ethtx.RawTx
-		var sqlcTxDetailItem *sqlcgen.EthDetailTx
-		rawTx, sqlcTxDetailItem, err = u.ethClient.CreateRawTransaction(
+		var rawTx *domainEthereum.RawTx
+		var txParams *portsEth.TxCreateParams
+		rawTx, txParams, err = u.ethClient.CreateRawTransaction(
 			ctx, val.Address, depositAddr.WalletAddress, 0, 0)
 		if err != nil {
 			return nil, nil, fmt.Errorf(
 				"fail to call addrRepo.CreateRawTransaction(), sender address: %s: %w",
 				val.Address, err)
-		}
-
-		// Convert sqlcgen type to domain entity
-		txDetailItem, err := convertSqlcToEthDetailTx(sqlcTxDetailItem)
-		if err != nil {
-			return nil, nil, fmt.Errorf("fail to convert sqlc to domain entity: %w", err)
 		}
 
 		rawTxHex := rawTx.TxHex
@@ -402,9 +370,12 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 		}
 		serializedTxs = append(serializedTxs, serializedTx)
 
-		// create insert data for　eth_detail_tx
-		txDetailItem.SenderAccount = sender.String()
-		txDetailItem.ReceiverAccount = receiver.String()
+		// create domain entity EthDetailTx from DTO
+		var txDetailItem *domainEthereum.EthDetailTx
+		txDetailItem, err = u.createEthDetailTx(txParams, sender, receiver, rawTxHex, domainTx.ActionTypeDeposit)
+		if err != nil {
+			return nil, nil, fmt.Errorf("fail to create EthDetailTx: %w", err)
+		}
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}
 	return serializedTxs, txDetailItems, nil
@@ -464,7 +435,7 @@ func (u *createTransactionUseCase) validateAmount(
 	totalAmount *big.Int,
 ) error {
 	// check sender's total balance
-	senderBalance, err := u.ethClient.GetBalance(ctx, senderAddr.WalletAddress, eth.QuantityTagPending)
+	senderBalance, err := u.ethClient.GetBalance(ctx, senderAddr.WalletAddress, domainEthereum.QuantityTagPending)
 	if err != nil {
 		return fmt.Errorf("fail to call eth.GetBalance(): %w", err)
 	}
@@ -480,13 +451,13 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	sender, receiver domainAccount.AccountType,
 	userPayments []userPayment,
 	senderAddr *domainAddress.Address,
-) ([]string, []*domainEth.EthDetailTx, error) {
+) ([]string, []*domainEthereum.EthDetailTx, error) {
 	serializedTxs := make([]string, 0, len(userPayments))
-	txDetailItems := make([]*domainEth.EthDetailTx, 0, len(userPayments))
+	txDetailItems := make([]*domainEthereum.EthDetailTx, 0, len(userPayments))
 	additionalNonce := 0
 	for _, userPayment := range userPayments {
 		// call CreateRawTransaction
-		rawTx, sqlcTxDetailItem, err := u.ethClient.CreateRawTransaction(ctx,
+		rawTx, txParams, err := u.ethClient.CreateRawTransaction(ctx,
 			senderAddr.WalletAddress, userPayment.receiverAddr, userPayment.amount.Uint64(), additionalNonce)
 		if err != nil {
 			return nil, nil, fmt.Errorf(
@@ -494,12 +465,6 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 				senderAddr.WalletAddress, err)
 		}
 		additionalNonce++
-
-		// Convert sqlcgen type to domain entity
-		txDetailItem, err := convertSqlcToEthDetailTx(sqlcTxDetailItem)
-		if err != nil {
-			return nil, nil, fmt.Errorf("fail to convert sqlc to domain entity: %w", err)
-		}
 
 		rawTxHex := rawTx.TxHex
 		logger.Debug("rawTxHex", "rawTxHex", rawTxHex)
@@ -510,9 +475,11 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 		}
 		serializedTxs = append(serializedTxs, serializedTx)
 
-		// create insert data for　eth_detail_tx
-		txDetailItem.SenderAccount = sender.String()
-		txDetailItem.ReceiverAccount = receiver.String()
+		// create domain entity EthDetailTx from DTO
+		txDetailItem, err := u.createEthDetailTx(txParams, sender, receiver, rawTxHex, domainTx.ActionTypePayment)
+		if err != nil {
+			return nil, nil, fmt.Errorf("fail to create EthDetailTx: %w", err)
+		}
 		txDetailItems = append(txDetailItems, txDetailItem)
 	}
 	return serializedTxs, txDetailItems, nil
@@ -520,7 +487,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 
 func (u *createTransactionUseCase) updateDB(
 	targetAction domainTx.ActionType,
-	txDetailItems []*domainEth.EthDetailTx,
+	txDetailItems []*domainEthereum.EthDetailTx,
 	paymentRequestIds []int64,
 ) (int64, error) {
 	// start transaction
@@ -578,4 +545,37 @@ func (u *createTransactionUseCase) generateHexFile(
 	}
 
 	return generatedFileName, nil
+}
+
+// createEthDetailTx constructs the domain entity EthDetailTx from the DTO returned by infrastructure layer.
+// This ensures the use case layer maintains full responsibility for domain entity creation.
+func (*createTransactionUseCase) createEthDetailTx(
+	txParams *portsEth.TxCreateParams,
+	sender, receiver domainAccount.AccountType,
+	rawTxHex string,
+	_ domainTx.ActionType,
+) (*domainEthereum.EthDetailTx, error) {
+	// Create domain entity from DTO
+	// Note: CurrentTxType is set to TxTypeUnsigned since we're creating unsigned transactions
+	txDetailItem, err := domainEthereum.NewEthDetailTx(
+		0, // TxID - will be set when saving to DB
+		txParams.UUID,
+		domainTx.TxTypeUnsigned,
+		sender.String(),
+		txParams.FromAddress,
+		receiver.String(),
+		txParams.ToAddress,
+		txParams.Amount,
+		txParams.Fee,
+		txParams.GasLimit,
+		txParams.Nonce,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("fail to create domain EthDetailTx: %w", err)
+	}
+
+	// Set unsigned transaction data
+	txDetailItem.SetUnsignedTx(rawTxHex)
+
+	return txDetailItem, nil
 }

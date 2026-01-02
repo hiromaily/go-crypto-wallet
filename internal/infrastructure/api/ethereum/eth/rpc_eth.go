@@ -10,6 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/mitchellh/mapstructure"
 
+	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/pkg/debug"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -38,7 +39,7 @@ type ResponseSyncing struct {
 // Syncing returns sync status or bool
 //   - return false if not syncing (it means syncing is done)
 //   - there seems 2 different responses
-func (e *Ethereum) Syncing(ctx context.Context) (*ResponseSyncing, bool, error) {
+func (e *Ethereum) Syncing(ctx context.Context) (*domainEthereum.ResponseSyncing, bool, error) {
 	var result any
 
 	err := e.rpcClient.CallContext(ctx, &result, "eth_syncing")
@@ -67,7 +68,8 @@ func (e *Ethereum) Syncing(ctx context.Context) (*ResponseSyncing, bool, error) 
 			return nil, false, err
 		}
 		debug.Debug(resSyncing)
-		return &resSyncing, true, nil
+		// Convert to domain type
+		return ToDomainResponseSyncing(&resSyncing), true, nil
 	}
 
 	return nil, false, errors.New("unexpected response, need to be implemented")
@@ -166,13 +168,18 @@ func (e *Ethereum) EnsureBlockNumber(ctx context.Context, loopCount int) (*big.I
 // - `QuantityTagEarliest` must NOT be used
 // - On goerli testnet, balance can be found just after sending coins
 // - TODO: which quantityTag should be used `QuantityTagLatest` or `QuantityTagPending`
-func (e *Ethereum) GetBalance(ctx context.Context, hexAddr string, quantityTag QuantityTag) (*big.Int, error) {
+func (e *Ethereum) GetBalance(
+	ctx context.Context, hexAddr string, quantityTag domainEthereum.QuantityTag,
+) (*big.Int, error) {
+	// Convert domain type to infrastructure type
+	infraQuantityTag := FromDomainQuantityTag(quantityTag)
+
 	var balance string
-	err := e.rpcClient.CallContext(ctx, &balance, "eth_getBalance", hexAddr, quantityTag.String())
+	err := e.rpcClient.CallContext(ctx, &balance, "eth_getBalance", hexAddr, infraQuantityTag.String())
 	if err != nil {
 		return nil, fmt.Errorf(
 			"fail to call rpc.CallContext(eth_getBalance) quantityTag: %s: %w",
-			quantityTag.String(), err)
+			infraQuantityTag.String(), err)
 	}
 	h, err := hexutil.DecodeBig(balance)
 	if err != nil {
@@ -204,9 +211,16 @@ func (e *Ethereum) GetBalance(ctx context.Context, hexAddr string, quantityTag Q
 // - `QuantityTagEarliest` must NOT be used
 // - after sending coin from this address, result is counted??
 // - generated new address is always 0
-func (e *Ethereum) GetTransactionCount(ctx context.Context, hexAddr string, quantityTag QuantityTag) (*big.Int, error) {
+func (e *Ethereum) GetTransactionCount(
+	ctx context.Context, hexAddr string, quantityTag domainEthereum.QuantityTag,
+) (*big.Int, error) {
+	// Convert domain type to infrastructure type
+	infraQuantityTag := FromDomainQuantityTag(quantityTag)
+
 	var transactionCount string
-	err := e.rpcClient.CallContext(ctx, &transactionCount, "eth_getTransactionCount", hexAddr, quantityTag.String())
+	err := e.rpcClient.CallContext(
+		ctx, &transactionCount, "eth_getTransactionCount", hexAddr, infraQuantityTag.String(),
+	)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getTransactionCount): %w", err)
 	}
@@ -395,7 +409,7 @@ type BlockInfo struct {
 
 // GetBlockByNumber returns information about a block by block number
 // https://github.com/ethereum/wiki/wiki/JSON-RPC#eth_getblockbynumber
-func (e *Ethereum) GetBlockByNumber(ctx context.Context, blockNumber uint64) (*BlockInfo, error) {
+func (e *Ethereum) GetBlockByNumber(ctx context.Context, blockNumber uint64) (*domainEthereum.BlockInfo, error) {
 	// convert int64 to hex
 	blockHexNumber := hexutil.EncodeUint64(blockNumber)
 
@@ -407,7 +421,8 @@ func (e *Ethereum) GetBlockByNumber(ctx context.Context, blockNumber uint64) (*B
 		return nil, fmt.Errorf("fail to call rpc.CallContext(eth_getBlockByNumber): %w", err)
 	}
 
-	return convertBlockRawInfo(&blockRawInfo), nil
+	infraBlockInfo := convertBlockRawInfo(&blockRawInfo)
+	return ToDomainBlockInfo(infraBlockInfo), nil
 }
 
 func convertBlockRawInfo(raw *BlockRawInfo) *BlockInfo {
