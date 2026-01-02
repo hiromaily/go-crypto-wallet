@@ -9,13 +9,13 @@ import (
 
 	"github.com/bookerzzz/grok"
 
+	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -23,7 +23,7 @@ import (
 )
 
 type createTransactionUseCase struct {
-	rippler         ripple.Rippler
+	rippler         portsRipple.Rippler
 	dbConn          *sql.DB
 	uuidHandler     uuid.UUIDHandler
 	addrRepo        watchrepo.AddressRepositorier
@@ -37,7 +37,7 @@ type createTransactionUseCase struct {
 
 // NewCreateTransactionUseCase creates a new CreateTransactionUseCase
 func NewCreateTransactionUseCase(
-	rippler ripple.Rippler,
+	rippler portsRipple.Rippler,
 	dbConn *sql.DB,
 	uuidHandler uuid.UUIDHandler,
 	addrRepo watchrepo.AddressRepositorier,

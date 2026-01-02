@@ -4,18 +4,18 @@ import (
 	"context"
 	"database/sql"
 
+	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // XRPWatch watch only wallet object
 type XRPWatch struct {
-	XRP                     ripple.Rippler
+	XRP                     portsRipple.Rippler
 	dbConn                  *sql.DB
 	wtype                   domainWallet.WalletType
 	createTxUseCase         watchusecase.CreateTransactionUseCase
@@ -27,7 +27,7 @@ type XRPWatch struct {
 
 // NewXRPWatch returns XRPWatch object
 func NewXRPWatch(
-	xrp ripple.Rippler,
+	xrp portsRipple.Rippler,
 	dbConn *sql.DB,
 	createTxUseCase watchusecase.CreateTransactionUseCase,
 	monitorTxUseCase watchusecase.MonitorTransactionUseCase,

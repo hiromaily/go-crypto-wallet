@@ -9,12 +9,12 @@ import (
 	"github.com/bookerzzz/grok"
 	"google.golang.org/grpc/status"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
+	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 
-func runSendCoin(xrpAPI ripple.Rippler, txData *config.RippleTxData, receiverAddr string, amount float64) error {
+func runSendCoin(xrpAPI portsRipple.Rippler, txData *config.RippleTxData, receiverAddr string, amount float64) error {
 	// validator
 	if receiverAddr == "" {
 		return errors.New("address option [-address] is invalid")

@@ -1,3 +1,12 @@
+// Package ripple defines interfaces for Ripple/XRP blockchain operations.
+//
+// This package follows the Dependency Inversion Principle of Clean Architecture
+// by defining interfaces in the application layer that are implemented by the
+// infrastructure layer.
+//
+// Note: This package imports XRP infrastructure types to define the interface.
+// This is acceptable because the interface is the abstraction and the infrastructure
+// implements it. The dependency direction is: infrastructure -> ports (interface).
 package ripple
 
 import (
@@ -9,8 +18,8 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 )
 
-// Rippler Ripple Interface
-// FIXIME: infrastructure layer should not have interface dependency from usecase layer
+// Rippler defines the main interface for Ripple/XRP blockchain operations.
+// It embeds specialized interfaces for admin, public, and API operations.
 type Rippler interface {
 	RippleAdminer
 	RipplePublicer
@@ -31,7 +40,8 @@ type Rippler interface {
 	GetChainConf() *chaincfg.Params
 }
 
-// RippleAPIer is RippleAPI interface
+// RippleAPIer defines the interface for Ripple API operations.
+// Implementations handle account management, address generation, and transaction operations.
 type RippleAPIer interface {
 	// RippleAccountAPI
 	GetAccountInfo(ctx context.Context, address string) (*xrp.ResponseGetAccountInfo, error)
@@ -50,7 +60,8 @@ type RippleAPIer interface {
 	GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*xrp.TxInfo, error)
 }
 
-// RipplePublicer is RipplePublic interface
+// RipplePublicer defines the interface for Ripple public node operations.
+// These operations query public information from the Ripple network.
 type RipplePublicer interface {
 	// public_account
 	AccountChannels(ctx context.Context, sender, receiver string) (*xrp.ResponseAccountChannels, error)
@@ -59,7 +70,8 @@ type RipplePublicer interface {
 	ServerInfo(ctx context.Context) (*xrp.ResponseServerInfo, error)
 }
 
-// RippleAdminer is RippleAdmin interface
+// RippleAdminer defines the interface for Ripple admin node operations.
+// These operations typically require admin access to the Ripple node.
 type RippleAdminer interface {
 	// admin_keygen
 	ValidationCreate(ctx context.Context, secret string) (*xrp.ResponseValidationCreate, error)

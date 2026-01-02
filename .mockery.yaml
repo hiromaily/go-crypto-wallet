@@ -22,6 +22,17 @@ packages:
     interfaces:
       Bitcoiner:
 
+  # Ripple API - interface in application/ports, implementation in infrastructure
+  github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple:
+    config:
+      dir: "internal/infrastructure/api/ripple/mocks"
+      pkgname: "mocks"
+    interfaces:
+      Rippler:
+      RippleAPIer:
+      RipplePublicer:
+      RippleAdminer:
+
   # File storage - interface in application/ports, implementation in infrastructure
   github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
     config:

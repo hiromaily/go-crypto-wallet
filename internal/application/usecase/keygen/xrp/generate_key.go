@@ -6,18 +6,18 @@ import (
 	"errors"
 	"fmt"
 
+	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type generateKeyUseCase struct {
-	xrp               ripple.Rippler
+	xrp               portsRipple.Rippler
 	dbConn            *sql.DB
 	coinTypeCode      domainCoin.CoinTypeCode
 	xrpAccountKeyRepo cold.XRPAccountKeyRepositorier
@@ -25,7 +25,7 @@ type generateKeyUseCase struct {
 
 // NewGenerateKeyUseCase creates a new GenerateKeyUseCase
 func NewGenerateKeyUseCase(
-	xrp ripple.Rippler,
+	xrp portsRipple.Rippler,
 	dbConn *sql.DB,
 	coinTypeCode domainCoin.CoinTypeCode,
 	xrpAccountKeyRepo cold.XRPAccountKeyRepositorier,

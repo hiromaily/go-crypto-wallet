@@ -8,24 +8,24 @@ import (
 
 	"github.com/bookerzzz/grok"
 
+	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type sendTransactionUseCase struct {
-	rippler      ripple.Rippler
+	rippler      portsRipple.Rippler
 	txDetailRepo watchrepo.XRPDetailTXRepositorier
 	txFileRepo   portsStorage.TransactionFileRepositorier
 }
 
 // NewSendTransactionUseCase creates a new SendTransactionUseCase
 func NewSendTransactionUseCase(
-	rippler ripple.Rippler,
+	rippler portsRipple.Rippler,
 	txDetailRepo watchrepo.XRPDetailTXRepositorier,
 	txFileRepo portsStorage.TransactionFileRepositorier,
 ) watchusecase.SendTransactionUseCase {

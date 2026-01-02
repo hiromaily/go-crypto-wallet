@@ -11,6 +11,7 @@ import (
 )
 
 // Ripple includes client to call JSON-RPC
+// This type implements the interfaces defined in internal/application/ports/ripple
 type Ripple struct {
 	wsPublic     *websocket.WS
 	wsAdmin      *websocket.WS
