@@ -28,6 +28,11 @@ func NewBTCTxRepositorySqlc(dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode
 
 // convertToBtcTransaction converts sqlcgen.BtcTx to domain.BtcTransaction entity
 func convertToBtcTransaction(sqlcTx *sqlcgen.BtcTx) (*domainBitcoin.BtcTransaction, error) {
+	currentTxType, err := domainTx.TxTypeFromInt8(sqlcTx.CurrentTxType)
+	if err != nil {
+		return nil, fmt.Errorf("invalid tx type in database: %w", err)
+	}
+
 	tx := &domainBitcoin.BtcTransaction{
 		ID:                sqlcTx.ID,
 		CoinTypeCode:      domainCoin.CoinTypeCode(sqlcTx.Coin),
@@ -38,7 +43,7 @@ func convertToBtcTransaction(sqlcTx *sqlcgen.BtcTx) (*domainBitcoin.BtcTransacti
 		TotalInputAmount:  sqlcTx.TotalInputAmount,
 		TotalOutputAmount: sqlcTx.TotalOutputAmount,
 		Fee:               sqlcTx.Fee,
-		CurrentTxType:     domainTx.TxTypeFromInt8(sqlcTx.CurrentTxType),
+		CurrentTxType:     currentTxType,
 	}
 
 	if sqlcTx.UnsignedUpdatedAt.Valid {

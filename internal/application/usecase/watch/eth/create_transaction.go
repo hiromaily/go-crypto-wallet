@@ -37,10 +37,15 @@ type createTransactionUseCase struct {
 
 // convertSqlcToEthDetailTx converts sqlcgen.EthDetailTx to domain entity
 func convertSqlcToEthDetailTx(sqlcTx *sqlcgen.EthDetailTx) (*domainEth.EthDetailTx, error) {
+	currentTxType, err := domainTx.TxTypeFromInt8(sqlcTx.CurrentTxType)
+	if err != nil {
+		return nil, fmt.Errorf("invalid tx type in database: %w", err)
+	}
+
 	return domainEth.NewEthDetailTx(
 		sqlcTx.TxID,
 		sqlcTx.Uuid,
-		domainTx.TxTypeFromInt8(sqlcTx.CurrentTxType),
+		currentTxType,
 		sqlcTx.SenderAccount,
 		sqlcTx.SenderAddress,
 		sqlcTx.ReceiverAccount,

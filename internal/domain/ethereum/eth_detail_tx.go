@@ -51,9 +51,7 @@ func NewEthDetailTx(
 	if receiverAddress == "" {
 		return nil, errors.New("receiver address cannot be empty")
 	}
-	if amount == 0 {
-		return nil, errors.New("amount cannot be zero")
-	}
+	// Note: amount can be zero for ERC20 token transactions where only the token is transferred
 
 	return &EthDetailTx{
 		TxID:            txID,

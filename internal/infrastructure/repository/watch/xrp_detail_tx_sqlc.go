@@ -31,11 +31,16 @@ func NewXRPDetailTxInputRepositorySqlc(
 
 // convertToXrpDetailTx converts sqlcgen.XrpDetailTx to domain.XrpDetailTx entity
 func convertToXrpDetailTx(sqlcTx *sqlcgen.XrpDetailTx) (*domainXrp.XrpDetailTx, error) {
+	currentTxType, err := domainTx.TxTypeFromInt8(sqlcTx.CurrentTxType)
+	if err != nil {
+		return nil, fmt.Errorf("invalid tx type in database: %w", err)
+	}
+
 	tx := &domainXrp.XrpDetailTx{
 		ID:                    sqlcTx.ID,
 		TxID:                  sqlcTx.TxID,
 		UUID:                  sqlcTx.Uuid,
-		CurrentTxType:         domainTx.TxTypeFromInt8(sqlcTx.CurrentTxType),
+		CurrentTxType:         currentTxType,
 		SenderAccount:         sqlcTx.SenderAccount,
 		SenderAddress:         sqlcTx.SenderAddress,
 		ReceiverAccount:       sqlcTx.ReceiverAccount,

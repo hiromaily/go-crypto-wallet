@@ -31,11 +31,16 @@ func NewETHDetailTXInputRepositorySqlc(
 
 // convertToEthDetailTx converts sqlcgen.EthDetailTx to domain.EthDetailTx entity
 func convertToEthDetailTx(sqlcTx *sqlcgen.EthDetailTx) (*domainEth.EthDetailTx, error) {
+	currentTxType, err := domainTx.TxTypeFromInt8(sqlcTx.CurrentTxType)
+	if err != nil {
+		return nil, fmt.Errorf("invalid tx type in database: %w", err)
+	}
+
 	tx := &domainEth.EthDetailTx{
 		ID:              sqlcTx.ID,
 		TxID:            sqlcTx.TxID,
 		UUID:            sqlcTx.Uuid,
-		CurrentTxType:   domainTx.TxTypeFromInt8(sqlcTx.CurrentTxType),
+		CurrentTxType:   currentTxType,
 		SenderAccount:   sqlcTx.SenderAccount,
 		SenderAddress:   sqlcTx.SenderAddress,
 		ReceiverAccount: sqlcTx.ReceiverAccount,
