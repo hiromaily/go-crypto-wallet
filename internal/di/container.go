@@ -33,6 +33,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
 	btcwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/btc"
@@ -537,7 +538,7 @@ func (c *container) newAddressFileRepo() file.AddressFileRepositorier {
 }
 
 func (c *container) newTxFileRepo() portsStorage.TransactionFileRepositorier {
-	return file.NewTransactionFileRepository(
+	return transaction.NewTransactionFileRepository(
 		c.conf.FilePath.Tx,
 	)
 }
@@ -671,7 +672,7 @@ func (c *container) newPubkeyFileStorager() file.AddressFileRepositorier {
 }
 
 func (c *container) newTxFileStorager() portsStorage.TransactionFileRepositorier {
-	return file.NewTransactionFileRepository(
+	return transaction.NewTransactionFileRepository(
 		c.conf.FilePath.Tx,
 	)
 }

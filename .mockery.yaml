@@ -25,7 +25,7 @@ packages:
   # File storage - interface in application/ports, implementation in infrastructure
   github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
     config:
-      dir: "internal/infrastructure/storage/file/mocks"
+      dir: "internal/infrastructure/storage/file/transaction/mocks"
       pkgname: "mocks"
     interfaces:
       TransactionFileRepositorier:

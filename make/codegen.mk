@@ -22,11 +22,11 @@ sqlc:
 # Output: Internal mocks directories (next to interfaces)
 #
 # Usage:
-#   make mockery        - Generate all mocks defined in .mockery.yaml
+#   make mockery        - Generate all mocks defined in .mockery.yaml (cleans old mocks first)
 #   make clean-mocks    - Remove all generated mock files
 #------------------------------------------------------------------------------
 .PHONY: mockery
-mockery:
+mockery: clean-mocks
 	go tool github.com/vektra/mockery/v3
 
 .PHONY: clean-mocks

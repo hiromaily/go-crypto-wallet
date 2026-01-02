@@ -1,4 +1,4 @@
-package file
+package transaction
 
 import (
 	"bufio"
@@ -258,3 +258,4 @@ func (*TransactionFileRepository) createDir(path string) {
 		_ = os.MkdirAll(dir, 0o700) // Create all parent directories
 	}
 }
+
