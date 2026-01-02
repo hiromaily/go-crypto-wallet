@@ -13,6 +13,7 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	domainPayment "github.com/hiromaily/go-crypto-wallet/internal/domain/payment"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
@@ -23,27 +24,27 @@ import (
 
 // SeedRepositorier is SeedRepository interface
 type SeedRepositorier interface {
-	GetOne(ctx context.Context) (*sqlcgen.Seed, error)
+	GetOne(ctx context.Context) (*domainKey.Seed, error)
 	Insert(ctx context.Context, strSeed string) error
 }
 
 // BTCAccountKeyRepositorier is BtcAccountKeyRepository interface for BTC/BCH
 type BTCAccountKeyRepositorier interface {
 	GetMaxIndex(accountType domainAccount.AccountType) (int64, error)
-	GetOneMaxID(accountType domainAccount.AccountType) (*sqlcgen.BtcAccountKey, error)
+	GetOneMaxID(accountType domainAccount.AccountType) (*domainBitcoin.BtcAccountKey, error)
 	GetAllAddrStatus(
 		accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus,
-	) ([]*sqlcgen.BtcAccountKey, error)
-	GetAllMultiAddr(accountType domainAccount.AccountType, addrs []string) ([]*sqlcgen.BtcAccountKey, error)
-	InsertBulk(items []*sqlcgen.BtcAccountKey) error
+	) ([]*domainBitcoin.BtcAccountKey, error)
+	GetAllMultiAddr(accountType domainAccount.AccountType, addrs []string) ([]*domainBitcoin.BtcAccountKey, error)
+	InsertBulk(items []*domainBitcoin.BtcAccountKey) error
 	UpdateAddr(
 		accountType domainAccount.AccountType, addr, keyAddress string,
 	) (int64, error)
 	UpdateAddrStatus(
 		accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus, strWIFs []string,
 	) (int64, error)
-	UpdateMultisigAddr(accountType domainAccount.AccountType, item *sqlcgen.BtcAccountKey) (int64, error)
-	UpdateMultisigAddrs(accountType domainAccount.AccountType, items []*sqlcgen.BtcAccountKey) (int64, error)
+	UpdateMultisigAddr(accountType domainAccount.AccountType, item *domainBitcoin.BtcAccountKey) (int64, error)
+	UpdateMultisigAddrs(accountType domainAccount.AccountType, items []*domainBitcoin.BtcAccountKey) (int64, error)
 }
 
 // ETHAccountKeyRepositorier is EthAccountKeyRepository interface for ETH

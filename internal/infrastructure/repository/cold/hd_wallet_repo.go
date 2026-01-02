@@ -3,8 +3,11 @@ package cold
 import (
 	"database/sql"
 	"errors"
+	"time"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
@@ -123,21 +126,29 @@ func (w *AccountHDWalletRepo) Insert(
 	keyType domainKey.KeyType,
 ) error {
 	// insert key information to btc_account_key table
-	accountKeyItems := make([]*sqlcgen.BtcAccountKey, len(keys))
+	accountKeyItems := make([]*domainBitcoin.BtcAccountKey, len(keys))
+	now := time.Now()
 	for idx, keyItem := range keys {
-		accountKeyItems[idx] = &sqlcgen.BtcAccountKey{
-			Coin:               sqlcgen.BtcAccountKeyCoin(coinTypeCode.String()),
+		var taprootAddr *string
+		if keyItem.TaprootAddr != "" {
+			taprootAddr = &keyItem.TaprootAddr
+		}
+
+		accountKeyItems[idx] = &domainBitcoin.BtcAccountKey{
+			CoinTypeCode:       coinTypeCode,
 			KeyType:            keyType.String(),
-			Account:            sqlcgen.BtcAccountKeyAccount(accountType.String()),
+			Account:            accountType,
 			P2pkhAddress:       keyItem.P2PKHAddr,
 			P2shSegwitAddress:  keyItem.P2SHSegWitAddr,
 			Bech32Address:      keyItem.Bech32Addr,
-			TaprootAddress:     sql.NullString{String: keyItem.TaprootAddr, Valid: keyItem.TaprootAddr != ""},
+			TaprootAddress:     taprootAddr,
 			FullPublicKey:      keyItem.FullPubKey,
 			MultisigAddress:    "",
 			RedeemScript:       keyItem.RedeemScript,
 			WalletImportFormat: keyItem.WIF,
 			Idx:                idxFrom,
+			AddrStatus:         domainAddress.AddrStatusHDKeyGenerated,
+			UpdatedAt:          &now,
 		}
 		idxFrom++
 	}

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
@@ -25,14 +26,30 @@ func NewSeedRepositorySqlc(
 	}
 }
 
+// convertToSeed converts sqlcgen.Seed to domain.Seed entity.
+// SECURITY: Handles encrypted seed data - never log the seed field.
+func convertToSeed(sqlcSeed *sqlcgen.Seed) (*domainKey.Seed, error) {
+	seed := &domainKey.Seed{
+		ID:           sqlcSeed.ID,
+		CoinTypeCode: domainCoin.CoinTypeCode(sqlcSeed.Coin),
+		Seed:         sqlcSeed.Seed, // Encrypted seed - NEVER log
+	}
+
+	if sqlcSeed.UpdatedAt.Valid {
+		seed.UpdatedAt = &sqlcSeed.UpdatedAt.Time
+	}
+
+	return seed, nil
+}
+
 // GetOne returns one record
-func (r *SeedRepositorySqlc) GetOne(ctx context.Context) (*sqlcgen.Seed, error) {
-	seed, err := r.queries.GetSeed(ctx, sqlcgen.SeedCoin(r.coinTypeCode.String()))
+func (r *SeedRepositorySqlc) GetOne(ctx context.Context) (*domainKey.Seed, error) {
+	sqlcSeed, err := r.queries.GetSeed(ctx, sqlcgen.SeedCoin(r.coinTypeCode.String()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to call GetSeed(): %w", err)
 	}
 
-	return &seed, nil
+	return convertToSeed(&sqlcSeed)
 }
 
 // Insert inserts record
