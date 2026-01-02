@@ -5,17 +5,19 @@
 # All modules are located in the make/ directory.
 #
 # Module organization:
+# - utils.mk:        Utility functions and cleanup
 # - vars.mk:         Variable definitions and constants
 # - install.mk:      Installation targets
+# - codegen.mk:      Code generation targets
+# - lint.mk:         Linting and code quality checks
 # - build.mk:        Build-related targets
 # - test.mk:         Testing targets
+# - db.mk:           Database-specific targets
+# - ai.mk:           AI-related targets
 # - btc.mk:          Bitcoin-specific targets
 # - eth.mk:          Ethereum-specific targets
 # - xrp.mk:          XRP/Ripple-specific targets
-# - codegen.mk:      Code generation targets
-# - lint.mk:         Linting and code quality checks
 # - wallet.mk:       Wallet management operations
-# - utils.mk:        Utility functions and cleanup
 # - watch_op.mk:     Watch wallet operations
 # - keygen_op.mk:    Keygen wallet operations
 # - sign_op.mk:      Sign wallet operations
@@ -40,6 +42,7 @@ include make/vars.mk
 
 # 2. Development tools
 include make/install.mk
+include make/ai.mk
 include make/build.mk
 include make/test.mk
 include make/codegen.mk
