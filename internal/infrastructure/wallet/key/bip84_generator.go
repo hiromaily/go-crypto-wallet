@@ -3,6 +3,7 @@ package key
 import (
 	"github.com/btcsuite/btcd/chaincfg"
 
+	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
@@ -13,6 +14,9 @@ import (
 type BIP84Generator struct {
 	hdKey *HDKey
 }
+
+// Compile-time check that BIP84Generator implements Generator interface
+var _ portsWallet.Generator = (*BIP84Generator)(nil)
 
 // NewBIP84Generator returns BIP84Generator
 func NewBIP84Generator(coinTypeCode domainCoin.CoinTypeCode, conf *chaincfg.Params) *BIP84Generator {

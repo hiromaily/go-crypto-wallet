@@ -6,7 +6,7 @@ import (
 
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
+	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 )
 
 type storeSeedUseCase struct {
@@ -25,9 +25,9 @@ func (u *storeSeedUseCase) Store(
 	input signusecase.StoreSeedInput,
 ) (signusecase.StoreSeedOutput, error) {
 	// Convert seed string to bytes
-	bSeed, err := key.SeedToByte(input.Seed)
+	bSeed, err := infraKey.SeedToByte(input.Seed)
 	if err != nil {
-		return signusecase.StoreSeedOutput{}, fmt.Errorf("fail to call key.SeedToByte(): %w", err)
+		return signusecase.StoreSeedOutput{}, fmt.Errorf("fail to call infraKey.SeedToByte(): %w", err)
 	}
 
 	// Insert seed in database

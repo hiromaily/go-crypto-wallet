@@ -3,7 +3,7 @@ package create
 import (
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
+	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
 	btcwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/btc"
 )
@@ -15,7 +15,7 @@ func runKey(wallet wallets.Keygener) error {
 	// This is debug code that uses utility function directly
 	// Not migrated to use case layer as it's a simple utility operation
 	if v, ok := wallet.(*btcwallet.BTCKeygen); ok {
-		wif, pubAddress, err := key.GenerateWIF(v.BTC.GetChainConf())
+		wif, pubAddress, err := infraKey.GenerateWIF(v.BTC.GetChainConf())
 		if err != nil {
 			return fmt.Errorf("fail to generate WIF key: %w", err)
 		}

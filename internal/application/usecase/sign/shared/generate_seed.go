@@ -7,7 +7,7 @@ import (
 
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
+	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -32,11 +32,11 @@ func (u *generateSeedUseCase) Generate(ctx context.Context) (signusecase.Generat
 	}
 
 	// Generate new seed if not found
-	bSeed, err = key.GenerateSeed()
+	bSeed, err = infraKey.GenerateSeed()
 	if err != nil {
-		return signusecase.GenerateSeedOutput{}, fmt.Errorf("fail to call key.GenerateSeed(): %w", err)
+		return signusecase.GenerateSeedOutput{}, fmt.Errorf("fail to call infraKey.GenerateSeed(): %w", err)
 	}
-	strSeed := key.SeedToString(bSeed)
+	strSeed := infraKey.SeedToString(bSeed)
 
 	// Insert seed in database
 	err = u.seedRepo.Insert(ctx, strSeed)
@@ -55,7 +55,7 @@ func (u *generateSeedUseCase) retrieveSeed(ctx context.Context) ([]byte, error) 
 	seed, err := u.seedRepo.GetOne(ctx)
 	if err == nil && seed.Seed != "" {
 		logger.Info("seed have already been generated")
-		return key.SeedToByte(seed.Seed)
+		return infraKey.SeedToByte(seed.Seed)
 	}
 	if err != nil {
 		return nil, fmt.Errorf("fail to call seedRepo.GetOne(): %w", err)
