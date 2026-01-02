@@ -10,15 +10,15 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 
+	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/ethtx"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // when creating multiple transaction from same address, nonce should be incremented
 func (e *Ethereum) getNonce(ctx context.Context, fromAddr string, additionalNonce int) (uint64, error) {
 	// by calling GetTransactionCount()
-	nonce, err := e.GetTransactionCount(ctx, fromAddr, QuantityTagPending)
+	nonce, err := e.GetTransactionCount(ctx, fromAddr, domainEthereum.QuantityTagPending)
 	if err != nil {
 		return 0, fmt.Errorf("fail to call eth.GetTransactionCount(): %w", err)
 	}
@@ -85,7 +85,7 @@ func (e *Ethereum) calculateFee(
 // - sender has to pay 5ETH + fee
 func (e *Ethereum) CreateRawTransaction(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-) (*ethtx.RawTx, *sqlcgen.EthDetailTx, error) {
+) (*domainEthereum.RawTx, *domainEthereum.EthDetailTx, error) {
 	// validation check
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
@@ -98,7 +98,7 @@ func (e *Ethereum) CreateRawTransaction(
 
 	// TODO: pending status should be included in target balance??
 	// TODO: if block is still syncing, proper balance is not returned
-	balance, err := e.GetBalance(ctx, fromAddr, QuantityTagPending)
+	balance, err := e.GetBalance(ctx, fromAddr, domainEthereum.QuantityTagPending)
 	if err != nil {
 		return nil, nil, fmt.Errorf("fail to call eth.GetBalance(): %w", err)
 	}
@@ -159,22 +159,8 @@ func (e *Ethereum) CreateRawTransaction(
 		return nil, nil, fmt.Errorf("fail to call uuidHandler.GenerateV7(): %w", err)
 	}
 
-	// create insert data for　eth_detail_tx
-	txDetailItem := &sqlcgen.EthDetailTx{
-		Uuid:            uid.String(),
-		SenderAccount:   "",
-		SenderAddress:   fromAddr,
-		ReceiverAccount: "",
-		ReceiverAddress: toAddr,
-		Amount:          newValue.Uint64(),
-		Fee:             txFee.Uint64(),
-		GasLimit:        uint32(estimatedGas.Uint64()),
-		Nonce:           nonce,
-		UnsignedHexTx:   *rawTxHex,
-	}
-
-	// RawTx
-	rawtx := &ethtx.RawTx{
+	// create domain RawTx
+	domainRawTx := &domainEthereum.RawTx{
 		UUID:  uid.String(),
 		From:  fromAddr,
 		To:    toAddr,
@@ -183,15 +169,41 @@ func (e *Ethereum) CreateRawTransaction(
 		TxHex: *rawTxHex,
 		Hash:  txHash,
 	}
-	return rawtx, txDetailItem, nil
+
+	// create domain EthDetailTx entity
+	// Note: TxID will be set later when saving to database
+	domainTxDetailItem, err := domainEthereum.NewEthDetailTx(
+		0, // TxID - will be set when saving to DB
+		uid.String(),
+		"", // CurrentTxType - will be set by the caller
+		"", // SenderAccount - will be set by the caller
+		fromAddr,
+		"", // ReceiverAccount - will be set by the caller
+		toAddr,
+		newValue.Uint64(),
+		txFee.Uint64(),
+		uint32(estimatedGas.Uint64()),
+		nonce,
+	)
+	if err != nil {
+		return nil, nil, fmt.Errorf("fail to create domain EthDetailTx: %w", err)
+	}
+
+	// Set unsigned transaction data
+	domainTxDetailItem.SetUnsignedTx(*rawTxHex)
+
+	return domainRawTx, domainTxDetailItem, nil
 }
 
 // SignOnRawTransaction signs on raw transaction
 // - https://ethereum.stackexchange.com/questions/16472/signing-a-raw-transaction-in-go
 // - Note: this requires private key on this machine, if node is working remotely, it would not work.
-func (e *Ethereum) SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (*ethtx.RawTx, error) {
-	txHex := rawTx.TxHex
-	fromAddr := rawTx.From
+func (e *Ethereum) SignOnRawTransaction(rawTx *domainEthereum.RawTx, passphrase string) (*domainEthereum.RawTx, error) {
+	// Convert domain type to infrastructure type
+	infraRawTx := ethtx.FromDomainRawTx(rawTx)
+
+	txHex := infraRawTx.TxHex
+	fromAddr := infraRawTx.From
 	tx, err := ethtx.DecodeTx(txHex)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call decodeTx(txHex): %w", err)
@@ -235,8 +247,8 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (
 		return nil, fmt.Errorf("fail to call encodeTx(): %w", err)
 	}
 
-	resTx := &ethtx.RawTx{
-		UUID:  rawTx.UUID,
+	infraResTx := &ethtx.RawTx{
+		UUID:  infraRawTx.UUID,
 		From:  fromSignedAddr.Hex(),
 		To:    signedTX.To().Hex(),
 		Value: *signedTX.Value(),
@@ -245,7 +257,8 @@ func (e *Ethereum) SignOnRawTransaction(rawTx *ethtx.RawTx, passphrase string) (
 		Hash:  signedTX.Hash().Hex(),
 	}
 
-	return resTx, nil
+	// Convert to domain type
+	return ethtx.ToDomainRawTx(infraResTx), nil
 }
 
 // SendSignedRawTransaction sends signed raw transaction

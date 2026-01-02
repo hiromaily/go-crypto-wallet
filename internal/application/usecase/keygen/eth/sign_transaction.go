@@ -7,10 +7,10 @@ import (
 
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
+	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/eth"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/ethtx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serializer"
 )
 
@@ -52,13 +52,13 @@ func (u *signTransactionUseCase) Sign(
 
 	txHexs := make([]string, 0, len(serializedTxs))
 	for _, serializedTx := range serializedTxs {
-		var rawTx ethtx.RawTx
+		var rawTx domainEthereum.RawTx
 		if err = serializer.GetDefaultSerializer().DecodeFromString(serializedTx, &rawTx); err != nil {
 			return keygenusecase.SignTransactionOutput{}, fmt.Errorf("fail to call serial.DecodeFromString(): %w", err)
 		}
 
 		// Sign
-		var signedRawTx *ethtx.RawTx
+		var signedRawTx *domainEthereum.RawTx
 		signedRawTx, err = u.eth.SignOnRawTransaction(&rawTx, eth.Password)
 		if err != nil {
 			return keygenusecase.SignTransactionOutput{}, fmt.Errorf("fail to call eth.SignOnRawTransaction(): %w", err)

@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/eth"
+	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/testutil"
 )
 
@@ -66,10 +66,10 @@ func (et *ethTest) TestBlockNumber() {
 
 // TestGetBalance is test for GetBalance
 func (et *ethTest) TestGetBalance() {
-	tags := []eth.QuantityTag{
-		eth.QuantityTagLatest,
-		eth.QuantityTagPending,
-		// eth.QuantityTagEarliest,
+	tags := []domainEthereum.QuantityTag{
+		domainEthereum.QuantityTagLatest,
+		domainEthereum.QuantityTagPending,
+		// domainEthereum.QuantityTagEarliest,
 	}
 
 	type args struct {
@@ -115,10 +115,10 @@ func (et *ethTest) TestGetBalance() {
 
 // TestGetTransactionCount is test for GetTransactionCount
 func (et *ethTest) TestGetTransactionCount() {
-	tags := []eth.QuantityTag{
-		eth.QuantityTagLatest,
-		eth.QuantityTagPending,
-		// eth.QuantityTagEarliest,
+	tags := []domainEthereum.QuantityTag{
+		domainEthereum.QuantityTagLatest,
+		domainEthereum.QuantityTagPending,
+		// domainEthereum.QuantityTagEarliest,
 	}
 
 	type args struct {

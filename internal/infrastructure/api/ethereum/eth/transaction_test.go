@@ -10,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/eth"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/testutil"
 )
@@ -156,7 +157,7 @@ func (txt *transactionTest) TestSignAndSendRawTransaction() {
 				t.Logf("tx: %v", tx)
 
 				// check balance
-				balance, err := txt.ETH.GetBalance(ctx, tt.args.receiverAddr, eth.QuantityTagPending)
+				balance, err := txt.ETH.GetBalance(ctx, tt.args.receiverAddr, domainEthereum.QuantityTagPending)
 				txt.NoError(err)
 				txt.NotEqual(0, balance.Uint64())
 
