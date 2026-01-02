@@ -2,14 +2,17 @@
 # Utility Targets
 ###############################################################################
 
+# get timestamp
 .PHONY: timestamp
 timestamp:
 	@echo $(timestamp)
 
+# remove local binaries
 .PHONY: rm-local-binaries
 rm-local-binaries:
 	rm -rf watch keygen sign
 
+# remove local wallet data
 .PHONY: rm-local-wallet-dat
 rm-local-wallet-dat:
 	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/wallet.dat
@@ -21,6 +24,7 @@ rm-local-wallet-dat:
 	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/sign4
 	rm -rf ~/Library/Application\ Support/Bitcoin/testnet3/wallets/sign5
 
+# remove docker wallet data
 .PHONY: rm-docker-wallet-dat
 rm-docker-wallet-dat:
 	# BTC
@@ -42,7 +46,7 @@ rm-docker-wallet-dat:
 	rm -rf ./docker/bch/data/testnet3/wallets/sign4
 	rm -rf ./docker/bch/data/testnet3/wallets/sign5
 
-
+# remove local files
 .PHONY: rm-files
 rm-files:
 	rm -rf ./data/btc/address/*.csv
@@ -54,8 +58,14 @@ rm-files:
 	touch ./data/btc/tx/payment/.gitkeep
 	touch ./data/btc/tx/transfer/.gitkeep
 
+# clean
 .PHONY: clean
 clean: rm-db-volumes rm-local-wallet-dat
+
+# find empty directories
+.PHONY: find-empty-dirs
+find-empty-dirs:
+	find . -type d -empty
 
 #after that, run `make up-docker-db`
 
