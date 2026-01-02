@@ -12,7 +12,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/di"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen"
 	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
@@ -67,9 +66,9 @@ func initializeWallet() error {
 	}
 
 	// account config
-	accountConf := &account.AccountRoot{}
+	accountConf := &config.AccountRoot{}
 	if accountConfPath != "" {
-		accountConf, err = account.NewAccount(accountConfPath)
+		accountConf, err = config.NewAccount(accountConfPath)
 		if err != nil {
 			return fmt.Errorf("failed to load account config: %w", err)
 		}

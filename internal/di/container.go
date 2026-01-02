@@ -28,7 +28,6 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/erc20"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/contract"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
@@ -115,7 +114,7 @@ type container struct {
 	pkgContainer pkgdi.PkgContainer
 	// config
 	conf        *config.WalletRoot
-	accountConf *account.AccountRoot
+	accountConf *config.AccountRoot
 	// wallet
 	walletType domainWallet.WalletType
 	btc        portsBtc.Bitcoiner
@@ -137,7 +136,7 @@ type container struct {
 // NewContainer is to create container interface
 func NewContainer(
 	conf *config.WalletRoot,
-	accountConf *account.AccountRoot,
+	accountConf *config.AccountRoot,
 	walletType domainWallet.WalletType,
 ) Container {
 	return &container{
@@ -602,9 +601,9 @@ func (c *container) getKeyType() domainKey.KeyType {
 func (c *container) newMultiAccount() *domainAccount.MultisigConfig {
 	if c.multisig == nil {
 		if c.accountConf == nil || c.accountConf.Multisigs == nil {
-			c.multisig = account.NewMultisigConfig(nil)
+			c.multisig = config.NewMultisigConfig(nil)
 		} else {
-			c.multisig = account.NewMultisigConfig(c.accountConf.Multisigs)
+			c.multisig = config.NewMultisigConfig(c.accountConf.Multisigs)
 		}
 	}
 	return c.multisig

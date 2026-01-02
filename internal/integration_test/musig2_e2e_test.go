@@ -18,7 +18,6 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 
@@ -272,7 +271,7 @@ func setupKeygenWallet(t *testing.T) di.Container {
 	require.NoError(t, err, "Failed to load keygen wallet config")
 
 	// Load account configuration
-	accountConf, err := account.NewAccount(accountConfPath)
+	accountConf, err := config.NewAccount(accountConfPath)
 	require.NoError(t, err, "Failed to load account config")
 
 	// Create DI container (no error return)
@@ -294,7 +293,7 @@ func setupSignWallet(t *testing.T, authName string) di.Container {
 	require.NoError(t, err, "Failed to load sign wallet config")
 
 	// Load account configuration
-	accountConf, err := account.NewAccount(accountConfPath)
+	accountConf, err := config.NewAccount(accountConfPath)
 	require.NoError(t, err, "Failed to load account config")
 
 	// Note: authName override would be done via environment variables or command-line flags
@@ -320,7 +319,7 @@ func setupWatchWallet(t *testing.T) di.Container {
 	require.NoError(t, err, "Failed to load watch wallet config")
 
 	// Load account configuration
-	accountConf, err := account.NewAccount(accountConfPath)
+	accountConf, err := config.NewAccount(accountConfPath)
 	require.NoError(t, err, "Failed to load account config")
 
 	// Create DI container (no error return)

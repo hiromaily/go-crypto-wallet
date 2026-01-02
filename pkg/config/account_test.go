@@ -1,16 +1,72 @@
-package account
+package config
 
 import (
+	"os"
 	"testing"
 
+	"github.com/bookerzzz/grok"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	configutil "github.com/hiromaily/go-crypto-wallet/pkg/config/testutil"
 )
 
+// TestNewAccount tests the NewAccount function for loading account configuration from TOML files.
+func TestNewAccount(t *testing.T) {
+	// t.SkipNow()
+	confPath := configutil.GetConfigFilePath("account.toml")
+	conf, err := NewAccount(confPath)
+	require.NoError(t, err, "fail to create config")
+	grok.Value(conf)
+}
+
+// TestNewAccountWithViper tests account loading using viper.
+// This verifies that the TOML file is properly loaded and unmarshaled into AccountRoot structure.
+func TestNewAccountWithViper(t *testing.T) {
+	confPath := configutil.GetConfigFilePath("account.toml")
+
+	// Skip if config file doesn't exist
+	if _, err := os.Stat(confPath); os.IsNotExist(err) {
+		t.Skipf("Config file not found: %s", confPath)
+	}
+
+	conf, err := NewAccount(confPath)
+	require.NoError(t, err, "NewAccount() should not return error")
+	require.NotNil(t, conf, "NewAccount() returned nil config")
+
+	// Verify that viper properly loaded the TOML file
+	assert.NotEmpty(t, conf.Types, "Account types should not be empty")
+	assert.NotEmpty(t, conf.DepositReceiver, "DepositReceiver should not be empty")
+	assert.NotEmpty(t, conf.PaymentSender, "PaymentSender should not be empty")
+	assert.NotEmpty(t, conf.Multisigs, "Multisigs should not be empty")
+
+	// Verify multisig structure loaded correctly
+	for i, ms := range conf.Multisigs {
+		assert.NotEmpty(t, ms.Type, "Multisig[%d].Type should not be empty", i)
+		assert.NotZero(t, ms.Required, "Multisig[%d].Required should not be zero", i)
+		assert.NotEmpty(t, ms.AuthUsers, "Multisig[%d].AuthUsers should not be empty", i)
+	}
+}
+
+// TestLoadAccount tests the TOML loading functionality indirectly through NewAccount.
+// This test verifies that NewAccount correctly loads and validates account configuration
+// from a TOML file using the common loadTOML function.
+func TestLoadAccount(t *testing.T) {
+	confPath := configutil.GetConfigFilePath("account.toml")
+
+	// Skip if config file doesn't exist
+	if _, err := os.Stat(confPath); os.IsNotExist(err) {
+		t.Skipf("Config file not found: %s", confPath)
+	}
+
+	conf, err := NewAccount(confPath)
+	require.NoError(t, err, "NewAccount() should not return error")
+	require.NotNil(t, conf, "NewAccount() returned nil config")
+}
+
 // TestNewMultisigConfig tests the conversion from AccountMultisig config to domain MultisigConfig.
-// This is an integration test that verifies the conversion logic works correctly.
+// This verifies that the conversion logic works correctly.
 func TestNewMultisigConfig(t *testing.T) {
 	tests := []struct {
 		name         string

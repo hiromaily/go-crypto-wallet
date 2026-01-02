@@ -1,8 +1,14 @@
 package config
 
 import (
+	"errors"
+	"fmt"
+
+	"github.com/go-playground/validator/v10"
+
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
@@ -36,10 +42,11 @@ type Bitcoin struct {
 	Fee   BitcoinFee   `toml:"fee" mapstructure:"fee"`
 }
 
-// BitcoinBlock block information of Bitcoin
-// FIXME: keygen/signature wallet doesn't have this value
+// BitcoinBlock block information of Bitcoin.
 //
-//	so validation can not be used
+// Note: This field is only required for watch-only wallets.
+// Keygen and signature wallets do not require this value, so validation
+// is conditionally applied based on wallet type.
 type BitcoinBlock struct {
 	ConfirmationNum uint64 `toml:"confirmation_num" mapstructure:"confirmation_num"`
 }
@@ -142,4 +149,82 @@ type PubKeyFile struct {
 // AddressFile saved address file path which is used when import/export file
 type AddressFile struct {
 	BasePath string `toml:"base_path" mapstructure:"base_path" validate:"required"`
+}
+
+// NewWallet creates wallet config by loading it from the specified file.
+//
+// This function:
+//  1. Validates the file path
+//  2. Loads the TOML configuration file
+//  3. Validates the configuration structure based on wallet type and coin type
+//  4. Returns the validated WalletRoot configuration
+//
+// Returns an error if:
+//   - File path is empty
+//   - File cannot be read
+//   - TOML unmarshaling fails
+//   - Validation fails
+func NewWallet(file string, wtype domainWallet.WalletType, coinTypeCode domainCoin.CoinTypeCode) (*WalletRoot, error) {
+	if file == "" {
+		return nil, errors.New("wallet config file path cannot be empty")
+	}
+
+	conf, err := loadTOML[WalletRoot](file)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := conf.validate(wtype, coinTypeCode); err != nil {
+		return nil, fmt.Errorf("wallet config validation failed: %w", err)
+	}
+
+	return conf, nil
+}
+
+// loadWallet loads wallet configuration from a TOML file.
+// This function is kept for backward compatibility with tests.
+func loadWallet(path string) (*WalletRoot, error) {
+	return loadTOML[WalletRoot](path)
+}
+
+// validate validates the wallet configuration structure based on wallet type and coin type.
+func (c *WalletRoot) validate(wtype domainWallet.WalletType, coinTypeCode domainCoin.CoinTypeCode) error {
+	validate := validator.New()
+
+	switch coinTypeCode {
+	case domainCoin.BTC, domainCoin.BCH:
+		if err := validate.StructExcept(c, "Ethereum", "Ripple"); err != nil {
+			return err
+		}
+		switch wtype {
+		case domainWallet.WalletTypeWatchOnly:
+			if c.Bitcoin.Block.ConfirmationNum == 0 {
+				return errors.New("block ConfirmationNum is required in toml file")
+			}
+		case domainWallet.WalletTypeKeyGen, domainWallet.WalletTypeSign:
+			// No additional validation needed
+		default:
+		}
+	case domainCoin.ETH, domainCoin.ERC20:
+		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ripple"); err != nil {
+			return err
+		}
+	case domainCoin.XRP:
+		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ethereum"); err != nil {
+			return err
+		}
+	case domainCoin.LTC, domainCoin.HYT:
+		// Not implemented yet
+	default:
+	}
+
+	return nil
+}
+
+// ValidateERC20 validates that the specified ERC20 token is configured.
+func (c *WalletRoot) ValidateERC20(token domainCoin.ERC20Token) error {
+	if _, ok := c.Ethereum.ERC20s[token]; !ok {
+		return fmt.Errorf("erc20 token information for [%s] is required", token.String())
+	}
+	return nil
 }
