@@ -6,11 +6,12 @@ import (
 
 	"google.golang.org/protobuf/types/known/emptypb"
 
+	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // GenerateAddress calls GenerateAddress API
-func (r *Ripple) GenerateAddress(ctx context.Context) (*ResponseGenerateAddress, error) {
+func (r *Ripple) GenerateAddress(ctx context.Context) (*dtoRipple.ResponseGenerateAddress, error) {
 	req := &emptypb.Empty{}
 
 	res, err := r.API.addressClient.GenerateAddress(ctx, req)
@@ -24,11 +25,12 @@ func (r *Ripple) GenerateAddress(ctx context.Context) (*ResponseGenerateAddress,
 		"Secret", res.Secret,
 	)
 
-	return res, nil
+	// Convert infrastructure type to DTO
+	return ToDTOResponseGenerateAddress(res), nil
 }
 
 // GenerateXAddress calls GenerateXAddress API
-func (r *Ripple) GenerateXAddress(ctx context.Context) (*ResponseGenerateXAddress, error) {
+func (r *Ripple) GenerateXAddress(ctx context.Context) (*dtoRipple.ResponseGenerateXAddress, error) {
 	req := &emptypb.Empty{}
 
 	res, err := r.API.addressClient.GenerateXAddress(ctx, req)
@@ -40,7 +42,8 @@ func (r *Ripple) GenerateXAddress(ctx context.Context) (*ResponseGenerateXAddres
 		"Secret", res.Secret,
 	)
 
-	return res, nil
+	// Convert infrastructure type to DTO
+	return ToDTOResponseGenerateXAddress(res), nil
 }
 
 // IsValidAddress calls IsValidAddress API

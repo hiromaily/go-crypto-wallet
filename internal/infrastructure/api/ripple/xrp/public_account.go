@@ -3,6 +3,8 @@ package xrp
 import (
 	"context"
 	"fmt"
+
+	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
 )
 
 // https://xrpl.org/account-methods.html
@@ -80,7 +82,9 @@ type ResponseAccountInfo struct {
 }
 
 // AccountChannels calls account_channels method
-func (r *Ripple) AccountChannels(ctx context.Context, sender, receiver string) (*ResponseAccountChannels, error) {
+func (r *Ripple) AccountChannels(
+	ctx context.Context, sender, receiver string,
+) (*dtoRipple.ResponseAccountChannels, error) {
 	req := AccountChannels{
 		ID:                 1,
 		Command:            "account_channels",
@@ -92,11 +96,13 @@ func (r *Ripple) AccountChannels(ctx context.Context, sender, receiver string) (
 	if err := r.wsPublic.Call(ctx, &req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsClient.Call(account_channels): %w", err)
 	}
-	return &res, nil
+
+	// Convert infrastructure type to DTO
+	return ToDTOResponseAccountChannels(&res), nil
 }
 
 // AccountInfo calls account_channels method
-func (r *Ripple) AccountInfo(ctx context.Context, address string) (*ResponseAccountInfo, error) {
+func (r *Ripple) AccountInfo(ctx context.Context, address string) (*dtoRipple.ResponseAccountInfo, error) {
 	req := AccountInfo{
 		ID:          2,
 		Command:     "account_info",
@@ -109,5 +115,7 @@ func (r *Ripple) AccountInfo(ctx context.Context, address string) (*ResponseAcco
 	if err := r.wsPublic.Call(ctx, &req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsClient.Call(account_info): %w", err)
 	}
-	return &res, nil
+
+	// Convert infrastructure type to DTO
+	return ToDTOResponseAccountInfo(&res), nil
 }

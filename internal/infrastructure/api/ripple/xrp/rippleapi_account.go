@@ -5,11 +5,12 @@ import (
 	"errors"
 	"fmt"
 
+	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // GetAccountInfo calls GetAccountInfo API
-func (r *Ripple) GetAccountInfo(ctx context.Context, address string) (*ResponseGetAccountInfo, error) {
+func (r *Ripple) GetAccountInfo(ctx context.Context, address string) (*dtoRipple.ResponseGetAccountInfo, error) {
 	// validation
 	if address == "" {
 		return nil, errors.New("address is empty")
@@ -34,5 +35,6 @@ func (r *Ripple) GetAccountInfo(ctx context.Context, address string) (*ResponseG
 		"PreviousAffectingTransactionLedgerVersion", res.PreviousAffectingTransactionLedgerVersion,
 	)
 
-	return res, nil
+	// Convert infrastructure type to DTO
+	return ToDTOResponseGetAccountInfo(res), nil
 }

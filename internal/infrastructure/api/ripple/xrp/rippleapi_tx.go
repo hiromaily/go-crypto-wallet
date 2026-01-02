@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 
+	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -109,14 +110,17 @@ type TxOrderbookChange struct {
 
 // PrepareTransaction calls PrepareTransaction API
 func (r *Ripple) PrepareTransaction(
-	ctx context.Context, senderAccount, receiverAccount string, amount float64, instructions *Instructions,
-) (*TxInput, string, error) {
+	ctx context.Context, senderAccount, receiverAccount string, amount float64, instructions *dtoRipple.Instructions,
+) (*dtoRipple.TxInput, string, error) {
+	// Convert DTO to infrastructure type
+	infraInstructions := ToInfraInstructions(instructions)
+
 	req := &RequestPrepareTransaction{
 		TxType:          EnumTransactionType_TX_PAYMENT,
 		SenderAccount:   senderAccount,
 		Amount:          amount,
 		ReceiverAccount: receiverAccount,
-		Instructions:    instructions,
+		Instructions:    infraInstructions,
 	}
 
 	res, err := r.API.txClient.PrepareTransaction(ctx, req)
@@ -134,14 +138,20 @@ func (r *Ripple) PrepareTransaction(
 		return nil, "", fmt.Errorf("fail to call json.Unmarshal(txJSON): %w", err)
 	}
 
-	return &txInput, unquotedJSON, nil
+	// Convert infrastructure type to DTO
+	return ToDTOTxInput(&txInput), unquotedJSON, nil
 }
 
 // SignTransaction calls SignTransaction API
 // Offline functionality
 // - https://xrpl.org/rippleapi-reference.html#offline-functionality
-func (r *Ripple) SignTransaction(ctx context.Context, txInput *TxInput, secret string) (string, string, error) {
-	strJSON, err := json.Marshal(txInput)
+func (r *Ripple) SignTransaction(
+	ctx context.Context, txInput *dtoRipple.TxInput, secret string,
+) (string, string, error) {
+	// Convert DTO to infrastructure type
+	infraTxInput := ToInfraTxInput(txInput)
+
+	strJSON, err := json.Marshal(infraTxInput)
 	if err != nil {
 		return "", "", fmt.Errorf("fail to call json.Marshal(txJSON): %w", err)
 	}
@@ -175,7 +185,7 @@ func (r *Ripple) CombineTransaction(ctx context.Context, signedTxs []string) (st
 
 // SubmitTransaction calls SubmitTransaction API
 // - signedTx is returned TxBlob by SignTransaction()
-func (r *Ripple) SubmitTransaction(ctx context.Context, signedTx string) (*SentTx, uint64, error) {
+func (r *Ripple) SubmitTransaction(ctx context.Context, signedTx string) (*dtoRipple.SentTx, uint64, error) {
 	req := &RequestSubmitTransaction{
 		TxBlob: signedTx,
 	}
@@ -199,8 +209,9 @@ func (r *Ripple) SubmitTransaction(ctx context.Context, signedTx string) (*SentT
 	// res.EarliestLedgerVersion => for when calling GetTransaction()
 	// sentTxJSON.TxJSON.LastLedgerSequence => for when calling WaitValidation()
 
-	return &sentTxJSON, res.EarliestLedgerVersion, nil
-	// return &sentTxJSON, sentTxJSON.TxJSON.LastLedgerSequence, nil
+	// Convert infrastructure type to DTO
+	return ToDTOSentTx(&sentTxJSON), res.EarliestLedgerVersion, nil
+	// return ToDTOSentTx(&sentTxJSON), sentTxJSON.TxJSON.LastLedgerSequence, nil
 }
 
 // WaitValidation calls WaitValidation API
@@ -263,7 +274,9 @@ func (r *Ripple) WaitValidation(ctx context.Context, targetledgerVarsion uint64)
 }
 
 // GetTransaction calls GetTransaction API
-func (r *Ripple) GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*TxInfo, error) {
+func (r *Ripple) GetTransaction(
+	ctx context.Context, txID string, targetLedgerVersion uint64,
+) (*dtoRipple.TxInfo, error) {
 	req := &RequestGetTransaction{
 		TxID:             txID,
 		MinLedgerVersion: targetLedgerVersion,
@@ -287,5 +300,7 @@ func (r *Ripple) GetTransaction(ctx context.Context, txID string, targetLedgerVe
 	}
 	// TODO: check
 	// txInfo.Outcome.Result : tesSUCCESS
-	return &txInfo, nil
+
+	// Convert infrastructure type to DTO
+	return ToDTOTxInfo(&txInfo), nil
 }

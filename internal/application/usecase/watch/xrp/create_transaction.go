@@ -9,6 +9,7 @@ import (
 
 	"github.com/bookerzzz/grok"
 
+	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
 	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
@@ -247,7 +248,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	}
 
 	// call CreateRawTransaction
-	instructions := &xrp.Instructions{
+	instructions := &dtoRipple.Instructions{
 		MaxLedgerVersionOffset: xrp.MaxLedgerVersionOffset,
 	}
 	txJSON, rawTxString, err := u.rippler.CreateRawTransaction(
@@ -360,13 +361,13 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 	var sequence uint64
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
-		instructions := &xrp.Instructions{
+		instructions := &dtoRipple.Instructions{
 			MaxLedgerVersionOffset: xrp.MaxLedgerVersionOffset,
 		}
 		if sequence != 0 {
 			instructions.Sequence = sequence
 		}
-		var txJSON *xrp.TxInput
+		var txJSON *dtoRipple.TxInput
 		var rawTxString string
 		txJSON, rawTxString, err = u.rippler.CreateRawTransaction(
 			ctx, val.Address, depositAddr.WalletAddress, 0, instructions)
@@ -497,7 +498,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	var sequence uint64
 	for _, userPayment := range userPayments {
 		// call CreateRawTransaction
-		instructions := &xrp.Instructions{
+		instructions := &dtoRipple.Instructions{
 			MaxLedgerVersionOffset: xrp.MaxLedgerVersionOffset,
 		}
 		if sequence != 0 {

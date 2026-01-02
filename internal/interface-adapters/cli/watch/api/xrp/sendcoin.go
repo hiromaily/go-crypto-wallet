@@ -9,6 +9,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"google.golang.org/grpc/status"
 
+	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
 	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
@@ -22,7 +23,7 @@ func runSendCoin(xrpAPI portsRipple.Rippler, txData *config.RippleTxData, receiv
 
 	// send coin
 	// PrepareTransaction
-	instructions := &xrp.Instructions{
+	instructions := &dtoRipple.Instructions{
 		MaxLedgerVersionOffset: xrp.MaxLedgerVersionOffset,
 	}
 	fmt.Printf("sender: %s, receiver: %s, amount: %v\n", txData.Account, receiverAddr, amount)
