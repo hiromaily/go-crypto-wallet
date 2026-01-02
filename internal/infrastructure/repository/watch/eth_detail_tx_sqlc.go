@@ -8,6 +8,7 @@ import (
 
 	portsPersistence "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
@@ -28,8 +29,68 @@ func NewETHDetailTXInputRepositorySqlc(
 	}
 }
 
+// convertToEthDetailTx converts sqlcgen.EthDetailTx to domain.EthDetailTx entity
+func convertToEthDetailTx(sqlcTx *sqlcgen.EthDetailTx) (*domainEth.EthDetailTx, error) {
+	tx := &domainEth.EthDetailTx{
+		ID:              sqlcTx.ID,
+		TxID:            sqlcTx.TxID,
+		UUID:            sqlcTx.Uuid,
+		CurrentTxType:   domainTx.TxTypeFromInt8(sqlcTx.CurrentTxType),
+		SenderAccount:   sqlcTx.SenderAccount,
+		SenderAddress:   sqlcTx.SenderAddress,
+		ReceiverAccount: sqlcTx.ReceiverAccount,
+		ReceiverAddress: sqlcTx.ReceiverAddress,
+		Amount:          sqlcTx.Amount,
+		Fee:             sqlcTx.Fee,
+		GasLimit:        sqlcTx.GasLimit,
+		Nonce:           sqlcTx.Nonce,
+		UnsignedHexTx:   sqlcTx.UnsignedHexTx,
+		SignedHexTx:     sqlcTx.SignedHexTx,
+		SentHashTx:      sqlcTx.SentHashTx,
+	}
+
+	if sqlcTx.UnsignedUpdatedAt.Valid {
+		tx.UnsignedUpdatedAt = &sqlcTx.UnsignedUpdatedAt.Time
+	}
+	if sqlcTx.SentUpdatedAt.Valid {
+		tx.SentUpdatedAt = &sqlcTx.SentUpdatedAt.Time
+	}
+
+	return tx, nil
+}
+
+// convertFromEthDetailTx converts domain.EthDetailTx entity to sqlcgen.EthDetailTx
+func convertFromEthDetailTx(tx *domainEth.EthDetailTx) *sqlcgen.EthDetailTx {
+	sqlcTx := &sqlcgen.EthDetailTx{
+		ID:              tx.ID,
+		TxID:            tx.TxID,
+		Uuid:            tx.UUID,
+		CurrentTxType:   tx.CurrentTxType.Int8(),
+		SenderAccount:   tx.SenderAccount,
+		SenderAddress:   tx.SenderAddress,
+		ReceiverAccount: tx.ReceiverAccount,
+		ReceiverAddress: tx.ReceiverAddress,
+		Amount:          tx.Amount,
+		Fee:             tx.Fee,
+		GasLimit:        tx.GasLimit,
+		Nonce:           tx.Nonce,
+		UnsignedHexTx:   tx.UnsignedHexTx,
+		SignedHexTx:     tx.SignedHexTx,
+		SentHashTx:      tx.SentHashTx,
+	}
+
+	if tx.UnsignedUpdatedAt != nil {
+		sqlcTx.UnsignedUpdatedAt = sql.NullTime{Time: *tx.UnsignedUpdatedAt, Valid: true}
+	}
+	if tx.SentUpdatedAt != nil {
+		sqlcTx.SentUpdatedAt = sql.NullTime{Time: *tx.SentUpdatedAt, Valid: true}
+	}
+
+	return sqlcTx
+}
+
 // GetOne get one record by ID
-func (r *ETHDetailTXInputRepositorySqlc) GetOne(id int64) (*sqlcgen.EthDetailTx, error) {
+func (r *ETHDetailTXInputRepositorySqlc) GetOne(id int64) (*domainEth.EthDetailTx, error) {
 	ctx := context.Background()
 
 	ethTx, err := r.queries.GetETHDetailTXByID(ctx, id)
@@ -37,11 +98,11 @@ func (r *ETHDetailTXInputRepositorySqlc) GetOne(id int64) (*sqlcgen.EthDetailTx,
 		return nil, fmt.Errorf("failed to call GetETHDetailTXByID(): %w", err)
 	}
 
-	return &ethTx, nil
+	return convertToEthDetailTx(&ethTx)
 }
 
 // GetAllByTxID returns all records searched by tx_id
-func (r *ETHDetailTXInputRepositorySqlc) GetAllByTxID(id int64) ([]*sqlcgen.EthDetailTx, error) {
+func (r *ETHDetailTXInputRepositorySqlc) GetAllByTxID(id int64) ([]*domainEth.EthDetailTx, error) {
 	ctx := context.Background()
 
 	ethTxs, err := r.queries.GetETHDetailTXsByTxID(ctx, id)
@@ -49,9 +110,13 @@ func (r *ETHDetailTXInputRepositorySqlc) GetAllByTxID(id int64) ([]*sqlcgen.EthD
 		return nil, fmt.Errorf("failed to call GetETHDetailTXsByTxID(): %w", err)
 	}
 
-	result := make([]*sqlcgen.EthDetailTx, len(ethTxs))
+	result := make([]*domainEth.EthDetailTx, len(ethTxs))
 	for i := range ethTxs {
-		result[i] = &ethTxs[i]
+		domainTx, err := convertToEthDetailTx(&ethTxs[i])
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert eth detail tx: %w", err)
+		}
+		result[i] = domainTx
 	}
 
 	return result, nil
@@ -73,26 +138,27 @@ func (r *ETHDetailTXInputRepositorySqlc) GetSentHashTx(txType domainTx.TxType) (
 }
 
 // Insert inserts one record
-func (r *ETHDetailTXInputRepositorySqlc) Insert(txItem *sqlcgen.EthDetailTx) error {
+func (r *ETHDetailTXInputRepositorySqlc) Insert(txItem *domainEth.EthDetailTx) error {
 	ctx := context.Background()
 
+	sqlcTx := convertFromEthDetailTx(txItem)
 	_, err := r.queries.InsertETHDetailTX(ctx, sqlcgen.InsertETHDetailTXParams{
-		TxID:              txItem.TxID,
-		Uuid:              txItem.Uuid,
-		CurrentTxType:     txItem.CurrentTxType,
-		SenderAccount:     txItem.SenderAccount,
-		SenderAddress:     txItem.SenderAddress,
-		ReceiverAccount:   txItem.ReceiverAccount,
-		ReceiverAddress:   txItem.ReceiverAddress,
-		Amount:            txItem.Amount,
-		Fee:               txItem.Fee,
-		GasLimit:          txItem.GasLimit,
-		Nonce:             txItem.Nonce,
-		UnsignedHexTx:     txItem.UnsignedHexTx,
-		SignedHexTx:       txItem.SignedHexTx,
-		SentHashTx:        txItem.SentHashTx,
-		UnsignedUpdatedAt: txItem.UnsignedUpdatedAt,
-		SentUpdatedAt:     txItem.SentUpdatedAt,
+		TxID:              sqlcTx.TxID,
+		Uuid:              sqlcTx.Uuid,
+		CurrentTxType:     sqlcTx.CurrentTxType,
+		SenderAccount:     sqlcTx.SenderAccount,
+		SenderAddress:     sqlcTx.SenderAddress,
+		ReceiverAccount:   sqlcTx.ReceiverAccount,
+		ReceiverAddress:   sqlcTx.ReceiverAddress,
+		Amount:            sqlcTx.Amount,
+		Fee:               sqlcTx.Fee,
+		GasLimit:          sqlcTx.GasLimit,
+		Nonce:             sqlcTx.Nonce,
+		UnsignedHexTx:     sqlcTx.UnsignedHexTx,
+		SignedHexTx:       sqlcTx.SignedHexTx,
+		SentHashTx:        sqlcTx.SentHashTx,
+		UnsignedUpdatedAt: sqlcTx.UnsignedUpdatedAt,
+		SentUpdatedAt:     sqlcTx.SentUpdatedAt,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to call InsertETHDetailTX(): %w", err)
@@ -102,7 +168,7 @@ func (r *ETHDetailTXInputRepositorySqlc) Insert(txItem *sqlcgen.EthDetailTx) err
 }
 
 // InsertBulk inserts multiple records
-func (r *ETHDetailTXInputRepositorySqlc) InsertBulk(txItems []*sqlcgen.EthDetailTx) error {
+func (r *ETHDetailTXInputRepositorySqlc) InsertBulk(txItems []*domainEth.EthDetailTx) error {
 	for _, item := range txItems {
 		if err := r.Insert(item); err != nil {
 			return err

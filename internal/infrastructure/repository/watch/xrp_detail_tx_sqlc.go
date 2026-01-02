@@ -9,6 +9,7 @@ import (
 	portsPersistence "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
+	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
@@ -28,8 +29,72 @@ func NewXRPDetailTxInputRepositorySqlc(
 	}
 }
 
+// convertToXrpDetailTx converts sqlcgen.XrpDetailTx to domain.XrpDetailTx entity
+func convertToXrpDetailTx(sqlcTx *sqlcgen.XrpDetailTx) (*domainXrp.XrpDetailTx, error) {
+	tx := &domainXrp.XrpDetailTx{
+		ID:                    sqlcTx.ID,
+		TxID:                  sqlcTx.TxID,
+		UUID:                  sqlcTx.Uuid,
+		CurrentTxType:         domainTx.TxTypeFromInt8(sqlcTx.CurrentTxType),
+		SenderAccount:         sqlcTx.SenderAccount,
+		SenderAddress:         sqlcTx.SenderAddress,
+		ReceiverAccount:       sqlcTx.ReceiverAccount,
+		ReceiverAddress:       sqlcTx.ReceiverAddress,
+		Amount:                sqlcTx.Amount,
+		XrpTxType:             sqlcTx.XrpTxType,
+		Fee:                   sqlcTx.Fee,
+		Flags:                 sqlcTx.Flags,
+		LastLedgerSequence:    sqlcTx.LastLedgerSequence,
+		Sequence:              sqlcTx.Sequence,
+		SigningPubkey:         sqlcTx.SigningPubkey,
+		TxnSignature:          sqlcTx.TxnSignature,
+		Hash:                  sqlcTx.Hash,
+		EarliestLedgerVersion: sqlcTx.EarliestLedgerVersion,
+		SignedTxID:            sqlcTx.SignedTxID,
+		TxBlob:                sqlcTx.TxBlob,
+	}
+
+	if sqlcTx.SentUpdatedAt.Valid {
+		tx.SentUpdatedAt = &sqlcTx.SentUpdatedAt.Time
+	}
+
+	return tx, nil
+}
+
+// convertFromXrpDetailTx converts domain.XrpDetailTx entity to sqlcgen.XrpDetailTx
+func convertFromXrpDetailTx(tx *domainXrp.XrpDetailTx) *sqlcgen.XrpDetailTx {
+	sqlcTx := &sqlcgen.XrpDetailTx{
+		ID:                    tx.ID,
+		TxID:                  tx.TxID,
+		Uuid:                  tx.UUID,
+		CurrentTxType:         tx.CurrentTxType.Int8(),
+		SenderAccount:         tx.SenderAccount,
+		SenderAddress:         tx.SenderAddress,
+		ReceiverAccount:       tx.ReceiverAccount,
+		ReceiverAddress:       tx.ReceiverAddress,
+		Amount:                tx.Amount,
+		XrpTxType:             tx.XrpTxType,
+		Fee:                   tx.Fee,
+		Flags:                 tx.Flags,
+		LastLedgerSequence:    tx.LastLedgerSequence,
+		Sequence:              tx.Sequence,
+		SigningPubkey:         tx.SigningPubkey,
+		TxnSignature:          tx.TxnSignature,
+		Hash:                  tx.Hash,
+		EarliestLedgerVersion: tx.EarliestLedgerVersion,
+		SignedTxID:            tx.SignedTxID,
+		TxBlob:                tx.TxBlob,
+	}
+
+	if tx.SentUpdatedAt != nil {
+		sqlcTx.SentUpdatedAt = sql.NullTime{Time: *tx.SentUpdatedAt, Valid: true}
+	}
+
+	return sqlcTx
+}
+
 // GetOne get one record by ID
-func (r *XRPDetailTxInputRepositorySqlc) GetOne(id int64) (*sqlcgen.XrpDetailTx, error) {
+func (r *XRPDetailTxInputRepositorySqlc) GetOne(id int64) (*domainXrp.XrpDetailTx, error) {
 	ctx := context.Background()
 
 	xrpTx, err := r.queries.GetXrpDetailTxByID(ctx, id)
@@ -37,11 +102,11 @@ func (r *XRPDetailTxInputRepositorySqlc) GetOne(id int64) (*sqlcgen.XrpDetailTx,
 		return nil, fmt.Errorf("failed to call GetXrpDetailTxByID(): %w", err)
 	}
 
-	return &xrpTx, nil
+	return convertToXrpDetailTx(&xrpTx)
 }
 
 // GetAllByTxID returns all records searched by tx_id
-func (r *XRPDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*sqlcgen.XrpDetailTx, error) {
+func (r *XRPDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*domainXrp.XrpDetailTx, error) {
 	ctx := context.Background()
 
 	xrpTxs, err := r.queries.GetXrpDetailTxsByTxID(ctx, id)
@@ -49,9 +114,13 @@ func (r *XRPDetailTxInputRepositorySqlc) GetAllByTxID(id int64) ([]*sqlcgen.XrpD
 		return nil, fmt.Errorf("failed to call GetXrpDetailTxsByTxID(): %w", err)
 	}
 
-	result := make([]*sqlcgen.XrpDetailTx, len(xrpTxs))
+	result := make([]*domainXrp.XrpDetailTx, len(xrpTxs))
 	for i := range xrpTxs {
-		result[i] = &xrpTxs[i]
+		domainTx, err := convertToXrpDetailTx(&xrpTxs[i])
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert xrp detail tx: %w", err)
+		}
+		result[i] = domainTx
 	}
 
 	return result, nil
@@ -73,30 +142,31 @@ func (r *XRPDetailTxInputRepositorySqlc) GetSentHashTx(txType domainTx.TxType) (
 }
 
 // Insert inserts one record
-func (r *XRPDetailTxInputRepositorySqlc) Insert(txItem *sqlcgen.XrpDetailTx) error {
+func (r *XRPDetailTxInputRepositorySqlc) Insert(txItem *domainXrp.XrpDetailTx) error {
 	ctx := context.Background()
 
+	sqlcTx := convertFromXrpDetailTx(txItem)
 	_, err := r.queries.InsertXrpDetailTx(ctx, sqlcgen.InsertXrpDetailTxParams{
-		TxID:                  txItem.TxID,
-		Uuid:                  txItem.Uuid,
-		CurrentTxType:         txItem.CurrentTxType,
-		SenderAccount:         txItem.SenderAccount,
-		SenderAddress:         txItem.SenderAddress,
-		ReceiverAccount:       txItem.ReceiverAccount,
-		ReceiverAddress:       txItem.ReceiverAddress,
-		Amount:                txItem.Amount,
-		XrpTxType:             txItem.XrpTxType,
-		Fee:                   txItem.Fee,
-		Flags:                 txItem.Flags,
-		LastLedgerSequence:    txItem.LastLedgerSequence,
-		Sequence:              txItem.Sequence,
-		SigningPubkey:         txItem.SigningPubkey,
-		TxnSignature:          txItem.TxnSignature,
-		Hash:                  txItem.Hash,
-		EarliestLedgerVersion: txItem.EarliestLedgerVersion,
-		SignedTxID:            txItem.SignedTxID,
-		TxBlob:                txItem.TxBlob,
-		SentUpdatedAt:         txItem.SentUpdatedAt,
+		TxID:                  sqlcTx.TxID,
+		Uuid:                  sqlcTx.Uuid,
+		CurrentTxType:         sqlcTx.CurrentTxType,
+		SenderAccount:         sqlcTx.SenderAccount,
+		SenderAddress:         sqlcTx.SenderAddress,
+		ReceiverAccount:       sqlcTx.ReceiverAccount,
+		ReceiverAddress:       sqlcTx.ReceiverAddress,
+		Amount:                sqlcTx.Amount,
+		XrpTxType:             sqlcTx.XrpTxType,
+		Fee:                   sqlcTx.Fee,
+		Flags:                 sqlcTx.Flags,
+		LastLedgerSequence:    sqlcTx.LastLedgerSequence,
+		Sequence:              sqlcTx.Sequence,
+		SigningPubkey:         sqlcTx.SigningPubkey,
+		TxnSignature:          sqlcTx.TxnSignature,
+		Hash:                  sqlcTx.Hash,
+		EarliestLedgerVersion: sqlcTx.EarliestLedgerVersion,
+		SignedTxID:            sqlcTx.SignedTxID,
+		TxBlob:                sqlcTx.TxBlob,
+		SentUpdatedAt:         sqlcTx.SentUpdatedAt,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to call InsertXrpDetailTx(): %w", err)
@@ -106,7 +176,7 @@ func (r *XRPDetailTxInputRepositorySqlc) Insert(txItem *sqlcgen.XrpDetailTx) err
 }
 
 // InsertBulk inserts multiple records
-func (r *XRPDetailTxInputRepositorySqlc) InsertBulk(txItems []*sqlcgen.XrpDetailTx) error {
+func (r *XRPDetailTxInputRepositorySqlc) InsertBulk(txItems []*domainXrp.XrpDetailTx) error {
 	for _, item := range txItems {
 		if err := r.Insert(item); err != nil {
 			return err

@@ -12,6 +12,7 @@ import (
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/eth"
@@ -32,6 +33,23 @@ type createTransactionUseCase struct {
 	txFileRepo      portsStorage.TransactionFileRepositorier
 	depositReceiver domainAccount.AccountType
 	paymentSender   domainAccount.AccountType
+}
+
+// convertSqlcToEthDetailTx converts sqlcgen.EthDetailTx to domain entity
+func convertSqlcToEthDetailTx(sqlcTx *sqlcgen.EthDetailTx) (*domainEth.EthDetailTx, error) {
+	return domainEth.NewEthDetailTx(
+		sqlcTx.TxID,
+		sqlcTx.Uuid,
+		domainTx.TxTypeFromInt8(sqlcTx.CurrentTxType),
+		sqlcTx.SenderAccount,
+		sqlcTx.SenderAddress,
+		sqlcTx.ReceiverAccount,
+		sqlcTx.ReceiverAddress,
+		sqlcTx.Amount,
+		sqlcTx.Fee,
+		sqlcTx.GasLimit,
+		sqlcTx.Nonce,
+	)
 }
 
 // NewCreateTransactionUseCase creates a new CreateTransactionUseCase
@@ -251,12 +269,18 @@ func (u *createTransactionUseCase) createTransferTx(
 	}
 
 	// call CreateRawTransaction
-	rawTx, txDetailItem, err := u.ethClient.CreateRawTransaction(ctx,
+	rawTx, sqlcTxDetailItem, err := u.ethClient.CreateRawTransaction(ctx,
 		senderAddr.WalletAddress, receiverAddr.WalletAddress, requiredValue.Uint64(), 0)
 	if err != nil {
 		return "", fmt.Errorf(
 			"fail to call eth.CreateRawTransaction(), sender address: %s: %w",
 			senderAddr.WalletAddress, err)
+	}
+
+	// Convert sqlcgen type to domain entity
+	txDetailItem, err := convertSqlcToEthDetailTx(sqlcTxDetailItem)
+	if err != nil {
+		return "", fmt.Errorf("fail to convert sqlc to domain entity: %w", err)
 	}
 
 	rawTxHex := rawTx.TxHex
@@ -271,7 +295,7 @@ func (u *createTransactionUseCase) createTransferTx(
 	// create insert data for　eth_detail_tx
 	txDetailItem.SenderAccount = sender.String()
 	txDetailItem.ReceiverAccount = receiver.String()
-	txDetailItems := []*sqlcgen.EthDetailTx{txDetailItem}
+	txDetailItems := []*domainEth.EthDetailTx{txDetailItem}
 
 	txID, err := u.updateDB(targetAction, txDetailItems, nil)
 	if err != nil {
@@ -333,7 +357,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	userAmounts []eth.UserAmount,
-) ([]string, []*sqlcgen.EthDetailTx, error) {
+) ([]string, []*domainEth.EthDetailTx, error) {
 	// get address for deposit account
 	depositAddr, err := u.addrRepo.GetOneUnAllocated(receiver)
 	if err != nil {
@@ -344,17 +368,23 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 
 	// create raw transaction each address
 	serializedTxs := make([]string, 0, len(userAmounts))
-	txDetailItems := make([]*sqlcgen.EthDetailTx, 0, len(userAmounts))
+	txDetailItems := make([]*domainEth.EthDetailTx, 0, len(userAmounts))
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
 		var rawTx *ethtx.RawTx
-		var txDetailItem *sqlcgen.EthDetailTx
-		rawTx, txDetailItem, err = u.ethClient.CreateRawTransaction(
+		var sqlcTxDetailItem *sqlcgen.EthDetailTx
+		rawTx, sqlcTxDetailItem, err = u.ethClient.CreateRawTransaction(
 			ctx, val.Address, depositAddr.WalletAddress, 0, 0)
 		if err != nil {
 			return nil, nil, fmt.Errorf(
 				"fail to call addrRepo.CreateRawTransaction(), sender address: %s: %w",
 				val.Address, err)
+		}
+
+		// Convert sqlcgen type to domain entity
+		txDetailItem, err := convertSqlcToEthDetailTx(sqlcTxDetailItem)
+		if err != nil {
+			return nil, nil, fmt.Errorf("fail to convert sqlc to domain entity: %w", err)
 		}
 
 		rawTxHex := rawTx.TxHex
@@ -445,13 +475,13 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	sender, receiver domainAccount.AccountType,
 	userPayments []userPayment,
 	senderAddr *domainAddress.Address,
-) ([]string, []*sqlcgen.EthDetailTx, error) {
+) ([]string, []*domainEth.EthDetailTx, error) {
 	serializedTxs := make([]string, 0, len(userPayments))
-	txDetailItems := make([]*sqlcgen.EthDetailTx, 0, len(userPayments))
+	txDetailItems := make([]*domainEth.EthDetailTx, 0, len(userPayments))
 	additionalNonce := 0
 	for _, userPayment := range userPayments {
 		// call CreateRawTransaction
-		rawTx, txDetailItem, err := u.ethClient.CreateRawTransaction(ctx,
+		rawTx, sqlcTxDetailItem, err := u.ethClient.CreateRawTransaction(ctx,
 			senderAddr.WalletAddress, userPayment.receiverAddr, userPayment.amount.Uint64(), additionalNonce)
 		if err != nil {
 			return nil, nil, fmt.Errorf(
@@ -459,6 +489,12 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 				senderAddr.WalletAddress, err)
 		}
 		additionalNonce++
+
+		// Convert sqlcgen type to domain entity
+		txDetailItem, err := convertSqlcToEthDetailTx(sqlcTxDetailItem)
+		if err != nil {
+			return nil, nil, fmt.Errorf("fail to convert sqlc to domain entity: %w", err)
+		}
 
 		rawTxHex := rawTx.TxHex
 		logger.Debug("rawTxHex", "rawTxHex", rawTxHex)
@@ -479,7 +515,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 
 func (u *createTransactionUseCase) updateDB(
 	targetAction domainTx.ActionType,
-	txDetailItems []*sqlcgen.EthDetailTx,
+	txDetailItems []*domainEth.EthDetailTx,
 	paymentRequestIds []int64,
 ) (int64, error) {
 	// start transaction

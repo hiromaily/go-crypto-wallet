@@ -12,7 +12,9 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
+	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
@@ -150,11 +152,11 @@ type PaymentRequestRepositorier interface {
 
 // ETHDetailTXRepositorier is ETHDetailTXRepository interface
 type ETHDetailTXRepositorier interface {
-	GetOne(id int64) (*sqlcgen.EthDetailTx, error)
-	GetAllByTxID(id int64) ([]*sqlcgen.EthDetailTx, error)
+	GetOne(id int64) (*domainEth.EthDetailTx, error)
+	GetAllByTxID(id int64) ([]*domainEth.EthDetailTx, error)
 	GetSentHashTx(txType domainTx.TxType) ([]string, error)
-	Insert(txItem *sqlcgen.EthDetailTx) error
-	InsertBulk(txItems []*sqlcgen.EthDetailTx) error
+	Insert(txItem *domainEth.EthDetailTx) error
+	InsertBulk(txItems []*domainEth.EthDetailTx) error
 	UpdateAfterTxSent(uuid string, txType domainTx.TxType, signedHex, sentHashTx string) (int64, error)
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(txType domainTx.TxType, sentHashTx string) (int64, error)
@@ -163,11 +165,11 @@ type ETHDetailTXRepositorier interface {
 
 // XRPDetailTXRepositorier is XrpDetailTxRepository interface
 type XRPDetailTXRepositorier interface {
-	GetOne(id int64) (*sqlcgen.XrpDetailTx, error)
-	GetAllByTxID(id int64) ([]*sqlcgen.XrpDetailTx, error)
+	GetOne(id int64) (*domainXrp.XrpDetailTx, error)
+	GetAllByTxID(id int64) ([]*domainXrp.XrpDetailTx, error)
 	GetSentHashTx(txType domainTx.TxType) ([]string, error)
-	Insert(txItem *sqlcgen.XrpDetailTx) error
-	InsertBulk(txItems []*sqlcgen.XrpDetailTx) error
+	Insert(txItem *domainXrp.XrpDetailTx) error
+	InsertBulk(txItems []*domainXrp.XrpDetailTx) error
 	UpdateAfterTxSent(
 		uuid string, txType domainTx.TxType, signedTxID, signedTxBlob string, earlistLedgerVersion uint64,
 	) (int64, error)
