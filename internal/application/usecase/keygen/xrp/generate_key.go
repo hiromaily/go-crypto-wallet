@@ -76,7 +76,7 @@ func (u *generateKeyUseCase) Generate(ctx context.Context, input keygenusecase.G
 			return fmt.Errorf("fail to call xrp.WalletPropose(): %w", err)
 		}
 		if generatedKey.Warning != "" {
-			logger.Warn("xrp.WalletPropose() warning", "warning", generatedKey.Warning)
+			return fmt.Errorf("fail to call xrp.WalletPropose(): %s", generatedKey.Warning)
 		}
 
 		// TODO: passphrase or related ID should be stored in table??

@@ -249,7 +249,7 @@ func (u *createTransactionUseCase) createTransferTx(
 
 	// call CreateRawTransaction
 	instructions := &dtoRipple.Instructions{
-		MaxLedgerVersionOffset: xrp.MaxLedgerVersionOffset,
+		MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
 	}
 	txJSON, rawTxString, err := u.rippler.CreateRawTransaction(
 		ctx, senderAddr.WalletAddress, receiverAddr.WalletAddress, floatValue, instructions)
@@ -362,7 +362,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
 		instructions := &dtoRipple.Instructions{
-			MaxLedgerVersionOffset: xrp.MaxLedgerVersionOffset,
+			MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
 		}
 		if sequence != 0 {
 			instructions.Sequence = sequence
@@ -499,7 +499,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	for _, userPayment := range userPayments {
 		// call CreateRawTransaction
 		instructions := &dtoRipple.Instructions{
-			MaxLedgerVersionOffset: xrp.MaxLedgerVersionOffset,
+			MaxLedgerVersionOffset: domainXrp.MaxLedgerVersionOffset,
 		}
 		if sequence != 0 {
 			instructions.Sequence = sequence

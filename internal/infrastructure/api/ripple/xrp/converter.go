@@ -234,7 +234,7 @@ func ToDTOResponseAccountChannels(infra *ResponseAccountChannels) *dtoRipple.Res
 			SettleDelay:    uint64(ch.SettleDelay),
 			PublicKey:      ch.PublicKey,
 			DestinationTag: uint32(ch.DestinationTag),
-			CancelAfter:    uint64(ch.Expiration),
+			CancelAfter:    uint64(ch.CancelAfter),
 			Expiration:     uint64(ch.Expiration),
 		}
 	}
@@ -309,6 +309,12 @@ func ToDTOResponseWalletPropose(infra *ResponseWalletPropose) *dtoRipple.Respons
 	if infra == nil {
 		return nil
 	}
+
+	warning := ""
+	if infra.Status == StatusCodeError.String() {
+		warning = infra.Error
+	}
+
 	return &dtoRipple.ResponseWalletPropose{
 		MasterSeed:    infra.Result.MasterSeed,
 		MasterSeedHex: infra.Result.MasterSeedHex,
@@ -317,6 +323,6 @@ func ToDTOResponseWalletPropose(infra *ResponseWalletPropose) *dtoRipple.Respons
 		PublicKey:     infra.Result.PublicKey,
 		PublicKeyHex:  infra.Result.PublicKeyHex,
 		KeyType:       infra.Result.KeyType,
-		Warning:       "", // Not in the infrastructure type
+		Warning:       warning,
 	}
 }

@@ -33,6 +33,7 @@ type ResponseAccountChannels struct {
 			ChannelID          string `json:"channel_id"`
 			DestinationAccount string `json:"destination_account"`
 			DestinationTag     int    `json:"destination_tag"`
+			CancelAfter        int    `json:"cancel_after"`
 			Expiration         int    `json:"expiration"`
 			PublicKey          string `json:"public_key"`
 			PublicKeyHex       string `json:"public_key_hex"`
