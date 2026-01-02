@@ -5,7 +5,6 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/config/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/mysql"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -28,7 +27,7 @@ var _ PkgContainer = (*pkgContainer)(nil)
 type pkgContainer struct {
 	// config
 	config      *config.WalletRoot
-	accountConf *account.AccountRoot
+	accountConf *config.AccountRoot
 	// logger
 	logger logger.Logger
 	// uuid
@@ -44,7 +43,7 @@ type pkgContainer struct {
 // NewPkgContainer creates a new package container with pkg/ components
 func NewPkgContainer(
 	conf *config.WalletRoot,
-	accountConf *account.AccountRoot,
+	accountConf *config.AccountRoot,
 ) *pkgContainer {
 	return &pkgContainer{
 		config:      conf,

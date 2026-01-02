@@ -98,6 +98,51 @@ func TestMultisigConfig_IsMultisigAccount(t *testing.T) {
 	}
 }
 
+// TestNewMultisigConfig tests the NewMultisigConfig factory function.
+// This verifies that the function correctly creates MultisigConfig from domain types.
+func TestNewMultisigConfig(t *testing.T) {
+	tests := []struct {
+		name       string
+		accountMap map[AccountType]map[int][]AuthType
+		wantCount  int
+	}{
+		{
+			name:       "nil map returns empty map",
+			accountMap: nil,
+			wantCount:  0,
+		},
+		{
+			name: "single multisig config",
+			accountMap: map[AccountType]map[int][]AuthType{
+				AccountTypeDeposit: {
+					2: {AuthType1, AuthType2},
+				},
+			},
+			wantCount: 1,
+		},
+		{
+			name: "multiple multisig configs",
+			accountMap: map[AccountType]map[int][]AuthType{
+				AccountTypeDeposit: {
+					2: {AuthType1, AuthType2},
+				},
+				AccountTypePayment: {
+					3: {AuthType1, AuthType2, AuthType3},
+				},
+			},
+			wantCount: 2,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			multi := NewMultisigConfig(tt.accountMap)
+			require.NotNil(t, multi, "MultisigConfig should not be nil")
+			require.Equal(t, tt.wantCount, len(multi.AccountMap), "AccountMap count mismatch")
+		})
+	}
+}
+
 // TestMultisigConfig_MultiAccounts tests the MultiAccounts method.
 func TestMultisigConfig_MultiAccounts(t *testing.T) {
 	tests := []struct {
