@@ -3,25 +3,12 @@
     "allow": [
       "WebSearch",
       "WebFetch(domain:github.com)",
-      "Bash(make -n:*)",
       "Bash(make:*)",
-      "Bash(make lint-fix:*)",
-      "Bash(make lint:*)",
+      "Bash(go:*)",
+      "Bash(go tool:*)",
+      "Bash(go mod:*)",
       "Bash(gofumpt:*)",
       "Bash(goimports:*)",
-      "Bash(go doc:*)",
-      "Bash(go fmt:*)",
-      "Bash(go build:*)",
-      "Bash(go test:*)",
-      "Bash(go install:*)",
-      "Bash(go list:*)",
-      "Bash(go tool govulncheck:*)",
-      "Bash(go mod tidy:*)",
-      "Bash(go mod edit:*)",
-      "Bash(go mod why:*)",
-      "Bash(go mod graph:*)",
-      "Bash($HOME/go/bin/goimports -w pkg/)",
-      "Bash($HOME/go/bin/goimports:*)",
       "Bash(git add:*)",
       "Bash(git branch:*)",
       "Bash(git commit:*)",
@@ -32,15 +19,8 @@
       "Bash(gh pr create:*)",
       "Bash(gh pr view:*)",
       "Bash(gh pr comment:*)",
-      "Bash(docker volume:*)",
-      "Bash(docker logs:*)",
-      "Bash(docker exec:*)",
-      "Bash(docker compose:*)",
-      "Bash(docker compose ps:*)",
-      "Bash(docker compose up:*)",
-      "Bash(docker compose rm:*)",
-      "Bash(sqlc version:*)",
-      "Bash(sqlc generate:*)",
+      "Bash(docker:*)",
+      "Bash(sqlc:*)",
       "Bash(awk:*)",
       "Bash(cat:*)",
       "Bash(find:*)",
@@ -51,19 +31,25 @@
       "Bash(wc:*)",
       "Bash(grep:*)",
       "Bash(xargs:*)",
-      "Bash(xargs rm:*)",
       "Bash(tee:*)",
-      "Bash(for file in )",
-      "Bash(do)",
-      "Bash(do sed:*)",
-      "Bash(do goimports:*)",
-      "Bash(done)",
-      "Bash(while read file)",
-      "Bash(while read f)",
+      "Bash(for:*)",
+      "Bash(do:*)",
+      "Bash(while:*)",
       "Bash(then)",
       "Bash(fi)",
-      "Bash(perl -i -pe:*)",
       "Bash(python3:*)"
     ]
-  }
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "afplay /System/Library/Sounds/Glass.aiff"
+          }
+        ]
+      }
+    ]
+  }  
 }
