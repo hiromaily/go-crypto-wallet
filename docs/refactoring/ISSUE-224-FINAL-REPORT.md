@@ -694,12 +694,6 @@ The 2 minor violations found are easily fixable and do not impact the overall ar
 - [Internal Directory Guidelines](../../internal/AGENTS.md)
 - [Repository Pattern Documentation](../../internal/AGENTS.md#repository-pattern-converting-between-infrastructure-and-domain-types)
 
-### Test Results Archive
-
-- Unit test results: `/tmp/test-results.txt`
-- Integration test results: `/tmp/integration-test-results.txt`
-- Vulnerability scan results: `/tmp/vuln-check-results.txt`
-
 ---
 
 **Report Generated**: 2026-01-02

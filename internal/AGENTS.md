@@ -394,12 +394,12 @@ The repository layer follows a consistent pattern for converting between infrast
 ```go
 // infrastructure/repository/watch/address_sqlc.go
 type AddressRepositorySqlc struct {
-    queries *sqlcgen.Queries  // Infrastructure database access
+    queries      *sqlcgen.Queries  // Infrastructure database access
+    coinTypeCode domainCoin.CoinTypeCode
 }
 
 // Private conversion: sqlcgen → domain entity
 func convertToAddress(sqlcAddr *sqlcgen.Address) (*domainAddress.Address, error) {
-    // Validate and convert types
     addr := &domainAddress.Address{
         ID:            sqlcAddr.ID,
         CoinTypeCode:  domainCoin.CoinTypeCode(sqlcAddr.Coin),
@@ -410,43 +410,47 @@ func convertToAddress(sqlcAddr *sqlcgen.Address) (*domainAddress.Address, error)
 
     // Parse timestamps if present
     if sqlcAddr.UpdatedAt.Valid {
-        t := sqlcAddr.UpdatedAt.Time
-        addr.UpdatedAt = &t
+        addr.UpdatedAt = &sqlcAddr.UpdatedAt.Time
     }
 
     return addr, nil
 }
 
 // Private conversion: domain entity → sqlcgen
-func convertFromAddress(addr *domainAddress.Address) *sqlcgen.InsertAddressParams {
-    params := &sqlcgen.InsertAddressParams{
-        Coin:          string(addr.CoinTypeCode),
-        Account:       string(addr.AccountType),
+func convertFromAddress(addr *domainAddress.Address) *sqlcgen.Address {
+    sqlcAddr := &sqlcgen.Address{
+        ID:            addr.ID,
+        Coin:          sqlcgen.AddressCoin(addr.CoinTypeCode.String()),
+        Account:       sqlcgen.AddressAccount(addr.AccountType.String()),
         WalletAddress: addr.WalletAddress,
         IsAllocated:   addr.IsAllocated,
     }
-    return params
+
+    if addr.UpdatedAt != nil {
+        sqlcAddr.UpdatedAt = sql.NullTime{Time: *addr.UpdatedAt, Valid: true}
+    }
+
+    return sqlcAddr
 }
 
 // Public method - uses domain entities only
-func (r *AddressRepositorySqlc) GetByAddress(
-    coinType domainCoin.CoinTypeCode,
-    address string,
+func (r *AddressRepositorySqlc) GetOneUnAllocated(
+    accountType domainAccount.AccountType,
 ) (*domainAddress.Address, error) {
     // Call infrastructure (returns sqlcgen type)
-    sqlcAddr, err := r.queries.GetAddressByWalletAddress(
+    addr, err := r.queries.GetOneUnallocatedAddress(
         context.Background(),
-        sqlcgen.GetAddressByWalletAddressParams{
-            Coin:          string(coinType),
-            WalletAddress: address,
+        sqlcgen.GetOneUnallocatedAddressParams{
+            Coin:    sqlcgen.AddressCoin(r.coinTypeCode.String()),
+            Account: sqlcgen.AddressAccount(accountType.String()),
         },
     )
     if err != nil {
-        return nil, fmt.Errorf("failed to get address: %w", err)
+        return nil, fmt.Errorf("failed to call GetOneUnallocatedAddress(): %w", err)
     }
 
     // Convert to domain entity before returning
-    return convertToAddress(&sqlcAddr)
+    return convertToAddress(&addr)
 }
 ```
 
