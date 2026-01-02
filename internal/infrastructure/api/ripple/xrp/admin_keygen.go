@@ -3,6 +3,8 @@ package xrp
 import (
 	"context"
 	"fmt"
+
+	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
 )
 
 // Note: Admin commands are available only if you connect to rippled on a host and port that
@@ -33,7 +35,7 @@ type ResponseValidationCreate struct {
 }
 
 // ValidationCreate calls validation_create method
-func (r *Ripple) ValidationCreate(ctx context.Context, secret string) (*ResponseValidationCreate, error) {
+func (r *Ripple) ValidationCreate(ctx context.Context, secret string) (*dtoRipple.ResponseValidationCreate, error) {
 	if r.wsAdmin == nil {
 		return nil, XRPErrorDisabledAdminAPI
 	}
@@ -47,7 +49,9 @@ func (r *Ripple) ValidationCreate(ctx context.Context, secret string) (*Response
 	if err := r.wsAdmin.Call(ctx, &req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsAdmin.Call(validation_create): %w", err)
 	}
-	return &res, nil
+
+	// Convert infrastructure type to DTO
+	return ToDTOResponseValidationCreate(&res), nil
 }
 
 // WalletProposeWithKey is request data for wallet_propose method
@@ -82,27 +86,32 @@ type ResponseWalletPropose struct {
 
 // WalletProposeWithKey calls wallet_propose method
 func (r *Ripple) WalletProposeWithKey(
-	ctx context.Context, seed string, keyType XRPKeyType,
-) (*ResponseWalletPropose, error) {
+	ctx context.Context, seed string, keyType dtoRipple.XRPKeyType,
+) (*dtoRipple.ResponseWalletPropose, error) {
 	if r.wsAdmin == nil {
 		return nil, XRPErrorDisabledAdminAPI
 	}
 
+	// Convert DTO to infrastructure type
+	infraKeyType := ToInfraXRPKeyType(keyType)
+
 	req := WalletProposeWithKey{
 		Command: "wallet_propose",
 		Seed:    seed,
-		KeyType: keyType.String(),
+		KeyType: infraKeyType.String(),
 	}
 	var res ResponseWalletPropose
 	if err := r.wsAdmin.Call(ctx, &req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsAdmin.Call(wallet_propose): %w", err)
 	}
-	return &res, nil
+
+	// Convert infrastructure type to DTO
+	return ToDTOResponseWalletPropose(&res), nil
 }
 
 // WalletPropose calls wallet_propose method
 // - result is same as long as using same passphrase
-func (r *Ripple) WalletPropose(ctx context.Context, passphrase string) (*ResponseWalletPropose, error) {
+func (r *Ripple) WalletPropose(ctx context.Context, passphrase string) (*dtoRipple.ResponseWalletPropose, error) {
 	if r.wsAdmin == nil {
 		return nil, XRPErrorDisabledAdminAPI
 	}
@@ -115,5 +124,7 @@ func (r *Ripple) WalletPropose(ctx context.Context, passphrase string) (*Respons
 	if err := r.wsAdmin.Call(ctx, &req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsAdmin.Call(wallet_propose): %w", err)
 	}
-	return &res, nil
+
+	// Convert infrastructure type to DTO
+	return ToDTOResponseWalletPropose(&res), nil
 }

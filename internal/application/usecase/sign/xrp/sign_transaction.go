@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"strings"
 
+	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
 	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -74,7 +74,7 @@ func (u *signTransactionUseCase) Sign(
 		uuid := strings.TrimRight(tmp[0], ",")
 		txJSON := tmp[1]
 
-		var txInput xrp.TxInput
+		var txInput dtoRipple.TxInput
 		if err = json.Unmarshal([]byte(txJSON), &txInput); err != nil {
 			return signusecase.SignTransactionOutput{}, fmt.Errorf("fail to call json.Unmarshal(txJSON): %w", err)
 		}

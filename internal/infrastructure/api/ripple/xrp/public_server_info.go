@@ -3,6 +3,8 @@ package xrp
 import (
 	"context"
 	"fmt"
+
+	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
 )
 
 // https://xrpl.org/server-info-methods.html
@@ -85,7 +87,7 @@ type ResponseServerInfo struct {
 }
 
 // ServerInfo calls server_info method
-func (r *Ripple) ServerInfo(ctx context.Context) (*ResponseServerInfo, error) {
+func (r *Ripple) ServerInfo(ctx context.Context) (*dtoRipple.ResponseServerInfo, error) {
 	req := RequestCommand{
 		ID:      1,
 		Command: "server_info",
@@ -94,5 +96,7 @@ func (r *Ripple) ServerInfo(ctx context.Context) (*ResponseServerInfo, error) {
 	if err := r.wsPublic.Call(ctx, &req, &res); err != nil {
 		return nil, fmt.Errorf("fail to call wsClient.Call(server_info): %w", err)
 	}
-	return &res, nil
+
+	// Convert infrastructure type to DTO
+	return ToDTOResponseServerInfo(&res), nil
 }

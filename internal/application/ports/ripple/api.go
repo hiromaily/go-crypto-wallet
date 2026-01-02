@@ -3,33 +3,6 @@
 // This package follows the Dependency Inversion Principle of Clean Architecture
 // by defining interfaces in the application layer that are implemented by the
 // infrastructure layer.
-//
-// TODO(architecture): ARCHITECTURAL DEBT - This package currently imports infrastructure
-// types (xrp package) which violates Clean Architecture dependency direction.
-// The dependency should flow: infrastructure -> ports, not ports -> infrastructure.
-//
-// Current state (INCORRECT):
-//
-//	application/ports/ripple (interface)
-//	    ↓ imports
-//	infrastructure/api/ripple/xrp (implementation)
-//
-// Desired state (CORRECT):
-//
-//	application/ports/ripple (interface)
-//	    ↑ implemented by
-//	infrastructure/api/ripple/xrp (implementation)
-//
-// This creates inconsistency with other blockchain interfaces (BTC, ETH) which only
-// import external library types and domain types, never infrastructure types.
-//
-// Recommended solutions:
-// 1. Move XRP protocol types (Instructions, TxInput, Response*) to internal/domain/xrp
-// 2. Create application-layer DTOs in internal/application/dto/ripple
-// 3. Use generic types (map[string]interface{}) for protocol-specific structures
-//
-// This technical debt should be addressed in a future refactoring to align with
-// the project's Clean Architecture principles. See PR #240 review for full analysis.
 package ripple
 
 import (
@@ -37,9 +10,8 @@ import (
 
 	"github.com/btcsuite/btcd/chaincfg"
 
+	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	// TODO: Remove this infrastructure import (architectural debt)
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 )
 
 // Rippler defines the main interface for Ripple/XRP blockchain operations.
@@ -55,8 +27,11 @@ type Rippler interface {
 
 	// transaction
 	CreateRawTransaction(
-		ctx context.Context, senderAccount, receiverAccount string, amount float64, instructions *xrp.Instructions,
-	) (*xrp.TxInput, string, error)
+		ctx context.Context,
+		senderAccount, receiverAccount string,
+		amount float64,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.TxInput, string, error)
 
 	// ripple
 	Close() error
@@ -68,37 +43,44 @@ type Rippler interface {
 // Implementations handle account management, address generation, and transaction operations.
 type RippleAPIer interface {
 	// RippleAccountAPI
-	GetAccountInfo(ctx context.Context, address string) (*xrp.ResponseGetAccountInfo, error)
+	GetAccountInfo(ctx context.Context, address string) (*dtoRipple.ResponseGetAccountInfo, error)
 	// RippleAddressAPI
-	GenerateAddress(ctx context.Context) (*xrp.ResponseGenerateAddress, error)
-	GenerateXAddress(ctx context.Context) (*xrp.ResponseGenerateXAddress, error)
+	GenerateAddress(ctx context.Context) (*dtoRipple.ResponseGenerateAddress, error)
+	GenerateXAddress(ctx context.Context) (*dtoRipple.ResponseGenerateXAddress, error)
 	IsValidAddress(ctx context.Context, addr string) (bool, error)
 	// RippleTxAPI
 	PrepareTransaction(
-		ctx context.Context, senderAccount, receiverAccount string, amount float64, instructions *xrp.Instructions,
-	) (*xrp.TxInput, string, error)
-	SignTransaction(ctx context.Context, txJSON *xrp.TxInput, secret string) (string, string, error)
+		ctx context.Context,
+		senderAccount, receiverAccount string,
+		amount float64,
+		instructions *dtoRipple.Instructions,
+	) (*dtoRipple.TxInput, string, error)
+	SignTransaction(ctx context.Context, txJSON *dtoRipple.TxInput, secret string) (string, string, error)
 	CombineTransaction(ctx context.Context, signedTxs []string) (string, string, error)
-	SubmitTransaction(ctx context.Context, signedTx string) (*xrp.SentTx, uint64, error)
+	SubmitTransaction(ctx context.Context, signedTx string) (*dtoRipple.SentTx, uint64, error)
 	WaitValidation(ctx context.Context, targetledgerVarsion uint64) (uint64, error)
-	GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*xrp.TxInfo, error)
+	GetTransaction(ctx context.Context, txID string, targetLedgerVersion uint64) (*dtoRipple.TxInfo, error)
 }
 
 // RipplePublicer defines the interface for Ripple public node operations.
 // These operations query public information from the Ripple network.
 type RipplePublicer interface {
 	// public_account
-	AccountChannels(ctx context.Context, sender, receiver string) (*xrp.ResponseAccountChannels, error)
-	AccountInfo(ctx context.Context, address string) (*xrp.ResponseAccountInfo, error)
+	AccountChannels(ctx context.Context, sender, receiver string) (*dtoRipple.ResponseAccountChannels, error)
+	AccountInfo(ctx context.Context, address string) (*dtoRipple.ResponseAccountInfo, error)
 	// public_server_info
-	ServerInfo(ctx context.Context) (*xrp.ResponseServerInfo, error)
+	ServerInfo(ctx context.Context) (*dtoRipple.ResponseServerInfo, error)
 }
 
 // RippleAdminer defines the interface for Ripple admin node operations.
 // These operations typically require admin access to the Ripple node.
 type RippleAdminer interface {
 	// admin_keygen
-	ValidationCreate(ctx context.Context, secret string) (*xrp.ResponseValidationCreate, error)
-	WalletProposeWithKey(ctx context.Context, seed string, keyType xrp.XRPKeyType) (*xrp.ResponseWalletPropose, error)
-	WalletPropose(ctx context.Context, passphrase string) (*xrp.ResponseWalletPropose, error)
+	ValidationCreate(ctx context.Context, secret string) (*dtoRipple.ResponseValidationCreate, error)
+	WalletProposeWithKey(
+		ctx context.Context,
+		seed string,
+		keyType dtoRipple.XRPKeyType,
+	) (*dtoRipple.ResponseWalletPropose, error)
+	WalletPropose(ctx context.Context, passphrase string) (*dtoRipple.ResponseWalletPropose, error)
 }

@@ -6,13 +6,15 @@ import (
 	"fmt"
 
 	"google.golang.org/grpc/status"
+
+	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
 )
 
 // CreateRawTransaction creates raw transaction
 // - https://xrpl.org/ja/send-xrp.html
 func (r *Ripple) CreateRawTransaction(
-	ctx context.Context, senderAccount, receiverAccount string, amount float64, instructions *Instructions,
-) (*TxInput, string, error) {
+	ctx context.Context, senderAccount, receiverAccount string, amount float64, instructions *dtoRipple.Instructions,
+) (*dtoRipple.TxInput, string, error) {
 	// validation
 	if senderAccount == "" {
 		return nil, "", errors.New("senderAccount is empty")
@@ -54,5 +56,6 @@ func (r *Ripple) CreateRawTransaction(
 	} else if calculatedAmount < amount {
 		return nil, "", fmt.Errorf("balance is short to send %s", accountInfo.XrpBalance)
 	}
+
 	return txJSON, stringJSON, nil
 }

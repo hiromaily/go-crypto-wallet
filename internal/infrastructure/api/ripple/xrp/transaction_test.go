@@ -10,6 +10,7 @@ import (
 	"github.com/bookerzzz/grok"
 	"github.com/stretchr/testify/suite"
 
+	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/testutil"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 )
@@ -24,7 +25,7 @@ func (txt *txTest) TestCreateRawTransaction() {
 		sernderAccount  string
 		receiverAccount string
 		amount          float64
-		instructions    *xrp.Instructions
+		instructions    *dtoRipple.Instructions
 	}
 	type want struct{}
 	tests := []struct {
@@ -38,7 +39,7 @@ func (txt *txTest) TestCreateRawTransaction() {
 				sernderAccount:  "rKXvsrd5H6MQNVpYgdeffFYjfGq4VdDogd",
 				receiverAccount: "rpBzBQ6aWJhuatJCkQgfE3VJT67ukBQopf",
 				amount:          50,
-				instructions: &xrp.Instructions{
+				instructions: &dtoRipple.Instructions{
 					MaxLedgerVersionOffset: xrp.MaxLedgerVersionOffset,
 				},
 			},

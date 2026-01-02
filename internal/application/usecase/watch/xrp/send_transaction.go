@@ -8,11 +8,11 @@ import (
 
 	"github.com/bookerzzz/grok"
 
+	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
 	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -86,7 +86,7 @@ func (u *sendTransactionUseCase) Execute(
 			txBlob := tmp[2]
 
 			// Submit transaction to XRP network
-			var sentTx *xrp.SentTx
+			var sentTx *dtoRipple.SentTx
 			var earlistLedgerVersion uint64
 			sentTx, earlistLedgerVersion, err = u.rippler.SubmitTransaction(ctx, txBlob)
 			if err != nil {
@@ -139,7 +139,7 @@ func (u *sendTransactionUseCase) Execute(
 			}
 
 			// Get transaction info for verification
-			var txInfo *xrp.TxInfo
+			var txInfo *dtoRipple.TxInfo
 			txInfo, err = u.rippler.GetTransaction(ctx, sentTx.TxJSON.Hash, earlistLedgerVersion)
 			if err != nil {
 				logger.Warn("fail to call xrp.GetTransaction()",

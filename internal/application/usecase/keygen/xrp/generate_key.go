@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 
+	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
 	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
@@ -69,25 +70,25 @@ func (u *generateKeyUseCase) Generate(ctx context.Context, input keygenusecase.G
 		// TODO:
 		// - WIF => badSeed
 		// - P2PKHAddr => badSeed
-		var generatedKey *xrp.ResponseWalletPropose
+		var generatedKey *dtoRipple.ResponseWalletPropose
 		generatedKey, err = u.xrp.WalletPropose(ctx, v.P2SHSegWitAddr)
 		if err != nil {
 			return fmt.Errorf("fail to call xrp.WalletPropose(): %w", err)
 		}
-		if generatedKey.Status == xrp.StatusCodeError.String() {
-			return fmt.Errorf("fail to call xrp.WalletPropose() %s", generatedKey.Error)
+		if generatedKey.Warning != "" {
+			return fmt.Errorf("fail to call xrp.WalletPropose(): %s", generatedKey.Warning)
 		}
 
 		// TODO: passphrase or related ID should be stored in table??
 		xrpKey, err := domainXrp.NewXRPAccountKey(
 			u.coinTypeCode,
 			input.AccountType,
-			generatedKey.Result.AccountID,
-			domainXrp.XRPKeyType(xrp.GetXRPKeyTypeValue(generatedKey.Result.KeyType)),
-			generatedKey.Result.MasterSeed,
-			generatedKey.Result.MasterSeedHex,
-			generatedKey.Result.PublicKey,
-			generatedKey.Result.PublicKeyHex,
+			generatedKey.AccountID,
+			domainXrp.XRPKeyType(xrp.GetXRPKeyTypeValue(generatedKey.KeyType)),
+			generatedKey.MasterSeed,
+			generatedKey.MasterSeedHex,
+			generatedKey.PublicKey,
+			generatedKey.PublicKeyHex,
 			input.IsKeyPair,
 			0,
 		)
@@ -96,8 +97,8 @@ func (u *generateKeyUseCase) Generate(ctx context.Context, input keygenusecase.G
 		}
 
 		// Set deprecated MasterKey field if present
-		if generatedKey.Result.MasterKey != "" {
-			xrpKey.MasterKey = generatedKey.Result.MasterKey
+		if generatedKey.MasterKey != "" {
+			xrpKey.MasterKey = generatedKey.MasterKey
 		}
 
 		items = append(items, xrpKey)
