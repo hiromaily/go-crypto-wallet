@@ -378,6 +378,120 @@ type addressUseCase struct {
 - These are aliases to `application/ports/persistence` interfaces
 - New code should import interfaces directly from `application/ports/`
 
+##### Repository Pattern: Converting Between Infrastructure and Domain Types
+
+The repository layer follows a consistent pattern for converting between infrastructure types (sqlcgen, API responses) and domain entities:
+
+**Key Principles:**
+
+1. **Private conversion functions**: Each repository has `convertToXxx` and `convertFromXxx` helper functions
+2. **Bidirectional conversion**: Repository can convert infrastructure→domain and domain→infrastructure
+3. **Validation during conversion**: Domain constraints are enforced during conversion
+4. **Public methods expose only domain entities**: Repository interface methods work exclusively with domain types
+
+**Example Pattern:**
+
+```go
+// infrastructure/repository/watch/address_sqlc.go
+type AddressRepositorySqlc struct {
+    queries *sqlcgen.Queries  // Infrastructure database access
+}
+
+// Private conversion: sqlcgen → domain entity
+func convertToAddress(sqlcAddr *sqlcgen.Address) (*domainAddress.Address, error) {
+    // Validate and convert types
+    addr := &domainAddress.Address{
+        ID:            sqlcAddr.ID,
+        CoinTypeCode:  domainCoin.CoinTypeCode(sqlcAddr.Coin),
+        AccountType:   domainAccount.AccountType(sqlcAddr.Account),
+        WalletAddress: sqlcAddr.WalletAddress,
+        IsAllocated:   sqlcAddr.IsAllocated,
+    }
+
+    // Parse timestamps if present
+    if sqlcAddr.UpdatedAt.Valid {
+        t := sqlcAddr.UpdatedAt.Time
+        addr.UpdatedAt = &t
+    }
+
+    return addr, nil
+}
+
+// Private conversion: domain entity → sqlcgen
+func convertFromAddress(addr *domainAddress.Address) *sqlcgen.InsertAddressParams {
+    params := &sqlcgen.InsertAddressParams{
+        Coin:          string(addr.CoinTypeCode),
+        Account:       string(addr.AccountType),
+        WalletAddress: addr.WalletAddress,
+        IsAllocated:   addr.IsAllocated,
+    }
+    return params
+}
+
+// Public method - uses domain entities only
+func (r *AddressRepositorySqlc) GetByAddress(
+    coinType domainCoin.CoinTypeCode,
+    address string,
+) (*domainAddress.Address, error) {
+    // Call infrastructure (returns sqlcgen type)
+    sqlcAddr, err := r.queries.GetAddressByWalletAddress(
+        context.Background(),
+        sqlcgen.GetAddressByWalletAddressParams{
+            Coin:          string(coinType),
+            WalletAddress: address,
+        },
+    )
+    if err != nil {
+        return nil, fmt.Errorf("failed to get address: %w", err)
+    }
+
+    // Convert to domain entity before returning
+    return convertToAddress(&sqlcAddr)
+}
+```
+
+**Benefits of This Pattern:**
+
+- ✅ **Clean separation**: Infrastructure details don't leak into application layer
+- ✅ **Type safety**: Domain constraints are enforced at repository boundary
+- ✅ **Testability**: Domain entities are easy to construct in tests
+- ✅ **Maintainability**: Changes to database schema only affect repository layer
+- ✅ **Flexibility**: Can easily switch database implementations without changing use cases
+
+**Common Conversion Patterns:**
+
+1. **Enum types**: Convert strings to domain enum types with validation
+   ```go
+   accountType := domainAccount.AccountType(sqlcRow.Account)
+   ```
+
+2. **Nullable types**: Handle SQL NULL values properly
+   ```go
+   if sqlcRow.UpdatedAt.Valid {
+       entity.UpdatedAt = &sqlcRow.UpdatedAt.Time
+   }
+   ```
+
+3. **Numeric types**: Convert between int/int64/uint64 as needed
+   ```go
+   sequence := uint64(sqlcRow.Sequence)
+   ```
+
+4. **Validation**: Use domain validators during conversion
+   ```go
+   txType, err := domainTx.TxTypeFromInt8(sqlcRow.TxType)
+   if err != nil {
+       return nil, fmt.Errorf("invalid tx type: %w", err)
+   }
+   ```
+
+**Anti-Patterns to Avoid:**
+
+- ❌ **DON'T** expose sqlcgen types in repository interface methods
+- ❌ **DON'T** skip validation during conversion
+- ❌ **DON'T** use infrastructure types in use cases
+- ❌ **DON'T** create public conversion functions (keep them private to repository)
+
 ### 4. Interface Adapters Layer (`internal/interface-adapters/`)
 
 **Purpose**: Adapters between use cases and external interfaces
