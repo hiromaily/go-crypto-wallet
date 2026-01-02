@@ -102,7 +102,9 @@ func (r *AddressRepositorySqlc) GetAllAddress(accountType domainAccount.AccountT
 }
 
 // GetOneUnAllocated returns one records by is_allocated=false
-func (r *AddressRepositorySqlc) GetOneUnAllocated(accountType domainAccount.AccountType) (*domainAddress.Address, error) {
+func (r *AddressRepositorySqlc) GetOneUnAllocated(
+	accountType domainAccount.AccountType,
+) (*domainAddress.Address, error) {
 	ctx := context.Background()
 
 	addr, err := r.queries.GetOneUnallocatedAddress(ctx, sqlcgen.GetOneUnallocatedAddressParams{

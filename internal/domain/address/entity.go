@@ -1,7 +1,7 @@
 package address
 
 import (
-	"fmt"
+	"errors"
 	"time"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -43,7 +43,7 @@ func NewAddress(
 	isAllocated bool,
 ) (*Address, error) {
 	if walletAddress == "" {
-		return nil, fmt.Errorf("wallet address cannot be empty")
+		return nil, errors.New("wallet address cannot be empty")
 	}
 
 	return &Address{

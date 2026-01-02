@@ -13,7 +13,6 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -57,7 +56,7 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 		return fmt.Errorf("failed to import addresses from file: %w", err)
 	}
 
-	pubKeyData := make([]*sqlcgen.Address, 0, len(pubKeys))
+	pubKeyData := make([]*domainAddress.Address, 0, len(pubKeys))
 	for _, key := range pubKeys {
 		// Parse CSV line
 		inner := strings.Split(key, ",")
@@ -87,10 +86,11 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 		}
 
 		// Add to batch for database insertion
-		pubKeyData = append(pubKeyData, &sqlcgen.Address{
-			Coin:          sqlcgen.AddressCoin(u.coinTypeCode.String()),
-			Account:       sqlcgen.AddressAccount(addrFmt.AccountType.String()),
+		pubKeyData = append(pubKeyData, &domainAddress.Address{
+			CoinTypeCode:  u.coinTypeCode,
+			AccountType:   addrFmt.AccountType,
 			WalletAddress: targetAddr,
+			IsAllocated:   false,
 		})
 
 		// Verify address was imported correctly
