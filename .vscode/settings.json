@@ -1,0 +1,33 @@
+{
+  // Auto-fix on save
+  "editor.formatOnSave": true,
+  // go build tag
+  "go.buildTags": "integration",
+  "go.lintFlags": [
+    "-tags=integration"
+  ],
+  "gopls": {
+    "buildFlags": [
+      "-tags=integration"
+    ]
+  },
+  // Markdown linting settings
+  "markdownlint.enabled": true,
+  "markdownlint.config": {
+    "default": true,
+    "MD013": {
+      "line_length": 120,
+      "code_blocks": false,
+      "tables": false,
+      "headings": false
+    },
+    "MD033": false,
+    "MD041": false
+  },
+  // Show markdownlint issues in problems panel
+  "markdownlint.problemSeverity": "warning",
+  "[markdown]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+  }
+}
