@@ -1,16 +1,15 @@
 package cold
 
 import (
-	"database/sql"
 	"errors"
 	"time"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
 //-----------------------------------------------------------------------------
@@ -73,19 +72,27 @@ func (w *AuthHDWalletRepo) Insert(
 		return errors.New("only one key is allowed")
 	}
 	keyItem := keys[0]
-	item := &sqlcgen.AuthAccountKey{
-		Coin:               sqlcgen.AuthAccountKeyCoin(coinTypeCode.String()),
-		KeyType:            keyType.String(),
-		AuthAccount:        w.authType.String(),
-		P2pkhAddress:       keyItem.P2PKHAddr,
-		P2shSegwitAddress:  keyItem.P2SHSegWitAddr,
-		Bech32Address:      keyItem.Bech32Addr,
-		TaprootAddress:     sql.NullString{String: keyItem.TaprootAddr, Valid: keyItem.TaprootAddr != ""},
-		FullPublicKey:      keyItem.FullPubKey,
-		MultisigAddress:    "",
-		RedeemScript:       keyItem.RedeemScript,
-		WalletImportFormat: keyItem.WIF,
-		Idx:                idx,
+
+	item, err := domainAuth.NewAuthAccountKey(
+		coinTypeCode,
+		keyType.String(),
+		w.authType,
+		keyItem.P2PKHAddr,
+		keyItem.P2SHSegWitAddr,
+		keyItem.Bech32Addr,
+		keyItem.FullPubKey,
+		keyItem.WIF,
+		idx,
+	)
+	if err != nil {
+		return err
+	}
+
+	if keyItem.TaprootAddr != "" {
+		item.SetTaprootAddress(keyItem.TaprootAddr)
+	}
+	if keyItem.RedeemScript != "" {
+		item.RedeemScript = keyItem.RedeemScript
 	}
 
 	return w.authKeyRepo.Insert(item)

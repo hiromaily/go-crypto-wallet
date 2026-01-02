@@ -11,6 +11,7 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
@@ -78,15 +79,15 @@ type XRPAccountKeyRepositorier interface {
 
 // AuthFullPubkeyRepositorier is AuthFullPubkeyRepository interface
 type AuthFullPubkeyRepositorier interface {
-	GetOne(authType domainAccount.AuthType) (*sqlcgen.AuthFullpubkey, error)
+	GetOne(authType domainAccount.AuthType) (*domainAuth.AuthFullPubkey, error)
 	Insert(authType domainAccount.AuthType, fullPubKey string) error
-	InsertBulk(items []*sqlcgen.AuthFullpubkey) error
+	InsertBulk(items []*domainAuth.AuthFullPubkey) error
 }
 
 // AuthAccountKeyRepositorier is AuthAccountKeyRepository interface
 type AuthAccountKeyRepositorier interface {
-	GetOne(authType domainAccount.AuthType) (*sqlcgen.AuthAccountKey, error)
-	Insert(item *sqlcgen.AuthAccountKey) error
+	GetOne(authType domainAccount.AuthType) (*domainAuth.AuthAccountKey, error)
+	Insert(item *domainAuth.AuthAccountKey) error
 	UpdateAddrStatus(addrStatus domainAddress.AddrStatus, strWIF string) (int64, error)
 }
 

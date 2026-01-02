@@ -9,9 +9,9 @@ import (
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/fullpubkey"
 )
@@ -62,7 +62,7 @@ func (u *exportFullPubkeyUseCase) Export(ctx context.Context) (signusecase.Expor
 
 // exportAccountKey export account_key_table as csv file
 func (u *exportFullPubkeyUseCase) exportAccountKey(
-	authKeyTable *sqlcgen.AuthAccountKey, authType domainAccount.AuthType,
+	authKeyTable *domainAuth.AuthAccountKey, authType domainAccount.AuthType,
 ) (string, error) {
 	// create fileName
 	fileName := u.pubkeyFileRepo.CreateFilePath(u.authType.AccountType())
