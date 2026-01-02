@@ -67,9 +67,9 @@ The `internal/` directory is organized into four main layers following Clean Arc
 
 **Structure:**
 
-  - `dto/`: **Data Transfer Objects** - Application-layer DTOs for port interfaces
-  - `btc/`: Bitcoin DTOs (AddressInfo, UnspentOutput, TransactionResult, etc.)
-  - Other coin DTOs (eth, xrp) as needed
+- `dto/`: **Data Transfer Objects** - Application-layer DTOs for port interfaces
+- `btc/`: Bitcoin DTOs (AddressInfo, UnspentOutput, TransactionResult, etc.)
+- Other coin DTOs (eth, xrp) as needed
 - `ports/`: **Interface definitions (abstractions)** - Contracts that infrastructure must implement
   - `btc/`: Bitcoiner interface (Bitcoin/BCH API abstraction)
   - `persistence/`: Repository interfaces (database abstractions)
@@ -241,6 +241,142 @@ func (u *xxxUseCase) Execute(ctx context.Context, input XxxInput) (*XxxOutput, e
 - **API Clients**: Communicate with external blockchain APIs, handle network errors
 - **Storage**: File I/O for transaction and address data
 - **Network**: Connection management (WebSocket, gRPC)
+
+#### Infrastructure Layer Structure and Responsibilities
+
+The infrastructure layer is organized into three categories based on their relationship with domain concepts:
+
+##### 1. Domain-Agnostic I/O (Low-Level Technical Implementation)
+
+These packages provide low-level I/O operations without domain awareness:
+
+- **`infrastructure/database/`**: Database connections, SQLC-generated code, query execution
+- **`infrastructure/storage/`**: File I/O operations (transaction files, address CSV files)
+- **`infrastructure/api/`**: External API clients (Bitcoin, Ethereum, Ripple)
+
+**Characteristics:**
+
+- ✅ **NO interface definitions** - These are concrete implementations only
+- ✅ Handle raw data (bytes, strings, database rows)
+- ✅ No domain entity conversion
+- ✅ Technical concerns only (connection management, error handling, data serialization)
+
+**Example:**
+
+```go
+// infrastructure/storage/file/transaction/transaction.go
+type TransactionFileRepository struct {
+    filePath string
+}
+
+func (r *TransactionFileRepository) ReadFile(path string) (string, error) {
+    // Raw file I/O - returns string, no domain conversion
+    return os.ReadFile(path)
+}
+```
+
+##### 2. Domain-Aware I/O (Repository Layer)
+
+These packages provide domain-aware data access with conversion responsibilities:
+
+- **`infrastructure/repository/*`**: Repository implementations that convert between infrastructure types and domain entities
+
+**Characteristics:**
+
+- ✅ **NO interface definitions** - Interfaces are defined in `application/ports/`
+- ✅ **Depend on** domain-agnostic I/O packages (`database`, `storage`, `api`)
+- ✅ **Convert** between infrastructure types (sqlcgen, API responses) and domain entities
+- ✅ **Implement** interfaces defined in `application/ports/persistence`
+- ✅ Handle domain-specific error mapping
+
+**Dependency Flow:**
+
+```text
+infrastructure/repository/*
+    ↓ depends on
+infrastructure/database/  (or storage/, api/)
+    ↓ uses
+sqlcgen.* (or file I/O, API responses)
+    ↓ converts to
+domain.* entities
+```
+
+**Example:**
+
+```go
+// infrastructure/repository/cold/nonce_repository_sqlc.go
+type NonceRepositorySqlc struct {
+    queries *sqlcgen.Queries  // Depends on database layer
+}
+
+// Implements application/ports/persistence interface
+// Converts sqlcgen type to domain entity
+func (r *NonceRepositorySqlc) GetNonce(...) (*multisig.NonceCommitment, error) {
+    nonce, err := r.queries.GetNonceBySignerAndTx(...)  // Infrastructure type
+    if err != nil {
+        return nil, err
+    }
+    return convertToNonceCommitment(&nonce)  // Convert to domain entity
+}
+```
+
+##### 3. Interface Definitions (Application Ports)
+
+All repository and storage interfaces are defined in the application layer:
+
+- **`application/ports/persistence/`**: Repository interfaces for data persistence
+- **`application/ports/storage/`**: File storage interfaces
+- **`application/ports/btc/`**: Blockchain API interfaces
+
+**Characteristics:**
+
+- ✅ **All interfaces** are defined here, NOT in infrastructure
+- ✅ Infrastructure packages implement these interfaces
+- ✅ Use cases depend on these interfaces, not concrete implementations
+- ✅ May use domain entities or DTOs in method signatures
+
+**Example:**
+
+```go
+// application/ports/persistence/repository.go
+type AddressRepositorier interface {
+    GetAll(accountType domainAccount.AccountType) ([]*sqlcgen.Address, error)
+}
+
+// application/usecase/watch/address.go
+type addressUseCase struct {
+    addressRepo persistence.AddressRepositorier  // Depends on interface
+}
+```
+
+##### Design Principles
+
+1. **Separation of Concerns:**
+   - Domain-agnostic I/O: Raw data handling
+   - Domain-aware I/O: Domain entity conversion
+   - Interface definitions: Application layer abstraction
+
+2. **Dependency Direction:**
+
+   ```text
+   application/ports/* (interfaces)
+       ↑ implements
+   infrastructure/repository/* (domain-aware)
+       ↑ depends on
+   infrastructure/database/ (domain-agnostic)
+   ```
+
+3. **No Interface Definitions in Infrastructure:**
+   - ❌ **NEVER** define interfaces in `infrastructure/`
+   - ✅ **ALWAYS** define interfaces in `application/ports/`
+   - ✅ Infrastructure packages only contain implementations
+
+##### Migration Notes
+
+- `infrastructure/repository/cold/interfaces.go` and
+  `infrastructure/repository/watch/interfaces.go` contain type aliases for backward compatibility
+- These are aliases to `application/ports/persistence` interfaces
+- New code should import interfaces directly from `application/ports/`
 
 ### 4. Interface Adapters Layer (`internal/interface-adapters/`)
 
