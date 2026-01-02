@@ -46,6 +46,12 @@ func NewBtcAccountKey(
 	walletImportFormat string,
 	idx int64,
 ) (*BtcAccountKey, error) {
+	if coinTypeCode == "" {
+		return nil, errors.New("coin type code cannot be empty")
+	}
+	if account == "" {
+		return nil, errors.New("account cannot be empty")
+	}
 	if fullPublicKey == "" {
 		return nil, errors.New("full public key cannot be empty")
 	}

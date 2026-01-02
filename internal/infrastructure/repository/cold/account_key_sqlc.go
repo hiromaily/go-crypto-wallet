@@ -39,11 +39,21 @@ func convertToBtcAccountKey(sqlcKey *sqlcgen.BtcAccountKey) (*domainBitcoin.BtcA
 		return nil, fmt.Errorf("invalid addr status in database: %w", err)
 	}
 
+	coinTypeCode := domainCoin.CoinTypeCode(sqlcKey.Coin)
+	if !domainCoin.IsCoinTypeCode(string(coinTypeCode)) {
+		return nil, fmt.Errorf("invalid coin type from database: %s", sqlcKey.Coin)
+	}
+
+	accountType := domainAccount.AccountType(sqlcKey.Account)
+	if !domainAccount.ValidateAccountType(string(accountType)) {
+		return nil, fmt.Errorf("invalid account type from database: %s", sqlcKey.Account)
+	}
+
 	key := &domainBitcoin.BtcAccountKey{
 		ID:                 sqlcKey.ID,
-		CoinTypeCode:       domainCoin.CoinTypeCode(sqlcKey.Coin),
+		CoinTypeCode:       coinTypeCode,
 		KeyType:            sqlcKey.KeyType,
-		Account:            domainAccount.AccountType(sqlcKey.Account),
+		Account:            accountType,
 		P2pkhAddress:       sqlcKey.P2pkhAddress,
 		P2shSegwitAddress:  sqlcKey.P2shSegwitAddress,
 		Bech32Address:      sqlcKey.Bech32Address,

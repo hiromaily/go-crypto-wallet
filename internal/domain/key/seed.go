@@ -27,6 +27,9 @@ func NewSeed(
 	coinTypeCode domainCoin.CoinTypeCode,
 	encryptedSeed string,
 ) (*Seed, error) {
+	if coinTypeCode == "" {
+		return nil, errors.New("coin type code cannot be empty")
+	}
 	if encryptedSeed == "" {
 		return nil, errors.New("encrypted seed cannot be empty")
 	}
