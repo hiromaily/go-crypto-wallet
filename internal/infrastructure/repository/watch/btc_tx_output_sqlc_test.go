@@ -9,8 +9,9 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
 
+	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	watchTestutil "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/testutil"
 )
 
@@ -21,34 +22,28 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 	btcTxOutputRepo := watchTestutil.NewBTCTxOutputRepositorySqlc()
 
 	// Create a parent tx
-	txItem := &sqlcgen.BtcTx{
-		Coin:              sqlcgen.BtcTxCoinBtc,
-		Action:            sqlcgen.BtcTxActionPayment,
-		UnsignedHexTx:     "output-test-hex",
-		TotalInputAmount:  "0.100",
-		TotalOutputAmount: "0.090",
-		Fee:               "0.010",
-	}
+	txItem := domainBitcoin.NewBtcTransaction(
+		domainCoin.BTC,
+		domainTx.ActionTypePayment,
+		domainTx.TxTypeUnsigned,
+	)
+	txItem.SetUnsignedTx("output-test-hex", "0.100", "0.090", "0.010")
+
 	txID, err := btcTxRepo.InsertUnsignedTx(domainTx.ActionTypePayment, txItem)
 	require.NoError(t, err, "fail to create parent tx")
 
 	// Create test outputs
-	outputs := []*sqlcgen.BtcTxOutput{
-		{
-			TxID:          txID,
-			OutputAddress: "output-address-sqlc-1",
-			OutputAccount: "receipt",
-			OutputAmount:  "0.08",
-			IsChange:      false,
-		},
-		{
-			TxID:          txID,
-			OutputAddress: "output-address-sqlc-2",
-			OutputAccount: "change",
-			OutputAmount:  "0.01",
-			IsChange:      true,
-		},
-	}
+	output1, err := domainBitcoin.NewBtcTxOutput(
+		txID, "output-address-sqlc-1", "receipt", "0.08", false,
+	)
+	require.NoError(t, err, "fail to create output1")
+
+	output2, err := domainBitcoin.NewBtcTxOutput(
+		txID, "output-address-sqlc-2", "change", "0.01", true,
+	)
+	require.NoError(t, err, "fail to create output2")
+
+	outputs := []*domainBitcoin.BtcTxOutput{output1, output2}
 
 	// Insert bulk
 	err = btcTxOutputRepo.InsertBulk(outputs)
@@ -78,13 +73,10 @@ func TestBTCTxOutputSqlc(t *testing.T) {
 	require.Equal(t, txID, oneOutput.TxID, "GetOne() should return output with correct TxID")
 
 	// Insert single
-	singleOutput := &sqlcgen.BtcTxOutput{
-		TxID:          txID,
-		OutputAddress: "output-address-sqlc-3",
-		OutputAccount: "receipt",
-		OutputAmount:  "0.02",
-		IsChange:      false,
-	}
+	singleOutput, err := domainBitcoin.NewBtcTxOutput(
+		txID, "output-address-sqlc-3", "receipt", "0.02", false,
+	)
+	require.NoError(t, err, "fail to create singleOutput")
 	err = btcTxOutputRepo.Insert(singleOutput)
 	require.NoError(t, err, "fail to call Insert()")
 

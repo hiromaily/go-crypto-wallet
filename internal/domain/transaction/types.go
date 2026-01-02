@@ -53,6 +53,17 @@ var TxTypeValue = map[TxType]uint8{
 	TxTypeCancel:   6,
 }
 
+// TxTypeFromInt8 converts an int8 value to TxType.
+// Returns empty TxType if the value is not valid.
+func TxTypeFromInt8(val int8) TxType {
+	for txType, num := range TxTypeValue {
+		if int8(num) == val {
+			return txType
+		}
+	}
+	return ""
+}
+
 // ValidateTxType validates that the given string is a valid transaction type.
 func ValidateTxType(val string) bool {
 	_, ok := TxTypeValue[TxType(val)]

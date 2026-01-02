@@ -11,6 +11,7 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
@@ -98,12 +99,12 @@ type AddressRepositorier interface {
 
 // BTCTxRepositorier is BTCTxRepository interface
 type BTCTxRepositorier interface {
-	GetOne(id int64) (*sqlcgen.BtcTx, error)
+	GetOne(id int64) (*domainBitcoin.BtcTransaction, error)
 	GetCountByUnsignedHex(actionType domainTx.ActionType, hex string) (int64, error)
 	GetTxIDBySentHash(actionType domainTx.ActionType, hash string) (int64, error)
 	GetSentHashTx(actionType domainTx.ActionType, txType domainTx.TxType) ([]string, error)
-	InsertUnsignedTx(actionType domainTx.ActionType, txItem *sqlcgen.BtcTx) (int64, error)
-	Update(txItem *sqlcgen.BtcTx) (int64, error)
+	InsertUnsignedTx(actionType domainTx.ActionType, txItem *domainBitcoin.BtcTransaction) (int64, error)
+	Update(txItem *domainBitcoin.BtcTransaction) (int64, error)
 	UpdateAfterTxSent(txID int64, txType domainTx.TxType, signedHex, sentHashTx string) (int64, error)
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(actionType domainTx.ActionType, txType domainTx.TxType, sentHashTx string) (int64, error)
@@ -112,18 +113,18 @@ type BTCTxRepositorier interface {
 
 // TxInputRepositorier is TxInputRepository interface
 type TxInputRepositorier interface {
-	GetOne(id int64) (*sqlcgen.BtcTxInput, error)
-	GetAllByTxID(id int64) ([]*sqlcgen.BtcTxInput, error)
-	Insert(txItem *sqlcgen.BtcTxInput) error
-	InsertBulk(txItems []*sqlcgen.BtcTxInput) error
+	GetOne(id int64) (*domainBitcoin.BtcTxInput, error)
+	GetAllByTxID(id int64) ([]*domainBitcoin.BtcTxInput, error)
+	Insert(txItem *domainBitcoin.BtcTxInput) error
+	InsertBulk(txItems []*domainBitcoin.BtcTxInput) error
 }
 
 // TxOutputRepositorier is TxOutputRepository interface
 type TxOutputRepositorier interface {
-	GetOne(id int64) (*sqlcgen.BtcTxOutput, error)
-	GetAllByTxID(id int64) ([]*sqlcgen.BtcTxOutput, error)
-	Insert(txItem *sqlcgen.BtcTxOutput) error
-	InsertBulk(txItems []*sqlcgen.BtcTxOutput) error
+	GetOne(id int64) (*domainBitcoin.BtcTxOutput, error)
+	GetAllByTxID(id int64) ([]*domainBitcoin.BtcTxOutput, error)
+	Insert(txItem *domainBitcoin.BtcTxOutput) error
+	InsertBulk(txItems []*domainBitcoin.BtcTxOutput) error
 }
 
 // TxRepositorier is TxRepository interface

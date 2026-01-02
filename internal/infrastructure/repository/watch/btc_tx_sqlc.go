@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
@@ -25,8 +26,58 @@ func NewBTCTxRepositorySqlc(dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode
 	}
 }
 
+// convertToBtcTransaction converts sqlcgen.BtcTx to domain.BtcTransaction entity
+func convertToBtcTransaction(sqlcTx *sqlcgen.BtcTx) (*domainBitcoin.BtcTransaction, error) {
+	tx := &domainBitcoin.BtcTransaction{
+		ID:                sqlcTx.ID,
+		CoinTypeCode:      domainCoin.CoinTypeCode(sqlcTx.Coin),
+		ActionType:        domainTx.ActionType(sqlcTx.Action),
+		UnsignedHexTx:     sqlcTx.UnsignedHexTx,
+		SignedHexTx:       sqlcTx.SignedHexTx,
+		SentHashTx:        sqlcTx.SentHashTx,
+		TotalInputAmount:  sqlcTx.TotalInputAmount,
+		TotalOutputAmount: sqlcTx.TotalOutputAmount,
+		Fee:               sqlcTx.Fee,
+		CurrentTxType:     domainTx.TxTypeFromInt8(sqlcTx.CurrentTxType),
+	}
+
+	if sqlcTx.UnsignedUpdatedAt.Valid {
+		tx.UnsignedUpdatedAt = &sqlcTx.UnsignedUpdatedAt.Time
+	}
+	if sqlcTx.SentUpdatedAt.Valid {
+		tx.SentUpdatedAt = &sqlcTx.SentUpdatedAt.Time
+	}
+
+	return tx, nil
+}
+
+// convertFromBtcTransaction converts domain.BtcTransaction entity to sqlcgen.BtcTx
+func convertFromBtcTransaction(tx *domainBitcoin.BtcTransaction) *sqlcgen.BtcTx {
+	sqlcTx := &sqlcgen.BtcTx{
+		ID:                tx.ID,
+		Coin:              sqlcgen.BtcTxCoin(tx.CoinTypeCode.String()),
+		Action:            sqlcgen.BtcTxAction(tx.ActionType.String()),
+		UnsignedHexTx:     tx.UnsignedHexTx,
+		SignedHexTx:       tx.SignedHexTx,
+		SentHashTx:        tx.SentHashTx,
+		TotalInputAmount:  tx.TotalInputAmount,
+		TotalOutputAmount: tx.TotalOutputAmount,
+		Fee:               tx.Fee,
+		CurrentTxType:     tx.CurrentTxType.Int8(),
+	}
+
+	if tx.UnsignedUpdatedAt != nil {
+		sqlcTx.UnsignedUpdatedAt = sql.NullTime{Time: *tx.UnsignedUpdatedAt, Valid: true}
+	}
+	if tx.SentUpdatedAt != nil {
+		sqlcTx.SentUpdatedAt = sql.NullTime{Time: *tx.SentUpdatedAt, Valid: true}
+	}
+
+	return sqlcTx
+}
+
 // GetOne returns one record by ID
-func (r *BTCTxRepositorySqlc) GetOne(id int64) (*sqlcgen.BtcTx, error) {
+func (r *BTCTxRepositorySqlc) GetOne(id int64) (*domainBitcoin.BtcTransaction, error) {
 	ctx := context.Background()
 
 	btcTx, err := r.queries.GetBtcTxByID(ctx, id)
@@ -34,7 +85,7 @@ func (r *BTCTxRepositorySqlc) GetOne(id int64) (*sqlcgen.BtcTx, error) {
 		return nil, fmt.Errorf("failed to call GetBtcTxByID(): %w", err)
 	}
 
-	return &btcTx, nil
+	return convertToBtcTransaction(&btcTx)
 }
 
 // GetCountByUnsignedHex returns count by hex string
@@ -86,21 +137,25 @@ func (r *BTCTxRepositorySqlc) GetSentHashTx(actionType domainTx.ActionType, txTy
 }
 
 // InsertUnsignedTx inserts records
-func (r *BTCTxRepositorySqlc) InsertUnsignedTx(actionType domainTx.ActionType, txItem *sqlcgen.BtcTx) (int64, error) {
+func (r *BTCTxRepositorySqlc) InsertUnsignedTx(
+	actionType domainTx.ActionType,
+	txItem *domainBitcoin.BtcTransaction,
+) (int64, error) {
 	ctx := context.Background()
 
+	sqlcTx := convertFromBtcTransaction(txItem)
 	result, err := r.queries.InsertBtcTx(ctx, sqlcgen.InsertBtcTxParams{
 		Coin:              sqlcgen.BtcTxCoin(r.coinTypeCode.String()),
 		Action:            sqlcgen.BtcTxAction(actionType.String()),
-		UnsignedHexTx:     txItem.UnsignedHexTx,
-		SignedHexTx:       txItem.SignedHexTx,
-		SentHashTx:        txItem.SentHashTx,
-		TotalInputAmount:  txItem.TotalInputAmount,
-		TotalOutputAmount: txItem.TotalOutputAmount,
-		Fee:               txItem.Fee,
-		CurrentTxType:     txItem.CurrentTxType,
-		UnsignedUpdatedAt: txItem.UnsignedUpdatedAt,
-		SentUpdatedAt:     txItem.SentUpdatedAt,
+		UnsignedHexTx:     sqlcTx.UnsignedHexTx,
+		SignedHexTx:       sqlcTx.SignedHexTx,
+		SentHashTx:        sqlcTx.SentHashTx,
+		TotalInputAmount:  sqlcTx.TotalInputAmount,
+		TotalOutputAmount: sqlcTx.TotalOutputAmount,
+		Fee:               sqlcTx.Fee,
+		CurrentTxType:     sqlcTx.CurrentTxType,
+		UnsignedUpdatedAt: sqlcTx.UnsignedUpdatedAt,
+		SentUpdatedAt:     sqlcTx.SentUpdatedAt,
 	})
 	if err != nil {
 		return 0, fmt.Errorf("failed to call InsertBtcTx(): %w", err)
@@ -114,23 +169,24 @@ func (r *BTCTxRepositorySqlc) InsertUnsignedTx(actionType domainTx.ActionType, t
 	return id, nil
 }
 
-// Update updates by sqlc.BtcTx (entire update)
-func (r *BTCTxRepositorySqlc) Update(txItem *sqlcgen.BtcTx) (int64, error) {
+// Update updates by domain.BtcTransaction (entire update)
+func (r *BTCTxRepositorySqlc) Update(txItem *domainBitcoin.BtcTransaction) (int64, error) {
 	ctx := context.Background()
 
+	sqlcTx := convertFromBtcTransaction(txItem)
 	err := r.queries.UpdateBtcTx(ctx, sqlcgen.UpdateBtcTxParams{
-		Coin:              txItem.Coin,
-		Action:            txItem.Action,
-		UnsignedHexTx:     txItem.UnsignedHexTx,
-		SignedHexTx:       txItem.SignedHexTx,
-		SentHashTx:        txItem.SentHashTx,
-		TotalInputAmount:  txItem.TotalInputAmount,
-		TotalOutputAmount: txItem.TotalOutputAmount,
-		Fee:               txItem.Fee,
-		CurrentTxType:     txItem.CurrentTxType,
-		UnsignedUpdatedAt: txItem.UnsignedUpdatedAt,
-		SentUpdatedAt:     txItem.SentUpdatedAt,
-		ID:                txItem.ID,
+		Coin:              sqlcTx.Coin,
+		Action:            sqlcTx.Action,
+		UnsignedHexTx:     sqlcTx.UnsignedHexTx,
+		SignedHexTx:       sqlcTx.SignedHexTx,
+		SentHashTx:        sqlcTx.SentHashTx,
+		TotalInputAmount:  sqlcTx.TotalInputAmount,
+		TotalOutputAmount: sqlcTx.TotalOutputAmount,
+		Fee:               sqlcTx.Fee,
+		CurrentTxType:     sqlcTx.CurrentTxType,
+		UnsignedUpdatedAt: sqlcTx.UnsignedUpdatedAt,
+		SentUpdatedAt:     sqlcTx.SentUpdatedAt,
+		ID:                sqlcTx.ID,
 	})
 	if err != nil {
 		return 0, fmt.Errorf("failed to call UpdateBtcTx(): %w", err)
