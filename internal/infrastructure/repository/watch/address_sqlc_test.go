@@ -12,7 +12,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	watchTestutil "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/testutil"
 	dbTestutil "github.com/hiromaily/go-crypto-wallet/pkg/db/mysql/testutil"
 )
@@ -28,22 +29,22 @@ func TestAddressSqlc(t *testing.T) {
 	accountType := account.AccountTypeClient
 
 	// Insert bulk addresses
-	addresses := []*sqlcgen.Address{
+	addresses := []*domainAddress.Address{
 		{
-			Coin:          sqlcgen.AddressCoinBtc,
-			Account:       sqlcgen.AddressAccountClient,
+			CoinTypeCode:  coin.BTC,
+			AccountType:   account.AccountTypeClient,
 			WalletAddress: "address-sqlc-1",
 			IsAllocated:   false,
 		},
 		{
-			Coin:          sqlcgen.AddressCoinBtc,
-			Account:       sqlcgen.AddressAccountClient,
+			CoinTypeCode:  coin.BTC,
+			AccountType:   account.AccountTypeClient,
 			WalletAddress: "address-sqlc-2",
 			IsAllocated:   false,
 		},
 		{
-			Coin:          sqlcgen.AddressCoinBtc,
-			Account:       sqlcgen.AddressAccountClient,
+			CoinTypeCode:  coin.BTC,
+			AccountType:   account.AccountTypeClient,
 			WalletAddress: "address-sqlc-3",
 			IsAllocated:   true,
 		},

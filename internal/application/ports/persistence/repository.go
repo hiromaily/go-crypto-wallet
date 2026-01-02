@@ -89,10 +89,10 @@ type AuthAccountKeyRepositorier interface {
 
 // AddressRepositorier is AddressRepository interface
 type AddressRepositorier interface {
-	GetAll(accountType domainAccount.AccountType) ([]*sqlcgen.Address, error)
+	GetAll(accountType domainAccount.AccountType) ([]*domainAddress.Address, error)
 	GetAllAddress(accountType domainAccount.AccountType) ([]string, error)
-	GetOneUnAllocated(accountType domainAccount.AccountType) (*sqlcgen.Address, error)
-	InsertBulk(ctx context.Context, items []*sqlcgen.Address) error
+	GetOneUnAllocated(accountType domainAccount.AccountType) (*domainAddress.Address, error)
+	InsertBulk(ctx context.Context, items []*domainAddress.Address) error
 	UpdateIsAllocated(isAllocated bool, Address string) (int64, error)
 }
 
@@ -128,10 +128,10 @@ type TxOutputRepositorier interface {
 
 // TxRepositorier is TxRepository interface
 type TxRepositorier interface {
-	GetOne(id int64) (*sqlcgen.Tx, error)
+	GetOne(id int64) (*domainTx.Transaction, error)
 	GetMaxID(actionType domainTx.ActionType) (int64, error)
 	InsertUnsignedTx(actionType domainTx.ActionType) (int64, error)
-	Update(txItem *sqlcgen.Tx) (int64, error)
+	Update(txItem *domainTx.Transaction) (int64, error)
 	DeleteAll() (int64, error)
 	WithTx(tx *sql.Tx) TxRepositorier
 }

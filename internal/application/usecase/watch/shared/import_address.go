@@ -11,7 +11,6 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
@@ -48,7 +47,7 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 		return fmt.Errorf("fail to call addrFileRepo.ImportAddress(): %w", err)
 	}
 
-	pubKeyData := make([]*sqlcgen.Address, 0, len(pubKeys))
+	pubKeyData := make([]*domainAddress.Address, 0, len(pubKeys))
 	for _, key := range pubKeys {
 		// coin, account, ...
 		inner := strings.Split(key, ",")
@@ -59,10 +58,11 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 			return err
 		}
 
-		pubKeyData = append(pubKeyData, &sqlcgen.Address{
-			Coin:          sqlcgen.AddressCoin(u.coinTypeCode.String()),
-			Account:       sqlcgen.AddressAccount(addrFmt.AccountType.String()),
+		pubKeyData = append(pubKeyData, &domainAddress.Address{
+			CoinTypeCode:  u.coinTypeCode,
+			AccountType:   addrFmt.AccountType,
 			WalletAddress: addrFmt.P2PKHAddress,
+			IsAllocated:   false,
 		})
 	}
 

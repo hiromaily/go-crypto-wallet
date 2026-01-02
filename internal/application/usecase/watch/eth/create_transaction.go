@@ -11,6 +11,7 @@ import (
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/eth"
@@ -424,7 +425,7 @@ func (u *createTransactionUseCase) createUserPayment() ([]userPayment, *big.Int,
 
 func (u *createTransactionUseCase) validateAmount(
 	ctx context.Context,
-	senderAddr *sqlcgen.Address,
+	senderAddr *domainAddress.Address,
 	totalAmount *big.Int,
 ) error {
 	// check sender's total balance
@@ -443,7 +444,7 @@ func (u *createTransactionUseCase) createPaymentRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
 	userPayments []userPayment,
-	senderAddr *sqlcgen.Address,
+	senderAddr *domainAddress.Address,
 ) ([]string, []*sqlcgen.EthDetailTx, error) {
 	serializedTxs := make([]string, 0, len(userPayments))
 	txDetailItems := make([]*sqlcgen.EthDetailTx, 0, len(userPayments))

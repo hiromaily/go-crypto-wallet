@@ -25,8 +25,38 @@ func NewTxRepositorySqlc(dbConn *sql.DB, coinTypeCode domainCoin.CoinTypeCode) *
 	}
 }
 
+// convertToTransaction converts sqlcgen.Tx to domain.Transaction entity
+func convertToTransaction(sqlcTx *sqlcgen.Tx) (*domainTx.Transaction, error) {
+	tx := &domainTx.Transaction{
+		ID:           sqlcTx.ID,
+		CoinTypeCode: domainCoin.CoinTypeCode(sqlcTx.Coin),
+		ActionType:   domainTx.ActionType(sqlcTx.Action),
+	}
+
+	if sqlcTx.UpdatedAt.Valid {
+		tx.UpdatedAt = &sqlcTx.UpdatedAt.Time
+	}
+
+	return tx, nil
+}
+
+// convertFromTransaction converts domain.Transaction entity to sqlcgen.Tx
+func convertFromTransaction(tx *domainTx.Transaction) *sqlcgen.Tx {
+	sqlcTx := &sqlcgen.Tx{
+		ID:     tx.ID,
+		Coin:   sqlcgen.TxCoin(tx.CoinTypeCode.String()),
+		Action: sqlcgen.TxAction(tx.ActionType.String()),
+	}
+
+	if tx.UpdatedAt != nil {
+		sqlcTx.UpdatedAt = sql.NullTime{Time: *tx.UpdatedAt, Valid: true}
+	}
+
+	return sqlcTx
+}
+
 // GetOne returns one record by ID
-func (r *TxRepositorySqlc) GetOne(id int64) (*sqlcgen.Tx, error) {
+func (r *TxRepositorySqlc) GetOne(id int64) (*domainTx.Transaction, error) {
 	ctx := context.Background()
 
 	tx, err := r.queries.GetTxByID(ctx, id)
@@ -34,7 +64,7 @@ func (r *TxRepositorySqlc) GetOne(id int64) (*sqlcgen.Tx, error) {
 		return nil, fmt.Errorf("failed to call GetTxByID(): %w", err)
 	}
 
-	return &tx, nil
+	return convertToTransaction(&tx)
 }
 
 // GetMaxID returns max id
@@ -81,15 +111,16 @@ func (r *TxRepositorySqlc) InsertUnsignedTx(actionType domainTx.ActionType) (int
 	return id, nil
 }
 
-// Update updates by sqlcgen.Tx (entire update)
-func (r *TxRepositorySqlc) Update(txItem *sqlcgen.Tx) (int64, error) {
+// Update updates by domain.Transaction (entire update)
+func (r *TxRepositorySqlc) Update(txItem *domainTx.Transaction) (int64, error) {
 	ctx := context.Background()
 
+	sqlcTx := convertFromTransaction(txItem)
 	err := r.queries.UpdateTx(ctx, sqlcgen.UpdateTxParams{
-		Coin:      txItem.Coin,
-		Action:    txItem.Action,
-		UpdatedAt: txItem.UpdatedAt,
-		ID:        txItem.ID,
+		Coin:      sqlcTx.Coin,
+		Action:    sqlcTx.Action,
+		UpdatedAt: sqlcTx.UpdatedAt,
+		ID:        sqlcTx.ID,
 	})
 	if err != nil {
 		return 0, fmt.Errorf("failed to call UpdateTx(): %w", err)
