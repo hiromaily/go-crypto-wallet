@@ -18,7 +18,6 @@ import (
 	domainPayment "github.com/hiromaily/go-crypto-wallet/internal/domain/payment"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
 // Repository interfaces for cold wallet (keygen and sign wallets)
@@ -51,12 +50,12 @@ type BTCAccountKeyRepositorier interface {
 // ETHAccountKeyRepositorier is EthAccountKeyRepository interface for ETH
 type ETHAccountKeyRepositorier interface {
 	GetMaxIndex(accountType domainAccount.AccountType) (int64, error)
-	GetOneMaxID(accountType domainAccount.AccountType) (*sqlcgen.EthAccountKey, error)
+	GetOneMaxID(accountType domainAccount.AccountType) (*domainEth.ETHAccountKey, error)
 	GetAllAddrStatus(
 		accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus,
-	) ([]*sqlcgen.EthAccountKey, error)
-	GetByAddress(address string) (*sqlcgen.EthAccountKey, error)
-	InsertBulk(items []*sqlcgen.EthAccountKey) error
+	) ([]*domainEth.ETHAccountKey, error)
+	GetByAddress(address string) (*domainEth.ETHAccountKey, error)
+	InsertBulk(items []*domainEth.ETHAccountKey) error
 	UpdateAddrStatus(
 		accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus, privateKeys []string,
 	) (int64, error)
@@ -66,9 +65,9 @@ type ETHAccountKeyRepositorier interface {
 type XRPAccountKeyRepositorier interface {
 	GetAllAddrStatus(
 		ctx context.Context, accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus,
-	) ([]*sqlcgen.XrpAccountKey, error)
+	) ([]*domainXrp.XRPAccountKey, error)
 	GetSecret(ctx context.Context, accountType domainAccount.AccountType, addr string) (string, error)
-	InsertBulk(ctx context.Context, items []*sqlcgen.XrpAccountKey) error
+	InsertBulk(ctx context.Context, items []*domainXrp.XRPAccountKey) error
 	UpdateAddrStatus(
 		ctx context.Context,
 		accountType domainAccount.AccountType,

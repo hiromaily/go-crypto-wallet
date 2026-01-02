@@ -8,6 +8,7 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
@@ -23,6 +24,50 @@ func NewETHAccountKeyRepositorySqlc(dbConn *sql.DB) *ETHAccountKeyRepositorySqlc
 		queries: sqlcgen.New(dbConn),
 		dbConn:  dbConn,
 	}
+}
+
+// convertToETHAccountKey converts sqlcgen.EthAccountKey to domain.EthAccountKey entity.
+// SECURITY: Handles private key data - never log the private key field.
+func convertToETHAccountKey(sqlcKey *sqlcgen.EthAccountKey) (*domainEth.ETHAccountKey, error) {
+	addrStatus, err := domainAddress.AddrStatusFromInt8(sqlcKey.AddrStatus)
+	if err != nil {
+		return nil, fmt.Errorf("invalid addr status in database: %w", err)
+	}
+
+	key := &domainEth.ETHAccountKey{
+		ID:            sqlcKey.ID,
+		Account:       domainAccount.AccountType(sqlcKey.Account),
+		Address:       sqlcKey.Address,
+		FullPublicKey: sqlcKey.FullPublicKey,
+		PrivateKey:    sqlcKey.PrivateKey, // Private key - NEVER log
+		Idx:           sqlcKey.Idx,
+		AddrStatus:    addrStatus,
+	}
+
+	if sqlcKey.UpdatedAt.Valid {
+		key.UpdatedAt = &sqlcKey.UpdatedAt.Time
+	}
+
+	return key, nil
+}
+
+// convertFromETHAccountKey converts domain.EthAccountKey entity to sqlcgen.EthAccountKey.
+func convertFromETHAccountKey(key *domainEth.ETHAccountKey) *sqlcgen.EthAccountKey {
+	sqlcKey := &sqlcgen.EthAccountKey{
+		ID:            key.ID,
+		Account:       sqlcgen.EthAccountKeyAccount(key.Account.String()),
+		Address:       key.Address,
+		FullPublicKey: key.FullPublicKey,
+		PrivateKey:    key.PrivateKey,
+		Idx:           key.Idx,
+		AddrStatus:    key.AddrStatus.Int8(),
+	}
+
+	if key.UpdatedAt != nil {
+		sqlcKey.UpdatedAt = sql.NullTime{Time: *key.UpdatedAt, Valid: true}
+	}
+
+	return sqlcKey
 }
 
 // GetMaxIndex returns max idx
@@ -44,7 +89,7 @@ func (r *ETHAccountKeyRepositorySqlc) GetMaxIndex(accountType domainAccount.Acco
 
 // GetOneMaxID returns one record by max id
 func (r *ETHAccountKeyRepositorySqlc) GetOneMaxID(accountType domainAccount.AccountType,
-) (*sqlcgen.EthAccountKey, error) {
+) (*domainEth.ETHAccountKey, error) {
 	ctx := context.Background()
 
 	accountKey, err := r.queries.GetOneEthAccountKeyByMaxID(ctx, sqlcgen.EthAccountKeyAccount(accountType.String()))
@@ -52,13 +97,13 @@ func (r *ETHAccountKeyRepositorySqlc) GetOneMaxID(accountType domainAccount.Acco
 		return nil, fmt.Errorf("failed to call GetOneEthAccountKeyByMaxID(): %w", err)
 	}
 
-	return &accountKey, nil
+	return convertToETHAccountKey(&accountKey)
 }
 
 // GetAllAddrStatus returns all EthAccountKey by addr_status
 func (r *ETHAccountKeyRepositorySqlc) GetAllAddrStatus(
 	accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus,
-) ([]*sqlcgen.EthAccountKey, error) {
+) ([]*domainEth.ETHAccountKey, error) {
 	ctx := context.Background()
 
 	accountKeys, err := r.queries.GetEthAccountKeysByAddrStatus(ctx, sqlcgen.GetEthAccountKeysByAddrStatusParams{
@@ -69,16 +114,20 @@ func (r *ETHAccountKeyRepositorySqlc) GetAllAddrStatus(
 		return nil, fmt.Errorf("failed to call GetEthAccountKeysByAddrStatus(): %w", err)
 	}
 
-	result := make([]*sqlcgen.EthAccountKey, len(accountKeys))
+	result := make([]*domainEth.ETHAccountKey, 0, len(accountKeys))
 	for i := range accountKeys {
-		result[i] = &accountKeys[i]
+		key, err := convertToETHAccountKey(&accountKeys[i])
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, key)
 	}
 
 	return result, nil
 }
 
 // GetByAddress returns EthAccountKey by address
-func (r *ETHAccountKeyRepositorySqlc) GetByAddress(addr string) (*sqlcgen.EthAccountKey, error) {
+func (r *ETHAccountKeyRepositorySqlc) GetByAddress(addr string) (*domainEth.ETHAccountKey, error) {
 	ctx := context.Background()
 
 	accountKey, err := r.queries.GetEthAccountKeyByAddress(ctx, addr)
@@ -86,11 +135,11 @@ func (r *ETHAccountKeyRepositorySqlc) GetByAddress(addr string) (*sqlcgen.EthAcc
 		return nil, fmt.Errorf("failed to call GetEthAccountKeyByAddress(): %w", err)
 	}
 
-	return &accountKey, nil
+	return convertToETHAccountKey(&accountKey)
 }
 
 // InsertBulk inserts multiple records
-func (r *ETHAccountKeyRepositorySqlc) InsertBulk(items []*sqlcgen.EthAccountKey) error {
+func (r *ETHAccountKeyRepositorySqlc) InsertBulk(items []*domainEth.ETHAccountKey) error {
 	ctx := context.Background()
 
 	tx, err := r.dbConn.BeginTx(ctx, nil)
@@ -100,13 +149,14 @@ func (r *ETHAccountKeyRepositorySqlc) InsertBulk(items []*sqlcgen.EthAccountKey)
 	qtx := r.queries.WithTx(tx)
 
 	for _, item := range items {
+		sqlcItem := convertFromETHAccountKey(item)
 		_, err := qtx.InsertEthAccountKey(ctx, sqlcgen.InsertEthAccountKeyParams{
-			Account:       item.Account,
-			Address:       item.Address,
-			FullPublicKey: item.FullPublicKey,
-			PrivateKey:    item.PrivateKey,
-			Idx:           item.Idx,
-			AddrStatus:    item.AddrStatus,
+			Account:       sqlcItem.Account,
+			Address:       sqlcItem.Address,
+			FullPublicKey: sqlcItem.FullPublicKey,
+			PrivateKey:    sqlcItem.PrivateKey,
+			Idx:           sqlcItem.Idx,
+			AddrStatus:    sqlcItem.AddrStatus,
 		})
 		if err != nil {
 			_ = tx.Rollback()

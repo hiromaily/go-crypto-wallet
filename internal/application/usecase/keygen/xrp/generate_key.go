@@ -9,9 +9,9 @@ import (
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
+	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -64,7 +64,7 @@ func (u *generateKeyUseCase) Generate(ctx context.Context, input keygenusecase.G
 	}()
 
 	// Generate XRP keys
-	items := make([]*sqlcgen.XrpAccountKey, 0, len(walletKeys))
+	items := make([]*domainXrp.XRPAccountKey, 0, len(walletKeys))
 	for _, v := range walletKeys {
 		// TODO:
 		// - WIF => badSeed
@@ -79,19 +79,28 @@ func (u *generateKeyUseCase) Generate(ctx context.Context, input keygenusecase.G
 		}
 
 		// TODO: passphrase or related ID should be stored in table??
-		items = append(items, &sqlcgen.XrpAccountKey{
-			Coin:             sqlcgen.XrpAccountKeyCoin(u.coinTypeCode.String()),
-			Account:          sqlcgen.XrpAccountKeyAccount(input.AccountType.String()),
-			AccountID:        generatedKey.Result.AccountID,
-			KeyType:          xrp.GetXRPKeyTypeValue(generatedKey.Result.KeyType),
-			MasterKey:        generatedKey.Result.MasterKey,
-			MasterSeed:       generatedKey.Result.MasterSeed,
-			MasterSeedHex:    generatedKey.Result.MasterSeedHex,
-			PublicKey:        generatedKey.Result.PublicKey,
-			PublicKeyHex:     generatedKey.Result.PublicKeyHex,
-			IsRegularKeyPair: input.IsKeyPair,
-			AllocatedID:      0,
-		})
+		xrpKey, err := domainXrp.NewXRPAccountKey(
+			u.coinTypeCode,
+			input.AccountType,
+			generatedKey.Result.AccountID,
+			domainXrp.XRPKeyType(xrp.GetXRPKeyTypeValue(generatedKey.Result.KeyType)),
+			generatedKey.Result.MasterSeed,
+			generatedKey.Result.MasterSeedHex,
+			generatedKey.Result.PublicKey,
+			generatedKey.Result.PublicKeyHex,
+			input.IsKeyPair,
+			0,
+		)
+		if err != nil {
+			return fmt.Errorf("fail to create XrpAccountKey: %w", err)
+		}
+
+		// Set deprecated MasterKey field if present
+		if generatedKey.Result.MasterKey != "" {
+			xrpKey.MasterKey = generatedKey.Result.MasterKey
+		}
+
+		items = append(items, xrpKey)
 
 		// TODO: Legacy cross-coin table update - removed as XRP should only use XRP repository
 		// Previously this was updating the BTC account_key table with XRP address
