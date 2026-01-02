@@ -4,9 +4,32 @@
 // by defining interfaces in the application layer that are implemented by the
 // infrastructure layer.
 //
-// Note: This package imports XRP infrastructure types to define the interface.
-// This is acceptable because the interface is the abstraction and the infrastructure
-// implements it. The dependency direction is: infrastructure -> ports (interface).
+// TODO(architecture): ARCHITECTURAL DEBT - This package currently imports infrastructure
+// types (xrp package) which violates Clean Architecture dependency direction.
+// The dependency should flow: infrastructure -> ports, not ports -> infrastructure.
+//
+// Current state (INCORRECT):
+//
+//	application/ports/ripple (interface)
+//	    ↓ imports
+//	infrastructure/api/ripple/xrp (implementation)
+//
+// Desired state (CORRECT):
+//
+//	application/ports/ripple (interface)
+//	    ↑ implemented by
+//	infrastructure/api/ripple/xrp (implementation)
+//
+// This creates inconsistency with other blockchain interfaces (BTC, ETH) which only
+// import external library types and domain types, never infrastructure types.
+//
+// Recommended solutions:
+// 1. Move XRP protocol types (Instructions, TxInput, Response*) to internal/domain/xrp
+// 2. Create application-layer DTOs in internal/application/dto/ripple
+// 3. Use generic types (map[string]interface{}) for protocol-specific structures
+//
+// This technical debt should be addressed in a future refactoring to align with
+// the project's Clean Architecture principles. See PR #240 review for full analysis.
 package ripple
 
 import (
@@ -15,6 +38,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	// TODO: Remove this infrastructure import (architectural debt)
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 )
 
