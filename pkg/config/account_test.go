@@ -49,9 +49,9 @@ func TestNewAccountWithViper(t *testing.T) {
 	}
 }
 
-// TestLoadAccount tests the loadAccount function indirectly through NewAccount.
-// Note: loadAccount is a private function, so this test verifies that NewAccount
-// (which uses loadAccount internally) works correctly.
+// TestLoadAccount tests the TOML loading functionality indirectly through NewAccount.
+// This test verifies that NewAccount correctly loads and validates account configuration
+// from a TOML file using the common loadTOML function.
 func TestLoadAccount(t *testing.T) {
 	confPath := configutil.GetConfigFilePath("account.toml")
 

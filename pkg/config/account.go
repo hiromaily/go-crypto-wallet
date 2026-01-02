@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/go-playground/validator/v10"
 
@@ -88,37 +89,25 @@ type AccountMultisig struct {
 //   - Validation fails
 func NewAccount(file string) (*AccountRoot, error) {
 	if file == "" {
-		return nil, errors.New("config file should be passed")
+		return nil, errors.New("account config file path cannot be empty")
 	}
 
-	var err error
-	conf, err := loadAccount(file)
+	conf, err := loadTOML[AccountRoot](file)
 	if err != nil {
 		return nil, err
 	}
 
-	// validate
-	if err = conf.validate(); err != nil {
-		return nil, err
+	if err := conf.validate(); err != nil {
+		return nil, fmt.Errorf("account config validation failed: %w", err)
 	}
 
 	return conf, nil
 }
 
-// loadAccount loads account configuration from a TOML file.
-// This function uses the common loadTOML function for consistency.
-func loadAccount(path string) (*AccountRoot, error) {
-	return loadTOML[AccountRoot](path)
-}
-
-// validate validates the account configuration structure.
+// validate validates the account configuration structure using go-playground/validator.
 func (c *AccountRoot) validate() error {
 	validate := validator.New()
-	if err := validate.Struct(c); err != nil {
-		return err
-	}
-
-	return nil
+	return validate.Struct(c)
 }
 
 // NewMultisigConfig converts AccountMultisig config to domain MultisigConfig.

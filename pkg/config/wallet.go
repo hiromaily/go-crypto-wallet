@@ -42,10 +42,11 @@ type Bitcoin struct {
 	Fee   BitcoinFee   `toml:"fee" mapstructure:"fee"`
 }
 
-// BitcoinBlock block information of Bitcoin
-// FIXME: keygen/signature wallet doesn't have this value
+// BitcoinBlock block information of Bitcoin.
 //
-//	so validation can not be used
+// Note: This field is only required for watch-only wallets.
+// Keygen and signature wallets do not require this value, so validation
+// is conditionally applied based on wallet type.
 type BitcoinBlock struct {
 	ConfirmationNum uint64 `toml:"confirmation_num" mapstructure:"confirmation_num"`
 }
@@ -165,7 +166,7 @@ type AddressFile struct {
 //   - Validation fails
 func NewWallet(file string, wtype domainWallet.WalletType, coinTypeCode domainCoin.CoinTypeCode) (*WalletRoot, error) {
 	if file == "" {
-		return nil, errors.New("config file should be passed")
+		return nil, errors.New("wallet config file path cannot be empty")
 	}
 
 	conf, err := loadTOML[WalletRoot](file)
@@ -173,9 +174,8 @@ func NewWallet(file string, wtype domainWallet.WalletType, coinTypeCode domainCo
 		return nil, err
 	}
 
-	// validate
-	if err = conf.validate(wtype, coinTypeCode); err != nil {
-		return nil, err
+	if err := conf.validate(wtype, coinTypeCode); err != nil {
+		return nil, fmt.Errorf("wallet config validation failed: %w", err)
 	}
 
 	return conf, nil
