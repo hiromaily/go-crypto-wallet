@@ -14,7 +14,6 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	sqlcgen "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/mysql"
@@ -51,7 +50,7 @@ func TestTxSqlc(t *testing.T) {
 	tx, err := txRepo.GetOne(id)
 	require.NoError(t, err, "fail to call GetOne()")
 	require.Equal(t, id, tx.ID, "GetOne() should return correct id")
-	require.Equal(t, sqlcgen.TxActionPayment, tx.Action, "GetOne() should return correct action")
+	require.Equal(t, domainTx.ActionTypePayment, tx.ActionType, "GetOne() should return correct action")
 
 	// Get max ID
 	maxID, err := txRepo.GetMaxID(actionType)
@@ -69,7 +68,7 @@ func TestTxSqlc(t *testing.T) {
 	require.Greater(t, id2, id, "second InsertUnsignedTx() should return id greater than first")
 
 	// Update tx
-	tx.Action = sqlcgen.TxActionDeposit
+	tx.ActionType = domainTx.ActionTypeDeposit
 	rowsAffected, err := txRepo.Update(tx)
 	require.NoError(t, err, "fail to call Update()")
 	require.Equal(t, int64(1), rowsAffected, "Update() should affect 1 row")
@@ -77,5 +76,5 @@ func TestTxSqlc(t *testing.T) {
 	// Verify update
 	updatedTx, err := txRepo.GetOne(id)
 	require.NoError(t, err, "fail to call GetOne() after update")
-	require.Equal(t, sqlcgen.TxActionDeposit, updatedTx.Action, "Update() should change action to Deposit")
+	require.Equal(t, domainTx.ActionTypeDeposit, updatedTx.ActionType, "Update() should change action to Deposit")
 }
