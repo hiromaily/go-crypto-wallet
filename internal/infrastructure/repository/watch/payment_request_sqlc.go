@@ -7,6 +7,7 @@ import (
 
 	portsPersistence "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainPayment "github.com/hiromaily/go-crypto-wallet/internal/domain/payment"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
@@ -26,8 +27,52 @@ func NewPaymentRequestRepositorySqlc(
 	}
 }
 
+// convertToPaymentRequest converts sqlcgen.PaymentRequest to domain.PaymentRequest entity
+func convertToPaymentRequest(sqlcReq *sqlcgen.PaymentRequest) (*domainPayment.PaymentRequest, error) {
+	req := &domainPayment.PaymentRequest{
+		ID:              sqlcReq.ID,
+		CoinTypeCode:    domainCoin.CoinTypeCode(sqlcReq.Coin),
+		SenderAddress:   sqlcReq.SenderAddress,
+		SenderAccount:   sqlcReq.SenderAccount,
+		ReceiverAddress: sqlcReq.ReceiverAddress,
+		Amount:          sqlcReq.Amount,
+		IsDone:          sqlcReq.IsDone,
+	}
+
+	if sqlcReq.PaymentID.Valid {
+		req.PaymentID = &sqlcReq.PaymentID.Int64
+	}
+	if sqlcReq.UpdatedAt.Valid {
+		req.UpdatedAt = &sqlcReq.UpdatedAt.Time
+	}
+
+	return req, nil
+}
+
+// convertFromPaymentRequest converts domain.PaymentRequest entity to sqlcgen.PaymentRequest
+func convertFromPaymentRequest(req *domainPayment.PaymentRequest) *sqlcgen.PaymentRequest {
+	sqlcReq := &sqlcgen.PaymentRequest{
+		ID:              req.ID,
+		Coin:            sqlcgen.PaymentRequestCoin(req.CoinTypeCode.String()),
+		SenderAddress:   req.SenderAddress,
+		SenderAccount:   req.SenderAccount,
+		ReceiverAddress: req.ReceiverAddress,
+		Amount:          req.Amount,
+		IsDone:          req.IsDone,
+	}
+
+	if req.PaymentID != nil {
+		sqlcReq.PaymentID = sql.NullInt64{Int64: *req.PaymentID, Valid: true}
+	}
+	if req.UpdatedAt != nil {
+		sqlcReq.UpdatedAt = sql.NullTime{Time: *req.UpdatedAt, Valid: true}
+	}
+
+	return sqlcReq
+}
+
 // GetAll returns all records whose payment_id is null
-func (r *PaymentRequestRepositorySqlc) GetAll() ([]*sqlcgen.PaymentRequest, error) {
+func (r *PaymentRequestRepositorySqlc) GetAll() ([]*domainPayment.PaymentRequest, error) {
 	ctx := context.Background()
 
 	requests, err := r.queries.GetAllPaymentRequests(ctx, sqlcgen.PaymentRequestCoin(r.coinTypeCode.String()))
@@ -35,16 +80,20 @@ func (r *PaymentRequestRepositorySqlc) GetAll() ([]*sqlcgen.PaymentRequest, erro
 		return nil, fmt.Errorf("failed to call GetAllPaymentRequests(): %w", err)
 	}
 
-	result := make([]*sqlcgen.PaymentRequest, len(requests))
+	result := make([]*domainPayment.PaymentRequest, len(requests))
 	for i := range requests {
-		result[i] = &requests[i]
+		domainReq, err := convertToPaymentRequest(&requests[i])
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert payment request: %w", err)
+		}
+		result[i] = domainReq
 	}
 
 	return result, nil
 }
 
 // GetAllByPaymentID returns all records searched by payment_id
-func (r *PaymentRequestRepositorySqlc) GetAllByPaymentID(paymentID int64) ([]*sqlcgen.PaymentRequest, error) {
+func (r *PaymentRequestRepositorySqlc) GetAllByPaymentID(paymentID int64) ([]*domainPayment.PaymentRequest, error) {
 	ctx := context.Background()
 
 	requests, err := r.queries.GetPaymentRequestsByPaymentID(ctx, sqlcgen.GetPaymentRequestsByPaymentIDParams{
@@ -55,28 +104,33 @@ func (r *PaymentRequestRepositorySqlc) GetAllByPaymentID(paymentID int64) ([]*sq
 		return nil, fmt.Errorf("failed to call GetPaymentRequestsByPaymentID(): %w", err)
 	}
 
-	result := make([]*sqlcgen.PaymentRequest, len(requests))
+	result := make([]*domainPayment.PaymentRequest, len(requests))
 	for i := range requests {
-		result[i] = &requests[i]
+		domainReq, err := convertToPaymentRequest(&requests[i])
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert payment request: %w", err)
+		}
+		result[i] = domainReq
 	}
 
 	return result, nil
 }
 
 // InsertBulk inserts multiple records
-func (r *PaymentRequestRepositorySqlc) InsertBulk(items []*sqlcgen.PaymentRequest) error {
+func (r *PaymentRequestRepositorySqlc) InsertBulk(items []*domainPayment.PaymentRequest) error {
 	ctx := context.Background()
 
 	for _, item := range items {
+		sqlcReq := convertFromPaymentRequest(item)
 		_, err := r.queries.InsertPaymentRequest(ctx, sqlcgen.InsertPaymentRequestParams{
-			Coin:            item.Coin,
-			PaymentID:       item.PaymentID,
-			SenderAddress:   item.SenderAddress,
-			SenderAccount:   item.SenderAccount,
-			ReceiverAddress: item.ReceiverAddress,
-			Amount:          item.Amount,
-			IsDone:          item.IsDone,
-			UpdatedAt:       item.UpdatedAt,
+			Coin:            sqlcReq.Coin,
+			PaymentID:       sqlcReq.PaymentID,
+			SenderAddress:   sqlcReq.SenderAddress,
+			SenderAccount:   sqlcReq.SenderAccount,
+			ReceiverAddress: sqlcReq.ReceiverAddress,
+			Amount:          sqlcReq.Amount,
+			IsDone:          sqlcReq.IsDone,
+			UpdatedAt:       sqlcReq.UpdatedAt,
 		})
 		if err != nil {
 			return fmt.Errorf("failed to call InsertPaymentRequest(): %w", err)

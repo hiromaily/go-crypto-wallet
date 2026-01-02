@@ -11,7 +11,11 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	domainPayment "github.com/hiromaily/go-crypto-wallet/internal/domain/payment"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
+	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
@@ -98,12 +102,12 @@ type AddressRepositorier interface {
 
 // BTCTxRepositorier is BTCTxRepository interface
 type BTCTxRepositorier interface {
-	GetOne(id int64) (*sqlcgen.BtcTx, error)
+	GetOne(id int64) (*domainBitcoin.BtcTransaction, error)
 	GetCountByUnsignedHex(actionType domainTx.ActionType, hex string) (int64, error)
 	GetTxIDBySentHash(actionType domainTx.ActionType, hash string) (int64, error)
 	GetSentHashTx(actionType domainTx.ActionType, txType domainTx.TxType) ([]string, error)
-	InsertUnsignedTx(actionType domainTx.ActionType, txItem *sqlcgen.BtcTx) (int64, error)
-	Update(txItem *sqlcgen.BtcTx) (int64, error)
+	InsertUnsignedTx(actionType domainTx.ActionType, txItem *domainBitcoin.BtcTransaction) (int64, error)
+	Update(txItem *domainBitcoin.BtcTransaction) (int64, error)
 	UpdateAfterTxSent(txID int64, txType domainTx.TxType, signedHex, sentHashTx string) (int64, error)
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(actionType domainTx.ActionType, txType domainTx.TxType, sentHashTx string) (int64, error)
@@ -112,18 +116,18 @@ type BTCTxRepositorier interface {
 
 // TxInputRepositorier is TxInputRepository interface
 type TxInputRepositorier interface {
-	GetOne(id int64) (*sqlcgen.BtcTxInput, error)
-	GetAllByTxID(id int64) ([]*sqlcgen.BtcTxInput, error)
-	Insert(txItem *sqlcgen.BtcTxInput) error
-	InsertBulk(txItems []*sqlcgen.BtcTxInput) error
+	GetOne(id int64) (*domainBitcoin.BtcTxInput, error)
+	GetAllByTxID(id int64) ([]*domainBitcoin.BtcTxInput, error)
+	Insert(txItem *domainBitcoin.BtcTxInput) error
+	InsertBulk(txItems []*domainBitcoin.BtcTxInput) error
 }
 
 // TxOutputRepositorier is TxOutputRepository interface
 type TxOutputRepositorier interface {
-	GetOne(id int64) (*sqlcgen.BtcTxOutput, error)
-	GetAllByTxID(id int64) ([]*sqlcgen.BtcTxOutput, error)
-	Insert(txItem *sqlcgen.BtcTxOutput) error
-	InsertBulk(txItems []*sqlcgen.BtcTxOutput) error
+	GetOne(id int64) (*domainBitcoin.BtcTxOutput, error)
+	GetAllByTxID(id int64) ([]*domainBitcoin.BtcTxOutput, error)
+	Insert(txItem *domainBitcoin.BtcTxOutput) error
+	InsertBulk(txItems []*domainBitcoin.BtcTxOutput) error
 }
 
 // TxRepositorier is TxRepository interface
@@ -138,9 +142,9 @@ type TxRepositorier interface {
 
 // PaymentRequestRepositorier is PaymentRequestRepository interface
 type PaymentRequestRepositorier interface {
-	GetAll() ([]*sqlcgen.PaymentRequest, error)
-	GetAllByPaymentID(paymentID int64) ([]*sqlcgen.PaymentRequest, error)
-	InsertBulk(items []*sqlcgen.PaymentRequest) error
+	GetAll() ([]*domainPayment.PaymentRequest, error)
+	GetAllByPaymentID(paymentID int64) ([]*domainPayment.PaymentRequest, error)
+	InsertBulk(items []*domainPayment.PaymentRequest) error
 	UpdatePaymentID(paymentID int64, ids []int64) (int64, error)
 	UpdateIsDone(paymentID int64) (int64, error)
 	DeleteAll() (int64, error)
@@ -149,11 +153,11 @@ type PaymentRequestRepositorier interface {
 
 // ETHDetailTXRepositorier is ETHDetailTXRepository interface
 type ETHDetailTXRepositorier interface {
-	GetOne(id int64) (*sqlcgen.EthDetailTx, error)
-	GetAllByTxID(id int64) ([]*sqlcgen.EthDetailTx, error)
+	GetOne(id int64) (*domainEth.EthDetailTx, error)
+	GetAllByTxID(id int64) ([]*domainEth.EthDetailTx, error)
 	GetSentHashTx(txType domainTx.TxType) ([]string, error)
-	Insert(txItem *sqlcgen.EthDetailTx) error
-	InsertBulk(txItems []*sqlcgen.EthDetailTx) error
+	Insert(txItem *domainEth.EthDetailTx) error
+	InsertBulk(txItems []*domainEth.EthDetailTx) error
 	UpdateAfterTxSent(uuid string, txType domainTx.TxType, signedHex, sentHashTx string) (int64, error)
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(txType domainTx.TxType, sentHashTx string) (int64, error)
@@ -162,11 +166,11 @@ type ETHDetailTXRepositorier interface {
 
 // XRPDetailTXRepositorier is XrpDetailTxRepository interface
 type XRPDetailTXRepositorier interface {
-	GetOne(id int64) (*sqlcgen.XrpDetailTx, error)
-	GetAllByTxID(id int64) ([]*sqlcgen.XrpDetailTx, error)
+	GetOne(id int64) (*domainXrp.XrpDetailTx, error)
+	GetAllByTxID(id int64) ([]*domainXrp.XrpDetailTx, error)
 	GetSentHashTx(txType domainTx.TxType) ([]string, error)
-	Insert(txItem *sqlcgen.XrpDetailTx) error
-	InsertBulk(txItems []*sqlcgen.XrpDetailTx) error
+	Insert(txItem *domainXrp.XrpDetailTx) error
+	InsertBulk(txItems []*domainXrp.XrpDetailTx) error
 	UpdateAfterTxSent(
 		uuid string, txType domainTx.TxType, signedTxID, signedTxBlob string, earlistLedgerVersion uint64,
 	) (int64, error)

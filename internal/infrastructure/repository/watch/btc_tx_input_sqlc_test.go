@@ -9,8 +9,9 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
 
+	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	watchTestutil "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/testutil"
 )
 
@@ -21,38 +22,30 @@ func TestBTCTxInputSqlc(t *testing.T) {
 	btcTxInputRepo := watchTestutil.NewBTCTxInputRepositorySqlc()
 
 	// Create a parent tx
-	txItem := &sqlcgen.BtcTx{
-		Coin:              sqlcgen.BtcTxCoinBtc,
-		Action:            sqlcgen.BtcTxActionPayment,
-		UnsignedHexTx:     "input-test-hex",
-		TotalInputAmount:  "0.100",
-		TotalOutputAmount: "0.090",
-		Fee:               "0.010",
-	}
+	txItem := domainBitcoin.NewBtcTransaction(
+		domainCoin.BTC,
+		domainTx.ActionTypePayment,
+		domainTx.TxTypeUnsigned,
+	)
+	txItem.SetUnsignedTx("input-test-hex", "0.100", "0.090", "0.010")
+
 	txID, err := btcTxRepo.InsertUnsignedTx(domainTx.ActionTypePayment, txItem)
 	require.NoError(t, err, "fail to create parent tx")
 
 	// Create test inputs
-	inputs := []*sqlcgen.BtcTxInput{
-		{
-			TxID:               txID,
-			InputTxid:          "input-txid-sqlc-1",
-			InputVout:          0,
-			InputAddress:       "input-address-sqlc-1",
-			InputAccount:       "client",
-			InputAmount:        "0.05",
-			InputConfirmations: 6,
-		},
-		{
-			TxID:               txID,
-			InputTxid:          "input-txid-sqlc-2",
-			InputVout:          1,
-			InputAddress:       "input-address-sqlc-2",
-			InputAccount:       "client",
-			InputAmount:        "0.05",
-			InputConfirmations: 6,
-		},
-	}
+	input1, err := domainBitcoin.NewBtcTxInput(
+		txID, "input-txid-sqlc-1", 0, "input-address-sqlc-1",
+		"client", "0.05", 6,
+	)
+	require.NoError(t, err, "fail to create input1")
+
+	input2, err := domainBitcoin.NewBtcTxInput(
+		txID, "input-txid-sqlc-2", 1, "input-address-sqlc-2",
+		"client", "0.05", 6,
+	)
+	require.NoError(t, err, "fail to create input2")
+
+	inputs := []*domainBitcoin.BtcTxInput{input1, input2}
 
 	// Insert bulk
 	err = btcTxInputRepo.InsertBulk(inputs)
@@ -69,15 +62,11 @@ func TestBTCTxInputSqlc(t *testing.T) {
 	require.Equal(t, "input-txid-sqlc-1", oneInput.InputTxid, "GetOne() InputTxid mismatch")
 
 	// Insert single
-	singleInput := &sqlcgen.BtcTxInput{
-		TxID:               txID,
-		InputTxid:          "input-txid-sqlc-3",
-		InputVout:          2,
-		InputAddress:       "input-address-sqlc-3",
-		InputAccount:       "client",
-		InputAmount:        "0.03",
-		InputConfirmations: 6,
-	}
+	singleInput, err := domainBitcoin.NewBtcTxInput(
+		txID, "input-txid-sqlc-3", 2, "input-address-sqlc-3",
+		"client", "0.03", 6,
+	)
+	require.NoError(t, err, "fail to create singleInput")
 	err = btcTxInputRepo.Insert(singleInput)
 	require.NoError(t, err, "fail to call Insert()")
 

@@ -4,15 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
 
 	"github.com/quagmt/udecimal"
 
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainPayment "github.com/hiromaily/go-crypto-wallet/internal/domain/payment"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 )
 
@@ -71,7 +70,7 @@ func (u *createPaymentRequestUseCase) Execute(ctx context.Context, input watchus
 	}
 
 	// insert payment_request
-	payReqItems := make([]*sqlcgen.PaymentRequest, 0, len(input.AmountList))
+	payReqItems := make([]*domainPayment.PaymentRequest, 0, len(input.AmountList))
 	var idx int
 	for _, amt := range input.AmountList {
 		// Convert float amount to string using decimal library for financial precision
@@ -79,16 +78,17 @@ func (u *createPaymentRequestUseCase) Execute(ctx context.Context, input watchus
 		if err != nil {
 			return fmt.Errorf("fail to convert amount %f to decimal: %w", amt, err)
 		}
-		payReqItems = append(payReqItems, &sqlcgen.PaymentRequest{
-			Coin:            sqlcgen.PaymentRequestCoin(u.coinTypeCode.String()),
-			PaymentID:       sql.NullInt64{},
-			SenderAddress:   pubkeyItems[0+idx].WalletAddress,
-			SenderAccount:   string(pubkeyItems[0+idx].AccountType),
-			ReceiverAddress: pubkeyItems[len(input.AmountList)+idx].WalletAddress,
-			Amount:          amount.String(),
-			IsDone:          false,
-			UpdatedAt:       sql.NullTime{Time: time.Now(), Valid: true},
-		})
+		payReqItem, err := domainPayment.NewPaymentRequest(
+			u.coinTypeCode,
+			pubkeyItems[0+idx].WalletAddress,
+			string(pubkeyItems[0+idx].AccountType),
+			pubkeyItems[len(input.AmountList)+idx].WalletAddress,
+			amount.String(),
+		)
+		if err != nil {
+			return fmt.Errorf("fail to create PaymentRequest: %w", err)
+		}
+		payReqItems = append(payReqItems, payReqItem)
 		idx++
 	}
 	if err = u.payReqRepo.InsertBulk(payReqItems); err != nil {

@@ -15,7 +15,7 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
+	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	mysql "github.com/hiromaily/go-crypto-wallet/pkg/db/mysql"
@@ -50,27 +50,23 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 
 	// Create test xrp detail tx
 	uuid := "xrp-uuid-sqlc-test"
-	xrpTx := &sqlcgen.XrpDetailTx{
-		TxID:                  txID,
-		Uuid:                  uuid,
-		CurrentTxType:         domainTx.TxTypeUnsigned.Int8(),
-		SenderAccount:         "deposit",
-		SenderAddress:         "rSender-sqlc",
-		ReceiverAccount:       "client",
-		ReceiverAddress:       "rReceiver-sqlc",
-		Amount:                "1000000",
-		XrpTxType:             "Payment",
-		Fee:                   "12",
-		Flags:                 0,
-		LastLedgerSequence:    12345,
-		Sequence:              1,
-		SigningPubkey:         "pubkey-sqlc",
-		TxnSignature:          "",
-		Hash:                  "",
-		EarliestLedgerVersion: 0,
-		SignedTxID:            "",
-		TxBlob:                "",
-	}
+	xrpTx, err := domainXrp.NewXrpDetailTx(
+		txID,
+		uuid,
+		domainTx.TxTypeUnsigned,
+		"deposit",
+		"rSender-sqlc",
+		"client",
+		"rReceiver-sqlc",
+		"1000000",
+		"Payment",
+		"12",
+		0,
+		12345,
+		1,
+	)
+	require.NoError(t, err, "fail to create XrpDetailTx")
+	xrpTx.SigningPubkey = "pubkey-sqlc"
 
 	// Insert
 	err = xrpDetailTxRepo.Insert(xrpTx)
@@ -84,7 +80,7 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	// Get one
 	retrievedTx, err := xrpDetailTxRepo.GetOne(xrpTxs[0].ID)
 	require.NoError(t, err, "fail to call GetOne()")
-	require.Equal(t, uuid, retrievedTx.Uuid, "GetOne() should return correct Uuid")
+	require.Equal(t, uuid, retrievedTx.UUID, "GetOne() should return correct UUID")
 
 	// Update after tx sent
 	signedTxID := "signed-txid-sqlc"
@@ -103,7 +99,7 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	require.Equal(t, txBlob, updatedTx.TxBlob, "UpdateAfterTxSent() should update TxBlob")
 	require.Equal(
 		t,
-		domainTx.TxTypeSent.Int8(),
+		domainTx.TxTypeSent,
 		updatedTx.CurrentTxType,
 		"UpdateAfterTxSent() should update CurrentTxType",
 	)
@@ -129,7 +125,7 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	require.NoError(t, err, "fail to call GetOne() after UpdateTxTypeBySentHashTx()")
 	require.Equal(
 		t,
-		domainTx.TxTypeDone.Int8(),
+		domainTx.TxTypeDone,
 		verifyTx.CurrentTxType,
 		"UpdateTxTypeBySentHashTx() should update CurrentTxType to TxTypeDone",
 	)
@@ -144,7 +140,7 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	require.NoError(t, err, "fail to call GetOne() after UpdateTxType()")
 	require.Equal(
 		t,
-		domainTx.TxTypeNotified.Int8(),
+		domainTx.TxTypeNotified,
 		finalTx.CurrentTxType,
 		"UpdateTxType() should update CurrentTxType to TxTypeNotified",
 	)
@@ -154,50 +150,43 @@ func TestXrpDetailTxSqlc(t *testing.T) {
 	txID2, err := txRepo.InsertUnsignedTx(domainTx.ActionTypePayment)
 	require.NoError(t, err, "fail to create second parent tx")
 
-	bulkTxs := []*sqlcgen.XrpDetailTx{
-		{
-			TxID:                  txID2,
-			Uuid:                  "xrp-uuid-bulk-1",
-			CurrentTxType:         domainTx.TxTypeUnsigned.Int8(),
-			SenderAccount:         "deposit",
-			SenderAddress:         "rSender-bulk-1",
-			ReceiverAccount:       "client",
-			ReceiverAddress:       "rReceiver-bulk-1",
-			Amount:                "2000000",
-			XrpTxType:             "Payment",
-			Fee:                   "12",
-			Flags:                 0,
-			LastLedgerSequence:    12346,
-			Sequence:              2,
-			SigningPubkey:         "pubkey-bulk-1",
-			TxnSignature:          "",
-			Hash:                  "",
-			EarliestLedgerVersion: 0,
-			SignedTxID:            "",
-			TxBlob:                "",
-		},
-		{
-			TxID:                  txID2,
-			Uuid:                  "xrp-uuid-bulk-2",
-			CurrentTxType:         domainTx.TxTypeUnsigned.Int8(),
-			SenderAccount:         "deposit",
-			SenderAddress:         "rSender-bulk-2",
-			ReceiverAccount:       "client",
-			ReceiverAddress:       "rReceiver-bulk-2",
-			Amount:                "3000000",
-			XrpTxType:             "Payment",
-			Fee:                   "12",
-			Flags:                 0,
-			LastLedgerSequence:    12347,
-			Sequence:              3,
-			SigningPubkey:         "pubkey-bulk-2",
-			TxnSignature:          "",
-			Hash:                  "",
-			EarliestLedgerVersion: 0,
-			SignedTxID:            "",
-			TxBlob:                "",
-		},
-	}
+	bulkTx1, err := domainXrp.NewXrpDetailTx(
+		txID2,
+		"xrp-uuid-bulk-1",
+		domainTx.TxTypeUnsigned,
+		"deposit",
+		"rSender-bulk-1",
+		"client",
+		"rReceiver-bulk-1",
+		"2000000",
+		"Payment",
+		"12",
+		0,
+		12346,
+		2,
+	)
+	require.NoError(t, err, "fail to create bulk XrpDetailTx 1")
+	bulkTx1.SigningPubkey = "pubkey-bulk-1"
+
+	bulkTx2, err := domainXrp.NewXrpDetailTx(
+		txID2,
+		"xrp-uuid-bulk-2",
+		domainTx.TxTypeUnsigned,
+		"deposit",
+		"rSender-bulk-2",
+		"client",
+		"rReceiver-bulk-2",
+		"3000000",
+		"Payment",
+		"12",
+		0,
+		12347,
+		3,
+	)
+	require.NoError(t, err, "fail to create bulk XrpDetailTx 2")
+	bulkTx2.SigningPubkey = "pubkey-bulk-2"
+
+	bulkTxs := []*domainXrp.XrpDetailTx{bulkTx1, bulkTx2}
 
 	err = xrpDetailTxRepo.InsertBulk(bulkTxs)
 	require.NoError(t, err, "fail to call InsertBulk()")

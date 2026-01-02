@@ -9,8 +9,9 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
 
+	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	watchTestutil "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/testutil"
 )
 
@@ -25,14 +26,13 @@ func TestBTCTxSqlc(t *testing.T) {
 	// Insert
 	hex := "unsigned-hex-sqlc"
 	actionType := domainTx.ActionTypePayment
-	txItem := &sqlcgen.BtcTx{
-		Coin:              sqlcgen.BtcTxCoinBtc,
-		Action:            sqlcgen.BtcTxActionPayment,
-		UnsignedHexTx:     hex,
-		TotalInputAmount:  "0.100",
-		TotalOutputAmount: "0.090",
-		Fee:               "0.010",
-	}
+	txItem := domainBitcoin.NewBtcTransaction(
+		domainCoin.BTC,
+		actionType,
+		domainTx.TxTypeUnsigned,
+	)
+	txItem.SetUnsignedTx(hex, "0.100", "0.090", "0.010")
+
 	id, err := txRepo.InsertUnsignedTx(actionType, txItem)
 	require.NoError(t, err, "fail to call InsertUnsignedTx()")
 	txItem.ID = id // Set the ID for later operations
@@ -77,7 +77,7 @@ func TestBTCTxSqlc(t *testing.T) {
 	require.NoError(t, err, "fail to call GetOne()")
 	require.Equal(
 		t,
-		domainTx.TxTypeDone.Int8(),
+		domainTx.TxTypeDone,
 		tmpTx.CurrentTxType,
 		"UpdateTxTypeBySentHashTx() should update CurrentTxType to TxTypeDone",
 	)
@@ -90,7 +90,7 @@ func TestBTCTxSqlc(t *testing.T) {
 	require.NoError(t, err, "fail to call GetOne()")
 	require.Equal(
 		t,
-		domainTx.TxTypeNotified.Int8(),
+		domainTx.TxTypeNotified,
 		tmpTx.CurrentTxType,
 		"UpdateTxType() should update CurrentTxType to TxTypeNotified",
 	)

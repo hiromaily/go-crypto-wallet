@@ -1,5 +1,7 @@
 package transaction
 
+import "fmt"
+
 // TxType represents the transaction status/lifecycle state.
 //
 // Transactions progress through a state machine:
@@ -51,6 +53,17 @@ var TxTypeValue = map[TxType]uint8{
 	TxTypeDone:     4,
 	TxTypeNotified: 5,
 	TxTypeCancel:   6,
+}
+
+// TxTypeFromInt8 converts an int8 value to TxType.
+// Returns an error if the value is not valid to prevent silent data corruption.
+func TxTypeFromInt8(val int8) (TxType, error) {
+	for txType, num := range TxTypeValue {
+		if int8(num) == val {
+			return txType, nil
+		}
+	}
+	return "", fmt.Errorf("invalid tx type value: %d", val)
 }
 
 // ValidateTxType validates that the given string is a valid transaction type.

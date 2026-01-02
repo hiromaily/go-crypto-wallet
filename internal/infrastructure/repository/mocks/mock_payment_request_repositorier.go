@@ -8,7 +8,7 @@ import (
 	"database/sql"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/payment"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -93,23 +93,23 @@ func (_c *MockPaymentRequestRepositorier_DeleteAll_Call) RunAndReturn(run func()
 }
 
 // GetAll provides a mock function for the type MockPaymentRequestRepositorier
-func (_mock *MockPaymentRequestRepositorier) GetAll() ([]*sqlcgen.PaymentRequest, error) {
+func (_mock *MockPaymentRequestRepositorier) GetAll() ([]*payment.PaymentRequest, error) {
 	ret := _mock.Called()
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAll")
 	}
 
-	var r0 []*sqlcgen.PaymentRequest
+	var r0 []*payment.PaymentRequest
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func() ([]*sqlcgen.PaymentRequest, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func() ([]*payment.PaymentRequest, error)); ok {
 		return returnFunc()
 	}
-	if returnFunc, ok := ret.Get(0).(func() []*sqlcgen.PaymentRequest); ok {
+	if returnFunc, ok := ret.Get(0).(func() []*payment.PaymentRequest); ok {
 		r0 = returnFunc()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*sqlcgen.PaymentRequest)
+			r0 = ret.Get(0).([]*payment.PaymentRequest)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func() error); ok {
@@ -137,34 +137,34 @@ func (_c *MockPaymentRequestRepositorier_GetAll_Call) Run(run func()) *MockPayme
 	return _c
 }
 
-func (_c *MockPaymentRequestRepositorier_GetAll_Call) Return(paymentRequests []*sqlcgen.PaymentRequest, err error) *MockPaymentRequestRepositorier_GetAll_Call {
+func (_c *MockPaymentRequestRepositorier_GetAll_Call) Return(paymentRequests []*payment.PaymentRequest, err error) *MockPaymentRequestRepositorier_GetAll_Call {
 	_c.Call.Return(paymentRequests, err)
 	return _c
 }
 
-func (_c *MockPaymentRequestRepositorier_GetAll_Call) RunAndReturn(run func() ([]*sqlcgen.PaymentRequest, error)) *MockPaymentRequestRepositorier_GetAll_Call {
+func (_c *MockPaymentRequestRepositorier_GetAll_Call) RunAndReturn(run func() ([]*payment.PaymentRequest, error)) *MockPaymentRequestRepositorier_GetAll_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GetAllByPaymentID provides a mock function for the type MockPaymentRequestRepositorier
-func (_mock *MockPaymentRequestRepositorier) GetAllByPaymentID(paymentID int64) ([]*sqlcgen.PaymentRequest, error) {
+func (_mock *MockPaymentRequestRepositorier) GetAllByPaymentID(paymentID int64) ([]*payment.PaymentRequest, error) {
 	ret := _mock.Called(paymentID)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAllByPaymentID")
 	}
 
-	var r0 []*sqlcgen.PaymentRequest
+	var r0 []*payment.PaymentRequest
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(int64) ([]*sqlcgen.PaymentRequest, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) ([]*payment.PaymentRequest, error)); ok {
 		return returnFunc(paymentID)
 	}
-	if returnFunc, ok := ret.Get(0).(func(int64) []*sqlcgen.PaymentRequest); ok {
+	if returnFunc, ok := ret.Get(0).(func(int64) []*payment.PaymentRequest); ok {
 		r0 = returnFunc(paymentID)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*sqlcgen.PaymentRequest)
+			r0 = ret.Get(0).([]*payment.PaymentRequest)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(int64) error); ok {
@@ -199,18 +199,18 @@ func (_c *MockPaymentRequestRepositorier_GetAllByPaymentID_Call) Run(run func(pa
 	return _c
 }
 
-func (_c *MockPaymentRequestRepositorier_GetAllByPaymentID_Call) Return(paymentRequests []*sqlcgen.PaymentRequest, err error) *MockPaymentRequestRepositorier_GetAllByPaymentID_Call {
+func (_c *MockPaymentRequestRepositorier_GetAllByPaymentID_Call) Return(paymentRequests []*payment.PaymentRequest, err error) *MockPaymentRequestRepositorier_GetAllByPaymentID_Call {
 	_c.Call.Return(paymentRequests, err)
 	return _c
 }
 
-func (_c *MockPaymentRequestRepositorier_GetAllByPaymentID_Call) RunAndReturn(run func(paymentID int64) ([]*sqlcgen.PaymentRequest, error)) *MockPaymentRequestRepositorier_GetAllByPaymentID_Call {
+func (_c *MockPaymentRequestRepositorier_GetAllByPaymentID_Call) RunAndReturn(run func(paymentID int64) ([]*payment.PaymentRequest, error)) *MockPaymentRequestRepositorier_GetAllByPaymentID_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // InsertBulk provides a mock function for the type MockPaymentRequestRepositorier
-func (_mock *MockPaymentRequestRepositorier) InsertBulk(items []*sqlcgen.PaymentRequest) error {
+func (_mock *MockPaymentRequestRepositorier) InsertBulk(items []*payment.PaymentRequest) error {
 	ret := _mock.Called(items)
 
 	if len(ret) == 0 {
@@ -218,7 +218,7 @@ func (_mock *MockPaymentRequestRepositorier) InsertBulk(items []*sqlcgen.Payment
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func([]*sqlcgen.PaymentRequest) error); ok {
+	if returnFunc, ok := ret.Get(0).(func([]*payment.PaymentRequest) error); ok {
 		r0 = returnFunc(items)
 	} else {
 		r0 = ret.Error(0)
@@ -232,16 +232,16 @@ type MockPaymentRequestRepositorier_InsertBulk_Call struct {
 }
 
 // InsertBulk is a helper method to define mock.On call
-//   - items []*sqlcgen.PaymentRequest
+//   - items []*payment.PaymentRequest
 func (_e *MockPaymentRequestRepositorier_Expecter) InsertBulk(items interface{}) *MockPaymentRequestRepositorier_InsertBulk_Call {
 	return &MockPaymentRequestRepositorier_InsertBulk_Call{Call: _e.mock.On("InsertBulk", items)}
 }
 
-func (_c *MockPaymentRequestRepositorier_InsertBulk_Call) Run(run func(items []*sqlcgen.PaymentRequest)) *MockPaymentRequestRepositorier_InsertBulk_Call {
+func (_c *MockPaymentRequestRepositorier_InsertBulk_Call) Run(run func(items []*payment.PaymentRequest)) *MockPaymentRequestRepositorier_InsertBulk_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 []*sqlcgen.PaymentRequest
+		var arg0 []*payment.PaymentRequest
 		if args[0] != nil {
-			arg0 = args[0].([]*sqlcgen.PaymentRequest)
+			arg0 = args[0].([]*payment.PaymentRequest)
 		}
 		run(
 			arg0,
@@ -255,7 +255,7 @@ func (_c *MockPaymentRequestRepositorier_InsertBulk_Call) Return(err error) *Moc
 	return _c
 }
 
-func (_c *MockPaymentRequestRepositorier_InsertBulk_Call) RunAndReturn(run func(items []*sqlcgen.PaymentRequest) error) *MockPaymentRequestRepositorier_InsertBulk_Call {
+func (_c *MockPaymentRequestRepositorier_InsertBulk_Call) RunAndReturn(run func(items []*payment.PaymentRequest) error) *MockPaymentRequestRepositorier_InsertBulk_Call {
 	_c.Call.Return(run)
 	return _c
 }
