@@ -8,7 +8,7 @@ import (
 	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
+	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/fullpubkey"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -44,8 +44,8 @@ func (u *importFullPubkeyUseCase) Import(
 	}
 
 	// Insert full pubKey into auth_fullpubkey_table
-	fullPubKeys := make([]*sqlcgen.AuthFullpubkey, len(pubKeys))
-	for i, key := range pubKeys {
+	fullPubKeys := make([]*domainAuth.AuthFullPubkey, 0, len(pubKeys))
+	for _, key := range pubKeys {
 		inner := strings.Split(key, ",")
 
 		fpk, err := fullpubkey.ConvertLine(u.btc.CoinTypeCode(), inner)
@@ -53,11 +53,16 @@ func (u *importFullPubkeyUseCase) Import(
 			return err
 		}
 
-		fullPubKeys[i] = &sqlcgen.AuthFullpubkey{
-			Coin:          sqlcgen.AuthFullpubkeyCoin(fpk.CoinTypeCode.String()),
-			AuthAccount:   fpk.AuthType.String(),
-			FullPublicKey: fpk.FullPubKey,
+		authFullPubkey, err := domainAuth.NewAuthFullPubkey(
+			fpk.CoinTypeCode,
+			fpk.AuthType,
+			fpk.FullPubKey,
+		)
+		if err != nil {
+			return fmt.Errorf("fail to create AuthFullPubkey: %w", err)
 		}
+
+		fullPubKeys = append(fullPubKeys, authFullPubkey)
 	}
 
 	// TODO: Upsert would be better to prevent error which occur when data is already inserted

@@ -44,7 +44,7 @@ func (u *importPrivateKeyUseCase) Import(ctx context.Context, input signusecase.
 	if err != nil {
 		return fmt.Errorf("fail to call authKeyRepo.GetOne(): %w", err)
 	}
-	if authKeyItem.AddrStatus != domainAddress.AddrStatusHDKeyGenerated.Int8() {
+	if authKeyItem.AddrStatus != domainAddress.AddrStatusHDKeyGenerated {
 		logger.Info("no unimported private key")
 		return nil
 	}

@@ -18,6 +18,7 @@ import (
 
 	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
+	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
@@ -34,7 +35,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
+	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
 	btcwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/btc"
 	ethwallet "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet/eth"
@@ -567,7 +568,7 @@ func (c *container) newHdWalletRepo() cold.HDWalletRepo {
 	)
 }
 
-func (c *container) newKeyGenerator() key.Generator {
+func (c *container) newKeyGenerator() portsWallet.Generator {
 	var chainConf *chaincfg.Params
 	switch {
 	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
@@ -581,7 +582,7 @@ func (c *container) newKeyGenerator() key.Generator {
 	}
 
 	// Use factory to create generator based on key type
-	factory := key.NewFactory()
+	factory := infraKey.NewFactory()
 	keyType := c.getKeyType() // Get from config or default to BIP44
 	generator, err := factory.CreateGenerator(keyType, c.conf.CoinTypeCode, chainConf)
 	if err != nil {

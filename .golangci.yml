@@ -201,6 +201,9 @@ linters:
       - text: "BtcTxOutput should use BTC, ETH, or XRP"
         linters:
           - gocritic
+      - text: "BtcAccountKey should use BTC, ETH, or XRP"
+        linters:
+          - gocritic
       - text: "EthDetailTx should use BTC, ETH, or XRP"
         linters:
           - gocritic

@@ -6,12 +6,16 @@ import (
 
 	"github.com/btcsuite/btcd/chaincfg"
 
+	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 )
 
 // Factory creates key generators based on key type
 type Factory struct{}
+
+// Compile-time check that Factory implements GeneratorFactory interface
+var _ portsWallet.GeneratorFactory = (*Factory)(nil)
 
 // NewFactory returns Factory
 func NewFactory() *Factory {
@@ -23,7 +27,7 @@ func (*Factory) CreateGenerator(
 	keyType domainKey.KeyType,
 	coinTypeCode domainCoin.CoinTypeCode,
 	conf *chaincfg.Params,
-) (Generator, error) {
+) (portsWallet.Generator, error) {
 	if err := keyType.Validate(); err != nil {
 		return nil, fmt.Errorf("invalid key type: %w", err)
 	}

@@ -11,50 +11,51 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	domainPayment "github.com/hiromaily/go-crypto-wallet/internal/domain/payment"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
 // Repository interfaces for cold wallet (keygen and sign wallets)
 
 // SeedRepositorier is SeedRepository interface
 type SeedRepositorier interface {
-	GetOne(ctx context.Context) (*sqlcgen.Seed, error)
+	GetOne(ctx context.Context) (*domainKey.Seed, error)
 	Insert(ctx context.Context, strSeed string) error
 }
 
 // BTCAccountKeyRepositorier is BtcAccountKeyRepository interface for BTC/BCH
 type BTCAccountKeyRepositorier interface {
 	GetMaxIndex(accountType domainAccount.AccountType) (int64, error)
-	GetOneMaxID(accountType domainAccount.AccountType) (*sqlcgen.BtcAccountKey, error)
+	GetOneMaxID(accountType domainAccount.AccountType) (*domainBitcoin.BtcAccountKey, error)
 	GetAllAddrStatus(
 		accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus,
-	) ([]*sqlcgen.BtcAccountKey, error)
-	GetAllMultiAddr(accountType domainAccount.AccountType, addrs []string) ([]*sqlcgen.BtcAccountKey, error)
-	InsertBulk(items []*sqlcgen.BtcAccountKey) error
+	) ([]*domainBitcoin.BtcAccountKey, error)
+	GetAllMultiAddr(accountType domainAccount.AccountType, addrs []string) ([]*domainBitcoin.BtcAccountKey, error)
+	InsertBulk(items []*domainBitcoin.BtcAccountKey) error
 	UpdateAddr(
 		accountType domainAccount.AccountType, addr, keyAddress string,
 	) (int64, error)
 	UpdateAddrStatus(
 		accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus, strWIFs []string,
 	) (int64, error)
-	UpdateMultisigAddr(accountType domainAccount.AccountType, item *sqlcgen.BtcAccountKey) (int64, error)
-	UpdateMultisigAddrs(accountType domainAccount.AccountType, items []*sqlcgen.BtcAccountKey) (int64, error)
+	UpdateMultisigAddr(accountType domainAccount.AccountType, item *domainBitcoin.BtcAccountKey) (int64, error)
+	UpdateMultisigAddrs(accountType domainAccount.AccountType, items []*domainBitcoin.BtcAccountKey) (int64, error)
 }
 
 // ETHAccountKeyRepositorier is EthAccountKeyRepository interface for ETH
 type ETHAccountKeyRepositorier interface {
 	GetMaxIndex(accountType domainAccount.AccountType) (int64, error)
-	GetOneMaxID(accountType domainAccount.AccountType) (*sqlcgen.EthAccountKey, error)
+	GetOneMaxID(accountType domainAccount.AccountType) (*domainEth.ETHAccountKey, error)
 	GetAllAddrStatus(
 		accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus,
-	) ([]*sqlcgen.EthAccountKey, error)
-	GetByAddress(address string) (*sqlcgen.EthAccountKey, error)
-	InsertBulk(items []*sqlcgen.EthAccountKey) error
+	) ([]*domainEth.ETHAccountKey, error)
+	GetByAddress(address string) (*domainEth.ETHAccountKey, error)
+	InsertBulk(items []*domainEth.ETHAccountKey) error
 	UpdateAddrStatus(
 		accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus, privateKeys []string,
 	) (int64, error)
@@ -64,9 +65,9 @@ type ETHAccountKeyRepositorier interface {
 type XRPAccountKeyRepositorier interface {
 	GetAllAddrStatus(
 		ctx context.Context, accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus,
-	) ([]*sqlcgen.XrpAccountKey, error)
+	) ([]*domainXrp.XRPAccountKey, error)
 	GetSecret(ctx context.Context, accountType domainAccount.AccountType, addr string) (string, error)
-	InsertBulk(ctx context.Context, items []*sqlcgen.XrpAccountKey) error
+	InsertBulk(ctx context.Context, items []*domainXrp.XRPAccountKey) error
 	UpdateAddrStatus(
 		ctx context.Context,
 		accountType domainAccount.AccountType,
@@ -77,15 +78,15 @@ type XRPAccountKeyRepositorier interface {
 
 // AuthFullPubkeyRepositorier is AuthFullPubkeyRepository interface
 type AuthFullPubkeyRepositorier interface {
-	GetOne(authType domainAccount.AuthType) (*sqlcgen.AuthFullpubkey, error)
+	GetOne(authType domainAccount.AuthType) (*domainAuth.AuthFullPubkey, error)
 	Insert(authType domainAccount.AuthType, fullPubKey string) error
-	InsertBulk(items []*sqlcgen.AuthFullpubkey) error
+	InsertBulk(items []*domainAuth.AuthFullPubkey) error
 }
 
 // AuthAccountKeyRepositorier is AuthAccountKeyRepository interface
 type AuthAccountKeyRepositorier interface {
-	GetOne(authType domainAccount.AuthType) (*sqlcgen.AuthAccountKey, error)
-	Insert(item *sqlcgen.AuthAccountKey) error
+	GetOne(authType domainAccount.AuthType) (*domainAuth.AuthAccountKey, error)
+	Insert(item *domainAuth.AuthAccountKey) error
 	UpdateAddrStatus(addrStatus domainAddress.AddrStatus, strWIF string) (int64, error)
 }
 

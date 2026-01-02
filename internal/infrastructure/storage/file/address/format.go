@@ -6,19 +6,20 @@ import (
 
 	appdto "github.com/hiromaily/go-crypto-wallet/internal/application/dto"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
 // CreateLine creates line for csv from BtcAccountKey
-func CreateLine(accountKeyItem *sqlcgen.BtcAccountKey) []string {
+func CreateLine(accountKeyItem *domainBitcoin.BtcAccountKey) []string {
 	taprootAddr := ""
-	if accountKeyItem.TaprootAddress.Valid {
-		taprootAddr = accountKeyItem.TaprootAddress.String
+	if accountKeyItem.TaprootAddress != nil {
+		taprootAddr = *accountKeyItem.TaprootAddress
 	}
 	return []string{
-		string(accountKeyItem.Coin),
-		string(accountKeyItem.Account),
+		accountKeyItem.CoinTypeCode.String(),
+		accountKeyItem.Account.String(),
 		accountKeyItem.P2pkhAddress,
 		accountKeyItem.P2shSegwitAddress,
 		accountKeyItem.Bech32Address,

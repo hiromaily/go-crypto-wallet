@@ -104,7 +104,7 @@ func (u *createMultisigAddressUseCase) Create(
 		// Update generated multisig address, redeemScript, addrStatus
 		item.MultisigAddress = resAddr.Address
 		item.RedeemScript = resAddr.RedeemScript
-		item.AddrStatus = domainAddress.AddrStatusMultisigAddressGenerated.Int8()
+		item.AddrStatus = domainAddress.AddrStatusMultisigAddressGenerated
 
 		_, err = u.accountKeyRepo.UpdateMultisigAddr(input.AccountType, item)
 		if err != nil {

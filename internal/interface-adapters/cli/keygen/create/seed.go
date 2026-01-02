@@ -7,7 +7,7 @@ import (
 
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	"github.com/hiromaily/go-crypto-wallet/internal/di"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
+	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 )
 
 func runSeed(container di.Container, seed string) error {
@@ -41,7 +41,7 @@ func runSeed(container di.Container, seed string) error {
 		}
 		bSeed = output.Seed
 	}
-	fmt.Println("seed: " + key.SeedToString(bSeed))
+	fmt.Println("seed: " + infraKey.SeedToString(bSeed))
 
 	return nil
 }

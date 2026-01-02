@@ -1,5 +1,7 @@
 package address
 
+import "fmt"
+
 //----------------------------------------------------
 // AddrType
 //----------------------------------------------------
@@ -62,6 +64,17 @@ var AddrStatusValue = map[AddrStatus]uint8{
 	AddrStatusPrivKeyImported:          1,
 	AddrStatusMultisigAddressGenerated: 2,
 	AddrStatusAddressExported:          3,
+}
+
+// AddrStatusFromInt8 converts an int8 value to AddrStatus.
+// Returns an error if the value is not valid to prevent silent data corruption.
+func AddrStatusFromInt8(val int8) (AddrStatus, error) {
+	for addrStatus, num := range AddrStatusValue {
+		if int8(num) == val {
+			return addrStatus, nil
+		}
+	}
+	return "", fmt.Errorf("invalid addr status value: %d", val)
 }
 
 // ValidateAddrStatus validates AddrStatus

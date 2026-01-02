@@ -6,7 +6,9 @@ import (
 	"fmt"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
 
@@ -26,8 +28,50 @@ func NewAuthFullPubkeyRepositorySqlc(
 	}
 }
 
+// convertToAuthFullPubkey converts sqlcgen.AuthFullpubkey to domain.AuthFullPubkey entity.
+func convertToAuthFullPubkey(sqlcKey *sqlcgen.AuthFullpubkey) (*domainAuth.AuthFullPubkey, error) {
+	key := &domainAuth.AuthFullPubkey{
+		ID:            sqlcKey.ID,
+		CoinTypeCode:  domainCoin.CoinTypeCode(sqlcKey.Coin),
+		AuthAccount:   domainAccount.AuthType(sqlcKey.AuthAccount),
+		FullPublicKey: sqlcKey.FullPublicKey,
+	}
+
+	if sqlcKey.Fingerprint.Valid {
+		fingerprint, err := domainKey.NewFingerprint(sqlcKey.Fingerprint.String)
+		if err != nil {
+			return nil, fmt.Errorf("invalid fingerprint in database: %w", err)
+		}
+		key.Fingerprint = &fingerprint
+	}
+	if sqlcKey.UpdatedAt.Valid {
+		key.UpdatedAt = &sqlcKey.UpdatedAt.Time
+	}
+
+	return key, nil
+}
+
+// convertFromAuthFullPubkey converts domain.AuthFullPubkey entity to sqlcgen.AuthFullpubkey.
+func convertFromAuthFullPubkey(key *domainAuth.AuthFullPubkey) *sqlcgen.AuthFullpubkey {
+	sqlcKey := &sqlcgen.AuthFullpubkey{
+		ID:            key.ID,
+		Coin:          sqlcgen.AuthFullpubkeyCoin(key.CoinTypeCode.String()),
+		AuthAccount:   key.AuthAccount.String(),
+		FullPublicKey: key.FullPublicKey,
+	}
+
+	if key.Fingerprint != nil {
+		sqlcKey.Fingerprint = sql.NullString{String: key.Fingerprint.String(), Valid: true}
+	}
+	if key.UpdatedAt != nil {
+		sqlcKey.UpdatedAt = sql.NullTime{Time: *key.UpdatedAt, Valid: true}
+	}
+
+	return sqlcKey
+}
+
 // GetOne returns one record by authType
-func (r *AuthFullPubkeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (*sqlcgen.AuthFullpubkey, error) {
+func (r *AuthFullPubkeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (*domainAuth.AuthFullPubkey, error) {
 	ctx := context.Background()
 
 	authPubkey, err := r.queries.GetAuthFullPubkey(ctx, sqlcgen.GetAuthFullPubkeyParams{
@@ -38,7 +82,7 @@ func (r *AuthFullPubkeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (
 		return nil, fmt.Errorf("failed to call GetAuthFullPubkey(): %w", err)
 	}
 
-	return &authPubkey, nil
+	return convertToAuthFullPubkey(&authPubkey)
 }
 
 // Insert inserts record
@@ -58,14 +102,15 @@ func (r *AuthFullPubkeyRepositorySqlc) Insert(authType domainAccount.AuthType, f
 }
 
 // InsertBulk inserts multiple records
-func (r *AuthFullPubkeyRepositorySqlc) InsertBulk(items []*sqlcgen.AuthFullpubkey) error {
+func (r *AuthFullPubkeyRepositorySqlc) InsertBulk(items []*domainAuth.AuthFullPubkey) error {
 	ctx := context.Background()
 
 	for _, item := range items {
+		sqlcItem := convertFromAuthFullPubkey(item)
 		_, err := r.queries.InsertAuthFullPubkey(ctx, sqlcgen.InsertAuthFullPubkeyParams{
-			Coin:          item.Coin,
-			AuthAccount:   item.AuthAccount,
-			FullPublicKey: item.FullPublicKey,
+			Coin:          sqlcItem.Coin,
+			AuthAccount:   sqlcItem.AuthAccount,
+			FullPublicKey: sqlcItem.FullPublicKey,
 		})
 		if err != nil {
 			return fmt.Errorf("failed to call InsertAuthFullPubkey(): %w", err)

@@ -8,6 +8,7 @@ import (
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 )
@@ -28,8 +29,70 @@ func NewAuthAccountKeyRepositorySqlc(
 	}
 }
 
+// convertToAuthAccountKey converts sqlcgen.AuthAccountKey to domain.AuthAccountKey entity.
+// SECURITY: Handles WIF (private key) data - never log the wallet import format field.
+func convertToAuthAccountKey(sqlcKey *sqlcgen.AuthAccountKey) (*domainAuth.AuthAccountKey, error) {
+	addrStatus, err := domainAddress.AddrStatusFromInt8(sqlcKey.AddrStatus)
+	if err != nil {
+		return nil, fmt.Errorf("invalid addr status in database: %w", err)
+	}
+
+	key := &domainAuth.AuthAccountKey{
+		ID:                 sqlcKey.ID,
+		CoinTypeCode:       domainCoin.CoinTypeCode(sqlcKey.Coin),
+		KeyType:            sqlcKey.KeyType,
+		AuthAccount:        domainAccount.AuthType(sqlcKey.AuthAccount),
+		P2pkhAddress:       sqlcKey.P2pkhAddress,
+		P2shSegwitAddress:  sqlcKey.P2shSegwitAddress,
+		Bech32Address:      sqlcKey.Bech32Address,
+		FullPublicKey:      sqlcKey.FullPublicKey,
+		MultisigAddress:    sqlcKey.MultisigAddress,
+		RedeemScript:       sqlcKey.RedeemScript,
+		WalletImportFormat: sqlcKey.WalletImportFormat, // WIF - NEVER log
+		Idx:                sqlcKey.Idx,
+		AddrStatus:         addrStatus,
+	}
+
+	if sqlcKey.TaprootAddress.Valid {
+		key.TaprootAddress = &sqlcKey.TaprootAddress.String
+	}
+	if sqlcKey.UpdatedAt.Valid {
+		key.UpdatedAt = &sqlcKey.UpdatedAt.Time
+	}
+
+	return key, nil
+}
+
+// convertFromAuthAccountKey converts domain.AuthAccountKey entity to sqlcgen.AuthAccountKey.
+func convertFromAuthAccountKey(key *domainAuth.AuthAccountKey) *sqlcgen.AuthAccountKey {
+	sqlcKey := &sqlcgen.AuthAccountKey{
+		ID:                 key.ID,
+		Coin:               sqlcgen.AuthAccountKeyCoin(key.CoinTypeCode.String()),
+		KeyType:            key.KeyType,
+		AuthAccount:        key.AuthAccount.String(),
+		P2pkhAddress:       key.P2pkhAddress,
+		P2shSegwitAddress:  key.P2shSegwitAddress,
+		Bech32Address:      key.Bech32Address,
+		FullPublicKey:      key.FullPublicKey,
+		MultisigAddress:    key.MultisigAddress,
+		RedeemScript:       key.RedeemScript,
+		WalletImportFormat: key.WalletImportFormat,
+		Idx:                key.Idx,
+		AddrStatus:         key.AddrStatus.Int8(),
+	}
+
+	if key.TaprootAddress != nil {
+		sqlcKey.TaprootAddress = sql.NullString{String: *key.TaprootAddress, Valid: true}
+	}
+	if key.UpdatedAt != nil {
+		sqlcKey.UpdatedAt = sql.NullTime{Time: *key.UpdatedAt, Valid: true}
+	}
+
+	return sqlcKey
+}
+
 // GetOne returns one record by authType
-func (r *AuthAccountKeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (*sqlcgen.AuthAccountKey, error) {
+func (r *AuthAccountKeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (*domainAuth.AuthAccountKey, error) {
 	ctx := context.Background()
 
 	authKey, err := r.queries.GetAuthAccountKey(ctx, sqlcgen.GetAuthAccountKeyParams{
@@ -40,27 +103,28 @@ func (r *AuthAccountKeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (
 		return nil, fmt.Errorf("failed to call GetAuthAccountKey(): %w", err)
 	}
 
-	return &authKey, nil
+	return convertToAuthAccountKey(&authKey)
 }
 
 // Insert inserts record
-func (r *AuthAccountKeyRepositorySqlc) Insert(item *sqlcgen.AuthAccountKey) error {
+func (r *AuthAccountKeyRepositorySqlc) Insert(item *domainAuth.AuthAccountKey) error {
 	ctx := context.Background()
 
+	sqlcItem := convertFromAuthAccountKey(item)
 	_, err := r.queries.InsertAuthAccountKey(ctx, sqlcgen.InsertAuthAccountKeyParams{
-		Coin:               item.Coin,
-		KeyType:            item.KeyType,
-		AuthAccount:        item.AuthAccount,
-		P2pkhAddress:       item.P2pkhAddress,
-		P2shSegwitAddress:  item.P2shSegwitAddress,
-		Bech32Address:      item.Bech32Address,
-		TaprootAddress:     item.TaprootAddress,
-		FullPublicKey:      item.FullPublicKey,
-		MultisigAddress:    item.MultisigAddress,
-		RedeemScript:       item.RedeemScript,
-		WalletImportFormat: item.WalletImportFormat,
-		Idx:                item.Idx,
-		AddrStatus:         item.AddrStatus,
+		Coin:               sqlcItem.Coin,
+		KeyType:            sqlcItem.KeyType,
+		AuthAccount:        sqlcItem.AuthAccount,
+		P2pkhAddress:       sqlcItem.P2pkhAddress,
+		P2shSegwitAddress:  sqlcItem.P2shSegwitAddress,
+		Bech32Address:      sqlcItem.Bech32Address,
+		TaprootAddress:     sqlcItem.TaprootAddress,
+		FullPublicKey:      sqlcItem.FullPublicKey,
+		MultisigAddress:    sqlcItem.MultisigAddress,
+		RedeemScript:       sqlcItem.RedeemScript,
+		WalletImportFormat: sqlcItem.WalletImportFormat,
+		Idx:                sqlcItem.Idx,
+		AddrStatus:         sqlcItem.AddrStatus,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to call InsertAuthAccountKey(): %w", err)

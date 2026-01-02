@@ -240,10 +240,10 @@ func (u *createMuSig2AddressUseCase) Create(
 		}
 
 		// Update taproot address and addr_status in database
-		item.TaprootAddress.String = taprootAddr.EncodeAddress()
-		item.TaprootAddress.Valid = true
+		taprootAddrStr := taprootAddr.EncodeAddress()
+		item.TaprootAddress = &taprootAddrStr
 		item.MultisigAddress = taprootAddr.EncodeAddress() // Store in multisig_address for compatibility
-		item.AddrStatus = domainAddress.AddrStatusMultisigAddressGenerated.Int8()
+		item.AddrStatus = domainAddress.AddrStatusMultisigAddressGenerated
 
 		_, err = u.accountKeyRepo.UpdateMultisigAddr(input.AccountType, item)
 		if err != nil {

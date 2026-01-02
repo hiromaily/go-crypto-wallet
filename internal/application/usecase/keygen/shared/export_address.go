@@ -11,8 +11,8 @@ import (
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -101,7 +101,7 @@ func (u *exportAddressUseCase) Export(
 
 // exportAccountKey exports btc_account_key table as csv file
 func (u *exportAddressUseCase) exportAccountKey(
-	accountKeyTable []*sqlcgen.BtcAccountKey, accountType domainAccount.AccountType,
+	accountKeyTable []*domainBitcoin.BtcAccountKey, accountType domainAccount.AccountType,
 ) (string, error) {
 	// Create fileName
 	fileName := u.addrFileRepo.CreateFilePath(accountType)
