@@ -15,7 +15,7 @@ When multiple issues are provided:
 - Issues are processed **in the order specified**
 - Each issue gets its own **separate commit** in the same branch
 - All commits are included in **one PR** that closes all issues
-- Branch name is based on the first issue number
+- Branch name includes all issue numbers (e.g., `feature/issue-123-456-{description}`)
 
 ## Common Workflow Steps
 
@@ -47,11 +47,13 @@ Follow the [Pre-Flight Checks](../../agents/workflow.md#pre-flight-checks) from 
 
 3. **Create Feature Branch:**
    - **Single issue**: Format: `feature/issue-{issue_number}-{brief-description}`
-   - **Multiple issues**: Format: `feature/issue-{first_issue_number}-{brief-description}` (use first issue's description)
+   - **Multiple issues**: Format: `feature/issue-{issue_number1}-{issue_number2}-...-{brief-description}` (include all issue numbers, use first issue's description)
    - Example (single): `feature/issue-123-fix-logger-global-issue`
-   - Example (multiple): `feature/issue-123-fix-multiple-issues`
+   - Example (multiple): `feature/issue-123-456-fix-logger-global-issue`
    - Keep description concise and descriptive
-   - Create and checkout branch: `git checkout -b feature/issue-{issue_number}-{description}`
+   - Create and checkout branch:
+     - **Single issue**: `git checkout -b feature/issue-{issue_number}-{description}`
+     - **Multiple issues**: `git checkout -b feature/issue-{issue_number1}-{issue_number2}-...-{description}`
 
 ### Resolve Systematically
 
@@ -140,7 +142,9 @@ For each issue in the ordered list:
 
 10. **PR Draft (After All Issues):**
 
-- Push branch: `git push origin feature/issue-{first_issue_number}-{description}`
+- Push branch:
+  - **Single issue**: `git push origin feature/issue-{issue_number}-{description}`
+  - **Multiple issues**: `git push origin feature/issue-{issue_number1}-{issue_number2}-...-{description}`
 - Create PR using `gh pr create`:
   - **Single issue**: Title: `Fix: {issue title} (Closes #{issue_number})`
   - **Multiple issues**: Title: `Fix: {brief description} (Closes #{issue_number1}, #{issue_number2})`
@@ -341,7 +345,7 @@ All steps completed:
 ✓ Pull request #456 created
 ✓ Ready for review
 
-Branch: feature/issue-123-fix-multiple-issues
+Branch: feature/issue-123-124-125-fix-multiple-issues
 PR: #456
 
 Commits:

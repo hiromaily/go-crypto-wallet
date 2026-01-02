@@ -191,6 +191,26 @@ linters:
       - text: "EtherTxMonitor should use BTC, ETH, or XRP"
         linters:
           - gocritic
+      # Exclude domain entity type names (match database table naming conventions)
+      - text: "BtcTransaction should use BTC, ETH, or XRP"
+        linters:
+          - gocritic
+      - text: "BtcTxInput should use BTC, ETH, or XRP"
+        linters:
+          - gocritic
+      - text: "BtcTxOutput should use BTC, ETH, or XRP"
+        linters:
+          - gocritic
+      - text: "EthDetailTx should use BTC, ETH, or XRP"
+        linters:
+          - gocritic
+      - text: "XrpDetailTx should use BTC, ETH, or XRP"
+        linters:
+          - gocritic
+      # Exclude converter functions from unparam (kept for consistency and future-proofing)
+      - text: "convertTo.* - result .* is always nil"
+        linters:
+          - unparam
 
     # Exclude files from all linters.
     paths:

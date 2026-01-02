@@ -9,7 +9,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/require"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainPayment "github.com/hiromaily/go-crypto-wallet/internal/domain/payment"
 	watchTestutil "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/testutil"
 )
 
@@ -22,22 +23,25 @@ func TestPaymentRequestSqlc(t *testing.T) {
 	require.NoError(t, err, "fail to call DeleteAll()")
 
 	// Create test payment requests
-	requests := []*sqlcgen.PaymentRequest{
-		{
-			Coin:            sqlcgen.PaymentRequestCoinBtc,
-			SenderAddress:   "sender-sqlc-1",
-			ReceiverAddress: "receiver-sqlc-1",
-			Amount:          "1.5",
-			IsDone:          false,
-		},
-		{
-			Coin:            sqlcgen.PaymentRequestCoinBtc,
-			SenderAddress:   "sender-sqlc-2",
-			ReceiverAddress: "receiver-sqlc-2",
-			Amount:          "2.5",
-			IsDone:          false,
-		},
-	}
+	req1, err := domainPayment.NewPaymentRequest(
+		domainCoin.BTC,
+		"sender-sqlc-1",
+		"",
+		"receiver-sqlc-1",
+		"1.5",
+	)
+	require.NoError(t, err, "fail to create PaymentRequest 1")
+
+	req2, err := domainPayment.NewPaymentRequest(
+		domainCoin.BTC,
+		"sender-sqlc-2",
+		"",
+		"receiver-sqlc-2",
+		"2.5",
+	)
+	require.NoError(t, err, "fail to create PaymentRequest 2")
+
+	requests := []*domainPayment.PaymentRequest{req1, req2}
 
 	// Insert bulk
 	err = paymentRepo.InsertBulk(requests)
