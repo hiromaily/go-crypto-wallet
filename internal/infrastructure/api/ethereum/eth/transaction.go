@@ -10,6 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 
+	portsEth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
 	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/ethtx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -85,7 +86,7 @@ func (e *Ethereum) calculateFee(
 // - sender has to pay 5ETH + fee
 func (e *Ethereum) CreateRawTransaction(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-) (*domainEthereum.RawTx, *domainEthereum.EthDetailTx, error) {
+) (*domainEthereum.RawTx, *portsEth.TxCreateParams, error) {
 	// validation check
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
@@ -170,29 +171,18 @@ func (e *Ethereum) CreateRawTransaction(
 		Hash:  txHash,
 	}
 
-	// create domain EthDetailTx entity
-	// Note: TxID will be set later when saving to database
-	domainTxDetailItem, err := domainEthereum.NewEthDetailTx(
-		0, // TxID - will be set when saving to DB
-		uid.String(),
-		"", // CurrentTxType - will be set by the caller
-		"", // SenderAccount - will be set by the caller
-		fromAddr,
-		"", // ReceiverAccount - will be set by the caller
-		toAddr,
-		newValue.Uint64(),
-		txFee.Uint64(),
-		uint32(estimatedGas.Uint64()),
-		nonce,
-	)
-	if err != nil {
-		return nil, nil, fmt.Errorf("fail to create domain EthDetailTx: %w", err)
+	// create TxCreateParams DTO for use case layer
+	txParams := &portsEth.TxCreateParams{
+		UUID:        uid.String(),
+		FromAddress: fromAddr,
+		ToAddress:   toAddr,
+		Amount:      newValue.Uint64(),
+		Fee:         txFee.Uint64(),
+		GasLimit:    uint32(estimatedGas.Uint64()),
+		Nonce:       nonce,
 	}
 
-	// Set unsigned transaction data
-	domainTxDetailItem.SetUnsignedTx(*rawTxHex)
-
-	return domainRawTx, domainTxDetailItem, nil
+	return domainRawTx, txParams, nil
 }
 
 // SignOnRawTransaction signs on raw transaction

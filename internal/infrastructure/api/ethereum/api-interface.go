@@ -21,6 +21,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/p2p"
 
+	portsEthereum "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
@@ -96,7 +97,7 @@ type Ethereumer interface {
 	// transaction
 	CreateRawTransaction(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*domainEthereum.RawTx, *domainEthereum.EthDetailTx, error)
+	) (*domainEthereum.RawTx, *portsEthereum.TxCreateParams, error)
 	SignOnRawTransaction(rawTx *domainEthereum.RawTx, passphrase string) (*domainEthereum.RawTx, error)
 	SendSignedRawTransaction(ctx context.Context, signedTxHex string) (string, error)
 	GetConfirmation(ctx context.Context, hashTx string) (uint64, error)
@@ -120,7 +121,7 @@ type ERC20er interface {
 	GetBalance(ctx context.Context, hexAddr string, quantityTag domainEthereum.QuantityTag) (*big.Int, error)
 	CreateRawTransaction(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*domainEthereum.RawTx, *domainEthereum.EthDetailTx, error)
+	) (*domainEthereum.RawTx, *portsEthereum.TxCreateParams, error)
 }
 
 // EtherTxCreator is a type alias for ERC20er used in transaction creation contexts.

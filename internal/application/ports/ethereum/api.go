@@ -22,6 +22,19 @@ import (
 	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 )
 
+// TxCreateParams contains the parameters returned from transaction creation
+// that are needed by the use case layer to construct the domain entity.
+// This DTO allows the use case to maintain full responsibility for domain entity creation.
+type TxCreateParams struct {
+	UUID        string // Transaction UUID for tracing
+	FromAddress string // Sender's wallet address
+	ToAddress   string // Receiver's wallet address
+	Amount      uint64 // Final amount being sent (Wei)
+	Fee         uint64 // Transaction fee (Wei)
+	GasLimit    uint32 // Gas limit for transaction
+	Nonce       uint64 // Transaction nonce
+}
+
 // Ethereumer defines the interface for Ethereum blockchain operations.
 // Implementations handle Ethereum RPC communication, transaction management,
 // and wallet operations.
@@ -87,7 +100,7 @@ type Ethereumer interface {
 	// transaction
 	CreateRawTransaction(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*domainEthereum.RawTx, *domainEthereum.EthDetailTx, error)
+	) (*domainEthereum.RawTx, *TxCreateParams, error)
 	SignOnRawTransaction(rawTx *domainEthereum.RawTx, passphrase string) (*domainEthereum.RawTx, error)
 	SendSignedRawTransaction(ctx context.Context, signedTxHex string) (string, error)
 	GetConfirmation(ctx context.Context, hashTx string) (uint64, error)
@@ -108,7 +121,7 @@ type ERC20er interface {
 	GetBalance(ctx context.Context, hexAddr string, quantityTag domainEthereum.QuantityTag) (*big.Int, error)
 	CreateRawTransaction(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*domainEthereum.RawTx, *domainEthereum.EthDetailTx, error)
+	) (*domainEthereum.RawTx, *TxCreateParams, error)
 }
 
 // EtherTxCreator is a type alias for ERC20er used in transaction creation contexts.

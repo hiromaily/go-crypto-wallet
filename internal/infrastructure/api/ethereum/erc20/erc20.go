@@ -123,7 +123,7 @@ func (e *ERC20) GetBalance(ctx context.Context, hexAddr string, _ domainEthereum
 // - 1.b. Or after approve is called, this transaction may be sent
 func (e *ERC20) CreateRawTransaction(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-) (*domainEthereum.RawTx, *domainEthereum.EthDetailTx, error) {
+) (*domainEthereum.RawTx, *portsEthereum.TxCreateParams, error) {
 	// validation check
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
@@ -205,30 +205,22 @@ func (e *ERC20) CreateRawTransaction(
 		Hash:  txHash,
 	}
 
-	// create domain EthDetailTx entity
-	// Note: TxID will be set later when saving to database
-	domainTxDetailItem, err := domainEthereum.NewEthDetailTx(
-		0, // TxID - will be set when saving to DB
-		uid.String(),
-		"", // CurrentTxType - will be set by the caller
-		"", // SenderAccount - will be set by the caller
-		fromAddr,
-		"", // ReceiverAccount - will be set by the caller
-		toAddr,
-		tokenAmount.Uint64(),
-		0, // Fee - later update is required
-		uint32(gasLimit),
-		nonce,
-	)
-	if err != nil {
-		return nil, nil, fmt.Errorf("fail to create domain EthDetailTx: %w", err)
+	// Calculate transaction fee (gasPrice * gasLimit)
+	txFee := new(big.Int).Mul(gasPrice, new(big.Int).SetUint64(gasLimit))
+
+	// create TxCreateParams DTO for use case layer
+	txParams := &portsEthereum.TxCreateParams{
+		UUID:        uid.String(),
+		FromAddress: fromAddr,
+		ToAddress:   toAddr,
+		Amount:      tokenAmount.Uint64(),
+		Fee:         txFee.Uint64(),
+		GasLimit:    uint32(gasLimit),
+		Nonce:       nonce,
 	}
 
-	// Set unsigned transaction data
-	domainTxDetailItem.SetUnsignedTx(*rawTxHex)
-
 	// Convert infrastructure RawTx to domain RawTx
-	return ethtx.ToDomainRawTx(infraRawTx), domainTxDetailItem, nil
+	return ethtx.ToDomainRawTx(infraRawTx), txParams, nil
 }
 
 func (*ERC20) createTransferData(toAddr string, amount *big.Int) []byte {
