@@ -28,9 +28,10 @@ Use this navigation guide to find relevant documentation for specific tasks:
 - **[`internal/` Directory Guidelines](internal/AGENTS.md)** - Clean Architecture layers, dependency rules, and internal package guidelines
 - **[`pkg/` Directory Guidelines](pkg/AGENTS.md)** - Public package guidelines and critical rule about `internal/` dependencies
 
-### Custom Commands
+### Custom Commands and Agent Skills
 
-- **[Custom Slash Commands](.claude/commands/README.md)** - Custom commands for Claude Desktop (fix-issue, fix-pr-review, fix-linter, create-github-issue)
+- **[Agent Skills](docs/ai-agents/agent-skills.md)** - Modern Agent Skills format for AI assistants (github-issue-creation). Includes installation, usage guide, and examples.
+- **[Custom Slash Commands](.claude/commands/README.md)** - Legacy custom commands for Claude Desktop (fix-issue, fix-pr-review, fix-linter). Note: create-github-issue has been migrated to Agent Skills.
 
 ## Core Priorities
 
