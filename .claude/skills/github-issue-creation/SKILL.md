@@ -46,12 +46,31 @@ gh label list
 **Sync labels from `.github/labels.yml`:**
 
 ```bash
-# Apply labels from the labels.yml file
-gh label create --from-file .github/labels.yml
+# Parse labels.yml and create each label
+# Note: This requires yq (YAML parser) or manual parsing
+while IFS= read -r line; do
+  if [[ $line =~ ^-\ name:\ (.+)$ ]]; then
+    name="${BASH_REMATCH[1]}"
+  elif [[ $line =~ ^\ \ color:\ (.+)$ ]]; then
+    color="${BASH_REMATCH[1]}"
+  elif [[ $line =~ ^\ \ description:\ (.+)$ ]]; then
+    desc="${BASH_REMATCH[1]}"
+    # Create or update label
+    gh label create "$name" --color "$color" --description "$desc" --force 2>/dev/null || echo "Label $name already exists or error occurred"
+  fi
+done < .github/labels.yml
 ```
 
-**Note**: If labels are missing, run the sync command above to create them from `.github/labels.yml`.
+**Alternative using yq (if installed):**
+
+```bash
+# Install yq if needed: brew install yq (macOS) or see https://github.com/mikefarah/yq
+yq eval '.[] | "gh label create \"" + .name + "\" --color " + .color + " --description \"" + .description + "\" --force"' .github/labels.yml | sh
+```
+
+**Note**: If labels are missing, run one of the sync commands above to create them from `.github/labels.yml`.
 The repository uses `.github/labels.yml` as the source of truth for label definitions.
+The `--force` flag updates existing labels with new colors/descriptions.
 
 ## Context Understanding
 
@@ -202,10 +221,25 @@ After the user approves the issue proposal, proceed with creating the issue.
 Before creating the issue:
 
 1. Check available labels: `gh label list`
-2. If labels are missing, sync from `.github/labels.yml`:
+2. If labels are missing, sync from `.github/labels.yml` using one of these methods:
 
+   **Method 1: Using bash script (no additional dependencies)**
    ```bash
-   gh label create --from-file .github/labels.yml
+   while IFS= read -r line; do
+     if [[ $line =~ ^-\ name:\ (.+)$ ]]; then
+       name="${BASH_REMATCH[1]}"
+     elif [[ $line =~ ^\ \ color:\ (.+)$ ]]; then
+       color="${BASH_REMATCH[1]}"
+     elif [[ $line =~ ^\ \ description:\ (.+)$ ]]; then
+       desc="${BASH_REMATCH[1]}"
+       gh label create "$name" --color "$color" --description "$desc" --force 2>/dev/null || echo "Label $name already exists"
+     fi
+   done < .github/labels.yml
+   ```
+
+   **Method 2: Using yq (if installed)**
+   ```bash
+   yq eval '.[] | "gh label create \"" + .name + "\" --color " + .color + " --description \"" + .description + "\" --force"' .github/labels.yml | sh
    ```
 
 3. Verify the labels you plan to use exist in the repository
@@ -469,8 +503,17 @@ Currently, the wallet only supports legacy addresses. Native SegWit addresses pr
 # 1. Verify labels exist
 gh label list
 
-# 2. Sync labels if needed
-gh label create --from-file .github/labels.yml
+# 2. Sync labels if needed (use bash parsing method)
+while IFS= read -r line; do
+  if [[ $line =~ ^-\ name:\ (.+)$ ]]; then
+    name="${BASH_REMATCH[1]}"
+  elif [[ $line =~ ^\ \ color:\ (.+)$ ]]; then
+    color="${BASH_REMATCH[1]}"
+  elif [[ $line =~ ^\ \ description:\ (.+)$ ]]; then
+    desc="${BASH_REMATCH[1]}"
+    gh label create "$name" --color "$color" --description "$desc" --force 2>/dev/null
+  fi
+done < .github/labels.yml
 
 # 3. Create the issue
 gh issue create \
