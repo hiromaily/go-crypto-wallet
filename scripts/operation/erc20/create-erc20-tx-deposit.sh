@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # prepare token for client address
-# https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/Installation.md#ethereum-setup
+# https://github.com/hiromaily/go-crypto-wallet/blob/main/docs/Installation.md#ethereum-setup
 # WIP
 
 set -eu

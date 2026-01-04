@@ -47,7 +47,7 @@ This document describes development workflow, dependency management, and git ope
 
 - ❌ `git merge` operations
 - ❌ `gh` command merge operations (e.g., `gh pr merge`)
-- ❌ `git commit` and `git push` to `main` or `master` branches
+- ❌ `git commit` and `git push` to `main` branch
 
 **Workflow:**
 
@@ -156,7 +156,7 @@ Closes #[issue_number]
 
 **Branch Lifecycle:**
 
-1. Create branch from `main`/`master`
+1. Create branch from `main`
 2. Make changes and commit
 3. Push to GitHub
 4. Create pull request
@@ -189,7 +189,7 @@ Before starting any development task, perform these checks:
    - Verify working directory is clean (`git status`)
    - Stop immediately if there are uncommitted changes
    - Check current branch (`git branch --show-current`)
-   - Never proceed on `main` or `master` branch without creating a feature branch
+   - Never proceed on `main` branch without creating a feature branch
 
 2. **Verify Branch:**
    - Ensure you're on the correct branch for your task
@@ -206,13 +206,13 @@ Before starting any development task, perform these checks:
 **CRITICAL Rules (Must Always Follow):**
 
 - **CRITICAL**: Stop immediately if working directory is not clean
-- **CRITICAL**: Never proceed on `main`/`master` branch without creating feature branch
+- **CRITICAL**: Never proceed on `main` branch without creating feature branch
 - **CRITICAL**: Always verify branch and status before implementing fixes
 - **CRITICAL**: Never edit files with `DO NOT EDIT` comments (auto-generated files)
 - **CRITICAL**: Never log private keys or sensitive information
 - **CRITICAL**: For security-related changes, run `make go-check-vuln` and conduct security review
 - Never use `git merge` operations
-- Never commit/push directly to `main`/`master` branches
+- Never commit/push directly to `main` branch
 
 ### Self-Review
 

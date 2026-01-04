@@ -63,7 +63,7 @@ Use this navigation guide to find relevant documentation for specific tasks:
 ### Git Operations
 
 - **Allowed**: `git add`, `git commit`, `git push` to GitHub
-- **NOT allowed**: `git merge` operations, `gh pr merge`, commits/pushes to `main`/`master` branches
+- **NOT allowed**: `git merge` operations, `gh pr merge`, commits/pushes to `main` branch
 
 ## Common Workflows
 

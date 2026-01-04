@@ -51,7 +51,7 @@ lint-proto:
 # Check for breaking changes in proto files
 .PHONY: breaking-proto
 breaking-proto:
-	buf breaking --against '.git#branch=master'
+	buf breaking --against '.git#branch=main'
 
 # Generate Go code from proto files using buf
 .PHONY: protoc-go

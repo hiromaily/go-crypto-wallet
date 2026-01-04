@@ -4,14 +4,14 @@
 
 - 3 nodes are running `btc-watch`,`btc-keygen`,`btc-sign` respectively.
 - To use multisig functionality, multiple auth accounts are required.
-- Set 5 auth accounts on [account.toml](https://github.com/hiromaily/go-crypto-wallet/blob/master/data/config/account.toml)
+- Set 5 auth accounts on [account.toml](https://github.com/hiromaily/go-crypto-wallet/blob/main/data/config/account.toml)
 
 ### Prerequisite
 
-See [Installation](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/Installation.md#bitcoind-setup)
+See [Installation](https://github.com/hiromaily/go-crypto-wallet/blob/main/docs/Installation.md#bitcoind-setup)
 
 1. `bitcoin-cli` needs to be ready
-2. [account.toml](https://github.com/hiromaily/go-crypto-wallet/blob/master/data/config/account.toml) configuration
+2. [account.toml](https://github.com/hiromaily/go-crypto-wallet/blob/main/data/config/account.toml) configuration
 3. create wallets
 
 ### 1. Generate Key for Bitcoin
@@ -84,7 +84,7 @@ $ ./scripts/operation/create-bitcoind-wallet.sh
 
 1. Recreate `payment_request` table as needed
 
-- target sql is [here]([this sql](https://github.com/hiromaily/go-crypto-wallet/blob/master/docker/mysql/sqls/payment_request.sql))
+- target sql is [here]([this sql](https://github.com/hiromaily/go-crypto-wallet/blob/main/docker/mysql/sqls/payment_request.sql))
 - modify as needed as restart container (recreate table)
 - As default, receiver adderesses are for Signet. If network is different, address must be changed.
 

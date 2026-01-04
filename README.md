@@ -1,8 +1,8 @@
 # go-crypto-wallet
 
-<img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/images/xrp-img.jpg?raw=true">
-<img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/images/ethereum-img.png?raw=true">
-<img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/images/bitcoin-img.svg?sanitize=true">
+<img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/xrp-img.jpg?raw=true">
+<img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/ethereum-img.png?raw=true">
+<img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/bitcoin-img.svg?sanitize=true">
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/hiromaily/go-crypto-wallet)](https://goreportcard.com/report/github.com/hiromaily/go-crypto-wallet)
 [![GitHub release](https://img.shields.io/badge/release-v5.0.0-blue.svg)](https://github.com/hiromaily/go-crypto-wallet/releases)
@@ -100,15 +100,15 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 
 #### 1. Generate keys
 
-![generate keys](https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/images/0_key%20generation%20diagram.png?raw=true)
+![generate keys](https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/0_key%20generation%20diagram.png?raw=true)
 
 #### 2. Create unsigned transaction, Sign on unsigned tx, Send signed tx for non-multisig address
 
-![create tx](https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/images/1_Handle%20transactions%20for%20non-multisig%20address.png?raw=true)
+![create tx](https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/1_Handle%20transactions%20for%20non-multisig%20address.png?raw=true)
 
 #### 3. Create unsigned transaction, Sign on unsigned tx, Send signed tx for multisig address
 
-![create tx for multisig](https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/master/images/2_Handle%20transactions%20for%20multisig%20address.png?raw=true)
+![create tx for multisig](https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/2_Handle%20transactions%20for%20multisig%20address.png?raw=true)
 
 ## Requirements
 
@@ -127,10 +127,10 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 - **ETH**:
   - [go-ethereum](https://github.com/ethereum/go-ethereum) (Geth client)
   - [Ganache](https://www.trufflesuite.com/ganache) (for local development)
-  - [erc20-token](https://github.com/hiromaily/go-crypto-wallet/tree/master/web/erc20-token) (ERC-20 token contract)
+  - [erc20-token](https://github.com/hiromaily/go-crypto-wallet/tree/main/web/erc20-token) (ERC-20 token contract)
 - **XRP**:
   - [rippled](https://xrpl.org/manage-the-rippled-server.html) (Ripple node)
-  - [ripple-lib-server](https://github.com/hiromaily/go-crypto-wallet/tree/master/web/ripple-lib-server) (gRPC server)
+  - [ripple-lib-server](https://github.com/hiromaily/go-crypto-wallet/tree/main/web/ripple-lib-server) (gRPC server)
 
 ### Database
 
@@ -264,20 +264,20 @@ The `pkg/` directory contains shared utilities and legacy/transitional code:
 
 ## Installation
 
-[Installation](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/Installation.md)
+[Installation](https://github.com/hiromaily/go-crypto-wallet/blob/main/docs/Installation.md)
 
 ## Operation example
 
-- [For Bitcoin](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/btc/OperationExample.md)
-- [operation scripts](https://github.com/hiromaily/go-crypto-wallet/tree/master/scripts/operation)
+- [For Bitcoin](https://github.com/hiromaily/go-crypto-wallet/blob/main/docs/btc/OperationExample.md)
+- [operation scripts](https://github.com/hiromaily/go-crypto-wallet/tree/main/scripts/operation)
 
 ## Command example
 
-- [Makefile](https://github.com/hiromaily/go-crypto-wallet/blob/master/Makefile) - Main Makefile with modular includes
+- [Makefile](https://github.com/hiromaily/go-crypto-wallet/blob/main/Makefile) - Main Makefile with modular includes
 - Makefile modules (in `make/` directory):
-  - [watch_op.mk](https://github.com/hiromaily/go-crypto-wallet/blob/master/make/watch_op.mk) - Watch wallet operations
-  - [keygen_op.mk](https://github.com/hiromaily/go-crypto-wallet/blob/master/make/keygen_op.mk) - Keygen wallet operations
-  - [sign_op.mk](https://github.com/hiromaily/go-crypto-wallet/blob/master/make/sign_op.mk) - Sign wallet operations
+  - [watch_op.mk](https://github.com/hiromaily/go-crypto-wallet/blob/main/make/watch_op.mk) - Watch wallet operations
+  - [keygen_op.mk](https://github.com/hiromaily/go-crypto-wallet/blob/main/make/keygen_op.mk) - Keygen wallet operations
+  - [sign_op.mk](https://github.com/hiromaily/go-crypto-wallet/blob/main/make/sign_op.mk) - Sign wallet operations
   - And other specialized modules for builds, tests, Docker, etc.
 
 ## Architecture

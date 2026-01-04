@@ -23,7 +23,7 @@ go build -ldflags "-X main.authName=auth1" -v -o ${GOPATH}/bin/sign1 ./cmd/sign/
 go build -ldflags "-X main.authName=auth2" -v -o ${GOPATH}/bin/sign2 ./cmd/sign/
 ```
 
-1. configure config files in [./data/config/*.toml](https://github.com/hiromaily/go-crypto-wallet/tree/master/data/config)
+1. configure config files in [./data/config/*.toml](https://github.com/hiromaily/go-crypto-wallet/tree/main/data/config)
 2. run Database containers
 
 ```
@@ -83,7 +83,7 @@ docker compose -f compose.btc.yaml up btc-watch btc-keygen btc-sign
 
 4. operation
 
-- see [Operation Example](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/btc/OperationExample.md)
+- see [Operation Example](https://github.com/hiromaily/go-crypto-wallet/blob/main/docs/btc/OperationExample.md)
 
 ## Bitcoind Setup without container
 
@@ -152,12 +152,12 @@ docker compose -f compose.eth.yaml up ganache
 ```
 
 - prepare sql file if you choose Ganache.  
-  But, first account(index[0]) must not be used. See more instruction [here](https://github.com/hiromaily/go-crypto-wallet/blob/master/docs/eth/Ganache.md)
+  But, first account(index[0]) must not be used. See more instruction [here](https://github.com/hiromaily/go-crypto-wallet/blob/main/docs/eth/Ganache.md)
 
 ## ERC20 Token Setup
 
 - deploy ERC-20 token contract if needed
-- Original ERC-20 token is [here](https://github.com/hiromaily/go-crypto-wallet/tree/master/web/erc20-token). See [`scripts/operation/deploy-token.sh`](https://github.com/hiromaily/go-crypto-wallet/blob/master/scripts/operation/deploy-token.sh)
+- Original ERC-20 token is [here](https://github.com/hiromaily/go-crypto-wallet/tree/main/web/erc20-token). See [`scripts/operation/deploy-token.sh`](https://github.com/hiromaily/go-crypto-wallet/blob/main/scripts/operation/deploy-token.sh)
 
 ```
 cd ./web/erc20-token
