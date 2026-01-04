@@ -36,6 +36,7 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/descriptor"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction"
 	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 	wallets "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/wallet"
@@ -83,6 +84,8 @@ type Container interface {
 	// Keygen Use Cases
 	NewKeygenGenerateHDWalletUseCase() keygenusecase.GenerateHDWalletUseCase
 	NewKeygenGenerateSeedUseCase() keygenusecase.GenerateSeedUseCase
+	NewKeygenGenerateDescriptorUseCase() keygenusecase.GenerateDescriptorUseCase
+	NewKeygenExportDescriptorUseCase() keygenusecase.ExportDescriptorUseCase
 	NewKeygenExportAddressUseCase() keygenusecase.ExportAddressUseCase
 	NewKeygenImportPrivateKeyUseCase() keygenusecase.ImportPrivateKeyUseCase
 	NewKeygenCreateMultisigAddressUseCase() keygenusecase.CreateMultisigAddressUseCase
@@ -674,6 +677,10 @@ func (c *container) newPubkeyFileStorager() portsStorage.AddressFileRepositorier
 	)
 }
 
+func (c *container) newDescriptorFileWriter() portsStorage.DescriptorFileWriter {
+	return descriptor.NewFileWriter()
+}
+
 //
 // Sign Service
 //
@@ -750,6 +757,20 @@ func (c *container) NewKeygenGenerateHDWalletUseCase() keygenusecase.GenerateHDW
 
 func (c *container) NewKeygenGenerateSeedUseCase() keygenusecase.GenerateSeedUseCase {
 	return c.newKeygenGenerateSeedUseCase()
+}
+
+func (c *container) NewKeygenGenerateDescriptorUseCase() keygenusecase.GenerateDescriptorUseCase {
+	if !domainCoin.IsBTCGroup(c.conf.CoinTypeCode) {
+		panic(fmt.Sprintf("descriptor generation is only supported for BTC group coins, got %s", c.conf.CoinTypeCode))
+	}
+	return c.newBTCKeygenGenerateDescriptorUseCase()
+}
+
+func (c *container) NewKeygenExportDescriptorUseCase() keygenusecase.ExportDescriptorUseCase {
+	if !domainCoin.IsBTCGroup(c.conf.CoinTypeCode) {
+		panic(fmt.Sprintf("descriptor export is only supported for BTC group coins, got %s", c.conf.CoinTypeCode))
+	}
+	return c.newBTCKeygenExportDescriptorUseCase()
 }
 
 func (c *container) NewKeygenExportAddressUseCase() keygenusecase.ExportAddressUseCase {
@@ -1032,6 +1053,23 @@ func (c *container) newKeygenExportAddressUseCase() keygenusecase.ExportAddressU
 		c.newAddressFileRepo(),
 		c.newMultiAccount(),
 		c.conf.CoinTypeCode,
+	)
+}
+
+func (c *container) newBTCKeygenGenerateDescriptorUseCase() keygenusecase.GenerateDescriptorUseCase {
+	return keygenusecasebtc.NewGenerateDescriptorUseCase(
+		btcapi.NewDescriptorService(c.newBTC().GetChainConf()),
+		c.newBTC().GetChainConf(),
+		c.newAuthFullPubKeyRepo(),
+		c.newAccountKeyRepo(),
+		c.newMultiAccount(),
+	)
+}
+
+func (c *container) newBTCKeygenExportDescriptorUseCase() keygenusecase.ExportDescriptorUseCase {
+	return keygenusecasebtc.NewExportDescriptorUseCase(
+		c.newBTCKeygenGenerateDescriptorUseCase(),
+		c.newDescriptorFileWriter(),
 	)
 }
 

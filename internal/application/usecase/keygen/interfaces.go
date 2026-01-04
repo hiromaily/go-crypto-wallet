@@ -69,6 +69,21 @@ type GenerateDescriptorUseCase interface {
 	Generate(ctx context.Context, input GenerateDescriptorInput) (GenerateDescriptorOutput, error)
 }
 
+// ExportDescriptorUseCase exports descriptors to file
+type ExportDescriptorUseCase interface {
+	Export(ctx context.Context, input ExportDescriptorInput) (ExportDescriptorOutput, error)
+}
+
+// DescriptorFormat specifies output format
+type DescriptorFormat string
+
+// Descriptor format constants
+const (
+	DescriptorFormatText        DescriptorFormat = "text"
+	DescriptorFormatJSON        DescriptorFormat = "json"
+	DescriptorFormatBitcoinCore DescriptorFormat = "bitcoin-core"
+)
+
 // Input/Output DTOs
 type GenerateDescriptorInput struct {
 	AccountType  domainAccount.AccountType
@@ -82,6 +97,19 @@ type GenerateDescriptorOutput struct {
 	AccountType domainAccount.AccountType
 	AddressType domainAddress.AddrType
 	IsMultisig  bool
+}
+
+// ExportDescriptorInput contains export parameters
+type ExportDescriptorInput struct {
+	AccountType   domainAccount.AccountType
+	OutputPath    string
+	Format        DescriptorFormat
+	IncludeChange bool
+}
+
+// ExportDescriptorOutput contains export result
+type ExportDescriptorOutput struct {
+	FilePath string
 }
 
 // GenerateHDWalletInput represents input for generating HD wallet keys
