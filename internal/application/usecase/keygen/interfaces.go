@@ -4,6 +4,7 @@ import (
 	"context"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 )
 
@@ -63,7 +64,24 @@ type MuSig2SignUseCase interface {
 	Sign(ctx context.Context, input MuSig2SignInput) (MuSig2SignOutput, error)
 }
 
+// GenerateDescriptorUseCase generates descriptors for an account (single-sig or multisig)
+type GenerateDescriptorUseCase interface {
+	Generate(ctx context.Context, input GenerateDescriptorInput) (GenerateDescriptorOutput, error)
+}
+
 // Input/Output DTOs
+type GenerateDescriptorInput struct {
+	AccountType domainAccount.AccountType
+	AddressType domainAddress.AddrType
+	IsChange    bool
+}
+
+type GenerateDescriptorOutput struct {
+	Descriptor  string
+	AccountType domainAccount.AccountType
+	AddressType domainAddress.AddrType
+	IsMultisig  bool
+}
 
 // GenerateHDWalletInput represents input for generating HD wallet keys
 type GenerateHDWalletInput struct {
