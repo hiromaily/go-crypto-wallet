@@ -43,9 +43,8 @@ Analyze the command content for parameter patterns:
 **Common Parameter Patterns:**
 - `#{issue_number}` or `{issue_number}` → `ISSUE_NUMBER=#123`
 - `#{pr_number}` or `{pr_number}` → `PR_NUMBER=#456`
-- `{file_path}` or `FILE=` → `FILE=<path>`
+- `{file_path}` → `FILE_PATH=<path>`
 - `{name}` or `{description}` → `NAME=<value>` or `DESCRIPTION=<value>`
-- `COMMAND_NAME=` → `COMMAND_NAME=<name>`
 
 **Argument Hint Format:**
 - Single parameter: `ISSUE_NUMBER=#123`
@@ -54,7 +53,7 @@ Analyze the command content for parameter patterns:
 - Required parameters: `PARAM=<value>` (no brackets)
 
 **Detection Rules:**
-1. Look for patterns like `#{param}`, `{param}`, or `PARAM=` in the content
+1. Look for patterns like `#{param}` or `{param}` in the content
 2. Convert parameter names to uppercase with underscores (e.g., `issue_number` → `ISSUE_NUMBER`)
 3. Infer whether parameters are required or optional based on context:
    - If command says "required" or shows usage without brackets → required
@@ -88,11 +87,10 @@ Replace parameter placeholders throughout the content:
 **Common Conversions:**
 - `#{issue_number}` → `$ISSUE_NUMBER`
 - `#{pr_number}` → `$PR_NUMBER`
-- `{file_path}` → `$FILE`
+- `{file_path}` → `$FILE_PATH`
 - `{name}` → `$NAME`
 - `{description}` → `$DESCRIPTION`
 - `{brief-description}` → `$BRIEF_DESCRIPTION`
-- `COMMAND_NAME=` → remains as is (this is the argument hint syntax)
 
 **Special Cases:**
 - `$ARGUMENTS` placeholder: Keep as-is (Codex built-in)
@@ -149,7 +147,7 @@ Replace parameter placeholders throughout the content:
 
 3. **Write to file**:
    - Path: `~/.codex/prompts/$COMMAND_NAME.md`
-   - Preserve line endings (LF on Unix/Mac, CRLF on Windows)
+   - Use LF (Unix) line endings
    - Use UTF-8 encoding
 
 4. **Set permissions**:
