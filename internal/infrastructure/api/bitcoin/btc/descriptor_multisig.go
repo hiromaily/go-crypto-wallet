@@ -3,7 +3,6 @@ package btc
 import (
 	"errors"
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
@@ -34,22 +33,10 @@ func (d *DescriptorService) GenerateMultisigDescriptor(
 		return "", fmt.Errorf("invalid required signatures: %d of %d", requiredSigs, len(signers))
 	}
 
-	changeIndex := 0
-	if isChange {
-		changeIndex = 1
+	keyStrings, err := d.formatAndSortMultisigKeys(signers, isChange)
+	if err != nil {
+		return "", err
 	}
-
-	keyStrings := make([]string, len(signers))
-	for i, signer := range signers {
-		keyStr, err := d.formatMultisigKey(signer, changeIndex)
-		if err != nil {
-			return "", fmt.Errorf("invalid signer %d: %w", i, err)
-		}
-		keyStrings[i] = keyStr
-	}
-
-	// Ensure deterministic output independent of input order.
-	sort.Strings(keyStrings)
 
 	return fmt.Sprintf(
 		"wsh(sortedmulti(%d,%s))",

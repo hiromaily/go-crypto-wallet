@@ -3,6 +3,7 @@ package btc
 import (
 	"errors"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
@@ -76,4 +77,25 @@ func normalizeDerivationPath(path string) string {
 	}
 
 	return trimmed
+}
+
+func (d *DescriptorService) formatAndSortMultisigKeys(signers []MultisigSigner, isChange bool) ([]string, error) {
+	changeIndex := 0
+	if isChange {
+		changeIndex = 1
+	}
+
+	keyStrings := make([]string, len(signers))
+	for i, signer := range signers {
+		keyStr, err := d.formatMultisigKey(signer, changeIndex)
+		if err != nil {
+			return nil, fmt.Errorf("invalid signer %d: %w", i, err)
+		}
+		keyStrings[i] = keyStr
+	}
+
+	// Ensure deterministic output independent of input order.
+	sort.Strings(keyStrings)
+
+	return keyStrings, nil
 }

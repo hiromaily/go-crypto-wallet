@@ -10,31 +10,31 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const testDerivationMuSig = "/86'/0'/0'"
+const testDerivationTaprootMultiKey = "/86'/0'/0'"
 
-func TestGenerateMuSig2Descriptor(t *testing.T) {
+func TestGenerateTaprootScriptPathDescriptor(t *testing.T) {
 	service := NewDescriptorService(&chaincfg.MainNetParams)
 
 	signers := []MultisigSigner{
 		{
 			Fingerprint:    "a1b2c3d4",
-			DerivationPath: testDerivationMuSig,
+			DerivationPath: testDerivationTaprootMultiKey,
 			ExtendedKey:    mustNewExtendedKey(t, testMainnetXpub),
 		},
 		{
 			Fingerprint:    "b2c3d4e5",
-			DerivationPath: testDerivationMuSig,
+			DerivationPath: testDerivationTaprootMultiKey,
 			ExtendedKey:    newTestXpubFromSeed(t, 0x04),
 		},
 	}
 
 	t.Run("receive descriptor sorts keys", func(t *testing.T) {
-		desc, err := service.GenerateMuSig2Descriptor(signers, false)
+		desc, err := service.GenerateTaprootScriptPathDescriptor(signers, false)
 		require.NoError(t, err)
 
 		expectedKeys := []string{
-			fmt.Sprintf("[a1b2c3d4%s]%s/0/*", testDerivationMuSig, signers[0].ExtendedKey.String()),
-			fmt.Sprintf("[b2c3d4e5%s]%s/0/*", testDerivationMuSig, signers[1].ExtendedKey.String()),
+			fmt.Sprintf("[a1b2c3d4%s]%s/0/*", testDerivationTaprootMultiKey, signers[0].ExtendedKey.String()),
+			fmt.Sprintf("[b2c3d4e5%s]%s/0/*", testDerivationTaprootMultiKey, signers[1].ExtendedKey.String()),
 		}
 		sort.Strings(expectedKeys)
 
@@ -42,12 +42,12 @@ func TestGenerateMuSig2Descriptor(t *testing.T) {
 	})
 
 	t.Run("change descriptor uses /1/*", func(t *testing.T) {
-		desc, err := service.GenerateMuSig2Descriptor(signers, true)
+		desc, err := service.GenerateTaprootScriptPathDescriptor(signers, true)
 		require.NoError(t, err)
 
 		expectedKeys := []string{
-			fmt.Sprintf("[a1b2c3d4%s]%s/1/*", testDerivationMuSig, signers[0].ExtendedKey.String()),
-			fmt.Sprintf("[b2c3d4e5%s]%s/1/*", testDerivationMuSig, signers[1].ExtendedKey.String()),
+			fmt.Sprintf("[a1b2c3d4%s]%s/1/*", testDerivationTaprootMultiKey, signers[0].ExtendedKey.String()),
+			fmt.Sprintf("[b2c3d4e5%s]%s/1/*", testDerivationTaprootMultiKey, signers[1].ExtendedKey.String()),
 		}
 		sort.Strings(expectedKeys)
 
@@ -55,12 +55,12 @@ func TestGenerateMuSig2Descriptor(t *testing.T) {
 	})
 }
 
-func TestGenerateMuSig2Descriptor_Validation(t *testing.T) {
+func TestGenerateTaprootScriptPathDescriptor_Validation(t *testing.T) {
 	service := NewDescriptorService(&chaincfg.MainNetParams)
 
 	validSigner := MultisigSigner{
 		Fingerprint:    "a1b2c3d4",
-		DerivationPath: testDerivationMuSig,
+		DerivationPath: testDerivationTaprootMultiKey,
 		ExtendedKey:    mustNewExtendedKey(t, testMainnetXpub),
 	}
 
@@ -79,7 +79,7 @@ func TestGenerateMuSig2Descriptor_Validation(t *testing.T) {
 			signers: []MultisigSigner{
 				{
 					Fingerprint:    "a1b2c3d4",
-					DerivationPath: testDerivationMuSig,
+					DerivationPath: testDerivationTaprootMultiKey,
 					ExtendedKey:    mustNewExtendedKey(t, testTestnetTpub),
 				},
 				validSigner,
@@ -102,7 +102,7 @@ func TestGenerateMuSig2Descriptor_Validation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := service.GenerateMuSig2Descriptor(tt.signers, false)
+			_, err := service.GenerateTaprootScriptPathDescriptor(tt.signers, false)
 			require.ErrorContains(t, err, tt.wantErr)
 		})
 	}
