@@ -5,6 +5,7 @@ This directory contains definition files for custom slash commands that can be u
 ## Architecture
 
 These commands follow a modular structure where:
+
 - **Common workflow steps** are defined in [Workflow Guidelines](../../agents/workflow.md)
 - **Command-specific logic** is defined in each command file
 - This reduces duplication and makes maintenance easier
@@ -16,6 +17,7 @@ These commands follow a modular structure where:
 ### New Location (Agent Skills)
 
 The GitHub issue creation functionality is now available as an Agent Skill:
+
 - **Location**: `.claude/skills/github-issue-creation/SKILL.md`
 - **Usage**: Use the Skill tool with `skill: "github-issue-creation"`
 - **Benefits**: Automatic discovery, team-wide sharing, progressive disclosure
@@ -76,7 +78,7 @@ Converts Claude custom slash commands to Codex-optimized prompt format.
 - Extracts metadata (description, argument hints)
 - Transforms parameter placeholders to Codex syntax
 - Generates YAML frontmatter
-- Outputs to `~/.codex/prompts/`
+- Outputs to `.codex/prompts/`
 - See [convert-custom-slash-for-codex.md](convert-custom-slash-for-codex.md) for details
 
 ## Usage
@@ -106,6 +108,7 @@ Each command file links to these common steps to avoid duplication and ensure co
 ## Project Guidelines
 
 Each command operates in accordance with the project guidelines ([AGENTS.md](../../AGENTS.md)), following:
+
 - Clean Architecture principles
 - Security best practices
 - Code quality standards
