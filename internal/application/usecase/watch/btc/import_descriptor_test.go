@@ -97,3 +97,43 @@ func TestImportDescriptorUseCase_ValidateOnly(t *testing.T) {
 	require.Equal(t, 0, output.AddressesGenerated)
 	require.Empty(t, output.Errors)
 }
+
+func TestImportDescriptorUseCase_ImportsMultisigAddresses(t *testing.T) {
+	t.Parallel()
+
+	xpub2 := "xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW5"
+	desc := fmt.Sprintf(
+		"wsh(sortedmulti(2,[a1b2c3d4/48'/0'/0'/2']%s/0/*,[b2c3d4e5/48'/0'/0'/2']%s/0/*))",
+		testDescriptorMainnetXpub,
+		xpub2,
+	)
+
+	tmpDir := t.TempDir()
+	filePath := filepath.Join(tmpDir, "desc.txt")
+	require.NoError(t, os.WriteFile(filePath, []byte(desc), 0o600))
+
+	repo := mocks.NewMockAddressRepositorier(t)
+	repo.EXPECT().
+		InsertBulk(mock.Anything, mock.Anything).
+		Return(nil).
+		Once()
+
+	parser := btc.NewDescriptorParser()
+	useCase := watchusecasebtc.NewImportDescriptorUseCase(
+		parser,
+		&chaincfg.MainNetParams,
+		repo,
+		domainCoin.BTC,
+	)
+
+	output, err := useCase.Import(context.Background(), watchusecase.ImportDescriptorInput{
+		FilePath:    filePath,
+		AccountType: domainAccount.AccountTypeDeposit,
+		StartIndex:  0,
+		Count:       1,
+	})
+	require.NoError(t, err)
+	require.Equal(t, 1, output.DescriptorsImported)
+	require.Equal(t, 1, output.AddressesGenerated)
+	require.Empty(t, output.Errors)
+}
