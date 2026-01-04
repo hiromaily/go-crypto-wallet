@@ -47,7 +47,7 @@ func (u *generateDescriptorUseCase) Generate(
 ) (keygenusecase.GenerateDescriptorOutput, error) {
 	_ = ctx
 
-	isMultisig := u.multisigConfig != nil && u.multisigConfig.IsMultisigAccount(input.AccountType)
+	isMultisig := u.multisigConfig.IsMultisigAccount(input.AccountType)
 
 	var (
 		descriptor string
@@ -115,16 +115,15 @@ func (u *generateDescriptorUseCase) generateSingleSigDescriptor(
 func (u *generateDescriptorUseCase) generateMultisigDescriptor(
 	input keygenusecase.GenerateDescriptorInput,
 ) (string, error) {
-	if u.multisigConfig == nil {
-		return "", fmt.Errorf("multisig config not available for %s", input.AccountType.String())
-	}
-
 	multiConfig := u.multisigConfig.MultiAccounts()[input.AccountType]
 	if len(multiConfig) == 0 {
 		return "", fmt.Errorf("multisig account not configured for %s", input.AccountType.String())
 	}
 
-	requiredSigs, authTypes := firstRequiredSigConfig(multiConfig)
+	requiredSigs, authTypes, err := selectRequiredSigConfig(multiConfig, input.RequiredSigs)
+	if err != nil {
+		return "", err
+	}
 
 	signers, err := u.buildMultisigSigners(authTypes, input.AddressType)
 	if err != nil {
@@ -208,11 +207,20 @@ func derivationPathForAddress(addrType domainAddress.AddrType, isMultisig bool) 
 	}
 }
 
-func firstRequiredSigConfig(config map[int][]domainAccount.AuthType) (int, []domainAccount.AuthType) {
+func selectRequiredSigConfig(config map[int][]domainAccount.AuthType, requested int) (int, []domainAccount.AuthType, error) {
 	if len(config) == 0 {
-		return 0, nil
+		return 0, nil, fmt.Errorf("no multisig configuration available")
 	}
 
+	if requested > 0 {
+		auths, ok := config[requested]
+		if !ok {
+			return 0, nil, fmt.Errorf("required signatures %d not configured", requested)
+		}
+		return requested, auths, nil
+	}
+
+	// Default to the smallest required-sigs configuration if not specified.
 	requiredKeys := make([]int, 0, len(config))
 	for k := range config {
 		requiredKeys = append(requiredKeys, k)
@@ -220,5 +228,5 @@ func firstRequiredSigConfig(config map[int][]domainAccount.AuthType) (int, []dom
 	sort.Ints(requiredKeys)
 
 	req := requiredKeys[0]
-	return req, config[req]
+	return req, config[req], nil
 }

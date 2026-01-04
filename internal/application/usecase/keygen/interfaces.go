@@ -71,9 +71,10 @@ type GenerateDescriptorUseCase interface {
 
 // Input/Output DTOs
 type GenerateDescriptorInput struct {
-	AccountType domainAccount.AccountType
-	AddressType domainAddress.AddrType
-	IsChange    bool
+	AccountType  domainAccount.AccountType
+	AddressType  domainAddress.AddrType
+	IsChange     bool
+	RequiredSigs int // Optional for multisig; 0 selects the minimal required-sigs config
 }
 
 type GenerateDescriptorOutput struct {

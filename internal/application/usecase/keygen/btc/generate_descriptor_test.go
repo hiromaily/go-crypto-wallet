@@ -111,9 +111,10 @@ func TestGenerateDescriptorUseCase_MultisigWsh(t *testing.T) {
 	require.NoError(t, err)
 
 	output, err := useCase.Generate(context.Background(), keygenusecase.GenerateDescriptorInput{
-		AccountType: domainAccount.AccountTypeDeposit,
-		AddressType: domainAddress.AddrTypeBech32,
-		IsChange:    false,
+		AccountType:  domainAccount.AccountTypeDeposit,
+		AddressType:  domainAddress.AddrTypeBech32,
+		IsChange:     false,
+		RequiredSigs: 2,
 	})
 	require.NoError(t, err)
 	require.True(t, output.IsMultisig)
@@ -142,15 +143,30 @@ func TestGenerateDescriptorUseCase_TaprootScriptPath(t *testing.T) {
 		multiConfig,
 	)
 
+	fp1, err := infraKey.FingerprintFromExtendedKey(signers[domainAccount.AuthType1].FullPublicKey)
+	require.NoError(t, err)
+	fp2, err := infraKey.FingerprintFromExtendedKey(signers[domainAccount.AuthType2].FullPublicKey)
+	require.NoError(t, err)
+
 	output, err := useCase.Generate(context.Background(), keygenusecase.GenerateDescriptorInput{
-		AccountType: domainAccount.AccountTypeDeposit,
-		AddressType: domainAddress.AddrTypeTaproot,
-		IsChange:    false,
+		AccountType:  domainAccount.AccountTypeDeposit,
+		AddressType:  domainAddress.AddrTypeTaproot,
+		IsChange:     false,
+		RequiredSigs: 2,
 	})
 	require.NoError(t, err)
 	require.True(t, output.IsMultisig)
-	require.Contains(t, output.Descriptor, "tr([")
-	require.Contains(t, output.Descriptor, "/0/*)")
+	xpub1, _ := hdkeychain.NewKeyFromString(signers[domainAccount.AuthType1].FullPublicKey)
+	xpub2, _ := hdkeychain.NewKeyFromString(signers[domainAccount.AuthType2].FullPublicKey)
+	expected, err := btc.NewDescriptorService(&chaincfg.MainNetParams).GenerateTaprootScriptPathDescriptor(
+		[]btc.MultisigSigner{
+			{Fingerprint: fp1.String(), DerivationPath: "/86'/0'/0'", ExtendedKey: xpub1},
+			{Fingerprint: fp2.String(), DerivationPath: "/86'/0'/0'", ExtendedKey: xpub2},
+		},
+		false,
+	)
+	require.NoError(t, err)
+	require.Equal(t, expected, output.Descriptor)
 }
 
 func TestGenerateDescriptorUseCase_MissingAccountKey(t *testing.T) {
