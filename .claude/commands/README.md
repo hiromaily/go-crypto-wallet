@@ -68,6 +68,17 @@ Addresses pull request review comments.
 - Commits and pushes changes
 - See [fix-pr-review.md](fix-pr-review.md) for details
 
+### `convert-custom-slash-for-codex`
+
+Converts Claude custom slash commands to Codex-optimized prompt format.
+
+- Reads Claude commands from `.claude/commands/`
+- Extracts metadata (description, argument hints)
+- Transforms parameter placeholders to Codex syntax
+- Generates YAML frontmatter
+- Outputs to `~/.codex/prompts/`
+- See [convert-custom-slash-for-codex.md](convert-custom-slash-for-codex.md) for details
+
 ## Usage
 
 In Claude Desktop, you can use these commands as slash commands. For example:
@@ -76,6 +87,7 @@ In Claude Desktop, you can use these commands as slash commands. For example:
 - `/fix-issue #123` - Fix issue #123
 - `/fix-linter` - Fix linter errors
 - `/fix-pr-review #456` - Address review comments for PR #456
+- `/convert-custom-slash-for-codex fix-issue` - Convert fix-issue command to Codex format
 
 ## Common Workflow Steps
 
