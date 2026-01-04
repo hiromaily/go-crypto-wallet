@@ -69,7 +69,7 @@ func TestDescriptorWorkflow_EndToEnd(t *testing.T) {
 	_, statErr := os.Stat(exported.FilePath)
 	require.NoError(t, statErr)
 
-	descriptorCount, filterErr := filterNonTaprootDescriptors(exported.FilePath)
+	descriptorCount, filterErr := removeTaprootDescriptorsFromFile(exported.FilePath)
 	require.NoError(t, filterErr)
 
 	addrRepo := &recordingAddressRepo{}
@@ -93,7 +93,7 @@ func TestDescriptorWorkflow_EndToEnd(t *testing.T) {
 	require.Len(t, addrRepo.inserted, imported.AddressesGenerated)
 }
 
-func filterNonTaprootDescriptors(path string) (int, error) {
+func removeTaprootDescriptorsFromFile(path string) (int, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return 0, err
@@ -107,17 +107,16 @@ func filterNonTaprootDescriptors(path string) (int, error) {
 		return 0, fmt.Errorf("no descriptors found in %s", path)
 	}
 
-	var filtered []map[string]any
+	var nonTaprootDescriptors []map[string]any
 	for _, rec := range coreFormat {
 		desc, _ := rec["desc"].(string)
-		if strings.HasPrefix(desc, "tr(") {
-			continue
+		if !strings.HasPrefix(desc, "tr(") {
+			nonTaprootDescriptors = append(nonTaprootDescriptors, rec)
 		}
-		filtered = append(filtered, rec)
 	}
 
-	if len(filtered) != len(coreFormat) {
-		encoded, marshalErr := json.MarshalIndent(filtered, "", "  ")
+	if len(nonTaprootDescriptors) < len(coreFormat) {
+		encoded, marshalErr := json.MarshalIndent(nonTaprootDescriptors, "", "  ")
 		if marshalErr != nil {
 			return 0, marshalErr
 		}
@@ -126,7 +125,7 @@ func filterNonTaprootDescriptors(path string) (int, error) {
 		}
 	}
 
-	return len(filtered), nil
+	return len(nonTaprootDescriptors), nil
 }
 
 type stubAuthFullPubkeyRepo struct {
