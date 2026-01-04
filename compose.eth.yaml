@@ -111,35 +111,6 @@ services:
       start_period: 60s
 
   #########################################################################
-  # trufflesuite/ganache-cli
-  # - https://hub.docker.com/r/trufflesuite/ganache-cli
-  #------------------------------------------------------------------------
-  # Example of commands to container
-  # - run
-  #  $ docker compose -f compose.eth.yaml up ganache
-  # - cli command example
-  #  $ ganache-cli --mnemonic "toy echo orbit embrace opinion file client report history bomb regret life"
-  #
-  ganache:
-    image: trufflesuite/ganache-cli:v6.12.2
-    container_name: ganache
-    ports:
-      - "${ETH_RPC_PORT:-8545}:8545"
-    volumes:
-      - ./docker/nodes/eth/ganache-data:/ganache_data
-    networks:
-      - eth
-    healthcheck:
-      test: ["CMD", "wget", "-q", "-O-", "--post-data={\"jsonrpc\":\"2.0\",\"method\":\"web3_clientVersion\",\"params\":[],\"id\":1}", "--header=Content-Type: application/json", "http://localhost:8545"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    # command adds into default ENTRYPOINT
-    # https://hub.docker.com/r/trufflesuite/ganache-cli/dockerfile
-    command: --mnemonic "toy echo orbit embrace opinion file client report history bomb regret life"
-
-  #########################################################################
   # foundry/anvil
   # - https://getfoundry.sh/anvil/overview/
   #------------------------------------------------------------------------
