@@ -9,16 +9,34 @@ These commands follow a modular structure where:
 - **Command-specific logic** is defined in each command file
 - This reduces duplication and makes maintenance easier
 
-## Available Commands
+## Migration to Agent Skills
 
-### `create-github-issue`
+**Note**: The `create-github-issue` command has been migrated to Agent Skills format for better team collaboration.
+
+### New Location (Agent Skills)
+
+The GitHub issue creation functionality is now available as an Agent Skill:
+- **Location**: `.claude/skills/github-issue-creation/SKILL.md`
+- **Usage**: Use the Skill tool with `skill: "github-issue-creation"`
+- **Benefits**: Automatic discovery, team-wide sharing, progressive disclosure
+
+See [Agent Skills documentation](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview) for more information.
+
+### Deprecated Commands
+
+The following commands are being migrated to Agent Skills format:
+
+#### `create-github-issue` (Deprecated - Use Agent Skill instead)
 
 Creates a GitHub issue.
 
+- **New location**: `.claude/skills/github-issue-creation/SKILL.md`
 - Creates a well-structured issue with understanding of project context
 - Suggests appropriate labels
 - Includes detailed template with security and architecture considerations
-- See [create-github-issue.md](create-github-issue.md) for details
+- See [create-github-issue.md](create-github-issue.md) for legacy reference
+
+## Available Commands
 
 ### `fix-issue`
 
