@@ -27,6 +27,11 @@ type ImportAddressUseCase interface {
 	Execute(ctx context.Context, input ImportAddressInput) error
 }
 
+// ImportDescriptorUseCase imports descriptors into watch wallet
+type ImportDescriptorUseCase interface {
+	Import(ctx context.Context, input ImportDescriptorInput) (ImportDescriptorOutput, error)
+}
+
 // CreatePaymentRequestUseCase creates payment requests
 type CreatePaymentRequestUseCase interface {
 	Execute(ctx context.Context, input CreatePaymentRequestInput) error
@@ -68,6 +73,22 @@ type SendTransactionInput struct {
 // SendTransactionOutput represents output from sending a transaction
 type SendTransactionOutput struct {
 	TxID string
+}
+
+// ImportDescriptorInput contains import parameters
+type ImportDescriptorInput struct {
+	FilePath     string
+	AccountType  domainAccount.AccountType
+	StartIndex   uint32
+	Count        uint32
+	ValidateOnly bool
+}
+
+// ImportDescriptorOutput contains import results
+type ImportDescriptorOutput struct {
+	DescriptorsImported int
+	AddressesGenerated  int
+	Errors              []string
 }
 
 // ImportAddressInput represents input for importing addresses
