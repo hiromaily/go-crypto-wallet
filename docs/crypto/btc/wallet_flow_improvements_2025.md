@@ -78,7 +78,7 @@ This document outlines improvements for the Bitcoin wallet flow, including the r
 
 **Improvements Needed:**
 - ⚠️ Taproot address support
-- ⚠️ Descriptor wallet integration
+- ✅ Descriptor wallet integration
 - ⚠️ PSBT (Partially Signed Bitcoin Transaction) support
 - ⚠️ Transaction fee estimation improvements
 
@@ -534,6 +534,8 @@ watch --coin btc create payment --multisig-type musig2 --fee 0.0001
 
 ### Phase 4: Descriptor Wallets (6-12 months)
 
+**Status: Completed** — descriptors are generated/exported/imported across keygen and watch wallets (see `docs/descriptor_user_guide.md`).
+
 1. Generate descriptors for all address types
 2. Integrate with Bitcoin Core
 3. Update backup/recovery procedures
@@ -610,7 +612,7 @@ watch --coin btc create payment --multisig-type musig2 --fee 0.0001
 - **Phase 1 (Taproot)**: 3-6 months
 - **Phase 2 (PSBT)**: 3-6 months
 - **Phase 3 (MuSig2)**: 6-12 months
-- **Phase 4 (Descriptors)**: 6-12 months
+- **Phase 4 (Descriptors)**: Completed (6-12 months)
 
 **Total**: 18-36 months for complete implementation
 
@@ -624,4 +626,3 @@ watch --coin btc create payment --multisig-type musig2 --fee 0.0001
 - [BIP 86: Key Derivation for Single Key Taproot Outputs](https://github.com/bitcoin/bips/blob/master/bip-0086.mediawiki)
 - [MuSig2: Simple Two-Round Schnorr Multisignatures](https://eprint.iacr.org/2020/1261)
 - [Bitcoin Core: Descriptors](https://github.com/bitcoin/bitcoin/blob/master/doc/descriptors.md)
-
