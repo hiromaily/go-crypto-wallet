@@ -85,7 +85,7 @@ Taproot is Bitcoin's latest major upgrade (activated November 2021) that introdu
 
 Edit your wallet configuration file to enable Taproot:
 
-**Keygen Wallet** (`data/config/btc_keygen.toml`):
+**Keygen Wallet** (`config/wallet/btc_keygen.toml`):
 ```toml
 # BIP86 is required for Taproot
 key_type = "bip86"  # bip44, bip49, bip84, bip86, musig2
@@ -100,7 +100,7 @@ pass = "your_rpc_password"
 network_type = "testnet3"  # mainnet, testnet3, regtest, signet
 ```
 
-**Watch Wallet** (`data/config/btc_watch.toml`):
+**Watch Wallet** (`config/wallet/btc_watch.toml`):
 ```toml
 address_type = "taproot"
 
@@ -111,7 +111,7 @@ pass = "your_rpc_password"
 network_type = "testnet3"
 ```
 
-**Sign Wallet** (`data/config/btc_sign.toml`):
+**Sign Wallet** (`config/wallet/btc_sign.toml`):
 ```toml
 address_type = "taproot"
 
@@ -159,9 +159,9 @@ This example walks through creating a Taproot wallet from scratch:
 
 ```bash
 # 1. Set environment variables
-export BTC_KEYGEN_WALLET_CONF=./data/config/btc_keygen.toml
-export BTC_WATCH_WALLET_CONF=./data/config/btc_watch.toml
-export BTC_ACCOUNT_CONF=./data/config/account.toml
+export BTC_KEYGEN_WALLET_CONF=./config/wallet/btc_keygen.toml
+export BTC_WATCH_WALLET_CONF=./config/wallet/btc_watch.toml
+export BTC_ACCOUNT_CONF=./config/wallet/account.toml
 
 # 2. Generate seed (Keygen wallet - OFFLINE)
 ./keygen --coin btc create seed
@@ -203,7 +203,7 @@ Testnet: tb1pqqqqp399et2xygdj5xreqhjjvcmzhxw4aywxecjdzew6hylgvsesf3hn0c
 
 ```bash
 # 1. Generate client account Taproot addresses (Keygen - OFFLINE)
-export BTC_KEYGEN_WALLET_CONF=./data/config/btc_keygen.toml
+export BTC_KEYGEN_WALLET_CONF=./config/wallet/btc_keygen.toml
 ./keygen --coin btc create hdkey --account client --count 100
 
 # 2. Export addresses (Keygen - OFFLINE)
@@ -214,7 +214,7 @@ export BTC_KEYGEN_WALLET_CONF=./data/config/btc_keygen.toml
 # Copy client_1234567890.csv to Watch wallet system
 
 # 4. Import addresses (Watch - ONLINE)
-export BTC_WATCH_WALLET_CONF=./data/config/btc_watch.toml
+export BTC_WATCH_WALLET_CONF=./config/wallet/btc_watch.toml
 ./watch --coin btc import address --account client \
   --filepath ./data/address/btc/client_1234567890.csv
 
@@ -232,7 +232,7 @@ export BTC_WATCH_WALLET_CONF=./data/config/btc_watch.toml
 
 ```bash
 # 1. Create unsigned transaction (Watch - ONLINE)
-export BTC_WATCH_WALLET_CONF=./data/config/btc_watch.toml
+export BTC_WATCH_WALLET_CONF=./config/wallet/btc_watch.toml
 ./watch --coin btc create transaction --account deposit
 # Output: ./data/tx/btc/deposit_1_unsigned_0_1234567890.tx
 
@@ -240,7 +240,7 @@ export BTC_WATCH_WALLET_CONF=./data/config/btc_watch.toml
 # Copy deposit_1_unsigned_0_1234567890.tx to Keygen system
 
 # 3. Sign transaction with Schnorr signature (Keygen - OFFLINE)
-export BTC_KEYGEN_WALLET_CONF=./data/config/btc_keygen.toml
+export BTC_KEYGEN_WALLET_CONF=./config/wallet/btc_keygen.toml
 ./keygen --coin btc sign \
   --file ./data/tx/btc/deposit_1_unsigned_0_1234567890.tx
 # Output: ./data/tx/btc/deposit_1_signed_0_1234567890.tx
@@ -258,18 +258,18 @@ export BTC_KEYGEN_WALLET_CONF=./data/config/btc_keygen.toml
 
 ```bash
 # 1. Create unsigned transaction (Watch - ONLINE)
-export BTC_WATCH_WALLET_CONF=./data/config/btc_watch.toml
+export BTC_WATCH_WALLET_CONF=./config/wallet/btc_watch.toml
 ./watch --coin btc create transaction --account payment
 # Output: ./data/tx/btc/payment_5_unsigned_0_1234567890.tx
 
 # 2. First signature (Keygen - OFFLINE)
-export BTC_KEYGEN_WALLET_CONF=./data/config/btc_keygen.toml
+export BTC_KEYGEN_WALLET_CONF=./config/wallet/btc_keygen.toml
 ./keygen --coin btc sign \
   --file ./data/tx/btc/payment_5_unsigned_0_1234567890.tx
 # Output: ./data/tx/btc/payment_5_unsigned_1_1234567890.tx (still unsigned - needs more sigs)
 
 # 3. Second signature (Sign wallet - OFFLINE)
-export BTC_SIGN_WALLET_CONF=./data/config/btc_sign.toml
+export BTC_SIGN_WALLET_CONF=./config/wallet/btc_sign.toml
 ./sign --coin btc sign \
   --file ./data/tx/btc/payment_5_unsigned_1_1234567890.tx
 # Output: ./data/tx/btc/payment_5_signed_0_1234567890.tx (now fully signed)
@@ -283,7 +283,7 @@ export BTC_SIGN_WALLET_CONF=./data/config/btc_sign.toml
 
 ```bash
 # 1. Create payment request (Watch - ONLINE)
-export BTC_WATCH_WALLET_CONF=./data/config/btc_watch.toml
+export BTC_WATCH_WALLET_CONF=./config/wallet/btc_watch.toml
 ./watch --coin btc create payment-request \
   --address bc1p5cyxnuxmeuwuvkwfem96lqzszd02n6xdcjrs20cac6yqjjwudpxqkedrcr \
   --amount 0.001
@@ -303,9 +303,9 @@ export BTC_WATCH_WALLET_CONF=./data/config/btc_watch.toml
 ```bash
 # Update configuration
 sed -i 's/address_type = "bech32"/address_type = "taproot"/' \
-  data/config/btc_keygen.toml
+  config/wallet/btc_keygen.toml
 sed -i 's/key_type = "bip84"/key_type = "bip86"/' \
-  data/config/btc_keygen.toml
+  config/wallet/btc_keygen.toml
 
 # Generate new Taproot addresses
 ./keygen --coin btc create hdkey --account client --count 100
@@ -401,7 +401,7 @@ sed -i 's/key_type = "bip84"/key_type = "bip86"/' \
 1. **Test on Testnet First**
    ```bash
    # Always test new workflows on testnet
-   export BTC_KEYGEN_WALLET_CONF=./data/config/btc_keygen_testnet.toml
+   export BTC_KEYGEN_WALLET_CONF=./config/wallet/btc_keygen_testnet.toml
    ```
 
 2. **Keep Audit Logs**
@@ -488,7 +488,7 @@ Error: address type 'taproot' not recognized
 **Solutions:**
 1. Verify configuration file:
    ```bash
-   grep "address_type" data/config/btc_keygen.toml
+   grep "address_type" config/wallet/btc_keygen.toml
    # Should show: address_type = "taproot"
    ```
 
@@ -536,7 +536,7 @@ Error: could not connect to Bitcoin Core RPC
 **Solutions:**
 1. Verify `key_type` is set to `bip86`:
    ```bash
-   grep "key_type" data/config/btc_keygen.toml
+   grep "key_type" config/wallet/btc_keygen.toml
    # Should show: key_type = "bip86"
    ```
 
@@ -607,7 +607,7 @@ If you encounter issues not covered here:
 3. **Verify Configuration:**
    ```bash
    # Validate TOML syntax
-   python3 -c "import toml; toml.load('data/config/btc_keygen.toml')"
+   python3 -c "import toml; toml.load('config/wallet/btc_keygen.toml')"
    ```
 
 4. **Test with Signet:**

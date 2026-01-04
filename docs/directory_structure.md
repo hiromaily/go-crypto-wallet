@@ -154,22 +154,32 @@ cmd/
     └── get-eth-key/        # Ethereum key retrieval tool
 ```
 
-## Data Directory
+## Configuration and Data Directories
 
 ```text
-data/
-├── address/                # Generated address files (bch, btc, eth, xrp)
-├── certs/                  # Certificates for Docker volumes
-├── config/                 # Configuration TOML files
+config/                      # Git管理: アプリケーション設定ファイル
+├── wallet/                 # ウォレット設定ファイル
 │   ├── account.toml
 │   ├── *_keygen.toml       # Keygen wallet configs
 │   ├── *_sign.toml         # Sign wallet configs
-│   ├── *_watch.toml        # Watch wallet configs
-│   └── [blockchain]/       # Blockchain node configs
-├── contract/               # Contract ABI files
+│   └── *_watch.toml        # Watch wallet configs
+└── blockchain/             # ブロックチェーンノード設定
+    ├── bitcoind/
+    ├── openeth/
+    └── rippled/
+
+proto/                       # Git管理: Protocol Buffers定義（コード生成のソース）
+└── rippleapi/              # Ripple gRPC proto files
+
+contracts/                    # Git管理: スマートコントラクトABI（コード生成のソース）
+└── token.abi
+
+data/                        # 生成されるファイル（.gitignore対象）
+├── address/                # Generated address files (bch, btc, eth, xrp)
+├── certs/                  # Certificates for Docker volumes
+├── dump/                   # Database dumps
+├── fullpubkey/             # Generated full public key files
 ├── keystore/               # Keystore files
-├── proto/                  # Protocol buffer definitions
-│   └── rippleapi/          # Ripple gRPC proto files
 └── tx/                     # Transaction data files (bch, btc, eth, xrp)
 ```
 

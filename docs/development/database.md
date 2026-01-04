@@ -198,7 +198,7 @@ When the container starts for the first time:
 
 Each wallet type (watch, keygen, sign) connects to the same database host but specifies different schema names:
 
-**Watch Wallet** (`data/config/*_watch.toml`):
+**Watch Wallet** (`config/wallet/*_watch.toml`):
 ```toml
 [mysql]
 host = "127.0.0.1:3306"
@@ -207,7 +207,7 @@ user = "hiromaily"
 pass = "hiromaily"
 ```
 
-**Keygen Wallet** (`data/config/*_keygen.toml`):
+**Keygen Wallet** (`config/wallet/*_keygen.toml`):
 ```toml
 [mysql]
 host = "127.0.0.1:3306"
@@ -216,7 +216,7 @@ user = "hiromaily"
 pass = "hiromaily"
 ```
 
-**Sign Wallet** (`data/config/*_sign.toml`):
+**Sign Wallet** (`config/wallet/*_sign.toml`):
 ```toml
 [mysql]
 host = "127.0.0.1:3306"

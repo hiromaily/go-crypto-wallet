@@ -441,7 +441,7 @@ func (k *HDKey) GetDerivationPath(accountType domainAccount.AccountType, index u
 ### Configuration
 
 ```toml
-# data/config/btc_watch.toml
+# config/wallet/btc_watch.toml
 [wallet]
 coin_type = "btc"
 key_type = "bip86"  # Use Taproot

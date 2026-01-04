@@ -24,7 +24,7 @@ func GetETH() (ethereum.Ethereumer, error) {
 	}
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := projPath + "/data/config/eth_watch.toml"
+	confPath := projPath + "/config/wallet/eth_watch.toml"
 	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.ETH)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create config: %w", err)

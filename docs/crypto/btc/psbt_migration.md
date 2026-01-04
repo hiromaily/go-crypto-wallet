@@ -163,7 +163,7 @@ cp -r data/db/ backups/pre-psbt-migration-$(date +%Y%m%d)/db/
 cp -r data/tx/ backups/pre-psbt-migration-$(date +%Y%m%d)/tx/
 
 # Backup configuration
-cp -r data/config/ backups/pre-psbt-migration-$(date +%Y%m%d)/config/
+cp -r config/wallet/ backups/pre-psbt-migration-$(date +%Y%m%d)/config/
 
 # Create backup archive
 tar -czf psbt-migration-backup-$(date +%Y%m%d).tar.gz \
@@ -181,10 +181,10 @@ tar -tzf psbt-migration-backup-$(date +%Y%m%d).tar.gz | head -20
 
 ```bash
 # Clone production config for testnet
-cp data/config/btc_watch.toml data/config/btc_watch_testnet.toml
+cp config/wallet/btc_watch.toml config/wallet/btc_watch_testnet.toml
 
 # Update RPC endpoint to testnet node
-vim data/config/btc_watch_testnet.toml
+vim config/wallet/btc_watch_testnet.toml
 # Change:
 # host = "mainnet-node:8332"
 # To:

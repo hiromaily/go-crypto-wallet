@@ -4,7 +4,7 @@
 PLUGIN_TS=./node_modules/.bin/protoc-gen-ts
 PLUGIN_GRPC=./node_modules/.bin/grpc_tools_node_protoc_plugin
 DIST_DIR=./src/pb
-PROTO_PATH=../../data/proto
+PROTO_PATH=../../proto
 
 rm -rf ${DIST_DIR}
 mkdir ${DIST_DIR}

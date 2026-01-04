@@ -70,9 +70,9 @@ clean-pb:
 # abigen is a tool for generating Go code from Ethereum smart contract ABIs
 #------------------------------------------------------------------------------
 # Generate ABI code from token.abi file using abigen
-# Source: data/contract/token.abi
+# Source: contracts/token.abi
 # Output: internal/infrastructure/contract/token-abi.go
 #------------------------------------------------------------------------------
 .PHONY: generate-abi
 generate-abi:
-	abigen --abi ./data/contract/token.abi --pkg contract --type Token --out ./internal/infrastructure/contract/token-abi.go
+	abigen --abi ./contracts/token.abi --pkg contract --type Token --out ./internal/infrastructure/contract/token-abi.go

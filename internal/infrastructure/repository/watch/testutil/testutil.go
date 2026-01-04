@@ -30,7 +30,7 @@ func NewBTCTxRepositorySqlc() watch.BTCTxRepositorier {
 	}
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := projPath + "/data/config/btc_watch.toml"
+	confPath := projPath + "/config/wallet/btc_watch.toml"
 	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.BTC)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
@@ -52,7 +52,7 @@ func NewTxRepositorySqlc() watch.TxRepositorier {
 	}
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := projPath + "/data/config/btc_watch.toml"
+	confPath := projPath + "/config/wallet/btc_watch.toml"
 	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.BTC)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
@@ -74,7 +74,7 @@ func NewAddressRepositorySqlc() watch.AddressRepositorier {
 	}
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := projPath + "/data/config/btc_watch.toml"
+	confPath := projPath + "/config/wallet/btc_watch.toml"
 	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.BTC)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
@@ -96,7 +96,7 @@ func NewPaymentRequestRepositorySqlc() watch.PaymentRequestRepositorier {
 	}
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := projPath + "/data/config/btc_watch.toml"
+	confPath := projPath + "/config/wallet/btc_watch.toml"
 	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.BTC)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
@@ -118,7 +118,7 @@ func NewBTCTxInputRepositorySqlc() watch.TxInputRepositorier {
 	}
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := projPath + "/data/config/btc_watch.toml"
+	confPath := projPath + "/config/wallet/btc_watch.toml"
 	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.BTC)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
@@ -140,7 +140,7 @@ func NewBTCTxOutputRepositorySqlc() watch.TxOutputRepositorier {
 	}
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := projPath + "/data/config/btc_watch.toml"
+	confPath := projPath + "/config/wallet/btc_watch.toml"
 	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.BTC)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
@@ -162,7 +162,7 @@ func NewETHDetailTXRepositorySqlc() watch.ETHDetailTXRepositorier {
 	}
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := projPath + "/data/config/eth_watch.toml"
+	confPath := projPath + "/config/wallet/eth_watch.toml"
 	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.ETH)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
@@ -184,7 +184,7 @@ func NewXrpDetailTxRepositorySqlc() watch.XRPDetailTXRepositorier {
 	}
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := projPath + "/data/config/xrp_watch.toml"
+	confPath := projPath + "/config/wallet/xrp_watch.toml"
 	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.XRP)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)

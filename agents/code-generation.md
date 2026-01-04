@@ -57,7 +57,7 @@ This project uses several code generation tools. **All auto-generated files cont
 ## Protocol Buffer Code (Go)
 
 **Tool**: [buf](https://buf.build/) with protoc-gen-go and protoc-gen-go-grpc
-**Source**: `data/proto/rippleapi/*.proto`
+**Source**: `proto/rippleapi/*.proto`
 **Command**: `make protoc-go` (or `buf generate`)
 
 **Generated Files**:
@@ -75,8 +75,8 @@ This project uses several code generation tools. **All auto-generated files cont
 ## Smart Contract ABI Code
 
 **Tool**: [abigen](https://geth.ethereum.org/docs/tools/abigen) (from go-ethereum)
-**Source**: `data/contract/token.abi`
-**Command**: `make generate-abi` (or `abigen --abi ./data/contract/token.abi --pkg contract --type Token --out ./internal/infrastructure/contract/token-abi.go`)
+**Source**: `contracts/token.abi`
+**Command**: `make generate-abi` (or `abigen --abi ./contracts/token.abi --pkg contract --type Token --out ./internal/infrastructure/contract/token-abi.go`)
 
 **Generated Files**:
 
@@ -160,7 +160,7 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 ## Protocol Buffer Code (JavaScript/TypeScript)
 
 **Tool**: protoc with JavaScript/TypeScript plugins
-**Source**: `data/proto/rippleapi/*.proto`
+**Source**: `proto/rippleapi/*.proto`
 **Command**: `web/ripple-lib-server/scripts/protoc-ts.sh`
 
 **Generated Files**:
@@ -203,8 +203,8 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
    - SQLC Schemas: **DO NOT EDIT** `tools/sqlc/schemas/*.sql` - these are auto-generated from database dumps. Edit `tools/atlas/schemas/*.hcl` instead.
    - SQLC Queries: Edit `tools/sqlc/queries/*.sql` (manually edited)
    - Mockery: Edit `.mockery.yaml` to add new interfaces, then run `make mockery`
-   - Protocol Buffers: Edit `data/proto/rippleapi/*.proto`
-   - ABI: Edit `data/contract/token.abi` (or regenerate from Solidity source)
+   - Protocol Buffers: Edit `proto/rippleapi/*.proto`
+   - ABI: Edit `contracts/token.abi` (or regenerate from Solidity source)
 3. **Regenerate after source changes** - Run the appropriate make command after modifying source files
 4. **Verify generation** - Run `make check-build` after regenerating to ensure code compiles
 
@@ -216,9 +216,9 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 | SQLC Schema Extract | `data/dump/sql/dump_*.sql` | `make extract-sqlc-schema-all` | `tools/sqlc/schemas/*.sql` |
 | SQLC | `tools/sqlc/schemas/*.sql` + `tools/sqlc/queries/*.sql` | `make sqlc` | `internal/infrastructure/database/sqlc/*.go` |
 | Mockery | `.mockery.yaml` + interface definitions | `make mockery` | `internal/infrastructure/*/mocks/*.go` |
-| Protocol Buffers (Go) | `data/proto/rippleapi/*.proto` | `make protoc-go` | `internal/infrastructure/api/ripple/xrp/*.pb.go` |
-| Smart Contract ABI | `data/contract/token.abi` | `make generate-abi` | `internal/infrastructure/contract/token-abi.go` |
-| Protocol Buffers (JS/TS) | `data/proto/rippleapi/*.proto` | `web/ripple-lib-server/scripts/protoc-ts.sh` | `web/ripple-lib-server/src/pb/*.js` |
+| Protocol Buffers (Go) | `proto/rippleapi/*.proto` | `make protoc-go` | `internal/infrastructure/api/ripple/xrp/*.pb.go` |
+| Smart Contract ABI | `contracts/token.abi` | `make generate-abi` | `internal/infrastructure/contract/token-abi.go` |
+| Protocol Buffers (JS/TS) | `proto/rippleapi/*.proto` | `web/ripple-lib-server/scripts/protoc-ts.sh` | `web/ripple-lib-server/src/pb/*.js` |
 
 ## See Also
 

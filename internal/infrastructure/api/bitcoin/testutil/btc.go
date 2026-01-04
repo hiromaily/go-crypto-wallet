@@ -24,7 +24,7 @@ func GetBTC() (portsBtc.Bitcoiner, error) {
 	}
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := projPath + "/data/config/btc_watch.toml"
+	confPath := projPath + "/config/wallet/btc_watch.toml"
 	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.BTC)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create config: %w", err)
