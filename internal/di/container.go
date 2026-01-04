@@ -79,6 +79,7 @@ type Container interface {
 	NewWatchSendTransactionUseCase() any
 	NewWatchImportAddressUseCase() watchusecase.ImportAddressUseCase
 	NewWatchCreatePaymentRequestUseCase() watchusecase.CreatePaymentRequestUseCase
+	NewWatchImportDescriptorUseCase() watchusecase.ImportDescriptorUseCase
 	NewWatchAggregateMuSig2SignaturesUseCase() watchusecase.AggregateMuSig2SignaturesUseCase
 
 	// Keygen Use Cases
@@ -745,6 +746,13 @@ func (c *container) NewWatchCreatePaymentRequestUseCase() watchusecase.CreatePay
 	return c.newWatchCreatePaymentRequestUseCase()
 }
 
+func (c *container) NewWatchImportDescriptorUseCase() watchusecase.ImportDescriptorUseCase {
+	if !domainCoin.IsBTCGroup(c.conf.CoinTypeCode) {
+		panic(fmt.Sprintf("descriptor import supported only for BTC group, got %s", c.conf.CoinTypeCode))
+	}
+	return c.newBTCWatchImportDescriptorUseCase()
+}
+
 func (c *container) NewWatchAggregateMuSig2SignaturesUseCase() watchusecase.AggregateMuSig2SignaturesUseCase {
 	return c.newBTCWatchAggregateMuSig2SignaturesUseCase()
 }
@@ -922,6 +930,15 @@ func (c *container) newBTCWatchImportAddressUseCase() watchusecase.ImportAddress
 		c.newAddressFileRepo(),
 		c.conf.CoinTypeCode,
 		c.conf.AddressType,
+	)
+}
+
+func (c *container) newBTCWatchImportDescriptorUseCase() watchusecase.ImportDescriptorUseCase {
+	return watchusecasebtc.NewImportDescriptorUseCase(
+		btcapi.NewDescriptorParser(),
+		c.newBTC().GetChainConf(),
+		c.newAddressRepo(),
+		c.conf.CoinTypeCode,
 	)
 }
 
