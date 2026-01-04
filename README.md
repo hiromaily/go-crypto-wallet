@@ -39,6 +39,10 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
   - Parallel nonce generation (Round 1) for faster workflow
   - Maximum privacy - indistinguishable from single-signature transactions
   - See [MuSig2 User Guide](./docs/crypto/btc/musig2_guide.md) for setup and usage
+- ✅ **Descriptor Wallets (BIP380)** - Generate, export, and import descriptors for BTC accounts (Bitcoin Core compatible)
+  - Export receive/change descriptors in Bitcoin Core JSON or text formats
+  - Watch wallet import/validate commands for descriptor onboarding (single-key; multisig import intentionally disabled)
+  - See [Descriptor User Guide](./docs/descriptor_user_guide.md) and [Descriptor API](./docs/api/descriptor_api.md)
 
 ## Expected use cases
 
