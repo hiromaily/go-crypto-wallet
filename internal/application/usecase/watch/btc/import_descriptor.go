@@ -53,10 +53,6 @@ func (u *importDescriptorUseCase) Import(
 	ctx context.Context,
 	input watchusecase.ImportDescriptorInput,
 ) (watchusecase.ImportDescriptorOutput, error) {
-	if input.Count == 0 {
-		input.Count = 1
-	}
-
 	descriptorStrs, err := u.readDescriptors(input.FilePath)
 	if err != nil {
 		return watchusecase.ImportDescriptorOutput{}, fmt.Errorf("read descriptors: %w", err)
@@ -71,7 +67,7 @@ func (u *importDescriptorUseCase) Import(
 	for _, descStr := range descriptorStrs {
 		descriptor, parseErr := u.parser.Parse(descStr)
 		if parseErr != nil {
-			errors = append(errors, fmt.Sprintf("parse descriptor: %v", parseErr))
+			errors = append(errors, fmt.Sprintf("parse descriptor '%s': %v", descStr, parseErr))
 			continue
 		}
 
@@ -82,7 +78,7 @@ func (u *importDescriptorUseCase) Import(
 
 		addrs, deriveErr := u.deriveAddresses(descriptor, input.StartIndex, input.Count)
 		if deriveErr != nil {
-			errors = append(errors, fmt.Sprintf("derive addresses: %v", deriveErr))
+			errors = append(errors, fmt.Sprintf("derive addresses for descriptor '%s': %v", descStr, deriveErr))
 			continue
 		}
 
@@ -91,7 +87,7 @@ func (u *importDescriptorUseCase) Import(
 		}
 
 		if err := u.storeAddresses(ctx, input.AccountType, addrs); err != nil {
-			errors = append(errors, fmt.Sprintf("store addresses: %v", err))
+			errors = append(errors, fmt.Sprintf("store addresses for descriptor '%s': %v", descStr, err))
 			continue
 		}
 
@@ -286,6 +282,10 @@ func (u *importDescriptorUseCase) storeAddresses(
 	accountType domainAccount.AccountType,
 	addrs []string,
 ) error {
+	if len(addrs) == 0 {
+		return nil
+	}
+
 	items := make([]*domainAddress.Address, 0, len(addrs))
 	for _, addr := range addrs {
 		entity, err := domainAddress.NewAddress(u.coinType, accountType, addr, false)
