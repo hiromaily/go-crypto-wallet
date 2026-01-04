@@ -33,21 +33,29 @@ echo "✓ importdescriptors succeeded"
 echo "--- Deriving first two addresses from first descriptor ---"
 first_desc=$(
   python - <<'PY'
-import json,sys
+import json
+import sys
 from pathlib import Path
-data=Path(sys.argv[1]).read_text()
+
+data = Path(sys.argv[1]).read_text()
+
+# Try to parse as Bitcoin Core JSON format
 try:
-    recs=json.loads(data)
-    if isinstance(recs,list) and recs and "desc" in recs[0]:
-        print(recs[0]["desc"])
+    records = json.loads(data)
+    if isinstance(records, list) and records and "desc" in records[0]:
+        print(records[0]["desc"])
         sys.exit(0)
-except Exception:
+except json.JSONDecodeError:
+    # Fallback to plain text if not valid JSON
     pass
+
+# Fallback: treat as plain descriptors (one per line)
 for line in data.splitlines():
-    line=line.strip()
+    line = line.strip()
     if line and not line.startswith("#"):
         print(line)
         sys.exit(0)
+
 sys.exit(1)
 PY
   "${DESC_FILE}"
