@@ -17,7 +17,7 @@ const (
 )
 
 func TestGenerateP2PKHDescriptor(t *testing.T) {
-	service := NewDescriptorService(&chaincfg.MainNetParams)
+	service := NewDescriptorService()
 	xpub := mustNewExtendedKey(t, testMainnetXpub)
 
 	t.Run("receive descriptor", func(t *testing.T) {
@@ -64,7 +64,7 @@ func TestGenerateP2PKHDescriptor(t *testing.T) {
 }
 
 func TestGenerateP2PKHDescriptorValidation(t *testing.T) {
-	service := NewDescriptorService(&chaincfg.MainNetParams)
+	service := NewDescriptorService()
 	xpub := mustNewExtendedKey(t, testMainnetXpub)
 
 	tests := []struct {
@@ -100,6 +100,13 @@ func TestGenerateP2PKHDescriptorValidation(t *testing.T) {
 			name:           "invalid derivation path",
 			fingerprint:    testFingerprint,
 			derivationPath: "44'/0'/0'",
+			key:            xpub,
+			wantErr:        "invalid derivation path",
+		},
+		{
+			name:           "double master prefix rejected",
+			fingerprint:    testFingerprint,
+			derivationPath: "mM/44'/0'/0'",
 			key:            xpub,
 			wantErr:        "invalid derivation path",
 		},

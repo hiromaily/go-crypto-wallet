@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
-	"github.com/btcsuite/btcd/chaincfg"
 
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 )
@@ -18,14 +17,11 @@ const (
 
 // DescriptorService generates descriptors for supported single-signature templates.
 type DescriptorService struct {
-	chainParams *chaincfg.Params
 }
 
 // NewDescriptorService creates a descriptor service for the given Bitcoin network parameters.
-func NewDescriptorService(chainParams *chaincfg.Params) *DescriptorService {
-	return &DescriptorService{
-		chainParams: chainParams,
-	}
+func NewDescriptorService() *DescriptorService {
+	return &DescriptorService{}
 }
 
 // GenerateP2PKHDescriptor generates a P2PKH (legacy) descriptor following BIP380.
@@ -66,23 +62,20 @@ func (d *DescriptorService) formatDescriptor(
 		return "", fmt.Errorf("invalid derivation path: %w", err)
 	}
 
-	xpubStr := xpub.String()
-	if err := domainWallet.ValidateExtendedPubKey(xpubStr); err != nil {
-		return "", fmt.Errorf("invalid extended public key: %w", err)
-	}
-
 	changeIndex := 0
 	if isChange {
 		changeIndex = 1
 	}
 
-	return fmt.Sprintf(template, normalizedFingerprint, normalizedPath, xpubStr, changeIndex), nil
+	return fmt.Sprintf(template, normalizedFingerprint, normalizedPath, xpub.String(), changeIndex), nil
 }
 
 func normalizeDerivationPath(path string) string {
 	trimmed := strings.TrimSpace(path)
-	trimmed = strings.TrimPrefix(trimmed, "m")
-	trimmed = strings.TrimPrefix(trimmed, "M")
+
+	if strings.HasPrefix(trimmed, "m/") || strings.HasPrefix(trimmed, "M/") {
+		trimmed = trimmed[1:]
+	}
 
 	return trimmed
 }

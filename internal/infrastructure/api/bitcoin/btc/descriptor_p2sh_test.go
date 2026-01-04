@@ -3,14 +3,13 @@ package btc
 import (
 	"testing"
 
-	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/stretchr/testify/require"
 )
 
 const testDerivationP2SH = "/49'/0'/0'"
 
 func TestGenerateP2SHSegWitDescriptor(t *testing.T) {
-	service := NewDescriptorService(&chaincfg.MainNetParams)
+	service := NewDescriptorService()
 	xpub := mustNewExtendedKey(t, testMainnetXpub)
 
 	t.Run("receive descriptor", func(t *testing.T) {
@@ -45,7 +44,7 @@ func TestGenerateP2SHSegWitDescriptor(t *testing.T) {
 }
 
 func TestGenerateP2SHSegWitDescriptor_NormalizesPath(t *testing.T) {
-	service := NewDescriptorService(&chaincfg.MainNetParams)
+	service := NewDescriptorService()
 	xpub := mustNewExtendedKey(t, testMainnetXpub)
 
 	descriptor, err := service.GenerateP2SHSegWitDescriptor(
