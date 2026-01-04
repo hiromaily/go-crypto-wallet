@@ -14,6 +14,8 @@ import (
 const (
 	descriptorFormatPKH    = "pkh([%s%s]%s/%d/*)"
 	descriptorFormatSHWPKH = "sh(wpkh([%s%s]%s/%d/*))"
+	descriptorFormatWPKH   = "wpkh([%s%s]%s/%d/*)"
+	descriptorFormatTR     = "tr([%s%s]%s/%d/*)"
 )
 
 // DescriptorService generates descriptors for supported single-signature templates.
