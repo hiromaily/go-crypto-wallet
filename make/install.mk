@@ -16,7 +16,8 @@ install-mac-tools:
 		mkcert \
 		ariga/tap/atlas \
 		protobuf \
-		buf
+		buf \
+		sqlfluff
 
 .PHONY: install-ssl
 install-ssl:

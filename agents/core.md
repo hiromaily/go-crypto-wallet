@@ -17,7 +17,7 @@ Security is of utmost importance in this financial-related project.
 
 **When to Run Security Scans:**
 
-- For security-related changes, run `make check-vuln`
+- For security-related changes, run `make go-check-vuln`
 - Review encryption/decryption logic carefully
 - Extra caution for private key management and wallet operations
 
@@ -89,7 +89,7 @@ These patterns should be avoided across the entire codebase:
 - Unused imports, variables, or functions
 - Ignoring errors (detected by `errcheck`)
 - Using `go build -v` directly (use `make check-build` instead)
-- Using `go tool golangci-lint` directly (use `make lint-fix` instead)
+- Using `go tool golangci-lint` directly (use `make go-lint` instead)
 - For `unused-receiver` lint errors: **Remove the receiver entirely** instead of renaming it to `_`. Renaming to `_` will only cause the same error to appear for other receivers, so convert the method to a function from the start.
 
 ## Recommended Patterns

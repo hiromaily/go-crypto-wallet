@@ -5,16 +5,16 @@ This document describes the coding standards and conventions for the go-crypto-w
 ## Linting and Formatting
 
 - Follow `golangci-lint` configuration (`.golangci.yml`)
-- Format code with `make format` (uses `gofumpt` and `goimports` via golangci-lint)
+- Format code with `make go-fmt` (uses `gofumpt` and `goimports` via golangci-lint)
   - Import order: standard → third-party → local
-- Use `make lint-fix` to run linting and formatting together (executes lint checks and format fixes)
+- Use `make go-lint` to run linting and formatting together (executes lint checks and format fixes)
 - Maintain consistent naming conventions (lowercase package names, exported functions start with uppercase)
 
 ## Common Commands
 
 After making code changes, use these commands to verify code correctness:
 
-- `make lint-fix`: Fix linting issues automatically
+- `make go-lint`: Fix linting issues automatically
 - `make check-build`: Verify that the code builds successfully
 - `make gotest`: Run Go tests to verify functionality
 - `make tidy`: Organize dependencies and clean up `go.mod`
@@ -24,7 +24,7 @@ After making code changes, use these commands to verify code correctness:
 **Command Constraints**:
 
 - **DO NOT** use `go build -v` directly; use `make check-build` instead
-- **DO NOT** use `go tool golangci-lint` directly; use `make lint-fix` instead
+- **DO NOT** use `go tool golangci-lint` directly; use `make go-lint` instead
 
 ## Naming Conventions
 
@@ -81,7 +81,7 @@ import (
 )
 ```
 
-The `goimports` tool (via `make format`) will automatically organize imports in this order.
+The `goimports` tool (via `make go-fmt`) will automatically organize imports in this order.
 
 ## Code Style
 
@@ -129,13 +129,13 @@ The `goimports` tool (via `make format`) will automatically organize imports in 
 
 **gofmt / gofumpt:**
 
-- Always run `make format` before committing
+- Always run `make go-fmt` before committing
 - Consistent formatting helps with code reviews
 
 **goimports:**
 
 - Import organization is handled by `goimports`
-- Run `make format` to organize imports automatically
+- Run `make go-fmt` to organize imports automatically
 
 ## Testing Standards
 

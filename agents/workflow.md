@@ -26,7 +26,7 @@ This document describes development workflow, dependency management, and git ope
 **Commands:**
 
 - `make tidy`: Organize dependencies and clean up `go.mod`
-- `make check-vuln`: Run security vulnerability scan (govulncheck)
+- `make go-check-vuln`: Run security vulnerability scan (govulncheck)
 
 **Best Practices:**
 
@@ -85,14 +85,14 @@ Closes #123
 
 After making code changes, always run these commands in order:
 
-1. `make lint-fix` - Fix linting issues automatically
+1. `make go-lint` - Fix linting issues automatically
 2. `make tidy` - Organize dependencies and clean up `go.mod`
 3. `make check-build` - Verify that the code builds successfully
 4. `make gotest` - Run Go tests to verify functionality
 
 **Optional but Recommended:**
 
-- `make check-vuln` - Run security vulnerability scan (for security-related changes)
+- `make go-check-vuln` - Run security vulnerability scan (for security-related changes)
 - `make gotest-integration` - Run integration tests (if applicable)
 
 **Important**:
@@ -138,7 +138,7 @@ After making code changes, always run these commands in order:
 - [ ] Manual testing completed
 
 ## Verification
-- [ ] `make lint-fix` passes
+- [ ] `make go-lint` passes
 - [ ] `make check-build` passes
 - [ ] `make gotest` passes
 - [ ] Security scan completed (if applicable)
@@ -210,7 +210,7 @@ Before starting any development task, perform these checks:
 - **CRITICAL**: Always verify branch and status before implementing fixes
 - **CRITICAL**: Never edit files with `DO NOT EDIT` comments (auto-generated files)
 - **CRITICAL**: Never log private keys or sensitive information
-- **CRITICAL**: For security-related changes, run `make check-vuln` and conduct security review
+- **CRITICAL**: For security-related changes, run `make go-check-vuln` and conduct security review
 - Never use `git merge` operations
 - Never commit/push directly to `main`/`master` branches
 
@@ -254,7 +254,7 @@ If Go files (`.go`) were changed, run these commands in order and ensure:
 - All commands pass successfully:
 
 ```bash
-make lint-fix      # Fix linting issues (not 'fix-lint')
+make go-lint       # Fix linting issues (not 'fix-lint')
 make tidy          # Organize dependencies
 make check-build   # Verify builds successfully
 make gotest        # Run all tests
@@ -262,7 +262,7 @@ make gotest        # Run all tests
 
 **Optional but Recommended:**
 
-- `make check-vuln` - Run security vulnerability scan (for security-related changes)
+- `make go-check-vuln` - Run security vulnerability scan (for security-related changes)
 - `make gotest-integration` - Run integration tests (if applicable)
 
 #### For Markdown File Changes Only
@@ -304,7 +304,7 @@ For issues involving:
 **Additional requirements:**
 
 - Extra caution for private key management, wallet operations
-- Run security scan: `make check-vuln`
+- Run security scan: `make go-check-vuln`
 - Consider impact on offline wallets (keygen, sign)
 - Review encryption/decryption logic carefully
 - Never include sensitive information in commits or PR descriptions

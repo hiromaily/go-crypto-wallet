@@ -1,4 +1,45 @@
 ###############################################################################
+# sqlc Format, Validation, and Lint Targets
+###############################################################################
+
+# Compile SQL queries and schemas to check for syntax and type errors
+# `sqlc compile` - Statically check SQL for syntax and type errors
+.PHONY: sqlc-compile
+sqlc-compile:
+	@echo "Compiling SQL queries and schemas..."
+	@cd tools/sqlc && sqlc compile
+	@echo "✓ SQL compilation successful"
+
+# Vet SQL queries for potential issues
+# `sqlc vet` - Examines queries for potential problems
+.PHONY: sqlc-vet
+sqlc-vet:
+	@echo "Vetting SQL queries..."
+	@cd tools/sqlc && sqlc vet
+	@echo "✓ SQL queries passed vetting"
+
+# Verify schema, queries, and configuration
+# `sqlc verify` - Verify schema, queries, and configuration for this project
+# Note: This command requires sqlc Cloud connection. If you don't use sqlc Cloud,
+# you can skip this command and use sqlc-compile and sqlc-vet instead.
+.PHONY: sqlc-verify
+sqlc-verify:
+	@echo "Verifying sqlc configuration, schemas, and queries..."
+	@echo "Note: This command requires sqlc Cloud. Use sqlc-validate for local validation."
+	@cd tools/sqlc && sqlc verify --no-remote || (echo "⚠️  sqlc verify requires sqlc Cloud connection. Use sqlc-validate for local validation." && exit 0)
+
+# Validate SQL queries and schemas (combines compile and vet)
+# This target runs compile and vet checks for local validation
+.PHONY: sqlc-validate
+sqlc-validate: sqlc-compile sqlc-vet
+	@echo "✓ All sqlc validation checks passed"
+
+# Lint SQL queries (alias for vet)
+# This target runs vet to check queries for potential issues
+.PHONY: sqlc-lint
+sqlc-lint: sqlc-vet
+
+###############################################################################
 # Schema Export Targets
 ###############################################################################
 

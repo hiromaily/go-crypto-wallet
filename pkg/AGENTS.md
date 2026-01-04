@@ -49,7 +49,7 @@ This is the fundamental architectural principle for the `pkg/` directory.
 
 After making code changes, use these commands to verify code correctness:
 
-- `make lint-fix`: Fix linting issues automatically
+- `make go-lint`: Fix linting issues automatically
 - `make check-build`: Verify that the code builds successfully
 - `make gotest`: Run Go tests to verify functionality
 - `make tidy`: Organize dependencies and clean up `go.mod`

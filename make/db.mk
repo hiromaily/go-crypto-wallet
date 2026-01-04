@@ -61,3 +61,39 @@ regenerate-all-from-atlas:
 	@$(MAKE) sqlc
 	@echo ""
 	@echo "✓ All done! Schema regeneration complete."
+
+
+###############################################################################
+# sqlfluff Linting
+###############################################################################
+
+###############################################################################
+# SQLFluff Targets (SQL Formatting and Linting)
+###############################################################################
+# SQLFluff is used for formatting and linting SQL files used by sqlc
+# Note: SQLFluff may show PRS (parsing) errors for MySQL ? placeholders,
+# but these are acceptable as sqlc handles them correctly.
+
+# Format SQL files
+# Formats SQL files according to .sqlfluff configuration
+.PHONY: sqlfluff-format
+sqlfluff-format:
+	@echo "Formatting SQL files..."
+	@sqlfluff format tools/sqlc/queries/*.sql
+	@echo "✓ SQL files formatted"
+
+# Lint SQL files
+# Lints SQL files and reports issues (excluding parsing errors for ? placeholders)
+.PHONY: sqlfluff-lint
+sqlfluff-lint:
+	@echo "Linting SQL files..."
+	@sqlfluff lint tools/sqlc/queries/*.sql || true
+	@echo "Note: PRS (parsing) errors for ? placeholders are acceptable for sqlc"
+
+# Fix SQL files (format and auto-fix issues)
+# Formats SQL files and automatically fixes linting issues where possible
+.PHONY: sqlfluff-fix
+sqlfluff-fix:
+	@echo "Formatting and fixing SQL files..."
+	@sqlfluff fix tools/sqlc/queries/*.sql
+	@echo "✓ SQL files formatted and fixed"

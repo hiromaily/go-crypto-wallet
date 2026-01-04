@@ -1,0 +1,86 @@
+[sqlfluff]
+# SQLFluff configuration for go-crypto-wallet project
+# This project uses sqlc with MySQL engine
+#
+# Note: SQLFluff may show PRS (parsing) errors for MySQL ? placeholders.
+# These errors are acceptable and can be ignored, as sqlc handles ? placeholders correctly.
+# The linting will still check for other issues like formatting and style.
+
+# Supported dialects: https://docs.sqlfluff.com/en/stable/perma/dialects.html
+# MySQL dialect for sqlc queries
+dialect = mysql
+
+# Templater: raw (sqlc doesn't use templating, uses raw SQL with ? placeholders)
+templater = raw
+
+# SQL file extensions to lint
+sql_file_exts = .sql
+
+# Maximum line length (set to 0 to disable)
+max_line_length = 120
+
+# CPU processes to use while linting
+# -1 means use all processors but one
+processes = -1
+
+[sqlfluff:rules]
+# Exclude rules that conflict with sqlc conventions or MySQL-specific patterns
+# Note: PRS (parsing errors) cannot be excluded but are acceptable for sqlc
+# SQLFluff may have issues parsing MySQL ? placeholders, but sqlc handles them correctly
+# AM04: query produces an unknown number of result columns (sqlc handles this via code generation)
+# L010: keywords must be followed by a space (can conflict with sqlc comment syntax)
+# L014: inconsistent capitalisation of unquoted identifiers (sqlc uses lowercase)
+# L030: function names must be consistently capitalised (sqlc uses lowercase)
+# L031: avoid table aliases in from clauses (sqlc allows this for readability)
+# L034: select wildcards then simple targets before calculations (sqlc allows this)
+# L036: select targets should be on a new line unless there is only one (sqlc allows single line)
+# L040: Null & Boolean Literals (sqlc uses lowercase)
+# L042: join/from clauses should not contain subqueries (sqlc allows this)
+# L051: join clauses should be fully qualified (sqlc allows table aliases)
+# L052: statements must end with a semicolon (sqlc requires this, but formatter can handle)
+# L055: line too long (handled by max_line_length setting)
+# L059: use consistent table aliases (sqlc allows short aliases)
+# L060: right join is not preferred (sqlc allows this)
+# L061: use != instead of <> (sqlc allows both, we prefer != via convention rule)
+# L066: order by columns should be in select (sqlc allows this)
+# L067: select statement should have FROM clause (sqlc allows subqueries)
+# L068: values clause should have explicit column names (sqlc allows this)
+# LT14: The 'WHERE' keyword should always start a new line (sqlc allows inline WHERE)
+exclude_rules = AM04,L010,L014,L030,L031,L034,L036,L040,L042,L051,L052,L055,L059,L060,L061,L066,L067,L068,LT14
+
+[sqlfluff:rules:capitalisation.keywords]
+# Use "consistent" to auto-detect and respect existing code style
+# The project uses uppercase keywords (SELECT, FROM, WHERE, etc.)
+capitalisation_policy = consistent
+
+[sqlfluff:rules:capitalisation.identifiers]
+# SQLFluff default is "consistent" which auto-detects
+# For sqlc projects, we prefer lowercase identifiers for consistency
+extended_capitalisation_policy = lower
+
+[sqlfluff:rules:capitalisation.functions]
+# SQLFluff default is "consistent" which auto-detects
+# For sqlc projects, we prefer lowercase function names for consistency
+extended_capitalisation_policy = lower
+
+[sqlfluff:rules:capitalisation.literals]
+# SQLFluff default is "consistent" which auto-detects
+# For sqlc projects, we prefer lowercase literals for consistency
+capitalisation_policy = lower
+
+[sqlfluff:rules:capitalisation.types]
+# SQLFluff default is "consistent" which auto-detects
+# For sqlc projects, we prefer lowercase types for consistency
+extended_capitalisation_policy = lower
+
+[sqlfluff:rules:convention.not_equal]
+# Prefer != over <> for consistency
+preferred_not_equal_style = c_style
+
+[sqlfluff:indentation]
+# Indentation settings
+indented_joins = False
+indented_using_on = True
+template_blocks_indent = False
+tab_space_size = 2
+

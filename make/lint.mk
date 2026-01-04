@@ -1,54 +1,63 @@
 ###############################################################################
 # Linter and Code Quality Targets
 ###############################################################################
+###############################################################################
+# Golang Linting
+###############################################################################
 
 # Note: Build tags (e.g., //go:build integration) are supported via .golangci.yml run.build-tags setting
-.PHONY: format
-format:
+.PHONY: go-fmt
+go-fmt:
 	go tool golangci-lint fmt
 
 # format imports
-.PHONY: imports
+.PHONY: go-imports
 imports:
 	./scripts/imports.sh
 
 # lint by golangci-lint
-.PHONY: lint
-lint:
+.PHONY: go-lint-check
+go-lint-check:
 	go tool golangci-lint run
 
 # lint and fix
-.PHONY: lint-fix
-lint-fix:
+.PHONY: go-lint
+go-lint:
 	go tool golangci-lint run --fix
 
 # clean golangci-lint cache
-.PHONY: clean-lint-cache
-clean-lint-cache:
+.PHONY: go-clean-lint-cache
+go-clean-lint-cache:
 	go tool golangci-lint cache clean
 
 # staticcheck
-.PHONY: staticcheck
-staticcheck:
+.PHONY: go-staticcheck
+go-staticcheck:
 	go tool staticcheck ./...
 
 # check for upgrade
-.PHONY: check-upgrade
-check-upgrade:
+.PHONY: go-check-upgrade
+go-check-upgrade:
 	go tool gomajor list
 
 # check for vulnerabilities
-.PHONY: check-vuln
-check-vuln:
+.PHONY: go-check-vuln
+go-check-vuln:
 	go tool govulncheck ./...
 
+###############################################################################
+# Shell Script Linting
+###############################################################################
 # format shell scripts
 .PHONY: shfmt
 shfmt:
 	shfmt -l -w scripts/*.sh
 	shfmt -l -w scripts/*/**.sh
 
+###############################################################################
+# Makefile Linting
+###############################################################################
 # lint makefile
-.PHONY: lint-makefile
-lint-makefile:
+.PHONY: mk-lint
+mk-lint:
 	checkmake Makefile make/*.mk 

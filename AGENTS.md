@@ -56,7 +56,7 @@ Use this navigation guide to find relevant documentation for specific tasks:
 
 ### Code Quality
 
-- Run verification commands after making changes: `make lint-fix`, `make tidy`, `make check-build`, `make gotest`
+- Run verification commands after making changes: `make go-lint`, `make tidy`, `make check-build`, `make gotest`
 - **DO NOT** edit files that contain `DO NOT EDIT` comments (auto-generated files)
 - Wrap errors with `fmt.Errorf` + `%w` for proper error chains
 
@@ -72,7 +72,7 @@ Use this navigation guide to find relevant documentation for specific tasks:
 1. Create a feature branch
 2. Make your changes following Clean Architecture principles
 3. Run verification commands:
-   - `make lint-fix` - Fix linting issues
+   - `make go-lint` - Fix linting issues
    - `make tidy` - Organize dependencies
    - `make check-build` - Verify build
    - `make gotest` - Run tests

@@ -1,6 +1,6 @@
 # Fix Linter Command
 
-You are tasked with fixing lint errors that occurred when running the `make lint-fix` command.
+You are tasked with fixing lint errors that occurred when running the `make go-lint` command.
 
 ## Common Workflow Steps
 

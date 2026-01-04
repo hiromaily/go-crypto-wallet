@@ -672,7 +672,7 @@ Interface Adapters → Application Layer → Domain Layer ← Infrastructure Lay
 
 After making code changes in `internal/`, use these commands:
 
-- `make lint-fix`: Fix linting issues automatically
+- `make go-lint`: Fix linting issues automatically
 - `make check-build`: Verify that the code builds successfully
 - `make gotest`: Run Go tests to verify functionality
 - `make tidy`: Organize dependencies and clean up `go.mod`
