@@ -3,6 +3,7 @@ package btc
 import (
 	"bufio"
 	"context"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +11,9 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"bytes"
+	"sort"
 
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcutil"
@@ -162,26 +166,12 @@ func (u *importDescriptorUseCase) deriveAddresses(
 	}
 
 	// Currently support single-key descriptors; multisig descriptors are not yet supported.
-	if len(descriptor.Keys) > 1 && descriptor.Type == domainWallet.DescriptorTypeWSH {
-		return nil, fmt.Errorf("multisig descriptors are not supported yet")
-	}
-
 	key := descriptor.Keys[0]
-	paths, err := deriveChildKeys(key, start, count)
-	if err != nil {
-		return nil, err
+	if len(descriptor.Keys) > 1 && descriptor.Type == domainWallet.DescriptorTypeWSH {
+		return deriveMultisigAddresses(descriptor, start, count, u.chainConf)
 	}
 
-	addresses := make([]string, 0, len(paths))
-	for _, child := range paths {
-		addr, addrErr := deriveAddressForType(child, descriptor.Type, u.chainConf)
-		if addrErr != nil {
-			return nil, addrErr
-		}
-		addresses = append(addresses, addr)
-	}
-
-	return addresses, nil
+	return deriveSingleKeyAddresses(key, descriptor.Type, start, count, u.chainConf)
 }
 
 func deriveChildKeys(key domainWallet.DescriptorKey, start, count uint32) ([]*hdkeychain.ExtendedKey, error) {
@@ -275,6 +265,109 @@ func deriveAddressForType(key *hdkeychain.ExtendedKey, descType domainWallet.Des
 	default:
 		return "", fmt.Errorf("unsupported descriptor type: %s", descType.String())
 	}
+}
+
+func deriveSingleKeyAddresses(
+	key domainWallet.DescriptorKey,
+	descType domainWallet.DescriptorType,
+	start uint32,
+	count uint32,
+	chain *chaincfg.Params,
+) ([]string, error) {
+	paths, err := deriveChildKeys(key, start, count)
+	if err != nil {
+		return nil, err
+	}
+
+	addresses := make([]string, 0, len(paths))
+	for _, child := range paths {
+		addr, addrErr := deriveAddressForType(child, descType, chain)
+		if addrErr != nil {
+			return nil, addrErr
+		}
+		addresses = append(addresses, addr)
+	}
+
+	return addresses, nil
+}
+
+func deriveMultisigAddresses(
+	descriptor *domainWallet.Descriptor,
+	start uint32,
+	count uint32,
+	chain *chaincfg.Params,
+) ([]string, error) {
+	requiredSigs, err := parseRequiredSignatures(descriptor.Script)
+	if err != nil {
+		return nil, err
+	}
+
+	if requiredSigs <= 0 || requiredSigs > len(descriptor.Keys) {
+		return nil, fmt.Errorf("invalid required signatures: %d", requiredSigs)
+	}
+
+	addresses := make([]string, 0, count)
+	for idx := start; idx < start+count; idx++ {
+		pubKeys := make([]*btcec.PublicKey, 0, len(descriptor.Keys))
+		for _, key := range descriptor.Keys {
+			children, derr := deriveChildKeys(key, idx, 1)
+			if derr != nil {
+				return nil, derr
+			}
+			child := children[0]
+			pubKey, derr := child.ECPubKey()
+			if derr != nil {
+				return nil, derr
+			}
+			pubKeys = append(pubKeys, pubKey)
+		}
+
+		// sortedmulti requires lexicographic sorting of pubkeys
+		sort.Slice(pubKeys, func(i, j int) bool {
+			return bytes.Compare(pubKeys[i].SerializeCompressed(), pubKeys[j].SerializeCompressed()) < 0
+		})
+
+		addrPubs := make([]*btcutil.AddressPubKey, 0, len(pubKeys))
+		for _, pk := range pubKeys {
+			addrPub, addrErr := btcutil.NewAddressPubKey(pk.SerializeCompressed(), chain)
+			if addrErr != nil {
+				return nil, addrErr
+			}
+			addrPubs = append(addrPubs, addrPub)
+		}
+
+		script, err := txscript.MultiSigScript(addrPubs, requiredSigs)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create multisig script: %w", err)
+		}
+
+		hash := sha256.Sum256(script)
+		wshAddr, err := btcutil.NewAddressWitnessScriptHash(hash[:], chain)
+		if err != nil {
+			return nil, err
+		}
+
+		addresses = append(addresses, wshAddr.EncodeAddress())
+	}
+
+	return addresses, nil
+}
+
+func parseRequiredSignatures(script string) (int, error) {
+	start := strings.Index(script, "sortedmulti(")
+	if start == -1 {
+		return 0, errors.New("sortedmulti expression not found for multisig descriptor")
+	}
+	after := script[start+len("sortedmulti("):]
+	parts := strings.SplitN(after, ",", 2)
+	if len(parts) < 2 {
+		return 0, errors.New("invalid sortedmulti expression")
+	}
+	required, err := strconv.Atoi(parts[0])
+	if err != nil {
+		return 0, fmt.Errorf("parse required signatures: %w", err)
+	}
+	return required, nil
 }
 
 func (u *importDescriptorUseCase) storeAddresses(

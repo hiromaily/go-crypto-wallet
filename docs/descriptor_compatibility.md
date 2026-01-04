@@ -42,6 +42,5 @@ The script:
 Configure node access via `BITCOIN_CLI_ARGS` if needed.
 
 ## Known Limitations
-- Multisig descriptors and MuSig2 may require additional setup in Bitcoin Core; integration tests currently target single-key descriptors and small ranges.
+- Multisig descriptors and MuSig2 may require additional setup in Bitcoin Core; integration tests currently target single-key descriptors and small ranges. P2WSH `sortedmulti` descriptors are supported by the watch wallet; Taproot/MuSig2 script-path imports remain unsupported.
 - Descriptor content must match the network of the target Bitcoin Core node (mainnet/testnet/regtest).
-- The watch wallet’s descriptor import currently treats complex multisig as unsupported; document and test accordingly before production use.
