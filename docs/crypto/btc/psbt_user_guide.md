@@ -59,13 +59,13 @@ Ensure your wallets are properly configured:
 
 ```bash
 # Watch wallet configuration
-data/config/btc_watch.toml
+config/wallet/btc_watch.toml
 
 # Keygen wallet configuration
-data/config/btc_keygen.toml
+config/wallet/btc_keygen.toml
 
 # Sign wallet configuration (for multisig)
-data/config/btc_sign.toml
+config/wallet/btc_sign.toml
 ```
 
 See `docs/crypto/btc/operation_example.md` for configuration details.

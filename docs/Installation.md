@@ -23,7 +23,7 @@ go build -ldflags "-X main.authName=auth1" -v -o ${GOPATH}/bin/sign1 ./cmd/sign/
 go build -ldflags "-X main.authName=auth2" -v -o ${GOPATH}/bin/sign2 ./cmd/sign/
 ```
 
-1. configure config files in [./data/config/*.toml](https://github.com/hiromaily/go-crypto-wallet/tree/main/data/config)
+1. configure config files in [./config/wallet/*.toml](https://github.com/hiromaily/go-crypto-wallet/tree/main/config/wallet)
 2. run Database containers
 
 ```
@@ -34,7 +34,7 @@ docker compose up wallet-db
 
 At least, one bitcoin core server and 1 database (with 3 schemas: watch, keygen, sign) are required.
 
-1. copy `bitcoin.conf` from ./data/config/bitcoind/ to ./docker/nodes/btc/watch, keygen, sign1 directory respectively.
+1. copy `bitcoin.conf` from ./config/blockchain/bitcoind/ to ./docker/nodes/btc/watch, keygen, sign1 directory respectively.
 
 - I recommend signet network.
 

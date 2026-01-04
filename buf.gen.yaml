@@ -25,4 +25,4 @@ plugins:
 # Note: third_party proto files are not included as inputs since they are
 # provided by the protobuf runtime (google.golang.org/protobuf/types/known)
 inputs:
-  - directory: data/proto/rippleapi
+  - directory: proto/rippleapi

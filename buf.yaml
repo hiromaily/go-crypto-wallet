@@ -3,9 +3,9 @@
 version: v2
 
 # Directories containing proto files to build
-# The root directory is data/proto
+# The root directory is proto
 modules:
-  - path: data/proto/rippleapi
+  - path: proto/rippleapi
     name: buf.build/hiromaily/go-crypto-wallet-rippleapi
 
 # Lint configuration
@@ -30,4 +30,4 @@ breaking:
     - FILE
   ignore:
     # Ignore breaking changes in third_party proto files
-    - data/proto/third_party
+    - proto/third_party

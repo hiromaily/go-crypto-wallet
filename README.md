@@ -163,12 +163,14 @@ The codebase is organized into `internal/` (new architecture) and `pkg/` (shared
   - `tools/` ... Development tools
 - `internal/` ... **New architecture** following Clean Architecture
 - `pkg/` ... Shared utilities and legacy/transitional code
-- `data/` ... Generated files and configuration
+- `config/` ... Application configuration files (Git managed)
+  - `wallet/` ... Wallet configuration TOML files
+  - `blockchain/` ... Blockchain node configuration files
+- `proto/` ... Protocol Buffers definitions (Git managed, code generation source)
+- `contracts/` ... Smart contract ABI files (Git managed, code generation source)
+- `data/` ... Generated files (ignored by Git)
   - `address/` ... Generated address files (bch, btc, eth, xrp)
-  - `config/` ... Configuration TOML files
-  - `contract/` ... Contract ABI files
   - `keystore/` ... Keystore files for Ethereum
-  - `proto/` ... Protocol buffer definitions (rippleapi)
   - `tx/` ... Transaction data files
 - `docker/` ... Docker resources for blockchain nodes and databases
 - `docs/` ... Documentation

@@ -123,7 +123,7 @@ go install github.com/ethereum/go-ethereum/cmd/abigen@latest
 - create abi json file from built contract json file. only abi element is required. then
 
 ```
-abigen --abi ./data/contract/token.abi --pkg contract --type Token --out ./internal/infrastructure/contract/token-abi.go
+abigen --abi ./contracts/token.abi --pkg contract --type Token --out ./internal/infrastructure/contract/token-abi.go
 ```
 
 ## How to implement multisig on Ethereum

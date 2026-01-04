@@ -179,7 +179,7 @@ Wire up dependencies:
 
 Add configuration support:
 
-- Update configuration files in `data/config/`
+- Update configuration files in `config/wallet/`
 - Add coin-specific settings
 
 ### 7. Testing

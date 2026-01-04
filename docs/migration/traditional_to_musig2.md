@@ -559,7 +559,7 @@ GROUP BY account;
 watch btc api gettxoutsetinfo
 
 # 3. Document wallet configuration
-ls -la data/config/
+ls -la config/wallet/
 # Review: watch_btc.toml, keygen_btc.toml, sign_btc.toml
 ```
 
@@ -692,7 +692,7 @@ bitcoin-cli getblockchaininfo | grep verification
 
 ```bash
 # 1. Update watch wallet configuration
-vi data/config/watch_btc.toml
+vi config/wallet/watch_btc.toml
 
 # Add or verify these settings:
 [bitcoin]
@@ -709,12 +709,12 @@ use_musig2 = true      # Enable MuSig2
 enabled = true         # Enable Taproot support
 
 # 2. Update keygen wallet configuration
-vi data/config/keygen_btc.toml
+vi config/wallet/keygen_btc.toml
 
 # Verify multisig and taproot settings match
 
 # 3. Update sign wallet configuration
-vi data/config/sign_btc.toml
+vi config/wallet/sign_btc.toml
 
 # Verify multisig and taproot settings match
 ```
@@ -1233,7 +1233,7 @@ Before initiating rollback:
 
 ```bash
 # 1. Disable MuSig2 in configuration
-vi data/config/watch_btc.toml
+vi config/wallet/watch_btc.toml
 
 [multisig]
 use_musig2 = false  # Set to false
@@ -1394,7 +1394,7 @@ During migration (and optionally long-term), you'll run both P2WSH and MuSig2 ad
 #### Configuration
 
 ```toml
-# data/config/watch_btc.toml
+# config/wallet/watch_btc.toml
 
 [multisig]
 require_num = 2
