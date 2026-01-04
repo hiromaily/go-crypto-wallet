@@ -55,8 +55,7 @@ func TestGenerateTaprootDescriptor_NormalizesPath(t *testing.T) {
 		false,
 	)
 	require.NoError(t, err)
-	require.Contains(t, descriptor, "[a1b2c3d4/86'/0'/0']")
-	require.Contains(t, descriptor, "/0/*)")
+	require.Equal(t, "tr([a1b2c3d4/86'/0'/0']"+testMainnetXpub+"/0/*)", descriptor)
 }
 
 func TestGenerateTaprootDescriptor_NetworkMismatch(t *testing.T) {

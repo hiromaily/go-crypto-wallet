@@ -55,8 +55,7 @@ func TestGenerateBech32Descriptor_NormalizesPath(t *testing.T) {
 		false,
 	)
 	require.NoError(t, err)
-	require.Contains(t, descriptor, "[a1b2c3d4/84'/0'/0']")
-	require.Contains(t, descriptor, "/0/*)")
+	require.Equal(t, "wpkh([a1b2c3d4/84'/0'/0']"+testMainnetXpub+"/0/*)", descriptor)
 }
 
 func TestGenerateBech32Descriptor_NetworkMismatch(t *testing.T) {
