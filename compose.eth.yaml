@@ -138,3 +138,53 @@ services:
     # command adds into default ENTRYPOINT
     # https://hub.docker.com/r/trufflesuite/ganache-cli/dockerfile
     command: --mnemonic "toy echo orbit embrace opinion file client report history bomb regret life"
+
+  #########################################################################
+  # foundry/anvil
+  # - https://getfoundry.sh/anvil/overview/
+  #------------------------------------------------------------------------
+  # Example of commands to container
+  # - run
+  #  $ docker compose -f compose.eth.yaml up anvil
+  # - call JSON-RPC
+  #  $ curl -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_chainId","params":[],"id":1}' http://localhost:${ANVIL_RPC_PORT:-8546}
+  # - fork mainnet/testnet
+  #  $ ANVIL_FORK_URL="https://..." docker compose -f compose.eth.yaml up anvil
+  # Notes
+  # - Uses custom mnemonic to avoid EIP-7702 delegation on default accounts
+  # - Defaults to port 8546 to run alongside geth/ganache
+  # - Designed to run independently (no dependencies)
+  #
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:latest
+    container_name: anvil
+    ports:
+      - "${ANVIL_RPC_PORT:-8546}:8545"
+    volumes:
+      - ./docker/nodes/eth/anvil-data:/anvil_data
+    networks:
+      - eth
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >
+          bash -c 'payload="{\"jsonrpc\":\"2.0\",\"method\":\"web3_clientVersion\",\"params\":[],\"id\":1}";
+          length=$(printf "%s" "$payload" | wc -c | tr -d " ");
+          request=$(printf "POST / HTTP/1.1\r\nHost: localhost\r\nContent-Type: application/json\r\nContent-Length: %s\r\nConnection: close\r\n\r\n%s" "$length" "$payload");
+          exec 3<>/dev/tcp/localhost/8545 &&
+          printf "%s" "$request" >&3 &&
+          read -r line <&3 &&
+          echo "$line" | grep -q "200"'
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    entrypoint:
+      - /bin/sh
+      - -c
+    command: |
+      ANVIL_ARGS=""
+      if [ -n "${ANVIL_FORK_URL}" ]; then
+        ANVIL_ARGS="--fork-url ${ANVIL_FORK_URL}"
+      fi
+      exec anvil --host 0.0.0.0 --port 8545 --chain-id ${ANVIL_CHAIN_ID:-31337} --mnemonic "${ANVIL_MNEMONIC:-toy echo orbit embrace opinion file client report history bomb regret life}" --block-time ${ANVIL_BLOCK_TIME:-1} $ANVIL_ARGS
