@@ -6,8 +6,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/di"
-	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/api/btc"
+	btcapi "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/api/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/api/eth"
+	btckeygen "github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/create"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/export"
 	"github.com/hiromaily/go-crypto-wallet/internal/interface-adapters/cli/keygen/imports"
@@ -51,6 +52,9 @@ func AddCommands(rootCmd *cobra.Command, wallet *wallets.Keygener, container di.
 	rootCmd.AddCommand(signCmd)
 	sign.AddCommands(signCmd, wallet, container)
 
+	// Descriptor commands (BTC only)
+	btckeygen.AddDescriptorCommands(rootCmd, container)
+
 	// MuSig2 command (BTC only)
 	AddMuSig2Commands(rootCmd, container)
 
@@ -66,7 +70,7 @@ func AddCommands(rootCmd *cobra.Command, wallet *wallets.Keygener, container di.
 			cmd.ResetCommands()
 			switch v := (*wallet).(type) {
 			case *btcwallet.BTCKeygen:
-				btc.AddCommands(cmd, v.BTC)
+				btcapi.AddCommands(cmd, v.BTC)
 			case *ethwallet.ETHKeygen:
 				eth.AddCommands(cmd, v.ETH)
 			}

@@ -37,3 +37,8 @@ type AddressFileRepositorier interface {
 	ValidateFilePath(fileName string, accountType domainAccount.AccountType) error
 	ImportAddress(fileName string) ([]string, error)
 }
+
+// DescriptorFileWriter writes descriptor data to a file path.
+type DescriptorFileWriter interface {
+	WriteFile(path string, data []byte) error
+}
