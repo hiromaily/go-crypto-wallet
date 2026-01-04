@@ -87,7 +87,7 @@ In Claude Desktop, you can use these commands as slash commands. For example:
 - `/fix-issue #123` - Fix issue #123
 - `/fix-linter` - Fix linter errors
 - `/fix-pr-review #456` - Address review comments for PR #456
-- `/convert-custom-slash-for-codex COMMAND_NAME=fix-issue` - Convert fix-issue command to Codex format
+- `/convert-custom-slash-for-codex fix-issue` - Convert fix-issue command to Codex format
 
 ## Common Workflow Steps
 

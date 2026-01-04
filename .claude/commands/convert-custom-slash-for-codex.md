@@ -5,8 +5,9 @@ You are tasked with converting a Claude custom slash command from `.claude/comma
 ## Parameter
 
 - **COMMAND_NAME** (required): Name of the Claude command to convert (without `.md` extension)
-  - Example: `COMMAND_NAME=fix-issue`
-  - Example: `COMMAND_NAME=fix-linter`
+  - Example: `fix-issue`
+  - Example: `fix-linter`
+  - Usage: `/convert-custom-slash-for-codex fix-issue`
 
 ## Context
 
@@ -185,8 +186,8 @@ Next steps:
    ```
    ❌ Error: COMMAND_NAME parameter is required
 
-   Usage: /convert-custom-slash-for-codex COMMAND_NAME=<name>
-   Example: /convert-custom-slash-for-codex COMMAND_NAME=fix-issue
+   Usage: /convert-custom-slash-for-codex <command-name>
+   Example: /convert-custom-slash-for-codex fix-issue
    ```
 
 2. **Source file not found**:
@@ -199,7 +200,7 @@ Next steps:
    - fix-pr-review
    - create-github-issue
 
-   Usage: /convert-custom-slash-for-codex COMMAND_NAME=<name>
+   Usage: /convert-custom-slash-for-codex <command-name>
    ```
 
 3. **Cannot create output directory**:
