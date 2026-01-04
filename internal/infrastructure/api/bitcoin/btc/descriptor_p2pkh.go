@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
+	"github.com/btcsuite/btcd/chaincfg"
 
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 )
@@ -17,11 +18,14 @@ const (
 
 // DescriptorService generates descriptors for supported single-signature templates.
 type DescriptorService struct {
+	chainParams *chaincfg.Params
 }
 
 // NewDescriptorService creates a descriptor service for the given Bitcoin network parameters.
-func NewDescriptorService() *DescriptorService {
-	return &DescriptorService{}
+func NewDescriptorService(chainParams *chaincfg.Params) *DescriptorService {
+	return &DescriptorService{
+		chainParams: chainParams,
+	}
 }
 
 // GenerateP2PKHDescriptor generates a P2PKH (legacy) descriptor following BIP380.
@@ -49,6 +53,10 @@ func (d *DescriptorService) formatDescriptor(
 
 	if xpub.IsPrivate() {
 		return "", errors.New("extended key must be public")
+	}
+
+	if d.chainParams != nil && !xpub.IsForNet(d.chainParams) {
+		return "", fmt.Errorf("extended public key network mismatch: expected %s", d.chainParams.Name)
 	}
 
 	normalizedFingerprint := strings.ToLower(strings.TrimSpace(fingerprint))

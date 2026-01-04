@@ -14,10 +14,12 @@ const (
 	testDerivationP2PKH = "/44'/0'/0'"
 	//nolint:revive // Descriptor test vector needs the full xpub string
 	testMainnetXpub = "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL"
+	//nolint:revive // Descriptor test vector needs the full tpub string
+	testTestnetTpub = "tpubD6NzVbkrYhZ4XgiXtGrdW5XDAPFCL9h7we1vwNCpn8tGbBcgfVYjXyhWo4E1xkh56hjod1RhGjxbaTLV3X4FyWuejifB9jusQ46QzG87VKp"
 )
 
 func TestGenerateP2PKHDescriptor(t *testing.T) {
-	service := NewDescriptorService()
+	service := NewDescriptorService(&chaincfg.MainNetParams)
 	xpub := mustNewExtendedKey(t, testMainnetXpub)
 
 	t.Run("receive descriptor", func(t *testing.T) {
@@ -64,7 +66,7 @@ func TestGenerateP2PKHDescriptor(t *testing.T) {
 }
 
 func TestGenerateP2PKHDescriptorValidation(t *testing.T) {
-	service := NewDescriptorService()
+	service := NewDescriptorService(&chaincfg.MainNetParams)
 	xpub := mustNewExtendedKey(t, testMainnetXpub)
 
 	tests := []struct {
@@ -109,6 +111,13 @@ func TestGenerateP2PKHDescriptorValidation(t *testing.T) {
 			derivationPath: "mM/44'/0'/0'",
 			key:            xpub,
 			wantErr:        "invalid derivation path",
+		},
+		{
+			name:           "network mismatch",
+			fingerprint:    testFingerprint,
+			derivationPath: testDerivationP2PKH,
+			key:            mustNewExtendedKey(t, testTestnetTpub),
+			wantErr:        "network mismatch",
 		},
 	}
 

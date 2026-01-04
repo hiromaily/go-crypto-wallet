@@ -3,13 +3,14 @@ package btc
 import (
 	"testing"
 
+	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/stretchr/testify/require"
 )
 
 const testDerivationP2SH = "/49'/0'/0'"
 
 func TestGenerateP2SHSegWitDescriptor(t *testing.T) {
-	service := NewDescriptorService()
+	service := NewDescriptorService(&chaincfg.MainNetParams)
 	xpub := mustNewExtendedKey(t, testMainnetXpub)
 
 	t.Run("receive descriptor", func(t *testing.T) {
@@ -44,7 +45,7 @@ func TestGenerateP2SHSegWitDescriptor(t *testing.T) {
 }
 
 func TestGenerateP2SHSegWitDescriptor_NormalizesPath(t *testing.T) {
-	service := NewDescriptorService()
+	service := NewDescriptorService(&chaincfg.MainNetParams)
 	xpub := mustNewExtendedKey(t, testMainnetXpub)
 
 	descriptor, err := service.GenerateP2SHSegWitDescriptor(
@@ -56,4 +57,17 @@ func TestGenerateP2SHSegWitDescriptor_NormalizesPath(t *testing.T) {
 	require.NoError(t, err)
 	require.Contains(t, descriptor, "[a1b2c3d4/49'/0'/0']")
 	require.Contains(t, descriptor, "/0/*))")
+}
+
+func TestGenerateP2SHSegWitDescriptor_NetworkMismatch(t *testing.T) {
+	service := NewDescriptorService(&chaincfg.MainNetParams)
+	tpub := mustNewExtendedKey(t, testTestnetTpub)
+
+	_, err := service.GenerateP2SHSegWitDescriptor(
+		testFingerprint,
+		testDerivationP2SH,
+		tpub,
+		false,
+	)
+	require.ErrorContains(t, err, "network mismatch")
 }
