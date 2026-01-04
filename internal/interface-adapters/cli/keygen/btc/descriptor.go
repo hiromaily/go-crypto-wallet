@@ -86,10 +86,9 @@ func newDescriptorExportCommand(container di.Container) *cobra.Command {
 
 func newDescriptorExportAllCommand(container di.Container) *cobra.Command {
 	var (
-		account       string
-		outputPath    string
-		format        string
-		includeChange bool
+		account    string
+		outputPath string
+		format     string
 	)
 
 	cmd := &cobra.Command{
@@ -97,14 +96,13 @@ func newDescriptorExportAllCommand(container di.Container) *cobra.Command {
 		Short:   "Export all descriptors (receive and change) for the account",
 		Example: "  keygen --coin btc descriptor export-all --account deposit --output /tmp/deposit_descriptors.json",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runDescriptorExport(cmd.Context(), container, account, outputPath, format, includeChange)
+			return runDescriptorExport(cmd.Context(), container, account, outputPath, format, true)
 		},
 	}
 
 	cmd.Flags().StringVar(&account, "account", "", "target account (e.g. deposit, payment)")
 	cmd.Flags().StringVar(&outputPath, "output", "", "output file path")
 	cmd.Flags().StringVar(&format, "format", string(keygenusecase.DescriptorFormatJSON), "output format (text|json|bitcoin-core)")
-	cmd.Flags().BoolVar(&includeChange, "include-change", true, "include change descriptors (always enabled for export-all)")
 	_ = cmd.MarkFlagRequired("account")
 	_ = cmd.MarkFlagRequired("output")
 

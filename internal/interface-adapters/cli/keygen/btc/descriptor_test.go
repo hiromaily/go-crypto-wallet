@@ -77,7 +77,7 @@ func TestDescriptorExportAllFlags(t *testing.T) {
 		t.Fatalf("export-all subcommand not found: %v", err)
 	}
 
-	for _, flag := range []string{"account", "output", "format", "include-change"} {
+	for _, flag := range []string{"account", "output", "format"} {
 		if exportAllCmd.Flags().Lookup(flag) == nil {
 			t.Fatalf("flag --%s not found on export-all command", flag)
 		}

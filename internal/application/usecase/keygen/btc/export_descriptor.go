@@ -44,26 +44,31 @@ func (u *exportDescriptorUseCase) Export(
 	descriptors := make([]string, 0, len(addressTypes)*2)
 
 	for _, addrType := range addressTypes {
-		output, err := u.generator.Generate(ctx, keygenusecase.GenerateDescriptorInput{
-			AccountType: input.AccountType,
-			AddressType: addrType,
-			IsChange:    false,
-		})
-		if err != nil {
-			return keygenusecase.ExportDescriptorOutput{}, fmt.Errorf("generate receive descriptor for %s/%s: %w", input.AccountType, addrType, err)
-		}
-		descriptors = append(descriptors, output.Descriptor)
-
-		if input.IncludeChange {
-			changeOutput, err := u.generator.Generate(ctx, keygenusecase.GenerateDescriptorInput{
+		generate := func(isChange bool) error {
+			output, err := u.generator.Generate(ctx, keygenusecase.GenerateDescriptorInput{
 				AccountType: input.AccountType,
 				AddressType: addrType,
-				IsChange:    true,
+				IsChange:    isChange,
 			})
 			if err != nil {
-				return keygenusecase.ExportDescriptorOutput{}, fmt.Errorf("generate change descriptor for %s/%s: %w", input.AccountType, addrType, err)
+				descType := "receive"
+				if isChange {
+					descType = "change"
+				}
+				return fmt.Errorf("generate %s descriptor for %s/%s: %w", descType, input.AccountType, addrType, err)
 			}
-			descriptors = append(descriptors, changeOutput.Descriptor)
+			descriptors = append(descriptors, output.Descriptor)
+			return nil
+		}
+
+		if err := generate(false); err != nil {
+			return keygenusecase.ExportDescriptorOutput{}, err
+		}
+
+		if input.IncludeChange {
+			if err := generate(true); err != nil {
+				return keygenusecase.ExportDescriptorOutput{}, err
+			}
 		}
 	}
 
