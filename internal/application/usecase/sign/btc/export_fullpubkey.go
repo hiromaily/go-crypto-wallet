@@ -12,12 +12,12 @@ import (
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/fullpubkey"
 )
 
 type exportFullPubkeyUseCase struct {
-	authKeyRepo    cold.AuthAccountKeyRepositorier
+	authKeyRepo    persistence.AuthAccountKeyRepositorier
 	pubkeyFileRepo portsStorage.AddressFileRepositorier
 	coinTypeCode   domainCoin.CoinTypeCode
 	authType       domainAccount.AuthType
@@ -26,7 +26,7 @@ type exportFullPubkeyUseCase struct {
 
 // NewExportFullPubkeyUseCase creates a new ExportFullPubkeyUseCase for sign wallet
 func NewExportFullPubkeyUseCase(
-	authKeyRepo cold.AuthAccountKeyRepositorier,
+	authKeyRepo persistence.AuthAccountKeyRepositorier,
 	pubkeyFileRepo portsStorage.AddressFileRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,
 	authType domainAccount.AuthType,
