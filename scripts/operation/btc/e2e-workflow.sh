@@ -125,7 +125,10 @@ create_wallet_if_needed() {
         docker exec "$container" bitcoin-cli -regtest -rpcuser="${RPC_USER}" -rpcpassword="${RPC_PASSWORD}" loadwallet "$wallet_name" >/dev/null 2>&1 || true
     else
         log_info "Creating wallet '$wallet_name' in $container"
-        docker exec "$container" bitcoin-cli -regtest -rpcuser="${RPC_USER}" -rpcpassword="${RPC_PASSWORD}" createwallet "$wallet_name" >/dev/null
+        # Create legacy wallet (descriptors=false) for compatibility with importprivkey command
+        # Parameters: wallet_name, disable_private_keys, blank, passphrase, avoid_reuse, descriptors
+        docker exec "$container" bitcoin-cli -regtest -rpcuser="${RPC_USER}" -rpcpassword="${RPC_PASSWORD}" \
+            createwallet "$wallet_name" false false "" false false >/dev/null
     fi
 }
 
@@ -315,9 +318,9 @@ key_generation_phase() {
         keygen -c "${CONFIG_KEYGEN}" api walletlock
     fi
 
-    # Sign wallets - create seed
+    # Sign wallets - create seed (using sign1 as the primary sign wallet)
     log_substep "Creating seeds for sign wallets"
-    sign -c "${CONFIG_SIGN}" create seed || {
+    sign1 --conf "${CONFIG_SIGN}" --coin "${COIN}" create seed || {
         log_warn "Sign seed already exists or error occurred, continuing..."
     }
 
@@ -325,7 +328,7 @@ key_generation_phase() {
     log_substep "Creating HD keys for sign wallets"
     for i in $(seq 1 "$SIGN_WALLET_NUM"); do
         log_info "Creating HD keys for sign${i}"
-        "sign${i}" -c "${CONFIG_SIGN}" -coin "${COIN}" --wallet "sign${i}" create hdkey
+        "sign${i}" --conf "${CONFIG_SIGN}" --coin "${COIN}" --wallet "sign${i}" create hdkey
     done
 
     # Sign wallets - import private keys
@@ -333,18 +336,18 @@ key_generation_phase() {
     for i in $(seq 1 "$SIGN_WALLET_NUM"); do
         log_info "Importing private keys for sign${i}"
         if [ "$ENCRYPTED" = "true" ]; then
-            "sign${i}" -c "${CONFIG_SIGN}" -coin "${COIN}" --wallet "sign${i}" api walletpassphrase --passphrase "${WALLET_PASSPHRASE}"
+            "sign${i}" --conf "${CONFIG_SIGN}" --coin "${COIN}" --wallet "sign${i}" api walletpassphrase --passphrase "${WALLET_PASSPHRASE}"
         fi
-        "sign${i}" -c "${CONFIG_SIGN}" -coin "${COIN}" --wallet "sign${i}" import privkey
+        "sign${i}" --conf "${CONFIG_SIGN}" --coin "${COIN}" --wallet "sign${i}" import privkey
         if [ "$ENCRYPTED" = "true" ]; then
-            "sign${i}" -c "${CONFIG_SIGN}" -coin "${COIN}" --wallet "sign${i}" api walletlock
+            "sign${i}" --conf "${CONFIG_SIGN}" --coin "${COIN}" --wallet "sign${i}" api walletlock
         fi
     done
 
     # Sign wallets - export fullpubkey
     log_substep "Exporting full public keys from sign wallets"
-    file_fullpubkey_auth1=$(sign1 -c "${CONFIG_SIGN}" --coin "${COIN}" --wallet sign1 export fullpubkey)
-    file_fullpubkey_auth2=$(sign2 -c "${CONFIG_SIGN}" --coin "${COIN}" --wallet sign2 export fullpubkey)
+    file_fullpubkey_auth1=$(sign1 --conf "${CONFIG_SIGN}" --coin "${COIN}" --wallet sign1 export fullpubkey)
+    file_fullpubkey_auth2=$(sign2 --conf "${CONFIG_SIGN}" --coin "${COIN}" --wallet sign2 export fullpubkey)
 
     # Extract file paths
     fullpubkey_file1="${file_fullpubkey_auth1##*\[fileName\]: }"
@@ -501,13 +504,13 @@ transaction_flow_phase() {
 
     # Sign with sign1 wallet (2nd signature)
     log_substep "Signing with sign1 wallet (2nd signature)"
-    tx_file_signed2=$(sign1 -c "${CONFIG_SIGN}" --wallet sign1 sign --file "${tx_signed1}")
+    tx_file_signed2=$(sign1 --conf "${CONFIG_SIGN}" --wallet sign1 sign --file "${tx_signed1}")
     tx_signed2="${tx_file_signed2##*\[fileName\]: }"
     log_info "Signed transaction (2nd): $tx_signed2"
 
     # Sign with sign2 wallet (3rd signature)
     log_substep "Signing with sign2 wallet (3rd signature)"
-    tx_file_signed3=$(sign2 -c "${CONFIG_SIGN}" --wallet sign2 sign --file "${tx_signed2}")
+    tx_file_signed3=$(sign2 --conf "${CONFIG_SIGN}" --wallet sign2 sign --file "${tx_signed2}")
     tx_signed3="${tx_file_signed3##*\[fileName\]: }"
     log_info "Signed transaction (3rd): $tx_signed3"
 
