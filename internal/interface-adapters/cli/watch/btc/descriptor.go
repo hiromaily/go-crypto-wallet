@@ -13,21 +13,21 @@ import (
 )
 
 // AddDescriptorCommands adds descriptor-related commands for watch wallet (BTC).
-func AddDescriptorCommands(parentCmd *cobra.Command, container di.Container) {
+func AddDescriptorCommands(parentCmd *cobra.Command, containerGetter func() di.Container) {
 	descCmd := &cobra.Command{
 		Use:   "descriptor",
 		Short: "Descriptor operations for BTC watch wallet",
 	}
 
 	descCmd.AddCommand(
-		newDescriptorImportCommand(container),
-		newDescriptorValidateCommand(container),
+		newDescriptorImportCommand(containerGetter),
+		newDescriptorValidateCommand(containerGetter),
 	)
 
 	parentCmd.AddCommand(descCmd)
 }
 
-func newDescriptorImportCommand(container di.Container) *cobra.Command {
+func newDescriptorImportCommand(containerGetter func() di.Container) *cobra.Command {
 	var (
 		file       string
 		account    string
@@ -39,7 +39,7 @@ func newDescriptorImportCommand(container di.Container) *cobra.Command {
 		Use:   "import",
 		Short: "Import descriptors from file or stdin",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runDescriptorImport(cmd.Context(), container, watchusecase.ImportDescriptorInput{
+			return runDescriptorImport(cmd.Context(), containerGetter(), watchusecase.ImportDescriptorInput{
 				FilePath:    file,
 				AccountType: domainAccount.AccountType(account),
 				StartIndex:  startIndex,
@@ -57,14 +57,14 @@ func newDescriptorImportCommand(container di.Container) *cobra.Command {
 	return cmd
 }
 
-func newDescriptorValidateCommand(container di.Container) *cobra.Command {
+func newDescriptorValidateCommand(containerGetter func() di.Container) *cobra.Command {
 	var file string
 
 	cmd := &cobra.Command{
 		Use:   "validate",
 		Short: "Validate descriptors without importing",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runDescriptorImport(cmd.Context(), container, watchusecase.ImportDescriptorInput{
+			return runDescriptorImport(cmd.Context(), containerGetter(), watchusecase.ImportDescriptorInput{
 				FilePath:     file,
 				ValidateOnly: true,
 			})

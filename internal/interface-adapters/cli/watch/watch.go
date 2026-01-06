@@ -25,7 +25,7 @@ import (
 func AddCommands(
 	rootCmd *cobra.Command,
 	wallet *wallets.Watcher,
-	container di.Container,
+	containerGetter func() di.Container,
 	version string,
 	confPtr *config.WalletRoot,
 ) {
@@ -35,7 +35,7 @@ func AddCommands(
 		Short: "import resources",
 	}
 	rootCmd.AddCommand(importCmd)
-	imports.AddCommands(importCmd, wallet, container)
+	imports.AddCommands(importCmd, wallet, containerGetter)
 
 	// Create command
 	createCmd := &cobra.Command{
@@ -43,10 +43,10 @@ func AddCommands(
 		Short: "create resources",
 	}
 	rootCmd.AddCommand(createCmd)
-	create.AddCommands(createCmd, wallet, container)
+	create.AddCommands(createCmd, wallet, containerGetter)
 
 	// Send command
-	sendCmd := send.AddCommand(wallet, container)
+	sendCmd := send.AddCommand(wallet, containerGetter)
 	rootCmd.AddCommand(sendCmd)
 
 	// Monitor command
@@ -55,13 +55,13 @@ func AddCommands(
 		Short: "monitor resources",
 	}
 	rootCmd.AddCommand(monitorCmd)
-	monitor.AddCommands(monitorCmd, wallet, container)
+	monitor.AddCommands(monitorCmd, wallet, containerGetter)
 
 	// Descriptor command (BTC only)
-	watchbtccmd.AddDescriptorCommands(rootCmd, container)
+	watchbtccmd.AddDescriptorCommands(rootCmd, containerGetter)
 
 	// MuSig2 command (BTC only)
-	AddMuSig2Commands(rootCmd, container)
+	AddMuSig2Commands(rootCmd, containerGetter)
 
 	// API command - wallet-type specific, dynamically configured
 	apiCmd := &cobra.Command{

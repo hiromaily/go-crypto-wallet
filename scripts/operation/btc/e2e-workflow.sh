@@ -36,6 +36,8 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 CONFIG_WATCH="${PROJECT_ROOT}/config/wallet/btc_watch.toml"
 CONFIG_KEYGEN="${PROJECT_ROOT}/config/wallet/btc_keygen.toml"
 CONFIG_SIGN="${PROJECT_ROOT}/config/wallet/btc_sign.toml"
+CONFIG_SIGN1="${PROJECT_ROOT}/config/wallet/btc_sign1.toml"
+CONFIG_SIGN2="${PROJECT_ROOT}/config/wallet/btc_sign2.toml"
 
 # Colors for output
 RED='\033[0;31m'
@@ -320,7 +322,7 @@ key_generation_phase() {
 
     # Sign wallets - create seed (using sign1 as the primary sign wallet)
     log_substep "Creating seeds for sign wallets"
-    sign1 --conf "${CONFIG_SIGN}" --coin "${COIN}" create seed || {
+    sign1 --conf "${CONFIG_SIGN1}" --coin "${COIN}" create seed || {
         log_warn "Sign seed already exists or error occurred, continuing..."
     }
 
@@ -328,26 +330,28 @@ key_generation_phase() {
     log_substep "Creating HD keys for sign wallets"
     for i in $(seq 1 "$SIGN_WALLET_NUM"); do
         log_info "Creating HD keys for sign${i}"
-        "sign${i}" --conf "${CONFIG_SIGN}" --coin "${COIN}" --wallet "sign${i}" create hdkey
+        config_var="CONFIG_SIGN${i}"
+        "sign${i}" --conf "${!config_var}" --coin "${COIN}" --wallet "sign${i}" create hdkey
     done
 
     # Sign wallets - import private keys
     log_substep "Importing private keys into sign wallets"
     for i in $(seq 1 "$SIGN_WALLET_NUM"); do
         log_info "Importing private keys for sign${i}"
+        config_var="CONFIG_SIGN${i}"
         if [ "$ENCRYPTED" = "true" ]; then
-            "sign${i}" --conf "${CONFIG_SIGN}" --coin "${COIN}" --wallet "sign${i}" api walletpassphrase --passphrase "${WALLET_PASSPHRASE}"
+            "sign${i}" --conf "${!config_var}" --coin "${COIN}" --wallet "sign${i}" api walletpassphrase --passphrase "${WALLET_PASSPHRASE}"
         fi
-        "sign${i}" --conf "${CONFIG_SIGN}" --coin "${COIN}" --wallet "sign${i}" import privkey
+        "sign${i}" --conf "${!config_var}" --coin "${COIN}" --wallet "sign${i}" import privkey
         if [ "$ENCRYPTED" = "true" ]; then
-            "sign${i}" --conf "${CONFIG_SIGN}" --coin "${COIN}" --wallet "sign${i}" api walletlock
+            "sign${i}" --conf "${!config_var}" --coin "${COIN}" --wallet "sign${i}" api walletlock
         fi
     done
 
     # Sign wallets - export fullpubkey
     log_substep "Exporting full public keys from sign wallets"
-    file_fullpubkey_auth1=$(sign1 --conf "${CONFIG_SIGN}" --coin "${COIN}" --wallet sign1 export fullpubkey)
-    file_fullpubkey_auth2=$(sign2 --conf "${CONFIG_SIGN}" --coin "${COIN}" --wallet sign2 export fullpubkey)
+    file_fullpubkey_auth1=$(sign1 --conf "${CONFIG_SIGN1}" --coin "${COIN}" --wallet sign1 export fullpubkey)
+    file_fullpubkey_auth2=$(sign2 --conf "${CONFIG_SIGN2}" --coin "${COIN}" --wallet sign2 export fullpubkey)
 
     # Extract file paths
     fullpubkey_file1="${file_fullpubkey_auth1##*\[fileName\]: }"
@@ -504,13 +508,13 @@ transaction_flow_phase() {
 
     # Sign with sign1 wallet (2nd signature)
     log_substep "Signing with sign1 wallet (2nd signature)"
-    tx_file_signed2=$(sign1 --conf "${CONFIG_SIGN}" --wallet sign1 sign --file "${tx_signed1}")
+    tx_file_signed2=$(sign1 --conf "${CONFIG_SIGN1}" --wallet sign1 sign --file "${tx_signed1}")
     tx_signed2="${tx_file_signed2##*\[fileName\]: }"
     log_info "Signed transaction (2nd): $tx_signed2"
 
     # Sign with sign2 wallet (3rd signature)
     log_substep "Signing with sign2 wallet (3rd signature)"
-    tx_file_signed3=$(sign2 --conf "${CONFIG_SIGN}" --wallet sign2 sign --file "${tx_signed2}")
+    tx_file_signed3=$(sign2 --conf "${CONFIG_SIGN2}" --wallet sign2 sign --file "${tx_signed2}")
     tx_signed3="${tx_file_signed3##*\[fileName\]: }"
     log_info "Signed transaction (3rd): $tx_signed3"
 

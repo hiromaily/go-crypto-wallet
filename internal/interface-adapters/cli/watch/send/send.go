@@ -13,14 +13,14 @@ import (
 )
 
 // AddCommand creates and returns the send command
-func AddCommand(wallet *wallets.Watcher, container di.Container) *cobra.Command {
+func AddCommand(wallet *wallets.Watcher, containerGetter func() di.Container) *cobra.Command {
 	var filePath string
 
 	cmd := &cobra.Command{
 		Use:   "send",
 		Short: "send signed transaction to blockchain network",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runSend(container, filePath)
+			return runSend(containerGetter(), filePath)
 		},
 	}
 	cmd.Flags().StringVar(&filePath, "file", "", "signed transaction file path")

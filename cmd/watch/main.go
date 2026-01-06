@@ -153,7 +153,7 @@ func main() {
 	rootCmd.PersistentFlags().StringVarP(&btcWallet, "wallet", "w", "", "specify wallet.dat in bitcoin core")
 
 	// Add subcommands
-	wcmd.AddCommands(rootCmd, &walleter, container, appVersion, conf)
+	wcmd.AddCommands(rootCmd, &walleter, func() di.Container { return container }, appVersion, conf)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

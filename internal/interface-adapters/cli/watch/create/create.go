@@ -8,14 +8,14 @@ import (
 )
 
 // AddCommands adds all create subcommands
-func AddCommands(parentCmd *cobra.Command, wallet *wallets.Watcher, container di.Container) {
+func AddCommands(parentCmd *cobra.Command, wallet *wallets.Watcher, containerGetter func() di.Container) {
 	// deposit command
 	var depositFee float64
 	depositCmd := &cobra.Command{
 		Use:   "deposit",
 		Short: "create a deposit unsigned transaction file for client account",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runDeposit(container, depositFee)
+			return runDeposit(containerGetter(), depositFee)
 		},
 	}
 	depositCmd.Flags().Float64Var(&depositFee, "fee", 0, "adjustment fee")
@@ -27,7 +27,7 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Watcher, container di
 		Use:   "payment",
 		Short: "create a payment unsigned transaction file for payment account",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runPayment(container, paymentFee)
+			return runPayment(containerGetter(), paymentFee)
 		},
 	}
 	paymentCmd.Flags().Float64Var(&paymentFee, "fee", 0, "adjustment fee")
@@ -44,7 +44,7 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Watcher, container di
 		Use:   "transfer",
 		Short: "create unsigned transaction for transfer among accounts",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runTransfer(container, transferAccount1, transferAccount2, transferAmount, transferFee)
+			return runTransfer(containerGetter(), transferAccount1, transferAccount2, transferAmount, transferFee)
 		},
 	}
 	transferCmd.Flags().StringVar(&transferAccount1, "account1", "", "sender account")
@@ -61,7 +61,7 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Watcher, container di
 		Short:      "create payment_request table with dummy data for development use",
 		Deprecated: "Use query with shell script instead of go code",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runDB(container, dbTable)
+			return runDB(containerGetter(), dbTable)
 		},
 	}
 	dbCmd.Flags().StringVar(&dbTable, "table", "", "target table name")
