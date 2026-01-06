@@ -1,32 +1,5 @@
 package watch
 
-import (
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
-)
-
-// Type aliases for backward compatibility.
-// These interfaces have been moved to pkg/application/ports/persistence.
-
-// AddressRepositorier is AddressRepository interface
-type AddressRepositorier = persistence.AddressRepositorier
-
-// BTCTxRepositorier is BTCTxRepository interface
-type BTCTxRepositorier = persistence.BTCTxRepositorier
-
-// TxInputRepositorier is TxInputRepository interface
-type TxInputRepositorier = persistence.TxInputRepositorier
-
-// TxOutputRepositorier is TxOutputRepository interface
-type TxOutputRepositorier = persistence.TxOutputRepositorier
-
-// TxRepositorier is TxRepository interface
-type TxRepositorier = persistence.TxRepositorier
-
-// PaymentRequestRepositorier is PaymentRequestRepository interface
-type PaymentRequestRepositorier = persistence.PaymentRequestRepositorier
-
-// ETHDetailTXRepositorier is ETHDetailTXRepository interface
-type ETHDetailTXRepositorier = persistence.ETHDetailTXRepositorier
-
-// XRPDetailTXRepositorier is XrpDetailTxRepository interface
-type XRPDetailTXRepositorier = persistence.XRPDetailTXRepositorier
+// This file previously contained type aliases for backward compatibility.
+// All interfaces have been moved to internal/application/ports/persistence.
+// The aliases have been removed as part of Phase 3 of the Clean Architecture refactoring.
