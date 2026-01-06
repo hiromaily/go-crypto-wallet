@@ -20,6 +20,8 @@ type AddMultisigAddressResult struct {
 //   - requiredSigs: required number of signature for transaction
 //   - addresses:    list of addresses(e.g. client, auth1, auth2, auth3
 //   - [N:M] e.g. 2:5 => requiredSigs=2, addresses[addr1, addr2, addr3, addr4, addr5]
+// Note: This is a legacy wallet method. For descriptor wallets (Bitcoin Core v23.0+),
+// consider using descriptor-based multisig with importdescriptors for better functionality.
 func (b *Bitcoin) AddMultisigAddress(
 	requiredSigs int,
 	addresses []string,

@@ -36,6 +36,7 @@ type GetTransactionResult struct {
 	Blocktime         uint64                 `json:"blocktime"`
 	Txid              string                 `json:"txid"`
 	Walletconflicts   []any                  `json:"walletconflicts"`
+	Mempoolconflicts  []string               `json:"mempoolconflicts,omitempty"` // Bitcoin Core v28.0+
 	Time              int64                  `json:"time"`
 	Timereceived      int64                  `json:"timereceived"`
 	Bip125Replaceable string                 `json:"bip125-replaceable"`
@@ -292,9 +293,24 @@ func (b *Bitcoin) CreateRawTransaction(
 	return msgTx, nil
 }
 
+// FundRawTransactionOptions options for fundrawtransaction RPC
+// Bitcoin Core v28.0+ supports max_tx_weight parameter
+type FundRawTransactionOptions struct {
+	FeeRate      float64 `json:"feeRate,omitempty"`      // Fee rate in BTC/kvB
+	MaxTxWeight  *int    `json:"max_tx_weight,omitempty"` // Max transaction weight (v28.0+, default: 4000000 WU)
+	ChangeType   string  `json:"changeType,omitempty"`    // Output type for change (legacy, p2sh-segwit, bech32, bech32m)
+	IncludeUnsafe bool   `json:"includeUnsafe,omitempty"` // Include unsafe inputs
+}
+
 // FundRawTransaction Add inputs to a transaction until it has enough in value to meet its out value.
 // TODO: unused for now, but it looks useful
 func (b *Bitcoin) FundRawTransaction(hexTx string) (*dtobtc.FundRawTransactionResult, error) {
+	return b.FundRawTransactionWithOptions(hexTx, nil)
+}
+
+// FundRawTransactionWithOptions adds inputs to a transaction with custom options.
+// Bitcoin Core v28.0+ supports max_tx_weight parameter to limit transaction size.
+func (b *Bitcoin) FundRawTransactionWithOptions(hexTx string, opts *FundRawTransactionOptions) (*dtobtc.FundRawTransactionResult, error) {
 	// fundrawtransaction
 	// https://bitcoincore.org/en/doc/0.19.0/rpc/rawtransactions/fundrawtransaction/
 
@@ -304,22 +320,26 @@ func (b *Bitcoin) FundRawTransaction(hexTx string) (*dtobtc.FundRawTransactionRe
 		return nil, fmt.Errorf("fail to call json.Marchal(hex): %w", err)
 	}
 
-	// fee rate
-	feePerKb, err := b.EstimateSmartFee()
-	if err != nil {
-		return nil, fmt.Errorf("fail to call btc.EstimateSmartFee(): %w", err)
+	// Prepare options
+	if opts == nil {
+		opts = &FundRawTransactionOptions{}
 	}
 
-	bFeeRate, err := json.Marshal(struct {
-		FeeRate float64 `json:"feeRate"`
-	}{
-		FeeRate: feePerKb,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Marchal(feeRate): %w", err)
+	// Set fee rate if not specified
+	if opts.FeeRate == 0 {
+		feePerKb, err := b.EstimateSmartFee()
+		if err != nil {
+			return nil, fmt.Errorf("fail to call btc.EstimateSmartFee(): %w", err)
+		}
+		opts.FeeRate = feePerKb
 	}
 
-	rawResult, err := b.Client.RawRequest("fundrawtransaction", []json.RawMessage{bHex, bFeeRate})
+	bOptions, err := json.Marshal(opts)
+	if err != nil {
+		return nil, fmt.Errorf("fail to call json.Marchal(options): %w", err)
+	}
+
+	rawResult, err := b.Client.RawRequest("fundrawtransaction", []json.RawMessage{bHex, bOptions})
 	if err != nil {
 		// error: -4: Insufficient funds
 		return nil, fmt.Errorf("fail to call json.RawRequest(fundrawtransaction): %w", err)

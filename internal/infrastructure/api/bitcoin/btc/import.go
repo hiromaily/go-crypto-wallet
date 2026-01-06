@@ -40,6 +40,8 @@ func (b *Bitcoin) ImportPrivKeyWithoutReScan(privKeyWIF *btcutil.WIF, label stri
 }
 
 // ImportAddress import pubkey to wallet
+// Note: This is a legacy wallet method. For descriptor wallets (Bitcoin Core v23.0+),
+// consider using importdescriptors instead for better functionality and future compatibility.
 func (b *Bitcoin) ImportAddress(pubkey string) error {
 	err := b.Client.ImportAddress(pubkey)
 	if err != nil {
@@ -61,6 +63,8 @@ func (b *Bitcoin) ImportAddressWithoutReScan(pubkey string) error {
 
 // ImportAddressWithLabel import geven address with label to wallet
 // - rescan is adjustable
+// Note: This is a legacy wallet method. For descriptor wallets (Bitcoin Core v23.0+),
+// consider using importdescriptors instead for better functionality and future compatibility.
 func (b *Bitcoin) ImportAddressWithLabel(address, label string, rescan bool) error {
 	bAddress, err := json.Marshal(address)
 	if err != nil {
