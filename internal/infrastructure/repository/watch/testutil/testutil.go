@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
@@ -24,7 +25,7 @@ var (
 )
 
 // NewBTCTxRepositorySqlc returns BTCTxRepositorySqlc for test
-func NewBTCTxRepositorySqlc() watch.BTCTxRepositorier {
+func NewBTCTxRepositorySqlc() persistence.BTCTxRepositorier {
 	if btcTxRepoSqlc != nil {
 		return btcTxRepoSqlc
 	}
@@ -46,7 +47,7 @@ func NewBTCTxRepositorySqlc() watch.BTCTxRepositorier {
 }
 
 // NewTxRepositorySqlc returns TxRepositorySqlc for test
-func NewTxRepositorySqlc() watch.TxRepositorier {
+func NewTxRepositorySqlc() persistence.TxRepositorier {
 	if txRepoSqlc != nil {
 		return txRepoSqlc
 	}
@@ -68,7 +69,7 @@ func NewTxRepositorySqlc() watch.TxRepositorier {
 }
 
 // NewAddressRepositorySqlc returns AddressRepositorySqlc for test
-func NewAddressRepositorySqlc() watch.AddressRepositorier {
+func NewAddressRepositorySqlc() persistence.AddressRepositorier {
 	if addressRepoSqlc != nil {
 		return addressRepoSqlc
 	}
@@ -90,7 +91,7 @@ func NewAddressRepositorySqlc() watch.AddressRepositorier {
 }
 
 // NewPaymentRequestRepositorySqlc returns PaymentRequestRepositorySqlc for test
-func NewPaymentRequestRepositorySqlc() watch.PaymentRequestRepositorier {
+func NewPaymentRequestRepositorySqlc() persistence.PaymentRequestRepositorier {
 	if paymentRequestRepoSqlc != nil {
 		return paymentRequestRepoSqlc
 	}
@@ -112,7 +113,7 @@ func NewPaymentRequestRepositorySqlc() watch.PaymentRequestRepositorier {
 }
 
 // NewBTCTxInputRepositorySqlc returns TxInputRepositorySqlc for test
-func NewBTCTxInputRepositorySqlc() watch.TxInputRepositorier {
+func NewBTCTxInputRepositorySqlc() persistence.TxInputRepositorier {
 	if btcTxInputRepoSqlc != nil {
 		return btcTxInputRepoSqlc
 	}
@@ -134,7 +135,7 @@ func NewBTCTxInputRepositorySqlc() watch.TxInputRepositorier {
 }
 
 // NewBTCTxOutputRepositorySqlc returns TxOutputRepositorySqlc for test
-func NewBTCTxOutputRepositorySqlc() watch.TxOutputRepositorier {
+func NewBTCTxOutputRepositorySqlc() persistence.TxOutputRepositorier {
 	if btcTxOutputRepoSqlc != nil {
 		return btcTxOutputRepoSqlc
 	}
@@ -156,7 +157,7 @@ func NewBTCTxOutputRepositorySqlc() watch.TxOutputRepositorier {
 }
 
 // NewETHDetailTXRepositorySqlc returns ETHDetailTXInputRepositorySqlc for test
-func NewETHDetailTXRepositorySqlc() watch.ETHDetailTXRepositorier {
+func NewETHDetailTXRepositorySqlc() persistence.ETHDetailTXRepositorier {
 	if ethDetailTXRepoSqlc != nil {
 		return ethDetailTXRepoSqlc
 	}
@@ -178,7 +179,7 @@ func NewETHDetailTXRepositorySqlc() watch.ETHDetailTXRepositorier {
 }
 
 // NewXrpDetailTxRepositorySqlc returns XRPDetailTxInputRepositorySqlc for test
-func NewXrpDetailTxRepositorySqlc() watch.XRPDetailTXRepositorier {
+func NewXrpDetailTxRepositorySqlc() persistence.XRPDetailTXRepositorier {
 	if xrpDetailTXRepoSqlc != nil {
 		return xrpDetailTXRepoSqlc
 	}

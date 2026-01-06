@@ -18,6 +18,7 @@ import (
 
 	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
 	portsEth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
@@ -482,56 +483,56 @@ func (c *container) newRippleAPI() *xrp.RippleAPI {
 // Repository
 //
 
-func (c *container) newBTCTxRepo() watch.BTCTxRepositorier {
+func (c *container) newBTCTxRepo() persistence.BTCTxRepositorier {
 	return watch.NewBTCTxRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newBTCTxInputRepo() watch.TxInputRepositorier {
+func (c *container) newBTCTxInputRepo() persistence.TxInputRepositorier {
 	return watch.NewBTCTxInputRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newBTCTxOutputRepo() watch.TxOutputRepositorier {
+func (c *container) newBTCTxOutputRepo() persistence.TxOutputRepositorier {
 	return watch.NewBTCTxOutputRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newTxRepo() watch.TxRepositorier {
+func (c *container) newTxRepo() persistence.TxRepositorier {
 	return watch.NewTxRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newETHTxDetailRepo() watch.ETHDetailTXRepositorier {
+func (c *container) newETHTxDetailRepo() persistence.ETHDetailTXRepositorier {
 	return watch.NewETHDetailTXInputRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newXRPTxDetailRepo() watch.XRPDetailTXRepositorier {
+func (c *container) newXRPTxDetailRepo() persistence.XRPDetailTXRepositorier {
 	return watch.NewXRPDetailTxInputRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newPaymentRequestRepo() watch.PaymentRequestRepositorier {
+func (c *container) newPaymentRequestRepo() persistence.PaymentRequestRepositorier {
 	return watch.NewPaymentRequestRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newAddressRepo() watch.AddressRepositorier {
+func (c *container) newAddressRepo() persistence.AddressRepositorier {
 	return watch.NewAddressRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
@@ -568,7 +569,7 @@ func (c *container) newPaymentAccount() domainAccount.AccountType {
 	return c.accountConf.PaymentSender
 }
 
-func (c *container) newHdWalletRepo() cold.HDWalletRepo {
+func (c *container) newHdWalletRepo() persistence.HDWalletRepo {
 	return cold.NewAccountHDWalletRepo(
 		c.newAccountKeyRepo(),
 	)
@@ -621,41 +622,41 @@ func (c *container) newMultiAccount() *domainAccount.MultisigConfig {
 // Keygen Repository
 //
 
-func (c *container) newSeedRepo() cold.SeedRepositorier {
+func (c *container) newSeedRepo() persistence.SeedRepositorier {
 	return cold.NewSeedRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newAccountKeyRepo() cold.BTCAccountKeyRepositorier {
+func (c *container) newAccountKeyRepo() persistence.BTCAccountKeyRepositorier {
 	return cold.NewAccountKeyRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newXRPAccountKeyRepo() cold.XRPAccountKeyRepositorier {
+func (c *container) newXRPAccountKeyRepo() persistence.XRPAccountKeyRepositorier {
 	return cold.NewXRPAccountKeyRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newEthAccountKeyRepo() cold.ETHAccountKeyRepositorier {
+func (c *container) newEthAccountKeyRepo() persistence.ETHAccountKeyRepositorier {
 	return cold.NewETHAccountKeyRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 	)
 }
 
-func (c *container) newAuthFullPubKeyRepo() cold.AuthFullPubkeyRepositorier {
+func (c *container) newAuthFullPubKeyRepo() persistence.AuthFullPubkeyRepositorier {
 	return cold.NewAuthFullPubkeyRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newAuthKeyRepo() cold.AuthAccountKeyRepositorier {
+func (c *container) newAuthKeyRepo() persistence.AuthAccountKeyRepositorier {
 	return cold.NewAuthAccountKeyRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
@@ -686,7 +687,7 @@ func (*container) newDescriptorFileWriter() portsStorage.DescriptorFileWriter {
 // Sign Service
 //
 
-func (c *container) newSignHdWalletRepo(authType domainAccount.AuthType) cold.HDWalletRepo {
+func (c *container) newSignHdWalletRepo(authType domainAccount.AuthType) persistence.HDWalletRepo {
 	return cold.NewAuthHDWalletRepo(
 		c.newAuthKeyRepo(),
 		authType,

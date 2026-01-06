@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
@@ -18,15 +19,15 @@ import (
 
 // AuthHDWalletRepo implements HDWalletRepo for auth account keys
 type AuthHDWalletRepo struct {
-	authKeyRepo AuthAccountKeyRepositorier
+	authKeyRepo persistence.AuthAccountKeyRepositorier
 	authType    domainAccount.AuthType
 }
 
 // NewAuthHDWalletRepo creates a new AuthHDWalletRepo
 func NewAuthHDWalletRepo(
-	authKeyRepo AuthAccountKeyRepositorier,
+	authKeyRepo persistence.AuthAccountKeyRepositorier,
 	authType domainAccount.AuthType,
-) HDWalletRepo {
+) persistence.HDWalletRepo {
 	return &AuthHDWalletRepo{
 		authKeyRepo: authKeyRepo,
 		authType:    authType,
@@ -86,11 +87,11 @@ func (w *AuthHDWalletRepo) Insert(
 
 // AccountHDWalletRepo implements HDWalletRepo for account keys
 type AccountHDWalletRepo struct {
-	accountKeyRepo BTCAccountKeyRepositorier
+	accountKeyRepo persistence.BTCAccountKeyRepositorier
 }
 
 // NewAccountHDWalletRepo creates a new AccountHDWalletRepo
-func NewAccountHDWalletRepo(accountKeyRepo BTCAccountKeyRepositorier) HDWalletRepo {
+func NewAccountHDWalletRepo(accountKeyRepo persistence.BTCAccountKeyRepositorier) persistence.HDWalletRepo {
 	return &AccountHDWalletRepo{
 		accountKeyRepo: accountKeyRepo,
 	}
