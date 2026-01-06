@@ -26,6 +26,9 @@ type AuthFullPubkeyRepositorier = persistence.AuthFullPubkeyRepositorier
 // AuthAccountKeyRepositorier is AuthAccountKeyRepository interface
 type AuthAccountKeyRepositorier = persistence.AuthAccountKeyRepositorier
 
+// HDWalletRepo is a type alias to persistence.HDWalletRepo for backward compatibility
+type HDWalletRepo = persistence.HDWalletRepo
+
 // GetRedeemScriptByAddress returns redeem script by address for BTC
 func GetRedeemScriptByAddress(accountKeys []*sqlcgen.BtcAccountKey, addr string) string {
 	for _, val := range accountKeys {

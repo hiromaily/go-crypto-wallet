@@ -13,6 +13,7 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	domainPayment "github.com/hiromaily/go-crypto-wallet/internal/domain/payment"
@@ -88,6 +89,20 @@ type AuthAccountKeyRepositorier interface {
 	GetOne(authType domainAccount.AuthType) (*domainAuth.AuthAccountKey, error)
 	Insert(item *domainAuth.AuthAccountKey) error
 	UpdateAddrStatus(addrStatus domainAddress.AddrStatus, strWIF string) (int64, error)
+}
+
+// HDWalletRepo is an interface for HD wallet key storage operations.
+// It abstracts over key storage for different account types (e.g., regular accounts
+// and authorization accounts), allowing the same use case code to work with either.
+type HDWalletRepo interface {
+	GetMaxIndex(accountType domainAccount.AccountType) (int64, error)
+	Insert(
+		keys []domainKey.WalletKey,
+		idx int64,
+		coinTypeCode domainCoin.CoinTypeCode,
+		accountType domainAccount.AccountType,
+		keyType domainKey.KeyType,
+	) error
 }
 
 // Repository interfaces for watch wallet
