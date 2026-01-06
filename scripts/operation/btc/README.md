@@ -20,6 +20,9 @@ make btc-e2e-test
 # Run with verbose output
 make btc-e2e-test-verbose
 
+# Run in non-interactive mode (for CI/CD)
+make btc-e2e-test-ci
+
 # Cleanup containers and state
 make btc-e2e-cleanup
 ```
@@ -63,6 +66,7 @@ The script automates the following workflow:
 
 - `--cleanup`: Stop containers and cleanup state, then exit
 - `--verbose`: Enable verbose output (shows all commands)
+- `--non-interactive`: Run without interactive prompts (for CI/CD)
 - `-h, --help`: Display help message
 
 ### Prerequisites

@@ -53,6 +53,11 @@ btc-e2e-test:
 btc-e2e-test-verbose:
 	./scripts/operation/btc/e2e-workflow.sh --verbose
 
+# Run Bitcoin E2E workflow in non-interactive mode (for CI/CD)
+.PHONY: btc-e2e-test-ci
+btc-e2e-test-ci:
+	./scripts/operation/btc/e2e-workflow.sh --non-interactive
+
 # Cleanup Bitcoin E2E test environment
 .PHONY: btc-e2e-cleanup
 btc-e2e-cleanup:

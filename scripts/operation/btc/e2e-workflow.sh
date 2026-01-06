@@ -16,6 +16,7 @@ ENCRYPTED="false"
 SIGN_WALLET_NUM=2
 VERBOSE=false
 CLEANUP_ONLY=false
+NON_INTERACTIVE=false
 
 # Colors for output
 RED='\033[0;31m'
@@ -221,7 +222,7 @@ key_generation_phase() {
     log_substep "Creating HD keys for keygen wallet (client, deposit, payment, stored)"
     for account in client deposit payment stored; do
         log_info "Creating HD keys for account: $account"
-        keygen -coin ${COIN} create hdkey -account "$account" -keynum 10
+        keygen -coin "${COIN}" create hdkey -account "$account" -keynum 10
     done
 
     # Keygen wallet - import private keys
@@ -231,7 +232,7 @@ key_generation_phase() {
     fi
     for account in client deposit payment stored; do
         log_info "Importing private keys for account: $account"
-        keygen -coin ${COIN} import privkey -account "$account"
+        keygen -coin "${COIN}" import privkey -account "$account"
     done
     if [ "$ENCRYPTED" = "true" ]; then
         keygen api walletlock
@@ -245,21 +246,21 @@ key_generation_phase() {
 
     # Sign wallets - create hdkeys
     log_substep "Creating HD keys for sign wallets"
-    for i in $(seq 1 $SIGN_WALLET_NUM); do
+    for i in $(seq 1 "$SIGN_WALLET_NUM"); do
         log_info "Creating HD keys for sign${i}"
-        sign${i} -coin ${COIN} -wallet sign${i} create hdkey
+        "sign${i}" -coin "${COIN}" -wallet "sign${i}" create hdkey
     done
 
     # Sign wallets - import private keys
     log_substep "Importing private keys into sign wallets"
-    for i in $(seq 1 $SIGN_WALLET_NUM); do
+    for i in $(seq 1 "$SIGN_WALLET_NUM"); do
         log_info "Importing private keys for sign${i}"
         if [ "$ENCRYPTED" = "true" ]; then
-            sign${i} -coin ${COIN} -wallet sign${i} api walletpassphrase -passphrase test
+            "sign${i}" -coin "${COIN}" -wallet "sign${i}" api walletpassphrase -passphrase test
         fi
-        sign${i} -coin ${COIN} -wallet sign${i} import privkey
+        "sign${i}" -coin "${COIN}" -wallet "sign${i}" import privkey
         if [ "$ENCRYPTED" = "true" ]; then
-            sign${i} -coin ${COIN} -wallet sign${i} api walletlock
+            "sign${i}" -coin "${COIN}" -wallet "sign${i}" api walletlock
         fi
     done
 
@@ -291,16 +292,16 @@ multisig_setup_phase() {
     # Import fullpubkeys
     log_substep "Importing full public keys into keygen wallet"
     log_info "Importing fullpubkey from sign1: $FULLPUBKEY_FILE1"
-    keygen -coin ${COIN} import fullpubkey -file "${FULLPUBKEY_FILE1}"
+    keygen -coin "${COIN}" import fullpubkey -file "${FULLPUBKEY_FILE1}"
 
     log_info "Importing fullpubkey from sign2: $FULLPUBKEY_FILE2"
-    keygen -coin ${COIN} import fullpubkey -file "${FULLPUBKEY_FILE2}"
+    keygen -coin "${COIN}" import fullpubkey -file "${FULLPUBKEY_FILE2}"
 
     # Create multisig addresses
     log_substep "Creating multisig addresses"
     for account in deposit payment stored; do
         log_info "Creating multisig address for account: $account"
-        keygen -coin ${COIN} create multisig -account "$account"
+        keygen -coin "${COIN}" create multisig -account "$account"
     done
 
     # Export addresses
@@ -325,16 +326,16 @@ multisig_setup_phase() {
     # Import addresses into watch wallet
     log_substep "Importing addresses into watch wallet"
     log_info "Importing client addresses"
-    watch -coin ${COIN} import address -file "${address_client}"
+    watch -coin "${COIN}" import address -file "${address_client}"
 
     log_info "Importing deposit addresses"
-    watch -coin ${COIN} import address -file "${address_deposit}"
+    watch -coin "${COIN}" import address -file "${address_deposit}"
 
     log_info "Importing payment addresses"
-    watch -coin ${COIN} import address -file "${address_payment}"
+    watch -coin "${COIN}" import address -file "${address_payment}"
 
     log_info "Importing stored addresses"
-    watch -coin ${COIN} import address -file "${address_stored}"
+    watch -coin "${COIN}" import address -file "${address_stored}"
 }
 
 ###############################################################################
@@ -354,7 +355,13 @@ transaction_flow_phase() {
     log_warn "  1. Generate coins to a payment address: docker exec btc-watch bitcoin-cli -regtest -rpcuser=xyz -rpcpassword=xyz generatetoaddress 101 <payment_address>"
     log_warn "  2. Check balance: watch -coin btc monitor balance"
     log_warn ""
-    read -p "Press Enter to continue or Ctrl+C to exit..." dummy || true
+
+    # Only prompt if in interactive mode
+    if [ "$NON_INTERACTIVE" = "false" ] && [ -t 0 ]; then
+        read -p "Press Enter to continue or Ctrl+C to exit..." dummy || true
+    else
+        log_info "Running in non-interactive mode, proceeding automatically..."
+    fi
 
     # Create unsigned transaction
     log_substep "Creating unsigned payment transaction"
@@ -430,9 +437,10 @@ the Bitcoin workflow functions correctly after code changes.
 Usage: $0 [OPTIONS]
 
 Options:
-  --cleanup       Stop containers and cleanup state, then exit
-  --verbose       Enable verbose output
-  -h, --help      Display this help message
+  --cleanup           Stop containers and cleanup state, then exit
+  --verbose           Enable verbose output
+  --non-interactive   Run without interactive prompts (for CI/CD)
+  -h, --help          Display this help message
 
 Examples:
   # Run complete E2E workflow
@@ -474,6 +482,10 @@ main() {
             --verbose)
                 VERBOSE=true
                 set -x
+                shift
+                ;;
+            --non-interactive)
+                NON_INTERACTIVE=true
                 shift
                 ;;
             -h|--help)
