@@ -126,7 +126,7 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 
 ### Blockchain Nodes
 
-- **BTC**: [Bitcoin Core](https://bitcoin.org/en/bitcoin-core/), [Bitcoin node docker image](https://hub.docker.com/r/bitcoin/bitcoin) 29.2+
+- **BTC**: [Bitcoin Core](https://bitcoin.org/en/bitcoin-core/), [Bitcoin node docker image](https://hub.docker.com/r/bitcoin/bitcoin) 28.0+ (supports v28-v30)
 - **BCH**: [Bitcoin ABC](https://www.bitcoinabc.org/) 0.21+ (Bitcoin Cash node)
 - **ETH**:
   - [go-ethereum](https://github.com/ethereum/go-ethereum) (Geth client)
