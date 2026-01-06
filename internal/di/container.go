@@ -1065,7 +1065,7 @@ func (c *container) newKeygenGenerateSeedUseCase() keygenusecase.GenerateSeedUse
 }
 
 func (c *container) newKeygenExportAddressUseCase() keygenusecase.ExportAddressUseCase {
-	return keygenusecaseshared.NewExportAddressUseCase(
+	return keygenusecasebtc.NewExportAddressUseCase(
 		c.newAccountKeyRepo(),
 		c.newAddressFileRepo(),
 		c.newMultiAccount(),
