@@ -29,7 +29,7 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
   - ✅ Integration tests separated using build tags (`//go:build integration`)
   - ✅ Go 1.25.5 with updated major dependencies (btcsuite/btcd v0.25.0, ethereum/go-ethereum v1.16.7)
   - ✅ golangci-lint v2.7.2 for code quality checks
-- ✅ **Taproot (BIP341/BIP86) Support** - Full support for P2TR addresses with Schnorr signatures (requires Bitcoin Core v29.2+)
+- ✅ **Taproot (BIP341/BIP86) Support** - Full support for P2TR addresses with Schnorr signatures
   - 30-50% transaction size/fee reduction compared to legacy multisig
   - Enhanced privacy with indistinguishable spend patterns
   - See [Taproot User Guide](./docs/TAPROOT_GUIDE.md) for setup and usage
@@ -126,7 +126,7 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 
 ### Blockchain Nodes
 
-- **BTC**: [Bitcoin Core](https://bitcoin.org/en/bitcoin-core/), [Bitcoin node docker image](https://hub.docker.com/r/bitcoin/bitcoin) 29.2+
+- **BTC**: [Bitcoin Core](https://bitcoin.org/en/bitcoin-core/), [Bitcoin node docker image](https://hub.docker.com/r/bitcoin/bitcoin) 28.0+ (supports v28-v30)
 - **BCH**: [Bitcoin ABC](https://www.bitcoinabc.org/) 0.21+ (Bitcoin Cash node)
 - **ETH**:
   - [go-ethereum](https://github.com/ethereum/go-ethereum) (Geth client)

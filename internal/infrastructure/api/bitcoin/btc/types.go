@@ -9,11 +9,9 @@ type BTCVersion int
 
 // expected version
 const (
-	BTCVer17 BTCVersion = 170000
-	BTCVer18 BTCVersion = 180000
-	BTCVer19 BTCVersion = 190000
-	BTCVer20 BTCVersion = 200000
-	BTCVer21 BTCVersion = 210000 // for BCH version
+	BTCVer28 BTCVersion = 280000
+	BTCVer29 BTCVersion = 290000
+	BTCVer30 BTCVersion = 300000
 )
 
 // Int converter
@@ -22,7 +20,7 @@ func (v BTCVersion) Int() int {
 }
 
 // RequiredVersion is required version for this wallet apps
-const RequiredVersion = BTCVer19
+const RequiredVersion = BTCVer28
 
 //----------------------------------------------------
 // NetworkTypeBTC

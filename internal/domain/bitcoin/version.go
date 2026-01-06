@@ -5,11 +5,9 @@ type Version int
 
 // Bitcoin Core versions
 const (
-	Ver17 Version = 170000
-	Ver18 Version = 180000
-	Ver19 Version = 190000
-	Ver20 Version = 200000
-	Ver21 Version = 210000 // for BCH version
+	Ver28 Version = 280000
+	Ver29 Version = 290000
+	Ver30 Version = 300000
 )
 
 // Int converts Version to int
@@ -18,4 +16,4 @@ func (v Version) Int() int {
 }
 
 // RequiredVersion is the minimum required version for this wallet
-const RequiredVersion = Ver19
+const RequiredVersion = Ver28
