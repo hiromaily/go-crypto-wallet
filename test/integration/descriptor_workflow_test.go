@@ -20,7 +20,8 @@ import (
 func TestDescriptorImportWorkflow_SingleKey(t *testing.T) {
 	t.Parallel()
 
-	desc := "wpkh([a1b2c3d4/84'/0'/0']xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL/0/*)"
+	desc := "wpkh([a1b2c3d4/84'/0'/0']xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb" +
+		"5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL/0/*)"
 	tmpDir := t.TempDir()
 	filePath := filepath.Join(tmpDir, "single.txt")
 	require.NoError(t, os.WriteFile(filePath, []byte(desc), 0o600))
@@ -49,7 +50,11 @@ func TestDescriptorImportWorkflow_SingleKey(t *testing.T) {
 func TestDescriptorImportWorkflow_Multisig(t *testing.T) {
 	t.Parallel()
 
-	desc := "wsh(sortedmulti(2,[a1b2c3d4/48'/0'/0'/2']xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL/0/*,[b2c3d4e5/48'/0'/0'/2']xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW5/0/*))"
+	desc := "wsh(sortedmulti(2,[a1b2c3d4/48'/0'/0'/2']" +
+		"xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJ" +
+		"vLJuZZvRcEL/0/*,[b2c3d4e5/48'/0'/0'/2']" +
+		"xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7Do" +
+		"gT5Uv6fcLW5/0/*))"
 	tmpDir := t.TempDir()
 	filePath := filepath.Join(tmpDir, "multisig.txt")
 	require.NoError(t, os.WriteFile(filePath, []byte(desc), 0o600))
@@ -79,15 +84,15 @@ type recordingAddressRepo struct {
 	inserted []*domainAddress.Address
 }
 
-func (r *recordingAddressRepo) GetAll(domainAccount.AccountType) ([]*domainAddress.Address, error) {
+func (*recordingAddressRepo) GetAll(domainAccount.AccountType) ([]*domainAddress.Address, error) {
 	return nil, nil
 }
 
-func (r *recordingAddressRepo) GetAllAddress(domainAccount.AccountType) ([]string, error) {
+func (*recordingAddressRepo) GetAllAddress(domainAccount.AccountType) ([]string, error) {
 	return nil, nil
 }
 
-func (r *recordingAddressRepo) GetOneUnAllocated(domainAccount.AccountType) (*domainAddress.Address, error) {
+func (*recordingAddressRepo) GetOneUnAllocated(domainAccount.AccountType) (*domainAddress.Address, error) {
 	return nil, nil
 }
 
@@ -96,6 +101,6 @@ func (r *recordingAddressRepo) InsertBulk(_ context.Context, items []*domainAddr
 	return nil
 }
 
-func (r *recordingAddressRepo) UpdateIsAllocated(bool, string) (int64, error) {
+func (*recordingAddressRepo) UpdateIsAllocated(bool, string) (int64, error) {
 	return 0, nil
 }

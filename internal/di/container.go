@@ -678,7 +678,7 @@ func (c *container) newPubkeyFileStorager() portsStorage.AddressFileRepositorier
 	)
 }
 
-func (c *container) newDescriptorFileWriter() portsStorage.DescriptorFileWriter {
+func (*container) newDescriptorFileWriter() portsStorage.DescriptorFileWriter {
 	return descriptor.NewFileWriter()
 }
 

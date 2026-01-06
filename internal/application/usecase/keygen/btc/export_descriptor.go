@@ -3,6 +3,7 @@ package btc
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -32,7 +33,7 @@ func (u *exportDescriptorUseCase) Export(
 	input keygenusecase.ExportDescriptorInput,
 ) (keygenusecase.ExportDescriptorOutput, error) {
 	if input.OutputPath == "" {
-		return keygenusecase.ExportDescriptorOutput{}, fmt.Errorf("output path is required")
+		return keygenusecase.ExportDescriptorOutput{}, errors.New("output path is required")
 	}
 
 	format := input.Format
@@ -86,7 +87,7 @@ func (u *exportDescriptorUseCase) Export(
 	}, nil
 }
 
-func (u *exportDescriptorUseCase) formatDescriptors(
+func (*exportDescriptorUseCase) formatDescriptors(
 	descriptors []string,
 	format keygenusecase.DescriptorFormat,
 ) ([]byte, error) {

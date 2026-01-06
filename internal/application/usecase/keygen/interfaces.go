@@ -84,7 +84,7 @@ const (
 	DescriptorFormatBitcoinCore DescriptorFormat = "bitcoin-core"
 )
 
-// Input/Output DTOs
+// GenerateDescriptorInput represents the input for generating a descriptor.
 type GenerateDescriptorInput struct {
 	AccountType  domainAccount.AccountType
 	AddressType  domainAddress.AddrType

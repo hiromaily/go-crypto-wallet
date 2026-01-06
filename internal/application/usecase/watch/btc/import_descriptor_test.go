@@ -21,7 +21,8 @@ import (
 )
 
 const (
-	testDescriptorMainnetXpub = "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL"
+	testDescriptorMainnetXpub = "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4" +
+		"ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL"
 )
 
 func TestImportDescriptorUseCase_ImportsAddresses(t *testing.T) {
@@ -101,7 +102,8 @@ func TestImportDescriptorUseCase_ValidateOnly(t *testing.T) {
 func TestImportDescriptorUseCase_ImportsMultisigAddresses(t *testing.T) {
 	t.Parallel()
 
-	xpub2 := "xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW5"
+	xpub2 := "xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7" +
+		"x7DogT5Uv6fcLW5"
 	desc := fmt.Sprintf(
 		"wsh(sortedmulti(2,[a1b2c3d4/48'/0'/0'/2']%s/0/*,[b2c3d4e5/48'/0'/0'/2']%s/0/*))",
 		testDescriptorMainnetXpub,

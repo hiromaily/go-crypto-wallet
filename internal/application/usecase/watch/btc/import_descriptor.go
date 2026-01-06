@@ -2,6 +2,7 @@ package btc
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/json"
@@ -9,11 +10,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
-
-	"bytes"
-	"sort"
 
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcutil"
@@ -107,7 +106,7 @@ func (u *importDescriptorUseCase) Import(
 	}, nil
 }
 
-func (u *importDescriptorUseCase) readDescriptors(filePath string) ([]string, error) {
+func (*importDescriptorUseCase) readDescriptors(filePath string) ([]string, error) {
 	var data []byte
 	var err error
 
@@ -213,7 +212,11 @@ func deriveChildKeys(key domainWallet.DescriptorKey, start, count uint32) ([]*hd
 	return children, nil
 }
 
-func deriveAddressForType(key *hdkeychain.ExtendedKey, descType domainWallet.DescriptorType, chain *chaincfg.Params) (string, error) {
+func deriveAddressForType(
+	key *hdkeychain.ExtendedKey,
+	descType domainWallet.DescriptorType,
+	chain *chaincfg.Params,
+) (string, error) {
 	switch descType {
 	case domainWallet.DescriptorTypePKH:
 		addr, err := key.Address(chain)
@@ -256,12 +259,16 @@ func deriveAddressForType(key *hdkeychain.ExtendedKey, descType domainWallet.Des
 		if err != nil {
 			return "", err
 		}
-		tapKey := txscript.ComputeTaprootKeyNoScript((*btcec.PublicKey)(pubKey))
+		tapKey := txscript.ComputeTaprootKeyNoScript(pubKey)
 		addr, err := btcutil.NewAddressTaproot(tapKey.SerializeCompressed(), chain)
 		if err != nil {
 			return "", err
 		}
 		return addr.EncodeAddress(), nil
+	case domainWallet.DescriptorTypeWSH:
+		return "", errors.New("WSH descriptor type requires multisig handling, not supported for single key derivation")
+	case domainWallet.DescriptorTypeUnknown:
+		return "", errors.New("unknown descriptor type")
 	default:
 		return "", fmt.Errorf("unsupported descriptor type: %s", descType.String())
 	}
@@ -392,6 +399,4 @@ func (u *importDescriptorUseCase) storeAddresses(
 }
 
 // ioReadAll is a wrapper for io.ReadAll to allow testing via injection.
-var ioReadAll = func(r io.Reader) ([]byte, error) {
-	return io.ReadAll(r) //nolint:gosec
-}
+var ioReadAll = io.ReadAll

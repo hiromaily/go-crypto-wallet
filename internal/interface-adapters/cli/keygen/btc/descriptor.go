@@ -2,6 +2,7 @@ package btc
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -66,9 +67,10 @@ func newDescriptorExportCommand(container di.Container) *cobra.Command {
 	)
 
 	cmd := &cobra.Command{
-		Use:     "export",
-		Short:   "Export descriptors for the account to a file",
-		Example: "  keygen --coin btc descriptor export --account deposit --output /tmp/descriptors.txt --format bitcoin-core --include-change",
+		Use:   "export",
+		Short: "Export descriptors for the account to a file",
+		Example: "  keygen --coin btc descriptor export --account deposit --output /tmp/descriptors.txt " +
+			"--format bitcoin-core --include-change",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runDescriptorExport(cmd.Context(), container, account, outputPath, format, includeChange)
 		},
@@ -76,7 +78,12 @@ func newDescriptorExportCommand(container di.Container) *cobra.Command {
 
 	cmd.Flags().StringVar(&account, "account", "", "target account (e.g. deposit, payment)")
 	cmd.Flags().StringVar(&outputPath, "output", "", "output file path")
-	cmd.Flags().StringVar(&format, "format", string(keygenusecase.DescriptorFormatBitcoinCore), "output format (text|json|bitcoin-core)")
+	cmd.Flags().StringVar(
+		&format,
+		"format",
+		string(keygenusecase.DescriptorFormatBitcoinCore),
+		"output format (text|json|bitcoin-core)",
+	)
 	cmd.Flags().BoolVar(&includeChange, "include-change", false, "include change descriptors")
 	_ = cmd.MarkFlagRequired("account")
 	_ = cmd.MarkFlagRequired("output")
@@ -102,7 +109,12 @@ func newDescriptorExportAllCommand(container di.Container) *cobra.Command {
 
 	cmd.Flags().StringVar(&account, "account", "", "target account (e.g. deposit, payment)")
 	cmd.Flags().StringVar(&outputPath, "output", "", "output file path")
-	cmd.Flags().StringVar(&format, "format", string(keygenusecase.DescriptorFormatJSON), "output format (text|json|bitcoin-core)")
+	cmd.Flags().StringVar(
+		&format,
+		"format",
+		string(keygenusecase.DescriptorFormatJSON),
+		"output format (text|json|bitcoin-core)",
+	)
 	_ = cmd.MarkFlagRequired("account")
 	_ = cmd.MarkFlagRequired("output")
 
@@ -126,7 +138,7 @@ func runDescriptorGenerate(
 		return err
 	}
 	if container == nil {
-		return fmt.Errorf("container is not initialized")
+		return errors.New("container is not initialized")
 	}
 
 	useCase := container.NewKeygenGenerateDescriptorUseCase()
@@ -161,7 +173,7 @@ func runDescriptorExport(
 		return err
 	}
 	if container == nil {
-		return fmt.Errorf("container is not initialized")
+		return errors.New("container is not initialized")
 	}
 
 	useCase := container.NewKeygenExportDescriptorUseCase()
@@ -181,7 +193,7 @@ func runDescriptorExport(
 
 func parseAccountType(account string) (domainAccount.AccountType, error) {
 	if !domainAccount.ValidateAccountType(account) {
-		return "", fmt.Errorf("account option [--account] is invalid")
+		return "", errors.New("account option [--account] is invalid")
 	}
 	return domainAccount.AccountType(account), nil
 }

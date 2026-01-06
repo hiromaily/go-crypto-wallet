@@ -7,7 +7,8 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 )
 
-const benchmarkXpub = "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL"
+const benchmarkXpub = "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY" +
+	"2grBGRjaDMzQLcgJvLJuZZvRcEL"
 
 func BenchmarkGenerateDescriptors(b *testing.B) {
 	service := NewDescriptorService(&chaincfg.MainNetParams)

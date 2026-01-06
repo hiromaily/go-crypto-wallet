@@ -2,6 +2,7 @@ package btc
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 
@@ -61,7 +62,8 @@ func (u *generateDescriptorUseCase) Generate(
 	}
 
 	if err != nil {
-		return keygenusecase.GenerateDescriptorOutput{}, fmt.Errorf("failed to generate descriptor for %s: %w", input.AccountType.String(), err)
+		return keygenusecase.GenerateDescriptorOutput{},
+			fmt.Errorf("failed to generate descriptor for %s: %w", input.AccountType.String(), err)
 	}
 
 	return keygenusecase.GenerateDescriptorOutput{
@@ -107,6 +109,8 @@ func (u *generateDescriptorUseCase) generateSingleSigDescriptor(
 		return u.descriptorService.GenerateP2SHSegWitDescriptor(fp.String(), derivationPath, xpub, input.IsChange)
 	case domainAddress.AddrTypeLegacy:
 		return u.descriptorService.GenerateP2PKHDescriptor(fp.String(), derivationPath, xpub, input.IsChange)
+	case domainAddress.AddrTypeBCHCashAddr, domainAddress.AddrTypeETH:
+		return "", fmt.Errorf("unsupported address type for Bitcoin descriptors: %s", input.AddressType)
 	default:
 		return "", fmt.Errorf("unsupported address type for single-sig: %s", input.AddressType)
 	}
@@ -165,7 +169,7 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 			return nil, fmt.Errorf("auth extended key network mismatch for %s", authType.String())
 		}
 
-		fp := ""
+		var fp string
 		if authKey.Fingerprint != nil {
 			fp = authKey.Fingerprint.String()
 		} else {
@@ -202,14 +206,19 @@ func derivationPathForAddress(addrType domainAddress.AddrType, isMultisig bool) 
 		return "/84'/0'/0'", nil
 	case domainAddress.AddrTypeTaproot:
 		return "/86'/0'/0'", nil
+	case domainAddress.AddrTypeBCHCashAddr, domainAddress.AddrTypeETH:
+		return "", fmt.Errorf("unsupported address type for Bitcoin: %s", addrType)
 	default:
 		return "", fmt.Errorf("unsupported address type: %s", addrType)
 	}
 }
 
-func selectRequiredSigConfig(config map[int][]domainAccount.AuthType, requested int) (int, []domainAccount.AuthType, error) {
+func selectRequiredSigConfig(
+	config map[int][]domainAccount.AuthType,
+	requested int,
+) (int, []domainAccount.AuthType, error) {
 	if len(config) == 0 {
-		return 0, nil, fmt.Errorf("no multisig configuration available")
+		return 0, nil, errors.New("no multisig configuration available")
 	}
 
 	if requested > 0 {

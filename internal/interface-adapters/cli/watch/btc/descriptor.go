@@ -2,6 +2,7 @@ package btc
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -77,11 +78,11 @@ func newDescriptorValidateCommand(container di.Container) *cobra.Command {
 
 func runDescriptorImport(ctx context.Context, container di.Container, input watchusecase.ImportDescriptorInput) error {
 	if container == nil {
-		return fmt.Errorf("container is not initialized")
+		return errors.New("container is not initialized")
 	}
 
 	if input.AccountType != "" && !domainAccount.ValidateAccountType(input.AccountType.String()) {
-		return fmt.Errorf("account option [--account] is invalid")
+		return errors.New("account option [--account] is invalid")
 	}
 
 	useCase := container.NewWatchImportDescriptorUseCase()
@@ -91,7 +92,11 @@ func runDescriptorImport(ctx context.Context, container di.Container, input watc
 	}
 
 	if !input.ValidateOnly {
-		fmt.Printf("Descriptors imported: %d, addresses generated: %d\n", output.DescriptorsImported, output.AddressesGenerated)
+		fmt.Printf(
+			"Descriptors imported: %d, addresses generated: %d\n",
+			output.DescriptorsImported,
+			output.AddressesGenerated,
+		)
 	} else {
 		fmt.Println("Descriptors validated successfully")
 	}

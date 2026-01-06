@@ -1,6 +1,7 @@
 package descriptor
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -15,9 +16,9 @@ func NewFileWriter() *FileWriter {
 }
 
 // WriteFile writes descriptor content to the specified path, creating directories as needed.
-func (w *FileWriter) WriteFile(path string, data []byte) error {
+func (*FileWriter) WriteFile(path string, data []byte) error {
 	if path == "" {
-		return fmt.Errorf("output path cannot be empty")
+		return errors.New("output path cannot be empty")
 	}
 
 	cleanPath := filepath.Clean(path)

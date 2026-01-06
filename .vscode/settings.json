@@ -14,11 +14,6 @@
   ],
   "go.lintTool": "golangci-lint",
   "go.lintOnSave": "package",
-  "gopls": {
-    "buildFlags": [
-      "-tags=integration"
-    ]
-  },
   "[go]": {
     "editor.defaultFormatter": "golang.go",
     "editor.codeActionsOnSave": {

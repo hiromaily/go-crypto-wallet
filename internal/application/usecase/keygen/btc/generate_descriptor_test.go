@@ -21,7 +21,8 @@ import (
 )
 
 const (
-	testDescriptorMainnetXpub = "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL"
+	testDescriptorMainnetXpub = "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4AL" +
+		"HY2grBGRjaDMzQLcgJvLJuZZvRcEL"
 )
 
 func TestNewGenerateDescriptorUseCase(t *testing.T) {
@@ -193,27 +194,42 @@ type stubAccountRepo struct {
 	err error
 }
 
-func (s *stubAccountRepo) GetMaxIndex(domainAccount.AccountType) (int64, error) { return 0, nil }
+func (*stubAccountRepo) GetMaxIndex(domainAccount.AccountType) (int64, error) { return 0, nil }
 func (s *stubAccountRepo) GetOneMaxID(domainAccount.AccountType) (*domainBitcoin.BtcAccountKey, error) {
 	return s.key, s.err
 }
-func (s *stubAccountRepo) GetAllAddrStatus(domainAccount.AccountType, domainAddress.AddrStatus) ([]*domainBitcoin.BtcAccountKey, error) {
+
+func (*stubAccountRepo) GetAllAddrStatus(
+	domainAccount.AccountType,
+	domainAddress.AddrStatus,
+) ([]*domainBitcoin.BtcAccountKey, error) {
 	return nil, nil
 }
-func (s *stubAccountRepo) GetAllMultiAddr(domainAccount.AccountType, []string) ([]*domainBitcoin.BtcAccountKey, error) {
+
+func (*stubAccountRepo) GetAllMultiAddr(domainAccount.AccountType, []string) ([]*domainBitcoin.BtcAccountKey, error) {
 	return nil, nil
 }
-func (s *stubAccountRepo) InsertBulk([]*domainBitcoin.BtcAccountKey) error { return nil }
-func (s *stubAccountRepo) UpdateAddr(domainAccount.AccountType, string, string) (int64, error) {
+func (*stubAccountRepo) InsertBulk([]*domainBitcoin.BtcAccountKey) error { return nil }
+func (*stubAccountRepo) UpdateAddr(domainAccount.AccountType, string, string) (int64, error) {
 	return 0, nil
 }
-func (s *stubAccountRepo) UpdateAddrStatus(domainAccount.AccountType, domainAddress.AddrStatus, []string) (int64, error) {
+
+func (*stubAccountRepo) UpdateAddrStatus(
+	domainAccount.AccountType,
+	domainAddress.AddrStatus,
+	[]string,
+) (int64, error) {
 	return 0, nil
 }
-func (s *stubAccountRepo) UpdateMultisigAddr(domainAccount.AccountType, *domainBitcoin.BtcAccountKey) (int64, error) {
+
+func (*stubAccountRepo) UpdateMultisigAddr(domainAccount.AccountType, *domainBitcoin.BtcAccountKey) (int64, error) {
 	return 0, nil
 }
-func (s *stubAccountRepo) UpdateMultisigAddrs(domainAccount.AccountType, []*domainBitcoin.BtcAccountKey) (int64, error) {
+
+func (*stubAccountRepo) UpdateMultisigAddrs(
+	domainAccount.AccountType,
+	[]*domainBitcoin.BtcAccountKey,
+) (int64, error) {
 	return 0, nil
 }
 
@@ -231,8 +247,8 @@ func (s *stubAuthRepo) GetOne(authType domainAccount.AuthType) (*domainAuth.Auth
 	}
 	return val, nil
 }
-func (s *stubAuthRepo) Insert(domainAccount.AuthType, string) error   { return nil }
-func (s *stubAuthRepo) InsertBulk([]*domainAuth.AuthFullPubkey) error { return nil }
+func (*stubAuthRepo) Insert(domainAccount.AuthType, string) error   { return nil }
+func (*stubAuthRepo) InsertBulk([]*domainAuth.AuthFullPubkey) error { return nil }
 
 func newTestXpubFromSeed(t *testing.T, seedByte byte) string {
 	t.Helper()

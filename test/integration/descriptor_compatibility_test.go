@@ -15,10 +15,10 @@ import (
 )
 
 type descriptorRecord struct {
-	Desc      string      `json:"desc"`
-	Timestamp interface{} `json:"timestamp,omitempty"`
-	Active    bool        `json:"active,omitempty"`
-	Range     []int       `json:"range,omitempty"`
+	Desc      string `json:"desc"`
+	Timestamp any    `json:"timestamp,omitempty"`
+	Active    bool   `json:"active,omitempty"`
+	Range     []int  `json:"range,omitempty"`
 }
 
 func TestDescriptorCompatibility_ImportAndDerive(t *testing.T) {
@@ -46,7 +46,6 @@ func TestDescriptorCompatibility_ImportAndDerive(t *testing.T) {
 	}
 
 	for i, rec := range records {
-		rec := rec
 		t.Run(fmt.Sprintf("descriptor_%d", i), func(t *testing.T) {
 			t.Helper()
 
@@ -89,7 +88,7 @@ func (c bitcoinCLI) run(ctx context.Context, subCmd string, extraArgs ...string)
 	cmdArgs = append(cmdArgs, subCmd)
 	cmdArgs = append(cmdArgs, extraArgs...)
 
-	cmd := exec.CommandContext(ctx, c.bin, cmdArgs...)
+	cmd := exec.CommandContext(ctx, c.bin, cmdArgs...) //nolint:gosec // G204: integration test with controlled inputs
 	cmd.Env = os.Environ()
 	out, err := cmd.CombinedOutput()
 	if err != nil {
@@ -140,7 +139,7 @@ func loadDescriptorRecords(path string) ([]descriptorRecord, error) {
 		return nil, err
 	}
 
-	var recs []descriptorRecord
+	recs := make([]descriptorRecord, 0)
 	if err := json.Unmarshal(data, &recs); err == nil && len(recs) > 0 {
 		return recs, nil
 	}
