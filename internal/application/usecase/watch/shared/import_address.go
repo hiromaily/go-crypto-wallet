@@ -11,12 +11,12 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 )
 
 type importAddressUseCase struct {
-	addrRepo     watch.AddressRepositorier
+	addrRepo     persistence.AddressRepositorier
 	addrFileRepo portsStorage.AddressFileRepositorier
 	coinTypeCode domainCoin.CoinTypeCode
 	addrType     domainAddress.AddrType
@@ -25,7 +25,7 @@ type importAddressUseCase struct {
 
 // NewImportAddressUseCase creates a new ImportAddressUseCase for watch wallet
 func NewImportAddressUseCase(
-	addrRepo watch.AddressRepositorier,
+	addrRepo persistence.AddressRepositorier,
 	addrFileRepo portsStorage.AddressFileRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,
 	addrType domainAddress.AddrType,

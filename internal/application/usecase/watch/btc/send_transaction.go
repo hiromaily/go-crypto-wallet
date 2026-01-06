@@ -10,7 +10,7 @@ import (
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
+	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 

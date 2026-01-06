@@ -26,7 +26,7 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
-	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
+	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
