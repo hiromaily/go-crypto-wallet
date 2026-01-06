@@ -17,7 +17,7 @@ import (
 )
 
 // AddMuSig2Commands adds MuSig2 subcommands to the parent command
-func AddMuSig2Commands(parentCmd *cobra.Command, container di.Container) {
+func AddMuSig2Commands(parentCmd *cobra.Command, containerGetter func() di.Container) {
 	musig2Cmd := &cobra.Command{
 		Use:   "musig2",
 		Short: "MuSig2 operations for BTC",
@@ -25,14 +25,14 @@ func AddMuSig2Commands(parentCmd *cobra.Command, container di.Container) {
 	}
 
 	// Add nonce and sign subcommands
-	musig2Cmd.AddCommand(newMuSig2NonceCommand(container))
-	musig2Cmd.AddCommand(newMuSig2SignCommand(container))
+	musig2Cmd.AddCommand(newMuSig2NonceCommand(containerGetter))
+	musig2Cmd.AddCommand(newMuSig2SignCommand(containerGetter))
 
 	parentCmd.AddCommand(musig2Cmd)
 }
 
 // newMuSig2NonceCommand creates the 'musig2 nonce' command
-func newMuSig2NonceCommand(container di.Container) *cobra.Command {
+func newMuSig2NonceCommand(containerGetter func() di.Container) *cobra.Command {
 	var (
 		file   string
 		output string
@@ -47,7 +47,7 @@ for sharing with other signers.`,
 		Example: `  keygen --coin btc musig2 nonce --file payment_123_unsigned.psbt ` +
 			`--output payment_123_keygen_nonce.json`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runMuSig2Nonce(cmd.Context(), container, file, output)
+			return runMuSig2Nonce(cmd.Context(), containerGetter(), file, output)
 		},
 	}
 
@@ -60,7 +60,7 @@ for sharing with other signers.`,
 }
 
 // newMuSig2SignCommand creates the 'musig2 sign' command
-func newMuSig2SignCommand(container di.Container) *cobra.Command {
+func newMuSig2SignCommand(containerGetter func() di.Container) *cobra.Command {
 	var (
 		file   string
 		output string
@@ -75,7 +75,7 @@ and saves the signed PSBT to a file for aggregation.`,
 		Example: `  keygen --coin btc musig2 sign --file payment_123_with_nonces.psbt ` +
 			`--output payment_123_keygen_signed.psbt`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runMuSig2Sign(cmd.Context(), container, file, output)
+			return runMuSig2Sign(cmd.Context(), containerGetter(), file, output)
 		},
 	}
 

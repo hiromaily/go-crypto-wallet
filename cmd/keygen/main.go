@@ -138,7 +138,7 @@ func main() {
 	rootCmd.PersistentFlags().StringVarP(&btcWallet, "wallet", "w", "", "specify wallet.dat in bitcoin core")
 
 	// Add subcommands
-	keygen.AddCommands(rootCmd, &walleter, container, appVersion)
+	keygen.AddCommands(rootCmd, &walleter, func() di.Container { return container }, appVersion)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

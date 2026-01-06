@@ -15,22 +15,22 @@ import (
 )
 
 // AddDescriptorCommands adds descriptor-related subcommands for BTC.
-func AddDescriptorCommands(parentCmd *cobra.Command, container di.Container) {
+func AddDescriptorCommands(parentCmd *cobra.Command, containerGetter func() di.Container) {
 	descriptorCmd := &cobra.Command{
 		Use:   "descriptor",
 		Short: "Descriptor operations for BTC keygen wallet",
 	}
 
 	descriptorCmd.AddCommand(
-		newDescriptorGenerateCommand(container),
-		newDescriptorExportCommand(container),
-		newDescriptorExportAllCommand(container),
+		newDescriptorGenerateCommand(containerGetter),
+		newDescriptorExportCommand(containerGetter),
+		newDescriptorExportAllCommand(containerGetter),
 	)
 
 	parentCmd.AddCommand(descriptorCmd)
 }
 
-func newDescriptorGenerateCommand(container di.Container) *cobra.Command {
+func newDescriptorGenerateCommand(containerGetter func() di.Container) *cobra.Command {
 	var (
 		account       string
 		addressType   string
@@ -44,7 +44,7 @@ func newDescriptorGenerateCommand(container di.Container) *cobra.Command {
 		Example: "  keygen --coin btc descriptor generate --account deposit --address-type taproot\n" +
 			"  keygen --coin btc descriptor generate --account deposit --address-type bech32 --change",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runDescriptorGenerate(cmd.Context(), container, account, addressType, includeChange, requiredSigs)
+			return runDescriptorGenerate(cmd.Context(), containerGetter(), account, addressType, includeChange, requiredSigs)
 		},
 	}
 
@@ -58,7 +58,7 @@ func newDescriptorGenerateCommand(container di.Container) *cobra.Command {
 	return cmd
 }
 
-func newDescriptorExportCommand(container di.Container) *cobra.Command {
+func newDescriptorExportCommand(containerGetter func() di.Container) *cobra.Command {
 	var (
 		account       string
 		outputPath    string
@@ -72,7 +72,7 @@ func newDescriptorExportCommand(container di.Container) *cobra.Command {
 		Example: "  keygen --coin btc descriptor export --account deposit --output /tmp/descriptors.txt " +
 			"--format bitcoin-core --include-change",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runDescriptorExport(cmd.Context(), container, account, outputPath, format, includeChange)
+			return runDescriptorExport(cmd.Context(), containerGetter(), account, outputPath, format, includeChange)
 		},
 	}
 
@@ -91,7 +91,7 @@ func newDescriptorExportCommand(container di.Container) *cobra.Command {
 	return cmd
 }
 
-func newDescriptorExportAllCommand(container di.Container) *cobra.Command {
+func newDescriptorExportAllCommand(containerGetter func() di.Container) *cobra.Command {
 	var (
 		account    string
 		outputPath string
@@ -103,7 +103,7 @@ func newDescriptorExportAllCommand(container di.Container) *cobra.Command {
 		Short:   "Export all descriptors (receive and change) for the account",
 		Example: "  keygen --coin btc descriptor export-all --account deposit --output /tmp/deposit_descriptors.json",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runDescriptorExport(cmd.Context(), container, account, outputPath, format, true)
+			return runDescriptorExport(cmd.Context(), containerGetter(), account, outputPath, format, true)
 		},
 	}
 

@@ -8,7 +8,7 @@ import (
 )
 
 // AddCommands adds all create subcommands
-func AddCommands(parentCmd *cobra.Command, wallet *wallets.Keygener, container di.Container) {
+func AddCommands(parentCmd *cobra.Command, wallet *wallets.Keygener, containerGetter func() di.Container) {
 	// key command
 	keyCmd := &cobra.Command{
 		Use:   "key",
@@ -29,7 +29,7 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Keygener, container d
 		Use:   "hdkey",
 		Short: "create HD key",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runHDKeyWithFlags(container, hdkeyKeyNum, hdkeyAccount, hdkeyIsKeyPair)
+			return runHDKeyWithFlags(containerGetter(), hdkeyKeyNum, hdkeyAccount, hdkeyIsKeyPair)
 		},
 	}
 	hdkeyCmd.Flags().Uint64Var(&hdkeyKeyNum, "keynum", 0, "number of generating hd key")
@@ -44,7 +44,7 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Keygener, container d
 		Short: "create seed",
 		Long:  "create seed for wallet. If --seed is provided, it will be stored instead of generating a new one",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runSeed(container, seedValue)
+			return runSeed(containerGetter(), seedValue)
 		},
 	}
 	seedCmd.Flags().StringVar(&seedValue, "seed", "",
@@ -77,7 +77,7 @@ MuSig2 multisig:
   # Create MuSig2 Taproot address
   keygen --coin btc create multisig --account payment --multisig-type musig2`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runMultisigWithFlags(container, multisigAccount, multisigType)
+			return runMultisigWithFlags(containerGetter(), multisigAccount, multisigType)
 		},
 	}
 	multisigCmd.Flags().StringVar(&multisigAccount, "account", "", "target account")
