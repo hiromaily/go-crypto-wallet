@@ -77,6 +77,8 @@ func (b *Bitcoin) dumpImportWallet(fileName, method string) error {
 
 // EncryptWallet encrypt wallet by pass phrase
 // https://bitcoincore.org/en/doc/0.19.0/rpc/wallet/encryptwallet/
+// Note: For new wallets, consider using the passphrase parameter in createwallet
+// instead of encrypting after creation.
 func (b *Bitcoin) EncryptWallet(passphrase string) error {
 	// backupwallet
 	input1, err := json.Marshal(passphrase)
@@ -184,4 +186,83 @@ func (b *Bitcoin) CreateWallet(fileName string, disablePrivKey bool) error {
 	}
 
 	return nil
+}
+
+// ===== Bitcoin Core v28.0+ New RPC Methods =====
+
+// HDKeyResult is response type of RPC `gethdkeys` (Bitcoin Core v28.0+)
+type HDKeyResult struct {
+	XPub string `json:"xpub"`
+}
+
+// GetHDKeys lists all BIP32 HD keys in use by wallet descriptors
+// Bitcoin Core v28.0+ only
+// https://bitcoincore.org/en/doc/28.0/rpc/wallet/gethdkeys/
+func (b *Bitcoin) GetHDKeys(active *bool) ([]HDKeyResult, error) {
+	var params []json.RawMessage
+
+	// Add active parameter if specified
+	if active != nil {
+		bActive, err := json.Marshal(map[string]bool{"active": *active})
+		if err != nil {
+			return nil, fmt.Errorf("fail to call json.Marshal(active): %w", err)
+		}
+		params = append(params, bActive)
+	}
+
+	rawResult, err := b.Client.RawRequest("gethdkeys", params)
+	if err != nil {
+		return nil, fmt.Errorf("fail to call json.RawRequest(gethdkeys): %w", err)
+	}
+
+	var hdKeys []HDKeyResult
+	err = json.Unmarshal(rawResult, &hdKeys)
+	if err != nil {
+		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
+	}
+
+	return hdKeys, nil
+}
+
+// CreateWalletDescriptorResult is response type of RPC `createwalletdescriptor` (Bitcoin Core v28.0+)
+type CreateWalletDescriptorResult struct {
+	Descriptors []string `json:"descriptors"` // Array of descriptors that were added
+	Warnings    []string `json:"warnings"`    // Any warnings that occurred
+}
+
+// DescriptorType represents the type of descriptor to create
+type DescriptorType string
+
+const (
+	DescriptorTypeBech32  DescriptorType = "bech32"  // Native segwit (P2WPKH)
+	DescriptorTypeBech32m DescriptorType = "bech32m" // Taproot (P2TR)
+)
+
+// CreateWalletDescriptor adds new automatically generated descriptors to the wallet
+// Bitcoin Core v28.0+ only
+// This allows upgrading wallets to support new standards like taproot
+// https://bitcoincore.org/en/doc/28.0/rpc/wallet/createwalletdescriptor/
+func (b *Bitcoin) CreateWalletDescriptor(descriptorType DescriptorType) (*CreateWalletDescriptorResult, error) {
+	// Validate descriptor type
+	if descriptorType != DescriptorTypeBech32 && descriptorType != DescriptorTypeBech32m {
+		return nil, fmt.Errorf("invalid descriptor type: %s (must be 'bech32' or 'bech32m')", descriptorType)
+	}
+
+	bType, err := json.Marshal(string(descriptorType))
+	if err != nil {
+		return nil, fmt.Errorf("fail to call json.Marshal(type): %w", err)
+	}
+
+	rawResult, err := b.Client.RawRequest("createwalletdescriptor", []json.RawMessage{bType})
+	if err != nil {
+		return nil, fmt.Errorf("fail to call json.RawRequest(createwalletdescriptor): %w", err)
+	}
+
+	var result CreateWalletDescriptorResult
+	err = json.Unmarshal(rawResult, &result)
+	if err != nil {
+		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
+	}
+
+	return &result, nil
 }
