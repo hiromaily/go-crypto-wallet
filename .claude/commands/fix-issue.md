@@ -44,6 +44,11 @@ Follow the [Pre-Flight Checks](../../agents/workflow.md#pre-flight-checks) from 
    - Review issue descriptions, comments, and labels
    - Store issue information for later reference
    - **If any issue is invalid or already closed**: Stop and report which issue(s) have problems
+   - **Check if issues are sub-issues**:
+     - Look for parent issue references in issue descriptions or labels
+     - If issues are sub-issues that should be reviewed separately, inform the user and recommend
+       using Sub-Issue Resolution Workflow
+     - If user wants separate PRs for each sub-issue, use Sub-Issue Resolution Workflow instead of main workflow
 
 3. **Create Feature Branch:**
    - **Single issue**: Format: `feature/issue-{issue_number}-{brief-description}`
@@ -58,6 +63,10 @@ Follow the [Pre-Flight Checks](../../agents/workflow.md#pre-flight-checks) from 
 ### Resolve Systematically
 
 **For Multiple Issues**: Process each issue **sequentially in the specified order**. Each issue gets its own commit, but all commits go into the same branch and PR.
+
+**IMPORTANT**: If the issues are sub-issues that should be reviewed and merged separately, use the
+[Sub-Issue Resolution Workflow](#sub-issue-resolution-workflow) instead. The main workflow below is
+for issues that can be safely combined in a single PR.
 
 #### Process Each Issue (Loop for Multiple Issues)
 
@@ -123,10 +132,10 @@ For each issue in the ordered list:
 
      ```text
      fix: resolve issue #{issue_number} - {brief description}
-     
+
      - {detail 1}
      - {detail 2}
-     
+
      Closes #{issue_number}
      ```
 
@@ -153,33 +162,33 @@ For each issue in the ordered list:
        ```markdown
        ## Description
        {Brief description of the fixes}
-       
+
        This PR resolves multiple related issues:
        - Issue #{issue_number1}: {brief description}
        - Issue #{issue_number2}: {brief description}
        - ...
-       
+
        ## Changes
        - {Change 1 from issue 1}
        - {Change 2 from issue 2}
        - ...
-       
+
        ## Testing
        - [ ] Unit tests added/updated
        - [ ] Integration tests pass
        - [ ] Manual testing completed
-       
+
        ## Verification
        - [ ] `make lint-fix` passes
        - [ ] `make tidy` passes
        - [ ] `make check-build` passes
        - [ ] `make gotest` passes
        - [ ] Security scan completed (if applicable)
-       
+
        ## Commits
        - Each issue has been resolved in a separate commit
        - Commits are in the order issues were specified
-       
+
        Closes #{issue_number1}
        Closes #{issue_number2}
        ...
@@ -210,7 +219,10 @@ For each issue in the ordered list:
 ### Sub-Issue Resolution Workflow
 
 **Note**: This workflow is for when sub-issues need to be resolved **separately** (each in its own PR).
-If you want to resolve multiple sub-issues in **one PR** with separate commits, use the main workflow above with multiple issue numbers.
+If you want to resolve multiple sub-issues in **one PR** with separate commits, use the main workflow
+above with multiple issue numbers.
+
+**CRITICAL RULE**: When processing multiple sub-issues, **NEVER proceed to the next sub-issue until the current sub-issue's PR has been reviewed and merged**. This ensures proper code review and prevents conflicts.
 
 When a parent issue has multiple sub-issues that need separate PRs, resolve them sequentially following this workflow:
 
@@ -225,29 +237,42 @@ When a parent issue has multiple sub-issues that need separate PRs, resolve them
      - Commit changes
      - Create PR with description referencing the sub-issue
      - Request review
-   - **Stop here and wait for user confirmation and merge**
+   - **STOP HERE - DO NOT PROCEED TO NEXT SUB-ISSUE**
+   - **Wait for explicit user confirmation that the PR has been reviewed and merged**
 
-2. **Wait for User Action:**
-   - User will review the PR
-   - User will merge if approved
-   - **Do not proceed to next sub-issue until user confirms merge is complete**
+2. **Mandatory Wait for User Confirmation:**
+   - **CRITICAL**: After creating PR for the first sub-issue, you MUST stop and wait
+   - **DO NOT** automatically proceed to the next sub-issue
+   - **DO NOT** create branches or PRs for other sub-issues
+   - Inform the user that you are waiting for PR review and merge confirmation
+   - Only proceed when the user explicitly confirms:
+     - The PR has been reviewed
+     - The PR has been merged (or approved for merge)
+     - It is safe to proceed to the next sub-issue
+   - **If user does not confirm, do not proceed to next sub-issue**
 
-3. **Next Sub-Issue:**
+3. **Next Sub-Issue (Only After User Confirmation):**
+   - **ONLY proceed if user has explicitly confirmed the previous PR is merged**
+   - Verify the previous PR is actually merged by checking: `gh pr view {previous_pr_number}` or `gh pr list --state merged`
    - Ensure working directory is clean (`git status`)
    - Ensure you're on `main` or `master` branch (or switch to it: `git checkout main`)
    - Pull latest changes: `git pull origin main` (or `master`)
    - Create **new** feature branch for the next sub-issue: `git checkout -b feature/issue-{next_sub_issue_number}-{description}`
    - Follow steps 3-10 again for the next sub-issue
+   - **After creating PR, STOP and wait for user confirmation again**
    - **Repeat steps 2-3 for each remaining sub-issue**
 
 **Important Rules for Sub-Issue Workflow:**
 
 - **CRITICAL**: Always create a new branch for each sub-issue (do not reuse branches)
 - **CRITICAL**: Always start from clean state (clean working directory, latest main/master)
-- **CRITICAL**: Wait for user confirmation before proceeding to next sub-issue
+- **CRITICAL**: **NEVER proceed to next sub-issue without explicit user confirmation**
+- **CRITICAL**: **NEVER create multiple PRs for sub-issues simultaneously**
+- **CRITICAL**: **ALWAYS wait for PR review and merge confirmation before proceeding**
 - Each sub-issue should be independent and mergeable separately
 - PR title should reference the sub-issue: `Fix: {sub-issue title} (Closes #{sub_issue_number})`
 - Link sub-issue PR to parent issue in PR description
+- After each PR creation, explicitly inform the user: "Waiting for PR #{pr_number} review and merge confirmation before proceeding to next sub-issue"
 
 **Alternative: Multiple Sub-Issues in One PR**
 
@@ -290,10 +315,17 @@ After completing all steps, report the completion status to the user using the f
 - [ ] **Issue #{issue_number} - Step 7 - Verify**: All verification commands passed (`make lint-fix`, `make tidy`, `make check-build`, `make gotest`)
 - [ ] **Issue #{issue_number} - Step 8 - Commit**: Changes committed with appropriate commit message
 
-**After All Issues:**
+**After All Issues (Main Workflow - Single PR):**
 
 - [ ] **Step 9 - PR Draft**: Pull request created with complete description (includes all issues)
 - [ ] **Step 10 - Review Request**: PR ready for review
+
+**For Sub-Issue Workflow (Separate PRs):**
+
+- [ ] **Sub-Issue #{issue_number} - PR Created**: PR created and ready for review
+- [ ] **Sub-Issue #{issue_number} - Waiting for User Confirmation**: Stopped and waiting for user to confirm PR review and merge
+- [ ] **Sub-Issue #{issue_number} - User Confirmed**: User confirmed PR is merged, proceeding to next sub-issue
+- [ ] **All Sub-Issues Complete**: All sub-issues have been processed and their PRs merged
 
 ### Summary
 
@@ -357,4 +389,59 @@ Key changes:
 - Issue #123: Fixed logger initialization issue in domain layer
 - Issue #124: Updated error handling in repository layer
 - Issue #125: Added domain entity conversion in infrastructure layer
+```
+
+**Example completion message (sub-issue workflow - first sub-issue):**
+
+```text
+✅ Sub-Issue #123 has been resolved
+
+All steps completed:
+✓ Analyzed sub-issue and identified affected components
+✓ Planned solution and test cases
+✓ Implemented fixes following Clean Architecture
+✓ Self-reviewed code for quality and security
+✓ Tests created and passing
+✓ Documentation updated
+✓ All verification commands passed
+✓ Changes committed
+✓ Pull request #456 created
+✓ Ready for review
+
+Branch: feature/issue-123-fix-logger-global-issue
+PR: #456
+Key changes: Fixed logger initialization issue in domain layer
+
+⏸️ WAITING: Please review and merge PR #456 before I proceed to the next sub-issue.
+Once the PR is merged, please confirm and I will proceed to the next sub-issue.
+```
+
+**Example completion message (sub-issue workflow - subsequent sub-issue):**
+
+```text
+✅ Sub-Issue #124 has been resolved
+
+Previous sub-issue #123 PR #456 has been merged (confirmed by user).
+Proceeding with sub-issue #124.
+
+All steps completed:
+✓ Verified previous PR #456 is merged
+✓ Pulled latest changes from main branch
+✓ Analyzed sub-issue and identified affected components
+✓ Planned solution and test cases
+✓ Implemented fixes following Clean Architecture
+✓ Self-reviewed code for quality and security
+✓ Tests created and passing
+✓ Documentation updated
+✓ All verification commands passed
+✓ Changes committed
+✓ Pull request #457 created
+✓ Ready for review
+
+Branch: feature/issue-124-update-error-handling
+PR: #457
+Key changes: Updated error handling in repository layer
+
+⏸️ WAITING: Please review and merge PR #457 before I proceed to the next sub-issue.
+Once the PR is merged, please confirm and I will proceed to the next sub-issue.
 ```
