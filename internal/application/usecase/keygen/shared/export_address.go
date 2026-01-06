@@ -13,13 +13,13 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type exportAddressUseCase struct {
-	accountKeyRepo  cold.BTCAccountKeyRepositorier
+	accountKeyRepo  persistence.BTCAccountKeyRepositorier
 	addrFileRepo    portsStorage.AddressFileRepositorier
 	multisigAccount *domainAccount.MultisigConfig
 	coinTypeCode    domainCoin.CoinTypeCode
@@ -27,7 +27,7 @@ type exportAddressUseCase struct {
 
 // NewExportAddressUseCase creates a new ExportAddressUseCase
 func NewExportAddressUseCase(
-	accountKeyRepo cold.BTCAccountKeyRepositorier,
+	accountKeyRepo persistence.BTCAccountKeyRepositorier,
 	addrFileRepo portsStorage.AddressFileRepositorier,
 	multisigAccount *domainAccount.MultisigConfig,
 	coinTypeCode domainCoin.CoinTypeCode,

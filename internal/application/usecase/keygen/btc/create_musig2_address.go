@@ -103,15 +103,15 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type createMuSig2AddressUseCase struct {
 	musig2Service      *btc.MuSig2Service
 	chainConfig        *chaincfg.Params
-	authFullPubKeyRepo cold.AuthFullPubkeyRepositorier
-	accountKeyRepo     cold.BTCAccountKeyRepositorier
+	authFullPubKeyRepo persistence.AuthFullPubkeyRepositorier
+	accountKeyRepo     persistence.BTCAccountKeyRepositorier
 	multisigAccount    *domainAccount.MultisigConfig
 }
 
@@ -119,8 +119,8 @@ type createMuSig2AddressUseCase struct {
 func NewCreateMuSig2AddressUseCase(
 	musig2Service *btc.MuSig2Service,
 	chainConfig *chaincfg.Params,
-	authFullPubKeyRepo cold.AuthFullPubkeyRepositorier,
-	accountKeyRepo cold.BTCAccountKeyRepositorier,
+	authFullPubKeyRepo persistence.AuthFullPubkeyRepositorier,
+	accountKeyRepo persistence.BTCAccountKeyRepositorier,
 	multisigAccount *domainAccount.MultisigConfig,
 ) keygenusecase.CreateMuSig2AddressUseCase {
 	return &createMuSig2AddressUseCase{
@@ -280,8 +280,8 @@ func ExampleCreateMuSig2Address() {
 	var (
 		musig2Service      *btc.MuSig2Service              // Provides MuSig2 cryptographic operations
 		chainConfig        = &chaincfg.TestNet3Params      // Bitcoin network configuration
-		authFullPubKeyRepo cold.AuthFullPubkeyRepositorier // Repository for auth public keys
-		accountKeyRepo     cold.BTCAccountKeyRepositorier  // Repository for account keys
+		authFullPubKeyRepo persistence.AuthFullPubkeyRepositorier // Repository for auth public keys
+		accountKeyRepo     persistence.BTCAccountKeyRepositorier  // Repository for account keys
 		multisigAccount    *domainAccount.MultisigConfig   // Multisig account configuration
 	)
 
