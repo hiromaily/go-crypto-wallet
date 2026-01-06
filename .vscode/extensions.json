@@ -1,0 +1,36 @@
+{
+  "recommendations": [
+    // Go
+    "golang.go",
+    // Markdown
+    "DavidAnson.vscode-markdownlint",
+    "yzhang.markdown-all-in-one",
+    // Shell Script
+    "timonwong.shellcheck",
+    "foxundermoon.shell-format",
+    // YAML
+    "redhat.vscode-yaml",
+    // TOML
+    "tamasfe.even-better-toml",
+    // JSON
+    "ZainChen.json",
+    // SQL
+    "mtxr.sqltools",
+    "mtxr.sqltools-driver-mysql",
+    // Log files
+    "IBM.output-colorizer",
+    "emilast.LogFileHighlighter",
+    // Protocol Buffers
+    "zxh404.vscode-proto3",
+    // HCL (HashiCorp Configuration Language - for Atlas)
+    "hashicorp.hcl",
+    // Solidity (for ERC20 contracts)
+    "JuanBlanco.solidity",
+    // General utilities
+    "EditorConfig.EditorConfig",
+    "streetsidesoftware.code-spell-checker",
+    "ms-azuretools.vscode-docker",
+    "eamodio.gitlens"
+  ],
+  "unwantedRecommendations": []
+}
