@@ -75,6 +75,28 @@ The script automates the following workflow:
 2. **Built CLI commands**: Run `make build` to build the wallet CLI commands
 3. **Docker images**: Bitcoin Core 29.2 image will be pulled automatically
 
+### Environment Variables
+
+The script supports the following environment variables for configuration:
+
+| Variable | Description | Default | Notes |
+|----------|-------------|---------|-------|
+| `RPC_USER` | Bitcoin RPC username | `xyz` | Default for regtest/development only |
+| `RPC_PASSWORD` | Bitcoin RPC password | `xyz` | Default for regtest/development only |
+| `WALLET_PASSPHRASE` | Wallet passphrase for encrypted wallets | `test` | Only used when testing encrypted wallets |
+
+**Example usage with custom credentials:**
+
+```bash
+# Run with custom RPC credentials
+RPC_USER=myuser RPC_PASSWORD=mypass make btc-e2e-test
+
+# Run with encrypted wallet (requires WALLET_PASSPHRASE)
+WALLET_PASSPHRASE=mypassphrase ./scripts/operation/btc/e2e-workflow.sh
+```
+
+**Security Note**: The default values are for regtest/development environments only. For production use, always set strong credentials via environment variables and never commit them to version control.
+
 ### Testing in Regtest Mode
 
 The transaction phase requires UTXOs to be available. For testing in regtest mode:
@@ -84,7 +106,11 @@ The transaction phase requires UTXOs to be available. For testing in regtest mod
 # Look in: data/address/btc/address_payment_*.csv
 
 # 2. Generate test coins to a payment address
+# Using default credentials (xyz/xyz for regtest)
 docker exec btc-watch bitcoin-cli -regtest -rpcuser=xyz -rpcpassword=xyz generatetoaddress 101 <payment_address>
+
+# Or using environment variables
+docker exec btc-watch bitcoin-cli -regtest -rpcuser=${RPC_USER:-xyz} -rpcpassword=${RPC_PASSWORD:-xyz} generatetoaddress 101 <payment_address>
 
 # 3. Check balance
 watch -coin btc monitor balance

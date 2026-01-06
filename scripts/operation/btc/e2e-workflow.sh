@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Bitcoin E2E Workflow Script
 # This script automates the complete Bitcoin workflow from infrastructure setup to transaction execution
@@ -17,6 +17,15 @@ SIGN_WALLET_NUM=2
 VERBOSE=false
 CLEANUP_ONLY=false
 NON_INTERACTIVE=false
+
+# RPC credentials (can be overridden via environment variables)
+# Note: Default values are for regtest/development only
+RPC_USER="${RPC_USER:-xyz}"
+RPC_PASSWORD="${RPC_PASSWORD:-xyz}"
+
+# Wallet passphrase (only used if ENCRYPTED=true)
+# Note: Default value is for testing only - use strong passphrase in production
+WALLET_PASSPHRASE="${WALLET_PASSPHRASE:-test}"
 
 # Colors for output
 RED='\033[0;31m'
@@ -93,7 +102,7 @@ wallet_exists() {
     local container=$1
     local wallet_name=$2
 
-    docker exec "$container" bitcoin-cli -regtest -rpcuser=xyz -rpcpassword=xyz listwallets 2>/dev/null | grep -q "\"$wallet_name\"" && return 0 || return 1
+    docker exec "$container" bitcoin-cli -regtest -rpcuser="${RPC_USER}" -rpcpassword="${RPC_PASSWORD}" listwallets 2>/dev/null | grep -q "\"$wallet_name\"" && return 0 || return 1
 }
 
 # Create Bitcoin wallet if not exists
@@ -103,10 +112,10 @@ create_wallet_if_needed() {
 
     if wallet_exists "$container" "$wallet_name"; then
         log_info "Wallet '$wallet_name' already exists in $container"
-        docker exec "$container" bitcoin-cli -regtest -rpcuser=xyz -rpcpassword=xyz loadwallet "$wallet_name" >/dev/null 2>&1 || true
+        docker exec "$container" bitcoin-cli -regtest -rpcuser="${RPC_USER}" -rpcpassword="${RPC_PASSWORD}" loadwallet "$wallet_name" >/dev/null 2>&1 || true
     else
         log_info "Creating wallet '$wallet_name' in $container"
-        docker exec "$container" bitcoin-cli -regtest -rpcuser=xyz -rpcpassword=xyz createwallet "$wallet_name" >/dev/null
+        docker exec "$container" bitcoin-cli -regtest -rpcuser="${RPC_USER}" -rpcpassword="${RPC_PASSWORD}" createwallet "$wallet_name" >/dev/null
     fi
 }
 
@@ -172,7 +181,9 @@ setup_infrastructure() {
     log_substep "Starting database container"
     docker compose -f compose.yaml up -d
     log_info "Database container started"
-    sleep 5
+
+    # Wait for database to be healthy
+    wait_for_healthy "wallet-db" 90
 
     # Start Bitcoin nodes
     log_substep "Starting Bitcoin node containers"
@@ -228,7 +239,7 @@ key_generation_phase() {
     # Keygen wallet - import private keys
     log_substep "Importing private keys into keygen wallet"
     if [ "$ENCRYPTED" = "true" ]; then
-        keygen api walletpassphrase -passphrase test
+        keygen api walletpassphrase -passphrase "${WALLET_PASSPHRASE}"
     fi
     for account in client deposit payment stored; do
         log_info "Importing private keys for account: $account"
@@ -256,7 +267,7 @@ key_generation_phase() {
     for i in $(seq 1 "$SIGN_WALLET_NUM"); do
         log_info "Importing private keys for sign${i}"
         if [ "$ENCRYPTED" = "true" ]; then
-            "sign${i}" -coin "${COIN}" -wallet "sign${i}" api walletpassphrase -passphrase test
+            "sign${i}" -coin "${COIN}" -wallet "sign${i}" api walletpassphrase -passphrase "${WALLET_PASSPHRASE}"
         fi
         "sign${i}" -coin "${COIN}" -wallet "sign${i}" import privkey
         if [ "$ENCRYPTED" = "true" ]; then
@@ -352,7 +363,7 @@ transaction_flow_phase() {
     log_warn "  3. Re-run this script"
     log_warn ""
     log_warn "For testing in regtest mode, you can:"
-    log_warn "  1. Generate coins to a payment address: docker exec btc-watch bitcoin-cli -regtest -rpcuser=xyz -rpcpassword=xyz generatetoaddress 101 <payment_address>"
+    log_warn "  1. Generate coins to a payment address: docker exec btc-watch bitcoin-cli -regtest -rpcuser=${RPC_USER} -rpcpassword=${RPC_PASSWORD} generatetoaddress 101 <payment_address>"
     log_warn "  2. Check balance: watch -coin btc monitor balance"
     log_warn ""
 
@@ -391,7 +402,7 @@ transaction_flow_phase() {
     # Sign with keygen wallet (1st signature)
     log_substep "Signing with keygen wallet (1st signature)"
     if [ "$ENCRYPTED" = "true" ]; then
-        keygen api walletpassphrase -passphrase test
+        keygen api walletpassphrase -passphrase "${WALLET_PASSPHRASE}"
     fi
     tx_file_signed=$(keygen sign -file "${tx_unsigned}")
     if [ "$ENCRYPTED" = "true" ]; then
@@ -462,7 +473,12 @@ The script performs the following steps:
 
 Note: The transaction phase requires UTXOs to be available. For testing in
 regtest mode, you can generate test coins using:
-  docker exec btc-watch bitcoin-cli -regtest -rpcuser=xyz -rpcpassword=xyz generatetoaddress 101 <payment_address>
+  docker exec btc-watch bitcoin-cli -regtest -rpcuser=\${RPC_USER:-xyz} -rpcpassword=\${RPC_PASSWORD:-xyz} generatetoaddress 101 <payment_address>
+
+Environment Variables:
+  RPC_USER          Bitcoin RPC username (default: xyz for regtest)
+  RPC_PASSWORD      Bitcoin RPC password (default: xyz for regtest)
+  WALLET_PASSPHRASE Wallet passphrase for encrypted wallets (default: test)
 
 EOF
 }
