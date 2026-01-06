@@ -13,7 +13,7 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -25,7 +25,7 @@ type ImportAddressUseCase interface {
 
 type importAddressUseCase struct {
 	btcClient    portsBtc.Bitcoiner
-	addrRepo     watch.AddressRepositorier
+	addrRepo     persistence.AddressRepositorier
 	addrFileRepo portsStorage.AddressFileRepositorier
 	coinTypeCode domainCoin.CoinTypeCode
 	addrType     domainAddress.AddrType
@@ -34,7 +34,7 @@ type importAddressUseCase struct {
 // NewImportAddressUseCase creates a new BTC-specific ImportAddressUseCase
 func NewImportAddressUseCase(
 	btcClient portsBtc.Bitcoiner,
-	addrRepo watch.AddressRepositorier,
+	addrRepo persistence.AddressRepositorier,
 	addrFileRepo portsStorage.AddressFileRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,
 	addrType domainAddress.AddrType,

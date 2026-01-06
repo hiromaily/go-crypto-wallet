@@ -12,13 +12,13 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainPayment "github.com/hiromaily/go-crypto-wallet/internal/domain/payment"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 )
 
 type createPaymentRequestUseCase struct {
 	dbConn       *sql.DB
-	addrRepo     watch.AddressRepositorier
-	payReqRepo   watch.PaymentRequestRepositorier
+	addrRepo     persistence.AddressRepositorier
+	payReqRepo   persistence.PaymentRequestRepositorier
 	coinTypeCode domainCoin.CoinTypeCode
 	wtype        domainWallet.WalletType
 }
@@ -26,8 +26,8 @@ type createPaymentRequestUseCase struct {
 // NewCreatePaymentRequestUseCase creates a new CreatePaymentRequestUseCase for watch wallet
 func NewCreatePaymentRequestUseCase(
 	dbConn *sql.DB,
-	addrRepo watch.AddressRepositorier,
-	payReqRepo watch.PaymentRequestRepositorier,
+	addrRepo persistence.AddressRepositorier,
+	payReqRepo persistence.PaymentRequestRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,
 	wtype domainWallet.WalletType,
 ) watchusecase.CreatePaymentRequestUseCase {
