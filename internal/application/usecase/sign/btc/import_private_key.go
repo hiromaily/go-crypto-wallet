@@ -12,13 +12,13 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type importPrivateKeyUseCase struct {
 	btc         portsBtc.Bitcoiner
-	authKeyRepo cold.AuthAccountKeyRepositorier
+	authKeyRepo persistence.AuthAccountKeyRepositorier
 	authType    domainAccount.AuthType
 	wtype       domainWallet.WalletType
 }
@@ -26,7 +26,7 @@ type importPrivateKeyUseCase struct {
 // NewImportPrivateKeyUseCase creates a new ImportPrivateKeyUseCase for sign wallet
 func NewImportPrivateKeyUseCase(
 	btc portsBtc.Bitcoiner,
-	authKeyRepo cold.AuthAccountKeyRepositorier,
+	authKeyRepo persistence.AuthAccountKeyRepositorier,
 	authType domainAccount.AuthType,
 	wtype domainWallet.WalletType,
 ) signusecase.ImportPrivateKeyUseCase {
