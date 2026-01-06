@@ -1,4 +1,4 @@
-package shared
+package btc
 
 import (
 	"bufio"
@@ -7,27 +7,29 @@ import (
 	"os"
 	"strings"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type exportAddressUseCase struct {
-	accountKeyRepo  cold.BTCAccountKeyRepositorier
+	accountKeyRepo  persistence.BTCAccountKeyRepositorier
 	addrFileRepo    portsStorage.AddressFileRepositorier
 	multisigAccount *domainAccount.MultisigConfig
 	coinTypeCode    domainCoin.CoinTypeCode
 }
 
-// NewExportAddressUseCase creates a new ExportAddressUseCase
+// NewExportAddressUseCase creates a new ExportAddressUseCase for BTC/BCH.
+// Note: This use case is specific to BTC/BCH. ETH and XRP require separate implementations
+// due to different repository interfaces and domain types.
 func NewExportAddressUseCase(
-	accountKeyRepo cold.BTCAccountKeyRepositorier,
+	accountKeyRepo persistence.BTCAccountKeyRepositorier,
 	addrFileRepo portsStorage.AddressFileRepositorier,
 	multisigAccount *domainAccount.MultisigConfig,
 	coinTypeCode domainCoin.CoinTypeCode,
@@ -44,24 +46,19 @@ func (u *exportAddressUseCase) Export(
 	ctx context.Context,
 	input keygenusecase.ExportAddressInput,
 ) (keygenusecase.ExportAddressOutput, error) {
-	// Get target status for account based on coin type
+	// Validate coin type - this use case only supports BTC/BCH
+	if u.coinTypeCode != domainCoin.BTC && u.coinTypeCode != domainCoin.BCH {
+		return keygenusecase.ExportAddressOutput{},
+			fmt.Errorf("unsupported coinType[%s]: this use case only supports BTC/BCH", u.coinTypeCode)
+	}
+
+	// Get target status for account based on multisig configuration
 	var targetAddrStatus domainAddress.AddrStatus
-	switch u.coinTypeCode {
-	case domainCoin.BTC, domainCoin.BCH:
-		if !u.multisigAccount.IsMultisigAccount(input.AccountType) {
-			// non-multisig account
-			targetAddrStatus = domainAddress.AddrStatusPrivKeyImported
-		} else {
-			targetAddrStatus = domainAddress.AddrStatusMultisigAddressGenerated
-		}
-	case domainCoin.ETH:
+	if !u.multisigAccount.IsMultisigAccount(input.AccountType) {
+		// non-multisig account
 		targetAddrStatus = domainAddress.AddrStatusPrivKeyImported
-	case domainCoin.XRP:
-		targetAddrStatus = domainAddress.AddrStatusHDKeyGenerated
-	case domainCoin.LTC, domainCoin.ERC20, domainCoin.HYT:
-		return keygenusecase.ExportAddressOutput{}, fmt.Errorf("coinType[%s] is not implemented yet", u.coinTypeCode)
-	default:
-		return keygenusecase.ExportAddressOutput{}, fmt.Errorf("coinType[%s] is not implemented yet", u.coinTypeCode)
+	} else {
+		targetAddrStatus = domainAddress.AddrStatusMultisigAddressGenerated
 	}
 
 	// Get account key

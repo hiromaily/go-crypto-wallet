@@ -13,15 +13,15 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 )
 
 type generateDescriptorUseCase struct {
 	descriptorService  *btc.DescriptorService
 	chainConfig        *chaincfg.Params
-	authFullPubKeyRepo cold.AuthFullPubkeyRepositorier
-	accountKeyRepo     cold.BTCAccountKeyRepositorier
+	authFullPubKeyRepo persistence.AuthFullPubkeyRepositorier
+	accountKeyRepo     persistence.BTCAccountKeyRepositorier
 	multisigConfig     *domainAccount.MultisigConfig
 }
 
@@ -29,8 +29,8 @@ type generateDescriptorUseCase struct {
 func NewGenerateDescriptorUseCase(
 	descriptorService *btc.DescriptorService,
 	chainConfig *chaincfg.Params,
-	authFullPubKeyRepo cold.AuthFullPubkeyRepositorier,
-	accountKeyRepo cold.BTCAccountKeyRepositorier,
+	authFullPubKeyRepo persistence.AuthFullPubkeyRepositorier,
+	accountKeyRepo persistence.BTCAccountKeyRepositorier,
 	multisigConfig *domainAccount.MultisigConfig,
 ) keygenusecase.GenerateDescriptorUseCase {
 	return &generateDescriptorUseCase{

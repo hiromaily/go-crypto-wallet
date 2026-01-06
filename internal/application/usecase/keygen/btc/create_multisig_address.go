@@ -9,22 +9,22 @@ import (
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type createMultisigAddressUseCase struct {
 	btc                portsBtc.Bitcoiner
-	authFullPubKeyRepo cold.AuthFullPubkeyRepositorier
-	accountKeyRepo     cold.BTCAccountKeyRepositorier
+	authFullPubKeyRepo persistence.AuthFullPubkeyRepositorier
+	accountKeyRepo     persistence.BTCAccountKeyRepositorier
 	multisigAccount    *domainAccount.MultisigConfig
 }
 
 // NewCreateMultisigAddressUseCase creates a new CreateMultisigAddressUseCase
 func NewCreateMultisigAddressUseCase(
 	btc portsBtc.Bitcoiner,
-	authFullPubKeyRepo cold.AuthFullPubkeyRepositorier,
-	accountKeyRepo cold.BTCAccountKeyRepositorier,
+	authFullPubKeyRepo persistence.AuthFullPubkeyRepositorier,
+	accountKeyRepo persistence.BTCAccountKeyRepositorier,
 	multisigAccount *domainAccount.MultisigConfig,
 ) keygenusecase.CreateMultisigAddressUseCase {
 	return &createMultisigAddressUseCase{
