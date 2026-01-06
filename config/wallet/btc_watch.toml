@@ -9,7 +9,7 @@ user = "xyz"
 pass = "xyz"
 http_post_mode = true
 disable_tls = true
-network_type = "signet" # mainnet, testnet3, regtest, signet
+network_type = "regtest" # mainnet, testnet3, regtest, signet
 
 [bitcoin.block]
 confirmation_num = 3 #block number for required confirmation

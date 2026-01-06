@@ -11,6 +11,12 @@ The `e2e-workflow.sh` script provides a unified, automated workflow for complete
 ### Usage
 
 ```bash
+# Run from completely fresh state (recommended)
+./scripts/operation/btc/e2e-workflow.sh --reset
+
+# Or use Makefile target
+make btc-e2e-test-reset
+
 # Run complete E2E workflow
 ./scripts/operation/btc/e2e-workflow.sh
 
@@ -54,7 +60,12 @@ The script automates the following workflow:
    - Exports addresses from keygen wallet
    - Imports addresses into watch wallet
 
-6. **Transaction Flow Phase** (requires UTXOs)
+6. **UTXO Generation Phase**
+   - Automatically generates 101 blocks to payment address
+   - Creates mature coinbase UTXOs for testing
+   - Verifies balance in watch wallet
+
+7. **Transaction Flow Phase**
    - Creates unsigned payment transaction
    - Signs with keygen wallet (1st signature)
    - Signs with sign1 wallet (2nd signature)
@@ -64,6 +75,7 @@ The script automates the following workflow:
 
 ### Options
 
+- `--reset`: Full reset - cleanup all state for completely fresh start
 - `--cleanup`: Stop containers and cleanup state, then exit
 - `--verbose`: Enable verbose output (shows all commands)
 - `--non-interactive`: Run without interactive prompts (for CI/CD)
@@ -99,7 +111,9 @@ WALLET_PASSPHRASE=mypassphrase ./scripts/operation/btc/e2e-workflow.sh
 
 ### Testing in Regtest Mode
 
-The transaction phase requires UTXOs to be available. For testing in regtest mode:
+The script now automatically generates test UTXOs during the workflow, making it fully automated. No manual UTXO generation is required.
+
+For manual UTXO generation (if needed for debugging):
 
 ```bash
 # 1. Get a payment address from the exported address CSV files
@@ -109,14 +123,8 @@ The transaction phase requires UTXOs to be available. For testing in regtest mod
 # Using default credentials (xyz/xyz for regtest)
 docker exec btc-watch bitcoin-cli -regtest -rpcuser=xyz -rpcpassword=xyz generatetoaddress 101 <payment_address>
 
-# Or using environment variables
-docker exec btc-watch bitcoin-cli -regtest -rpcuser=${RPC_USER:-xyz} -rpcpassword=${RPC_PASSWORD:-xyz} generatetoaddress 101 <payment_address>
-
 # 3. Check balance
-watch -coin btc monitor balance
-
-# 4. Re-run the E2E script
-make btc-e2e-test
+watch -conf config/wallet/btc_watch.toml -coin btc monitor balance
 ```
 
 ### Directory Structure
@@ -137,14 +145,25 @@ data/
 3. **CI/CD Integration**: Can be integrated into CI/CD pipelines (returns appropriate exit codes)
 4. **Learning**: Demonstrates the complete Bitcoin wallet workflow
 
+### Fresh State Testing
+
+To ensure the script works correctly from a completely fresh state:
+
+```bash
+# Full reset and run (recommended for testing)
+./scripts/operation/btc/e2e-workflow.sh --reset
+
+# Or use Makefile target
+make btc-e2e-test-reset
+```
+
+The `--reset` flag performs a complete cleanup:
+- Stops all containers and removes volumes
+- Cleans generated data files (address, fullpubkey, tx)
+- Cleans Bitcoin node wallet data directories
+- Ensures truly fresh state for testing
+
 ### Troubleshooting
-
-**"No utxo" Error**
-
-If you see "No utxo" when creating a transaction:
-- The script will skip the transaction flow phase
-- You need to generate test coins (see "Testing in Regtest Mode" above)
-- Re-run the script after generating coins
 
 **Container Health Check Failures**
 

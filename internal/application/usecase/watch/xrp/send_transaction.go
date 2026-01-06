@@ -9,11 +9,11 @@ import (
 	"github.com/bookerzzz/grok"
 
 	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
+	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 

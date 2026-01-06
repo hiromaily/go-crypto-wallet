@@ -99,11 +99,11 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/txscript"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -278,11 +278,11 @@ func ExampleCreateMuSig2Address() {
 
 	// Initialize dependencies (simplified for example)
 	var (
-		musig2Service      *btc.MuSig2Service              // Provides MuSig2 cryptographic operations
-		chainConfig        = &chaincfg.TestNet3Params      // Bitcoin network configuration
+		musig2Service      *btc.MuSig2Service                     // Provides MuSig2 cryptographic operations
+		chainConfig        = &chaincfg.TestNet3Params             // Bitcoin network configuration
 		authFullPubKeyRepo persistence.AuthFullPubkeyRepositorier // Repository for auth public keys
 		accountKeyRepo     persistence.BTCAccountKeyRepositorier  // Repository for account keys
-		multisigAccount    *domainAccount.MultisigConfig   // Multisig account configuration
+		multisigAccount    *domainAccount.MultisigConfig          // Multisig account configuration
 	)
 
 	// Create the use case

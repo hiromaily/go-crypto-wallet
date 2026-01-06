@@ -8,12 +8,12 @@ import (
 
 	appdto "github.com/hiromaily/go-crypto-wallet/internal/application/dto"
 	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
