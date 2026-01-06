@@ -336,7 +336,7 @@ func (b *Bitcoin) FundRawTransactionWithOptions(hexTx string, opts *FundRawTrans
 
 	bOptions, err := json.Marshal(opts)
 	if err != nil {
-		return nil, fmt.Errorf("fail to call json.Marchal(options): %w", err)
+		return nil, fmt.Errorf("fail to call json.Marshal(options): %w", err)
 	}
 
 	rawResult, err := b.Client.RawRequest("fundrawtransaction", []json.RawMessage{bHex, bOptions})
