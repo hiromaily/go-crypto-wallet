@@ -1,0 +1,124 @@
+{
+  "name": "go-crypto-wallet",
+  "image": "mcr.microsoft.com/devcontainers/go:1-1.25",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "postCreateCommand": "bash -c 'set -e; go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.7.2 && curl -sSfL https://atlasgo.sh | sh -s -- --version v1.0.0'",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go",
+        "DavidAnson.vscode-markdownlint",
+        "yzhang.markdown-all-in-one",
+        "timonwong.shellcheck",
+        "foxundermoon.shell-format",
+        "redhat.vscode-yaml",
+        "tamasfe.even-better-toml",
+        "ZainChen.json",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-mysql",
+        "IBM.output-colorizer",
+        "emilast.LogFileHighlighter",
+        "zxh404.vscode-proto3",
+        "hashicorp.hcl",
+        "JuanBlanco.solidity",
+        "EditorConfig.EditorConfig",
+        "streetsidesoftware.code-spell-checker",
+        "ms-azuretools.vscode-docker",
+        "eamodio.gitlens"
+      ],
+      "settings": {
+        "editor.formatOnSave": true,
+        "files.trimTrailingWhitespace": true,
+        "files.insertFinalNewline": true,
+        "go.buildTags": "integration",
+        "go.lintFlags": ["-tags=integration"],
+        "go.lintTool": "golangci-lint",
+        "go.lintOnSave": "package",
+        "gopls": {
+          "buildFlags": ["-tags=integration"]
+        },
+        "[go]": {
+          "editor.defaultFormatter": "golang.go",
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+          }
+        },
+        "[go.mod]": {
+          "editor.defaultFormatter": "golang.go"
+        },
+        "markdownlint.enabled": true,
+        "markdownlint.config": {
+          "default": true,
+          "MD013": {
+            "line_length": 120,
+            "code_blocks": false,
+            "tables": false,
+            "headings": false
+          },
+          "MD033": false,
+          "MD041": false
+        },
+        "[markdown]": {
+          "editor.formatOnSave": true,
+          "editor.defaultFormatter": "DavidAnson.vscode-markdownlint",
+          "editor.wordWrap": "on"
+        },
+        "[shellscript]": {
+          "editor.defaultFormatter": "foxundermoon.shell-format",
+          "editor.tabSize": 2
+        },
+        "shellcheck.enable": true,
+        "shellcheck.run": "onSave",
+        "shellformat.flag": "-i 2 -ci -bn",
+        "[yaml]": {
+          "editor.defaultFormatter": "redhat.vscode-yaml",
+          "editor.tabSize": 2,
+          "editor.autoIndent": "full"
+        },
+        "yaml.format.enable": true,
+        "yaml.validate": true,
+        "yaml.schemas": {
+          "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.yml",
+          "https://json.schemastore.org/docker-compose.json": [
+            "compose*.yaml",
+            "docker-compose*.yaml"
+          ]
+        },
+        "[toml]": {
+          "editor.defaultFormatter": "tamasfe.even-better-toml",
+          "editor.tabSize": 2
+        },
+        "[json]": {
+          "editor.defaultFormatter": "vscode.json-language-features",
+          "editor.tabSize": 2
+        },
+        "[jsonc]": {
+          "editor.defaultFormatter": "vscode.json-language-features",
+          "editor.tabSize": 2
+        },
+        "[makefile]": {
+          "editor.insertSpaces": false,
+          "editor.tabSize": 4
+        },
+        "[dockerfile]": {
+          "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+        },
+        "[hcl]": {
+          "editor.tabSize": 2
+        },
+        "files.associations": {
+          "*.conf": "ini",
+          "*.cfg": "ini",
+          "*.toml": "toml",
+          "*.hcl": "hcl",
+          "Makefile.*": "makefile",
+          "*.mk": "makefile"
+        }
+      }
+    }
+  },
+  "remoteUser": "vscode"
+}
