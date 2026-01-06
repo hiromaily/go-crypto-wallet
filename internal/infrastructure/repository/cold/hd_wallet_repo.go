@@ -13,24 +13,6 @@ import (
 )
 
 //-----------------------------------------------------------------------------
-// HDWalletRepo interface
-//-----------------------------------------------------------------------------
-
-// HDWalletRepo is an interface for HD wallet key storage operations.
-// It abstracts over both AccountKeyRepository and AuthAccountKeyRepository
-// to allow the same use case code to work with either account or auth keys.
-type HDWalletRepo interface {
-	GetMaxIndex(accountType domainAccount.AccountType) (int64, error)
-	Insert(
-		keys []domainKey.WalletKey,
-		idx int64,
-		coinTypeCode domainCoin.CoinTypeCode,
-		accountType domainAccount.AccountType,
-		keyType domainKey.KeyType,
-	) error
-}
-
-//-----------------------------------------------------------------------------
 // AuthHDWalletRepo
 //-----------------------------------------------------------------------------
 

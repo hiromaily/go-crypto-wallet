@@ -13,6 +13,7 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	domainPayment "github.com/hiromaily/go-crypto-wallet/internal/domain/payment"
@@ -178,4 +179,17 @@ type XRPDetailTXRepositorier interface {
 	UpdateTxType(id int64, txType domainTx.TxType) (int64, error)
 	UpdateTxTypeBySentHashTx(txType domainTx.TxType, sentHashTx string) (int64, error)
 	WithTx(tx *sql.Tx) XRPDetailTXRepositorier
+}
+// HDWalletRepo is an interface for HD wallet key storage operations.
+// It abstracts over both AccountKeyRepository and AuthAccountKeyRepository
+// to allow the same use case code to work with either account or auth keys.
+type HDWalletRepo interface {
+	GetMaxIndex(accountType domainAccount.AccountType) (int64, error)
+	Insert(
+		keys []domainKey.WalletKey,
+		idx int64,
+		coinTypeCode domainCoin.CoinTypeCode,
+		accountType domainAccount.AccountType,
+		keyType domainKey.KeyType,
+	) error
 }
