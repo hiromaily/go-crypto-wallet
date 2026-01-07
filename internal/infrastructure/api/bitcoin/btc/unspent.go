@@ -60,6 +60,11 @@ func (b *Bitcoin) ListUnspent(confirmationNum uint64) ([]dtobtc.UnspentOutput, e
 func (b *Bitcoin) ListUnspentByAccount(
 	accountType domainAccount.AccountType, confirmationNum uint64,
 ) ([]dtobtc.UnspentOutput, error) {
+	// For BCH, use string-based method to support CashAddr format
+	if b.coinTypeCode.String() == "bch" {
+		return b.listUnspentByAccountBCH(accountType, confirmationNum)
+	}
+
 	addrs, err := b.GetAddressesByLabel(accountType.String())
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btc.GetAddressesByLabel(): %w", err)
@@ -140,6 +145,59 @@ func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address, confirmationNum 
 	}
 
 	return listunspentResult, nil
+}
+
+// listUnspentByAccountBCH gets listunspent by account for BCH using raw address strings
+// This avoids the btcutil.DecodeAddress issue with BCH CashAddr format
+func (b *Bitcoin) listUnspentByAccountBCH(
+	accountType domainAccount.AccountType, confirmationNum uint64,
+) ([]dtobtc.UnspentOutput, error) {
+	// Get addresses as raw strings (CashAddr format)
+	addrs, err := b.GetAddressStringsByLabel(accountType.String())
+	if err != nil {
+		return nil, fmt.Errorf("fail to call GetAddressStringsByLabel(): %w", err)
+	}
+	if len(addrs) == 0 {
+		return nil, fmt.Errorf("address for %s can not be found", accountType)
+	}
+
+	// Call listunspent with string addresses
+	input1, err := json.Marshal(confirmationNum)
+	if err != nil {
+		return nil, fmt.Errorf("fail to call json.Marshal(confirmationBlock): %w", err)
+	}
+
+	input2, err := json.Marshal(uint64(9999999))
+	if err != nil {
+		return nil, fmt.Errorf("fail to call json.Marshal(9999999): %w", err)
+	}
+
+	input3, err := json.Marshal(addrs)
+	if err != nil {
+		return nil, fmt.Errorf("fail to call json.Marshal(addresses): %w", err)
+	}
+
+	rawResult, err := b.Client.RawRequest("listunspent", []json.RawMessage{input1, input2, input3})
+	if err != nil {
+		return nil, fmt.Errorf("fail to call json.RawRequest(listunspent): %w", err)
+	}
+
+	var unspentList []ListUnspentResult
+	err = json.Unmarshal(rawResult, &unspentList)
+	if err != nil {
+		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
+	}
+
+	if len(unspentList) == 0 {
+		return nil, nil
+	}
+
+	// Sort amount by ascending (small to big)
+	sort.Slice(unspentList, func(i, j int) bool {
+		return unspentList[i].Amount < unspentList[j].Amount
+	})
+
+	return ToUnspentOutputList(unspentList, b)
 }
 
 // LockUnspent lock given txID

@@ -97,12 +97,10 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 	}
 
 	// retrieve
-	resAddrs := make([]btcutil.Address, len(labels))
-	idx := 0
+	resAddrs := make([]btcutil.Address, 0, len(labels))
 	for key := range labels {
 		// key is address string
-		var address btcutil.Address
-		address, err = b.DecodeAddress(key)
+		address, err := b.DecodeAddress(key)
 		if err != nil {
 			logger.Error(
 				"fail to call b.DecodeAddress()",
@@ -111,8 +109,36 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 			continue
 		}
 
-		resAddrs[idx] = address
-		idx++
+		resAddrs = append(resAddrs, address)
+	}
+
+	return resAddrs, nil
+}
+
+// GetAddressStringsByLabel gets addresses by label as raw strings (for BCH CashAddr support)
+func (b *Bitcoin) GetAddressStringsByLabel(labelName string) ([]string, error) {
+	// input for rpc api
+	input, err := json.Marshal(labelName)
+	if err != nil {
+		return nil, fmt.Errorf("fail to call json.Marchal(): %w", err)
+	}
+	// call getaddressesbylabel
+	rawResult, err := b.Client.RawRequest("getaddressesbylabel", []json.RawMessage{input})
+	if err != nil {
+		return nil, fmt.Errorf("fail to call json.RawRequest(getaddressesbylabel): %w", err)
+	}
+
+	// unmarshal response
+	var labels map[string]Purpose
+	err = json.Unmarshal(rawResult, &labels)
+	if err != nil {
+		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
+	}
+
+	// retrieve address strings directly without decoding
+	resAddrs := make([]string, 0, len(labels))
+	for addr := range labels {
+		resAddrs = append(resAddrs, addr)
 	}
 
 	return resAddrs, nil
