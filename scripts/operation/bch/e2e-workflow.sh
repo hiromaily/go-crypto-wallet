@@ -41,6 +41,10 @@ CONFIG_WATCH="${PROJECT_ROOT}/config/wallet/bch_watch.toml"
 CONFIG_KEYGEN="${PROJECT_ROOT}/config/wallet/bch_keygen.toml"
 CONFIG_SIGN1="${PROJECT_ROOT}/config/wallet/bch_sign1.toml"
 CONFIG_SIGN2="${PROJECT_ROOT}/config/wallet/bch_sign2.toml"
+CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account.toml"
+
+# Export account config path for keygen to load multisig configuration
+export BCH_ACCOUNT_CONF="${CONFIG_ACCOUNT}"
 
 ###############################################################################
 # Cleanup Functions
