@@ -160,12 +160,13 @@ extract_filename() {
 }
 
 ###############################################################################
-# Bitcoin-Specific Utility Functions
+# Bitcoin/Bitcoin Cash Common Utility Functions
 ###############################################################################
 
-# Check if wallet exists in Bitcoin node
-# Usage: btc_wallet_exists "btc-watch" "watch" && echo "exists"
-btc_wallet_exists() {
+# Check if wallet exists in Bitcoin/BCH node
+# Usage: bitcoin_wallet_exists "btc-watch" "watch" && echo "exists"
+# Note: Works for both BTC and BCH as they share the same RPC interface
+bitcoin_wallet_exists() {
     local container=$1
     local wallet_name=$2
     local rpc_user="${RPC_USER:-xyz}"
@@ -177,15 +178,16 @@ btc_wallet_exists() {
         listwallets 2>/dev/null | grep -q "\"$wallet_name\"" && return 0 || return 1
 }
 
-# Create Bitcoin wallet if not exists
-# Usage: btc_create_wallet_if_needed "btc-watch" "watch"
-btc_create_wallet_if_needed() {
+# Create Bitcoin/BCH wallet if not exists
+# Usage: bitcoin_create_wallet_if_needed "btc-watch" "watch"
+# Note: Works for both BTC and BCH as they share the same RPC interface
+bitcoin_create_wallet_if_needed() {
     local container=$1
     local wallet_name=$2
     local rpc_user="${RPC_USER:-xyz}"
     local rpc_password="${RPC_PASSWORD:-xyz}"
 
-    if btc_wallet_exists "$container" "$wallet_name"; then
+    if bitcoin_wallet_exists "$container" "$wallet_name"; then
         log_info "Wallet '$wallet_name' already exists in $container"
         docker exec "$container" bitcoin-cli -regtest \
             -rpcuser="${rpc_user}" \
@@ -203,8 +205,9 @@ btc_create_wallet_if_needed() {
 }
 
 # Execute bitcoin-cli command in a container
-# Usage: btc_cli "btc-watch" "getblockcount"
-btc_cli() {
+# Usage: bitcoin_cli "btc-watch" "getblockcount"
+# Note: Works for both BTC and BCH as they share the same RPC interface
+bitcoin_cli() {
     local container=$1
     shift
     local rpc_user="${RPC_USER:-xyz}"
@@ -214,6 +217,50 @@ btc_cli() {
         -rpcuser="${rpc_user}" \
         -rpcpassword="${rpc_password}" \
         "$@"
+}
+
+###############################################################################
+# Bitcoin-Specific Utility Functions (Aliases for backward compatibility)
+###############################################################################
+
+# Check if wallet exists in Bitcoin node (alias for backward compatibility)
+# Usage: btc_wallet_exists "btc-watch" "watch" && echo "exists"
+btc_wallet_exists() {
+    bitcoin_wallet_exists "$@"
+}
+
+# Create Bitcoin wallet if not exists (alias for backward compatibility)
+# Usage: btc_create_wallet_if_needed "btc-watch" "watch"
+btc_create_wallet_if_needed() {
+    bitcoin_create_wallet_if_needed "$@"
+}
+
+# Execute bitcoin-cli command in a container (alias for backward compatibility)
+# Usage: btc_cli "btc-watch" "getblockcount"
+btc_cli() {
+    bitcoin_cli "$@"
+}
+
+###############################################################################
+# Bitcoin Cash Specific Utility Functions (Aliases)
+###############################################################################
+
+# Check if wallet exists in BCH node
+# Usage: bch_wallet_exists "bch-watch" "watch" && echo "exists"
+bch_wallet_exists() {
+    bitcoin_wallet_exists "$@"
+}
+
+# Create BCH wallet if not exists
+# Usage: bch_create_wallet_if_needed "bch-watch" "watch"
+bch_create_wallet_if_needed() {
+    bitcoin_create_wallet_if_needed "$@"
+}
+
+# Execute bitcoin-cli command in BCH container
+# Usage: bch_cli "bch-watch" "getblockcount"
+bch_cli() {
+    bitcoin_cli "$@"
 }
 
 ###############################################################################

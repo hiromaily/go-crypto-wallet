@@ -31,7 +31,7 @@ services:
     volumes:
       - ./docker/nodes/bch/watch:/data
     ports:
-      - "${BCH_WATCH_RPC_PORT:-18332}:18443" # Map to regtest RPC port 18443
+      - "${BCH_WATCH_RPC_PORT:-28332}:18443" # Map to regtest RPC port 18443
     stdin_open: true
     tty: true
     networks:
@@ -58,7 +58,7 @@ services:
     volumes:
       - ./docker/nodes/bch/keygen:/data
     ports:
-      - "${BCH_KEYGEN_RPC_PORT:-19332}:18443" # Map to regtest RPC port 18443
+      - "${BCH_KEYGEN_RPC_PORT:-29332}:18443" # Map to regtest RPC port 18443
     stdin_open: true
     tty: true
     networks:
@@ -85,7 +85,7 @@ services:
     volumes:
       - ./docker/nodes/bch/sign1:/data
     ports:
-      - "${BCH_SIGN1_RPC_PORT:-20332}:18443" # Map to regtest RPC port 18443
+      - "${BCH_SIGN1_RPC_PORT:-30332}:18443" # Map to regtest RPC port 18443
     stdin_open: true
     tty: true
     networks:
@@ -112,7 +112,7 @@ services:
     volumes:
       - ./docker/nodes/bch/sign2:/data
     ports:
-      - "${BCH_SIGN2_RPC_PORT:-21332}:18443" # Map to regtest RPC port 18443
+      - "${BCH_SIGN2_RPC_PORT:-31332}:18443" # Map to regtest RPC port 18443
     stdin_open: true
     tty: true
     networks:

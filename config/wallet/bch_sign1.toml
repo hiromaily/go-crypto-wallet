@@ -2,40 +2,28 @@
 address_type = "bch-cashaddr" # p2sh-segwit, bech32, bch-cashaddr
 
 [bitcoin]
-#host = "127.0.0.1:28332"
-# if specific wallet want to be used like `bitcoin-cli -rpcwallet=watch`
-host = "127.0.0.1:28332/wallet/watch"
+host = "127.0.0.1:30332"
+# if specific wallet want to be used like `bitcoin-cli -rpcwallet=sign`
+#host = "127.0.0.1:30332/wallet/sign"
 user = "xyz"
 pass = "xyz"
 http_post_mode = true
 disable_tls = true
 network_type = "regtest" # mainnet, testnet3, regtest
 
-[bitcoin.block]
-confirmation_num = 4 #block number for required confirmation
-
-[bitcoin.fee]
-adjustment_min = 0.5 # adjustable minimum fee magnification
-adjustment_max = 2.0 # adjustable maximum fee magnification
-
 [logger]
-service = "bch-wallet"
+service = "bch-sign"
 env = "custom" # dev, prod, custom :for only zap logger
 level = "debug" # debug, info, warn, error
 is_stacktrace = true
 
-# only available for watch only wallet
+# only available for watch only wallet, but definition is required as none
 [tracer]
 type = "none"  # none, jaeger, datadog
 
-[tracer.jaeger]
-service_name = "wallet"
-collector_endpoint = "http://127.0.0.1:14268/api/traces"
-sampling_probability = 0.5  # 0.001 to 1.0
-
 [mysql]
 host = "127.0.0.1:3306"
-dbname = "watch"
+dbname = "sign"
 user = "hiromaily"
 pass = "hiromaily"
 debug = true
@@ -44,3 +32,7 @@ debug = true
 tx = "./data/tx/bch/"
 address = "./data/address/bch/"
 full_pubkey = "./data/fullpubkey/bch/"
+
+#[key]
+#seed = "Hj3H3GB6KzFpy4Yt6CEuVdXIDX5VRXGrvgbVkW37xhc="
+

@@ -15,6 +15,7 @@
 # - db.mk:           Database-specific targets
 # - ai.mk:           AI-related targets
 # - btc.mk:          Bitcoin-specific targets
+# - bch.mk:          Bitcoin Cash-specific targets
 # - eth.mk:          Ethereum-specific targets
 # - xrp.mk:          XRP/Ripple-specific targets
 # - wallet.mk:       Wallet management operations
@@ -50,6 +51,7 @@ include make/lint.mk
 
 # 3. Blockchain-specific
 include make/btc.mk
+include make/bch.mk
 include make/eth.mk
 include make/xrp.mk
 
