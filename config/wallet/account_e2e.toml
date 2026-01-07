@@ -1,0 +1,20 @@
+types = ["client", "deposit", "payment", "stored"]
+
+deposit_receiver = "deposit"
+payment_sender = "payment"
+
+# E2E test configuration with 2 auth users (sign1, sign2)
+[[multisig]]
+type = "deposit"
+required = 2
+auth_users = ["auth1", "auth2"]
+
+[[multisig]]
+type = "payment"
+required = 2
+auth_users = ["auth1", "auth2"]
+
+[[multisig]]
+type = "stored"
+required = 2
+auth_users = ["auth1", "auth2"]

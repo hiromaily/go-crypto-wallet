@@ -41,7 +41,7 @@ CONFIG_WATCH="${PROJECT_ROOT}/config/wallet/btc_watch.toml"
 CONFIG_KEYGEN="${PROJECT_ROOT}/config/wallet/btc_keygen.toml"
 CONFIG_SIGN1="${PROJECT_ROOT}/config/wallet/btc_sign1.toml"
 CONFIG_SIGN2="${PROJECT_ROOT}/config/wallet/btc_sign2.toml"
-CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account.toml"
+CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account_e2e.toml"
 
 # Export account config path for keygen to load multisig configuration
 export BTC_ACCOUNT_CONF="${CONFIG_ACCOUNT}"
