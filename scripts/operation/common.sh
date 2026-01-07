@@ -195,12 +195,23 @@ bitcoin_create_wallet_if_needed() {
             loadwallet "$wallet_name" >/dev/null 2>&1 || true
     else
         log_info "Creating wallet '$wallet_name' in $container"
-        # Create legacy wallet (descriptors=false) for compatibility with importprivkey command
-        # Parameters: wallet_name, disable_private_keys, blank, passphrase, avoid_reuse, descriptors
-        docker exec "$container" bitcoin-cli -regtest \
-            -rpcuser="${rpc_user}" \
-            -rpcpassword="${rpc_password}" \
-            createwallet "$wallet_name" false false "" false false >/dev/null
+        # Bitcoin Cash Node (BCH) has different createwallet API than Bitcoin Core
+        # BCH: createwallet "wallet_name" (disable_private_keys blank)
+        # BTC: createwallet "wallet_name" (disable_private_keys blank passphrase avoid_reuse descriptors load_on_startup external_signer)
+        if [[ "$container" == bch-* ]]; then
+            # BCH: Use 3-parameter format (wallet_name, disable_private_keys, blank)
+            docker exec "$container" bitcoin-cli -regtest \
+                -rpcuser="${rpc_user}" \
+                -rpcpassword="${rpc_password}" \
+                createwallet "$wallet_name" false false >/dev/null
+        else
+            # BTC: Create legacy wallet (descriptors=false) for compatibility with importprivkey command
+            # Parameters: wallet_name, disable_private_keys, blank, passphrase, avoid_reuse, descriptors
+            docker exec "$container" bitcoin-cli -regtest \
+                -rpcuser="${rpc_user}" \
+                -rpcpassword="${rpc_password}" \
+                createwallet "$wallet_name" false false "" false false >/dev/null
+        fi
     fi
 }
 

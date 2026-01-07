@@ -50,7 +50,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    command: -printtoconsole
+    command: bitcoind -printtoconsole
 
   bch-keygen:
     image: zquestz/bitcoin-cash-node:28.0.1
@@ -77,7 +77,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    command: -maxconnections=0 -printtoconsole
+    command: bitcoind -maxconnections=0 -printtoconsole
 
   bch-sign1:
     image: zquestz/bitcoin-cash-node:28.0.1
@@ -104,7 +104,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    command: -maxconnections=0 -printtoconsole
+    command: bitcoind -maxconnections=0 -printtoconsole
 
   bch-sign2:
     image: zquestz/bitcoin-cash-node:28.0.1
@@ -131,4 +131,4 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    command: -maxconnections=0 -printtoconsole
+    command: bitcoind -maxconnections=0 -printtoconsole
