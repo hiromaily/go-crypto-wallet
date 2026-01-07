@@ -321,9 +321,9 @@ generate_test_utxos() {
 
     log_info "Reading payment address from exported file..."
     # Get first payment address from the exported CSV file
-    # CSV format: coin,account,P2PKH,P2SH-segwit,bech32,taproot,pubkey,,index
-    # For BCH, use field 3 (P2PKH/cashaddr format)
-    payment_address=$(grep -v '^#' "${address_payment}" 2>/dev/null | head -n1 | cut -d',' -f3)
+    # CSV format: coin,account,P2PKH,P2SH-segwit,bech32,taproot,pubkey,multisigAddress,index
+    # Payment account is a multisig account, so use field 8 (multisig address)
+    payment_address=$(grep -v '^#' "${address_payment}" 2>/dev/null | head -n1 | cut -d',' -f8)
 
     if [ -z "$payment_address" ]; then
         log_error "Failed to extract payment address from ${address_payment}"
