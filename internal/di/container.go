@@ -740,7 +740,16 @@ func (c *container) NewWatchSendTransactionUseCase() any {
 }
 
 func (c *container) NewWatchImportAddressUseCase() watchusecase.ImportAddressUseCase {
-	return c.newWatchImportAddressUseCase()
+	switch {
+	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
+		return c.newBTCWatchImportAddressUseCase()
+	case domainCoin.IsETHGroup(c.conf.CoinTypeCode):
+		return c.newWatchImportAddressUseCase()
+	case c.conf.CoinTypeCode == domainCoin.XRP:
+		return c.newWatchImportAddressUseCase()
+	default:
+		panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
+	}
 }
 
 func (c *container) NewWatchCreatePaymentRequestUseCase() watchusecase.CreatePaymentRequestUseCase {
