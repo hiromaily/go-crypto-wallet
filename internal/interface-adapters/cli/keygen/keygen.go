@@ -19,14 +19,16 @@ import (
 )
 
 // AddCommands adds all keygen subcommands to the root command
-func AddCommands(rootCmd *cobra.Command, wallet *wallets.Keygener, container di.Container, version string) {
+func AddCommands(
+	rootCmd *cobra.Command, wallet *wallets.Keygener, containerGetter func() di.Container, version string,
+) {
 	// Create command
 	createCmd := &cobra.Command{
 		Use:   "create",
 		Short: "create resources",
 	}
 	rootCmd.AddCommand(createCmd)
-	create.AddCommands(createCmd, wallet, container)
+	create.AddCommands(createCmd, wallet, containerGetter)
 
 	// Export command
 	exportCmd := &cobra.Command{
@@ -34,7 +36,7 @@ func AddCommands(rootCmd *cobra.Command, wallet *wallets.Keygener, container di.
 		Short: "export resources",
 	}
 	rootCmd.AddCommand(exportCmd)
-	export.AddCommands(exportCmd, wallet, container)
+	export.AddCommands(exportCmd, wallet, containerGetter)
 
 	// Import command
 	importCmd := &cobra.Command{
@@ -42,7 +44,7 @@ func AddCommands(rootCmd *cobra.Command, wallet *wallets.Keygener, container di.
 		Short: "import resources",
 	}
 	rootCmd.AddCommand(importCmd)
-	imports.AddCommands(importCmd, wallet, container)
+	imports.AddCommands(importCmd, wallet, containerGetter)
 
 	// Sign command
 	signCmd := &cobra.Command{
@@ -50,13 +52,13 @@ func AddCommands(rootCmd *cobra.Command, wallet *wallets.Keygener, container di.
 		Short: "sign unsigned transaction",
 	}
 	rootCmd.AddCommand(signCmd)
-	sign.AddCommands(signCmd, wallet, container)
+	sign.AddCommands(signCmd, wallet, containerGetter)
 
 	// Descriptor commands (BTC only)
-	btckeygen.AddDescriptorCommands(rootCmd, container)
+	btckeygen.AddDescriptorCommands(rootCmd, containerGetter)
 
 	// MuSig2 command (BTC only)
-	AddMuSig2Commands(rootCmd, container)
+	AddMuSig2Commands(rootCmd, containerGetter)
 
 	// API command - wallet-type specific, dynamically configured
 	apiCmd := &cobra.Command{

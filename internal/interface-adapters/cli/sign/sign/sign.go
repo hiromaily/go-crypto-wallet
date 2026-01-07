@@ -13,14 +13,14 @@ import (
 )
 
 // AddCommands adds all sign subcommands
-func AddCommands(parentCmd *cobra.Command, wallet *wallets.Signer, container di.Container) {
+func AddCommands(parentCmd *cobra.Command, wallet *wallets.Signer, containerGetter func() di.Container) {
 	// signature command
 	var signatureFile string
 	signatureCmd := &cobra.Command{
 		Use:   "signature",
 		Short: "sign on signed transaction for multsig address (account would be found from file name)",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runSignature(container, signatureFile)
+			return runSignature(containerGetter(), signatureFile)
 		},
 	}
 	signatureCmd.Flags().StringVar(&signatureFile, "file", "", "import file path for signed transactions")

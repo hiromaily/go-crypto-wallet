@@ -43,6 +43,11 @@ generate-bch-key-local:
 ###############################################################################
 # E2E Testing
 ###############################################################################
+# Run Bitcoin E2E workflow from completely fresh state (recommended)
+.PHONY: btc-e2e-test-reset
+btc-e2e-test-reset:
+	./scripts/operation/btc/e2e-workflow.sh --reset
+
 # Run complete Bitcoin end-to-end workflow (regression test)
 .PHONY: btc-e2e-test
 btc-e2e-test:

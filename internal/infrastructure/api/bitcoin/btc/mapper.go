@@ -92,7 +92,7 @@ func ToNetworkInfo(result *GetNetworkInfoResult) *dtobtc.NetworkInfo {
 		RelayFee:        result.Relayfee,
 		IncrementalFee:  result.Incrementalfee,
 		LocalAddresses:  localAddrs,
-		Warnings:        result.Warnings,
+		Warnings:        result.Warnings.String(),
 	}
 }
 
@@ -130,7 +130,7 @@ func ToBlockchainInfo(result *GetBlockchainInfoResult) *dtobtc.BlockchainInfo {
 		InitialBlockDownload: result.Initialblockdownload,
 		Pruned:               result.Pruned,
 		SoftForks:            softForks,
-		Warnings:             result.Warnings,
+		Warnings:             result.Warnings.String(),
 	}
 }
 

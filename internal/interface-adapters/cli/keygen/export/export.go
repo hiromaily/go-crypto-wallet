@@ -8,14 +8,14 @@ import (
 )
 
 // AddCommands adds all export subcommands
-func AddCommands(parentCmd *cobra.Command, wallet *wallets.Keygener, container di.Container) {
+func AddCommands(parentCmd *cobra.Command, wallet *wallets.Keygener, containerGetter func() di.Container) {
 	// address command
 	var addressAccount string
 	addressCmd := &cobra.Command{
 		Use:   "address",
 		Short: "export generated PublicKey as csv file",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runAddress(container, addressAccount)
+			return runAddress(containerGetter(), addressAccount)
 		},
 	}
 	addressCmd.Flags().StringVar(&addressAccount, "account", "", "target account")

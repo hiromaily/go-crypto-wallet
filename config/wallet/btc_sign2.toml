@@ -2,7 +2,7 @@
 address_type = "bech32" # legacy, p2sh-segwit, bech32, taproot
 
 [bitcoin]
-host = "127.0.0.1:20332"
+host = "127.0.0.1:21332"
 # if specific wallet want to be used like `bitcoin-cli -rpcwallet=sign`
 #host = "127.0.0.1:18332/wallet/sign"
 user = "xyz"

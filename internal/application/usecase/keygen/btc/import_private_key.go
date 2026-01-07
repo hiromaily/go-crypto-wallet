@@ -7,10 +7,10 @@ import (
 	"github.com/btcsuite/btcd/btcutil"
 
 	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 

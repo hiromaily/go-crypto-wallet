@@ -3,6 +3,7 @@ package btc
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 )
@@ -22,7 +23,7 @@ type GetNetworkInfoResult struct {
 	Relayfee           float64        `json:"relayfee"`
 	Incrementalfee     float64        `json:"incrementalfee"`
 	Localaddresses     []LocalAddress `json:"localaddresses"`
-	Warnings           string         `json:"warnings"`
+	Warnings           WarningsField  `json:"warnings"`
 }
 
 // BlockchainInfoChain is chain in GetBlockchainInfoResult
@@ -41,6 +42,42 @@ func (c BlockchainInfoChain) String() string {
 	return string(c)
 }
 
+// WarningsField handles both string (Bitcoin Core < 29.2) and array (Bitcoin Core >= 29.2) formats
+type WarningsField struct {
+	Value []string
+}
+
+// UnmarshalJSON implements custom unmarshaling for warnings field
+func (w *WarningsField) UnmarshalJSON(data []byte) error {
+	// Try to unmarshal as array first
+	var arr []string
+	if err := json.Unmarshal(data, &arr); err == nil {
+		w.Value = arr
+		return nil
+	}
+
+	// Fall back to string format
+	var str string
+	if err := json.Unmarshal(data, &str); err != nil {
+		return err
+	}
+
+	if str != "" {
+		w.Value = []string{str}
+	} else {
+		w.Value = []string{}
+	}
+	return nil
+}
+
+// String returns a concatenated string of all warnings
+func (w *WarningsField) String() string {
+	if len(w.Value) == 0 {
+		return ""
+	}
+	return strings.Join(w.Value, ", ")
+}
+
 // GetBlockchainInfoResult is response type of PRC `getblockchaininfo`
 type GetBlockchainInfoResult struct {
 	Chain                BlockchainInfoChain `json:"chain"` // main, test, regtest, signet
@@ -55,7 +92,7 @@ type GetBlockchainInfoResult struct {
 	SizeOnDisk           uint64              `json:"size_on_disk"`
 	Pruned               bool                `json:"pruned"`
 	SoftForks            SoftForks           `json:"softforks"`
-	Warnings             string              `json:"warnings"`
+	Warnings             WarningsField       `json:"warnings"`
 }
 
 // SoftForks is soft fork list

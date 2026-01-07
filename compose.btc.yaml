@@ -47,7 +47,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    command: -printtoconsole
+    command: -printtoconsole -deprecatedrpc=create_bdb
 
   btc-keygen:
     image: bitcoin/bitcoin:29.2
@@ -74,7 +74,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    command: -maxconnections=0 -printtoconsole
+    command: -maxconnections=0 -printtoconsole -deprecatedrpc=create_bdb
 
   btc-sign1:
     image: bitcoin/bitcoin:29.2
@@ -101,7 +101,7 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    command: -maxconnections=0 -printtoconsole
+    command: -maxconnections=0 -printtoconsole -deprecatedrpc=create_bdb
 
   btc-sign2:
     image: bitcoin/bitcoin:29.2
@@ -128,4 +128,4 @@ services:
       timeout: 10s
       retries: 5
       start_period: 30s
-    command: -maxconnections=0 -printtoconsole
+    command: -maxconnections=0 -printtoconsole -deprecatedrpc=create_bdb

@@ -17,6 +17,7 @@ SIGN_WALLET_NUM=2
 VERBOSE=false
 CLEANUP_ONLY=false
 NON_INTERACTIVE=false
+RESET_STATE=false
 
 # RPC credentials (can be overridden via environment variables)
 # Note: Default values are for regtest/development only
@@ -26,6 +27,17 @@ RPC_PASSWORD="${RPC_PASSWORD:-xyz}"
 # Wallet passphrase (only used if ENCRYPTED=true)
 # Note: Default value is for testing only - use strong passphrase in production
 WALLET_PASSPHRASE="${WALLET_PASSPHRASE:-test}"
+
+# Script directory for relative paths
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+
+# Config file paths (absolute)
+CONFIG_WATCH="${PROJECT_ROOT}/config/wallet/btc_watch.toml"
+CONFIG_KEYGEN="${PROJECT_ROOT}/config/wallet/btc_keygen.toml"
+CONFIG_SIGN="${PROJECT_ROOT}/config/wallet/btc_sign.toml"
+CONFIG_SIGN1="${PROJECT_ROOT}/config/wallet/btc_sign1.toml"
+CONFIG_SIGN2="${PROJECT_ROOT}/config/wallet/btc_sign2.toml"
 
 # Colors for output
 RED='\033[0;31m'
@@ -115,14 +127,76 @@ create_wallet_if_needed() {
         docker exec "$container" bitcoin-cli -regtest -rpcuser="${RPC_USER}" -rpcpassword="${RPC_PASSWORD}" loadwallet "$wallet_name" >/dev/null 2>&1 || true
     else
         log_info "Creating wallet '$wallet_name' in $container"
-        docker exec "$container" bitcoin-cli -regtest -rpcuser="${RPC_USER}" -rpcpassword="${RPC_PASSWORD}" createwallet "$wallet_name" >/dev/null
+        # Create legacy wallet (descriptors=false) for compatibility with importprivkey command
+        # Parameters: wallet_name, disable_private_keys, blank, passphrase, avoid_reuse, descriptors
+        docker exec "$container" bitcoin-cli -regtest -rpcuser="${RPC_USER}" -rpcpassword="${RPC_PASSWORD}" \
+            createwallet "$wallet_name" false false "" false false >/dev/null
     fi
 }
 
 ###############################################################################
-# Cleanup Function
+# Cleanup Functions
 ###############################################################################
 
+# Clean generated data files
+clean_data_files() {
+    log_substep "Cleaning generated data files"
+
+    # Clean address files (keeping .gitkeep)
+    if [ -d "data/address/btc" ]; then
+        find data/address/btc -type f ! -name '.gitkeep' -delete 2>/dev/null || true
+        log_info "Cleaned address files"
+    fi
+
+    # Clean fullpubkey files (keeping .gitkeep)
+    if [ -d "data/fullpubkey/btc" ]; then
+        find data/fullpubkey/btc -type f ! -name '.gitkeep' -delete 2>/dev/null || true
+        log_info "Cleaned fullpubkey files"
+    fi
+
+    # Clean transaction files (keeping .gitkeep)
+    if [ -d "data/tx/btc" ]; then
+        find data/tx/btc -type f ! -name '.gitkeep' -delete 2>/dev/null || true
+        log_info "Cleaned transaction files"
+    fi
+}
+
+# Clean Bitcoin node wallet data
+clean_bitcoin_wallet_data() {
+    log_substep "Cleaning Bitcoin node wallet data"
+
+    # Clean regtest data directories (keeping bitcoin.conf)
+    for node in watch keygen sign1 sign2; do
+        wallet_dir="docker/nodes/btc/${node}/regtest"
+        if [ -d "$wallet_dir" ]; then
+            # Remove all files/dirs except bitcoin.conf
+            find "$wallet_dir" -mindepth 1 ! -name 'bitcoin.conf' -exec rm -rf {} + 2>/dev/null || true
+            log_info "Cleaned ${node} wallet data"
+        fi
+    done
+}
+
+# Full reset: cleanup everything for fresh state
+full_reset() {
+    log_step "Performing full reset for fresh state"
+
+    # Stop and remove containers
+    log_info "Stopping Bitcoin containers..."
+    docker compose -f compose.btc.yaml down -v 2>/dev/null || true
+
+    log_info "Stopping database container..."
+    docker compose -f compose.yaml down -v 2>/dev/null || true
+
+    # Clean data files
+    clean_data_files
+
+    # Clean Bitcoin wallet data
+    clean_bitcoin_wallet_data
+
+    log_info "Full reset complete - system is in fresh state"
+}
+
+# Basic cleanup: just stop containers
 cleanup() {
     log_step "Cleaning up containers and state"
 
@@ -132,9 +206,6 @@ cleanup() {
 
     log_info "Stopping database container..."
     docker compose -f compose.yaml down -v 2>/dev/null || true
-
-    # Remove wallet data directories (optional - commented out for safety)
-    # log_warn "To remove wallet data, manually delete: docker/nodes/btc/"
 
     log_info "Cleanup complete"
 }
@@ -225,7 +296,7 @@ key_generation_phase() {
 
     # Keygen wallet - create seed
     log_substep "Creating seed for keygen wallet"
-    keygen create seed || {
+    keygen -c "${CONFIG_KEYGEN}" create seed || {
         log_warn "Seed already exists or error occurred, continuing..."
     }
 
@@ -233,25 +304,25 @@ key_generation_phase() {
     log_substep "Creating HD keys for keygen wallet (client, deposit, payment, stored)"
     for account in client deposit payment stored; do
         log_info "Creating HD keys for account: $account"
-        keygen -coin "${COIN}" create hdkey -account "$account" -keynum 10
+        keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" create hdkey --account "$account" --keynum 10
     done
 
     # Keygen wallet - import private keys
     log_substep "Importing private keys into keygen wallet"
     if [ "$ENCRYPTED" = "true" ]; then
-        keygen api walletpassphrase -passphrase "${WALLET_PASSPHRASE}"
+        keygen -c "${CONFIG_KEYGEN}" api walletpassphrase --passphrase "${WALLET_PASSPHRASE}"
     fi
     for account in client deposit payment stored; do
         log_info "Importing private keys for account: $account"
-        keygen -coin "${COIN}" import privkey -account "$account"
+        keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" import privkey --account "$account"
     done
     if [ "$ENCRYPTED" = "true" ]; then
-        keygen api walletlock
+        keygen -c "${CONFIG_KEYGEN}" api walletlock
     fi
 
-    # Sign wallets - create seed
+    # Sign wallets - create seed (using sign1 as the primary sign wallet)
     log_substep "Creating seeds for sign wallets"
-    sign create seed || {
+    sign1 --conf "${CONFIG_SIGN1}" --coin "${COIN}" create seed || {
         log_warn "Sign seed already exists or error occurred, continuing..."
     }
 
@@ -259,26 +330,28 @@ key_generation_phase() {
     log_substep "Creating HD keys for sign wallets"
     for i in $(seq 1 "$SIGN_WALLET_NUM"); do
         log_info "Creating HD keys for sign${i}"
-        "sign${i}" -coin "${COIN}" -wallet "sign${i}" create hdkey
+        config_var="CONFIG_SIGN${i}"
+        "sign${i}" --conf "${!config_var}" --coin "${COIN}" --wallet "sign${i}" create hdkey
     done
 
     # Sign wallets - import private keys
     log_substep "Importing private keys into sign wallets"
     for i in $(seq 1 "$SIGN_WALLET_NUM"); do
         log_info "Importing private keys for sign${i}"
+        config_var="CONFIG_SIGN${i}"
         if [ "$ENCRYPTED" = "true" ]; then
-            "sign${i}" -coin "${COIN}" -wallet "sign${i}" api walletpassphrase -passphrase "${WALLET_PASSPHRASE}"
+            "sign${i}" --conf "${!config_var}" --coin "${COIN}" --wallet "sign${i}" api walletpassphrase --passphrase "${WALLET_PASSPHRASE}"
         fi
-        "sign${i}" -coin "${COIN}" -wallet "sign${i}" import privkey
+        "sign${i}" --conf "${!config_var}" --coin "${COIN}" --wallet "sign${i}" import privkey
         if [ "$ENCRYPTED" = "true" ]; then
-            "sign${i}" -coin "${COIN}" -wallet "sign${i}" api walletlock
+            "sign${i}" --conf "${!config_var}" --coin "${COIN}" --wallet "sign${i}" api walletlock
         fi
     done
 
     # Sign wallets - export fullpubkey
     log_substep "Exporting full public keys from sign wallets"
-    file_fullpubkey_auth1=$(sign1 -coin "${COIN}" -wallet sign1 export fullpubkey)
-    file_fullpubkey_auth2=$(sign2 -coin "${COIN}" -wallet sign2 export fullpubkey)
+    file_fullpubkey_auth1=$(sign1 --conf "${CONFIG_SIGN1}" --coin "${COIN}" --wallet sign1 export fullpubkey)
+    file_fullpubkey_auth2=$(sign2 --conf "${CONFIG_SIGN2}" --coin "${COIN}" --wallet sign2 export fullpubkey)
 
     # Extract file paths
     fullpubkey_file1="${file_fullpubkey_auth1##*\[fileName\]: }"
@@ -303,24 +376,24 @@ multisig_setup_phase() {
     # Import fullpubkeys
     log_substep "Importing full public keys into keygen wallet"
     log_info "Importing fullpubkey from sign1: $FULLPUBKEY_FILE1"
-    keygen -coin "${COIN}" import fullpubkey -file "${FULLPUBKEY_FILE1}"
+    keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" import fullpubkey --file "${FULLPUBKEY_FILE1}"
 
     log_info "Importing fullpubkey from sign2: $FULLPUBKEY_FILE2"
-    keygen -coin "${COIN}" import fullpubkey -file "${FULLPUBKEY_FILE2}"
+    keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" import fullpubkey --file "${FULLPUBKEY_FILE2}"
 
     # Create multisig addresses
     log_substep "Creating multisig addresses"
     for account in deposit payment stored; do
         log_info "Creating multisig address for account: $account"
-        keygen -coin "${COIN}" create multisig -account "$account"
+        keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" create multisig --account "$account"
     done
 
     # Export addresses
     log_substep "Exporting addresses from keygen wallet"
-    file_address_client=$(keygen -coin "${COIN}" export address -account client)
-    file_address_deposit=$(keygen -coin "${COIN}" export address -account deposit)
-    file_address_payment=$(keygen -coin "${COIN}" export address -account payment)
-    file_address_stored=$(keygen -coin "${COIN}" export address -account stored)
+    file_address_client=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" export address --account client)
+    file_address_deposit=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" export address --account deposit)
+    file_address_payment=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" export address --account payment)
+    file_address_stored=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" export address --account stored)
 
     # Extract file paths
     address_client="${file_address_client##*\[fileName\]: }"
@@ -337,16 +410,71 @@ multisig_setup_phase() {
     # Import addresses into watch wallet
     log_substep "Importing addresses into watch wallet"
     log_info "Importing client addresses"
-    watch -coin "${COIN}" import address -file "${address_client}"
+    watch -c "${CONFIG_WATCH}" --coin "${COIN}" import address --file "${address_client}"
 
     log_info "Importing deposit addresses"
-    watch -coin "${COIN}" import address -file "${address_deposit}"
+    watch -c "${CONFIG_WATCH}" --coin "${COIN}" import address --file "${address_deposit}"
 
     log_info "Importing payment addresses"
-    watch -coin "${COIN}" import address -file "${address_payment}"
+    watch -c "${CONFIG_WATCH}" --coin "${COIN}" import address --file "${address_payment}"
 
     log_info "Importing stored addresses"
-    watch -coin "${COIN}" import address -file "${address_stored}"
+    watch -c "${CONFIG_WATCH}" --coin "${COIN}" import address --file "${address_stored}"
+}
+
+###############################################################################
+# UTXO Generation Phase (for regtest)
+###############################################################################
+
+generate_test_utxos() {
+    log_step "Generating Test UTXOs for Transaction Phase"
+
+    log_info "Reading payment address from exported file..."
+    # Get first payment address from the exported CSV file
+    # CSV format: coin,account,P2PKH,P2SH-segwit,bech32,taproot,pubkey,,index
+    # Use field 4 (P2SH-segwit address) which works for both single and multisig addresses
+    payment_address=$(grep -v '^#' "${address_payment}" 2>/dev/null | head -n1 | cut -d',' -f4)
+
+    if [ -z "$payment_address" ]; then
+        log_error "Failed to extract payment address from ${address_payment}"
+        return 1
+    fi
+
+    log_info "Using payment address: $payment_address"
+
+    # Generate blocks with coinbase reward to payment address
+    log_info "Generating 101 blocks to create mature coinbase for testing..."
+    docker exec btc-watch bitcoin-cli -regtest \
+        -rpcuser="${RPC_USER}" \
+        -rpcpassword="${RPC_PASSWORD}" \
+        generatetoaddress 101 "$payment_address" >/dev/null
+
+    log_info "Test UTXOs generated successfully"
+    log_info "Waiting for blockchain sync and balance update..."
+
+    # Poll for balance update with timeout
+    max_wait=30
+    wait_interval=2
+    elapsed=0
+    balance_found=false
+
+    while [ $elapsed -lt $max_wait ]; do
+        balance_output=$(watch -c "${CONFIG_WATCH}" --coin "${COIN}" monitor balance 2>&1 || true)
+        if echo "$balance_output" | grep -q "payment"; then
+            log_info "Payment account balance verified (took ${elapsed}s)"
+            balance_found=true
+            break
+        fi
+        sleep $wait_interval
+        elapsed=$((elapsed + wait_interval))
+        if [ $elapsed -lt $max_wait ]; then
+            log_info "Still waiting for balance update... (${elapsed}s/${max_wait}s)"
+        fi
+    done
+
+    if [ "$balance_found" = false ]; then
+        log_warn "Balance not detected within ${max_wait}s, but proceeding with transaction phase"
+    fi
 }
 
 ###############################################################################
@@ -356,27 +484,9 @@ multisig_setup_phase() {
 transaction_flow_phase() {
     log_step "Transaction Flow Phase"
 
-    log_warn "This phase requires UTXOs to be available in the payment account"
-    log_warn "If you see 'No utxo' error, you need to:"
-    log_warn "  1. Send test coins to payment addresses"
-    log_warn "  2. Mine some blocks to confirm transactions"
-    log_warn "  3. Re-run this script"
-    log_warn ""
-    log_warn "For testing in regtest mode, you can:"
-    log_warn "  1. Generate coins to a payment address: docker exec btc-watch bitcoin-cli -regtest -rpcuser=${RPC_USER} -rpcpassword=${RPC_PASSWORD} generatetoaddress 101 <payment_address>"
-    log_warn "  2. Check balance: watch -coin btc monitor balance"
-    log_warn ""
-
-    # Only prompt if in interactive mode
-    if [ "$NON_INTERACTIVE" = "false" ] && [ -t 0 ]; then
-        read -p "Press Enter to continue or Ctrl+C to exit..." dummy || true
-    else
-        log_info "Running in non-interactive mode, proceeding automatically..."
-    fi
-
     # Create unsigned transaction
     log_substep "Creating unsigned payment transaction"
-    tx_file=$(watch create payment 2>&1) || {
+    tx_file=$(watch -c "${CONFIG_WATCH}" create payment 2>&1) || {
         log_error "Failed to create payment transaction"
         log_error "Output: $tx_file"
 
@@ -402,11 +512,11 @@ transaction_flow_phase() {
     # Sign with keygen wallet (1st signature)
     log_substep "Signing with keygen wallet (1st signature)"
     if [ "$ENCRYPTED" = "true" ]; then
-        keygen api walletpassphrase -passphrase "${WALLET_PASSPHRASE}"
+        keygen -c "${CONFIG_KEYGEN}" api walletpassphrase --passphrase "${WALLET_PASSPHRASE}"
     fi
-    tx_file_signed=$(keygen sign -file "${tx_unsigned}")
+    tx_file_signed=$(keygen -c "${CONFIG_KEYGEN}" sign --file "${tx_unsigned}")
     if [ "$ENCRYPTED" = "true" ]; then
-        keygen api walletlock
+        keygen -c "${CONFIG_KEYGEN}" api walletlock
     fi
 
     tx_signed1="${tx_file_signed##*\[fileName\]: }"
@@ -414,19 +524,19 @@ transaction_flow_phase() {
 
     # Sign with sign1 wallet (2nd signature)
     log_substep "Signing with sign1 wallet (2nd signature)"
-    tx_file_signed2=$(sign1 -wallet sign1 sign -file "${tx_signed1}")
+    tx_file_signed2=$(sign1 --conf "${CONFIG_SIGN1}" --wallet sign1 sign --file "${tx_signed1}")
     tx_signed2="${tx_file_signed2##*\[fileName\]: }"
     log_info "Signed transaction (2nd): $tx_signed2"
 
     # Sign with sign2 wallet (3rd signature)
     log_substep "Signing with sign2 wallet (3rd signature)"
-    tx_file_signed3=$(sign2 -wallet sign2 sign -file "${tx_signed2}")
+    tx_file_signed3=$(sign2 --conf "${CONFIG_SIGN2}" --wallet sign2 sign --file "${tx_signed2}")
     tx_signed3="${tx_file_signed3##*\[fileName\]: }"
     log_info "Signed transaction (3rd): $tx_signed3"
 
     # Send transaction
     log_substep "Sending fully signed transaction"
-    tx_result=$(watch send -file "${tx_signed3}")
+    tx_result=$(watch -c "${CONFIG_WATCH}" send --file "${tx_signed3}")
     tx_id="${tx_result##*txID: }"
 
     log_info "Transaction sent successfully!"
@@ -448,12 +558,16 @@ the Bitcoin workflow functions correctly after code changes.
 Usage: $0 [OPTIONS]
 
 Options:
+  --reset             Full reset: cleanup all state for fresh start
   --cleanup           Stop containers and cleanup state, then exit
   --verbose           Enable verbose output
   --non-interactive   Run without interactive prompts (for CI/CD)
   -h, --help          Display this help message
 
 Examples:
+  # Run from completely fresh state
+  $0 --reset
+
   # Run complete E2E workflow
   $0
 
@@ -469,11 +583,11 @@ The script performs the following steps:
   3. Create wallets in Bitcoin nodes
   4. Generate keys for keygen and sign wallets
   5. Create multisig addresses and export to watch wallet
-  6. Create, sign, and send a test transaction
+  6. Generate test UTXOs (automatically generates 101 blocks)
+  7. Create, sign, and send a test transaction
 
-Note: The transaction phase requires UTXOs to be available. For testing in
-regtest mode, you can generate test coins using:
-  docker exec btc-watch bitcoin-cli -regtest -rpcuser=\${RPC_USER:-xyz} -rpcpassword=\${RPC_PASSWORD:-xyz} generatetoaddress 101 <payment_address>
+The script now automatically generates test UTXOs for the transaction phase,
+making it fully automated and suitable for CI/CD pipelines.
 
 Environment Variables:
   RPC_USER          Bitcoin RPC username (default: xyz for regtest)
@@ -493,6 +607,10 @@ main() {
         case "$1" in
             --cleanup)
                 CLEANUP_ONLY=true
+                shift
+                ;;
+            --reset)
+                RESET_STATE=true
                 shift
                 ;;
             --verbose)
@@ -522,6 +640,11 @@ main() {
         exit 0
     fi
 
+    # Full reset if requested
+    if [ "$RESET_STATE" = "true" ]; then
+        full_reset
+    fi
+
     log_info "Starting Bitcoin E2E Workflow"
     log_info "Coin: $COIN"
     log_info "Encrypted: $ENCRYPTED"
@@ -534,6 +657,7 @@ main() {
     setup_wallets
     key_generation_phase
     multisig_setup_phase
+    generate_test_utxos
     transaction_flow_phase
 
     log_step "Bitcoin E2E Workflow Completed Successfully!"
@@ -543,10 +667,12 @@ main() {
     log_info "  ✓ Keys generated and imported"
     log_info "  ✓ Multisig addresses created"
     log_info "  ✓ Addresses imported into watch wallet"
-    log_info "  ✓ Transaction flow tested (if UTXOs available)"
+    log_info "  ✓ Test UTXOs generated"
+    log_info "  ✓ Transaction created, signed, and sent"
     echo ""
     log_info "You can now use the wallet system for Bitcoin operations"
-    log_info "To cleanup and reset, run: $0 --cleanup"
+    log_info "To cleanup, run: $0 --cleanup"
+    log_info "To full reset for fresh state, run: $0 --reset"
 }
 
 # Trap errors and cleanup

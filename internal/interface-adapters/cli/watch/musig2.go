@@ -13,7 +13,7 @@ import (
 )
 
 // AddMuSig2Commands adds MuSig2 subcommands to the parent command
-func AddMuSig2Commands(parentCmd *cobra.Command, container di.Container) {
+func AddMuSig2Commands(parentCmd *cobra.Command, containerGetter func() di.Container) {
 	musig2Cmd := &cobra.Command{
 		Use:   "musig2",
 		Short: "MuSig2 operations for BTC",
@@ -21,14 +21,14 @@ func AddMuSig2Commands(parentCmd *cobra.Command, container di.Container) {
 	}
 
 	// Add collect-nonces and aggregate subcommands
-	musig2Cmd.AddCommand(newMuSig2CollectNoncesCommand(container))
-	musig2Cmd.AddCommand(newMuSig2AggregateCommand(container))
+	musig2Cmd.AddCommand(newMuSig2CollectNoncesCommand(containerGetter))
+	musig2Cmd.AddCommand(newMuSig2AggregateCommand(containerGetter))
 
 	parentCmd.AddCommand(musig2Cmd)
 }
 
 // newMuSig2CollectNoncesCommand creates the 'musig2 collect-nonces' command
-func newMuSig2CollectNoncesCommand(container di.Container) *cobra.Command {
+func newMuSig2CollectNoncesCommand(containerGetter func() di.Container) *cobra.Command {
 	var (
 		file   string
 		nonces string
@@ -47,7 +47,7 @@ aggregated nonces for Round 2 signing.`,
   --nonces payment_123_keygen_nonce.json,payment_123_sign1_nonce.json,payment_123_sign2_nonce.json \
   --output payment_123_with_nonces.psbt`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runMuSig2CollectNonces(cmd.Context(), container, file, nonces, output)
+			return runMuSig2CollectNonces(cmd.Context(), containerGetter(), file, nonces, output)
 		},
 	}
 
@@ -62,7 +62,7 @@ aggregated nonces for Round 2 signing.`,
 }
 
 // newMuSig2AggregateCommand creates the 'musig2 aggregate' command
-func newMuSig2AggregateCommand(container di.Container) *cobra.Command {
+func newMuSig2AggregateCommand(containerGetter func() di.Container) *cobra.Command {
 	var (
 		files  string
 		output string
@@ -79,7 +79,7 @@ a finalized PSBT ready for broadcast.`,
   --files payment_123_keygen_signed.psbt,payment_123_sign1_signed.psbt,payment_123_sign2_signed.psbt \
   --output payment_123_final.psbt`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runMuSig2Aggregate(cmd.Context(), container, files, output)
+			return runMuSig2Aggregate(cmd.Context(), containerGetter(), files, output)
 		},
 	}
 

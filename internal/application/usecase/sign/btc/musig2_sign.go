@@ -7,10 +7,10 @@ import (
 
 	"github.com/btcsuite/btcd/btcec/v2"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/multisig"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 )
 
 type muSig2SignUseCase struct {

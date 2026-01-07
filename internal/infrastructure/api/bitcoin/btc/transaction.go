@@ -296,9 +296,10 @@ func (b *Bitcoin) CreateRawTransaction(
 // FundRawTransactionOptions options for fundrawtransaction RPC
 // Bitcoin Core v28.0+ supports max_tx_weight parameter
 type FundRawTransactionOptions struct {
-	FeeRate      float64 `json:"feeRate,omitempty"`      // Fee rate in BTC/kvB
-	MaxTxWeight  *int    `json:"max_tx_weight,omitempty"` // Max transaction weight (v28.0+, default: 4000000 WU)
-	ChangeType   string  `json:"changeType,omitempty"`    // Output type for change (legacy, p2sh-segwit, bech32, bech32m)
+	FeeRate     float64 `json:"feeRate,omitempty"`       // Fee rate in BTC/kvB
+	MaxTxWeight *int    `json:"max_tx_weight,omitempty"` // Max transaction weight (v28.0+, default: 4000000 WU)
+	// Output type for change (legacy, p2sh-segwit, bech32, bech32m)
+	ChangeType    string `json:"changeType,omitempty"`
 	IncludeUnsafe bool   `json:"includeUnsafe,omitempty"` // Include unsafe inputs
 }
 
@@ -310,7 +311,10 @@ func (b *Bitcoin) FundRawTransaction(hexTx string) (*dtobtc.FundRawTransactionRe
 
 // FundRawTransactionWithOptions adds inputs to a transaction with custom options.
 // Bitcoin Core v28.0+ supports max_tx_weight parameter to limit transaction size.
-func (b *Bitcoin) FundRawTransactionWithOptions(hexTx string, opts *FundRawTransactionOptions) (*dtobtc.FundRawTransactionResult, error) {
+func (b *Bitcoin) FundRawTransactionWithOptions(
+	hexTx string,
+	opts *FundRawTransactionOptions,
+) (*dtobtc.FundRawTransactionResult, error) {
 	// fundrawtransaction
 	// https://bitcoincore.org/en/doc/0.19.0/rpc/rawtransactions/fundrawtransaction/
 
