@@ -79,7 +79,7 @@ Use this navigation guide to find relevant documentation for specific tasks:
 4. Commit changes with descriptive message
 5. Push and create pull request
 
-See [Workflow Guidelines](agents/workflow.md) for detailed workflow documentation.
+See [Workflow Guidelines](agents/workflow.md) for detailed workflow documentation (`agents/workflow.md`).
 
 ### Changing Database Schema
 
@@ -90,7 +90,7 @@ See [Workflow Guidelines](agents/workflow.md) for detailed workflow documentatio
 5. Regenerate SQLC code: `make sqlc`
 6. Verify build: `make check-build`
 
-See [Database Management](agents/database.md) for detailed database workflow.
+See [Database Management](agents/database.md) for detailed database workflow (`agents/database.md`).
 
 ### Adding New Use Case
 
@@ -100,7 +100,7 @@ See [Database Management](agents/database.md) for detailed database workflow.
 4. Update CLI commands in `internal/interface-adapters/cli/` to use new use case
 5. Wire up dependencies in `internal/di/`
 
-See [Architecture Guidelines](agents/architecture.md) for use case patterns and guidelines.
+See [Architecture Guidelines](agents/architecture.md) for use case patterns and guidelines (`agents/architecture.md`).
 
 ## When to Use Each Document
 

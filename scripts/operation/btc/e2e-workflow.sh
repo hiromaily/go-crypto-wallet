@@ -10,6 +10,14 @@
 
 set -eu
 
+# Script directory for relative paths
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+
+# Source common utilities
+# shellcheck source=../common.sh
+source "${SCRIPT_DIR}/../common.sh"
+
 # Configuration
 COIN="btc"
 ENCRYPTED="false"
@@ -28,111 +36,11 @@ RPC_PASSWORD="${RPC_PASSWORD:-xyz}"
 # Note: Default value is for testing only - use strong passphrase in production
 WALLET_PASSPHRASE="${WALLET_PASSPHRASE:-test}"
 
-# Script directory for relative paths
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
-
 # Config file paths (absolute)
 CONFIG_WATCH="${PROJECT_ROOT}/config/wallet/btc_watch.toml"
 CONFIG_KEYGEN="${PROJECT_ROOT}/config/wallet/btc_keygen.toml"
-CONFIG_SIGN="${PROJECT_ROOT}/config/wallet/btc_sign.toml"
 CONFIG_SIGN1="${PROJECT_ROOT}/config/wallet/btc_sign1.toml"
 CONFIG_SIGN2="${PROJECT_ROOT}/config/wallet/btc_sign2.toml"
-
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
-
-###############################################################################
-# Helper Functions
-###############################################################################
-
-log_info() {
-    printf "${GREEN}[INFO]${NC} %s\n" "$1"
-}
-
-log_warn() {
-    printf "${YELLOW}[WARN]${NC} %s\n" "$1"
-}
-
-log_error() {
-    printf "${RED}[ERROR]${NC} %s\n" "$1"
-}
-
-log_step() {
-    echo ""
-    echo "=================================================="
-    echo "$1"
-    echo "=================================================="
-}
-
-log_substep() {
-    echo ""
-    echo "------------------------------------------------"
-    echo "$1"
-    echo "------------------------------------------------"
-}
-
-# Check if command exists
-command_exists() {
-    command -v "$1" >/dev/null 2>&1
-}
-
-# Wait for Docker container to be healthy
-wait_for_healthy() {
-    local container_name=$1
-    local max_wait=${2:-60}
-    local counter=0
-
-    log_info "Waiting for $container_name to be healthy..."
-
-    while [ $counter -lt $max_wait ]; do
-        status=$(docker inspect --format='{{.State.Health.Status}}' "$container_name" 2>/dev/null || echo "not_found")
-
-        if [ "$status" = "healthy" ]; then
-            log_info "$container_name is healthy"
-            return 0
-        fi
-
-        if [ "$status" = "not_found" ]; then
-            log_error "Container $container_name not found"
-            return 1
-        fi
-
-        counter=$((counter + 1))
-        sleep 1
-    done
-
-    log_error "$container_name did not become healthy within ${max_wait}s"
-    return 1
-}
-
-# Check if wallet exists in Bitcoin node
-wallet_exists() {
-    local container=$1
-    local wallet_name=$2
-
-    docker exec "$container" bitcoin-cli -regtest -rpcuser="${RPC_USER}" -rpcpassword="${RPC_PASSWORD}" listwallets 2>/dev/null | grep -q "\"$wallet_name\"" && return 0 || return 1
-}
-
-# Create Bitcoin wallet if not exists
-create_wallet_if_needed() {
-    local container=$1
-    local wallet_name=$2
-
-    if wallet_exists "$container" "$wallet_name"; then
-        log_info "Wallet '$wallet_name' already exists in $container"
-        docker exec "$container" bitcoin-cli -regtest -rpcuser="${RPC_USER}" -rpcpassword="${RPC_PASSWORD}" loadwallet "$wallet_name" >/dev/null 2>&1 || true
-    else
-        log_info "Creating wallet '$wallet_name' in $container"
-        # Create legacy wallet (descriptors=false) for compatibility with importprivkey command
-        # Parameters: wallet_name, disable_private_keys, blank, passphrase, avoid_reuse, descriptors
-        docker exec "$container" bitcoin-cli -regtest -rpcuser="${RPC_USER}" -rpcpassword="${RPC_PASSWORD}" \
-            createwallet "$wallet_name" false false "" false false >/dev/null
-    fi
-}
 
 ###############################################################################
 # Cleanup Functions
@@ -143,22 +51,13 @@ clean_data_files() {
     log_substep "Cleaning generated data files"
 
     # Clean address files (keeping .gitkeep)
-    if [ -d "data/address/btc" ]; then
-        find data/address/btc -type f ! -name '.gitkeep' -delete 2>/dev/null || true
-        log_info "Cleaned address files"
-    fi
+    clean_dir_except_gitkeep "data/address/btc"
 
     # Clean fullpubkey files (keeping .gitkeep)
-    if [ -d "data/fullpubkey/btc" ]; then
-        find data/fullpubkey/btc -type f ! -name '.gitkeep' -delete 2>/dev/null || true
-        log_info "Cleaned fullpubkey files"
-    fi
+    clean_dir_except_gitkeep "data/fullpubkey/btc"
 
     # Clean transaction files (keeping .gitkeep)
-    if [ -d "data/tx/btc" ]; then
-        find data/tx/btc -type f ! -name '.gitkeep' -delete 2>/dev/null || true
-        log_info "Cleaned transaction files"
-    fi
+    clean_dir_except_gitkeep "data/tx/btc"
 }
 
 # Clean Bitcoin node wallet data
@@ -217,17 +116,8 @@ cleanup() {
 check_prerequisites() {
     log_step "Checking prerequisites"
 
-    # Check Docker
-    if ! command_exists docker; then
-        log_error "docker is not installed"
-        exit 1
-    fi
-
-    # Check Docker Compose
-    if ! docker compose version >/dev/null 2>&1; then
-        log_error "docker compose is not available"
-        exit 1
-    fi
+    # Check Docker and Docker Compose
+    check_docker || exit 1
 
     # Check CLI commands
     for cmd in watch keygen sign1 sign2; do
@@ -279,10 +169,10 @@ setup_wallets() {
     log_step "Setting up Bitcoin wallets"
 
     # Create wallets in Bitcoin nodes
-    create_wallet_if_needed "btc-watch" "watch"
-    create_wallet_if_needed "btc-keygen" "keygen"
-    create_wallet_if_needed "btc-sign1" "sign1"
-    create_wallet_if_needed "btc-sign2" "sign2"
+    btc_create_wallet_if_needed "btc-watch" "watch"
+    btc_create_wallet_if_needed "btc-keygen" "keygen"
+    btc_create_wallet_if_needed "btc-sign1" "sign1"
+    btc_create_wallet_if_needed "btc-sign2" "sign2"
 
     log_info "All wallets are ready"
 }
@@ -444,10 +334,7 @@ generate_test_utxos() {
 
     # Generate blocks with coinbase reward to payment address
     log_info "Generating 101 blocks to create mature coinbase for testing..."
-    docker exec btc-watch bitcoin-cli -regtest \
-        -rpcuser="${RPC_USER}" \
-        -rpcpassword="${RPC_PASSWORD}" \
-        generatetoaddress 101 "$payment_address" >/dev/null
+    btc_cli "btc-watch" generatetoaddress 101 "$payment_address" >/dev/null
 
     log_info "Test UTXOs generated successfully"
     log_info "Waiting for blockchain sync and balance update..."
