@@ -90,6 +90,10 @@ full_reset() {
     log_info "Stopping database container..."
     docker compose -f compose.yaml down -v 2>/dev/null || true
 
+    # Remove database volume to ensure clean state
+    log_info "Removing database volume..."
+    docker volume rm go-crypto-wallet_wallet-db 2>/dev/null || true
+
     # Clean data files
     clean_data_files
 
