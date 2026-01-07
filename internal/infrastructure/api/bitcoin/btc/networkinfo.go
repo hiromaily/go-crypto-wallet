@@ -3,6 +3,7 @@ package btc
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 )
@@ -74,7 +75,7 @@ func (w *WarningsField) String() string {
 	if len(w.Value) == 0 {
 		return ""
 	}
-	return w.Value[0]
+	return strings.Join(w.Value, ", ")
 }
 
 // GetBlockchainInfoResult is response type of PRC `getblockchaininfo`

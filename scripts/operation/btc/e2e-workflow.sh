@@ -450,16 +450,30 @@ generate_test_utxos() {
         generatetoaddress 101 "$payment_address" >/dev/null
 
     log_info "Test UTXOs generated successfully"
-    log_info "Waiting for blockchain sync..."
-    sleep 5
+    log_info "Waiting for blockchain sync and balance update..."
 
-    # Verify balance
-    log_info "Verifying balance in payment account..."
-    balance_output=$(watch -c "${CONFIG_WATCH}" --coin "${COIN}" monitor balance 2>&1 || true)
-    if echo "$balance_output" | grep -q "payment"; then
-        log_info "Payment account balance verified"
-    else
-        log_warn "Could not verify balance, but proceeding with transaction phase"
+    # Poll for balance update with timeout
+    max_wait=30
+    wait_interval=2
+    elapsed=0
+    balance_found=false
+
+    while [ $elapsed -lt $max_wait ]; do
+        balance_output=$(watch -c "${CONFIG_WATCH}" --coin "${COIN}" monitor balance 2>&1 || true)
+        if echo "$balance_output" | grep -q "payment"; then
+            log_info "Payment account balance verified (took ${elapsed}s)"
+            balance_found=true
+            break
+        fi
+        sleep $wait_interval
+        elapsed=$((elapsed + wait_interval))
+        if [ $elapsed -lt $max_wait ]; then
+            log_info "Still waiting for balance update... (${elapsed}s/${max_wait}s)"
+        fi
+    done
+
+    if [ "$balance_found" = false ]; then
+        log_warn "Balance not detected within ${max_wait}s, but proceeding with transaction phase"
     fi
 }
 
