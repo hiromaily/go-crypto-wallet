@@ -19,7 +19,9 @@ import (
 )
 
 // AddCommands adds all keygen subcommands to the root command
-func AddCommands(rootCmd *cobra.Command, wallet *wallets.Keygener, containerGetter func() di.Container, version string) {
+func AddCommands(
+	rootCmd *cobra.Command, wallet *wallets.Keygener, containerGetter func() di.Container, version string,
+) {
 	// Create command
 	createCmd := &cobra.Command{
 		Use:   "create",

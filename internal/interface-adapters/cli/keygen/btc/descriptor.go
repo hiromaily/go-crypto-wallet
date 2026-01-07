@@ -44,7 +44,9 @@ func newDescriptorGenerateCommand(containerGetter func() di.Container) *cobra.Co
 		Example: "  keygen --coin btc descriptor generate --account deposit --address-type taproot\n" +
 			"  keygen --coin btc descriptor generate --account deposit --address-type bech32 --change",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runDescriptorGenerate(cmd.Context(), containerGetter(), account, addressType, includeChange, requiredSigs)
+			return runDescriptorGenerate(
+				cmd.Context(), containerGetter(), account, addressType, includeChange, requiredSigs,
+			)
 		},
 	}
 
