@@ -33,3 +33,8 @@ install-codex-custom-prompts:
 		fi; \
 	done
 	@echo "Codex custom prompts installed to $$HOME/.codex/prompts/"
+
+# add Notion MCP by Claude
+.PHONY: add-notion-mcp-by-claude
+add-notion-mcp-by-claude:
+	claude mcp add notion --scope project --transport http https://mcp.notion.com/mcp

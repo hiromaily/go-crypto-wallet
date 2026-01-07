@@ -1,212 +1,298 @@
-# Bitcoin Operation Scripts
+# Bitcoin E2E Workflow
 
-This directory contains scripts for Bitcoin wallet operations.
+This document describes the complete Bitcoin end-to-end workflow implemented in `e2e-workflow.sh`.
 
-## E2E Workflow Script
+## Overview
 
-### Overview
+The E2E workflow automates the complete Bitcoin wallet operation from infrastructure setup to transaction execution. It serves as both a regression test tool and documentation of the standard Bitcoin operation flow.
 
-The `e2e-workflow.sh` script provides a unified, automated workflow for complete Bitcoin end-to-end testing. It serves as a regression test tool to verify that program modifications don't break the Bitcoin workflow.
+## Prerequisites
 
-### Usage
+Before running the workflow, ensure the following are available:
+
+- **Docker & Docker Compose**: For running Bitcoin nodes and database
+- **CLI Commands**: `watch`, `keygen`, `sign1`, `sign2` (build with `make build`)
+
+## Workflow Phases
+
+### Phase 1: Prerequisites Check
+
+Verifies that all required tools and dependencies are available:
+
+- Docker and Docker Compose are installed and running
+- All CLI commands (`watch`, `keygen`, `sign1`, `sign2`) are built and accessible
+
+### Phase 2: Infrastructure Setup
+
+Starts the required infrastructure containers:
+
+```
+┌─────────────────┐     ┌─────────────────┐
+│   wallet-db     │     │   btc-watch     │
+│   (MySQL)       │     │   (Bitcoin Node)│
+└─────────────────┘     └─────────────────┘
+                        ┌─────────────────┐
+                        │   btc-keygen    │
+                        │   (Bitcoin Node)│
+                        └─────────────────┘
+                        ┌─────────────────┐
+                        │   btc-sign1     │
+                        │   (Bitcoin Node)│
+                        └─────────────────┘
+                        ┌─────────────────┐
+                        │   btc-sign2     │
+                        │   (Bitcoin Node)│
+                        └─────────────────┘
+```
+
+1. Start database container (`compose.yaml`)
+2. Wait for database to be healthy
+3. Start Bitcoin node containers (`compose.btc.yaml`)
+4. Wait for all Bitcoin nodes to be healthy
+
+### Phase 3: Wallet Setup
+
+Creates wallets in each Bitcoin node:
+
+| Node       | Wallet Name |
+|------------|-------------|
+| btc-watch  | watch       |
+| btc-keygen | keygen      |
+| btc-sign1  | sign1       |
+| btc-sign2  | sign2       |
+
+### Phase 4: Key Generation
+
+This phase generates all required keys for the wallet system.
+
+#### 4.1 Keygen Wallet Operations
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    KEYGEN WALLET                            │
+├─────────────────────────────────────────────────────────────┤
+│ 1. Create seed                                              │
+│    └─ keygen create seed                                    │
+│                                                             │
+│ 2. Create HD keys for each account (10 keys each)          │
+│    ├─ client account                                        │
+│    ├─ deposit account                                       │
+│    ├─ payment account                                       │
+│    └─ stored account                                        │
+│                                                             │
+│ 3. Import private keys into Bitcoin node                   │
+│    └─ For all accounts (client, deposit, payment, stored)  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### 4.2 Sign Wallet Operations
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    SIGN WALLETS (sign1, sign2)              │
+├─────────────────────────────────────────────────────────────┤
+│ 1. Create seed                                              │
+│    └─ sign1 create seed                                     │
+│                                                             │
+│ 2. Create HD keys                                           │
+│    ├─ sign1 create hdkey                                    │
+│    └─ sign2 create hdkey                                    │
+│                                                             │
+│ 3. Import private keys into Bitcoin nodes                  │
+│    ├─ sign1 import privkey                                  │
+│    └─ sign2 import privkey                                  │
+│                                                             │
+│ 4. Export full public keys                                 │
+│    ├─ sign1 export fullpubkey → fullpubkey_auth1.csv       │
+│    └─ sign2 export fullpubkey → fullpubkey_auth2.csv       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Phase 5: Multisig Setup
+
+Creates multisig addresses and exports them to the watch wallet.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    MULTISIG SETUP                           │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  KEYGEN WALLET                                              │
+│  ├─ Import fullpubkey from sign1                           │
+│  ├─ Import fullpubkey from sign2                           │
+│  │                                                          │
+│  ├─ Create multisig addresses                              │
+│  │   ├─ deposit account                                     │
+│  │   ├─ payment account                                     │
+│  │   └─ stored account                                      │
+│  │                                                          │
+│  └─ Export addresses                                       │
+│      ├─ client addresses  → address_client.csv             │
+│      ├─ deposit addresses → address_deposit.csv            │
+│      ├─ payment addresses → address_payment.csv            │
+│      └─ stored addresses  → address_stored.csv             │
+│                                                             │
+│  WATCH WALLET                                               │
+│  └─ Import all address files                               │
+│      ├─ client addresses                                    │
+│      ├─ deposit addresses                                   │
+│      ├─ payment addresses                                   │
+│      └─ stored addresses                                    │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Phase 6: Test UTXO Generation
+
+For regtest environment, generates test UTXOs for transaction testing:
+
+1. Extract payment address from exported address file
+2. Generate 101 blocks to the payment address (creates mature coinbase)
+3. Wait for balance update in watch wallet
+
+### Phase 7: Transaction Flow
+
+Creates, signs, and sends a payment transaction.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    TRANSACTION FLOW                         │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  1. CREATE UNSIGNED TRANSACTION                             │
+│     └─ watch create payment → tx_unsigned.hex              │
+│                                                             │
+│  2. SIGN WITH KEYGEN WALLET (1st signature)                │
+│     └─ keygen sign --file tx_unsigned.hex                  │
+│        → tx_signed_1.hex                                    │
+│                                                             │
+│  3. SIGN WITH SIGN1 WALLET (2nd signature)                 │
+│     └─ sign1 sign --file tx_signed_1.hex                   │
+│        → tx_signed_2.hex                                    │
+│                                                             │
+│  4. SIGN WITH SIGN2 WALLET (3rd signature)                 │
+│     └─ sign2 sign --file tx_signed_2.hex                   │
+│        → tx_signed_3.hex                                    │
+│                                                             │
+│  5. SEND TRANSACTION                                        │
+│     └─ watch send --file tx_signed_3.hex                   │
+│        → Transaction ID                                     │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Usage
+
+### Run Complete E2E Workflow
 
 ```bash
-# Run from completely fresh state (recommended)
+# From fresh state (full reset first)
 ./scripts/operation/btc/e2e-workflow.sh --reset
 
-# Or use Makefile target
-make btc-e2e-test-reset
-
-# Run complete E2E workflow
+# Run workflow (assumes clean state or continuing from previous run)
 ./scripts/operation/btc/e2e-workflow.sh
 
-# Or use Makefile target
-make btc-e2e-test
-
 # Run with verbose output
-make btc-e2e-test-verbose
-
-# Run in non-interactive mode (for CI/CD)
-make btc-e2e-test-ci
-
-# Cleanup containers and state
-make btc-e2e-cleanup
+./scripts/operation/btc/e2e-workflow.sh --verbose
 ```
-
-### What the Script Does
-
-The script automates the following workflow:
-
-1. **Prerequisites Check**
-   - Verifies Docker and Docker Compose are installed
-   - Checks that CLI commands (watch, keygen, sign1, sign2) are available
-
-2. **Infrastructure Setup**
-   - Starts database container
-   - Starts Bitcoin node containers (btc-watch, btc-keygen, btc-sign1, btc-sign2)
-   - Waits for all services to be healthy
-
-3. **Wallet Setup**
-   - Creates wallets in Bitcoin nodes (if not already created)
-   - Loads wallets automatically
-
-4. **Key Generation Phase**
-   - **Keygen wallet**: Creates seed → Generates HD keys → Imports private keys
-   - **Sign wallets**: Creates seed → Generates HD keys → Imports private keys → Exports full public keys
-
-5. **Multisig Setup Phase**
-   - Imports full public keys into keygen wallet
-   - Creates multisig addresses for deposit, payment, and stored accounts
-   - Exports addresses from keygen wallet
-   - Imports addresses into watch wallet
-
-6. **UTXO Generation Phase**
-   - Automatically generates 101 blocks to payment address
-   - Creates mature coinbase UTXOs for testing
-   - Verifies balance in watch wallet
-
-7. **Transaction Flow Phase**
-   - Creates unsigned payment transaction
-   - Signs with keygen wallet (1st signature)
-   - Signs with sign1 wallet (2nd signature)
-   - Signs with sign2 wallet (3rd signature)
-   - Sends fully signed transaction
-   - Outputs transaction ID
-
-### Options
-
-- `--reset`: Full reset - cleanup all state for completely fresh start
-- `--cleanup`: Stop containers and cleanup state, then exit
-- `--verbose`: Enable verbose output (shows all commands)
-- `--non-interactive`: Run without interactive prompts (for CI/CD)
-- `-h, --help`: Display help message
-
-### Prerequisites
-
-1. **Docker and Docker Compose**: Required for running Bitcoin nodes and database
-2. **Built CLI commands**: Run `make build` to build the wallet CLI commands
-3. **Docker images**: Bitcoin Core 29.2 image will be pulled automatically
-
-### Environment Variables
-
-The script supports the following environment variables for configuration:
-
-| Variable | Description | Default | Notes |
-|----------|-------------|---------|-------|
-| `RPC_USER` | Bitcoin RPC username | `xyz` | Default for regtest/development only |
-| `RPC_PASSWORD` | Bitcoin RPC password | `xyz` | Default for regtest/development only |
-| `WALLET_PASSPHRASE` | Wallet passphrase for encrypted wallets | `test` | Only used when testing encrypted wallets |
-
-**Example usage with custom credentials:**
-
-```bash
-# Run with custom RPC credentials
-RPC_USER=myuser RPC_PASSWORD=mypass make btc-e2e-test
-
-# Run with encrypted wallet (requires WALLET_PASSPHRASE)
-WALLET_PASSPHRASE=mypassphrase ./scripts/operation/btc/e2e-workflow.sh
-```
-
-**Security Note**: The default values are for regtest/development environments only. For production use, always set strong credentials via environment variables and never commit them to version control.
-
-### Testing in Regtest Mode
-
-The script now automatically generates test UTXOs during the workflow, making it fully automated. No manual UTXO generation is required.
-
-For manual UTXO generation (if needed for debugging):
-
-```bash
-# 1. Get a payment address from the exported address CSV files
-# Look in: data/address/btc/address_payment_*.csv
-
-# 2. Generate test coins to a payment address
-# Using default credentials (xyz/xyz for regtest)
-docker exec btc-watch bitcoin-cli -regtest -rpcuser=xyz -rpcpassword=xyz generatetoaddress 101 <payment_address>
-
-# 3. Check balance
-watch -conf config/wallet/btc_watch.toml -coin btc monitor balance
-```
-
-### Directory Structure
-
-After running the script, the following directories will contain generated files:
-
-```
-data/
-├── address/btc/          # Exported address CSV files
-├── fullpubkey/btc/       # Exported full public key CSV files
-└── tx/btc/               # Transaction files (unsigned and signed)
-```
-
-### Use Cases
-
-1. **Regression Testing**: Run after code changes to verify Bitcoin workflow still works
-2. **Development Setup**: Quickly set up a complete Bitcoin test environment
-3. **CI/CD Integration**: Can be integrated into CI/CD pipelines (returns appropriate exit codes)
-4. **Learning**: Demonstrates the complete Bitcoin wallet workflow
-
-### Fresh State Testing
-
-To ensure the script works correctly from a completely fresh state:
-
-```bash
-# Full reset and run (recommended for testing)
-./scripts/operation/btc/e2e-workflow.sh --reset
-
-# Or use Makefile target
-make btc-e2e-test-reset
-```
-
-The `--reset` flag performs a complete cleanup:
-- Stops all containers and removes volumes
-- Cleans generated data files (address, fullpubkey, tx)
-- Cleans Bitcoin node wallet data directories
-- Ensures truly fresh state for testing
-
-### Troubleshooting
-
-**Container Health Check Failures**
-
-If containers don't become healthy:
-- Check Docker is running
-- Check container logs: `docker compose -f compose.btc.yaml logs`
-- Try cleanup and restart: `make btc-e2e-cleanup && make btc-e2e-test`
-
-**CLI Commands Not Found**
-
-If CLI commands are not available:
-- Build the project: `make build`
-- Ensure binaries are in PATH or install them: `make install`
 
 ### Cleanup
 
-To stop containers and cleanup state:
-
 ```bash
-make btc-e2e-cleanup
+# Stop containers and cleanup state
+./scripts/operation/btc/e2e-workflow.sh --cleanup
 ```
 
-This will:
-- Stop and remove all Bitcoin node containers
-- Stop and remove database container
-- Remove Docker volumes
+### Options
 
-Note: Wallet data directories (`docker/nodes/btc/`) are not automatically deleted for safety. To completely reset, manually delete these directories.
+| Option              | Description                                        |
+|---------------------|----------------------------------------------------|
+| `--reset`           | Full reset: cleanup all state for fresh start      |
+| `--cleanup`         | Stop containers and cleanup state, then exit       |
+| `--verbose`         | Enable verbose output                              |
+| `--non-interactive` | Run without interactive prompts (for CI/CD)        |
+| `-h, --help`        | Display help message                               |
 
-## Other Scripts
+## Environment Variables
 
-### generate-btc-key.sh
+| Variable            | Default | Description                                      |
+|---------------------|---------|--------------------------------------------------|
+| `RPC_USER`          | `xyz`   | Bitcoin RPC username (for regtest)               |
+| `RPC_PASSWORD`      | `xyz`   | Bitcoin RPC password (for regtest)               |
+| `WALLET_PASSPHRASE` | `test`  | Wallet passphrase for encrypted wallets          |
 
-Generates keys for Bitcoin wallets (legacy script, now superseded by e2e-workflow.sh for testing).
+## Configuration Files
 
-### create-btc-tx-payment.sh
+| File                              | Purpose                    |
+|-----------------------------------|----------------------------|
+| `config/wallet/btc_watch.toml`    | Watch wallet configuration |
+| `config/wallet/btc_keygen.toml`   | Keygen wallet configuration|
+| `config/wallet/btc_sign1.toml`    | Sign1 wallet configuration |
+| `config/wallet/btc_sign2.toml`    | Sign2 wallet configuration |
 
-Creates and signs a payment transaction (legacy script, now superseded by e2e-workflow.sh for testing).
+## Generated Files
 
-### create-bitcoind-wallet.sh
+### Address Files (`data/address/btc/`)
 
-Creates wallets in Bitcoin nodes (now integrated into e2e-workflow.sh).
+- `address_client_*.csv` - Client addresses (non-multisig)
+- `address_deposit_*.csv` - Deposit multisig addresses
+- `address_payment_*.csv` - Payment multisig addresses
+- `address_stored_*.csv` - Stored multisig addresses
 
-### load-bitcoind-wallet.sh
+### Public Key Files (`data/fullpubkey/btc/`)
 
-Loads existing wallets in Bitcoin nodes (now integrated into e2e-workflow.sh).
+- `fullpubkey_auth1_*.csv` - Full public keys from sign1
+- `fullpubkey_auth2_*.csv` - Full public keys from sign2
+
+### Transaction Files (`data/tx/btc/`)
+
+- `tx_*.hex` - Unsigned and signed transaction files
+
+## Account Types
+
+| Account  | Purpose                                           | Multisig |
+|----------|---------------------------------------------------|----------|
+| client   | Client-facing addresses for receiving funds       | No       |
+| deposit  | Deposit addresses for initial fund receipt        | Yes      |
+| payment  | Payment addresses for outgoing transactions       | Yes      |
+| stored   | Cold storage addresses for long-term holding      | Yes      |
+
+## Signature Flow (3-of-3 Multisig)
+
+The transaction requires signatures from three wallets:
+
+1. **Keygen Wallet** - Primary key holder
+2. **Sign1 Wallet** - First authorization signer
+3. **Sign2 Wallet** - Second authorization signer
+
+This implements a 3-of-3 multisig scheme where all three parties must sign to authorize a transaction.
+
+## Troubleshooting
+
+### "No UTXOs available"
+
+If the transaction phase reports no UTXOs:
+
+1. Verify blocks were generated successfully
+2. Check balance with: `watch -c config/wallet/btc_watch.toml --coin btc monitor balance`
+3. The script automatically generates 101 blocks; if this fails, manually run:
+
+   ```bash
+   docker exec btc-watch bitcoin-cli -regtest generatetoaddress 101 <address>
+   ```
+
+### Container Health Issues
+
+If containers fail health checks:
+
+1. Check container logs: `docker logs btc-watch`
+2. Verify Docker resources are available
+3. Try full reset: `./scripts/operation/btc/e2e-workflow.sh --reset`
+
+### Key Import Failures
+
+If key import fails:
+
+1. Ensure wallets were created successfully in Bitcoin nodes
+2. Check if encrypted mode is properly configured
+3. Verify configuration file paths are correct
