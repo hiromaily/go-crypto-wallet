@@ -50,15 +50,15 @@ NC='\033[0m' # No Color
 ###############################################################################
 
 log_info() {
-    echo "${GREEN}[INFO]${NC} $1"
+    printf "${GREEN}[INFO]${NC} %s\n" "$1"
 }
 
 log_warn() {
-    echo "${YELLOW}[WARN]${NC} $1"
+    printf "${YELLOW}[WARN]${NC} %s\n" "$1"
 }
 
 log_error() {
-    echo "${RED}[ERROR]${NC} $1"
+    printf "${RED}[ERROR]${NC} %s\n" "$1"
 }
 
 log_step() {
