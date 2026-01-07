@@ -541,7 +541,7 @@ func (c *container) newAddressRepo() persistence.AddressRepositorier {
 
 func (c *container) newAddressFileRepo() portsStorage.AddressFileRepositorier {
 	return address.NewAddressFileRepository(
-		c.conf.FilePath.FullPubKey,
+		c.conf.FilePath.Address,
 	)
 }
 
