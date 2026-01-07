@@ -1,4 +1,4 @@
-# Fix Issue #{issue_number} [or multiple: #{issue_number1},#{issue_number2},...]
+# Fix Issue #{issue_number} [or multiple: #{issue_number1},#{issue_number2},...] {base_branch}
 
 ## Repository
 
@@ -16,6 +16,30 @@ When multiple issues are provided:
 - Each issue gets its own **separate commit** in the same branch
 - All commits are included in **one PR** that closes all issues
 - Branch name includes all issue numbers (e.g., `feature/issue-123-456-{description}`)
+
+## Base Branch Parameter (Optional)
+
+The second parameter `{base_branch}` specifies which branch to use as the base for work. This parameter is **optional**.
+
+| Value | Description | Behavior |
+|-------|-------------|----------|
+| `new` (default) | Create new branch from latest `origin/main` | Fetches latest `origin/main` and creates a new feature branch from it |
+| `current` | Use current branch | Works directly on the current branch without switching |
+| `<branch-name>` | Use specified branch as base | Checks out the specified branch and creates a new feature branch from it |
+
+**Examples:**
+
+- `/fix-issue #123` - Creates new branch from latest `origin/main` (same as `new`)
+- `/fix-issue #123 new` - Creates new branch from latest `origin/main`
+- `/fix-issue #123 current` - Works on the current branch
+- `/fix-issue #123 develop` - Creates new branch from `develop` branch
+- `/fix-issue #123,#124 feature/base-branch` - Creates new branch from `feature/base-branch`
+
+**When to use each mode:**
+
+- **`new`**: Default mode for most issue fixes. Ensures you're working with the latest main branch.
+- **`current`**: Useful when you're already on a feature branch and want to continue work there, or when fixing issues that are part of an ongoing PR.
+- **`<branch-name>`**: Useful when the fix needs to be based on a specific branch (e.g., release branch, another feature branch).
 
 ## Common Workflow Steps
 
@@ -38,7 +62,14 @@ Follow the [Pre-Flight Checks](../../agents/workflow.md#pre-flight-checks) from 
    - Remove `#` prefix if present
    - Store issue numbers in an ordered list: `[issue_number1, issue_number2, ...]`
 
-2. **Fetch All Issues:**
+2. **Parse Base Branch Parameter:**
+   - Extract the second parameter if provided
+   - Determine branch mode:
+     - If not provided or `new`: Use `new` mode (default)
+     - If `current`: Use `current` mode
+     - Otherwise: Treat as branch name
+
+3. **Fetch All Issues:**
    - For each issue number, use `gh issue view {issue_number}` to fetch complete issue content
    - Verify each issue exists and is not already closed/assigned
    - Review issue descriptions, comments, and labels
@@ -50,7 +81,35 @@ Follow the [Pre-Flight Checks](../../agents/workflow.md#pre-flight-checks) from 
        using Sub-Issue Resolution Workflow
      - If user wants separate PRs for each sub-issue, use Sub-Issue Resolution Workflow instead of main workflow
 
-3. **Create Feature Branch:**
+4. **Prepare Working Branch:**
+
+   Based on the branch mode determined in step 2:
+
+   **Mode: `new` (default)**
+   - Ensure working directory is clean: `git status`
+   - Fetch latest changes: `git fetch origin`
+   - Checkout main branch: `git checkout main`
+   - Reset to latest origin/main: `git reset --hard origin/main`
+   - Create new feature branch (see naming below)
+
+   **Mode: `current`**
+   - Verify current branch exists and is valid: `git branch --show-current`
+   - Ensure working directory is clean: `git status`
+   - **DO NOT** create a new branch - work directly on current branch
+   - **Note**: Branch naming conventions do not apply in this mode
+   - Inform user: "Working on current branch: {current_branch_name}"
+
+   **Mode: `<branch-name>` (specific branch)**
+   - Ensure working directory is clean: `git status`
+   - Fetch latest changes: `git fetch origin`
+   - Verify the specified branch exists: `git branch -a | grep {branch-name}`
+   - If branch doesn't exist locally but exists on remote, checkout from remote: `git checkout -b {branch-name} origin/{branch-name}`
+   - If branch exists locally, checkout: `git checkout {branch-name}`
+   - Pull latest changes: `git pull origin {branch-name}`
+   - Create new feature branch from the specified branch (see naming below)
+
+5. **Create Feature Branch (for `new` and `<branch-name>` modes only):**
+   - **Skip this step if mode is `current`**
    - **Single issue**: Format: `feature/issue-{issue_number}-{brief-description}`
    - **Multiple issues**: Format: `feature/issue-{issue_number1}-{issue_number2}-...-{brief-description}` (include all issue numbers, use first issue's description)
    - Example (single): `feature/issue-123-fix-logger-global-issue`
@@ -224,11 +283,19 @@ above with multiple issue numbers.
 
 **CRITICAL RULE**: When processing multiple sub-issues, **NEVER proceed to the next sub-issue until the current sub-issue's PR has been reviewed and merged**. This ensures proper code review and prevents conflicts.
 
+**Branch Mode Behavior for Sub-Issues:**
+
+- **First sub-issue**: Uses the branch mode specified by the user (or `new` if not specified)
+- **Subsequent sub-issues**: Always uses `new` mode (creates branch from latest `origin/main` after previous PR is merged)
+- **`current` mode**: Only applicable to the first sub-issue. Subsequent sub-issues will use `new` mode.
+
 When a parent issue has multiple sub-issues that need separate PRs, resolve them sequentially following this workflow:
 
 1. **First Sub-Issue:**
-   - Create feature branch: `git checkout -b feature/issue-{sub_issue_number}-{description}`
-   - Follow steps 3-10 from "Resolve Systematically" section:
+   - **If mode is `new` or `<branch-name>`**: Create feature branch following "Prepare Working Branch" steps
+   - **If mode is `current`**: Work on current branch (no new branch created)
+   - Create feature branch (if not `current` mode): `git checkout -b feature/issue-{sub_issue_number}-{description}`
+   - Follow steps 4-10 from "Resolve Systematically" section:
      - Implement the fix
      - Self-review
      - Test
@@ -332,13 +399,15 @@ After completing all steps, report the completion status to the user using the f
 Provide a brief summary including:
 
 - Issue number(s) and title(s)
-- Branch name created
+- Branch mode used (`new`, `current`, or specific branch name)
+- Branch name created (or current branch if `current` mode)
+- Base branch used (if applicable)
 - PR number (if created)
 - Key changes made for each issue
 - Commit structure (if multiple issues)
 - Any special considerations or notes
 
-**Example completion message (single issue):**
+**Example completion message (single issue - new mode):**
 
 ```text
 ✅ Issue #123 has been resolved
@@ -355,6 +424,54 @@ All steps completed:
 ✓ Pull request #456 created
 ✓ Ready for review
 
+Branch mode: new (from origin/main)
+Branch: feature/issue-123-fix-logger-global-issue
+PR: #456
+Key changes: Fixed logger initialization issue in domain layer
+```
+
+**Example completion message (single issue - current mode):**
+
+```text
+✅ Issue #123 has been resolved
+
+All steps completed:
+✓ Analyzed issue and identified affected components
+✓ Planned solution and test cases
+✓ Implemented fixes following Clean Architecture
+✓ Self-reviewed code for quality and security
+✓ Tests created and passing
+✓ Documentation updated
+✓ All verification commands passed
+✓ Changes committed
+✓ Pull request #456 created
+✓ Ready for review
+
+Branch mode: current
+Working branch: feature/existing-work-branch
+PR: #456
+Key changes: Fixed logger initialization issue in domain layer
+```
+
+**Example completion message (single issue - specific branch mode):**
+
+```text
+✅ Issue #123 has been resolved
+
+All steps completed:
+✓ Analyzed issue and identified affected components
+✓ Planned solution and test cases
+✓ Implemented fixes following Clean Architecture
+✓ Self-reviewed code for quality and security
+✓ Tests created and passing
+✓ Documentation updated
+✓ All verification commands passed
+✓ Changes committed
+✓ Pull request #456 created
+✓ Ready for review
+
+Branch mode: develop (from develop branch)
+Base branch: develop
 Branch: feature/issue-123-fix-logger-global-issue
 PR: #456
 Key changes: Fixed logger initialization issue in domain layer
@@ -377,6 +494,7 @@ All steps completed:
 ✓ Pull request #456 created
 ✓ Ready for review
 
+Branch mode: new (from origin/main)
 Branch: feature/issue-123-124-125-fix-multiple-issues
 PR: #456
 
