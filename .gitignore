@@ -14,11 +14,11 @@ bin/
 
 # data directory
 data/address/*
+data/certs/*
 data/dump/*
 data/fullpubkey/*
 data/keystore/*
 data/tx/*
-data/certs/*
 data/gaiad/*
 
 # Node files
@@ -32,8 +32,14 @@ docker/nodes/btc/sign1/*
 docker/nodes/btc/sign2/*
 !docker/nodes/btc/sign2/bitcoin.conf
 # BCH
-docker/nodes/bch/data/testnet3
-!docker/nodes/bch/data/bitcoin.conf
+docker/nodes/bch/watch/*
+!docker/nodes/bch/watch/bitcoin.conf
+docker/nodes/bch/keygen/*
+!docker/nodes/bch/keygen/bitcoin.conf
+docker/nodes/bch/sign1/*
+!docker/nodes/bch/sign1/bitcoin.conf
+docker/nodes/bch/sign2/*
+!docker/nodes/bch/sign2/bitcoin.conf
 # ETH
 docker/nodes/eth/goerli/*
 docker/nodes/eth/sepolia/*

@@ -5,33 +5,130 @@ networks:
 
 services:
   #########################################################################
-  # Bitcoin ABC
+  # Bitcoin Cash Node (BCHN)
   #------------------------------------------------------------------------
+  # Configuration: Regtest Mode
+  # - All nodes run in regtest mode for local development and testing
+  # - Watch node: Online node with network connectivity
+  # - Keygen/Sign nodes: Offline nodes with -maxconnections=0
+  #
   # Example of commands to container
-  # -up bch-watch
-  #  $ docker compose -f compose.bch.yaml up bch-watch
-  # -login
-  #  $ docker compose -f compose.bch.yaml exec bch-watch bash
-  #  - # bitcoin-cli -rpcuser=xyz -rpcpassword=xyz -rpcport=18332 getnetworkinfo
-  # - run command
-  #  $ docker compose -f compose.bch.yaml exec bch-watch bitcoin-cli -rpcuser=xyz -rpcpassword=xyz -rpcport=18332 getnetworkinfo
+  # - enter in container
+  #   - $ docker compose -f compose.bch.yaml exec bch-watch bash
+  # - run bitcoin-cli (regtest mode)
+  #   - $ docker compose -f compose.bch.yaml exec bch-watch bitcoin-cli -regtest -rpcuser=xyz -rpcpassword=xyz getnetworkinfo
+  # - wallet location (regtest mode)
+  #   - /data/regtest/wallets
+  #
+  # Reference:
+  # - https://docs.bitcoincashnode.org/
+  # - https://hub.docker.com/r/zquestz/bitcoin-cash-node
+  # - https://github.com/zquestz/docker-bitcoin
   #########################################################################
   bch-watch:
-    image: zquestz/bitcoin-cash-node:0.24.0
-    # https://hub.docker.com/r/zquestz/bitcoin-cash-node/tags
-    # https://github.com/zquestz/docker-bitcoin
+    image: zquestz/bitcoin-cash-node:28.0.1
+    container_name: bch-watch
     volumes:
-      - ./docker/nodes/bch/data:/data
+      - ./docker/nodes/bch/watch:/data
     ports:
-      - "${BCH_WALLET_RPC_PORT:-19332}:18332"
+      - "${BCH_WATCH_RPC_PORT:-18332}:18443" # Map to regtest RPC port 18443
     stdin_open: true
     tty: true
     networks:
       - bch
     healthcheck:
-      test: ["CMD", "bitcoin-cli", "-rpcuser=xyz", "-rpcpassword=xyz", "-rpcport=18332", "getblockchaininfo"]
+      test:
+        [
+          "CMD",
+          "bitcoin-cli",
+          "-regtest",
+          "-rpcuser=xyz",
+          "-rpcpassword=xyz",
+          "getblockchaininfo",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 30s
-    #command: /usr/local/bin/bitcoind --printtoconsole --conf=/data/bitcoind.conf
+    command: -printtoconsole
+
+  bch-keygen:
+    image: zquestz/bitcoin-cash-node:28.0.1
+    container_name: bch-keygen
+    volumes:
+      - ./docker/nodes/bch/keygen:/data
+    ports:
+      - "${BCH_KEYGEN_RPC_PORT:-19332}:18443" # Map to regtest RPC port 18443
+    stdin_open: true
+    tty: true
+    networks:
+      - bch
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bitcoin-cli",
+          "-regtest",
+          "-rpcuser=xyz",
+          "-rpcpassword=xyz",
+          "getblockchaininfo",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    command: -maxconnections=0 -printtoconsole
+
+  bch-sign1:
+    image: zquestz/bitcoin-cash-node:28.0.1
+    container_name: bch-sign1
+    volumes:
+      - ./docker/nodes/bch/sign1:/data
+    ports:
+      - "${BCH_SIGN1_RPC_PORT:-20332}:18443" # Map to regtest RPC port 18443
+    stdin_open: true
+    tty: true
+    networks:
+      - bch
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bitcoin-cli",
+          "-regtest",
+          "-rpcuser=xyz",
+          "-rpcpassword=xyz",
+          "getblockchaininfo",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    command: -maxconnections=0 -printtoconsole
+
+  bch-sign2:
+    image: zquestz/bitcoin-cash-node:28.0.1
+    container_name: bch-sign2
+    volumes:
+      - ./docker/nodes/bch/sign2:/data
+    ports:
+      - "${BCH_SIGN2_RPC_PORT:-21332}:18443" # Map to regtest RPC port 18443
+    stdin_open: true
+    tty: true
+    networks:
+      - bch
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bitcoin-cli",
+          "-regtest",
+          "-rpcuser=xyz",
+          "-rpcpassword=xyz",
+          "getblockchaininfo",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    command: -maxconnections=0 -printtoconsole
