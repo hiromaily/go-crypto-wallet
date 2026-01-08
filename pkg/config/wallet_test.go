@@ -195,3 +195,97 @@ func TestLoadWallet(t *testing.T) {
 		}
 	}
 }
+
+// TestNewWallet_YAML tests the NewWallet function with YAML configuration files.
+// This verifies that YAML configuration files are properly loaded and unmarshaled into WalletRoot structure.
+func TestNewWallet_YAML(t *testing.T) {
+	// Create temporary YAML config file
+	tmpDir := t.TempDir()
+	yamlContent := `
+key_type: bip44
+address_type: legacy
+coin_type: btc
+
+bitcoin:
+  host: localhost:8332
+  user: user
+  pass: pass
+  http_post_mode: true
+  disable_tls: true
+  network_type: testnet3
+  block:
+    confirmation_num: 6
+  fee:
+    adjustment_min: 0.8
+    adjustment_max: 1.2
+
+ethereum:
+  host: localhost
+  port: 8545
+  disable_tls: true
+  network_type: mainnet
+  confirmation_num: 12
+
+ripple:
+  websocket_public_url: ws://localhost:6006
+  websocket_admin_url: ws://localhost:6006
+  network_type: testnet
+  api:
+    url: http://localhost:5005
+    is_secure: false
+
+logger:
+  service: test-wallet
+  env: dev
+  level: debug
+  is_logger: true
+
+tracer:
+  type: none
+
+mysql:
+  host: localhost:3306
+  dbname: test_db
+  user: root
+  pass: root
+  debug: false
+
+file_path:
+  tx: /tmp/tx
+  address: /tmp/address
+  full_pubkey: /tmp/pubkey
+`
+	yamlPath := filepath.Join(tmpDir, "test_wallet.yaml")
+	err := os.WriteFile(yamlPath, []byte(yamlContent), 0o600)
+	require.NoError(t, err, "Failed to create test YAML file")
+
+	// Test loading YAML config
+	conf, err := NewWallet(yamlPath, domainWallet.WalletTypeWatchOnly, domainCoin.BTC)
+	require.NoError(t, err, "NewWallet() should not return error")
+	require.NotNil(t, conf, "NewWallet() returned nil config")
+
+	// Verify that viper properly loaded the YAML file
+	assert.NotEmpty(t, conf.Bitcoin.Host, "Bitcoin.Host should not be empty")
+	assert.NotEmpty(t, conf.Logger.Service, "Logger.Service should not be empty")
+	assert.NotEmpty(t, conf.MySQL.Host, "MySQL.Host should not be empty")
+
+	// Verify nested structures are loaded correctly
+	assert.NotZero(t, conf.Bitcoin.Block.ConfirmationNum, "Bitcoin.Block.ConfirmationNum should not be zero")
+	assert.True(t, conf.Bitcoin.Fee.AdjustmentMin != 0 || conf.Bitcoin.Fee.AdjustmentMax != 0,
+		"Bitcoin fee settings should be loaded")
+}
+
+// TestNewWallet_UnsupportedExtension tests that NewWallet returns an error for unsupported file extensions.
+func TestNewWallet_UnsupportedExtension(t *testing.T) {
+	tmpDir := t.TempDir()
+	invalidPath := filepath.Join(tmpDir, "config.json")
+
+	// Create a dummy JSON file
+	err := os.WriteFile(invalidPath, []byte(`{"test": "data"}`), 0o600)
+	require.NoError(t, err, "Failed to create test file")
+
+	conf, err := NewWallet(invalidPath, domainWallet.WalletTypeWatchOnly, domainCoin.BTC)
+	require.Error(t, err, "NewWallet() should return error for unsupported extension")
+	assert.Nil(t, conf, "Config should be nil on error")
+	assert.Contains(t, err.Error(), "unsupported config file extension", "Error should mention unsupported extension")
+}

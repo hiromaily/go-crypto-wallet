@@ -36,10 +36,12 @@ import (
 // Note: While AccountRoot is application-specific, it's placed in pkg/ because it's
 // shared between pkg/di and internal/di during the initialization phase.
 type AccountRoot struct {
-	Types           []domainAccount.AccountType `toml:"types" mapstructure:"types"`
-	DepositReceiver domainAccount.AccountType   `toml:"deposit_receiver" mapstructure:"deposit_receiver"`
-	PaymentSender   domainAccount.AccountType   `toml:"payment_sender" mapstructure:"payment_sender"`
-	Multisigs       []AccountMultisig           `toml:"multisig" mapstructure:"multisig"`
+	Types []domainAccount.AccountType `toml:"types" yaml:"types" mapstructure:"types"`
+	//nolint:revive
+	DepositReceiver domainAccount.AccountType `toml:"deposit_receiver" yaml:"deposit_receiver" mapstructure:"deposit_receiver"`
+
+	PaymentSender domainAccount.AccountType `toml:"payment_sender" yaml:"payment_sender" mapstructure:"payment_sender"`
+	Multisigs     []AccountMultisig         `toml:"multisig" yaml:"multisig" mapstructure:"multisig"`
 }
 
 // AccountMultisig represents multisig account configuration.
@@ -49,16 +51,16 @@ type AccountRoot struct {
 // - Must be accessible from pkg/ without importing internal/
 // - Represents configuration data that maps to domain concepts
 //
-// The structure contains TOML tags for file deserialization, which is an
+// The structure contains TOML and YAML tags for file deserialization, which is an
 // infrastructure concern, but the structure itself is shared configuration
 // that needs to be accessible from both pkg/ and internal/ layers.
 type AccountMultisig struct {
-	Type      domainAccount.AccountType `toml:"type" mapstructure:"type"`
-	Required  int                       `toml:"required" mapstructure:"required"`
-	AuthUsers []domainAccount.AuthType  `toml:"auth_users" mapstructure:"auth_users"`
+	Type      domainAccount.AccountType `toml:"type" yaml:"type" mapstructure:"type"`
+	Required  int                       `toml:"required" yaml:"required" mapstructure:"required"`
+	AuthUsers []domainAccount.AuthType  `toml:"auth_users" yaml:"auth_users" mapstructure:"auth_users"`
 }
 
-// NewAccount loads and validates account configuration from a TOML file.
+// NewAccount loads and validates account configuration from a file.
 //
 // This function is placed in pkg/config (not internal/infrastructure/config) because:
 //
@@ -69,7 +71,7 @@ type AccountMultisig struct {
 //
 // 2. Configuration loading is a shared concern:
 //   - Similar to NewWallet() which is also in pkg/config
-//   - Both functions handle TOML file loading and validation
+//   - Both functions handle configuration file loading and validation
 //   - This is infrastructure-level file I/O, but needed at initialization
 //
 // 3. Architectural compliance:
@@ -79,21 +81,26 @@ type AccountMultisig struct {
 //
 // The function performs:
 //   - File path validation
-//   - TOML file loading using viper
+//   - Configuration file loading (supports both TOML and YAML formats)
 //   - Structure validation using go-playground/validator
+//
+// The function automatically detects the configuration format based on file extension:
+//   - .toml -> TOML format
+//   - .yaml, .yml -> YAML format
 //
 // Returns an error if:
 //   - File path is empty
+//   - File extension is not supported
 //   - File cannot be read
-//   - TOML unmarshaling fails
+//   - Unmarshaling fails
 //   - Validation fails
 func NewAccount(file string) (*AccountRoot, error) {
 	if file == "" {
 		return nil, errors.New("account config file path cannot be empty")
 	}
 
-	conf, err := loadTOML[AccountRoot](file)
-	if err != nil {
+	var conf AccountRoot
+	if err := loadConfig(file, &conf); err != nil {
 		return nil, err
 	}
 
@@ -101,7 +108,7 @@ func NewAccount(file string) (*AccountRoot, error) {
 		return nil, fmt.Errorf("account config validation failed: %w", err)
 	}
 
-	return conf, nil
+	return &conf, nil
 }
 
 // validate validates the account configuration structure using go-playground/validator.
