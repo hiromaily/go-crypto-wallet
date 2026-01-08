@@ -1,0 +1,30 @@
+
+ethereum:
+  host: "127.0.0.1"
+  port: 8545
+  disable_tls: true
+  network_type: "goerli"  # mainnet, goerli, rinkeby, ropsten
+  keydir: "./data/keystore"
+
+logger:
+  service: "eth-sign"
+  env: "custom"  # dev, prod, custom :for only zap logger
+  level: "debug"  # debug, info, warn, error
+  is_stacktrace: true
+
+# only available for watch only wallet
+tracer:
+  type: "none"  # none, jaeger, datadog
+
+mysql:
+  host: "127.0.0.1:3306"
+  dbname: "sign"
+  user: "hiromaily"
+  pass: "hiromaily"
+  debug: true
+
+file_path:
+  tx: "./data/tx/eth/"
+  address: "./data/address/eth/"
+  full_pubkey: "./data/fullpubkey/eth/"
+
