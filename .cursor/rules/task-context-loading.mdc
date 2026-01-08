@@ -1,0 +1,122 @@
+---
+description: Task-Oriented Context Loading - Automatically load appropriate context documents based on task type and chain
+globs:
+  - "**/*.go"
+  - "**/*.md"
+  - "**/*.toml"
+  - "**/*.hcl"
+  - "**/*.sql"
+---
+
+# Task-Oriented Context Loading
+
+タスクを受け取った際、適切なコンテキストドキュメントを自動的に読み込むためのルールです。
+
+## Task Type Detection
+
+以下のキーワードからタスクタイプを判定してください：
+
+| Keywords | Task Type | Context File |
+|----------|-----------|--------------|
+| バグ, 修正, fix, error, Issue #, bug | `bug-fix` | `docs/ai-agents/task-contexts/bug-fix.md` |
+| 追加, 実装, 機能, feature, add, implement | `feature-add` | `docs/ai-agents/task-contexts/feature-add.md` |
+| リファクタリング, 整理, 移動, refactor | `refactoring` | `docs/ai-agents/task-contexts/refactoring.md` |
+| スキーマ, DB, テーブル, カラム, migration | `db-change` | `docs/ai-agents/task-contexts/db-change.md` |
+
+## Chain Detection
+
+以下のキーワードからチェーンを特定してください：
+
+| Keywords | Chain | Context Files |
+|----------|-------|---------------|
+| Bitcoin, BTC, ビットコイン, Taproot, Descriptor, PSBT, MuSig2 | BTC | `docs/ai-agents/task-contexts/chain-specific.md`, `docs/ai-agents/task-contexts/chains/btc.md` |
+| Bitcoin Cash, BCH, ビットコインキャッシュ, CashAddr | BCH | `docs/ai-agents/task-contexts/chain-specific.md`, `docs/ai-agents/task-contexts/chains/bch.md` |
+| Ethereum, ETH, イーサリアム, ERC-20, Gas, Nonce | ETH | `docs/ai-agents/task-contexts/chain-specific.md`, `docs/ai-agents/task-contexts/chains/eth.md` |
+| Ripple, XRP, リップル, Destination Tag | XRP | `docs/ai-agents/task-contexts/chain-specific.md`, `docs/ai-agents/task-contexts/chains/xrp.md` |
+
+## Context Loading Procedure
+
+1. **タスクタイプを判定**: ユーザーの依頼からタスクタイプを特定
+2. **チェーンを特定**: 暗号通貨に関連する場合はチェーンを特定
+3. **コンテキストをロード**: 該当するドキュメントを読み込む
+
+```
+順序:
+1. docs/ai-agents/task-contexts/{task-type}.md (タスクタイプ別)
+2. docs/ai-agents/task-contexts/chain-specific.md (チェーン関連の場合)
+3. docs/ai-agents/task-contexts/chains/{chain}.md (特定チェーンの場合)
+4. 追加の関連ドキュメント (各コンテキストファイルで指定)
+```
+
+## Explicit Task Type Specification
+
+ユーザーが明示的にタスクタイプを指定した場合は、そのタイプに従ってください：
+
+```
+Task Type: bug-fix, Chain: BCH. {description}
+Task Type: feature-add, Chain: BTC. {description}
+Task Type: db-change. {description}
+```
+
+## Chain-Specific Rules
+
+### BCH (Bitcoin Cash) - 重要
+
+BCHタスクの場合、以下のルールを必ず確認：
+
+1. **BTCコードを直接修正しない**: BCH固有の問題はBCH側でメソッドをオーバーライドして対応
+2. **BitcoinCash構造体**: `btc.Bitcoin` を埋め込んでいる
+3. **SegWit/Taproot非対応**: 関連機能はBCHでは使用しない
+
+```go
+// BCH実装場所
+internal/infrastructure/api/bitcoin/bch/
+
+// オーバーライドの例
+func (b *BitcoinCash) GetAddressInfo(addr string) (*dtobtc.AddressInfo, error) {
+    // BCH固有の実装
+}
+```
+
+## Directory Structure Reference
+
+### Use Case Layer
+```
+internal/application/usecase/
+├── keygen/{btc,eth,xrp}/
+├── sign/{btc,eth,xrp}/
+└── watch/{btc,eth,xrp}/
+```
+
+### Infrastructure Layer
+```
+internal/infrastructure/api/
+├── bitcoin/{btc,bch}/
+├── ethereum/{eth,erc20}/
+└── ripple/xrp/
+```
+
+### CLI Layer
+```
+internal/interface-adapters/cli/
+├── keygen/api/{btc,eth}/
+├── sign/
+└── watch/api/{btc,eth,xrp}/
+```
+
+## Verification Commands
+
+タスク完了前に必ず実行：
+
+```bash
+make go-lint      # リンターチェック
+make tidy         # 依存関係整理
+make check-build  # ビルド確認
+make gotest       # テスト実行
+```
+
+## Related Documents
+
+- [Task-Oriented Context Management](docs/ai-agents/task-oriented-context.md)
+- [Task Contexts](docs/ai-agents/task-contexts/README.md)
+- [AGENTS.md](AGENTS.md) - プロジェクト全体のガイドライン
