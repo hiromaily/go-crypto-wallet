@@ -108,7 +108,7 @@ type RippleTxData struct {
 type Logger struct {
 	Service  string `toml:"service" yaml:"service" mapstructure:"service" validate:"required"`
 	Format   string `toml:"format" yaml:"format" mapstructure:"format" validate:"oneof=json console"`
-	Level    string `toml:"level" yaml:"level" mapstructure:"level" validate:"required"`
+	Level    string `toml:"level" yaml:"level" mapstructure:"level" validate:"oneof=debug info warn error"`
 	IsLogger bool   `toml:"is_logger" yaml:"is_logger" mapstructure:"is_logger"`
 }
 
