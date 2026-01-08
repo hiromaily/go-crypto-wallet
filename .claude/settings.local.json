@@ -37,7 +37,8 @@
       "Bash(while:*)",
       "Bash(then)",
       "Bash(fi)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "WebFetch(domain:api.github.com)"
     ]
   },
   "hooks": {

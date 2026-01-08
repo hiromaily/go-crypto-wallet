@@ -145,3 +145,68 @@ func TestNewMultisigConfig_Integration(t *testing.T) {
 	// Verify that client account is not multisig
 	require.False(t, multi.IsMultisigAccount(domainAccount.AccountTypeClient), "client should not be multisig")
 }
+
+// TestNewAccount_YAML tests the NewAccount function for loading account configuration from YAML files.
+// This verifies that YAML configuration files are properly loaded and unmarshaled into AccountRoot structure.
+func TestNewAccount_YAML(t *testing.T) {
+	confPath := configutil.GetConfigFilePath("account.yaml")
+
+	// Skip if config file doesn't exist
+	if _, err := os.Stat(confPath); os.IsNotExist(err) {
+		t.Skipf("Config file not found: %s", confPath)
+	}
+
+	conf, err := NewAccount(confPath)
+	require.NoError(t, err, "NewAccount() should not return error")
+	require.NotNil(t, conf, "NewAccount() returned nil config")
+
+	// Verify that viper properly loaded the YAML file
+	assert.NotEmpty(t, conf.Types, "Account types should not be empty")
+	assert.NotEmpty(t, conf.DepositReceiver, "DepositReceiver should not be empty")
+	assert.NotEmpty(t, conf.PaymentSender, "PaymentSender should not be empty")
+	assert.NotEmpty(t, conf.Multisigs, "Multisigs should not be empty")
+
+	// Verify multisig structure loaded correctly
+	for i, ms := range conf.Multisigs {
+		assert.NotEmpty(t, ms.Type, "Multisig[%d].Type should not be empty", i)
+		assert.NotZero(t, ms.Required, "Multisig[%d].Required should not be zero", i)
+		assert.NotEmpty(t, ms.AuthUsers, "Multisig[%d].AuthUsers should not be empty", i)
+	}
+}
+
+// TestNewAccount_TOMLvsYAML tests that TOML and YAML configs produce identical results.
+// This verifies backward compatibility and ensures both formats are equivalent.
+func TestNewAccount_TOMLvsYAML(t *testing.T) {
+	tomlPath := configutil.GetConfigFilePath("account.toml")
+	yamlPath := configutil.GetConfigFilePath("account.yaml")
+
+	// Skip if either config file doesn't exist
+	if _, err := os.Stat(tomlPath); os.IsNotExist(err) {
+		t.Skipf("Config file not found: %s", tomlPath)
+	}
+	if _, err := os.Stat(yamlPath); os.IsNotExist(err) {
+		t.Skipf("Config file not found: %s", yamlPath)
+	}
+
+	tomlConf, err := NewAccount(tomlPath)
+	require.NoError(t, err, "NewAccount(TOML) should not return error")
+
+	yamlConf, err := NewAccount(yamlPath)
+	require.NoError(t, err, "NewAccount(YAML) should not return error")
+
+	// Compare configurations
+	assert.Equal(t, tomlConf.Types, yamlConf.Types, "Types should match")
+	assert.Equal(t, tomlConf.DepositReceiver, yamlConf.DepositReceiver, "DepositReceiver should match")
+	assert.Equal(t, tomlConf.PaymentSender, yamlConf.PaymentSender, "PaymentSender should match")
+	assert.Equal(t, len(tomlConf.Multisigs), len(yamlConf.Multisigs), "Multisigs count should match")
+
+	// Compare multisig configurations
+	for i := range tomlConf.Multisigs {
+		assert.Equal(t, tomlConf.Multisigs[i].Type, yamlConf.Multisigs[i].Type,
+			"Multisig[%d].Type should match", i)
+		assert.Equal(t, tomlConf.Multisigs[i].Required, yamlConf.Multisigs[i].Required,
+			"Multisig[%d].Required should match", i)
+		assert.Equal(t, tomlConf.Multisigs[i].AuthUsers, yamlConf.Multisigs[i].AuthUsers,
+			"Multisig[%d].AuthUsers should match", i)
+	}
+}

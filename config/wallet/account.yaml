@@ -1,0 +1,46 @@
+# Account Configuration (YAML format)
+# This is a sample YAML configuration file equivalent to account.toml
+# You can use either TOML or YAML format for wallet and account configuration
+
+# Account types available in the wallet
+types:
+  - client
+  - deposit
+  - payment
+  - stored
+
+# Account type that receives deposits
+deposit_receiver: deposit
+
+# Account type that sends payments
+payment_sender: payment
+
+# Multisig account configurations
+# Each entry defines the multisig requirements for a specific account type
+multisig:
+  - type: deposit
+    required: 2
+    auth_users:
+      - auth1
+      - auth2
+      - auth3
+      - auth4
+      - auth5
+
+  - type: payment
+    required: 3
+    auth_users:
+      - auth1
+      - auth2
+      - auth3
+      - auth4
+      - auth5
+
+  - type: stored
+    required: 4
+    auth_users:
+      - auth1
+      - auth2
+      - auth3
+      - auth4
+      - auth5
