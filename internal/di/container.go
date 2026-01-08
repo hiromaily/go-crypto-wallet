@@ -163,7 +163,7 @@ func NewContainer(
 // NewKeygener is to register for keygener interface
 func (c *container) NewKeygener() wallets.Keygener {
 	// set global logger
-	logger.SetGlobal(logger.NewSlogFromConfig(c.conf.Logger.Env, c.conf.Logger.Level, c.conf.Logger.Service))
+	logger.SetGlobal(logger.NewSlogLogger(c.conf.Logger.Format, c.conf.Logger.Level, c.conf.Logger.Service, ""))
 
 	switch {
 	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
@@ -222,7 +222,7 @@ func (c *container) newXRPKeygener() wallets.Keygener {
 // NewWalleter is to register for walleter interface
 func (c *container) NewWalleter() wallets.Watcher {
 	// set global logger
-	logger.SetGlobal(logger.NewSlogFromConfig(c.conf.Logger.Env, c.conf.Logger.Level, c.conf.Logger.Service))
+	logger.SetGlobal(logger.NewSlogLogger(c.conf.Logger.Format, c.conf.Logger.Level, c.conf.Logger.Service, ""))
 
 	switch {
 	case domainCoin.IsBTCGroup(c.conf.CoinTypeCode):
@@ -247,7 +247,7 @@ func (c *container) NewSigner(authName string) wallets.Signer {
 	c.authName = authName
 
 	// set global logger
-	logger.SetGlobal(logger.NewSlogFromConfig(c.conf.Logger.Env, c.conf.Logger.Level, c.conf.Logger.Service))
+	logger.SetGlobal(logger.NewSlogLogger(c.conf.Logger.Format, c.conf.Logger.Level, c.conf.Logger.Service, ""))
 
 	authType := domainAccount.AuthTypeMap[authName]
 

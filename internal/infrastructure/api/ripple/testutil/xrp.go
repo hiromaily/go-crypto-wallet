@@ -95,7 +95,7 @@ func (xts *XRPTestSuite) TearDownTest() {
 //	if conn == nil {
 //		log.Fatal("connection is nil")
 //	}
-//	logger := logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
+//	logger := logger.NewSlogLogger(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
 //	api = xrp.NewRippleAPI(conn, logger)
 //
 //	return api

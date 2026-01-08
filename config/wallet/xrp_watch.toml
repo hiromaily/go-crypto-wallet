@@ -16,7 +16,7 @@ sender_secret = "sh7PZkFPYmSgPm25UYZ2f46PwKJZ9"
 
 [logger]
 service = "xrp-wallet"
-env = "custom" # dev, prod, custom :for only zap logger
+format = "json" # json, console
 level = "debug" # debug, info, warn, error
 is_stacktrace = false
 

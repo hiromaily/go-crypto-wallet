@@ -13,7 +13,7 @@ network_type = "regtest" # mainnet, testnet3, regtest
 
 [logger]
 service = "bch-sign"
-env = "custom" # dev, prod, custom :for only zap logger
+format = "json" # json, console
 level = "debug" # debug, info, warn, error
 is_stacktrace = true
 

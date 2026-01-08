@@ -54,10 +54,11 @@ func NewPkgContainer(
 // NewLogger creates a new logger
 func (c *pkgContainer) NewLogger() logger.Logger {
 	if c.logger == nil {
-		c.logger = logger.NewSlogFromConfig(
-			c.config.Logger.Env,
+		c.logger = logger.NewSlogLogger(
+			c.config.Logger.Format,
 			c.config.Logger.Level,
 			c.config.Logger.Service,
+			"",
 		)
 	}
 	return c.logger

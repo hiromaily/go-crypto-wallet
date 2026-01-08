@@ -14,7 +14,7 @@ ripple:
 
 logger:
   service: "xrp-keygen"
-  env: "custom"  # dev, prod, custom :for only zap logger
+  format: "json"  # json, console
   level: "debug"  # debug, info, warn, error
   is_stacktrace: false
 

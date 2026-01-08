@@ -29,7 +29,7 @@ func TestTxSqlc(t *testing.T) {
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)
 	}
-	_ = logger.NewSlogFromConfig(conf.Logger.Env, conf.Logger.Level, conf.Logger.Service)
+	_ = logger.NewSlogLogger(conf.Logger.Format, conf.Logger.Level, conf.Logger.Service, "")
 	db, err := mysql.NewMySQL(&conf.MySQL)
 	if err != nil {
 		log.Fatalf("fail to create db: %v", err)

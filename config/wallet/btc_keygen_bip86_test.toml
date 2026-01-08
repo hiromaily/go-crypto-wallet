@@ -14,7 +14,7 @@ network_type = "signet" # mainnet, testnet3, regtest, signet
 
 [logger]
 service = "btc-keygen-bip86-test"
-env = "custom" # dev, prod, custom :for only zap logger
+format = "json" # json, console
 level = "debug" # debug, info, warn, error
 is_stacktrace = true
 
