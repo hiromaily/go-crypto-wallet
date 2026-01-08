@@ -9,82 +9,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestNewConfigLoader tests the config loader factory function.
-// This verifies that the factory correctly resolves loaders based on file extension.
-func TestNewConfigLoader(t *testing.T) {
-	tests := []struct {
-		name       string
-		path       string
-		wantFormat ConfigFormat
-		wantErr    bool
-	}{
-		{
-			name:       "TOML file extension",
-			path:       "config/test.toml",
-			wantFormat: FormatTOML,
-			wantErr:    false,
-		},
-		{
-			name:       "YAML file extension (.yaml)",
-			path:       "config/test.yaml",
-			wantFormat: FormatYAML,
-			wantErr:    false,
-		},
-		{
-			name:       "YAML file extension (.yml)",
-			path:       "config/test.yml",
-			wantFormat: FormatYAML,
-			wantErr:    false,
-		},
-		{
-			name:       "Uppercase TOML extension",
-			path:       "config/TEST.TOML",
-			wantFormat: FormatTOML,
-			wantErr:    false,
-		},
-		{
-			name:       "Uppercase YAML extension",
-			path:       "config/TEST.YAML",
-			wantFormat: FormatYAML,
-			wantErr:    false,
-		},
-		{
-			name:    "Unsupported extension (.json)",
-			path:    "config/test.json",
-			wantErr: true,
-		},
-		{
-			name:    "Unsupported extension (.xml)",
-			path:    "config/test.xml",
-			wantErr: true,
-		},
-		{
-			name:    "No extension",
-			path:    "config/test",
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			loader, err := NewConfigLoader(tt.path)
-
-			if tt.wantErr {
-				require.Error(t, err, "NewConfigLoader() should return error")
-				assert.Nil(t, loader, "Loader should be nil on error")
-				return
-			}
-
-			require.NoError(t, err, "NewConfigLoader() should not return error")
-			require.NotNil(t, loader, "Loader should not be nil")
-			assert.Equal(t, tt.wantFormat, loader.Format(), "Format mismatch")
-		})
-	}
-}
-
-// TestConfigLoaderLoad tests the Load method of config loaders.
-// This verifies that both TOML and YAML loaders can load configuration files.
-func TestConfigLoaderLoad(t *testing.T) {
+// TestLoadConfig tests the loadConfig function with various file formats.
+// This verifies that both TOML and YAML files can be loaded automatically.
+func TestLoadConfig(t *testing.T) {
 	// Create temporary test config files
 	tmpDir := t.TempDir()
 
@@ -110,6 +37,11 @@ payment_sender: payment
 	err = os.WriteFile(yamlPath, []byte(yamlContent), 0o600)
 	require.NoError(t, err, "Failed to create test YAML file")
 
+	// Create YML test file
+	ymlPath := filepath.Join(tmpDir, "test.yml")
+	err = os.WriteFile(ymlPath, []byte(yamlContent), 0o600)
+	require.NoError(t, err, "Failed to create test YML file")
+
 	tests := []struct {
 		name    string
 		path    string
@@ -126,6 +58,11 @@ payment_sender: payment
 			wantErr: false,
 		},
 		{
+			name:    "Load YML file",
+			path:    ymlPath,
+			wantErr: false,
+		},
+		{
 			name:    "Load non-existent file",
 			path:    filepath.Join(tmpDir, "nonexistent.toml"),
 			wantErr: true,
@@ -138,11 +75,11 @@ payment_sender: payment
 			err := loadConfig(tt.path, &conf)
 
 			if tt.wantErr {
-				require.Error(t, err, "Load() should return error")
+				require.Error(t, err, "loadConfig() should return error")
 				return
 			}
 
-			require.NoError(t, err, "Load() should not return error")
+			require.NoError(t, err, "loadConfig() should not return error")
 			assert.NotEmpty(t, conf.Types, "Types should not be empty")
 			assert.Equal(t, "deposit", string(conf.DepositReceiver), "DepositReceiver mismatch")
 			assert.Equal(t, "payment", string(conf.PaymentSender), "PaymentSender mismatch")
@@ -150,27 +87,85 @@ payment_sender: payment
 	}
 }
 
-// TestLoadConfigWithInvalidExtension tests loadConfig with unsupported file extensions.
-func TestLoadConfigWithInvalidExtension(t *testing.T) {
+// TestLoadConfigWithUnsupportedExtension tests loadConfig with unsupported file extensions.
+func TestLoadConfigWithUnsupportedExtension(t *testing.T) {
 	tmpDir := t.TempDir()
-	invalidPath := filepath.Join(tmpDir, "test.json")
 
-	var conf AccountRoot
-	err := loadConfig(invalidPath, &conf)
+	tests := []struct {
+		name string
+		path string
+	}{
+		{
+			name: "JSON extension",
+			path: filepath.Join(tmpDir, "test.json"),
+		},
+		{
+			name: "XML extension",
+			path: filepath.Join(tmpDir, "test.xml"),
+		},
+		{
+			name: "No extension",
+			path: filepath.Join(tmpDir, "test"),
+		},
+		{
+			name: "Uppercase unsupported extension",
+			path: filepath.Join(tmpDir, "test.JSON"),
+		},
+	}
 
-	require.Error(t, err, "loadConfig() should return error for unsupported extension")
-	assert.Contains(t, err.Error(), "unsupported config file extension",
-		"Error message should mention unsupported extension")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var conf AccountRoot
+			err := loadConfig(tt.path, &conf)
+
+			require.Error(t, err, "loadConfig() should return error for unsupported extension")
+			assert.Contains(t, err.Error(), "unsupported config file extension",
+				"Error message should mention unsupported extension")
+		})
+	}
 }
 
-// TestTOMLLoaderImplementation tests tomlLoader implementation.
-func TestTOMLLoaderImplementation(t *testing.T) {
-	loader := &tomlLoader{}
-	assert.Equal(t, FormatTOML, loader.Format(), "tomlLoader should return TOML format")
-}
+// TestLoadConfigCaseInsensitive tests that file extension detection is case-insensitive.
+func TestLoadConfigCaseInsensitive(t *testing.T) {
+	tmpDir := t.TempDir()
 
-// TestYAMLLoaderImplementation tests yamlLoader implementation.
-func TestYAMLLoaderImplementation(t *testing.T) {
-	loader := &yamlLoader{}
-	assert.Equal(t, FormatYAML, loader.Format(), "yamlLoader should return YAML format")
+	tomlContent := `
+types = ["client", "deposit"]
+deposit_receiver = "deposit"
+payment_sender = "payment"
+`
+
+	yamlContent := `
+types:
+  - client
+  - deposit
+deposit_receiver: deposit
+payment_sender: payment
+`
+
+	tests := []struct {
+		name     string
+		filename string
+		content  string
+	}{
+		{name: "Uppercase TOML", filename: "test.TOML", content: tomlContent},
+		{name: "Mixed case TOML", filename: "test.Toml", content: tomlContent},
+		{name: "Uppercase YAML", filename: "test.YAML", content: yamlContent},
+		{name: "Mixed case YAML", filename: "test.Yaml", content: yamlContent},
+		{name: "Uppercase YML", filename: "test.YML", content: yamlContent},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			path := filepath.Join(tmpDir, tt.filename)
+			err := os.WriteFile(path, []byte(tt.content), 0o600)
+			require.NoError(t, err, "Failed to create test file")
+
+			var conf AccountRoot
+			err = loadConfig(path, &conf)
+
+			require.NoError(t, err, "loadConfig() should handle case-insensitive extensions")
+			assert.NotEmpty(t, conf.Types, "Types should not be empty")
+		})
+	}
 }
