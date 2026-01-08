@@ -15,7 +15,7 @@ import (
 // TestNewAccount tests the NewAccount function for loading account configuration from TOML files.
 func TestNewAccount(t *testing.T) {
 	// t.SkipNow()
-	confPath := configutil.GetConfigFilePath("account.toml")
+	confPath := configutil.GetConfigFilePath("account.yaml")
 	conf, err := NewAccount(confPath)
 	require.NoError(t, err, "fail to create config")
 	grok.Value(conf)
@@ -24,7 +24,7 @@ func TestNewAccount(t *testing.T) {
 // TestNewAccountWithViper tests account loading using viper.
 // This verifies that the TOML file is properly loaded and unmarshaled into AccountRoot structure.
 func TestNewAccountWithViper(t *testing.T) {
-	confPath := configutil.GetConfigFilePath("account.toml")
+	confPath := configutil.GetConfigFilePath("account.yaml")
 
 	// Skip if config file doesn't exist
 	if _, err := os.Stat(confPath); os.IsNotExist(err) {
@@ -53,7 +53,7 @@ func TestNewAccountWithViper(t *testing.T) {
 // This test verifies that NewAccount correctly loads and validates account configuration
 // from a TOML file using the common loadTOML function.
 func TestLoadAccount(t *testing.T) {
-	confPath := configutil.GetConfigFilePath("account.toml")
+	confPath := configutil.GetConfigFilePath("account.yaml")
 
 	// Skip if config file doesn't exist
 	if _, err := os.Stat(confPath); os.IsNotExist(err) {
@@ -130,7 +130,7 @@ func TestNewMultisigConfig(t *testing.T) {
 // This verifies that the conversion from TOML config to domain entity works correctly.
 func TestNewMultisigConfig_Integration(t *testing.T) {
 	// config
-	confPath := configutil.GetConfigFilePath("account.toml")
+	confPath := configutil.GetConfigFilePath("account.yaml")
 	conf, err := NewAccount(confPath)
 	require.NoError(t, err, "fail to create config")
 

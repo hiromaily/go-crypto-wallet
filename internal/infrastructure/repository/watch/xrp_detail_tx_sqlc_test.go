@@ -26,7 +26,7 @@ import (
 func TestXrpDetailTxSqlc(t *testing.T) {
 	// Create XRP repositories
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := projPath + "/config/wallet/xrp_watch.toml"
+	confPath := projPath + "/config/wallet/xrp_watch.yaml"
 	conf, err := config.NewWallet(confPath, domainWallet.WalletTypeWatchOnly, domainCoin.XRP)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)

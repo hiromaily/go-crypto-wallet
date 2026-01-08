@@ -263,8 +263,8 @@ func setupKeygenWallet(t *testing.T) di.Container {
 
 	// Use relative path from this test file location
 	// internal/integration_test/ -> ../../config/wallet/
-	confPath := filepath.Join("..", "..", "config", "wallet", "btc_keygen.toml")
-	accountConfPath := filepath.Join("..", "..", "config", "wallet", "account.toml")
+	confPath := filepath.Join("..", "..", "config", "wallet", "btc_keygen.yaml")
+	accountConfPath := filepath.Join("..", "..", "config", "wallet", "account.yaml")
 
 	// Load wallet configuration
 	conf, err := config.NewWallet(confPath, domainWallet.WalletTypeKeyGen, domainCoin.BTC)

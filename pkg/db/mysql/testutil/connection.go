@@ -21,7 +21,7 @@ func GetDB() *sql.DB {
 	}
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := projPath + "/config/wallet/btc_watch.toml"
+	confPath := projPath + "/config/wallet/btc_watch.yaml"
 	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.BTC)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)

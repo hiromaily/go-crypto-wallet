@@ -26,7 +26,7 @@ import (
 func TestETHDetailTXSqlc(t *testing.T) {
 	// Create ETH repositories
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := projPath + "/config/wallet/eth_watch.toml"
+	confPath := projPath + "/config/wallet/eth_watch.yaml"
 	conf, err := config.NewWallet(confPath, domainWallet.WalletTypeWatchOnly, domainCoin.ETH)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)

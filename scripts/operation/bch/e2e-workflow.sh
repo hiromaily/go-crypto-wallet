@@ -37,10 +37,10 @@ RPC_PASSWORD="${RPC_PASSWORD:-xyz}"
 WALLET_PASSPHRASE="${WALLET_PASSPHRASE:-test}"
 
 # Config file paths (absolute)
-CONFIG_WATCH="${PROJECT_ROOT}/config/wallet/bch_watch.toml"
-CONFIG_KEYGEN="${PROJECT_ROOT}/config/wallet/bch_keygen.toml"
-CONFIG_SIGN1="${PROJECT_ROOT}/config/wallet/bch_sign1.toml"
-CONFIG_SIGN2="${PROJECT_ROOT}/config/wallet/bch_sign2.toml"
+CONFIG_WATCH="${PROJECT_ROOT}/config/wallet/bch_watch.yaml"
+CONFIG_KEYGEN="${PROJECT_ROOT}/config/wallet/bch_keygen.yaml"
+CONFIG_SIGN1="${PROJECT_ROOT}/config/wallet/bch_sign1.yaml"
+CONFIG_SIGN2="${PROJECT_ROOT}/config/wallet/bch_sign2.yaml"
 
 ###############################################################################
 # Cleanup Functions

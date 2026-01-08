@@ -30,42 +30,42 @@ func TestNewWallet(t *testing.T) {
 	}{
 		{
 			name:         "BTC Watch Wallet",
-			configFile:   filepath.Join(projPath, "config/wallet/btc_watch.toml"),
+			configFile:   filepath.Join(projPath, "config/wallet/btc_watch.yaml"),
 			walletType:   domainWallet.WalletTypeWatchOnly,
 			coinTypeCode: domainCoin.BTC,
 			wantErr:      false,
 		},
 		{
 			name:         "BTC Keygen Wallet",
-			configFile:   filepath.Join(projPath, "config/wallet/btc_keygen.toml"),
+			configFile:   filepath.Join(projPath, "config/wallet/btc_keygen.yaml"),
 			walletType:   domainWallet.WalletTypeKeyGen,
 			coinTypeCode: domainCoin.BTC,
 			wantErr:      false,
 		},
 		{
 			name:         "BTC Sign Wallet",
-			configFile:   filepath.Join(projPath, "config/wallet/btc_sign.toml"),
+			configFile:   filepath.Join(projPath, "config/wallet/btc_sign.yaml"),
 			walletType:   domainWallet.WalletTypeSign,
 			coinTypeCode: domainCoin.BTC,
 			wantErr:      false,
 		},
 		{
 			name:         "ETH Watch Wallet",
-			configFile:   filepath.Join(projPath, "config/wallet/eth_watch.toml"),
+			configFile:   filepath.Join(projPath, "config/wallet/eth_watch.yaml"),
 			walletType:   domainWallet.WalletTypeWatchOnly,
 			coinTypeCode: domainCoin.ETH,
 			wantErr:      false,
 		},
 		{
 			name:         "ETH Keygen Wallet",
-			configFile:   filepath.Join(projPath, "config/wallet/eth_keygen.toml"),
+			configFile:   filepath.Join(projPath, "config/wallet/eth_keygen.yaml"),
 			walletType:   domainWallet.WalletTypeKeyGen,
 			coinTypeCode: domainCoin.ETH,
 			wantErr:      false,
 		},
 		{
 			name:         "ETH Sign Wallet",
-			configFile:   filepath.Join(projPath, "config/wallet/eth_sign.toml"),
+			configFile:   filepath.Join(projPath, "config/wallet/eth_sign.yaml"),
 			walletType:   domainWallet.WalletTypeSign,
 			coinTypeCode: domainCoin.ETH,
 			wantErr:      false,
@@ -170,7 +170,7 @@ func TestLoadWallet(t *testing.T) {
 	}
 
 	projPath := filepath.Join(gopath, "src/github.com/hiromaily/go-crypto-wallet")
-	configPath := filepath.Join(projPath, "config/wallet/btc_watch.toml")
+	configPath := filepath.Join(projPath, "config/wallet/btc_watch.yaml")
 
 	// Skip if config file doesn't exist
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
