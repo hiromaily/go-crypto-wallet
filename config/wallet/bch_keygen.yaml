@@ -1,8 +1,8 @@
-#coin_type = "bch" # btc, bch
+# coin_type: "bch" # btc, bch
 address_type: "bch-cashaddr"  # p2sh-segwit, bech32, bch-cashaddr
 
 bitcoin:
-#host = "127.0.0.1:29332"
+# host: "127.0.0.1:29332"
 # if specific wallet want to be used like `bitcoin-cli -rpcwallet=keygen`
   host: "127.0.0.1:29332/wallet/keygen"
   user: "xyz"
@@ -34,6 +34,6 @@ file_path:
   full_pubkey: "./data/fullpubkey/bch/"
 
 # default seed of key used when dev mode
-#[key]
-#seed = "Ve5Kkaba4SQGavc/pWXazZuYD4mE53+qV9tLeRTS5t4="
+# key:
+#   seed: "Ve5Kkaba4SQGavc/pWXazZuYD4mE53+qV9tLeRTS5t4="
 
