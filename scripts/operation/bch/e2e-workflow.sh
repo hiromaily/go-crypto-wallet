@@ -314,6 +314,20 @@ multisig_setup_phase() {
 
 ###############################################################################
 # UTXO Generation Phase (for regtest)
+#
+# This function generates test UTXOs required for the transaction phase.
+# It only works in regtest environment where blocks can be instantly generated.
+#
+# How it works:
+#   1. Extract payment address from the exported CSV file
+#   2. Generate 101 blocks with coinbase rewards sent to the payment address
+#      (101 blocks are needed because coinbase outputs require 100 confirmations
+#       to become spendable - this is Bitcoin's coinbase maturity rule)
+#   3. Poll for balance update to verify UTXOs are available
+#   4. Fail with error if balance is not detected within timeout
+#
+# Note: The generatetoaddress RPC command is regtest-only and will not work
+# on testnet or mainnet where actual proof-of-work mining is required.
 ###############################################################################
 
 generate_test_utxos() {
