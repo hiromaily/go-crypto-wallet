@@ -79,12 +79,18 @@ clean_bitcoin_wallet_data() {
 full_reset() {
 	log_step "Performing full reset for fresh state"
 
-	# Stop and remove containers
-	log_info "Stopping Bitcoin containers..."
+	# Stop and remove containers WITH VOLUMES
+	# The -v flag removes volumes, which clears the database state
+	log_info "Stopping Bitcoin containers (with volume removal)..."
 	docker compose -f compose.btc.yaml down -v 2>/dev/null || true
 
-	log_info "Stopping database container..."
+	log_info "Stopping database container (with volume removal)..."
+	# This removes all database data, ensuring a clean slate
 	docker compose -f compose.yaml down -v 2>/dev/null || true
+
+	# Explicitly remove database volume (in case -v flag didn't work)
+	log_info "Removing database volume..."
+	docker volume rm go-crypto-wallet_wallet-db 2>/dev/null || true
 
 	# Clean data files
 	clean_data_files
@@ -93,6 +99,7 @@ full_reset() {
 	clean_bitcoin_wallet_data
 
 	log_info "Full reset complete - system is in fresh state"
+	log_info "Note: Database volumes were removed for complete cleanup"
 }
 
 # Basic cleanup: just stop containers
@@ -299,17 +306,23 @@ multisig_setup_phase() {
 
 	# Import addresses into watch wallet
 	log_substep "Importing addresses into watch wallet"
-	log_info "Importing client addresses"
+	log_info "Importing client addresses (without rescan)"
 	watch -c "${CONFIG_WATCH}" --coin "${COIN}" import address --file "${address_client}"
 
-	log_info "Importing deposit addresses"
+	log_info "Importing deposit addresses (without rescan)"
 	watch -c "${CONFIG_WATCH}" --coin "${COIN}" import address --file "${address_deposit}"
 
-	log_info "Importing payment addresses"
+	log_info "Importing payment addresses (without rescan)"
 	watch -c "${CONFIG_WATCH}" --coin "${COIN}" import address --file "${address_payment}"
 
-	log_info "Importing stored addresses"
+	log_info "Importing stored addresses (without rescan)"
 	watch -c "${CONFIG_WATCH}" --coin "${COIN}" import address --file "${address_stored}"
+
+	# Trigger blockchain rescan for all imported addresses
+	log_info "Triggering blockchain rescan for all imported addresses..."
+	# Using rescanblockchain RPC via bitcoin-cli is more efficient than rescanning per-address
+	btc_cli "btc-watch" -rpcwallet=watch rescanblockchain 0 >/dev/null
+	log_info "Blockchain rescan completed"
 }
 
 ###############################################################################
@@ -354,8 +367,9 @@ generate_test_utxos() {
 	log_info "Waiting for blockchain sync and balance update..."
 
 	# Poll for balance update with timeout
-	max_wait=30
-	wait_interval=2
+	# Note: First time after rescan may take longer as Bitcoin Core indexes the addresses
+	max_wait=60
+	wait_interval=3
 	elapsed=0
 	balance_found=false
 
@@ -380,6 +394,8 @@ generate_test_utxos() {
 		log_error "  - Bitcoin node logs: docker compose -f compose.btc.yaml logs btc-watch"
 		log_error "  - Block generation succeeded"
 		log_error "  - Address import into watch wallet succeeded"
+		log_error "Debug: Last balance command output:"
+		echo "$balance_output"
 		return 1
 	fi
 }
