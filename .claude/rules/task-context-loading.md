@@ -1,0 +1,190 @@
+# Task-Oriented Context Loading
+
+タスクを受け取った際、適切なコンテキストドキュメントを自動的に読み込むためのルールです。
+
+## 対象ファイル
+
+このルールは以下のファイルタイプを編集する際に適用されます：
+
+- `**/*.go`
+- `**/*.md`
+- `**/*.toml`
+- `**/*.yaml`
+- `**/*.hcl`
+- `**/*.sql`
+- `**/*.sh`
+- `**/*.proto`
+
+## Task Type Detection
+
+以下のキーワードからタスクタイプを判定してください：
+
+| Keywords | Task Type | Context File |
+|----------|-----------|--------------|
+| バグ, 修正, fix, error, Issue #, bug | `bug-fix` | `docs/ai-agents/task-contexts/bug-fix.md` |
+| 追加, 実装, 機能, feature, add, implement | `feature-add` | `docs/ai-agents/task-contexts/feature-add.md` |
+| リファクタリング, 整理, 移動, refactor | `refactoring` | `docs/ai-agents/task-contexts/refactoring.md` |
+| スキーマ, DB, テーブル, カラム, migration | `db-change` | `docs/ai-agents/task-contexts/db-change.md` |
+| ドキュメント, README, 説明, docs, comment | `documentation` | `docs/ai-agents/task-contexts/documentation.md` |
+
+## Chain Detection
+
+以下のキーワードからチェーンを特定してください：
+
+| Keywords | Chain | Context Files |
+|----------|-------|---------------|
+| Bitcoin, BTC, ビットコイン, Taproot, Descriptor, PSBT, MuSig2 | BTC | `docs/ai-agents/task-contexts/chain-specific.md`, `docs/ai-agents/task-contexts/chains/btc.md` |
+| Bitcoin Cash, BCH, ビットコインキャッシュ, CashAddr | BCH | `docs/ai-agents/task-contexts/chain-specific.md`, `docs/ai-agents/task-contexts/chains/bch.md` |
+| Ethereum, ETH, イーサリアム, ERC-20, Gas, Nonce | ETH | `docs/ai-agents/task-contexts/chain-specific.md`, `docs/ai-agents/task-contexts/chains/eth.md` |
+| Ripple, XRP, リップル, Destination Tag | XRP | `docs/ai-agents/task-contexts/chain-specific.md`, `docs/ai-agents/task-contexts/chains/xrp.md` |
+
+## File Type Detection for Verification
+
+編集したファイルの拡張子に基づいて、適切な検証コマンドを決定してください：
+
+| File Extension | Required Verification | Optional |
+|----------------|----------------------|----------|
+| `*.go` | `make go-lint`, `make check-build` | `make gotest` |
+| `*.md`, `*.mdc` | (none) | markdownlint |
+| `*.sql`, `*.hcl` | `make atlas-fmt`, `make atlas-lint` | |
+| `*.yaml`, `*.toml` | (none) | |
+| `*.sh` | (none) | shellcheck |
+| `*.proto` | `make proto` | |
+
+**重要**: ドキュメント（`*.md`）のみの変更では、Go 関連の検証コマンドは**実行しないでください**。
+
+詳細は `docs/ai-agents/task-contexts/verification.md` を参照。
+
+## Context Loading Procedure
+
+1. **タスクタイプを判定**: ユーザーの依頼からタスクタイプを特定
+2. **チェーンを特定**: 暗号通貨に関連する場合はチェーンを特定
+3. **コンテキストをロード**: 該当するドキュメントを読み込む
+4. **ファイルタイプを検出**: 編集対象ファイルの拡張子を確認
+5. **検証コマンドを決定**: ファイルタイプに応じた検証コマンドを選択
+
+```
+順序:
+1. docs/ai-agents/task-contexts/{task-type}.md (タスクタイプ別)
+2. docs/ai-agents/task-contexts/chain-specific.md (チェーン関連の場合)
+3. docs/ai-agents/task-contexts/chains/{chain}.md (特定チェーンの場合)
+4. docs/ai-agents/task-contexts/verification.md (検証コマンド確認)
+5. 追加の関連ドキュメント (各コンテキストファイルで指定)
+```
+
+## Explicit Task Type Specification
+
+ユーザーが明示的にタスクタイプを指定した場合は、そのタイプに従ってください：
+
+```
+Task Type: bug-fix, Chain: BCH. {description}
+Task Type: feature-add, Chain: BTC. {description}
+Task Type: db-change. {description}
+Task Type: documentation. {description}
+```
+
+## Chain-Specific Rules
+
+### BCH (Bitcoin Cash) - 重要
+
+BCHタスクの場合、以下のルールを必ず確認：
+
+1. **BTCコードを直接修正しない**: BCH固有の問題はBCH側でメソッドをオーバーライドして対応
+2. **BitcoinCash構造体**: `btc.Bitcoin` を埋め込んでいる
+3. **SegWit/Taproot非対応**: 関連機能はBCHでは使用しない
+
+```go
+// BCH実装場所
+internal/infrastructure/api/bitcoin/bch/
+
+// オーバーライドの例
+func (b *BitcoinCash) GetAddressInfo(addr string) (*dtobtc.AddressInfo, error) {
+    // BCH固有の実装
+}
+```
+
+## Directory Structure Reference
+
+### Use Case Layer
+
+```
+internal/application/usecase/
+├── keygen/{btc,eth,xrp}/
+├── sign/{btc,eth,xrp}/
+└── watch/{btc,eth,xrp}/
+```
+
+### Infrastructure Layer
+
+```
+internal/infrastructure/api/
+├── bitcoin/{btc,bch}/
+├── ethereum/{eth,erc20}/
+└── ripple/xrp/
+```
+
+### CLI Layer
+
+```
+internal/interface-adapters/cli/
+├── keygen/api/{btc,eth}/
+├── sign/
+└── watch/api/{btc,eth,xrp}/
+```
+
+## Verification Commands by File Type
+
+### Go Files (*.go)
+
+```bash
+make go-lint      # 必須: リンターチェック
+make check-build  # 必須: ビルド確認
+make gotest       # 推奨: テスト実行（機能変更時）
+make tidy         # 推奨: 依存関係整理（import変更時）
+```
+
+### Documentation Files (*.md)
+
+```bash
+# Go 関連コマンドは不要
+# オプション: markdownlint (インストール時)
+```
+
+### Database Files (*.sql,*.hcl)
+
+```bash
+make atlas-fmt    # 必須: フォーマット
+make atlas-lint   # 必須: リント
+make sqlc         # スキーマ変更時
+```
+
+### Shell Scripts (*.sh)
+
+```bash
+# オプション: shellcheck (インストール時)
+```
+
+## Quick Decision Tree
+
+```
+タスク受信
+    │
+    ├─ Go ファイル編集？
+    │   └─ Yes → make go-lint, make check-build, (make gotest)
+    │
+    ├─ ドキュメントのみ？
+    │   └─ Yes → 検証コマンド不要
+    │
+    ├─ DB スキーマ変更？
+    │   └─ Yes → make atlas-fmt, make atlas-lint, make sqlc
+    │
+    └─ その他
+        └─ ファイルタイプに応じて判断
+```
+
+## Related Documents
+
+- [Task-Oriented Context Management](../../docs/ai-agents/task-oriented-context.md)
+- [Task Contexts](../../docs/ai-agents/task-contexts/README.md)
+- [Verification Matrix](../../docs/ai-agents/task-contexts/verification.md)
+- [AGENTS.md](../../AGENTS.md) - プロジェクト全体のガイドライン

@@ -186,7 +186,15 @@ Each command file links to these common steps to avoid duplication and ensure co
 
 **Important**: Always verify tool versions before starting work. Using incorrect versions (especially Atlas v1.0.0) may cause compatibility issues.
 
-## Cursor Rules Integration
+## Rules Integration
+
+### Claude Rules
+
+Claude Code を使用している場合、`.claude/rules/task-context-loading.md` を参照してタスクタイプとチェーンを判定し、適切なコンテキストをロードしてください。
+
+See [.claude/rules/task-context-loading.md](../rules/task-context-loading.md) for details.
+
+### Cursor Rules
 
 Cursor を使用している場合、`.cursor/rules/task-context-loading.mdc` により自動的にタスクタイプとチェーンが判定され、適切なコンテキストがロードされます。
 
@@ -222,3 +230,5 @@ Each command operates in accordance with the project guidelines ([AGENTS.md](../
 - [Task-Oriented Context Management](../../docs/ai-agents/task-oriented-context.md) - コンテキスト管理の概念と戦略
 - [Task Contexts](../../docs/ai-agents/task-contexts/README.md) - タスクコンテキスト一覧
 - [Agent Skills](../../docs/ai-agents/agent-skills.md) - Agent Skills使用ガイド
+- [Claude Task Context Loading](../rules/task-context-loading.md) - Claude用タスクコンテキストローディングルール
+- [Cursor Task Context Loading](../../.cursor/rules/task-context-loading.mdc) - Cursor用タスクコンテキストローディングルール
