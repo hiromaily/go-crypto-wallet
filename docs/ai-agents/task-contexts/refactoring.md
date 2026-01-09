@@ -23,10 +23,10 @@ version: 1.0.0
 
 | Document | Path | Purpose |
 |----------|------|---------|
-| Architecture | `agents/architecture.md` | Clean Architecture原則 |
-| Coding Standards | `agents/coding-standards.md` | コーディング規約 |
+| Architecture | `docs/ai-agents/guidelines/architecture.md` | Clean Architecture原則 |
+| Coding Standards | `docs/ai-agents/guidelines/coding-standards.md` | コーディング規約 |
 | Refactoring Plan | `docs/issues/REFACTORING_PLAN.md` | リファクタリング計画 |
-| Testing | `agents/testing.md` | 既存テストの維持 |
+| Testing | `docs/ai-agents/guidelines/testing.md` | 既存テストの維持 |
 
 ### Conditional Read (条件付き)
 
@@ -36,8 +36,8 @@ version: 1.0.0
 |-----------|----------|------|
 | internalパッケージ移動 | Internal Guidelines | `internal/AGENTS.md` |
 | pkgパッケージ移動 | Pkg Guidelines | `pkg/AGENTS.md` |
-| モック関連の変更 | Code Generation | `agents/code-generation.md` |
-| DB関連の変更 | Database | `agents/database.md` |
+| モック関連の変更 | Code Generation | `docs/ai-agents/guidelines/code-generation.md` |
+| DB関連の変更 | Database | `docs/ai-agents/guidelines/database.md` |
 
 ## Task-Specific Rules
 
@@ -231,7 +231,7 @@ Steps:
 User: "BTCのトランザクションロジックをDomain層に移動して"
 
 Agent Actions:
-1. agents/architecture.md を読み込み
+1. docs/ai-agents/guidelines/architecture.md を読み込み
 2. 現在の実装を確認（internal/infrastructure/wallet/btc/）
 3. ドメインロジックとインフラロジックを分離
 4. Domain層にエンティティ/値オブジェクトを作成
@@ -247,7 +247,7 @@ Agent Actions:
 User: "Repository実装をインターフェースで抽象化して"
 
 Agent Actions:
-1. agents/architecture.md を読み込み
+1. docs/ai-agents/guidelines/architecture.md を読み込み
 2. 現在の具象クラスを確認
 3. internal/application/ports/ にインターフェース定義
 4. 依存側をインターフェースに変更
@@ -264,7 +264,7 @@ Agent Actions:
 User: "BTCとBCHで重複しているコードを共通化して"
 
 Agent Actions:
-1. agents/architecture.md を読み込み
+1. docs/ai-agents/guidelines/architecture.md を読み込み
 2. 重複コードを特定
 3. 共通パッケージの配置場所を決定
 4. 共通ロジックを抽出
@@ -304,8 +304,8 @@ Agent Actions:
 
 ## Related Documents
 
-- [Architecture Guidelines](../../../agents/architecture.md) - Clean Architecture詳細
-- [Refactoring Plan](../../../docs/issues/REFACTORING_PLAN.md) - プロジェクトのリファクタリング計画
-- [Code Generation](../../../agents/code-generation.md) - モック生成など
+- [Architecture Guidelines](../guidelines/architecture.md) - Clean Architecture詳細
+- [Refactoring Plan](../../issues/REFACTORING_PLAN.md) - プロジェクトのリファクタリング計画
+- [Code Generation](../guidelines/code-generation.md) - モック生成など
 - [Internal Guidelines](../../../internal/AGENTS.md) - internalパッケージ構造
 

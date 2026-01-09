@@ -88,10 +88,10 @@ After making code changes, use these commands to verify code correctness:
 ### Root Documentation
 
 - **[Root AGENTS.md](../AGENTS.md)**: Overall project guidelines, navigation, and quick reference
-- **[Core Principles](../agents/core.md)**: Security, error handling, panic usage, and core patterns
-- **[Coding Standards](../agents/coding-standards.md)**: Linting, formatting, and code style
-- **[Testing Guidelines](../agents/testing.md)**: Testing strategy and requirements
-- **[Workflow Guidelines](../agents/workflow.md)**: Git operations and dependency management
+- **[Core Principles](../docs/ai-agents/guidelines/core.md)**: Security, error handling, panic usage, and core patterns
+- **[Coding Standards](../docs/ai-agents/guidelines/coding-standards.md)**: Linting, formatting, and code style
+- **[Testing Guidelines](../docs/ai-agents/guidelines/testing.md)**: Testing strategy and requirements
+- **[Workflow Guidelines](../docs/ai-agents/guidelines/workflow.md)**: Git operations and dependency management
 
 ### Directory Documentation
 

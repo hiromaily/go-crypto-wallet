@@ -229,7 +229,7 @@ go test ./internal/infrastructure/api/ripple/xrp/...
 ## Related Documentation
 
 - [XRP README](../../../../docs/crypto/xrp/README.md) - 詳細なXRPドキュメント
-- [Code Generation](../../../../agents/code-generation.md) - protobuf生成
+- [Code Generation](../../guidelines/code-generation.md) - protobuf生成
 
 ## Common Operations
 

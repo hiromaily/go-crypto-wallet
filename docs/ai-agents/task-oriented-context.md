@@ -18,17 +18,19 @@
 ```
 go-crypto-wallet/
 ├── AGENTS.md                    # エントリーポイント（常にロード）
-├── agents/                      # トピック別ガイドライン
-│   ├── architecture.md
-│   ├── coding-standards.md
-│   ├── database.md
-│   ├── testing.md
-│   └── ...
+├── docs/ai-agents/              # AI Agent関連ドキュメント
+│   ├── guidelines/              # トピック別ガイドライン
+│   │   ├── architecture.md
+│   │   ├── coding-standards.md
+│   │   ├── database.md
+│   │   ├── testing.md
+│   │   └── ...
+│   ├── task-contexts/           # タスク別コンテキスト
+│   └── agent-skills.md          # Skills使用ガイド
 ├── .claude/
 │   ├── commands/                # カスタムコマンド
 │   └── skills/                  # Agent Skills
-└── docs/ai-agents/
-    └── agent-skills.md          # Skills使用ガイド
+└── internal/AGENTS.md           # internal固有ガイドライン
 ```
 
 ## Proposed Solution
@@ -216,7 +218,7 @@ Command Behavior:
 
 ### Backward Compatibility
 
-- 既存の `agents/` ドキュメントはそのまま維持
+- 既存のガイドラインは `docs/ai-agents/guidelines/` に統合済み
 - タスクコンテキストは追加レイヤーとして機能
 - 明示的なタスクタイプ指定がなくても従来通り動作
 
@@ -225,4 +227,6 @@ Command Behavior:
 - [AGENTS.md](../../AGENTS.md) - プロジェクトガイドライン
 - [Agent Skills](./agent-skills.md) - Agent Skills使用ガイド
 - [Task Contexts](./task-contexts/README.md) - タスクコンテキスト一覧
-- [Workflow Guidelines](../../agents/workflow.md) - 共通ワークフロー
+- [Task Analysis](./task-analysis.md) - Issue/Commit パターン分析
+- [Verification Matrix](./task-contexts/verification.md) - ファイルタイプ別検証コマンド
+- [Workflow Guidelines](./guidelines/workflow.md) - 共通ワークフロー

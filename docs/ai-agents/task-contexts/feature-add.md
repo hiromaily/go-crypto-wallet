@@ -22,10 +22,10 @@ version: 1.0.0
 
 | Document | Path | Purpose |
 |----------|------|---------|
-| Architecture | `agents/architecture.md` | Clean Architecture原則、レイヤー分離 |
-| Coding Standards | `agents/coding-standards.md` | コーディング規約、命名規則 |
+| Architecture | `docs/ai-agents/guidelines/architecture.md` | Clean Architecture原則、レイヤー分離 |
+| Coding Standards | `docs/ai-agents/guidelines/coding-standards.md` | コーディング規約、命名規則 |
 | Internal Guidelines | `internal/AGENTS.md` | internalパッケージ構造 |
-| Workflow Guidelines | `agents/workflow.md` | 検証ステップ、PRフロー |
+| Workflow Guidelines | `docs/ai-agents/guidelines/workflow.md` | 検証ステップ、PRフロー |
 
 ### Conditional Read (条件付き)
 
@@ -33,11 +33,11 @@ version: 1.0.0
 
 | Condition | Document | Path |
 |-----------|----------|------|
-| DB変更が必要 | Database | `agents/database.md` |
-| 複数チェーン対応 | Multi-Chain | `agents/multi-chain.md` |
-| セキュリティ関連機能 | Core Principles | `agents/core.md` |
-| コード生成が必要 | Code Generation | `agents/code-generation.md` |
-| 新規テスト戦略 | Testing | `agents/testing.md` |
+| DB変更が必要 | Database | `docs/ai-agents/guidelines/database.md` |
+| 複数チェーン対応 | Multi-Chain | `docs/ai-agents/guidelines/multi-chain.md` |
+| セキュリティ関連機能 | Core Principles | `docs/ai-agents/guidelines/core.md` |
+| コード生成が必要 | Code Generation | `docs/ai-agents/guidelines/code-generation.md` |
+| 新規テスト戦略 | Testing | `docs/ai-agents/guidelines/testing.md` |
 
 ## Task-Specific Rules
 
@@ -213,9 +213,9 @@ gh pr create --title "Feature: {feature title}"
 User: "BTCにMuSig2署名のUse Caseを追加して"
 
 Agent Actions:
-1. agents/architecture.md を読み込み
+1. docs/ai-agents/guidelines/architecture.md を読み込み
 2. internal/application/usecase/sign/btc/ の既存実装を確認
-3. agents/multi-chain.md を読み込み（BTC固有の考慮事項）
+3. docs/ai-agents/guidelines/multi-chain.md を読み込み（BTC固有の考慮事項）
 4. Portsにインターフェース定義があるか確認
 5. 必要に応じて新しいPortを定義
 6. Use Case実装
@@ -230,7 +230,7 @@ Agent Actions:
 User: "残高確認のCLIコマンドを追加して"
 
 Agent Actions:
-1. agents/architecture.md を読み込み
+1. docs/ai-agents/guidelines/architecture.md を読み込み
 2. internal/interface-adapters/cli/ の既存実装パターンを確認
 3. 既存のUse Caseを使用するか、新規作成が必要か判断
 4. CLIコマンド実装（cobra使用）
@@ -245,8 +245,8 @@ Agent Actions:
 User: "Cosmosチェーンのサポートを追加して"
 
 Agent Actions:
-1. agents/architecture.md を読み込み
-2. agents/multi-chain.md を読み込み
+1. docs/ai-agents/guidelines/architecture.md を読み込み
+2. docs/ai-agents/guidelines/multi-chain.md を読み込み
 3. 既存チェーン（BTC/ETH/XRP）の実装パターンを調査
 4. Domain層のエンティティ定義
 5. Infrastructure層のAPI Client実装
@@ -296,8 +296,8 @@ Agent Actions:
 
 ## Related Documents
 
-- [Architecture Guidelines](../../../agents/architecture.md) - Clean Architecture詳細
-- [Coding Standards](../../../agents/coding-standards.md) - コーディング規約詳細
+- [Architecture Guidelines](../guidelines/architecture.md) - Clean Architecture詳細
+- [Coding Standards](../guidelines/coding-standards.md) - コーディング規約詳細
 - [Internal Guidelines](../../../internal/AGENTS.md) - internalパッケージ詳細
-- [Multi-Chain Support](../../../agents/multi-chain.md) - マルチチェーン対応詳細
+- [Multi-Chain Support](../guidelines/multi-chain.md) - マルチチェーン対応詳細
 

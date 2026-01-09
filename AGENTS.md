@@ -13,15 +13,24 @@ This document provides guidelines for AI agents working on this project.
 
 Use this navigation guide to find relevant documentation for specific tasks:
 
-- **[Core Principles](agents/core.md)** - Security, error handling, panic usage, context management, logging, and core patterns
-- **[Architecture Guidelines](agents/architecture.md)** - Clean Architecture principles, layer separation, directory structure, and dependency direction
-- **[Coding Standards](agents/coding-standards.md)** - Linting, formatting, naming conventions, import organization, and code style
-- **[Database Management](agents/database.md)** - Database schema changes, Atlas migrations, and SQLC code generation
-- **[Code Generation](agents/code-generation.md)** - Auto-generated files, code generation tools (Atlas, SQLC, protobuf, ABI, mocks). **Important**: When moving code with mocks, update `.mockery.yaml` configuration.
-- **[Workflow Guidelines](agents/workflow.md)** - Git operations, dependency management, refactoring status, and verification commands
-- **[Required Tools and Versions](agents/requirements.md)** - Tool requirements and version information
-- **[Testing Guidelines](agents/testing.md)** - Testing strategy, test organization, and coverage goals by layer
-- **[Multi-Chain Support](agents/multi-chain.md)** - Cryptocurrency support (BTC, ETH, XRP), wallet types, and blockchain communication
+### Guidelines (基本ガイドライン)
+
+- **[Core Principles](docs/ai-agents/guidelines/core.md)** - Security, error handling, panic usage, context management, logging, and core patterns
+- **[Architecture Guidelines](docs/ai-agents/guidelines/architecture.md)** - Clean Architecture principles, layer separation, directory structure, and dependency direction
+- **[Coding Standards](docs/ai-agents/guidelines/coding-standards.md)** - Linting, formatting, naming conventions, import organization, and code style
+- **[Database Management](docs/ai-agents/guidelines/database.md)** - Database schema changes, Atlas migrations, and SQLC code generation
+- **[Code Generation](docs/ai-agents/guidelines/code-generation.md)** - Auto-generated files, code generation tools (Atlas, SQLC, protobuf, ABI, mocks). **Important**: When moving code with mocks, update `.mockery.yaml` configuration.
+- **[Workflow Guidelines](docs/ai-agents/guidelines/workflow.md)** - Git operations, dependency management, refactoring status, and verification commands
+- **[Required Tools and Versions](docs/ai-agents/guidelines/requirements.md)** - Tool requirements and version information
+- **[Testing Guidelines](docs/ai-agents/guidelines/testing.md)** - Testing strategy, test organization, and coverage goals by layer
+- **[Multi-Chain Support](docs/ai-agents/guidelines/multi-chain.md)** - Cryptocurrency support (BTC, ETH, XRP), wallet types, and blockchain communication
+
+### Task Contexts (タスク別コンテキスト)
+
+- **[Task-Oriented Context](docs/ai-agents/task-oriented-context.md)** - タスク指向のコンテキスト管理
+- **[Task Contexts](docs/ai-agents/task-contexts/README.md)** - タスクタイプ別コンテキスト一覧
+- **[Verification Matrix](docs/ai-agents/task-contexts/verification.md)** - ファイルタイプ別検証コマンド
+- **[Task Analysis](docs/ai-agents/task-analysis.md)** - Issue/Commit パターン分析
 
 ### Directory-Specific Guidelines
 
@@ -79,7 +88,7 @@ Use this navigation guide to find relevant documentation for specific tasks:
 4. Commit changes with descriptive message
 5. Push and create pull request
 
-See [Workflow Guidelines](agents/workflow.md) for detailed workflow documentation (`agents/workflow.md`).
+See [Workflow Guidelines](docs/ai-agents/guidelines/workflow.md) for detailed workflow documentation.
 
 ### Changing Database Schema
 
@@ -90,7 +99,7 @@ See [Workflow Guidelines](agents/workflow.md) for detailed workflow documentatio
 5. Regenerate SQLC code: `make sqlc`
 6. Verify build: `make check-build`
 
-See [Database Management](agents/database.md) for detailed database workflow (`agents/database.md`).
+See [Database Management](docs/ai-agents/guidelines/database.md) for detailed database workflow.
 
 ### Adding New Use Case
 
@@ -100,20 +109,20 @@ See [Database Management](agents/database.md) for detailed database workflow (`a
 4. Update CLI commands in `internal/interface-adapters/cli/` to use new use case
 5. Wire up dependencies in `internal/di/`
 
-See [Architecture Guidelines](agents/architecture.md) for use case patterns and guidelines (`agents/architecture.md`).
+See [Architecture Guidelines](docs/ai-agents/guidelines/architecture.md) for use case patterns and guidelines.
 
 ## When to Use Each Document
 
 | Task | Document to Read |
 |------|------------------|
-| Understanding security requirements | [Core Principles](agents/core.md) |
-| Adding new business logic | [Architecture Guidelines](agents/architecture.md) |
-| Fixing linting issues | [Coding Standards](agents/coding-standards.md) |
-| Changing database schema | [Database Management](agents/database.md) |
-| Working with auto-generated files | [Code Generation](agents/code-generation.md) |
-| Creating pull requests | [Workflow Guidelines](agents/workflow.md) |
-| Writing tests | [Testing Guidelines](agents/testing.md) |
-| Adding cryptocurrency support | [Multi-Chain Support](agents/multi-chain.md) |
+| Understanding security requirements | [Core Principles](docs/ai-agents/guidelines/core.md) |
+| Adding new business logic | [Architecture Guidelines](docs/ai-agents/guidelines/architecture.md) |
+| Fixing linting issues | [Coding Standards](docs/ai-agents/guidelines/coding-standards.md) |
+| Changing database schema | [Database Management](docs/ai-agents/guidelines/database.md) |
+| Working with auto-generated files | [Code Generation](docs/ai-agents/guidelines/code-generation.md) |
+| Creating pull requests | [Workflow Guidelines](docs/ai-agents/guidelines/workflow.md) |
+| Writing tests | [Testing Guidelines](docs/ai-agents/guidelines/testing.md) |
+| Adding cryptocurrency support | [Multi-Chain Support](docs/ai-agents/guidelines/multi-chain.md) |
 | Working in `internal/` packages | [Internal Guidelines](internal/AGENTS.md) |
 | Working in `pkg/` packages | [Pkg Guidelines](pkg/AGENTS.md) |
 
@@ -128,3 +137,36 @@ See [Architecture Guidelines](agents/architecture.md) for use case patterns and 
 ## Getting Help
 
 If you need more detailed information about a specific topic, refer to the relevant document in the Quick Navigation section above. Each document provides focused, comprehensive guidelines for its domain.
+
+## AI Agent Documentation Structure
+
+All AI-agent related documentation is consolidated under `docs/ai-agents/`:
+
+```
+docs/ai-agents/
+├── guidelines/           # 基本ガイドライン (旧 agents/)
+│   ├── architecture.md
+│   ├── coding-standards.md
+│   ├── core.md
+│   ├── database.md
+│   ├── testing.md
+│   ├── workflow.md
+│   ├── code-generation.md
+│   ├── multi-chain.md
+│   └── requirements.md
+├── task-contexts/        # タスク別コンテキスト
+│   ├── bug-fix.md
+│   ├── feature-add.md
+│   ├── refactoring.md
+│   ├── db-change.md
+│   ├── documentation.md
+│   ├── verification.md
+│   └── chains/           # チェーン固有
+│       ├── btc.md
+│       ├── bch.md
+│       ├── eth.md
+│       └── xrp.md
+├── agent-skills.md       # Agent Skills ガイド
+├── task-oriented-context.md
+└── task-analysis.md      # パターン分析
+```

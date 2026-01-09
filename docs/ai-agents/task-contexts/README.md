@@ -10,7 +10,9 @@
 | Feature Add | [feature-add.md](./feature-add.md) | 新機能追加、Use Case追加、API追加 |
 | Refactoring | [refactoring.md](./refactoring.md) | コード整理、アーキテクチャ改善 |
 | DB Change | [db-change.md](./db-change.md) | スキーマ変更、マイグレーション |
+| Documentation | [documentation.md](./documentation.md) | ドキュメント更新、README整備、コメント追加 |
 | Chain-Specific | [chain-specific.md](./chain-specific.md) | 暗号通貨固有のタスク（BTC/BCH/ETH/XRP） |
+| Verification | [verification.md](./verification.md) | ファイルタイプ別の検証コマンドマトリックス |
 
 ## Chain-Specific References
 
@@ -55,9 +57,9 @@
 
 **主な読み込みドキュメント**:
 
-- `agents/core.md` - エラーハンドリング
-- `agents/coding-standards.md` - コーディング規約
-- `agents/workflow.md` - 検証ステップ
+- `docs/ai-agents/guidelines/core.md` - エラーハンドリング
+- `docs/ai-agents/guidelines/coding-standards.md` - コーディング規約
+- `docs/ai-agents/guidelines/workflow.md` - 検証ステップ
 
 ### feature-add
 
@@ -65,8 +67,8 @@
 
 **主な読み込みドキュメント**:
 
-- `agents/architecture.md` - Clean Architecture
-- `agents/coding-standards.md` - コーディング規約
+- `docs/ai-agents/guidelines/architecture.md` - Clean Architecture
+- `docs/ai-agents/guidelines/coding-standards.md` - コーディング規約
 - `internal/AGENTS.md` - レイヤー構造
 
 ### refactoring
@@ -75,9 +77,9 @@
 
 **主な読み込みドキュメント**:
 
-- `agents/architecture.md` - Clean Architecture
+- `docs/ai-agents/guidelines/architecture.md` - Clean Architecture
 - `docs/issues/REFACTORING_PLAN.md` - リファクタリング計画
-- `agents/testing.md` - 既存テストの維持
+- `docs/ai-agents/guidelines/testing.md` - 既存テストの維持
 
 ### db-change
 
@@ -85,8 +87,8 @@
 
 **主な読み込みドキュメント**:
 
-- `agents/database.md` - Atlas/SQLC手順
-- `agents/code-generation.md` - コード生成
+- `docs/ai-agents/guidelines/database.md` - Atlas/SQLC手順
+- `docs/ai-agents/guidelines/code-generation.md` - コード生成
 - `tools/atlas/` - スキーマファイル
 
 ## Adding New Task Types
@@ -102,4 +104,4 @@
 
 - [Task-Oriented Context Management](../task-oriented-context.md) - 概念と戦略
 - [AGENTS.md](../../../AGENTS.md) - プロジェクトガイドライン
-- [Workflow Guidelines](../../../agents/workflow.md) - 共通ワークフロー
+- [Workflow Guidelines](../guidelines/workflow.md) - 共通ワークフロー

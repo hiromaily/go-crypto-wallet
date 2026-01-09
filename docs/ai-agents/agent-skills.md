@@ -361,7 +361,7 @@ To maintain Clean Architecture principles, wallet types should be defined at the
 ## Related Context
 - Related to: #242 (Bitcoin DTO migration)
 - Related to: #224 (Infrastructure refactoring)
-- Documentation: agents/architecture.md (Clean Architecture guidelines)
+- Documentation: docs/ai-agents/guidelines/architecture.md (Clean Architecture guidelines)
 
 **Affected Components**:
 - Application layer (use cases)
@@ -448,7 +448,7 @@ To maintain Clean Architecture principles, wallet types should be defined at the
 - [Agent Skills Overview (Anthropic)](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)
 - [GitHub CLI Documentation](https://cli.github.com/manual/)
 - [AGENTS.md](../../AGENTS.md) - Project-specific AI agent guidelines
-- [Workflow Guidelines](../../agents/workflow.md) - Common workflow steps
+- [Workflow Guidelines](./guidelines/workflow.md) - Common workflow steps
 
 ## Contributing
 

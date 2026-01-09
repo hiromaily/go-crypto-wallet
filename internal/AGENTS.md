@@ -136,7 +136,7 @@ func (b *Bitcoin) GetAddressInfo(addr string) (*btcdto.AddressInfo, error) {
     if err != nil {
         return nil, err
     }
-    
+
     // Map to application DTO
     return &btcdto.AddressInfo{
         Address:      result.Address,
@@ -183,13 +183,13 @@ func (u *xxxUseCase) Execute(ctx context.Context, input XxxInput) (*XxxOutput, e
     if err := domain.ValidateXxx(input); err != nil {
         return nil, fmt.Errorf("invalid input: %w", err)
     }
-    
+
     // Delegate to service
     result, err := u.service.SomeMethod(input.Param1)
     if err != nil {
         return nil, fmt.Errorf("failed to execute xxx: %w", err)
     }
-    
+
     return &XxxOutput{Result: result}, nil
 }
 ```
@@ -535,13 +535,13 @@ func (c *CreateCommand) Run(args []string) error {
         Param1: args[0],
         Param2: args[1],
     }
-    
+
     // Call use case
     output, err := c.useCase.Execute(context.Background(), input)
     if err != nil {
         return fmt.Errorf("failed to create: %w", err)
     }
-    
+
     // Format output for CLI
     fmt.Printf("Created: %s\n", output.Result)
     return nil
@@ -694,13 +694,13 @@ After making code changes in `internal/`, use these commands:
 ### Root Documentation
 
 - **[Root AGENTS.md](../AGENTS.md)**: Overall project guidelines, navigation, and quick reference
-- **[Core Principles](../agents/core.md)**: Security, error handling, panic usage, and core patterns
-- **[Architecture Guidelines](../agents/architecture.md)**: Clean Architecture principles and layer guidelines
-- **[Coding Standards](../agents/coding-standards.md)**: Linting, formatting, and code style
-- **[Database Management](../agents/database.md)**: Database schema changes and SQLC workflow
-- **[Code Generation](../agents/code-generation.md)**: Auto-generated files and code generation tools
-- **[Workflow Guidelines](../agents/workflow.md)**: Git operations and dependency management
-- **[Testing Guidelines](../agents/testing.md)**: Testing strategy and requirements
+- **[Core Principles](../docs/ai-agents/guidelines/core.md)**: Security, error handling, panic usage, and core patterns
+- **[Architecture Guidelines](../docs/ai-agents/guidelines/architecture.md)**: Clean Architecture principles and layer guidelines
+- **[Coding Standards](../docs/ai-agents/guidelines/coding-standards.md)**: Linting, formatting, and code style
+- **[Database Management](../docs/ai-agents/guidelines/database.md)**: Database schema changes and SQLC workflow
+- **[Code Generation](../docs/ai-agents/guidelines/code-generation.md)**: Auto-generated files and code generation tools
+- **[Workflow Guidelines](../docs/ai-agents/guidelines/workflow.md)**: Git operations and dependency management
+- **[Testing Guidelines](../docs/ai-agents/guidelines/testing.md)**: Testing strategy and requirements
 
 ### Directory Documentation
 

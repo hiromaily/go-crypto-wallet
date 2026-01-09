@@ -48,8 +48,8 @@ version: 1.0.0
 
 | Document | Path | Purpose |
 |----------|------|---------|
-| Multi-Chain Support | `agents/multi-chain.md` | マルチチェーンアーキテクチャ |
-| Architecture | `agents/architecture.md` | Clean Architecture原則 |
+| Multi-Chain Support | `docs/ai-agents/guidelines/multi-chain.md` | マルチチェーンアーキテクチャ |
+| Architecture | `docs/ai-agents/guidelines/architecture.md` | Clean Architecture原則 |
 
 ### Chain-Specific (チェーン特定後)
 
@@ -330,7 +330,7 @@ Agent Actions:
 
 ## Related Documents
 
-- [Multi-Chain Support](../../../agents/multi-chain.md) - マルチチェーンアーキテクチャ詳細
-- [Architecture Guidelines](../../../agents/architecture.md) - レイヤー構造
+- [Multi-Chain Support](../guidelines/multi-chain.md) - マルチチェーンアーキテクチャ詳細
+- [Architecture Guidelines](../guidelines/architecture.md) - レイヤー構造
 - [Chain References](./chains/) - 各チェーンの詳細リファレンス
 

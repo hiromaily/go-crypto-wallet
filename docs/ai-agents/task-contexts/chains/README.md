@@ -55,5 +55,5 @@ internal/
 ## Related Documents
 
 - [Chain-Specific Task Context](../chain-specific.md) - チェーン固有タスクの処理方法
-- [Multi-Chain Support](../../../../agents/multi-chain.md) - マルチチェーンアーキテクチャ
+- [Multi-Chain Support](../../guidelines/multi-chain.md) - マルチチェーンアーキテクチャ
 
