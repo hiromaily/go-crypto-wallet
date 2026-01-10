@@ -13,6 +13,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcutil"
@@ -571,10 +572,9 @@ func (u *importDescriptorUseCase) setLabelWithRetry(addr, label string) error {
 
 			// Exponential backoff before retry
 			if attempt < maxRetries-1 {
-				backoff := initialBackoff * (1 << attempt) // 100ms, 200ms, 400ms
-				logger.Debug("waiting before retry", "backoff_ms", backoff)
-				// Sleep using a simple loop (Go doesn't have time.Sleep in this context)
-				// For now, just retry immediately as adding time dependency would require imports
+				backoffDuration := time.Duration(initialBackoff*(1<<attempt)) * time.Millisecond // 100ms, 200ms
+				logger.Debug("waiting before retry", "backoff", backoffDuration)
+				time.Sleep(backoffDuration)
 			}
 			continue
 		}
