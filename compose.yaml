@@ -126,3 +126,16 @@ services:
       - file://migrations/sign
       - --url
       - "mysql://root:root@wallet-db:3306/sign?charset=utf8mb4&parseTime=True&loc=Local"
+
+  # Sign2 schema migration service (separate database for second sign wallet)
+  # Inherits common configuration from &migration-base using <<: *migration-base
+  wallet-db-migrate-sign2:
+    <<: *migration-base
+    container_name: wallet-db-migrate-sign2
+    command:
+      - migrate
+      - apply
+      - --dir
+      - file://migrations/sign
+      - --url
+      - "mysql://root:root@wallet-db:3306/sign2?charset=utf8mb4&parseTime=True&loc=Local"
