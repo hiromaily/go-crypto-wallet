@@ -168,7 +168,7 @@ func TestDescriptorParser_ExtractKeys(t *testing.T) {
 			descriptor:      "pkh([a1b2c3d4/44'/0'/0']xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL/0/*)",
 			wantKeyCount:    1,
 			wantFingerprint: "a1b2c3d4",
-			wantPath:        "/44'/0'/0'/0/*",
+			wantPath:        "/0/*", // Only derivation path from xpub, not origin path
 			wantErr:         false,
 		},
 		{
@@ -176,7 +176,7 @@ func TestDescriptorParser_ExtractKeys(t *testing.T) {
 			descriptor:      "pkh([a1b2c3d4/44'/0'/0']xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL)",
 			wantKeyCount:    1,
 			wantFingerprint: "a1b2c3d4",
-			wantPath:        "/44'/0'/0'",
+			wantPath:        "", // No derivation path after xpub
 			wantErr:         false,
 		},
 		{
@@ -184,7 +184,7 @@ func TestDescriptorParser_ExtractKeys(t *testing.T) {
 			descriptor:      "wsh(sortedmulti(2,[a1b2c3d4/48'/0'/0'/2']xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL,[b2c3d4e5/48'/0'/0'/2']xpub6D4BDPcP2GT577Vvch3R8wDkScZWzQzMMUm3PWbmWvVJrZwQY4VUNgqFJPMM3No2dFDFGTsxxpG5uJh7n7epu4trkrX7x7DogT5Uv6fcLW5/0/*))",
 			wantKeyCount:    2,
 			wantFingerprint: "a1b2c3d4",
-			wantPath:        "/48'/0'/0'/2'",
+			wantPath:        "", // First key has no derivation path after xpub (only second key has /0/*)
 			wantErr:         false,
 		},
 		{
@@ -192,6 +192,14 @@ func TestDescriptorParser_ExtractKeys(t *testing.T) {
 			descriptor:   "pkh()",
 			wantKeyCount: 0,
 			wantErr:      true,
+		},
+		{
+			name:            "issue #297 - multisig with origin path and derivation path",
+			descriptor:      "wsh(sortedmulti(2,[4a91842f/84'/1'/1]tpubDDed8zT1hv9vC5YpYDdufsNU5rGVr36q1ZrEM8Sx4y8NqEfCrqEfYfZjXXJP9f3ybvjkemCgvM6N7iJGrQhPHbKvDZZQWRpPJ7cj8Hio6Ty/0/*,[5bf99bc2/84'/1'/1]tpubDDHe7z2hv9vC5YpYDdufsNU5rGVr36q1ZrEM8Sx4y8NqEfCrqEfYfZjXXJP9f3ybvjkemCgvM6N7iJGrQhPHbKvDZZQWRpPJ7cj8Hio6Ty/0/*))",
+			wantKeyCount:    2,
+			wantFingerprint: "4a91842f",
+			wantPath:        "/0/*", // Should only contain derivation path FROM xpub, not origin path
+			wantErr:         false,
 		},
 	}
 
@@ -222,6 +230,23 @@ func TestDescriptorParser_ExtractKeys(t *testing.T) {
 				if firstKey.ExtendedPubKey == "" {
 					t.Error("extractKeys() extended public key is empty")
 				}
+
+				// For issue #297 test case, validate second key as well to ensure
+				// both keys in the multisig descriptor are parsed correctly
+				if tt.name == "issue #297 - multisig with origin path and derivation path" && len(keys) > 1 {
+					secondKey := keys[1]
+					expectedFingerprint := "5bf99bc2"
+					expectedPath := "/0/*"
+					if secondKey.Fingerprint != expectedFingerprint {
+						t.Errorf("extractKeys() second key fingerprint = %s, want %s", secondKey.Fingerprint, expectedFingerprint)
+					}
+					if secondKey.DerivationPath != expectedPath {
+						t.Errorf("extractKeys() second key path = %s, want %s", secondKey.DerivationPath, expectedPath)
+					}
+					if secondKey.ExtendedPubKey == "" {
+						t.Error("extractKeys() second key extended public key is empty")
+					}
+				}
 			}
 		})
 	}
@@ -242,7 +267,7 @@ func TestDescriptorParser_FormatDescriptor(t *testing.T) {
 				Keys: []domainWallet.DescriptorKey{
 					{
 						Fingerprint:    "a1b2c3d4",
-						DerivationPath: "/84'/0'/0'/0/*",
+						DerivationPath: "/0/*", // Only derivation path from xpub
 						ExtendedPubKey: "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL",
 					},
 				},
@@ -259,7 +284,7 @@ func TestDescriptorParser_FormatDescriptor(t *testing.T) {
 				Keys: []domainWallet.DescriptorKey{
 					{
 						Fingerprint:    "a1b2c3d4",
-						DerivationPath: "/84'/0'/0'/0/*",
+						DerivationPath: "/0/*", // Only derivation path from xpub
 						ExtendedPubKey: "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4ALHY2grBGRjaDMzQLcgJvLJuZZvRcEL",
 					},
 				},
