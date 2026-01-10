@@ -6,7 +6,8 @@
 // Example usage:
 //
 //	// Simple retry with default configuration
-//	err := retry.Retry(ctx, retry.DefaultConfig(), func() error {
+//	err := retry.Retry(ctx, retry.DefaultConfig(), func(attempt uint) error {
+//	    log.Printf("Attempt %d", attempt)
 //	    return someOperation()
 //	})
 //
@@ -18,17 +19,20 @@
 //	    Multiplier:     2.0,
 //	    Jitter:         true,
 //	}
-//	err := retry.Retry(ctx, cfg, func() error {
+//	err := retry.Retry(ctx, cfg, func(attempt uint) error {
+//	    log.Printf("Attempt %d", attempt)
 //	    return someOperation()
 //	})
 //
 //	// Retry with result
-//	result, err := retry.RetryWithResult(ctx, retry.DefaultConfig(), func() (*MyResult, error) {
+//	result, err := retry.RetryWithResult(ctx, retry.DefaultConfig(), func(attempt uint) (*MyResult, error) {
+//	    log.Printf("Attempt %d", attempt)
 //	    return fetchData()
 //	})
 //
 //	// Conditional retry (only retry specific errors)
-//	err := retry.RetryIf(ctx, cfg, func() error {
+//	err := retry.RetryIf(ctx, cfg, func(attempt uint) error {
+//	    log.Printf("Attempt %d", attempt)
 //	    return someOperation()
 //	}, func(err error) bool {
 //	    return errors.Is(err, ErrTemporary)
@@ -38,9 +42,18 @@ package retry
 import (
 	"context"
 	"fmt"
+	"math"
 	"math/rand/v2"
 	"time"
 )
+
+// Operation is a function that can be retried.
+// It receives the current attempt number (1-indexed).
+type Operation func(attempt uint) error
+
+// OperationWithResult is a function that returns a result and can be retried.
+// It receives the current attempt number (1-indexed).
+type OperationWithResult[T any] func(attempt uint) (T, error)
 
 // IsRetryable is a function type to determine if an error should be retried.
 type IsRetryable func(error) bool
@@ -52,24 +65,26 @@ type IsRetryable func(error) bool
 // Parameters:
 //   - ctx: Context for cancellation
 //   - cfg: Retry configuration
-//   - operation: Function to execute (returns error)
+//   - operation: Function to execute (receives 1-indexed attempt number, returns error)
 //
 // Returns:
 //   - error: nil if operation succeeds, last error if all retries are exhausted
-func Retry(ctx context.Context, cfg Config, operation func() error) error {
+func Retry(ctx context.Context, cfg Config, operation Operation) error {
 	if err := cfg.Validate(); err != nil {
 		return fmt.Errorf("invalid retry config: %w", err)
 	}
 
 	var lastErr error
 	for attempt := 0; attempt <= cfg.MaxRetries; attempt++ {
+		attemptNum := uint(attempt + 1)
+
 		// Check context cancellation before attempt
 		if err := ctx.Err(); err != nil {
-			return fmt.Errorf("context cancelled before attempt %d: %w", attempt, err)
+			return fmt.Errorf("context cancelled before attempt %d: %w", attemptNum, err)
 		}
 
 		// Execute operation
-		lastErr = operation()
+		lastErr = operation(attemptNum)
 		if lastErr == nil {
 			return nil // Success
 		}
@@ -84,7 +99,7 @@ func Retry(ctx context.Context, cfg Config, operation func() error) error {
 
 		// Sleep with context cancellation support
 		if err := sleepWithContext(ctx, backoff); err != nil {
-			return fmt.Errorf("context cancelled during backoff after attempt %d: %w", attempt, err)
+			return fmt.Errorf("context cancelled during backoff after attempt %d: %w", attemptNum, err)
 		}
 	}
 
@@ -97,12 +112,12 @@ func Retry(ctx context.Context, cfg Config, operation func() error) error {
 // Parameters:
 //   - ctx: Context for cancellation
 //   - cfg: Retry configuration
-//   - operation: Function to execute (returns T and error)
+//   - operation: Function to execute (receives 1-indexed attempt number, returns T and error)
 //
 // Returns:
 //   - T: Result of the operation (zero value if failed)
 //   - error: nil if operation succeeds, last error if all retries are exhausted
-func RetryWithResult[T any](ctx context.Context, cfg Config, operation func() (T, error)) (T, error) {
+func RetryWithResult[T any](ctx context.Context, cfg Config, operation OperationWithResult[T]) (T, error) {
 	if err := cfg.Validate(); err != nil {
 		var zero T
 		return zero, fmt.Errorf("invalid retry config: %w", err)
@@ -112,14 +127,16 @@ func RetryWithResult[T any](ctx context.Context, cfg Config, operation func() (T
 	var result T
 
 	for attempt := 0; attempt <= cfg.MaxRetries; attempt++ {
+		attemptNum := uint(attempt + 1)
+
 		// Check context cancellation before attempt
 		if err := ctx.Err(); err != nil {
 			var zero T
-			return zero, fmt.Errorf("context cancelled before attempt %d: %w", attempt, err)
+			return zero, fmt.Errorf("context cancelled before attempt %d: %w", attemptNum, err)
 		}
 
 		// Execute operation
-		result, lastErr = operation()
+		result, lastErr = operation(attemptNum)
 		if lastErr == nil {
 			return result, nil // Success
 		}
@@ -135,7 +152,7 @@ func RetryWithResult[T any](ctx context.Context, cfg Config, operation func() (T
 		// Sleep with context cancellation support
 		if err := sleepWithContext(ctx, backoff); err != nil {
 			var zero T
-			return zero, fmt.Errorf("context cancelled during backoff after attempt %d: %w", attempt, err)
+			return zero, fmt.Errorf("context cancelled during backoff after attempt %d: %w", attemptNum, err)
 		}
 	}
 
@@ -150,32 +167,34 @@ func RetryWithResult[T any](ctx context.Context, cfg Config, operation func() (T
 // Parameters:
 //   - ctx: Context for cancellation
 //   - cfg: Retry configuration
-//   - operation: Function to execute (returns error)
+//   - operation: Function to execute (receives 1-indexed attempt number, returns error)
 //   - isRetryable: Function to determine if an error should be retried
 //
 // Returns:
 //   - error: nil if operation succeeds, error if operation fails or all retries are exhausted
-func RetryIf(ctx context.Context, cfg Config, operation func() error, isRetryable IsRetryable) error {
+func RetryIf(ctx context.Context, cfg Config, operation Operation, isRetryable IsRetryable) error {
 	if err := cfg.Validate(); err != nil {
 		return fmt.Errorf("invalid retry config: %w", err)
 	}
 
 	var lastErr error
 	for attempt := 0; attempt <= cfg.MaxRetries; attempt++ {
+		attemptNum := uint(attempt + 1)
+
 		// Check context cancellation before attempt
 		if err := ctx.Err(); err != nil {
-			return fmt.Errorf("context cancelled before attempt %d: %w", attempt, err)
+			return fmt.Errorf("context cancelled before attempt %d: %w", attemptNum, err)
 		}
 
 		// Execute operation
-		lastErr = operation()
+		lastErr = operation(attemptNum)
 		if lastErr == nil {
 			return nil // Success
 		}
 
 		// Check if error is retryable
 		if !isRetryable(lastErr) {
-			return fmt.Errorf("non-retryable error on attempt %d: %w", attempt, lastErr)
+			return fmt.Errorf("non-retryable error on attempt %d: %w", attemptNum, lastErr)
 		}
 
 		// Don't sleep after the last attempt
@@ -188,7 +207,7 @@ func RetryIf(ctx context.Context, cfg Config, operation func() error, isRetryabl
 
 		// Sleep with context cancellation support
 		if err := sleepWithContext(ctx, backoff); err != nil {
-			return fmt.Errorf("context cancelled during backoff after attempt %d: %w", attempt, err)
+			return fmt.Errorf("context cancelled during backoff after attempt %d: %w", attemptNum, err)
 		}
 	}
 
@@ -199,10 +218,7 @@ func RetryIf(ctx context.Context, cfg Config, operation func() error, isRetryabl
 // It uses exponential backoff with optional jitter and max backoff cap.
 func calculateBackoff(attempt int, cfg Config) time.Duration {
 	// Calculate exponential backoff: InitialBackoff * (Multiplier ^ attempt)
-	backoff := float64(cfg.InitialBackoff)
-	for range attempt {
-		backoff *= cfg.Multiplier
-	}
+	backoff := float64(cfg.InitialBackoff) * math.Pow(cfg.Multiplier, float64(attempt))
 
 	// Convert to duration
 	duration := time.Duration(backoff)

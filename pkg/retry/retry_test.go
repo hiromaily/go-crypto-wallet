@@ -24,8 +24,11 @@ func TestRetry_Success(t *testing.T) {
 	}
 
 	attemptCount := 0
-	operation := func() error {
+	operation := func(attempt uint) error {
 		attemptCount++
+		if attempt != uint(attemptCount) {
+			t.Errorf("expected attempt %d, got %d", attemptCount, attempt)
+		}
 		return nil // Success on first attempt
 	}
 
@@ -51,8 +54,11 @@ func TestRetry_SuccessAfterRetries(t *testing.T) {
 	}
 
 	attemptCount := 0
-	operation := func() error {
+	operation := func(attempt uint) error {
 		attemptCount++
+		if attempt != uint(attemptCount) {
+			t.Errorf("expected attempt %d, got %d", attemptCount, attempt)
+		}
 		if attemptCount < 3 {
 			return errTemporary // Fail first 2 attempts
 		}
@@ -81,8 +87,11 @@ func TestRetry_MaxRetriesExceeded(t *testing.T) {
 	}
 
 	attemptCount := 0
-	operation := func() error {
+	operation := func(attempt uint) error {
 		attemptCount++
+		if attempt != uint(attemptCount) {
+			t.Errorf("expected attempt %d, got %d", attemptCount, attempt)
+		}
 		return errTemporary // Always fail
 	}
 
@@ -116,8 +125,11 @@ func TestRetry_ContextCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	attemptCount := 0
-	operation := func() error {
+	operation := func(attempt uint) error {
 		attemptCount++
+		if attempt != uint(attemptCount) {
+			t.Errorf("expected attempt %d, got %d", attemptCount, attempt)
+		}
 		if attemptCount == 2 {
 			cancel() // Cancel context on 2nd attempt
 		}
@@ -154,8 +166,11 @@ func TestRetry_ContextTimeout(t *testing.T) {
 	defer cancel()
 
 	attemptCount := 0
-	operation := func() error {
+	operation := func(attempt uint) error {
 		attemptCount++
+		if attempt != uint(attemptCount) {
+			t.Errorf("expected attempt %d, got %d", attemptCount, attempt)
+		}
 		return errTemporary
 	}
 
@@ -181,7 +196,7 @@ func TestRetry_ExponentialBackoff(t *testing.T) {
 	}
 
 	attemptTimes := []time.Time{}
-	operation := func() error {
+	operation := func(attempt uint) error {
 		attemptTimes = append(attemptTimes, time.Now())
 		return errTemporary
 	}
@@ -223,7 +238,7 @@ func TestRetry_MaxBackoffCap(t *testing.T) {
 	}
 
 	attemptTimes := []time.Time{}
-	operation := func() error {
+	operation := func(attempt uint) error {
 		attemptTimes = append(attemptTimes, time.Now())
 		return errTemporary
 	}
@@ -282,7 +297,7 @@ func TestRetry_InvalidConfig(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			err := Retry(context.Background(), tt.config, func() error { return nil })
+			err := Retry(context.Background(), tt.config, func(attempt uint) error { return nil })
 			if err == nil {
 				t.Error("expected validation error, got nil")
 			}
@@ -296,8 +311,11 @@ func TestRetryWithResult_Success(t *testing.T) {
 	cfg := DefaultConfig()
 
 	attemptCount := 0
-	operation := func() (string, error) {
+	operation := func(attempt uint) (string, error) {
 		attemptCount++
+		if attempt != uint(attemptCount) {
+			t.Errorf("expected attempt %d, got %d", attemptCount, attempt)
+		}
 		return "success", nil
 	}
 
@@ -327,8 +345,11 @@ func TestRetryWithResult_SuccessAfterRetries(t *testing.T) {
 	}
 
 	attemptCount := 0
-	operation := func() (int, error) {
+	operation := func(attempt uint) (int, error) {
 		attemptCount++
+		if attempt != uint(attemptCount) {
+			t.Errorf("expected attempt %d, got %d", attemptCount, attempt)
+		}
 		if attemptCount < 3 {
 			return 0, errTemporary
 		}
@@ -361,8 +382,11 @@ func TestRetryWithResult_MaxRetriesExceeded(t *testing.T) {
 	}
 
 	attemptCount := 0
-	operation := func() (*int, error) {
+	operation := func(attempt uint) (*int, error) {
 		attemptCount++
+		if attempt != uint(attemptCount) {
+			t.Errorf("expected attempt %d, got %d", attemptCount, attempt)
+		}
 		return nil, errTemporary
 	}
 
@@ -395,8 +419,11 @@ func TestRetryWithResult_ContextCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	attemptCount := 0
-	operation := func() (string, error) {
+	operation := func(attempt uint) (string, error) {
 		attemptCount++
+		if attempt != uint(attemptCount) {
+			t.Errorf("expected attempt %d, got %d", attemptCount, attempt)
+		}
 		if attemptCount == 2 {
 			cancel()
 		}
@@ -433,8 +460,11 @@ func TestRetryIf_NonRetryableError(t *testing.T) {
 	}
 
 	attemptCount := 0
-	operation := func() error {
+	operation := func(attempt uint) error {
 		attemptCount++
+		if attempt != uint(attemptCount) {
+			t.Errorf("expected attempt %d, got %d", attemptCount, attempt)
+		}
 		return errPermanent // Non-retryable error
 	}
 
@@ -469,8 +499,11 @@ func TestRetryIf_RetryableError(t *testing.T) {
 	}
 
 	attemptCount := 0
-	operation := func() error {
+	operation := func(attempt uint) error {
 		attemptCount++
+		if attempt != uint(attemptCount) {
+			t.Errorf("expected attempt %d, got %d", attemptCount, attempt)
+		}
 		if attemptCount < 3 {
 			return errTemporary // Retryable error
 		}

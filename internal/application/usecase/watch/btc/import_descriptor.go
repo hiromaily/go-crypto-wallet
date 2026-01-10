@@ -563,16 +563,13 @@ func (u *importDescriptorUseCase) setLabelWithRetry(addr, label string) error {
 		Jitter:         false, // Keep false to match original behavior
 	}
 
-	attemptCount := 0
-	operation := func() error {
-		attemptCount++
-
+	operation := func(attempt uint) error {
 		// Try to set the label
 		if err := u.btcClient.SetLabel(addr, label); err != nil {
 			logger.Debug("setLabel failed, will retry",
 				"address", addr,
 				"label", label,
-				"attempt", attemptCount,
+				"attempt", attempt,
 				"error", err)
 			return fmt.Errorf("setlabel call failed: %w", err)
 		}
@@ -583,7 +580,7 @@ func (u *importDescriptorUseCase) setLabelWithRetry(addr, label string) error {
 			logger.Debug("label verification failed, will retry",
 				"address", addr,
 				"label", label,
-				"attempt", attemptCount,
+				"attempt", attempt,
 				"error", err)
 			return fmt.Errorf("failed to verify label (getaddressinfo failed): %w", err)
 		}
@@ -602,7 +599,7 @@ func (u *importDescriptorUseCase) setLabelWithRetry(addr, label string) error {
 				"address", addr,
 				"expected_label", label,
 				"actual_labels", info.Labels,
-				"attempt", attemptCount)
+				"attempt", attempt)
 			return fmt.Errorf("label not found after setlabel (expected %s, got %v)", label, info.Labels)
 		}
 
@@ -610,7 +607,7 @@ func (u *importDescriptorUseCase) setLabelWithRetry(addr, label string) error {
 		logger.Debug("successfully labeled address",
 			"address", addr,
 			"label", label,
-			"attempt", attemptCount)
+			"attempt", attempt)
 		return nil
 	}
 
