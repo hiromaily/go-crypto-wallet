@@ -12,9 +12,17 @@ docs/issues/*
 
 bin/
 
+# built binaries (root only)
+/keygen
+/sign
+/sign1
+/sign2
+/watch
+
 # data directory
 data/address/*
 data/certs/*
+data/descriptor/*
 data/dump/*
 data/fullpubkey/*
 data/keystore/*

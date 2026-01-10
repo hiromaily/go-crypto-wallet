@@ -43,6 +43,7 @@ func (u *exportDescriptorUseCase) Export(
 
 	addressTypes := supportedAddressTypes()
 	descriptors := make([]string, 0, len(addressTypes)*2)
+	var skippedTypes []string
 
 	for _, addrType := range addressTypes {
 		generate := func(isChange bool) error {
@@ -52,25 +53,36 @@ func (u *exportDescriptorUseCase) Export(
 				IsChange:    isChange,
 			})
 			if err != nil {
-				descType := "receive"
-				if isChange {
-					descType = "change"
-				}
-				return fmt.Errorf("generate %s descriptor for %s/%s: %w", descType, input.AccountType, addrType, err)
+				// Skip address types that don't have keys instead of failing
+				return err
 			}
 			descriptors = append(descriptors, output.Descriptor)
 			return nil
 		}
 
 		if err := generate(false); err != nil {
-			return keygenusecase.ExportDescriptorOutput{}, err
+			// Log and skip this address type (keys may not exist for all types)
+			skippedTypes = append(skippedTypes, addrType.String())
+			continue
 		}
 
 		if input.IncludeChange {
 			if err := generate(true); err != nil {
-				return keygenusecase.ExportDescriptorOutput{}, err
+				// If receive descriptor exists but change fails, it's an actual error
+				return keygenusecase.ExportDescriptorOutput{},
+					fmt.Errorf("generate change descriptor for %s/%s: %w",
+						input.AccountType, addrType, err)
 			}
 		}
+	}
+
+	// If no descriptors were generated, return error
+	if len(descriptors) == 0 {
+		if len(skippedTypes) > 0 {
+			return keygenusecase.ExportDescriptorOutput{},
+				fmt.Errorf("no keys found for any address type (skipped: %v)", skippedTypes)
+		}
+		return keygenusecase.ExportDescriptorOutput{}, errors.New("no descriptors generated")
 	}
 
 	content, err := u.formatDescriptors(descriptors, format)

@@ -10,6 +10,7 @@ import (
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
+	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/fullpubkey"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -53,6 +54,9 @@ func (u *importFullPubkeyUseCase) Import(
 			return err
 		}
 
+		// Create base entity (supports both legacy and extended formats)
+		// Legacy format: only FullPubKey is set
+		// Extended format: ExtendedPubKey, Fingerprint, DerivationPath are also set
 		authFullPubkey, err := domainAuth.NewAuthFullPubkey(
 			fpk.CoinTypeCode,
 			fpk.AuthType,
@@ -60,6 +64,19 @@ func (u *importFullPubkeyUseCase) Import(
 		)
 		if err != nil {
 			return fmt.Errorf("fail to create AuthFullPubkey: %w", err)
+		}
+
+		// If extended format is detected, set additional fields
+		if fpk.ExtendedPubKey != "" {
+			authFullPubkey.SetExtendedPubKey(fpk.ExtendedPubKey)
+		}
+		if fpk.Fingerprint != "" {
+			// Convert string fingerprint to domainKey.Fingerprint
+			fingerprint := domainKey.Fingerprint(fpk.Fingerprint)
+			authFullPubkey.SetFingerprint(fingerprint)
+		}
+		if fpk.DerivationPath != "" {
+			authFullPubkey.SetDerivationPath(fpk.DerivationPath)
 		}
 
 		fullPubKeys = append(fullPubKeys, authFullPubkey)

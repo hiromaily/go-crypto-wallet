@@ -395,13 +395,25 @@ table "auth_fullpubkey" {
   column "full_public_key" {
     type    = varchar(255)
     null    = false
-    comment = "full public key"
+    comment = "full public key (legacy: compressed pubkey, new: may be empty if using extended_pubkey)"
+  }
+
+  column "extended_pubkey" {
+    type    = varchar(255)
+    null    = true
+    comment = "BIP32 extended public key (xpub/tpub format)"
   }
 
   column "fingerprint" {
     type    = varchar(8)
     null    = true
     comment = "BIP32 master key fingerprint (8 hex chars)"
+  }
+
+  column "derivation_path" {
+    type    = varchar(50)
+    null    = true
+    comment = "BIP32 derivation path (e.g., m/49'/1'/0')"
   }
 
   column "updated_at" {
@@ -418,11 +430,6 @@ table "auth_fullpubkey" {
   index "idex_coin_auth_account" {
     unique  = true
     columns = [column.coin, column.auth_account]
-  }
-
-  index "idx_full_public_key" {
-    unique  = true
-    columns = [column.full_public_key]
   }
 
   index "idx_coin" {

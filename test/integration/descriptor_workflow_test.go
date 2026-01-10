@@ -7,14 +7,17 @@ import (
 	"testing"
 
 	"github.com/btcsuite/btcd/chaincfg"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	watchusecasebtc "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
+	btcmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/mocks"
 )
 
 func TestDescriptorImportWorkflow_SingleKey(t *testing.T) {
@@ -27,7 +30,17 @@ func TestDescriptorImportWorkflow_SingleKey(t *testing.T) {
 	require.NoError(t, os.WriteFile(filePath, []byte(desc), 0o600))
 
 	addrRepo := &recordingAddressRepo{}
+
+	btcClient := btcmocks.NewMockBitcoiner(t)
+	btcClient.EXPECT().
+		ImportDescriptors(mock.MatchedBy(func(reqs []dtobtc.ImportDescriptorsRequest) bool {
+			return len(reqs) == 1 && reqs[0].Active && reqs[0].Watchonly
+		})).
+		Return([]dtobtc.ImportDescriptorsResponse{{Success: true}}, nil).
+		Once()
+
 	importer := watchusecasebtc.NewImportDescriptorUseCase(
+		btcClient,
 		btc.NewDescriptorParser(),
 		&chaincfg.MainNetParams,
 		addrRepo,
@@ -60,7 +73,17 @@ func TestDescriptorImportWorkflow_Multisig(t *testing.T) {
 	require.NoError(t, os.WriteFile(filePath, []byte(desc), 0o600))
 
 	addrRepo := &recordingAddressRepo{}
+
+	btcClient := btcmocks.NewMockBitcoiner(t)
+	btcClient.EXPECT().
+		ImportDescriptors(mock.MatchedBy(func(reqs []dtobtc.ImportDescriptorsRequest) bool {
+			return len(reqs) == 1 && reqs[0].Active && reqs[0].Watchonly
+		})).
+		Return([]dtobtc.ImportDescriptorsResponse{{Success: true}}, nil).
+		Once()
+
 	importer := watchusecasebtc.NewImportDescriptorUseCase(
+		btcClient,
 		btc.NewDescriptorParser(),
 		&chaincfg.MainNetParams,
 		addrRepo,

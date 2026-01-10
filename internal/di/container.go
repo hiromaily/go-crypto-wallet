@@ -740,6 +740,11 @@ func (c *container) NewWatchSendTransactionUseCase() any {
 }
 
 func (c *container) NewWatchImportAddressUseCase() watchusecase.ImportAddressUseCase {
+	// Use BTC-specific implementation for BTC/BCH to import addresses into Bitcoin Core
+	if domainCoin.IsBTCGroup(c.conf.CoinTypeCode) {
+		return c.newBTCWatchImportAddressUseCase()
+	}
+	// Use shared implementation for other coins (ETH, XRP, etc.)
 	return c.newWatchImportAddressUseCase()
 }
 
@@ -936,6 +941,7 @@ func (c *container) newBTCWatchImportAddressUseCase() watchusecase.ImportAddress
 
 func (c *container) newBTCWatchImportDescriptorUseCase() watchusecase.ImportDescriptorUseCase {
 	return watchusecasebtc.NewImportDescriptorUseCase(
+		c.newBTC(),
 		btcapi.NewDescriptorParser(),
 		c.newBTC().GetChainConf(),
 		c.newAddressRepo(),
@@ -1221,10 +1227,12 @@ func (c *container) newBTCSignExportFullPubkeyUseCase(
 ) signusecase.ExportFullPubkeyUseCase {
 	return signusecasebtc.NewExportFullPubkeyUseCase(
 		c.newAuthKeyRepo(),
+		c.newSeedRepo(),
 		c.newPubkeyFileStorager(),
 		c.conf.CoinTypeCode,
 		authType,
 		c.walletType,
+		c.newBTC().GetChainConf(),
 	)
 }
 

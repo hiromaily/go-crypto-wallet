@@ -37,12 +37,18 @@ func convertToAuthFullPubkey(sqlcKey *sqlcgen.AuthFullpubkey) (*domainAuth.AuthF
 		FullPublicKey: sqlcKey.FullPublicKey,
 	}
 
+	if sqlcKey.ExtendedPubkey.Valid {
+		key.ExtendedPubKey = sqlcKey.ExtendedPubkey.String
+	}
 	if sqlcKey.Fingerprint.Valid {
 		fingerprint, err := domainKey.NewFingerprint(sqlcKey.Fingerprint.String)
 		if err != nil {
 			return nil, fmt.Errorf("invalid fingerprint in database: %w", err)
 		}
 		key.Fingerprint = &fingerprint
+	}
+	if sqlcKey.DerivationPath.Valid {
+		key.DerivationPath = sqlcKey.DerivationPath.String
 	}
 	if sqlcKey.UpdatedAt.Valid {
 		key.UpdatedAt = &sqlcKey.UpdatedAt.Time
@@ -60,8 +66,14 @@ func convertFromAuthFullPubkey(key *domainAuth.AuthFullPubkey) *sqlcgen.AuthFull
 		FullPublicKey: key.FullPublicKey,
 	}
 
+	if key.ExtendedPubKey != "" {
+		sqlcKey.ExtendedPubkey = sql.NullString{String: key.ExtendedPubKey, Valid: true}
+	}
 	if key.Fingerprint != nil {
 		sqlcKey.Fingerprint = sql.NullString{String: key.Fingerprint.String(), Valid: true}
+	}
+	if key.DerivationPath != "" {
+		sqlcKey.DerivationPath = sql.NullString{String: key.DerivationPath, Valid: true}
 	}
 	if key.UpdatedAt != nil {
 		sqlcKey.UpdatedAt = sql.NullTime{Time: *key.UpdatedAt, Valid: true}
@@ -108,9 +120,12 @@ func (r *AuthFullPubkeyRepositorySqlc) InsertBulk(items []*domainAuth.AuthFullPu
 	for _, item := range items {
 		sqlcItem := convertFromAuthFullPubkey(item)
 		_, err := r.queries.InsertAuthFullPubkey(ctx, sqlcgen.InsertAuthFullPubkeyParams{
-			Coin:          sqlcItem.Coin,
-			AuthAccount:   sqlcItem.AuthAccount,
-			FullPublicKey: sqlcItem.FullPublicKey,
+			Coin:           sqlcItem.Coin,
+			AuthAccount:    sqlcItem.AuthAccount,
+			FullPublicKey:  sqlcItem.FullPublicKey,
+			ExtendedPubkey: sqlcItem.ExtendedPubkey,
+			Fingerprint:    sqlcItem.Fingerprint,
+			DerivationPath: sqlcItem.DerivationPath,
 		})
 		if err != nil {
 			return fmt.Errorf("failed to call InsertAuthFullPubkey(): %w", err)

@@ -6,7 +6,7 @@ package mocks
 
 import (
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -38,23 +38,23 @@ func (_m *MockAuthFullPubkeyRepositorier) EXPECT() *MockAuthFullPubkeyRepositori
 }
 
 // GetOne provides a mock function for the type MockAuthFullPubkeyRepositorier
-func (_mock *MockAuthFullPubkeyRepositorier) GetOne(authType account.AuthType) (*sqlcgen.AuthFullpubkey, error) {
+func (_mock *MockAuthFullPubkeyRepositorier) GetOne(authType account.AuthType) (*auth.AuthFullPubkey, error) {
 	ret := _mock.Called(authType)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetOne")
 	}
 
-	var r0 *sqlcgen.AuthFullpubkey
+	var r0 *auth.AuthFullPubkey
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(account.AuthType) (*sqlcgen.AuthFullpubkey, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AuthType) (*auth.AuthFullPubkey, error)); ok {
 		return returnFunc(authType)
 	}
-	if returnFunc, ok := ret.Get(0).(func(account.AuthType) *sqlcgen.AuthFullpubkey); ok {
+	if returnFunc, ok := ret.Get(0).(func(account.AuthType) *auth.AuthFullPubkey); ok {
 		r0 = returnFunc(authType)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*sqlcgen.AuthFullpubkey)
+			r0 = ret.Get(0).(*auth.AuthFullPubkey)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(account.AuthType) error); ok {
@@ -89,12 +89,12 @@ func (_c *MockAuthFullPubkeyRepositorier_GetOne_Call) Run(run func(authType acco
 	return _c
 }
 
-func (_c *MockAuthFullPubkeyRepositorier_GetOne_Call) Return(authFullpubkey *sqlcgen.AuthFullpubkey, err error) *MockAuthFullPubkeyRepositorier_GetOne_Call {
-	_c.Call.Return(authFullpubkey, err)
+func (_c *MockAuthFullPubkeyRepositorier_GetOne_Call) Return(authFullPubkey *auth.AuthFullPubkey, err error) *MockAuthFullPubkeyRepositorier_GetOne_Call {
+	_c.Call.Return(authFullPubkey, err)
 	return _c
 }
 
-func (_c *MockAuthFullPubkeyRepositorier_GetOne_Call) RunAndReturn(run func(authType account.AuthType) (*sqlcgen.AuthFullpubkey, error)) *MockAuthFullPubkeyRepositorier_GetOne_Call {
+func (_c *MockAuthFullPubkeyRepositorier_GetOne_Call) RunAndReturn(run func(authType account.AuthType) (*auth.AuthFullPubkey, error)) *MockAuthFullPubkeyRepositorier_GetOne_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -157,7 +157,7 @@ func (_c *MockAuthFullPubkeyRepositorier_Insert_Call) RunAndReturn(run func(auth
 }
 
 // InsertBulk provides a mock function for the type MockAuthFullPubkeyRepositorier
-func (_mock *MockAuthFullPubkeyRepositorier) InsertBulk(items []*sqlcgen.AuthFullpubkey) error {
+func (_mock *MockAuthFullPubkeyRepositorier) InsertBulk(items []*auth.AuthFullPubkey) error {
 	ret := _mock.Called(items)
 
 	if len(ret) == 0 {
@@ -165,7 +165,7 @@ func (_mock *MockAuthFullPubkeyRepositorier) InsertBulk(items []*sqlcgen.AuthFul
 	}
 
 	var r0 error
-	if returnFunc, ok := ret.Get(0).(func([]*sqlcgen.AuthFullpubkey) error); ok {
+	if returnFunc, ok := ret.Get(0).(func([]*auth.AuthFullPubkey) error); ok {
 		r0 = returnFunc(items)
 	} else {
 		r0 = ret.Error(0)
@@ -179,16 +179,16 @@ type MockAuthFullPubkeyRepositorier_InsertBulk_Call struct {
 }
 
 // InsertBulk is a helper method to define mock.On call
-//   - items []*sqlcgen.AuthFullpubkey
+//   - items []*auth.AuthFullPubkey
 func (_e *MockAuthFullPubkeyRepositorier_Expecter) InsertBulk(items interface{}) *MockAuthFullPubkeyRepositorier_InsertBulk_Call {
 	return &MockAuthFullPubkeyRepositorier_InsertBulk_Call{Call: _e.mock.On("InsertBulk", items)}
 }
 
-func (_c *MockAuthFullPubkeyRepositorier_InsertBulk_Call) Run(run func(items []*sqlcgen.AuthFullpubkey)) *MockAuthFullPubkeyRepositorier_InsertBulk_Call {
+func (_c *MockAuthFullPubkeyRepositorier_InsertBulk_Call) Run(run func(items []*auth.AuthFullPubkey)) *MockAuthFullPubkeyRepositorier_InsertBulk_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 []*sqlcgen.AuthFullpubkey
+		var arg0 []*auth.AuthFullPubkey
 		if args[0] != nil {
-			arg0 = args[0].([]*sqlcgen.AuthFullpubkey)
+			arg0 = args[0].([]*auth.AuthFullPubkey)
 		}
 		run(
 			arg0,
@@ -202,7 +202,7 @@ func (_c *MockAuthFullPubkeyRepositorier_InsertBulk_Call) Return(err error) *Moc
 	return _c
 }
 
-func (_c *MockAuthFullPubkeyRepositorier_InsertBulk_Call) RunAndReturn(run func(items []*sqlcgen.AuthFullpubkey) error) *MockAuthFullPubkeyRepositorier_InsertBulk_Call {
+func (_c *MockAuthFullPubkeyRepositorier_InsertBulk_Call) RunAndReturn(run func(items []*auth.AuthFullPubkey) error) *MockAuthFullPubkeyRepositorier_InsertBulk_Call {
 	_c.Call.Return(run)
 	return _c
 }

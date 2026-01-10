@@ -205,12 +205,23 @@ bitcoin_create_wallet_if_needed() {
                 -rpcpassword="${rpc_password}" \
                 createwallet "$wallet_name" false false >/dev/null
         else
-            # BTC: Create legacy wallet (descriptors=false) for compatibility with importprivkey command
+            # BTC: Create wallet with appropriate descriptor setting
+            # Watch wallet needs descriptors=true for importdescriptors RPC
+            # Other wallets use descriptors=false for compatibility with importprivkey command
             # Parameters: wallet_name, disable_private_keys, blank, passphrase, avoid_reuse, descriptors
+            local disable_private_keys=false
+            local use_descriptors=false
+
+            # Watch wallet: watch-only with descriptors
+            if [[ "$wallet_name" == "watch" ]]; then
+                disable_private_keys=true
+                use_descriptors=true
+            fi
+
             docker exec "$container" bitcoin-cli -regtest \
                 -rpcuser="${rpc_user}" \
                 -rpcpassword="${rpc_password}" \
-                createwallet "$wallet_name" false false "" false false >/dev/null
+                createwallet "$wallet_name" "$disable_private_keys" false "" false "$use_descriptors" >/dev/null
         fi
     fi
 }

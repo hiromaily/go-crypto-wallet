@@ -20,4 +20,35 @@ func AddCommands(parentCmd *cobra.Command, wallet *wallets.Keygener, containerGe
 	}
 	addressCmd.Flags().StringVar(&addressAccount, "account", "", "target account")
 	parentCmd.AddCommand(addressCmd)
+
+	// descriptor command
+	var (
+		descriptorAccount       string
+		descriptorOutput        string
+		descriptorFormat        string
+		descriptorIncludeChange bool
+	)
+	descriptorCmd := &cobra.Command{
+		Use:   "descriptor",
+		Short: "export output descriptors to file",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return runDescriptor(
+				containerGetter(),
+				descriptorAccount,
+				descriptorOutput,
+				descriptorFormat,
+				descriptorIncludeChange,
+			)
+		},
+	}
+	descriptorCmd.Flags().StringVar(&descriptorAccount, "account", "", "target account (required)")
+	descriptorCmd.Flags().StringVar(&descriptorOutput, "output", "", "output file path (required)")
+	descriptorCmd.Flags().StringVar(
+		&descriptorFormat,
+		"format",
+		"bitcoin-core",
+		"output format: text, json, bitcoin-core (default)",
+	)
+	descriptorCmd.Flags().BoolVar(&descriptorIncludeChange, "include-change", false, "include change descriptors")
+	parentCmd.AddCommand(descriptorCmd)
 }

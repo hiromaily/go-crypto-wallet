@@ -3,14 +3,15 @@ CREATE TABLE `auth_fullpubkey` (
   `id` smallint NOT NULL AUTO_INCREMENT COMMENT "ID",
   `coin` enum('btc','bch') NOT NULL COMMENT "coin type code",
   `auth_account` varchar(20) NOT NULL COMMENT "auth type",
-  `full_public_key` varchar(255) NOT NULL COMMENT "full public key",
+  `full_public_key` varchar(255) NOT NULL COMMENT "full public key (legacy: compressed pubkey, new: may be empty if using extended_pubkey)",
+  `extended_pubkey` varchar(255) NULL COMMENT "BIP32 extended public key (xpub/tpub format)",
   `fingerprint` varchar(8) NULL COMMENT "BIP32 master key fingerprint (8 hex chars)",
+  `derivation_path` varchar(50) NULL COMMENT "BIP32 derivation path (e.g., m/49'/1'/0')",
   `updated_at` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT "updated date",
   PRIMARY KEY (`id`),
   UNIQUE INDEX `idex_coin_auth_account` (`coin`, `auth_account`),
   INDEX `idx_coin` (`coin`),
-  INDEX `idx_fingerprint` (`fingerprint`),
-  UNIQUE INDEX `idx_full_public_key` (`full_public_key`)
+  INDEX `idx_fingerprint` (`fingerprint`)
 ) CHARSET utf8mb4 COLLATE utf8mb4_0900_ai_ci COMMENT "table for auth key exported from sign db";
 -- Create "btc_account_key" table
 CREATE TABLE `btc_account_key` (

@@ -2,9 +2,12 @@ package btc
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/btcsuite/btcd/btcutil"
+
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 )
 
 // ImportPrivKey import privKey to wallet
@@ -91,4 +94,59 @@ func (b *Bitcoin) ImportAddressWithLabel(address, label string, rescan bool) err
 	}
 
 	return nil
+}
+
+// ImportDescriptors imports output descriptors into the wallet (Bitcoin Core v0.21.0+).
+//
+// This is the modern replacement for importaddress and importmulti.
+// It allows importing descriptors with full scriptPubKey information, enabling
+// Bitcoin Core to mark addresses as solvable for transaction creation.
+//
+// Parameters:
+//   - requests: List of descriptor import requests
+//
+// Returns:
+//   - List of responses (one per request, in the same order)
+//   - Error if the RPC call fails
+//
+// Notes:
+//   - All descriptors must include checksums
+//   - Use "now" timestamp to skip rescanning (fastest)
+//   - Set active=true to enable spending from these descriptors
+//   - Set watchonly=true for watch-only wallets (no private keys)
+//
+// Reference: Bitcoin Core RPC documentation - importdescriptors
+func (b *Bitcoin) ImportDescriptors(
+	requests []dtobtc.ImportDescriptorsRequest,
+) ([]dtobtc.ImportDescriptorsResponse, error) {
+	if len(requests) == 0 {
+		return nil, errors.New("no descriptors to import")
+	}
+
+	// Marshal requests to JSON
+	bRequests, err := json.Marshal(requests)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal import requests: %w", err)
+	}
+
+	// Call importdescriptors RPC
+	jsonRawMsg := []json.RawMessage{bRequests}
+	rawResponse, err := b.Client.RawRequest("importdescriptors", jsonRawMsg)
+	if err != nil {
+		return nil, fmt.Errorf("failed to call client.RawRequest(importdescriptors): %w", err)
+	}
+
+	// Parse response
+	var responses []dtobtc.ImportDescriptorsResponse
+	if err := json.Unmarshal(rawResponse, &responses); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal import responses: %w", err)
+	}
+
+	// Verify response count matches request count
+	if len(responses) != len(requests) {
+		return nil, fmt.Errorf("response count mismatch: got %d responses for %d requests",
+			len(responses), len(requests))
+	}
+
+	return responses, nil
 }

@@ -3,7 +3,6 @@ package btc
 import (
 	"fmt"
 	"sort"
-	"strings"
 	"testing"
 
 	"github.com/btcsuite/btcd/chaincfg"
@@ -28,7 +27,7 @@ func TestGenerateTaprootScriptPathDescriptor(t *testing.T) {
 		},
 	}
 
-	t.Run("receive descriptor sorts keys", func(t *testing.T) {
+	t.Run("receive descriptor uses correct Taproot format", func(t *testing.T) {
 		desc, err := service.GenerateTaprootScriptPathDescriptor(signers, false)
 		require.NoError(t, err)
 
@@ -38,7 +37,10 @@ func TestGenerateTaprootScriptPathDescriptor(t *testing.T) {
 		}
 		sort.Strings(expectedKeys)
 
-		require.Equal(t, "tr("+strings.Join(expectedKeys, ",")+")", desc)
+		// Correct Taproot format: tr(internal_key,pk(script_key))
+		// First key is internal key (key-path), second key is script path
+		expected := fmt.Sprintf("tr(%s,pk(%s))", expectedKeys[0], expectedKeys[1])
+		require.Equal(t, expected, desc)
 	})
 
 	t.Run("change descriptor uses /1/*", func(t *testing.T) {
@@ -51,7 +53,45 @@ func TestGenerateTaprootScriptPathDescriptor(t *testing.T) {
 		}
 		sort.Strings(expectedKeys)
 
-		require.Equal(t, "tr("+strings.Join(expectedKeys, ",")+")", desc)
+		// Correct Taproot format: tr(internal_key,pk(script_key))
+		// First key is internal key (key-path), second key is script path
+		expected := fmt.Sprintf("tr(%s,pk(%s))", expectedKeys[0], expectedKeys[1])
+		require.Equal(t, expected, desc)
+	})
+
+	t.Run("three signers use script tree with braces", func(t *testing.T) {
+		threeSigners := []MultisigSigner{
+			{
+				Fingerprint:    "a1b2c3d4",
+				DerivationPath: testDerivationTaprootMultiKey,
+				ExtendedKey:    mustNewExtendedKey(t, testMainnetXpub),
+			},
+			{
+				Fingerprint:    "b2c3d4e5",
+				DerivationPath: testDerivationTaprootMultiKey,
+				ExtendedKey:    newTestXpubFromSeed(t, 0x04),
+			},
+			{
+				Fingerprint:    "c3d4e5f6",
+				DerivationPath: testDerivationTaprootMultiKey,
+				ExtendedKey:    newTestXpubFromSeed(t, 0x05),
+			},
+		}
+
+		desc, err := service.GenerateTaprootScriptPathDescriptor(threeSigners, false)
+		require.NoError(t, err)
+
+		expectedKeys := []string{
+			fmt.Sprintf("[a1b2c3d4%s]%s/0/*", testDerivationTaprootMultiKey, threeSigners[0].ExtendedKey.String()),
+			fmt.Sprintf("[b2c3d4e5%s]%s/0/*", testDerivationTaprootMultiKey, threeSigners[1].ExtendedKey.String()),
+			fmt.Sprintf("[c3d4e5f6%s]%s/0/*", testDerivationTaprootMultiKey, threeSigners[2].ExtendedKey.String()),
+		}
+		sort.Strings(expectedKeys)
+
+		// With 3+ keys: tr(internal_key,{pk(key1),pk(key2)})
+		// First key is internal key, remaining keys are script paths in braces
+		expected := fmt.Sprintf("tr(%s,{pk(%s),pk(%s)})", expectedKeys[0], expectedKeys[1], expectedKeys[2])
+		require.Equal(t, expected, desc)
 	})
 }
 

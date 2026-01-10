@@ -716,10 +716,14 @@ type AuthFullpubkey struct {
 	Coin AuthFullpubkeyCoin
 	// auth type
 	AuthAccount string
-	// full public key
+	// full public key (legacy: compressed pubkey, new: may be empty if using extended_pubkey)
 	FullPublicKey string
+	// BIP32 extended public key (xpub/tpub format)
+	ExtendedPubkey sql.NullString
 	// BIP32 master key fingerprint (8 hex chars)
 	Fingerprint sql.NullString
+	// BIP32 derivation path (e.g., m/49'/1'/0')
+	DerivationPath sql.NullString
 	// updated date
 	UpdatedAt sql.NullTime
 }
