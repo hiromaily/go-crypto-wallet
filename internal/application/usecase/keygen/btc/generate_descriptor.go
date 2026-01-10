@@ -213,7 +213,9 @@ func derivationPathForAddress(
 	isMultisig bool,
 	accountType domainAccount.AccountType,
 ) (string, error) {
-	accountIndex := accountType.Uint32()
+	// Use BIP44AccountIndex for derivation paths (deposit=0, payment=1, stored=2)
+	// NOT Uint32() which returns database storage values (deposit=1, payment=2, stored=3)
+	accountIndex := accountType.BIP44AccountIndex()
 
 	// Note: coin' index is hardcoded to 1' for testnet/regtest
 	// For mainnet, this should be 0'
@@ -301,8 +303,8 @@ func (u *generateDescriptorUseCase) deriveAccountExtendedKey(
 	// Derive account-specific key: m/49'/coin/account (non-hardened account index)
 	// Note: Since we're deriving from an extended public key (xpub), we can only
 	// derive non-hardened keys. The coin level (m/49'/coin') is already hardened.
-	// accountType.Uint32() gives account index (deposit=0, payment=1, stored=2, etc.)
-	accountKey, err := coinLevelKey.Derive(accountType.Uint32())
+	// Use BIP44AccountIndex (deposit=0, payment=1, stored=2) not Uint32() (deposit=1, payment=2, stored=3)
+	accountKey, err := coinLevelKey.Derive(accountType.BIP44AccountIndex())
 	if err != nil {
 		return "", fmt.Errorf("failed to derive account key: %w", err)
 	}
