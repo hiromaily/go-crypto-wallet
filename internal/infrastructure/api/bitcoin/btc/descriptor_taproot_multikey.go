@@ -8,10 +8,14 @@ import (
 
 // GenerateTaprootScriptPathDescriptor generates a Taproot descriptor with multiple script-path pubkeys.
 //
-// SECURITY NOTE: This is NOT MuSig2. Each key forms its own script path, resulting in a 1-of-N spend policy
-// (any listed key can spend via script path). For MuSig2 key-path spends, aggregate keys first and use tr(<agg_key>).
+// SECURITY NOTE: This is NOT MuSig2. The first key is used as the internal key (key-path spending),
+// and remaining keys form script paths (script-path spending). This results in a 1-of-N spend policy
+// where any listed key can spend (first key via key path, others via script path).
+// For MuSig2 key-path spends, aggregate keys first and use tr(<agg_key>).
 //
-// Format: tr([fp1/path]xpub1/change/*,[fp2/path]xpub2/change/*,...)
+// Format: tr(internal_key,{pk(key1),pk(key2),...})
+// - internal_key: First signer's key (can spend via key path - most efficient)
+// - Script tree: Remaining signers' keys wrapped in pk() (can spend via script path)
 func (d *DescriptorService) GenerateTaprootScriptPathDescriptor(
 	signers []MultisigSigner,
 	isChange bool,
@@ -25,7 +29,27 @@ func (d *DescriptorService) GenerateTaprootScriptPathDescriptor(
 		return "", err
 	}
 
-	descriptor := fmt.Sprintf("tr(%s)", strings.Join(keyStrings, ","))
+	// First key becomes the internal key (key-path spending)
+	internalKey := keyStrings[0]
+
+	// Remaining keys become script paths (script-path spending)
+	scriptKeys := keyStrings[1:]
+
+	// Wrap each script key in pk() for Tapscript
+	pkScripts := make([]string, len(scriptKeys))
+	for i, key := range scriptKeys {
+		pkScripts[i] = fmt.Sprintf("pk(%s)", key)
+	}
+
+	// Build descriptor based on number of script keys
+	var descriptor string
+	if len(pkScripts) == 1 {
+		// Single script: tr(internal_key,pk(script_key))
+		descriptor = fmt.Sprintf("tr(%s,%s)", internalKey, pkScripts[0])
+	} else {
+		// Multiple scripts: tr(internal_key,{pk(key1),pk(key2),...})
+		descriptor = fmt.Sprintf("tr(%s,{%s})", internalKey, strings.Join(pkScripts, ","))
+	}
 
 	// Note: Checksum is NOT added here because the domain layer's BIP380 implementation
 	// produces incorrect checksums. Instead, the watch wallet will add checksums using

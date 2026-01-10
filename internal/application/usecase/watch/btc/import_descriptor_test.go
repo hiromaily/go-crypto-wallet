@@ -46,10 +46,19 @@ func TestImportDescriptorUseCase_ImportsAddresses(t *testing.T) {
 		Once()
 
 	btcClient := btcmocks.NewMockBitcoiner(t)
-	btcClient.EXPECT().
-		ImportDescriptors(mock.MatchedBy(func(reqs []dtobtc.ImportDescriptorsRequest) bool {
-			return len(reqs) == 1 && reqs[0].Active && reqs[0].Watchonly
-		})).
+	// Mock GetDescriptorInfo to return descriptor with checksum
+	btcClient.On("GetDescriptorInfo", mock.Anything).
+		Return(&dtobtc.DescriptorInfo{
+			Descriptor:     desc + "#abcd1234",
+			Checksum:       "abcd1234",
+			IsRange:        true,
+			IsSolvable:     true,
+			HasPrivateKeys: false,
+		}, nil).
+		Once()
+	btcClient.On("ImportDescriptors", mock.MatchedBy(func(reqs []dtobtc.ImportDescriptorsRequest) bool {
+		return len(reqs) == 1 && reqs[0].Active && reqs[0].Watchonly
+	})).
 		Return([]dtobtc.ImportDescriptorsResponse{{Success: true}}, nil).
 		Once()
 
@@ -136,10 +145,19 @@ func TestImportDescriptorUseCase_ImportsMultisigAddresses(t *testing.T) {
 		Once()
 
 	btcClient := btcmocks.NewMockBitcoiner(t)
-	btcClient.EXPECT().
-		ImportDescriptors(mock.MatchedBy(func(reqs []dtobtc.ImportDescriptorsRequest) bool {
-			return len(reqs) == 1 && reqs[0].Active && reqs[0].Watchonly
-		})).
+	// Mock GetDescriptorInfo to return descriptor with checksum
+	btcClient.On("GetDescriptorInfo", mock.Anything).
+		Return(&dtobtc.DescriptorInfo{
+			Descriptor:     desc + "#abcd1234",
+			Checksum:       "abcd1234",
+			IsRange:        true,
+			IsSolvable:     true,
+			HasPrivateKeys: false,
+		}, nil).
+		Once()
+	btcClient.On("ImportDescriptors", mock.MatchedBy(func(reqs []dtobtc.ImportDescriptorsRequest) bool {
+		return len(reqs) == 1 && reqs[0].Active && reqs[0].Watchonly
+	})).
 		Return([]dtobtc.ImportDescriptorsResponse{{Success: true}}, nil).
 		Once()
 

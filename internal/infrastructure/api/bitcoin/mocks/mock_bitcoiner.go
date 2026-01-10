@@ -1787,6 +1787,68 @@ func (_c *MockBitcoiner_GetChainConf_Call) RunAndReturn(run func() *chaincfg.Par
 	return _c
 }
 
+// GetDescriptorInfo provides a mock function for the type MockBitcoiner
+func (_mock *MockBitcoiner) GetDescriptorInfo(descriptor string) (*btc.DescriptorInfo, error) {
+	ret := _mock.Called(descriptor)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetDescriptorInfo")
+	}
+
+	var r0 *btc.DescriptorInfo
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(string) (*btc.DescriptorInfo, error)); ok {
+		return returnFunc(descriptor)
+	}
+	if returnFunc, ok := ret.Get(0).(func(string) *btc.DescriptorInfo); ok {
+		r0 = returnFunc(descriptor)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*btc.DescriptorInfo)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(string) error); ok {
+		r1 = returnFunc(descriptor)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockBitcoiner_GetDescriptorInfo_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetDescriptorInfo'
+type MockBitcoiner_GetDescriptorInfo_Call struct {
+	*mock.Call
+}
+
+// GetDescriptorInfo is a helper method to define mock.On call
+//   - descriptor string
+func (_e *MockBitcoiner_Expecter) GetDescriptorInfo(descriptor interface{}) *MockBitcoiner_GetDescriptorInfo_Call {
+	return &MockBitcoiner_GetDescriptorInfo_Call{Call: _e.mock.On("GetDescriptorInfo", descriptor)}
+}
+
+func (_c *MockBitcoiner_GetDescriptorInfo_Call) Run(run func(descriptor string)) *MockBitcoiner_GetDescriptorInfo_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBitcoiner_GetDescriptorInfo_Call) Return(descriptorInfo *btc.DescriptorInfo, err error) *MockBitcoiner_GetDescriptorInfo_Call {
+	_c.Call.Return(descriptorInfo, err)
+	return _c
+}
+
+func (_c *MockBitcoiner_GetDescriptorInfo_Call) RunAndReturn(run func(descriptor string) (*btc.DescriptorInfo, error)) *MockBitcoiner_GetDescriptorInfo_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetFee provides a mock function for the type MockBitcoiner
 func (_mock *MockBitcoiner) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount, error) {
 	ret := _mock.Called(tx, adjustmentFee)
@@ -2464,13 +2526,11 @@ func (_mock *MockBitcoiner) ImportDescriptors(requests []btc.ImportDescriptorsRe
 			r0 = ret.Get(0).([]btc.ImportDescriptorsResponse)
 		}
 	}
-
 	if returnFunc, ok := ret.Get(1).(func([]btc.ImportDescriptorsRequest) error); ok {
 		r1 = returnFunc(requests)
 	} else {
 		r1 = ret.Error(1)
 	}
-
 	return r0, r1
 }
 
@@ -2487,17 +2547,23 @@ func (_e *MockBitcoiner_Expecter) ImportDescriptors(requests interface{}) *MockB
 
 func (_c *MockBitcoiner_ImportDescriptors_Call) Run(run func(requests []btc.ImportDescriptorsRequest)) *MockBitcoiner_ImportDescriptors_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].([]btc.ImportDescriptorsRequest))
+		var arg0 []btc.ImportDescriptorsRequest
+		if args[0] != nil {
+			arg0 = args[0].([]btc.ImportDescriptorsRequest)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
 
-func (_c *MockBitcoiner_ImportDescriptors_Call) Return(_a0 []btc.ImportDescriptorsResponse, _a1 error) *MockBitcoiner_ImportDescriptors_Call {
-	_c.Call.Return(_a0, _a1)
+func (_c *MockBitcoiner_ImportDescriptors_Call) Return(importDescriptorsResponses []btc.ImportDescriptorsResponse, err error) *MockBitcoiner_ImportDescriptors_Call {
+	_c.Call.Return(importDescriptorsResponses, err)
 	return _c
 }
 
-func (_c *MockBitcoiner_ImportDescriptors_Call) RunAndReturn(run func([]btc.ImportDescriptorsRequest) ([]btc.ImportDescriptorsResponse, error)) *MockBitcoiner_ImportDescriptors_Call {
+func (_c *MockBitcoiner_ImportDescriptors_Call) RunAndReturn(run func(requests []btc.ImportDescriptorsRequest) ([]btc.ImportDescriptorsResponse, error)) *MockBitcoiner_ImportDescriptors_Call {
 	_c.Call.Return(run)
 	return _c
 }
