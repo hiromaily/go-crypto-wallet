@@ -148,22 +148,26 @@ func inferSenderAccount(actionType domainTx.ActionType) (domainAccount.AccountTy
 }
 
 // signWithAccount signs a PSBT with keys from the specified account.
-// This is a simplified MVP approach that works for both single-sig and multisig:
-// - For single-sig: Signs completely if the key matches
-// - For multisig: Adds first signature (Keygen wallet signature)
+// This function supports two signing approaches:
 //
-// The PSBT signing operation will only apply signatures where keys match input requirements.
-// This approach works offline without needing to extract addresses from PSBT scriptPubKeys.
+// 1. Offline signing (WIF keys in database):
+//   - For legacy workflow where keys are exported to database
+//   - Uses SignPSBTWithKey with WIF private keys
+//   - Works completely offline
 //
-// Implementation:
-// 1. Get all exported keys for the sender account
-// 2. Extract WIFs from retrieved keys
-// 3. Pass all WIFs to SignPSBTWithKey - btcd will use only matching keys
+// 2. RPC-based signing (descriptor wallets):
+//   - For descriptor-based workflow where keys are managed by Bitcoin Core
+//   - Uses WalletProcessPsbt RPC to sign with Bitcoin Core's wallet
+//   - Requires connection to Bitcoin Core
+//
+// The function automatically detects which approach to use:
+// - If WIF keys are found in database → offline signing
+// - If no WIF keys found → RPC-based signing
 func (u *signTransactionUseCase) signWithAccount(
 	psbtBase64 string,
 	senderAccount domainAccount.AccountType,
 ) (string, bool, error) {
-	// Get all exported keys for this account
+	// Try to get exported keys for this account
 	// Using AddrStatusAddressExported ensures keys are ready and have been exported to watch wallet
 	accountKeys, err := u.accountKeyRepo.GetAllAddrStatus(
 		senderAccount,
@@ -173,33 +177,50 @@ func (u *signTransactionUseCase) signWithAccount(
 		return "", false, fmt.Errorf("fail to get account keys for %s: %w", senderAccount.String(), err)
 	}
 
-	if len(accountKeys) == 0 {
-		return "", false, fmt.Errorf("no exported keys found for account %s", senderAccount.String())
-	}
-
-	// Extract WIFs from account keys
-	wifs := make([]string, 0, len(accountKeys))
-	for _, key := range accountKeys {
-		if key.WalletImportFormat != "" {
-			wifs = append(wifs, key.WalletImportFormat)
+	// Check if we have WIF keys in the database (legacy workflow)
+	wifs := make([]string, 0)
+	if len(accountKeys) > 0 {
+		// Extract WIFs from account keys
+		for _, key := range accountKeys {
+			if key.WalletImportFormat != "" {
+				wifs = append(wifs, key.WalletImportFormat)
+			}
 		}
 	}
 
-	if len(wifs) == 0 {
-		return "", false, fmt.Errorf("no valid WIFs found for account %s", senderAccount.String())
+	// Determine signing approach based on available keys
+	if len(wifs) > 0 {
+		// Approach 1: Offline signing with WIF keys
+		logger.Debug("using offline signing with WIF keys",
+			"account", senderAccount.String(),
+			"key_count", len(accountKeys),
+			"wif_count", len(wifs),
+		)
+
+		// Sign PSBT with all WIFs - btcd will automatically use only matching keys
+		signedPSBT, isSigned, err := u.btc.SignPSBTWithKey(psbtBase64, wifs)
+		if err != nil {
+			return "", false, fmt.Errorf("fail to sign PSBT with account keys: %w", err)
+		}
+
+		return signedPSBT, isSigned, nil
 	}
 
-	logger.Debug("signing PSBT with account keys",
+	// Approach 2: RPC-based signing with descriptor wallet
+	logger.Info("no WIF keys found, using descriptor-based signing via RPC",
 		"account", senderAccount.String(),
-		"key_count", len(accountKeys),
-		"wif_count", len(wifs),
 	)
 
-	// Sign PSBT with all WIFs - btcd will automatically use only matching keys
-	signedPSBT, isSigned, err := u.btc.SignPSBTWithKey(psbtBase64, wifs)
+	// Sign PSBT using Bitcoin Core's wallet (descriptor-based)
+	signedPSBT, isSigned, err := u.btc.WalletProcessPsbt(psbtBase64, true)
 	if err != nil {
-		return "", false, fmt.Errorf("fail to sign PSBT with account keys: %w", err)
+		return "", false, fmt.Errorf("fail to sign PSBT with walletprocesspsbt RPC: %w", err)
 	}
+
+	logger.Debug("descriptor-based signing completed",
+		"account", senderAccount.String(),
+		"complete", isSigned,
+	)
 
 	return signedPSBT, isSigned, nil
 }

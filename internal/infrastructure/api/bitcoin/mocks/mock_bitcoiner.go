@@ -4397,3 +4397,75 @@ func (_c *MockBitcoiner_WalletPassphraseChange_Call) RunAndReturn(run func(old s
 	_c.Call.Return(run)
 	return _c
 }
+
+// WalletProcessPsbt provides a mock function for the type MockBitcoiner
+func (_mock *MockBitcoiner) WalletProcessPsbt(psbtBase64 string, sign bool) (string, bool, error) {
+	ret := _mock.Called(psbtBase64, sign)
+
+	if len(ret) == 0 {
+		panic("no return value specified for WalletProcessPsbt")
+	}
+
+	var r0 string
+	var r1 bool
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(string, bool) (string, bool, error)); ok {
+		return returnFunc(psbtBase64, sign)
+	}
+	if returnFunc, ok := ret.Get(0).(func(string, bool) string); ok {
+		r0 = returnFunc(psbtBase64, sign)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+	if returnFunc, ok := ret.Get(1).(func(string, bool) bool); ok {
+		r1 = returnFunc(psbtBase64, sign)
+	} else {
+		r1 = ret.Get(1).(bool)
+	}
+	if returnFunc, ok := ret.Get(2).(func(string, bool) error); ok {
+		r2 = returnFunc(psbtBase64, sign)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// MockBitcoiner_WalletProcessPsbt_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'WalletProcessPsbt'
+type MockBitcoiner_WalletProcessPsbt_Call struct {
+	*mock.Call
+}
+
+// WalletProcessPsbt is a helper method to define mock.On call
+//   - psbtBase64 string
+//   - sign bool
+func (_e *MockBitcoiner_Expecter) WalletProcessPsbt(psbtBase64 interface{}, sign interface{}) *MockBitcoiner_WalletProcessPsbt_Call {
+	return &MockBitcoiner_WalletProcessPsbt_Call{Call: _e.mock.On("WalletProcessPsbt", psbtBase64, sign)}
+}
+
+func (_c *MockBitcoiner_WalletProcessPsbt_Call) Run(run func(psbtBase64 string, sign bool)) *MockBitcoiner_WalletProcessPsbt_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		var arg1 bool
+		if args[1] != nil {
+			arg1 = args[1].(bool)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBitcoiner_WalletProcessPsbt_Call) Return(s string, b bool, err error) *MockBitcoiner_WalletProcessPsbt_Call {
+	_c.Call.Return(s, b, err)
+	return _c
+}
+
+func (_c *MockBitcoiner_WalletProcessPsbt_Call) RunAndReturn(run func(psbtBase64 string, sign bool) (string, bool, error)) *MockBitcoiner_WalletProcessPsbt_Call {
+	_c.Call.Return(run)
+	return _c
+}

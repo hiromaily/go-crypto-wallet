@@ -123,11 +123,12 @@ type PreviousTxs struct {
 
 // PrevTx is required parameters for api `signrawtransaction` for multisig address
 type PrevTx struct {
-	Txid         string  `json:"txid"`
-	Vout         uint32  `json:"vout"`
-	ScriptPubKey string  `json:"scriptPubKey"`
-	RedeemScript string  `json:"redeemScript"`
-	Amount       float64 `json:"amount"`
+	Txid          string  `json:"txid"`
+	Vout          uint32  `json:"vout"`
+	ScriptPubKey  string  `json:"scriptPubKey"`
+	RedeemScript  string  `json:"redeemScript"`
+	WitnessScript string  `json:"witnessScript"`
+	Amount        float64 `json:"amount"`
 }
 
 // FundRawTransactionResult response of api `fundrawtransaction`
