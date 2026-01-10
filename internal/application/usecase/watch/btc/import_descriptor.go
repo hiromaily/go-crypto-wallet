@@ -514,7 +514,26 @@ func (u *importDescriptorUseCase) storeAddresses(
 		items = append(items, entity)
 	}
 
-	return u.addrRepo.InsertBulk(ctx, items)
+	// Store addresses in database
+	if err := u.addrRepo.InsertBulk(ctx, items); err != nil {
+		return err
+	}
+
+	// Label addresses in Bitcoin Core for getaddressesbylabel lookup
+	// Note: This is necessary because ranged descriptor import doesn't support labels
+	// (Bitcoin Core limitation), so we must label each derived address individually.
+	label := accountType.String()
+	for _, addr := range addrs {
+		if err := u.btcClient.SetLabel(addr, label); err != nil {
+			logger.Warn("failed to label address in Bitcoin Core",
+				"address", addr,
+				"label", label,
+				"error", err)
+			// Continue labeling other addresses even if one fails
+		}
+	}
+
+	return nil
 }
 
 // ioReadAll is a wrapper for io.ReadAll to allow testing via injection.

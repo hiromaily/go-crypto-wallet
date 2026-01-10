@@ -109,6 +109,7 @@ type Bitcoiner interface {
 	ParsePSBT(psbtBase64 string) (*dtobtc.ParsedPSBT, error)
 	ValidatePSBT(psbtBase64 string) error
 	SignPSBTWithKey(psbtBase64 string, wifs []string) (string, bool, error)
+	WalletProcessPsbt(psbtBase64 string, sign bool) (string, bool, error) // RPC-based signing for descriptor wallets
 	FinalizePSBT(psbtBase64 string) (string, error)
 	ExtractTransaction(psbtBase64 string) (*wire.MsgTx, error)
 	IsPSBTComplete(psbtBase64 string) (bool, error)

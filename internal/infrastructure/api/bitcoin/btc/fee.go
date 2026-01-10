@@ -66,7 +66,28 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 	// get tx fee
 	fee, err := b.GetTransactionFee(tx)
 	if err != nil {
-		return 0, err
+		// Fee estimation failed (common on fresh regtest/signet networks)
+		// Fall back to minimum relay fee or hardcoded fallback
+		logger.Warn("fee estimation failed, using fallback", "error", err)
+
+		// Try to get minimum relay fee from network
+		relayFee, relayErr := b.getMinRelayFee()
+		if relayErr != nil {
+			logger.Warn("failed to get relay fee, using hardcoded fallback", "error", relayErr)
+			// Use hardcoded fallback: 1 sat/vbyte = 0.00001 BTC/kB
+			// This is conservative and works for regtest/signet
+			fallbackFeePerKB := 0.00001 // BTC/kB
+			fallbackFee := fmt.Sprintf("%f", fallbackFeePerKB*float64(tx.SerializeSize())/1000)
+			fee, err = b.StrToAmount(fallbackFee)
+			if err != nil {
+				return 0, fmt.Errorf("failed to calculate fallback fee: %w", err)
+			}
+			logger.Info("using hardcoded fallback fee", "fee_btc", fee.ToBTC(), "fee_per_kb", fallbackFeePerKB)
+		} else {
+			// Use relay fee as base
+			fee = relayFee
+			logger.Info("using relay fee as fallback", "fee_btc", fee.ToBTC())
+		}
 	}
 	// logger.Debug("called GetTransactionFee()", "fee", fee) //0.000208 BTC
 

@@ -23,7 +23,7 @@ tracer:
 
 mysql:
   host: "127.0.0.1:3306"
-  dbname: "sign"
+  dbname: "sign2"
   user: "hiromaily"
   pass: "hiromaily"
   debug: true

@@ -203,6 +203,54 @@ func (g *DescriptorGenerator) GetAccountXPub(
 	return xpub, nil
 }
 
+// GetCoinLevelXPub derives the coin-level extended public key from a seed.
+//
+// The coin xpub represents the public key at the coin level in the
+// BIP32 hierarchy: m/purpose'/coin_type'
+//
+// This xpub can be used to derive all account keys without exposing the private key.
+// This is useful for sign wallets that need to export a single extended key
+// that can derive multiple account keys (deposit, payment, stored) in the keygen wallet.
+//
+// Parameters:
+//   - seed: BIP39 seed (32 or 64 bytes)
+//
+// Returns:
+//   - Extended public key string (starts with "xpub", "tpub", "ypub", "zpub", etc.)
+//   - Error if seed is invalid or derivation fails
+//
+// Example: "tpub6D8Z......" for m/49'/1' on regtest
+func (g *DescriptorGenerator) GetCoinLevelXPub(seed []byte) (string, error) {
+	// Derive master key
+	masterKey, err := hdkeychain.NewMaster(seed, g.conf)
+	if err != nil {
+		return "", fmt.Errorf("failed to derive master key: %w", err)
+	}
+
+	// Derive purpose level: m/purpose'
+	purposeKey, err := masterKey.Derive(g.hdKey.purpose.Uint32() + hdkeychain.HardenedKeyStart)
+	if err != nil {
+		return "", fmt.Errorf("failed to derive purpose key: %w", err)
+	}
+
+	// Derive coin level: m/purpose'/coin_type'
+	coinKey, err := purposeKey.Derive(g.hdKey.coinType.Uint32() + hdkeychain.HardenedKeyStart)
+	if err != nil {
+		return "", fmt.Errorf("failed to derive coin key: %w", err)
+	}
+
+	// Get public key (neuter removes private key)
+	coinPubKey, err := coinKey.Neuter()
+	if err != nil {
+		return "", fmt.Errorf("failed to get coin public key: %w", err)
+	}
+
+	// Convert to string (xpub format)
+	xpub := coinPubKey.String()
+
+	return xpub, nil
+}
+
 // GenerateAccountDescriptorWithRange generates a descriptor with derivation path range.
 //
 // This is useful for generating descriptors that represent multiple addresses

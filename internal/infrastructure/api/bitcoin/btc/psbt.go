@@ -96,7 +96,8 @@ func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx) (st
 			return "", fmt.Errorf("failed to add witness UTXO for input %d: %w", i, err)
 		}
 
-		// Add redeem script for P2SH/P2WSH if provided
+		// Add redeem script for P2SH if provided
+		// For P2SH-wrapped SegWit, this is the witness program
 		if prevTx.RedeemScript != "" {
 			redeemScript, err := b.decodeHexScript(prevTx.RedeemScript)
 			if err != nil {
@@ -104,6 +105,18 @@ func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx) (st
 			}
 			if err := updater.AddInRedeemScript(redeemScript, i); err != nil {
 				return "", fmt.Errorf("failed to add redeem script for input %d: %w", i, err)
+			}
+		}
+
+		// Add witness script for P2WSH (native SegWit multisig) if provided
+		// This is the actual multisig script that defines required signatures
+		if prevTx.WitnessScript != "" {
+			witnessScript, err := b.decodeHexScript(prevTx.WitnessScript)
+			if err != nil {
+				return "", fmt.Errorf("failed to decode witnessScript for input %d: %w", i, err)
+			}
+			if err := updater.AddInWitnessScript(witnessScript, i); err != nil {
+				return "", fmt.Errorf("failed to add witness script for input %d: %w", i, err)
 			}
 		}
 
@@ -404,6 +417,34 @@ func (b *Bitcoin) GetPSBTFee(psbtBase64 string) (int64, error) {
 	}
 
 	return fee, nil
+}
+
+// WalletProcessPsbt signs a PSBT using Bitcoin Core's wallet (online RPC method).
+// This is used when working with descriptor-based wallets where private keys are managed by Bitcoin Core.
+// Used by Keygen wallet when descriptor-based workflow is enabled.
+//
+// Parameters:
+//   - psbtBase64: Base64-encoded PSBT to sign
+//   - sign: Whether to sign (true) or just add metadata (false)
+//
+// Returns:
+//   - signedPSBT: The signed PSBT in base64 format
+//   - isComplete: true if all signatures are collected
+//   - error: any error that occurred
+func (b *Bitcoin) WalletProcessPsbt(psbtBase64 string, sign bool) (string, bool, error) {
+	// Call Bitcoin Core RPC
+	signPtr := &sign
+	// Use SigHashAll as default sighash type
+	result, err := b.Client.WalletProcessPsbt(psbtBase64, signPtr, "ALL", nil)
+	if err != nil {
+		return "", false, fmt.Errorf("failed to call walletprocesspsbt RPC: %w", err)
+	}
+
+	logger.Debug("walletprocesspsbt completed",
+		"complete", result.Complete,
+		"sign", sign)
+
+	return result.Psbt, result.Complete, nil
 }
 
 // serializePSBT serializes a PSBT packet to base64 string

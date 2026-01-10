@@ -159,6 +159,52 @@ var AccountTypeValue = map[AccountType]uint32{
 	AccountTypeTest:      100,
 }
 
+// BIP44AccountIndexMap provides BIP44 account indices for derivation paths.
+// These values are used for BIP44/BIP49/BIP84 derivation paths.
+// For multisig accounts following BIP44 hierarchy: m/purpose'/coin_type'/account'/...
+//
+// Note: These are different from AccountTypeValue which is used for database storage.
+// Client account uses single-key derivation so it also gets index 0.
+var BIP44AccountIndexMap = map[AccountType]uint32{
+	AccountTypeClient:  0, // For single-key addresses
+	AccountTypeDeposit: 0, // First multisig account
+	AccountTypePayment: 1, // Second multisig account
+	AccountTypeStored:  2, // Third multisig account
+
+	// Auth accounts: not used for account-level derivation in multisig
+	// (they export coin-level xpubs that keygen derives from)
+	AccountTypeAuthorization: 10,
+	AccountTypeAuth1:         10,
+	AccountTypeAuth2:         11,
+	AccountTypeAuth3:         12,
+	AccountTypeAuth4:         13,
+	AccountTypeAuth5:         14,
+	AccountTypeAuth6:         15,
+	AccountTypeAuth7:         16,
+	AccountTypeAuth8:         17,
+	AccountTypeAuth9:         18,
+	AccountTypeAuth10:        19,
+	AccountTypeAuth11:        20,
+	AccountTypeAuth12:        21,
+	AccountTypeAuth13:        22,
+	AccountTypeAuth14:        23,
+	AccountTypeAuth15:        24,
+
+	AccountTypeAnonymous: 99,
+	AccountTypeTest:      100,
+}
+
+// BIP44AccountIndex returns the BIP44 account index for derivation paths.
+// This is different from Uint32() which returns database storage values.
+//
+// For BIP44/BIP49/BIP84 derivation paths (m/purpose'/coin_type'/account'/...):
+//   - Deposit: account index 0
+//   - Payment: account index 1
+//   - Stored: account index 2
+func (a AccountType) BIP44AccountIndex() uint32 {
+	return BIP44AccountIndexMap[a]
+}
+
 // AuthType represents authorization account details for multisig addresses.
 //
 // This type is used for operators with sign wallet to authorize multisig transactions.

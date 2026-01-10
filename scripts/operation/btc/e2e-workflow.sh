@@ -224,11 +224,15 @@ key_generation_phase() {
 		keygen -c "${CONFIG_KEYGEN}" api walletlock
 	fi
 
-	# Sign wallets - create seed (using sign1 as the primary sign wallet)
+	# Sign wallets - create seeds for all sign wallets
 	log_substep "Creating seeds for sign wallets"
-	sign1 --conf "${CONFIG_SIGN1}" --coin "${COIN}" create seed || {
-		log_warn "Sign seed already exists or error occurred, continuing..."
-	}
+	for i in $(seq 1 "$SIGN_WALLET_NUM"); do
+		log_info "Creating seed for sign${i}"
+		config_var="CONFIG_SIGN${i}"
+		"sign${i}" --conf "${!config_var}" --coin "${COIN}" create seed || {
+			log_warn "Sign${i} seed already exists or error occurred, continuing..."
+		}
+	done
 
 	# Sign wallets - create hdkeys
 	log_substep "Creating HD keys for sign wallets"
@@ -285,15 +289,20 @@ multisig_setup_phase() {
 	log_info "Importing fullpubkey from sign2: $FULLPUBKEY_FILE2"
 	keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" import fullpubkey --file "${FULLPUBKEY_FILE2}"
 
-	# Create multisig addresses
-	log_substep "Creating multisig addresses"
-	for account in deposit payment stored; do
-		log_info "Creating multisig address for account: $account"
-		keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" create multisig --account "$account"
-	done
+	# NOTE: Traditional multisig address creation is no longer needed when using descriptors.
+	# The descriptor import process automatically derives and stores addresses.
+	# Keeping both methods causes duplicate address errors.
+	#
+	# Create multisig addresses (DISABLED - replaced by descriptor-based workflow)
+	# log_substep "Creating multisig addresses"
+	# for account in deposit payment stored; do
+	# 	log_info "Creating multisig address for account: $account"
+	# 	keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" create multisig --account "$account"
+	# done
 
 	# Export descriptors for multisig accounts (deposit, payment, stored)
 	# Note: Now using descriptor export because sign wallets export extended keys (xpub format)
+	# Descriptor import automatically derives addresses and stores them in the database.
 	log_substep "Exporting descriptors from keygen wallet"
 	file_descriptor_deposit=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account deposit --output data/descriptor/btc/deposit_descriptors.json --format bitcoin-core --include-change)
 	file_descriptor_payment=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account payment --output data/descriptor/btc/payment_descriptors.json --format bitcoin-core --include-change)
@@ -439,6 +448,70 @@ generate_test_utxos() {
 }
 
 ###############################################################################
+# Payment Request Creation Phase
+###############################################################################
+
+create_payment_requests_phase() {
+	log_step "Payment Request Creation Phase"
+
+	# Get a payment sender address from database
+	log_substep "Retrieving payment sender address from database"
+	sender_address=$(docker compose exec -T wallet-db mysql -u root -proot watch -N -e \
+		"SELECT wallet_address FROM address WHERE coin='btc' AND account='payment' LIMIT 1" 2>/dev/null)
+
+	if [ -z "$sender_address" ]; then
+		log_error "No payment addresses found in database"
+		log_error "Please check:"
+		log_error "  - Descriptor import succeeded"
+		log_error "  - Addresses were derived and stored in database"
+		return 1
+	fi
+
+	log_info "Using sender address: $sender_address"
+
+	# Generate anonymous receiver addresses for testing
+	log_substep "Generating receiver addresses for payment requests"
+	log_info "Creating 3 receiver addresses in watch wallet..."
+	receiver1=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" bech32)
+	receiver2=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" bech32)
+	receiver3=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" bech32)
+
+	log_info "Generated receiver addresses:"
+	log_info "  1. $receiver1"
+	log_info "  2. $receiver2"
+	log_info "  3. $receiver3"
+
+	# Create payment requests
+	log_substep "Inserting payment requests into database"
+	docker compose exec -T wallet-db mysql -u root -proot watch <<EOF
+DELETE FROM payment_request;
+INSERT INTO payment_request (coin, payment_id, sender_address, sender_account, receiver_address, amount, is_done)
+VALUES
+	('btc', NULL, '${sender_address}', 'payment', '${receiver1}', 0.001, false),
+	('btc', NULL, '${sender_address}', 'payment', '${receiver2}', 0.002, false),
+	('btc', NULL, '${sender_address}', 'payment', '${receiver3}', 0.0015, false);
+EOF
+
+	if [ $? -ne 0 ]; then
+		log_error "Failed to insert payment requests"
+		return 1
+	fi
+
+	# Verify payment requests were created
+	count=$(docker compose exec -T wallet-db mysql -u root -proot watch -N -e \
+		"SELECT COUNT(*) FROM payment_request WHERE coin='btc' AND is_done=false" 2>/dev/null)
+
+	log_info "Created $count payment requests"
+
+	if [ "$count" -eq 0 ]; then
+		log_error "No payment requests were created"
+		return 1
+	fi
+
+	log_info "Payment requests ready for transaction creation"
+}
+
+###############################################################################
 # Transaction Flow Phase
 ###############################################################################
 
@@ -452,9 +525,11 @@ transaction_flow_phase() {
 		log_error "Output: $tx_file"
 
 		if echo "$tx_file" | grep -q "No utxo"; then
-			log_error "No UTXOs available for payment transaction"
-			log_error "Transaction flow phase FAILED - no UTXOs available"
-			log_error "This indicates addresses were not properly stored in the database"
+			log_error "Transaction creation failed"
+			log_error "This could indicate:"
+			log_error "  - No payment requests in database"
+			log_error "  - No UTXOs available for payment account"
+			log_error "  - UTXOs not mature enough (need 100+ confirmations)"
 			return 1
 		fi
 
@@ -462,14 +537,16 @@ transaction_flow_phase() {
 	}
 
 	if echo "$tx_file" | grep -q "No utxo"; then
-		log_error "No UTXOs available for payment transaction"
-		log_error "Transaction flow phase FAILED"
-		log_error "This indicates addresses were not properly stored in the database"
+		log_error "Transaction creation failed"
+		log_error "This could indicate:"
+		log_error "  - No payment requests in database"
+		log_error "  - No UTXOs available for payment account"
+		log_error "  - UTXOs not mature enough (need 100+ confirmations)"
 		return 1
 	fi
 
 	# Extract file path
-	tx_unsigned="${tx_file##*\[fileName\]: }"
+	tx_unsigned=$(echo "${tx_file}" | grep "\[fileName\]:" | sed 's/.*\[fileName\]: //')
 	log_info "Created unsigned transaction: $tx_unsigned"
 
 	# Sign with keygen wallet (1st signature)
@@ -477,24 +554,24 @@ transaction_flow_phase() {
 	if [ "$ENCRYPTED" = "true" ]; then
 		keygen -c "${CONFIG_KEYGEN}" api walletpassphrase --passphrase "${WALLET_PASSPHRASE}"
 	fi
-	tx_file_signed=$(keygen -c "${CONFIG_KEYGEN}" sign --file "${tx_unsigned}")
+	tx_file_signed=$(keygen -c "${CONFIG_KEYGEN}" sign signature --file "${tx_unsigned}")
 	if [ "$ENCRYPTED" = "true" ]; then
 		keygen -c "${CONFIG_KEYGEN}" api walletlock
 	fi
 
-	tx_signed1="${tx_file_signed##*\[fileName\]: }"
+	tx_signed1=$(echo "${tx_file_signed}" | grep "\[fileName\]:" | sed 's/.*\[fileName\]: //')
 	log_info "Signed transaction (1st): $tx_signed1"
 
 	# Sign with sign1 wallet (2nd signature)
 	log_substep "Signing with sign1 wallet (2nd signature)"
-	tx_file_signed2=$(sign1 --conf "${CONFIG_SIGN1}" --wallet sign1 sign --file "${tx_signed1}")
-	tx_signed2="${tx_file_signed2##*\[fileName\]: }"
+	tx_file_signed2=$(sign1 --conf "${CONFIG_SIGN1}" --wallet sign1 sign signature --file "${tx_signed1}")
+	tx_signed2=$(echo "${tx_file_signed2}" | grep "\[fileName\]:" | sed 's/.*\[fileName\]: //')
 	log_info "Signed transaction (2nd): $tx_signed2"
 
 	# Sign with sign2 wallet (3rd signature)
 	log_substep "Signing with sign2 wallet (3rd signature)"
-	tx_file_signed3=$(sign2 --conf "${CONFIG_SIGN2}" --wallet sign2 sign --file "${tx_signed2}")
-	tx_signed3="${tx_file_signed3##*\[fileName\]: }"
+	tx_file_signed3=$(sign2 --conf "${CONFIG_SIGN2}" --wallet sign2 sign signature --file "${tx_signed2}")
+	tx_signed3=$(echo "${tx_file_signed3}" | grep "\[fileName\]:" | sed 's/.*\[fileName\]: //')
 	log_info "Signed transaction (3rd): $tx_signed3"
 
 	# Send transaction
@@ -626,6 +703,7 @@ main() {
 	key_generation_phase
 	multisig_setup_phase
 	generate_test_utxos
+	create_payment_requests_phase
 	transaction_flow_phase
 
 	log_step "Bitcoin E2E Workflow Completed Successfully!"
@@ -636,6 +714,7 @@ main() {
 	log_info "  ✓ Multisig addresses created with descriptors"
 	log_info "  ✓ Descriptors exported and imported (P2SH-segwit addresses are solvable)"
 	log_info "  ✓ Test UTXOs generated"
+	log_info "  ✓ Payment requests created"
 	log_info "  ✓ Transaction created, signed, and sent"
 	echo ""
 	log_info "Key improvements in this workflow:"
