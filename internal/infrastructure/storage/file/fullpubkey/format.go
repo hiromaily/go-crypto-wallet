@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 )
 
@@ -96,9 +97,9 @@ func ConvertLine(coinTypeCode domainCoin.CoinTypeCode, line []string) (*FullPubK
 			return nil, fmt.Errorf("invalid purpose value: %s (must be 44, 49, 84, or 86)", line[2])
 		}
 		format.Purpose = uint8(purposeVal)
-		// Validate purpose value
-		if format.Purpose != 44 && format.Purpose != 49 && format.Purpose != 84 && format.Purpose != 86 {
-			return nil, fmt.Errorf("invalid purpose value: %d (must be 44, 49, 84, or 86)", format.Purpose)
+		// Validate purpose value using domain layer validation
+		if err := domainAuth.Purpose(format.Purpose).Validate(); err != nil {
+			return nil, fmt.Errorf("invalid purpose: %w", err)
 		}
 		format.ExtendedPubKey = line[3]
 		format.Fingerprint = line[4]

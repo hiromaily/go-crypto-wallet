@@ -104,6 +104,15 @@ func (u *exportFullPubkeyUseCase) exportAccountKey(
 		coinIndex = 1
 	}
 
+	// Get master fingerprint once (same for all BIP purposes)
+	// Use any purpose for fingerprint calculation since it's derived from seed
+	tempHdKey := infraKey.NewHDKey(infraKey.PurposeTypeBIP44, u.coinTypeCode, u.chainConfig)
+	tempDescGenerator := infraKey.NewDescriptorGenerator(tempHdKey, u.chainConfig)
+	fingerprint, err := tempDescGenerator.GetMasterFingerprintHex(seed)
+	if err != nil {
+		return "", fmt.Errorf("fail to get master fingerprint: %w", err)
+	}
+
 	// Export extended public keys for all 4 BIP purposes
 	// Each sign wallet exports 4 xpubs (one for each BIP purpose)
 	// to support all address types (Legacy, P2SH-SegWit, Native SegWit, Taproot)
@@ -118,7 +127,7 @@ func (u *exportFullPubkeyUseCase) exportAccountKey(
 		// Create HDKey for this BIP purpose
 		hdKey := infraKey.NewHDKey(purpose, u.coinTypeCode, u.chainConfig)
 
-		// Derive extended public key and fingerprint from seed
+		// Derive extended public key from seed
 		descGenerator := infraKey.NewDescriptorGenerator(hdKey, u.chainConfig)
 
 		// Export purpose/coin-level extended public key (NOT account-level)
@@ -134,12 +143,6 @@ func (u *exportFullPubkeyUseCase) exportAccountKey(
 		extendedPubKey, err := descGenerator.GetCoinLevelXPub(seed)
 		if err != nil {
 			return "", fmt.Errorf("fail to derive extended public key for BIP%d: %w", purpose, err)
-		}
-
-		// Get master fingerprint (same for all purposes)
-		fingerprint, err := descGenerator.GetMasterFingerprintHex(seed)
-		if err != nil {
-			return "", fmt.Errorf("fail to get master fingerprint for BIP%d: %w", purpose, err)
 		}
 
 		// Build derivation path at purpose/coin level (NOT account level)
