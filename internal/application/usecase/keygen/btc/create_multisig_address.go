@@ -2,7 +2,10 @@ package btc
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
+
+	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
@@ -64,7 +67,32 @@ func (u *createMultisigAddressUseCase) Create(
 			if err != nil {
 				return fmt.Errorf("fail to call authFullPubKeyRepo.GetOne() %s: %w", authType.String(), err)
 			}
-			authFullPubKeys = append(authFullPubKeys, fullPubKeyItem.FullPublicKey)
+
+			// Derive account-specific public key if extended format is used
+			var pubKey string
+			if fullPubKeyItem.ExtendedPubKey != "" {
+				// Extended format: derive account-specific key
+				// The extended key is at m/49'/coin' level
+				// We need to derive to m/49'/coin'/account' level
+				pubKey, err = u.deriveAccountPublicKey(fullPubKeyItem.ExtendedPubKey, input.AccountType)
+				if err != nil {
+					return fmt.Errorf("fail to derive account public key for %s: %w", authType.String(), err)
+				}
+				logger.Debug("derived account-specific public key",
+					"auth_type", authType.String(),
+					"account_type", input.AccountType.String(),
+					"pubkey", pubKey,
+				)
+			} else {
+				// Legacy format: use compressed public key directly
+				pubKey = fullPubKeyItem.FullPublicKey
+				logger.Debug("using legacy compressed public key",
+					"auth_type", authType.String(),
+					"pubkey", pubKey,
+				)
+			}
+
+			authFullPubKeys = append(authFullPubKeys, pubKey)
 		}
 		logger.Debug("don't repeat again")
 	}
@@ -113,4 +141,48 @@ func (u *createMultisigAddressUseCase) Create(
 	}
 
 	return nil
+}
+
+// deriveAccountPublicKey derives an account-specific compressed public key from a coin-level extended public key.
+//
+// The input extended public key should be at m/49'/coin' level (exported from sign wallets).
+// This function derives to m/49'/coin'/account' level and returns the compressed public key.
+//
+// Parameters:
+//   - extendedPubKey: Extended public key at m/49'/coin' level (xpub/tpub format)
+//   - accountType: Account type (deposit=0, payment=1, stored=2, etc.)
+//
+// Returns:
+//   - Compressed public key (33 bytes, hex-encoded)
+//   - Error if derivation fails
+func (u *createMultisigAddressUseCase) deriveAccountPublicKey(
+	extendedPubKey string,
+	accountType domainAccount.AccountType,
+) (string, error) {
+	// Parse extended public key
+	coinLevelKey, err := hdkeychain.NewKeyFromString(extendedPubKey)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse extended public key: %w", err)
+	}
+
+	// Derive account-specific key: m/49'/coin'/account'
+	// accountType.Uint32() gives account index (deposit=0, payment=1, stored=2, etc.)
+	accountKey, err := coinLevelKey.Derive(accountType.Uint32() + hdkeychain.HardenedKeyStart)
+	if err != nil {
+		return "", fmt.Errorf("failed to derive account key: %w", err)
+	}
+
+	// Get the public key
+	pubKey, err := accountKey.ECPubKey()
+	if err != nil {
+		return "", fmt.Errorf("failed to get public key: %w", err)
+	}
+
+	// Serialize as compressed public key (33 bytes)
+	compressedPubKey := pubKey.SerializeCompressed()
+
+	// Convert to hex string
+	pubKeyHex := hex.EncodeToString(compressedPubKey)
+
+	return pubKeyHex, nil
 }

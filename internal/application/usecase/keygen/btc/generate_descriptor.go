@@ -95,7 +95,7 @@ func (u *generateDescriptorUseCase) generateSingleSigDescriptor(
 		return "", fmt.Errorf("calculate fingerprint: %w", err)
 	}
 
-	derivationPath, err := derivationPathForAddress(input.AddressType, false)
+	derivationPath, err := derivationPathForAddress(input.AddressType, false, input.AccountType)
 	if err != nil {
 		return "", err
 	}
@@ -129,7 +129,7 @@ func (u *generateDescriptorUseCase) generateMultisigDescriptor(
 		return "", err
 	}
 
-	signers, err := u.buildMultisigSigners(authTypes, input.AddressType)
+	signers, err := u.buildMultisigSigners(authTypes, input.AddressType, input.AccountType)
 	if err != nil {
 		return "", err
 	}
@@ -144,8 +144,9 @@ func (u *generateDescriptorUseCase) generateMultisigDescriptor(
 func (u *generateDescriptorUseCase) buildMultisigSigners(
 	authTypes []domainAccount.AuthType,
 	addressType domainAddress.AddrType,
+	accountType domainAccount.AccountType,
 ) ([]btc.MultisigSigner, error) {
-	derivationPath, err := derivationPathForAddress(addressType, true)
+	derivationPath, err := derivationPathForAddress(addressType, true, accountType)
 	if err != nil {
 		return nil, err
 	}
@@ -161,8 +162,8 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 		}
 
 		// Use ExtendedPubKey (new format) if available, otherwise fall back to FullPublicKey (legacy)
-		extendedKey := authKey.ExtendedPubKey
-		if extendedKey == "" {
+		coinLevelExtendedKey := authKey.ExtendedPubKey
+		if coinLevelExtendedKey == "" {
 			// Legacy format: FullPublicKey contains compressed pubkey, not extended key
 			return nil, fmt.Errorf(
 				"extended public key not found for %s (legacy compressed pubkey format not supported for descriptors)",
@@ -170,20 +171,27 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 			)
 		}
 
-		xpub, err := hdkeychain.NewKeyFromString(extendedKey)
+		// The extended key is at m/49'/coin' level (from sign wallet export)
+		// Derive to m/49'/coin'/account' level for this specific account
+		accountExtendedKey, err := u.deriveAccountExtendedKey(coinLevelExtendedKey, accountType)
 		if err != nil {
-			return nil, fmt.Errorf("parse auth extended key for %s: %w", authType.String(), err)
+			return nil, fmt.Errorf("derive account extended key for %s: %w", authType.String(), err)
+		}
+
+		xpub, err := hdkeychain.NewKeyFromString(accountExtendedKey)
+		if err != nil {
+			return nil, fmt.Errorf("parse account extended key for %s: %w", authType.String(), err)
 		}
 
 		if u.chainConfig != nil && !xpub.IsForNet(u.chainConfig) {
-			return nil, fmt.Errorf("auth extended key network mismatch for %s", authType.String())
+			return nil, fmt.Errorf("account extended key network mismatch for %s", authType.String())
 		}
 
 		var fp string
 		if authKey.Fingerprint != nil {
 			fp = authKey.Fingerprint.String()
 		} else {
-			finger, err := infraKey.FingerprintFromExtendedKey(extendedKey)
+			finger, err := infraKey.FingerprintFromExtendedKey(accountExtendedKey)
 			if err != nil {
 				return nil, fmt.Errorf("calculate fingerprint for %s: %w", authType.String(), err)
 			}
@@ -200,22 +208,37 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 	return signers, nil
 }
 
-func derivationPathForAddress(addrType domainAddress.AddrType, isMultisig bool) (string, error) {
+func derivationPathForAddress(
+	addrType domainAddress.AddrType,
+	isMultisig bool,
+	accountType domainAccount.AccountType,
+) (string, error) {
+	accountIndex := accountType.Uint32()
+
+	// Note: coin' index is hardcoded to 1' for testnet/regtest
+	// For mainnet, this should be 0'
+	// TODO: Make this configurable based on network
+	coinIndex := "1'" // testnet/regtest
+
 	switch addrType {
 	case domainAddress.AddrTypeLegacy:
-		return "/44'/0'/0'", nil
+		return fmt.Sprintf("/44'/%s/%d'", coinIndex, accountIndex), nil
 	case domainAddress.AddrTypeP2shSegwit:
 		if isMultisig {
-			return "/48'/0'/0'/2'", nil
+			// BIP48: m/48'/coin'/account'/script_type'
+			// script_type=2 for P2SH-wrapped SegWit (sh(wpkh(...)))
+			return fmt.Sprintf("/48'/%s/%d'/2'", coinIndex, accountIndex), nil
 		}
-		return "/49'/0'/0'", nil
+		return fmt.Sprintf("/49'/%s/%d'", coinIndex, accountIndex), nil
 	case domainAddress.AddrTypeBech32:
 		if isMultisig {
-			return "/48'/0'/0'/2'", nil
+			// BIP48: m/48'/coin'/account'/script_type'
+			// script_type=2 for native SegWit multisig (wsh(sortedmulti(...)))
+			return fmt.Sprintf("/48'/%s/%d'/2'", coinIndex, accountIndex), nil
 		}
-		return "/84'/0'/0'", nil
+		return fmt.Sprintf("/84'/%s/%d'", coinIndex, accountIndex), nil
 	case domainAddress.AddrTypeTaproot:
-		return "/86'/0'/0'", nil
+		return fmt.Sprintf("/86'/%s/%d'", coinIndex, accountIndex), nil
 	case domainAddress.AddrTypeBCHCashAddr, domainAddress.AddrTypeETH:
 		return "", fmt.Errorf("unsupported address type for Bitcoin: %s", addrType)
 	default:
@@ -248,4 +271,39 @@ func selectRequiredSigConfig(
 
 	req := requiredKeys[0]
 	return req, config[req], nil
+}
+
+// deriveAccountExtendedKey derives an account-specific extended public key from a coin-level extended public key.
+//
+// The input extended public key should be at m/49'/coin' level (exported from sign wallets).
+// This function derives to m/49'/coin'/account' level and returns the account extended key.
+//
+// Parameters:
+//   - coinLevelExtendedKey: Extended public key at m/49'/coin' level (xpub/tpub format)
+//   - accountType: Account type (deposit=0, payment=1, stored=2, etc.)
+//
+// Returns:
+//   - Account-level extended public key (xpub/tpub format)
+//   - Error if derivation fails
+func (u *generateDescriptorUseCase) deriveAccountExtendedKey(
+	coinLevelExtendedKey string,
+	accountType domainAccount.AccountType,
+) (string, error) {
+	// Parse extended public key
+	coinLevelKey, err := hdkeychain.NewKeyFromString(coinLevelExtendedKey)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse coin-level extended public key: %w", err)
+	}
+
+	// Derive account-specific key: m/49'/coin'/account'
+	// accountType.Uint32() gives account index (deposit=0, payment=1, stored=2, etc.)
+	accountKey, err := coinLevelKey.Derive(accountType.Uint32() + hdkeychain.HardenedKeyStart)
+	if err != nil {
+		return "", fmt.Errorf("failed to derive account key: %w", err)
+	}
+
+	// Convert to string (xpub format)
+	accountExtendedKey := accountKey.String()
+
+	return accountExtendedKey, nil
 }
