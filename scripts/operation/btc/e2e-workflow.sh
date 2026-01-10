@@ -224,11 +224,15 @@ key_generation_phase() {
 		keygen -c "${CONFIG_KEYGEN}" api walletlock
 	fi
 
-	# Sign wallets - create seed (using sign1 as the primary sign wallet)
+	# Sign wallets - create seeds for all sign wallets
 	log_substep "Creating seeds for sign wallets"
-	sign1 --conf "${CONFIG_SIGN1}" --coin "${COIN}" create seed || {
-		log_warn "Sign seed already exists or error occurred, continuing..."
-	}
+	for i in $(seq 1 "$SIGN_WALLET_NUM"); do
+		log_info "Creating seed for sign${i}"
+		config_var="CONFIG_SIGN${i}"
+		"sign${i}" --conf "${!config_var}" --coin "${COIN}" create seed || {
+			log_warn "Sign${i} seed already exists or error occurred, continuing..."
+		}
+	done
 
 	# Sign wallets - create hdkeys
 	log_substep "Creating HD keys for sign wallets"
