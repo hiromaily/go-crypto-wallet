@@ -230,6 +230,23 @@ func TestDescriptorParser_ExtractKeys(t *testing.T) {
 				if firstKey.ExtendedPubKey == "" {
 					t.Error("extractKeys() extended public key is empty")
 				}
+
+				// For issue #297 test case, validate second key as well to ensure
+				// both keys in the multisig descriptor are parsed correctly
+				if tt.name == "issue #297 - multisig with origin path and derivation path" && len(keys) > 1 {
+					secondKey := keys[1]
+					expectedFingerprint := "5bf99bc2"
+					expectedPath := "/0/*"
+					if secondKey.Fingerprint != expectedFingerprint {
+						t.Errorf("extractKeys() second key fingerprint = %s, want %s", secondKey.Fingerprint, expectedFingerprint)
+					}
+					if secondKey.DerivationPath != expectedPath {
+						t.Errorf("extractKeys() second key path = %s, want %s", secondKey.DerivationPath, expectedPath)
+					}
+					if secondKey.ExtendedPubKey == "" {
+						t.Error("extractKeys() second key extended public key is empty")
+					}
+				}
 			}
 		})
 	}
