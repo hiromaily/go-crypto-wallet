@@ -11,11 +11,13 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	watchusecasebtc "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
+	btcmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/mocks"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/mocks"
 	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 )
@@ -43,8 +45,17 @@ func TestImportDescriptorUseCase_ImportsAddresses(t *testing.T) {
 		Return(nil).
 		Once()
 
+	btcClient := btcmocks.NewMockBitcoiner(t)
+	btcClient.EXPECT().
+		ImportDescriptors(mock.MatchedBy(func(reqs []dtobtc.ImportDescriptorsRequest) bool {
+			return len(reqs) == 1 && reqs[0].Active && reqs[0].Watchonly
+		})).
+		Return([]dtobtc.ImportDescriptorsResponse{{Success: true}}, nil).
+		Once()
+
 	parser := btc.NewDescriptorParser()
 	useCase := watchusecasebtc.NewImportDescriptorUseCase(
+		btcClient,
 		parser,
 		&chaincfg.MainNetParams,
 		repo,
@@ -78,8 +89,12 @@ func TestImportDescriptorUseCase_ValidateOnly(t *testing.T) {
 	repo := mocks.NewMockAddressRepositorier(t)
 	// No insert expected
 
+	btcClient := btcmocks.NewMockBitcoiner(t)
+	// No ImportDescriptors call expected in ValidateOnly mode
+
 	parser := btc.NewDescriptorParser()
 	useCase := watchusecasebtc.NewImportDescriptorUseCase(
+		btcClient,
 		parser,
 		&chaincfg.MainNetParams,
 		repo,
@@ -120,8 +135,17 @@ func TestImportDescriptorUseCase_ImportsMultisigAddresses(t *testing.T) {
 		Return(nil).
 		Once()
 
+	btcClient := btcmocks.NewMockBitcoiner(t)
+	btcClient.EXPECT().
+		ImportDescriptors(mock.MatchedBy(func(reqs []dtobtc.ImportDescriptorsRequest) bool {
+			return len(reqs) == 1 && reqs[0].Active && reqs[0].Watchonly
+		})).
+		Return([]dtobtc.ImportDescriptorsResponse{{Success: true}}, nil).
+		Once()
+
 	parser := btc.NewDescriptorParser()
 	useCase := watchusecasebtc.NewImportDescriptorUseCase(
+		btcClient,
 		parser,
 		&chaincfg.MainNetParams,
 		repo,

@@ -941,6 +941,7 @@ func (c *container) newBTCWatchImportAddressUseCase() watchusecase.ImportAddress
 
 func (c *container) newBTCWatchImportDescriptorUseCase() watchusecase.ImportDescriptorUseCase {
 	return watchusecasebtc.NewImportDescriptorUseCase(
+		c.newBTC(),
 		btcapi.NewDescriptorParser(),
 		c.newBTC().GetChainConf(),
 		c.newAddressRepo(),

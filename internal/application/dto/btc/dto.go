@@ -284,3 +284,77 @@ type MultisigAddress struct {
 	RedeemScript string
 	Descriptor   string
 }
+
+// ImportDescriptorsRequest represents a single descriptor import request.
+//
+// This matches the format expected by Bitcoin Core's importdescriptors RPC (v0.21.0+).
+// Each request describes one descriptor to import into the wallet.
+//
+// Reference: Bitcoin Core RPC documentation - importdescriptors
+type ImportDescriptorsRequest struct {
+	// Descriptor is the output descriptor string WITH checksum
+	// Format: descriptor#checksum
+	// Example: "sh(wpkh([fingerprint/49'/0'/0']xpub.../0/*))#checksum"
+	Descriptor string `json:"desc"`
+
+	// Timestamp indicates when to start scanning for transactions
+	// Values:
+	//   - "now": Skip rescanning (fastest, use for new imports)
+	//   - 0: Scan from genesis block (slowest, use if unsure)
+	//   - unix timestamp: Scan from specific time
+	Timestamp any `json:"timestamp"`
+
+	// Active indicates whether to track outputs for spending
+	// Set to true for watch-only wallets that need to create unsigned transactions
+	Active bool `json:"active"`
+
+	// Range specifies the range of addresses to derive for ranged descriptors
+	// Format: [start, end] or integer for 0-N
+	// Example: [0, 1000] or 1000
+	// Only used for descriptors with wildcards (e.g., /0/*)
+	Range any `json:"range,omitempty"`
+
+	// NextIndex specifies the next unused address index
+	// Only used for ranged descriptors
+	// Bitcoin Core tracks this automatically
+	NextIndex *int `json:"next_index,omitempty"`
+
+	// Label is an optional label for the imported addresses
+	// Useful for organizing addresses by account type (e.g., "deposit", "payment")
+	Label string `json:"label,omitempty"`
+
+	// Internal indicates if this is for change addresses
+	// Set to true for internal chain (change), false for external chain (receiving)
+	Internal bool `json:"internal,omitempty"`
+
+	// Watchonly indicates this is a watch-only import (no private keys)
+	// Should be true for watch wallets
+	Watchonly bool `json:"watchonly,omitempty"`
+}
+
+// ImportDescriptorsResponse represents the response for a single descriptor import.
+//
+// Bitcoin Core returns one response for each request in the same order.
+// Check Success field to determine if the import succeeded.
+type ImportDescriptorsResponse struct {
+	// Success indicates whether the import succeeded
+	Success bool `json:"success"`
+
+	// Warnings contains any warnings generated during import
+	// Common warnings:
+	//   - "Rescan aborted" (if rescan was interrupted)
+	//   - "Some private keys are missing" (for multisig)
+	Warnings []string `json:"warnings,omitempty"`
+
+	// Error contains error information if Success is false
+	Error *ImportDescriptorError `json:"error,omitempty"`
+}
+
+// ImportDescriptorError contains detailed error information for failed imports.
+type ImportDescriptorError struct {
+	// Code is the JSON-RPC error code
+	Code int `json:"code"`
+
+	// Message is the human-readable error message
+	Message string `json:"message"`
+}

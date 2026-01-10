@@ -64,6 +64,7 @@ type Bitcoiner interface {
 	ImportAddress(pubkey string) error
 	ImportAddressWithoutReScan(pubkey string) error
 	ImportAddressWithLabel(addr, label string, rescan bool) error
+	ImportDescriptors(requests []dtobtc.ImportDescriptorsRequest) ([]dtobtc.ImportDescriptorsResponse, error)
 
 	// label.go
 	SetLabel(addr, label string) error

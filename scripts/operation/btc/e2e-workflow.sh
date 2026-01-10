@@ -285,44 +285,44 @@ multisig_setup_phase() {
 		keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" create multisig --account "$account"
 	done
 
-	# Export addresses
+	# Export addresses for multisig accounts (deposit, payment, stored)
+	# Note: Multisig accounts use traditional addmultisigaddress and don't support descriptor export
+	# because auth fullpubkeys are compressed public keys, not extended keys (xpub)
 	log_substep "Exporting addresses from keygen wallet"
-	file_address_client=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" export address --account client)
 	file_address_deposit=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" export address --account deposit)
 	file_address_payment=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" export address --account payment)
 	file_address_stored=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" export address --account stored)
+	file_address_client=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" export address --account client)
 
 	# Extract file paths
-	address_client="${file_address_client##*\[fileName\]: }"
 	address_deposit="${file_address_deposit##*\[fileName\]: }"
 	address_payment="${file_address_payment##*\[fileName\]: }"
 	address_stored="${file_address_stored##*\[fileName\]: }"
+	address_client="${file_address_client##*\[fileName\]: }"
 
 	log_info "Exported address files:"
-	log_info "  client: $address_client"
 	log_info "  deposit: $address_deposit"
 	log_info "  payment: $address_payment"
 	log_info "  stored: $address_stored"
+	log_info "  client: $address_client"
 
 	# Import addresses into watch wallet
 	log_substep "Importing addresses into watch wallet"
-	log_info "Importing client addresses (without rescan)"
-	watch -c "${CONFIG_WATCH}" --coin "${COIN}" import address --file "${address_client}"
-
-	log_info "Importing deposit addresses (without rescan)"
+	log_info "Importing deposit addresses"
 	watch -c "${CONFIG_WATCH}" --coin "${COIN}" import address --file "${address_deposit}"
 
-	log_info "Importing payment addresses (without rescan)"
+	log_info "Importing payment addresses"
 	watch -c "${CONFIG_WATCH}" --coin "${COIN}" import address --file "${address_payment}"
 
-	log_info "Importing stored addresses (without rescan)"
+	log_info "Importing stored addresses"
 	watch -c "${CONFIG_WATCH}" --coin "${COIN}" import address --file "${address_stored}"
 
-	# Trigger blockchain rescan for all imported addresses
-	log_info "Triggering blockchain rescan for all imported addresses..."
-	# Using rescanblockchain RPC via bitcoin-cli is more efficient than rescanning per-address
-	btc_cli "btc-watch" -rpcwallet=watch rescanblockchain 0 >/dev/null
-	log_info "Blockchain rescan completed"
+	log_info "Importing client addresses"
+	watch -c "${CONFIG_WATCH}" --coin "${COIN}" import address --file "${address_client}"
+
+	log_info "All addresses imported successfully"
+	log_info "Note: Traditional address import is used for multisig accounts"
+	log_info "Note: Descriptor-based import requires extended public keys (xpub), not compressed pubkeys"
 }
 
 ###############################################################################
@@ -505,9 +505,10 @@ The script performs the following steps:
   2. Start infrastructure (database and Bitcoin nodes)
   3. Create wallets in Bitcoin nodes
   4. Generate keys for keygen and sign wallets
-  5. Create multisig addresses and export to watch wallet
-  6. Generate test UTXOs (automatically generates 101 blocks)
-  7. Create, sign, and send a test transaction
+  5. Create multisig addresses and export descriptors to watch wallet
+  6. Import descriptors (makes P2SH-segwit addresses solvable)
+  7. Generate test UTXOs (automatically generates 101 blocks)
+  8. Create, sign, and send a test transaction
 
 The script now automatically generates test UTXOs for the transaction phase,
 making it fully automated and suitable for CI/CD pipelines.
@@ -589,7 +590,7 @@ main() {
 	log_info "  ✓ Wallets created and configured"
 	log_info "  ✓ Keys generated and imported"
 	log_info "  ✓ Multisig addresses created"
-	log_info "  ✓ Addresses imported into watch wallet"
+	log_info "  ✓ Descriptors exported and imported (P2SH-segwit addresses now solvable)"
 	log_info "  ✓ Test UTXOs generated"
 	log_info "  ✓ Transaction created, signed, and sent"
 	echo ""

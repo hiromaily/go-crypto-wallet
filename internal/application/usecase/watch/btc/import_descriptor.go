@@ -20,6 +20,8 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/txscript"
 
+	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
+	portsbtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
 	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -31,6 +33,7 @@ import (
 )
 
 type importDescriptorUseCase struct {
+	btcClient portsbtc.Bitcoiner
 	parser    *btc.DescriptorParser
 	chainConf *chaincfg.Params
 	addrRepo  watchrepo.AddressRepositorier
@@ -39,12 +42,14 @@ type importDescriptorUseCase struct {
 
 // NewImportDescriptorUseCase creates a descriptor import use case.
 func NewImportDescriptorUseCase(
+	btcClient portsbtc.Bitcoiner,
 	parser *btc.DescriptorParser,
 	chainConf *chaincfg.Params,
 	addrRepo watchrepo.AddressRepositorier,
 	coinType domainCoin.CoinTypeCode,
 ) watchusecase.ImportDescriptorUseCase {
 	return &importDescriptorUseCase{
+		btcClient: btcClient,
 		parser:    parser,
 		chainConf: chainConf,
 		addrRepo:  addrRepo,
@@ -67,6 +72,8 @@ func (u *importDescriptorUseCase) Import(
 		errors    []string
 	)
 
+	// Parse all descriptors first to validate them
+	var descriptors []*domainWallet.Descriptor
 	for _, descStr := range descriptorStrs {
 		descriptor, parseErr := u.parser.Parse(descStr)
 		if parseErr != nil {
@@ -78,6 +85,28 @@ func (u *importDescriptorUseCase) Import(
 			logger.Info("descriptor validated", "descriptor", descStr)
 			continue
 		}
+
+		descriptors = append(descriptors, descriptor)
+	}
+
+	// If validate-only mode, return early
+	if input.ValidateOnly {
+		return watchusecase.ImportDescriptorOutput{
+			DescriptorsImported: len(descriptors),
+			AddressesGenerated:  0,
+			Errors:              errors,
+		}, nil
+	}
+
+	// Import descriptors to Bitcoin Core first
+	if len(descriptors) > 0 {
+		importErrs := u.importToBitcoinCore(descriptorStrs, input.AccountType)
+		errors = append(errors, importErrs...)
+	}
+
+	// Then derive addresses locally and store them in the database
+	for i, descriptor := range descriptors {
+		descStr := descriptorStrs[i]
 
 		addrs, deriveErr := u.deriveAddresses(descriptor, input.StartIndex, input.Count)
 		if deriveErr != nil {
@@ -104,6 +133,71 @@ func (u *importDescriptorUseCase) Import(
 		AddressesGenerated:  generated,
 		Errors:              errors,
 	}, nil
+}
+
+// importToBitcoinCore imports descriptors to Bitcoin Core using the importdescriptors RPC.
+//
+// This makes the descriptors solvable in Bitcoin Core, allowing transaction creation.
+// Returns a list of error messages for any failed imports.
+func (u *importDescriptorUseCase) importToBitcoinCore(
+	descriptorStrs []string,
+	accountType domainAccount.AccountType,
+) []string {
+	if len(descriptorStrs) == 0 {
+		return nil
+	}
+
+	// Build import requests for Bitcoin Core
+	requests := make([]dtobtc.ImportDescriptorsRequest, 0, len(descriptorStrs))
+	for _, descStr := range descriptorStrs {
+		req := dtobtc.ImportDescriptorsRequest{
+			Descriptor: descStr,
+			Timestamp:  "now", // Skip rescanning (fastest)
+			Active:     true,  // Track outputs for spending
+			Label:      accountType.String(),
+			Internal:   false, // External chain (receiving addresses)
+			Watchonly:  true,  // Watch-only wallet (no private keys)
+		}
+
+		// Add range for ranged descriptors (with wildcards)
+		if strings.Contains(descStr, "/*") {
+			req.Range = 1000 // Derive 0-999 addresses
+		}
+
+		requests = append(requests, req)
+	}
+
+	// Call Bitcoin Core importdescriptors RPC
+	responses, err := u.btcClient.ImportDescriptors(requests)
+	if err != nil {
+		return []string{fmt.Sprintf("failed to call importdescriptors RPC: %v", err)}
+	}
+
+	// Process responses and collect errors
+	var importErrors []string
+	for i, resp := range responses {
+		if !resp.Success {
+			errMsg := fmt.Sprintf("failed to import descriptor '%s'", descriptorStrs[i])
+			if resp.Error != nil {
+				errMsg = fmt.Sprintf("%s: [code %d] %s", errMsg, resp.Error.Code, resp.Error.Message)
+			}
+			importErrors = append(importErrors, errMsg)
+			continue
+		}
+
+		// Log warnings if any
+		if len(resp.Warnings) > 0 {
+			logger.Warn("descriptor import warnings",
+				"descriptor", descriptorStrs[i],
+				"warnings", strings.Join(resp.Warnings, "; "))
+		}
+
+		logger.Info("descriptor imported to Bitcoin Core",
+			"descriptor", descriptorStrs[i],
+			"label", accountType.String())
+	}
+
+	return importErrors
 }
 
 func (*importDescriptorUseCase) readDescriptors(filePath string) ([]string, error) {

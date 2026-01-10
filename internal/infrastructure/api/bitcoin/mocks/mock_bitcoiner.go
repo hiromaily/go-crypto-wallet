@@ -2444,6 +2444,64 @@ func (_c *MockBitcoiner_ImportAddressWithoutReScan_Call) RunAndReturn(run func(p
 	return _c
 }
 
+// ImportDescriptors provides a mock function for the type MockBitcoiner
+func (_mock *MockBitcoiner) ImportDescriptors(requests []btc.ImportDescriptorsRequest) ([]btc.ImportDescriptorsResponse, error) {
+	ret := _mock.Called(requests)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ImportDescriptors")
+	}
+
+	var r0 []btc.ImportDescriptorsResponse
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func([]btc.ImportDescriptorsRequest) ([]btc.ImportDescriptorsResponse, error)); ok {
+		return returnFunc(requests)
+	}
+	if returnFunc, ok := ret.Get(0).(func([]btc.ImportDescriptorsRequest) []btc.ImportDescriptorsResponse); ok {
+		r0 = returnFunc(requests)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]btc.ImportDescriptorsResponse)
+		}
+	}
+
+	if returnFunc, ok := ret.Get(1).(func([]btc.ImportDescriptorsRequest) error); ok {
+		r1 = returnFunc(requests)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockBitcoiner_ImportDescriptors_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ImportDescriptors'
+type MockBitcoiner_ImportDescriptors_Call struct {
+	*mock.Call
+}
+
+// ImportDescriptors is a helper method to define mock.On call
+//   - requests []btc.ImportDescriptorsRequest
+func (_e *MockBitcoiner_Expecter) ImportDescriptors(requests interface{}) *MockBitcoiner_ImportDescriptors_Call {
+	return &MockBitcoiner_ImportDescriptors_Call{Call: _e.mock.On("ImportDescriptors", requests)}
+}
+
+func (_c *MockBitcoiner_ImportDescriptors_Call) Run(run func(requests []btc.ImportDescriptorsRequest)) *MockBitcoiner_ImportDescriptors_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].([]btc.ImportDescriptorsRequest))
+	})
+	return _c
+}
+
+func (_c *MockBitcoiner_ImportDescriptors_Call) Return(_a0 []btc.ImportDescriptorsResponse, _a1 error) *MockBitcoiner_ImportDescriptors_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockBitcoiner_ImportDescriptors_Call) RunAndReturn(run func([]btc.ImportDescriptorsRequest) ([]btc.ImportDescriptorsResponse, error)) *MockBitcoiner_ImportDescriptors_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ImportPrivKey provides a mock function for the type MockBitcoiner
 func (_mock *MockBitcoiner) ImportPrivKey(privKeyWIF *btcutil.WIF) error {
 	ret := _mock.Called(privKeyWIF)
