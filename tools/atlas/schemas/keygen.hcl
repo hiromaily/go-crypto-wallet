@@ -392,6 +392,13 @@ table "auth_fullpubkey" {
     comment = "auth type"
   }
 
+  column "purpose" {
+    type    = tinyint
+    null    = false
+    default = 49
+    comment = "BIP purpose (44, 49, 84, 86) - default 49 for backward compatibility"
+  }
+
   column "full_public_key" {
     type    = varchar(255)
     null    = false
@@ -427,9 +434,10 @@ table "auth_fullpubkey" {
     columns = [column.id]
   }
 
-  index "idex_coin_auth_account" {
+  index "idex_coin_auth_account_purpose" {
     unique  = true
-    columns = [column.coin, column.auth_account]
+    columns = [column.coin, column.auth_account, column.purpose]
+    comment = "unique constraint for coin, auth_account, and purpose combination"
   }
 
   index "idx_coin" {
@@ -438,6 +446,10 @@ table "auth_fullpubkey" {
 
   index "idx_fingerprint" {
     columns = [column.fingerprint]
+  }
+
+  index "idx_purpose" {
+    columns = [column.purpose]
   }
 }
 

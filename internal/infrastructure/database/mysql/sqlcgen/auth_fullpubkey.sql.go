@@ -11,8 +11,8 @@ import (
 )
 
 const getAuthFullPubkey = `-- name: GetAuthFullPubkey :one
-SELECT id, coin, auth_account, full_public_key, extended_pubkey, fingerprint, derivation_path, updated_at
-FROM auth_fullpubkey WHERE coin = ? AND auth_account = ? LIMIT 1
+SELECT id, coin, auth_account, purpose, full_public_key, extended_pubkey, fingerprint, derivation_path, updated_at
+FROM auth_fullpubkey WHERE coin = ? AND auth_account = ? AND purpose = 49 LIMIT 1
 `
 
 type GetAuthFullPubkeyParams struct {
@@ -27,6 +27,7 @@ func (q *Queries) GetAuthFullPubkey(ctx context.Context, arg GetAuthFullPubkeyPa
 		&i.ID,
 		&i.Coin,
 		&i.AuthAccount,
+		&i.Purpose,
 		&i.FullPublicKey,
 		&i.ExtendedPubkey,
 		&i.Fingerprint,
@@ -37,7 +38,7 @@ func (q *Queries) GetAuthFullPubkey(ctx context.Context, arg GetAuthFullPubkeyPa
 }
 
 const getAuthFullPubkeyByFingerprint = `-- name: GetAuthFullPubkeyByFingerprint :one
-SELECT id, coin, auth_account, full_public_key, extended_pubkey, fingerprint, derivation_path, updated_at
+SELECT id, coin, auth_account, purpose, full_public_key, extended_pubkey, fingerprint, derivation_path, updated_at
 FROM auth_fullpubkey WHERE fingerprint = ? LIMIT 1
 `
 
@@ -48,6 +49,35 @@ func (q *Queries) GetAuthFullPubkeyByFingerprint(ctx context.Context, fingerprin
 		&i.ID,
 		&i.Coin,
 		&i.AuthAccount,
+		&i.Purpose,
+		&i.FullPublicKey,
+		&i.ExtendedPubkey,
+		&i.Fingerprint,
+		&i.DerivationPath,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getAuthFullPubkeyByPurpose = `-- name: GetAuthFullPubkeyByPurpose :one
+SELECT id, coin, auth_account, purpose, full_public_key, extended_pubkey, fingerprint, derivation_path, updated_at
+FROM auth_fullpubkey WHERE coin = ? AND auth_account = ? AND purpose = ? LIMIT 1
+`
+
+type GetAuthFullPubkeyByPurposeParams struct {
+	Coin        AuthFullpubkeyCoin
+	AuthAccount string
+	Purpose     int8
+}
+
+func (q *Queries) GetAuthFullPubkeyByPurpose(ctx context.Context, arg GetAuthFullPubkeyByPurposeParams) (AuthFullpubkey, error) {
+	row := q.db.QueryRowContext(ctx, getAuthFullPubkeyByPurpose, arg.Coin, arg.AuthAccount, arg.Purpose)
+	var i AuthFullpubkey
+	err := row.Scan(
+		&i.ID,
+		&i.Coin,
+		&i.AuthAccount,
+		&i.Purpose,
 		&i.FullPublicKey,
 		&i.ExtendedPubkey,
 		&i.Fingerprint,
@@ -58,13 +88,14 @@ func (q *Queries) GetAuthFullPubkeyByFingerprint(ctx context.Context, fingerprin
 }
 
 const insertAuthFullPubkey = `-- name: InsertAuthFullPubkey :execresult
-INSERT INTO auth_fullpubkey (coin, auth_account, full_public_key, extended_pubkey, fingerprint, derivation_path)
-VALUES (?, ?, ?, ?, ?, ?)
+INSERT INTO auth_fullpubkey (coin, auth_account, purpose, full_public_key, extended_pubkey, fingerprint, derivation_path)
+VALUES (?, ?, ?, ?, ?, ?, ?)
 `
 
 type InsertAuthFullPubkeyParams struct {
 	Coin           AuthFullpubkeyCoin
 	AuthAccount    string
+	Purpose        int8
 	FullPublicKey  string
 	ExtendedPubkey sql.NullString
 	Fingerprint    sql.NullString
@@ -75,6 +106,7 @@ func (q *Queries) InsertAuthFullPubkey(ctx context.Context, arg InsertAuthFullPu
 	return q.db.ExecContext(ctx, insertAuthFullPubkey,
 		arg.Coin,
 		arg.AuthAccount,
+		arg.Purpose,
 		arg.FullPublicKey,
 		arg.ExtendedPubkey,
 		arg.Fingerprint,
@@ -83,16 +115,22 @@ func (q *Queries) InsertAuthFullPubkey(ctx context.Context, arg InsertAuthFullPu
 }
 
 const updateAuthFullPubkeyFingerprint = `-- name: UpdateAuthFullPubkeyFingerprint :exec
-UPDATE auth_fullpubkey SET fingerprint = ?, updated_at = CURRENT_TIMESTAMP WHERE coin = ? AND auth_account = ?
+UPDATE auth_fullpubkey SET fingerprint = ?, updated_at = CURRENT_TIMESTAMP WHERE coin = ? AND auth_account = ? AND purpose = ?
 `
 
 type UpdateAuthFullPubkeyFingerprintParams struct {
 	Fingerprint sql.NullString
 	Coin        AuthFullpubkeyCoin
 	AuthAccount string
+	Purpose     int8
 }
 
 func (q *Queries) UpdateAuthFullPubkeyFingerprint(ctx context.Context, arg UpdateAuthFullPubkeyFingerprintParams) error {
-	_, err := q.db.ExecContext(ctx, updateAuthFullPubkeyFingerprint, arg.Fingerprint, arg.Coin, arg.AuthAccount)
+	_, err := q.db.ExecContext(ctx, updateAuthFullPubkeyFingerprint,
+		arg.Fingerprint,
+		arg.Coin,
+		arg.AuthAccount,
+		arg.Purpose,
+	)
 	return err
 }

@@ -80,6 +80,7 @@ type XRPAccountKeyRepositorier interface {
 // AuthFullPubkeyRepositorier is AuthFullPubkeyRepository interface
 type AuthFullPubkeyRepositorier interface {
 	GetOne(authType domainAccount.AuthType) (*domainAuth.AuthFullPubkey, error)
+	GetOneByPurpose(authType domainAccount.AuthType, purpose domainAuth.Purpose) (*domainAuth.AuthFullPubkey, error)
 	Insert(authType domainAccount.AuthType, fullPubKey string) error
 	InsertBulk(items []*domainAuth.AuthFullPubkey) error
 }

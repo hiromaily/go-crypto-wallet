@@ -716,6 +716,8 @@ type AuthFullpubkey struct {
 	Coin AuthFullpubkeyCoin
 	// auth type
 	AuthAccount string
+	// BIP purpose (44, 49, 84, 86) - default 49 for backward compatibility
+	Purpose int8
 	// full public key (legacy: compressed pubkey, new: may be empty if using extended_pubkey)
 	FullPublicKey string
 	// BIP32 extended public key (xpub/tpub format)

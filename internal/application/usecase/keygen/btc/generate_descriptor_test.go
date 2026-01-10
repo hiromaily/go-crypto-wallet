@@ -220,6 +220,15 @@ func (s *stubAuthRepo) GetOne(authType domainAccount.AuthType) (*domainAuth.Auth
 	}
 	return val, nil
 }
+
+func (s *stubAuthRepo) GetOneByPurpose(
+	authType domainAccount.AuthType,
+	_ domainAuth.Purpose,
+) (*domainAuth.AuthFullPubkey, error) {
+	// For tests, ignore purpose and return the same result as GetOne
+	return s.GetOne(authType)
+}
+
 func (*stubAuthRepo) Insert(domainAccount.AuthType, string) error   { return nil }
 func (*stubAuthRepo) InsertBulk([]*domainAuth.AuthFullPubkey) error { return nil }
 

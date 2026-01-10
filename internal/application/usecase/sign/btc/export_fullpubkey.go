@@ -96,61 +96,79 @@ func (u *exportFullPubkeyUseCase) exportAccountKey(
 
 	writer := bufio.NewWriter(file)
 
-	// Create HDKey for BIP49 (P2SH-SegWit)
-	// Auth accounts are used for multisig P2SH-wrapped SegWit addresses
-	// BIP49 path: m/49'/coin'/account'
-	hdKey := infraKey.NewHDKey(infraKey.PurposeTypeBIP49, u.coinTypeCode, u.chainConfig)
-
-	// Derive extended public key and fingerprint from seed
-	descGenerator := infraKey.NewDescriptorGenerator(hdKey, u.chainConfig)
-
-	// Export purpose/coin-level extended public key (NOT account-level)
-	// This allows keygen to derive account-specific keys for deposit, payment, stored
-	// Path: m/49'/coin' (BIP48-style for multisig, stopping at coin level)
-	//
-	// Why not account-level (m/49'/coin'/account')?
-	// - Sign wallets don't know which multisig account (deposit/payment/stored) will use these keys
-	// - Each sign wallet should provide ONE extended key that can derive ALL multisig accounts
-	// - Keygen will derive account-specific keys: m/49'/coin'/0' for deposit, m/49'/coin'/1' for payment, etc.
-	extendedPubKey, err := descGenerator.GetCoinLevelXPub(seed)
-	if err != nil {
-		return "", fmt.Errorf("fail to derive extended public key: %w", err)
-	}
-
-	// Get master fingerprint
-	fingerprint, err := descGenerator.GetMasterFingerprintHex(seed)
-	if err != nil {
-		return "", fmt.Errorf("fail to get master fingerprint: %w", err)
-	}
-
-	// Build derivation path at purpose/coin level (NOT account level)
-	// Format: m/purpose'/coin_type'
-	// For BIP49: m/49'/coin'
+	// Determine coin index based on network
 	// coin' = 0' for mainnet, 1' for testnet/regtest
-	//
-	// Keygen will extend this path to m/49'/coin'/account' for each multisig account
 	coinIndex := uint32(0) // mainnet
 	if u.chainConfig.Net != 0x00000000 {
 		// testnet, regtest, or other networks use 1'
 		coinIndex = 1
 	}
-	derivationPath := fmt.Sprintf("m/49'/%d'",
-		coinIndex,
-	)
 
-	// output: coinType, authType, extendedPubKey, fingerprint, derivationPath
-	_, err = writer.WriteString(
-		fullpubkey.CreateExtendedLine(
-			u.coinTypeCode,
-			authType,
-			extendedPubKey,
-			fingerprint,
-			derivationPath,
-		),
-	)
-	if err != nil {
-		return "", fmt.Errorf("fail to call writer.WriteString(%s): %w", fileName, err)
+	// Export extended public keys for all 4 BIP purposes
+	// Each sign wallet exports 4 xpubs (one for each BIP purpose)
+	// to support all address types (Legacy, P2SH-SegWit, Native SegWit, Taproot)
+	purposes := []infraKey.PurposeType{
+		infraKey.PurposeTypeBIP44, // Legacy (P2PKH)
+		infraKey.PurposeTypeBIP49, // P2SH-SegWit
+		infraKey.PurposeTypeBIP84, // Native SegWit (Bech32)
+		infraKey.PurposeTypeBIP86, // Taproot
 	}
+
+	for _, purpose := range purposes {
+		// Create HDKey for this BIP purpose
+		hdKey := infraKey.NewHDKey(purpose, u.coinTypeCode, u.chainConfig)
+
+		// Derive extended public key and fingerprint from seed
+		descGenerator := infraKey.NewDescriptorGenerator(hdKey, u.chainConfig)
+
+		// Export purpose/coin-level extended public key (NOT account-level)
+		// This allows keygen to derive account-specific keys for deposit, payment, stored
+		// Path: m/purpose'/coin' (BIP48-style for multisig, stopping at coin level)
+		//
+		// Why not account-level (m/purpose'/coin'/account')?
+		// - Sign wallets don't know which multisig account (deposit/payment/stored) will use these keys
+		// - Each sign wallet should provide ONE extended key per BIP purpose
+		//   that can derive ALL multisig accounts
+		// - Keygen will derive account-specific keys:
+		//   m/purpose'/coin'/0' for deposit, m/purpose'/coin'/1' for payment, etc.
+		extendedPubKey, err := descGenerator.GetCoinLevelXPub(seed)
+		if err != nil {
+			return "", fmt.Errorf("fail to derive extended public key for BIP%d: %w", purpose, err)
+		}
+
+		// Get master fingerprint (same for all purposes)
+		fingerprint, err := descGenerator.GetMasterFingerprintHex(seed)
+		if err != nil {
+			return "", fmt.Errorf("fail to get master fingerprint for BIP%d: %w", purpose, err)
+		}
+
+		// Build derivation path at purpose/coin level (NOT account level)
+		// Format: m/purpose'/coin_type'
+		// Examples:
+		//   - BIP44: m/44'/coin'  (Legacy/P2PKH)
+		//   - BIP49: m/49'/coin'  (P2SH-SegWit)
+		//   - BIP84: m/84'/coin'  (Native SegWit/Bech32)
+		//   - BIP86: m/86'/coin'  (Taproot)
+		//
+		// Keygen will extend this path to m/purpose'/coin'/account' for each multisig account
+		derivationPath := fmt.Sprintf("m/%d'/%d'", purpose, coinIndex)
+
+		// output: coinType, authType, purpose, extendedPubKey, fingerprint, derivationPath
+		_, err = writer.WriteString(
+			fullpubkey.CreateExtendedLine(
+				u.coinTypeCode,
+				authType,
+				uint8(purpose),
+				extendedPubKey,
+				fingerprint,
+				derivationPath,
+			),
+		)
+		if err != nil {
+			return "", fmt.Errorf("fail to call writer.WriteString(%s) for BIP%d: %w", fileName, purpose, err)
+		}
+	}
+
 	if err = writer.Flush(); err != nil {
 		return "", fmt.Errorf("fail to call writer.Flush(%s): %w", fileName, err)
 	}

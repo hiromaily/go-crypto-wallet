@@ -30,10 +30,17 @@ func NewAuthFullPubkeyRepositorySqlc(
 
 // convertToAuthFullPubkey converts sqlcgen.AuthFullpubkey to domain.AuthFullPubkey entity.
 func convertToAuthFullPubkey(sqlcKey *sqlcgen.AuthFullpubkey) (*domainAuth.AuthFullPubkey, error) {
+	// Convert and validate purpose
+	purpose, err := domainAuth.PurposeFromUint8(uint8(sqlcKey.Purpose))
+	if err != nil {
+		return nil, fmt.Errorf("invalid purpose in database: %w", err)
+	}
+
 	key := &domainAuth.AuthFullPubkey{
 		ID:            sqlcKey.ID,
 		CoinTypeCode:  domainCoin.CoinTypeCode(sqlcKey.Coin),
 		AuthAccount:   domainAccount.AuthType(sqlcKey.AuthAccount),
+		Purpose:       purpose,
 		FullPublicKey: sqlcKey.FullPublicKey,
 	}
 
@@ -63,6 +70,7 @@ func convertFromAuthFullPubkey(key *domainAuth.AuthFullPubkey) *sqlcgen.AuthFull
 		ID:            key.ID,
 		Coin:          sqlcgen.AuthFullpubkeyCoin(key.CoinTypeCode.String()),
 		AuthAccount:   key.AuthAccount.String(),
+		Purpose:       int8(key.Purpose),
 		FullPublicKey: key.FullPublicKey,
 	}
 
@@ -82,7 +90,7 @@ func convertFromAuthFullPubkey(key *domainAuth.AuthFullPubkey) *sqlcgen.AuthFull
 	return sqlcKey
 }
 
-// GetOne returns one record by authType
+// GetOne returns one record by authType (defaults to BIP49 for backward compatibility)
 func (r *AuthFullPubkeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (*domainAuth.AuthFullPubkey, error) {
 	ctx := context.Background()
 
@@ -97,13 +105,33 @@ func (r *AuthFullPubkeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (
 	return convertToAuthFullPubkey(&authPubkey)
 }
 
-// Insert inserts record
+// GetOneByPurpose returns one record by authType and purpose
+func (r *AuthFullPubkeyRepositorySqlc) GetOneByPurpose(
+	authType domainAccount.AuthType,
+	purpose domainAuth.Purpose,
+) (*domainAuth.AuthFullPubkey, error) {
+	ctx := context.Background()
+
+	authPubkey, err := r.queries.GetAuthFullPubkeyByPurpose(ctx, sqlcgen.GetAuthFullPubkeyByPurposeParams{
+		Coin:        sqlcgen.AuthFullpubkeyCoin(r.coinTypeCode.String()),
+		AuthAccount: authType.String(),
+		Purpose:     int8(purpose),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to call GetAuthFullPubkeyByPurpose(): %w", err)
+	}
+
+	return convertToAuthFullPubkey(&authPubkey)
+}
+
+// Insert inserts record (defaults to BIP49 for backward compatibility)
 func (r *AuthFullPubkeyRepositorySqlc) Insert(authType domainAccount.AuthType, fullPubKey string) error {
 	ctx := context.Background()
 
 	_, err := r.queries.InsertAuthFullPubkey(ctx, sqlcgen.InsertAuthFullPubkeyParams{
 		Coin:          sqlcgen.AuthFullpubkeyCoin(r.coinTypeCode.String()),
 		AuthAccount:   authType.String(),
+		Purpose:       49, // Default to BIP49 for backward compatibility
 		FullPublicKey: fullPubKey,
 	})
 	if err != nil {
@@ -122,6 +150,7 @@ func (r *AuthFullPubkeyRepositorySqlc) InsertBulk(items []*domainAuth.AuthFullPu
 		_, err := r.queries.InsertAuthFullPubkey(ctx, sqlcgen.InsertAuthFullPubkeyParams{
 			Coin:           sqlcItem.Coin,
 			AuthAccount:    sqlcItem.AuthAccount,
+			Purpose:        sqlcItem.Purpose,
 			FullPublicKey:  sqlcItem.FullPublicKey,
 			ExtendedPubkey: sqlcItem.ExtendedPubkey,
 			Fingerprint:    sqlcItem.Fingerprint,
