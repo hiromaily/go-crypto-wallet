@@ -453,17 +453,19 @@ transaction_flow_phase() {
 
 		if echo "$tx_file" | grep -q "No utxo"; then
 			log_error "No UTXOs available for payment transaction"
-			log_warn "Transaction flow phase skipped - no UTXOs available"
-			return 0
+			log_error "Transaction flow phase FAILED - no UTXOs available"
+			log_error "This indicates addresses were not properly stored in the database"
+			return 1
 		fi
 
 		return 1
 	}
 
 	if echo "$tx_file" | grep -q "No utxo"; then
-		log_warn "No UTXOs available for payment transaction"
-		log_warn "Transaction flow phase skipped"
-		return 0
+		log_error "No UTXOs available for payment transaction"
+		log_error "Transaction flow phase FAILED"
+		log_error "This indicates addresses were not properly stored in the database"
+		return 1
 	fi
 
 	# Extract file path
