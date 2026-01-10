@@ -31,6 +31,7 @@ import (
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
+	"github.com/hiromaily/go-crypto-wallet/pkg/retry"
 )
 
 type importDescriptorUseCase struct {
@@ -552,43 +553,39 @@ func (u *importDescriptorUseCase) storeAddresses(
 }
 
 // setLabelWithRetry attempts to set a label with retry and verification.
-// It retries up to 3 times with exponential backoff if the label fails to be set.
+// It uses the pkg/retry package with exponential backoff.
 func (u *importDescriptorUseCase) setLabelWithRetry(addr, label string) error {
-	const (
-		maxRetries     = 3
-		initialBackoff = 100 // milliseconds
-	)
+	cfg := retry.Config{
+		MaxRetries:     2, // 2 retries = 3 total attempts (initial + 2 retries)
+		InitialBackoff: 100 * time.Millisecond,
+		MaxBackoff:     1 * time.Second,
+		Multiplier:     2.0,
+		Jitter:         false, // Keep false to match original behavior
+	}
 
-	var lastErr error
-	for attempt := 0; attempt < maxRetries; attempt++ {
+	attemptCount := 0
+	operation := func() error {
+		attemptCount++
+
 		// Try to set the label
 		if err := u.btcClient.SetLabel(addr, label); err != nil {
-			lastErr = fmt.Errorf("setlabel call failed: %w", err)
 			logger.Debug("setLabel failed, will retry",
 				"address", addr,
 				"label", label,
-				"attempt", attempt+1,
+				"attempt", attemptCount,
 				"error", err)
-
-			// Exponential backoff before retry
-			if attempt < maxRetries-1 {
-				backoffDuration := time.Duration(initialBackoff*(1<<attempt)) * time.Millisecond // 100ms, 200ms
-				logger.Debug("waiting before retry", "backoff", backoffDuration)
-				time.Sleep(backoffDuration)
-			}
-			continue
+			return fmt.Errorf("setlabel call failed: %w", err)
 		}
 
 		// Verify the label was actually set by checking getaddressinfo
 		info, err := u.btcClient.GetAddressInfo(addr)
 		if err != nil {
-			lastErr = fmt.Errorf("failed to verify label (getaddressinfo failed): %w", err)
 			logger.Debug("label verification failed, will retry",
 				"address", addr,
 				"label", label,
-				"attempt", attempt+1,
+				"attempt", attemptCount,
 				"error", err)
-			continue
+			return fmt.Errorf("failed to verify label (getaddressinfo failed): %w", err)
 		}
 
 		// Check if the label is present in the address labels
@@ -601,25 +598,27 @@ func (u *importDescriptorUseCase) setLabelWithRetry(addr, label string) error {
 		}
 
 		if !labelFound {
-			lastErr = fmt.Errorf("label not found after setlabel (expected %s, got %v)", label, info.Labels)
 			logger.Debug("label not found in address info, will retry",
 				"address", addr,
 				"expected_label", label,
 				"actual_labels", info.Labels,
-				"attempt", attempt+1)
-			continue
+				"attempt", attemptCount)
+			return fmt.Errorf("label not found after setlabel (expected %s, got %v)", label, info.Labels)
 		}
 
 		// Success - label was set and verified
 		logger.Debug("successfully labeled address",
 			"address", addr,
 			"label", label,
-			"attempt", attempt+1)
+			"attempt", attemptCount)
 		return nil
 	}
 
-	// All retries failed
-	return fmt.Errorf("failed after %d attempts: %w", maxRetries, lastErr)
+	// Use context with reasonable timeout for label operations
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	return retry.Retry(ctx, cfg, operation)
 }
 
 // ioReadAll is a wrapper for io.ReadAll to allow testing via injection.

@@ -20,6 +20,7 @@ The `pkg/` directory is organized as follows:
 - `di/`: Legacy dependency injection container (for backward compatibility)
 - `grpc/`: gRPC client utilities
 - `logger/`: Logging utilities (structured logging, noop logger, slog support)
+- `retry/`: Retry utilities with exponential backoff and context support
 - `serial/`: Serialization utilities
 - `testutil/`: Test utilities for various components
   - `btc.go`: Bitcoin test utilities
