@@ -13,6 +13,7 @@ import (
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
 	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 )
@@ -151,14 +152,27 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 		return nil, err
 	}
 
+	// Determine BIP purpose from address type
+	purpose, err := domainAuth.PurposeForAddressType(addressType.String())
+	if err != nil {
+		return nil, fmt.Errorf("failed to determine purpose for address type %s: %w", addressType.String(), err)
+	}
+
 	signers := make([]btc.MultisigSigner, 0, len(authTypes))
 	for _, authType := range authTypes {
-		authKey, err := u.authFullPubKeyRepo.GetOne(authType)
+		// Query by purpose to get correct xpub for the address type
+		authKey, err := u.authFullPubKeyRepo.GetOneByPurpose(authType, purpose)
 		if err != nil {
-			return nil, fmt.Errorf("get auth full pubkey for %s: %w", authType.String(), err)
+			return nil, fmt.Errorf(
+				"get auth full pubkey for %s with purpose %s: %w",
+				authType.String(), purpose.String(), err,
+			)
 		}
 		if authKey == nil {
-			return nil, fmt.Errorf("auth full pubkey not found for %s", authType.String())
+			return nil, fmt.Errorf(
+				"auth full pubkey not found for %s with purpose %s",
+				authType.String(), purpose.String(),
+			)
 		}
 
 		// Use ExtendedPubKey (new format) if available, otherwise fall back to FullPublicKey (legacy)
@@ -166,8 +180,10 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 		if coinLevelExtendedKey == "" {
 			// Legacy format: FullPublicKey contains compressed pubkey, not extended key
 			return nil, fmt.Errorf(
-				"extended public key not found for %s (legacy compressed pubkey format not supported for descriptors)",
+				"extended public key not found for %s with purpose %s "+
+					"(legacy compressed pubkey format not supported for descriptors)",
 				authType.String(),
+				purpose.String(),
 			)
 		}
 

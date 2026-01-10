@@ -54,12 +54,25 @@ func (u *importFullPubkeyUseCase) Import(
 			return err
 		}
 
+		// Determine purpose from CSV format
+		// - 3-field format (legacy): purpose=0 (not set, will use default 49)
+		// - 5-field format (old extended): purpose=49 (default)
+		// - 6-field format (new): purpose from CSV
+		var purpose domainAuth.Purpose
+		if fpk.Purpose == 0 {
+			// Legacy format without purpose field - default to BIP49
+			purpose = domainAuth.PurposeBIP49
+		} else {
+			purpose = domainAuth.Purpose(fpk.Purpose)
+		}
+
 		// Create base entity (supports both legacy and extended formats)
 		// Legacy format: only FullPubKey is set
 		// Extended format: ExtendedPubKey, Fingerprint, DerivationPath are also set
 		authFullPubkey, err := domainAuth.NewAuthFullPubkey(
 			fpk.CoinTypeCode,
 			fpk.AuthType,
+			purpose,
 			fpk.FullPubKey,
 		)
 		if err != nil {
