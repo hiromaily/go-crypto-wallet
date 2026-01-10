@@ -406,12 +406,18 @@ generate_test_utxos() {
 	balance_found=false
 
 	while [ $elapsed -lt $max_wait ]; do
-		balance_output=$(watch -c "${CONFIG_WATCH}" --coin "${COIN}" monitor balance 2>&1 || true)
-		if echo "$balance_output" | grep -q "payment"; then
-			log_info "Payment account balance verified (took ${elapsed}s)"
+		# Check balance using Bitcoin Core RPC directly (descriptor-based wallets may not have
+		# all accounts set up in application database yet, especially "client" account)
+		balance_json=$(btc_cli "btc-watch" -rpcwallet=watch getbalances 2>&1 || true)
+		trusted_balance=$(echo "$balance_json" | jq -r '.mine.trusted // 0' 2>/dev/null || echo "0")
+
+		# Check if we have any trusted (mature) balance
+		if [ -n "$trusted_balance" ] && [ "$(echo "$trusted_balance > 0" | bc -l 2>/dev/null || echo "0")" -eq 1 ]; then
+			log_info "Payment account balance verified: ${trusted_balance} BTC (took ${elapsed}s)"
 			balance_found=true
 			break
 		fi
+
 		sleep $wait_interval
 		elapsed=$((elapsed + wait_interval))
 		if [ $elapsed -lt $max_wait ]; then
@@ -426,8 +432,8 @@ generate_test_utxos() {
 		log_error "  - Bitcoin node logs: docker compose -f compose.btc.yaml logs btc-watch"
 		log_error "  - Block generation succeeded"
 		log_error "  - Address import into watch wallet succeeded"
-		log_error "Debug: Last balance command output:"
-		echo "$balance_output"
+		log_error "Debug: Last balance check output:"
+		echo "$balance_json"
 		return 1
 	fi
 }
