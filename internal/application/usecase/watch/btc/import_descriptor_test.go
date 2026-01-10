@@ -61,6 +61,17 @@ func TestImportDescriptorUseCase_ImportsAddresses(t *testing.T) {
 	})).
 		Return([]dtobtc.ImportDescriptorsResponse{{Success: true}}, nil).
 		Once()
+	// Mock SetLabel for each address (2 addresses)
+	btcClient.On("SetLabel", mock.AnythingOfType("string"), "deposit").
+		Return(nil).
+		Times(2)
+	// Mock GetAddressInfo for label verification (2 addresses)
+	btcClient.On("GetAddressInfo", mock.AnythingOfType("string")).
+		Return(&dtobtc.AddressInfo{
+			Address: "mock-address",
+			Labels:  []string{"deposit"},
+		}, nil).
+		Times(2)
 
 	parser := btc.NewDescriptorParser()
 	useCase := watchusecasebtc.NewImportDescriptorUseCase(
@@ -159,6 +170,17 @@ func TestImportDescriptorUseCase_ImportsMultisigAddresses(t *testing.T) {
 		return len(reqs) == 1 && reqs[0].Active && reqs[0].Watchonly
 	})).
 		Return([]dtobtc.ImportDescriptorsResponse{{Success: true}}, nil).
+		Once()
+	// Mock SetLabel for each address (1 address)
+	btcClient.On("SetLabel", mock.AnythingOfType("string"), "deposit").
+		Return(nil).
+		Once()
+	// Mock GetAddressInfo for label verification (1 address)
+	btcClient.On("GetAddressInfo", mock.AnythingOfType("string")).
+		Return(&dtobtc.AddressInfo{
+			Address: "mock-address",
+			Labels:  []string{"deposit"},
+		}, nil).
 		Once()
 
 	parser := btc.NewDescriptorParser()

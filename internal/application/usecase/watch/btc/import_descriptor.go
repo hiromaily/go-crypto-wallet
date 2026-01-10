@@ -13,6 +13,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcutil"
@@ -523,17 +524,102 @@ func (u *importDescriptorUseCase) storeAddresses(
 	// Note: This is necessary because ranged descriptor import doesn't support labels
 	// (Bitcoin Core limitation), so we must label each derived address individually.
 	label := accountType.String()
+
+	var labelErrors []string
 	for _, addr := range addrs {
-		if err := u.btcClient.SetLabel(addr, label); err != nil {
-			logger.Warn("failed to label address in Bitcoin Core",
+		if err := u.setLabelWithRetry(addr, label); err != nil {
+			labelErrors = append(labelErrors, fmt.Sprintf("%s: %v", addr, err))
+			logger.Error("failed to label address after retries",
 				"address", addr,
 				"label", label,
 				"error", err)
-			// Continue labeling other addresses even if one fails
 		}
 	}
 
+	// If all addresses failed to be labeled, return error
+	if len(labelErrors) == len(addrs) {
+		return fmt.Errorf("failed to label all addresses: %s", strings.Join(labelErrors, "; "))
+	}
+
+	// If some addresses failed, log warning but continue
+	if len(labelErrors) > 0 {
+		logger.Warn("some addresses failed to be labeled",
+			"failed_count", len(labelErrors),
+			"total_count", len(addrs))
+	}
+
 	return nil
+}
+
+// setLabelWithRetry attempts to set a label with retry and verification.
+// It retries up to 3 times with exponential backoff if the label fails to be set.
+func (u *importDescriptorUseCase) setLabelWithRetry(addr, label string) error {
+	const (
+		maxRetries     = 3
+		initialBackoff = 100 // milliseconds
+	)
+
+	var lastErr error
+	for attempt := 0; attempt < maxRetries; attempt++ {
+		// Try to set the label
+		if err := u.btcClient.SetLabel(addr, label); err != nil {
+			lastErr = fmt.Errorf("setlabel call failed: %w", err)
+			logger.Debug("setLabel failed, will retry",
+				"address", addr,
+				"label", label,
+				"attempt", attempt+1,
+				"error", err)
+
+			// Exponential backoff before retry
+			if attempt < maxRetries-1 {
+				backoffDuration := time.Duration(initialBackoff*(1<<attempt)) * time.Millisecond // 100ms, 200ms
+				logger.Debug("waiting before retry", "backoff", backoffDuration)
+				time.Sleep(backoffDuration)
+			}
+			continue
+		}
+
+		// Verify the label was actually set by checking getaddressinfo
+		info, err := u.btcClient.GetAddressInfo(addr)
+		if err != nil {
+			lastErr = fmt.Errorf("failed to verify label (getaddressinfo failed): %w", err)
+			logger.Debug("label verification failed, will retry",
+				"address", addr,
+				"label", label,
+				"attempt", attempt+1,
+				"error", err)
+			continue
+		}
+
+		// Check if the label is present in the address labels
+		labelFound := false
+		for _, addrLabel := range info.Labels {
+			if addrLabel == label {
+				labelFound = true
+				break
+			}
+		}
+
+		if !labelFound {
+			lastErr = fmt.Errorf("label not found after setlabel (expected %s, got %v)", label, info.Labels)
+			logger.Debug("label not found in address info, will retry",
+				"address", addr,
+				"expected_label", label,
+				"actual_labels", info.Labels,
+				"attempt", attempt+1)
+			continue
+		}
+
+		// Success - label was set and verified
+		logger.Debug("successfully labeled address",
+			"address", addr,
+			"label", label,
+			"attempt", attempt+1)
+		return nil
+	}
+
+	// All retries failed
+	return fmt.Errorf("failed after %d attempts: %w", maxRetries, lastErr)
 }
 
 // ioReadAll is a wrapper for io.ReadAll to allow testing via injection.
