@@ -139,6 +139,9 @@ func (u *importDescriptorUseCase) Import(
 //
 // This makes the descriptors solvable in Bitcoin Core, allowing transaction creation.
 // Returns a list of error messages for any failed imports.
+//
+// Note: This method adds checksums to descriptors using Bitcoin Core's getdescriptorinfo RPC
+// before importing them, since the domain layer's BIP380 checksum implementation is incorrect.
 func (u *importDescriptorUseCase) importToBitcoinCore(
 	descriptorStrs []string,
 	accountType domainAccount.AccountType,
@@ -150,18 +153,40 @@ func (u *importDescriptorUseCase) importToBitcoinCore(
 	// Build import requests for Bitcoin Core
 	requests := make([]dtobtc.ImportDescriptorsRequest, 0, len(descriptorStrs))
 	for _, descStr := range descriptorStrs {
+		// Add checksum using Bitcoin Core if not present
+		// (keygen generates descriptors without checksums)
+		if !strings.Contains(descStr, "#") {
+			info, err := u.btcClient.GetDescriptorInfo(descStr)
+			if err != nil {
+				logger.Warn("failed to get descriptor checksum, will try importing without it",
+					"descriptor", descStr,
+					"error", err.Error())
+				// Continue with original descriptor (will likely fail at import)
+			} else {
+				// Use descriptor with correct checksum from Bitcoin Core
+				descStr = info.Descriptor
+				logger.Debug("added checksum to descriptor",
+					"original", descriptorStrs,
+					"with_checksum", descStr)
+			}
+		}
+
 		req := dtobtc.ImportDescriptorsRequest{
 			Descriptor: descStr,
 			Timestamp:  "now", // Skip rescanning (fastest)
 			Active:     true,  // Track outputs for spending
-			Label:      accountType.String(),
 			Internal:   false, // External chain (receiving addresses)
 			Watchonly:  true,  // Watch-only wallet (no private keys)
 		}
 
 		// Add range for ranged descriptors (with wildcards)
+		// Note: Bitcoin Core doesn't allow labels for ranged descriptors
 		if strings.Contains(descStr, "/*") {
 			req.Range = 1000 // Derive 0-999 addresses
+			// Label is intentionally omitted for ranged descriptors
+		} else {
+			// Only non-ranged descriptors can have labels
+			req.Label = accountType.String()
 		}
 
 		requests = append(requests, req)

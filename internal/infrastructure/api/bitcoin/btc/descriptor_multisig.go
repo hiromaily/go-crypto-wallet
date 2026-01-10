@@ -38,11 +38,19 @@ func (d *DescriptorService) GenerateMultisigDescriptor(
 		return "", err
 	}
 
-	return fmt.Sprintf(
+	descriptor := fmt.Sprintf(
 		"wsh(sortedmulti(%d,%s))",
 		requiredSigs,
 		strings.Join(keyStrings, ","),
-	), nil
+	)
+
+	// Note: Checksum is NOT added here because the domain layer's BIP380 implementation
+	// produces incorrect checksums. Instead, the watch wallet will add checksums using
+	// Bitcoin Core's getdescriptorinfo RPC before importing (which guarantees correctness).
+	// This allows keygen to remain offline while ensuring correct checksums.
+	// TODO: Fix BIP380 checksum implementation in internal/domain/wallet/descriptor_builder.go
+
+	return descriptor, nil
 }
 
 func (d *DescriptorService) formatMultisigKey(signer MultisigSigner, changeIndex int) (string, error) {

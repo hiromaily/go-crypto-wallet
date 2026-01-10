@@ -66,6 +66,9 @@ type Bitcoiner interface {
 	ImportAddressWithLabel(addr, label string, rescan bool) error
 	ImportDescriptors(requests []dtobtc.ImportDescriptorsRequest) ([]dtobtc.ImportDescriptorsResponse, error)
 
+	// descriptor_info.go
+	GetDescriptorInfo(descriptor string) (*dtobtc.DescriptorInfo, error)
+
 	// label.go
 	SetLabel(addr, label string) error
 	// GetReceivedByLabelAndMinConf(accountName string, minConf int) (btcutil.Amount, error)

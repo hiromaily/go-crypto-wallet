@@ -358,3 +358,24 @@ type ImportDescriptorError struct {
 	// Message is the human-readable error message
 	Message string `json:"message"`
 }
+
+// DescriptorInfo represents the result of getdescriptorinfo RPC.
+//
+// Used to analyze descriptors and calculate BIP380 checksums.
+type DescriptorInfo struct {
+	// Descriptor is the descriptor with checksum appended
+	Descriptor string `json:"descriptor"`
+
+	// Checksum is the BIP380 checksum (8 characters)
+	Checksum string `json:"checksum"`
+
+	// IsRange indicates if the descriptor is a ranged descriptor (contains /*)
+	IsRange bool `json:"isrange"`
+
+	// IsSolvable indicates if Bitcoin Core can solve for this descriptor
+	// (i.e., has enough information to construct spending transactions)
+	IsSolvable bool `json:"issolvable"`
+
+	// HasPrivateKeys indicates if the wallet has private keys for this descriptor
+	HasPrivateKeys bool `json:"hasprivatekeys"`
+}
