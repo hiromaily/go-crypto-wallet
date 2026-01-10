@@ -1,37 +1,35 @@
 ripple:
-# https://xrpl.org/get-started-with-the-rippled-api.html
-#websocket_public_url = "wss://127.0.0.1:6005"
+  # https://xrpl.org/get-started-with-the-rippled-api.html
+  # websocket_public_url = "wss://127.0.0.1:6005"
   websocket_public_url: ""
-#websocket_admin_url = "ws://127.0.0.1:6006"
-  network_type: "testnet"  # mainnet, testnet, devnet
+  # websocket_admin_url = "ws://127.0.0.1:6006"
+  network_type: "testnet" # mainnet, testnet, devnet
 
   api:
     url: "127.0.0.1:50051"
     is_secure: false
-
-  api:
     transaction:
-# generated from faucet https://xrpl.org/xrp-testnet-faucet.html
+      # generated from faucet https://xrpl.org/xrp-testnet-faucet.html
       sender_account: "rNsauxk2RYvZtEEnHHsp7zHSXDpJgwVSJW"
       sender_secret: "sh7PZkFPYmSgPm25UYZ2f46PwKJZ9"
 
 logger:
   service: "xrp-wallet"
-  format: "json"  # json, console
-  level: "debug"  # debug, info, warn, error
+  format: "json" # json, console
+  level: "debug" # debug, info, warn, error
   is_stacktrace: false
 
 # only available for watch only wallet
 tracer:
-  type: "none"  # none, jaeger, datadog
+  type: "none" # none, jaeger, datadog
 
   jaeger:
     service_name: "xrp-wallet"
     collector_endpoint: "http://127.0.0.1:14268/api/traces"
-    sampling_probability: 0.5  # 0.001 to 1.0
+    sampling_probability: 0.5 # 0.001 to 1.0
 
 mysql:
-#host = "192.168.10.101:3307"
+  # host = "192.168.10.101:3307"
   host: "127.0.0.1:3306"
   dbname: "watch"
   user: "hiromaily"
@@ -42,4 +40,3 @@ file_path:
   tx: "./data/tx/xrp/"
   address: "./data/address/xrp/"
   full_pubkey: "./data/fullpubkey/xrp/"
-

@@ -23,24 +23,15 @@ multisig:
     auth_users:
       - auth1
       - auth2
-      - auth3
-      - auth4
-      - auth5
 
   - type: payment
-    required: 3
+    required: 2
     auth_users:
       - auth1
       - auth2
-      - auth3
-      - auth4
-      - auth5
 
   - type: stored
-    required: 4
+    required: 2
     auth_users:
       - auth1
       - auth2
-      - auth3
-      - auth4
-      - auth5

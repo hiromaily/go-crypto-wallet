@@ -57,6 +57,14 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 	}
 
 	pubKeyData := make([]*domainAddress.Address, 0, len(pubKeys))
+	importStats := struct {
+		total   int
+		success int
+		skipped int
+	}{
+		total: len(pubKeys),
+	}
+
 	for _, key := range pubKeys {
 		// Parse CSV line
 		inner := strings.Split(key, ",")
@@ -76,14 +84,22 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 		// Import address into Bitcoin Core
 		err = u.btcClient.ImportAddressWithLabel(targetAddr, addrFmt.AccountType.String(), input.Rescan)
 		if err != nil {
-			// Warning: address may already exist, continue with other addresses
-			logger.Warn(
-				"failed to import address but continuing",
-				"address", targetAddr,
-				"account_type", addrFmt.AccountType.String(),
-				"error", err)
-			continue
+			// Check if error is recoverable (address already exists)
+			if isRecoverableImportError(err) {
+				logger.Warn(
+					"address already exists in wallet, skipping",
+					"address", targetAddr,
+					"account_type", addrFmt.AccountType.String())
+				importStats.skipped++
+				continue
+			}
+
+			// All other errors are critical - fail the import
+			return fmt.Errorf("failed to import address %s (account: %s): %w",
+				targetAddr, addrFmt.AccountType.String(), err)
 		}
+
+		importStats.success++
 
 		// Add to batch for database insertion
 		pubKeyData = append(pubKeyData, &domainAddress.Address{
@@ -96,6 +112,12 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 		// Verify address was imported correctly
 		u.verifyImportedAddress(targetAddr)
 	}
+
+	// Log import statistics
+	logger.Info("address import completed",
+		"total", importStats.total,
+		"imported", importStats.success,
+		"skipped", importStats.skipped)
 
 	// Insert all addresses into database
 	if len(pubKeyData) > 0 {
@@ -139,7 +161,15 @@ func (u *importAddressUseCase) selectTargetAddress(addrFmt *appdto.AddressFormat
 	}
 
 	// For non-client accounts (deposit, payment, etc.), use multisig address
-	return addrFmt.MultisigAddress, nil
+	// Fallback to P2SHSegwit if MultisigAddress is empty (traditional multisig)
+	if addrFmt.MultisigAddress != "" {
+		return addrFmt.MultisigAddress, nil
+	}
+	// For traditional multisig (non-MuSig2), use P2SH-Segwit address
+	if addrFmt.P2SHSegwitAddress != "" {
+		return addrFmt.P2SHSegwitAddress, nil
+	}
+	return "", errors.New("no valid address found for non-client account")
 }
 
 // verifyImportedAddress confirms the address was imported correctly as watch-only
@@ -166,4 +196,32 @@ func (u *importAddressUseCase) verifyImportedAddress(addr string) {
 		logger.Warn("address should be watch-only",
 			"address", addr)
 	}
+}
+
+// isRecoverableImportError checks if an import error is recoverable (address already exists)
+// Returns true for errors that can be safely ignored (address duplicates)
+// Returns false for critical errors that should fail the import
+func isRecoverableImportError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	errMsg := strings.ToLower(err.Error())
+
+	// Check for common "address already exists" error patterns
+	// Note: "already" covers all variants like "already have", "already imported",
+	// "already in wallet", and "label already exists"
+	recoverablePatterns := []string{
+		"already",   // Catches all "already..." variants, e.g., "address already exists", "label already exists"
+		"duplicate", // For "duplicate" errors
+		"exists",    // For generic "exists" errors
+	}
+
+	for _, pattern := range recoverablePatterns {
+		if strings.Contains(errMsg, pattern) {
+			return true
+		}
+	}
+
+	return false
 }

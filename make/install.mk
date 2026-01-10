@@ -12,7 +12,9 @@ check-ver:
 
 .PHONY: install-mac-tools
 install-mac-tools:
-	brew install jq \
+	brew tap hiromaily/tap \
+	brew install yaml-lint \
+		jq \
 		mkcert \
 		ariga/tap/atlas \
 		protobuf \

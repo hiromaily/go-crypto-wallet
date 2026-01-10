@@ -11,7 +11,7 @@ import (
 )
 
 const getAuthFullPubkey = `-- name: GetAuthFullPubkey :one
-SELECT id, coin, auth_account, full_public_key, fingerprint, updated_at
+SELECT id, coin, auth_account, full_public_key, extended_pubkey, fingerprint, derivation_path, updated_at
 FROM auth_fullpubkey WHERE coin = ? AND auth_account = ? LIMIT 1
 `
 
@@ -28,14 +28,16 @@ func (q *Queries) GetAuthFullPubkey(ctx context.Context, arg GetAuthFullPubkeyPa
 		&i.Coin,
 		&i.AuthAccount,
 		&i.FullPublicKey,
+		&i.ExtendedPubkey,
 		&i.Fingerprint,
+		&i.DerivationPath,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const getAuthFullPubkeyByFingerprint = `-- name: GetAuthFullPubkeyByFingerprint :one
-SELECT id, coin, auth_account, full_public_key, fingerprint, updated_at
+SELECT id, coin, auth_account, full_public_key, extended_pubkey, fingerprint, derivation_path, updated_at
 FROM auth_fullpubkey WHERE fingerprint = ? LIMIT 1
 `
 
@@ -47,21 +49,26 @@ func (q *Queries) GetAuthFullPubkeyByFingerprint(ctx context.Context, fingerprin
 		&i.Coin,
 		&i.AuthAccount,
 		&i.FullPublicKey,
+		&i.ExtendedPubkey,
 		&i.Fingerprint,
+		&i.DerivationPath,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const insertAuthFullPubkey = `-- name: InsertAuthFullPubkey :execresult
-INSERT INTO auth_fullpubkey (coin, auth_account, full_public_key, fingerprint) VALUES (?, ?, ?, ?)
+INSERT INTO auth_fullpubkey (coin, auth_account, full_public_key, extended_pubkey, fingerprint, derivation_path)
+VALUES (?, ?, ?, ?, ?, ?)
 `
 
 type InsertAuthFullPubkeyParams struct {
-	Coin          AuthFullpubkeyCoin
-	AuthAccount   string
-	FullPublicKey string
-	Fingerprint   sql.NullString
+	Coin           AuthFullpubkeyCoin
+	AuthAccount    string
+	FullPublicKey  string
+	ExtendedPubkey sql.NullString
+	Fingerprint    sql.NullString
+	DerivationPath sql.NullString
 }
 
 func (q *Queries) InsertAuthFullPubkey(ctx context.Context, arg InsertAuthFullPubkeyParams) (sql.Result, error) {
@@ -69,7 +76,9 @@ func (q *Queries) InsertAuthFullPubkey(ctx context.Context, arg InsertAuthFullPu
 		arg.Coin,
 		arg.AuthAccount,
 		arg.FullPublicKey,
+		arg.ExtendedPubkey,
 		arg.Fingerprint,
+		arg.DerivationPath,
 	)
 }
 
