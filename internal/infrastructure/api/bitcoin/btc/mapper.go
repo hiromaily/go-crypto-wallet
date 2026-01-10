@@ -297,11 +297,12 @@ func FromPreviousTx(prevTxs []dtobtc.PreviousTx, btc *Bitcoin) ([]PrevTx, error)
 		amount := float64(tx.Amount) / 1e8 // Convert satoshis to BTC
 
 		result[i] = PrevTx{
-			Txid:         tx.TxID,
-			Vout:         tx.Vout,
-			ScriptPubKey: tx.ScriptPubKey,
-			RedeemScript: tx.RedeemScript,
-			Amount:       amount,
+			Txid:          tx.TxID,
+			Vout:          tx.Vout,
+			ScriptPubKey:  tx.ScriptPubKey,
+			RedeemScript:  tx.RedeemScript,
+			WitnessScript: tx.WitnessScript,
+			Amount:        amount,
 		}
 	}
 	return result, nil
@@ -353,7 +354,7 @@ func ToUnspentOutput(result *ListUnspentResult, btc *Bitcoin) (*dtobtc.UnspentOu
 		Amount:        amount,
 		Confirmations: result.Confirmations,
 		RedeemScript:  result.RedeemScript,
-		WitnessScript: "", // Not provided by Bitcoin Core RPC
+		WitnessScript: result.WitnessScript, // Bitcoin Core provides this for P2WSH addresses
 		Spendable:     result.Spendable,
 		Solvable:      result.Solvable,
 		Safe:          result.Safe,
@@ -395,6 +396,7 @@ func FromUnspentOutput(output *dtobtc.UnspentOutput) *ListUnspentResult {
 		Address:       output.Address,
 		Label:         output.Label,
 		RedeemScript:  output.RedeemScript,
+		WitnessScript: output.WitnessScript,
 		ScriptPubKey:  output.ScriptPubKey,
 		Amount:        amount,
 		Confirmations: output.Confirmations,

@@ -21,6 +21,7 @@ type ListUnspentResult struct {
 	Address       string  `json:"address"`
 	Label         string  `json:"label"`
 	RedeemScript  string  `json:"redeemScript"`
+	WitnessScript string  `json:"witnessScript"`
 	ScriptPubKey  string  `json:"scriptPubKey"`
 	Amount        float64 `json:"amount"`
 	Confirmations int64   `json:"confirmations"`
