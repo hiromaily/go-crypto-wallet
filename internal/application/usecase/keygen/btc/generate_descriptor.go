@@ -226,16 +226,18 @@ func derivationPathForAddress(
 	case domainAddress.AddrTypeP2shSegwit:
 		if isMultisig {
 			// For multisig with BIP49 keys, show actual derivation path
-			// The xpubs are derived to m/49'/coin'/account' level
-			// Note: Although BIP48 is the standard for multisig paths,
-			// we use BIP49 here because sign wallets export BIP49 keys.
-			return fmt.Sprintf("/49'/%s/%d'", coinIndex, accountIndex), nil
+			// The xpubs are derived from m/49'/coin' (hardened coin level) to
+			// m/49'/coin/account (non-hardened account level) because we're deriving
+			// from extended public keys.
+			// Note: Account index is non-hardened (%d, not %d') for xpub derivation.
+			return fmt.Sprintf("/49'/%s/%d", coinIndex, accountIndex), nil
 		}
 		return fmt.Sprintf("/49'/%s/%d'", coinIndex, accountIndex), nil
 	case domainAddress.AddrTypeBech32:
 		if isMultisig {
 			// Native SegWit multisig: show actual derivation path
-			return fmt.Sprintf("/84'/%s/%d'", coinIndex, accountIndex), nil
+			// Account index is non-hardened for xpub derivation
+			return fmt.Sprintf("/84'/%s/%d", coinIndex, accountIndex), nil
 		}
 		return fmt.Sprintf("/84'/%s/%d'", coinIndex, accountIndex), nil
 	case domainAddress.AddrTypeTaproot:
@@ -296,9 +298,11 @@ func (u *generateDescriptorUseCase) deriveAccountExtendedKey(
 		return "", fmt.Errorf("failed to parse coin-level extended public key: %w", err)
 	}
 
-	// Derive account-specific key: m/49'/coin'/account'
+	// Derive account-specific key: m/49'/coin/account (non-hardened account index)
+	// Note: Since we're deriving from an extended public key (xpub), we can only
+	// derive non-hardened keys. The coin level (m/49'/coin') is already hardened.
 	// accountType.Uint32() gives account index (deposit=0, payment=1, stored=2, etc.)
-	accountKey, err := coinLevelKey.Derive(accountType.Uint32() + hdkeychain.HardenedKeyStart)
+	accountKey, err := coinLevelKey.Derive(accountType.Uint32())
 	if err != nil {
 		return "", fmt.Errorf("failed to derive account key: %w", err)
 	}
