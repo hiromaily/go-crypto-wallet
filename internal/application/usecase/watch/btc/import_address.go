@@ -209,14 +209,12 @@ func isRecoverableImportError(err error) bool {
 	errMsg := strings.ToLower(err.Error())
 
 	// Check for common "address already exists" error patterns
+	// Note: "already" covers all variants like "already have", "already imported",
+	// "already in wallet", and "label already exists"
 	recoverablePatterns := []string{
-		"already",           // Generic "already exists" messages
-		"duplicate",         // Duplicate entry errors
-		"label already",     // "Label already exists"
-		"exists",            // Generic existence errors
-		"already have",      // "Already have this address"
-		"already imported",  // "Address already imported"
-		"already in wallet", // "Address already in wallet"
+		"already",   // Catches all "already..." variants, e.g., "address already exists", "label already exists"
+		"duplicate", // For "duplicate" errors
+		"exists",    // For generic "exists" errors
 	}
 
 	for _, pattern := range recoverablePatterns {
