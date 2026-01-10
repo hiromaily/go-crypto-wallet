@@ -225,16 +225,17 @@ func derivationPathForAddress(
 		return fmt.Sprintf("/44'/%s/%d'", coinIndex, accountIndex), nil
 	case domainAddress.AddrTypeP2shSegwit:
 		if isMultisig {
-			// BIP48: m/48'/coin'/account'/script_type'
-			// script_type=2 for P2SH-wrapped SegWit (sh(wpkh(...)))
-			return fmt.Sprintf("/48'/%s/%d'/2'", coinIndex, accountIndex), nil
+			// For multisig with BIP49 keys, show actual derivation path
+			// The xpubs are derived to m/49'/coin'/account' level
+			// Note: Although BIP48 is the standard for multisig paths,
+			// we use BIP49 here because sign wallets export BIP49 keys.
+			return fmt.Sprintf("/49'/%s/%d'", coinIndex, accountIndex), nil
 		}
 		return fmt.Sprintf("/49'/%s/%d'", coinIndex, accountIndex), nil
 	case domainAddress.AddrTypeBech32:
 		if isMultisig {
-			// BIP48: m/48'/coin'/account'/script_type'
-			// script_type=2 for native SegWit multisig (wsh(sortedmulti(...)))
-			return fmt.Sprintf("/48'/%s/%d'/2'", coinIndex, accountIndex), nil
+			// Native SegWit multisig: show actual derivation path
+			return fmt.Sprintf("/84'/%s/%d'", coinIndex, accountIndex), nil
 		}
 		return fmt.Sprintf("/84'/%s/%d'", coinIndex, accountIndex), nil
 	case domainAddress.AddrTypeTaproot:
