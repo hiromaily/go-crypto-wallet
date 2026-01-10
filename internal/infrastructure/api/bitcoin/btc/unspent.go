@@ -61,13 +61,32 @@ func (b *Bitcoin) ListUnspent(confirmationNum uint64) ([]dtobtc.UnspentOutput, e
 func (b *Bitcoin) ListUnspentByAccount(
 	accountType domainAccount.AccountType, confirmationNum uint64,
 ) ([]dtobtc.UnspentOutput, error) {
-	addrs, err := b.GetAddressesByLabel(accountType.String())
+	label := accountType.String()
+	addrs, err := b.GetAddressesByLabel(label)
 	if err != nil {
-		return nil, fmt.Errorf("fail to call btc.GetAddressesByLabel(): %w", err)
+		return nil, fmt.Errorf("fail to call btc.GetAddressesByLabel(%s): %w", label, err)
 	}
 	if len(addrs) == 0 {
-		return nil, fmt.Errorf("address for %s can not be found", accountType)
+		// Enhanced error message with debugging information
+		logger.Error("no addresses found for account label",
+			"account_type", accountType,
+			"label", label,
+			"hint", "addresses may not be labeled in Bitcoin Core - check descriptor import")
+		return nil, fmt.Errorf(
+			"no addresses found for account %s (label: %s). "+
+				"This usually means: "+
+				"(1) descriptor import failed, "+
+				"(2) address labeling failed after import, or "+
+				"(3) wallet rescan is incomplete. "+
+				"Check Bitcoin Core logs and verify addresses with: "+
+				"bitcoin-cli -rpcwallet=watch getaddressesbylabel %s",
+			accountType, label, label)
 	}
+
+	logger.Debug("found labeled addresses for account",
+		"account_type", accountType,
+		"label", label,
+		"address_count", len(addrs))
 
 	var unspentList []ListUnspentResult
 
@@ -75,6 +94,12 @@ func (b *Bitcoin) ListUnspentByAccount(
 	if err != nil {
 		return nil, fmt.Errorf("fail to call btc.listUnspentByAccount(): %w", err)
 	}
+
+	logger.Debug("found unspent outputs",
+		"account_type", accountType,
+		"unspent_count", len(unspentList),
+		"confirmation_required", confirmationNum)
+
 	// for debug use
 	// filterdAddrs := b.getUnspentListAddrs(unspentList, accountType)
 

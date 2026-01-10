@@ -78,6 +78,8 @@ func (b *Bitcoin) GetAddressInfo(addr string) (*dtobtc.AddressInfo, error) {
 //
 // For now, it would be better to stop using it
 func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, error) {
+	logger.Debug("getting addresses by label", "label", labelName)
+
 	// input for rpc api
 	input, err := json.Marshal(labelName)
 	if err != nil {
@@ -86,7 +88,8 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 	// call getaddressesbylabel
 	rawResult, err := b.Client.RawRequest("getaddressesbylabel", []json.RawMessage{input})
 	if err != nil {
-		return nil, fmt.Errorf("fail to call json.RawRequest(getaddressesbylabel): %w", err)
+		logger.Debug("getaddressesbylabel RPC failed", "label", labelName, "error", err)
+		return nil, fmt.Errorf("fail to call json.RawRequest(getaddressesbylabel) for label %s: %w", labelName, err)
 	}
 
 	// unmarshal response
@@ -96,9 +99,17 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 		return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult): %w", err)
 	}
 
+	if len(labels) == 0 {
+		logger.Debug("no addresses found for label", "label", labelName)
+		return nil, nil
+	}
+
+	logger.Debug("found addresses for label",
+		"label", labelName,
+		"raw_count", len(labels))
+
 	// retrieve
-	resAddrs := make([]btcutil.Address, len(labels))
-	idx := 0
+	resAddrs := make([]btcutil.Address, 0, len(labels))
 	for key := range labels {
 		// key is address string
 		var address btcutil.Address
@@ -107,13 +118,17 @@ func (b *Bitcoin) GetAddressesByLabel(labelName string) ([]btcutil.Address, erro
 			logger.Error(
 				"fail to call b.DecodeAddress()",
 				"address", key,
+				"label", labelName,
 				"error", err)
 			continue
 		}
 
-		resAddrs[idx] = address
-		idx++
+		resAddrs = append(resAddrs, address)
 	}
+
+	logger.Debug("successfully decoded addresses",
+		"label", labelName,
+		"decoded_count", len(resAddrs))
 
 	return resAddrs, nil
 }

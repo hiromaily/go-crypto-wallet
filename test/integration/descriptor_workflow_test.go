@@ -32,12 +32,38 @@ func TestDescriptorImportWorkflow_SingleKey(t *testing.T) {
 	addrRepo := &recordingAddressRepo{}
 
 	btcClient := btcmocks.NewMockBitcoiner(t)
+
+	// Expect GetDescriptorInfo to add checksums
+	btcClient.EXPECT().
+		GetDescriptorInfo(mock.AnythingOfType("string")).
+		Return(&dtobtc.DescriptorInfo{
+			Descriptor: desc + "#abcd1234",
+			Checksum:   "abcd1234",
+		}, nil).
+		Maybe()
+
+	// Expect ImportDescriptors
 	btcClient.EXPECT().
 		ImportDescriptors(mock.MatchedBy(func(reqs []dtobtc.ImportDescriptorsRequest) bool {
 			return len(reqs) == 1 && reqs[0].Active && reqs[0].Watchonly
 		})).
 		Return([]dtobtc.ImportDescriptorsResponse{{Success: true}}, nil).
 		Once()
+
+	// Expect SetLabel calls for each derived address
+	btcClient.EXPECT().
+		SetLabel(mock.AnythingOfType("string"), "deposit").
+		Return(nil).
+		Times(2)
+
+	// Expect GetAddressInfo calls for label verification
+	btcClient.EXPECT().
+		GetAddressInfo(mock.AnythingOfType("string")).
+		Return(&dtobtc.AddressInfo{
+			Address: "mock-address",
+			Labels:  []string{"deposit"},
+		}, nil).
+		Times(2)
 
 	importer := watchusecasebtc.NewImportDescriptorUseCase(
 		btcClient,
@@ -75,11 +101,37 @@ func TestDescriptorImportWorkflow_Multisig(t *testing.T) {
 	addrRepo := &recordingAddressRepo{}
 
 	btcClient := btcmocks.NewMockBitcoiner(t)
+
+	// Expect GetDescriptorInfo to add checksums
+	btcClient.EXPECT().
+		GetDescriptorInfo(mock.AnythingOfType("string")).
+		Return(&dtobtc.DescriptorInfo{
+			Descriptor: desc + "#abcd1234",
+			Checksum:   "abcd1234",
+		}, nil).
+		Maybe()
+
+	// Expect ImportDescriptors
 	btcClient.EXPECT().
 		ImportDescriptors(mock.MatchedBy(func(reqs []dtobtc.ImportDescriptorsRequest) bool {
 			return len(reqs) == 1 && reqs[0].Active && reqs[0].Watchonly
 		})).
 		Return([]dtobtc.ImportDescriptorsResponse{{Success: true}}, nil).
+		Once()
+
+	// Expect SetLabel calls for each derived address
+	btcClient.EXPECT().
+		SetLabel(mock.AnythingOfType("string"), "deposit").
+		Return(nil).
+		Once()
+
+	// Expect GetAddressInfo calls for label verification
+	btcClient.EXPECT().
+		GetAddressInfo(mock.AnythingOfType("string")).
+		Return(&dtobtc.AddressInfo{
+			Address: "mock-address",
+			Labels:  []string{"deposit"},
+		}, nil).
 		Once()
 
 	importer := watchusecasebtc.NewImportDescriptorUseCase(
