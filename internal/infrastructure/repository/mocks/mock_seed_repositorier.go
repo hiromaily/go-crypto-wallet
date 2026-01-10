@@ -7,7 +7,7 @@ package mocks
 import (
 	"context"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -39,23 +39,23 @@ func (_m *MockSeedRepositorier) EXPECT() *MockSeedRepositorier_Expecter {
 }
 
 // GetOne provides a mock function for the type MockSeedRepositorier
-func (_mock *MockSeedRepositorier) GetOne(ctx context.Context) (*sqlcgen.Seed, error) {
+func (_mock *MockSeedRepositorier) GetOne(ctx context.Context) (*key.Seed, error) {
 	ret := _mock.Called(ctx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetOne")
 	}
 
-	var r0 *sqlcgen.Seed
+	var r0 *key.Seed
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context) (*sqlcgen.Seed, error)); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) (*key.Seed, error)); ok {
 		return returnFunc(ctx)
 	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context) *sqlcgen.Seed); ok {
+	if returnFunc, ok := ret.Get(0).(func(context.Context) *key.Seed); ok {
 		r0 = returnFunc(ctx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*sqlcgen.Seed)
+			r0 = ret.Get(0).(*key.Seed)
 		}
 	}
 	if returnFunc, ok := ret.Get(1).(func(context.Context) error); ok {
@@ -90,12 +90,12 @@ func (_c *MockSeedRepositorier_GetOne_Call) Run(run func(ctx context.Context)) *
 	return _c
 }
 
-func (_c *MockSeedRepositorier_GetOne_Call) Return(seed *sqlcgen.Seed, err error) *MockSeedRepositorier_GetOne_Call {
+func (_c *MockSeedRepositorier_GetOne_Call) Return(seed *key.Seed, err error) *MockSeedRepositorier_GetOne_Call {
 	_c.Call.Return(seed, err)
 	return _c
 }
 
-func (_c *MockSeedRepositorier_GetOne_Call) RunAndReturn(run func(ctx context.Context) (*sqlcgen.Seed, error)) *MockSeedRepositorier_GetOne_Call {
+func (_c *MockSeedRepositorier_GetOne_Call) RunAndReturn(run func(ctx context.Context) (*key.Seed, error)) *MockSeedRepositorier_GetOne_Call {
 	_c.Call.Return(run)
 	return _c
 }

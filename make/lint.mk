@@ -60,4 +60,13 @@ shfmt:
 # lint makefile
 .PHONY: mk-lint
 mk-lint:
-	checkmake Makefile make/*.mk 
+	checkmake Makefile make/*.mk
+
+###############################################################################
+# YAML Linting
+###############################################################################
+.PHONY: yaml-lint
+yaml-lint:
+	yaml-lint .github/workflows
+	yaml-lint .devcontainer
+	yaml-lint config

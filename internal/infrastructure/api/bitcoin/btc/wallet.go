@@ -157,20 +157,86 @@ func (b *Bitcoin) UnLoadWallet(fileName string) error {
 	return nil
 }
 
+// CreateWalletOptions configures wallet creation parameters
+type CreateWalletOptions struct {
+	DisablePrivateKeys bool   // If true, wallet will not have private keys (watch-only)
+	Blank              bool   // If true, create a blank wallet
+	Passphrase         string // Encrypt wallet with this passphrase
+	AvoidReuse         bool   // If true, wallet will avoid address reuse
+	Descriptors        bool   // If true, create a descriptor wallet (Bitcoin Core v0.21.0+)
+	LoadOnStartup      bool   // If true, load wallet on startup
+}
+
 // CreateWallet Creates and loads a new wallet
+// For descriptor wallets, set opts.Descriptors = true (Bitcoin Core v0.21.0+)
 func (b *Bitcoin) CreateWallet(fileName string, disablePrivKey bool) error {
-	// createwallet "wallet_name" ( disable_private_keys )
+	return b.CreateWalletWithOptions(fileName, &CreateWalletOptions{
+		DisablePrivateKeys: disablePrivKey,
+	})
+}
+
+// CreateWalletWithOptions creates and loads a new wallet with advanced options
+// Bitcoin Core RPC: createwallet "wallet_name"
+//
+//	( disable_private_keys blank "passphrase" avoid_reuse descriptors load_on_startup )
+func (b *Bitcoin) CreateWalletWithOptions(fileName string, opts *CreateWalletOptions) error {
+	if opts == nil {
+		opts = &CreateWalletOptions{}
+	}
+
+	// Build parameters array
+	params := make([]json.RawMessage, 0, 7)
+
+	// 1. wallet_name (required)
 	bFileName, err := json.Marshal(fileName)
 	if err != nil {
-		return fmt.Errorf("fail to call json.Marchal(fileName): %w", err)
+		return fmt.Errorf("fail to call json.Marshal(fileName): %w", err)
 	}
+	params = append(params, bFileName)
 
-	bDisablePrivKey, err := json.Marshal(disablePrivKey)
+	// 2. disable_private_keys (optional, default: false)
+	bDisablePrivKey, err := json.Marshal(opts.DisablePrivateKeys)
 	if err != nil {
-		return fmt.Errorf("fail to call json.Marchal(bool): %w", err)
+		return fmt.Errorf("fail to call json.Marshal(disablePrivKey): %w", err)
 	}
+	params = append(params, bDisablePrivKey)
 
-	rawResult, err := b.Client.RawRequest("createwallet", []json.RawMessage{bFileName, bDisablePrivKey})
+	// 3. blank (optional, default: false)
+	bBlank, err := json.Marshal(opts.Blank)
+	if err != nil {
+		return fmt.Errorf("fail to call json.Marshal(blank): %w", err)
+	}
+	params = append(params, bBlank)
+
+	// 4. passphrase (optional, default: "")
+	bPassphrase, err := json.Marshal(opts.Passphrase)
+	if err != nil {
+		return fmt.Errorf("fail to call json.Marshal(passphrase): %w", err)
+	}
+	params = append(params, bPassphrase)
+
+	// 5. avoid_reuse (optional, default: false)
+	bAvoidReuse, err := json.Marshal(opts.AvoidReuse)
+	if err != nil {
+		return fmt.Errorf("fail to call json.Marshal(avoidReuse): %w", err)
+	}
+	params = append(params, bAvoidReuse)
+
+	// 6. descriptors (optional, default: false) - Bitcoin Core v0.21.0+
+	bDescriptors, err := json.Marshal(opts.Descriptors)
+	if err != nil {
+		return fmt.Errorf("fail to call json.Marshal(descriptors): %w", err)
+	}
+	params = append(params, bDescriptors)
+
+	// 7. load_on_startup (optional, default: null) - Bitcoin Core v0.21.0+
+	bLoadOnStartup, err := json.Marshal(opts.LoadOnStartup)
+	if err != nil {
+		return fmt.Errorf("fail to call json.Marshal(loadOnStartup): %w", err)
+	}
+	params = append(params, bLoadOnStartup)
+
+	rawResult, err := b.Client.RawRequest("createwallet", params)
 	if err != nil {
 		return fmt.Errorf("fail to call json.RawRequest(createwallet): %w", err)
 	}

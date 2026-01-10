@@ -160,7 +160,17 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 			return nil, fmt.Errorf("auth full pubkey not found for %s", authType.String())
 		}
 
-		xpub, err := hdkeychain.NewKeyFromString(authKey.FullPublicKey)
+		// Use ExtendedPubKey (new format) if available, otherwise fall back to FullPublicKey (legacy)
+		extendedKey := authKey.ExtendedPubKey
+		if extendedKey == "" {
+			// Legacy format: FullPublicKey contains compressed pubkey, not extended key
+			return nil, fmt.Errorf(
+				"extended public key not found for %s (legacy compressed pubkey format not supported for descriptors)",
+				authType.String(),
+			)
+		}
+
+		xpub, err := hdkeychain.NewKeyFromString(extendedKey)
 		if err != nil {
 			return nil, fmt.Errorf("parse auth extended key for %s: %w", authType.String(), err)
 		}
@@ -173,7 +183,7 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 		if authKey.Fingerprint != nil {
 			fp = authKey.Fingerprint.String()
 		} else {
-			finger, err := infraKey.FingerprintFromExtendedKey(authKey.FullPublicKey)
+			finger, err := infraKey.FingerprintFromExtendedKey(extendedKey)
 			if err != nil {
 				return nil, fmt.Errorf("calculate fingerprint for %s: %w", authType.String(), err)
 			}

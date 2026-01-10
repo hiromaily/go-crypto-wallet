@@ -1227,10 +1227,12 @@ func (c *container) newBTCSignExportFullPubkeyUseCase(
 ) signusecase.ExportFullPubkeyUseCase {
 	return signusecasebtc.NewExportFullPubkeyUseCase(
 		c.newAuthKeyRepo(),
+		c.newSeedRepo(),
 		c.newPubkeyFileStorager(),
 		c.conf.CoinTypeCode,
 		authType,
 		c.walletType,
+		c.newBTC().GetChainConf(),
 	)
 }
 
