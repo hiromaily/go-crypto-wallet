@@ -163,12 +163,18 @@ func (p *DescriptorParser) extractKeys(descriptorStr string) ([]domainWallet.Des
 		}
 
 		fingerprint := match[1]
-		accountPath := match[2]   // Path before xpub
+		// match[2] is accountPath (origin info) - not used, already baked into xpub
 		xpub := match[3]          // Extended public key
-		remainingPath := match[4] // Path after xpub
+		remainingPath := match[4] // Path after xpub (derivation path FROM xpub)
 
-		// Combine paths
-		fullPath := accountPath + remainingPath
+		// Use only remainingPath (derivation path FROM the xpub).
+		// match[2] is origin metadata (where the xpub was derived from master key),
+		// which is already baked into the xpub and should not be derived again.
+		// Example: [4a91842f/84'/1'/1]tpubDDed.../0/*
+		//   match[2] = "/84'/1'/1" (origin - already in xpub)
+		//   remainingPath = "/0/*" (what to derive from xpub)
+		// Bitcoin Core's deriveaddresses interprets this the same way.
+		fullPath := remainingPath
 
 		key := domainWallet.DescriptorKey{
 			Fingerprint:    fingerprint,
