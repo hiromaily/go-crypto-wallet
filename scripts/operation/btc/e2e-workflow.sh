@@ -289,15 +289,20 @@ multisig_setup_phase() {
 	log_info "Importing fullpubkey from sign2: $FULLPUBKEY_FILE2"
 	keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" import fullpubkey --file "${FULLPUBKEY_FILE2}"
 
-	# Create multisig addresses
-	log_substep "Creating multisig addresses"
-	for account in deposit payment stored; do
-		log_info "Creating multisig address for account: $account"
-		keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" create multisig --account "$account"
-	done
+	# NOTE: Traditional multisig address creation is no longer needed when using descriptors.
+	# The descriptor import process automatically derives and stores addresses.
+	# Keeping both methods causes duplicate address errors.
+	#
+	# Create multisig addresses (DISABLED - replaced by descriptor-based workflow)
+	# log_substep "Creating multisig addresses"
+	# for account in deposit payment stored; do
+	# 	log_info "Creating multisig address for account: $account"
+	# 	keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" create multisig --account "$account"
+	# done
 
 	# Export descriptors for multisig accounts (deposit, payment, stored)
 	# Note: Now using descriptor export because sign wallets export extended keys (xpub format)
+	# Descriptor import automatically derives addresses and stores them in the database.
 	log_substep "Exporting descriptors from keygen wallet"
 	file_descriptor_deposit=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account deposit --output data/descriptor/btc/deposit_descriptors.json --format bitcoin-core --include-change)
 	file_descriptor_payment=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account payment --output data/descriptor/btc/payment_descriptors.json --format bitcoin-core --include-change)
