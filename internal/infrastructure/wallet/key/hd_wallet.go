@@ -537,3 +537,40 @@ func getFullPubKey(privKey *btcec.PrivateKey, isCompressed bool) string {
 	hexPubKey := hex.EncodeToString(bPubKey)
 	return hexPubKey
 }
+
+// DeriveAccountKey derives an account-level extended key from a coin-level extended public key.
+//
+// The input extended public key should be at m/purpose'/coin' level (exported from sign wallets).
+// This function derives to m/purpose'/coin'/account level and returns the account extended key.
+//
+// Parameters:
+//   - coinLevelExtendedKey: Extended public key at m/purpose'/coin' level (xpub/tpub format)
+//   - accountType: Account type (deposit=0, payment=1, stored=2, etc.)
+//
+// Returns:
+//   - Derived account-level extended key (hdkeychain.ExtendedKey)
+//   - Error if derivation fails
+//
+// Note: Since we're deriving from an extended public key (xpub), we can only derive non-hardened keys.
+// The coin level (m/purpose'/coin') is already hardened.
+func DeriveAccountKey(
+	coinLevelExtendedKey string,
+	accountType domainAccount.AccountType,
+) (*hdkeychain.ExtendedKey, error) {
+	// Parse extended public key
+	coinLevelKey, err := hdkeychain.NewKeyFromString(coinLevelExtendedKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse coin-level extended public key: %w", err)
+	}
+
+	// Derive account-specific key: m/purpose'/coin/account (non-hardened account index)
+	// Note: Since we're deriving from an extended public key (xpub), we can only
+	// derive non-hardened keys. The coin level is already hardened.
+	// Use BIP44AccountIndex (deposit=0, payment=1, stored=2) not Uint32() (deposit=1, payment=2, stored=3)
+	accountKey, err := coinLevelKey.Derive(accountType.BIP44AccountIndex())
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive account key: %w", err)
+	}
+
+	return accountKey, nil
+}

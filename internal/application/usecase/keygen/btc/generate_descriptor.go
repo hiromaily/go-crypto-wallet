@@ -95,7 +95,7 @@ func (u *generateDescriptorUseCase) generateSingleSigDescriptor(
 		return "", fmt.Errorf("calculate fingerprint: %w", err)
 	}
 
-	derivationPath, err := derivationPathForAddress(input.AddressType, false, input.AccountType)
+	derivationPath, err := derivationPathForAddress(input.AddressType, false, input.AccountType, u.chainConfig)
 	if err != nil {
 		return "", err
 	}
@@ -146,7 +146,7 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 	addressType domainAddress.AddrType,
 	accountType domainAccount.AccountType,
 ) ([]btc.MultisigSigner, error) {
-	derivationPath, err := derivationPathForAddress(addressType, true, accountType)
+	derivationPath, err := derivationPathForAddress(addressType, true, accountType, u.chainConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -212,15 +212,17 @@ func derivationPathForAddress(
 	addrType domainAddress.AddrType,
 	isMultisig bool,
 	accountType domainAccount.AccountType,
+	chainConfig *chaincfg.Params,
 ) (string, error) {
 	// Use BIP44AccountIndex for derivation paths (deposit=0, payment=1, stored=2)
 	// NOT Uint32() which returns database storage values (deposit=1, payment=2, stored=3)
 	accountIndex := accountType.BIP44AccountIndex()
 
-	// Note: coin' index is hardcoded to 1' for testnet/regtest
-	// For mainnet, this should be 0'
-	// TODO: Make this configurable based on network
-	coinIndex := "1'" // testnet/regtest
+	// Determine coin index based on network: 0' for mainnet, 1' for testnet/regtest
+	coinIndex := "1'" // Default for testnet/regtest
+	if chainConfig != nil && chainConfig.Net == chaincfg.MainNetParams.Net {
+		coinIndex = "0'"
+	}
 
 	switch addrType {
 	case domainAddress.AddrTypeLegacy:
@@ -280,37 +282,25 @@ func selectRequiredSigConfig(
 
 // deriveAccountExtendedKey derives an account-specific extended public key from a coin-level extended public key.
 //
-// The input extended public key should be at m/49'/coin' level (exported from sign wallets).
-// This function derives to m/49'/coin'/account' level and returns the account extended key.
+// This is a wrapper around infraKey.DeriveAccountKey that returns the extended key as a string.
 //
 // Parameters:
-//   - coinLevelExtendedKey: Extended public key at m/49'/coin' level (xpub/tpub format)
+//   - coinLevelExtendedKey: Extended public key at m/purpose'/coin' level (xpub/tpub format)
 //   - accountType: Account type (deposit=0, payment=1, stored=2, etc.)
 //
 // Returns:
 //   - Account-level extended public key (xpub/tpub format)
 //   - Error if derivation fails
-func (u *generateDescriptorUseCase) deriveAccountExtendedKey(
+func (*generateDescriptorUseCase) deriveAccountExtendedKey(
 	coinLevelExtendedKey string,
 	accountType domainAccount.AccountType,
 ) (string, error) {
-	// Parse extended public key
-	coinLevelKey, err := hdkeychain.NewKeyFromString(coinLevelExtendedKey)
+	// Use common derivation helper
+	accountKey, err := infraKey.DeriveAccountKey(coinLevelExtendedKey, accountType)
 	if err != nil {
-		return "", fmt.Errorf("failed to parse coin-level extended public key: %w", err)
-	}
-
-	// Derive account-specific key: m/49'/coin/account (non-hardened account index)
-	// Note: Since we're deriving from an extended public key (xpub), we can only
-	// derive non-hardened keys. The coin level (m/49'/coin') is already hardened.
-	// Use BIP44AccountIndex (deposit=0, payment=1, stored=2) not Uint32() (deposit=1, payment=2, stored=3)
-	accountKey, err := coinLevelKey.Derive(accountType.BIP44AccountIndex())
-	if err != nil {
-		return "", fmt.Errorf("failed to derive account key: %w", err)
+		return "", err
 	}
 
 	// Convert to string (xpub format)
-	accountExtendedKey := accountKey.String()
-
-	return accountExtendedKey, nil
+	return accountKey.String(), nil
 }

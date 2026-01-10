@@ -5,14 +5,13 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/btcsuite/btcd/btcutil/hdkeychain"
-
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -145,33 +144,23 @@ func (u *createMultisigAddressUseCase) Create(
 
 // deriveAccountPublicKey derives an account-specific compressed public key from a coin-level extended public key.
 //
-// The input extended public key should be at m/49'/coin' level (exported from sign wallets).
-// This function derives to m/49'/coin'/account' level and returns the compressed public key.
+// This function uses the common infraKey.DeriveAccountKey helper and extracts the compressed public key.
 //
 // Parameters:
-//   - extendedPubKey: Extended public key at m/49'/coin' level (xpub/tpub format)
+//   - extendedPubKey: Extended public key at m/purpose'/coin' level (xpub/tpub format)
 //   - accountType: Account type (deposit=0, payment=1, stored=2, etc.)
 //
 // Returns:
 //   - Compressed public key (33 bytes, hex-encoded)
 //   - Error if derivation fails
-func (u *createMultisigAddressUseCase) deriveAccountPublicKey(
+func (*createMultisigAddressUseCase) deriveAccountPublicKey(
 	extendedPubKey string,
 	accountType domainAccount.AccountType,
 ) (string, error) {
-	// Parse extended public key
-	coinLevelKey, err := hdkeychain.NewKeyFromString(extendedPubKey)
+	// Use common derivation helper
+	accountKey, err := infraKey.DeriveAccountKey(extendedPubKey, accountType)
 	if err != nil {
-		return "", fmt.Errorf("failed to parse extended public key: %w", err)
-	}
-
-	// Derive account-specific key: m/49'/coin/account (non-hardened account index)
-	// Note: Since we're deriving from an extended public key (xpub), we can only
-	// derive non-hardened keys. The coin level (m/49'/coin') is already hardened.
-	// Use BIP44AccountIndex (deposit=0, payment=1, stored=2) not Uint32() (deposit=1, payment=2, stored=3)
-	accountKey, err := coinLevelKey.Derive(accountType.BIP44AccountIndex())
-	if err != nil {
-		return "", fmt.Errorf("failed to derive account key: %w", err)
+		return "", err
 	}
 
 	// Get the public key
