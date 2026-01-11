@@ -76,6 +76,13 @@ table "auth_account_key" {
     comment = "auth type"
   }
 
+  column "account" {
+    type    = varchar(20)
+    null    = false
+    default = "deposit"
+    comment = "multisig account type (deposit, payment, stored)"
+  }
+
   column "p2pkh_address" {
     type    = varchar(255)
     null    = false
@@ -150,9 +157,9 @@ table "auth_account_key" {
     columns = [column.id]
   }
 
-  index "idex_coin_auth_account" {
+  index "idex_coin_auth_account_account" {
     unique  = true
-    columns = [column.coin, column.auth_account]
+    columns = [column.coin, column.auth_account, column.account]
   }
 
   index "idx_p2pkh_address" {

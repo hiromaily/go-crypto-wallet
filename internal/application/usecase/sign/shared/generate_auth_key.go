@@ -36,36 +36,56 @@ func (u *generateAuthKeyUseCase) Generate(
 	ctx context.Context,
 	input signusecase.GenerateAuthKeyInput,
 ) (signusecase.GenerateAuthKeyOutput, error) {
-	accountType := input.AuthType.AccountType()
-	logger.Debug("generate HDWallet", "account_type", accountType.String())
+	// For descriptor-based multisig, generate keys for each multisig account
+	// (deposit, payment, stored) instead of using auth account index (11, 12, etc.).
+	// This ensures auth keys match the descriptor derivation paths:
+	//   - deposit: m/purpose'/coin'/0'/0/0
+	//   - payment: m/purpose'/coin'/1'/0/0
+	//   - stored: m/purpose'/coin'/2'/0/0
 
-	// Get latest index
-	idxFrom, err := u.repo.GetMaxIndex(accountType)
-	if err != nil {
-		logger.Info(err.Error())
-		return signusecase.GenerateAuthKeyOutput{
-			GeneratedCount: 0,
-		}, nil
-	}
-	logger.Debug("max_index",
-		"account_type", accountType.String(),
-		"current_index", idxFrom,
-	)
-
-	// Generate HD wallet keys
-	walletKeys, err := u.generateHDKey(accountType, input.Seed, uint32(idxFrom), input.Count)
-	if err != nil {
-		return signusecase.GenerateAuthKeyOutput{}, fmt.Errorf("fail to generate HD key: %w", err)
+	multisigAccounts := []domainAccount.AccountType{
+		domainAccount.AccountTypeDeposit, // BIP44 account index 0
+		domainAccount.AccountTypePayment, // BIP44 account index 1
+		domainAccount.AccountTypeStored,  // BIP44 account index 2
 	}
 
-	// Insert key information to auth_account_key_table
-	err = u.repo.Insert(walletKeys, idxFrom, u.coinTypeCode, accountType, u.keygen.KeyType())
-	if err != nil {
-		return signusecase.GenerateAuthKeyOutput{}, fmt.Errorf("fail to call repo.Insert(): %w", err)
+	totalGenerated := 0
+
+	for _, accountType := range multisigAccounts {
+		logger.Debug("generating HD wallet keys",
+			"auth_type", input.AuthType.String(),
+			"account_type", accountType.String())
+
+		// Get latest index for this account
+		idxFrom, err := u.repo.GetMaxIndex(accountType)
+		if err != nil {
+			logger.Info(err.Error())
+			continue
+		}
+		logger.Debug("max_index",
+			"account_type", accountType.String(),
+			"current_index", idxFrom,
+		)
+
+		// Generate HD wallet keys for this account
+		walletKeys, err := u.generateHDKey(accountType, input.Seed, uint32(idxFrom), input.Count)
+		if err != nil {
+			return signusecase.GenerateAuthKeyOutput{},
+				fmt.Errorf("fail to generate HD key for %s: %w", accountType.String(), err)
+		}
+
+		// Insert key information to auth_account_key_table
+		err = u.repo.Insert(walletKeys, idxFrom, u.coinTypeCode, accountType, u.keygen.KeyType())
+		if err != nil {
+			return signusecase.GenerateAuthKeyOutput{},
+				fmt.Errorf("fail to insert keys for %s: %w", accountType.String(), err)
+		}
+
+		totalGenerated += len(walletKeys)
 	}
 
 	return signusecase.GenerateAuthKeyOutput{
-		GeneratedCount: len(walletKeys),
+		GeneratedCount: totalGenerated,
 	}, nil
 }
 

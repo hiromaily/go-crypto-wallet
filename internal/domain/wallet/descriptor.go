@@ -68,6 +68,12 @@ const (
 	// Example: wsh(sortedmulti(2,[fp1/48'/0'/0'/2']xpub1...,[fp2/48'/0'/0'/2']xpub2.../0/*))
 	DescriptorTypeWSH
 
+	// DescriptorTypeSHWSH represents Pay-to-Script-Hash wrapping Pay-to-Witness-Script-Hash.
+	// Also known as P2SH-P2WSH or Nested SegWit multisig (BIP49).
+	// Format: sh(wsh(sortedmulti(M,KEY1,KEY2,...)))
+	// Example: sh(wsh(sortedmulti(2,[fp1/49'/0'/0']xpub1...,[fp2/49'/0'/0']xpub2.../0/*)))
+	DescriptorTypeSHWSH
+
 	// DescriptorTypeUnknown represents an unknown or unsupported descriptor type.
 	DescriptorTypeUnknown
 )
@@ -85,6 +91,8 @@ func (d DescriptorType) String() string {
 		return "tr"
 	case DescriptorTypeWSH:
 		return "wsh"
+	case DescriptorTypeSHWSH:
+		return "sh(wsh)"
 	case DescriptorTypeUnknown:
 		return "unknown"
 	default:

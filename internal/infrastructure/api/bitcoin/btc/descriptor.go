@@ -107,9 +107,12 @@ func (p *DescriptorParser) Parse(descriptorStr string) (*domainWallet.Descriptor
 // determineType determines the descriptor type from the descriptor string.
 func determineType(descriptorStr string) (domainWallet.DescriptorType, error) {
 	// Check for different descriptor types based on prefix
+	// Note: Order matters - check more specific patterns first (sh(wsh) before sh(wpkh))
 	switch {
 	case strings.HasPrefix(descriptorStr, "pkh("):
 		return domainWallet.DescriptorTypePKH, nil
+	case strings.HasPrefix(descriptorStr, "sh(wsh("):
+		return domainWallet.DescriptorTypeSHWSH, nil
 	case strings.HasPrefix(descriptorStr, "sh(wpkh("):
 		return domainWallet.DescriptorTypeSHWPKH, nil
 	case strings.HasPrefix(descriptorStr, "wpkh("):

@@ -42,6 +42,7 @@ func convertToAuthAccountKey(sqlcKey *sqlcgen.AuthAccountKey) (*domainAuth.AuthA
 		CoinTypeCode:       domainCoin.CoinTypeCode(sqlcKey.Coin),
 		KeyType:            sqlcKey.KeyType,
 		AuthAccount:        domainAccount.AuthType(sqlcKey.AuthAccount),
+		Account:            domainAccount.AccountType(sqlcKey.Account),
 		P2pkhAddress:       sqlcKey.P2pkhAddress,
 		P2shSegwitAddress:  sqlcKey.P2shSegwitAddress,
 		Bech32Address:      sqlcKey.Bech32Address,
@@ -70,6 +71,7 @@ func convertFromAuthAccountKey(key *domainAuth.AuthAccountKey) *sqlcgen.AuthAcco
 		Coin:               sqlcgen.AuthAccountKeyCoin(key.CoinTypeCode.String()),
 		KeyType:            key.KeyType,
 		AuthAccount:        key.AuthAccount.String(),
+		Account:            key.Account.String(),
 		P2pkhAddress:       key.P2pkhAddress,
 		P2shSegwitAddress:  key.P2shSegwitAddress,
 		Bech32Address:      key.Bech32Address,
@@ -106,6 +108,24 @@ func (r *AuthAccountKeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (
 	return convertToAuthAccountKey(&authKey)
 }
 
+// GetByAccount returns one record by authType and accountType
+func (r *AuthAccountKeyRepositorySqlc) GetByAccount(
+	authType domainAccount.AuthType, accountType domainAccount.AccountType,
+) (*domainAuth.AuthAccountKey, error) {
+	ctx := context.Background()
+
+	authKey, err := r.queries.GetAuthAccountKeyByAccount(ctx, sqlcgen.GetAuthAccountKeyByAccountParams{
+		Coin:        sqlcgen.AuthAccountKeyCoin(r.coinTypeCode.String()),
+		AuthAccount: authType.String(),
+		Account:     accountType.String(),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to call GetAuthAccountKeyByAccount(): %w", err)
+	}
+
+	return convertToAuthAccountKey(&authKey)
+}
+
 // Insert inserts record
 func (r *AuthAccountKeyRepositorySqlc) Insert(item *domainAuth.AuthAccountKey) error {
 	ctx := context.Background()
@@ -115,6 +135,7 @@ func (r *AuthAccountKeyRepositorySqlc) Insert(item *domainAuth.AuthAccountKey) e
 		Coin:               sqlcItem.Coin,
 		KeyType:            sqlcItem.KeyType,
 		AuthAccount:        sqlcItem.AuthAccount,
+		Account:            sqlcItem.Account,
 		P2pkhAddress:       sqlcItem.P2pkhAddress,
 		P2shSegwitAddress:  sqlcItem.P2shSegwitAddress,
 		Bech32Address:      sqlcItem.Bech32Address,

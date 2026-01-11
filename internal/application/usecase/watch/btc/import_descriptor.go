@@ -285,9 +285,12 @@ func (u *importDescriptorUseCase) deriveAddresses(
 		return nil, errors.New("descriptor has no keys")
 	}
 
-	// Currently support single-key descriptors; multisig descriptors are not yet supported.
+	// Check if multisig descriptor (WSH or SH-WSH)
 	key := descriptor.Keys[0]
-	if len(descriptor.Keys) > 1 && descriptor.Type == domainWallet.DescriptorTypeWSH {
+	isMultisig := len(descriptor.Keys) > 1 &&
+		(descriptor.Type == domainWallet.DescriptorTypeWSH ||
+			descriptor.Type == domainWallet.DescriptorTypeSHWSH)
+	if isMultisig {
 		return deriveMultisigAddresses(descriptor, start, count, u.chainConf)
 	}
 
@@ -387,7 +390,11 @@ func deriveAddressForType(
 		}
 		return addr.EncodeAddress(), nil
 	case domainWallet.DescriptorTypeWSH:
-		return "", errors.New("WSH descriptor type requires multisig handling, not supported for single key derivation")
+		return "", errors.New(
+			"WSH descriptor type requires multisig handling, not supported for single key derivation")
+	case domainWallet.DescriptorTypeSHWSH:
+		return "", errors.New(
+			"SH-WSH descriptor type requires multisig handling, not supported for single key derivation")
 	case domainWallet.DescriptorTypeUnknown:
 		return "", errors.New("unknown descriptor type")
 	default:
@@ -475,7 +482,25 @@ func deriveMultisigAddresses(
 			return nil, err
 		}
 
-		addresses = append(addresses, wshAddr.EncodeAddress())
+		// For P2SH-P2WSH (sh(wsh(...))), wrap the witness script hash in a P2SH
+		if descriptor.Type == domainWallet.DescriptorTypeSHWSH {
+			// Create P2WSH script (witness program)
+			witnessProgram, err := txscript.PayToAddrScript(wshAddr)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create witness program: %w", err)
+			}
+
+			// Wrap in P2SH
+			shAddr, err := btcutil.NewAddressScriptHash(witnessProgram, chain)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create P2SH address: %w", err)
+			}
+
+			addresses = append(addresses, shAddr.EncodeAddress())
+		} else {
+			// Native P2WSH
+			addresses = append(addresses, wshAddr.EncodeAddress())
+		}
 	}
 
 	return addresses, nil

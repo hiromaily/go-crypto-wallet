@@ -192,9 +192,9 @@ func (k *HDKey) createKeyByAccount(
 	logger.Debug(
 		"create_key_by_account",
 		"account_type", accountType.String(),
-		"account_value", accountType.Uint32(),
+		"account_value", accountType.BIP44AccountIndex(),
 	)
-	accountPrivKey, err := coinType.Derive(hdkeychain.HardenedKeyStart + accountType.Uint32())
+	accountPrivKey, err := coinType.Derive(hdkeychain.HardenedKeyStart + accountType.BIP44AccountIndex())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -451,7 +451,7 @@ func (k *HDKey) getP2PKHAddrBCH(p2PKHAddr *btcutil.AddressPubKeyHash) (string, e
 //
 // FIXME: getting RedeemScript is not fixed yet
 //
-//nolint:unparam // redeemScript (second return value) is not implemented yet, will be fixed in future
+
 func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, error) {
 	// []byte
 	pubKeyHash := btcutil.Hash160(privKey.PubKey().SerializeCompressed())

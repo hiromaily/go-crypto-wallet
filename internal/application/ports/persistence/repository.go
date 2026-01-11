@@ -88,6 +88,7 @@ type AuthFullPubkeyRepositorier interface {
 // AuthAccountKeyRepositorier is AuthAccountKeyRepository interface
 type AuthAccountKeyRepositorier interface {
 	GetOne(authType domainAccount.AuthType) (*domainAuth.AuthAccountKey, error)
+	GetByAccount(authType domainAccount.AuthType, accountType domainAccount.AccountType) (*domainAuth.AuthAccountKey, error)
 	Insert(item *domainAuth.AuthAccountKey) error
 	UpdateAddrStatus(addrStatus domainAddress.AddrStatus, strWIF string) (int64, error)
 }
