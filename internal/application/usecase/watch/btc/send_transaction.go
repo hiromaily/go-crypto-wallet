@@ -43,13 +43,19 @@ func (u *sendTransactionUseCase) Execute(
 	ctx context.Context,
 	input watchusecase.SendTransactionInput,
 ) (watchusecase.SendTransactionOutput, error) {
-	// Validate file path and extract transaction metadata
-	actionType, _, txID, _, err := u.txFileRepo.ValidateFilePath(input.FilePath, domainTx.TxTypeSigned)
+	// Extract transaction metadata from file path
+	// Note: We don't strictly validate txType here because:
+	// 1. For PSBT files, the actual signature validation happens in processPSBTFile via IsPSBTComplete()
+	// 2. The btcd PSBT library's IsComplete() detection may not work correctly for all multisig configurations
+	// 3. The real validation is whether the PSBT has enough signatures to be finalized
+	fileNameType, err := u.txFileRepo.GetFileNameType(input.FilePath)
 	if err != nil {
 		return watchusecase.SendTransactionOutput{}, fmt.Errorf("invalid file path: %w", err)
 	}
+	actionType := fileNameType.ActionType
+	txID := fileNameType.TxID
 
-	logger.Debug("sending transaction", "action_type", actionType.String(), "tx_id", txID)
+	logger.Debug("sending transaction", "action_type", actionType.String(), "tx_id", txID, "tx_type", fileNameType.TxType.String())
 
 	// Determine file format based on extension and read accordingly
 	var signedHex string

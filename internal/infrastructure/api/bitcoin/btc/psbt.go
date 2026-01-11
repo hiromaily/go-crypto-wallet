@@ -273,16 +273,16 @@ func (b *Bitcoin) SignPSBTWithKey(psbtBase64 string, wifs []string) (string, boo
 	// Sign each input with each provided key
 	signedCount := 0
 	for i := range parsed.Packet.UnsignedTx.TxIn {
-		// Get witness UTXO for this input
-		witnessUtxo := parsed.Packet.Inputs[i].WitnessUtxo
-		if witnessUtxo == nil {
+		// Get PSBT input which contains metadata (WitnessUtxo, RedeemScript, WitnessScript)
+		psbtInput := &parsed.Packet.Inputs[i]
+		if psbtInput.WitnessUtxo == nil {
 			logger.Warn("Skipping input without witness UTXO", "input", i)
 			continue
 		}
 
 		// Try signing with each private key
 		for _, privKey := range privKeys {
-			if b.signInputWithKey(updater, parsed.Packet.UnsignedTx, i, witnessUtxo, privKey, prevOutputFetcher) {
+			if b.signInputWithKey(updater, parsed.Packet.UnsignedTx, i, psbtInput, privKey, prevOutputFetcher) {
 				signedCount++
 			}
 		}
@@ -470,16 +470,25 @@ func (*Bitcoin) hasPartialSignatures(packet *psbt.Packet) bool {
 
 // signInputWithKey signs a single PSBT input with a private key.
 // Returns true if signature was successfully added, false otherwise.
+//
+// For P2SH-P2WSH (P2SH-wrapped native SegWit multisig), this function:
+//   - Uses the witness script for signature hash calculation
+//   - Passes redeem script and witness script to the PSBT updater
 func (*Bitcoin) signInputWithKey(
 	updater *psbt.Updater,
 	msgTx *wire.MsgTx,
 	inputIndex int,
-	witnessUtxo *wire.TxOut,
+	psbtInput *psbt.PInput,
 	privKey *btcutil.WIF,
 	prevOutputFetcher *txscript.MultiPrevOutFetcher,
 ) bool {
+	witnessUtxo := psbtInput.WitnessUtxo
+
 	// Detect script type to determine signing method
 	isTaproot := txscript.IsPayToTaproot(witnessUtxo.PkScript)
+
+	// Check if this is a multisig input (has witness script)
+	hasWitnessScript := len(psbtInput.WitnessScript) > 0
 
 	var sigBytes []byte
 	var err error
@@ -511,8 +520,19 @@ func (*Bitcoin) signInputWithKey(
 	} else {
 		// SegWit v0 (P2WPKH/P2WSH): Use ECDSA signature
 		sigHashes := txscript.NewTxSigHashes(msgTx, prevOutputFetcher)
+
+		// For P2WSH multisig, use the witness script for hash calculation
+		// For P2WPKH (single sig), use the scriptPubKey
+		scriptForHash := witnessUtxo.PkScript
+		if hasWitnessScript {
+			scriptForHash = psbtInput.WitnessScript
+			logger.Debug("Using witness script for P2WSH multisig hash calculation",
+				"input", inputIndex,
+				"witnessScriptLen", len(psbtInput.WitnessScript))
+		}
+
 		hash, err := txscript.CalcWitnessSigHash(
-			witnessUtxo.PkScript,
+			scriptForHash,
 			sigHashes,
 			txscript.SigHashAll,
 			msgTx,
@@ -532,8 +552,9 @@ func (*Bitcoin) signInputWithKey(
 	}
 
 	// Add partial signature to PSBT
+	// Pass redeem script and witness script for proper PSBT completion detection
 	pubKey := privKey.PrivKey.PubKey().SerializeCompressed()
-	outcome, err := updater.Sign(inputIndex, sigBytes, pubKey, nil, nil)
+	outcome, err := updater.Sign(inputIndex, sigBytes, pubKey, psbtInput.RedeemScript, psbtInput.WitnessScript)
 	if err != nil {
 		// This may fail if the key doesn't match this input, which is normal
 		logger.Debug("Signature not applicable for this input", "input", inputIndex, "error", err)
@@ -542,7 +563,10 @@ func (*Bitcoin) signInputWithKey(
 
 	// Check outcome: 0 = success, 1 = already finalized, -1 = invalid
 	if outcome == psbt.SignSuccesful {
-		logger.Debug("Added signature to input", "input", inputIndex, "isTaproot", isTaproot)
+		logger.Debug("Added signature to input",
+			"input", inputIndex,
+			"isTaproot", isTaproot,
+			"hasWitnessScript", hasWitnessScript)
 		return true
 	}
 
