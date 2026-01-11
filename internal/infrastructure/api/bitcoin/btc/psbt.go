@@ -292,8 +292,12 @@ func (b *Bitcoin) SignPSBTWithKey(psbtBase64 string, wifs []string) (string, boo
 		return "", false, errors.New("no signatures were added (keys may not match PSBT inputs)")
 	}
 
-	// Check if PSBT is now complete
-	isComplete := parsed.Packet.IsComplete()
+	// Check if PSBT is now complete using custom multisig completion check
+	isComplete, err := b.isMultisigPSBTComplete(parsed.Packet)
+	if err != nil {
+		logger.Warn("Failed to check PSBT completion, assuming incomplete", "error", err)
+		isComplete = false
+	}
 
 	// Serialize signed PSBT to base64
 	signedPSBT, err := b.serializePSBT(parsed.Packet)
@@ -318,8 +322,12 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
 		return "", fmt.Errorf("failed to parse PSBT for finalization: %w", err)
 	}
 
-	// Check if PSBT is complete
-	if !parsed.IsComplete {
+	// Check if PSBT is complete using custom multisig completion check
+	isComplete, err := b.isMultisigPSBTComplete(parsed.Packet)
+	if err != nil {
+		return "", fmt.Errorf("failed to check PSBT completion: %w", err)
+	}
+	if !isComplete {
 		return "", errors.New("cannot finalize incomplete PSBT (missing signatures)")
 	}
 
