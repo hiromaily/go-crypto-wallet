@@ -48,7 +48,7 @@ func (w *AuthHDWalletRepo) Insert(
 	keys []domainKey.WalletKey,
 	idx int64,
 	coinTypeCode domainCoin.CoinTypeCode,
-	_ domainAccount.AccountType,
+	accountType domainAccount.AccountType,
 	keyType domainKey.KeyType,
 ) error {
 	if len(keys) != 1 {
@@ -60,6 +60,7 @@ func (w *AuthHDWalletRepo) Insert(
 		coinTypeCode,
 		keyType.String(),
 		w.authType,
+		accountType,
 		keyItem.P2PKHAddr,
 		keyItem.P2SHSegWitAddr,
 		keyItem.Bech32Addr,

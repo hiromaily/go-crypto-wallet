@@ -91,6 +91,9 @@ func (*DescriptorBuilder) BuildDescriptor(descType DescriptorType, key Descripto
 	case DescriptorTypeWSH:
 		// WSH typically requires multisig, this is a simple case
 		descriptor = fmt.Sprintf("wsh(%s)", keyStr)
+	case DescriptorTypeSHWSH:
+		// SH-WSH requires multisig, this is a simple case
+		descriptor = fmt.Sprintf("sh(wsh(%s))", keyStr)
 	case DescriptorTypeUnknown:
 		return "", errors.New("unknown descriptor type")
 	default:

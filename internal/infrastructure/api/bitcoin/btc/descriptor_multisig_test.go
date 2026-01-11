@@ -36,7 +36,7 @@ func TestGenerateMultisigDescriptor(t *testing.T) {
 	}
 
 	t.Run("receive 2-of-3 descriptor with deterministic ordering", func(t *testing.T) {
-		descriptor, err := service.GenerateMultisigDescriptor(2, signers, false)
+		descriptor, err := service.GenerateMultisigDescriptor(2, signers, false, false)
 		require.NoError(t, err)
 
 		expectedKeys := []string{
@@ -51,7 +51,7 @@ func TestGenerateMultisigDescriptor(t *testing.T) {
 	})
 
 	t.Run("change descriptor uses /1/*", func(t *testing.T) {
-		descriptor, err := service.GenerateMultisigDescriptor(2, signers, true)
+		descriptor, err := service.GenerateMultisigDescriptor(2, signers, true, false)
 		require.NoError(t, err)
 
 		expectedKeys := []string{
@@ -133,7 +133,7 @@ func TestGenerateMultisigDescriptor_Validation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := service.GenerateMultisigDescriptor(tt.requiredSigs, tt.signers, false)
+			_, err := service.GenerateMultisigDescriptor(tt.requiredSigs, tt.signers, false, false)
 			require.ErrorContains(t, err, tt.wantErr)
 		})
 	}
@@ -148,7 +148,7 @@ func TestGenerateMultisigDescriptor_NormalizesInputs(t *testing.T) {
 		ExtendedKey:    mustNewExtendedKey(t, testMainnetXpub),
 	}
 
-	desc, err := service.GenerateMultisigDescriptor(1, []MultisigSigner{signer}, false)
+	desc, err := service.GenerateMultisigDescriptor(1, []MultisigSigner{signer}, false, false)
 	require.NoError(t, err)
 
 	require.Equal(

@@ -18,7 +18,8 @@ type AuthAccountKey struct {
 	CoinTypeCode       domainCoin.CoinTypeCode
 	KeyType            string // BIP type: bip44, bip49, bip84, bip86, musig2
 	AuthAccount        domainAccount.AuthType
-	P2pkhAddress       string  // Pay To PubKey Hash address (legacy)
+	Account            domainAccount.AccountType // Multisig account type (deposit, payment, stored)
+	P2pkhAddress       string                    // Pay To PubKey Hash address (legacy)
 	P2shSegwitAddress  string  // P2SH-SegWit address (wrapped SegWit)
 	Bech32Address      string  // Native SegWit address (bech32)
 	TaprootAddress     *string // Taproot address (BIP86) - nullable
@@ -39,6 +40,7 @@ func NewAuthAccountKey(
 	coinTypeCode domainCoin.CoinTypeCode,
 	keyType string,
 	authAccount domainAccount.AuthType,
+	account domainAccount.AccountType,
 	p2pkhAddress string,
 	p2shSegwitAddress string,
 	bech32Address string,
@@ -61,6 +63,7 @@ func NewAuthAccountKey(
 		CoinTypeCode:       coinTypeCode,
 		KeyType:            keyType,
 		AuthAccount:        authAccount,
+		Account:            account,
 		P2pkhAddress:       p2pkhAddress,
 		P2shSegwitAddress:  p2shSegwitAddress,
 		Bech32Address:      bech32Address,

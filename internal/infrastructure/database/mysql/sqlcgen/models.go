@@ -684,6 +684,8 @@ type AuthAccountKey struct {
 	KeyType string
 	// auth type
 	AuthAccount string
+	// multisig account type (deposit, payment, stored)
+	Account string
 	// address as standard pubkey script that Pays To PubKey Hash (P2PKH)
 	P2pkhAddress string
 	// p2sh-segwit address

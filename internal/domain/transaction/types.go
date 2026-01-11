@@ -1,6 +1,10 @@
 package transaction
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+)
 
 // TxType represents the transaction status/lifecycle state.
 //
@@ -100,6 +104,23 @@ func (a ActionType) String() string {
 // Uint8 returns the numeric value of the action type.
 func (a ActionType) Uint8() uint8 {
 	return ActionTypeValue[a]
+}
+
+// ToAccountType returns the multisig account type associated with this action.
+// - Deposit actions use deposit account keys (receiving funds)
+// - Payment actions use payment account keys (sending funds)
+// - Transfer actions use stored account keys (internal movements)
+func (a ActionType) ToAccountType() account.AccountType {
+	switch a {
+	case ActionTypeDeposit:
+		return account.AccountTypeDeposit
+	case ActionTypePayment:
+		return account.AccountTypePayment
+	case ActionTypeTransfer:
+		return account.AccountTypeStored
+	default:
+		return account.AccountTypeDeposit // Default to deposit for unknown types
+	}
 }
 
 // ActionTypeValue provides numeric values for action types.

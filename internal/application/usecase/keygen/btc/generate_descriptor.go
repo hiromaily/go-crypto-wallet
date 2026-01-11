@@ -139,7 +139,10 @@ func (u *generateDescriptorUseCase) generateMultisigDescriptor(
 		return u.descriptorService.GenerateTaprootScriptPathDescriptor(signers, input.IsChange)
 	}
 
-	return u.descriptorService.GenerateMultisigDescriptor(requiredSigs, signers, input.IsChange)
+	// P2SH-SegWit (BIP49) requires sh() wrapper around wsh()
+	isP2SHWrapped := input.AddressType == domainAddress.AddrTypeP2shSegwit
+
+	return u.descriptorService.GenerateMultisigDescriptor(requiredSigs, signers, input.IsChange, isP2SHWrapped)
 }
 
 func (u *generateDescriptorUseCase) buildMultisigSigners(

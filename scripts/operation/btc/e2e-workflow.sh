@@ -344,8 +344,9 @@ multisig_setup_phase() {
 	log_substep "Deriving payment address from descriptor for UTXO generation"
 
 	# Extract first descriptor from payment_descriptors.json
-	# Use P2WSH descriptor (not Taproot, due to test data limitation with same keys)
-	first_descriptor=$(jq -r '.[2].desc // .[0].desc' "${descriptor_payment}" 2>/dev/null)
+	# Use P2SH-P2WSH descriptor (BIP49) at index 4 to test P2SH-wrapped SegWit
+	# Index 2 would be P2WSH (BIP84 native SegWit)
+	first_descriptor=$(jq -r '.[4].desc // .[0].desc' "${descriptor_payment}" 2>/dev/null)
 
 	if [ -z "$first_descriptor" ]; then
 		log_error "Failed to extract descriptor from ${descriptor_payment}"
@@ -455,9 +456,10 @@ create_payment_requests_phase() {
 	log_step "Payment Request Creation Phase"
 
 	# Get a payment sender address from database
+	# For P2SH-P2WSH testing, query for P2SH addresses (starting with '2')
 	log_substep "Retrieving payment sender address from database"
 	sender_address=$(docker compose exec -T wallet-db mysql -u root -proot watch -N -e \
-		"SELECT wallet_address FROM address WHERE coin='btc' AND account='payment' LIMIT 1" 2>/dev/null)
+		"SELECT wallet_address FROM address WHERE coin='btc' AND account='payment' AND wallet_address LIKE '2%' LIMIT 1" 2>/dev/null)
 
 	if [ -z "$sender_address" ]; then
 		log_error "No payment addresses found in database"

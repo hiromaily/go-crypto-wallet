@@ -192,9 +192,9 @@ func (k *HDKey) createKeyByAccount(
 	logger.Debug(
 		"create_key_by_account",
 		"account_type", accountType.String(),
-		"account_value", accountType.Uint32(),
+		"account_value", accountType.BIP44AccountIndex(),
 	)
-	accountPrivKey, err := coinType.Derive(hdkeychain.HardenedKeyStart + accountType.Uint32())
+	accountPrivKey, err := coinType.Derive(hdkeychain.HardenedKeyStart + accountType.BIP44AccountIndex())
 	if err != nil {
 		return nil, nil, err
 	}
@@ -451,7 +451,7 @@ func (k *HDKey) getP2PKHAddrBCH(p2PKHAddr *btcutil.AddressPubKeyHash) (string, e
 //
 // FIXME: getting RedeemScript is not fixed yet
 //
-//nolint:unparam // redeemScript (second return value) is not implemented yet, will be fixed in future
+
 func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, error) {
 	// []byte
 	pubKeyHash := btcutil.Hash160(privKey.PubKey().SerializeCompressed())
@@ -467,12 +467,12 @@ func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, er
 		return "", "", fmt.Errorf("fail to call txscript.PayToAddrScript(): %w", err)
 	}
 
-	// value of payToAddrScript is equal to scriptPubKey, but it's not redeemScript
-	// if call `getaddressinfo` API, result includes this value as scriptPubKey in embedded in p2sh_segwit_address
-	// That's why payToAddrScript is not used as redeemScript
-	// Redeem Script => Hash of RedeemScript => p2SH ScriptPubKey
+	// For P2SH-SegWit (P2SH-wrapped witness), the redeemScript IS the witness program
+	// The witness program (OP_0 <hash>) is hashed to create the P2SH address
+	// When spending, the redeemScript reveals the witness program
+	// Redeem Script (witness program) => Hash of RedeemScript => P2SH ScriptPubKey
 
-	var strRedeemScript string // FIXME: not implemented yet
+	strRedeemScript := hex.EncodeToString(payToAddrScript)
 	switch k.coinTypeCode {
 	case domainCoin.BTC:
 		btcAddress, addrErr := btcutil.NewAddressScriptHash(payToAddrScript, k.conf)

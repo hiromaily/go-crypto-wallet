@@ -224,4 +224,3 @@ make gotest-integration
 | 送信 | Watch | `watch/btc/send_transaction.go` |
 | 残高確認 | Watch | Infrastructure API |
 | UTXO取得 | Watch | Infrastructure API |
-

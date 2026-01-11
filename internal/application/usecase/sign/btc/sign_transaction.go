@@ -121,7 +121,9 @@ func (u *signTransactionUseCase) sign(
 ) (string, bool, error) {
 	// Sign wallet always signs multisig transactions
 	// Add second signature to PSBT using auth key
-	signedPSBT, isSigned, err := u.signMultisigPSBT(psbtBase64)
+	// Determine which multisig account to use based on the action type
+	accountType := actionType.ToAccountType()
+	signedPSBT, isSigned, err := u.signMultisigPSBT(psbtBase64, accountType)
 	if err != nil {
 		return "", false, err
 	}
@@ -147,16 +149,22 @@ func (u *signTransactionUseCase) sign(
 // For 2-of-N multisig (N>2), the transaction is complete once 2 signatures are present.
 func (u *signTransactionUseCase) signMultisigPSBT(
 	psbtBase64 string,
+	accountType domainAccount.AccountType,
 ) (string, bool, error) {
 	// Get auth key from auth_account_key table (Sign wallet's key)
-	// Using explicit authType from configuration for robust key selection
-	authKey, err := u.authKeyRepo.GetOne(u.authType)
+	// Using explicit authType and accountType for robust key selection
+	// The accountType ensures we use keys derived at the correct BIP44 account index
+	// to match the descriptor public keys (e.g., m/49'/1'/1' for payment account)
+	authKey, err := u.authKeyRepo.GetByAccount(u.authType, accountType)
 	if err != nil {
-		return "", false, fmt.Errorf("fail to get auth key for authType %s: %w", u.authType, err)
+		return "", false, fmt.Errorf("fail to get auth key for authType %s, account %s: %w",
+			u.authType, accountType, err)
 	}
 
 	logger.Debug("signing PSBT with auth key",
 		"wallet_type", u.wtype.String(),
+		"auth_type", u.authType.String(),
+		"account_type", accountType.String(),
 	)
 
 	// Sign PSBT with Sign wallet's private key (offline, using btcd)
