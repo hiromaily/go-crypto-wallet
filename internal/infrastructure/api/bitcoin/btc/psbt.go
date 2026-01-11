@@ -740,9 +740,14 @@ func (*Bitcoin) signInputWithKey(
 // This is a custom implementation because btcd's Packet.IsComplete() only checks if inputs
 // are finalized, not if there are enough partial signatures for the multisig threshold.
 //
-// For P2SH-P2WSH multisig (e.g., 2-of-3):
-// 1. Parse the witness script to extract M-of-N requirements
-// 2. Count partial signatures for each input
+// Supports multiple multisig types:
+// - P2WSH multisig: Uses WitnessScript
+// - P2SH-P2WSH multisig: Uses both RedeemScript and WitnessScript
+// - Legacy P2SH multisig: Uses RedeemScript
+//
+// For each input:
+// 1. Parse the multisig script (WitnessScript or RedeemScript) to extract M-of-N requirements
+// 2. Count partial signatures for the input
 // 3. Return true if all inputs have at least M signatures
 func (b *Bitcoin) isMultisigPSBTComplete(packet *psbt.Packet) (bool, error) {
 	logger.Debug("Checking PSBT completion", "totalInputs", len(packet.Inputs))
@@ -754,6 +759,7 @@ func (b *Bitcoin) isMultisigPSBTComplete(packet *psbt.Packet) (bool, error) {
 			"hasFinalScriptSig", input.FinalScriptSig != nil,
 			"hasFinalScriptWitness", input.FinalScriptWitness != nil,
 			"witnessScriptLen", len(input.WitnessScript),
+			"redeemScriptLen", len(input.RedeemScript),
 			"partialSigsCount", len(input.PartialSigs))
 
 		// If input is already finalized, it's complete
@@ -762,29 +768,42 @@ func (b *Bitcoin) isMultisigPSBTComplete(packet *psbt.Packet) (bool, error) {
 			continue
 		}
 
-		// For multisig, we need to check the witness script
-		if len(input.WitnessScript) == 0 {
-			// No witness script - might be single-sig or already finalized
-			// Check if it has at least one partial signature
+		// Determine which script to parse for multisig requirements
+		// Priority: WitnessScript (P2WSH, P2SH-P2WSH) > RedeemScript (legacy P2SH)
+		var scriptToParse []byte
+		var scriptType string
+		if len(input.WitnessScript) > 0 {
+			scriptToParse = input.WitnessScript
+			scriptType = "WitnessScript"
+		} else if len(input.RedeemScript) > 0 {
+			// Also check RedeemScript for legacy P2SH multisig
+			scriptToParse = input.RedeemScript
+			scriptType = "RedeemScript"
+		}
+
+		// If no script is available, assume single-sig and check for at least one signature
+		if scriptToParse == nil {
 			if len(input.PartialSigs) == 0 {
-				logger.Debug("Input has no witness script and no partial signatures", "input", i)
+				logger.Debug("Input has no script and no partial signatures", "input", i)
 				return false, nil
 			}
-			logger.Debug("Input has partial sigs but no witness script (single-sig?)", "input", i)
+			logger.Debug("Input has partial sigs but no multisig script (single-sig?)", "input", i)
 			continue
 		}
 
-		// Log witness script for debugging
-		logger.Debug("Input has witness script",
+		// Log script for debugging
+		logger.Debug("Input has multisig script",
 			"input", i,
-			"scriptHex", hex.EncodeToString(input.WitnessScript))
+			"scriptType", scriptType,
+			"scriptHex", hex.EncodeToString(scriptToParse))
 
-		// Parse witness script to determine required signatures (M-of-N)
-		requiredSigs, totalSigs, err := b.parseMultisigScript(input.WitnessScript)
+		// Parse script to determine required signatures (M-of-N)
+		requiredSigs, totalSigs, err := b.parseMultisigScript(scriptToParse)
 		if err != nil {
-			// If we can't parse it as multisig, fall back to checking partial sigs
-			logger.Debug("Failed to parse witness script as multisig, checking partial sigs",
-				"input", i, "error", err, "partialSigs", len(input.PartialSigs))
+			// If we can't parse it as multisig, fall back to checking for at least one partial sig
+			// This handles non-multisig scripts
+			logger.Debug("Failed to parse script as multisig, falling back to checking for any partial sig",
+				"input", i, "scriptType", scriptType, "error", err, "partialSigs", len(input.PartialSigs))
 			if len(input.PartialSigs) == 0 {
 				return false, nil
 			}
