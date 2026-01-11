@@ -18,6 +18,9 @@ bin/
 /sign1
 /sign2
 /watch
+/cmd/keygen/keygen
+/cmd/sign/sign
+/cmd/watch/watch
 
 # data directory
 data/address/*
