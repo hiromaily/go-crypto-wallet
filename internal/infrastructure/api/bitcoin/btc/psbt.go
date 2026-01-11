@@ -2,6 +2,7 @@ package btc
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
@@ -96,6 +97,20 @@ func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx) (st
 			return "", fmt.Errorf("failed to add witness UTXO for input %d: %w", i, err)
 		}
 
+		// Add witness script for P2WSH (native SegWit multisig) if provided
+		// This is the actual multisig script that defines required signatures
+		var witnessScript []byte
+		if prevTx.WitnessScript != "" {
+			var err error
+			witnessScript, err = b.decodeHexScript(prevTx.WitnessScript)
+			if err != nil {
+				return "", fmt.Errorf("failed to decode witnessScript for input %d: %w", i, err)
+			}
+			if err := updater.AddInWitnessScript(witnessScript, i); err != nil {
+				return "", fmt.Errorf("failed to add witness script for input %d: %w", i, err)
+			}
+		}
+
 		// Add redeem script for P2SH if provided
 		// For P2SH-wrapped SegWit, this is the witness program
 		if prevTx.RedeemScript != "" {
@@ -106,18 +121,21 @@ func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx) (st
 			if err := updater.AddInRedeemScript(redeemScript, i); err != nil {
 				return "", fmt.Errorf("failed to add redeem script for input %d: %w", i, err)
 			}
-		}
-
-		// Add witness script for P2WSH (native SegWit multisig) if provided
-		// This is the actual multisig script that defines required signatures
-		if prevTx.WitnessScript != "" {
-			witnessScript, err := b.decodeHexScript(prevTx.WitnessScript)
+		} else if len(witnessScript) > 0 && txscript.IsPayToScriptHash(scriptPubKey) {
+			// Auto-generate RedeemScript for P2SH-P2WSH when it's missing
+			// RedeemScript is the witness program: OP_0 <witnessScriptHash>
+			witnessScriptHash := sha256.Sum256(witnessScript)
+			redeemScript, err := txscript.NewScriptBuilder().
+				AddOp(txscript.OP_0).
+				AddData(witnessScriptHash[:]).
+				Script()
 			if err != nil {
-				return "", fmt.Errorf("failed to decode witnessScript for input %d: %w", i, err)
+				return "", fmt.Errorf("failed to build redeemScript for input %d: %w", i, err)
 			}
-			if err := updater.AddInWitnessScript(witnessScript, i); err != nil {
-				return "", fmt.Errorf("failed to add witness script for input %d: %w", i, err)
+			if err := updater.AddInRedeemScript(redeemScript, i); err != nil {
+				return "", fmt.Errorf("failed to add auto-generated redeem script for input %d: %w", i, err)
 			}
+			logger.Debug("Auto-generated RedeemScript for P2SH-P2WSH input", "input", i)
 		}
 
 		// Add sighash type (default to SIGHASH_ALL)
@@ -331,10 +349,64 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
 		return "", errors.New("cannot finalize incomplete PSBT (missing signatures)")
 	}
 
+	// Auto-generate missing RedeemScripts for P2SH-P2WSH inputs before finalization
+	for i, input := range parsed.Packet.Inputs {
+		logger.Debug("Checking RedeemScript auto-generation",
+			"input", i,
+			"hasRedeemScript", len(input.RedeemScript) > 0,
+			"hasWitnessScript", len(input.WitnessScript) > 0,
+			"hasWitnessUtxo", input.WitnessUtxo != nil)
+
+		// If RedeemScript is missing but we have WitnessScript and witnessUtxo is P2SH
+		if len(input.RedeemScript) == 0 && len(input.WitnessScript) > 0 && input.WitnessUtxo != nil {
+			isP2SH := txscript.IsPayToScriptHash(input.WitnessUtxo.PkScript)
+			logger.Debug("RedeemScript check details",
+				"input", i,
+				"isP2SH", isP2SH)
+
+			if isP2SH {
+				// Auto-generate RedeemScript for P2SH-P2WSH
+				witnessScriptHash := sha256.Sum256(input.WitnessScript)
+				redeemScript, err := txscript.NewScriptBuilder().
+					AddOp(txscript.OP_0).
+					AddData(witnessScriptHash[:]).
+					Script()
+				if err != nil {
+					return "", fmt.Errorf("failed to build redeemScript for input %d: %w", i, err)
+				}
+				input.RedeemScript = redeemScript
+				logger.Debug("Auto-generated RedeemScript for P2SH-P2WSH input during finalization", "input", i)
+			}
+		}
+	}
+
 	// Finalize all inputs
 	for i := range parsed.Packet.UnsignedTx.TxIn {
-		if err := psbt.Finalize(parsed.Packet, i); err != nil {
-			return "", fmt.Errorf("failed to finalize input %d: %w", i, err)
+		// Check if this is a P2SH-P2WSH multisig input
+		input := parsed.Packet.Inputs[i]
+		hasRedeemScript := len(input.RedeemScript) > 0
+		hasWitnessScript := len(input.WitnessScript) > 0
+		hasPartialSigs := len(input.PartialSigs) > 0
+
+		logger.Debug("Checking finalization method for input",
+			"input", i,
+			"hasRedeemScript", hasRedeemScript,
+			"hasWitnessScript", hasWitnessScript,
+			"hasPartialSigs", hasPartialSigs,
+			"partialSigsCount", len(input.PartialSigs))
+
+		if hasRedeemScript && hasWitnessScript && hasPartialSigs {
+			// P2SH-P2WSH multisig - use custom finalization
+			logger.Debug("Using custom multisig finalization", "input", i)
+			if err := b.finalizeMultisigInput(parsed.Packet, i); err != nil {
+				return "", fmt.Errorf("failed to finalize multisig input %d: %w", i, err)
+			}
+		} else {
+			// Other script types - use btcd's default finalization
+			logger.Debug("Using btcd default finalization", "input", i)
+			if err := psbt.Finalize(parsed.Packet, i); err != nil {
+				return "", fmt.Errorf("failed to finalize input %d: %w", i, err)
+			}
 		}
 	}
 
@@ -348,6 +420,80 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
 		"inputs", len(parsed.Packet.UnsignedTx.TxIn))
 
 	return finalizedPSBT, nil
+}
+
+// finalizeMultisigInput finalizes a P2SH-P2WSH multisig PSBT input.
+// This is a custom implementation to work around btcd's Finalize() limitations with P2SH-P2WSH.
+//
+// For P2SH-P2WSH multisig:
+//   - scriptSig contains the redeemScript (P2WSH: OP_0 <witnessScriptHash>)
+//   - witness contains: [OP_0, sig1, sig2, ..., witnessScript]
+func (b *Bitcoin) finalizeMultisigInput(packet *psbt.Packet, inputIndex int) error {
+	input := packet.Inputs[inputIndex]
+
+	// Ensure we have the required scripts
+	if len(input.RedeemScript) == 0 {
+		return errors.New("missing redeem script for P2SH-P2WSH input")
+	}
+	if len(input.WitnessScript) == 0 {
+		return errors.New("missing witness script for P2WSH multisig input")
+	}
+	if len(input.PartialSigs) == 0 {
+		return errors.New("no signatures to finalize")
+	}
+
+	// Extract signatures from PartialSigs
+	// For multisig, we need to order signatures according to the pubkey order in witness script
+	sigs := make([][]byte, 0, len(input.PartialSigs))
+	for _, partialSig := range input.PartialSigs {
+		sigs = append(sigs, partialSig.Signature)
+	}
+
+	// Build witness stack for P2WSH multisig:
+	// [OP_0, sig1, sig2, ..., witnessScript]
+	witness := wire.TxWitness{
+		[]byte{}, // OP_0 (required for CHECKMULTISIG bug)
+	}
+	for _, sig := range sigs {
+		witness = append(witness, sig)
+	}
+	witness = append(witness, input.WitnessScript)
+
+	// Serialize witness to FinalScriptWitness format
+	// PSBT witness format is the same as transaction witness serialization
+	var witnessBuf bytes.Buffer
+	// Write witness stack count (always 1 for witness serialization per input)
+	if err := wire.WriteVarInt(&witnessBuf, 0, uint64(len(witness))); err != nil {
+		return fmt.Errorf("failed to write witness count: %w", err)
+	}
+	// Write each witness element
+	for _, elem := range witness {
+		if err := wire.WriteVarBytes(&witnessBuf, 0, elem); err != nil {
+			return fmt.Errorf("failed to write witness element: %w", err)
+		}
+	}
+	input.FinalScriptWitness = witnessBuf.Bytes()
+
+	// Build scriptSig for P2SH wrapping:
+	// For P2SH-P2WSH, scriptSig is just the redeemScript (P2WSH: OP_0 <hash>)
+	scriptSigBuilder := txscript.NewScriptBuilder()
+	scriptSigBuilder.AddData(input.RedeemScript)
+	scriptSig, err := scriptSigBuilder.Script()
+	if err != nil {
+		return fmt.Errorf("failed to build scriptSig: %w", err)
+	}
+	input.FinalScriptSig = scriptSig
+
+	// Clear partial signatures as they're no longer needed
+	input.PartialSigs = nil
+
+	logger.Debug("Finalized P2SH-P2WSH multisig input",
+		"input", inputIndex,
+		"signatures", len(sigs),
+		"witnessLen", len(input.FinalScriptWitness),
+		"scriptSigLen", len(input.FinalScriptSig))
+
+	return nil
 }
 
 // ExtractTransaction extracts the final signed transaction from a finalized PSBT.

@@ -17,13 +17,16 @@ type MultisigSigner struct {
 	ExtendedKey    *hdkeychain.ExtendedKey
 }
 
-// GenerateMultisigDescriptor generates a traditional multisig descriptor (wsh(sortedmulti)).
+// GenerateMultisigDescriptor generates a traditional multisig descriptor.
 //
-// Format: wsh(sortedmulti(M,[fp1/path]xpub1/change/*,[fp2/path]xpub2/change/*,...))
+// Format:
+//   - P2WSH (native SegWit): wsh(sortedmulti(M,[fp1/path]xpub1/change/*,[fp2/path]xpub2/change/*,...))
+//   - P2SH-P2WSH (wrapped SegWit): sh(wsh(sortedmulti(M,[fp1/path]xpub1/change/*,[fp2/path]xpub2/change/*,...)))
 func (d *DescriptorService) GenerateMultisigDescriptor(
 	requiredSigs int,
 	signers []MultisigSigner,
 	isChange bool,
+	isP2SHWrapped bool,
 ) (string, error) {
 	if len(signers) == 0 {
 		return "", errors.New("no multisig signers provided")
@@ -38,11 +41,20 @@ func (d *DescriptorService) GenerateMultisigDescriptor(
 		return "", err
 	}
 
-	descriptor := fmt.Sprintf(
-		"wsh(sortedmulti(%d,%s))",
+	multisigPart := fmt.Sprintf(
+		"sortedmulti(%d,%s)",
 		requiredSigs,
 		strings.Join(keyStrings, ","),
 	)
+
+	var descriptor string
+	if isP2SHWrapped {
+		// P2SH-P2WSH: sh(wsh(sortedmulti(...)))
+		descriptor = fmt.Sprintf("sh(wsh(%s))", multisigPart)
+	} else {
+		// P2WSH: wsh(sortedmulti(...))
+		descriptor = fmt.Sprintf("wsh(%s)", multisigPart)
+	}
 
 	// Note: Checksum is NOT added here because the domain layer's BIP380 implementation
 	// produces incorrect checksums. Instead, the watch wallet will add checksums using

@@ -467,12 +467,12 @@ func (k *HDKey) getP2SHSegWitAddr(privKey *btcec.PrivateKey) (string, string, er
 		return "", "", fmt.Errorf("fail to call txscript.PayToAddrScript(): %w", err)
 	}
 
-	// value of payToAddrScript is equal to scriptPubKey, but it's not redeemScript
-	// if call `getaddressinfo` API, result includes this value as scriptPubKey in embedded in p2sh_segwit_address
-	// That's why payToAddrScript is not used as redeemScript
-	// Redeem Script => Hash of RedeemScript => p2SH ScriptPubKey
+	// For P2SH-SegWit (P2SH-wrapped witness), the redeemScript IS the witness program
+	// The witness program (OP_0 <hash>) is hashed to create the P2SH address
+	// When spending, the redeemScript reveals the witness program
+	// Redeem Script (witness program) => Hash of RedeemScript => P2SH ScriptPubKey
 
-	var strRedeemScript string // FIXME: not implemented yet
+	strRedeemScript := hex.EncodeToString(payToAddrScript)
 	switch k.coinTypeCode {
 	case domainCoin.BTC:
 		btcAddress, addrErr := btcutil.NewAddressScriptHash(payToAddrScript, k.conf)
