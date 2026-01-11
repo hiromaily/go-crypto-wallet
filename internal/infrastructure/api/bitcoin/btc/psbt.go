@@ -367,13 +367,21 @@ func (b *Bitcoin) ExtractTransaction(psbtBase64 string) (*wire.MsgTx, error) {
 
 // IsPSBTComplete checks if a PSBT has all required signatures.
 // Used to determine if PSBT is ready for finalization.
+//
+// This function uses a custom completion check for multisig PSBTs because btcd's
+// Packet.IsComplete() only checks if inputs are finalized, not if enough signatures
+// exist for multisig threshold. For P2SH-P2WSH multisig (e.g., 2-of-3), we need to:
+// 1. Parse the witness script to determine M-of-N requirements
+// 2. Count partial signatures in each input
+// 3. Compare signature count against required threshold
 func (b *Bitcoin) IsPSBTComplete(psbtBase64 string) (bool, error) {
 	parsed, err := b.parsePSBTInternal(psbtBase64)
 	if err != nil {
 		return false, fmt.Errorf("failed to parse PSBT: %w", err)
 	}
 
-	return parsed.IsComplete, nil
+	// Use custom multisig completion check
+	return b.isMultisigPSBTComplete(parsed.Packet)
 }
 
 // GetPSBTFee calculates the transaction fee from a PSBT.
@@ -572,6 +580,134 @@ func (*Bitcoin) signInputWithKey(
 
 	logger.Debug("Signature not added", "input", inputIndex, "outcome", outcome)
 	return false
+}
+
+// isMultisigPSBTComplete checks if a multisig PSBT has enough signatures for each input.
+// This is a custom implementation because btcd's Packet.IsComplete() only checks if inputs
+// are finalized, not if there are enough partial signatures for the multisig threshold.
+//
+// For P2SH-P2WSH multisig (e.g., 2-of-3):
+// 1. Parse the witness script to extract M-of-N requirements
+// 2. Count partial signatures for each input
+// 3. Return true if all inputs have at least M signatures
+func (b *Bitcoin) isMultisigPSBTComplete(packet *psbt.Packet) (bool, error) {
+	// Check each input
+	for i, input := range packet.Inputs {
+		// If input is already finalized, it's complete
+		if input.FinalScriptSig != nil || input.FinalScriptWitness != nil {
+			logger.Debug("Input already finalized", "input", i)
+			continue
+		}
+
+		// For multisig, we need to check the witness script
+		if len(input.WitnessScript) == 0 {
+			// No witness script - might be single-sig or already finalized
+			// Check if it has at least one partial signature
+			if len(input.PartialSigs) == 0 {
+				logger.Debug("Input has no witness script and no partial signatures", "input", i)
+				return false, nil
+			}
+			continue
+		}
+
+		// Parse witness script to determine required signatures (M-of-N)
+		requiredSigs, totalSigs, err := b.parseMultisigScript(input.WitnessScript)
+		if err != nil {
+			// If we can't parse it as multisig, fall back to checking partial sigs
+			logger.Debug("Failed to parse witness script as multisig, checking partial sigs",
+				"input", i, "error", err, "partialSigs", len(input.PartialSigs))
+			if len(input.PartialSigs) == 0 {
+				return false, nil
+			}
+			continue
+		}
+
+		// Count partial signatures for this input
+		sigCount := len(input.PartialSigs)
+
+		logger.Debug("Checking multisig completion",
+			"input", i,
+			"requiredSigs", requiredSigs,
+			"totalSigs", totalSigs,
+			"currentSigs", sigCount)
+
+		// Check if we have enough signatures
+		if sigCount < requiredSigs {
+			logger.Debug("Insufficient signatures for input",
+				"input", i,
+				"required", requiredSigs,
+				"have", sigCount)
+			return false, nil
+		}
+	}
+
+	// All inputs have enough signatures
+	logger.Debug("PSBT has enough signatures for all inputs")
+	return true, nil
+}
+
+// parseMultisigScript parses a multisig witness script to extract M-of-N requirements.
+// Returns (requiredSigs, totalSigs, error).
+//
+// Multisig script format: <M> <pubkey1> <pubkey2> ... <pubkeyN> <N> OP_CHECKMULTISIG
+// Example 2-of-3: OP_2 <pk1> <pk2> <pk3> OP_3 OP_CHECKMULTISIG
+func (*Bitcoin) parseMultisigScript(script []byte) (int, int, error) {
+	if len(script) == 0 {
+		return 0, 0, errors.New("empty script")
+	}
+
+	// Parse script to extract opcodes and data
+	tokenizer := txscript.MakeScriptTokenizer(0, script)
+
+	// First opcode should be OP_M (required signatures)
+	if !tokenizer.Next() {
+		return 0, 0, errors.New("failed to read first opcode")
+	}
+
+	firstOp := tokenizer.Opcode()
+	if !txscript.IsSmallInt(firstOp) {
+		return 0, 0, fmt.Errorf("first opcode is not a small int (M): %v", firstOp)
+	}
+	requiredSigs := txscript.AsSmallInt(firstOp)
+
+	// Count public keys
+	pubKeyCount := 0
+	for tokenizer.Next() {
+		opcode := tokenizer.Opcode()
+
+		// Check if this is the total signers count (N)
+		if txscript.IsSmallInt(opcode) {
+			totalSigs := txscript.AsSmallInt(opcode)
+
+			// Next should be OP_CHECKMULTISIG
+			if !tokenizer.Next() {
+				return 0, 0, errors.New("script ended before OP_CHECKMULTISIG")
+			}
+			if tokenizer.Opcode() != txscript.OP_CHECKMULTISIG {
+				return 0, 0, fmt.Errorf("expected OP_CHECKMULTISIG, got %v", tokenizer.Opcode())
+			}
+
+			// Verify counts match
+			if pubKeyCount != totalSigs {
+				return 0, 0, fmt.Errorf("pubkey count mismatch: found %d pubkeys, script says %d",
+					pubKeyCount, totalSigs)
+			}
+
+			logger.Debug("Parsed multisig script",
+				"required", requiredSigs,
+				"total", totalSigs,
+				"pubkeys", pubKeyCount)
+
+			return requiredSigs, totalSigs, nil
+		}
+
+		// This should be a public key
+		if len(tokenizer.Data()) == 33 || len(tokenizer.Data()) == 65 {
+			pubKeyCount++
+		}
+	}
+
+	return 0, 0, errors.New("script does not match multisig format (missing N or OP_CHECKMULTISIG)")
 }
 
 // decodeHexScript decodes a hex-encoded script to bytes

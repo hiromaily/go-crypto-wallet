@@ -55,7 +55,10 @@ func (u *sendTransactionUseCase) Execute(
 	actionType := fileNameType.ActionType
 	txID := fileNameType.TxID
 
-	logger.Debug("sending transaction", "action_type", actionType.String(), "tx_id", txID, "tx_type", fileNameType.TxType.String())
+	logger.Debug("sending transaction",
+		"action_type", actionType.String(),
+		"tx_id", txID,
+		"tx_type", fileNameType.TxType.String())
 
 	// Determine file format based on extension and read accordingly
 	var signedHex string
