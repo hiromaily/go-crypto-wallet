@@ -599,8 +599,17 @@ func (*Bitcoin) signInputWithKey(
 // 2. Count partial signatures for each input
 // 3. Return true if all inputs have at least M signatures
 func (b *Bitcoin) isMultisigPSBTComplete(packet *psbt.Packet) (bool, error) {
+	logger.Debug("Checking PSBT completion", "totalInputs", len(packet.Inputs))
+
 	// Check each input
 	for i, input := range packet.Inputs {
+		logger.Debug("Checking input",
+			"input", i,
+			"hasFinalScriptSig", input.FinalScriptSig != nil,
+			"hasFinalScriptWitness", input.FinalScriptWitness != nil,
+			"witnessScriptLen", len(input.WitnessScript),
+			"partialSigsCount", len(input.PartialSigs))
+
 		// If input is already finalized, it's complete
 		if input.FinalScriptSig != nil || input.FinalScriptWitness != nil {
 			logger.Debug("Input already finalized", "input", i)
@@ -615,8 +624,14 @@ func (b *Bitcoin) isMultisigPSBTComplete(packet *psbt.Packet) (bool, error) {
 				logger.Debug("Input has no witness script and no partial signatures", "input", i)
 				return false, nil
 			}
+			logger.Debug("Input has partial sigs but no witness script (single-sig?)", "input", i)
 			continue
 		}
+
+		// Log witness script for debugging
+		logger.Debug("Input has witness script",
+			"input", i,
+			"scriptHex", hex.EncodeToString(input.WitnessScript))
 
 		// Parse witness script to determine required signatures (M-of-N)
 		requiredSigs, totalSigs, err := b.parseMultisigScript(input.WitnessScript)
