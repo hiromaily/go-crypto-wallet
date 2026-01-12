@@ -1,4 +1,19 @@
-# coin_type: "btc"  # btc, bch
+# =============================================================================
+# BTC Sign1 Wallet Configuration
+# =============================================================================
+# All values can be overridden by environment variables with WALLET_ prefix.
+# Priority: Environment Variables > Config File > Default Values
+#
+# Examples:
+#   WALLET_ADDRESS_TYPE=p2sh-segwit
+#   WALLET_BITCOIN_HOST=127.0.0.1:20332
+#   WALLET_MYSQL_HOST=localhost:3306
+#   WALLET_LOGGER_LEVEL=info
+#
+# See pkg/config/README.md for full documentation.
+# =============================================================================
+
+# coin_type: "btc" # btc, bch
 # address_type options:
 #   - legacy:      P2PKH (Legacy addresses starting with 1)
 #   - p2sh-segwit: P2SH-wrapped SegWit (P2SH-P2WPKH/P2SH-P2WSH, addresses starting with 3)
