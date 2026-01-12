@@ -5,11 +5,12 @@
 <img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/bitcoin-img.svg?sanitize=true">
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/hiromaily/go-crypto-wallet)](https://goreportcard.com/report/github.com/hiromaily/go-crypto-wallet)
+[![CI](https://github.com/hiromaily/go-crypto-wallet/workflows/CI/badge.svg)](https://github.com/hiromaily/go-crypto-wallet/actions)
 [![GitHub release](https://img.shields.io/badge/release-v5.0.0-blue.svg)](https://github.com/hiromaily/go-crypto-wallet/releases)
-[![MIT License](./LICENSE)]
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Wallet functionalities to create raw transaction, to sign on unsigned transaction,
-to send signed transaction for BTC, BCH, ETH, XRP and so on.  
+to send signed transaction for BTC, BCH, ETH, XRP and so on.
 
 ## What kind of coin can be used?
 
@@ -18,6 +19,17 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
 - Ethereum
 - ERC-20 Token
 - Ripple
+
+## Requirements
+
+| Tool | Version | Description |
+|------|---------|-------------|
+| Go | 1.25.5 | Programming language |
+| MySQL | 8.4 | Database (via Docker) |
+| Atlas | 1.0.0 | Database schema migration |
+| sqlc | 1.30.0 | SQL code generator |
+| Docker | latest | Container runtime |
+| Docker Compose | latest | Container orchestration |
 
 ## Current development
 
@@ -64,7 +76,7 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
 
 ## Wallet Type
 
-This is explained for BTC/BCH for now.  
+This is explained for BTC/BCH for now.
 There are mainly 3 wallets separately and these wallets are expected to be installed in each different devices.
 
 ### 1.Watch only wallet
@@ -78,7 +90,7 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 
 ### 2.Keygen wallet as cold wallet
 
-- Key management functionalities for accounts.  
+- Key management functionalities for accounts.
 - This wallet is expected to work offline.
 - Major functionalities are
   - generating seed for accounts
@@ -275,12 +287,14 @@ The `pkg/` directory contains shared utilities and legacy/transitional code:
 This project provides an **optional** DevContainer configuration for a standardized, isolated development environment. DevContainer is particularly useful when working with AI coding assistants like Claude Code, GitHub Copilot, or Cursor.
 
 **Key Benefits:**
+
 - ✅ **Safe AI Development**: Isolated environment protects your host system from accidental AI-generated changes
 - ✅ **Consistent Setup**: Pre-configured with Go 1.25.5, golangci-lint v2.7.2, Atlas v1.0.0, and GitHub CLI
 - ✅ **Quick Start**: New developers can start coding in minutes
 - ✅ **Zero Impact**: Local development workflow remains completely unchanged
 
 **Quick Start:**
+
 ```bash
 # 1. Open project in VS Code or Cursor
 code .
@@ -293,6 +307,7 @@ code .
 ```
 
 **Documentation:**
+
 - 📖 [Complete DevContainer Guide](./docs/development/devcontainer.md) - Setup, usage, and troubleshooting
 - 🤖 [AI-Assisted Development with DevContainer](./docs/development/devcontainer.md#using-with-ai-tools) - Claude Code, Copilot integration
 
