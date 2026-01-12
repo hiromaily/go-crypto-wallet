@@ -1,37 +1,42 @@
 # coin_type: "btc"  # btc, bch
-address_type: "p2sh-segwit"  # legacy, p2sh-segwit, bech32, taproot
+# address_type options:
+#   - legacy:      P2PKH (Legacy addresses starting with 1)
+#   - p2sh-segwit: P2SH-wrapped SegWit (P2SH-P2WPKH/P2SH-P2WSH, addresses starting with 3)
+#   - bech32:      Native SegWit (P2WPKH/P2WSH, addresses starting with bc1q)
+#   - taproot:     Taproot (P2TR, addresses starting with bc1p)
+address_type: "p2sh-segwit"
 
 bitcoin:
   host: "127.0.0.1:18332"
-# if specific wallet want to be used like `bitcoin-cli -rpcwallet=watch`
-# host: "127.0.0.1:18332/wallet/watch"
+  # if specific wallet want to be used like `bitcoin-cli -rpcwallet=watch`
+  # host: "127.0.0.1:18332/wallet/watch"
   user: "xyz"
   pass: "xyz"
   http_post_mode: true
   disable_tls: true
-  network_type: "regtest"  # mainnet, testnet3, regtest, signet
+  network_type: "regtest" # mainnet, testnet3, regtest, signet
 
   block:
-    confirmation_num: 3  # block number for required confirmation
+    confirmation_num: 3 # block number for required confirmation
 
   fee:
-    adjustment_min: 0.5  # adjustable minimum fee magnification
-    adjustment_max: 2.0  # adjustable maximum fee magnification
+    adjustment_min: 0.5 # adjustable minimum fee magnification
+    adjustment_max: 2.0 # adjustable maximum fee magnification
 
 logger:
   service: "btc-wallet"
-  format: "json"  # json, console
-  level: "debug"  # debug, info, warn, error
+  format: "json" # json, console
+  level: "debug" # debug, info, warn, error
   is_stacktrace: true
 
 # only available for watch only wallet
 tracer:
-  type: "none"  # none, jaeger, datadog
+  type: "none" # none, jaeger, datadog
 
   jaeger:
     service_name: "btc-wallet"
     collector_endpoint: "http://127.0.0.1:14268/api/traces"
-    sampling_probability: 0.5  # 0.001 to 1.0
+    sampling_probability: 0.5 # 0.001 to 1.0
 
 mysql:
   host: "127.0.0.1:3306"
@@ -44,4 +49,3 @@ file_path:
   tx: "./data/tx/btc/"
   address: "./data/address/btc/"
   full_pubkey: "./data/fullpubkey/btc/"
-
