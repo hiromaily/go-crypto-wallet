@@ -608,8 +608,10 @@ func (c *container) getKeyType() domainKey.KeyType {
 	//   - taproot     -> bip86
 	keyType, err := c.conf.AddressType.ToKeyType()
 	if err != nil {
-		// Fallback to BIP44 for unsupported address types
-		return domainKey.KeyTypeBIP44
+		// Unsupported address type is a critical configuration error.
+		// Panic to prevent silent failures that could lead to incorrect
+		// key generation and potential asset loss.
+		panic(fmt.Sprintf("failed to derive key type from address type %q: %v", c.conf.AddressType, err))
 	}
 	return keyType
 }
