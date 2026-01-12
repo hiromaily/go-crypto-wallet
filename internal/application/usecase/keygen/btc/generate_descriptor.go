@@ -116,8 +116,11 @@ func (u *generateDescriptorUseCase) generateSingleSigDescriptor(
 
 	// Verify that the stored key_type matches the requested address_type
 	// This prevents trying to generate P2TR descriptors from BIP44 keys, etc.
-	expectedKeyType := keyTypeForAddressType(input.AddressType)
-	if expectedKeyType != "" && accountKey.KeyType != expectedKeyType {
+	expectedKeyType, err := input.AddressType.ToKeyType()
+	if err != nil {
+		return "", fmt.Errorf("unsupported address type %q for key derivation: %w", input.AddressType, err)
+	}
+	if accountKey.KeyType != string(expectedKeyType) {
 		return "", fmt.Errorf(
 			"key type mismatch: stored key_type=%s, but address_type=%s requires key_type=%s",
 			accountKey.KeyType,
@@ -495,27 +498,4 @@ func (*generateDescriptorUseCase) deriveAccountExtendedKey(
 
 	// Convert to string (xpub format)
 	return accountKey.String(), nil
-}
-
-// keyTypeForAddressType returns the expected key_type for a given address_type.
-// This is used to validate that stored keys match the requested descriptor type.
-//
-// Mapping:
-//   - legacy (P2PKH) -> bip44
-//   - p2sh-segwit (P2SH-P2WPKH) -> bip49
-//   - bech32 (P2WPKH) -> bip84
-//   - taproot (P2TR) -> bip86
-func keyTypeForAddressType(addrType domainAddress.AddrType) string {
-	switch addrType {
-	case domainAddress.AddrTypeLegacy:
-		return "bip44"
-	case domainAddress.AddrTypeP2shSegwit:
-		return "bip49"
-	case domainAddress.AddrTypeBech32:
-		return "bip84"
-	case domainAddress.AddrTypeTaproot:
-		return "bip86"
-	default:
-		return ""
-	}
 }
