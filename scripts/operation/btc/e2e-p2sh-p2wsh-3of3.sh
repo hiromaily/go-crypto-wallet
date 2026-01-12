@@ -1,12 +1,33 @@
 #!/usr/bin/env bash
 
-# Bitcoin E2E Workflow Script
+# Bitcoin E2E Workflow Script - Pattern 8: P2SH-P2WSH 3-of-3 Multisig
 # This script automates the complete Bitcoin workflow from infrastructure setup to transaction execution
-# Usage: ./scripts/operation/btc/e2e-workflow.sh [OPTIONS]
+# Usage: ./scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh [OPTIONS]
 # Options:
 #   --cleanup  Stop containers and cleanup state
 #   --verbose  Enable verbose output
 #   -h, --help Display help message
+#
+# Reference Documentation:
+#   docs/crypto/btc/e2e_transaction_patterns.md - E2E transaction patterns and workflow details
+#
+# Transaction Pattern:
+#   Pattern 8: BTC P2SH-P2WSH 3-of-3 Multisig
+#   - Address Type: P2SH-P2WSH (BIP49 wrapped SegWit)
+#   - Address Format: `3...` (Testnet: `2...`)
+#   - Signature Requirement: 3-of-3 (Keygen + Sign1 + Sign2)
+#   - Descriptor: sh(wsh(sortedmulti(3, xpub1, xpub2, xpub3)))
+#
+# Required Config Settings:
+#   - config/wallet/btc_watch.yaml:  address_type: "p2sh-segwit"
+#   - config/wallet/btc_keygen.yaml: address_type: "p2sh-segwit"
+#   - config/wallet/btc_sign1.yaml:  address_type: "p2sh-segwit"
+#   - config/wallet/btc_sign2.yaml:  address_type: "p2sh-segwit"
+#   - All configs must use the same address_type for consistency
+
+
+
+
 
 set -eu
 

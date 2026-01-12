@@ -171,7 +171,7 @@ Schnorr署名ベースの集約署名プロトコル。N-of-N マルチシグが
 | 5 | P2WPKH (BIP84) | Single-sig | `bc1q...` | 🔶 手動テスト |
 | 6 | P2WSH (BIP84) | 2-of-3 Multisig | `bc1q...` | ❌ 未対応 |
 | 7 | P2WSH (BIP84) | 3-of-3 Multisig | `bc1q...` | ❌ 未対応 |
-| **8** | **P2SH-P2WSH** | **3-of-3 Multisig** | **`3...`** | **✅ e2e-workflow.sh** |
+| **8** | **P2SH-P2WSH** | **3-of-3 Multisig** | **`3...`** | **✅ e2e-p2sh-p2wsh-3of3.sh** |
 | 9 | P2TR (BIP86) | Single-sig | `bc1p...` | 🔶 手動テスト |
 | 10 | P2TR (BIP86) | MuSig2 (N-of-N) | `bc1p...` | 🔜 開発中 |
 | 11 | P2TR (BIP86) | Tapscript (M-of-N) | `bc1p...` | 🔜 開発中 |
@@ -190,7 +190,7 @@ Schnorr署名ベースの集約署名プロトコル。N-of-N マルチシグが
 
 ### パターン 8: BTC P2SH-P2WSH 3-of-3 Multisig（現在のE2E）
 
-**現在の `scripts/operation/btc/e2e-workflow.sh` で実装されているパターン**
+**現在の `scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh` で実装されているパターン**
 
 ```
 アドレスタイプ: P2SH-P2WSH (BIP49 wrapped SegWit)
@@ -313,7 +313,7 @@ Descriptor: tr(musig(xpub1, xpub2, xpub3))
 
 | スクリプト | コイン | パターン | 署名要件 |
 |-----------|--------|---------|---------|
-| `scripts/operation/btc/e2e-workflow.sh` | BTC | P2SH-P2WSH Multisig | 3-of-3 |
+| `scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh` | BTC | P2SH-P2WSH Multisig | 3-of-3 |
 | `scripts/operation/bch/e2e-workflow.sh` | BCH | CashAddr Multisig | 3-of-3 |
 
 ### 今後追加予定のE2Eスクリプト
