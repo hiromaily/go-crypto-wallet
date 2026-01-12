@@ -17,6 +17,7 @@ import (
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
 	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type generateDescriptorUseCase struct {
@@ -83,6 +84,12 @@ func (u *generateDescriptorUseCase) Generate(
 func (u *generateDescriptorUseCase) generateSingleSigDescriptor(
 	input keygenusecase.GenerateDescriptorInput,
 ) (string, error) {
+	logger.Debug("generating single-sig descriptor",
+		"account_type", input.AccountType.String(),
+		"address_type", input.AddressType.String(),
+		"is_change", input.IsChange,
+	)
+
 	accountKey, err := u.accountKeyRepo.GetOneMaxID(input.AccountType)
 	if err != nil {
 		return "", fmt.Errorf("get account key: %w", err)
@@ -91,12 +98,39 @@ func (u *generateDescriptorUseCase) generateSingleSigDescriptor(
 		return "", fmt.Errorf("no account key found for %s", input.AccountType.String())
 	}
 
-	xpub, err := hdkeychain.NewKeyFromString(accountKey.FullPublicKey)
-	if err != nil {
-		return "", fmt.Errorf("parse extended public key: %w", err)
+	logger.Debug("found account key",
+		"account_type", input.AccountType.String(),
+		"key_id", accountKey.ID,
+		"has_extended_privkey", accountKey.AccountExtendedPrivkey != nil,
+	)
+
+	// Check if AccountExtendedPrivkey is available (new format)
+	if accountKey.AccountExtendedPrivkey == nil || *accountKey.AccountExtendedPrivkey == "" {
+		return "", fmt.Errorf(
+			"account extended private key not found for %s - descriptors require keys generated with extended key support",
+			input.AccountType.String(),
+		)
 	}
 
-	fp, err := infraKey.FingerprintFromExtendedKey(accountKey.FullPublicKey)
+	// Derive account-level extended public key from extended private key
+	xpriv, err := hdkeychain.NewKeyFromString(*accountKey.AccountExtendedPrivkey)
+	if err != nil {
+		return "", fmt.Errorf("parse account extended private key: %w", err)
+	}
+
+	// Convert to extended public key
+	xpub, err := xpriv.Neuter()
+	if err != nil {
+		return "", fmt.Errorf("derive extended public key: %w", err)
+	}
+
+	// Verify network match
+	if u.chainConfig != nil && !xpub.IsForNet(u.chainConfig) {
+		return "", errors.New("extended key network mismatch")
+	}
+
+	// Calculate fingerprint from extended key
+	fp, err := infraKey.FingerprintFromExtendedKey(xpub.String())
 	if err != nil {
 		return "", fmt.Errorf("calculate fingerprint: %w", err)
 	}
@@ -106,20 +140,47 @@ func (u *generateDescriptorUseCase) generateSingleSigDescriptor(
 		return "", err
 	}
 
+	logger.Debug("generating descriptor",
+		"address_type", input.AddressType.String(),
+		"derivation_path", derivationPath,
+		"fingerprint", fp.String(),
+	)
+
+	var descriptor string
+	fpStr := fp.String()
 	switch input.AddressType {
 	case domainAddress.AddrTypeTaproot:
-		return u.descriptorService.GenerateTaprootDescriptor(fp.String(), derivationPath, xpub, input.IsChange)
+		descriptor, err = u.descriptorService.GenerateTaprootDescriptor(
+			fpStr, derivationPath, xpub, input.IsChange,
+		)
 	case domainAddress.AddrTypeBech32:
-		return u.descriptorService.GenerateBech32Descriptor(fp.String(), derivationPath, xpub, input.IsChange)
+		descriptor, err = u.descriptorService.GenerateBech32Descriptor(
+			fpStr, derivationPath, xpub, input.IsChange,
+		)
 	case domainAddress.AddrTypeP2shSegwit:
-		return u.descriptorService.GenerateP2SHSegWitDescriptor(fp.String(), derivationPath, xpub, input.IsChange)
+		descriptor, err = u.descriptorService.GenerateP2SHSegWitDescriptor(
+			fpStr, derivationPath, xpub, input.IsChange,
+		)
 	case domainAddress.AddrTypeLegacy:
-		return u.descriptorService.GenerateP2PKHDescriptor(fp.String(), derivationPath, xpub, input.IsChange)
+		descriptor, err = u.descriptorService.GenerateP2PKHDescriptor(
+			fpStr, derivationPath, xpub, input.IsChange,
+		)
 	case domainAddress.AddrTypeBCHCashAddr, domainAddress.AddrTypeETH:
 		return "", fmt.Errorf("unsupported address type for Bitcoin descriptors: %s", input.AddressType)
 	default:
 		return "", fmt.Errorf("unsupported address type for single-sig: %s", input.AddressType)
 	}
+
+	if err != nil {
+		return "", fmt.Errorf("generate descriptor for %s: %w", input.AddressType, err)
+	}
+
+	logger.Debug("successfully generated descriptor",
+		"account_type", input.AccountType.String(),
+		"address_type", input.AddressType.String(),
+	)
+
+	return descriptor, nil
 }
 
 func (u *generateDescriptorUseCase) generateMultisigDescriptor(
