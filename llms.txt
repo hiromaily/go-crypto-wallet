@@ -71,8 +71,9 @@ docs/          → Documentation
 - [docs/crypto/btc/](docs/crypto/btc/) - Bitcoin-specific documentation
 - [docs/crypto/eth/](docs/crypto/eth/) - Ethereum-specific documentation
 
-### Development Standards
+### Project Standards (SSOT)
 
+- [docs/standards/](docs/standards/) - Single Source of Truth for standards
 - [docs/standards/coding-conventions.md](docs/standards/coding-conventions.md) - Coding standards
 - [docs/standards/security.md](docs/standards/security.md) - Security requirements
 - [docs/standards/testing.md](docs/standards/testing.md) - Testing strategy
@@ -81,6 +82,7 @@ docs/          → Documentation
 ### AI Agent Context
 
 - [docs/ai-agents/](docs/ai-agents/) - AI-specific context and task guides
+- [docs/ai-agents/guidelines/](docs/ai-agents/guidelines/) - Detailed guidelines (full context)
 - [docs/ai-agents/task-contexts/](docs/ai-agents/task-contexts/) - Task-type specific context
 
 ## Supported Cryptocurrencies
