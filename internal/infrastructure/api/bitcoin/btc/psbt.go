@@ -442,11 +442,72 @@ func (b *Bitcoin) finalizeMultisigInput(packet *psbt.Packet, inputIndex int) err
 		return errors.New("no signatures to finalize")
 	}
 
-	// Extract signatures from PartialSigs
-	// For multisig, we need to order signatures according to the pubkey order in witness script
+	// Extract public keys from witness script to determine signature order
+	// For multisig, signatures MUST be ordered according to pubkey order in witness script
+	pubKeys, err := b.extractPubKeysFromScript(input.WitnessScript)
+	if err != nil {
+		return fmt.Errorf("failed to extract public keys from witness script: %w", err)
+	}
+
+	// Log public keys from witness script for debugging
+	logger.Debug("Public keys extracted from witness script",
+		"input", inputIndex,
+		"count", len(pubKeys))
+	for i, pk := range pubKeys {
+		logger.Debug("Witness script pubkey",
+			"input", inputIndex,
+			"index", i,
+			"length", len(pk),
+			"pubkey", hex.EncodeToString(pk))
+	}
+
+	// Log partial signatures for debugging
+	logger.Debug("Partial signatures available",
+		"input", inputIndex,
+		"count", len(input.PartialSigs))
+	for i, ps := range input.PartialSigs {
+		logger.Debug("PartialSig pubkey",
+			"input", inputIndex,
+			"index", i,
+			"length", len(ps.PubKey),
+			"pubkey", hex.EncodeToString(ps.PubKey))
+	}
+
+	// Order signatures according to public key order in witness script
+	// PartialSigs is a slice []*PartialSig where each PartialSig has a PubKey field
 	sigs := make([][]byte, 0, len(input.PartialSigs))
-	for _, partialSig := range input.PartialSigs {
-		sigs = append(sigs, partialSig.Signature)
+	for pkIdx, pubKey := range pubKeys {
+		// Find the signature for this public key in PartialSigs
+		found := false
+		for psIdx, partialSig := range input.PartialSigs {
+			if bytes.Equal(partialSig.PubKey, pubKey) {
+				sigs = append(sigs, partialSig.Signature)
+				logger.Debug("Matched signature for pubkey",
+					"input", inputIndex,
+					"witnessPubkeyIndex", pkIdx,
+					"partialSigIndex", psIdx,
+					"pubkey", hex.EncodeToString(pubKey))
+				found = true
+				break
+			}
+		}
+		if !found {
+			logger.Warn("No signature found for witness script pubkey",
+				"input", inputIndex,
+				"witnessPubkeyIndex", pkIdx,
+				"pubkey", hex.EncodeToString(pubKey))
+		}
+	}
+
+	logger.Debug("Signature matching complete",
+		"input", inputIndex,
+		"witnessScriptPubkeys", len(pubKeys),
+		"partialSigs", len(input.PartialSigs),
+		"matchedSigs", len(sigs))
+
+	if len(sigs) == 0 {
+		return fmt.Errorf("no matching signatures found: witness script has %d pubkeys, PSBT has %d partial sigs, but none matched",
+			len(pubKeys), len(input.PartialSigs))
 	}
 
 	// Build witness stack for P2WSH multisig:
@@ -896,6 +957,59 @@ func (*Bitcoin) parseMultisigScript(script []byte) (int, int, error) {
 	}
 
 	return 0, 0, errors.New("script does not match multisig format (missing N or OP_CHECKMULTISIG)")
+}
+
+// extractPubKeysFromScript extracts public keys from a multisig script in order
+func (*Bitcoin) extractPubKeysFromScript(script []byte) ([][]byte, error) {
+	if len(script) == 0 {
+		return nil, errors.New("empty script")
+	}
+
+	// Parse script to extract public keys
+	tokenizer := txscript.MakeScriptTokenizer(0, script)
+
+	// First opcode should be OP_M (required signatures) - skip it
+	if !tokenizer.Next() {
+		return nil, errors.New("failed to read first opcode")
+	}
+
+	firstOp := tokenizer.Opcode()
+	if !txscript.IsSmallInt(firstOp) {
+		return nil, fmt.Errorf("first opcode is not a small int (M): %v", firstOp)
+	}
+
+	// Extract public keys in order
+	pubKeys := make([][]byte, 0)
+	for tokenizer.Next() {
+		opcode := tokenizer.Opcode()
+
+		// Check if this is the total signers count (N) - we're done
+		if txscript.IsSmallInt(opcode) {
+			// Next should be OP_CHECKMULTISIG
+			if !tokenizer.Next() {
+				return nil, errors.New("script ended before OP_CHECKMULTISIG")
+			}
+			if tokenizer.Opcode() != txscript.OP_CHECKMULTISIG {
+				return nil, fmt.Errorf("expected OP_CHECKMULTISIG, got %v", tokenizer.Opcode())
+			}
+
+			logger.Debug("Extracted public keys from multisig script",
+				"count", len(pubKeys))
+
+			return pubKeys, nil
+		}
+
+		// This should be a public key (33 bytes compressed or 65 bytes uncompressed)
+		data := tokenizer.Data()
+		if len(data) == 33 || len(data) == 65 {
+			// Make a copy of the data since tokenizer reuses the buffer
+			pubKey := make([]byte, len(data))
+			copy(pubKey, data)
+			pubKeys = append(pubKeys, pubKey)
+		}
+	}
+
+	return nil, errors.New("script does not match multisig format (missing N or OP_CHECKMULTISIG)")
 }
 
 // decodeHexScript decodes a hex-encoded script to bytes
