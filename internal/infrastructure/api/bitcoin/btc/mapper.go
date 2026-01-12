@@ -717,7 +717,7 @@ func FromAddressType(addrType domainBitcoin.AddressType) domainAddress.AddrType 
 		return domainAddress.AddrTypeP2shSegwit
 	case domainBitcoin.AddressTypeBech32:
 		return domainAddress.AddrTypeBech32
-	case domainBitcoin.AddressTypeBech32m:
+	case domainBitcoin.AddressTypeTaproot:
 		return domainAddress.AddrTypeTaproot
 	default:
 		// This indicates a programming error (unhandled domain type).
@@ -736,7 +736,7 @@ func ToAddressType(addrType domainAddress.AddrType) domainBitcoin.AddressType {
 	case domainAddress.AddrTypeBech32:
 		return domainBitcoin.AddressTypeBech32
 	case domainAddress.AddrTypeTaproot:
-		return domainBitcoin.AddressTypeBech32m
+		return domainBitcoin.AddressTypeTaproot
 	case domainAddress.AddrTypeBCHCashAddr:
 		// BCH uses legacy address format in domain model
 		return domainBitcoin.AddressTypeLegacy

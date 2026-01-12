@@ -8,7 +8,7 @@ const (
 	AddressTypeLegacy     AddressType = "legacy"      // P2PKH
 	AddressTypeP2SHSegwit AddressType = "p2sh-segwit" // P2SH-wrapped SegWit
 	AddressTypeBech32     AddressType = "bech32"      // Native SegWit (P2WPKH)
-	AddressTypeBech32m    AddressType = "bech32m"     // Taproot (P2TR)
+	AddressTypeTaproot    AddressType = "taproot"     // Taproot (P2TR) - uses bech32m encoding
 )
 
 // String returns string representation
