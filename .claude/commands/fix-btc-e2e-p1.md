@@ -216,7 +216,6 @@ docker exec btc-keygen bitcoin-cli -regtest createwallet "keygen" false true
 ```bash
 # 1. 環境変数確認
 echo "WALLET_ADDRESS_TYPE: $WALLET_ADDRESS_TYPE"  # "legacy" であること
-# Note: WALLET_KEY_TYPE is not needed (key_type is auto-derived from address_type)
 
 # 2. Keygen ウォレットの秘密鍵確認
 docker exec btc-keygen bitcoin-cli -regtest -rpcwallet=keygen \
@@ -261,7 +260,6 @@ grep -A2 "Environment Variable Overrides" \
 
 ```bash
 export WALLET_ADDRESS_TYPE="legacy"
-# Note: key_type is auto-derived from address_type (legacy -> bip44)
 ```
 
 ### DB関連エラー
