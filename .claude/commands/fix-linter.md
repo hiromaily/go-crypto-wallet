@@ -1,21 +1,47 @@
 # Fix Linter
 
-Fix linter errors reported by `make go-lint`.
+Fix linter errors by selecting appropriate skill based on language.
 
-## Skill Reference
+## Task Classification
 
-**Use the `go-development` Skill** for verification commands.
+| Linter Command | Language | Skill |
+|----------------|----------|-------|
+| `make go-lint` | Go | `go-development` |
+| `npm run lint` (in apps/) | TypeScript/JS | `typescript-development` |
+| `npm run lint` (contracts) | Solidity | `solidity-development` |
 
 ## Process
 
-1. **Run**: `make go-lint`
-2. **Prioritize**: syntax > security > type > style
-3. **Fix**: Address errors by priority
-4. **Verify**: Run verification commands from Skill
-5. **Commit**: Use `fix: resolve linter errors` format
+1. **Identify language** from linter command or error messages
+2. **Load Skill**: Use appropriate `{lang}-development` Skill
+3. **Prioritize**: syntax > security > type > style
+4. **Fix**: Address errors by priority
+5. **Verify**: Run Skill-specific verification commands
 
-## Guidelines
+## Quick Reference
 
-- Never edit files with `DO NOT EDIT` comments
-- Preserve original functionality
-- Use linter auto-fix where appropriate
+### Go
+
+```bash
+make go-lint
+# Fix errors
+make go-lint && make tidy && make check-build && make gotest
+```
+
+### TypeScript
+
+```bash
+cd apps/ripple-lib-server
+npm run lint
+# Fix errors
+npm run lint && npm run build && npm test
+```
+
+### Solidity
+
+```bash
+cd apps/erc20-token
+npm run lint
+# Fix errors
+truffle compile && truffle test
+```

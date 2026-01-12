@@ -57,3 +57,41 @@
   color: 0366d6
   description: Pull requests that update a dependency file
 
+# Programming Language Labels
+- name: lang:go
+  color: 00ADD8
+  description: Go language code
+
+- name: lang:typescript
+  color: 3178C6
+  description: TypeScript/JavaScript code
+
+- name: lang:solidity
+  color: 363636
+  description: Solidity smart contract code
+
+# Chain Labels
+- name: chain:btc
+  color: F7931A
+  description: Bitcoin (BTC) related
+
+- name: chain:bch
+  color: 0AC18E
+  description: Bitcoin Cash (BCH) related
+
+- name: chain:eth
+  color: 627EEA
+  description: Ethereum (ETH) related
+
+- name: chain:erc20
+  color: 627EEA
+  description: ERC-20 token related
+
+- name: chain:xrp
+  color: 23292F
+  description: XRP/Ripple related
+
+- name: chain:all
+  color: 6f42c1
+  description: Affects all supported chains
+

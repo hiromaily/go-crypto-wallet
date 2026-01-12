@@ -1,6 +1,6 @@
 # Claude Code Commands
 
-Minimal commands that invoke Skills for common tasks.
+Commands that select appropriate Skills based on task classification.
 
 ## Available Commands
 
@@ -10,17 +10,34 @@ Minimal commands that invoke Skills for common tasks.
 | `/fix-linter` | Fix linter errors |
 | `/fix-pr-review #123` | Address PR review comments |
 
-## Skills (Referenced by Commands)
+## Task Classification
 
-Commands use these Skills for detailed workflows:
+Commands automatically select Skills based on:
 
-| Skill | Description |
-|-------|-------------|
-| `go-development` | Branch, verify, review, commit workflow |
-| `github-issue-creation` | Create GitHub issues |
+### Language (from labels or files)
 
-## Usage
+| Classification | Skill |
+|----------------|-------|
+| `lang:go` / Go files | `go-development` |
+| `lang:typescript` / TS files | `typescript-development` |
+| `lang:solidity` / Solidity files | `solidity-development` |
 
-1. Invoke command (e.g., `/fix-issue #123`)
-2. Command loads the `go-development` Skill automatically
-3. Follow the workflow defined in the Skill
+### Chain (from labels)
+
+| Classification | Context |
+|----------------|---------|
+| `chain:btc` | Bitcoin considerations |
+| `chain:bch` | Bitcoin Cash considerations |
+| `chain:eth` | Ethereum considerations |
+| `chain:erc20` | ERC-20 token considerations |
+| `chain:xrp` | XRP/Ripple considerations |
+| `chain:all` | Cross-chain considerations |
+
+## Skills
+
+| Skill | Description | Path |
+|-------|-------------|------|
+| `go-development` | Go workflow | `.claude/skills/go-development/SKILL.md` |
+| `typescript-development` | TypeScript/JS workflow | `.claude/skills/typescript-development/SKILL.md` |
+| `solidity-development` | Solidity workflow | `.claude/skills/solidity-development/SKILL.md` |
+| `github-issue-creation` | Issue creation | `.claude/skills/github-issue-creation/SKILL.md` |

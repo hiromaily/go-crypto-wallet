@@ -54,17 +54,20 @@ make gotest       # Unit tests
 Before creating a commit, verify:
 
 ### Code Quality
+
 - [ ] Follows Clean Architecture (domain has ZERO infrastructure deps)
 - [ ] Error handling uses `fmt.Errorf("context: %w", err)`
 - [ ] Import order: standard → third-party → local
 - [ ] Exported functions have godoc comments
 
 ### Security
+
 - [ ] No private keys or sensitive data logged
 - [ ] No hardcoded secrets
 - [ ] Security-critical changes reviewed
 
 ### Auto-Generated Files
+
 - [ ] NOT editing files with `DO NOT EDIT` comments:
   - `internal/infrastructure/database/sqlc/*.go`
   - `internal/infrastructure/api/ripple/xrp/*.pb.go`
@@ -84,6 +87,7 @@ Closes #{issue_number}
 ```
 
 ### Types
+
 - `feat:` - New feature
 - `fix:` - Bug fix
 - `refactor:` - Code refactoring

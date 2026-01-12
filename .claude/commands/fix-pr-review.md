@@ -1,23 +1,34 @@
 # Fix PR Review #{pr_number}
 
-Address review comments on a pull request.
+Address review comments by selecting appropriate skills based on modified files.
 
-## Skill Reference
+## Task Classification
 
-**Use the `go-development` Skill** for verification and commit workflow.
+### Identify Language from PR Files
+
+| Files Modified | Skill to Use |
+|----------------|--------------|
+| `internal/`, `pkg/`, `cmd/`, `*.go` | `go-development` |
+| `apps/ripple-lib-server/`, `*.ts` | `typescript-development` |
+| `apps/erc20-token/contracts/`, `*.sol` | `solidity-development` |
 
 ## Process
 
 1. **Fetch PR**: `gh pr view {pr_number}`
 2. **Get comments**: `gh api repos/{owner}/{repo}/pulls/{pr_number}/comments`
-3. **Prioritize**: security > functionality > quality > docs
-4. **Fix**: Address each comment
-5. **Verify**: Run verification commands from Skill
-6. **Push**: `git push` (updates existing PR)
+3. **Classify**: Identify language from modified files
+4. **Load Skill**: Use appropriate `{lang}-development` Skill
+5. **Fix**: Address each comment (priority: security > functionality > quality)
+6. **Verify**: Run Skill-specific verification commands
+7. **Push**: `git push` (updates existing PR)
 
-## Parameters
+## Skills Reference
 
-- `{pr_number}`: Pull request number (e.g., `#123` or `123`)
+| Skill | Path |
+|-------|------|
+| Go | `.claude/skills/go-development/SKILL.md` |
+| TypeScript | `.claude/skills/typescript-development/SKILL.md` |
+| Solidity | `.claude/skills/solidity-development/SKILL.md` |
 
 ## Example
 
