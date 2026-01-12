@@ -21,23 +21,23 @@ Refer to @docs/standards/security.md for full security requirements.
 
 ### Security-Critical Areas
 
-- `internal/domain/wallet/` - Wallet operations
-- `internal/infrastructure/storage/` - Key storage
-- `cmd/keygen/` - Key generation
-- `cmd/sign/` - Transaction signing
+- `internal/infrastructure/wallet/key/` - Key generation
+- `internal/domain/key/` - Key value objects
+- Any code handling private keys, seeds, or passwords
 
 ### Wallet Architecture
 
 | Wallet | Environment | Security Level |
 |--------|-------------|----------------|
-| Watch | Online | Standard |
-| Keygen | **Offline** | Critical |
-| Sign | **Offline** | Critical |
+| Watch | Online | Public keys only |
+| Keygen | **Offline** | Generates private keys |
+| Sign | **Offline** | Signs transactions |
 
 ## Verification
 
 Before committing security-related changes:
 ```bash
+make go-check-vuln
 make go-lint
 make gotest
 ```
