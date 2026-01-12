@@ -61,6 +61,18 @@ CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account.yaml"
 export BTC_ACCOUNT_CONF="${CONFIG_ACCOUNT}"
 
 ###############################################################################
+# Environment Variable Overrides for Configuration
+###############################################################################
+# These environment variables override config file values.
+# Priority: Environment Variables > Config File > Default Values
+#
+# Pattern 1 (P2PKH Single-sig) requires:
+#   - address_type: "legacy" (BIP44)
+#   - key_type: "bip44"
+export WALLET_ADDRESS_TYPE="legacy"
+export WALLET_KEY_TYPE="bip44"
+
+###############################################################################
 # Cleanup Functions
 ###############################################################################
 
