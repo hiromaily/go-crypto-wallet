@@ -1,21 +1,60 @@
 # Codex Prompts
 
-Minimal prompts referencing shared workflow.
+> **TODO**: Codex CLI has unique characteristics different from Cursor and Claude Code.
+> Prompts configuration is pending until the optimal approach is determined.
 
-## Available Prompts
+## Differences from Cursor / Claude Code
 
-| Prompt | Description |
-|--------|-------------|
-| `fix-issue #123` | Fix a GitHub issue |
-| `fix-linter` | Fix linter errors |
-| `fix-pr-review #123` | Address PR review comments |
+| Feature | Codex CLI | Cursor | Claude Code |
+|---------|-----------|--------|-------------|
+| Config format | `config.toml` | `.mdc` files | `.md` files |
+| Prompts | CLI args / interactive | `/commands/` | `/commands/` |
+| Skills/Rules | `.codex/rules/` | `.cursor/rules/` | `.claude/skills/` |
+| Execution modes | Suggest/Auto Edit/Full Auto | N/A | N/A |
+| Sandbox | Network-disabled sandbox | IDE sandbox | Terminal sandbox |
 
-## Workflow
+## Codex-Specific Features
 
-All prompts follow the workflow in `.codex/rules/general.md`:
+### Approval Modes
 
-1. Branch from `main`
-2. Implement following Clean Architecture
-3. Verify: `make go-lint && make tidy && make check-build && make gotest`
-4. Self-review
-5. Commit & PR
+| Mode | Description |
+|------|-------------|
+| Suggest (default) | Proposes changes, requires approval |
+| Auto Edit | Auto file edits, approval for commands |
+| Full Auto | Autonomous in sandboxed environment |
+
+### Usage
+
+```bash
+# Suggest mode (default)
+codex "describe this function"
+
+# Auto edit mode
+codex --auto-edit "refactor this module"
+
+# Full auto mode
+codex --full-auto "implement feature"
+```
+
+### Configuration
+
+Codex uses `config.toml` instead of markdown prompts:
+
+```toml
+# .codex/config.toml
+model = "gpt-5-codex"
+approval_mode = "suggest"
+```
+
+## Current Status
+
+For now, Codex should use:
+
+- `.codex/rules/general.md` - General guidelines (references docs/standards/)
+
+Prompt-based workflows (like `/fix-issue`) are **not yet implemented** for Codex.
+
+## References
+
+- [Codex CLI Documentation](https://developers.openai.com/codex/)
+- [Codex Configuration](https://developers.openai.com/codex/config-advanced/)
