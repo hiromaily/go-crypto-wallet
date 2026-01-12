@@ -303,16 +303,10 @@ key_generation_phase() {
 
 	# Sign wallets - create hdkeys
 	#
-	# IMPORTANT: After PR #301, sign wallets need to have keys for ALL multisig accounts
+	# After PR #301, sign wallets need to have keys for ALL multisig accounts
 	# (deposit, payment, stored) because they participate in signing transactions for any
-	# of these accounts. The `sign create hdkey` command should automatically create keys
-	# for all required accounts, but currently it does not support the --account flag.
-	#
-	# FIXME: The Go code for `sign create hdkey` needs to be updated to automatically
-	# create auth keys for deposit, payment, and stored accounts instead of just one account.
-	# Until this is fixed, the E2E test will fail at the signing phase.
-	#
-	# Tracked in: issue #302 - https://github.com/hiromaily/go-crypto-wallet/issues/302
+	# of these accounts. The `sign create hdkey` command automatically creates keys
+	# for all required accounts (fixed in this PR).
 	#
 	log_substep "Creating HD keys for sign wallets"
 	for i in $(seq 1 "$SIGN_WALLET_NUM"); do

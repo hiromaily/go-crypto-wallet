@@ -34,13 +34,13 @@ func NewAuthHDWalletRepo(
 	}
 }
 
-// GetMaxIndex returns index for auth keys (always 0 since only one auth key is allowed)
-func (w *AuthHDWalletRepo) GetMaxIndex(_ domainAccount.AccountType) (int64, error) {
-	_, err := w.authKeyRepo.GetOne(w.authType)
+// GetMaxIndex returns index for auth keys (always 0 since only one auth key is allowed per account)
+func (w *AuthHDWalletRepo) GetMaxIndex(accountType domainAccount.AccountType) (int64, error) {
+	_, err := w.authKeyRepo.GetByAccount(w.authType, accountType)
 	if err != nil {
 		return 0, nil
 	}
-	return 0, errors.New("auth key has already been created. only one record is allowed")
+	return 0, errors.New("auth key has already been created for this account. only one record is allowed per account")
 }
 
 // Insert inserts key to auth_account_key table
