@@ -324,4 +324,3 @@ Bitcoin Cash uses CashAddr format. If you see address format errors:
 
 1. Ensure `address_type = "bch-cashaddr"` is set in configuration files
 2. Verify the wallet software supports CashAddr format
-
