@@ -1,0 +1,41 @@
+# Claude Rules - General
+
+## Overview
+
+General rules for Claude Code when working on go-crypto-wallet.
+
+## Behavior Guidelines
+
+- Follow @AGENTS.md for behavior guidelines
+- Refer to @docs/standards/ for detailed conventions
+- Read @ARCHITECTURE.md for system design
+
+## Code Quality
+
+Refer to @docs/standards/coding-conventions.md
+
+Key rules:
+- Follow Clean Architecture layer separation
+- Domain layer has ZERO infrastructure dependencies
+- Use error wrapping: `fmt.Errorf("context: %w", err)`
+- Follow language-specific verification commands
+
+## Testing
+
+Refer to @docs/standards/testing.md
+
+## Workflow
+
+Refer to @docs/standards/workflow.md
+
+Key rules:
+- Create feature branches for changes
+- Follow conventional commit messages
+- Run verification commands before committing
+
+## Auto-Generated Files
+
+**DO NOT EDIT** files containing `DO NOT EDIT` comments:
+- `internal/infrastructure/database/sqlc/*.go`
+- `internal/infrastructure/api/ripple/xrp/*.pb.go`
+- `internal/infrastructure/contract/token-abi.go`
