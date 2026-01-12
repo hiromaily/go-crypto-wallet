@@ -8,6 +8,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Environment variable prefix for wallet configuration.
+// Example: WALLET_ADDRESS_TYPE, WALLET_BITCOIN_HOST
+const envPrefix = "WALLET"
+
 // loadConfig loads a configuration file and unmarshals it into the target.
 //
 // This function automatically detects the configuration format based on file extension:
@@ -43,6 +47,22 @@ func loadConfig(path string, target any) error {
 	v := viper.New()
 	v.SetConfigFile(path)
 	v.SetConfigType(configType)
+
+	// Enable environment variable override
+	// Priority: Environment Variables > Config File > Default Values
+	//
+	// Environment variable naming convention:
+	//   - Prefix: WALLET_
+	//   - Nested keys use underscore: WALLET_BITCOIN_HOST
+	//   - All uppercase: WALLET_ADDRESS_TYPE
+	//
+	// Examples:
+	//   WALLET_ADDRESS_TYPE=legacy      -> address_type: "legacy"
+	//   WALLET_BITCOIN_HOST=127.0.0.1   -> bitcoin.host: "127.0.0.1"
+	//   WALLET_MYSQL_HOST=localhost     -> mysql.host: "localhost"
+	v.SetEnvPrefix(envPrefix)
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	v.AutomaticEnv()
 
 	if err := v.ReadInConfig(); err != nil {
 		return fmt.Errorf("can't read config file. %s: %w", path, err)
