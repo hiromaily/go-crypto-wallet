@@ -58,6 +58,7 @@ This project handles sensitive financial operations including private key manage
 **Purpose**: Pure business logic with **ZERO infrastructure dependencies**
 
 **Contains**:
+
 - Value Objects (AccountType, TxType, CoinTypeCode)
 - Entities (objects with identity and lifecycle)
 - Domain Services (stateless business logic)
@@ -65,6 +66,7 @@ This project handles sensitive financial operations including private key manage
 - Domain Errors (business-specific error types)
 
 **Rules**:
+
 - ❌ NO imports from infrastructure packages
 - ❌ NO database, API, or file I/O operations
 - ❌ NO external library dependencies (except stdlib)
@@ -72,6 +74,7 @@ This project handles sensitive financial operations including private key manage
 - ✅ Testable without mocks
 
 **Structure**:
+
 ```
 internal/domain/
 ├── account/      # Account types, validators, business rules
@@ -87,16 +90,19 @@ internal/domain/
 **Purpose**: Orchestrate business operations through use cases
 
 **Contains**:
+
 - **Use Cases** (`usecase/`): Single business operations with clear input/output
 - **Ports** (`ports/`): Interface definitions for infrastructure dependencies
 - **DTOs** (`dto/`): Data Transfer Objects for port interfaces
 
 **Rules**:
+
 - Use cases depend on port interfaces, not concrete implementations
 - Ports define contracts that infrastructure must fulfill
 - DTOs use domain types, not infrastructure types
 
 **Structure**:
+
 ```
 internal/application/
 ├── usecase/
@@ -121,17 +127,20 @@ internal/application/
 **Purpose**: Implement interfaces defined by application ports
 
 **Contains**:
+
 - API Clients (Bitcoin Core RPC, Ethereum JSON-RPC, Ripple gRPC)
 - Database Repositories (MySQL via SQLC)
 - File Storage (address files, transaction files)
 - Network Communication (WebSocket clients)
 
 **Rules**:
+
 - ❌ NO interface definitions (only implementations)
 - ✅ Implements port interfaces from `application/ports/`
 - ✅ Maps infrastructure types to application DTOs
 
 **Structure**:
+
 ```
 internal/infrastructure/
 ├── api/
@@ -154,15 +163,18 @@ internal/infrastructure/
 **Purpose**: Adapt between external interfaces and application layer
 
 **Contains**:
+
 - CLI Commands (Cobra-based command implementations)
 - Wallet Adapters (wallet-specific implementations)
 - HTTP Handlers (if applicable)
 
 **Rules**:
+
 - Commands depend on use cases, NOT services directly
 - Convert between external formats and application DTOs
 
 **Structure**:
+
 ```
 internal/interface-adapters/
 ├── cli/
@@ -186,10 +198,10 @@ func NewWatchWallet(cfg *config.WalletConfig) (*WatchWallet, error) {
     // Infrastructure
     bitcoinClient := bitcoin.NewClient(cfg.Bitcoin)
     repository := watchrepo.NewRepository(db)
-    
+
     // Application (Use Cases)
     createTxUseCase := watch.NewCreateTransactionUseCase(bitcoinClient, repository)
-    
+
     // Interface Adapters (Commands)
     return &WatchWallet{
         createTxCmd: cli.NewCreateTxCommand(createTxUseCase),
