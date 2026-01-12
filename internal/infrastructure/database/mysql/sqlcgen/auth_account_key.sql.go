@@ -11,7 +11,7 @@ import (
 )
 
 const getAuthAccountKey = `-- name: GetAuthAccountKey :one
-SELECT id, coin, key_type, auth_account, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, idx, addr_status, updated_at FROM auth_account_key WHERE coin = ? AND auth_account = ? LIMIT 1
+SELECT id, coin, key_type, auth_account, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, account_extended_privkey, idx, addr_status, updated_at FROM auth_account_key WHERE coin = ? AND auth_account = ? LIMIT 1
 `
 
 type GetAuthAccountKeyParams struct {
@@ -36,6 +36,7 @@ func (q *Queries) GetAuthAccountKey(ctx context.Context, arg GetAuthAccountKeyPa
 		&i.MultisigAddress,
 		&i.RedeemScript,
 		&i.WalletImportFormat,
+		&i.AccountExtendedPrivkey,
 		&i.Idx,
 		&i.AddrStatus,
 		&i.UpdatedAt,
@@ -44,7 +45,7 @@ func (q *Queries) GetAuthAccountKey(ctx context.Context, arg GetAuthAccountKeyPa
 }
 
 const getAuthAccountKeyByAccount = `-- name: GetAuthAccountKeyByAccount :one
-SELECT id, coin, key_type, auth_account, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, idx, addr_status, updated_at FROM auth_account_key WHERE coin = ? AND auth_account = ? AND account = ? LIMIT 1
+SELECT id, coin, key_type, auth_account, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, account_extended_privkey, idx, addr_status, updated_at FROM auth_account_key WHERE coin = ? AND auth_account = ? AND account = ? LIMIT 1
 `
 
 type GetAuthAccountKeyByAccountParams struct {
@@ -70,6 +71,7 @@ func (q *Queries) GetAuthAccountKeyByAccount(ctx context.Context, arg GetAuthAcc
 		&i.MultisigAddress,
 		&i.RedeemScript,
 		&i.WalletImportFormat,
+		&i.AccountExtendedPrivkey,
 		&i.Idx,
 		&i.AddrStatus,
 		&i.UpdatedAt,
@@ -80,25 +82,26 @@ func (q *Queries) GetAuthAccountKeyByAccount(ctx context.Context, arg GetAuthAcc
 const insertAuthAccountKey = `-- name: InsertAuthAccountKey :execresult
 INSERT INTO auth_account_key (
   coin, key_type, auth_account, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address,
-  full_public_key, multisig_address, redeem_script, wallet_import_format, idx, addr_status
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  full_public_key, multisig_address, redeem_script, wallet_import_format, account_extended_privkey, idx, addr_status
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type InsertAuthAccountKeyParams struct {
-	Coin               AuthAccountKeyCoin
-	KeyType            string
-	AuthAccount        string
-	Account            string
-	P2pkhAddress       string
-	P2shSegwitAddress  string
-	Bech32Address      string
-	TaprootAddress     sql.NullString
-	FullPublicKey      string
-	MultisigAddress    string
-	RedeemScript       string
-	WalletImportFormat string
-	Idx                int64
-	AddrStatus         int8
+	Coin                   AuthAccountKeyCoin
+	KeyType                string
+	AuthAccount            string
+	Account                string
+	P2pkhAddress           string
+	P2shSegwitAddress      string
+	Bech32Address          string
+	TaprootAddress         sql.NullString
+	FullPublicKey          string
+	MultisigAddress        string
+	RedeemScript           string
+	WalletImportFormat     string
+	AccountExtendedPrivkey sql.NullString
+	Idx                    int64
+	AddrStatus             int8
 }
 
 func (q *Queries) InsertAuthAccountKey(ctx context.Context, arg InsertAuthAccountKeyParams) (sql.Result, error) {
@@ -115,6 +118,7 @@ func (q *Queries) InsertAuthAccountKey(ctx context.Context, arg InsertAuthAccoun
 		arg.MultisigAddress,
 		arg.RedeemScript,
 		arg.WalletImportFormat,
+		arg.AccountExtendedPrivkey,
 		arg.Idx,
 		arg.AddrStatus,
 	)
