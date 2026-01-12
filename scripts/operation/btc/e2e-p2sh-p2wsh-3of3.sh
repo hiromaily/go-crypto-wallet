@@ -116,9 +116,55 @@ full_reset() {
 	# This removes all database data, ensuring a clean slate
 	docker compose -f compose.yaml down -v 2>/dev/null || true
 
+	# Wait for containers to fully stop before attempting volume removal
+	log_info "Waiting for containers to stop completely..."
+	sleep 3
+
 	# Explicitly remove database volume (in case -v flag didn't work)
-	log_info "Removing database volume..."
-	docker volume rm go-crypto-wallet_wallet-db 2>/dev/null || true
+	# Force removal with docker volume rm (not just -v flag which may be ignored if containers exist)
+	log_info "Forcefully removing database volume..."
+	local volume_name="go-crypto-wallet_wallet-db"
+
+	# Try multiple times in case volume is still being used
+	local removal_attempts=0
+	local max_removal_attempts=5
+
+	while [ $removal_attempts -lt $max_removal_attempts ]; do
+		if docker volume rm "$volume_name" 2>/dev/null; then
+			log_info "Volume removed successfully on attempt $((removal_attempts + 1))"
+			break
+		fi
+		removal_attempts=$((removal_attempts + 1))
+		if [ $removal_attempts -lt $max_removal_attempts ]; then
+			log_warn "Volume removal failed, retrying in 2 seconds... (attempt $removal_attempts/$max_removal_attempts)"
+			sleep 2
+		fi
+	done
+
+	# Verify volume is truly deleted (wait up to 10 seconds)
+	log_info "Verifying volume deletion..."
+	local max_wait=10
+	local counter=0
+	local volume_deleted=false
+
+	while [ $counter -lt $max_wait ]; do
+		if ! docker volume inspect "$volume_name" >/dev/null 2>&1; then
+			log_info "Volume successfully deleted"
+			volume_deleted=true
+			break
+		fi
+		counter=$((counter + 1))
+		if [ $counter -lt $max_wait ]; then
+			log_warn "Volume still exists, waiting... (${counter}s/${max_wait}s)"
+			sleep 1
+		fi
+	done
+
+	if [ "$volume_deleted" = "false" ]; then
+		log_error "Volume still exists after ${max_wait}s - this may cause duplicate key errors"
+		log_error "Manual cleanup required: docker volume rm -f $volume_name"
+		return 1
+	fi
 
 	# Clean data files
 	clean_data_files
@@ -256,6 +302,12 @@ key_generation_phase() {
 	done
 
 	# Sign wallets - create hdkeys
+	#
+	# After PR #301, sign wallets need to have keys for ALL multisig accounts
+	# (deposit, payment, stored) because they participate in signing transactions for any
+	# of these accounts. The `sign create hdkey` command automatically creates keys
+	# for all required accounts (fixed in this PR).
+	#
 	log_substep "Creating HD keys for sign wallets"
 	for i in $(seq 1 "$SIGN_WALLET_NUM"); do
 		log_info "Creating HD keys for sign${i}"
