@@ -1,21 +1,34 @@
 # Cursor Commands
 
-Minimal commands referencing shared workflow.
+> **Note**: Cursor automatically loads Claude Code configurations from `.claude/` directory.
+> Therefore, dedicated Cursor commands are not necessary.
 
-## Available Commands
+## How It Works
 
-| Command | Description |
-|---------|-------------|
-| `/fix-issue #123` | Fix a GitHub issue |
-| `/fix-linter` | Fix linter errors |
-| `/fix-pr-review #123` | Address PR review comments |
+Cursor uses Claude as its AI backend, which means:
 
-## Workflow
+- `.claude/commands/` - Automatically available in Cursor
+- `.claude/skills/` - Automatically available in Cursor
+- `CLAUDE.md` - Automatically loaded
 
-All commands follow the workflow in `.cursor/rules/general.mdc`:
+## What Cursor Uses
 
-1. Branch from `main`
-2. Implement following Clean Architecture
-3. Verify: `make go-lint && make tidy && make check-build && make gotest`
-4. Self-review
-5. Commit & PR
+| Source | Purpose |
+|--------|---------|
+| `.claude/commands/` | Slash commands (`/fix-issue`, etc.) |
+| `.claude/skills/` | Skills (go-development, git-workflow, etc.) |
+| `.cursor/rules/` | Cursor-specific rules (if needed) |
+
+## Cursor-Specific Configuration
+
+Only `.cursor/rules/` is Cursor-specific:
+
+- `general.mdc` - General rules
+- `security.mdc` - Security rules
+- `task-context-loading.mdc` - Context loading rules
+
+These rules supplement (not replace) the Claude configuration.
+
+## Summary
+
+**Do not duplicate commands here.** Use `.claude/commands/` instead.
