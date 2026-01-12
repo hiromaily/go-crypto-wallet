@@ -65,7 +65,7 @@ func TestBIP86Generator(t *testing.T) {
 				assert.NotEmpty(t, key.TaprootAddr, "Taproot address should not be empty for key %d", i)
 				assert.NotEmpty(t, key.FullPubKey, "Full public key should not be empty for key %d", i)
 
-				// Verify Taproot address format (bech32m)
+				// Verify Taproot address format (uses bech32m encoding)
 				if tt.conf == &chaincfg.MainNetParams {
 					assert.Contains(t, key.TaprootAddr, "bc1p", "Mainnet address should start with bc1p, key %d", i)
 				} else if tt.conf == &chaincfg.TestNet3Params {

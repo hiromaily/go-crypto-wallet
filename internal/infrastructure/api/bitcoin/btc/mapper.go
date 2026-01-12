@@ -708,7 +708,8 @@ func ToMultisigAddress(result *AddMultisigAddressResult) *dtobtc.MultisigAddress
 	}
 }
 
-// FromAddressType converts domain AddressType to domain AddrType
+// FromAddressType converts Bitcoin Core RPC AddressType to user-facing AddrType
+// Note: Converts "bech32m" (Bitcoin Core value) to "taproot" (user-facing value)
 func FromAddressType(addrType domainBitcoin.AddressType) domainAddress.AddrType {
 	switch addrType {
 	case domainBitcoin.AddressTypeLegacy:
@@ -717,7 +718,7 @@ func FromAddressType(addrType domainBitcoin.AddressType) domainAddress.AddrType 
 		return domainAddress.AddrTypeP2shSegwit
 	case domainBitcoin.AddressTypeBech32:
 		return domainAddress.AddrTypeBech32
-	case domainBitcoin.AddressTypeBech32m:
+	case domainBitcoin.AddressTypeTaproot: // "bech32m" -> "taproot"
 		return domainAddress.AddrTypeTaproot
 	default:
 		// This indicates a programming error (unhandled domain type).
@@ -726,7 +727,8 @@ func FromAddressType(addrType domainBitcoin.AddressType) domainAddress.AddrType 
 	}
 }
 
-// ToAddressType converts domain AddrType to domain AddressType
+// ToAddressType converts user-facing AddrType to Bitcoin Core RPC AddressType
+// Note: Converts "taproot" (user-facing value) to "bech32m" (Bitcoin Core value)
 func ToAddressType(addrType domainAddress.AddrType) domainBitcoin.AddressType {
 	switch addrType {
 	case domainAddress.AddrTypeLegacy:
@@ -735,8 +737,8 @@ func ToAddressType(addrType domainAddress.AddrType) domainBitcoin.AddressType {
 		return domainBitcoin.AddressTypeP2SHSegwit
 	case domainAddress.AddrTypeBech32:
 		return domainBitcoin.AddressTypeBech32
-	case domainAddress.AddrTypeTaproot:
-		return domainBitcoin.AddressTypeBech32m
+	case domainAddress.AddrTypeTaproot: // "taproot" -> "bech32m"
+		return domainBitcoin.AddressTypeTaproot
 	case domainAddress.AddrTypeBCHCashAddr:
 		// BCH uses legacy address format in domain model
 		return domainBitcoin.AddressTypeLegacy

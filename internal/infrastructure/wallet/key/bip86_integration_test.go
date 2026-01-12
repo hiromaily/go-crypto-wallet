@@ -216,7 +216,7 @@ func TestBIP86IntegrationAddressValidation(t *testing.T) {
 		name           string
 		network        *chaincfg.Params
 		expectedPrefix string
-		expectedHRP    string // Human Readable Part for bech32m
+		expectedHRP    string // Human Readable Part for Taproot address (bech32m encoding)
 	}{
 		{
 			name:           "Bitcoin Mainnet",
@@ -253,11 +253,11 @@ func TestBIP86IntegrationAddressValidation(t *testing.T) {
 			assert.True(t, strings.HasPrefix(address, tt.expectedPrefix),
 				"address should start with %s for %s", tt.expectedPrefix, tt.name)
 
-			// Verify bech32m format characteristics
+			// Verify Taproot address format characteristics (bech32m encoding)
 			assert.True(t, len(address) == 62,
 				"Taproot address should be 62 characters")
 
-			// Verify lowercase (bech32m requirement)
+			// Verify lowercase (bech32m encoding requirement)
 			assert.Equal(t, strings.ToLower(address), address,
 				"address should be lowercase")
 
