@@ -1,64 +1,81 @@
-# Claude Code Configuration
+# Agent Guidelines for go-crypto-wallet
 
-This document contains **Claude Code specific settings** for the go-crypto-wallet project.
-For general agent guidelines, see [AGENTS.md](AGENTS.md).
+This document defines the **behavior and values** for AI agents working on this project.
+For detailed documentation, see [llms.txt](llms.txt) and [ARCHITECTURE.md](ARCHITECTURE.md).
 
-## General Guidelines
+## Project Identity
 
-Refer to [AGENTS.md](AGENTS.md) for:
+- **Type**: Multi-signature cryptocurrency wallet (BTC, BCH, ETH, XRP, ERC-20)
+- **Security Model**: Offline cold wallets (keygen, sign) + Online watch wallet
+- **Architecture**: Clean Architecture with strict layer separation
+- **Status**: Under refactoring based on Clean Code principles
 
-- Core values and priorities
-- Expected behavior (do/don't/ask)
-- Documentation map
-- Verification commands
+## Core Values (Priority Order)
 
-## Claude Code Preferences
+1. **Security First** - Private key protection is non-negotiable
+2. **Clean Architecture** - Domain layer has ZERO infrastructure dependencies
+3. **Incremental Changes** - No breaking changes without rollback plan
+4. **Code Quality** - Follow language-specific linting and testing standards
 
-### Tool Usage
+## Expected Behavior
 
-- Prefer built-in file operations over shell commands for reading/writing files
-- Use semantic search (`SemanticSearch`) for exploring unfamiliar code
-- Use `Grep` for exact text/symbol searches
-- Batch parallel tool calls when operations are independent
+### Always Do
 
-### Code Changes
+- Read relevant documentation before making changes
+- Run verification commands after code changes
+- Wrap errors with context using `fmt.Errorf("context: %w", err)`
+- Consider impact on offline wallet operations
 
-- Always read files before proposing edits
-- Provide context with code changes (before/after)
-- Run verification commands after changes:
-  - Go: `make go-lint && make check-build`
-  - TypeScript: `npm run lint && npm run build`
+### Never Do
 
-### Response Style
+- ❌ Log private keys or sensitive information
+- ❌ Edit files marked `DO NOT EDIT` (auto-generated)
+- ❌ Push directly to `main` branch
+- ❌ Run `git merge` or `gh pr merge`
 
-- Be concise but thorough
-- Show relevant code snippets with file paths
-- Explain "why" not just "what"
-- Use Japanese when the user writes in Japanese
+### Ask Before
 
-## Project-Specific Notes
+- Making security-related changes
+- Breaking changes to public APIs
+- Changes affecting multiple layers
 
-### Security-Critical Areas
+## Documentation Map
 
-These areas require extra caution:
+| Need | Document |
+|------|----------|
+| Project overview | [llms.txt](llms.txt) |
+| Architecture design | [ARCHITECTURE.md](ARCHITECTURE.md) |
+| Security & core patterns | [docs/ai-agents/guidelines/core.md](docs/ai-agents/guidelines/core.md) |
+| Coding standards | [docs/ai-agents/guidelines/coding-standards.md](docs/ai-agents/guidelines/coding-standards.md) |
+| Database changes | [docs/ai-agents/guidelines/database.md](docs/ai-agents/guidelines/database.md) |
+| Testing strategy | [docs/ai-agents/guidelines/testing.md](docs/ai-agents/guidelines/testing.md) |
+| Git workflow | [docs/ai-agents/guidelines/workflow.md](docs/ai-agents/guidelines/workflow.md) |
+| Auto-generated files | [docs/ai-agents/guidelines/code-generation.md](docs/ai-agents/guidelines/code-generation.md) |
+| Internal packages | [internal/AGENTS.md](internal/AGENTS.md) |
+| Public packages | [pkg/AGENTS.md](pkg/AGENTS.md) |
 
-- `internal/infrastructure/wallet/key/` - Key generation
-- `internal/domain/key/` - Key value objects
-- Any code handling private keys or seeds
+## Quick Reference
 
-### Auto-Generated Files (DO NOT EDIT)
+### Verification Commands
 
-- `internal/infrastructure/database/sqlc/*.go`
-- `internal/infrastructure/api/ripple/xrp/*.pb.go`
-- `internal/infrastructure/contract/token-abi.go`
+| Language | Lint | Build | Test |
+|----------|------|-------|------|
+| Go | `make go-lint` | `make check-build` | `make gotest` |
+| TypeScript | `npm run lint` | `npm run build` | `npm test` |
+| Shell | `make shfmt` | - | - |
 
-### Build Tags
+### Git Operations
 
-- Integration tests use `//go:build integration`
-- Run with: `go test -tags=integration ./...`
+```bash
+# Allowed
+git add, git commit, git push
+
+# NOT Allowed
+git merge, gh pr merge, push to main
+```
 
 ## See Also
 
-- [AGENTS.md](AGENTS.md) - General agent guidelines
-- [llms.txt](llms.txt) - Project sitemap
+- [llms.txt](llms.txt) - AI-friendly project sitemap
 - [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture
+- [docs/ai-agents/](docs/ai-agents/) - Detailed guidelines
