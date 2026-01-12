@@ -107,8 +107,7 @@ func (u *generateDescriptorUseCase) generateSingleSigDescriptor(
 	// Check if AccountExtendedPrivkey is available (new format)
 	if accountKey.AccountExtendedPrivkey == nil || *accountKey.AccountExtendedPrivkey == "" {
 		return "", fmt.Errorf(
-			"account extended private key not found for %s - "+
-				"descriptors require keys generated with extended key support",
+			"account extended private key not found for %s - descriptors require keys generated with extended key support",
 			input.AccountType.String(),
 		)
 	}
