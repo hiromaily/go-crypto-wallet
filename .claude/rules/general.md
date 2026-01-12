@@ -17,8 +17,8 @@ Refer to @docs/standards/coding-conventions.md
 Key rules:
 - Follow Clean Architecture layer separation
 - Domain layer has ZERO infrastructure dependencies
-- Use error wrapping: `fmt.Errorf("context: %w", err)`
-- Follow language-specific verification commands
+- Follow language-specific conventions (see Skills below)
+- Run verification commands before committing
 
 ## Testing
 
@@ -33,9 +33,20 @@ Key rules:
 - Follow conventional commit messages
 - Run verification commands before committing
 
+## Language-Specific Skills
+
+Use appropriate skills based on the file type:
+
+| File Type | Skill |
+|-----------|-------|
+| Go (`*.go`) | `go-development` |
+| TypeScript (`*.ts`) | `typescript-development` |
+| Shell (`*.sh`) | `shell-scripts` |
+| Solidity (`*.sol`) | `solidity-development` |
+| SQL/HCL | `db-migration` |
+| Makefile | `makefile-update` |
+
 ## Auto-Generated Files
 
-**DO NOT EDIT** files containing `DO NOT EDIT` comments:
-- `internal/infrastructure/database/sqlc/*.go`
-- `internal/infrastructure/api/ripple/xrp/*.pb.go`
-- `internal/infrastructure/contract/token-abi.go`
+**DO NOT EDIT** files containing `DO NOT EDIT` comments.
+See language-specific skills for details on auto-generated file locations.

@@ -21,11 +21,11 @@
 
 | Keywords | Task Type | Context File |
 |----------|-----------|--------------|
-| バグ, 修正, fix, error, Issue #, bug | `bug-fix` | `docs/ai-agents/task-contexts/bug-fix.md` |
-| 追加, 実装, 機能, feature, add, implement | `feature-add` | `docs/ai-agents/task-contexts/feature-add.md` |
-| リファクタリング, 整理, 移動, refactor | `refactoring` | `docs/ai-agents/task-contexts/refactoring.md` |
-| スキーマ, DB, テーブル, カラム, migration | `db-change` | `docs/ai-agents/task-contexts/db-change.md` |
-| ドキュメント, README, 説明, docs, comment | `documentation` | `docs/ai-agents/task-contexts/documentation.md` |
+| バグ, 修正, fix, error, Issue #, bug | `bug-fix` | `docs/task-contexts/bug-fix.md` |
+| 追加, 実装, 機能, feature, add, implement | `feature-add` | `docs/task-contexts/feature-add.md` |
+| リファクタリング, 整理, 移動, refactor | `refactoring` | `docs/task-contexts/refactoring.md` |
+| スキーマ, DB, テーブル, カラム, migration | `db-change` | `docs/task-contexts/db-change.md` |
+| ドキュメント, README, 説明, docs, comment | `documentation` | `docs/task-contexts/documentation.md` |
 
 ## Chain Detection
 
@@ -33,10 +33,10 @@
 
 | Keywords | Chain | Context Files |
 |----------|-------|---------------|
-| Bitcoin, BTC, ビットコイン, Taproot, Descriptor, PSBT, MuSig2 | BTC | `docs/ai-agents/task-contexts/chain-specific.md`, `docs/ai-agents/task-contexts/chains/btc.md` |
-| Bitcoin Cash, BCH, ビットコインキャッシュ, CashAddr | BCH | `docs/ai-agents/task-contexts/chain-specific.md`, `docs/ai-agents/task-contexts/chains/bch.md` |
-| Ethereum, ETH, イーサリアム, ERC-20, Gas, Nonce | ETH | `docs/ai-agents/task-contexts/chain-specific.md`, `docs/ai-agents/task-contexts/chains/eth.md` |
-| Ripple, XRP, リップル, Destination Tag | XRP | `docs/ai-agents/task-contexts/chain-specific.md`, `docs/ai-agents/task-contexts/chains/xrp.md` |
+| Bitcoin, BTC, ビットコイン, Taproot, Descriptor, PSBT, MuSig2 | BTC | `docs/task-contexts/chain-specific.md`, `docs/task-contexts/chains/btc.md` |
+| Bitcoin Cash, BCH, ビットコインキャッシュ, CashAddr | BCH | `docs/task-contexts/chain-specific.md`, `docs/task-contexts/chains/bch.md` |
+| Ethereum, ETH, イーサリアム, ERC-20, Gas, Nonce | ETH | `docs/task-contexts/chain-specific.md`, `docs/task-contexts/chains/eth.md` |
+| Ripple, XRP, リップル, Destination Tag | XRP | `docs/task-contexts/chain-specific.md`, `docs/task-contexts/chains/xrp.md` |
 
 ## File Type Detection for Verification
 
@@ -53,7 +53,7 @@
 
 **重要**: ドキュメント（`*.md`）のみの変更では、Go 関連の検証コマンドは**実行しないでください**。
 
-詳細は `docs/ai-agents/task-contexts/verification.md` を参照。
+詳細は `docs/task-contexts/verification.md` を参照。
 
 ## Context Loading Procedure
 
@@ -65,10 +65,10 @@
 
 ```
 順序:
-1. docs/ai-agents/task-contexts/{task-type}.md (タスクタイプ別)
-2. docs/ai-agents/task-contexts/chain-specific.md (チェーン関連の場合)
-3. docs/ai-agents/task-contexts/chains/{chain}.md (特定チェーンの場合)
-4. docs/ai-agents/task-contexts/verification.md (検証コマンド確認)
+1. docs/task-contexts/{task-type}.md (タスクタイプ別)
+2. docs/task-contexts/chain-specific.md (チェーン関連の場合)
+3. docs/task-contexts/chains/{chain}.md (特定チェーンの場合)
+4. docs/task-contexts/verification.md (検証コマンド確認)
 5. 追加の関連ドキュメント (各コンテキストファイルで指定)
 ```
 
@@ -184,7 +184,7 @@ make sqlc         # スキーマ変更時
 
 ## Related Documents
 
-- [Task-Oriented Context Management](../../docs/ai-agents/task-oriented-context.md)
-- [Task Contexts](../../docs/ai-agents/task-contexts/README.md)
-- [Verification Matrix](../../docs/ai-agents/task-contexts/verification.md)
+- [Task-Oriented Context Management](../../docs/task-oriented-context.md)
+- [Task Contexts](../../docs/task-contexts/README.md)
+- [Verification Matrix](../../docs/task-contexts/verification.md)
 - [AGENTS.md](../../AGENTS.md) - プロジェクト全体のガイドライン
