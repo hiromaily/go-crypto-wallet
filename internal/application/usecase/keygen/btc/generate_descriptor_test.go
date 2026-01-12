@@ -16,6 +16,8 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
 	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 )
@@ -33,6 +35,8 @@ func TestNewGenerateDescriptorUseCase(t *testing.T) {
 		&chaincfg.MainNetParams,
 		nil,
 		nil,
+		nil,
+		domainCoin.BTC,
 		nil,
 	)
 	require.NotNil(t, useCase)
@@ -55,6 +59,8 @@ func TestGenerateDescriptorUseCase_SingleSig(t *testing.T) {
 		&stubAuthRepo{},
 		accountRepo,
 		nil,
+		domainCoin.BTC,
+		nil,
 	)
 
 	fp, err := infraKey.FingerprintFromExtendedKey(testDescriptorMainnetXpub)
@@ -73,6 +79,7 @@ func TestGenerateDescriptorUseCase_SingleSig(t *testing.T) {
 func TestGenerateDescriptorUseCase_MultisigWsh(t *testing.T) {
 	t.Parallel()
 
+	testSeed := bytes.Repeat([]byte{0x01}, hdkeychain.RecommendedSeedLen)
 	signers := map[domainAccount.AuthType]*domainAuth.AuthFullPubkey{
 		domainAccount.AuthType1: {ExtendedPubKey: testDescriptorMainnetXpub},
 		domainAccount.AuthType2: {ExtendedPubKey: newTestXpubFromSeed(t, 0x02)},
@@ -90,6 +97,8 @@ func TestGenerateDescriptorUseCase_MultisigWsh(t *testing.T) {
 		&chaincfg.MainNetParams,
 		&stubAuthRepo{items: signers},
 		&stubAccountRepo{},
+		&stubSeedRepo{seed: testSeed},
+		domainCoin.BTC,
 		multiConfig,
 	)
 
@@ -110,6 +119,7 @@ func TestGenerateDescriptorUseCase_MultisigWsh(t *testing.T) {
 func TestGenerateDescriptorUseCase_TaprootScriptPath(t *testing.T) {
 	t.Parallel()
 
+	testSeed := bytes.Repeat([]byte{0x01}, hdkeychain.RecommendedSeedLen)
 	signers := map[domainAccount.AuthType]*domainAuth.AuthFullPubkey{
 		domainAccount.AuthType1: {ExtendedPubKey: testDescriptorMainnetXpub},
 		domainAccount.AuthType2: {ExtendedPubKey: newTestXpubFromSeed(t, 0x03)},
@@ -126,6 +136,8 @@ func TestGenerateDescriptorUseCase_TaprootScriptPath(t *testing.T) {
 		&chaincfg.MainNetParams,
 		&stubAuthRepo{items: signers},
 		&stubAccountRepo{},
+		&stubSeedRepo{seed: testSeed},
+		domainCoin.BTC,
 		multiConfig,
 	)
 
@@ -152,6 +164,8 @@ func TestGenerateDescriptorUseCase_MissingAccountKey(t *testing.T) {
 		&stubAuthRepo{},
 		&stubAccountRepo{key: nil},
 		nil,
+		domainCoin.BTC,
+		nil,
 	)
 
 	_, err := useCase.Generate(context.Background(), keygenusecase.GenerateDescriptorInput{
@@ -160,6 +174,91 @@ func TestGenerateDescriptorUseCase_MissingAccountKey(t *testing.T) {
 		IsChange:    false,
 	})
 	require.Error(t, err)
+}
+
+// TestGenerateDescriptorUseCase_MultisigWithKeygenKey tests that multisig descriptors
+// include the keygen wallet's own key along with auth keys.
+// This is the critical fix for issue #320 - ensuring 2-of-3 multisig instead of 2-of-2.
+func TestGenerateDescriptorUseCase_MultisigWithKeygenKey(t *testing.T) {
+	t.Parallel()
+
+	testSeed := bytes.Repeat([]byte{0x01}, hdkeychain.RecommendedSeedLen)
+	signers := map[domainAccount.AuthType]*domainAuth.AuthFullPubkey{
+		domainAccount.AuthType1: {ExtendedPubKey: testDescriptorMainnetXpub},
+		domainAccount.AuthType2: {ExtendedPubKey: newTestXpubFromSeed(t, 0x02)},
+	}
+
+	multiConfig := domainAccount.NewMultisigConfig(map[domainAccount.AccountType]map[int][]domainAccount.AuthType{
+		domainAccount.AccountTypePayment: {
+			2: {domainAccount.AuthType1, domainAccount.AuthType2},
+		},
+	})
+
+	descriptorService := btc.NewDescriptorService(&chaincfg.MainNetParams)
+	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
+		descriptorService,
+		&chaincfg.MainNetParams,
+		&stubAuthRepo{items: signers},
+		&stubAccountRepo{},
+		&stubSeedRepo{seed: testSeed},
+		domainCoin.BTC,
+		multiConfig,
+	)
+
+	// Test P2SH-SegWit (BIP49) descriptor generation
+	output, err := useCase.Generate(context.Background(), keygenusecase.GenerateDescriptorInput{
+		AccountType:  domainAccount.AccountTypePayment,
+		AddressType:  domainAddress.AddrTypeP2shSegwit,
+		IsChange:     false,
+		RequiredSigs: 2,
+	})
+	require.NoError(t, err)
+	require.True(t, output.IsMultisig)
+
+	// Verify descriptor contains sh(wsh(sortedmulti(2, ...)))
+	require.Contains(t, output.Descriptor, "sh(wsh(sortedmulti(2,")
+
+	// Verify BIP49 path for P2SH-SegWit (payment account = 1)
+	require.Contains(t, output.Descriptor, "/49'/0'/1]") // account=1 (payment)
+
+	// Count occurrences of extended public keys in descriptor
+	// Should have 3 xpubs: keygen + auth1 + auth2
+	xpubCount := bytes.Count([]byte(output.Descriptor), []byte("xpub"))
+	require.Equal(t, 3, xpubCount, "descriptor should contain 3 xpubs (keygen + auth1 + auth2)")
+}
+
+// TestGenerateDescriptorUseCase_MultisigMissingSeed tests error handling when seed is missing.
+func TestGenerateDescriptorUseCase_MultisigMissingSeed(t *testing.T) {
+	t.Parallel()
+
+	signers := map[domainAccount.AuthType]*domainAuth.AuthFullPubkey{
+		domainAccount.AuthType1: {ExtendedPubKey: testDescriptorMainnetXpub},
+	}
+
+	multiConfig := domainAccount.NewMultisigConfig(map[domainAccount.AccountType]map[int][]domainAccount.AuthType{
+		domainAccount.AccountTypeDeposit: {
+			2: {domainAccount.AuthType1},
+		},
+	})
+
+	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
+		btc.NewDescriptorService(&chaincfg.MainNetParams),
+		&chaincfg.MainNetParams,
+		&stubAuthRepo{items: signers},
+		&stubAccountRepo{},
+		&stubSeedRepo{seed: nil}, // No seed available
+		domainCoin.BTC,
+		multiConfig,
+	)
+
+	_, err := useCase.Generate(context.Background(), keygenusecase.GenerateDescriptorInput{
+		AccountType:  domainAccount.AccountTypeDeposit,
+		AddressType:  domainAddress.AddrTypeBech32,
+		IsChange:     false,
+		RequiredSigs: 2,
+	})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "seed not found")
 }
 
 type stubAccountRepo struct {
@@ -244,3 +343,22 @@ func newTestXpubFromSeed(t *testing.T, seedByte byte) string {
 
 	return xpub.String()
 }
+
+type stubSeedRepo struct {
+	seed []byte
+	err  error
+}
+
+func (s *stubSeedRepo) GetOne(context.Context) (*domainKey.Seed, error) {
+	if s.err != nil {
+		return nil, s.err
+	}
+	if s.seed == nil {
+		return nil, nil
+	}
+	return &domainKey.Seed{
+		Seed: fmt.Sprintf("%x", s.seed),
+	}, nil
+}
+
+func (*stubSeedRepo) Insert(context.Context, string) error { return nil }

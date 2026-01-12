@@ -1086,6 +1086,8 @@ func (c *container) newBTCKeygenGenerateDescriptorUseCase() keygenusecase.Genera
 		c.newBTC().GetChainConf(),
 		c.newAuthFullPubKeyRepo(),
 		c.newAccountKeyRepo(),
+		c.newSeedRepo(),
+		c.conf.CoinTypeCode,
 		c.newMultiAccount(),
 	)
 }

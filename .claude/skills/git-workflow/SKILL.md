@@ -34,9 +34,41 @@ git checkout -b {type}/issue-{number}-{brief-description}
 ### Branch Rules
 
 - **Always from `main`**: Never branch from feature branches
-- **One issue per branch**: Keep branches focused
+- **One issue = One branch**: 1つのissueに対して1つのbranchのみ作成
 - **Short-lived**: Merge within days, not weeks
 - **Delete after merge**: Keep repository clean
+
+### ⚠️ 重要: 複数ブランチ禁止ルール
+
+**1つのissueに対して複数のbranchを作成しないでください。**
+
+```
+❌ 禁止パターン:
+  issue-123 → fix/issue-123-first-attempt
+            → fix/issue-123-second-attempt  ← これは作らない
+            → fix/issue-123-another-fix     ← これも作らない
+
+✅ 正しいパターン:
+  issue-123 → fix/issue-123-description
+            → PR作成 → レビュー → マージ
+            → (必要なら) 新しいissueで新しいbranch
+```
+
+### 作業開始前の確認
+
+**新しいbranchを作成する前に、必ず以下を確認:**
+
+```bash
+# 1. 既存のブランチを確認
+git branch -a | grep "issue-{number}"
+
+# 2. 既存のPRを確認
+gh pr list --search "issue-{number}"
+```
+
+- **既存branchがある場合**: そのbranchで作業を継続
+- **既存PRがある場合**: PRをmergeしてから新しい作業を開始
+- **何もない場合**: 新しいbranchを作成してOK
 
 ## Commit Conventions
 
@@ -131,6 +163,7 @@ EOF
 ```
 
 Examples:
+
 - `feat: add taproot address support (Closes #123)`
 - `fix: resolve database connection timeout (Closes #456)`
 - `docs: update architecture guide (Closes #789)`
@@ -176,10 +209,15 @@ Examples:
 ### New Issue Workflow
 
 ```bash
+# 0. 既存ブランチ/PRを確認（必須）
+git branch -a | grep "issue-{number}"
+gh pr list --search "issue-{number}"
+# → 既存があれば、そのbranchで作業を継続
+
 # 1. Update main
 git fetch origin && git checkout main && git reset --hard origin/main
 
-# 2. Create branch
+# 2. Create branch (既存がない場合のみ)
 git checkout -b {type}/issue-{number}-{description}
 
 # 3. Make changes...
