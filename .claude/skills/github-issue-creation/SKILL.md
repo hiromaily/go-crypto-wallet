@@ -1,178 +1,123 @@
 ---
 name: github-issue-creation
-description: Create well-structured GitHub issues with proper task classification. This is the starting point for all tasks - proper classification here determines which Skills will be used when working on the issue.
+description: Create GitHub issues with proper task classification. Classification determines which Skills will be used when working on the issue.
 ---
 
 # GitHub Issue Creation
 
-Create GitHub issues with proper task classification. **This is the critical first step** that determines how the issue will be worked on.
+Create issues with proper classification. **Labels determine which Skills are used.**
 
-## Task Classification System
+## Label → Skill Mapping
 
-### Step 1: Identify Task Type
+### Language Labels (code tasks)
+
+| Label | Skill | Verification |
+|-------|-------|--------------|
+| `lang:go` | `go-development` | `make go-lint && make gotest` |
+| `lang:typescript` | `typescript-development` | `npm run lint && npm run build` |
+| `lang:solidity` | `solidity-development` | `truffle compile && truffle test` |
+
+### Scope Labels (non-code tasks)
+
+| Label | Skill | Verification |
+|-------|-------|--------------|
+| `scope:docs` | `docs-update` | Markdown formatting |
+| `scope:devops` | `devops` | `yamllint`, workflow test |
+| `scope:scripts` | `shell-scripts` | `make shfmt` |
+| `scope:makefile` | `makefile-update` | `make mk-lint` |
+| `scope:db` | `db-migration` | `make atlas-lint && make sqlc` |
+| `scope:config` | (no specific skill) | Syntax validation |
+| `scope:proto` | (no specific skill) | `protoc` compilation |
+
+### Chain Labels (additional context)
+
+| Label | Context |
+|-------|---------|
+| `chain:btc` | Bitcoin-specific considerations |
+| `chain:bch` | Bitcoin Cash-specific considerations |
+| `chain:eth` | Ethereum-specific considerations |
+| `chain:erc20` | ERC-20 token considerations |
+| `chain:xrp` | XRP/Ripple considerations |
+| `chain:all` | Cross-chain considerations |
+
+## Task Classification
+
+### Step 1: Type Label (required)
 
 | Type | Label | Description |
 |------|-------|-------------|
-| Bug Fix | `bug` | Something isn't working |
-| Feature | `enhancement` | New feature or request |
-| Refactoring | `refactoring` | Code improvement without behavior change |
+| Bug | `bug` | Something isn't working |
+| Feature | `enhancement` | New feature |
+| Refactoring | `refactoring` | Code improvement |
 | Documentation | `documentation` | Docs updates |
 | Security | `security` | Security-related |
-| Technical Debt | `technical-debt` | Code quality cleanup |
+| Technical Debt | `technical-debt` | Code quality |
 
-### Step 2: Identify Scope
+### Step 2: Language OR Scope Label (required)
 
-**Code Tasks** - Select language:
+**Code tasks** → Language label (`lang:*`)
+**Non-code tasks** → Scope label (`scope:*`)
 
-| Scope | Label | Affected Directories |
-|-------|-------|---------------------|
-| Go Development | `lang:go` | `internal/`, `pkg/`, `cmd/` |
-| TypeScript Development | `lang:typescript` | `apps/ripple-lib-server/` |
-| Solidity Development | `lang:solidity` | `apps/erc20-token/contracts/` |
+### Step 3: Chain Label (if applicable)
 
-**Non-Code Tasks** - Select scope:
+Only for cryptocurrency-specific code.
 
-| Scope | Label | Affected Directories |
-|-------|-------|---------------------|
-| Documentation | `scope:docs` | `docs/`, `*.md` |
-| DevOps/CI/CD | `scope:devops` | `.github/workflows/`, `docker/`, `compose.*.yaml` |
-| Shell Scripts | `scope:scripts` | `scripts/`, `*.sh` |
-| Makefile | `scope:makefile` | `Makefile`, `make/` |
-| Configuration | `scope:config` | `config/`, `*.toml`, `*.yaml` |
-| Protocol Buffers | `scope:proto` | `proto/` |
-| Database | `scope:db` | `tools/atlas/`, `tools/sqlc/` |
+## Label Examples
 
-### Step 3: Identify Chain (if applicable)
-
-Only for code that involves specific cryptocurrency:
-
-| Chain | Label | When to Use |
-|-------|-------|-------------|
-| Bitcoin | `chain:btc` | BTC-specific code |
-| Bitcoin Cash | `chain:bch` | BCH-specific code |
-| Ethereum | `chain:eth` | ETH-specific code |
-| ERC-20 | `chain:erc20` | Token contract code |
-| XRP | `chain:xrp` | Ripple-specific code |
-| All Chains | `chain:all` | Cross-chain code |
-
-## Label Combination Examples
-
-| Task Description | Labels |
-|------------------|--------|
-| Fix bug in Bitcoin address generation | `bug`, `lang:go`, `chain:btc` |
-| Add new ETH transaction type | `enhancement`, `lang:go`, `chain:eth` |
-| Refactor XRP gRPC server | `refactoring`, `lang:typescript`, `chain:xrp` |
-| Update ARCHITECTURE.md | `documentation`, `scope:docs` |
-| Add new GitHub Action workflow | `enhancement`, `scope:devops` |
-| Fix shell script permission issue | `bug`, `scope:scripts` |
-| Update Makefile targets | `enhancement`, `scope:makefile` |
-| Add new database migration | `enhancement`, `scope:db`, `lang:go` |
+| Task | Labels | Skills Used |
+|------|--------|-------------|
+| Fix Go bug in BTC | `bug`, `lang:go`, `chain:btc` | `git-workflow` + `go-development` |
+| Add TS feature for XRP | `enhancement`, `lang:typescript`, `chain:xrp` | `git-workflow` + `typescript-development` |
+| Update README | `documentation`, `scope:docs` | `git-workflow` + `docs-update` |
+| Add GitHub Action | `enhancement`, `scope:devops` | `git-workflow` + `devops` |
+| Fix shell script | `bug`, `scope:scripts` | `git-workflow` + `shell-scripts` |
+| Add Makefile target | `enhancement`, `scope:makefile` | `git-workflow` + `makefile-update` |
+| Add DB migration | `enhancement`, `scope:db`, `lang:go` | `git-workflow` + `db-migration` + `go-development` |
 
 ## Issue Creation Process
 
-### 1. Gather Information
+### 1. Classify Task
 
-From user request, identify:
-- **What**: Clear description of the task
-- **Why**: Context and motivation
-- **Type**: Bug, feature, refactoring, etc.
-- **Scope**: Language or non-code scope
-- **Chain**: If cryptocurrency-specific
+From user request, determine:
+- Type (bug, feature, etc.)
+- Language OR Scope
+- Chain (if applicable)
 
-### 2. Determine Labels
-
-Apply classification:
-1. One **Type** label (required)
-2. One **Language** OR **Scope** label (required)
-3. One **Chain** label (if applicable)
-
-### 3. Create Issue Proposal
+### 2. Create Proposal
 
 ```markdown
 ## Proposed Issue
 
-**Title**: [Clear, imperative title - 50-72 chars]
+**Title**: [Clear title - 50-72 chars]
 
 **Labels**: [type], [lang/scope], [chain if applicable]
 
-**Body**:
+**Skills**: [git-workflow] + [skill based on label]
 
+**Body**:
 ## Description
 [What needs to be done]
-
-## Context
-[Why this is needed]
 
 ## Acceptance Criteria
 - [ ] Criterion 1
 - [ ] Criterion 2
-
-## Technical Notes
-- Affected files: [list]
-- Related docs: [links]
-
----
-**Ready to create?** Confirm to proceed.
 ```
 
-### 4. Create Issue (After Approval)
+### 3. Create Issue (after approval)
 
 ```bash
-# Verify labels exist
-gh label list
-
-# Create issue
 gh issue create \
   --title "Title" \
   --body "Body" \
   --label "type,lang/scope,chain"
 ```
 
-## Skill Mapping
-
-When the issue is worked on, these labels determine which Skill to use:
-
-| Label | Skill to Use |
-|-------|--------------|
-| `lang:go` | `go-development` |
-| `lang:typescript` | `typescript-development` |
-| `lang:solidity` | `solidity-development` |
-| `scope:docs` | No specific skill (follow docs standards) |
-| `scope:devops` | No specific skill (follow DevOps practices) |
-| `scope:scripts` | No specific skill (run `make shfmt`) |
-| `scope:makefile` | No specific skill (run `make mk-lint`) |
-| `scope:db` | `go-development` + database workflow |
-
 ## Quick Reference
 
-### Required Labels Per Issue
-
 ```
-[Type] + [Language OR Scope] + [Chain if applicable]
+Required: [Type] + [Language OR Scope]
+Optional: [Chain]
 
-Examples:
-- bug + lang:go + chain:btc
-- enhancement + scope:devops
-- documentation + scope:docs
-- refactoring + lang:typescript + chain:xrp
+→ Labels determine Skills
+→ Skills determine workflow
 ```
-
-### Label Sync Command
-
-If labels are missing:
-
-```bash
-# Check existing labels
-gh label list
-
-# Create missing labels from labels.yml
-# (Labels are defined in .github/labels.yml)
-```
-
-## Important Notes
-
-1. **Classification is critical** - It determines workflow and verification commands
-2. **One type label** - Don't mix bug and enhancement
-3. **Language XOR Scope** - Code tasks use language, non-code use scope
-4. **Chain is optional** - Only for cryptocurrency-specific code
-5. **Wait for approval** - Always confirm before creating issue

@@ -1,15 +1,13 @@
 # Claude Code Commands
 
-## Task Workflow
+## Workflow Overview
 
 ```
-1. Create Issue                    2. Work on Issue
-   ↓                                  ↓
-   github-issue-creation           git-workflow + language skill
-   - Type label                    - Branch from main
-   - Language/Scope label          - Implement
-   - Chain label (if needed)       - Verify (language-specific)
-                                   - Commit & PR
+1. Create Issue                     2. Work on Issue
+   github-issue-creation               git-workflow + task skill
+         ↓                                    ↓
+   Classify: Type + Lang/Scope        Use skill based on label
+   Assign labels                      (see mapping below)
 ```
 
 ## Commands
@@ -20,44 +18,9 @@
 | `/fix-linter` | Fix linter errors |
 | `/fix-pr-review #123` | Address PR review comments |
 
-## Skills
+## Label → Skill Mapping
 
-| Skill | Purpose |
-|-------|---------|
-| `github-issue-creation` | Create issues with proper classification |
-| `git-workflow` | Branch, commit, PR workflow (all tasks) |
-| `go-development` | Go verification & review |
-| `typescript-development` | TypeScript verification & review |
-| `solidity-development` | Solidity verification & review |
-
-## Skill Composition
-
-Most tasks use multiple skills:
-
-```
-git-workflow (common)
-     +
-language skill (based on label)
-     =
-complete workflow
-```
-
-### Examples
-
-| Task | Skills Used |
-|------|-------------|
-| Go bug fix | `git-workflow` + `go-development` |
-| TypeScript feature | `git-workflow` + `typescript-development` |
-| Documentation update | `git-workflow` only |
-| DevOps/CI change | `git-workflow` only |
-
-## Task Classification (Labels)
-
-### Type (required)
-
-`bug`, `enhancement`, `refactoring`, `documentation`, `security`, `technical-debt`
-
-### Language (for code tasks)
+### Language Labels (code tasks)
 
 | Label | Skill |
 |-------|-------|
@@ -65,10 +28,45 @@ complete workflow
 | `lang:typescript` | `typescript-development` |
 | `lang:solidity` | `solidity-development` |
 
-### Scope (for non-code tasks)
+### Scope Labels (non-code tasks)
 
-`scope:docs`, `scope:devops`, `scope:scripts`, `scope:makefile`, `scope:config`, `scope:db`
+| Label | Skill |
+|-------|-------|
+| `scope:docs` | `docs-update` |
+| `scope:devops` | `devops` |
+| `scope:scripts` | `shell-scripts` |
+| `scope:makefile` | `makefile-update` |
+| `scope:db` | `db-migration` |
 
-### Chain (if applicable)
+## All Skills
 
-`chain:btc`, `chain:bch`, `chain:eth`, `chain:erc20`, `chain:xrp`, `chain:all`
+| Skill | Purpose |
+|-------|---------|
+| `github-issue-creation` | Task classification |
+| `git-workflow` | Branch/commit/PR (all tasks) |
+| `go-development` | Go verification |
+| `typescript-development` | TypeScript verification |
+| `solidity-development` | Solidity verification |
+| `docs-update` | Documentation workflow |
+| `devops` | CI/CD workflow |
+| `shell-scripts` | Shell script workflow |
+| `makefile-update` | Makefile workflow |
+| `db-migration` | Database change workflow |
+
+## Skill Composition
+
+Every task uses:
+```
+git-workflow (common)
+     +
+task-specific skill (based on label)
+```
+
+### Examples
+
+| Task | Labels | Skills |
+|------|--------|--------|
+| Go bug fix | `bug`, `lang:go` | `git-workflow` + `go-development` |
+| Docs update | `docs`, `scope:docs` | `git-workflow` + `docs-update` |
+| Add CI workflow | `enhancement`, `scope:devops` | `git-workflow` + `devops` |
+| DB migration | `enhancement`, `scope:db` | `git-workflow` + `db-migration` + `go-development` |
