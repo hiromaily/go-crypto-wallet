@@ -1,11 +1,11 @@
-# Fix PR Review Command
+# Fix PR Review Prompt
 
-Refer to @docs/commands/fix-pr-review.md for full documentation.
+Refer to [docs/commands/fix-pr-review.md](../../docs/commands/fix-pr-review.md) for full documentation.
 
 ## Quick Reference
 
 ```
-/fix-pr-review #123
+fix-pr-review #123
 ```
 
 ## Parameters
@@ -28,5 +28,5 @@ make go-lint && make tidy && make check-build && make gotest
 
 ## Related
 
-- @docs/standards/workflow.md
-- @docs/standards/coding-conventions.md
+- [Workflow Guidelines](../../docs/standards/workflow.md)
+- [Coding Conventions](../../docs/standards/coding-conventions.md)

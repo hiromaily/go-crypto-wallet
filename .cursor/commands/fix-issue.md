@@ -1,13 +1,13 @@
-# Fix Issue Prompt
+# Fix Issue Command
 
 Refer to [docs/commands/fix-issue.md](../../docs/commands/fix-issue.md) for full documentation.
 
 ## Quick Reference
 
 ```
-fix-issue #123
-fix-issue #123,#124
-fix-issue #123 current
+/fix-issue #123
+/fix-issue #123,#124
+/fix-issue #123 current
 ```
 
 ## Parameters
@@ -17,8 +17,8 @@ fix-issue #123 current
 
 ## Process Summary
 
-1. Fetch issue details: `gh issue view {issue_number}`
-2. Create feature branch (unless `current` mode)
+1. Fetch issue details
+2. Create feature branch
 3. Implement fix following Clean Architecture
 4. Run verification commands
 5. Create commit and PR
@@ -28,8 +28,3 @@ fix-issue #123 current
 ```bash
 make go-lint && make tidy && make check-build && make gotest
 ```
-
-## Related
-
-- [Workflow Guidelines](../../docs/standards/workflow.md)
-- [Coding Conventions](../../docs/standards/coding-conventions.md)

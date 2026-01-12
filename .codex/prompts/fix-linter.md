@@ -1,11 +1,11 @@
-# Fix Linter Command
+# Fix Linter Prompt
 
-Refer to @docs/commands/fix-linter.md for full documentation.
+Refer to [docs/commands/fix-linter.md](../../docs/commands/fix-linter.md) for full documentation.
 
 ## Quick Reference
 
 ```
-/fix-linter
+fix-linter
 ```
 
 ## Process Summary
@@ -24,5 +24,5 @@ make go-lint && make tidy && make check-build && make gotest
 
 ## Related
 
-- @docs/standards/coding-conventions.md
-- @docs/ai-agents/guidelines/code-generation.md
+- [Coding Conventions](../../docs/standards/coding-conventions.md)
+- [Code Generation](../../docs/ai-agents/guidelines/code-generation.md)
