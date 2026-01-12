@@ -95,3 +95,32 @@
   color: 6f42c1
   description: Affects all supported chains
 
+# Scope Labels (non-code tasks)
+- name: scope:docs
+  color: 0075ca
+  description: Documentation files (docs/, *.md)
+
+- name: scope:devops
+  color: 1d76db
+  description: CI/CD, GitHub Actions, Docker
+
+- name: scope:scripts
+  color: 89e051
+  description: Shell scripts (scripts/, *.sh)
+
+- name: scope:makefile
+  color: 427819
+  description: Makefile and make/ directory
+
+- name: scope:config
+  color: fef2c0
+  description: Configuration files (config/, *.toml, *.yaml)
+
+- name: scope:proto
+  color: 4a154b
+  description: Protocol Buffer definitions (proto/)
+
+- name: scope:db
+  color: c5def5
+  description: Database schema and migrations
+
