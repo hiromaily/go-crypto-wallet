@@ -114,7 +114,7 @@ BTC E2Eテスト（パターン8: P2SH-P2WSH 3-of-3）で発生したエラー
 ## 再現手順
 
 ```bash
-make btc-e2e-test-reset
+make btc-e2e-p2sh-3of3-reset
 ```
 
 ## 参考資料
@@ -160,7 +160,7 @@ make build-all
 
 ```bash
 # フルリセットして実行（推奨）
-make btc-e2e-test-reset
+make btc-e2e-p2sh-3of3-reset
 
 # または既存状態から実行
 ./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh
@@ -203,13 +203,13 @@ make go-lint && make check-build && make gotest
 make build-all
 
 # 3. E2Eテストを再実行
-make btc-e2e-test-reset
+make btc-e2e-p2sh-3of3-reset
 ```
 
 **ワンライナー（Goコード修正後の完全検証）:**
 
 ```bash
-make go-lint && make check-build && make gotest && make build-all && make btc-e2e-test-reset
+make go-lint && make check-build && make gotest && make build-all && make btc-e2e-p2sh-3of3-reset
 ```
 
 ## 技術仕様: パターン8 (P2SH-P2WSH 3-of-3)
