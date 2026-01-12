@@ -24,8 +24,12 @@ import (
 )
 
 const (
-	testDescriptorMainnetXpub = "xpub6ERApfZwUNrhLCkDtcHTcxd75RbzS1ed54G1LkBUHQVHQKqhMkhgbmJbZRkrgZw4koxb5JaHWkY4AL" +
-		"HY2grBGRjaDMzQLcgJvLJuZZvRcEL"
+	// Test account-level xpub/xpriv pair derived from deterministic seed (bytes.Repeat([]byte{0x01}, 32))
+	// Derivation path: m/84'/0'/0' (BIP84 account 0 on mainnet)
+	testDescriptorMainnetXpub = "xpub6CFtfy4QXsEUW5CtgE7mZe1Lvs15Yw7ctjdyaDRy89JdhtyM1wFf8uY2BdyJ3JmAFfrHdw77h" +
+		"Eit1ebVXxB2dytGAvq9mmQJ2c83G1q8P7A"
+	testDescriptorMainnetXpriv = "xprv9yGYGTXWhVgBHb8RaCamCW4cNqAb9UPmXWiNmq2MZomeq6eCUPwQb7DYLQ2prX4aFBTpF8Cpq" +
+		"abzQVCeuhBNJo9YvKHjfnJBCeM9Vk8mN5H"
 )
 
 func TestNewGenerateDescriptorUseCase(t *testing.T) {
@@ -47,10 +51,12 @@ func TestGenerateDescriptorUseCase_SingleSig(t *testing.T) {
 	t.Parallel()
 
 	descriptorService := btc.NewDescriptorService(&chaincfg.MainNetParams)
+	xpriv := testDescriptorMainnetXpriv
 	accountRepo := &stubAccountRepo{
 		key: &domainBitcoin.BtcAccountKey{
-			FullPublicKey: testDescriptorMainnetXpub,
-			Account:       domainAccount.AccountTypeDeposit,
+			FullPublicKey:          testDescriptorMainnetXpub,
+			Account:                domainAccount.AccountTypeDeposit,
+			AccountExtendedPrivkey: &xpriv,
 		},
 	}
 
