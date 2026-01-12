@@ -1,22 +1,21 @@
 # Codex Prompts
 
-Prompts for OpenAI Codex CLI. These reference the shared command definitions in `docs/commands/`.
+Minimal prompts referencing shared workflow.
 
 ## Available Prompts
 
 | Prompt | Description |
 |--------|-------------|
-| `fix-issue` | Fix GitHub issues |
+| `fix-issue #123` | Fix a GitHub issue |
 | `fix-linter` | Fix linter errors |
-| `fix-pr-review` | Address PR review comments |
+| `fix-pr-review #123` | Address PR review comments |
 
-## Shared Definitions
+## Workflow
 
-All command definitions are maintained in [docs/commands/](../../docs/commands/).
+All prompts follow the workflow in `.codex/rules/general.md`:
 
-## Codex-Specific Notes
-
-- Prompts use Markdown format
-- Reference `docs/standards/` for coding conventions
-- Follow `AGENTS.md` for behavior guidelines
-- Use standard Markdown links for file references
+1. Branch from `main`
+2. Implement following Clean Architecture
+3. Verify: `make go-lint && make tidy && make check-build && make gotest`
+4. Self-review
+5. Commit & PR

@@ -1,35 +1,26 @@
-# Fix Issue Command
+# Fix Issue #{issue_number}
 
-Refer to @docs/commands/fix-issue.md for full documentation.
+Fix a GitHub issue following the standard workflow.
 
-## Quick Reference
+## Skill Reference
 
-```
-/fix-issue #123
-/fix-issue #123,#124
-/fix-issue #123 current
-```
+**Use the `go-development` Skill** for branch management, verification, and commit workflow.
+
+## Process
+
+1. **Fetch issue**: `gh issue view {issue_number}`
+2. **Create branch**: Follow `go-development` Skill
+3. **Implement fix**: Follow Clean Architecture
+4. **Verify**: Run verification commands from Skill
+5. **Self-review**: Complete checklist from Skill
+6. **Commit & PR**: Follow Skill workflow
 
 ## Parameters
 
-- `{issue_number}`: GitHub issue number(s)
-- `{base_branch}`: `new` (default), `current`, or branch name
+- `{issue_number}`: GitHub issue number (e.g., `#123` or `123`)
 
-## Process Summary
+## Example
 
-1. Fetch issue details: `gh issue view {issue_number}`
-2. Create feature branch (unless `current` mode)
-3. Implement fix following Clean Architecture
-4. Run verification commands
-5. Create commit and PR
-
-## Verification
-
-```bash
-make go-lint && make tidy && make check-build && make gotest
 ```
-
-## Related
-
-- @docs/standards/workflow.md
-- @docs/standards/coding-conventions.md
+/fix-issue #123
+```

@@ -1,33 +1,26 @@
 # Claude Code Commands
 
-Commands for Claude Code. These reference the shared command definitions in `docs/commands/`.
+Minimal commands that invoke Skills for common tasks.
 
 ## Available Commands
 
 | Command | Description |
 |---------|-------------|
-| `/fix-issue` | Fix GitHub issues |
+| `/fix-issue #123` | Fix a GitHub issue |
 | `/fix-linter` | Fix linter errors |
-| `/fix-pr-review` | Address PR review comments |
-| `/task-bug-fix` | Bug fix workflow |
-| `/task-feature-add` | Feature addition workflow |
-| `/task-refactoring` | Refactoring workflow |
-| `/task-db-change` | Database change workflow |
+| `/fix-pr-review #123` | Address PR review comments |
 
-## Claude-Specific Commands
+## Skills (Referenced by Commands)
 
-| Command | Description |
-|---------|-------------|
-| `/convert-custom-slash-for-codex` | Convert Claude commands to Codex format |
-| `/create-github-issue` | Create GitHub issue (migrated to Skills) |
+Commands use these Skills for detailed workflows:
 
-## Shared Definitions
+| Skill | Description |
+|-------|-------------|
+| `go-development` | Branch, verify, review, commit workflow |
+| `github-issue-creation` | Create GitHub issues |
 
-All common command definitions are maintained in @docs/commands/.
+## Usage
 
-## Claude-Specific Notes
-
-- Use `@file-name` syntax for file references
-- Commands use Markdown format
-- Reference @docs/standards/ for coding conventions
-- Follow @AGENTS.md for behavior guidelines
+1. Invoke command (e.g., `/fix-issue #123`)
+2. Command loads the `go-development` Skill automatically
+3. Follow the workflow defined in the Skill

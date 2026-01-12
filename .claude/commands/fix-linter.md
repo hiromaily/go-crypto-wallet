@@ -1,28 +1,21 @@
-# Fix Linter Command
+# Fix Linter
 
-Refer to @docs/commands/fix-linter.md for full documentation.
+Fix linter errors reported by `make go-lint`.
 
-## Quick Reference
+## Skill Reference
 
-```
-/fix-linter
-```
+**Use the `go-development` Skill** for verification commands.
 
-## Process Summary
+## Process
 
-1. Run `make go-lint` to identify errors
-2. Categorize by severity (syntax > security > type > style)
-3. Fix critical errors first
-4. Verify fixes don't break functionality
-5. Check for auto-generated files (DO NOT EDIT)
+1. **Run**: `make go-lint`
+2. **Prioritize**: syntax > security > type > style
+3. **Fix**: Address errors by priority
+4. **Verify**: Run verification commands from Skill
+5. **Commit**: Use `fix: resolve linter errors` format
 
-## Verification
+## Guidelines
 
-```bash
-make go-lint && make tidy && make check-build && make gotest
-```
-
-## Related
-
-- @docs/standards/coding-conventions.md
-- @docs/ai-agents/guidelines/code-generation.md
+- Never edit files with `DO NOT EDIT` comments
+- Preserve original functionality
+- Use linter auto-fix where appropriate

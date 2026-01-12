@@ -1,25 +1,21 @@
 # Cursor Commands
 
-Commands for Cursor AI. These reference the shared command definitions in `docs/commands/`.
+Minimal commands referencing shared workflow.
 
 ## Available Commands
 
 | Command | Description |
 |---------|-------------|
-| `/fix-issue` | Fix GitHub issues |
+| `/fix-issue #123` | Fix a GitHub issue |
 | `/fix-linter` | Fix linter errors |
-| `/fix-pr-review` | Address PR review comments |
-| `/task-bug-fix` | Bug fix workflow |
-| `/task-feature-add` | Feature addition workflow |
-| `/task-refactoring` | Refactoring workflow |
-| `/task-db-change` | Database change workflow |
+| `/fix-pr-review #123` | Address PR review comments |
 
-## Shared Definitions
+## Workflow
 
-All command definitions are maintained in [docs/commands/](../../docs/commands/).
+All commands follow the workflow in `.cursor/rules/general.mdc`:
 
-## Cursor-Specific Notes
-
-- Commands use standard Markdown format
-- Reference `docs/standards/` for coding conventions
-- Follow `AGENTS.md` for behavior guidelines
+1. Branch from `main`
+2. Implement following Clean Architecture
+3. Verify: `make go-lint && make tidy && make check-build && make gotest`
+4. Self-review
+5. Commit & PR

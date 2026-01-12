@@ -1,32 +1,16 @@
-# Fix PR Review Prompt
+# Fix PR Review
 
-Refer to [docs/commands/fix-pr-review.md](../../docs/commands/fix-pr-review.md) for full documentation.
-
-## Quick Reference
-
-```
-fix-pr-review #123
-```
+Address review comments on a pull request.
 
 ## Parameters
 
 - `{pr_number}`: Pull request number
 
-## Process Summary
+## Workflow
 
-1. Fetch PR: `gh pr view {pr_number}`
-2. Get comments: `gh api repos/{owner}/{repo}/pulls/{pr_number}/comments`
-3. Categorize comments (security > functionality > quality)
-4. Address each comment
-5. Commit and push
-
-## Verification
+See `.codex/rules/general.md` for detailed workflow.
 
 ```bash
-make go-lint && make tidy && make check-build && make gotest
+gh pr view {pr_number}
+# Fix comments, verify, push
 ```
-
-## Related
-
-- [Workflow Guidelines](../../docs/standards/workflow.md)
-- [Coding Conventions](../../docs/standards/coding-conventions.md)

@@ -1,28 +1,12 @@
-# Fix Linter Prompt
+# Fix Linter
 
-Refer to [docs/commands/fix-linter.md](../../docs/commands/fix-linter.md) for full documentation.
+Fix linter errors reported by `make go-lint`.
 
-## Quick Reference
+## Workflow
 
-```
-fix-linter
-```
-
-## Process Summary
-
-1. Run `make go-lint` to identify errors
-2. Categorize by severity (syntax > security > type > style)
-3. Fix critical errors first
-4. Verify fixes don't break functionality
-5. Check for auto-generated files (DO NOT EDIT)
-
-## Verification
+See `.codex/rules/general.md` for detailed workflow.
 
 ```bash
-make go-lint && make tidy && make check-build && make gotest
+make go-lint
+# Fix errors, verify
 ```
-
-## Related
-
-- [Coding Conventions](../../docs/standards/coding-conventions.md)
-- [Code Generation](../../docs/ai-agents/guidelines/code-generation.md)
