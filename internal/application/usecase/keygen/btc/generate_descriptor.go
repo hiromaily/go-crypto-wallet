@@ -14,6 +14,7 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
 	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 )
@@ -23,6 +24,8 @@ type generateDescriptorUseCase struct {
 	chainConfig        *chaincfg.Params
 	authFullPubKeyRepo persistence.AuthFullPubkeyRepositorier
 	accountKeyRepo     persistence.BTCAccountKeyRepositorier
+	seedRepo           persistence.SeedRepositorier
+	coinTypeCode       domainCoin.CoinTypeCode
 	multisigConfig     *domainAccount.MultisigConfig
 }
 
@@ -32,6 +35,8 @@ func NewGenerateDescriptorUseCase(
 	chainConfig *chaincfg.Params,
 	authFullPubKeyRepo persistence.AuthFullPubkeyRepositorier,
 	accountKeyRepo persistence.BTCAccountKeyRepositorier,
+	seedRepo persistence.SeedRepositorier,
+	coinTypeCode domainCoin.CoinTypeCode,
 	multisigConfig *domainAccount.MultisigConfig,
 ) keygenusecase.GenerateDescriptorUseCase {
 	return &generateDescriptorUseCase{
@@ -39,6 +44,8 @@ func NewGenerateDescriptorUseCase(
 		chainConfig:        chainConfig,
 		authFullPubKeyRepo: authFullPubKeyRepo,
 		accountKeyRepo:     accountKeyRepo,
+		seedRepo:           seedRepo,
+		coinTypeCode:       coinTypeCode,
 		multisigConfig:     multisigConfig,
 	}
 }
@@ -161,7 +168,18 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 		return nil, fmt.Errorf("failed to determine purpose for address type %s: %w", addressType.String(), err)
 	}
 
-	signers := make([]btc.MultisigSigner, 0, len(authTypes))
+	// Reserve space for keygen key + auth keys
+	signers := make([]btc.MultisigSigner, 0, len(authTypes)+1)
+
+	// CRITICAL FIX: Include keygen wallet's own key in multisig
+	// Without this, descriptors only contain auth keys, resulting in (N-1)-of-(N-1) instead of N-of-N
+	keygenSigner, err := u.buildKeygenSigner(accountType, addressType, derivationPath)
+	if err != nil {
+		return nil, fmt.Errorf("build keygen signer: %w", err)
+	}
+	signers = append(signers, keygenSigner)
+
+	// Add auth user keys (sign1, sign2, etc.)
 	for _, authType := range authTypes {
 		// Query by purpose to get correct xpub for the address type
 		authKey, err := u.authFullPubKeyRepo.GetOneByPurpose(authType, purpose)
@@ -225,6 +243,86 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 	}
 
 	return signers, nil
+}
+
+// buildKeygenSigner creates a MultisigSigner for the keygen wallet's own key.
+// This ensures that the keygen wallet participates in multisig along with auth users.
+func (u *generateDescriptorUseCase) buildKeygenSigner(
+	accountType domainAccount.AccountType,
+	addressType domainAddress.AddrType,
+	derivationPath string,
+) (btc.MultisigSigner, error) {
+	// Get seed from repository
+	ctx := context.Background()
+	seedData, err := u.seedRepo.GetOne(ctx)
+	if err != nil {
+		return btc.MultisigSigner{}, fmt.Errorf("get seed: %w", err)
+	}
+	if seedData == nil {
+		return btc.MultisigSigner{}, errors.New("seed not found - run 'keygen seed' first")
+	}
+
+	// Convert seed string to bytes
+	seedBytes, err := infraKey.SeedToByte(seedData.Seed)
+	if err != nil {
+		return btc.MultisigSigner{}, fmt.Errorf("decode seed: %w", err)
+	}
+
+	// Determine BIP purpose from address type
+	purpose, err := domainAuth.PurposeForAddressType(addressType.String())
+	if err != nil {
+		return btc.MultisigSigner{}, fmt.Errorf("determine purpose for address type %s: %w", addressType.String(), err)
+	}
+
+	// Map BIP purpose to infraKey.PurposeType
+	var purposeType infraKey.PurposeType
+	switch purpose {
+	case domainAuth.PurposeBIP44:
+		purposeType = infraKey.PurposeTypeBIP44
+	case domainAuth.PurposeBIP49:
+		purposeType = infraKey.PurposeTypeBIP49
+	case domainAuth.PurposeBIP84:
+		purposeType = infraKey.PurposeTypeBIP84
+	case domainAuth.PurposeBIP86:
+		purposeType = infraKey.PurposeTypeBIP86
+	default:
+		return btc.MultisigSigner{}, fmt.Errorf("unsupported BIP purpose: %s", purpose.String())
+	}
+
+	// Create HD key for this purpose
+	hdKey := infraKey.NewHDKey(purposeType, u.coinTypeCode, u.chainConfig)
+
+	// Create descriptor generator
+	descGenerator := infraKey.NewDescriptorGenerator(hdKey, u.chainConfig)
+
+	// Generate account-level extended public key from seed
+	accountXPub, err := descGenerator.GetAccountXPub(seedBytes, accountType)
+	if err != nil {
+		return btc.MultisigSigner{}, fmt.Errorf("generate account xpub: %w", err)
+	}
+
+	// Parse extended public key
+	xpub, err := hdkeychain.NewKeyFromString(accountXPub)
+	if err != nil {
+		return btc.MultisigSigner{}, fmt.Errorf("parse keygen extended key: %w", err)
+	}
+
+	// Verify network match
+	if u.chainConfig != nil && !xpub.IsForNet(u.chainConfig) {
+		return btc.MultisigSigner{}, fmt.Errorf("keygen extended key network mismatch")
+	}
+
+	// Get master fingerprint
+	fingerprint, err := descGenerator.GetMasterFingerprintHex(seedBytes)
+	if err != nil {
+		return btc.MultisigSigner{}, fmt.Errorf("calculate keygen fingerprint: %w", err)
+	}
+
+	return btc.MultisigSigner{
+		Fingerprint:    fingerprint,
+		DerivationPath: derivationPath,
+		ExtendedKey:    xpub,
+	}, nil
 }
 
 func derivationPathForAddress(
