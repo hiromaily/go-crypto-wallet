@@ -1,3 +1,17 @@
+# =============================================================================
+# XRP Keygen Wallet Configuration
+# =============================================================================
+# All values can be overridden by environment variables with WALLET_ prefix.
+# Priority: Environment Variables > Config File > Default Values
+#
+# Examples:
+#   WALLET_RIPPLE_WEBSOCKET_PUBLIC_URL=wss://127.0.0.1:6005
+#   WALLET_MYSQL_HOST=localhost:3306
+#   WALLET_LOGGER_LEVEL=info
+#
+# See pkg/config/README.md for full documentation.
+# =============================================================================
+
 ripple:
 # on production, it should run offline
 
