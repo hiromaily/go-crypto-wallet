@@ -68,14 +68,14 @@ func (u *generateAuthKeyUseCase) Generate(
 		)
 
 		// Generate HD wallet keys for this account
-		walletKeys, err := u.generateHDKey(accountType, input.Seed, uint32(idxFrom), input.Count)
+		walletKeys, accountXpriv, err := u.generateHDKeyWithAccountXpriv(accountType, input.Seed, uint32(idxFrom), input.Count)
 		if err != nil {
 			return signusecase.GenerateAuthKeyOutput{},
 				fmt.Errorf("fail to generate HD key for %s: %w", accountType.String(), err)
 		}
 
-		// Insert key information to auth_account_key_table
-		err = u.repo.Insert(walletKeys, idxFrom, u.coinTypeCode, accountType, u.keygen.KeyType())
+		// Insert key information to auth_account_key_table with account xpriv
+		err = u.repo.Insert(walletKeys, accountXpriv, idxFrom, u.coinTypeCode, accountType, u.keygen.KeyType())
 		if err != nil {
 			return signusecase.GenerateAuthKeyOutput{},
 				fmt.Errorf("fail to insert keys for %s: %w", accountType.String(), err)
@@ -102,4 +102,40 @@ func (u *generateAuthKeyUseCase) generateHDKey(
 		return nil, fmt.Errorf("fail to call keygen.CreateKey(): %w", err)
 	}
 	return walletKeys, nil
+}
+
+// generateHDKeyWithAccountXpriv generates HD wallet keys and returns account-level extended private key.
+// The account xpriv can be used for BIP32 derivation at different address indices.
+func (u *generateAuthKeyUseCase) generateHDKeyWithAccountXpriv(
+	accountType domainAccount.AccountType,
+	seed []byte,
+	idxFrom,
+	count uint32,
+) (keys []domainKey.WalletKey, accountXpriv string, err error) {
+	// Type assert to access CreateKeyWithAccountXpriv
+	// This method is specific to HDKey implementation
+	type accountXprivGenerator interface {
+		CreateKeyWithAccountXpriv(
+			seed []byte,
+			accountType domainAccount.AccountType,
+			idxFrom, count uint32,
+		) ([]domainKey.WalletKey, string, error)
+	}
+
+	gen, ok := u.keygen.(accountXprivGenerator)
+	if !ok {
+		// Fallback: generate keys without xpriv (backward compatibility)
+		keys, err := u.keygen.CreateKey(seed, accountType, idxFrom, count)
+		if err != nil {
+			return nil, "", fmt.Errorf("fail to call keygen.CreateKey(): %w", err)
+		}
+		return keys, "", nil
+	}
+
+	// Generate keys with account xpriv
+	keys, accountXpriv, err = gen.CreateKeyWithAccountXpriv(seed, accountType, idxFrom, count)
+	if err != nil {
+		return nil, "", fmt.Errorf("fail to call keygen.CreateKeyWithAccountXpriv(): %w", err)
+	}
+	return keys, accountXpriv, nil
 }

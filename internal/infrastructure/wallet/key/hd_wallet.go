@@ -120,6 +120,31 @@ func (k *HDKey) CreateKey(
 	return k.createKeysWithIndex(privKey, idxFrom, count)
 }
 
+// CreateKeyWithAccountXpriv creates HD keys and returns the account-level extended private key.
+// This extended private key can be used for BIP32 derivation at different indices.
+func (k *HDKey) CreateKeyWithAccountXpriv(
+	seed []byte,
+	accountType domainAccount.AccountType,
+	idxFrom, count uint32,
+) (keys []domainKey.WalletKey, accountXpriv string, err error) {
+	// create privateKey, publicKey by account level
+	privKey, _, err := k.createKeyByAccount(seed, accountType)
+	if err != nil {
+		return nil, "", fmt.Errorf("fail to call createKeyByAccount(): %w", err)
+	}
+
+	// Get account-level extended private key string
+	accountXpriv = privKey.String()
+
+	// create keys by index and count
+	keys, err = k.createKeysWithIndex(privKey, idxFrom, count)
+	if err != nil {
+		return nil, "", err
+	}
+
+	return keys, accountXpriv, nil
+}
+
 // KeyType returns the key type this generator supports (implements Generator interface)
 func (k *HDKey) KeyType() domainKey.KeyType {
 	switch k.purpose {

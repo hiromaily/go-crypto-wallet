@@ -24,12 +24,13 @@ type AuthAccountKey struct {
 	Bech32Address      string  // Native SegWit address (bech32)
 	TaprootAddress     *string // Taproot address (BIP86) - nullable
 	FullPublicKey      string  // Full public key
-	MultisigAddress    string  // Multisig address
-	RedeemScript       string  // Redeem script for multisig
-	WalletImportFormat string  // WIF - NEVER log this field
-	Idx                int64   // HD wallet index
-	AddrStatus         domainAddress.AddrStatus
-	UpdatedAt          *time.Time
+	MultisigAddress         string  // Multisig address
+	RedeemScript            string  // Redeem script for multisig
+	WalletImportFormat      string  // WIF - NEVER log this field
+	AccountExtendedPrivkey  *string // Account-level extended private key (xpriv) for BIP32 derivation - NEVER log this field
+	Idx                     int64   // HD wallet index
+	AddrStatus              domainAddress.AddrStatus
+	UpdatedAt               *time.Time
 }
 
 // NewAuthAccountKey creates a new AuthAccountKey entity for key generation.
@@ -104,6 +105,19 @@ func (k *AuthAccountKey) UpdateAddress(p2pkhAddress string) {
 // SECURITY: This returns sensitive private key data. Never log the return value.
 func (k *AuthAccountKey) GetWIF() string {
 	return k.WalletImportFormat
+}
+
+// SetAccountExtendedPrivkey sets the account-level extended private key for BIP32 derivation.
+// SECURITY: This contains sensitive private key data. Never log the parameter or field value.
+func (k *AuthAccountKey) SetAccountExtendedPrivkey(xpriv string) {
+	k.AccountExtendedPrivkey = &xpriv
+	k.updateTimestamp()
+}
+
+// GetAccountExtendedPrivkey returns the account-level extended private key.
+// SECURITY: This returns sensitive private key data. Never log the return value.
+func (k *AuthAccountKey) GetAccountExtendedPrivkey() *string {
+	return k.AccountExtendedPrivkey
 }
 
 func (k *AuthAccountKey) updateTimestamp() {

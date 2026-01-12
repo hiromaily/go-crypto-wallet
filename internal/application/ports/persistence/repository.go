@@ -100,6 +100,7 @@ type HDWalletRepo interface {
 	GetMaxIndex(accountType domainAccount.AccountType) (int64, error)
 	Insert(
 		keys []domainKey.WalletKey,
+		accountXpriv string,
 		idx int64,
 		coinTypeCode domainCoin.CoinTypeCode,
 		accountType domainAccount.AccountType,

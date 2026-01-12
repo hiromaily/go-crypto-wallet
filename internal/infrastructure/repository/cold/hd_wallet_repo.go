@@ -46,6 +46,7 @@ func (w *AuthHDWalletRepo) GetMaxIndex(accountType domainAccount.AccountType) (i
 // Insert inserts key to auth_account_key table
 func (w *AuthHDWalletRepo) Insert(
 	keys []domainKey.WalletKey,
+	accountXpriv string,
 	idx int64,
 	coinTypeCode domainCoin.CoinTypeCode,
 	accountType domainAccount.AccountType,
@@ -77,6 +78,11 @@ func (w *AuthHDWalletRepo) Insert(
 	}
 	if keyItem.RedeemScript != "" {
 		item.RedeemScript = keyItem.RedeemScript
+	}
+
+	// Store account-level extended private key for BIP32 derivation
+	if accountXpriv != "" {
+		item.SetAccountExtendedPrivkey(accountXpriv)
 	}
 
 	return w.authKeyRepo.Insert(item)
@@ -111,11 +117,14 @@ func (w *AccountHDWalletRepo) GetMaxIndex(accountType domainAccount.AccountType)
 // Insert inserts keys to btc_account_key table
 func (w *AccountHDWalletRepo) Insert(
 	keys []domainKey.WalletKey,
+	accountXpriv string,
 	idxFrom int64,
 	coinTypeCode domainCoin.CoinTypeCode,
 	accountType domainAccount.AccountType,
 	keyType domainKey.KeyType,
 ) error {
+	// accountXpriv is not used for btc_account_key table (only for auth_account_key)
+	_ = accountXpriv
 	// insert key information to btc_account_key table
 	accountKeyItems := make([]*domainBitcoin.BtcAccountKey, len(keys))
 	now := time.Now()
