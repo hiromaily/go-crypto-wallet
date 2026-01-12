@@ -760,6 +760,8 @@ type BtcAccountKey struct {
 	RedeemScript string
 	// WIF
 	WalletImportFormat string
+	// Account-level extended private key (xpriv) for BIP32 derivation
+	AccountExtendedPrivkey sql.NullString
 	// index for hd wallet
 	Idx int64
 	// progress status for address generating

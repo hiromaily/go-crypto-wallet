@@ -14,21 +14,22 @@ import (
 // SECURITY NOTE: The WalletImportFormat field contains the private key in WIF format.
 // This must NEVER be logged or exposed in error messages. Handle with extreme care.
 type BtcAccountKey struct {
-	ID                 int64
-	CoinTypeCode       domainCoin.CoinTypeCode
-	KeyType            string // BIP type: bip44, bip49, bip84, bip86, musig2
-	Account            domainAccount.AccountType
-	P2pkhAddress       string  // Pay To PubKey Hash address (legacy)
-	P2shSegwitAddress  string  // P2SH-SegWit address (wrapped SegWit)
-	Bech32Address      string  // Native SegWit address (bech32)
-	TaprootAddress     *string // Taproot address (BIP86) - nullable
-	FullPublicKey      string  // Full public key
-	MultisigAddress    string  // Multisig address
-	RedeemScript       string  // Redeem script for multisig
-	WalletImportFormat string  // WIF - NEVER log this field
-	Idx                int64   // HD wallet index
-	AddrStatus         domainAddress.AddrStatus
-	UpdatedAt          *time.Time
+	ID                     int64
+	CoinTypeCode           domainCoin.CoinTypeCode
+	KeyType                string // BIP type: bip44, bip49, bip84, bip86, musig2
+	Account                domainAccount.AccountType
+	P2pkhAddress           string  // Pay To PubKey Hash address (legacy)
+	P2shSegwitAddress      string  // P2SH-SegWit address (wrapped SegWit)
+	Bech32Address          string  // Native SegWit address (bech32)
+	TaprootAddress         *string // Taproot address (BIP86) - nullable
+	FullPublicKey          string  // Full public key
+	MultisigAddress        string  // Multisig address
+	RedeemScript           string  // Redeem script for multisig
+	WalletImportFormat     string  // WIF - NEVER log this field
+	AccountExtendedPrivkey *string // Account xpriv for BIP32 derivation - NEVER log this field
+	Idx                    int64   // HD wallet index
+	AddrStatus             domainAddress.AddrStatus
+	UpdatedAt              *time.Time
 }
 
 // NewBtcAccountKey creates a new BtcAccountKey entity for key generation.
@@ -107,6 +108,19 @@ func (k *BtcAccountKey) UpdateAddress(p2pkhAddress string) {
 // SECURITY: This returns sensitive private key data. Never log the return value.
 func (k *BtcAccountKey) GetWIF() string {
 	return k.WalletImportFormat
+}
+
+// SetAccountExtendedPrivkey sets the account-level extended private key for BIP32 derivation.
+// SECURITY: This contains sensitive private key data. Never log the parameter or field value.
+func (k *BtcAccountKey) SetAccountExtendedPrivkey(xpriv string) {
+	k.AccountExtendedPrivkey = &xpriv
+	k.updateTimestamp()
+}
+
+// GetAccountExtendedPrivkey returns the account-level extended private key.
+// SECURITY: This returns sensitive private key data. Never log the return value.
+func (k *BtcAccountKey) GetAccountExtendedPrivkey() *string {
+	return k.AccountExtendedPrivkey
 }
 
 func (k *BtcAccountKey) updateTimestamp() {

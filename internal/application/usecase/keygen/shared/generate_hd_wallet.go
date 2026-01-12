@@ -51,15 +51,16 @@ func (u *generateHDWalletUseCase) Generate(
 		"current_index", idxFrom,
 	)
 
-	// Generate HD wallet keys
-	walletKeys, err := u.generateHDKey(input.AccountType, input.Seed, uint32(idxFrom), input.Count)
+	// Generate HD wallet keys with account xpriv
+	walletKeys, accountXpriv, err := u.generateHDKeyWithAccountXpriv(
+		input.AccountType, input.Seed, uint32(idxFrom), input.Count,
+	)
 	if err != nil {
 		return keygenusecase.GenerateHDWalletOutput{}, fmt.Errorf("fail to generate HD key: %w", err)
 	}
 
-	// Insert key information to account_key_table / auth_account_key_table
-	// For keygen wallet (btc_account_key), accountXpriv is not used (empty string)
-	err = u.repo.Insert(walletKeys, "", idxFrom, u.coinTypeCode, input.AccountType, u.keygen.KeyType())
+	// Insert key information to account_key_table / auth_account_key_table with account xpriv
+	err = u.repo.Insert(walletKeys, accountXpriv, idxFrom, u.coinTypeCode, input.AccountType, u.keygen.KeyType())
 	if err != nil {
 		return keygenusecase.GenerateHDWalletOutput{}, fmt.Errorf("fail to call repo.Insert(): %w", err)
 	}
@@ -69,17 +70,41 @@ func (u *generateHDWalletUseCase) Generate(
 	}, nil
 }
 
-// generateHDKey generates HD wallet keys
-func (u *generateHDWalletUseCase) generateHDKey(
+// generateHDKeyWithAccountXpriv generates HD wallet keys and returns account-level extended private key.
+// The account xpriv can be used for BIP32 derivation at different address indices.
+func (u *generateHDWalletUseCase) generateHDKeyWithAccountXpriv(
 	accountType domainAccount.AccountType,
 	seed []byte,
 	idxFrom,
 	count uint32,
-) ([]domainKey.WalletKey, error) {
-	// Generate key
-	walletKeys, err := u.keygen.CreateKey(seed, accountType, idxFrom, count)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call keygen.CreateKey(): %w", err)
+) (keys []domainKey.WalletKey, accountXpriv string, err error) {
+	// Type assert to access CreateKeyWithAccountXpriv
+	// This method is specific to HDKey implementation
+	type accountXprivGenerator interface {
+		CreateKeyWithAccountXpriv(
+			seed []byte,
+			accountType domainAccount.AccountType,
+			idxFrom, count uint32,
+		) ([]domainKey.WalletKey, string, error)
 	}
-	return walletKeys, nil
+
+	gen, ok := u.keygen.(accountXprivGenerator)
+	if !ok {
+		// Fallback: generate keys without xpriv (backward compatibility)
+		logger.Warn("generator does not implement CreateKeyWithAccountXpriv, falling back to CreateKey (no xpriv will be stored)")
+		keys, err := u.keygen.CreateKey(seed, accountType, idxFrom, count)
+		if err != nil {
+			return nil, "", fmt.Errorf("fail to call keygen.CreateKey(): %w", err)
+		}
+		return keys, "", nil
+	}
+
+	logger.Debug("using CreateKeyWithAccountXpriv to generate keys with account xpriv")
+
+	// Generate keys with account xpriv
+	keys, accountXpriv, err = gen.CreateKeyWithAccountXpriv(seed, accountType, idxFrom, count)
+	if err != nil {
+		return nil, "", fmt.Errorf("fail to call keygen.CreateKeyWithAccountXpriv(): %w", err)
+	}
+	return keys, accountXpriv, nil
 }
