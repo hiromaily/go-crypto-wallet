@@ -123,4 +123,3 @@
 - name: scope:db
   color: c5def5
   description: Database schema and migrations
-

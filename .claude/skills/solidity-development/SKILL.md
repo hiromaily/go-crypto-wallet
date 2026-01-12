@@ -1,11 +1,15 @@
 ---
 name: solidity-development
-description: Workflow for Solidity smart contract development. Use when modifying smart contracts in apps/erc20-token/contracts/.
+description: Solidity smart contract development workflow. Use when modifying smart contracts in apps/erc20-token/contracts/.
 ---
 
 # Solidity Development Workflow
 
-Standard workflow for Solidity smart contract changes.
+Workflow for Solidity smart contract changes.
+
+## Prerequisites
+
+**Use `git-workflow` Skill** for branch management, commit conventions, and PR creation.
 
 ## Applicable Directories
 
@@ -13,17 +17,6 @@ Standard workflow for Solidity smart contract changes.
 |------|-------------|
 | `apps/erc20-token/contracts/` | Smart contract source files |
 | `contracts/` | ABI files |
-
-## Branch Management
-
-Same as other development:
-
-```bash
-git fetch origin
-git checkout main
-git reset --hard origin/main
-git checkout -b {branch-type}/issue-{number}-{brief-description}
-```
 
 ## Verification Commands
 
@@ -41,7 +34,7 @@ npm run lint          # Lint Solidity code
 
 - [ ] Follows Solidity best practices
 - [ ] Gas optimization considered
-- [ ] Proper visibility modifiers (public, private, internal, external)
+- [ ] Proper visibility modifiers
 - [ ] Events emitted for state changes
 
 ### Security
@@ -49,7 +42,7 @@ npm run lint          # Lint Solidity code
 - [ ] No reentrancy vulnerabilities
 - [ ] Integer overflow/underflow protection
 - [ ] Access control properly implemented
-- [ ] No hardcoded addresses (use constructor parameters)
+- [ ] No hardcoded addresses
 
 ### Testing
 
@@ -59,36 +52,26 @@ npm run lint          # Lint Solidity code
 
 ## ABI Generation
 
-After modifying contracts, regenerate ABI:
+After contract changes:
 
 ```bash
-# Compile contracts
+# 1. Compile
 cd apps/erc20-token
 truffle compile
 
-# Update ABI in main contracts directory
+# 2. Update ABI
 cp build/contracts/Token.json ../../contracts/token.abi
-```
 
-**Note**: After ABI update, regenerate Go bindings:
-
-```bash
-# From project root
-make gen-abi  # If available, or manual abigen command
-```
-
-## Commit Message Format
-
-```
-feat(contract): {brief description}
-
-- {detail 1}
-- {detail 2}
-
-Closes #{issue_number}
+# 3. Regenerate Go bindings (if needed)
+make gen-abi
 ```
 
 ## Related Chain Context
 
-- ETH (Ethereum mainnet/testnet)
+- ETH (Ethereum)
 - ERC20 (Token standard)
+
+## Related Skills
+
+- `git-workflow` - Branch, commit, PR workflow
+- `github-issue-creation` - Task classification

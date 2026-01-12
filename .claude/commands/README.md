@@ -3,12 +3,13 @@
 ## Task Workflow
 
 ```
-1. Create Issue (classify task)    2. Work on Issue (use appropriate skill)
-         ↓                                    ↓
-   github-issue-creation              language/scope-based skill
-   - Determine type                   - go-development
-   - Assign labels                    - typescript-development
-   - Set scope/chain                  - solidity-development
+1. Create Issue                    2. Work on Issue
+   ↓                                  ↓
+   github-issue-creation           git-workflow + language skill
+   - Type label                    - Branch from main
+   - Language/Scope label          - Implement
+   - Chain label (if needed)       - Verify (language-specific)
+                                   - Commit & PR
 ```
 
 ## Commands
@@ -19,54 +20,55 @@
 | `/fix-linter` | Fix linter errors |
 | `/fix-pr-review #123` | Address PR review comments |
 
-## Task Classification (at Issue Creation)
-
-### Type Labels (required - pick one)
-
-| Label | Description |
-|-------|-------------|
-| `bug` | Something isn't working |
-| `enhancement` | New feature |
-| `refactoring` | Code improvement |
-| `documentation` | Docs updates |
-| `security` | Security-related |
-| `technical-debt` | Code quality |
-
-### Language Labels (for code tasks)
-
-| Label | Skill | Directories |
-|-------|-------|-------------|
-| `lang:go` | `go-development` | `internal/`, `pkg/`, `cmd/` |
-| `lang:typescript` | `typescript-development` | `apps/ripple-lib-server/` |
-| `lang:solidity` | `solidity-development` | `apps/erc20-token/contracts/` |
-
-### Scope Labels (for non-code tasks)
-
-| Label | Directories |
-|-------|-------------|
-| `scope:docs` | `docs/`, `*.md` |
-| `scope:devops` | `.github/workflows/`, `docker/` |
-| `scope:scripts` | `scripts/`, `*.sh` |
-| `scope:makefile` | `Makefile`, `make/` |
-| `scope:config` | `config/`, `*.toml` |
-| `scope:db` | `tools/atlas/`, `tools/sqlc/` |
-
-### Chain Labels (if applicable)
-
-| Label | Chain |
-|-------|-------|
-| `chain:btc` | Bitcoin |
-| `chain:bch` | Bitcoin Cash |
-| `chain:eth` | Ethereum |
-| `chain:erc20` | ERC-20 tokens |
-| `chain:xrp` | XRP/Ripple |
-| `chain:all` | Cross-chain |
-
 ## Skills
 
 | Skill | Purpose |
 |-------|---------|
 | `github-issue-creation` | Create issues with proper classification |
-| `go-development` | Go code workflow |
-| `typescript-development` | TypeScript/JS workflow |
-| `solidity-development` | Solidity contract workflow |
+| `git-workflow` | Branch, commit, PR workflow (all tasks) |
+| `go-development` | Go verification & review |
+| `typescript-development` | TypeScript verification & review |
+| `solidity-development` | Solidity verification & review |
+
+## Skill Composition
+
+Most tasks use multiple skills:
+
+```
+git-workflow (common)
+     +
+language skill (based on label)
+     =
+complete workflow
+```
+
+### Examples
+
+| Task | Skills Used |
+|------|-------------|
+| Go bug fix | `git-workflow` + `go-development` |
+| TypeScript feature | `git-workflow` + `typescript-development` |
+| Documentation update | `git-workflow` only |
+| DevOps/CI change | `git-workflow` only |
+
+## Task Classification (Labels)
+
+### Type (required)
+
+`bug`, `enhancement`, `refactoring`, `documentation`, `security`, `technical-debt`
+
+### Language (for code tasks)
+
+| Label | Skill |
+|-------|-------|
+| `lang:go` | `go-development` |
+| `lang:typescript` | `typescript-development` |
+| `lang:solidity` | `solidity-development` |
+
+### Scope (for non-code tasks)
+
+`scope:docs`, `scope:devops`, `scope:scripts`, `scope:makefile`, `scope:config`, `scope:db`
+
+### Chain (if applicable)
+
+`chain:btc`, `chain:bch`, `chain:eth`, `chain:erc20`, `chain:xrp`, `chain:all`

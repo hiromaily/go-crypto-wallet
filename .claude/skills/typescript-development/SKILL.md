@@ -1,11 +1,15 @@
 ---
 name: typescript-development
-description: Workflow for TypeScript/JavaScript development in apps/ directory. Use when modifying TypeScript code in ripple-lib-server or JavaScript in erc20-token.
+description: TypeScript/JavaScript development workflow for apps/ directory. Use when modifying TypeScript code in ripple-lib-server or JavaScript in erc20-token.
 ---
 
 # TypeScript/JavaScript Development Workflow
 
-Standard workflow for TypeScript/JavaScript code changes in `apps/` directory.
+Workflow for TypeScript/JavaScript code changes in `apps/` directory.
+
+## Prerequisites
+
+**Use `git-workflow` Skill** for branch management, commit conventions, and PR creation.
 
 ## Applicable Directories
 
@@ -14,20 +18,9 @@ Standard workflow for TypeScript/JavaScript code changes in `apps/` directory.
 | ripple-lib-server | TypeScript | `apps/ripple-lib-server/` |
 | erc20-token | JavaScript | `apps/erc20-token/` |
 
-## Branch Management
-
-Same as Go development:
-
-```bash
-git fetch origin
-git checkout main
-git reset --hard origin/main
-git checkout -b {branch-type}/issue-{number}-{brief-description}
-```
-
 ## Verification Commands
 
-**Navigate to the app directory first:**
+**Navigate to app directory first:**
 
 ```bash
 cd apps/{app-name}
@@ -52,7 +45,7 @@ npm test          # Run tests
 - [ ] Follows project ESLint configuration
 - [ ] Proper TypeScript types (no `any` unless necessary)
 - [ ] Async/await error handling
-- [ ] Proper imports (no circular dependencies)
+- [ ] No circular dependencies
 
 ### Security
 
@@ -62,26 +55,19 @@ npm test          # Run tests
 
 ### Auto-Generated Files
 
-- [ ] NOT editing files in:
-  - `apps/ripple-lib-server/src/pb/` (Protocol Buffer generated)
-  - `apps/erc20-token/build/` (Truffle build artifacts)
+**DO NOT EDIT:**
 
-## Commit Message Format
-
-Same as Go development:
-
-```
-{type}: {brief description}
-
-- {detail 1}
-- {detail 2}
-
-Closes #{issue_number}
-```
+- `apps/ripple-lib-server/src/pb/` (Protocol Buffer generated)
+- `apps/erc20-token/build/` (Truffle build artifacts)
 
 ## Related Chain Context
 
-| App | Related Chain |
-|-----|---------------|
+| App | Chain |
+|-----|-------|
 | ripple-lib-server | XRP |
 | erc20-token | ETH, ERC20 |
+
+## Related Skills
+
+- `git-workflow` - Branch, commit, PR workflow
+- `github-issue-creation` - Task classification
