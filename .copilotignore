@@ -1,3 +1,7 @@
+# GitHub Copilot Context Ignore
+# Files that should not be analyzed by GitHub Copilot
+# See .claudeignore for reference
+
 # Generated code files (DO NOT EDIT)
 # These files are auto-generated and should not be analyzed or edited
 
@@ -76,4 +80,3 @@ docs/issues/*
 !docs/issues/CURRENT_ISSUES.md
 !docs/issues/REFACTORING_CHECKLIST.md
 !docs/issues/REFACTORING_PLAN.md
-
