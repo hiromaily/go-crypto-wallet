@@ -148,7 +148,7 @@ full_reset() {
 	local volume_deleted=false
 
 	while [ $counter -lt $max_wait ]; do
-		if ! docker volume ls | grep -q "$volume_name"; then
+		if ! docker volume inspect "$volume_name" >/dev/null 2>&1; then
 			log_info "Volume successfully deleted"
 			volume_deleted=true
 			break
