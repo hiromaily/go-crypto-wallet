@@ -38,3 +38,34 @@ install-codex-custom-prompts:
 .PHONY: add-notion-mcp-by-claude
 add-notion-mcp-by-claude:
 	claude mcp add notion --scope project --transport http https://mcp.notion.com/mcp
+
+###############################################################################
+# AI Agent SSOT Sync
+###############################################################################
+# Sync Claude rules to Cursor rules
+# Source: .claude/rules/*.md -> Destination: .cursor/rules/*.mdc
+#
+# Conversion rules:
+#   - paths: present -> globs: + alwaysApply: false
+#   - paths: absent  -> alwaysApply: true (global rule)
+#   - First # heading -> description:
+#   - .md -> .mdc extension
+.PHONY: sync-cursor-rules
+sync-cursor-rules:
+	@./scripts/ai-agent/sync-rule-claude-to-cursor.sh --force --verbose
+
+# Dry-run: preview what would be converted
+.PHONY: sync-cursor-rules-dry
+sync-cursor-rules-dry:
+	@./scripts/ai-agent/sync-rule-claude-to-cursor.sh --dry-run --verbose
+
+# Sync all AI agent configurations (SSOT)
+# - Cursor rules: auto-generated from Claude rules
+# - Cursor skills: symlink to .claude/skills (manual setup required)
+# - Cursor commands: auto-loaded from .claude/commands
+.PHONY: sync-ai-agent
+sync-ai-agent: sync-cursor-rules
+	@echo ""
+	@echo "AI Agent configurations synced."
+	@echo "Note: .cursor/skills should be a symlink to ../.claude/skills"
+	@echo "      Run: ln -sf ../.claude/skills .cursor/skills"

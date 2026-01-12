@@ -1,13 +1,18 @@
-# Cursor Rules - Security
+---
+description: Claude Rules - Security
+alwaysApply: true
+---
+
+# Claude Rules - Security
 
 ## Overview
 
-Security rules for Cursor AI when working on go-crypto-wallet.
+Security rules for Claude Code when working on go-crypto-wallet.
 **Security is paramount** - this project handles private keys and cryptocurrency transactions.
 
 ## Detailed Rules
 
-Refer to [docs/standards/security.md](../../docs/standards/security.md) for full security requirements.
+Refer to @docs/standards/security.md for full security requirements.
 
 ## Quick Reference
 

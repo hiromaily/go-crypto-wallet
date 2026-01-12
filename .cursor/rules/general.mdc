@@ -1,41 +1,57 @@
-# Cursor Rules - General
+---
+description: Claude Rules - General
+alwaysApply: true
+---
+
+# Claude Rules - General
 
 ## Overview
 
-General rules for Cursor AI when working on go-crypto-wallet.
+General rules for Claude Code when working on go-crypto-wallet.
 
 ## Behavior Guidelines
 
-- Follow [AGENTS.md](../../AGENTS.md) for behavior guidelines
-- Refer to [docs/standards/](../../docs/standards/) for detailed conventions
-- Read [ARCHITECTURE.md](../../ARCHITECTURE.md) for system design
+- Follow @AGENTS.md for behavior guidelines
+- Refer to @docs/standards/ for detailed conventions
+- Read @ARCHITECTURE.md for system design
 
 ## Code Quality
 
-Refer to [docs/standards/coding-conventions.md](../../docs/standards/coding-conventions.md)
+Refer to @docs/standards/coding-conventions.md
 
 Key rules:
 - Follow Clean Architecture layer separation
 - Domain layer has ZERO infrastructure dependencies
-- Use error wrapping: `fmt.Errorf("context: %w", err)`
-- Follow language-specific verification commands
+- Follow language-specific conventions (see Skills below)
+- Run verification commands before committing
 
 ## Testing
 
-Refer to [docs/standards/testing.md](../../docs/standards/testing.md)
+Refer to @docs/standards/testing.md
 
 ## Workflow
 
-Refer to [docs/standards/workflow.md](../../docs/standards/workflow.md)
+Refer to @docs/standards/workflow.md
 
 Key rules:
 - Create feature branches for changes
 - Follow conventional commit messages
 - Run verification commands before committing
 
+## Language-Specific Skills
+
+Use appropriate skills based on the file type:
+
+| File Type | Skill |
+|-----------|-------|
+| Go (`*.go`) | `go-development` |
+| TypeScript (`*.ts`) | `typescript-development` |
+| Shell (`*.sh`) | `shell-scripts` |
+| Solidity (`*.sol`) | `solidity-development` |
+| SQL/HCL | `db-migration` |
+| Makefile | `makefile-update` |
+
 ## Auto-Generated Files
 
-**DO NOT EDIT** files containing `DO NOT EDIT` comments:
-- `internal/infrastructure/database/sqlc/*.go`
-- `internal/infrastructure/api/ripple/xrp/*.pb.go`
-- `internal/infrastructure/contract/token-abi.go`
+**DO NOT EDIT** files containing `DO NOT EDIT` comments.
+See language-specific skills for details on auto-generated file locations.

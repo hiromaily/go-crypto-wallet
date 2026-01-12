@@ -1,19 +1,24 @@
 ---
-description: Task-Oriented Context Loading - Automatically load appropriate context documents based on task type, chain, and file type
-globs:
-  - "**/*.go"
-  - "**/*.md"
-  - "**/*.toml"
-  - "**/*.yaml"
-  - "**/*.hcl"
-  - "**/*.sql"
-  - "**/*.sh"
-  - "**/*.proto"
+description: Task-Oriented Context Loading
+alwaysApply: true
 ---
 
 # Task-Oriented Context Loading
 
 タスクを受け取った際、適切なコンテキストドキュメントを自動的に読み込むためのルールです。
+
+## 対象ファイル
+
+このルールは以下のファイルタイプを編集する際に適用されます：
+
+- `**/*.go`
+- `**/*.md`
+- `**/*.toml`
+- `**/*.yaml`
+- `**/*.hcl`
+- `**/*.sql`
+- `**/*.sh`
+- `**/*.proto`
 
 ## Task Type Detection
 
@@ -184,7 +189,7 @@ make sqlc         # スキーマ変更時
 
 ## Related Documents
 
-- [Task-Oriented Context Management](docs/task-oriented-context.md)
-- [Task Contexts](docs/task-contexts/README.md)
-- [Verification Matrix](docs/task-contexts/verification.md)
-- [AGENTS.md](AGENTS.md) - プロジェクト全体のガイドライン
+- [Task-Oriented Context Management](../../docs/task-oriented-context.md)
+- [Task Contexts](../../docs/task-contexts/README.md)
+- [Verification Matrix](../../docs/task-contexts/verification.md)
+- [AGENTS.md](../../AGENTS.md) - プロジェクト全体のガイドライン
