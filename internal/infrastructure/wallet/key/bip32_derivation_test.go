@@ -166,8 +166,8 @@ func TestExtractAddressIndexFromPSBTInput(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name               string
-		bip32Derivations   []struct {
+		name             string
+		bip32Derivations []struct {
 			PubKey               []byte
 			MasterKeyFingerprint uint32
 			Bip32Path            []uint32
@@ -210,14 +210,14 @@ func TestExtractAddressIndexFromPSBTInput(t *testing.T) {
 			expectedChange:       1,
 		},
 		{
-			name:               "no derivation information",
-			bip32Derivations:   []struct {
+			name: "no derivation information",
+			bip32Derivations: []struct {
 				PubKey               []byte
 				MasterKeyFingerprint uint32
 				Bip32Path            []uint32
 			}{},
-			expectedError:      true,
-			errorSubstring:     "no BIP32 derivation information",
+			expectedError:  true,
+			errorSubstring: "no BIP32 derivation information",
 		},
 		{
 			name: "invalid path length",

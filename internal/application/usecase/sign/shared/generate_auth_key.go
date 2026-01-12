@@ -68,7 +68,9 @@ func (u *generateAuthKeyUseCase) Generate(
 		)
 
 		// Generate HD wallet keys for this account
-		walletKeys, accountXpriv, err := u.generateHDKeyWithAccountXpriv(accountType, input.Seed, uint32(idxFrom), input.Count)
+		walletKeys, accountXpriv, err := u.generateHDKeyWithAccountXpriv(
+			accountType, input.Seed, uint32(idxFrom), input.Count,
+		)
 		if err != nil {
 			return signusecase.GenerateAuthKeyOutput{},
 				fmt.Errorf("fail to generate HD key for %s: %w", accountType.String(), err)
@@ -87,21 +89,6 @@ func (u *generateAuthKeyUseCase) Generate(
 	return signusecase.GenerateAuthKeyOutput{
 		GeneratedCount: totalGenerated,
 	}, nil
-}
-
-// generateHDKey generates HD wallet keys
-func (u *generateAuthKeyUseCase) generateHDKey(
-	accountType domainAccount.AccountType,
-	seed []byte,
-	idxFrom,
-	count uint32,
-) ([]domainKey.WalletKey, error) {
-	// Generate key
-	walletKeys, err := u.keygen.CreateKey(seed, accountType, idxFrom, count)
-	if err != nil {
-		return nil, fmt.Errorf("fail to call keygen.CreateKey(): %w", err)
-	}
-	return walletKeys, nil
 }
 
 // generateHDKeyWithAccountXpriv generates HD wallet keys and returns account-level extended private key.

@@ -14,23 +14,23 @@ import (
 // SECURITY NOTE: The WalletImportFormat field contains the private key in WIF format.
 // This must NEVER be logged or exposed in error messages. Handle with extreme care.
 type AuthAccountKey struct {
-	ID                 int16
-	CoinTypeCode       domainCoin.CoinTypeCode
-	KeyType            string // BIP type: bip44, bip49, bip84, bip86, musig2
-	AuthAccount        domainAccount.AuthType
-	Account            domainAccount.AccountType // Multisig account type (deposit, payment, stored)
-	P2pkhAddress       string                    // Pay To PubKey Hash address (legacy)
-	P2shSegwitAddress  string  // P2SH-SegWit address (wrapped SegWit)
-	Bech32Address      string  // Native SegWit address (bech32)
-	TaprootAddress     *string // Taproot address (BIP86) - nullable
-	FullPublicKey      string  // Full public key
-	MultisigAddress         string  // Multisig address
-	RedeemScript            string  // Redeem script for multisig
-	WalletImportFormat      string  // WIF - NEVER log this field
-	AccountExtendedPrivkey  *string // Account-level extended private key (xpriv) for BIP32 derivation - NEVER log this field
-	Idx                     int64   // HD wallet index
-	AddrStatus              domainAddress.AddrStatus
-	UpdatedAt               *time.Time
+	ID                     int16
+	CoinTypeCode           domainCoin.CoinTypeCode
+	KeyType                string // BIP type: bip44, bip49, bip84, bip86, musig2
+	AuthAccount            domainAccount.AuthType
+	Account                domainAccount.AccountType // Multisig account type (deposit, payment, stored)
+	P2pkhAddress           string                    // Pay To PubKey Hash address (legacy)
+	P2shSegwitAddress      string                    // P2SH-SegWit address (wrapped SegWit)
+	Bech32Address          string                    // Native SegWit address (bech32)
+	TaprootAddress         *string                   // Taproot address (BIP86) - nullable
+	FullPublicKey          string                    // Full public key
+	MultisigAddress        string                    // Multisig address
+	RedeemScript           string                    // Redeem script for multisig
+	WalletImportFormat     string                    // WIF - NEVER log this field
+	AccountExtendedPrivkey *string                   // Account xpriv for BIP32 derivation - NEVER log this field
+	Idx                    int64                     // HD wallet index
+	AddrStatus             domainAddress.AddrStatus
+	UpdatedAt              *time.Time
 }
 
 // NewAuthAccountKey creates a new AuthAccountKey entity for key generation.

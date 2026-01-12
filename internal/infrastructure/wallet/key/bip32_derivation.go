@@ -1,6 +1,7 @@
 package key
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -102,7 +103,7 @@ func ExtractAddressIndexFromPSBTInput(
 	},
 ) (addressIndex uint32, change uint32, err error) {
 	if len(bip32Derivations) == 0 {
-		return 0, 0, fmt.Errorf("no BIP32 derivation information in PSBT input")
+		return 0, 0, errors.New("no BIP32 derivation information in PSBT input")
 	}
 
 	// Use the first derivation (all keys should have same address index)
