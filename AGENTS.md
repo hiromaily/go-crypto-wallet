@@ -45,11 +45,12 @@ For detailed documentation, see [llms.txt](llms.txt) and [ARCHITECTURE.md](ARCHI
 |------|----------|
 | Project overview | [llms.txt](llms.txt) |
 | Architecture design | [ARCHITECTURE.md](ARCHITECTURE.md) |
-| Security & core patterns | [docs/ai-agents/guidelines/core.md](docs/ai-agents/guidelines/core.md) |
-| Coding standards | [docs/ai-agents/guidelines/coding-standards.md](docs/ai-agents/guidelines/coding-standards.md) |
+| **Standards (SSOT)** | [docs/standards/](docs/standards/) |
+| Coding conventions | [docs/standards/coding-conventions.md](docs/standards/coding-conventions.md) |
+| Security | [docs/standards/security.md](docs/standards/security.md) |
+| Testing | [docs/standards/testing.md](docs/standards/testing.md) |
+| Workflow | [docs/standards/workflow.md](docs/standards/workflow.md) |
 | Database changes | [docs/ai-agents/guidelines/database.md](docs/ai-agents/guidelines/database.md) |
-| Testing strategy | [docs/ai-agents/guidelines/testing.md](docs/ai-agents/guidelines/testing.md) |
-| Git workflow | [docs/ai-agents/guidelines/workflow.md](docs/ai-agents/guidelines/workflow.md) |
 | Auto-generated files | [docs/ai-agents/guidelines/code-generation.md](docs/ai-agents/guidelines/code-generation.md) |
 | Internal packages | [internal/AGENTS.md](internal/AGENTS.md) |
 | Public packages | [pkg/AGENTS.md](pkg/AGENTS.md) |
@@ -78,4 +79,5 @@ git merge, gh pr merge, push to main
 
 - [llms.txt](llms.txt) - AI-friendly project sitemap
 - [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture
-- [docs/ai-agents/](docs/ai-agents/) - Detailed guidelines
+- [docs/standards/](docs/standards/) - Project standards (SSOT)
+- [docs/ai-agents/](docs/ai-agents/) - Detailed AI guidelines
