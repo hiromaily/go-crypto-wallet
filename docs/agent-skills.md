@@ -361,7 +361,7 @@ To maintain Clean Architecture principles, wallet types should be defined at the
 ## Related Context
 - Related to: #242 (Bitcoin DTO migration)
 - Related to: #224 (Infrastructure refactoring)
-- Documentation: docs/ai-agents/guidelines/architecture.md (Clean Architecture guidelines)
+- Documentation: docs/guidelines/architecture.md (Clean Architecture guidelines)
 
 **Affected Components**:
 - Application layer (use cases)

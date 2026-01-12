@@ -52,4 +52,4 @@ Run for:
 
 ## Detailed Guidelines
 
-See [docs/ai-agents/guidelines/core.md](../ai-agents/guidelines/core.md) for full security guidelines.
+See [docs/guidelines/core.md](../guidelines/core.md) for full security guidelines.

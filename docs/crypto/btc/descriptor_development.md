@@ -3,7 +3,7 @@
 Guidance for contributors extending descriptor functionality.
 
 ## Prerequisites
-- Go toolchain (see `docs/ai-agents/guidelines/requirements.md`).
+- Go toolchain (see `docs/guidelines/requirements.md`).
 - Bitcoin Core available for compatibility testing when running `integration`-tag tests or smoke scripts.
 - Avoid editing auto-generated files; descriptors live in application/infrastructure layers.
 

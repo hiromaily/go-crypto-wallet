@@ -696,13 +696,13 @@ After making code changes in `internal/`, use these commands:
 - **[AGENTS.md](../AGENTS.md)**: Agent behavior guidelines and core values
 - **[llms.txt](../llms.txt)**: AI-friendly project sitemap
 - **[ARCHITECTURE.md](../ARCHITECTURE.md)**: System architecture overview
-- **[Core Principles](../docs/ai-agents/guidelines/core.md)**: Security, error handling, panic usage, and core patterns
-- **[Architecture Guidelines](../docs/ai-agents/guidelines/architecture.md)**: Clean Architecture principles and layer guidelines
-- **[Coding Standards](../docs/ai-agents/guidelines/coding-standards.md)**: Linting, formatting, and code style
-- **[Database Management](../docs/ai-agents/guidelines/database.md)**: Database schema changes and SQLC workflow
-- **[Code Generation](../docs/ai-agents/guidelines/code-generation.md)**: Auto-generated files and code generation tools
-- **[Workflow Guidelines](../docs/ai-agents/guidelines/workflow.md)**: Git operations and dependency management
-- **[Testing Guidelines](../docs/ai-agents/guidelines/testing.md)**: Testing strategy and requirements
+- **[Core Principles](../docs/guidelines/core.md)**: Security, error handling, panic usage, and core patterns
+- **[Architecture Guidelines](../docs/guidelines/architecture.md)**: Clean Architecture principles and layer guidelines
+- **[Coding Standards](../docs/guidelines/coding-standards.md)**: Linting, formatting, and code style
+- **[Database Management](../docs/guidelines/database.md)**: Database schema changes and SQLC workflow
+- **[Code Generation](../docs/guidelines/code-generation.md)**: Auto-generated files and code generation tools
+- **[Workflow Guidelines](../docs/guidelines/workflow.md)**: Git operations and dependency management
+- **[Testing Guidelines](../docs/guidelines/testing.md)**: Testing strategy and requirements
 
 ### Directory Documentation
 

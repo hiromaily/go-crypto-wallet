@@ -50,8 +50,8 @@ For detailed documentation, see [llms.txt](llms.txt) and [ARCHITECTURE.md](ARCHI
 | Security | [docs/standards/security.md](docs/standards/security.md) |
 | Testing | [docs/standards/testing.md](docs/standards/testing.md) |
 | Workflow | [docs/standards/workflow.md](docs/standards/workflow.md) |
-| Database changes | [docs/ai-agents/guidelines/database.md](docs/ai-agents/guidelines/database.md) |
-| Auto-generated files | [docs/ai-agents/guidelines/code-generation.md](docs/ai-agents/guidelines/code-generation.md) |
+| Database changes | [docs/guidelines/database.md](docs/guidelines/database.md) |
+| Auto-generated files | [docs/guidelines/code-generation.md](docs/guidelines/code-generation.md) |
 | Internal packages | [internal/AGENTS.md](internal/AGENTS.md) |
 | Public packages | [pkg/AGENTS.md](pkg/AGENTS.md) |
 
@@ -80,4 +80,4 @@ git merge, gh pr merge, push to main
 - [llms.txt](llms.txt) - AI-friendly project sitemap
 - [ARCHITECTURE.md](ARCHITECTURE.md) - System architecture
 - [docs/standards/](docs/standards/) - Project standards (SSOT)
-- [docs/ai-agents/](docs/ai-agents/) - Detailed AI guidelines
+- [docs/guidelines/](docs/guidelines/) - Detailed guidelines

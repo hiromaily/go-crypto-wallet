@@ -18,7 +18,7 @@
 ```
 go-crypto-wallet/
 ├── AGENTS.md                    # エントリーポイント（常にロード）
-├── docs/ai-agents/              # AI Agent関連ドキュメント
+├── docs/
 │   ├── guidelines/              # トピック別ガイドライン
 │   │   ├── architecture.md
 │   │   ├── coding-standards.md
@@ -55,10 +55,10 @@ go-crypto-wallet/
 ### Directory Structure
 
 ```
-docs/ai-agents/
-├── README.md                     # 概要とクイックスタート
-├── agent-skills.md               # 既存: Skills使用ガイド
+docs/
+├── agent-skills.md               # Skills使用ガイド
 ├── task-oriented-context.md      # 本ドキュメント
+├── guidelines/                   # トピック別ガイドライン
 └── task-contexts/                # タスクコンテキスト定義
     ├── README.md                 # タスクタイプ一覧
     ├── bug-fix.md
@@ -116,7 +116,7 @@ version: 1.0.0
 
 ### Phase 1: ドキュメント作成
 
-1. `docs/ai-agents/task-contexts/` ディレクトリ作成
+1. `docs/task-contexts/` ディレクトリ作成
 2. 主要タスクタイプのコンテキストファイル作成（優先度順）:
    - `bug-fix.md` - 最も頻繁
    - `feature-add.md` - 開発の中心
@@ -155,7 +155,7 @@ version: 1.0.0
 User: "Task Type: bug-fix. Issue #123を修正して"
 
 Agent:
-1. docs/ai-agents/task-contexts/bug-fix.md を読み込み
+1. docs/task-contexts/bug-fix.md を読み込み
 2. 必須ドキュメントをロード
 3. タスク実行
 ```
@@ -167,7 +167,7 @@ User: "Use CaseにMuSig2署名機能を追加して"
 
 Agent:
 1. 内容から "feature-add" タイプと判定
-2. docs/ai-agents/task-contexts/feature-add.md を読み込み
+2. docs/task-contexts/feature-add.md を読み込み
 3. タスク実行
 ```
 
@@ -218,7 +218,7 @@ Command Behavior:
 
 ### Backward Compatibility
 
-- 既存のガイドラインは `docs/ai-agents/guidelines/` に統合済み
+- 既存のガイドラインは `docs/guidelines/` に統合済み
 - タスクコンテキストは追加レイヤーとして機能
 - 明示的なタスクタイプ指定がなくても従来通り動作
 

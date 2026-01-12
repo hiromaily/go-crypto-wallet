@@ -66,4 +66,4 @@ func TestValidateAddress(t *testing.T) {
 
 ## Detailed Guidelines
 
-See [docs/ai-agents/guidelines/testing.md](../ai-agents/guidelines/testing.md) for full testing strategy.
+See [docs/guidelines/testing.md](../guidelines/testing.md) for full testing strategy.

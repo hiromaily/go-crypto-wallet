@@ -21,9 +21,9 @@ version: 1.0.0
 
 | Document | Path | Purpose |
 |----------|------|---------|
-| Core Principles | `docs/ai-agents/guidelines/core.md` | エラーハンドリング、セキュリティ |
-| Coding Standards | `docs/ai-agents/guidelines/coding-standards.md` | コーディング規約 |
-| Workflow Guidelines | `docs/ai-agents/guidelines/workflow.md` | 検証ステップ、PRフロー |
+| Core Principles | `docs/guidelines/core.md` | エラーハンドリング、セキュリティ |
+| Coding Standards | `docs/guidelines/coding-standards.md` | コーディング規約 |
+| Workflow Guidelines | `docs/guidelines/workflow.md` | 検証ステップ、PRフロー |
 
 ### Conditional Read (条件付き)
 
@@ -31,11 +31,11 @@ version: 1.0.0
 
 | Condition | Document | Path |
 |-----------|----------|------|
-| アーキテクチャ関連のバグ | Architecture | `docs/ai-agents/guidelines/architecture.md` |
-| データベース関連のバグ | Database | `docs/ai-agents/guidelines/database.md` |
-| 特定チェーン固有の問題 | Multi-Chain | `docs/ai-agents/guidelines/multi-chain.md` |
-| セキュリティ関連のバグ | Core (Security) | `docs/ai-agents/guidelines/core.md` |
-| テスト関連の問題 | Testing | `docs/ai-agents/guidelines/testing.md` |
+| アーキテクチャ関連のバグ | Architecture | `docs/guidelines/architecture.md` |
+| データベース関連のバグ | Database | `docs/guidelines/database.md` |
+| 特定チェーン固有の問題 | Multi-Chain | `docs/guidelines/multi-chain.md` |
+| セキュリティ関連のバグ | Core (Security) | `docs/guidelines/core.md` |
+| テスト関連の問題 | Testing | `docs/guidelines/testing.md` |
 
 ## Task-Specific Rules
 
@@ -170,7 +170,7 @@ User: "Issue #123: トランザクション作成時にpanicが発生する"
 
 Agent Actions:
 1. gh issue view 123 でIssue内容を確認
-2. docs/ai-agents/guidelines/core.md を読み込み（エラーハンドリング規約）
+2. docs/guidelines/core.md を読み込み（エラーハンドリング規約）
 3. パニックが発生するコードパスを特定
 4. 適切なエラーハンドリングを追加
 5. テストを追加して回帰を防止
@@ -185,7 +185,7 @@ User: "Issue #456: アドレス検索で重複結果が返される"
 
 Agent Actions:
 1. gh issue view 456 でIssue内容を確認
-2. docs/ai-agents/guidelines/database.md を追加で読み込み
+2. docs/guidelines/database.md を追加で読み込み
 3. クエリロジックを調査
 4. DISTINCT追加やクエリ修正
 5. 単体テストとSQLCクエリテストを追加

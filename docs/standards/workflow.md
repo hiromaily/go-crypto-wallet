@@ -84,4 +84,4 @@ Closes #XXX
 
 ## Detailed Guidelines
 
-See [docs/ai-agents/guidelines/workflow.md](../ai-agents/guidelines/workflow.md) for full workflow documentation.
+See [docs/guidelines/workflow.md](../guidelines/workflow.md) for full workflow documentation.

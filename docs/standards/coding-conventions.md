@@ -68,4 +68,4 @@ make shfmt  # Format shell scripts
 
 ## Detailed Guidelines
 
-See [docs/ai-agents/guidelines/coding-standards.md](../ai-agents/guidelines/coding-standards.md) for full details.
+See [docs/guidelines/coding-standards.md](../guidelines/coding-standards.md) for full details.

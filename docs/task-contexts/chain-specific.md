@@ -48,20 +48,20 @@ version: 1.0.0
 
 | Document | Path | Purpose |
 |----------|------|---------|
-| Multi-Chain Support | `docs/ai-agents/guidelines/multi-chain.md` | マルチチェーンアーキテクチャ |
-| Architecture | `docs/ai-agents/guidelines/architecture.md` | Clean Architecture原則 |
+| Multi-Chain Support | `docs/guidelines/multi-chain.md` | マルチチェーンアーキテクチャ |
+| Architecture | `docs/guidelines/architecture.md` | Clean Architecture原則 |
 
 ### Chain-Specific (チェーン特定後)
 
 | Chain | Document | Path |
 |-------|----------|------|
-| BTC | BTC Reference | `docs/ai-agents/task-contexts/chains/btc.md` |
+| BTC | BTC Reference | `docs/task-contexts/chains/btc.md` |
 | BTC | BTC Documentation | `docs/crypto/btc/README.md` |
-| BCH | BCH Reference | `docs/ai-agents/task-contexts/chains/bch.md` |
+| BCH | BCH Reference | `docs/task-contexts/chains/bch.md` |
 | BCH | BCH Documentation | `docs/crypto/bch/README.md` |
-| ETH | ETH Reference | `docs/ai-agents/task-contexts/chains/eth.md` |
+| ETH | ETH Reference | `docs/task-contexts/chains/eth.md` |
 | ETH | ETH Documentation | `docs/crypto/eth/README.md` |
-| XRP | XRP Reference | `docs/ai-agents/task-contexts/chains/xrp.md` |
+| XRP | XRP Reference | `docs/task-contexts/chains/xrp.md` |
 | XRP | XRP Documentation | `docs/crypto/xrp/README.md` |
 
 ## Wallet Types

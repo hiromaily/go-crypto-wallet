@@ -30,9 +30,9 @@ version: 1.0.0
 
 | Condition | Document | Path |
 |-----------|----------|------|
-| AGENTS.md 系の更新 | Architecture | `docs/ai-agents/guidelines/architecture.md` |
-| タスクコンテキスト作成 | Task-Oriented Context | `docs/ai-agents/task-oriented-context.md` |
-| チェーン固有ドキュメント | Chain Specific | `docs/ai-agents/task-contexts/chains/` |
+| AGENTS.md 系の更新 | Architecture | `docs/guidelines/architecture.md` |
+| タスクコンテキスト作成 | Task-Oriented Context | `docs/task-oriented-context.md` |
+| チェーン固有ドキュメント | Chain Specific | `docs/task-contexts/chains/` |
 
 ## Task-Specific Rules
 
@@ -188,7 +188,7 @@ Agent Actions:
 User: "security-audit タスク用のコンテキストファイルを作成して"
 
 Agent Actions:
-1. docs/ai-agents/task-oriented-context.md を読み込み（フォーマット確認）
+1. docs/task-oriented-context.md を読み込み（フォーマット確認）
 2. 既存のタスクコンテキストを参照
 3. security-audit.md を作成
 4. README.md のテーブルを更新

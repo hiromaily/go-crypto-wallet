@@ -77,9 +77,8 @@ docs/          → Documentation
 
 ### AI Agent Context
 
-- [docs/ai-agents/](docs/ai-agents/) - AI-specific context and task guides
-- [docs/ai-agents/guidelines/](docs/ai-agents/guidelines/) - Detailed guidelines (full context)
-- [docs/ai-agents/task-contexts/](docs/ai-agents/task-contexts/) - Task-type specific context
+- [docs/guidelines/](docs/guidelines/) - Detailed guidelines (full context)
+- [docs/task-contexts/](docs/task-contexts/) - Task-type specific context
 
 ## Supported Cryptocurrencies
 

@@ -57,9 +57,9 @@
 
 **主な読み込みドキュメント**:
 
-- `docs/ai-agents/guidelines/core.md` - エラーハンドリング
-- `docs/ai-agents/guidelines/coding-standards.md` - コーディング規約
-- `docs/ai-agents/guidelines/workflow.md` - 検証ステップ
+- `docs/guidelines/core.md` - エラーハンドリング
+- `docs/guidelines/coding-standards.md` - コーディング規約
+- `docs/guidelines/workflow.md` - 検証ステップ
 
 ### feature-add
 
@@ -67,8 +67,8 @@
 
 **主な読み込みドキュメント**:
 
-- `docs/ai-agents/guidelines/architecture.md` - Clean Architecture
-- `docs/ai-agents/guidelines/coding-standards.md` - コーディング規約
+- `docs/guidelines/architecture.md` - Clean Architecture
+- `docs/guidelines/coding-standards.md` - コーディング規約
 - `internal/AGENTS.md` - レイヤー構造
 
 ### refactoring
@@ -77,9 +77,9 @@
 
 **主な読み込みドキュメント**:
 
-- `docs/ai-agents/guidelines/architecture.md` - Clean Architecture
+- `docs/guidelines/architecture.md` - Clean Architecture
 - `docs/issues/REFACTORING_PLAN.md` - リファクタリング計画
-- `docs/ai-agents/guidelines/testing.md` - 既存テストの維持
+- `docs/guidelines/testing.md` - 既存テストの維持
 
 ### db-change
 
@@ -87,8 +87,8 @@
 
 **主な読み込みドキュメント**:
 
-- `docs/ai-agents/guidelines/database.md` - Atlas/SQLC手順
-- `docs/ai-agents/guidelines/code-generation.md` - コード生成
+- `docs/guidelines/database.md` - Atlas/SQLC手順
+- `docs/guidelines/code-generation.md` - コード生成
 - `tools/atlas/` - スキーマファイル
 
 ## Adding New Task Types

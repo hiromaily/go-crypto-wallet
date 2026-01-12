@@ -23,9 +23,9 @@ version: 1.0.0
 
 | Document | Path | Purpose |
 |----------|------|---------|
-| Database Management | `docs/ai-agents/guidelines/database.md` | Atlas/SQLC手順、スキーマ管理 |
-| Code Generation | `docs/ai-agents/guidelines/code-generation.md` | 自動生成ファイルの扱い |
-| Workflow Guidelines | `docs/ai-agents/guidelines/workflow.md` | 検証ステップ |
+| Database Management | `docs/guidelines/database.md` | Atlas/SQLC手順、スキーマ管理 |
+| Code Generation | `docs/guidelines/code-generation.md` | 自動生成ファイルの扱い |
+| Workflow Guidelines | `docs/guidelines/workflow.md` | 検証ステップ |
 
 ### Must Check (必須確認)
 
@@ -39,7 +39,7 @@ version: 1.0.0
 
 | Condition | Document | Path |
 |-----------|----------|------|
-| 新しいエンティティ追加 | Architecture | `docs/ai-agents/guidelines/architecture.md` |
+| 新しいエンティティ追加 | Architecture | `docs/guidelines/architecture.md` |
 | Repository実装変更 | Internal Guidelines | `internal/AGENTS.md` |
 
 ## Task-Specific Rules
@@ -308,7 +308,7 @@ Phase 2: カラム削除
 User: "XRPトランザクション履歴を保存するテーブルを追加して"
 
 Agent Actions:
-1. docs/ai-agents/guidelines/database.md を読み込み
+1. docs/guidelines/database.md を読み込み
 2. 既存のスキーマを確認（tools/atlas/schemas/）
 3. 新しいテーブル定義をHCLに追加
 4. make atlas-fmt && make atlas-lint
@@ -326,7 +326,7 @@ Agent Actions:
 User: "addressテーブルにlabelカラムを追加して"
 
 Agent Actions:
-1. docs/ai-agents/guidelines/database.md を読み込み
+1. docs/guidelines/database.md を読み込み
 2. 既存のaddressテーブル定義を確認
 3. HCLにlabelカラムを追加
 4. make atlas-fmt && make atlas-lint

@@ -91,10 +91,10 @@ After making code changes, use these commands to verify code correctness:
 - **[AGENTS.md](../AGENTS.md)**: Agent behavior guidelines and core values
 - **[llms.txt](../llms.txt)**: AI-friendly project sitemap
 - **[ARCHITECTURE.md](../ARCHITECTURE.md)**: System architecture overview
-- **[Core Principles](../docs/ai-agents/guidelines/core.md)**: Security, error handling, panic usage, and core patterns
-- **[Coding Standards](../docs/ai-agents/guidelines/coding-standards.md)**: Linting, formatting, and code style
-- **[Testing Guidelines](../docs/ai-agents/guidelines/testing.md)**: Testing strategy and requirements
-- **[Workflow Guidelines](../docs/ai-agents/guidelines/workflow.md)**: Git operations and dependency management
+- **[Core Principles](../docs/guidelines/core.md)**: Security, error handling, panic usage, and core patterns
+- **[Coding Standards](../docs/guidelines/coding-standards.md)**: Linting, formatting, and code style
+- **[Testing Guidelines](../docs/guidelines/testing.md)**: Testing strategy and requirements
+- **[Workflow Guidelines](../docs/guidelines/workflow.md)**: Git operations and dependency management
 
 ### Directory Documentation
 
