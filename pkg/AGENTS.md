@@ -88,7 +88,9 @@ After making code changes, use these commands to verify code correctness:
 
 ### Root Documentation
 
-- **[Root AGENTS.md](../AGENTS.md)**: Overall project guidelines, navigation, and quick reference
+- **[AGENTS.md](../AGENTS.md)**: Agent behavior guidelines and core values
+- **[llms.txt](../llms.txt)**: AI-friendly project sitemap
+- **[ARCHITECTURE.md](../ARCHITECTURE.md)**: System architecture overview
 - **[Core Principles](../docs/ai-agents/guidelines/core.md)**: Security, error handling, panic usage, and core patterns
 - **[Coding Standards](../docs/ai-agents/guidelines/coding-standards.md)**: Linting, formatting, and code style
 - **[Testing Guidelines](../docs/ai-agents/guidelines/testing.md)**: Testing strategy and requirements
