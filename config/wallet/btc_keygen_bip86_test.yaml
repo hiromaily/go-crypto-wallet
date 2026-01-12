@@ -1,3 +1,19 @@
+# =============================================================================
+# BTC Keygen BIP86 Test Configuration
+# =============================================================================
+# All values can be overridden by environment variables with WALLET_ prefix.
+# Priority: Environment Variables > Config File > Default Values
+#
+# Examples:
+#   WALLET_ADDRESS_TYPE=taproot
+#   WALLET_KEY_TYPE=bip86
+#   WALLET_BITCOIN_HOST=127.0.0.1:19332
+#   WALLET_MYSQL_HOST=localhost:3306
+#   WALLET_LOGGER_LEVEL=info
+#
+# See pkg/config/README.md for full documentation.
+# =============================================================================
+
 # coin_type: "btc" # btc, bch
 key_type: "bip86" # bip44, bip49, bip84, bip86, musig2
 # address_type options:

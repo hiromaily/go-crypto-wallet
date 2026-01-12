@@ -1,3 +1,18 @@
+# =============================================================================
+# BTC Keygen Wallet Configuration
+# =============================================================================
+# All values can be overridden by environment variables with WALLET_ prefix.
+# Priority: Environment Variables > Config File > Default Values
+#
+# Examples:
+#   WALLET_ADDRESS_TYPE=legacy
+#   WALLET_BITCOIN_HOST=127.0.0.1:19332
+#   WALLET_MYSQL_HOST=localhost:3306
+#   WALLET_LOGGER_LEVEL=info
+#
+# See pkg/config/README.md for full documentation.
+# =============================================================================
+
 # coin_type: "btc"  # btc, bch
 # address_type options:
 #   - legacy:      P2PKH (Legacy addresses starting with 1)

@@ -1,3 +1,17 @@
+# =============================================================================
+# ETH Watch Wallet Configuration
+# =============================================================================
+# All values can be overridden by environment variables with WALLET_ prefix.
+# Priority: Environment Variables > Config File > Default Values
+#
+# Examples:
+#   WALLET_ETHEREUM_HOST=127.0.0.1
+#   WALLET_ETHEREUM_PORT=8545
+#   WALLET_MYSQL_HOST=localhost:3306
+#   WALLET_LOGGER_LEVEL=info
+#
+# See pkg/config/README.md for full documentation.
+# =============================================================================
 
 ethereum:
   host: "127.0.0.1"

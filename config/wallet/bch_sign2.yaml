@@ -1,5 +1,20 @@
+# =============================================================================
+# BCH Sign2 Wallet Configuration
+# =============================================================================
+# All values can be overridden by environment variables with WALLET_ prefix.
+# Priority: Environment Variables > Config File > Default Values
+#
+# Examples:
+#   WALLET_ADDRESS_TYPE=bch-cashaddr
+#   WALLET_BITCOIN_HOST=127.0.0.1:31332
+#   WALLET_MYSQL_HOST=localhost:3306
+#   WALLET_LOGGER_LEVEL=info
+#
+# See pkg/config/README.md for full documentation.
+# =============================================================================
+
 # coin_type: "bch" # btc, bch
-address_type: "bch-cashaddr"  # p2sh-segwit, bech32, bch-cashaddr
+address_type: "bch-cashaddr" # p2sh-segwit, bech32, bch-cashaddr
 
 bitcoin:
   host: "127.0.0.1:31332"
