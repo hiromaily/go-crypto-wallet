@@ -164,7 +164,7 @@ Schnorr署名ベースの集約署名プロトコル。N-of-N マルチシグが
 
 | パターン | 鍵タイプ | 署名パターン | アドレスフォーマット | E2Eスクリプト対応 |
 |----------|---------|-------------|---------------------|-------------------|
-| 1 | P2PKH (BIP44) | Single-sig | `1...` | 🔶 手動テスト |
+| **1** | **P2PKH (BIP44)** | **Single-sig** | **`1...`** | **✅ e2e/e2e-p2pkh-singlesig.sh** |
 | 2 | P2PKH (BIP44) | 2-of-3 Multisig | `3...` (P2SH wrapped) | ❌ 未対応 |
 | 3 | P2SH-P2WPKH (BIP49) | Single-sig | `3...` | 🔶 手動テスト |
 | 4 | P2SH-P2WPKH (BIP49) | 2-of-3 Multisig | `3...` | ❌ 未対応 |
@@ -187,6 +187,32 @@ Schnorr署名ベースの集約署名プロトコル。N-of-N マルチシグが
 ---
 
 ## 各パターンの詳細
+
+### パターン 1: BTC P2PKH Single-sig
+
+**現在の `scripts/operation/btc/e2e/e2e-p2pkh-singlesig.sh` で実装されているパターン**
+
+```
+アドレスタイプ: P2PKH (BIP44 Legacy)
+署名要件: Single-sig (Keygen のみ)
+Descriptor: pkh([fingerprint/44'/0'/0']xpub.../0/*)
+```
+
+**ワークフロー:**
+
+1. Keygen で Seed を生成
+2. Keygen で HD Key を生成（各アカウント10個）
+3. Keygen で Descriptor をエクスポート
+4. Watch に Descriptor をインポート
+5. Test UTXO を生成（regtest）
+6. 未署名トランザクション作成 → 1回署名 → ブロードキャスト
+
+**特徴:**
+
+- シンプルで高速（1回の署名で完了）
+- Sign1/Sign2 ウォレット不要
+- BIP44 鍵派生パス使用
+- Legacy アドレス形式（`m...`/`n...` in regtest）
 
 ### パターン 8: BTC P2SH-P2WSH 3-of-3 Multisig（現在のE2E）
 
@@ -313,6 +339,7 @@ Descriptor: tr(musig(xpub1, xpub2, xpub3))
 
 | スクリプト | コイン | パターン | 署名要件 |
 |-----------|--------|---------|---------|
+| `scripts/operation/btc/e2e/e2e-p2pkh-singlesig.sh` | BTC | P2PKH Single-sig | Single-sig |
 | `scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh` | BTC | P2SH-P2WSH Multisig | 3-of-3 |
 | `scripts/operation/bch/e2e-workflow.sh` | BCH | CashAddr Multisig | 3-of-3 |
 
