@@ -15,10 +15,11 @@
 
 # coin_type: "btc"  # btc, bch
 # address_type options:
-#   - legacy:      P2PKH (Legacy addresses starting with 1)
-#   - p2sh-segwit: P2SH-wrapped SegWit (P2SH-P2WPKH/P2SH-P2WSH, addresses starting with 3)
-#   - bech32:      Native SegWit (P2WPKH/P2WSH, addresses starting with bc1q)
-#   - taproot:     Taproot (P2TR, addresses starting with bc1p)
+#   - legacy:      P2PKH (Legacy addresses starting with 1) -> derives key_type: bip44
+#   - p2sh-segwit: P2SH-wrapped SegWit (addresses starting with 3) -> derives key_type: bip49
+#   - bech32:      Native SegWit (addresses starting with bc1q) -> derives key_type: bip84
+#   - taproot:     Taproot (addresses starting with bc1p) -> derives key_type: bip86
+# Note: key_type is automatically derived from address_type (see AddrType.ToKeyType())
 address_type: "p2sh-segwit"
 
 bitcoin:

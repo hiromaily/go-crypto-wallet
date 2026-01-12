@@ -600,11 +600,18 @@ func (c *container) newKeyGenerator() portsWallet.Generator {
 }
 
 func (c *container) getKeyType() domainKey.KeyType {
-	// Get from config if available, otherwise default to BIP44
-	if c.conf.KeyType != "" {
-		return c.conf.KeyType
+	// Derive KeyType from AddressType to ensure consistency
+	// address_type and key_type have a 1:1 mapping:
+	//   - legacy      -> bip44
+	//   - p2sh-segwit -> bip49
+	//   - bech32      -> bip84
+	//   - taproot     -> bip86
+	keyType, err := c.conf.AddressType.ToKeyType()
+	if err != nil {
+		// Fallback to BIP44 for unsupported address types
+		return domainKey.KeyTypeBIP44
 	}
-	return domainKey.KeyTypeBIP44
+	return keyType
 }
 
 func (c *container) newMultiAccount() *domainAccount.MultisigConfig {

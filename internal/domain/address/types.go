@@ -1,6 +1,10 @@
 package address
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/key"
+)
 
 //----------------------------------------------------
 // AddrType
@@ -83,4 +87,40 @@ func ValidateAddrStatus(val string) bool {
 		return true
 	}
 	return false
+}
+
+//----------------------------------------------------
+// AddrType to KeyType conversion
+//----------------------------------------------------
+
+// ToKeyType derives the corresponding KeyType from AddrType.
+// This ensures address_type and key_type are always consistent.
+//
+// Mapping:
+//   - legacy      -> bip44
+//   - p2sh-segwit -> bip49
+//   - bech32      -> bip84
+//   - taproot     -> bip86
+//   - bch-cashaddr -> bip44 (BCH uses BIP44 derivation)
+//
+// Returns an error for unsupported address types.
+func (a AddrType) ToKeyType() (key.KeyType, error) {
+	switch a {
+	case AddrTypeLegacy:
+		return key.KeyTypeBIP44, nil
+	case AddrTypeP2shSegwit:
+		return key.KeyTypeBIP49, nil
+	case AddrTypeBech32:
+		return key.KeyTypeBIP84, nil
+	case AddrTypeTaproot:
+		return key.KeyTypeBIP86, nil
+	case AddrTypeBCHCashAddr:
+		// BCH uses BIP44 derivation path (same as legacy BTC)
+		return key.KeyTypeBIP44, nil
+	case AddrTypeETH:
+		// Ethereum uses BIP44 derivation path
+		return key.KeyTypeBIP44, nil
+	default:
+		return "", fmt.Errorf("unsupported address type for key derivation: %s", a)
+	}
 }
