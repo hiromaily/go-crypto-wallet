@@ -290,36 +290,32 @@ singlesig_setup_phase() {
 	# Export descriptors for all accounts (client, deposit, payment, stored)
 	# Note: For single-sig, all accounts use the same P2PKH address type
 	log_substep "Exporting descriptors from keygen wallet"
-	file_descriptor_client=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account client --output data/descriptor/btc/client_descriptors.json --format bitcoin-core --include-change)
-	file_descriptor_deposit=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account deposit --output data/descriptor/btc/deposit_descriptors.json --format bitcoin-core --include-change)
-	file_descriptor_payment=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account payment --output data/descriptor/btc/payment_descriptors.json --format bitcoin-core --include-change)
-	file_descriptor_stored=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account stored --output data/descriptor/btc/stored_descriptors.json --format bitcoin-core --include-change)
 
-	# Extract file paths from descriptor export output
-	descriptor_client="${file_descriptor_client##*exported to }"
-	descriptor_deposit="${file_descriptor_deposit##*exported to }"
-	descriptor_payment="${file_descriptor_payment##*exported to }"
-	descriptor_stored="${file_descriptor_stored##*exported to }"
+	# Define accounts to process
+	local accounts=(client deposit payment stored)
 
-	log_info "Exported descriptor files:"
-	log_info "  client: $descriptor_client"
-	log_info "  deposit: $descriptor_deposit"
-	log_info "  payment: $descriptor_payment"
-	log_info "  stored: $descriptor_stored"
+	# Export descriptors for all accounts
+	declare -A descriptor_files
+	for account in "${accounts[@]}"; do
+		log_info "Exporting ${account} descriptors"
+		file_output=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export \
+			--account "${account}" \
+			--output "data/descriptor/btc/${account}_descriptors.json" \
+			--format bitcoin-core \
+			--include-change)
+		# Extract file path from output
+		descriptor_files[$account]="${file_output##*exported to }"
+		log_info "  ${account}: ${descriptor_files[$account]}"
+	done
 
 	# Import descriptors into watch wallet for all accounts
 	log_substep "Importing descriptors into watch wallet"
-	log_info "Importing client descriptors"
-	watch -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor --file "${descriptor_client}" --account client
-
-	log_info "Importing deposit descriptors"
-	watch -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor --file "${descriptor_deposit}" --account deposit
-
-	log_info "Importing payment descriptors"
-	watch -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor --file "${descriptor_payment}" --account payment
-
-	log_info "Importing stored descriptors"
-	watch -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor --file "${descriptor_stored}" --account stored
+	for account in "${accounts[@]}"; do
+		log_info "Importing ${account} descriptors"
+		watch -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor \
+			--file "${descriptor_files[$account]}" \
+			--account "${account}"
+	done
 
 	log_info "All descriptors imported successfully"
 	log_info "Note: All accounts use descriptor-based import for P2PKH single-sig"
@@ -329,10 +325,10 @@ singlesig_setup_phase() {
 
 	# Extract first descriptor from payment_descriptors.json
 	# For P2PKH (legacy), we use the first descriptor (index 0)
-	first_descriptor=$(jq -r '.[0].desc // empty' "${descriptor_payment}" 2>/dev/null)
+	first_descriptor=$(jq -r '.[0].desc // empty' "${descriptor_files[payment]}" 2>/dev/null)
 
 	if [ -z "$first_descriptor" ]; then
-		log_error "Failed to extract descriptor from ${descriptor_payment}"
+		log_error "Failed to extract descriptor from ${descriptor_files[payment]}"
 		return 1
 	fi
 
@@ -389,7 +385,7 @@ generate_test_utxos() {
 		trusted_balance=$(echo "$balance_json" | jq -r '.mine.trusted // 0' 2>/dev/null || echo "0")
 
 		# Check if we have any trusted (mature) balance
-		if [ -n "$trusted_balance" ] && [ "$(echo "$trusted_balance > 0" | bc -l 2>/dev/null || echo "0")" -eq 1 ]; then
+		if [ -n "$trusted_balance" ] && (($(echo "$trusted_balance > 0" | bc -l))); then
 			log_info "Payment account balance verified: ${trusted_balance} BTC (took ${elapsed}s)"
 			balance_found=true
 			break
@@ -515,7 +511,7 @@ transaction_flow_phase() {
 	fi
 
 	# Extract file path
-	tx_unsigned=$(echo "${tx_file}" | grep "\[fileName\]:" | sed 's/.*\[fileName\]: //')
+	tx_unsigned=$(echo "${tx_file}" | sed -n 's/.*\[fileName\]: //p')
 	log_info "Created unsigned transaction: $tx_unsigned"
 
 	# Sign with keygen wallet (single signature)
@@ -528,7 +524,7 @@ transaction_flow_phase() {
 		keygen -c "${CONFIG_KEYGEN}" api walletlock
 	fi
 
-	tx_signed=$(echo "${tx_file_signed}" | grep "\[fileName\]:" | sed 's/.*\[fileName\]: //')
+	tx_signed=$(echo "${tx_file_signed}" | sed -n 's/.*\[fileName\]: //p')
 	log_info "Signed transaction: $tx_signed"
 
 	# Send transaction

@@ -339,7 +339,7 @@ Descriptor: tr(musig(xpub1, xpub2, xpub3))
 
 | スクリプト | コイン | パターン | 署名要件 |
 |-----------|--------|---------|---------|
-| `scripts/operation/btc/e2e/e2e-p2pkh-singlesig.sh` | BTC | P2PKH Single-sig | 1 |
+| `scripts/operation/btc/e2e/e2e-p2pkh-singlesig.sh` | BTC | P2PKH Single-sig | Single-sig |
 | `scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh` | BTC | P2SH-P2WSH Multisig | 3-of-3 |
 | `scripts/operation/bch/e2e-workflow.sh` | BCH | CashAddr Multisig | 3-of-3 |
 
