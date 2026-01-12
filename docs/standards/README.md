@@ -16,7 +16,7 @@ All AI agent configurations and developer documentation should reference these s
 
 For comprehensive documentation (including AI-specific context), see:
 
-- [docs/ai-agents/guidelines/](../ai-agents/guidelines/) - Full guidelines with examples
+- [Detailed AI Agent Guidelines](../ai-agents/guidelines/) - Full guidelines with examples
 
 ## How to Use
 

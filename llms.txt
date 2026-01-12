@@ -73,11 +73,7 @@ docs/          → Documentation
 
 ### Project Standards (SSOT)
 
-- [docs/standards/](docs/standards/) - Single Source of Truth for standards
-- [docs/standards/coding-conventions.md](docs/standards/coding-conventions.md) - Coding standards
-- [docs/standards/security.md](docs/standards/security.md) - Security requirements
-- [docs/standards/testing.md](docs/standards/testing.md) - Testing strategy
-- [docs/standards/workflow.md](docs/standards/workflow.md) - Development workflow
+- [docs/standards/](docs/standards/) - Single Source of Truth for all project standards
 
 ### AI Agent Context
 
