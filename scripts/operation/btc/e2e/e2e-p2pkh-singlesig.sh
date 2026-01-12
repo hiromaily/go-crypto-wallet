@@ -67,10 +67,10 @@ export BTC_ACCOUNT_CONF="${CONFIG_ACCOUNT}"
 # Priority: Environment Variables > Config File > Default Values
 #
 # Pattern 1 (P2PKH Single-sig) requires:
-#   - address_type: "legacy" (BIP44)
-#   - key_type: "bip44"
+#   - address_type: "legacy" (derives key_type: bip44 automatically)
+# Note: key_type is automatically derived from address_type in Go code
+#       (see internal/domain/address/types.go AddrType.ToKeyType())
 export WALLET_ADDRESS_TYPE="legacy"
-export WALLET_KEY_TYPE="bip44"
 
 ###############################################################################
 # Cleanup Functions

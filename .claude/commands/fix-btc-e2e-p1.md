@@ -46,23 +46,33 @@ Config ファイルの値は環境変数で上書きできます：
 Priority: Environment Variables > Config File > Default Values
 ```
 
+### key_type の自動導出
+
+`key_type` は `address_type` から自動的に導出されます（`internal/domain/address/types.go`）：
+
+| address_type | 自動導出される key_type | 用途 |
+|--------------|----------------------|------|
+| `legacy` | `bip44` | P2PKH (Pattern 1) |
+| `p2sh-segwit` | `bip49` | P2SH-P2WPKH/P2SH-P2WSH (Pattern 8) |
+| `bech32` | `bip84` | Native SegWit |
+| `taproot` | `bip86` | Taproot |
+
+**注意**: `WALLET_KEY_TYPE` 環境変数は不要です。`WALLET_ADDRESS_TYPE` のみ設定してください。
+
 ### Pattern 1 (P2PKH Single-sig) に必要な設定
 
 | 設定 | 環境変数名 | Pattern 1 の値 | Config ファイルのデフォルト |
 |------|-----------|---------------|---------------------------|
 | `address_type` | `WALLET_ADDRESS_TYPE` | `legacy` | `p2sh-segwit` |
-| `key_type` | `WALLET_KEY_TYPE` | `bip44` | (未設定) |
 
 ### スクリプト内での設定（確認必須）
 
-`e2e-p2pkh-singlesig.sh` の 72-73 行目で環境変数をエクスポートしています：
+`e2e-p2pkh-singlesig.sh` で環境変数をエクスポートしています：
 
 ```bash
 # Pattern 1 (P2PKH Single-sig) requires:
-#   - address_type: "legacy" (BIP44)
-#   - key_type: "bip44"
+#   - address_type: "legacy" (derives key_type: bip44 automatically)
 export WALLET_ADDRESS_TYPE="legacy"
-export WALLET_KEY_TYPE="bip44"
 ```
 
 **エラー発生時は、この設定が正しく適用されているか確認してください。**
@@ -206,7 +216,6 @@ docker exec btc-keygen bitcoin-cli -regtest createwallet "keygen" false true
 ```bash
 # 1. 環境変数確認
 echo "WALLET_ADDRESS_TYPE: $WALLET_ADDRESS_TYPE"  # "legacy" であること
-echo "WALLET_KEY_TYPE: $WALLET_KEY_TYPE"          # "bip44" であること
 
 # 2. Keygen ウォレットの秘密鍵確認
 docker exec btc-keygen bitcoin-cli -regtest -rpcwallet=keygen \
@@ -251,7 +260,6 @@ grep -A2 "Environment Variable Overrides" \
 
 ```bash
 export WALLET_ADDRESS_TYPE="legacy"
-export WALLET_KEY_TYPE="bip44"
 ```
 
 ### DB関連エラー
@@ -368,8 +376,7 @@ make btc-e2e-p2pkh-reset
 [現在の状態を説明]
 
 ### 環境変数の設定状況
-- WALLET_ADDRESS_TYPE: [値]
-- WALLET_KEY_TYPE: [値]
+- WALLET_ADDRESS_TYPE: [値] (key_type は自動導出)
 
 ### 次のステップ
 [次に必要なアクション]
@@ -414,7 +421,8 @@ make build-all
 ### Config ファイルは変更しない
 
 Config ファイル (`btc_watch.yaml`, `btc_keygen.yaml`) は変更せず、
-**環境変数 (`WALLET_ADDRESS_TYPE`, `WALLET_KEY_TYPE`) による上書き**で対応してください。
+**環境変数 (`WALLET_ADDRESS_TYPE`) による上書き**で対応してください。
+`key_type` は `address_type` から自動導出されます。
 
 ### 既存スクリプトへの影響を避ける
 

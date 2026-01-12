@@ -103,9 +103,21 @@ See `wallet.go` for the complete `WalletRoot` structure with all available confi
 | Field | Description | Environment Variable |
 |-------|-------------|----------------------|
 | `address_type` | Address type (legacy, p2sh-segwit, bech32, taproot) | `WALLET_ADDRESS_TYPE` |
-| `key_type` | Key derivation type (bip44, bip49, bip84, bip86) | `WALLET_KEY_TYPE` |
 | `bitcoin.host` | Bitcoin node RPC host | `WALLET_BITCOIN_HOST` |
 | `bitcoin.network_type` | Network (mainnet, testnet3, regtest) | `WALLET_BITCOIN_NETWORK_TYPE` |
 | `mysql.host` | MySQL host | `WALLET_MYSQL_HOST` |
 | `mysql.dbname` | MySQL database name | `WALLET_MYSQL_DBNAME` |
 | `logger.level` | Log level (debug, info, warn, error) | `WALLET_LOGGER_LEVEL` |
+
+### Automatic Key Type Derivation
+
+`key_type` is automatically derived from `address_type` to ensure consistency:
+
+| address_type | Derived key_type |
+|--------------|------------------|
+| `legacy` | `bip44` |
+| `p2sh-segwit` | `bip49` |
+| `bech32` | `bip84` |
+| `taproot` | `bip86` |
+
+See `internal/domain/address/types.go` `AddrType.ToKeyType()` for implementation.
