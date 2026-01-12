@@ -56,24 +56,24 @@ generate-bch-key-local:
 # Run Bitcoin E2E workflow from completely fresh state (recommended)
 .PHONY: btc-e2e-test-reset
 btc-e2e-test-reset:
-	./scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh --reset
+	./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh --reset
 
 # Run complete Bitcoin end-to-end workflow (regression test)
 .PHONY: btc-e2e-test
 btc-e2e-test:
-	./scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh
+	./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh
 
 # Run Bitcoin E2E workflow with verbose output
 .PHONY: btc-e2e-test-verbose
 btc-e2e-test-verbose:
-	./scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh --verbose
+	./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh --verbose
 
 # Run Bitcoin E2E workflow in non-interactive mode (for CI/CD)
 .PHONY: btc-e2e-test-ci
 btc-e2e-test-ci:
-	./scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh --non-interactive
+	./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh --non-interactive
 
 # Cleanup Bitcoin E2E test environment
 .PHONY: btc-e2e-cleanup
 btc-e2e-cleanup:
-	./scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh --cleanup
+	./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh --cleanup

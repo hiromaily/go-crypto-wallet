@@ -10,7 +10,7 @@ BTC E2Eテスト（パターン8: P2SH-P2WSH 3-of-3 Multisig）を実行し、�
 
 ## 概要
 
-このコマンドは`scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh`を実行し、発生したエラーを分析・修正します。
+このコマンドは`scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh`を実行し、発生したエラーを分析・修正します。
 Bitcoinの深い仕様理解が必要なため、以下の技術情報を参照してください。
 
 ### issue番号が指定された場合
@@ -33,7 +33,7 @@ Bitcoinの深い仕様理解が必要なため、以下の技術情報を参照�
 
 - @docs/crypto/btc/e2e_transaction_patterns.md - 全8パターンの詳細（**必須**）
 - @scripts/operation/btc/README.md - E2Eスクリプトの使い方
-- @scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh - 実行対象のスクリプト
+- @scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh - 実行対象のスクリプト
 
 ## 事前確認: Config設定
 
@@ -163,10 +163,10 @@ make build-all
 make btc-e2e-test-reset
 
 # または既存状態から実行
-./scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh
+./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh
 
 # デバッグ出力付き
-./scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh --verbose
+./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh --verbose
 ```
 
 ### Step 2: エラー分析
@@ -349,8 +349,8 @@ docker compose -f compose.btc.yaml logs btc-watch
 
 ```bash
 # コンテナ停止のみ
-./scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh --cleanup
+./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh --cleanup
 
 # 完全リセット（データ含む）
-./scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh --reset
+./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh --reset
 ```
