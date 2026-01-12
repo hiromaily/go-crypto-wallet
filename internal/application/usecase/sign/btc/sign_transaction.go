@@ -2,15 +2,22 @@ package btc
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strconv"
+	"strings"
+
+	"github.com/btcsuite/btcd/btcutil"
 
 	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
+	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -147,6 +154,10 @@ func (u *signTransactionUseCase) sign(
 //
 // For 2-of-2 multisig, this signature typically completes the transaction.
 // For 2-of-N multisig (N>2), the transaction is complete once 2 signatures are present.
+//
+// CRITICAL FIX (#320): For descriptor-based multisig, derives child keys at the correct
+// address index from account-level extended private key, ensuring signatures match
+// the descriptor-derived public keys.
 func (u *signTransactionUseCase) signMultisigPSBT(
 	psbtBase64 string,
 	accountType domainAccount.AccountType,
@@ -165,14 +176,114 @@ func (u *signTransactionUseCase) signMultisigPSBT(
 		"wallet_type", u.wtype.String(),
 		"auth_type", u.authType.String(),
 		"account_type", accountType.String(),
+		"has_account_xpriv", authKey.AccountExtendedPrivkey != nil,
 	)
+
+	// Derive WIF for signing based on PSBT address index
+	wif, err := u.deriveWIFForPSBT(psbtBase64, authKey)
+	if err != nil {
+		return "", false, fmt.Errorf("fail to derive WIF for PSBT signing: %w", err)
+	}
 
 	// Sign PSBT with Sign wallet's private key (offline, using btcd)
 	// This adds the second signature to the partially signed PSBT
-	signedPSBT, isSigned, err := u.btc.SignPSBTWithKey(psbtBase64, []string{authKey.WalletImportFormat})
+	signedPSBT, isSigned, err := u.btc.SignPSBTWithKey(psbtBase64, []string{wif})
 	if err != nil {
 		return "", false, fmt.Errorf("fail to sign PSBT with auth key: %w", err)
 	}
 
 	return signedPSBT, isSigned, nil
+}
+
+// deriveWIFForPSBT derives the appropriate WIF (Wallet Import Format) private key for signing a PSBT.
+//
+// For descriptor-based workflows (#320 fix):
+//   - If accountExtendedPrivkey is available, parses PSBT to extract address index
+//   - Derives child private key at the correct index from account-level xpriv
+//   - Converts to WIF format for signing
+//
+// For legacy workflows:
+//   - Returns the stored WIF directly (static key at index 0)
+//
+// This ensures signatures match the descriptor-derived public keys regardless of address index.
+func (u *signTransactionUseCase) deriveWIFForPSBT(
+	psbtBase64 string,
+	authKey *domainAuth.AuthAccountKey,
+) (string, error) {
+	// Legacy workflow: Use stored WIF directly if no account xpriv available
+	if authKey.AccountExtendedPrivkey == nil || *authKey.AccountExtendedPrivkey == "" {
+		logger.Debug("using stored WIF (legacy workflow, no account xpriv)")
+		return authKey.WalletImportFormat, nil
+	}
+
+	// Descriptor workflow: Parse PSBT to extract address index
+	parsed, err := u.btc.ParsePSBT(psbtBase64)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse PSBT: %w", err)
+	}
+
+	if len(parsed.Inputs) == 0 {
+		return "", errors.New("PSBT has no inputs")
+	}
+
+	// Extract address index from first input's BIP32 derivation
+	// All inputs should have same address index for single-address transactions
+	if len(parsed.Inputs[0].BIP32Derivation) == 0 {
+		// No BIP32 derivation info - fall back to stored WIF
+		logger.Warn("PSBT input has no BIP32 derivation information, using stored WIF")
+		return authKey.WalletImportFormat, nil
+	}
+
+	// Parse BIP32 derivation path to extract address index and change
+	// Path format: m/purpose'/coin'/account'/change/addressIndex
+	firstDeriv := parsed.Inputs[0].BIP32Derivation[0]
+	pathComponents := strings.Split(strings.TrimPrefix(firstDeriv.Path, "m/"), "/")
+	if len(pathComponents) < 5 {
+		return "", fmt.Errorf("invalid BIP32 path format: %s", firstDeriv.Path)
+	}
+
+	// Parse address index (last component)
+	addressIndexStr := strings.TrimSuffix(pathComponents[len(pathComponents)-1], "'")
+	addrIdx, err := strconv.ParseUint(addressIndexStr, 10, 32)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse address index from path %s: %w", firstDeriv.Path, err)
+	}
+	addressIndex := uint32(addrIdx)
+
+	// Parse change index (second to last component)
+	changeStr := strings.TrimSuffix(pathComponents[len(pathComponents)-2], "'")
+	chgIdx, err := strconv.ParseUint(changeStr, 10, 32)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse change index from path %s: %w", firstDeriv.Path, err)
+	}
+	change := uint32(chgIdx)
+
+	logger.Debug("deriving child key from account xpriv",
+		"address_index", addressIndex,
+		"change", change,
+		"derivation_path", firstDeriv.Path)
+
+	// Derive child private key at the correct address index
+	childKey, err := infraKey.DeriveChildPrivateKey(*authKey.AccountExtendedPrivkey, change, addressIndex)
+	if err != nil {
+		return "", fmt.Errorf("failed to derive child key at index %d: %w", addressIndex, err)
+	}
+
+	// Extract private key
+	privKey, err := childKey.ECPrivKey()
+	if err != nil {
+		return "", fmt.Errorf("failed to get private key from child: %w", err)
+	}
+
+	// Convert to WIF (compressed format)
+	wif, err := btcutil.NewWIF(privKey, u.btc.GetChainConf(), true)
+	if err != nil {
+		return "", fmt.Errorf("failed to create WIF from derived key: %w", err)
+	}
+
+	logger.Debug("derived WIF for address index",
+		"address_index", addressIndex,
+		"change", change)
+
+	return wif.String(), nil
 }

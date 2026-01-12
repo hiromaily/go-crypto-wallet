@@ -309,7 +309,7 @@ func (u *generateDescriptorUseCase) buildKeygenSigner(
 
 	// Verify network match
 	if u.chainConfig != nil && !xpub.IsForNet(u.chainConfig) {
-		return btc.MultisigSigner{}, fmt.Errorf("keygen extended key network mismatch")
+		return btc.MultisigSigner{}, errors.New("keygen extended key network mismatch")
 	}
 
 	// Get master fingerprint

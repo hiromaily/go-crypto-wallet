@@ -3,6 +3,7 @@ package btc_test
 import (
 	"bytes"
 	"context"
+	"encoding/hex"
 	"fmt"
 	"testing"
 
@@ -357,7 +358,7 @@ func (s *stubSeedRepo) GetOne(context.Context) (*domainKey.Seed, error) {
 		return nil, nil
 	}
 	return &domainKey.Seed{
-		Seed: fmt.Sprintf("%x", s.seed),
+		Seed: hex.EncodeToString(s.seed),
 	}, nil
 }
 

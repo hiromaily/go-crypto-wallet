@@ -57,6 +57,9 @@ func convertToAuthAccountKey(sqlcKey *sqlcgen.AuthAccountKey) (*domainAuth.AuthA
 	if sqlcKey.TaprootAddress.Valid {
 		key.TaprootAddress = &sqlcKey.TaprootAddress.String
 	}
+	if sqlcKey.AccountExtendedPrivkey.Valid {
+		key.AccountExtendedPrivkey = &sqlcKey.AccountExtendedPrivkey.String
+	}
 	if sqlcKey.UpdatedAt.Valid {
 		key.UpdatedAt = &sqlcKey.UpdatedAt.Time
 	}
@@ -85,6 +88,9 @@ func convertFromAuthAccountKey(key *domainAuth.AuthAccountKey) *sqlcgen.AuthAcco
 
 	if key.TaprootAddress != nil {
 		sqlcKey.TaprootAddress = sql.NullString{String: *key.TaprootAddress, Valid: true}
+	}
+	if key.AccountExtendedPrivkey != nil {
+		sqlcKey.AccountExtendedPrivkey = sql.NullString{String: *key.AccountExtendedPrivkey, Valid: true}
 	}
 	if key.UpdatedAt != nil {
 		sqlcKey.UpdatedAt = sql.NullTime{Time: *key.UpdatedAt, Valid: true}
@@ -132,20 +138,21 @@ func (r *AuthAccountKeyRepositorySqlc) Insert(item *domainAuth.AuthAccountKey) e
 
 	sqlcItem := convertFromAuthAccountKey(item)
 	_, err := r.queries.InsertAuthAccountKey(ctx, sqlcgen.InsertAuthAccountKeyParams{
-		Coin:               sqlcItem.Coin,
-		KeyType:            sqlcItem.KeyType,
-		AuthAccount:        sqlcItem.AuthAccount,
-		Account:            sqlcItem.Account,
-		P2pkhAddress:       sqlcItem.P2pkhAddress,
-		P2shSegwitAddress:  sqlcItem.P2shSegwitAddress,
-		Bech32Address:      sqlcItem.Bech32Address,
-		TaprootAddress:     sqlcItem.TaprootAddress,
-		FullPublicKey:      sqlcItem.FullPublicKey,
-		MultisigAddress:    sqlcItem.MultisigAddress,
-		RedeemScript:       sqlcItem.RedeemScript,
-		WalletImportFormat: sqlcItem.WalletImportFormat,
-		Idx:                sqlcItem.Idx,
-		AddrStatus:         sqlcItem.AddrStatus,
+		Coin:                   sqlcItem.Coin,
+		KeyType:                sqlcItem.KeyType,
+		AuthAccount:            sqlcItem.AuthAccount,
+		Account:                sqlcItem.Account,
+		P2pkhAddress:           sqlcItem.P2pkhAddress,
+		P2shSegwitAddress:      sqlcItem.P2shSegwitAddress,
+		Bech32Address:          sqlcItem.Bech32Address,
+		TaprootAddress:         sqlcItem.TaprootAddress,
+		FullPublicKey:          sqlcItem.FullPublicKey,
+		MultisigAddress:        sqlcItem.MultisigAddress,
+		RedeemScript:           sqlcItem.RedeemScript,
+		WalletImportFormat:     sqlcItem.WalletImportFormat,
+		AccountExtendedPrivkey: sqlcItem.AccountExtendedPrivkey,
+		Idx:                    sqlcItem.Idx,
+		AddrStatus:             sqlcItem.AddrStatus,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to call InsertAuthAccountKey(): %w", err)
