@@ -54,17 +54,11 @@ No automated verification, but check:
 - [ ] Consistent formatting
 - [ ] Tables align properly
 
-## Commit Format
+## Commit & PR
 
-```
-docs: {brief description}
+`git-workflow` スキルを使用。ドキュメント変更時の設定：
 
-- {change 1}
-- {change 2}
+- **コミットタイプ**: `docs`
+- **スコープ**: 省略可（または対象領域: `btc`, `eth` など）
 
-Closes #{issue_number}
-```
-
-## Related Skills
-
-- `git-workflow` - Branch, commit, PR workflow
+→ 詳細は @.claude/skills/git-workflow/SKILL.md を参照

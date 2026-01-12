@@ -19,6 +19,39 @@ Workflow for Go code changes in this repository.
 | `pkg/` | Reusable shared packages |
 | `cmd/` | Application entry points |
 
+## Build Rules
+
+**CRITICAL: Never run `go build` directly. Always use Makefile targets.**
+
+### Why?
+
+Direct `go build ./cmd/xxx/` creates binaries in the current directory, causing:
+- Inconsistent build artifact locations (project root or `cmd/xxx/`)
+- Unintended files in git working directory
+- Confusion about where binaries are located
+
+### Correct Build Commands
+
+| Purpose | Command | Output Location |
+|---------|---------|-----------------|
+| **Verify build** (no binary) | `make check-build` | `/dev/null` |
+| Build all | `make build-all` | `${GOPATH}/bin/` |
+| Build watch only | `make build-watch` | `${GOPATH}/bin/watch` |
+| Build keygen only | `make build-keygen` | `${GOPATH}/bin/keygen` |
+| Build sign only | `make build-sign` | `${GOPATH}/bin/sign{1,2}` |
+
+### Common Mistakes (DO NOT DO)
+
+```bash
+# ❌ WRONG: Creates binary in current directory
+go build ./cmd/keygen/
+go build -o keygen ./cmd/keygen/
+
+# ✅ CORRECT: Use Makefile targets
+make check-build    # For verification
+make build-keygen   # If binary is needed
+```
+
 ## Verification Commands
 
 **ALWAYS run before committing:**
@@ -26,7 +59,7 @@ Workflow for Go code changes in this repository.
 ```bash
 make go-lint      # Lint check
 make tidy         # go mod tidy
-make check-build  # Build verification
+make check-build  # Build verification (no binary created)
 make gotest       # Unit tests
 ```
 

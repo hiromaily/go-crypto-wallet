@@ -17,6 +17,7 @@
 | `/fix-issue #123` | Work on a GitHub issue |
 | `/fix-linter` | Fix linter errors |
 | `/fix-pr-review #123` | Address PR review comments |
+| `/fix-btc-e2e` | Fix BTC E2E test (Pattern 8: P2SH-P2WSH 3-of-3) |
 
 ## Label → Skill Mapping
 
