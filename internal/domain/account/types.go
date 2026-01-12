@@ -164,9 +164,9 @@ var AccountTypeValue = map[AccountType]uint32{
 // For multisig accounts following BIP44 hierarchy: m/purpose'/coin_type'/account'/...
 //
 // Note: These are different from AccountTypeValue which is used for database storage.
-// Client account uses single-key derivation so it also gets index 0.
+// Each account type must use a unique index to avoid key collisions.
 var BIP44AccountIndexMap = map[AccountType]uint32{
-	AccountTypeClient:  0, // For single-key addresses
+	AccountTypeClient:  3, // For single-key addresses (index 3 to avoid collision with multisig accounts)
 	AccountTypeDeposit: 0, // First multisig account
 	AccountTypePayment: 1, // Second multisig account
 	AccountTypeStored:  2, // Third multisig account
@@ -201,6 +201,7 @@ var BIP44AccountIndexMap = map[AccountType]uint32{
 //   - Deposit: account index 0
 //   - Payment: account index 1
 //   - Stored: account index 2
+//   - Client: account index 3 (for single-key addresses, must not collide with multisig accounts)
 func (a AccountType) BIP44AccountIndex() uint32 {
 	return BIP44AccountIndexMap[a]
 }
