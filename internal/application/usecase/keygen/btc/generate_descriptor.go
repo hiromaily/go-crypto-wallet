@@ -54,8 +54,6 @@ func (u *generateDescriptorUseCase) Generate(
 	ctx context.Context,
 	input keygenusecase.GenerateDescriptorInput,
 ) (keygenusecase.GenerateDescriptorOutput, error) {
-	_ = ctx
-
 	isMultisig := u.multisigConfig.IsMultisigAccount(input.AccountType)
 
 	var (
@@ -64,7 +62,7 @@ func (u *generateDescriptorUseCase) Generate(
 	)
 
 	if isMultisig {
-		descriptor, err = u.generateMultisigDescriptor(input)
+		descriptor, err = u.generateMultisigDescriptor(ctx, input)
 	} else {
 		descriptor, err = u.generateSingleSigDescriptor(input)
 	}
@@ -125,6 +123,7 @@ func (u *generateDescriptorUseCase) generateSingleSigDescriptor(
 }
 
 func (u *generateDescriptorUseCase) generateMultisigDescriptor(
+	ctx context.Context,
 	input keygenusecase.GenerateDescriptorInput,
 ) (string, error) {
 	multiConfig := u.multisigConfig.MultiAccounts()[input.AccountType]
@@ -137,7 +136,7 @@ func (u *generateDescriptorUseCase) generateMultisigDescriptor(
 		return "", err
 	}
 
-	signers, err := u.buildMultisigSigners(authTypes, input.AddressType, input.AccountType)
+	signers, err := u.buildMultisigSigners(ctx, authTypes, input.AddressType, input.AccountType)
 	if err != nil {
 		return "", err
 	}
@@ -153,6 +152,7 @@ func (u *generateDescriptorUseCase) generateMultisigDescriptor(
 }
 
 func (u *generateDescriptorUseCase) buildMultisigSigners(
+	ctx context.Context,
 	authTypes []domainAccount.AuthType,
 	addressType domainAddress.AddrType,
 	accountType domainAccount.AccountType,
@@ -173,7 +173,7 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 
 	// CRITICAL FIX: Include keygen wallet's own key in multisig
 	// Without this, descriptors only contain auth keys, resulting in (N-1)-of-(N-1) instead of N-of-N
-	keygenSigner, err := u.buildKeygenSigner(accountType, addressType, derivationPath)
+	keygenSigner, err := u.buildKeygenSigner(ctx, accountType, addressType, derivationPath)
 	if err != nil {
 		return nil, fmt.Errorf("build keygen signer: %w", err)
 	}
@@ -248,12 +248,12 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 // buildKeygenSigner creates a MultisigSigner for the keygen wallet's own key.
 // This ensures that the keygen wallet participates in multisig along with auth users.
 func (u *generateDescriptorUseCase) buildKeygenSigner(
+	ctx context.Context,
 	accountType domainAccount.AccountType,
 	addressType domainAddress.AddrType,
 	derivationPath string,
 ) (btc.MultisigSigner, error) {
 	// Get seed from repository
-	ctx := context.Background()
 	seedData, err := u.seedRepo.GetOne(ctx)
 	if err != nil {
 		return btc.MultisigSigner{}, fmt.Errorf("get seed: %w", err)
