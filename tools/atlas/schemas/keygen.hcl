@@ -127,6 +127,12 @@ table "btc_account_key" {
     comment = "WIF"
   }
 
+  column "account_extended_privkey" {
+    type    = varchar(255)
+    null    = true
+    comment = "Account-level extended private key (xpriv) for BIP32 derivation"
+  }
+
   column "idx" {
     type    = bigint
     null    = false

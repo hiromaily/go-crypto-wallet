@@ -40,6 +40,16 @@ func (g *BIP44Generator) CreateKey(
 	return g.hdKey.CreateKey(seed, accountType, idxFrom, count)
 }
 
+// CreateKeyWithAccountXpriv creates HD keys and returns the account-level extended private key.
+// This method delegates to the underlying HDKey implementation.
+func (g *BIP44Generator) CreateKeyWithAccountXpriv(
+	seed []byte,
+	accountType domainAccount.AccountType,
+	idxFrom, count uint32,
+) ([]domainKey.WalletKey, string, error) {
+	return g.hdKey.CreateKeyWithAccountXpriv(seed, accountType, idxFrom, count)
+}
+
 // SupportsAddressType checks if this generator supports the given address type
 func (*BIP44Generator) SupportsAddressType(addrType domainAddress.AddrType) bool {
 	return addrType == domainAddress.AddrTypeLegacy

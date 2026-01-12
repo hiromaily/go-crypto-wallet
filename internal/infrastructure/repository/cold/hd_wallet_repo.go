@@ -123,8 +123,6 @@ func (w *AccountHDWalletRepo) Insert(
 	accountType domainAccount.AccountType,
 	keyType domainKey.KeyType,
 ) error {
-	// accountXpriv is not used for btc_account_key table (only for auth_account_key)
-	_ = accountXpriv
 	// insert key information to btc_account_key table
 	accountKeyItems := make([]*domainBitcoin.BtcAccountKey, len(keys))
 	now := time.Now()
@@ -150,6 +148,12 @@ func (w *AccountHDWalletRepo) Insert(
 			AddrStatus:         domainAddress.AddrStatusHDKeyGenerated,
 			UpdatedAt:          &now,
 		}
+
+		// Store account-level extended private key for BIP32 derivation
+		if accountXpriv != "" {
+			accountKeyItems[idx].SetAccountExtendedPrivkey(accountXpriv)
+		}
+
 		idxFrom++
 	}
 	return w.accountKeyRepo.InsertBulk(accountKeyItems)

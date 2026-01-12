@@ -16,8 +16,8 @@ SELECT * FROM btc_account_key WHERE coin = ? AND account = ? AND multisig_addres
 -- name: InsertBtcAccountKey :execresult
 INSERT INTO btc_account_key (
   coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address,
-  full_public_key, multisig_address, redeem_script, wallet_import_format, idx, addr_status
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+  full_public_key, multisig_address, redeem_script, wallet_import_format, account_extended_privkey, idx, addr_status
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdateBtcAccountKeyAddress :execresult
 UPDATE btc_account_key SET p2pkh_address = ?, updated_at = ?

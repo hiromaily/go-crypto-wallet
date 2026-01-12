@@ -32,6 +32,7 @@ CREATE TABLE btc_account_key (
   multisig_address varchar(255) NOT NULL DEFAULT '' COMMENT 'multisig address',
   redeem_script varchar(1000) NOT NULL DEFAULT '' COMMENT 'redeedScript after multisig address generated',
   wallet_import_format varchar(255) NOT NULL COMMENT 'WIF',
+  account_extended_privkey varchar(255) DEFAULT NULL COMMENT 'Account-level extended private key (xpriv) for BIP32 derivation',
   idx bigint NOT NULL COMMENT 'index for hd wallet',
   addr_status tinyint NOT NULL DEFAULT '0' COMMENT 'progress status for address generating',
   updated_at datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'updated date',

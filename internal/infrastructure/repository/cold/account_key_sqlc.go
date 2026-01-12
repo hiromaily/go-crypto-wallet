@@ -68,6 +68,9 @@ func convertToBtcAccountKey(sqlcKey *sqlcgen.BtcAccountKey) (*domainBitcoin.BtcA
 	if sqlcKey.TaprootAddress.Valid {
 		key.TaprootAddress = &sqlcKey.TaprootAddress.String
 	}
+	if sqlcKey.AccountExtendedPrivkey.Valid {
+		key.AccountExtendedPrivkey = &sqlcKey.AccountExtendedPrivkey.String // NEVER log
+	}
 	if sqlcKey.UpdatedAt.Valid {
 		key.UpdatedAt = &sqlcKey.UpdatedAt.Time
 	}
@@ -95,6 +98,9 @@ func convertFromBtcAccountKey(key *domainBitcoin.BtcAccountKey) *sqlcgen.BtcAcco
 
 	if key.TaprootAddress != nil {
 		sqlcKey.TaprootAddress = sql.NullString{String: *key.TaprootAddress, Valid: true}
+	}
+	if key.AccountExtendedPrivkey != nil {
+		sqlcKey.AccountExtendedPrivkey = sql.NullString{String: *key.AccountExtendedPrivkey, Valid: true}
 	}
 	if key.UpdatedAt != nil {
 		sqlcKey.UpdatedAt = sql.NullTime{Time: *key.UpdatedAt, Valid: true}
@@ -203,19 +209,20 @@ func (r *BTCAccountKeyRepositorySqlc) InsertBulk(items []*domainBitcoin.BtcAccou
 	for _, item := range items {
 		sqlcItem := convertFromBtcAccountKey(item)
 		_, err := r.queries.InsertBtcAccountKey(ctx, sqlcgen.InsertBtcAccountKeyParams{
-			Coin:               sqlcItem.Coin,
-			KeyType:            sqlcItem.KeyType,
-			Account:            sqlcItem.Account,
-			P2pkhAddress:       sqlcItem.P2pkhAddress,
-			P2shSegwitAddress:  sqlcItem.P2shSegwitAddress,
-			Bech32Address:      sqlcItem.Bech32Address,
-			TaprootAddress:     sqlcItem.TaprootAddress,
-			FullPublicKey:      sqlcItem.FullPublicKey,
-			MultisigAddress:    sqlcItem.MultisigAddress,
-			RedeemScript:       sqlcItem.RedeemScript,
-			WalletImportFormat: sqlcItem.WalletImportFormat,
-			Idx:                sqlcItem.Idx,
-			AddrStatus:         sqlcItem.AddrStatus,
+			Coin:                   sqlcItem.Coin,
+			KeyType:                sqlcItem.KeyType,
+			Account:                sqlcItem.Account,
+			P2pkhAddress:           sqlcItem.P2pkhAddress,
+			P2shSegwitAddress:      sqlcItem.P2shSegwitAddress,
+			Bech32Address:          sqlcItem.Bech32Address,
+			TaprootAddress:         sqlcItem.TaprootAddress,
+			FullPublicKey:          sqlcItem.FullPublicKey,
+			MultisigAddress:        sqlcItem.MultisigAddress,
+			RedeemScript:           sqlcItem.RedeemScript,
+			WalletImportFormat:     sqlcItem.WalletImportFormat,
+			AccountExtendedPrivkey: sqlcItem.AccountExtendedPrivkey,
+			Idx:                    sqlcItem.Idx,
+			AddrStatus:             sqlcItem.AddrStatus,
 		})
 		if err != nil {
 			return fmt.Errorf("failed to call InsertBtcAccountKey(): %w", err)

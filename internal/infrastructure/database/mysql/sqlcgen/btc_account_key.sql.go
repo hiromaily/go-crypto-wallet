@@ -12,7 +12,7 @@ import (
 )
 
 const getBtcAccountKeysByAddrStatus = `-- name: GetBtcAccountKeysByAddrStatus :many
-SELECT id, coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, idx, addr_status, updated_at FROM btc_account_key WHERE coin = ? AND account = ? AND addr_status = ?
+SELECT id, coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, account_extended_privkey, idx, addr_status, updated_at FROM btc_account_key WHERE coin = ? AND account = ? AND addr_status = ?
 `
 
 type GetBtcAccountKeysByAddrStatusParams struct {
@@ -43,6 +43,7 @@ func (q *Queries) GetBtcAccountKeysByAddrStatus(ctx context.Context, arg GetBtcA
 			&i.MultisigAddress,
 			&i.RedeemScript,
 			&i.WalletImportFormat,
+			&i.AccountExtendedPrivkey,
 			&i.Idx,
 			&i.AddrStatus,
 			&i.UpdatedAt,
@@ -61,7 +62,7 @@ func (q *Queries) GetBtcAccountKeysByAddrStatus(ctx context.Context, arg GetBtcA
 }
 
 const getBtcAccountKeysByMultisigAddresses = `-- name: GetBtcAccountKeysByMultisigAddresses :many
-SELECT id, coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, idx, addr_status, updated_at FROM btc_account_key WHERE coin = ? AND account = ? AND multisig_address IN (/*SLICE:addrs*/?)
+SELECT id, coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, account_extended_privkey, idx, addr_status, updated_at FROM btc_account_key WHERE coin = ? AND account = ? AND multisig_address IN (/*SLICE:addrs*/?)
 `
 
 type GetBtcAccountKeysByMultisigAddressesParams struct {
@@ -104,6 +105,7 @@ func (q *Queries) GetBtcAccountKeysByMultisigAddresses(ctx context.Context, arg 
 			&i.MultisigAddress,
 			&i.RedeemScript,
 			&i.WalletImportFormat,
+			&i.AccountExtendedPrivkey,
 			&i.Idx,
 			&i.AddrStatus,
 			&i.UpdatedAt,
@@ -141,7 +143,7 @@ func (q *Queries) GetMaxBtcAccountKeyIndex(ctx context.Context, arg GetMaxBtcAcc
 }
 
 const getOneBtcAccountKeyByMaxID = `-- name: GetOneBtcAccountKeyByMaxID :one
-SELECT id, coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, idx, addr_status, updated_at FROM btc_account_key WHERE coin = ? AND account = ? ORDER BY id DESC LIMIT 1
+SELECT id, coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address, full_public_key, multisig_address, redeem_script, wallet_import_format, account_extended_privkey, idx, addr_status, updated_at FROM btc_account_key WHERE coin = ? AND account = ? ORDER BY id DESC LIMIT 1
 `
 
 type GetOneBtcAccountKeyByMaxIDParams struct {
@@ -165,6 +167,7 @@ func (q *Queries) GetOneBtcAccountKeyByMaxID(ctx context.Context, arg GetOneBtcA
 		&i.MultisigAddress,
 		&i.RedeemScript,
 		&i.WalletImportFormat,
+		&i.AccountExtendedPrivkey,
 		&i.Idx,
 		&i.AddrStatus,
 		&i.UpdatedAt,
@@ -175,24 +178,25 @@ func (q *Queries) GetOneBtcAccountKeyByMaxID(ctx context.Context, arg GetOneBtcA
 const insertBtcAccountKey = `-- name: InsertBtcAccountKey :execresult
 INSERT INTO btc_account_key (
   coin, key_type, account, p2pkh_address, p2sh_segwit_address, bech32_address, taproot_address,
-  full_public_key, multisig_address, redeem_script, wallet_import_format, idx, addr_status
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  full_public_key, multisig_address, redeem_script, wallet_import_format, account_extended_privkey, idx, addr_status
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type InsertBtcAccountKeyParams struct {
-	Coin               BtcAccountKeyCoin
-	KeyType            string
-	Account            BtcAccountKeyAccount
-	P2pkhAddress       string
-	P2shSegwitAddress  string
-	Bech32Address      string
-	TaprootAddress     sql.NullString
-	FullPublicKey      string
-	MultisigAddress    string
-	RedeemScript       string
-	WalletImportFormat string
-	Idx                int64
-	AddrStatus         int8
+	Coin                   BtcAccountKeyCoin
+	KeyType                string
+	Account                BtcAccountKeyAccount
+	P2pkhAddress           string
+	P2shSegwitAddress      string
+	Bech32Address          string
+	TaprootAddress         sql.NullString
+	FullPublicKey          string
+	MultisigAddress        string
+	RedeemScript           string
+	WalletImportFormat     string
+	AccountExtendedPrivkey sql.NullString
+	Idx                    int64
+	AddrStatus             int8
 }
 
 func (q *Queries) InsertBtcAccountKey(ctx context.Context, arg InsertBtcAccountKeyParams) (sql.Result, error) {
@@ -208,6 +212,7 @@ func (q *Queries) InsertBtcAccountKey(ctx context.Context, arg InsertBtcAccountK
 		arg.MultisigAddress,
 		arg.RedeemScript,
 		arg.WalletImportFormat,
+		arg.AccountExtendedPrivkey,
 		arg.Idx,
 		arg.AddrStatus,
 	)
