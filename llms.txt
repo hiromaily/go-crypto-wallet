@@ -1,0 +1,100 @@
+# go-crypto-wallet
+
+> Cryptocurrency wallet implementation supporting BTC, BCH, ETH, XRP, and ERC-20 tokens
+
+## Project Summary
+
+- **Type**: Multi-signature cryptocurrency wallet with offline signing capability
+- **Primary Language**: Go (backend, wallet operations)
+- **Additional Languages**: TypeScript/JavaScript (apps/), Solidity (smart contracts), SQL, HCL, Protobuf
+- **Architecture**: Clean Architecture with clear layer separation
+- **Security Model**: Cold wallet (offline) for key generation and signing, Watch wallet (online) for monitoring
+
+## For AI Agents
+
+Read these documents in order:
+
+1. **[AGENTS.md](AGENTS.md)** - Agent behavior guidelines (how to act)
+2. **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture (how it's designed)
+3. **[docs/standards/](docs/standards/)** - Detailed coding standards (SSOT)
+
+## Quick Reference
+
+### Core Values (Priority Order)
+
+1. Security First - Never log private keys, consider offline wallet impact
+2. Clean Architecture - Domain has ZERO infrastructure dependencies
+3. Incremental Changes - No breaking changes without rollback plan
+4. Code Quality - Follow language-specific linting and testing standards
+
+### Wallet Types
+
+| Wallet | Environment | Purpose |
+|--------|-------------|---------|
+| Watch | Online | Monitor transactions, create unsigned tx, send signed tx |
+| Keygen | Offline | Generate keys, create multisig addresses, first signature |
+| Sign | Offline | Authorization signatures for multisig transactions |
+
+### Directory Structure
+
+```
+cmd/           → Application entry points (keygen, sign, watch)
+internal/      → Core application code (Clean Architecture)
+├── domain/         → Pure business logic (ZERO dependencies)
+├── application/    → Use cases, ports, DTOs
+├── infrastructure/ → External systems (API, DB, storage)
+└── interface-adapters/ → CLI commands, wallet adapters
+pkg/           → Reusable shared packages
+apps/          → TypeScript/JavaScript applications
+docs/          → Documentation
+```
+
+### Verification Commands
+
+| Language | Lint | Format | Build | Test |
+|----------|------|--------|-------|------|
+| Go | `make go-lint` | `make go-fmt` | `make check-build` | `make gotest` |
+| TypeScript | `npm run lint` | `npm run format` | `npm run build` | `npm test` |
+| Shell | - | `make shfmt` | - | - |
+
+### Auto-Generated Files (DO NOT EDIT)
+
+- `internal/infrastructure/database/sqlc/*.go` - SQLC generated
+- `internal/infrastructure/api/ripple/xrp/*.pb.go` - Protocol Buffer generated
+- `internal/infrastructure/contract/token-abi.go` - ABI generated
+
+## Documentation Map
+
+### Architecture & Design
+
+- [ARCHITECTURE.md](ARCHITECTURE.md) - Clean Architecture overview
+- [docs/crypto/btc/](docs/crypto/btc/) - Bitcoin-specific documentation
+- [docs/crypto/eth/](docs/crypto/eth/) - Ethereum-specific documentation
+
+### Development Standards
+
+- [docs/standards/coding-conventions.md](docs/standards/coding-conventions.md) - Coding standards
+- [docs/standards/security.md](docs/standards/security.md) - Security requirements
+- [docs/standards/testing.md](docs/standards/testing.md) - Testing strategy
+- [docs/standards/workflow.md](docs/standards/workflow.md) - Development workflow
+
+### AI Agent Context
+
+- [docs/ai-agents/](docs/ai-agents/) - AI-specific context and task guides
+- [docs/ai-agents/task-contexts/](docs/ai-agents/task-contexts/) - Task-type specific context
+
+## Supported Cryptocurrencies
+
+- **BTC** (Bitcoin) - Full support including Taproot (BIP341/BIP86) and MuSig2 (BIP327)
+- **BCH** (Bitcoin Cash) - Based on Bitcoin ABC
+- **ETH** (Ethereum) - Including ERC-20 token support
+- **XRP** (Ripple) - Via gRPC server communication
+
+## Key Technologies
+
+- Go 1.25.5
+- btcsuite/btcd v0.25.0
+- ethereum/go-ethereum v1.16.7
+- golangci-lint v2.7.2
+- Atlas v1.0.0 (DB migration)
+- MySQL 8.4+
