@@ -1,6 +1,6 @@
 # Bitcoin E2E Workflow
 
-This document describes the complete Bitcoin end-to-end workflow implemented in `e2e-p2sh-p2wsh-3of3.sh`.
+This document describes the complete Bitcoin end-to-end workflow implemented in `e2e/e2e-p2sh-p2wsh-3of3.sh`.
 
 ## Overview
 
@@ -187,20 +187,20 @@ Creates, signs, and sends a payment transaction.
 
 ```bash
 # From fresh state (full reset first)
-./scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh --reset
+./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh --reset
 
 # Run workflow (assumes clean state or continuing from previous run)
-./scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh
+./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh
 
 # Run with verbose output
-./scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh --verbose
+./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh --verbose
 ```
 
 ### Cleanup
 
 ```bash
 # Stop containers and cleanup state
-./scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh --cleanup
+./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh --cleanup
 ```
 
 ### Options
@@ -287,7 +287,7 @@ If containers fail health checks:
 
 1. Check container logs: `docker logs btc-watch`
 2. Verify Docker resources are available
-3. Try full reset: `./scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh --reset`
+3. Try full reset: `./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh --reset`
 
 ### Key Import Failures
 

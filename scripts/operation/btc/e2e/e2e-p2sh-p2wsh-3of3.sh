@@ -2,7 +2,7 @@
 
 # Bitcoin E2E Workflow Script - Pattern 8: P2SH-P2WSH 3-of-3 Multisig
 # This script automates the complete Bitcoin workflow from infrastructure setup to transaction execution
-# Usage: ./scripts/operation/btc/e2e-p2sh-p2wsh-3of3.sh [OPTIONS]
+# Usage: ./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh [OPTIONS]
 # Options:
 #   --cleanup  Stop containers and cleanup state
 #   --verbose  Enable verbose output
@@ -33,11 +33,11 @@ set -eu
 
 # Script directory for relative paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../../.." && pwd)"
 
 # Source common utilities
-# shellcheck source=../common.sh
-source "${SCRIPT_DIR}/../common.sh"
+# shellcheck source=../../common.sh
+source "${SCRIPT_DIR}/../../common.sh"
 
 # Configuration
 COIN="btc"
