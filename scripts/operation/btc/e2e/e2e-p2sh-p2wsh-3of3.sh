@@ -68,6 +68,18 @@ CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account.yaml"
 export BTC_ACCOUNT_CONF="${CONFIG_ACCOUNT}"
 
 ###############################################################################
+# Environment Variable Overrides for Configuration
+###############################################################################
+# These environment variables override config file values.
+# Priority: Environment Variables > Config File > Default Values
+#
+# Pattern 8 (P2SH-P2WSH 3-of-3 Multisig) requires:
+#   - address_type: "p2sh-segwit" (BIP49 wrapped SegWit)
+#   - key_type: "bip49"
+export WALLET_ADDRESS_TYPE="p2sh-segwit"
+export WALLET_KEY_TYPE="bip49"
+
+###############################################################################
 # Cleanup Functions
 ###############################################################################
 
