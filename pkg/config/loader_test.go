@@ -216,6 +216,94 @@ payment_sender: original_payment
 	})
 }
 
+// TestLoadConfigNestedKeyOverride tests that nested configuration keys can be overridden
+// using environment variables with underscore as separator (e.g., bitcoin.host -> WALLET_BITCOIN_HOST).
+func TestLoadConfigNestedKeyOverride(t *testing.T) {
+	tmpDir := t.TempDir()
+
+	// Create a YAML config with nested structure matching WalletRoot
+	yamlContent := `
+address_type: "legacy"
+bitcoin:
+  host: "127.0.0.1:18332"
+  user: "testuser"
+  pass: "testpass"
+  http_post_mode: true
+  disable_tls: true
+  network_type: "regtest"
+mysql:
+  host: "localhost:3306"
+  dbname: "testdb"
+  user: "dbuser"
+  pass: "dbpass"
+logger:
+  service: "test-service"
+  format: "json"
+  level: "debug"
+file_path:
+  tx: "./data/tx/"
+  address: "./data/address/"
+  full_pubkey: "./data/fullpubkey/"
+`
+	yamlPath := filepath.Join(tmpDir, "wallet_test.yaml")
+	err := os.WriteFile(yamlPath, []byte(yamlContent), 0o600)
+	require.NoError(t, err, "Failed to create test YAML file")
+
+	t.Run("Override nested bitcoin.host with WALLET_BITCOIN_HOST", func(t *testing.T) {
+		// Set env var for nested key: bitcoin.host -> WALLET_BITCOIN_HOST
+		t.Setenv("WALLET_BITCOIN_HOST", "overridden-host:19999")
+
+		var conf WalletRoot
+		err := loadConfig(yamlPath, &conf)
+
+		require.NoError(t, err, "loadConfig() should not return error")
+		assert.Equal(t, "overridden-host:19999", conf.Bitcoin.Host,
+			"Nested key bitcoin.host should be overridden by WALLET_BITCOIN_HOST")
+		// Verify other nested values are not affected
+		assert.Equal(t, "testuser", conf.Bitcoin.User,
+			"Other nested values should remain unchanged")
+	})
+
+	t.Run("Override nested mysql.host with WALLET_MYSQL_HOST", func(t *testing.T) {
+		// Set env var for nested key: mysql.host -> WALLET_MYSQL_HOST
+		t.Setenv("WALLET_MYSQL_HOST", "mysql-server:3307")
+
+		var conf WalletRoot
+		err := loadConfig(yamlPath, &conf)
+
+		require.NoError(t, err, "loadConfig() should not return error")
+		assert.Equal(t, "mysql-server:3307", conf.MySQL.Host,
+			"Nested key mysql.host should be overridden by WALLET_MYSQL_HOST")
+		// Verify other nested values are not affected
+		assert.Equal(t, "testdb", conf.MySQL.DB,
+			"Other nested values should remain unchanged")
+	})
+
+	t.Run("Override top-level address_type with WALLET_ADDRESS_TYPE", func(t *testing.T) {
+		// Set env var for top-level key
+		t.Setenv("WALLET_ADDRESS_TYPE", "bech32")
+
+		var conf WalletRoot
+		err := loadConfig(yamlPath, &conf)
+
+		require.NoError(t, err, "loadConfig() should not return error")
+		assert.Equal(t, "bech32", string(conf.AddressType),
+			"Top-level key address_type should be overridden by WALLET_ADDRESS_TYPE")
+	})
+
+	t.Run("Override deeply nested logger.level with WALLET_LOGGER_LEVEL", func(t *testing.T) {
+		// Set env var for nested key: logger.level -> WALLET_LOGGER_LEVEL
+		t.Setenv("WALLET_LOGGER_LEVEL", "error")
+
+		var conf WalletRoot
+		err := loadConfig(yamlPath, &conf)
+
+		require.NoError(t, err, "loadConfig() should not return error")
+		assert.Equal(t, "error", conf.Logger.Level,
+			"Nested key logger.level should be overridden by WALLET_LOGGER_LEVEL")
+	})
+}
+
 // TestLoadConfigCaseInsensitive tests that file extension detection is case-insensitive.
 func TestLoadConfigCaseInsensitive(t *testing.T) {
 	tmpDir := t.TempDir()

@@ -65,7 +65,13 @@ func loadConfig(path string, target any) error {
 	v.AutomaticEnv()
 
 	if err := v.ReadInConfig(); err != nil {
-		return fmt.Errorf("can't read config file. %s: %w", path, err)
+		// Allow running without config file if env vars provide all required config
+		// This is useful for containerized deployments (12-factor apps)
+		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+			// Config file was found but another error occurred
+			return fmt.Errorf("can't read config file. %s: %w", path, err)
+		}
+		// Config file not found; continue with env vars only
 	}
 
 	if err := v.Unmarshal(target); err != nil {
