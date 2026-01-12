@@ -693,7 +693,9 @@ After making code changes in `internal/`, use these commands:
 
 ### Root Documentation
 
-- **[Root AGENTS.md](../AGENTS.md)**: Overall project guidelines, navigation, and quick reference
+- **[AGENTS.md](../AGENTS.md)**: Agent behavior guidelines and core values
+- **[llms.txt](../llms.txt)**: AI-friendly project sitemap
+- **[ARCHITECTURE.md](../ARCHITECTURE.md)**: System architecture overview
 - **[Core Principles](../docs/ai-agents/guidelines/core.md)**: Security, error handling, panic usage, and core patterns
 - **[Architecture Guidelines](../docs/ai-agents/guidelines/architecture.md)**: Clean Architecture principles and layer guidelines
 - **[Coding Standards](../docs/ai-agents/guidelines/coding-standards.md)**: Linting, formatting, and code style
