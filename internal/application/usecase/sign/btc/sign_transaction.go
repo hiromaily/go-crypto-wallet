@@ -234,24 +234,29 @@ func (u *signTransactionUseCase) deriveWIFForPSBT(
 		return authKey.WalletImportFormat, nil
 	}
 
-	// Convert DTO BIP32Derivation to format expected by ExtractAddressIndexFromPSBTInput
-	// We need to parse the Path string to get the Bip32Path []uint32
-	firstDeriv := parsed.Inputs[0].BIP32Derivation[0]
-	addressIndex, err := infraKey.ParseBIP32DerivationPath(firstDeriv.Path)
-	if err != nil {
-		return "", fmt.Errorf("failed to parse BIP32 derivation path %s: %w", firstDeriv.Path, err)
-	}
-
-	// Determine change index from path
+	// Parse BIP32 derivation path to extract address index and change
 	// Path format: m/purpose'/coin'/account'/change/addressIndex
+	firstDeriv := parsed.Inputs[0].BIP32Derivation[0]
 	pathComponents := strings.Split(strings.TrimPrefix(firstDeriv.Path, "m/"), "/")
 	if len(pathComponents) < 5 {
 		return "", fmt.Errorf("invalid BIP32 path format: %s", firstDeriv.Path)
 	}
-	change, err := strconv.ParseUint(strings.TrimSuffix(pathComponents[len(pathComponents)-2], "'"), 10, 32)
+
+	// Parse address index (last component)
+	addressIndexStr := strings.TrimSuffix(pathComponents[len(pathComponents)-1], "'")
+	addrIdx, err := strconv.ParseUint(addressIndexStr, 10, 32)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse address index from path %s: %w", firstDeriv.Path, err)
+	}
+	addressIndex := uint32(addrIdx)
+
+	// Parse change index (second to last component)
+	changeStr := strings.TrimSuffix(pathComponents[len(pathComponents)-2], "'")
+	chgIdx, err := strconv.ParseUint(changeStr, 10, 32)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse change index from path %s: %w", firstDeriv.Path, err)
 	}
+	change := uint32(chgIdx)
 
 	logger.Debug("deriving child key from account xpriv",
 		"address_index", addressIndex,
@@ -259,7 +264,7 @@ func (u *signTransactionUseCase) deriveWIFForPSBT(
 		"derivation_path", firstDeriv.Path)
 
 	// Derive child private key at the correct address index
-	childKey, err := infraKey.DeriveChildPrivateKey(*authKey.AccountExtendedPrivkey, uint32(change), addressIndex)
+	childKey, err := infraKey.DeriveChildPrivateKey(*authKey.AccountExtendedPrivkey, change, addressIndex)
 	if err != nil {
 		return "", fmt.Errorf("failed to derive child key at index %d: %w", addressIndex, err)
 	}
