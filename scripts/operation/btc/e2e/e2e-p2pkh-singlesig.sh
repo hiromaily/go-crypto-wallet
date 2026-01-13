@@ -55,7 +55,8 @@ WALLET_PASSPHRASE="${WALLET_PASSPHRASE:-test}"
 # Config file paths (absolute)
 CONFIG_WATCH="${PROJECT_ROOT}/config/wallet/btc_watch.yaml"
 CONFIG_KEYGEN="${PROJECT_ROOT}/config/wallet/btc_keygen.yaml"
-CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account.yaml"
+# Use single-sig account configuration for Pattern 1
+CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account_singlesig.yaml"
 
 # Export account config for keygen wallet (required for configuration)
 export BTC_ACCOUNT_CONF="${CONFIG_ACCOUNT}"
@@ -299,14 +300,16 @@ key_generation_phase() {
 singlesig_setup_phase() {
 	log_step "Single-sig Address Setup Phase"
 
-	# Export descriptors for all accounts (client, deposit, payment, stored)
-	# Note: For single-sig, all accounts use the same P2PKH address type
+	# For Pattern 1 (P2PKH Single-sig), use account_singlesig.yaml
+	# which configures all accounts as single-sig
+	# We export descriptors for both client and payment accounts
+	# to test the complete deposit → payment flow
 	log_substep "Exporting descriptors from keygen wallet"
 
-	# Define accounts to process
-	local accounts=(client deposit payment stored)
+	# Process client and payment accounts for single-sig testing
+	local accounts=(client payment)
 
-	# Export descriptors for all accounts
+	# Export descriptors for accounts
 	declare -A descriptor_files
 	for account in "${accounts[@]}"; do
 		log_info "Exporting ${account} descriptors"
@@ -320,7 +323,7 @@ singlesig_setup_phase() {
 		log_info "  ${account}: ${descriptor_files[$account]}"
 	done
 
-	# Import descriptors into watch wallet for all accounts
+	# Import descriptors into watch wallet
 	log_substep "Importing descriptors into watch wallet"
 	for account in "${accounts[@]}"; do
 		log_info "Importing ${account} descriptors"
@@ -330,9 +333,10 @@ singlesig_setup_phase() {
 	done
 
 	log_info "All descriptors imported successfully"
-	log_info "Note: All accounts use descriptor-based import for P2PKH single-sig"
+	log_info "Note: Pattern 1 uses account_singlesig.yaml (all accounts are single-sig)"
 
 	# Derive payment address from descriptor for UTXO generation
+	# We generate UTXOs to the payment account address for testing payment transactions
 	log_substep "Deriving payment address from descriptor for UTXO generation"
 
 	# Extract first descriptor from payment_descriptors.json
@@ -458,7 +462,7 @@ create_payment_requests_phase() {
 	log_info "  2. $receiver2"
 	log_info "  3. $receiver3"
 
-	# Create payment requests
+	# Create payment requests using payment account
 	log_substep "Inserting payment requests into database"
 	docker compose exec -T wallet-db mysql -u root -proot watch <<EOF
 DELETE FROM payment_request;
@@ -683,16 +687,17 @@ main() {
 	log_info "  ✓ Infrastructure setup complete"
 	log_info "  ✓ Wallets created and configured"
 	log_info "  ✓ HD keys generated for keygen wallet"
-	log_info "  ✓ Descriptors exported and imported"
+	log_info "  ✓ Descriptors exported and imported (client and payment accounts)"
 	log_info "  ✓ P2PKH single-sig addresses created"
 	log_info "  ✓ Test UTXOs generated"
-	log_info "  ✓ Payment requests created"
+	log_info "  ✓ Payment requests created (using payment account)"
 	log_info "  ✓ Transaction created, signed (1 signature), and sent"
 	echo ""
 	log_info "Transaction Pattern Used:"
 	log_info "  • P2PKH (BIP44 Legacy) single-signature"
 	log_info "  • Descriptor-based address management"
 	log_info "  • Simple single-key signing workflow"
+	log_info "  • Uses account_singlesig.yaml (all accounts configured as single-sig)"
 	echo ""
 	log_info "You can now use the wallet system for Bitcoin single-sig operations"
 	log_info "To cleanup, run: $0 --cleanup"

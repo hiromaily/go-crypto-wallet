@@ -1,0 +1,19 @@
+# Account Configuration for Pattern 1 (P2PKH Single-sig E2E Test)
+# All accounts configured as single-sig for Pattern 1 testing
+
+# Account types available in the wallet
+types:
+  - client
+  - deposit
+  - payment
+  - stored
+
+# Account type that receives deposits
+deposit_receiver: deposit
+
+# Account type that sends payments
+payment_sender: payment
+
+# Multisig account configurations
+# For Pattern 1: No multisig accounts (all accounts are single-sig)
+multisig: []

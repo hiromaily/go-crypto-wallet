@@ -7,24 +7,30 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
 	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 )
 
 type exportDescriptorUseCase struct {
-	generator  keygenusecase.GenerateDescriptorUseCase
-	fileWriter portsStorage.DescriptorFileWriter
+	generator      keygenusecase.GenerateDescriptorUseCase
+	fileWriter     portsStorage.DescriptorFileWriter
+	accountKeyRepo persistence.BTCAccountKeyRepositorier
 }
 
 // NewExportDescriptorUseCase creates a descriptor export use case.
 func NewExportDescriptorUseCase(
 	generator keygenusecase.GenerateDescriptorUseCase,
 	fileWriter portsStorage.DescriptorFileWriter,
+	accountKeyRepo persistence.BTCAccountKeyRepositorier,
 ) keygenusecase.ExportDescriptorUseCase {
 	return &exportDescriptorUseCase{
-		generator:  generator,
-		fileWriter: fileWriter,
+		generator:      generator,
+		fileWriter:     fileWriter,
+		accountKeyRepo: accountKeyRepo,
 	}
 }
 
@@ -41,9 +47,19 @@ func (u *exportDescriptorUseCase) Export(
 		format = keygenusecase.DescriptorFormatBitcoinCore
 	}
 
-	addressTypes := supportedAddressTypes()
+	// Determine which address types have keys in the database by checking the account key
+	addressTypes, err := u.getAvailableAddressTypes(ctx, input.AccountType)
+	if err != nil {
+		return keygenusecase.ExportDescriptorOutput{},
+			fmt.Errorf("determine available address types: %w", err)
+	}
+
+	if len(addressTypes) == 0 {
+		return keygenusecase.ExportDescriptorOutput{},
+			fmt.Errorf("no keys found for account %s - run 'keygen create hdkey' first", input.AccountType)
+	}
+
 	descriptors := make([]string, 0, len(addressTypes)*2)
-	var skippedTypes []string
 
 	for _, addrType := range addressTypes {
 		generate := func(isChange bool) error {
@@ -53,7 +69,6 @@ func (u *exportDescriptorUseCase) Export(
 				IsChange:    isChange,
 			})
 			if err != nil {
-				// Skip address types that don't have keys instead of failing
 				return err
 			}
 			descriptors = append(descriptors, output.Descriptor)
@@ -61,14 +76,13 @@ func (u *exportDescriptorUseCase) Export(
 		}
 
 		if err := generate(false); err != nil {
-			// Log and skip this address type (keys may not exist for all types)
-			skippedTypes = append(skippedTypes, addrType.String())
-			continue
+			return keygenusecase.ExportDescriptorOutput{},
+				fmt.Errorf("generate descriptor for %s/%s: %w",
+					input.AccountType, addrType, err)
 		}
 
 		if input.IncludeChange {
 			if err := generate(true); err != nil {
-				// If receive descriptor exists but change fails, it's an actual error
 				return keygenusecase.ExportDescriptorOutput{},
 					fmt.Errorf("generate change descriptor for %s/%s: %w",
 						input.AccountType, addrType, err)
@@ -78,10 +92,6 @@ func (u *exportDescriptorUseCase) Export(
 
 	// If no descriptors were generated, return error
 	if len(descriptors) == 0 {
-		if len(skippedTypes) > 0 {
-			return keygenusecase.ExportDescriptorOutput{},
-				fmt.Errorf("no keys found for any address type (skipped: %v)", skippedTypes)
-		}
 		return keygenusecase.ExportDescriptorOutput{}, errors.New("no descriptors generated")
 	}
 
@@ -124,13 +134,43 @@ func (*exportDescriptorUseCase) formatDescriptors(
 	}
 }
 
-func supportedAddressTypes() []domainAddress.AddrType {
-	return []domainAddress.AddrType{
-		domainAddress.AddrTypeTaproot,
-		domainAddress.AddrTypeBech32,
-		domainAddress.AddrTypeP2shSegwit,
-		domainAddress.AddrTypeLegacy,
+// getAvailableAddressTypes queries the database to find which key types exist
+// for the given account, and returns the corresponding address types.
+// This prevents trying to export descriptors for key types that don't exist.
+func (u *exportDescriptorUseCase) getAvailableAddressTypes(
+	_ context.Context,
+	accountType domainAccount.AccountType,
+) ([]domainAddress.AddrType, error) {
+	// Get the account key to determine which key_type exists
+	accountKey, err := u.accountKeyRepo.GetOneMaxID(accountType)
+	if err != nil {
+		return nil, fmt.Errorf("get account key: %w", err)
 	}
+	if accountKey == nil {
+		return nil, nil // No keys found
+	}
+
+	// Convert key_type string to KeyType
+	keyType := domainKey.KeyType(accountKey.KeyType)
+
+	// Determine the address type from the key type
+	var addrType domainAddress.AddrType
+	switch keyType {
+	case domainKey.KeyTypeBIP44:
+		addrType = domainAddress.AddrTypeLegacy
+	case domainKey.KeyTypeBIP49:
+		addrType = domainAddress.AddrTypeP2shSegwit
+	case domainKey.KeyTypeBIP84:
+		addrType = domainAddress.AddrTypeBech32
+	case domainKey.KeyTypeBIP86:
+		addrType = domainAddress.AddrTypeTaproot
+	case domainKey.KeyTypeMuSig2:
+		addrType = domainAddress.AddrTypeTaproot
+	default:
+		return nil, fmt.Errorf("unsupported key type: %s", keyType)
+	}
+
+	return []domainAddress.AddrType{addrType}, nil
 }
 
 type bitcoinCoreDescriptor struct {
