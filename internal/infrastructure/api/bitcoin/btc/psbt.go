@@ -38,6 +38,12 @@ type ParsedPSBT struct {
 //
 //nolint:gocyclo // Complex function handling PSBT creation with metadata
 func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx, senderAccount domainAccount.AccountType) (string, error) {
+	logger.Info("CreatePSBT called",
+		"inputs", len(msgTx.TxIn),
+		"outputs", len(msgTx.TxOut),
+		"prevTxs", len(prevTxs),
+		"sender_account", senderAccount.String())
+
 	// Convert application DTOs to infrastructure types
 	infraPrevTxs, err := FromPreviousTx(prevTxs, b)
 	if err != nil {
@@ -150,7 +156,15 @@ func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx, sen
 		// Extract address from scriptPubKey to query Bitcoin Core for derivation info
 		if err := b.addBIP32DerivationForInput(updater, scriptPubKey, i, senderAccount); err != nil {
 			// Log warning but don't fail - signing might still work without derivation paths
-			logger.Warn("failed to add BIP32 derivation for input", "input_index", i, "error", err)
+			// Known issue: listdescriptors RPC fails with "-4: Can't get descriptor string"
+			logger.Warn("failed to add BIP32 derivation for input",
+				"input_index", i,
+				"error", err,
+				"sender_account", senderAccount.String())
+		} else {
+			logger.Info("Successfully added BIP32 derivation for input",
+				"input_index", i,
+				"sender_account", senderAccount.String())
 		}
 	}
 
@@ -1061,10 +1075,22 @@ func (b *Bitcoin) addBIP32DerivationForInput(
 
 	// Get address info to determine the derivation path
 	addressStr := addrs[0].EncodeAddress()
+	logger.Info("Adding BIP32 derivation for input",
+		"input_index", inputIndex,
+		"address", addressStr,
+		"sender_account", senderAccount.String())
+
 	addressInfo, err := b.GetAddressInfo(addressStr)
 	if err != nil {
-		return fmt.Errorf("failed to get address info: %w", err)
+		logger.Error("GetAddressInfo failed", "address", addressStr, "error", err)
+		return fmt.Errorf("failed to get address info for %s: %w", addressStr, err)
 	}
+
+	logger.Info("Got address info",
+		"address", addressStr,
+		"hd_key_path", addressInfo.HDKeyPath,
+		"hd_fingerprint", addressInfo.HDMasterFingerprint,
+		"pubkey_len", len(addressInfo.PubKey))
 
 	// Check if address has derivation path
 	if addressInfo.HDKeyPath == "" {
@@ -1206,19 +1232,25 @@ func (b *Bitcoin) getDescriptorInfoForAddress(address, fullPath string, senderAc
 	// Get the account-level path (e.g., "44h/1h/1h")
 	accountPath := strings.Join(pathParts[:len(pathParts)-2], "/")
 
+	// Normalize accountPath: convert 'h' notation to "'" notation for descriptor matching
+	// getaddressinfo returns "44h/1h/1h" but descriptors use "44'/1'/1'"
+	accountPathApostrophe := strings.ReplaceAll(accountPath, "h", "'")
+
 	// Get expected BIP44 account index for validation
 	expectedAccountIndex := senderAccount.BIP44AccountIndex()
 	logger.Debug("Searching for descriptor",
 		"account", senderAccount.String(),
 		"expected_account_index", expectedAccountIndex,
 		"account_path", accountPath,
+		"normalized_path", accountPathApostrophe,
 	)
 
 	// Find the descriptor that matches this account path
 	for _, desc := range result.Descriptors {
 		// Parse descriptor to extract fingerprint and path
 		// Format: "pkh([fingerprint/path]xpub.../change/*)"
-		if !strings.Contains(desc.Desc, accountPath) {
+		// Match using apostrophe notation since descriptors use that format
+		if !strings.Contains(desc.Desc, accountPathApostrophe) {
 			continue
 		}
 
