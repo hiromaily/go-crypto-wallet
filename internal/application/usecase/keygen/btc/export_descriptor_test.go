@@ -157,8 +157,8 @@ func (*stubAccountKeyRepo) GetMaxIndex(_ domainAccount.AccountType) (int64, erro
 }
 
 func (*stubAccountKeyRepo) GetOneMaxID(_ domainAccount.AccountType) (*domainBitcoin.BtcAccountKey, error) {
-	// Return a mock account key with legacy/bip44 type for testing
-	// This simulates having keys available for all address types
+	// Return a mock account key with bip44 type for testing
+	// The export logic will use this key type to determine which descriptor to generate
 	return &domainBitcoin.BtcAccountKey{
 		ID:      1,
 		KeyType: "bip44",
