@@ -1105,6 +1105,7 @@ func (c *container) newBTCKeygenExportDescriptorUseCase() keygenusecase.ExportDe
 	return keygenusecasebtc.NewExportDescriptorUseCase(
 		c.newBTCKeygenGenerateDescriptorUseCase(),
 		c.newDescriptorFileWriter(),
+		c.newAccountKeyRepo(),
 	)
 }
 

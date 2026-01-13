@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/testutil"
 )
@@ -65,7 +66,7 @@ func TestCreatePSBT(t *testing.T) {
 	require.NoError(t, err)
 
 	// Create PSBT
-	psbtBase64, err := bitcoin.CreatePSBT(msgTx, prevTxsDTO)
+	psbtBase64, err := bitcoin.CreatePSBT(msgTx, prevTxsDTO, domainAccount.AccountTypePayment)
 	require.NoError(t, err)
 	assert.NotEmpty(t, psbtBase64)
 
@@ -373,7 +374,7 @@ func TestPSBTWorkflow_Integration(t *testing.T) {
 	prevTxsDTO, err := btc.ToPreviousTxList(prevTxs, bitcoin.(*btc.Bitcoin))
 	require.NoError(t, err)
 
-	psbtBase64, err := bitcoin.CreatePSBT(msgTx, prevTxsDTO)
+	psbtBase64, err := bitcoin.CreatePSBT(msgTx, prevTxsDTO, domainAccount.AccountTypePayment)
 	require.NoError(t, err)
 	t.Logf("Step 1: Created PSBT")
 
@@ -464,7 +465,7 @@ func TestCreatePSBT_ErrorCases(t *testing.T) {
 			}
 			require.NoError(t, convErr)
 
-			_, err := bitcoin.CreatePSBT(msgTx, prevTxsDTO)
+			_, err := bitcoin.CreatePSBT(msgTx, prevTxsDTO, domainAccount.AccountTypePayment)
 			if tt.wantErr {
 				assert.Error(t, err)
 				if tt.errMsg != "" {

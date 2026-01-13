@@ -23,8 +23,8 @@ func NewMySQL(conf *config.MySQL) (*sql.DB, error) {
 
 	// Configure connection pool to prevent stale connections
 	// Limit idle connections to force fresh connections for each process
-	db.SetMaxIdleConns(0) // No idle connections - always create fresh
-	db.SetMaxOpenConns(10) // Reasonable limit for concurrent operations
+	db.SetMaxIdleConns(0)    // No idle connections - always create fresh
+	db.SetMaxOpenConns(10)   // Reasonable limit for concurrent operations
 	db.SetConnMaxLifetime(0) // No max lifetime - connections live until closed
 
 	// Verify connection is established and working

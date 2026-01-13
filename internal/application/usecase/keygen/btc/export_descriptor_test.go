@@ -13,6 +13,7 @@ import (
 	keygenusecasebtc "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 )
 
 func TestExportDescriptorUseCase_TextFormat(t *testing.T) {
@@ -27,8 +28,9 @@ func TestExportDescriptorUseCase_TextFormat(t *testing.T) {
 		},
 	}
 	writer := &stubDescriptorFileWriter{}
+	accountKeyRepo := &stubAccountKeyRepo{}
 
-	useCase := keygenusecasebtc.NewExportDescriptorUseCase(generator, writer)
+	useCase := keygenusecasebtc.NewExportDescriptorUseCase(generator, writer, accountKeyRepo)
 
 	output, err := useCase.Export(context.Background(), keygenusecase.ExportDescriptorInput{
 		AccountType:   domainAccount.AccountTypeDeposit,
@@ -65,8 +67,9 @@ func TestExportDescriptorUseCase_BitcoinCoreFormat(t *testing.T) {
 		},
 	}
 	writer := &stubDescriptorFileWriter{}
+	accountKeyRepo := &stubAccountKeyRepo{}
 
-	useCase := keygenusecasebtc.NewExportDescriptorUseCase(generator, writer)
+	useCase := keygenusecasebtc.NewExportDescriptorUseCase(generator, writer, accountKeyRepo)
 
 	output, err := useCase.Export(context.Background(), keygenusecase.ExportDescriptorInput{
 		AccountType: domainAccount.AccountTypePayment,
@@ -101,6 +104,7 @@ func TestExportDescriptorUseCase_InvalidFormat(t *testing.T) {
 	useCase := keygenusecasebtc.NewExportDescriptorUseCase(
 		&stubDescriptorGenerator{},
 		&stubDescriptorFileWriter{},
+		&stubAccountKeyRepo{},
 	)
 
 	_, err := useCase.Export(context.Background(), keygenusecase.ExportDescriptorInput{
@@ -144,4 +148,59 @@ func (s *stubDescriptorFileWriter) WriteFile(path string, data []byte) error {
 	s.path = path
 	s.data = data
 	return nil
+}
+
+type stubAccountKeyRepo struct{}
+
+func (*stubAccountKeyRepo) GetMaxIndex(_ domainAccount.AccountType) (int64, error) {
+	return 0, nil
+}
+
+func (*stubAccountKeyRepo) GetOneMaxID(_ domainAccount.AccountType) (*domainBitcoin.BtcAccountKey, error) {
+	// Return a mock account key with bip44 type for testing
+	// The export logic will use this key type to determine which descriptor to generate
+	return &domainBitcoin.BtcAccountKey{
+		ID:      1,
+		KeyType: "bip44",
+	}, nil
+}
+
+func (*stubAccountKeyRepo) GetAllAddrStatus(
+	_ domainAccount.AccountType, _ domainAddress.AddrStatus,
+) ([]*domainBitcoin.BtcAccountKey, error) {
+	return nil, nil
+}
+
+func (*stubAccountKeyRepo) GetAllMultiAddr(
+	_ domainAccount.AccountType, _ []string,
+) ([]*domainBitcoin.BtcAccountKey, error) {
+	return nil, nil
+}
+
+func (*stubAccountKeyRepo) InsertBulk(_ []*domainBitcoin.BtcAccountKey) error {
+	return nil
+}
+
+func (*stubAccountKeyRepo) UpdateAddr(
+	_ domainAccount.AccountType, _, _ string,
+) (int64, error) {
+	return 0, nil
+}
+
+func (*stubAccountKeyRepo) UpdateAddrStatus(
+	_ domainAccount.AccountType, _ domainAddress.AddrStatus, _ []string,
+) (int64, error) {
+	return 0, nil
+}
+
+func (*stubAccountKeyRepo) UpdateMultisigAddr(
+	_ domainAccount.AccountType, _ *domainBitcoin.BtcAccountKey,
+) (int64, error) {
+	return 0, nil
+}
+
+func (*stubAccountKeyRepo) UpdateMultisigAddrs(
+	_ domainAccount.AccountType, _ []*domainBitcoin.BtcAccountKey,
+) (int64, error) {
+	return 0, nil
 }

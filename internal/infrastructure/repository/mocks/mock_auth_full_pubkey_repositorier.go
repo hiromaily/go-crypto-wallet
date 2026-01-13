@@ -99,6 +99,74 @@ func (_c *MockAuthFullPubkeyRepositorier_GetOne_Call) RunAndReturn(run func(auth
 	return _c
 }
 
+// GetOneByPurpose provides a mock function for the type MockAuthFullPubkeyRepositorier
+func (_mock *MockAuthFullPubkeyRepositorier) GetOneByPurpose(authType account.AuthType, purpose auth.Purpose) (*auth.AuthFullPubkey, error) {
+	ret := _mock.Called(authType, purpose)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetOneByPurpose")
+	}
+
+	var r0 *auth.AuthFullPubkey
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(account.AuthType, auth.Purpose) (*auth.AuthFullPubkey, error)); ok {
+		return returnFunc(authType, purpose)
+	}
+	if returnFunc, ok := ret.Get(0).(func(account.AuthType, auth.Purpose) *auth.AuthFullPubkey); ok {
+		r0 = returnFunc(authType, purpose)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*auth.AuthFullPubkey)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(account.AuthType, auth.Purpose) error); ok {
+		r1 = returnFunc(authType, purpose)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockAuthFullPubkeyRepositorier_GetOneByPurpose_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetOneByPurpose'
+type MockAuthFullPubkeyRepositorier_GetOneByPurpose_Call struct {
+	*mock.Call
+}
+
+// GetOneByPurpose is a helper method to define mock.On call
+//   - authType account.AuthType
+//   - purpose auth.Purpose
+func (_e *MockAuthFullPubkeyRepositorier_Expecter) GetOneByPurpose(authType interface{}, purpose interface{}) *MockAuthFullPubkeyRepositorier_GetOneByPurpose_Call {
+	return &MockAuthFullPubkeyRepositorier_GetOneByPurpose_Call{Call: _e.mock.On("GetOneByPurpose", authType, purpose)}
+}
+
+func (_c *MockAuthFullPubkeyRepositorier_GetOneByPurpose_Call) Run(run func(authType account.AuthType, purpose auth.Purpose)) *MockAuthFullPubkeyRepositorier_GetOneByPurpose_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 account.AuthType
+		if args[0] != nil {
+			arg0 = args[0].(account.AuthType)
+		}
+		var arg1 auth.Purpose
+		if args[1] != nil {
+			arg1 = args[1].(auth.Purpose)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockAuthFullPubkeyRepositorier_GetOneByPurpose_Call) Return(authFullPubkey *auth.AuthFullPubkey, err error) *MockAuthFullPubkeyRepositorier_GetOneByPurpose_Call {
+	_c.Call.Return(authFullPubkey, err)
+	return _c
+}
+
+func (_c *MockAuthFullPubkeyRepositorier_GetOneByPurpose_Call) RunAndReturn(run func(authType account.AuthType, purpose auth.Purpose) (*auth.AuthFullPubkey, error)) *MockAuthFullPubkeyRepositorier_GetOneByPurpose_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Insert provides a mock function for the type MockAuthFullPubkeyRepositorier
 func (_mock *MockAuthFullPubkeyRepositorier) Insert(authType account.AuthType, fullPubKey string) error {
 	ret := _mock.Called(authType, fullPubKey)

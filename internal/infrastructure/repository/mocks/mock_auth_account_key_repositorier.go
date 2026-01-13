@@ -38,6 +38,74 @@ func (_m *MockAuthAccountKeyRepositorier) EXPECT() *MockAuthAccountKeyRepositori
 	return &MockAuthAccountKeyRepositorier_Expecter{mock: &_m.Mock}
 }
 
+// GetByAccount provides a mock function for the type MockAuthAccountKeyRepositorier
+func (_mock *MockAuthAccountKeyRepositorier) GetByAccount(authType account.AuthType, accountType account.AccountType) (*auth.AuthAccountKey, error) {
+	ret := _mock.Called(authType, accountType)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetByAccount")
+	}
+
+	var r0 *auth.AuthAccountKey
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(account.AuthType, account.AccountType) (*auth.AuthAccountKey, error)); ok {
+		return returnFunc(authType, accountType)
+	}
+	if returnFunc, ok := ret.Get(0).(func(account.AuthType, account.AccountType) *auth.AuthAccountKey); ok {
+		r0 = returnFunc(authType, accountType)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*auth.AuthAccountKey)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(account.AuthType, account.AccountType) error); ok {
+		r1 = returnFunc(authType, accountType)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockAuthAccountKeyRepositorier_GetByAccount_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetByAccount'
+type MockAuthAccountKeyRepositorier_GetByAccount_Call struct {
+	*mock.Call
+}
+
+// GetByAccount is a helper method to define mock.On call
+//   - authType account.AuthType
+//   - accountType account.AccountType
+func (_e *MockAuthAccountKeyRepositorier_Expecter) GetByAccount(authType interface{}, accountType interface{}) *MockAuthAccountKeyRepositorier_GetByAccount_Call {
+	return &MockAuthAccountKeyRepositorier_GetByAccount_Call{Call: _e.mock.On("GetByAccount", authType, accountType)}
+}
+
+func (_c *MockAuthAccountKeyRepositorier_GetByAccount_Call) Run(run func(authType account.AuthType, accountType account.AccountType)) *MockAuthAccountKeyRepositorier_GetByAccount_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 account.AuthType
+		if args[0] != nil {
+			arg0 = args[0].(account.AuthType)
+		}
+		var arg1 account.AccountType
+		if args[1] != nil {
+			arg1 = args[1].(account.AccountType)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *MockAuthAccountKeyRepositorier_GetByAccount_Call) Return(authAccountKey *auth.AuthAccountKey, err error) *MockAuthAccountKeyRepositorier_GetByAccount_Call {
+	_c.Call.Return(authAccountKey, err)
+	return _c
+}
+
+func (_c *MockAuthAccountKeyRepositorier_GetByAccount_Call) RunAndReturn(run func(authType account.AuthType, accountType account.AccountType) (*auth.AuthAccountKey, error)) *MockAuthAccountKeyRepositorier_GetByAccount_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetOne provides a mock function for the type MockAuthAccountKeyRepositorier
 func (_mock *MockAuthAccountKeyRepositorier) GetOne(authType account.AuthType) (*auth.AuthAccountKey, error) {
 	ret := _mock.Called(authType)

@@ -6,22 +6,23 @@ import (
 
 // AddressInfo contains information about a Bitcoin address
 type AddressInfo struct {
-	Address        string
-	ScriptPubKey   string
-	IsWitness      bool
-	WitnessVersion *int
-	WitnessProg    string
-	Labels         []string
-	IsCompressed   bool
-	IsChange       bool
-	Timestamp      int64
-	HDKeyPath      string
-	HDMasterKeyID  string
-	IsMine         bool
-	IsWatchOnly    bool
-	IsScript       bool
-	PubKey         string
-	Embedded       *AddressInfo
+	Address             string
+	ScriptPubKey        string
+	IsWitness           bool
+	WitnessVersion      *int
+	WitnessProg         string
+	Labels              []string
+	IsCompressed        bool
+	IsChange            bool
+	Timestamp           int64
+	HDKeyPath           string
+	HDMasterKeyID       string
+	HDMasterFingerprint string
+	IsMine              bool
+	IsWatchOnly         bool
+	IsScript            bool
+	PubKey              string
+	Embedded            *AddressInfo
 }
 
 // ValidateAddressResult contains validation result for a Bitcoin address
