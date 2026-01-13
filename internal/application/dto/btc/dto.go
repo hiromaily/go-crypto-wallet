@@ -15,12 +15,13 @@ type AddressInfo struct {
 	IsCompressed   bool
 	IsChange       bool
 	Timestamp      int64
-	HDKeyPath      string
-	HDMasterKeyID  string
-	IsMine         bool
-	IsWatchOnly    bool
-	IsScript       bool
-	PubKey         string
+	HDKeyPath            string
+	HDMasterKeyID        string
+	HDMasterFingerprint  string
+	IsMine               bool
+	IsWatchOnly          bool
+	IsScript             bool
+	PubKey               string
 	Embedded       *AddressInfo
 }
 

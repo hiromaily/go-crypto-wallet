@@ -12,19 +12,22 @@ import (
 
 // GetAddressInfoResult is response type of RPC `getaddressinfo`
 type GetAddressInfoResult struct {
-	Address      string   `json:"address"`
-	ScriptPubKey string   `json:"scriptPubKey"`
-	Ismine       bool     `json:"ismine"`
-	Solvable     bool     `json:"solvable,omitempty"`
-	Desc         string   `json:"desc,omitempty"`
-	Iswatchonly  bool     `json:"iswatchonly"`
-	Isscript     bool     `json:"isscript"`
-	Iswitness    bool     `json:"iswitness,omitempty"`
-	Pubkey       string   `json:"pubkey,omitempty"`
-	Iscompressed bool     `json:"iscompressed,omitempty"`
-	Ischange     bool     `json:"ischange"`
-	Timestamp    int64    `json:"timestamp,omitempty"`
-	Labels       []string `json:"labels"`
+	Address              string   `json:"address"`
+	ScriptPubKey         string   `json:"scriptPubKey"`
+	Ismine               bool     `json:"ismine"`
+	Solvable             bool     `json:"solvable,omitempty"`
+	Desc                 string   `json:"desc,omitempty"`
+	Iswatchonly          bool     `json:"iswatchonly"`
+	Isscript             bool     `json:"isscript"`
+	Iswitness            bool     `json:"iswitness,omitempty"`
+	Pubkey               string   `json:"pubkey,omitempty"`
+	Iscompressed         bool     `json:"iscompressed,omitempty"`
+	Ischange             bool     `json:"ischange"`
+	Timestamp            int64    `json:"timestamp,omitempty"`
+	HDKeyPath            string   `json:"hdkeypath,omitempty"`
+	HDSeedID             string   `json:"hdseedid,omitempty"`
+	HDMasterFingerprint  string   `json:"hdmasterfingerprint,omitempty"`
+	Labels               []string `json:"labels"`
 }
 
 // ValidateAddressResult is response type of RPC `validateaddress`

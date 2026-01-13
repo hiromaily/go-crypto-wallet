@@ -22,17 +22,20 @@ func ToAddressInfo(result *GetAddressInfoResult) *dtobtc.AddressInfo {
 	}
 
 	dto := &dtobtc.AddressInfo{
-		Address:      result.Address,
-		ScriptPubKey: result.ScriptPubKey,
-		IsWitness:    result.Iswitness,
-		Labels:       result.Labels,
-		IsCompressed: result.Iscompressed,
-		IsChange:     result.Ischange,
-		Timestamp:    result.Timestamp,
-		IsMine:       result.Ismine,
-		IsWatchOnly:  result.Iswatchonly,
-		IsScript:     result.Isscript,
-		PubKey:       result.Pubkey,
+		Address:             result.Address,
+		ScriptPubKey:        result.ScriptPubKey,
+		IsWitness:           result.Iswitness,
+		Labels:              result.Labels,
+		IsCompressed:        result.Iscompressed,
+		IsChange:            result.Ischange,
+		Timestamp:           result.Timestamp,
+		HDKeyPath:           result.HDKeyPath,
+		HDMasterKeyID:       result.HDSeedID,
+		HDMasterFingerprint: result.HDMasterFingerprint,
+		IsMine:              result.Ismine,
+		IsWatchOnly:         result.Iswatchonly,
+		IsScript:            result.Isscript,
+		PubKey:              result.Pubkey,
 	}
 
 	return dto
