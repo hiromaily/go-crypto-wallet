@@ -101,14 +101,44 @@ func (u *generateDescriptorUseCase) generateSingleSigDescriptor(
 	logger.Debug("found account key",
 		"account_type", input.AccountType.String(),
 		"key_id", accountKey.ID,
+		"key_type", accountKey.KeyType,
 		"has_extended_privkey", accountKey.AccountExtendedPrivkey != nil,
 	)
 
 	// Check if AccountExtendedPrivkey is available (new format)
 	if accountKey.AccountExtendedPrivkey == nil || *accountKey.AccountExtendedPrivkey == "" {
 		return "", fmt.Errorf(
-			"account extended private key not found for %s - descriptors require keys generated with extended key support",
+			"account extended private key not found for %s - "+
+				"descriptors require keys generated with extended key support",
 			input.AccountType.String(),
+		)
+	}
+
+	// Verify that the stored key_type matches the requested address_type
+	// This prevents trying to generate P2TR descriptors from BIP44 keys, etc.
+	expectedKeyType, err := input.AddressType.ToKeyType()
+	if err != nil {
+		logger.Debug("unsupported address type for key derivation",
+			"address_type", input.AddressType.String(),
+			"error", err.Error(),
+		)
+		return "", fmt.Errorf("unsupported address type %q for key derivation: %w", input.AddressType, err)
+	}
+
+	logger.Debug("validating key type match",
+		"account_type", input.AccountType.String(),
+		"address_type", input.AddressType.String(),
+		"stored_key_type", accountKey.KeyType,
+		"expected_key_type", string(expectedKeyType),
+		"match", accountKey.KeyType == string(expectedKeyType),
+	)
+
+	if accountKey.KeyType != string(expectedKeyType) {
+		return "", fmt.Errorf(
+			"key type mismatch: stored key_type=%s, but address_type=%s requires key_type=%s",
+			accountKey.KeyType,
+			input.AddressType.String(),
+			expectedKeyType,
 		)
 	}
 

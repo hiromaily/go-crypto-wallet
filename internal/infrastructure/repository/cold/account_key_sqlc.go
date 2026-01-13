@@ -206,9 +206,16 @@ func (r *BTCAccountKeyRepositorySqlc) GetAllMultiAddr(
 func (r *BTCAccountKeyRepositorySqlc) InsertBulk(items []*domainBitcoin.BtcAccountKey) error {
 	ctx := context.Background()
 
+	// Begin transaction to ensure atomicity of bulk insert
+	tx, err := r.dbConn.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	qtx := r.queries.WithTx(tx)
+
 	for _, item := range items {
 		sqlcItem := convertFromBtcAccountKey(item)
-		_, err := r.queries.InsertBtcAccountKey(ctx, sqlcgen.InsertBtcAccountKeyParams{
+		_, err := qtx.InsertBtcAccountKey(ctx, sqlcgen.InsertBtcAccountKeyParams{
 			Coin:                   sqlcItem.Coin,
 			KeyType:                sqlcItem.KeyType,
 			Account:                sqlcItem.Account,
@@ -225,8 +232,13 @@ func (r *BTCAccountKeyRepositorySqlc) InsertBulk(items []*domainBitcoin.BtcAccou
 			AddrStatus:             sqlcItem.AddrStatus,
 		})
 		if err != nil {
+			_ = tx.Rollback()
 			return fmt.Errorf("failed to call InsertBtcAccountKey(): %w", err)
 		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
 	}
 
 	return nil
