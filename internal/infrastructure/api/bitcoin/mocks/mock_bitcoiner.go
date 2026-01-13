@@ -409,8 +409,8 @@ func (_c *MockBitcoiner_ConfirmationBlock_Call) RunAndReturn(run func() uint64) 
 }
 
 // CreatePSBT provides a mock function for the type MockBitcoiner
-func (_mock *MockBitcoiner) CreatePSBT(msgTx *wire.MsgTx, prevTxs []btc.PreviousTx) (string, error) {
-	ret := _mock.Called(msgTx, prevTxs)
+func (_mock *MockBitcoiner) CreatePSBT(msgTx *wire.MsgTx, prevTxs []btc.PreviousTx, senderAccount account.AccountType) (string, error) {
+	ret := _mock.Called(msgTx, prevTxs, senderAccount)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreatePSBT")
@@ -418,16 +418,16 @@ func (_mock *MockBitcoiner) CreatePSBT(msgTx *wire.MsgTx, prevTxs []btc.Previous
 
 	var r0 string
 	var r1 error
-	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []btc.PreviousTx) (string, error)); ok {
-		return returnFunc(msgTx, prevTxs)
+	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []btc.PreviousTx, account.AccountType) (string, error)); ok {
+		return returnFunc(msgTx, prevTxs, senderAccount)
 	}
-	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []btc.PreviousTx) string); ok {
-		r0 = returnFunc(msgTx, prevTxs)
+	if returnFunc, ok := ret.Get(0).(func(*wire.MsgTx, []btc.PreviousTx, account.AccountType) string); ok {
+		r0 = returnFunc(msgTx, prevTxs, senderAccount)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
-	if returnFunc, ok := ret.Get(1).(func(*wire.MsgTx, []btc.PreviousTx) error); ok {
-		r1 = returnFunc(msgTx, prevTxs)
+	if returnFunc, ok := ret.Get(1).(func(*wire.MsgTx, []btc.PreviousTx, account.AccountType) error); ok {
+		r1 = returnFunc(msgTx, prevTxs, senderAccount)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -442,11 +442,12 @@ type MockBitcoiner_CreatePSBT_Call struct {
 // CreatePSBT is a helper method to define mock.On call
 //   - msgTx *wire.MsgTx
 //   - prevTxs []btc.PreviousTx
-func (_e *MockBitcoiner_Expecter) CreatePSBT(msgTx interface{}, prevTxs interface{}) *MockBitcoiner_CreatePSBT_Call {
-	return &MockBitcoiner_CreatePSBT_Call{Call: _e.mock.On("CreatePSBT", msgTx, prevTxs)}
+//   - senderAccount account.AccountType
+func (_e *MockBitcoiner_Expecter) CreatePSBT(msgTx interface{}, prevTxs interface{}, senderAccount interface{}) *MockBitcoiner_CreatePSBT_Call {
+	return &MockBitcoiner_CreatePSBT_Call{Call: _e.mock.On("CreatePSBT", msgTx, prevTxs, senderAccount)}
 }
 
-func (_c *MockBitcoiner_CreatePSBT_Call) Run(run func(msgTx *wire.MsgTx, prevTxs []btc.PreviousTx)) *MockBitcoiner_CreatePSBT_Call {
+func (_c *MockBitcoiner_CreatePSBT_Call) Run(run func(msgTx *wire.MsgTx, prevTxs []btc.PreviousTx, senderAccount account.AccountType)) *MockBitcoiner_CreatePSBT_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 *wire.MsgTx
 		if args[0] != nil {
@@ -456,9 +457,14 @@ func (_c *MockBitcoiner_CreatePSBT_Call) Run(run func(msgTx *wire.MsgTx, prevTxs
 		if args[1] != nil {
 			arg1 = args[1].([]btc.PreviousTx)
 		}
+		var arg2 account.AccountType
+		if args[2] != nil {
+			arg2 = args[2].(account.AccountType)
+		}
 		run(
 			arg0,
 			arg1,
+			arg2,
 		)
 	})
 	return _c
@@ -469,7 +475,7 @@ func (_c *MockBitcoiner_CreatePSBT_Call) Return(s string, err error) *MockBitcoi
 	return _c
 }
 
-func (_c *MockBitcoiner_CreatePSBT_Call) RunAndReturn(run func(msgTx *wire.MsgTx, prevTxs []btc.PreviousTx) (string, error)) *MockBitcoiner_CreatePSBT_Call {
+func (_c *MockBitcoiner_CreatePSBT_Call) RunAndReturn(run func(msgTx *wire.MsgTx, prevTxs []btc.PreviousTx, senderAccount account.AccountType) (string, error)) *MockBitcoiner_CreatePSBT_Call {
 	_c.Call.Return(run)
 	return _c
 }

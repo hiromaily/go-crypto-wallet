@@ -105,7 +105,7 @@ type Bitcoiner interface {
 	Sign(tx *wire.MsgTx, strPrivateKey string) (string, error)
 
 	// psbt.go (BIP174 Partially Signed Bitcoin Transaction support)
-	CreatePSBT(msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx) (string, error)
+	CreatePSBT(msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx, senderAccount domainAccount.AccountType) (string, error)
 	ParsePSBT(psbtBase64 string) (*dtobtc.ParsedPSBT, error)
 	ValidatePSBT(psbtBase64 string) error
 	SignPSBTWithKey(psbtBase64 string, wifs []string) (string, bool, error)

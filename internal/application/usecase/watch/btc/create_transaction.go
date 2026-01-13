@@ -777,7 +777,7 @@ func (u *createTransactionUseCase) generatePSBTFile(
 ) (string, error) {
 	// Create PSBT from msgTx and previous outputs
 	// This includes all necessary metadata for offline signing
-	psbtBase64, err := u.btcClient.CreatePSBT(msgTx, prevTxs)
+	psbtBase64, err := u.btcClient.CreatePSBT(msgTx, prevTxs, senderAccount)
 	if err != nil {
 		return "", fmt.Errorf("fail to create PSBT: %w", err)
 	}
