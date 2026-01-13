@@ -118,8 +118,21 @@ func (u *generateDescriptorUseCase) generateSingleSigDescriptor(
 	// This prevents trying to generate P2TR descriptors from BIP44 keys, etc.
 	expectedKeyType, err := input.AddressType.ToKeyType()
 	if err != nil {
+		logger.Debug("unsupported address type for key derivation",
+			"address_type", input.AddressType.String(),
+			"error", err.Error(),
+		)
 		return "", fmt.Errorf("unsupported address type %q for key derivation: %w", input.AddressType, err)
 	}
+
+	logger.Debug("validating key type match",
+		"account_type", input.AccountType.String(),
+		"address_type", input.AddressType.String(),
+		"stored_key_type", accountKey.KeyType,
+		"expected_key_type", string(expectedKeyType),
+		"match", accountKey.KeyType == string(expectedKeyType),
+	)
+
 	if accountKey.KeyType != string(expectedKeyType) {
 		return "", fmt.Errorf(
 			"key type mismatch: stored key_type=%s, but address_type=%s requires key_type=%s",
