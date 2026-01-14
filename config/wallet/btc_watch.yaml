@@ -23,9 +23,10 @@
 address_type: "p2sh-segwit"
 
 bitcoin:
-  host: "127.0.0.1:18332"
+  # Using /wallet/<name> path requires pre-created wallet via `bitcoin-cli createwallet <name>`.
+  # See: scripts/operation/btc/create-bitcoind-wallet.sh
   # if specific wallet want to be used like `bitcoin-cli -rpcwallet=watch`
-  # host: "127.0.0.1:18332/wallet/watch"
+  host: "127.0.0.1:18332/wallet/watch"
   user: "xyz"
   pass: "xyz"
   http_post_mode: true

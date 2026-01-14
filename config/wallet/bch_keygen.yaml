@@ -17,7 +17,8 @@
 address_type: "bch-cashaddr" # p2sh-segwit, bech32, bch-cashaddr
 
 bitcoin:
-  # host: "127.0.0.1:29332"
+  # Using /wallet/<name> path requires pre-created wallet via `bitcoin-cli createwallet <name>`.
+  # See: scripts/operation/btc/create-bitcoind-wallet.sh
   # if specific wallet want to be used like `bitcoin-cli -rpcwallet=keygen`
   host: "127.0.0.1:29332/wallet/keygen"
   user: "xyz"

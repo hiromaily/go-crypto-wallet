@@ -329,7 +329,9 @@ func (b *Bitcoin) SignPSBTWithKey(psbtBase64 string, wifs []string) (string, boo
 			continue
 		}
 
-		// Detect script type
+		// Detect script type for logging purposes.
+		// NOTE: If this pattern is needed in multiple places, consider extracting to
+		// pkg/cryptocurrency/btc_script.go as DetectScriptType(pkScript []byte) string.
 		scriptType := "unknown"
 		if txscript.IsPayToTaproot(psbtInput.WitnessUtxo.PkScript) {
 			scriptType = "P2TR (Taproot)"
