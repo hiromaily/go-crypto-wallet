@@ -2850,6 +2850,68 @@ func (_c *MockBitcoiner_IsPSBTComplete_Call) RunAndReturn(run func(psbtBase64 st
 	return _c
 }
 
+// ListDescriptors provides a mock function for the type MockBitcoiner
+func (_mock *MockBitcoiner) ListDescriptors(privateDescriptors bool) (*btc.ListDescriptorsResult, error) {
+	ret := _mock.Called(privateDescriptors)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListDescriptors")
+	}
+
+	var r0 *btc.ListDescriptorsResult
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(bool) (*btc.ListDescriptorsResult, error)); ok {
+		return returnFunc(privateDescriptors)
+	}
+	if returnFunc, ok := ret.Get(0).(func(bool) *btc.ListDescriptorsResult); ok {
+		r0 = returnFunc(privateDescriptors)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*btc.ListDescriptorsResult)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(bool) error); ok {
+		r1 = returnFunc(privateDescriptors)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// MockBitcoiner_ListDescriptors_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListDescriptors'
+type MockBitcoiner_ListDescriptors_Call struct {
+	*mock.Call
+}
+
+// ListDescriptors is a helper method to define mock.On call
+//   - privateDescriptors bool
+func (_e *MockBitcoiner_Expecter) ListDescriptors(privateDescriptors interface{}) *MockBitcoiner_ListDescriptors_Call {
+	return &MockBitcoiner_ListDescriptors_Call{Call: _e.mock.On("ListDescriptors", privateDescriptors)}
+}
+
+func (_c *MockBitcoiner_ListDescriptors_Call) Run(run func(privateDescriptors bool)) *MockBitcoiner_ListDescriptors_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 bool
+		if args[0] != nil {
+			arg0 = args[0].(bool)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *MockBitcoiner_ListDescriptors_Call) Return(listDescriptorsResult *btc.ListDescriptorsResult, err error) *MockBitcoiner_ListDescriptors_Call {
+	_c.Call.Return(listDescriptorsResult, err)
+	return _c
+}
+
+func (_c *MockBitcoiner_ListDescriptors_Call) RunAndReturn(run func(privateDescriptors bool) (*btc.ListDescriptorsResult, error)) *MockBitcoiner_ListDescriptors_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListUnspent provides a mock function for the type MockBitcoiner
 func (_mock *MockBitcoiner) ListUnspent(confirmationNum uint64) ([]btc.UnspentOutput, error) {
 	ret := _mock.Called(confirmationNum)

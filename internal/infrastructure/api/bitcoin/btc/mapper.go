@@ -36,6 +36,7 @@ func ToAddressInfo(result *GetAddressInfoResult) *dtobtc.AddressInfo {
 		IsWatchOnly:         result.Iswatchonly,
 		IsScript:            result.Isscript,
 		PubKey:              result.Pubkey,
+		Desc:                result.Desc,
 	}
 
 	return dto

@@ -42,3 +42,40 @@ func (b *Bitcoin) GetDescriptorInfo(descriptor string) (*dtobtc.DescriptorInfo, 
 
 	return &result, nil
 }
+
+// ListDescriptors calls Bitcoin Core's listdescriptors RPC to list all imported descriptors.
+//
+// Bitcoin Core RPC: listdescriptors ( private )
+//
+// This method returns all descriptors that have been imported into the wallet,
+// including their status (active, internal) and range information for ranged descriptors.
+//
+// Parameters:
+//   - privateDescriptors: if true, return private descriptors (requires wallet with private keys)
+//     For watch-only wallets, this must be false.
+//
+// Returns the list of descriptors with their metadata.
+func (b *Bitcoin) ListDescriptors(privateDescriptors bool) (*dtobtc.ListDescriptorsResult, error) {
+	params := make([]json.RawMessage, 0, 1)
+
+	// Add private parameter
+	bPrivate, err := json.Marshal(privateDescriptors)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal private parameter: %w", err)
+	}
+	params = append(params, bPrivate)
+
+	// Call RPC
+	rawResult, err := b.Client.RawRequest("listdescriptors", params)
+	if err != nil {
+		return nil, fmt.Errorf("failed to call listdescriptors RPC: %w", err)
+	}
+
+	// Parse result
+	var result dtobtc.ListDescriptorsResult
+	if err := json.Unmarshal(rawResult, &result); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal listdescriptors result: %w", err)
+	}
+
+	return &result, nil
+}

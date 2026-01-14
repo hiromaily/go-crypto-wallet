@@ -121,8 +121,16 @@ type DescriptorKey struct {
 	// Example: "a1b2c3d4"
 	Fingerprint string
 
-	// DerivationPath is the BIP32 derivation path from the master key.
-	// Example: "/44'/0'/0'" or "/84'/0'/0'/0/*"
+	// OriginPath is the BIP32 path from the master key to the xpub level.
+	// This is the path inside the brackets in the descriptor.
+	// Example: "/44'/1'/1'" (for account 1 of Bitcoin testnet)
+	// For PSBT BIP32 derivation, combine OriginPath + DerivationPath.
+	OriginPath string
+
+	// DerivationPath is the BIP32 derivation path from the xpub.
+	// This is the path after the xpub in the descriptor.
+	// Example: "/0/*" (external chain with wildcard)
+	// For key derivation, use only this path since xpub is already at OriginPath level.
 	DerivationPath string
 
 	// ExtendedPubKey is the BIP32 extended public key.

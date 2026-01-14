@@ -22,6 +22,7 @@ type AddressInfo struct {
 	IsWatchOnly         bool
 	IsScript            bool
 	PubKey              string
+	Desc                string // Descriptor for the address (if available)
 	Embedded            *AddressInfo
 }
 
@@ -379,4 +380,39 @@ type DescriptorInfo struct {
 
 	// HasPrivateKeys indicates if the wallet has private keys for this descriptor
 	HasPrivateKeys bool `json:"hasprivatekeys"`
+}
+
+// ListDescriptorsResult represents the result of listdescriptors RPC.
+//
+// Returns all descriptors imported into the wallet.
+type ListDescriptorsResult struct {
+	// WalletName is the name of the wallet
+	WalletName string `json:"wallet_name"`
+
+	// Descriptors is the list of imported descriptors
+	Descriptors []DescriptorEntry `json:"descriptors"`
+}
+
+// DescriptorEntry represents a single descriptor entry from listdescriptors RPC.
+type DescriptorEntry struct {
+	// Desc is the descriptor string (with checksum)
+	Desc string `json:"desc"`
+
+	// Timestamp indicates when the descriptor was imported
+	Timestamp int64 `json:"timestamp"`
+
+	// Active indicates if the descriptor is active (tracking outputs for spending)
+	Active bool `json:"active"`
+
+	// Internal indicates if this is for internal (change) addresses
+	// nil if not specified during import
+	Internal *bool `json:"internal,omitempty"`
+
+	// Range specifies the range for ranged descriptors [start, end]
+	// nil for non-ranged descriptors
+	Range *[2]int `json:"range,omitempty"`
+
+	// Next is the next index to derive for ranged descriptors
+	// nil for non-ranged descriptors
+	Next *int `json:"next,omitempty"`
 }
