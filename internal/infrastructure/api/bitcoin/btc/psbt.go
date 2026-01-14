@@ -693,11 +693,11 @@ func (b *Bitcoin) finalizeMultisigInput(packet *psbt.Packet, inputIndex int) err
 	}
 
 	// Log redeemScript public keys
-	logger.Info("RedeemScript public keys",
+	logger.Debug("RedeemScript public keys",
 		"input", inputIndex,
 		"count", len(pubKeys))
 	for i, pk := range pubKeys {
-		logger.Info("RedeemScript pubkey",
+		logger.Debug("RedeemScript pubkey",
 			"input", inputIndex,
 			"index", i,
 			"pubkey", hex.EncodeToString(pk),
@@ -705,11 +705,11 @@ func (b *Bitcoin) finalizeMultisigInput(packet *psbt.Packet, inputIndex int) err
 	}
 
 	// Log PartialSigs public keys
-	logger.Info("PartialSigs public keys",
+	logger.Debug("PartialSigs public keys",
 		"input", inputIndex,
 		"count", len(input.PartialSigs))
 	for i, partialSig := range input.PartialSigs {
-		logger.Info("PartialSig pubkey",
+		logger.Debug("PartialSig pubkey",
 			"input", inputIndex,
 			"index", i,
 			"pubkey", hex.EncodeToString(partialSig.PubKey),
@@ -740,12 +740,12 @@ func (b *Bitcoin) finalizeMultisigInput(packet *psbt.Packet, inputIndex int) err
 	}
 
 	// Log public keys from multisig script for debugging
-	logger.Info("Public keys extracted from multisig script",
+	logger.Debug("Public keys extracted from multisig script",
 		"input", inputIndex,
 		"count", len(pubKeys),
 		"is_segwit", isSegWit)
 	for i, pk := range normalizedPubKeys {
-		logger.Info("Multisig script pubkey (normalized)",
+		logger.Debug("Multisig script pubkey (normalized)",
 			"input", inputIndex,
 			"index", i,
 			"length", len(pk),
@@ -753,11 +753,11 @@ func (b *Bitcoin) finalizeMultisigInput(packet *psbt.Packet, inputIndex int) err
 	}
 
 	// Log partial signatures for debugging
-	logger.Info("Partial signatures available",
+	logger.Debug("Partial signatures available",
 		"input", inputIndex,
 		"count", len(input.PartialSigs))
 	for i, ps := range input.PartialSigs {
-		logger.Info("PartialSig pubkey",
+		logger.Debug("PartialSig pubkey",
 			"input", inputIndex,
 			"index", i,
 			"length", len(ps.PubKey),
@@ -1674,6 +1674,18 @@ func (b *Bitcoin) addBIP32DerivationFromDescriptor(
 // 1. Finding the matching descriptor for the account
 // 2. Searching for the address index within the descriptor range
 // 3. Deriving the redeemScript at that index
+//
+// Performance characteristics:
+//   - Lists all wallet descriptors (typically < 10)
+//   - Iterates through up to 1,000 address indices per descriptor
+//   - For each index, derives redeemScript and checks address match
+//   - Time complexity: O(n * m) where n = descriptors, m = search range (1000)
+//   - Typical time: < 1 second for addresses in first 100 indices
+//   - Worst case: Several seconds for high-index addresses
+//
+// This is used as a fallback when Bitcoin Core's listunspent doesn't return
+// redeemScript for descriptor-based addresses. It's called once per PSBT creation
+// for P2SH multisig inputs.
 func (b *Bitcoin) deriveRedeemScriptForAddress(address string, senderAccount domainAccount.AccountType) ([]byte, error) {
 	// List all descriptors
 	descriptorList, err := b.ListDescriptors(false)
@@ -1759,6 +1771,20 @@ func (b *Bitcoin) deriveP2SHAddressFromRedeemScript(redeemScript []byte) (string
 
 // findAddressIndexInDescriptor uses Bitcoin Core's deriveaddresses RPC to find
 // the index of an address within a descriptor's range.
+//
+// Performance characteristics:
+//   - Time complexity: O(n) where n is the address index
+//   - Searches in chunks of 100 addresses at a time
+//   - Maximum search range: 10,000 addresses
+//   - Early termination when address is found
+//   - Average case: ~50 RPC calls for index 5000 (50 chunks * 100 addresses)
+//   - Best case: 1 RPC call (address in first chunk)
+//   - Worst case: 100 RPC calls (address at index 9,999)
+//
+// Optimization opportunities:
+//   - Use Bitcoin Core's native address index lookup if available
+//   - Cache descriptor derivation results
+//   - Binary search if descriptor supports random access
 func (b *Bitcoin) findAddressIndexInDescriptor(descriptor string, targetAddress string) (uint32, error) {
 	// Search in chunks to avoid deriving too many addresses at once
 	const chunkSize = 100

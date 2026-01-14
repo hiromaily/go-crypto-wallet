@@ -1,10 +1,12 @@
 package btc
 
 import (
+	"bytes"
 	"encoding/hex"
 	"errors"
 	"fmt"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -278,7 +280,7 @@ func (b *Bitcoin) DeriveRedeemScriptFromDescriptor(descriptor string, address st
 	}
 
 	// Build multisig redeemScript: OP_M <pk1> <pk2> ... <pkN> OP_N OP_CHECKMULTISIG
-	redeemScript, err := b.buildMultisigRedeemScript(requiredSigs, totalSigs, pubKeys)
+	redeemScript, err := b.buildMultisigRedeemScript(requiredSigs, totalSigs, pubKeys, isSorted)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build redeemScript: %w", err)
 	}
@@ -336,7 +338,10 @@ func (b *Bitcoin) extractMultisigParams(descriptorScript string) (requiredSigs, 
 func (b *Bitcoin) derivePublicKeyFromDescriptorKey(keyInfo domainWallet.DescriptorKey, addressIndex uint32) ([]byte, error) {
 	// Parse the derivation path
 	// Format: "/0/*" or "/1/*" or "/*"
-	pathParts := strings.Split(strings.TrimPrefix(keyInfo.DerivationPath, "/"), "/")
+	// Replace wildcard with actual address index before parsing
+	derivationPath := strings.ReplaceAll(keyInfo.DerivationPath, "/*", fmt.Sprintf("/%d", addressIndex))
+	derivationPath = strings.ReplaceAll(derivationPath, "*", fmt.Sprintf("%d", addressIndex))
+	pathParts := strings.Split(strings.TrimPrefix(derivationPath, "/"), "/")
 
 	// Parse extended public key
 	extKey, err := hdkeychain.NewKeyFromString(keyInfo.ExtendedPubKey)
@@ -346,36 +351,21 @@ func (b *Bitcoin) derivePublicKeyFromDescriptorKey(keyInfo domainWallet.Descript
 
 	// Derive child keys according to the path
 	currentKey := extKey
-	for i, part := range pathParts {
+	for _, part := range pathParts {
 		if part == "" {
 			continue
 		}
-		if part == "*" {
-			// Wildcard - use the address index
-			currentKey, err = currentKey.Derive(addressIndex)
-			if err != nil {
-				return nil, fmt.Errorf("failed to derive wildcard index %d: %w", addressIndex, err)
-			}
-		} else {
-			// Fixed index (e.g., "0" or "1")
-			// Only derive if this is not the last component that should be the wildcard
-			index, parseErr := strconv.ParseUint(part, 10, 32)
-			if parseErr != nil {
-				return nil, fmt.Errorf("invalid path component: %s", part)
-			}
-			currentKey, err = currentKey.Derive(uint32(index))
-			if err != nil {
-				return nil, fmt.Errorf("failed to derive index %d: %w", index, err)
-			}
 
-			// If this was the last component before wildcard, derive the address index
-			if i == len(pathParts)-2 && pathParts[i+1] == "*" {
-				currentKey, err = currentKey.Derive(addressIndex)
-				if err != nil {
-					return nil, fmt.Errorf("failed to derive address index %d: %w", addressIndex, err)
-				}
-				break
-			}
+		// Parse the index
+		index, parseErr := strconv.ParseUint(part, 10, 32)
+		if parseErr != nil {
+			return nil, fmt.Errorf("invalid path component %s: %w", part, parseErr)
+		}
+
+		// Derive the key
+		currentKey, err = currentKey.Derive(uint32(index))
+		if err != nil {
+			return nil, fmt.Errorf("failed to derive index %d: %w", index, err)
 		}
 	}
 
@@ -390,13 +380,24 @@ func (b *Bitcoin) derivePublicKeyFromDescriptorKey(keyInfo domainWallet.Descript
 
 // buildMultisigRedeemScript builds a multisig redeemScript from public keys
 // Format: OP_M <pk1> <pk2> ... <pkN> OP_N OP_CHECKMULTISIG
-func (b *Bitcoin) buildMultisigRedeemScript(requiredSigs, totalSigs int, pubKeys [][]byte) ([]byte, error) {
+//
+// For sortedmulti descriptors (BIP67), public keys are sorted lexicographically
+// before being added to the script. This ensures deterministic multisig addresses
+// regardless of the order keys are specified in the descriptor.
+func (b *Bitcoin) buildMultisigRedeemScript(requiredSigs, totalSigs int, pubKeys [][]byte, sorted bool) ([]byte, error) {
 	if requiredSigs <= 0 || requiredSigs > totalSigs {
 		return nil, fmt.Errorf("invalid multisig parameters: %d-of-%d", requiredSigs, totalSigs)
 	}
 
 	if len(pubKeys) != totalSigs {
 		return nil, fmt.Errorf("pubkey count mismatch: expected %d, got %d", totalSigs, len(pubKeys))
+	}
+
+	// Sort public keys lexicographically if this is a sortedmulti descriptor (BIP67)
+	if sorted {
+		b.sortPublicKeys(pubKeys)
+		logger.Debug("Sorted public keys for sortedmulti descriptor",
+			"count", len(pubKeys))
 	}
 
 	// Build the script
@@ -417,4 +418,13 @@ func (b *Bitcoin) buildMultisigRedeemScript(requiredSigs, totalSigs int, pubKeys
 	builder.AddOp(txscript.OP_CHECKMULTISIG)
 
 	return builder.Script()
+}
+
+// sortPublicKeys sorts public keys lexicographically (BIP67).
+// This is used for sortedmulti descriptors to ensure deterministic ordering.
+// The keys are sorted in-place.
+func (b *Bitcoin) sortPublicKeys(pubKeys [][]byte) {
+	sort.Slice(pubKeys, func(i, j int) bool {
+		return bytes.Compare(pubKeys[i], pubKeys[j]) < 0
+	})
 }

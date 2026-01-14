@@ -218,6 +218,17 @@ func (b *Bitcoin) listUnspentByAccount(addrs []btcutil.Address, confirmationNum 
 //   - Every address derived from a descriptor has that descriptor in its address info
 //   - The descriptor includes the BIP44 path with the account index
 //   - We can match descriptors by comparing the base descriptor (before the address index)
+//
+// Performance characteristics:
+//   - Fetches ALL unspent outputs from wallet (1 RPC call)
+//   - Lists all descriptors (1 RPC call, typically < 10 descriptors)
+//   - For each unspent, calls getaddressinfo to check account (N RPC calls)
+//   - Time complexity: O(n) where n = total unspent outputs in wallet
+//   - Typical time: < 1 second for wallets with < 100 UTXOs
+//   - Performance degrades with many UTXOs (1000+ UTXOs may take several seconds)
+//
+// Optimization: This is only used as a fallback when label-based lookup fails.
+// For best performance, ensure addresses are properly labeled during descriptor import.
 func (b *Bitcoin) listUnspentByDescriptorMatching(
 	accountType domainAccount.AccountType,
 	confirmationNum uint64,
@@ -360,9 +371,68 @@ func (b *Bitcoin) addressBelongsToAccount(address string, expectedAccountIndex u
 //   - wsh(sortedmulti(2,[fp/48h/0h/2h]xpub.../0/*,[fp/48h/0h/2h]xpub.../0/*)) -> account index is 2
 //
 // The account index is the 3rd component in the BIP44 path (after coin_type).
-func (*Bitcoin) descriptorMatchesAccountIndex(descriptor string, expectedAccountIndex uint32) bool {
+func (b *Bitcoin) descriptorMatchesAccountIndex(descriptor string, expectedAccountIndex uint32) bool {
+	// Use the descriptor parser for robust parsing
+	parser := NewDescriptorParser()
+	parsed, err := parser.Parse(descriptor)
+	if err != nil {
+		// If parsing fails, fall back to simple string matching for compatibility
+		logger.Debug("failed to parse descriptor, falling back to string matching",
+			"error", err,
+			"descriptor_len", len(descriptor))
+		return b.descriptorMatchesAccountIndexFallback(descriptor, expectedAccountIndex)
+	}
+
+	// Extract account index from the first key's OriginPath
+	// All keys in a multisig should have the same account index
+	if len(parsed.Keys) == 0 {
+		logger.Debug("descriptor has no keys")
+		return false
+	}
+
+	// Parse the OriginPath to extract account index
+	// Format: "/44'/1'/0'" where 0 is the account index (3rd component)
+	return b.extractAccountIndexFromOriginPath(parsed.Keys[0].OriginPath, expectedAccountIndex)
+}
+
+// extractAccountIndexFromOriginPath extracts the account index from a BIP32 origin path.
+// Format: "/44'/1'/0'" -> account index is 0 (3rd component after purpose and coin_type)
+func (b *Bitcoin) extractAccountIndexFromOriginPath(originPath string, expectedAccountIndex uint32) bool {
+	// Split path into components
+	parts := strings.Split(strings.TrimPrefix(originPath, "/"), "/")
+
+	// We expect: purpose / coin_type / account
+	// Example: 44' / 1' / 0'
+	if len(parts) < 3 {
+		return false
+	}
+
+	// The account index is the 3rd component (index 2)
+	accountComponent := parts[2]
+
+	// Remove hardening suffix ('h', 'H', or ')
+	accountComponent = strings.TrimSuffix(accountComponent, "h")
+	accountComponent = strings.TrimSuffix(accountComponent, "H")
+	accountComponent = strings.TrimSuffix(accountComponent, "'")
+
+	// Parse to uint32
+	var accountIndex uint32
+	_, err := fmt.Sscanf(accountComponent, "%d", &accountIndex)
+	if err != nil {
+		logger.Debug("failed to parse account index from origin path",
+			"origin_path", originPath,
+			"account_component", accountComponent,
+			"error", err)
+		return false
+	}
+
+	return accountIndex == expectedAccountIndex
+}
+
+// descriptorMatchesAccountIndexFallback is a fallback method using string matching
+// when descriptor parsing fails. This handles edge cases and malformed descriptors.
+func (*Bitcoin) descriptorMatchesAccountIndexFallback(descriptor string, expectedAccountIndex uint32) bool {
 	// Find the first key origin pattern: [fingerprint/path]
-	// We only check the first key origin since all keys in a multisig should have the same account index
 	start := strings.Index(descriptor, "[")
 	if start == -1 {
 		return false
@@ -397,13 +467,6 @@ func (*Bitcoin) descriptorMatchesAccountIndex(descriptor string, expectedAccount
 	var accountIndex uint32
 	_, err := fmt.Sscanf(accountComponent, "%d", &accountIndex)
 	if err != nil {
-		descriptorForLog := descriptor
-		if len(descriptorForLog) > 50 {
-			descriptorForLog = descriptorForLog[:50]
-		}
-		logger.Debug("failed to parse account index from descriptor",
-			"descriptor", descriptorForLog,
-			"account_component", accountComponent)
 		return false
 	}
 
