@@ -165,7 +165,7 @@ Schnorr署名ベースの集約署名プロトコル。N-of-N マルチシグが
 | パターン | 鍵タイプ | 署名パターン | アドレスフォーマット | E2Eスクリプト対応 |
 |----------|---------|-------------|---------------------|-------------------|
 | **1** | **P2PKH (BIP44)** | **Single-sig** | **`1...`** | **✅ e2e/e2e-p2pkh-singlesig.sh** |
-| 2 | P2PKH (BIP44) | 2-of-3 Multisig | `3...` (P2SH wrapped) | ❌ 未対応 |
+| **2** | **P2PKH (BIP44)** | **2-of-3 Multisig** | **`3...` (P2SH wrapped)** | **✅ e2e/e2e-p2pkh-2of3.sh** |
 | 3 | P2SH-P2WPKH (BIP49) | Single-sig | `3...` | 🔶 手動テスト |
 | 4 | P2SH-P2WPKH (BIP49) | 2-of-3 Multisig | `3...` | ❌ 未対応 |
 | 5 | P2WPKH (BIP84) | Single-sig | `bc1q...` | 🔶 手動テスト |
@@ -340,6 +340,7 @@ Descriptor: tr(musig(xpub1, xpub2, xpub3))
 | スクリプト | コイン | パターン | 署名要件 |
 |-----------|--------|---------|---------|
 | `scripts/operation/btc/e2e/e2e-p2pkh-singlesig.sh` | BTC | P2PKH Single-sig | Single-sig |
+| `scripts/operation/btc/e2e/e2e-p2pkh-2of3.sh` | BTC | P2PKH 2-of-3 Multisig | 2-of-3 |
 | `scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh` | BTC | P2SH-P2WSH Multisig | 3-of-3 |
 | `scripts/operation/bch/e2e-workflow.sh` | BCH | CashAddr Multisig | 3-of-3 |
 
