@@ -1,0 +1,52 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: go-mod-tidy
+      root: "/"
+      glob: "**/go.{mod,sum}"
+      run: |
+        go mod tidy
+        git add go.mod go.sum # files may be changed so add to stage
+      stage_fixed: true
+
+    - name: go-fmt # lightweight lint only for fast pre-commit
+      root: "/"
+      glob: "**/*.{go}"
+      run: |
+        make go-fmt
+      stage_fixed: true
+
+    # - name: go-unit-test
+    #   root: "/"
+    #   glob: "**/*.{go}"
+    #   run: |
+    #     make gotest
+    #   stage_fixed: false
+
+    - name: sh-fmt
+      root: "/scripts"
+      glob: "**/*.{sh}"
+      run: |
+        make shfmt
+      stage_fixed: true
+
+    - name: makefile-fmt
+      root: "/"
+      glob: "**/*.{mk,Makefile}"
+      run: |
+        make mk-lint
+      stage_fixed: true
+
+    - name: yaml-fmt
+      root: "/"
+      glob: "**/*.{yaml,yml}"
+      run: |
+        make yaml-lint
+      stage_fixed: true
+
+    - name: sql-fmt
+      root: "/"
+      glob: "tools/sqlc/**/*.sql"
+      run: |
+        make sqlfluff-format
+      stage_fixed: true
