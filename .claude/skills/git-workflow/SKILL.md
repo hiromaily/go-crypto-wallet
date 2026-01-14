@@ -188,6 +188,44 @@ Examples:
 - Related to #{other_issue}
 ```
 
+## Pre-Commit Self-Review (Required)
+
+**Before EVERY commit, you MUST complete self-review:**
+
+### Step 1: Run Verification Commands
+
+Execute verification commands for the modified file types:
+
+| File Type | Required Commands |
+|-----------|-------------------|
+| Go (`*.go`) | `make go-lint && make tidy && make check-build && make gotest` |
+| TypeScript (`*.ts`) | `cd apps/{app} && npm run lint && npm run build` |
+| Shell (`*.sh`) | `make shfmt` |
+| Makefile | `make mk-lint` |
+| SQL/HCL | `make atlas-fmt && make atlas-lint` |
+
+### Step 2: Complete Self-Review Checklist
+
+Read the applicable language skill and verify ALL checklist items:
+
+| File Type | Skill | Section to Check |
+|-----------|-------|------------------|
+| Go (`*.go`) | `go-development` | Self-Review Checklist |
+| TypeScript/JS | `typescript-development` | Self-Review Checklist |
+| Shell (`*.sh`) | `shell-scripts` | Verification Checklist |
+| Makefile | `makefile-update` | Verification Checklist |
+| SQL/HCL | `db-migration` | Verification Checklist |
+
+### Step 3: Confirm Before Commit
+
+Only proceed to commit after:
+
+- [ ] All verification commands pass
+- [ ] Self-review checklist is complete
+- [ ] No unresolved linter errors
+
+⚠️ **DO NOT commit until all steps are verified.**
+
 ## Safety Rules
 
 ### Allowed Operations
@@ -222,13 +260,18 @@ git checkout -b {type}/issue-{number}-{description}
 
 # 3. Make changes...
 
-# 4. Commit
+# 4. Self-Review (REQUIRED - see "Pre-Commit Self-Review" section)
+#    - Run verification commands for modified file types
+#    - Complete self-review checklist from language skill
+#    - Confirm no linter errors
+
+# 5. Commit (only after self-review is complete)
 git add <files>
 git commit -m "{type}: {description}
 
 Closes #{number}"
 
-# 5. Push and create PR
+# 6. Push and create PR
 git push -u origin {branch-name}
 gh pr create --title "{type}: {description}"
 ```
@@ -237,6 +280,13 @@ gh pr create --title "{type}: {description}"
 
 ```bash
 # Already on PR branch
+
+# 1. Make fixes...
+
+# 2. Self-Review (REQUIRED)
+#    Run verification commands & complete checklist
+
+# 3. Commit and push
 git add <files>
 git commit -m "fix(pr): address review comments"
 git push

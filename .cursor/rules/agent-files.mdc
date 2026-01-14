@@ -1,10 +1,11 @@
 ---
 description: Agent Files
-alwaysApply: true
+globs: 
   - ".claude/**"
   - ".cursor/**"
   - ".codex/**"
   - ".github/copilot-instructions.md"
+alwaysApply: false
 ---
 
 

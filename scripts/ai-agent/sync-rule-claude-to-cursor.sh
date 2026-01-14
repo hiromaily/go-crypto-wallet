@@ -122,9 +122,53 @@ convert_file() {
             has_frontmatter=false
         fi
 
-        # paths: を抽出
+        # paths: を抽出 (単一行または複数行のYAML配列形式に対応)
         if [[ "$has_frontmatter" == "true" ]] && echo "$frontmatter" | grep -q '^paths:'; then
-            paths_value=$(echo "$frontmatter" | grep '^paths:' | sed 's/^paths:[[:space:]]*//')
+            local paths_line
+            paths_line=$(echo "$frontmatter" | grep '^paths:' | sed 's/^paths:[[:space:]]*//')
+
+            if [[ -n "$paths_line" ]]; then
+                # 単一行形式: paths: ["value1", "value2"] または paths: "value"
+                paths_value="$paths_line"
+            else
+                # 複数行形式: paths: の後に続くインデントされた配列要素を抽出
+                # paths: の行番号を取得
+                local paths_line_num
+                paths_line_num=$(echo "$frontmatter" | grep -n '^paths:' | cut -d: -f1)
+
+                # paths: の次の行から、インデントされた - で始まる行を収集
+                local array_items=""
+                local in_paths_array=false
+                local line_num=0
+
+                while IFS= read -r line; do
+                    ((line_num++))
+                    if [[ $line_num -eq $paths_line_num ]]; then
+                        in_paths_array=true
+                        continue
+                    fi
+                    if [[ "$in_paths_array" == "true" ]]; then
+                        # インデントされた - で始まる行を収集
+                        if [[ "$line" =~ ^[[:space:]]+-[[:space:]] ]]; then
+                            if [[ -n "$array_items" ]]; then
+                                array_items="${array_items}
+${line}"
+                            else
+                                array_items="$line"
+                            fi
+                        else
+                            # 配列終了
+                            break
+                        fi
+                    fi
+                done <<< "$frontmatter"
+
+                if [[ -n "$array_items" ]]; then
+                    # 複数行形式をそのまま保持
+                    paths_value="
+${array_items}"
+                fi
+            fi
         fi
     else
         body="$content"
@@ -160,9 +204,44 @@ alwaysApply: true"
     fi
 
     # 元の frontmatter から paths 以外の項目を保持
+    # (paths: 行とそれに続くインデントされた配列要素を除外)
     if [[ "$has_frontmatter" == "true" ]]; then
-        local other_fields
-        other_fields=$(echo "$frontmatter" | grep -v '^paths:' || true)
+        local other_fields=""
+        local skip_array=false
+
+        while IFS= read -r line; do
+            if [[ "$line" =~ ^paths: ]]; then
+                # paths: 行をスキップ
+                # 値が空の場合は次の配列要素もスキップ
+                local paths_inline_value
+                paths_inline_value=$(echo "$line" | sed 's/^paths:[[:space:]]*//')
+                if [[ -z "$paths_inline_value" ]]; then
+                    skip_array=true
+                fi
+                continue
+            fi
+
+            if [[ "$skip_array" == "true" ]]; then
+                # インデントされた - で始まる行（配列要素）をスキップ
+                if [[ "$line" =~ ^[[:space:]]+-[[:space:]] ]]; then
+                    continue
+                else
+                    # 配列終了
+                    skip_array=false
+                fi
+            fi
+
+            # その他のフィールドを保持
+            if [[ -n "$line" ]]; then
+                if [[ -n "$other_fields" ]]; then
+                    other_fields="${other_fields}
+${line}"
+                else
+                    other_fields="$line"
+                fi
+            fi
+        done <<< "$frontmatter"
+
         if [[ -n "$other_fields" ]]; then
             new_frontmatter="${new_frontmatter}
 ${other_fields}"

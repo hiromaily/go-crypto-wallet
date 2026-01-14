@@ -14,8 +14,9 @@ For detailed documentation, see [llms.txt](llms.txt) and [ARCHITECTURE.md](ARCHI
 
 1. **Security First** - Private key protection is non-negotiable
 2. **Clean Architecture** - Domain layer has ZERO infrastructure dependencies
-3. **Incremental Changes** - No breaking changes without rollback plan
-4. **Code Quality** - Follow language-specific linting and testing standards
+3. **Single Source of Truth (SSOT)** - One authoritative location for each piece of information
+4. **Incremental Changes** - No breaking changes without rollback plan
+5. **Code Quality** - Follow language-specific linting and testing standards
 
 ## Expected Behavior
 
@@ -38,6 +39,37 @@ For detailed documentation, see [llms.txt](llms.txt) and [ARCHITECTURE.md](ARCHI
 - Making security-related changes
 - Breaking changes to public APIs
 - Changes affecting multiple layers
+
+## SSOT Structure
+
+**When modifying rules, skills, or documentation, always edit the SSOT location.**
+
+### AI Agent Configuration
+
+| Category | SSOT Location | Other Locations |
+|----------|---------------|-----------------|
+| Rules | `.claude/rules/*.md` | `.cursor/rules/*.mdc` (auto-generated) |
+| Skills | `.claude/skills/*/SKILL.md` | `.cursor/skills/` (symlink) |
+| Commands | `.claude/commands/` | `.cursor/commands/` (reference only) |
+
+**Sync Process:**
+
+- `.cursor/rules/` → Auto-generated via `scripts/ai-agent/sync-rule-claude-to-cursor.sh`
+- `.cursor/skills/` → Symlink to `.claude/skills/`
+
+### Project Documentation
+
+| Category | SSOT Location | Notes |
+|----------|---------------|-------|
+| Standards | `docs/standards/` | Coding, testing, security, workflow |
+| Guidelines | `docs/guidelines/` | Database, code-generation |
+| Architecture | `ARCHITECTURE.md` | System design |
+| Agent behavior | `AGENTS.md` (this file) | Entry point for all agents |
+
+### Key Principle
+
+> **Don't Repeat Yourself (DRY)**: Define once, reference everywhere.
+> When information exists in multiple places, update the SSOT and reference it from others.
 
 ## Documentation Map
 
