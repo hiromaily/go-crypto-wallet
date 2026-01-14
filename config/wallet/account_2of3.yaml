@@ -1,0 +1,39 @@
+# Account Configuration for Pattern 2 (P2PKH 2-of-3 Multisig E2E Test)
+# This configuration defines 2-of-3 multisig accounts for Pattern 2 testing
+
+# Account types available in the wallet
+types:
+  - client
+  - deposit
+  - payment
+  - stored
+
+# Account type that receives deposits
+deposit_receiver: deposit
+
+# Account type that sends payments
+payment_sender: payment
+
+# Multisig account configurations
+# For Pattern 2: 2-of-3 multisig (any 2 signatures out of 3 required)
+# - deposit: 2-of-3 multisig for security during fund aggregation
+# - payment: 2-of-3 multisig for approval workflow
+# - stored: 2-of-3 multisig for secure long-term storage
+multisig:
+  - type: deposit
+    required: 2  # 2-of-3 multisig
+    auth_users:
+      - auth1
+      - auth2
+
+  - type: payment
+    required: 2  # 2-of-3 multisig
+    auth_users:
+      - auth1
+      - auth2
+
+  - type: stored
+    required: 2  # 2-of-3 multisig
+    auth_users:
+      - auth1
+      - auth2
