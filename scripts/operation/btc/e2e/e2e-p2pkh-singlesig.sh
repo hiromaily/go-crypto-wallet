@@ -71,6 +71,7 @@ export BTC_ACCOUNT_CONF="${CONFIG_ACCOUNT}"
 #   - address_type: "legacy" (derives key_type: bip44 automatically)
 # Note: key_type is automatically derived from address_type in Go code
 #       (see internal/domain/address/types.go AddrType.ToKeyType())
+# Note: Bitcoin RPC wallet names are set via sed in setup_wallets() function
 export WALLET_ADDRESS_TYPE="legacy"
 
 ###############################################################################
@@ -185,6 +186,16 @@ full_reset() {
 cleanup() {
 	log_step "Cleaning up containers and state"
 
+	# Restore original config files if backups exist
+	if [ -f "${CONFIG_WATCH}.bak" ]; then
+		mv "${CONFIG_WATCH}.bak" "${CONFIG_WATCH}"
+		log_info "Restored watch config"
+	fi
+	if [ -f "${CONFIG_KEYGEN}.bak" ]; then
+		mv "${CONFIG_KEYGEN}.bak" "${CONFIG_KEYGEN}"
+		log_info "Restored keygen config"
+	fi
+
 	# Stop and remove containers
 	log_info "Stopping Bitcoin containers..."
 	docker compose -f compose.btc.yaml down -v 2>/dev/null || true
@@ -257,6 +268,17 @@ setup_wallets() {
 	btc_create_wallet_if_needed "btc-keygen" "keygen"
 
 	log_info "All wallets are ready"
+
+	# Update config files to include wallet names in Bitcoin RPC hosts
+	# This is required for wallet-specific RPC commands like listdescriptors
+	log_substep "Configuring wallet-specific RPC endpoints"
+	sed -i.bak 's|host: "127.0.0.1:18332"|host: "127.0.0.1:18332/wallet/watch"|' "${CONFIG_WATCH}"
+	sed -i.bak 's|host: "127.0.0.1:19332"|host: "127.0.0.1:19332/wallet/keygen"|' "${CONFIG_KEYGEN}"
+	log_info "Configured watch wallet RPC: 127.0.0.1:18332/wallet/watch"
+	log_info "Configured keygen wallet RPC: 127.0.0.1:19332/wallet/keygen"
+
+	# Note: Keygen wallet signs PSBTs directly using btcd library (offline signing)
+	# It does NOT use Bitcoin Core RPC for signing, so it doesn't need descriptors in Bitcoin Core
 }
 
 ###############################################################################
@@ -280,17 +302,20 @@ key_generation_phase() {
 	done
 
 	# Keygen wallet - import private keys
-	log_substep "Importing private keys into keygen wallet"
-	if [ "$ENCRYPTED" = "true" ]; then
-		keygen -c "${CONFIG_KEYGEN}" api walletpassphrase --passphrase "${WALLET_PASSPHRASE}"
-	fi
-	for account in client deposit payment stored; do
-		log_info "Importing private keys for account: $account"
-		keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" import privkey --account "$account"
-	done
-	if [ "$ENCRYPTED" = "true" ]; then
-		keygen -c "${CONFIG_KEYGEN}" api walletlock
-	fi
+	# NOTE: Private key import is NOT needed for descriptor-based wallets (Pattern 1)
+	# The keygen wallet will sign PSBTs using its internal descriptor wallet
+	# Skipping this step to avoid "Cannot import private keys to a wallet with private keys disabled" error
+	# log_substep "Importing private keys into keygen wallet"
+	# if [ "$ENCRYPTED" = "true" ]; then
+	# 	keygen -c "${CONFIG_KEYGEN}" api walletpassphrase --passphrase "${WALLET_PASSPHRASE}"
+	# fi
+	# for account in client deposit payment stored; do
+	# 	log_info "Importing private keys for account: $account"
+	# 	keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" import privkey --account "$account"
+	# done
+	# if [ "$ENCRYPTED" = "true" ]; then
+	# 	keygen -c "${CONFIG_KEYGEN}" api walletlock
+	# fi
 }
 
 ###############################################################################

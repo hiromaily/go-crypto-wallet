@@ -178,15 +178,24 @@ func (u *signTransactionUseCase) signWithAccount(
 	psbtBase64 string,
 	senderAccount domainAccount.AccountType,
 ) (string, bool, error) {
-	// Try to get generated keys for this account
-	// For keygen wallet, keys are available after generation and import (AddrStatusPrivKeyImported)
-	// We don't need to wait for export to watch wallet to use them for signing
-	accountKeys, err := u.accountKeyRepo.GetAllAddrStatus(
-		senderAccount,
+	// Try to get keys for this account, checking multiple statuses
+	// For descriptor-based workflows: keys have AddrStatusHDKeyGenerated (don't need WIF import)
+	// For legacy workflows: keys have AddrStatusPrivKeyImported (after WIF import to Bitcoin Core)
+	statuses := []domainAddress.AddrStatus{
+		domainAddress.AddrStatusHDKeyGenerated,
 		domainAddress.AddrStatusPrivKeyImported,
-	)
-	if err != nil {
-		return "", false, fmt.Errorf("fail to get account keys for %s: %w", senderAccount.String(), err)
+	}
+
+	var accountKeys []*domainBitcoin.BtcAccountKey
+	var err error
+	for _, status := range statuses {
+		accountKeys, err = u.accountKeyRepo.GetAllAddrStatus(senderAccount, status)
+		if err != nil {
+			return "", false, fmt.Errorf("fail to get account keys for %s: %w", senderAccount.String(), err)
+		}
+		if len(accountKeys) > 0 {
+			break
+		}
 	}
 
 	// Check if we have account xpriv (descriptor-based workflow)
