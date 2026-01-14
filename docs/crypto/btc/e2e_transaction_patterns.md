@@ -165,7 +165,7 @@ Schnorr署名ベースの集約署名プロトコル。N-of-N マルチシグが
 | パターン | 鍵タイプ | 署名パターン | アドレスフォーマット | E2Eスクリプト対応 |
 |----------|---------|-------------|---------------------|-------------------|
 | **1** | **P2PKH (BIP44)** | **Single-sig** | **`1...`** | **✅ e2e/e2e-p2pkh-singlesig.sh** |
-| **2** | **P2PKH (BIP44)** | **2-of-3 Multisig** | **`3...` (P2SH wrapped)** | **✅ e2e/e2e-p2pkh-2of3.sh** |
+| **2** | **P2PKH (BIP44)** | **2-of-3 Multisig** | **`3...` (P2SH wrapped)** | **⚠️ e2e/e2e-p2pkh-2of3.sh (P2WSH生成 #340)** |
 | 3 | P2SH-P2WPKH (BIP49) | Single-sig | `3...` | 🔶 手動テスト |
 | 4 | P2SH-P2WPKH (BIP49) | 2-of-3 Multisig | `3...` | ❌ 未対応 |
 | 5 | P2WPKH (BIP84) | Single-sig | `bc1q...` | 🔶 手動テスト |
@@ -235,6 +235,39 @@ Descriptor: sh(wsh(sortedmulti(3, xpub1, xpub2, xpub3)))
 7. Watch に Descriptor をインポート
 8. Test UTXO を生成（regtest）
 9. 未署名トランザクション作成 → 3回署名 → ブロードキャスト
+
+### パターン 2: BTC P2PKH 2-of-3 Multisig
+
+**`scripts/operation/btc/e2e/e2e-p2pkh-2of3.sh` で実装されているパターン（⚠️ 既知の制限あり）**
+
+```
+アドレスタイプ: P2PKH (BIP44 Legacy) with 2-of-3 Multisig
+署名要件: 2-of-3 (Keygen + Sign1, Sign2 は任意)
+期待される Descriptor: sh(multi(2, xpub1, xpub2, xpub3))  ← 未実装
+実際の Descriptor: wsh(sortedmulti(2, xpub1, xpub2, xpub3))  ← 現在生成
+```
+
+**⚠️ 既知の制限 (Issue #340):**
+
+Go wallet の実装が P2SH-wrapped multisig descriptors に対応していないため、現在は P2WSH アドレス (`bcrt1q...`) が生成されます。本来の仕様では P2SH アドレス (`2...` in regtest, `3...` in mainnet) が生成されるべきです。
+
+**ワークフロー:**
+
+1. Keygen/Sign1/Sign2 で Seed を生成
+2. Keygen で HD Key を生成（各アカウント10個）
+3. Sign1/Sign2 で HD Key を生成
+4. Sign1/Sign2 から fullpubkey をエクスポート
+5. Keygen に fullpubkey をインポート
+6. Keygen で Descriptor をエクスポート（⚠️ 現在は `wsh(sortedmulti(2, ...))` が生成される）
+7. Watch に Descriptor をインポート
+8. Test UTXO を生成（regtest）
+9. 未署名トランザクション作成 → 2回署名 → ブロードキャスト
+
+**特徴:**
+
+- 2-of-3 マルチシグ（Keygen + Sign1 の2署名で完了、Sign2 は不要）
+- BIP44 鍵派生パス使用
+- ⚠️ 実装上は P2WSH 形式で動作（PR #339 参照）
 
 ### パターン 2: BCH CashAddr 3-of-3 Multisig（現在のE2E）
 
