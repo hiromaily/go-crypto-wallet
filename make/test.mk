@@ -6,6 +6,7 @@
 gotest:
 	go test -v ./...
 
+# What is this?
 .PHONY: gotest-addr
 gotest-addr:
 	go test -tags=integration -v -run pkg/wallets/api/btc/...
