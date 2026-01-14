@@ -5,7 +5,7 @@
 <img align="right" width="159px" src="https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/bitcoin-img.svg?sanitize=true">
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/hiromaily/go-crypto-wallet)](https://goreportcard.com/report/github.com/hiromaily/go-crypto-wallet)
-[![CI](https://github.com/hiromaily/go-crypto-wallet/workflows/CI/badge.svg)](https://github.com/hiromaily/go-crypto-wallet/actions)
+[![Test](https://github.com/hiromaily/go-crypto-wallet/actions/workflows/lint-test.yml/badge.svg)](https://github.com/hiromaily/go-crypto-wallet/actions/workflows/lint-test.yml)
 [![GitHub release](https://img.shields.io/badge/release-v5.0.0-blue.svg)](https://github.com/hiromaily/go-crypto-wallet/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -22,14 +22,39 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
 
 ## Requirements
 
+### Core Dependencies
+
 | Tool | Version | Description |
 |------|---------|-------------|
 | Go | 1.25.5 | Programming language |
-| MySQL | 8.4 | Database (via Docker) |
+| MySQL | 8.4+ | Database (via Docker) |
 | Atlas | 1.0.0 | Database schema migration |
 | sqlc | 1.30.0 | SQL code generator |
 | Docker | latest | Container runtime |
 | Docker Compose | latest | Container orchestration |
+| [golangci-lint](https://github.com/golangci/golangci-lint) | v2.7.2+ | Linter (for development) |
+| [buf](https://buf.build/) | latest | Protocol buffer management |
+
+### Blockchain Nodes
+
+| Chain | Node | Version | Notes |
+|-------|------|---------|-------|
+| BTC | [Bitcoin Core](https://bitcoin.org/en/bitcoin-core/) | 28.0+ | supports v28-v30, [Docker image](https://hub.docker.com/r/bitcoin/bitcoin) |
+| BCH | [Bitcoin ABC](https://www.bitcoinabc.org/) | 0.21+ | Bitcoin Cash node |
+| ETH | [go-ethereum](https://github.com/ethereum/go-ethereum) | latest | Geth client |
+| ETH | [Anvil](https://getfoundry.sh/anvil/overview/) | latest | For local development (Foundry) |
+| XRP | [rippled](https://xrpl.org/manage-the-rippled-server.html) | latest | Ripple node |
+
+### Major Go Dependencies
+
+| Package | Version | Description |
+|---------|---------|-------------|
+| btcsuite/btcd | v0.25.0 | Bitcoin library |
+| ethereum/go-ethereum | v1.16.7 | Ethereum library |
+| spf13/cobra | v1.10.2 | CLI framework |
+| spf13/viper | v1.21.0 | Configuration management |
+| google.golang.org/grpc | v1.78.0 | gRPC for XRP communication |
+| golang.org/x/crypto | v0.46.0 | Cryptographic functions |
 
 ## Current development
 
@@ -125,41 +150,6 @@ There are mainly 3 wallets separately and these wallets are expected to be insta
 #### 3. Create unsigned transaction, Sign on unsigned tx, Send signed tx for multisig address
 
 ![create tx for multisig](https://raw.githubusercontent.com/hiromaily/go-crypto-wallet/main/images/2_Handle%20transactions%20for%20multisig%20address.png?raw=true)
-
-## Requirements
-
-### Core Dependencies
-
-- **Go**: 1.25.5
-- **[golangci-lint](https://github.com/golangci/golangci-lint)**: v2.7.2+ (for development)
-- **[atras](https://atlasgo.io/)**: v1.0.0, For DB migration
-- **[buf](https://buf.build/)**: For protocol buffer management
-- **Docker**: For running blockchain nodes and databases
-
-### Blockchain Nodes
-
-- **BTC**: [Bitcoin Core](https://bitcoin.org/en/bitcoin-core/), [Bitcoin node docker image](https://hub.docker.com/r/bitcoin/bitcoin) 28.0+ (supports v28-v30)
-- **BCH**: [Bitcoin ABC](https://www.bitcoinabc.org/) 0.21+ (Bitcoin Cash node)
-- **ETH**:
-  - [go-ethereum](https://github.com/ethereum/go-ethereum) (Geth client)
-  - [Ganache](https://www.trufflesuite.com/ganache) (for local development)
-  - [erc20-token](https://github.com/hiromaily/go-crypto-wallet/tree/main/web/erc20-token) (ERC-20 token contract)
-- **XRP**:
-  - [rippled](https://xrpl.org/manage-the-rippled-server.html) (Ripple node)
-  - [ripple-lib-server](https://github.com/hiromaily/go-crypto-wallet/tree/main/web/ripple-lib-server) (gRPC server)
-
-### Database
-
-- **MySQL**: 8.4+ (for wallet data persistence)
-
-### Major Go Dependencies
-
-- **btcsuite/btcd**: v0.25.0 (Bitcoin library)
-- **ethereum/go-ethereum**: v1.16.7 (Ethereum library)
-- **spf13/cobra**: v1.10.2 (CLI framework)
-- **spf13/viper**: v1.21.0 (Configuration management)
-- **google.golang.org/grpc**: v1.78.0 (gRPC for XRP communication)
-- **golang.org/x/crypto**: v0.46.0 (Cryptographic functions)
 
 ## Directory Structure
 
