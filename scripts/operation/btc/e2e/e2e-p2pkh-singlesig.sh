@@ -61,6 +61,10 @@ CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account_singlesig.yaml"
 # Export account config for keygen wallet (required for configuration)
 export BTC_ACCOUNT_CONF="${CONFIG_ACCOUNT}"
 
+# Wallet-specific RPC hosts (for environment variable overrides)
+WATCH_WALLET_RPC_HOST="127.0.0.1:18332/wallet/watch"
+KEYGEN_WALLET_RPC_HOST="127.0.0.1:19332/wallet/keygen"
+
 ###############################################################################
 # Environment Variable Overrides for Configuration
 ###############################################################################
@@ -71,7 +75,6 @@ export BTC_ACCOUNT_CONF="${CONFIG_ACCOUNT}"
 #   - address_type: "legacy" (derives key_type: bip44 automatically)
 # Note: key_type is automatically derived from address_type in Go code
 #       (see internal/domain/address/types.go AddrType.ToKeyType())
-# Note: Bitcoin RPC wallet names are set via sed in setup_wallets() function
 export WALLET_ADDRESS_TYPE="legacy"
 
 ###############################################################################
@@ -186,16 +189,6 @@ full_reset() {
 cleanup() {
 	log_step "Cleaning up containers and state"
 
-	# Restore original config files if backups exist
-	if [ -f "${CONFIG_WATCH}.bak" ]; then
-		mv "${CONFIG_WATCH}.bak" "${CONFIG_WATCH}"
-		log_info "Restored watch config"
-	fi
-	if [ -f "${CONFIG_KEYGEN}.bak" ]; then
-		mv "${CONFIG_KEYGEN}.bak" "${CONFIG_KEYGEN}"
-		log_info "Restored keygen config"
-	fi
-
 	# Stop and remove containers
 	log_info "Stopping Bitcoin containers..."
 	docker compose -f compose.btc.yaml down -v 2>/dev/null || true
@@ -269,16 +262,24 @@ setup_wallets() {
 
 	log_info "All wallets are ready"
 
-	# Update config files to include wallet names in Bitcoin RPC hosts
-	# This is required for wallet-specific RPC commands like listdescriptors
-	log_substep "Configuring wallet-specific RPC endpoints"
-	sed -i.bak 's|host: "127.0.0.1:18332"|host: "127.0.0.1:18332/wallet/watch"|' "${CONFIG_WATCH}"
-	sed -i.bak 's|host: "127.0.0.1:19332"|host: "127.0.0.1:19332/wallet/keygen"|' "${CONFIG_KEYGEN}"
-	log_info "Configured watch wallet RPC: 127.0.0.1:18332/wallet/watch"
-	log_info "Configured keygen wallet RPC: 127.0.0.1:19332/wallet/keygen"
+	# Note: Wallet-specific RPC endpoints are configured via environment variables
+	# for each command invocation (see wrapper functions below)
+	# This avoids modifying config files and creating backups
+	# Environment variables use WALLET_ prefix to override config file settings
+}
 
-	# Note: Keygen wallet signs PSBTs directly using btcd library (offline signing)
-	# It does NOT use Bitcoin Core RPC for signing, so it doesn't need descriptors in Bitcoin Core
+###############################################################################
+# Wallet Command Wrappers with Environment Variable Overrides
+###############################################################################
+
+# Wrapper for watch wallet commands with host override
+watch_with_wallet() {
+	WALLET_BITCOIN_HOST="${WATCH_WALLET_RPC_HOST}" watch "$@"
+}
+
+# Wrapper for keygen wallet commands with host override
+keygen_with_wallet() {
+	WALLET_BITCOIN_HOST="${KEYGEN_WALLET_RPC_HOST}" keygen "$@"
 }
 
 ###############################################################################
@@ -335,10 +336,11 @@ singlesig_setup_phase() {
 	local accounts=(client payment)
 
 	# Export descriptors for accounts
+	# Note: Using wrapper function to set WALLET_BITCOIN_HOST for Bitcoin Core RPC
 	declare -A descriptor_files
 	for account in "${accounts[@]}"; do
 		log_info "Exporting ${account} descriptors"
-		file_output=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export \
+		file_output=$(keygen_with_wallet -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export \
 			--account "${account}" \
 			--output "data/descriptor/btc/${account}_descriptors.json" \
 			--format bitcoin-core \
@@ -349,10 +351,11 @@ singlesig_setup_phase() {
 	done
 
 	# Import descriptors into watch wallet
+	# Note: Using wrapper function to set WALLET_BITCOIN_HOST for Bitcoin Core RPC
 	log_substep "Importing descriptors into watch wallet"
 	for account in "${accounts[@]}"; do
 		log_info "Importing ${account} descriptors"
-		watch -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor \
+		watch_with_wallet -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor \
 			--file "${descriptor_files[$account]}" \
 			--account "${account}"
 	done
@@ -526,7 +529,7 @@ transaction_flow_phase() {
 
 	# Create unsigned transaction
 	log_substep "Creating unsigned payment transaction"
-	tx_file=$(watch -c "${CONFIG_WATCH}" create payment 2>&1) || {
+	tx_file=$(watch_with_wallet -c "${CONFIG_WATCH}" create payment 2>&1) || {
 		log_error "Failed to create payment transaction"
 		log_error "Output: $tx_file"
 
@@ -570,7 +573,7 @@ transaction_flow_phase() {
 
 	# Send transaction
 	log_substep "Sending fully signed transaction"
-	tx_result=$(watch -c "${CONFIG_WATCH}" send --file "${tx_signed}")
+	tx_result=$(watch_with_wallet -c "${CONFIG_WATCH}" send --file "${tx_signed}")
 	tx_id="${tx_result##*txID: }"
 
 	log_info "Transaction sent successfully!"

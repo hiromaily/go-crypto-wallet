@@ -65,6 +65,44 @@ WALLET_PASSPHRASE="${WALLET_PASSPHRASE:-test}"
 DOCKER_VOLUME_NAME="${DOCKER_VOLUME_NAME:-go-crypto-wallet_wallet-db}"
 ```
 
+### Use Environment Variables Instead of Modifying Config Files
+
+**Bad (creates backups, modifies files):**
+```bash
+# Backup and modify config file
+sed -i.bak 's|host: "127.0.0.1:18332"|host: "127.0.0.1:18332/wallet/watch"|' config.yaml
+
+# ... operations ...
+
+# Restore backup
+if [ -f "config.yaml.bak" ]; then
+    mv "config.yaml.bak" "config.yaml"
+fi
+```
+
+**Good (use environment variables):**
+```bash
+# Create wrapper function to set environment variable per-command
+watch_with_wallet() {
+    WALLET_BITCOIN_HOST="127.0.0.1:18332/wallet/watch" watch "$@"
+}
+
+# Use wrapper function
+watch_with_wallet -c config.yaml create payment
+```
+
+**Benefits:**
+- No risk of leaving modified configs if script fails
+- No backup files to manage
+- Cleaner and more robust
+- Easy to override in CI/CD
+- No file permission issues
+
+**When to use this pattern:**
+- Applications that support environment variable overrides (check config documentation)
+- Temporary config changes for scripts or tests
+- Multi-environment setups (dev, staging, prod)
+
 ## Error Handling
 
 ### Refactor Duplicate Error Handling
