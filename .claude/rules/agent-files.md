@@ -8,11 +8,11 @@ paths:
 
 # Agent Files
 
-このルールは `.claude/`, `.cursor/`, `.codex/`, `.github/copilot-instructions.md` を編集する際に適用されます。
+This rule applies when editing `.claude/`, `.cursor/`, `.codex/`, or `.github/copilot-instructions.md`.
 
-## Single Source of Truth (SSOT) 設計
+## Single Source of Truth (SSOT) Design
 
-AI Agent 設定ファイルは **Claude Code の `.claude/` ディレクトリを唯一のソース** として管理し、他のエージェント用設定は自動生成またはシンボリックリンクで対応します。
+AI Agent configuration files are managed with **Claude Code's `.claude/` directory as the single source**. Other agent configurations are auto-generated or symlinked.
 
 ```
 .claude/                    ← SSOT (Source of Truth)
@@ -20,25 +20,25 @@ AI Agent 設定ファイルは **Claude Code の `.claude/` ディレクトリ�
 ├── rules/                  ← Rules (*.md)
 └── skills/                 ← Skills (SKILL.md)
 
-.cursor/                    ← 自動生成 / シンボリックリンク
-├── commands/README.md      ← 参照のみ (.claude/commands を使用)
-├── rules/*.mdc             ← 自動生成 (scripts/ai-agent/sync-rule-claude-to-cursor.sh)
-└── skills/                 ← シンボリックリンク → ../.claude/skills
+.cursor/                    ← Auto-generated / Symlinked
+├── commands/README.md      ← Reference only (uses .claude/commands)
+├── rules/*.mdc             ← Auto-generated (scripts/ai-agent/sync-rule-claude-to-cursor.sh)
+└── skills/                 ← Symlink → ../.claude/skills
 
-.codex/                     ← TODO (将来対応)
-.github/copilot-instructions.md ← TODO (将来対応)
+.codex/                     ← TODO (Future support)
+.github/copilot-instructions.md ← TODO (Future support)
 ```
 
-## 対応 AI Agent
+## Supported AI Agents
 
-| Agent | Version | Status | 設定場所 |
-|-------|---------|--------|----------|
+| Agent | Version | Status | Config Location |
+|-------|---------|--------|-----------------|
 | Claude Code | v2 | ✅ Active | `.claude/` (SSOT) |
-| Cursor | v2 | ✅ Active | `.cursor/` (自動生成) |
+| Cursor | v2 | ✅ Active | `.cursor/` (Auto-generated) |
 | Codex | v0.80 | 📋 TODO | `.codex/` |
 | GitHub Copilot | 2026 | 📋 TODO | `.github/copilot-instructions.md` |
 
-## ファイル参照形式
+## File Reference Format
 
 ### Claude Code
 
@@ -49,24 +49,24 @@ AI Agent 設定ファイルは **Claude Code の `.claude/` ディレクトリ�
 
 ### Cursor
 
-同じ `@path` 形式をサポート。変換不要。
+Supports the same `@path` format. No conversion needed.
 
-## ディレクトリ別ルール
+## Directory-Specific Rules
 
 ### `.claude/commands/`
 
-Slash commands の定義場所。Cursor からも自動的に読み込まれる。
+Location for slash command definitions. Automatically loaded by Cursor as well.
 
-**編集時の注意:**
+**Editing Notes:**
 
-- 新規コマンド追加は `.claude/commands/` に作成
-- `.cursor/commands/` には README.md のみ配置
+- Create new commands in `.claude/commands/`
+- Only place README.md in `.cursor/commands/`
 
 ### `.claude/rules/`
 
-Claude Code 用ルールファイル (`.md`)。
+Rule files for Claude Code (`.md`).
 
-**フォーマット:**
+**Format:**
 
 ```markdown
 ---
@@ -77,15 +77,15 @@ paths:
 
 # Rule Title
 
-ルール内容...
+Rule content...
 ```
 
-- `paths:` がない場合 → すべての指示に適用 (グローバルルール)
-- `paths:` がある場合 → 指定パターンにマッチするファイル編集時に適用
+- Without `paths:` → Applies to all instructions (global rule)
+- With `paths:` → Applies when editing files matching the specified patterns
 
 ### `.claude/skills/`
 
-Skills (MCP) の定義場所。各スキルはサブディレクトリに `SKILL.md` を配置。
+Location for Skills (MCP) definitions. Each skill has `SKILL.md` in its subdirectory.
 
 ```
 .claude/skills/
@@ -96,18 +96,18 @@ Skills (MCP) の定義場所。各スキルはサブディレクトリに `SKILL
 
 ### `.cursor/rules/`
 
-**自動生成ファイル - 直接編集禁止**
+**Auto-generated files - DO NOT EDIT DIRECTLY**
 
-Claude rules から自動生成される。変換ルール:
+Auto-generated from Claude rules. Conversion rules:
 
 | Claude | Cursor |
 |--------|--------|
-| `paths:` なし | `alwaysApply: true` |
-| `paths:` あり | `globs:` + `alwaysApply: false` |
-| 最初の `# 見出し` | `description:` |
+| No `paths:` | `alwaysApply: true` |
+| Has `paths:` | `globs:` + `alwaysApply: false` |
+| First `# Heading` | `description:` |
 | `.md` | `.mdc` |
 
-**同期コマンド:**
+**Sync Command:**
 
 ```bash
 ./scripts/ai-agent/sync-rule-claude-to-cursor.sh --force --verbose
@@ -115,27 +115,27 @@ Claude rules から自動生成される。変換ルール:
 
 ## Model Context Protocol (MCP) / Skills
 
-2024年末から提唱された MCP が2026年現在普及し、AI Agent が「Skills」としてリポジトリ内のスクリプトやローカルサーバーを道具として使用可能。
+MCP, proposed since late 2024, is now widespread as of 2026. AI Agents can use repository scripts and local servers as "Skills".
 
 ### Claude Code / Cursor
 
-`.claude/skills/` または `.cursor/skills/` に `SKILL.md` を配置。
+Place `SKILL.md` in `.claude/skills/` or `.cursor/skills/`.
 
-### Codex (将来対応)
+### Codex (Future Support)
 
-CLI ベースの Codex agent では、Shell/Python スクリプトを Skill としてバインドし、`@database_tool` のように呼び出す形式を想定。
+For CLI-based Codex agent, Shell/Python scripts are expected to be bound as Skills and invoked like `@database_tool`.
 
-## 編集時のチェックリスト
+## Editing Checklist
 
-`.claude/` または `.cursor/` を編集する場合:
+When editing `.claude/` or `.cursor/`:
 
-- [ ] 変更は `.claude/` (SSOT) に対して行う
-- [ ] `.cursor/rules/` を直接編集しない
-- [ ] 新規 rules 追加後は同期スクリプトを実行
-- [ ] README.md の更新が必要か確認
+- [ ] Make changes to `.claude/` (SSOT)
+- [ ] Do NOT edit `.cursor/rules/` directly
+- [ ] Run sync script after adding new rules
+- [ ] Check if README.md needs updating
 
-## 関連ドキュメント
+## Related Documents
 
-- @.cursor/rules/README.md - Cursor rules の仕様
-- @.cursor/commands/README.md - Commands の説明
-- @AGENTS.md - プロジェクト全体のガイドライン
+- @.cursor/rules/README.md - Cursor rules specification
+- @.cursor/commands/README.md - Commands description
+- @AGENTS.md - Project-wide guidelines
