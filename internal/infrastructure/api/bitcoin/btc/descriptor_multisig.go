@@ -55,23 +55,22 @@ func (d *DescriptorService) GenerateMultisigDescriptor(
 		)
 		descriptor = fmt.Sprintf("sh(%s)", multisigPart)
 
-	case domainWallet.DescriptorTypeSHWSH:
-		// P2SH-P2WSH (BIP49): sh(wsh(sortedmulti(...)))
+	case domainWallet.DescriptorTypeSHWSH, domainWallet.DescriptorTypeWSH:
+		// Both P2SH-P2WSH (BIP49) and P2WSH (BIP48) use sortedmulti
+		// Generate common sortedmulti part
 		multisigPart := fmt.Sprintf(
 			"sortedmulti(%d,%s)",
 			requiredSigs,
 			strings.Join(keyStrings, ","),
 		)
-		descriptor = fmt.Sprintf("sh(wsh(%s))", multisigPart)
-
-	case domainWallet.DescriptorTypeWSH:
-		// P2WSH (BIP48): wsh(sortedmulti(...))
-		multisigPart := fmt.Sprintf(
-			"sortedmulti(%d,%s)",
-			requiredSigs,
-			strings.Join(keyStrings, ","),
-		)
-		descriptor = fmt.Sprintf("wsh(%s)", multisigPart)
+		// Apply appropriate wrapper based on descriptor type
+		if descriptorType == domainWallet.DescriptorTypeSHWSH {
+			// P2SH-P2WSH (BIP49): sh(wsh(sortedmulti(...)))
+			descriptor = fmt.Sprintf("sh(wsh(%s))", multisigPart)
+		} else {
+			// P2WSH (BIP48): wsh(sortedmulti(...))
+			descriptor = fmt.Sprintf("wsh(%s)", multisigPart)
+		}
 
 	case domainWallet.DescriptorTypePKH, domainWallet.DescriptorTypeSHWPKH,
 		domainWallet.DescriptorTypeWPKH, domainWallet.DescriptorTypeTR,
