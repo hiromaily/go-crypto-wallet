@@ -309,40 +309,47 @@ func (b *Bitcoin) listUnspentByDescriptorMatching(
 
 // addressBelongsToAccount checks if an address belongs to an account by verifying its BIP44 path.
 //
-// This gets the address info from Bitcoin Core and checks if the HDKeyPath contains
-// the expected account index.
+// This gets the address info from Bitcoin Core and checks if the HDKeyPath or descriptor
+// contains the expected account index.
+//
+// For watch-only multisig descriptors, Bitcoin Core doesn't set HDKeyPath, so we need to
+// parse the descriptor to extract the account index.
 func (b *Bitcoin) addressBelongsToAccount(address string, expectedAccountIndex uint32) (bool, error) {
 	addrInfo, err := b.GetAddressInfo(address)
 	if err != nil {
 		return false, fmt.Errorf("failed to get address info: %w", err)
 	}
 
-	// If the address doesn't have an HD key path, it's not from a descriptor
-	if addrInfo.HDKeyPath == "" {
-		return false, nil
+	// First, try to use HDKeyPath if available (for non-multisig descriptors)
+	if addrInfo.HDKeyPath != "" {
+		// Parse the HD key path (e.g., "m/44h/0h/1h/0/5")
+		// The account index is the 4th component (index 3 after splitting)
+		parts := strings.Split(strings.TrimPrefix(addrInfo.HDKeyPath, "m/"), "/")
+		if len(parts) >= 4 {
+			// Extract account component (e.g., "1h" or "1'")
+			accountComponent := parts[2]
+			accountComponent = strings.TrimSuffix(accountComponent, "h")
+			accountComponent = strings.TrimSuffix(accountComponent, "H")
+			accountComponent = strings.TrimSuffix(accountComponent, "'")
+
+			// Parse the account index
+			var accountIndex uint32
+			_, err = fmt.Sscanf(accountComponent, "%d", &accountIndex)
+			if err == nil {
+				return accountIndex == expectedAccountIndex, nil
+			}
+		}
 	}
 
-	// Parse the HD key path (e.g., "m/44h/0h/1h/0/5")
-	// The account index is the 4th component (index 3 after splitting)
-	parts := strings.Split(strings.TrimPrefix(addrInfo.HDKeyPath, "m/"), "/")
-	if len(parts) < 4 {
-		return false, nil
+	// If HDKeyPath is not available, try to parse the descriptor
+	// This is needed for watch-only multisig descriptors
+	if addrInfo.Desc != "" {
+		// Use the existing descriptor matching logic
+		return b.descriptorMatchesAccountIndex(addrInfo.Desc, expectedAccountIndex), nil
 	}
 
-	// Extract account component (e.g., "1h" or "1'")
-	accountComponent := parts[2]
-	accountComponent = strings.TrimSuffix(accountComponent, "h")
-	accountComponent = strings.TrimSuffix(accountComponent, "H")
-	accountComponent = strings.TrimSuffix(accountComponent, "'")
-
-	// Parse the account index
-	var accountIndex uint32
-	_, err = fmt.Sscanf(accountComponent, "%d", &accountIndex)
-	if err != nil {
-		return false, nil
-	}
-
-	return accountIndex == expectedAccountIndex, nil
+	// No HD key path or descriptor available
+	return false, nil
 }
 
 // descriptorMatchesAccountIndex checks if a descriptor contains the expected BIP44 account index.

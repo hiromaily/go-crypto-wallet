@@ -22,6 +22,7 @@ type AddressInfo struct {
 	IsWatchOnly         bool
 	IsScript            bool
 	PubKey              string
+	Desc                string // Descriptor for the address (if available)
 	Embedded            *AddressInfo
 }
 

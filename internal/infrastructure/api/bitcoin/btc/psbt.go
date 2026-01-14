@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcec/v2/ecdsa"
 	"github.com/btcsuite/btcd/btcec/v2/schnorr"
 	"github.com/btcsuite/btcd/btcutil"
@@ -499,11 +500,17 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
 			if err := b.finalizeP2PKHInput(parsed.Packet, i); err != nil {
 				return "", fmt.Errorf("failed to finalize P2PKH input %d: %w", i, err)
 			}
+		} else if scriptType == "P2SH" && hasRedeemScript && !hasWitnessScript && hasPartialSigs {
+			// P2SH multisig (non-SegWit, BIP44) - use custom finalization
+			logger.Debug("Using custom P2SH multisig finalization", "input", i)
+			if err := b.finalizeMultisigInput(parsed.Packet, i); err != nil {
+				return "", fmt.Errorf("failed to finalize P2SH multisig input %d: %w", i, err)
+			}
 		} else if hasRedeemScript && hasWitnessScript && hasPartialSigs {
 			// P2SH-P2WSH multisig - use custom finalization
-			logger.Debug("Using custom multisig finalization", "input", i)
+			logger.Debug("Using custom P2SH-P2WSH multisig finalization", "input", i)
 			if err := b.finalizeMultisigInput(parsed.Packet, i); err != nil {
-				return "", fmt.Errorf("failed to finalize multisig input %d: %w", i, err)
+				return "", fmt.Errorf("failed to finalize P2SH-P2WSH multisig input %d: %w", i, err)
 			}
 		} else {
 			// Other script types - use btcd's default finalization
@@ -588,10 +595,14 @@ func (b *Bitcoin) finalizeP2PKHInput(packet *psbt.Packet, inputIndex int) error 
 	return nil
 }
 
-// finalizeMultisigInput finalizes a P2SH-P2WSH multisig PSBT input.
-// This is a custom implementation to work around btcd's Finalize() limitations with P2SH-P2WSH.
+// finalizeMultisigInput finalizes a P2SH or P2SH-P2WSH multisig PSBT input.
+// This is a custom implementation to work around btcd's Finalize() limitations with multisig.
 //
-// For P2SH-P2WSH multisig:
+// For P2SH multisig (non-SegWit, BIP44):
+//   - scriptSig contains: [OP_0, sig1, sig2, ..., redeemScript]
+//   - No witness data
+//
+// For P2SH-P2WSH multisig (SegWit):
 //   - scriptSig contains the redeemScript (P2WSH: OP_0 <witnessScriptHash>)
 //   - witness contains: [OP_0, sig1, sig2, ..., witnessScript]
 func (b *Bitcoin) finalizeMultisigInput(packet *psbt.Packet, inputIndex int) error {
@@ -599,28 +610,59 @@ func (b *Bitcoin) finalizeMultisigInput(packet *psbt.Packet, inputIndex int) err
 
 	// Ensure we have the required scripts
 	if len(input.RedeemScript) == 0 {
-		return errors.New("missing redeem script for P2SH-P2WSH input")
-	}
-	if len(input.WitnessScript) == 0 {
-		return errors.New("missing witness script for P2WSH multisig input")
+		return errors.New("missing redeem script for P2SH multisig input")
 	}
 	if len(input.PartialSigs) == 0 {
 		return errors.New("no signatures to finalize")
 	}
 
-	// Extract public keys from witness script to determine signature order
-	// For multisig, signatures MUST be ordered according to pubkey order in witness script
-	pubKeys, err := b.extractPubKeysFromScript(input.WitnessScript)
-	if err != nil {
-		return fmt.Errorf("failed to extract public keys from witness script: %w", err)
+	// Determine if this is P2SH (non-SegWit) or P2SH-P2WSH (SegWit)
+	isSegWit := len(input.WitnessScript) > 0
+
+	// Extract public keys from the multisig script to determine signature order
+	// For multisig, signatures MUST be ordered according to pubkey order in the script
+	var scriptToExtract []byte
+	if isSegWit {
+		scriptToExtract = input.WitnessScript
+	} else {
+		scriptToExtract = input.RedeemScript
 	}
 
-	// Log public keys from witness script for debugging
-	logger.Debug("Public keys extracted from witness script",
-		"input", inputIndex,
-		"count", len(pubKeys))
+	pubKeys, err := b.extractPubKeysFromScript(scriptToExtract)
+	if err != nil {
+		return fmt.Errorf("failed to extract public keys from multisig script: %w", err)
+	}
+
+	// Normalize public keys to compressed format for matching
+	// PartialSigs always use compressed public keys (33 bytes), but redeem script
+	// may contain uncompressed keys (65 bytes). Convert all to compressed for comparison.
+	normalizedPubKeys := make([][]byte, len(pubKeys))
 	for i, pk := range pubKeys {
-		logger.Debug("Witness script pubkey",
+		if len(pk) == 65 {
+			// Uncompressed key - convert to compressed
+			pubKeyObj, err := btcec.ParsePubKey(pk)
+			if err != nil {
+				return fmt.Errorf("failed to parse uncompressed public key at index %d: %w", i, err)
+			}
+			normalizedPubKeys[i] = pubKeyObj.SerializeCompressed()
+			logger.Debug("Converted uncompressed pubkey to compressed",
+				"input", inputIndex,
+				"index", i,
+				"uncompressed_len", len(pk),
+				"compressed_len", len(normalizedPubKeys[i]))
+		} else {
+			// Already compressed (33 bytes) or unknown format
+			normalizedPubKeys[i] = pk
+		}
+	}
+
+	// Log public keys from multisig script for debugging
+	logger.Info("Public keys extracted from multisig script",
+		"input", inputIndex,
+		"count", len(pubKeys),
+		"is_segwit", isSegWit)
+	for i, pk := range normalizedPubKeys {
+		logger.Info("Multisig script pubkey (normalized)",
 			"input", inputIndex,
 			"index", i,
 			"length", len(pk),
@@ -628,21 +670,22 @@ func (b *Bitcoin) finalizeMultisigInput(packet *psbt.Packet, inputIndex int) err
 	}
 
 	// Log partial signatures for debugging
-	logger.Debug("Partial signatures available",
+	logger.Info("Partial signatures available",
 		"input", inputIndex,
 		"count", len(input.PartialSigs))
 	for i, ps := range input.PartialSigs {
-		logger.Debug("PartialSig pubkey",
+		logger.Info("PartialSig pubkey",
 			"input", inputIndex,
 			"index", i,
 			"length", len(ps.PubKey),
 			"pubkey", hex.EncodeToString(ps.PubKey))
 	}
 
-	// Order signatures according to public key order in witness script
+	// Order signatures according to public key order in multisig script
 	// PartialSigs is a slice []*PartialSig where each PartialSig has a PubKey field
+	// Use normalizedPubKeys for matching since PartialSigs always use compressed format
 	sigs := make([][]byte, 0, len(input.PartialSigs))
-	for pkIdx, pubKey := range pubKeys {
+	for pkIdx, pubKey := range normalizedPubKeys {
 		// Find the signature for this public key in PartialSigs
 		found := false
 		for psIdx, partialSig := range input.PartialSigs {
@@ -650,7 +693,7 @@ func (b *Bitcoin) finalizeMultisigInput(packet *psbt.Packet, inputIndex int) err
 				sigs = append(sigs, partialSig.Signature)
 				logger.Debug("Matched signature for pubkey",
 					"input", inputIndex,
-					"witnessPubkeyIndex", pkIdx,
+					"multisigPubkeyIndex", pkIdx,
 					"partialSigIndex", psIdx,
 					"pubkey", hex.EncodeToString(pubKey))
 				found = true
@@ -658,67 +701,88 @@ func (b *Bitcoin) finalizeMultisigInput(packet *psbt.Packet, inputIndex int) err
 			}
 		}
 		if !found {
-			logger.Warn("No signature found for witness script pubkey",
+			logger.Warn("No signature found for multisig script pubkey",
 				"input", inputIndex,
-				"witnessPubkeyIndex", pkIdx,
+				"multisigPubkeyIndex", pkIdx,
 				"pubkey", hex.EncodeToString(pubKey))
 		}
 	}
 
 	logger.Debug("Signature matching complete",
 		"input", inputIndex,
-		"witnessScriptPubkeys", len(pubKeys),
+		"multisigScriptPubkeys", len(normalizedPubKeys),
 		"partialSigs", len(input.PartialSigs),
 		"matchedSigs", len(sigs))
 
 	if len(sigs) == 0 {
-		return fmt.Errorf("no matching signatures found: witness script has %d pubkeys, PSBT has %d partial sigs, but none matched",
-			len(pubKeys), len(input.PartialSigs))
+		return fmt.Errorf("no matching signatures found: multisig script has %d pubkeys, PSBT has %d partial sigs, but none matched",
+			len(normalizedPubKeys), len(input.PartialSigs))
 	}
 
-	// Build witness stack for P2WSH multisig:
-	// [OP_0, sig1, sig2, ..., witnessScript]
-	witness := wire.TxWitness{
-		[]byte{}, // OP_0 (required for CHECKMULTISIG bug)
-	}
-	for _, sig := range sigs {
-		witness = append(witness, sig)
-	}
-	witness = append(witness, input.WitnessScript)
-
-	// Serialize witness to FinalScriptWitness format
-	// PSBT witness format is the same as transaction witness serialization
-	var witnessBuf bytes.Buffer
-	// Write witness stack count (always 1 for witness serialization per input)
-	if err := wire.WriteVarInt(&witnessBuf, 0, uint64(len(witness))); err != nil {
-		return fmt.Errorf("failed to write witness count: %w", err)
-	}
-	// Write each witness element
-	for _, elem := range witness {
-		if err := wire.WriteVarBytes(&witnessBuf, 0, elem); err != nil {
-			return fmt.Errorf("failed to write witness element: %w", err)
+	// Build final scripts based on whether this is SegWit or non-SegWit
+	if isSegWit {
+		// P2SH-P2WSH (SegWit) multisig:
+		// Build witness stack: [OP_0, sig1, sig2, ..., witnessScript]
+		witness := wire.TxWitness{
+			[]byte{}, // OP_0 (required for CHECKMULTISIG bug)
 		}
-	}
-	input.FinalScriptWitness = witnessBuf.Bytes()
+		for _, sig := range sigs {
+			witness = append(witness, sig)
+		}
+		witness = append(witness, input.WitnessScript)
 
-	// Build scriptSig for P2SH wrapping:
-	// For P2SH-P2WSH, scriptSig is just the redeemScript (P2WSH: OP_0 <hash>)
-	scriptSigBuilder := txscript.NewScriptBuilder()
-	scriptSigBuilder.AddData(input.RedeemScript)
-	scriptSig, err := scriptSigBuilder.Script()
-	if err != nil {
-		return fmt.Errorf("failed to build scriptSig: %w", err)
+		// Serialize witness to FinalScriptWitness format
+		var witnessBuf bytes.Buffer
+		if err := wire.WriteVarInt(&witnessBuf, 0, uint64(len(witness))); err != nil {
+			return fmt.Errorf("failed to write witness count: %w", err)
+		}
+		for _, elem := range witness {
+			if err := wire.WriteVarBytes(&witnessBuf, 0, elem); err != nil {
+				return fmt.Errorf("failed to write witness element: %w", err)
+			}
+		}
+		input.FinalScriptWitness = witnessBuf.Bytes()
+
+		// Build scriptSig for P2SH wrapping: just the redeemScript (OP_0 <witnessScriptHash>)
+		scriptSigBuilder := txscript.NewScriptBuilder()
+		scriptSigBuilder.AddData(input.RedeemScript)
+		scriptSig, err := scriptSigBuilder.Script()
+		if err != nil {
+			return fmt.Errorf("failed to build P2SH-P2WSH scriptSig: %w", err)
+		}
+		input.FinalScriptSig = scriptSig
+
+		logger.Debug("Finalized P2SH-P2WSH multisig input",
+			"input", inputIndex,
+			"signatures", len(sigs),
+			"witnessLen", len(input.FinalScriptWitness),
+			"scriptSigLen", len(input.FinalScriptSig))
+	} else {
+		// P2SH (non-SegWit, BIP44) multisig:
+		// Build scriptSig: [OP_0, sig1, sig2, ..., redeemScript]
+		scriptSigBuilder := txscript.NewScriptBuilder()
+		scriptSigBuilder.AddOp(txscript.OP_0) // OP_0 (required for CHECKMULTISIG bug)
+		for _, sig := range sigs {
+			scriptSigBuilder.AddData(sig)
+		}
+		scriptSigBuilder.AddData(input.RedeemScript)
+		scriptSig, err := scriptSigBuilder.Script()
+		if err != nil {
+			return fmt.Errorf("failed to build P2SH scriptSig: %w", err)
+		}
+		input.FinalScriptSig = scriptSig
+
+		// No witness data for non-SegWit
+		input.FinalScriptWitness = nil
+
+		logger.Debug("Finalized P2SH multisig input",
+			"input", inputIndex,
+			"signatures", len(sigs),
+			"scriptSigLen", len(input.FinalScriptSig))
 	}
-	input.FinalScriptSig = scriptSig
 
 	// Clear partial signatures as they're no longer needed
 	input.PartialSigs = nil
-
-	logger.Debug("Finalized P2SH-P2WSH multisig input",
-		"input", inputIndex,
-		"signatures", len(sigs),
-		"witnessLen", len(input.FinalScriptWitness),
-		"scriptSigLen", len(input.FinalScriptSig))
 
 	return nil
 }
@@ -1386,10 +1450,22 @@ func (b *Bitcoin) addBIP32DerivationForInput(
 		"address", addressStr,
 		"hd_key_path", addressInfo.HDKeyPath,
 		"hd_fingerprint", addressInfo.HDMasterFingerprint,
-		"pubkey_len", len(addressInfo.PubKey))
+		"pubkey_len", len(addressInfo.PubKey),
+		"is_watch_only", addressInfo.IsWatchOnly,
+		"is_script", addressInfo.IsScript)
 
 	// Check if address has derivation path
+	// For watch-only multisig descriptors, HDKeyPath and PubKey may be empty
+	// Bitcoin Core doesn't populate HDKeyPath for ranged multisig descriptors
+	// In this case, skip BIP32 derivation (signing wallets will add it during signing)
 	if addressInfo.HDKeyPath == "" {
+		if addressInfo.IsScript {
+			logger.Info("Skipping BIP32 derivation for multisig address without HD key path",
+				"address", addressStr,
+				"input_index", inputIndex,
+				"is_script", addressInfo.IsScript)
+			return nil
+		}
 		return errors.New("address has no HD key path (not from descriptor wallet?)")
 	}
 	if addressInfo.PubKey == "" {
