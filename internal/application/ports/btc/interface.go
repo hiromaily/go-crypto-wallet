@@ -68,6 +68,7 @@ type Bitcoiner interface {
 
 	// descriptor_info.go
 	GetDescriptorInfo(descriptor string) (*dtobtc.DescriptorInfo, error)
+	ListDescriptors(privateDescriptors bool) (*dtobtc.ListDescriptorsResult, error)
 
 	// label.go
 	SetLabel(addr, label string) error
