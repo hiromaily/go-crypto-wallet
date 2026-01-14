@@ -61,6 +61,10 @@ CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account_singlesig.yaml"
 # Export account config for keygen wallet (required for configuration)
 export BTC_ACCOUNT_CONF="${CONFIG_ACCOUNT}"
 
+# Wallet-specific RPC hosts (for environment variable overrides)
+WATCH_WALLET_RPC_HOST="127.0.0.1:18332/wallet/watch"
+KEYGEN_WALLET_RPC_HOST="127.0.0.1:19332/wallet/keygen"
+
 ###############################################################################
 # Environment Variable Overrides for Configuration
 ###############################################################################
@@ -71,7 +75,6 @@ export BTC_ACCOUNT_CONF="${CONFIG_ACCOUNT}"
 #   - address_type: "legacy" (derives key_type: bip44 automatically)
 # Note: key_type is automatically derived from address_type in Go code
 #       (see internal/domain/address/types.go AddrType.ToKeyType())
-# Note: Bitcoin RPC wallet names are set via sed in setup_wallets() function
 export WALLET_ADDRESS_TYPE="legacy"
 
 ###############################################################################
@@ -271,12 +274,12 @@ setup_wallets() {
 
 # Wrapper for watch wallet commands with host override
 watch_with_wallet() {
-	WALLET_BITCOIN_HOST="127.0.0.1:18332/wallet/watch" watch "$@"
+	WALLET_BITCOIN_HOST="${WATCH_WALLET_RPC_HOST}" watch "$@"
 }
 
 # Wrapper for keygen wallet commands with host override
 keygen_with_wallet() {
-	WALLET_BITCOIN_HOST="127.0.0.1:19332/wallet/keygen" keygen "$@"
+	WALLET_BITCOIN_HOST="${KEYGEN_WALLET_RPC_HOST}" keygen "$@"
 }
 
 ###############################################################################
