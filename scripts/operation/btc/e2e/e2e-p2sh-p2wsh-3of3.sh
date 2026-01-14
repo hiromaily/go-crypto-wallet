@@ -62,7 +62,7 @@ CONFIG_WATCH="${PROJECT_ROOT}/config/wallet/btc_watch.yaml"
 CONFIG_KEYGEN="${PROJECT_ROOT}/config/wallet/btc_keygen.yaml"
 CONFIG_SIGN1="${PROJECT_ROOT}/config/wallet/btc_sign1.yaml"
 CONFIG_SIGN2="${PROJECT_ROOT}/config/wallet/btc_sign2.yaml"
-CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account.yaml"
+CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account_3of3.yaml"
 
 # Export account config for keygen wallet (required for multisig configuration)
 export BTC_ACCOUNT_CONF="${CONFIG_ACCOUNT}"

@@ -1,8 +1,8 @@
 # Wallet Configuration Files
 
-このディレクトリには、各ウォレットタイプ・暗号通貨ごとの設定ファイルが格納されています。
+This directory contains configuration files for each wallet type and cryptocurrency.
 
-## ディレクトリ構成
+## Directory Structure
 
 ```
 config/wallet/
@@ -14,51 +14,51 @@ config/wallet/
 └── archive/           # Legacy TOML configurations (deprecated)
 ```
 
-## 設定ファイルの種類
+## Configuration File Types
 
 ### Wallet Config (`{chain}_{wallet_type}.yaml`)
 
-| ファイル | 用途 |
-|----------|------|
-| `btc_watch.yaml` | BTC Watch-only wallet (オンライン) |
-| `btc_keygen.yaml` | BTC Keygen wallet (オフライン環境推奨) |
-| `btc_sign.yaml` | BTC Sign wallet (オフライン環境推奨) |
-| `btc_sign1.yaml` / `btc_sign2.yaml` | マルチシグ用署名者1/2 |
+| File | Purpose |
+|------|---------|
+| `btc_watch.yaml` | BTC Watch-only wallet (online) |
+| `btc_keygen.yaml` | BTC Keygen wallet (offline recommended) |
+| `btc_sign.yaml` | BTC Sign wallet (offline recommended) |
+| `btc_sign1.yaml` / `btc_sign2.yaml` | Multisig signers 1/2 |
 
 ### Account Config (`account*.yaml`)
 
-| ファイル | 用途 |
-|----------|------|
-| `account.yaml` | デフォルトのアカウント構成 |
-| `account_singlesig.yaml` | シングルシグ用アカウント構成 |
-| `account_2of3.yaml` | 2-of-3 マルチシグ用アカウント構成 |
+| File | Purpose | Use Case |
+|------|---------|----------|
+| `account.yaml` | Single-sig account configuration | Pattern 1, 3, 5, 9 |
+| `account_2of3.yaml` | 2-of-3 multisig account configuration | Pattern 2, 4 |
+| `account_3of3.yaml` | 3-of-3 multisig account configuration | Pattern 8 |
 
-## ⚠️ 重要: 設定ファイルの運用方針
+## ⚠️ Important: Configuration File Policy
 
-**これらの設定ファイルはスクリプト実行ごとに編集・上書きすることを想定していません。**
+**These configuration files are NOT intended to be edited or overwritten per script execution.**
 
-### 環境変数による設定の上書き
+### Override via Environment Variables
 
-異なる設定でCLIを実行する場合は、**環境変数を使用**してください。
+Use **environment variables** to run CLI with different settings:
 
 ```bash
-# 設定ファイルを編集せずに、環境変数で上書き
+# Override config without editing files
 export WALLET_ADDRESS_TYPE=legacy
 export WALLET_BITCOIN_HOST=127.0.0.1:18443
 ./scripts/operation/btc/e2e/e2e-p2pkh-singlesig.sh
 ```
 
-#### 環境変数の命名規則
+#### Environment Variable Naming
 
 ```
-WALLET_{KEY}              # トップレベル設定
-WALLET_{SECTION}_{KEY}    # ネストされた設定
+WALLET_{KEY}              # Top-level settings
+WALLET_{SECTION}_{KEY}    # Nested settings
 ```
 
-#### 主要な環境変数
+#### Common Environment Variables
 
-| 設定ファイルのキー | 環境変数 |
-|-------------------|----------|
+| Config Key | Environment Variable |
+|------------|---------------------|
 | `address_type` | `WALLET_ADDRESS_TYPE` |
 | `bitcoin.host` | `WALLET_BITCOIN_HOST` |
 | `bitcoin.user` | `WALLET_BITCOIN_USER` |
@@ -67,73 +67,73 @@ WALLET_{SECTION}_{KEY}    # ネストされた設定
 | `mysql.dbname` | `WALLET_MYSQL_DBNAME` |
 | `logger.level` | `WALLET_LOGGER_LEVEL` |
 
-#### 優先順位
+#### Priority Order
 
-1. **環境変数** (最優先)
-2. **設定ファイル**
-3. **デフォルト値** (最低優先)
+1. **Environment Variables** (highest priority)
+2. **Config File**
+3. **Default Values** (lowest priority)
 
-詳細は [pkg/config/README.md](../../pkg/config/README.md) を参照。
+See [pkg/config/README.md](../../pkg/config/README.md) for details.
 
-## Bitcoin RPC Host の設定
+## Bitcoin RPC Host Configuration
 
-`bitcoin.host` の設定には、**ドメインのみ**と**パス付き**の2つの形式があります。
+The `bitcoin.host` setting supports two formats: **domain only** and **with path**.
 
-### 形式1: ドメインのみ
+### Format 1: Domain Only
 
 ```yaml
 bitcoin:
   host: "127.0.0.1:20332"
 ```
 
-### 形式2: パス付き (`/wallet/<name>`)
+### Format 2: With Path (`/wallet/<name>`)
 
 ```yaml
 bitcoin:
   host: "127.0.0.1:18332/wallet/watch"
 ```
 
-### どちらを使うべきか？
+### Which Format to Use?
 
-| ウォレットタイプ | 推奨形式 | 理由 |
-|-----------------|----------|------|
-| **Watch** | パス付き | Descriptorをインポートしてbitcoindでアドレス/UTXO管理を行う |
-| **Keygen** | パス付き | Descriptorをインポートしてbitcoindでアドレス/UTXO管理を行う |
-| **Sign** | ドメインのみ | Descriptorを使用しない。秘密鍵をアプリ内で管理 |
+| Wallet Type | Recommended | Reason |
+|-------------|-------------|--------|
+| **Watch** | With path | Imports Descriptors for address/UTXO management in bitcoind |
+| **Keygen** | With path | Imports Descriptors for address/UTXO management in bitcoind |
+| **Sign** | Domain only | Does not use Descriptors. Manages private keys within the app |
 
-### パス付き形式が必要な場合
+### When Path Format is Required
 
-Bitcoindの [Descriptor Wallet](https://bitcoincore.org/en/doc/24.0.0/rpc/wallet/importdescriptors/) 機能を使用する場合、事前にbitcoind側でwalletを作成する必要があります。
+When using bitcoind's [Descriptor Wallet](https://bitcoincore.org/en/doc/24.0.0/rpc/wallet/importdescriptors/) feature, you must create the wallet in bitcoind first:
 
 ```bash
-# bitcoindでwalletを作成
+# Create wallets in bitcoind
 bitcoin-cli createwallet "watch"
 bitcoin-cli createwallet "keygen"
 
-# CLIで特定のwalletを指定してRPCを実行
+# Execute RPC with specific wallet
 bitcoin-cli -rpcwallet=watch getwalletinfo
 ```
 
-パス付き形式 (`host: "127.0.0.1:18332/wallet/watch"`) は、`bitcoin-cli -rpcwallet=watch` と同等の動作をします。
+The path format (`host: "127.0.0.1:18332/wallet/watch"`) is equivalent to `bitcoin-cli -rpcwallet=watch`.
 
-#### 作成スクリプト
+#### Creation Script
 
-Dockerコンテナ内でwalletを作成するスクリプト:
+Script to create wallets in Docker container:
 
 ```bash
 ./scripts/operation/btc/create-bitcoind-wallet.sh
 ```
 
-### 補足: Sign walletがパスを使わない理由
+### Why Sign Wallet Doesn't Use Path
 
-Sign walletは以下の理由でbitcoindのwallet機能を使用しません：
+Sign wallet does not use bitcoind's wallet feature because:
 
-1. **オフライン環境**: Sign walletはセキュリティ上オフライン環境での運用を想定
-2. **秘密鍵管理**: アプリケーション内で秘密鍵を管理し、bitcoindには渡さない
-3. **トランザクション署名**: 未署名のPSBTを受け取り、アプリ内で署名処理を実行
+1. **Offline Environment**: Sign wallet is designed for offline operation for security
+2. **Private Key Management**: Manages private keys within the application, not in bitcoind
+3. **Transaction Signing**: Receives unsigned PSBTs and performs signing within the app
 
-## 関連ドキュメント
+## Related Documentation
 
-- [pkg/config/README.md](../../pkg/config/README.md) - 設定パッケージの詳細
-- [docs/crypto/btc/descriptor_user_guide.md](../../docs/crypto/btc/descriptor_user_guide.md) - Descriptor Walletの解説
-- [scripts/operation/btc/](../../scripts/operation/btc/) - BTC操作スクリプト
+- [pkg/config/README.md](../../pkg/config/README.md) - Config package details
+- [docs/crypto/btc/descriptor_user_guide.md](../../docs/crypto/btc/descriptor_user_guide.md) - Descriptor Wallet guide
+- [scripts/operation/btc/](../../scripts/operation/btc/) - BTC operation scripts

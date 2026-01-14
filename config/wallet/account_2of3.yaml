@@ -1,5 +1,10 @@
-# Account Configuration for Pattern 2 (P2PKH 2-of-3 Multisig E2E Test)
-# This configuration defines 2-of-3 multisig accounts for Pattern 2 testing
+# Account Configuration - 2-of-3 Multisig
+# Any 2 of 3 signatures required for transaction approval
+#
+# Use case:
+#   - Pattern 2: P2PKH 2-of-3 Multisig
+#   - Pattern 4: P2SH-P2WPKH 2-of-3 Multisig
+#   - Standard multisig scenarios with threshold approval
 
 # Account types available in the wallet
 types:
