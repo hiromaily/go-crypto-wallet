@@ -194,16 +194,6 @@ full_reset() {
 cleanup() {
 	log_step "Cleaning up containers and state"
 
-	# Restore original config files if backups exist
-	if [ -f "${CONFIG_WATCH}.bak" ]; then
-		mv "${CONFIG_WATCH}.bak" "${CONFIG_WATCH}"
-		log_info "Restored watch config"
-	fi
-	if [ -f "${CONFIG_KEYGEN}.bak" ]; then
-		mv "${CONFIG_KEYGEN}.bak" "${CONFIG_KEYGEN}"
-		log_info "Restored keygen config"
-	fi
-
 	# Stop and remove containers
 	log_info "Stopping Bitcoin containers..."
 	docker compose -f compose.btc.yaml down -v 2>/dev/null || true
@@ -281,16 +271,24 @@ setup_wallets() {
 
 	log_info "All wallets are ready"
 
-	# Update config files to include wallet names in Bitcoin RPC hosts
-	# This is required for wallet-specific RPC commands like listdescriptors
-	log_substep "Configuring wallet-specific RPC endpoints"
-	sed -i.bak 's|host: "127.0.0.1:18332"|host: "127.0.0.1:18332/wallet/watch"|' "${CONFIG_WATCH}"
-	sed -i.bak 's|host: "127.0.0.1:19332"|host: "127.0.0.1:19332/wallet/keygen"|' "${CONFIG_KEYGEN}"
-	log_info "Configured watch wallet RPC: 127.0.0.1:18332/wallet/watch"
-	log_info "Configured keygen wallet RPC: 127.0.0.1:19332/wallet/keygen"
+	# Note: Wallet-specific RPC endpoints are configured via environment variables
+	# for each command invocation (see wrapper functions below)
+	# This avoids modifying config files and creating backups
+	# Environment variables use WALLET_ prefix to override config file settings
+}
 
-	# Note: Sign wallets sign PSBTs directly using btcd library (offline signing)
-	# They do NOT use Bitcoin Core RPC for signing
+###############################################################################
+# Wallet Command Wrappers with Environment Variable Overrides
+###############################################################################
+
+# Wrapper for watch wallet commands with host override
+watch_with_wallet() {
+	WALLET_BITCOIN_HOST="127.0.0.1:18332/wallet/watch" watch "$@"
+}
+
+# Wrapper for keygen wallet commands with host override
+keygen_with_wallet() {
+	WALLET_BITCOIN_HOST="127.0.0.1:19332/wallet/keygen" keygen "$@"
 }
 
 ###############################################################################
@@ -393,10 +391,11 @@ multisig_setup_phase() {
 
 	# Export descriptors for multisig accounts (deposit, payment, stored)
 	# Pattern 2 uses 2-of-3 multisig with P2PKH (BIP44) wrapped in P2SH
+	# Note: Using wrapper function to set WALLET_BITCOIN_HOST for Bitcoin Core RPC
 	log_substep "Exporting descriptors from keygen wallet"
-	file_descriptor_deposit=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account deposit --output data/descriptor/btc/deposit_descriptors.json --format bitcoin-core --include-change)
-	file_descriptor_payment=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account payment --output data/descriptor/btc/payment_descriptors.json --format bitcoin-core --include-change)
-	file_descriptor_stored=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account stored --output data/descriptor/btc/stored_descriptors.json --format bitcoin-core --include-change)
+	file_descriptor_deposit=$(keygen_with_wallet -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account deposit --output data/descriptor/btc/deposit_descriptors.json --format bitcoin-core --include-change)
+	file_descriptor_payment=$(keygen_with_wallet -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account payment --output data/descriptor/btc/payment_descriptors.json --format bitcoin-core --include-change)
+	file_descriptor_stored=$(keygen_with_wallet -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account stored --output data/descriptor/btc/stored_descriptors.json --format bitcoin-core --include-change)
 
 	# Extract file paths from descriptor export output
 	descriptor_deposit="${file_descriptor_deposit##*exported to }"
@@ -409,15 +408,16 @@ multisig_setup_phase() {
 	log_info "  stored: $descriptor_stored"
 
 	# Import descriptors into watch wallet for multisig accounts
+	# Note: Using wrapper function to set WALLET_BITCOIN_HOST for Bitcoin Core RPC
 	log_substep "Importing descriptors into watch wallet"
 	log_info "Importing deposit descriptors"
-	watch -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor --file "${descriptor_deposit}" --account deposit
+	watch_with_wallet -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor --file "${descriptor_deposit}" --account deposit
 
 	log_info "Importing payment descriptors"
-	watch -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor --file "${descriptor_payment}" --account payment
+	watch_with_wallet -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor --file "${descriptor_payment}" --account payment
 
 	log_info "Importing stored descriptors"
-	watch -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor --file "${descriptor_stored}" --account stored
+	watch_with_wallet -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor --file "${descriptor_stored}" --account stored
 
 	log_info "All descriptors imported successfully"
 	log_info "Note: Pattern 2 uses 2-of-3 multisig with P2PKH (BIP44) wrapped in P2SH"
@@ -602,7 +602,7 @@ transaction_flow_phase() {
 
 	# Create unsigned transaction
 	log_substep "Creating unsigned payment transaction"
-	tx_file=$(watch -c "${CONFIG_WATCH}" create payment 2>&1) || {
+	tx_file=$(watch_with_wallet -c "${CONFIG_WATCH}" create payment 2>&1) || {
 		log_error "Failed to create payment transaction"
 		log_error "Output: $tx_file"
 
@@ -646,7 +646,7 @@ transaction_flow_phase() {
 
 	# Send transaction
 	log_substep "Sending fully signed transaction"
-	tx_result=$(watch -c "${CONFIG_WATCH}" send --file "${tx_signed2}")
+	tx_result=$(watch_with_wallet -c "${CONFIG_WATCH}" send --file "${tx_signed2}")
 	tx_id="${tx_result##*txID: }"
 
 	log_info "Transaction sent successfully!"
