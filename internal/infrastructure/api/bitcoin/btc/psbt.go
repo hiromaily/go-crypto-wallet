@@ -392,10 +392,26 @@ func (b *Bitcoin) SignPSBTWithKey(psbtBase64 string, wifs []string) (string, boo
 // This function should only be called when PSBT is complete (all signatures collected).
 // Used by Watch wallet before extracting the final transaction.
 func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
+	logger.Info("FinalizePSBT called")
+
 	// Parse PSBT
 	parsed, err := b.parsePSBTInternal(psbtBase64)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse PSBT for finalization: %w", err)
+	}
+
+	logger.Debug("PSBT parsed for finalization",
+		"inputs", len(parsed.Packet.Inputs),
+		"outputs", len(parsed.Packet.Outputs))
+
+	// Log input states before finalization
+	for i, input := range parsed.Packet.Inputs {
+		logger.Debug("Input state before finalization",
+			"input", i,
+			"hasPartialSigs", len(input.PartialSigs) > 0,
+			"partialSigsCount", len(input.PartialSigs),
+			"hasFinalScriptSig", input.FinalScriptSig != nil,
+			"hasFinalScriptWitness", input.FinalScriptWitness != nil)
 	}
 
 	// Check if PSBT is complete using custom multisig completion check
@@ -403,6 +419,7 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("failed to check PSBT completion: %w", err)
 	}
+	logger.Info("PSBT completion check result", "isComplete", isComplete)
 	if !isComplete {
 		return "", errors.New("cannot finalize incomplete PSBT (missing signatures)")
 	}
@@ -446,14 +463,41 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
 		hasWitnessScript := len(input.WitnessScript) > 0
 		hasPartialSigs := len(input.PartialSigs) > 0
 
+		// Detect script type for proper finalization
+		var scriptType string
+		if input.WitnessUtxo != nil {
+			if txscript.IsPayToPubKeyHash(input.WitnessUtxo.PkScript) {
+				scriptType = "P2PKH"
+			} else if txscript.IsPayToScriptHash(input.WitnessUtxo.PkScript) {
+				if hasWitnessScript {
+					scriptType = "P2SH-P2WSH"
+				} else {
+					scriptType = "P2SH"
+				}
+			} else if txscript.IsPayToWitnessPubKeyHash(input.WitnessUtxo.PkScript) {
+				scriptType = "P2WPKH"
+			} else if txscript.IsPayToWitnessScriptHash(input.WitnessUtxo.PkScript) {
+				scriptType = "P2WSH"
+			} else if txscript.IsPayToTaproot(input.WitnessUtxo.PkScript) {
+				scriptType = "P2TR"
+			}
+		}
+
 		logger.Debug("Checking finalization method for input",
 			"input", i,
+			"scriptType", scriptType,
 			"hasRedeemScript", hasRedeemScript,
 			"hasWitnessScript", hasWitnessScript,
 			"hasPartialSigs", hasPartialSigs,
 			"partialSigsCount", len(input.PartialSigs))
 
-		if hasRedeemScript && hasWitnessScript && hasPartialSigs {
+		if scriptType == "P2PKH" && hasPartialSigs {
+			// P2PKH - use custom finalization (creates scriptSig, no witness)
+			logger.Debug("Using custom P2PKH finalization", "input", i)
+			if err := b.finalizeP2PKHInput(parsed.Packet, i); err != nil {
+				return "", fmt.Errorf("failed to finalize P2PKH input %d: %w", i, err)
+			}
+		} else if hasRedeemScript && hasWitnessScript && hasPartialSigs {
 			// P2SH-P2WSH multisig - use custom finalization
 			logger.Debug("Using custom multisig finalization", "input", i)
 			if err := b.finalizeMultisigInput(parsed.Packet, i); err != nil {
@@ -461,11 +505,21 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
 			}
 		} else {
 			// Other script types - use btcd's default finalization
-			logger.Debug("Using btcd default finalization", "input", i)
+			logger.Debug("Using btcd default finalization", "input", i, "scriptType", scriptType)
 			if err := psbt.Finalize(parsed.Packet, i); err != nil {
 				return "", fmt.Errorf("failed to finalize input %d: %w", i, err)
 			}
 		}
+	}
+
+	// Log input states after finalization
+	for i, input := range parsed.Packet.Inputs {
+		logger.Info("Input state after finalization",
+			"input", i,
+			"hasPartialSigs", len(input.PartialSigs) > 0,
+			"hasFinalScriptSig", input.FinalScriptSig != nil,
+			"finalScriptSigLen", len(input.FinalScriptSig),
+			"hasFinalScriptWitness", input.FinalScriptWitness != nil)
 	}
 
 	// Serialize finalized PSBT to base64
@@ -474,10 +528,62 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
 		return "", fmt.Errorf("failed to serialize finalized PSBT: %w", err)
 	}
 
-	logger.Debug("PSBT finalization completed",
+	logger.Info("PSBT finalization completed",
 		"inputs", len(parsed.Packet.UnsignedTx.TxIn))
 
 	return finalizedPSBT, nil
+}
+
+// finalizeP2PKHInput finalizes a P2PKH (Pay-to-Public-Key-Hash) PSBT input.
+// This creates a scriptSig in the format: <signature> <pubkey>
+// P2PKH does NOT use witness data - all data goes in scriptSig.
+func (b *Bitcoin) finalizeP2PKHInput(packet *psbt.Packet, inputIndex int) error {
+	// IMPORTANT: Get pointer to input, not a copy
+	input := &packet.Inputs[inputIndex]
+
+	// Ensure we have a partial signature
+	if len(input.PartialSigs) == 0 {
+		return errors.New("no signatures to finalize for P2PKH input")
+	}
+
+	// P2PKH single-sig should have exactly one signature
+	if len(input.PartialSigs) != 1 {
+		return fmt.Errorf("P2PKH input has %d signatures, expected 1", len(input.PartialSigs))
+	}
+
+	partialSig := input.PartialSigs[0]
+
+	logger.Debug("Finalizing P2PKH input",
+		"input", inputIndex,
+		"sigLen", len(partialSig.Signature),
+		"pubKeyLen", len(partialSig.PubKey))
+
+	// Build scriptSig: <signature> <pubkey>
+	scriptSig, err := txscript.NewScriptBuilder().
+		AddData(partialSig.Signature).
+		AddData(partialSig.PubKey).
+		Script()
+	if err != nil {
+		return fmt.Errorf("failed to build P2PKH scriptSig: %w", err)
+	}
+
+	// Set the final scriptSig
+	input.FinalScriptSig = scriptSig
+
+	// Clear witness data (P2PKH doesn't use witness)
+	input.FinalScriptWitness = nil
+
+	// Clear partial sigs and other metadata (no longer needed after finalization)
+	input.PartialSigs = nil
+	input.SighashType = 0
+	input.Bip32Derivation = nil
+
+	logger.Debug("P2PKH input finalized",
+		"input", inputIndex,
+		"scriptSigLen", len(scriptSig),
+		"hasWitness", input.FinalScriptWitness != nil)
+
+	return nil
 }
 
 // finalizeMultisigInput finalizes a P2SH-P2WSH multisig PSBT input.
