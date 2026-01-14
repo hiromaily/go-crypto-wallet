@@ -56,7 +56,7 @@ WALLET_PASSPHRASE="${WALLET_PASSPHRASE:-test}"
 CONFIG_WATCH="${PROJECT_ROOT}/config/wallet/btc_watch.yaml"
 CONFIG_KEYGEN="${PROJECT_ROOT}/config/wallet/btc_keygen.yaml"
 # Use single-sig account configuration for Pattern 1
-CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account_singlesig.yaml"
+CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account.yaml"
 
 # Export account config for keygen wallet (required for configuration)
 export BTC_ACCOUNT_CONF="${CONFIG_ACCOUNT}"
@@ -326,7 +326,7 @@ key_generation_phase() {
 singlesig_setup_phase() {
 	log_step "Single-sig Address Setup Phase"
 
-	# For Pattern 1 (P2PKH Single-sig), use account_singlesig.yaml
+	# For Pattern 1 (P2PKH Single-sig), use account.yaml
 	# which configures all accounts as single-sig
 	# We export descriptors for both client and payment accounts
 	# to test the complete deposit → payment flow
@@ -361,7 +361,7 @@ singlesig_setup_phase() {
 	done
 
 	log_info "All descriptors imported successfully"
-	log_info "Note: Pattern 1 uses account_singlesig.yaml (all accounts are single-sig)"
+	log_info "Note: Pattern 1 uses account.yaml (all accounts are single-sig)"
 
 	# Derive payment address from descriptor for UTXO generation
 	# We generate UTXOs to the payment account address for testing payment transactions
@@ -725,7 +725,7 @@ main() {
 	log_info "  • P2PKH (BIP44 Legacy) single-signature"
 	log_info "  • Descriptor-based address management"
 	log_info "  • Simple single-key signing workflow"
-	log_info "  • Uses account_singlesig.yaml (all accounts configured as single-sig)"
+	log_info "  • Uses account.yaml (all accounts configured as single-sig)"
 	echo ""
 	log_info "You can now use the wallet system for Bitcoin single-sig operations"
 	log_info "To cleanup, run: $0 --cleanup"

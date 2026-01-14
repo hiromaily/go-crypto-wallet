@@ -1,6 +1,11 @@
-# Account Configuration (YAML format)
-# This is a sample YAML configuration file equivalent to account.toml
-# You can use either TOML or YAML format for wallet and account configuration
+# Account Configuration - Single Signature
+# Default account configuration for single-sig wallets
+#
+# Use case:
+#   - Pattern 1: P2PKH Single-sig
+#   - Pattern 3: P2SH-P2WPKH Single-sig
+#   - Pattern 5: P2WPKH Single-sig
+#   - Pattern 9: P2TR Single-sig
 
 # Account types available in the wallet
 types:
@@ -16,22 +21,5 @@ deposit_receiver: deposit
 payment_sender: payment
 
 # Multisig account configurations
-# Each entry defines the multisig requirements for a specific account type
-multisig:
-  - type: deposit
-    required: 2
-    auth_users:
-      - auth1
-      - auth2
-
-  - type: payment
-    required: 2
-    auth_users:
-      - auth1
-      - auth2
-
-  - type: stored
-    required: 2
-    auth_users:
-      - auth1
-      - auth2
+# For single-sig: No multisig accounts
+multisig: []

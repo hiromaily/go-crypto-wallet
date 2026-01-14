@@ -71,9 +71,9 @@ Use the appropriate configuration file based on the pattern:
 
 | Pattern | Account Config |
 |---------|----------------|
-| Single-sig | `config/wallet/account_singlesig.yaml` |
+| Single-sig | `config/wallet/account.yaml` |
 | 2-of-3 Multisig | `config/wallet/account_2of3.yaml` |
-| 3-of-3 Multisig | `config/wallet/account.yaml` |
+| 3-of-3 Multisig | `config/wallet/account_3of3.yaml` |
 
 ## Configuration File Policy (Important)
 
