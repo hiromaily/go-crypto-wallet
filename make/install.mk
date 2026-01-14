@@ -45,6 +45,10 @@ install-tools-by-gomod:
 install-tools:
 	go install github.com/mrtazz/checkmake/cmd/checkmake@latest
 
+.PHONY: setup-lefthook
+setup-lefthook:
+	go tool lefthook install
+
 .PHONY: goget
 goget:
 	go mod download
