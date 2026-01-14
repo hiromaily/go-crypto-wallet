@@ -471,6 +471,9 @@ generate_test_utxos() {
 
 	log_info "Using payment address: $payment_address"
 
+	# Export for use in create_payment_requests_phase
+	export payment_address
+
 	# Generate blocks with coinbase reward to payment address
 	log_info "Generating 101 blocks to create mature coinbase for testing..."
 	btc_cli "btc-watch" generatetoaddress 101 "$payment_address" >/dev/null
@@ -523,20 +526,10 @@ generate_test_utxos() {
 create_payment_requests_phase() {
 	log_step "Payment Request Creation Phase"
 
-	# Get a payment sender address from database
-	# For P2SH-wrapped P2PKH 2-of-3 testing, query for P2SH addresses (starting with '2' in regtest)
-	log_substep "Retrieving payment sender address from database"
-	sender_address=$(docker compose exec -T wallet-db mysql -u root -proot watch -N -e \
-		"SELECT wallet_address FROM address WHERE coin='btc' AND account='payment' AND wallet_address LIKE '2%' LIMIT 1" 2>/dev/null)
-
-	if [ -z "$sender_address" ]; then
-		log_error "No payment addresses found in database"
-		log_error "Please check:"
-		log_error "  - Descriptor import succeeded"
-		log_error "  - Addresses were derived and stored in database"
-		return 1
-	fi
-
+	# Use the payment address derived from descriptor in generate_test_utxos phase
+	# For multisig descriptors, addresses are managed by Bitcoin Core, not stored in the database
+	log_substep "Using payment sender address derived from descriptor"
+	sender_address="$payment_address"
 	log_info "Using sender address: $sender_address"
 
 	# Generate anonymous receiver addresses for testing
