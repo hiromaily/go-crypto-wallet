@@ -15,6 +15,7 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
 	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -236,10 +237,29 @@ func (u *generateDescriptorUseCase) generateMultisigDescriptor(
 		return u.descriptorService.GenerateTaprootScriptPathDescriptor(signers, input.IsChange)
 	}
 
-	// P2SH-SegWit (BIP49) requires sh() wrapper around wsh()
-	isP2SHWrapped := input.AddressType == domainAddress.AddrTypeP2shSegwit
+	// Map address type to descriptor type for multisig
+	var descriptorType domainWallet.DescriptorType
+	switch input.AddressType {
+	case domainAddress.AddrTypeLegacy:
+		// BIP44 Legacy: P2SH multisig - sh(multi(...))
+		descriptorType = domainWallet.DescriptorTypeSH
+	case domainAddress.AddrTypeP2shSegwit:
+		// BIP49 P2SH-SegWit: P2SH-P2WSH multisig - sh(wsh(sortedmulti(...)))
+		descriptorType = domainWallet.DescriptorTypeSHWSH
+	case domainAddress.AddrTypeBech32:
+		// BIP48/84 Native SegWit: P2WSH multisig - wsh(sortedmulti(...))
+		descriptorType = domainWallet.DescriptorTypeWSH
+	case domainAddress.AddrTypeTaproot:
+		// Already handled above
+		return "", errors.New("taproot should be handled before this switch")
+	case domainAddress.AddrTypeBCHCashAddr, domainAddress.AddrTypeETH:
+		// Not applicable for BTC multisig
+		return "", fmt.Errorf("unsupported address type for BTC multisig: %s", input.AddressType)
+	default:
+		return "", fmt.Errorf("unsupported address type for multisig: %s", input.AddressType)
+	}
 
-	return u.descriptorService.GenerateMultisigDescriptor(requiredSigs, signers, input.IsChange, isP2SHWrapped)
+	return u.descriptorService.GenerateMultisigDescriptor(requiredSigs, signers, input.IsChange, descriptorType)
 }
 
 func (u *generateDescriptorUseCase) buildMultisigSigners(

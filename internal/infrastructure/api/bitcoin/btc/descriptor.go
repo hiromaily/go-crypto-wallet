@@ -115,6 +115,8 @@ func determineType(descriptorStr string) (domainWallet.DescriptorType, error) {
 		return domainWallet.DescriptorTypeSHWSH, nil
 	case strings.HasPrefix(descriptorStr, "sh(wpkh("):
 		return domainWallet.DescriptorTypeSHWPKH, nil
+	case strings.HasPrefix(descriptorStr, "sh(multi("), strings.HasPrefix(descriptorStr, "sh(sortedmulti("):
+		return domainWallet.DescriptorTypeSH, nil
 	case strings.HasPrefix(descriptorStr, "wpkh("):
 		return domainWallet.DescriptorTypeWPKH, nil
 	case strings.HasPrefix(descriptorStr, "tr("):

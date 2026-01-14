@@ -22,11 +22,12 @@ type MultisigSigner struct {
 // Format:
 //   - P2WSH (native SegWit): wsh(sortedmulti(M,[fp1/path]xpub1/change/*,[fp2/path]xpub2/change/*,...))
 //   - P2SH-P2WSH (wrapped SegWit): sh(wsh(sortedmulti(M,[fp1/path]xpub1/change/*,[fp2/path]xpub2/change/*,...)))
+//   - P2SH (Legacy): sh(multi(M,[fp1/path]xpub1/change/*,[fp2/path]xpub2/change/*,...))
 func (d *DescriptorService) GenerateMultisigDescriptor(
 	requiredSigs int,
 	signers []MultisigSigner,
 	isChange bool,
-	isP2SHWrapped bool,
+	descriptorType domainWallet.DescriptorType,
 ) (string, error) {
 	if len(signers) == 0 {
 		return "", errors.New("no multisig signers provided")
@@ -41,19 +42,44 @@ func (d *DescriptorService) GenerateMultisigDescriptor(
 		return "", err
 	}
 
-	multisigPart := fmt.Sprintf(
-		"sortedmulti(%d,%s)",
-		requiredSigs,
-		strings.Join(keyStrings, ","),
-	)
-
 	var descriptor string
-	if isP2SHWrapped {
-		// P2SH-P2WSH: sh(wsh(sortedmulti(...)))
-		descriptor = fmt.Sprintf("sh(wsh(%s))", multisigPart)
-	} else {
-		// P2WSH: wsh(sortedmulti(...))
-		descriptor = fmt.Sprintf("wsh(%s)", multisigPart)
+	switch descriptorType {
+	case domainWallet.DescriptorTypeSH:
+		// P2SH (Legacy): sh(multi(...))
+		// Note: For BIP44 Legacy multisig, we use multi() not sortedmulti()
+		// to match Bitcoin Core's standard behavior for non-witness scripts.
+		multisigPart := fmt.Sprintf(
+			"multi(%d,%s)",
+			requiredSigs,
+			strings.Join(keyStrings, ","),
+		)
+		descriptor = fmt.Sprintf("sh(%s)", multisigPart)
+
+	case domainWallet.DescriptorTypeSHWSH, domainWallet.DescriptorTypeWSH:
+		// Both P2SH-P2WSH (BIP49) and P2WSH (BIP48) use sortedmulti
+		// Generate common sortedmulti part
+		multisigPart := fmt.Sprintf(
+			"sortedmulti(%d,%s)",
+			requiredSigs,
+			strings.Join(keyStrings, ","),
+		)
+		// Apply appropriate wrapper based on descriptor type
+		if descriptorType == domainWallet.DescriptorTypeSHWSH {
+			// P2SH-P2WSH (BIP49): sh(wsh(sortedmulti(...)))
+			descriptor = fmt.Sprintf("sh(wsh(%s))", multisigPart)
+		} else {
+			// P2WSH (BIP48): wsh(sortedmulti(...))
+			descriptor = fmt.Sprintf("wsh(%s)", multisigPart)
+		}
+
+	case domainWallet.DescriptorTypePKH, domainWallet.DescriptorTypeSHWPKH,
+		domainWallet.DescriptorTypeWPKH, domainWallet.DescriptorTypeTR,
+		domainWallet.DescriptorTypeUnknown:
+		// These descriptor types are not for traditional multisig
+		return "", fmt.Errorf("descriptor type %s is not supported for traditional multisig", descriptorType.String())
+
+	default:
+		return "", fmt.Errorf("unsupported multisig descriptor type: %s", descriptorType.String())
 	}
 
 	// Note: Checksum is NOT added here because the domain layer's BIP380 implementation
