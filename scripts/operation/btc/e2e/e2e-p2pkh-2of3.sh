@@ -26,7 +26,7 @@
 #   - config/wallet/btc_sign1.yaml:  address_type: "legacy"
 #   - config/wallet/btc_sign2.yaml:  address_type: "legacy"
 
-set -eu
+set -euo pipefail
 
 # Script directory for relative paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -53,6 +53,10 @@ RPC_PASSWORD="${RPC_PASSWORD:-xyz}"
 # Wallet passphrase (only used if ENCRYPTED=true)
 # Note: Default value is for testing only - use strong passphrase in production
 WALLET_PASSPHRASE="${WALLET_PASSPHRASE:-test}"
+
+# Docker volume name (can be overridden via environment variable)
+# Note: Docker Compose prepends project name to volume names
+DOCKER_VOLUME_NAME="${DOCKER_VOLUME_NAME:-go-crypto-wallet_wallet-db}"
 
 # Config file paths (absolute)
 CONFIG_WATCH="${PROJECT_ROOT}/config/wallet/btc_watch.yaml"
@@ -133,7 +137,7 @@ full_reset() {
 
 	# Explicitly remove database volume (in case -v flag didn't work)
 	log_info "Forcefully removing database volume..."
-	local volume_name="go-crypto-wallet_wallet-db"
+	local volume_name="${DOCKER_VOLUME_NAME}"
 
 	# Try multiple times in case volume is still being used
 	local removal_attempts=0
@@ -483,7 +487,7 @@ generate_test_utxos() {
 		trusted_balance=$(echo "$balance_json" | jq -r '.mine.trusted // 0' 2>/dev/null || echo "0")
 
 		# Check if we have any trusted (mature) balance
-		if [ -n "$trusted_balance" ] && (($(echo "$trusted_balance > 0" | bc -l))); then
+		if [ -n "$trusted_balance" ] && [ "$(echo "$trusted_balance > 0" | bc -l 2>/dev/null || echo 0)" -eq 1 ]; then
 			log_info "Payment account balance verified: ${trusted_balance} BTC (took ${elapsed}s)"
 			balance_found=true
 			break
@@ -575,6 +579,21 @@ EOF
 }
 
 ###############################################################################
+# Helper Functions for Transaction Flow
+###############################################################################
+
+# Log detailed error message for "No utxo" errors
+# Usage: log_no_utxo_error
+log_no_utxo_error() {
+	log_error "Transaction creation failed"
+	log_error "This could indicate:"
+	log_error "  - No payment requests in database"
+	log_error "  - No UTXOs available for payment account"
+	log_error "  - UTXOs not mature enough (need 100+ confirmations)"
+	return 1
+}
+
+###############################################################################
 # Transaction Flow Phase (2-of-3 Multisig)
 ###############################################################################
 
@@ -588,24 +607,14 @@ transaction_flow_phase() {
 		log_error "Output: $tx_file"
 
 		if echo "$tx_file" | grep -q "No utxo"; then
-			log_error "Transaction creation failed"
-			log_error "This could indicate:"
-			log_error "  - No payment requests in database"
-			log_error "  - No UTXOs available for payment account"
-			log_error "  - UTXOs not mature enough (need 100+ confirmations)"
-			return 1
+			log_no_utxo_error
 		fi
 
 		return 1
 	}
 
 	if echo "$tx_file" | grep -q "No utxo"; then
-		log_error "Transaction creation failed"
-		log_error "This could indicate:"
-		log_error "  - No payment requests in database"
-		log_error "  - No UTXOs available for payment account"
-		log_error "  - UTXOs not mature enough (need 100+ confirmations)"
-		return 1
+		log_no_utxo_error
 	fi
 
 	# Extract file path
