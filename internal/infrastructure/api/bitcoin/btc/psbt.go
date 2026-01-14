@@ -858,11 +858,12 @@ func (*Bitcoin) hasPartialSignatures(packet *psbt.Packet) bool {
 // signInputWithKey signs a single PSBT input with a private key.
 // Returns true if signature was successfully added, false otherwise.
 //
-// Supports three signing methods based on script type:
-//   - Taproot (P2TR): Schnorr signatures with CalcTaprootSignatureHash
-//   - SegWit v0 (P2WPKH/P2WSH): ECDSA signatures with CalcWitnessSigHash
-//   - Legacy (P2PKH/P2SH): ECDSA signatures with CalcSignatureHash
-func (*Bitcoin) signInputWithKey(
+// This function acts as a dispatcher, routing to the appropriate signing method
+// based on script type:
+//   - Taproot (P2TR): signTaprootInput
+//   - SegWit v0 (P2WPKH/P2WSH): signSegWitInput
+//   - Legacy (P2PKH/P2SH): signLegacyInput
+func (b *Bitcoin) signInputWithKey(
 	updater *psbt.Updater,
 	msgTx *wire.MsgTx,
 	inputIndex int,
@@ -878,150 +879,200 @@ func (*Bitcoin) signInputWithKey(
 		txscript.IsPayToWitnessScriptHash(witnessUtxo.PkScript) ||
 		(txscript.IsPayToScriptHash(witnessUtxo.PkScript) && len(psbtInput.WitnessScript) > 0)
 
-	// Check if this is a multisig input (has witness script)
-	hasWitnessScript := len(psbtInput.WitnessScript) > 0
-
-	var sigBytes []byte
-	var err error
-
+	// Route to appropriate signing function
 	if isTaproot {
-		// Taproot (P2TR): Use Schnorr signature
-		sigHashes := txscript.NewTxSigHashes(msgTx, prevOutputFetcher)
-		hash, err := txscript.CalcTaprootSignatureHash(
-			sigHashes,
-			txscript.SigHashDefault,
-			msgTx,
-			inputIndex,
-			prevOutputFetcher,
-		)
-		if err != nil {
-			logger.Warn("Failed to calculate Taproot signature hash", "input", inputIndex, "error", err)
-			return false
-		}
-
-		// Sign with Schnorr
-		signature, err := schnorr.Sign(privKey.PrivKey, hash)
-		if err != nil {
-			logger.Warn("Failed to create Schnorr signature", "input", inputIndex, "error", err)
-			return false
-		}
-
-		// For Taproot, signature is just the Schnorr signature (no sighash type appended for SIGHASH_DEFAULT)
-		sigBytes = signature.Serialize()
+		return b.signTaprootInput(updater, msgTx, inputIndex, psbtInput, privKey, prevOutputFetcher)
 	} else if isSegWit {
-		// SegWit v0 (P2WPKH/P2WSH): Use ECDSA signature with witness sig hash
-		sigHashes := txscript.NewTxSigHashes(msgTx, prevOutputFetcher)
+		return b.signSegWitInput(updater, msgTx, inputIndex, psbtInput, privKey, prevOutputFetcher)
+	}
+	return b.signLegacyInput(msgTx, inputIndex, psbtInput, privKey)
+}
 
-		// For P2WSH multisig, use the witness script for hash calculation
-		// For P2WPKH (single sig), use the scriptPubKey
-		scriptForHash := witnessUtxo.PkScript
-		if hasWitnessScript {
-			scriptForHash = psbtInput.WitnessScript
-			logger.Debug("Using witness script for P2WSH multisig hash calculation",
-				"input", inputIndex,
-				"witnessScriptLen", len(psbtInput.WitnessScript))
-		}
-
-		hash, err := txscript.CalcWitnessSigHash(
-			scriptForHash,
-			sigHashes,
-			txscript.SigHashAll,
-			msgTx,
-			inputIndex,
-			witnessUtxo.Value,
-		)
-		if err != nil {
-			logger.Warn("Failed to calculate witness signature hash", "input", inputIndex, "error", err)
-			return false
-		}
-
-		// Sign with ECDSA
-		signature := ecdsa.Sign(privKey.PrivKey, hash)
-
-		// Serialize signature with sighash type
-		sigBytes = append(signature.Serialize(), byte(txscript.SigHashAll))
-	} else {
-		// Legacy (P2PKH/P2SH): Use ECDSA signature with legacy sig hash
-		logger.Debug("Using legacy signature algorithm for P2PKH/P2SH",
-			"input", inputIndex,
-			"pkScript", hex.EncodeToString(witnessUtxo.PkScript))
-
-		// For legacy P2PKH, the scriptPubKey is used for signature hash
-		scriptForHash := witnessUtxo.PkScript
-
-		// For P2SH, use the redeem script if available
-		if len(psbtInput.RedeemScript) > 0 {
-			scriptForHash = psbtInput.RedeemScript
-			logger.Debug("Using redeem script for legacy P2SH signature",
-				"input", inputIndex,
-				"redeemScriptLen", len(psbtInput.RedeemScript))
-		}
-
-		hash, err := txscript.CalcSignatureHash(
-			scriptForHash,
-			txscript.SigHashAll,
-			msgTx,
-			inputIndex,
-		)
-		if err != nil {
-			logger.Warn("Failed to calculate legacy signature hash", "input", inputIndex, "error", err)
-			return false
-		}
-
-		logger.Debug("Legacy signature hash calculated",
-			"input", inputIndex,
-			"hash", hex.EncodeToString(hash),
-			"scriptForHashLen", len(scriptForHash))
-
-		// Sign with ECDSA
-		signature := ecdsa.Sign(privKey.PrivKey, hash)
-
-		logger.Debug("ECDSA signature created",
-			"input", inputIndex,
-			"sigR", signature.R().String(),
-			"sigS", signature.S().String())
-
-		// Serialize signature with sighash type
-		sigBytes = append(signature.Serialize(), byte(txscript.SigHashAll))
-
-		// Verify signature locally before adding to PSBT
-		pubKeyObj := privKey.PrivKey.PubKey()
-		if !signature.Verify(hash, pubKeyObj) {
-			logger.Error("Signature verification FAILED locally",
-				"input", inputIndex,
-				"pubKey", hex.EncodeToString(pubKeyObj.SerializeCompressed()))
-			return false
-		}
-		logger.Debug("Signature verified successfully locally", "input", inputIndex)
+// signTaprootInput signs a Taproot (P2TR) input using Schnorr signatures.
+func (*Bitcoin) signTaprootInput(
+	updater *psbt.Updater,
+	msgTx *wire.MsgTx,
+	inputIndex int,
+	psbtInput *psbt.PInput,
+	privKey *btcutil.WIF,
+	prevOutputFetcher *txscript.MultiPrevOutFetcher,
+) bool {
+	// Calculate Taproot signature hash
+	sigHashes := txscript.NewTxSigHashes(msgTx, prevOutputFetcher)
+	hash, err := txscript.CalcTaprootSignatureHash(
+		sigHashes,
+		txscript.SigHashDefault,
+		msgTx,
+		inputIndex,
+		prevOutputFetcher,
+	)
+	if err != nil {
+		logger.Warn("Failed to calculate Taproot signature hash", "input", inputIndex, "error", err)
+		return false
 	}
 
-	// Add partial signature to PSBT
-	// Pass redeem script and witness script for proper PSBT completion detection
+	// Sign with Schnorr
+	signature, err := schnorr.Sign(privKey.PrivKey, hash)
+	if err != nil {
+		logger.Warn("Failed to create Schnorr signature", "input", inputIndex, "error", err)
+		return false
+	}
+
+	// For Taproot, signature is just the Schnorr signature (no sighash type appended for SIGHASH_DEFAULT)
+	sigBytes := signature.Serialize()
 	pubKey := privKey.PrivKey.PubKey().SerializeCompressed()
 
-	// For debugging: Extract pubkey hash from scriptPubKey
-	if !isTaproot && !isSegWit {
-		// P2PKH scriptPubKey format: OP_DUP OP_HASH160 <20-byte-hash> OP_EQUALVERIFY OP_CHECKSIG
-		if len(witnessUtxo.PkScript) == 25 {
-			expectedPKH := witnessUtxo.PkScript[3:23]
-			actualPKH := btcutil.Hash160(pubKey)
-			logger.Debug("Comparing public key hashes for P2PKH",
-				"input", inputIndex,
-				"expectedPKH", hex.EncodeToString(expectedPKH),
-				"actualPKH", hex.EncodeToString(actualPKH),
-				"match", bytes.Equal(expectedPKH, actualPKH))
-		}
+	// Add signature using btcd's updater
+	outcome, err := updater.Sign(inputIndex, sigBytes, pubKey, psbtInput.RedeemScript, psbtInput.WitnessScript)
+	if err != nil {
+		logger.Debug("Signature not applicable for this input", "input", inputIndex, "error", err)
+		return false
 	}
 
-	logger.Debug("Calling updater.Sign",
-		"input", inputIndex,
-		"sigLen", len(sigBytes),
-		"pubKeyLen", len(pubKey),
-		"hasRedeemScript", len(psbtInput.RedeemScript) > 0,
-		"hasWitnessScript", len(psbtInput.WitnessScript) > 0,
-		"hasBIP32Derivation", len(psbtInput.Bip32Derivation) > 0)
+	if outcome == psbt.SignSuccesful {
+		logger.Debug("Added Taproot signature to input", "input", inputIndex)
+		return true
+	}
 
-	// Log BIP32 derivation public keys for comparison
+	logger.Debug("Taproot signature not added", "input", inputIndex, "outcome", outcome)
+	return false
+}
+
+// signSegWitInput signs a SegWit v0 (P2WPKH/P2WSH) input using ECDSA signatures.
+func (*Bitcoin) signSegWitInput(
+	updater *psbt.Updater,
+	msgTx *wire.MsgTx,
+	inputIndex int,
+	psbtInput *psbt.PInput,
+	privKey *btcutil.WIF,
+	prevOutputFetcher *txscript.MultiPrevOutFetcher,
+) bool {
+	witnessUtxo := psbtInput.WitnessUtxo
+
+	// Calculate witness signature hash
+	sigHashes := txscript.NewTxSigHashes(msgTx, prevOutputFetcher)
+
+	// For P2WSH multisig, use the witness script for hash calculation
+	// For P2WPKH (single sig), use the scriptPubKey
+	scriptForHash := witnessUtxo.PkScript
+	if len(psbtInput.WitnessScript) > 0 {
+		scriptForHash = psbtInput.WitnessScript
+		logger.Debug("Using witness script for P2WSH multisig hash calculation",
+			"input", inputIndex,
+			"witnessScriptLen", len(psbtInput.WitnessScript))
+	}
+
+	hash, err := txscript.CalcWitnessSigHash(
+		scriptForHash,
+		sigHashes,
+		txscript.SigHashAll,
+		msgTx,
+		inputIndex,
+		witnessUtxo.Value,
+	)
+	if err != nil {
+		logger.Warn("Failed to calculate witness signature hash", "input", inputIndex, "error", err)
+		return false
+	}
+
+	// Sign with ECDSA
+	signature := ecdsa.Sign(privKey.PrivKey, hash)
+	sigBytes := append(signature.Serialize(), byte(txscript.SigHashAll))
+	pubKey := privKey.PrivKey.PubKey().SerializeCompressed()
+
+	// Add signature using btcd's updater
+	outcome, err := updater.Sign(inputIndex, sigBytes, pubKey, psbtInput.RedeemScript, psbtInput.WitnessScript)
+	if err != nil {
+		logger.Debug("Signature not applicable for this input", "input", inputIndex, "error", err)
+		return false
+	}
+
+	if outcome == psbt.SignSuccesful {
+		logger.Debug("Added SegWit signature to input",
+			"input", inputIndex,
+			"hasWitnessScript", len(psbtInput.WitnessScript) > 0)
+		return true
+	}
+
+	logger.Debug("SegWit signature not added", "input", inputIndex, "outcome", outcome)
+	return false
+}
+
+// signLegacyInput signs a legacy (P2PKH/P2SH) input using ECDSA signatures.
+// Note: btcd's updater.Sign() has limitations with P2PKH, so we add the signature directly to PartialSigs.
+func (*Bitcoin) signLegacyInput(
+	msgTx *wire.MsgTx,
+	inputIndex int,
+	psbtInput *psbt.PInput,
+	privKey *btcutil.WIF,
+) bool {
+	witnessUtxo := psbtInput.WitnessUtxo
+
+	logger.Debug("Using legacy signature algorithm for P2PKH/P2SH",
+		"input", inputIndex,
+		"pkScript", hex.EncodeToString(witnessUtxo.PkScript))
+
+	// For legacy P2PKH, the scriptPubKey is used for signature hash
+	// For P2SH, use the redeem script if available
+	scriptForHash := witnessUtxo.PkScript
+	if len(psbtInput.RedeemScript) > 0 {
+		scriptForHash = psbtInput.RedeemScript
+		logger.Debug("Using redeem script for legacy P2SH signature",
+			"input", inputIndex,
+			"redeemScriptLen", len(psbtInput.RedeemScript))
+	}
+
+	// Calculate legacy signature hash
+	hash, err := txscript.CalcSignatureHash(
+		scriptForHash,
+		txscript.SigHashAll,
+		msgTx,
+		inputIndex,
+	)
+	if err != nil {
+		logger.Warn("Failed to calculate legacy signature hash", "input", inputIndex, "error", err)
+		return false
+	}
+
+	logger.Debug("Legacy signature hash calculated",
+		"input", inputIndex,
+		"hash", hex.EncodeToString(hash),
+		"scriptForHashLen", len(scriptForHash))
+
+	// Sign with ECDSA
+	signature := ecdsa.Sign(privKey.PrivKey, hash)
+
+	logger.Debug("ECDSA signature created",
+		"input", inputIndex,
+		"sigR", signature.R().String(),
+		"sigS", signature.S().String())
+
+	// Verify signature locally before adding to PSBT
+	pubKeyObj := privKey.PrivKey.PubKey()
+	if !signature.Verify(hash, pubKeyObj) {
+		logger.Error("Signature verification FAILED locally",
+			"input", inputIndex,
+			"pubKey", hex.EncodeToString(pubKeyObj.SerializeCompressed()))
+		return false
+	}
+	logger.Debug("Signature verified successfully locally", "input", inputIndex)
+
+	// Serialize signature with sighash type
+	sigBytes := append(signature.Serialize(), byte(txscript.SigHashAll))
+	pubKey := pubKeyObj.SerializeCompressed()
+
+	// Debug: Compare public key hashes for P2PKH
+	if len(witnessUtxo.PkScript) == 25 { // P2PKH scriptPubKey length
+		expectedPKH := witnessUtxo.PkScript[3:23]
+		actualPKH := btcutil.Hash160(pubKey)
+		logger.Debug("Comparing public key hashes for P2PKH",
+			"input", inputIndex,
+			"expectedPKH", hex.EncodeToString(expectedPKH),
+			"actualPKH", hex.EncodeToString(actualPKH),
+			"match", bytes.Equal(expectedPKH, actualPKH))
+	}
+
+	// Log BIP32 derivation for debugging
 	if len(psbtInput.Bip32Derivation) > 0 {
 		logger.Debug("PSBT BIP32 derivation info",
 			"input", inputIndex,
@@ -1035,59 +1086,33 @@ func (*Bitcoin) signInputWithKey(
 		}
 	}
 
-	// For legacy P2PKH, btcd's updater.Sign() has issues, so add signature directly
-	if !isTaproot && !isSegWit {
-		logger.Debug("Adding P2PKH signature directly to PartialSigs (bypassing updater.Sign)",
-			"input", inputIndex)
+	// For P2PKH, btcd's updater.Sign() has issues, so add signature directly
+	logger.Debug("Adding P2PKH signature directly to PartialSigs (bypassing updater.Sign)",
+		"input", inputIndex)
 
-		// Initialize PartialSigs map if needed
-		if psbtInput.PartialSigs == nil {
-			psbtInput.PartialSigs = make([]*psbt.PartialSig, 0)
-		}
-
-		// Check if signature already exists for this public key
-		sigExists := false
-		for _, partialSig := range psbtInput.PartialSigs {
-			if bytes.Equal(partialSig.PubKey, pubKey) {
-				logger.Debug("Signature already exists for this pubkey", "input", inputIndex)
-				sigExists = true
-				break
-			}
-		}
-
-		if !sigExists {
-			// Add partial signature directly
-			psbtInput.PartialSigs = append(psbtInput.PartialSigs, &psbt.PartialSig{
-				PubKey:    pubKey,
-				Signature: sigBytes,
-			})
-			logger.Debug("Added P2PKH signature directly to PartialSigs",
-				"input", inputIndex,
-				"pubKey", hex.EncodeToString(pubKey))
-			return true
-		}
-		return false
+	// Initialize PartialSigs slice if needed
+	if psbtInput.PartialSigs == nil {
+		psbtInput.PartialSigs = make([]*psbt.PartialSig, 0)
 	}
 
-	// For SegWit and Taproot, use updater.Sign()
-	outcome, err := updater.Sign(inputIndex, sigBytes, pubKey, psbtInput.RedeemScript, psbtInput.WitnessScript)
-	if err != nil {
-		// This may fail if the key doesn't match this input, which is normal
-		logger.Debug("Signature not applicable for this input", "input", inputIndex, "error", err)
-		return false
+	// Check if signature already exists for this public key
+	for _, partialSig := range psbtInput.PartialSigs {
+		if bytes.Equal(partialSig.PubKey, pubKey) {
+			logger.Debug("Signature already exists for this pubkey", "input", inputIndex)
+			return false
+		}
 	}
 
-	// Check outcome: 0 = success, 1 = already finalized, -1 = invalid
-	if outcome == psbt.SignSuccesful {
-		logger.Debug("Added signature to input",
-			"input", inputIndex,
-			"isTaproot", isTaproot,
-			"hasWitnessScript", hasWitnessScript)
-		return true
-	}
+	// Add partial signature directly
+	psbtInput.PartialSigs = append(psbtInput.PartialSigs, &psbt.PartialSig{
+		PubKey:    pubKey,
+		Signature: sigBytes,
+	})
+	logger.Debug("Added P2PKH signature directly to PartialSigs",
+		"input", inputIndex,
+		"pubKey", hex.EncodeToString(pubKey))
 
-	logger.Debug("Signature not added", "input", inputIndex, "outcome", outcome)
-	return false
+	return true
 }
 
 // isMultisigPSBTComplete checks if a multisig PSBT has enough signatures for each input.
