@@ -556,6 +556,38 @@ wait_for_healthy() {
 }
 ```
 
+## Language Requirements
+
+### Write All Comments and Messages in English
+
+All shell scripts must use English for:
+
+- **Header comments** - Script description, usage, options
+- **Inline comments** - Code explanations
+- **Function documentation** - Usage, arguments, returns
+- **Log messages** - Info, warning, error messages
+- **Help text** - Command-line help output
+
+**Bad (Japanese):**
+```bash
+# 変換完了
+log_success "変換完了!"
+log_info "DRY-RUN モードでした"
+```
+
+**Good (English):**
+```bash
+# Conversion complete
+log_success "Conversion complete!"
+log_info "DRY-RUN mode was enabled"
+```
+
+**Rationale:**
+- Ensures accessibility for international contributors
+- Maintains consistency across the codebase
+- Facilitates collaboration with global developer community
+- Aligns with project documentation standards (see `documentation-language` rule)
+
 ## Makefile Integration
 
 Shell scripts are often called from Makefiles:
@@ -591,6 +623,7 @@ Before committing shell scripts:
 - [ ] No sensitive information in logs
 - [ ] Prerequisites are checked
 - [ ] Help message is comprehensive
+- [ ] **All comments and messages are in English**
 - [ ] Run `shfmt -l -w script.sh`
 - [ ] Run `shellcheck script.sh`
 - [ ] File is executable: `chmod +x script.sh`

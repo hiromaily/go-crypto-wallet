@@ -1,35 +1,35 @@
 #!/bin/bash
 #
-# convert-claude-to-cursor.sh
+# sync-rule-claude-to-cursor.sh
 #
-# Claude Code のルール (.claude/rules/*.md) を
-# Cursor のルール (.cursor/rules/*.mdc) に変換するスクリプト
+# Converts Claude Code rules (.claude/rules/*.md) to
+# Cursor rules (.cursor/rules/*.mdc)
 #
-# 使用方法:
-#   ./convert-claude-to-cursor.sh [SOURCE_DIR] [DEST_DIR]
+# Usage:
+#   ./sync-rule-claude-to-cursor.sh [SOURCE_DIR] [DEST_DIR]
 #
-# デフォルト:
+# Defaults:
 #   SOURCE_DIR: .claude/rules
 #   DEST_DIR: .cursor/rules
 #
-# 変換ルール:
-#   - paths あり → globs: + alwaysApply: false
-#   - paths なし → alwaysApply: true (グローバルルール)
-#   - 最初の # 見出し → description: (frontmatter に追加)
-#   - .md → .mdc (拡張子変換)
-#   - サブディレクトリ構造を維持
+# Conversion Rules:
+#   - paths present → globs: + alwaysApply: false
+#   - paths absent → alwaysApply: true (global rule)
+#   - First # heading → description: (added to frontmatter)
+#   - .md → .mdc (extension conversion)
+#   - Preserves subdirectory structure
 #
 
 set -euo pipefail
 
-# カラー出力
+# Color output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# ログ関数
+# Log functions
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
 }
@@ -46,23 +46,23 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# 使用方法
+# Usage
 usage() {
     cat << EOF
 Usage: $(basename "$0") [OPTIONS] [SOURCE_DIR] [DEST_DIR]
 
-Claude Code のルール (.claude/rules/*.md) を
-Cursor のルール (.cursor/rules/*.mdc) に変換します。
+Converts Claude Code rules (.claude/rules/*.md) to
+Cursor rules (.cursor/rules/*.mdc).
 
 Arguments:
-  SOURCE_DIR    変換元ディレクトリ (デフォルト: .claude/rules)
-  DEST_DIR      変換先ディレクトリ (デフォルト: .cursor/rules)
+  SOURCE_DIR    Source directory (default: .claude/rules)
+  DEST_DIR      Destination directory (default: .cursor/rules)
 
 Options:
-  -h, --help    このヘルプを表示
-  -d, --dry-run 実際には変換せず、処理内容を表示
-  -v, --verbose 詳細な出力を表示
-  -f, --force   既存ファイルを上書き
+  -h, --help    Show this help message
+  -d, --dry-run Show what would be done without actually converting
+  -v, --verbose Show detailed output
+  -f, --force   Overwrite existing files
 
 Examples:
   $(basename "$0")
@@ -73,7 +73,7 @@ Examples:
 EOF
 }
 
-# Markdown ファイルを変換
+# Convert markdown file
 convert_file() {
     local src_file="$1"
     local dest_file="$2"
@@ -98,45 +98,45 @@ convert_file() {
     local paths_value=""
     local description=""
 
-    # frontmatter の解析
-    # ファイルの先頭が --- で始まるかチェック
+    # Parse frontmatter
+    # Check if file starts with ---
     local first_line
     first_line=$(echo "$content" | head -n 1)
 
     if [[ "$first_line" == "---" ]]; then
         has_frontmatter=true
 
-        # frontmatter の終了行を探す (2行目以降で最初の --- を探す)
+        # Find the closing --- (first --- after line 2)
         local end_line
         end_line=$(echo "$content" | tail -n +2 | grep -n '^---$' | head -n 1 | cut -d: -f1)
 
         if [[ -n "$end_line" ]]; then
-            # frontmatter を抽出 (1行目と終了行を除く)
+            # Extract frontmatter (excluding first and last ---)
             frontmatter=$(echo "$content" | sed -n "2,${end_line}p")
-            # body を抽出 (終了行の次の行から)
+            # Extract body (from after the closing ---)
             local body_start=$((end_line + 2))
             body=$(echo "$content" | tail -n +"$body_start")
         else
-            # frontmatter が閉じられていない場合は全体を body として扱う
+            # Frontmatter not properly closed, treat entire content as body
             body="$content"
             has_frontmatter=false
         fi
 
-        # paths: を抽出 (単一行または複数行のYAML配列形式に対応)
+        # Extract paths: (supports both single-line and multi-line YAML array format)
         if [[ "$has_frontmatter" == "true" ]] && echo "$frontmatter" | grep -q '^paths:'; then
             local paths_line
             paths_line=$(echo "$frontmatter" | grep '^paths:' | sed 's/^paths:[[:space:]]*//')
 
             if [[ -n "$paths_line" ]]; then
-                # 単一行形式: paths: ["value1", "value2"] または paths: "value"
+                # Single-line format: paths: ["value1", "value2"] or paths: "value"
                 paths_value="$paths_line"
             else
-                # 複数行形式: paths: の後に続くインデントされた配列要素を抽出
-                # paths: の行番号を取得
+                # Multi-line format: paths: followed by indented array elements
+                # Get the line number of paths:
                 local paths_line_num
                 paths_line_num=$(echo "$frontmatter" | grep -n '^paths:' | cut -d: -f1)
 
-                # paths: の次の行から、インデントされた - で始まる行を収集
+                # Collect indented lines starting with - after paths:
                 local array_items=""
                 local in_paths_array=false
                 local line_num=0
@@ -148,7 +148,7 @@ convert_file() {
                         continue
                     fi
                     if [[ "$in_paths_array" == "true" ]]; then
-                        # インデントされた - で始まる行を収集
+                        # Collect indented lines starting with -
                         if [[ "$line" =~ ^[[:space:]]+-[[:space:]] ]]; then
                             if [[ -n "$array_items" ]]; then
                                 array_items="${array_items}
@@ -157,14 +157,14 @@ ${line}"
                                 array_items="$line"
                             fi
                         else
-                            # 配列終了
+                            # End of array
                             break
                         fi
                     fi
                 done <<< "$frontmatter"
 
                 if [[ -n "$array_items" ]]; then
-                    # 複数行形式をそのまま保持
+                    # Preserve multi-line format
                     paths_value="
 ${array_items}"
                 fi
@@ -174,7 +174,7 @@ ${array_items}"
         body="$content"
     fi
 
-    # 最初の # 見出しを description として抽出
+    # Extract first # heading as description
     local first_heading
     first_heading=$(echo "$body" | grep -m1 '^#[[:space:]]' | sed 's/^#[[:space:]]*//' || true)
 
@@ -182,37 +182,37 @@ ${array_items}"
         description="$first_heading"
     fi
 
-    # 新しい frontmatter を構築
+    # Build new frontmatter
     local new_frontmatter="---"
 
-    # description を追加
+    # Add description
     if [[ -n "$description" ]]; then
         new_frontmatter="${new_frontmatter}
 description: ${description}"
     fi
 
-    # globs と alwaysApply を追加 (paths の有無で分岐)
+    # Add globs and alwaysApply (based on presence of paths)
     if [[ -n "$paths_value" ]]; then
-        # paths あり → globs + alwaysApply: false
+        # paths present → globs + alwaysApply: false
         new_frontmatter="${new_frontmatter}
 globs: ${paths_value}
 alwaysApply: false"
     else
-        # paths なし → alwaysApply: true (グローバルルール)
+        # paths absent → alwaysApply: true (global rule)
         new_frontmatter="${new_frontmatter}
 alwaysApply: true"
     fi
 
-    # 元の frontmatter から paths 以外の項目を保持
-    # (paths: 行とそれに続くインデントされた配列要素を除外)
+    # Preserve other fields from original frontmatter
+    # (excluding paths: line and its indented array elements)
     if [[ "$has_frontmatter" == "true" ]]; then
         local other_fields=""
         local skip_array=false
 
         while IFS= read -r line; do
             if [[ "$line" =~ ^paths: ]]; then
-                # paths: 行をスキップ
-                # 値が空の場合は次の配列要素もスキップ
+                # Skip paths: line
+                # If value is empty, also skip following array elements
                 local paths_inline_value
                 paths_inline_value=$(echo "$line" | sed 's/^paths:[[:space:]]*//')
                 if [[ -z "$paths_inline_value" ]]; then
@@ -222,16 +222,16 @@ alwaysApply: true"
             fi
 
             if [[ "$skip_array" == "true" ]]; then
-                # インデントされた - で始まる行（配列要素）をスキップ
+                # Skip indented lines starting with - (array elements)
                 if [[ "$line" =~ ^[[:space:]]+-[[:space:]] ]]; then
                     continue
                 else
-                    # 配列終了
+                    # End of array
                     skip_array=false
                 fi
             fi
 
-            # その他のフィールドを保持
+            # Preserve other fields
             if [[ -n "$line" ]]; then
                 if [[ -n "$other_fields" ]]; then
                     other_fields="${other_fields}
@@ -251,10 +251,10 @@ ${other_fields}"
     new_frontmatter="${new_frontmatter}
 ---"
 
-    # 最終的なコンテンツを構築
+    # Build final content
     local final_content
     if [[ "$new_frontmatter" == $'---\n---' ]]; then
-        # frontmatter が空の場合は body のみ
+        # If frontmatter is empty, use body only
         final_content="$body"
     else
         final_content="${new_frontmatter}
@@ -262,12 +262,12 @@ ${other_fields}"
 ${body}"
     fi
 
-    # 出力ディレクトリを作成
+    # Create output directory
     local dest_dir
     dest_dir=$(dirname "$dest_file")
     mkdir -p "$dest_dir"
 
-    # ファイルを書き込み
+    # Write file
     echo "$final_content" > "$dest_file"
 
     if [[ "$verbose" == "true" ]]; then
@@ -283,7 +283,7 @@ ${body}"
     fi
 }
 
-# メイン処理
+# Main process
 main() {
     local dry_run=false
     local verbose=false
@@ -291,7 +291,7 @@ main() {
     local source_dir=".claude/rules"
     local dest_dir=".cursor/rules"
 
-    # 引数解析
+    # Parse arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
             -h|--help)
@@ -327,32 +327,32 @@ main() {
         esac
     done
 
-    log_info "Claude → Cursor ルール変換"
+    log_info "Claude → Cursor rule conversion"
     log_info "Source: $source_dir"
     log_info "Destination: $dest_dir"
 
-    # ソースディレクトリの確認
+    # Verify source directory exists
     if [[ ! -d "$source_dir" ]]; then
         log_error "Source directory not found: $source_dir"
         exit 1
     fi
 
-    # 変換先ディレクトリの作成
+    # Create destination directory
     if [[ "$dry_run" == "false" ]]; then
         mkdir -p "$dest_dir"
     fi
 
-    # .md ファイルを検索して変換
+    # Find and convert .md files
     local count=0
     local skipped=0
 
     while IFS= read -r -d '' src_file; do
-        # 相対パスを計算
+        # Calculate relative path
         local rel_path="${src_file#$source_dir/}"
-        # 拡張子を .mdc に変更
+        # Change extension to .mdc
         local dest_file="${dest_dir}/${rel_path%.md}.mdc"
 
-        # 既存ファイルのチェック
+        # Check for existing file
         if [[ -f "$dest_file" && "$force" == "false" && "$dry_run" == "false" ]]; then
             log_warn "Skipping (already exists): $dest_file"
             log_warn "  Use -f/--force to overwrite"
@@ -365,14 +365,14 @@ main() {
     done < <(find "$source_dir" -type f -name "*.md" -print0)
 
     echo ""
-    log_success "変換完了!"
+    log_success "Conversion complete!"
     log_info "Converted: $count files"
     if [[ $skipped -gt 0 ]]; then
         log_warn "Skipped: $skipped files"
     fi
 
     if [[ "$dry_run" == "true" ]]; then
-        log_warn "DRY-RUN モードでした。実際の変換は行われていません。"
+        log_warn "DRY-RUN mode was enabled. No actual conversion was performed."
     fi
 }
 
