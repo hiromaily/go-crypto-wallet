@@ -19,7 +19,8 @@ install-mac-tools:
 		ariga/tap/atlas \
 		protobuf \
 		buf \
-		sqlfluff
+		sqlfluff \
+		shellcheck
 
 .PHONY: install-ssl
 install-ssl:

@@ -208,6 +208,7 @@ alwaysApply: true"
     if [[ "$has_frontmatter" == "true" ]]; then
         local other_fields=""
         local skip_array=false
+        local first_field=true
 
         while IFS= read -r line; do
             if [[ "$line" =~ ^paths: ]]; then
@@ -231,14 +232,13 @@ alwaysApply: true"
                 fi
             fi
 
-            # Preserve other fields
-            if [[ -n "$line" ]]; then
-                if [[ -n "$other_fields" ]]; then
-                    other_fields="${other_fields}
+            # Preserve other fields (including blank lines)
+            if $first_field; then
+                other_fields="$line"
+                first_field=false
+            else
+                other_fields="${other_fields}
 ${line}"
-                else
-                    other_fields="$line"
-                fi
             fi
         done <<< "$frontmatter"
 
