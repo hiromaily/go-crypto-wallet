@@ -1,53 +1,53 @@
 # E2E Transaction Patterns Guide
 
-このドキュメントは、Bitcoin/Bitcoin Cash におけるトランザクションの組み合わせパターンについて説明します。鍵の種類とマルチシグの有無によって、様々なE2Eワークフローパターンが存在します。
+This document explains transaction combination patterns for Bitcoin/Bitcoin Cash. Various E2E workflow patterns exist depending on key types and whether multisig is used.
 
-## 目次
+## Table of Contents
 
-1. [概要](#概要)
-2. [サポートされる鍵の種類](#サポートされる鍵の種類)
-3. [署名パターン](#署名パターン)
-4. [E2Eワークフローマトリックス](#e2eワークフローマトリックス)
-5. [各パターンの詳細](#各パターンの詳細)
-6. [アカウントタイプと署名要件](#アカウントタイプと署名要件)
-7. [実装状態](#実装状態)
-8. [E2Eスクリプトの対応表](#e2eスクリプトの対応表)
-
----
-
-## 概要
-
-Bitcoinトランザクションは、以下の2つの主要な軸で分類できます：
-
-1. **鍵の種類（アドレスタイプ）** - どのBIPに基づいてアドレスを生成するか
-2. **署名パターン** - シングルシグかマルチシグか
-
-これらの組み合わせにより、様々なE2Eワークフローが必要となります。
+1. [Overview](#overview)
+2. [Supported Key Types](#supported-key-types)
+3. [Signature Patterns](#signature-patterns)
+4. [E2E Workflow Matrix](#e2e-workflow-matrix)
+5. [Details of Each Pattern](#details-of-each-pattern)
+6. [Account Types and Signing Requirements](#account-types-and-signing-requirements)
+7. [Implementation Status](#implementation-status)
+8. [E2E Script Reference](#e2e-script-reference)
 
 ---
 
-## サポートされる鍵の種類
+## Overview
+
+Bitcoin transactions can be classified along two main axes:
+
+1. **Key Type (Address Type)** - Which BIP standard is used to generate addresses
+2. **Signature Pattern** - Single-sig or multisig
+
+The combination of these creates various E2E workflows.
+
+---
+
+## Supported Key Types
 
 ### Bitcoin (BTC)
 
-| アドレスタイプ | BIP | Prefix (Mainnet) | Prefix (Testnet) | 説明 |
-|---------------|-----|------------------|------------------|------|
-| **P2PKH** (Legacy) | BIP44 | `1...` | `m.../n...` | 従来のPay-to-Public-Key-Hash |
+| Address Type | BIP | Prefix (Mainnet) | Prefix (Testnet) | Description |
+|--------------|-----|------------------|------------------|-------------|
+| **P2PKH** (Legacy) | BIP44 | `1...` | `m.../n...` | Traditional Pay-to-Public-Key-Hash |
 | **P2SH-P2WPKH** | BIP49 | `3...` | `2...` | SegWit wrapped in P2SH |
 | **P2WPKH** (Native SegWit) | BIP84 | `bc1q...` | `tb1q...` | Native SegWit |
-| **P2TR** (Taproot) | BIP86 | `bc1p...` | `tb1p...` | Taproot (推奨) |
+| **P2TR** (Taproot) | BIP86 | `bc1p...` | `tb1p...` | Taproot (recommended) |
 
 ### Bitcoin Cash (BCH)
 
-| アドレスタイプ | Prefix | 説明 |
-|---------------|--------|------|
-| **CashAddr** | `bitcoincash:q...` | Bitcoin Cash専用フォーマット |
-| **Legacy** | `1...` | レガシーフォーマット（互換性用） |
+| Address Type | Prefix | Description |
+|--------------|--------|-------------|
+| **CashAddr** | `bitcoincash:q...` | Bitcoin Cash dedicated format |
+| **Legacy** | `1...` | Legacy format (for compatibility) |
 
-### 鍵派生パス
+### Key Derivation Paths
 
-| 標準 | パス | 用途 |
-|------|------|------|
+| Standard | Path | Usage |
+|----------|------|-------|
 | BIP44 | `m/44'/0'/account'/change/index` | P2PKH (Legacy) |
 | BIP49 | `m/49'/0'/account'/change/index` | P2SH-P2WPKH |
 | BIP84 | `m/84'/0'/account'/change/index` | P2WPKH (Native SegWit) |
@@ -55,11 +55,11 @@ Bitcoinトランザクションは、以下の2つの主要な軸で分類でき
 
 ---
 
-## 署名パターン
+## Signature Patterns
 
-### Single-Sig（シングルシグ）
+### Single-Sig
 
-1つの秘密鍵で署名するパターン。
+Pattern where a single private key is used for signing.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -75,17 +75,17 @@ Bitcoinトランザクションは、以下の2つの主要な軸で分類でき
 └─────────────────────────────────────────────────────────┘
 ```
 
-**特徴:**
+**Characteristics:**
 
-- シンプルで高速
-- 1回の署名で完了
-- 秘密鍵が1つのため、紛失・漏洩リスクが集中
+- Simple and fast
+- Completed with a single signature
+- Risk concentrated since there's only one private key
 
-### Multi-Sig（マルチシグ）
+### Multi-Sig
 
-複数の秘密鍵で署名するパターン。M-of-N（N個の鍵のうちM個の署名が必要）。
+Pattern where multiple private keys are used for signing. M-of-N (M signatures required out of N keys).
 
-#### 3-of-3 マルチシグ
+#### 3-of-3 Multisig
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -105,7 +105,7 @@ Bitcoinトランザクションは、以下の2つの主要な軸で分類でき
 └─────────────────────────────────────────────────────────┘
 ```
 
-#### 2-of-3 マルチシグ
+#### 2-of-3 Multisig
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -120,26 +120,26 @@ Bitcoinトランザクションは、以下の2つの主要な軸で分類でき
 │          ↓                                              │
 │  4. Watch Wallet: Broadcast transaction                 │
 │                                                         │
-│  (Sign2 Wallet は不要 - 2つの署名で完了)                │
+│  (Sign2 Wallet not required - completed with 2 sigs)   │
 │                                                         │
 └─────────────────────────────────────────────────────────┘
 ```
 
-### MuSig2（署名集約）
+### MuSig2 (Signature Aggregation)
 
-Schnorr署名ベースの集約署名プロトコル。N-of-N マルチシグがシングルシグと同じサイズになる。
+Aggregate signature protocol based on Schnorr signatures. N-of-N multisig becomes the same size as single-sig.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                    MUSIG2 FLOW                          │
 ├─────────────────────────────────────────────────────────┤
 │                                                         │
-│  Round 1: Nonce Generation (並列実行可能)              │
+│  Round 1: Nonce Generation (can be parallelized)       │
 │  ├─ Keygen Wallet: Generate nonce                       │
 │  ├─ Sign1 Wallet: Generate nonce                        │
 │  └─ Sign2 Wallet: Generate nonce                        │
 │          ↓                                              │
-│  Round 2: Signing (順次実行)                           │
+│  Round 2: Signing (sequential)                         │
 │  ├─ Keygen Wallet: Create partial signature             │
 │  ├─ Sign1 Wallet: Create partial signature              │
 │  └─ Sign2 Wallet: Create partial signature              │
@@ -150,266 +150,266 @@ Schnorr署名ベースの集約署名プロトコル。N-of-N マルチシグが
 └─────────────────────────────────────────────────────────┘
 ```
 
-**MuSig2の利点:**
+**MuSig2 Benefits:**
 
-- トランザクションサイズが30-50%削減
-- プライバシー向上（シングルシグと見分けがつかない）
-- 手数料削減
+- Transaction size reduced by 30-50%
+- Improved privacy (indistinguishable from single-sig)
+- Reduced fees
 
 ---
 
-## E2Eワークフローマトリックス
+## E2E Workflow Matrix
 
-### BTC パターンマトリックス
+### BTC Pattern Matrix
 
-| パターン | 鍵タイプ | 署名パターン | アドレスフォーマット | E2Eスクリプト対応 |
-|----------|---------|-------------|---------------------|-------------------|
+| Pattern | Key Type | Signature Pattern | Address Format | E2E Script Support |
+|---------|----------|-------------------|----------------|-------------------|
 | **1** | **P2PKH (BIP44)** | **Single-sig** | **`1...`** | **✅ e2e/e2e-p2pkh-singlesig.sh** |
-| **2** | **P2PKH (BIP44)** | **2-of-3 Multisig** | **`3...` (P2SH wrapped)** | **⚠️ e2e/e2e-p2pkh-2of3.sh (P2WSH生成 #340)** |
-| 3 | P2SH-P2WPKH (BIP49) | Single-sig | `3...` | 🔶 手動テスト |
-| 4 | P2SH-P2WPKH (BIP49) | 2-of-3 Multisig | `3...` | ❌ 未対応 |
-| 5 | P2WPKH (BIP84) | Single-sig | `bc1q...` | 🔶 手動テスト |
-| 6 | P2WSH (BIP84) | 2-of-3 Multisig | `bc1q...` | ❌ 未対応 |
-| 7 | P2WSH (BIP84) | 3-of-3 Multisig | `bc1q...` | ❌ 未対応 |
+| **2** | **P2PKH (BIP44)** | **2-of-3 Multisig** | **`3...` (P2SH wrapped)** | **⚠️ e2e/e2e-p2pkh-2of3.sh (P2WSH generation #340)** |
+| 3 | P2SH-P2WPKH (BIP49) | Single-sig | `3...` | 🔶 Manual testing |
+| 4 | P2SH-P2WPKH (BIP49) | 2-of-3 Multisig | `3...` | ❌ Not supported |
+| 5 | P2WPKH (BIP84) | Single-sig | `bc1q...` | 🔶 Manual testing |
+| 6 | P2WSH (BIP84) | 2-of-3 Multisig | `bc1q...` | ❌ Not supported |
+| 7 | P2WSH (BIP84) | 3-of-3 Multisig | `bc1q...` | ❌ Not supported |
 | **8** | **P2SH-P2WSH** | **3-of-3 Multisig** | **`3...`** | **✅ e2e/e2e-p2sh-p2wsh-3of3.sh** |
-| 9 | P2TR (BIP86) | Single-sig | `bc1p...` | 🔶 手動テスト |
-| 10 | P2TR (BIP86) | MuSig2 (N-of-N) | `bc1p...` | 🔜 開発中 |
-| 11 | P2TR (BIP86) | Tapscript (M-of-N) | `bc1p...` | 🔜 開発中 |
+| 9 | P2TR (BIP86) | Single-sig | `bc1p...` | 🔶 Manual testing |
+| 10 | P2TR (BIP86) | MuSig2 (N-of-N) | `bc1p...` | 🔜 In development |
+| 11 | P2TR (BIP86) | Tapscript (M-of-N) | `bc1p...` | 🔜 In development |
 
-### BCH パターンマトリックス
+### BCH Pattern Matrix
 
-| パターン | 鍵タイプ | 署名パターン | アドレスフォーマット | E2Eスクリプト対応 |
-|----------|---------|-------------|---------------------|-------------------|
-| 1 | CashAddr | Single-sig | `bitcoincash:q...` | 🔶 手動テスト |
+| Pattern | Key Type | Signature Pattern | Address Format | E2E Script Support |
+|---------|----------|-------------------|----------------|-------------------|
+| 1 | CashAddr | Single-sig | `bitcoincash:q...` | 🔶 Manual testing |
 | **2** | **CashAddr** | **3-of-3 Multisig** | **`bitcoincash:p...`** | **✅ e2e-workflow.sh** |
-| 3 | CashAddr | 2-of-3 Multisig | `bitcoincash:p...` | ❌ 未対応 |
+| 3 | CashAddr | 2-of-3 Multisig | `bitcoincash:p...` | ❌ Not supported |
 
 ---
 
-## 各パターンの詳細
+## Details of Each Pattern
 
-### パターン 1: BTC P2PKH Single-sig
+### Pattern 1: BTC P2PKH Single-sig
 
-**現在の `scripts/operation/btc/e2e/e2e-p2pkh-singlesig.sh` で実装されているパターン**
+**Currently implemented in `scripts/operation/btc/e2e/e2e-p2pkh-singlesig.sh`**
 
 ```
-アドレスタイプ: P2PKH (BIP44 Legacy)
-署名要件: Single-sig (Keygen のみ)
+Address Type: P2PKH (BIP44 Legacy)
+Signing Requirements: Single-sig (Keygen only)
 Descriptor: pkh([fingerprint/44'/0'/0']xpub.../0/*)
 ```
 
-**ワークフロー:**
+**Workflow:**
 
-1. Keygen で Seed を生成
-2. Keygen で HD Key を生成（各アカウント10個）
-3. Keygen で Descriptor をエクスポート
-4. Watch に Descriptor をインポート
-5. Test UTXO を生成（regtest）
-6. 未署名トランザクション作成 → 1回署名 → ブロードキャスト
+1. Generate Seed in Keygen
+2. Generate HD Key in Keygen (10 accounts each)
+3. Export Descriptor from Keygen
+4. Import Descriptor to Watch
+5. Generate Test UTXO (regtest)
+6. Create unsigned transaction → Sign once → Broadcast
 
-**特徴:**
+**Characteristics:**
 
-- シンプルで高速（1回の署名で完了）
-- Sign1/Sign2 ウォレット不要
-- BIP44 鍵派生パス使用
-- Legacy アドレス形式（`m...`/`n...` in regtest）
+- Simple and fast (completed with single signature)
+- Sign1/Sign2 wallets not required
+- Uses BIP44 key derivation path
+- Legacy address format (`m...`/`n...` in regtest)
 
-### パターン 8: BTC P2SH-P2WSH 3-of-3 Multisig（現在のE2E）
+### Pattern 8: BTC P2SH-P2WSH 3-of-3 Multisig (Current E2E)
 
-**現在の `scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh` で実装されているパターン**
+**Currently implemented in `scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh`**
 
 ```
-アドレスタイプ: P2SH-P2WSH (BIP49 wrapped SegWit)
-署名要件: 3-of-3 (Keygen + Sign1 + Sign2)
+Address Type: P2SH-P2WSH (BIP49 wrapped SegWit)
+Signing Requirements: 3-of-3 (Keygen + Sign1 + Sign2)
 Descriptor: sh(wsh(sortedmulti(3, xpub1, xpub2, xpub3)))
 ```
 
-**ワークフロー:**
+**Workflow:**
 
-1. Keygen/Sign1/Sign2 で Seed を生成
-2. Keygen で HD Key を生成（各アカウント10個）
-3. Sign1/Sign2 で HD Key を生成
-4. Sign1/Sign2 から fullpubkey をエクスポート
-5. Keygen に fullpubkey をインポート
-6. Keygen で Descriptor をエクスポート
-7. Watch に Descriptor をインポート
-8. Test UTXO を生成（regtest）
-9. 未署名トランザクション作成 → 3回署名 → ブロードキャスト
+1. Generate Seed in Keygen/Sign1/Sign2
+2. Generate HD Key in Keygen (10 accounts each)
+3. Generate HD Key in Sign1/Sign2
+4. Export fullpubkey from Sign1/Sign2
+5. Import fullpubkey to Keygen
+6. Export Descriptor from Keygen
+7. Import Descriptor to Watch
+8. Generate Test UTXO (regtest)
+9. Create unsigned transaction → Sign 3 times → Broadcast
 
-### パターン 2: BTC P2PKH 2-of-3 Multisig
+### Pattern 2: BTC P2PKH 2-of-3 Multisig
 
-**`scripts/operation/btc/e2e/e2e-p2pkh-2of3.sh` で実装されているパターン（⚠️ 既知の制限あり）**
-
-```
-アドレスタイプ: P2PKH (BIP44 Legacy) with 2-of-3 Multisig
-署名要件: 2-of-3 (Keygen + Sign1, Sign2 は任意)
-期待される Descriptor: sh(multi(2, xpub1, xpub2, xpub3))  ← 未実装
-実際の Descriptor: wsh(sortedmulti(2, xpub1, xpub2, xpub3))  ← 現在生成
-```
-
-**⚠️ 既知の制限 (Issue #340):**
-
-Go wallet の実装が P2SH-wrapped multisig descriptors に対応していないため、現在は P2WSH アドレス (`bcrt1q...`) が生成されます。本来の仕様では P2SH アドレス (`2...` in regtest, `3...` in mainnet) が生成されるべきです。
-
-**ワークフロー:**
-
-1. Keygen/Sign1/Sign2 で Seed を生成
-2. Keygen で HD Key を生成（各アカウント10個）
-3. Sign1/Sign2 で HD Key を生成
-4. Sign1/Sign2 から fullpubkey をエクスポート
-5. Keygen に fullpubkey をインポート
-6. Keygen で Descriptor をエクスポート（⚠️ 現在は `wsh(sortedmulti(2, ...))` が生成される）
-7. Watch に Descriptor をインポート
-8. Test UTXO を生成（regtest）
-9. 未署名トランザクション作成 → 2回署名 → ブロードキャスト
-
-**特徴:**
-
-- 2-of-3 マルチシグ（Keygen + Sign1 の2署名で完了、Sign2 は不要）
-- BIP44 鍵派生パス使用
-- ⚠️ 実装上は P2WSH 形式で動作（PR #339 参照）
-
-### パターン 2: BCH CashAddr 3-of-3 Multisig（現在のE2E）
-
-**現在の `scripts/operation/bch/e2e-workflow.sh` で実装されているパターン**
+**Implemented in `scripts/operation/btc/e2e/e2e-p2pkh-2of3.sh` (⚠️ Known limitations)**
 
 ```
-アドレスタイプ: CashAddr P2SH
-署名要件: 3-of-3 (Keygen + Sign1 + Sign2)
-アドレス形式: bitcoincash:p... (P2SH multisig)
+Address Type: P2PKH (BIP44 Legacy) with 2-of-3 Multisig
+Signing Requirements: 2-of-3 (Keygen + Sign1, Sign2 is optional)
+Expected Descriptor: sh(multi(2, xpub1, xpub2, xpub3))  ← Not implemented
+Actual Descriptor: wsh(sortedmulti(2, xpub1, xpub2, xpub3))  ← Currently generated
 ```
 
-**ワークフロー:**
+**⚠️ Known Limitation (Issue #340):**
 
-1. Keygen/Sign1/Sign2 で Seed を生成
-2. Keygen で HD Key を生成
-3. Sign1/Sign2 で HD Key を生成
-4. Sign1/Sign2 から fullpubkey をエクスポート
-5. Keygen に fullpubkey をインポート
-6. Keygen で Multisig アドレスを作成
-7. Keygen からアドレスをエクスポート
-8. Watch にアドレスをインポート
-9. Test UTXO を生成（regtest）
-10. 未署名トランザクション作成 → 3回署名 → ブロードキャスト
+The Go wallet implementation doesn't support P2SH-wrapped multisig descriptors, so P2WSH addresses (`bcrt1q...`) are currently generated. According to specifications, P2SH addresses (`2...` in regtest, `3...` in mainnet) should be generated.
 
-### パターン 9: BTC P2TR Single-sig（Taproot）
+**Workflow:**
+
+1. Generate Seed in Keygen/Sign1/Sign2
+2. Generate HD Key in Keygen (10 accounts each)
+3. Generate HD Key in Sign1/Sign2
+4. Export fullpubkey from Sign1/Sign2
+5. Import fullpubkey to Keygen
+6. Export Descriptor from Keygen (⚠️ Currently generates `wsh(sortedmulti(2, ...))`)
+7. Import Descriptor to Watch
+8. Generate Test UTXO (regtest)
+9. Create unsigned transaction → Sign 2 times → Broadcast
+
+**Characteristics:**
+
+- 2-of-3 multisig (completed with Keygen + Sign1 signatures, Sign2 not required)
+- Uses BIP44 key derivation path
+- ⚠️ Currently operates in P2WSH format (see PR #339)
+
+### Pattern 2: BCH CashAddr 3-of-3 Multisig (Current E2E)
+
+**Currently implemented in `scripts/operation/bch/e2e-workflow.sh`**
 
 ```
-アドレスタイプ: P2TR (BIP86)
-署名要件: Single-sig (Keygen のみ)
+Address Type: CashAddr P2SH
+Signing Requirements: 3-of-3 (Keygen + Sign1 + Sign2)
+Address Format: bitcoincash:p... (P2SH multisig)
+```
+
+**Workflow:**
+
+1. Generate Seed in Keygen/Sign1/Sign2
+2. Generate HD Key in Keygen
+3. Generate HD Key in Sign1/Sign2
+4. Export fullpubkey from Sign1/Sign2
+5. Import fullpubkey to Keygen
+6. Create Multisig address in Keygen
+7. Export address from Keygen
+8. Import address to Watch
+9. Generate Test UTXO (regtest)
+10. Create unsigned transaction → Sign 3 times → Broadcast
+
+### Pattern 9: BTC P2TR Single-sig (Taproot)
+
+```
+Address Type: P2TR (BIP86)
+Signing Requirements: Single-sig (Keygen only)
 Descriptor: tr([fingerprint/86'/0'/0']xpub.../0/*)
 ```
 
-**シンプルなワークフロー:**
+**Simple Workflow:**
 
-1. Keygen で Seed を生成
-2. Keygen で BIP86 HD Key を生成
-3. Keygen から Taproot アドレスをエクスポート
-4. Watch に Taproot アドレスをインポート
-5. 未署名トランザクション作成 → 1回署名（Schnorr）→ ブロードキャスト
+1. Generate Seed in Keygen
+2. Generate BIP86 HD Key in Keygen
+3. Export Taproot address from Keygen
+4. Import Taproot address to Watch
+5. Create unsigned transaction → Sign once (Schnorr) → Broadcast
 
-### パターン 10: BTC P2TR MuSig2（開発中）
+### Pattern 10: BTC P2TR MuSig2 (In Development)
 
 ```
-アドレスタイプ: P2TR (BIP86)
-署名要件: N-of-N MuSig2 (全員の署名が必要)
+Address Type: P2TR (BIP86)
+Signing Requirements: N-of-N MuSig2 (all signatures required)
 Descriptor: tr(musig(xpub1, xpub2, xpub3))
 ```
 
-**2ラウンドプロトコル:**
+**2-Round Protocol:**
 
-1. Round 1: 各ウォレットでノンスを生成
-2. Round 2: 各ウォレットで部分署名を作成
-3. Watch で署名を集約してブロードキャスト
-
----
-
-## アカウントタイプと署名要件
-
-| アカウント | 用途 | 推奨署名パターン | 理由 |
-|-----------|------|-----------------|------|
-| **client** | 顧客入金アドレス | Single-sig | 顧客側での操作が必要なため |
-| **deposit** | 入金集約 | Multisig (2-of-3 または 3-of-3) | セキュリティ強化 |
-| **payment** | 支払い | Multisig (2-of-3 または 3-of-3) | 承認フロー |
-| **stored** | 長期保管 | Multisig (3-of-3) | 最高レベルのセキュリティ |
+1. Round 1: Generate nonces in each wallet
+2. Round 2: Create partial signatures in each wallet
+3. Aggregate signatures in Watch and broadcast
 
 ---
 
-## 実装状態
+## Account Types and Signing Requirements
 
-### 鍵タイプの実装状態
+| Account | Purpose | Recommended Signature Pattern | Reason |
+|---------|---------|------------------------------|--------|
+| **client** | Customer deposit addresses | Single-sig | Required for customer-side operations |
+| **deposit** | Deposit aggregation | Multisig (2-of-3 or 3-of-3) | Enhanced security |
+| **payment** | Payments | Multisig (2-of-3 or 3-of-3) | Approval workflow |
+| **stored** | Long-term storage | Multisig (3-of-3) | Highest level of security |
 
-| 鍵タイプ | BTC | BCH |
+---
+
+## Implementation Status
+
+### Key Type Implementation Status
+
+| Key Type | BTC | BCH |
+|----------|-----|-----|
+| P2PKH (Legacy) | ✅ Implemented | N/A |
+| P2SH-P2WPKH (BIP49) | ✅ Implemented | N/A |
+| P2WPKH (BIP84) | ✅ Implemented | N/A |
+| P2TR (BIP86) | ✅ Implemented | N/A |
+| CashAddr | N/A | ✅ Implemented |
+
+### Signature Pattern Implementation Status
+
+| Signature Pattern | BTC | BCH |
+|-------------------|-----|-----|
+| Single-sig | ✅ Implemented | ✅ Implemented |
+| 2-of-3 Multisig | ⚠️ Partial | ⚠️ Partial |
+| 3-of-3 Multisig | ✅ Implemented | ✅ Implemented |
+| MuSig2 | 🔜 In development | N/A |
+
+### Descriptor Support
+
+| Feature | BTC | BCH |
 |---------|-----|-----|
-| P2PKH (Legacy) | ✅ 実装済み | N/A |
-| P2SH-P2WPKH (BIP49) | ✅ 実装済み | N/A |
-| P2WPKH (BIP84) | ✅ 実装済み | N/A |
-| P2TR (BIP86) | ✅ 実装済み | N/A |
-| CashAddr | N/A | ✅ 実装済み |
-
-### 署名パターンの実装状態
-
-| 署名パターン | BTC | BCH |
-|-------------|-----|-----|
-| Single-sig | ✅ 実装済み | ✅ 実装済み |
-| 2-of-3 Multisig | ⚠️ 部分的 | ⚠️ 部分的 |
-| 3-of-3 Multisig | ✅ 実装済み | ✅ 実装済み |
-| MuSig2 | 🔜 開発中 | N/A |
-
-### Descriptor サポート
-
-| 機能 | BTC | BCH |
-|------|-----|-----|
-| Descriptor Export | ✅ 実装済み | ❌ 未対応 |
-| Descriptor Import | ✅ 実装済み | ❌ 未対応 |
-| Bitcoin Core連携 | ✅ 実装済み | N/A |
+| Descriptor Export | ✅ Implemented | ❌ Not supported |
+| Descriptor Import | ✅ Implemented | ❌ Not supported |
+| Bitcoin Core Integration | ✅ Implemented | N/A |
 
 ---
 
-## E2Eスクリプトの対応表
+## E2E Script Reference
 
-### 現在利用可能なE2Eスクリプト
+### Currently Available E2E Scripts
 
-| スクリプト | コイン | パターン | 署名要件 |
-|-----------|--------|---------|---------|
+| Script | Coin | Pattern | Signing Requirements |
+|--------|------|---------|---------------------|
 | `scripts/operation/btc/e2e/e2e-p2pkh-singlesig.sh` | BTC | P2PKH Single-sig | Single-sig |
 | `scripts/operation/btc/e2e/e2e-p2pkh-2of3.sh` | BTC | P2PKH 2-of-3 Multisig | 2-of-3 |
 | `scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh` | BTC | P2SH-P2WSH Multisig | 3-of-3 |
 | `scripts/operation/bch/e2e-workflow.sh` | BCH | CashAddr Multisig | 3-of-3 |
 
-### 今後追加予定のE2Eスクリプト
+### Planned E2E Scripts
 
-| スクリプト（予定） | コイン | パターン | 署名要件 | 優先度 |
-|-------------------|--------|---------|---------|--------|
-| `e2e-singlesig.sh` | BTC | P2WPKH/P2TR Single-sig | 1 | 高 |
-| `e2e-musig2.sh` | BTC | P2TR MuSig2 | N-of-N | 中 |
-| `e2e-2of3.sh` | BTC | P2WSH 2-of-3 | 2-of-3 | 低 |
-| `e2e-tapscript.sh` | BTC | P2TR Script Path | M-of-N | 低 |
+| Script (Planned) | Coin | Pattern | Signing Requirements | Priority |
+|------------------|------|---------|---------------------|----------|
+| `e2e-singlesig.sh` | BTC | P2WPKH/P2TR Single-sig | 1 | High |
+| `e2e-musig2.sh` | BTC | P2TR MuSig2 | N-of-N | Medium |
+| `e2e-2of3.sh` | BTC | P2WSH 2-of-3 | 2-of-3 | Low |
+| `e2e-tapscript.sh` | BTC | P2TR Script Path | M-of-N | Low |
 
 ---
 
-## クイックリファレンス
+## Quick Reference
 
-### BTC アドレス種別の見分け方
+### Identifying BTC Address Types
 
-| プレフィックス | 種類 | BIP | SegWit |
-|---------------|------|-----|--------|
+| Prefix | Type | BIP | SegWit |
+|--------|------|-----|--------|
 | `1...` | P2PKH | BIP44 | ❌ |
-| `3...` | P2SH または P2SH-P2WPKH | BIP16/BIP49 | △ |
-| `bc1q...` | P2WPKH または P2WSH | BIP84 | ✅ |
+| `3...` | P2SH or P2SH-P2WPKH | BIP16/BIP49 | △ |
+| `bc1q...` | P2WPKH or P2WSH | BIP84 | ✅ |
 | `bc1p...` | P2TR (Taproot) | BIP86 | ✅ |
 
-### BCH アドレス種別の見分け方
+### Identifying BCH Address Types
 
-| プレフィックス | 種類 | Multisig |
-|---------------|------|----------|
+| Prefix | Type | Multisig |
+|--------|------|----------|
 | `bitcoincash:q...` | P2PKH | ❌ |
 | `bitcoincash:p...` | P2SH | ✅ |
 
-### トランザクションサイズ比較
+### Transaction Size Comparison
 
-| パターン | Weight | vBytes | 備考 |
-|----------|--------|--------|------|
+| Pattern | Weight | vBytes | Notes |
+|---------|--------|--------|-------|
 | P2PKH Single-sig (1-in, 2-out) | ~680 | ~170 | Legacy |
 | P2WPKH Single-sig (1-in, 2-out) | ~440 | ~110 | Native SegWit |
 | P2TR Single-sig (1-in, 2-out) | ~396 | ~99 | Taproot |
@@ -418,17 +418,17 @@ Descriptor: tr(musig(xpub1, xpub2, xpub3))
 
 ---
 
-## 関連ドキュメント
+## Related Documents
 
-- [BTC Technical Reference](./README.md) - Bitcoin技術リファレンス
-- [Taproot User Guide](./TAPROOT_GUIDE.md) - Taprootの使い方
-- [MuSig2 User Guide](./musig2_guide.md) - MuSig2の使い方
-- [Descriptor Examples](./descriptor_examples.md) - Descriptorの例
-- [PSBT Developer Guide](./psbt_developer_guide.md) - PSBT開発ガイド
-- [BCH E2E Workflow](../../../scripts/operation/bch/README.md) - BCH E2Eワークフロー
+- [BTC Technical Reference](./README.md) - Bitcoin technical reference
+- [Taproot User Guide](./TAPROOT_GUIDE.md) - How to use Taproot
+- [MuSig2 User Guide](./musig2_guide.md) - How to use MuSig2
+- [Descriptor Examples](./descriptor_examples.md) - Descriptor examples
+- [PSBT Developer Guide](./psbt_developer_guide.md) - PSBT development guide
+- [BCH E2E Workflow](../../../scripts/operation/bch/README.md) - BCH E2E workflow
 
 ---
 
-**ドキュメントバージョン:** 1.0
-**最終更新:** 2026-01-12
-**メンテナー:** go-crypto-wallet team
+**Document Version:** 1.1
+**Last Updated:** 2026-01-14
+**Maintainer:** go-crypto-wallet team

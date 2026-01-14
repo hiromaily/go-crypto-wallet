@@ -18,11 +18,13 @@ set -euo pipefail
 ```
 
 **Explanation:**
+
 - `-e`: Exit immediately if any command fails
 - `-u`: Treat unset variables as errors
 - `-o pipefail`: Fail if any command in a pipeline fails (not just the last one)
 
 **Why pipefail matters:**
+
 ```bash
 # WITHOUT pipefail (BAD)
 set -eu
@@ -38,12 +40,14 @@ cat nonexistent.txt | grep "pattern"  # Fails immediately if cat fails
 ### Make Hardcoded Values Configurable
 
 **Bad:**
+
 ```bash
 # Hardcoded volume name - brittle if project name changes
 docker volume rm "go-crypto-wallet_wallet-db"
 ```
 
 **Good:**
+
 ```bash
 # Configurable with default
 DOCKER_VOLUME_NAME="${DOCKER_VOLUME_NAME:-go-crypto-wallet_wallet-db}"
@@ -51,6 +55,7 @@ docker volume rm "$DOCKER_VOLUME_NAME"
 ```
 
 **Benefits:**
+
 - Flexibility for different environments
 - No breakage if project structure changes
 - Easy to override in CI/CD
@@ -58,6 +63,7 @@ docker volume rm "$DOCKER_VOLUME_NAME"
 ### Environment Variable Naming
 
 Use descriptive, uppercase names with underscores:
+
 ```bash
 RPC_USER="${RPC_USER:-xyz}"
 RPC_PASSWORD="${RPC_PASSWORD:-xyz}"
@@ -68,6 +74,7 @@ DOCKER_VOLUME_NAME="${DOCKER_VOLUME_NAME:-go-crypto-wallet_wallet-db}"
 ### Use Environment Variables Instead of Modifying Config Files
 
 **Bad (creates backups, modifies files):**
+
 ```bash
 # Backup and modify config file
 sed -i.bak 's|host: "127.0.0.1:18332"|host: "127.0.0.1:18332/wallet/watch"|' config.yaml
@@ -81,6 +88,7 @@ fi
 ```
 
 **Good (use environment variables):**
+
 ```bash
 # Create wrapper function to set environment variable per-command
 watch_with_wallet() {
@@ -92,6 +100,7 @@ watch_with_wallet -c config.yaml create payment
 ```
 
 **Benefits:**
+
 - No risk of leaving modified configs if script fails
 - No backup files to manage
 - Cleaner and more robust
@@ -99,6 +108,7 @@ watch_with_wallet -c config.yaml create payment
 - No file permission issues
 
 **When to use this pattern:**
+
 - Applications that support environment variable overrides (check config documentation)
 - Temporary config changes for scripts or tests
 - Multi-environment setups (dev, staging, prod)
@@ -108,6 +118,7 @@ watch_with_wallet -c config.yaml create payment
 ### Refactor Duplicate Error Handling
 
 **Bad (Duplicated):**
+
 ```bash
 if echo "$output" | grep -q "error"; then
     log_error "Operation failed"
@@ -129,6 +140,7 @@ fi
 ```
 
 **Good (DRY with helper function):**
+
 ```bash
 # Create helper function
 log_operation_error() {
@@ -152,6 +164,7 @@ fi
 ### Error Handling in Command Substitution
 
 Always handle errors in command substitution:
+
 ```bash
 # Get output with error handling
 balance_json=$(bitcoin-cli getbalances 2>&1 || true)
@@ -165,6 +178,7 @@ balance=$(echo "$balance_json" | jq -r '.amount // 0' 2>/dev/null || echo "0")
 ### Floating Point Comparisons with bc
 
 **Bad (Fragile):**
+
 ```bash
 if (($(echo "$balance > 0" | bc -l))); then
     # Fails if bc is not installed or input is malformed
@@ -172,6 +186,7 @@ fi
 ```
 
 **Good (Robust):**
+
 ```bash
 if [ -n "$balance" ] && [ "$(echo "$balance > 0" | bc -l 2>/dev/null || echo 0)" -eq 1 ]; then
     # Handles bc failures gracefully
@@ -179,6 +194,7 @@ fi
 ```
 
 **Why this is better:**
+
 - Checks variable is not empty first
 - Redirects bc errors to /dev/null
 - Defaults to 0 on failure
@@ -187,6 +203,7 @@ fi
 ### String Comparisons
 
 Always quote variables:
+
 ```bash
 # BAD
 if [ $var = "value" ]; then
@@ -553,6 +570,41 @@ wait_for_healthy() {
 }
 ```
 
+## Language Requirements
+
+### Write All Comments and Messages in English
+
+All shell scripts must use English for:
+
+- **Header comments** - Script description, usage, options
+- **Inline comments** - Code explanations
+- **Function documentation** - Usage, arguments, returns
+- **Log messages** - Info, warning, error messages
+- **Help text** - Command-line help output
+
+**Bad (Japanese):**
+
+```bash
+# 変換完了
+log_success "変換完了!"
+log_info "DRY-RUN モードでした"
+```
+
+**Good (English):**
+
+```bash
+# Conversion complete
+log_success "Conversion complete!"
+log_info "DRY-RUN mode was enabled"
+```
+
+**Rationale:**
+
+- Ensures accessibility for international contributors
+- Maintains consistency across the codebase
+- Facilitates collaboration with global developer community
+- Aligns with project documentation standards (see `documentation-language` rule)
+
 ## Makefile Integration
 
 Shell scripts are often called from Makefiles:
@@ -560,11 +612,11 @@ Shell scripts are often called from Makefiles:
 ```makefile
 .PHONY: btc-e2e-reset
 btc-e2e-reset:
-	./scripts/operation/btc/e2e/e2e-workflow.sh --reset
+ ./scripts/operation/btc/e2e/e2e-workflow.sh --reset
 
 .PHONY: btc-e2e-verbose
 btc-e2e-verbose:
-	./scripts/operation/btc/e2e/e2e-workflow.sh --verbose
+ ./scripts/operation/btc/e2e/e2e-workflow.sh --verbose
 ```
 
 ## References
@@ -588,6 +640,7 @@ Before committing shell scripts:
 - [ ] No sensitive information in logs
 - [ ] Prerequisites are checked
 - [ ] Help message is comprehensive
+- [ ] **All comments and messages are in English**
 - [ ] Run `shfmt -l -w script.sh`
 - [ ] Run `shellcheck script.sh`
 - [ ] File is executable: `chmod +x script.sh`
