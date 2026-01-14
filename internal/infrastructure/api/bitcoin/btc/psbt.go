@@ -38,7 +38,7 @@ type ParsedPSBT struct {
 //
 //nolint:gocyclo // Complex function handling PSBT creation with metadata
 func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx, senderAccount domainAccount.AccountType) (string, error) {
-	logger.Info("CreatePSBT called",
+	logger.Info("Creating PSBT",
 		"inputs", len(msgTx.TxIn),
 		"outputs", len(msgTx.TxOut),
 		"prevTxs", len(prevTxs),
@@ -153,19 +153,17 @@ func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx, sen
 		}
 
 		// Add BIP32 derivation path for descriptor-based signing
-		// Extract address from scriptPubKey to query Bitcoin Core for derivation info
+		// This is REQUIRED for descriptor wallets to sign PSBTs
 		if err := b.addBIP32DerivationForInput(updater, scriptPubKey, i, senderAccount); err != nil {
-			// Log warning but don't fail - signing might still work without derivation paths
-			// Known issue: listdescriptors RPC fails with "-4: Can't get descriptor string"
-			logger.Warn("failed to add BIP32 derivation for input",
+			logger.Error("failed to add BIP32 derivation for input",
 				"input_index", i,
 				"error", err,
 				"sender_account", senderAccount.String())
-		} else {
-			logger.Info("Successfully added BIP32 derivation for input",
-				"input_index", i,
-				"sender_account", senderAccount.String())
+			return "", fmt.Errorf("failed to add BIP32 derivation for input %d (required for descriptor-based signing): %w", i, err)
 		}
+		logger.Debug("Added BIP32 derivation for input",
+			"input_index", i,
+			"sender_account", senderAccount.String())
 	}
 
 	// Serialize PSBT to base64
@@ -317,15 +315,51 @@ func (b *Bitcoin) SignPSBTWithKey(psbtBase64 string, wifs []string) (string, boo
 	for i := range parsed.Packet.UnsignedTx.TxIn {
 		// Get PSBT input which contains metadata (WitnessUtxo, RedeemScript, WitnessScript)
 		psbtInput := &parsed.Packet.Inputs[i]
+
+		logger.Debug("Processing PSBT input for signing",
+			"input", i,
+			"hasWitnessUtxo", psbtInput.WitnessUtxo != nil,
+			"hasNonWitnessUtxo", psbtInput.NonWitnessUtxo != nil,
+			"hasBIP32Derivation", len(psbtInput.Bip32Derivation) > 0,
+			"hasRedeemScript", len(psbtInput.RedeemScript) > 0,
+			"hasWitnessScript", len(psbtInput.WitnessScript) > 0)
+
 		if psbtInput.WitnessUtxo == nil {
 			logger.Warn("Skipping input without witness UTXO", "input", i)
 			continue
 		}
 
+		// Detect script type
+		scriptType := "unknown"
+		if txscript.IsPayToTaproot(psbtInput.WitnessUtxo.PkScript) {
+			scriptType = "P2TR (Taproot)"
+		} else if txscript.IsPayToWitnessPubKeyHash(psbtInput.WitnessUtxo.PkScript) {
+			scriptType = "P2WPKH (SegWit v0)"
+		} else if txscript.IsPayToWitnessScriptHash(psbtInput.WitnessUtxo.PkScript) {
+			scriptType = "P2WSH (SegWit v0)"
+		} else if txscript.IsPayToScriptHash(psbtInput.WitnessUtxo.PkScript) {
+			scriptType = "P2SH"
+		} else if txscript.IsPayToPubKeyHash(psbtInput.WitnessUtxo.PkScript) {
+			scriptType = "P2PKH (Legacy)"
+		}
+
+		logger.Debug("PSBT input script type detected",
+			"input", i,
+			"scriptType", scriptType,
+			"pkScriptHex", hex.EncodeToString(psbtInput.WitnessUtxo.PkScript))
+
 		// Try signing with each private key
-		for _, privKey := range privKeys {
+		for j, privKey := range privKeys {
+			logger.Debug("Attempting to sign with key",
+				"input", i,
+				"keyIndex", j,
+				"pubKey", hex.EncodeToString(privKey.PrivKey.PubKey().SerializeCompressed()))
+
 			if b.signInputWithKey(updater, parsed.Packet.UnsignedTx, i, psbtInput, privKey, prevOutputFetcher) {
 				signedCount++
+				logger.Info("Successfully signed input",
+					"input", i,
+					"keyIndex", j)
 			}
 		}
 	}
@@ -718,9 +752,10 @@ func (*Bitcoin) hasPartialSignatures(packet *psbt.Packet) bool {
 // signInputWithKey signs a single PSBT input with a private key.
 // Returns true if signature was successfully added, false otherwise.
 //
-// For P2SH-P2WSH (P2SH-wrapped native SegWit multisig), this function:
-//   - Uses the witness script for signature hash calculation
-//   - Passes redeem script and witness script to the PSBT updater
+// Supports three signing methods based on script type:
+//   - Taproot (P2TR): Schnorr signatures with CalcTaprootSignatureHash
+//   - SegWit v0 (P2WPKH/P2WSH): ECDSA signatures with CalcWitnessSigHash
+//   - Legacy (P2PKH/P2SH): ECDSA signatures with CalcSignatureHash
 func (*Bitcoin) signInputWithKey(
 	updater *psbt.Updater,
 	msgTx *wire.MsgTx,
@@ -733,6 +768,9 @@ func (*Bitcoin) signInputWithKey(
 
 	// Detect script type to determine signing method
 	isTaproot := txscript.IsPayToTaproot(witnessUtxo.PkScript)
+	isSegWit := txscript.IsPayToWitnessPubKeyHash(witnessUtxo.PkScript) ||
+		txscript.IsPayToWitnessScriptHash(witnessUtxo.PkScript) ||
+		(txscript.IsPayToScriptHash(witnessUtxo.PkScript) && len(psbtInput.WitnessScript) > 0)
 
 	// Check if this is a multisig input (has witness script)
 	hasWitnessScript := len(psbtInput.WitnessScript) > 0
@@ -764,8 +802,8 @@ func (*Bitcoin) signInputWithKey(
 
 		// For Taproot, signature is just the Schnorr signature (no sighash type appended for SIGHASH_DEFAULT)
 		sigBytes = signature.Serialize()
-	} else {
-		// SegWit v0 (P2WPKH/P2WSH): Use ECDSA signature
+	} else if isSegWit {
+		// SegWit v0 (P2WPKH/P2WSH): Use ECDSA signature with witness sig hash
 		sigHashes := txscript.NewTxSigHashes(msgTx, prevOutputFetcher)
 
 		// For P2WSH multisig, use the witness script for hash calculation
@@ -796,11 +834,136 @@ func (*Bitcoin) signInputWithKey(
 
 		// Serialize signature with sighash type
 		sigBytes = append(signature.Serialize(), byte(txscript.SigHashAll))
+	} else {
+		// Legacy (P2PKH/P2SH): Use ECDSA signature with legacy sig hash
+		logger.Debug("Using legacy signature algorithm for P2PKH/P2SH",
+			"input", inputIndex,
+			"pkScript", hex.EncodeToString(witnessUtxo.PkScript))
+
+		// For legacy P2PKH, the scriptPubKey is used for signature hash
+		scriptForHash := witnessUtxo.PkScript
+
+		// For P2SH, use the redeem script if available
+		if len(psbtInput.RedeemScript) > 0 {
+			scriptForHash = psbtInput.RedeemScript
+			logger.Debug("Using redeem script for legacy P2SH signature",
+				"input", inputIndex,
+				"redeemScriptLen", len(psbtInput.RedeemScript))
+		}
+
+		hash, err := txscript.CalcSignatureHash(
+			scriptForHash,
+			txscript.SigHashAll,
+			msgTx,
+			inputIndex,
+		)
+		if err != nil {
+			logger.Warn("Failed to calculate legacy signature hash", "input", inputIndex, "error", err)
+			return false
+		}
+
+		logger.Debug("Legacy signature hash calculated",
+			"input", inputIndex,
+			"hash", hex.EncodeToString(hash),
+			"scriptForHashLen", len(scriptForHash))
+
+		// Sign with ECDSA
+		signature := ecdsa.Sign(privKey.PrivKey, hash)
+
+		logger.Debug("ECDSA signature created",
+			"input", inputIndex,
+			"sigR", signature.R().String(),
+			"sigS", signature.S().String())
+
+		// Serialize signature with sighash type
+		sigBytes = append(signature.Serialize(), byte(txscript.SigHashAll))
+
+		// Verify signature locally before adding to PSBT
+		pubKeyObj := privKey.PrivKey.PubKey()
+		if !signature.Verify(hash, pubKeyObj) {
+			logger.Error("Signature verification FAILED locally",
+				"input", inputIndex,
+				"pubKey", hex.EncodeToString(pubKeyObj.SerializeCompressed()))
+			return false
+		}
+		logger.Debug("Signature verified successfully locally", "input", inputIndex)
 	}
 
 	// Add partial signature to PSBT
 	// Pass redeem script and witness script for proper PSBT completion detection
 	pubKey := privKey.PrivKey.PubKey().SerializeCompressed()
+
+	// For debugging: Extract pubkey hash from scriptPubKey
+	if !isTaproot && !isSegWit {
+		// P2PKH scriptPubKey format: OP_DUP OP_HASH160 <20-byte-hash> OP_EQUALVERIFY OP_CHECKSIG
+		if len(witnessUtxo.PkScript) == 25 {
+			expectedPKH := witnessUtxo.PkScript[3:23]
+			actualPKH := btcutil.Hash160(pubKey)
+			logger.Debug("Comparing public key hashes for P2PKH",
+				"input", inputIndex,
+				"expectedPKH", hex.EncodeToString(expectedPKH),
+				"actualPKH", hex.EncodeToString(actualPKH),
+				"match", bytes.Equal(expectedPKH, actualPKH))
+		}
+	}
+
+	logger.Debug("Calling updater.Sign",
+		"input", inputIndex,
+		"sigLen", len(sigBytes),
+		"pubKeyLen", len(pubKey),
+		"hasRedeemScript", len(psbtInput.RedeemScript) > 0,
+		"hasWitnessScript", len(psbtInput.WitnessScript) > 0,
+		"hasBIP32Derivation", len(psbtInput.Bip32Derivation) > 0)
+
+	// Log BIP32 derivation public keys for comparison
+	if len(psbtInput.Bip32Derivation) > 0 {
+		logger.Debug("PSBT BIP32 derivation info",
+			"input", inputIndex,
+			"derivation_count", len(psbtInput.Bip32Derivation))
+		for i, deriv := range psbtInput.Bip32Derivation {
+			logger.Debug("BIP32 derivation entry",
+				"input", inputIndex,
+				"index", i,
+				"pubKey", hex.EncodeToString(deriv.PubKey),
+				"match", bytes.Equal(deriv.PubKey, pubKey))
+		}
+	}
+
+	// For legacy P2PKH, btcd's updater.Sign() has issues, so add signature directly
+	if !isTaproot && !isSegWit {
+		logger.Debug("Adding P2PKH signature directly to PartialSigs (bypassing updater.Sign)",
+			"input", inputIndex)
+
+		// Initialize PartialSigs map if needed
+		if psbtInput.PartialSigs == nil {
+			psbtInput.PartialSigs = make([]*psbt.PartialSig, 0)
+		}
+
+		// Check if signature already exists for this public key
+		sigExists := false
+		for _, partialSig := range psbtInput.PartialSigs {
+			if bytes.Equal(partialSig.PubKey, pubKey) {
+				logger.Debug("Signature already exists for this pubkey", "input", inputIndex)
+				sigExists = true
+				break
+			}
+		}
+
+		if !sigExists {
+			// Add partial signature directly
+			psbtInput.PartialSigs = append(psbtInput.PartialSigs, &psbt.PartialSig{
+				PubKey:    pubKey,
+				Signature: sigBytes,
+			})
+			logger.Debug("Added P2PKH signature directly to PartialSigs",
+				"input", inputIndex,
+				"pubKey", hex.EncodeToString(pubKey))
+			return true
+		}
+		return false
+	}
+
+	// For SegWit and Taproot, use updater.Sign()
 	outcome, err := updater.Sign(inputIndex, sigBytes, pubKey, psbtInput.RedeemScript, psbtInput.WitnessScript)
 	if err != nil {
 		// This may fail if the key doesn't match this input, which is normal
@@ -1108,13 +1271,14 @@ func (b *Bitcoin) addBIP32DerivationForInput(
 
 	// Get the correct fingerprint from imported descriptors, not from Bitcoin Core's internal wallet
 	// Query list of descriptors to find the one that matches this address and account
-	fingerprint, basePath, err := b.getDescriptorInfoForAddress(addressStr, addressInfo.HDKeyPath, senderAccount)
+	fingerprint, _, err := b.getDescriptorInfoForAddress(addressStr, addressInfo.HDKeyPath, senderAccount)
 	if err != nil {
 		return fmt.Errorf("failed to get descriptor info: %w", err)
 	}
 
 	// Parse the full derivation path
-	derivationPath, err := parseDerivationPath(basePath + addressInfo.HDKeyPath[len("m"):])
+	// Use addressInfo.HDKeyPath directly as it already contains the full path from getaddressinfo
+	derivationPath, err := parseDerivationPath(addressInfo.HDKeyPath)
 	if err != nil {
 		return fmt.Errorf("failed to parse derivation path: %w", err)
 	}
@@ -1206,8 +1370,9 @@ func splitPath(path string) []string {
 // for the given address. This is necessary because getaddressinfo returns Bitcoin Core's
 // internal wallet fingerprint, not the imported descriptor's fingerprint.
 func (b *Bitcoin) getDescriptorInfoForAddress(address, fullPath string, senderAccount domainAccount.AccountType) (uint32, string, error) {
-	// Call listdescriptors RPC
-	rawResult, err := b.Client.RawRequest("listdescriptors", []json.RawMessage{json.RawMessage("true")})
+	// Call listdescriptors RPC with false to get public descriptors
+	// Note: Watch-only wallets can't return private descriptors (true parameter would fail)
+	rawResult, err := b.Client.RawRequest("listdescriptors", []json.RawMessage{json.RawMessage("false")})
 	if err != nil {
 		return 0, "", fmt.Errorf("failed to call listdescriptors: %w", err)
 	}
@@ -1232,8 +1397,9 @@ func (b *Bitcoin) getDescriptorInfoForAddress(address, fullPath string, senderAc
 	// Get the account-level path (e.g., "44h/1h/1h")
 	accountPath := strings.Join(pathParts[:len(pathParts)-2], "/")
 
-	// Normalize accountPath: convert 'h' notation to "'" notation for descriptor matching
-	// getaddressinfo returns "44h/1h/1h" but descriptors use "44'/1'/1'"
+	// Prepare path variations for matching
+	// Both 'h' notation (44h/1h/1h) and apostrophe notation (44'/1'/1') are valid
+	// listdescriptors may return either format depending on how descriptors were imported
 	accountPathApostrophe := strings.ReplaceAll(accountPath, "h", "'")
 
 	// Get expected BIP44 account index for validation
@@ -1249,8 +1415,8 @@ func (b *Bitcoin) getDescriptorInfoForAddress(address, fullPath string, senderAc
 	for _, desc := range result.Descriptors {
 		// Parse descriptor to extract fingerprint and path
 		// Format: "pkh([fingerprint/path]xpub.../change/*)"
-		// Match using apostrophe notation since descriptors use that format
-		if !strings.Contains(desc.Desc, accountPathApostrophe) {
+		// Match using both 'h' notation and apostrophe notation
+		if !strings.Contains(desc.Desc, accountPath) && !strings.Contains(desc.Desc, accountPathApostrophe) {
 			continue
 		}
 
