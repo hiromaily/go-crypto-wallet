@@ -32,10 +32,9 @@ type ListUnspentResult struct {
 	Safe          bool    `json:"safe"`
 }
 
-// ListUnspent call RPC `listunspent`
-func (b *Bitcoin) ListUnspent(confirmationNum uint64) ([]dtobtc.UnspentOutput, error) {
-	logger.Debug("call ListUnspent()", "confirmation", b.confirmationBlock)
-
+// listUnspentRaw calls RPC `listunspent` and returns raw ListUnspentResult without conversion to DTO.
+// This is used internally to avoid redundant data conversions.
+func (b *Bitcoin) listUnspentRaw(confirmationNum uint64) ([]ListUnspentResult, error) {
 	input, err := json.Marshal(confirmationNum)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Marchal(): %w", err)
@@ -49,6 +48,18 @@ func (b *Bitcoin) ListUnspent(confirmationNum uint64) ([]dtobtc.UnspentOutput, e
 	err = json.Unmarshal(rawResult, &listunspentResult)
 	if err != nil {
 		return nil, fmt.Errorf("fail to call json.Unmarshal(): %w", err)
+	}
+
+	return listunspentResult, nil
+}
+
+// ListUnspent call RPC `listunspent`
+func (b *Bitcoin) ListUnspent(confirmationNum uint64) ([]dtobtc.UnspentOutput, error) {
+	logger.Debug("call ListUnspent()", "confirmation", b.confirmationBlock)
+
+	listunspentResult, err := b.listUnspentRaw(confirmationNum)
+	if err != nil {
+		return nil, err
 	}
 
 	if len(listunspentResult) == 0 {
@@ -211,8 +222,8 @@ func (b *Bitcoin) listUnspentByDescriptorMatching(
 	accountType domainAccount.AccountType,
 	confirmationNum uint64,
 ) ([]ListUnspentResult, error) {
-	// Get all unspent outputs (no address filter)
-	allUnspent, err := b.ListUnspent(confirmationNum)
+	// Get all unspent outputs (no address filter) - use raw result to avoid conversion
+	allUnspent, err := b.listUnspentRaw(confirmationNum)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list all unspent outputs: %w", err)
 	}
@@ -239,10 +250,10 @@ func (b *Bitcoin) listUnspentByDescriptorMatching(
 	// Get the expected BIP44 account index for this account type
 	expectedAccountIndex := accountType.BIP44AccountIndex()
 
-	// Filter descriptors that match this account's BIP44 index
+	// Check if any descriptor matches this account's BIP44 index
 	// Descriptor format: "sh(wsh(sortedmulti(2,[fingerprint/path]xpub.../0/*,...))"
 	// The path contains the account index (e.g., 44h/1h/0h where 0 is the account index)
-	accountDescriptors := make([]string, 0)
+	hasMatchingDescriptor := false
 	for _, desc := range descriptorList.Descriptors {
 		// Skip internal (change) descriptors - we only want external (receiving) descriptors
 		if desc.Internal != nil && *desc.Internal {
@@ -251,20 +262,20 @@ func (b *Bitcoin) listUnspentByDescriptorMatching(
 
 		// Check if this descriptor matches the account index
 		if b.descriptorMatchesAccountIndex(desc.Desc, expectedAccountIndex) {
-			accountDescriptors = append(accountDescriptors, desc.Desc)
+			hasMatchingDescriptor = true
+			break
 		}
 	}
 
-	if len(accountDescriptors) == 0 {
+	if !hasMatchingDescriptor {
 		logger.Warn("no matching descriptors found for account",
 			"account_type", accountType,
 			"expected_account_index", expectedAccountIndex)
 		return nil, nil
 	}
 
-	logger.Debug("found matching descriptors for account",
-		"account_type", accountType,
-		"descriptor_count", len(accountDescriptors))
+	logger.Debug("found matching descriptor for account",
+		"account_type", accountType)
 
 	// Filter unspent outputs by checking if they belong to this account
 	// We do this by getting address info for each unspent and checking the account
@@ -282,21 +293,9 @@ func (b *Bitcoin) listUnspentByDescriptorMatching(
 		}
 
 		if belongs {
-			// Convert UnspentOutput DTO back to ListUnspentResult for internal processing
-			matchingUnspent = append(matchingUnspent, ListUnspentResult{
-				TxID:          unspent.TxID,
-				Vout:          unspent.Vout,
-				Address:       unspent.Address,
-				Label:         accountType.String(), // Set the label for consistency
-				RedeemScript:  unspent.RedeemScript,
-				WitnessScript: unspent.WitnessScript,
-				ScriptPubKey:  unspent.ScriptPubKey,
-				Amount:        unspent.Amount.ToBTC(),
-				Confirmations: unspent.Confirmations,
-				Spendable:     unspent.Spendable,
-				Solvable:      unspent.Solvable,
-				Safe:          unspent.Safe,
-			})
+			// Set the label for consistency
+			unspent.Label = accountType.String()
+			matchingUnspent = append(matchingUnspent, unspent)
 		}
 	}
 
@@ -391,8 +390,12 @@ func (*Bitcoin) descriptorMatchesAccountIndex(descriptor string, expectedAccount
 	var accountIndex uint32
 	_, err := fmt.Sscanf(accountComponent, "%d", &accountIndex)
 	if err != nil {
+		descriptorForLog := descriptor
+		if len(descriptorForLog) > 50 {
+			descriptorForLog = descriptorForLog[:50]
+		}
 		logger.Debug("failed to parse account index from descriptor",
-			"descriptor", descriptor[:min(len(descriptor), 50)],
+			"descriptor", descriptorForLog,
 			"account_component", accountComponent)
 		return false
 	}
