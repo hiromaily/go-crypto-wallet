@@ -437,24 +437,28 @@ func (b *Bitcoin) SignPSBTWithKey(psbtBase64 string, wifs []string) (string, boo
 // This function should only be called when PSBT is complete (all signatures collected).
 // Used by Watch wallet before extracting the final transaction.
 func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
-	logger.Info("FinalizePSBT called")
+	logger.Info("========== FinalizePSBT CALLED ==========")
 
 	// Parse PSBT
 	parsed, err := b.parsePSBTInternal(psbtBase64)
 	if err != nil {
+		logger.Error("Failed to parse PSBT in FinalizePSBT", "error", err)
 		return "", fmt.Errorf("failed to parse PSBT for finalization: %w", err)
 	}
 
-	logger.Debug("PSBT parsed for finalization",
+	logger.Info("PSBT parsed for finalization",
 		"inputs", len(parsed.Packet.Inputs),
 		"outputs", len(parsed.Packet.Outputs))
 
 	// Log input states before finalization
 	for i, input := range parsed.Packet.Inputs {
-		logger.Debug("Input state before finalization",
+		logger.Info("Input state before finalization",
 			"input", i,
 			"hasPartialSigs", len(input.PartialSigs) > 0,
 			"partialSigsCount", len(input.PartialSigs),
+			"hasRedeemScript", len(input.RedeemScript) > 0,
+			"redeemScriptLen", len(input.RedeemScript),
+			"hasWitnessScript", len(input.WitnessScript) > 0,
 			"hasFinalScriptSig", input.FinalScriptSig != nil,
 			"hasFinalScriptWitness", input.FinalScriptWitness != nil)
 	}
@@ -466,6 +470,7 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
 	}
 	logger.Info("PSBT completion check result", "isComplete", isComplete)
 	if !isComplete {
+		logger.Error("PSBT is incomplete - cannot finalize")
 		return "", errors.New("cannot finalize incomplete PSBT (missing signatures)")
 	}
 
@@ -528,7 +533,7 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
 			}
 		}
 
-		logger.Debug("Checking finalization method for input",
+		logger.Info("Checking finalization method for input",
 			"input", i,
 			"scriptType", scriptType,
 			"hasRedeemScript", hasRedeemScript,
@@ -538,26 +543,28 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
 
 		if scriptType == "P2PKH" && hasPartialSigs {
 			// P2PKH - use custom finalization (creates scriptSig, no witness)
-			logger.Debug("Using custom P2PKH finalization", "input", i)
+			logger.Info("Using custom P2PKH finalization", "input", i)
 			if err := b.finalizeP2PKHInput(parsed.Packet, i); err != nil {
 				return "", fmt.Errorf("failed to finalize P2PKH input %d: %w", i, err)
 			}
 		} else if scriptType == "P2SH" && hasRedeemScript && !hasWitnessScript && hasPartialSigs {
 			// P2SH multisig (non-SegWit, BIP44) - use custom finalization
-			logger.Debug("Using custom P2SH multisig finalization", "input", i)
+			logger.Info("Using custom P2SH multisig finalization", "input", i)
 			if err := b.finalizeMultisigInput(parsed.Packet, i); err != nil {
 				return "", fmt.Errorf("failed to finalize P2SH multisig input %d: %w", i, err)
 			}
 		} else if hasRedeemScript && hasWitnessScript && hasPartialSigs {
 			// P2SH-P2WSH multisig - use custom finalization
-			logger.Debug("Using custom P2SH-P2WSH multisig finalization", "input", i)
+			logger.Info("Using custom P2SH-P2WSH multisig finalization", "input", i)
 			if err := b.finalizeMultisigInput(parsed.Packet, i); err != nil {
 				return "", fmt.Errorf("failed to finalize P2SH-P2WSH multisig input %d: %w", i, err)
 			}
 		} else {
 			// Other script types - use btcd's default finalization
-			logger.Debug("Using btcd default finalization", "input", i, "scriptType", scriptType)
+			logger.Info("Using btcd default finalization", "input", i, "scriptType", scriptType,
+				"reason", "no matching custom finalization condition")
 			if err := psbt.Finalize(parsed.Packet, i); err != nil {
+				logger.Error("btcd finalization failed", "input", i, "error", err)
 				return "", fmt.Errorf("failed to finalize input %d: %w", i, err)
 			}
 		}
@@ -648,18 +655,28 @@ func (b *Bitcoin) finalizeP2PKHInput(packet *psbt.Packet, inputIndex int) error 
 //   - scriptSig contains the redeemScript (P2WSH: OP_0 <witnessScriptHash>)
 //   - witness contains: [OP_0, sig1, sig2, ..., witnessScript]
 func (b *Bitcoin) finalizeMultisigInput(packet *psbt.Packet, inputIndex int) error {
-	input := packet.Inputs[inputIndex]
+	input := &packet.Inputs[inputIndex]
+
+	logger.Info("Starting finalizeMultisigInput",
+		"input", inputIndex,
+		"hasRedeemScript", len(input.RedeemScript) > 0,
+		"redeemScriptLen", len(input.RedeemScript),
+		"hasWitnessScript", len(input.WitnessScript) > 0,
+		"partialSigsCount", len(input.PartialSigs))
 
 	// Ensure we have the required scripts
 	if len(input.RedeemScript) == 0 {
+		logger.Error("Missing redeemScript in finalizeMultisigInput", "input", inputIndex)
 		return errors.New("missing redeem script for P2SH multisig input")
 	}
 	if len(input.PartialSigs) == 0 {
+		logger.Error("No partial signatures in finalizeMultisigInput", "input", inputIndex)
 		return errors.New("no signatures to finalize")
 	}
 
 	// Determine if this is P2SH (non-SegWit) or P2SH-P2WSH (SegWit)
 	isSegWit := len(input.WitnessScript) > 0
+	logger.Info("Determined multisig type", "input", inputIndex, "isSegWit", isSegWit)
 
 	// Extract public keys from the multisig script to determine signature order
 	// For multisig, signatures MUST be ordered according to pubkey order in the script
