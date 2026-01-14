@@ -54,6 +54,11 @@ shfmt:
 	shfmt -l -w scripts/*.sh
 	shfmt -l -w scripts/*/**.sh
 
+.PHONY: shellcheck
+shellcheck:
+	shellcheck scripts/*.sh
+	shellcheck scripts/*/**.sh
+
 ###############################################################################
 # Makefile Linting
 ###############################################################################
