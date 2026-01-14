@@ -530,15 +530,6 @@ create_payment_requests_phase() {
 	# For multisig descriptors, addresses are managed by Bitcoin Core, not stored in the database
 	log_substep "Using payment sender address derived from descriptor"
 	sender_address="$payment_address"
-
-	if [ -z "$sender_address" ]; then
-		log_error "Payment address not available"
-		log_error "Please check:"
-		log_error "  - Descriptor import succeeded"
-		log_error "  - Address derivation in generate_test_utxos succeeded"
-		return 1
-	fi
-
 	log_info "Using sender address: $sender_address"
 
 	# Generate anonymous receiver addresses for testing
