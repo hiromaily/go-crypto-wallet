@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -21,6 +22,7 @@ import (
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -64,6 +66,12 @@ func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx, sen
 
 	// Add metadata for each input from prevTxs
 	for i, prevTx := range infraPrevTxs {
+		logger.Info("Processing input for PSBT",
+			"input", i,
+			"has_redeem_script", prevTx.RedeemScript != "",
+			"redeem_script_len", len(prevTx.RedeemScript),
+			"has_witness_script", prevTx.WitnessScript != "")
+
 		if i >= len(packet.UnsignedTx.TxIn) {
 			return "", fmt.Errorf("prevTxs index %d exceeds number of inputs %d", i, len(packet.UnsignedTx.TxIn))
 		}
@@ -123,6 +131,12 @@ func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx, sen
 
 		// Add redeem script for P2SH if provided
 		// For P2SH-wrapped SegWit, this is the witness program
+		logger.Debug("Checking redeemScript for input",
+			"input", i,
+			"has_redeem_script", prevTx.RedeemScript != "",
+			"has_witness_script", len(witnessScript) > 0,
+			"is_p2sh", txscript.IsPayToScriptHash(scriptPubKey))
+
 		if prevTx.RedeemScript != "" {
 			redeemScript, err := b.decodeHexScript(prevTx.RedeemScript)
 			if err != nil {
@@ -131,6 +145,7 @@ func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx, sen
 			if err := updater.AddInRedeemScript(redeemScript, i); err != nil {
 				return "", fmt.Errorf("failed to add redeem script for input %d: %w", i, err)
 			}
+			logger.Debug("Added redeemScript from prevTx", "input", i, "script_len", len(redeemScript))
 		} else if len(witnessScript) > 0 && txscript.IsPayToScriptHash(scriptPubKey) {
 			// Auto-generate RedeemScript for P2SH-P2WSH when it's missing
 			// RedeemScript is the witness program: OP_0 <witnessScriptHash>
@@ -146,6 +161,33 @@ func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx, sen
 				return "", fmt.Errorf("failed to add auto-generated redeem script for input %d: %w", i, err)
 			}
 			logger.Debug("Auto-generated RedeemScript for P2SH-P2WSH input", "input", i)
+		} else if txscript.IsPayToScriptHash(scriptPubKey) && len(witnessScript) == 0 {
+			// P2SH (non-SegWit) multisig - derive redeemScript from descriptor
+			// Bitcoin Core's listunspent doesn't return redeemScript for descriptor-based addresses
+
+			// Extract address from scriptPubKey
+			_, addrs, _, err := txscript.ExtractPkScriptAddrs(scriptPubKey, b.chainConf)
+			if err != nil || len(addrs) == 0 {
+				return "", fmt.Errorf("failed to extract address from scriptPubKey for input %d: %w", i, err)
+			}
+			address := addrs[0].EncodeAddress()
+
+			logger.Info("RedeemScript missing for P2SH input, attempting to derive from descriptor",
+				"input", i,
+				"address", address)
+
+			redeemScript, err := b.deriveRedeemScriptForAddress(address, senderAccount)
+			if err != nil {
+				return "", fmt.Errorf("failed to derive redeemScript for input %d: %w", i, err)
+			}
+
+			if err := updater.AddInRedeemScript(redeemScript, i); err != nil {
+				return "", fmt.Errorf("failed to add derived redeem script for input %d: %w", i, err)
+			}
+			logger.Info("Derived and added RedeemScript for P2SH multisig input",
+				"input", i,
+				"address", address,
+				"script_len", len(redeemScript))
 		}
 
 		// Add sighash type (default to SIGHASH_ALL)
@@ -633,6 +675,30 @@ func (b *Bitcoin) finalizeMultisigInput(packet *psbt.Packet, inputIndex int) err
 		return fmt.Errorf("failed to extract public keys from multisig script: %w", err)
 	}
 
+	// Log redeemScript public keys
+	logger.Info("RedeemScript public keys",
+		"input", inputIndex,
+		"count", len(pubKeys))
+	for i, pk := range pubKeys {
+		logger.Info("RedeemScript pubkey",
+			"input", inputIndex,
+			"index", i,
+			"pubkey", hex.EncodeToString(pk),
+			"len", len(pk))
+	}
+
+	// Log PartialSigs public keys
+	logger.Info("PartialSigs public keys",
+		"input", inputIndex,
+		"count", len(input.PartialSigs))
+	for i, partialSig := range input.PartialSigs {
+		logger.Info("PartialSig pubkey",
+			"input", inputIndex,
+			"index", i,
+			"pubkey", hex.EncodeToString(partialSig.PubKey),
+			"len", len(partialSig.PubKey))
+	}
+
 	// Normalize public keys to compressed format for matching
 	// PartialSigs always use compressed public keys (33 bytes), but redeem script
 	// may contain uncompressed keys (65 bytes). Convert all to compressed for comparison.
@@ -795,6 +861,18 @@ func (b *Bitcoin) ExtractTransaction(psbtBase64 string) (*wire.MsgTx, error) {
 	parsed, err := b.parsePSBTInternal(psbtBase64)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse PSBT for extraction: %w", err)
+	}
+
+	// DIAGNOSTIC: Log state before extraction
+	for i, input := range parsed.Packet.Inputs {
+		logger.Info("Input state before extraction",
+			"input", i,
+			"hasPartialSigs", len(input.PartialSigs) > 0,
+			"partialSigsCount", len(input.PartialSigs),
+			"hasFinalScriptSig", input.FinalScriptSig != nil,
+			"finalScriptSigLen", len(input.FinalScriptSig),
+			"hasRedeemScript", len(input.RedeemScript) > 0,
+			"redeemScriptLen", len(input.RedeemScript))
 	}
 
 	// Extract final transaction from finalized PSBT
@@ -1414,6 +1492,360 @@ func (*Bitcoin) decodeHexScript(hexScript string) ([]byte, error) {
 	return script, nil
 }
 
+// addBIP32DerivationFromDescriptor adds BIP32 derivation paths to PSBT from descriptor.
+// This is required for descriptor-based signing when Bitcoin Core doesn't return HDKeyPath.
+func (b *Bitcoin) addBIP32DerivationFromDescriptor(
+	updater *psbt.Updater,
+	address string,
+	inputIndex int,
+	senderAccount domainAccount.AccountType,
+) error {
+	logger.Debug("Deriving BIP32 paths from descriptor",
+		"address", address,
+		"account", senderAccount.String())
+
+	// List all descriptors to find the original descriptor with xpubs
+	// Note: getaddressinfo returns a descriptor with raw public keys, not xpubs
+	descriptorList, err := b.ListDescriptors(false)
+	if err != nil {
+		return fmt.Errorf("failed to list descriptors: %w", err)
+	}
+
+	// Get address info to check which descriptor this address belongs to
+	addressInfo, err := b.GetAddressInfo(address)
+	if err != nil {
+		return fmt.Errorf("failed to get address info: %w", err)
+	}
+
+	if addressInfo.Desc == "" {
+		return fmt.Errorf("address info does not contain descriptor (not a descriptor wallet address?)")
+	}
+
+	logger.Debug("Got descriptor from getaddressinfo (with raw keys)",
+		"address", address,
+		"descriptor_len", len(addressInfo.Desc))
+
+	// Find the matching wallet descriptor (with xpubs) by comparing the structure
+	// We need to match descriptors based on their fingerprints
+	var walletDescriptor string
+	var isInternal bool
+	var addressIndex uint32
+
+	for _, desc := range descriptorList.Descriptors {
+		// Try to find address in this descriptor
+		foundIndex, err := b.findAddressIndexInDescriptor(desc.Desc, address)
+		if err == nil {
+			// Found it!
+			walletDescriptor = desc.Desc
+			addressIndex = foundIndex
+			isInternal = desc.Internal != nil && *desc.Internal
+			logger.Info("Found matching wallet descriptor",
+				"address", address,
+				"address_index", addressIndex,
+				"is_internal", isInternal,
+				"descriptor_prefix", desc.Desc[:80]+"...")
+
+			// DIAGNOSTIC: Verify what Bitcoin Core returns for this descriptor at this index
+			addresses, err := b.deriveAddressesFromDescriptor(desc.Desc, addressIndex, addressIndex)
+			if err == nil && len(addresses) > 0 {
+				logger.Info("Bitcoin Core deriveaddresses verification",
+					"descriptor_index", addressIndex,
+					"bitcoin_core_address", addresses[0],
+					"target_address", address,
+					"match", addresses[0] == address)
+			} else {
+				logger.Warn("Failed to verify with Bitcoin Core deriveaddresses", "error", err)
+			}
+
+			// Parse the wallet descriptor (which has xpubs)
+			parser := NewDescriptorParser()
+			parsed, err := parser.Parse(walletDescriptor)
+			if err != nil {
+				return fmt.Errorf("failed to parse wallet descriptor: %w", err)
+			}
+
+			// Only support P2SH multisig for now
+			if parsed.Type != domainWallet.DescriptorTypeSH {
+				return fmt.Errorf("unsupported descriptor type: %s (only sh supported)", parsed.Type)
+			}
+
+			// Verify by deriving the redeemScript
+			redeemScript, err := b.DeriveRedeemScriptFromDescriptor(walletDescriptor, address, addressIndex)
+			if err != nil {
+				return fmt.Errorf("failed to derive redeemScript: %w", err)
+			}
+
+			derivedAddr, err := b.deriveP2SHAddressFromRedeemScript(redeemScript)
+			if err != nil {
+				return fmt.Errorf("failed to derive address from redeemScript: %w", err)
+			}
+
+			if derivedAddr != address {
+				return fmt.Errorf("derived address %s does not match target %s", derivedAddr, address)
+			}
+
+			logger.Info("Verified redeemScript matches address, adding BIP32 derivation for all keys",
+				"address", address,
+				"descriptor_index", addressIndex,
+				"num_keys", len(parsed.Keys))
+
+			// Add BIP32 derivation for each key in the multisig
+			for keyIdx, keyInfo := range parsed.Keys {
+				// Derive the public key at this index
+				pubKey, err := b.derivePublicKeyFromDescriptorKey(keyInfo, addressIndex)
+				if err != nil {
+					return fmt.Errorf("failed to derive public key %d: %w", keyIdx, err)
+				}
+
+				// Parse the derivation path to get the full path
+				// Format: fingerprint from descriptor + derivation path
+				fingerprint, err := hex.DecodeString(keyInfo.Fingerprint)
+				if err != nil {
+					return fmt.Errorf("invalid fingerprint: %w", err)
+				}
+
+				// Build the full derivation path from master key
+				// Format: OriginPath + DerivationPath (with wildcard replaced)
+				// Example: "/44'/1'/1'" + "/0/*" = "/44'/1'/1'/0/0" (for addressIndex=0)
+				relativePath := keyInfo.DerivationPath
+				if relativePath == "" {
+					relativePath = fmt.Sprintf("/%d", addressIndex)
+				} else {
+					// Replace wildcard with actual index
+					relativePath = strings.ReplaceAll(relativePath, "/*", fmt.Sprintf("/%d", addressIndex))
+				}
+
+				// Combine origin and relative paths for full BIP32 path
+				fullPath := keyInfo.OriginPath + relativePath
+
+				// Parse full derivation path into []uint32
+				pathIndices, err := b.parseDerivationPath(fullPath)
+				if err != nil {
+					return fmt.Errorf("failed to parse derivation path %s: %w", fullPath, err)
+				}
+
+				// Add BIP32 derivation to PSBT
+				// AddInBip32Derivation signature: (fingerprint uint32, path []uint32, pubkey []byte, inputIndex int)
+				fingerprintUint32 := binary.LittleEndian.Uint32(fingerprint)
+
+				if err := updater.AddInBip32Derivation(fingerprintUint32, pathIndices, pubKey, inputIndex); err != nil {
+					return fmt.Errorf("failed to add BIP32 derivation for key %d: %w", keyIdx, err)
+				}
+
+				logger.Debug("Added BIP32 derivation for multisig key",
+					"input", inputIndex,
+					"key_index", keyIdx,
+					"pubkey", hex.EncodeToString(pubKey),
+					"fingerprint", keyInfo.Fingerprint,
+					"full_path", fullPath,
+					"origin", keyInfo.OriginPath,
+					"relative", relativePath)
+			}
+
+			logger.Info("Successfully added BIP32 derivation for all multisig keys",
+				"address", address,
+				"input", inputIndex,
+				"num_keys", len(parsed.Keys))
+			return nil
+		}
+	}
+
+	return fmt.Errorf("no matching wallet descriptor found for address %s", address)
+}
+
+// deriveRedeemScriptForAddress derives a redeemScript for a P2SH address by:
+// 1. Finding the matching descriptor for the account
+// 2. Searching for the address index within the descriptor range
+// 3. Deriving the redeemScript at that index
+func (b *Bitcoin) deriveRedeemScriptForAddress(address string, senderAccount domainAccount.AccountType) ([]byte, error) {
+	// List all descriptors
+	descriptorList, err := b.ListDescriptors(false)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list descriptors: %w", err)
+	}
+
+	// Determine expected account index
+	var expectedAccountIndex uint32
+	switch senderAccount {
+	case domainAccount.AccountTypeDeposit:
+		expectedAccountIndex = 0
+	case domainAccount.AccountTypePayment:
+		expectedAccountIndex = 1
+	case domainAccount.AccountTypeStored:
+		expectedAccountIndex = 2
+	default:
+		return nil, fmt.Errorf("unknown account type: %s", senderAccount.String())
+	}
+
+	logger.Debug("Searching for descriptor matching address",
+		"address", address,
+		"account", senderAccount.String(),
+		"account_index", expectedAccountIndex)
+
+	// Find matching descriptor and derive redeemScript
+	for _, desc := range descriptorList.Descriptors {
+		// Skip internal (change) descriptors
+		if desc.Internal != nil && *desc.Internal {
+			continue
+		}
+
+		// Check if descriptor matches the account
+		if !b.descriptorMatchesAccountIndex(desc.Desc, expectedAccountIndex) {
+			continue
+		}
+
+		logger.Debug("Found matching descriptor, searching for address",
+			"descriptor_len", len(desc.Desc),
+			"account_index", expectedAccountIndex)
+
+		// Try to find the address by deriving up to 1000 addresses (default range)
+		for i := uint32(0); i < 1000; i++ {
+			redeemScript, err := b.DeriveRedeemScriptFromDescriptor(desc.Desc, address, i)
+			if err != nil {
+				// This index doesn't work, try next
+				continue
+			}
+
+			// Verify the derived redeemScript matches the address
+			derivedAddr, err := b.deriveP2SHAddressFromRedeemScript(redeemScript)
+			if err != nil {
+				continue
+			}
+
+			if derivedAddr == address {
+				logger.Info("Successfully derived redeemScript for address",
+					"address", address,
+					"descriptor_index", i,
+					"script_len", len(redeemScript))
+				return redeemScript, nil
+			}
+		}
+	}
+
+	return nil, fmt.Errorf("no matching descriptor found for address %s (account=%s)", address, senderAccount.String())
+}
+
+// deriveP2SHAddressFromRedeemScript derives a P2SH address from a redeemScript
+func (b *Bitcoin) deriveP2SHAddressFromRedeemScript(redeemScript []byte) (string, error) {
+	// Hash the redeemScript
+	scriptHash := btcutil.Hash160(redeemScript)
+
+	// Create P2SH address from hash
+	// Note: Use NewAddressScriptHashFromHash since we already hashed the script
+	address, err := btcutil.NewAddressScriptHashFromHash(scriptHash, b.chainConf)
+	if err != nil {
+		return "", fmt.Errorf("failed to create P2SH address: %w", err)
+	}
+
+	return address.EncodeAddress(), nil
+}
+
+// findAddressIndexInDescriptor uses Bitcoin Core's deriveaddresses RPC to find
+// the index of an address within a descriptor's range.
+func (b *Bitcoin) findAddressIndexInDescriptor(descriptor string, targetAddress string) (uint32, error) {
+	// Search in chunks to avoid deriving too many addresses at once
+	const chunkSize = 100
+	const maxSearchRange = 10000 // Maximum range to search
+
+	for startIdx := uint32(0); startIdx < maxSearchRange; startIdx += chunkSize {
+		endIdx := startIdx + chunkSize - 1
+
+		// Call deriveaddresses with range
+		addresses, err := b.deriveAddressesFromDescriptor(descriptor, startIdx, endIdx)
+		if err != nil {
+			return 0, fmt.Errorf("failed to derive addresses [%d,%d]: %w", startIdx, endIdx, err)
+		}
+
+		// Search for target address in the chunk
+		for i, addr := range addresses {
+			if addr == targetAddress {
+				return startIdx + uint32(i), nil
+			}
+		}
+	}
+
+	return 0, fmt.Errorf("address %s not found in descriptor range [0,%d]", targetAddress, maxSearchRange)
+}
+
+// deriveAddressesFromDescriptor calls Bitcoin Core's deriveaddresses RPC.
+// It derives addresses from a descriptor within the specified range.
+func (b *Bitcoin) deriveAddressesFromDescriptor(descriptor string, startIdx, endIdx uint32) ([]string, error) {
+	// Build the RPC parameters
+	// Format: deriveaddresses "descriptor" [start, end]
+	rangeParam := fmt.Sprintf("[%d,%d]", startIdx, endIdx)
+
+	// Call RPC
+	params := []json.RawMessage{
+		json.RawMessage(fmt.Sprintf(`"%s"`, descriptor)),
+		json.RawMessage(rangeParam),
+	}
+
+	rawResult, err := b.Client.RawRequest("deriveaddresses", params)
+	if err != nil {
+		return nil, fmt.Errorf("deriveaddresses RPC failed: %w", err)
+	}
+
+	// Parse result
+	var addresses []string
+	if err := json.Unmarshal(rawResult, &addresses); err != nil {
+		return nil, fmt.Errorf("failed to parse deriveaddresses result: %w", err)
+	}
+
+	logger.Debug("Derived addresses from descriptor",
+		"range", fmt.Sprintf("[%d,%d]", startIdx, endIdx),
+		"count", len(addresses))
+
+	return addresses, nil
+}
+
+// parseDerivationPath parses a BIP32 derivation path string into a slice of indices.
+// Format: "/0/5" or "/0/*" (wildcard should be replaced before calling)
+func (b *Bitcoin) parseDerivationPath(path string) ([]uint32, error) {
+	if path == "" {
+		return []uint32{}, nil
+	}
+
+	// Remove leading slash
+	path = strings.TrimPrefix(path, "/")
+	if path == "" {
+		return []uint32{}, nil
+	}
+
+	// Split by slash
+	parts := strings.Split(path, "/")
+	indices := make([]uint32, 0, len(parts))
+
+	for _, part := range parts {
+		if part == "" {
+			continue
+		}
+
+		// Check for hardened derivation (')
+		hardened := false
+		if strings.HasSuffix(part, "'") || strings.HasSuffix(part, "h") {
+			hardened = true
+			part = strings.TrimSuffix(part, "'")
+			part = strings.TrimSuffix(part, "h")
+		}
+
+		// Parse the index
+		var index uint32
+		_, err := fmt.Sscanf(part, "%d", &index)
+		if err != nil {
+			return nil, fmt.Errorf("invalid path component %s: %w", part, err)
+		}
+
+		// Apply hardened bit if needed
+		if hardened {
+			index += 0x80000000
+		}
+
+		indices = append(indices, index)
+	}
+
+	return indices, nil
+}
+
 // addBIP32DerivationForInput adds BIP32 derivation path information to a PSBT input.
 // This is required for descriptor-based signing to work correctly.
 // It extracts the address from the scriptPubKey, queries Bitcoin Core for derivation info,
@@ -1457,13 +1889,24 @@ func (b *Bitcoin) addBIP32DerivationForInput(
 	// Check if address has derivation path
 	// For watch-only multisig descriptors, HDKeyPath and PubKey may be empty
 	// Bitcoin Core doesn't populate HDKeyPath for ranged multisig descriptors
-	// In this case, skip BIP32 derivation (signing wallets will add it during signing)
+	// In this case, derive BIP32 information from the descriptor
 	if addressInfo.HDKeyPath == "" {
 		if addressInfo.IsScript {
-			logger.Info("Skipping BIP32 derivation for multisig address without HD key path",
+			logger.Info("Deriving BIP32 information from descriptor for multisig address",
 				"address", addressStr,
-				"input_index", inputIndex,
-				"is_script", addressInfo.IsScript)
+				"input_index", inputIndex)
+
+			// Derive BIP32 derivation paths from descriptor
+			err := b.addBIP32DerivationFromDescriptor(updater, addressStr, inputIndex, senderAccount)
+			if err != nil {
+				logger.Error("Failed to derive BIP32 from descriptor",
+					"address", addressStr,
+					"error", err)
+				return fmt.Errorf("failed to derive BIP32 from descriptor: %w", err)
+			}
+			logger.Info("Successfully added BIP32 derivation from descriptor",
+				"address", addressStr,
+				"input_index", inputIndex)
 			return nil
 		}
 		return errors.New("address has no HD key path (not from descriptor wallet?)")

@@ -1,12 +1,19 @@
 package btc
 
 import (
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 
+	"github.com/btcsuite/btcd/btcutil"
+	"github.com/btcsuite/btcd/btcutil/hdkeychain"
+	"github.com/btcsuite/btcd/txscript"
+
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
+	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 // DescriptorParser parses Bitcoin output descriptors according to BIP380.
@@ -168,22 +175,22 @@ func (p *DescriptorParser) extractKeys(descriptorStr string) ([]domainWallet.Des
 		}
 
 		fingerprint := match[1]
-		// match[2] is accountPath (origin info) - not used, already baked into xpub
+		originPath := match[2]    // Origin path (e.g., "/44'/1'/1'")
 		xpub := match[3]          // Extended public key
 		remainingPath := match[4] // Path after xpub (derivation path FROM xpub)
 
-		// Use only remainingPath (derivation path FROM the xpub).
-		// match[2] is origin metadata (where the xpub was derived from master key),
-		// which is already baked into the xpub and should not be derived again.
-		// Example: [4a91842f/84'/1'/1]tpubDDed.../0/*
-		//   match[2] = "/84'/1'/1" (origin - already in xpub)
-		//   remainingPath = "/0/*" (what to derive from xpub)
-		// Bitcoin Core's deriveaddresses interprets this the same way.
-		fullPath := remainingPath
+		// Store both origin and remaining paths separately:
+		// - OriginPath: Used for PSBT BIP32 derivation metadata (full path from master)
+		// - DerivationPath: Used for key derivation from xpub (xpub is already at origin level)
+		// Example: [4a91842f/84'/1'/1']tpubDDed.../0/*
+		//   OriginPath = "/84'/1'/1'" (where xpub was derived from master)
+		//   DerivationPath = "/0/*" (what to derive from xpub)
+		//   For PSBT: combine both = "/84'/1'/1'/0/0" (after replacing wildcard)
 
 		key := domainWallet.DescriptorKey{
 			Fingerprint:    fingerprint,
-			DerivationPath: fullPath,
+			OriginPath:     originPath,
+			DerivationPath: remainingPath,
 			ExtendedPubKey: xpub,
 		}
 
@@ -210,4 +217,204 @@ func FormatDescriptor(desc *domainWallet.Descriptor) (string, error) {
 	}
 
 	return result, nil
+}
+
+// DeriveRedeemScriptFromDescriptor derives a P2SH redeemScript from a descriptor at a specific index.
+// This is used when Bitcoin Core's listunspent doesn't return the redeemScript for descriptor-based addresses.
+//
+// Example descriptor:
+//   sh(multi(2,[fp1/44'/1'/1']tpub.../0/*,[fp2/44'/1'/1']tpub.../0/*,[fp3/44'/1'/1']tpub.../0/*))
+//
+// For index=0, this derives the three public keys at path /0/0 and builds:
+//   OP_2 <pk1> <pk2> <pk3> OP_3 OP_CHECKMULTISIG
+func (b *Bitcoin) DeriveRedeemScriptFromDescriptor(descriptor string, address string, addressIndex uint32) ([]byte, error) {
+	logger.Debug("Deriving redeemScript from descriptor",
+		"descriptor_len", len(descriptor),
+		"address", address,
+		"index", addressIndex)
+
+	// Parse using the existing descriptor parser
+	parser := NewDescriptorParser()
+	parsed, err := parser.Parse(descriptor)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse descriptor: %w", err)
+	}
+
+	// Only support sh(multi(...)) for now
+	if parsed.Type != domainWallet.DescriptorTypeSH {
+		return nil, fmt.Errorf("unsupported descriptor type: %s (only sh supported)", parsed.Type)
+	}
+
+	// Extract multisig parameters from the descriptor
+	requiredSigs, totalSigs, err := b.extractMultisigParams(parsed.Script)
+	if err != nil {
+		return nil, fmt.Errorf("failed to extract multisig params: %w", err)
+	}
+
+	// Check if it's sorted or not
+	isSorted := strings.Contains(parsed.Script, "sortedmulti(")
+
+	logger.Info("Parsed multisig descriptor",
+		"type", parsed.Type,
+		"required_sigs", requiredSigs,
+		"total_keys", len(parsed.Keys),
+		"is_sorted", isSorted,
+		"script_preview", parsed.Script[:min(100, len(parsed.Script))])
+
+	// Derive public keys at the specified index
+	pubKeys := make([][]byte, 0, len(parsed.Keys))
+	for i, keyInfo := range parsed.Keys {
+		pubKey, err := b.derivePublicKeyFromDescriptorKey(keyInfo, addressIndex)
+		if err != nil {
+			return nil, fmt.Errorf("failed to derive public key %d: %w", i, err)
+		}
+		pubKeys = append(pubKeys, pubKey)
+		logger.Debug("Derived public key from descriptor",
+			"key_index", i,
+			"xpub_first_10", keyInfo.ExtendedPubKey[:10]+"...",
+			"derivation_path", keyInfo.DerivationPath,
+			"address_index", addressIndex,
+			"pubkey", hex.EncodeToString(pubKey))
+	}
+
+	// Build multisig redeemScript: OP_M <pk1> <pk2> ... <pkN> OP_N OP_CHECKMULTISIG
+	redeemScript, err := b.buildMultisigRedeemScript(requiredSigs, totalSigs, pubKeys)
+	if err != nil {
+		return nil, fmt.Errorf("failed to build redeemScript: %w", err)
+	}
+
+	// DIAGNOSTIC: Hash the redeemScript to get the P2SH address
+	redeemScriptHash := btcutil.Hash160(redeemScript)
+	p2shAddr, err := btcutil.NewAddressScriptHashFromHash(redeemScriptHash, b.chainConf)
+	var derivedAddrStr string
+	if err == nil {
+		derivedAddrStr = p2shAddr.EncodeAddress()
+	}
+
+	logger.Info("Derived redeemScript from descriptor",
+		"target_address", address,
+		"derived_address", derivedAddrStr,
+		"match", derivedAddrStr == address,
+		"index", addressIndex,
+		"required_sigs", requiredSigs,
+		"total_keys", len(pubKeys),
+		"script_len", len(redeemScript),
+		"script_hex", hex.EncodeToString(redeemScript))
+
+	return redeemScript, nil
+}
+
+// extractMultisigParams extracts M and N from a multisig descriptor
+// Format: sh(multi(M,key1,key2,...)) or sh(sortedmulti(M,key1,key2,...))
+func (b *Bitcoin) extractMultisigParams(descriptorScript string) (requiredSigs, totalSigs int, err error) {
+	// Match multi(M, or sortedmulti(M,
+	multiRegex := regexp.MustCompile(`(?:sorted)?multi\((\d+),`)
+	matches := multiRegex.FindStringSubmatch(descriptorScript)
+	if len(matches) < 2 {
+		return 0, 0, errors.New("failed to extract multisig M parameter")
+	}
+
+	requiredSigs, err = strconv.Atoi(matches[1])
+	if err != nil {
+		return 0, 0, fmt.Errorf("invalid M parameter: %s", matches[1])
+	}
+
+	// Count the number of keys
+	// Keys have format: [fingerprint/path]xpub or just xpub
+	keyPattern := regexp.MustCompile(`\[[0-9a-fA-F]{8}[^\]]*\][xyztYZ]pub`)
+	keyMatches := keyPattern.FindAllString(descriptorScript, -1)
+	totalSigs = len(keyMatches)
+
+	if totalSigs == 0 {
+		return 0, 0, errors.New("no keys found in multisig descriptor")
+	}
+
+	return requiredSigs, totalSigs, nil
+}
+
+// derivePublicKeyFromDescriptorKey derives a child public key from a descriptor key
+func (b *Bitcoin) derivePublicKeyFromDescriptorKey(keyInfo domainWallet.DescriptorKey, addressIndex uint32) ([]byte, error) {
+	// Parse the derivation path
+	// Format: "/0/*" or "/1/*" or "/*"
+	pathParts := strings.Split(strings.TrimPrefix(keyInfo.DerivationPath, "/"), "/")
+
+	// Parse extended public key
+	extKey, err := hdkeychain.NewKeyFromString(keyInfo.ExtendedPubKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse xpub: %w", err)
+	}
+
+	// Derive child keys according to the path
+	currentKey := extKey
+	for i, part := range pathParts {
+		if part == "" {
+			continue
+		}
+		if part == "*" {
+			// Wildcard - use the address index
+			currentKey, err = currentKey.Derive(addressIndex)
+			if err != nil {
+				return nil, fmt.Errorf("failed to derive wildcard index %d: %w", addressIndex, err)
+			}
+		} else {
+			// Fixed index (e.g., "0" or "1")
+			// Only derive if this is not the last component that should be the wildcard
+			index, parseErr := strconv.ParseUint(part, 10, 32)
+			if parseErr != nil {
+				return nil, fmt.Errorf("invalid path component: %s", part)
+			}
+			currentKey, err = currentKey.Derive(uint32(index))
+			if err != nil {
+				return nil, fmt.Errorf("failed to derive index %d: %w", index, err)
+			}
+
+			// If this was the last component before wildcard, derive the address index
+			if i == len(pathParts)-2 && pathParts[i+1] == "*" {
+				currentKey, err = currentKey.Derive(addressIndex)
+				if err != nil {
+					return nil, fmt.Errorf("failed to derive address index %d: %w", addressIndex, err)
+				}
+				break
+			}
+		}
+	}
+
+	// Get the public key
+	pubKey, err := currentKey.ECPubKey()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get public key: %w", err)
+	}
+
+	return pubKey.SerializeCompressed(), nil
+}
+
+// buildMultisigRedeemScript builds a multisig redeemScript from public keys
+// Format: OP_M <pk1> <pk2> ... <pkN> OP_N OP_CHECKMULTISIG
+func (b *Bitcoin) buildMultisigRedeemScript(requiredSigs, totalSigs int, pubKeys [][]byte) ([]byte, error) {
+	if requiredSigs <= 0 || requiredSigs > totalSigs {
+		return nil, fmt.Errorf("invalid multisig parameters: %d-of-%d", requiredSigs, totalSigs)
+	}
+
+	if len(pubKeys) != totalSigs {
+		return nil, fmt.Errorf("pubkey count mismatch: expected %d, got %d", totalSigs, len(pubKeys))
+	}
+
+	// Build the script
+	builder := txscript.NewScriptBuilder()
+
+	// Add OP_M
+	builder.AddInt64(int64(requiredSigs))
+
+	// Add public keys
+	for _, pubKey := range pubKeys {
+		builder.AddData(pubKey)
+	}
+
+	// Add OP_N
+	builder.AddInt64(int64(totalSigs))
+
+	// Add OP_CHECKMULTISIG
+	builder.AddOp(txscript.OP_CHECKMULTISIG)
+
+	return builder.Script()
 }
