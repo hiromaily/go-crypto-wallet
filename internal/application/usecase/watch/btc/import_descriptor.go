@@ -389,6 +389,9 @@ func deriveAddressForType(
 			return "", err
 		}
 		return addr.EncodeAddress(), nil
+	case domainWallet.DescriptorTypeSH:
+		return "", errors.New(
+			"SH descriptor type requires multisig handling, not supported for single key derivation")
 	case domainWallet.DescriptorTypeWSH:
 		return "", errors.New(
 			"WSH descriptor type requires multisig handling, not supported for single key derivation")

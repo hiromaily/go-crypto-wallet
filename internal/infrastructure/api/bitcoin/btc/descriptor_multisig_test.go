@@ -10,6 +10,8 @@ import (
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/stretchr/testify/require"
+
+	wallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 )
 
 const testDerivationMultisig = "/48'/0'/0'/2'"
@@ -36,7 +38,7 @@ func TestGenerateMultisigDescriptor(t *testing.T) {
 	}
 
 	t.Run("receive 2-of-3 descriptor with deterministic ordering", func(t *testing.T) {
-		descriptor, err := service.GenerateMultisigDescriptor(2, signers, false, false)
+		descriptor, err := service.GenerateMultisigDescriptor(2, signers, false, wallet.DescriptorTypeWSH)
 		require.NoError(t, err)
 
 		expectedKeys := []string{
@@ -51,7 +53,7 @@ func TestGenerateMultisigDescriptor(t *testing.T) {
 	})
 
 	t.Run("change descriptor uses /1/*", func(t *testing.T) {
-		descriptor, err := service.GenerateMultisigDescriptor(2, signers, true, false)
+		descriptor, err := service.GenerateMultisigDescriptor(2, signers, true, wallet.DescriptorTypeWSH)
 		require.NoError(t, err)
 
 		expectedKeys := []string{
@@ -133,7 +135,7 @@ func TestGenerateMultisigDescriptor_Validation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_, err := service.GenerateMultisigDescriptor(tt.requiredSigs, tt.signers, false, false)
+			_, err := service.GenerateMultisigDescriptor(tt.requiredSigs, tt.signers, false, wallet.DescriptorTypeWSH)
 			require.ErrorContains(t, err, tt.wantErr)
 		})
 	}
@@ -148,7 +150,7 @@ func TestGenerateMultisigDescriptor_NormalizesInputs(t *testing.T) {
 		ExtendedKey:    mustNewExtendedKey(t, testMainnetXpub),
 	}
 
-	desc, err := service.GenerateMultisigDescriptor(1, []MultisigSigner{signer}, false, false)
+	desc, err := service.GenerateMultisigDescriptor(1, []MultisigSigner{signer}, false, wallet.DescriptorTypeWSH)
 	require.NoError(t, err)
 
 	require.Equal(

@@ -20,7 +20,7 @@
 #   - bech32:      Native SegWit (addresses starting with bc1q) -> derives key_type: bip84
 #   - taproot:     Taproot (addresses starting with bc1p) -> derives key_type: bip86
 # Note: key_type is automatically derived from address_type (see AddrType.ToKeyType())
-address_type: "p2sh-segwit"
+address_type: "legacy"
 
 bitcoin:
   # Using /wallet/<name> path requires pre-created wallet via `bitcoin-cli createwallet <name>`.

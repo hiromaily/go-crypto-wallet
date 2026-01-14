@@ -74,6 +74,14 @@ const (
 	// Example: sh(wsh(sortedmulti(2,[fp1/49'/0'/0']xpub1...,[fp2/49'/0'/0']xpub2.../0/*)))
 	DescriptorTypeSHWSH
 
+	// DescriptorTypeSH represents Pay-to-Script-Hash multisig descriptors (non-SegWit).
+	// Used for BIP44 (Legacy) multisig addresses.
+	// Format: sh(multi(M,KEY1,KEY2,...))
+	// Example: sh(multi(2,[fp1/44'/0'/0']xpub1...,[fp2/44'/0'/0']xpub2.../0/*))
+	// Note: Bitcoin Core prefers sorted keys, so we use multi() not sortedmulti()
+	// for P2SH (non-witness) multisig to match standard behavior.
+	DescriptorTypeSH
+
 	// DescriptorTypeUnknown represents an unknown or unsupported descriptor type.
 	DescriptorTypeUnknown
 )
@@ -93,6 +101,8 @@ func (d DescriptorType) String() string {
 		return "wsh"
 	case DescriptorTypeSHWSH:
 		return "sh(wsh)"
+	case DescriptorTypeSH:
+		return "sh"
 	case DescriptorTypeUnknown:
 		return "unknown"
 	default:
