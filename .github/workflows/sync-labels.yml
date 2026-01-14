@@ -1,0 +1,27 @@
+name: Sync Labels
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - ".github/labels.yml"
+  workflow_dispatch: # Manual trigger
+
+jobs:
+  sync-labels:
+    name: Sync labels from labels.yml
+    runs-on: ubuntu-slim
+    timeout-minutes: 5
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Sync labels
+        uses: EndBug/label-sync@v2
+        with:
+          config-file: .github/labels.yml
+          delete-other-labels: false # Keep labels not defined in labels.yml
+          dry-run: false
