@@ -224,13 +224,15 @@ func FormatDescriptor(desc *domainWallet.Descriptor) (string, error) {
 // DeriveRedeemScriptFromDescriptor derives a P2SH redeemScript from a descriptor at a specific index.
 // This is used when Bitcoin Core's listunspent doesn't return the redeemScript for descriptor-based addresses.
 //
-// Example descriptor:
+// Supported descriptor types:
 //
-//	sh(multi(2,[fp1/44'/1'/1']tpub.../0/*,[fp2/44'/1'/1']tpub.../0/*,[fp3/44'/1'/1']tpub.../0/*))
+//   - sh(multi(...)): Legacy P2SH multisig
+//     Example: sh(multi(2,[fp1/44'/1'/1']tpub.../0/*,[fp2/44'/1'/1']tpub.../0/*))
+//     RedeemScript: OP_2 <pk1> <pk2> OP_2 OP_CHECKMULTISIG
 //
-// For index=0, this derives the three public keys at path /0/0 and builds:
-//
-//	OP_2 <pk1> <pk2> <pk3> OP_3 OP_CHECKMULTISIG
+//   - sh(wpkh(...)): P2SH-wrapped P2WPKH (BIP49 Nested SegWit)
+//     Example: sh(wpkh([fp/49'/1'/1']tpub.../0/*))
+//     RedeemScript: OP_0 <20-byte-pubkey-hash>
 func (b *Bitcoin) DeriveRedeemScriptFromDescriptor(
 	descriptor string, address string, addressIndex uint32,
 ) ([]byte, error) {
@@ -246,11 +248,79 @@ func (b *Bitcoin) DeriveRedeemScriptFromDescriptor(
 		return nil, fmt.Errorf("failed to parse descriptor: %w", err)
 	}
 
-	// Only support sh(multi(...)) for now
-	if parsed.Type != domainWallet.DescriptorTypeSH {
-		return nil, fmt.Errorf("unsupported descriptor type: %s (only sh supported)", parsed.Type)
+	logger.Info("Parsed descriptor",
+		"type", parsed.Type,
+		"total_keys", len(parsed.Keys),
+		"script_preview", parsed.Script[:min(100, len(parsed.Script))])
+
+	// Route to appropriate handler based on descriptor type
+	var redeemScript []byte
+	switch parsed.Type {
+	case domainWallet.DescriptorTypeSH:
+		// Legacy P2SH multisig
+		redeemScript, err = b.deriveMultisigRedeemScript(parsed, addressIndex)
+		if err != nil {
+			return nil, fmt.Errorf("failed to derive multisig redeemScript: %w", err)
+		}
+
+	case domainWallet.DescriptorTypeSHWPKH:
+		// P2SH-wrapped P2WPKH (BIP49 Nested SegWit)
+		redeemScript, err = b.deriveP2WPKHRedeemScript(parsed, addressIndex)
+		if err != nil {
+			return nil, fmt.Errorf("failed to derive P2WPKH redeemScript: %w", err)
+		}
+
+	case domainWallet.DescriptorTypePKH,
+		domainWallet.DescriptorTypeWPKH,
+		domainWallet.DescriptorTypeTR,
+		domainWallet.DescriptorTypeWSH,
+		domainWallet.DescriptorTypeSHWSH,
+		domainWallet.DescriptorTypeUnknown:
+		// These descriptor types don't require redeemScript derivation:
+		// - PKH: P2PKH addresses don't use redeemScript
+		// - WPKH: Native SegWit (bech32) addresses don't use redeemScript
+		// - TR: Taproot addresses don't use redeemScript
+		// - WSH/SHWSH: Not yet implemented
+		return nil, fmt.Errorf("unsupported descriptor type for redeemScript derivation: %s", parsed.Type)
 	}
 
+	// DIAGNOSTIC: Hash the redeemScript to get the P2SH address
+	redeemScriptHash := btcutil.Hash160(redeemScript)
+	p2shAddr, err := btcutil.NewAddressScriptHashFromHash(redeemScriptHash, b.chainConf)
+	var derivedAddrStr string
+	if err == nil {
+		derivedAddrStr = p2shAddr.EncodeAddress()
+	}
+
+	logger.Info("Derived redeemScript from descriptor",
+		"target_address", address,
+		"derived_address", derivedAddrStr,
+		"match", derivedAddrStr == address,
+		"index", addressIndex,
+		"descriptor_type", parsed.Type,
+		"script_len", len(redeemScript),
+		"script_hex", hex.EncodeToString(redeemScript))
+
+	return redeemScript, nil
+}
+
+// deriveMultisigRedeemScript derives a redeemScript for sh(multi(...)) or sh(sortedmulti(...)) descriptors.
+// This handles legacy P2SH multisig addresses.
+//
+// For a descriptor like:
+//
+//	sh(sortedmulti(3,[fp1/path]xpub1/0/*,[fp2/path]xpub2/0/*,[fp3/path]xpub3/0/*))
+//
+// At index 0, it derives the three public keys and builds:
+//
+//	OP_3 <pk1> <pk2> <pk3> OP_3 OP_CHECKMULTISIG
+//
+// For sortedmulti, public keys are sorted lexicographically (BIP67).
+//
+
+func (b *Bitcoin) deriveMultisigRedeemScript(
+	parsed *domainWallet.Descriptor, addressIndex uint32,
+) ([]byte, error) {
 	// Extract multisig parameters from the descriptor
 	requiredSigs, totalSigs, err := b.extractMultisigParams(parsed.Script)
 	if err != nil {
@@ -261,11 +331,9 @@ func (b *Bitcoin) DeriveRedeemScriptFromDescriptor(
 	isSorted := strings.Contains(parsed.Script, "sortedmulti(")
 
 	logger.Info("Parsed multisig descriptor",
-		"type", parsed.Type,
 		"required_sigs", requiredSigs,
 		"total_keys", len(parsed.Keys),
-		"is_sorted", isSorted,
-		"script_preview", parsed.Script[:min(100, len(parsed.Script))])
+		"is_sorted", isSorted)
 
 	// Derive public keys at the specified index
 	pubKeys := make([][]byte, 0, len(parsed.Keys))
@@ -284,26 +352,66 @@ func (b *Bitcoin) DeriveRedeemScriptFromDescriptor(
 	}
 
 	// Build multisig redeemScript: OP_M <pk1> <pk2> ... <pkN> OP_N OP_CHECKMULTISIG
-	redeemScript, err := b.buildMultisigRedeemScript(requiredSigs, totalSigs, pubKeys, isSorted)
+	return b.buildMultisigRedeemScript(requiredSigs, totalSigs, pubKeys, isSorted)
+}
+
+// deriveP2WPKHRedeemScript derives a redeemScript for sh(wpkh(...)) descriptors.
+// This handles P2SH-wrapped P2WPKH addresses (BIP49 Nested SegWit).
+//
+// For a descriptor like:
+//
+//	sh(wpkh([fingerprint/49'/1'/1']tpubDDYi.../0/*))
+//
+// At index 0, it:
+// 1. Derives the public key at path /0/0 from the xpub
+// 2. Hashes the public key: HASH160(pubkey) = RIPEMD160(SHA256(pubkey))
+// 3. Builds P2WPKH script: OP_0 <20-byte-hash>
+//
+// This P2WPKH script becomes the redeemScript for the P2SH wrapper.
+// When spending:
+//   - scriptSig: <redeemScript>
+//   - witness: [<signature>, <pubkey>]
+//
+
+func (b *Bitcoin) deriveP2WPKHRedeemScript(
+	parsed *domainWallet.Descriptor, addressIndex uint32,
+) ([]byte, error) {
+	if len(parsed.Keys) != 1 {
+		return nil, fmt.Errorf("sh(wpkh) descriptor must have exactly 1 key, got %d", len(parsed.Keys))
+	}
+
+	keyInfo := parsed.Keys[0]
+
+	// Derive the public key at the specified index
+	pubKey, err := b.derivePublicKeyFromDescriptorKey(keyInfo, addressIndex)
 	if err != nil {
-		return nil, fmt.Errorf("failed to build redeemScript: %w", err)
+		return nil, fmt.Errorf("failed to derive public key: %w", err)
 	}
 
-	// DIAGNOSTIC: Hash the redeemScript to get the P2SH address
-	redeemScriptHash := btcutil.Hash160(redeemScript)
-	p2shAddr, err := btcutil.NewAddressScriptHashFromHash(redeemScriptHash, b.chainConf)
-	var derivedAddrStr string
-	if err == nil {
-		derivedAddrStr = p2shAddr.EncodeAddress()
+	logger.Debug("Derived public key for P2WPKH",
+		"xpub_first_10", keyInfo.ExtendedPubKey[:10]+"...",
+		"derivation_path", keyInfo.DerivationPath,
+		"address_index", addressIndex,
+		"pubkey", hex.EncodeToString(pubKey))
+
+	// Hash the public key: RIPEMD160(SHA256(pubkey))
+	pubKeyHash := btcutil.Hash160(pubKey)
+
+	logger.Debug("Computed pubkey hash",
+		"pubkey_hash", hex.EncodeToString(pubKeyHash))
+
+	// Build P2WPKH script: OP_0 <20-byte-hash>
+	// This is the redeemScript for the P2SH wrapper
+	builder := txscript.NewScriptBuilder()
+	builder.AddOp(txscript.OP_0)
+	builder.AddData(pubKeyHash)
+
+	redeemScript, err := builder.Script()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build P2WPKH redeemScript: %w", err)
 	}
 
-	logger.Info("Derived redeemScript from descriptor",
-		"target_address", address,
-		"derived_address", derivedAddrStr,
-		"match", derivedAddrStr == address,
-		"index", addressIndex,
-		"required_sigs", requiredSigs,
-		"total_keys", len(pubKeys),
+	logger.Info("Built P2WPKH redeemScript",
 		"script_len", len(redeemScript),
 		"script_hex", hex.EncodeToString(redeemScript))
 

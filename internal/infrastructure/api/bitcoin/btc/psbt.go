@@ -1142,7 +1142,9 @@ func (b *Bitcoin) signInputWithKey(
 	isTaproot := txscript.IsPayToTaproot(witnessUtxo.PkScript)
 	isSegWit := txscript.IsPayToWitnessPubKeyHash(witnessUtxo.PkScript) ||
 		txscript.IsPayToWitnessScriptHash(witnessUtxo.PkScript) ||
-		(txscript.IsPayToScriptHash(witnessUtxo.PkScript) && len(psbtInput.WitnessScript) > 0)
+		(txscript.IsPayToScriptHash(witnessUtxo.PkScript) && len(psbtInput.WitnessScript) > 0) ||
+		(txscript.IsPayToScriptHash(witnessUtxo.PkScript) && len(psbtInput.RedeemScript) > 0 &&
+			txscript.IsPayToWitnessPubKeyHash(psbtInput.RedeemScript))
 
 	// Route to appropriate signing function
 	if isTaproot {
@@ -1217,14 +1219,24 @@ func (*Bitcoin) signSegWitInput(
 	// Calculate witness signature hash
 	sigHashes := txscript.NewTxSigHashes(msgTx, prevOutputFetcher)
 
-	// For P2WSH multisig, use the witness script for hash calculation
-	// For P2WPKH (single sig), use the scriptPubKey
+	// Determine the script to use for hash calculation per BIP143:
+	// - P2WSH multisig: use the witness script
+	// - P2WPKH (native): use the scriptPubKey (witness program)
+	// - P2SH-P2WPKH (nested): use the redeem script (which IS the witness program)
+	// CalcWitnessSigHash will convert the witness program to scriptCode internally
 	scriptForHash := witnessUtxo.PkScript
 	if len(psbtInput.WitnessScript) > 0 {
+		// P2WSH multisig
 		scriptForHash = psbtInput.WitnessScript
 		logger.Debug("Using witness script for P2WSH multisig hash calculation",
 			"input", inputIndex,
 			"witnessScriptLen", len(psbtInput.WitnessScript))
+	} else if len(psbtInput.RedeemScript) > 0 && txscript.IsPayToWitnessPubKeyHash(psbtInput.RedeemScript) {
+		// P2SH-P2WPKH: use the redeem script (the P2WPKH witness program)
+		scriptForHash = psbtInput.RedeemScript
+		logger.Debug("Using redeem script for P2SH-P2WPKH hash calculation",
+			"input", inputIndex,
+			"redeemScriptLen", len(psbtInput.RedeemScript))
 	}
 
 	hash, err := txscript.CalcWitnessSigHash(
@@ -1243,9 +1255,47 @@ func (*Bitcoin) signSegWitInput(
 	// Sign with ECDSA
 	signature := ecdsa.Sign(privKey.PrivKey, hash)
 	sigBytes := append(signature.Serialize(), byte(txscript.SigHashAll))
-	pubKey := privKey.PrivKey.PubKey().SerializeCompressed()
+	pubKeyObj := privKey.PrivKey.PubKey()
+	pubKey := pubKeyObj.SerializeCompressed()
 
-	// Add signature using btcd's updater
+	// Verify signature locally before adding
+	if !signature.Verify(hash, pubKeyObj) {
+		logger.Error("SegWit signature verification FAILED locally", "input", inputIndex)
+		return false
+	}
+	logger.Debug("SegWit signature verified locally", "input", inputIndex)
+
+	// For P2SH-P2WPKH, add signature directly (btcd's updater may have issues)
+	// For other SegWit types, use updater.Sign()
+	isP2SHP2WPKH := len(psbtInput.RedeemScript) > 0 && txscript.IsPayToWitnessPubKeyHash(psbtInput.RedeemScript)
+	if isP2SHP2WPKH {
+		logger.Debug("Adding P2SH-P2WPKH signature directly to PartialSigs", "input", inputIndex)
+
+		// Initialize PartialSigs if needed
+		if psbtInput.PartialSigs == nil {
+			psbtInput.PartialSigs = make([]*psbt.PartialSig, 0)
+		}
+
+		// Check if signature already exists
+		for _, partialSig := range psbtInput.PartialSigs {
+			if bytes.Equal(partialSig.PubKey, pubKey) {
+				logger.Debug("Signature already exists for this pubkey", "input", inputIndex)
+				return false
+			}
+		}
+
+		// Add partial signature directly
+		psbtInput.PartialSigs = append(psbtInput.PartialSigs, &psbt.PartialSig{
+			PubKey:    pubKey,
+			Signature: sigBytes,
+		})
+		logger.Debug("Added P2SH-P2WPKH signature to PartialSigs",
+			"input", inputIndex,
+			"pubKey", hex.EncodeToString(pubKey))
+		return true
+	}
+
+	// For other SegWit types (P2WSH, native P2WPKH), use btcd's updater
 	outcome, err := updater.Sign(inputIndex, sigBytes, pubKey, psbtInput.RedeemScript, psbtInput.WitnessScript)
 	if err != nil {
 		logger.Debug("Signature not applicable for this input", "input", inputIndex, "error", err)
@@ -1685,9 +1735,9 @@ func (b *Bitcoin) addBIP32DerivationFromDescriptor(
 				return fmt.Errorf("failed to parse wallet descriptor: %w", err)
 			}
 
-			// Only support P2SH multisig for now
-			if parsed.Type != domainWallet.DescriptorTypeSH {
-				return fmt.Errorf("unsupported descriptor type: %s (only sh supported)", parsed.Type)
+			// Support P2SH-wrapped descriptors (sh(multi(...)), sh(wpkh(...)))
+			if parsed.Type != domainWallet.DescriptorTypeSH && parsed.Type != domainWallet.DescriptorTypeSHWPKH {
+				return fmt.Errorf("unsupported descriptor type: %s (only sh/sh(wpkh) supported)", parsed.Type)
 			}
 
 			// Verify by deriving the redeemScript
@@ -1707,10 +1757,13 @@ func (b *Bitcoin) addBIP32DerivationFromDescriptor(
 
 			logger.Info("Verified redeemScript matches address, adding BIP32 derivation for all keys",
 				"address", address,
+				"descriptor_type", parsed.Type,
 				"descriptor_index", addressIndex,
 				"num_keys", len(parsed.Keys))
 
-			// Add BIP32 derivation for each key in the multisig
+			// Add BIP32 derivation for each key in the descriptor
+			// For sh(wpkh(...)), there is only 1 key
+			// For sh(multi(...)), there are multiple keys
 			for keyIdx, keyInfo := range parsed.Keys {
 				// Derive the public key at this index
 				pubKey, err := b.derivePublicKeyFromDescriptorKey(keyInfo, addressIndex)
@@ -1753,8 +1806,9 @@ func (b *Bitcoin) addBIP32DerivationFromDescriptor(
 					return fmt.Errorf("failed to add BIP32 derivation for key %d: %w", keyIdx, err)
 				}
 
-				logger.Debug("Added BIP32 derivation for multisig key",
+				logger.Debug("Added BIP32 derivation for descriptor key",
 					"input", inputIndex,
+					"descriptor_type", parsed.Type,
 					"key_index", keyIdx,
 					"pubkey", hex.EncodeToString(pubKey),
 					"fingerprint", keyInfo.Fingerprint,
@@ -1763,8 +1817,9 @@ func (b *Bitcoin) addBIP32DerivationFromDescriptor(
 					"relative", relativePath)
 			}
 
-			logger.Info("Successfully added BIP32 derivation for all multisig keys",
+			logger.Info("Successfully added BIP32 derivation for all descriptor keys",
 				"address", address,
+				"descriptor_type", parsed.Type,
 				"input", inputIndex,
 				"num_keys", len(parsed.Keys))
 			return nil
