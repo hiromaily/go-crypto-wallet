@@ -2,6 +2,7 @@ package btc
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"strconv"
@@ -259,6 +260,8 @@ func (u *signTransactionUseCase) deriveWIFForPSBT(
 	change := uint32(chgIdx)
 
 	logger.Debug("deriving child key from account xpriv",
+		"wallet_type", u.wtype.String(),
+		"auth_type", u.authType.String(),
 		"address_index", addressIndex,
 		"change", change,
 		"derivation_path", firstDeriv.Path)
@@ -275,15 +278,24 @@ func (u *signTransactionUseCase) deriveWIFForPSBT(
 		return "", fmt.Errorf("failed to get private key from child: %w", err)
 	}
 
+	// Get public key for verification logging
+	pubKey, err := childKey.ECPubKey()
+	if err != nil {
+		return "", fmt.Errorf("failed to get public key from child: %w", err)
+	}
+
 	// Convert to WIF (compressed format)
 	wif, err := btcutil.NewWIF(privKey, u.btc.GetChainConf(), true)
 	if err != nil {
 		return "", fmt.Errorf("failed to create WIF from derived key: %w", err)
 	}
 
-	logger.Debug("derived WIF for address index",
+	logger.Info("derived WIF for signing",
+		"wallet_type", u.wtype.String(),
+		"auth_type", u.authType.String(),
 		"address_index", addressIndex,
-		"change", change)
+		"change", change,
+		"pubkey_hex", hex.EncodeToString(pubKey.SerializeCompressed()))
 
 	return wif.String(), nil
 }
