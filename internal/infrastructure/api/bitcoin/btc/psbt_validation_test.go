@@ -115,47 +115,19 @@ func TestP2WPKHRedeemScriptValidation(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Test length validation
-			lengthValid := len(tt.redeemScript) == p2wpkhRedeemScriptLen
-
-			if !lengthValid {
-				if tt.shouldPass {
-					t.Errorf("Length validation failed for valid case: %s", tt.description)
-				}
-				// Length check fails first, so we're done
-				return
-			}
-
-			// Test format validation (first byte must be OP_0)
-			firstByteValid := tt.redeemScript[0] == txscript.OP_0
-			if !firstByteValid && tt.shouldPass {
-				t.Errorf("First byte validation failed: expected OP_0 (0x00), got 0x%02x - %s",
-					tt.redeemScript[0], tt.description)
-			}
-
-			// Test length byte validation (second byte must be 0x14 = 20)
-			const pubKeyHashLength = 20
-			lengthByteValid := tt.redeemScript[1] == pubKeyHashLength
-			if !lengthByteValid && tt.shouldPass {
-				t.Errorf("Length byte validation failed: expected 0x14, got 0x%02x - %s",
-					tt.redeemScript[1], tt.description)
-			}
-
-			// Overall validation result
-			allValid := lengthValid && firstByteValid && lengthByteValid
-			if allValid != tt.shouldPass {
-				if tt.shouldPass {
-					t.Errorf("Validation failed for case that should pass: %s", tt.description)
-				} else {
-					t.Errorf("Validation passed for case that should fail: %s", tt.description)
-				}
+			// Test by calling the actual function
+			_, err := buildP2PKHScriptCodeForP2SHWPKH(tt.redeemScript, 0, 10000)
+			if tt.shouldPass {
+				assert.NoError(t, err, tt.description)
+			} else {
+				assert.Error(t, err, tt.description)
 			}
 		})
 	}
 }
 
-// TestP2WPKHRedeemScriptExtraction tests that after validation,
-// the pubkey hash can be safely extracted from the redeemScript.
+// TestP2WPKHRedeemScriptExtraction tests that buildP2PKHScriptCodeForP2SHWPKH
+// correctly constructs a P2PKH scriptCode from a valid P2WPKH redeemScript.
 func TestP2WPKHRedeemScriptExtraction(t *testing.T) {
 	// Create a valid P2WPKH redeemScript with known hash
 	expectedHash := []byte{
@@ -169,17 +141,22 @@ func TestP2WPKHRedeemScriptExtraction(t *testing.T) {
 	redeemScript, err := builder.Script()
 	assert.NoError(t, err)
 
-	// Validate the redeemScript
-	assert.Equal(t, p2wpkhRedeemScriptLen, len(redeemScript), "RedeemScript length must be 22")
-	assert.Equal(t, byte(txscript.OP_0), redeemScript[0], "First byte must be OP_0")
-	assert.Equal(t, byte(20), redeemScript[1], "Length byte must be 0x14 (20)")
+	// Call the function under test
+	scriptCode, err := buildP2PKHScriptCodeForP2SHWPKH(redeemScript, 0, 10000)
+	assert.NoError(t, err)
 
-	// Extract pubkey hash (after validation)
-	extractedHash := redeemScript[2:]
+	// Verify the constructed scriptCode is a valid P2PKH script
+	// Expected format: OP_DUP OP_HASH160 <20-byte-hash> OP_EQUALVERIFY OP_CHECKSIG
+	expectedScriptCodeBuilder := txscript.NewScriptBuilder()
+	expectedScriptCodeBuilder.AddOp(txscript.OP_DUP)
+	expectedScriptCodeBuilder.AddOp(txscript.OP_HASH160)
+	expectedScriptCodeBuilder.AddData(expectedHash)
+	expectedScriptCodeBuilder.AddOp(txscript.OP_EQUALVERIFY)
+	expectedScriptCodeBuilder.AddOp(txscript.OP_CHECKSIG)
+	expectedScriptCode, err := expectedScriptCodeBuilder.Script()
+	assert.NoError(t, err)
 
-	// Verify extraction is correct
-	assert.Equal(t, expectedHash, extractedHash, "Extracted hash must match original")
-	assert.Len(t, extractedHash, 20, "Extracted hash must be 20 bytes")
+	assert.Equal(t, expectedScriptCode, scriptCode, "Constructed scriptCode should match expected P2PKH script")
 }
 
 // TestIsPayToWitnessPubKeyHash tests that btcd's IsPayToWitnessPubKeyHash
