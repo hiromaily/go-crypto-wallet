@@ -39,7 +39,7 @@ source "${SCRIPT_DIR}/../../common.sh"
 # Configuration
 COIN="btc"
 ENCRYPTED="false"
-SIGN_WALLET_NUM=2 # 3-of-3: need sign1 and sign2 wallets (keygen + sign1 + sign2 = 3)
+SIGN_WALLET_NUM=2 # Number of additional signers (sign1, sign2) for 3-of-3 multisig (keygen + sign1 + sign2 = 3)
 VERBOSE=false
 CLEANUP_ONLY=false
 NON_INTERACTIVE=false
@@ -618,10 +618,6 @@ transaction_flow_phase() {
 
 		return 1
 	}
-
-	if echo "$tx_file" | grep -q "No utxo"; then
-		log_no_utxo_error
-	fi
 
 	# Extract file path
 	tx_unsigned=$(echo "${tx_file}" | sed -n 's/.*\[fileName\]: //p')
