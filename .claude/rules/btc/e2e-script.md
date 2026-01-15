@@ -238,23 +238,23 @@ Add targets to `make/btc_e2e.mk` when creating new scripts.
 # Example for Pattern 1 (e2e-p1-p2pkh-singlesig.sh)
 .PHONY: btc-e2e-p1-reset
 btc-e2e-p1-reset:
- ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --reset
+	./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --reset
 
 .PHONY: btc-e2e-p1
 btc-e2e-p1:
- ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh
+	./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh
 
 .PHONY: btc-e2e-p1-verbose
 btc-e2e-p1-verbose:
- ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --verbose
+	./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --verbose
 
 .PHONY: btc-e2e-p1-ci
 btc-e2e-p1-ci:
- ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --non-interactive
+	./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --non-interactive
 
 .PHONY: btc-e2e-p1-cleanup
 btc-e2e-p1-cleanup:
- ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --cleanup
+	./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --cleanup
 ```
 
 **Current Scripts**:

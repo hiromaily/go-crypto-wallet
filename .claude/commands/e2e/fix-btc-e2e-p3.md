@@ -110,23 +110,23 @@ Add to `make/btc_e2e.mk`:
 ###############################################################################
 .PHONY: btc-e2e-p3-reset
 btc-e2e-p3-reset:
- ./scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh --reset
+	./scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh --reset
 
 .PHONY: btc-e2e-p3
 btc-e2e-p3:
- ./scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh
+	./scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh
 
 .PHONY: btc-e2e-p3-verbose
 btc-e2e-p3-verbose:
- ./scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh --verbose
+	./scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh --verbose
 
 .PHONY: btc-e2e-p3-ci
 btc-e2e-p3-ci:
- ./scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh --non-interactive
+	./scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh --non-interactive
 
 .PHONY: btc-e2e-p3-cleanup
 btc-e2e-p3-cleanup:
- ./scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh --cleanup
+	./scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh --cleanup
 ```
 
 ### Step 3: Run E2E Test
@@ -267,7 +267,7 @@ docker exec btc-watch bitcoin-cli -regtest -rpcwallet=watch listunspent
 # Check address info (verify P2SH-P2WPKH)
 docker exec btc-watch bitcoin-cli -regtest -rpcwallet=watch \
   getaddressinfo "<address>"
-# → "isscript": true, "iswitness": false, "script": "witness_v0_keyhash"
+# → "isscript": true, "iswitness": false, "embedded": { "isscript": false, "iswitness": true, "witness_version": 0, ... }
 ```
 
 ### Descriptor Check
