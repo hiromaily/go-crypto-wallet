@@ -13,36 +13,36 @@ For detailed transaction pattern explanations, technical references, and impleme
 
 | Script | Pattern | Signature Requirement | Address Format |
 |--------|---------|----------------------|----------------|
-| `e2e-p2pkh-singlesig.sh` | P2PKH Single-sig (Pattern 1) | Single-sig | `1...` / `m...` |
-| `e2e-p2pkh-2of3.sh` | P2PKH 2-of-3 Multisig (Pattern 2) | 2-of-3 | `3...` / `2...` |
-| `e2e-p2sh-p2wsh-3of3.sh` | P2SH-P2WSH 3-of-3 Multisig (Pattern 8) | 3-of-3 | `3...` / `2...` |
+| `e2e-p1-p2pkh-singlesig.sh` | P2PKH Single-sig (Pattern 1) | Single-sig | `1...` / `m...` |
+| `e2e-p2-p2pkh-2of3.sh` | P2PKH 2-of-3 Multisig (Pattern 2) | 2-of-3 | `3...` / `2...` |
+| `e2e-p8-p2sh-p2wsh-3of3.sh` | P2SH-P2WSH 3-of-3 Multisig (Pattern 8) | 3-of-3 | `3...` / `2...` |
 
 ## Usage
 
 ### Basic Execution
 
 ```bash
-# Single-sig E2E test
-./scripts/operation/btc/e2e/e2e-p2pkh-singlesig.sh
+# Pattern 1: Single-sig E2E test
+./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh
 
-# 2-of-3 Multisig E2E test
-./scripts/operation/btc/e2e/e2e-p2pkh-2of3.sh
+# Pattern 2: 2-of-3 Multisig E2E test
+./scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh
 
-# 3-of-3 Multisig E2E test
-./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh
+# Pattern 8: 3-of-3 Multisig E2E test
+./scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh
 ```
 
 ### Make Targets
 
 ```bash
-# Single-sig
-make btc-e2e-p2pkh-singlesig
+# Pattern 1: Single-sig
+make btc-e2e-p1
 
-# 2-of-3 Multisig
-make btc-e2e-p2pkh-2of3
+# Pattern 2: 2-of-3 Multisig
+make btc-e2e-p2
 
-# 3-of-3 Multisig
-make btc-e2e-p2sh-p2wsh-3of3
+# Pattern 8: 3-of-3 Multisig
+make btc-e2e-p8
 ```
 
 ### Common Options

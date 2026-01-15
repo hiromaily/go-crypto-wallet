@@ -23,7 +23,7 @@ Key rules:
 - Follow Clean Architecture layer separation
 - Domain layer has ZERO infrastructure dependencies
 - Follow language-specific conventions (see Skills below)
-- Run verification commands before committing
+- Run file-type-appropriate verification commands before committing (see table below; `*.md` requires none)
 
 ## Testing
 
@@ -36,20 +36,21 @@ Refer to @docs/standards/workflow.md
 Key rules:
 - Create feature branches for changes
 - Follow conventional commit messages
-- Run verification commands before committing
+- Run file-type-appropriate verification commands before committing (see table below; `*.md` requires none)
 
 ## Language-Specific Skills
 
 Use appropriate skills based on the file type:
 
-| File Type | Skill |
-|-----------|-------|
-| Go (`*.go`) | `go-development` |
-| TypeScript (`*.ts`) | `typescript-development` |
-| Shell (`*.sh`) | `shell-scripts` |
-| Solidity (`*.sol`) | `solidity-development` |
-| SQL/HCL | `db-migration` |
-| Makefile | `makefile-update` |
+| File Type | Skill | Verification |
+|-----------|-------|--------------|
+| Go (`*.go`) | `go-development` | `make go-lint`, `make check-build` |
+| TypeScript (`*.ts`) | `typescript-development` | `npm run lint`, `npm run build` |
+| Shell (`*.sh`) | `shell-scripts` | `make shfmt` |
+| Solidity (`*.sol`) | `solidity-development` | (see skill) |
+| SQL/HCL | `db-migration` | `make atlas-fmt`, `make atlas-lint` |
+| Makefile | `makefile-update` | `make mk-lint` |
+| Markdown (`*.md`) | `docs-update` | (none required) |
 
 ## Auto-Generated Files
 

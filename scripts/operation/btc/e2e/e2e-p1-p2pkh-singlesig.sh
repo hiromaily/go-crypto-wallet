@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# Bitcoin E2E Workflow Script - Pattern 2: P2PKH 2-of-3 Multisig
-# This script automates the complete Bitcoin workflow for 2-of-3 multisig P2PKH transactions
-# Usage: ./scripts/operation/btc/e2e/e2e-p2pkh-2of3.sh [OPTIONS]
+# Bitcoin E2E Workflow Script - Pattern 1: P2PKH Single-sig
+# This script automates the complete Bitcoin workflow for single-sig P2PKH transactions
+# Usage: ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh [OPTIONS]
 # Options:
 #   --cleanup  Stop containers and cleanup state
 #   --reset    Full reset and run from scratch
@@ -14,19 +14,17 @@
 #   docs/crypto/btc/e2e_transaction_patterns.md - E2E transaction patterns
 #
 # Transaction Pattern:
-#   Pattern 2: BTC P2PKH 2-of-3 Multisig
-#   - Address Type: P2PKH (BIP44 Legacy) wrapped in P2SH
-#   - Address Format: `3...` (Mainnet), `2...` (Testnet/Regtest)
-#   - Signature Requirement: 2-of-3 (any 2 signatures out of 3)
-#   - Descriptor: sh(multi(2,[fingerprint/44'/0'/0']xpub1.../0/*,xpub2.../0/*,xpub3.../0/*))
+#   Pattern 1: BTC P2PKH Single-sig
+#   - Address Type: P2PKH (BIP44 Legacy)
+#   - Address Format: `1...` (Mainnet), `m.../n...` (Testnet/Regtest)
+#   - Signature Requirement: Single-sig (Keygen only)
+#   - Descriptor: pkh([fingerprint/44'/0'/0']xpub.../0/*)
 #
 # Required Config Settings:
 #   - config/wallet/btc_watch.yaml:  address_type: "legacy"
 #   - config/wallet/btc_keygen.yaml: address_type: "legacy"
-#   - config/wallet/btc_sign1.yaml:  address_type: "legacy"
-#   - config/wallet/btc_sign2.yaml:  address_type: "legacy"
 
-set -euo pipefail
+set -eu
 
 # Script directory for relative paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -39,7 +37,7 @@ source "${SCRIPT_DIR}/../../common.sh"
 # Configuration
 COIN="btc"
 ENCRYPTED="false"
-SIGN_WALLET_NUM=2 # 2-of-3: need sign1 and sign2 wallets
+SIGN_WALLET_NUM=0  # Single-sig: no additional sign wallets needed
 VERBOSE=false
 CLEANUP_ONLY=false
 NON_INTERACTIVE=false
@@ -54,17 +52,11 @@ RPC_PASSWORD="${RPC_PASSWORD:-xyz}"
 # Note: Default value is for testing only - use strong passphrase in production
 WALLET_PASSPHRASE="${WALLET_PASSPHRASE:-test}"
 
-# Docker volume name (can be overridden via environment variable)
-# Note: Docker Compose prepends project name to volume names
-DOCKER_VOLUME_NAME="${DOCKER_VOLUME_NAME:-go-crypto-wallet_wallet-db}"
-
 # Config file paths (absolute)
 CONFIG_WATCH="${PROJECT_ROOT}/config/wallet/btc_watch.yaml"
 CONFIG_KEYGEN="${PROJECT_ROOT}/config/wallet/btc_keygen.yaml"
-CONFIG_SIGN1="${PROJECT_ROOT}/config/wallet/btc_sign1.yaml"
-CONFIG_SIGN2="${PROJECT_ROOT}/config/wallet/btc_sign2.yaml"
-# Use 2-of-3 multisig account configuration for Pattern 2
-CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account_2of3.yaml"
+# Use single-sig account configuration for Pattern 1
+CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account.yaml"
 
 # Export account config for keygen wallet (required for configuration)
 export BTC_ACCOUNT_CONF="${CONFIG_ACCOUNT}"
@@ -79,7 +71,7 @@ KEYGEN_WALLET_RPC_HOST="127.0.0.1:19332/wallet/keygen"
 # These environment variables override config file values.
 # Priority: Environment Variables > Config File > Default Values
 #
-# Pattern 2 (P2PKH 2-of-3 Multisig) requires:
+# Pattern 1 (P2PKH Single-sig) requires:
 #   - address_type: "legacy" (derives key_type: bip44 automatically)
 # Note: key_type is automatically derived from address_type in Go code
 #       (see internal/domain/address/types.go AddrType.ToKeyType())
@@ -111,7 +103,7 @@ clean_bitcoin_wallet_data() {
 	log_substep "Cleaning Bitcoin node wallet data"
 
 	# Clean regtest data directories (keeping bitcoin.conf)
-	for node in watch keygen sign1 sign2; do
+	for node in watch keygen; do
 		wallet_dir="docker/nodes/btc/${node}/regtest"
 		if [ -d "$wallet_dir" ]; then
 			# Remove all files/dirs except bitcoin.conf
@@ -140,7 +132,7 @@ full_reset() {
 
 	# Explicitly remove database volume (in case -v flag didn't work)
 	log_info "Forcefully removing database volume..."
-	local volume_name="${DOCKER_VOLUME_NAME}"
+	local volume_name="go-crypto-wallet_wallet-db"
 
 	# Try multiple times in case volume is still being used
 	local removal_attempts=0
@@ -217,8 +209,8 @@ check_prerequisites() {
 	# Check Docker and Docker Compose
 	check_docker || exit 1
 
-	# Check CLI commands (watch, keygen, sign1, sign2 for 2-of-3 multisig)
-	for cmd in watch keygen sign1 sign2; do
+	# Check CLI commands (only watch and keygen for single-sig)
+	for cmd in watch keygen; do
 		if ! command_exists "$cmd"; then
 			log_error "$cmd command is not available"
 			log_error "Please build the project first: make build"
@@ -244,17 +236,15 @@ setup_infrastructure() {
 	# Wait for database to be healthy
 	wait_for_healthy "wallet-db" 90
 
-	# Start Bitcoin nodes (watch, keygen, sign1, sign2 for 2-of-3)
+	# Start Bitcoin nodes (only watch and keygen for single-sig)
 	log_substep "Starting Bitcoin node containers"
-	docker compose -f compose.btc.yaml up -d
+	docker compose -f compose.btc.yaml up -d btc-watch btc-keygen
 	log_info "Bitcoin node containers started"
 
 	# Wait for containers to be healthy
 	log_substep "Waiting for containers to be healthy"
 	wait_for_healthy "btc-watch" 90
 	wait_for_healthy "btc-keygen" 90
-	wait_for_healthy "btc-sign1" 90
-	wait_for_healthy "btc-sign2" 90
 
 	log_info "All containers are healthy"
 }
@@ -266,11 +256,9 @@ setup_infrastructure() {
 setup_wallets() {
 	log_step "Setting up Bitcoin wallets"
 
-	# Create wallets in Bitcoin nodes
+	# Create wallets in Bitcoin nodes (only watch and keygen for single-sig)
 	btc_create_wallet_if_needed "btc-watch" "watch"
 	btc_create_wallet_if_needed "btc-keygen" "keygen"
-	btc_create_wallet_if_needed "btc-sign1" "sign1"
-	btc_create_wallet_if_needed "btc-sign2" "sign2"
 
 	log_info "All wallets are ready"
 
@@ -315,125 +303,76 @@ key_generation_phase() {
 	done
 
 	# Keygen wallet - import private keys
-	log_substep "Importing private keys into keygen wallet"
-	if [ "$ENCRYPTED" = "true" ]; then
-		keygen -c "${CONFIG_KEYGEN}" api walletpassphrase --passphrase "${WALLET_PASSPHRASE}"
-	fi
-	for account in client deposit payment stored; do
-		log_info "Importing private keys for account: $account"
-		keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" import privkey --account "$account"
-	done
-	if [ "$ENCRYPTED" = "true" ]; then
-		keygen -c "${CONFIG_KEYGEN}" api walletlock
-	fi
-
-	# Sign wallets - create seeds for all sign wallets
-	log_substep "Creating seeds for sign wallets"
-	for i in $(seq 1 "$SIGN_WALLET_NUM"); do
-		log_info "Creating seed for sign${i}"
-		config_var="CONFIG_SIGN${i}"
-		"sign${i}" --conf "${!config_var}" --coin "${COIN}" create seed || {
-			log_warn "Sign${i} seed already exists or error occurred, continuing..."
-		}
-	done
-
-	# Sign wallets - create hdkeys
-	log_substep "Creating HD keys for sign wallets"
-	for i in $(seq 1 "$SIGN_WALLET_NUM"); do
-		log_info "Creating HD keys for sign${i}"
-		config_var="CONFIG_SIGN${i}"
-		"sign${i}" --conf "${!config_var}" --coin "${COIN}" --wallet "sign${i}" create hdkey
-	done
-
-	# Sign wallets - import private keys
-	log_substep "Importing private keys into sign wallets"
-	for i in $(seq 1 "$SIGN_WALLET_NUM"); do
-		log_info "Importing private keys for sign${i}"
-		config_var="CONFIG_SIGN${i}"
-		if [ "$ENCRYPTED" = "true" ]; then
-			"sign${i}" --conf "${!config_var}" --coin "${COIN}" --wallet "sign${i}" api walletpassphrase --passphrase "${WALLET_PASSPHRASE}"
-		fi
-		"sign${i}" --conf "${!config_var}" --coin "${COIN}" --wallet "sign${i}" import privkey
-		if [ "$ENCRYPTED" = "true" ]; then
-			"sign${i}" --conf "${!config_var}" --coin "${COIN}" --wallet "sign${i}" api walletlock
-		fi
-	done
-
-	# Sign wallets - export fullpubkey
-	log_substep "Exporting full public keys from sign wallets"
-	file_fullpubkey_auth1=$(sign1 --conf "${CONFIG_SIGN1}" --coin "${COIN}" --wallet sign1 export fullpubkey)
-	file_fullpubkey_auth2=$(sign2 --conf "${CONFIG_SIGN2}" --coin "${COIN}" --wallet sign2 export fullpubkey)
-
-	# Extract file paths
-	fullpubkey_file1="${file_fullpubkey_auth1##*\[fileName\]: }"
-	fullpubkey_file2="${file_fullpubkey_auth2##*\[fileName\]: }"
-
-	log_info "Exported fullpubkey files:"
-	log_info "  sign1: $fullpubkey_file1"
-	log_info "  sign2: $fullpubkey_file2"
-
-	# Store for next phase
-	export FULLPUBKEY_FILE1="$fullpubkey_file1"
-	export FULLPUBKEY_FILE2="$fullpubkey_file2"
+	# NOTE: Private key import is NOT needed for descriptor-based wallets (Pattern 1)
+	# The keygen wallet will sign PSBTs using its internal descriptor wallet
+	# Skipping this step to avoid "Cannot import private keys to a wallet with private keys disabled" error
+	# log_substep "Importing private keys into keygen wallet"
+	# if [ "$ENCRYPTED" = "true" ]; then
+	# 	keygen -c "${CONFIG_KEYGEN}" api walletpassphrase --passphrase "${WALLET_PASSPHRASE}"
+	# fi
+	# for account in client deposit payment stored; do
+	# 	log_info "Importing private keys for account: $account"
+	# 	keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" import privkey --account "$account"
+	# done
+	# if [ "$ENCRYPTED" = "true" ]; then
+	# 	keygen -c "${CONFIG_KEYGEN}" api walletlock
+	# fi
 }
 
 ###############################################################################
-# Multisig Setup Phase (2-of-3)
+# Single-sig Address Setup Phase
 ###############################################################################
 
-multisig_setup_phase() {
-	log_step "Multisig Setup Phase (2-of-3)"
+singlesig_setup_phase() {
+	log_step "Single-sig Address Setup Phase"
 
-	# Import fullpubkeys
-	log_substep "Importing full public keys into keygen wallet"
-	log_info "Importing fullpubkey from sign1: $FULLPUBKEY_FILE1"
-	keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" import fullpubkey --file "${FULLPUBKEY_FILE1}"
-
-	log_info "Importing fullpubkey from sign2: $FULLPUBKEY_FILE2"
-	keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" import fullpubkey --file "${FULLPUBKEY_FILE2}"
-
-	# Export descriptors for multisig accounts (deposit, payment, stored)
-	# Pattern 2 uses 2-of-3 multisig with P2PKH (BIP44) wrapped in P2SH
-	# Note: Using wrapper function to set WALLET_BITCOIN_HOST for Bitcoin Core RPC
+	# For Pattern 1 (P2PKH Single-sig), use account.yaml
+	# which configures all accounts as single-sig
+	# We export descriptors for both client and payment accounts
+	# to test the complete deposit → payment flow
 	log_substep "Exporting descriptors from keygen wallet"
-	file_descriptor_deposit=$(keygen_with_wallet -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account deposit --output data/descriptor/btc/deposit_descriptors.json --format bitcoin-core --include-change)
-	file_descriptor_payment=$(keygen_with_wallet -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account payment --output data/descriptor/btc/payment_descriptors.json --format bitcoin-core --include-change)
-	file_descriptor_stored=$(keygen_with_wallet -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account stored --output data/descriptor/btc/stored_descriptors.json --format bitcoin-core --include-change)
 
-	# Extract file paths from descriptor export output
-	descriptor_deposit="${file_descriptor_deposit##*exported to }"
-	descriptor_payment="${file_descriptor_payment##*exported to }"
-	descriptor_stored="${file_descriptor_stored##*exported to }"
+	# Process client and payment accounts for single-sig testing
+	local accounts=(client payment)
 
-	log_info "Exported descriptor files:"
-	log_info "  deposit: $descriptor_deposit"
-	log_info "  payment: $descriptor_payment"
-	log_info "  stored: $descriptor_stored"
+	# Export descriptors for accounts
+	# Note: Using wrapper function to set WALLET_BITCOIN_HOST for Bitcoin Core RPC
+	declare -A descriptor_files
+	for account in "${accounts[@]}"; do
+		log_info "Exporting ${account} descriptors"
+		file_output=$(keygen_with_wallet -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export \
+			--account "${account}" \
+			--output "data/descriptor/btc/${account}_descriptors.json" \
+			--format bitcoin-core \
+			--include-change)
+		# Extract file path from output
+		descriptor_files[$account]="${file_output##*exported to }"
+		log_info "  ${account}: ${descriptor_files[$account]}"
+	done
 
-	# Import descriptors into watch wallet for multisig accounts
+	# Import descriptors into watch wallet
 	# Note: Using wrapper function to set WALLET_BITCOIN_HOST for Bitcoin Core RPC
 	log_substep "Importing descriptors into watch wallet"
-	log_info "Importing deposit descriptors"
-	watch_with_wallet -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor --file "${descriptor_deposit}" --account deposit
-
-	log_info "Importing payment descriptors"
-	watch_with_wallet -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor --file "${descriptor_payment}" --account payment
-
-	log_info "Importing stored descriptors"
-	watch_with_wallet -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor --file "${descriptor_stored}" --account stored
+	for account in "${accounts[@]}"; do
+		log_info "Importing ${account} descriptors"
+		watch_with_wallet -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor \
+			--file "${descriptor_files[$account]}" \
+			--account "${account}"
+	done
 
 	log_info "All descriptors imported successfully"
-	log_info "Note: Pattern 2 uses 2-of-3 multisig with P2PKH (BIP44) wrapped in P2SH"
+	log_info "Note: Pattern 1 uses account.yaml (all accounts are single-sig)"
 
 	# Derive payment address from descriptor for UTXO generation
+	# We generate UTXOs to the payment account address for testing payment transactions
 	log_substep "Deriving payment address from descriptor for UTXO generation"
 
 	# Extract first descriptor from payment_descriptors.json
-	# For P2PKH wrapped in P2SH (2-of-3), we use the descriptor at index 0
-	first_descriptor=$(jq -r '.[0].desc // empty' "${descriptor_payment}" 2>/dev/null)
+	# For P2PKH (legacy), we use the first descriptor (index 0)
+	first_descriptor=$(jq -r '.[0].desc // empty' "${descriptor_files[payment]}" 2>/dev/null)
 
 	if [ -z "$first_descriptor" ]; then
-		log_error "Failed to extract descriptor from ${descriptor_payment}"
+		log_error "Failed to extract descriptor from ${descriptor_files[payment]}"
 		return 1
 	fi
 
@@ -471,9 +410,6 @@ generate_test_utxos() {
 
 	log_info "Using payment address: $payment_address"
 
-	# Export for use in create_payment_requests_phase
-	export payment_address
-
 	# Generate blocks with coinbase reward to payment address
 	log_info "Generating 101 blocks to create mature coinbase for testing..."
 	btc_cli "btc-watch" generatetoaddress 101 "$payment_address" >/dev/null
@@ -493,7 +429,7 @@ generate_test_utxos() {
 		trusted_balance=$(echo "$balance_json" | jq -r '.mine.trusted // 0' 2>/dev/null || echo "0")
 
 		# Check if we have any trusted (mature) balance
-		if [ -n "$trusted_balance" ] && [ "$(echo "$trusted_balance > 0" | bc -l 2>/dev/null || echo 0)" -eq 1 ]; then
+		if [ -n "$trusted_balance" ] && (($(echo "$trusted_balance > 0" | bc -l))); then
 			log_info "Payment account balance verified: ${trusted_balance} BTC (took ${elapsed}s)"
 			balance_found=true
 			break
@@ -526,10 +462,20 @@ generate_test_utxos() {
 create_payment_requests_phase() {
 	log_step "Payment Request Creation Phase"
 
-	# Use the payment address derived from descriptor in generate_test_utxos phase
-	# For multisig descriptors, addresses are managed by Bitcoin Core, not stored in the database
-	log_substep "Using payment sender address derived from descriptor"
-	sender_address="$payment_address"
+	# Get a payment sender address from database
+	# For P2PKH testing, query for legacy addresses (starting with 'm' or 'n' in regtest)
+	log_substep "Retrieving payment sender address from database"
+	sender_address=$(docker compose exec -T wallet-db mysql -u root -proot watch -N -e \
+		"SELECT wallet_address FROM address WHERE coin='btc' AND account='payment' LIMIT 1" 2>/dev/null)
+
+	if [ -z "$sender_address" ]; then
+		log_error "No payment addresses found in database"
+		log_error "Please check:"
+		log_error "  - Descriptor import succeeded"
+		log_error "  - Addresses were derived and stored in database"
+		return 1
+	fi
+
 	log_info "Using sender address: $sender_address"
 
 	# Generate anonymous receiver addresses for testing
@@ -575,26 +521,11 @@ EOF
 }
 
 ###############################################################################
-# Helper Functions for Transaction Flow
-###############################################################################
-
-# Log detailed error message for "No utxo" errors
-# Usage: log_no_utxo_error
-log_no_utxo_error() {
-	log_error "Transaction creation failed"
-	log_error "This could indicate:"
-	log_error "  - No payment requests in database"
-	log_error "  - No UTXOs available for payment account"
-	log_error "  - UTXOs not mature enough (need 100+ confirmations)"
-	return 1
-}
-
-###############################################################################
-# Transaction Flow Phase (2-of-3 Multisig)
+# Transaction Flow Phase (Single-sig)
 ###############################################################################
 
 transaction_flow_phase() {
-	log_step "Transaction Flow Phase (2-of-3 Multisig)"
+	log_step "Transaction Flow Phase (Single-sig)"
 
 	# Create unsigned transaction
 	log_substep "Creating unsigned payment transaction"
@@ -603,22 +534,32 @@ transaction_flow_phase() {
 		log_error "Output: $tx_file"
 
 		if echo "$tx_file" | grep -q "No utxo"; then
-			log_no_utxo_error
+			log_error "Transaction creation failed"
+			log_error "This could indicate:"
+			log_error "  - No payment requests in database"
+			log_error "  - No UTXOs available for payment account"
+			log_error "  - UTXOs not mature enough (need 100+ confirmations)"
+			return 1
 		fi
 
 		return 1
 	}
 
 	if echo "$tx_file" | grep -q "No utxo"; then
-		log_no_utxo_error
+		log_error "Transaction creation failed"
+		log_error "This could indicate:"
+		log_error "  - No payment requests in database"
+		log_error "  - No UTXOs available for payment account"
+		log_error "  - UTXOs not mature enough (need 100+ confirmations)"
+		return 1
 	fi
 
 	# Extract file path
 	tx_unsigned=$(echo "${tx_file}" | sed -n 's/.*\[fileName\]: //p')
 	log_info "Created unsigned transaction: $tx_unsigned"
 
-	# Sign with keygen wallet (1st signature)
-	log_substep "Signing with keygen wallet (1st signature)"
+	# Sign with keygen wallet (single signature)
+	log_substep "Signing with keygen wallet (single signature)"
 	if [ "$ENCRYPTED" = "true" ]; then
 		keygen -c "${CONFIG_KEYGEN}" api walletpassphrase --passphrase "${WALLET_PASSPHRASE}"
 	fi
@@ -627,22 +568,12 @@ transaction_flow_phase() {
 		keygen -c "${CONFIG_KEYGEN}" api walletlock
 	fi
 
-	tx_signed1=$(echo "${tx_file_signed}" | sed -n 's/.*\[fileName\]: //p')
-	log_info "Signed transaction (1st): $tx_signed1"
-
-	# Sign with sign1 wallet (2nd signature)
-	# For 2-of-3 multisig, 2 signatures are sufficient
-	log_substep "Signing with sign1 wallet (2nd signature - completing 2-of-3 requirement)"
-	tx_file_signed2=$(sign1 --conf "${CONFIG_SIGN1}" --wallet sign1 sign signature --file "${tx_signed1}")
-	tx_signed2=$(echo "${tx_file_signed2}" | sed -n 's/.*\[fileName\]: //p')
-	log_info "Signed transaction (2nd): $tx_signed2"
-	log_info "Note: 2-of-3 multisig requirement satisfied with 2 signatures"
-
-	# Sign2 wallet is not needed for 2-of-3 (only 2 signatures required)
+	tx_signed=$(echo "${tx_file_signed}" | sed -n 's/.*\[fileName\]: //p')
+	log_info "Signed transaction: $tx_signed"
 
 	# Send transaction
 	log_substep "Sending fully signed transaction"
-	tx_result=$(watch_with_wallet -c "${CONFIG_WATCH}" send --file "${tx_signed2}")
+	tx_result=$(watch_with_wallet -c "${CONFIG_WATCH}" send --file "${tx_signed}")
 	tx_id="${tx_result##*txID: }"
 
 	log_info "Transaction sent successfully!"
@@ -655,11 +586,11 @@ transaction_flow_phase() {
 
 show_help() {
 	cat <<EOF
-Bitcoin E2E Workflow Script - Pattern 2: P2PKH 2-of-3 Multisig
+Bitcoin E2E Workflow Script - Pattern 1: P2PKH Single-sig
 
-This script automates the complete Bitcoin workflow for 2-of-3 multisig P2PKH
-transactions wrapped in P2SH. It serves as a regression test tool to verify that
-the Bitcoin 2-of-3 multisig workflow functions correctly after code changes.
+This script automates the complete Bitcoin workflow for single-signature P2PKH
+transactions. It serves as a regression test tool to verify that the Bitcoin
+single-sig workflow functions correctly after code changes.
 
 Usage: $0 [OPTIONS]
 
@@ -687,28 +618,25 @@ The script performs the following steps:
   1. Check prerequisites (Docker, CLI commands)
   2. Start infrastructure (database and Bitcoin nodes)
   3. Create wallets in Bitcoin nodes
-  4. Generate keys for keygen and sign wallets
-  5. Export extended keys (xpub) from sign wallets
-  6. Import extended keys into keygen wallet
-  7. Create 2-of-3 multisig addresses with descriptor export
-  8. Import descriptors into watch wallet
-  9. Generate test UTXOs (automatically generates 101 blocks)
- 10. Create payment requests
- 11. Create unsigned transaction
- 12. Sign with keygen wallet (1st signature)
- 13. Sign with sign1 wallet (2nd signature - completing 2-of-3)
- 14. Broadcast transaction
+  4. Generate keys for keygen wallet
+  5. Export descriptors from keygen wallet
+  6. Import descriptors into watch wallet
+  7. Generate test UTXOs (automatically generates 101 blocks)
+  8. Create payment requests
+  9. Create unsigned transaction
+ 10. Sign with keygen wallet (single signature)
+ 11. Broadcast transaction
 
-The script uses descriptor-based import for 2-of-3 multisig accounts,
-ensuring that P2SH-wrapped P2PKH addresses are properly handled.
+The script uses descriptor-based import for P2PKH single-sig addresses,
+ensuring compatibility with Bitcoin Core's modern wallet infrastructure.
 Test UTXOs are automatically generated for the transaction phase, making it
 fully automated and suitable for CI/CD pipelines.
 
 Transaction Pattern Details:
-  - Address Type: P2PKH (BIP44 Legacy) wrapped in P2SH
-  - Address Format: 2... (Regtest)
-  - Signature Requirement: 2-of-3 (any 2 out of 3 signatures)
-  - Descriptor: sh(multi(2, xpub1, xpub2, xpub3))
+  - Address Type: P2PKH (BIP44 Legacy)
+  - Address Format: m.../n... (Regtest)
+  - Signature Requirement: Single-sig (Keygen only)
+  - No sign wallets needed
 
 Environment Variables:
   RPC_USER          Bitcoin RPC username (default: xyz for regtest)
@@ -766,10 +694,10 @@ main() {
 		full_reset
 	fi
 
-	log_info "Starting Bitcoin E2E Workflow - Pattern 2: P2PKH 2-of-3 Multisig"
+	log_info "Starting Bitcoin E2E Workflow - Pattern 1: P2PKH Single-sig"
 	log_info "Coin: $COIN"
 	log_info "Encrypted: $ENCRYPTED"
-	log_info "Sign wallet count: $SIGN_WALLET_NUM (2-of-3 Multisig)"
+	log_info "Sign wallet count: $SIGN_WALLET_NUM (Single-sig)"
 	echo ""
 
 	# Execute workflow phases
@@ -777,7 +705,7 @@ main() {
 	setup_infrastructure
 	setup_wallets
 	key_generation_phase
-	multisig_setup_phase
+	singlesig_setup_phase
 	generate_test_utxos
 	create_payment_requests_phase
 	transaction_flow_phase
@@ -786,20 +714,20 @@ main() {
 	log_info "Summary:"
 	log_info "  ✓ Infrastructure setup complete"
 	log_info "  ✓ Wallets created and configured"
-	log_info "  ✓ HD keys generated for keygen and sign wallets"
-	log_info "  ✓ Descriptors exported and imported (deposit, payment, stored accounts)"
-	log_info "  ✓ P2SH-wrapped P2PKH 2-of-3 multisig addresses created"
+	log_info "  ✓ HD keys generated for keygen wallet"
+	log_info "  ✓ Descriptors exported and imported (client and payment accounts)"
+	log_info "  ✓ P2PKH single-sig addresses created"
 	log_info "  ✓ Test UTXOs generated"
 	log_info "  ✓ Payment requests created (using payment account)"
-	log_info "  ✓ Transaction created, signed (2 signatures), and sent"
+	log_info "  ✓ Transaction created, signed (1 signature), and sent"
 	echo ""
 	log_info "Transaction Pattern Used:"
-	log_info "  • P2PKH (BIP44 Legacy) wrapped in P2SH for 2-of-3 multisig"
+	log_info "  • P2PKH (BIP44 Legacy) single-signature"
 	log_info "  • Descriptor-based address management"
-	log_info "  • 2-of-3 signature requirement (any 2 signatures out of 3)"
-	log_info "  • Uses account_2of3.yaml (all accounts configured as 2-of-3 multisig)"
+	log_info "  • Simple single-key signing workflow"
+	log_info "  • Uses account.yaml (all accounts configured as single-sig)"
 	echo ""
-	log_info "You can now use the wallet system for Bitcoin 2-of-3 multisig operations"
+	log_info "You can now use the wallet system for Bitcoin single-sig operations"
 	log_info "To cleanup, run: $0 --cleanup"
 	log_info "To full reset for fresh state, run: $0 --reset"
 }

@@ -1,118 +1,118 @@
 # Fix BTC E2E Pattern 2 Test #{issue_number}
 
-BTC E2Eテスト（パターン2: P2PKH 2-of-3 Multisig）を **regtest環境** で実行し、エラーを修正する。
+Run and fix BTC E2E test (Pattern 2: P2PKH 2-of-3 Multisig) in **regtest environment**.
 
-## 前提条件
+## Prerequisites
 
-**以下の共通ルールを最初に読み込むこと：**
+**Read the following common rules first:**
 
-- @.claude/rules/btc-e2e-script.md - BTC E2E共通ルール（ビルド、検証、エスカレーション、セキュリティ）
+- @.claude/rules/btc/e2e-script.md - BTC E2E common rules (build, verification, escalation, security)
 
-## パラメータ
+## Parameters
 
-| パラメータ | 必須 | 説明 |
-|-----------|------|------|
-| `{issue_number}` | Optional | GitHub issue番号。指定時はgit-workflowに従う |
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `{issue_number}` | Optional | GitHub issue number. Follow git-workflow when specified |
 
-## 概要
+## Overview
 
-このコマンドは`scripts/operation/btc/e2e/e2e-p2pkh-2of3.sh`を **Bitcoin Core regtest環境** で実行し、発生したエラーを分析・修正します。
+This command runs `scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh` in **Bitcoin Core regtest environment** and analyzes/fixes any errors.
 
-> **Note**: このE2Eテストはローカルのregtest（Regression Test）環境で実行されます。
-> 実際のBitcoinネットワーク（mainnet/testnet）には接続しません。
+> **Note**: This E2E test runs in local regtest (Regression Test) environment.
+> It does not connect to actual Bitcoin network (mainnet/testnet).
 
-### Pattern 2 の技術仕様
+### Pattern 2 Technical Specifications
 
-| 項目 | 値 |
-|------|-----|
-| **パターン番号** | 2 |
-| **ネットワーク** | **regtest** (ローカル環境) |
-| **鍵タイプ** | P2PKH (BIP44 Legacy) |
-| **スクリプトタイプ** | 2-of-3 Multisig (P2SH wrapped) |
-| **アドレス形式** | `2...` (regtest/testnet P2SH) |
-| **署名要件** | 2-of-3 (任意の2つの署名で完了) |
+| Item | Value |
+|------|-------|
+| **Pattern Number** | 2 |
+| **Network** | **regtest** (local environment) |
+| **Key Type** | P2PKH (BIP44 Legacy) |
+| **Script Type** | 2-of-3 Multisig (P2SH wrapped) |
+| **Address Format** | `2...` (regtest/testnet P2SH) |
+| **Signature Requirement** | 2-of-3 (any 2 signatures complete) |
 | **Descriptor** | `sh(multi(2, [fp/44'/0'/0']xpub1/0/*, xpub2/0/*, xpub3/0/*))` |
-| **必要なウォレット** | watch, keygen, sign1, sign2 |
-| **環境変数** | `WALLET_ADDRESS_TYPE="legacy"` |
+| **Required Wallets** | watch, keygen, sign1, sign2 |
+| **Environment Variable** | `WALLET_ADDRESS_TYPE="legacy"` |
 
-### Pattern 1 (Single-sig) との違い
+### Differences from Pattern 1 (Single-sig)
 
-| 項目 | Pattern 1 | Pattern 2 |
+| Item | Pattern 1 | Pattern 2 |
 |------|-----------|-----------|
-| 署名要件 | Single-sig (1つ) | 2-of-3 Multisig |
-| 必要ウォレット | keygen のみ | keygen + sign1 + sign2 |
-| アドレス形式 | `m.../n...` (P2PKH) | `2...` (P2SH) |
-| fullpubkey交換 | 不要 | 必要 |
-| account設定 | `account_singlesig.yaml` | `account_2of3.yaml` |
+| Signature Requirement | Single-sig (1) | 2-of-3 Multisig |
+| Required Wallets | keygen only | keygen + sign1 + sign2 |
+| Address Format | `m.../n...` (P2PKH) | `2...` (P2SH) |
+| fullpubkey Exchange | Not required | Required |
+| Account Config | `account_singlesig.yaml` | `account_2of3.yaml` |
 
-### Pattern 8 (3-of-3) との違い
+### Differences from Pattern 8 (3-of-3)
 
-| 項目 | Pattern 2 | Pattern 8 |
+| Item | Pattern 2 | Pattern 8 |
 |------|-----------|-----------|
-| 鍵タイプ | BIP44 (Legacy) | BIP49 (P2SH-SegWit) |
-| 署名要件 | 2-of-3 | 3-of-3 |
+| Key Type | BIP44 (Legacy) | BIP49 (P2SH-SegWit) |
+| Signature Requirement | 2-of-3 | 3-of-3 |
 | Descriptor | `sh(multi(2,...))` | `sh(wsh(sortedmulti(3,...)))` |
-| 署名フロー | 2回署名で完了 | 3回署名必要 |
+| Signing Flow | Complete with 2 signatures | Requires all 3 signatures |
 
-### issue番号が指定された場合
+### When issue number is specified
 
-`git-workflow`スキルを読み込み、以下の設定で作業してください：
+Load `git-workflow` skill and work with these settings:
 
-- **ブランチ名**: `fix/issue-{issue_number}-btc-e2e-p2`
-- **コミットタイプ**: `fix(btc)`
-- **スコープ**: BTC E2E Pattern 2
+- **Branch name**: `fix/issue-{issue_number}-btc-e2e-p2`
+- **Commit type**: `fix(btc)`
+- **Scope**: BTC E2E Pattern 2
 
-→ 詳細は @.claude/skills/git-workflow/SKILL.md を参照
+→ See @.claude/skills/git-workflow/SKILL.md for details
 
-### issue番号が指定されない場合
+### When issue number is not specified
 
-ブランチ作成・PR作成なしで、ローカルで修正のみ行います。
+Fix locally without creating branch or PR.
 
-## Pattern 2 固有のドキュメント
+## Pattern 2 Specific Documentation
 
-共通ルールの Required Documentation に加えて、以下を参照：
+In addition to Required Documentation in common rules, refer to:
 
-- @scripts/operation/btc/e2e/e2e-p2pkh-2of3.sh - 実行対象のスクリプト
-- @scripts/operation/btc/e2e/e2e-p2pkh-singlesig.sh - Pattern 1 スクリプト（Single-sig部分の参考）
-- @scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh - Pattern 8 スクリプト（Multisig部分の参考）
-- @config/wallet/account_2of3.yaml - 2-of-3 マルチシグ設定
+- @scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh - Target script
+- @scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh - Pattern 1 script (Single-sig reference)
+- @scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh - Pattern 8 script (Multisig reference)
+- @config/wallet/account_2of3.yaml - 2-of-3 multisig config
 
-## 事前確認: 環境変数
+## Pre-check: Environment Variables
 
-**パターン2では `WALLET_ADDRESS_TYPE="legacy"` が必要です。**
+**Pattern 2 requires `WALLET_ADDRESS_TYPE="legacy"`.**
 
-スクリプト内で自動設定されますが、確認用：
-
-```bash
-echo $WALLET_ADDRESS_TYPE  # "legacy" であること
-```
-
-> **Note**: 設定ファイルを直接編集しないでください。環境変数で上書きします。
-> 詳細は共通ルールの「Configuration File Policy」を参照。
-
-## 実行手順
-
-### Step 1: E2Eテストを実行
+Auto-configured in script, but for verification:
 
 ```bash
-# フルリセットして実行（推奨）
-make btc-e2e-p2pkh-2of3-reset
-
-# または既存状態から実行
-./scripts/operation/btc/e2e/e2e-p2pkh-2of3.sh
-
-# デバッグ出力付き
-./scripts/operation/btc/e2e/e2e-p2pkh-2of3.sh --verbose
+echo $WALLET_ADDRESS_TYPE  # Should be "legacy"
 ```
 
-> **Note**: ビルドと検証コマンドは共通ルールを参照。
+> **Note**: Do not edit config files directly. Override with environment variables.
+> See "Configuration File Policy" in common rules for details.
 
-### Step 2: エラー分析
+## Execution Steps
 
-エラーが発生したフェーズを特定し、対応するコードを調査：
+### Step 1: Run E2E Test
 
-| Phase | 関連コード | 説明 |
-|-------|-----------|------|
+```bash
+# Full reset and run (recommended)
+make btc-e2e-p2-reset
+
+# Or run from existing state
+./scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh
+
+# With debug output
+./scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh --verbose
+```
+
+> **Note**: For build and verification commands, see common rules.
+
+### Step 2: Error Analysis
+
+Identify the phase where error occurred and investigate related code:
+
+| Phase | Related Code | Description |
+|-------|--------------|-------------|
 | Prerequisites | CLI commands | `watch`, `keygen`, `sign1`, `sign2` |
 | Infrastructure | Docker/compose | `compose.btc.yaml`, `compose.yaml` |
 | Wallet Setup | Bitcoin RPC | `createwallet`, `loadwallet` |
@@ -121,122 +121,122 @@ make btc-e2e-p2pkh-2of3-reset
 | UTXO Generation | Bitcoin Core RPC | `generatetoaddress`, `deriveaddresses` |
 | Transaction Flow | PSBT signing | `internal/infrastructure/wallet/api/btc/` |
 
-### Step 3: コードを修正
+### Step 3: Fix Code
 
-エラー種別に応じて適切なスキルをロード（共通ルールの Related Skills 参照）。
+Load appropriate skill based on error type (see Related Skills in common rules).
 
-## 技術仕様: 署名フロー（2-of-3）
+## Technical Specification: Signing Flow (2-of-3)
 
 ```
 Watch Wallet (create unsigned tx)
     ↓
 Keygen Wallet (1st signature)
     ↓
-Sign1 Wallet (2nd signature) ← ここで完了
+Sign1 Wallet (2nd signature) ← Complete here
     ↓
 Watch Wallet (broadcast)
 
-※ Sign2 は不要 - 2つの署名で2-of-3が満たされる
+※ Sign2 not required - 2 signatures satisfy 2-of-3
 ```
 
-### 重要な技術ポイント
+### Key Technical Points
 
 1. **2-of-3 vs 3-of-3**
-   - Pattern 2: 任意の2つの署名で完了
-   - Pattern 8: 全3つの署名が必要
-   - 署名フローの制御が異なる
+   - Pattern 2: Complete with any 2 signatures
+   - Pattern 8: All 3 signatures required
+   - Signing flow control differs
 
-2. **Descriptor形式**
+2. **Descriptor Format**
    - `sh(multi(2, ...))` - P2SH wrapper + 2-of-3 multisig
-   - `sortedmulti` ではなく `multi` を使用可能
-   - 鍵の順序に注意
+   - Can use `multi` instead of `sortedmulti`
+   - Note key order
 
-3. **HD Key派生パス**
+3. **HD Key Derivation Path**
    - BIP44: `m/44'/0'/account'/change/index`
-   - Pattern 8 (BIP49) とは異なる派生パス
+   - Different from Pattern 8 (BIP49)
 
-## Pattern 2 固有のエラー
+## Pattern 2 Specific Errors
 
-共通エラー（No utxo, RPC接続等）は共通ルールを参照。以下はPattern 2固有のエラー：
+For common errors (No utxo, RPC connection, etc.), see common rules. Below are Pattern 2 specific errors:
 
-### Descriptor形式エラー
+### Descriptor Format Error
 
-**症状**: Descriptor export/import 時にエラー
+**Symptoms**: Error during Descriptor export/import
 
-**原因**: BIP49 形式になっている（P2SH-SegWit）
+**Cause**: Using BIP49 format (P2SH-SegWit)
 
-**解決策**: `address_type` が `legacy` であることを確認
+**Solution**: Verify `address_type` is `legacy`
 
 ```bash
-echo $WALLET_ADDRESS_TYPE  # "legacy" であること
+echo $WALLET_ADDRESS_TYPE  # Should be "legacy"
 ```
 
-### アドレス形式が異なる
+### Address Format Differs
 
-**症状**: `m...` や `n...` で始まるアドレスが生成される（Single-sig P2PKHアドレス）
+**Symptoms**: `m...` or `n...` addresses generated (Single-sig P2PKH address)
 
-**原因**: Single-sig アドレスが生成されている
+**Cause**: Generating Single-sig addresses
 
-**解決策**:
+**Solution**:
 
-- `account_2of3.yaml` の `multisig` セクションを確認
-- fullpubkey のインポートが成功しているか確認
-- `required: 2` が設定されているか確認
+- Check `multisig` section in `account_2of3.yaml`
+- Verify fullpubkey import succeeded
+- Check `required: 2` is set
 
-### 署名が足りない / 署名が多すぎる
+### Insufficient/Too Many Signatures
 
-**症状**: トランザクション送信時に「署名が不完全」または「署名が多すぎる」エラー
+**Symptoms**: "Incomplete signature" or "Too many signatures" error on transaction send
 
-**原因**:
+**Cause**:
 
-- 2回目の署名が正しく適用されていない
-- 3回目の署名を行っている（不要）
+- 2nd signature not applied correctly
+- Applied 3rd signature (unnecessary)
 
-**確認**:
+**Check**:
 
 ```bash
-# PSBTの署名状態を確認
+# Check PSBT signature status
 btc_cli "btc-watch" analyzepsbt "${psbt_hex}"
 ```
 
-### fullpubkey インポートエラー
+### fullpubkey Import Error
 
-**症状**: Multisig セットアップ時にエラー
+**Symptoms**: Error during Multisig setup
 
-**原因**: fullpubkey の形式不一致または順序の問題
+**Cause**: fullpubkey format mismatch or ordering issue
 
-**解決策**:
+**Solution**:
 
-1. `sign1`, `sign2` から正しくエクスポートされているか確認
-2. `keygen` へのインポート順序を確認
-3. 関連コード: `internal/infrastructure/wallet/key/fullpubkey/`
+1. Verify correctly exported from `sign1`, `sign2`
+2. Check import order to `keygen`
+3. Related code: `internal/infrastructure/wallet/key/fullpubkey/`
 
-## 関連コード（Go）
+## Related Code (Go)
 
-| パス | 役割 |
+| Path | Role |
 |------|------|
-| `internal/application/usecase/keygen/btc/` | 鍵生成ユースケース |
-| `internal/application/usecase/watch/btc/` | Watch walletユースケース |
-| `internal/infrastructure/wallet/api/btc/` | Bitcoin RPC実装 |
-| `internal/infrastructure/wallet/key/fullpubkey/` | fullpubkey処理 |
-| `internal/domain/wallet/key/` | 鍵ドメインモデル |
+| `internal/application/usecase/keygen/btc/` | Key generation use case |
+| `internal/application/usecase/watch/btc/` | Watch wallet use case |
+| `internal/infrastructure/wallet/api/btc/` | Bitcoin RPC implementation |
+| `internal/infrastructure/wallet/key/fullpubkey/` | fullpubkey processing |
+| `internal/domain/wallet/key/` | Key domain model |
 
-## 注意事項
+## Cautions
 
-### 他パターンへの影響を避ける
+### Avoid Impact on Other Patterns
 
-- パターン2固有の修正は`P2PKH 2-of-3`関連コードに限定
-- 共通コードを修正する場合は、他パターン（特に1, 8）への影響を確認
-- 共通関数を修正する場合は単体テストで回帰を確認
+- Limit Pattern 2 specific fixes to `P2PKH 2-of-3` related code
+- When modifying common code, verify impact on other patterns (especially 1, 8)
+- Confirm regression with unit tests when modifying common functions
 
-> **Note**: ビルドルール、セキュリティは共通ルールを参照。
+> **Note**: For build rules, security, see common rules.
 
-## クリーンアップ
+## Cleanup
 
 ```bash
-# コンテナ停止のみ
-./scripts/operation/btc/e2e/e2e-p2pkh-2of3.sh --cleanup
+# Stop containers only
+./scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh --cleanup
 
-# 完全リセット（データ含む）
-./scripts/operation/btc/e2e/e2e-p2pkh-2of3.sh --reset
+# Full reset (including data)
+make btc-e2e-p2-reset
 ```

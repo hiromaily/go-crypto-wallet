@@ -2,7 +2,7 @@
 
 # Bitcoin E2E Workflow Script - Pattern 8: P2SH-P2WSH 3-of-3 Multisig
 # This script automates the complete Bitcoin workflow from infrastructure setup to transaction execution
-# Usage: ./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh [OPTIONS]
+# Usage: ./scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh [OPTIONS]
 # Options:
 #   --cleanup  Stop containers and cleanup state
 #   --verbose  Enable verbose output
