@@ -90,7 +90,11 @@ func normalizeDerivationPath(path string) string {
 	return trimmed
 }
 
-func (d *DescriptorService) formatAndSortMultisigKeys(signers []MultisigSigner, isChange bool) ([]string, error) {
+func (d *DescriptorService) formatAndSortMultisigKeys(
+	signers []MultisigSigner,
+	isChange bool,
+	shouldSort bool,
+) ([]string, error) {
 	changeIndex := 0
 	if isChange {
 		changeIndex = 1
@@ -105,8 +109,11 @@ func (d *DescriptorService) formatAndSortMultisigKeys(signers []MultisigSigner, 
 		keyStrings[i] = keyStr
 	}
 
-	// Ensure deterministic output independent of input order.
-	sort.Strings(keyStrings)
+	// Sort keys only for sortedmulti() descriptors (WSH, SHWSH).
+	// For multi() descriptors (SH), preserve original order.
+	if shouldSort {
+		sort.Strings(keyStrings)
+	}
 
 	return keyStrings, nil
 }

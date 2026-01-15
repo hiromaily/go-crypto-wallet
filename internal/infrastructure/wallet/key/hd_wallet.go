@@ -214,12 +214,27 @@ func (k *HDKey) createKeyByAccount(
 		return nil, nil, err
 	}
 	// Account
+	// For multisig accounts (deposit=0, payment=1, stored=2), use non-hardened derivation
+	// because watch wallet derives from coin-level xpubs which can only derive non-hardened children.
+	// For other accounts (auth1=11, auth2=12, etc.), use hardened derivation for enhanced security.
+	accountIndex := accountType.BIP44AccountIndex()
+	isMultisigAccount := accountIndex <= 2 // deposit=0, payment=1, stored=2
+
 	logger.Debug(
 		"create_key_by_account",
 		"account_type", accountType.String(),
-		"account_value", accountType.BIP44AccountIndex(),
+		"account_value", accountIndex,
+		"is_multisig_account", isMultisigAccount,
 	)
-	accountPrivKey, err := coinType.Derive(hdkeychain.HardenedKeyStart + accountType.BIP44AccountIndex())
+
+	var accountPrivKey *hdkeychain.ExtendedKey
+	if isMultisigAccount {
+		// Non-hardened derivation for multisig accounts to match xpub-derived keys
+		accountPrivKey, err = coinType.Derive(accountIndex)
+	} else {
+		// Hardened derivation for non-multisig accounts (enhanced security)
+		accountPrivKey, err = coinType.Derive(hdkeychain.HardenedKeyStart + accountIndex)
+	}
 	if err != nil {
 		return nil, nil, err
 	}

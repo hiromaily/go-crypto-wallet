@@ -24,7 +24,8 @@ func (d *DescriptorService) GenerateTaprootScriptPathDescriptor(
 		return "", errors.New("at least 2 signers are required for taproot script-path multi-key descriptors")
 	}
 
-	keyStrings, err := d.formatAndSortMultisigKeys(signers, isChange)
+	// For Taproot script-path descriptors, keys should be sorted for deterministic output
+	keyStrings, err := d.formatAndSortMultisigKeys(signers, isChange, true)
 	if err != nil {
 		return "", err
 	}

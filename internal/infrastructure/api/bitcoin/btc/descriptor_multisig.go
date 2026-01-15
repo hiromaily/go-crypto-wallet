@@ -37,7 +37,12 @@ func (d *DescriptorService) GenerateMultisigDescriptor(
 		return "", fmt.Errorf("invalid required signatures: %d of %d", requiredSigs, len(signers))
 	}
 
-	keyStrings, err := d.formatAndSortMultisigKeys(signers, isChange)
+	// For P2SH multi(), keys should NOT be sorted (preserve original order).
+	// For P2WSH/P2SH-P2WSH sortedmulti(), keys MUST be sorted.
+	shouldSortKeys := descriptorType == domainWallet.DescriptorTypeWSH ||
+		descriptorType == domainWallet.DescriptorTypeSHWSH
+
+	keyStrings, err := d.formatAndSortMultisigKeys(signers, isChange, shouldSortKeys)
 	if err != nil {
 		return "", err
 	}
@@ -48,6 +53,7 @@ func (d *DescriptorService) GenerateMultisigDescriptor(
 		// P2SH (Legacy): sh(multi(...))
 		// Note: For BIP44 Legacy multisig, we use multi() not sortedmulti()
 		// to match Bitcoin Core's standard behavior for non-witness scripts.
+		// Keys are NOT sorted - they remain in the order provided.
 		multisigPart := fmt.Sprintf(
 			"multi(%d,%s)",
 			requiredSigs,
@@ -57,6 +63,7 @@ func (d *DescriptorService) GenerateMultisigDescriptor(
 
 	case domainWallet.DescriptorTypeSHWSH, domainWallet.DescriptorTypeWSH:
 		// Both P2SH-P2WSH (BIP49) and P2WSH (BIP48) use sortedmulti
+		// Keys are sorted lexicographically
 		// Generate common sortedmulti part
 		multisigPart := fmt.Sprintf(
 			"sortedmulti(%d,%s)",
