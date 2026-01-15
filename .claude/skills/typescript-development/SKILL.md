@@ -9,7 +9,8 @@ Workflow for TypeScript/JavaScript code changes in `apps/` directory.
 
 ## Prerequisites
 
-**Use `git-workflow` Skill** for branch management, commit conventions, and PR creation.
+- **Use `git-workflow` Skill** for branch management, commit conventions, and PR creation.
+- **Refer to `.claude/rules/typescript.md`** for detailed verification commands (SSOT).
 
 ## Applicable Directories
 
@@ -18,56 +19,31 @@ Workflow for TypeScript/JavaScript code changes in `apps/` directory.
 | ripple-lib-server | TypeScript | `apps/ripple-lib-server/` |
 | erc20-token | JavaScript | `apps/erc20-token/` |
 
-## Verification Commands
+## Workflow
 
-**Navigate to app directory first:**
+### 1. Make Changes
+
+Edit TypeScript/JavaScript files following the rules in `.claude/rules/typescript.md`.
+
+### 2. Verify (from rules/typescript.md)
 
 ```bash
-cd apps/{app-name}
-npm install       # Install dependencies (if needed)
-npm run lint      # Lint check
-npm run format    # Format code
-npm run build     # Build
-npm test          # Run tests
+# ripple-lib-server
+cd apps/ripple-lib-server && yarn lint && yarn test
+
+# erc20-token
+cd apps/erc20-token && npm run lint-js && npm run fmt
 ```
 
-### Quick Reference
+### 3. Self-Review Checklist
 
-| App | Commands |
-|-----|----------|
-| ripple-lib-server | `cd apps/ripple-lib-server && npm run lint && npm run build` |
-| erc20-token | `cd apps/erc20-token && npm run lint && npm run build` |
+- [ ] No TypeScript errors
+- [ ] No `any` types (unless documented reason)
+- [ ] Async errors properly handled
+- [ ] Auto-generated files not edited
 
-## Self-Review Checklist
+## Related
 
-### Code Quality
-
-- [ ] Follows project ESLint configuration
-- [ ] Proper TypeScript types (no `any` unless necessary)
-- [ ] Async/await error handling
-- [ ] No circular dependencies
-
-### Security
-
-- [ ] No hardcoded secrets or API keys
-- [ ] No sensitive data in logs
-- [ ] Input validation at boundaries
-
-### Auto-Generated Files
-
-**DO NOT EDIT:**
-
-- `apps/ripple-lib-server/src/pb/` (Protocol Buffer generated)
-- `apps/erc20-token/build/` (Truffle build artifacts)
-
-## Related Chain Context
-
-| App | Chain |
-|-----|-------|
-| ripple-lib-server | XRP |
-| erc20-token | ETH, ERC20 |
-
-## Related Skills
-
+- `.claude/rules/typescript.md` - TypeScript rules (SSOT)
 - `git-workflow` - Branch, commit, PR workflow
-- `github-issue-creation` - Task classification
+- `solidity-development` - For Solidity contracts in erc20-token

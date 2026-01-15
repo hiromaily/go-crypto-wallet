@@ -27,7 +27,11 @@
   color: fbca04
   description: Code quality improvements and cleanup tasks
 
-# Test Labels
+- name: test
+  color: 6b21a8
+  description: Test additions or fixes
+
+# Test Scope Labels
 - name: unit-test
   color: 5319e7
   description: Unit test additions or fixes

@@ -11,6 +11,7 @@
 | Refactoring | [refactoring.md](./refactoring.md) | コード整理、アーキテクチャ改善 |
 | DB Change | [db-change.md](./db-change.md) | スキーマ変更、マイグレーション |
 | Documentation | [documentation.md](./documentation.md) | ドキュメント更新、README整備、コメント追加 |
+| Test | [test.md](./test.md) | テスト追加・修正、カバレッジ向上 |
 | Chain-Specific | [chain-specific.md](./chain-specific.md) | 暗号通貨固有のタスク（BTC/BCH/ETH/XRP） |
 | Verification | [verification.md](./verification.md) | ファイルタイプ別の検証コマンドマトリックス |
 
