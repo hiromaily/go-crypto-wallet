@@ -31,7 +31,7 @@ Each script must include header comments in the following format:
 
 # Bitcoin E2E Workflow Script - Pattern N: [Pattern Name]
 # This script automates the complete Bitcoin workflow for [description]
-# Usage: ./scripts/operation/btc/e2e/e2e-{pattern}.sh [OPTIONS]
+# Usage: ./scripts/operation/btc/e2e/e2e-pN-{description}.sh [OPTIONS]
 # Options:
 #   --cleanup  Stop containers and cleanup state
 #   --reset    Full reset and run from scratch
@@ -140,8 +140,8 @@ make go-lint && make check-build && make gotest
 # 2. Rebuild binaries (required)
 make build-all
 
-# 3. Run E2E test
-make btc-e2e-{pattern}-reset
+# 3. Run E2E test (e.g., make btc-e2e-p1-reset for Pattern 1)
+make btc-e2e-pN-reset
 ```
 
 ### Verification After Shell Script Changes
@@ -228,34 +228,45 @@ echo $WALLET_ADDRESS_TYPE
 When data from previous execution remains:
 
 ```bash
-make btc-e2e-{pattern}-reset
+make btc-e2e-pN-reset  # e.g., make btc-e2e-p1-reset
 ```
 
 ## Makefile Targets
 
-Add targets to `make/btc_e2e.mk` when creating new scripts:
+Add targets to `make/btc_e2e.mk` when creating new scripts.
+
+**Naming Convention**: `btc-e2e-pN` where N is the pattern number.
 
 ```makefile
-.PHONY: btc-e2e-{pattern}-reset
-btc-e2e-{pattern}-reset:
- ./scripts/operation/btc/e2e/e2e-{pattern}.sh --reset
+# Example for Pattern 1 (e2e-p1-p2pkh-singlesig.sh)
+.PHONY: btc-e2e-p1-reset
+btc-e2e-p1-reset:
+	./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --reset
 
-.PHONY: btc-e2e-{pattern}
-btc-e2e-{pattern}:
- ./scripts/operation/btc/e2e/e2e-{pattern}.sh
+.PHONY: btc-e2e-p1
+btc-e2e-p1:
+	./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh
 
-.PHONY: btc-e2e-{pattern}-verbose
-btc-e2e-{pattern}-verbose:
- ./scripts/operation/btc/e2e/e2e-{pattern}.sh --verbose
+.PHONY: btc-e2e-p1-verbose
+btc-e2e-p1-verbose:
+	./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --verbose
 
-.PHONY: btc-e2e-{pattern}-ci
-btc-e2e-{pattern}-ci:
- ./scripts/operation/btc/e2e/e2e-{pattern}.sh --non-interactive
+.PHONY: btc-e2e-p1-ci
+btc-e2e-p1-ci:
+	./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --non-interactive
 
-.PHONY: btc-e2e-{pattern}-cleanup
-btc-e2e-{pattern}-cleanup:
- ./scripts/operation/btc/e2e/e2e-{pattern}.sh --cleanup
+.PHONY: btc-e2e-p1-cleanup
+btc-e2e-p1-cleanup:
+	./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --cleanup
 ```
+
+**Current Scripts**:
+
+| Pattern | Script | Make Target |
+|---------|--------|-------------|
+| 1 | `e2e-p1-p2pkh-singlesig.sh` | `btc-e2e-p1` |
+| 2 | `e2e-p2-p2pkh-2of3.sh` | `btc-e2e-p2` |
+| 8 | `e2e-p8-p2sh-p2wsh-3of3.sh` | `btc-e2e-p8` |
 
 ## Related Skills
 

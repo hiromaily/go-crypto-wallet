@@ -164,14 +164,14 @@ Aggregate signature protocol based on Schnorr signatures. N-of-N multisig become
 
 | Pattern | Key Type | Signature Pattern | Address Format | E2E Script Support |
 |---------|----------|-------------------|----------------|-------------------|
-| **1** | **P2PKH (BIP44)** | **Single-sig** | **`1...`** | **✅ e2e/e2e-p2pkh-singlesig.sh** |
-| **2** | **P2PKH (BIP44)** | **2-of-3 Multisig** | **`3...` (P2SH wrapped)** | **✅ e2e/e2e-p2pkh-2of3.sh (Fixed in #357)** |
+| **1** | **P2PKH (BIP44)** | **Single-sig** | **`1...`** | **✅ e2e/e2e-p1-p2pkh-singlesig.sh** |
+| **2** | **P2PKH (BIP44)** | **2-of-3 Multisig** | **`3...` (P2SH wrapped)** | **✅ e2e/e2e-p2-p2pkh-2of3.sh (Fixed in #357)** |
 | 3 | P2SH-P2WPKH (BIP49) | Single-sig | `3...` | 🔶 Manual testing |
 | 4 | P2SH-P2WPKH (BIP49) | 2-of-3 Multisig | `3...` | ❌ Not supported |
 | 5 | P2WPKH (BIP84) | Single-sig | `bc1q...` | 🔶 Manual testing |
 | 6 | P2WSH (BIP84) | 2-of-3 Multisig | `bc1q...` | ❌ Not supported |
 | 7 | P2WSH (BIP84) | 3-of-3 Multisig | `bc1q...` | ❌ Not supported |
-| **8** | **P2SH-P2WSH** | **3-of-3 Multisig** | **`3...`** | **✅ e2e/e2e-p2sh-p2wsh-3of3.sh** |
+| **8** | **P2SH-P2WSH** | **3-of-3 Multisig** | **`3...`** | **✅ e2e/e2e-p8-p2sh-p2wsh-3of3.sh** |
 | 9 | P2TR (BIP86) | Single-sig | `bc1p...` | 🔶 Manual testing |
 | 10 | P2TR (BIP86) | MuSig2 (N-of-N) | `bc1p...` | 🔜 In development |
 | 11 | P2TR (BIP86) | Tapscript (M-of-N) | `bc1p...` | 🔜 In development |
@@ -190,7 +190,7 @@ Aggregate signature protocol based on Schnorr signatures. N-of-N multisig become
 
 ### Pattern 1: BTC P2PKH Single-sig
 
-**Currently implemented in `scripts/operation/btc/e2e/e2e-p2pkh-singlesig.sh`**
+**Currently implemented in `scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh`**
 
 ```
 Address Type: P2PKH (BIP44 Legacy)
@@ -216,7 +216,7 @@ Descriptor: pkh([fingerprint/44'/0'/0']xpub.../0/*)
 
 ### Pattern 8: BTC P2SH-P2WSH 3-of-3 Multisig (Current E2E)
 
-**Currently implemented in `scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh`**
+**Currently implemented in `scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh`**
 
 ```
 Address Type: P2SH-P2WSH (BIP49 wrapped SegWit)
@@ -238,7 +238,7 @@ Descriptor: sh(wsh(sortedmulti(3, xpub1, xpub2, xpub3)))
 
 ### Pattern 2: BTC P2PKH 2-of-3 Multisig
 
-**✅ Fully implemented in `scripts/operation/btc/e2e/e2e-p2pkh-2of3.sh` (Fixed in #357)**
+**✅ Fully implemented in `scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh` (Fixed in #357)**
 
 ```
 Address Type: P2PKH (BIP44 Legacy) with 2-of-3 Multisig
@@ -380,9 +380,9 @@ Descriptor: tr(musig(xpub1, xpub2, xpub3))
 
 | Script | Coin | Pattern | Signing Requirements |
 |--------|------|---------|---------------------|
-| `scripts/operation/btc/e2e/e2e-p2pkh-singlesig.sh` | BTC | P2PKH Single-sig | Single-sig |
-| `scripts/operation/btc/e2e/e2e-p2pkh-2of3.sh` | BTC | P2PKH 2-of-3 Multisig | 2-of-3 |
-| `scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh` | BTC | P2SH-P2WSH Multisig | 3-of-3 |
+| `scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh` | BTC | P2PKH Single-sig (Pattern 1) | Single-sig |
+| `scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh` | BTC | P2PKH 2-of-3 Multisig (Pattern 2) | 2-of-3 |
+| `scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh` | BTC | P2SH-P2WSH Multisig (Pattern 8) | 3-of-3 |
 | `scripts/operation/bch/e2e-workflow.sh` | BCH | CashAddr Multisig | 3-of-3 |
 
 ### Planned E2E Scripts
