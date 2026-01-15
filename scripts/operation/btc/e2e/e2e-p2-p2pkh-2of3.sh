@@ -50,6 +50,10 @@ RESET_STATE=false
 RPC_USER="${RPC_USER:-xyz}"
 RPC_PASSWORD="${RPC_PASSWORD:-xyz}"
 
+# MySQL credentials (can be overridden via environment variables)
+# Note: Default value is for regtest/development only
+MYSQL_ROOT_PASSWORD="${MYSQL_ROOT_PASSWORD:-root}"
+
 # Wallet passphrase (only used if ENCRYPTED=true)
 # Note: Default value is for testing only - use strong passphrase in production
 WALLET_PASSPHRASE="${WALLET_PASSPHRASE:-test}"
@@ -546,7 +550,7 @@ create_payment_requests_phase() {
 
 	# Create payment requests using payment account
 	log_substep "Inserting payment requests into database"
-	docker compose exec -T wallet-db mysql -u root -proot watch <<EOF
+	MYSQL_PWD="${MYSQL_ROOT_PASSWORD}" docker compose exec -T wallet-db mysql -u root watch <<EOF
 DELETE FROM payment_request;
 INSERT INTO payment_request (coin, payment_id, sender_address, sender_account, receiver_address, amount, is_done)
 VALUES
@@ -561,7 +565,7 @@ EOF
 	fi
 
 	# Verify payment requests were created
-	count=$(docker compose exec -T wallet-db mysql -u root -proot watch -N -e \
+	count=$(MYSQL_PWD="${MYSQL_ROOT_PASSWORD}" docker compose exec -T wallet-db mysql -u root watch -N -e \
 		"SELECT COUNT(*) FROM payment_request WHERE coin='btc' AND is_done=false" 2>/dev/null)
 
 	log_info "Created $count payment requests"
