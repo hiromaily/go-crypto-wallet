@@ -306,8 +306,10 @@ func (u *createTransactionUseCase) createTx(
 	// calculate fee and output total
 	//  - adjust outputTotal by fee and re-run CreateRawTransaction
 	//  - this logic would be different from payment
+	// Pass the change address (unspentAddrs[0]) to identify which output should have fee subtracted
+	changeAddr := unspentAddrs[0]
 	outputTotal, fee, txOutputs, txRepoTxOutputs, err := u.calculateOutputTotal(
-		sender, receiver, msgTx, adjustmentFee, inputTotal, txPrevOutputs)
+		sender, receiver, msgTx, adjustmentFee, inputTotal, txPrevOutputs, changeAddr)
 	if err != nil {
 		return "", "", err
 	}
@@ -572,6 +574,7 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 	adjustmentFee float64,
 	inputTotal btcutil.Amount,
 	txPrevOutputs map[btcutil.Address]btcutil.Amount,
+	changeAddrStr string, // Address string of the change output (where fee should be subtracted from)
 ) (btcutil.Amount, btcutil.Amount, map[btcutil.Address]btcutil.Amount, []*domainBitcoin.BtcTxOutput, error) {
 	// get fee
 	fee, err := u.btcClient.GetFee(msgTx, adjustmentFee)
@@ -584,8 +587,12 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 	// subtract fee from output transaction for change
 	// FIXME: what if change is short, should re-run from the beginning with shortage-flag
 	for addr, amt := range txPrevOutputs {
+		// Check if this address is the change address (by comparing address strings)
+		// This works with descriptor-based wallets where GetAccount() may not work correctly
+		isChangeAddr := addr.String() == changeAddrStr
+
 		if len(txPrevOutputs) == 1 {
-			// no change
+			// Only one output - subtract fee from it
 			txPrevOutputs[addr] -= fee
 			outputAmount, err := u.btcClient.AmountToDecimal(amt - fee)
 			if err != nil {
@@ -606,9 +613,9 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 			break
 		}
 
-		if acnt, _ := u.btcClient.GetAccount(addr.String()); acnt == sender.String() {
-			logger.Debug("detect sender account in calculateOutputTotal")
-			// address is used for change
+		if isChangeAddr {
+			logger.Debug("detect change address in calculateOutputTotal", "address", addr.String())
+			// address is used for change - subtract fee from it
 			txPrevOutputs[addr] -= fee
 			outputAmount, err := u.btcClient.AmountToDecimal(amt - fee)
 			if err != nil {
@@ -619,13 +626,14 @@ func (u *createTransactionUseCase) calculateOutputTotal(
 				addr.String(),
 				sender.String(),
 				outputAmount.String(),
-				true,
+				true, // Mark as change output
 			)
 			if err != nil {
 				return 0, 0, nil, nil, fmt.Errorf("fail to create BtcTxOutput: %w", err)
 			}
 			txRepoOutputs = append(txRepoOutputs, output)
 		} else {
+			// Not change address - don't subtract fee
 			outputAmount, err := u.btcClient.AmountToDecimal(amt)
 			if err != nil {
 				return 0, 0, nil, nil, fmt.Errorf("fail to convert output amount to decimal: %w", err)
