@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
@@ -230,7 +231,7 @@ func TestGenerateDescriptorUseCase_MultisigWithKeygenKey(t *testing.T) {
 
 	// Count occurrences of extended public keys in descriptor
 	// Should have 3 xpubs: keygen + auth1 + auth2
-	xpubCount := bytes.Count([]byte(output.Descriptor), []byte("xpub"))
+	xpubCount := strings.Count(output.Descriptor, "xpub")
 	require.Equal(t, 3, xpubCount, "descriptor should contain 3 xpubs (keygen + auth1 + auth2)")
 }
 

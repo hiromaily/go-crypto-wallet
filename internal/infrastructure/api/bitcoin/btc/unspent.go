@@ -397,6 +397,8 @@ func (b *Bitcoin) descriptorMatchesAccountIndex(descriptor string, expectedAccou
 
 // extractAccountIndexFromOriginPath extracts the account index from a BIP32 origin path.
 // Format: "/44'/1'/0'" -> account index is 0 (3rd component after purpose and coin_type)
+//
+//nolint:revive // receiver unused but method belongs to Bitcoin type
 func (b *Bitcoin) extractAccountIndexFromOriginPath(originPath string, expectedAccountIndex uint32) bool {
 	// Split path into components
 	parts := strings.Split(strings.TrimPrefix(originPath, "/"), "/")

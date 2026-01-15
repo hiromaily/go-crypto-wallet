@@ -201,10 +201,13 @@ func (u *signTransactionUseCase) signWithAccount(
 
 	// Check if we have account xpriv (descriptor-based workflow)
 	// We only need to check one key since all keys for an account share the same xpriv
+	hasXpriv := len(accountKeys) > 0 &&
+		accountKeys[0].AccountExtendedPrivkey != nil &&
+		*accountKeys[0].AccountExtendedPrivkey != ""
 	logger.Debug("checking for account xpriv",
 		"account", senderAccount.String(),
 		"key_count", len(accountKeys),
-		"has_xpriv", len(accountKeys) > 0 && accountKeys[0].AccountExtendedPrivkey != nil && *accountKeys[0].AccountExtendedPrivkey != "",
+		"has_xpriv", hasXpriv,
 	)
 	if len(accountKeys) > 0 &&
 		accountKeys[0].AccountExtendedPrivkey != nil &&

@@ -112,7 +112,7 @@ func (u *generateAuthKeyUseCase) generateHDKeyWithAccountXpriv(
 	gen, ok := u.keygen.(accountXprivGenerator)
 	if !ok {
 		// Fallback: generate keys without xpriv (backward compatibility)
-		keys, err := u.keygen.CreateKey(seed, accountType, idxFrom, count)
+		keys, err = u.keygen.CreateKey(seed, accountType, idxFrom, count)
 		if err != nil {
 			return nil, "", fmt.Errorf("fail to call keygen.CreateKey(): %w", err)
 		}

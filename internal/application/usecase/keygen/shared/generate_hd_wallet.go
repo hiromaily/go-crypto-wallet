@@ -91,8 +91,11 @@ func (u *generateHDWalletUseCase) generateHDKeyWithAccountXpriv(
 	gen, ok := u.keygen.(accountXprivGenerator)
 	if !ok {
 		// Fallback: generate keys without xpriv (backward compatibility)
-		logger.Warn("generator does not implement CreateKeyWithAccountXpriv, falling back to CreateKey (no xpriv will be stored)")
-		keys, err := u.keygen.CreateKey(seed, accountType, idxFrom, count)
+		logger.Warn(
+			"generator does not implement CreateKeyWithAccountXpriv, " +
+				"falling back to CreateKey (no xpriv will be stored)",
+		)
+		keys, err = u.keygen.CreateKey(seed, accountType, idxFrom, count)
 		if err != nil {
 			return nil, "", fmt.Errorf("fail to call keygen.CreateKey(): %w", err)
 		}
