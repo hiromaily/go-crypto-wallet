@@ -114,6 +114,9 @@ address_type: "p2sh-segwit"
 # RPC credentials (defaults are for regtest/development only)
 RPC_USER=xyz
 RPC_PASSWORD=xyz
+
+# MySQL credentials (defaults are for regtest/development only)
+MYSQL_ROOT_PASSWORD=root
 ```
 
 ## Related Documentation
