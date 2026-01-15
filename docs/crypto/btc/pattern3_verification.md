@@ -36,7 +36,7 @@ This document verifies the successful implementation of Pattern 3: P2SH-P2WPKH (
 
 4. **Descriptor Export/Import**
    - Descriptors exported from keygen wallet
-   - Format: `sh(wpkh([fingerprint/49'/1'/1']xpub.../0/*))`
+   - Format: `sh(wpkh([fingerprint/49'/1'/1']tpub.../0/*))`
    - Descriptors imported into watch wallet
    - 2000 addresses generated (1000 per descriptor: receive + change)
 
@@ -52,7 +52,7 @@ This document verifies the successful implementation of Pattern 3: P2SH-P2WPKH (
 7. **Payment Request Creation**
    - 3 payment requests created successfully
    - Sender address: `2N3r5aBFJWBGavJpX7HNpaFRoZWWdyr1jTd` (P2SH format verified)
-   - Receiver addresses generated (bech32 format for testing)
+   - Receiver addresses generated (P2SH-SegWit format for testing)
 
 8. **Transaction Creation and Signing**
    - ✅ Unsigned transaction created: `payment_1_unsigned_0_1768471249785717000.psbt`
