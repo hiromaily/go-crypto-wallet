@@ -260,14 +260,16 @@ func (b *Bitcoin) DeriveRedeemScriptFromDescriptor(
 		// Legacy P2SH multisig
 		redeemScript, err = b.deriveMultisigRedeemScript(parsed, addressIndex)
 		if err != nil {
-			return nil, fmt.Errorf("failed to derive multisig redeemScript: %w", err)
+			return nil, fmt.Errorf("failed to derive multisig redeemScript for address %s at index %d: %w",
+				address, addressIndex, err)
 		}
 
 	case domainWallet.DescriptorTypeSHWPKH:
 		// P2SH-wrapped P2WPKH (BIP49 Nested SegWit)
 		redeemScript, err = b.deriveP2WPKHRedeemScript(parsed, addressIndex)
 		if err != nil {
-			return nil, fmt.Errorf("failed to derive P2WPKH redeemScript: %w", err)
+			return nil, fmt.Errorf("failed to derive P2WPKH redeemScript for address %s at index %d: %w",
+				address, addressIndex, err)
 		}
 
 	case domainWallet.DescriptorTypePKH,
