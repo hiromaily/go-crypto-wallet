@@ -663,6 +663,21 @@ func (b *Bitcoin) finalizeP2PKHInput(packet *psbt.Packet, inputIndex int) error 
 	return nil
 }
 
+// serializeWitness serializes a TxWitness into the raw wire format.
+// This is used to convert witness data into the format expected by PSBT FinalScriptWitness.
+func serializeWitness(witness wire.TxWitness) ([]byte, error) {
+	var witnessBuf bytes.Buffer
+	if err := wire.WriteVarInt(&witnessBuf, 0, uint64(len(witness))); err != nil {
+		return nil, fmt.Errorf("failed to write witness count: %w", err)
+	}
+	for _, elem := range witness {
+		if err := wire.WriteVarBytes(&witnessBuf, 0, elem); err != nil {
+			return nil, fmt.Errorf("failed to write witness element: %w", err)
+		}
+	}
+	return witnessBuf.Bytes(), nil
+}
+
 // finalizeP2SHP2WPKHInput finalizes a P2SH-P2WPKH (BIP49 Nested SegWit single-sig) PSBT input.
 // This creates a scriptSig containing the redeemScript (P2WPKH script) and witness data.
 //
@@ -716,16 +731,11 @@ func (b *Bitcoin) finalizeP2SHP2WPKHInput(packet *psbt.Packet, inputIndex int) e
 	}
 
 	// Serialize witness to FinalScriptWitness format
-	var witnessBuf bytes.Buffer
-	if err := wire.WriteVarInt(&witnessBuf, 0, uint64(len(witness))); err != nil {
-		return fmt.Errorf("failed to write witness count: %w", err)
+	witnessBytes, err := serializeWitness(witness)
+	if err != nil {
+		return fmt.Errorf("failed to serialize witness: %w", err)
 	}
-	for _, elem := range witness {
-		if err := wire.WriteVarBytes(&witnessBuf, 0, elem); err != nil {
-			return fmt.Errorf("failed to write witness element: %w", err)
-		}
-	}
-	input.FinalScriptWitness = witnessBuf.Bytes()
+	input.FinalScriptWitness = witnessBytes
 
 	// Clear partial sigs and other metadata (no longer needed after finalization)
 	input.PartialSigs = nil
@@ -914,16 +924,11 @@ func (b *Bitcoin) finalizeMultisigInput(packet *psbt.Packet, inputIndex int) err
 		witness = append(witness, input.WitnessScript)
 
 		// Serialize witness to FinalScriptWitness format
-		var witnessBuf bytes.Buffer
-		if err := wire.WriteVarInt(&witnessBuf, 0, uint64(len(witness))); err != nil {
-			return fmt.Errorf("failed to write witness count: %w", err)
+		witnessBytes, err := serializeWitness(witness)
+		if err != nil {
+			return fmt.Errorf("failed to serialize witness: %w", err)
 		}
-		for _, elem := range witness {
-			if err := wire.WriteVarBytes(&witnessBuf, 0, elem); err != nil {
-				return fmt.Errorf("failed to write witness element: %w", err)
-			}
-		}
-		input.FinalScriptWitness = witnessBuf.Bytes()
+		input.FinalScriptWitness = witnessBytes
 
 		// Build scriptSig for P2SH wrapping: just the redeemScript (OP_0 <witnessScriptHash>)
 		scriptSigBuilder := txscript.NewScriptBuilder()
