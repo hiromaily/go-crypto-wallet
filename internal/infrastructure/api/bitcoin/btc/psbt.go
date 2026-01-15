@@ -1234,10 +1234,19 @@ func (*Bitcoin) signSegWitInput(
 	} else if len(psbtInput.RedeemScript) > 0 && txscript.IsPayToWitnessPubKeyHash(psbtInput.RedeemScript) {
 		// P2SH-P2WPKH: use the redeem script (the P2WPKH witness program)
 		scriptForHash = psbtInput.RedeemScript
-		logger.Debug("Using redeem script for P2SH-P2WPKH hash calculation",
+		logger.Info("P2SH-P2WPKH signing details",
 			"input", inputIndex,
-			"redeemScriptLen", len(psbtInput.RedeemScript))
+			"redeemScript_hex", hex.EncodeToString(psbtInput.RedeemScript),
+			"redeemScript_len", len(psbtInput.RedeemScript),
+			"witnessUtxo_value", witnessUtxo.Value,
+			"witnessUtxo_pkScript", hex.EncodeToString(witnessUtxo.PkScript))
 	}
+
+	logger.Info("Calculating witness signature hash",
+		"input", inputIndex,
+		"scriptForHash_hex", hex.EncodeToString(scriptForHash),
+		"scriptForHash_len", len(scriptForHash),
+		"amount_satoshis", witnessUtxo.Value)
 
 	hash, err := txscript.CalcWitnessSigHash(
 		scriptForHash,
@@ -1252,18 +1261,32 @@ func (*Bitcoin) signSegWitInput(
 		return false
 	}
 
+	logger.Info("Witness signature hash calculated",
+		"input", inputIndex,
+		"hash_hex", hex.EncodeToString(hash),
+		"hash_len", len(hash))
+
 	// Sign with ECDSA
 	signature := ecdsa.Sign(privKey.PrivKey, hash)
 	sigBytes := append(signature.Serialize(), byte(txscript.SigHashAll))
 	pubKeyObj := privKey.PrivKey.PubKey()
 	pubKey := pubKeyObj.SerializeCompressed()
 
+	logger.Info("ECDSA signature created",
+		"input", inputIndex,
+		"signature_hex", hex.EncodeToString(sigBytes),
+		"signature_len", len(sigBytes),
+		"pubkey_hex", hex.EncodeToString(pubKey),
+		"pubkey_len", len(pubKey))
+
 	// Verify signature locally before adding
 	if !signature.Verify(hash, pubKeyObj) {
 		logger.Error("SegWit signature verification FAILED locally", "input", inputIndex)
 		return false
 	}
-	logger.Debug("SegWit signature verified locally", "input", inputIndex)
+	logger.Info("SegWit signature verified locally - signature is VALID",
+		"input", inputIndex,
+		"pubkey_hash", hex.EncodeToString(btcutil.Hash160(pubKey)))
 
 	// For P2SH-P2WPKH, add signature directly (btcd's updater may have issues)
 	// For other SegWit types, use updater.Sign()
