@@ -1,5 +1,9 @@
 package config
 
+// Note: TOML configuration files are no longer maintained.
+// All configuration files use YAML format (.yaml).
+// TOML files in config/wallet/archive/ are kept for reference only.
+
 import (
 	"os"
 	"testing"
@@ -12,7 +16,7 @@ import (
 	configutil "github.com/hiromaily/go-crypto-wallet/pkg/config/testutil"
 )
 
-// TestNewAccount tests the NewAccount function for loading account configuration from TOML files.
+// TestNewAccount tests the NewAccount function for loading account configuration.
 func TestNewAccount(t *testing.T) {
 	// t.SkipNow()
 	confPath := configutil.GetConfigFilePath("account.yaml")
@@ -26,7 +30,7 @@ func TestNewAccount(t *testing.T) {
 }
 
 // TestNewAccountWithViper tests account loading using viper.
-// This verifies that the TOML file is properly loaded and unmarshaled into AccountRoot structure.
+// This verifies that the config file is properly loaded and unmarshaled into AccountRoot structure.
 func TestNewAccountWithViper(t *testing.T) {
 	confPath := configutil.GetConfigFilePath("account.yaml")
 
@@ -39,23 +43,16 @@ func TestNewAccountWithViper(t *testing.T) {
 	require.NoError(t, err, "NewAccount() should not return error")
 	require.NotNil(t, conf, "NewAccount() returned nil config")
 
-	// Verify that viper properly loaded the TOML file
+	// Verify that viper properly loaded the config file
 	assert.NotEmpty(t, conf.Types, "Account types should not be empty")
 	assert.NotEmpty(t, conf.DepositReceiver, "DepositReceiver should not be empty")
 	assert.NotEmpty(t, conf.PaymentSender, "PaymentSender should not be empty")
-	assert.NotEmpty(t, conf.Multisigs, "Multisigs should not be empty")
-
-	// Verify multisig structure loaded correctly
-	for i, ms := range conf.Multisigs {
-		assert.NotEmpty(t, ms.Type, "Multisig[%d].Type should not be empty", i)
-		assert.NotZero(t, ms.Required, "Multisig[%d].Required should not be zero", i)
-		assert.NotEmpty(t, ms.AuthUsers, "Multisig[%d].AuthUsers should not be empty", i)
-	}
+	// Note: Multisigs may be empty for single-sig configurations (account.yaml)
+	// Multisig-specific tests are covered in TestNewMultisigConfig_Integration
 }
 
-// TestLoadAccount tests the TOML loading functionality indirectly through NewAccount.
-// This test verifies that NewAccount correctly loads and validates account configuration
-// from a TOML file using the common loadTOML function.
+// TestLoadAccount tests the config loading functionality indirectly through NewAccount.
+// This test verifies that NewAccount correctly loads and validates account configuration.
 func TestLoadAccount(t *testing.T) {
 	confPath := configutil.GetConfigFilePath("account.yaml")
 
@@ -131,13 +128,14 @@ func TestNewMultisigConfig(t *testing.T) {
 }
 
 // TestNewMultisigConfig_Integration tests NewMultisigConfig with real config file.
-// This verifies that the conversion from TOML config to domain entity works correctly.
+// This verifies that the conversion from config to domain entity works correctly.
+// Uses account_2of3.yaml which contains multisig configuration.
 func TestNewMultisigConfig_Integration(t *testing.T) {
-	// config
-	confPath := configutil.GetConfigFilePath("account.yaml")
+	// config - use multisig config file for this test
+	confPath := configutil.GetConfigFilePath("account_2of3.yaml")
 	// Skip if config file path is empty (file not found)
 	if confPath == "" {
-		t.Skip("Config file not found: account.yaml")
+		t.Skip("Config file not found: account_2of3.yaml")
 	}
 	conf, err := NewAccount(confPath)
 	require.NoError(t, err, "fail to create config")
@@ -172,49 +170,6 @@ func TestNewAccount_YAML(t *testing.T) {
 	assert.NotEmpty(t, conf.Types, "Account types should not be empty")
 	assert.NotEmpty(t, conf.DepositReceiver, "DepositReceiver should not be empty")
 	assert.NotEmpty(t, conf.PaymentSender, "PaymentSender should not be empty")
-	assert.NotEmpty(t, conf.Multisigs, "Multisigs should not be empty")
-
-	// Verify multisig structure loaded correctly
-	for i, ms := range conf.Multisigs {
-		assert.NotEmpty(t, ms.Type, "Multisig[%d].Type should not be empty", i)
-		assert.NotZero(t, ms.Required, "Multisig[%d].Required should not be zero", i)
-		assert.NotEmpty(t, ms.AuthUsers, "Multisig[%d].AuthUsers should not be empty", i)
-	}
-}
-
-// TestNewAccount_TOMLvsYAML tests that TOML and YAML configs produce identical results.
-// This verifies backward compatibility and ensures both formats are equivalent.
-func TestNewAccount_TOMLvsYAML(t *testing.T) {
-	tomlPath := configutil.GetConfigFilePath("account.toml")
-	yamlPath := configutil.GetConfigFilePath("account.yaml")
-
-	// Skip if either config file doesn't exist
-	if _, err := os.Stat(tomlPath); os.IsNotExist(err) {
-		t.Skipf("Config file not found: %s", tomlPath)
-	}
-	if _, err := os.Stat(yamlPath); os.IsNotExist(err) {
-		t.Skipf("Config file not found: %s", yamlPath)
-	}
-
-	tomlConf, err := NewAccount(tomlPath)
-	require.NoError(t, err, "NewAccount(TOML) should not return error")
-
-	yamlConf, err := NewAccount(yamlPath)
-	require.NoError(t, err, "NewAccount(YAML) should not return error")
-
-	// Compare configurations
-	assert.Equal(t, tomlConf.Types, yamlConf.Types, "Types should match")
-	assert.Equal(t, tomlConf.DepositReceiver, yamlConf.DepositReceiver, "DepositReceiver should match")
-	assert.Equal(t, tomlConf.PaymentSender, yamlConf.PaymentSender, "PaymentSender should match")
-	assert.Equal(t, len(tomlConf.Multisigs), len(yamlConf.Multisigs), "Multisigs count should match")
-
-	// Compare multisig configurations
-	for i := range tomlConf.Multisigs {
-		assert.Equal(t, tomlConf.Multisigs[i].Type, yamlConf.Multisigs[i].Type,
-			"Multisig[%d].Type should match", i)
-		assert.Equal(t, tomlConf.Multisigs[i].Required, yamlConf.Multisigs[i].Required,
-			"Multisig[%d].Required should match", i)
-		assert.Equal(t, tomlConf.Multisigs[i].AuthUsers, yamlConf.Multisigs[i].AuthUsers,
-			"Multisig[%d].AuthUsers should match", i)
-	}
+	// Note: Multisigs may be empty for single-sig configurations (account.yaml)
+	// Multisig-specific tests are covered in TestNewMultisigConfig_Integration
 }

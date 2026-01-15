@@ -68,7 +68,7 @@ func TestDescriptorGenerator_GetMasterFingerprint(t *testing.T) {
 
 				// Verify all characters are hex
 				for _, c := range fingerprint {
-					if !((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f')) {
+					if (c < '0' || c > '9') && (c < 'a' || c > 'f') {
 						t.Errorf("GetMasterFingerprint() invalid hex character: %c", c)
 					}
 				}
