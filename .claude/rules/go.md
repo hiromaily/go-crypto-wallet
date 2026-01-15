@@ -1,0 +1,125 @@
+---
+paths: ["**/*.go"]
+---
+
+# Go File Rules
+
+## Overview
+
+Rules for modifying Go files (`*.go`) in go-crypto-wallet.
+
+## Applicable Directories
+
+| Directory | Description |
+|-----------|-------------|
+| `internal/` | Core application code (Clean Architecture) |
+| `pkg/` | Reusable shared packages |
+| `cmd/` | Application entry points |
+
+## Verification Commands
+
+**ALWAYS run before committing:**
+
+| Command | Purpose | Required |
+|---------|---------|----------|
+| `make go-lint` | Lint and auto-fix | ✅ Yes |
+| `make tidy` | `go mod tidy` | ✅ Yes |
+| `make check-build` | Build verification (no binary) | ✅ Yes |
+| `make gotest` | Run unit tests | Recommended |
+
+### Quick One-Liner
+
+```bash
+make go-lint && make tidy && make check-build && make gotest
+```
+
+### Additional Commands
+
+| Command | Purpose |
+|---------|---------|
+| `make go-fmt` | Format only (gofmt) |
+| `make go-imports` | Format imports |
+| `make go-staticcheck` | Additional static analysis |
+| `make go-check-vuln` | Security vulnerability check |
+| `make gotest-integration` | Integration tests |
+
+## Build Rules
+
+**CRITICAL: Never run `go build` directly. Always use Makefile targets.**
+
+| Purpose | Command | Output Location |
+|---------|---------|-----------------|
+| Verify build (no binary) | `make check-build` | `/dev/null` |
+| Build all | `make build-all` | `${GOPATH}/bin/` |
+| Build watch only | `make build-watch` | `${GOPATH}/bin/watch` |
+| Build keygen only | `make build-keygen` | `${GOPATH}/bin/keygen` |
+| Build sign only | `make build-sign` | `${GOPATH}/bin/sign{1,2}` |
+
+## Code Style
+
+### Import Order
+
+1. Standard library
+2. Third-party packages
+3. Local packages
+
+```go
+import (
+    "context"
+    "fmt"
+
+    "github.com/btcsuite/btcd/btcutil"
+
+    "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+)
+```
+
+### Error Handling
+
+Always wrap errors with context:
+
+```go
+result, err := service.DoSomething()
+if err != nil {
+    return nil, fmt.Errorf("failed to do something: %w", err)
+}
+```
+
+### Naming Conventions
+
+| Type | Convention | Example |
+|------|------------|---------|
+| Package | lowercase, no underscores | `account`, `transaction` |
+| Exported | UpperCamelCase | `GetAccountKey` |
+| Unexported | lowerCamelCase | `calculateFee` |
+| Interface | Behavior + "er" | `Validator`, `Reader` |
+
+## Auto-Generated Files
+
+**DO NOT EDIT** files with `DO NOT EDIT` comments:
+
+- `internal/infrastructure/database/sqlc/*.go` (SQLC)
+- `internal/infrastructure/api/ripple/xrp/*.pb.go` (Protocol Buffers)
+- `internal/infrastructure/contract/token-abi.go` (ABI)
+
+## Quick Checklist
+
+- [ ] `make go-lint` passes
+- [ ] `make tidy` completes
+- [ ] `make check-build` passes
+- [ ] Domain layer has ZERO infrastructure dependencies
+- [ ] Error handling uses `fmt.Errorf("context: %w", err)`
+- [ ] No private keys or sensitive data logged
+- [ ] No hardcoded secrets
+
+## Related Documentation
+
+- @docs/standards/coding-conventions.md - Coding standards
+- @docs/standards/security.md - Security requirements
+- @internal/AGENTS.md - Internal package guidelines
+- @pkg/AGENTS.md - Public package guidelines
+
+## Related Skills
+
+- `go-development` - Full Go development workflow
+- `git-workflow` - Branch, commit, PR workflow

@@ -1,6 +1,7 @@
 pre-commit:
   parallel: true
   jobs:
+    # go mod files
     - name: go-mod-tidy
       root: "/"
       glob: "**/go.{mod,sum}"
@@ -9,6 +10,7 @@ pre-commit:
         git add go.mod go.sum # files may be changed so add to stage
       stage_fixed: true
 
+    # go files
     - name: go-fmt # lightweight lint only for fast pre-commit
       root: "/"
       glob: "**/*.{go}"
@@ -23,6 +25,7 @@ pre-commit:
     #     make gotest
     #   stage_fixed: false
 
+    # shell scripts
     - name: sh-fmt
       root: "/scripts"
       glob: "**/*.{sh}"
@@ -30,6 +33,7 @@ pre-commit:
         make shfmt
       stage_fixed: true
 
+    # Makefile
     - name: makefile-fmt
       root: "/"
       glob: "**/*.{mk,Makefile}"
@@ -37,6 +41,7 @@ pre-commit:
         make mk-lint
       stage_fixed: true
 
+    # YAML files
     - name: yaml-fmt
       root: "/"
       glob: "**/*.{yaml,yml}"
@@ -44,6 +49,15 @@ pre-commit:
         make yaml-lint
       stage_fixed: true
 
+    # Atlas HCL files
+    - name: atlas-hcl-fmt
+      root: "/"
+      glob: "tools/atlas/**/*.hcl"
+      run: |
+        make atlas-fmt
+      stage_fixed: true
+
+    # SQL files
     - name: sql-fmt
       root: "/"
       glob: "tools/sqlc/**/*.sql"

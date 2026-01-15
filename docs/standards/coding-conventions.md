@@ -2,70 +2,36 @@
 
 Project coding standards for go-crypto-wallet.
 
-## Go Code
+## Language-Specific Rules (SSOT)
 
-### Verification Commands
+For detailed rules, format commands, and verification commands, see the corresponding rule files in `.claude/rules/`:
 
-```bash
-make go-lint      # Lint and format
-make check-build  # Verify build
-make gotest       # Run tests
-make tidy         # Clean dependencies
-```
+| Language | Rule File | Key Commands |
+|----------|-----------|--------------|
+| Go | [.claude/rules/go.md](../../.claude/rules/go.md) | `make go-lint`, `make check-build` |
+| TypeScript/JS | [.claude/rules/typescript.md](../../.claude/rules/typescript.md) | `yarn lint`, `npm run lint` |
+| Shell | [.claude/rules/shell-script.md](../../.claude/rules/shell-script.md) | `make shfmt`, `shellcheck` |
+| SQL | [.claude/rules/sql.md](../../.claude/rules/sql.md) | `make sqlc-validate`, `make sqlc` |
+| HCL | [.claude/rules/hcl.md](../../.claude/rules/hcl.md) | `make atlas-fmt`, `make atlas-lint` |
+| Proto | [.claude/rules/proto.md](../../.claude/rules/proto.md) | `make lint-proto`, `make protoc-go` |
+| YAML | [.claude/rules/yaml.md](../../.claude/rules/yaml.md) | `make yaml-lint` |
 
-### Import Order
-
-1. Standard library
-2. Third-party packages
-3. Local packages
-
-```go
-import (
-    "context"
-    "fmt"
-
-    "github.com/btcsuite/btcd/btcutil"
-
-    "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
-)
-```
-
-### Naming Conventions
-
-| Type | Convention | Example |
-|------|------------|---------|
-| Package | lowercase, no underscores | `account`, `transaction` |
-| Exported | UpperCamelCase | `GetAccountKey` |
-| Unexported | lowerCamelCase | `calculateFee` |
-| Interface | Behavior + "er" | `Validator`, `Reader` |
-
-### Error Handling
-
-```go
-result, err := service.DoSomething()
-if err != nil {
-    return nil, fmt.Errorf("failed to do something: %w", err)
-}
-```
-
-## TypeScript/JavaScript
-
-### Verification Commands
+## Quick Verification Reference
 
 ```bash
-cd apps/{app-name}
-npm run lint
-npm run format
-npm run build
-npm test
-```
+# Go files
+make go-lint && make tidy && make check-build && make gotest
 
-## Shell Scripts
+# TypeScript (ripple-lib-server)
+cd apps/ripple-lib-server && yarn lint && yarn test
 
-```bash
-make shfmt  # Format shell scripts
+# Database schema (HCL)
+make atlas-fmt && make atlas-lint
+
+# SQL queries
+make sqlc-validate && make sqlc
 ```
 
 ## Detailed Guidelines
 
-See [docs/guidelines/coding-standards.md](../guidelines/coding-standards.md) for full details.
+See [docs/guidelines/coding-standards.md](../guidelines/coding-standards.md) for additional guidelines.
