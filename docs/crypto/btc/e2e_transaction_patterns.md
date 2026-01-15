@@ -591,6 +591,7 @@ Address Format: bitcoincash:p... (P2SH multisig)
 | `scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh` | BTC | P2PKH 2-of-3 Multisig (Pattern 2) | 2-of-3 |
 | `scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh` | BTC | P2SH-P2WPKH Single-sig (Pattern 3) | Single-sig |
 | `scripts/operation/btc/e2e/e2e-p4-p2sh-p2wsh-2of3.sh` | BTC | P2SH-P2WSH 2-of-3 Multisig (Pattern 4) | 2-of-3 |
+| `scripts/operation/btc/e2e/e2e-p5-p2wpkh-singlesig.sh` | BTC | P2WPKH Native SegWit Single-sig (Pattern 5) | Single-sig |
 | `scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh` | BTC | P2SH-P2WSH 3-of-3 Multisig (Pattern 8) | 3-of-3 |
 | `scripts/operation/bch/e2e-workflow.sh` | BCH | CashAddr Multisig | 3-of-3 |
 
@@ -598,9 +599,9 @@ Address Format: bitcoincash:p... (P2SH multisig)
 
 | Script (Planned) | Coin | Pattern | Signing Requirements | Priority |
 |------------------|------|---------|---------------------|----------|
-| `e2e-singlesig.sh` | BTC | P2WPKH/P2TR Single-sig | 1 | High |
+| `e2e-p9-p2tr-singlesig.sh` | BTC | P2TR Single-sig (Pattern 9) | Single-sig | High |
 | `e2e-musig2.sh` | BTC | P2TR MuSig2 | N-of-N | Medium |
-| `e2e-2of3.sh` | BTC | P2WSH 2-of-3 | 2-of-3 | Low |
+| `e2e-p6-p2wsh-2of3.sh` | BTC | P2WSH 2-of-3 (Pattern 6) | 2-of-3 | Low |
 | `e2e-tapscript.sh` | BTC | P2TR Script Path | M-of-N | Low |
 
 ---
@@ -646,13 +647,19 @@ Address Format: bitcoincash:p... (P2SH multisig)
 
 ---
 
-**Document Version:** 1.3
+**Document Version:** 1.4
 **Last Updated:** 2026-01-15
 **Maintainer:** go-crypto-wallet team
 
 ---
 
 ## Changelog
+
+### Version 1.4 (2026-01-15)
+
+- ✅ Pattern 5 (P2WPKH Native SegWit Single-sig) is now fully working
+- E2E script `e2e-p5-p2wpkh-singlesig.sh` completed and verified
+- Native SegWit with Bech32 encoding (`bcrt1q...` addresses)
 
 ### Version 1.3 (2026-01-15)
 
