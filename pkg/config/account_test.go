@@ -16,6 +16,10 @@ import (
 func TestNewAccount(t *testing.T) {
 	// t.SkipNow()
 	confPath := configutil.GetConfigFilePath("account.yaml")
+	// Skip if config file path is empty (file not found)
+	if confPath == "" {
+		t.Skip("Config file not found: account.yaml")
+	}
 	conf, err := NewAccount(confPath)
 	require.NoError(t, err, "fail to create config")
 	grok.Value(conf)
@@ -131,6 +135,10 @@ func TestNewMultisigConfig(t *testing.T) {
 func TestNewMultisigConfig_Integration(t *testing.T) {
 	// config
 	confPath := configutil.GetConfigFilePath("account.yaml")
+	// Skip if config file path is empty (file not found)
+	if confPath == "" {
+		t.Skip("Config file not found: account.yaml")
+	}
 	conf, err := NewAccount(confPath)
 	require.NoError(t, err, "fail to create config")
 

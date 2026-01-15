@@ -42,13 +42,8 @@ func TestExportDescriptorUseCase_TextFormat(t *testing.T) {
 	require.Equal(t, "/tmp/descriptors.txt", output.FilePath)
 	require.Equal(t, output.FilePath, writer.path)
 
+	// stubAccountKeyRepo returns bip44 type, so only legacy (pkh) descriptors should be exported
 	expectedDescriptors := []string{
-		"tr-desc",
-		"tr-desc-change",
-		"wpkh-desc",
-		"wpkh-desc-change",
-		"shwpkh-desc",
-		"shwpkh-desc-change",
 		"pkh-desc",
 		"pkh-desc-change",
 	}
@@ -86,16 +81,13 @@ func TestExportDescriptorUseCase_BitcoinCoreFormat(t *testing.T) {
 		WatchOnly  bool   `json:"watchonly"`
 	}
 	require.NoError(t, json.Unmarshal(writer.data, &items))
-	require.Len(t, items, 4)
+	// stubAccountKeyRepo returns bip44 type, so only 1 legacy descriptor is exported (no change)
+	require.Len(t, items, 1)
 
-	require.Equal(t, "tr-desc", items[0].Descriptor)
+	require.Equal(t, "pkh-desc", items[0].Descriptor)
 	require.Equal(t, "now", items[0].Timestamp)
 	require.Equal(t, []int{0, 1000}, items[0].Range)
 	require.True(t, items[0].WatchOnly)
-
-	require.Equal(t, "wpkh-desc", items[1].Descriptor)
-	require.Equal(t, "shwpkh-desc", items[2].Descriptor)
-	require.Equal(t, "pkh-desc", items[3].Descriptor)
 }
 
 func TestExportDescriptorUseCase_InvalidFormat(t *testing.T) {

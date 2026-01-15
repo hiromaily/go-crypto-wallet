@@ -224,6 +224,8 @@ func TestDescriptorGenerator_GenerateAccountDescriptor(t *testing.T) {
 					expectedPrefix = "sh(wpkh("
 				case PurposeTypeBIP84:
 					expectedPrefix = "wpkh("
+				case PurposeTypeBIP86:
+					expectedPrefix = "tr("
 				}
 
 				if !strings.HasPrefix(descriptor.Script, expectedPrefix) {

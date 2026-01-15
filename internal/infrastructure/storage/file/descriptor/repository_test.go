@@ -79,7 +79,7 @@ func TestDescriptorFileRepository_WriteDescriptorsPlainText(t *testing.T) {
 				}
 
 				// Read back and verify content
-				content, err := os.ReadFile(filePath)
+				content, err := os.ReadFile(filePath) // #nosec G304 -- Test file path is controlled
 				if err != nil {
 					t.Fatalf("Failed to read written file: %v", err)
 				}
@@ -131,7 +131,7 @@ func TestDescriptorFileRepository_WriteDescriptorsBitcoinCoreJSON(t *testing.T) 
 	}
 
 	// Read back and verify content is valid JSON
-	content, err := os.ReadFile(filePath)
+	content, err := os.ReadFile(filePath) // #nosec G304 -- Test file path is controlled
 	if err != nil {
 		t.Fatalf("Failed to read written file: %v", err)
 	}

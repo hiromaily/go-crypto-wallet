@@ -56,6 +56,7 @@ func TestGenerateDescriptorUseCase_SingleSig(t *testing.T) {
 	accountRepo := &stubAccountRepo{
 		key: &domainBitcoin.BtcAccountKey{
 			FullPublicKey:          testDescriptorMainnetXpub,
+			KeyType:                string(domainKey.KeyTypeBIP84),
 			Account:                domainAccount.AccountTypeDeposit,
 			AccountExtendedPrivkey: &xpriv,
 		},

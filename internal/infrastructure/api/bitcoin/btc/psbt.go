@@ -1713,6 +1713,15 @@ func (b *Bitcoin) deriveRedeemScriptForAddress(
 		expectedAccountIndex = 1
 	case domainAccount.AccountTypeStored:
 		expectedAccountIndex = 2
+	case domainAccount.AccountTypeClient,
+		domainAccount.AccountTypeAuthorization,
+		domainAccount.AccountTypeAuth1, domainAccount.AccountTypeAuth2, domainAccount.AccountTypeAuth3,
+		domainAccount.AccountTypeAuth4, domainAccount.AccountTypeAuth5, domainAccount.AccountTypeAuth6,
+		domainAccount.AccountTypeAuth7, domainAccount.AccountTypeAuth8, domainAccount.AccountTypeAuth9,
+		domainAccount.AccountTypeAuth10, domainAccount.AccountTypeAuth11, domainAccount.AccountTypeAuth12,
+		domainAccount.AccountTypeAuth13, domainAccount.AccountTypeAuth14, domainAccount.AccountTypeAuth15,
+		domainAccount.AccountTypeAnonymous, domainAccount.AccountTypeTest:
+		return nil, fmt.Errorf("unsupported account type for this operation: %s", senderAccount.String())
 	default:
 		return nil, fmt.Errorf("unknown account type: %s", senderAccount.String())
 	}
@@ -2077,7 +2086,9 @@ func splitPath(path string) []string {
 // getDescriptorInfoForAddress queries loaded descriptors to find the correct fingerprint
 // for the given address. This is necessary because getaddressinfo returns Bitcoin Core's
 // internal wallet fingerprint, not the imported descriptor's fingerprint.
-func (b *Bitcoin) getDescriptorInfoForAddress(address, fullPath string, senderAccount domainAccount.AccountType) (uint32, string, error) {
+func (b *Bitcoin) getDescriptorInfoForAddress(
+	address, fullPath string, senderAccount domainAccount.AccountType,
+) (uint32, string, error) {
 	// Call listdescriptors RPC with false to get public descriptors
 	// Note: Watch-only wallets can't return private descriptors (true parameter would fail)
 	rawResult, err := b.Client.RawRequest("listdescriptors", []json.RawMessage{json.RawMessage("false")})

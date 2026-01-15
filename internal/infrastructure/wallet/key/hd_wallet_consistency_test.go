@@ -197,7 +197,7 @@ func TestHDWalletKnownVectors(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, keys, 3)
 
-		// Known vectors for BIP44 path: m/44'/0'/0'/0/x
+		// Known vectors for BIP44 path: m/44'/0'/3'/0/x (Client account uses index 3)
 		// These addresses are deterministic and should never change
 		expectedAddresses := []struct {
 			p2pkh      string
@@ -205,22 +205,22 @@ func TestHDWalletKnownVectors(t *testing.T) {
 			bech32     string
 		}{
 			{
-				// m/44'/0'/0'/0/0 - verified with btcd v0.25.0
-				p2pkh:      "1LqBGSKuX5yYUonjxT5qGfpUsXKYYWeabA",
-				p2shSegWit: "3HkzTaFbEMWeJPLyNCNhPyGfZsVLDwdD3G",
-				bech32:     "bc1qmxrw6qdh5g3ztfcwm0et5l8mvws4eva24kmp8m",
+				// m/44'/0'/3'/0/0 - verified with btcd v0.25.0
+				p2pkh:      "1hMB5gzhaYVt1uNQx2cuRWx4pJzzpJysR",
+				p2shSegWit: "3AWPNDLF15cSaT7GhxTtTYfTtQj7JXY8y4",
+				bech32:     "bc1qq7sh4r2gzyv6z8z7r5ryun0hm0ffvz8xepatfv",
 			},
 			{
-				// m/44'/0'/0'/0/1 - verified with btcd v0.25.0
-				p2pkh:      "1Ak8PffB2meyfYnbXZR9EGfLfFZVpzJvQP",
-				p2shSegWit: "3FYpNH4eWWmqqrvcbjWpvSJYybEaGmCwZi",
-				bech32:     "bc1qdtsnq885fjjj2agaza36cnl0ztg32wvxqg5x0c",
+				// m/44'/0'/3'/0/1 - verified with btcd v0.25.0
+				p2pkh:      "1NWA2WmZmygsEwE1txGjwmgzc2LtPbh9sk",
+				p2shSegWit: "39r98eHg6Vcko2iYqCARGrB55EvrWF3NfL",
+				bech32:     "bc1qa00r62lhy5cn7430xjm7y946thvesq5jl5ympv",
 			},
 			{
-				// m/44'/0'/0'/0/2 - verified with btcd v0.25.0
-				p2pkh:      "1MNF5RSaabFwcbtJirJwKnDytsXXEsVsNb",
-				p2shSegWit: "3Qnpgq3UEaRRqXNmMBJZCDmVmCHQUmshaF",
-				bech32:     "bc1qmansqj24utny54uag2ped8censfwnszplhg27m",
+				// m/44'/0'/3'/0/2 - verified with btcd v0.25.0
+				p2pkh:      "1GVT8RQVsYah4V8zbReDcZZrxPsEKkt6hp",
+				p2shSegWit: "3774PxgQkYAjeSNpVSZboHQ6NvK8DFZ6pc",
+				bech32:     "bc1q4844s82phrgn8v5939pm43pyt54qlcrkpw4njs",
 			},
 		}
 

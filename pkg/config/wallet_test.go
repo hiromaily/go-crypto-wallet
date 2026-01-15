@@ -236,6 +236,7 @@ ripple:
 
 logger:
   service: test-wallet
+  format: json
   env: dev
   level: debug
   is_logger: true
