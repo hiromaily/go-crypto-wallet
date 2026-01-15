@@ -1217,6 +1217,60 @@ func (*Bitcoin) signTaprootInput(
 	return false
 }
 
+// buildP2PKHScriptCodeForP2SHWPKH validates a P2WPKH redeemScript and builds
+// the P2PKH scriptCode for signature hash calculation per BIP143.
+//
+// For P2SH-P2WPKH, the redeemScript is: OP_0 <20-byte-pubkey-hash>
+// This function validates the format and builds the P2PKH scriptCode:
+// OP_DUP OP_HASH160 <20-byte-hash> OP_EQUALVERIFY OP_CHECKSIG
+func buildP2PKHScriptCodeForP2SHWPKH(redeemScript []byte, inputIndex int, utxoValue int64) ([]byte, error) {
+	// Validate length (must be 22 bytes: OP_0 + length byte + 20-byte hash)
+	if len(redeemScript) != p2wpkhRedeemScriptLen {
+		return nil, fmt.Errorf("invalid P2WPKH redeemScript length: expected %d, got %d",
+			p2wpkhRedeemScriptLen, len(redeemScript))
+	}
+
+	// Validate format: must be OP_0 <20-byte-hash>
+	// Format: [OP_0 (0x00), length byte (0x14 = 20 decimal), 20-byte pubkey hash]
+	if redeemScript[0] != txscript.OP_0 {
+		return nil, fmt.Errorf("invalid P2WPKH redeemScript format: must start with OP_0 (0x00), got 0x%02x",
+			redeemScript[0])
+	}
+
+	// Validate length byte (0x14 = 20 bytes for pubkey hash)
+	const pubKeyHashLength = 20
+	if redeemScript[1] != pubKeyHashLength {
+		return nil, fmt.Errorf("invalid P2WPKH redeemScript format: invalid length byte, expected 0x14, got 0x%02x",
+			redeemScript[1])
+	}
+
+	// Extract pubkey hash (now safe after validation)
+	pubKeyHash := redeemScript[2:]
+
+	// Build P2PKH scriptCode per BIP143
+	// Format: OP_DUP OP_HASH160 <20-byte-hash> OP_EQUALVERIFY OP_CHECKSIG
+	scriptCodeBuilder := txscript.NewScriptBuilder()
+	scriptCodeBuilder.AddOp(txscript.OP_DUP)
+	scriptCodeBuilder.AddOp(txscript.OP_HASH160)
+	scriptCodeBuilder.AddData(pubKeyHash)
+	scriptCodeBuilder.AddOp(txscript.OP_EQUALVERIFY)
+	scriptCodeBuilder.AddOp(txscript.OP_CHECKSIG)
+
+	scriptForHash, err := scriptCodeBuilder.Script()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build P2PKH scriptCode: %w", err)
+	}
+
+	logger.Info("P2SH-P2WPKH signing - constructed P2PKH scriptCode",
+		"input", inputIndex,
+		"redeemScript_hex", hex.EncodeToString(redeemScript),
+		"pubKeyHash_hex", hex.EncodeToString(pubKeyHash),
+		"scriptCode_hex", hex.EncodeToString(scriptForHash),
+		"witnessUtxo_value", utxoValue)
+
+	return scriptForHash, nil
+}
+
 // signSegWitInput signs a SegWit v0 (P2WPKH/P2WSH) input using ECDSA signatures.
 func (*Bitcoin) signSegWitInput(
 	updater *psbt.Updater,
@@ -1244,42 +1298,15 @@ func (*Bitcoin) signSegWitInput(
 			"input", inputIndex,
 			"witnessScriptLen", len(psbtInput.WitnessScript))
 	} else if len(psbtInput.RedeemScript) > 0 && txscript.IsPayToWitnessPubKeyHash(psbtInput.RedeemScript) {
-		// P2SH-P2WPKH: Extract pubkey hash from redeemScript and construct P2PKH scriptCode
-		// Per BIP143, the scriptCode for P2WPKH is: OP_DUP OP_HASH160 <20-byte-hash> OP_EQUALVERIFY OP_CHECKSIG
-		// The redeemScript is: OP_0 <20-byte-hash>, so extract bytes 2-22
-		if len(psbtInput.RedeemScript) != p2wpkhRedeemScriptLen {
-			logger.Error("Invalid P2WPKH redeemScript length",
-				"input", inputIndex,
-				"expected", p2wpkhRedeemScriptLen,
-				"actual", len(psbtInput.RedeemScript))
-			return false
-		}
-
-		pubKeyHash := psbtInput.RedeemScript[2:] // Skip OP_0 and length byte
-
-		// Build P2PKH scriptCode per BIP143
-		scriptCodeBuilder := txscript.NewScriptBuilder()
-		scriptCodeBuilder.AddOp(txscript.OP_DUP)
-		scriptCodeBuilder.AddOp(txscript.OP_HASH160)
-		scriptCodeBuilder.AddData(pubKeyHash)
-		scriptCodeBuilder.AddOp(txscript.OP_EQUALVERIFY)
-		scriptCodeBuilder.AddOp(txscript.OP_CHECKSIG)
-
+		// P2SH-P2WPKH: Build P2PKH scriptCode from redeemScript per BIP143
 		var err error
-		scriptForHash, err = scriptCodeBuilder.Script()
+		scriptForHash, err = buildP2PKHScriptCodeForP2SHWPKH(psbtInput.RedeemScript, inputIndex, witnessUtxo.Value)
 		if err != nil {
-			logger.Error("Failed to build P2PKH scriptCode from redeemScript",
+			logger.Error("Failed to build P2PKH scriptCode for P2SH-P2WPKH",
 				"input", inputIndex,
 				"error", err)
 			return false
 		}
-
-		logger.Info("P2SH-P2WPKH signing - constructed P2PKH scriptCode",
-			"input", inputIndex,
-			"redeemScript_hex", hex.EncodeToString(psbtInput.RedeemScript),
-			"pubKeyHash_hex", hex.EncodeToString(pubKeyHash),
-			"scriptCode_hex", hex.EncodeToString(scriptForHash),
-			"witnessUtxo_value", witnessUtxo.Value)
 	}
 
 	logger.Info("Calculating witness signature hash",
