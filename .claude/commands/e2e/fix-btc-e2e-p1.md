@@ -1,114 +1,114 @@
 # Fix BTC E2E Pattern 1 Errors #{issue_number}
 
-BTC E2Eテスト（パターン1: P2PKH Single-sig）の実行エラーを修正する。
+Fix errors in BTC E2E test (Pattern 1: P2PKH Single-sig).
 
-## 前提条件
+## Prerequisites
 
-**以下の共通ルールを最初に読み込むこと：**
+**Read the following common rules first:**
 
-- @.claude/rules/btc/e2e-script.md - BTC E2E共通ルール（ビルド、検証、エスカレーション、セキュリティ）
+- @.claude/rules/btc/e2e-script.md - BTC E2E common rules (build, verification, escalation, security)
 
-## パラメータ
+## Parameters
 
-| パラメータ | 必須 | 説明 |
-|-----------|------|------|
-| `{issue_number}` | Optional | GitHub issue番号。指定時はgit-workflowに従う |
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `{issue_number}` | Optional | GitHub issue number. Follow git-workflow when specified |
 
-## 概要
+## Overview
 
-このコマンドは `make btc-e2e-p1-reset` 実行時のエラーを診断・修正します。
-スクリプトは既に存在するため、エラーの原因特定と修正に集中します。
+This command diagnoses and fixes errors when running `make btc-e2e-p1-reset`.
+The script already exists, so focus on identifying and fixing the root cause.
 
-### Pattern 1 の技術仕様
+### Pattern 1 Technical Specifications
 
-| 項目 | 値 |
-|------|-----|
-| **パターン番号** | 1 |
-| **ネットワーク** | **regtest** (ローカル環境) |
-| **鍵タイプ** | P2PKH (BIP44 Legacy) |
-| **スクリプトタイプ** | Single-sig |
-| **アドレス形式** | `m.../n...` (regtest/testnet P2PKH) |
-| **署名要件** | Single-sig (1つの署名) |
+| Item | Value |
+|------|-------|
+| **Pattern Number** | 1 |
+| **Network** | **regtest** (local environment) |
+| **Key Type** | P2PKH (BIP44 Legacy) |
+| **Script Type** | Single-sig |
+| **Address Format** | `m.../n...` (regtest/testnet P2PKH) |
+| **Signature Requirement** | Single-sig (1 signature) |
 | **Descriptor** | `pkh([fingerprint/44'/0'/0']xpub.../0/*)` |
-| **必要なウォレット** | watch, keygen |
-| **環境変数** | `WALLET_ADDRESS_TYPE="legacy"` |
+| **Required Wallets** | watch, keygen |
+| **Environment Variable** | `WALLET_ADDRESS_TYPE="legacy"` |
 
-### Pattern 2 (2-of-3 Multisig) との違い
+### Differences from Pattern 2 (2-of-3 Multisig)
 
-| 項目 | Pattern 1 | Pattern 2 |
+| Item | Pattern 1 | Pattern 2 |
 |------|-----------|-----------|
-| 署名要件 | Single-sig (1つ) | 2-of-3 Multisig |
-| 必要ウォレット | keygen のみ | keygen + sign1 + sign2 |
-| アドレス形式 | `m.../n...` (P2PKH) | `2...` (P2SH) |
-| fullpubkey交換 | 不要 | 必要 |
-| account設定 | `account_singlesig.yaml` | `account_2of3.yaml` |
+| Signature Requirement | Single-sig (1) | 2-of-3 Multisig |
+| Required Wallets | keygen only | keygen + sign1 + sign2 |
+| Address Format | `m.../n...` (P2PKH) | `2...` (P2SH) |
+| fullpubkey Exchange | Not required | Required |
+| Account Config | `account_singlesig.yaml` | `account_2of3.yaml` |
 
-### issue番号が指定された場合
+### When issue number is specified
 
-`git-workflow`スキルを読み込み、以下の設定で作業してください：
+Load `git-workflow` skill and work with these settings:
 
-- **ブランチ名**: `fix/issue-{issue_number}-btc-e2e-p1`
-- **コミットタイプ**: `fix(btc)`
-- **スコープ**: BTC E2E Pattern 1
+- **Branch name**: `fix/issue-{issue_number}-btc-e2e-p1`
+- **Commit type**: `fix(btc)`
+- **Scope**: BTC E2E Pattern 1
 
-→ 詳細は @.claude/skills/git-workflow/SKILL.md を参照
+→ See @.claude/skills/git-workflow/SKILL.md for details
 
-### issue番号が指定されない場合
+### When issue number is not specified
 
-ブランチ作成・PR作成なしで、ローカルで修正のみ行います。
+Fix locally without creating branch or PR.
 
-## Pattern 1 固有のドキュメント
+## Pattern 1 Specific Documentation
 
-共通ルールの Required Documentation に加えて、以下を参照：
+In addition to Required Documentation in common rules, refer to:
 
-- @scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh - **対象スクリプト**
-- @scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh - Pattern 2 スクリプト（Multisig部分の参考）
+- @scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh - **Target script**
+- @scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh - Pattern 2 script (Multisig reference)
 
-## 事前確認: 環境変数
+## Pre-check: Environment Variables
 
-**パターン1では `WALLET_ADDRESS_TYPE="legacy"` が必要です。**
+**Pattern 1 requires `WALLET_ADDRESS_TYPE="legacy"`.**
 
-スクリプト内で自動設定されますが、確認用：
+Auto-configured in script, but for verification:
 
 ```bash
-echo $WALLET_ADDRESS_TYPE  # "legacy" であること
+echo $WALLET_ADDRESS_TYPE  # Should be "legacy"
 ```
 
-> **Note**: 設定ファイルを直接編集しないでください。環境変数で上書きします。
-> 詳細は共通ルールの「Configuration File Policy」を参照。
+> **Note**: Do not edit config files directly. Override with environment variables.
+> See "Configuration File Policy" in common rules for details.
 
-## エラー診断手順
+## Error Diagnosis Steps
 
-### Step 1: エラー再現
+### Step 1: Reproduce Error
 
 ```bash
-# 完全リセットしてE2Eテストを実行
+# Full reset and run E2E test
 make btc-e2e-p1-reset
 ```
 
-エラーメッセージを確認し、以下のカテゴリに分類。
+Check error message and categorize below.
 
-### Step 2: エラーカテゴリの特定
+### Step 2: Identify Error Category
 
-| エラーメッセージ | カテゴリ | 参照セクション |
-|----------------|---------|--------------|
-| `No utxo` | UTXO関連 | [UTXO関連エラー](#utxo関連エラー) |
-| `connection refused` | インフラ | 共通ルール参照 |
-| `wallet not found` | ウォレット | [ウォレット関連エラー](#ウォレット関連エラー) |
-| `signing failed` | 署名 | [署名関連エラー](#署名関連エラー) |
-| `descriptor` | Descriptor | [Descriptor関連エラー](#descriptor関連エラー) |
-| `address_type` mismatch | 設定 | [設定関連エラー](#設定関連エラー) |
-| `duplicate key` | DB | 共通ルール参照 |
+| Error Message | Category | Reference Section |
+|---------------|----------|-------------------|
+| `No utxo` | UTXO-related | [UTXO Errors](#utxo-errors) |
+| `connection refused` | Infrastructure | See common rules |
+| `wallet not found` | Wallet | [Wallet Errors](#wallet-errors) |
+| `signing failed` | Signing | [Signing Errors](#signing-errors) |
+| `descriptor` | Descriptor | [Descriptor Errors](#descriptor-errors) |
+| `address_type` mismatch | Config | [Config Errors](#config-errors) |
+| `duplicate key` | DB | See common rules |
 
-## Pattern 1 固有のエラーと解決策
+## Pattern 1 Specific Errors and Solutions
 
-共通エラー（connection refused, duplicate key等）は共通ルールを参照。
+For common errors (connection refused, duplicate key, etc.), see common rules.
 
-### UTXO関連エラー
+### UTXO Errors
 
-#### "No utxo" エラー
+#### "No utxo" Error
 
-**症状**:
+**Symptoms**:
 
 ```
 Transaction creation failed
@@ -118,178 +118,178 @@ This could indicate:
   - UTXOs not mature enough (need 100+ confirmations)
 ```
 
-**原因と解決策**:
+**Causes and Solutions**:
 
-1. **Descriptor が正しくインポートされていない**
+1. **Descriptor not imported correctly**
 
    ```bash
-   # デバッグ: アドレス情報確認
+   # Debug: Check address info
    docker exec btc-watch bitcoin-cli -regtest -rpcwallet=watch \
      getaddressinfo "<payment_address>"
    ```
 
-   確認ポイント:
-   - `solvable: true` であること
-   - `ismine: true` (watch-only wallet では false でも OK)
+   Check:
+   - `solvable: true`
+   - `ismine: true` (false is OK for watch-only wallet)
 
-2. **ブロック生成が不足**
+2. **Insufficient block generation**
 
    ```bash
-   # ブロック数確認
+   # Check block count
    docker exec btc-watch bitcoin-cli -regtest getblockcount
-   # 101 以上であること
+   # Should be 101 or more
    ```
 
-3. **address_type の不一致**
+3. **address_type mismatch**
 
    ```bash
-   # 環境変数確認
-   echo $WALLET_ADDRESS_TYPE  # "legacy" であること
+   # Check environment variable
+   echo $WALLET_ADDRESS_TYPE  # Should be "legacy"
    ```
 
-### ウォレット関連エラー
+### Wallet Errors
 
-#### "wallet not found" エラー
+#### "wallet not found" Error
 
-**解決策**:
+**Solution**:
 
 ```bash
-# ウォレット一覧確認
+# List wallets
 docker exec btc-watch bitcoin-cli -regtest listwallets
 
-# ウォレット作成
+# Create wallets
 docker exec btc-watch bitcoin-cli -regtest createwallet "watch" true true
 docker exec btc-keygen bitcoin-cli -regtest createwallet "keygen" false true
 ```
 
-### 署名関連エラー
+### Signing Errors
 
-#### 署名失敗エラー
+#### Signing Failed Error
 
-**原因**: 秘密鍵がインポートされていない、または address_type の不一致
+**Cause**: Private key not imported or address_type mismatch
 
-**確認手順**:
+**Steps**:
 
 ```bash
-# 1. 環境変数確認
-echo "WALLET_ADDRESS_TYPE: $WALLET_ADDRESS_TYPE"  # "legacy" であること
+# 1. Check environment variable
+echo "WALLET_ADDRESS_TYPE: $WALLET_ADDRESS_TYPE"  # Should be "legacy"
 
-# 2. Keygen ウォレットの秘密鍵確認
+# 2. Check keygen wallet private keys
 docker exec btc-keygen bitcoin-cli -regtest -rpcwallet=keygen \
   listdescriptors true
 ```
 
-### Descriptor関連エラー
+### Descriptor Errors
 
-#### Descriptor インポート失敗
+#### Descriptor Import Failed
 
-**確認手順**:
+**Steps**:
 
 ```bash
-# Descriptor ファイル確認
+# Check descriptor file
 cat data/descriptor/btc/payment_descriptors.json
 
-# フォーマット確認 (P2PKH なら pkh(...) 形式)
+# Check format (P2PKH should be pkh(...) format)
 jq '.[0].desc' data/descriptor/btc/payment_descriptors.json
 ```
 
-**期待される形式** (Pattern 1):
+**Expected format** (Pattern 1):
 
 ```
 pkh([fingerprint/44'/0'/0']xpub.../0/*)
 ```
 
-### 設定関連エラー
+### Config Errors
 
-#### address_type 不一致エラー
+#### address_type Mismatch Error
 
-**症状**: 生成されるアドレスが期待と異なる
+**Symptoms**: Generated address differs from expected
 
-**確認手順**:
+**Steps**:
 
 ```bash
-# スクリプト内の環境変数エクスポートを確認
+# Check environment variable export in script
 grep -A2 "Environment Variable Overrides" \
   scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh
 ```
 
-**修正**: スクリプト内で以下が設定されていることを確認
+**Fix**: Ensure the following is set in script
 
 ```bash
 export WALLET_ADDRESS_TYPE="legacy"
 ```
 
-## デバッグ用コマンド
+## Debug Commands
 
-### 状態確認
+### Status Check
 
 ```bash
-# Bitcoin ノード状態
+# Bitcoin node status
 docker exec btc-watch bitcoin-cli -regtest getblockchaininfo
 
-# ウォレット残高
+# Wallet balance
 docker exec btc-watch bitcoin-cli -regtest -rpcwallet=watch getbalances
 
-# UTXO 一覧
+# UTXO list
 docker exec btc-watch bitcoin-cli -regtest -rpcwallet=watch listunspent
 
-# DB のアドレス確認
+# Check DB addresses
 docker compose exec -T wallet-db mysql -u root -proot watch -e \
   "SELECT wallet_address, account FROM address WHERE coin='btc' LIMIT 10"
 
-# Payment request 確認
+# Check payment requests
 docker compose exec -T wallet-db mysql -u root -proot watch -e \
   "SELECT * FROM payment_request WHERE coin='btc'"
 ```
 
-### ログ確認
+### Log Check
 
 ```bash
-# 詳細モードで実行
+# Run in verbose mode
 make btc-e2e-p1-verbose
 
-# または
+# Or
 ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --verbose --reset
 ```
 
-## 修正ファイルの特定
+## Identifying Files to Fix
 
-| エラー種別 | 修正対象ファイル |
-|-----------|-----------------|
-| スクリプトロジック | `scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh` |
-| 共通関数 | `scripts/operation/common.sh` |
-| Descriptor 生成 | `internal/application/usecase/keygen/btc/` |
+| Error Type | Target File |
+|------------|-------------|
+| Script logic | `scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh` |
+| Common functions | `scripts/operation/common.sh` |
+| Descriptor generation | `internal/application/usecase/keygen/btc/` |
 | Watch wallet | `internal/application/usecase/watch/btc/` |
 | Bitcoin RPC | `internal/infrastructure/wallet/api/btc/` |
-| 設定読み込み | `pkg/config/` |
+| Config loading | `pkg/config/` |
 
-## 関連コード（Go）
+## Related Code (Go)
 
-| パス | 役割 |
+| Path | Role |
 |------|------|
-| `internal/application/usecase/keygen/btc/` | 鍵生成ユースケース |
-| `internal/application/usecase/watch/btc/` | Watch wallet ユースケース |
-| `internal/infrastructure/wallet/api/btc/` | Bitcoin RPC 実装 |
-| `internal/domain/wallet/key/` | 鍵ドメインモデル |
-| `pkg/config/loader.go` | 設定ローダー |
+| `internal/application/usecase/keygen/btc/` | Key generation use case |
+| `internal/application/usecase/watch/btc/` | Watch wallet use case |
+| `internal/infrastructure/wallet/api/btc/` | Bitcoin RPC implementation |
+| `internal/domain/wallet/key/` | Key domain model |
+| `pkg/config/loader.go` | Config loader |
 
-## 注意事項
+## Cautions
 
-### 既存スクリプトへの影響を避ける
+### Avoid Impact on Existing Scripts
 
-- Pattern 2 (`e2e-p2-p2pkh-2of3.sh`) の動作を壊さないこと
-- Pattern 8 (`e2e-p8-p2sh-p2wsh-3of3.sh`) の動作を壊さないこと
-- `common.sh` を修正する場合は、他パターンへの影響を確認
-- 環境変数の設定は各スクリプト内でローカルに行う
+- Do not break Pattern 2 (`e2e-p2-p2pkh-2of3.sh`)
+- Do not break Pattern 8 (`e2e-p8-p2sh-p2wsh-3of3.sh`)
+- When modifying `common.sh`, verify impact on other patterns
+- Set environment variables locally within each script
 
-> **Note**: ビルドルール、検証コマンド、セキュリティは共通ルールを参照。
+> **Note**: For build rules, verification commands, security, see common rules.
 
-## クリーンアップ
+## Cleanup
 
 ```bash
-# コンテナ停止のみ
+# Stop containers only
 make btc-e2e-p1-cleanup
 
-# 完全リセット（データ含む）
+# Full reset (including data)
 make btc-e2e-p1-reset
 ```

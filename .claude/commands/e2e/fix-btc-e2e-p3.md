@@ -1,108 +1,108 @@
 # Fix BTC E2E Pattern 3 Test #{issue_number}
 
-BTC E2Eテスト（パターン3: P2SH-P2WPKH Single-sig）を **regtest環境** で実装・修正する。
+Implement and fix BTC E2E test (Pattern 3: P2SH-P2WPKH Single-sig) in **regtest environment**.
 
-## 前提条件
+## Prerequisites
 
-**以下の共通ルールを最初に読み込むこと：**
+**Read the following common rules first:**
 
-- @.claude/rules/btc/e2e-script.md - BTC E2E共通ルール（ビルド、検証、エスカレーション、セキュリティ）
+- @.claude/rules/btc/e2e-script.md - BTC E2E common rules (build, verification, escalation, security)
 
-## パラメータ
+## Parameters
 
-| パラメータ | 必須 | 説明 |
-|-----------|------|------|
-| `{issue_number}` | Optional | GitHub issue番号。指定時はgit-workflowに従う |
+| Parameter | Required | Description |
+|-----------|----------|-------------|
+| `{issue_number}` | Optional | GitHub issue number. Follow git-workflow when specified |
 
-## 概要
+## Overview
 
-このコマンドは `scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh` を作成・実行し、発生したエラーを分析・修正します。
+This command creates/runs `scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh` and analyzes/fixes any errors.
 
-> **Note**: このE2Eテストはローカルのregtest（Regression Test）環境で実行されます。
-> 実際のBitcoinネットワーク（mainnet/testnet）には接続しません。
+> **Note**: This E2E test runs in local regtest (Regression Test) environment.
+> It does not connect to actual Bitcoin network (mainnet/testnet).
 
-### Pattern 3 の技術仕様
+### Pattern 3 Technical Specifications
 
-| 項目 | 値 |
-|------|-----|
-| **パターン番号** | 3 |
-| **ネットワーク** | **regtest** (ローカル環境) |
-| **鍵タイプ** | P2SH-P2WPKH (BIP49 Nested SegWit) |
-| **スクリプトタイプ** | Single-sig |
-| **アドレス形式** | `3...` (Mainnet), `2...` (regtest/testnet) |
-| **署名要件** | Single-sig (1つの署名) |
+| Item | Value |
+|------|-------|
+| **Pattern Number** | 3 |
+| **Network** | **regtest** (local environment) |
+| **Key Type** | P2SH-P2WPKH (BIP49 Nested SegWit) |
+| **Script Type** | Single-sig |
+| **Address Format** | `3...` (Mainnet), `2...` (regtest/testnet) |
+| **Signature Requirement** | Single-sig (1 signature) |
 | **Descriptor** | `sh(wpkh([fingerprint/49'/0'/0']xpub.../0/*))` |
-| **必要なウォレット** | watch, keygen |
-| **環境変数** | `WALLET_ADDRESS_TYPE="p2sh-segwit"` |
+| **Required Wallets** | watch, keygen |
+| **Environment Variable** | `WALLET_ADDRESS_TYPE="p2sh-segwit"` |
 
-### Pattern 1 (P2PKH Single-sig) との違い
+### Differences from Pattern 1 (P2PKH Single-sig)
 
-| 項目 | Pattern 1 | Pattern 3 |
+| Item | Pattern 1 | Pattern 3 |
 |------|-----------|-----------|
-| 鍵タイプ | BIP44 (Legacy) | BIP49 (Nested SegWit) |
-| アドレス形式 | `m.../n...` (P2PKH) | `2...` (P2SH) |
+| Key Type | BIP44 (Legacy) | BIP49 (Nested SegWit) |
+| Address Format | `m.../n...` (P2PKH) | `2...` (P2SH) |
 | Descriptor | `pkh(...)` | `sh(wpkh(...))` |
-| 環境変数 | `legacy` | `p2sh-segwit` |
-| トランザクションサイズ | 大きい | 小さい (SegWit割引) |
+| Environment Variable | `legacy` | `p2sh-segwit` |
+| Transaction Size | Larger | Smaller (SegWit discount) |
 
-### Pattern 8 (P2SH-P2WSH 3-of-3) との違い
+### Differences from Pattern 8 (P2SH-P2WSH 3-of-3)
 
-| 項目 | Pattern 3 | Pattern 8 |
+| Item | Pattern 3 | Pattern 8 |
 |------|-----------|-----------|
-| 署名要件 | Single-sig | 3-of-3 Multisig |
+| Signature Requirement | Single-sig | 3-of-3 Multisig |
 | Descriptor | `sh(wpkh(...))` | `sh(wsh(sortedmulti(3,...)))` |
-| 必要ウォレット | keygen のみ | keygen + sign1 + sign2 |
-| fullpubkey交換 | 不要 | 必要 |
+| Required Wallets | keygen only | keygen + sign1 + sign2 |
+| fullpubkey Exchange | Not required | Required |
 
-### issue番号が指定された場合
+### When issue number is specified
 
-`git-workflow`スキルを読み込み、以下の設定で作業してください：
+Load `git-workflow` skill and work with these settings:
 
-- **ブランチ名**: `fix/issue-{issue_number}-btc-e2e-p3`
-- **コミットタイプ**: `feat(btc)` (新規スクリプト作成の場合) / `fix(btc)` (修正の場合)
-- **スコープ**: BTC E2E Pattern 3
+- **Branch name**: `fix/issue-{issue_number}-btc-e2e-p3`
+- **Commit type**: `feat(btc)` (for new script) / `fix(btc)` (for fixes)
+- **Scope**: BTC E2E Pattern 3
 
-→ 詳細は @.claude/skills/git-workflow/SKILL.md を参照
+→ See @.claude/skills/git-workflow/SKILL.md for details
 
-### issue番号が指定されない場合
+### When issue number is not specified
 
-ブランチ作成・PR作成なしで、ローカルで実装・修正のみ行います。
+Implement/fix locally without creating branch or PR.
 
-## Pattern 3 固有のドキュメント
+## Pattern 3 Specific Documentation
 
-共通ルールの Required Documentation に加えて、以下を参照：
+In addition to Required Documentation in common rules, refer to:
 
-- @scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh - Pattern 1 スクリプト（Single-sig のベース）
-- @scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh - Pattern 8 スクリプト（P2SH-SegWit の参考）
-- @config/wallet/account.yaml - Single-sig account設定
+- @scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh - Pattern 1 script (Single-sig base)
+- @scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh - Pattern 8 script (P2SH-SegWit reference)
+- @config/wallet/account.yaml - Single-sig account config
 
-## 事前確認: 環境変数
+## Pre-check: Environment Variables
 
-**パターン3では `WALLET_ADDRESS_TYPE="p2sh-segwit"` が必要です。**
+**Pattern 3 requires `WALLET_ADDRESS_TYPE="p2sh-segwit"`.**
 
-スクリプト内で自動設定されますが、確認用：
+Auto-configured in script, but for verification:
 
 ```bash
-echo $WALLET_ADDRESS_TYPE  # "p2sh-segwit" であること
+echo $WALLET_ADDRESS_TYPE  # Should be "p2sh-segwit"
 ```
 
-> **Note**: 設定ファイルを直接編集しないでください。環境変数で上書きします。
-> 詳細は共通ルールの「Configuration File Policy」を参照。
+> **Note**: Do not edit config files directly. Override with environment variables.
+> See "Configuration File Policy" in common rules for details.
 
-## 実装手順
+## Implementation Steps
 
-### Step 1: スクリプト作成
+### Step 1: Create Script
 
-Pattern 1 (`e2e-p1-p2pkh-singlesig.sh`) をベースに、以下を変更：
+Base on Pattern 1 (`e2e-p1-p2pkh-singlesig.sh`) with these changes:
 
-1. ファイル名: `e2e-p3-p2sh-p2wpkh-singlesig.sh`
-2. 環境変数: `WALLET_ADDRESS_TYPE="p2sh-segwit"`
-3. ヘッダーコメント: Pattern 3 の仕様に更新
-4. アドレス検証ロジック: `2...` 形式の確認
+1. Filename: `e2e-p3-p2sh-p2wpkh-singlesig.sh`
+2. Environment variable: `WALLET_ADDRESS_TYPE="p2sh-segwit"`
+3. Header comments: Update to Pattern 3 specs
+4. Address validation logic: Check for `2...` format
 
-### Step 2: Makefile ターゲット追加
+### Step 2: Add Makefile Targets
 
-`make/btc_e2e.mk` に以下を追加：
+Add to `make/btc_e2e.mk`:
 
 ```makefile
 ###############################################################################
@@ -129,24 +129,24 @@ btc-e2e-p3-cleanup:
  ./scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh --cleanup
 ```
 
-### Step 3: E2Eテストを実行
+### Step 3: Run E2E Test
 
 ```bash
-# フルリセットして実行（推奨）
+# Full reset and run (recommended)
 make btc-e2e-p3-reset
 
-# デバッグ出力付き
+# With debug output
 ./scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh --verbose
 ```
 
-> **Note**: ビルドと検証コマンドは共通ルールを参照。
+> **Note**: For build and verification commands, see common rules.
 
-### Step 4: エラー分析
+### Step 4: Error Analysis
 
-エラーが発生したフェーズを特定し、対応するコードを調査：
+Identify the phase where error occurred and investigate related code:
 
-| Phase | 関連コード | 説明 |
-|-------|-----------|------|
+| Phase | Related Code | Description |
+|-------|--------------|-------------|
 | Prerequisites | CLI commands | `watch`, `keygen` |
 | Infrastructure | Docker/compose | `compose.btc.yaml`, `compose.yaml` |
 | Wallet Setup | Bitcoin RPC | `createwallet`, `loadwallet` |
@@ -155,12 +155,12 @@ make btc-e2e-p3-reset
 | UTXO Generation | Bitcoin Core RPC | `generatetoaddress`, `deriveaddresses` |
 | Transaction Flow | PSBT signing | `internal/infrastructure/wallet/api/btc/` |
 
-## 技術仕様: P2SH-P2WPKH (Nested SegWit)
+## Technical Specification: P2SH-P2WPKH (Nested SegWit)
 
-### アドレス構造
+### Address Structure
 
 ```
-P2SH-P2WPKH アドレス:
+P2SH-P2WPKH Address:
 ┌─────────────────────────────────────────────────────────────┐
 │  P2SH wrapper                                                │
 │  ┌─────────────────────────────────────────────────────────┐ │
@@ -172,14 +172,14 @@ P2SH-P2WPKH アドレス:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Descriptor 形式
+### Descriptor Format
 
 ```
 sh(wpkh([fingerprint/49'/0'/0']xpub.../0/*))
            └─ BIP49 derivation path
 ```
 
-### 署名フロー（Single-sig）
+### Signing Flow (Single-sig)
 
 ```
 Watch Wallet (create unsigned tx)
@@ -189,134 +189,134 @@ Keygen Wallet (sign with single key)
 Watch Wallet (broadcast)
 ```
 
-## Pattern 3 固有のエラー
+## Pattern 3 Specific Errors
 
-共通エラー（No utxo, RPC接続等）は共通ルールを参照。以下はPattern 3固有のエラー：
+For common errors (No utxo, RPC connection, etc.), see common rules. Below are Pattern 3 specific errors:
 
-### address_type 不一致
+### address_type Mismatch
 
-**症状**: `m...` や `n...` で始まるアドレスが生成される（P2PKHアドレス）
+**Symptoms**: `m...` or `n...` addresses generated (P2PKH address)
 
-**原因**: `address_type` が `legacy` になっている
+**Cause**: `address_type` is `legacy`
 
-**解決策**:
+**Solution**:
 
 ```bash
-# 環境変数確認
-echo $WALLET_ADDRESS_TYPE  # "p2sh-segwit" であること
+# Check environment variable
+echo $WALLET_ADDRESS_TYPE  # Should be "p2sh-segwit"
 
-# スクリプト内の設定確認
+# Check script setting
 grep "WALLET_ADDRESS_TYPE" scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh
 ```
 
-### Descriptor 形式エラー
+### Descriptor Format Error
 
-**症状**: Descriptor export/import 時にエラー
+**Symptoms**: Error during Descriptor export/import
 
-**原因**: BIP44 形式（`pkh(...)`）になっている
+**Cause**: Using BIP44 format (`pkh(...)`)
 
-**確認**:
+**Check**:
 
 ```bash
-# Descriptor ファイル確認
+# Check descriptor file
 cat data/descriptor/btc/payment_descriptors.json
 
-# 期待される形式
+# Expected format
 jq '.[0].desc' data/descriptor/btc/payment_descriptors.json
 # → "sh(wpkh([...]xpub.../0/*))"
 ```
 
-### key_type 自動派生の確認
+### key_type Auto-derivation Check
 
-**確認**: `address_type` から `key_type` が正しく派生されているか
+**Check**: Verify `key_type` correctly derived from `address_type`
 
-| address_type | 期待される key_type |
+| address_type | Expected key_type |
 |--------------|-------------------|
 | `p2sh-segwit` | `bip49` |
 
-関連コード: `internal/domain/address/types.go` の `AddrType.ToKeyType()`
+Related code: `AddrType.ToKeyType()` in `internal/domain/address/types.go`
 
-### トランザクション署名エラー
+### Transaction Signing Error
 
-**症状**: 署名時に witness 関連のエラー
+**Symptoms**: Witness-related error during signing
 
-**原因**: SegWit トランザクションの witness データ処理の問題
+**Cause**: Issue with SegWit transaction witness data processing
 
-**確認**:
+**Check**:
 
 ```bash
-# PSBT の分析
+# Analyze PSBT
 docker exec btc-watch bitcoin-cli -regtest -rpcwallet=watch \
   analyzepsbt "${psbt_hex}"
 ```
 
-## デバッグ用コマンド
+## Debug Commands
 
-### 状態確認
+### Status Check
 
 ```bash
-# Bitcoin ノード状態
+# Bitcoin node status
 docker exec btc-watch bitcoin-cli -regtest getblockchaininfo
 
-# ウォレット残高
+# Wallet balance
 docker exec btc-watch bitcoin-cli -regtest -rpcwallet=watch getbalances
 
-# UTXO 一覧
+# UTXO list
 docker exec btc-watch bitcoin-cli -regtest -rpcwallet=watch listunspent
 
-# アドレス情報確認（P2SH-P2WPKH かどうか）
+# Check address info (verify P2SH-P2WPKH)
 docker exec btc-watch bitcoin-cli -regtest -rpcwallet=watch \
   getaddressinfo "<address>"
 # → "isscript": true, "iswitness": false, "script": "witness_v0_keyhash"
 ```
 
-### Descriptor 確認
+### Descriptor Check
 
 ```bash
-# Keygen の Descriptor 一覧
+# Keygen descriptor list
 docker exec btc-keygen bitcoin-cli -regtest -rpcwallet=keygen \
   listdescriptors true
 
-# Watch の Descriptor 一覧
+# Watch descriptor list
 docker exec btc-watch bitcoin-cli -regtest -rpcwallet=watch \
   listdescriptors
 ```
 
-## 関連コード（Go）
+## Related Code (Go)
 
-| パス | 役割 |
+| Path | Role |
 |------|------|
-| `internal/application/usecase/keygen/btc/` | 鍵生成ユースケース |
-| `internal/application/usecase/watch/btc/` | Watch walletユースケース |
-| `internal/infrastructure/wallet/api/btc/` | Bitcoin RPC実装 |
-| `internal/infrastructure/wallet/key/descriptor/` | Descriptor処理 |
-| `internal/domain/address/types.go` | address_type → key_type 変換 |
-| `pkg/config/loader.go` | 設定ローダー |
+| `internal/application/usecase/keygen/btc/` | Key generation use case |
+| `internal/application/usecase/watch/btc/` | Watch wallet use case |
+| `internal/infrastructure/wallet/api/btc/` | Bitcoin RPC implementation |
+| `internal/infrastructure/wallet/key/descriptor/` | Descriptor processing |
+| `internal/domain/address/types.go` | address_type → key_type conversion |
+| `pkg/config/loader.go` | Config loader |
 
-## ドキュメント更新
+## Documentation Updates
 
-スクリプト作成後、以下のドキュメントを更新：
+After creating script, update these documents:
 
-1. `scripts/operation/btc/e2e/README.md` - スクリプト一覧に追加
-2. `docs/crypto/btc/e2e_transaction_patterns.md` - 実装ステータス更新
-3. `.claude/rules/btc/e2e-script.md` - パターン一覧に追加
+1. `scripts/operation/btc/e2e/README.md` - Add to script list
+2. `docs/crypto/btc/e2e_transaction_patterns.md` - Update implementation status
+3. `.claude/rules/btc/e2e-script.md` - Add to pattern list
 
-## 注意事項
+## Cautions
 
-### 他パターンへの影響を避ける
+### Avoid Impact on Other Patterns
 
-- パターン3固有の修正は `P2SH-P2WPKH Single-sig` 関連コードに限定
-- 共通コードを修正する場合は、他パターン（特に1, 2, 8）への影響を確認
-- 共通関数を修正する場合は単体テストで回帰を確認
+- Limit Pattern 3 specific fixes to `P2SH-P2WPKH Single-sig` related code
+- When modifying common code, verify impact on other patterns (especially 1, 2, 8)
+- Confirm regression with unit tests when modifying common functions
 
-> **Note**: ビルドルール、セキュリティは共通ルールを参照。
+> **Note**: For build rules, security, see common rules.
 
-## クリーンアップ
+## Cleanup
 
 ```bash
-# コンテナ停止のみ
+# Stop containers only
 ./scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh --cleanup
 
-# 完全リセット（データ含む）
+# Full reset (including data)
 make btc-e2e-p3-reset
 ```
