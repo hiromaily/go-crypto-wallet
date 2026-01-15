@@ -40,7 +40,9 @@ type ParsedPSBT struct {
 // Used by Watch wallet to create unsigned PSBTs.
 //
 //nolint:gocyclo // Complex function handling PSBT creation with metadata
-func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx, senderAccount domainAccount.AccountType) (string, error) {
+func (b *Bitcoin) CreatePSBT(
+	msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx, senderAccount domainAccount.AccountType,
+) (string, error) {
 	logger.Info("Creating PSBT",
 		"inputs", len(msgTx.TxIn),
 		"outputs", len(msgTx.TxOut),
@@ -202,7 +204,10 @@ func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []dtobtc.PreviousTx, sen
 				"input_index", i,
 				"error", err,
 				"sender_account", senderAccount.String())
-			return "", fmt.Errorf("failed to add BIP32 derivation for input %d (required for descriptor-based signing): %w", i, err)
+			return "", fmt.Errorf(
+				"failed to add BIP32 derivation for input %d (required for descriptor-based signing): %w",
+				i, err,
+			)
 		}
 		logger.Debug("Added BIP32 derivation for input",
 			"input_index", i,
@@ -595,6 +600,8 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
 // finalizeP2PKHInput finalizes a P2PKH (Pay-to-Public-Key-Hash) PSBT input.
 // This creates a scriptSig in the format: <signature> <pubkey>
 // P2PKH does NOT use witness data - all data goes in scriptSig.
+//
+//nolint:revive // receiver unused but method belongs to Bitcoin type
 func (b *Bitcoin) finalizeP2PKHInput(packet *psbt.Packet, inputIndex int) error {
 	// IMPORTANT: Get pointer to input, not a copy
 	input := &packet.Inputs[inputIndex]
@@ -798,8 +805,10 @@ func (b *Bitcoin) finalizeMultisigInput(packet *psbt.Packet, inputIndex int) err
 		"matchedSigs", len(sigs))
 
 	if len(sigs) == 0 {
-		return fmt.Errorf("no matching signatures found: multisig script has %d pubkeys, PSBT has %d partial sigs, but none matched",
-			len(normalizedPubKeys), len(input.PartialSigs))
+		return fmt.Errorf(
+			"no matching signatures found: multisig script has %d pubkeys, PSBT has %d partial sigs, but none matched",
+			len(normalizedPubKeys), len(input.PartialSigs),
+		)
 	}
 
 	// Build final scripts based on whether this is SegWit or non-SegWit
@@ -1535,7 +1544,7 @@ func (b *Bitcoin) addBIP32DerivationFromDescriptor(
 	}
 
 	if addressInfo.Desc == "" {
-		return fmt.Errorf("address info does not contain descriptor (not a descriptor wallet address?)")
+		return errors.New("address info does not contain descriptor (not a descriptor wallet address?)")
 	}
 
 	logger.Debug("Got descriptor from getaddressinfo (with raw keys)",
@@ -1686,7 +1695,9 @@ func (b *Bitcoin) addBIP32DerivationFromDescriptor(
 // This is used as a fallback when Bitcoin Core's listunspent doesn't return
 // redeemScript for descriptor-based addresses. It's called once per PSBT creation
 // for P2SH multisig inputs.
-func (b *Bitcoin) deriveRedeemScriptForAddress(address string, senderAccount domainAccount.AccountType) ([]byte, error) {
+func (b *Bitcoin) deriveRedeemScriptForAddress(
+	address string, senderAccount domainAccount.AccountType,
+) ([]byte, error) {
 	// List all descriptors
 	descriptorList, err := b.ListDescriptors(false)
 	if err != nil {
@@ -1843,6 +1854,8 @@ func (b *Bitcoin) deriveAddressesFromDescriptor(descriptor string, startIdx, end
 
 // parseDerivationPath parses a BIP32 derivation path string into a slice of indices.
 // Format: "/0/5" or "/0/*" (wildcard should be replaced before calling)
+//
+//nolint:revive // receiver unused but method belongs to Bitcoin type
 func (b *Bitcoin) parseDerivationPath(path string) ([]uint32, error) {
 	if path == "" {
 		return []uint32{}, nil
@@ -2179,6 +2192,8 @@ func (b *Bitcoin) getDescriptorInfoForAddress(address, fullPath string, senderAc
 		}
 	}
 
-	return 0, "", fmt.Errorf("no matching descriptor found for address %s with path %s and account %s (expected account index %d)",
-		address, fullPath, senderAccount.String(), expectedAccountIndex)
+	return 0, "", fmt.Errorf(
+		"no matching descriptor found for address %s with path %s and account %s (expected account index %d)",
+		address, fullPath, senderAccount.String(), expectedAccountIndex,
+	)
 }

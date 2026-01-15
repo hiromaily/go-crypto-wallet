@@ -225,11 +225,15 @@ func FormatDescriptor(desc *domainWallet.Descriptor) (string, error) {
 // This is used when Bitcoin Core's listunspent doesn't return the redeemScript for descriptor-based addresses.
 //
 // Example descriptor:
-//   sh(multi(2,[fp1/44'/1'/1']tpub.../0/*,[fp2/44'/1'/1']tpub.../0/*,[fp3/44'/1'/1']tpub.../0/*))
+//
+//	sh(multi(2,[fp1/44'/1'/1']tpub.../0/*,[fp2/44'/1'/1']tpub.../0/*,[fp3/44'/1'/1']tpub.../0/*))
 //
 // For index=0, this derives the three public keys at path /0/0 and builds:
-//   OP_2 <pk1> <pk2> <pk3> OP_3 OP_CHECKMULTISIG
-func (b *Bitcoin) DeriveRedeemScriptFromDescriptor(descriptor string, address string, addressIndex uint32) ([]byte, error) {
+//
+//	OP_2 <pk1> <pk2> <pk3> OP_3 OP_CHECKMULTISIG
+func (b *Bitcoin) DeriveRedeemScriptFromDescriptor(
+	descriptor string, address string, addressIndex uint32,
+) ([]byte, error) {
 	logger.Debug("Deriving redeemScript from descriptor",
 		"descriptor_len", len(descriptor),
 		"address", address,
@@ -308,6 +312,8 @@ func (b *Bitcoin) DeriveRedeemScriptFromDescriptor(descriptor string, address st
 
 // extractMultisigParams extracts M and N from a multisig descriptor
 // Format: sh(multi(M,key1,key2,...)) or sh(sortedmulti(M,key1,key2,...))
+//
+//nolint:revive // receiver unused but method belongs to Bitcoin type
 func (b *Bitcoin) extractMultisigParams(descriptorScript string) (requiredSigs, totalSigs int, err error) {
 	// Match multi(M, or sortedmulti(M,
 	multiRegex := regexp.MustCompile(`(?:sorted)?multi\((\d+),`)
@@ -335,12 +341,16 @@ func (b *Bitcoin) extractMultisigParams(descriptorScript string) (requiredSigs, 
 }
 
 // derivePublicKeyFromDescriptorKey derives a child public key from a descriptor key
-func (b *Bitcoin) derivePublicKeyFromDescriptorKey(keyInfo domainWallet.DescriptorKey, addressIndex uint32) ([]byte, error) {
+//
+//nolint:revive // receiver unused but method belongs to Bitcoin type
+func (b *Bitcoin) derivePublicKeyFromDescriptorKey(
+	keyInfo domainWallet.DescriptorKey, addressIndex uint32,
+) ([]byte, error) {
 	// Parse the derivation path
 	// Format: "/0/*" or "/1/*" or "/*"
 	// Replace wildcard with actual address index before parsing
 	derivationPath := strings.ReplaceAll(keyInfo.DerivationPath, "/*", fmt.Sprintf("/%d", addressIndex))
-	derivationPath = strings.ReplaceAll(derivationPath, "*", fmt.Sprintf("%d", addressIndex))
+	derivationPath = strings.ReplaceAll(derivationPath, "*", strconv.FormatUint(uint64(addressIndex), 10))
 	pathParts := strings.Split(strings.TrimPrefix(derivationPath, "/"), "/")
 
 	// Parse extended public key
@@ -384,7 +394,9 @@ func (b *Bitcoin) derivePublicKeyFromDescriptorKey(keyInfo domainWallet.Descript
 // For sortedmulti descriptors (BIP67), public keys are sorted lexicographically
 // before being added to the script. This ensures deterministic multisig addresses
 // regardless of the order keys are specified in the descriptor.
-func (b *Bitcoin) buildMultisigRedeemScript(requiredSigs, totalSigs int, pubKeys [][]byte, sorted bool) ([]byte, error) {
+func (b *Bitcoin) buildMultisigRedeemScript(
+	requiredSigs, totalSigs int, pubKeys [][]byte, sorted bool,
+) ([]byte, error) {
 	if requiredSigs <= 0 || requiredSigs > totalSigs {
 		return nil, fmt.Errorf("invalid multisig parameters: %d-of-%d", requiredSigs, totalSigs)
 	}
@@ -423,6 +435,8 @@ func (b *Bitcoin) buildMultisigRedeemScript(requiredSigs, totalSigs int, pubKeys
 // sortPublicKeys sorts public keys lexicographically (BIP67).
 // This is used for sortedmulti descriptors to ensure deterministic ordering.
 // The keys are sorted in-place.
+//
+//nolint:revive // receiver unused but method belongs to Bitcoin type
 func (b *Bitcoin) sortPublicKeys(pubKeys [][]byte) {
 	sort.Slice(pubKeys, func(i, j int) bool {
 		return bytes.Compare(pubKeys[i], pubKeys[j]) < 0

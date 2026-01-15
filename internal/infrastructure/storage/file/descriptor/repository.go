@@ -63,7 +63,7 @@ func (r *DescriptorFileRepository) WriteDescriptorsPlainText(
 	}
 
 	// Build output content
-	var lines []string
+	lines := make([]string, 0, len(descriptors))
 	for _, desc := range descriptors {
 		line := desc.Script
 		if withChecksum && desc.Checksum != "" {
@@ -151,7 +151,7 @@ func (r *DescriptorFileRepository) WriteDescriptorsBitcoinCoreJSON(
 	}
 
 	// Build Bitcoin Core import requests
-	var requests []BitcoinCoreImportDescriptor
+	requests := make([]BitcoinCoreImportDescriptor, 0, len(descriptors))
 	for _, desc := range descriptors {
 		// Build descriptor string with checksum
 		descriptorStr := desc.Script

@@ -2,6 +2,7 @@ package btc
 
 import (
 	"context"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"strconv"
@@ -200,10 +201,13 @@ func (u *signTransactionUseCase) signWithAccount(
 
 	// Check if we have account xpriv (descriptor-based workflow)
 	// We only need to check one key since all keys for an account share the same xpriv
+	hasXpriv := len(accountKeys) > 0 &&
+		accountKeys[0].AccountExtendedPrivkey != nil &&
+		*accountKeys[0].AccountExtendedPrivkey != ""
 	logger.Debug("checking for account xpriv",
 		"account", senderAccount.String(),
 		"key_count", len(accountKeys),
-		"has_xpriv", len(accountKeys) > 0 && accountKeys[0].AccountExtendedPrivkey != nil && *accountKeys[0].AccountExtendedPrivkey != "",
+		"has_xpriv", hasXpriv,
 	)
 	if len(accountKeys) > 0 &&
 		accountKeys[0].AccountExtendedPrivkey != nil &&
@@ -358,6 +362,7 @@ func (u *signTransactionUseCase) deriveWIFsForPSBT(
 		change := uint32(chgIdx)
 
 		logger.Debug("deriving child key from account xpriv",
+			"wallet_type", "keygen",
 			"input_index", i,
 			"address_index", addressIndex,
 			"change", change,
@@ -375,11 +380,24 @@ func (u *signTransactionUseCase) deriveWIFsForPSBT(
 			return nil, fmt.Errorf("failed to get private key from child for input %d: %w", i, err)
 		}
 
+		// Get public key for verification logging
+		pubKey, err := childKey.ECPubKey()
+		if err != nil {
+			return nil, fmt.Errorf("failed to get public key from child for input %d: %w", i, err)
+		}
+
 		// Convert to WIF (compressed format)
 		wif, err := btcutil.NewWIF(privKey, u.btc.GetChainConf(), true)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create WIF from derived key for input %d: %w", i, err)
 		}
+
+		logger.Info("derived WIF for signing",
+			"wallet_type", "keygen",
+			"input_index", i,
+			"address_index", addressIndex,
+			"change", change,
+			"pubkey_hex", hex.EncodeToString(pubKey.SerializeCompressed()))
 
 		wifKeys[wif.String()] = struct{}{}
 	}

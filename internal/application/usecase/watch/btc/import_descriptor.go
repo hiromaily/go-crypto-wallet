@@ -75,7 +75,7 @@ func (u *importDescriptorUseCase) Import(
 	)
 
 	// Parse all descriptors first to validate them
-	var descriptors []*domainWallet.Descriptor
+	descriptors := make([]*domainWallet.Descriptor, 0, len(descriptorStrs))
 	for _, descStr := range descriptorStrs {
 		descriptor, parseErr := u.parser.Parse(descStr)
 		if parseErr != nil {

@@ -65,10 +65,16 @@ func (b *Bitcoin) GetTransactionFee(tx *wire.MsgTx) (btcutil.Amount, error) {
 func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount, error) {
 	// get tx fee
 	fee, err := b.GetTransactionFee(tx)
-	if err != nil {
-		// Fee estimation failed (common on fresh regtest/signet networks)
+
+	// Treat 0 fee as an error - it's invalid for transaction broadcast
+	if err != nil || fee == 0 {
+		// Fee estimation failed or returned 0 (common on fresh regtest/signet networks)
 		// Fall back to minimum relay fee or hardcoded fallback
-		logger.Warn("fee estimation failed, using fallback", "error", err)
+		if err != nil {
+			logger.Warn("fee estimation failed, using fallback", "error", err)
+		} else {
+			logger.Warn("fee estimation returned 0, using fallback")
+		}
 
 		// Try to get minimum relay fee from network
 		relayFee, relayErr := b.getMinRelayFee()
@@ -89,7 +95,6 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 			logger.Info("using relay fee as fallback", "fee_btc", fee.ToBTC())
 		}
 	}
-	// logger.Debug("called GetTransactionFee()", "fee", fee) //0.000208 BTC
 
 	// if response doesn't meet minimum fee, it should be overridden
 	relayFee, err := b.getMinRelayFee()
@@ -105,9 +110,10 @@ func (b *Bitcoin) GetFee(tx *wire.MsgTx, adjustmentFee float64) (btcutil.Amount,
 		newFee, err = b.calculateNewFee(fee, adjustmentFee)
 		if err != nil {
 			logger.Warn("fail to call btc.calculateNewFee() but continue", "error", err)
+		} else {
+			fee = newFee
 		}
-		logger.Debug("called btc.calculateNewFee()", "adjusted newFee", newFee) // 0.000208 BTC
-		fee = newFee
+		logger.Debug("called btc.calculateNewFee()", "adjusted newFee", newFee)
 	}
 
 	return fee, nil
