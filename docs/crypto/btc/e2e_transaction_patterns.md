@@ -697,6 +697,7 @@ Address Format: bitcoincash:p... (P2SH multisig)
 | `scripts/operation/btc/e2e/e2e-p4-p2sh-p2wsh-2of3.sh` | BTC | P2SH-P2WSH 2-of-3 Multisig (Pattern 4) | 2-of-3 |
 | `scripts/operation/btc/e2e/e2e-p5-p2wpkh-singlesig.sh` | BTC | P2WPKH Native SegWit Single-sig (Pattern 5) | Single-sig |
 | `scripts/operation/btc/e2e/e2e-p6-p2wsh-2of3.sh` | BTC | P2WSH Native SegWit 2-of-3 Multisig (Pattern 6) | 2-of-3 |
+| `scripts/operation/btc/e2e/e2e-p7-p2wsh-3of3.sh` | BTC | P2WSH Native SegWit 3-of-3 Multisig (Pattern 7) | 3-of-3 |
 | `scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh` | BTC | P2SH-P2WSH 3-of-3 Multisig (Pattern 8) | 3-of-3 |
 | `scripts/operation/bch/e2e-workflow.sh` | BCH | CashAddr Multisig | 3-of-3 |
 
@@ -706,7 +707,6 @@ Address Format: bitcoincash:p... (P2SH multisig)
 |------------------|------|---------|---------------------|----------|
 | `e2e-p9-p2tr-singlesig.sh` | BTC | P2TR Single-sig (Pattern 9) | Single-sig | High |
 | `e2e-musig2.sh` | BTC | P2TR MuSig2 | N-of-N | Medium |
-| `e2e-p7-p2wsh-3of3.sh` | BTC | P2WSH 3-of-3 (Pattern 7) | 3-of-3 | Low |
 | `e2e-tapscript.sh` | BTC | P2TR Script Path | M-of-N | Low |
 
 ---
