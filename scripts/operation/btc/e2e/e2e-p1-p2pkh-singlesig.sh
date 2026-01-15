@@ -469,7 +469,7 @@ create_payment_requests_phase() {
 	# Get a payment sender address from database
 	# For P2PKH testing, query for legacy addresses (starting with 'm' or 'n' in regtest)
 	log_substep "Retrieving payment sender address from database"
-	sender_address=$(MYSQL_PWD="${MYSQL_ROOT_PASSWORD}" docker compose exec -T wallet-db mysql -u root watch -N -e \
+	sender_address=$(docker compose exec -e MYSQL_PWD="${MYSQL_ROOT_PASSWORD}" -T wallet-db mysql -u root watch -N -e \
 		"SELECT wallet_address FROM address WHERE coin='btc' AND account='payment' LIMIT 1" 2>/dev/null)
 
 	if [ -z "$sender_address" ]; then
@@ -496,7 +496,7 @@ create_payment_requests_phase() {
 
 	# Create payment requests using payment account
 	log_substep "Inserting payment requests into database"
-	MYSQL_PWD="${MYSQL_ROOT_PASSWORD}" docker compose exec -T wallet-db mysql -u root watch <<EOF
+	docker compose exec -e MYSQL_PWD="${MYSQL_ROOT_PASSWORD}" -T wallet-db mysql -u root watch <<EOF
 DELETE FROM payment_request;
 INSERT INTO payment_request (coin, payment_id, sender_address, sender_account, receiver_address, amount, is_done)
 VALUES
@@ -511,7 +511,7 @@ EOF
 	fi
 
 	# Verify payment requests were created
-	count=$(MYSQL_PWD="${MYSQL_ROOT_PASSWORD}" docker compose exec -T wallet-db mysql -u root watch -N -e \
+	count=$(docker compose exec -e MYSQL_PWD="${MYSQL_ROOT_PASSWORD}" -T wallet-db mysql -u root watch -N -e \
 		"SELECT COUNT(*) FROM payment_request WHERE coin='btc' AND is_done=false" 2>/dev/null)
 
 	log_info "Created $count payment requests"
