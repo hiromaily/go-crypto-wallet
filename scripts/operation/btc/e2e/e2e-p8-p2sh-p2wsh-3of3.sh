@@ -1,31 +1,32 @@
 #!/usr/bin/env bash
 
 # Bitcoin E2E Workflow Script - Pattern 8: P2SH-P2WSH 3-of-3 Multisig
-# This script automates the complete Bitcoin workflow from infrastructure setup to transaction execution
+# This script automates the complete Bitcoin workflow for 3-of-3 multisig P2SH-P2WSH transactions
 # Usage: ./scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh [OPTIONS]
 # Options:
 #   --cleanup  Stop containers and cleanup state
+#   --reset    Full reset and run from scratch
 #   --verbose  Enable verbose output
+#   --non-interactive  Run without prompts (for CI/CD)
 #   -h, --help Display help message
 #
 # Reference Documentation:
-#   docs/crypto/btc/e2e_transaction_patterns.md - E2E transaction patterns and workflow details
+#   docs/crypto/btc/e2e_transaction_patterns.md - E2E transaction patterns
 #
 # Transaction Pattern:
 #   Pattern 8: BTC P2SH-P2WSH 3-of-3 Multisig
 #   - Address Type: P2SH-P2WSH (BIP49 wrapped SegWit)
-#   - Address Format: `3...` (Testnet: `2...`)
-#   - Signature Requirement: 3-of-3 (Keygen + Sign1 + Sign2)
-#   - Descriptor: sh(wsh(sortedmulti(3, xpub1, xpub2, xpub3)))
+#   - Address Format: `3...` (Mainnet), `2...` (Testnet/Regtest)
+#   - Signature Requirement: 3-of-3 (all 3 signatures required)
+#   - Descriptor: sh(wsh(sortedmulti(3,[fingerprint/49'/1'/1']xpub1.../0/*,xpub2.../0/*,xpub3.../0/*)))
 #
 # Required Config Settings:
 #   - config/wallet/btc_watch.yaml:  address_type: "p2sh-segwit"
 #   - config/wallet/btc_keygen.yaml: address_type: "p2sh-segwit"
 #   - config/wallet/btc_sign1.yaml:  address_type: "p2sh-segwit"
 #   - config/wallet/btc_sign2.yaml:  address_type: "p2sh-segwit"
-#   - All configs must use the same address_type for consistency
 
-set -eu
+set -euo pipefail
 
 # Script directory for relative paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -57,15 +58,24 @@ MYSQL_ROOT_PASSWORD="${MYSQL_ROOT_PASSWORD:-root}"
 # Note: Default value is for testing only - use strong passphrase in production
 WALLET_PASSPHRASE="${WALLET_PASSPHRASE:-test}"
 
+# Docker volume name (can be overridden via environment variable)
+# Note: Docker Compose prepends project name to volume names
+DOCKER_VOLUME_NAME="${DOCKER_VOLUME_NAME:-go-crypto-wallet_wallet-db}"
+
 # Config file paths (absolute)
 CONFIG_WATCH="${PROJECT_ROOT}/config/wallet/btc_watch.yaml"
 CONFIG_KEYGEN="${PROJECT_ROOT}/config/wallet/btc_keygen.yaml"
 CONFIG_SIGN1="${PROJECT_ROOT}/config/wallet/btc_sign1.yaml"
 CONFIG_SIGN2="${PROJECT_ROOT}/config/wallet/btc_sign2.yaml"
+# Use 3-of-3 multisig account configuration for Pattern 8
 CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account_3of3.yaml"
 
 # Export account config for keygen wallet (required for multisig configuration)
 export BTC_ACCOUNT_CONF="${CONFIG_ACCOUNT}"
+
+# Wallet-specific RPC hosts (for environment variable overrides)
+WATCH_WALLET_RPC_HOST="127.0.0.1:18332/wallet/watch"
+KEYGEN_WALLET_RPC_HOST="127.0.0.1:19332/wallet/keygen"
 
 ###############################################################################
 # Environment Variable Overrides for Configuration
@@ -133,21 +143,20 @@ full_reset() {
 	sleep 3
 
 	# Explicitly remove database volume (in case -v flag didn't work)
-	# Force removal with docker volume rm (not just -v flag which may be ignored if containers exist)
 	log_info "Forcefully removing database volume..."
-	local volume_name="go-crypto-wallet_wallet-db"
+	local volume_name="${DOCKER_VOLUME_NAME}"
 
 	# Try multiple times in case volume is still being used
 	local removal_attempts=0
 	local max_removal_attempts=5
 
-	while [ $removal_attempts -lt $max_removal_attempts ]; do
+	while ((removal_attempts < max_removal_attempts)); do
 		if docker volume rm "$volume_name" 2>/dev/null; then
 			log_info "Volume removed successfully on attempt $((removal_attempts + 1))"
 			break
 		fi
 		removal_attempts=$((removal_attempts + 1))
-		if [ $removal_attempts -lt $max_removal_attempts ]; then
+		if ((removal_attempts < max_removal_attempts)); then
 			log_warn "Volume removal failed, retrying in 2 seconds... (attempt $removal_attempts/$max_removal_attempts)"
 			sleep 2
 		fi
@@ -159,14 +168,14 @@ full_reset() {
 	local counter=0
 	local volume_deleted=false
 
-	while [ $counter -lt $max_wait ]; do
+	while ((counter < max_wait)); do
 		if ! docker volume inspect "$volume_name" >/dev/null 2>&1; then
 			log_info "Volume successfully deleted"
 			volume_deleted=true
 			break
 		fi
 		counter=$((counter + 1))
-		if [ $counter -lt $max_wait ]; then
+		if ((counter < max_wait)); then
 			log_warn "Volume still exists, waiting... (${counter}s/${max_wait}s)"
 			sleep 1
 		fi
@@ -261,13 +270,32 @@ setup_infrastructure() {
 setup_wallets() {
 	log_step "Setting up Bitcoin wallets"
 
-	# Create wallets in Bitcoin nodes
+	# Create wallets in Bitcoin nodes (3-of-3: watch, keygen, sign1, sign2)
 	btc_create_wallet_if_needed "btc-watch" "watch"
 	btc_create_wallet_if_needed "btc-keygen" "keygen"
 	btc_create_wallet_if_needed "btc-sign1" "sign1"
 	btc_create_wallet_if_needed "btc-sign2" "sign2"
 
 	log_info "All wallets are ready"
+
+	# Note: Wallet-specific RPC endpoints are configured via environment variables
+	# for each command invocation (see wrapper functions below)
+	# This avoids modifying config files and creating backups
+	# Environment variables use WALLET_ prefix to override config file settings
+}
+
+###############################################################################
+# Wallet Command Wrappers with Environment Variable Overrides
+###############################################################################
+
+# Wrapper for watch wallet commands with host override
+watch_with_wallet() {
+	WALLET_BITCOIN_HOST="${WATCH_WALLET_RPC_HOST}" watch "$@"
+}
+
+# Wrapper for keygen wallet commands with host override
+keygen_with_wallet() {
+	WALLET_BITCOIN_HOST="${KEYGEN_WALLET_RPC_HOST}" keygen "$@"
 }
 
 ###############################################################################
@@ -364,7 +392,7 @@ key_generation_phase() {
 ###############################################################################
 
 multisig_setup_phase() {
-	log_step "Multisig Setup Phase"
+	log_step "Multisig Setup Phase (3-of-3 P2SH-P2WSH)"
 
 	# Import fullpubkeys
 	log_substep "Importing full public keys into keygen wallet"
@@ -374,24 +402,13 @@ multisig_setup_phase() {
 	log_info "Importing fullpubkey from sign2: $FULLPUBKEY_FILE2"
 	keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" import fullpubkey --file "${FULLPUBKEY_FILE2}"
 
-	# NOTE: Traditional multisig address creation is no longer needed when using descriptors.
-	# The descriptor import process automatically derives and stores addresses.
-	# Keeping both methods causes duplicate address errors.
-	#
-	# Create multisig addresses (DISABLED - replaced by descriptor-based workflow)
-	# log_substep "Creating multisig addresses"
-	# for account in deposit payment stored; do
-	# 	log_info "Creating multisig address for account: $account"
-	# 	keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" create multisig --account "$account"
-	# done
-
 	# Export descriptors for multisig accounts (deposit, payment, stored)
-	# Note: Now using descriptor export because sign wallets export extended keys (xpub format)
-	# Descriptor import automatically derives addresses and stores them in the database.
+	# Pattern 8 uses 3-of-3 multisig with P2SH-P2WSH (BIP49 wrapped SegWit)
+	# Note: Using wrapper function to set WALLET_BITCOIN_HOST for Bitcoin Core RPC
 	log_substep "Exporting descriptors from keygen wallet"
-	file_descriptor_deposit=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account deposit --output data/descriptor/btc/deposit_descriptors.json --format bitcoin-core --include-change)
-	file_descriptor_payment=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account payment --output data/descriptor/btc/payment_descriptors.json --format bitcoin-core --include-change)
-	file_descriptor_stored=$(keygen -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account stored --output data/descriptor/btc/stored_descriptors.json --format bitcoin-core --include-change)
+	file_descriptor_deposit=$(keygen_with_wallet -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account deposit --output data/descriptor/btc/deposit_descriptors.json --format bitcoin-core --include-change)
+	file_descriptor_payment=$(keygen_with_wallet -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account payment --output data/descriptor/btc/payment_descriptors.json --format bitcoin-core --include-change)
+	file_descriptor_stored=$(keygen_with_wallet -c "${CONFIG_KEYGEN}" --coin "${COIN}" descriptor export --account stored --output data/descriptor/btc/stored_descriptors.json --format bitcoin-core --include-change)
 
 	# Extract file paths from descriptor export output
 	descriptor_deposit="${file_descriptor_deposit##*exported to }"
@@ -403,35 +420,27 @@ multisig_setup_phase() {
 	log_info "  payment: $descriptor_payment"
 	log_info "  stored: $descriptor_stored"
 
-	# Note: Client account uses single-key addresses (not multisig), so descriptor export
-	# would require different implementation. For now, we skip client account import
-	# and focus on testing multisig accounts (deposit, payment, stored).
-	log_info "Note: Skipping client account for descriptor-based workflow"
-
 	# Import descriptors into watch wallet for multisig accounts
+	# Note: Using wrapper function to set WALLET_BITCOIN_HOST for Bitcoin Core RPC
 	log_substep "Importing descriptors into watch wallet"
 	log_info "Importing deposit descriptors"
-	watch -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor --file "${descriptor_deposit}" --account deposit
+	watch_with_wallet -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor --file "${descriptor_deposit}" --account deposit
 
 	log_info "Importing payment descriptors"
-	watch -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor --file "${descriptor_payment}" --account payment
+	watch_with_wallet -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor --file "${descriptor_payment}" --account payment
 
 	log_info "Importing stored descriptors"
-	watch -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor --file "${descriptor_stored}" --account stored
+	watch_with_wallet -c "${CONFIG_WATCH}" --coin "${COIN}" import descriptor --file "${descriptor_stored}" --account stored
 
 	log_info "All descriptors imported successfully"
-	log_info "Note: All accounts now use descriptor-based import"
-	log_info "Note: P2SH-wrapped SegWit addresses are now solvable with descriptors"
+	log_info "Note: Pattern 8 uses 3-of-3 multisig with P2SH-P2WSH (BIP49 wrapped SegWit)"
 
 	# Derive payment address from descriptor for UTXO generation
-	# Note: With descriptor-based workflow, we derive addresses from descriptors
-	# instead of exporting from keygen database
 	log_substep "Deriving payment address from descriptor for UTXO generation"
 
 	# Extract first descriptor from payment_descriptors.json
-	# Use P2SH-P2WSH descriptor (BIP49) at index 4 to test P2SH-wrapped SegWit
-	# Index 2 would be P2WSH (BIP84 native SegWit)
-	first_descriptor=$(jq -r '.[4].desc // .[0].desc' "${descriptor_payment}" 2>/dev/null)
+	# For P2SH-P2WSH (3-of-3), we use the descriptor at index 0
+	first_descriptor=$(jq -r '.[0].desc // empty' "${descriptor_payment}" 2>/dev/null)
 
 	if [ -z "$first_descriptor" ]; then
 		log_error "Failed to extract descriptor from ${descriptor_payment}"
@@ -446,20 +455,6 @@ multisig_setup_phase() {
 
 ###############################################################################
 # UTXO Generation Phase (for regtest)
-#
-# This function generates test UTXOs required for the transaction phase.
-# It only works in regtest environment where blocks can be instantly generated.
-#
-# How it works:
-#   1. Derive payment address from descriptor using Bitcoin Core's deriveaddresses RPC
-#   2. Generate 101 blocks with coinbase rewards sent to the payment address
-#      (101 blocks are needed because coinbase outputs require 100 confirmations
-#       to become spendable - this is Bitcoin's coinbase maturity rule)
-#   3. Poll for balance update to verify UTXOs are available
-#   4. Fail with error if balance is not detected within timeout
-#
-# Note: The generatetoaddress RPC command is regtest-only and will not work
-# on testnet or mainnet where actual proof-of-work mining is required.
 ###############################################################################
 
 generate_test_utxos() {
@@ -486,6 +481,15 @@ generate_test_utxos() {
 
 	log_info "Using payment address: $payment_address"
 
+	# Verify address format (should start with '2' for regtest P2SH)
+	if [[ ! "$payment_address" =~ ^2 ]]; then
+		log_warn "Warning: Expected P2SH address starting with '2', got: $payment_address"
+		log_warn "This may indicate address_type configuration issue"
+	fi
+
+	# Export for use in create_payment_requests_phase
+	export payment_address
+
 	# Generate blocks with coinbase reward to payment address
 	log_info "Generating 101 blocks to create mature coinbase for testing..."
 	btc_cli "btc-watch" generatetoaddress 101 "$payment_address" >/dev/null
@@ -494,20 +498,18 @@ generate_test_utxos() {
 	log_info "Waiting for blockchain sync and balance update..."
 
 	# Poll for balance update with timeout
-	# Note: First time after rescan may take longer as Bitcoin Core indexes the addresses
 	max_wait=60
 	wait_interval=3
 	elapsed=0
 	balance_found=false
 
-	while [ $elapsed -lt $max_wait ]; do
-		# Check balance using Bitcoin Core RPC directly (descriptor-based wallets may not have
-		# all accounts set up in application database yet, especially "client" account)
+	while ((elapsed < max_wait)); do
+		# Check balance using Bitcoin Core RPC directly
 		balance_json=$(btc_cli "btc-watch" -rpcwallet=watch getbalances 2>&1 || true)
 		trusted_balance=$(echo "$balance_json" | jq -r '.mine.trusted // 0' 2>/dev/null || echo "0")
 
 		# Check if we have any trusted (mature) balance
-		if [ -n "$trusted_balance" ] && [ "$(echo "$trusted_balance > 0" | bc -l 2>/dev/null || echo "0")" -eq 1 ]; then
+		if [ -n "$trusted_balance" ] && [ "$(echo "$trusted_balance > 0" | bc -l 2>/dev/null || echo 0)" -eq 1 ]; then
 			log_info "Payment account balance verified: ${trusted_balance} BTC (took ${elapsed}s)"
 			balance_found=true
 			break
@@ -515,7 +517,7 @@ generate_test_utxos() {
 
 		sleep $wait_interval
 		elapsed=$((elapsed + wait_interval))
-		if [ $elapsed -lt $max_wait ]; then
+		if ((elapsed < max_wait)); then
 			log_info "Still waiting for balance update... (${elapsed}s/${max_wait}s)"
 		fi
 	done
@@ -540,20 +542,10 @@ generate_test_utxos() {
 create_payment_requests_phase() {
 	log_step "Payment Request Creation Phase"
 
-	# Get a payment sender address from database
-	# For P2SH-P2WSH testing, query for P2SH addresses (starting with '2')
-	log_substep "Retrieving payment sender address from database"
-	sender_address=$(docker compose exec -e MYSQL_PWD="${MYSQL_ROOT_PASSWORD}" -T wallet-db mysql -u root watch -N -e \
-		"SELECT wallet_address FROM address WHERE coin='btc' AND account='payment' AND wallet_address LIKE '2%' LIMIT 1" 2>/dev/null)
-
-	if [ -z "$sender_address" ]; then
-		log_error "No payment addresses found in database"
-		log_error "Please check:"
-		log_error "  - Descriptor import succeeded"
-		log_error "  - Addresses were derived and stored in database"
-		return 1
-	fi
-
+	# Use the payment address derived from descriptor in generate_test_utxos phase
+	# For multisig descriptors, addresses are managed by Bitcoin Core, not stored in the database
+	log_substep "Using payment sender address derived from descriptor"
+	sender_address="$payment_address"
 	log_info "Using sender address: $sender_address"
 
 	# Generate anonymous receiver addresses for testing
@@ -568,7 +560,7 @@ create_payment_requests_phase() {
 	log_info "  2. $receiver2"
 	log_info "  3. $receiver3"
 
-	# Create payment requests
+	# Create payment requests using payment account
 	log_substep "Inserting payment requests into database"
 	docker compose exec -e MYSQL_PWD="${MYSQL_ROOT_PASSWORD}" -T wallet-db mysql -u root watch <<EOF
 DELETE FROM payment_request;
@@ -599,41 +591,46 @@ EOF
 }
 
 ###############################################################################
-# Transaction Flow Phase
+# Helper Functions for Transaction Flow
+###############################################################################
+
+# Log detailed error message for "No utxo" errors
+# Usage: log_no_utxo_error
+log_no_utxo_error() {
+	log_error "Transaction creation failed"
+	log_error "This could indicate:"
+	log_error "  - No payment requests in database"
+	log_error "  - No UTXOs available for payment account"
+	log_error "  - UTXOs not mature enough (need 100+ confirmations)"
+	return 1
+}
+
+###############################################################################
+# Transaction Flow Phase (3-of-3 Multisig)
 ###############################################################################
 
 transaction_flow_phase() {
-	log_step "Transaction Flow Phase"
+	log_step "Transaction Flow Phase (3-of-3 P2SH-P2WSH)"
 
 	# Create unsigned transaction
 	log_substep "Creating unsigned payment transaction"
-	tx_file=$(watch -c "${CONFIG_WATCH}" create payment 2>&1) || {
+	tx_file=$(watch_with_wallet -c "${CONFIG_WATCH}" create payment 2>&1) || {
 		log_error "Failed to create payment transaction"
 		log_error "Output: $tx_file"
 
 		if echo "$tx_file" | grep -q "No utxo"; then
-			log_error "Transaction creation failed"
-			log_error "This could indicate:"
-			log_error "  - No payment requests in database"
-			log_error "  - No UTXOs available for payment account"
-			log_error "  - UTXOs not mature enough (need 100+ confirmations)"
-			return 1
+			log_no_utxo_error
 		fi
 
 		return 1
 	}
 
 	if echo "$tx_file" | grep -q "No utxo"; then
-		log_error "Transaction creation failed"
-		log_error "This could indicate:"
-		log_error "  - No payment requests in database"
-		log_error "  - No UTXOs available for payment account"
-		log_error "  - UTXOs not mature enough (need 100+ confirmations)"
-		return 1
+		log_no_utxo_error
 	fi
 
 	# Extract file path
-	tx_unsigned=$(echo "${tx_file}" | grep "\[fileName\]:" | sed 's/.*\[fileName\]: //')
+	tx_unsigned=$(echo "${tx_file}" | sed -n 's/.*\[fileName\]: //p')
 	log_info "Created unsigned transaction: $tx_unsigned"
 
 	# Sign with keygen wallet (1st signature)
@@ -646,24 +643,25 @@ transaction_flow_phase() {
 		keygen -c "${CONFIG_KEYGEN}" api walletlock
 	fi
 
-	tx_signed1=$(echo "${tx_file_signed}" | grep "\[fileName\]:" | sed 's/.*\[fileName\]: //')
+	tx_signed1=$(echo "${tx_file_signed}" | sed -n 's/.*\[fileName\]: //p')
 	log_info "Signed transaction (1st): $tx_signed1"
 
 	# Sign with sign1 wallet (2nd signature)
 	log_substep "Signing with sign1 wallet (2nd signature)"
 	tx_file_signed2=$(sign1 --conf "${CONFIG_SIGN1}" --wallet sign1 sign signature --file "${tx_signed1}")
-	tx_signed2=$(echo "${tx_file_signed2}" | grep "\[fileName\]:" | sed 's/.*\[fileName\]: //')
+	tx_signed2=$(echo "${tx_file_signed2}" | sed -n 's/.*\[fileName\]: //p')
 	log_info "Signed transaction (2nd): $tx_signed2"
 
-	# Sign with sign2 wallet (3rd signature)
-	log_substep "Signing with sign2 wallet (3rd signature)"
+	# Sign with sign2 wallet (3rd signature - completing 3-of-3 requirement)
+	log_substep "Signing with sign2 wallet (3rd signature - completing 3-of-3 requirement)"
 	tx_file_signed3=$(sign2 --conf "${CONFIG_SIGN2}" --wallet sign2 sign signature --file "${tx_signed2}")
-	tx_signed3=$(echo "${tx_file_signed3}" | grep "\[fileName\]:" | sed 's/.*\[fileName\]: //')
+	tx_signed3=$(echo "${tx_file_signed3}" | sed -n 's/.*\[fileName\]: //p')
 	log_info "Signed transaction (3rd): $tx_signed3"
+	log_info "Note: 3-of-3 multisig requirement satisfied with all 3 signatures"
 
 	# Send transaction
 	log_substep "Sending fully signed transaction"
-	tx_result=$(watch -c "${CONFIG_WATCH}" send --file "${tx_signed3}")
+	tx_result=$(watch_with_wallet -c "${CONFIG_WATCH}" send --file "${tx_signed3}")
 	tx_id="${tx_result##*txID: }"
 
 	log_info "Transaction sent successfully!"
@@ -676,11 +674,11 @@ transaction_flow_phase() {
 
 show_help() {
 	cat <<EOF
-Bitcoin E2E Workflow Script
+Bitcoin E2E Workflow Script - Pattern 8: P2SH-P2WSH 3-of-3 Multisig
 
-This script automates the complete Bitcoin workflow from infrastructure setup
-to transaction execution. It serves as a regression test tool to verify that
-the Bitcoin workflow functions correctly after code changes.
+This script automates the complete Bitcoin workflow for 3-of-3 multisig P2SH-P2WSH
+transactions. It serves as a regression test tool to verify that the Bitcoin
+3-of-3 multisig P2SH-wrapped SegWit workflow functions correctly after code changes.
 
 Usage: $0 [OPTIONS]
 
@@ -711,15 +709,28 @@ The script performs the following steps:
   4. Generate keys for keygen and sign wallets
   5. Export extended keys (xpub) from sign wallets
   6. Import extended keys into keygen wallet
-  7. Create multisig addresses with descriptor export
-  8. Import descriptors into watch wallet (makes P2SH-segwit addresses solvable)
+  7. Create 3-of-3 multisig addresses with descriptor export
+  8. Import descriptors into watch wallet
   9. Generate test UTXOs (automatically generates 101 blocks)
-  10. Create, sign, and send a test transaction
+ 10. Create payment requests
+ 11. Create unsigned transaction
+ 12. Sign with keygen wallet (1st signature)
+ 13. Sign with sign1 wallet (2nd signature)
+ 14. Sign with sign2 wallet (3rd signature - completing 3-of-3)
+ 15. Broadcast transaction
 
-The script uses descriptor-based import for multisig accounts, ensuring that
-P2SH-wrapped SegWit addresses are solvable and can be used for transactions.
+The script uses descriptor-based import for 3-of-3 multisig accounts,
+ensuring that P2SH-wrapped SegWit addresses are properly handled.
 Test UTXOs are automatically generated for the transaction phase, making it
 fully automated and suitable for CI/CD pipelines.
+
+Transaction Pattern Details:
+  - Address Type: P2SH-P2WSH (BIP49 wrapped SegWit)
+  - Address Format: 2... (Regtest P2SH)
+  - Signature Requirement: 3-of-3 (all 3 signatures required)
+  - Descriptor: sh(wsh(sortedmulti(3, xpub1, xpub2, xpub3)))
+  - Legacy compatible (2.../3... addresses work with all wallets)
+  - SegWit efficiency with P2SH backward compatibility
 
 Environment Variables:
   RPC_USER          Bitcoin RPC username (default: xyz for regtest)
@@ -777,10 +788,10 @@ main() {
 		full_reset
 	fi
 
-	log_info "Starting Bitcoin E2E Workflow"
+	log_info "Starting Bitcoin E2E Workflow - Pattern 8: P2SH-P2WSH 3-of-3 Multisig"
 	log_info "Coin: $COIN"
 	log_info "Encrypted: $ENCRYPTED"
-	log_info "Sign wallet count: $SIGN_WALLET_NUM"
+	log_info "Sign wallet count: $SIGN_WALLET_NUM (3-of-3 Multisig: keygen + sign1 + sign2)"
 	echo ""
 
 	# Execute workflow phases
@@ -797,19 +808,22 @@ main() {
 	log_info "Summary:"
 	log_info "  ✓ Infrastructure setup complete"
 	log_info "  ✓ Wallets created and configured"
-	log_info "  ✓ Extended keys (xpub) generated and imported"
-	log_info "  ✓ Multisig addresses created with descriptors"
-	log_info "  ✓ Descriptors exported and imported (P2SH-segwit addresses are solvable)"
+	log_info "  ✓ HD keys generated for keygen and sign wallets"
+	log_info "  ✓ Descriptors exported and imported (deposit, payment, stored accounts)"
+	log_info "  ✓ P2SH-P2WSH 3-of-3 multisig addresses created"
 	log_info "  ✓ Test UTXOs generated"
-	log_info "  ✓ Payment requests created"
-	log_info "  ✓ Transaction created, signed, and sent"
+	log_info "  ✓ Payment requests created (using payment account)"
+	log_info "  ✓ Transaction created, signed (3 signatures), and sent"
 	echo ""
-	log_info "Key improvements in this workflow:"
-	log_info "  • Sign wallets export extended keys (xpub) instead of compressed pubkeys"
-	log_info "  • Multisig accounts use descriptor-based import for solvability"
-	log_info "  • P2SH-wrapped SegWit UTXOs can now be spent correctly"
+	log_info "Transaction Pattern Used:"
+	log_info "  • P2SH-P2WSH (BIP49 wrapped SegWit) 3-of-3 multisig"
+	log_info "  • Descriptor-based address management"
+	log_info "  • 3-of-3 signature requirement (all 3 signatures required)"
+	log_info "  • Uses account_3of3.yaml (all accounts configured as 3-of-3 multisig)"
+	log_info "  • Legacy compatible (2.../3... addresses work with all wallets)"
+	log_info "  • SegWit efficiency with P2SH backward compatibility"
 	echo ""
-	log_info "You can now use the wallet system for Bitcoin operations"
+	log_info "You can now use the wallet system for Bitcoin 3-of-3 multisig P2SH-P2WSH operations"
 	log_info "To cleanup, run: $0 --cleanup"
 	log_info "To full reset for fresh state, run: $0 --reset"
 }
