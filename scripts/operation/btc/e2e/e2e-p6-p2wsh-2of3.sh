@@ -150,13 +150,13 @@ full_reset() {
 	local removal_attempts=0
 	local max_removal_attempts=5
 
-	while [ $removal_attempts -lt $max_removal_attempts ]; do
+	while ((removal_attempts < max_removal_attempts)); do
 		if docker volume rm "$volume_name" 2>/dev/null; then
 			log_info "Volume removed successfully on attempt $((removal_attempts + 1))"
 			break
 		fi
 		removal_attempts=$((removal_attempts + 1))
-		if [ $removal_attempts -lt $max_removal_attempts ]; then
+		if ((removal_attempts < max_removal_attempts)); then
 			log_warn "Volume removal failed, retrying in 2 seconds... (attempt $removal_attempts/$max_removal_attempts)"
 			sleep 2
 		fi
@@ -168,14 +168,14 @@ full_reset() {
 	local counter=0
 	local volume_deleted=false
 
-	while [ $counter -lt $max_wait ]; do
+	while ((counter < max_wait)); do
 		if ! docker volume inspect "$volume_name" >/dev/null 2>&1; then
 			log_info "Volume successfully deleted"
 			volume_deleted=true
 			break
 		fi
 		counter=$((counter + 1))
-		if [ $counter -lt $max_wait ]; then
+		if ((counter < max_wait)); then
 			log_warn "Volume still exists, waiting... (${counter}s/${max_wait}s)"
 			sleep 1
 		fi
@@ -497,7 +497,7 @@ generate_test_utxos() {
 	elapsed=0
 	balance_found=false
 
-	while [ $elapsed -lt $max_wait ]; do
+	while ((elapsed < max_wait)); do
 		# Check balance using Bitcoin Core RPC directly
 		balance_json=$(btc_cli "btc-watch" -rpcwallet=watch getbalances 2>&1 || true)
 		trusted_balance=$(echo "$balance_json" | jq -r '.mine.trusted // 0' 2>/dev/null || echo "0")
@@ -511,7 +511,7 @@ generate_test_utxos() {
 
 		sleep $wait_interval
 		elapsed=$((elapsed + wait_interval))
-		if [ $elapsed -lt $max_wait ]; then
+		if ((elapsed < max_wait)); then
 			log_info "Still waiting for balance update... (${elapsed}s/${max_wait}s)"
 		fi
 	done

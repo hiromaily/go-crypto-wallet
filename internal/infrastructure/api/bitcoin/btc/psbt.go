@@ -9,6 +9,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
+	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/btcsuite/btcd/btcec/v2"
@@ -2148,28 +2151,22 @@ func (b *Bitcoin) deriveWitnessScriptFromDescriptor(
 	// This ensures deterministic key ordering
 	sortedPubKeys := make([][]byte, len(pubKeys))
 	copy(sortedPubKeys, pubKeys)
-	for i := 0; i < len(sortedPubKeys)-1; i++ {
-		for j := i + 1; j < len(sortedPubKeys); j++ {
-			if bytes.Compare(sortedPubKeys[i], sortedPubKeys[j]) > 0 {
-				sortedPubKeys[i], sortedPubKeys[j] = sortedPubKeys[j], sortedPubKeys[i]
-			}
-		}
-	}
+	sort.Slice(sortedPubKeys, func(i, j int) bool {
+		return bytes.Compare(sortedPubKeys[i], sortedPubKeys[j]) < 0
+	})
 
 	// Extract threshold from descriptor script
 	// Format: wsh(sortedmulti(M, key1, key2, ...))
 	// We need to parse "sortedmulti(M," to extract M
 	threshold := 2 // Default for 2-of-3
-	if strings.Contains(parsed.Script, "sortedmulti(") {
-		// Extract threshold: sortedmulti(2, ...) -> "2"
-		start := strings.Index(parsed.Script, "sortedmulti(") + len("sortedmulti(")
-		end := strings.Index(parsed.Script[start:], ",")
-		if end > 0 {
-			thresholdStr := parsed.Script[start : start+end]
-			if _, err := fmt.Sscanf(thresholdStr, "%d", &threshold); err != nil {
-				return nil, fmt.Errorf("failed to parse threshold from descriptor: %w", err)
-			}
+	re := regexp.MustCompile(`sortedmulti\((\d+),`)
+	matches := re.FindStringSubmatch(parsed.Script)
+	if len(matches) > 1 {
+		parsedThreshold, err := strconv.Atoi(matches[1])
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse threshold from descriptor: %w", err)
 		}
+		threshold = parsedThreshold
 	}
 
 	// Build witness script using txscript
