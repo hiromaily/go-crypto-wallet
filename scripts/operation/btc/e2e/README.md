@@ -15,6 +15,8 @@ For detailed transaction pattern explanations, technical references, and impleme
 |--------|---------|----------------------|----------------|
 | `e2e-p1-p2pkh-singlesig.sh` | P2PKH Single-sig (Pattern 1) | Single-sig | `1...` / `m...` |
 | `e2e-p2-p2pkh-2of3.sh` | P2PKH 2-of-3 Multisig (Pattern 2) | 2-of-3 | `3...` / `2...` |
+| `e2e-p3-p2sh-p2wpkh-singlesig.sh` | P2SH-P2WPKH Single-sig (Pattern 3) | Single-sig | `3...` / `2...` |
+| `e2e-p4-p2sh-p2wsh-2of3.sh` | P2SH-P2WSH 2-of-3 Multisig (Pattern 4) | 2-of-3 | `3...` / `2...` |
 | `e2e-p8-p2sh-p2wsh-3of3.sh` | P2SH-P2WSH 3-of-3 Multisig (Pattern 8) | 3-of-3 | `3...` / `2...` |
 
 ## Usage
@@ -28,6 +30,12 @@ For detailed transaction pattern explanations, technical references, and impleme
 # Pattern 2: 2-of-3 Multisig E2E test
 ./scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh
 
+# Pattern 3: P2SH-P2WPKH Single-sig E2E test
+./scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh
+
+# Pattern 4: P2SH-P2WSH 2-of-3 Multisig E2E test
+./scripts/operation/btc/e2e/e2e-p4-p2sh-p2wsh-2of3.sh
+
 # Pattern 8: 3-of-3 Multisig E2E test
 ./scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh
 ```
@@ -40,6 +48,12 @@ make btc-e2e-p1
 
 # Pattern 2: 2-of-3 Multisig
 make btc-e2e-p2
+
+# Pattern 3: P2SH-P2WPKH Single-sig
+make btc-e2e-p3
+
+# Pattern 4: P2SH-P2WSH 2-of-3 Multisig
+make btc-e2e-p4
 
 # Pattern 8: 3-of-3 Multisig
 make btc-e2e-p8
@@ -73,6 +87,20 @@ address_type: "legacy"
 address_type: "legacy"
 ```
 
+### Pattern 3: P2SH-P2WPKH Single-sig
+
+```yaml
+# config/wallet/btc_watch.yaml, btc_keygen.yaml
+address_type: "p2sh-segwit"
+```
+
+### Pattern 4: P2SH-P2WSH 2-of-3 Multisig
+
+```yaml
+# config/wallet/btc_watch.yaml, btc_keygen.yaml, btc_sign1.yaml, btc_sign2.yaml
+address_type: "p2sh-segwit"
+```
+
 ### Pattern 8: P2SH-P2WSH 3-of-3 Multisig
 
 ```yaml
@@ -86,6 +114,9 @@ address_type: "p2sh-segwit"
 # RPC credentials (defaults are for regtest/development only)
 RPC_USER=xyz
 RPC_PASSWORD=xyz
+
+# MySQL credentials (defaults are for regtest/development only)
+MYSQL_ROOT_PASSWORD=root
 ```
 
 ## Related Documentation

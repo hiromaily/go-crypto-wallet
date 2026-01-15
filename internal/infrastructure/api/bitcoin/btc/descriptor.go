@@ -2,6 +2,7 @@ package btc
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -272,17 +273,26 @@ func (b *Bitcoin) DeriveRedeemScriptFromDescriptor(
 				address, addressIndex, err)
 		}
 
+	case domainWallet.DescriptorTypeSHWSH:
+		// P2SH-wrapped P2WSH multisig (BIP49)
+		// For sh(wsh(sortedmulti(...))), the redeemScript is OP_0 <witnessScript hash>
+		// The witnessScript is the inner multisig script
+		redeemScript, err = b.deriveP2WSHRedeemScript(parsed, addressIndex)
+		if err != nil {
+			return nil, fmt.Errorf("failed to derive P2WSH redeemScript for address %s at index %d: %w",
+				address, addressIndex, err)
+		}
+
 	case domainWallet.DescriptorTypePKH,
 		domainWallet.DescriptorTypeWPKH,
 		domainWallet.DescriptorTypeTR,
 		domainWallet.DescriptorTypeWSH,
-		domainWallet.DescriptorTypeSHWSH,
 		domainWallet.DescriptorTypeUnknown:
 		// These descriptor types don't require redeemScript derivation:
 		// - PKH: P2PKH addresses don't use redeemScript
 		// - WPKH: Native SegWit (bech32) addresses don't use redeemScript
 		// - TR: Taproot addresses don't use redeemScript
-		// - WSH/SHWSH: Not yet implemented
+		// - WSH: Native SegWit multisig, not wrapped in P2SH
 		return nil, fmt.Errorf("unsupported descriptor type for redeemScript derivation: %s", parsed.Type)
 	}
 
@@ -416,6 +426,103 @@ func (b *Bitcoin) deriveP2WPKHRedeemScript(
 	logger.Info("Built P2WPKH redeemScript",
 		"script_len", len(redeemScript),
 		"script_hex", hex.EncodeToString(redeemScript))
+
+	return redeemScript, nil
+}
+
+// deriveP2WSHRedeemScript derives the redeemScript for sh(wsh(...)) descriptors.
+// For sh(wsh(sortedmulti(M, key1, key2, ...))):
+//   - The witnessScript is the multisig script: OP_M <pk1> <pk2> ... OP_N OP_CHECKMULTISIG
+//   - The redeemScript is: OP_0 <32-byte-witnessScript-hash>
+//
+// This is used for P2SH-wrapped P2WSH multisig (BIP49).
+func (b *Bitcoin) deriveP2WSHRedeemScript(
+	parsed *domainWallet.Descriptor, addressIndex uint32,
+) ([]byte, error) {
+	logger.Debug("Deriving P2WSH redeemScript",
+		"descriptor_type", parsed.Type,
+		"address_index", addressIndex,
+		"num_keys", len(parsed.Keys))
+
+	// Extract M and N from the descriptor script
+	requiredSigs, totalSigs, err := b.extractMultisigParams(parsed.Script)
+	if err != nil {
+		return nil, fmt.Errorf("failed to extract multisig params: %w", err)
+	}
+
+	if len(parsed.Keys) != totalSigs {
+		return nil, fmt.Errorf("key count mismatch: parsed %d keys but descriptor has %d",
+			len(parsed.Keys), totalSigs)
+	}
+
+	logger.Info("Building P2WSH redeemScript",
+		"required_sigs", requiredSigs,
+		"total_sigs", totalSigs,
+		"address_index", addressIndex)
+
+	// Derive all public keys at the specified index
+	pubKeys := make([][]byte, 0, totalSigs)
+	for keyIdx, keyInfo := range parsed.Keys {
+		pubKey, err := b.derivePublicKeyFromDescriptorKey(keyInfo, addressIndex)
+		if err != nil {
+			return nil, fmt.Errorf("failed to derive public key %d: %w", keyIdx, err)
+		}
+		pubKeys = append(pubKeys, pubKey)
+
+		logger.Debug("Derived pubkey for P2WSH multisig",
+			"key_index", keyIdx,
+			"pubkey", hex.EncodeToString(pubKey))
+	}
+
+	// For sortedmulti, sort the public keys lexicographically (BIP67)
+	if strings.Contains(parsed.Script, "sortedmulti") {
+		logger.Debug("Sorting public keys for sortedmulti")
+		sort.Slice(pubKeys, func(i, j int) bool {
+			return bytes.Compare(pubKeys[i], pubKeys[j]) < 0
+		})
+	}
+
+	// Build the witnessScript: OP_M <pk1> <pk2> ... <pkN> OP_N OP_CHECKMULTISIG
+	witnessBuilder := txscript.NewScriptBuilder()
+	witnessBuilder.AddInt64(int64(requiredSigs))
+
+	for _, pubKey := range pubKeys {
+		witnessBuilder.AddData(pubKey)
+	}
+
+	witnessBuilder.AddInt64(int64(totalSigs))
+	witnessBuilder.AddOp(txscript.OP_CHECKMULTISIG)
+
+	witnessScript, err := witnessBuilder.Script()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build witnessScript: %w", err)
+	}
+
+	logger.Debug("Built witnessScript",
+		"script_len", len(witnessScript),
+		"script_hex", hex.EncodeToString(witnessScript))
+
+	// Hash the witnessScript: SHA256(witnessScript)
+	witnessScriptHash := sha256.Sum256(witnessScript)
+
+	logger.Debug("Computed witnessScript hash",
+		"hash", hex.EncodeToString(witnessScriptHash[:]))
+
+	// Build the redeemScript: OP_0 <32-byte-witnessScript-hash>
+	// This is what goes into the P2SH
+	redeemBuilder := txscript.NewScriptBuilder()
+	redeemBuilder.AddOp(txscript.OP_0)
+	redeemBuilder.AddData(witnessScriptHash[:])
+
+	redeemScript, err := redeemBuilder.Script()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build P2WSH redeemScript: %w", err)
+	}
+
+	logger.Info("Built P2WSH redeemScript",
+		"script_len", len(redeemScript),
+		"script_hex", hex.EncodeToString(redeemScript),
+		"witness_script_len", len(witnessScript))
 
 	return redeemScript, nil
 }

@@ -1825,9 +1825,11 @@ func (b *Bitcoin) addBIP32DerivationFromDescriptor(
 				return fmt.Errorf("failed to parse wallet descriptor: %w", err)
 			}
 
-			// Support P2SH-wrapped descriptors (sh(multi(...)), sh(wpkh(...)))
-			if parsed.Type != domainWallet.DescriptorTypeSH && parsed.Type != domainWallet.DescriptorTypeSHWPKH {
-				return fmt.Errorf("unsupported descriptor type: %s (only sh/sh(wpkh) supported)", parsed.Type)
+			// Support P2SH-wrapped descriptors (sh(multi(...)), sh(wpkh(...)), sh(wsh(...)))
+			if parsed.Type != domainWallet.DescriptorTypeSH &&
+				parsed.Type != domainWallet.DescriptorTypeSHWPKH &&
+				parsed.Type != domainWallet.DescriptorTypeSHWSH {
+				return fmt.Errorf("unsupported descriptor type: %s (only sh/sh(wpkh)/sh(wsh) supported)", parsed.Type)
 			}
 
 			// Verify by deriving the redeemScript
