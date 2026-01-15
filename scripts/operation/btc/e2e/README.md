@@ -18,6 +18,8 @@ For detailed transaction pattern explanations, technical references, and impleme
 | `e2e-p3-p2sh-p2wpkh-singlesig.sh` | P2SH-P2WPKH Single-sig (Pattern 3) | Single-sig | `3...` / `2...` |
 | `e2e-p4-p2sh-p2wsh-2of3.sh` | P2SH-P2WSH 2-of-3 Multisig (Pattern 4) | 2-of-3 | `3...` / `2...` |
 | `e2e-p5-p2wpkh-singlesig.sh` | P2WPKH Native SegWit Single-sig (Pattern 5) | Single-sig | `bc1q...` / `bcrt1q...` |
+| `e2e-p6-p2wsh-2of3.sh` | P2WSH Native SegWit 2-of-3 Multisig (Pattern 6) | 2-of-3 | `bc1q...` / `bcrt1q...` |
+| `e2e-p7-p2wsh-3of3.sh` | P2WSH Native SegWit 3-of-3 Multisig (Pattern 7) | 3-of-3 | `bc1q...` / `bcrt1q...` |
 | `e2e-p8-p2sh-p2wsh-3of3.sh` | P2SH-P2WSH 3-of-3 Multisig (Pattern 8) | 3-of-3 | `3...` / `2...` |
 
 ## Usage
@@ -40,7 +42,13 @@ For detailed transaction pattern explanations, technical references, and impleme
 # Pattern 5: P2WPKH Native SegWit Single-sig E2E test
 ./scripts/operation/btc/e2e/e2e-p5-p2wpkh-singlesig.sh
 
-# Pattern 8: 3-of-3 Multisig E2E test
+# Pattern 6: P2WSH Native SegWit 2-of-3 Multisig E2E test
+./scripts/operation/btc/e2e/e2e-p6-p2wsh-2of3.sh
+
+# Pattern 7: P2WSH Native SegWit 3-of-3 Multisig E2E test
+./scripts/operation/btc/e2e/e2e-p7-p2wsh-3of3.sh
+
+# Pattern 8: P2SH-P2WSH 3-of-3 Multisig E2E test
 ./scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh
 ```
 
@@ -62,7 +70,13 @@ make btc-e2e-p4
 # Pattern 5: P2WPKH Native SegWit Single-sig
 make btc-e2e-p5
 
-# Pattern 8: 3-of-3 Multisig
+# Pattern 6: P2WSH Native SegWit 2-of-3 Multisig
+make btc-e2e-p6
+
+# Pattern 7: P2WSH Native SegWit 3-of-3 Multisig
+make btc-e2e-p7
+
+# Pattern 8: P2SH-P2WSH 3-of-3 Multisig
 make btc-e2e-p8
 ```
 
@@ -112,6 +126,20 @@ address_type: "p2sh-segwit"
 
 ```yaml
 # config/wallet/btc_watch.yaml, btc_keygen.yaml
+address_type: "bech32"
+```
+
+### Pattern 6: P2WSH Native SegWit 2-of-3 Multisig
+
+```yaml
+# config/wallet/btc_watch.yaml, btc_keygen.yaml, btc_sign1.yaml, btc_sign2.yaml
+address_type: "bech32"
+```
+
+### Pattern 7: P2WSH Native SegWit 3-of-3 Multisig
+
+```yaml
+# config/wallet/btc_watch.yaml, btc_keygen.yaml, btc_sign1.yaml, btc_sign2.yaml
 address_type: "bech32"
 ```
 

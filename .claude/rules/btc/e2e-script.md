@@ -269,6 +269,8 @@ btc-e2e-p1-cleanup:
 | 3 | `e2e-p3-p2sh-p2wpkh-singlesig.sh` | `btc-e2e-p3` |
 | 4 | `e2e-p4-p2sh-p2wsh-2of3.sh` | `btc-e2e-p4` |
 | 5 | `e2e-p5-p2wpkh-singlesig.sh` | `btc-e2e-p5` |
+| 6 | `e2e-p6-p2wsh-2of3.sh` | `btc-e2e-p6` |
+| 7 | `e2e-p7-p2wsh-3of3.sh` | `btc-e2e-p7` |
 | 8 | `e2e-p8-p2sh-p2wsh-3of3.sh` | `btc-e2e-p8` |
 
 ## Related Skills
