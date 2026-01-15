@@ -244,9 +244,9 @@ Address Format: 2... (P2SH in regtest), 3... (P2SH in mainnet)
 - Generates proper P2SH addresses (`2...` prefix in regtest)
 - Fully compatible with Bitcoin Core descriptor import
 
-### Pattern 3: BTC P2SH-P2WPKH Single-sig (WIP)
+### Pattern 3: BTC P2SH-P2WPKH Single-sig
 
-**Currently WIP implemented in `scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh`**
+**Fully implemented and verified in `scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh`**
 
 ```
 Address Type: P2SH-P2WPKH (BIP49 Nested SegWit)
@@ -489,6 +489,7 @@ Address Format: bitcoincash:p... (P2SH multisig)
 |--------|------|---------|---------------------|
 | `scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh` | BTC | P2PKH Single-sig (Pattern 1) | Single-sig |
 | `scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh` | BTC | P2PKH 2-of-3 Multisig (Pattern 2) | 2-of-3 |
+| `scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh` | BTC | P2SH-P2WPKH Single-sig (Pattern 3) | Single-sig |
 | `scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh` | BTC | P2SH-P2WSH Multisig (Pattern 8) | 3-of-3 |
 | `scripts/operation/bch/e2e-workflow.sh` | BCH | CashAddr Multisig | 3-of-3 |
 
