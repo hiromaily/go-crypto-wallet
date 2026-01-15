@@ -514,15 +514,20 @@ func deriveAddressFromMultisigScript(
 		}
 		return shAddr.EncodeAddress(), nil
 
-	case domainWallet.DescriptorTypeSHWSH:
-		// P2SH-P2WSH (SegWit, BIP49): sh(wsh(sortedmulti(...)))
-		// Wrap witness script hash in P2SH
+	case domainWallet.DescriptorTypeSHWSH, domainWallet.DescriptorTypeWSH:
+		// P2SH-P2WSH (SegWit, BIP49) or Native P2WSH (BIP48)
 		hash := sha256.Sum256(script)
 		wshAddr, err := btcutil.NewAddressWitnessScriptHash(hash[:], chain)
 		if err != nil {
 			return "", fmt.Errorf("failed to create witness script hash: %w", err)
 		}
 
+		if descType == domainWallet.DescriptorTypeWSH {
+			// Native P2WSH (BIP48): wsh(sortedmulti(...))
+			return wshAddr.EncodeAddress(), nil
+		}
+
+		// P2SH-P2WSH (SegWit, BIP49): sh(wsh(sortedmulti(...)))
 		// Create P2WSH script (witness program)
 		witnessProgram, err := txscript.PayToAddrScript(wshAddr)
 		if err != nil {
@@ -535,15 +540,6 @@ func deriveAddressFromMultisigScript(
 			return "", fmt.Errorf("failed to create P2SH-P2WSH address: %w", err)
 		}
 		return shAddr.EncodeAddress(), nil
-
-	case domainWallet.DescriptorTypeWSH:
-		// Native P2WSH (BIP48): wsh(sortedmulti(...))
-		hash := sha256.Sum256(script)
-		wshAddr, err := btcutil.NewAddressWitnessScriptHash(hash[:], chain)
-		if err != nil {
-			return "", fmt.Errorf("failed to create witness script hash: %w", err)
-		}
-		return wshAddr.EncodeAddress(), nil
 
 	case domainWallet.DescriptorTypePKH, domainWallet.DescriptorTypeSHWPKH,
 		domainWallet.DescriptorTypeWPKH, domainWallet.DescriptorTypeTR,

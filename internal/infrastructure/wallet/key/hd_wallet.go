@@ -83,6 +83,11 @@ const (
 	ChangeTypeInternal ChangeType = 1 // constant 1 for internal chain (also known as change addresses)
 )
 
+// maxMultisigAccountIndex is the maximum account index for multisig accounts.
+// Accounts with indices 0, 1, and 2 (deposit, payment, stored) are used for multisig
+// and require non-hardened derivation to match xpub-derived keys.
+const maxMultisigAccountIndex = 2
+
 // HDKey HD Wallet Key object
 type HDKey struct {
 	purpose      PurposeType
@@ -218,7 +223,7 @@ func (k *HDKey) createKeyByAccount(
 	// because watch wallet derives from coin-level xpubs which can only derive non-hardened children.
 	// For other accounts (auth1=11, auth2=12, etc.), use hardened derivation for enhanced security.
 	accountIndex := accountType.BIP44AccountIndex()
-	isMultisigAccount := accountIndex <= 2 // deposit=0, payment=1, stored=2
+	isMultisigAccount := accountIndex <= maxMultisigAccountIndex // deposit=0, payment=1, stored=2
 
 	logger.Debug(
 		"create_key_by_account",
