@@ -165,13 +165,13 @@ Aggregate signature protocol based on Schnorr signatures. N-of-N multisig become
 | Pattern | Key Type | Signature Pattern | Address Format | E2E Script Support |
 |---------|----------|-------------------|----------------|-------------------|
 | **1** | **P2PKH (BIP44)** | **Single-sig** | **`1...`** | **✅ e2e/e2e-p1-p2pkh-singlesig.sh** |
-| **2** | **P2PKH (BIP44)** | **2-of-3 Multisig** | **`3...` (P2SH wrapped)** | **✅ e2e/e2e-p2-p2pkh-2of3.sh (Fixed in #357)** |
-| 3 | P2SH-P2WPKH (BIP49) | Single-sig | `3...` | 🔶 Manual testing |
+| **2** | **P2PKH (BIP44)** | **2-of-3 Multisig** | **`3...` (P2SH wrapped)** | **✅ e2e/e2e-p2-p2pkh-2of3.sh** |
+| 3 | P2SH-P2WPKH (BIP49) | Single-sig | `3...` | **🔶 e2e/fix-btc-e2e-p3.sh** (WIP) |
 | 4 | P2SH-P2WPKH (BIP49) | 2-of-3 Multisig | `3...` | ❌ Not supported |
 | 5 | P2WPKH (BIP84) | Single-sig | `bc1q...` | 🔶 Manual testing |
 | 6 | P2WSH (BIP84) | 2-of-3 Multisig | `bc1q...` | ❌ Not supported |
 | 7 | P2WSH (BIP84) | 3-of-3 Multisig | `bc1q...` | ❌ Not supported |
-| **8** | **P2SH-P2WSH** | **3-of-3 Multisig** | **`3...`** | **✅ e2e/e2e-p8-p2sh-p2wsh-3of3.sh** |
+| **8** | **P2SH-P2WSH** | **3-of-3 Multisig** | **`3...`** | **🔶 e2e/e2e-p8-p2sh-p2wsh-3of3.sh** (WIP) |
 | 9 | P2TR (BIP86) | Single-sig | `bc1p...` | 🔶 Manual testing |
 | 10 | P2TR (BIP86) | MuSig2 (N-of-N) | `bc1p...` | 🔜 In development |
 | 11 | P2TR (BIP86) | Tapscript (M-of-N) | `bc1p...` | 🔜 In development |
@@ -186,7 +186,7 @@ Aggregate signature protocol based on Schnorr signatures. N-of-N multisig become
 
 ---
 
-## Details of Each Pattern
+## Details of Each Pattern for BTC
 
 ### Pattern 1: BTC P2PKH Single-sig
 
@@ -214,31 +214,9 @@ Descriptor: pkh([fingerprint/44'/0'/0']xpub.../0/*)
 - Uses BIP44 key derivation path
 - Legacy address format (`m...`/`n...` in regtest)
 
-### Pattern 8: BTC P2SH-P2WSH 3-of-3 Multisig (Current E2E)
-
-**Currently implemented in `scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh`**
-
-```
-Address Type: P2SH-P2WSH (BIP49 wrapped SegWit)
-Signing Requirements: 3-of-3 (Keygen + Sign1 + Sign2)
-Descriptor: sh(wsh(sortedmulti(3, xpub1, xpub2, xpub3)))
-```
-
-**Workflow:**
-
-1. Generate Seed in Keygen/Sign1/Sign2
-2. Generate HD Key in Keygen (10 accounts each)
-3. Generate HD Key in Sign1/Sign2
-4. Export fullpubkey from Sign1/Sign2
-5. Import fullpubkey to Keygen
-6. Export Descriptor from Keygen
-7. Import Descriptor to Watch
-8. Generate Test UTXO (regtest)
-9. Create unsigned transaction → Sign 3 times → Broadcast
-
 ### Pattern 2: BTC P2PKH 2-of-3 Multisig
 
-**✅ Fully implemented in `scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh` (Fixed in #357)**
+**✅ Fully implemented in `scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh`**
 
 ```
 Address Type: P2PKH (BIP44 Legacy) with 2-of-3 Multisig
@@ -246,17 +224,6 @@ Signing Requirements: 2-of-3 (Keygen + Sign1, Sign2 is optional)
 Descriptor: sh(multi(2, [fingerprint/44'/1'/1]xpub1/0/*, [fingerprint/44'/1'/1]xpub2/0/*, [fingerprint/44'/1'/1]xpub3/0/*))
 Address Format: 2... (P2SH in regtest), 3... (P2SH in mainnet)
 ```
-
-**Fixed Issues (PR #357):**
-
-- ✅ P2SH multisig descriptor generation now working correctly
-- ✅ Key derivation path mismatch resolved (non-hardened account paths for multisig)
-- ✅ P2SH address generation (not P2WSH) working as expected
-- ✅ Transaction signing and broadcasting verified end-to-end
-
-**Root Cause of Previous Failure:**
-
-Sign/keygen wallets were using hardened account derivation (`m/44'/1'/[account]'`) while descriptors specified non-hardened paths (`m/44'/1'/[account]`). For multisig with xpub derivation, non-hardened account paths are required since xpubs cannot derive hardened children.
 
 **Workflow:**
 
@@ -277,28 +244,143 @@ Sign/keygen wallets were using hardened account derivation (`m/44'/1'/[account]'
 - Generates proper P2SH addresses (`2...` prefix in regtest)
 - Fully compatible with Bitcoin Core descriptor import
 
-### Pattern 2: BCH CashAddr 3-of-3 Multisig (Current E2E)
+### Pattern 3: BTC P2SH-P2WPKH Single-sig (WIP)
 
-**Currently implemented in `scripts/operation/bch/e2e-workflow.sh`**
+**Currently WIP implemented in `scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh`**
 
 ```
-Address Type: CashAddr P2SH
+Address Type: P2SH-P2WPKH (BIP49 Nested SegWit)
+Signing Requirements: Single-sig (Keygen only)
+Descriptor: sh(wpkh([fingerprint/49'/0'/0']xpub.../0/*))
+Address Format: 2... (P2SH in regtest), 3... (P2SH in mainnet)
+```
+
+#### What is P2SH-P2WPKH (BIP49)?
+
+P2SH-P2WPKH is **SegWit (P2WPKH) wrapped in P2SH for backward compatibility**. It was introduced in **BIP49** as a transitional format during SegWit adoption.
+
+| BIP | Role |
+|-----|------|
+| **BIP16** | Defines P2SH (Pay-to-Script-Hash) |
+| **BIP49** | Defines P2SH-P2WPKH derivation path (`m/49'/...`) |
+| **BIP141** | Defines SegWit (P2WPKH witness program) |
+| **BIP143** | Defines SegWit transaction signing |
+
+#### Address Structure
+
+```
+P2SH-P2WPKH Address:
+┌─────────────────────────────────────────────────────┐
+│  P2SH wrapper (for legacy wallet compatibility)     │
+│  ┌─────────────────────────────────────────────────┐│
+│  │  P2WPKH (Native SegWit)                         ││
+│  │  ┌─────────────────────────────────────────────┐││
+│  │  │  Public Key Hash (20 bytes)                 │││
+│  │  └─────────────────────────────────────────────┘││
+│  └─────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────┘
+```
+
+#### Comparison with Other Single-sig Patterns
+
+| Item | Pattern 1 (P2PKH) | Pattern 3 (P2SH-P2WPKH) | Pattern 5 (P2WPKH) | Pattern 9 (P2TR) |
+|------|-------------------|-------------------------|--------------------|--------------------|
+| BIP | BIP44 | **BIP49** | BIP84 | BIP86 |
+| Address Prefix | `1...`/`m...` | **`3...`/`2...`** | `bc1q...` | `bc1p...` |
+| Descriptor | `pkh(...)` | **`sh(wpkh(...))`** | `wpkh(...)` | `tr(...)` |
+| SegWit | No | **Yes (wrapped)** | Yes (native) | Yes (Taproot) |
+| Transaction Size | Largest | Medium | Smaller | Smallest |
+| Legacy Compatible | Yes | **Yes** | No | No |
+
+#### Why Use P2SH-P2WPKH?
+
+| Aspect | Description |
+|--------|-------------|
+| ✅ SegWit benefits | Reduced transaction size compared to P2PKH, lower fees |
+| ✅ Legacy compatibility | `3...` addresses can receive from any wallet (including old wallets) |
+| ✅ Widely supported | Supported by most exchanges and services |
+| ❌ Not optimal | Native SegWit (P2WPKH) is more efficient |
+| ❌ Transitional | Primarily for backward compatibility during SegWit migration |
+
+**Workflow:**
+
+1. Generate Seed in Keygen
+2. Generate BIP49 HD Key in Keygen (10 accounts each)
+3. Export Descriptor from Keygen (generates `sh(wpkh(...))`)
+4. Import Descriptor to Watch
+5. Generate Test UTXO (regtest)
+6. Create unsigned transaction → Sign once → Broadcast
+
+**Characteristics:**
+
+- Simple and fast (completed with single signature)
+- Sign1/Sign2 wallets not required
+- Uses BIP49 key derivation path (`m/49'/0'/account'/change/index`)
+- P2SH address format (`2...` prefix in regtest)
+- SegWit transaction efficiency with legacy address compatibility
+
+### Pattern 8: BTC P2SH-P2WSH 3-of-3 Multisig (WIP)
+
+**Currently WIP implemented in `scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh`**
+
+```
+Address Type: P2SH-P2WSH (SegWit multisig wrapped in P2SH)
 Signing Requirements: 3-of-3 (Keygen + Sign1 + Sign2)
-Address Format: bitcoincash:p... (P2SH multisig)
+Descriptor: sh(wsh(sortedmulti(3, xpub1, xpub2, xpub3)))
 ```
+
+#### What is P2SH-P2WSH?
+
+P2SH-P2WSH is a **nested structure where P2WSH (Pay-to-Witness-Script-Hash) is wrapped inside P2SH (Pay-to-Script-Hash)**. This is achieved through a combination of multiple BIPs:
+
+| BIP | Role |
+|-----|------|
+| **BIP16** | Defines P2SH (Pay-to-Script-Hash) |
+| **BIP141** | Defines SegWit (including P2WSH) |
+| **BIP143** | Defines SegWit transaction signing |
+
+**Note:** P2SH-P2WSH is different from BIP49 (P2SH-P2WPKH):
+
+- **BIP49 (P2SH-P2WPKH)**: Wraps **P2WPKH** (single public key) in P2SH → For Single-sig
+- **P2SH-P2WSH**: Wraps **P2WSH** (witness script) in P2SH → **For Multisig**
+
+#### Why No Single-sig or 2-of-3 Variants?
+
+| Variant | Reason for Absence |
+|---------|-------------------|
+| **Single-sig** | P2SH-P2WPKH (BIP49, Pattern 3) is sufficient. P2SH-P2WSH is designed for complex scripts |
+| **2-of-3** | Technically possible but not implemented in this project (prioritization) |
+
+P2SH-P2WSH is primarily used for **complex multisig scripts** while maintaining SegWit efficiency and backward compatibility with legacy wallets.
+
+#### Comparison with Other Patterns
+
+| Pattern | Descriptor | Use Case |
+|---------|------------|----------|
+| Pattern 2 | `sh(multi(2, ...))` | Legacy P2SH multisig |
+| Pattern 6-7 | `wsh(sortedmulti(...))` | Native SegWit multisig |
+| **Pattern 8** | **`sh(wsh(sortedmulti(...)))`** | **SegWit multisig + Legacy compatibility** |
+
+#### Pros and Cons
+
+| Aspect | Description |
+|--------|-------------|
+| ✅ Legacy compatibility | `3...` addresses can receive from legacy wallets |
+| ✅ SegWit efficiency | Witness data stored separately, reducing transaction size |
+| ❌ Complexity | Nested structure makes implementation and debugging more complex |
+| ❌ Size | Slightly larger than Native SegWit (P2WSH)
 
 **Workflow:**
 
 1. Generate Seed in Keygen/Sign1/Sign2
-2. Generate HD Key in Keygen
+2. Generate HD Key in Keygen (10 accounts each)
 3. Generate HD Key in Sign1/Sign2
 4. Export fullpubkey from Sign1/Sign2
 5. Import fullpubkey to Keygen
-6. Create Multisig address in Keygen
-7. Export address from Keygen
-8. Import address to Watch
-9. Generate Test UTXO (regtest)
-10. Create unsigned transaction → Sign 3 times → Broadcast
+6. Export Descriptor from Keygen
+7. Import Descriptor to Watch
+8. Generate Test UTXO (regtest)
+9. Create unsigned transaction → Sign 3 times → Broadcast
 
 ### Pattern 9: BTC P2TR Single-sig (Taproot)
 
@@ -329,6 +411,31 @@ Descriptor: tr(musig(xpub1, xpub2, xpub3))
 1. Round 1: Generate nonces in each wallet
 2. Round 2: Create partial signatures in each wallet
 3. Aggregate signatures in Watch and broadcast
+
+## Details of Each Pattern for BCH
+
+### BCH Pattern 2: BCH CashAddr 3-of-3 Multisig (Current E2E)
+
+**Currently WIP implemented in `scripts/operation/bch/e2e-workflow.sh`**
+
+```
+Address Type: CashAddr P2SH
+Signing Requirements: 3-of-3 (Keygen + Sign1 + Sign2)
+Address Format: bitcoincash:p... (P2SH multisig)
+```
+
+**Workflow:**
+
+1. Generate Seed in Keygen/Sign1/Sign2
+2. Generate HD Key in Keygen
+3. Generate HD Key in Sign1/Sign2
+4. Export fullpubkey from Sign1/Sign2
+5. Import fullpubkey to Keygen
+6. Create Multisig address in Keygen
+7. Export address from Keygen
+8. Import address to Watch
+9. Generate Test UTXO (regtest)
+10. Create unsigned transaction → Sign 3 times → Broadcast
 
 ---
 
