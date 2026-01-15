@@ -1,0 +1,116 @@
+---
+paths:
+  - "**/*.md"
+  - "**/*.mdc"
+---
+
+# Single Source of Truth (SSOT) Rules
+
+## Overview
+
+This project follows SSOT principles. When editing documentation, always identify and update the SSOT location first.
+
+## SSOT Locations
+
+### AI Agent Configuration
+
+| Category | SSOT Location | Auto-Generated |
+|----------|---------------|----------------|
+| File-type Rules | `.claude/rules/*.md` | `.cursor/rules/*.mdc` |
+| Skills | `.claude/skills/*/SKILL.md` | - |
+| Commands | `.claude/commands/` | - |
+
+### Project Documentation
+
+| Category | SSOT Location | References |
+|----------|---------------|------------|
+| Coding Standards | `.claude/rules/*.md` (per file type) | `docs/standards/coding-conventions.md` |
+| Security | `docs/standards/security.md` | `.claude/rules/security.md` |
+| Testing | `docs/standards/testing.md` | - |
+| Workflow | `docs/standards/workflow.md` | - |
+| Database | `docs/guidelines/database.md` | `.claude/rules/sql.md`, `.claude/rules/hcl.md` |
+| Architecture | `ARCHITECTURE.md` | - |
+| Agent Behavior | `AGENTS.md` | - |
+
+## Key Principles
+
+### 1. Define Once, Reference Everywhere
+
+```
+SSOT Location (edit here)
+    ↓
+Referenced by other docs (add links, not duplicate content)
+```
+
+### 2. Identification Rules
+
+Before editing, ask:
+
+1. **Is this the SSOT?** → Edit directly
+2. **Is this a reference?** → Find and edit the SSOT instead
+3. **Creating new content?** → Determine appropriate SSOT location
+
+### 3. Reference Patterns
+
+**Good (reference):**
+```markdown
+For verification commands, see `.claude/rules/go.md`.
+```
+
+**Bad (duplication):**
+```markdown
+## Verification Commands
+make go-lint
+make check-build
+... (duplicating content from rules/go.md)
+```
+
+## File-Type Rules SSOT
+
+| File Type | SSOT Rule File |
+|-----------|----------------|
+| `*.go` | `.claude/rules/go.md` |
+| `*.ts`, `*.js` | `.claude/rules/typescript.md` |
+| `*.sh` | `.claude/rules/shell-script.md` |
+| `*.sql` | `.claude/rules/sql.md` |
+| `*.hcl` | `.claude/rules/hcl.md` |
+| `*.proto` | `.claude/rules/proto.md` |
+| `*.yaml` | `.claude/rules/yaml.md` |
+| `*.md`, `*.mdc` | `.claude/rules/ssot.md` (this file) |
+
+## Sync Requirements
+
+After editing `.claude/rules/*.md`:
+
+```bash
+./scripts/ai-agent/sync-rule-claude-to-cursor.sh -f
+```
+
+This generates `.cursor/rules/*.mdc` automatically.
+
+## Editing Guidelines
+
+### When Editing SSOT Files
+
+1. Make changes in the SSOT location
+2. Run sync script if editing `.claude/rules/`
+3. Verify references are still accurate
+
+### When Editing Reference Files
+
+1. Check if content should be in SSOT instead
+2. If duplicating SSOT content, convert to reference link
+3. Keep references concise
+
+## Quick Checklist
+
+- [ ] Identified the SSOT location for this information
+- [ ] Editing the SSOT (not a duplicate)
+- [ ] References link to SSOT (not duplicating content)
+- [ ] Sync script run after editing `.claude/rules/`
+
+## Related Documentation
+
+- @AGENTS.md - SSOT structure overview
+- @docs/standards/ - Project standards
+- @.claude/rules/ - File-type specific rules (SSOT)

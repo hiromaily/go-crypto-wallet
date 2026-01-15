@@ -2,6 +2,8 @@
 
 Rules for automatically loading appropriate context documents when receiving a task.
 
+**SSOT Reference**: See [Task Classification](../docs/standards/task-classification.md) for the authoritative definition of labels and task types.
+
 ## Target Files
 
 This rule applies when editing the following file types:
@@ -15,17 +17,39 @@ This rule applies when editing the following file types:
 - `**/*.sh`
 - `**/*.proto`
 
-## Task Type Detection
+## Task Detection Priority
 
-Determine the task type from the following keywords:
+1. **GitHub Issue Labels** (if working on an issue) → Highest priority
+2. **Explicit User Specification** → Second priority
+3. **Keyword Detection** → Fallback
+
+## Task Type from GitHub Labels
+
+When working on a GitHub Issue, use labels to determine task type:
+
+| Label | Task Type | Context File |
+|-------|-----------|--------------|
+| `bug` | bug | `docs/task-contexts/bug-fix.md` |
+| `enhancement` | feature-add | `docs/task-contexts/feature-add.md` |
+| `refactoring` | refactoring | `docs/task-contexts/refactoring.md` |
+| `documentation` | documentation | `docs/task-contexts/documentation.md` |
+| `security` | security | `docs/task-contexts/security.md` |
+| `technical-debt` | refactoring | `docs/task-contexts/refactoring.md` |
+| `test` | test | `docs/task-contexts/test.md` |
+
+## Task Type Detection (Keyword Fallback)
+
+If no GitHub labels are available, determine task type from keywords:
 
 | Keywords | Task Type | Context File |
 |----------|-----------|--------------|
-| bug, fix, error, Issue #, bug | `bug-fix` | `docs/task-contexts/bug-fix.md` |
-| add, implement, feature | `feature-add` | `docs/task-contexts/feature-add.md` |
-| refactor, reorganize, move | `refactoring` | `docs/task-contexts/refactoring.md` |
+| bug, fix, error, issue | `bug` | `docs/task-contexts/bug-fix.md` |
+| add, implement, feature, new | `enhancement` | `docs/task-contexts/feature-add.md` |
+| refactor, reorganize, move, cleanup | `refactoring` | `docs/task-contexts/refactoring.md` |
 | schema, DB, table, column, migration | `db-change` | `docs/task-contexts/db-change.md` |
 | document, README, description, docs, comment | `documentation` | `docs/task-contexts/documentation.md` |
+| test, coverage, spec, unit test, integration test | `test` | `docs/task-contexts/test.md` |
+| security, vulnerability, CVE | `security` | `docs/task-contexts/security.md` |
 
 ## Chain Detection
 

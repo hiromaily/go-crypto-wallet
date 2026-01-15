@@ -9,42 +9,27 @@ Workflow for database schema and migration changes.
 
 ## Prerequisites
 
-**Use `git-workflow` Skill** for branch, commit, and PR workflow.
-
-**Use `go-development` Skill** for Go code verification after SQLC generation.
+- **Use `git-workflow` Skill** for branch, commit, and PR workflow.
+- **Refer to `.claude/rules/hcl.md`** for HCL schema rules (SSOT).
+- **Refer to `.claude/rules/sql.md`** for SQL query rules (SSOT).
 
 ## Applicable Files
 
 | Path | Description |
 |------|-------------|
-| `tools/atlas/schemas/` | HCL schema definitions |
-| `tools/sqlc/` | SQLC query definitions |
-| `docker/*.sql` | Initial data/schemas |
+| `tools/atlas/schemas/*.hcl` | HCL schema definitions (source of truth) |
+| `tools/sqlc/queries/*.sql` | SQLC query definitions |
 
 ## Workflow
 
-### 1. Modify Schema
+### 1. Modify Schema (HCL)
 
-Edit HCL files in `tools/atlas/schemas/`:
+Edit HCL files in `tools/atlas/schemas/`.
 
-```hcl
-table "new_table" {
-  schema = schema.wallet
-  column "id" {
-    type = bigint
-    auto_increment = true
-  }
-  primary_key {
-    columns = [column.id]
-  }
-}
-```
-
-### 2. Format and Lint
+### 2. Verify HCL (from rules/hcl.md)
 
 ```bash
-make atlas-fmt
-make atlas-lint
+make atlas-fmt && make atlas-lint
 ```
 
 ### 3. Generate Migrations
@@ -56,70 +41,31 @@ make atlas-dev-reset
 ### 4. Test Migration
 
 ```bash
-# Reset database and apply
-docker compose down -v
-docker compose up -d
-
-# Verify tables
-docker compose exec mysql mysql -u root -p -e "SHOW TABLES;"
+docker compose down -v && docker compose up -d
 ```
 
-### 5. Regenerate SQLC
+### 5. Regenerate SQLC (from rules/sql.md)
 
 ```bash
-make sqlc
+make extract-sqlc-schema-all && make sqlc
 ```
 
 ### 6. Verify Go Code
 
 ```bash
-make check-build
-make gotest
+make check-build && make gotest
 ```
 
-## Guidelines
+## Self-Review Checklist
 
-### Schema Changes
-
-- [ ] Backward compatible (if possible)
-- [ ] Indexes for frequently queried columns
-- [ ] Foreign keys with proper cascades
-- [ ] Appropriate column types
-
-### SQLC Queries
-
-- [ ] Named parameters
-- [ ] Proper return types
-- [ ] Efficient queries (avoid N+1)
-
-## Verification Checklist
-
-- [ ] `make atlas-fmt` passes
-- [ ] `make atlas-lint` passes
+- [ ] HCL format/lint passes
 - [ ] Migration applies cleanly
-- [ ] `make sqlc` generates correctly
-- [ ] `make check-build` passes
-- [ ] `make gotest` passes
+- [ ] SQLC generates correctly
+- [ ] Go build passes
 
-## Auto-Generated Files
+## Related
 
-**DO NOT EDIT** directly:
-- `internal/infrastructure/database/sqlc/*.go`
-
-Regenerate with `make sqlc` instead.
-
-## Commit Format
-
-```
-feat(db): {brief description}
-
-- {schema change 1}
-- {schema change 2}
-
-Closes #{issue_number}
-```
-
-## Related Skills
-
-- `git-workflow` - Branch, commit, PR workflow
+- `.claude/rules/hcl.md` - HCL rules (SSOT)
+- `.claude/rules/sql.md` - SQL rules (SSOT)
 - `go-development` - Go verification after SQLC generation
+- `git-workflow` - Branch, commit, PR workflow

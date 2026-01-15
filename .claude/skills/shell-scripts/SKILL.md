@@ -9,7 +9,8 @@ Workflow for shell script changes.
 
 ## Prerequisites
 
-**Use `git-workflow` Skill** for branch, commit, and PR workflow.
+- **Use `git-workflow` Skill** for branch, commit, and PR workflow.
+- **Refer to `.claude/rules/shell-script.md`** for detailed best practices (SSOT).
 
 ## Applicable Files
 
@@ -18,68 +19,28 @@ Workflow for shell script changes.
 | `scripts/` | All shell scripts |
 | `*.sh` | Shell scripts anywhere |
 
-## Verification Commands
+## Workflow
+
+### 1. Make Changes
+
+Edit shell scripts following the rules in `.claude/rules/shell-script.md`.
+
+### 2. Verify (from rules/shell-script.md)
 
 ```bash
-make shfmt    # Format shell scripts
+make shfmt
+shellcheck scripts/{script}.sh  # if installed
 ```
 
-### Manual Checks
-
-```bash
-# Check syntax
-bash -n scripts/{script}.sh
-
-# Shellcheck (if installed)
-shellcheck scripts/{script}.sh
-```
-
-## Guidelines
-
-### Style
-
-- Use `#!/bin/bash` or `#!/usr/bin/env bash`
-- Quote variables: `"${var}"`
-- Use `set -euo pipefail` for strict mode
-- Add comments for complex logic
-
-### Best Practices
+### 3. Self-Review Checklist
 
 - [ ] Script is executable (`chmod +x`)
-- [ ] Has shebang line
-- [ ] Uses strict mode
+- [ ] Has shebang line (`#!/usr/bin/env bash`)
+- [ ] Uses strict mode (`set -euo pipefail`)
 - [ ] Variables are quoted
-- [ ] Error handling exists
-- [ ] No hardcoded paths (use variables)
+- [ ] All comments and messages are in English
 
-### Example Header
+## Related
 
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-
-# Description: What this script does
-# Usage: ./script.sh [options]
-```
-
-## Verification Checklist
-
-- [ ] `make shfmt` passes
-- [ ] Script runs without errors
-- [ ] No shellcheck warnings (if available)
-- [ ] Proper error handling
-
-## Commit Format
-
-```
-chore(scripts): {brief description}
-
-- {change 1}
-- {change 2}
-
-Closes #{issue_number}
-```
-
-## Related Skills
-
+- `.claude/rules/shell-script.md` - Shell rules (SSOT)
 - `git-workflow` - Branch, commit, PR workflow
