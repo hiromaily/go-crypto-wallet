@@ -1,0 +1,42 @@
+# Example .yamllint configuration file
+# Place this file as .yamllint or .yamllint.yml in your project root
+
+# Extend a preset configuration
+# Available presets: default (strict), relaxed
+extends: default
+
+# Configure individual rules
+rules:
+  # Trailing spaces - always enabled as error
+  trailing-spaces: error
+
+  # Line length - maximum 120 characters
+  line-length:
+    max: 120
+
+  # Document start - require --- at the beginning
+  document-start: error
+
+  # Colons - control spacing around colons
+  # max-spaces-before: 0, max-spaces-after: 1 (default)
+  colons: error
+
+  # Key duplicates - prevent duplicate keys
+  key-duplicates: error
+
+  # Indentation - enforce consistent indentation
+  # spaces: 2 or 4 or "consistent" to auto-detect
+  indentation:
+    spaces: 2
+
+# Ignore patterns (one per line)
+# Uses .gitignore-style patterns
+ignore: |
+  /node_modules/
+  *.generated.yaml
+  *.template.yml
+
+# Alternative relaxed configuration:
+# extends: relaxed
+# rules:
+#   key-duplicates: error  # Keep this as error even in relaxed mode

@@ -4,139 +4,139 @@
 
 # Type Labels
 - name: bug
-  color: d73a4a
+  color: "d73a4a"
   description: Something isn't working
 
 - name: enhancement
-  color: a2eeef
+  color: "a2eeef"
   description: New feature or request
 
 - name: refactoring
-  color: 0e8a16
+  color: "0e8a16"
   description: Code refactoring without changing functionality
 
 - name: documentation
-  color: 0075ca
+  color: "0075ca"
   description: Documentation updates or improvements
 
 - name: security
-  color: ee0701
+  color: "ee0701"
   description: Security-related issues or improvements
 
 - name: technical-debt
-  color: fbca04
+  color: "fbca04"
   description: Code quality improvements and cleanup tasks
 
 - name: test
-  color: 6b21a8
+  color: "6b21a8"
   description: Test additions or fixes
 
 # Test Scope Labels
 - name: unit-test
-  color: 5319e7
+  color: "5319e7"
   description: Unit test additions or fixes
 
 - name: integration-test
-  color: 8b5cf6
+  color: "8b5cf6"
   description: Integration test additions or fixes
 
 - name: e2e-test
-  color: a855f7
+  color: "a855f7"
   description: End-to-end test additions or fixes
 
 # Status Labels
 - name: duplicate
-  color: cfd3d7
+  color: "cfd3d7"
   description: This issue or pull request already exists
 
 - name: invalid
-  color: e4e669
+  color: "e4e669"
   description: This doesn't seem right
 
 - name: question
-  color: d876e3
+  color: "d876e3"
   description: Further information is requested
 
 - name: wontfix
-  color: ffffff
+  color: "ffffff"
   description: This will not be worked on
 
 - name: help wanted
-  color: 008672
+  color: "008672"
   description: Extra attention is needed
 
 - name: good first issue
-  color: 7057ff
+  color: "7057ff"
   description: Good for newcomers
 
 # Dependency Labels
 - name: dependencies
-  color: 0366d6
+  color: "0366d6"
   description: Pull requests that update a dependency file
 
 # Programming Language Labels
 - name: lang:go
-  color: 00ADD8
+  color: "00ADD8"
   description: Go language code
 
 - name: lang:typescript
-  color: 3178C6
+  color: "3178C6"
   description: TypeScript/JavaScript code
 
 - name: lang:solidity
-  color: 363636
+  color: "363636"
   description: Solidity smart contract code
 
 # Chain Labels
 - name: chain:btc
-  color: F7931A
+  color: "F7931A"
   description: Bitcoin (BTC) related
 
 - name: chain:bch
-  color: 0AC18E
+  color: "0AC18E"
   description: Bitcoin Cash (BCH) related
 
 - name: chain:eth
-  color: 627EEA
+  color: "627EEA"
   description: Ethereum (ETH) related
 
 - name: chain:erc20
-  color: 627EEA
+  color: "627EEA"
   description: ERC-20 token related
 
 - name: chain:xrp
-  color: 23292F
+  color: "23292F"
   description: XRP/Ripple related
 
 - name: chain:all
-  color: 6f42c1
+  color: "6f42c1"
   description: Affects all supported chains
 
 # Scope Labels (non-code tasks)
 - name: scope:docs
-  color: 0075ca
+  color: "0075ca"
   description: Documentation files (docs/, *.md)
 
 - name: scope:devops
-  color: 1d76db
+  color: "1d76db"
   description: CI/CD, GitHub Actions, Docker
 
 - name: scope:scripts
-  color: 89e051
+  color: "89e051"
   description: Shell scripts (scripts/, *.sh)
 
 - name: scope:makefile
-  color: 427819
+  color: "427819"
   description: Makefile and make/ directory
 
 - name: scope:config
-  color: fef2c0
+  color: "fef2c0"
   description: Configuration files (config/, *.toml, *.yaml)
 
 - name: scope:proto
-  color: 4a154b
+  color: "4a154b"
   description: Protocol Buffer definitions (proto/)
 
 - name: scope:db
-  color: c5def5
+  color: "c5def5"
   description: Database schema and migrations
