@@ -113,6 +113,9 @@ Reference: `AddrType.ToKeyType()` in `internal/domain/address/types.go`
 |---------|-------------|--------------|----------------|-----------|
 | 1 | P2PKH Single-sig | `legacy` | `m.../n...` | Single |
 | 2 | P2PKH 2-of-3 | `legacy` | `2...` (P2SH) | 2-of-3 |
+| 3 | P2SH-P2WPKH Single-sig | `p2sh-segwit` | `2...` | Single |
+| 4 | P2SH-P2WSH 2-of-3 | `p2sh-segwit` | `2...` | 2-of-3 |
+| 5 | P2WPKH Native SegWit Single-sig | `bech32` | `bcrt1q...` | Single |
 | 8 | P2SH-P2WSH 3-of-3 | `p2sh-segwit` | `2...` | 3-of-3 |
 
 ## Build and Verification Rules
@@ -263,6 +266,9 @@ btc-e2e-p1-cleanup:
 |---------|--------|-------------|
 | 1 | `e2e-p1-p2pkh-singlesig.sh` | `btc-e2e-p1` |
 | 2 | `e2e-p2-p2pkh-2of3.sh` | `btc-e2e-p2` |
+| 3 | `e2e-p3-p2sh-p2wpkh-singlesig.sh` | `btc-e2e-p3` |
+| 4 | `e2e-p4-p2sh-p2wsh-2of3.sh` | `btc-e2e-p4` |
+| 5 | `e2e-p5-p2wpkh-singlesig.sh` | `btc-e2e-p5` |
 | 8 | `e2e-p8-p2sh-p2wsh-3of3.sh` | `btc-e2e-p8` |
 
 ## Related Skills
