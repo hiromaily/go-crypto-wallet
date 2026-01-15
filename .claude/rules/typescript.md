@@ -1,0 +1,131 @@
+---
+paths: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
+---
+
+# TypeScript/JavaScript File Rules
+
+## Overview
+
+Rules for modifying TypeScript (`*.ts`, `*.tsx`) and JavaScript (`*.js`, `*.jsx`) files in go-crypto-wallet.
+
+## Applicable Directories
+
+| App | Language | Path |
+|-----|----------|------|
+| ripple-lib-server | TypeScript | `apps/ripple-lib-server/` |
+| erc20-token | JavaScript/TypeScript | `apps/erc20-token/` |
+
+## Verification Commands
+
+**Navigate to app directory first:**
+
+### ripple-lib-server (TypeScript)
+
+```bash
+cd apps/ripple-lib-server
+yarn install          # Install dependencies (if needed)
+yarn lint             # Lint and auto-fix with ESLint
+yarn test             # Run tests with Jest
+yarn test:watch       # Run tests in watch mode
+```
+
+### erc20-token (JavaScript/Solidity)
+
+```bash
+cd apps/erc20-token
+npm install           # Install dependencies (if needed)
+npm run lint          # Lint Solidity files
+npm run lint-js       # Lint JavaScript/TypeScript files
+npm run fmt           # Format all files with Prettier
+npm run build         # Compile contracts with Truffle
+npm run test-all      # Run all tests
+```
+
+## Command Summary
+
+| App | Lint | Format | Build | Test |
+|-----|------|--------|-------|------|
+| ripple-lib-server | `yarn lint` | (included in lint) | - | `yarn test` |
+| erc20-token | `npm run lint-js` | `npm run fmt` | `npm run build` | `npm run test-all` |
+
+## Code Style
+
+### TypeScript Best Practices
+
+```typescript
+// Good: Explicit types
+function getBalance(address: string): Promise<number> {
+  // ...
+}
+
+// Good: Async/await with error handling
+async function fetchData(): Promise<Data> {
+  try {
+    const result = await api.call();
+    return result;
+  } catch (error) {
+    throw new Error(`Failed to fetch data: ${error.message}`);
+  }
+}
+
+// Avoid: any type (unless absolutely necessary)
+// Bad: function process(data: any)
+// Good: function process(data: TransactionData)
+```
+
+### Import Order
+
+1. Node.js built-ins
+2. External packages
+3. Internal modules
+
+```typescript
+import * as path from 'path';
+
+import { RippleAPI } from 'ripple-lib';
+
+import { AccountService } from './services/account';
+```
+
+## Auto-Generated Files
+
+**DO NOT EDIT:**
+
+| App | Generated Files |
+|-----|-----------------|
+| ripple-lib-server | `apps/ripple-lib-server/src/pb/` (Protocol Buffer generated) |
+| erc20-token | `apps/erc20-token/build/` (Truffle build artifacts) |
+
+## Security
+
+- No hardcoded secrets or API keys
+- No sensitive data in logs
+- Input validation at boundaries
+- Use environment variables for configuration
+
+## Quick Checklist
+
+### ripple-lib-server
+
+- [ ] `yarn lint` passes
+- [ ] `yarn test` passes
+- [ ] No TypeScript errors
+- [ ] No `any` types (unless documented reason)
+- [ ] Async errors properly handled
+
+### erc20-token
+
+- [ ] `npm run lint-js` passes
+- [ ] `npm run fmt` applied
+- [ ] `npm run build` passes
+- [ ] `npm run test-all` passes
+
+## Related Documentation
+
+- @apps/ripple-lib-server/package.json - ripple-lib-server scripts
+- @apps/erc20-token/package.json - erc20-token scripts
+
+## Related Skills
+
+- `typescript-development` - Full TypeScript workflow
+- `solidity-development` - For Solidity contracts in erc20-token

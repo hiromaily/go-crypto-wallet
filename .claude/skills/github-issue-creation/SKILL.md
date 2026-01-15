@@ -40,6 +40,14 @@ Create issues with proper classification. **Labels determine which Skills are us
 | `chain:xrp` | XRP/Ripple considerations |
 | `chain:all` | Cross-chain considerations |
 
+### Test Labels (test scope)
+
+| Label | Description | Verification |
+|-------|-------------|--------------|
+| `unit-test` | Unit test additions or fixes | `make gotest` |
+| `integration-test` | Integration test additions or fixes | `make gotest-integration` |
+| `e2e-test` | End-to-end test additions or fixes | `make btc-e2e-*` |
+
 ## Task Classification
 
 ### Step 1: Type Label (required)
@@ -58,7 +66,15 @@ Create issues with proper classification. **Labels determine which Skills are us
 **Code tasks** → Language label (`lang:*`)
 **Non-code tasks** → Scope label (`scope:*`)
 
-### Step 3: Chain Label (if applicable)
+### Step 3: Test Label (if applicable)
+
+| Label | When to use |
+|-------|-------------|
+| `unit-test` | Adding or fixing unit tests |
+| `integration-test` | Adding or fixing integration tests |
+| `e2e-test` | Adding or fixing E2E tests |
+
+### Step 4: Chain Label (if applicable)
 
 Only for cryptocurrency-specific code.
 
@@ -73,6 +89,9 @@ Only for cryptocurrency-specific code.
 | Fix shell script | `bug`, `scope:scripts` | `git-workflow` + `shell-scripts` |
 | Add Makefile target | `enhancement`, `scope:makefile` | `git-workflow` + `makefile-update` |
 | Add DB migration | `enhancement`, `scope:db`, `lang:go` | `git-workflow` + `db-migration` + `go-development` |
+| Fix unit test | `bug`, `lang:go`, `unit-test` | `git-workflow` + `go-development` |
+| Add E2E test for BTC | `enhancement`, `lang:go`, `e2e-test`, `chain:btc` | `git-workflow` + `go-development` |
+| Fix integration test | `bug`, `lang:go`, `integration-test` | `git-workflow` + `go-development` |
 
 ## Issue Creation Process
 
@@ -81,6 +100,7 @@ Only for cryptocurrency-specific code.
 From user request, determine:
 - Type (bug, feature, etc.)
 - Language OR Scope
+- Test scope (if applicable)
 - Chain (if applicable)
 
 ### 2. Create Proposal
@@ -90,7 +110,7 @@ From user request, determine:
 
 **Title**: [Clear title - 50-72 chars]
 
-**Labels**: [type], [lang/scope], [chain if applicable]
+**Labels**: [type], [lang/scope], [test if applicable], [chain if applicable]
 
 **Skills**: [git-workflow] + [skill based on label]
 
@@ -116,7 +136,7 @@ gh issue create \
 
 ```
 Required: [Type] + [Language OR Scope]
-Optional: [Chain]
+Optional: [Test] + [Chain]
 
 → Labels determine Skills
 → Skills determine workflow

@@ -27,6 +27,19 @@
   color: fbca04
   description: Code quality improvements and cleanup tasks
 
+# Test Labels
+- name: unit-test
+  color: 5319e7
+  description: Unit test additions or fixes
+
+- name: integration-test
+  color: 8b5cf6
+  description: Integration test additions or fixes
+
+- name: e2e-test
+  color: a855f7
+  description: End-to-end test additions or fixes
+
 # Status Labels
 - name: duplicate
   color: cfd3d7
