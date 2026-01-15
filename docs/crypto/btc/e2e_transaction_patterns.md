@@ -167,7 +167,7 @@ Aggregate signature protocol based on Schnorr signatures. N-of-N multisig become
 | **1** | **P2PKH (BIP44)** | **Single-sig** | **`1...`** | **✅ e2e/e2e-p1-p2pkh-singlesig.sh** |
 | **2** | **P2PKH (BIP44)** | **2-of-3 Multisig** | **`3...` (P2SH wrapped)** | **✅ e2e/e2e-p2-p2pkh-2of3.sh** |
 | **3** | **P2SH-P2WPKH (BIP49)** | **Single-sig** | **`3...`** | **✅ e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh** |
-| 4 | P2SH-P2WPKH (BIP49) | 2-of-3 Multisig | `3...` | ❌ Not supported |
+| **4** | **P2SH-P2WSH (BIP49)** | **2-of-3 Multisig** | **`3...`/`2...`** | **✅ e2e/e2e-p4-p2sh-p2wsh-2of3.sh** |
 | 5 | P2WPKH (BIP84) | Single-sig | `bc1q...` | 🔶 Manual testing |
 | 6 | P2WSH (BIP84) | 2-of-3 Multisig | `bc1q...` | ❌ Not supported |
 | 7 | P2WSH (BIP84) | 3-of-3 Multisig | `bc1q...` | ❌ Not supported |
@@ -318,6 +318,106 @@ P2SH-P2WPKH Address:
 - Uses BIP49 key derivation path (`m/49'/0'/account'/change/index`)
 - P2SH address format (`2...` prefix in regtest)
 - SegWit transaction efficiency with legacy address compatibility
+
+---
+
+### Pattern 4: BTC P2SH-P2WSH 2-of-3 Multisig
+
+**Fully implemented and verified in `scripts/operation/btc/e2e/e2e-p4-p2sh-p2wsh-2of3.sh`**
+
+```
+Address Type: P2SH-P2WSH (BIP49 Nested SegWit Multisig)
+Signing Requirements: 2-of-3 Multisig (any 2 signatures out of 3)
+Descriptor: sh(wsh(sortedmulti(2,[fp1/49'/1'/1']xpub1/0/*,[fp2/49'/1'/1']xpub2/0/*,[fp3/49'/1'/1']xpub3/0/*)))
+Address Format: 2... (P2SH in regtest), 3... (P2SH in mainnet)
+```
+
+#### What is P2SH-P2WSH 2-of-3?
+
+P2SH-P2WSH is **SegWit multisig (P2WSH) wrapped in P2SH for backward compatibility**. The 2-of-3 configuration requires **any 2 signatures out of 3 possible keys** to authorize a transaction.
+
+| BIP | Role |
+|-----|------|
+| **BIP16** | Defines P2SH (Pay-to-Script-Hash) |
+| **BIP49** | Defines P2SH-SegWit derivation path (`m/49'/...`) |
+| **BIP141** | Defines SegWit witness program |
+| **BIP143** | Defines SegWit transaction signing |
+| **BIP67** | Defines sorted multisig keys (lexicographic ordering) |
+
+#### Address Structure
+
+```
+P2SH-P2WSH 2-of-3 Address:
+┌─────────────────────────────────────────────────────────────┐
+│  P2SH wrapper (for legacy wallet compatibility)              │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │  P2WSH (SegWit Script Hash)                              │ │
+│  │  ┌─────────────────────────────────────────────────────┐ │ │
+│  │  │  sortedmulti(2, pubkey1, pubkey2, pubkey3)           │ │ │
+│  │  │  → 2-of-3 multisig script                            │ │ │
+│  │  └─────────────────────────────────────────────────────┘ │ │
+│  └─────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Comparison with Related Patterns
+
+| Item | Pattern 2 (P2PKH 2-of-3) | **Pattern 4 (P2SH-P2WSH 2-of-3)** | Pattern 8 (P2SH-P2WSH 3-of-3) |
+|------|-------------------------|------------------------------------|-------------------------------|
+| BIP | BIP44 | **BIP49** | BIP49 |
+| Address Prefix | `2...` (P2SH) | **`2...` (P2SH)** | `2...` (P2SH) |
+| Descriptor | `sh(multi(2,...))` | **`sh(wsh(sortedmulti(2,...)))`** | `sh(wsh(sortedmulti(3,...)))` |
+| SegWit | No | **Yes (wrapped)** | Yes (wrapped) |
+| Signature Requirement | 2-of-3 | **2-of-3** | 3-of-3 (all required) |
+| Transaction Size | Larger | **Smaller** | Similar to P4 |
+| Threshold Flexibility | Medium | **Medium** | Low (all must sign) |
+
+#### Why Use P2SH-P2WSH 2-of-3?
+
+| Aspect | Description |
+|--------|-------------|
+| ✅ Threshold security | Requires only 2 out of 3 keys - provides redundancy and operational flexibility |
+| ✅ SegWit efficiency | Reduced transaction size and fees compared to legacy multisig |
+| ✅ Legacy compatibility | `2...` addresses can receive from any wallet |
+| ✅ Sorted keys | Uses BIP67 sorted multisig for deterministic key ordering |
+| ❌ Complex setup | Requires 3 separate wallets (keygen + sign1 + sign2) |
+| ❌ Multiple signatures | Requires coordination between 2 signers |
+
+**Workflow:**
+
+1. Generate Seeds in Keygen, Sign1, Sign2 wallets
+2. Generate BIP49 HD Keys in all wallets (deposit, payment, stored accounts)
+3. Export fullpubkeys from Sign1 and Sign2 wallets
+4. Import fullpubkeys into Keygen wallet
+5. Export 2-of-3 multisig descriptors from Keygen (generates `sh(wsh(sortedmulti(2,...)))`)
+6. Import descriptors into Watch wallet
+7. Generate Test UTXOs (regtest)
+8. Create unsigned transaction → Sign with Keygen (1st) → Sign with Sign1 (2nd) → Broadcast
+
+**Characteristics:**
+
+- **2-of-3 threshold**: Any 2 signatures out of 3 are sufficient (Sign2 not needed if Keygen + Sign1 sign)
+- Uses BIP49 key derivation path (`m/49'/1'/1'/change/index` for multisig)
+- P2SH address format (`2...` prefix in regtest, `3...` in mainnet)
+- SegWit transaction efficiency with legacy address compatibility
+- Configuration: Uses `account_2of3.yaml` for multisig account settings
+- **Security model**: Provides redundancy - losing one key doesn't prevent access to funds
+
+**Signing Flow:**
+
+```
+Watch Wallet (create unsigned tx)
+    ↓
+Keygen Wallet (1st signature)
+    ↓
+Sign1 Wallet (2nd signature) ← Complete here! (2-of-3 satisfied)
+    ↓
+Watch Wallet (broadcast)
+
+Note: Sign2 is optional - 2 signatures already satisfy the 2-of-3 requirement
+```
+
+---
 
 ### Pattern 8: BTC P2SH-P2WSH 3-of-3 Multisig (WIP)
 
@@ -490,7 +590,8 @@ Address Format: bitcoincash:p... (P2SH multisig)
 | `scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh` | BTC | P2PKH Single-sig (Pattern 1) | Single-sig |
 | `scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh` | BTC | P2PKH 2-of-3 Multisig (Pattern 2) | 2-of-3 |
 | `scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh` | BTC | P2SH-P2WPKH Single-sig (Pattern 3) | Single-sig |
-| `scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh` | BTC | P2SH-P2WSH Multisig (Pattern 8) | 3-of-3 |
+| `scripts/operation/btc/e2e/e2e-p4-p2sh-p2wsh-2of3.sh` | BTC | P2SH-P2WSH 2-of-3 Multisig (Pattern 4) | 2-of-3 |
+| `scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh` | BTC | P2SH-P2WSH 3-of-3 Multisig (Pattern 8) | 3-of-3 |
 | `scripts/operation/bch/e2e-workflow.sh` | BCH | CashAddr Multisig | 3-of-3 |
 
 ### Planned E2E Scripts
