@@ -29,6 +29,7 @@ Rules for modifying YAML files (`*.yaml`, `*.yml`) in go-crypto-wallet.
 ### Target Directories for yaml-lint
 
 The `yaml-lint` command checks:
+
 - `.github/workflows/`
 - `.devcontainer/`
 - `config/`
@@ -101,7 +102,7 @@ ports:
 # Good: Anchors for repeated values
 defaults: &defaults
   restart: unless-stopped
-  
+
 services:
   app:
     <<: *defaults

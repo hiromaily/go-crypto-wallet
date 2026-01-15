@@ -7,9 +7,23 @@ description: Create GitHub issues with proper task classification. Classificatio
 
 Create issues with proper classification. **Labels determine which Skills are used.**
 
-## Label → Skill Mapping
+**SSOT Reference**: See [Task Classification](../../../docs/standards/task-classification.md) for the authoritative definition of all labels and mappings.
 
-### Language Labels (code tasks)
+## Label Categories
+
+### Type Labels (Required)
+
+| Label | Description | Context File |
+|-------|-------------|--------------|
+| `bug` | Something isn't working | bug-fix.md |
+| `enhancement` | New feature or request | feature-add.md |
+| `refactoring` | Code improvement | refactoring.md |
+| `documentation` | Documentation updates | documentation.md |
+| `security` | Security-related | security.md |
+| `technical-debt` | Code quality improvements | refactoring.md |
+| `test` | Test additions or fixes | test.md |
+
+### Language Labels (For Code Tasks)
 
 | Label | Skill | Verification |
 |-------|-------|--------------|
@@ -17,7 +31,7 @@ Create issues with proper classification. **Labels determine which Skills are us
 | `lang:typescript` | `typescript-development` | `npm run lint && npm run build` |
 | `lang:solidity` | `solidity-development` | `truffle compile && truffle test` |
 
-### Scope Labels (non-code tasks)
+### Scope Labels (For Non-Code Tasks)
 
 | Label | Skill | Verification |
 |-------|-------|--------------|
@@ -26,21 +40,21 @@ Create issues with proper classification. **Labels determine which Skills are us
 | `scope:scripts` | `shell-scripts` | `make shfmt` |
 | `scope:makefile` | `makefile-update` | `make mk-lint` |
 | `scope:db` | `db-migration` | `make atlas-lint && make sqlc` |
-| `scope:config` | (no specific skill) | Syntax validation |
-| `scope:proto` | (no specific skill) | `protoc` compilation |
+| `scope:config` | - | Syntax validation |
+| `scope:proto` | - | `protoc` compilation |
 
-### Chain Labels (additional context)
+### Chain Labels (For Cryptocurrency Tasks)
 
-| Label | Context |
-|-------|---------|
-| `chain:btc` | Bitcoin-specific considerations |
-| `chain:bch` | Bitcoin Cash-specific considerations |
-| `chain:eth` | Ethereum-specific considerations |
-| `chain:erc20` | ERC-20 token considerations |
-| `chain:xrp` | XRP/Ripple considerations |
-| `chain:all` | Cross-chain considerations |
+| Label | Description |
+|-------|-------------|
+| `chain:btc` | Bitcoin-specific |
+| `chain:bch` | Bitcoin Cash-specific |
+| `chain:eth` | Ethereum-specific |
+| `chain:erc20` | ERC-20 token-specific |
+| `chain:xrp` | XRP/Ripple-specific |
+| `chain:all` | Cross-chain |
 
-### Test Labels (test scope)
+### Test Scope Labels (When Type is `test`)
 
 | Label | Description | Verification |
 |-------|-------------|--------------|
@@ -48,37 +62,20 @@ Create issues with proper classification. **Labels determine which Skills are us
 | `integration-test` | Integration test additions or fixes | `make gotest-integration` |
 | `e2e-test` | End-to-end test additions or fixes | `make btc-e2e-*` |
 
-## Task Classification
+## Label Selection Rules
 
-### Step 1: Type Label (required)
+### Required Labels
 
-| Type | Label | Description |
-|------|-------|-------------|
-| Bug | `bug` | Something isn't working |
-| Feature | `enhancement` | New feature |
-| Refactoring | `refactoring` | Code improvement |
-| Documentation | `documentation` | Docs updates |
-| Security | `security` | Security-related |
-| Technical Debt | `technical-debt` | Code quality |
+Every issue must have:
+1. **One Type label** (`bug`, `enhancement`, `refactoring`, `documentation`, `security`, `technical-debt`, `test`)
+2. **One Language OR Scope label** (`lang:*` or `scope:*`)
 
-### Step 2: Language OR Scope Label (required)
+### Optional Labels
 
-**Code tasks** → Language label (`lang:*`)
-**Non-code tasks** → Scope label (`scope:*`)
+- **Chain label**: Only for cryptocurrency-specific code
+- **Test Scope label**: Only when Type is `test`
 
-### Step 3: Test Label (if applicable)
-
-| Label | When to use |
-|-------|-------------|
-| `unit-test` | Adding or fixing unit tests |
-| `integration-test` | Adding or fixing integration tests |
-| `e2e-test` | Adding or fixing E2E tests |
-
-### Step 4: Chain Label (if applicable)
-
-Only for cryptocurrency-specific code.
-
-## Label Examples
+## Label → Skill Mapping Examples
 
 | Task | Labels | Skills Used |
 |------|--------|-------------|
@@ -89,16 +86,16 @@ Only for cryptocurrency-specific code.
 | Fix shell script | `bug`, `scope:scripts` | `git-workflow` + `shell-scripts` |
 | Add Makefile target | `enhancement`, `scope:makefile` | `git-workflow` + `makefile-update` |
 | Add DB migration | `enhancement`, `scope:db`, `lang:go` | `git-workflow` + `db-migration` + `go-development` |
-| Fix unit test | `bug`, `lang:go`, `unit-test` | `git-workflow` + `go-development` |
-| Add E2E test for BTC | `enhancement`, `lang:go`, `e2e-test`, `chain:btc` | `git-workflow` + `go-development` |
-| Fix integration test | `bug`, `lang:go`, `integration-test` | `git-workflow` + `go-development` |
+| Add unit tests | `test`, `lang:go`, `unit-test` | `git-workflow` + `go-development` |
+| Add E2E test for BTC | `test`, `lang:go`, `e2e-test`, `chain:btc` | `git-workflow` + `go-development` |
+| Fix integration test | `test`, `lang:go`, `integration-test` | `git-workflow` + `go-development` |
 
 ## Issue Creation Process
 
 ### 1. Classify Task
 
 From user request, determine:
-- Type (bug, feature, etc.)
+- Type (bug, enhancement, refactoring, documentation, security, technical-debt, test)
 - Language OR Scope
 - Test scope (if applicable)
 - Chain (if applicable)
@@ -110,7 +107,7 @@ From user request, determine:
 
 **Title**: [Clear title - 50-72 chars]
 
-**Labels**: [type], [lang/scope], [test if applicable], [chain if applicable]
+**Labels**: [type], [lang/scope], [test scope if applicable], [chain if applicable]
 
 **Skills**: [git-workflow] + [skill based on label]
 
@@ -123,7 +120,7 @@ From user request, determine:
 - [ ] Criterion 2
 ```
 
-### 3. Create Issue (after approval)
+### 3. Create Issue (After Approval)
 
 ```bash
 gh issue create \
@@ -136,8 +133,13 @@ gh issue create \
 
 ```
 Required: [Type] + [Language OR Scope]
-Optional: [Test] + [Chain]
+Optional: [Test Scope] + [Chain]
 
 → Labels determine Skills
 → Skills determine workflow
 ```
+
+## Related Documents
+
+- [Task Classification SSOT](../../../docs/standards/task-classification.md) - Authoritative label definitions
+- [Task Context Loading](../../rules/task-context-loading.md) - Context loading rules

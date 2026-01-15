@@ -68,29 +68,29 @@ make gotest
 ```hcl
 table "account_key" {
   schema = schema.watch
-  
+
   column "id" {
     type           = bigint
     auto_increment = true
   }
-  
+
   column "coin_type" {
     type = varchar(10)
   }
-  
+
   column "account" {
     type = varchar(100)
   }
-  
+
   column "created_at" {
     type    = timestamp
     default = sql("CURRENT_TIMESTAMP")
   }
-  
+
   primary_key {
     columns = [column.id]
   }
-  
+
   index "idx_account_key_coin_type" {
     columns = [column.coin_type]
   }

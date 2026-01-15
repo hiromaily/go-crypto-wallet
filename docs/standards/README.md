@@ -11,6 +11,7 @@ All AI agent configurations and developer documentation should reference these s
 | [Security](security.md) | Security requirements and practices |
 | [Testing](testing.md) | Testing strategy and requirements |
 | [Workflow](workflow.md) | Git operations and development workflow |
+| [Task Classification](task-classification.md) | Labels, task types, and skill mappings (SSOT) |
 
 ## Detailed Guidelines
 
