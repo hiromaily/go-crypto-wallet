@@ -6,7 +6,7 @@ BTC E2Eテスト（パターン1: P2PKH Single-sig）の実行エラーを修正
 
 **以下の共通ルールを最初に読み込むこと：**
 
-- @.claude/rules/btc-e2e-script.md - BTC E2E共通ルール（ビルド、検証、エスカレーション、セキュリティ）
+- @.claude/rules/btc/e2e-script.md - BTC E2E共通ルール（ビルド、検証、エスカレーション、セキュリティ）
 
 ## パラメータ
 
@@ -16,7 +16,7 @@ BTC E2Eテスト（パターン1: P2PKH Single-sig）の実行エラーを修正
 
 ## 概要
 
-このコマンドは `make btc-e2e-p2pkh-reset` 実行時のエラーを診断・修正します。
+このコマンドは `make btc-e2e-p1-reset` 実行時のエラーを診断・修正します。
 スクリプトは既に存在するため、エラーの原因特定と修正に集中します。
 
 ### Pattern 1 の技術仕様
@@ -61,8 +61,8 @@ BTC E2Eテスト（パターン1: P2PKH Single-sig）の実行エラーを修正
 
 共通ルールの Required Documentation に加えて、以下を参照：
 
-- @scripts/operation/btc/e2e/e2e-p2pkh-singlesig.sh - **対象スクリプト**
-- @scripts/operation/btc/e2e/e2e-p2pkh-2of3.sh - Pattern 2 スクリプト（Multisig部分の参考）
+- @scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh - **対象スクリプト**
+- @scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh - Pattern 2 スクリプト（Multisig部分の参考）
 
 ## 事前確認: 環境変数
 
@@ -83,7 +83,7 @@ echo $WALLET_ADDRESS_TYPE  # "legacy" であること
 
 ```bash
 # 完全リセットしてE2Eテストを実行
-make btc-e2e-p2pkh-reset
+make btc-e2e-p1-reset
 ```
 
 エラーメッセージを確認し、以下のカテゴリに分類。
@@ -210,7 +210,7 @@ pkh([fingerprint/44'/0'/0']xpub.../0/*)
 ```bash
 # スクリプト内の環境変数エクスポートを確認
 grep -A2 "Environment Variable Overrides" \
-  scripts/operation/btc/e2e/e2e-p2pkh-singlesig.sh
+  scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh
 ```
 
 **修正**: スクリプト内で以下が設定されていることを確認
@@ -246,17 +246,17 @@ docker compose exec -T wallet-db mysql -u root -proot watch -e \
 
 ```bash
 # 詳細モードで実行
-make btc-e2e-p2pkh-verbose
+make btc-e2e-p1-verbose
 
 # または
-./scripts/operation/btc/e2e/e2e-p2pkh-singlesig.sh --verbose --reset
+./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --verbose --reset
 ```
 
 ## 修正ファイルの特定
 
 | エラー種別 | 修正対象ファイル |
 |-----------|-----------------|
-| スクリプトロジック | `scripts/operation/btc/e2e/e2e-p2pkh-singlesig.sh` |
+| スクリプトロジック | `scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh` |
 | 共通関数 | `scripts/operation/common.sh` |
 | Descriptor 生成 | `internal/application/usecase/keygen/btc/` |
 | Watch wallet | `internal/application/usecase/watch/btc/` |
@@ -277,8 +277,8 @@ make btc-e2e-p2pkh-verbose
 
 ### 既存スクリプトへの影響を避ける
 
-- Pattern 2 (`e2e-p2pkh-2of3.sh`) の動作を壊さないこと
-- Pattern 8 (`e2e-p2sh-p2wsh-3of3.sh`) の動作を壊さないこと
+- Pattern 2 (`e2e-p2-p2pkh-2of3.sh`) の動作を壊さないこと
+- Pattern 8 (`e2e-p8-p2sh-p2wsh-3of3.sh`) の動作を壊さないこと
 - `common.sh` を修正する場合は、他パターンへの影響を確認
 - 環境変数の設定は各スクリプト内でローカルに行う
 
@@ -288,8 +288,8 @@ make btc-e2e-p2pkh-verbose
 
 ```bash
 # コンテナ停止のみ
-make btc-e2e-p2pkh-cleanup
+make btc-e2e-p1-cleanup
 
 # 完全リセット（データ含む）
-make btc-e2e-p2pkh-reset
+make btc-e2e-p1-reset
 ```

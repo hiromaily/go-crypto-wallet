@@ -6,7 +6,7 @@ BTC E2Eテスト（パターン8: P2SH-P2WSH 3-of-3 Multisig）を **regtest環�
 
 **以下の共通ルールを最初に読み込むこと：**
 
-- @.claude/rules/btc-e2e-script.md - BTC E2E共通ルール（ビルド、検証、エスカレーション、セキュリティ）
+- @.claude/rules/btc/e2e-script.md - BTC E2E共通ルール（ビルド、検証、エスカレーション、セキュリティ）
 
 ## パラメータ
 
@@ -16,7 +16,7 @@ BTC E2Eテスト（パターン8: P2SH-P2WSH 3-of-3 Multisig）を **regtest環�
 
 ## 概要
 
-このコマンドは`scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh`を **Bitcoin Core regtest環境** で実行し、発生したエラーを分析・修正します。
+このコマンドは`scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh`を **Bitcoin Core regtest環境** で実行し、発生したエラーを分析・修正します。
 
 > **Note**: このE2Eテストはローカルのregtest（Regression Test）環境で実行されます。
 > 実際のBitcoinネットワーク（mainnet/testnet）には接続しません。
@@ -73,9 +73,9 @@ BTC E2Eテスト（パターン8: P2SH-P2WSH 3-of-3 Multisig）を **regtest環�
 
 共通ルールの Required Documentation に加えて、以下を参照：
 
-- @scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh - 実行対象のスクリプト
-- @scripts/operation/btc/e2e/e2e-p2pkh-2of3.sh - Pattern 2 スクリプト（2-of-3 部分の参考）
-- @scripts/operation/btc/e2e/e2e-p2pkh-singlesig.sh - Pattern 1 スクリプト（Single-sig部分の参考）
+- @scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh - 実行対象のスクリプト
+- @scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh - Pattern 2 スクリプト（2-of-3 部分の参考）
+- @scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh - Pattern 1 スクリプト（Single-sig部分の参考）
 - @config/wallet/account_3of3.yaml - 3-of-3 マルチシグ設定
 
 ## 事前確認: 環境変数
@@ -97,13 +97,13 @@ echo $WALLET_ADDRESS_TYPE  # "p2sh-segwit" であること
 
 ```bash
 # フルリセットして実行（推奨）
-make btc-e2e-p2sh-3of3-reset
+make btc-e2e-p8-reset
 
 # または既存状態から実行
-./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh
+./scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh
 
 # デバッグ出力付き
-./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh --verbose
+./scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh --verbose
 ```
 
 > **Note**: ビルドと検証コマンドは共通ルールを参照。
@@ -254,8 +254,8 @@ sh(wsh(sortedmulti(3, [fp/49'/0'/0']xpub1/0/*, xpub2/0/*, xpub3/0/*)))
 
 ```bash
 # コンテナ停止のみ
-./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh --cleanup
+./scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh --cleanup
 
 # 完全リセット（データ含む）
-./scripts/operation/btc/e2e/e2e-p2sh-p2wsh-3of3.sh --reset
+make btc-e2e-p8-reset
 ```
