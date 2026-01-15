@@ -26,6 +26,12 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
+const (
+	// p2wpkhRedeemScriptLen is the expected length of a P2WPKH redeemScript
+	// Format: OP_0 (1 byte) + length byte (1 byte) + pubkey hash (20 bytes) = 22 bytes
+	p2wpkhRedeemScriptLen = 22
+)
+
 // ParsedPSBT represents a parsed PSBT with metadata
 type ParsedPSBT struct {
 	Packet       *psbt.Packet
@@ -707,11 +713,14 @@ func (b *Bitcoin) finalizeP2SHP2WPKHInput(packet *psbt.Packet, inputIndex int) e
 
 	partialSig := input.PartialSigs[0]
 
-	logger.Debug("Finalizing P2SH-P2WPKH input",
+	logger.Info("===== FINALIZING P2SH-P2WPKH INPUT =====",
 		"input", inputIndex,
-		"sigLen", len(partialSig.Signature),
-		"pubKeyLen", len(partialSig.PubKey),
-		"redeemScriptLen", len(input.RedeemScript))
+		"signature_hex", hex.EncodeToString(partialSig.Signature),
+		"signature_len", len(partialSig.Signature),
+		"pubkey_hex", hex.EncodeToString(partialSig.PubKey),
+		"pubkey_len", len(partialSig.PubKey),
+		"redeemScript_hex", hex.EncodeToString(input.RedeemScript),
+		"redeemScript_len", len(input.RedeemScript))
 
 	// For P2SH-P2WPKH, scriptSig contains the redeemScript
 	// The redeemScript is the P2WPKH script: OP_0 <20-byte-pubkey-hash>
@@ -743,10 +752,13 @@ func (b *Bitcoin) finalizeP2SHP2WPKHInput(packet *psbt.Packet, inputIndex int) e
 	input.Bip32Derivation = nil
 	input.RedeemScript = nil // Clear redeemScript as it's now in FinalScriptSig
 
-	logger.Debug("P2SH-P2WPKH input finalized",
+	logger.Info("===== P2SH-P2WPKH INPUT FINALIZED =====",
 		"input", inputIndex,
-		"scriptSigLen", len(input.FinalScriptSig),
-		"witnessCount", len(witness))
+		"final_scriptSig_hex", hex.EncodeToString(input.FinalScriptSig),
+		"final_scriptSig_len", len(input.FinalScriptSig),
+		"final_witness_hex", hex.EncodeToString(input.FinalScriptWitness),
+		"final_witness_len", len(input.FinalScriptWitness),
+		"witness_count", len(witness))
 
 	return nil
 }
@@ -1142,7 +1154,9 @@ func (b *Bitcoin) signInputWithKey(
 	isTaproot := txscript.IsPayToTaproot(witnessUtxo.PkScript)
 	isSegWit := txscript.IsPayToWitnessPubKeyHash(witnessUtxo.PkScript) ||
 		txscript.IsPayToWitnessScriptHash(witnessUtxo.PkScript) ||
-		(txscript.IsPayToScriptHash(witnessUtxo.PkScript) && len(psbtInput.WitnessScript) > 0)
+		(txscript.IsPayToScriptHash(witnessUtxo.PkScript) && len(psbtInput.WitnessScript) > 0) ||
+		(txscript.IsPayToScriptHash(witnessUtxo.PkScript) && len(psbtInput.RedeemScript) > 0 &&
+			txscript.IsPayToWitnessPubKeyHash(psbtInput.RedeemScript))
 
 	// Route to appropriate signing function
 	if isTaproot {
@@ -1217,15 +1231,62 @@ func (*Bitcoin) signSegWitInput(
 	// Calculate witness signature hash
 	sigHashes := txscript.NewTxSigHashes(msgTx, prevOutputFetcher)
 
-	// For P2WSH multisig, use the witness script for hash calculation
-	// For P2WPKH (single sig), use the scriptPubKey
+	// Determine the script to use for hash calculation per BIP143:
+	// - P2WSH multisig: use the witness script
+	// - P2WPKH (native): use the scriptPubKey (witness program)
+	// - P2SH-P2WPKH (nested): use the redeem script (which IS the witness program)
+	// CalcWitnessSigHash will convert the witness program to scriptCode internally
 	scriptForHash := witnessUtxo.PkScript
 	if len(psbtInput.WitnessScript) > 0 {
+		// P2WSH multisig
 		scriptForHash = psbtInput.WitnessScript
 		logger.Debug("Using witness script for P2WSH multisig hash calculation",
 			"input", inputIndex,
 			"witnessScriptLen", len(psbtInput.WitnessScript))
+	} else if len(psbtInput.RedeemScript) > 0 && txscript.IsPayToWitnessPubKeyHash(psbtInput.RedeemScript) {
+		// P2SH-P2WPKH: Extract pubkey hash from redeemScript and construct P2PKH scriptCode
+		// Per BIP143, the scriptCode for P2WPKH is: OP_DUP OP_HASH160 <20-byte-hash> OP_EQUALVERIFY OP_CHECKSIG
+		// The redeemScript is: OP_0 <20-byte-hash>, so extract bytes 2-22
+		if len(psbtInput.RedeemScript) != p2wpkhRedeemScriptLen {
+			logger.Error("Invalid P2WPKH redeemScript length",
+				"input", inputIndex,
+				"expected", p2wpkhRedeemScriptLen,
+				"actual", len(psbtInput.RedeemScript))
+			return false
+		}
+
+		pubKeyHash := psbtInput.RedeemScript[2:] // Skip OP_0 and length byte
+
+		// Build P2PKH scriptCode per BIP143
+		scriptCodeBuilder := txscript.NewScriptBuilder()
+		scriptCodeBuilder.AddOp(txscript.OP_DUP)
+		scriptCodeBuilder.AddOp(txscript.OP_HASH160)
+		scriptCodeBuilder.AddData(pubKeyHash)
+		scriptCodeBuilder.AddOp(txscript.OP_EQUALVERIFY)
+		scriptCodeBuilder.AddOp(txscript.OP_CHECKSIG)
+
+		var err error
+		scriptForHash, err = scriptCodeBuilder.Script()
+		if err != nil {
+			logger.Error("Failed to build P2PKH scriptCode from redeemScript",
+				"input", inputIndex,
+				"error", err)
+			return false
+		}
+
+		logger.Info("P2SH-P2WPKH signing - constructed P2PKH scriptCode",
+			"input", inputIndex,
+			"redeemScript_hex", hex.EncodeToString(psbtInput.RedeemScript),
+			"pubKeyHash_hex", hex.EncodeToString(pubKeyHash),
+			"scriptCode_hex", hex.EncodeToString(scriptForHash),
+			"witnessUtxo_value", witnessUtxo.Value)
 	}
+
+	logger.Info("Calculating witness signature hash",
+		"input", inputIndex,
+		"scriptForHash_hex", hex.EncodeToString(scriptForHash),
+		"scriptForHash_len", len(scriptForHash),
+		"amount_satoshis", witnessUtxo.Value)
 
 	hash, err := txscript.CalcWitnessSigHash(
 		scriptForHash,
@@ -1240,12 +1301,64 @@ func (*Bitcoin) signSegWitInput(
 		return false
 	}
 
+	logger.Info("Witness signature hash calculated",
+		"input", inputIndex,
+		"hash_hex", hex.EncodeToString(hash),
+		"hash_len", len(hash))
+
 	// Sign with ECDSA
 	signature := ecdsa.Sign(privKey.PrivKey, hash)
 	sigBytes := append(signature.Serialize(), byte(txscript.SigHashAll))
-	pubKey := privKey.PrivKey.PubKey().SerializeCompressed()
+	pubKeyObj := privKey.PrivKey.PubKey()
+	pubKey := pubKeyObj.SerializeCompressed()
 
-	// Add signature using btcd's updater
+	logger.Info("ECDSA signature created",
+		"input", inputIndex,
+		"signature_hex", hex.EncodeToString(sigBytes),
+		"signature_len", len(sigBytes),
+		"pubkey_hex", hex.EncodeToString(pubKey),
+		"pubkey_len", len(pubKey))
+
+	// Verify signature locally before adding
+	if !signature.Verify(hash, pubKeyObj) {
+		logger.Error("SegWit signature verification FAILED locally", "input", inputIndex)
+		return false
+	}
+	logger.Info("SegWit signature verified locally - signature is VALID",
+		"input", inputIndex,
+		"pubkey_hash", hex.EncodeToString(btcutil.Hash160(pubKey)))
+
+	// For P2SH-P2WPKH, add signature directly (btcd's updater may have issues)
+	// For other SegWit types, use updater.Sign()
+	isP2SHP2WPKH := len(psbtInput.RedeemScript) > 0 && txscript.IsPayToWitnessPubKeyHash(psbtInput.RedeemScript)
+	if isP2SHP2WPKH {
+		logger.Debug("Adding P2SH-P2WPKH signature directly to PartialSigs", "input", inputIndex)
+
+		// Initialize PartialSigs if needed
+		if psbtInput.PartialSigs == nil {
+			psbtInput.PartialSigs = make([]*psbt.PartialSig, 0)
+		}
+
+		// Check if signature already exists
+		for _, partialSig := range psbtInput.PartialSigs {
+			if bytes.Equal(partialSig.PubKey, pubKey) {
+				logger.Debug("Signature already exists for this pubkey", "input", inputIndex)
+				return false
+			}
+		}
+
+		// Add partial signature directly
+		psbtInput.PartialSigs = append(psbtInput.PartialSigs, &psbt.PartialSig{
+			PubKey:    pubKey,
+			Signature: sigBytes,
+		})
+		logger.Debug("Added P2SH-P2WPKH signature to PartialSigs",
+			"input", inputIndex,
+			"pubKey", hex.EncodeToString(pubKey))
+		return true
+	}
+
+	// For other SegWit types (P2WSH, native P2WPKH), use btcd's updater
 	outcome, err := updater.Sign(inputIndex, sigBytes, pubKey, psbtInput.RedeemScript, psbtInput.WitnessScript)
 	if err != nil {
 		logger.Debug("Signature not applicable for this input", "input", inputIndex, "error", err)
@@ -1685,9 +1798,9 @@ func (b *Bitcoin) addBIP32DerivationFromDescriptor(
 				return fmt.Errorf("failed to parse wallet descriptor: %w", err)
 			}
 
-			// Only support P2SH multisig for now
-			if parsed.Type != domainWallet.DescriptorTypeSH {
-				return fmt.Errorf("unsupported descriptor type: %s (only sh supported)", parsed.Type)
+			// Support P2SH-wrapped descriptors (sh(multi(...)), sh(wpkh(...)))
+			if parsed.Type != domainWallet.DescriptorTypeSH && parsed.Type != domainWallet.DescriptorTypeSHWPKH {
+				return fmt.Errorf("unsupported descriptor type: %s (only sh/sh(wpkh) supported)", parsed.Type)
 			}
 
 			// Verify by deriving the redeemScript
@@ -1707,10 +1820,13 @@ func (b *Bitcoin) addBIP32DerivationFromDescriptor(
 
 			logger.Info("Verified redeemScript matches address, adding BIP32 derivation for all keys",
 				"address", address,
+				"descriptor_type", parsed.Type,
 				"descriptor_index", addressIndex,
 				"num_keys", len(parsed.Keys))
 
-			// Add BIP32 derivation for each key in the multisig
+			// Add BIP32 derivation for each key in the descriptor
+			// For sh(wpkh(...)), there is only 1 key
+			// For sh(multi(...)), there are multiple keys
 			for keyIdx, keyInfo := range parsed.Keys {
 				// Derive the public key at this index
 				pubKey, err := b.derivePublicKeyFromDescriptorKey(keyInfo, addressIndex)
@@ -1753,8 +1869,9 @@ func (b *Bitcoin) addBIP32DerivationFromDescriptor(
 					return fmt.Errorf("failed to add BIP32 derivation for key %d: %w", keyIdx, err)
 				}
 
-				logger.Debug("Added BIP32 derivation for multisig key",
+				logger.Debug("Added BIP32 derivation for descriptor key",
 					"input", inputIndex,
+					"descriptor_type", parsed.Type,
 					"key_index", keyIdx,
 					"pubkey", hex.EncodeToString(pubKey),
 					"fingerprint", keyInfo.Fingerprint,
@@ -1763,8 +1880,9 @@ func (b *Bitcoin) addBIP32DerivationFromDescriptor(
 					"relative", relativePath)
 			}
 
-			logger.Info("Successfully added BIP32 derivation for all multisig keys",
+			logger.Info("Successfully added BIP32 derivation for all descriptor keys",
 				"address", address,
+				"descriptor_type", parsed.Type,
 				"input", inputIndex,
 				"num_keys", len(parsed.Keys))
 			return nil
