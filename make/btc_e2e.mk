@@ -139,6 +139,34 @@ btc-e2e-p5-cleanup:
 	./scripts/operation/btc/e2e/e2e-p5-p2wpkh-singlesig.sh --cleanup
 
 ###############################################################################
+# E2E Testing - Pattern 6: P2WSH Native SegWit 2-of-3 Multisig
+###############################################################################
+# Run Bitcoin E2E workflow Pattern 6 from completely fresh state (recommended)
+.PHONY: btc-e2e-p6-reset
+btc-e2e-p6-reset:
+	./scripts/operation/btc/e2e/e2e-p6-p2wsh-2of3.sh --reset
+
+# Run complete Bitcoin end-to-end workflow Pattern 6
+.PHONY: btc-e2e-p6
+btc-e2e-p6:
+	./scripts/operation/btc/e2e/e2e-p6-p2wsh-2of3.sh
+
+# Run Bitcoin E2E workflow Pattern 6 with verbose output
+.PHONY: btc-e2e-p6-verbose
+btc-e2e-p6-verbose:
+	./scripts/operation/btc/e2e/e2e-p6-p2wsh-2of3.sh --verbose
+
+# Run Bitcoin E2E workflow Pattern 6 in non-interactive mode (for CI/CD)
+.PHONY: btc-e2e-p6-ci
+btc-e2e-p6-ci:
+	./scripts/operation/btc/e2e/e2e-p6-p2wsh-2of3.sh --non-interactive
+
+# Cleanup Bitcoin E2E test environment Pattern 6
+.PHONY: btc-e2e-p6-cleanup
+btc-e2e-p6-cleanup:
+	./scripts/operation/btc/e2e/e2e-p6-p2wsh-2of3.sh --cleanup
+
+###############################################################################
 # E2E Testing - Pattern 8: P2SH-P2WSH 3-of-3 Multisig
 ###############################################################################
 # Run Bitcoin E2E workflow Pattern 8 from completely fresh state (recommended)

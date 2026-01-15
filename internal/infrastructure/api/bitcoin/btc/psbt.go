@@ -9,6 +9,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
+	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/btcsuite/btcd/btcec/v2"
@@ -1825,29 +1828,48 @@ func (b *Bitcoin) addBIP32DerivationFromDescriptor(
 				return fmt.Errorf("failed to parse wallet descriptor: %w", err)
 			}
 
-			// Support P2SH-wrapped descriptors (sh(multi(...)), sh(wpkh(...)), sh(wsh(...)))
+			// Support all descriptor types: P2SH-wrapped and Native SegWit
+			// P2SH-wrapped: sh (P2SH multisig), sh(wpkh) (P2SH-P2WPKH), sh(wsh) (P2SH-P2WSH)
+			// Native SegWit: wpkh (P2WPKH), wsh (P2WSH)
 			if parsed.Type != domainWallet.DescriptorTypeSH &&
 				parsed.Type != domainWallet.DescriptorTypeSHWPKH &&
-				parsed.Type != domainWallet.DescriptorTypeSHWSH {
-				return fmt.Errorf("unsupported descriptor type: %s (only sh/sh(wpkh)/sh(wsh) supported)", parsed.Type)
+				parsed.Type != domainWallet.DescriptorTypeSHWSH &&
+				parsed.Type != domainWallet.DescriptorTypeWPKH &&
+				parsed.Type != domainWallet.DescriptorTypeWSH {
+				return fmt.Errorf(
+					"unsupported descriptor type: %s (only sh/sh(wpkh)/sh(wsh)/wpkh/wsh supported)",
+					parsed.Type,
+				)
 			}
 
-			// Verify by deriving the redeemScript
-			redeemScript, err := b.DeriveRedeemScriptFromDescriptor(walletDescriptor, address, addressIndex)
-			if err != nil {
-				return fmt.Errorf("failed to derive redeemScript: %w", err)
-			}
+			// Verify descriptor by deriving the address
+			// Different logic for P2SH vs Native SegWit
+			var derivedAddr string
 
-			derivedAddr, err := b.deriveP2SHAddressFromRedeemScript(redeemScript)
-			if err != nil {
-				return fmt.Errorf("failed to derive address from redeemScript: %w", err)
+			if parsed.Type == domainWallet.DescriptorTypeWSH || parsed.Type == domainWallet.DescriptorTypeWPKH {
+				// Native SegWit - derive Bech32 address from witness script/program
+				derivedAddr, err = b.deriveNativeSegWitAddress(parsed, addressIndex)
+				if err != nil {
+					return fmt.Errorf("failed to derive native SegWit address: %w", err)
+				}
+			} else {
+				// P2SH - derive P2SH address from redeem script
+				redeemScript, err := b.DeriveRedeemScriptFromDescriptor(walletDescriptor, address, addressIndex)
+				if err != nil {
+					return fmt.Errorf("failed to derive redeemScript: %w", err)
+				}
+
+				derivedAddr, err = b.deriveP2SHAddressFromRedeemScript(redeemScript)
+				if err != nil {
+					return fmt.Errorf("failed to derive P2SH address from redeemScript: %w", err)
+				}
 			}
 
 			if derivedAddr != address {
 				return fmt.Errorf("derived address %s does not match target %s", derivedAddr, address)
 			}
 
-			logger.Info("Verified redeemScript matches address, adding BIP32 derivation for all keys",
+			logger.Info("Verified address matches descriptor, adding BIP32 derivation for all keys",
 				"address", address,
 				"descriptor_type", parsed.Type,
 				"descriptor_index", addressIndex,
@@ -2029,6 +2051,141 @@ func (b *Bitcoin) deriveP2SHAddressFromRedeemScript(redeemScript []byte) (string
 	}
 
 	return address.EncodeAddress(), nil
+}
+
+// deriveNativeSegWitAddress derives a Bech32 address from a Native SegWit descriptor.
+// Supports both P2WPKH (single-sig) and P2WSH (multisig) descriptors.
+//
+// For P2WPKH:
+//   - Derives public key at addressIndex
+//   - Hashes public key (HASH160)
+//   - Creates Bech32 address from 20-byte witness program
+//   - Format: bc1q<20-byte-hash> (42 chars mainnet), bcrt1q<20-byte-hash> (regtest)
+//
+// For P2WSH:
+//   - Derives witness script (multisig script) at addressIndex
+//   - Hashes witness script (SHA256)
+//   - Creates Bech32 address from 32-byte witness program
+//   - Format: bc1q<32-byte-hash> (62 chars mainnet), bcrt1q<32-byte-hash> (regtest)
+func (b *Bitcoin) deriveNativeSegWitAddress(parsed *domainWallet.Descriptor, addressIndex uint32) (string, error) {
+	//nolint:exhaustive // Only WPKH and WSH are native SegWit types
+	switch parsed.Type {
+	case domainWallet.DescriptorTypeWPKH:
+		// P2WPKH: single-sig Native SegWit
+		if len(parsed.Keys) != 1 {
+			return "", fmt.Errorf("P2WPKH descriptor must have exactly 1 key, got %d", len(parsed.Keys))
+		}
+
+		// Derive the public key at this index
+		pubKey, err := b.derivePublicKeyFromDescriptorKey(parsed.Keys[0], addressIndex)
+		if err != nil {
+			return "", fmt.Errorf("failed to derive public key: %w", err)
+		}
+
+		// Hash the public key (HASH160 = RIPEMD160(SHA256(pubkey)))
+		pubKeyHash := btcutil.Hash160(pubKey)
+
+		// Create P2WPKH address
+		address, err := btcutil.NewAddressWitnessPubKeyHash(pubKeyHash, b.chainConf)
+		if err != nil {
+			return "", fmt.Errorf("failed to create P2WPKH address: %w", err)
+		}
+
+		return address.EncodeAddress(), nil
+
+	case domainWallet.DescriptorTypeWSH:
+		// P2WSH: multisig Native SegWit
+		// Derive the witness script (multisig script)
+		witnessScript, err := b.deriveWitnessScriptFromDescriptor(parsed, addressIndex)
+		if err != nil {
+			return "", fmt.Errorf("failed to derive witness script: %w", err)
+		}
+
+		// Hash the witness script (SHA256)
+		witnessScriptHash := sha256.Sum256(witnessScript)
+
+		// Create P2WSH address
+		address, err := btcutil.NewAddressWitnessScriptHash(witnessScriptHash[:], b.chainConf)
+		if err != nil {
+			return "", fmt.Errorf("failed to create P2WSH address: %w", err)
+		}
+
+		return address.EncodeAddress(), nil
+
+	default:
+		return "", fmt.Errorf("unsupported native SegWit descriptor type: %s", parsed.Type)
+	}
+}
+
+// deriveWitnessScriptFromDescriptor derives a witness script (multisig script) from a P2WSH descriptor.
+// The witness script defines the spending conditions (e.g., 2-of-3 multisig).
+//
+// Format for sortedmulti(M, key1, key2, ...):
+//   - M (threshold as OP_N)
+//   - For each key: <pubkey>
+//   - N (total keys as OP_N)
+//   - OP_CHECKMULTISIG
+//
+// Example for 2-of-3:
+//
+//	OP_2 <pubkey1> <pubkey2> <pubkey3> OP_3 OP_CHECKMULTISIG
+func (b *Bitcoin) deriveWitnessScriptFromDescriptor(
+	parsed *domainWallet.Descriptor,
+	addressIndex uint32,
+) ([]byte, error) {
+	if len(parsed.Keys) < 2 {
+		return nil, fmt.Errorf("multisig descriptor must have at least 2 keys, got %d", len(parsed.Keys))
+	}
+
+	// Derive all public keys at this index
+	pubKeys := make([][]byte, len(parsed.Keys))
+	for i, keyInfo := range parsed.Keys {
+		pubKey, err := b.derivePublicKeyFromDescriptorKey(keyInfo, addressIndex)
+		if err != nil {
+			return nil, fmt.Errorf("failed to derive public key %d: %w", i, err)
+		}
+		pubKeys[i] = pubKey
+	}
+
+	// Sort public keys lexicographically (BIP67 sortedmulti)
+	// This ensures deterministic key ordering
+	sortedPubKeys := make([][]byte, len(pubKeys))
+	copy(sortedPubKeys, pubKeys)
+	sort.Slice(sortedPubKeys, func(i, j int) bool {
+		return bytes.Compare(sortedPubKeys[i], sortedPubKeys[j]) < 0
+	})
+
+	// Extract threshold from descriptor script
+	// Format: wsh(sortedmulti(M, key1, key2, ...))
+	// We need to parse "sortedmulti(M," to extract M
+	threshold := 2 // Default for 2-of-3
+	re := regexp.MustCompile(`sortedmulti\((\d+),`)
+	matches := re.FindStringSubmatch(parsed.Script)
+	if len(matches) > 1 {
+		parsedThreshold, err := strconv.Atoi(matches[1])
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse threshold from descriptor: %w", err)
+		}
+		threshold = parsedThreshold
+	}
+
+	// Build witness script using txscript
+	builder := txscript.NewScriptBuilder()
+	builder.AddInt64(int64(threshold)) // M (threshold)
+
+	for _, pubKey := range sortedPubKeys {
+		builder.AddData(pubKey)
+	}
+
+	builder.AddInt64(int64(len(sortedPubKeys))) // N (total keys)
+	builder.AddOp(txscript.OP_CHECKMULTISIG)
+
+	witnessScript, err := builder.Script()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build witness script: %w", err)
+	}
+
+	return witnessScript, nil
 }
 
 // findAddressIndexInDescriptor uses Bitcoin Core's deriveaddresses RPC to find
