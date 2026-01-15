@@ -55,6 +55,34 @@ btc-e2e-p2-cleanup:
 	./scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh --cleanup
 
 ###############################################################################
+# E2E Testing - Pattern 3: P2SH-P2WPKH Single-sig
+###############################################################################
+# Run Bitcoin E2E workflow Pattern 3 from completely fresh state (recommended)
+.PHONY: btc-e2e-p3-reset
+btc-e2e-p3-reset:
+	./scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh --reset
+
+# Run complete Bitcoin end-to-end workflow Pattern 3
+.PHONY: btc-e2e-p3
+btc-e2e-p3:
+	./scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh
+
+# Run Bitcoin E2E workflow Pattern 3 with verbose output
+.PHONY: btc-e2e-p3-verbose
+btc-e2e-p3-verbose:
+	./scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh --verbose
+
+# Run Bitcoin E2E workflow Pattern 3 in non-interactive mode (for CI/CD)
+.PHONY: btc-e2e-p3-ci
+btc-e2e-p3-ci:
+	./scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh --non-interactive
+
+# Cleanup Bitcoin E2E test environment Pattern 3
+.PHONY: btc-e2e-p3-cleanup
+btc-e2e-p3-cleanup:
+	./scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh --cleanup
+
+###############################################################################
 # E2E Testing - Pattern 8: P2SH-P2WSH 3-of-3 Multisig
 ###############################################################################
 # Run Bitcoin E2E workflow Pattern 8 from completely fresh state (recommended)

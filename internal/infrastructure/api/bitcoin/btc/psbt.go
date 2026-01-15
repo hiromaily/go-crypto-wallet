@@ -553,10 +553,22 @@ func (b *Bitcoin) FinalizePSBT(psbtBase64 string) (string, error) {
 				return "", fmt.Errorf("failed to finalize P2PKH input %d: %w", i, err)
 			}
 		} else if scriptType == "P2SH" && hasRedeemScript && !hasWitnessScript && hasPartialSigs {
-			// P2SH multisig (non-SegWit, BIP44) - use custom finalization
-			logger.Info("Using custom P2SH multisig finalization", "input", i)
-			if err := b.finalizeMultisigInput(parsed.Packet, i); err != nil {
-				return "", fmt.Errorf("failed to finalize P2SH multisig input %d: %w", i, err)
+			// Check if redeemScript is P2WPKH (BIP49 Nested SegWit single-sig)
+			// or multisig script (BIP44 P2SH multisig)
+			isP2WPKHRedeemScript := txscript.IsPayToWitnessPubKeyHash(input.RedeemScript)
+
+			if isP2WPKHRedeemScript {
+				// P2SH-P2WPKH (BIP49 Nested SegWit single-sig) - use custom finalization
+				logger.Info("Using custom P2SH-P2WPKH finalization", "input", i)
+				if err := b.finalizeP2SHP2WPKHInput(parsed.Packet, i); err != nil {
+					return "", fmt.Errorf("failed to finalize P2SH-P2WPKH input %d: %w", i, err)
+				}
+			} else {
+				// P2SH multisig (non-SegWit, BIP44) - use custom finalization
+				logger.Info("Using custom P2SH multisig finalization", "input", i)
+				if err := b.finalizeMultisigInput(parsed.Packet, i); err != nil {
+					return "", fmt.Errorf("failed to finalize P2SH multisig input %d: %w", i, err)
+				}
 			}
 		} else if hasRedeemScript && hasWitnessScript && hasPartialSigs {
 			// P2SH-P2WSH multisig - use custom finalization
@@ -647,6 +659,84 @@ func (b *Bitcoin) finalizeP2PKHInput(packet *psbt.Packet, inputIndex int) error 
 		"input", inputIndex,
 		"scriptSigLen", len(scriptSig),
 		"hasWitness", input.FinalScriptWitness != nil)
+
+	return nil
+}
+
+// finalizeP2SHP2WPKHInput finalizes a P2SH-P2WPKH (BIP49 Nested SegWit single-sig) PSBT input.
+// This creates a scriptSig containing the redeemScript (P2WPKH script) and witness data.
+//
+// For P2SH-P2WPKH:
+//   - scriptSig contains: <redeemScript> (which is the P2WPKH script: OP_0 <20-byte-pubkey-hash>)
+//   - witness contains: [<signature>, <pubkey>]
+//
+//nolint:revive // receiver unused but method belongs to Bitcoin type
+func (b *Bitcoin) finalizeP2SHP2WPKHInput(packet *psbt.Packet, inputIndex int) error {
+	// IMPORTANT: Get pointer to input, not a copy
+	input := &packet.Inputs[inputIndex]
+
+	// Ensure we have a partial signature
+	if len(input.PartialSigs) == 0 {
+		return errors.New("no signatures to finalize for P2SH-P2WPKH input")
+	}
+
+	// P2SH-P2WPKH single-sig should have exactly one signature
+	if len(input.PartialSigs) != 1 {
+		return fmt.Errorf("P2SH-P2WPKH input has %d signatures, expected 1", len(input.PartialSigs))
+	}
+
+	// Ensure we have a redeemScript (required for P2SH-P2WPKH)
+	if len(input.RedeemScript) == 0 {
+		return errors.New("missing redeem script for P2SH-P2WPKH input")
+	}
+
+	partialSig := input.PartialSigs[0]
+
+	logger.Debug("Finalizing P2SH-P2WPKH input",
+		"input", inputIndex,
+		"sigLen", len(partialSig.Signature),
+		"pubKeyLen", len(partialSig.PubKey),
+		"redeemScriptLen", len(input.RedeemScript))
+
+	// For P2SH-P2WPKH, scriptSig contains the redeemScript
+	// The redeemScript is the P2WPKH script: OP_0 <20-byte-pubkey-hash>
+	// Use ScriptBuilder to properly serialize with length prefix
+	scriptSigBuilder := txscript.NewScriptBuilder()
+	scriptSigBuilder.AddData(input.RedeemScript)
+	scriptSig, err := scriptSigBuilder.Script()
+	if err != nil {
+		return fmt.Errorf("failed to build P2SH-P2WPKH scriptSig: %w", err)
+	}
+	input.FinalScriptSig = scriptSig
+
+	// Build witness: [<signature>, <pubkey>]
+	witness := wire.TxWitness{
+		partialSig.Signature,
+		partialSig.PubKey,
+	}
+
+	// Serialize witness to FinalScriptWitness format
+	var witnessBuf bytes.Buffer
+	if err := wire.WriteVarInt(&witnessBuf, 0, uint64(len(witness))); err != nil {
+		return fmt.Errorf("failed to write witness count: %w", err)
+	}
+	for _, elem := range witness {
+		if err := wire.WriteVarBytes(&witnessBuf, 0, elem); err != nil {
+			return fmt.Errorf("failed to write witness element: %w", err)
+		}
+	}
+	input.FinalScriptWitness = witnessBuf.Bytes()
+
+	// Clear partial sigs and other metadata (no longer needed after finalization)
+	input.PartialSigs = nil
+	input.SighashType = 0
+	input.Bip32Derivation = nil
+	input.RedeemScript = nil // Clear redeemScript as it's now in FinalScriptSig
+
+	logger.Debug("P2SH-P2WPKH input finalized",
+		"input", inputIndex,
+		"scriptSigLen", len(input.FinalScriptSig),
+		"witnessCount", len(witness))
 
 	return nil
 }
