@@ -166,7 +166,7 @@ Aggregate signature protocol based on Schnorr signatures. N-of-N multisig become
 |---------|----------|-------------------|----------------|-------------------|
 | **1** | **P2PKH (BIP44)** | **Single-sig** | **`1...`** | **✅ e2e/e2e-p1-p2pkh-singlesig.sh** |
 | **2** | **P2PKH (BIP44)** | **2-of-3 Multisig** | **`3...` (P2SH wrapped)** | **✅ e2e/e2e-p2-p2pkh-2of3.sh** |
-| 3 | P2SH-P2WPKH (BIP49) | Single-sig | `3...` | **🔶 e2e/fix-btc-e2e-p3.sh** (WIP) |
+| 3 | P2SH-P2WPKH (BIP49) | Single-sig | `3...` | **🔶 e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh** (WIP) |
 | 4 | P2SH-P2WPKH (BIP49) | 2-of-3 Multisig | `3...` | ❌ Not supported |
 | 5 | P2WPKH (BIP84) | Single-sig | `bc1q...` | 🔶 Manual testing |
 | 6 | P2WSH (BIP84) | 2-of-3 Multisig | `bc1q...` | ❌ Not supported |

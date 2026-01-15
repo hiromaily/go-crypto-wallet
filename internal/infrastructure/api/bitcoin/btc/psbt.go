@@ -26,6 +26,12 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
+const (
+	// p2wpkhRedeemScriptLen is the expected length of a P2WPKH redeemScript
+	// Format: OP_0 (1 byte) + length byte (1 byte) + pubkey hash (20 bytes) = 22 bytes
+	p2wpkhRedeemScriptLen = 22
+)
+
 // ParsedPSBT represents a parsed PSBT with metadata
 type ParsedPSBT struct {
 	Packet       *psbt.Packet
@@ -1241,10 +1247,10 @@ func (*Bitcoin) signSegWitInput(
 		// P2SH-P2WPKH: Extract pubkey hash from redeemScript and construct P2PKH scriptCode
 		// Per BIP143, the scriptCode for P2WPKH is: OP_DUP OP_HASH160 <20-byte-hash> OP_EQUALVERIFY OP_CHECKSIG
 		// The redeemScript is: OP_0 <20-byte-hash>, so extract bytes 2-22
-		if len(psbtInput.RedeemScript) != 22 {
+		if len(psbtInput.RedeemScript) != p2wpkhRedeemScriptLen {
 			logger.Error("Invalid P2WPKH redeemScript length",
 				"input", inputIndex,
-				"expected", 22,
+				"expected", p2wpkhRedeemScriptLen,
 				"actual", len(psbtInput.RedeemScript))
 			return false
 		}
