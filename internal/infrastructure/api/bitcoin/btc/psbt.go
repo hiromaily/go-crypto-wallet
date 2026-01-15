@@ -1535,7 +1535,7 @@ func (b *Bitcoin) addBIP32DerivationFromDescriptor(
 	}
 
 	if addressInfo.Desc == "" {
-		return fmt.Errorf("address info does not contain descriptor (not a descriptor wallet address?)")
+		return errors.New("address info does not contain descriptor (not a descriptor wallet address?)")
 	}
 
 	logger.Debug("Got descriptor from getaddressinfo (with raw keys)",

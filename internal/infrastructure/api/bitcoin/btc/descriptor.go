@@ -225,10 +225,12 @@ func FormatDescriptor(desc *domainWallet.Descriptor) (string, error) {
 // This is used when Bitcoin Core's listunspent doesn't return the redeemScript for descriptor-based addresses.
 //
 // Example descriptor:
-//   sh(multi(2,[fp1/44'/1'/1']tpub.../0/*,[fp2/44'/1'/1']tpub.../0/*,[fp3/44'/1'/1']tpub.../0/*))
+//
+//	sh(multi(2,[fp1/44'/1'/1']tpub.../0/*,[fp2/44'/1'/1']tpub.../0/*,[fp3/44'/1'/1']tpub.../0/*))
 //
 // For index=0, this derives the three public keys at path /0/0 and builds:
-//   OP_2 <pk1> <pk2> <pk3> OP_3 OP_CHECKMULTISIG
+//
+//	OP_2 <pk1> <pk2> <pk3> OP_3 OP_CHECKMULTISIG
 func (b *Bitcoin) DeriveRedeemScriptFromDescriptor(descriptor string, address string, addressIndex uint32) ([]byte, error) {
 	logger.Debug("Deriving redeemScript from descriptor",
 		"descriptor_len", len(descriptor),
@@ -340,7 +342,7 @@ func (b *Bitcoin) derivePublicKeyFromDescriptorKey(keyInfo domainWallet.Descript
 	// Format: "/0/*" or "/1/*" or "/*"
 	// Replace wildcard with actual address index before parsing
 	derivationPath := strings.ReplaceAll(keyInfo.DerivationPath, "/*", fmt.Sprintf("/%d", addressIndex))
-	derivationPath = strings.ReplaceAll(derivationPath, "*", fmt.Sprintf("%d", addressIndex))
+	derivationPath = strings.ReplaceAll(derivationPath, "*", strconv.FormatUint(uint64(addressIndex), 10))
 	pathParts := strings.Split(strings.TrimPrefix(derivationPath, "/"), "/")
 
 	// Parse extended public key
