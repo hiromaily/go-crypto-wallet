@@ -454,6 +454,14 @@ func derivationPathForAddress(
 
 	switch addrType {
 	case domainAddress.AddrTypeLegacy:
+		if isMultisig {
+			// For multisig with BIP44 keys, show actual derivation path
+			// The xpubs are derived from m/44'/coin' (hardened coin level) to
+			// m/44'/coin/account (non-hardened account level) because we're deriving
+			// from extended public keys.
+			// Note: Account index is non-hardened (%d, not %d') for xpub derivation.
+			return fmt.Sprintf("/44'/%s/%d", coinIndex, accountIndex), nil
+		}
 		return fmt.Sprintf("/44'/%s/%d'", coinIndex, accountIndex), nil
 	case domainAddress.AddrTypeP2shSegwit:
 		if isMultisig {

@@ -83,6 +83,11 @@ const (
 	ChangeTypeInternal ChangeType = 1 // constant 1 for internal chain (also known as change addresses)
 )
 
+// maxMultisigAccountIndex is the maximum account index for multisig accounts.
+// Accounts with indices 0, 1, and 2 (deposit, payment, stored) are used for multisig
+// and require non-hardened derivation to match xpub-derived keys.
+const maxMultisigAccountIndex = 2
+
 // HDKey HD Wallet Key object
 type HDKey struct {
 	purpose      PurposeType
@@ -214,12 +219,27 @@ func (k *HDKey) createKeyByAccount(
 		return nil, nil, err
 	}
 	// Account
+	// For multisig accounts (deposit=0, payment=1, stored=2), use non-hardened derivation
+	// because watch wallet derives from coin-level xpubs which can only derive non-hardened children.
+	// For other accounts (auth1=11, auth2=12, etc.), use hardened derivation for enhanced security.
+	accountIndex := accountType.BIP44AccountIndex()
+	isMultisigAccount := accountIndex <= maxMultisigAccountIndex // deposit=0, payment=1, stored=2
+
 	logger.Debug(
 		"create_key_by_account",
 		"account_type", accountType.String(),
-		"account_value", accountType.BIP44AccountIndex(),
+		"account_value", accountIndex,
+		"is_multisig_account", isMultisigAccount,
 	)
-	accountPrivKey, err := coinType.Derive(hdkeychain.HardenedKeyStart + accountType.BIP44AccountIndex())
+
+	var accountPrivKey *hdkeychain.ExtendedKey
+	if isMultisigAccount {
+		// Non-hardened derivation for multisig accounts to match xpub-derived keys
+		accountPrivKey, err = coinType.Derive(accountIndex)
+	} else {
+		// Hardened derivation for non-multisig accounts (enhanced security)
+		accountPrivKey, err = coinType.Derive(hdkeychain.HardenedKeyStart + accountIndex)
+	}
 	if err != nil {
 		return nil, nil, err
 	}

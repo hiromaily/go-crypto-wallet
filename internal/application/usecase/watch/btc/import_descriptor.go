@@ -285,10 +285,13 @@ func (u *importDescriptorUseCase) deriveAddresses(
 		return nil, errors.New("descriptor has no keys")
 	}
 
-	// Check if multisig descriptor (WSH or SH-WSH)
+	// Check if multisig descriptor (SH, WSH, or SH-WSH)
+	// Pattern 2 (P2PKH 2-of-3 multisig) uses SH descriptor type
+	// Pattern 8 (P2SH-P2WSH 3-of-3 multisig) uses SHWSH descriptor type
 	key := descriptor.Keys[0]
 	isMultisig := len(descriptor.Keys) > 1 &&
-		(descriptor.Type == domainWallet.DescriptorTypeWSH ||
+		(descriptor.Type == domainWallet.DescriptorTypeSH ||
+			descriptor.Type == domainWallet.DescriptorTypeWSH ||
 			descriptor.Type == domainWallet.DescriptorTypeSHWSH)
 	if isMultisig {
 		return deriveMultisigAddresses(descriptor, start, count, u.chainConf)
@@ -460,10 +463,14 @@ func deriveMultisigAddresses(
 			pubKeys = append(pubKeys, pubKey)
 		}
 
-		// sortedmulti requires lexicographic sorting of pubkeys
-		sort.Slice(pubKeys, func(i, j int) bool {
-			return bytes.Compare(pubKeys[i].SerializeCompressed(), pubKeys[j].SerializeCompressed()) < 0
-		})
+		// sortedmulti (WSH, SHWSH) requires lexicographic sorting of pubkeys
+		// multi (SH) keeps original order from descriptor
+		if descriptor.Type == domainWallet.DescriptorTypeWSH ||
+			descriptor.Type == domainWallet.DescriptorTypeSHWSH {
+			sort.Slice(pubKeys, func(i, j int) bool {
+				return bytes.Compare(pubKeys[i].SerializeCompressed(), pubKeys[j].SerializeCompressed()) < 0
+			})
+		}
 
 		addrPubs := make([]*btcutil.AddressPubKey, 0, len(pubKeys))
 		for _, pk := range pubKeys {
@@ -479,45 +486,90 @@ func deriveMultisigAddresses(
 			return nil, fmt.Errorf("failed to create multisig script: %w", err)
 		}
 
-		hash := sha256.Sum256(script)
-		wshAddr, err := btcutil.NewAddressWitnessScriptHash(hash[:], chain)
+		// Generate address based on descriptor type
+		addr, err := deriveAddressFromMultisigScript(script, descriptor.Type, chain)
 		if err != nil {
 			return nil, err
 		}
-
-		// For P2SH-P2WSH (sh(wsh(...))), wrap the witness script hash in a P2SH
-		if descriptor.Type == domainWallet.DescriptorTypeSHWSH {
-			// Create P2WSH script (witness program)
-			witnessProgram, err := txscript.PayToAddrScript(wshAddr)
-			if err != nil {
-				return nil, fmt.Errorf("failed to create witness program: %w", err)
-			}
-
-			// Wrap in P2SH
-			shAddr, err := btcutil.NewAddressScriptHash(witnessProgram, chain)
-			if err != nil {
-				return nil, fmt.Errorf("failed to create P2SH address: %w", err)
-			}
-
-			addresses = append(addresses, shAddr.EncodeAddress())
-		} else {
-			// Native P2WSH
-			addresses = append(addresses, wshAddr.EncodeAddress())
-		}
+		addresses = append(addresses, addr)
 	}
 
 	return addresses, nil
 }
 
-func parseRequiredSignatures(script string) (int, error) {
-	start := strings.Index(script, "sortedmulti(")
-	if start == -1 {
-		return 0, errors.New("sortedmulti expression not found for multisig descriptor")
+// deriveAddressFromMultisigScript derives a multisig address from a multisig script
+// based on the descriptor type (SH, WSH, or SHWSH).
+func deriveAddressFromMultisigScript(
+	script []byte,
+	descType domainWallet.DescriptorType,
+	chain *chaincfg.Params,
+) (string, error) {
+	switch descType {
+	case domainWallet.DescriptorTypeSH:
+		// P2SH (non-SegWit, BIP44): sh(multi(...))
+		// Wrap multisig script directly in P2SH
+		shAddr, err := btcutil.NewAddressScriptHash(script, chain)
+		if err != nil {
+			return "", fmt.Errorf("failed to create P2SH address: %w", err)
+		}
+		return shAddr.EncodeAddress(), nil
+
+	case domainWallet.DescriptorTypeSHWSH, domainWallet.DescriptorTypeWSH:
+		// P2SH-P2WSH (SegWit, BIP49) or Native P2WSH (BIP48)
+		hash := sha256.Sum256(script)
+		wshAddr, err := btcutil.NewAddressWitnessScriptHash(hash[:], chain)
+		if err != nil {
+			return "", fmt.Errorf("failed to create witness script hash: %w", err)
+		}
+
+		if descType == domainWallet.DescriptorTypeWSH {
+			// Native P2WSH (BIP48): wsh(sortedmulti(...))
+			return wshAddr.EncodeAddress(), nil
+		}
+
+		// P2SH-P2WSH (SegWit, BIP49): sh(wsh(sortedmulti(...)))
+		// Create P2WSH script (witness program)
+		witnessProgram, err := txscript.PayToAddrScript(wshAddr)
+		if err != nil {
+			return "", fmt.Errorf("failed to create witness program: %w", err)
+		}
+
+		// Wrap in P2SH
+		shAddr, err := btcutil.NewAddressScriptHash(witnessProgram, chain)
+		if err != nil {
+			return "", fmt.Errorf("failed to create P2SH-P2WSH address: %w", err)
+		}
+		return shAddr.EncodeAddress(), nil
+
+	case domainWallet.DescriptorTypePKH, domainWallet.DescriptorTypeSHWPKH,
+		domainWallet.DescriptorTypeWPKH, domainWallet.DescriptorTypeTR,
+		domainWallet.DescriptorTypeUnknown:
+		// These descriptor types should not reach here (filtered by isMultisig check)
+		return "", fmt.Errorf(
+			"descriptor type %s is not supported for multisig address derivation",
+			descType.String())
+
+	default:
+		return "", fmt.Errorf("unsupported multisig descriptor type: %s", descType.String())
 	}
-	after := script[start+len("sortedmulti("):]
+}
+
+func parseRequiredSignatures(script string) (int, error) {
+	// Try sortedmulti first (used in P2WSH and P2SH-P2WSH)
+	start := strings.Index(script, "sortedmulti(")
+	keyword := "sortedmulti("
+	if start == -1 {
+		// Fall back to multi (used in P2SH non-SegWit)
+		start = strings.Index(script, "multi(")
+		keyword = "multi("
+		if start == -1 {
+			return 0, errors.New("multi or sortedmulti expression not found for multisig descriptor")
+		}
+	}
+	after := script[start+len(keyword):]
 	parts := strings.SplitN(after, ",", 2)
 	if len(parts) < 2 {
-		return 0, errors.New("invalid sortedmulti expression")
+		return 0, fmt.Errorf("invalid %s expression", keyword)
 	}
 	required, err := strconv.Atoi(parts[0])
 	if err != nil {

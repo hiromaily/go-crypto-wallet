@@ -165,7 +165,7 @@ Aggregate signature protocol based on Schnorr signatures. N-of-N multisig become
 | Pattern | Key Type | Signature Pattern | Address Format | E2E Script Support |
 |---------|----------|-------------------|----------------|-------------------|
 | **1** | **P2PKH (BIP44)** | **Single-sig** | **`1...`** | **✅ e2e/e2e-p2pkh-singlesig.sh** |
-| **2** | **P2PKH (BIP44)** | **2-of-3 Multisig** | **`3...` (P2SH wrapped)** | **⚠️ e2e/e2e-p2pkh-2of3.sh (P2WSH generation #340)** |
+| **2** | **P2PKH (BIP44)** | **2-of-3 Multisig** | **`3...` (P2SH wrapped)** | **✅ e2e/e2e-p2pkh-2of3.sh (Fixed in #357)** |
 | 3 | P2SH-P2WPKH (BIP49) | Single-sig | `3...` | 🔶 Manual testing |
 | 4 | P2SH-P2WPKH (BIP49) | 2-of-3 Multisig | `3...` | ❌ Not supported |
 | 5 | P2WPKH (BIP84) | Single-sig | `bc1q...` | 🔶 Manual testing |
@@ -238,27 +238,34 @@ Descriptor: sh(wsh(sortedmulti(3, xpub1, xpub2, xpub3)))
 
 ### Pattern 2: BTC P2PKH 2-of-3 Multisig
 
-**Implemented in `scripts/operation/btc/e2e/e2e-p2pkh-2of3.sh` (⚠️ Known limitations)**
+**✅ Fully implemented in `scripts/operation/btc/e2e/e2e-p2pkh-2of3.sh` (Fixed in #357)**
 
 ```
 Address Type: P2PKH (BIP44 Legacy) with 2-of-3 Multisig
 Signing Requirements: 2-of-3 (Keygen + Sign1, Sign2 is optional)
-Expected Descriptor: sh(multi(2, xpub1, xpub2, xpub3))  ← Not implemented
-Actual Descriptor: wsh(sortedmulti(2, xpub1, xpub2, xpub3))  ← Currently generated
+Descriptor: sh(multi(2, [fingerprint/44'/1'/1]xpub1/0/*, [fingerprint/44'/1'/1]xpub2/0/*, [fingerprint/44'/1'/1]xpub3/0/*))
+Address Format: 2... (P2SH in regtest), 3... (P2SH in mainnet)
 ```
 
-**⚠️ Known Limitation (Issue #340):**
+**Fixed Issues (PR #357):**
 
-The Go wallet implementation doesn't support P2SH-wrapped multisig descriptors, so P2WSH addresses (`bcrt1q...`) are currently generated. According to specifications, P2SH addresses (`2...` in regtest, `3...` in mainnet) should be generated.
+- ✅ P2SH multisig descriptor generation now working correctly
+- ✅ Key derivation path mismatch resolved (non-hardened account paths for multisig)
+- ✅ P2SH address generation (not P2WSH) working as expected
+- ✅ Transaction signing and broadcasting verified end-to-end
+
+**Root Cause of Previous Failure:**
+
+Sign/keygen wallets were using hardened account derivation (`m/44'/1'/[account]'`) while descriptors specified non-hardened paths (`m/44'/1'/[account]`). For multisig with xpub derivation, non-hardened account paths are required since xpubs cannot derive hardened children.
 
 **Workflow:**
 
 1. Generate Seed in Keygen/Sign1/Sign2
 2. Generate HD Key in Keygen (10 accounts each)
-3. Generate HD Key in Sign1/Sign2
+3. Generate HD Key in Sign1/Sign2 (with non-hardened account derivation for multisig)
 4. Export fullpubkey from Sign1/Sign2
 5. Import fullpubkey to Keygen
-6. Export Descriptor from Keygen (⚠️ Currently generates `wsh(sortedmulti(2, ...))`)
+6. Export Descriptor from Keygen (generates `sh(multi(2, ...))`)
 7. Import Descriptor to Watch
 8. Generate Test UTXO (regtest)
 9. Create unsigned transaction → Sign 2 times → Broadcast
@@ -266,8 +273,9 @@ The Go wallet implementation doesn't support P2SH-wrapped multisig descriptors, 
 **Characteristics:**
 
 - 2-of-3 multisig (completed with Keygen + Sign1 signatures, Sign2 not required)
-- Uses BIP44 key derivation path
-- ⚠️ Currently operates in P2WSH format (see PR #339)
+- Uses BIP44 key derivation path with non-hardened account index for multisig
+- Generates proper P2SH addresses (`2...` prefix in regtest)
+- Fully compatible with Bitcoin Core descriptor import
 
 ### Pattern 2: BCH CashAddr 3-of-3 Multisig (Current E2E)
 
@@ -352,7 +360,7 @@ Descriptor: tr(musig(xpub1, xpub2, xpub3))
 | Signature Pattern | BTC | BCH |
 |-------------------|-----|-----|
 | Single-sig | ✅ Implemented | ✅ Implemented |
-| 2-of-3 Multisig | ⚠️ Partial | ⚠️ Partial |
+| 2-of-3 Multisig | ✅ Implemented (Fixed in #357) | ⚠️ Partial |
 | 3-of-3 Multisig | ✅ Implemented | ✅ Implemented |
 | MuSig2 | 🔜 In development | N/A |
 
@@ -429,6 +437,21 @@ Descriptor: tr(musig(xpub1, xpub2, xpub3))
 
 ---
 
-**Document Version:** 1.1
-**Last Updated:** 2026-01-14
+**Document Version:** 1.2
+**Last Updated:** 2026-01-15
 **Maintainer:** go-crypto-wallet team
+
+---
+
+## Changelog
+
+### Version 1.2 (2026-01-15)
+
+- ✅ Pattern 2 (P2PKH 2-of-3 Multisig) is now fully working
+- Fixed key derivation path mismatch for multisig accounts (PR #357)
+- Added detailed explanation of the fix and root cause
+- Updated implementation status for 2-of-3 multisig
+
+### Version 1.1 (2026-01-14)
+
+- Initial comprehensive documentation of all patterns
