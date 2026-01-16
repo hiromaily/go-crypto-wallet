@@ -23,31 +23,31 @@ import (
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
-	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
+	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/retry"
 )
 
 type importDescriptorUseCase struct {
 	btcClient apibtc.Bitcoiner
-	parser    *btc.DescriptorParser
+	parser    *apibtcimpl.DescriptorParser
 	chainConf *chaincfg.Params
-	addrRepo  repository.AddressRepositorier
+	addrRepo  repowatch.AddressRepositorier
 	coinType  domainCoin.CoinTypeCode
 }
 
 // NewImportDescriptorUseCase creates a descriptor import use case.
 func NewImportDescriptorUseCase(
 	btcClient apibtc.Bitcoiner,
-	parser *btc.DescriptorParser,
+	parser *apibtcimpl.DescriptorParser,
 	chainConf *chaincfg.Params,
-	addrRepo repository.AddressRepositorier,
+	addrRepo repowatch.AddressRepositorier,
 	coinType domainCoin.CoinTypeCode,
 ) watchusecase.ImportDescriptorUseCase {
 	return &importDescriptorUseCase{

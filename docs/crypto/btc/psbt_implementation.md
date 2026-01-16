@@ -441,7 +441,7 @@ type PSBTOutput struct {
 ### 3.2 Implementation Structure
 
 ```
-internal/infrastructure/api/bitcoin/btc/
+internal/infrastructure/api/btc/btc/
 ├── psbt.go              (new) - PSBT operations implementation
 ├── psbt_rpc.go          (new) - Bitcoin Core RPC PSBT methods
 ├── psbt_offline.go      (new) - Offline PSBT signing (btcd)
@@ -760,7 +760,7 @@ deposit_8_signed_2_1534744537000000000.psbt     # Signed by Sign (2/2, complete)
 ### Phase 2.2: Infrastructure (#93)
 - Duration: 2-3 weeks
 - Dependencies: #92
-- Deliverable: `internal/infrastructure/api/bitcoin/btc/psbt.go`
+- Deliverable: `internal/infrastructure/api/btc/btc/psbt.go`
 
 ### Phase 2.3: File Repository (#94)
 - Duration: 1 week

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -14,14 +14,14 @@ import (
 )
 
 type generateHDWalletUseCase struct {
-	repo         repository.HDWalletRepo
+	repo         repocold.HDWalletRepo
 	keygen       portsWallet.Generator
 	coinTypeCode domainCoin.CoinTypeCode
 }
 
 // NewGenerateHDWalletUseCase creates a new GenerateHDWalletUseCase
 func NewGenerateHDWalletUseCase(
-	repo repository.HDWalletRepo,
+	repo repocold.HDWalletRepo,
 	keygen portsWallet.Generator,
 	coinTypeCode domainCoin.CoinTypeCode,
 ) keygenusecase.GenerateHDWalletUseCase {

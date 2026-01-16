@@ -10,7 +10,7 @@ import (
 
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
-	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -23,10 +23,10 @@ import (
 type createTransactionUseCase struct {
 	ethClient       apieth.EtherTxCreator
 	dbConn          *sql.DB
-	addrRepo        repository.AddressRepositorier
-	txRepo          repository.TxRepositorier
-	txDetailRepo    repository.ETHDetailTXRepositorier
-	payReqRepo      repository.PaymentRequestRepositorier
+	addrRepo        repowatch.AddressRepositorier
+	txRepo          repowatch.TxRepositorier
+	txDetailRepo    repowatch.ETHDetailTXRepositorier
+	payReqRepo      repowatch.PaymentRequestRepositorier
 	txFileRepo      file.TransactionFileRepositorier
 	depositReceiver domainAccount.AccountType
 	paymentSender   domainAccount.AccountType
@@ -36,10 +36,10 @@ type createTransactionUseCase struct {
 func NewCreateTransactionUseCase(
 	ethClient apieth.EtherTxCreator,
 	dbConn *sql.DB,
-	addrRepo repository.AddressRepositorier,
-	txRepo repository.TxRepositorier,
-	txDetailRepo repository.ETHDetailTXRepositorier,
-	payReqRepo repository.PaymentRequestRepositorier,
+	addrRepo repowatch.AddressRepositorier,
+	txRepo repowatch.TxRepositorier,
+	txDetailRepo repowatch.ETHDetailTXRepositorier,
+	payReqRepo repowatch.PaymentRequestRepositorier,
 	txFileRepo file.TransactionFileRepositorier,
 	depositReceiver domainAccount.AccountType,
 	paymentSender domainAccount.AccountType,

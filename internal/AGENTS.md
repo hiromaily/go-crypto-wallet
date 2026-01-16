@@ -116,7 +116,7 @@ type Bitcoiner interface {
     GetAddressInfo(addr string) (*btcdto.AddressInfo, error)  // Uses DTO, not infrastructure type
 }
 
-// Implementation in infrastructure/api/bitcoin/btc/bitcoin.go
+// Implementation in infrastructure/api/btc/btc/bitcoin.go
 package btc
 
 import (

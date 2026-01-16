@@ -35,7 +35,7 @@ go test -v ./internal/domain/key/ -run "Taproot"
 go test -v ./internal/infrastructure/wallet/key/ -run "BIP86"
 
 # Integration tests (requires Bitcoin Core RPC)
-go test -v -tags=integration ./internal/infrastructure/api/bitcoin/btc/
+go test -v -tags=integration ./internal/infrastructure/api/btc/btc/
 ```
 
 ### Test Coverage
@@ -188,7 +188,7 @@ address_type = "taproot"  # legacy, p2sh-segwit, bech32, taproot
 
 ```bash
 # Run with integration tag
-go test -v -tags=integration ./internal/infrastructure/api/bitcoin/btc/
+go test -v -tags=integration ./internal/infrastructure/api/btc/btc/
 ```
 
 ## End-to-End Testing Workflow

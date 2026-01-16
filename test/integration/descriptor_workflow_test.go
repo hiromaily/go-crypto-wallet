@@ -16,8 +16,8 @@ import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
-	btcmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/mocks"
+	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
+	btcmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/mocks"
 )
 
 func TestDescriptorImportWorkflow_SingleKey(t *testing.T) {
@@ -67,7 +67,7 @@ func TestDescriptorImportWorkflow_SingleKey(t *testing.T) {
 
 	importer := watchusecasebtc.NewImportDescriptorUseCase(
 		btcClient,
-		btc.NewDescriptorParser(),
+		apibtcimpl.NewDescriptorParser(),
 		&chaincfg.MainNetParams,
 		addrRepo,
 		domainCoin.BTC,
@@ -136,7 +136,7 @@ func TestDescriptorImportWorkflow_Multisig(t *testing.T) {
 
 	importer := watchusecasebtc.NewImportDescriptorUseCase(
 		btcClient,
-		btc.NewDescriptorParser(),
+		apibtcimpl.NewDescriptorParser(),
 		&chaincfg.MainNetParams,
 		addrRepo,
 		domainCoin.BTC,

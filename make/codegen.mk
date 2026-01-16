@@ -71,7 +71,7 @@ protoc-go: clean-pb
 # Clean generated protobuf files
 .PHONY: clean-pb
 clean-pb:
-	rm -rf internal/infrastructure/api/ripple/xrp/*.pb.go
+	rm -rf internal/infrastructure/api/xrp/xrp/*.pb.go
 
 ###############################################################################
 # ABI

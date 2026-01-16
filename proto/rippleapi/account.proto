@@ -2,11 +2,10 @@ edition = "2023";
 
 package rippleapi.account;
 
-option go_package = "github.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/ripple/xrp";
-
 // Use proto3 semantics for field presence (implicit presence)
 // This maintains backward compatibility with existing Go code
 option features.field_presence = IMPLICIT;
+option go_package = "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/xrp";
 
 message RequestGetAccountInfo {
   string address = 1;
@@ -21,7 +20,7 @@ message ResponseGetAccountInfo {
   uint64 previousAffectingTransactionLedgerVersion = 5;
 }
 
-// RippleAccountAPI 
+// RippleAccountAPI
 service RippleAccountAPI {
   // https://xrpl.org/rippleapi-reference.html#getaccountinfo
   rpc GetAccountInfo(RequestGetAccountInfo) returns (ResponseGetAccountInfo) {}

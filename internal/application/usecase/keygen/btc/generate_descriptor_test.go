@@ -20,7 +20,7 @@ import (
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
+	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 )
 
@@ -37,7 +37,7 @@ func TestNewGenerateDescriptorUseCase(t *testing.T) {
 	t.Parallel()
 
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
-		btc.NewDescriptorService(&chaincfg.MainNetParams),
+		apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams),
 		&chaincfg.MainNetParams,
 		nil,
 		nil,
@@ -51,7 +51,7 @@ func TestNewGenerateDescriptorUseCase(t *testing.T) {
 func TestGenerateDescriptorUseCase_SingleSig(t *testing.T) {
 	t.Parallel()
 
-	descriptorService := btc.NewDescriptorService(&chaincfg.MainNetParams)
+	descriptorService := apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams)
 	xpriv := testDescriptorMainnetXpriv
 	accountRepo := &stubAccountRepo{
 		key: &domainBitcoin.BtcAccountKey{
@@ -100,7 +100,7 @@ func TestGenerateDescriptorUseCase_MultisigWsh(t *testing.T) {
 		},
 	})
 
-	descriptorService := btc.NewDescriptorService(&chaincfg.MainNetParams)
+	descriptorService := apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		descriptorService,
 		&chaincfg.MainNetParams,
@@ -141,7 +141,7 @@ func TestGenerateDescriptorUseCase_TaprootScriptPath(t *testing.T) {
 	})
 
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
-		btc.NewDescriptorService(&chaincfg.MainNetParams),
+		apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams),
 		&chaincfg.MainNetParams,
 		&stubAuthRepo{items: signers},
 		&stubAccountRepo{},
@@ -168,7 +168,7 @@ func TestGenerateDescriptorUseCase_MissingAccountKey(t *testing.T) {
 	t.Parallel()
 
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
-		btc.NewDescriptorService(&chaincfg.MainNetParams),
+		apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams),
 		&chaincfg.MainNetParams,
 		&stubAuthRepo{},
 		&stubAccountRepo{key: nil},
@@ -203,7 +203,7 @@ func TestGenerateDescriptorUseCase_MultisigWithKeygenKey(t *testing.T) {
 		},
 	})
 
-	descriptorService := btc.NewDescriptorService(&chaincfg.MainNetParams)
+	descriptorService := apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams)
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
 		descriptorService,
 		&chaincfg.MainNetParams,
@@ -251,7 +251,7 @@ func TestGenerateDescriptorUseCase_MultisigMissingSeed(t *testing.T) {
 	})
 
 	useCase := keygenusecasebtc.NewGenerateDescriptorUseCase(
-		btc.NewDescriptorService(&chaincfg.MainNetParams),
+		apibtcimpl.NewDescriptorService(&chaincfg.MainNetParams),
 		&chaincfg.MainNetParams,
 		&stubAuthRepo{items: signers},
 		&stubAccountRepo{},

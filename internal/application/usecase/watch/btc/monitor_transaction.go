@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
-	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
@@ -17,18 +17,18 @@ import (
 type monitorTransactionUseCase struct {
 	btcClient   apibtc.Bitcoiner
 	dbConn      *sql.DB
-	txRepo      repository.BTCTxRepositorier
-	txInputRepo repository.TxInputRepositorier
-	payReqRepo  repository.PaymentRequestRepositorier
+	txRepo      repowatch.BTCTxRepositorier
+	txInputRepo repowatch.TxInputRepositorier
+	payReqRepo  repowatch.PaymentRequestRepositorier
 }
 
 // NewMonitorTransactionUseCase creates a new MonitorTransactionUseCase
 func NewMonitorTransactionUseCase(
 	btcClient apibtc.Bitcoiner,
 	dbConn *sql.DB,
-	txRepo repository.BTCTxRepositorier,
-	txInputRepo repository.TxInputRepositorier,
-	payReqRepo repository.PaymentRequestRepositorier,
+	txRepo repowatch.BTCTxRepositorier,
+	txInputRepo repowatch.TxInputRepositorier,
+	payReqRepo repowatch.PaymentRequestRepositorier,
 ) watchusecase.MonitorTransactionUseCase {
 	return &monitorTransactionUseCase{
 		btcClient:   btcClient,

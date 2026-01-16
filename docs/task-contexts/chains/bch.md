@@ -37,7 +37,7 @@ internal/application/usecase/
 ### Infrastructure Layer
 
 ```
-internal/infrastructure/api/bitcoin/bch/
+internal/infrastructure/api/btc/bch/
 ├── bitcoin_cash.go      # クライアント初期化
 ├── account.go           # アカウント管理
 └── address.go           # アドレス操作（CashAddr対応）
@@ -92,7 +92,7 @@ BTCと同様にUTXO型トランザクションモデルを使用：
 BCHのAPIクライアントは**BTCのインスタンスを埋め込んで拡張**する設計になっています：
 
 ```go
-// internal/infrastructure/api/bitcoin/bch/bitcoin_cash.go
+// internal/infrastructure/api/btc/bch/bitcoin_cash.go
 type BitcoinCash struct {
     btc.Bitcoin  // BTCの実装を埋め込み
 }
@@ -108,10 +108,10 @@ BTCのAPI実装に問題がある場合、**BTCのコードを直接修正する
 
 ```go
 // ❌ やってはいけない: BTCのコードを直接修正
-// internal/infrastructure/api/bitcoin/btc/address.go を編集
+// internal/infrastructure/api/btc/btc/address.go を編集
 
 // ✅ 正しいパターン: BCHでメソッドをオーバーライド
-// internal/infrastructure/api/bitcoin/bch/address.go
+// internal/infrastructure/api/btc/bch/address.go
 func (b *BitcoinCash) GetAddressInfo(addr string) (*dtobtc.AddressInfo, error) {
     // BCH固有の実装
     input, err := json.Marshal(addr)
@@ -179,7 +179,7 @@ BCHとBTCは多くのロジックを共有できますが、以下の点で分�
 ### アドレス変換
 
 ```go
-// internal/infrastructure/api/bitcoin/bch/address.go
+// internal/infrastructure/api/btc/bch/address.go
 // CashAddr ↔ Legacy変換が必要な場合の処理
 ```
 
@@ -201,7 +201,7 @@ pass = "password"
 
 ```bash
 # BCH Infrastructureテスト
-go test ./internal/infrastructure/api/bitcoin/bch/...
+go test ./internal/infrastructure/api/btc/bch/...
 
 # BCH関連の設定ファイル確認
 ls config/wallet/bch_*.toml
@@ -236,9 +236,9 @@ ls config/wallet/bch_*.toml
 ### 埋め込みによる継承関係
 
 ```
-btc.Bitcoin (internal/infrastructure/api/bitcoin/btc/)
+btc.Bitcoin (internal/infrastructure/api/btc/btc/)
     ↑ 埋め込み
-BitcoinCash (internal/infrastructure/api/bitcoin/bch/)
+BitcoinCash (internal/infrastructure/api/btc/bch/)
     → BTCのメソッドを継承
     → 必要に応じてオーバーライド
 ```
@@ -249,21 +249,21 @@ BitcoinCash (internal/infrastructure/api/bitcoin/bch/)
 BTC実装を参考にする場合:
 
 ✅ 自動継承される（そのまま使用可能）:
-- internal/infrastructure/api/bitcoin/btc/unspent.go (UTXO取得)
-- internal/infrastructure/api/bitcoin/btc/transaction.go (トランザクション基本)
-- internal/infrastructure/api/bitcoin/btc/balance.go (残高取得)
+- internal/infrastructure/api/btc/btc/unspent.go (UTXO取得)
+- internal/infrastructure/api/btc/btc/transaction.go (トランザクション基本)
+- internal/infrastructure/api/btc/btc/balance.go (残高取得)
 
 ✅ 参考にできる（Use Case層）:
 - internal/application/usecase/keygen/btc/sign_transaction.go (署名基本)
 
 ⚠️ BCHでオーバーライド済み:
-- internal/infrastructure/api/bitcoin/bch/address.go (GetAddressInfo)
+- internal/infrastructure/api/btc/bch/address.go (GetAddressInfo)
 - 必要に応じて追加のオーバーライドを実装
 
 ❌ BCHでは使用しない:
-- internal/infrastructure/api/bitcoin/btc/descriptor*.go (Descriptor非対応)
-- internal/infrastructure/api/bitcoin/btc/psbt.go (PSBT非対応)
-- internal/infrastructure/api/bitcoin/btc/musig2.go (MuSig2非対応)
+- internal/infrastructure/api/btc/btc/descriptor*.go (Descriptor非対応)
+- internal/infrastructure/api/btc/btc/psbt.go (PSBT非対応)
+- internal/infrastructure/api/btc/btc/musig2.go (MuSig2非対応)
 - internal/application/usecase/*/btc/*musig2*.go
 - internal/application/usecase/*/btc/*descriptor*.go
 ```
@@ -272,7 +272,7 @@ BTC実装を参考にする場合:
 
 ```go
 // 1. bch/ ディレクトリに新しいファイルを作成
-// internal/infrastructure/api/bitcoin/bch/new_feature.go
+// internal/infrastructure/api/btc/bch/new_feature.go
 
 package bch
 

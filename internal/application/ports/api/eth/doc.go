@@ -4,7 +4,7 @@
 //
 // This package follows the Dependency Inversion Principle of Clean Architecture
 // by defining interfaces in the application layer that are implemented by the
-// infrastructure layer (internal/infrastructure/api/ethereum/).
+// infrastructure layer (internal/infrastructure/api/eth/).
 //
 // # Interfaces
 //
@@ -38,7 +38,7 @@
 //
 // # Related Packages
 //
-//   - internal/infrastructure/api/ethereum/eth/: ETH implementation
-//   - internal/infrastructure/api/ethereum/erc20/: ERC-20 implementation
+//   - internal/infrastructure/api/eth/eth/: ETH implementation
+//   - internal/infrastructure/api/eth/erc20/: ERC-20 implementation
 //   - internal/domain/ethereum/: Domain types used in interface methods
 package eth

@@ -253,11 +253,11 @@ Use case layer following Clean Architecture:
 
 External dependencies and implementations:
 
-- `infrastructure/api/bitcoin/` ... Bitcoin/BCH Core RPC API clients
+- `infrastructure/api/btc/` ... Bitcoin/BCH Core RPC API clients
   - [API References](https://developer.bitcoin.org/reference/rpc/index.html)
-- `infrastructure/api/ethereum/` ... Ethereum JSON-RPC API clients
+- `infrastructure/api/eth/` ... Ethereum JSON-RPC API clients
   - [API References](https://ethereum.org/en/developers/docs/apis/json-rpc/)
-- `infrastructure/api/ripple/` ... Ripple gRPC API clients
+- `infrastructure/api/xrp/` ... Ripple gRPC API clients
   - Communicates with [ripple-lib-server](./web/ripple-lib-server/)
 - `infrastructure/database/` ... Database connections and generated code
   - `mysql/` ... MySQL connection management

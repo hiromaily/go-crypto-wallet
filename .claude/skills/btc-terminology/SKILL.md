@@ -91,7 +91,7 @@ AddrTypeTaproot AddrType = "taproot"  // User sees "taproot"
 Conversion between these is handled by mapper functions:
 
 ```go
-// internal/infrastructure/api/bitcoin/btc/mapper.go
+// internal/infrastructure/api/btc/btc/mapper.go
 // FromAddressType: "bech32m" (Bitcoin Core) → "taproot" (user-facing)
 // ToAddressType:   "taproot" (user-facing) → "bech32m" (Bitcoin Core)
 ```
@@ -114,7 +114,7 @@ When working with Taproot/Bech32m code:
 |------|---------|
 | `internal/domain/address/types.go` | User-facing `AddrType` definitions |
 | `internal/domain/bitcoin/address_type.go` | Bitcoin Core `AddressType` definitions |
-| `internal/infrastructure/api/bitcoin/btc/mapper.go` | Type conversion functions |
+| `internal/infrastructure/api/btc/btc/mapper.go` | Type conversion functions |
 | `docs/crypto/btc/TAPROOT_GUIDE.md` | Taproot user guide |
 
 ## Related Documentation

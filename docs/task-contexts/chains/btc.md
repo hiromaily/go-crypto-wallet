@@ -44,7 +44,7 @@ internal/application/usecase/
 ### Infrastructure Layer
 
 ```
-internal/infrastructure/api/bitcoin/btc/
+internal/infrastructure/api/btc/btc/
 ├── bitcoin.go           # クライアント初期化
 ├── account.go           # アカウント管理
 ├── address.go           # アドレス操作
@@ -200,7 +200,7 @@ go test ./internal/application/usecase/keygen/btc/...
 go test ./internal/application/usecase/sign/btc/...
 
 # BTC Infrastructureテスト
-go test ./internal/infrastructure/api/bitcoin/btc/...
+go test ./internal/infrastructure/api/btc/btc/...
 
 # 統合テスト
 make gotest-integration

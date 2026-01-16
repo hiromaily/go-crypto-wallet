@@ -16,9 +16,9 @@ import (
 	watchusecasebtc "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
-	btcmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/mocks"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/mocks"
+	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
+	btcmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/mocks"
+	repomocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/mocks"
 	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 )
 
@@ -39,7 +39,7 @@ func TestImportDescriptorUseCase_ImportsAddresses(t *testing.T) {
 	filePath := filepath.Join(tmpDir, "desc.txt")
 	require.NoError(t, os.WriteFile(filePath, []byte(desc), 0o600))
 
-	repo := mocks.NewMockAddressRepositorier(t)
+	repo := repomocks.NewMockAddressRepositorier(t)
 	repo.EXPECT().
 		InsertBulk(mock.Anything, mock.Anything).
 		Return(nil).
@@ -73,7 +73,7 @@ func TestImportDescriptorUseCase_ImportsAddresses(t *testing.T) {
 		}, nil).
 		Times(2)
 
-	parser := btc.NewDescriptorParser()
+	parser := apibtcimpl.NewDescriptorParser()
 	useCase := watchusecasebtc.NewImportDescriptorUseCase(
 		btcClient,
 		parser,
@@ -106,13 +106,13 @@ func TestImportDescriptorUseCase_ValidateOnly(t *testing.T) {
 	filePath := filepath.Join(tmpDir, "desc.txt")
 	require.NoError(t, os.WriteFile(filePath, []byte(desc), 0o600))
 
-	repo := mocks.NewMockAddressRepositorier(t)
+	repo := repomocks.NewMockAddressRepositorier(t)
 	// No insert expected
 
 	btcClient := btcmocks.NewMockBitcoiner(t)
 	// No ImportDescriptors call expected in ValidateOnly mode
 
-	parser := btc.NewDescriptorParser()
+	parser := apibtcimpl.NewDescriptorParser()
 	useCase := watchusecasebtc.NewImportDescriptorUseCase(
 		btcClient,
 		parser,
@@ -149,7 +149,7 @@ func TestImportDescriptorUseCase_ImportsMultisigAddresses(t *testing.T) {
 	filePath := filepath.Join(tmpDir, "desc.txt")
 	require.NoError(t, os.WriteFile(filePath, []byte(desc), 0o600))
 
-	repo := mocks.NewMockAddressRepositorier(t)
+	repo := repomocks.NewMockAddressRepositorier(t)
 	repo.EXPECT().
 		InsertBulk(mock.Anything, mock.Anything).
 		Return(nil).
@@ -183,7 +183,7 @@ func TestImportDescriptorUseCase_ImportsMultisigAddresses(t *testing.T) {
 		}, nil).
 		Once()
 
-	parser := btc.NewDescriptorParser()
+	parser := apibtcimpl.NewDescriptorParser()
 	useCase := watchusecasebtc.NewImportDescriptorUseCase(
 		btcClient,
 		parser,

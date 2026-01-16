@@ -61,7 +61,7 @@ When signing (lines 150-178):
 2. Gets WIF: `authKey.WalletImportFormat` (line 172)
 3. Passes WIF to `SignPSBTWithKey()`
 
-File: `internal/infrastructure/api/bitcoin/btc/psbt.go`
+File: `internal/infrastructure/api/btc/btc/psbt.go`
 
 The signing logic (lines 694-798):
 1. Decodes WIF to private key (line 269-274)
@@ -79,7 +79,7 @@ When creating a PSBT for sending funds:
 
 #### Finalization (Watch Wallet)
 
-File: `internal/infrastructure/api/bitcoin/btc/psbt.go`
+File: `internal/infrastructure/api/btc/btc/psbt.go`
 
 The finalization logic (lines 425-558):
 1. Extracts pubkeys from witness script (line 445-462)
@@ -259,12 +259,12 @@ PSBT_IN_BIP32_DERIVATION = {pubkey: (fingerprint, derivation_path)}
 - `internal/infrastructure/repository/cold/auth_account_key_sqlc.go` - Handle xpriv storage
 
 ### 3. PSBT Parsing
-- `internal/infrastructure/api/bitcoin/btc/psbt.go` - Add BIP32 derivation path parsing
+- `internal/infrastructure/api/btc/btc/psbt.go` - Add BIP32 derivation path parsing
 - New method: `extractAddressIndexFromPSBT(psbt)` - Parse BIP32_DERIVATION fields
 
 ### 4. Signing Logic
 - `internal/application/usecase/sign/btc/sign_transaction.go` - Retrieve xpriv, derive child key
-- `internal/infrastructure/api/bitcoin/btc/psbt.go` - Update SignPSBTWithKey to support extended keys
+- `internal/infrastructure/api/btc/btc/psbt.go` - Update SignPSBTWithKey to support extended keys
 - New method: `deriveKeyAtIndex(xpriv, index)` - Derive child key from extended key
 
 ### 5. Testing

@@ -1,4 +1,4 @@
-// Package repository defines interfaces for database persistence operations.
+// Package repository is the parent directory for repository port interfaces.
 //
 // # Overview
 //
@@ -6,39 +6,23 @@
 // by defining interfaces in the application layer that are implemented by the
 // infrastructure layer (internal/infrastructure/repository/).
 //
-// # Cold Wallet Repositories (keygen/sign wallets)
+// # Subdirectories
 //
-//   - SeedRepositorier: HD wallet seed storage
-//   - BTCAccountKeyRepositorier: BTC/BCH account key management
-//   - ETHAccountKeyRepositorier: ETH account key management
-//   - XRPAccountKeyRepositorier: XRP account key management
-//   - AuthFullPubkeyRepositorier: Authorization public key storage
-//   - AuthAccountKeyRepositorier: Authorization account key storage
-//   - HDWalletRepo: Generic HD wallet key storage abstraction
-//
-// # Watch Wallet Repositories
-//
-//   - AddressRepositorier: Address management and allocation
-//   - BTCTxRepositorier: BTC transaction record management
-//   - TxInputRepositorier: Transaction input records
-//   - TxOutputRepositorier: Transaction output records
-//   - TxRepositorier: Generic transaction records
-//   - PaymentRequestRepositorier: Payment request management
-//   - ETHDetailTXRepositorier: ETH transaction detail management
-//   - XRPDetailTXRepositorier: XRP transaction detail management
+//   - cold/: Repository interfaces for cold wallets (keygen/sign)
+//   - watch/: Repository interfaces for watch wallets (online)
 //
 // # Usage
 //
-// Use cases depend on these interfaces, not concrete implementations:
+// Import the appropriate subpackage based on wallet type:
 //
-//	type myUseCase struct {
-//	    addressRepo repository.AddressRepositorier
-//	    txRepo      repository.BTCTxRepositorier
-//	}
+//	import (
+//	    repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
+//	    repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
+//	)
 //
 // # Related Packages
 //
-//   - internal/infrastructure/repository/cold/: Cold wallet implementations
-//   - internal/infrastructure/repository/watch/: Watch wallet implementations
+//   - internal/infrastructure/repository/cold/mysql/: Cold wallet MySQL implementations
+//   - internal/infrastructure/repository/watch/mysql/: Watch wallet MySQL implementations
 //   - internal/domain/: Domain entities used in interface methods
 package repository

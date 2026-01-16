@@ -85,8 +85,8 @@ The implementation correctly follows BIP143 (Segregated Witness Transaction Sign
 
 | File | Changes |
 |------|---------|
-| `internal/infrastructure/api/bitcoin/btc/descriptor.go` | Added `deriveP2WPKHRedeemScript()` for `sh(wpkh(...))` descriptors |
-| `internal/infrastructure/api/bitcoin/btc/psbt.go` | BIP143-compliant signing and `finalizeP2SHP2WPKHInput()` finalization |
+| `internal/infrastructure/api/btc/btc/descriptor.go` | Added `deriveP2WPKHRedeemScript()` for `sh(wpkh(...))` descriptors |
+| `internal/infrastructure/api/btc/btc/psbt.go` | BIP143-compliant signing and `finalizeP2SHP2WPKHInput()` finalization |
 
 ### Descriptor Format Verified
 

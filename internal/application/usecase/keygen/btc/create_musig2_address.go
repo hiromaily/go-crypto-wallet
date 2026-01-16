@@ -99,28 +99,28 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/btcsuite/btcd/txscript"
 
-	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
+	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type createMuSig2AddressUseCase struct {
-	musig2Service      *btc.MuSig2Service
+	musig2Service      *apibtcimpl.MuSig2Service
 	chainConfig        *chaincfg.Params
-	authFullPubKeyRepo repository.AuthFullPubkeyRepositorier
-	accountKeyRepo     repository.BTCAccountKeyRepositorier
+	authFullPubKeyRepo repocold.AuthFullPubkeyRepositorier
+	accountKeyRepo     repocold.BTCAccountKeyRepositorier
 	multisigAccount    *domainAccount.MultisigConfig
 }
 
 // NewCreateMuSig2AddressUseCase creates a new CreateMuSig2AddressUseCase
 func NewCreateMuSig2AddressUseCase(
-	musig2Service *btc.MuSig2Service,
+	musig2Service *apibtcimpl.MuSig2Service,
 	chainConfig *chaincfg.Params,
-	authFullPubKeyRepo repository.AuthFullPubkeyRepositorier,
-	accountKeyRepo repository.BTCAccountKeyRepositorier,
+	authFullPubKeyRepo repocold.AuthFullPubkeyRepositorier,
+	accountKeyRepo repocold.BTCAccountKeyRepositorier,
 	multisigAccount *domainAccount.MultisigConfig,
 ) keygenusecase.CreateMuSig2AddressUseCase {
 	return &createMuSig2AddressUseCase{
@@ -278,11 +278,11 @@ func ExampleCreateMuSig2Address() {
 
 	// Initialize dependencies (simplified for example)
 	var (
-		musig2Service      *btc.MuSig2Service                    // Provides MuSig2 cryptographic operations
-		chainConfig        = &chaincfg.TestNet3Params            // Bitcoin network configuration
-		authFullPubKeyRepo repository.AuthFullPubkeyRepositorier // Repository for auth public keys
-		accountKeyRepo     repository.BTCAccountKeyRepositorier  // Repository for account keys
-		multisigAccount    *domainAccount.MultisigConfig         // Multisig account configuration
+		musig2Service      *apibtcimpl.MuSig2Service           // Provides MuSig2 cryptographic operations
+		chainConfig        = &chaincfg.TestNet3Params          // Bitcoin network configuration
+		authFullPubKeyRepo repocold.AuthFullPubkeyRepositorier // Repository for auth public keys
+		accountKeyRepo     repocold.BTCAccountKeyRepositorier  // Repository for account keys
+		multisigAccount    *domainAccount.MultisigConfig       // Multisig account configuration
 	)
 
 	// Create the use case

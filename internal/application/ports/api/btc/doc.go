@@ -4,7 +4,7 @@
 //
 // This package follows the Dependency Inversion Principle of Clean Architecture
 // by defining interfaces in the application layer that are implemented by the
-// infrastructure layer (internal/infrastructure/api/bitcoin/).
+// infrastructure layer (internal/infrastructure/api/btc/).
 //
 // # Interfaces
 //
@@ -33,7 +33,7 @@
 //
 // # Related Packages
 //
-//   - internal/infrastructure/api/bitcoin/btc/: BTC implementation
-//   - internal/infrastructure/api/bitcoin/bch/: BCH implementation
+//   - internal/infrastructure/api/btc/btc/: BTC implementation
+//   - internal/infrastructure/api/btc/bch/: BCH implementation
 //   - internal/application/dto/btc/: DTOs used in interface methods
 package btc

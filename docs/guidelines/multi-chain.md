@@ -58,7 +58,7 @@ The project implements three types of wallets, each with specific roles:
 
 **Implementation**: Bitcoin Core RPC API
 
-**Location**: `internal/infrastructure/api/bitcoin/`
+**Location**: `internal/infrastructure/api/btc/`
 
 **Features**:
 
@@ -76,7 +76,7 @@ The project implements three types of wallets, each with specific roles:
 
 **Implementation**: Ethereum JSON-RPC API
 
-**Location**: `internal/infrastructure/api/ethereum/`
+**Location**: `internal/infrastructure/api/eth/`
 
 **Features**:
 
@@ -95,7 +95,7 @@ The project implements three types of wallets, each with specific roles:
 
 **Implementation**: Communication via gRPC with ripple-lib-server
 
-**Location**: `internal/infrastructure/api/ripple/`
+**Location**: `internal/infrastructure/api/xrp/`
 
 **Features**:
 

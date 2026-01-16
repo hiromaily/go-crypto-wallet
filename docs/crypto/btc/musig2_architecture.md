@@ -300,7 +300,7 @@ type AggregateMuSig2SignaturesOutput struct {
 
 #### MuSig2Service
 
-**Location**: `internal/infrastructure/api/bitcoin/btc/musig2.go`
+**Location**: `internal/infrastructure/api/btc/btc/musig2.go`
 
 **Purpose**: Wrapper around `github.com/btcsuite/btcd/btcec/v2/schnorr/musig2` library
 
@@ -1471,7 +1471,7 @@ internal/application/usecase/sign/btc/
 internal/application/usecase/watch/btc/
 └── musig2_aggregate_test.go
 
-internal/infrastructure/api/bitcoin/btc/
+internal/infrastructure/api/btc/btc/
 └── musig2_test.go
 ```
 

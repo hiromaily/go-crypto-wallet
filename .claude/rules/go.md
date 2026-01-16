@@ -99,7 +99,7 @@ if err != nil {
 **DO NOT EDIT** files with `DO NOT EDIT` comments:
 
 - `internal/infrastructure/database/sqlc/*.go` (SQLC)
-- `internal/infrastructure/api/ripple/xrp/*.pb.go` (Protocol Buffers)
+- `internal/infrastructure/api/xrp/xrp/*.pb.go` (Protocol Buffers)
 - `internal/infrastructure/contract/token-abi.go` (ABI)
 
 ## Quick Checklist

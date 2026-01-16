@@ -20,22 +20,23 @@ import (
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
-	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
+	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
-	btcapi "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
-	ethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/erc20"
-	rippleimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
+	bitcoin "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc"
+	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
+	ethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth"
+	apierc20impl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/erc20"
+	rippleimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp"
+	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/contract"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"
+	coldmysql "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/mysql"
+	watchmysql "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/mysql"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/descriptor"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction"
@@ -135,7 +136,7 @@ type container struct {
 	rpcEthClient *ethrpc.Client
 	wsXrpPublic  *websocket.WS
 	wsXrpAdmin   *websocket.WS
-	rippleAPI    *xrp.RippleAPI
+	rippleAPI    *apixrpimpl.RippleAPI
 	// keygen specific
 	multisig *domainAccount.MultisigConfig
 	// sign specific
@@ -367,7 +368,7 @@ func (c *container) newXRPWSClient() (*websocket.WS, *websocket.WS) {
 		// public client
 		publicURL := c.conf.Ripple.WebsocketPublicURL
 		if publicURL == "" {
-			if publicURL = xrp.GetPublicWSServer(c.conf.Ripple.NetworkType).String(); publicURL == "" {
+			if publicURL = apixrpimpl.GetPublicWSServer(c.conf.Ripple.NetworkType).String(); publicURL == "" {
 				panic(errors.New("websocket URL is not found"))
 			}
 		}
@@ -408,8 +409,8 @@ func (c *container) newBTC() apibtc.Bitcoiner {
 	return c.btc
 }
 
-func (c *container) newMuSig2Service() *btcapi.MuSig2Service {
-	return btcapi.NewMuSig2Service(c.pkgContainer.NewLogger())
+func (c *container) newMuSig2Service() *apibtcimpl.MuSig2Service {
+	return apibtcimpl.NewMuSig2Service(c.pkgContainer.NewLogger())
 }
 
 func (c *container) newETH() apieth.Ethereumer {
@@ -440,7 +441,7 @@ func (c *container) newERC20() apieth.ERC20er {
 		if err != nil {
 			panic(err)
 		}
-		c.erc20 = erc20.NewERC20(
+		c.erc20 = apierc20impl.NewERC20(
 			client,
 			tokenClient,
 			conf.ERC20Token,
@@ -472,9 +473,9 @@ func (c *container) newXRP() apixrp.Rippler {
 	return c.xrp
 }
 
-func (c *container) newRippleAPI() *xrp.RippleAPI {
+func (c *container) newRippleAPI() *apixrpimpl.RippleAPI {
 	if c.rippleAPI == nil {
-		c.rippleAPI = xrp.NewRippleAPI(c.pkgContainer.NewGRPCClient())
+		c.rippleAPI = apixrpimpl.NewRippleAPI(c.pkgContainer.NewGRPCClient())
 	}
 	return c.rippleAPI
 }
@@ -483,57 +484,57 @@ func (c *container) newRippleAPI() *xrp.RippleAPI {
 // Repository
 //
 
-func (c *container) newBTCTxRepo() repository.BTCTxRepositorier {
-	return watch.NewBTCTxRepositorySqlc(
+func (c *container) newBTCTxRepo() repowatch.BTCTxRepositorier {
+	return watchmysql.NewBTCTxRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newBTCTxInputRepo() repository.TxInputRepositorier {
-	return watch.NewBTCTxInputRepositorySqlc(
+func (c *container) newBTCTxInputRepo() repowatch.TxInputRepositorier {
+	return watchmysql.NewBTCTxInputRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newBTCTxOutputRepo() repository.TxOutputRepositorier {
-	return watch.NewBTCTxOutputRepositorySqlc(
+func (c *container) newBTCTxOutputRepo() repowatch.TxOutputRepositorier {
+	return watchmysql.NewBTCTxOutputRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newTxRepo() repository.TxRepositorier {
-	return watch.NewTxRepositorySqlc(
+func (c *container) newTxRepo() repowatch.TxRepositorier {
+	return watchmysql.NewTxRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newETHTxDetailRepo() repository.ETHDetailTXRepositorier {
-	return watch.NewETHDetailTXInputRepositorySqlc(
+func (c *container) newETHTxDetailRepo() repowatch.ETHDetailTXRepositorier {
+	return watchmysql.NewETHDetailTXInputRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newXRPTxDetailRepo() repository.XRPDetailTXRepositorier {
-	return watch.NewXRPDetailTxInputRepositorySqlc(
+func (c *container) newXRPTxDetailRepo() repowatch.XRPDetailTXRepositorier {
+	return watchmysql.NewXRPDetailTxInputRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newPaymentRequestRepo() repository.PaymentRequestRepositorier {
-	return watch.NewPaymentRequestRepositorySqlc(
+func (c *container) newPaymentRequestRepo() repowatch.PaymentRequestRepositorier {
+	return watchmysql.NewPaymentRequestRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newAddressRepo() repository.AddressRepositorier {
-	return watch.NewAddressRepositorySqlc(
+func (c *container) newAddressRepo() repowatch.AddressRepositorier {
+	return watchmysql.NewAddressRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
@@ -569,8 +570,8 @@ func (c *container) newPaymentAccount() domainAccount.AccountType {
 	return c.accountConf.PaymentSender
 }
 
-func (c *container) newHdWalletRepo() repository.HDWalletRepo {
-	return cold.NewAccountHDWalletRepo(
+func (c *container) newHdWalletRepo() repocold.HDWalletRepo {
+	return coldmysql.NewAccountHDWalletRepo(
 		c.newAccountKeyRepo(),
 	)
 }
@@ -631,49 +632,49 @@ func (c *container) newMultiAccount() *domainAccount.MultisigConfig {
 // Keygen Repository
 //
 
-func (c *container) newSeedRepo() repository.SeedRepositorier {
-	return cold.NewSeedRepositorySqlc(
+func (c *container) newSeedRepo() repocold.SeedRepositorier {
+	return coldmysql.NewSeedRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newAccountKeyRepo() repository.BTCAccountKeyRepositorier {
-	return cold.NewAccountKeyRepositorySqlc(
+func (c *container) newAccountKeyRepo() repocold.BTCAccountKeyRepositorier {
+	return coldmysql.NewAccountKeyRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newXRPAccountKeyRepo() repository.XRPAccountKeyRepositorier {
-	return cold.NewXRPAccountKeyRepositorySqlc(
+func (c *container) newXRPAccountKeyRepo() repocold.XRPAccountKeyRepositorier {
+	return coldmysql.NewXRPAccountKeyRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newEthAccountKeyRepo() repository.ETHAccountKeyRepositorier {
-	return cold.NewETHAccountKeyRepositorySqlc(
+func (c *container) newEthAccountKeyRepo() repocold.ETHAccountKeyRepositorier {
+	return coldmysql.NewETHAccountKeyRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 	)
 }
 
-func (c *container) newAuthFullPubKeyRepo() repository.AuthFullPubkeyRepositorier {
-	return cold.NewAuthFullPubkeyRepositorySqlc(
-		c.pkgContainer.NewMySQLClient(),
-		c.conf.CoinTypeCode,
-	)
-}
-
-func (c *container) newAuthKeyRepo() repository.AuthAccountKeyRepositorier {
-	return cold.NewAuthAccountKeyRepositorySqlc(
+func (c *container) newAuthFullPubKeyRepo() repocold.AuthFullPubkeyRepositorier {
+	return coldmysql.NewAuthFullPubkeyRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 		c.conf.CoinTypeCode,
 	)
 }
 
-func (c *container) newNonceRepo() *cold.NonceRepositorySqlc {
-	return cold.NewNonceRepositorySqlc(
+func (c *container) newAuthKeyRepo() repocold.AuthAccountKeyRepositorier {
+	return coldmysql.NewAuthAccountKeyRepositorySqlc(
+		c.pkgContainer.NewMySQLClient(),
+		c.conf.CoinTypeCode,
+	)
+}
+
+func (c *container) newNonceRepo() *coldmysql.NonceRepositorySqlc {
+	return coldmysql.NewNonceRepositorySqlc(
 		c.pkgContainer.NewMySQLClient(),
 	)
 }
@@ -696,8 +697,8 @@ func (*container) newDescriptorFileWriter() file.DescriptorFileWriter {
 // Sign Service
 //
 
-func (c *container) newSignHdWalletRepo(authType domainAccount.AuthType) repository.HDWalletRepo {
-	return cold.NewAuthHDWalletRepo(
+func (c *container) newSignHdWalletRepo(authType domainAccount.AuthType) repocold.HDWalletRepo {
+	return coldmysql.NewAuthHDWalletRepo(
 		c.newAuthKeyRepo(),
 		authType,
 	)
@@ -951,7 +952,7 @@ func (c *container) newBTCWatchImportAddressUseCase() watchusecase.ImportAddress
 func (c *container) newBTCWatchImportDescriptorUseCase() watchusecase.ImportDescriptorUseCase {
 	return watchusecasebtc.NewImportDescriptorUseCase(
 		c.newBTC(),
-		btcapi.NewDescriptorParser(),
+		apibtcimpl.NewDescriptorParser(),
 		c.newBTC().GetChainConf(),
 		c.newAddressRepo(),
 		c.conf.CoinTypeCode,
@@ -1091,7 +1092,7 @@ func (c *container) newKeygenExportAddressUseCase() keygenusecase.ExportAddressU
 
 func (c *container) newBTCKeygenGenerateDescriptorUseCase() keygenusecase.GenerateDescriptorUseCase {
 	return keygenusecasebtc.NewGenerateDescriptorUseCase(
-		btcapi.NewDescriptorService(c.newBTC().GetChainConf()),
+		apibtcimpl.NewDescriptorService(c.newBTC().GetChainConf()),
 		c.newBTC().GetChainConf(),
 		c.newAuthFullPubKeyRepo(),
 		c.newAccountKeyRepo(),

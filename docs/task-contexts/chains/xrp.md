@@ -29,7 +29,7 @@ internal/application/usecase/
 ### Infrastructure Layer
 
 ```
-internal/infrastructure/api/ripple/
+internal/infrastructure/api/xrp/
 ├── connection.go                # gRPC接続
 └── xrp/
     ├── ripple.go                # クライアント初期化
@@ -223,7 +223,7 @@ go test ./internal/application/usecase/keygen/xrp/...
 go test ./internal/application/usecase/sign/xrp/...
 
 # XRP Infrastructureテスト
-go test ./internal/infrastructure/api/ripple/xrp/...
+go test ./internal/infrastructure/api/xrp/xrp/...
 ```
 
 ## Related Documentation

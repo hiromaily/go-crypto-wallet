@@ -15,8 +15,8 @@ This commit implements P2SH-P2WPKH (BIP49 Nested SegWit) support for Pattern 3 E
 
 ## Files Modified
 
-1. `internal/infrastructure/api/bitcoin/btc/descriptor.go` (+160 lines)
-2. `internal/infrastructure/api/bitcoin/btc/psbt.go` (+154 lines)
+1. `internal/infrastructure/api/btc/btc/descriptor.go` (+160 lines)
+2. `internal/infrastructure/api/btc/btc/psbt.go` (+154 lines)
 3. `docs/crypto/btc/e2e_transaction_patterns.md` (+201 lines)
 
 ---
@@ -25,7 +25,7 @@ This commit implements P2SH-P2WPKH (BIP49 Nested SegWit) support for Pattern 3 E
 
 ### ❌ CRITICAL: Missing RedeemScript Format Validation (descriptor.go:1258)
 
-**Location**: `internal/infrastructure/api/bitcoin/btc/psbt.go:1258`
+**Location**: `internal/infrastructure/api/btc/btc/psbt.go:1258`
 
 **Issue**:
 ```go
@@ -66,7 +66,7 @@ pubKeyHash := psbtInput.RedeemScript[2:] // Now safe to extract
 
 ### ⚠️ MEDIUM: Redundant Format Check
 
-**Location**: `internal/infrastructure/api/bitcoin/btc/psbt.go:1246`
+**Location**: `internal/infrastructure/api/btc/btc/psbt.go:1246`
 
 **Issue**:
 ```go
@@ -86,7 +86,7 @@ pubKeyHash := psbtInput.RedeemScript[2:] // Now safe to extract
 
 ### ⚠️ MEDIUM: Magic Number Usage (Fixed in follow-up)
 
-**Location**: `internal/infrastructure/api/bitcoin/btc/psbt.go:8-10`
+**Location**: `internal/infrastructure/api/btc/btc/psbt.go:8-10`
 
 **Status**: ✅ FIXED - Follow-up commit added `p2wpkhRedeemScriptLen` constant
 
@@ -108,7 +108,7 @@ if len(psbtInput.RedeemScript) != p2wpkhRedeemScriptLen {
 
 ### ⚠️ MEDIUM: Incomplete Error Context
 
-**Location**: `internal/infrastructure/api/bitcoin/btc/descriptor.go:275`
+**Location**: `internal/infrastructure/api/btc/btc/descriptor.go:275`
 
 **Issue**:
 ```go

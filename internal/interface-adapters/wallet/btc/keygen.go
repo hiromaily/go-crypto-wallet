@@ -10,7 +10,7 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	infrabtc "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
+	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 )
 
 // BTCKeygen is keygen wallet object
@@ -112,7 +112,7 @@ func (k *BTCKeygen) ImportFullPubKey(fileName string) error {
 func (k *BTCKeygen) CreateMultisigAddress(accountType domainAccount.AccountType) error {
 	return k.createMultisigAddrUseCase.Create(context.Background(), keygenusecase.CreateMultisigAddressInput{
 		AccountType: accountType,
-		AddressType: infrabtc.ToAddressType(k.addrType),
+		AddressType: apibtcimpl.ToAddressType(k.addrType),
 	})
 }
 

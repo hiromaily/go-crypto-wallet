@@ -127,17 +127,17 @@ import (
 
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/multisig"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
+	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 )
 
 type muSig2SignUseCase struct {
-	musig2Service *btc.MuSig2Service
+	musig2Service *apibtcimpl.MuSig2Service
 	nonceRepo     multisig.NonceRepository
 }
 
 // NewMuSig2SignUseCase creates a new MuSig2SignUseCase for BTC keygen.
 func NewMuSig2SignUseCase(
-	musig2Service *btc.MuSig2Service,
+	musig2Service *apibtcimpl.MuSig2Service,
 	nonceRepo multisig.NonceRepository,
 ) keygenusecase.MuSig2SignUseCase {
 	return &muSig2SignUseCase{
@@ -283,8 +283,8 @@ func ExampleMuSig2Sign() {
 
 	// Initialize dependencies
 	var (
-		musig2Service *btc.MuSig2Service       // Provides MuSig2 cryptographic operations
-		nonceRepo     multisig.NonceRepository // Repository for nonce storage
+		musig2Service *apibtcimpl.MuSig2Service // Provides MuSig2 cryptographic operations
+		nonceRepo     multisig.NonceRepository  // Repository for nonce storage
 	)
 
 	// Create the use case
