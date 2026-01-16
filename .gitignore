@@ -10,6 +10,9 @@ docs/issues/*
 # environment variables
 .env
 
+# benchmark results
+benchmark_results.txt
+
 bin/
 
 # built binaries (root only)

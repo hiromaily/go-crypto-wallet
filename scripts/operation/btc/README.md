@@ -1,3 +1,75 @@
+# Bitcoin Operation Scripts
+
+This directory contains Bitcoin operation and E2E workflow scripts.
+
+## Directory Structure
+
+```
+btc/
+├── btc_common.sh         # BTC-specific common utilities (NEW)
+├── README.md             # This file
+├── create-bitcoind-wallet.sh
+├── create-btc-tx-deposit.sh
+├── create-btc-tx-payment.sh
+├── create-btc-tx-transfer-all.sh
+├── create-btc-tx-transfer.sh
+├── generate-btc-key.sh
+├── load-bitcoind-wallet.sh
+└── e2e/                  # E2E test scripts
+    ├── README.md
+    ├── e2e-p1-p2pkh-singlesig.sh
+    ├── e2e-p2-p2pkh-2of3.sh
+    └── ... (other patterns)
+```
+
+## Common Utilities
+
+### btc_common.sh
+
+BTC-specific common functions for E2E scripts. This file automatically sources `../common.sh`, so you don't need to source both.
+
+**Usage in E2E scripts:**
+
+```bash
+# Source BTC common utilities
+source "${SCRIPT_DIR}/../btc_common.sh"
+
+# Initialize config paths
+btc_get_config_paths
+
+# Use common functions
+btc_check_prerequisites "watch keygen"
+btc_setup_infrastructure "btc-watch btc-keygen"
+btc_setup_wallets "btc-watch:watch btc-keygen:keygen"
+```
+
+**Available Functions:**
+
+| Function | Description |
+|----------|-------------|
+| `btc_get_config_paths` | Set standard config file paths |
+| `btc_clean_data_files` | Clean BTC data directories |
+| `btc_clean_wallet_data` | Clean Bitcoin node wallet data |
+| `btc_full_reset` | Full reset with volume deletion |
+| `btc_cleanup` | Stop containers |
+| `btc_check_prerequisites` | Check Docker and CLI commands |
+| `btc_setup_infrastructure` | Start database and Bitcoin nodes |
+| `btc_setup_wallets` | Create wallets in Bitcoin nodes |
+| `btc_watch_cmd` | Wrapper for watch commands |
+| `btc_keygen_cmd` | Wrapper for keygen commands |
+| `btc_log_no_utxo_error` | Log UTXO error details |
+| `btc_wait_for_balance` | Wait for balance update |
+| `btc_generate_test_utxos` | Generate test UTXOs |
+| `btc_derive_address_from_descriptor` | Derive address from descriptor |
+| `btc_extract_file_path` | Extract file path from output |
+| `btc_extract_descriptor_path` | Extract descriptor path from output |
+| `btc_get_sender_address` | Get sender address from database |
+| `btc_generate_receiver_addresses` | Generate receiver addresses |
+| `btc_insert_payment_requests` | Insert payment requests |
+| `btc_parse_args` | Parse common e2e script arguments |
+
+---
+
 # Bitcoin E2E Workflow
 
 This document describes the complete Bitcoin end-to-end workflow implemented in `e2e/e2e-p2sh-p2wsh-3of3.sh`.
