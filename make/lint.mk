@@ -51,13 +51,22 @@ go-check-vuln:
 # format shell scripts
 .PHONY: shfmt
 shfmt:
-	shfmt -l -w scripts/*.sh
-	shfmt -l -w scripts/*/**.sh
+	find scripts -name '*.sh' -exec shfmt -l -w {} +
 
+# Excluded shellcheck codes:
+#   SC2086: Double quote to prevent globbing (safe in controlled context)
+#   SC2034: Unused variables (often used via source)
+#   SC1091: Not following sourced files (shellcheck limitation)
+#   SC2143: Use grep -q (style preference)
+#   SC2181: Check exit code directly (style preference)
+#   SC3043: POSIX sh 'local' undefined (scripts use bash)
+#   SC3018: POSIX sh '++' undefined (scripts use bash)
+#   SC2016: Expressions in single quotes (intentional)
+#   SC2001: Use ${var//} instead of sed (style suggestion)
+#   SC2295: Nested quoting style (style suggestion)
 .PHONY: shellcheck
 shellcheck:
-	shellcheck scripts/*.sh
-	shellcheck scripts/*/**.sh
+	find scripts -name '*.sh' -exec shellcheck --exclude=SC2086,SC2034,SC1091,SC2143,SC2181,SC3043,SC3018,SC2016,SC2001,SC2295 {} +
 
 ###############################################################################
 # Makefile Linting

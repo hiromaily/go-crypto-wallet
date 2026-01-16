@@ -6,19 +6,19 @@ BITCOIN_CLI_ARGS="${BITCOIN_CLI_ARGS:-}"
 DESC_FILE="${1:-${BTC_CORE_COMPAT_DESCRIPTOR_FILE:-}}"
 
 if [[ -z "${DESC_FILE}" ]]; then
-  echo "Usage: $0 <descriptor-file>"
-  echo "Or set BTC_CORE_COMPAT_DESCRIPTOR_FILE to the descriptor JSON/text file exported from keygen or Bitcoin Core."
-  exit 1
+	echo "Usage: $0 <descriptor-file>"
+	echo "Or set BTC_CORE_COMPAT_DESCRIPTOR_FILE to the descriptor JSON/text file exported from keygen or Bitcoin Core."
+	exit 1
 fi
 
 if [[ ! -f "${DESC_FILE}" ]]; then
-  echo "Descriptor file not found: ${DESC_FILE}"
-  exit 1
+	echo "Descriptor file not found: ${DESC_FILE}"
+	exit 1
 fi
 
 run_cli() {
-  # shellcheck disable=SC2086
-  "${BITCOIN_CLI}" ${BITCOIN_CLI_ARGS} "$@"
+	# shellcheck disable=SC2086
+	"${BITCOIN_CLI}" ${BITCOIN_CLI_ARGS} "$@"
 }
 
 echo "=== Bitcoin Core descriptor compatibility smoke test ==="
@@ -32,7 +32,7 @@ echo "✓ importdescriptors succeeded"
 
 echo "--- Deriving first two addresses from first descriptor ---"
 first_desc=$(
-  python - <<'PY'
+	python - <<'PY'
 import json
 import sys
 from pathlib import Path
@@ -58,12 +58,12 @@ for line in data.splitlines():
 
 sys.exit(1)
 PY
-  "${DESC_FILE}"
+	"${DESC_FILE}"
 )
 
 if [[ -z "${first_desc}" ]]; then
-  echo "Could not extract a descriptor from ${DESC_FILE}"
-  exit 1
+	echo "Could not extract a descriptor from ${DESC_FILE}"
+	exit 1
 fi
 
 run_cli deriveaddresses "${first_desc}" "[0,1]"

@@ -8,5 +8,5 @@ for gofile in $gofiles; do
 	mv tmp $gofile
 done
 
-go fmt $(go list ./... | grep -v "/vendor/")
-goimports -local github.com/hiromaily/ -w $(goimports -local github.com/hiromaily/ -l ./ | grep -v "/vendor/")
+go list ./... | grep -v "/vendor/" | xargs -r go fmt
+goimports -local github.com/hiromaily/ -l ./ | grep -v "/vendor/" | xargs -r goimports -local github.com/hiromaily/ -w

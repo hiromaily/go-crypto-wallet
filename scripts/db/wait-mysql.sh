@@ -6,7 +6,7 @@ set -e
 
 host="$1"
 shift
-cmd="$@"
+cmd="$*"
 
 count=0
 while ! mysqladmin ping -h"$host" --silent; do
