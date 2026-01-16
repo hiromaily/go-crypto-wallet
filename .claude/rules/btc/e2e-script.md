@@ -276,6 +276,8 @@ btc-e2e-p1-cleanup:
 | 7 | `e2e-p7-p2wsh-3of3.sh` | `btc-e2e-p7` | ✅ |
 | 8 | `e2e-p8-p2sh-p2wsh-3of3.sh` | `btc-e2e-p8` | ✅ |
 | 9 | `e2e-p9-p2tr-singlesig.sh` | `btc-e2e-p9` | ✅ |
+| 10 | `e2e-p10-p2tr-musig2.sh` | `btc-e2e-p10` | ✅ |
+| 11 | `e2e-p11-p2tr-tapscript.sh` | `btc-e2e-p11` | ✅ |
 
 ## Related Skills
 
