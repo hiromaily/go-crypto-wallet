@@ -37,7 +37,7 @@ Taproot is Bitcoin's major upgrade (activated November 2021) introducing:
 
 ```yaml
 # config/wallet/btc_keygen.yaml
-address_type: bech32m  # Use Taproot (P2TR)
+address_type: taproot  # Use Taproot (P2TR)
 ```
 
 ## Related Documentation
