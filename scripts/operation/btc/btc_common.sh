@@ -391,11 +391,11 @@ btc_derive_address_from_descriptor() {
 	local descriptor="$1"
 	local descriptor_with_checksum
 
-	log_info "Deriving payment address from descriptor..."
+	log_info "Deriving payment address from descriptor..." >&2
 
 	# Add checksum to descriptor if not present
 	if ! echo "$descriptor" | grep -q '#'; then
-		log_info "Adding checksum to descriptor..."
+		log_info "Adding checksum to descriptor..." >&2
 		descriptor_with_checksum=$(btc_cli "btc-watch" getdescriptorinfo "$descriptor" | jq -r '.descriptor')
 	else
 		descriptor_with_checksum="$descriptor"
@@ -406,8 +406,8 @@ btc_derive_address_from_descriptor() {
 	payment_address=$(btc_cli "btc-watch" deriveaddresses "$descriptor_with_checksum" "[0,0]" 2>/dev/null | jq -r '.[0]')
 
 	if [ -z "$payment_address" ] || [ "$payment_address" = "null" ]; then
-		log_error "Failed to derive payment address from descriptor"
-		log_error "Descriptor: $descriptor_with_checksum"
+		log_error "Failed to derive payment address from descriptor" >&2
+		log_error "Descriptor: $descriptor_with_checksum" >&2
 		return 1
 	fi
 
@@ -451,8 +451,8 @@ btc_generate_receiver_addresses() {
 	local address_type="${2:-legacy}"
 	local addresses=""
 
-	log_substep "Generating receiver addresses for payment requests"
-	log_info "Creating $count receiver addresses in watch wallet..."
+	log_substep "Generating receiver addresses for payment requests" >&2
+	log_info "Creating $count receiver addresses in watch wallet..." >&2
 
 	for i in $(seq 1 "$count"); do
 		local addr
@@ -462,7 +462,7 @@ btc_generate_receiver_addresses() {
 		else
 			addresses="$addr"
 		fi
-		log_info "  $i. $addr"
+		log_info "  $i. $addr" >&2
 	done
 
 	echo "$addresses"
