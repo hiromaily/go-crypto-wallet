@@ -743,9 +743,9 @@ Descriptor: tr(musig([fingerprint1/86'/1'/1']xpub1,[fingerprint2]xpub2,[fingerpr
 
 **Implementation Notes:**
 
-- Environment variable: `WALLET_ADDRESS_TYPE="bech32m"`
+- Environment variable: `WALLET_ADDRESS_TYPE="taproot"`
 - Uses BIP86 key derivation (m/86'/coin'/account'/change/index)
-- Address format: `bcrt1p...` (regtest), `bc1p...` (mainnet)
+- Address format: `bcrt1p...` (regtest), `bc1p...` (mainnet) - bech32m encoding
 - Requires Bitcoin Core v22.0+ for descriptor-based wallets
 - 2-round signing protocol (BIP327)
 - Framework script available at `scripts/operation/btc/e2e/e2e-p10-p2tr-musig2.sh`

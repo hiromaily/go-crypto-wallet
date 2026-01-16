@@ -33,7 +33,7 @@ This command creates/runs `scripts/operation/btc/e2e/e2e-p10-p2tr-musig2.sh` and
 | **Signature Requirement** | N-of-N (all signers required, aggregated into single signature) |
 | **Descriptor** | `tr(musig([fp1/86'/1'/1']xpub1,[fp2/86'/1'/1']xpub2,[fp3/86'/1'/1']xpub3)/0/*)` |
 | **Required Wallets** | watch, keygen, sign1, sign2 |
-| **Environment Variable** | `WALLET_ADDRESS_TYPE="bech32m"` |
+| **Environment Variable** | `WALLET_ADDRESS_TYPE="taproot"` |
 | **Bitcoin Core Version** | **v22.0+** (Required for Taproot/Schnorr) |
 | **Protocol** | **2-Round MuSig2** (BIP327) |
 
@@ -46,7 +46,7 @@ This command creates/runs `scripts/operation/btc/e2e/e2e-p10-p2tr-musig2.sh` and
 | Descriptor | `wsh(sortedmulti(3,...))` | `tr(...)` | **`tr(musig(...))`** |
 | Signers | 3 | 1 | **N (all required)** |
 | On-Chain Signatures | 3 ECDSA | 1 Schnorr | **1 Schnorr (aggregated)** |
-| Transaction Size | ~550 vBytes | ~99 vBytes | **~99 vBytes** |
+| Transaction Size | ~370-400 vBytes | ~99 vBytes | **~99 vBytes** |
 | Privacy | Multisig visible | Single-sig | **Single-sig appearance** |
 | Signature Algorithm | ECDSA | Schnorr (BIP340) | **Schnorr (BIP340)** |
 

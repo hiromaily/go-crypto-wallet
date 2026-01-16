@@ -25,10 +25,10 @@
 #   - Protocol: 2-Round MuSig2 (BIP327)
 #
 # Required Config Settings:
-#   - config/wallet/btc_watch.yaml:  address_type: "bech32m"
-#   - config/wallet/btc_keygen.yaml: address_type: "bech32m"
-#   - config/wallet/btc_sign1.yaml:  address_type: "bech32m"
-#   - config/wallet/btc_sign2.yaml:  address_type: "bech32m"
+#   - config/wallet/btc_watch.yaml:  address_type: "taproot"
+#   - config/wallet/btc_keygen.yaml: address_type: "taproot"
+#   - config/wallet/btc_sign1.yaml:  address_type: "taproot"
+#   - config/wallet/btc_sign2.yaml:  address_type: "taproot"
 #
 # IMPORTANT NOTE:
 #   This E2E script demonstrates the MuSig2 workflow framework.
@@ -90,12 +90,12 @@ KEYGEN_WALLET_RPC_HOST="127.0.0.1:19332/wallet/keygen"
 # Priority: Environment Variables > Config File > Default Values
 #
 # Pattern 10 (P2TR MuSig2 N-of-N) requires:
-#   - address_type: "bech32m" (for Taproot P2TR addresses)
+#   - address_type: "taproot" (for Taproot P2TR addresses)
 #   - Derives key_type: bip86 automatically
 # Note: key_type is automatically derived from address_type in Go code
 #       (see internal/domain/address/types.go AddrType.ToKeyType())
-# Note: "bech32m" is used for Taproot addresses (not "taproot" config value)
-export WALLET_ADDRESS_TYPE="bech32m"
+# Note: "taproot" is the config identifier; bech32m is the encoding scheme
+export WALLET_ADDRESS_TYPE="taproot"
 
 ###############################################################################
 # Cleanup Functions

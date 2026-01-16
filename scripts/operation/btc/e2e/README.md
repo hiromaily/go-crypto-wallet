@@ -177,12 +177,13 @@ address_type: "taproot"
 
 ```bash
 # Script automatically sets:
-export WALLET_ADDRESS_TYPE="bech32m"
+export WALLET_ADDRESS_TYPE="taproot"
 ```
 
 Required:
 - Uses `config/wallet/account_3of3.yaml` for N-of-N configuration
 - Bitcoin Core v22.0+ with descriptor-based wallet support
+- Address encoding: bech32m (`bcrt1p...` for regtest)
 
 ## Environment Variables
 
