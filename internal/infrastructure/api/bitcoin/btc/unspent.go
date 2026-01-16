@@ -96,17 +96,26 @@ func (b *Bitcoin) ListUnspentByAccount(
 			return nil, fmt.Errorf("fail to call btc.listUnspentByAccount(): %w", err)
 		}
 
-		logger.Debug("found unspent outputs via label lookup",
+		// If we found UTXOs, return them
+		if len(unspentList) > 0 {
+			logger.Debug("found unspent outputs via label lookup",
+				"account_type", accountType,
+				"unspent_count", len(unspentList),
+				"confirmation_required", confirmationNum)
+
+			// sort amount by ascending (small to big)
+			sort.Slice(unspentList, func(i, j int) bool {
+				return unspentList[i].Amount < unspentList[j].Amount
+			})
+
+			return ToUnspentOutputList(unspentList, b)
+		}
+
+		// Labeled addresses exist but have no UTXOs - fall back to descriptor matching
+		logger.Info("labeled addresses found but no UTXOs, falling back to descriptor matching",
 			"account_type", accountType,
-			"unspent_count", len(unspentList),
-			"confirmation_required", confirmationNum)
-
-		// sort amount by ascending (small to big)
-		sort.Slice(unspentList, func(i, j int) bool {
-			return unspentList[i].Amount < unspentList[j].Amount
-		})
-
-		return ToUnspentOutputList(unspentList, b)
+			"label", label,
+			"address_count", len(addrs))
 	}
 
 	// No addresses found by label (or error occurred) - fall back to descriptor matching
