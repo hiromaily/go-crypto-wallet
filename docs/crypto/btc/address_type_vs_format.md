@@ -126,19 +126,25 @@ In `go-crypto-wallet`, `key_type` is **automatically derived** from `address_typ
 
 ```go
 // internal/domain/address/types.go
-func (a AddrType) ToKeyType() KeyType {
-    switch a {
-    case AddrTypeLegacy:
-        return KeyTypeBIP44      // legacy → bip44
-    case AddrTypeP2shSegwit:
-        return KeyTypeBIP49      // p2sh-segwit → bip49
-    case AddrTypeBech32:
-        return KeyTypeBIP84      // bech32 → bip84
-    case AddrTypeTaproot, AddrTypeBech32m:
-        return KeyTypeBIP86      // taproot → bip86
-    default:
-        return KeyTypeBIP44
-    }
+func (a AddrType) ToKeyType() (key.KeyType, error) {
+	switch a {
+	case AddrTypeLegacy:
+		return key.KeyTypeBIP44, nil
+	case AddrTypeP2shSegwit:
+		return key.KeyTypeBIP49, nil
+	case AddrTypeBech32:
+		return key.KeyTypeBIP84, nil
+	case AddrTypeTaproot:
+		return key.KeyTypeBIP86, nil
+	case AddrTypeBCHCashAddr:
+		// BCH uses BIP44 derivation path (same as legacy BTC)
+		return key.KeyTypeBIP44, nil
+	case AddrTypeETH:
+		// Ethereum uses BIP44 derivation path
+		return key.KeyTypeBIP44, nil
+	default:
+		return "", fmt.Errorf("unsupported address type for key derivation: %s", a)
+	}
 }
 ```
 
@@ -303,15 +309,15 @@ def identify_address_type(address: str) -> str:
 
     if address.startswith('1'):
         return "P2PKH (Legacy)"
-    elif address.startswith('3') or address.startswith('2'):
+    elif address.startswith(('3', '2')):
         return "P2SH (Legacy multisig or Nested SegWit)"
-    elif address.startswith('bc1q') or address.startswith(('tb1q', 'bcrt1q')):
+    elif address.startswith(('bc1q', 'tb1q', 'bcrt1q')):
         # Check length: 42 = P2WPKH, 62 = P2WSH
         if len(address) == 42:
             return "P2WPKH (Native SegWit)"
         elif len(address) == 62:
             return "P2WSH (Native SegWit Multisig)"
-    elif address.startswith('bc1p') or address.startswith(('tb1p', 'bcrt1p')):
+    elif address.startswith(('bc1p', 'tb1p', 'bcrt1p')):
         return "P2TR (Taproot)"
 
     return "Unknown"
