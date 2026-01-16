@@ -387,7 +387,10 @@ func deriveAddressForType(
 			return "", err
 		}
 		tapKey := txscript.ComputeTaprootKeyNoScript(pubKey)
-		addr, err := btcutil.NewAddressTaproot(tapKey.SerializeCompressed(), chain)
+		// NewAddressTaproot expects a 32-byte x-only public key (without the parity byte)
+		// SerializeCompressed returns 33 bytes, so we remove the first byte (parity)
+		witnessProg := tapKey.SerializeCompressed()[1:]
+		addr, err := btcutil.NewAddressTaproot(witnessProg, chain)
 		if err != nil {
 			return "", err
 		}

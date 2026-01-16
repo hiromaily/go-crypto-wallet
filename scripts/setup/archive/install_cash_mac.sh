@@ -6,10 +6,10 @@ brew install automake berkeley-db libtool boost --c++11 miniupnpc openssl pkg-co
 
 # clone git
 mkdir work
-cd ./work
+cd ./work || exit
 
 git clone https://github.com/Bitcoin-ABC/bitcoin-abc.git
-cd bitcoin-abc
+cd bitcoin-abc || exit
 
 ./autogen.sh
 

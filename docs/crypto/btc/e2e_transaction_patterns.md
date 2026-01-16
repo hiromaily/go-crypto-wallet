@@ -172,7 +172,7 @@ Aggregate signature protocol based on Schnorr signatures. N-of-N multisig become
 | **6** | **P2WSH (BIP84)** | **2-of-3 Multisig** | **`bc1q...`** | **✅ e2e/e2e-p6-p2wsh-2of3.sh** |
 | **7** | **P2WSH (BIP84)** | **3-of-3 Multisig** | **`bc1q...`** | **✅ e2e/e2e-p7-p2wsh-3of3.sh** |
 | **8** | **P2SH-P2WSH** | **3-of-3 Multisig** | **`3...`** | **✅ e2e/e2e-p8-p2sh-p2wsh-3of3.sh** |
-| **9** | **P2TR (BIP86)** | **Single-sig** | **`bc1p...`** | **🔶 e2e/e2e-p9-p2tr-singlesig.sh** |
+| **9** | **P2TR (BIP86)** | **Single-sig** | **`bc1p...`** | **✅ e2e/e2e-p9-p2tr-singlesig.sh** |
 | 10 | P2TR (BIP86) | MuSig2 (N-of-N) | `bc1p...` | 🔜 In development |
 | 11 | P2TR (BIP86) | Tapscript (M-of-N) | `bc1p...` | 🔜 In development |
 
@@ -588,7 +588,7 @@ P2SH-P2WSH is primarily used for **complex multisig scripts** while maintaining 
 
 ### Pattern 9: BTC P2TR Single-sig (Taproot)
 
-**❌ Not yet implemented - Planned in `scripts/operation/btc/e2e/e2e-p9-p2tr-singlesig.sh`**
+**✅ Fully implemented in `scripts/operation/btc/e2e/e2e-p9-p2tr-singlesig.sh`**
 
 ```
 Address Type: P2TR (BIP86 Taproot)
@@ -641,7 +641,7 @@ Format: bc1p + 58 characters (mainnet, 62 chars total)
 | Signature Size | 71-72 bytes | 71-72 bytes | 71-72 bytes | **64 bytes** |
 | Transaction Size | Largest | Medium | Smaller | **Smallest** |
 | Encoding | Base58Check | Base58Check | Bech32 | **Bech32m** |
-| address_type | `legacy` | `p2sh-segwit` | `bech32` | **`bech32m`** |
+| address_type | `legacy` | `p2sh-segwit` | `bech32` | **`taproot`** |
 
 #### Key Path vs Script Path Spending
 
@@ -719,10 +719,11 @@ Watch Wallet (broadcast)
 
 **Implementation Notes:**
 
-- Environment variable: `WALLET_ADDRESS_TYPE="bech32m"`
+- Environment variable: `WALLET_ADDRESS_TYPE="taproot"`
 - Descriptor format: `tr([fingerprint/86'/coin'/account']xpub.../0/*)`
 - Uses Bech32m encoding (NOT Bech32 - different checksum constant)
 - Witness version 1 (vs version 0 for P2WPKH)
+- Address derivation uses x-only public keys (32 bytes, parity byte removed)
 
 ### Pattern 10: BTC P2TR MuSig2 (In Development)
 
@@ -821,15 +822,8 @@ Address Format: bitcoincash:p... (P2SH multisig)
 | `scripts/operation/btc/e2e/e2e-p6-p2wsh-2of3.sh` | BTC | P2WSH Native SegWit 2-of-3 Multisig (Pattern 6) | 2-of-3 |
 | `scripts/operation/btc/e2e/e2e-p7-p2wsh-3of3.sh` | BTC | P2WSH Native SegWit 3-of-3 Multisig (Pattern 7) | 3-of-3 |
 | `scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh` | BTC | P2SH-P2WSH 3-of-3 Multisig (Pattern 8) | 3-of-3 |
+| `scripts/operation/btc/e2e/e2e-p9-p2tr-singlesig.sh` | BTC | P2TR Taproot Single-sig (Pattern 9) | Single-sig |
 | `scripts/operation/bch/e2e-workflow.sh` | BCH | CashAddr Multisig | 3-of-3 |
-
-### In Progress E2E Scripts
-
-| Script | Coin | Pattern | Signing Requirements | Status |
-|--------|------|---------|---------------------|--------|
-| `e2e-p9-p2tr-singlesig.sh` | BTC | P2TR Taproot Single-sig (Pattern 9) | Single-sig | 🔶 In Progress |
-
-**Note:** Pattern 9 implementation can be tracked with the custom command: `.claude/commands/e2e/fix-btc-e2e-p9.md`
 
 ### Planned E2E Scripts
 
@@ -881,13 +875,23 @@ Address Format: bitcoincash:p... (P2SH multisig)
 
 ---
 
-**Document Version:** 1.6
+**Document Version:** 1.7
 **Last Updated:** 2026-01-16
 **Maintainer:** go-crypto-wallet team
 
 ---
 
 ## Changelog
+
+### Version 1.7 (2026-01-16)
+
+- ✅ Pattern 9 (P2TR Taproot Single-sig) is now fully working
+- E2E script `e2e-p9-p2tr-singlesig.sh` completed and verified (Closes #377)
+- Fixed Taproot address derivation to use x-only public keys (32 bytes)
+- Implements BIP86 key derivation for Taproot key path spending
+- Uses Schnorr signatures (BIP340, 64 bytes)
+- Most efficient single-sig transaction format
+- Address format: `bcrt1p...` (62 chars, Bech32m encoding)
 
 ### Version 1.6 (2026-01-16)
 

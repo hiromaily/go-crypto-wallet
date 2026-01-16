@@ -14,19 +14,19 @@
 
 # Only set colors if not already defined and if terminal supports colors
 if [ -z "${RED:-}" ]; then
-    if [ -t 1 ] && command -v tput >/dev/null 2>&1; then
-        RED='\033[0;31m'
-        GREEN='\033[0;32m'
-        YELLOW='\033[1;33m'
-        BLUE='\033[0;34m'
-        NC='\033[0m' # No Color
-    else
-        RED=''
-        GREEN=''
-        YELLOW=''
-        BLUE=''
-        NC=''
-    fi
+	if [ -t 1 ] && command -v tput >/dev/null 2>&1; then
+		RED='\033[0;31m'
+		GREEN='\033[0;32m'
+		YELLOW='\033[1;33m'
+		BLUE='\033[0;34m'
+		NC='\033[0m' # No Color
+	else
+		RED=''
+		GREEN=''
+		YELLOW=''
+		BLUE=''
+		NC=''
+	fi
 fi
 
 ###############################################################################
@@ -35,40 +35,40 @@ fi
 
 # Log info message (green)
 log_info() {
-    printf "${GREEN}[INFO]${NC} %s\n" "$1"
+	printf "${GREEN}[INFO]${NC} %s\n" "$1"
 }
 
 # Log warning message (yellow)
 log_warn() {
-    printf "${YELLOW}[WARN]${NC} %s\n" "$1"
+	printf "${YELLOW}[WARN]${NC} %s\n" "$1"
 }
 
 # Log error message (red)
 log_error() {
-    printf "${RED}[ERROR]${NC} %s\n" "$1"
+	printf "${RED}[ERROR]${NC} %s\n" "$1"
 }
 
 # Log debug message (blue) - only shown when VERBOSE=true
 log_debug() {
-    if [ "${VERBOSE:-false}" = "true" ]; then
-        printf "${BLUE}[DEBUG]${NC} %s\n" "$1"
-    fi
+	if [ "${VERBOSE:-false}" = "true" ]; then
+		printf "${BLUE}[DEBUG]${NC} %s\n" "$1"
+	fi
 }
 
 # Log step header (major section)
 log_step() {
-    echo ""
-    echo "=================================================="
-    echo "$1"
-    echo "=================================================="
+	echo ""
+	echo "=================================================="
+	echo "$1"
+	echo "=================================================="
 }
 
 # Log substep header (minor section)
 log_substep() {
-    echo ""
-    echo "--------------------------------------------------"
-    echo "$1"
-    echo "--------------------------------------------------"
+	echo ""
+	echo "--------------------------------------------------"
+	echo "$1"
+	echo "--------------------------------------------------"
 }
 
 ###############################################################################
@@ -78,85 +78,85 @@ log_substep() {
 # Check if command exists
 # Usage: command_exists docker && echo "docker is installed"
 command_exists() {
-    command -v "$1" >/dev/null 2>&1
+	command -v "$1" >/dev/null 2>&1
 }
 
 # Check if Docker is available
 # Usage: check_docker || exit 1
 check_docker() {
-    if ! command_exists docker; then
-        log_error "docker is not installed"
-        return 1
-    fi
+	if ! command_exists docker; then
+		log_error "docker is not installed"
+		return 1
+	fi
 
-    if ! docker compose version >/dev/null 2>&1; then
-        log_error "docker compose is not available"
-        return 1
-    fi
+	if ! docker compose version >/dev/null 2>&1; then
+		log_error "docker compose is not available"
+		return 1
+	fi
 
-    return 0
+	return 0
 }
 
 # Wait for Docker container to be healthy
 # Usage: wait_for_healthy "container-name" [max_wait_seconds]
 wait_for_healthy() {
-    local container_name=$1
-    local max_wait=${2:-60}
-    local counter=0
+	local container_name=$1
+	local max_wait=${2:-60}
+	local counter=0
 
-    log_info "Waiting for $container_name to be healthy..."
+	log_info "Waiting for $container_name to be healthy..."
 
-    while [ $counter -lt $max_wait ]; do
-        status=$(docker inspect --format='{{.State.Health.Status}}' "$container_name" 2>/dev/null || echo "not_found")
+	while [ $counter -lt $max_wait ]; do
+		status=$(docker inspect --format='{{.State.Health.Status}}' "$container_name" 2>/dev/null || echo "not_found")
 
-        if [ "$status" = "healthy" ]; then
-            log_info "$container_name is healthy"
-            return 0
-        fi
+		if [ "$status" = "healthy" ]; then
+			log_info "$container_name is healthy"
+			return 0
+		fi
 
-        if [ "$status" = "not_found" ]; then
-            log_error "Container $container_name not found"
-            return 1
-        fi
+		if [ "$status" = "not_found" ]; then
+			log_error "Container $container_name not found"
+			return 1
+		fi
 
-        counter=$((counter + 1))
-        sleep 1
-    done
+		counter=$((counter + 1))
+		sleep 1
+	done
 
-    log_error "$container_name did not become healthy within ${max_wait}s"
-    return 1
+	log_error "$container_name did not become healthy within ${max_wait}s"
+	return 1
 }
 
 # Wait for a port to be available
 # Usage: wait_for_port "localhost" 8080 [max_wait_seconds]
 wait_for_port() {
-    local host=$1
-    local port=$2
-    local max_wait=${3:-30}
-    local counter=0
+	local host=$1
+	local port=$2
+	local max_wait=${3:-30}
+	local counter=0
 
-    log_info "Waiting for ${host}:${port} to be available..."
+	log_info "Waiting for ${host}:${port} to be available..."
 
-    while [ $counter -lt $max_wait ]; do
-        if nc -z "$host" "$port" 2>/dev/null; then
-            log_info "${host}:${port} is available"
-            return 0
-        fi
+	while [ $counter -lt $max_wait ]; do
+		if nc -z "$host" "$port" 2>/dev/null; then
+			log_info "${host}:${port} is available"
+			return 0
+		fi
 
-        counter=$((counter + 1))
-        sleep 1
-    done
+		counter=$((counter + 1))
+		sleep 1
+	done
 
-    log_error "${host}:${port} did not become available within ${max_wait}s"
-    return 1
+	log_error "${host}:${port} did not become available within ${max_wait}s"
+	return 1
 }
 
 # Extract filename from command output
 # Usage: filename=$(extract_filename "$output")
 # Expects format: "[fileName]: /path/to/file"
 extract_filename() {
-    local output="$1"
-    echo "${output##*\[fileName\]: }"
+	local output="$1"
+	echo "${output##*\[fileName\]: }"
 }
 
 ###############################################################################
@@ -167,78 +167,78 @@ extract_filename() {
 # Usage: bitcoin_wallet_exists "btc-watch" "watch" && echo "exists"
 # Note: Works for both BTC and BCH as they share the same RPC interface
 bitcoin_wallet_exists() {
-    local container=$1
-    local wallet_name=$2
-    local rpc_user="${RPC_USER:-xyz}"
-    local rpc_password="${RPC_PASSWORD:-xyz}"
+	local container=$1
+	local wallet_name=$2
+	local rpc_user="${RPC_USER:-xyz}"
+	local rpc_password="${RPC_PASSWORD:-xyz}"
 
-    docker exec "$container" bitcoin-cli -regtest \
-        -rpcuser="${rpc_user}" \
-        -rpcpassword="${rpc_password}" \
-        listwallets 2>/dev/null | grep -q "\"$wallet_name\"" && return 0 || return 1
+	docker exec "$container" bitcoin-cli -regtest \
+		-rpcuser="${rpc_user}" \
+		-rpcpassword="${rpc_password}" \
+		listwallets 2>/dev/null | grep -q "\"$wallet_name\"" && return 0 || return 1
 }
 
 # Create Bitcoin/BCH wallet if not exists
 # Usage: bitcoin_create_wallet_if_needed "btc-watch" "watch"
 # Note: Works for both BTC and BCH as they share the same RPC interface
 bitcoin_create_wallet_if_needed() {
-    local container=$1
-    local wallet_name=$2
-    local rpc_user="${RPC_USER:-xyz}"
-    local rpc_password="${RPC_PASSWORD:-xyz}"
+	local container=$1
+	local wallet_name=$2
+	local rpc_user="${RPC_USER:-xyz}"
+	local rpc_password="${RPC_PASSWORD:-xyz}"
 
-    if bitcoin_wallet_exists "$container" "$wallet_name"; then
-        log_info "Wallet '$wallet_name' already exists in $container"
-        docker exec "$container" bitcoin-cli -regtest \
-            -rpcuser="${rpc_user}" \
-            -rpcpassword="${rpc_password}" \
-            loadwallet "$wallet_name" >/dev/null 2>&1 || true
-    else
-        log_info "Creating wallet '$wallet_name' in $container"
-        # Bitcoin Cash Node (BCH) has different createwallet API than Bitcoin Core
-        # BCH: createwallet "wallet_name" (disable_private_keys blank)
-        # BTC: createwallet "wallet_name" (disable_private_keys blank passphrase avoid_reuse descriptors load_on_startup external_signer)
-        if [[ "$container" == bch-* ]]; then
-            # BCH: Use 3-parameter format (wallet_name, disable_private_keys, blank)
-            docker exec "$container" bitcoin-cli -regtest \
-                -rpcuser="${rpc_user}" \
-                -rpcpassword="${rpc_password}" \
-                createwallet "$wallet_name" false false >/dev/null
-        else
-            # BTC: Create wallet with appropriate descriptor setting
-            # Watch wallet needs descriptors=true for importdescriptors RPC
-            # Other wallets use descriptors=false for compatibility with importprivkey command
-            # Parameters: wallet_name, disable_private_keys, blank, passphrase, avoid_reuse, descriptors
-            local disable_private_keys=false
-            local use_descriptors=false
+	if bitcoin_wallet_exists "$container" "$wallet_name"; then
+		log_info "Wallet '$wallet_name' already exists in $container"
+		docker exec "$container" bitcoin-cli -regtest \
+			-rpcuser="${rpc_user}" \
+			-rpcpassword="${rpc_password}" \
+			loadwallet "$wallet_name" >/dev/null 2>&1 || true
+	else
+		log_info "Creating wallet '$wallet_name' in $container"
+		# Bitcoin Cash Node (BCH) has different createwallet API than Bitcoin Core
+		# BCH: createwallet "wallet_name" (disable_private_keys blank)
+		# BTC: createwallet "wallet_name" (disable_private_keys blank passphrase avoid_reuse descriptors load_on_startup external_signer)
+		if [[ "$container" == bch-* ]]; then
+			# BCH: Use 3-parameter format (wallet_name, disable_private_keys, blank)
+			docker exec "$container" bitcoin-cli -regtest \
+				-rpcuser="${rpc_user}" \
+				-rpcpassword="${rpc_password}" \
+				createwallet "$wallet_name" false false >/dev/null
+		else
+			# BTC: Create wallet with appropriate descriptor setting
+			# Watch wallet needs descriptors=true for importdescriptors RPC
+			# Other wallets use descriptors=false for compatibility with importprivkey command
+			# Parameters: wallet_name, disable_private_keys, blank, passphrase, avoid_reuse, descriptors
+			local disable_private_keys=false
+			local use_descriptors=false
 
-            # Watch wallet: watch-only with descriptors
-            if [[ "$wallet_name" == "watch" ]]; then
-                disable_private_keys=true
-                use_descriptors=true
-            fi
+			# Watch wallet: watch-only with descriptors
+			if [[ "$wallet_name" == "watch" ]]; then
+				disable_private_keys=true
+				use_descriptors=true
+			fi
 
-            docker exec "$container" bitcoin-cli -regtest \
-                -rpcuser="${rpc_user}" \
-                -rpcpassword="${rpc_password}" \
-                createwallet "$wallet_name" "$disable_private_keys" false "" false "$use_descriptors" >/dev/null
-        fi
-    fi
+			docker exec "$container" bitcoin-cli -regtest \
+				-rpcuser="${rpc_user}" \
+				-rpcpassword="${rpc_password}" \
+				createwallet "$wallet_name" "$disable_private_keys" false "" false "$use_descriptors" >/dev/null
+		fi
+	fi
 }
 
 # Execute bitcoin-cli command in a container
 # Usage: bitcoin_cli "btc-watch" "getblockcount"
 # Note: Works for both BTC and BCH as they share the same RPC interface
 bitcoin_cli() {
-    local container=$1
-    shift
-    local rpc_user="${RPC_USER:-xyz}"
-    local rpc_password="${RPC_PASSWORD:-xyz}"
+	local container=$1
+	shift
+	local rpc_user="${RPC_USER:-xyz}"
+	local rpc_password="${RPC_PASSWORD:-xyz}"
 
-    docker exec "$container" bitcoin-cli -regtest \
-        -rpcuser="${rpc_user}" \
-        -rpcpassword="${rpc_password}" \
-        "$@"
+	docker exec "$container" bitcoin-cli -regtest \
+		-rpcuser="${rpc_user}" \
+		-rpcpassword="${rpc_password}" \
+		"$@"
 }
 
 ###############################################################################
@@ -248,19 +248,19 @@ bitcoin_cli() {
 # Check if wallet exists in Bitcoin node (alias for backward compatibility)
 # Usage: btc_wallet_exists "btc-watch" "watch" && echo "exists"
 btc_wallet_exists() {
-    bitcoin_wallet_exists "$@"
+	bitcoin_wallet_exists "$@"
 }
 
 # Create Bitcoin wallet if not exists (alias for backward compatibility)
 # Usage: btc_create_wallet_if_needed "btc-watch" "watch"
 btc_create_wallet_if_needed() {
-    bitcoin_create_wallet_if_needed "$@"
+	bitcoin_create_wallet_if_needed "$@"
 }
 
 # Execute bitcoin-cli command in a container (alias for backward compatibility)
 # Usage: btc_cli "btc-watch" "getblockcount"
 btc_cli() {
-    bitcoin_cli "$@"
+	bitcoin_cli "$@"
 }
 
 ###############################################################################
@@ -270,19 +270,19 @@ btc_cli() {
 # Check if wallet exists in BCH node
 # Usage: bch_wallet_exists "bch-watch" "watch" && echo "exists"
 bch_wallet_exists() {
-    bitcoin_wallet_exists "$@"
+	bitcoin_wallet_exists "$@"
 }
 
 # Create BCH wallet if not exists
 # Usage: bch_create_wallet_if_needed "bch-watch" "watch"
 bch_create_wallet_if_needed() {
-    bitcoin_create_wallet_if_needed "$@"
+	bitcoin_create_wallet_if_needed "$@"
 }
 
 # Execute bitcoin-cli command in BCH container
 # Usage: bch_cli "bch-watch" "getblockcount"
 bch_cli() {
-    bitcoin_cli "$@"
+	bitcoin_cli "$@"
 }
 
 ###############################################################################
@@ -292,20 +292,20 @@ bch_cli() {
 # Get project root directory
 # Usage: PROJECT_ROOT=$(get_project_root)
 get_project_root() {
-    local script_dir
-    script_dir="$(cd "$(dirname "${BASH_SOURCE[1]}")" && pwd)"
-    # Navigate up from scripts/operation/{coin}/ to project root
-    cd "$script_dir" && pwd | sed 's|/scripts/operation.*||'
+	local script_dir
+	script_dir="$(cd "$(dirname "${BASH_SOURCE[1]}")" && pwd)"
+	# Navigate up from scripts/operation/{coin}/ to project root
+	cd "$script_dir" && pwd | sed 's|/scripts/operation.*||'
 }
 
 # Clean files in directory except .gitkeep
 # Usage: clean_dir_except_gitkeep "data/address/btc"
 clean_dir_except_gitkeep() {
-    local dir=$1
-    if [ -d "$dir" ]; then
-        find "$dir" -type f ! -name '.gitkeep' -delete 2>/dev/null || true
-        log_info "Cleaned files in $dir"
-    fi
+	local dir=$1
+	if [ -d "$dir" ]; then
+		find "$dir" -type f ! -name '.gitkeep' -delete 2>/dev/null || true
+		log_info "Cleaned files in $dir"
+	fi
 }
 
 ###############################################################################
@@ -315,33 +315,32 @@ clean_dir_except_gitkeep() {
 # Validate required environment variable
 # Usage: require_env "RPC_USER" || exit 1
 require_env() {
-    local var_name=$1
-    if [ -z "${!var_name:-}" ]; then
-        log_error "Required environment variable $var_name is not set"
-        return 1
-    fi
-    return 0
+	local var_name=$1
+	if [ -z "${!var_name:-}" ]; then
+		log_error "Required environment variable $var_name is not set"
+		return 1
+	fi
+	return 0
 }
 
 # Validate file exists
 # Usage: require_file "/path/to/file" || exit 1
 require_file() {
-    local file_path=$1
-    if [ ! -f "$file_path" ]; then
-        log_error "Required file not found: $file_path"
-        return 1
-    fi
-    return 0
+	local file_path=$1
+	if [ ! -f "$file_path" ]; then
+		log_error "Required file not found: $file_path"
+		return 1
+	fi
+	return 0
 }
 
 # Validate directory exists
 # Usage: require_dir "/path/to/dir" || exit 1
 require_dir() {
-    local dir_path=$1
-    if [ ! -d "$dir_path" ]; then
-        log_error "Required directory not found: $dir_path"
-        return 1
-    fi
-    return 0
+	local dir_path=$1
+	if [ ! -d "$dir_path" ]; then
+		log_error "Required directory not found: $dir_path"
+		return 1
+	fi
+	return 0
 }
-

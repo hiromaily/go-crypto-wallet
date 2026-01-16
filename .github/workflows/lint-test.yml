@@ -6,11 +6,13 @@ on:
       - main
     paths-ignore:
       - "**.md"
+      - "**.mdc"
   pull_request:
     branches:
       - main
     paths-ignore:
       - "**.md"
+      - "**.mdc"
 
 env:
   GO_VERSION: "1.25"
@@ -105,6 +107,10 @@ jobs:
         uses: ludeeus/action-shellcheck@master
         with:
           scandir: "./scripts"
+        # Excluded codes (see make/lint.mk for details):
+        # SC2086,SC2034,SC1091,SC2143,SC2181,SC3043,SC3018,SC2016,SC2001,SC2295
+        env:
+          SHELLCHECK_OPTS: --exclude=SC2086,SC2034,SC1091,SC2143,SC2181,SC3043,SC3018,SC2016,SC2001,SC2295
 
   # SQL linting with sqlc
   sql-lint:

@@ -1,9 +1,9 @@
 #!/bin/bash
 
-mkdir tmp && cd tmp/
+mkdir tmp && cd tmp/ || exit
 git clone https://github.com/WietseWind/docker-rippled.git
 
-cd docker-rippled
+cd docker-rippled || exit
 docker build --tag local-rippled:latest .
 
 cd ../../

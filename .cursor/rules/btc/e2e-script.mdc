@@ -116,7 +116,13 @@ Reference: `AddrType.ToKeyType()` in `internal/domain/address/types.go`
 |---------|-------------|--------------|----------------|-----------|
 | 1 | P2PKH Single-sig | `legacy` | `m.../n...` | Single |
 | 2 | P2PKH 2-of-3 | `legacy` | `2...` (P2SH) | 2-of-3 |
+| 3 | P2SH-P2WPKH Single-sig | `p2sh-segwit` | `2...` | Single |
+| 4 | P2SH-P2WSH 2-of-3 | `p2sh-segwit` | `2...` | 2-of-3 |
+| 5 | P2WPKH Native SegWit Single-sig | `bech32` | `bcrt1q...` | Single |
+| 6 | P2WSH 2-of-3 | `bech32` | `bcrt1q...` (62 chars) | 2-of-3 |
+| 7 | P2WSH 3-of-3 | `bech32` | `bcrt1q...` (62 chars) | 3-of-3 |
 | 8 | P2SH-P2WSH 3-of-3 | `p2sh-segwit` | `2...` | 3-of-3 |
+| 9 | P2TR Taproot Single-sig | `taproot` | `bcrt1p...` | Single |
 
 ## Build and Verification Rules
 
@@ -241,32 +247,38 @@ Add targets to `make/btc_e2e.mk` when creating new scripts.
 # Example for Pattern 1 (e2e-p1-p2pkh-singlesig.sh)
 .PHONY: btc-e2e-p1-reset
 btc-e2e-p1-reset:
-	./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --reset
+  ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --reset
 
 .PHONY: btc-e2e-p1
 btc-e2e-p1:
-	./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh
+  ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh
 
 .PHONY: btc-e2e-p1-verbose
 btc-e2e-p1-verbose:
-	./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --verbose
+  ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --verbose
 
 .PHONY: btc-e2e-p1-ci
 btc-e2e-p1-ci:
-	./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --non-interactive
+  ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --non-interactive
 
 .PHONY: btc-e2e-p1-cleanup
 btc-e2e-p1-cleanup:
-	./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --cleanup
+  ./scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh --cleanup
 ```
 
 **Current Scripts**:
 
-| Pattern | Script | Make Target |
-|---------|--------|-------------|
-| 1 | `e2e-p1-p2pkh-singlesig.sh` | `btc-e2e-p1` |
-| 2 | `e2e-p2-p2pkh-2of3.sh` | `btc-e2e-p2` |
-| 8 | `e2e-p8-p2sh-p2wsh-3of3.sh` | `btc-e2e-p8` |
+| Pattern | Script | Make Target | Status |
+|---------|--------|-------------|--------|
+| 1 | `e2e-p1-p2pkh-singlesig.sh` | `btc-e2e-p1` | ✅ |
+| 2 | `e2e-p2-p2pkh-2of3.sh` | `btc-e2e-p2` | ✅ |
+| 3 | `e2e-p3-p2sh-p2wpkh-singlesig.sh` | `btc-e2e-p3` | ✅ |
+| 4 | `e2e-p4-p2sh-p2wsh-2of3.sh` | `btc-e2e-p4` | ✅ |
+| 5 | `e2e-p5-p2wpkh-singlesig.sh` | `btc-e2e-p5` | ✅ |
+| 6 | `e2e-p6-p2wsh-2of3.sh` | `btc-e2e-p6` | ✅ |
+| 7 | `e2e-p7-p2wsh-3of3.sh` | `btc-e2e-p7` | ✅ |
+| 8 | `e2e-p8-p2sh-p2wsh-3of3.sh` | `btc-e2e-p8` | ✅ |
+| 9 | `e2e-p9-p2tr-singlesig.sh` | `btc-e2e-p9` | ✅ |
 
 ## Related Skills
 
