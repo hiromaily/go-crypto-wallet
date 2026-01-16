@@ -835,7 +835,7 @@ const file_transaction_proto_rawDesc = "" +
 	"\x11SubmitTransaction\x12/.rippleapi.transaction.RequestSubmitTransaction\x1a0.rippleapi.transaction.ResponseSubmitTransaction\"\x00\x12[\n" +
 	"\x0eWaitValidation\x12\x16.google.protobuf.Empty\x1a-.rippleapi.transaction.ResponseWaitValidation\"\x000\x01\x12o\n" +
 	"\x0eGetTransaction\x12,.rippleapi.transaction.RequestGetTransaction\x1a-.rippleapi.transaction.ResponseGetTransaction\"\x00\x12{\n" +
-	"\x12CombineTransaction\x120.rippleapi.transaction.RequestCombineTransaction\x1a1.rippleapi.transaction.ResponseCombineTransaction\"\x00BNZGgithub.com/hiromaily/go-crypto-wallet/pkg/infrastructure/api/xrp/xrp\x92\x03\x02\b\x02b\beditionsp\xe8\a"
+	"\x12CombineTransaction\x120.rippleapi.transaction.RequestCombineTransaction\x1a1.rippleapi.transaction.ResponseCombineTransaction\"\x00BPZIgithub.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/xrp\x92\x03\x02\b\x02b\beditionsp\xe8\a"
 
 var (
 	file_transaction_proto_rawDescOnce sync.Once
