@@ -90,7 +90,7 @@ import (
     "github.com/stretchr/testify/require"
 
     "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch/btc"
-    bitcoinmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/mocks"
+    bitcoinmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/mocks"
     repomocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/mocks"
 )
 
@@ -300,7 +300,7 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 import (
     "testing"
 
-    bitcoinmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/mocks"
+    bitcoinmocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/mocks"
     repomocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/mocks"
     storagemocks "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction/mocks"
 )

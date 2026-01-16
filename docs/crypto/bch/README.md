@@ -614,7 +614,7 @@ decoded, err := bchutil.DecodeAddress(cashaddr, &chaincfg.MainNetParams)
 ### Code Organization
 
 ```
-internal/infrastructure/api/bitcoin/
+internal/infrastructure/api/btc/
 ├── btc/          # Bitcoin implementation (base)
 │   ├── bitcoin.go
 │   ├── address.go
@@ -747,8 +747,8 @@ BCH has lower hashrate than BTC, making it theoretically more vulnerable to 51% 
 
 | File | Description |
 |------|-------------|
-| `internal/infrastructure/api/bitcoin/bch/bitcoin_cash.go` | Main BCH implementation |
-| `internal/infrastructure/api/bitcoin/bch/address.go` | Address handling override |
+| `internal/infrastructure/api/btc/bch/bitcoin_cash.go` | Main BCH implementation |
+| `internal/infrastructure/api/btc/bch/address.go` | Address handling override |
 | `internal/domain/coin/types.go` | Coin type definitions (BCH = 145) |
 
 ---

@@ -44,7 +44,7 @@ The PSBT implementation follows Clean Architecture principles:
                 │
 ┌───────────────▼─────────────────────────────────┐
 │         Infrastructure Layer                     │
-│  - internal/infrastructure/api/bitcoin/btc/      │
+│  - internal/infrastructure/api/btc/btc/      │
 │  - internal/infrastructure/storage/file/         │
 │  - internal/infrastructure/repository/           │
 └─────────────────────────────────────────────────┘
@@ -72,7 +72,7 @@ Use Case (e.g., CreateTransactionUseCase)
 
 ### Bitcoin API Layer
 
-Location: `internal/infrastructure/api/bitcoin/btc/psbt.go`
+Location: `internal/infrastructure/api/btc/btc/psbt.go`
 
 #### Core PSBT Methods
 
@@ -626,7 +626,7 @@ func (h *HDWallet) GenerateTaprootMultisigAddress(
 
 #### Step 2: Update PSBT Creation
 
-Location: `internal/infrastructure/api/bitcoin/btc/psbt.go`
+Location: `internal/infrastructure/api/btc/btc/psbt.go`
 
 ```go
 // Update CreatePSBT to include Taproot witness data
@@ -652,7 +652,7 @@ func (b *Bitcoin) CreatePSBT(msgTx *wire.MsgTx, prevTxs []PrevTx) (string, error
 
 #### Step 3: Update Signing Logic
 
-Location: `internal/infrastructure/api/bitcoin/btc/psbt.go`
+Location: `internal/infrastructure/api/btc/btc/psbt.go`
 
 ```go
 // Update SignPSBTWithKey for Taproot script path
@@ -860,7 +860,7 @@ bitcoin-cli decodepsbt "$(cat "$PSBT_FILE")"
 
 ### Code References
 
-- Bitcoin API: `internal/infrastructure/api/bitcoin/btc/psbt.go`
+- Bitcoin API: `internal/infrastructure/api/btc/btc/psbt.go`
 - File Storage: `internal/infrastructure/storage/file/transaction.go`
 - Watch Use Cases: `internal/application/usecase/watch/btc/`
 - Keygen Use Cases: `internal/application/usecase/keygen/btc/`

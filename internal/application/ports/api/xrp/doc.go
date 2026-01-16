@@ -4,7 +4,7 @@
 //
 // This package follows the Dependency Inversion Principle of Clean Architecture
 // by defining interfaces in the application layer that are implemented by the
-// infrastructure layer (internal/infrastructure/api/ripple/).
+// infrastructure layer (internal/infrastructure/api/xrp/).
 //
 // # Interfaces
 //
@@ -34,6 +34,6 @@
 //
 // # Related Packages
 //
-//   - internal/infrastructure/api/ripple/xrp/: XRP implementation
+//   - internal/infrastructure/api/xrp/xrp/: XRP implementation
 //   - internal/application/dto/ripple/: DTOs used in interface methods
 package xrp

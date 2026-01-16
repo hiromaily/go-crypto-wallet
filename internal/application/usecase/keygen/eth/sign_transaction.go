@@ -9,8 +9,8 @@ import (
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/eth"
+	ethereum "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth"
+	apiethimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/eth"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serializer"
 )
 
@@ -59,7 +59,7 @@ func (u *signTransactionUseCase) Sign(
 
 		// Sign
 		var signedRawTx *domainEthereum.RawTx
-		signedRawTx, err = u.eth.SignOnRawTransaction(&rawTx, eth.Password)
+		signedRawTx, err = u.eth.SignOnRawTransaction(&rawTx, apiethimpl.Password)
 		if err != nil {
 			return keygenusecase.SignTransactionOutput{}, fmt.Errorf("fail to call eth.SignOnRawTransaction(): %w", err)
 		}

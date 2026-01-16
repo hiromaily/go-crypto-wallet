@@ -10,7 +10,7 @@ import (
 	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
-	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
@@ -20,7 +20,7 @@ import (
 
 type signTransactionUseCase struct {
 	xrp               apixrp.Rippler
-	xrpAccountKeyRepo repository.XRPAccountKeyRepositorier
+	xrpAccountKeyRepo repocold.XRPAccountKeyRepositorier
 	txFileRepo        file.TransactionFileRepositorier
 	wtype             domainWallet.WalletType
 }
@@ -28,7 +28,7 @@ type signTransactionUseCase struct {
 // NewSignTransactionUseCase creates a new SignTransactionUseCase for sign wallet
 func NewSignTransactionUseCase(
 	xrpAPI apixrp.Rippler,
-	xrpAccountKeyRepo repository.XRPAccountKeyRepositorier,
+	xrpAccountKeyRepo repocold.XRPAccountKeyRepositorier,
 	txFileRepo file.TransactionFileRepositorier,
 	wtype domainWallet.WalletType,
 ) signusecase.SignTransactionUseCase {

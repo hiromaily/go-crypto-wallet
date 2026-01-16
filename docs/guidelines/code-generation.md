@@ -62,7 +62,7 @@ This project uses several code generation tools. **All auto-generated files cont
 
 **Generated Files**:
 
-- `internal/infrastructure/api/ripple/xrp/*.pb.go` (6 files)
+- `internal/infrastructure/api/xrp/xrp/*.pb.go` (6 files)
   - `account.pb.go` - Account message types
   - `account_grpc.pb.go` - Account gRPC service code
   - `address.pb.go` - Address message types
@@ -93,7 +93,7 @@ This project uses several code generation tools. **All auto-generated files cont
 
 **Generated Files**:
 
-- `internal/infrastructure/api/bitcoin/mocks/mock_bitcoiner.go` - Bitcoin API mock
+- `internal/infrastructure/api/btc/mocks/mock_bitcoiner.go` - Bitcoin API mock
 - `internal/infrastructure/repository/mocks/mock_*.go` - Repository interface mocks
 - `internal/infrastructure/storage/file/transaction/mocks/mock_transaction_file_repositorier.go` - File storage mock
 
@@ -216,7 +216,7 @@ github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage:
 | SQLC Schema Extract | `data/dump/sql/dump_*.sql` | `make extract-sqlc-schema-all` | `tools/sqlc/schemas/*.sql` |
 | SQLC | `tools/sqlc/schemas/*.sql` + `tools/sqlc/queries/*.sql` | `make sqlc` | `internal/infrastructure/database/sqlc/*.go` |
 | Mockery | `.mockery.yaml` + interface definitions | `make mockery` | `internal/infrastructure/*/mocks/*.go` |
-| Protocol Buffers (Go) | `proto/rippleapi/*.proto` | `make protoc-go` | `internal/infrastructure/api/ripple/xrp/*.pb.go` |
+| Protocol Buffers (Go) | `proto/rippleapi/*.proto` | `make protoc-go` | `internal/infrastructure/api/xrp/xrp/*.pb.go` |
 | Smart Contract ABI | `contracts/token.abi` | `make generate-abi` | `internal/infrastructure/contract/token-abi.go` |
 | Protocol Buffers (JS/TS) | `proto/rippleapi/*.proto` | `web/ripple-lib-server/scripts/protoc-ts.sh` | `web/ripple-lib-server/src/pb/*.js` |
 

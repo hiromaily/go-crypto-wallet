@@ -12,7 +12,7 @@ import (
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
+	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 )
 
 // TestTraditionalMultisigStillWorks verifies that traditional P2WSH multisig
@@ -39,7 +39,7 @@ func TestTraditionalMultisigStillWorks(t *testing.T) {
 		useCase := keygen.NewKeygenCreateMultisigAddressUseCase()
 		err := useCase.Create(ctx, keygenusecase.CreateMultisigAddressInput{
 			AccountType: domainAccount.AccountTypePayment,
-			AddressType: btc.ToAddressType(keygen.AddressType()),
+			AddressType: apibtcimpl.ToAddressType(keygen.AddressType()),
 		})
 		require.NoError(t, err, "Failed to create traditional multisig address")
 
@@ -100,7 +100,7 @@ func TestMixedTraditionalAndMuSig2Wallets(t *testing.T) {
 		traditionalUseCase := keygen.NewKeygenCreateMultisigAddressUseCase()
 		err := traditionalUseCase.Create(ctx, keygenusecase.CreateMultisigAddressInput{
 			AccountType: domainAccount.AccountTypePayment,
-			AddressType: btc.ToAddressType(keygen.AddressType()),
+			AddressType: apibtcimpl.ToAddressType(keygen.AddressType()),
 		})
 		require.NoError(t, err, "Failed to create traditional multisig address")
 
@@ -138,7 +138,7 @@ func TestMixedTraditionalAndMuSig2Wallets(t *testing.T) {
 			traditionalUseCase := keygen.NewKeygenCreateMultisigAddressUseCase()
 			err := traditionalUseCase.Create(ctx, keygenusecase.CreateMultisigAddressInput{
 				AccountType: accountType,
-				AddressType: btc.ToAddressType(keygen.AddressType()),
+				AddressType: apibtcimpl.ToAddressType(keygen.AddressType()),
 			})
 			require.NoError(t, err, "Failed to create traditional address for %s", accountType)
 
@@ -178,7 +178,7 @@ func TestPSBTFormatCompatibility(t *testing.T) {
 		useCase := keygen.NewKeygenCreateMultisigAddressUseCase()
 		err := useCase.Create(ctx, keygenusecase.CreateMultisigAddressInput{
 			AccountType: domainAccount.AccountTypePayment,
-			AddressType: btc.ToAddressType(keygen.AddressType()),
+			AddressType: apibtcimpl.ToAddressType(keygen.AddressType()),
 		})
 		require.NoError(t, err, "Failed to create traditional multisig address for PSBT test")
 
@@ -248,7 +248,7 @@ func TestAddressTypeCoexistence(t *testing.T) {
 		traditionalUseCase := keygen.NewKeygenCreateMultisigAddressUseCase()
 		err := traditionalUseCase.Create(ctx, keygenusecase.CreateMultisigAddressInput{
 			AccountType: domainAccount.AccountTypePayment,
-			AddressType: btc.ToAddressType(keygen.AddressType()),
+			AddressType: apibtcimpl.ToAddressType(keygen.AddressType()),
 		})
 		require.NoError(t, err, "Failed to create traditional address")
 
@@ -318,7 +318,7 @@ func TestDatabaseSchemaCompatibility(t *testing.T) {
 		traditionalUseCase := keygen.NewKeygenCreateMultisigAddressUseCase()
 		err := traditionalUseCase.Create(ctx, keygenusecase.CreateMultisigAddressInput{
 			AccountType: domainAccount.AccountTypePayment,
-			AddressType: btc.ToAddressType(keygen.AddressType()),
+			AddressType: apibtcimpl.ToAddressType(keygen.AddressType()),
 		})
 		require.NoError(t, err, "Failed to create traditional address for database schema test")
 
@@ -418,7 +418,7 @@ func TestMigrationFromTraditionalToMuSig2(t *testing.T) {
 		traditionalUseCase := keygen.NewKeygenCreateMultisigAddressUseCase()
 		err := traditionalUseCase.Create(ctx, keygenusecase.CreateMultisigAddressInput{
 			AccountType: domainAccount.AccountTypePayment,
-			AddressType: btc.ToAddressType(keygen.AddressType()),
+			AddressType: apibtcimpl.ToAddressType(keygen.AddressType()),
 		})
 		require.NoError(t, err, "Failed to create traditional address for migration test")
 
@@ -524,7 +524,7 @@ func TestErrorHandlingAcrossTypes(t *testing.T) {
 		traditionalUseCase := keygen.NewKeygenCreateMultisigAddressUseCase()
 		err := traditionalUseCase.Create(ctx, keygenusecase.CreateMultisigAddressInput{
 			AccountType: "invalid",
-			AddressType: btc.ToAddressType(keygen.AddressType()),
+			AddressType: apibtcimpl.ToAddressType(keygen.AddressType()),
 		})
 		// Current behavior: returns nil (no error) - this is a bug
 		// TODO: Change to assert.Error once implementation is fixed

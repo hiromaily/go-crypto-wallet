@@ -8,7 +8,7 @@ import (
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	"github.com/hiromaily/go-crypto-wallet/internal/di"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
+	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 )
 
 // runMultisigWithFlags is the actual implementation that accepts parsed flags
@@ -37,7 +37,7 @@ func runTraditionalMultisig(container di.Container, acnt string) error {
 	useCase := container.NewKeygenCreateMultisigAddressUseCase()
 	err := useCase.Create(context.Background(), keygenusecase.CreateMultisigAddressInput{
 		AccountType: domainAccount.AccountType(acnt),
-		AddressType: btc.ToAddressType(container.AddressType()),
+		AddressType: apibtcimpl.ToAddressType(container.AddressType()),
 	})
 	if err != nil {
 		return fmt.Errorf("fail to create traditional multisig address: %w", err)

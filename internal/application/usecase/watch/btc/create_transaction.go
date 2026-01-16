@@ -14,7 +14,7 @@ import (
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
-	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
@@ -26,11 +26,11 @@ import (
 type createTransactionUseCase struct {
 	btcClient       apibtc.Bitcoiner
 	dbConn          *sql.DB
-	addrRepo        repository.AddressRepositorier
-	txRepo          repository.BTCTxRepositorier
-	txInputRepo     repository.TxInputRepositorier
-	txOutputRepo    repository.TxOutputRepositorier
-	payReqRepo      repository.PaymentRequestRepositorier
+	addrRepo        repowatch.AddressRepositorier
+	txRepo          repowatch.BTCTxRepositorier
+	txInputRepo     repowatch.TxInputRepositorier
+	txOutputRepo    repowatch.TxOutputRepositorier
+	payReqRepo      repowatch.PaymentRequestRepositorier
 	txFileRepo      file.TransactionFileRepositorier
 	depositReceiver domainAccount.AccountType
 	paymentSender   domainAccount.AccountType
@@ -41,11 +41,11 @@ type createTransactionUseCase struct {
 func NewCreateTransactionUseCase(
 	btcClient apibtc.Bitcoiner,
 	dbConn *sql.DB,
-	addrRepo repository.AddressRepositorier,
-	txRepo repository.BTCTxRepositorier,
-	txInputRepo repository.TxInputRepositorier,
-	txOutputRepo repository.TxOutputRepositorier,
-	payReqRepo repository.PaymentRequestRepositorier,
+	addrRepo repowatch.AddressRepositorier,
+	txRepo repowatch.BTCTxRepositorier,
+	txInputRepo repowatch.TxInputRepositorier,
+	txOutputRepo repowatch.TxOutputRepositorier,
+	payReqRepo repowatch.PaymentRequestRepositorier,
 	txFileRepo file.TransactionFileRepositorier,
 	depositReceiver domainAccount.AccountType,
 	paymentSender domainAccount.AccountType,

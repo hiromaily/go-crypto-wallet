@@ -47,5 +47,5 @@ Key rules:
 
 **DO NOT EDIT** files containing `DO NOT EDIT` comments:
 - `internal/infrastructure/database/sqlc/*.go`
-- `internal/infrastructure/api/ripple/xrp/*.pb.go`
+- `internal/infrastructure/api/xrp/xrp/*.pb.go`
 - `internal/infrastructure/contract/token-abi.go`

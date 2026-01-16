@@ -12,13 +12,13 @@ import (
 	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
-	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
+	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
 )
@@ -27,10 +27,10 @@ type createTransactionUseCase struct {
 	rippler         apixrp.Rippler
 	dbConn          *sql.DB
 	uuidHandler     uuid.UUIDHandler
-	addrRepo        repository.AddressRepositorier
-	txRepo          repository.TxRepositorier
-	txDetailRepo    repository.XRPDetailTXRepositorier
-	payReqRepo      repository.PaymentRequestRepositorier
+	addrRepo        repowatch.AddressRepositorier
+	txRepo          repowatch.TxRepositorier
+	txDetailRepo    repowatch.XRPDetailTXRepositorier
+	payReqRepo      repowatch.PaymentRequestRepositorier
 	txFileRepo      file.TransactionFileRepositorier
 	depositReceiver domainAccount.AccountType
 	paymentSender   domainAccount.AccountType
@@ -41,10 +41,10 @@ func NewCreateTransactionUseCase(
 	rippler apixrp.Rippler,
 	dbConn *sql.DB,
 	uuidHandler uuid.UUIDHandler,
-	addrRepo repository.AddressRepositorier,
-	txRepo repository.TxRepositorier,
-	txDetailRepo repository.XRPDetailTXRepositorier,
-	payReqRepo repository.PaymentRequestRepositorier,
+	addrRepo repowatch.AddressRepositorier,
+	txRepo repowatch.TxRepositorier,
+	txDetailRepo repowatch.XRPDetailTXRepositorier,
+	payReqRepo repowatch.PaymentRequestRepositorier,
 	txFileRepo file.TransactionFileRepositorier,
 	depositReceiver domainAccount.AccountType,
 	paymentSender domainAccount.AccountType,
@@ -311,7 +311,7 @@ func (u *createTransactionUseCase) createTransferTx(
 func (u *createTransactionUseCase) getUserAmounts(
 	ctx context.Context,
 	sender domainAccount.AccountType,
-) ([]xrp.UserAmount, error) {
+) ([]apixrpimpl.UserAmount, error) {
 	// get addresses for sender account
 	addrs, err := u.addrRepo.GetAll(sender)
 	if err != nil {
@@ -319,7 +319,7 @@ func (u *createTransactionUseCase) getUserAmounts(
 	}
 
 	// target addresses
-	var userAmounts []xrp.UserAmount
+	var userAmounts []apixrpimpl.UserAmount
 	// address list for sender
 	for _, addr := range addrs {
 		// TODO: if previous tx is not done, wrong amount is returned. how to manage it??
@@ -333,7 +333,7 @@ func (u *createTransactionUseCase) getUserAmounts(
 			logger.Debug("account_info",
 				"address", addr.WalletAddress, "balance", balance)
 			if balance != 0 {
-				userAmounts = append(userAmounts, xrp.UserAmount{Address: addr.WalletAddress, Amount: balance})
+				userAmounts = append(userAmounts, apixrpimpl.UserAmount{Address: addr.WalletAddress, Amount: balance})
 			}
 		}
 	}
@@ -344,7 +344,7 @@ func (u *createTransactionUseCase) getUserAmounts(
 func (u *createTransactionUseCase) createDepositRawTransactions(
 	ctx context.Context,
 	sender, receiver domainAccount.AccountType,
-	userAmounts []xrp.UserAmount,
+	userAmounts []apixrpimpl.UserAmount,
 ) ([]string, []*domainXrp.XrpDetailTx, error) {
 	// get address for deposit account
 	depositAddr, err := u.addrRepo.GetOneUnAllocated(receiver)
@@ -453,7 +453,7 @@ func (u *createTransactionUseCase) createUserPayment() ([]userPayment, float64, 
 		userPayments[idx].floatAmount = amt
 
 		// validate address
-		if !xrp.ValidateAddress(userPayments[idx].receiverAddr) {
+		if !apixrpimpl.ValidateAddress(userPayments[idx].receiverAddr) {
 			// fatal error
 			logger.Error("address is invalid",
 				"address", userPayments[idx].receiverAddr,

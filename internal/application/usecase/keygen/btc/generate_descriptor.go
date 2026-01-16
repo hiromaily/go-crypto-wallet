@@ -9,35 +9,35 @@ import (
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
 
-	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
+	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type generateDescriptorUseCase struct {
-	descriptorService  *btc.DescriptorService
+	descriptorService  *apibtcimpl.DescriptorService
 	chainConfig        *chaincfg.Params
-	authFullPubKeyRepo repository.AuthFullPubkeyRepositorier
-	accountKeyRepo     repository.BTCAccountKeyRepositorier
-	seedRepo           repository.SeedRepositorier
+	authFullPubKeyRepo repocold.AuthFullPubkeyRepositorier
+	accountKeyRepo     repocold.BTCAccountKeyRepositorier
+	seedRepo           repocold.SeedRepositorier
 	coinTypeCode       domainCoin.CoinTypeCode
 	multisigConfig     *domainAccount.MultisigConfig
 }
 
 // NewGenerateDescriptorUseCase creates a descriptor generation use case.
 func NewGenerateDescriptorUseCase(
-	descriptorService *btc.DescriptorService,
+	descriptorService *apibtcimpl.DescriptorService,
 	chainConfig *chaincfg.Params,
-	authFullPubKeyRepo repository.AuthFullPubkeyRepositorier,
-	accountKeyRepo repository.BTCAccountKeyRepositorier,
-	seedRepo repository.SeedRepositorier,
+	authFullPubKeyRepo repocold.AuthFullPubkeyRepositorier,
+	accountKeyRepo repocold.BTCAccountKeyRepositorier,
+	seedRepo repocold.SeedRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,
 	multisigConfig *domainAccount.MultisigConfig,
 ) keygenusecase.GenerateDescriptorUseCase {
@@ -267,7 +267,7 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 	authTypes []domainAccount.AuthType,
 	addressType domainAddress.AddrType,
 	accountType domainAccount.AccountType,
-) ([]btc.MultisigSigner, error) {
+) ([]apibtcimpl.MultisigSigner, error) {
 	derivationPath, err := derivationPathForAddress(addressType, true, accountType, u.chainConfig)
 	if err != nil {
 		return nil, err
@@ -280,7 +280,7 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 	}
 
 	// Reserve space for keygen key + auth keys
-	signers := make([]btc.MultisigSigner, 0, len(authTypes)+1)
+	signers := make([]apibtcimpl.MultisigSigner, 0, len(authTypes)+1)
 
 	// CRITICAL FIX: Include keygen wallet's own key in multisig
 	// Without this, descriptors only contain auth keys, resulting in (N-1)-of-(N-1) instead of N-of-N
@@ -346,7 +346,7 @@ func (u *generateDescriptorUseCase) buildMultisigSigners(
 			fp = finger.String()
 		}
 
-		signers = append(signers, btc.MultisigSigner{
+		signers = append(signers, apibtcimpl.MultisigSigner{
 			Fingerprint:    fp,
 			DerivationPath: derivationPath,
 			ExtendedKey:    xpub,
@@ -363,26 +363,27 @@ func (u *generateDescriptorUseCase) buildKeygenSigner(
 	accountType domainAccount.AccountType,
 	addressType domainAddress.AddrType,
 	derivationPath string,
-) (btc.MultisigSigner, error) {
+) (apibtcimpl.MultisigSigner, error) {
 	// Get seed from repository
 	seedData, err := u.seedRepo.GetOne(ctx)
 	if err != nil {
-		return btc.MultisigSigner{}, fmt.Errorf("get seed: %w", err)
+		return apibtcimpl.MultisigSigner{}, fmt.Errorf("get seed: %w", err)
 	}
 	if seedData == nil {
-		return btc.MultisigSigner{}, errors.New("seed not found - run 'keygen seed' first")
+		return apibtcimpl.MultisigSigner{}, errors.New("seed not found - run 'keygen seed' first")
 	}
 
 	// Convert seed string to bytes
 	seedBytes, err := infraKey.SeedToByte(seedData.Seed)
 	if err != nil {
-		return btc.MultisigSigner{}, fmt.Errorf("decode seed: %w", err)
+		return apibtcimpl.MultisigSigner{}, fmt.Errorf("decode seed: %w", err)
 	}
 
 	// Determine BIP purpose from address type
 	purpose, err := domainAuth.PurposeForAddressType(addressType.String())
 	if err != nil {
-		return btc.MultisigSigner{}, fmt.Errorf("determine purpose for address type %s: %w", addressType.String(), err)
+		return apibtcimpl.MultisigSigner{}, fmt.Errorf(
+			"determine purpose for address type %s: %w", addressType.String(), err)
 	}
 
 	// Map BIP purpose to infraKey.PurposeType
@@ -397,7 +398,7 @@ func (u *generateDescriptorUseCase) buildKeygenSigner(
 	case domainAuth.PurposeBIP86:
 		purposeType = infraKey.PurposeTypeBIP86
 	default:
-		return btc.MultisigSigner{}, fmt.Errorf("unsupported BIP purpose: %s", purpose.String())
+		return apibtcimpl.MultisigSigner{}, fmt.Errorf("unsupported BIP purpose: %s", purpose.String())
 	}
 
 	// Create HD key for this purpose
@@ -409,27 +410,27 @@ func (u *generateDescriptorUseCase) buildKeygenSigner(
 	// Generate account-level extended public key from seed
 	accountXPub, err := descGenerator.GetAccountXPub(seedBytes, accountType)
 	if err != nil {
-		return btc.MultisigSigner{}, fmt.Errorf("generate account xpub: %w", err)
+		return apibtcimpl.MultisigSigner{}, fmt.Errorf("generate account xpub: %w", err)
 	}
 
 	// Parse extended public key
 	xpub, err := hdkeychain.NewKeyFromString(accountXPub)
 	if err != nil {
-		return btc.MultisigSigner{}, fmt.Errorf("parse keygen extended key: %w", err)
+		return apibtcimpl.MultisigSigner{}, fmt.Errorf("parse keygen extended key: %w", err)
 	}
 
 	// Verify network match
 	if u.chainConfig != nil && !xpub.IsForNet(u.chainConfig) {
-		return btc.MultisigSigner{}, errors.New("keygen extended key network mismatch")
+		return apibtcimpl.MultisigSigner{}, errors.New("keygen extended key network mismatch")
 	}
 
 	// Get master fingerprint
 	fingerprint, err := descGenerator.GetMasterFingerprintHex(seedBytes)
 	if err != nil {
-		return btc.MultisigSigner{}, fmt.Errorf("calculate keygen fingerprint: %w", err)
+		return apibtcimpl.MultisigSigner{}, fmt.Errorf("calculate keygen fingerprint: %w", err)
 	}
 
-	return btc.MultisigSigner{
+	return apibtcimpl.MultisigSigner{
 		Fingerprint:    fingerprint,
 		DerivationPath: derivationPath,
 		ExtendedKey:    xpub,

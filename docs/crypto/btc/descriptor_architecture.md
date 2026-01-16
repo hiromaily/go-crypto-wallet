@@ -50,7 +50,7 @@ Descriptor file (text or Bitcoin Core JSON)
 
 - **Unit**: Descriptor parsing/formatting, domain validation, CLI flag parsing, use case constructors.
 - **Integration**: `test/integration/descriptor_workflow_test.go` exercises export → import → storage with in-memory repositories; `test/integration/descriptor_compatibility_test.go` verifies Bitcoin Core compatibility (requires external node, `integration` tag).
-- **Benchmark**: `internal/infrastructure/api/bitcoin/btc/descriptor_bench_test.go` measures generation and parsing throughput.
+- **Benchmark**: `internal/infrastructure/api/btc/btc/descriptor_bench_test.go` measures generation and parsing throughput.
 
 ## Security Considerations
 

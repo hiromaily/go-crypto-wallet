@@ -135,6 +135,17 @@ linters:
           alias: apieth
         - pkg: github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp
           alias: apixrp
+        # Infrastructure API implementations
+        - pkg: github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc
+          alias: apibtcimpl
+        - pkg: github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/bch
+          alias: apibchimpl
+        - pkg: github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/eth
+          alias: apiethimpl
+        - pkg: github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/eth/erc20
+          alias: apierc20impl
+        - pkg: github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/xrp
+          alias: apixrpimpl
         # - pkg: github.com/hiromaily/go-crypto-wallet/internal/infrastructure/db/mysql/sqlcgen
         #   alias: sqlcgen
     nakedret:
@@ -228,7 +239,7 @@ linters:
       - text: "cyclomatic complexity .* of func `\\(\\*Bitcoin\\).(SignPSBTWithKey|FinalizePSBT|finalizeMultisigInput|addBIP32DerivationFromDescriptor|getDescriptorInfoForAddress)`"
         linters:
           - gocyclo
-        path: internal/infrastructure/api/bitcoin/btc/psbt\.go
+        path: internal/infrastructure/api/btc/btc/psbt\.go
       # Exclude complex descriptor generation from gocyclo (BIP44/49/84/86 logic is complex)
       - text: "cyclomatic complexity .* of func `\\(\\*generateDescriptorUseCase\\).generateSingleSigDescriptor`"
         linters:

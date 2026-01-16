@@ -28,7 +28,7 @@ Guidance for contributors extending descriptor functionality.
 
 4. **Performance benchmarks**
    ```bash
-   go test ./internal/infrastructure/api/bitcoin/btc -bench=BenchmarkGenerateDescriptors -benchmem
+   go test ./internal/infrastructure/api/btc/btc -bench=BenchmarkGenerateDescriptors -benchmem
    ```
 
 ## Manual Smoke Test

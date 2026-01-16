@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
-	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -13,13 +13,13 @@ import (
 
 type monitorTransactionUseCase struct {
 	rippler  apixrp.Rippler
-	addrRepo repository.AddressRepositorier
+	addrRepo repowatch.AddressRepositorier
 }
 
 // NewMonitorTransactionUseCase creates a new MonitorTransactionUseCase
 func NewMonitorTransactionUseCase(
 	rippler apixrp.Rippler,
-	addrRepo repository.AddressRepositorier,
+	addrRepo repowatch.AddressRepositorier,
 ) watchusecase.MonitorTransactionUseCase {
 	return &monitorTransactionUseCase{
 		rippler:  rippler,

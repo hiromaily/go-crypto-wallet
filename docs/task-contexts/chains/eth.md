@@ -29,7 +29,7 @@ internal/application/usecase/
 ### Infrastructure Layer
 
 ```
-internal/infrastructure/api/ethereum/
+internal/infrastructure/api/eth/
 ├── connection.go              # RPC接続
 ├── api-interface.go           # インターフェース定義
 ├── eth/
@@ -140,7 +140,7 @@ gasLimit, err := client.EstimateGas(ctx, callMsg)
 ### Token Operations
 
 ```go
-// internal/infrastructure/api/ethereum/erc20/erc20.go
+// internal/infrastructure/api/eth/erc20/erc20.go
 type ERC20Client struct {
     // ...
 }
@@ -215,8 +215,8 @@ go test ./internal/application/usecase/keygen/eth/...
 go test ./internal/application/usecase/sign/eth/...
 
 # ETH Infrastructureテスト
-go test ./internal/infrastructure/api/ethereum/eth/...
-go test ./internal/infrastructure/api/ethereum/erc20/...
+go test ./internal/infrastructure/api/eth/eth/...
+go test ./internal/infrastructure/api/eth/erc20/...
 ```
 
 ## Related Documentation

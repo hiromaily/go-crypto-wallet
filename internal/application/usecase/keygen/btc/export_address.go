@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
-	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repocold "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/cold"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -19,7 +19,7 @@ import (
 )
 
 type exportAddressUseCase struct {
-	accountKeyRepo  repository.BTCAccountKeyRepositorier
+	accountKeyRepo  repocold.BTCAccountKeyRepositorier
 	addrFileRepo    file.AddressFileRepositorier
 	multisigAccount *domainAccount.MultisigConfig
 	coinTypeCode    domainCoin.CoinTypeCode
@@ -29,7 +29,7 @@ type exportAddressUseCase struct {
 // Note: This use case is specific to BTC/BCH. ETH and XRP require separate implementations
 // due to different repository interfaces and domain types.
 func NewExportAddressUseCase(
-	accountKeyRepo repository.BTCAccountKeyRepositorier,
+	accountKeyRepo repocold.BTCAccountKeyRepositorier,
 	addrFileRepo file.AddressFileRepositorier,
 	multisigAccount *domainAccount.MultisigConfig,
 	coinTypeCode domainCoin.CoinTypeCode,

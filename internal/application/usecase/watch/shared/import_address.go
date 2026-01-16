@@ -7,7 +7,7 @@ import (
 
 	appdto "github.com/hiromaily/go-crypto-wallet/internal/application/dto"
 	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
-	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repowatch "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository/watch"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
@@ -16,7 +16,7 @@ import (
 )
 
 type importAddressUseCase struct {
-	addrRepo     repository.AddressRepositorier
+	addrRepo     repowatch.AddressRepositorier
 	addrFileRepo file.AddressFileRepositorier
 	coinTypeCode domainCoin.CoinTypeCode
 	addrType     domainAddress.AddrType
@@ -25,7 +25,7 @@ type importAddressUseCase struct {
 
 // NewImportAddressUseCase creates a new ImportAddressUseCase for watch wallet
 func NewImportAddressUseCase(
-	addrRepo repository.AddressRepositorier,
+	addrRepo repowatch.AddressRepositorier,
 	addrFileRepo file.AddressFileRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,
 	addrType domainAddress.AddrType,

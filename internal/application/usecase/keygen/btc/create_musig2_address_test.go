@@ -6,7 +6,7 @@ import (
 	"github.com/btcsuite/btcd/chaincfg"
 
 	keygenusecasebtc "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen/btc"
-	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
+	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
@@ -14,7 +14,7 @@ func TestNewCreateMuSig2AddressUseCase(t *testing.T) {
 	t.Parallel()
 
 	// Create dependencies
-	musig2Service := btc.NewMuSig2Service(logger.NewNoopLogger())
+	musig2Service := apibtcimpl.NewMuSig2Service(logger.NewNoopLogger())
 	chainConfig := &chaincfg.RegressionNetParams
 
 	// Test constructor

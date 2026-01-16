@@ -119,7 +119,7 @@ For BCH tasks, always check the following rules:
 
 ```go
 // BCH implementation location
-internal/infrastructure/api/bitcoin/bch/
+internal/infrastructure/api/btc/bch/
 
 // Override example
 func (b *BitcoinCash) GetAddressInfo(addr string) (*dtobtc.AddressInfo, error) {

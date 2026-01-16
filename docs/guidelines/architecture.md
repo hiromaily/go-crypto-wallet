@@ -103,7 +103,7 @@ type Bitcoiner interface {
     // ... other methods using DTOs
 }
 
-// Implementation in infrastructure/api/bitcoin/btc/bitcoin.go
+// Implementation in infrastructure/api/btc/btc/bitcoin.go
 package btc
 
 import (
