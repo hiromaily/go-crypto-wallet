@@ -139,7 +139,9 @@ full_reset() {
 
 	# Explicitly remove database volume (in case -v flag didn't work)
 	log_info "Forcefully removing database volume..."
-	local volume_name="go-crypto-wallet_wallet-db"
+	# Docker Compose prefixes volume names with the project name (defaults to base name of project directory)
+	# Dynamically determine volume name to handle different project directory names
+	local volume_name="$(basename "$PROJECT_ROOT" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_-]//g')_wallet-db"
 
 	# Try multiple times in case volume is still being used
 	local removal_attempts=0
@@ -725,14 +727,16 @@ main() {
 	echo ""
 
 	# Execute workflow phases
+	# Note: Explicitly check return values for functions that may return non-zero
+	# The 'set -e' option only exits for failing commands, not for functions that return non-zero
 	check_prerequisites
 	setup_infrastructure
 	setup_wallets
 	key_generation_phase
 	singlesig_setup_phase
-	generate_test_utxos
-	create_payment_requests_phase
-	transaction_flow_phase
+	generate_test_utxos || exit 1
+	create_payment_requests_phase || exit 1
+	transaction_flow_phase || exit 1
 
 	log_step "Bitcoin E2E Workflow Completed Successfully!"
 	log_info "Summary:"
