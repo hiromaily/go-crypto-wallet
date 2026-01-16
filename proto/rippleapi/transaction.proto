@@ -2,33 +2,32 @@ edition = "2023";
 
 package rippleapi.transaction;
 
-option go_package = "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/xrp";
+import "google/protobuf/empty.proto";
 
 // Use proto3 semantics for field presence (implicit presence)
 // This maintains backward compatibility with existing Go code
 option features.field_presence = IMPLICIT;
-
-import "google/protobuf/empty.proto";
+option go_package = "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/xrp";
 
 enum EnumTransactionType {
-  TX_ACCOUNT_SET = 0;      // AccountSet
-  TX_ACCOUNT_DELETE = 1;   // AccountDelete
-  TX_CHECK_CANCEL = 2;     // CheckCancel
-  TX_CHECK_CASH = 3;       // CheckCash
-  TX_CHECK_CREATE = 4;     // CheckCreate
-  TX_DEPOSIT_PREAUTH = 5;  // DepositPreauth
-  TX_ESCROW_CANCEL = 6;    // EscrowCancel
-  TX_ESCROW_CREATE = 7;    // EscrowCreate
-  TX_ESCROW_FINISH = 8;    // EscrowFinish
-  TX_OFFER_CANCEL = 9;     // OfferCancel
-  TX_OFFER_CREATE = 10;    // OfferCreate
-  TX_PAYMENT = 11;         // Payment
-  TX_PAYMENT_CHANNEL_CLAIM = 12;   // PaymentChannelClaim
-  TX_PAYMENT_CHANNEL_CREATE = 13;  // PaymentChannelCreate
-  TX_PAYMENT_CHANNEL_FUND = 14;    // PaymentChannelFund
-  TX_SET_REGULAR_KEY = 15;         // SetRegularKey
-  TX_SINGER_LIST_SET = 16;         // SignerListSet
-  TX_TRUST_SET = 17;       // TrustSet
+  TX_ACCOUNT_SET = 0; // AccountSet
+  TX_ACCOUNT_DELETE = 1; // AccountDelete
+  TX_CHECK_CANCEL = 2; // CheckCancel
+  TX_CHECK_CASH = 3; // CheckCash
+  TX_CHECK_CREATE = 4; // CheckCreate
+  TX_DEPOSIT_PREAUTH = 5; // DepositPreauth
+  TX_ESCROW_CANCEL = 6; // EscrowCancel
+  TX_ESCROW_CREATE = 7; // EscrowCreate
+  TX_ESCROW_FINISH = 8; // EscrowFinish
+  TX_OFFER_CANCEL = 9; // OfferCancel
+  TX_OFFER_CREATE = 10; // OfferCreate
+  TX_PAYMENT = 11; // Payment
+  TX_PAYMENT_CHANNEL_CLAIM = 12; // PaymentChannelClaim
+  TX_PAYMENT_CHANNEL_CREATE = 13; // PaymentChannelCreate
+  TX_PAYMENT_CHANNEL_FUND = 14; // PaymentChannelFund
+  TX_SET_REGULAR_KEY = 15; // SetRegularKey
+  TX_SINGER_LIST_SET = 16; // SignerListSet
+  TX_TRUST_SET = 17; // TrustSet
 }
 
 message Instructions {
@@ -94,7 +93,7 @@ message ResponseCombineTransaction {
   string txID = 2;
 }
 
-// RippleTransactionAPI 
+// RippleTransactionAPI
 service RippleTransactionAPI {
   // https://xrpl.org/rippleapi-reference.html#preparetransaction
   rpc PrepareTransaction(RequestPrepareTransaction) returns (ResponsePrepareTransaction) {}
