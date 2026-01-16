@@ -13,6 +13,7 @@ Read the following documents before creating or modifying scripts:
 | Document | Contents |
 |----------|----------|
 | `docs/crypto/btc/e2e_transaction_patterns.md` | Detailed specifications for all 11 patterns |
+| `docs/crypto/btc/address_type_vs_format.md` | **CRITICAL**: Address types vs formats (taproot vs bech32m) |
 | `scripts/operation/common.sh` | Common utility functions |
 | `pkg/config/README.md` | Configuration override via environment variables |
 | `config/wallet/README.md` | Wallet configuration file policies |
@@ -109,6 +110,8 @@ Reference: `AddrType.ToKeyType()` in `internal/domain/address/types.go`
 
 ## Pattern-Specific Settings
 
+⚠️ **CRITICAL**: For Pattern 9 (Taproot), use `address_type="taproot"` NOT `"bech32m"`. See [address_type_vs_format.md](../../docs/crypto/btc/address_type_vs_format.md).
+
 | Pattern | Description | address_type | Address Format | Signature |
 |---------|-------------|--------------|----------------|-----------|
 | 1 | P2PKH Single-sig | `legacy` | `m.../n...` | Single |
@@ -120,6 +123,8 @@ Reference: `AddrType.ToKeyType()` in `internal/domain/address/types.go`
 | 7 | P2WSH 3-of-3 | `bech32` | `bcrt1q...` (62 chars) | 3-of-3 |
 | 8 | P2SH-P2WSH 3-of-3 | `p2sh-segwit` | `2...` | 3-of-3 |
 | 9 | P2TR Taproot Single-sig | `taproot` | `bcrt1p...` | Single |
+
+**Note**: `address_type` values represent **address types** (semantic), NOT encoding formats. "bech32m" is an encoding format used by Taproot, but you configure the type as "taproot".
 
 ## Build and Verification Rules
 
