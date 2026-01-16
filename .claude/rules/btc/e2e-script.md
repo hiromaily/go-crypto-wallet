@@ -116,7 +116,10 @@ Reference: `AddrType.ToKeyType()` in `internal/domain/address/types.go`
 | 3 | P2SH-P2WPKH Single-sig | `p2sh-segwit` | `2...` | Single |
 | 4 | P2SH-P2WSH 2-of-3 | `p2sh-segwit` | `2...` | 2-of-3 |
 | 5 | P2WPKH Native SegWit Single-sig | `bech32` | `bcrt1q...` | Single |
+| 6 | P2WSH 2-of-3 | `bech32` | `bcrt1q...` (62 chars) | 2-of-3 |
+| 7 | P2WSH 3-of-3 | `bech32` | `bcrt1q...` (62 chars) | 3-of-3 |
 | 8 | P2SH-P2WSH 3-of-3 | `p2sh-segwit` | `2...` | 3-of-3 |
+| 9 | P2TR Taproot Single-sig | `bech32m` | `bcrt1p...` | Single |
 
 ## Build and Verification Rules
 
@@ -262,16 +265,17 @@ btc-e2e-p1-cleanup:
 
 **Current Scripts**:
 
-| Pattern | Script | Make Target |
-|---------|--------|-------------|
-| 1 | `e2e-p1-p2pkh-singlesig.sh` | `btc-e2e-p1` |
-| 2 | `e2e-p2-p2pkh-2of3.sh` | `btc-e2e-p2` |
-| 3 | `e2e-p3-p2sh-p2wpkh-singlesig.sh` | `btc-e2e-p3` |
-| 4 | `e2e-p4-p2sh-p2wsh-2of3.sh` | `btc-e2e-p4` |
-| 5 | `e2e-p5-p2wpkh-singlesig.sh` | `btc-e2e-p5` |
-| 6 | `e2e-p6-p2wsh-2of3.sh` | `btc-e2e-p6` |
-| 7 | `e2e-p7-p2wsh-3of3.sh` | `btc-e2e-p7` |
-| 8 | `e2e-p8-p2sh-p2wsh-3of3.sh` | `btc-e2e-p8` |
+| Pattern | Script | Make Target | Status |
+|---------|--------|-------------|--------|
+| 1 | `e2e-p1-p2pkh-singlesig.sh` | `btc-e2e-p1` | ✅ |
+| 2 | `e2e-p2-p2pkh-2of3.sh` | `btc-e2e-p2` | ✅ |
+| 3 | `e2e-p3-p2sh-p2wpkh-singlesig.sh` | `btc-e2e-p3` | ✅ |
+| 4 | `e2e-p4-p2sh-p2wsh-2of3.sh` | `btc-e2e-p4` | ✅ |
+| 5 | `e2e-p5-p2wpkh-singlesig.sh` | `btc-e2e-p5` | ✅ |
+| 6 | `e2e-p6-p2wsh-2of3.sh` | `btc-e2e-p6` | ✅ |
+| 7 | `e2e-p7-p2wsh-3of3.sh` | `btc-e2e-p7` | ✅ |
+| 8 | `e2e-p8-p2sh-p2wsh-3of3.sh` | `btc-e2e-p8` | ✅ |
+| 9 | `e2e-p9-p2tr-singlesig.sh` | `btc-e2e-p9` | 🔶 |
 
 ## Related Skills
 

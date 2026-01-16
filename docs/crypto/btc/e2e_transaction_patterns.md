@@ -172,7 +172,7 @@ Aggregate signature protocol based on Schnorr signatures. N-of-N multisig become
 | **6** | **P2WSH (BIP84)** | **2-of-3 Multisig** | **`bc1q...`** | **✅ e2e/e2e-p6-p2wsh-2of3.sh** |
 | **7** | **P2WSH (BIP84)** | **3-of-3 Multisig** | **`bc1q...`** | **✅ e2e/e2e-p7-p2wsh-3of3.sh** |
 | **8** | **P2SH-P2WSH** | **3-of-3 Multisig** | **`3...`** | **✅ e2e/e2e-p8-p2sh-p2wsh-3of3.sh** |
-| 9 | P2TR (BIP86) | Single-sig | `bc1p...` | ❌ Not implemented yet |
+| **9** | **P2TR (BIP86)** | **Single-sig** | **`bc1p...`** | **🔶 e2e/e2e-p9-p2tr-singlesig.sh** |
 | 10 | P2TR (BIP86) | MuSig2 (N-of-N) | `bc1p...` | 🔜 In development |
 | 11 | P2TR (BIP86) | Tapscript (M-of-N) | `bc1p...` | 🔜 In development |
 
@@ -588,19 +588,141 @@ P2SH-P2WSH is primarily used for **complex multisig scripts** while maintaining 
 
 ### Pattern 9: BTC P2TR Single-sig (Taproot)
 
+**❌ Not yet implemented - Planned in `scripts/operation/btc/e2e/e2e-p9-p2tr-singlesig.sh`**
+
 ```
-Address Type: P2TR (BIP86)
+Address Type: P2TR (BIP86 Taproot)
 Signing Requirements: Single-sig (Keygen only)
 Descriptor: tr([fingerprint/86'/0'/0']xpub.../0/*)
+Address Format: bc1p... (Mainnet), tb1p... (Testnet), bcrt1p... (regtest)
+Bitcoin Core: v22.0+ required
 ```
 
-**Simple Workflow:**
+#### What is P2TR (Taproot)?
+
+P2TR (Pay-to-Taproot) is Bitcoin's latest major upgrade (activated November 2021) that introduces a new address format and signature scheme. It combines **Schnorr signatures** and **Merkelized Alternative Script Trees (MAST)** into a single output type.
+
+| BIP | Role |
+|-----|------|
+| **BIP86** | Defines key derivation path (`m/86'/...`) for Taproot key path spend |
+| **BIP340** | Defines Schnorr signature scheme (64 bytes vs 71-72 for ECDSA) |
+| **BIP341** | Defines Taproot output structure and spending rules |
+| **BIP342** | Defines Tapscript (script semantics for Taproot) |
+
+#### Address Structure
+
+```
+P2TR Address (SegWit v1 - Taproot):
+┌─────────────────────────────────────────────────────────────┐
+│  Bech32m Encoding (NOT Bech32!)                              │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │  Witness Version: 1 (different from v0 in P2WPKH)       │ │
+│  │  ┌─────────────────────────────────────────────────────┐ │ │
+│  │  │  Tweaked Public Key (32 bytes, x-only format)        │ │ │
+│  │  │  output_key = internal_key + H_TapTweak(P) * G       │ │ │
+│  │  └─────────────────────────────────────────────────────┘ │ │
+│  └─────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+
+Format: bc1p + 58 characters (mainnet, 62 chars total)
+        tb1p + 58 characters (testnet/signet)
+        bcrt1p + 58 characters (regtest)
+```
+
+#### Comparison with Other Single-sig Patterns
+
+| Item | Pattern 1 (P2PKH) | Pattern 3 (P2SH-P2WPKH) | Pattern 5 (P2WPKH) | **Pattern 9 (P2TR)** |
+|------|-------------------|-------------------------|--------------------|--------------------|
+| BIP | BIP44 | BIP49 | BIP84 | **BIP86** |
+| Address Prefix | `1...`/`m...` | `3...`/`2...` | `bc1q...` | **`bc1p...`** |
+| Descriptor | `pkh(...)` | `sh(wpkh(...))` | `wpkh(...)` | **`tr(...)`** |
+| SegWit Version | N/A | v0 (wrapped) | v0 (native) | **v1 (Taproot)** |
+| Signature | ECDSA | ECDSA | ECDSA | **Schnorr (BIP340)** |
+| Signature Size | 71-72 bytes | 71-72 bytes | 71-72 bytes | **64 bytes** |
+| Transaction Size | Largest | Medium | Smaller | **Smallest** |
+| Encoding | Base58Check | Base58Check | Bech32 | **Bech32m** |
+| address_type | `legacy` | `p2sh-segwit` | `bech32` | **`bech32m`** |
+
+#### Key Path vs Script Path Spending
+
+Taproot supports two spending paths:
+
+| Spend Type | Description | Use Case | Pattern |
+|------------|-------------|----------|---------|
+| **Key Path** | Direct signature with tweaked key | Single-sig, efficient multisig | **Pattern 9** |
+| Script Path | Reveal Merkle proof + satisfy script | Complex conditions, timelocks | Pattern 11 |
+
+Pattern 9 uses **Key Path Spend** - the most efficient method when only a single key controls the funds.
+
+#### Why Use P2TR (Taproot)?
+
+| Aspect | Description |
+|--------|-------------|
+| ✅ Smallest transactions | ~30-40% smaller than P2PKH, ~15% smaller than P2WPKH |
+| ✅ Lowest fees | Most efficient single-sig format |
+| ✅ Enhanced privacy | All Taproot spends (single-sig and multisig) look identical |
+| ✅ Schnorr signatures | 64 bytes vs 71-72 for ECDSA, batch verification possible |
+| ✅ Future-proof | Latest Bitcoin address standard |
+| ✅ Faster validation | Schnorr signatures verify faster than ECDSA |
+| ❌ Requires Bitcoin Core v22.0+ | Older nodes cannot create/validate Taproot |
+| ❌ Newer standard | Some services may not support `bc1p...` addresses yet |
+
+#### Key Derivation Path (BIP86)
+
+```
+m / 86' / coin_type' / account' / change / address_index
+         └─ 0' for mainnet, 1' for testnet/regtest
+```
+
+#### Schnorr Signature (BIP340)
+
+```
+Schnorr Signature: 64 bytes total
+  ┌──────────────────────────────────────────────────────────┐
+  │  r (32 bytes) │ s (32 bytes)                              │
+  │  x-coord of R │ scalar value                              │
+  └──────────────────────────────────────────────────────────┘
+
+ECDSA Signature (DER encoded): 71-72 bytes
+  ┌──────────────────────────────────────────────────────────┐
+  │ 30 │ len │ 02 │ r_len │ r │ 02 │ s_len │ s              │
+  └──────────────────────────────────────────────────────────┘
+```
+
+**Workflow:**
 
 1. Generate Seed in Keygen
-2. Generate BIP86 HD Key in Keygen
-3. Export Taproot address from Keygen
-4. Import Taproot address to Watch
-5. Create unsigned transaction → Sign once (Schnorr) → Broadcast
+2. Generate BIP86 HD Key in Keygen (10 accounts each)
+3. Export Taproot Descriptor from Keygen (generates `tr(...)`)
+4. Import Descriptor to Watch
+5. Generate Test UTXO (regtest)
+6. Create unsigned transaction → Sign once (Schnorr) → Broadcast
+
+**Signing Flow (Single-sig):**
+
+```
+Watch Wallet (create unsigned tx)
+    ↓
+Keygen Wallet (sign with Schnorr signature - 64 bytes)
+    ↓
+Watch Wallet (broadcast)
+```
+
+**Characteristics:**
+
+- Simple and fast (completed with single Schnorr signature)
+- Sign1/Sign2 wallets not required
+- Uses BIP86 key derivation path (`m/86'/0'/account'/change/index`)
+- Taproot address format (`bcrt1p...` prefix in regtest)
+- Most efficient single-sig transaction format
+- **Requires Bitcoin Core v22.0+** (Taproot/Schnorr support)
+
+**Implementation Notes:**
+
+- Environment variable: `WALLET_ADDRESS_TYPE="bech32m"`
+- Descriptor format: `tr([fingerprint/86'/coin'/account']xpub.../0/*)`
+- Uses Bech32m encoding (NOT Bech32 - different checksum constant)
+- Witness version 1 (vs version 0 for P2WPKH)
 
 ### Pattern 10: BTC P2TR MuSig2 (In Development)
 
@@ -701,13 +823,20 @@ Address Format: bitcoincash:p... (P2SH multisig)
 | `scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh` | BTC | P2SH-P2WSH 3-of-3 Multisig (Pattern 8) | 3-of-3 |
 | `scripts/operation/bch/e2e-workflow.sh` | BCH | CashAddr Multisig | 3-of-3 |
 
+### In Progress E2E Scripts
+
+| Script | Coin | Pattern | Signing Requirements | Status |
+|--------|------|---------|---------------------|--------|
+| `e2e-p9-p2tr-singlesig.sh` | BTC | P2TR Taproot Single-sig (Pattern 9) | Single-sig | 🔶 In Progress |
+
+**Note:** Pattern 9 implementation can be tracked with the custom command: `.claude/commands/e2e/fix-btc-e2e-p9.md`
+
 ### Planned E2E Scripts
 
 | Script (Planned) | Coin | Pattern | Signing Requirements | Priority |
 |------------------|------|---------|---------------------|----------|
-| `e2e-p9-p2tr-singlesig.sh` | BTC | P2TR Single-sig (Pattern 9) | Single-sig | High |
-| `e2e-musig2.sh` | BTC | P2TR MuSig2 | N-of-N | Medium |
-| `e2e-tapscript.sh` | BTC | P2TR Script Path | M-of-N | Low |
+| `e2e-musig2.sh` | BTC | P2TR MuSig2 (Pattern 10) | N-of-N | Medium |
+| `e2e-tapscript.sh` | BTC | P2TR Tapscript (Pattern 11) | M-of-N | Low |
 
 ---
 
