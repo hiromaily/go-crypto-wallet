@@ -7,7 +7,7 @@ import (
 
 	"github.com/btcsuite/btcd/btcec/v2"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/multisig"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"

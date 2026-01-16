@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ethereum"
+	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
@@ -14,7 +14,7 @@ import (
 
 // ETHKeygen keygen wallet object
 type ETHKeygen struct {
-	ETH                     ethereum.Ethereumer
+	ETH                     apieth.Ethereumer
 	dbConn                  *sql.DB
 	wtype                   domainWallet.WalletType
 	generateSeedUseCase     keygenusecase.GenerateSeedUseCase
@@ -26,7 +26,7 @@ type ETHKeygen struct {
 
 // NewETHKeygen returns ETHKeygen object
 func NewETHKeygen(
-	eth ethereum.Ethereumer,
+	eth apieth.Ethereumer,
 	dbConn *sql.DB,
 	walletType domainWallet.WalletType,
 	generateSeedUseCase keygenusecase.GenerateSeedUseCase,

@@ -1,4 +1,4 @@
-// Package ripple defines interfaces for Ripple/XRP blockchain operations.
+// Package xrp defines interfaces for Ripple/XRP blockchain operations.
 //
 // # Overview
 //
@@ -26,12 +26,14 @@
 //
 // Use cases depend on these interfaces, not concrete implementations:
 //
+//	import apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
+//
 //	type myUseCase struct {
-//	    xrp ripple.Rippler
+//	    xrp apixrp.Rippler
 //	}
 //
 // # Related Packages
 //
 //   - internal/infrastructure/api/ripple/xrp/: XRP implementation
 //   - internal/application/dto/ripple/: DTOs used in interface methods
-package ripple
+package xrp

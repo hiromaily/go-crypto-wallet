@@ -3,11 +3,11 @@ package eth
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ethereum"
+	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 )
 
 // AddCommands adds all Ethereum API subcommands
-func AddCommands(parentCmd *cobra.Command, eth ethereum.Ethereumer) {
+func AddCommands(parentCmd *cobra.Command, eth apieth.Ethereumer) {
 	// importrawkey command
 	var (
 		importrawkeyPrivKey    string

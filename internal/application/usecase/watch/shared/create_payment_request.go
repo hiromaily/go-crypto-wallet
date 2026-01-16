@@ -7,7 +7,7 @@ import (
 
 	"github.com/quagmt/udecimal"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"

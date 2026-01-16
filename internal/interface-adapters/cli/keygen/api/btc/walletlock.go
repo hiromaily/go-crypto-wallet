@@ -3,10 +3,10 @@ package btc
 import (
 	"fmt"
 
-	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/bitcoin"
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 )
 
-func runWalletLock(btc portsBitcoin.Bitcoiner) error {
+func runWalletLock(btc apibtc.Bitcoiner) error {
 	fmt.Println("removes the wallet encryption key from memory, locking the wallet")
 
 	err := btc.WalletLock()

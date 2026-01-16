@@ -12,7 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"golang.org/x/crypto/sha3"
 
-	portsEthereum "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ethereum"
+	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/ethtx"
@@ -22,7 +22,7 @@ import (
 )
 
 // Compile-time check to ensure ERC20 implements the ERC20er interface
-var _ portsEthereum.ERC20er = (*ERC20)(nil)
+var _ apieth.ERC20er = (*ERC20)(nil)
 
 // ERC20 struct
 // TODO: Ethereum struct in internal/infrastructure/api/ethereum/eth/ethereum.go must be embedded to use common funcs
@@ -123,7 +123,7 @@ func (e *ERC20) GetBalance(ctx context.Context, hexAddr string, _ domainEthereum
 // - 1.b. Or after approve is called, this transaction may be sent
 func (e *ERC20) CreateRawTransaction(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-) (*domainEthereum.RawTx, *portsEthereum.TxCreateParams, error) {
+) (*domainEthereum.RawTx, *apieth.TxCreateParams, error) {
 	// validation check
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
@@ -209,7 +209,7 @@ func (e *ERC20) CreateRawTransaction(
 	txFee := new(big.Int).Mul(gasPrice, new(big.Int).SetUint64(gasLimit))
 
 	// create TxCreateParams DTO for use case layer
-	txParams := &portsEthereum.TxCreateParams{
+	txParams := &apieth.TxCreateParams{
 		UUID:        uid.String(),
 		FromAddress: fromAddr,
 		ToAddress:   toAddr,

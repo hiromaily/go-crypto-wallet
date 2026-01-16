@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ripple"
+	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
@@ -15,7 +15,7 @@ import (
 func NewRipple(
 	wsPublic *websocket.WS, wsAdmin *websocket.WS, api *xrp.RippleAPI, conf *config.Ripple,
 	coinTypeCode domainCoin.CoinTypeCode,
-) (portsRipple.Rippler, error) {
+) (apixrp.Rippler, error) {
 	//nolint:exhaustive
 	switch coinTypeCode {
 	case domainCoin.XRP:

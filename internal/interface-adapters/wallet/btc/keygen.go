@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/bitcoin"
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -15,7 +15,7 @@ import (
 
 // BTCKeygen is keygen wallet object
 type BTCKeygen struct {
-	BTC                       portsBitcoin.Bitcoiner
+	BTC                       apibtc.Bitcoiner
 	dbConn                    *sql.DB
 	addrType                  domainAddress.AddrType
 	wtype                     domainWallet.WalletType
@@ -30,7 +30,7 @@ type BTCKeygen struct {
 
 // NewBTCKeygen returns Keygen object
 func NewBTCKeygen(
-	btc portsBitcoin.Bitcoiner,
+	btc apibtc.Bitcoiner,
 	dbConn *sql.DB,
 	addrType domainAddress.AddrType,
 	generateSeedUseCase keygenusecase.GenerateSeedUseCase,

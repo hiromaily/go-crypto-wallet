@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ripple"
+	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
@@ -15,7 +15,7 @@ import (
 
 // XRPKeygen keygen wallet object
 type XRPKeygen struct {
-	XRP                     portsRipple.Rippler
+	XRP                     apixrp.Rippler
 	dbConn                  *sql.DB
 	wtype                   domainWallet.WalletType
 	generateSeedUseCase     keygenusecase.GenerateSeedUseCase
@@ -27,7 +27,7 @@ type XRPKeygen struct {
 
 // NewXRPKeygen returns XRPKeygen object
 func NewXRPKeygen(
-	xrp portsRipple.Rippler,
+	xrp apixrp.Rippler,
 	dbConn *sql.DB,
 	walletType domainWallet.WalletType,
 	generateSeedUseCase keygenusecase.GenerateSeedUseCase,

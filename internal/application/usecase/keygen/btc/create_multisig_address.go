@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
-	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/bitcoin"
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
+	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -16,7 +16,7 @@ import (
 )
 
 type createMultisigAddressUseCase struct {
-	btc                portsBitcoin.Bitcoiner
+	btc                apibtc.Bitcoiner
 	authFullPubKeyRepo repository.AuthFullPubkeyRepositorier
 	accountKeyRepo     repository.BTCAccountKeyRepositorier
 	multisigAccount    *domainAccount.MultisigConfig
@@ -24,7 +24,7 @@ type createMultisigAddressUseCase struct {
 
 // NewCreateMultisigAddressUseCase creates a new CreateMultisigAddressUseCase
 func NewCreateMultisigAddressUseCase(
-	btc portsBitcoin.Bitcoiner,
+	btc apibtc.Bitcoiner,
 	authFullPubKeyRepo repository.AuthFullPubkeyRepositorier,
 	accountKeyRepo repository.BTCAccountKeyRepositorier,
 	multisigAccount *domainAccount.MultisigConfig,

@@ -1,4 +1,4 @@
-// Package ethereum defines interfaces for Ethereum blockchain operations.
+// Package eth defines interfaces for Ethereum blockchain operations.
 //
 // # Overview
 //
@@ -30,8 +30,10 @@
 //
 // Use cases depend on these interfaces, not concrete implementations:
 //
+//	import apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
+//
 //	type myUseCase struct {
-//	    eth ethereum.Ethereumer
+//	    eth apieth.Ethereumer
 //	}
 //
 // # Related Packages
@@ -39,4 +41,4 @@
 //   - internal/infrastructure/api/ethereum/eth/: ETH implementation
 //   - internal/infrastructure/api/ethereum/erc20/: ERC-20 implementation
 //   - internal/domain/ethereum/: Domain types used in interface methods
-package ethereum
+package eth

@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch"

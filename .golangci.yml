@@ -16,7 +16,7 @@ issues:
 
 formatters:
   enable:
-    - gofumpt       # Detects whether code was gofumpt-ed.
+    - gofumpt # Detects whether code was gofumpt-ed.
     - goimports
   settings:
     goimports:
@@ -27,52 +27,52 @@ formatters:
 
 linters:
   enable:
-    - asasalint                 # Detects "[]any" used as argument for variadic "func(...any)".
+    - asasalint # Detects "[]any" used as argument for variadic "func(...any)".
     - bodyclose
-    - copyloopvar               # Detects places where loop variables are copied.
+    - copyloopvar # Detects places where loop variables are copied.
     - depguard
-    - dogsled                   # Detects assignments with too many blank identifiers.
-    - dupword                   # Detects duplicate words.
-    - durationcheck             # Detect cases where two time.Duration values are being multiplied in possibly erroneous ways.
+    - dogsled # Detects assignments with too many blank identifiers.
+    - dupword # Detects duplicate words.
+    - durationcheck # Detect cases where two time.Duration values are being multiplied in possibly erroneous ways.
     - errcheck
-    - errchkjson                # Detects unsupported types passed to json encoding functions and reports if checks for the returned error can be omitted.
-    - exhaustive                # Detects missing options in enum switch statements.
-    - exptostd                  # Detects functions from golang.org/x/exp/ that can be replaced by std functions.
-    - fatcontext                # Detects nested contexts in loops and function literals.
+    - errchkjson # Detects unsupported types passed to json encoding functions and reports if checks for the returned error can be omitted.
+    - exhaustive # Detects missing options in enum switch statements.
+    - exptostd # Detects functions from golang.org/x/exp/ that can be replaced by std functions.
+    - fatcontext # Detects nested contexts in loops and function literals.
     - forbidigo
     - gocheckcompilerdirectives # Detects invalid go compiler directive comments (//go:).
-    - gocritic                  # Metalinter; detects bugs, performance, and styling issues.
+    - gocritic # Metalinter; detects bugs, performance, and styling issues.
     - gocyclo
-    - gosec                     # Detects security problems.
+    - gosec # Detects security problems.
     - govet
-    - iface                     # Detects incorrect use of interfaces. Currently only used for "identical" interfaces in the same package.
-    - importas                  # Enforces consistent import aliases.
+    - iface # Detects incorrect use of interfaces. Currently only used for "identical" interfaces in the same package.
+    - importas # Enforces consistent import aliases.
     - ineffassign
-    - makezero                  # Finds slice declarations with non-zero initial length.
-    - mirror                    # Detects wrong mirror patterns of bytes/strings usage.
-    - misspell                  # Detects commonly misspelled English words in comments.
-    - nakedret                  # Detects uses of naked returns.
-    - nilnesserr                # Detects returning nil errors. It combines the features of nilness and nilerr,
-    - nosprintfhostport         # Detects misuse of Sprintf to construct a host with port in a URL.
-    - nolintlint                # Detects ill-formed or insufficient nolint directives.
-    - perfsprint                # Detects fmt.Sprintf uses that can be replaced with a faster alternative.
-    - prealloc                  # Detects slice declarations that could potentially be pre-allocated.
-    - predeclared               # Detects code that shadows one of Go's predeclared identifiers
-    - reassign                  # Detects reassigning a top-level variable in another package.
-    - revive                    # Metalinter; drop-in replacement for golint.
-    - spancheck                 # Detects mistakes with OpenTelemetry/Census spans.
+    - makezero # Finds slice declarations with non-zero initial length.
+    - mirror # Detects wrong mirror patterns of bytes/strings usage.
+    - misspell # Detects commonly misspelled English words in comments.
+    - nakedret # Detects uses of naked returns.
+    - nilnesserr # Detects returning nil errors. It combines the features of nilness and nilerr,
+    - nosprintfhostport # Detects misuse of Sprintf to construct a host with port in a URL.
+    - nolintlint # Detects ill-formed or insufficient nolint directives.
+    - perfsprint # Detects fmt.Sprintf uses that can be replaced with a faster alternative.
+    - prealloc # Detects slice declarations that could potentially be pre-allocated.
+    - predeclared # Detects code that shadows one of Go's predeclared identifiers
+    - reassign # Detects reassigning a top-level variable in another package.
+    - revive # Metalinter; drop-in replacement for golint.
+    - spancheck # Detects mistakes with OpenTelemetry/Census spans.
     - staticcheck
-    - thelper                   # Detects test helpers without t.Helper().
-    - tparallel                 # Detects inappropriate usage of t.Parallel().
-    - unconvert                 # Detects unnecessary type conversions.
+    - thelper # Detects test helpers without t.Helper().
+    - tparallel # Detects inappropriate usage of t.Parallel().
+    - unconvert # Detects unnecessary type conversions.
     - unparam
     - unused
-    - usestdlibvars             # Detects the possibility to use variables/constants from the Go standard library.
-    - usetesting                # Reports uses of functions with replacement inside the testing package.
-    - wastedassign              # Detects wasted assignment statements.
-    
+    - usestdlibvars # Detects the possibility to use variables/constants from the Go standard library.
+    - usetesting # Reports uses of functions with replacement inside the testing package.
+    - wastedassign # Detects wasted assignment statements.
+
   settings:
-    depguard: 
+    depguard:
       rules:
         websocket:
           deny:
@@ -103,7 +103,7 @@ linters:
         - G306 # G306: Expect WriteFile permissions to be 0600 or less (too restrictive; also flags "0o644" permissions)
         - G307 # G307: Deferring unsafe method
       # G103: Use of unsafe calls should be audited (includes panic detection)
-      # Note: panic is allowed only in instance construction phase (main.go and pkg/di) 
+      # Note: panic is allowed only in instance construction phase (main.go and pkg/di)
 
     govet:
       enable:
@@ -121,12 +121,25 @@ linters:
 
       # set aliases for packages
       alias:
+        # Application DTOs
         - pkg: github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc
           alias: dtobtc
         - pkg: github.com/hiromaily/go-crypto-wallet/internal/application/dto/eth
           alias: dtoeth
         - pkg: github.com/hiromaily/go-crypto-wallet/internal/application/dto/xrp
           alias: dtoxrp
+        # Application Ports - API
+        - pkg: github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc
+          alias: apibtc
+        - pkg: github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth
+          alias: apieth
+        - pkg: github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp
+          alias: apixrp
+        # Application Ports - Others
+        - pkg: github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository
+          alias: repository
+        - pkg: github.com/hiromaily/go-crypto-wallet/internal/application/ports/file
+          alias: portsfile
         # - pkg: github.com/hiromaily/go-crypto-wallet/internal/infrastructure/db/mysql/sqlcgen
         #   alias: sqlcgen
     nakedret:
@@ -141,19 +154,19 @@ linters:
 
     revive:
       rules:
-        - name: empty-block       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#empty-block
-        - name: empty-lines       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#empty-lines
+        - name: empty-block # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#empty-block
+        - name: empty-lines # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#empty-lines
         - name: line-length-limit # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#line-length-limit
           arguments: [120]
-        - name: unused-receiver   # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#unused-receiver
-        - name: use-any           # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#use-any
-        - name: use-errors-new    # https://github.com/mgechev/revive/blob/HEAD/RULES_DESCRIPTIONS.md#use-errors-new
+        - name: unused-receiver # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#unused-receiver
+        - name: use-any # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#use-any
+        - name: use-errors-new # https://github.com/mgechev/revive/blob/HEAD/RULES_DESCRIPTIONS.md#use-errors-new
         # - name: import-shadowing  # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#import-shadowing
 
     usetesting:
-      os-chdir: false           # FIXME(thaJeztah): Disable `os.Chdir()` detections; should be automatically disabled on Go < 1.24; see https://github.com/docker/cli/pull/5835#issuecomment-2665302478
+      os-chdir: false # FIXME(thaJeztah): Disable `os.Chdir()` detections; should be automatically disabled on Go < 1.24; see https://github.com/docker/cli/pull/5835#issuecomment-2665302478
       context-background: false # FIXME(thaJeztah): Disable `context.Background()` detections; should be automatically disabled on Go < 1.24; see https://github.com/docker/cli/pull/5835#issuecomment-2665302478
-      context-todo: false       # FIXME(thaJeztah): Disable `context.TODO()` detections; should be automatically disabled on Go < 1.24; see https://github.com/docker/cli/pull/5835#issuecomment-2665302478
+      context-todo: false # FIXME(thaJeztah): Disable `context.TODO()` detections; should be automatically disabled on Go < 1.24; see https://github.com/docker/cli/pull/5835#issuecomment-2665302478
 
   exclusions:
     generated: strict
@@ -246,7 +259,7 @@ linters:
     paths:
       - ".*\\.pb\\.go"
       #- ".*\\.test\\.go"
-    
+
     # Log a warning if an exclusion rule is unused.
     # Default: false
     warn-unused: true

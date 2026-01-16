@@ -1,10 +1,10 @@
-// Package ethereum defines interfaces for Ethereum blockchain operations.
+// Package eth defines interfaces for Ethereum blockchain operations.
 //
 // This package follows the Dependency Inversion Principle of Clean Architecture
 // by defining interfaces in the application layer that are implemented by the
 // infrastructure layer. All types used in these interfaces are domain types,
 // avoiding circular dependencies with the infrastructure layer.
-package ethereum
+package eth
 
 import (
 	"context"

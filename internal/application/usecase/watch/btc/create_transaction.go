@@ -12,9 +12,9 @@ import (
 	"github.com/btcsuite/btcd/wire"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
-	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/bitcoin"
-	portsFile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
-	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
+	portsfile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
@@ -24,14 +24,14 @@ import (
 )
 
 type createTransactionUseCase struct {
-	btcClient       portsBitcoin.Bitcoiner
+	btcClient       apibtc.Bitcoiner
 	dbConn          *sql.DB
-	addrRepo        watchrepo.AddressRepositorier
-	txRepo          watchrepo.BTCTxRepositorier
-	txInputRepo     watchrepo.TxInputRepositorier
-	txOutputRepo    watchrepo.TxOutputRepositorier
-	payReqRepo      watchrepo.PaymentRequestRepositorier
-	txFileRepo      portsFile.TransactionFileRepositorier
+	addrRepo        repository.AddressRepositorier
+	txRepo          repository.BTCTxRepositorier
+	txInputRepo     repository.TxInputRepositorier
+	txOutputRepo    repository.TxOutputRepositorier
+	payReqRepo      repository.PaymentRequestRepositorier
+	txFileRepo      portsfile.TransactionFileRepositorier
 	depositReceiver domainAccount.AccountType
 	paymentSender   domainAccount.AccountType
 	walletType      domainWallet.WalletType
@@ -39,14 +39,14 @@ type createTransactionUseCase struct {
 
 // NewCreateTransactionUseCase creates a new CreateTransactionUseCase
 func NewCreateTransactionUseCase(
-	btcClient portsBitcoin.Bitcoiner,
+	btcClient apibtc.Bitcoiner,
 	dbConn *sql.DB,
-	addrRepo watchrepo.AddressRepositorier,
-	txRepo watchrepo.BTCTxRepositorier,
-	txInputRepo watchrepo.TxInputRepositorier,
-	txOutputRepo watchrepo.TxOutputRepositorier,
-	payReqRepo watchrepo.PaymentRequestRepositorier,
-	txFileRepo portsFile.TransactionFileRepositorier,
+	addrRepo repository.AddressRepositorier,
+	txRepo repository.BTCTxRepositorier,
+	txInputRepo repository.TxInputRepositorier,
+	txOutputRepo repository.TxOutputRepositorier,
+	payReqRepo repository.PaymentRequestRepositorier,
+	txFileRepo portsfile.TransactionFileRepositorier,
 	depositReceiver domainAccount.AccountType,
 	paymentSender domainAccount.AccountType,
 	walletType domainWallet.WalletType,

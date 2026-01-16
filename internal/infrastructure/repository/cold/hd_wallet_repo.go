@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"

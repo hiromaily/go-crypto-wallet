@@ -8,9 +8,9 @@ import (
 	"math/big"
 	"strconv"
 
-	portsEth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ethereum"
-	portsFile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
-	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
+	portsfile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -21,26 +21,26 @@ import (
 )
 
 type createTransactionUseCase struct {
-	ethClient       portsEth.EtherTxCreator
+	ethClient       apieth.EtherTxCreator
 	dbConn          *sql.DB
-	addrRepo        watchrepo.AddressRepositorier
-	txRepo          watchrepo.TxRepositorier
-	txDetailRepo    watchrepo.ETHDetailTXRepositorier
-	payReqRepo      watchrepo.PaymentRequestRepositorier
-	txFileRepo      portsFile.TransactionFileRepositorier
+	addrRepo        repository.AddressRepositorier
+	txRepo          repository.TxRepositorier
+	txDetailRepo    repository.ETHDetailTXRepositorier
+	payReqRepo      repository.PaymentRequestRepositorier
+	txFileRepo      portsfile.TransactionFileRepositorier
 	depositReceiver domainAccount.AccountType
 	paymentSender   domainAccount.AccountType
 }
 
 // NewCreateTransactionUseCase creates a new CreateTransactionUseCase
 func NewCreateTransactionUseCase(
-	ethClient portsEth.EtherTxCreator,
+	ethClient apieth.EtherTxCreator,
 	dbConn *sql.DB,
-	addrRepo watchrepo.AddressRepositorier,
-	txRepo watchrepo.TxRepositorier,
-	txDetailRepo watchrepo.ETHDetailTXRepositorier,
-	payReqRepo watchrepo.PaymentRequestRepositorier,
-	txFileRepo portsFile.TransactionFileRepositorier,
+	addrRepo repository.AddressRepositorier,
+	txRepo repository.TxRepositorier,
+	txDetailRepo repository.ETHDetailTXRepositorier,
+	payReqRepo repository.PaymentRequestRepositorier,
+	txFileRepo portsfile.TransactionFileRepositorier,
 	depositReceiver domainAccount.AccountType,
 	paymentSender domainAccount.AccountType,
 ) watchusecase.CreateTransactionUseCase {
@@ -351,7 +351,7 @@ func (u *createTransactionUseCase) createDepositRawTransactions(
 	for _, val := range userAmounts {
 		// call CreateRawTransaction
 		var rawTx *domainEthereum.RawTx
-		var txParams *portsEth.TxCreateParams
+		var txParams *apieth.TxCreateParams
 		rawTx, txParams, err = u.ethClient.CreateRawTransaction(
 			ctx, val.Address, depositAddr.WalletAddress, 0, 0)
 		if err != nil {
@@ -550,7 +550,7 @@ func (u *createTransactionUseCase) generateHexFile(
 // createEthDetailTx constructs the domain entity EthDetailTx from the DTO returned by infrastructure layer.
 // This ensures the use case layer maintains full responsibility for domain entity creation.
 func (*createTransactionUseCase) createEthDetailTx(
-	txParams *portsEth.TxCreateParams,
+	txParams *apieth.TxCreateParams,
 	sender, receiver domainAccount.AccountType,
 	rawTxHex string,
 	_ domainTx.ActionType,

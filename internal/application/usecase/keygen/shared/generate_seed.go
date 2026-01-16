@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"

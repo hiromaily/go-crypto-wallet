@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"

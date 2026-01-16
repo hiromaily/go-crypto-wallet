@@ -22,8 +22,8 @@ import (
 	"github.com/btcsuite/btcd/txscript"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
-	portsbtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/bitcoin"
-	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
+	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -35,19 +35,19 @@ import (
 )
 
 type importDescriptorUseCase struct {
-	btcClient portsbtc.Bitcoiner
+	btcClient apibtc.Bitcoiner
 	parser    *btc.DescriptorParser
 	chainConf *chaincfg.Params
-	addrRepo  watchrepo.AddressRepositorier
+	addrRepo  repository.AddressRepositorier
 	coinType  domainCoin.CoinTypeCode
 }
 
 // NewImportDescriptorUseCase creates a descriptor import use case.
 func NewImportDescriptorUseCase(
-	btcClient portsbtc.Bitcoiner,
+	btcClient apibtc.Bitcoiner,
 	parser *btc.DescriptorParser,
 	chainConf *chaincfg.Params,
-	addrRepo watchrepo.AddressRepositorier,
+	addrRepo repository.AddressRepositorier,
 	coinType domainCoin.CoinTypeCode,
 ) watchusecase.ImportDescriptorUseCase {
 	return &importDescriptorUseCase{

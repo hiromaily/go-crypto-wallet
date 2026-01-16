@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"strings"
 
-	portsFile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	portsfile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -17,14 +17,14 @@ import (
 
 type exportDescriptorUseCase struct {
 	generator      keygenusecase.GenerateDescriptorUseCase
-	fileWriter     portsFile.DescriptorFileWriter
+	fileWriter     portsfile.DescriptorFileWriter
 	accountKeyRepo repository.BTCAccountKeyRepositorier
 }
 
 // NewExportDescriptorUseCase creates a descriptor export use case.
 func NewExportDescriptorUseCase(
 	generator keygenusecase.GenerateDescriptorUseCase,
-	fileWriter portsFile.DescriptorFileWriter,
+	fileWriter portsfile.DescriptorFileWriter,
 	accountKeyRepo repository.BTCAccountKeyRepositorier,
 ) keygenusecase.ExportDescriptorUseCase {
 	return &exportDescriptorUseCase{

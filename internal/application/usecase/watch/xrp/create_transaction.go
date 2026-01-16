@@ -10,9 +10,9 @@ import (
 	"github.com/bookerzzz/grok"
 
 	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
-	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ripple"
-	portsFile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
-	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
+	portsfile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -24,28 +24,28 @@ import (
 )
 
 type createTransactionUseCase struct {
-	rippler         portsRipple.Rippler
+	rippler         apixrp.Rippler
 	dbConn          *sql.DB
 	uuidHandler     uuid.UUIDHandler
-	addrRepo        watchrepo.AddressRepositorier
-	txRepo          watchrepo.TxRepositorier
-	txDetailRepo    watchrepo.XRPDetailTXRepositorier
-	payReqRepo      watchrepo.PaymentRequestRepositorier
-	txFileRepo      portsFile.TransactionFileRepositorier
+	addrRepo        repository.AddressRepositorier
+	txRepo          repository.TxRepositorier
+	txDetailRepo    repository.XRPDetailTXRepositorier
+	payReqRepo      repository.PaymentRequestRepositorier
+	txFileRepo      portsfile.TransactionFileRepositorier
 	depositReceiver domainAccount.AccountType
 	paymentSender   domainAccount.AccountType
 }
 
 // NewCreateTransactionUseCase creates a new CreateTransactionUseCase
 func NewCreateTransactionUseCase(
-	rippler portsRipple.Rippler,
+	rippler apixrp.Rippler,
 	dbConn *sql.DB,
 	uuidHandler uuid.UUIDHandler,
-	addrRepo watchrepo.AddressRepositorier,
-	txRepo watchrepo.TxRepositorier,
-	txDetailRepo watchrepo.XRPDetailTXRepositorier,
-	payReqRepo watchrepo.PaymentRequestRepositorier,
-	txFileRepo portsFile.TransactionFileRepositorier,
+	addrRepo repository.AddressRepositorier,
+	txRepo repository.TxRepositorier,
+	txDetailRepo repository.XRPDetailTXRepositorier,
+	payReqRepo repository.PaymentRequestRepositorier,
+	txFileRepo portsfile.TransactionFileRepositorier,
 	depositReceiver domainAccount.AccountType,
 	paymentSender domainAccount.AccountType,
 ) watchusecase.CreateTransactionUseCase {

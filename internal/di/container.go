@@ -16,11 +16,11 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 
-	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/bitcoin"
-	portsEth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ethereum"
-	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ripple"
-	portsFile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
+	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
+	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
+	portsfile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -126,10 +126,10 @@ type container struct {
 	accountConf *config.AccountRoot
 	// wallet
 	walletType domainWallet.WalletType
-	btc        portsBitcoin.Bitcoiner
-	eth        portsEth.Ethereumer
-	erc20      portsEth.ERC20er
-	xrp        portsRipple.Rippler
+	btc        apibtc.Bitcoiner
+	eth        apieth.Ethereumer
+	erc20      apieth.ERC20er
+	xrp        apixrp.Rippler
 	// client
 	rpcClient    *rpcclient.Client
 	rpcEthClient *ethrpc.Client
@@ -393,7 +393,7 @@ func (c *container) newXRPWSClient() (*websocket.WS, *websocket.WS) {
 // Wallet API
 //
 
-func (c *container) newBTC() portsBitcoin.Bitcoiner {
+func (c *container) newBTC() apibtc.Bitcoiner {
 	if c.btc == nil {
 		var err error
 		c.btc, err = bitcoin.NewBitcoin(
@@ -412,7 +412,7 @@ func (c *container) newMuSig2Service() *btcapi.MuSig2Service {
 	return btcapi.NewMuSig2Service(c.pkgContainer.NewLogger())
 }
 
-func (c *container) newETH() portsEth.Ethereumer {
+func (c *container) newETH() apieth.Ethereumer {
 	if c.eth == nil {
 		var err error
 		c.eth, err = ethimpl.NewEthereum(
@@ -428,7 +428,7 @@ func (c *container) newETH() portsEth.Ethereumer {
 	return c.eth
 }
 
-func (c *container) newERC20() portsEth.ERC20er {
+func (c *container) newERC20() apieth.ERC20er {
 	if c.erc20 == nil {
 		var err error
 		client := ethclient.NewClient(c.newEthRPCClient())
@@ -454,7 +454,7 @@ func (c *container) newERC20() portsEth.ERC20er {
 	return c.erc20
 }
 
-func (c *container) newXRP() portsRipple.Rippler {
+func (c *container) newXRP() apixrp.Rippler {
 	if c.xrp == nil {
 		var err error
 		wsPublic, wsAdmin := c.newXRPWSClient()
@@ -539,13 +539,13 @@ func (c *container) newAddressRepo() repository.AddressRepositorier {
 	)
 }
 
-func (c *container) newAddressFileRepo() portsFile.AddressFileRepositorier {
+func (c *container) newAddressFileRepo() portsfile.AddressFileRepositorier {
 	return address.NewAddressFileRepository(
 		c.conf.FilePath.FullPubKey,
 	)
 }
 
-func (c *container) newTxFileRepo() portsFile.TransactionFileRepositorier {
+func (c *container) newTxFileRepo() portsfile.TransactionFileRepositorier {
 	return transaction.NewTransactionFileRepository(
 		c.conf.FilePath.Tx,
 	)
@@ -682,13 +682,13 @@ func (c *container) newNonceRepo() *cold.NonceRepositorySqlc {
 // Keygen File Storage
 //
 
-func (c *container) newPubkeyFileStorager() portsFile.AddressFileRepositorier {
+func (c *container) newPubkeyFileStorager() portsfile.AddressFileRepositorier {
 	return address.NewAddressFileRepository(
 		c.conf.FilePath.FullPubKey,
 	)
 }
 
-func (*container) newDescriptorFileWriter() portsFile.DescriptorFileWriter {
+func (*container) newDescriptorFileWriter() portsfile.DescriptorFileWriter {
 	return descriptor.NewFileWriter()
 }
 
@@ -969,7 +969,7 @@ func (c *container) newBTCWatchAggregateMuSig2SignaturesUseCase() watchusecase.A
 
 func (c *container) newETHWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
 	// Determine which Ethereum API to use based on coin type
-	var targetEthAPI portsEth.EtherTxCreator
+	var targetEthAPI apieth.EtherTxCreator
 	if domainCoin.IsERC20Token(c.conf.CoinTypeCode.String()) {
 		targetEthAPI = c.newERC20()
 	} else {

@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	appdto "github.com/hiromaily/go-crypto-wallet/internal/application/dto"
-	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/bitcoin"
-	portsFile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
+	portsfile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -24,18 +24,18 @@ type ImportAddressUseCase interface {
 }
 
 type importAddressUseCase struct {
-	btcClient    portsBitcoin.Bitcoiner
+	btcClient    apibtc.Bitcoiner
 	addrRepo     repository.AddressRepositorier
-	addrFileRepo portsFile.AddressFileRepositorier
+	addrFileRepo portsfile.AddressFileRepositorier
 	coinTypeCode domainCoin.CoinTypeCode
 	addrType     domainAddress.AddrType
 }
 
 // NewImportAddressUseCase creates a new BTC-specific ImportAddressUseCase
 func NewImportAddressUseCase(
-	btcClient portsBitcoin.Bitcoiner,
+	btcClient apibtc.Bitcoiner,
 	addrRepo repository.AddressRepositorier,
-	addrFileRepo portsFile.AddressFileRepositorier,
+	addrFileRepo portsfile.AddressFileRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,
 	addrType domainAddress.AddrType,
 ) ImportAddressUseCase {

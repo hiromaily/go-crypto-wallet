@@ -1,9 +1,9 @@
-// Package ripple defines interfaces for Ripple/XRP blockchain operations.
+// Package xrp defines interfaces for Ripple/XRP blockchain operations.
 //
 // This package follows the Dependency Inversion Principle of Clean Architecture
 // by defining interfaces in the application layer that are implemented by the
 // infrastructure layer.
-package ripple
+package xrp
 
 import (
 	"context"

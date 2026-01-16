@@ -7,7 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"

@@ -5,7 +5,7 @@ import (
 
 	"github.com/btcsuite/btcd/rpcclient"
 
-	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/bitcoin"
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/bch"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
@@ -15,7 +15,7 @@ import (
 // NewBitcoin creates bitcoin/bitcoin cash instance according to coinType
 func NewBitcoin(
 	client *rpcclient.Client, conf *config.Bitcoin, coinTypeCode domainCoin.CoinTypeCode,
-) (portsBitcoin.Bitcoiner, error) {
+) (apibtc.Bitcoiner, error) {
 	switch coinTypeCode {
 	case domainCoin.BTC:
 		bit, err := btc.NewBitcoin(client, conf, coinTypeCode)

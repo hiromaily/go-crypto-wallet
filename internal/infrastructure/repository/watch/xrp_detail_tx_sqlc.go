@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	portsRepository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	domainXrp "github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
@@ -263,7 +263,7 @@ func (r *XRPDetailTxInputRepositorySqlc) UpdateTxTypeBySentHashTx(
 }
 
 // WithTx returns a new repository instance that uses the provided transaction
-func (r *XRPDetailTxInputRepositorySqlc) WithTx(tx *sql.Tx) portsRepository.XRPDetailTXRepositorier {
+func (r *XRPDetailTxInputRepositorySqlc) WithTx(tx *sql.Tx) repository.XRPDetailTXRepositorier {
 	return &XRPDetailTxInputRepositorySqlc{
 		queries:      r.queries.WithTx(tx),
 		coinTypeCode: r.coinTypeCode,

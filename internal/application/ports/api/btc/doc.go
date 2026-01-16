@@ -1,4 +1,4 @@
-// Package bitcoin defines interfaces for Bitcoin/BitcoinCash blockchain operations.
+// Package btc defines interfaces for Bitcoin/BitcoinCash blockchain operations.
 //
 // # Overview
 //
@@ -25,8 +25,10 @@
 //
 // Use cases depend on this interface, not concrete implementations:
 //
+//	import apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
+//
 //	type myUseCase struct {
-//	    btc bitcoin.Bitcoiner
+//	    btc apibtc.Bitcoiner
 //	}
 //
 // # Related Packages
@@ -34,4 +36,4 @@
 //   - internal/infrastructure/api/bitcoin/btc/: BTC implementation
 //   - internal/infrastructure/api/bitcoin/bch/: BCH implementation
 //   - internal/application/dto/btc/: DTOs used in interface methods
-package bitcoin
+package btc

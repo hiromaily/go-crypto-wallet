@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 
-	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/bitcoin"
-	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
+	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
@@ -15,20 +15,20 @@ import (
 )
 
 type monitorTransactionUseCase struct {
-	btcClient   portsBitcoin.Bitcoiner
+	btcClient   apibtc.Bitcoiner
 	dbConn      *sql.DB
-	txRepo      watchrepo.BTCTxRepositorier
-	txInputRepo watchrepo.TxInputRepositorier
-	payReqRepo  watchrepo.PaymentRequestRepositorier
+	txRepo      repository.BTCTxRepositorier
+	txInputRepo repository.TxInputRepositorier
+	payReqRepo  repository.PaymentRequestRepositorier
 }
 
 // NewMonitorTransactionUseCase creates a new MonitorTransactionUseCase
 func NewMonitorTransactionUseCase(
-	btcClient portsBitcoin.Bitcoiner,
+	btcClient apibtc.Bitcoiner,
 	dbConn *sql.DB,
-	txRepo watchrepo.BTCTxRepositorier,
-	txInputRepo watchrepo.TxInputRepositorier,
-	payReqRepo watchrepo.PaymentRequestRepositorier,
+	txRepo repository.BTCTxRepositorier,
+	txInputRepo repository.TxInputRepositorier,
+	payReqRepo repository.PaymentRequestRepositorier,
 ) watchusecase.MonitorTransactionUseCase {
 	return &monitorTransactionUseCase{
 		btcClient:   btcClient,
