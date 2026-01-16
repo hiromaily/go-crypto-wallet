@@ -270,6 +270,31 @@ RPC_PASSWORD=xyz
 MYSQL_ROOT_PASSWORD=root
 ```
 
+## Common Utilities
+
+All E2E scripts use shared utility functions from:
+
+- **`../btc_common.sh`** - BTC-specific common functions
+- **`../../common.sh`** - General common functions (auto-sourced by btc_common.sh)
+
+### Usage in E2E Scripts
+
+```bash
+# Source BTC common utilities (includes common.sh automatically)
+source "${SCRIPT_DIR}/../btc_common.sh"
+
+# Initialize config paths
+btc_get_config_paths
+
+# Use common functions
+btc_check_prerequisites "watch keygen"
+btc_setup_infrastructure "btc-watch btc-keygen"
+btc_setup_wallets "btc-watch:watch btc-keygen:keygen"
+btc_full_reset "watch keygen"
+```
+
+See `../README.md` for a complete list of available functions.
+
 ## Related Documentation
 
 - [E2E Transaction Patterns Guide](../../../../docs/crypto/btc/e2e_transaction_patterns.md) - Pattern details
