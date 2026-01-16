@@ -141,7 +141,8 @@ full_reset() {
 	log_info "Forcefully removing database volume..."
 	# Docker Compose prefixes volume names with the project name (defaults to base name of project directory)
 	# Dynamically determine volume name to handle different project directory names
-	local volume_name="$(basename "$PROJECT_ROOT" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_-]//g')_wallet-db"
+	local volume_name
+	volume_name="$(basename "$PROJECT_ROOT" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9_-]//g')_wallet-db"
 
 	# Try multiple times in case volume is still being used
 	local removal_attempts=0
