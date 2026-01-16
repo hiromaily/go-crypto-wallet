@@ -50,17 +50,41 @@ pre-commit:
       stage_fixed: true
 
     # Atlas HCL files
-    - name: atlas-hcl-fmt
+    - name: hcl-fmt
       root: "/"
       glob: "tools/atlas/**/*.hcl"
       run: |
-        make atlas-fmt
+        make hcl-fmt
       stage_fixed: true
 
-    # SQL files
+    # SQL files (format)
     - name: sql-fmt
       root: "/"
       glob: "tools/sqlc/**/*.sql"
       run: |
-        make sqlfluff-format
+        make sql-fmt
       stage_fixed: true
+
+    # sqlc config and queries (validate)
+    - name: sqlc-lint
+      root: "/"
+      glob: "tools/sqlc/**/*.{sql,yml}"
+      run: |
+        make sqlc-lint
+      stage_fixed: false
+
+    # Proto files (format)
+    - name: proto-fmt
+      root: "/"
+      glob: "proto/**/*.proto"
+      run: |
+        make proto-fmt
+      stage_fixed: true
+
+    # Proto files (lint)
+    - name: proto-lint
+      root: "/"
+      glob: "proto/**/*.proto"
+      run: |
+        make proto-lint
+      stage_fixed: false
