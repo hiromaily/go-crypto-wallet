@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
-	portsfile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -27,7 +27,7 @@ type createTransactionUseCase struct {
 	txRepo          repository.TxRepositorier
 	txDetailRepo    repository.ETHDetailTXRepositorier
 	payReqRepo      repository.PaymentRequestRepositorier
-	txFileRepo      portsfile.TransactionFileRepositorier
+	txFileRepo      file.TransactionFileRepositorier
 	depositReceiver domainAccount.AccountType
 	paymentSender   domainAccount.AccountType
 }
@@ -40,7 +40,7 @@ func NewCreateTransactionUseCase(
 	txRepo repository.TxRepositorier,
 	txDetailRepo repository.ETHDetailTXRepositorier,
 	payReqRepo repository.PaymentRequestRepositorier,
-	txFileRepo portsfile.TransactionFileRepositorier,
+	txFileRepo file.TransactionFileRepositorier,
 	depositReceiver domainAccount.AccountType,
 	paymentSender domainAccount.AccountType,
 ) watchusecase.CreateTransactionUseCase {

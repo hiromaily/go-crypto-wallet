@@ -13,7 +13,7 @@ import (
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
-	portsfile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -31,7 +31,7 @@ type createTransactionUseCase struct {
 	txInputRepo     repository.TxInputRepositorier
 	txOutputRepo    repository.TxOutputRepositorier
 	payReqRepo      repository.PaymentRequestRepositorier
-	txFileRepo      portsfile.TransactionFileRepositorier
+	txFileRepo      file.TransactionFileRepositorier
 	depositReceiver domainAccount.AccountType
 	paymentSender   domainAccount.AccountType
 	walletType      domainWallet.WalletType
@@ -46,7 +46,7 @@ func NewCreateTransactionUseCase(
 	txInputRepo repository.TxInputRepositorier,
 	txOutputRepo repository.TxOutputRepositorier,
 	payReqRepo repository.PaymentRequestRepositorier,
-	txFileRepo portsfile.TransactionFileRepositorier,
+	txFileRepo file.TransactionFileRepositorier,
 	depositReceiver domainAccount.AccountType,
 	paymentSender domainAccount.AccountType,
 	walletType domainWallet.WalletType,

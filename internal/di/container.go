@@ -19,7 +19,7 @@ import (
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
-	portsfile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	portsWallet "github.com/hiromaily/go-crypto-wallet/internal/application/ports/wallet"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -539,13 +539,13 @@ func (c *container) newAddressRepo() repository.AddressRepositorier {
 	)
 }
 
-func (c *container) newAddressFileRepo() portsfile.AddressFileRepositorier {
+func (c *container) newAddressFileRepo() file.AddressFileRepositorier {
 	return address.NewAddressFileRepository(
 		c.conf.FilePath.FullPubKey,
 	)
 }
 
-func (c *container) newTxFileRepo() portsfile.TransactionFileRepositorier {
+func (c *container) newTxFileRepo() file.TransactionFileRepositorier {
 	return transaction.NewTransactionFileRepository(
 		c.conf.FilePath.Tx,
 	)
@@ -682,13 +682,13 @@ func (c *container) newNonceRepo() *cold.NonceRepositorySqlc {
 // Keygen File Storage
 //
 
-func (c *container) newPubkeyFileStorager() portsfile.AddressFileRepositorier {
+func (c *container) newPubkeyFileStorager() file.AddressFileRepositorier {
 	return address.NewAddressFileRepository(
 		c.conf.FilePath.FullPubKey,
 	)
 }
 
-func (*container) newDescriptorFileWriter() portsfile.DescriptorFileWriter {
+func (*container) newDescriptorFileWriter() file.DescriptorFileWriter {
 	return descriptor.NewFileWriter()
 }
 

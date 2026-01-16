@@ -8,7 +8,7 @@ import (
 
 	"github.com/btcsuite/btcd/chaincfg"
 
-	portsfile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -21,7 +21,7 @@ import (
 type exportFullPubkeyUseCase struct {
 	authKeyRepo    repository.AuthAccountKeyRepositorier
 	seedRepo       repository.SeedRepositorier
-	pubkeyFileRepo portsfile.AddressFileRepositorier
+	pubkeyFileRepo file.AddressFileRepositorier
 	coinTypeCode   domainCoin.CoinTypeCode
 	authType       domainAccount.AuthType
 	wtype          domainWallet.WalletType
@@ -32,7 +32,7 @@ type exportFullPubkeyUseCase struct {
 func NewExportFullPubkeyUseCase(
 	authKeyRepo repository.AuthAccountKeyRepositorier,
 	seedRepo repository.SeedRepositorier,
-	pubkeyFileRepo portsfile.AddressFileRepositorier,
+	pubkeyFileRepo file.AddressFileRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,
 	authType domainAccount.AuthType,
 	wtype domainWallet.WalletType,

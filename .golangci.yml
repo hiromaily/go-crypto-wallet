@@ -135,11 +135,6 @@ linters:
           alias: apieth
         - pkg: github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp
           alias: apixrp
-        # Application Ports - Others
-        - pkg: github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository
-          alias: repository
-        - pkg: github.com/hiromaily/go-crypto-wallet/internal/application/ports/file
-          alias: portsfile
         # - pkg: github.com/hiromaily/go-crypto-wallet/internal/infrastructure/db/mysql/sqlcgen
         #   alias: sqlcgen
     nakedret:

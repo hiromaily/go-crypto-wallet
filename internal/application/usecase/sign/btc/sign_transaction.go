@@ -11,7 +11,7 @@ import (
 	"github.com/btcsuite/btcd/btcutil"
 
 	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
-	portsfile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
@@ -26,7 +26,7 @@ type signTransactionUseCase struct {
 	btc             apibtc.Bitcoiner
 	accountKeyRepo  repository.BTCAccountKeyRepositorier
 	authKeyRepo     repository.AuthAccountKeyRepositorier
-	txFileRepo      portsfile.TransactionFileRepositorier
+	txFileRepo      file.TransactionFileRepositorier
 	multisigAccount *domainAccount.MultisigConfig
 	wtype           domainWallet.WalletType
 	authType        domainAccount.AuthType
@@ -37,7 +37,7 @@ func NewSignTransactionUseCase(
 	btcAPI apibtc.Bitcoiner,
 	accountKeyRepo repository.BTCAccountKeyRepositorier,
 	authKeyRepo repository.AuthAccountKeyRepositorier,
-	txFileRepo portsfile.TransactionFileRepositorier,
+	txFileRepo file.TransactionFileRepositorier,
 	multisigAccount *domainAccount.MultisigConfig,
 	wtype domainWallet.WalletType,
 	authType domainAccount.AuthType,
