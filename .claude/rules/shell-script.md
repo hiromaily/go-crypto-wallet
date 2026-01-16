@@ -496,13 +496,25 @@ clean_dir_except_gitkeep "data/address/btc"
 
 ## ShellCheck Integration
 
-Always run shellcheck before committing:
+**Always run Makefile targets after modifying shell scripts:**
 
 ```bash
-# Format with shfmt
+# Format all shell scripts
+make shfmt
+
+# Lint all shell scripts
+make shellcheck
+```
+
+These targets automatically process all `.sh` files in the `scripts/` directory.
+
+For individual file testing (optional):
+
+```bash
+# Format single file
 shfmt -l -w script.sh
 
-# Check with shellcheck
+# Check single file
 shellcheck script.sh
 ```
 
@@ -641,6 +653,6 @@ Before committing shell scripts:
 - [ ] Prerequisites are checked
 - [ ] Help message is comprehensive
 - [ ] **All comments and messages are in English**
-- [ ] Run `shfmt -l -w script.sh`
-- [ ] Run `shellcheck script.sh`
+- [ ] Run `make shfmt` (format all shell scripts)
+- [ ] Run `make shellcheck` (lint all shell scripts)
 - [ ] File is executable: `chmod +x script.sh`
