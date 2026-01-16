@@ -88,8 +88,8 @@ sql-lint: sqlfluff-lint
 .PHONY: sql-fix
 sql-fix: sqlfluff-fix
 
-# Lint SQL queries
-# This target runs vet to check queries for potential issues
+# Lint sqlc configuration and queries
+# This target runs sqlc-validate, which combines compile and vet checks.
 .PHONY: sqlc-lint
 sqlc-lint: sqlc-validate
 
@@ -110,4 +110,4 @@ hcl-validate: atlas-validate
 # Proto Linting (Aliases to codegen.mk targets)
 ###############################################################################
 .PHONY: proto-fmtlint
-proto-fmtlint: proto-fmt proto-lint
+proto-fmtlint: proto-fmt-check proto-lint

@@ -48,6 +48,11 @@ clean-mocks:
 proto-fmt:
 	buf format -w
 
+# Check proto file formatting (for CI)
+.PHONY: proto-fmt-check
+proto-fmt-check:
+	buf format -d --exit-code
+
 # Lint proto files with buf
 .PHONY: proto-lint
 proto-lint:
