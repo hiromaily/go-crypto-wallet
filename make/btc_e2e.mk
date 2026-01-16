@@ -222,3 +222,31 @@ btc-e2e-p8-ci:
 btc-e2e-p8-cleanup:
 	./scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh --cleanup
 
+###############################################################################
+# E2E Testing - Pattern 9: P2TR Taproot Single-sig
+###############################################################################
+# Run Bitcoin E2E workflow Pattern 9 from completely fresh state (recommended)
+.PHONY: btc-e2e-p9-reset
+btc-e2e-p9-reset:
+	./scripts/operation/btc/e2e/e2e-p9-p2tr-singlesig.sh --reset
+
+# Run complete Bitcoin end-to-end workflow Pattern 9
+.PHONY: btc-e2e-p9
+btc-e2e-p9:
+	./scripts/operation/btc/e2e/e2e-p9-p2tr-singlesig.sh
+
+# Run Bitcoin E2E workflow Pattern 9 with verbose output
+.PHONY: btc-e2e-p9-verbose
+btc-e2e-p9-verbose:
+	./scripts/operation/btc/e2e/e2e-p9-p2tr-singlesig.sh --verbose
+
+# Run Bitcoin E2E workflow Pattern 9 in non-interactive mode (for CI/CD)
+.PHONY: btc-e2e-p9-ci
+btc-e2e-p9-ci:
+	./scripts/operation/btc/e2e/e2e-p9-p2tr-singlesig.sh --non-interactive
+
+# Cleanup Bitcoin E2E test environment Pattern 9
+.PHONY: btc-e2e-p9-cleanup
+btc-e2e-p9-cleanup:
+	./scripts/operation/btc/e2e/e2e-p9-p2tr-singlesig.sh --cleanup
+
