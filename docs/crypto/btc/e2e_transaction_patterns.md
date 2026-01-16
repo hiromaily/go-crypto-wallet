@@ -170,9 +170,9 @@ Aggregate signature protocol based on Schnorr signatures. N-of-N multisig become
 | **4** | **P2SH-P2WSH (BIP49)** | **2-of-3 Multisig** | **`3...`/`2...`** | **✅ e2e/e2e-p4-p2sh-p2wsh-2of3.sh** |
 | **5** | **P2WPKH (BIP84)** | **Single-sig** | **`bc1q...`** | **✅ e2e/e2e-p5-p2wpkh-singlesig.sh** |
 | **6** | **P2WSH (BIP84)** | **2-of-3 Multisig** | **`bc1q...`** | **✅ e2e/e2e-p6-p2wsh-2of3.sh** |
-| 7 | P2WSH (BIP84) | 3-of-3 Multisig | `bc1q...` | ❌ Not supported |
-| **8** | **P2SH-P2WSH** | **3-of-3 Multisig** | **`3...`** | **🔶 e2e/e2e-p8-p2sh-p2wsh-3of3.sh** (WIP) |
-| 9 | P2TR (BIP86) | Single-sig | `bc1p...` | 🔶 Manual testing |
+| **7** | **P2WSH (BIP84)** | **3-of-3 Multisig** | **`bc1q...`** | **✅ e2e/e2e-p7-p2wsh-3of3.sh** |
+| **8** | **P2SH-P2WSH** | **3-of-3 Multisig** | **`3...`** | **✅ e2e/e2e-p8-p2sh-p2wsh-3of3.sh** |
+| 9 | P2TR (BIP86) | Single-sig | `bc1p...` | ❌ Not implemented yet |
 | 10 | P2TR (BIP86) | MuSig2 (N-of-N) | `bc1p...` | 🔜 In development |
 | 11 | P2TR (BIP86) | Tapscript (M-of-N) | `bc1p...` | 🔜 In development |
 
@@ -523,9 +523,9 @@ Note: Sign2 is optional - 2 signatures already satisfy the 2-of-3 requirement
 
 ---
 
-### Pattern 8: BTC P2SH-P2WSH 3-of-3 Multisig (WIP)
+### Pattern 8: BTC P2SH-P2WSH 3-of-3 Multisig
 
-**Currently WIP implemented in `scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh`**
+**✅ Fully implemented in `scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh`**
 
 ```
 Address Type: P2SH-P2WSH (SegWit multisig wrapped in P2SH)
@@ -752,13 +752,22 @@ Address Format: bitcoincash:p... (P2SH multisig)
 
 ---
 
-**Document Version:** 1.5
+**Document Version:** 1.6
 **Last Updated:** 2026-01-16
 **Maintainer:** go-crypto-wallet team
 
 ---
 
 ## Changelog
+
+### Version 1.6 (2026-01-16)
+
+- ✅ Pattern 8 (P2SH-P2WSH 3-of-3 Multisig) is now fully working
+- E2E script `e2e-p8-p2sh-p2wsh-3of3.sh` completed and verified
+- Fixed receiver address generation to use P2SH-SegWit format (Closes #374)
+- P2SH-wrapped SegWit multisig with legacy compatibility (`2...` addresses in regtest)
+- Implements BIP49 key derivation for 3-of-3 multisig
+- All 3 signatures required (Keygen + Sign1 + Sign2)
 
 ### Version 1.5 (2026-01-16)
 
