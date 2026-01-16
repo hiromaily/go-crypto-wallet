@@ -7,6 +7,7 @@ Implement and fix BTC E2E test (Pattern 10: P2TR MuSig2 N-of-N) in **regtest env
 **Read the following common rules first:**
 
 - @.claude/rules/btc/e2e-script.md - BTC E2E common rules (build, verification, escalation, security)
+- @.claude/skills/btc-terminology/SKILL.md - **CRITICAL**: Understand `bech32m` (encoding) vs `taproot` (address_type)
 
 ## Parameters
 
@@ -120,12 +121,15 @@ In addition to Required Documentation in common rules, refer to:
 
 ## Pre-check: Environment Variables
 
-**Pattern 10 requires `WALLET_ADDRESS_TYPE="bech32m"`.**
+**Pattern 10 requires `WALLET_ADDRESS_TYPE="taproot"`.**
+
+> ⚠️ **CRITICAL**: Use `"taproot"` (address type), NOT `"bech32m"` (encoding format).
+> See `btc-terminology` skill for details.
 
 Auto-configured in script, but for verification:
 
 ```bash
-echo $WALLET_ADDRESS_TYPE  # Should be "bech32m"
+echo $WALLET_ADDRESS_TYPE  # Should be "taproot"
 ```
 
 > **Note**: Do not edit config files directly. Override with environment variables.
@@ -151,7 +155,7 @@ docker exec btc-watch bitcoin-cli -regtest getblockchaininfo | grep -A 5 taproot
 Base on Pattern 9 (`e2e-p9-p2tr-singlesig.sh`) and Pattern 7 (`e2e-p7-p2wsh-3of3.sh`) with these changes:
 
 1. Filename: `e2e-p10-p2tr-musig2.sh`
-2. Environment variable: `WALLET_ADDRESS_TYPE="bech32m"`
+2. Environment variable: `WALLET_ADDRESS_TYPE="taproot"` (NOT `"bech32m"`)
 3. Header comments: Update to Pattern 10 specs
 4. Address validation logic: Check for `bcrt1p...` format (regtest Taproot)
 5. Descriptor format: Use `tr(musig(...))` for aggregated key

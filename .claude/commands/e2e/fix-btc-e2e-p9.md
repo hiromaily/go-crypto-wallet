@@ -7,6 +7,7 @@ Implement and fix BTC E2E test (Pattern 9: P2TR Taproot Single-sig) in **regtest
 **Read the following common rules first:**
 
 - @.claude/rules/btc/e2e-script.md - BTC E2E common rules (build, verification, escalation, security)
+- @.claude/skills/btc-terminology/SKILL.md - **CRITICAL**: Understand `bech32m` (encoding) vs `taproot` (address_type)
 
 ## Parameters
 
@@ -33,7 +34,7 @@ This command creates/runs `scripts/operation/btc/e2e/e2e-p9-p2tr-singlesig.sh` a
 | **Signature Requirement** | Single-sig (1 Schnorr signature) |
 | **Descriptor** | `tr([fingerprint/86'/0'/0']xpub.../0/*)` |
 | **Required Wallets** | watch, keygen |
-| **Environment Variable** | `WALLET_ADDRESS_TYPE="bech32m"` |
+| **Environment Variable** | `WALLET_ADDRESS_TYPE="taproot"` |
 | **Bitcoin Core Version** | **v22.0+** (Required for Taproot/Schnorr) |
 
 ### Comparison with Other Single-sig Patterns
@@ -47,7 +48,7 @@ This command creates/runs `scripts/operation/btc/e2e/e2e-p9-p2tr-singlesig.sh` a
 | Signature Algorithm | ECDSA | ECDSA | ECDSA | **Schnorr (BIP340)** |
 | Transaction Size | Largest | Medium | Smaller | **Smallest** |
 | Legacy Compatible | Yes | Yes | No | **No** |
-| address_type | `legacy` | `p2sh-segwit` | `bech32` | **`bech32m`** |
+| address_type | `legacy` | `p2sh-segwit` | `bech32` | **`taproot`** |
 | Encoding | Base58Check | Base58Check | Bech32 | **Bech32m** |
 
 ### Why Use P2TR (Taproot)?
@@ -88,12 +89,15 @@ In addition to Required Documentation in common rules, refer to:
 
 ## Pre-check: Environment Variables
 
-**Pattern 9 requires `WALLET_ADDRESS_TYPE="bech32m"`.**
+**Pattern 9 requires `WALLET_ADDRESS_TYPE="taproot"`.**
+
+> ⚠️ **CRITICAL**: Use `"taproot"` (address type), NOT `"bech32m"` (encoding format).
+> See `btc-terminology` skill for details.
 
 Auto-configured in script, but for verification:
 
 ```bash
-echo $WALLET_ADDRESS_TYPE  # Should be "bech32m"
+echo $WALLET_ADDRESS_TYPE  # Should be "taproot"
 ```
 
 > **Note**: Do not edit config files directly. Override with environment variables.
@@ -119,7 +123,7 @@ docker exec btc-watch bitcoin-cli -regtest getblockchaininfo | grep -A 5 taproot
 Base on Pattern 5 (`e2e-p5-p2wpkh-singlesig.sh`) with these changes:
 
 1. Filename: `e2e-p9-p2tr-singlesig.sh`
-2. Environment variable: `WALLET_ADDRESS_TYPE="bech32m"`
+2. Environment variable: `WALLET_ADDRESS_TYPE="taproot"` (NOT `"bech32m"`)
 3. Header comments: Update to Pattern 9 specs
 4. Address validation logic: Check for `bcrt1p...` format (regtest Taproot)
 5. Descriptor format: Use `tr(...)` instead of `wpkh(...)`
@@ -282,15 +286,18 @@ docker exec btc-watch bitcoin-cli --version
 
 ### address_type Mismatch
 
-**Symptoms**: `bcrt1q...` (bech32) addresses generated instead of `bcrt1p...` (bech32m)
+**Symptoms**: `bcrt1q...` (bech32) addresses generated instead of `bcrt1p...` (bech32m encoded)
 
-**Cause**: `address_type` is not `bech32m`
+**Cause**: `address_type` is not `taproot`
+
+> ⚠️ **CRITICAL**: `address_type` must be `"taproot"`, NOT `"bech32m"`.
+> `bech32m` is the encoding format, not the address type. See `btc-terminology` skill.
 
 **Solution**:
 
 ```bash
 # Check environment variable
-echo $WALLET_ADDRESS_TYPE  # Should be "bech32m"
+echo $WALLET_ADDRESS_TYPE  # Should be "taproot"
 
 # Check script setting
 grep "WALLET_ADDRESS_TYPE" scripts/operation/btc/e2e/e2e-p9-p2tr-singlesig.sh
@@ -332,7 +339,7 @@ jq '.[0].desc' data/descriptor/btc/payment_descriptors.json
 
 | address_type | Expected key_type |
 |--------------|-------------------|
-| `bech32m` | `bip86` |
+| `taproot` | `bip86` |
 
 Related code: `AddrType.ToKeyType()` in `internal/domain/address/types.go`
 
@@ -461,10 +468,13 @@ After creating script, update these documents:
 
 ### Bech32 vs Bech32m (Critical)
 
+> See `btc-terminology` skill for complete explanation.
+
 - **Pattern 5 (P2WPKH)**: Uses **Bech32** encoding (SegWit v0, prefix `bcrt1q`)
 - **Pattern 9 (P2TR)**: Uses **Bech32m** encoding (SegWit v1, prefix `bcrt1p`)
 - These are **different encodings** - do not confuse them
 - Bech32m has a different checksum constant than Bech32
+- **CRITICAL**: `address_type` config uses `"taproot"`, NOT `"bech32m"`
 
 ### Bitcoin Core Version Requirement
 

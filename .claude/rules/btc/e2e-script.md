@@ -110,7 +110,7 @@ Reference: `AddrType.ToKeyType()` in `internal/domain/address/types.go`
 
 ## Pattern-Specific Settings
 
-⚠️ **CRITICAL**: For Pattern 9 (Taproot), use `address_type="taproot"` NOT `"bech32m"`. See [address_type_vs_format.md](../../docs/crypto/btc/address_type_vs_format.md).
+⚠️ **CRITICAL**: For P2TR patterns (9, 10, 11), use `address_type="taproot"` NOT `"bech32m"`. See `btc-terminology` skill for details.
 
 | Pattern | Description | address_type | Address Format | Signature |
 |---------|-------------|--------------|----------------|-----------|
@@ -123,8 +123,10 @@ Reference: `AddrType.ToKeyType()` in `internal/domain/address/types.go`
 | 7 | P2WSH 3-of-3 | `bech32` | `bcrt1q...` (62 chars) | 3-of-3 |
 | 8 | P2SH-P2WSH 3-of-3 | `p2sh-segwit` | `2...` | 3-of-3 |
 | 9 | P2TR Taproot Single-sig | `taproot` | `bcrt1p...` | Single |
+| 10 | P2TR MuSig2 N-of-N | `taproot` | `bcrt1p...` | N-of-N |
+| 11 | P2TR Tapscript M-of-N | `taproot` | `bcrt1p...` | M-of-N |
 
-**Note**: `address_type` values represent **address types** (semantic), NOT encoding formats. "bech32m" is an encoding format used by Taproot, but you configure the type as "taproot".
+**Note**: `address_type` values represent **address types** (semantic), NOT encoding formats. "bech32m" is an encoding format used by Taproot addresses, but you configure the type as "taproot". See `.claude/skills/btc-terminology/SKILL.md` for details.
 
 ## Build and Verification Rules
 
