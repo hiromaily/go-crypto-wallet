@@ -278,3 +278,30 @@ btc-e2e-p10-ci:
 .PHONY: btc-e2e-p10-cleanup
 btc-e2e-p10-cleanup:
 	./scripts/operation/btc/e2e/e2e-p10-p2tr-musig2.sh --cleanup
+###############################################################################
+# E2E Testing - Pattern 11: P2TR Tapscript M-of-N
+###############################################################################
+# Run Bitcoin E2E workflow Pattern 11 from completely fresh state (recommended)
+.PHONY: btc-e2e-p11-reset
+btc-e2e-p11-reset:
+	./scripts/operation/btc/e2e/e2e-p11-p2tr-tapscript.sh --reset
+
+# Run complete Bitcoin end-to-end workflow Pattern 11
+.PHONY: btc-e2e-p11
+btc-e2e-p11:
+	./scripts/operation/btc/e2e/e2e-p11-p2tr-tapscript.sh
+
+# Run Bitcoin E2E workflow Pattern 11 with verbose output
+.PHONY: btc-e2e-p11-verbose
+btc-e2e-p11-verbose:
+	./scripts/operation/btc/e2e/e2e-p11-p2tr-tapscript.sh --verbose
+
+# Run Bitcoin E2E workflow Pattern 11 in non-interactive mode (for CI/CD)
+.PHONY: btc-e2e-p11-ci
+btc-e2e-p11-ci:
+	./scripts/operation/btc/e2e/e2e-p11-p2tr-tapscript.sh --non-interactive
+
+# Cleanup Bitcoin E2E test environment Pattern 11
+.PHONY: btc-e2e-p11-cleanup
+btc-e2e-p11-cleanup:
+	./scripts/operation/btc/e2e/e2e-p11-p2tr-tapscript.sh --cleanup

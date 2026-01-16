@@ -23,6 +23,7 @@ For detailed transaction pattern explanations, technical references, and impleme
 | `e2e-p8-p2sh-p2wsh-3of3.sh` | P2SH-P2WSH 3-of-3 Multisig (Pattern 8) | 3-of-3 | `3...` / `2...` |
 | `e2e-p9-p2tr-singlesig.sh` | P2TR Taproot Single-sig (Pattern 9) | Single-sig | `bc1p...` / `bcrt1p...` |
 | `e2e-p10-p2tr-musig2.sh` | P2TR MuSig2 (Pattern 10) | N-of-N (framework) | `bc1p...` / `bcrt1p...` |
+| `e2e-p11-p2tr-tapscript.sh` | P2TR Tapscript M-of-N (Pattern 11) | 2-of-3 (framework) | `bc1p...` / `bcrt1p...` |
 
 ## Verification Status
 
@@ -30,6 +31,7 @@ For detailed transaction pattern explanations, technical references, and impleme
 |---------|----------------|---------------|-------|
 | 1-9 | ✅ Fully operational | - | Complete transaction signing |
 | 10 | ✅ Framework verified | 2026-01-16 | Infrastructure and workflow verified; MuSig2 protocol pending CLI implementation |
+| 11 | ✅ Framework verified | 2026-01-16 | Infrastructure and workflow verified; Tapscript Script Path pending CLI implementation |
 
 **Pattern 10 Verified Components:**
 - Infrastructure setup (Docker, Bitcoin Core, MySQL)
@@ -41,6 +43,21 @@ For detailed transaction pattern explanations, technical references, and impleme
 **Pattern 10 Pending:**
 - Full MuSig2 2-round protocol (nonce generation, partial signatures, aggregation)
 - Requires completion of MuSig2 CLI commands
+
+**Pattern 11 Verified Components:**
+- Infrastructure setup (Docker, Bitcoin Core, MySQL)
+- Wallet creation and configuration
+- Taproot address generation (bech32m encoding)
+- Descriptor import
+- Payment workflow
+
+**Pattern 11 Pending:**
+- Script tree construction (Merkle tree)
+- Internal key tweaking with Merkle root
+- Control block construction
+- Tapscript signing with sortedmulti_a
+- Witness construction (sigs + script + control block)
+- Requires completion of Tapscript CLI commands
 
 ## Usage
 
@@ -76,6 +93,9 @@ For detailed transaction pattern explanations, technical references, and impleme
 
 # Pattern 10: P2TR MuSig2 N-of-N E2E test
 ./scripts/operation/btc/e2e/e2e-p10-p2tr-musig2.sh
+
+# Pattern 11: P2TR Tapscript M-of-N E2E test
+./scripts/operation/btc/e2e/e2e-p11-p2tr-tapscript.sh
 ```
 
 ### Make Targets
@@ -110,6 +130,9 @@ make btc-e2e-p9
 
 # Pattern 10: P2TR MuSig2 N-of-N
 make btc-e2e-p10
+
+# Pattern 11: P2TR Tapscript M-of-N
+make btc-e2e-p11
 ```
 
 ### Common Options
@@ -201,6 +224,20 @@ export WALLET_ADDRESS_TYPE="taproot"
 Required:
 - Uses `config/wallet/account_3of3.yaml` for N-of-N configuration
 - Bitcoin Core v22.0+ with descriptor-based wallet support
+- Address encoding: bech32m (`bcrt1p...` for regtest)
+
+### Pattern 11: P2TR Tapscript M-of-N
+
+**Note:** Pattern 11 uses environment variable override instead of editing config files.
+
+```bash
+# Script automatically sets:
+export WALLET_ADDRESS_TYPE="taproot"
+```
+
+Required:
+- Uses `config/wallet/account_2of3.yaml` for 2-of-3 configuration
+- Bitcoin Core v22.0+ with Taproot/Tapscript support
 - Address encoding: bech32m (`bcrt1p...` for regtest)
 
 ## Environment Variables
