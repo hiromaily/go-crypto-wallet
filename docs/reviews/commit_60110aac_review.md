@@ -17,7 +17,7 @@ This commit implements P2SH-P2WPKH (BIP49 Nested SegWit) support for Pattern 3 E
 
 1. `internal/infrastructure/api/btc/btc/descriptor.go` (+160 lines)
 2. `internal/infrastructure/api/btc/btc/psbt.go` (+154 lines)
-3. `docs/crypto/btc/e2e_transaction_patterns.md` (+201 lines)
+3. `docs/crypto/btc/operations/e2e-transaction-patterns.md` (+201 lines)
 
 ---
 

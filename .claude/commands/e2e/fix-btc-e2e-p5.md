@@ -330,7 +330,7 @@ docker exec btc-watch bitcoin-cli -regtest -rpcwallet=watch \
 After creating script, update these documents:
 
 1. `scripts/operation/btc/e2e/README.md` - Add to script list
-2. `docs/crypto/btc/e2e_transaction_patterns.md` - Update implementation status (Pattern 5: 🔶 → ✅)
+2. `docs/crypto/btc/operations/e2e-transaction-patterns.md` - Update implementation status (Pattern 5: 🔶 → ✅)
 3. `.claude/rules/btc/e2e-script.md` - Add to pattern list
 
 ## Cautions

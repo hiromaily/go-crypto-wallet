@@ -7,7 +7,7 @@ Each script automates the complete workflow from infrastructure setup to transac
 
 For detailed transaction pattern explanations, technical references, and implementation status, see:
 
-- **[E2E Transaction Patterns Guide](../../../../docs/crypto/btc/e2e_transaction_patterns.md)** - Key types, signature patterns, and workflow details
+- **[E2E Transaction Patterns Guide](../../../../docs/crypto/btc/operations/e2e-transaction-patterns.md)** - Key types, signature patterns, and workflow details
 
 ## Script List
 
@@ -297,7 +297,7 @@ See `../README.md` for a complete list of available functions.
 
 ## Related Documentation
 
-- [E2E Transaction Patterns Guide](../../../../docs/crypto/btc/e2e_transaction_patterns.md) - Pattern details
+- [E2E Transaction Patterns Guide](../../../../docs/crypto/btc/operations/e2e-transaction-patterns.md) - Pattern details
 - [BTC Technical Reference](../../../../docs/crypto/btc/README.md) - Bitcoin technical reference
-- [Descriptor Examples](../../../../docs/crypto/btc/descriptor_examples.md) - Descriptor examples
-- [PSBT Developer Guide](../../../../docs/crypto/btc/psbt_developer_guide.md) - PSBT developer guide
+- [Descriptor Examples](../../../../docs/crypto/btc/descriptor/examples.md) - Descriptor examples
+- [PSBT Developer Guide](../../../../docs/crypto/btc/psbt/developer-guide.md) - PSBT developer guide

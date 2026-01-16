@@ -12,8 +12,8 @@ Read the following documents before creating or modifying scripts:
 
 | Document | Contents |
 |----------|----------|
-| `docs/crypto/btc/e2e_transaction_patterns.md` | Detailed specifications for all 11 patterns |
-| `docs/crypto/btc/address_type_vs_format.md` | **CRITICAL**: Address types vs formats (taproot vs bech32m) |
+| `docs/crypto/btc/operations/e2e-transaction-patterns.md` | Detailed specifications for all 11 patterns |
+| `docs/crypto/btc/overview/address-types.md` | **CRITICAL**: Address types vs formats (taproot vs bech32m) |
 | `scripts/operation/common.sh` | Common utility functions |
 | `pkg/config/README.md` | Configuration override via environment variables |
 | `config/wallet/README.md` | Wallet configuration file policies |
@@ -38,7 +38,7 @@ Each script must include header comments in the following format:
 #   -h, --help Display help message
 #
 # Reference Documentation:
-#   docs/crypto/btc/e2e_transaction_patterns.md - E2E transaction patterns
+#   docs/crypto/btc/operations/e2e-transaction-patterns.md - E2E transaction patterns
 #
 # Transaction Pattern:
 #   Pattern N: BTC [Address Type] [Signature Requirement]

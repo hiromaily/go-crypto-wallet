@@ -75,7 +75,7 @@ to send signed transaction for BTC, BCH, ETH, XRP and so on.
   - 30-50% smaller transactions compared to traditional P2WSH multisig
   - Parallel nonce generation (Round 1) for faster workflow
   - Maximum privacy - indistinguishable from single-signature transactions
-  - See [MuSig2 User Guide](./docs/crypto/btc/musig2_guide.md) for setup and usage
+  - See [MuSig2 User Guide](./docs/crypto/btc/musig2/user-guide.md) for setup and usage
 - ✅ **Descriptor Wallets (BIP380)** - Generate, export, and import descriptors for BTC accounts (Bitcoin Core compatible)
   - Export receive/change descriptors in Bitcoin Core JSON or text formats
   - Watch wallet import/validate commands for descriptor onboarding (single-key; multisig import intentionally disabled)
@@ -123,7 +123,7 @@ make btc-e2e-ci P=3
 - 🚀 **CI/CD Ready**: Automated testing for continuous integration
 - 🧩 **Modular Design**: Shared utilities in `btc_common.sh` reduce code duplication by 80%
 
-See [E2E Transaction Patterns Guide](./docs/crypto/btc/e2e_transaction_patterns.md) for detailed documentation.
+See [E2E Transaction Patterns Guide](./docs/crypto/btc/operations/e2e-transaction-patterns.md) for detailed documentation.
 
 ## Expected use cases
 

@@ -991,7 +991,7 @@ sign import-keys --input keys_v5.json --verify
 **Minimum Training Requirements**:
 
 1. **MuSig2 Basics** (2 hours)
-   - Read: `docs/crypto/btc/musig2_guide.md`
+   - Read: `docs/crypto/btc/musig2/user-guide.md`
    - Understand two-round protocol
    - Understand nonce security
 
