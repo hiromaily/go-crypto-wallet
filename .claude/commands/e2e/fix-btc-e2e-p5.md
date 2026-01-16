@@ -45,7 +45,7 @@ This command creates/runs `scripts/operation/btc/e2e/e2e-p5-p2wpkh-singlesig.sh`
 | SegWit | No | Yes (wrapped) | **Yes (native)** | Yes (Taproot) |
 | Transaction Size | Largest | Medium | **Smaller** | Smallest |
 | Legacy Compatible | Yes | Yes | **No** | No |
-| address_type | `legacy` | `p2sh-segwit` | **`bech32`** | `bech32m` |
+| address_type | `legacy` | `p2sh-segwit` | **`bech32`** | `taproot` |
 
 ### Why Use P2WPKH (Native SegWit)?
 

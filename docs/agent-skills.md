@@ -25,6 +25,21 @@ Agent Skills are a structured format for defining AI agent capabilities:
 
 ## Available Skills
 
+### btc-terminology
+
+**Location**: `.claude/skills/btc-terminology/SKILL.md`
+
+**Description**: Critical Bitcoin terminology rules to prevent confusion between bech32m (encoding) and taproot (address type). Use when working on BTC-related code, config files, or shell scripts.
+
+**Key Concept**:
+- **bech32m** = Encoding format (HOW address is serialized) → Use in Bitcoin Core RPC/CLI
+- **taproot** = Address type (WHAT the address represents) → Use in config files
+
+**When to use**:
+- Working on Taproot-related code (Pattern 9, 10, 11)
+- Modifying BTC config files or shell scripts
+- Understanding why `bech32m` vs `taproot` is used in different contexts
+
 ### github-issue-creation
 
 **Location**: `.claude/skills/github-issue-creation/SKILL.md`

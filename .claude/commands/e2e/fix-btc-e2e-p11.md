@@ -7,6 +7,7 @@ Implement and fix BTC E2E test (Pattern 11: P2TR Tapscript M-of-N) in **regtest 
 **Read the following common rules first:**
 
 - @.claude/rules/btc/e2e-script.md - BTC E2E common rules (build, verification, escalation, security)
+- @.claude/skills/btc-terminology/SKILL.md - **CRITICAL**: Understand `bech32m` (encoding) vs `taproot` (address_type)
 
 ## Parameters
 
@@ -177,23 +178,23 @@ Add to `make/btc_e2e.mk`:
 ###############################################################################
 .PHONY: btc-e2e-p11-reset
 btc-e2e-p11-reset:
-	./scripts/operation/btc/e2e/e2e-p11-p2tr-tapscript.sh --reset
+ ./scripts/operation/btc/e2e/e2e-p11-p2tr-tapscript.sh --reset
 
 .PHONY: btc-e2e-p11
 btc-e2e-p11:
-	./scripts/operation/btc/e2e/e2e-p11-p2tr-tapscript.sh
+ ./scripts/operation/btc/e2e/e2e-p11-p2tr-tapscript.sh
 
 .PHONY: btc-e2e-p11-verbose
 btc-e2e-p11-verbose:
-	./scripts/operation/btc/e2e/e2e-p11-p2tr-tapscript.sh --verbose
+ ./scripts/operation/btc/e2e/e2e-p11-p2tr-tapscript.sh --verbose
 
 .PHONY: btc-e2e-p11-ci
 btc-e2e-p11-ci:
-	./scripts/operation/btc/e2e/e2e-p11-p2tr-tapscript.sh --non-interactive
+ ./scripts/operation/btc/e2e/e2e-p11-p2tr-tapscript.sh --non-interactive
 
 .PHONY: btc-e2e-p11-cleanup
 btc-e2e-p11-cleanup:
-	./scripts/operation/btc/e2e/e2e-p11-p2tr-tapscript.sh --cleanup
+ ./scripts/operation/btc/e2e/e2e-p11-p2tr-tapscript.sh --cleanup
 ```
 
 ### Step 3: Run E2E Test
