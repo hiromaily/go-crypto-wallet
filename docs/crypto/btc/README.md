@@ -2,6 +2,38 @@
 
 This document provides a comprehensive technical reference for Bitcoin implementation in the go-crypto-wallet system. It covers specifications, protocol details, and links to official documentation to help AI agents and developers understand Bitcoin's architecture and implement features correctly.
 
+## Documentation Structure
+
+This directory is organized into the following categories:
+
+| Directory | Description | Audience |
+|-----------|-------------|----------|
+| [overview/](overview/) | Fundamental technical references and Bitcoin basics | All |
+| [operations/](operations/) | Wallet operation guides and transaction flows | Operators |
+| [keygen/](keygen/) | Key generation design and improvements | Developers |
+| [psbt/](psbt/) | PSBT implementation and usage guides | All |
+| [descriptor/](descriptor/) | Output Descriptor implementation | Developers |
+| [taproot/](taproot/) | Taproot (BIP341/BIP86) guides | All |
+| [musig2/](musig2/) | MuSig2 multisignature implementation | All |
+| [testing/](testing/) | Test procedures and verification | Developers |
+| [archive/](archive/) | Outdated documentation (reference only) | - |
+
+## Quick Start
+
+### For Operators
+
+1. Start with [operations/wallet-flow.md](operations/wallet-flow.md) for wallet setup and transaction flows
+2. Review [operations/e2e-transaction-patterns.md](operations/e2e-transaction-patterns.md) for transaction types
+3. See [psbt/user-guide.md](psbt/user-guide.md) for offline signing workflows
+
+### For Developers
+
+1. Read [overview/technical-reference.md](overview/technical-reference.md) for Bitcoin fundamentals
+2. Review architecture docs: [descriptor/architecture.md](descriptor/architecture.md), [musig2/architecture.md](musig2/architecture.md)
+3. Check [psbt/developer-guide.md](psbt/developer-guide.md) for implementation details
+
+---
+
 ## Table of Contents
 
 1. [Overview](#overview)
@@ -110,6 +142,8 @@ Curve Parameters:
 | **P2WSH** | BIP141 | `bc1q` | `tb1q` | SegWit Script Hash |
 | **P2TR** | BIP86 | `bc1p` | `tb1p` | Taproot (recommended) |
 
+See [overview/address-types.md](overview/address-types.md) for detailed comparison.
+
 ### HD Wallet Derivation Paths
 
 | Standard | Path | Address Type |
@@ -164,57 +198,6 @@ UTXO = {
 - Total inputs must equal outputs + transaction fee
 - UTXOs can only be spent once (double-spend protection)
 
-### Transaction Structure
-
-#### Legacy Transaction Format
-
-```
-+--------------------+
-| Version (4 bytes)  |
-+--------------------+
-| Input Count        |  VarInt
-+--------------------+
-| Inputs[]           |
-|   - prevTxHash     |  32 bytes
-|   - prevVout       |  4 bytes
-|   - scriptSigLen   |  VarInt
-|   - scriptSig      |  variable
-|   - sequence       |  4 bytes
-+--------------------+
-| Output Count       |  VarInt
-+--------------------+
-| Outputs[]          |
-|   - value          |  8 bytes (satoshis)
-|   - scriptPubKeyLen|  VarInt
-|   - scriptPubKey   |  variable
-+--------------------+
-| Locktime (4 bytes) |
-+--------------------+
-```
-
-#### SegWit Transaction Format (BIP141)
-
-```
-+--------------------+
-| Version (4 bytes)  |
-+--------------------+
-| Marker (0x00)      |  1 byte (SegWit indicator)
-| Flag (0x01)        |  1 byte
-+--------------------+
-| Input Count        |
-+--------------------+
-| Inputs[]           |  (scriptSig empty for SegWit)
-+--------------------+
-| Output Count       |
-+--------------------+
-| Outputs[]          |
-+--------------------+
-| Witness[]          |  SegWit data (signatures, pubkeys)
-+--------------------+
-| Locktime (4 bytes) |
-+--------------------+
-```
-
 ### Transaction Weight & Virtual Size
 
 SegWit introduced weight units for fee calculation:
@@ -249,17 +232,6 @@ Fee = Virtual Size × Fee Rate (sat/vB)
 
 Used for P2PKH, P2SH, P2WPKH, and P2WSH transactions.
 
-**Signature Format (DER Encoded):**
-
-```
-0x30 [total-length]
-  0x02 [r-length] [r]
-  0x02 [s-length] [s]
-[sighash-type]
-```
-
-**Size:** 71-73 bytes (variable due to DER encoding)
-
 **Sighash Types:**
 
 | Type | Value | Description |
@@ -268,10 +240,6 @@ Used for P2PKH, P2SH, P2WPKH, and P2WSH transactions.
 | SIGHASH_NONE | 0x02 | Sign all inputs, no outputs |
 | SIGHASH_SINGLE | 0x03 | Sign all inputs, matching output only |
 | SIGHASH_ANYONECANPAY | 0x80 | Modifier: sign only current input |
-
-**Reference:**
-
-- [BIP143 - SegWit Signature Verification](https://github.com/bitcoin/bips/blob/master/bip-0143.mediawiki)
 
 ### Schnorr Signatures (Taproot)
 
@@ -284,22 +252,7 @@ Used for P2TR transactions. Introduced with Taproot (BIP340).
 - Provably secure under standard assumptions
 - Batch verification is faster
 
-**Signature Format:**
-
-```
-[32-byte R] [32-byte s]  (64 bytes total, no sighash byte appended)
-```
-
-**Key Format (x-only):**
-
-- Taproot uses 32-byte x-only public keys
-- Y-coordinate is implicitly even (BIP340 convention)
-
-**References:**
-
-- [BIP340 - Schnorr Signatures](https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki)
-- [BIP341 - Taproot](https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki)
-- [BIP342 - Tapscript](https://github.com/bitcoin/bips/blob/master/bip-0342.mediawiki)
+See [taproot/user-guide.md](taproot/user-guide.md) for details.
 
 ---
 
@@ -313,34 +266,9 @@ Used for P2TR transactions. Introduced with Taproot (BIP340).
 <M> <PubKey1> <PubKey2> ... <PubKeyN> <N> OP_CHECKMULTISIG
 ```
 
-**Characteristics:**
-
-- Maximum 15 keys (OP_CHECKMULTISIG limit)
-- Multiple signatures visible on-chain
-- Higher fees due to larger transaction size
-
-**Reference:**
-
-- [BIP11 - M-of-N Standard Transactions](https://github.com/bitcoin/bips/blob/master/bip-0011.mediawiki)
-- [BIP16 - P2SH](https://github.com/bitcoin/bips/blob/master/bip-0016.mediawiki)
-
 ### MuSig2 (Schnorr Signature Aggregation)
 
 MuSig2 enables N-of-N multisig that appears as single-sig on-chain.
-
-**Two-Round Protocol:**
-
-```
-Round 1: Nonce Generation (Parallel)
-├── Each signer generates random nonce
-├── Public nonces are exchanged
-└── Aggregate nonce computed
-
-Round 2: Partial Signing (Sequential)
-├── Each signer creates partial signature
-├── Partial signatures are collected
-└── Aggregate into single 64-byte Schnorr signature
-```
 
 **Benefits:**
 
@@ -355,58 +283,13 @@ Round 2: Partial Signing (Sequential)
 - Generate fresh nonces for every transaction
 - Delete nonces after signing
 
-**References:**
-
-- [BIP327 - MuSig2](https://github.com/bitcoin/bips/blob/master/bip-0327.mediawiki)
-- [MuSig2 Paper (Cryptology ePrint)](https://eprint.iacr.org/2020/1261)
-
-### Taproot Script Path (M-of-N where M < N)
-
-For threshold signatures (e.g., 2-of-3), Taproot uses Merkle script trees:
-
-```
-Taproot Output Key = Internal Key + TapTweak(Merkle Root)
-
-              Root
-             /    \
-        Branch    Leaf3
-        /    \     (2-of-3 script)
-    Leaf1   Leaf2
-    (2-of-3) (2-of-3)
-```
-
-- Only the used script path is revealed on-chain
-- Unused branches remain private
+See [musig2/](musig2/) for detailed documentation.
 
 ---
 
 ## PSBT (Partially Signed Bitcoin Transactions)
 
 PSBT (BIP174) is the standard format for offline/multi-party signing workflows.
-
-### PSBT Structure
-
-```
-+----------------------+
-| Magic: "psbt" + 0xFF |  5 bytes
-+----------------------+
-| Global Map           |
-|   - UNSIGNED_TX      |
-|   - XPUB (optional)  |
-|   - VERSION          |
-+----------------------+
-| Input Maps[]         |
-|   - WITNESS_UTXO     |
-|   - PARTIAL_SIG[]    |
-|   - SIGHASH_TYPE     |
-|   - BIP32_DERIVATION |
-|   - TAP_* fields     |
-+----------------------+
-| Output Maps[]        |
-|   - BIP32_DERIVATION |
-|   - TAP_* fields     |
-+----------------------+
-```
 
 ### PSBT Workflow
 
@@ -430,22 +313,7 @@ PSBT (BIP174) is the standard format for offline/multi-party signing workflows.
    └── Extract broadcastable transaction
 ```
 
-### PSBT Extensions for Taproot
-
-| Field | Description |
-|-------|-------------|
-| PSBT_IN_TAP_KEY_SIG | Key path Schnorr signature |
-| PSBT_IN_TAP_SCRIPT_SIG | Script path signature |
-| PSBT_IN_TAP_LEAF_SCRIPT | Tapscript leaf |
-| PSBT_IN_TAP_BIP32_DERIVATION | Taproot derivation info |
-| PSBT_IN_TAP_INTERNAL_KEY | Internal key |
-| PSBT_IN_TAP_MERKLE_ROOT | Script tree Merkle root |
-
-**References:**
-
-- [BIP174 - PSBT](https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki)
-- [BIP370 - PSBT Version 2](https://github.com/bitcoin/bips/blob/master/bip-0370.mediawiki)
-- [BIP371 - Taproot PSBT Fields](https://github.com/bitcoin/bips/blob/master/bip-0371.mediawiki)
+See [psbt/](psbt/) for detailed documentation.
 
 ---
 
@@ -459,24 +327,6 @@ PSBT (BIP174) is the standard format for offline/multi-party signing workflows.
 | **Testnet3** | Public testing | 18333 | 18332 | 0x0B110907 |
 | **Signet** | Controlled testing | 38333 | 38332 | 0x0A03CF40 |
 | **Regtest** | Local development | 18444 | 18443 | 0xFABFB5DA |
-
-### Block Structure
-
-```
-+----------------------+
-| Block Header (80 B)  |
-|   - Version (4 B)    |
-|   - PrevBlockHash    |  32 bytes
-|   - MerkleRoot       |  32 bytes
-|   - Timestamp (4 B)  |
-|   - Bits (4 B)       |  Difficulty target
-|   - Nonce (4 B)      |
-+----------------------+
-| Transaction Count    |  VarInt
-+----------------------+
-| Transactions[]       |
-+----------------------+
-```
 
 ### Confirmation Guidelines
 
@@ -518,10 +368,6 @@ bitcoin-cli estimatesmartfee <conf_target> [estimate_mode]
 3. **Batching** - Combine multiple payments in single transaction
 4. **RBF** - Use Replace-by-Fee for fee bumping if needed
 
-**Reference:**
-
-- [BIP125 - Replace-by-Fee](https://github.com/bitcoin/bips/blob/master/bip-0125.mediawiki)
-
 ---
 
 ## Wallet Implementation
@@ -534,19 +380,6 @@ bitcoin-cli estimatesmartfee <conf_target> [estimate_mode]
 | **Keygen** | Generate keys, first signature | Offline (air-gapped) |
 | **Sign** | Additional signatures (multisig) | Offline (air-gapped) |
 
-### Key Operations
-
-| Operation | Wallet | Description |
-|-----------|--------|-------------|
-| `create seed` | Keygen | Generate BIP39 mnemonic |
-| `create hdkey` | Keygen | Derive HD keys |
-| `export address` | Keygen | Export addresses for import |
-| `import address` | Watch | Import addresses to monitor |
-| `create transaction` | Watch | Create unsigned PSBT |
-| `sign` | Keygen/Sign | Add signature to PSBT |
-| `send transaction` | Watch | Broadcast signed transaction |
-| `monitor transaction` | Watch | Track confirmations |
-
 ### Account Types
 
 | Account | Purpose | Multisig |
@@ -555,6 +388,8 @@ bitcoin-cli estimatesmartfee <conf_target> [estimate_mode]
 | **deposit** | Aggregate client funds | No |
 | **payment** | Outgoing payments | Yes (2-of-3 or 3-of-3) |
 | **stored** | Cold storage | Yes |
+
+See [operations/wallet-flow.md](operations/wallet-flow.md) for detailed procedures.
 
 ---
 
@@ -616,11 +451,7 @@ bitcoin-cli estimatesmartfee <conf_target> [estimate_mode]
 - Generate cryptographically secure random nonces
 - Delete nonces immediately after signing
 
-### Network Security
-
-- Use authenticated RPC connections
-- Implement TLS for all network communication
-- Validate transaction broadcasts
+See [musig2/security.md](musig2/security.md) for details.
 
 ---
 
@@ -717,33 +548,26 @@ bitcoin-cli estimatesmartfee <conf_target> [estimate_mode]
 
 ## Project Documentation
 
-### Implementation Guides
+### By Category
 
-| Document | Description |
-|----------|-------------|
-| [BTC/BCH Technical Guide](btc_bch_technical_guide.md) | Comprehensive technical reference |
-| [Taproot User Guide](TAPROOT_GUIDE.md) | Taproot address and transaction guide |
-| [MuSig2 User Guide](musig2_guide.md) | MuSig2 multisig operations |
-| [PSBT Developer Guide](psbt_developer_guide.md) | PSBT implementation details |
-| [PSBT User Guide](psbt_user_guide.md) | PSBT usage guide |
-| [Operation Examples](operation_example.md) | Wallet setup and operation |
+| Category | Documents |
+|----------|-----------|
+| **Overview** | [technical-reference.md](overview/technical-reference.md), [address-types.md](overview/address-types.md) |
+| **Operations** | [wallet-flow.md](operations/wallet-flow.md), [e2e-transaction-patterns.md](operations/e2e-transaction-patterns.md), [wallet-flow-improvements-2025.md](operations/wallet-flow-improvements-2025.md) |
+| **Key Generation** | [improvements-2025.md](keygen/improvements-2025.md), [interface-design.md](keygen/interface-design.md) |
+| **PSBT** | [user-guide.md](psbt/user-guide.md), [developer-guide.md](psbt/developer-guide.md), [implementation.md](psbt/implementation.md) |
+| **Descriptor** | [user-guide.md](descriptor/user-guide.md), [architecture.md](descriptor/architecture.md), [api.md](descriptor/api.md) |
+| **Taproot** | [user-guide.md](taproot/user-guide.md), [testing.md](taproot/testing.md) |
+| **MuSig2** | [user-guide.md](musig2/user-guide.md), [architecture.md](musig2/architecture.md), [security.md](musig2/security.md) |
+| **Testing** | [pattern3-verification.md](testing/pattern3-verification.md) |
 
-### Architecture & Design
+### Related Resources
 
-| Document | Description |
-|----------|-------------|
-| [Descriptor Architecture](./descriptor_architecture.md) | Output descriptor design |
-| [MuSig2 Architecture](./musig2_architecture.md) | MuSig2 system architecture |
-| [Key Generation Improvements](key_generation_improvements_2025.md) | 2025 key generation updates |
-| [Wallet Flow Improvements](wallet_flow_improvements_2025.md) | 2025 workflow enhancements |
-
-### Testing
-
-| Document | Description |
-|----------|-------------|
-| [E2E Transaction Patterns](e2e_transaction_patterns.md) | E2E test scripts for all transaction patterns (Patterns 1-10) |
-| [E2E Scripts README](../../../scripts/operation/btc/e2e/README.md) | Bitcoin E2E test script usage and configuration |
-| [Taproot Testing](../testing/TAPROOT_TESTING.md) | Taproot test procedures |
+| Resource | Location |
+|----------|----------|
+| E2E Test Scripts | [scripts/operation/btc/e2e/](../../../scripts/operation/btc/e2e/) |
+| Project Testing Standards | [docs/standards/testing.md](../../standards/testing.md) |
+| Security Standards | [docs/standards/security.md](../../standards/security.md) |
 
 ---
 
@@ -757,6 +581,6 @@ bitcoin-cli estimatesmartfee <conf_target> [estimate_mode]
 
 ---
 
-**Document Version:** 2.0
-**Last Updated:** 2026-01-07
+**Document Version:** 3.0
+**Last Updated:** 2026-01-16
 **Maintainer:** go-crypto-wallet team
