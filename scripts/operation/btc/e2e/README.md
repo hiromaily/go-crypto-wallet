@@ -24,6 +24,24 @@ For detailed transaction pattern explanations, technical references, and impleme
 | `e2e-p9-p2tr-singlesig.sh` | P2TR Taproot Single-sig (Pattern 9) | Single-sig | `bc1p...` / `bcrt1p...` |
 | `e2e-p10-p2tr-musig2.sh` | P2TR MuSig2 (Pattern 10) | N-of-N (framework) | `bc1p...` / `bcrt1p...` |
 
+## Verification Status
+
+| Pattern | E2E Test Status | Last Verified | Notes |
+|---------|----------------|---------------|-------|
+| 1-9 | ✅ Fully operational | - | Complete transaction signing |
+| 10 | ✅ Framework verified | 2026-01-16 | Infrastructure and workflow verified; MuSig2 protocol pending CLI implementation |
+
+**Pattern 10 Verified Components:**
+- Infrastructure setup (Docker, Bitcoin Core, MySQL)
+- Wallet creation and configuration
+- Taproot address generation (bech32m encoding)
+- Descriptor import (2000 addresses)
+- Payment workflow
+
+**Pattern 10 Pending:**
+- Full MuSig2 2-round protocol (nonce generation, partial signatures, aggregation)
+- Requires completion of MuSig2 CLI commands
+
 ## Usage
 
 ### Basic Execution

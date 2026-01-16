@@ -741,6 +741,8 @@ bitcoin-cli estimatesmartfee <conf_target> [estimate_mode]
 
 | Document | Description |
 |----------|-------------|
+| [E2E Transaction Patterns](e2e_transaction_patterns.md) | E2E test scripts for all transaction patterns (Patterns 1-10) |
+| [E2E Scripts README](../../../scripts/operation/btc/e2e/README.md) | Bitcoin E2E test script usage and configuration |
 | [Taproot Testing](../testing/TAPROOT_TESTING.md) | Taproot test procedures |
 
 ---
