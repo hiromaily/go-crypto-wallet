@@ -22,6 +22,7 @@ For detailed transaction pattern explanations, technical references, and impleme
 | `e2e-p7-p2wsh-3of3.sh` | P2WSH Native SegWit 3-of-3 Multisig (Pattern 7) | 3-of-3 | `bc1q...` / `bcrt1q...` |
 | `e2e-p8-p2sh-p2wsh-3of3.sh` | P2SH-P2WSH 3-of-3 Multisig (Pattern 8) | 3-of-3 | `3...` / `2...` |
 | `e2e-p9-p2tr-singlesig.sh` | P2TR Taproot Single-sig (Pattern 9) | Single-sig | `bc1p...` / `bcrt1p...` |
+| `e2e-p10-p2tr-musig2.sh` | P2TR MuSig2 (Pattern 10) | N-of-N (framework) | `bc1p...` / `bcrt1p...` |
 
 ## Usage
 
@@ -54,6 +55,9 @@ For detailed transaction pattern explanations, technical references, and impleme
 
 # Pattern 9: P2TR Taproot Single-sig E2E test
 ./scripts/operation/btc/e2e/e2e-p9-p2tr-singlesig.sh
+
+# Pattern 10: P2TR MuSig2 N-of-N E2E test
+./scripts/operation/btc/e2e/e2e-p10-p2tr-musig2.sh
 ```
 
 ### Make Targets
@@ -85,6 +89,9 @@ make btc-e2e-p8
 
 # Pattern 9: P2TR Taproot Single-sig
 make btc-e2e-p9
+
+# Pattern 10: P2TR MuSig2 N-of-N
+make btc-e2e-p10
 ```
 
 ### Common Options
@@ -163,6 +170,19 @@ address_type: "p2sh-segwit"
 # config/wallet/btc_watch.yaml, btc_keygen.yaml
 address_type: "taproot"
 ```
+
+### Pattern 10: P2TR MuSig2 N-of-N
+
+**Note:** Pattern 10 uses environment variable override instead of editing config files.
+
+```bash
+# Script automatically sets:
+export WALLET_ADDRESS_TYPE="bech32m"
+```
+
+Required:
+- Uses `config/wallet/account_3of3.yaml` for N-of-N configuration
+- Bitcoin Core v22.0+ with descriptor-based wallet support
 
 ## Environment Variables
 

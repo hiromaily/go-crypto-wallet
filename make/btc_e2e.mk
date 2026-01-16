@@ -250,3 +250,31 @@ btc-e2e-p9-ci:
 btc-e2e-p9-cleanup:
 	./scripts/operation/btc/e2e/e2e-p9-p2tr-singlesig.sh --cleanup
 
+
+###############################################################################
+# E2E Testing - Pattern 10: P2TR MuSig2 N-of-N
+###############################################################################
+# Run Bitcoin E2E workflow Pattern 10 from completely fresh state (recommended)
+.PHONY: btc-e2e-p10-reset
+btc-e2e-p10-reset:
+	./scripts/operation/btc/e2e/e2e-p10-p2tr-musig2.sh --reset
+
+# Run complete Bitcoin end-to-end workflow Pattern 10
+.PHONY: btc-e2e-p10
+btc-e2e-p10:
+	./scripts/operation/btc/e2e/e2e-p10-p2tr-musig2.sh
+
+# Run Bitcoin E2E workflow Pattern 10 with verbose output
+.PHONY: btc-e2e-p10-verbose
+btc-e2e-p10-verbose:
+	./scripts/operation/btc/e2e/e2e-p10-p2tr-musig2.sh --verbose
+
+# Run Bitcoin E2E workflow Pattern 10 in non-interactive mode (for CI/CD)
+.PHONY: btc-e2e-p10-ci
+btc-e2e-p10-ci:
+	./scripts/operation/btc/e2e/e2e-p10-p2tr-musig2.sh --non-interactive
+
+# Cleanup Bitcoin E2E test environment Pattern 10
+.PHONY: btc-e2e-p10-cleanup
+btc-e2e-p10-cleanup:
+	./scripts/operation/btc/e2e/e2e-p10-p2tr-musig2.sh --cleanup
