@@ -1,5 +1,5 @@
-name: Test
-#on: pull_request
+name: Lint and Test
+
 on:
   push:
     branches:
@@ -11,11 +11,49 @@ on:
       - main
     paths-ignore:
       - "**.md"
+
 env:
   GO_VERSION: "1.25"
+
 jobs:
-  golangci:
-    name: lint
+  # Detect which files changed to conditionally run jobs
+  changes:
+    runs-on: ubuntu-slim
+    outputs:
+      go: ${{ steps.filter.outputs.go }}
+      proto: ${{ steps.filter.outputs.proto }}
+      shell: ${{ steps.filter.outputs.shell }}
+      sql: ${{ steps.filter.outputs.sql }}
+      hcl: ${{ steps.filter.outputs.hcl }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            go:
+              - '**/*.go'
+              - 'go.mod'
+              - 'go.sum'
+              - '.golangci.yml'
+            proto:
+              - 'proto/**/*.proto'
+              - 'buf.yaml'
+              - 'buf.gen.yaml'
+            shell:
+              - 'scripts/**/*.sh'
+            sql:
+              - 'tools/sqlc/**/*.sql'
+              - 'tools/sqlc/sqlc.yml'
+            hcl:
+              - 'tools/atlas/**/*.hcl'
+              - 'tools/atlas/atlas.hcl'
+
+  # Go linting
+  go-lint:
+    needs: changes
+    if: ${{ needs.changes.outputs.go == 'true' }}
+    name: go-lint
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -24,30 +62,91 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
-          cache: true # Go modules and build outputs (default: true)
-      - name: golangci-lint for root directory
-        uses: golangci/golangci-lint-action@v8 # already has cache functionality
+          cache: true
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v8
         with:
           version: v2.7.2
           working-directory: ./
-  buf-lint:
+
+  # Proto linting with buf
+  proto-lint:
+    needs: changes
+    if: ${{ needs.changes.outputs.proto == 'true' }}
     name: proto-lint
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # Required for buf breaking
       - name: Setup buf
         uses: bufbuild/buf-action@v1
         with:
           setup_only: true
+      - name: Format check
+        run: buf format --diff --exit-code
       - name: Lint proto files
         run: buf lint
       - name: Check for breaking changes
-        run: buf breaking --against '.git#branch=master'
-        continue-on-error: true # Don't fail the build on breaking changes, just report them
+        run: buf breaking --against '.git#branch=main'
+        continue-on-error: true
+
+  # Shell script linting
+  shell-lint:
+    needs: changes
+    if: ${{ needs.changes.outputs.shell == 'true' }}
+    name: shell-lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - name: Run shellcheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: "./scripts"
+
+  # SQL linting with sqlc
+  sql-lint:
+    needs: changes
+    if: ${{ needs.changes.outputs.sql == 'true' }}
+    name: sql-lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - name: Set up Go ${{ env.GO_VERSION }}
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+      - name: Install sqlc
+        run: go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+      - name: sqlc compile
+        run: cd tools/sqlc && sqlc compile
+      - name: sqlc vet
+        run: cd tools/sqlc && sqlc vet
+
+  # HCL linting with Atlas
+  hcl-lint:
+    needs: changes
+    if: ${{ needs.changes.outputs.hcl == 'true' }}
+    name: hcl-lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup Atlas
+        uses: ariga/setup-atlas@v0
+      - name: Format check
+        run: atlas schema fmt --check tools/atlas/schemas/
+
+  # Unit tests (only when Go files change)
   unit-test:
+    needs: changes
+    if: ${{ needs.changes.outputs.go == 'true' }}
     name: unit-test
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
@@ -55,9 +154,7 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
-          cache: true # Go modules and build outputs (default: true)
+          cache: true
       - name: Run Unit Test
-        # /home/runner/work/go-crypto-wallet/go-crypto-wallet
         working-directory: ./
-        run: |
-          make gotest
+        run: make gotest

@@ -75,3 +75,39 @@ yaml-lint:
 	yaml-lint .github/workflows
 	yaml-lint .devcontainer
 	yaml-lint config
+
+###############################################################################
+# SQL Linting (Aliases to db.mk sqlfluff targets)
+###############################################################################
+.PHONY: sql-fmt
+sql-fmt: sqlfluff-format
+
+.PHONY: sql-lint
+sql-lint: sqlfluff-lint
+
+.PHONY: sql-fix
+sql-fix: sqlfluff-fix
+
+# Lint SQL queries
+# This target runs vet to check queries for potential issues
+.PHONY: sqlc-lint
+sqlc-lint: sqlc-validate
+
+
+###############################################################################
+# HCL Linting (Aliases to db_atlas.mk targets)
+###############################################################################
+.PHONY: hcl-fmt
+hcl-fmt: atlas-fmt
+
+.PHONY: hcl-lint
+hcl-lint: atlas-lint
+
+.PHONY: hcl-validate
+hcl-validate: atlas-validate
+
+###############################################################################
+# Proto Linting (Aliases to codegen.mk targets)
+###############################################################################
+.PHONY: proto-fmtlint
+proto-fmtlint: proto-fmt proto-lint

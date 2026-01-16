@@ -43,9 +43,14 @@ clean-mocks:
 # - Code generation with buf generate
 #------------------------------------------------------------------------------
 
+# Format proto files with buf
+.PHONY: proto-fmt
+proto-fmt:
+	buf format -w
+
 # Lint proto files with buf
-.PHONY: lint-proto
-lint-proto:
+.PHONY: proto-lint
+proto-lint:
 	buf lint
 
 # Check for breaking changes in proto files
