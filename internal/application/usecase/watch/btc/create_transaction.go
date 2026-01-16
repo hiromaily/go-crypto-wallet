@@ -12,9 +12,9 @@ import (
 	"github.com/btcsuite/btcd/wire"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
-	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
-	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
-	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
+	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/bitcoin"
+	portsFile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainBitcoin "github.com/hiromaily/go-crypto-wallet/internal/domain/bitcoin"
@@ -24,14 +24,14 @@ import (
 )
 
 type createTransactionUseCase struct {
-	btcClient       portsBtc.Bitcoiner
+	btcClient       portsBitcoin.Bitcoiner
 	dbConn          *sql.DB
 	addrRepo        watchrepo.AddressRepositorier
 	txRepo          watchrepo.BTCTxRepositorier
 	txInputRepo     watchrepo.TxInputRepositorier
 	txOutputRepo    watchrepo.TxOutputRepositorier
 	payReqRepo      watchrepo.PaymentRequestRepositorier
-	txFileRepo      portsStorage.TransactionFileRepositorier
+	txFileRepo      portsFile.TransactionFileRepositorier
 	depositReceiver domainAccount.AccountType
 	paymentSender   domainAccount.AccountType
 	walletType      domainWallet.WalletType
@@ -39,14 +39,14 @@ type createTransactionUseCase struct {
 
 // NewCreateTransactionUseCase creates a new CreateTransactionUseCase
 func NewCreateTransactionUseCase(
-	btcClient portsBtc.Bitcoiner,
+	btcClient portsBitcoin.Bitcoiner,
 	dbConn *sql.DB,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.BTCTxRepositorier,
 	txInputRepo watchrepo.TxInputRepositorier,
 	txOutputRepo watchrepo.TxOutputRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,
-	txFileRepo portsStorage.TransactionFileRepositorier,
+	txFileRepo portsFile.TransactionFileRepositorier,
 	depositReceiver domainAccount.AccountType,
 	paymentSender domainAccount.AccountType,
 	walletType domainWallet.WalletType,

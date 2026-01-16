@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 
-	portsEth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
+	portsEth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ethereum"
 	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/ethtx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"

@@ -3,7 +3,7 @@ package xrp
 import (
 	"github.com/spf13/cobra"
 
-	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
+	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ripple"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
 

@@ -22,8 +22,8 @@ import (
 	"github.com/btcsuite/btcd/txscript"
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
-	portsbtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
-	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
+	portsbtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/bitcoin"
+	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"

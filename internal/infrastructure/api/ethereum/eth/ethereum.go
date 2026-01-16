@@ -9,7 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	ethrpc "github.com/ethereum/go-ethereum/rpc"
 
-	portsEthereum "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
+	portsEthereum "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ethereum"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"

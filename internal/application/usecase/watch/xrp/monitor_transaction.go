@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
-	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
+	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ripple"
+	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"

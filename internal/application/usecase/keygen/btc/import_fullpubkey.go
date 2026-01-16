@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
-	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
+	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/bitcoin"
+	portsFile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
@@ -16,16 +16,16 @@ import (
 )
 
 type importFullPubkeyUseCase struct {
-	btc                portsBtc.Bitcoiner
-	authFullPubKeyRepo persistence.AuthFullPubkeyRepositorier
-	pubkeyFileRepo     portsStorage.AddressFileRepositorier
+	btc                portsBitcoin.Bitcoiner
+	authFullPubKeyRepo repository.AuthFullPubkeyRepositorier
+	pubkeyFileRepo     portsFile.AddressFileRepositorier
 }
 
 // NewImportFullPubkeyUseCase creates a new ImportFullPubkeyUseCase
 func NewImportFullPubkeyUseCase(
-	btc portsBtc.Bitcoiner,
-	authFullPubKeyRepo persistence.AuthFullPubkeyRepositorier,
-	pubkeyFileRepo portsStorage.AddressFileRepositorier,
+	btc portsBitcoin.Bitcoiner,
+	authFullPubKeyRepo repository.AuthFullPubkeyRepositorier,
+	pubkeyFileRepo portsFile.AddressFileRepositorier,
 ) keygenusecase.ImportFullPubkeyUseCase {
 	return &importFullPubkeyUseCase{
 		btc:                btc,

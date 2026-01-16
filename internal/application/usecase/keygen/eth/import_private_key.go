@@ -7,7 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
@@ -17,13 +17,13 @@ import (
 
 type importPrivateKeyUseCase struct {
 	eth            ethereum.Ethereumer
-	accountKeyRepo persistence.ETHAccountKeyRepositorier
+	accountKeyRepo repository.ETHAccountKeyRepositorier
 }
 
 // NewImportPrivateKeyUseCase creates a new ImportPrivateKeyUseCase
 func NewImportPrivateKeyUseCase(
 	eth ethereum.Ethereumer,
-	accountKeyRepo persistence.ETHAccountKeyRepositorier,
+	accountKeyRepo repository.ETHAccountKeyRepositorier,
 ) keygenusecase.ImportPrivateKeyUseCase {
 	return &importPrivateKeyUseCase{
 		eth:            eth,

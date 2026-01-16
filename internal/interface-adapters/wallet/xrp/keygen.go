@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
+	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ripple"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"

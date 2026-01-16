@@ -7,7 +7,7 @@ import (
 
 	"github.com/quagmt/udecimal"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
@@ -17,8 +17,8 @@ import (
 
 type createPaymentRequestUseCase struct {
 	dbConn       *sql.DB
-	addrRepo     persistence.AddressRepositorier
-	payReqRepo   persistence.PaymentRequestRepositorier
+	addrRepo     repository.AddressRepositorier
+	payReqRepo   repository.PaymentRequestRepositorier
 	coinTypeCode domainCoin.CoinTypeCode
 	wtype        domainWallet.WalletType
 }
@@ -26,8 +26,8 @@ type createPaymentRequestUseCase struct {
 // NewCreatePaymentRequestUseCase creates a new CreatePaymentRequestUseCase for watch wallet
 func NewCreatePaymentRequestUseCase(
 	dbConn *sql.DB,
-	addrRepo persistence.AddressRepositorier,
-	payReqRepo persistence.PaymentRequestRepositorier,
+	addrRepo repository.AddressRepositorier,
+	payReqRepo repository.PaymentRequestRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,
 	wtype domainWallet.WalletType,
 ) watchusecase.CreatePaymentRequestUseCase {

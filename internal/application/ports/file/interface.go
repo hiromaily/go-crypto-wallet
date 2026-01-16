@@ -1,4 +1,4 @@
-package storage
+package file
 
 import (
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"

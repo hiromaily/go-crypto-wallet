@@ -9,7 +9,7 @@ import (
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -24,9 +24,9 @@ import (
 type generateDescriptorUseCase struct {
 	descriptorService  *btc.DescriptorService
 	chainConfig        *chaincfg.Params
-	authFullPubKeyRepo persistence.AuthFullPubkeyRepositorier
-	accountKeyRepo     persistence.BTCAccountKeyRepositorier
-	seedRepo           persistence.SeedRepositorier
+	authFullPubKeyRepo repository.AuthFullPubkeyRepositorier
+	accountKeyRepo     repository.BTCAccountKeyRepositorier
+	seedRepo           repository.SeedRepositorier
 	coinTypeCode       domainCoin.CoinTypeCode
 	multisigConfig     *domainAccount.MultisigConfig
 }
@@ -35,9 +35,9 @@ type generateDescriptorUseCase struct {
 func NewGenerateDescriptorUseCase(
 	descriptorService *btc.DescriptorService,
 	chainConfig *chaincfg.Params,
-	authFullPubKeyRepo persistence.AuthFullPubkeyRepositorier,
-	accountKeyRepo persistence.BTCAccountKeyRepositorier,
-	seedRepo persistence.SeedRepositorier,
+	authFullPubKeyRepo repository.AuthFullPubkeyRepositorier,
+	accountKeyRepo repository.BTCAccountKeyRepositorier,
+	seedRepo repository.SeedRepositorier,
 	coinTypeCode domainCoin.CoinTypeCode,
 	multisigConfig *domainAccount.MultisigConfig,
 ) keygenusecase.GenerateDescriptorUseCase {

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
+	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ripple"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple/xrp"
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"

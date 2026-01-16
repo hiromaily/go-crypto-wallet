@@ -8,9 +8,9 @@ import (
 	"math/big"
 	"strconv"
 
-	portsEth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
-	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
-	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
+	portsEth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ethereum"
+	portsFile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -27,7 +27,7 @@ type createTransactionUseCase struct {
 	txRepo          watchrepo.TxRepositorier
 	txDetailRepo    watchrepo.ETHDetailTXRepositorier
 	payReqRepo      watchrepo.PaymentRequestRepositorier
-	txFileRepo      portsStorage.TransactionFileRepositorier
+	txFileRepo      portsFile.TransactionFileRepositorier
 	depositReceiver domainAccount.AccountType
 	paymentSender   domainAccount.AccountType
 }
@@ -40,7 +40,7 @@ func NewCreateTransactionUseCase(
 	txRepo watchrepo.TxRepositorier,
 	txDetailRepo watchrepo.ETHDetailTXRepositorier,
 	payReqRepo watchrepo.PaymentRequestRepositorier,
-	txFileRepo portsStorage.TransactionFileRepositorier,
+	txFileRepo portsFile.TransactionFileRepositorier,
 	depositReceiver domainAccount.AccountType,
 	paymentSender domainAccount.AccountType,
 ) watchusecase.CreateTransactionUseCase {

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"strings"
 
-	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
-	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
+	portsFile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum"
@@ -17,14 +17,14 @@ import (
 type sendTransactionUseCase struct {
 	ethClient    ethereum.Ethereumer
 	txDetailRepo watchrepo.ETHDetailTXRepositorier
-	txFileRepo   portsStorage.TransactionFileRepositorier
+	txFileRepo   portsFile.TransactionFileRepositorier
 }
 
 // NewSendTransactionUseCase creates a new SendTransactionUseCase
 func NewSendTransactionUseCase(
 	ethClient ethereum.Ethereumer,
 	txDetailRepo watchrepo.ETHDetailTXRepositorier,
-	txFileRepo portsStorage.TransactionFileRepositorier,
+	txFileRepo portsFile.TransactionFileRepositorier,
 ) watchusecase.SendTransactionUseCase {
 	return &sendTransactionUseCase{
 		ethClient:    ethClient,

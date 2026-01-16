@@ -12,7 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"golang.org/x/crypto/sha3"
 
-	portsEthereum "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
+	portsEthereum "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ethereum"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/ethtx"

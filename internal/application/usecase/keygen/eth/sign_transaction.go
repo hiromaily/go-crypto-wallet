@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
+	portsFile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
@@ -16,13 +16,13 @@ import (
 
 type signTransactionUseCase struct {
 	eth        ethereum.Ethereumer
-	txFileRepo portsStorage.TransactionFileRepositorier
+	txFileRepo portsFile.TransactionFileRepositorier
 }
 
 // NewSignTransactionUseCase creates a new SignTransactionUseCase for ETH keygen
 func NewSignTransactionUseCase(
 	eth ethereum.Ethereumer,
-	txFileRepo portsStorage.TransactionFileRepositorier,
+	txFileRepo portsFile.TransactionFileRepositorier,
 ) keygenusecase.SignTransactionUseCase {
 	return &signTransactionUseCase{
 		eth:        eth,

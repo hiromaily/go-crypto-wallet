@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	portsPersistence "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
+	portsRepository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
@@ -147,7 +147,7 @@ func (r *TxRepositorySqlc) DeleteAll() (int64, error) {
 }
 
 // WithTx returns a new repository instance that uses the provided transaction
-func (r *TxRepositorySqlc) WithTx(tx *sql.Tx) portsPersistence.TxRepositorier {
+func (r *TxRepositorySqlc) WithTx(tx *sql.Tx) portsRepository.TxRepositorier {
 	return &TxRepositorySqlc{
 		queries:      r.queries.WithTx(tx),
 		coinTypeCode: r.coinTypeCode,

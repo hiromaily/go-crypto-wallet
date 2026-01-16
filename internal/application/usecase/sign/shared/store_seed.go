@@ -4,17 +4,17 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	infraKey "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/wallet/key"
 )
 
 type storeSeedUseCase struct {
-	seedRepo persistence.SeedRepositorier
+	seedRepo repository.SeedRepositorier
 }
 
 // NewStoreSeedUseCase creates a new StoreSeedUseCase for sign wallet
-func NewStoreSeedUseCase(seedRepo persistence.SeedRepositorier) signusecase.StoreSeedUseCase {
+func NewStoreSeedUseCase(seedRepo repository.SeedRepositorier) signusecase.StoreSeedUseCase {
 	return &storeSeedUseCase{
 		seedRepo: seedRepo,
 	}

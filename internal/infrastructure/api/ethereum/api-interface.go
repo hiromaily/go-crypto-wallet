@@ -4,7 +4,7 @@
 // internal/application/ports/ethereum following Clean Architecture principles.
 // Import from there instead:
 //
-//	import portsEthereum "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
+//	import portsEthereum "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ethereum"
 //
 // The implementations remain in this package but now implement the interfaces
 // defined in the application/ports layer.
@@ -21,7 +21,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/p2p"
 
-	portsEthereum "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
+	portsEthereum "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ethereum"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"

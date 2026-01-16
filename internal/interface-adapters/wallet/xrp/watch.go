@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
+	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ripple"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"

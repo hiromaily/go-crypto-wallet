@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	dtoRipple "github.com/hiromaily/go-crypto-wallet/internal/application/dto/ripple"
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
-	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
-	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
+	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ripple"
+	portsFile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	keygenusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/keygen"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
@@ -19,15 +19,15 @@ import (
 
 type signTransactionUseCase struct {
 	xrp               portsRipple.Rippler
-	xrpAccountKeyRepo persistence.XRPAccountKeyRepositorier
-	txFileRepo        portsStorage.TransactionFileRepositorier
+	xrpAccountKeyRepo repository.XRPAccountKeyRepositorier
+	txFileRepo        portsFile.TransactionFileRepositorier
 }
 
 // NewSignTransactionUseCase creates a new SignTransactionUseCase for XRP keygen
 func NewSignTransactionUseCase(
 	xrp portsRipple.Rippler,
-	xrpAccountKeyRepo persistence.XRPAccountKeyRepositorier,
-	txFileRepo portsStorage.TransactionFileRepositorier,
+	xrpAccountKeyRepo repository.XRPAccountKeyRepositorier,
+	txFileRepo portsFile.TransactionFileRepositorier,
 ) keygenusecase.SignTransactionUseCase {
 	return &signTransactionUseCase{
 		xrp:               xrp,

@@ -3,7 +3,7 @@ package eth
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/ethereum"
 )
 
 // AddCommands adds all Ethereum API subcommands

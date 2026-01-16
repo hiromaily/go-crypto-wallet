@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 
-	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
+	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/bitcoin"
 )
 
-func runEncryptWallet(btc portsBtc.Bitcoiner, passphrase string) error {
+func runEncryptWallet(btc portsBitcoin.Bitcoiner, passphrase string) error {
 	fmt.Println("encrypts the wallet with 'passphrase'")
 
 	// validator

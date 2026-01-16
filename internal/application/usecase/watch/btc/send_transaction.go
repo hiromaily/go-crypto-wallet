@@ -6,29 +6,29 @@ import (
 	"fmt"
 	"strings"
 
-	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
-	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
-	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
+	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/bitcoin"
+	portsFile "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	watchrepo "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
 
 type sendTransactionUseCase struct {
-	btcClient    portsBtc.Bitcoiner
+	btcClient    portsBitcoin.Bitcoiner
 	addrRepo     watchrepo.AddressRepositorier
 	txRepo       watchrepo.BTCTxRepositorier
 	txOutputRepo watchrepo.TxOutputRepositorier
-	txFileRepo   portsStorage.TransactionFileRepositorier
+	txFileRepo   portsFile.TransactionFileRepositorier
 }
 
 // NewSendTransactionUseCase creates a new SendTransactionUseCase
 func NewSendTransactionUseCase(
-	btcClient portsBtc.Bitcoiner,
+	btcClient portsBitcoin.Bitcoiner,
 	addrRepo watchrepo.AddressRepositorier,
 	txRepo watchrepo.BTCTxRepositorier,
 	txOutputRepo watchrepo.TxOutputRepositorier,
-	txFileRepo portsStorage.TransactionFileRepositorier,
+	txFileRepo portsFile.TransactionFileRepositorier,
 ) watchusecase.SendTransactionUseCase {
 	return &sendTransactionUseCase{
 		btcClient:    btcClient,

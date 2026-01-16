@@ -1,4 +1,4 @@
-// Package repository provides repository implementations for data persistence.
+// Package repository provides repository implementations for data repository.
 //
 // This package contains:
 //   - cold/: Repository implementations for cold wallets (keygen, sign)

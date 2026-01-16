@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 
-	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
+	portsBitcoin "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/bitcoin"
 )
 
-func runValidateAddress(btc portsBtc.Bitcoiner, address string) error {
+func runValidateAddress(btc portsBitcoin.Bitcoiner, address string) error {
 	// validate args
 	if address == "" {
 		return errors.New("address option [-address] is required")
