@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
+	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 )
 
-func runNodeInfo(eth ethereum.Ethereumer) error {
+func runNodeInfo(eth apieth.Ethereumer) error {
 	peerInfo, err := eth.NodeInfo(context.Background())
 	if err != nil {
 		return fmt.Errorf("fail to call eth.NodeInfo() %w", err)

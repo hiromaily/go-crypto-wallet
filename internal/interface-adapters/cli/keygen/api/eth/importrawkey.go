@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
+	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 )
 
-func runImportRawKey(eth ethereum.Ethereumer, privKey, passPhrase string) error {
+func runImportRawKey(eth apieth.Ethereumer, privKey, passPhrase string) error {
 	fmt.Println("import raw key")
 
 	// validation

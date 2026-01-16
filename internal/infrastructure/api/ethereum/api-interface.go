@@ -4,7 +4,7 @@
 // internal/application/ports/ethereum following Clean Architecture principles.
 // Import from there instead:
 //
-//	import portsEthereum "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
+//	import apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 //
 // The implementations remain in this package but now implement the interfaces
 // defined in the application/ports layer.
@@ -21,7 +21,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/p2p"
 
-	portsEthereum "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
+	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
@@ -30,7 +30,7 @@ import (
 // Ethereumer defines the interface for Ethereum blockchain operations.
 //
 // Deprecated: This interface has been moved to internal/application/ports/ethereum.
-// Use portsEthereum.Ethereumer instead.
+// Use apieth.Ethereumer instead.
 type Ethereumer interface {
 	// balance
 	GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []domainEthereum.UserAmount)
@@ -97,7 +97,7 @@ type Ethereumer interface {
 	// transaction
 	CreateRawTransaction(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*domainEthereum.RawTx, *portsEthereum.TxCreateParams, error)
+	) (*domainEthereum.RawTx, *apieth.TxCreateParams, error)
 	SignOnRawTransaction(rawTx *domainEthereum.RawTx, passphrase string) (*domainEthereum.RawTx, error)
 	SendSignedRawTransaction(ctx context.Context, signedTxHex string) (string, error)
 	GetConfirmation(ctx context.Context, hashTx string) (uint64, error)
@@ -114,26 +114,26 @@ type Ethereumer interface {
 // ERC20er defines the interface for ERC-20 token operations.
 //
 // Deprecated: This interface has been moved to internal/application/ports/ethereum.
-// Use portsEthereum.ERC20er instead.
+// Use apieth.ERC20er instead.
 type ERC20er interface {
 	ValidateAddr(addr string) error
 	FloatToBigInt(v float64) *big.Int
 	GetBalance(ctx context.Context, hexAddr string, quantityTag domainEthereum.QuantityTag) (*big.Int, error)
 	CreateRawTransaction(
 		ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-	) (*domainEthereum.RawTx, *portsEthereum.TxCreateParams, error)
+	) (*domainEthereum.RawTx, *apieth.TxCreateParams, error)
 }
 
 // EtherTxCreator is a type alias for ERC20er used in transaction creation contexts.
 //
 // Deprecated: This type alias has been moved to internal/application/ports/ethereum.
-// Use portsEthereum.EtherTxCreator instead.
+// Use apieth.EtherTxCreator instead.
 type EtherTxCreator = ERC20er
 
 // EtherTxMonitor defines the interface for monitoring Ethereum transactions.
 //
 // Deprecated: This interface has been moved to internal/application/ports/ethereum.
-// Use portsEthereum.EtherTxMonitor instead.
+// Use apieth.EtherTxMonitor instead.
 type EtherTxMonitor interface {
 	GetTotalBalance(ctx context.Context, addrs []string) (*big.Int, []domainEthereum.UserAmount)
 	GetConfirmation(ctx context.Context, hashTx string) (uint64, error)

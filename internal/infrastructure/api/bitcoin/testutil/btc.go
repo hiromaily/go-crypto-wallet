@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin"
@@ -14,11 +14,11 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/cryptocurrency"
 )
 
-var bc portsBtc.Bitcoiner
+var bc apibtc.Bitcoiner
 
 // GetBTC returns btc instance
 // FIXME: hard coded config path
-func GetBTC() (portsBtc.Bitcoiner, error) {
+func GetBTC() (apibtc.Bitcoiner, error) {
 	if bc != nil {
 		return bc, nil
 	}
@@ -49,7 +49,7 @@ func GetBTC() (portsBtc.Bitcoiner, error) {
 
 type BTCTestSuite struct {
 	suite.Suite
-	BTC portsBtc.Bitcoiner
+	BTC apibtc.Bitcoiner
 }
 
 func (bts *BTCTestSuite) SetupTest() {

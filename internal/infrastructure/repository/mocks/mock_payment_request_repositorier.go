@@ -7,7 +7,7 @@ package mocks
 import (
 	"database/sql"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/payment"
 	mock "github.com/stretchr/testify/mock"
 )
@@ -387,19 +387,19 @@ func (_c *MockPaymentRequestRepositorier_UpdatePaymentID_Call) RunAndReturn(run 
 }
 
 // WithTx provides a mock function for the type MockPaymentRequestRepositorier
-func (_mock *MockPaymentRequestRepositorier) WithTx(tx *sql.Tx) persistence.PaymentRequestRepositorier {
+func (_mock *MockPaymentRequestRepositorier) WithTx(tx *sql.Tx) repository.PaymentRequestRepositorier {
 	ret := _mock.Called(tx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for WithTx")
 	}
 
-	var r0 persistence.PaymentRequestRepositorier
-	if returnFunc, ok := ret.Get(0).(func(*sql.Tx) persistence.PaymentRequestRepositorier); ok {
+	var r0 repository.PaymentRequestRepositorier
+	if returnFunc, ok := ret.Get(0).(func(*sql.Tx) repository.PaymentRequestRepositorier); ok {
 		r0 = returnFunc(tx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(persistence.PaymentRequestRepositorier)
+			r0 = ret.Get(0).(repository.PaymentRequestRepositorier)
 		}
 	}
 	return r0
@@ -429,12 +429,12 @@ func (_c *MockPaymentRequestRepositorier_WithTx_Call) Run(run func(tx *sql.Tx)) 
 	return _c
 }
 
-func (_c *MockPaymentRequestRepositorier_WithTx_Call) Return(paymentRequestRepositorier persistence.PaymentRequestRepositorier) *MockPaymentRequestRepositorier_WithTx_Call {
+func (_c *MockPaymentRequestRepositorier_WithTx_Call) Return(paymentRequestRepositorier repository.PaymentRequestRepositorier) *MockPaymentRequestRepositorier_WithTx_Call {
 	_c.Call.Return(paymentRequestRepositorier)
 	return _c
 }
 
-func (_c *MockPaymentRequestRepositorier_WithTx_Call) RunAndReturn(run func(tx *sql.Tx) persistence.PaymentRequestRepositorier) *MockPaymentRequestRepositorier_WithTx_Call {
+func (_c *MockPaymentRequestRepositorier_WithTx_Call) RunAndReturn(run func(tx *sql.Tx) repository.PaymentRequestRepositorier) *MockPaymentRequestRepositorier_WithTx_Call {
 	_c.Call.Return(run)
 	return _c
 }

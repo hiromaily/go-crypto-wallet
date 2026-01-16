@@ -134,20 +134,20 @@ import (
 
 	"github.com/btcsuite/btcd/btcec/v2"
 
-	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/bitcoin/btc"
 )
 
 type aggregateMuSig2SignaturesUseCase struct {
 	musig2Service *btc.MuSig2Service
-	btcClient     portsBtc.Bitcoiner
+	btcClient     apibtc.Bitcoiner
 }
 
 // NewAggregateMuSig2SignaturesUseCase creates a new AggregateMuSig2SignaturesUseCase for BTC watch wallet.
 func NewAggregateMuSig2SignaturesUseCase(
 	musig2Service *btc.MuSig2Service,
-	btcClient portsBtc.Bitcoiner,
+	btcClient apibtc.Bitcoiner,
 ) watchusecase.AggregateMuSig2SignaturesUseCase {
 	return &aggregateMuSig2SignaturesUseCase{
 		musig2Service: musig2Service,
@@ -327,7 +327,7 @@ func ExampleAggregateMuSig2Signatures() {
 	// Initialize dependencies
 	var (
 		musig2Service *btc.MuSig2Service // Provides MuSig2 cryptographic operations
-		btcClient     portsBtc.Bitcoiner // Bitcoin Core RPC client (for broadcast)
+		btcClient     apibtc.Bitcoiner   // Bitcoin Core RPC client (for broadcast)
 	)
 
 	// Create the use case

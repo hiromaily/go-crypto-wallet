@@ -12,8 +12,8 @@ import (
 )
 
 // AddressFileRepository is repository to store pubkey as csv file.
-// It implements portsStorage.AddressFileRepositorier interface defined in
-// internal/application/ports/storage.
+// It implements file.AddressFileRepositorier interface defined in
+// internal/application/ports/file.
 type AddressFileRepository struct {
 	filePath string
 }

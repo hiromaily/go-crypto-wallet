@@ -10,9 +10,9 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 
-	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
-	portsStorage "github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
+	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
+	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAuth "github.com/hiromaily/go-crypto-wallet/internal/domain/auth"
@@ -23,10 +23,10 @@ import (
 )
 
 type signTransactionUseCase struct {
-	btc             portsBtc.Bitcoiner
-	accountKeyRepo  persistence.BTCAccountKeyRepositorier
-	authKeyRepo     persistence.AuthAccountKeyRepositorier
-	txFileRepo      portsStorage.TransactionFileRepositorier
+	btc             apibtc.Bitcoiner
+	accountKeyRepo  repository.BTCAccountKeyRepositorier
+	authKeyRepo     repository.AuthAccountKeyRepositorier
+	txFileRepo      file.TransactionFileRepositorier
 	multisigAccount *domainAccount.MultisigConfig
 	wtype           domainWallet.WalletType
 	authType        domainAccount.AuthType
@@ -34,10 +34,10 @@ type signTransactionUseCase struct {
 
 // NewSignTransactionUseCase creates a new SignTransactionUseCase for sign wallet
 func NewSignTransactionUseCase(
-	btcAPI portsBtc.Bitcoiner,
-	accountKeyRepo persistence.BTCAccountKeyRepositorier,
-	authKeyRepo persistence.AuthAccountKeyRepositorier,
-	txFileRepo portsStorage.TransactionFileRepositorier,
+	btcAPI apibtc.Bitcoiner,
+	accountKeyRepo repository.BTCAccountKeyRepositorier,
+	authKeyRepo repository.AuthAccountKeyRepositorier,
+	txFileRepo file.TransactionFileRepositorier,
 	multisigAccount *domainAccount.MultisigConfig,
 	wtype domainWallet.WalletType,
 	authType domainAccount.AuthType,

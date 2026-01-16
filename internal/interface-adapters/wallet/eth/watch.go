@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
+	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	watchusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/watch"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
@@ -14,7 +14,7 @@ import (
 
 // ETHWatch watch only wallet object
 type ETHWatch struct {
-	ETH                     ethereum.Ethereumer
+	ETH                     apieth.Ethereumer
 	dbConn                  *sql.DB
 	wtype                   domainWallet.WalletType
 	createTxUseCase         watchusecase.CreateTransactionUseCase
@@ -26,7 +26,7 @@ type ETHWatch struct {
 
 // NewETHWatch returns ETHWatch object
 func NewETHWatch(
-	eth ethereum.Ethereumer,
+	eth apieth.Ethereumer,
 	dbConn *sql.DB,
 	createTxUseCase watchusecase.CreateTransactionUseCase,
 	monitorTxUseCase watchusecase.MonitorTransactionUseCase,

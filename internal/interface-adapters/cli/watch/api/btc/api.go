@@ -3,11 +3,11 @@ package btc
 import (
 	"github.com/spf13/cobra"
 
-	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 )
 
 // AddCommands adds all Bitcoin API subcommands
-func AddCommands(parentCmd *cobra.Command, btc portsBtc.Bitcoiner) {
+func AddCommands(parentCmd *cobra.Command, btc apibtc.Bitcoiner) {
 	// balance command
 	var balanceAccount string
 	balanceCmd := &cobra.Command{

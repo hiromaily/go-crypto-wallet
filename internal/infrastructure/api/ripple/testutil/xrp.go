@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	portsRipple "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ripple"
+	apixrp "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/xrp"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	rippleimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ripple"
@@ -16,11 +16,11 @@ import (
 	"github.com/hiromaily/go-crypto-wallet/pkg/grpc"
 )
 
-var xr portsRipple.Rippler
+var xr apixrp.Rippler
 
 // GetXRP returns xrp instance
 // FIXME: hard coded
-func GetXRP() (portsRipple.Rippler, error) {
+func GetXRP() (apixrp.Rippler, error) {
 	if xr != nil {
 		return xr, nil
 	}
@@ -60,7 +60,7 @@ func GetXRP() (portsRipple.Rippler, error) {
 // XRPTestSuite is a test suite for XRP
 type XRPTestSuite struct {
 	suite.Suite
-	XRP portsRipple.Rippler
+	XRP apixrp.Rippler
 }
 
 func (xts *XRPTestSuite) SetupTest() {

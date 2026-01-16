@@ -6,8 +6,8 @@ import (
 
 	"github.com/btcsuite/btcd/btcutil"
 
-	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
+	repository "github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	signusecase "github.com/hiromaily/go-crypto-wallet/internal/application/usecase/sign"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
@@ -17,16 +17,16 @@ import (
 )
 
 type importPrivateKeyUseCase struct {
-	btc         portsBtc.Bitcoiner
-	authKeyRepo persistence.AuthAccountKeyRepositorier
+	btc         apibtc.Bitcoiner
+	authKeyRepo repository.AuthAccountKeyRepositorier
 	authType    domainAccount.AuthType
 	wtype       domainWallet.WalletType
 }
 
 // NewImportPrivateKeyUseCase creates a new ImportPrivateKeyUseCase for sign wallet
 func NewImportPrivateKeyUseCase(
-	btc portsBtc.Bitcoiner,
-	authKeyRepo persistence.AuthAccountKeyRepositorier,
+	btc apibtc.Bitcoiner,
+	authKeyRepo repository.AuthAccountKeyRepositorier,
 	authType domainAccount.AuthType,
 	wtype domainWallet.WalletType,
 ) signusecase.ImportPrivateKeyUseCase {

@@ -3,7 +3,7 @@ package eth
 import (
 	"database/sql"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
+	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -11,14 +11,14 @@ import (
 
 // ETHSign keygen wallet object
 type ETHSign struct {
-	ETH    ethereum.Ethereumer
+	ETH    apieth.Ethereumer
 	dbConn *sql.DB
 	wtype  domainWallet.WalletType
 }
 
 // NewETHSign returns ETHSign object
 func NewETHSign(
-	eth ethereum.Ethereumer,
+	eth apieth.Ethereumer,
 	dbConn *sql.DB,
 	walletType domainWallet.WalletType,
 ) *ETHSign {

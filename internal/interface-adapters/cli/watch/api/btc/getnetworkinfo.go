@@ -5,10 +5,10 @@ import (
 
 	"github.com/bookerzzz/grok"
 
-	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 )
 
-func runGetNetworkInfo(btc portsBtc.Bitcoiner) error {
+func runGetNetworkInfo(btc apibtc.Bitcoiner) error {
 	// call getnetworkinfo
 	infoData, err := btc.GetNetworkInfo()
 	if err != nil {

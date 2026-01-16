@@ -7,7 +7,7 @@ package mocks
 import (
 	"database/sql"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/persistence"
+	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/repository"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/xrp"
 	mock "github.com/stretchr/testify/mock"
@@ -545,19 +545,19 @@ func (_c *MockXRPDetailTXRepositorier_UpdateTxTypeBySentHashTx_Call) RunAndRetur
 }
 
 // WithTx provides a mock function for the type MockXRPDetailTXRepositorier
-func (_mock *MockXRPDetailTXRepositorier) WithTx(tx *sql.Tx) persistence.XRPDetailTXRepositorier {
+func (_mock *MockXRPDetailTXRepositorier) WithTx(tx *sql.Tx) repository.XRPDetailTXRepositorier {
 	ret := _mock.Called(tx)
 
 	if len(ret) == 0 {
 		panic("no return value specified for WithTx")
 	}
 
-	var r0 persistence.XRPDetailTXRepositorier
-	if returnFunc, ok := ret.Get(0).(func(*sql.Tx) persistence.XRPDetailTXRepositorier); ok {
+	var r0 repository.XRPDetailTXRepositorier
+	if returnFunc, ok := ret.Get(0).(func(*sql.Tx) repository.XRPDetailTXRepositorier); ok {
 		r0 = returnFunc(tx)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(persistence.XRPDetailTXRepositorier)
+			r0 = ret.Get(0).(repository.XRPDetailTXRepositorier)
 		}
 	}
 	return r0
@@ -587,12 +587,12 @@ func (_c *MockXRPDetailTXRepositorier_WithTx_Call) Run(run func(tx *sql.Tx)) *Mo
 	return _c
 }
 
-func (_c *MockXRPDetailTXRepositorier_WithTx_Call) Return(xRPDetailTXRepositorier persistence.XRPDetailTXRepositorier) *MockXRPDetailTXRepositorier_WithTx_Call {
+func (_c *MockXRPDetailTXRepositorier_WithTx_Call) Return(xRPDetailTXRepositorier repository.XRPDetailTXRepositorier) *MockXRPDetailTXRepositorier_WithTx_Call {
 	_c.Call.Return(xRPDetailTXRepositorier)
 	return _c
 }
 
-func (_c *MockXRPDetailTXRepositorier_WithTx_Call) RunAndReturn(run func(tx *sql.Tx) persistence.XRPDetailTXRepositorier) *MockXRPDetailTXRepositorier_WithTx_Call {
+func (_c *MockXRPDetailTXRepositorier_WithTx_Call) RunAndReturn(run func(tx *sql.Tx) repository.XRPDetailTXRepositorier) *MockXRPDetailTXRepositorier_WithTx_Call {
 	_c.Call.Return(run)
 	return _c
 }

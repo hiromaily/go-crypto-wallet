@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 
-	portsEth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/ethereum"
+	apieth "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/eth"
 	domainEthereum "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/ethereum/ethtx"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
@@ -86,7 +86,7 @@ func (e *Ethereum) calculateFee(
 // - sender has to pay 5ETH + fee
 func (e *Ethereum) CreateRawTransaction(
 	ctx context.Context, fromAddr, toAddr string, amount uint64, additionalNonce int,
-) (*domainEthereum.RawTx, *portsEth.TxCreateParams, error) {
+) (*domainEthereum.RawTx, *apieth.TxCreateParams, error) {
 	// validation check
 	if e.ValidateAddr(fromAddr) != nil || e.ValidateAddr(toAddr) != nil {
 		return nil, nil, errors.New("address validation error")
@@ -172,7 +172,7 @@ func (e *Ethereum) CreateRawTransaction(
 	}
 
 	// create TxCreateParams DTO for use case layer
-	txParams := &portsEth.TxCreateParams{
+	txParams := &apieth.TxCreateParams{
 		UUID:        uid.String(),
 		FromAddress: fromAddr,
 		ToAddress:   toAddr,

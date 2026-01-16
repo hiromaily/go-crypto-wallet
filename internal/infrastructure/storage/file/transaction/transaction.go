@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hiromaily/go-crypto-wallet/internal/application/ports/storage"
+	file "github.com/hiromaily/go-crypto-wallet/internal/application/ports/file"
 	domainTx "github.com/hiromaily/go-crypto-wallet/internal/domain/transaction"
 )
 
@@ -45,7 +45,7 @@ func (r *TransactionFileRepository) CreateFilePath(
 }
 
 // GetFileNameType returns as FileName type
-func (*TransactionFileRepository) GetFileNameType(filePath string) (*storage.FileName, error) {
+func (*TransactionFileRepository) GetFileNameType(filePath string) (*file.FileName, error) {
 	// just file path or full path
 	// ./data/tx/deposit/deposit_8_unsigned_0_1534744535097796209.psbt
 	tmp := strings.Split(filePath, "/")
@@ -65,7 +65,7 @@ func (*TransactionFileRepository) GetFileNameType(filePath string) (*storage.Fil
 		return nil, fmt.Errorf("invalid file path: %s", fileName)
 	}
 
-	fileNameType := storage.FileName{}
+	fileNameType := file.FileName{}
 
 	// Action
 	if !domainTx.ValidateActionType(s[0]) {

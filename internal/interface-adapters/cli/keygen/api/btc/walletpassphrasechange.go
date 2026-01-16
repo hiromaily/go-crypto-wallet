@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 
-	portsBtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/btc"
+	apibtc "github.com/hiromaily/go-crypto-wallet/internal/application/ports/api/btc"
 )
 
-func runWalletPassphraseChange(btc portsBtc.Bitcoiner, old, newPass string) error {
+func runWalletPassphraseChange(btc apibtc.Bitcoiner, old, newPass string) error {
 	fmt.Println("changes the wallet passphrase from 'oldpassphrase' to 'newpassphrase'")
 
 	// validator
