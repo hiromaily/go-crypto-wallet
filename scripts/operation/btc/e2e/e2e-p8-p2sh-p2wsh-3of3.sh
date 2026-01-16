@@ -551,9 +551,9 @@ create_payment_requests_phase() {
 	# Generate anonymous receiver addresses for testing
 	log_substep "Generating receiver addresses for payment requests"
 	log_info "Creating 3 receiver addresses in watch wallet..."
-	receiver1=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" bech32)
-	receiver2=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" bech32)
-	receiver3=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" bech32)
+	receiver1=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" p2sh-segwit)
+	receiver2=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" p2sh-segwit)
+	receiver3=$(btc_cli "btc-watch" -rpcwallet=watch getnewaddress "" p2sh-segwit)
 
 	log_info "Generated receiver addresses:"
 	log_info "  1. $receiver1"
