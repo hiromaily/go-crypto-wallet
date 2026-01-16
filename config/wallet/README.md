@@ -135,5 +135,5 @@ Sign wallet does not use bitcoind's wallet feature because:
 ## Related Documentation
 
 - [pkg/config/README.md](../../pkg/config/README.md) - Config package details
-- [docs/crypto/btc/descriptor_user_guide.md](../../docs/crypto/btc/descriptor_user_guide.md) - Descriptor Wallet guide
+- [docs/crypto/btc/descriptor/user-guide.md](../../docs/crypto/btc/descriptor/user-guide.md) - Descriptor Wallet guide
 - [scripts/operation/btc/](../../scripts/operation/btc/) - BTC operation scripts

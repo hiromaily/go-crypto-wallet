@@ -81,8 +81,8 @@ Implement/fix locally without creating branch or PR.
 
 In addition to Required Documentation in common rules, refer to:
 
-- @docs/crypto/btc/TAPROOT_GUIDE.md - Taproot user guide
-- @docs/crypto/btc/e2e_transaction_patterns.md - Pattern 9 details
+- @docs/crypto/btc/taproot/user-guide.md - Taproot user guide
+- @docs/crypto/btc/operations/e2e-transaction-patterns.md - Pattern 9 details
 - @scripts/operation/btc/e2e/e2e-p5-p2wpkh-singlesig.sh - Pattern 5 script (Native SegWit Single-sig reference)
 - @scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh - Pattern 1 script (Single-sig base)
 - @config/wallet/account.yaml - Single-sig account config
@@ -454,7 +454,7 @@ docker exec btc-watch bitcoin-cli -regtest \
 After creating script, update these documents:
 
 1. `scripts/operation/btc/e2e/README.md` - Add to script list
-2. `docs/crypto/btc/e2e_transaction_patterns.md` - Update implementation status (Pattern 9: ❌ → ✅)
+2. `docs/crypto/btc/operations/e2e-transaction-patterns.md` - Update implementation status (Pattern 9: ❌ → ✅)
 3. `.claude/rules/btc/e2e-script.md` - Add to pattern list
 4. `make/btc_e2e.mk` - Add Makefile targets
 

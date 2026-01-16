@@ -209,9 +209,9 @@ make gotest-integration
 ## Related Documentation
 
 - [BTC README](../../../../docs/crypto/btc/README.md) - 詳細なBTCドキュメント
-- [Taproot Guide](../../../../docs/crypto/btc/TAPROOT_GUIDE.md) - Taproot実装
-- [PSBT Guide](../../../../docs/crypto/btc/psbt_user_guide.md) - PSBT使用方法
-- [MuSig2 Guide](../../../../docs/crypto/btc/musig2_guide.md) - MuSig2実装
+- [Taproot Guide](../../../../docs/crypto/btc/taproot/user-guide.md) - Taproot実装
+- [PSBT Guide](../../../../docs/crypto/btc/psbt/user-guide.md) - PSBT使用方法
+- [MuSig2 Guide](../../../../docs/crypto/btc/musig2/user-guide.md) - MuSig2実装
 - [Descriptor Guide](../../../../docs/descriptor_user_guide.md) - Descriptor使用方法
 
 ## Common Operations

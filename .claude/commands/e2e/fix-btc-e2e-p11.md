@@ -118,9 +118,9 @@ Implement/fix locally without creating branch or PR.
 
 In addition to Required Documentation in common rules, refer to:
 
-- @docs/crypto/btc/TAPROOT_GUIDE.md - Taproot user guide
-- @docs/crypto/btc/btc_bch_technical_guide.md - Script Path details
-- @docs/crypto/btc/e2e_transaction_patterns.md - Pattern 11 details
+- @docs/crypto/btc/taproot/user-guide.md - Taproot user guide
+- @docs/crypto/btc/overview/technical-reference.md - Script Path details
+- @docs/crypto/btc/operations/e2e-transaction-patterns.md - Pattern 11 details
 - @scripts/operation/btc/e2e/e2e-p9-p2tr-singlesig.sh - Pattern 9 script (Taproot Key Path reference)
 - @scripts/operation/btc/e2e/e2e-p10-p2tr-musig2.sh - Pattern 10 script (MuSig2 reference)
 - @scripts/operation/btc/e2e/e2e-p4-p2sh-p2wsh-2of3.sh - Pattern 4 script (2-of-3 multisig reference)
@@ -597,7 +597,7 @@ docker exec btc-watch bitcoin-cli -regtest \
 After creating script, update these documents:
 
 1. `scripts/operation/btc/e2e/README.md` - Add to script list
-2. `docs/crypto/btc/e2e_transaction_patterns.md` - Update implementation status (Pattern 11: 🔜 → ✅)
+2. `docs/crypto/btc/operations/e2e-transaction-patterns.md` - Update implementation status (Pattern 11: 🔜 → ✅)
 3. `.claude/rules/btc/e2e-script.md` - Add to pattern list
 4. `make/btc_e2e.mk` - Add Makefile targets
 

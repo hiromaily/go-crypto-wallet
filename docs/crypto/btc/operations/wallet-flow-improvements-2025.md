@@ -512,9 +512,9 @@ watch --coin btc create payment --multisig-type musig2 --fee 0.0001
 ```
 
 **Deliverables:**
-- `docs/crypto/btc/psbt_user_guide.md` - User documentation
-- `docs/crypto/btc/psbt_migration.md` - Migration guide
-- `docs/crypto/btc/psbt_developer_guide.md` - Developer documentation
+- `docs/crypto/btc/psbt/user-guide.md` - User documentation
+- `docs/crypto/btc/psbt/migration.md` - Migration guide
+- `docs/crypto/btc/psbt/developer-guide.md` - Developer documentation
 - Full PSBT implementation across all wallets
 - Comprehensive test coverage
 

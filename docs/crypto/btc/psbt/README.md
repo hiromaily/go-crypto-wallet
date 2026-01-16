@@ -1,0 +1,44 @@
+# PSBT (Partially Signed Bitcoin Transactions)
+
+This directory contains documentation for PSBT implementation and usage in the go-crypto-wallet system.
+
+## Contents
+
+| Document | Description | Audience |
+|----------|-------------|----------|
+| [user-guide.md](user-guide.md) | How to use PSBT for offline signing workflows | Operators |
+| [developer-guide.md](developer-guide.md) | Technical implementation details for developers | Developers |
+| [implementation.md](implementation.md) | PSBT implementation architecture | Developers |
+| [migration.md](migration.md) | Migration guide from legacy to PSBT | All |
+| [poc-example.md](poc-example.md) | Proof of concept examples | Developers |
+
+## What is PSBT?
+
+PSBT (BIP174) is the standard format for Bitcoin transactions that require offline or multi-party signing. It enables:
+
+- **Offline Signing**: Sign transactions on air-gapped devices
+- **Multi-party Signing**: Coordinate signatures from multiple parties
+- **Hardware Wallet Support**: Compatible with hardware security modules
+
+## PSBT Workflow
+
+```
+1. Creator (Watch Wallet) → Create unsigned PSBT
+2. Updater → Add metadata (optional)
+3. Signer(s) (Keygen/Sign Wallet) → Add signatures
+4. Combiner → Combine PSBTs (optional)
+5. Finalizer → Create final transaction
+6. Extractor → Extract broadcastable transaction
+```
+
+## Related Documentation
+
+- [../operations/wallet-flow.md](../operations/wallet-flow.md) - Transaction flow using PSBT
+- [../musig2/](../musig2/) - MuSig2 uses PSBT for coordination
+- [../README.md](../README.md) - Main BTC documentation index
+
+## References
+
+- [BIP174 - PSBT](https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki)
+- [BIP370 - PSBT Version 2](https://github.com/bitcoin/bips/blob/master/bip-0370.mediawiki)
+- [BIP371 - Taproot PSBT Fields](https://github.com/bitcoin/bips/blob/master/bip-0371.mediawiki)

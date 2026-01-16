@@ -210,7 +210,7 @@ ls config/wallet/bch_*.toml
 ## Related Documentation
 
 - [BCH README](../../../../docs/crypto/bch/README.md) - 詳細なBCHドキュメント
-- [BTC/BCH Technical Guide](../../../../docs/crypto/btc/btc_bch_technical_guide.md) - BTC/BCH技術比較
+- [BTC/BCH Technical Guide](../../../../docs/crypto/btc/overview/technical-reference.md) - BTC/BCH技術比較
 
 ## Common Operations
 

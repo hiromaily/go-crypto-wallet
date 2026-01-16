@@ -238,7 +238,7 @@ Your team should understand:
    - Two-round protocol
    - Nonce security requirements
    - Key aggregation
-   - Read: `docs/crypto/btc/musig2_guide.md`
+   - Read: `docs/crypto/btc/musig2/user-guide.md`
 
 2. **Security Implications**
    - Nonce reuse consequences
@@ -250,7 +250,7 @@ Your team should understand:
    - File management
    - Error recovery
    - Monitoring
-   - Read: `docs/crypto/btc/musig2_guide.md` (Best Practices)
+   - Read: `docs/crypto/btc/musig2/user-guide.md` (Best Practices)
 
 #### Training Checklist
 
@@ -1128,7 +1128,7 @@ GROUP BY account;
 mv docs/procedures/p2wsh_signing.md docs/procedures/archive/
 
 # 3. Create new MuSig2 procedures
-cp docs/crypto/btc/musig2_guide.md docs/procedures/musig2_signing.md
+cp docs/crypto/btc/musig2/user-guide.md docs/procedures/musig2_signing.md
 # Customize for your operational environment
 ```
 
@@ -1714,7 +1714,7 @@ watch btc api testmempoolaccept '["<tx_hex>"]'
 #### Q: How do I train my team on MuSig2?
 
 **A**: Recommended approach:
-1. **Read Documentation**: All operators read `docs/crypto/btc/musig2_guide.md` and `docs/security/musig2_security.md`
+1. **Read Documentation**: All operators read `docs/crypto/btc/musig2/user-guide.md` and `docs/security/musig2_security.md`
 2. **Testnet Practice**: Each operator practices full workflow on testnet (5-10 transactions)
 3. **Shadow Production**: Observe experienced operator in production
 4. **Supervised Production**: Perform under supervision
@@ -1846,7 +1846,7 @@ After successful migration, you'll achieve:
 
 ### Support and Resources
 
-- **Documentation**: `docs/crypto/btc/musig2_guide.md`
+- **Documentation**: `docs/crypto/btc/musig2/user-guide.md`
 - **Security**: `docs/security/musig2_security.md`
 - **Architecture**: `docs/architecture/musig2_architecture.md`
 - **Issues**: GitHub Issues - Report bugs or ask questions

@@ -115,7 +115,7 @@ When working with Taproot/Bech32m code:
 | `internal/domain/address/types.go` | User-facing `AddrType` definitions |
 | `internal/domain/bitcoin/address_type.go` | Bitcoin Core `AddressType` definitions |
 | `internal/infrastructure/api/btc/btc/mapper.go` | Type conversion functions |
-| `docs/crypto/btc/TAPROOT_GUIDE.md` | Taproot user guide |
+| `docs/crypto/btc/taproot/user-guide.md` | Taproot user guide |
 
 ## Related Documentation
 
