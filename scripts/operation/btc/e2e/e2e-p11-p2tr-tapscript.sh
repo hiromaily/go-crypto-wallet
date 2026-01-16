@@ -378,8 +378,8 @@ key_generation_phase() {
 	file_fullpubkey_auth2=$(sign2 --conf "${CONFIG_SIGN2}" --coin "${COIN}" --wallet sign2 export fullpubkey)
 
 	# Extract file paths
-	fullpubkey_file1=$(extract_filename "$file_fullpubkey_auth1")
-	fullpubkey_file2=$(extract_filename "$file_fullpubkey_auth2")
+	fullpubkey_file1="${file_fullpubkey_auth1##*\[fileName\]: }"
+	fullpubkey_file2="${file_fullpubkey_auth2##*\[fileName\]: }"
 
 	log_info "Exported fullpubkey files:"
 	log_info "  sign1: $fullpubkey_file1"
@@ -521,7 +521,7 @@ generate_test_utxos() {
 		trusted_balance=$(echo "$balance_json" | jq -r '.mine.trusted // 0' 2>/dev/null || echo "0")
 
 		# Check if we have any trusted (mature) balance
-		if [ -n "$trusted_balance" ] && [ "$(echo "$trusted_balance > 0" | bc -l)" -eq 1 ]; then
+		if [ -n "$trusted_balance" ] && (($(echo "$trusted_balance > 0" | bc -l))); then
 			log_info "Payment account balance verified: ${trusted_balance} BTC (took ${elapsed}s)"
 			balance_found=true
 			break
@@ -627,7 +627,7 @@ transaction_flow_phase() {
 	}
 
 	# Extract file path
-	tx_unsigned=$(extract_filename "$tx_file")
+	tx_unsigned=$(echo "${tx_file}" | sed -n 's/.*\[fileName\]: //p')
 	log_info "Created unsigned transaction (PSBT): $tx_unsigned"
 
 	###########################################################################
@@ -654,14 +654,14 @@ transaction_flow_phase() {
 		keygen -c "${CONFIG_KEYGEN}" api walletlock
 	fi
 
-	tx_signed1=$(extract_filename "$tx_file_signed")
+	tx_signed1=$(echo "${tx_file_signed}" | sed -n 's/.*\[fileName\]: //p')
 	log_info "Signed transaction (1st signature): $tx_signed1"
 
 	# Sign with sign1 wallet (2nd Schnorr signature)
 	# For 2-of-3 Tapscript, 2 signatures are sufficient
 	log_substep "Signing with sign1 wallet (2nd signature - completing 2-of-3 requirement)"
 	tx_file_signed2=$(sign1 --conf "${CONFIG_SIGN1}" --wallet sign1 sign signature --file "${tx_signed1}")
-	tx_signed2=$(extract_filename "$tx_file_signed2")
+	tx_signed2=$(echo "${tx_file_signed2}" | sed -n 's/.*\[fileName\]: //p')
 	log_info "Signed transaction (2nd signature): $tx_signed2"
 	log_info "Note: 2-of-3 Tapscript requirement satisfied with 2 Schnorr signatures"
 
