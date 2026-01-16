@@ -100,40 +100,59 @@ For detailed transaction pattern explanations, technical references, and impleme
 
 ### Make Targets
 
-```bash
-# Pattern 1: Single-sig
-make btc-e2e-p1
+Use `P=<pattern>` parameter to specify the test pattern (1-11):
 
-# Pattern 2: 2-of-3 Multisig
-make btc-e2e-p2
+```bash
+# Run E2E test (default P=1)
+make btc-e2e P=<pattern>
+
+# Run with fresh state (recommended)
+make btc-e2e-reset P=<pattern>
+
+# Run with verbose output
+make btc-e2e-verbose P=<pattern>
+
+# Run in non-interactive mode (for CI/CD)
+make btc-e2e-ci P=<pattern>
+
+# Cleanup test environment
+make btc-e2e-cleanup P=<pattern>
+
+# Show help and pattern list
+make btc-e2e-help
+```
+
+**Examples:**
+
+```bash
+# Pattern 1: P2PKH Single-sig (fresh start)
+make btc-e2e-reset P=1
 
 # Pattern 3: P2SH-P2WPKH Single-sig
-make btc-e2e-p3
+make btc-e2e P=3
 
-# Pattern 4: P2SH-P2WSH 2-of-3 Multisig
-make btc-e2e-p4
+# Pattern 9: P2TR Taproot Single-sig (verbose)
+make btc-e2e-verbose P=9
 
-# Pattern 5: P2WPKH Native SegWit Single-sig
-make btc-e2e-p5
-
-# Pattern 6: P2WSH Native SegWit 2-of-3 Multisig
-make btc-e2e-p6
-
-# Pattern 7: P2WSH Native SegWit 3-of-3 Multisig
-make btc-e2e-p7
-
-# Pattern 8: P2SH-P2WSH 3-of-3 Multisig
-make btc-e2e-p8
-
-# Pattern 9: P2TR Taproot Single-sig
-make btc-e2e-p9
-
-# Pattern 10: P2TR MuSig2 N-of-N
-make btc-e2e-p10
-
-# Pattern 11: P2TR Tapscript M-of-N
-make btc-e2e-p11
+# Pattern 10: P2TR MuSig2 N-of-N (CI mode)
+make btc-e2e-ci P=10
 ```
+
+**Available Patterns:**
+
+| P | Pattern |
+|---|---------|
+| 1 | P2PKH Single-sig |
+| 2 | P2PKH 2-of-3 Multisig |
+| 3 | P2SH-P2WPKH Single-sig |
+| 4 | P2SH-P2WSH 2-of-3 Multisig |
+| 5 | P2WPKH Native SegWit Single-sig |
+| 6 | P2WSH Native SegWit 2-of-3 Multisig |
+| 7 | P2WSH Native SegWit 3-of-3 Multisig |
+| 8 | P2SH-P2WSH 3-of-3 Multisig |
+| 9 | P2TR Taproot Single-sig |
+| 10 | P2TR MuSig2 N-of-N |
+| 11 | P2TR Tapscript M-of-N |
 
 ### Common Options
 

@@ -16,7 +16,7 @@ This document verifies the successful implementation of Pattern 3: P2SH-P2WPKH (
 |-----------|-------|
 | Network | Bitcoin Regtest (local) |
 | Test Script | `scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh` |
-| Command | `make btc-e2e-p3-reset` |
+| Command | `make btc-e2e-reset P=3` |
 
 ## Test Results
 
