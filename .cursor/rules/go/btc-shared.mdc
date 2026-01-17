@@ -1,0 +1,154 @@
+---
+description: BTC Shared Implementation Rules
+globs: ["internal/infrastructure/api/btc/btc/**"]
+alwaysApply: false
+---
+
+
+# BTC Shared Implementation Rules
+
+## Overview
+
+Rules for modifying files in `internal/infrastructure/api/btc/btc/` directory.
+This directory contains the **shared BTC implementation** used by both BTC and BCH.
+
+## Critical Rule
+
+### 🚨 DO NOT Modify for BCH-Specific Issues
+
+Files in this directory (`internal/infrastructure/api/btc/btc/`) are **shared code** that must remain pure BTC implementation.
+
+**If BCH behavior is incorrect, you MUST fix it by overriding the method in `internal/infrastructure/api/btc/bch/` directory.**
+
+```
+❌ FORBIDDEN: Modifying btc/btc/ for BCH issues
+✅ REQUIRED:  Override in btc/bch/ directory
+```
+
+## Architecture
+
+```
+internal/infrastructure/api/btc/
+├── btc/                      # ← THIS DIRECTORY (Shared BTC implementation)
+│   ├── bitcoin.go            # Bitcoin struct - DO NOT add BCH conditionals
+│   ├── account.go
+│   ├── address.go
+│   └── ...
+├── bch/                      # BCH overrides (ADD BCH-specific code here)
+│   ├── bitcoin_cash.go       # BitcoinCash embeds Bitcoin
+│   ├── account.go            # Override: GetAccount
+│   ├── address.go            # Override: GetAddressInfo
+│   └── ...
+└── connection.go             # Shared connection logic
+```
+
+## Why This Pattern?
+
+| Reason | Explanation |
+|--------|-------------|
+| **Separation of Concerns** | BTC code remains pure and focused |
+| **Maintainability** | BCH changes don't affect BTC behavior |
+| **Clarity** | BCH differences are explicit in BCH directory |
+| **Safety** | Prevents accidental BCH breakage when modifying BTC |
+
+## How BCH Override Works
+
+BCH uses Go's struct embedding pattern:
+
+```go
+// internal/infrastructure/api/btc/bch/bitcoin_cash.go
+type BitcoinCash struct {
+    apibtcimpl.Bitcoin  // Embeds BTC implementation
+}
+```
+
+When `BitcoinCash` defines a method with the same signature as `Bitcoin`, it overrides the embedded method.
+
+## Prohibited Patterns
+
+### ❌ NEVER: Add BCH Conditionals
+
+```go
+// internal/infrastructure/api/btc/btc/account.go
+func (b *Bitcoin) GetAccount(addr string) (string, error) {
+    if b.coinTypeCode == domainCoin.BCH {  // ❌ NEVER DO THIS
+        // BCH-specific logic
+    }
+    // BTC logic
+}
+```
+
+### ❌ NEVER: Add BCH-Specific Types
+
+```go
+// internal/infrastructure/api/btc/btc/types.go
+type BCHSpecificResult struct {  // ❌ NEVER DO THIS
+    // BCH-specific fields
+}
+```
+
+### ❌ NEVER: Handle BCH Edge Cases Here
+
+```go
+// internal/infrastructure/api/btc/btc/address.go
+func (b *Bitcoin) GetAddressInfo(addr string) (*AddressInfo, error) {
+    // ... BTC logic ...
+    
+    // Handle BCH label difference  // ❌ NEVER DO THIS
+    if isBCH {
+        // ...
+    }
+}
+```
+
+## Required Pattern
+
+### ✅ Override in BCH Directory
+
+```go
+// internal/infrastructure/api/btc/bch/account.go
+func (b *BitcoinCash) GetAccount(addr string) (string, error) {
+    // BCH-specific implementation
+    res, err := b.GetAddressInfo(addr)
+    if err != nil {
+        return "", fmt.Errorf("fail to call btc.GetAddressInfo() in bch: %w", err)
+    }
+    // BCH-specific label handling
+    if len(res.Labels) == 0 {
+        return "", nil
+    }
+    return res.Labels[0], nil
+}
+```
+
+## When to Override in BCH
+
+Override in `btc/bch/` when:
+
+1. BCH RPC response structure differs from BTC
+2. BCH requires different validation logic
+3. BCH has different network parameters
+4. BCH lacks features (SegWit, Taproot)
+5. BCH error messages need different handling
+
+## Checklist Before Modifying btc/btc/
+
+- [ ] Change is **NOT** BCH-specific
+- [ ] Change applies to **pure BTC behavior**
+- [ ] No BCH conditionals added
+- [ ] No BCH-specific types added
+- [ ] BCH still works after this change (or override created in `btc/bch/`)
+
+## Related Files
+
+| Location | Purpose |
+|----------|---------|
+| `internal/infrastructure/api/btc/btc/` | Shared BTC implementation (this rule) |
+| `internal/infrastructure/api/btc/bch/` | BCH-specific overrides |
+| `internal/application/ports/btc/interface.go` | Bitcoiner interface |
+
+## Related Documentation
+
+- @.claude/skills/bch-development/SKILL.md - Full BCH development workflow
+- @.claude/rules/go/conventions.md - Go coding conventions
+- @docs/task-contexts/chains/bch.md - BCH task context

@@ -63,12 +63,15 @@ Options:
   -d, --dry-run Show what would be done without actually converting
   -v, --verbose Show detailed output
   -f, --force   Overwrite existing files
+  -c, --clean   Clean destination before sync (removes old .mdc files)
+                Preserves README.md and other non-.mdc files
 
 Examples:
   $(basename "$0")
+  $(basename "$0") --clean          # Recommended: clean sync
   $(basename "$0") .claude/rules .cursor/rules
-  $(basename "$0") --dry-run
-  $(basename "$0") -v -f /path/to/claude/rules /path/to/cursor/rules
+  $(basename "$0") --dry-run --clean
+  $(basename "$0") -v -f -c /path/to/claude/rules /path/to/cursor/rules
 
 EOF
 }
@@ -283,11 +286,50 @@ ${body}"
 	fi
 }
 
+# Clean destination directory (remove .mdc files only)
+clean_destination() {
+	local dest_dir="$1"
+	local dry_run="$2"
+	local verbose="$3"
+
+	if [[ ! -d "$dest_dir" ]]; then
+		if [[ "$verbose" == "true" ]]; then
+			log_info "Destination directory does not exist, skipping clean"
+		fi
+		return 0
+	fi
+
+	local deleted=0
+
+	# Find and delete .mdc files
+	while IFS= read -r -d '' mdc_file; do
+		if [[ "$dry_run" == "true" ]]; then
+			echo "  [DRY-RUN] Would delete: $mdc_file"
+		else
+			if [[ "$verbose" == "true" ]]; then
+				log_info "Deleting: $mdc_file"
+			fi
+			rm -f "$mdc_file"
+		fi
+		((deleted++))
+	done < <(find "$dest_dir" -type f -name "*.mdc" -print0 2>/dev/null || true)
+
+	# Remove empty subdirectories (but keep the root dest_dir)
+	if [[ "$dry_run" == "false" ]]; then
+		find "$dest_dir" -mindepth 1 -type d -empty -delete 2>/dev/null || true
+	fi
+
+	if [[ $deleted -gt 0 ]]; then
+		log_info "Cleaned $deleted .mdc file(s) from $dest_dir"
+	fi
+}
+
 # Main process
 main() {
 	local dry_run=false
 	local verbose=false
 	local force=false
+	local clean=false
 	local source_dir=".claude/rules"
 	local dest_dir=".cursor/rules"
 
@@ -308,6 +350,10 @@ main() {
 			;;
 		-f | --force)
 			force=true
+			shift
+			;;
+		-c | --clean)
+			clean=true
 			shift
 			;;
 		-*)
@@ -335,6 +381,14 @@ main() {
 	if [[ ! -d "$source_dir" ]]; then
 		log_error "Source directory not found: $source_dir"
 		exit 1
+	fi
+
+	# Clean destination if requested
+	if [[ "$clean" == "true" ]]; then
+		log_info "Cleaning destination directory..."
+		clean_destination "$dest_dir" "$dry_run" "$verbose"
+		# When cleaning, force is implied (no files to skip)
+		force=true
 	fi
 
 	# Create destination directory

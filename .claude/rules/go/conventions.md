@@ -112,6 +112,12 @@ if err != nil {
 - [ ] No private keys or sensitive data logged
 - [ ] No hardcoded secrets
 
+## Related Rules (in this directory)
+
+- @.claude/rules/go/di.md - Dependency injection patterns
+- @.claude/rules/go/usecase.md - Use case patterns
+- @.claude/rules/go/repository.md - Repository patterns
+
 ## Related Documentation
 
 - @docs/standards/coding-conventions.md - Coding standards

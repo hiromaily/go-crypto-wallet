@@ -1,0 +1,299 @@
+# Claude Rules - Repository Pattern
+
+## Overview
+
+Rules for implementing Repository pattern in go-crypto-wallet.
+Repositories abstract data access and map between domain entities and infrastructure.
+
+## Applicable Files
+
+- `internal/application/ports/repository/**/*.go` - Interface definitions (Ports)
+- `internal/infrastructure/repository/**/*.go` - Implementations
+
+## Architecture
+
+```
+internal/application/ports/repository/
+├── cold/                    # Cold wallet repositories (keygen/sign)
+│   ├── account_key.go       # Interface
+│   ├── auth.go
+│   └── seed.go
+└── watch/                   # Watch wallet repositories
+    ├── address.go           # Interface
+    ├── btc_transaction.go
+    └── ...
+
+internal/infrastructure/repository/
+├── cold/
+│   ├── mysql/               # MySQL implementations
+│   │   ├── account_key_sqlc.go
+│   │   └── ...
+│   └── mocks/               # Test mocks
+│       └── mock_*.go
+└── watch/
+    ├── mysql/
+    │   ├── address_sqlc.go
+    │   └── ...
+    └── mocks/
+        └── mock_*.go
+```
+
+## Interface Definition (Ports)
+
+### Naming Convention
+
+Interface names end with `er` suffix:
+
+```go
+// ✅ GOOD: Descriptive interface names
+type AddressRepositorier interface { ... }
+type BTCTxRepositorier interface { ... }
+type SeedRepositorier interface { ... }
+
+// ❌ BAD: Missing suffix or unclear
+type AddressRepository interface { ... }
+type AddressRepo interface { ... }
+```
+
+### Interface Location
+
+Interfaces MUST be defined in `internal/application/ports/repository/`:
+
+```go
+// internal/application/ports/repository/watch/address.go
+package watch
+
+type AddressRepositorier interface {
+    GetAll(accountType domainAccount.AccountType) ([]*domainAddress.Address, error)
+    GetAllAddress(accountType domainAccount.AccountType) ([]string, error)
+    GetOneUnAllocated(accountType domainAccount.AccountType) (*domainAddress.Address, error)
+    InsertBulk(ctx context.Context, items []*domainAddress.Address) error
+    UpdateIsAllocated(isAllocated bool, Address string) (int64, error)
+}
+```
+
+### Method Signatures
+
+- Use domain types in parameters and return values
+- Accept `context.Context` for write operations
+- Return domain entities, not infrastructure types
+
+```go
+// ✅ GOOD: Uses domain types
+type AddressRepositorier interface {
+    GetAll(accountType domainAccount.AccountType) ([]*domainAddress.Address, error)
+    InsertBulk(ctx context.Context, items []*domainAddress.Address) error
+}
+
+// ❌ BAD: Uses infrastructure types
+type AddressRepositorier interface {
+    GetAll(accountType string) ([]*sqlcgen.Address, error)
+    InsertBulk(items []map[string]interface{}) error
+}
+```
+
+## Implementation (Infrastructure)
+
+### Struct Naming
+
+Implementation struct names include technology suffix:
+
+```go
+// ✅ GOOD: Clear technology indicator
+type AddressRepositorySqlc struct { ... }
+type AccountKeyRepositorySqlc struct { ... }
+
+// ❌ BAD: Generic names
+type AddressRepository struct { ... }
+type AddressRepositoryImpl struct { ... }
+```
+
+### Constructor Pattern
+
+Follow pure constructor pattern (see @.claude/rules/go/di.md):
+
+```go
+// ✅ GOOD: Pure constructor
+func NewAddressRepositorySqlc(
+    dbConn *sql.DB,
+    coinTypeCode domainCoin.CoinTypeCode,
+) *AddressRepositorySqlc {
+    return &AddressRepositorySqlc{
+        queries:      sqlcgen.New(dbConn),
+        coinTypeCode: coinTypeCode,
+    }
+}
+```
+
+### Data Mapping
+
+Implement conversion functions between domain entities and SQLC types:
+
+```go
+// Convert infrastructure to domain (read path)
+func convertToAddress(sqlcAddr *sqlcgen.Address) (*domainAddress.Address, error) {
+    return &domainAddress.Address{
+        ID:            sqlcAddr.ID,
+        CoinTypeCode:  domainCoin.CoinTypeCode(sqlcAddr.Coin),
+        AccountType:   domainAccount.AccountType(sqlcAddr.Account),
+        WalletAddress: sqlcAddr.WalletAddress,
+        IsAllocated:   sqlcAddr.IsAllocated,
+    }, nil
+}
+
+// Convert domain to infrastructure (write path)
+func convertFromAddress(addr *domainAddress.Address) *sqlcgen.Address {
+    return &sqlcgen.Address{
+        Coin:          sqlcgen.AddressCoin(addr.CoinTypeCode.String()),
+        Account:       sqlcgen.AddressAccount(addr.AccountType.String()),
+        WalletAddress: addr.WalletAddress,
+        IsAllocated:   addr.IsAllocated,
+    }
+}
+```
+
+### Method Implementation
+
+```go
+func (r *AddressRepositorySqlc) GetAll(
+    accountType domainAccount.AccountType,
+) ([]*domainAddress.Address, error) {
+    ctx := context.Background()
+
+    // 1. Call SQLC-generated query
+    addresses, err := r.queries.GetAllAddresses(ctx, sqlcgen.GetAllAddressesParams{
+        Coin:    sqlcgen.AddressCoin(r.coinTypeCode.String()),
+        Account: sqlcgen.AddressAccount(accountType.String()),
+    })
+    if err != nil {
+        return nil, fmt.Errorf("failed to call GetAllAddresses(): %w", err)
+    }
+
+    // 2. Convert to domain entities
+    result := make([]*domainAddress.Address, 0, len(addresses))
+    for i := range addresses {
+        addr, err := convertToAddress(&addresses[i])
+        if err != nil {
+            return nil, fmt.Errorf("failed to convert address at index %d: %w", i, err)
+        }
+        result = append(result, addr)
+    }
+
+    return result, nil
+}
+```
+
+## Error Handling
+
+Wrap errors with operation context:
+
+```go
+// ✅ GOOD: Descriptive error wrapping
+if err != nil {
+    return nil, fmt.Errorf("failed to call GetAllAddresses(): %w", err)
+}
+
+if err != nil {
+    return nil, fmt.Errorf("failed to convert address at index %d: %w", i, err)
+}
+
+// ❌ BAD: No context
+if err != nil {
+    return nil, err
+}
+```
+
+## Mock Generation
+
+Mocks are stored in `mocks/` subdirectory:
+
+```
+internal/infrastructure/repository/watch/mocks/
+├── mock_address_repositorier.go
+├── mock_btc_tx_repositorier.go
+└── ...
+```
+
+Mock naming convention:
+
+```go
+// File: mock_address_repositorier.go
+type MockAddressRepositorier struct {
+    mock.Mock
+}
+
+func (m *MockAddressRepositorier) GetAll(
+    accountType domainAccount.AccountType,
+) ([]*domainAddress.Address, error) {
+    args := m.Called(accountType)
+    return args.Get(0).([]*domainAddress.Address), args.Error(1)
+}
+```
+
+## Split by Wallet Type
+
+### Cold Wallet Repositories (`cold/`)
+
+Used by keygen and sign wallets:
+
+- `SeedRepositorier` - Seed storage
+- `BTCAccountKeyRepositorier` - BTC account keys
+- `ETHAccountKeyRepositorier` - ETH account keys
+- `AuthAccountKeyRepositorier` - Authorization keys
+- `AuthFullPubkeyRepositorier` - Full public keys for multisig
+
+### Watch Wallet Repositories (`watch/`)
+
+Used by watch wallet:
+
+- `AddressRepositorier` - Address management
+- `BTCTxRepositorier` - BTC transaction records
+- `TxInputRepositorier` - Transaction inputs
+- `TxOutputRepositorier` - Transaction outputs
+- `PaymentRequestRepositorier` - Payment requests
+
+## SQLC Integration
+
+Repository implementations use SQLC-generated code:
+
+```go
+import "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/mysql/sqlcgen"
+
+type AddressRepositorySqlc struct {
+    queries      *sqlcgen.Queries  // SQLC-generated
+    coinTypeCode domainCoin.CoinTypeCode
+}
+```
+
+**DO NOT EDIT** SQLC-generated files in `internal/infrastructure/database/sqlc/`.
+
+## Testing
+
+Test repositories with integration tests:
+
+```go
+//go:build integration
+
+func TestAddressRepository_GetAll(t *testing.T) {
+    // Setup test database
+    db := testutil.SetupTestDB(t)
+    defer db.Close()
+
+    repo := NewAddressRepositorySqlc(db, domainCoin.BTC)
+
+    // Insert test data
+    testutil.InsertTestAddresses(t, db, ...)
+
+    // Test
+    addresses, err := repo.GetAll(domainAccount.AccountTypeDeposit)
+    require.NoError(t, err)
+    assert.Len(t, addresses, expectedCount)
+}
+```
+
+## Related Documentation
+
+- @.claude/rules/go/di.md - Dependency injection rules
+- @.claude/rules/go/usecase.md - Use case pattern
+- @docs/guidelines/database.md - Database guidelines
+- @internal/application/ports/ - Port interface definitions
