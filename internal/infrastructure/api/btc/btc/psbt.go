@@ -25,6 +25,7 @@ import (
 
 	dtobtc "github.com/hiromaily/go-crypto-wallet/internal/application/dto/btc"
 	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 )
@@ -2356,6 +2357,16 @@ func (b *Bitcoin) addBIP32DerivationForInput(
 	// In this case, derive BIP32 information from the descriptor
 	if addressInfo.HDKeyPath == "" {
 		if addressInfo.IsScript {
+			// BCH uses legacy (non-descriptor) wallets and doesn't support descriptor-based signing
+			// Skip BIP32 derivation from descriptor for BCH
+			if b.coinTypeCode == domainCoin.BCH {
+				logger.Debug("BCH: Skipping BIP32 derivation from descriptor (legacy wallet, not supported)",
+					"input_index", inputIndex,
+					"address", addressStr,
+					"sender_account", senderAccount.String())
+				return nil
+			}
+
 			logger.Info("Deriving BIP32 information from descriptor for multisig address",
 				"address", addressStr,
 				"input_index", inputIndex)
