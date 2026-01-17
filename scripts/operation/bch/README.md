@@ -324,3 +324,61 @@ Bitcoin Cash uses CashAddr format. If you see address format errors:
 
 1. Ensure `address_type = "bch-cashaddr"` is set in configuration files
 2. Verify the wallet software supports CashAddr format
+
+## E2E Script Verification Status
+
+### Pattern 1: P2PKH Single-sig (`e2e-p1-p2pkh-singlesig.sh`)
+
+**Status**: ⚠️ Partially Verified (4 bugs fixed, 1 blocking issue remains)
+
+**Last Verified**: 2026-01-17
+**Issue**: #404
+
+#### Test Results
+
+| Acceptance Criteria | Status | Notes |
+|---------------------|--------|-------|
+| Script executes with `--reset` | ⚠️ Partial | Progresses through most phases |
+| All phases complete | ❌ Failed | Stops at transaction creation |
+| Transaction broadcast | ❌ Not reached | Blocked by UTXO query issue |
+| `--cleanup` works | ✅ Pass | Containers stop properly |
+| `--verbose` works | ✅ Pass | Debug output displayed |
+| `--help` works | ✅ Pass | Help message displayed |
+
+#### Bugs Fixed
+
+1. **Balance Detection** - Fixed to use `getbalance` with watch-only flag (BCH doesn't support `getbalances`)
+2. **Missing Rescan** - Added blockchain rescan after block generation to detect UTXOs
+3. **Address Format** - Fixed to use field 4 (legacy format) matching imported addresses
+4. **Sign Command** - Fixed syntax to use `keygen sign signature --file`
+
+#### Known Issues
+
+- **UTXO Query Issue**: Transaction creation fails with "No utxo" error despite UTXOs existing in wallet
+- Requires investigation of watch wallet UTXO query logic for BCH watch-only addresses
+
+#### Execution Progress
+
+- ✅ Prerequisites check
+- ✅ Infrastructure setup
+- ✅ Wallet creation  
+- ✅ HD key generation
+- ✅ Address import
+- ✅ UTXO generation (50 BCH)
+- ✅ Balance verification
+- ✅ Payment request creation
+- ❌ Transaction creation (blocked)
+- ⏹️ Transaction signing (not reached)
+- ⏹️ Transaction broadcast (not reached)
+
+### Pattern 2: P2SH 2-of-3 (`e2e-p2-p2sh-2of3.sh`)
+
+**Status**: ⚠️ Not Verified
+
+**Notes**: Likely has similar address format issues as Pattern 1 (uses field 3 extraction on line 192)
+
+### Pattern 3: P2SH 3-of-3 (`e2e-p3-p2sh-3of3.sh`)
+
+**Status**: ⚠️ Not Verified
+
+**Notes**: Likely has similar address format issues as Pattern 1 (uses field 3 extraction on line 192)

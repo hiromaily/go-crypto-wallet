@@ -111,8 +111,8 @@ generate_test_utxos() {
 	log_info "Reading payment address from exported file..."
 	# Get first payment address from the exported CSV file
 	# CSV format: coin,account,P2PKH,P2SH-segwit,bech32,taproot,pubkey,index
-	# For BCH, use field 3 (P2PKH format)
-	payment_address=$(grep -v '^#' "${ADDRESS_FILE_PAYMENT}" 2>/dev/null | head -n1 | cut -d',' -f3)
+	# For BCH, use field 4 (legacy format) which matches the imported address format
+	payment_address=$(grep -v '^#' "${ADDRESS_FILE_PAYMENT}" 2>/dev/null | head -n1 | cut -d',' -f4)
 
 	if [ -z "$payment_address" ]; then
 		log_error "Failed to extract payment address from ${ADDRESS_FILE_PAYMENT}"
@@ -157,7 +157,7 @@ transaction_flow_phase() {
 	log_step "Transaction Flow Phase (Single-sig)"
 
 	log_substep "Creating unsigned payment transaction"
-	tx_file=$(watch -c "${BCH_CONFIG_WATCH}" create payment 2>&1) || {
+	tx_file=$(watch -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" create payment 2>&1) || {
 		log_error "Failed to create payment transaction"
 		if echo "$tx_file" | grep -q "No utxo"; then
 			bch_log_no_utxo_error
@@ -172,7 +172,7 @@ transaction_flow_phase() {
 	if [ "${BCH_ENCRYPTED}" = "true" ]; then
 		keygen -c "${BCH_CONFIG_KEYGEN}" api walletpassphrase --passphrase "${BCH_WALLET_PASSPHRASE}"
 	fi
-	tx_file_signed=$(keygen -c "${BCH_CONFIG_KEYGEN}" sign --file "${tx_unsigned}")
+	tx_file_signed=$(keygen -c "${BCH_CONFIG_KEYGEN}" sign signature --file "${tx_unsigned}")
 	if [ "${BCH_ENCRYPTED}" = "true" ]; then
 		keygen -c "${BCH_CONFIG_KEYGEN}" api walletlock
 	fi
@@ -181,7 +181,7 @@ transaction_flow_phase() {
 	log_info "Signed transaction: $tx_signed"
 
 	log_substep "Sending fully signed transaction"
-	tx_result=$(watch -c "${BCH_CONFIG_WATCH}" send --file "${tx_signed}")
+	tx_result=$(watch -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" send --file "${tx_signed}")
 	tx_id="${tx_result##*txID: }"
 
 	log_info "Transaction sent successfully!"
