@@ -1,6 +1,7 @@
+package btc
+
 // Descriptor Bech32 - BTC ONLY (BCH does NOT support descriptors or Bech32)
 // See descriptor_service.go for full warning.
-package btc
 
 import "github.com/btcsuite/btcd/btcutil/hdkeychain"
 

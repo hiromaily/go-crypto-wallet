@@ -1,3 +1,5 @@
+package btc
+
 // MuSig2 (Schnorr Multi-Signature) - BTC ONLY
 //
 // ┌─────────────────────────────────────────────────────────────────────────────┐
@@ -15,7 +17,6 @@
 // │   - internal/infrastructure/api/btc/bch/                                    │
 // │   - docs/task-contexts/chains/bch.md                                        │
 // └─────────────────────────────────────────────────────────────────────────────┘
-package btc
 
 import (
 	"errors"

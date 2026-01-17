@@ -1,7 +1,8 @@
+package btc
+
 // Descriptor Multisig - BTC ONLY (BCH does NOT support descriptors)
 // See descriptor_service.go for full warning.
 // BCH uses traditional P2SH multisig without descriptors.
-package btc
 
 import (
 	"errors"
