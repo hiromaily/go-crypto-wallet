@@ -66,6 +66,20 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 		total: len(pubKeys),
 	}
 
+	// Helper function to handle recoverable import errors (e.g., address already exists)
+	handleRecoverableError := func(err error, targetAddr string, accountType domainAccount.AccountType) bool {
+		if !isRecoverableImportError(err) {
+			return false
+		}
+
+		logger.Warn(
+			"address already exists in wallet, skipping",
+			"address", targetAddr,
+			"account_type", accountType.String())
+		importStats.skipped++
+		return true
+	}
+
 	for _, key := range pubKeys {
 		// Parse CSV line
 		inner := strings.Split(key, ",")
@@ -111,13 +125,8 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 				if len(responses) > 0 && responses[0].Error != nil {
 					errMsg = responses[0].Error.Message
 				}
-				// Check if error is recoverable
-				if isRecoverableImportError(fmt.Errorf("%s", errMsg)) {
-					logger.Warn(
-						"address already exists in wallet, skipping",
-						"address", targetAddr,
-						"account_type", addrFmt.AccountType.String())
-					importStats.skipped++
+				// Check if error is recoverable using helper
+				if handleRecoverableError(fmt.Errorf("%s", errMsg), targetAddr, addrFmt.AccountType) {
 					continue
 				}
 				return fmt.Errorf("failed to import multisig address %s: %s", targetAddr, errMsg)
@@ -126,13 +135,8 @@ func (u *importAddressUseCase) Execute(ctx context.Context, input watchusecase.I
 			// Regular address - use legacy import
 			err = u.btcClient.ImportAddressWithLabel(targetAddr, addrFmt.AccountType.String(), input.Rescan)
 			if err != nil {
-				// Check if error is recoverable (address already exists)
-				if isRecoverableImportError(err) {
-					logger.Warn(
-						"address already exists in wallet, skipping",
-						"address", targetAddr,
-						"account_type", addrFmt.AccountType.String())
-					importStats.skipped++
+				// Check if error is recoverable using helper
+				if handleRecoverableError(err, targetAddr, addrFmt.AccountType) {
 					continue
 				}
 
