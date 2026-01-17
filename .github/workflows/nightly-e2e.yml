@@ -23,7 +23,7 @@ jobs:
           TARGET="scripts/e2e/"
           COMMITS="$(git rev-list --since="24 hours ago" HEAD || true)"
 
-          # 24h以内にコミット自体が無ければ「変更なし」扱い
+          # If no commits within 24h, treat as "no changes"
           if [[ -z "${COMMITS}" ]]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
@@ -47,7 +47,7 @@ jobs:
           set -euo pipefail
           chmod +x scripts/e2e/* || true
 
-          # 例: ディレクトリ配下の *.sh を順に実行（必要に応じて調整）
+          # Execute all *.sh files in the directory (adjust as needed)
           for f in scripts/e2e/*.sh; do
             echo "==> running: $f"
             "$f"
