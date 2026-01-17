@@ -137,16 +137,16 @@ type Database struct {
 
 // MySQL info
 type MySQL struct {
-	Host  string `toml:"host" yaml:"host" mapstructure:"host" validate:"required"`
-	DB    string `toml:"dbname" yaml:"dbname" mapstructure:"dbname" validate:"required"`
-	User  string `toml:"user" yaml:"user" mapstructure:"user" validate:"required"`
-	Pass  string `toml:"pass" yaml:"pass" mapstructure:"pass" validate:"required"`
+	Host  string `toml:"host" yaml:"host" mapstructure:"host"`
+	DB    string `toml:"dbname" yaml:"dbname" mapstructure:"dbname"`
+	User  string `toml:"user" yaml:"user" mapstructure:"user"`
+	Pass  string `toml:"pass" yaml:"pass" mapstructure:"pass"`
 	Debug bool   `toml:"debug" yaml:"debug" mapstructure:"debug"`
 }
 
 // SQLite info
 type SQLite struct {
-	Path  string `toml:"path" yaml:"path" mapstructure:"path" validate:"required"`
+	Path  string `toml:"path" yaml:"path" mapstructure:"path"`
 	Debug bool   `toml:"debug" yaml:"debug" mapstructure:"debug"`
 }
 
@@ -212,9 +212,14 @@ func loadWallet(path string) (*WalletRoot, error) {
 func (c *WalletRoot) validate(wtype domainWallet.WalletType, coinTypeCode domainCoin.CoinTypeCode) error {
 	validate := validator.New()
 
+	// Validate database configuration
+	if err := c.validateDatabase(); err != nil {
+		return err
+	}
+
 	switch coinTypeCode {
 	case domainCoin.BTC, domainCoin.BCH:
-		if err := validate.StructExcept(c, "Ethereum", "Ripple"); err != nil {
+		if err := validate.StructExcept(c, "Ethereum", "Ripple", "MySQL", "SQLite"); err != nil {
 			return err
 		}
 		switch wtype {
@@ -227,16 +232,50 @@ func (c *WalletRoot) validate(wtype domainWallet.WalletType, coinTypeCode domain
 		default:
 		}
 	case domainCoin.ETH, domainCoin.ERC20:
-		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ripple"); err != nil {
+		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ripple", "MySQL", "SQLite"); err != nil {
 			return err
 		}
 	case domainCoin.XRP:
-		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ethereum"); err != nil {
+		if err := validate.StructExcept(c, "AddressType", "Bitcoin", "Ethereum", "MySQL", "SQLite"); err != nil {
 			return err
 		}
 	case domainCoin.LTC, domainCoin.HYT:
 		// Not implemented yet
 	default:
+	}
+
+	return nil
+}
+
+// validateDatabase validates database configuration based on the selected database type.
+func (c *WalletRoot) validateDatabase() error {
+	// Database.Type is always required
+	if c.Database.Type == "" {
+		return errors.New("database.type is required")
+	}
+
+	switch c.Database.Type {
+	case "mysql":
+		// Validate MySQL configuration
+		if c.MySQL.Host == "" {
+			return errors.New("mysql.host is required when database.type is mysql")
+		}
+		if c.MySQL.DB == "" {
+			return errors.New("mysql.dbname is required when database.type is mysql")
+		}
+		if c.MySQL.User == "" {
+			return errors.New("mysql.user is required when database.type is mysql")
+		}
+		if c.MySQL.Pass == "" {
+			return errors.New("mysql.pass is required when database.type is mysql")
+		}
+	case "sqlite":
+		// Validate SQLite configuration
+		if c.SQLite.Path == "" {
+			return errors.New("sqlite.path is required when database.type is sqlite")
+		}
+	default:
+		return fmt.Errorf("unsupported database type: %s (must be mysql or sqlite)", c.Database.Type)
 	}
 
 	return nil
