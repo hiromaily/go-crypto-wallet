@@ -4,7 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "modernc.org/sqlite" // Pure Go SQLite driver (CGO-free)
+	// Pure Go SQLite driver (CGO-free)
+	// Changed from mattn/go-sqlite3 to enable cross-compilation with CGO_ENABLED=0
+	// Required for GoReleaser builds (see Issue #419)
+	_ "modernc.org/sqlite"
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 )
