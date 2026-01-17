@@ -71,7 +71,7 @@ func (b *BitcoinCash) GetAddressInfo(addr string) (*dtobtc.AddressInfo, error) {
 func (b *BitcoinCash) GetAddressesByLabel(labelName string) ([]btcutil.Address, error) {
 	// This override is necessary because the parent Bitcoin.GetAddressesByLabel calls
 	// Bitcoin.DecodeAddress internally, which doesn't understand BCH CashAddr format.
-	logger.Debug("getting addresses by label", "label", labelName)
+	logger.Debug("BCH GetAddressesByLabel called", "label", labelName)
 
 	// input for rpc api
 	input, err := json.Marshal(labelName)
@@ -104,14 +104,14 @@ func (b *BitcoinCash) GetAddressesByLabel(labelName string) ([]btcutil.Address, 
 		"raw_count", len(labels))
 
 	// retrieve - use BCH DecodeAddress for proper CashAddr handling
+	// With GetBalanceByAccount override, b is *BitcoinCash so b.DecodeAddress calls BCH version
 	resAddrs := make([]btcutil.Address, 0, len(labels))
 	for key := range labels {
 		// key is address string
-		var address btcutil.Address
-		address, err = b.DecodeAddress(key)
+		address, err := b.DecodeAddress(key)
 		if err != nil {
 			logger.Error(
-				"fail to call b.DecodeAddress()",
+				"failed to decode address",
 				"address", key,
 				"label", labelName,
 				"error", err)
