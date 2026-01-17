@@ -192,6 +192,11 @@ BCH supports **fewer patterns** than BTC due to lack of SegWit, Taproot, and Sch
 - ❌ No Taproot (no P2TR patterns)
 - ❌ No Schnorr signatures (ECDSA only)
 - ❌ No MuSig2 (no signature aggregation)
+- ❌ No Descriptor support (use address export/import instead)
+- ❌ No PSBT format (use raw transaction hex)
+- ❌ No Bech32/Bech32m encoding (use CashAddr)
+- ❌ No BIP49/84/86 derivation paths (BIP44 only)
+- ⚠️ Fee unit: sat/Byte (not sat/vByte - no witness discount)
 
 For detailed BCH patterns, see [BCH Technical Reference](../../bch/README.md#e2e-transaction-patterns).
 

@@ -1,26 +1,233 @@
-# BCH (Bitcoin Cash) Reference
+# BCH (Bitcoin Cash) Task Context for AI Agents
+
+This document provides AI agents with critical information about BCH implementation differences from BTC. **Read this document before implementing any BCH E2E workflow.**
 
 ## Overview
 
-| 項目 | 値 |
-|------|-----|
-| トランザクションモデル | UTXO型 |
-| 通信方式 | Bitcoin Cash RPC |
-| アドレス形式 | P2PKH, P2SH (CashAddr形式: bitcoincash:q...) |
-| 特殊機能 | CashAddr, BTCからのフォーク |
+| Property | Value |
+|----------|-------|
+| Transaction Model | UTXO-based |
+| Communication | Bitcoin Cash RPC |
+| Address Format | P2PKH, P2SH (CashAddr: `bitcoincash:q...`) |
+| Special Features | CashAddr, Fork from BTC |
 
-## ⚠️ BTCとの違い
+---
 
-BCHはBTCからのフォークですが、以下の重要な違いがあります：
+## Critical: BTC vs BCH Feature Differences
 
-| 項目 | BTC | BCH |
-|------|-----|-----|
-| アドレス形式 | Legacy/Bech32 | CashAddr |
-| SegWit | ✅ | ❌ |
-| Taproot | ✅ | ❌ |
-| Descriptor | ✅ | ❌ |
-| ブロックサイズ | 1MB (+ SegWit) | 32MB |
-| 手数料単位 | sat/vB | sat/B |
+BCH is a fork of BTC but has **significant protocol differences**. Many BTC features are NOT available in BCH.
+
+| Feature | BTC | BCH | Impact on Implementation |
+|---------|-----|-----|--------------------------|
+| Address Format | Legacy/Bech32/Bech32m | CashAddr only | Different address encoding |
+| SegWit | Yes | **NO** | No witness data, larger TX size |
+| Taproot | Yes | **NO** | No P2TR addresses |
+| Schnorr Signatures | Yes (BIP340) | **NO** | ECDSA only |
+| Descriptor | Yes | **NO** | Cannot use descriptor APIs |
+| PSBT | Yes (BIP174) | **NO** | Use raw transaction hex |
+| MuSig2 | Yes (BIP327) | **NO** | Traditional multisig only |
+| Block Size | 1MB (+SegWit) | 32MB | Different capacity |
+| Fee Unit | sat/vByte | sat/Byte | No witness discount |
+
+---
+
+## Workflow-based Feature Comparison
+
+This section compares BTC and BCH capabilities at each workflow step.
+
+### 1. Key Generation
+
+| Step | BTC | BCH | Notes |
+|------|-----|-----|-------|
+| Seed Generation | BIP39 mnemonic | BIP39 mnemonic | Same |
+| HD Key Derivation | BIP32 | BIP32 | Same |
+| Derivation Paths | BIP44/49/84/86 | **BIP44 only** | BCH: No BIP49/84/86 |
+| Coin Type (SLIP44) | 0 (mainnet), 1 (testnet) | 145 (mainnet), 1 (testnet) | Different coin type |
+
+**BCH Derivation Path:**
+
+```
+m/44'/145'/account'/change/index  (mainnet)
+m/44'/1'/account'/change/index    (testnet/regtest)
+```
+
+### 2. Address Generation
+
+| Step | BTC | BCH | Notes |
+|------|-----|-----|-------|
+| P2PKH | Yes (`1...`) | Yes (CashAddr `q...`) | Different encoding |
+| P2SH (Multisig) | Yes (`3...`) | Yes (CashAddr `p...`) | Different encoding |
+| P2WPKH (Native SegWit) | Yes (`bc1q...`) | **NO** | SegWit not supported |
+| P2WSH (SegWit Multisig) | Yes (`bc1q...`) | **NO** | SegWit not supported |
+| P2TR (Taproot) | Yes (`bc1p...`) | **NO** | Taproot not supported |
+| Descriptor Export | Yes | **NO** | Not available |
+| Descriptor Import | Yes | **NO** | Not available |
+
+**BCH Address Types:**
+
+| Type | CashAddr Prefix | Legacy Prefix | Description |
+|------|-----------------|---------------|-------------|
+| P2PKH | `q...` | `1...` | Standard address |
+| P2SH | `p...` | `3...` | Script Hash (multisig) |
+
+### 3. Transaction Creation
+
+| Step | BTC | BCH | Notes |
+|------|-----|-----|-------|
+| Transaction Format | PSBT (BIP174) | **Raw TX (Hex)** | BCH: No PSBT support |
+| UTXO Selection | Automatic | Automatic | Same logic |
+| Change Address | Any type | P2PKH/P2SH only | Limited types |
+| Fee Calculation | sat/vByte | **sat/Byte** | No witness discount |
+| RBF (Replace-by-Fee) | Yes (BIP125) | No | Not supported |
+
+### 4. Signing
+
+| Step | BTC | BCH | Notes |
+|------|-----|-----|-------|
+| ECDSA (secp256k1) | Yes | Yes | Same |
+| Schnorr (BIP340) | Yes | **NO** | Not available |
+| MuSig2 Protocol | Yes (BIP327) | **NO** | Not available |
+| Sighash Fork ID | No | **Yes (0x40)** | Replay protection |
+| Single-sig | Yes | Yes | Same |
+| 2-of-3 Multisig | Yes (P2SH/P2WSH) | Yes (P2SH only) | BCH: P2SH only |
+| 3-of-3 Multisig | Yes (P2SH/P2WSH/MuSig2) | Yes (P2SH only) | BCH: P2SH only |
+
+### 5. Signed Transaction Output
+
+| Step | BTC | BCH | Notes |
+|------|-----|-----|-------|
+| Output Format | PSBT (base64) | **Raw TX (Hex)** | Different format |
+| Partial Signatures | PSBT fields | **Embedded in TX** | Different handling |
+| Signature Size | 64-72 bytes | 71-73 bytes (DER) | ECDSA only |
+| Witness Data | Separate | **None** | No SegWit |
+
+---
+
+## E2E Pattern Availability Matrix
+
+This matrix shows which BTC E2E patterns are available for BCH.
+
+| BTC Pattern | Description | BCH Available? | BCH Equivalent | Reason |
+|-------------|-------------|----------------|----------------|--------|
+| Pattern 1 | P2PKH Single-sig | **Yes** | BCH Pattern 1 | Legacy format supported |
+| Pattern 2 | P2PKH 2-of-3 Multisig | **Yes** | BCH Pattern 2 | P2SH multisig supported |
+| Pattern 3 | P2SH-P2WPKH Single-sig | **NO** | N/A | SegWit not supported |
+| Pattern 4 | P2SH-P2WSH 2-of-3 | **NO** | N/A | SegWit not supported |
+| Pattern 5 | P2WPKH Single-sig | **NO** | N/A | SegWit not supported |
+| Pattern 6 | P2WSH 2-of-3 | **NO** | N/A | SegWit not supported |
+| Pattern 7 | P2WSH 3-of-3 | **NO** | Use BCH Pattern 3 | SegWit not supported |
+| Pattern 8 | P2SH-P2WSH 3-of-3 | **NO** | Use BCH Pattern 3 | SegWit not supported |
+| Pattern 9 | P2TR Single-sig | **NO** | N/A | Taproot not supported |
+| Pattern 10 | P2TR MuSig2 | **NO** | N/A | Taproot/Schnorr not supported |
+| Pattern 11 | P2TR Tapscript | **NO** | N/A | Taproot not supported |
+
+### BCH Available Patterns
+
+| BCH Pattern | Address Type | Signature Pattern | E2E Script |
+|-------------|--------------|-------------------|------------|
+| **Pattern 1** | CashAddr P2PKH | Single-sig | Manual testing |
+| **Pattern 2** | CashAddr P2SH | 2-of-3 Multisig | Not implemented |
+| **Pattern 3** | CashAddr P2SH | 3-of-3 Multisig | `scripts/operation/bch/e2e-workflow.sh` |
+
+---
+
+## BCH Implementation Decision Flowchart
+
+Use this flowchart to determine if a feature is available for BCH:
+
+```mermaid
+flowchart TD
+    Start[Feature Request] --> Q1{Is it SegWit related?}
+    Q1 -->|Yes| NoSegWit[NOT Available in BCH]
+    Q1 -->|No| Q2{Is it Taproot related?}
+
+    Q2 -->|Yes| NoTaproot[NOT Available in BCH]
+    Q2 -->|No| Q3{Is it Descriptor related?}
+
+    Q3 -->|Yes| NoDescriptor[NOT Available in BCH]
+    Q3 -->|No| Q4{Is it PSBT format?}
+
+    Q4 -->|Yes| UsePSBT[Use Raw TX Hex instead]
+    Q4 -->|No| Q5{Is it Schnorr/MuSig2?}
+
+    Q5 -->|Yes| NoSchnorr[NOT Available - Use ECDSA]
+    Q5 -->|No| Q6{Is it basic UTXO/signing?}
+
+    Q6 -->|Yes| Available[Available in BCH]
+    Q6 -->|No| CheckDocs[Check BCH README]
+
+    NoSegWit --> UseP2SH[Use P2PKH or P2SH instead]
+    NoTaproot --> UseP2SH
+    NoDescriptor --> UseAddressExport[Use address export instead]
+    NoSchnorr --> UseECDSA[Use ECDSA multisig]
+```
+
+---
+
+## Critical Implementation Rules
+
+### DO NOT (Prohibited for BCH)
+
+| Rule | Reason | BTC File to Avoid |
+|------|--------|-------------------|
+| DO NOT use Descriptor APIs | BCH has no descriptor support | `descriptor*.go` |
+| DO NOT use PSBT format | BCH uses raw transaction hex | `psbt.go` |
+| DO NOT use MuSig2 | BCH has no Schnorr signatures | `musig2.go` |
+| DO NOT use Taproot addresses | BCH has no Taproot | `descriptor_taproot*.go` |
+| DO NOT use Bech32/Bech32m | BCH uses CashAddr | N/A |
+| DO NOT use BIP49/84/86 paths | BCH only supports BIP44 | N/A |
+| DO NOT calculate fees in sat/vByte | BCH uses sat/Byte | N/A |
+
+### DO (Required for BCH)
+
+| Rule | Reason | Implementation |
+|------|--------|----------------|
+| DO use CashAddr format | BCH standard address format | `bitcoincash:q...` or `bitcoincash:p...` |
+| DO use Raw Transaction Hex | BCH transaction format | `createrawtransaction` RPC |
+| DO use ECDSA signatures only | Only supported algorithm | Standard secp256k1 |
+| DO use P2SH for multisig | Only multisig option | `createmultisig` RPC |
+| DO include SIGHASH_FORKID | Replay protection | Sighash type `0x41` |
+| DO use BIP44 derivation | Only supported path | `m/44'/145'/...` |
+| DO override BTC methods | BCH-specific behavior | In `bch/` directory |
+
+---
+
+## Files NOT to Use for BCH Implementation
+
+These BTC files should **NEVER** be referenced for BCH:
+
+```
+# Descriptor files (BCH has no descriptor support)
+internal/infrastructure/api/btc/btc/descriptor*.go
+internal/application/usecase/*/btc/*descriptor*.go
+
+# PSBT files (BCH uses raw transactions)
+internal/infrastructure/api/btc/btc/psbt.go
+
+# MuSig2 files (BCH has no Schnorr)
+internal/infrastructure/api/btc/btc/musig2.go
+internal/application/usecase/*/btc/*musig2*.go
+```
+
+## Files Safe to Use for BCH Implementation
+
+These BTC files can be inherited/referenced:
+
+```
+# UTXO management (same logic)
+internal/infrastructure/api/btc/btc/unspent.go
+
+# Basic transaction structure
+internal/infrastructure/api/btc/btc/transaction.go
+
+# Balance operations
+internal/infrastructure/api/btc/btc/balance.go
+
+# Basic signing (ECDSA)
+internal/application/usecase/keygen/btc/sign_transaction.go
+```
+
+---
 
 ## Directory Structure
 
@@ -28,160 +235,154 @@ BCHはBTCからのフォークですが、以下の重要な違いがありま�
 
 ```
 internal/application/usecase/
-└── keygen/btc/          # BTC/BCH共通（一部）
+└── keygen/btc/          # Shared with BTC (partially)
     └── ...
 ```
 
-**注意**: BCH固有のUse Caseは現在BTCと共有されている部分があります。実装時は違いに注意してください。
+**Note**: BCH-specific Use Cases currently share code with BTC. Pay attention to differences when implementing.
 
 ### Infrastructure Layer
 
 ```
 internal/infrastructure/api/btc/bch/
-├── bitcoin_cash.go      # クライアント初期化
-├── account.go           # アカウント管理
-└── address.go           # アドレス操作（CashAddr対応）
+├── bitcoin_cash.go      # Client initialization
+├── account.go           # Account management
+├── address.go           # Address operations (CashAddr support)
+├── balance.go           # Balance operations
+└── unspent.go           # UTXO management
 ```
 
 ### CLI Layer
 
-BCH固有のCLIコマンドはBTCと構造を共有していますが、`coin_type = "bch"` で区別されます。
+BCH CLI commands share structure with BTC but are distinguished by `coin_type = "bch"`.
 
-## Key Concepts
-
-### CashAddr Format
-
-BCHはCashAddr形式のアドレスを使用：
-
-```
-# Legacy形式（互換性あり）
-1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2
-
-# CashAddr形式（推奨）
-bitcoincash:qr95sy3j9xwd2ap32xkykttr4cvcu7as4y0qverfuy
-
-# プレフィックスなし
-qr95sy3j9xwd2ap32xkykttr4cvcu7as4y0qverfuy
-```
-
-### UTXO Model
-
-BTCと同様にUTXO型トランザクションモデルを使用：
-
-```
-入力 (UTXO) → トランザクション → 出力 (新しいUTXO)
-
-- 入力: 以前のトランザクションの未使用出力
-- 出力: 送金先アドレス + お釣りアドレス
-- 手数料: 入力合計 - 出力合計
-```
-
-### Address Types
-
-| タイプ | CashAddr | Legacy | 説明 |
-|--------|----------|--------|------|
-| P2PKH | q... | 1... | 通常アドレス |
-| P2SH | p... | 3... | Script Hash (マルチシグ等) |
-
-**注意**: SegWit (bc1...) およびTaproot (bc1p...) はBCHでは使用不可。
+---
 
 ## Implementation Patterns
 
-### BitcoinCash構造体の設計
+### BitcoinCash Struct Design
 
-BCHのAPIクライアントは**BTCのインスタンスを埋め込んで拡張**する設計になっています：
+The BCH API client **embeds and extends** the BTC implementation:
 
 ```go
 // internal/infrastructure/api/btc/bch/bitcoin_cash.go
 type BitcoinCash struct {
-    btc.Bitcoin  // BTCの実装を埋め込み
+    btc.Bitcoin  // Embed BTC implementation
 }
 ```
 
-この設計により：
-- BTCと共通のメソッドは自動的に継承される
-- BCH固有の処理が必要な場合は**メソッドをオーバーライド**して対応
+This design means:
 
-### ⚠️ 重要: BTC APIの問題修正パターン
+- Methods common to BTC are automatically inherited
+- BCH-specific behavior requires **method overriding**
 
-BTCのAPI実装に問題がある場合、**BTCのコードを直接修正するのではなく**、BCH側でメソッドをオーバーライドして対応します：
+### Important: BTC API Override Pattern
+
+When BTC API implementation has issues for BCH, **DO NOT modify BTC code directly**. Override in BCH instead:
 
 ```go
-// ❌ やってはいけない: BTCのコードを直接修正
-// internal/infrastructure/api/btc/btc/address.go を編集
+// WRONG: Modifying BTC code directly
+// internal/infrastructure/api/btc/btc/address.go
 
-// ✅ 正しいパターン: BCHでメソッドをオーバーライド
+// CORRECT: Override in BCH
 // internal/infrastructure/api/btc/bch/address.go
 func (b *BitcoinCash) GetAddressInfo(addr string) (*dtobtc.AddressInfo, error) {
-    // BCH固有の実装
+    // BCH-specific implementation
     input, err := json.Marshal(addr)
     if err != nil {
-        return nil, fmt.Errorf("fail to call json.Marchal() in bch: %w", err)
+        return nil, fmt.Errorf("fail to call json.Marshal() in bch: %w", err)
     }
     rawResult, err := b.Client.RawRequest("getaddressinfo", []json.RawMessage{input})
     if err != nil {
         return nil, fmt.Errorf("fail to call json.RawRequest(getaddressinfo) %s in bch: %w", addr, err)
     }
 
-    // BCH固有のレスポンス型を使用
+    // Use BCH-specific response type
     infoResult := GetAddressInfoResult{}
     err = json.Unmarshal(rawResult, &infoResult)
     if err != nil {
         return nil, fmt.Errorf("fail to call json.Unmarshal(rawResult) in bch: %w", err)
     }
 
-    // BCH型からBTC型に変換し、最終的にDTOに変換
+    // Convert BCH type to BTC type, then to DTO
     btcResult := &btc.GetAddressInfoResult{
         Address:      infoResult.Address,
         ScriptPubKey: infoResult.ScriptPubKey,
-        // ... BCH固有のマッピング
-        Iswitness:    false,  // BCHはSegWit非対応
+        // ... BCH-specific mapping
+        Iswitness:    false,  // BCH has no SegWit
     }
 
     return btc.ToAddressInfo(btcResult), nil
 }
 ```
 
-**この設計の理由**:
-1. BTCの実装はBTC専用として安定させる
-2. BCH固有の差異はBCHレイヤーで吸収
-3. 両方のチェーンへの影響を分離
+**Design Reasons:**
 
-### BCH固有の実装が必要なケース
+1. Keep BTC implementation stable for BTC-only use
+2. Absorb BCH differences in BCH layer
+3. Isolate changes to each chain
 
-以下の場合はBCH側でオーバーライドが必要：
+### When to Override
 
-| ケース | 理由 |
-|--------|------|
-| レスポンス構造の違い | BCHノードのAPIレスポンスがBTCと異なる |
-| フィールドの有無 | SegWit/Taproot関連フィールドがない |
-| アドレス形式 | CashAddr形式の処理 |
-| 手数料計算 | sat/B vs sat/vB |
-| 署名方式 | リプレイプロテクション |
+Override is required when:
 
-### BTCとの共通化
+| Case | Reason |
+|------|--------|
+| Response structure differs | BCH node API response differs from BTC |
+| Missing fields | SegWit/Taproot fields don't exist |
+| Address format | CashAddr processing required |
+| Fee calculation | sat/Byte vs sat/vByte |
+| Signature method | Replay protection with FORKID |
 
-BCHとBTCは多くのロジックを共有できますが、以下の点で分離が必要：
+### Shared Code
 
-```go
-// ✅ 共通化可能（埋め込みで自動継承）
-- UTXO選択ロジック
-- トランザクション構造の基本部分
-- 署名アルゴリズム（ECDSA）
-- 多くのRPCメソッド
-
-// ❌ BCH側でオーバーライドが必要
-- アドレス関連API（GetAddressInfo等）
-- 手数料関連API
-- SegWit/Taproot関連機能（BCHでは無効化）
-```
-
-### アドレス変換
+BCH and BTC can share these components:
 
 ```go
-// internal/infrastructure/api/btc/bch/address.go
-// CashAddr ↔ Legacy変換が必要な場合の処理
+// CAN be shared (inherited via embedding)
+- UTXO selection logic
+- Basic transaction structure
+- Signing algorithm (ECDSA)
+- Many RPC methods
+
+// MUST override in BCH
+- Address-related APIs (GetAddressInfo, etc.)
+- Fee-related APIs
+- SegWit/Taproot features (disabled in BCH)
 ```
+
+---
+
+## Key Concepts
+
+### CashAddr Format
+
+BCH uses CashAddr format for addresses:
+
+```
+# Legacy format (compatible)
+1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2
+
+# CashAddr format (recommended)
+bitcoincash:qr95sy3j9xwd2ap32xkykttr4cvcu7as4y0qverfuy
+
+# Without prefix
+qr95sy3j9xwd2ap32xkykttr4cvcu7as4y0qverfuy
+```
+
+### UTXO Model
+
+Same as BTC, BCH uses the UTXO transaction model:
+
+```
+Input (UTXO) -> Transaction -> Output (New UTXO)
+
+- Input: Unspent output from previous transaction
+- Output: Recipient address + Change address
+- Fee: Total inputs - Total outputs
+```
+
+---
 
 ## Configuration
 
@@ -197,93 +398,112 @@ bitcoin:  # Bitcoin Cash Node
   pass: password
 ```
 
+---
+
 ## Testing
 
 ```bash
-# BCH Infrastructureテスト
+# BCH Infrastructure tests
 go test ./internal/infrastructure/api/btc/bch/...
 
-# BCH関連の設定ファイル確認
+# Check BCH config files
 ls config/wallet/bch/*.yaml
 ```
 
-## Related Documentation
-
-- [BCH README](../../../../docs/crypto/bch/README.md) - 詳細なBCHドキュメント
-- [BTC/BCH Technical Guide](../../../../docs/crypto/btc/overview/technical-reference.md) - BTC/BCH技術比較
+---
 
 ## Common Operations
 
-| 操作 | Wallet | 実装場所 |
-|------|--------|----------|
-| アドレス生成 | Keygen | 共通ロジック + CashAddr変換 |
-| トランザクション作成 | Watch | BTC共通 + BCH固有調整 |
-| 署名 | Keygen/Sign | BTC共通 |
-| 送信 | Watch | BTC共通 |
+| Operation | Wallet | Implementation Location |
+|-----------|--------|-------------------------|
+| Address Generation | Keygen | Shared logic + CashAddr conversion |
+| Transaction Creation | Watch | BTC shared + BCH adjustments |
+| Signing | Keygen/Sign | BTC shared |
+| Broadcasting | Watch | BTC shared |
 
-## ⚠️ Implementation Notes
+---
 
-1. **BTCコードを直接修正しない**: BCH固有の問題はBCH側でメソッドをオーバーライドして対応
-2. **埋め込み構造の理解**: `BitcoinCash`は`btc.Bitcoin`を埋め込んでいる
-3. **SegWit非対応**: BTCのSegWit/Taproot関連コードはBCHでは使用しない
-4. **Descriptor非対応**: BTCのDescriptor機能はBCHでは使用しない
-5. **アドレス形式**: CashAddr形式を適切に処理する
-6. **手数料計算**: sat/B (バイト) で計算、vByte (仮想バイト) ではない
-7. **チェーンID**: リプレイプロテクションのためBTCと異なる署名が必要
+## Implementation Checklist for AI Agents
 
-## Comparison with BTC Implementation
+Before implementing BCH E2E workflow, verify:
 
-### 埋め込みによる継承関係
+- [ ] Using CashAddr format (not Bech32/Bech32m)
+- [ ] Using BIP44 derivation path with coin type 145
+- [ ] Using Raw Transaction Hex (not PSBT)
+- [ ] Using ECDSA signatures only (not Schnorr)
+- [ ] Using P2SH for multisig (not P2WSH)
+- [ ] Including SIGHASH_FORKID in signatures
+- [ ] NOT referencing descriptor/psbt/musig2 files
+- [ ] Overriding in BCH layer (not modifying BTC code)
+
+---
+
+## Related Documentation
+
+- [BCH Technical Reference](../../crypto/bch/README.md) - Comprehensive BCH documentation
+- [BTC E2E Transaction Patterns](../../crypto/btc/operations/e2e-transaction-patterns.md) - BTC patterns (for comparison)
+- [BTC Task Context](./btc.md) - BTC reference (for comparison)
+
+---
+
+## Embedding Inheritance Diagram
 
 ```
 btc.Bitcoin (internal/infrastructure/api/btc/btc/)
-    ↑ 埋め込み
+    |
+    | embedding
+    v
 BitcoinCash (internal/infrastructure/api/btc/bch/)
-    → BTCのメソッドを継承
-    → 必要に応じてオーバーライド
+    -> Inherits BTC methods
+    -> Override as needed for BCH
 ```
 
-### 参照・修正パターン
+### Reference Pattern Summary
 
 ```
-BTC実装を参考にする場合:
+When referencing BTC implementation:
 
-✅ 自動継承される（そのまま使用可能）:
-- internal/infrastructure/api/btc/btc/unspent.go (UTXO取得)
-- internal/infrastructure/api/btc/btc/transaction.go (トランザクション基本)
-- internal/infrastructure/api/btc/btc/balance.go (残高取得)
+INHERITED (usable as-is):
+- internal/infrastructure/api/btc/btc/unspent.go (UTXO)
+- internal/infrastructure/api/btc/btc/transaction.go (basic TX)
+- internal/infrastructure/api/btc/btc/balance.go (balance)
 
-✅ 参考にできる（Use Case層）:
-- internal/application/usecase/keygen/btc/sign_transaction.go (署名基本)
+CAN REFERENCE (Use Case layer):
+- internal/application/usecase/keygen/btc/sign_transaction.go (basic signing)
 
-⚠️ BCHでオーバーライド済み:
+ALREADY OVERRIDDEN in BCH:
 - internal/infrastructure/api/btc/bch/address.go (GetAddressInfo)
-- 必要に応じて追加のオーバーライドを実装
+- Add more overrides as needed
 
-❌ BCHでは使用しない:
-- internal/infrastructure/api/btc/btc/descriptor*.go (Descriptor非対応)
-- internal/infrastructure/api/btc/btc/psbt.go (PSBT非対応)
-- internal/infrastructure/api/btc/btc/musig2.go (MuSig2非対応)
+DO NOT USE for BCH:
+- internal/infrastructure/api/btc/btc/descriptor*.go (No Descriptor)
+- internal/infrastructure/api/btc/btc/psbt.go (No PSBT)
+- internal/infrastructure/api/btc/btc/musig2.go (No MuSig2)
 - internal/application/usecase/*/btc/*musig2*.go
 - internal/application/usecase/*/btc/*descriptor*.go
 ```
 
-### BCH固有実装を追加する場合
+### Adding BCH-specific Implementation
 
 ```go
-// 1. bch/ ディレクトリに新しいファイルを作成
+// 1. Create new file in bch/ directory
 // internal/infrastructure/api/btc/bch/new_feature.go
 
 package bch
 
-// 2. BitcoinCashのメソッドとして実装
+// 2. Implement as BitcoinCash method
 func (b *BitcoinCash) SomeMethod() error {
-    // BCH固有の実装
+    // BCH-specific implementation
 }
 
-// または、BTCのメソッドをオーバーライド
+// Or override existing BTC method
 func (b *BitcoinCash) ExistingBTCMethod() (*Result, error) {
-    // BCH向けにカスタマイズした実装
+    // BCH-customized implementation
 }
 ```
 
+---
+
+**Document Version:** 2.0
+**Last Updated:** 2026-01-17
+**Purpose:** AI Agent Task Context for BCH Implementation
