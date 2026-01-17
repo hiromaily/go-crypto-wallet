@@ -48,8 +48,7 @@ func (b *BitcoinCash) ListUnspentByAccount(
 	var unspentList []dtobtc.UnspentOutput
 	addrStrings := make(map[string]bool)
 	for _, addr := range addrs {
-		// Store both formats: with and without prefix
-		// EncodeAddress() returns the base format
+		// Store the normalized address format for quick lookup
 		addrStrings[addr.EncodeAddress()] = true
 	}
 
