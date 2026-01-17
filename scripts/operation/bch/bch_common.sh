@@ -384,7 +384,11 @@ bch_generate_test_utxos() {
 	# Rescan blockchain to detect the newly generated UTXOs
 	# This is necessary because addresses were imported before blocks were generated
 	log_info "Rescanning blockchain to detect UTXOs..."
-	bch_cli "bch-watch" -rpcwallet=watch rescanblockchain 0 >/dev/null 2>&1
+	if ! output=$(bch_cli "bch-watch" -rpcwallet=watch rescanblockchain 0 2>&1); then
+		log_error "Blockchain rescan failed with output:"
+		log_error "$output"
+		return 1
+	fi
 	log_info "Blockchain rescan completed"
 }
 
