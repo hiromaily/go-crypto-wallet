@@ -2,6 +2,9 @@
 # Bitcoin Cash Node Targets
 ###############################################################################
 
+# E2E Testing
+include make/bch_e2e.mk
+
 ###############################################################################
 # Docker Compose Targets
 ###############################################################################
@@ -26,31 +29,4 @@ down-docker-bch:
 down-docker-bch-v:
 	docker compose -f compose.bch.yaml down -v
 
-###############################################################################
-# E2E Testing
-###############################################################################
-# Run Bitcoin Cash E2E workflow from completely fresh state (recommended)
-.PHONY: bch-e2e-test-reset
-bch-e2e-test-reset:
-	./scripts/operation/bch/e2e-workflow.sh --reset
-
-# Run complete Bitcoin Cash end-to-end workflow (regression test)
-.PHONY: bch-e2e-test
-bch-e2e-test:
-	./scripts/operation/bch/e2e-workflow.sh
-
-# Run Bitcoin Cash E2E workflow with verbose output
-.PHONY: bch-e2e-test-verbose
-bch-e2e-test-verbose:
-	./scripts/operation/bch/e2e-workflow.sh --verbose
-
-# Run Bitcoin Cash E2E workflow in non-interactive mode (for CI/CD)
-.PHONY: bch-e2e-test-ci
-bch-e2e-test-ci:
-	./scripts/operation/bch/e2e-workflow.sh --non-interactive
-
-# Cleanup Bitcoin Cash E2E test environment
-.PHONY: bch-e2e-cleanup
-bch-e2e-cleanup:
-	./scripts/operation/bch/e2e-workflow.sh --cleanup
 

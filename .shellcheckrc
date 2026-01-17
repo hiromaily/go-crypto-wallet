@@ -1,0 +1,17 @@
+# ShellCheck Configuration File
+# https://www.shellcheck.net/wiki/Configuration
+
+# Shell dialect (bash)
+shell=bash
+
+# Disable style checks that are too strict for this codebase
+# SC2292: Prefer [[ ]] over [ ] - we use [ ] for POSIX compatibility
+# SC2250: Prefer braces around variable references - not always needed
+# SC2312: Consider invoking command separately - reduces readability
+disable=SC2292,SC2250,SC2312
+
+# Notes:
+# - SC2086: Double quote to prevent globbing and word splitting (ENABLED)
+#   Variables in [ ] tests should always be quoted: [ "$var" -lt "$max" ]
+# - SC2034: Variable appears unused (warning, may be intentional for exports)
+# - SC1091: Not following sourced file (info, expected for relative paths)
