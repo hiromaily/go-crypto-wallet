@@ -84,7 +84,7 @@ In addition to Required Documentation in common rules, refer to:
 - @scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh - Pattern 2 script (2-of-3 reference)
 - @scripts/operation/btc/e2e/e2e-p3-p2sh-p2wpkh-singlesig.sh - Pattern 3 script (P2SH-SegWit reference)
 - @scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh - Pattern 8 script (P2SH-P2WSH 3-of-3 reference)
-- @config/wallet/account_2of3.yaml - 2-of-3 multisig config
+- @config/wallet/account/account_2of3.yaml - 2-of-3 multisig config
 
 ## Pre-check: Environment Variables
 

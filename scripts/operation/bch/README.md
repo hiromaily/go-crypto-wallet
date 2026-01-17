@@ -225,10 +225,10 @@ Creates, signs, and sends a payment transaction.
 
 | File                              | Purpose                    |
 |-----------------------------------|----------------------------|
-| `config/wallet/bch_watch.toml`    | Watch wallet configuration |
-| `config/wallet/bch_keygen.toml`   | Keygen wallet configuration|
-| `config/wallet/bch_sign1.toml`    | Sign1 wallet configuration |
-| `config/wallet/bch_sign2.toml`    | Sign2 wallet configuration |
+| `config/wallet/bch/watch.yaml`    | Watch wallet configuration |
+| `config/wallet/bch/keygen.yaml`   | Keygen wallet configuration|
+| `config/wallet/bch/sign1.yaml`    | Sign1 wallet configuration |
+| `config/wallet/bch/sign2.yaml`    | Sign2 wallet configuration |
 
 ## Generated Files
 
@@ -295,7 +295,7 @@ Default ports (to avoid conflicts with Bitcoin):
 If the transaction phase reports no UTXOs:
 
 1. Verify blocks were generated successfully
-2. Check balance with: `watch -c config/wallet/bch_watch.toml --coin bch monitor balance`
+2. Check balance with: `watch -c config/wallet/bch/watch.yaml --coin bch monitor balance`
 3. The script automatically generates 101 blocks; if this fails, manually run:
 
    ```bash

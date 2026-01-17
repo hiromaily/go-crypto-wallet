@@ -124,7 +124,7 @@ In addition to Required Documentation in common rules, refer to:
 - @scripts/operation/btc/e2e/e2e-p9-p2tr-singlesig.sh - Pattern 9 script (Taproot Key Path reference)
 - @scripts/operation/btc/e2e/e2e-p10-p2tr-musig2.sh - Pattern 10 script (MuSig2 reference)
 - @scripts/operation/btc/e2e/e2e-p4-p2sh-p2wsh-2of3.sh - Pattern 4 script (2-of-3 multisig reference)
-- @config/wallet/account_2of3.yaml - 2-of-3 account config
+- @config/wallet/account/account_2of3.yaml - 2-of-3 account config
 
 ## Pre-check: Environment Variables
 

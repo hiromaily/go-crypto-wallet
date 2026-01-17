@@ -44,4 +44,4 @@ build-linux:
 
 .PHONY: run-watch
 run-watch:
-	go run ./cmd/watch/ -conf ./config/wallet/btc_watch.yaml
+	go run ./cmd/watch/ -conf ./config/wallet/btc/watch.yaml

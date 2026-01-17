@@ -31,7 +31,7 @@ NON_INTERACTIVE=false
 RESET_STATE=false
 
 # Use single-sig account configuration for Pattern 3
-CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account.yaml"
+CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account/account.yaml"
 export BTC_ACCOUNT_CONF="${CONFIG_ACCOUNT}"
 
 # Pattern 3 requires: address_type: "p2sh-segwit"

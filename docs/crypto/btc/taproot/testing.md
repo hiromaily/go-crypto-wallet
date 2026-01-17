@@ -179,7 +179,7 @@ bitcoin-cli -regtest -rpcwallet=test_taproot -generate 101
 Set `address_type = "taproot"` in your test configuration:
 
 ```toml
-# config/wallet/btc_keygen_bip86_test.toml
+# config/wallet/btc/keygen_bip86_test.yaml
 key_type = "bip86"        # Required for Taproot
 address_type = "taproot"  # legacy, p2sh-segwit, bech32, taproot
 ```
@@ -197,7 +197,7 @@ go test -v -tags=integration ./internal/infrastructure/api/btc/btc/
 
 ```bash
 # Configure for Taproot
-export BTC_KEYGEN_WALLET_CONF=./config/wallet/btc_keygen_bip86_test.toml
+export BTC_KEYGEN_WALLET_CONF=./config/wallet/btc/keygen_bip86_test.yaml
 
 # Generate seed
 ./keygen --coin btc create seed
@@ -213,7 +213,7 @@ export BTC_KEYGEN_WALLET_CONF=./config/wallet/btc_keygen_bip86_test.toml
 
 ```bash
 # Configure for Taproot
-export BTC_WATCH_WALLET_CONF=./config/wallet/btc_watch.toml
+export BTC_WATCH_WALLET_CONF=./config/wallet/btc/watch.yaml
 
 # Import Taproot addresses
 ./watch --coin btc import address --account client \
@@ -234,7 +234,7 @@ export BTC_WATCH_WALLET_CONF=./config/wallet/btc_watch.toml
 
 ```bash
 # Configure for Taproot
-export BTC_SIGN_WALLET_CONF=./config/wallet/btc_sign.toml
+export BTC_SIGN_WALLET_CONF=./config/wallet/btc/sign.yaml
 
 # Sign multisig transaction (Schnorr signature)
 ./sign --coin btc sign --file ./data/tx/btc/payment_5_unsigned_1_1234567890.tx

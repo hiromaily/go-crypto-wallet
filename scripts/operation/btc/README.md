@@ -297,10 +297,10 @@ Creates, signs, and sends a payment transaction.
 
 | File                              | Purpose                    |
 |-----------------------------------|----------------------------|
-| `config/wallet/btc_watch.toml`    | Watch wallet configuration |
-| `config/wallet/btc_keygen.toml`   | Keygen wallet configuration|
-| `config/wallet/btc_sign1.toml`    | Sign1 wallet configuration |
-| `config/wallet/btc_sign2.toml`    | Sign2 wallet configuration |
+| `config/wallet/btc/watch.yaml`    | Watch wallet configuration |
+| `config/wallet/btc/keygen.yaml`   | Keygen wallet configuration|
+| `config/wallet/btc/sign1.yaml`    | Sign1 wallet configuration |
+| `config/wallet/btc/sign2.yaml`    | Sign2 wallet configuration |
 
 ## Generated Files
 
@@ -346,7 +346,7 @@ This implements a 3-of-3 multisig scheme where all three parties must sign to au
 If the transaction phase reports no UTXOs:
 
 1. Verify blocks were generated successfully
-2. Check balance with: `watch -c config/wallet/btc_watch.toml --coin btc monitor balance`
+2. Check balance with: `watch -c config/wallet/btc/watch.yaml --coin btc monitor balance`
 3. The script automatically generates 101 blocks; if this fails, manually run:
 
    ```bash

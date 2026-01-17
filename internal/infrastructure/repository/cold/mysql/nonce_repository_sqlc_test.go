@@ -23,7 +23,7 @@ func getTestDB(t *testing.T) *sql.DB {
 	t.Helper()
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := projPath + "/config/wallet/btc_keygen.toml"
+	confPath := projPath + "/config/wallet/btc/keygen.yaml"
 	conf, err := config.NewWallet(confPath, wallet.WalletTypeKeyGen, domainCoin.BTC)
 	if err != nil {
 		log.Fatalf("fail to create config: %v", err)

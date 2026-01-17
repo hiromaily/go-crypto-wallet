@@ -203,15 +203,15 @@ func (u *SignTransactionUseCase) Execute(ctx context.Context, req *SignTxRequest
 
 ## Configuration
 
-```toml
-# config/wallet/xrp_watch.toml
-coin_type = "xrp"
-network_type = "mainnet"  # mainnet, testnet
+```yaml
+# config/wallet/xrp/watch.yaml
+coin_type: xrp
+network_type: mainnet  # mainnet, testnet
 
-[ripple]
-# ripple-lib-server接続設定
-host = "localhost"
-port = 50051
+ripple:
+  # ripple-lib-server接続設定
+  host: localhost
+  port: 50051
 ```
 
 ## Testing

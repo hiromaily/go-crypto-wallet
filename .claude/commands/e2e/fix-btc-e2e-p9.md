@@ -85,7 +85,7 @@ In addition to Required Documentation in common rules, refer to:
 - @docs/crypto/btc/operations/e2e-transaction-patterns.md - Pattern 9 details
 - @scripts/operation/btc/e2e/e2e-p5-p2wpkh-singlesig.sh - Pattern 5 script (Native SegWit Single-sig reference)
 - @scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh - Pattern 1 script (Single-sig base)
-- @config/wallet/account.yaml - Single-sig account config
+- @config/wallet/account/account.yaml - Single-sig account config
 
 ## Pre-check: Environment Variables
 

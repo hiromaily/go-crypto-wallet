@@ -4,14 +4,14 @@
 
 - 3 nodes are running `btc-watch`,`btc-keygen`,`btc-sign` respectively.
 - To use multisig functionality, multiple auth accounts are required.
-- Set 5 auth accounts on [account.toml](https://github.com/hiromaily/go-crypto-wallet/blob/main/config/wallet/account.toml)
+- Set 5 auth accounts on [account.yaml](https://github.com/hiromaily/go-crypto-wallet/blob/main/config/wallet/account/account.yaml)
 
 ### Prerequisite
 
 See [Installation](https://github.com/hiromaily/go-crypto-wallet/blob/main/docs/Installation.md#bitcoind-setup)
 
 1. `bitcoin-cli` needs to be ready
-2. [account.toml](https://github.com/hiromaily/go-crypto-wallet/blob/main/config/wallet/account.toml) configuration
+2. [account.yaml](https://github.com/hiromaily/go-crypto-wallet/blob/main/config/wallet/account/account.yaml) configuration
 3. create wallets
 
 ### 1. Generate Key for Bitcoin

@@ -26,7 +26,7 @@ func GetXRP() (apixrp.Rippler, error) {
 	}
 
 	projPath := os.Getenv("GOPATH") + "/src/github.com/hiromaily/go-crypto-wallet"
-	confPath := projPath + "/config/wallet/xrp_watch.yaml"
+	confPath := projPath + "/config/wallet/xrp/watch.yaml"
 	conf, err := config.NewWallet(confPath, wallet.WalletTypeWatchOnly, domainCoin.XRP)
 	if err != nil {
 		return nil, fmt.Errorf("fail to create config: %w", err)

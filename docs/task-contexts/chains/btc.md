@@ -179,16 +179,16 @@ func (u *SignTransactionUseCase) Execute(ctx context.Context, req *SignTxRequest
 
 ## Configuration
 
-```toml
-# config/wallet/btc_watch.toml
-coin_type = "btc"
-network_type = "mainnet"  # mainnet, testnet, signet, regtest
+```yaml
+# config/wallet/btc/watch.yaml
+coin_type: btc
+network_type: mainnet  # mainnet, testnet, signet, regtest
 
-[bitcoin]
-host = "localhost"
-port = 8332
-user = "user"
-pass = "password"
+bitcoin:
+  host: localhost
+  port: 8332
+  user: user
+  pass: password
 ```
 
 ## Testing

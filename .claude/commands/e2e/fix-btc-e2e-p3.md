@@ -74,7 +74,7 @@ In addition to Required Documentation in common rules, refer to:
 
 - @scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh - Pattern 1 script (Single-sig base)
 - @scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh - Pattern 8 script (P2SH-SegWit reference)
-- @config/wallet/account.yaml - Single-sig account config
+- @config/wallet/account/account.yaml - Single-sig account config
 
 ## Pre-check: Environment Variables
 

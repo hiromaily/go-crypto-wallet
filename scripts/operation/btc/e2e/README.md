@@ -171,63 +171,63 @@ Each script requires matching `address_type` in the corresponding config files:
 ### Pattern 1: P2PKH Single-sig
 
 ```yaml
-# config/wallet/btc_watch.yaml, btc_keygen.yaml
+# config/wallet/btc/watch.yaml, btc/keygen.yaml
 address_type: "legacy"
 ```
 
 ### Pattern 2: P2PKH 2-of-3 Multisig
 
 ```yaml
-# config/wallet/btc_watch.yaml, btc_keygen.yaml, btc_sign1.yaml, btc_sign2.yaml
+# config/wallet/btc/watch.yaml, btc/keygen.yaml, btc/sign1.yaml, btc/sign2.yaml
 address_type: "legacy"
 ```
 
 ### Pattern 3: P2SH-P2WPKH Single-sig
 
 ```yaml
-# config/wallet/btc_watch.yaml, btc_keygen.yaml
+# config/wallet/btc/watch.yaml, btc/keygen.yaml
 address_type: "p2sh-segwit"
 ```
 
 ### Pattern 4: P2SH-P2WSH 2-of-3 Multisig
 
 ```yaml
-# config/wallet/btc_watch.yaml, btc_keygen.yaml, btc_sign1.yaml, btc_sign2.yaml
+# config/wallet/btc/watch.yaml, btc/keygen.yaml, btc/sign1.yaml, btc/sign2.yaml
 address_type: "p2sh-segwit"
 ```
 
 ### Pattern 5: P2WPKH Native SegWit Single-sig
 
 ```yaml
-# config/wallet/btc_watch.yaml, btc_keygen.yaml
+# config/wallet/btc/watch.yaml, btc/keygen.yaml
 address_type: "bech32"
 ```
 
 ### Pattern 6: P2WSH Native SegWit 2-of-3 Multisig
 
 ```yaml
-# config/wallet/btc_watch.yaml, btc_keygen.yaml, btc_sign1.yaml, btc_sign2.yaml
+# config/wallet/btc/watch.yaml, btc/keygen.yaml, btc/sign1.yaml, btc/sign2.yaml
 address_type: "bech32"
 ```
 
 ### Pattern 7: P2WSH Native SegWit 3-of-3 Multisig
 
 ```yaml
-# config/wallet/btc_watch.yaml, btc_keygen.yaml, btc_sign1.yaml, btc_sign2.yaml
+# config/wallet/btc/watch.yaml, btc/keygen.yaml, btc/sign1.yaml, btc/sign2.yaml
 address_type: "bech32"
 ```
 
 ### Pattern 8: P2SH-P2WSH 3-of-3 Multisig
 
 ```yaml
-# config/wallet/btc_watch.yaml, btc_keygen.yaml, btc_sign1.yaml, btc_sign2.yaml
+# config/wallet/btc/watch.yaml, btc/keygen.yaml, btc/sign1.yaml, btc/sign2.yaml
 address_type: "p2sh-segwit"
 ```
 
 ### Pattern 9: P2TR Taproot Single-sig
 
 ```yaml
-# config/wallet/btc_watch.yaml, btc_keygen.yaml
+# config/wallet/btc/watch.yaml, btc/keygen.yaml
 address_type: "taproot"
 ```
 
@@ -241,7 +241,7 @@ export WALLET_ADDRESS_TYPE="taproot"
 ```
 
 Required:
-- Uses `config/wallet/account_3of3.yaml` for N-of-N configuration
+- Uses `config/wallet/account/account_3of3.yaml` for N-of-N configuration
 - Bitcoin Core v22.0+ with descriptor-based wallet support
 - Address encoding: bech32m (`bcrt1p...` for regtest)
 
@@ -255,7 +255,7 @@ export WALLET_ADDRESS_TYPE="taproot"
 ```
 
 Required:
-- Uses `config/wallet/account_2of3.yaml` for 2-of-3 configuration
+- Uses `config/wallet/account/account_2of3.yaml` for 2-of-3 configuration
 - Bitcoin Core v22.0+ with Taproot/Tapscript support
 - Address encoding: bech32m (`bcrt1p...` for regtest)
 

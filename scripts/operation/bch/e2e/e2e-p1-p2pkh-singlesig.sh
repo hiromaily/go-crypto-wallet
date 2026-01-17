@@ -34,7 +34,7 @@ NON_INTERACTIVE=false
 RESET_STATE=false
 
 # Use single-sig account configuration for Pattern 1
-CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account.yaml"
+CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account/account.yaml"
 export BCH_ACCOUNT_CONF="${CONFIG_ACCOUNT}"
 
 ###############################################################################

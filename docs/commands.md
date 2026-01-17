@@ -418,6 +418,6 @@ All wallet commands support the following global flags:
 **Example:**
 
 ```bash
-watch --coin eth --conf config/wallet/eth_watch.toml create deposit
+watch --coin eth --conf config/wallet/eth/watch.yaml create deposit
 keygen --coin btc --wallet keygen sign signature --file tx.json
 ```

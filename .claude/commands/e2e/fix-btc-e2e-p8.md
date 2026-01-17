@@ -76,7 +76,7 @@ In addition to Required Documentation in common rules, refer to:
 - @scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh - Target script
 - @scripts/operation/btc/e2e/e2e-p2-p2pkh-2of3.sh - Pattern 2 script (2-of-3 reference)
 - @scripts/operation/btc/e2e/e2e-p1-p2pkh-singlesig.sh - Pattern 1 script (Single-sig reference)
-- @config/wallet/account_3of3.yaml - 3-of-3 multisig config
+- @config/wallet/account/account_3of3.yaml - 3-of-3 multisig config
 
 ## Pre-check: Environment Variables
 

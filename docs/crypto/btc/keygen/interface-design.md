@@ -47,16 +47,16 @@ type KeyType string
 const (
     // KeyTypeBIP44 represents BIP44 (Legacy P2PKH)
     KeyTypeBIP44 KeyType = "bip44"
-    
+
     // KeyTypeBIP49 represents BIP49 (P2SH-SegWit)
     KeyTypeBIP49 KeyType = "bip49"
-    
+
     // KeyTypeBIP84 represents BIP84 (Native SegWit P2WPKH)
     KeyTypeBIP84 KeyType = "bip84"
-    
+
     // KeyTypeBIP86 represents BIP86 (Taproot)
     KeyTypeBIP86 KeyType = "bip86"
-    
+
     // KeyTypeMuSig2 represents MuSig2 aggregated keys
     KeyTypeMuSig2 KeyType = "musig2"
 )
@@ -110,17 +110,17 @@ import (
 type Generator interface {
     // KeyType returns the key type this generator supports
     KeyType() domainKey.KeyType
-    
+
     // CreateKey creates keys based on the seed and account type
     CreateKey(
         seed []byte,
         accountType domainAccount.AccountType,
         idxFrom, count uint32,
     ) ([]domainKey.WalletKey, error)
-    
+
     // SupportsAddressType checks if this generator supports the given address type
     SupportsAddressType(addrType address.AddrType) bool
-    
+
     // GetDerivationPath returns the derivation path for the given account and index
     GetDerivationPath(accountType domainAccount.AccountType, index uint32) string
 }
@@ -229,7 +229,7 @@ package key
 
 import (
     "fmt"
-    
+
     domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
     domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
     "github.com/btcsuite/btcd/chaincfg"
@@ -251,7 +251,7 @@ func (f *Factory) CreateGenerator(
     if err := keyType.Validate(); err != nil {
         return nil, fmt.Errorf("invalid key type: %w", err)
     }
-    
+
     switch keyType {
     case domainKey.KeyTypeBIP44:
         return NewBIP44Generator(coinTypeCode, conf), nil
@@ -311,7 +311,7 @@ func (c *container) newKeyGenerator() key.Generator {
     default:
         panic(fmt.Sprintf("coinType[%s] is not implemented yet.", c.conf.CoinTypeCode))
     }
-    
+
     // Use factory to create generator based on key type
     factory := key.NewFactory()
     keyType := c.getKeyType() // Get from config or default to BIP44
@@ -319,7 +319,7 @@ func (c *container) newKeyGenerator() key.Generator {
     if err != nil {
         panic(fmt.Sprintf("failed to create key generator: %v", err))
     }
-    
+
     return generator
 }
 
@@ -362,10 +362,10 @@ func (k *HDKey) SupportsAddressType(addrType address.AddrType) bool {
 }
 
 func (k *HDKey) GetDerivationPath(accountType domainAccount.AccountType, index uint32) string {
-    return fmt.Sprintf("m/%d'/%d'/%d'/0/%d", 
-        k.purpose.Uint32(), 
-        k.coinType.Uint32(), 
-        accountType.Uint32(), 
+    return fmt.Sprintf("m/%d'/%d'/%d'/0/%d",
+        k.purpose.Uint32(),
+        k.coinType.Uint32(),
+        accountType.Uint32(),
         index)
 }
 ```
@@ -375,26 +375,31 @@ func (k *HDKey) GetDerivationPath(accountType domainAccount.AccountType, index u
 ## Benefits
 
 ### 1. **Extensibility**
+
 - Easy to add new key types (BIP86, MuSig2, etc.)
 - No need to modify existing code
 - Clear separation of concerns
 
 ### 2. **Testability**
+
 - Each generator can be tested independently
 - Mock generators for testing
 - Clear interface contracts
 
 ### 3. **Flexibility**
+
 - Choose key type at runtime based on configuration
 - Support multiple key types simultaneously
 - Easy to switch between key types
 
 ### 4. **Maintainability**
+
 - Clear code organization
 - Each key type has its own implementation
 - Easier to understand and modify
 
 ### 5. **Future-Proof**
+
 - Ready for new Bitcoin improvements
 - Easy to add quantum-resistant key types
 - Supports evolving standards
@@ -441,7 +446,7 @@ func (k *HDKey) GetDerivationPath(accountType domainAccount.AccountType, index u
 ### Configuration
 
 ```toml
-# config/wallet/btc_watch.toml
+# config/wallet/btc/watch.yaml
 [wallet]
 coin_type = "btc"
 key_type = "bip86"  # Use Taproot
@@ -509,4 +514,3 @@ This design provides:
 6. **Backward compatibility** with existing code
 
 This approach allows the system to evolve with Bitcoin standards while maintaining clean, testable, and maintainable code.
-

@@ -59,13 +59,13 @@ bch_get_config_paths() {
 		return 1
 	fi
 
-	BCH_CONFIG_WATCH="${PROJECT_ROOT}/config/wallet/bch_watch.yaml"
-	BCH_CONFIG_KEYGEN="${PROJECT_ROOT}/config/wallet/bch_keygen.yaml"
-	BCH_CONFIG_SIGN1="${PROJECT_ROOT}/config/wallet/bch_sign1.yaml"
-	BCH_CONFIG_SIGN2="${PROJECT_ROOT}/config/wallet/bch_sign2.yaml"
-	BCH_CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account.yaml"
-	BCH_CONFIG_ACCOUNT_2OF3="${PROJECT_ROOT}/config/wallet/account_2of3.yaml"
-	BCH_CONFIG_ACCOUNT_3OF3="${PROJECT_ROOT}/config/wallet/account_3of3.yaml"
+	BCH_CONFIG_WATCH="${PROJECT_ROOT}/config/wallet/bch/watch.yaml"
+	BCH_CONFIG_KEYGEN="${PROJECT_ROOT}/config/wallet/bch/keygen.yaml"
+	BCH_CONFIG_SIGN1="${PROJECT_ROOT}/config/wallet/bch/sign1.yaml"
+	BCH_CONFIG_SIGN2="${PROJECT_ROOT}/config/wallet/bch/sign2.yaml"
+	BCH_CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account/account.yaml"
+	BCH_CONFIG_ACCOUNT_2OF3="${PROJECT_ROOT}/config/wallet/account/account_2of3.yaml"
+	BCH_CONFIG_ACCOUNT_3OF3="${PROJECT_ROOT}/config/wallet/account/account_3of3.yaml"
 }
 
 ###############################################################################

@@ -35,7 +35,7 @@ NON_INTERACTIVE=false
 RESET_STATE=false
 
 # Use 2-of-3 account configuration for Tapscript 2-of-3
-CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account_2of3.yaml"
+CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account/account_2of3.yaml"
 export BTC_ACCOUNT_CONF="${CONFIG_ACCOUNT}"
 
 # Pattern 11 requires: address_type: "taproot"

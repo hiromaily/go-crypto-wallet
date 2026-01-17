@@ -194,16 +194,16 @@ func (u *SignTransactionUseCase) Execute(ctx context.Context, req *SignTxRequest
 
 ## Configuration
 
-```toml
-# config/wallet/eth_watch.toml
-coin_type = "eth"
-network_type = "mainnet"  # mainnet, goerli, sepolia
+```yaml
+# config/wallet/eth/watch.yaml
+coin_type: eth
+network_type: mainnet  # mainnet, goerli, sepolia
 
-[ethereum]
-host = "localhost"
-port = 8545
-# または Infura等のURL
-url = "https://mainnet.infura.io/v3/YOUR_KEY"
+ethereum:
+  host: localhost
+  port: 8545
+  # または Infura等のURL
+  url: https://mainnet.infura.io/v3/YOUR_KEY
 ```
 
 ## Testing

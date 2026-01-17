@@ -78,7 +78,7 @@ In addition to Required Documentation in common rules, refer to:
 
 - @scripts/operation/btc/e2e/e2e-p6-p2wsh-2of3.sh - Pattern 6 script (P2WSH 2-of-3 reference)
 - @scripts/operation/btc/e2e/e2e-p8-p2sh-p2wsh-3of3.sh - Pattern 8 script (P2SH-P2WSH 3-of-3 reference)
-- @config/wallet/account_3of3.yaml - 3-of-3 multisig config
+- @config/wallet/account/account_3of3.yaml - 3-of-3 multisig config
 
 ## Pre-check: Environment Variables
 

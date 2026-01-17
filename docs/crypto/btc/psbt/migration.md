@@ -181,10 +181,10 @@ tar -tzf psbt-migration-backup-$(date +%Y%m%d).tar.gz | head -20
 
 ```bash
 # Clone production config for testnet
-cp config/wallet/btc_watch.toml config/wallet/btc_watch_testnet.toml
+cp config/wallet/btc/watch.yaml config/wallet/btc/watch_testnet.yaml
 
 # Update RPC endpoint to testnet node
-vim config/wallet/btc_watch_testnet.toml
+vim config/wallet/btc/watch_testnet.yaml
 # Change:
 # host = "mainnet-node:8332"
 # To:

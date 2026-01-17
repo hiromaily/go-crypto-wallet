@@ -6,32 +6,55 @@ This directory contains configuration files for each wallet type and cryptocurre
 
 ```
 config/wallet/
-├── btc_*.yaml         # Bitcoin wallet configurations
-├── bch_*.yaml         # Bitcoin Cash wallet configurations
-├── eth_*.yaml         # Ethereum wallet configurations
-├── xrp_*.yaml         # XRP (Ripple) wallet configurations
-├── account*.yaml      # Account type configurations
+├── btc/               # Bitcoin wallet configurations
+│   ├── watch.yaml     # BTC Watch-only wallet (online)
+│   ├── keygen.yaml    # BTC Keygen wallet (offline recommended)
+│   ├── sign.yaml      # BTC Sign wallet (offline recommended)
+│   ├── sign1.yaml     # Multisig signer 1
+│   └── sign2.yaml     # Multisig signer 2
+├── bch/               # Bitcoin Cash wallet configurations
+│   ├── watch.yaml
+│   ├── keygen.yaml
+│   ├── sign.yaml
+│   ├── sign1.yaml
+│   └── sign2.yaml
+├── eth/               # Ethereum wallet configurations
+│   ├── watch.yaml
+│   ├── keygen.yaml
+│   └── sign.yaml
+├── xrp/               # XRP (Ripple) wallet configurations
+│   ├── watch.yaml
+│   └── keygen.yaml
+├── account/           # Account type configurations
+│   ├── account.yaml        # Single-sig account
+│   ├── account_2of3.yaml   # 2-of-3 multisig account
+│   └── account_3of3.yaml   # 3-of-3 multisig account
 └── archive/           # Legacy TOML configurations (deprecated)
+    ├── btc/
+    ├── bch/
+    ├── eth/
+    ├── xrp/
+    └── account/
 ```
 
 ## Configuration File Types
 
-### Wallet Config (`{chain}_{wallet_type}.yaml`)
+### Wallet Config (`{chain}/{wallet_type}.yaml`)
 
 | File | Purpose |
 |------|---------|
-| `btc_watch.yaml` | BTC Watch-only wallet (online) |
-| `btc_keygen.yaml` | BTC Keygen wallet (offline recommended) |
-| `btc_sign.yaml` | BTC Sign wallet (offline recommended) |
-| `btc_sign1.yaml` / `btc_sign2.yaml` | Multisig signers 1/2 |
+| `btc/watch.yaml` | BTC Watch-only wallet (online) |
+| `btc/keygen.yaml` | BTC Keygen wallet (offline recommended) |
+| `btc/sign.yaml` | BTC Sign wallet (offline recommended) |
+| `btc/sign1.yaml` / `btc/sign2.yaml` | Multisig signers 1/2 |
 
-### Account Config (`account*.yaml`)
+### Account Config (`account/account*.yaml`)
 
 | File | Purpose | Use Case |
 |------|---------|----------|
-| `account.yaml` | Single-sig account configuration | Pattern 1, 3, 5, 9 |
-| `account_2of3.yaml` | 2-of-3 multisig account configuration | Pattern 2, 4 |
-| `account_3of3.yaml` | 3-of-3 multisig account configuration | Pattern 8 |
+| `account/account.yaml` | Single-sig account configuration | Pattern 1, 3, 5, 9 |
+| `account/account_2of3.yaml` | 2-of-3 multisig account configuration | Pattern 2, 4 |
+| `account/account_3of3.yaml` | 3-of-3 multisig account configuration | Pattern 8 |
 
 ## ⚠️ Important: Configuration File Policy
 

@@ -31,7 +31,7 @@ NON_INTERACTIVE=false
 RESET_STATE=false
 
 # Use 3-of-3 multisig account configuration
-CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account_3of3.yaml"
+CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account/account_3of3.yaml"
 export BTC_ACCOUNT_CONF="${CONFIG_ACCOUNT}"
 
 # Pattern 8 requires: address_type: "p2sh-segwit"

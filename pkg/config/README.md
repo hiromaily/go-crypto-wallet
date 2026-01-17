@@ -61,7 +61,7 @@ export WALLET_ADDRESS_TYPE=legacy
 export WALLET_MYSQL_HOST=localhost:3307
 export WALLET_MYSQL_USER=testuser
 export WALLET_MYSQL_PASS=testpass
-keygen -c config/wallet/btc_keygen.yaml create seed
+keygen -c config/wallet/btc/keygen.yaml create seed
 ```
 
 #### Override Bitcoin node connection
@@ -70,7 +70,7 @@ keygen -c config/wallet/btc_keygen.yaml create seed
 export WALLET_BITCOIN_HOST=127.0.0.1:18443
 export WALLET_BITCOIN_USER=rpcuser
 export WALLET_BITCOIN_PASS=rpcpassword
-watch -c config/wallet/btc_watch.yaml balance
+watch -c config/wallet/btc/watch.yaml balance
 ```
 
 ### Docker / CI Usage

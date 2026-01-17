@@ -117,7 +117,7 @@ In addition to Required Documentation in common rules, refer to:
 - @docs/crypto/btc/operations/e2e-transaction-patterns.md - Pattern 10 details
 - @scripts/operation/btc/e2e/e2e-p9-p2tr-singlesig.sh - Pattern 9 script (Taproot reference)
 - @scripts/operation/btc/e2e/e2e-p7-p2wsh-3of3.sh - Pattern 7 script (3-of-3 multisig reference)
-- @config/wallet/account_3of3.yaml - 3-of-3 account config
+- @config/wallet/account/account_3of3.yaml - 3-of-3 account config
 
 ## Pre-check: Environment Variables
 

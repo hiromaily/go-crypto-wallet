@@ -59,13 +59,13 @@ btc_get_config_paths() {
 		return 1
 	fi
 
-	BTC_CONFIG_WATCH="${PROJECT_ROOT}/config/wallet/btc_watch.yaml"
-	BTC_CONFIG_KEYGEN="${PROJECT_ROOT}/config/wallet/btc_keygen.yaml"
-	BTC_CONFIG_SIGN1="${PROJECT_ROOT}/config/wallet/btc_sign1.yaml"
-	BTC_CONFIG_SIGN2="${PROJECT_ROOT}/config/wallet/btc_sign2.yaml"
-	BTC_CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account.yaml"
-	BTC_CONFIG_ACCOUNT_2OF3="${PROJECT_ROOT}/config/wallet/account_2of3.yaml"
-	BTC_CONFIG_ACCOUNT_3OF3="${PROJECT_ROOT}/config/wallet/account_3of3.yaml"
+	BTC_CONFIG_WATCH="${PROJECT_ROOT}/config/wallet/btc/watch.yaml"
+	BTC_CONFIG_KEYGEN="${PROJECT_ROOT}/config/wallet/btc/keygen.yaml"
+	BTC_CONFIG_SIGN1="${PROJECT_ROOT}/config/wallet/btc/sign1.yaml"
+	BTC_CONFIG_SIGN2="${PROJECT_ROOT}/config/wallet/btc/sign2.yaml"
+	BTC_CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account/account.yaml"
+	BTC_CONFIG_ACCOUNT_2OF3="${PROJECT_ROOT}/config/wallet/account/account_2of3.yaml"
+	BTC_CONFIG_ACCOUNT_3OF3="${PROJECT_ROOT}/config/wallet/account/account_3of3.yaml"
 }
 
 ###############################################################################

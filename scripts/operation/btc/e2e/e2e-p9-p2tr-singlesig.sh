@@ -32,7 +32,7 @@ NON_INTERACTIVE=false
 RESET_STATE=false
 
 # Use single-sig account configuration
-CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account.yaml"
+CONFIG_ACCOUNT="${PROJECT_ROOT}/config/wallet/account/account.yaml"
 export BTC_ACCOUNT_CONF="${CONFIG_ACCOUNT}"
 
 # Pattern 9 requires: address_type: "taproot"

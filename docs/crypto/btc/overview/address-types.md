@@ -271,7 +271,7 @@ export WALLET_ADDRESS_TYPE="bc1p"     # ❌ WRONG - that's a prefix, not a type
 **Configuration:**
 
 ```yaml
-# config/wallet/btc_keygen.yaml
+# config/wallet/btc/keygen.yaml
 address_type: "taproot"  # This is all you need!
 # key_type is automatically set to "bip86"
 ```

@@ -185,16 +185,16 @@ BCHとBTCは多くのロジックを共有できますが、以下の点で分�
 
 ## Configuration
 
-```toml
-# config/wallet/bch_watch.toml
-coin_type = "bch"
-network_type = "mainnet"  # mainnet, testnet
+```yaml
+# config/wallet/bch/watch.yaml
+coin_type: bch
+network_type: mainnet  # mainnet, testnet
 
-[bitcoin]  # Bitcoin Cash Node
-host = "localhost"
-port = 8332
-user = "user"
-pass = "password"
+bitcoin:  # Bitcoin Cash Node
+  host: localhost
+  port: 8332
+  user: user
+  pass: password
 ```
 
 ## Testing
@@ -204,7 +204,7 @@ pass = "password"
 go test ./internal/infrastructure/api/btc/bch/...
 
 # BCH関連の設定ファイル確認
-ls config/wallet/bch_*.toml
+ls config/wallet/bch/*.yaml
 ```
 
 ## Related Documentation
