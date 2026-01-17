@@ -7,7 +7,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/mattn/go-sqlite3"
+	"modernc.org/sqlite"
+	sqlitelib "modernc.org/sqlite/lib"
 
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/multisig"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlite/sqlcgen"
@@ -40,11 +41,16 @@ func (r *NonceRepositorySqlc) SaveNonce(
 		CreatedAt:     sql.NullString{String: time.Now().Format("2006-01-02 15:04:05"), Valid: true},
 	})
 	if err != nil {
-		// Check for duplicate key error (SQLite error code 1555 or 2067)
-		var sqliteErr sqlite3.Error
-		if errors.As(err, &sqliteErr) &&
-			(sqliteErr.Code == sqlite3.ErrConstraint || sqliteErr.ExtendedCode == sqlite3.ErrConstraintUnique) {
-			return multisig.ErrNonceDuplicate
+		// Check for duplicate key error
+		// SQLite error code: SQLITE_CONSTRAINT_PRIMARYKEY=1555 or SQLITE_CONSTRAINT_UNIQUE=2067
+		var sqliteErr *sqlite.Error
+		if errors.As(err, &sqliteErr) {
+			code := sqliteErr.Code()
+			if code == sqlitelib.SQLITE_CONSTRAINT ||
+				code == sqlitelib.SQLITE_CONSTRAINT_UNIQUE ||
+				code == sqlitelib.SQLITE_CONSTRAINT_PRIMARYKEY {
+				return multisig.ErrNonceDuplicate
+			}
 		}
 		return fmt.Errorf("failed to save nonce: %w", err)
 	}

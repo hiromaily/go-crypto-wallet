@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite" // Pure Go SQLite driver (CGO-free)
 
 	"github.com/hiromaily/go-crypto-wallet/internal/domain/multisig"
 	coldsqlite "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/sqlite"
@@ -257,7 +257,7 @@ func testDeleteOperations(t *testing.T, repo *coldsqlite.NonceRepositorySqlc, ct
 
 // TestNonceRepositorySqlc tests the SQLC-based nonce repository implementation
 func TestNonceRepositorySqlc(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite", ":memory:")
 	if err != nil {
 		t.Fatalf("failed to open database: %v", err)
 	}
