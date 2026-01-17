@@ -7,6 +7,7 @@ import (
 
 	"github.com/hiromaily/go-crypto-wallet/pkg/config"
 	"github.com/hiromaily/go-crypto-wallet/pkg/db/mysql"
+	"github.com/hiromaily/go-crypto-wallet/pkg/db/sqlite"
 	"github.com/hiromaily/go-crypto-wallet/pkg/logger"
 	"github.com/hiromaily/go-crypto-wallet/pkg/serializer"
 	"github.com/hiromaily/go-crypto-wallet/pkg/uuid"
@@ -15,7 +16,9 @@ import (
 // PkgContainer is the interface for the package container
 type PkgContainer interface {
 	NewUUIDHandler() uuid.UUIDHandler
+	NewDatabaseClient() *sql.DB
 	NewMySQLClient() *sql.DB
+	NewSQLiteClient() *sql.DB
 	NewLogger() logger.Logger
 	NewGRPCClient() *grpc.ClientConn
 	NewSerializer() serializer.Serializer
@@ -33,7 +36,8 @@ type pkgContainer struct {
 	// uuid
 	uuidHandler uuid.UUIDHandler
 	// db
-	mysqlClient *sql.DB
+	mysqlClient  *sql.DB
+	sqliteClient *sql.DB
 	// grpc
 	grpcConn *grpc.ClientConn
 	// serial
@@ -72,6 +76,18 @@ func (c *pkgContainer) NewUUIDHandler() uuid.UUIDHandler {
 	return c.uuidHandler
 }
 
+// NewDatabaseClient creates a database client based on configured type
+func (c *pkgContainer) NewDatabaseClient() *sql.DB {
+	switch c.config.Database.Type {
+	case "mysql":
+		return c.NewMySQLClient()
+	case "sqlite":
+		return c.NewSQLiteClient()
+	default:
+		panic("unsupported database type: " + c.config.Database.Type)
+	}
+}
+
 // NewMySQLClient creates a new MySQL client
 func (c *pkgContainer) NewMySQLClient() *sql.DB {
 	if c.mysqlClient == nil {
@@ -82,6 +98,18 @@ func (c *pkgContainer) NewMySQLClient() *sql.DB {
 		c.mysqlClient = dbConn
 	}
 	return c.mysqlClient
+}
+
+// NewSQLiteClient creates a new SQLite client
+func (c *pkgContainer) NewSQLiteClient() *sql.DB {
+	if c.sqliteClient == nil {
+		dbConn, err := sqlite.NewSQLite(&c.config.SQLite)
+		if err != nil {
+			panic(err)
+		}
+		c.sqliteClient = dbConn
+	}
+	return c.sqliteClient
 }
 
 // NewGRPCClient creates a new gRPC client

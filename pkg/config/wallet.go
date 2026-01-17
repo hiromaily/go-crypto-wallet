@@ -24,7 +24,9 @@ type WalletRoot struct {
 	Ripple       Ripple                  `toml:"ripple" yaml:"ripple" mapstructure:"ripple"`
 	Logger       Logger                  `toml:"logger" yaml:"logger" mapstructure:"logger"`
 	Tracer       Tracer                  `toml:"tracer" yaml:"tracer" mapstructure:"tracer"`
+	Database     Database                `toml:"database" yaml:"database" mapstructure:"database"`
 	MySQL        MySQL                   `toml:"mysql" yaml:"mysql" mapstructure:"mysql"`
+	SQLite       SQLite                  `toml:"sqlite" yaml:"sqlite" mapstructure:"sqlite"`
 	FilePath     FilePath                `toml:"file_path" yaml:"file_path" mapstructure:"file_path"`
 }
 
@@ -128,12 +130,23 @@ type TracerDetail struct {
 	IsDebug             bool    `toml:"is_debug" yaml:"is_debug" mapstructure:"is_debug"`
 }
 
+// Database config for database type selection
+type Database struct {
+	Type string `toml:"type" yaml:"type" mapstructure:"type" validate:"required,oneof=mysql sqlite"`
+}
+
 // MySQL info
 type MySQL struct {
 	Host  string `toml:"host" yaml:"host" mapstructure:"host" validate:"required"`
 	DB    string `toml:"dbname" yaml:"dbname" mapstructure:"dbname" validate:"required"`
 	User  string `toml:"user" yaml:"user" mapstructure:"user" validate:"required"`
 	Pass  string `toml:"pass" yaml:"pass" mapstructure:"pass" validate:"required"`
+	Debug bool   `toml:"debug" yaml:"debug" mapstructure:"debug"`
+}
+
+// SQLite info
+type SQLite struct {
+	Path  string `toml:"path" yaml:"path" mapstructure:"path" validate:"required"`
 	Debug bool   `toml:"debug" yaml:"debug" mapstructure:"debug"`
 }
 
