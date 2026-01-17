@@ -78,19 +78,19 @@ singlesig_setup_phase() {
 
 	# Export addresses from keygen
 	log_substep "Exporting addresses from keygen wallet"
-	local accounts="client payment"
+	local accounts=("client" "payment")
 	declare -A address_files
 
-	for account in $accounts; do
+	for account in "${accounts[@]}"; do
 		log_info "Exporting ${account} addresses"
 		file_output=$(keygen -c "${BCH_CONFIG_KEYGEN}" --coin "${BCH_COIN}" export address --account "${account}")
-		address_files[$account]="${file_output##*\[fileName\]: }"
+		address_files[$account]=$(bch_extract_file_path "$file_output")
 		log_info "  ${account}: ${address_files[$account]}"
 	done
 
 	# Import addresses into watch wallet
 	log_substep "Importing addresses into watch wallet"
-	for account in $accounts; do
+	for account in "${accounts[@]}"; do
 		log_info "Importing ${account} addresses"
 		watch -c "${BCH_CONFIG_WATCH}" --coin "${BCH_COIN}" import address --file "${address_files[$account]}"
 	done

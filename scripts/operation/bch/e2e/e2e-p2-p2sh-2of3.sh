@@ -249,7 +249,7 @@ transaction_flow_phase() {
 	}
 
 	# Extract file path
-	tx_unsigned="${tx_file##*\[fileName\]: }"
+	tx_unsigned=$(bch_extract_file_path "$tx_file")
 	log_info "Created unsigned transaction: $tx_unsigned"
 
 	# Sign with keygen wallet (1st signature)
@@ -262,13 +262,13 @@ transaction_flow_phase() {
 		keygen -c "${BCH_CONFIG_KEYGEN}" api walletlock
 	fi
 
-	tx_signed1="${tx_file_signed##*\[fileName\]: }"
+	tx_signed1=$(bch_extract_file_path "$tx_file_signed")
 	log_info "Signed transaction (1st): $tx_signed1"
 
 	# Sign with sign1 wallet (2nd signature - completing 2-of-3)
 	log_substep "Signing with sign1 wallet (2nd signature - completing 2-of-3)"
 	tx_file_signed2=$(sign1 --conf "${BCH_CONFIG_SIGN1}" --wallet sign1 sign --file "${tx_signed1}")
-	tx_signed2="${tx_file_signed2##*\[fileName\]: }"
+	tx_signed2=$(bch_extract_file_path "$tx_file_signed2")
 	log_info "Signed transaction (2nd): $tx_signed2"
 
 	# Note: sign2 is NOT needed for 2-of-3 (we only need 2 signatures)

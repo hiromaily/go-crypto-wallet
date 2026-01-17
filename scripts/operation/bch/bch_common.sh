@@ -124,13 +124,13 @@ bch_remove_volume() {
 
 	log_info "Forcefully removing database volume: $volume_name"
 
-	while [ $removal_attempts -lt "$max_attempts" ]; do
+	while [ "$removal_attempts" -lt "$max_attempts" ]; do
 		if docker volume rm "$volume_name" 2>/dev/null; then
 			log_info "Volume removed successfully on attempt $((removal_attempts + 1))"
 			return 0
 		fi
 		removal_attempts=$((removal_attempts + 1))
-		if [ $removal_attempts -lt "$max_attempts" ]; then
+		if [ "$removal_attempts" -lt "$max_attempts" ]; then
 			log_warn "Volume removal failed, retrying in 2 seconds... (attempt $removal_attempts/$max_attempts)"
 			sleep 2
 		fi
@@ -149,13 +149,13 @@ bch_verify_volume_deleted() {
 
 	log_info "Verifying volume deletion..."
 
-	while [ $counter -lt "$max_wait" ]; do
+	while [ "$counter" -lt "$max_wait" ]; do
 		if ! docker volume inspect "$volume_name" >/dev/null 2>&1; then
 			log_info "Volume successfully deleted"
 			return 0
 		fi
 		counter=$((counter + 1))
-		if [ $counter -lt "$max_wait" ]; then
+		if [ "$counter" -lt "$max_wait" ]; then
 			log_warn "Volume still exists, waiting... (${counter}s/${max_wait}s)"
 			sleep 1
 		fi
@@ -333,7 +333,7 @@ bch_wait_for_balance() {
 
 	log_info "Waiting for blockchain sync and balance update..."
 
-	while [ $elapsed -lt "$max_wait" ]; do
+	while [ "$elapsed" -lt "$max_wait" ]; do
 		# Check balance using Bitcoin Cash RPC directly
 		local balance_json
 		balance_json=$(bch_cli "bch-watch" -rpcwallet=watch getbalances 2>&1 || true)
@@ -349,7 +349,7 @@ bch_wait_for_balance() {
 
 		sleep "$wait_interval"
 		elapsed=$((elapsed + wait_interval))
-		if [ $elapsed -lt "$max_wait" ]; then
+		if [ "$elapsed" -lt "$max_wait" ]; then
 			log_info "Still waiting for balance update... (${elapsed}s/${max_wait}s)"
 		fi
 	done
@@ -387,7 +387,7 @@ bch_generate_test_utxos() {
 # Usage: file_path=$(bch_extract_file_path "$output")
 bch_extract_file_path() {
 	local output="$1"
-	echo "$output" | sed -n 's/.*\[fileName\]: //p'
+	echo "${output##*\[fileName\]: }"
 }
 
 ###############################################################################
