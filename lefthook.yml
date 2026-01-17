@@ -8,14 +8,14 @@ commit-msg:
         # Format: type(scope)?: description
         # Types: feat, fix, docs, refactor, test, ci, chore, build, perf, style, revert
         pattern="^(feat|fix|docs|refactor|test|ci|chore|build|perf|style|revert)(\([a-zA-Z0-9_-]+\))?(!)?: .{1,}"
-        
+
         # Also allow merge commits and revert commits
         merge_pattern="^Merge (branch|pull request|remote-tracking branch)"
         revert_pattern="^Revert \""
-        
+
         commit_msg=$(cat "$1")
         first_line=$(echo "$commit_msg" | head -n 1)
-        
+
         if echo "$first_line" | grep -qE "$pattern"; then
           exit 0
         elif echo "$first_line" | grep -qE "$merge_pattern"; then

@@ -129,6 +129,9 @@ gh pr list --search "issue-{number}"
 
 ## Commit Conventions
 
+This project uses [Conventional Commits](https://www.conventionalcommits.org/) format.
+**Commit messages are validated by `lefthook` commit-msg hook.**
+
 ### Format
 
 ```
@@ -140,23 +143,37 @@ gh pr list --search "issue-{number}"
 Closes #{issue_number}
 ```
 
-### Types
+### Types (Required)
 
-| Type | Description |
-|------|-------------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `refactor` | Code refactoring |
-| `docs` | Documentation |
-| `test` | Tests |
-| `ci` | CI/CD changes |
-| `chore` | Maintenance |
+| Type | Description | Release Impact |
+|------|-------------|----------------|
+| `feat` | New feature | MINOR |
+| `fix` | Bug fix | PATCH |
+| `docs` | Documentation only | - |
+| `refactor` | Code refactoring (no feature/fix) | - |
+| `test` | Adding or updating tests | - |
+| `ci` | CI/CD changes | - |
+| `chore` | Maintenance tasks | - |
+| `build` | Build system changes | - |
+| `perf` | Performance improvements | PATCH |
+| `style` | Code style (formatting, etc.) | - |
+| `revert` | Revert a previous commit | - |
 
-### Scope (optional)
+### Breaking Changes
+
+Add `!` after type/scope to indicate breaking changes:
+
+```bash
+feat(btc)!: change address format to bech32m only
+fix!: remove deprecated API endpoint
+```
+
+### Scope (Optional)
 
 | Scope | Description |
 |-------|-------------|
 | `btc` | Bitcoin-related |
+| `bch` | Bitcoin Cash-related |
 | `eth` | Ethereum-related |
 | `xrp` | XRP-related |
 | `db` | Database |
@@ -167,7 +184,7 @@ Closes #{issue_number}
 ### Examples
 
 ```bash
-# Feature
+# Feature with scope
 git commit -m "feat(btc): add taproot address support
 
 - Add bech32m encoding
@@ -175,8 +192,8 @@ git commit -m "feat(btc): add taproot address support
 
 Closes #123"
 
-# Bug fix
-git commit -m "fix(db): resolve connection timeout
+# Bug fix without scope
+git commit -m "fix: resolve database connection timeout
 
 - Increase pool timeout
 - Add retry logic
@@ -190,6 +207,25 @@ git commit -m "docs: update architecture guide
 - Clarify dependency rules
 
 Closes #789"
+
+# Breaking change
+git commit -m "feat(btc)!: require bech32m for all taproot addresses
+
+BREAKING CHANGE: Legacy address format no longer supported
+
+Closes #999"
+```
+
+### Validation Error
+
+If commit message validation fails:
+
+```
+ERROR: Commit message does not follow Conventional Commits format.
+
+Expected format: <type>(<scope>): <description>
+
+Types: feat, fix, docs, refactor, test, ci, chore, build, perf, style, revert
 ```
 
 ## Pull Request Creation
