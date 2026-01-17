@@ -202,12 +202,6 @@ func NewWallet(file string, wtype domainWallet.WalletType, coinTypeCode domainCo
 	return &conf, nil
 }
 
-// loadWallet loads wallet configuration from a TOML file.
-// This function is kept for backward compatibility with tests.
-func loadWallet(path string) (*WalletRoot, error) {
-	return loadTOML[WalletRoot](path)
-}
-
 // validate validates the wallet configuration structure based on wallet type and coin type.
 func (c *WalletRoot) validate(wtype domainWallet.WalletType, coinTypeCode domainCoin.CoinTypeCode) error {
 	validate := validator.New()
@@ -281,8 +275,9 @@ func (c *WalletRoot) validateDatabase() error {
 	return nil
 }
 
-// ValidateERC20 validates that the specified ERC20 token is configured.
-func (c *WalletRoot) ValidateERC20(token domainCoin.ERC20Token) error {
+// HasERC20Config checks if the specified ERC20 token is configured.
+// This is a runtime validation that verifies the token exists in the ERC20s map.
+func (c *WalletRoot) HasERC20Config(token domainCoin.ERC20Token) error {
 	if _, ok := c.Ethereum.ERC20s[token]; !ok {
 		return fmt.Errorf("erc20 token information for [%s] is required", token.String())
 	}

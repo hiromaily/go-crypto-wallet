@@ -24,6 +24,8 @@ bin/
 /cmd/keygen/keygen
 /cmd/sign/sign
 /cmd/watch/watch
+/*.test
+/*.out
 
 # data directory
 data/address/*

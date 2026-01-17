@@ -162,40 +162,6 @@ func validateCommonConfig(t *testing.T, conf *WalletRoot) {
 	assert.NotEmpty(t, conf.MySQL.Host, "MySQL.Host should not be empty")
 }
 
-func TestLoadWallet(t *testing.T) {
-	// Get project path
-	gopath := os.Getenv("GOPATH")
-	if gopath == "" {
-		t.Skip("GOPATH not set, skipping integration test")
-	}
-
-	projPath := filepath.Join(gopath, "src/github.com/hiromaily/go-crypto-wallet")
-	configPath := filepath.Join(projPath, "config/wallet/btc/watch.yaml")
-
-	// Skip if config file doesn't exist
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
-		t.Skipf("Config file not found: %s", configPath)
-	}
-
-	conf, err := loadWallet(configPath)
-	require.NoError(t, err, "loadWallet() should not return error")
-	require.NotNil(t, conf, "loadWallet() returned nil config")
-
-	// Verify that viper properly loaded the TOML file
-	assert.NotEmpty(t, conf.Bitcoin.Host, "Bitcoin.Host should not be empty")
-
-	// Verify nested structures are loaded correctly
-	assert.True(t, conf.Bitcoin.Fee.AdjustmentMin != 0 || conf.Bitcoin.Fee.AdjustmentMax != 0,
-		"Bitcoin fee settings should be loaded")
-
-	// Verify map structures (if any ERC20s configured)
-	if len(conf.Ethereum.ERC20s) > 0 {
-		for token, erc20 := range conf.Ethereum.ERC20s {
-			assert.NotEmpty(t, erc20.Symbol, "ERC20 token %v should have symbol", token)
-		}
-	}
-}
-
 // TestNewWallet_YAML tests the NewWallet function with YAML configuration files.
 // This verifies that YAML configuration files are properly loaded and unmarshaled into WalletRoot structure.
 func TestNewWallet_YAML(t *testing.T) {

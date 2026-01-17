@@ -82,7 +82,7 @@ func initializeWallet() error {
 	// override config
 	conf.CoinTypeCode = domainCoin.CoinTypeCode(coinTypeCode)
 	if domainCoin.IsERC20Token(coinTypeCode) {
-		if err := conf.ValidateERC20(domainCoin.ERC20Token(coinTypeCode)); err != nil {
+		if err := conf.HasERC20Config(domainCoin.ERC20Token(coinTypeCode)); err != nil {
 			return fmt.Errorf("failed to validate ERC20 token: %w", err)
 		}
 		conf.Ethereum.ERC20Token = domainCoin.ERC20Token(coinTypeCode)
