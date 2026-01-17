@@ -277,6 +277,9 @@ bch_setup_infrastructure() {
 	# Wait for database to be healthy
 	wait_for_healthy "wallet-db" 90
 
+	# Wait for database migrations to complete
+	wait_for_migrations 120
+
 	# Start Bitcoin Cash nodes
 	log_substep "Starting Bitcoin Cash node containers"
 	# shellcheck disable=SC2086
