@@ -151,6 +151,56 @@ wait_for_port() {
 	return 1
 }
 
+# Wait for migration containers to complete
+# Usage: wait_for_migrations [max_wait_seconds]
+wait_for_migrations() {
+	local max_wait=${1:-120}
+	local counter=0
+	local migration_containers="wallet-db-migrate-watch wallet-db-migrate-keygen wallet-db-migrate-sign wallet-db-migrate-sign2"
+
+	log_info "Waiting for database migrations to complete..."
+
+	while [ $counter -lt $max_wait ]; do
+		local all_completed=true
+
+		for container in $migration_containers; do
+			# Check if container exists first
+			if ! docker ps -a --format '{{.Names}}' | grep -q "^${container}$"; then
+				continue
+			fi
+
+			# Get container state
+			local state
+			state=$(docker inspect --format='{{.State.Status}}' "$container" 2>/dev/null || echo "not_found")
+
+			if [ "$state" = "exited" ]; then
+				# Check exit code
+				local exit_code
+				exit_code=$(docker inspect --format='{{.State.ExitCode}}' "$container" 2>/dev/null || echo "1")
+				if [ "$exit_code" != "0" ]; then
+					log_error "Migration container $container failed with exit code $exit_code"
+					log_error "Container logs:"
+					docker logs "$container" 2>&1 | tail -20
+					return 1
+				fi
+			elif [ "$state" = "running" ] || [ "$state" = "created" ]; then
+				all_completed=false
+			fi
+		done
+
+		if [ "$all_completed" = true ]; then
+			log_info "All database migrations completed successfully"
+			return 0
+		fi
+
+		counter=$((counter + 1))
+		sleep 1
+	done
+
+	log_error "Database migrations did not complete within ${max_wait}s"
+	return 1
+}
+
 # Extract filename from command output
 # Usage: filename=$(extract_filename "$output")
 # Expects format: "[fileName]: /path/to/file"
