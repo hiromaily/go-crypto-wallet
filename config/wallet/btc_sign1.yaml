@@ -43,12 +43,22 @@ logger:
 tracer:
   type: "none" # none, jaeger, datadog
 
+# Database configuration - choose between mysql or sqlite
+database:
+  type: "mysql"  # mysql, sqlite
+
 mysql:
   host: "127.0.0.1:3306"
   dbname: "sign"
   user: "hiromaily"
   pass: "hiromaily"
   debug: true
+
+# SQLite configuration (used when database.type = "sqlite")
+# Uncomment and set database.type to "sqlite" to use SQLite instead of MySQL
+# sqlite:
+#   path: "./data/db/sign1.db"
+#   debug: true
 
 file_path:
   tx: "./data/tx/btc/"

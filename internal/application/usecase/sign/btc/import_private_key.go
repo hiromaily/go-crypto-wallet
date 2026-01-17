@@ -40,7 +40,7 @@ func NewImportPrivateKeyUseCase(
 
 func (u *importPrivateKeyUseCase) Import(ctx context.Context, input signusecase.ImportPrivateKeyInput) error {
 	// 1. retrieve records(private key) from account_key table
-	authKeyItem, err := u.authKeyRepo.GetOne(u.authType)
+	authKeyItem, err := u.authKeyRepo.GetOne(ctx, u.authType)
 	if err != nil {
 		return fmt.Errorf("fail to call authKeyRepo.GetOne(): %w", err)
 	}

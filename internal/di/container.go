@@ -27,6 +27,7 @@ import (
 	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
 	domainCoin "github.com/hiromaily/go-crypto-wallet/internal/domain/coin"
 	domainKey "github.com/hiromaily/go-crypto-wallet/internal/domain/key"
+	"github.com/hiromaily/go-crypto-wallet/internal/domain/multisig"
 	domainWallet "github.com/hiromaily/go-crypto-wallet/internal/domain/wallet"
 	bitcoin "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc"
 	apibtcimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/btc/btc"
@@ -36,7 +37,9 @@ import (
 	apixrpimpl "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/api/xrp/xrp"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/contract"
 	coldmysql "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/mysql"
+	coldsqlite "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/cold/sqlite"
 	watchmysql "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/mysql"
+	watchsqlite "github.com/hiromaily/go-crypto-wallet/internal/infrastructure/repository/watch/sqlite"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/address"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/descriptor"
 	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/storage/file/transaction"
@@ -181,7 +184,7 @@ func (c *container) NewKeygener() wallets.Keygener {
 func (c *container) newBTCKeygener() wallets.Keygener {
 	return btcwallet.NewBTCKeygen(
 		c.newBTC(),
-		c.pkgContainer.NewMySQLClient(),
+		c.pkgContainer.NewDatabaseClient(),
 		c.conf.AddressType,
 		c.newKeygenGenerateSeedUseCase(),
 		c.newKeygenGenerateHDWalletUseCase(),
@@ -197,7 +200,7 @@ func (c *container) newBTCKeygener() wallets.Keygener {
 func (c *container) newETHKeygener() wallets.Keygener {
 	return ethwallet.NewETHKeygen(
 		c.newETH(),
-		c.pkgContainer.NewMySQLClient(),
+		c.pkgContainer.NewDatabaseClient(),
 		c.walletType,
 		c.newKeygenGenerateSeedUseCase(),
 		c.newKeygenGenerateHDWalletUseCase(),
@@ -210,7 +213,7 @@ func (c *container) newETHKeygener() wallets.Keygener {
 func (c *container) newXRPKeygener() wallets.Keygener {
 	return xrpwallet.NewXRPKeygen(
 		c.newXRP(),
-		c.pkgContainer.NewMySQLClient(),
+		c.pkgContainer.NewDatabaseClient(),
 		c.walletType,
 		c.newKeygenGenerateSeedUseCase(),
 		c.newKeygenGenerateHDWalletUseCase(),
@@ -283,7 +286,7 @@ func (c *container) AddressType() domainAddress.AddrType {
 func (c *container) newBTCSigner(authType domainAccount.AuthType) wallets.Signer {
 	return btcwallet.NewBTCSign(
 		c.newBTC(),
-		c.pkgContainer.NewMySQLClient(),
+		c.pkgContainer.NewDatabaseClient(),
 		authType,
 		c.conf.AddressType,
 		c.NewSignGenerateSeedUseCase(),
@@ -299,7 +302,7 @@ func (c *container) newBTCSigner(authType domainAccount.AuthType) wallets.Signer
 func (c *container) newBTCWalleter() wallets.Watcher {
 	return btcwallet.NewBTCWatch(
 		c.newBTC(),
-		c.pkgContainer.NewMySQLClient(),
+		c.pkgContainer.NewDatabaseClient(),
 		c.conf.AddressType,
 		c.newBTCWatchCreateTransactionUseCase(),
 		c.newBTCWatchMonitorTransactionUseCase(),
@@ -313,7 +316,7 @@ func (c *container) newBTCWalleter() wallets.Watcher {
 func (c *container) newETHWalleter() wallets.Watcher {
 	return ethwallet.NewETHWatch(
 		c.newETH(),
-		c.pkgContainer.NewMySQLClient(),
+		c.pkgContainer.NewDatabaseClient(),
 		c.newETHWatchCreateTransactionUseCase(),
 		c.newETHWatchMonitorTransactionUseCase(),
 		c.newETHWatchSendTransactionUseCase(),
@@ -326,7 +329,7 @@ func (c *container) newETHWalleter() wallets.Watcher {
 func (c *container) newXRPWalleter() wallets.Watcher {
 	return xrpwallet.NewXRPWatch(
 		c.newXRP(),
-		c.pkgContainer.NewMySQLClient(),
+		c.pkgContainer.NewDatabaseClient(),
 		c.newXRPWatchCreateTransactionUseCase(),
 		c.newXRPWatchMonitorTransactionUseCase(),
 		c.newXRPWatchSendTransactionUseCase(),
@@ -485,59 +488,139 @@ func (c *container) newRippleAPI() *apixrpimpl.RippleAPI {
 //
 
 func (c *container) newBTCTxRepo() repowatch.BTCTxRepositorier {
-	return watchmysql.NewBTCTxRepositorySqlc(
-		c.pkgContainer.NewMySQLClient(),
-		c.conf.CoinTypeCode,
-	)
+	switch c.conf.Database.Type {
+	case "mysql":
+		return watchmysql.NewBTCTxRepositorySqlc(
+			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+		)
+	case "sqlite":
+		return watchsqlite.NewBTCTxRepositorySqlc(
+			c.pkgContainer.NewSQLiteClient(),
+			c.conf.CoinTypeCode,
+		)
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
 }
 
 func (c *container) newBTCTxInputRepo() repowatch.TxInputRepositorier {
-	return watchmysql.NewBTCTxInputRepositorySqlc(
-		c.pkgContainer.NewMySQLClient(),
-		c.conf.CoinTypeCode,
-	)
+	switch c.conf.Database.Type {
+	case "mysql":
+		return watchmysql.NewBTCTxInputRepositorySqlc(
+			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+		)
+	case "sqlite":
+		return watchsqlite.NewBTCTxInputRepositorySqlc(
+			c.pkgContainer.NewSQLiteClient(),
+			c.conf.CoinTypeCode,
+		)
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
 }
 
 func (c *container) newBTCTxOutputRepo() repowatch.TxOutputRepositorier {
-	return watchmysql.NewBTCTxOutputRepositorySqlc(
-		c.pkgContainer.NewMySQLClient(),
-		c.conf.CoinTypeCode,
-	)
+	switch c.conf.Database.Type {
+	case "mysql":
+		return watchmysql.NewBTCTxOutputRepositorySqlc(
+			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+		)
+	case "sqlite":
+		return watchsqlite.NewBTCTxOutputRepositorySqlc(
+			c.pkgContainer.NewSQLiteClient(),
+			c.conf.CoinTypeCode,
+		)
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
 }
 
 func (c *container) newTxRepo() repowatch.TxRepositorier {
-	return watchmysql.NewTxRepositorySqlc(
-		c.pkgContainer.NewMySQLClient(),
-		c.conf.CoinTypeCode,
-	)
+	switch c.conf.Database.Type {
+	case "mysql":
+		return watchmysql.NewTxRepositorySqlc(
+			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+		)
+	case "sqlite":
+		return watchsqlite.NewTxRepositorySqlc(
+			c.pkgContainer.NewSQLiteClient(),
+			c.conf.CoinTypeCode,
+		)
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
 }
 
 func (c *container) newETHTxDetailRepo() repowatch.ETHDetailTXRepositorier {
-	return watchmysql.NewETHDetailTXInputRepositorySqlc(
-		c.pkgContainer.NewMySQLClient(),
-		c.conf.CoinTypeCode,
-	)
+	switch c.conf.Database.Type {
+	case "mysql":
+		return watchmysql.NewETHDetailTXInputRepositorySqlc(
+			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+		)
+	case "sqlite":
+		return watchsqlite.NewETHDetailTXInputRepositorySqlc(
+			c.pkgContainer.NewSQLiteClient(),
+			c.conf.CoinTypeCode,
+		)
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
 }
 
 func (c *container) newXRPTxDetailRepo() repowatch.XRPDetailTXRepositorier {
-	return watchmysql.NewXRPDetailTxInputRepositorySqlc(
-		c.pkgContainer.NewMySQLClient(),
-		c.conf.CoinTypeCode,
-	)
+	switch c.conf.Database.Type {
+	case "mysql":
+		return watchmysql.NewXRPDetailTxInputRepositorySqlc(
+			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+		)
+	case "sqlite":
+		return watchsqlite.NewXRPDetailTxInputRepositorySqlc(
+			c.pkgContainer.NewSQLiteClient(),
+			c.conf.CoinTypeCode,
+		)
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
 }
 
 func (c *container) newPaymentRequestRepo() repowatch.PaymentRequestRepositorier {
-	return watchmysql.NewPaymentRequestRepositorySqlc(
-		c.pkgContainer.NewMySQLClient(),
-		c.conf.CoinTypeCode,
-	)
+	switch c.conf.Database.Type {
+	case "mysql":
+		return watchmysql.NewPaymentRequestRepositorySqlc(
+			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+		)
+	case "sqlite":
+		return watchsqlite.NewPaymentRequestRepositorySqlc(
+			c.pkgContainer.NewSQLiteClient(),
+			c.conf.CoinTypeCode,
+		)
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
 }
 
 func (c *container) newAddressRepo() repowatch.AddressRepositorier {
-	return watchmysql.NewAddressRepositorySqlc(
-		c.pkgContainer.NewMySQLClient(),
-		c.conf.CoinTypeCode,
-	)
+	switch c.conf.Database.Type {
+	case "mysql":
+		return watchmysql.NewAddressRepositorySqlc(
+			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+		)
+	case "sqlite":
+		return watchsqlite.NewAddressRepositorySqlc(
+			c.pkgContainer.NewSQLiteClient(),
+			c.conf.CoinTypeCode,
+		)
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
 }
 
 func (c *container) newAddressFileRepo() file.AddressFileRepositorier {
@@ -633,50 +716,118 @@ func (c *container) newMultiAccount() *domainAccount.MultisigConfig {
 //
 
 func (c *container) newSeedRepo() repocold.SeedRepositorier {
-	return coldmysql.NewSeedRepositorySqlc(
-		c.pkgContainer.NewMySQLClient(),
-		c.conf.CoinTypeCode,
-	)
+	switch c.conf.Database.Type {
+	case "mysql":
+		return coldmysql.NewSeedRepositorySqlc(
+			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+		)
+	case "sqlite":
+		return coldsqlite.NewSeedRepositorySqlc(
+			c.pkgContainer.NewSQLiteClient(),
+			c.conf.CoinTypeCode,
+		)
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
 }
 
 func (c *container) newAccountKeyRepo() repocold.BTCAccountKeyRepositorier {
-	return coldmysql.NewAccountKeyRepositorySqlc(
-		c.pkgContainer.NewMySQLClient(),
-		c.conf.CoinTypeCode,
-	)
+	switch c.conf.Database.Type {
+	case "mysql":
+		return coldmysql.NewBTCAccountKeyRepositorySqlc(
+			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+		)
+	case "sqlite":
+		return coldsqlite.NewBTCAccountKeyRepositorySqlc(
+			c.pkgContainer.NewSQLiteClient(),
+			c.conf.CoinTypeCode,
+		)
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
 }
 
 func (c *container) newXRPAccountKeyRepo() repocold.XRPAccountKeyRepositorier {
-	return coldmysql.NewXRPAccountKeyRepositorySqlc(
-		c.pkgContainer.NewMySQLClient(),
-		c.conf.CoinTypeCode,
-	)
+	switch c.conf.Database.Type {
+	case "mysql":
+		return coldmysql.NewXRPAccountKeyRepositorySqlc(
+			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+		)
+	case "sqlite":
+		return coldsqlite.NewXRPAccountKeyRepositorySqlc(
+			c.pkgContainer.NewSQLiteClient(),
+			c.conf.CoinTypeCode,
+		)
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
 }
 
 func (c *container) newEthAccountKeyRepo() repocold.ETHAccountKeyRepositorier {
-	return coldmysql.NewETHAccountKeyRepositorySqlc(
-		c.pkgContainer.NewMySQLClient(),
-	)
+	switch c.conf.Database.Type {
+	case "mysql":
+		return coldmysql.NewETHAccountKeyRepositorySqlc(
+			c.pkgContainer.NewDatabaseClient(),
+		)
+	case "sqlite":
+		return coldsqlite.NewETHAccountKeyRepositorySqlc(
+			c.pkgContainer.NewSQLiteClient(),
+		)
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
 }
 
 func (c *container) newAuthFullPubKeyRepo() repocold.AuthFullPubkeyRepositorier {
-	return coldmysql.NewAuthFullPubkeyRepositorySqlc(
-		c.pkgContainer.NewMySQLClient(),
-		c.conf.CoinTypeCode,
-	)
+	switch c.conf.Database.Type {
+	case "mysql":
+		return coldmysql.NewAuthFullPubkeyRepositorySqlc(
+			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+		)
+	case "sqlite":
+		return coldsqlite.NewAuthFullPubkeyRepositorySqlc(
+			c.pkgContainer.NewSQLiteClient(),
+			c.conf.CoinTypeCode,
+		)
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
 }
 
 func (c *container) newAuthKeyRepo() repocold.AuthAccountKeyRepositorier {
-	return coldmysql.NewAuthAccountKeyRepositorySqlc(
-		c.pkgContainer.NewMySQLClient(),
-		c.conf.CoinTypeCode,
-	)
+	switch c.conf.Database.Type {
+	case "mysql":
+		return coldmysql.NewAuthAccountKeyRepositorySqlc(
+			c.pkgContainer.NewDatabaseClient(),
+			c.conf.CoinTypeCode,
+		)
+	case "sqlite":
+		return coldsqlite.NewAuthAccountKeyRepositorySqlc(
+			c.pkgContainer.NewSQLiteClient(),
+			c.conf.CoinTypeCode,
+		)
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
 }
 
-func (c *container) newNonceRepo() *coldmysql.NonceRepositorySqlc {
-	return coldmysql.NewNonceRepositorySqlc(
-		c.pkgContainer.NewMySQLClient(),
-	)
+func (c *container) newNonceRepo() multisig.NonceRepository {
+	switch c.conf.Database.Type {
+	case "mysql":
+		return coldmysql.NewNonceRepositorySqlc(
+			c.pkgContainer.NewDatabaseClient(),
+		)
+	case "sqlite":
+		return coldsqlite.NewNonceRepositorySqlc(
+			c.pkgContainer.NewSQLiteClient(),
+		)
+	default:
+		panic("unsupported database type: " + c.conf.Database.Type)
+	}
 }
 
 //
@@ -906,7 +1057,7 @@ func (c *container) NewSignMuSig2SignUseCase() signusecase.MuSig2SignUseCase {
 func (c *container) newBTCWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
 	return watchusecasebtc.NewCreateTransactionUseCase(
 		c.newBTC(),
-		c.pkgContainer.NewMySQLClient(),
+		c.pkgContainer.NewDatabaseClient(),
 		c.newAddressRepo(),
 		c.newBTCTxRepo(),
 		c.newBTCTxInputRepo(),
@@ -922,7 +1073,7 @@ func (c *container) newBTCWatchCreateTransactionUseCase() watchusecase.CreateTra
 func (c *container) newBTCWatchMonitorTransactionUseCase() watchusecase.MonitorTransactionUseCase {
 	return watchusecasebtc.NewMonitorTransactionUseCase(
 		c.newBTC(),
-		c.pkgContainer.NewMySQLClient(),
+		c.pkgContainer.NewDatabaseClient(),
 		c.newBTCTxRepo(),
 		c.newBTCTxInputRepo(),
 		c.newPaymentRequestRepo(),
@@ -979,7 +1130,7 @@ func (c *container) newETHWatchCreateTransactionUseCase() watchusecase.CreateTra
 
 	return watchusecaseeth.NewCreateTransactionUseCase(
 		targetEthAPI,
-		c.pkgContainer.NewMySQLClient(),
+		c.pkgContainer.NewDatabaseClient(),
 		c.newAddressRepo(),
 		c.newTxRepo(),
 		c.newETHTxDetailRepo(),
@@ -1016,7 +1167,7 @@ func (c *container) newETHWatchSendTransactionUseCase() watchusecase.SendTransac
 func (c *container) newXRPWatchCreateTransactionUseCase() watchusecase.CreateTransactionUseCase {
 	return watchusecasexrp.NewCreateTransactionUseCase(
 		c.newXRP(),
-		c.pkgContainer.NewMySQLClient(),
+		c.pkgContainer.NewDatabaseClient(),
 		c.pkgContainer.NewUUIDHandler(),
 		c.newAddressRepo(),
 		c.newTxRepo(),
@@ -1057,7 +1208,7 @@ func (c *container) newWatchImportAddressUseCase() watchusecase.ImportAddressUse
 
 func (c *container) newWatchCreatePaymentRequestUseCase() watchusecase.CreatePaymentRequestUseCase {
 	return watchusecaseshared.NewCreatePaymentRequestUseCase(
-		c.pkgContainer.NewMySQLClient(),
+		c.pkgContainer.NewDatabaseClient(),
 		c.newAddressRepo(),
 		c.newPaymentRequestRepo(),
 		c.conf.CoinTypeCode,
@@ -1160,7 +1311,7 @@ func (c *container) newETHKeygenImportPrivateKeyUseCase() keygenusecase.ImportPr
 func (c *container) newXRPKeygenGenerateKeyUseCase() keygenusecase.GenerateKeyUseCase {
 	return keygenusecasexrp.NewGenerateKeyUseCase(
 		c.newXRP(),
-		c.pkgContainer.NewMySQLClient(),
+		c.pkgContainer.NewDatabaseClient(),
 		c.conf.CoinTypeCode,
 		c.newXRPAccountKeyRepo(),
 	)

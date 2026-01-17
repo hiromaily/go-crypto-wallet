@@ -275,7 +275,10 @@ type stubAccountRepo struct {
 	err error
 }
 
-func (*stubAccountRepo) GetMaxIndex(domainAccount.AccountType) (int64, error) { return 0, nil }
+func (*stubAccountRepo) GetMaxIndex(_ context.Context, _ domainAccount.AccountType) (int64, error) {
+	return 0, nil
+}
+
 func (s *stubAccountRepo) GetOneMaxID(domainAccount.AccountType) (*domainBitcoin.BtcAccountKey, error) {
 	return s.key, s.err
 }
@@ -318,7 +321,7 @@ type stubAuthRepo struct {
 	items map[domainAccount.AuthType]*domainAuth.AuthFullPubkey
 }
 
-func (s *stubAuthRepo) GetOne(authType domainAccount.AuthType) (*domainAuth.AuthFullPubkey, error) {
+func (s *stubAuthRepo) GetOne(_ context.Context, authType domainAccount.AuthType) (*domainAuth.AuthFullPubkey, error) {
 	if s.items == nil {
 		return nil, fmt.Errorf("auth not found: %s", authType.String())
 	}
@@ -334,7 +337,7 @@ func (s *stubAuthRepo) GetOneByPurpose(
 	_ domainAuth.Purpose,
 ) (*domainAuth.AuthFullPubkey, error) {
 	// For tests, ignore purpose and return the same result as GetOne
-	return s.GetOne(authType)
+	return s.GetOne(context.Background(), authType)
 }
 
 func (*stubAuthRepo) Insert(domainAccount.AuthType, string) error   { return nil }

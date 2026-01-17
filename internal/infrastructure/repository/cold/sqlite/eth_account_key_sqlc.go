@@ -1,0 +1,217 @@
+package sqlite
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+	"time"
+
+	domainAccount "github.com/hiromaily/go-crypto-wallet/internal/domain/account"
+	domainAddress "github.com/hiromaily/go-crypto-wallet/internal/domain/address"
+	domainEth "github.com/hiromaily/go-crypto-wallet/internal/domain/ethereum"
+	"github.com/hiromaily/go-crypto-wallet/internal/infrastructure/database/sqlite/sqlcgen"
+)
+
+// ETHAccountKeyRepositorySqlc is repository for eth_account_key table using sqlc
+type ETHAccountKeyRepositorySqlc struct {
+	queries *sqlcgen.Queries
+	dbConn  *sql.DB
+}
+
+// NewETHAccountKeyRepositorySqlc returns ETHAccountKeyRepositorySqlc object
+func NewETHAccountKeyRepositorySqlc(dbConn *sql.DB) *ETHAccountKeyRepositorySqlc {
+	return &ETHAccountKeyRepositorySqlc{
+		queries: sqlcgen.New(dbConn),
+		dbConn:  dbConn,
+	}
+}
+
+// convertToETHAccountKey converts sqlcgen.EthAccountKey to domain.EthAccountKey entity.
+// SECURITY: Handles private key data - never log the private key field.
+func convertToETHAccountKey(sqlcKey *sqlcgen.EthAccountKey) (*domainEth.ETHAccountKey, error) {
+	addrStatus, err := domainAddress.AddrStatusFromInt8(int8(sqlcKey.AddrStatus))
+	if err != nil {
+		return nil, fmt.Errorf("invalid addr status in database: %w", err)
+	}
+
+	key := &domainEth.ETHAccountKey{
+		ID:            sqlcKey.ID,
+		Account:       domainAccount.AccountType(sqlcKey.Account),
+		Address:       sqlcKey.Address,
+		FullPublicKey: sqlcKey.FullPublicKey,
+		PrivateKey:    sqlcKey.PrivateKey, // Private key - NEVER log
+		Idx:           sqlcKey.Idx,
+		AddrStatus:    addrStatus,
+	}
+
+	if sqlcKey.UpdatedAt.Valid {
+		t, err := time.Parse("2006-01-02 15:04:05", sqlcKey.UpdatedAt.String)
+		if err != nil {
+			return nil, fmt.Errorf("invalid timestamp in database: %w", err)
+		}
+		key.UpdatedAt = &t
+	}
+
+	return key, nil
+}
+
+// convertFromETHAccountKey converts domain.EthAccountKey entity to sqlcgen.EthAccountKey.
+func convertFromETHAccountKey(key *domainEth.ETHAccountKey) *sqlcgen.EthAccountKey {
+	sqlcKey := &sqlcgen.EthAccountKey{
+		ID:            key.ID,
+		Account:       key.Account.String(),
+		Address:       key.Address,
+		FullPublicKey: key.FullPublicKey,
+		PrivateKey:    key.PrivateKey,
+		Idx:           key.Idx,
+		AddrStatus:    int64(key.AddrStatus.Int8()),
+	}
+
+	if key.UpdatedAt != nil {
+		sqlcKey.UpdatedAt = sql.NullString{String: key.UpdatedAt.Format("2006-01-02 15:04:05"), Valid: true}
+	}
+
+	return sqlcKey
+}
+
+// GetMaxIndex returns max idx
+func (r *ETHAccountKeyRepositorySqlc) GetMaxIndex(
+	ctx context.Context, accountType domainAccount.AccountType,
+) (int64, error) {
+	result, err := r.queries.GetMaxEthAccountKeyIndex(ctx, accountType.String())
+	if err != nil {
+		return 0, fmt.Errorf("failed to call GetMaxEthAccountKeyIndex(): %w", err)
+	}
+
+	// Type assert interface{} to int64
+	if maxIdx, ok := result.(int64); ok {
+		return maxIdx, nil
+	}
+
+	return 0, nil
+}
+
+// GetOneMaxID returns one record by max id
+func (r *ETHAccountKeyRepositorySqlc) GetOneMaxID(accountType domainAccount.AccountType,
+) (*domainEth.ETHAccountKey, error) {
+	ctx := context.Background()
+
+	accountKey, err := r.queries.GetOneEthAccountKeyByMaxID(ctx, accountType.String())
+	if err != nil {
+		return nil, fmt.Errorf("failed to call GetOneEthAccountKeyByMaxID(): %w", err)
+	}
+
+	return convertToETHAccountKey(&accountKey)
+}
+
+// GetAllAddrStatus returns all EthAccountKey by addr_status
+func (r *ETHAccountKeyRepositorySqlc) GetAllAddrStatus(
+	accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus,
+) ([]*domainEth.ETHAccountKey, error) {
+	ctx := context.Background()
+
+	accountKeys, err := r.queries.GetEthAccountKeysByAddrStatus(ctx, sqlcgen.GetEthAccountKeysByAddrStatusParams{
+		Account:    accountType.String(),
+		AddrStatus: int64(addrStatus.Int8()),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to call GetEthAccountKeysByAddrStatus(): %w", err)
+	}
+
+	result := make([]*domainEth.ETHAccountKey, 0, len(accountKeys))
+	for i := range accountKeys {
+		key, err := convertToETHAccountKey(&accountKeys[i])
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, key)
+	}
+
+	return result, nil
+}
+
+// GetByAddress returns EthAccountKey by address
+func (r *ETHAccountKeyRepositorySqlc) GetByAddress(addr string) (*domainEth.ETHAccountKey, error) {
+	ctx := context.Background()
+
+	accountKey, err := r.queries.GetEthAccountKeyByAddress(ctx, addr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to call GetEthAccountKeyByAddress(): %w", err)
+	}
+
+	return convertToETHAccountKey(&accountKey)
+}
+
+// InsertBulk inserts multiple records
+func (r *ETHAccountKeyRepositorySqlc) InsertBulk(items []*domainEth.ETHAccountKey) error {
+	ctx := context.Background()
+
+	tx, err := r.dbConn.BeginTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	qtx := r.queries.WithTx(tx)
+
+	for _, item := range items {
+		sqlcItem := convertFromETHAccountKey(item)
+		_, err := qtx.InsertEthAccountKey(ctx, sqlcgen.InsertEthAccountKeyParams{
+			Account:       sqlcItem.Account,
+			Address:       sqlcItem.Address,
+			FullPublicKey: sqlcItem.FullPublicKey,
+			PrivateKey:    sqlcItem.PrivateKey,
+			Idx:           sqlcItem.Idx,
+			AddrStatus:    sqlcItem.AddrStatus,
+		})
+		if err != nil {
+			_ = tx.Rollback()
+			return fmt.Errorf("failed to call InsertEthAccountKey(): %w", err)
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return nil
+}
+
+// UpdateAddrStatus updates addr_status
+func (r *ETHAccountKeyRepositorySqlc) UpdateAddrStatus(
+	accountType domainAccount.AccountType, addrStatus domainAddress.AddrStatus, privateKeys []string,
+) (int64, error) {
+	ctx := context.Background()
+
+	tx, err := r.dbConn.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	qtx := r.queries.WithTx(tx)
+
+	var totalAffected int64
+	// sqlc doesn't support IN clauses with variable arguments, so update one at a time
+	for _, privateKey := range privateKeys {
+		result, err := qtx.UpdateEthAccountKeyAddrStatus(ctx, sqlcgen.UpdateEthAccountKeyAddrStatusParams{
+			AddrStatus: int64(addrStatus.Int8()),
+			UpdatedAt:  sql.NullString{String: time.Now().Format("2006-01-02 15:04:05"), Valid: true},
+			Account:    accountType.String(),
+			PrivateKey: privateKey,
+		})
+		if err != nil {
+			_ = tx.Rollback()
+			return 0, fmt.Errorf("failed to call UpdateEthAccountKeyAddrStatus(): %w", err)
+		}
+
+		affected, err := result.RowsAffected()
+		if err != nil {
+			_ = tx.Rollback()
+			return 0, fmt.Errorf("failed to get RowsAffected(): %w", err)
+		}
+		totalAffected += affected
+	}
+
+	if err := tx.Commit(); err != nil {
+		return 0, fmt.Errorf("failed to commit transaction: %w", err)
+	}
+
+	return totalAffected, nil
+}

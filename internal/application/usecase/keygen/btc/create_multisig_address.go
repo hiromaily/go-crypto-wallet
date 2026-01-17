@@ -62,7 +62,7 @@ func (u *createMultisigAddressUseCase) Create(
 		requiredSig = sigCount
 		for _, authType := range authTypes {
 			// Get record from auth_fullpubkey table
-			fullPubKeyItem, err := u.authFullPubKeyRepo.GetOne(authType)
+			fullPubKeyItem, err := u.authFullPubKeyRepo.GetOne(ctx, authType)
 			if err != nil {
 				return fmt.Errorf("fail to call authFullPubKeyRepo.GetOne() %s: %w", authType.String(), err)
 			}

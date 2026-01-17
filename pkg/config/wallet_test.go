@@ -244,6 +244,9 @@ logger:
 tracer:
   type: none
 
+database:
+  type: mysql
+
 mysql:
   host: localhost:3306
   dbname: test_db

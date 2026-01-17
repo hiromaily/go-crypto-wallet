@@ -110,9 +110,9 @@ func convertFromBtcAccountKey(key *domainBitcoin.BtcAccountKey) *sqlcgen.BtcAcco
 }
 
 // GetMaxIndex returns max idx
-func (r *BTCAccountKeyRepositorySqlc) GetMaxIndex(accountType domainAccount.AccountType) (int64, error) {
-	ctx := context.Background()
-
+func (r *BTCAccountKeyRepositorySqlc) GetMaxIndex(
+	ctx context.Context, accountType domainAccount.AccountType,
+) (int64, error) {
 	result, err := r.queries.GetMaxBtcAccountKeyIndex(ctx, sqlcgen.GetMaxBtcAccountKeyIndexParams{
 		Coin:    sqlcgen.BtcAccountKeyCoin(r.coinTypeCode.String()),
 		Account: sqlcgen.BtcAccountKeyAccount(accountType.String()),

@@ -39,7 +39,7 @@ func (u *generateHDWalletUseCase) Generate(
 	logger.Debug("generate HDWallet", "account_type", input.AccountType.String())
 
 	// Get latest index
-	idxFrom, err := u.repo.GetMaxIndex(input.AccountType)
+	idxFrom, err := u.repo.GetMaxIndex(ctx, input.AccountType)
 	if err != nil {
 		logger.Info(err.Error())
 		return keygenusecase.GenerateHDWalletOutput{

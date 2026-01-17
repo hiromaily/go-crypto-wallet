@@ -100,9 +100,9 @@ func convertFromAuthAccountKey(key *domainAuth.AuthAccountKey) *sqlcgen.AuthAcco
 }
 
 // GetOne returns one record by authType
-func (r *AuthAccountKeyRepositorySqlc) GetOne(authType domainAccount.AuthType) (*domainAuth.AuthAccountKey, error) {
-	ctx := context.Background()
-
+func (r *AuthAccountKeyRepositorySqlc) GetOne(
+	ctx context.Context, authType domainAccount.AuthType,
+) (*domainAuth.AuthAccountKey, error) {
 	authKey, err := r.queries.GetAuthAccountKey(ctx, sqlcgen.GetAuthAccountKeyParams{
 		Coin:        sqlcgen.AuthAccountKeyCoin(r.coinTypeCode.String()),
 		AuthAccount: authType.String(),

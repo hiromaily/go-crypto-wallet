@@ -16,6 +16,7 @@ require (
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/google/uuid v1.6.0
 	github.com/guregu/null/v6 v6.0.0
+	github.com/mattn/go-sqlite3 v1.14.33
 	github.com/mitchellh/mapstructure v1.5.1-0.20231216201459-8508981c8b6c
 	github.com/phsym/console-slog v0.3.1
 	github.com/quagmt/udecimal v1.9.0
